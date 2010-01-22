@@ -1,0 +1,99 @@
+
+/*
+select_input
+*/
+.si_container {
+	
+}
+
+input.si_input,input.si_error,input.si_warning,.si_inputted {
+	width: 8em;
+	color: #525;
+	background-color: #edf;
+}
+
+input.si_error {
+	color: #000 !important;
+	background-color: #f00 !important;
+}
+
+input.si_warning {
+	color: #f11 !important;
+}
+
+.si_inputted {
+	color: #845;
+}
+
+.si_arrow {
+	font-size: .8em;
+	cursor: pointer;
+	color: #ea1;
+}
+
+.si_list {
+	position: absolute;
+	z-index: 800;
+	font-size: .8em;
+	color: #133;
+	background-color: #ffe;
+	border: 1px solid #ed3;
+	overflow: auto;
+	opacity: .85;
+	filter: Alpha(Opacity =   80, Style =   0);
+}
+
+.si_item,.si_item_select {
+	color: #543;
+}
+
+.si_item_select {
+	color: #65e;
+	background-color: #8fe;
+	cursor: pointer;
+}
+
+.si_function {
+	white-space: nowrap;
+}
+
+.si_functionText {
+	color: #934;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+/*
+address
+*/
+.adr_clear {
+	color: #737;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+input.adr_zip {
+	width: 7em;
+	background-color: #def;
+}
+
+input.adr_address {
+	width: 25em;
+	background-color: #fed;
+}
+
+/*
+address.input
+*/
+input.address_input {
+	width: 10em;
+	background-color: #eef;
+}
+
+/*
+bank_account.input
+*/
+input.bank_account_input {
+	background-color: #efd;
+}
+

@@ -1,0 +1,239 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+<style type="text/css">
+#address,#legal_domicile{font-size:.9em;}
+</style>
+
+<script type="text/javascript" src="../ce.js"></script>
+
+<script type="text/javascript">
+
+//	相對於 library 本身來說的路徑
+CeL.include_module_resource('../../game/game.css');
+
+
+//	預防彈出警告視窗
+CeL.log.max_length = 20;
+
+CeL.set_debug();
+
+try {
+	dojo.require("dojo.NodeList-fx");
+	//dojo.require("dojo.NodeList-fx33");
+} catch (e) {
+	//CeL.debug(e.message);
+}
+
+//CeL.use('code.log2');
+
+//CeL.debug(111);
+//CeL.debug(CeL.simplify_path('a/../b'));
+//if(CeL.warn)CeL.warn('a WARNING');
+
+setTimeout(function() {
+	//alert(document.body.innerHTML);
+	}, 200);
+
+function test1() {
+	CeL.warn('a WARNING level message');
+}
+</script>
+<title>test suit</title></head>
+
+<body class="bgn">
+
+<div id="choose">choose: </div>
+
+<div id="legal_domicile">戶籍地址 </div>
+<div id="address">通訊地址 </div>
+
+<div id="account">匯款帳號 </div>
+
+<div id="education">教育程度 </div>
+
+<hr/>
+
+attach test:<br/>
+span: <span id="attach_span">test: </span>
+input: <input id="attach_input" value="input test" style="background-color:#ffb;"/>
+select: <select id="attach_select"><option value="A">option A</option><option value="B">option B</option><option value="C">option C</option><option value="select" selected="selected">option selected</option></select>
+hr: <hr id="attach_hr" style="width:2em;"/>
+
+<hr/>
+
+<input id="question" value="43/21"/>
+<b onclick="show_question();" style="cursor: pointer;">show</b>
+|
+<b onclick="run_code();" style="cursor: pointer;">run</b>
+
+<div id="panel_for_SVG">
+</div>
+
+<hr/>
+
+[test suit] log:
+<div id="panel_for_log">
+Page loaded. Prepare to initial..
+</div>
+
+
+
+<script type="text/javascript">
+
+	var SVG_object;
+
+	function show_question() {
+		var num = document.getElementById('question').value, m = num
+				.match(/(\d+)([+\-*\/])(\d+)/);
+
+		if (m)
+			CeL.SVG['draw_' + {
+				'+' : 'addition',
+				'-' : 'subtraction',
+				'*' : 'multiplication',
+				'/' : 'long_division'
+			}[m[2]]](m[1], m[3], SVG_object);
+	}
+
+	function run_code() {
+		try {
+			CeL.log(eval(document.getElementById('question').value));
+		} catch (e) {
+			CeL.err(e);
+		}
+	}
+
+
+	function init_work() {
+
+		CeL.use('code.compatibility');
+
+		//CeL.debug(CeL.is_type(window.navigator));
+		if (CeL.is_DOM('navigator')){
+			CeL.debug('User agent: ' + navigator.userAgent);
+			for (var i in navigator)
+				//CeL.debug('navigator.' + i + ' = ' + navigator[i])
+				;
+		}
+
+		//CeL.debug(CeL.is_type(window.ScriptEngineMajorVersion));
+		//	for IE only
+		if (CeL.is_DOM('ScriptEngineMajorVersion'))
+			CeL.debug('Script engine: ' + ScriptEngine() + ' '
+				+ ScriptEngineMajorVersion() + '.'
+				+ ScriptEngineMinorVersion() + '.'
+				+ ScriptEngineBuildVersion());
+
+		CeL.use('code.log.no_exist_module_to_test');
+		//CeL.warn('a WARNING level message');
+
+		//	base test
+		//CeL.log('split length: '+'.'.split(/\./).length);
+
+		//if(0)CeL.debug(2223);test1();
+
+		CeL.use('net.SVG');
+
+		//CeL.debug('CeL.SVG = ' + CeL.SVG, 0, 1);
+		//CeL.debug('CeL.log = ' + CeL.log, 0, 1);
+		//CeL.debug('CeL.net.SVG = ' + CeL.net.SVG);
+		//alert(CeL.SVG);
+		//CeL.debug(CeL.drawLongDivision);
+		SVG_object = new CeL.SVG(20, 20);
+		//CeL.debug('type of SVG_object = ' + CeL.is_type(SVG_object,0,1));
+		SVG_object.attach('panel_for_SVG').show(1);
+		//CeL.debug('SVG panel = ' + SVG_object);
+		//alert(SVG_object);
+
+		//CeL.SVG.draw_long_division(452, 34, SVG_object);
+		//CeL.draw_long_division(10000000000, 7, SVG_object);
+		//var SVG_object=CeL.SVG.draw_long_division(100000, 7);
+		//SVG_object.attach('panel_for_SVG').show(1);
+		//SVG_object.show();
+		//CeL.SVG.draw_long_division(1000000000000, 432, SVG_object);
+
+		/*
+		CeL.use('code.reorganize');
+		var c = CeL.get_file('../ce.js')+CeL.get_file('../code/log.js');
+		c = CeL.get_various_from_code(c);
+		c = CeL.get_code_from_generated_various(c);
+		CeL.debug(c.replace(/\n/g,'<br/>'));
+		 */
+
+		// function aaa(v){alert('mmm='+mmm);var r={};r[v]=222;return r;}
+		// var fff3=33;eval('var mmm=1;(function(){var included=aaa("fff");alert(included.fff);})()');alert(fff);
+		//CeL.use('net.form.select_input');
+		CeL.use( [ 'net.form.address', 'net.form.bank_account',
+				'net.form.education' ]);
+
+		var qi = new CeL.select_input('question', [ '4232+552', '4232-552',
+				'4232*34', '4232/34' ], 'includeKeyWC');
+		//qi.attach('question');
+		//qi.setSearch('includeKeyWC');
+
+		var addF = new CeL.address.TW('address', 'address_');
+		var domicileF = new CeL.address.TW('legal_domicile', 'legal_domicile_');
+		var accountF = new CeL.bank_account.TW('account');
+		var education_form = new CeL.education.TW('education');
+
+		addF.addFunc('同戶籍地址', function() {
+			addF.setAddress(domicileF.setAddress());
+			domicileF.focus(0, 0);
+			addF.focus('a');
+			addF.focus(0, 0);
+		});
+
+		//	attach test
+		var a_sp = new CeL.select_input('attach_span', [ 5, 6, 55, 555, 7 ]), a_i = new CeL.select_input(
+				0, [ 1, 2, 3, 4, 5 ]), a_s = new CeL.select_input, a_h = new CeL.select_input;
+
+		//sl('set attach_span: '+a_sp.loaded);
+		a_sp.attach('attach_span');
+		a_sp.setSearch('includeKeyWC');
+		//sl('set attach_input');
+		a_i.attach('attach_input');
+		a_i.setSearch('includeKeyWC');
+		//sl('set attach_select');
+		a_s.attach('attach_select');
+		a_s.setSearch('includeKeyWC');
+
+		a_h.attach('attach_hr');
+		a_h.setAllList( [ 1, 2, 3, 6 ]);
+		a_h.setSearch('includeKeyWC');
+
+
+
+		CeL.use('net.web');
+		//CeL.copy_to_clipboard('已經複製');
+	};
+
+	function init_setup() {
+		try {
+			//	initial log function
+			CeL.use('code.log');
+			CeL.Log.set_board('panel_for_log');
+			CeL.debug('log panel setted.');
+
+			try {
+				init_work();
+			} catch (e) {
+				CeL.warn('Initial test error!');
+				CeL.err(e);
+			}
+
+			CeL.log.max_length = 0;
+			CeL.log('Initial process done.');
+
+		} catch (e) {
+		}
+	};
+
+	window.onload = init_setup;
+	//CeL.use('net.web',function(){CeL.on_load(init_setup);});
+
+</script>
+
+</body>
+</html>

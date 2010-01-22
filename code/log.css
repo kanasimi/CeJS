@@ -1,0 +1,61 @@
+
+/*
+"34aL volume 3.1" icons set
+http://www.icojoy.com/
+http://www.freeiconsweb.com/Free_web_development_icons_04.html
+
+Basic Icons set
+http://pixel-mixer.com/
+http://www.freeiconsweb.com/Basic-Icons-set.html
+
+Crazy Eye Icons
+http://fasticon.com/freeware/
+http://www.freeiconsweb.com/Crazy_Eye_icons.html
+*/
+
+.debug_panel {
+	background-color: #efd;
+	border: 1px #3f3 dotted;
+	padding: 1pt;
+	font-size: .8em;
+}
+
+.debug_icon {
+	height: 1em;
+}
+
+.debug_log,.debug_em,.debug_warn,.debug_err,.debug_debug {
+	border-bottom:1px dotted #afc;
+}
+
+.debug_log {
+	color: #88f;
+}
+
+.debug_em {
+	color: #0c0;
+	font-weight: 900;
+}
+
+.debug_warn {
+	color: #f90;
+	background-color: #feb;
+}
+
+.debug_err {
+	color: #f44;
+	background-color: #fee;
+}
+
+.debug_debug {
+	background-color: #ddc;
+}
+
+.debug_caller{
+	color: #a71;
+	font-weight: 900;
+}
+
+.debug_weaken{
+	color: #999;
+}

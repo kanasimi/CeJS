@@ -1,0 +1,6 @@
+﻿ZIP code support for AddressF.TW
+
+These file is downloading from Chunghwa Post Co., Ltd.
+這些檔案由臺灣郵政全球資訊網下載專區取得。
+
+http://www.post.gov.tw/

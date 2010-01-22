@@ -1,0 +1,815 @@
+<html><head><meta http-equiv="content-type" content="text/html; charset=UTF-8"> <style>
+	.KEYW {color: #933;}
+	.COMM {color: #bbb; font-style: italic;}
+	.NUMB {color: #393;}
+	.STRN {color: #393;}
+	.REGX {color: #339;}
+	.line {border-right: 1px dotted #666; color: #666; font-style: normal;}
+	</style></head><body><pre><span class='line'>  1</span> <span class="TOKN">﻿</span><span class="WHIT">
+<span class='line'>  2</span> </span><span class="PUNC">(</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>  3</span> 
+<span class='line'>  4</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>  5</span> 	 * 本 library / module 之 id
+<span class='line'>  6</span> 	 */</span><span class="WHIT">
+<span class='line'>  7</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">lib_name</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'OS.Windows.WMI'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>  8</span> 
+<span class='line'>  9</span> </span><span class="WHIT">	</span><span class="COMM">//	若 CeL 尚未 loaded 或本 library 已經 loaded 則跳出。</span><span class="WHIT">
+<span class='line'> 10</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">CeL</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">CeL.Class</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="STRN">'CeL'</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">CeL.is_loaded</span><span class="PUNC">(</span><span class="NAME">lib_name</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'> 11</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 12</span> 
+<span class='line'> 13</span> 
+<span class='line'> 14</span> </span><span class="COMM">/**
+<span class='line'> 15</span>  * Windows.WMI test
+<span class='line'> 16</span>  * @memberOf	CeL
+<span class='line'> 17</span>  * @param	msg	msg
+<span class='line'> 18</span>  */</span><span class="WHIT">
+<span class='line'> 19</span> </span><span class="NAME">CeL.OS.Windows.WMI</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">msg</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 20</span> </span><span class="WHIT">	</span><span class="NAME">alert</span><span class="PUNC">(</span><span class="NAME">msg</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 21</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 22</span> 
+<span class='line'> 23</span> 
+<span class='line'> 24</span> 
+<span class='line'> 25</span> </span><span class="COMM">//CeL.extend(lib_name, {});</span><span class="WHIT">
+<span class='line'> 26</span> 
+<span class='line'> 27</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 28</span> 
+<span class='line'> 29</span> 
+<span class='line'> 30</span> 
+<span class='line'> 31</span> 
+<span class='line'> 32</span> 
+<span class='line'> 33</span> </span><span class="COMM">//	WMI set	==================</span><span class="WHIT">
+<span class='line'> 34</span> 
+<span class='line'> 35</span> </span><span class="COMM">/*	2007/5/22 23:34:43
+<span class='line'> 36</span> 	WMI: Windows Management Instrumentation
+<span class='line'> 37</span> 	http://www.codecomments.com/archive298-2004-5-203306.html
+<span class='line'> 38</span> 	http://msdn2.microsoft.com/en-us/library/Aa394616
+<span class='line'> 39</span> 	http://msdn2.microsoft.com/en-us/library/aa389290.aspx
+<span class='line'> 40</span> 	http://msdn2.microsoft.com/en-us/library/aa389763.aspx
+<span class='line'> 41</span> 	http://msdn2.microsoft.com/en-us/library/aa393854.aspx	SWbemServices
+<span class='line'> 42</span> 	http://msdn2.microsoft.com/en-us/library/ms525320.aspx
+<span class='line'> 43</span> 	http://www.serverwatch.com/tutorials/article.php/1476831
+<span class='line'> 44</span> 	http://www.serverwatch.com/tutorials/article.php/1476861
+<span class='line'> 45</span> 	http://www.serverwatch.com/tutorials/article.php/1476871
+<span class='line'> 46</span> 	http://www.serverwatch.com/tutorials/article.php/1476941
+<span class='line'> 47</span> 
+<span class='line'> 48</span> string moniker:
+<span class='line'> 49</span> 	[[/root/]cimv2:][from[.v]]	[/|\\]root[/|\\]
+<span class='line'> 50</span> 
+<span class='line'> 51</span> object moniker:
+<span class='line'> 52</span> {
+<span class='line'> 53</span> 	prefix:'WinMgmts:',	//	moniker prefix
+<span class='line'> 54</span> 	security:'{impersonationLevel=impersonate}!',
+<span class='line'> 55</span> 	computer:'.',	//	Computer string(localhost '.')
+<span class='line'> 56</span> 	p:'cimv2',	//	'/root/' will auto added
+<span class='line'> 57</span> 	path:'/root/cimv2',	//	Namespace e.g., \root\default
+<span class='line'> 58</span> 
+<span class='line'> 59</span> 	from:,	//	select from ~
+<span class='line'> 60</span> 	where:,	//	select from where ~	** You MUST check the string yourself!! This function won't do it!
+<span class='line'> 61</span> 	v:,	//	value to get
+<span class='line'> 62</span> 	value:,	//	value used in moniker
+<span class='line'> 63</span> 
+<span class='line'> 64</span> 	flag:48,	//	flag to call SWbemServices.ExecQuery Method
+<span class='line'> 65</span> }
+<span class='line'> 66</span> 
+<span class='line'> 67</span> 	prefix+security+computer+path+':'+from+'='+value	http://msdn2.microsoft.com/en-us/library/aa389292.aspx
+<span class='line'> 68</span> 
+<span class='line'> 69</span> TODO:
+<span class='line'> 70</span> 多次呼叫最佳化
+<span class='line'> 71</span> */</span><span class="WHIT">
+<span class='line'> 72</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="NAME">moniker</span><span class="PUNC">,</span><span class="NAME">func</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">	</span><span class="COMM">//	moniker, for each do function</span><span class="WHIT">
+<span class='line'> 73</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">,</span><span class="NAME">oWMIS</span><span class="PUNC">,</span><span class="NAME">_m</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 74</span> </span><span class="WHIT">	</span><span class="NAME">prefix</span><span class="PUNC">:</span><span class="STRN">'WinMgmts:'</span><span class="WHIT">
+<span class='line'> 75</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">security</span><span class="PUNC">:</span><span class="STRN">'{impersonationLevel=impersonate}!'</span><span class="WHIT">
+<span class='line'> 76</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">computer</span><span class="PUNC">:</span><span class="STRN">'.'</span><span class="WHIT">
+<span class='line'> 77</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">p</span><span class="PUNC">:</span><span class="STRN">'cimv2'</span><span class="WHIT">
+<span class='line'> 78</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">path</span><span class="PUNC">:</span><span class="STRN">''</span><span class="WHIT">
+<span class='line'> 79</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">from</span><span class="PUNC">:</span><span class="STRN">''</span><span class="WHIT">
+<span class='line'> 80</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">value</span><span class="PUNC">:</span><span class="STRN">''</span><span class="WHIT">
+<span class='line'> 81</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">v</span><span class="PUNC">:</span><span class="STRN">''</span><span class="WHIT">
+<span class='line'> 82</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">flag</span><span class="PUNC">:</span><span class="NUMB">48</span><span class="WHIT">	</span><span class="COMM">//	32: wbemFlagForwardOnly + 16: wbemFlagReturnImmediately</span><span class="WHIT">
+<span class='line'> 83</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 84</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">moniker</span><span class="PUNC">)</span><span class="NAME">moniker</span><span class="PUNC">=</span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 85</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">moniker</span><span class="PUNC">==</span><span class="STRN">'string'</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 86</span> </span><span class="WHIT">  </span><span class="COMM">//	parse moniker</span><span class="WHIT">
+<span class='line'> 87</span> </span><span class="WHIT">  </span><span class="NAME">_m.from</span><span class="PUNC">=</span><span class="NAME">moniker</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 88</span> </span><span class="WHIT">  </span><span class="COMM">//	取得path</span><span class="WHIT">
+<span class='line'> 89</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NAME">_m.from.match</span><span class="PUNC">(</span><span class="REGX">/^([^:]+):([^\/\\]*)$/</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 90</span> </span><span class="WHIT">   </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="REGX">/^[\/\\]/</span><span class="PUNC">.</span><span class="NAME">test</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">_m.path</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="NAME">_m.p</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 91</span> </span><span class="WHIT">   </span><span class="NAME">_m.from</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">[</span><span class="NUMB">2</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 92</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 93</span> </span><span class="WHIT">  </span><span class="COMM">//	取得from[.v]</span><span class="WHIT">
+<span class='line'> 94</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NAME">_m.from.match</span><span class="PUNC">(</span><span class="REGX">/^([^.]+)\.(.*)$/</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">_m.from</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">_m.v</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">[</span><span class="NUMB">2</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 95</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">i</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">moniker</span><span class="PUNC">)</span><span class="NAME">_m</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">moniker</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 96</span> 
+<span class='line'> 97</span> </span><span class="WHIT"> </span><span class="COMM">//	create object</span><span class="WHIT">
+<span class='line'> 98</span> </span><span class="WHIT"> </span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 99</span> </span><span class="WHIT">  </span><span class="COMM">//with(_m)alert(prefix+security+'//'+computer+(path||'/root/'+p)+(value||value===0?':'+from+'='+value:''));</span><span class="WHIT">
+<span class='line'>100</span> </span><span class="WHIT">  </span><span class="KEYW">with</span><span class="PUNC">(</span><span class="NAME">_m</span><span class="PUNC">)</span><span class="NAME">oWMIS</span><span class="PUNC">=</span><span class="NAME">GetObject</span><span class="PUNC">(</span><span class="NAME">prefix</span><span class="PUNC">+</span><span class="NAME">security</span><span class="PUNC">+</span><span class="STRN">'//'</span><span class="PUNC">+</span><span class="NAME">computer</span><span class="PUNC">+</span><span class="PUNC">(</span><span class="NAME">path</span><span class="PUNC">||</span><span class="STRN">'/root/'</span><span class="PUNC">+</span><span class="NAME">p</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>101</span> </span><span class="WHIT">	</span><span class="COMM">//+(func||v?'':(from?':'+from+(value||value==0?'':'='+value):''))	//	有func||_m.v時無條件捨棄，到後面再搞。</span><span class="WHIT">
+<span class='line'>102</span> </span><span class="WHIT">	</span><span class="PUNC">+</span><span class="PUNC">(</span><span class="NAME">value</span><span class="PUNC">||</span><span class="NAME">value</span><span class="PUNC">===</span><span class="NUMB">0</span><span class="PUNC">?</span><span class="STRN">':'</span><span class="PUNC">+</span><span class="NAME">from</span><span class="PUNC">+</span><span class="STRN">'='</span><span class="PUNC">+</span><span class="NAME">value</span><span class="PUNC">:</span><span class="STRN">''</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>103</span> </span><span class="WHIT">	</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>104</span> </span><span class="WHIT">  </span><span class="COMM">//oLoc=new ActiveXObject("WbemScripting.SWbemLocator");oSvc=oLoc.ConnectServer(sComputer||null,"root\\default");oReg=oSvc.Get("StdRegProv");	//	http://msdn.microsoft.com/library/en-us/wmisdk/wmi/swbemobject_execmethod_.asp</span><span class="WHIT">
+<span class='line'>105</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>106</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>107</span> </span><span class="COMM">/*	useless?
+<span class='line'>108</span>   try{
+<span class='line'>109</span>    with(new ActiveXObject("WbemScripting.SWbemLastError"))	//	Error Handling
+<span class='line'>110</span>     return {ProviderName:ProviderName,ParameterInfo:ParameterInfo,Operation:Operation,Description:Description};
+<span class='line'>111</span>   }catch(_e){throw e;}
+<span class='line'>112</span> */</span><span class="WHIT">
+<span class='line'>113</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>114</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">func</span><span class="PUNC">&&</span><span class="PUNC">!</span><span class="NAME">_m.from</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">oWMIS</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>115</span> 
+<span class='line'>116</span> </span><span class="WHIT"> </span><span class="COMM">//	do search</span><span class="WHIT">
+<span class='line'>117</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">oE</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>118</span> </span><span class="WHIT"> </span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>119</span> </span><span class="WHIT">  </span><span class="COMM">//	http://msdn2.microsoft.com/en-us/library/aa393866.aspx</span><span class="WHIT">
+<span class='line'>120</span> </span><span class="WHIT">  </span><span class="NAME">oE</span><span class="PUNC">=</span><span class="NAME">oWMIS.ExecQuery</span><span class="PUNC">(</span><span class="STRN">'Select * From '</span><span class="PUNC">+</span><span class="NAME">_m.from</span><span class="PUNC">+</span><span class="PUNC">(</span><span class="NAME">_m</span><span class="PUNC">[</span><span class="STRN">'where'</span><span class="PUNC">]</span><span class="PUNC">?</span><span class="STRN">' Where '</span><span class="PUNC">+</span><span class="NAME">_m.where</span><span class="PUNC">:</span><span class="STRN">''</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>121</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="STRN">'WQL'</span><span class="WHIT">	</span><span class="COMM">//	String that contains the query language to be used. If specified, this value must be "WQL".</span><span class="WHIT">
+<span class='line'>122</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">_m.flag</span><span class="WHIT">
+<span class='line'>123</span> </span><span class="WHIT">  </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>124</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>125</span> </span><span class="WHIT">  </span><span class="COMM">//	程式庫未登錄。</span><span class="WHIT">
+<span class='line'>126</span> </span><span class="WHIT">  </span><span class="COMM">//	此時 typeof oWMIS=='object'</span><span class="WHIT">
+<span class='line'>127</span> </span><span class="WHIT">  </span><span class="NAME">popErr</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">,</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="STRN">'getWMIData: error occurred!'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>128</span> </span><span class="WHIT">  </span><span class="COMM">//if(438!=(e.number&0xFFFF))return;</span><span class="WHIT">
+<span class='line'>129</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	return {item:function(){}};	//	or return a object using wbemQueryFlagPrototype</span><span class="WHIT">
+<span class='line'>130</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>131</span> </span><span class="WHIT"> </span><span class="NAME">oE</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Enumerator</span><span class="PUNC">(</span><span class="NAME">oE</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	wbemFlagForwardOnly:32+wbemFlagReturnImmediately:16</span><span class="WHIT">
+<span class='line'>132</span> </span><span class="WHIT"> </span><span class="COMM">//if(func)for(;!oE.atEnd()&&!func(oE.item());oE.moveNext());</span><span class="WHIT">
+<span class='line'>133</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">)</span><span class="KEYW">while</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">oE.atEnd</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">&&</span><span class="PUNC">!</span><span class="NAME">func</span><span class="PUNC">(</span><span class="NAME">oE.item</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">oE.moveNext</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>134</span> </span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_m.v</span><span class="PUNC">||</span><span class="NAME">_m.v</span><span class="PUNC">===</span><span class="NUMB">0</span><span class="PUNC">?</span><span class="NAME">oE.item</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="NAME">oE.item</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NAME">_m.v</span><span class="PUNC">]</span><span class="PUNC">:</span><span class="KEYW">null</span><span class="PUNC">:</span><span class="NAME">oE</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>135</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>136</span> 
+<span class='line'>137</span> </span><span class="COMM">/*	用在將 WMI date 轉成 javascript date, old: WMIDateStringToDate
+<span class='line'>138</span> 	http://www.microsoft.com/technet/scriptcenter/resources/qanda/sept04/hey0907.mspx
+<span class='line'>139</span> 	http://www.microsoft.com/technet/scriptcenter/resources/qanda/aug05/hey0802.mspx
+<span class='line'>140</span> 
+<span class='line'>141</span> TODO:
+<span class='line'>142</span> return ms
+<span class='line'>143</span> */</span><span class="WHIT">
+<span class='line'>144</span> </span><span class="NAME">getWMIData.DateStringToDate</span><span class="PUNC">=</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">t</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>145</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">t</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Date</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>146</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">m</span><span class="PUNC">=</span><span class="PUNC">(</span><span class="STRN">''</span><span class="PUNC">+</span><span class="NAME">t</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">match</span><span class="PUNC">(</span><span class="REGX">/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\.\d+)?([+ \-]\d+)?$/</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>147</span> </span><span class="WHIT"> </span><span class="COMM">//	http://msdn2.microsoft.com/en-us/library/474de325.aspx</span><span class="WHIT">
+<span class='line'>148</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">m</span><span class="PUNC">?</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Date</span><span class="PUNC">(</span><span class="NAME">m</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">m</span><span class="PUNC">[</span><span class="NUMB">2</span><span class="PUNC">]</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">,</span><span class="NAME">m</span><span class="PUNC">[</span><span class="NUMB">3</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">m</span><span class="PUNC">[</span><span class="NUMB">4</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">m</span><span class="PUNC">[</span><span class="NUMB">5</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">m</span><span class="PUNC">[</span><span class="NUMB">6</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">m</span><span class="PUNC">[</span><span class="NUMB">7</span><span class="PUNC">]</span><span class="PUNC">*</span><span class="NUMB">1</span><span class="NAME">e3</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="NAME">t</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	locale會自己調整</span><span class="WHIT">
+<span class='line'>149</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>150</span> 
+<span class='line'>151</span> </span><span class="COMM">/*	用在取得 WMI object 之 property
+<span class='line'>152</span> 	http://www.activexperts.com/activmonitor/windowsmanagement/adminscripts/other/wmi/
+<span class='line'>153</span> 	http://msdn.microsoft.com/en-us/library/aa393741%28VS.85%29.aspx
+<span class='line'>154</span> */</span><span class="WHIT">
+<span class='line'>155</span> </span><span class="NAME">getWMIData.getProperties</span><span class="PUNC">=</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">,</span><span class="NAME">is_VBA</span><span class="PUNC">,</span><span class="NAME">is_Date</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>156</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">oP</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Enumerator</span><span class="PUNC">(</span><span class="NAME">o.Properties_</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">ph</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="NAME">p</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>157</span> </span><span class="WHIT"> </span><span class="KEYW">while</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">oP.atEnd</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>158</span> </span><span class="WHIT">  </span><span class="NAME">o</span><span class="PUNC">=</span><span class="NAME">p</span><span class="PUNC">=</span><span class="NAME">oP.item</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>159</span> </span><span class="WHIT">  </span><span class="COMM">//	自動別日期</span><span class="WHIT">
+<span class='line'>160</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">p</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="REGX">/^\d{14}(\.\d+)?([+ \-]\d+)?$/</span><span class="PUNC">.</span><span class="NAME">test</span><span class="PUNC">(</span><span class="STRN">''</span><span class="PUNC">+</span><span class="NAME">p</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>161</span> </span><span class="WHIT">   </span><span class="NAME">p</span><span class="PUNC">=</span><span class="NAME">this.DateStringToDate</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>162</span> </span><span class="WHIT">  </span><span class="COMM">//	自動別 VBA</span><span class="WHIT">
+<span class='line'>163</span> </span><span class="WHIT">  </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">p</span><span class="PUNC">==</span><span class="STRN">'unknown'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>164</span> </span><span class="WHIT">   </span><span class="COMM">//	from VBA()</span><span class="WHIT">
+<span class='line'>165</span> </span><span class="WHIT">   </span><span class="KEYW">try</span><span class="PUNC">{</span><span class="NAME">p</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">VBArray</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">toArray</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>166</span> </span><span class="WHIT">  </span><span class="NAME">ph</span><span class="PUNC">[</span><span class="NAME">o.Name</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">p</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>167</span> </span><span class="WHIT">  </span><span class="NAME">oP.moveNext</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>168</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>169</span> 
+<span class='line'>170</span> </span><span class="WHIT"> </span><span class="COMM">//o=[];for(p in ph)o.push(p+': '+ph[p]);sl(o.join('\n'));</span><span class="WHIT">
+<span class='line'>171</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">ph</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>172</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>173</span> 
+<span class='line'>174</span> 
+<span class='line'>175</span> 
+<span class='line'>176</span> </span><span class="COMM">/*	cause error!	requires Windows 2003 DNS
+<span class='line'>177</span> 	http://forums.devshed.com/dns-36/dns-through-wmi-in-net-140427.html
+<span class='line'>178</span> 	http://www.activexperts.com/activmonitor/windowsmanagement/scripts/networking/dns/server/
+<span class='line'>179</span> 	http://www.113317.com/blog/article.asp?id=543
+<span class='line'>180</span> 	http://blogs.msdn.com/mpoulson/archive/2006/05/10/594950.aspx
+<span class='line'>181</span> 	http://www.ureader.com/message/3258511.aspx
+<span class='line'>182</span> 	http://www.scriptinganswers.com/forum/forum_posts.asp?TID=516&PID=3124
+<span class='line'>183</span> if(0){
+<span class='line'>184</span>  var qHost='213.22.211.in-addr.arpa',qIP=getWMIData({p:'MicrosoftDNS',from:'MicrosoftDNS_PTRType',where:"OwnerName='"+qHost+"'"}).item();
+<span class='line'>185</span>  alert(qIP.RecordData);
+<span class='line'>186</span> }
+<span class='line'>187</span> */</span><span class="WHIT">
+<span class='line'>188</span> 
+<span class='line'>189</span> 
+<span class='line'>190</span> 
+<span class='line'>191</span> 
+<span class='line'>192</span> </span><span class="COMM">/*
+<span class='line'>193</span> 	http://msdn2.microsoft.com/en-us/library/aa394239.aspx
+<span class='line'>194</span> 	http://tech.163.com/05/0406/10/1GL8FUG200091589.html
+<span class='line'>195</span> 
+<span class='line'>196</span> test:
+<span class='line'>197</span> with(getSysInfo())alert(Caption+' '+CSDVersion+' '+OtherTypeDescription+'(SP '+ServicePackMajorVersion+'.'+ServicePackMinorVersion+') [Version '+Version+']'
+<span class='line'>198</span> 	+'\nWindowsDirectory: '+WindowsDirectory
+<span class='line'>199</span> 	+'\nSystemDirectory: '+SystemDirectory
+<span class='line'>200</span> 	+'\nFreePhysicalMemory: '+turnSI(FreePhysicalMemory)+'/'+turnSI(PhysicalMemory)+'B ('+PhysicalMemory+' bytes)'
+<span class='line'>201</span> 	+'\nOSLanguage: '+OSLanguage+' (0x'+hex(OSLanguage)+')'	//	http://msdn.microsoft.com/zh-tw/library/system.globalization.cultureinfo%28VS.80%29.aspx
+<span class='line'>202</span> 	+'\nCountryCode: '+CountryCode
+<span class='line'>203</span> 	+'\nCodeSet: CP'+CodeSet	//	http://en.wikipedia.org/wiki/Code_page	http://msdn.microsoft.com/en-us/library/dd317756%28VS.85%29.aspx
+<span class='line'>204</span> 	+'\nLocale: '+Locale
+<span class='line'>205</span> 	+'\nCurrentTimeZone: '+gDate(CurrentTimeZone*60*1000)
+<span class='line'>206</span> 	+'\nMUILanguages: '+MUILanguages
+<span class='line'>207</span> 	+'\nBootUpTime: '+LastBootUpTime.toLocaleString()
+<span class='line'>208</span> 	+'\nLocalDateTime: '+LocalDateTime.toLocaleString()
+<span class='line'>209</span> 	+'\n系統運行 Uptime: '+gDate(Uptime)//+' ms'
+<span class='line'>210</span> 	+'\n系統 counter: '+Timestamp+' s'
+<span class='line'>211</span> 	+'\nCSName: '+CSName
+<span class='line'>212</span> 	+'\nRegisteredUser: '+RegisteredUser
+<span class='line'>213</span> );WScript.Quit();
+<span class='line'>214</span> */</span><span class="WHIT">
+<span class='line'>215</span> 
+<span class='line'>216</span> </span><span class="NAME">getSysInfo</span><span class="PUNC">[</span><span class="NAME">generateCode.dLK</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'getWMIData'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>217</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">getSysInfo</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>218</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">o</span><span class="PUNC">=</span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="STRN">'Win32_OperatingSystem'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">item</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>219</span> </span><span class="WHIT"> </span><span class="KEYW">with</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">)</span><span class="NAME">r</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>220</span> </span><span class="WHIT">	</span><span class="NAME">Caption</span><span class="PUNC">:</span><span class="NAME">o.Caption.replace</span><span class="PUNC">(</span><span class="REGX">/\s+$/</span><span class="PUNC">,</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">	</span><span class="COMM">//	系統</span><span class="WHIT">
+<span class='line'>221</span> </span><span class="WHIT">	</span><span class="NAME">Name</span><span class="PUNC">:</span><span class="NAME">o.Name</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>222</span> </span><span class="WHIT">	</span><span class="NAME">CSDVersion</span><span class="PUNC">:</span><span class="NAME">o.CSDVersion</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>223</span> </span><span class="WHIT">	</span><span class="NAME">ServicePackMajorVersion</span><span class="PUNC">:</span><span class="NAME">o.ServicePackMajorVersion</span><span class="PUNC">||</span><span class="PUNC">(</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">o.ServicePackMajorVersion</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="STRN">''</span><span class="PUNC">:</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>224</span> </span><span class="WHIT">	</span><span class="NAME">ServicePackMinorVersion</span><span class="PUNC">:</span><span class="NAME">o.ServicePackMinorVersion</span><span class="PUNC">||</span><span class="PUNC">(</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">o.ServicePackMinorVersion</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="STRN">''</span><span class="PUNC">:</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>225</span> </span><span class="WHIT">	</span><span class="NAME">OtherTypeDescription</span><span class="PUNC">:</span><span class="NAME">o.OtherTypeDescription</span><span class="PUNC">||</span><span class="STRN">''</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>226</span> </span><span class="WHIT">	</span><span class="NAME">Version</span><span class="PUNC">:</span><span class="NAME">o.Version</span><span class="PUNC">,</span><span class="WHIT">	</span><span class="COMM">//	系統版本</span><span class="WHIT">
+<span class='line'>227</span> 
+<span class='line'>228</span> </span><span class="WHIT">	</span><span class="NAME">WindowsDirectory</span><span class="PUNC">:</span><span class="NAME">o.WindowsDirectory</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>229</span> </span><span class="WHIT">	</span><span class="NAME">SystemDirectory</span><span class="PUNC">:</span><span class="NAME">o.SystemDirectory</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>230</span> 
+<span class='line'>231</span> </span><span class="WHIT">	</span><span class="NAME">CSName</span><span class="PUNC">:</span><span class="NAME">o.CSName</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>232</span> </span><span class="WHIT">	</span><span class="NAME">RegisteredUser</span><span class="PUNC">:</span><span class="NAME">o.RegisteredUser</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>233</span> 
+<span class='line'>234</span> </span><span class="WHIT">	</span><span class="NAME">CurrentTimeZone</span><span class="PUNC">:</span><span class="NAME">o.CurrentTimeZone</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>235</span> </span><span class="WHIT">	</span><span class="NAME">LastBootUpTime</span><span class="PUNC">:</span><span class="NAME">getWMIData.DateStringToDate</span><span class="PUNC">(</span><span class="NAME">o.LastBootUpTime</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">	</span><span class="COMM">//	系統最後一次啟動的時間</span><span class="WHIT">
+<span class='line'>236</span> </span><span class="WHIT">	</span><span class="NAME">LocalDateTime</span><span class="PUNC">:</span><span class="NAME">getWMIData.DateStringToDate</span><span class="PUNC">(</span><span class="NAME">o.LocalDateTime</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>237</span> </span><span class="WHIT">	</span><span class="NAME">OSLanguage</span><span class="PUNC">:</span><span class="NAME">o.OSLanguage</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>238</span> </span><span class="WHIT">	</span><span class="NAME">CountryCode</span><span class="PUNC">:</span><span class="NAME">o.CountryCode</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>239</span> </span><span class="WHIT">	</span><span class="NAME">CodeSet</span><span class="PUNC">:</span><span class="NAME">o.CodeSet</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>240</span> </span><span class="WHIT">	</span><span class="NAME">Locale</span><span class="PUNC">:</span><span class="NAME">o.Locale</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>241</span> </span><span class="WHIT">	</span><span class="NAME">MUILanguages</span><span class="PUNC">:</span><span class="NAME">VBA</span><span class="PUNC">(</span><span class="NAME">o.MUILanguages</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>242</span> 
+<span class='line'>243</span> </span><span class="WHIT">	</span><span class="NAME">FreePhysicalMemory</span><span class="PUNC">:</span><span class="NAME">o.FreePhysicalMemory</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>244</span> </span><span class="WHIT">	</span><span class="NAME">PhysicalMemory</span><span class="PUNC">:</span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="STRN">'Win32_PhysicalMemory'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">item</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">Capacity</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>245</span> 
+<span class='line'>246</span> </span><span class="WHIT">	</span><span class="COMM">// ms	http://msdn2.microsoft.com/en-us/library/aa394272.aspx</span><span class="WHIT">
+<span class='line'>247</span> </span><span class="WHIT">	</span><span class="NAME">Uptime</span><span class="PUNC">:</span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="STRN">'Win32_PerfFormattedData_PerfOS_System.SystemUpTime'</span><span class="PUNC">)</span><span class="PUNC">*</span><span class="NUMB">1</span><span class="NAME">e3</span><span class="PUNC">,</span><span class="WHIT">	</span><span class="COMM">//	maybe null!</span><span class="WHIT">
+<span class='line'>248</span> </span><span class="WHIT">	</span><span class="COMM">// 顯示系統運行時間(seconds) (NOT Uptime!)	這個運行時間是從性能計數器中獲得的64位整型數，不會出現在49.7天後溢出的情況。	http://www.dx21.com/SCRIPTING/WMI/SUBCLASS.ASP?CID=201</span><span class="WHIT">
+<span class='line'>249</span> </span><span class="WHIT">	</span><span class="COMM">//	maybe NaN</span><span class="WHIT">
+<span class='line'>250</span> </span><span class="WHIT">	</span><span class="NAME">Timestamp</span><span class="PUNC">:</span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="STRN">'Win32_PerfRawData_PerfOS_System.Timestamp_Sys100NS'</span><span class="PUNC">)</span><span class="PUNC">/</span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="STRN">'Win32_PerfRawData_PerfOS_System.Frequency_Sys100NS'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>251</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>252</span> </span><span class="WHIT"> </span><span class="COMM">//alert(getWMIData('Win32_PerfRawData_PerfOS_System.Timestamp_Sys100NS')+'/'+getWMIData('Win32_PerfRawData_PerfOS_System.Frequency_Sys100NS'));</span><span class="WHIT">
+<span class='line'>253</span> 
+<span class='line'>254</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">r.Uptime</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>255</span> </span><span class="WHIT">  </span><span class="NAME">r.Uptime</span><span class="PUNC">=</span><span class="PUNC">(</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Date</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">-</span><span class="NAME">r.LastBootUpTime</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>256</span> 
+<span class='line'>257</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>258</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>259</span> 
+<span class='line'>260</span> 
+<span class='line'>261</span> </span><span class="COMM">/*	http://support.microsoft.com/kb/328874/zh-tw
+<span class='line'>262</span> 	http://msdn.microsoft.com/en-us/library/aa394520(VS.85).aspx
+<span class='line'>263</span> 	http://msdn.microsoft.com/en-us/library/aa390456(VS.85).aspx	http://school.21tx.com/2004/06/16/11568_4.html
+<span class='line'>264</span> 	If this method succeeds and the ActivationRequired property is 1 (one), the method returns 0 (zero). Otherwise, the method returns one of the WMI error constants.
+<span class='line'>265</span> 
+<span class='line'>266</span> TODO:
+<span class='line'>267</span> 判別 OS
+<span class='line'>268</span> */</span><span class="WHIT">
+<span class='line'>269</span> </span><span class="NAME">getWinID</span><span class="PUNC">[</span><span class="NAME">generateCode.dLK</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'getWMIData'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>270</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">getWinID</span><span class="PUNC">(</span><span class="NAME">pKey</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>271</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">o</span><span class="PUNC">=</span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="STRN">'Win32_WindowsProductActivation'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>272</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">WshShell</span><span class="PUNC">=</span><span class="NAME">WScript.CreateObject</span><span class="PUNC">(</span><span class="STRN">"WScript.Shell"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>273</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">o</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="NAME">alert</span><span class="PUNC">(</span><span class="STRN">'getWinID: Can not get Win32_WindowsProductActivation!'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>274</span> </span><span class="WHIT"> </span><span class="NAME">o</span><span class="PUNC">=</span><span class="NAME">o.item</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>275</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">o.ActivationRequired</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>276</span> </span><span class="WHIT">  </span><span class="COMM">//	未啟用 Windows 前, 用錯誤序號會出錯</span><span class="WHIT">
+<span class='line'>277</span> </span><span class="WHIT">  </span><span class="NAME">alert</span><span class="PUNC">(</span><span class="STRN">'Activation Required.'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>278</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>279</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>280</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">pKey</span><span class="PUNC">)</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>281</span> </span><span class="WHIT">  </span><span class="COMM">//	SetProductKey: 修改產品金鑰CD-KEY序號, return 0:OK, else error</span><span class="WHIT">
+<span class='line'>282</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">=</span><span class="NAME">o.SetProductKey</span><span class="PUNC">(</span><span class="NAME">pKey.replace</span><span class="PUNC">(</span><span class="REGX">/[\s\-]/g</span><span class="PUNC">,</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>283</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>284</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>285</span> </span><span class="WHIT">  </span><span class="NAME">alert</span><span class="PUNC">(</span><span class="STRN">'Update failed for ['</span><span class="PUNC">+</span><span class="NAME">pKey</span><span class="PUNC">+</span><span class="STRN">']:\n'</span><span class="PUNC">+</span><span class="NAME">e.description</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	for old version 有可能：無效的操作, 此時需 delete OOBETimer registry value</span><span class="WHIT">
+<span class='line'>286</span> </span><span class="WHIT">  </span><span class="COMM">//	TODO: delete OOBETimer registry value for XP 2600: 針對非 Windows XP SP1 或較新版 Windows XP 使用，來停用 Windows。</span><span class="WHIT">
+<span class='line'>287</span> </span><span class="WHIT">  </span><span class="COMM">//WshShell.RegDelete("HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\WPAEvents\\OOBETimer");</span><span class="WHIT">
+<span class='line'>288</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>289</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">o.GetInstallationID</span><span class="PUNC">(</span><span class="NAME">pKey</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="COMM">//||pKey;	//	無法以此方法獲得 ID</span><span class="WHIT">
+<span class='line'>290</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>291</span> 
+<span class='line'>292</span> </span><span class="COMM">//  ksp:</span><span class="WHIT">
+<span class='line'>293</span> </span><span class="COMM">//alert(getWinID('Q9FDY-483HM-FV6RQ-2YQQQ-FD7J8'));WScript.Quit();</span><span class="WHIT">
+<span class='line'>294</span> 
+<span class='line'>295</span> </span><span class="COMM">// NTSU</span><span class="WHIT">
+<span class='line'>296</span> </span><span class="COMM">//alert(getWinID('VWPM3-MH7H6-VDDHG-YVR4Y-W38JQ'));WScript.Quit();</span><span class="WHIT">
+<span class='line'>297</span> </span><span class="COMM">//alert(getWinID());</span><span class="WHIT">
+<span class='line'>298</span> 
+<span class='line'>299</span> </span><span class="COMM">//alert(getSysInfo().Caption)</span><span class="WHIT">
+<span class='line'>300</span> </span><span class="COMM">//WScript.Quit();</span><span class="WHIT">
+<span class='line'>301</span> 
+<span class='line'>302</span> </span><span class="COMM">/*
+<span class='line'>303</span> http://163.19.54.70/student/SerialNumber.txt	大量授權
+<span class='line'>304</span> Windows XP Professional		VWPM3-MH7H6-VDDHG-YVR4Y-W38JQ
+<span class='line'>305</span> Windows XP Prof, x64 Ed.	FG2Q3-QX4JG-FQMMB-8XXD6-34MRY
+<span class='line'>306</span> Office XP Applications		MXCVH-R3QQG-DMQ2M-KXPVQ-VKD6W
+<span class='line'>307</span> Office XP Suites		PCCKW-J8Y6T-P632P-9KW9P-PK88B
+<span class='line'>308</span> Office 2003 Applications	TF6RQ-TVG9Q-FVV74-GR4CP-2C2MB
+<span class='line'>309</span> Office 2003 Suites		WCMVH-XJGPJ-G9BKC-2KHY9-Y7V36
+<span class='line'>310</span> Office 2007 Applications	FJXGQ-RDQRY-Q2784-D89BP-M4MYJ
+<span class='line'>311</span> Office 2007 Suites		KX3T3-RYFP7-BMPKG-JXTQ2-9HWBJ
+<span class='line'>312</span> 
+<span class='line'>313</span> DBXYD-TF477-46YM4-W74MH-6YDQ8 (CD)
+<span class='line'>314</span> W2JJW-4KYDP-2YMKW-FX36H-QYVD8 (FILES)
+<span class='line'>315</span> 
+<span class='line'>316</span> 'Microsoft Windows XP Professional 5.1.2600':'VWPM3-MH7H6-VDDHG-YVR4Y-W38JQ'
+<span class='line'>317</span> 
+<span class='line'>318</span> ksp:
+<span class='line'>319</span> Windows XP Professional		Q9FDY-483HM-FV6RQ-2YQQQ-FD7J8
+<span class='line'>320</span> Windows XP Prof, x64 Ed.	V3PP8-CD446-62H9J-3XHVF-K44F3
+<span class='line'>321</span> Windows Vista 的 KMS 認證方式，請參考	http://www.ks.edu.tw/KSnet_service.html#D
+<span class='line'>322</span> Office XP Suites		F86BJ-8PJWY-4P8QX-89FKF-896DT
+<span class='line'>323</span> Office 2003 Suites		F4RMR-DKBX3-2TV7F-9T8QJ-8MYQ6
+<span class='line'>324</span> Office 2007 Suites		M3JH3-4R8XX-R37F2-8D8H8-CBVD8
+<span class='line'>325</span> 
+<span class='line'>326</span> 高雄市？
+<span class='line'>327</span> Office 2007
+<span class='line'>328</span> W3GCD-YWK98-8F6BG-2CYBY-KVWBJ
+<span class='line'>329</span> 
+<span class='line'>330</span> 
+<span class='line'>331</span> 以下序號皆為 VLK 大量授權序號：
+<span class='line'>332</span> HCQ9D-TVCWX-X9QRG-J4B2Y-GR2TT
+<span class='line'>333</span> MRX3F-47B9T-2487J-KWKMF-RPWBY
+<span class='line'>334</span> QC986-27D34-6M3TY-JJXP9-TBGMD
+<span class='line'>335</span> CM3HY-26VYW-6JRYC-X66GX-JVY2D
+<span class='line'>336</span> DP7CM-PD6MC-6BKXT-M8JJ6-RPXGJ
+<span class='line'>337</span> F4297-RCWJP-P482C-YY23Y-XH8W3
+<span class='line'>338</span> HH7VV-6P3G9-82TWK-QKJJ3-MXR96
+<span class='line'>339</span> 
+<span class='line'>340</span> 
+<span class='line'>341</span> 
+<span class='line'>342</span> Windows XP Home Edition 
+<span class='line'>343</span> x:
+<span class='line'>344</span> BQFBV-9J43J-663WJ-T2VDY-X86HY
+<span class='line'>345</span> VTDBB-QVPCJ-33J2V-B9KV4-W2PBM
+<span class='line'>346</span> DJH7R-4CYKJ-GWYDC-7MXHJ-X9VJY
+<span class='line'>347</span> 3GT36-XXFDW-JC676-P4FBF-2G6MJ
+<span class='line'>348</span> DGDGK-XVXWR-XJHYK-3688K-8HXYJ
+<span class='line'>349</span> CX7DD-4GX4Y-BTTR4-H88Y7-GQPWQ
+<span class='line'>350</span> J22CH-K4V7X-4G6H6-66JFG-737TK
+<span class='line'>351</span> CG3BH-RG63P-6H2MR-3DVPT-6WTXJ 
+<span class='line'>352</span> JPDR8-7X4G9-Q226K-B7VYR-HFHMD
+<span class='line'>353</span> W888Y-WM6YJ-DJQ27-WRB88-7FG96
+<span class='line'>354</span> 
+<span class='line'>355</span> */</span><span class="WHIT">
+<span class='line'>356</span> 
+<span class='line'>357</span> 
+<span class='line'>358</span> </span><span class="COMM">/*
+<span class='line'>359</span> 	Win32_ComputerSystem:
+<span class='line'>360</span> 	http://msdn2.microsoft.com/en-us/library/aa394224.aspx
+<span class='line'>361</span> 
+<span class='line'>362</span> 	Win32_NetworkAdapterConfiguration:
+<span class='line'>363</span> 	http://msdn2.microsoft.com/en-us/library/aa394217.aspx
+<span class='line'>364</span> 	http://www.microsoft.com/china/technet/community/scriptcenter/topics/networking/01_atnc_intro.mspx
+<span class='line'>365</span> 	http://www.codeproject.com/vbscript/ipaddress.asp?df=100&forumid=3295&exp=0&select=123580
+<span class='line'>366</span> 
+<span class='line'>367</span> to use:
+<span class='line'>368</span> IP=getNetInfo().netif[0].IPAddress[0];
+<span class='line'>369</span> 
+<span class='line'>370</span> test:
+<span class='line'>371</span> with(getNetInfo())alert(UserName+'\n'+Name+'\n'+Workgroup+'\n'+Domain+'\n'+BootupState);
+<span class='line'>372</span> 
+<span class='line'>373</span> with(getNetInfo(2)){
+<span class='line'>374</span>  alert(UserName+'\n'+Name+'\n'+Domain+'\n'+BootupState+'\nAll '+netif.length+' interfaces get');
+<span class='line'>375</span>  for(i=0;i&lt;netif.length;i++)with(netif[i])
+<span class='line'>376</span>   sl(Caption+'\n'
+<span class='line'>377</span> 	+DNSDomain+'\n'
+<span class='line'>378</span> 	+DHCPServer+'\n'
+<span class='line'>379</span> 	+DNSHostName+'\n'
+<span class='line'>380</span> 	+DNSServerSearchOrder+'\n'
+<span class='line'>381</span> 	+IPSubnet+'\n'
+<span class='line'>382</span> 	+DefaultIPGateway+'\n'
+<span class='line'>383</span> 	+IPAddress+'\n'
+<span class='line'>384</span> 
+<span class='line'>385</span> 	+IPEnabled+'\n'
+<span class='line'>386</span> 	+DHCPEnabled+'\n'
+<span class='line'>387</span> 	+SettingID+'\n'
+<span class='line'>388</span> 
+<span class='line'>389</span> 	+MACAddress
+<span class='line'>390</span> 	);
+<span class='line'>391</span> }
+<span class='line'>392</span> WScript.Quit();
+<span class='line'>393</span> 
+<span class='line'>394</span> */</span><span class="WHIT">
+<span class='line'>395</span> </span><span class="NAME">getNetInfo</span><span class="PUNC">[</span><span class="NAME">generateCode.dLK</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'getWMIData,VBA'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>396</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">getNetInfo</span><span class="PUNC">(</span><span class="NAME">type</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">	</span><span class="COMM">//	default type: ip setted interfaces only, 1: all interfaces, 2: 實體 net interfaces(網路卡，無線)</span><span class="WHIT">
+<span class='line'>397</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">=</span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="STRN">'Win32_ComputerSystem'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>398</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">r</span><span class="PUNC">||</span><span class="PUNC">!</span><span class="NAME">r.item</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="NAME">alert</span><span class="PUNC">(</span><span class="STRN">'Can not get Win32_ComputerSystem!\nIs this old system or the function is limited?'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="NAME">r</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>399</span> </span><span class="WHIT"> </span><span class="KEYW">else</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>400</span> </span><span class="WHIT">  </span><span class="NAME">r</span><span class="PUNC">=</span><span class="NAME">getWMIData.getProperties</span><span class="PUNC">(</span><span class="NAME">r.item</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	getWMIData({computer:IP||'.',from:'Win32_ComputerSystem'}).item()</span><span class="WHIT">
+<span class='line'>401</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">r.Workgroup</span><span class="PUNC">)</span><span class="NAME">r.Workgroup</span><span class="PUNC">=</span><span class="NAME">r.Domain</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	        Windows 2000 and Windows NT: Workgroup is not available. Domain: If the computer is not part of a domain, then the name of the workgroup is returned.</span><span class="WHIT">
+<span class='line'>402</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>403</span> 
+<span class='line'>404</span> </span><span class="COMM">/*	waste time
+<span class='line'>405</span>  with(getWMIData('Win32_NTDomain').item()){
+<span class='line'>406</span>   r.Caption=Caption,r.Description=Description;
+<span class='line'>407</span>   if(!r.Name)r.Name=Name;
+<span class='line'>408</span>  }
+<span class='line'>409</span> */</span><span class="WHIT">
+<span class='line'>410</span> 
+<span class='line'>411</span> </span><span class="WHIT"> </span><span class="NAME">r.netif</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>412</span> </span><span class="WHIT"> </span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="NAME">from</span><span class="PUNC">:</span><span class="STRN">'Win32_NetworkAdapterConfiguration'</span><span class="WHIT">
+<span class='line'>413</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">where</span><span class="PUNC">:</span><span class="WHIT">	</span><span class="NAME">type</span><span class="PUNC">==</span><span class="NUMB">1</span><span class="PUNC">?</span><span class="STRN">''</span><span class="WHIT">
+<span class='line'>414</span> </span><span class="WHIT">		</span><span class="PUNC">:</span><span class="NAME">type</span><span class="PUNC">==</span><span class="NUMB">2</span><span class="PUNC">?</span><span class="STRN">'MACAddress!=NULL AND (DHCPEnabled=TRUE OR IPEnabled=TRUE)'</span><span class="COMM">// OR IPXEnabled=TRUE	//	這判別法不是很好</span><span class="WHIT">
+<span class='line'>415</span> </span><span class="WHIT">		</span><span class="PUNC">:</span><span class="STRN">'IPEnabled=TRUE'</span><span class="WHIT">	</span><span class="COMM">//	'NetEnabled=True': Vista only code?</span><span class="WHIT">
+<span class='line'>416</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>417</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>418</span> </span><span class="WHIT">		</span><span class="COMM">//	在DHCP可能得到兩筆同IP之data</span><span class="WHIT">
+<span class='line'>419</span> </span><span class="WHIT">		</span><span class="COMM">//	MACAddress: getmac.exe, arp -a, nbtstat -a 192.168.0.1</span><span class="WHIT">
+<span class='line'>420</span> </span><span class="WHIT">		</span><span class="NAME">r.netif.push</span><span class="PUNC">(</span><span class="NAME">getWMIData.getProperties</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>421</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>422</span> </span><span class="WHIT"> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>423</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>424</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>425</span> 
+<span class='line'>426</span> </span><span class="COMM">/*	改變網卡的IP地址: change IP, set IP
+<span class='line'>427</span> 	2009/5/7 0:24:5 加強
+<span class='line'>428</span> 
+<span class='line'>429</span> 	http://www.yongfa365.com/item/Use-WMi-Change-IP-VBS-yongfa365.html
+<span class='line'>430</span> 	http://www.microsoft.com/technet/scriptcenter/topics/networking/01_atnc_intro.mspx
+<span class='line'>431</span> 	http://www.dotblogs.com.tw/PowerHammer/archive/2008/03/24/2060.aspx
+<span class='line'>432</span> 
+<span class='line'>433</span> to use:
+<span class='line'>434</span> setNetInfo({IP:'163.16.20.212',Gateway:254});
+<span class='line'>435</span> sl(setNetInfo({IP:'163.16.20.30',Gateway:254}));WScript.Quit();
+<span class='line'>436</span> */</span><span class="WHIT">
+<span class='line'>437</span> </span><span class="NAME">setNetInfo</span><span class="PUNC">[</span><span class="NAME">generateCode.dLK</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'getWMIData,VBA,JSArrayToSafeArray'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>438</span> </span><span class="NAME">setNetInfo.default_DNS</span><span class="PUNC">=</span><span class="STRN">'168.95.1.1'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>439</span> </span><span class="NAME">setNetInfo.CIDR_notation</span><span class="PUNC">=</span><span class="NUMB">24</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	http://en.wikipedia.org/wiki/CIDR_notation</span><span class="WHIT">
+<span class='line'>440</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">setNetInfo</span><span class="PUNC">(</span><span class="NAME">to_s</span><span class="PUNC">,</span><span class="NAME">from</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">	</span><span class="COMM">//	to_s: IP or {IP:''||[], Subnet:''||[], DNS:''||[], Gateway:''||[], GatewayOrder:''||[]},  from: IP or netif No.</span><span class="WHIT">
+<span class='line'>441</span> 
+<span class='line'>442</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">_f</span><span class="PUNC">=</span><span class="NAME">arguments.callee</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">,</span><span class="NAME">count</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">IPA</span><span class="WHIT">
+<span class='line'>443</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">i</span><span class="PUNC">=</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">ip</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">ip</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="REGX">/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/</span><span class="PUNC">.</span><span class="NAME">test</span><span class="PUNC">(</span><span class="NAME">ip</span><span class="PUNC">+</span><span class="PUNC">=</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">ip</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="NAME">ip</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">return</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">JSArrayToSafeArray</span><span class="PUNC">(</span><span class="NAME">ip</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>444</span> 
+<span class='line'>445</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">to_s</span><span class="PUNC">!=</span><span class="STRN">'object'</span><span class="PUNC">||</span><span class="NAME">to_s</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>446</span> </span><span class="WHIT">  </span><span class="COMM">//	treat as IP</span><span class="WHIT">
+<span class='line'>447</span> </span><span class="WHIT">  </span><span class="NAME">to_s</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="NAME">IP</span><span class="PUNC">:</span><span class="NAME">to_s</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>448</span> 
+<span class='line'>449</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">to_s.Gateway</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>450</span> </span><span class="WHIT">  </span><span class="NAME">to_s.Gateway</span><span class="PUNC">=</span><span class="PUNC">(</span><span class="NAME">to_s.IP</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">?</span><span class="NAME">to_s.IP.join</span><span class="PUNC">(</span><span class="STRN">','</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="NAME">to_s.IP</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/\d+$/</span><span class="PUNC">,</span><span class="NAME">to_s.Gateway</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>451</span> 
+<span class='line'>452</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="STRN">'Subnet'</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">to_s</span><span class="PUNC">)</span><span class="PUNC">||</span><span class="PUNC">!</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">to_s.Subnet</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>453</span> </span><span class="WHIT">  </span><span class="NAME">IPA</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>454</span> </span><span class="WHIT">  </span><span class="NAME">r</span><span class="PUNC">=</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">to_s.Subnet</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="NAME">_f.CIDR_notation</span><span class="PUNC">:</span><span class="NAME">to_s.Subnet</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>455</span> </span><span class="WHIT">  </span><span class="KEYW">while</span><span class="PUNC">(</span><span class="NAME">r</span><span class="PUNC">></span><span class="NUMB">7</span><span class="PUNC">)</span><span class="NAME">r</span><span class="PUNC">-</span><span class="PUNC">=</span><span class="NUMB">8</span><span class="PUNC">,</span><span class="NAME">IPA.push</span><span class="PUNC">(</span><span class="NUMB">255</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>456</span> </span><span class="WHIT">  </span><span class="NAME">IPA.push</span><span class="PUNC">(</span><span class="NAME">parseInt</span><span class="PUNC">(</span><span class="STRN">'11111111'</span><span class="PUNC">.</span><span class="NAME">slice</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="STRN">'00000000'</span><span class="PUNC">.</span><span class="NAME">slice</span><span class="PUNC">(</span><span class="NAME">r</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NUMB">2</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>457</span> </span><span class="WHIT">  </span><span class="KEYW">while</span><span class="PUNC">(</span><span class="NAME">IPA.length</span><span class="PUNC">&lt;</span><span class="NUMB">4</span><span class="PUNC">)</span><span class="NAME">IPA.push</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>458</span> </span><span class="WHIT">  </span><span class="NAME">to_s.Subnet</span><span class="PUNC">=</span><span class="NAME">IPA.join</span><span class="PUNC">(</span><span class="STRN">'.'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>459</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>460</span> 
+<span class='line'>461</span> </span><span class="WHIT"> </span><span class="COMM">//sl('setNetInfo:\n['+from+'] → ['+to_s.IP+'/'+to_s.Subnet+']\nGateway: ['+to_s.Gateway+']\nDNS: ['+('DNS' in to_s?to_s.DNS:_f.default_DNS)+']');</span><span class="WHIT">
+<span class='line'>462</span> </span><span class="WHIT"> </span><span class="COMM">//return -1;</span><span class="WHIT">
+<span class='line'>463</span> 
+<span class='line'>464</span> </span><span class="WHIT"> </span><span class="NAME">to_s.Subnet</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">(</span><span class="NAME">to_s.Subnet</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>465</span> </span><span class="WHIT"> </span><span class="NAME">to_s.IP</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">(</span><span class="NAME">to_s.IP</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>466</span> </span><span class="WHIT"> </span><span class="NAME">to_s.DNS</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">(</span><span class="STRN">'DNS'</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">to_s</span><span class="PUNC">?</span><span class="NAME">to_s.DNS</span><span class="PUNC">:</span><span class="NAME">_f.default_DNS</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>467</span> 
+<span class='line'>468</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">(</span><span class="NAME">to_s.Gateway</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">(</span><span class="NAME">to_s.Gateway</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>469</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">to_s.GatewayOrder</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>470</span> </span><span class="WHIT">   </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">1</span><span class="PUNC">,</span><span class="NAME">to_s.GatewayOrder</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">=</span><span class="NAME">to_s.Gateway</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">?</span><span class="NAME">to_s.Gateway.length</span><span class="PUNC">:</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">r</span><span class="PUNC">;</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>471</span> </span><span class="WHIT">    </span><span class="NAME">to_s.GatewayOrder.push</span><span class="PUNC">(</span><span class="PUNC">++</span><span class="NAME">i</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>472</span> </span><span class="WHIT">  </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">to_s.GatewayOrder</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">to_s.GatewayOrder</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="NAME">to_s.GatewayOrder</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>473</span> 
+<span class='line'>474</span> </span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">=</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>475</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">from</span><span class="PUNC">)</span><span class="NAME">from</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>476</span> </span><span class="WHIT"> </span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="NAME">from</span><span class="PUNC">:</span><span class="STRN">'Win32_NetworkAdapterConfiguration'</span><span class="WHIT">
+<span class='line'>477</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">where</span><span class="PUNC">:</span><span class="STRN">'MACAddress!=NULL AND (DHCPEnabled=TRUE OR IPEnabled=TRUE)'</span><span class="COMM">// OR IPXEnabled=TRUE	//	這判別法不是很好</span><span class="WHIT">
+<span class='line'>478</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>479</span> </span><span class="WHIT">  </span><span class="COMM">//alert('Get if: '+o.Caption+'\n'+from+','+count);</span><span class="WHIT">
+<span class='line'>480</span> 
+<span class='line'>481</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">from</span><span class="PUNC">)</span><span class="PUNC">||</span><span class="NAME">from</span><span class="PUNC">==</span><span class="NAME">count</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>482</span> </span><span class="WHIT">   </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">IPA</span><span class="PUNC">=</span><span class="NAME">from</span><span class="PUNC">?</span><span class="NAME">VBA</span><span class="PUNC">(</span><span class="NAME">o.IPAddress</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">IPA.length</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>483</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">from</span><span class="PUNC">||</span><span class="NAME">IPA</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">==</span><span class="NAME">from</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>484</span> </span><span class="WHIT">     </span><span class="COMM">//alert('Set if: '+o.Caption);</span><span class="WHIT">
+<span class='line'>485</span> </span><span class="WHIT">     </span><span class="COMM">//alert(o.EnableStatic(to_s.IP,to_s.Subnet||o.IPSubnet))</span><span class="WHIT">
+<span class='line'>486</span> </span><span class="WHIT">     </span><span class="NAME">r</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">!</span><span class="NAME">to_s.IP</span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">o.EnableDHCP</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>487</span> </span><span class="WHIT">	</span><span class="PUNC">:</span><span class="NAME">o.EnableStatic</span><span class="PUNC">(</span><span class="NAME">to_s.IP</span><span class="PUNC">,</span><span class="NAME">to_s.Subnet</span><span class="PUNC">||</span><span class="NAME">o.IPSubnet</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>488</span> </span><span class="WHIT">	</span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">to_s.Gateway</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">o.SetGateways</span><span class="PUNC">(</span><span class="NAME">to_s.Gateway</span><span class="PUNC">,</span><span class="NAME">to_s.GatewayOrder</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>489</span> </span><span class="WHIT">	</span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">to_s.DNS</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">o.SetDNSServerSearchOrder</span><span class="PUNC">(</span><span class="NAME">to_s.DNS</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>490</span> </span><span class="WHIT">     </span><span class="COMM">//	TODO: error detection</span><span class="WHIT">
+<span class='line'>491</span> </span><span class="WHIT">     </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>492</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>493</span> </span><span class="WHIT">   </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>494</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>495</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>496</span> 
+<span class='line'>497</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	not found / error: http://msdn.microsoft.com/en-us/library/aa390383%28VS.85%29.aspx</span><span class="WHIT">
+<span class='line'>498</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>499</span> 
+<span class='line'>500</span> 
+<span class='line'>501</span> </span><span class="COMM">/*	get IP of Windows Host
+<span class='line'>502</span> 	http://www.scriptinganswers.com/forum/forum_posts.asp?TID=516&PID=3124
+<span class='line'>503</span> 	Wscript.Network
+<span class='line'>504</span> 
+<span class='line'>505</span> ping:
+<span class='line'>506</span> 	http://blog.blueshop.com.tw/hammerchou/archive/2006/07/08/32205.aspx
+<span class='line'>507</span> 1.
+<span class='line'>508</span> GetObject("winmgmts:").Get("NetDiagnostics=@").Ping(strAddr, Ping)
+<span class='line'>509</span> 2.
+<span class='line'>510</span> objCls = GetObject("winmgmts:\\" & strMachine & "\root\CIMV2").Get("NetDiagnostics")
+<span class='line'>511</span> objInPara = objCls.Methods_("Ping").inParameters.SpawnInstance_()
+<span class='line'>512</span> objInPara.Properties_("sInAddr") = "www.google.com.tw" // 設定 Ping 的位置
+<span class='line'>513</span> // Ping 為 方法 , ExecMethod 為 執行方法 ( 把參數送入執行 )
+<span class='line'>514</span> objOutPara = objWMIsvc.ExecMethod("NetDiagnostics=@", "Ping", objInPara)
+<span class='line'>515</span> // 取回輸出參數 ( Ping 的結果 ): objOutPara.ReturnValue = True 則 Ping 成功 , 反之則失敗
+<span class='line'>516</span> objOutPara.sOutArg
+<span class='line'>517</span> 
+<span class='line'>518</span> 
+<span class='line'>519</span> test:
+<span class='line'>520</span> var h='Public',ip=getIPofHost(h);alert(ip?h+':\n'+ip:'Computer [\\'+h+'] is unreachable!');
+<span class='line'>521</span> 
+<span class='line'>522</span> */</span><span class="WHIT">
+<span class='line'>523</span> </span><span class="NAME">getIPofHost</span><span class="PUNC">[</span><span class="NAME">generateCode.dLK</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'getWMIData'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>524</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">getIPofHost</span><span class="PUNC">(</span><span class="NAME">h</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>525</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">qIP</span><span class="PUNC">=</span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="NAME">from</span><span class="PUNC">:</span><span class="STRN">'Win32_PingStatus'</span><span class="PUNC">,</span><span class="NAME">where</span><span class="PUNC">:</span><span class="STRN">"Address='"</span><span class="PUNC">+</span><span class="NAME">h</span><span class="PUNC">+</span><span class="STRN">"'"</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">item</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>526</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">qIP.StatusCode</span><span class="PUNC">&&</span><span class="NAME">qIP.StatusCode</span><span class="PUNC">!=</span><span class="KEYW">null</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">qIP.ProtocolAddress</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>527</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>528</span> 
+<span class='line'>529</span> </span><span class="COMM">//	終止進程	http://msdn2.microsoft.com/en-us/library/aa393907.aspx</span><span class="WHIT">
+<span class='line'>530</span> </span><span class="NAME">killProcess</span><span class="PUNC">[</span><span class="NAME">generateCode.dLK</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'getWMIData'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>531</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">killProcess</span><span class="PUNC">(</span><span class="NAME">n</span><span class="PUNC">,</span><span class="NAME">isPID</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>532</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">k</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>533</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">isPID</span><span class="PUNC">==</span><span class="STRN">'undefined'</span><span class="PUNC">)</span><span class="NAME">isPID</span><span class="PUNC">=</span><span class="PUNC">!</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">n</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>534</span> </span><span class="WHIT"> </span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="STRN">'Win32_Process'</span><span class="PUNC">,</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>535</span> </span><span class="WHIT">  </span><span class="KEYW">with</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">)</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">isPID</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>536</span> </span><span class="WHIT">   </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">ProcessId</span><span class="PUNC">==</span><span class="NAME">n</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="NAME">Terminate</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="NAME">k</span><span class="PUNC">=</span><span class="NUMB">1</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>537</span> </span><span class="WHIT">   </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">Caption</span><span class="PUNC">==</span><span class="NAME">n</span><span class="PUNC">)</span><span class="NAME">Terminate</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">k</span><span class="PUNC">++</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>538</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>539</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">k</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>540</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>541</span> 
+<span class='line'>542</span> 
+<span class='line'>543</span> </span><span class="COMM">/*	列舉進程	http://msdn2.microsoft.com/en-us/library/aa394372.aspx
+<span class='line'>544</span> 
+<span class='line'>545</span> test:
+<span class='line'>546</span> alert(getProcess()['explorer.exe'].CommandLine);
+<span class='line'>547</span> for(i=0,p=getProcess();i&lt;p.length;i++)with(p[i])
+<span class='line'>548</span>  alert(i+' / '+p.length+'\n['+ProcessId+'] '+Caption+(Name==Caption?'':' ('+Name+')')+'\n'+(Description==Caption?'':Description+'\n')+CSName+'\n'
+<span class='line'>549</span> 	+'Open files: '+HandleCount+'\n'
+<span class='line'>550</span> 	//+OSName+'\n'
+<span class='line'>551</span> 	+'memory: '+MinimumWorkingSetSize+'-'+MaximumWorkingSetSize+'\n'	//	memory pages visible to the process in physical RAM
+<span class='line'>552</span> 	+'Time in kernel mode: '+KernelModeTime+' ms\n'+ExecutablePath+'\n'+CommandLine+'\n'+CreationDate.toLocaleString()
+<span class='line'>553</span> 	);
+<span class='line'>554</span> */</span><span class="WHIT">
+<span class='line'>555</span> </span><span class="NAME">getProcess</span><span class="PUNC">[</span><span class="NAME">generateCode.dLK</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'getWMIData'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>556</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">getProcess</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>557</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>558</span> </span><span class="WHIT"> </span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="STRN">'Win32_Process'</span><span class="PUNC">,</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="KEYW">with</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">)</span><span class="NAME">r</span><span class="PUNC">[</span><span class="NAME">Caption</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">r</span><span class="PUNC">[</span><span class="NAME">r.push</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>559</span> </span><span class="WHIT">	</span><span class="NAME">ProcessId</span><span class="PUNC">:</span><span class="NAME">ProcessId</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>560</span> </span><span class="WHIT">	</span><span class="NAME">Caption</span><span class="PUNC">:</span><span class="NAME">Caption</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>561</span> </span><span class="WHIT">	</span><span class="NAME">ExecutablePath</span><span class="PUNC">:</span><span class="NAME">ExecutablePath</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>562</span> </span><span class="WHIT">	</span><span class="NAME">CommandLine</span><span class="PUNC">:</span><span class="NAME">CommandLine</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>563</span> </span><span class="WHIT">	</span><span class="NAME">Name</span><span class="PUNC">:</span><span class="NAME">Name</span><span class="PUNC">,</span><span class="WHIT">	</span><span class="COMM">//	==Caption</span><span class="WHIT">
+<span class='line'>564</span> </span><span class="WHIT">	</span><span class="NAME">Description</span><span class="PUNC">:</span><span class="NAME">Description</span><span class="PUNC">,</span><span class="WHIT">	</span><span class="COMM">//	==Caption</span><span class="WHIT">
+<span class='line'>565</span> </span><span class="WHIT">	</span><span class="NAME">CSName</span><span class="PUNC">:</span><span class="NAME">CSName</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>566</span> </span><span class="WHIT">	</span><span class="NAME">HandleCount</span><span class="PUNC">:</span><span class="NAME">HandleCount</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>567</span> </span><span class="WHIT">	</span><span class="NAME">OSName</span><span class="PUNC">:</span><span class="NAME">OSName</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>568</span> </span><span class="WHIT">	</span><span class="NAME">MinimumWorkingSetSize</span><span class="PUNC">:</span><span class="NAME">MinimumWorkingSetSize</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>569</span> </span><span class="WHIT">	</span><span class="NAME">MaximumWorkingSetSize</span><span class="PUNC">:</span><span class="NAME">MaximumWorkingSetSize</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>570</span> </span><span class="WHIT">	</span><span class="NAME">KernelModeTime</span><span class="PUNC">:</span><span class="NAME">p.KernelModeTime</span><span class="PUNC">/</span><span class="NUMB">1</span><span class="NAME">e5</span><span class="PUNC">,</span><span class="WHIT">	</span><span class="COMM">//	100000ms</span><span class="WHIT">
+<span class='line'>571</span> </span><span class="WHIT">	</span><span class="NAME">CreationDate</span><span class="PUNC">:</span><span class="NAME">getWMIData.DateStringToDate</span><span class="PUNC">(</span><span class="NAME">CreationDate</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>572</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>573</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>574</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>575</span> 
+<span class='line'>576</span> 
+<span class='line'>577</span> 
+<span class='line'>578</span> </span><span class="COMM">/*	列舉服務
+<span class='line'>579</span> 	http://msdn2.microsoft.com/en-us/library/aa394418.aspx
+<span class='line'>580</span> 	http://www.microsoft.com/taiwan/technet/scriptcenter/topics/vista/indexer.mspx
+<span class='line'>581</span> 
+<span class='line'>582</span> test:
+<span class='line'>583</span> alert(getService()['Event Log'].Description);
+<span class='line'>584</span> for(i=0,s=getService();i&lt;s.length;i++){t=i+' / '+s.length;for(j in s[i])t+='\n'+j+': '+s[i][j];alert(t);}
+<span class='line'>585</span> */</span><span class="WHIT">
+<span class='line'>586</span> </span><span class="COMM">//getService[generateCode.dLK]='getWMIData';</span><span class="WHIT">
+<span class='line'>587</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">getService</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>588</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>589</span> </span><span class="WHIT"> </span><span class="NAME">getWMIData</span><span class="PUNC">(</span><span class="STRN">'Win32_Service'</span><span class="PUNC">,</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">s</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="KEYW">with</span><span class="PUNC">(</span><span class="NAME">s</span><span class="PUNC">)</span><span class="NAME">r</span><span class="PUNC">[</span><span class="NAME">Caption</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">r</span><span class="PUNC">[</span><span class="NAME">r.push</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>590</span> </span><span class="WHIT">	</span><span class="NAME">AcceptPause</span><span class="PUNC">:</span><span class="NAME">AcceptPause</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>591</span> </span><span class="WHIT">	</span><span class="NAME">AcceptStop</span><span class="PUNC">:</span><span class="NAME">AcceptStop</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>592</span> </span><span class="WHIT">	</span><span class="NAME">Caption</span><span class="PUNC">:</span><span class="NAME">Caption</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>593</span> </span><span class="WHIT">	</span><span class="NAME">Description</span><span class="PUNC">:</span><span class="NAME">Description</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>594</span> </span><span class="WHIT">	</span><span class="NAME">DisplayName</span><span class="PUNC">:</span><span class="NAME">DisplayName</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>595</span> </span><span class="WHIT">	</span><span class="NAME">ExitCode</span><span class="PUNC">:</span><span class="NAME">ExitCode</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>596</span> </span><span class="WHIT">	</span><span class="NAME">InstallDate</span><span class="PUNC">:</span><span class="NAME">getWMIData.DateStringToDate</span><span class="PUNC">(</span><span class="NAME">InstallDate</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>597</span> </span><span class="WHIT">	</span><span class="NAME">Name</span><span class="PUNC">:</span><span class="NAME">Name</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>598</span> </span><span class="WHIT">	</span><span class="NAME">Pathname</span><span class="PUNC">:</span><span class="NAME">Pathname</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>599</span> </span><span class="WHIT">	</span><span class="NAME">ProcessId</span><span class="PUNC">:</span><span class="NAME">ProcessId</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>600</span> </span><span class="WHIT">	</span><span class="NAME">ServiceSpecificExitCode</span><span class="PUNC">:</span><span class="NAME">ServiceSpecificExitCode</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>601</span> </span><span class="WHIT">	</span><span class="NAME">Started</span><span class="PUNC">:</span><span class="NAME">Started</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>602</span> </span><span class="WHIT">	</span><span class="NAME">StartMode</span><span class="PUNC">:</span><span class="NAME">StartMode</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>603</span> </span><span class="WHIT">	</span><span class="NAME">StartName</span><span class="PUNC">:</span><span class="NAME">StartName</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>604</span> </span><span class="WHIT">	</span><span class="NAME">State</span><span class="PUNC">:</span><span class="NAME">State</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>605</span> </span><span class="WHIT">	</span><span class="NAME">Status</span><span class="PUNC">:</span><span class="NAME">Status</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>606</span> </span><span class="WHIT">	</span><span class="NAME">SystemName</span><span class="PUNC">:</span><span class="NAME">SystemName</span><span class="WHIT">
+<span class='line'>607</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>608</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>609</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>610</span> 
+<span class='line'>611</span> 
+<span class='line'>612</span> </span><span class="COMM">/*	http://msdn.microsoft.com/en-us/library/bb774148.aspx
+<span class='line'>613</span> WinShell.ShellExecute(appName, appArgs, appPath, "", 0);	http://msdn.microsoft.com/en-us/library/bb774148.aspx
+<span class='line'>614</span> Private Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" (ByVal hwnd As Long, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As Long
+<span class='line'>615</span> &lt;object runat="server" id="WinShell" scope="page" classid="clsid:13709620-C279-11CE-A49E-444553540000">&lt;/object>
+<span class='line'>616</span> &lt;object runat="server" id="fso" scope="page" classid="clsid:0D43FE01-F093-11CF-8940-00A0C9054228">&lt;/object>
+<span class='line'>617</span> 
+<span class='line'>618</span> http://windowssdk.msdn.microsoft.com/en-us/library/ms630425.aspx
+<span class='line'>619</span> WinShell.ShutdownWindows();	//	Open the Shutdown dialog	http://www.robvanderwoude.com/index.html
+<span class='line'>620</span> */</span><span class="WHIT">
+<span class='line'>621</span> 
+<span class='line'>622</span> 
+<span class='line'>623</span> </span><span class="COMM">/*	2008/8/8 18:29:44
+<span class='line'>624</span> 	run them with administrator rights	runs under administrator privileges.
+<span class='line'>625</span> 帳戶控制	Windows Vista：使用軟體限制原則對抗未授權的軟體	http://www.microsoft.com/taiwan/technet/windowsvista/security/rstrplcy.mspx
+<span class='line'>626</span> http://4sysops.com/archives/vista%E2%80%99s-uac-how-to-elevate-scripts-vbscript-and-jscript/
+<span class='line'>627</span> http://blogs.msdn.com/aaron_margosis/archive/2007/07/01/scripting-elevation-on-vista.aspx
+<span class='line'>628</span> Software\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA	c:\windows\system32\control.exe /name Microsoft.UserAccounts	http://www.dashken.net/index.php?/archives/280-VBScript-Check-if-OS-is-Vista-and-Vistas-UAC-status.html
+<span class='line'>629</span> http://msdn.microsoft.com/en-us/magazine/cc163486.aspx
+<span class='line'>630</span> HKEY_LOCAL_MACHINESOFTWARE MicrosoftWindowsCurrentVersionPoliciesSystem\ConsentPromptBehaviorAdmin	http://hsu.easynow.com.tw/index.php?load=read&id=28
+<span class='line'>631</span> http://vistavitals.blogspot.com/2008/02/logon-scripts-token-effort.html
+<span class='line'>632</span> runas	http://www.merawindows.com/Forums/tabid/324/forumid/82/postid/32458/scope/posts/Default.aspx
+<span class='line'>633</span> 	http://www.winhelponline.com/articles/185/1/VBScripts-and-UAC-elevation.html
+<span class='line'>634</span> 
+<span class='line'>635</span> http://forums.techarena.in/vista-security/654643.htm
+<span class='line'>636</span> Set objShell = CreateObject("Shell.Application")
+<span class='line'>637</span> Set objFolder = objShell.Namespace("C:\")
+<span class='line'>638</span> Set objFolderItem = objFolder.ParseName("myhta.hta")
+<span class='line'>639</span> objFolderItem.InvokeVerb "runas"
+<span class='line'>640</span> 
+<span class='line'>641</span> var WinShell=new ActiveXObject("Shell.Application"),p=location.pathname.replace(/[^\\]+$/,''),o=WinShell.Namespace(p).ParseName(location.pathname.slice(p.length));
+<span class='line'>642</span> o.InvokeVerb("runas");
+<span class='line'>643</span> 
+<span class='line'>644</span> http://www.zaoxue.com/article/tech-28339_2.htm	http://www.lob.cn/vbs/20071126203237.shtml
+<span class='line'>645</span> 
+<span class='line'>646</span> TODO:
+<span class='line'>647</span> 對 prompt 回應不允許時的處理: 若想在受限的情況下使用?
+<span class='line'>648</span> 不使用自訂程式	http://msdn.microsoft.com/en-us/library/bb776820(VS.85).aspx
+<span class='line'>649</span> */</span><span class="WHIT">
+<span class='line'>650</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">runas</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>651</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">p</span><span class="PUNC">)</span><span class="NAME">p</span><span class="PUNC">=</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WScript</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="PUNC">?</span><span class="NAME">WScript.ScriptFullName</span><span class="PUNC">:</span><span class="NAME">unescape</span><span class="PUNC">(</span><span class="NAME">location.pathname</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>652</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">a</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="NAME">js</span><span class="PUNC">:</span><span class="STRN">'wscript.exe'</span><span class="PUNC">,</span><span class="NAME">vbs</span><span class="PUNC">:</span><span class="STRN">'wscript.exe'</span><span class="PUNC">,</span><span class="NAME">hta</span><span class="PUNC">:</span><span class="STRN">'mshta.exe'</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="NAME">ext</span><span class="PUNC">=</span><span class="NAME">p.match</span><span class="PUNC">(</span><span class="REGX">/([^.]+)$/</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>653</span> </span><span class="WHIT"> </span><span class="NAME">a</span><span class="PUNC">=</span><span class="NAME">ext</span><span class="PUNC">&&</span><span class="PUNC">(</span><span class="NAME">ext</span><span class="PUNC">=</span><span class="NAME">ext</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">toLowerCase</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">ext</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">a</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="NAME">a</span><span class="PUNC">[</span><span class="NAME">ext</span><span class="PUNC">]</span><span class="PUNC">:</span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>654</span> </span><span class="WHIT"> </span><span class="COMM">//	判斷是否有權限</span><span class="WHIT">
+<span class='line'>655</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">registryF.checkAccess</span><span class="PUNC">(</span><span class="STRN">'HKLM\\SOFTWARE\\'</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>656</span> </span><span class="WHIT">  </span><span class="COMM">//	以管理者權限另外執行新的	It will get the UAC prompt if this feature is not disabled.</span><span class="WHIT">
+<span class='line'>657</span> </span><span class="WHIT">  </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">"Shell.Application"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">ShellExecute</span><span class="PUNC">(</span><span class="NAME">a</span><span class="PUNC">||</span><span class="NAME">p</span><span class="PUNC">,</span><span class="NAME">a</span><span class="PUNC">?</span><span class="NAME">p</span><span class="PUNC">:</span><span class="STRN">''</span><span class="PUNC">,</span><span class="STRN">''</span><span class="PUNC">,</span><span class="STRN">'runas'</span><span class="COMM">/*,5*/</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>658</span> </span><span class="WHIT">  </span><span class="COMM">//	執行完本身則退出</span><span class="WHIT">
+<span class='line'>659</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WScript</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="PUNC">)</span><span class="NAME">WScript.Quit</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">window</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="PUNC">)</span><span class="NAME">window.close</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>660</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>661</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>662</span> 
+<span class='line'>663</span> 
+<span class='line'>664</span> </span><span class="COMM">/*	JScript file: check owner, .exe file
+<span class='line'>665</span> 	http://www.microsoft.com/taiwan/technet/scriptcenter/resources/qanda/nov04/hey1115.mspx
+<span class='line'>666</span> 	Exec Method (Windows Script Host)	http://msdn.microsoft.com/en-us/library/ateytk4a(VS.85).aspx
+<span class='line'>667</span> 
+<span class='line'>668</span> usage:
+<span class='line'>669</span> runProg(path): use WshShell.Exec, return [StdOut, StdErr, ExitCode]
+<span class='line'>670</span> runProg(path, 1): use WshShell.Exec, can get output by .StdOut.ReadAll(), or .StdErr.ReadAll()
+<span class='line'>671</span> runProg([path, WindowStyle, WaitonReturn],2): use WshShell.Run
+<span class='line'>672</span> runProg(script path, remote computer): use WshRemote
+<span class='line'>673</span> runProg(path, remote computer): use WMI
+<span class='line'>674</span> 
+<span class='line'>675</span> TODO:
+<span class='line'>676</span> runProg([path, Verb],3): use Shell.Application InvokeVerb
+<span class='line'>677</span> runProg([path, arg1, arg2,..]): use Shell.Application.ShellExecute
+<span class='line'>678</span> 
+<span class='line'>679</span> 
+<span class='line'>680</span> example:
+<span class='line'>681</span> WScript.Echo(runProg('%COMSPEC% /U /c ""C:\\Program Files\\WinRAR\\Rar.exe" vt -scuc "F:\\CLAMP 01.rar""')[0]);
+<span class='line'>682</span> 
+<span class='line'>683</span> 
+<span class='line'>684</span> WshShell.Run(command, [WindowStyle 0-10], [WaitonReturn false: nowait & return 0, true: wait & return error code])
+<span class='line'>685</span> WshShell.Exec(),objFolderItem.InvokeVerb()
+<span class='line'>686</span> WshShell.Run('command /k ' + ドライブ +' | cd /D '+ パス);// cd で他ドライブへ移れないので。
+<span class='line'>687</span> */</span><span class="WHIT">
+<span class='line'>688</span> </span><span class="COMM">//runProg[generateCode.dLK]='initWScriptObj';</span><span class="WHIT">
+<span class='line'>689</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">runProg</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>690</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">s</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>691</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">r</span><span class="PUNC">||</span><span class="NAME">r</span><span class="PUNC">===</span><span class="NUMB">1</span><span class="PUNC">||</span><span class="NAME">r</span><span class="PUNC">===</span><span class="NUMB">2</span><span class="PUNC">)</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">s</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">'WScript.Shell'</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>692</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">p</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="PUNC">&&</span><span class="NAME">r</span><span class="PUNC">===</span><span class="NUMB">2</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>693</span> </span><span class="WHIT">   </span><span class="NAME">r</span><span class="PUNC">=</span><span class="NAME">s.Run</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">p</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">p</span><span class="PUNC">[</span><span class="NUMB">2</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>694</span> </span><span class="WHIT">  </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">s</span><span class="PUNC">=</span><span class="NAME">s.Exec</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">)</span><span class="NAME">r</span><span class="PUNC">=</span><span class="NAME">s</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>695</span> </span><span class="WHIT">  </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">with</span><span class="PUNC">(</span><span class="NAME">s</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>696</span> </span><span class="WHIT">   </span><span class="KEYW">while</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">Status</span><span class="PUNC">)</span><span class="NAME">WScript.Sleep</span><span class="PUNC">(</span><span class="NUMB">80</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>697</span> </span><span class="WHIT">   </span><span class="NAME">r</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="NAME">StdOut.ReadAll</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">StdErr.ReadAll</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">ExitCode</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>698</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>699</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>700</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>701</span> 
+<span class='line'>702</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="REGX">/^[^ ]+\.(j|vb)s$/i</span><span class="PUNC">.</span><span class="NAME">test</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>703</span> </span><span class="WHIT">  </span><span class="NAME">s</span><span class="PUNC">=</span><span class="PUNC">(</span><span class="NAME">WScript.CreateObject</span><span class="PUNC">(</span><span class="STRN">'WSHController'</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">CreateScript</span><span class="PUNC">(</span><span class="NAME">p</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>704</span> </span><span class="WHIT">  </span><span class="NAME">s.Execute</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>705</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">s</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>706</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>707</span> 
+<span class='line'>708</span> </span><span class="WHIT"> </span><span class="NAME">s</span><span class="PUNC">=</span><span class="NAME">GetObject</span><span class="PUNC">(</span><span class="STRN">"winmgmts:{impersonationLevel=impersonate}//"</span><span class="PUNC">+</span><span class="PUNC">(</span><span class="NAME">r</span><span class="PUNC">||</span><span class="STRN">'.'</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="STRN">"/root/cimv2:Win32_Process"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>709</span> </span><span class="WHIT"> </span><span class="COMM">//if(/^[^ ]+\.(j|vb)s$/i.test(p))p="wscript.exe "+p;</span><span class="WHIT">
+<span class='line'>710</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">s.Create</span><span class="PUNC">(</span><span class="NAME">p</span><span class="COMM">/*,null,null,intProcessID*/</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	Create 方法會讓這個指令碼在「遠端電腦」上執行。</span><span class="WHIT">
+<span class='line'>711</span> </span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>712</span> </span><span class="WHIT"> </span><span class="COMM">//popErr(e);</span><span class="WHIT">
+<span class='line'>713</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>714</span> </span><span class="PUNC">}</span><span class="PUNC">}</span><span class="WHIT">	</span><span class="COMM">//	function runProg</span><span class="WHIT">
+<span class='line'>715</span> 
+<span class='line'>716</span> 
+<span class='line'>717</span> 
+<span class='line'>718</span> </span><span class="COMM">/*	shutdown/reboot computer	2007/5/8-9 0:8:52
+<span class='line'>719</span> 	http://www.robvanderwoude.com/index.html
+<span class='line'>720</span> 	http://www.ericphelps.com/batch/samples/reboot.txt
+<span class='line'>721</span> 
+<span class='line'>722</span> 	http://www.semcase.com/docus/iis/prog_wmi_tut_03_01.htm	http://www.semcase.com/docus/iis/iis.htm
+<span class='line'>723</span> 	http://support.microsoft.com/kb/913538	當您使用會讓列舉程式物件在 Microsoft Windows Server 2003 或 Microsoft Windows XP 用戶端電腦上進行內部複製的 Windows Management Instrumentation (WMI) 功能時，列舉程式物件於用戶端電腦尚未完成使用列舉程式物件的動作時，即遭取消。此外，WMI 功能還可能傳回錯誤碼。
+<span class='line'>724</span> 
+<span class='line'>725</span> mode:
+<span class='line'>726</span> 0	poweroff (if supported by the hardware)
+<span class='line'>727</span> null,1	reboot
+<span class='line'>728</span> 	restart
+<span class='line'>729</span> 	logoff
+<span class='line'>730</span> 	shutdown
+<span class='line'>731</span> 	suspend, sleep, hibernate
+<span class='line'>732</span> 	lock
+<span class='line'>733</span> //	standby	http://www.tutorials-xe.com/SCRIPTING/Restart-service/
+<span class='line'>734</span> 16	force
+<span class='line'>735</span> 
+<span class='line'>736</span> 	open the shutdown dialog
+<span class='line'>737</span> 
+<span class='line'>738</span> time: seconds
+<span class='line'>739</span> */</span><span class="WHIT">
+<span class='line'>740</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">shutdownF</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>741</span> </span><span class="NAME">setObjValue</span><span class="PUNC">(</span><span class="STRN">'shutdownF'</span><span class="PUNC">,</span><span class="STRN">'poweroff,reboot,restart,logoff,shutdown,suspend,lock,force=16,dialog=32'</span><span class="PUNC">,</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>742</span> </span><span class="NAME">shutdown</span><span class="PUNC">[</span><span class="NAME">generateCode.dLK</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'initWScriptObj,shutdownF,Sleep'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>743</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">shutdown</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="PUNC">,</span><span class="NAME">time</span><span class="COMM">/*,message*/</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>744</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">mode</span><span class="PUNC">=</span><span class="NAME">shutdownF.reboot</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>745</span> 
+<span class='line'>746</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">f</span><span class="PUNC">,</span><span class="NAME">sComputer</span><span class="PUNC">=</span><span class="STRN">"."</span><span class="WHIT">
+<span class='line'>747</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">_s</span><span class="PUNC">,</span><span class="NAME">s</span><span class="PUNC">=</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">t</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>748</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">t</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>749</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">time</span><span class="PUNC">&&</span><span class="PUNC">!</span><span class="NAME">_s</span><span class="PUNC">)</span><span class="NAME">Sleep</span><span class="PUNC">(</span><span class="NAME">time</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>750</span> </span><span class="WHIT">		</span><span class="NAME">_s</span><span class="PUNC">=</span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>751</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>752</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">force</span><span class="PUNC">=</span><span class="NAME">mode</span><span class="PUNC">&</span><span class="NAME">shutdownF.force</span><span class="WHIT">
+<span class='line'>753</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">sF</span><span class="PUNC">=</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">a</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="NAME">f</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">a.length</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">+</span><span class="PUNC">=</span><span class="NUMB">2</span><span class="PUNC">)</span><span class="NAME">f</span><span class="PUNC">[</span><span class="NAME">a</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">a</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">+</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>754</span> </span><span class="WHIT">	</span><span class="PUNC">,</span><span class="NAME">oWMIS</span><span class="WHIT">
+<span class='line'>755</span> </span><span class="WHIT">	</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>756</span> 
+<span class='line'>757</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="PUNC">-</span><span class="PUNC">=</span><span class="NAME">force</span><span class="PUNC">)</span><span class="PUNC">==</span><span class="NAME">shutdownF.dialog</span><span class="PUNC">)</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>758</span> </span><span class="WHIT">  </span><span class="NAME">s</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>759</span> </span><span class="WHIT">  </span><span class="NAME">WinShell.ShutdownWindows</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>760</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>761</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>762</span> 
+<span class='line'>763</span> </span><span class="WHIT"> </span><span class="COMM">// way 1: WMI</span><span class="WHIT">
+<span class='line'>764</span> </span><span class="WHIT"> </span><span class="NAME">sF</span><span class="PUNC">(</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">shutdownF.logoff</span><span class="PUNC">,</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">shutdownF.shutdown</span><span class="PUNC">,</span><span class="NUMB">1</span><span class="PUNC">,</span><span class="NAME">shutdownF.reboot</span><span class="PUNC">,</span><span class="NUMB">2</span><span class="PUNC">,</span><span class="NAME">shutdownF.force</span><span class="PUNC">,</span><span class="NUMB">4</span><span class="PUNC">,</span><span class="NAME">shutdownF.poweroff</span><span class="PUNC">,</span><span class="NUMB">8</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>765</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">f</span><span class="PUNC">)</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">	</span><span class="COMM">//	f.hasOwnProperty(mode)</span><span class="WHIT">
+<span class='line'>766</span> </span><span class="WHIT">  </span><span class="NAME">f</span><span class="PUNC">=</span><span class="NAME">f</span><span class="PUNC">[</span><span class="NAME">mode</span><span class="PUNC">]</span><span class="PUNC">&</span><span class="NAME">f</span><span class="PUNC">[</span><span class="NAME">force</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>767</span> </span><span class="WHIT">  </span><span class="NAME">oWMIS</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Enumerator</span><span class="PUNC">(</span><span class="WHIT">
+<span class='line'>768</span> </span><span class="WHIT">	 </span><span class="NAME">GetObject</span><span class="PUNC">(</span><span class="STRN">"winmgmts:{impersonationLevel=impersonate,(Shutdown)}//"</span><span class="PUNC">+</span><span class="PUNC">(</span><span class="NAME">sComputer</span><span class="PUNC">||</span><span class="STRN">'.'</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="STRN">"/root/cimv2"</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>769</span> </span><span class="WHIT">	 </span><span class="PUNC">.</span><span class="NAME">ExecQuery</span><span class="PUNC">(</span><span class="STRN">"Select * from Win32_OperatingSystem"</span><span class="PUNC">)</span><span class="COMM">//Select * from Win32_OperatingSystem Where primary=true</span><span class="WHIT">
+<span class='line'>770</span> </span><span class="WHIT">	</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>771</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">oWMIS</span><span class="PUNC">)</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>772</span> </span><span class="WHIT">  </span><span class="NAME">s</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>773</span> </span><span class="WHIT">  </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="PUNC">;</span><span class="PUNC">!</span><span class="NAME">oWMIS.atEnd</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="NAME">oWMIS.moveNext</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>774</span> </span><span class="WHIT">   </span><span class="COMM">//oWMIS.item().Reboot();//.Shutdown();	//	force!</span><span class="WHIT">
+<span class='line'>775</span> </span><span class="WHIT">   </span><span class="NAME">oWMIS.item</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">Win32Shutdown</span><span class="PUNC">(</span><span class="NAME">f</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="COMM">//if()	//	http://msdn2.microsoft.com/en-us/library/aa394058.aspx</span><span class="WHIT">
+<span class='line'>776</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>777</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>778</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>779</span> </span><span class="WHIT"> </span><span class="COMM">// way 2: RUNDLL32 SHELL32.DLL, SHExitWindowsEx [n]</span><span class="WHIT">
+<span class='line'>780</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">f</span><span class="PUNC">)</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="NAME">WshShell.Run</span><span class="PUNC">(</span><span class="STRN">" RUNDLL32 SHELL32.DLL,SHExitWindowsEx "</span><span class="PUNC">+</span><span class="NAME">f</span><span class="PUNC">[</span><span class="NAME">mode</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>781</span> 
+<span class='line'>782</span> </span><span class="WHIT"> </span><span class="COMM">// way 3: shutdown.exe utility</span><span class="WHIT">
+<span class='line'>783</span> </span><span class="WHIT"> </span><span class="NAME">sF</span><span class="PUNC">(</span><span class="PUNC">[</span><span class="NAME">shutdownF.logoff</span><span class="PUNC">,</span><span class="STRN">'l'</span><span class="PUNC">,</span><span class="NAME">shutdownF.poweroff</span><span class="PUNC">,</span><span class="STRN">'s'</span><span class="PUNC">,</span><span class="NAME">shutdownF.shutdown</span><span class="PUNC">,</span><span class="STRN">'s'</span><span class="PUNC">,</span><span class="NAME">shutdownF.reboot</span><span class="PUNC">,</span><span class="STRN">'r'</span><span class="PUNC">,</span><span class="NAME">shutdownF.dialog</span><span class="PUNC">,</span><span class="STRN">'i'</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>784</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">f</span><span class="PUNC">)</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="NAME">WshShell.Run</span><span class="PUNC">(</span><span class="STRN">'%windir%\System32\shutdown.exe -'</span><span class="PUNC">+</span><span class="NAME">f</span><span class="PUNC">+</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">time</span><span class="PUNC">||</span><span class="NAME">s</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="STRN">''</span><span class="PUNC">:</span><span class="STRN">' -t '</span><span class="PUNC">+</span><span class="NAME">time</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="PUNC">(</span><span class="NAME">force</span><span class="PUNC">?</span><span class="STRN">' -f'</span><span class="PUNC">:</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">	</span><span class="COMM">//	-s or -r</span><span class="WHIT">
+<span class='line'>785</span> 
+<span class='line'>786</span> </span><span class="WHIT"> </span><span class="COMM">// way 4: rundll.exe</span><span class="WHIT">
+<span class='line'>787</span> </span><span class="WHIT"> </span><span class="NAME">sF</span><span class="PUNC">(</span><span class="PUNC">[</span><span class="NAME">shutdownF.logoff</span><span class="PUNC">,</span><span class="STRN">'SHELL.DLL,RestartDialog'</span><span class="PUNC">,</span><span class="NAME">shutdownF.poweroff</span><span class="PUNC">,</span><span class="STRN">'USER.EXE,ExitWindows'</span><span class="PUNC">,</span><span class="NAME">shutdownF.shutdown</span><span class="PUNC">,</span><span class="STRN">'USER.EXE,ExitWindows'</span><span class="COMM">/*'USER.EXE,#7'||'USER.EXE, #7'||'USER.EXE,#7 0'*/</span><span class="PUNC">,</span><span class="NAME">shutdownF.restart</span><span class="PUNC">,</span><span class="STRN">'USER.EXE,ExitWindowsExec'</span><span class="COMM">/*'USER.EXE,#246'*/</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>788</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">f</span><span class="PUNC">)</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="NAME">WshShell.Run</span><span class="PUNC">(</span><span class="STRN">"rundll.exe "</span><span class="PUNC">+</span><span class="NAME">f</span><span class="PUNC">[</span><span class="NAME">mode</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>789</span> 
+<span class='line'>790</span> </span><span class="WHIT"> </span><span class="COMM">// way 5: rundll32.exe</span><span class="WHIT">
+<span class='line'>791</span> </span><span class="WHIT"> </span><span class="NAME">sF</span><span class="PUNC">(</span><span class="PUNC">[</span><span class="NAME">shutdownF.poweroff</span><span class="PUNC">,</span><span class="STRN">'KRNL386.EXE,exitkernel'</span><span class="PUNC">,</span><span class="NAME">shutdownF.shutdown</span><span class="PUNC">,</span><span class="STRN">'USER.EXE,ExitWindows'</span><span class="PUNC">,</span><span class="NAME">shutdownF.suspend</span><span class="PUNC">,</span><span class="STRN">'PowrProf.dll,SetSuspendState'</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>792</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">f</span><span class="PUNC">)</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="NAME">WshShell.Run</span><span class="PUNC">(</span><span class="STRN">"rundll32.exe "</span><span class="PUNC">+</span><span class="NAME">f</span><span class="PUNC">[</span><span class="NAME">mode</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>793</span> </span><span class="WHIT"> </span><span class="COMM">// way 6: RUNDLL32 USER32.DLL</span><span class="WHIT">
+<span class='line'>794</span> </span><span class="WHIT"> </span><span class="NAME">sF</span><span class="PUNC">(</span><span class="PUNC">[</span><span class="NAME">shutdownF.lock</span><span class="PUNC">,</span><span class="STRN">'LockWorkStation'</span><span class="PUNC">,</span><span class="NAME">shutdownF.logoff</span><span class="PUNC">,</span><span class="STRN">'ExitWindowsEx'</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>795</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">f</span><span class="PUNC">)</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="NAME">WshShell.Run</span><span class="PUNC">(</span><span class="STRN">"rundll32.exe user32.dll,"</span><span class="PUNC">+</span><span class="NAME">f</span><span class="PUNC">[</span><span class="NAME">mode</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>796</span> 
+<span class='line'>797</span> </span><span class="WHIT"> </span><span class="COMM">// way 7: RUNONCE.EXE	runonce.exe是微軟Run Once的包裝。它用於第三方應用程序的安裝程序。它允許安裝程序添加到啟動項中，用於再次啟動後，進行進一步配置。</span><span class="WHIT">
+<span class='line'>798</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="PUNC">==</span><span class="NAME">shutdownF.reboot</span><span class="PUNC">)</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="NAME">WshShell.Run</span><span class="PUNC">(</span><span class="STRN">"RUNONCE.EXE -q"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>799</span> 
+<span class='line'>800</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>801</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>802</span> 
+<span class='line'>803</span> 
+<span class='line'>804</span> </span><span class="COMM">//	↑WMI set	==================</span><span class="WHIT">
+<span class='line'>805</span> 
+<span class='line'>806</span> 
+<span class='line'>807</span> 
+<span class='line'>808</span> </span></pre></body></html>

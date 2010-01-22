@@ -1,0 +1,6 @@
+﻿bank support for AccountF.TW
+
+These file is downloading from The Taipei Disbursement Office.
+這些檔案由財政部臺北區支付處跨行通匯專區金融機構一覽表下載取得。
+
+http://www.trdo.gov.tw/
