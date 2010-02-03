@@ -1,0 +1,248 @@
+<html>
+<head>
+<title>test suit</title>
+</head>
+
+<body>
+
+
+<h1>Test suit</h1>
+
+
+
+Test &lt;script&gt; + define global variables + comments, <code>window</code>, <code>document.write</code>, <code>alert</code>, <code>if</code>, comma operator (<code>,</code>), <code>( ) ; +</code> ..
+<script type="text/javascript">
+// <em>Error!</em><br /><h3>You may be in an environment that this framework doesn't supportted.</h3><hr />Skip other tests..<br />
+//<!--
+
+
+NO_error = 0;
+
+// if basic document object is OK
+DO_OK = 0;
+
+test_variable = '<em>Error!</em>';
+
+
+if(window && (''+alert)==(''+window.alert))
+	if(document && document == window.document && (''+document.write)==(''+window.document.write))
+		document.write("<em>OK.</em>"), NO_error = DO_OK = 1;
+	else 
+		window.alert("No document.write found!\nSkip all tests.");
+
+
+global_variable_OK = 1;
+
+//-->
+</script>
+
+
+<br />
+
+Test global variables, <code>eval</code>, <code>if</code> and <code>{ }</code> ..
+<script type="text/javascript">
+// <em>Skipped.</em>
+//<!--
+
+if(global_variable_OK)
+	test_variable = '<em>Skipped.</em>';
+else
+	test_variable = '<em>Global variable error.</em>';
+
+if(NO_error){
+	NO_error = 0;
+	test_variable = '<em>Error!</em>';
+
+	if((''+eval)==(''+window.eval))
+		eval('if(1){test_variable="<em>OK.</em>";NO_error=1;}');
+}
+
+if(DO_OK)
+	document.write(test_variable);
+
+//-->
+</script>
+
+
+<br />
+
+Test <code>function</code> ..
+<script type="text/javascript">
+// <em>Skipped.</em>
+//<!--
+
+test_variable = '<em>Skipped.</em>';
+
+if(global_variable_OK && NO_error){
+
+	NO_error = 0;
+	test_variable = '<em>Error!</em>';
+
+	//	also try lambda function?
+	//	The purpose of .apply test is just that we don't want a popup for test of try latter.
+	eval('function set_test_OK(){test_variable="<em>OK.</em>";NO_error=1;} if(set_test_OK.apply)set_test_OK();else test_variable+=" function has no apply method."');
+}
+
+if(DO_OK)
+	document.write(test_variable);
+
+//-->
+</script>
+
+
+
+<br />
+
+Test <code>String</code> object and <code>charCodeAt()</code> ..
+<script type="text/javascript">
+// <em>Skipped.</em>
+//<!--
+
+//	The purpose of this test is just that we don't want a popup for test of try latter.
+//	http://msdn.microsoft.com/en-us/library/s4esdbwz.aspx
+
+test_variable = '<em>Skipped.</em>';
+
+if(global_variable_OK && NO_error){
+
+	NO_error = 0;
+
+	if(!window.String)
+		test_variable = '<em>Error: No window.String object!</em>';
+	else if(!test_variable.charCodeAt)
+		test_variable = '<em>Error: No charCodeAt method of String Object!</em>';
+	else
+		test_variable = "<em>OK.</em>", NO_error = 1;
+
+}
+
+if(DO_OK)
+	document.write(test_variable);
+
+//-->
+</script>
+
+
+
+<br />
+
+Test <code>try</code> and <code>throw</code> statement ..
+
+<script type="text/javascript">
+// <em>Skipped.</em>
+//<!--
+
+test_variable = '<em>Skipped.</em>';
+
+if(global_variable_OK && NO_error){
+	NO_error = 0;
+	test_variable = '<em>Error!</em>';
+	eval('try{throw NO_error;}catch(e){NO_error=1;}');
+
+	if(NO_error)
+		test_variable="<em>OK.</em>";
+}
+
+//-->
+</script>
+
+<script type="text/javascript">
+//<!--
+if(DO_OK)
+	document.write(test_variable);
+//-->
+</script>
+
+
+<br />
+
+Test including of UTF-8 encoding script ..
+
+<script type="text/javascript">
+// <em>Skipped.</em>
+//<!--
+
+has_error_including = 1;
+
+
+if(global_variable_OK && NO_error && DO_OK)
+	document.write('<script type="text/javascript" src="basic_test_1.js"><' + '/script>');
+
+//-->
+</script>
+
+
+
+<script type="text/javascript">
+//<!--
+
+if(global_variable_OK && NO_error)
+	if(has_error_including)
+		test_variable = "<em>Sorry, I can't include the script file to do basic tests.</em>";
+	else
+		test_variable = "<em>Script including OK.</em>";
+else
+	test_variable = "<em>Skipped.</em>";
+
+if(DO_OK)
+	document.write(test_variable);
+
+//-->
+</script>
+
+<hr />
+
+<script type="text/javascript">
+//<!--
+
+if(!global_variable_OK || !NO_error || has_error_including)
+	test_variable = "<p>You may be in an environment that this framework doesn't supportted.</p>";
+else
+	test_variable = "<p>It's all OK.<br />Let's going to <a href='basic_test_2.htm'>next test</a>..</p>";
+
+
+if(DO_OK){
+	if(navigator && navigator.userAgent)
+		test_variable = test_variable + 'User agent:<br />' + navigator.userAgent;
+
+	document.write(test_variable);
+}
+
+//-->
+</script>
+
+
+
+
+<!--
+
+2010/2/2 19:29:56-21:54:09
+
+test use Portable ¥iÄâª© / standalone version
+
+NCSA Mosaic 2.1.1 won't run under Windows 7.
+
+NCSA Mosaic 3.0 do, and can use "!" comments tag.
+
+
+In Mosaic 3.0, Netscape 2~4,
+<br/>
+don't work.
+
+<br />
+do.
+
+
+
+Netscape Navigator Gold 2.02 allows in-line script, but doesn't included script.
+
+Netscape Navigator 3.04 Gold allows including script.
+
+
+Only Internet Explorer 5.5+, Mozilla Firefox 0.8+, Opera 9?+, Safari ?+, Chrome 3?+, .. can pass the tests above.
+
+-->
+
+
+</body>
+</html>
