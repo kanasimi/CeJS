@@ -5,7 +5,7 @@
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 		<meta name="generator" content="JsDoc Toolkit" />
 		
-		<title>JsDoc Reference - CeL</title>
+		<title>JsDoc Reference - CeL.math.quotient</title>
 
 		<style type="text/css">
 			/* default.css */
@@ -244,7 +244,7 @@ ul.inheritsList
 <!-- ============================== class title ============================ -->
 			<h1 class="classTitle">
 				
-				Class CeL
+				Class CeL.math.quotient
 			</h1>
 
 <!-- ============================== class summary ========================== -->			
@@ -252,16 +252,16 @@ ul.inheritsList
 				
 				
 			
-				Colorless echo JavaScript kit/library: base name-space declaration
+				quotient 的 functions
 				
 				
-					<br /><i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+					<br /><i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math_quotient.origin.js.html">quotient.origin.js</a>.
 				
 			</p>
 
 <!-- ============================== constructor summary ==================== -->			
 			
-			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class CeL.">
+			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class CeL.math.quotient.">
 				<caption>Class Summary</caption>
 				<thead>
 					<tr>
@@ -274,9 +274,9 @@ ul.inheritsList
 						<td class="attributes">&nbsp;</td>
 						<td class="nameDescription" >
 							<div class="fixedFont">
-								<b><a href="../symbols/CeL.html#constructor">CeL</a></b>()
+								<b><a href="../symbols/CeL.math.quotient.html#constructor">CeL.math.quotient</a></b>(numerator, denominator, approximate)
 							</div>
-							<div class="description">本 JavaScript framework 的框架基本宣告<br/>base name-space declaration of JavaScript library framework</div>
+							<div class="description">有理數 rational number，有理数全体のつくる集合はしばしば、商を意味する quotient の頭文字をとり、太字の Q で表す。<br/>若要輸入不同基底的數值，請用 parse_base()</div>
 						</td>
 					</tr>
 				</tbody>
@@ -285,12 +285,110 @@ ul.inheritsList
 
 <!-- ============================== properties summary ===================== -->
 			
+				
+				
+				<table class="summaryTable" cellspacing="0" summary="A summary of the fields documented in the class CeL.math.quotient.">
+					<caption>Field Summary</caption>
+					<thead>
+						<tr>
+							<th scope="col">Field Attributes</th>
+							<th scope="col">Field Name and Description</th>
+						</tr>
+					</thead>
+					<tbody>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/CeL.math.quotient.html#compare_to">compare_to</a></b>
+								</div>
+								<div class="description">測試大小</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/CeL.math.quotient.html#count">count</a></b>
+								</div>
+								<div class="description">四則運算 + - * / (+-×÷)**[=]</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								CeL.math.quotient.<b><a href="../symbols/CeL.math.quotient.html#.digit_char">digit_char</a></b>
+								</div>
+								<div class="description">數字集</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/CeL.math.quotient.html#reduce">reduce</a></b>
+								</div>
+								<div class="description">最簡分數/化簡, 約分 reduction</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								CeL.math.quotient.<b><a href="../symbols/CeL.math.quotient.html#.repetend_separator">repetend_separator</a></b>
+								</div>
+								<div class="description">循環節分隔符號：整數.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/CeL.math.quotient.html#to_base">to_base</a></b>
+								</div>
+								<div class="description">依指定基底轉成循環小數 circulating decimal / repeating decimal。特殊情況可以考慮使用 .toString()，會快很多。TODO: 小數</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/CeL.math.quotient.html#to_decimal">to_decimal</a></b>
+								</div>
+								<div class="description">為十進位最佳化的 to_base()</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/CeL.math.quotient.html#to_print_mode">to_print_mode</a></b>
+								</div>
+								<div class="description">顯示數字</div>
+							</td>
+						</tr>
+					
+					</tbody>
+				</table>
+				
+				
+				
+			
 
 <!-- ============================== methods summary ======================== -->
 			
 				
 				
-				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class CeL.">
+				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class CeL.math.quotient.">
 					<caption>Method Summary</caption>
 					<thead>
 						<tr>
@@ -303,63 +401,9 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.<b><a href="../symbols/CeL.html#.HTA">HTA</a></b>(msg)
+								<div class="fixedFont">CeL.math.quotient.<b><a href="../symbols/CeL.math.quotient.html#.parse_base">parse_base</a></b>(number, base, digit_char)
 								</div>
-								<div class="description">compatibility/相容性 test</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">CeL.<b><a href="../symbols/CeL.html#.locale">locale</a></b>(msg)
-								</div>
-								<div class="description">compatibility/相容性 test</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">CeL.<b><a href="../symbols/CeL.html#.math.polynomial">math.polynomial</a></b>(msg)
-								</div>
-								<div class="description">polynomial test</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">CeL.<b><a href="../symbols/CeL.html#.OS.Windows">OS.Windows</a></b>(msg)
-								</div>
-								<div class="description">Windows test</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">CeL.<b><a href="../symbols/CeL.html#.OS.Windows.registry">OS.Windows.registry</a></b>(msg)
-								</div>
-								<div class="description">Windows.registry test</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">CeL.<b><a href="../symbols/CeL.html#.OS.Windows.WMI">OS.Windows.WMI</a></b>(msg)
-								</div>
-								<div class="description">Windows.WMI test</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">CeL.<b><a href="../symbols/CeL.html#.SVG">SVG</a></b>(msg)
-								</div>
-								<div class="description">math test</div>
+								<div class="description">轉換指定進位的數字成為 quotient 物件</div>
 							</td>
 						</tr>
 					
@@ -380,21 +424,44 @@ ul.inheritsList
 				</div>
 				
 				<div class="fixedFont">
-						<b>CeL</b>()
+						<b>CeL.math.quotient</b>(numerator, denominator, approximate)
 				</div>
 				
 				<div class="description">
-					本 JavaScript framework 的框架基本宣告<br/>base name-space declaration of JavaScript library framework
+					有理數 rational number，有理数全体のつくる集合はしばしば、商を意味する quotient の頭文字をとり、太字の Q で表す。<br/>若要輸入不同基底的數值，請用 parse_base()
 					
 				</div>
 				
 				
 				
-				<pre class="code">//	load library<script type="text/javascript" src="../ce.js"></script>//	預防 initial process 到一半彈出警告視窗，所以設大一點。CeL.log.max_length = 20;//	set debugCeL.set_debug();//	判別是否已經 load 過if(typeof CeL !== 'function' || CeL.Class !== 'CeL')	;	//	CeL has not been loaded</pre>
+				<pre class="code">CeL.log((new CeL.quotient(3,4)).count('*',new CeL.quotient(2,7)).reduce().to_print_mode());</pre>
 				
 				
 				
 				
+					
+						<dl class="detailList">
+						<dt class="heading">Parameters:</dt>
+						
+							<dt>
+								 <b>numerator</b>
+								
+							</dt>
+								<dd>分子</dd>
+						
+							<dt>
+								 <b>denominator</b>
+								
+							</dt>
+								<dd>分母</dd>
+						
+							<dt>
+								<span class="light fixedFont">{Boolean}</span>  <b>approximate</b>
+								
+							</dt>
+								<dd>取近似值</dd>
+						
+						</dl>
 					
 					
 					
@@ -408,6 +475,223 @@ ul.inheritsList
 
 <!-- ============================== field details ========================== -->		
 			
+				<div class="sectionTitle">
+					Field Detail
+				</div>
+				
+					<a name="compare_to"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{Number}</span>
+					<b>compare_to</b>
+					
+					</div>
+					<div class="description">
+						測試大小
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="count"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>count</b>
+					
+					</div>
+					<div class="description">
+						四則運算 + - * / (+-×÷)**[=]
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+							<dd>http://www.javaworld.com.tw/jute/post/view?bid=35&id=30169&tpg=1&ppg=1&sty=1&age=0#30169</dd>
+							
+							</dl>
+						
+						
+
+					<hr />
+				
+					<a name=".digit_char"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.math.quotient.</span><b>digit_char</b>
+					
+					</div>
+					<div class="description">
+						數字集
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+							<dd>http://en.wikipedia.org/wiki/Numerical_digit</dd>
+							
+							</dl>
+						
+						
+
+					<hr />
+				
+					<a name="reduce"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>reduce</b>
+					
+					</div>
+					<div class="description">
+						最簡分數/化簡, 約分 reduction
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name=".repetend_separator"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.math.quotient.</span><b>repetend_separator</b>
+					
+					</div>
+					<div class="description">
+						循環節分隔符號：整數.小數__repetend_separator__循環節
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="to_base"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>to_base</b>
+					
+					</div>
+					<div class="description">
+						依指定基底轉成循環小數 circulating decimal / repeating decimal。特殊情況可以考慮使用 .toString()，會快很多。TODO: 小數
+						
+						
+					</div>
+					
+					
+
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2004/7/9 13:28</dd>
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+							<dd>http://mathworld.wolfram.com/RepeatingDecimal.htmlhttp://hk.geocities.com/goodprimes/OFrp.htm</dd>
+							
+							</dl>
+						
+						
+
+					<hr />
+				
+					<a name="to_decimal"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>to_decimal</b>
+					
+					</div>
+					<div class="description">
+						為十進位最佳化的 to_base()
+						
+						
+					</div>
+					
+					
+
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2004/7/9 13:47</dd>
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="to_print_mode"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{String}</span>
+					<b>to_print_mode</b>
+					
+					</div>
+					<div class="description">
+						顯示數字
+						
+						
+					</div>
+					
+					
+
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2004/7/9 14:23</dd>
+							</dl>
+						
+						
+						
+
+					
+				
+			
 
 <!-- ============================== method details ========================= -->		
 			
@@ -415,21 +699,22 @@ ul.inheritsList
 					Method Detail
 				</div>
 				
-					<a name=".HTA"> </a>
+					<a name=".parse_base"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">CeL.</span><b>HTA</b>(msg)
+					<span class="light">CeL.math.quotient.</span><b>parse_base</b>(number, base, digit_char)
 					
 					</div>
 					<div class="description">
-						compatibility/相容性 test
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_HTA.origin.js.html">HTA.origin.js</a>.
+						轉換指定進位的數字成為 quotient 物件
 						
 						
 					</div>
+					
+					
+					
+					<pre class="code">var q=parse_base('10000.'+_.repetend_separator+'3',11);if(!q)alert('bad input!');else library_namespace.debug('<br/>'+q.base(8)+','+q.base()+' , '+q.to_print_mode()+','+q.print(1)+','+q.to_print_mode(2)+','+q.to_print_mode(3,0,'',5));</pre>
 					
 					
 					
@@ -438,250 +723,41 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>msg</b>
+									<b>number</b>
 									
 								</dt>
-								<dd>msg</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-						
-						
-
-					<hr />
-				
-					<a name=".locale"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">CeL.</span><b>locale</b>(msg)
-					
-					</div>
-					<div class="description">
-						compatibility/相容性 test
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_locale.origin.js.html">locale.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
+								<dd>數字</dd>
 							
 								<dt>
-									<b>msg</b>
+									<b>base</b>
 									
 								</dt>
-								<dd>msg</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-						
-						
-
-					<hr />
-				
-					<a name=".math.polynomial"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">CeL.</span><b>math.polynomial</b>(msg)
-					
-					</div>
-					<div class="description">
-						polynomial test
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math_polynomial.origin.js.html">polynomial.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
+								<dd>基底</dd>
 							
 								<dt>
-									<b>msg</b>
+									<b>digit_char</b>
 									
 								</dt>
-								<dd>msg</dd>
+								<dd>循環小數 digit 字集</dd>
 							
 							</dl>
 						
 						
-						
-						
-						
-						
-						
-
-					<hr />
-				
-					<a name=".OS.Windows"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">CeL.</span><b>OS.Windows</b>(msg)
-					
-					</div>
-					<div class="description">
-						Windows test
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_OS_Windows_job.origin.js.html">job.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
 						
 							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>msg</b>
-									
-								</dt>
-								<dd>msg</dd>
-							
+							<dt class="heading">Since:</dt>
+								<dd>2004/7/9 16:13</dd>
+							</dl>
 							</dl>
 						
 						
-						
-						
-						
-						
-						
-
-					<hr />
-				
-					<a name=".OS.Windows.registry"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">CeL.</span><b>OS.Windows.registry</b>(msg)
-					
-					</div>
-					<div class="description">
-						Windows.registry test
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_OS_Windows_registry.origin.js.html">registry.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
 						
 							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
+							<dt class="heading">Returns:</dt>
 							
-								<dt>
-									<b>msg</b>
-									
-								</dt>
-								<dd>msg</dd>
+								<dd>回傳 quotient 物件，請用 quotient.to_base() 傳回所欲之 base</dd>
 							
 							</dl>
-						
-						
-						
-						
-						
-						
-						
-
-					<hr />
-				
-					<a name=".OS.Windows.WMI"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">CeL.</span><b>OS.Windows.WMI</b>(msg)
-					
-					</div>
-					<div class="description">
-						Windows.WMI test
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_OS_WMI.origin.js.html">WMI.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>msg</b>
-									
-								</dt>
-								<dd>msg</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-						
-						
-
-					<hr />
-				
-					<a name=".SVG"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">CeL.</span><b>SVG</b>(msg)
-					
-					</div>
-					<div class="description">
-						math test
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_misc_check.origin.js.html">check.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>msg</b>
-									
-								</dt>
-								<dd>msg</dd>
-							
-							</dl>
-						
-						
-						
-						
 						
 						
 						
@@ -700,7 +776,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu Mar 11 2010 23:37:43 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu Mar 11 2010 23:37:44 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

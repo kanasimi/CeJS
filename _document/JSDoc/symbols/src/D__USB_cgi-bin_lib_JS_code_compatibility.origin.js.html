@@ -13,317 +13,326 @@
 <span class='line'>  6</span>  * @since	
 <span class='line'>  7</span>  */</span><span class="WHIT">
 <span class='line'>  8</span> 
-<span class='line'>  9</span> 
-<span class='line'> 10</span> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">CeL</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'> 11</span> 
-<span class='line'> 12</span> </span><span class="COMM">/**
-<span class='line'> 13</span>  * 本 module 之 name(id)，&lt;span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得&lt;/span>。
-<span class='line'> 14</span>  * @type	String
-<span class='line'> 15</span>  * @constant
-<span class='line'> 16</span>  * @inner
-<span class='line'> 17</span>  * @ignore
-<span class='line'> 18</span>  */</span><span class="WHIT">
-<span class='line'> 19</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">module_name</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'code.compatibility'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>  9</span> </span><span class="COMM">/*
+<span class='line'> 10</span> http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K875.aspx
+<span class='line'> 11</span> 8進制數字表示被禁止， 010 代表 10 而不是 8
+<span class='line'> 12</span> 引入備受歡迎的 JSON 對象
+<span class='line'> 13</span> Array 對象內置了一些標準函數，如 indexOf(), map(), filter(), reduce()
+<span class='line'> 14</span> # Object.keys() 會列出對象中所有可以枚舉的屬性
+<span class='line'> 15</span> # Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性
+<span class='line'> 16</span> # Object.getPrototypeof() 返回給定對象的原型
+<span class='line'> 17</span> */</span><span class="WHIT">
+<span class='line'> 18</span> 
+<span class='line'> 19</span> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">CeL</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'> 20</span> 
-<span class='line'> 21</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
-<span class='line'> 22</span> </span><span class="COMM">/**
-<span class='line'> 23</span>  * 若欲 include 整個 module 時，需囊括之 code。
-<span class='line'> 24</span>  * @type	Function
-<span class='line'> 25</span>  * @param	{Function} library_namespace	namespace of library
-<span class='line'> 26</span>  * @param	load_arguments	呼叫時之 argument(s)
-<span class='line'> 27</span>  * @return
-<span class='line'> 28</span>  * @name	CeL.code.compatibility
-<span class='line'> 29</span>  * @constant
-<span class='line'> 30</span>  * @inner
-<span class='line'> 31</span>  * @ignore
-<span class='line'> 32</span>  */</span><span class="WHIT">
-<span class='line'> 33</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">library_namespace</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">load_arguments</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'> 34</span> 
-<span class='line'> 35</span> </span><span class="COMM">//	**	no requires</span><span class="WHIT">
-<span class='line'> 36</span> 
-<span class='line'> 37</span> 
-<span class='line'> 38</span> </span><span class="COMM">/**
-<span class='line'> 39</span>  * null module constructor
-<span class='line'> 40</span>  * @class	相容性 test 專用的 functions
+<span class='line'> 21</span> </span><span class="COMM">/**
+<span class='line'> 22</span>  * 本 module 之 name(id)，&lt;span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得&lt;/span>。
+<span class='line'> 23</span>  * @type	String
+<span class='line'> 24</span>  * @constant
+<span class='line'> 25</span>  * @inner
+<span class='line'> 26</span>  * @ignore
+<span class='line'> 27</span>  */</span><span class="WHIT">
+<span class='line'> 28</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">module_name</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'code.compatibility'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 29</span> 
+<span class='line'> 30</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
+<span class='line'> 31</span> </span><span class="COMM">/**
+<span class='line'> 32</span>  * 若欲 include 整個 module 時，需囊括之 code。
+<span class='line'> 33</span>  * @type	Function
+<span class='line'> 34</span>  * @param	{Function} library_namespace	namespace of library
+<span class='line'> 35</span>  * @param	load_arguments	呼叫時之 argument(s)
+<span class='line'> 36</span>  * @return
+<span class='line'> 37</span>  * @name	CeL.code.compatibility
+<span class='line'> 38</span>  * @constant
+<span class='line'> 39</span>  * @inner
+<span class='line'> 40</span>  * @ignore
 <span class='line'> 41</span>  */</span><span class="WHIT">
-<span class='line'> 42</span> </span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
-<span class='line'> 43</span> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'> 44</span> </span><span class="WHIT">	</span><span class="COMM">//	null module constructor</span><span class="WHIT">
-<span class='line'> 45</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 42</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">library_namespace</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">load_arguments</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 43</span> 
+<span class='line'> 44</span> </span><span class="COMM">//	**	no requires</span><span class="WHIT">
+<span class='line'> 45</span> 
 <span class='line'> 46</span> 
 <span class='line'> 47</span> </span><span class="COMM">/**
-<span class='line'> 48</span>  * for JSDT: 有 prototype 才會將之當作 Class
-<span class='line'> 49</span>  */</span><span class="WHIT">
-<span class='line'> 50</span> </span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
-<span class='line'> 51</span> </span><span class="PUNC">.</span><span class="NAME">prototype</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'> 52</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 53</span> 
-<span class='line'> 54</span> 
+<span class='line'> 48</span>  * null module constructor
+<span class='line'> 49</span>  * @class	相容性 test 專用的 functions
+<span class='line'> 50</span>  */</span><span class="WHIT">
+<span class='line'> 51</span> </span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
+<span class='line'> 52</span> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 53</span> </span><span class="WHIT">	</span><span class="COMM">//	null module constructor</span><span class="WHIT">
+<span class='line'> 54</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'> 55</span> 
-<span class='line'> 56</span> 
-<span class='line'> 57</span> 
-<span class='line'> 58</span> 
-<span class='line'> 59</span> </span><span class="COMM">/*	對於舊版沒有Array.push()等函數時之判別及處置,舊版adapter
-<span class='line'> 60</span> 	從(typeof object.reverse=='function')可偵測object是否為Array
-<span class='line'> 61</span> 	http://www.coolcode.cn/?p=126
-<span class='line'> 62</span> */</span><span class="WHIT">
-<span class='line'> 63</span> </span><span class="COMM">//oldVadapter[generateCode.dLK]='*oldVadapter();';</span><span class="WHIT">
-<span class='line'> 64</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">oldVadapter</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'> 65</span> </span><span class="WHIT"> </span><span class="COMM">//var _Global=typeof window=='object'?window:this;</span><span class="WHIT">
-<span class='line'> 66</span> </span><span class="WHIT"> </span><span class="COMM">// Global undefined variable</span><span class="WHIT">
-<span class='line'> 67</span> </span><span class="COMM">/*
-<span class='line'> 68</span>  if(typeof _Global=='undefined')window.undefined=_Global;
-<span class='line'> 69</span>  else _Global.undefined=_Global.undefined;
-<span class='line'> 70</span> */</span><span class="WHIT">
-<span class='line'> 71</span> 
-<span class='line'> 72</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">Array.prototype.push</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Apush</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Array.prototype.push</span><span class="PUNC">=</span><span class="NAME">Apush</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 73</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">Array.prototype.pop</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Apop</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Array.prototype.pop</span><span class="PUNC">=</span><span class="NAME">Apop</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 74</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">Array.prototype.shift</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Ashift</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Array.prototype.shift</span><span class="PUNC">=</span><span class="NAME">Ashift</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 75</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">Array.prototype.unshift</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Aunshift</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Array.prototype.unshift</span><span class="PUNC">=</span><span class="NAME">Aunshift</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 76</span> </span><span class="WHIT"> </span><span class="COMM">//	apply & call: after ECMAScript 3rd Edition	不直接用undefined: for JS5</span><span class="WHIT">
-<span class='line'> 77</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Function.prototype.apply</span><span class="PUNC">==</span><span class="STRN">'undefined'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Fapply</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Function.prototype.apply</span><span class="PUNC">=</span><span class="NAME">Fapply</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 78</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Function.prototype.call</span><span class="PUNC">==</span><span class="STRN">'undefined'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Fcall</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Function.prototype.call</span><span class="PUNC">=</span><span class="NAME">Fcall</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 79</span> </span><span class="WHIT"> </span><span class="COMM">//if(typeof isNaN!='function'&&typeof NisNaN=='function')isNaN=NisNaN;</span><span class="WHIT">
-<span class='line'> 80</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">encodeURI</span><span class="PUNC">!=</span><span class="STRN">'function'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">escape</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">encodeURI</span><span class="PUNC">=</span><span class="NAME">escape</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 81</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">decodeURI</span><span class="PUNC">!=</span><span class="STRN">'function'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">unescape</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">decodeURI</span><span class="PUNC">=</span><span class="NAME">unescape</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 82</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">encodeURIComponent</span><span class="PUNC">!=</span><span class="STRN">'function'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">encodeURI</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">encodeURIComponent</span><span class="PUNC">=</span><span class="NAME">encodeURI</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 83</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">decodeURIComponent</span><span class="PUNC">!=</span><span class="STRN">'function'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">decodeURI</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">decodeURIComponent</span><span class="PUNC">=</span><span class="NAME">decodeURI</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 84</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'> 85</span> 
-<span class='line'> 86</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Apush</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NAME">this.length</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">o</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'> 87</span> </span><span class="COMM">//	將 element_toPush 加入 array_pushTo 並篩選重複的（本來已經加入的並不會變更）</span><span class="WHIT">
-<span class='line'> 88</span> </span><span class="COMM">//	array_reverse[value of element_toPush]=index of element_toPush</span><span class="WHIT">
-<span class='line'> 89</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">pushUnique</span><span class="PUNC">(</span><span class="NAME">array_pushTo</span><span class="PUNC">,</span><span class="NAME">element_toPush</span><span class="PUNC">,</span><span class="NAME">array_reverse</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'> 90</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">array_pushTo</span><span class="PUNC">||</span><span class="PUNC">!</span><span class="NAME">element_toPush</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">array_pushTo</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 91</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 92</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">array_reverse</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'> 93</span> </span><span class="WHIT">  </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">array_reverse</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">,</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">array_pushTo</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'> 94</span> </span><span class="WHIT">   </span><span class="NAME">array_reverse</span><span class="PUNC">[</span><span class="NAME">array_pushTo</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 95</span> 
-<span class='line'> 96</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">element_toPush</span><span class="PUNC">!=</span><span class="STRN">'object'</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'> 97</span> </span><span class="WHIT">  </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NAME">element_toPush</span><span class="PUNC">,</span><span class="NAME">element_toPush</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">,</span><span class="NAME">element_toPush.push</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 98</span> 
-<span class='line'> 99</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">l</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>100</span> </span><span class="WHIT"> </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">i</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">element_toPush</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>101</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">array_reverse</span><span class="PUNC">[</span><span class="NAME">element_toPush</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>102</span> </span><span class="WHIT">   </span><span class="COMM">//array_pushTo.push(element_toPush),array_reverse[element_toPush]=array_pushTo.length;</span><span class="WHIT">
-<span class='line'>103</span> </span><span class="WHIT">   </span><span class="NAME">array_reverse</span><span class="PUNC">[</span><span class="NAME">array_pushTo</span><span class="PUNC">[</span><span class="NAME">l</span><span class="PUNC">=</span><span class="NAME">array_pushTo.length</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">element_toPush</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">l</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 56</span> </span><span class="COMM">/**
+<span class='line'> 57</span>  * for JSDT: 有 prototype 才會將之當作 Class
+<span class='line'> 58</span>  */</span><span class="WHIT">
+<span class='line'> 59</span> </span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
+<span class='line'> 60</span> </span><span class="PUNC">.</span><span class="NAME">prototype</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 61</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 62</span> 
+<span class='line'> 63</span> 
+<span class='line'> 64</span> 
+<span class='line'> 65</span> 
+<span class='line'> 66</span> 
+<span class='line'> 67</span> 
+<span class='line'> 68</span> </span><span class="COMM">/*	對於舊版沒有Array.push()等函數時之判別及處置,舊版adapter
+<span class='line'> 69</span> 	從(typeof object.reverse=='function')可偵測object是否為Array
+<span class='line'> 70</span> 	http://www.coolcode.cn/?p=126
+<span class='line'> 71</span> */</span><span class="WHIT">
+<span class='line'> 72</span> </span><span class="COMM">//oldVadapter[generateCode.dLK]='*oldVadapter();';</span><span class="WHIT">
+<span class='line'> 73</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">oldVadapter</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 74</span> </span><span class="WHIT"> </span><span class="COMM">//var _Global=typeof window=='object'?window:this;</span><span class="WHIT">
+<span class='line'> 75</span> </span><span class="WHIT"> </span><span class="COMM">// Global undefined variable</span><span class="WHIT">
+<span class='line'> 76</span> </span><span class="COMM">/*
+<span class='line'> 77</span>  if(typeof _Global=='undefined')window.undefined=_Global;
+<span class='line'> 78</span>  else _Global.undefined=_Global.undefined;
+<span class='line'> 79</span> */</span><span class="WHIT">
+<span class='line'> 80</span> 
+<span class='line'> 81</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">Array.prototype.push</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Apush</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Array.prototype.push</span><span class="PUNC">=</span><span class="NAME">Apush</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 82</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">Array.prototype.pop</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Apop</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Array.prototype.pop</span><span class="PUNC">=</span><span class="NAME">Apop</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 83</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">Array.prototype.shift</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Ashift</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Array.prototype.shift</span><span class="PUNC">=</span><span class="NAME">Ashift</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 84</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">Array.prototype.unshift</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Aunshift</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Array.prototype.unshift</span><span class="PUNC">=</span><span class="NAME">Aunshift</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 85</span> </span><span class="WHIT"> </span><span class="COMM">//	apply & call: after ECMAScript 3rd Edition	不直接用undefined: for JS5</span><span class="WHIT">
+<span class='line'> 86</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Function.prototype.apply</span><span class="PUNC">==</span><span class="STRN">'undefined'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Fapply</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Function.prototype.apply</span><span class="PUNC">=</span><span class="NAME">Fapply</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 87</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Function.prototype.call</span><span class="PUNC">==</span><span class="STRN">'undefined'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">Fcall</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">Function.prototype.call</span><span class="PUNC">=</span><span class="NAME">Fcall</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 88</span> </span><span class="WHIT"> </span><span class="COMM">//if(typeof isNaN!='function'&&typeof NisNaN=='function')isNaN=NisNaN;</span><span class="WHIT">
+<span class='line'> 89</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">encodeURI</span><span class="PUNC">!=</span><span class="STRN">'function'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">escape</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">encodeURI</span><span class="PUNC">=</span><span class="NAME">escape</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 90</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">decodeURI</span><span class="PUNC">!=</span><span class="STRN">'function'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">unescape</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">decodeURI</span><span class="PUNC">=</span><span class="NAME">unescape</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 91</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">encodeURIComponent</span><span class="PUNC">!=</span><span class="STRN">'function'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">encodeURI</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">encodeURIComponent</span><span class="PUNC">=</span><span class="NAME">encodeURI</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 92</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">decodeURIComponent</span><span class="PUNC">!=</span><span class="STRN">'function'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">decodeURI</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">decodeURIComponent</span><span class="PUNC">=</span><span class="NAME">decodeURI</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 93</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 94</span> 
+<span class='line'> 95</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Apush</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NAME">this.length</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">o</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 96</span> </span><span class="COMM">//	將 element_toPush 加入 array_pushTo 並篩選重複的（本來已經加入的並不會變更）</span><span class="WHIT">
+<span class='line'> 97</span> </span><span class="COMM">//	array_reverse[value of element_toPush]=index of element_toPush</span><span class="WHIT">
+<span class='line'> 98</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">pushUnique</span><span class="PUNC">(</span><span class="NAME">array_pushTo</span><span class="PUNC">,</span><span class="NAME">element_toPush</span><span class="PUNC">,</span><span class="NAME">array_reverse</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 99</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">array_pushTo</span><span class="PUNC">||</span><span class="PUNC">!</span><span class="NAME">element_toPush</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">array_pushTo</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>100</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>101</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">array_reverse</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>102</span> </span><span class="WHIT">  </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">array_reverse</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">,</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">array_pushTo</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>103</span> </span><span class="WHIT">   </span><span class="NAME">array_reverse</span><span class="PUNC">[</span><span class="NAME">array_pushTo</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>104</span> 
-<span class='line'>105</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">array_pushTo</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>106</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>105</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">element_toPush</span><span class="PUNC">!=</span><span class="STRN">'object'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>106</span> </span><span class="WHIT">  </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NAME">element_toPush</span><span class="PUNC">,</span><span class="NAME">element_toPush</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">,</span><span class="NAME">element_toPush.push</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>107</span> 
-<span class='line'>108</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Apop</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>109</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">this.length</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>110</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">=</span><span class="NAME">this.slice</span><span class="PUNC">(</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="NAME">this.length</span><span class="PUNC">--</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">;</span><span class="COMM">//不能用return this[--this.length];</span><span class="WHIT">
-<span class='line'>111</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>112</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Ashift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>113</span> </span><span class="WHIT"> </span><span class="COMM">//var t=this[0],s=this.join('\0');s=s.substr(s.indexOf('\0')+1);this.length=0;this.push(s.split('\0'));return t;</span><span class="WHIT">
-<span class='line'>114</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">=</span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>115</span> </span><span class="WHIT"> </span><span class="NAME">this.value</span><span class="PUNC">=</span><span class="NAME">this.slice</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	ECMAScript 不允許設定 this=</span><span class="WHIT">
-<span class='line'>116</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>117</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>118</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Aunshift</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>119</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">this.length</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>120</span> </span><span class="WHIT"> </span><span class="COMM">//var t=this.join('\0');this.length=0;this.push(o);this.push(t.split('\0'));return this;</span><span class="WHIT">
-<span class='line'>121</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">this.value</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="NAME">o</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">concat</span><span class="PUNC">(</span><span class="KEYW">this</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	ECMAScript 不允許設Κ this=</span><span class="WHIT">
-<span class='line'>122</span> </span><span class="PUNC">}</span><span class="WHIT">	</span><span class="COMM">//	不能用t=this.valueOf(); .. this.push(t);</span><span class="WHIT">
-<span class='line'>123</span> </span><span class="COMM">//	奇怪的是，這個版本(5.1版)尚不提供isNaN。(should be isNaN, NOT isNAN)</span><span class="WHIT">
-<span class='line'>124</span> </span><span class="COMM">//	變數可以與其本身比較。如果比較結果不相等，則它會是 NaN。原因是 NaN 是唯一與其本身不相等的值。</span><span class="WHIT">
-<span class='line'>125</span> </span><span class="COMM">//function NisNaN(v){var a=typeof v=='number'?v:parseInt(v);return /*typeof v=='number'&&*/a!=a;}//parseFloat(v)	alert(typeof a+','+a+','+(a===a));</span><span class="WHIT">
-<span class='line'>126</span> </span><span class="COMM">//oldVadapter();</span><span class="WHIT">
-<span class='line'>127</span> 
-<span class='line'>128</span> </span><span class="COMM">/*	http://www.cnblogs.com/sunwangji/archive/2007/06/26/791428.html	http://www.cnblogs.com/sunwangji/archive/2006/08/21/482341.html
-<span class='line'>129</span> 	http://msdn.microsoft.com/en-us/library/4zc42wh1(VS.85).aspx
-<span class='line'>130</span> 	http://www.interq.or.jp/student/exeal/dss/ejs/3/1.html
-<span class='line'>131</span> 	http://blog.mvpcn.net/fason/
-<span class='line'>132</span> 	http://d.hatena.ne.jp/m-hiyama/20051017/1129510043
-<span class='line'>133</span> 	http://noir.s7.xrea.com/archives/000203.html
-<span class='line'>134</span> 
-<span class='line'>135</span> http://msdn.microsoft.com/en-us/library/4zc42wh1(VS.85).aspx
-<span class='line'>136</span> 傳回某物件的方法，以另一個物件取代目前的物件。
-<span class='line'>137</span> apply是將現在正在執行的function其this改成apply的引數。所有函數內部的this指針都會被賦值為oThis，這可實現將函數作為另外一個對象的方法運行的目的
-<span class='line'>138</span> xxx.apply(oThis,arrayArgs): 執行xxx，執行時以oThis作為 this，arrayArgs作為 arguments
-<span class='line'>139</span> 
-<span class='line'>140</span> http://www.tohoho-web.com/js/object.htm#inheritClass
-<span class='line'>141</span> クラスを継承する	親のクラスが持っている機能をすべて使用することができます。
-<span class='line'>142</span> 
-<span class='line'>143</span> to make classChild inheritance classParent:	http://www.interq.or.jp/student/exeal/dss/ejs/3/2.html
-<span class='line'>144</span> function classChild(_args1,_args2,..){
-<span class='line'>145</span>  處理arguments：arguments.pop() or other way
-<span class='line'>146</span> 
-<span class='line'>147</span>  classParent.call(this,_args1,_args2,..);	//	way1
-<span class='line'>148</span>  classParent.apply(this,arguments);	//	way2
-<span class='line'>149</span>  //this.constructor=classChild;	//	maybe needless
-<span class='line'>150</span> 
-<span class='line'>151</span>  // ..
-<span class='line'>152</span> }
-<span class='line'>153</span> classChild.prototype=new classParent;	//	for (objChild instanceof objParent)	關鍵字: 繼承，原型
-<span class='line'>154</span> classChild.prototype.methodOfParent=function(..){..};	//	オーバーライド
+<span class='line'>108</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">l</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>109</span> </span><span class="WHIT"> </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">i</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">element_toPush</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>110</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">array_reverse</span><span class="PUNC">[</span><span class="NAME">element_toPush</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>111</span> </span><span class="WHIT">   </span><span class="COMM">//array_pushTo.push(element_toPush),array_reverse[element_toPush]=array_pushTo.length;</span><span class="WHIT">
+<span class='line'>112</span> </span><span class="WHIT">   </span><span class="NAME">array_reverse</span><span class="PUNC">[</span><span class="NAME">array_pushTo</span><span class="PUNC">[</span><span class="NAME">l</span><span class="PUNC">=</span><span class="NAME">array_pushTo.length</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">element_toPush</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">l</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>113</span> 
+<span class='line'>114</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">array_pushTo</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>115</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>116</span> 
+<span class='line'>117</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Apop</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>118</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">this.length</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>119</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">=</span><span class="NAME">this.slice</span><span class="PUNC">(</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="NAME">this.length</span><span class="PUNC">--</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">;</span><span class="COMM">//不能用return this[--this.length];</span><span class="WHIT">
+<span class='line'>120</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>121</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Ashift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>122</span> </span><span class="WHIT"> </span><span class="COMM">//var t=this[0],s=this.join('\0');s=s.substr(s.indexOf('\0')+1);this.length=0;this.push(s.split('\0'));return t;</span><span class="WHIT">
+<span class='line'>123</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">=</span><span class="KEYW">this</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>124</span> </span><span class="WHIT"> </span><span class="NAME">this.value</span><span class="PUNC">=</span><span class="NAME">this.slice</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	ECMAScript 不允許設定 this=</span><span class="WHIT">
+<span class='line'>125</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>126</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>127</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Aunshift</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>128</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">this.length</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>129</span> </span><span class="WHIT"> </span><span class="COMM">//var t=this.join('\0');this.length=0;this.push(o);this.push(t.split('\0'));return this;</span><span class="WHIT">
+<span class='line'>130</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">this.value</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="NAME">o</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">concat</span><span class="PUNC">(</span><span class="KEYW">this</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	ECMAScript 不允許設Κ this=</span><span class="WHIT">
+<span class='line'>131</span> </span><span class="PUNC">}</span><span class="WHIT">	</span><span class="COMM">//	不能用t=this.valueOf(); .. this.push(t);</span><span class="WHIT">
+<span class='line'>132</span> </span><span class="COMM">//	奇怪的是，這個版本(5.1版)尚不提供isNaN。(should be isNaN, NOT isNAN)</span><span class="WHIT">
+<span class='line'>133</span> </span><span class="COMM">//	變數可以與其本身比較。如果比較結果不相等，則它會是 NaN。原因是 NaN 是唯一與其本身不相等的值。</span><span class="WHIT">
+<span class='line'>134</span> </span><span class="COMM">//function NisNaN(v){var a=typeof v=='number'?v:parseInt(v);return /*typeof v=='number'&&*/a!=a;}//parseFloat(v)	alert(typeof a+','+a+','+(a===a));</span><span class="WHIT">
+<span class='line'>135</span> </span><span class="COMM">//oldVadapter();</span><span class="WHIT">
+<span class='line'>136</span> 
+<span class='line'>137</span> </span><span class="COMM">/*	http://www.cnblogs.com/sunwangji/archive/2007/06/26/791428.html	http://www.cnblogs.com/sunwangji/archive/2006/08/21/482341.html
+<span class='line'>138</span> 	http://msdn.microsoft.com/en-us/library/4zc42wh1(VS.85).aspx
+<span class='line'>139</span> 	http://www.interq.or.jp/student/exeal/dss/ejs/3/1.html
+<span class='line'>140</span> 	http://blog.mvpcn.net/fason/
+<span class='line'>141</span> 	http://d.hatena.ne.jp/m-hiyama/20051017/1129510043
+<span class='line'>142</span> 	http://noir.s7.xrea.com/archives/000203.html
+<span class='line'>143</span> 
+<span class='line'>144</span> http://msdn.microsoft.com/en-us/library/4zc42wh1(VS.85).aspx
+<span class='line'>145</span> 傳回某物件的方法，以另一個物件取代目前的物件。
+<span class='line'>146</span> apply是將現在正在執行的function其this改成apply的引數。所有函數內部的this指針都會被賦值為oThis，這可實現將函數作為另外一個對象的方法運行的目的
+<span class='line'>147</span> xxx.apply(oThis,arrayArgs): 執行xxx，執行時以oThis作為 this，arrayArgs作為 arguments
+<span class='line'>148</span> 
+<span class='line'>149</span> http://www.tohoho-web.com/js/object.htm#inheritClass
+<span class='line'>150</span> クラスを継承する	親のクラスが持っている機能をすべて使用することができます。
+<span class='line'>151</span> 
+<span class='line'>152</span> to make classChild inheritance classParent:	http://www.interq.or.jp/student/exeal/dss/ejs/3/2.html
+<span class='line'>153</span> function classChild(_args1,_args2,..){
+<span class='line'>154</span>  處理arguments：arguments.pop() or other way
 <span class='line'>155</span> 
-<span class='line'>156</span> var objChild=new classChild(_args);
-<span class='line'>157</span> classParent.prototype.methodOfParent.call(objChild, ..);	//	基底プロトタイプのメソッドを呼び出す。ただしこの呼び出し自体は Programmer が Person を継承しているかどうかを何も考慮していません。
-<span class='line'>158</span> 
+<span class='line'>156</span>  classParent.call(this,_args1,_args2,..);	//	way1
+<span class='line'>157</span>  classParent.apply(this,arguments);	//	way2
+<span class='line'>158</span>  //this.constructor=classChild;	//	maybe needless
 <span class='line'>159</span> 
-<span class='line'>160</span> 因 arguments 非instanceof Array，arguments.join(sp) → Array.prototype.join.call(arguments,sp)
-<span class='line'>161</span> */</span><span class="WHIT">
-<span class='line'>162</span> </span><span class="COMM">/**
-<span class='line'>163</span>  * @ignore
-<span class='line'>164</span>  */</span><span class="WHIT">
-<span class='line'>165</span> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Fapply</span><span class="PUNC">(</span><span class="COMM">/* object */</span><span class="WHIT"> </span><span class="NAME">oThis</span><span class="WHIT"> </span><span class="COMM">/* = null */</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="COMM">/* Array */</span><span class="WHIT"> </span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="COMM">/* = null */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>166</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">oThis</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">oThis</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="NAME">undefined</span><span class="PUNC">)</span><span class="WHIT">	</span><span class="COMM">//	グローバルオブジェクトに適用</span><span class="WHIT">
-<span class='line'>167</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="NAME">undefined</span><span class="PUNC">?</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">(</span><span class="NAME">arrayArgs</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>168</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">oThis</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Object</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>169</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">undefined</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	実際は throw TypeError();</span><span class="WHIT">
-<span class='line'>170</span> 
-<span class='line'>171</span> </span><span class="WHIT"> </span><span class="NAME">oThis.$_funcTmp000</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>172</span> 
-<span class='line'>173</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">oReturn</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>174</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="NAME">undefined</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>175</span> </span><span class="WHIT">  </span><span class="NAME">oReturn</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">oThis.$_funcTmp000</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>176</span> </span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>177</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">args</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>178</span> </span><span class="WHIT">  </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">arrayArgs.length</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>179</span> </span><span class="WHIT">   </span><span class="NAME">args</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'arrayArgs['</span><span class="PUNC">+</span><span class="NAME">i</span><span class="PUNC">+</span><span class="STRN">']'</span><span class="PUNC">;</span><span class="COMM">//args.push('arrayArgs['+i+']');</span><span class="WHIT">
-<span class='line'>180</span> </span><span class="WHIT">  </span><span class="NAME">oReturn</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">eval</span><span class="PUNC">(</span><span class="STRN">"oThis.$_funcTmp000("</span><span class="PUNC">+</span><span class="NAME">args.join</span><span class="PUNC">(</span><span class="STRN">","</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="STRN">");"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	因為arrayArgs[i]之type不固定，故不能直接用arrayArgs.join(",")</span><span class="WHIT">
-<span class='line'>181</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="COMM">//else{delete oThis.$_funcTmp000;throw TypeError();}</span><span class="WHIT">
-<span class='line'>182</span> 
-<span class='line'>183</span> </span><span class="WHIT"> </span><span class="KEYW">delete</span><span class="WHIT"> </span><span class="NAME">oThis.$_funcTmp000</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>184</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">oReturn</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>185</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>186</span> </span><span class="COMM">/*	http://msdn.microsoft.com/library/CHT/jscript7/html/jsmthcall.asp
-<span class='line'>187</span> call 方法是用來呼叫代表另一個物件的方法。call 方法可讓您將函式的物件內容從原始內容變成由 thisObj 所指定的新物件。
-<span class='line'>188</span> 如果未提供 thisObj 的話，將使用 global 物件作為 thisObj。
-<span class='line'>189</span> */</span><span class="WHIT">
-<span class='line'>190</span> </span><span class="COMM">/**
-<span class='line'>191</span>  * @ignore
-<span class='line'>192</span>  */</span><span class="WHIT">
-<span class='line'>193</span> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Fcall</span><span class="PUNC">(</span><span class="COMM">/* object */</span><span class="WHIT"> </span><span class="NAME">oThis</span><span class="WHIT"> </span><span class="COMM">/* = null [, arg1[, arg2[, ... [, argN]]]]] */</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>194</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">argu</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>195</span> </span><span class="WHIT"> </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">1</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">arguments.length</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>196</span> </span><span class="WHIT">  </span><span class="NAME">argu</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">arguments</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	argu.push(arguments[i]);</span><span class="WHIT">
-<span class='line'>197</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">this.apply</span><span class="PUNC">(</span><span class="NAME">oThis</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">argu</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>198</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>199</span> 
-<span class='line'>200</span> 
-<span class='line'>201</span> 
-<span class='line'>202</span> 
-<span class='line'>203</span> </span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
-<span class='line'>204</span> </span><span class="PUNC">.</span><span class="WHIT">
-<span class='line'>205</span> </span><span class="COMM">/**
-<span class='line'>206</span>  * Are we in a web environment?
-<span class='line'>207</span>  * @param W3CDOM	Are we in a W3C DOM environment?
-<span class='line'>208</span>  * @return	We're in a web environment.
-<span class='line'>209</span>  * @since	2009/12/29 19:18:53
-<span class='line'>210</span>  * @see
-<span class='line'>211</span>  * use lazy evaluation
-<span class='line'>212</span>  * @memberOf	CeL.code.compatibility
-<span class='line'>213</span>  */</span><span class="WHIT">
-<span class='line'>214</span> </span><span class="NAME">is_web</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">W3CDOM</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>215</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">arguments.callee</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>216</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="STRN">'web'</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>217</span> </span><span class="WHIT">		</span><span class="NAME">_s.W3CDOM</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT">
-<span class='line'>218</span> </span><span class="WHIT">				</span><span class="PUNC">(</span><span class="WHIT">
-<span class='line'>219</span> </span><span class="WHIT">				</span><span class="NAME">_s.web</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">window</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'object'</span><span class="WHIT">
-<span class='line'>220</span> </span><span class="WHIT">						</span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">document</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'object'</span><span class="WHIT">
-<span class='line'>221</span> </span><span class="WHIT">						</span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">window.document</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">document</span><span class="WHIT">
-<span class='line'>222</span> </span><span class="WHIT">						</span><span class="COMM">// 下兩個在 IE5.5 中都是 Object</span><span class="WHIT">
-<span class='line'>223</span> </span><span class="WHIT">						</span><span class="COMM">//&& library_namespace.is_type(window, 'global')</span><span class="WHIT">
-<span class='line'>224</span> </span><span class="WHIT">						</span><span class="COMM">//&& library_namespace.is_type(document, 'HTMLDocument')</span><span class="WHIT">
-<span class='line'>225</span> </span><span class="WHIT">				</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>226</span> </span><span class="WHIT">				</span><span class="COMM">// W3CDOM, type: Object @ IE5.5</span><span class="WHIT">
-<span class='line'>227</span> </span><span class="WHIT">				</span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">document.createElement</span><span class="WHIT">
-<span class='line'>228</span> </span><span class="WHIT">				</span><span class="COMM">// &&!!document.createElement</span><span class="WHIT">
-<span class='line'>229</span> </span><span class="WHIT">				</span><span class="COMM">//	type: Object @ IE5.5</span><span class="WHIT">
-<span class='line'>230</span> </span><span class="WHIT">				</span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">document.getElementsByTagName</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>231</span> 
-<span class='line'>232</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">W3CDOM</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">_s.W3CDOM</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">_s.web</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>233</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>234</span> 
-<span class='line'>235</span> 
-<span class='line'>236</span> </span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
-<span class='line'>237</span> </span><span class="PUNC">.</span><span class="WHIT">
-<span class='line'>238</span> </span><span class="COMM">/**
-<span class='line'>239</span>  * 判斷為 DOM。
-<span class='line'>240</span>  * @param	name	various name
-<span class='line'>241</span>  * @return	{Boolean}	various is object of window
-<span class='line'>242</span>  * @since	2010/1/14 22:04:37
-<span class='line'>243</span>  */</span><span class="WHIT">
-<span class='line'>244</span> </span><span class="NAME">is_DOM</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">name</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>245</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">r</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_.is_web</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>246</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">r</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="PUNC">!</span><span class="NAME">name</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>247</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>248</span> 
-<span class='line'>249</span> </span><span class="WHIT">	</span><span class="COMM">// CeL.debug(CeL.is_type(window[name]));</span><span class="WHIT">
-<span class='line'>250</span> </span><span class="WHIT">	</span><span class="KEYW">try</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>251</span> </span><span class="WHIT">		</span><span class="NAME">eval</span><span class="PUNC">(</span><span class="STRN">'r='</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">name</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>252</span> </span><span class="WHIT">		</span><span class="NAME">r</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">r</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">window</span><span class="PUNC">[</span><span class="NAME">name</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>253</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">catch</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>254</span> </span><span class="WHIT">		</span><span class="NAME">r</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">false</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>255</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>256</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>257</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>258</span> 
-<span class='line'>259</span> 
-<span class='line'>260</span> </span><span class="COMM">//is_HTA[generateCode.dLK]='is_web';</span><span class="WHIT">
-<span class='line'>261</span> </span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
-<span class='line'>262</span> </span><span class="PUNC">.</span><span class="WHIT">
-<span class='line'>263</span> </span><span class="COMM">/**
-<span class='line'>264</span>  * Are we run in HTA?&lt;br/>
-<span class='line'>265</span>  * ** HTA 中應該在 onload 中呼叫，否則 document.getElementsByTagName 不會有東西！
-<span class='line'>266</span>  * @param [id]	HTA tag id (only used in low version that we have no document.getElementsByTagName)
-<span class='line'>267</span>  * @return	We're in HTA
-<span class='line'>268</span>  * @require	is_web
-<span class='line'>269</span>  * @since	2009/12/29 19:18:53
-<span class='line'>270</span>  * @memberOf	CeL.code.compatibility
-<span class='line'>271</span>  * @see
-<span class='line'>272</span>  * http://msdn2.microsoft.com/en-us/library/ms536479.aspx
-<span class='line'>273</span>  * http://www.microsoft.com/technet/scriptcenter/resources/qanda/apr05/hey0420.mspx
-<span class='line'>274</span>  * http://www.msfn.org/board/lofiversion/index.php/t61847.html
-<span class='line'>275</span>  * lazy evaluation
-<span class='line'>276</span>  * http://peter.michaux.ca/articles/lazy-function-definition-pattern
-<span class='line'>277</span>  */</span><span class="WHIT">
-<span class='line'>278</span> </span><span class="NAME">is_HTA</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>279</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">arguments.callee</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">a</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>280</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="STRN">'HTA'</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>281</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_s.HTA</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>282</span> 
-<span class='line'>283</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">is_web</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>284</span> </span><span class="WHIT">		</span><span class="NAME">a</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">document.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">'APPLICATION'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>285</span> </span><span class="WHIT">		</span><span class="NAME">a</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">a</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">a.length</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">a</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>286</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT">
-<span class='line'>287</span> </span><span class="WHIT">		</span><span class="NAME">a</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">is_web</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">id</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">document.all</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">document.all</span><span class="PUNC">[</span><span class="NAME">id</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>288</span> 
-<span class='line'>289</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_s.HTA</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">a</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>290</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>160</span>  // ..
+<span class='line'>161</span> }
+<span class='line'>162</span> classChild.prototype=new classParent;	//	for (objChild instanceof objParent)	關鍵字: 繼承，原型
+<span class='line'>163</span> classChild.prototype.methodOfParent=function(..){..};	//	オーバーライド
+<span class='line'>164</span> 
+<span class='line'>165</span> var objChild=new classChild(_args);
+<span class='line'>166</span> classParent.prototype.methodOfParent.call(objChild, ..);	//	基底プロトタイプのメソッドを呼び出す。ただしこの呼び出し自体は Programmer が Person を継承しているかどうかを何も考慮していません。
+<span class='line'>167</span> 
+<span class='line'>168</span> 
+<span class='line'>169</span> 因 arguments 非instanceof Array，arguments.join(sp) → Array.prototype.join.call(arguments,sp)
+<span class='line'>170</span> */</span><span class="WHIT">
+<span class='line'>171</span> </span><span class="COMM">/**
+<span class='line'>172</span>  * @ignore
+<span class='line'>173</span>  */</span><span class="WHIT">
+<span class='line'>174</span> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Fapply</span><span class="PUNC">(</span><span class="COMM">/* object */</span><span class="WHIT"> </span><span class="NAME">oThis</span><span class="WHIT"> </span><span class="COMM">/* = null */</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="COMM">/* Array */</span><span class="WHIT"> </span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="COMM">/* = null */</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>175</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">oThis</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">oThis</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="NAME">undefined</span><span class="PUNC">)</span><span class="WHIT">	</span><span class="COMM">//	グローバルオブジェクトに適用</span><span class="WHIT">
+<span class='line'>176</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="NAME">undefined</span><span class="PUNC">?</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">(</span><span class="NAME">arrayArgs</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>177</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">oThis</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Object</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>178</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">undefined</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	実際は throw TypeError();</span><span class="WHIT">
+<span class='line'>179</span> 
+<span class='line'>180</span> </span><span class="WHIT"> </span><span class="NAME">oThis.$_funcTmp000</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>181</span> 
+<span class='line'>182</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">oReturn</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>183</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="NAME">undefined</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>184</span> </span><span class="WHIT">  </span><span class="NAME">oReturn</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">oThis.$_funcTmp000</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>185</span> </span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">arrayArgs</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>186</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">args</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>187</span> </span><span class="WHIT">  </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">arrayArgs.length</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>188</span> </span><span class="WHIT">   </span><span class="NAME">args</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'arrayArgs['</span><span class="PUNC">+</span><span class="NAME">i</span><span class="PUNC">+</span><span class="STRN">']'</span><span class="PUNC">;</span><span class="COMM">//args.push('arrayArgs['+i+']');</span><span class="WHIT">
+<span class='line'>189</span> </span><span class="WHIT">  </span><span class="NAME">oReturn</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">eval</span><span class="PUNC">(</span><span class="STRN">"oThis.$_funcTmp000("</span><span class="PUNC">+</span><span class="NAME">args.join</span><span class="PUNC">(</span><span class="STRN">","</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="STRN">");"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	因為arrayArgs[i]之type不固定，故不能直接用arrayArgs.join(",")</span><span class="WHIT">
+<span class='line'>190</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="COMM">//else{delete oThis.$_funcTmp000;throw TypeError();}</span><span class="WHIT">
+<span class='line'>191</span> 
+<span class='line'>192</span> </span><span class="WHIT"> </span><span class="KEYW">delete</span><span class="WHIT"> </span><span class="NAME">oThis.$_funcTmp000</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>193</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">oReturn</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>194</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>195</span> </span><span class="COMM">/*	http://msdn.microsoft.com/library/CHT/jscript7/html/jsmthcall.asp
+<span class='line'>196</span> call 方法是用來呼叫代表另一個物件的方法。call 方法可讓您將函式的物件內容從原始內容變成由 thisObj 所指定的新物件。
+<span class='line'>197</span> 如果未提供 thisObj 的話，將使用 global 物件作為 thisObj。
+<span class='line'>198</span> */</span><span class="WHIT">
+<span class='line'>199</span> </span><span class="COMM">/**
+<span class='line'>200</span>  * @ignore
+<span class='line'>201</span>  */</span><span class="WHIT">
+<span class='line'>202</span> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Fcall</span><span class="PUNC">(</span><span class="COMM">/* object */</span><span class="WHIT"> </span><span class="NAME">oThis</span><span class="WHIT"> </span><span class="COMM">/* = null [, arg1[, arg2[, ... [, argN]]]]] */</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>203</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">argu</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>204</span> </span><span class="WHIT"> </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">1</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">arguments.length</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>205</span> </span><span class="WHIT">  </span><span class="NAME">argu</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">arguments</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	argu.push(arguments[i]);</span><span class="WHIT">
+<span class='line'>206</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">this.apply</span><span class="PUNC">(</span><span class="NAME">oThis</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">argu</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>207</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>208</span> 
+<span class='line'>209</span> 
+<span class='line'>210</span> 
+<span class='line'>211</span> 
+<span class='line'>212</span> </span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
+<span class='line'>213</span> </span><span class="PUNC">.</span><span class="WHIT">
+<span class='line'>214</span> </span><span class="COMM">/**
+<span class='line'>215</span>  * Are we in a web environment?
+<span class='line'>216</span>  * @param W3CDOM	Are we in a W3C DOM environment?
+<span class='line'>217</span>  * @return	We're in a web environment.
+<span class='line'>218</span>  * @since	2009/12/29 19:18:53
+<span class='line'>219</span>  * @see
+<span class='line'>220</span>  * use lazy evaluation
+<span class='line'>221</span>  * @memberOf	CeL.code.compatibility
+<span class='line'>222</span>  */</span><span class="WHIT">
+<span class='line'>223</span> </span><span class="NAME">is_web</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">W3CDOM</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>224</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">arguments.callee</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>225</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="STRN">'web'</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>226</span> </span><span class="WHIT">		</span><span class="NAME">_s.W3CDOM</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT">
+<span class='line'>227</span> </span><span class="WHIT">				</span><span class="PUNC">(</span><span class="WHIT">
+<span class='line'>228</span> </span><span class="WHIT">				</span><span class="NAME">_s.web</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">window</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'object'</span><span class="WHIT">
+<span class='line'>229</span> </span><span class="WHIT">						</span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">document</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'object'</span><span class="WHIT">
+<span class='line'>230</span> </span><span class="WHIT">						</span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">window.document</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">document</span><span class="WHIT">
+<span class='line'>231</span> </span><span class="WHIT">						</span><span class="COMM">// 下兩個在 IE5.5 中都是 Object</span><span class="WHIT">
+<span class='line'>232</span> </span><span class="WHIT">						</span><span class="COMM">//&& library_namespace.is_type(window, 'global')</span><span class="WHIT">
+<span class='line'>233</span> </span><span class="WHIT">						</span><span class="COMM">//&& library_namespace.is_type(document, 'HTMLDocument')</span><span class="WHIT">
+<span class='line'>234</span> </span><span class="WHIT">				</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>235</span> </span><span class="WHIT">				</span><span class="COMM">// W3CDOM, type: Object @ IE5.5</span><span class="WHIT">
+<span class='line'>236</span> </span><span class="WHIT">				</span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">document.createElement</span><span class="WHIT">
+<span class='line'>237</span> </span><span class="WHIT">				</span><span class="COMM">// &&!!document.createElement</span><span class="WHIT">
+<span class='line'>238</span> </span><span class="WHIT">				</span><span class="COMM">//	type: Object @ IE5.5</span><span class="WHIT">
+<span class='line'>239</span> </span><span class="WHIT">				</span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">document.getElementsByTagName</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>240</span> 
+<span class='line'>241</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">W3CDOM</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">_s.W3CDOM</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">_s.web</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>242</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>243</span> 
+<span class='line'>244</span> 
+<span class='line'>245</span> </span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
+<span class='line'>246</span> </span><span class="PUNC">.</span><span class="WHIT">
+<span class='line'>247</span> </span><span class="COMM">/**
+<span class='line'>248</span>  * 判斷為 DOM。
+<span class='line'>249</span>  * @param	name	various name
+<span class='line'>250</span>  * @return	{Boolean}	various is object of window
+<span class='line'>251</span>  * @since	2010/1/14 22:04:37
+<span class='line'>252</span>  */</span><span class="WHIT">
+<span class='line'>253</span> </span><span class="NAME">is_DOM</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">name</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>254</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">r</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_.is_web</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>255</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">r</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="PUNC">!</span><span class="NAME">name</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>256</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>257</span> 
+<span class='line'>258</span> </span><span class="WHIT">	</span><span class="COMM">// CeL.debug(CeL.is_type(window[name]));</span><span class="WHIT">
+<span class='line'>259</span> </span><span class="WHIT">	</span><span class="KEYW">try</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>260</span> </span><span class="WHIT">		</span><span class="NAME">eval</span><span class="PUNC">(</span><span class="STRN">'r='</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">name</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>261</span> </span><span class="WHIT">		</span><span class="NAME">r</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">r</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">window</span><span class="PUNC">[</span><span class="NAME">name</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>262</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">catch</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>263</span> </span><span class="WHIT">		</span><span class="NAME">r</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">false</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>264</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>265</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>266</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>267</span> 
+<span class='line'>268</span> 
+<span class='line'>269</span> </span><span class="COMM">//is_HTA[generateCode.dLK]='is_web';</span><span class="WHIT">
+<span class='line'>270</span> </span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
+<span class='line'>271</span> </span><span class="PUNC">.</span><span class="WHIT">
+<span class='line'>272</span> </span><span class="COMM">/**
+<span class='line'>273</span>  * Are we run in HTA?&lt;br/>
+<span class='line'>274</span>  * ** HTA 中應該在 onload 中呼叫，否則 document.getElementsByTagName 不會有東西！
+<span class='line'>275</span>  * @param [id]	HTA tag id (only used in low version that we have no document.getElementsByTagName)
+<span class='line'>276</span>  * @return	We're in HTA
+<span class='line'>277</span>  * @require	is_web
+<span class='line'>278</span>  * @since	2009/12/29 19:18:53
+<span class='line'>279</span>  * @memberOf	CeL.code.compatibility
+<span class='line'>280</span>  * @see
+<span class='line'>281</span>  * http://msdn2.microsoft.com/en-us/library/ms536479.aspx
+<span class='line'>282</span>  * http://www.microsoft.com/technet/scriptcenter/resources/qanda/apr05/hey0420.mspx
+<span class='line'>283</span>  * http://www.msfn.org/board/lofiversion/index.php/t61847.html
+<span class='line'>284</span>  * lazy evaluation
+<span class='line'>285</span>  * http://peter.michaux.ca/articles/lazy-function-definition-pattern
+<span class='line'>286</span>  */</span><span class="WHIT">
+<span class='line'>287</span> </span><span class="NAME">is_HTA</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>288</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">arguments.callee</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">a</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>289</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="STRN">'HTA'</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>290</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_s.HTA</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>291</span> 
-<span class='line'>292</span> 
-<span class='line'>293</span> 
-<span class='line'>294</span> </span><span class="COMM">//	版本檢查</span><span class="WHIT">
-<span class='line'>295</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">checkVer</span><span class="PUNC">(</span><span class="NAME">ver</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>296</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">ver</span><span class="PUNC">||</span><span class="NAME">ver</span><span class="PUNC">&lt;</span><span class="NUMB">5</span><span class="PUNC">)</span><span class="NAME">ver</span><span class="PUNC">=</span><span class="NUMB">5</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//WScript.FullName,WScript.Path</span><span class="WHIT">
-<span class='line'>297</span> </span><span class="WHIT"> </span><span class="KEYW">with</span><span class="PUNC">(</span><span class="NAME">WScript</span><span class="PUNC">)</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">Version</span><span class="PUNC">&lt;</span><span class="NAME">ver</span><span class="PUNC">)</span><span class="KEYW">with</span><span class="PUNC">(</span><span class="NAME">WshShell</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>298</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">promptTitle</span><span class="PUNC">=</span><span class="NAME">Locale</span><span class="PUNC">==</span><span class="NUMB">0x411</span><span class="PUNC">?</span><span class="STRN">'アップグレードしませんか？'</span><span class="PUNC">:</span><span class="STRN">'請升級'</span><span class="WHIT">
-<span class='line'>299</span> </span><span class="WHIT">  </span><span class="PUNC">,</span><span class="NAME">promptC</span><span class="PUNC">=</span><span class="NAME">Locale</span><span class="PUNC">==</span><span class="NUMB">0x411</span><span class="PUNC">?</span><span class="STRN">"今使ってる "</span><span class="PUNC">+</span><span class="NAME">WScript.Name</span><span class="PUNC">+</span><span class="STRN">" のバージョンは古過ぎるから、\nMicrosoft Windows スクリプト テクノロジ Web サイトより\nバージョン "</span><span class="WHIT">
-<span class='line'>300</span> </span><span class="WHIT">	</span><span class="PUNC">+</span><span class="NAME">Version</span><span class="PUNC">+</span><span class="STRN">" から "</span><span class="PUNC">+</span><span class="NAME">ver</span><span class="PUNC">+</span><span class="STRN">" 以上にアップグレードしましょう。"</span><span class="PUNC">:</span><span class="STRN">"正使用的 "</span><span class="PUNC">+</span><span class="NAME">WScript.Name</span><span class="PUNC">+</span><span class="STRN">" 版本過舊，\n請至 Microsoft Windows 網站將版本由 "</span><span class="WHIT">
-<span class='line'>301</span> </span><span class="WHIT">	</span><span class="PUNC">+</span><span class="NAME">Version</span><span class="PUNC">+</span><span class="STRN">" 升級到 "</span><span class="PUNC">+</span><span class="NAME">ver</span><span class="PUNC">+</span><span class="STRN">" 以上。"</span><span class="WHIT">
-<span class='line'>302</span> </span><span class="WHIT">  </span><span class="PUNC">,</span><span class="NAME">url</span><span class="PUNC">=</span><span class="COMM">/*Locale==0x411?*/</span><span class="STRN">"http://www.microsoft.com/japan/developer/scripting/default.htm"</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>303</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">==</span><span class="NAME">Popup</span><span class="PUNC">(</span><span class="NAME">promptC</span><span class="PUNC">,</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">promptTitle</span><span class="PUNC">,</span><span class="NUMB">1</span><span class="PUNC">+</span><span class="NUMB">48</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">Run</span><span class="PUNC">(</span><span class="NAME">url</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>304</span> </span><span class="WHIT">  </span><span class="NAME">Quit</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>305</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>306</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>307</span> 
-<span class='line'>308</span> 
-<span class='line'>309</span> 
-<span class='line'>310</span> 
-<span class='line'>311</span> 
-<span class='line'>312</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT">
-<span class='line'>313</span> </span><span class="WHIT">	</span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
-<span class='line'>314</span> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>315</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>292</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">is_web</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>293</span> </span><span class="WHIT">		</span><span class="NAME">a</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">document.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">'APPLICATION'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>294</span> </span><span class="WHIT">		</span><span class="NAME">a</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">a</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">a.length</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">a</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>295</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT">
+<span class='line'>296</span> </span><span class="WHIT">		</span><span class="NAME">a</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">is_web</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">id</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">document.all</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">document.all</span><span class="PUNC">[</span><span class="NAME">id</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>297</span> 
+<span class='line'>298</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_s.HTA</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">a</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>299</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>300</span> 
+<span class='line'>301</span> 
+<span class='line'>302</span> 
+<span class='line'>303</span> </span><span class="COMM">//	版本檢查</span><span class="WHIT">
+<span class='line'>304</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">checkVer</span><span class="PUNC">(</span><span class="NAME">ver</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>305</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">ver</span><span class="PUNC">||</span><span class="NAME">ver</span><span class="PUNC">&lt;</span><span class="NUMB">5</span><span class="PUNC">)</span><span class="NAME">ver</span><span class="PUNC">=</span><span class="NUMB">5</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//WScript.FullName,WScript.Path</span><span class="WHIT">
+<span class='line'>306</span> </span><span class="WHIT"> </span><span class="KEYW">with</span><span class="PUNC">(</span><span class="NAME">WScript</span><span class="PUNC">)</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">Version</span><span class="PUNC">&lt;</span><span class="NAME">ver</span><span class="PUNC">)</span><span class="KEYW">with</span><span class="PUNC">(</span><span class="NAME">WshShell</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>307</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">promptTitle</span><span class="PUNC">=</span><span class="NAME">Locale</span><span class="PUNC">==</span><span class="NUMB">0x411</span><span class="PUNC">?</span><span class="STRN">'アップグレードしませんか？'</span><span class="PUNC">:</span><span class="STRN">'請升級'</span><span class="WHIT">
+<span class='line'>308</span> </span><span class="WHIT">  </span><span class="PUNC">,</span><span class="NAME">promptC</span><span class="PUNC">=</span><span class="NAME">Locale</span><span class="PUNC">==</span><span class="NUMB">0x411</span><span class="PUNC">?</span><span class="STRN">"今使ってる "</span><span class="PUNC">+</span><span class="NAME">WScript.Name</span><span class="PUNC">+</span><span class="STRN">" のバージョンは古過ぎるから、\nMicrosoft Windows スクリプト テクノロジ Web サイトより\nバージョン "</span><span class="WHIT">
+<span class='line'>309</span> </span><span class="WHIT">	</span><span class="PUNC">+</span><span class="NAME">Version</span><span class="PUNC">+</span><span class="STRN">" から "</span><span class="PUNC">+</span><span class="NAME">ver</span><span class="PUNC">+</span><span class="STRN">" 以上にアップグレードしましょう。"</span><span class="PUNC">:</span><span class="STRN">"正使用的 "</span><span class="PUNC">+</span><span class="NAME">WScript.Name</span><span class="PUNC">+</span><span class="STRN">" 版本過舊，\n請至 Microsoft Windows 網站將版本由 "</span><span class="WHIT">
+<span class='line'>310</span> </span><span class="WHIT">	</span><span class="PUNC">+</span><span class="NAME">Version</span><span class="PUNC">+</span><span class="STRN">" 升級到 "</span><span class="PUNC">+</span><span class="NAME">ver</span><span class="PUNC">+</span><span class="STRN">" 以上。"</span><span class="WHIT">
+<span class='line'>311</span> </span><span class="WHIT">  </span><span class="PUNC">,</span><span class="NAME">url</span><span class="PUNC">=</span><span class="COMM">/*Locale==0x411?*/</span><span class="STRN">"http://www.microsoft.com/japan/developer/scripting/default.htm"</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>312</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">==</span><span class="NAME">Popup</span><span class="PUNC">(</span><span class="NAME">promptC</span><span class="PUNC">,</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">promptTitle</span><span class="PUNC">,</span><span class="NUMB">1</span><span class="PUNC">+</span><span class="NUMB">48</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">Run</span><span class="PUNC">(</span><span class="NAME">url</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>313</span> </span><span class="WHIT">  </span><span class="NAME">Quit</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>314</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>315</span> </span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'>316</span> 
-<span class='line'>317</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
+<span class='line'>317</span> 
 <span class='line'>318</span> 
-<span class='line'>319</span> </span><span class="NAME">CeL.setup_module</span><span class="PUNC">(</span><span class="NAME">module_name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>319</span> 
 <span class='line'>320</span> 
-<span class='line'>321</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>322</span> </span></pre></body></html>
+<span class='line'>321</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT">
+<span class='line'>322</span> </span><span class="WHIT">	</span><span class="NAME">CeL.code.compatibility</span><span class="WHIT">
+<span class='line'>323</span> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>324</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>325</span> 
+<span class='line'>326</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
+<span class='line'>327</span> 
+<span class='line'>328</span> </span><span class="NAME">CeL.setup_module</span><span class="PUNC">(</span><span class="NAME">module_name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>329</span> 
+<span class='line'>330</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>331</span> </span></pre></body></html>

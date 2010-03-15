@@ -211,6 +211,10 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.IO.Windows.file.html">CeL.IO.Windows.file</a></li>
 	
+	<li><a href="../symbols/CeL.math.html">CeL.math</a></li>
+	
+	<li><a href="../symbols/CeL.math.quotient.html">CeL.math.quotient</a></li>
+	
 	<li><a href="../symbols/CeL.native.html">CeL.native</a></li>
 	
 	<li><a href="../symbols/CeL.net.form.address.html">CeL.net.form.address</a></li>
@@ -290,6 +294,16 @@ ul.inheritsList
 							</td>
 						</tr>
 					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/_global_.html#script_extension">script_extension</a></b>
+								</div>
+								<div class="description">default extension of script file.</div>
+							</td>
+						</tr>
+					
 					</tbody>
 				</table>
 				
@@ -334,7 +348,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#add_listener">add_listener</a></b>(type, listener, document_object, pFirst)
 								</div>
-								<div class="description">bind/add listener<br/>**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。</div>
+								<div class="description">bind/add listener<br/>**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。**	NOT TESTED!!</div>
 							</td>
 						</tr>
 					
@@ -359,6 +373,33 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#complement">complement</a></b>(number)
+								</div>
+								<div class="description">補數</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#continued_fraction">continued_fraction</a></b>(sequence, max_no)
+								</div>
+								<div class="description">取得連分數序列的數值</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#decplaces">decplaces</a></b>(digits, max)
+								</div>
+								<div class="description">取至小數d位，原因：JScript即使在做加減運算時，有時還是會出現1.4000000000000001，0.0999999999999998等數值。此函數可取至1.4與0.1</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#eval">eval</a></b>(code)
 								</div>
 								<div class="description">本 library 專用之 evaluate()</div>
@@ -368,7 +409,7 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#eval_various">eval_various</a></b>(various_name, namespace)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#eval_various">eval_various</a></b>(various_name, name_space)
 								</div>
 								<div class="description">simple evaluates to get value of specified various name</div>
 							</td>
@@ -377,9 +418,36 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b>extend</b>(variable_set, namespace, from_namespace)
+								<div class="fixedFont"><b>extend</b>(variable_set, name_space, from_name_space)
 								</div>
 								<div class="description">延展物件 (learned from jQuery)</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#factorization">factorization</a></b>(number)
+								</div>
+								<div class="description">取得某數的質因數，因式分解/素因子分解, factorization, get floor factor.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#floor_sqrt">floor_sqrt</a></b>(positive)
+								</div>
+								<div class="description">得到平方數，相當於 Math.floor(Math.sqrt(number)).</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#gcd">gcd</a></b>(n1, n2)
+								</div>
+								<div class="description">Get GCD of 2 numbers</div>
 							</td>
 						</tr>
 					
@@ -425,6 +493,15 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_script_name">get_script_name</a></b>()
 								</div>
 								<div class="description">取得執行 script 之名稱</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#hex">hex</a></b>(number)
+								</div>
+								<div class="description">VBScript has a Hex() function but JScript does not.</div>
 							</td>
 						</tr>
 					
@@ -512,6 +589,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#mutual_division">mutual_division</a></b>(n1, n2, times)
+								</div>
+								<div class="description">輾轉相除</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#object_tester">object_tester</a></b>(want_type, toString_reference)
 								</div>
 								<div class="description">get a type test function</div>
@@ -557,6 +643,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#setNetInfo">setNetInfo</a></b>(to_s, from)
+								</div>
+								<div class="description">改變網卡的IP地址: change IP, set IP</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#setup_module">setup_module</a></b>(module_name, code_for_including)
 								</div>
 								<div class="description">預先準備好下層 module 定義時的環境。<br/>請盡量先 call 上層 name-space 再定義下層的。</div>
@@ -584,9 +679,18 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#to_rational_number">to_rational_number</a></b>(number, rate, max_no)
+								</div>
+								<div class="description">The best rational approximation.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#use">use</a></b>(module, callback, extend_to)
 								</div>
-								<div class="description">Include specified module<br/>注意：以下的 code 中，CeL.warn 不一定會被執行（可能會、可能不會），因為執行時 code.log 尚未被 include。<br/>此時應該改用 CeL.use('code.log', callback);<br/>code in head/script/:<pre>CeL.use('code.log');CeL.warn('a WARNING');</pre>**	在指定 callback 時 namespace 無效！**	預設會 extend 到 library 本身下！</div>
+								<div class="description">Include specified module<br/>注意：以下的 code 中，CeL.warn 不一定會被執行（可能會、可能不會），因為執行時 code.log 尚未被 include。<br/>此時應該改用 CeL.use('code.log', callback);<br/>code in head/script/:<pre>CeL.use('code.log');CeL.warn('a WARNING');</pre>**	在指定 callback 時 name_space 無效！**	預設會 extend 到 library 本身下！</div>
 							</td>
 						</tr>
 					
@@ -671,6 +775,31 @@ ul.inheritsList
 							<dt class="heading">Since:</dt>
 								<dd>2009/12/20 08:38:26</dd>
 							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="script_extension"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{String}</span>
+					<b>script_extension</b>
+					
+					</div>
+					<div class="description">
+						default extension of script file.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+
+						
 						
 						
 						
@@ -796,7 +925,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						bind/add listener<br/>**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。
+						bind/add listener<br/>**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。**	NOT TESTED!!
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_web.origin.js.html">web.origin.js</a>.
@@ -943,6 +1072,192 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="complement"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{Number}</span>
+					<b>complement</b>(number)
+					
+					</div>
+					<div class="description">
+						補數
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math.origin.js.html">math.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code">alert(complement())</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>number</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Number}</span> base	1: 1's Complement, 2: 2's Complement, (TODO: 3, 4, ..)</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://www.tomzap.com/notes/DigitalSystemsEngEE316/1sAnd2sComplement.pdf</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name="continued_fraction"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>continued_fraction</b>(sequence, max_no)
+					
+					</div>
+					<div class="description">
+						取得連分數序列的數值
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math.origin.js.html">math.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>sequence</b>
+									
+								</dt>
+								<dd>序列</dd>
+							
+								<dt>
+									<b>max_no</b>
+									
+								</dt>
+								<dd>取至第 max_no 個</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>mutual_division.done</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>var a=continued_fraction([1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]);alert(a+'\n'+a[0]/a[1]+'\n'+Math.SQRT2+'\n'+(Math.SQRT2-a[0]/a[1])+'\n'+mutual_division(a[0],a[1]));</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name="decplaces"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>decplaces</b>(digits, max)
+					
+					</div>
+					<div class="description">
+						取至小數d位，原因：JScript即使在做加減運算時，有時還是會出現1.4000000000000001，0.0999999999999998等數值。此函數可取至1.4與0.1
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_native.origin.js.html">native.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code"></pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>digits</b>
+									
+								</dt>
+								<dd>number of decimal places shown</dd>
+							
+								<dt>
+									<b>max</b>
+									
+								</dt>
+								<dd>max digits	max==0:round() else floor()</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>https://bugzilla.mozilla.org/show_bug.cgi?id=5856IEEE754の丸め演算は最も報告されるES3「バグ」である。http://www.jibbering.com/faq/#FAQ4_6</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
 					<a name="eval"> </a>
 					<div class="fixedFont">
 					
@@ -993,7 +1308,7 @@ ul.inheritsList
 					<div class="fixedFont">
 					
 					
-					<b>eval_various</b>(various_name, namespace)
+					<b>eval_various</b>(various_name, name_space)
 					
 					</div>
 					<div class="description">
@@ -1018,7 +1333,7 @@ ul.inheritsList
 								<dd>various name</dd>
 							
 								<dt>
-									<span class="light fixedFont">{Object}</span> <b>namespace</b>
+									<span class="light fixedFont">{Object}</span> <b>name_space</b>
 									<i>Optional</i>
 								</dt>
 								<dd>initial name-space. default: global</dd>
@@ -1051,7 +1366,7 @@ ul.inheritsList
 					<div class="fixedFont">
 					
 					
-					<b>extend</b>(variable_set, namespace, from_namespace)
+					<b>extend</b>(variable_set, name_space, from_name_space)
 					
 					</div>
 					<div class="description">
@@ -1076,13 +1391,13 @@ ul.inheritsList
 								<dd>variable set</dd>
 							
 								<dt>
-									<b>namespace</b>
+									<b>name_space</b>
 									
 								</dt>
 								<dd>extend to what name-space</dd>
 							
 								<dt>
-									<b>from_namespace</b>
+									<b>from_name_space</b>
 									
 								</dt>
 								<dd>When inputing function names, we need a base name-space to search these functions.</dd>
@@ -1114,6 +1429,175 @@ ul.inheritsList
 								<dd><a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/03/01/jquery-extend.aspx" accessdate="2009/11/17 1:24" title="jQuery.extend的用法 - 黑暗執行緒">jQuery.extend的用法</a>,<a href="http://www.cnblogs.com/rubylouvre/archive/2009/11/21/1607072.html" accessdate="2010/1/1 1:40">jQuery源码学习笔记三 - Ruby's Louvre - 博客园</a></dd>
 							
 							</dl>
+						
+
+					<hr />
+				
+					<a name="factorization"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{Array}</span>
+					<b>factorization</b>(number)
+					
+					</div>
+					<div class="description">
+						取得某數的質因數，因式分解/素因子分解, factorization, get floor factor.唯一分解定理(The Unique Factorization Theorem)告訴我們素因子分解是唯一的，這即是稱為算術基本定理 (The Fundamental Theorem of Arithmeric) 的數學金科玉律。
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math.origin.js.html">math.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>number</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Array}</span> [prime1,power1,prime2,power2,..]</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>floor_sqrt</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://homepage2.nifty.com/m_kamada/math/10001.htm" accessdate="2010/3/11 18:7">Factorizations of 100...001</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name="floor_sqrt"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>floor_sqrt</b>(positive)
+					
+					</div>
+					<div class="description">
+						得到平方數，相當於 Math.floor(Math.sqrt(number)).get integer square root
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math.origin.js.html">math.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code">var p = 20374345, q = CeL.math.floor_sqrt(p = p * p - 1); CeL.log(q + '<br/>' + (q * q) + '<br/>' + p + '<br/>' + (++q * q));</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>positive</b>
+									
+								</dt>
+								<dd>number</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>r, r^2 <= number < (r+1)^2</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://www.azillionmonkeys.com/qed/sqroot.html" accessdate="2010/3/11 18:37">Paul Hsieh's Square Root page</a><a href="http://www.embeddedrelated.com/usenet/embedded/show/114789-1.php" accessdate="2010/3/11 18:34">Suitable Integer Square Root Algorithm for 32-64-Bit Integers on Inexpensive Microcontroller? | Comp.Arch.Embedded | EmbeddedRelated.com</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name="gcd"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>gcd</b>(n1, n2)
+					
+					</div>
+					<div class="description">
+						Get GCD of 2 numbers
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math.origin.js.html">math.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>n1</b>
+									
+								</dt>
+								<dd>number 1</dd>
+							
+								<dt>
+									<b>n2</b>
+									
+								</dt>
+								<dd>number 2</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>GCD of the 2 numbers</dd>
+							
+							</dl>
+						
+						
 						
 
 					<hr />
@@ -1191,7 +1675,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd><a href=http://blog.joycode.com/saucer/archive/2006/10/03/84572.aspx">Cross Site AJAX</a>,<a href="http://domscripting.com/blog/display/91">Cross-domain Ajax</a>,<a href="http://forums.mozillazine.org/viewtopic.php?f=25&amp;t=737645" accessdate="2010/1/1 19:37">FF3 issue with iFrames and XSLT standards</a>,<a href="http://kb.mozillazine.org/Security.fileuri.strict_origin_policy" accessdate="2010/1/1 19:38">Security.fileuri.strict origin policy - MozillaZine Knowledge Base</a></dd>
+								<dd><a href=http://blog.joycode.com/saucer/archive/2006/10/03/84572.aspx">Cross Site AJAX</a>,<a href="http://domscripting.com/blog/display/91">Cross-domain Ajax</a>,<a href="http://forums.mozillazine.org/viewtopic.php?f=25&amp;t=737645" accessdate="2010/1/1 19:37">FF3 issue with iFrames and XSLT standards</a>,<a href="http://kb.mozillazine.org/Security.fileuri.strict_origin_policy" accessdate="2010/1/1 19:38">Security.fileuri.strict origin policy - MozillaZine Knowledge Base</a>Chrome: <a href="http://code.google.com/p/chromium/issues/detail?id=37586" title="between builds 39339 (good) and 39344 (bad)">NETWORK_ERR: XMLHttpRequest Exception 101</a></dd>
 							
 							</dl>
 						
@@ -1387,6 +1871,56 @@ ul.inheritsList
 								<dd><span class="light fixedFont">{String}</span> 執行 script 之 名稱</dd>
 							
 								<dd>''	unknown environment</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="hex"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{String}</span>
+					<b>hex</b>(number)
+					
+					</div>
+					<div class="description">
+						VBScript has a Hex() function but JScript does not.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math.origin.js.html">math.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code">alert('0x'+CeL.hex(16725))</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>number</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> number in hex</dd>
 							
 							</dl>
 						
@@ -1883,6 +2417,64 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="mutual_division"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>mutual_division</b>(n1, n2, times)
+					
+					</div>
+					<div class="description">
+						輾轉相除
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math.origin.js.html">math.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>n1</b>
+									
+								</dt>
+								<dd>number 1</dd>
+							
+								<dt>
+									<b>n2</b>
+									
+								</dt>
+								<dd>number 2</dd>
+							
+								<dt>
+									<b>times</b>
+									
+								</dt>
+								<dd>max 次數</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>連分數序列</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name="object_tester"> </a>
 					<div class="fixedFont">
 					
@@ -2169,6 +2761,75 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="setNetInfo"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>setNetInfo</b>(to_s, from)
+					
+					</div>
+					<div class="description">
+						改變網卡的IP地址: change IP, set IP
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_OS_WMI.origin.js.html">WMI.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code">setNetInfo({IP:'163.16.20.212',Gateway:254});sl(setNetInfo({IP:'163.16.20.30',Gateway:254}));WScript.Quit();</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>to_s</b>
+									
+								</dt>
+								<dd>IP or {IP:''||[], Subnet:''||[], DNS:''||[], Gateway:''||[], GatewayOrder:''||[]}</dd>
+							
+								<dt>
+									<b>from</b>
+									
+								</dt>
+								<dd>IP or netif No.</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2009/5/7 0:24:5	加強2010/3/3 10:41:17	a work version</dd>
+							</dl>
+							</dl>
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>getWMIData,VBA,JSArrayToSafeArray</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://msdn.microsoft.com/en-us/library/aa394217%28VS.85%29.aspx" accessdate="2010/3/3 13:15">Win32_NetworkAdapterConfiguration Class (Windows)</a><a href="http://www.yongfa365.com/item/Use-WMi-Change-IP-VBS-yongfa365.html" accessdate="2010/3/3 13:14">通过 WMI 改变网卡的IP地址 ChangeIP.vbs - 柳永法(yongfa365)'Blog</a><a href="http://www.microsoft.com/technet/scriptcenter/topics/networking/01_atnc_intro.mspx">Automating TCP/IP Networking on Clients: Part 1: Introduction</a><a href="http://www.dotblogs.com.tw/PowerHammer/archive/2008/03/24/2060.aspx" accessdate="2010/3/3 13:15">使用 WMI 更改IP、子網路遮罩、閘道、DNS - 強力鎯頭 VB BLOG - 點部落</a>Using NetSh.exe (no reboot required): <a href="http://techsupt.winbatch.com/webcgi/webbatch.exe?techsupt/tsleft.web+WinBatch/How~To+Change~Ip~Address.txt" accessdate="2010/3/3 13:12">WWW Tech Support/WinBatch/How To\Change Ip Address.txt</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
 					<a name="setup_module"> </a>
 					<div class="fixedFont">
 					
@@ -2323,6 +2984,82 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="to_rational_number"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>to_rational_number</b>(number, rate, max_no)
+					
+					</div>
+					<div class="description">
+						The best rational approximation. 取得值最接近之有理數 (use 連分數 continued fraction), 取近似值.c.f.,調日法在分子或分母小於下一個漸進分數的分數中，其值是最接近精確值的近似值。
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math.origin.js.html">math.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code">to_rational_number(4088/783)</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>number</b>
+									
+								</dt>
+								<dd>number</dd>
+							
+								<dt>
+									<b>rate</b>
+									
+								</dt>
+								<dd>比例在rate以上</dd>
+							
+								<dt>
+									<b>max_no</b>
+									
+								</dt>
+								<dd>最多取至序列第max_no個//TODO:並小於l:limit</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>[分子, 分母, 誤差]</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>mutual_division,continued_fraction</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://en.wikipedia.org/wiki/Continued_fraction#Best_to_rational_numbers</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
 					<a name="use"> </a>
 					<div class="fixedFont">
 					
@@ -2331,7 +3068,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						Include specified module<br/>注意：以下的 code 中，CeL.warn 不一定會被執行（可能會、可能不會），因為執行時 code.log 尚未被 include。<br/>此時應該改用 CeL.use('code.log', callback);<br/>code in head/script/:<pre>CeL.use('code.log');CeL.warn('a WARNING');</pre>**	在指定 callback 時 namespace 無效！**	預設會 extend 到 library 本身下！
+						Include specified module<br/>注意：以下的 code 中，CeL.warn 不一定會被執行（可能會、可能不會），因為執行時 code.log 尚未被 include。<br/>此時應該改用 CeL.use('code.log', callback);<br/>code in head/script/:<pre>CeL.use('code.log');CeL.warn('a WARNING');</pre>**	在指定 callback 時 name_space 無效！**	預設會 extend 到 library 本身下！
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -2365,7 +3102,7 @@ ul.inheritsList
 									<span class="light fixedFont">{Object|Boolean}</span> <b>extend_to</b>
 									<i>Optional</i>
 								</dt>
-								<dd>extend to which name-space<br/>false:	just load, don't extend to library name-space<br/>this:	extend to global<br/>object:	extend to specified name-space that you can use [namespace]._func_ to run it<br/>(others, including undefined):	extend to root of this library. e.g., call CeL._function_name_ and we can get the specified function.</dd>
+								<dd>extend to which name-space<br/>false:	just load, don't extend to library name-space<br/>this:	extend to global<br/>object:	extend to specified name-space that you can use [name_space]._func_ to run it<br/>(others, including undefined):	extend to root of this library. e.g., call CeL._function_name_ and we can get the specified function.</dd>
 							
 							</dl>
 						
@@ -2463,7 +3200,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu Jan 21 2010 01:40:51 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu Mar 11 2010 23:37:43 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

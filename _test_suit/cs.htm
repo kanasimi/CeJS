@@ -1,0 +1,163 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+<style type="text/css">
+body{margin:0;padding:0;color:#159;}
+#address,#legal_domicile{font-size:.9em;}
+#error_load_panel{color:#f00;background-color:#ff8;padding:.5em;display:none;}
+
+.sup,.up,.sub,.down,.ion{font-size:.8em;position:relative;}
+.sup,.up{top:-.6em;/*vertical-align:super;*/}/* <sup> */
+.sub,.down{top:.4em;/*vertical-align:sub;*/}/* <sub> */
+.ion{top:-.6em;left:-.6em;}
+</style>
+
+<script type="text/javascript" src="JS/ce.js"></script>
+
+<title>cs test</title></head>
+
+<body>
+
+
+<div id="error_load_panel">
+<hr />
+<h2>Loading error</h2>
+JavaScript doesn't work or XHR loading error?
+<hr />
+</div>
+
+<h3>換底</h3>
+
+number（正負整數、分數與小數）: <input id="number1" value="1000"/>
+in base: <input id="base1" value="10" style="width:3em;"/>
+<br />
+change to base: <input id="base2" value="10" style="width:3em;"/>
+<a href="#" onclick="return calc_base();">do</a>
+
+<hr />
+<h3>補數</h3>
+
+number（整數）: <input id="number" value="1000"/>
+base: <input id="base" value="2" style="width:3em;"/>
+bits: <input id="bits" value="8" style="width:3em;"/>
+<label for="diminished"><input type="checkbox" id="diminished"/>diminished radix complement</label>
+<a href="#" onclick="return calc_complement();">←</a>
+<a href="#" onclick="return calc_value();">→</a>
+（正負整數）<input id="value" value="16"/><span class="down">10</span>
+
+
+<hr />
+
+[cs test] log:
+<div id="panel_for_log">
+Page loaded. Initializing the framework. Please wait..
+</div>
+
+
+
+<script type="text/javascript">
+
+
+	function calc_base(){
+		try{
+			var v=CeL.get_element('number1').value,m=v.match(/^\s*([\+\-]?\d+)\s*\/\s*(\d+)\s*$/);
+			v=m?
+				//	正負分數
+				new CeL.quotient(m[1],m[2]):
+				//	正負整數與小數
+				CeL.quotient.parse_base(CeL.get_element('number1').value.toLowerCase(),CeL.get_element('base1').value);
+			CeL.log('換底: '+v.toString(3) + '<span class="down">10</span> → ' + v.to_base(CeL.get_element('base2').value).replace(/_([^\(]+)/,'_<i style="text-decoration:overline">$1</i>')+'<span class="down">'+CeL.get_element('base2').value+'</span>');
+		}catch(e){CeL.err(e);}
+		return false;
+	}
+
+
+	function calc_complement(){
+		var c = new CeL.complement;
+		c.bits=CeL.get_element('bits').value;
+		c.from(0,CeL.get_element('base').value,CeL.get_element('diminished').checked);
+		c.set(CeL.get_element('value').value);
+		CeL.get_element('number').value=c.to();
+		return false;
+	}
+
+	function calc_value(){
+		var c = new CeL.complement;
+		c.bits=CeL.get_element('bits').value;
+		c.from(CeL.get_element('number').value,CeL.get_element('base').value,CeL.get_element('diminished').checked);
+		CeL.get_element('value').value=c.valueOf();
+		return false;
+	}
+
+
+
+	function init_work() {
+
+		CeL.use('net.web');
+
+		CeL.use('math');
+		//var p = 20374345, q = CeL.math.floor_sqrt(p = p * p - 1); CeL.log(q + '<br/>' + (q * q) + '<br/>' + p + '<br/>' + (++q * q));
+
+		CeL.use('math.quotient');
+		//CeL.debug(CeL.get_module_path('math.quotient')+': '+CeL.is_loaded('math.quotient')+': '+CeL.math.quotient);
+		//var q1=CeL.quotient.parse_base('36768');
+		//CeL.log(q1.to_base());
+		//CeL.log(CeL.quotient.parse_base('65.43'.toLowerCase(),8).to_base(16).replace(/_([^\(]+)/,'_<i style="text-decoration:overline">$1</i>'));
+		//CeL.log((new CeL.quotient(3,4)).count('*',new CeL.quotient(2,7)).reduce().to_print_mode());
+		//CeL.log(CeL.quotient.turnBaseQ('4565.5',16).to_print_mode(3,2));
+
+
+/*
+		var c1 = new CeL.complement;
+		c1.bits = 4;
+		//c1.bits = 16;
+		//c1.from(1000 , 1);
+		//c1.set(-1000);
+		//CeL.log(c1.valueOf() + ', ' + c1.to());
+		for ( var i = -9; i < 10; i++)
+			try {
+				c1.set(i);
+				if (!i)
+					c1.sign = 1;
+				CeL.log(c1.valueOf() + ', ' + c1.to());
+			} catch (e) {
+				CeL.log(c1.valueOf() + ': overflow!');
+			}
+*/
+
+	};
+
+	function init_setup() {
+		try {
+			//	Initialize log function
+			CeL.use('code.log');
+			if (!CeL.is_loaded('code.log'))
+				throw 1;
+
+			CeL.Log.set_board('panel_for_log');
+			CeL.debug('Log panel was settled.');
+
+			try {
+				init_work();
+			} catch (e) {
+				CeL.warn('Initialization failed!');
+				CeL.err(e);
+			}
+
+			CeL.log.max_length = 0;
+			CeL.log('Initialization complete.');
+
+		} catch (e) {
+			//	show the error panel
+			document.getElementById('error_load_panel').style.display = 'block';
+		}
+	};
+
+	window.onload = init_setup;
+	//CeL.use('net.web',function(){CeL.on_
+</script>
+
+
+</body>
+</html>

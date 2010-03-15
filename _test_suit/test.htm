@@ -3,10 +3,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head><meta http-equiv="content-type" content="text/html;charset=utf-8"/>
 <style type="text/css">
+body{margin:0;padding:0;}
 #address,#legal_domicile{font-size:.9em;}
 </style>
 
+<!--
+<script type="text/javascript" src="http://sites.google.com/site/cejsph/lib/ce.txt"></script>
+<script type="text/javascript" src="http://neterr.hostwq.net/JS/ce.js"></script>
+-->
+
 <script type="text/javascript" src="../ce.js"></script>
+
+
 
 <script type="text/javascript">
 
@@ -18,6 +26,7 @@ CeL.include_module_resource('../../game/game.css');
 CeL.log.max_length = 20;
 
 CeL.set_debug();
+//CeL.set_debug(2);
 
 try {
 	dojo.require("dojo.NodeList-fx");
@@ -44,6 +53,16 @@ function test1() {
 
 <body class="bgn">
 
+
+<div id="error_load_panel" style="color:#f00;background-color:#ff8;padding:.5em;/* hack for NS4 */position:absolute;top:-800px;">
+<hr />
+<h2>Loading error</h2>
+JavaScript doesn't work or XMLHttpRequest loading error?<br />
+You may need to check the configuration of the browser, <a href="#" onclick="history.go(0);return false;">reload the page</a>, or start from <a href="basic/basic_test_1.htm">the basic test</a>.
+<hr />
+</div>
+
+
 <div id="choose">choose: </div>
 
 <div id="legal_domicile">戶籍地址 </div>
@@ -53,15 +72,16 @@ function test1() {
 
 <div id="education">教育程度 </div>
 
-<hr/>
+<hr />
 
-attach test:<br/>
+attach test:<br />
 span: <span id="attach_span">test: </span>
 input: <input id="attach_input" value="input test" style="background-color:#ffb;"/>
 select: <select id="attach_select"><option value="A">option A</option><option value="B">option B</option><option value="C">option C</option><option value="select" selected="selected">option selected</option></select>
 hr: <hr id="attach_hr" style="width:2em;"/>
 
-<hr/>
+
+<hr />
 
 <input id="question" value="43/21"/>
 <b onclick="show_question();" style="cursor: pointer;">show</b>
@@ -71,12 +91,11 @@ hr: <hr id="attach_hr" style="width:2em;"/>
 <div id="panel_for_SVG">
 </div>
 
-<hr/>
+<hr />
 
 [test suit] log:
 <div id="panel_for_log">
-Please start from <a href="basic/basic_test_1.htm">the basic test</a>.<br/>
-Page loaded. Prepare to initial..
+Page loaded. Initializing the framework. Please wait..
 </div>
 
 
@@ -160,7 +179,7 @@ Page loaded. Prepare to initial..
 		var c = CeL.get_file('../ce.js')+CeL.get_file('../code/log.js');
 		c = CeL.get_various_from_code(c);
 		c = CeL.get_code_from_generated_various(c);
-		CeL.debug(c.replace(/\n/g,'<br/>'));
+		CeL.debug(c.replace(/\n/g,'<br />'));
 		 */
 
 		// function aaa(v){alert('mmm='+mmm);var r={};r[v]=222;return r;}
@@ -208,33 +227,96 @@ Page loaded. Prepare to initial..
 
 		CeL.use('net.web');
 		//CeL.copy_to_clipboard('已經複製');
+
+
+		//CeL.log('long interger test: 36578368923657238645067315413986475314666666666666666666666666864506731541398647531466666666666666666666666666666666666666666666666666666666666666666666666666666622222222222222222222222222222222222222');
+
+		CeL.use('math');
+		//var p = 20374345, q = CeL.math.floor_sqrt(p = p * p - 1); CeL.log(q + '<br />' + (q * q) + '<br />' + p + '<br />' + (++q * q));
+
+		CeL.use('math.quotient');
+		//CeL.debug(CeL.get_module_path('math.quotient')+': '+CeL.is_loaded('math.quotient')+': '+CeL.math.quotient);
+		//var q1=CeL.quotient.parse_base('.110011001100110011001100110011001100',2);
+		//CeL.log(q1.to_base());
+		//q1=CeL.quotient.parse_base('.110011001100110011001100110011001100110011001100110011001100110011001100',2);
+		//CeL.log(q1.to_base());
+		//CeL.log(CeL.quotient.parse_base('65.43'.toLowerCase(),8).to_base(16).replace(/_([^\(]+)/,'_<i style="text-decoration:overline">$1</i>'));
+		//CeL.log((new CeL.quotient(3,4)).count('*',new CeL.quotient(2,7)).reduce().to_print_mode());
+		//CeL.log(CeL.quotient.turnBaseQ('4565.5',16).to_print_mode(3,2));
+
+
+/*
+		var c1 = new CeL.complement, c2 = new CeL.complement;
+		c1.bits = c2.bits = 4;
+		//c1.bits = 16;
+		//c1.from(1000 , 1);
+		//c1.set(-1000);
+		//CeL.log(c1.valueOf() + ', ' + c1.to());
+		for ( var i = -9; i < 10; i++ ){
+			c1.set(i);
+			c2.from(c1.to());//c2.from(c1.to(0,1),0,1);
+			CeL.log(c2.valueOf() + ', ' + c1.valueOf() + ', ' + c1.to());//CeL.log(c2.valueOf() + ', ' + c1.valueOf() + ', ' + c1.to(0,1));
+		}
+*/
+
+
 	};
+
 
 	function init_setup() {
 		try {
-			//	initial log function
+			//	Initialize log function
 			CeL.use('code.log');
+			if (!CeL.is_loaded('code.log'))
+				throw 1;
+
 			CeL.Log.set_board('panel_for_log');
-			CeL.debug('log panel setted.');
+			CeL.debug('Log panel was settled.');
 
 			try {
 				init_work();
 			} catch (e) {
-				CeL.warn('Initial test error!');
+				CeL.warn('Initialization failed!');
 				CeL.err(e);
 			}
 
 			CeL.log.max_length = 0;
-			CeL.log('Initial process done.');
+			CeL.log('Initialization complete.');
 
 		} catch (e) {
+			//	show the error panel
+			document.getElementById('error_load_panel').style.position = 'static';
 		}
 	};
 
-	window.onload = init_setup;
-	//CeL.use('net.web',function(){CeL.on_load(init_setup);});
+	//CeL.use('net.web',func
+</script>
+
+<script type="text/javascript">
+/*
+	本 script 段落之存在是為了預防萬一。因此只能放最簡單的 script parser 亦能讀懂的 code。
+
+	假設：通常能夠讀懂 CSS display:none; 的也能使用 DOM 來控制 error_load_panel 的顯示。
+	但很遺憾的，對讀得懂 CSS 卻沒有 document.getElementById 的 Netscape Navigator 4，這不成立。
+	因此不能用 display:none; 以從一開始避免顯示。
+*/
+
+	function load_detect() {
+		if (typeof init_setup == 'function')
+			init_setup();
+		else {
+			var mo = document && document.layers && document.layers['error_load_panel'];
+			if (mo)
+				mo.top = 8,
+				//	指定 position 對 NS4 事實上無效用。
+				mo.position = 'static';
+		}
+	}
+
+	window.onload = load_detect;
 
 </script>
+
 
 </body>
 </html>
