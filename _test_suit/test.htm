@@ -93,6 +93,39 @@ hr: <hr id="attach_hr" style="width:2em;"/>
 
 <hr />
 
+<h3>換底</h3>
+
+number（正負整數、分數與小數）: <input id="number1" value="1000"/>
+in base: <input id="base1" value="10" style="width:3em;"/>
+<br />
+change to base: <input id="base2" value="2" style="width:3em;"/>
+<a href="#" onclick="return calc_base();">do</a>
+
+<hr />
+<h3>補數</h3>
+
+number（整數）: <input id="number" value="1000"/>
+base: <input id="base" value="2" style="width:3em;"/>
+bits: <input id="bits" value="8" style="width:3em;"/>
+<label for="diminished"><input type="checkbox" id="diminished"/>diminished radix complement</label>
+<a href="#" onclick="return calc_complement();">←</a>
+<a href="#" onclick="return calc_value();">→</a>
+（正負整數）<input id="value" value="16"/><span class="down">10</span>
+
+
+<hr />
+<h3>Hamming Code</h3>
+data(/^[01]{,20}$/): <input id="h_data" value="1101"/>
+<a href="#" onclick="return Hamming.dec();" title="decode">←</a>
+<a href="#" onclick="return Hamming.enc();" title="encode">→</a>
+code(/^[01]{,20}$/): <input id="h_code"/>
+<label for="h_reverse"><input type="checkbox" id="h_reverse"/>reverse</label>
+show
+<a href="#" onclick="Hamming.show(8);return false;" title="encode">8</a>
+<a href="#" onclick="Hamming.show(16);return false;" title="encode">16</a>
+
+<hr />
+
 [test suit] log:
 <div id="panel_for_log">
 Page loaded. Initializing the framework. Please wait..
@@ -102,10 +135,10 @@ Page loaded. Initializing the framework. Please wait..
 
 <script type="text/javascript">
 
-	var SVG_object;
+	var SVG_object, Hamming;
 
 	function show_question() {
-		var num = document.getElementById('question').value, m = num
+		var num = CeL.get_element('question').value, m = num
 				.match(/(\d+)([+\-*\/])(\d+)/);
 
 		if (m)
@@ -119,14 +152,64 @@ Page loaded. Initializing the framework. Please wait..
 
 	function run_code() {
 		try {
-			CeL.log(eval(document.getElementById('question').value));
+			CeL.log(eval(CeL.get_element('question').value));
 		} catch (e) {
 			CeL.err(e);
 		}
 	}
 
 
+	function calc_base(){
+		try{
+			var v=CeL.get_element('number1').value,m=v.match(/^\s*([\+\-]?\d+)\s*\/\s*(\d+)\s*$/);
+			v=m?
+				//	正負分數
+				new CeL.quotient(m[1],m[2]):
+				//	正負整數與小數
+				CeL.quotient.parse_base(CeL.get_element('number1').value.toLowerCase(),CeL.get_element('base1').value);
+			CeL.log('換底: '+v.toString(3) + '<span class="down">10</span> → ' + v.to_base(CeL.get_element('base2').value).replace(/_([^\(]+)/,'_<i style="text-decoration:overline">$1</i>')+'<span class="down">'+CeL.get_element('base2').value+'</span>');
+		}catch(e){CeL.err(e);}
+		return false;
+	}
+
+
+	function calc_complement() {
+		var c = new CeL.complement;
+		c.bits = CeL.get_element('bits').value;
+		c.from(0, CeL.get_element('base').value,
+				CeL.get_element('diminished').checked);
+		c.set(CeL.get_element('value').value);
+		CeL.get_element('number').value = c.to();
+		return false;
+	}
+
+	function calc_value() {
+		var c = new CeL.complement;
+		c.bits = CeL.get_element('bits').value;
+		c.from(CeL.get_element('number').value, CeL.get_element('base').value, CeL
+				.get_element('diminished').checked);
+		CeL.get_element('value').value = c.valueOf();
+		return false;
+	}
+
+
+
 	function init_work() {
+
+		//	test the biggest 10^?	取得能準確計算的最大值
+		var biggest_exponent_of_10=0,test_num=1;
+		while(
+				//parseInt(test_num*=10)-1===test_num-1
+				//	/^9+$/.test(parseInt((test_num*=10)-1))
+				(test_num*=10)-(test_num/2-1)*2===0
+				)
+			biggest_exponent_of_10++
+			//	https://bugzilla.mozilla.org/show_bug.cgi?id=553799
+			//,CeL.debug('10^'+biggest_exponent_of_10+'='+test_num+'; '+(parseInt(test_num-1)))
+			;
+		//CeL.debug('biggest exponent of 10: ' + biggest_exponent_of_10);
+
+
 
 		CeL.use('code.compatibility');
 
@@ -260,6 +343,31 @@ Page loaded. Initializing the framework. Please wait..
 */
 
 
+		CeL.use('math.Hamming');
+		Hamming = CeL.math.Hamming;
+		//Hamming.show(16);
+		Hamming.dec = function() {
+			try {
+				Hamming.reverse = CeL.get_element('h_reverse').checked;
+				CeL.get_element('h_data').value = Hamming.decode(CeL
+						.get_element('h_code').value);
+			} catch (e) {
+				CeL.err(e);
+			}
+			return false;
+		};
+		Hamming.enc = function() {
+			try {
+				Hamming.reverse = CeL.get_element('h_reverse').checked;
+				CeL.get_element('h_code').value = Hamming.encode(CeL
+						.get_element('h_data').value);
+			} catch (e) {
+				CeL.err(e);
+			}
+			return false;
+		};
+
+
 	};
 
 
@@ -299,6 +407,7 @@ Page loaded. Initializing the framework. Please wait..
 	假設：通常能夠讀懂 CSS display:none; 的也能使用 DOM 來控制 error_load_panel 的顯示。
 	但很遺憾的，對讀得懂 CSS 卻沒有 document.getElementById 的 Netscape Navigator 4，這不成立。
 	因此不能用 display:none; 以從一開始避免顯示。
+	** limit: 上一段 code 不能出錯
 */
 
 	function load_detect() {
