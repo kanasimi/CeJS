@@ -107,7 +107,7 @@ change to base: <input id="base2" value="2" style="width:3em;"/>
 number（整數）: <input id="number" value="1000"/>
 base: <input id="base" value="2" style="width:3em;"/>
 bits: <input id="bits" value="8" style="width:3em;"/>
-<label for="diminished"><input type="checkbox" id="diminished"/>diminished radix complement</label>
+<label for="diminished" title="diminished radix complement"><input type="checkbox" id="diminished"/>diminished</label>
 <a href="#" onclick="return calc_complement();">←</a>
 <a href="#" onclick="return calc_value();">→</a>
 （正負整數）<input id="value" value="16"/><span class="down">10</span>
@@ -120,6 +120,7 @@ data(/^[01]{,20}$/): <input id="h_data" value="1101"/>
 <a href="#" onclick="return Hamming.enc();" title="encode">→</a>
 code(/^[01]{,20}$/): <input id="h_code"/>
 <label for="h_reverse"><input type="checkbox" id="h_reverse"/>reverse</label>
+|
 show
 <a href="#" onclick="Hamming.show(8);return false;" title="encode">8</a>
 <a href="#" onclick="Hamming.show(16);return false;" title="encode">16</a>
@@ -381,6 +382,7 @@ Page loaded. Initializing the framework. Please wait..
 			CeL.Log.set_board('panel_for_log');
 			CeL.debug('Log panel was settled.');
 
+			var e = 0;
 			try {
 				init_work();
 			} catch (e) {
@@ -389,7 +391,7 @@ Page loaded. Initializing the framework. Please wait..
 			}
 
 			CeL.log.max_length = 0;
-			CeL.log('Initialization complete.');
+			CeL.log('Initialization ' + (e ? 'error' : 'finished') + '.');
 
 		} catch (e) {
 			//	show the error panel
