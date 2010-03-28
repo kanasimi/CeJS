@@ -128,6 +128,13 @@ show
 <hr />
 
 [test suit] log:
+<a href="#" onclick="clipboardFunction(0,'panel_for_log');return false;">paste code</a>
+<b class="sp">|</b>
+<a href="#" onclick="var t=CeL.Log.get_log();clipboardFunction(t?2:1,t?(t+'').replace(/^\[\d+\]/,''):'result');return false;">copy result</a>
+<b class="sp">|</b>
+<a href="#" onclick="CeL.Log.clear();return false;" title="清除訊息">clear log</a>
+<b class="sp">|</b>
+<a href="#" onclick="CeL.Log.trigger();return false;" title="顯示/隱藏訊息">show/hidden log</a>
 <div id="panel_for_log">
 Page loaded. Initializing the framework. Please wait..
 </div>
@@ -135,6 +142,13 @@ Page loaded. Initializing the framework. Please wait..
 
 
 <script type="text/javascript">
+
+/*
+test short circuit
+http://hi.baidu.com/happy8d/blog/item/c6bc1146b4228e016b63e5d9.html
+把 A && B 對調，變成：B && A，結果還是 B 會先被 evaluate。
+test A||B
+*/
 
 	var SVG_object, Hamming;
 
@@ -206,7 +220,7 @@ Page loaded. Initializing the framework. Please wait..
 				)
 			biggest_exponent_of_10++
 			//	https://bugzilla.mozilla.org/show_bug.cgi?id=553799
-			//,CeL.debug('10^'+biggest_exponent_of_10+'='+test_num+'; '+(parseInt(test_num-1)))
+			//,CeL.debug('10^'+biggest_exponent_of_10+'='+test_num+'; '+(parseInt(test_num-1,10)))
 			;
 		//CeL.debug('biggest exponent of 10: ' + biggest_exponent_of_10);
 
