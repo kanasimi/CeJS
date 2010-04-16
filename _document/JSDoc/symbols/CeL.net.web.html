@@ -213,6 +213,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.math.html">CeL.math</a></li>
 	
+	<li><a href="../symbols/CeL.math.Hamming.html">CeL.math.Hamming</a></li>
+	
 	<li><a href="../symbols/CeL.math.quotient.html">CeL.math.quotient</a></li>
 	
 	<li><a href="../symbols/CeL.native.html">CeL.native</a></li>
@@ -330,6 +332,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.get_element">get_element</a></b>(id, flag)
+								</div>
+								<div class="description">簡化 document.getElementById 並配合 loadReference()</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.get_node_position">get_node_position</a></b>(obj)
 								</div>
 								<div class="description">get the actual position [left,top,width,height] of an HTML node object</div>
@@ -339,9 +350,36 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.get_style">get_style</a></b>(element, name, not_computed)
+								</div>
+								<div class="description">get current computed style property of specified HTML element.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.parse_URI">parse_URI</a></b>(URI)
+								</div>
+								<div class="description">Parses URI</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.remove_node">remove_node</a></b>(o, tag)
 								</div>
 								<div class="description">移除 node</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.replace_HTML">replace_HTML</a></b>(o, html)
+								</div>
+								<div class="description">replace HTML</div>
 							</td>
 						</tr>
 					
@@ -360,6 +398,15 @@ ul.inheritsList
 								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.set_class">set_class</a></b>(element, class_name, flag)
 								</div>
 								<div class="description">Sets / adds class of specified element.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.trigger_display">trigger_display</a></b>(element, type)
+								</div>
+								<div class="description">trigger/swap display and visibility.</div>
 							</td>
 						</tr>
 					
@@ -577,6 +624,68 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name=".get_element"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{HTML Object}</span>
+					<span class="light">CeL.net.web.</span><b>get_element</b>(id, flag)
+					
+					</div>
+					<div class="description">
+						簡化 document.getElementById 並配合 loadReference()
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>id</b>
+									
+								</dt>
+								<dd>所欲找尋之 element id</dd>
+							
+								<dt>
+									<b>flag</b>
+									
+								</dt>
+								<dd>{HTML Object} object: 參考此 document object           {Number} flag: 參見 code</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2004/6/25 19:33</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{HTML Object}</span> Object</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>referenceDoc,loadReferenceDone,`get_element();`</dd>
+							
+							</dl>
+						
+						
+
+					<hr />
+				
 					<a name=".get_node_position"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
@@ -627,6 +736,134 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name=".get_style"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.net.web.</span><b>get_style</b>(element, name, not_computed)
+					
+					</div>
+					<div class="description">
+						get current computed style property of specified HTML element.TODO: 整合 get_node_position, _.set_style
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>element</b>
+									
+								</dt>
+								<dd>HTML element</dd>
+							
+								<dt>
+									<b>name</b>
+									
+								</dt>
+								<dd>W3C style property name (e.g., no '-webkit-background-clip')</dd>
+							
+								<dt>
+									<b>not_computed</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/4/2 00:14:09	rewrite</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>curCss @ jQuery, http://api.jquery.com/category/css/,<a href="http://www.quirksmode.org/dom/getstyles.html" accessdate="2010/4/1 15:44">JavaScript - Get Styles</a>,<a href="http://www.javaeye.com/topic/140784?page=2" accessdate="2010/4/1 15:41">style.display取值不对，难道是浏览器bug？讨论第2页:  - JavaScript - web - JavaEye论坛</a>大體上， currentStyle 相當於getComputedStyle，而runtimeStyle相當於getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。document.defaultView在mozilla中是指向window obj的,但是很有可能在其他broswer中就不指向window obj...因為w3c中沒有強行規定document.defaultView一定是一個global obj.返回頁內樣式表定義的類，那麼可以使用DOM樣式表對象來訪問：var oCssRulers = document.styleSheets[0].cssRulers || document.styleSheets[0].rulers;(前者是DOM方法，後者是IE私有方法)alert(oCssRulers[0].style.display);</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".parse_URI"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.net.web.</span><b>parse_URI</b>(URI)
+					
+					</div>
+					<div class="description">
+						Parses URI
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code">alert(parse_URI('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23#hhh').hostname);</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>URI</b>
+									
+								</dt>
+								<dd>URI to parse</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/4/13 23:53:14 from parseURI+parseURL</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>parsed object</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>RFC 1738, RFC 2396, RFC 3986,Uniform Resource Identifier (URI): Generic Syntax,http://tools.ietf.org/html/rfc3987,http://flanders.co.nz/2009/11/08/a-good-url-regular-expression-repost/,http://www.mattfarina.com/2009/01/08/rfc-3986-url-validation,also see batURL.htm</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
 					<a name=".remove_node"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
@@ -657,6 +894,55 @@ ul.inheritsList
 									
 								</dt>
 								<dd>tag===1: only child, undefined: remove only self, others: only <tag> child</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name=".replace_HTML"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.net.web.</span><b>replace_HTML</b>(o, html)
+					
+					</div>
+					<div class="description">
+						replace HTML
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>o</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>html</b>
+									
+								</dt>
+								<dd></dd>
 							
 							</dl>
 						
@@ -807,6 +1093,75 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name=".trigger_display"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.net.web.</span><b>trigger_display</b>(element, type)
+					
+					</div>
+					<div class="description">
+						trigger/swap display and visibility.display:none or visibility:hidden.TODO: computed style
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>element</b>
+									
+								</dt>
+								<dd>HTML element</dd>
+							
+								<dt>
+									<span class="light fixedFont">{String|Number}</span> <b>type</b>
+									
+								</dt>
+								<dd>show or hidden or set the status type:			{Number}: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change			{String}: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/4/1 10:24:43 rewrite</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>display status</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>[_.get_element],[_.get_style]</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://www.w3schools.com/CSS/pr_class_visibility.asphttp://www.w3schools.com/css/pr_class_display.asphttp://www.javaeye.com/topic/140784	通過element.style對象只能取得內聯的樣式，也就是說只能取得html標籤裡寫的屬性。</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
 					<a name=".XML_node"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
@@ -899,7 +1254,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu Mar 11 2010 23:37:44 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Fri Apr 16 2010 20:35:52 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

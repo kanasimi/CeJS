@@ -213,6 +213,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.math.html">CeL.math</a></li>
 	
+	<li><a href="../symbols/CeL.math.Hamming.html">CeL.math.Hamming</a></li>
+	
 	<li><a href="../symbols/CeL.math.quotient.html">CeL.math.quotient</a></li>
 	
 	<li><a href="../symbols/CeL.native.html">CeL.native</a></li>
@@ -303,9 +305,27 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.data.<b><a href="../symbols/CeL.data.html#.split_String_to_Object">split_String_to_Object</a></b>(valueSet, pointerC, endC)
+								<div class="fixedFont">CeL.data.<b><a href="../symbols/CeL.data.html#.dec_to_bin">dec_to_bin</a></b>(number, places)
 								</div>
-								<div class="description">將字串 set 分作 Object</div>
+								<div class="description">運算式值的二進位表示法	已最佳化:5.82s/100000次dec_to_bin(20,8)@300(?)MHz,2.63s/100000次dec_to_bin(20)@300(?)MHz</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.data.<b><a href="../symbols/CeL.data.html#.set_obj_value">set_obj_value</a></b>(obj, value, type, mode)
+								</div>
+								<div class="description">設定object之值，輸入item=[value][,item=[value].</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.data.<b><a href="../symbols/CeL.data.html#.split_String_to_Object">split_String_to_Object</a></b>(value_set, assignment_char, end_char)
+								</div>
+								<div class="description">將字串組分作 Object</div>
 							</td>
 						</tr>
 					
@@ -357,15 +377,68 @@ ul.inheritsList
 					Method Detail
 				</div>
 				
-					<a name=".split_String_to_Object"> </a>
+					<a name=".dec_to_bin"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">CeL.data.</span><b>split_String_to_Object</b>(valueSet, pointerC, endC)
+					<span class="light">CeL.data.</span><b>dec_to_bin</b>(number, places)
 					
 					</div>
 					<div class="description">
-						將字串 set 分作 Object
+						運算式值的二進位表示法	已最佳化:5.82s/100000次dec_to_bin(20,8)@300(?)MHz,2.63s/100000次dec_to_bin(20)@300(?)MHz
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code"></pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>number</b>
+									
+								</dt>
+								<dd>number</dd>
+							
+								<dt>
+									<b>places</b>
+									
+								</dt>
+								<dd>places,字元數,使用前置0來填補回覆值</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name=".set_obj_value"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.data.</span><b>set_obj_value</b>(obj, value, type, mode)
+					
+					</div>
+					<div class="description">
+						設定object之值，輸入item=[value][,item=[value]..]。value未設定會自動累加。使用前不必需先宣告…起碼在現在的JS版本中
 						
 						
 					</div>
@@ -377,22 +450,83 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>valueSet</b>
+									<b>obj</b>
 									
 								</dt>
-								<dd></dd>
+								<dd>object name that need to operate at</dd>
 							
 								<dt>
-									<b>pointerC</b>
+									<b>value</b>
 									
 								</dt>
-								<dd></dd>
+								<dd>valueto set</dd>
 							
 								<dt>
-									<b>endC</b>
+									<b>type</b>
 									
 								</dt>
+								<dd>累加 / value type</dd>
+							
+								<dt>
+									<b>mode</b>
+									
+								</dt>
+								<dd>mode / value type</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
 								<dd></dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name=".split_String_to_Object"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.data.</span><b>split_String_to_Object</b>(value_set, assignment_char, end_char)
+					
+					</div>
+					<div class="description">
+						將字串組分作 Object
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>value_set</b>
+									
+								</dt>
+								<dd>字串組, e.g., 'a=12,b=34'</dd>
+							
+								<dt>
+									<b>assignment_char</b>
+									
+								</dt>
+								<dd>char to assign values, e.g., '='</dd>
+							
+								<dt>
+									<b>end_char</b>
+									
+								</dt>
+								<dd>end char of assignment</dd>
 							
 							</dl>
 						
@@ -400,7 +534,7 @@ ul.inheritsList
 						
 							<dl class="detailList">
 							<dt class="heading">Since:</dt>
-								<dd>2006/9/6 20:55</dd>
+								<dd>2006/9/6 20:55, 2010/4/12 23:06:04</dd>
 							</dl>
 							</dl>
 						
@@ -430,7 +564,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu Mar 11 2010 23:37:43 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Fri Apr 16 2010 20:35:51 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

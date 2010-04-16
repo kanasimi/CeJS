@@ -15,6 +15,8 @@ body{margin:0;padding:0;}
 <script type="text/javascript" src="http://neterr.hostwq.net/JS/ce.js"></script>
 -->
 
+<script type="text/javascript" src="jquery-nightly.js"></script>
+
 <script type="text/javascript" src="../ce.js"></script>
 
 
@@ -179,6 +181,8 @@ test A||B
 */
 
 	var SVG_object, Hamming;
+	var OtS = Object.prototype.toString;
+	var is_Function = CeL.object_tester('Function', 'OtS');
 
 	function show_question() {
 		var num = CeL.get_element('question').value,
@@ -201,7 +205,7 @@ test A||B
 		var i = 0, t, v = CeL.get_element('question').value, times = parseInt(CeL.get_element('run_times').value);
 		try {
 			if(times>1)
-				eval('for (t = new Date; i < '+times+'; i++){'+v+'}; t = new Date - t;'),v=(t/times)+'ms/time, '+t+'ms total: '+eval(v);
+				eval('for (t = new Date; i < '+times+'; i++){'+v+'}; t = new Date - t;'),v=(t/times)+'ms/time, '+t+'ms / '+times+': '+eval(v);
 			else
 				v=eval(v);
 			CeL.log(v);

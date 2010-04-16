@@ -5,7 +5,7 @@
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 		<meta name="generator" content="JsDoc Toolkit" />
 		
-		<title>JsDoc Reference - CeL.code.compatibility</title>
+		<title>JsDoc Reference - CeL.math.Hamming</title>
 
 		<style type="text/css">
 			/* default.css */
@@ -246,7 +246,7 @@ ul.inheritsList
 <!-- ============================== class title ============================ -->
 			<h1 class="classTitle">
 				
-				Class CeL.code.compatibility
+				Class CeL.math.Hamming
 			</h1>
 
 <!-- ============================== class summary ========================== -->			
@@ -254,16 +254,16 @@ ul.inheritsList
 				
 				
 			
-				相容性 test 專用的 functions
+				Hamming Code 的 constructor
 				
 				
-					<br /><i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_compatibility.origin.js.html">compatibility.origin.js</a>.
+					<br /><i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math_Hamming.origin.js.html">Hamming.origin.js</a>.
 				
 			</p>
 
 <!-- ============================== constructor summary ==================== -->			
 			
-			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class CeL.code.compatibility.">
+			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class CeL.math.Hamming.">
 				<caption>Class Summary</caption>
 				<thead>
 					<tr>
@@ -276,9 +276,9 @@ ul.inheritsList
 						<td class="attributes">&nbsp;</td>
 						<td class="nameDescription" >
 							<div class="fixedFont">
-								<b><a href="../symbols/CeL.code.compatibility.html#constructor">CeL.code.compatibility</a></b>()
+								<b><a href="../symbols/CeL.math.Hamming.html#constructor">CeL.math.Hamming</a></b>()
 							</div>
-							<div class="description">null module constructor</div>
+							<div class="description">Hamming code</div>
 						</td>
 					</tr>
 				</tbody>
@@ -287,12 +287,40 @@ ul.inheritsList
 
 <!-- ============================== properties summary ===================== -->
 			
+				
+				
+				<table class="summaryTable" cellspacing="0" summary="A summary of the fields documented in the class CeL.math.Hamming.">
+					<caption>Field Summary</caption>
+					<thead>
+						<tr>
+							<th scope="col">Field Attributes</th>
+							<th scope="col">Field Name and Description</th>
+						</tr>
+					</thead>
+					<tbody>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								CeL.math.Hamming.<b><a href="../symbols/CeL.math.Hamming.html#.reverse">reverse</a></b>
+								</div>
+								<div class="description">是否左右顛倒。default: data[1,2,.</div>
+							</td>
+						</tr>
+					
+					</tbody>
+				</table>
+				
+				
+				
+			
 
 <!-- ============================== methods summary ======================== -->
 			
 				
 				
-				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class CeL.code.compatibility.">
+				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class CeL.math.Hamming.">
 					<caption>Method Summary</caption>
 					<thead>
 						<tr>
@@ -305,18 +333,36 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.code.compatibility.<b><a href="../symbols/CeL.code.compatibility.html#.is_HTA">is_HTA</a></b>(id)
+								<div class="fixedFont">CeL.math.Hamming.<b><a href="../symbols/CeL.math.Hamming.html#.decode">decode</a></b>(code)
 								</div>
-								<div class="description">Are we run in HTA?<br/>** HTA 中應該在 onload 中呼叫，否則 document.getElementsByTagName 不會有東西！</div>
+								<div class="description">decode Hamming Code to data</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.code.compatibility.<b><a href="../symbols/CeL.code.compatibility.html#.is_web">is_web</a></b>(W3CDOM)
+								<div class="fixedFont">CeL.math.Hamming.<b><a href="../symbols/CeL.math.Hamming.html#.encode">encode</a></b>(data, no_reverse)
 								</div>
-								<div class="description">Are we in a web environment?</div>
+								<div class="description">encode data to Hamming Code.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.math.Hamming.<b><a href="../symbols/CeL.math.Hamming.html#.show">show</a></b>(bit_length)
+								</div>
+								<div class="description">顯示 Hamming Code 的計算方法</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.math.Hamming.<b><a href="../symbols/CeL.math.Hamming.html#.split_code">split_code</a></b>(code)
+								</div>
+								<div class="description">將 Hamming Code 分成 data & check bits</div>
 							</td>
 						</tr>
 					
@@ -337,11 +383,11 @@ ul.inheritsList
 				</div>
 				
 				<div class="fixedFont">
-						<b>CeL.code.compatibility</b>()
+						<b>CeL.math.Hamming</b>()
 				</div>
 				
 				<div class="description">
-					null module constructor
+					Hamming code
 					
 				</div>
 				
@@ -361,6 +407,33 @@ ul.inheritsList
 
 <!-- ============================== field details ========================== -->		
 			
+				<div class="sectionTitle">
+					Field Detail
+				</div>
+				
+					<a name=".reverse"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.math.Hamming.</span><b>reverse</b>
+					
+					</div>
+					<div class="description">
+						是否左右顛倒。default: data[1,2,..] 左至右, reverse: data[..,2,1] 右至左
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+						
+
+					
+				
+			
 
 <!-- ============================== method details ========================= -->		
 			
@@ -368,15 +441,15 @@ ul.inheritsList
 					Method Detail
 				</div>
 				
-					<a name=".is_HTA"> </a>
+					<a name=".decode"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">CeL.code.compatibility.</span><b>is_HTA</b>(id)
+					<span class="light">CeL.math.Hamming.</span><b>decode</b>(code)
 					
 					</div>
 					<div class="description">
-						Are we run in HTA?<br/>** HTA 中應該在 onload 中呼叫，否則 document.getElementsByTagName 不會有東西！
+						decode Hamming Code to data
 						
 						
 					</div>
@@ -388,51 +461,38 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>id</b>
-									<i>Optional</i>
+									<b>code</b>
+									
 								</dt>
-								<dd>HTA tag id (only used in low version that we have no document.getElementsByTagName)</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2009/12/29 19:18:53</dd>
-							</dl>
-							</dl>
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>We're in HTA</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd>http://msdn2.microsoft.com/en-us/library/ms536479.aspxhttp://www.microsoft.com/technet/scriptcenter/resources/qanda/apr05/hey0420.mspxhttp://www.msfn.org/board/lofiversion/index.php/t61847.htmllazy evaluationhttp://peter.michaux.ca/articles/lazy-function-definition-pattern</dd>
-							
-							</dl>
 						
 
 					<hr />
 				
-					<a name=".is_web"> </a>
+					<a name=".encode"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
-					
-					<span class="light">CeL.code.compatibility.</span><b>is_web</b>(W3CDOM)
+					<span class="light">{String}</span>
+					<span class="light">CeL.math.Hamming.</span><b>encode</b>(data, no_reverse)
 					
 					</div>
 					<div class="description">
-						Are we in a web environment?
+						encode data to Hamming Code.
 						
 						
 					</div>
@@ -444,38 +504,110 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>W3CDOM</b>
+									<b>data</b>
 									
 								</dt>
-								<dd>Are we in a W3C DOM environment?</dd>
+								<dd>data stream</dd>
+							
+								<dt>
+									<b>no_reverse</b>
+									
+								</dt>
+								<dd>forced NO reverse</dd>
 							
 							</dl>
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2009/12/29 19:18:53</dd>
-							</dl>
-							</dl>
 						
 						
 						
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>We're in a web environment.</dd>
+								<dd><span class="light fixedFont">{String}</span> encoded Hamming Code</dd>
 							
 							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name=".show"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.math.Hamming.</span><b>show</b>(bit_length)
+					
+					</div>
+					<div class="description">
+						顯示 Hamming Code 的計算方法
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>bit_length</b>
+									
+								</dt>
+								<dd>bit length. e.g., 8, 16.</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name=".split_code"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.math.Hamming.</span><b>split_code</b>(code)
+					
+					</div>
+					<div class="description">
+						將 Hamming Code 分成 data & check bits
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>code</b>
+									
+								</dt>
+								<dd>Hamming Code to split</dd>
+							
+							</dl>
+						
+						
 						
 						
 						
 							<dl class="detailList">
-							<dt class="heading">See:</dt>
+							<dt class="heading">Returns:</dt>
 							
-								<dd><a href="../symbols/_global_.html#use">use</a> lazy evaluation</dd>
+								<dd>[資料位元 data bits, 檢查位元 check bits (parity bits)]</dd>
 							
 							</dl>
+						
+						
 						
 
 					
@@ -492,7 +624,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Fri Apr 16 2010 20:35:51 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Fri Apr 16 2010 20:35:52 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

@@ -213,6 +213,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.math.html">CeL.math</a></li>
 	
+	<li><a href="../symbols/CeL.math.Hamming.html">CeL.math.Hamming</a></li>
+	
 	<li><a href="../symbols/CeL.math.quotient.html">CeL.math.quotient</a></li>
 	
 	<li><a href="../symbols/CeL.native.html">CeL.native</a></li>
@@ -278,6 +280,16 @@ ul.inheritsList
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
 								<div class="fixedFont">
+								<b><a href="../symbols/_global_.html#cache_code">cache_code</a></b>
+								</div>
+								<div class="description">是否 cache code。若不是要重構 code 則不需要。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
 								<b><a href="../symbols/_global_.html#is_Array">is_Array</a></b>
 								</div>
 								<div class="description">Test if the value is a native Array.</div>
@@ -291,16 +303,6 @@ ul.inheritsList
 								<b><a href="../symbols/_global_.html#is_Object">is_Object</a></b>
 								</div>
 								<div class="description">Test if the value is a native Object.</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">
-								<b><a href="../symbols/_global_.html#script_extension">script_extension</a></b>
-								</div>
-								<div class="description">default extension of script file.</div>
 							</td>
 						</tr>
 					
@@ -375,7 +377,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#complement">complement</a></b>(number)
 								</div>
-								<div class="description">補數</div>
+								<div class="description">補數計算。正數的補數即為自身。若要求得互補之後的數字，請設成負數。</div>
 							</td>
 						</tr>
 					
@@ -400,7 +402,7 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#eval">eval</a></b>(code)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#eval_code">eval_code</a></b>(code)
 								</div>
 								<div class="description">本 library 專用之 evaluate()</div>
 							</td>
@@ -409,18 +411,9 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#eval_various">eval_various</a></b>(various_name, name_space)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#extend">extend</a></b>(obj, className_set)
 								</div>
-								<div class="description">simple evaluates to get value of specified various name</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont"><b>extend</b>(variable_set, name_space, from_name_space)
-								</div>
-								<div class="description">延展物件 (learned from jQuery)</div>
+								<div class="description">get new extend instance</div>
 							</td>
 						</tr>
 					
@@ -454,6 +447,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_all_functions">get_all_functions</a></b>(script_filename)
+								</div>
+								<div class="description">取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_file">get_file</a></b>(path, encoding)
 								</div>
 								<div class="description">Get file resource<br/>用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br/>除 Ajax，本函數亦可用在 CScript 執行中。</div>
@@ -481,6 +483,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_script_base_path">get_script_base_path</a></b>(JSFN)
+								</div>
+								<div class="description">得知 script file 之相對 base path</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_script_full_name">get_script_full_name</a></b>()
 								</div>
 								<div class="description">取得執行 script 之 path, 在 .hta 中取代 WScript.ScriptFullName。</div>
@@ -493,6 +504,15 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_script_name">get_script_name</a></b>()
 								</div>
 								<div class="description">取得執行 script 之名稱</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_various">get_various</a></b>(various_name, name_space)
+								</div>
+								<div class="description">simple evaluates to get value of specified various name</div>
 							</td>
 						</tr>
 					
@@ -616,9 +636,9 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#replace_HTML">replace_HTML</a></b>(o, html)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#parse_number">parse_number</a></b>(number)
 								</div>
-								<div class="description">replace HTML</div>
+								<div class="description">轉換字串成數值，包括分數等。分數亦將轉為分數。</div>
 							</td>
 						</tr>
 					
@@ -688,6 +708,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#to_RegExp_pattern">to_RegExp_pattern</a></b>(pattern, RegExp_flag, escape_pattern)
+								</div>
+								<div class="description">String pattern (e.g.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#use">use</a></b>(module, callback, extend_to)
 								</div>
 								<div class="description">Include specified module<br/>注意：以下的 code 中，CeL.warn 不一定會被執行（可能會、可能不會），因為執行時 code.log 尚未被 include。<br/>此時應該改用 CeL.use('code.log', callback);<br/>code in head/script/:<pre>CeL.use('code.log');CeL.warn('a WARNING');</pre>**	在指定 callback 時 name_space 無效！**	預設會 extend 到 library 本身下！</div>
@@ -720,6 +749,31 @@ ul.inheritsList
 				<div class="sectionTitle">
 					Field Detail
 				</div>
+				
+					<a name="cache_code"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{Boolean}</span>
+					<b>cache_code</b>
+					
+					</div>
+					<div class="description">
+						是否 cache code。若不是要重構 code 則不需要。
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+						
+
+					<hr />
 				
 					<a name="is_Array"> </a>
 					<div class="fixedFont">
@@ -775,31 +829,6 @@ ul.inheritsList
 							<dt class="heading">Since:</dt>
 								<dd>2009/12/20 08:38:26</dd>
 							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name="script_extension"> </a>
-					<div class="fixedFont">
-					
-					<span class="light">{String}</span>
-					<b>script_extension</b>
-					
-					</div>
-					<div class="description">
-						default extension of script file.
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
-						
-						
-					</div>
-					
-					
-
-						
 						
 						
 						
@@ -949,7 +978,7 @@ ul.inheritsList
 									<b>listener</b>
 									
 								</dt>
-								<dd>listener function/function array</dd>
+								<dd>listener function/function array/function string,				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"</dd>
 							
 								<dt>
 									<b>document_object</b>
@@ -1080,7 +1109,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						補數
+						補數計算。正數的補數即為自身。若要求得互補之後的數字，請設成負數。
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math.origin.js.html">math.origin.js</a>.
@@ -1108,6 +1137,12 @@ ul.inheritsList
 						
 						
 						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/3/12 23:47:52</dd>
+							</dl>
+							</dl>
+						
 						
 						
 							<dl class="detailList">
@@ -1122,7 +1157,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>http://www.tomzap.com/notes/DigitalSystemsEngEE316/1sAnd2sComplement.pdf</dd>
+								<dd>http://www.tomzap.com/notes/DigitalSystemsEngEE316/1sAnd2sComplement.pdfhttp://en.wikipedia.org/wiki/Method_of_complementshttp://en.wikipedia.org/wiki/Signed_number_representations</dd>
 							
 							</dl>
 						
@@ -1258,11 +1293,11 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="eval"> </a>
+					<a name="eval_code"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>eval</b>(code)
+					<b>eval_code</b>(code)
 					
 					</div>
 					<div class="description">
@@ -1284,7 +1319,7 @@ ul.inheritsList
 									<b>code</b>
 									
 								</dt>
-								<dd>code to eval</dd>
+								<dd>script code to evaluate</dd>
 							
 							</dl>
 						
@@ -1295,65 +1330,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>value that eval() returned</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name="eval_various"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>eval_various</b>(various_name, name_space)
-					
-					</div>
-					<div class="description">
-						simple evaluates to get value of specified various name
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{String}</span> <b>various_name</b>
-									
-								</dt>
-								<dd>various name</dd>
-							
-								<dt>
-									<span class="light fixedFont">{Object}</span> <b>name_space</b>
-									<i>Optional</i>
-								</dt>
-								<dd>initial name-space. default: global</dd>
-							
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2010/1/1 18:11:40</dd>
-							</dl>
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>value of specified various name</dd>
+								<dd>value that evaluate process returned</dd>
 							
 							</dl>
 						
@@ -1365,18 +1342,22 @@ ul.inheritsList
 					<a name="extend"> </a>
 					<div class="fixedFont">
 					
-					
-					<b>extend</b>(variable_set, name_space, from_name_space)
+					<span class="light">{Array}</span>
+					<b>extend</b>(obj, className_set)
 					
 					</div>
 					<div class="description">
-						延展物件 (learned from jQuery)
+						get new extend instance
 						
 							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_log.origin.js.html">log.origin.js</a>.
 						
 						
 					</div>
+					
+					
+					
+					<pre class="code">//	status loggervar SL=new CeL.code.log('log'),sl=SL[1],warn=SL[2],err=SL[3];sl(msg);sl(msg,clear);//	general logfunction_set = new CeL.code.log.extend('panel',{});// 1.function_set = new CeL.code.log.extend('panel',{});logger = function_set[1];// 2.log_only = (new CeL.code.log.extend('panel',{}))[1];</pre>
 					
 					
 					
@@ -1385,22 +1366,16 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>variable_set</b>
-									
+									<span class="light fixedFont">{String|object HTMLElement}</span> <b>obj</b>
+									<i>Optional</i>
 								</dt>
-								<dd>variable set</dd>
+								<dd>message area element or id</dd>
 							
 								<dt>
-									<b>name_space</b>
+									<b>className_set</b>
 									
 								</dt>
-								<dd>extend to what name-space</dd>
-							
-								<dt>
-									<b>from_name_space</b>
-									
-								</dt>
-								<dd>When inputing function names, we need a base name-space to search these functions.</dd>
+								<dd></dd>
 							
 							</dl>
 						
@@ -1408,7 +1383,7 @@ ul.inheritsList
 						
 							<dl class="detailList">
 							<dt class="heading">Since:</dt>
-								<dd>2009/11/25 21:17:44</dd>
+								<dd>2009/8/24 20:15:31</dd>
 							</dl>
 							</dl>
 						
@@ -1417,18 +1392,11 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>library names-pace</dd>
+								<dd><span class="light fixedFont">{Array}</span> [ instance of this module, log function, warning function, error function ]</dd>
 							
 							</dl>
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd><a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/03/01/jquery-extend.aspx" accessdate="2009/11/17 1:24" title="jQuery.extend的用法 - 黑暗執行緒">jQuery.extend的用法</a>,<a href="http://www.cnblogs.com/rubylouvre/archive/2009/11/21/1607072.html" accessdate="2010/1/1 1:40">jQuery源码学习笔记三 - Ruby's Louvre - 博客园</a></dd>
-							
-							</dl>
 						
 
 					<hr />
@@ -1597,6 +1565,59 @@ ul.inheritsList
 							
 							</dl>
 						
+						
+						
+
+					<hr />
+				
+					<a name="get_all_functions"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>get_all_functions</b>(script_filename)
+					
+					</div>
+					<div class="description">
+						取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_reorganize.origin.js.html">reorganize.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>script_filename</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>ScriptName,simpleRead</dd>
+							
+							</dl>
 						
 						
 
@@ -1805,6 +1826,56 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="get_script_base_path"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{String}</span>
+					<b>get_script_base_path</b>(JSFN)
+					
+					</div>
+					<div class="description">
+						得知 script file 之相對 base path
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code"><script type="text/javascript" src="../baseFunc.js"></script>//	引數為本.js檔名。若是更改.js檔名，亦需要同步更動此值！var basePath=get_script_base_path('baseFunc.js');</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>JSFN</b>
+									
+								</dt>
+								<dd>script file name</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> 相對 base path</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name="get_script_full_name"> </a>
 					<div class="fixedFont">
 					
@@ -1871,6 +1942,64 @@ ul.inheritsList
 								<dd><span class="light fixedFont">{String}</span> 執行 script 之 名稱</dd>
 							
 								<dd>''	unknown environment</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="get_various"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>get_various</b>(various_name, name_space)
+					
+					</div>
+					<div class="description">
+						simple evaluates to get value of specified various name
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>various_name</b>
+									
+								</dt>
+								<dd>various name</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Object}</span> <b>name_space</b>
+									<i>Optional</i>
+								</dt>
+								<dd>initialize name-space. default: global</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/1/1 18:11:40</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>value of specified various name</dd>
 							
 							</dl>
 						
@@ -2266,7 +2395,7 @@ ul.inheritsList
 									<b>name</b>
 									
 								</dt>
-								<dd>various name</dd>
+								<dd>various name @ name-space window. e.g., document, location</dd>
 							
 							</dl>
 						
@@ -2595,18 +2724,18 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="replace_HTML"> </a>
+					<a name="parse_number"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>replace_HTML</b>(o, html)
+					<b>parse_number</b>(number)
 					
 					</div>
 					<div class="description">
-						replace HTML
+						轉換字串成數值，包括分數等。分數亦將轉為分數。
 						
 							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_web.origin.js.html">web.origin.js</a>.
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_native.origin.js.html">native.origin.js</a>.
 						
 						
 					</div>
@@ -2618,13 +2747,7 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>o</b>
-									
-								</dt>
-								<dd></dd>
-							
-								<dt>
-									<b>html</b>
+									<b>number</b>
 									
 								</dt>
 								<dd></dd>
@@ -3026,7 +3149,7 @@ ul.inheritsList
 									<b>max_no</b>
 									
 								</dt>
-								<dd>最多取至序列第max_no個//TODO:並小於l:limit</dd>
+								<dd>最多取至序列第 max_no 個					TODO : 並小於 l:limit</dd>
 							
 							</dl>
 						
@@ -3056,6 +3179,64 @@ ul.inheritsList
 								<dd>http://en.wikipedia.org/wiki/Continued_fraction#Best_to_rational_numbers</dd>
 							
 							</dl>
+						
+
+					<hr />
+				
+					<a name="to_RegExp_pattern"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{RegExp}</span>
+					<b>to_RegExp_pattern</b>(pattern, RegExp_flag, escape_pattern)
+					
+					</div>
+					<div class="description">
+						String pattern (e.g., "/a+/g") to RegExp pattern.qq// in perl.String.prototype.toRegExp = function(f) { return to_RegExp_pattern(this.valueOf(), f); };
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_native.origin.js.html">native.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>pattern</b>
+									
+								</dt>
+								<dd>pattern text</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Boolean|String}</span> <b>RegExp_flag</b>
+									
+								</dt>
+								<dd>flags when need to return RegExp object</dd>
+							
+								<dt>
+									<span class="light fixedFont">{RegExp}</span> <b>escape_pattern</b>
+									
+								</dt>
+								<dd>char pattern need to escape</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{RegExp}</span> RegExp object</dd>
+							
+							</dl>
+						
+						
 						
 
 					<hr />
@@ -3200,7 +3381,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu Mar 11 2010 23:37:43 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Fri Apr 16 2010 20:35:51 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

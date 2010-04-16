@@ -1,14 +1,19 @@
 ﻿
 /*
 	本檔案為自動生成，請勿編輯！
-	This file is auto created from _structure\structure.js, base.js, package.js
-		by tool: built.
+	This file is auto created from _structure\structure.js, base.js, package.js, init.js
+		by tool: build_main_script.
 */
 
 
 //<![CDATA[
 
-
+/*
+ * ECMA-262 5th edition, ECMAScript 5 strict mode
+ * http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
+ * http://davidflanagan.com/Talks/es5/slides.html
+ */
+'use strict';
 
 /**
  * @name	JavaScript framework: CeL base loader
@@ -47,8 +52,8 @@ function getU(p,enc){var o;try{o=new ActiveXObject('Microsoft.XMLHTTP');}catch(e
 initialization of function.js
 
 http://www.w3school.com.cn/html5/html5_script.asp
-<script type="text/javascript" src="path/to/function.js"></script>
-<script type="application/javascript;version=1.7" src="path/to/function.js"></script>
+<script type="text/javascript" async="true" src="path/to/function.js"></script>
+<script type="application/javascript;version=1.7" async="true" src="path/to/function.js"></script>
 
 
 */
@@ -58,7 +63,7 @@ http://www.w3school.com.cn/html5/html5_script.asp
 /*
 TODO
 
-本 library 大量使用了 arguments.callee，但這與 ECMAScript design principles 不甚相符？
+本 library 大量使用了 arguments.callee，但這與 ECMAScript design principles 不甚相符，需要避免。
 	http://stackoverflow.com/questions/103598/why-was-the-arguments-callee-caller-property-deprecated-in-javascript
 	http://wiki.ecmascript.org/doku.php?id=es3.1:design_principles
 
@@ -90,10 +95,10 @@ in case of
  * 用在比較或是 return undefined<br/>
  * 在舊的 browser 中，undefined 可能不存在。
  */
-function(global, _undefined){
+function(global, undefined){
 
 
-//if(typeof global !== 'function') throw new Error(1, 'No global object specified!');
+//if(typeof global !== 'function') throw new Error('No global object specified!');
 
 
 var
@@ -123,7 +128,7 @@ var
 
 /**
  * Global Scope object<br/>
- * 於 CeL.eval 使用
+ * 於 CeL.eval_code 使用
  * @ignore
  */
 //global = this;	//	isWeb()?window:this;
@@ -153,7 +158,7 @@ for(i in _Global)alert(i);
  * @example
  * //	load library
  * <script type="text/javascript" src="../ce.js"></script>
- * //	預防 initial process 到一半彈出警告視窗，所以設大一點。
+ * //	預防 initialization 到一半彈出警告視窗，所以設大一點。
  * CeL.log.max_length = 20;
  * //	set debug
  * CeL.set_debug();
@@ -164,10 +169,10 @@ for(i in _Global)alert(i);
  * @name	CeL
  * @class	Colorless echo JavaScript kit/library: base name-space declaration
  */
-_ = function(){
+function _(){
 	//	function CeL	//	declaration for debug
 	//this.global = arguments[0] || arguments.callee.ce_doc;
-	return new (arguments.callee.init.apply(null, arguments));
+	return new (_.init.apply(global, arguments));
 };
 
 /**
@@ -186,6 +191,7 @@ _.Class = library_name;
 global[library_name] = _;
 
 
+if (!_.prototype)
 /**
  * framework main prototype definition
  * for JSDT: 有 prototype 才會將之當作 Class
@@ -200,19 +206,19 @@ CeL.ce
 .
 /**
  * 本 library 專用之 evaluate()
- * @param code	code to eval
- * @return	value that eval() returned
+ * @param code	script code to evaluate
+ * @return	value that evaluate process returned
  */
-eval = function(code) {
+eval_code = function eval_code(code) {
 	/*
 		JSC eval() takes an optional second argument which can be 'unsafe'.
 		Mozilla/SpiderMonkey eval() takes an optional second argument which is the scope object for new symbols.
 
-		use window.execScript(code,"JavaScript") in IE: window.execScript()將直接使用全局上下文環境，因此，execScript(Str)中的字符串Str可以影響全局變量。——也包括聲明全局變量、函數以及對象構造器。
+		use window.execScript(code,"JavaScript") in IE: window.execScript() 將直接使用全局上下文環境，因此，execScript(Str)中的字符串Str可以影響全局變量。——也包括聲明全局變量、函數以及對象構造器。
 	*/
 	//this.debug(global.eval, 2);
 	//this.debug(global && global.eval && global.eval !== arguments.callee);
-	return global && global.eval && global.eval !== arguments.callee ? global.eval.call(global, code) : eval(code);
+	return global && global.eval && global.eval !== eval_code ? global.eval.call(global, code) : eval(code);
 };
 
 
@@ -221,13 +227,13 @@ CeL.ce
 /**
  * simple evaluates to get value of specified various name
  * @param {String} various_name	various name
- * @param {Object} [name_space]	initial name-space. default: global
+ * @param {Object} [name_space]	initialize name-space. default: global
  * @return	value of specified various name
  * @since	2010/1/1 18:11:40
  * @note
  * 'namespace' 是 JScript.NET 的保留字
  */
-eval_various = function(various_name, name_space) {
+get_various = function(various_name, name_space) {
 	//this.debug('get value of [' + various_name + ']');
 	if (typeof various_name !== 'string' || !various_name)
 		return various_name;
@@ -292,7 +298,7 @@ get_script_name = function(){
 		if (!(i = n.lastIndexOf('\\') + 1))
 			//	location.pathname 在 .hta 中會回傳 '\' 形式的 path
 			i = n.lastIndexOf('/') + 1;
-		return i < j ? n.slice(i, j) : n.substr(i);
+		return i < j ? n.slice(i, j) : n.slice(i);
 	}
 
 	return typeof document === 'object' && document === window.document ? document.title : '';
@@ -311,13 +317,15 @@ CeL.ce
  * @param value	環境變數之值
  * @return	舊環境變數之值
  */
-env = function(name, value) {
+env = function env(name, value) {
 	if (!name)
 		return undefined;
 
-	var _s = arguments.callee, v = _s[name];
-	if (arguments.length > 1)
-		_s[name] = value;
+	var _s = env, v = _s[name];
+
+	if (arguments.length > 1) _s[name] = value;
+	//if (typeof value !== 'undefined') _s[name] = value;
+
 	return isNaN(v) ? '' + v : v;
 };
 
@@ -479,6 +487,16 @@ initial_env = function(OS_type){
 	var OS, env = this.env;
 
 	/**
+	 * default extension of script file.
+	 * 設定成 '.' 時由 CeL.get_script_base_path 設定
+	 * @type	String
+	 * @see
+	 * <a href="http://soswitcher.blogspot.com/2009/05/blogger-host-javascript-file-for-free.html" accessdate="2010/3/11 23:30">Blogger - Host Javascript File for Free - Blogger,Javascript - Blogger Blog by Switcher</a>
+	 * @name	CeL.env.script_extension
+	 */
+	env.script_extension = typeof WScript === 'undefined' ? '.' : '.js';//'.txt'
+
+	/**
 	 * library main file base name<br/>
 	 * full path: {@link CeL.env.registry_path} + {@link CeL.env.main_script}
 	 * @example:
@@ -486,7 +504,7 @@ initial_env = function(OS_type){
 	 * @name	CeL.env.main_script
 	 * @type	String
 	 */
-	env.main_script = 'ce.js';
+	env.main_script = 'ce' + env.script_extension;
 
 	/**
 	 * module 中的這 member 定義了哪些 member 不被 extend
@@ -683,8 +701,8 @@ CeL.ce
  * 可能的話請改用 {@link CeL.native.parse_Function}(F).funcName
  * @since	2010/1/7 22:10:27
  */
-get_Function_name = function(fr, ns, force_load) {
-	var _s = arguments.callee,
+get_Function_name = function get_Function_name(fr, ns, force_load) {
+	var _s = get_Function_name,
 	//	初始化變數 'm'
 	m = 0, ft, b, load, k, i;
 	if (!fr)
@@ -763,11 +781,16 @@ CeL.ce
 null_function = function() {};
 
 
-//	initial
+//	Initialization
 
-//temporary decoration incase we call for nothing
-_.debug = _.err = _.warn = _.log = function(m) {
-	var _s=arguments.callee;
+//	temporary decoration in case we call for nothing and raise error
+_.debug = _.err = _.warn = _.log = function log(m) {
+	/*
+	 * 請注意:
+	 * _.log.buffer !== log.buffer
+	 * 在 WScript 中 需要用 _.log，其他則用 _.log
+	 */
+	var _s = log.buffer ? log : _.log;
 	//_s.function_to_call.apply(null,arguments);
 	//_s.function_to_call.apply(global, arguments);
 
@@ -780,169 +803,38 @@ _.debug = _.err = _.warn = _.log = function(m) {
 		_s.function_to_call.call(global, _s.buffer.join('\n\n')),
 		_s.buffer = [];
 };
+
+
+/*
+ * test:
+ * var k=function l(){alert(l.m);};k.m=1;alert(l.m+','+k.m);k();
+ * 
+ * JScript 中
+ * k();
+ * 為 undefined, 其他會把 "l." 代換成 "k."？
+ * 
+ * @inner
+ */
 _.log.buffer = [];
 _.log.max_length = 0;
 
+
 var max_log_length = 1000;
 _.log.function_to_call =
-	typeof JSalert === 'function' ? JSalert:
-	typeof WScript==='object'?function(m){m=''+m;if(m.length>2*max_log_length)m=m.slice(0,max_log_length)+'\n\n..\n\n'+m.slice(-max_log_length);WScript.Echo(m);}:
-	typeof alert==='object' || typeof alert==='function'? function(m){m=''+m;if(m.length>2*max_log_length)m=m.slice(0,max_log_length)+'\n\n..\n\n'+m.slice(-max_log_length);alert(m);}:
+	typeof JSalert === 'function' ? JSalert :
+	typeof WScript === 'object' ? function(m){m=''+m;if(m.length>2*max_log_length)m=m.slice(0,max_log_length)+'\n\n..\n\n'+m.slice(-max_log_length);WScript.Echo(m);} :
+	typeof alert === 'object' || typeof alert === 'function' ? function(m){m=''+m;if(m.length>2*max_log_length)m=m.slice(0,max_log_length)+'\n\n..\n\n'+m.slice(-max_log_length);alert(m);} :
 	_.null_function;
 
 _.initial_env();
 
 
 /*
-var test_obj=_(2,'test: initial');
+var test_obj = _(2, 'test: Initialization');
 
 test_obj.test_print('OK!');
 */
 ;
-
-
-
-//setTool(),oldVadapter();	//	當用此檔debug時請執行此行
-//alert(ScriptEngine()+' '+ScriptEngineMajorVersion()+'.'+ScriptEngineMinorVersion()+'.'+ScriptEngineBuildVersion());
-
-
-
-/*	initialization of function.js
-	僅僅執行此檔時欲執行的程序。
-
-TODO
-
-setTool(),oldVadapter();	//	當用此檔debug時請執行此行
-
-	利用.js加上此段與init()，以及.hta（<script type="text/javascript" src="~.js"></script>），可造出 GUI / none GUI 兩種可選擇之介面。
-	if(typeof args=='object')init();else window.onload=init;
-*/
-//args=args.concat(['turnCode.js']);
-var _library_onload;
-if (_library_onload === undefined){
-	_library_onload = function() {
-		//WScript.Echo(_.env.ScriptName);
-		//_.log(_.env.ScriptName);
-		if (1 && _.env.ScriptName === 'ce') {
-			//WScript.Echo(_.env.ScriptName);
-			_.use('OS.Windows.registry');
-			//_.log(_.registryF);
-
-			var _p = _.registryF.getValue(_._iF.p) || '(null)';
-			if (_p != _.env.library_base_path) {
-				_.log('Change path of [' + _.env.ScriptName + '] from:\n' + _p
-						+ '\n to\n' + _.env.library_base_path + '\n\n' + _._iF.p);
-				_.registryF.setValue.cid = 1;
-				_.registryF.setValue(_._iF.p, _.env.library_base_path, 0, 0, 1);
-				_.registryF.setValue.cid = 0;
-			}
-
-			if (typeof args === 'object') {// args instanceof Array
-				// getEnvironment();
-				// alert('Get arguments ['+args.length+']\n'+args.join('\n'));
-				if (args.length) {
-					var i = 0, p, enc, f, backupDir = dBasePath('kanashimi\\www\\cgi-bin\\program\\log\\');
-					if (!fso.FolderExists(backupDir))
-						try {
-							fso.CreateFolder(backupDir);
-						} catch (e) {
-							backupDir = dBasePath('kanashimi\\www\\cgi-bin\\game\\log\\');
-						}
-					if (!fso.FolderExists(backupDir))
-						try {
-							fso.CreateFolder(backupDir);
-						} catch (e) {
-							if (2 == alert(
-									'無法建立備份資料夾[' + backupDir + ']！\n接下來的操作將不會備份！',
-									0, 0, 1 + 48))
-								WScript.Quit();
-							backupDir = '';
-						}
-					// addCode.report=true; // 是否加入報告
-					for (; i < args.length; i++)
-						if ((f = dealShortcut(args[i], 1))
-								.match(/\.(js|vbs|hta|s?html?|txt|wsf|pac)$/i)
-								&& isFile(f)) {
-							p = alert(
-									'是否以預設編碼['
-											+ ((enc = autodetectEncode(f)) == simpleFileDformat ? '內定語系(' + simpleFileDformat + ')'
-													: enc) + ']處理下面檔案？\n' + f,
-									0, 0, 3 + 32);
-							if (p == 2)
-								break;
-							else if (p == 6) {
-								if (backupDir)
-									fso.CopyFile(f, backupDir + getFN(f), true);
-								addCode(f);
-							}
-						}
-				} else if (1 == alert('We will generate a reduced ['
-						+ _.env.ScriptName + ']\n  to [' + _.env.ScriptName
-						+ '.reduced.js].\nBut it takes several time.', 0, 0,
-						1 + 32))
-					reduceScript(0, _.env.ScriptName + '.reduced.js');
-			}//else window.onload=init;
-
-			//_._iF=undefined;
-		} //	if(1&&_.env.ScriptName==='function'){
-	}; //	_library_onload
-}
-
-
-
-/*
-
-//	test WinShell	http://msdn.microsoft.com/en-us/library/bb787810(VS.85).aspx
-if (0) {
-	alert(WinShell.Windows().Item(0).FullName);
-
-	var i, cmd, t = '', objFolder = WinShell.NameSpace(0xa), objFolderItem = objFolder
-			.Items().Item(), colVerbs = objFolderItem.Verbs(); // 假如出意外，objFolder==null
-	for (i = 0; i < colVerbs.Count; i++) {
-		t += colVerbs.Item(i) + '\n';
-		if (('' + colVerbs.Item(i)).indexOf('&R') != -1)
-			cmd = colVerbs.Item(i);
-	}
-	objFolderItem.InvokeVerb('' + cmd);
-	alert('Commands:\n' + t);
-
-	// objShell.NameSpace(FolderFrom).CopyHere(FolderTo,0); // copy folder
-	// objFolderItem=objShell.NameSpace(FolderFrom).ParseName("clock.avi");objFolderItem.Items().Item().InvokeVerb([動作]);
-	// objShell.NameSpace(FolderFromPath).Items.Item(mName).InvokeVerb();
-
-	// Sets or gets the date and time that a file was last modified.
-	// http://msdn.microsoft.com/en-us/library/bb787825(VS.85).aspx
-	// objFolderItem.ModifyDate = "01/01/1900 6:05:00 PM";
-	// objShell.NameSpace("C:\Temp").ParseName("Test.Txt").ModifyDate =
-	// DateAdd("d", -1, Now()) CDate("19 October 2007")
-
-	// Touch displays or sets the created, access, and modified times of one or
-	// more files. http://www.stevemiller.net/apps/
-}
-
-//	測試可寫入的字元:0-128,最好用1-127，因為許多編輯器會將\0轉成' '，\128又不確定
-if (0) {
-	var t = '', f = 'try.js', i = 0;
-	for (; i < 128; i++)
-		t += String.fromCharCode(i);
-	if (simpleWrite(f, t))
-		alert('Write error!\n有此local無法相容的字元?');
-	else if (simpleRead(f) != t)
-		alert('內容不同!');
-	else if (simpleWrite(f, dQuote(t) + ';'))
-		alert('Write error 2!\n有此local無法相容的字元?');
-	else if (eval(simpleRead(f)) != t)
-		alert('eval內容不同!');
-	else
-		alert('OK!');
-}
-*/
-
-
-if(_library_onload)
-	_library_onload();
-
-
 
 
 }
@@ -952,7 +844,6 @@ if(_library_onload)
 )
 //)	//	void(
 ;
-
 
 
 
@@ -983,7 +874,6 @@ var _ = this;
 
 
 
-
 CeL.ce
 .
 /**
@@ -997,10 +887,10 @@ CeL.ce
  * <a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/03/01/jquery-extend.aspx" accessdate="2009/11/17 1:24" title="jQuery.extend的用法 - 黑暗執行緒">jQuery.extend的用法</a>,
  * <a href="http://www.cnblogs.com/rubylouvre/archive/2009/11/21/1607072.html" accessdate="2010/1/1 1:40">jQuery源码学习笔记三 - Ruby's Louvre - 博客园</a>
  */
-extend = function(variable_set, name_space, from_name_space){
+extend = function extend(variable_set, name_space, from_name_space){
 /*
 	if(this.is_debug())
-		throw new Error(1, 'UNDO');
+		throw new Error('UNDO');
 */
 	var _s, i, l;
 
@@ -1025,14 +915,14 @@ extend = function(variable_set, name_space, from_name_space){
 			name_space[variable_set] = from_name_space[variable_set];
 		}else
 			try{
-				name_space[variable_set] = this.eval_various(variable_set);
+				name_space[variable_set] = this.get_various(variable_set);
 				//_.debug(variable_set + ' = ' + name_space[variable_set]);
 			}catch(e){
 				_.warn(this.Class + '.extend:\n' + e.message);
 			}
 
 	}else if(variable_set instanceof Array){
-		for (_s = arguments.callee, i = 0, l = variable_set.length; i < l; i++) {
+		for (_s = extend, i = 0, l = variable_set.length; i < l; i++) {
 			_s.call(this, variable_set[i], name_space, from_name_space);
 		}
 
@@ -1085,20 +975,20 @@ get_file = function(path, encoding){
 		o = new XMLHttpRequest();
 	}
 
-	if (o) with (o) {
-		open('GET', path, false);
+	if (o) {
+		o.open('GET', path, false);
 
 		if (encoding && o.overrideMimeType)
 			/*
-			 * old: overrideMimeType('text/xml;charset='+encoding);
+			 * old: o.overrideMimeType('text/xml;charset='+encoding);
 			 * 但這樣會被當作 XML 解析，產生語法錯誤。
 			 */
-			overrideMimeType('application/json;charset=' + encoding);
+			o.overrideMimeType('application/json;charset=' + encoding);
 
 		try {
 			//	http://www.w3.org/TR/2007/WD-XMLHttpRequest-20070227/#dfn-send
 			//	Invoking send() without the data argument must give the same result as if it was invoked with null as argument.
-			send(null);
+			o.send(null);
 
 		} catch (e) {
 			//	Apple Safari 3.0.3 may throw NETWORK_ERR: XMLHttpRequest Exception 101
@@ -1118,9 +1008,9 @@ get_file = function(path, encoding){
 		//	當在 local 時，成功的話 status === 0。失敗的話，除 IE 外，status 亦總是 0。
 		//	status was introduced in Windows Internet Explorer 7.	http://msdn.microsoft.com/en-us/library/ms534650%28VS.85%29.aspx
 		//	因此，在 local 失敗時，僅 IE 可由 status 探測，其他得由 responseText 判別。
-		//this.debug('Get [' + path + '], status: [' + status + '] ' + statusText);
+		//this.debug('Get [' + path + '], status: [' + o.status + '] ' + o.statusText);
 
-		return responseText;
+		return o.responseText;
 	}
 	//	else: This browser does not support XMLHttpRequest.
 
@@ -1141,35 +1031,37 @@ CeL.ce
  * @throws	error
  * @since	2010/1/2 00:40:42
  */
-require_netscape_privilege = function(privilege, callback) {
-	var _s = arguments.callee, f, i,
+require_netscape_privilege = function require_netscape_privilege(privilege, callback) {
+	var _s = require_netscape_privilege, f, i,
 	/**
 	 * raise error.
 	 * error 有很多種，所以僅以 'object' 判定。
 	 * @inner
 	 * @ignore
 	 */
-	re = function(n, m) {
+	re = function(m) {
 		//this.debug('Error: ' + m);
 		throw privilege && typeof privilege === 'object' ?
 			//	Error object
 			privilege :
-			new Error(n, m);
+			//	new Error (message)
+			new Error(m);
 	};
 
 	if(!_s.enabled)
-		re(3, 'Privilege requiring disabled.');
+		re('Privilege requiring disabled.');
 
 	//	test loop
 	//	得小心使用: 指定錯可能造成 loop!
 	if (!isNaN(callback) && callback > 0 && callback < 32) {
 		for (f = _s, i = 0; i < callback; i++)
 			if (f = f.caller)
+				//	TODO: do not use arguments
 				f = f.arguments.callee;
 
 		if (f === _s)
 			// It's looped
-			re(4, 'Privilege requiring looped.');
+			re('Privilege requiring looped.');
 
 		callback = 1;
 
@@ -1178,8 +1070,8 @@ require_netscape_privilege = function(privilege, callback) {
 
 	f = _s.enablePrivilege;
 	if (!f && !(_s.enablePrivilege = f = this
-				.eval_various('netscape.security.PrivilegeManager.enablePrivilege')))
-		re(1, 'No enablePrivilege get.');
+				.get_various('netscape.security.PrivilegeManager.enablePrivilege')))
+		re('No enablePrivilege get.');
 
 	if (this.is_type(privilege, 'DOMException')
 					&& privilege.code === 1012)
@@ -1194,7 +1086,7 @@ require_netscape_privilege = function(privilege, callback) {
 		privilege = 'UniversalBrowserRead';
 
 	else if (!privilege || typeof privilege !== 'string')
-		re(2, 'Unknown privilege.');
+		re('Unknown privilege.');
 
 	//this.debug('privilege: ' + privilege);
 	try {
@@ -1234,18 +1126,27 @@ require_netscape_privilege.enabled = true;
 
 CeL.ce
 .
-/*	得知相對 basePath
-<script type="text/javascript" src="../baseFunc.js"></script>
-var basePath=getBasePath('baseFunc.js');	//	引數為本.js檔名	若是更改.js檔名，亦需要同步更動此值！
-*/
-get_base_path = function(JSFN){
+/**
+ * 得知 script file 之相對 base path
+ * @param	{String} JSFN	script file name
+ * @return	{String} 相對 base path
+ * @example
+ * <script type="text/javascript" src="../baseFunc.js"></script>
+ * //	引數為本.js檔名。若是更改.js檔名，亦需要同步更動此值！
+ * var basePath=get_script_base_path('baseFunc.js');
+ */
+get_script_base_path = function(JSFN){
+	//alert(JSFN);
 	if(!JSFN)
-		return (typeof WScript === 'object'
-					? WScript.ScriptFullName
-					: location.href
-				).replace(/[^\/\\]+$/, '');
+		return (typeof location === 'object' ?
+				// location.pathname
+				location.href
+				: typeof WScript === 'object' ? WScript.ScriptFullName
+				//	用在把檔案拉到此檔上時不方便
+				//: typeof WshShell === 'object' ? WshShell.CurrentDirectory
+				: '').replace(/[^\/\\]+$/, '');
 
-	//	We don't use isObject or so.
+	//	We don't use is_Object or so.
 	//	通常會傳入的，都是已經驗證過的值，不會出現需要特殊認證的情況。
 	//	因此精確繁複的驗證只用在可能輸入奇怪引數的情況。
 	if (typeof document !== 'object')
@@ -1256,11 +1157,26 @@ get_base_path = function(JSFN){
 
 	for (i in o)
 		try {
-			j = o[i].getAttribute('src');
+			//	o[i].src 多是 full path, o[i].getAttribute('src') 僅取得其值，因此可能是相對的。
+			j = o[i].getAttribute ? o[i].getAttribute('src') : o[i].src;
 			i = j.lastIndexOf(JSFN);
-			if (i !== -1)
+			//alert(j + ',' + JSFN + ',' + i);
+			if (i !== -1){
+				//	TODO: dirty hack
+				if (_.env.script_extension === '.') {
+					b = j.slice(i + JSFN.length);
+					if (b === 'js' || b === 'txt')
+						_.env.script_extension += b,
+						_.env.main_script += b;
+					else{
+						b = '';
+						//	遇到奇怪的 extension
+						continue;
+					}
+				}
 				//	TODO: test 是否以 JSFN 作為結尾
 				b = j.slice(0, i);
+			}
 		} catch (e) {
 		}
 
@@ -1270,13 +1186,6 @@ get_base_path = function(JSFN){
 	return b || '';
 };
 
-CeL.ce
-.
-/**
- * default extension of script file.
- * @type	String
- */
-script_extension = '.js';//'.txt'
 
 CeL.ce
 .
@@ -1292,10 +1201,11 @@ get_module_path = function(module_name, file_name){
 
 	//this.debug('load [' + module_name + ']');
 	var module_path = this.env.registry_path
-				|| this.get_base_path(this.env.main_script)
-				|| this.get_base_path()
+				|| this.get_script_base_path(this.env.main_script)
+				|| this.get_script_base_path()
 				;
-	module_path += this.split_module_name(module_name).join(/\//.test(module_path)?'/':'\\') + _.script_extension;
+
+	module_path += this.split_module_name(module_name).join(/\//.test(module_path)?'/':'\\') + _.env.script_extension;
 	//this.debug(module_path);
 
 	if (file_name !== undefined)
@@ -1303,7 +1213,7 @@ get_module_path = function(module_name, file_name){
 	else if (this.getFP)
 		module_path = this.getFP(module_path, 1);
 
-	//this.debug(module_name+': '+module_path);
+	//this.debug(module_name + ': ' + module_path);
 
 	return module_path;
 };
@@ -1421,15 +1331,6 @@ simplify_path = function(path){
 
 
 
-
-/**
- * 已經 include 之函式或 class
- * @inner
- * @ignore
- */
-var loaded_module = {
-};
-
 CeL.ce
 .
 /**
@@ -1459,8 +1360,8 @@ CeL.ce
  * @note
  * 'use' 是 JScript.NET 的保留字
  */
-use = function(module, callback, extend_to){
-	var _s = arguments.callee, i, l, module_path;
+use = function requires(module, callback, extend_to){
+	var _s = requires, i, l, module_path;
 
 	if (!module)
 		return;
@@ -1499,7 +1400,7 @@ use = function(module, callback, extend_to){
 			if (i = this.get_file(module_path, this.env.source_encoding))
 				//	eval @ global. 這邊可能會出現 security 問題。
 				//	TODO: 以其他方法取代 eval 的使用。
-				this.eval(i);
+				this.eval_code(i);
 			else
 				this.warn('Get nothing from [' + module_path + ']! Some error occurred?');
 			i = 0;
@@ -1549,7 +1450,7 @@ use = function(module, callback, extend_to){
 					)
 				);
 		} else
-			this.err(this.Class + '.use: Cannot load [' + module + ']!'
+			this.err(this.Class + '.use: Cannot load [<a href="' + module_path + '">' + module + '</a>]!'
 					+ (this.get_error_message
 							? ('<br/>' + this.get_error_message(e) + '<br/>')
 							: '\n[' + (e.constructor) + '] ' + (e.number ? (e.number & 0xFFFF) : e.code) + ': ' + e.message + '\n'
@@ -1647,8 +1548,8 @@ CeL.ce
  * @param {Boolean} [use_write]	use document.write() instead of insert a element
  * @param {Boolean} [type]	1: is a .css file, others: script
  */
-include_resource = function(path, callback, use_write, type) {
-	var _s = arguments.callee, s, t, h;
+include_resource = function include_resource(path, callback, use_write, type) {
+	var _s = include_resource, s, t, h;
 
 	if (!_s.loaded){
 		s = this.get_include_resource();
@@ -1752,7 +1653,7 @@ include_resource.count = 0;
 
 CeL.ce
 .
-include_resource.wait_to_call = function(callback) {
+include_resource.wait_to_call = function wait_to_call(callback) {
 	//alert('include_resource.wait_to_call:\n' + _.to_module_name(callback.module));
 
 	if (typeof callback === 'function')
@@ -1774,7 +1675,7 @@ include_resource.wait_to_call = function(callback) {
 		 * @inner
 		 * @ignore
 		 */
-		var _s = arguments.callee, _t = this;
+		var _s = wait_to_call, _t = this;
 		window.setTimeout(function() {
 			_s.call(_t, callback);
 		}, 10);
@@ -1784,7 +1685,7 @@ include_resource.wait_to_call = function(callback) {
 CeL.ce
 .
 get_include_resource = function(split) {
-	if(typeof document!=='object'||!document.getElementsByTagName)
+	if (typeof document !== 'object' || !document.getElementsByTagName)
 		//	誤在非 HTML 環境執行，卻要求 HTML 環境下的 resource？
 		return;
 
@@ -1940,6 +1841,25 @@ setup_module = function(module_name, code_for_including) {
 };
 
 
+
+CeL.ce
+.
+/**
+ * 是否 cache code。
+ * 若不是要重構 code 則不需要。
+ * @type	Boolean
+ */
+cache_code = false;
+
+/**
+ * cache 已經 include 之函式或 class
+ * @inner
+ * @ignore
+ */
+var loaded_module = {
+};
+
+
 CeL.ce
 .
 /**
@@ -1952,10 +1872,15 @@ CeL.ce
  * <a href="http://www.crockford.com/javascript/inheritance.html" accessdate="2010/1/1 0:6">Classical Inheritance in JavaScript</a>
  */
 inherits = function(module_name, initial_arguments) {
+	if(!_.cache_code)
+		this.debug('inherits: cache code did not setted but want to use inherits function!');
+
 	var c = loaded_module[this.to_module_name(module_name)];
 	try {
 		if (typeof c === 'function')
 			return c(this, initial_arguments);
+
+		this.err('inherits: cache of [' + module_name + '] error!');
 	} catch (e) {
 		return e;
 	}
@@ -1978,7 +1903,7 @@ split_module_name = function(module_name) {
 
 	if (module_name instanceof Array) {
 		//	去除 library name
-		if (module_name.length>1 && this.Class == module_name[0])
+		if (module_name.length>1 && this.Class === module_name[0])
 			module_name.shift();
 		return module_name;
 	} else
@@ -2008,7 +1933,16 @@ to_module_name = function(module, separator) {
 	return name;
 };
 
-//	TODO
+
+
+//TODO
+CeL.ce
+.
+get_requires = function(func){
+	if (typeof func === 'function' || typeof func === 'object')
+		return func.requires;
+};
+
 CeL.ce
 .
 unload_module = function(module, g){
@@ -2025,8 +1959,7 @@ CeL.ce
 is_loaded = function(module_name) {
 	// var _s = arguments.callee;
 	//this.debug('test ' + this.to_module_name(module_name));
-	return loaded_module[this.to_module_name(module_name)] ? true
-			: false;
+	return !!loaded_module[this.to_module_name(module_name)];
 };
 
 
@@ -2035,10 +1968,8 @@ CeL.ce
 .
 set_loaded = function(module_name, code_for_including) {
 	//this.debug(this.to_module_name(module_name));
-	loaded_module[this.to_module_name(module_name)] = code_for_including || true;
+	loaded_module[this.to_module_name(module_name)] = _.cache_code && code_for_including || true;
 };
-
-
 
 
 CeL.ce
@@ -2083,7 +2014,7 @@ use_function = function(function_list, return_extend) {
 			variable_hash[n || m[m.length - 1]] = this.to_module_name(m);
 			if (n)
 				m.pop();
-			//this.debug('test module ['+m.join(this.env.module_name_separator)+']: '+this.eval_various(m.join(this.env.module_name_separator),this));
+			//this.debug('test module ['+m.join(this.env.module_name_separator)+']: '+this.get_various(m.join(this.env.module_name_separator),this));
 			module_hash[m.join(this.env.module_name_separator)] = 1;
 		}
 
@@ -2111,7 +2042,7 @@ use_function = function(function_list, return_extend) {
 	if(!return_extend)
 		l = [];
 	for (i in variable_hash) {
-		m = this.eval_various(n = variable_hash[i]);
+		m = this.get_various(n = variable_hash[i]);
 		//this.debug('load [' + n + ']: ' + m);
 
 		//	test if this function exists
@@ -2166,6 +2097,144 @@ environment_adapter();
 }.apply(CeL);
 
 
+
+
+
+
+
+
+//setTool(),oldVadapter();	//	當用此檔debug時請執行此行
+//alert(ScriptEngine()+' '+ScriptEngineMajorVersion()+'.'+ScriptEngineMinorVersion()+'.'+ScriptEngineBuildVersion());
+
+
+
+
+//args=args.concat(['turnCode.js']);
+var _library_onload;
+if (_library_onload === undefined && typeof CeL === 'function'){
+	_library_onload = function() {
+		//WScript.Echo(CeL.env.ScriptName);
+		//CeL.log(CeL.env.ScriptName);
+		if (1 && CeL.env.ScriptName === 'ce') {
+			//WScript.Echo(CeL.env.ScriptName);
+			CeL.use('OS.Windows.registry');
+			//CeL.log(CeL.registryF);
+
+			var _p = CeL.registryF.getValue(CeL._iF.p) || '(null)';
+			if (_p != CeL.env.library_base_path) {
+				CeL.log('Change path of [' + CeL.env.ScriptName + '] from:\n' + _p
+						+ '\n to\n' + CeL.env.library_base_path + '\n\n' + CeL._iF.p);
+				CeL.registryF.setValue.cid = 1;
+				CeL.registryF.setValue(CeL._iF.p, CeL.env.library_base_path, 0, 0, 1);
+				CeL.registryF.setValue.cid = 0;
+			}
+
+			if (
+					//	args instanceof Array
+					typeof args === 'object') {
+				//	getEnvironment();
+				//	alert('Get arguments ['+args.length+']\n'+args.join('\n'));
+				if (args.length) {
+					var i = 0, p, enc, f, backupDir = dBasePath('kanashimi\\www\\cgi-bin\\program\\log\\');
+					if (!fso.FolderExists(backupDir))
+						try {
+							fso.CreateFolder(backupDir);
+						} catch (e) {
+							backupDir = dBasePath('kanashimi\\www\\cgi-bin\\game\\log\\');
+						}
+					if (!fso.FolderExists(backupDir))
+						try {
+							fso.CreateFolder(backupDir);
+						} catch (e) {
+							if (2 == alert(
+									'無法建立備份資料夾[' + backupDir + ']！\n接下來的操作將不會備份！',
+									0, 0, 1 + 48))
+								WScript.Quit();
+							backupDir = '';
+						}
+					// addCode.report=true; // 是否加入報告
+					for (; i < args.length; i++)
+						if ((f = dealShortcut(args[i], 1))
+								.match(/\.(js|vbs|hta|s?html?|txt|wsf|pac)$/i)
+								&& isFile(f)) {
+							p = alert(
+									'是否以預設編碼['
+											+ ((enc = autodetectEncode(f)) == simpleFileDformat ? '內定語系(' + simpleFileDformat + ')'
+													: enc) + ']處理下面檔案？\n' + f,
+									0, 0, 3 + 32);
+							if (p == 2)
+								break;
+							else if (p == 6) {
+								if (backupDir)
+									fso.CopyFile(f, backupDir + getFN(f), true);
+								addCode(f);
+							}
+						}
+				} else if (1 == alert('We will generate a reduced ['
+						+ CeL.env.ScriptName + ']\n  to [' + CeL.env.ScriptName
+						+ '.reduced.js].\nBut it takes several time.', 0, 0,
+						1 + 32))
+					reduceScript(0, CeL.env.ScriptName + '.reduced.js');
+			}//else window.onload=init;
+
+			//CeL._iF=undefined;
+		} //	if(1&&CeL.env.ScriptName==='function'){
+	}; //	_library_onload
+}
+
+
+
+/*
+
+//	test WinShell	http://msdn.microsoft.com/en-us/library/bb787810(VS.85).aspx
+if (0) {
+	alert(WinShell.Windows().Item(0).FullName);
+
+	var i, cmd, t = '', objFolder = WinShell.NameSpace(0xa), objFolderItem = objFolder
+			.Items().Item(), colVerbs = objFolderItem.Verbs(); // 假如出意外，objFolder==null
+	for (i = 0; i < colVerbs.Count; i++) {
+		t += colVerbs.Item(i) + '\n';
+		if (('' + colVerbs.Item(i)).indexOf('&R') != -1)
+			cmd = colVerbs.Item(i);
+	}
+	objFolderItem.InvokeVerb('' + cmd);
+	alert('Commands:\n' + t);
+
+	// objShell.NameSpace(FolderFrom).CopyHere(FolderTo,0); // copy folder
+	// objFolderItem=objShell.NameSpace(FolderFrom).ParseName("clock.avi");objFolderItem.Items().Item().InvokeVerb([動作]);
+	// objShell.NameSpace(FolderFromPath).Items.Item(mName).InvokeVerb();
+
+	// Sets or gets the date and time that a file was last modified.
+	// http://msdn.microsoft.com/en-us/library/bb787825(VS.85).aspx
+	// objFolderItem.ModifyDate = "01/01/1900 6:05:00 PM";
+	// objShell.NameSpace("C:\Temp").ParseName("Test.Txt").ModifyDate =
+	// DateAdd("d", -1, Now()) CDate("19 October 2007")
+
+	// Touch displays or sets the created, access, and modified times of one or
+	// more files. http://www.stevemiller.net/apps/
+}
+
+//	測試可寫入的字元:0-128,最好用1-127，因為許多編輯器會將\0轉成' '，\128又不確定
+if (0) {
+	var t = '', f = 'try.js', i = 0;
+	for (; i < 128; i++)
+		t += String.fromCharCode(i);
+	if (simpleWrite(f, t))
+		alert('Write error!\n有此local無法相容的字元?');
+	else if (simpleRead(f) != t)
+		alert('內容不同!');
+	else if (simpleWrite(f, dQuote(t) + ';'))
+		alert('Write error 2!\n有此local無法相容的字元?');
+	else if (eval(simpleRead(f)) != t)
+		alert('eval內容不同!');
+	else
+		alert('OK!');
+}
+*/
+
+
+if(_library_onload)
+	_library_onload();
 
 
 
@@ -2241,7 +2310,7 @@ CeL.data
 
 
 
-/*	2008/7/19 11:13:10
+/*
 	eval(uneval(o)): IE 沒有 uneval
 	http://keithdevens.com/weblog/archive/2007/Jun/07/javascript.clone
 
@@ -2267,16 +2336,31 @@ b=cloneObject(a);
 equal()
 
 */
-function cloneObject(o,noTrivial){
- if(!o||!(o instanceof Object))return o;// || typeof(obj) != 'object'
- var i,r=new o.constructor(o);	//	o.constructor()
- for(i in o)r[i]=noTrivial/*||o[i]===o*/?o[i]:arguments.callee(o[i],deep);	//	o[i]===o: 預防 loop, 但還是不能防止交叉參照
- return r;
-}
+CeL.data
+.
+clone_object =
+/**
+ * clone native Object
+ * @param {Object} object
+ * @param {Boolean} not_trivial
+ * @return
+ * @since	2008/7/19 11:13:10
+ */
+function clone_object(object, not_trivial) {
+	if (!object || !(object instanceof Object)
+			// || typeof(object) != 'object'
+			)
+		return object;
+	var i, r = new object.constructor(object); // o.constructor()
+	for (i in object)
+		// o[i]===o: 預防 loop, 但還是不能防止交叉參照
+		r[i] = not_trivial/* ||o[i]===o */? object[i] : clone_object(object[i], deep);
+	return r;
+};
 
 
 /*	2004/5/5
-	輸入'"','dh"fdgfg'得到2:指向"的位置
+	輸入('"','dh"fdgfg')得到2:指向"的位置
 */
 function getQuoteIndex(quote,str){	//	quote:['"/]，[/]可能不太適用，除非將/[/]/→/[\/]/
  var i,l=0;
@@ -2665,7 +2749,7 @@ function try1(){
 
 	下兩行調到檔案頭
 var encodeCodeCC,encodeCodeDwordsRef=['function ','return ','return','undefined','for(','var ','.length','typeof','continue;','if(','else','while(','break;','this.','try{','}catch(','true','false','eval(','new ','Array','Object','RegExp','.replace(','.match(','.push(','.pop(','.split(','isNaN(','.indexOf(','.substr(','with('];
-setObjValue('encodeCodeCC','ucC=1,lucC=6,wordC=8,wordS=127','int');
+set_obj_value('encodeCodeCC','ucC=1,lucC=6,wordC=8,wordS=127','int');
 */
 function encodeCode(code,K){	//	code,key
  code=''+code;//code=reduceCode(code);
@@ -2812,23 +2896,46 @@ function decodeCode(c,K){	//	code,key
 
 //simpleWrite('charCount report3.txt',charCount(simpleRead('function.js')+simpleRead('accounts.js')));
 //{var t=reduceCode(simpleRead('function.js')+simpleRead('accounts.js'));simpleWrite('charCount source.js',t),simpleWrite('charCount report.txt',charCount(t));}	//	所費時間：十數秒（…太扯了吧！）
-/*	測出各字元的出現率
-普通使用字元@0-127：9-10,13,32-126，reduce後常用：9,32-95,97-125
-*/
-function charCount(text){
- var i,a,c=[],d,t=''+text,l=t.length,used='',unused='',u1=-1,u2=u1;
- for(i=0;i<l;i++)if(c[a=t.charCodeAt(i)])c[a]++;else c[a]=1;
- for(i=u1;i<256;i++)if(c[i]){if(u2+1===i)used+=','+i,unused+=(u2<0?'':'-'+u2);u1=i;}else{if(u1+1===i)unused+=','+i,used+=(u1<0?'':'-'+u1);u2=i;}
- for(i=0,t='used:'+used.substr(1)+'\nunused:'+unused.substr(1)+'\n',d=sortValue(c,2).reverse();i<d.length;i++){	//	若是reduceCode()的程式，通常在120項左右。
-  t+=NewLine+(a=d[i])+'['+fromCharCode(a).replace(/\0/g,'\\0').replace(/\r/g,'\\r').replace(/\n/g,'\\n').replace(/\t/g,'\\t')+']'
-	+':	'+(a=c[typeof a=='object'?a[0]:a])+'	'+(100*a/l);
-  //if(200*v<l)break;	//	.5%以上者←選購
- }
- alert(t);
- return t;
-}
+/**
+ * 測出各字元的出現率。
+ * 普通使用字元@0-127：9-10,13,32-126，reduce後常用：9,32-95,97-125
+ * @param text	文檔
+ * @return
+ */
+function charCount(text) {
+	var i, a, c = [], d, t = '' + text, l = t.length, used = '', unused = '', u1 = -1, u2 = u1;
+	for (i = 0; i < l; i++)
+		if (c[a = t.charCodeAt(i)])
+			c[a]++;
+		else
+			c[a] = 1;
+	for (i = u1; i < 256; i++)
+		if (c[i]) {
+			if (u2 + 1 === i)
+				used += ',' + i, unused += (u2 < 0 ? '' : '-' + u2);
+			u1 = i;
+		} else {
+			if (u1 + 1 === i)
+				unused += ',' + i, used += (u1 < 0 ? '' : '-' + u1);
+			u2 = i;
+		}
+	//	若是reduceCode()的程式，通常在120項左右。
+	for (i = 0, t = 'used:' + used.substr(1) + '\nunused:' + unused.substr(1)
+			+ '\n', d = sortValue(c, 2).reverse(); i < d.length; i++) {
+		t += NewLine
+				+ (a = d[i])
+				+ '['
+				+ fromCharCode(a).replace(/\0/g, '\\0').replace(/\r/g, '\\r')
+						.replace(/\n/g, '\\n').replace(/\t/g, '\\t') + ']'
+				+ ':	' + (a = c[typeof a === 'object' ? a[0] : a]) + '	'
+				+ (100 * a / l);
+		//if(200*v<l)break;	//	.5%以上者←選購
+	}
+	alert(t);
+	return t;
+};
 
-/*	計算字數 word counts
+/*	
 flag:
 	(flag&1)==0	表情符號等不算一個字
 	(flag&1)==1	連表情符號等也算一個字
@@ -2843,31 +2950,45 @@ Flesch-Kincaid grade level：和Gunning-Fog Index相似，分數越低可讀性�
 
 DO.normalize(): 合併所有child成一String, may crash IE6 Win!	http://www.quirksmode.org/dom/tests/splittext.html
 */
-function wordCount(t,flag){	//	text, flag
- var isHTML=flag&2;
+/**
+ * 計算字數 word counts.
+ * @param text
+ * @param flag
+ * @return
+ */
+function wordCount(text, flag) {
+	var isHTML = flag & 2;
 
- if(typeof t=='object')
-  if(t.innerText)
-   t=t.innerText,isHTML=0;
-  else if(t.innerHTML)
-   t=t.innerHTML,isHTML=1;
+	//	is HTML object
+	if (typeof text === 'object')
+		if (text.innerText)
+			text = text.innerText, isHTML = 0;
+		else if (text.innerHTML)
+			text = text.innerHTML, isHTML = 1;
 
- if(typeof t!='string')
-  return 0;
+	if (typeof text != 'string')
+		return 0;
 
- //	和perl不同，JScript常抓不到(.*?)之後還接特定字串的東西，大概因為沒有s。(.*?)得改作((.|\n)*?)？	或者該加/img？
- if(isHTML)
-  t=t.replace(/<!--((.|\n)*?)-->/g,'').replace(/<[\s\n]*\/?[\s\n]*[a-z][^<>]*>/gi,'');
+	//	和perl不同，JScript常抓不到(.*?)之後還接特定字串的東西，大概因為沒有s。(.*?)得改作((.|\n)*?)？ 或者該加/img？
+	if (isHTML)
+		text = text
+				.replace(/<!--((.|\n)*?)-->/g, '')
+				.replace(/<[\s\n]*\/?[\s\n]*[a-z][^<>]*>/gi, '');
 
- if(flag&1)
-  t=t.replace(/[\+\-*\\\/?!,;.()<>{}\[\]@#$%^&_|"'~`]{2,}/g,';');	//	連表情符號等也算一個字
+	if (flag & 1)
+		//	連表情符號等也算一個字
+		text = text.replace(/[\+\-*\\\/?!,;.()<>{}\[\]@#$%^&_|"'~`]{2,}/g, ';');
 
- return t
-	.replace(/[a-zA-ZÀ-ÖØ-öø-ʨ\-'.]{2,}/g,'w')	//	將英文等字改成單一字母。[.]: 縮寫	http://en.wikibooks.org/wiki/Unicode/Character_reference/0000-0FFF
-	.replace(/[\d:+\-\.\/,]{2,}/g,'d')	//	date/time or number
-	.replace(/[\s\n　]+/g,'')	//	再去掉*全部*空白
-	.length;
-}
+	return text
+			//	將英文等字改成單一字母。[.]: 縮寫
+			//	http://en.wikibooks.org/wiki/Unicode/Character_reference/0000-0FFF
+			.replace(/[a-zA-ZÀ-ÖØ-öø-ʨ\-'.]{2,}/g, 'w')
+			//	date/time or number
+			.replace(/[\d:+\-\.\/,]{2,}/g, '1')
+			//	再去掉*全部*空白
+			.replace(/[\s\n　]+/g, '')
+			.length;
+};
 
 
 
@@ -2875,29 +2996,41 @@ function wordCount(t,flag){	//	text, flag
 
 
 
-//{var d=new Date,i,b;for(i=0;i<100000;i++)b=dec_to_bin(20);alert(gDate(new Date-d));}
-//	運算式值的二進位表示法	已最佳化:5.82s/100000次dec_to_bin(20,8)@300(?)MHz,2.63s/100000次dec_to_bin(20)@300(?)MHz
-function dec_to_bin(n,p){	//	n:number,p:places,字元數,使用前置0來填補回覆值
- if(p&&n+1<(1<<p)){var h='',b=n.toString(2),i=b.length;for(;i<p;i++)h+='0';return h+b;}
- return n.toString(2);	//	native code還是最快！
-//	上兩代：慢	var b='',c=1;for(p=p&&n<(p=1<<p)?p:n+1;c<p;c<<=1)b=(c&n?'1':'0')+b;return b;	//	不用'1:0'，型別轉換比較慢.不用i，多一個變數會慢很多
-//	上一代：慢	if(p&&n+1<(1<<p)){var h='',c=1,b=n.toString(2);while(c<=n)c<<=1;while(c<p)c<<=1,h+='0';return h+(n?n.toString(2):'');}
-}
+CeL.data
+.
+/**
+ * 運算式值的二進位表示法	已最佳化:5.82s/100000次dec_to_bin(20,8)@300(?)MHz,2.63s/100000次dec_to_bin(20)@300(?)MHz
+ * @param {Number} number	number
+ * @param places	places,字元數,使用前置0來填補回覆值
+ * @return
+ * @example
+ * {var d=new Date,i,b;for(i=0;i<100000;i++)b=dec_to_bin(20);alert(gDate(new Date-d));}
+ * @memberOf	CeL.data
+ */
+dec_to_bin = function(number, places) {
+	if (places && number + 1 < (1 << places)) {
+		var h = '', b = number.toString(2), i = b.length;
+		for (; i < places; i++)
+			h += '0';
+		return h + b;
+	}
+	//	native code 還是最快！
+	return number.toString(2);
+
+	//	上兩代：慢	var b='',c=1;for(p=p&&n<(p=1<<p)?p:n+1;c<p;c<<=1)b=(c&n?'1':'0')+b;return b;	//	不用'1:0'，型別轉換比較慢.不用i，多一個變數會慢很多
+	//	上一代：慢	if(p&&n+1<(1<<p)){var h='',c=1,b=n.toString(2);while(c<=n)c<<=1;while(c<p)c<<=1,h+='0';return h+(n?n.toString(2):'');}
+};
 
 
 
 
 
 /*
-	設定object之值，輸入item=[value][,item=[value]..]。
-	value未設定會自動累加
-	使用前不必需先宣告…起碼在現在的JS版本中
+	value	(Array)=value,(Object)value=
+	[null]=value	累加=value
+	value=[null]	value=''
 
-	v	(Array)=v,(Object)v=
-	[null]=v	累加=v
-	v=[null]	v=''
-
-	t:value type	['=','][int|float|_num_]
+	type: value type	['=','][int|float|_num_]
 	*前段
 		以[']或["]作分隔重定義指定號[=]與分隔號[,]
 	*後段
@@ -2906,81 +3039,153 @@ function dec_to_bin(n,p){	//	n:number,p:places,字元數,使用前置0來填補�
 		'float'表示浮點數float，累加.1	bug:應該用.decp()
 		不輸入或非數字表示string
 
-	m:mode
-	setObjValueFlag.object
-	setObjValueFlag.array(10進位/當做數字)
-	number:key部分之base(10進位，16進位等)
+	mode
+	_.set_obj_value.F.object
+	_.set_obj_value.F.array(10進位/當做數字)
+	number: key部分之base(10進位，16進位等)
 
 	example:
-	setObjValue('UTCDay','Sun,Mon,Tue,Wed,Thu,Fri,Sat','int');	//	自動從0開始設，UTCDay.Tue=2
-	setObjValue('UTCDay','Sun,Mon,Tue,Wed,Thu,Fri,Sat');	//	UTCDay.Sun=UTCDay.Fri=''
-	setObjValue('add','a=3,b,c,d',2);	//	累加2。add.b=5
-	setObjValue('add','a,b,c,d',1,setObjValueFlag.array);	//	add[2]='c'
-	setObjValue('add','4=a,b,c,d',2,setObjValueFlag.array);	//	累加2。add[8]='c'
+	set_obj_value('UTCDay','Sun,Mon,Tue,Wed,Thu,Fri,Sat','int');	//	自動從0開始設，UTCDay.Tue=2
+	set_obj_value('UTCDay','Sun,Mon,Tue,Wed,Thu,Fri,Sat');	//	UTCDay.Sun=UTCDay.Fri=''
+	set_obj_value('add','a=3,b,c,d',2);	//	累加2。add.b=5
+	set_obj_value('add','a,b,c,d',1,_.set_obj_value.F.array);	//	add[2]='c'
+	set_obj_value('add','4=a,b,c,d',2,_.set_obj_value.F.array);	//	累加2。add[8]='c'
 
-Array之另一種表示法：[value1,value2,..]
-Object之另一種表示法：{key1:value1,key2:value2,..}
-
-var setObjValueFlag={'object':0,'array':-1};
 */
-function setObjValue(o,v,t,m){	//	obj,value,累加/value type,mode/value type
- if(typeof setObjValueFlag!='object')setObjValueFlag={'object':0,'array':-1};	//	object:default
- if(!v||typeof o!='string')return 1;
- var a,b,i=0,p='=',sp=',',e="if(typeof "+o+"!='object')"+o+"=new "+(m?"Array":"Object")//(m?"[]":"{}")
-	+";",n,Tint=false,cmC='\\u002c',eqC='\\u003d';//	l:item,n:value to 累加
- if(t){
-  if(typeof a=='string'){a=t.charAt(0);if(a=='"'||a=="'"){a=t.split(a);p=a[1],sp=a[2],t=a[3];}}
-  if(t=='int')t=1,Tint=true;else if(t=='float')t=.1;else if(isNaN(t))t=0;
-  else if(t==parseInt(t))t=parseInt(t),Tint=true;else t=parseFloat(t);	//	t被設成累加數
- }//else t=1;
- if(typeof v=='string')v=v.split(sp);
- // escape regex characters from jQuery
- cmC=new RegExp(cmC.replace(/([\.\\\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g,"\\$1"),'g'),eqC=new RegExp(eqC.replace(/([\.\\\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g,"\\$1"),'g');
- if(t)n=-t;	//	n:現在count到..
- for(;i<v.length;i++){
-  if(v[i].indexOf(p)==-1)v[i]=m?p+v[i]:v[i]+p;//if(v[i].indexOf(p)==-1&&m)v[i]=p+v[i];//
-  if(m&&v[i]==p){n+=t;continue;}
-  a=v[i].split(p);
-  if(!m&&!a[0])continue;	//	去掉不合理的(Array可能有NaN index，所以不設條件。)
-  a[0]=a[0].replace(cmC,',').replace(eqC,'='),a[1]=a[1].replace(cmC,',').replace(eqC,'=');
-  if(t)
-   if(m){
-    if(!a[0])a[0]=(n+=t);else if(!isNaN(b=m>0?parseInt(a[0],m):a[0]))n=Tint?(a[0]=parseInt(b)):parseFloat(b);
-   }else
-    if(!a[1])a[1]=(n+=t);else if(!isNaN(a[1]))n=Tint?parseInt(a[1]):parseFloat(a[1]);
-  if(!t||Tint&&isNaN(b=parseInt(a[1]))||isNaN(b=parseFloat(a[1])))b=a[1];
-  a=a[0];
-  e+=o+'['+(!t||isNaN(a)?dQuote(a):a)+']='+(!t||isNaN(b)?dQuote(b):b)+';';
- }
- try{
-  //if(o=='kk')alert(e.slice(0,500));
-  eval(e);	//	因為沒想到其他方法可存取Global的object，只好使用eval..可以試試obj=setObjValue(0,..){this=new Aaaray/Object}
- }catch(e){popErr(e,'Error @ '+o);return 2;}
-}
+CeL.data
+.
+/**
+ * 設定object之值，輸入item=[value][,item=[value]..]。
+ * value未設定會自動累加。
+ * 使用前不必需先宣告…起碼在現在的JS版本中
+ * @param obj	object name that need to operate at
+ * @param value	valueto set
+ * @param type	累加 / value type
+ * @param mode	mode / value type
+ * @return
+ * @memberOf	CeL.data
+ */
+set_obj_value = function(obj, value, type, mode) {
+	if (!value || typeof o !== 'string')
+		return 1;
+
+	var a, b, i = 0, p = '=', sp = ',', e = "if(typeof " + obj + "!='object')"
+			+ obj + "=new " + (mode ?
+				//	"[]":"{}"
+				//	Array之另一種表示法：[value1,value2,..], Object之另一種表示法：{key1:value1,key2:value2,..}
+				"Array" : "Object")
+			+ ";",
+		//	l: item, n: value to 累加
+		n, Tint = false, cmC = '\\u002c', eqC = '\\u003d';
+	if (type) {
+		if (typeof a === 'string') {
+			a = type.charAt(0);
+			if (a === '"' || a === "'") {
+				a = type.split(a);
+				p = a[1], sp = a[2], type = a[3];
+			}
+		}
+		if (type === 'int')
+			type = 1, Tint = true;
+		else if (type === 'float')
+			type = .1;
+		else if (isNaN(type))
+			type = 0;
+		else if (type == parseInt(type))
+			type = parseInt(type), Tint = true;
+		else
+			type = parseFloat(type); // t被設成累加數
+	}
+	//else t=1;
+
+	if (typeof value === 'string')
+		value = value.split(sp);
+	// escape regex characters from jQuery
+	cmC = new RegExp(cmC.replace(
+			/([\.\\\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1"), 'g'),
+			eqC = new RegExp(eqC.replace(
+					/([\.\\\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1"), 'g');
+
+	if (type)
+		//	n: 現在count到..
+		n = -type;
+
+	for (; i < value.length; i++) {
+		if (value[i].indexOf(p) === -1)
+			value[i] = mode ? p + value[i] : value[i] + p;// if(v[i].indexOf(p)==-1&&m)v[i]=p+v[i];//
+			if (mode && value[i] === p) {
+				n += type;
+				continue;
+			}
+			a = value[i].split(p);
+			if (!mode && !a[0])
+				//	去掉不合理的(Array可能有NaN index，所以不設條件。)
+				continue;
+			a[0] = a[0].replace(cmC, ',').replace(eqC, '='), a[1] = a[1].replace(
+					cmC, ',').replace(eqC, '=');
+			if (type)
+				if (mode) {
+					if (!a[0])
+						a[0] = (n += type);
+					else if (!isNaN(b = mode > 0 ? parseInt(a[0], mode) : a[0]))
+						n = Tint ? (a[0] = parseInt(b)) : parseFloat(b);
+				} else if (!a[1])
+					a[1] = (n += type);
+				else if (!isNaN(a[1]))
+					n = Tint ? parseInt(a[1]) : parseFloat(a[1]);
+					if (!type || Tint && isNaN(b = parseInt(a[1]))
+							|| isNaN(b = parseFloat(a[1])))
+						b = a[1];
+					a = a[0];
+					e += obj + '[' + (!type || isNaN(a) ? dQuote(a) : a) + ']='
+						+ (!type || isNaN(b) ? dQuote(b) : b) + ';';
+	}
+
+	try {
+		//if(o=='kk')alert(e.slice(0,500));
+		//	因為沒想到其他方法可存取Global的object，只好使用eval..可以試試obj=set_obj_value(0,..){this=new Aaaray/Object}
+		library_namespace.eval_code(e);
+	} catch (e) {
+		library_namespace.err('Error @ ' + obj);
+		library_namespace.err(e);
+		return 2;
+	}
+};
+
+_.set_obj_value.F = {
+	// object is default
+	'object' : 0,
+	'array' : -1
+};
+
+
 
 CeL.data
 .
 /**
- * 將字串 set 分作 Object
- * @param valueSet
- * @param pointerC
- * @param endC
+ * 將字串組分作 Object
+ * @param {String} value_set	字串組, e.g., 'a=12,b=34'
+ * @param assignment_char	char to assign values, e.g., '='
+ * @param end_char	end char of assignment
  * @return
- * @since	2006/9/6 20:55
+ * @since	2006/9/6 20:55, 2010/4/12 23:06:04
  * @memberOf	CeL.data
  */
-split_String_to_Object = function(valueSet, pointerC, endC) {
-	var a, o = {};
-	if (!endC)
-		endC = /[,;]/;
-	if (!pointerC)
-		pointerC = /[=:]/;
-	valueSet = valueSet.split(endC);
-	for (_e in valueSet) {
+split_String_to_Object = function(value_set, assignment_char, end_char) {
+	if (typeof value_set !== 'string' || !value_set)
+		return {};
+
+	value_set = value_set.split(end_char || /[,;]/);
+
+	if (!assignment_char)
+		assignment_char = /[=:]/;
+
+	var a, o = {}, _e = 0, l = value_set.length;
+	for (; _e < l; _e++) {
 		//	http://msdn.microsoft.com/library/en-us/jscript7/html/jsmthsplit.asp
-		a = valueSet[_e].split(pointerC, 2);
-		// alert(valueSet[_e]+'\n'+a[0]+' '+a[1]);
-		if (a[0])
+		a = value_set[_e].split(assignment_char, 2);
+		//library_namespace.debug(value_set[_e] + '\n' + a[0] + ' ' + a[1], 2);
+		if (a[0] !== '')
 			o[a[0]] = a[1];
 	}
 	return o;
@@ -3075,27 +3280,40 @@ function test_contain_substring(){
 
 
 */
-function same_length(m,n){
- if(typeof m!='string'||typeof n!='string')return;
- if(!m||!n)return 0;
- var i=m.length,b=0,s=n.length;
- if(i<s){
-  if(0==n.indexOf(m))//m==n.slice(0,i=m.length)
-   return i;
- }else if(i=s,0==m.indexOf(n))//n==m.slice(0,i=n.length)
-   return i;
 
- //sl('*same_length: start length: '+i);
- while((i=(i+1)>>1)>1 && (s=n.substr(b,i))){
-  //sl('same_length: '+i+','+b+'; ['+m.substr(b)+'], ['+s+'] of ['+n+']');
-  if(m.indexOf(s,b)==b)
-   b+=i;
- };
- //sl('*same_length: '+i+','+b+'; ['+m.charAt(b)+'], ['+n.charAt(b)+'] of ['+n+']');
- //var s_l=i&&m.charAt(b)==n.charAt(b)?b+1:b;
- //sl('*same_length: '+s_l+':'+m.slice(0,s_l)+',<em>'+m.slice(s_l)+'</em>; '+n.slice(0,s_l)+',<em>'+n.slice(s_l)+'</em>');
- return i&&m.charAt(b)==n.charAt(b)?b+1:b;
-}
+/**
+ * test if 2 string is at the same length
+ * @param s1	string 1
+ * @param s2	string 2
+ * @return
+ */
+function same_length(s1, s2) {
+	if (typeof m !== 'string' || typeof n !== 'string')
+		return;
+	if (!s1 || !s2)
+		return 0;
+
+	var i = s1.length, b = 0, s = s2.length;
+	if (i < s) {
+		if (
+				//m==n.slice(0,i=m.length)
+				0 === s2.indexOf(s1))
+			return i;
+	} else if (
+			//s2==s1.slice(0,i=s2.length)
+			i = s, 0 === s1.indexOf(s2))
+		return i;
+
+	//sl('*same_length: start length: '+i);
+	while ((i = (i + 1) >> 1) > 1 && (s = s2.substr(b, i)))
+		//{sl('same_length: '+i+','+b+'; ['+m.substr(b)+'], ['+s+'] of ['+n+']');
+		if (s1.indexOf(s, b) === b)
+			b += i;
+	//sl('*same_length: '+i+','+b+'; ['+m.charAt(b)+'], ['+n.charAt(b)+'] of ['+n+']');
+	//var s_l=i&&m.charAt(b)==n.charAt(b)?b+1:b;
+	//sl('*same_length: '+s_l+':'+m.slice(0,s_l)+',<em>'+m.slice(s_l)+'</em>; '+n.slice(0,s_l)+',<em>'+n.slice(s_l)+'</em>');
+	return i && s1.charAt(b) === s2.charAt(b) ? b + 1 : b;
+};
 
 
 
@@ -3137,7 +3355,7 @@ function turnKanjiToNumbers(num){
  for(;i<n.length;i++)n[n[i]]=i;
  for(i=0;i<d.length;i++){
   if(p&&(m=d[i]?p.indexOf(d[i]):p.length)!=-1)
-   if(!m&&d[i]=='十')r+=1,p=p.slice(1);else if(isNaN(l=n[p.slice(0,m).replace(/^〇+/,'')]))return num;else r+=l,p=p.slice(m+1);
+   if(!m&&d[i]==='十')r+=1,p=p.slice(1);else if(isNaN(l=n[p.slice(0,m).replace(/^〇+/,'')]))return num;else r+=l,p=p.slice(m+1);
   if(d[i])r*=10;
  }
  return r;
@@ -3269,6 +3487,8 @@ function trimStr(l,m){
 
 
 //mode=1:不取空字串
+//	.split() appears from Internet Explorer 4.0
+//	<a href="http://msdn.microsoft.com/en-us/library/s4esdbwz%28v=VS.85%29.aspx" accessdate="2010/4/16 20:4">Version Information (Windows Scripting - JScript)</a>
 function strToArray(s,mode){
 	var a=[],last=0,i;
 	while((i=s.indexOf(sp,last))!=-1){
@@ -3512,7 +3732,7 @@ CeL.math
 
 
 /*
-	Math	---------------------------------------------------------------
+	Math	---------------------------------------------------------------
 */
 
 /*
@@ -3530,7 +3750,7 @@ CeL.math
  * @param times	max 次數
  * @return	連分數序列
  */
-mutual_division = function(n1, n2, times) {
+mutual_division = function mutual_division(n1, n2, times) {
 	var q = [], c;
 	if (isNaN(times) || times <= 0)
 		times = 40;
@@ -3559,7 +3779,7 @@ mutual_division = function(n1, n2, times) {
 		if (n2)
 			q.push((n1 - (c = n1 % n2)) / n2), n1 = n2, n2 = c;
 		else {
-			q.push(arguments.callee.done, n1);
+			q.push(mutual_division.done, n1);
 			break;
 		}
 
@@ -3587,7 +3807,7 @@ CeL.math
  * alert(a+'\n'+a[0]/a[1]+'\n'+Math.SQRT2+'\n'+(Math.SQRT2-a[0]/a[1])+'\n'+mutual_division(a[0],a[1]));
  */
 continued_fraction = function(sequence, max_no) {
-	if (typeof s != 'object' || !sequence.length)
+	if (!library_namespace.is_Array(sequence) || !sequence.length)
 		return sequence;
 
 	if (sequence[sequence.length - 2] === _.mutual_division.done)
@@ -3604,15 +3824,15 @@ continued_fraction = function(sequence, max_no) {
 		b = 1, a = 0;
 	else
 		a = 1, b = 0;
-	// s[max_no++]=1;if(--max_no%2)b=s[max_no],a=s[--max_no];else a=s[max_no],b=s[--max_no];
+	//sequence[max_no++]=1;if(--max_no%2)b=sequence[max_no],a=s[--max_no];else a=sequence[max_no],b=sequence[--max_no];
 
-	//alert('a='+a+',b='+b+',max_no='+max_no);
+	//library_namespace.debug('a=' + a + ', b=' + b + ', max_no=' + max_no);
 	while (max_no--)
 		if (max_no % 2)
 			b += a * sequence[max_no];
 		else
 			a += b * sequence[max_no];
-	//alert('a='+a+',b='+b);
+	//library_namespace.debug('a=' + a + ', b=' + b);
 	return [ a, b ];
 };
 
@@ -3627,7 +3847,8 @@ CeL.math
  * to_rational_number(4088/783)
  * @param number	number
  * @param rate	比例在rate以上
- * @param max_no	最多取至序列第max_no個//TODO:並小於l:limit
+ * @param max_no	最多取至序列第 max_no 個
+ * 					TODO : 並小於 l:limit
  * @return	[分子, 分母, 誤差]
  * @requires	mutual_division,continued_fraction
  * @see
@@ -3645,7 +3866,7 @@ to_rational_number = function(number, rate, max_no) {
 		else
 			break;
 
-	//library_namespace.debug(d+': '+d.length+','+i+','+d[i]);
+	//library_namespace.debug(d + ': ' + d.length + ',' + i + ',' + d[i]);
 	d = _.continued_fraction(d, i);
 	//library_namespace.debug(d);
 	if (d[1] < 0)
@@ -3965,13 +4186,17 @@ hex = function(number) {
 CeL.math
 .
 /**
- * 補數
+ * 補數計算。
+ * 正數的補數即為自身。若要求得互補之後的數字，請設成負數。
  * @param {Number} number
  * @return	{Number} base	1: 1's Complement, 2: 2's Complement, (TODO: 3, 4, ..)
  * @example
  * alert(complement())
  * @see
  * http://www.tomzap.com/notes/DigitalSystemsEngEE316/1sAnd2sComplement.pdf
+ * http://en.wikipedia.org/wiki/Method_of_complements
+ * http://en.wikipedia.org/wiki/Signed_number_representations
+ * @since	2010/3/12 23:47:52
  */
 complement = function() {
 	return this.from.apply(this, arguments);
@@ -3981,70 +4206,137 @@ _.complement.prototype = {
 
 base : 2,
 
+//	1,2,..
 bits : 8,
 
-whole : 0,
+//	radix complement or diminished radix complement.
+//	http://en.wikipedia.org/wiki/Method_of_complements
+diminished : 0,
 
-//	!=0 / true: negative value
+/**
+ * 正負符號.
+ * 正: 0/false,
+ * 負 negative value:!=0 / true
+ */
 sign : 0,
 
+//	get the value
 valueOf : function() {
-	return this.value;
+	return this.sign ? -this.value : this.value;
 },
 
+/**
+ * set value
+ */
 set : function(value) {
-	this.sign = value<0;
-	this.value = value;
+	var m = Number(value), a = Math.abs(m);
+	if (isNaN(m) || m && a < 1e-8 || a > 1e12){
+		library_namespace.debug('complement.set: error number: ' + value);
+		return;
+	}
+
+	this.sign = m < 0;
+	// this.value 僅有正值
+	this.value = a;
+
 	return this;
 },
 
 
+/**
+ * input
+ */
+from : function(number, base, diminished) {
+	//	正規化
+	number = ('' + (number||0)).replace(/\s+$|^[\s0]+/g, '') || '0';
+	//library_namespace.debug(number + ':' + number.length + ',' + this.bits);
 
-from : function(number, base) {
-	number = ('' + (number||0)).replace(/\s+$|^[\s0]+/g, '');
-	//library_namespace.debug(number+':'+number.length +','+ this.bits);
-	if (number.length > this.bits)
-		throw 'overflow';
+	//	整數部分位數
+	var value = number.indexOf('.'), tmp;
+	if (value == -1)
+		value = number.length;
+	//	TODO: not good
+	if (value > this.bits)
+		//throw 'overflow';
+		library_namespace.err('complement.from: overflow: ' + value);
 
-	if ((base = Math.floor(base)) && base > 0)
-		this.base = base;
+	if (typeof diminished === 'undefined')
+		//	illegal setup
+		diminished = this.diminished;
 	else
+		this.diminished = diminished;
+
+	if ((base = Math.floor(base)) && base > 0){
+		if (base === 1)
+			base = 2, this.diminished = 1;
+		this.base = base;
+	}else
+		//	illegal base
 		base = this.base;
-	//library_namespace.debug(base+"'s Complement");
+	//library_namespace.debug(base + "'s Complement");
 
-	this.whole = base == 1 ? Math.pow(2, this.bits) - 1 : Math.pow(base, this.bits);
-	//library_namespace.debug(this.whole);
+	//	TODO: 僅對 integer 有效
+	value = parseInt(number, base);
+	tmp = Math.pow(base, this.bits - 1);
+	if (value >= tmp * base)
+		//throw 'overflow';
+		library_namespace.err('complement.from: overflow: ' + value);
 
-	this.sign = number.length == this.bits;
-	this.value = parseInt(number, base);
+	//library_namespace.debug('compare ' + value + ',' + tmp);
+	if (value < tmp)
+		this.sign = 0;
+	else
+		//library_namespace.debug('負數 ' + (tmp * base - (diminished ? 1 : 0)) + '-'+ value+'='+(tmp * base - (diminished ? 1 : 0) - value)),
+		this.sign = 1,
+		value = tmp * base - (diminished ? 1 : 0) - value;
+
+	this.value = value;
+	//library_namespace.debug(number + ' → '+this.valueOf());
+
 	return this;
 },
 
-to : function(base) {
+/**
+ * output
+ */
+to : function(base, diminished) {
 	if (!(base = Math.floor(base)) || base < 1)
 		base = this.base;
+	else if (base === 1)
+		base = 2, diminished = 1;
+	if (typeof diminished === 'undefined')
+		diminished = this.diminished;
 
-	var value = this.value;
-	if (this.sign)
-		value = this.whole + value;
+	var value = this.value, tmp = Math.pow(base, this.bits - 1);
+	if (value > tmp || value === tmp && (diminished || !this.sign))
+		//throw 'overflow';
+		library_namespace.err('complement.to: overflow: ' + (this.sign ? '-' : '+') + value);
 
-	//library_namespace.debug(value);
-	if (this.sign && value < -this.value 
-			|| this.bits - (value = value.toString(Math.max(2, this.base))).length < (this.sign?0:1))
-		throw 'overflow';
+	if (this.sign){
+		tmp *= base;
+		if (diminished)
+			//	TODO: 僅對 integer 有效
+			tmp--;
+		//library_namespace.debug('負數 ' + value + '，sum=' + tmp);
+		// 負數，添上兩補數之和
+		value = tmp - value;
+	}
+
+	//library_namespace.debug('value: ' + (this.sign ? '-' : '+') + value);
+
+	value = value.toString(Math.max(2, this.base));
 
 	return value;
 }
 
 };
 
+_.complement.prototype.toString = _.complement.prototype.to;
 
 
-/*	↑Math	---------------------------------------------------------------
-*/
-
-
-
+/*
+	↑Math	---------------------------------------------------------------
+*/
 
 
 return (
@@ -4251,25 +4543,43 @@ function StrToDate(s,f,diff){	//	date string, force parse(no Date.parse() try), 
 
 //	Turn to RFC 822 date-time
 //DateToRFC822[generateCode.dLK]='setTool,StrToDate';
-function DateToRFC822(d){
- if(!(d instanceof Date))d=(''+d).toDate();
- if(!d)d=new Date;
- return d.toGMTString().replace(/UTC/gi,'GMT');
-}
+function DateToRFC822(d) {
+	if (!(d instanceof Date))
+		d = ('' + d).toDate();
+	if (!d)
+		d = new Date;
+	return d.toGMTString().replace(/UTC/gi, 'GMT');
+};
 
-//	要用更多樣化的，請使用gDate()
-function DateToStr(sp){
- if(!sp)sp='/';
- with(this)return ''+getYear()+sp+(getMonth()+1)+sp+getDate()+' '+getHours()+':'+getMinutes();//+':'+.getSeconds()+'.'+getMilliseconds();
-}
+//	要用更多樣化的，請使用format_date()
+function DateToStr(sp) {
+	if (!sp)
+		sp = '/';
+	with (this)
+		return '' + getYear() + sp + (getMonth() + 1) + sp + getDate() + ' '
+				+ getHours() + ':' + getMinutes()
+		// +':'+.getSeconds()+'.'+getMilliseconds();
+		;
+};
 //var tt='2001/8/7 03:35PM';alert(tt+'\n'+tt.toDate().toStr());
 
-/*	顯示格式化日期string	input date,mode	2003/10/18 1:04修正
-	mode:	+4:不顯示時間,+3:顯示時間至時,+2:顯示時間至分,+1:顯示時間至秒,+0:顯示時間至毫秒(ms)
-		+32(4):不顯示日期,+24(3):顯示日期mm/dd,+16(2):顯示日期yyyy/mm,+8(1):顯示日期yyyy/mm/dd(星期),+0:顯示日期yyyy/mm/dd
-		+64:input UTC	+128:output UTC
-	http://www.merlyn.demon.co.uk/js-dates.htm
-	http://aa.usno.navy.mil/data/docs/JulianDate.html
+
+/*
+mode:
+	+4:不顯示時間,
+	+3:顯示時間至時,
+	+2:顯示時間至分,
+	+1:顯示時間至秒,
+	+0:顯示時間至毫秒(ms)
+
+	+32(4<<3):不顯示日期,
+	+24(3<<3):顯示日期mm/dd,
+	+16(2<<3):顯示日期yyyy/mm,
+	+8(1<<3):顯示日期yyyy/mm/dd(星期),
+	+0:顯示日期yyyy/mm/dd
+
+	+64(1<<6):input UTC
+	+128(2<<6):output UTC
 
 NOTE:
 在現有時制下要轉換其他時區之時間成正確time:
@@ -4278,54 +4588,131 @@ diff=其他時區之時差(例如 TW: UTC+8)
 d.setTime(d.getTime()-60000*((new Date).getTimezoneOffset()+diff*60))
 
 */
-//gDate[generateCode.dLK]='dateUTCdiff,setTool,decplaces';
-var dateUTCdiff;	//	全球標準時間(UCT)與本地時間之差距
-gDate.noZero=1;
-function gDate(d,M,sp1,sp2){
- //alert('['+(typeof d)+'] '+d+', '+M);
- if(!M)M=0;
- var isUTC,a,b,T,r=M;M%=64,noZero=arguments.callee.noZero,N=function(n){return noZero||n>9?n:'0'+n;};
- r=(r-M)/64;
- if(r%2==1)a=0;
- else{
-  //	UTC time = local time + dateUTCdiff(ms)
-  if(isNaN(dateUTCdiff))dateUTCdiff=6e4*(new Date).getTimezoneOffset();	//	.getTimezoneOffset() is in min. 60000(ms)=60*1000(ms)
-  a=dateUTCdiff;
- }
- isUTC=r>1;
- if(typeof d=='number' && d>=0)
-  d=new Date(Math.abs(d+a)<9e7?d+a:d)
-  ,M=32+M%8;	//	d<90000000~24*60*60*1000，判別為當天，只顯示時間。不允許d<0！
- else if(typeof d=='string'&&d.toDate())d=d.toDate();
- else if(typeof d=='date')d=new Date(d);	//	應對在Excel等中會出現的東西
- else if(!(d instanceof Date))d=new Date;//http://www.interq.or.jp/student/exeal/dss/ejs/1/1.html 引数がオブジェクトを要求してくる場合は instanceof 演算子を使用します	typeof d!='object'||d.constructor!=Date	//	new Date==new Date()
- a=sp1||'/',b=sp2||':',T=M%8,M=(M-T)/8,r='';
- if(T>4&&M>3)return '';	//	沒啥好顯示的了
- //	date
- if(M<4){
-  r=N((isUTC?d.getUTCMonth():d.getMonth())+1);
-  if(M<3)r=(isUTC?d.getUTCFullYear():d.getFullYear())+a+r;
-  if(M!=2){
-   r+=a+N(isUTC?d.getUTCDate():d.getDate());
-   if(M==1)r+='('+(isUTC?d.getUTCDay():d.getDay())+')';
-  }
- }
- //	time
- if(T<4){
-  if(M<4)r+=' ';	//	日期&時間中間分隔
-  r+=N(isUTC?d.getUTCHours():d.getHours())+b;
-  if(T<3){
-   r+=N(isUTC?d.getUTCMinutes():d.getMinutes());
-   if(T<2)r+=b+(T?N(isUTC?d.getUTCSeconds():d.getSeconds()):(isUTC?d.getUTCSeconds()+d.getUTCMilliseconds()/1e3:d.getSeconds()+d.getMilliseconds()/1e3).decp(3));
-  }
- }
- return r;
-}
+
+CeL.native
+.
+/**
+ * 顯示格式化日期 string
+ * @param date_value	要轉換的 date, 值過小時當作時間
+ * @param mode	要轉換的 mode
+ * @param zero_fill	對 0-9 是否補零
+ * @param date_separator	date separator
+ * @param time_separator	time separator
+ * @return	{String}	格式化日期
+ * @example
+ * alert(format_date());
+ * @since	2003/10/18 1:04 修正
+ * @since	2010/4/16 10:37:30	重構(refactoring)
+ * @requires setTool,decplaces
+ * @see
+ * http://www.merlyn.demon.co.uk/js-dates.htm,
+ * http://aa.usno.navy.mil/data/docs/JulianDate.html
+ * @memberOf	CeL.native
+ */
+format_date = function format_date(date_value, mode, zero_fill, date_separator, time_separator) {
+	//library_namespace.debug('[' + (typeof date_value) + '] ' + date_value + ', ' + mode);
+
+	// initiate
+	if (!mode)
+		mode = 0;
+
+	var output_UTC, a, b = mode, time_mode, return_string = '',
+	show_number = zero_fill ? function(n) {
+		return n > 9 ? n : '0' + n;
+	} : function(n) {
+		return n;
+	};
+
+	//	date & time mode
+	mode %= 64;
+	//	UTC mode
+	b = (b - mode) / 64;
+	//	input UTC
+	a = b % 2 == 1 ? 1 : 0;
+	output_UTC = b - a === 1;
+
+	time_mode = mode % 8;
+	//	date mode
+	mode = (mode - time_mode) / 8;
+	// time_mode > 4 && mode > 3: error mode: 沒啥好顯示的了
+
+	//	處理各種不同的 date
+	b = typeof date_value;
+	if (b === 'number' && date_value >= 0){
+		// 全球標準時間(UCT)與本地時間之差距
+		// UTC time = local time + format_date.UTC_offset(ms)
+		if (a && isNaN(a = format_date.UTC_offset))
+			//	input UTC 時之差距(ms)
+			//	.getTimezoneOffset() is in minute. 60*1000(ms)=6e4(ms)
+			a = format_date.UTC_offset = 6e4 * (new Date).getTimezoneOffset();
+
+		// 值過小時當作時間: d<90000000~24*60*60*1000，判別為當天，只顯示時間。不允許 d<0！
+		date_value = new Date(Math.abs(a += date_value) < 9e7 ? a : date_value);
+		mode = 32;
+	}else if (b === 'string' && (a = date_value.toDate()))
+		date_value = a;
+	else if (b === 'date')
+		// 應對在 Excel 等外部程式會出現的東西
+		date_value = new Date(date_value);
+	else if (
+			//	http://www.interq.or.jp/student/exeal/dss/ejs/1/1.html
+			//	引数がオブジェクトを要求してくる場合は instanceof 演算子を使用します
+			//	typeof date_value!=='object'||date_value.constructor!=Date
+			!(date_value instanceof Date))
+		//	new Date === new Date()
+		date_value = new Date;
+
+
+	// 處理 date
+	if (mode < 4) {
+		return_string = show_number((output_UTC ? date_value.getUTCMonth()
+				: date_value.getMonth()) + 1);
+		if (!date_separator)
+			date_separator = '/';
+		if (mode < 3)
+			return_string = (output_UTC ? date_value.getUTCFullYear() : date_value
+					.getFullYear())
+					+ date_separator + return_string;
+		if (mode !== 2) {
+			return_string += date_separator
+			+ show_number(output_UTC ? date_value.getUTCDate() : date_value
+					.getDate());
+			if (mode === 1)
+				return_string += '(' + (output_UTC ? date_value.getUTCDay()
+						: date_value.getDay()) + ')';
+		}
+	}
+
+	// 處理 time
+	if (time_mode < 4) {
+		if (mode < 4)
+			// 日期 & 時間中間分隔
+			return_string += ' ';
+		if (!time_separator)
+			time_separator = ':';
+		return_string += show_number(output_UTC ? date_value.getUTCHours()
+				: date_value.getHours());
+		if (time_mode < 3) {
+			return_string += time_separator
+			+ show_number(output_UTC ? date_value.getUTCMinutes()
+					: date_value.getMinutes());
+			if (time_mode < 2)
+				return_string += time_separator
+				+ (time_mode ? show_number(output_UTC ? date_value
+						.getUTCSeconds() : date_value.getSeconds())
+						: (output_UTC ? date_value.getUTCSeconds()
+								+ date_value.getUTCMilliseconds() / 1e3
+								: date_value.getSeconds() + date_value.getMilliseconds() / 1e3
+							).decp(3));
+		}
+	}
+
+	return return_string;
+};
 
 
 
 /*
-	Syntax error: http://msdn.microsoft.com/library/en-us/script56/html/js56jserrsyntaxerror.asp
 	function經ScriptEngine會轉成/取用'function'開始到'}'為止的字串
 
 	用[var thisFuncName=parse_Function().funcName]可得本身之函數名
@@ -4341,6 +4728,8 @@ e.g., parent_func.child_func=function(){var name=parse_Function(this,arguments);
 bug:
 函數定義 .toString() 時無法使用。
 */
+CeL.native
+.
 /**
  * 函數的文字解譯/取得函數的語法
  * @param function_name	function name
@@ -4350,11 +4739,12 @@ bug:
  * parsed_data = new parse_Function(function_name);
  * @see
  * http://www.interq.or.jp/student/exeal/dss/ref/jscript/object/function.html,
- * 
+ * Syntax error: http://msdn.microsoft.com/library/en-us/script56/html/js56jserrsyntaxerror.asp
+ * @memberOf	CeL.native
  */
-function parse_Function(function_name, flag) {
+parse_Function = function parse_Function(function_name, flag) {
 	if (!function_name
-			&& typeof (function_name = arguments.callee.caller) !== 'function')
+			&& typeof (function_name = parse_Function.caller) !== 'function')
 		return;
 	if (typeof function_name === 'string')
 		this.oriName = function_name,
@@ -4411,20 +4801,34 @@ function parse_Function(function_name, flag) {
 
 
 //	補強String.fromCharCode()
-function fromCharCode(c){
- if(!isNaN(c))return String.fromCharCode(c);
- try{return eval('String.fromCharCode('+c+');');}catch(e){}//	直接最快
+function fromCharCode(c) {
+	if (!isNaN(c))
+		return String.fromCharCode(c);
+	try {
+		// 直接最快
+		return eval('String.fromCharCode(' + c + ');');
+	} catch (e) {
+	}
+
 /*
- if(typeof c=='string')return eval('String.fromCharCode('+n+')');//c=c.split(',');	後者可以通過審查
- if(typeof c=='object'){
-  var t='',d,i,a,n=[];
-  if(c.length)a=c;else{a=[];for(i in c)a.push(c[i]);}
-  for(i=0;i<a.length;i++)
-   if(!isNaN(c=a[i])||!isNaN(c=(''+a[i]).charCodeAt(0)))n.push(c);	//	跳過無法判讀的值
-  return eval('String.fromCharCode('+n+')');//n.join(',')	這樣較快
- }
-*/
+if (typeof c == 'string')
+	return eval('String.fromCharCode(' + n + ')');// c=c.split(','); 後者可以通過審查
+if (typeof c == 'object') {
+	var t = '', d, i, a, n = [];
+	if (c.length)
+		a = c;
+	else {
+		a = [];
+		for (i in c)
+			a.push(c[i]);
+	}
+	for (i = 0; i < a.length; i++)
+		if (!isNaN(c = a[i]) || !isNaN(c = ('' + a[i]).charCodeAt(0)))
+			n.push(c); // 跳過無法判讀的值
+	return eval('String.fromCharCode(' + n + ')');//n.join(',')	這樣較快
 }
+*/
+};
 
 
 
@@ -4509,65 +4913,89 @@ function encodeUC(u,enc){
 
 
 
-
-/*	String to RegExp	qq// in perl
-	(pattern text, flags when need to return RegExp object, char pattern need to escape)
-*/
-function to_RegExp_pattern(t,toR,p){
- var r=t
-	.replace(p||/([.+*?|()\[\]\\{}])/g,'\\$1')	//	不能用 $0
-	.replace(/^([\^])/,'\\^').replace(/([$])$/,'\\$')	//	這種方法不完全，例如 /\s+$|^\s+/g
-	;
- return toR?new RegExp(r,/^[igms]$/i.test(toR)?toR:''):r;
+CeL.native
+.
+/**
+ * String pattern (e.g., "/a+/g") to RegExp pattern.
+ * qq// in perl.
+ * String.prototype.toRegExp = function(f) { return to_RegExp_pattern(this.valueOf(), f); };
+ * @param {String} pattern	pattern text
+ * @param {Boolean, String} RegExp_flag	flags when need to return RegExp object
+ * @param {RegExp} escape_pattern	char pattern need to escape
+ * @return	{RegExp} RegExp object
+ */
+to_RegExp_pattern = function(pattern, RegExp_flag, escape_pattern) {
+	var r = pattern
+		// 不能用 $0
+		.replace(escape_pattern || /([.+*?|()\[\]\\{}])/g, '\\$1')
+		// 這種方法不完全，例如 /\s+$|^\s+/g
+		.replace(/^([\^])/, '\\^').replace(/([$])$/, '\\$');
+	return RegExp_flag ? new RegExp(r, /^[igms]+$/i.test(RegExp_flag) ? RegExp_flag : '') : r;
 }
-//String.prototype.toRegExp=function(f){return to_RegExp_pattern(this.valueOf(),f);};
 
 
-/*
-	http://msdn.microsoft.com/zh-tw/library/x9h97e00(VS.80).aspx
-		如果規則運算式已經設定了全域旗標，test 將會從 lastIndex 值表示的位置開始搜尋字串。如果未設定全域旗標，則 test 會略過 lastIndex 值，並從字串之首開始搜尋。
-	http://www.aptana.com/reference/html/api/RegExp.html
 
-附帶 'g' flag 的 RegExp 對相同字串作 .test() 時，第二次並不會重設。因此像下面的 expression 兩次並不會得到相同結果。
-var r=/,/g,t='a,b';WScript.Echo(r.test(t)+','+r.test(t));
+CeL.native
+.
+/**
+ * 重新設定 RegExp object 之 flag
+ * @param {RegExp} regexp	RegExp object to set
+ * @param {String} flag	flag of RegExp
+ * @return
+ * @example
+ * 附帶 'g' flag 的 RegExp 對相同字串作 .test() 時，第二次並不會重設。因此像下面的 expression 兩次並不會得到相同結果。
+ * var r=/,/g,t='a,b';
+ * WScript.Echo(r.test(t)+','+r.test(t));
+ * 
+ * //	改成這樣就可以了：
+ * var r=/,/g,t='a,b',s=renew_RegExp_flag(r,'-g');
+ * WScript.Echo(s.test(t)+','+s.test(t));
+ * 
+ * //	這倒沒問題：
+ * r=/,/g,a='a,b';
+ * if(r.test(a))alert(a.replace(r,'_'));
+ * 
+ * //	delete r.lastIndex; 無效，得用 r.lastIndex=0; 因此下面的亦可：
+ * if(r.global)r.lastIndex=0;
+ * if(r.test(a)){~}
+ * 
+ * @see
+ * http://msdn.microsoft.com/zh-tw/library/x9h97e00(VS.80).aspx,
+ * 如果規則運算式已經設定了全域旗標，test 將會從 lastIndex 值表示的位置開始搜尋字串。如果未設定全域旗標，則 test 會略過 lastIndex 值，並從字串之首開始搜尋。
+ * http://www.aptana.com/reference/html/api/RegExp.html
+ * @memberOf	CeL.native
+ */
+renew_RegExp_flag = function(regexp, flag) {
+	var i, flag_set = {
+		global : 'g',
+		ignoreCase : 'i',
+		multiline : 'm'
+	};
 
-改成這樣就可以了：
-var r=/,/g,t='a,b',s=renew_RegExp_flag(r,'-g');WScript.Echo(s.test(t)+','+s.test(t));
+	// 未指定 flag: get flag
+	if (!flag) {
+		flag = '';
+		for (i in flag_set)
+			if (regexp[i])
+				flag += flag_set[i];
+		return flag;
+	}
 
-這倒沒問題：
-r=/,/g,a='a,b';if(r.test(a))alert(a.replace(r,'_'));
+	var a = flag.charAt(0), F = '', m;
+	a = a === '+' ? 1 : a === '-' ? 0 : (F = 1);
 
+	if (F)
+		// 無 [+-]
+		F = flag;
+	else
+		// f: [+-]~ 的情況，parse flag
+		for (i in flag_set)
+			if ((m = flag.indexOf(flag_set[i], 1) != -1) && a || !m
+					&& regexp[i])
+				F += flag_set[i];
 
-** delete r.lastIndex; 無效，得用 r.lastIndex=0;
-因此下面的亦可：
-if(r.global)r.lastIndex=0;
-if(r.test(a)){~}
-*/
-function renew_RegExp_flag(r,f){
- var i,fs={global:'g',ignoreCase:'i',multiline:'m'};
-
- //	未設定 flag,
- if(!f){
-  f='';
-  for(i in fs)
-   if(r[i])f+=fs[i];
-  return f;
- }
-
- var a=f.charAt(0),F='',m;
- a=a=='+'?1:a=='-'?0:(F=1);
-
- if(F)
-  //	無 [+-]
-  F=f;
- else
-  //	f: [+-]~ 的情況，parse flag
-  for(i in fs)
-   if((m=f.indexOf(fs[i],1)!=-1)&&a || !m&&r[i])
-    F+=fs[i];
- 
- return new RegExp(r.source,F);
-}
+	return new RegExp(regexp.source, F);
+};
 
 
 /*	2004/5/27 16:08
@@ -4711,7 +5139,7 @@ CeL.native
  * IEEE754の丸め演算は最も報告されるES3「バグ」である。
  * http://www.jibbering.com/faq/#FAQ4_6
  * @example
- * {var d=new Date,v=0.09999998,i=0,a;for(;i<100000;i++)a=v.decp(2);alert(v+'\n→'+a+'\ntime:'+gDate(new Date-d));}
+ * {var d=new Date,v=0.09999998,i=0,a;for(;i<100000;i++)a=v.decp(2);alert(v+'\n→'+a+'\ntime:'+format_date(new Date-d));}
  */
 decplaces = function(digits, max) {
 	var v = this.valueOf(),
@@ -4823,23 +5251,45 @@ function checkSQLInput(str){
 	;
 }
 // 去掉前後space
-function checkSQLInput_noSpace(str){
- return str?checkSQLInput(str.replace(/\s+$|^\s+/g,'')):'';	//	.replace(/[\s\n]+$|^[\s\n]+/g,'')
+function checkSQLInput_noSpace(str) {
+	return str ? checkSQLInput(str
+			//.replace(/[\s\n]+$|^[\s\n]+/g,'')
+			.replace(/\s+$|^\s+/g, '')) : '';
 }
 
 
-//	轉換字串成數值，包括分數等。分數亦將轉為分數。
-function parseNumber(n){
- if(typeof n=='number')return n;
- if(!n||typeof n!='string')return NaN;
- n=n.replace(/(\d),(\d)/g,'$1$2');
- var m;
- if(m=n.match(/(-?[\d.]+)\s+([\d.]+)\/([\d.]+)/)){
-  var p=parseFloat(m[1]),q=parseFloat(m[2])/parseFloat(m[3]);
-  return p+(m[1].charAt(0)=='-'?-q:q);
- }
- if(m=n.match(/(-?[\d.]+)\/([\d.]+)/))return parseFloat(m[1])/parseFloat(m[2]);	//	new quotient(m[1],m[2])
- try{return isNaN(m=parseFloat(n))&&typeof eval=='function'?eval(n):m;}catch(e){return m;}
+CeL.native
+.
+/**
+ * 轉換字串成數值，包括分數等。分數亦將轉為分數。
+ * @param number
+ * @return
+ */
+parse_number = function(number) {
+	var m = typeof number;
+	if (m === 'number')
+		return number;
+	if (!number || m !== 'string')
+		return NaN;
+
+	number = number.replace(/(\d),(\d)/g, '$1$2');
+	if (m = number.match(/(-?[\d.]+)\s+([\d.]+)\/([\d.]+)/)) {
+		var p = parseFloat(m[1]), q = parseFloat(m[2]) / parseFloat(m[3]);
+		return p + (m[1].charAt(0) === '-' ? -q : q);
+	}
+	if (m = number.match(/(-?[\d.]+)\/([\d.]+)/))
+		// new quotient(m[1],m[2])
+		return parseFloat(m[1]) / parseFloat(m[2]);
+
+/*
+	try {
+		return isNaN(m = parseFloat(number)) ?
+				//	TODO: security hole
+				eval(number) : m;
+	} catch (e) {
+		return m;
+	}
+*/
 }
 
 
@@ -5168,9 +5618,9 @@ curl --connect-timeout 5 -x 66.98.238.8:3128 http://www.getchu.com/ | grep Getch
 
 
 //	http://help.globalscape.com/help/cuteftppro8/
-setupCuteFTPSite[generateCode.dLK]='parseURI';
+//setupCuteFTPSite[generateCode.dLK]='parse_URI';
 function setupCuteFTPSite(targetS,site){
- if(typeof targetS=='string')targetS=parseURI(targetS,'ftp:');
+ if(typeof targetS=='string')targetS=parse_URI(targetS,'ftp:');
  if(!targetS)return;
 
  if(site){
@@ -5201,7 +5651,7 @@ function setupCuteFTPSite(targetS,site){
 TODO:
 transferURL(remote URI,remote URI)
 */
-transferURL[generateCode.dLK]='parsePath,parseURI,setupCuteFTPSite';
+transferURL[generateCode.dLK]='parsePath,parse_URI,setupCuteFTPSite';
 function transferURL(fromURI,toURI){
  //var connectTo=fromURI.indexOf('://')==-1?toURI:fromURI,CuteFTPSite=setupCuteFTPSite(connectTo);
  var isD,CuteFTPSite,lF,rP;	//	isD: use download (else upload), lF: local file, rP: remote path
@@ -5209,7 +5659,7 @@ function transferURL(fromURI,toURI){
  else if(toURI.indexOf('://')!=-1)isD=1;
  else return;	//	local to local?
  lF=parsePath(isD?toURI:fromURI);
- CuteFTPSite=setupCuteFTPSite(rP=parseURI(isD?fromURI:toURI,'ftp:'));
+ CuteFTPSite=setupCuteFTPSite(rP=parse_URI(isD?fromURI:toURI,'ftp:'));
  if(!CuteFTPSite||!CuteFTPSite.IsConnected)return;
  //	到這裡之後，就認定CuteFTPPro.TEConnection的initial沒有問題，接下來若出問題，會嘗試重新initial CuteFTPPro.TEConnection
 
@@ -6516,9 +6966,8 @@ function preCheck(argumentCount,ver,mFN){	//	argument數,最低版本,若ver<5.1
 
 Update[generateCode.dLK]='getU,getFN,simpleWrite';	//	,Debug_for_include,gDate
 
-function Update(for_check,install_url){
- var _f=arguments.callee;
- return _f.check(_f.setup(for_check,install_url));
+function Update(for_check, install_url) {
+	return Update.check(Update.setup(for_check, install_url));
 }
 
 //	base function
@@ -6699,7 +7148,7 @@ function parseINI(FN,format,INIunBlock,noComment){
 
 
 /*
-	Scriptlet.Typelib對象的設計用途是幫助您創建“Windows 腳本組件”（實質上，這是一種使您編寫的腳本可以像COM對象那樣工作的方法）。
+	Scriptlet.Typelib 對象的設計用途是幫助您創建“Windows 腳本組件”（實質上，這是一種使您編寫的腳本可以像COM對象那樣工作的方法）。
 	http://www.microsoft.com/technet/scriptcenter/resources/qanda/feb05/hey0221.mspx
 	http://msdn.microsoft.com/library/default.asp?url=/library/en-us/rpc/rpc/guid.asp
 */
@@ -7665,7 +8114,7 @@ getURL.HandleStateChange=function(e,URL,dealFunction){	//	e: object Error, dealF
     else dealFunction(
 	isOKc?_t?_oXMLH.responseXML:
 		//	JKL.ParseXML: Safari and Konqueror cannot understand the encoding of text files.
-		typeof window=='object'&&window.navigator.appVersion.indexOf("KHTML")!=-1&&(e=escape(_oXMLH.responseText),!e.match("%u")&&e.match("%"))?e:_oXMLH.responseText
+		typeof window=='object'&&window.navigator.appVersion.indexOf("KHTML")!=-1&&!(e=escape(_oXMLH.responseText)).indexOf("%u")!=-1?e:_oXMLH.responseText
 	:0
 	,isOKc?_oXMLH.getAllResponseHeaders():0,_oXMLH,URL);//dealFunction.apply()
     //	URL之protocol==file: 可能需要重新.loadXML((.responseText+'').replace(/<\?xml[^?]*\?>/,""))
@@ -10276,6 +10725,11 @@ CeL.setup_module(module_name, code_for_including);
  */
 
 
+/*
+TODO
+對無顯示 SVG 的多一項警告。
+*/
+
 if (typeof CeL === 'function'){
 
 /**
@@ -10348,7 +10802,7 @@ animation
  */
 CeL.net.SVG
 = function(_width, _height, _backgroundColor){
- var _f = arguments.callee, _s;
+ var _f = _, _s;
 /*
  if(!_f.createENS()){
   //alert('Your browser doesn't support SVG!');
@@ -11472,6 +11926,7 @@ draw_addition=function(num1, num2, svgO, _color, _font) {
 
 	_w -= mL + tW;
 
+	//	TODO: 讓 IE8 顯示起來像 111+111=222, 而非 +111111222
 	svgO
 		.addNum(num1, _w - num1.length * tW, mT + tH, tW, _color, _font)
 		.addNum(num2, _w - num2.length * tW, mT + 2 * tH, tW, _color, _font)
@@ -11983,25 +12438,68 @@ if(disabledKM){with(document.body)	//	已lock時不執行多餘的動作與覆�
 	window.captureEvents(Event.KEYDOWN);
 
  disabledKM=s;
-}
+};
 
-//setObjValue('trigger.f','_switch,_show,_hidden,_test','int');	//	use to control trigger().	test:get what condition with no change
-//trigger[generateCode.dLK]='get_element';
-function trigger(div,v,s){	//	v:trigger.f	toggle
- if(!s)s='block';
- var N,n='none',f=arguments.callee.f;//inline,list-item. 其他恐造成error!
- //showObj(div);
- if(typeof div=='string')div=typeof get_element=='function'?get_element(div):document.getElementById(div);
- if(!div)return;
- with(div){
-  if(!div.style)n='hidden';//visible	//var d=div.style?style:div.visibility;
-  if(typeof tagName=='string')N=tagName.toLowerCase();	//	Opera 7.5意外的沒有tagName (-_-) 而Firefox也可能沒有此property
-  if((N=='div'||N=='span')&&!innerHTML)if(div.style)style.display=n;else div.visibility=h;//N!='iframe'&&N!='input'
-  //alert(v+','+(!v||v==f._switch));
-  if(div.style)with(style)return display= !v||v==f._switch? !display||display==n?s:n:	//	display==''時預設為顯示
-	v==f._show?s: v==f._hidden?n: /*v==f._test?display:*/display;
- }
-}
+
+CeL.net.web
+.
+/**
+ * trigger/swap display and visibility.
+ * display:none or visibility:hidden.
+ * TODO: computed style
+ * @param element	HTML element
+ * @param {String,Number} type	show or hidden or set the status type:
+ * 			{Number}: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change
+ * 			{String}: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?
+ * @return	display status
+ * @since	2010/4/1 10:24:43 rewrite
+ * @see
+ * http://www.w3schools.com/CSS/pr_class_visibility.asp
+ * http://www.w3schools.com/css/pr_class_display.asp
+ * http://www.javaeye.com/topic/140784
+ * 	通過element.style對象只能取得內聯的樣式，也就是說只能取得html標籤裡寫的屬性。 
+ * @requires	[_.get_element],[_.get_style]
+ * @memberOf	CeL.net.web
+ */
+trigger_display = function(element, type){
+	// showObj(div);
+	if (typeof element === 'string')
+		element = typeof _.get_element === 'function' ? _.get_element(element)
+			: document.getElementById(element);
+
+	if (!element)
+		return;
+
+	// Opera 7.5 意外的沒有 tagName (-_-) 而 Firefox 也可能沒有此 property
+	var tagName = ('' + element.tagName).toLowerCase(), style = element.style,
+		v_value = {'visible':1, 'hidden': 2, 'collapse': 3};
+
+	if (typeof type === 'undefined' || type == 2)
+		type = style ?
+				(_.get_style ? _.get_style(element, 'display') :
+					//	style.display === '' 時預設為顯示
+					style.display) === 'none'
+			: element.visibility !== 'visible';
+
+	if (typeof type === 'boolean')
+		type = type ? 1 : 0;
+
+	if (!isNaN(type))
+		type = type == 0 ? style ? 'none' : tagName === 'tr' ? 'collapse' : 'hidden'
+			: type == 1 ? style ? (tagName in {'div':1, 'iframe':1}) ? 'block' : 'inline' : 'visible'
+			: null;
+
+	//	test .innerHTML
+
+	//library_namespace.debug('set display style to [' + type + ']');
+	if (style)
+		style[type in v_value? 'visibility' : 'display'] = type;
+	else if(type in v_value)// &&!(tagName in {'iframe':1,'input':1})
+		element.visibility = type;
+	else return;
+
+	return type;
+};
 //simpleWrite('a.txt',reduceCode([f,trigger,setObjValue]));
 //for(var i in style)tt+=i+'='+document.getElementById("others").style[i]+"<br/>";document.write(tt);
 
@@ -12026,6 +12524,7 @@ importNode() 比較像是 cloneNode() 加上變更 ownerDocument。
  * @param o
  * @param html
  * @return
+ * @memberOf	CeL.net.web
  */
 replace_HTML = function(o,html){
 	if (typeof o === 'string')
@@ -12073,35 +12572,37 @@ CeL.net.web
  * @return
  * @memberOf	CeL.net.web
  */
-remove_node = function(o,tag){
- var _f=arguments.callee,i;
- if(typeof o==='string')o=document.getElementById(o);
- if(!o||typeof o!='object')return;
+remove_node = function remove_node(o, tag) {
+	var _f = remove_node, i;
+	if (typeof o === 'string')
+		o = document.getElementById(o);
+	if (!o || typeof o != 'object')
+		return;
 
- //	remove child
- if(tag){
-  if(typeof tag=='string')
-   tag=tag.toLowerCase();
+	// remove child
+	if (tag) {
+		if (typeof tag === 'string')
+			tag = tag.toLowerCase();
 
-  //	safer: if you have any asynchronous events going. But node.hasChildNodes() will always do an evaluation.
-  //while(o.hasChildNodes()&&(i=o.firstChild))o.removeChild(i);
+		//	safer: if you have any asynchronous events going. But node.hasChildNodes() will always do an evaluation.
+		//while(o.hasChildNodes()&&(i=o.firstChild))o.removeChild(i);
 
-  //	don't use for()	http://weblogs.macromedia.com/mesh/archives/2006/01/removing_html_e.html
-  i=o.childNodes.length;
-  while(i--)
-   if(tag===1||tag==o.childNodes[i].tagName.toLowerCase())
-    //_f(o.childNodes[i],tag),	//	TODO: 會有問題
-    o.removeChild(o.childNodes[i]);
- }
+		// don't use for()
+		// http://weblogs.macromedia.com/mesh/archives/2006/01/removing_html_e.html
+		i = o.childNodes.length;
+		while (i--)
+			if (tag === 1 || tag == o.childNodes[i].tagName.toLowerCase())
+				// _f(o.childNodes[i],tag), // TODO: 會有問題
+				o.removeChild(o.childNodes[i]);
+	}
 
- //	remove self
- return tag||!(i=o.parentNode)?o:i.removeChild(o);	//	if(o.parentNode): 預防輸入的o為create出來的
+	// remove self
+	return tag || !(i = o.parentNode) ? o : i.removeChild(o); //	if(o.parentNode): 預防輸入的o為create出來的
 };
 
 CeL.net.web
 .
 remove_all_child = _.replace_HTML;
-
 
 
 
@@ -12122,12 +12623,15 @@ CeL.net.web
  * @since	2006/12/10 21:25 分離 separate from XML_node()
  * @memberOf	CeL.net.web
  */
-set_attribute=function(_e,propertyO){
- if(typeof _e=='string')_e=typeof get_element=='function'?get_element(_e):document.getElementById(_e);
+set_attribute = function(_e,propertyO){
+ if(typeof _e==='string')_e=typeof _.get_element==='function'?_.get_element(_e):document.getElementById(_e);
  if(!_e||!propertyO/*||_e.nodeType==3/* TEXT_NODE */)return;
 
  var _l,_m,_g,_N={svg:'2000/svg',mathml:'1998/Math/MathML',xhtml:'1999/xhtml',xlink:'1999/xlink'	//	Namespaces:SVG,MathML,XHTML,XLink
-		,html:'TR/REC-html40'	//	亦可用'1999/xhtml'
+	 //	亦可用'1999/xhtml'
+	 ,html:'TR/REC-html40'
+	 ,html4:'TR/REC-html40'
+	 ,html5:'TR/html5'
 	};
  if(typeof propertyO=='string')propertyO=/[=:]/.test(propertyO)?split_String_to_Object(propertyO):propertyO.split(',');
  if(propertyO instanceof Array)
@@ -12164,10 +12668,10 @@ CeL.net.web
  * @since	2007/1/20 14:12
  * @memberOf	CeL.net.web
  */
-add_node = function(node, child_list) {
-	var _s = arguments.callee;
+add_node = function add_node(node, child_list) {
+	var _s = add_node;
 	if (typeof node === 'string')
-		node = typeof get_element === 'function' ? get_element(node) 
+		node = typeof _.get_element === 'function' ? _.get_element(node) 
 				: document.getElementById(node);
 
 	if (node && arguments.length > 2) {
@@ -12334,7 +12838,8 @@ XML_node = function(tag,propertyO,insertBeforeO,innerObj,styleO){
  }catch(_e){alert('XML_node: Error create tag:\n'+tag/*+'\n'+_e.description*/);return;}
  if(tag)_.set_attribute(_e,propertyO);
 
- if(tag&&styleO&&_e.style)	//	IE需要先appendChild才能操作style，moz不用..?
+ //	IE需要先appendChild才能操作style，moz不用..??
+ if(tag&&styleO&&_e.style)
   if(typeof styleO=='string')_e.style.cssText=styleO;
   else if(typeof styleO=='object')for(_i in styleO)_e.style[_i=='float'?'cssFloat':_i]=styleO[_i];	//	isIE?"styleFloat":"cssFloat"
   //else alert('XML_node: Error set style:\n['+styleO+']');
@@ -12527,6 +13032,136 @@ function setAstatusOut(){
 
 
 
+/*
+
+test:
+/fsghj.sdf
+a.htm
+http://www.whatwg.org/specs/web-apps/current-work/#attr-input-pattern
+file:///D:/USB/cgi-bin/lib/JS/_test_suit/test.htm
+//www.whatwg.org/specs/web-apps/current-work/#attr-input-pattern
+
+TODO:
+.fileName:
+file:///D:/USB/cgi-bin/lib/JS/_test_suit/test.htm
+->
+D:\USB\cgi-bin\lib\JS\_test_suit\test.htm
+
+eURI : /^((file|telnet|ftp|https?)\:\/\/|~?\/)?(\w+(:\w+)?@)?(([-\w]+\.)+([a-z]{2}|com|org|net))?(:\d{1,5})?(\/([-\w~!$+|.,=]|%[a-f\d]{2})*)?(\?(([-\w~!$+|.,*:]|%[a-f\d{2}])+(=([-\w~!$+|.,*:=]|%[a-f\d]{2})*)?&?)*)?(#([-\w~!$+|.,*:=]|%[a-f\d]{2})*)?$/i,
+
+*/
+CeL.net.web
+.
+/**
+ * Parses URI
+ * @param {String} URI	URI to parse
+ * @return	parsed object
+ * @example
+ * alert(parse_URI('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23#hhh').hostname);
+ * @since	2010/4/13 23:53:14 from parseURI+parseURL
+ * @memberOf	CeL.net.web
+ * @see
+ * RFC 1738, RFC 2396, RFC 3986,
+ * Uniform Resource Identifier (URI): Generic Syntax,
+ * http://tools.ietf.org/html/rfc3987,
+ * http://flanders.co.nz/2009/11/08/a-good-url-regular-expression-repost/,
+ * http://www.mattfarina.com/2009/01/08/rfc-3986-url-validation,
+ * also see batURL.htm
+ */
+parse_URI = function(URI) {
+	var m, n, h = URI, p;
+	if (!h
+			||
+			// 不能用 instanceof String!
+			typeof h !== 'string'
+				|| !(m = h.match(/^([\w\d\-]{2,}:)?(\/\/)?(\/[A-Za-z]:|[^\/#?&\s:]+)([^\s:]*)$/)))
+		return;
+	//library_namespace.debug('parse [' + URI + ']: '+m);
+
+	URI = is_DOM('location') ? {
+		// protocol包含最後的':',search包含'?',hash包含'#'
+		// file|telnet|ftp|https
+		protocol : location.protocol,
+		hostname : location.hostname,
+		port : location.port,
+		host : location.host,
+		//	local file @ IE: C:\xx\xx\ff, others: /C:/xx/xx/ff
+		pathname : location.pathname
+	} : {};
+	URI.URI = h;
+
+	if (n = m[1])
+		URI.protocol = n;
+	URI._protocol = URI.protocol.slice(0,-1);
+	//library_namespace.debug('protocol [' + URI._protocol + ']');
+
+	/*	** filename 可能歸至m[4]!
+	 * 判斷準則:
+	 * gsh.sdf.df#dhfjk		filename|hostname
+	 * gsh.sdf.df/dhfjk		hostname
+	 * gsh.sdf.df?dhfjk		filename
+	 * gsh.sdf.df			filename
+	 */
+	h = m[3], p = m[4];
+	if (h && !/^\/[A-Za-z]:$/.test(h) && (p.charAt(0) === '/' || /[@:]/.test(h))) {
+		// 處理 username:password
+		if (m = h.match(/^([^@]*)@(.+)$/)) {
+			n = m[1].match(/^([^:]+)(:(.*))?$/);
+			if (!n)
+				return;
+			URI.username = n[1];
+			if (n[3])
+				URI.password = n[3];
+			h = m[2];
+		}
+
+		// 處理 host
+		if (m = h.match(/^([^\/#?&\s:]+)(:(\d{1,5}))?$/)) {
+			// host=hostname:port
+			URI.host = URI.hostname = m[1];
+			if (m[3])
+				URI.port = parseInt(m[3], 10);
+			else if (n = {
+						http : 80,
+						ftp : 21
+					}[URI._protocol])
+				URI.host += ':' + (URI.port = n);
+		} else
+			return;
+
+	} else//	test URI.protocol === 'file:'
+		p = h + p, h = '';
+	//if (!h) library_namespace.warn('將[' + p + ']當作 pathname!');
+	//library_namespace.debug('local file: [' + location.pathname + ']'),
+
+	if(!/^([^%]+|%[a-f\d]{2})+$/.test(p))
+		library_namespace.warn('encoding error: [' + p + ']');
+
+	if (p && (m = p.match(/^(((\/.*)\/)?([^\/#?]*))?(\?([^#]*))?(#(.*))?$/)))
+		// pathname={path}filename
+		//library_namespace.warn('pathname: [' + m + ']'),
+		//	.path 會隨不同 OS 之 local file 表示法作變動!
+		URI.path = /^\/[A-Za-z]:/.test(URI.pathname = m[1]) ? m[2].slice(1).replace(/\//g,'\\') : m[2],
+		URI.filename = m[4],
+		URI.search = m[5], URI._search = m[6],
+		URI.hash = m[7], URI._hash = m[8];
+	else {
+		if (!h)
+			return;
+		URI.path = URI.pathname.replace(/[^\/]+$/, '');
+	}
+	//library_namespace.debug('path: [' + URI.path + ']'),
+
+
+	// href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
+	URI.href = (URI.protocol ? URI.protocol + '//' : '')
+	+ (URI.username ? URI.username
+			+ (URI.password ? ':' + URI.password : '') + '@' : '')
+			+ URI.host + URI.pathname + (URI.search || '') + (URI.hash || '');
+
+	//library_namespace.debug('href: [' + URI.href + ']');
+	return URI;
+};
 
 
 
@@ -12774,9 +13409,11 @@ function setCookie(name,value){//,flagOnceTime
 getCookie(name);	//	取得name之值，亦可用RegExp：if(c=getCookie())c['name1']==value1;
 getCookie('nn[^=]*');	//	取得所有nn開頭之組合
 getCookie();	//	取得所有name=value組
+
+因為 cookie 較容易遭到竄改或是出問題，建議設定 verify。
 */
 //getCookie[generateCode.dLK]='renew_RegExp_flag';
-function getCookie(name,flag){
+function getCookie(name,flag,verify){
  if(typeof document!='object'||!document.cookie)return;
  if(!name)name='[^;=\\s]+';//\w+
  var c,R=name instanceof RegExp?name:new RegExp('('+name+')\\s*=\\s*([^;=\\s]*)','g')
@@ -12828,7 +13465,7 @@ retType	回傳0:node本身,1:註解值
 */
 function getComment(div,level,retType){
  if(!div)div=window.document;
- var i=0,d,_f=arguments.callee;
+ var i=0,d,_f=getComment;
  if(isNaN(_f.endLevel))_f.endLevel=2;
  if(isNaN(level)||level===-1)_f.a=[],level=_f.endLevel;
  else if(typeof _f.a!='object')_f.a=[];
@@ -13025,30 +13662,65 @@ function loginFTP(n,p,path,hostname){	//	name,password
 
 //	reference page set	==================
 
-/*	簡化document.getElementById並配合loadReference()	2004/6/25 19:33
+CeL.net.web
+.
+/**
+ * 簡化 document.getElementById 並配合 loadReference()
+ * @since 2004/6/25 19:33
+ * @param id	所欲找尋之 element id
+ * @param flag
+ *            {HTML Object} object: 參考此 document object
+ *            {Number} flag: 參見 code
+ * @return	{HTML Object} Object
+ * @requires	referenceDoc,loadReferenceDone,`get_element();`
+ * @memberOf	CeL.net.web
+ */
+get_element = function get_element(id, flag) {
+	var _s = get_element, _f = _s.f;
+	if (!_f)
+		// 在 Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.6) Gecko/20040510 中會出問題，所以改到函數中執行。但得先執行過一次。
+		//alert('get_element: set flags get_element.f'),
+		_s.f = _f = {
+			//	僅參考自身頁面，default
+			'self' : 0,
+			//	可參考 reference page
+			'ref' : 1,
+			//	僅參考 reference page
+			'refOnly' : 2
+		};
 
-	flag:
-	get_element.f.ref:可參考reference page
-	get_element.f.refOnly:僅參考reference page
-	object:參考此document object
-*/
-//get_element[generateCode.dLK]='referenceDoc,loadReferenceDone,*get_element();';
-function get_element(id,flag){
- if(!get_element.f)get_element.f={'self':0,'ref':1,'refOnly':2};//,alert('get_element: set flags get_element.f');	//	在Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.6) Gecko/20040510中會出問題，所以改到函數中執行。但得先執行過一次。
- if(!id||typeof window!='object'||typeof document!='object'||document!=window.document)return null;
- //if(flag)alert('get_element: '+id+','+flag);
- //if(!flag)flag=get_element.f.self;	//	後面暫時沒用到
- if(typeof document!='object'||!document.body)return;	//	document尚未load
- var o;
- if(flag!=get_element.f.refOnly)
-  o=document.getElementById?document.getElementById(id):document.all?document.all[id]:document.layers?document.layers[id]:window[id]||null;	//	僅參考reference page時不設定
- //if(flag)alert('get_element: '+id+','+flag+'\nloadReferenceDone='+loadReferenceDone+'\nreferenceDoc: '+referenceDoc+'\no: '+o+'\nreferenceDoc.get: '+referenceDoc.getElementById(id)+'\n'+referenceDoc.body.innerHTML.slice(0,200));
- try{	//	偶爾還是有可能'沒有使用權限'
-  if( typeof flag=='object'&&typeof flag.getElementById=='function'&&(o=flag.getElementById(id))
-	|| o || flag&&loadReferenceDone==1&&(o=referenceDoc.getElementById(id)) )return o;
- }catch(e){}
- return null;
-}
+	if (!id || typeof window != 'object' || typeof document != 'object'
+			|| document != window.document)
+		return null;
+	// if(flag)alert('get_element: '+id+','+flag);
+
+	// 後面暫時沒用到
+	// if(!flag)flag=_f.self;
+
+	if (typeof document != 'object' || !document.body)
+		// document 尚未 load
+		return;
+	var o;
+	if (flag != _f.refOnly)
+		// 僅參考 reference page 時不設定
+		o = document.getElementById ? document.getElementById(id)
+			: document.all ? document.all[id]
+			: document.layers ? document.layers[id] : window[id]
+			|| null;
+	//if(flag)alert('get_element: '+id+','+flag+'\nloadReferenceDone='+loadReferenceDone+'\nreferenceDoc: '+referenceDoc+'\no: '+o+'\nreferenceDoc.get: '+referenceDoc.getElementById(id)+'\n'+referenceDoc.body.innerHTML.slice(0,200));
+	try {
+		// 偶爾還是有可能'沒有使用權限'
+		if (typeof flag == 'object' && typeof flag.getElementById == 'function'
+				&& (o = flag.getElementById(id)) || o || flag
+				&& loadReferenceDone == 1
+				&& (o = referenceDoc.getElementById(id)))
+			return o;
+	} catch (e) {
+	}
+	return null;
+};
+
+
 
 /*	以外掛的reference page配置data object	2004/6/25 21:01
 
@@ -13058,14 +13730,14 @@ function get_element(id,flag){
 	在需要的文件body加入	<iframe id="reference"></iframe>
 	function setupPageR()	initial after load of reference page
 
-	如上，再使用get_element()即可得到reference.htm中的obj
+	如上，再使用 get_element() 即可得到 reference.htm 中的 obj
 */
 var referenceDoc,loadReferenceDone;//,loadReferenceCount;
 //loadReference[generateCode.dLK]='get_element,referenceDoc,loadReferenceDone,parseFunction';
 function loadReference(referenceURL,iframeId){
  if(loadReferenceDone||typeof location!='object'||!location.protocol||location.protocol=='https:')return;	//	https會拒絕存取，所以直接放棄。
  //if(loadReferenceDone)return;	//	https會拒絕存取，所以直接放棄。
- var o=get_element(iframeId||'reference'),thisFuncName=parseFunction().funcName;
+ var o=_.get_element(iframeId||'reference'),thisFuncName=parseFunction().funcName;
  if(typeof referenceDoc=='object' && typeof referenceDoc.document=='object' && referenceDoc.document){	//	referenceDoc is still contentWindow here.	typeof referenceDoc.document:預防使用https時產生不能讀取的權限問題。
   referenceDoc=o.contentWindow.document;//referenceDoc.document;	//	遺憾：在舊版IE不能用後者。也許是因為舊版IE連contentWindow都會重造。
   o=referenceDoc.body;//alert(o.innerHTML.length+'\n'+o.innerHTML);
@@ -13086,7 +13758,7 @@ function loadReference(referenceURL,iframeId){
   setTimeout(thisFuncName+'();',90);
   return 1;
  }
- //o=get_element(iframeId||'reference');	//	原來把設定放在這，不過反正都要在前面用到…
+ //o=_.get_element(iframeId||'reference');	//	原來把設定放在這，不過反正都要在前面用到…
  if(!o||(o.tagName||'').toLowerCase()!='iframe'){loadReferenceDone=2;return;}	//	iframe不存在
  if(!o.src)o.style.display='none',//'block',//
   o.src=referenceURL;	//	for game.js: typeof relatePath=='function'?relatePath(0,'cgi-bin/game/data/reference.htm'):'data/reference.htm'
@@ -13118,10 +13790,10 @@ function loadReference(referenceURL,iframeId){
 //transRefObj[generateCode.dLK]='get_element';
 function transRefObj(id,id2,force){
  if(typeof id2!='string'&&typeof id2!='object')force=id2,id2=typeof id=='object'?id.id:id;
- var o=typeof id=='object'?id:get_element(id,get_element.f.self),p;
+ var o=typeof id=='object'?id:_.get_element(id,_.get_element.f.self),p;
  //alert('transRefObj: '+id2+' -> '+id+'('+(force?'':'not ')+'force)\n'+o+'\ntarget:'+(o.innerHTML?'\n'+o.innerHTML.slice(0,200):' (null)'));
  if( o && (force||!o.innerHTML)
-	&& (p=typeof id2=='object'?id2:get_element(id2,get_element.f.refOnly)) && (force||p.innerHTML) )
+	&& (p=typeof id2=='object'?id2:_.get_element(id2,_.get_element.f.refOnly)) && (force||p.innerHTML) )
   try{
 	//alert('transRefObj: DO '+id2+' -> '+id+'('+(force?'':'not ')+'force)\n');
 	o.appendChild(p.cloneNode(true));
@@ -13404,7 +14076,7 @@ set_class = function(element, class_name, flag) {
  * @return
  */
 function has_class(element, class_name) {
-	var _s = arguments.callee, n = element.className, i;
+	var _s = has_class, n = element.className, i;
 	//class_name = class_name.replace(/\s+$|^\s+/g, '');
 	if (!n || !class_name)
 		return;
@@ -13807,7 +14479,7 @@ id=delayRun([function,[args],this] [,ms=0])
 
 */
 function delayRun(f,ms){
- var _f=arguments.callee,i;
+ var _f=delayRun,i;
  if(!_f.fL)_f.fL=[];
  i=_f.fL.length;
  _f.fL.push(f);
@@ -13873,43 +14545,6 @@ function VBalert(prompt,buttons,title,helpfile,context){
 //alert(VBalert('12',VBalert_f.vbInformation+VBalert_f.vbDefaultButton3));
 
 
-/*	**	protocol不包含最後的':',search不包含'?',hash不包含'#'
-	href=protocol:(//)?username:password@hostname:port/path/filename?search#hash
-	host=hostname:port
-	pathname=pathname/filename
-
-also see batURL.htm
-*/
-function parseURL(url){
- if(!url)return;
- var m=url.match(/^([\w-]{2,}):(\/\/)?([^\/]+)(\/.*)?$/),h,p,a,r={};
- if(!m)return;
- r.href=url,r.protocol=m[1],h=m[3],p=m[4];
- if(m=h.match(/^([^@]+)@([^@]+)$/)){
-  a=m[1].match(/^([^:]+):?([^:]*)$/);if(!a)return;
-  r.username=a[1];if(a[2])r.password=a[2];h=m[2];
- }
- r.host=h;
- if(m=h.match(/^([^:]+):?(\d*)$/)){
-  r.hostname=m[1];if(m[2])r.port=parseInt(m[2]);
- }else return;
- if(p){
-  if(m=p.match(/^([^\?#]+)([\?#].*)/)){
-   a=m[2];
-   if(a.match(/^\?([^#]*)(#.*)?$/))r.search=RegExp.$1,r.hash=RegExp.$2.slice(1);
-   //else if(a.match(/^#([^\?]*)(\?.*)?$/))r.hash=RegExp.$1,r.search=RegExp.$2.slice(1);	//	先#再?怪怪的
-   else return;
-   p=m[1];
-  }
-  r.pathname=p;
-  if(i=p.lastIndexOf('/')+1)r.path=p.slice(0,i),r.filename=p.slice(i);
-  else r.filename=p;
- }
- return r;
-}
-//alert(parseURL('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23#hhh').hostname);
-
-
 
 /*	get window status	取得視窗可利用的size。現在還得用種方法，真是羞恥。	2005/1/13 20:0
 	getWinStatus(event object)
@@ -13926,7 +14561,7 @@ function parseURL(url){
 
 //var eventObj;
 function getWinStatus(o){
- var r={};//var _f=arguments.callee,r={};
+ var r={};//var _f=getWinStatus,r={};
  //	已經scroll到哪
  //r.scrollX	=	_f.scrollX();
  //r.scrollY	=	_f.scrollY();
@@ -13959,23 +14594,23 @@ function getWinStatus(o){
 
  return r;
 };
-//Lazy Function Definition Pattern	http://realazy.org/blog/2007/08/16/lazy-function-definition-pattern/	http://peter.michaux.ca/article/3556
-//IE7遵照標準，不用 document.body.scrollLeft 而用 document.documentElement.scrollLeft	http://hkom.blog1.fc2.com/blog-entry-423.html	http://diaspar.jp/node/47
+//	Lazy Function Definition Pattern	http://realazy.org/blog/2007/08/16/lazy-function-definition-pattern/	http://peter.michaux.ca/article/3556
+//	IE7遵照標準，不用 document.body.scrollLeft 而用 document.documentElement.scrollLeft	http://hkom.blog1.fc2.com/blog-entry-423.html	http://diaspar.jp/node/47
 getWinStatus.scrollX=function(){
-return (this.scrollX=
-typeof window.pageXOffset=='number'?function(){return window.pageXOffset;}:	//	pageXOffset: 之前的?
-typeof document.body.scrollLeft!='undefined'?function(){return document.body.scrollLeft;}:
-typeof document.documentElement.scrollLeft!='undefined'?function(){return document.documentElement.scrollLeft;}:
-typeof window.scrollX!='undefined'?function(){return window.scrollX;}:
-function(){return NaN;})();
+ return (this.scrollX=
+	typeof window.pageXOffset=='number'?function(){return window.pageXOffset;}:	//	pageXOffset: 之前的?
+	typeof document.body.scrollLeft!='undefined'?function(){return document.body.scrollLeft;}:
+	typeof document.documentElement.scrollLeft!='undefined'?function(){return document.documentElement.scrollLeft;}:
+	typeof window.scrollX!='undefined'?function(){return window.scrollX;}:
+	function(){return NaN;})();
 };
 getWinStatus.scrollY=function(){
-return (this.scrollY=
-typeof window.pageYOffset=='number'?function(){return window.pageYOffset;}:	//	pageYOffset: 之前的?
-typeof document.body.scrollTop!='undefined'?function(){return document.body.scrollTop;}:
-typeof document.documentElement.scrollTop!='undefined'?function(){return document.documentElement.scrollTop;}:
-typeof window.scrollY!='undefined'?function(){return window.scrollY;}:
-function(){return NaN;})();
+ return (this.scrollY=
+	typeof window.pageYOffset=='number'?function(){return window.pageYOffset;}:	//	pageYOffset: 之前的?
+	typeof document.body.scrollTop!='undefined'?function(){return document.body.scrollTop;}:
+	typeof document.documentElement.scrollTop!='undefined'?function(){return document.documentElement.scrollTop;}:
+	typeof window.scrollY!='undefined'?function(){return window.scrollY;}:
+	function(){return NaN;})();
 };
 
 
@@ -14000,23 +14635,79 @@ function getMouseLoc(e){
 }
 
 
-/*	http://www.quirksmode.org/dom/getstyles.html
-	get style property ( object, property name )
+CeL.net.web
+.
+/**
+ * get current computed style property of specified HTML element.
+ * TODO: 整合 get_node_position, _.set_style
+ * @param element	HTML element
+ * @param name	W3C style property name (e.g., no '-webkit-background-clip')
+ * @return
+ * @see
+ * curCss @ jQuery, http://api.jquery.com/category/css/,
+ * <a href="http://www.quirksmode.org/dom/getstyles.html" accessdate="2010/4/1 15:44">JavaScript - Get Styles</a>,
+ * <a href="http://www.javaeye.com/topic/140784?page=2" accessdate="2010/4/1 15:41">style.display取值不对，难道是浏览器bug？讨论第2页:  - JavaScript - web - JavaEye论坛</a>
+ * 大體上， currentStyle 相當於getComputedStyle，而runtimeStyle相當於getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。
+ * document.defaultView在mozilla中是指向window obj的,但是很有可能在其他broswer中就不指向window obj...因為w3c中沒有強行規定document.defaultView一定是一個global obj.
+ * 
+ * 返回頁內樣式表定義的類，那麼可以使用DOM樣式表對象來訪問：
+ * var oCssRulers = document.styleSheets[0].cssRulers || document.styleSheets[0].rulers;
+ * (前者是DOM方法，後者是IE私有方法)
+ * alert(oCssRulers[0].style.display);
+ * @since	2010/4/2 00:14:09	rewrite
+ * @memberOf	CeL.net.web
+ */
+get_style = function(element, name, not_computed) {
+	if (typeof element === 'string')
+		element = document.getElementById(element);
 
-http://www.javaeye.com/post/414063?page=1
-大體上， currentStyle 相當於getComputedStyle，而runtimeStyle相當於getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。 
-document.defaultView在mozilla中是指向window obj的,但是很有可能在其他broswer中就不指向window obj...因為w3c中沒有強行規定document.defaultView一定是一個global obj.
-*/
-function getStyle(o,p){
- if(typeof o=='string')o=document.getElementById(o);
- var v;
- if(o)
-  if(o.currentStyle)v=o.currentStyle[p];
-  else if(window.getComputedStyle)
-   try{v=document.defaultView.getComputedStyle(o,null).getPropertyValue(p);}catch(e){}
-  //else if(v=o['offset'+p.charAt(0).toLowerCase()+p.slice(1).toUpperCase()],!v)v='';
- return v;
-}
+	//	opacity
+
+	if (!element || !name)
+		return;
+
+	var value, style_interface, e;
+	name = name.toLowerCase();
+	//	IE: element.style.styleFloat, firefox, chorme, safari: element.style.cssFloat
+	//if (name === 'float') name = 'cssFloat' in element.style ? 'cssFloat' : 'styleFloat';
+
+	if (style_interface = document.defaultView)	//	window.getComputedStyle
+		try {
+			if ((value = element.ownerDocument) && (value = value.defaultView))
+				style_interface = value;
+			else library_namespace.debug('Can not get .ownerDocument.defaultView of ' + library_namespace.node_description(element) + ' !');
+
+			//if (/[A-Z]/.test(name)) name = name.replace(/([A-Z])/g, '-$1').toLowerCase();
+			value = style_interface.getComputedStyle(element, null)
+					// [name]
+					.getPropertyValue(name);
+
+			//	from curCss @ jQuery: return a number for opacity
+			if(name === 'opacity' && value === '')
+				value = 1;
+		} catch (e) {
+			library_namespace.err(e);
+		}
+
+	//	IE 5-8
+	else if (style_interface = element.currentStyle)
+		//	IE: \w+\W\w+ (e.g., margin-bottom), firefox, chorme, safari: \w+-\w+
+		value = style_interface[name === 'float' ? 'styleFloat' : name.replace(/-([a-z])/g, function($0, $1) { return $1.toUpperCase(); })];
+		//	Dean Edwards（Base2類庫的作者）的hack	http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
+
+	else if((style_interface = element.style) && (name in style_interface))
+		value = style_interface[name];
+
+	//	we should directly get it from element itself
+	//else if (!(value = element['offset' + name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()])) value = '';
+
+	//	處理 px, pt, em, ..
+
+	//library_namespace.debug(library_namespace.node_description(element) + '.style[' + name + '] = [' + value + ']' +(style_interface === document.defaultView ? ' (use W3C .getComputedStyle)' : style_interface === element.currentStyle ? ' (use IE .currentStyle)' : ''));
+
+	return value;
+};
+
 
 
 CeL.net.web
@@ -14567,7 +15258,8 @@ CeL.net.web
  * **	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。
  * **	NOT TESTED!!
  * @param type	listen to what event type
- * @param listener	listener function/function array
+ * @param listener	listener function/function array/function string,
+ * 				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"
  * @param [document_object]	bind/attach to what document object
  * @param [pFirst]	parentNode first
  * @return
@@ -14575,7 +15267,7 @@ CeL.net.web
  * @see
  * c.f., GEvent.add_listener()
  */
-add_listener = function(type, listener, document_object, pFirst) {
+add_listener = function add_listener(type, listener, document_object, pFirst) {
 	if (!type || !listener)
 		return;
 
@@ -14585,7 +15277,7 @@ add_listener = function(type, listener, document_object, pFirst) {
 	if(typeof pFirst !== 'bool')
 		pFirst = typeof pFirst === 'undefined' ? _s.pFirst : !!pFirst;
 
-	var _s = arguments.callee, i, adder;
+	var _s = add_listener, i, adder;
 
 
 	//	進階功能
@@ -14959,7 +15651,7 @@ reduceHTML.file=function(FP,enc){
 };
 function reduceHTML(t){
  if(!t)return;
- var _f=arguments.callee,f=function($0,$1,$2){return $1!=$2||($1.toLowerCase() in {a:1,p:1,head:1})?$0:'';};
+ var _f=reduceHTML,f=function($0,$1,$2){return $1!=$2||($1.toLowerCase() in {a:1,p:1,head:1})?$0:'';};
  //if(m=t.match(/<!--\[if [^\]]+\]>(.|\n)*?<!\[endif\]-->/))sl(m[0].replace(/</g,'&lt;'));
  //if(m=t.match(/<!\[if !vml\]>((.|\n)*?)<!\[endif\]>/))sl(m[0]);
 
@@ -15123,11 +15815,13 @@ CeL.net.form.address
 
 
 /**
- * 簡易型 net.web.XML_node
+ * 簡易型 net.web.XML_node @ net.form.select_input
  * @param tag	p.appendChild tag
  * @param p	parent node
  * @param t	text
  * @param classN	className
+ * @inner
+ * @ignore
  * @return
  */
 var create_DO = function(tag, p, t, classN) {
@@ -15231,6 +15925,7 @@ addFunc=function(t,f){
  var _t=this,_p=pv(_t);
  create_DO(0,_p.container,' [');
  (create_DO('span',_p.container,t,_.classNameSet.clearMark))
+	//	TODO: do not use arguments
 	.onclick=arguments.callee.caller===initI?function(){f.apply(_t);}:f;//function(){f(_p.zipI,_p.cityI,_p.districtI,_p.addressI);};
  create_DO(0,_p.container,']');
 },
@@ -15241,7 +15936,7 @@ instanceL=[],
 initI=function(o,prefix){
  if(typeof o!='object')o=document.getElementById(o);
  if(!o){
-  //throw new Error(1,'Can not get outter document object!');
+  //throw new Error('Can not get outter document object!');
   return;
  }
 
@@ -15434,6 +16129,7 @@ initI=function(o,prefix){
 //	(instance private handle)	不要 instance private 的把這函數刪掉即可。
 _p='_'+(Math.random()+'').replace(/\./,''),
 //	get private variables (instance[,destroy]), init private variables (instance[,access function list[, instance destructor]])
+//	TODO: do not use arguments
 pv=function(i,d,k){var V,K=_p('k');return arguments.callee.caller===_p('i')?(V=_p(i[K]=_p()),V.O=i,V.L={}):(K in i)&&(V=_p(i[K]))&&i===V.O?d?(_p(i[K],1),delete i[K]):V.L:{};};
 
 //	class destructor	---------------------------
@@ -16107,17 +16803,19 @@ var code_for_including = function(library_namespace, load_arguments) {
 
 //	requires
 if (eval(library_namespace.use_function(
-		'net.web.get_node_position')))
+		'net.web.get_node_position,net.web.parse_URI')))
 	return;
 
 library_namespace.include_module_resource('select_input.css',module_name);
 
 /**
- * 簡易型 net.web.XML_node
+ * 簡易型 net.web.XML_node @ net.form.select_input
  * @param tag	p.appendChild tag
  * @param p	parent node
  * @param t	text
  * @param classN	className
+ * @inner
+ * @ignore
  * @return
  */
 var create_DO = function(tag, p, t, classN) {
@@ -16144,13 +16842,15 @@ var create_DO = function(tag, p, t, classN) {
  * get scrollbar height
  * @return
  * @since	2008/9/3 23:31:21
+ * @inner
+ * @ignore
  * @see
  * http://jdsharp.us/jQuery/minute/calculate-scrollbar-width.php
  * lazy evaluation
  * http://peter.michaux.ca/articles/lazy-function-definition-pattern
  */
 function scrollbar_width() {
-	var _f = arguments.callee;
+	var _f = scrollbar_width;
 	if (!_f.w) {
 		var w, p = create_DO('div', document.body), c = create_DO('div', p, ' '), s = p.style;
 		s.width = s.height = '80px';
@@ -16542,7 +17242,7 @@ dispose=function(o){
 
  if(!o || (o.tagName.toLowerCase() in {hr:1,br:1}))return;	//	** 這邊應該檢查 o 是不是 <hr/> 等不能加 child 的！
 
- //sl(('dispose: use <'+o.tagName+'>: '+o.innerHTML).replace(/</g,'&lt;'));
+ //library_namespace.debug(('dispose: use <'+o.tagName+(o.id?'#'+o.id:'')+'>: '+o.innerHTML).replace(/</g,'&lt;'));
 
  //	TODO: 這邊應該有一個更完善的刪除策略
  if(_t.loaded){
@@ -16550,7 +17250,7 @@ dispose=function(o){
   //	不必多做功，已經達到所需配置了。
   if(t===o.parentNode)return;
   for(var i=0,e='inputO,inputtedO,arrowO,listO'.split(',');i<e.length;i++)
-   //sl('dispose: removeChild '+e[i]),
+   //library_namespace.debug('dispose: removeChild '+e[i]),
    _p[e[i]].parentNode.removeChild(_p[e[i]]);//t.removeChild(_p[e[i]]);
   if(!t.childNodes.length)t.parentNode.removeChild(t);
  }
@@ -16560,6 +17260,24 @@ dispose=function(o){
  t=o.tagName.toLowerCase();
 
  if(t==='input'){
+
+  try{
+   //	http://www.w3.org/TR/html5/forms.html#the-pattern-attribute
+   //	http://www.whatwg.org/specs/web-apps/current-work/#attr-input-pattern
+   //	http://www.w3school.com.cn/html5/html5_input.asp
+   t=o.pattern||
+	//o.getAttribute&&
+	o.getAttribute('pattern');
+   //	compiled as a JavaScript regular expression with the global, ignoreCase, and multiline flags disabled
+   //	somewhat as if it implied a ^(?: at the start of the pattern and a )$ at the end
+   if(t&&(t=new RegExp('^('+t+')?$')))
+    //library_namespace.debug('set verify pattern of ['+o.id+']: '+t),
+    _t.set_verify(t);
+  }catch(e){
+   library_namespace.err('error pattern: ['+t+']');
+   library_namespace.err(e);
+  }
+
   o.parentNode.insertBefore(
 	t=_p.container=create_DO('span'),
 	_p.inputO=o
@@ -16597,6 +17315,7 @@ dispose=function(o){
 
   _p.inputO=create_DO('input',o);
   setClassName.call(_t,'input',_p.inputO);
+
  }
 
 
@@ -16680,14 +17399,14 @@ initI=function(o,l,s){	//	(HTML object, list: Array or Object)
  var _t=this,_p;
  // objects setting
  if(typeof o!='object')
-  //sl('Use object ['+o+']'),
+  //library_namespace.debug('Use object ['+o+']'),
   o=document.getElementById(o);
 
  _p=pv(_t);	//	also do initial
  instanceL.push(_t);	//	for destructor
 
-  if(o)
-   dispose.call(this,o);
+ if(o)
+  dispose.call(this,o);
 /*
  else{
   //throw new Error(1,'Can not get document object'+(o?' ['+o+']':'')+'!');
@@ -16776,13 +17495,26 @@ _.maxList=10;
 
 
 //	searchInList 常用到的函數
-_.searchFunctionSet={
- allTheSame:function(i,k){return (i+'')===k;},
- startWith:function(i,k){return (i+'').slice(0,k.length)===k;},
- //	不管大小寫 Whether the case
- startWithWC:function(i,k){return (i+'').slice(0,k.length).toLowerCase()===k.toLowerCase();},
- includeKey:function(i,k){return (i+'').toLowerCase().indexOf(k.toLowerCase())!==-1;},
- includeKeyWC:function(i,k){return (i+'').toLowerCase().indexOf((k+'').toLowerCase())!==-1;}
+_.searchFunctionSet = {
+	allTheSame : function(i, k) {
+		return (i + '') === k;
+	},
+	startWith : function(i, k) {
+		return (i + '').slice(0, k.length) === k;
+	},
+	//	不管大小寫 Whether the case
+	startWithWC : function(i, k) {
+		return (i + '').slice(0, k.length).toLowerCase() === k.toLowerCase();
+	},
+	includeKey : function(i, k) {
+		return (i + '').toLowerCase().indexOf(k.toLowerCase()) !== -1;
+	},
+	includeKeyWC : function(i, k) {
+		return (i + '').toLowerCase().indexOf((k + '').toLowerCase()) !== -1;
+	},
+	always : function() {
+		return true;
+	}
 };
 
 
@@ -16814,6 +17546,39 @@ _.textSet={
  closeBtn:'關閉'//'×'
 };
 
+
+//	default 欄位驗證 pattern
+//	http://blog.wu-boy.com/2009/06/16/1454/
+//	TODO: ID, Age, 電話, 地址, 性別, ..
+_.default_verify_pattern = {
+		'|word' : /^\w*$/,
+		'word' : /^\w+$/,
+		//	整數
+		'|integer' : /^[+-]?\d*$/,
+		'integer' : /^[+-]?\d+$/,
+		//	自然數
+		'|natural' : /^([1-9]\d*)?$/,
+		'natural' : /^[1-9]\d*$/,
+		//	十進位小數
+		'|decimal' : /^\d*(\.\d+)?$/,
+		'decimal' : /^(\d+|\d*\.\d+)$/,
+		//	數字
+		'|digit' : /^\d*$/,
+		'digit' : /^\d$/,
+
+		IPv4 : /^[12]?\d{1,2}\.[12]?\d{1,2}\.[12]?\d{1,2}\.[12]?\d{1,2}$/,
+
+		URI : function(k){return !!parse_URI(k);},
+
+		//	RFC 2822
+		//	http://regexlib.com/DisplayPatterns.aspx
+		//'RFC2822' : /^(?:[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/,
+		//	http://www.regular-expressions.info/email.html
+		//'email' : /^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+([a-z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b$/i,
+		email : /^[a-z0-9+_~-]+(\.[a-z0-9+_~-]+)*@([a-z\d]([a-z\d-]*[a-z\d])?\.)+([a-z]{2}|com|org|net)\b$/i,
+
+		any : function(k){return k===''?2:0;}
+};
 
 _.prototype={
 //	應該盡量把東西放在 class，instance少一點？
@@ -16877,9 +17642,28 @@ showArrow:function(show){
 onInput:function(k){	//	key
 },
 
-//	設定文字欄位的欄位驗證	return 1: warning, 2: error, string: 將輸入改為回傳值, else OK
+//	設定表單文字欄位的欄位驗證	return 1: warning, 2: error ('Suffering from a pattern mismatch'), string: 將輸入改為回傳值, else OK
 //	另外可設定 onkeypress(){return true/false;} 來對每一次按鍵作 check。但這不能處理 paste。	http://irw.ncut.edu.tw/peterju/jscript.html#skill
 verify:function(k){	//	key
+},
+
+set_verify:function(v){
+	var m=_.default_verify_pattern;
+	if(library_namespace.is_Object(m)&&(v in m))
+		v = m[v];
+
+	if(v instanceof RegExp)
+		this.verify = function(k) {
+			return v.test(k) ? 0 : 2;
+		};
+	else if(typeof v === 'function')
+		this.verify = v;
+	else if(typeof v === 'string' && (m=v.match(/^(\d*)-(\d*)$/))&&(m[1]||m[2]))
+		this.verify = new Function('k','return isNaN(k)'+(m[1]?'||k<'+m[1]:'')+(m[2]?'||k>'+m[2]:'')+' ? 2 : 0;');
+	else
+		library_namespace.err('error verify condition of ['+pv(this).inputO.id+']: ['+v+']');
+
+	return this;
 },
 
 //	input: (list, index), return [value, title[, key=title||value]]
@@ -16923,6 +17707,7 @@ setValue:function(v){
  //library_namespace.log('setValue: '+this.setProperty('value',v));
  v=this.setProperty('value',v);
  //library_namespace.log('setValue: '+v);
+ //	TODO: do not use arguments
  if(arguments.callee.caller!==do_verify)
   //library_namespace.log('setValue: call do_verify('+v+'), list: ['+this.allListCount+']'+this.setAllList()),
   do_verify.call(this,v);
@@ -16987,7 +17772,11 @@ focus:function(f){	//	,noE
  }
 */
  if(f||typeof f==='undefined')
-  i.focus();
+  try{
+   //	@IE5-8 initial:  Error @CeL: 2110 [Error] (facility code 10): 控制項不可見、未啟動或無法接受焦點，因此無法將焦點移到控制項上。
+   //	Error @CeL: 2110 [Error] (facility code 10): Can't move focus to the control because it is invisible, not enabled, or of a type that does not accept the focus.
+   i.focus();
+  }catch(e){}
  else
   this.showList(0),
   i.blur();
@@ -17195,6 +17984,270 @@ function isLuckyNum(num){	//	return luck kind
 
 
 
+/**
+ * @name	CeL Hamming function
+ * @fileoverview
+ * 本檔案包含了 Hamming Code, 漢明碼的 functions。
+ * @since	2010/3/21 14:26:08
+ * @example
+ * CeL.use('math.Hamming');
+ * var hc = CeL.Hamming.encode('1100');
+ */
+
+
+/*
+TODO:
+最佳化
+calculate generator matrix
+SEC-DED ("single error correction, double error detection") 版本（加在最後）
+http://www.ee.unb.ca/cgi-bin/tervo/hamming.pl
+最小漢明距離3
+	http://phpbb.godfat.org/viewtopic.php?t=66&sid=6e34dd040aa98c64c75bfe099008c82a
+BCH碼
+*/
+
+if (typeof CeL === 'function'){
+
+/**
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
+ */
+var module_name = 'math.Hamming';
+
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.math.Hamming
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function(library_namespace, load_arguments) {
+
+
+
+//============================================================================
+//	definition of module Hamming
+
+var
+/*
+*/
+/**
+ * Hamming code
+ * @class	Hamming Code 的 constructor
+ * @constructor
+ */
+CeL.math.Hamming
+= function() {
+	return this.encode.apply(this, arguments);
+};
+
+//class public interface	---------------------------
+
+CeL.math.Hamming
+.
+/**
+ * 是否左右顛倒。
+ * default: data[1,2,..] 左至右, reverse: data[..,2,1] 右至左
+ * @memberOf	CeL.math.Hamming
+ */
+reverse = false;
+
+
+CeL.math.Hamming
+.
+/**
+ * encode data to Hamming Code.
+ * @param data	data stream
+ * @param no_reverse	forced NO reverse
+ * @return	{String} encoded Hamming Code
+ * @memberOf	CeL.math.Hamming
+ */
+encode = function(data, no_reverse) {
+	data = (library_namespace.is_Array(data) ? data.join('') : '' + data)
+			.replace(/[ ,]/g, '');
+	if (!/^[01]{1,20}$/.test(data))
+		return '';
+	if (this.reverse && !no_reverse)
+		data = data.split('').reverse().join('');
+	// library_namespace.debug('encode [' + d + ']',1,module_name + '.encode');
+	var g = [ '' ], i_g = 1, bin = 1, i, i_d = 0, l_d = data.length, ch;
+	for (;; i_g++) {
+		if (i_g === bin)
+			// library_namespace.debug('initial [' + g.length + '] as 0',1,module_name + '.encode'),
+			g.push(0), bin *= 2;
+		else {
+			// library_namespace.debug('initial [' + g.length + '] as ' + d.charAt(i_d) + ' (' + i_d + '/' + l_d + ')',1,module_name + '.encode');
+			g.push(ch = data.charAt(i_d));
+			for (i = 1; i < bin; i *= 2)
+				if (i_g & i)
+					g[i] ^= ch;
+			if (++i_d === l_d)
+				break;
+		}
+	}
+
+
+	if (library_namespace.is_debug()) {
+		//	for debug print
+		for (bin = i = 1, i_d = []; i < g.length; i++) {
+			ch = g[i];
+			if (i === bin)
+				ch = '<span style="color:#292;">' + ch + '</span>', bin *= 2;
+			//	i_d 在這表示一個專門用於顯示的 array
+			i_d.push(ch);
+		}
+		library_namespace.log('Hamming code of [' + data + ']: ['
+				+ i_d.join('') + ']');
+	}
+
+	if (this.reverse && !no_reverse)
+		g = g.reverse();
+	return g.join('');
+};
+
+
+CeL.math.Hamming
+.
+/**
+ * 將 Hamming Code 分成 data & check bits
+ * @param code	Hamming Code to split
+ * @return	[資料位元 data bits, 檢查位元 check bits (parity bits)]
+ * @memberOf	CeL.math.Hamming
+ */
+split_code = function(code) {
+	if (library_namespace.is_Array(code))
+		code = code.join('');
+	code = (' ' + code).split('');
+	library_namespace.debug('split [' + code + ']', 1, module_name + '.split_code');
+	var i = 1, l = code.length, cb = [];
+	while (i < l)
+		cb.push(code[i]), code[i] = '', i *= 2;
+	library_namespace.debug('→ data [' + code.join('').replace(/ +/g, '') + '], check bits  [' + cb + ']', 1, module_name + '.split_code');
+	return [ code.join('').replace(/ +/g, ''), cb ];
+};
+
+CeL.math.Hamming
+.
+/**
+ * decode Hamming Code to data
+ * @param code
+ * @return
+ * @memberOf	CeL.math.Hamming
+ */
+decode = function(code) {
+	if (!code || !/^[01]{3,30}$/.test(code = ('' + code).replace(/[ ,]/g, '')))
+		return '';
+	code = code.split('');
+	if (this.reverse)
+		code = code.reverse();
+
+	var i = 0, l = code.length, ch, bin = 1, split_c = this.split_code(code), test_c, cb;
+
+	if (!split_c)
+		return;
+	//	check bits (parity bits)
+	cb = split_c[1];
+	test_c = this.encode(split_c[0], 1);
+	if (!test_c || !(test_c = this.split_code(test_c)))
+		return;
+
+	library_namespace.debug('received check bits: [' + cb.join('') + '], calculated: [' + test_c[1].join('') + ']', 1, module_name + '.decode');
+	test_c = parseInt(test_c[1].reverse().join(''), 2)
+			^ parseInt(cb.reverse().join(''), 2);
+	library_namespace.debug('error bit' + (this.reverse ? ' (do reversed XOR)' : '') + ': ' + test_c + '(' + test_c.toString(2) + '), ' + code.join(''), 1, module_name + '.decode');
+	if (test_c)
+		if (test_c < code.length)
+			code[test_c - 1] ^= 1, split_c = this.split_code(code);
+		else
+			//	這算是能檢測出 2 bits 以上錯誤的特殊例子，機率通常也不大：已經超過 index 了。
+			//	e.g., reversed 011010001100
+			library_namespace.debug('<em>Out of index!</em> More than 2 errors occurred.', 1, module_name + '.decode');
+
+	if (library_namespace.is_debug())
+		if (test_c) {
+			cb = code.join('\0').split('\0');
+			cb[test_c - 1] = '<span style="color:#f33;">' + cb[test_c - 1] + '</span>';
+			library_namespace.debug('→ ' + cb.join(''), 1, module_name + '.decode');
+		} else
+			library_namespace.debug('The Hamming code is correct.', 1, module_name + '.decode');
+
+	split_c = split_c[0];
+	if (this.reverse)
+		split_c = split_c.split('').reverse().join('');
+	return split_c;
+};
+
+
+CeL.math.Hamming
+.
+/**
+ * 顯示 Hamming Code 的計算方法
+ * @param {Number} bit_length	bit length. e.g., 8, 16.
+ * @memberOf	CeL.math.Hamming
+ */
+show = function(bit_length) {
+	var code = [], bit = [], parity = [], i = 1, j, k, d = 1, a = 1, cc = 1, dc = 1;
+	for (;; i++) {
+		bit[i] = i.toString(2);
+		if (i === a)
+			code[i] = 'C' + Math.pow(2, cc++ - 1), a *= 2;
+		else {
+			code[i] = 'D' + dc++;
+			for (j = 1, k = 1; j < cc; j++, k *= 2)
+				if (i & k)
+					if (parity[j])
+						parity[j] += '<span style="color:#aaa;">⊕</span>' + code[i];
+					else
+						parity[j] = code[i];
+			if (dc > bit_length)
+				break;
+		}
+	}
+	for (i = 1; i < code.length; i++) {
+		a = code[i];
+		if (j = a.match(/^C(\d+)$/))
+			a += ' = ' + parity[Math.round(Math.log(j[1]) * Math.LOG2E) + 1];
+		library_namespace.debug(bit[i] + ': ' + a);
+	}
+
+};
+
+
+/**
+ * 不 extend 的 member
+ * @ignore
+ */
+CeL.math.Hamming
+.no_extend = '*';
+
+
+return (
+	CeL.math.Hamming
+);
+};
+
+//============================================================================
+
+CeL.setup_module(module_name, code_for_including);
+
+};
+
+
+
+
+//--------------------------------------------------------------------------------//
+
+
+
+
 (function (){
 
 	/**
@@ -17389,6 +18442,16 @@ function getPbyR(roots){
  * CeL.log(CeL.quotient.parse_base('4877.6'.toLowerCase(),10).to_base(16).replace(/_([^\(]+)/,'_<i style="text-decoration:overline">$1</i>'));
  */
 
+
+/*
+TODO:
+use {String} value + {Number} exponent
+
+http://www.leemon.com/crypto/BigInt.html
+http://www-cs-students.stanford.edu/~tjw/jsbn/
+http://java.sun.com/javase/6/docs/api/java/math/BigInteger.html
+
+*/
 
 if (typeof CeL === 'function'){
 
@@ -17729,7 +18792,8 @@ to_base : function(base, digit_char) {
 },
 
 /**
- * 為十進位最佳化的 to_base()
+ * 為十進位最佳化的 to_base()<br/>
+ * 以結論來說，好像快不了多少?
  * @since 2004/7/9 13:47
  * @return
  * @name	CeL.math.quotient.prototype.to_decimal
@@ -17742,7 +18806,10 @@ to_decimal : function() {
 
 	// find 分母的 2,5 因數
 	while (t % 2 === 0)
-		g <<= 1, t >>= 1;
+		//	使用下面這行會造成 bug: 輸出 .110011001100110011001100110011001100(2) 會導致 g===t===0, 掛掉
+		//	以結論來說，好像快不了多少?
+		//g <<= 1, t >>= 1;
+		g *= 2, t /= 2;
 		while (t % 5 === 0)
 			g *= 5, t /= 5;
 
@@ -18003,19 +19070,10 @@ function getPathOnly(p){
 
 
 
-
-
-//	use dBasePath()
-function basePath(){
- return typeof location=='object'?location.href:	//	location.pathname
-	typeof WshShell=='object'?WshShell.CurrentDirectory:
-	typeof WScript=='object'?WScript.ScriptFullName:'';
-}
-
 /*	2003/10/1 15:57
 	pn(path now)相對於bp(base path)之path(增加../等)
 */
-//relatePath[generateCode.dLK]='reducePath,isAbsPath,same_length,dirSp,dirSpR';
+//relatePath[generateCode.dLK]='reducePath,is_absolute_path,same_length,dirSp,dirSpR';
 //,WScript,WshShell
 function relatePath(bp,pn){
  if(!pn)pn=typeof location=='object'?location.href:typeof WScript=='object'?WScript.ScriptFullName:'';
@@ -18024,10 +19082,10 @@ function relatePath(bp,pn){
  var p=reducePath(pn);
  if(!p)return;
  var d=reducePath(bp,1);
- if(!d||!isAbsPath(d))return p;	//	bp需要是絕對路徑
+ if(!d||!is_absolute_path(d))return p;	//	bp需要是絕對路徑
 
  //alert('relatePath: parse 2\n'+d+'\n'+p);
- if(!isAbsPath(p)){	//	p非絕對路徑時先處理成絕對路徑
+ if(!is_absolute_path(p)){	//	p非絕對路徑時先處理成絕對路徑
   var q=p.indexOf(dirSp,1);	//	預防第一字元為dirSp
   if(q==-1)q=p;else q=p.slice(0,q);	//	取得第一識別用目錄名
   //alert('relatePath: parse 3\n'+d+'\n'+q);
@@ -18058,80 +19116,98 @@ function relatePath(bp,pn){
 //alert(relatePath('//lyrics.meicho.com.tw/game/game.pl?seg=diary21','cgi-bin/game/photo/'));WScript.Quit();
 
 
-/*	得知相對basePath
-<script type="text/javascript" src="../baseFunc.js"></script>
-var basePath=getBasePath('baseFunc.js');	//	引數為本.js檔名	若是更改.js檔名，亦需要同步更動此值！
-*/
-function getBasePath(JSFN){
- if(!JSFN)return typeof WScript=='object'?WScript.ScriptFullName.replace(/[^\/]+$/,''):'';
- var i,j,b,o=document.getElementsByTagName('script');
- for(i in o)try{j=o[i].getAttribute('src');i=j.indexOf(JSFN);if(i!=-1)b=j.slice(0,i);}catch(e){}
- return b||'';	//	alert()
-}
 
-//	determine Base Path(base path的範本,path now)
-//dBasePath[generateCode.dLK]='reducePath,getPathOnly,dirSp,dirSpR';
-function dBasePath(bp,pn){
- if(!pn)pn=typeof location=='object'?location.href:
-	//typeof WshShell=='object'?WshShell.CurrentDirectory:	//	用在把檔案拉到此檔上時不方便
-	typeof WScript=='object'?WScript.ScriptFullName:'';
- var p=reducePath(pn,1);if(!p)return;if(!bp)return p;
+/**
+ * determine base path.
+ * 給定 base path 的結構後，藉由 path_now 推測 base path 的 full path
+ * @param {String} base_path_structure	base path 的範本結構
+ * @param {String} path_now
+ * @return	{String}	推測的 base path full path
+ * @example
+ * alert(dBasePath('kanashimi/www/cgi-bin/game/'));
+ * @requres	reducePath,getPathOnly,dirSp,dirSpR
+ */
+function dBasePath(base_path_structure, path_now) {
+	if (!path_now)
+		path_now = library_namespace.get_base_path();
 
- var i,j,k,t,d=getPathOnly(reducePath(bp,1)).match(new RegExp('([^'+dirSpR+']+'+dirSpR+')','g'));	//split()
- if(!d)return;
+	var p = reducePath(path_now, 1);
+	if (!p)
+		return;
+	if (!base_path_structure)
+		return p;
 
- for(i=0,t='';i<d.length;i++)if(p.lastIndexOf(dirSp+d[i])!=-1){t=dirSp;while(d[i]&&(k=p.lastIndexOf(t+d[i]))!=-1)j=k,t+=d[i++];while(d[i])t+=d[i++];break;}
- if(!t)return p;//alert("Can't find base directory of this file!\n"+pn+'\n\nTreat base directory as:\n'+p);//
- //alert('dBasePath:\nbp='+bp+'\npn='+pn+'\n\n'+p.slice(0,j)+'\n'+t+'\n'+(t.replace(new RegExp('([^'+dirSpR+']+'+dirSpR+')','g'),' ').length-1));
- return p.slice(0,j)+t;
-}
-//alert(dBasePath('kanashimi/www/cgi-bin/game/'));
+	var i, j, k, t,
+	// or use .split()
+	d = getPathOnly(reducePath(base_path_structure, 1))
+		.match(new RegExp('([^' + dirSpR + ']+' + dirSpR + ')', 'g'));
+	if (!d)
+		return;
 
+	for (i = 0, t = ''; i < d.length; i++)
+		if (p.lastIndexOf(dirSp + d[i]) !== -1) {
+			t = dirSp;
+			while (d[i] && (k = p.lastIndexOf(t + d[i])) !== -1)
+				j = k, t += d[i++];
+			while (d[i])
+				t += d[i++];
+			break;
+		}
+	if (!t)
+		//alert("Can't find base directory of this file!\n" + path_name + '\n\nTreat base directory as:\n' + p);
+		return p;
 
-// site to site: proxy
-function parseURI(URI,Dprotocol){
- var m,n;
- if(typeof URI!='string'||!(m=URI.match(/^(([\w\d\-\:]+)\/\/)?([^\/]+)(.+)?$/)))return;//不能用 instanceof String!
- URI={URI:URI};
- if(m[2]||Dprotocol)URI.protocol=m[2]||Dprotocol;
-
- if(n=(URI.host=m[3]).match(/^(.+?):(\d+)$/))URI.hostname=n[2],URI.port=n[2];
- else if(URI.hostname=m[3],(n={'http':80,'ftp':21}[URI.protocol]))URI.port=n;
-
- m=m[4];
- if(n=m.match(/^(.*)(\?.*?)$/))URI.search=n[2],m=n[1];
- if(n=m.match(/^(.*)(#.*?)$/))URI.hash=n[2],m=n[1];
- URI.pathname=m;
-
- URI.URL=URI.href=(URI.protocol?URI.protocol+'//':'')+(URI.username?URI.username+(URI.password?':'+URI.password:'')+'@':'')+URI.host+(URI.port?':'+URI.port:'')+URI.pathname+(URI.hash||'')+(URI.search||'');
-
- return URI;
-}
-
-// cf: getFN()
-function parsePath(path){
- if(typeof path!='string'||!path)return;
-
- var s={oInput:path},m;
- if(m=path.match(/^(([A-Za-z]):\\)(([^\\]+\\)*)([^\\]+)?$/)){
-  s.drive=m[2],s.pathName=m[3],s.fileName=m[5];
- }else if(m=path.match(/^file:\/\/\/([A-Za-z]):\/(([^\/]+\/)*)([^\/]+)?$/)){
-  s.drive=m[1],s.pathName=m[2].replace(/\//g,'\\'),s.fileName=m[4].replace(/\//g,'\\');
- }
- s.path=s.pathName+s.fileName;
- s.location=s.drive+':\\'+s.path;
- s.directory=s.drive+':\\'+s.pathName;
-
- return s;
+	//alert('dBasePath:\nbp='+bp+'\npn='+pn+'\n\n'+p.slice(0,j)+'\n'+t+'\n'+(t.replace(new RegExp('([^'+dirSpR+']+'+dirSpR+')','g'),' ').length-1));
+	return p.slice(0, j) + t;
 }
 
 
-//	absolute or relative path, not very good solution
-//isAbsPath[generateCode.dLK]='dirSp,dirSpR';
-function isAbsPath(p){//alert(typeof p+'\n'+p);
- return p&&(dirSp=='/'&&p.charAt(0)==dirSp||new RegExp('^(\\\\|[A-Za-z]+:)'+dirSpR).test(p));	//	?true:false
-}
-//alert(dBasePath('kanashimi/www/cgi-bin/game/'));
+/**
+ * cf: getFN()
+ * @param {String} path	path name
+ * @return
+ */
+function parse_path(path) {
+	if (typeof path !== 'string' || !path)
+		return;
+
+	var path_data = {
+		oInput : path
+	}, m;
+
+	if (m = path.match(/^(([A-Za-z]):\\)(([^\\]+\\)*)([^\\]+)?$/))
+		path_data.drive = m[2],
+		path_data.path_name = m[3],
+		path_data.file_name = m[5];
+	else if (m = path
+			.match(/^file:\/\/\/([A-Za-z]):\/(([^\/]+\/)*)([^\/]+)?$/))
+		path_data.drive = m[1],
+		path_data.path_name = m[2].replace(/\//g, '\\'),
+		path_data.file_name = m[4].replace(/\//g, '\\');
+
+	path_data.path = path_data.path_name + path_data.file_name;
+	path_data.location = path_data.drive + ':\\' + path_data.path;
+	path_data.directory = path_data.drive + ':\\' + path_data.path_name;
+
+	return path_data;
+};
+
+
+/**
+ * is absolute or relative path, not very good solution
+ * @param {String} path
+ * @return
+ * @requires	dirSp,dirSpR
+ */
+function is_absolute_path(path) {
+	//alert(typeof path + '\n' + path);
+	return path
+		&& (dirSp === '/' && path.charAt(0) === dirSp || new RegExp(
+		'^(\\\\|[A-Za-z]+:)' + dirSpR).test(path))
+		// ?true:false
+		;
+};
+
 
 //	轉成path（加'\'）
 function turnToPath(p){return p?p+(p.slice(-1)=='\\'?'':'\\'):'';}
@@ -18147,15 +19223,15 @@ function getFilePath(p){
 	在Win/DOS下輸入'\'..會加上base driver
 	若只要相對路徑，可用reducePath()。取得如'..\out'的絕對路徑可用getFP('../out',1)
 */
-//getFP[generateCode.dLK]='dBasePath,reducePath,isAbsPath,getPathOnly,relatePath';
+//getFP[generateCode.dLK]='dBasePath,reducePath,is_absolute_path,getPathOnly,relatePath';
 function getFP(p,m,bp){	//	path,mode=0:傳回auto(維持原狀),1:傳回絕對路徑,2:傳回相對路徑,base path
  //old:	return (p.lastIndexOf('\\')==-1&&p.lastIndexOf('/')==-1?getFolder(getScriptFullName()):'')+p;//getF
  if(!p)return'';
  if(p.charAt(0)=='\\'&&dBasePath(bp).match(/^(\\\\|[A-Za-z]+:)/))p=RegExp.$1+p;
  p=reducePath(p);
  if(m==1){
-  if(!isAbsPath(p))p=reducePath((bp?getPathOnly(bp):dBasePath())+p);	//	當為相對路徑時前置base path
- }else if(m==2&&isAbsPath(p))p=relatePath(dBasePath(bp),p);
+  if(!is_absolute_path(p))p=reducePath((bp?getPathOnly(bp):dBasePath())+p);	//	當為相對路徑時前置base path
+ }else if(m==2&&is_absolute_path(p))p=relatePath(dBasePath(bp),p);
  return p;
 }
 //	傳回檔名部分，the return value include ? #
@@ -21349,6 +22425,8 @@ CeL.setup_module(module_name, code_for_including);
  * @fileoverview
  * 本檔案包含了相容性 test 專用的 functions。
  * @since	
+ * @see
+ * <a href="http://msdn.microsoft.com/en-us/library/s4esdbwz%28v=VS.85%29.aspx" accessdate="2010/4/16 20:4">Version Information (Windows Scripting - JScript)</a>
  */
 
 /*
@@ -21459,6 +22537,14 @@ function pushUnique(array_pushTo,element_toPush,array_reverse){
  return array_pushTo;
 }
 
+//	e.g., Array.prototype.concat does not change the existing arrays, it only returns a copy of the joined arrays.
+function Aappend(a) {
+	var t = this, s = t.length, i = 0, l = a && a.length || 0;
+	for (; i < l; i++)
+		t[s + i] = a[i];
+	return t;
+}
+
 function Apop(){
  if(!this.length)return;
  var t=this.slice(-1);this.length--;return t;//不能用return this[--this.length];
@@ -21472,7 +22558,7 @@ function Ashift(){
 function Aunshift(o){
  if(!this.length)return;
  //var t=this.join('\0');this.length=0;this.push(o);this.push(t.split('\0'));return this;
- return this.value=[o].concat(this);	//	ECMAScript 不允許設Κ this=
+ return this.value=[o].concat(this);	//	ECMAScript 不允許設定 this=
 }	//	不能用t=this.valueOf(); .. this.push(t);
 //	奇怪的是，這個版本(5.1版)尚不提供isNaN。(should be isNaN, NOT isNAN)
 //	變數可以與其本身比較。如果比較結果不相等，則它會是 NaN。原因是 NaN 是唯一與其本身不相等的值。
@@ -21545,7 +22631,7 @@ call 方法是用來呼叫代表另一個物件的方法。call 方法可讓您�
  * @ignore
  */
 if(0)function Fcall(/* object */ oThis /* = null [, arg1[, arg2[, ... [, argN]]]]] */){
- var argu=[];
+ var argu=[];//Array.prototype.slice.call(arguments);
  for(var i=1;i<arguments.length;i++)
   argu[i-1]=arguments[i];	//	argu.push(arguments[i]);
  return this.apply(oThis, argu);
@@ -21565,8 +22651,8 @@ CeL.code.compatibility
  * use lazy evaluation
  * @memberOf	CeL.code.compatibility
  */
-is_web = function(W3CDOM) {
-	var _s = arguments.callee;
+is_web = function is_web(W3CDOM) {
+	var _s = is_web;
 	if (!('web' in _s))
 		_s.W3CDOM =
 				(
@@ -21591,7 +22677,7 @@ CeL.code.compatibility
 .
 /**
  * 判斷為 DOM。
- * @param	name	various name
+ * @param	name	various name @ name-space window. e.g., document, location
  * @return	{Boolean}	various is object of window
  * @since	2010/1/14 22:04:37
  */
@@ -21629,8 +22715,8 @@ CeL.code.compatibility
  * lazy evaluation
  * http://peter.michaux.ca/articles/lazy-function-definition-pattern
  */
-is_HTA = function(id) {
-	var _s = arguments.callee, a;
+is_HTA = function is_HTA(id) {
+	var _s = is_HTA, a;
 	if ('HTA' in _s)
 		return _s.HTA;
 
@@ -21918,6 +23004,8 @@ TODO:
 emergency/urgent situation alert
 會盡量以網頁上方/頂部黄色的導航條/警告條展示
 「不再顯示」功能
+.format()
+	將 div format 成 log panel。
 */
 
 
@@ -22004,8 +23092,10 @@ w = function(id) {
 	if (!B && !F)
 		return;
 
-	while (b.length) {
-		m = b.shift(); // 預防 MP 時重複顯示
+	while (b.length){
+		// 預防 MP 時重複顯示
+		m = b.shift();
+
 		if (F)
 			F(m);
 
@@ -22023,7 +23113,7 @@ w = function(id) {
 			if (c in _t.message_prefix)
 				m = _t.message_prefix[c] + m;
 			c = _t.className_set[c];
-		} else{
+		} else {
 			//	add default style set
 			if (c = _t.message_prefix.log)
 				m = c + m;
@@ -22042,7 +23132,7 @@ w = function(id) {
 						// for character (null)
 						m.replace(/\x00/g,
 						'<span class="control_character">\\x00</span>')
-						//	'­' 這符號可以自動斷行，並在斷行時自動加上個橫槓。在顯示長整數時較有用。
+						//	'­' (hyphen) 這符號(連字符)可以自動斷行，並在斷行時自動加上個橫槓。在顯示長整數時較有用。
 						.replace(/(\d{20})/g,'$1­')
 						: m;
 			} else
@@ -22121,7 +23211,7 @@ dependency:
 
  * @constructor
  * @name	CeL.code.log
- * @param	{String, object HTMLElement} obj	message area element or id
+ * @param	{String, object HTMLElement} obj	log target: message area element or id
  * @param	{Object} [className_set]	class name set
  */
 _tmp;CeL.code.log
@@ -22248,6 +23338,7 @@ get_error_message = function(e, new_line, caller) {
 		new_line = _.prototype.save_new_line;
 
 	if (!caller)
+		//	TODO: do not use arguments
 		caller = arguments.callee.caller;
 
 	// from popErr()
@@ -22256,17 +23347,19 @@ get_error_message = function(e, new_line, caller) {
 	//	message
 	m = T === 'Error' ?
 			'Error '
-			+ (caller === null ? 'from the top level: ' : '@function: ')
+			+ (caller === null ? 'from the top level: ' : '@' + library_namespace.Class + ': ')
 			+ (e.number & 0xFFFF) + (e.name ? ' [' + e.name + '] ' : ' ')
 			+ '(facility code ' + (e.number >> 16 & 0x1FFF) + '): '
 			+ new_line
-			+ (e.description || '').replace(/\r?\n/g, '<br/>')
-			+ (!e.message || e.message === e.description ?
+			+ (e.message || '').replace(/\r?\n/g, '<br/>')
+			//	.message 為主，.description 是舊的。
+			+ (!e.description || e.description === e.message ?
 				'' :
 				new_line
 					+ new_line
-					+ ('' + e.message).replace(/\r?\n/g, '<br/>')
+					+ ('' + e.description).replace(/\r?\n/g, '<br/>')
 			)
+			//	Firefox has (new Error).stack
 
 		: T === 'DOMException'?
 			//	http://www.w3.org/TR/DOM-Level-3-Core/core.html#ID-17189187
@@ -22282,8 +23375,7 @@ get_error_message = function(e, new_line, caller) {
 			try{
 				m += '<br/> <span class="debug_debug">' + T + '</span>: '
 						+ (T === 'stack' ? ('' + e[T]).replace(
-							/[\r\n]+$/, '').replace(/\n/g,
-							'<br/>- ') : e[T]);
+							/[\r\n]+$/, '').replace(/\n/g, '<br/>- ') : e[T]);
 			}catch (e) {}
 
 	//m += ' (' + arguments.callee.caller + ')';
@@ -22294,15 +23386,68 @@ get_error_message = function(e, new_line, caller) {
 CeL.code.log
 .
 /**
+ * get node description
+ * @param	node	HTML node
+ * @memberOf	CeL.code.log
+ */
+node_description = function(node, flag) {
+	if (typeof node === 'string')
+		node = document.getElementById(node);
+	if (!node)
+		return;
+
+	var description = '';
+
+	if (node.id)
+		description += '#' + node.id;
+
+	if (node.className)
+		description += '.' + node.className;
+
+	if (node.tagName)
+		description = '&lt;' + node.tagName + description + '&gt;';
+
+	if (!description && node.innerHTML) {
+		description = node.innerHTML;
+		if (description.length > 40)
+			description = description.slice(0, 40);
+		description = description.replace(/</g, '&lt;');
+	}
+
+	return description || '(null description node)';
+};
+
+
+//預設以訊息框代替
+_.default_log_target=
+	new Function('m',
+		(typeof JSalert === 'function' ? 'JSalert':
+			typeof WScript === 'object' ? 'WScript.Echo':
+		'alert') +
+		"(typeof m==='object'?'['+m.l+'] '+m.m:m);");
+
+CeL.code.log
+.
+/**
  * get new extend instance
  * @param	{String, object HTMLElement} [obj]	message area element or id
  * @return	{Array} [ instance of this module, log function, warning function, error function ]
  * @example
+ * 
  * //	status logger
  * var SL=new CeL.code.log('log'),sl=SL[1],warn=SL[2],err=SL[3];
  * sl(msg);
  * sl(msg,clear);
- * @memberOf	CeL.code.log
+ * 
+ * //	general log
+ * function_set = new CeL.code.log.extend('panel',{});
+ * // 1.
+ * function_set = new CeL.code.log.extend('panel',{});
+ * logger = function_set[1];
+ * // 2.
+ * log_only = (new CeL.code.log.extend('panel',{}))[1];
+ * 
+ * @_memberOf	CeL.code.log
  * @since	2009/8/24 20:15:31
  */
 extend = function(obj, className_set) {
@@ -22313,17 +23458,8 @@ extend = function(obj, className_set) {
 	 * @inner
 	 * @ignore
 	 */
-	var o = new
-			CeL.code.log
-			(
-			obj ||
-			//	預設以訊息框代替
-			new Function('m',
-					(typeof JSalert === 'function' ? 'JSalert':
-						typeof WScript === 'object' ? 'WScript.Echo':
-					'alert') +
-			"(typeof m==='object'?'['+m.l+'] '+m.m:m);"),
-			className_set);
+	var o = new _// JSDT:_module_
+			(obj || _.default_log_target, className_set);
 
 	return [ o, function() {
 		o.log.apply(o, arguments);
@@ -22334,7 +23470,6 @@ extend = function(obj, className_set) {
 	} ];
 
 };
-
 
 
 /*
@@ -22532,7 +23667,8 @@ warn : function(m, clean) {
  */
 err : function(e, clean) {
 	this.log(_.get_error_message(e, this.save_new_line,
-						arguments.callee.caller), clean, 'err');
+			//	TODO: do not use arguments
+			arguments.callee.caller), clean, 'err');
 },
 
 
@@ -22578,9 +23714,11 @@ get_log : function() {
  */
 trigger : function(s) {
 	var _s = p[this.id].board.style;
-	if (typeof s === 'undefined')
-		s = _s.display === 'none';
-	_s.display = s ? 'block' : 'none';
+	if (_s) {
+		if (typeof s === 'undefined')
+			s = _s.display === 'none';
+		return _s.display = s ? 'block' : 'none';
+	}
 },
 
 /**
@@ -22618,6 +23756,9 @@ return (
 };
 
 //	===================================================
+
+
+//	為 modele log 所作的初始化工作
 
 /**
  * modele namespace
@@ -22683,6 +23824,7 @@ if (!CeL.Log) {
 		//alert(CeL.is_debug() + ',' + l + '(' + (l === undefined) + '),' + m);
 		if (CeL.is_debug(l)){
 			if(!caller)
+				//	TODO: do not use arguments
 				caller = CeL.get_Function_name(arguments.callee.caller);
 
 			CeL.Log.log.call(
@@ -22747,13 +23889,17 @@ var module_name = 'code.reorganize';
 var code_for_including = function(library_namespace, load_arguments) {
 
 
+var
+/*
+*/
 /**
- * null module constructor
+ * reorganize functions
  * @class	程式碼重整相關之 function。
+ * @constructor
  */
 CeL.code.reorganize
 = function() {
-	//	null module constructor
+	return this.encode.apply(this, arguments);
 };
 
 /**
@@ -22766,24 +23912,31 @@ CeL.code.reorganize
 
 
 
+//class public interface	---------------------------
 
-//	取得[SN].wsf中不包括自己（[SN].js），其餘所有.js的code。
-//	若想在低版本中利用eval(AllFuncCode(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
-//AllFuncCode[generate_code.dLK]='simpleRead';
-function AllFuncCode(SN) {
-	if (!SN)
-		SN = ScriptName;
-	var t = '', i, a = simpleRead(SN + '.wsf'), l = a ? a
-			.match(/[^\\\/:*?"<>|'\r\n]+\.js/gi) : [ SN + '.js' ];
+CeL.code.reorganize
+.
+/**
+ * 取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。
+ * 若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
+ * @param {String} script_filename
+ * @return
+ * @requires	ScriptName,simpleRead
+ */
+get_all_functions = function(script_filename) {
+	if (!script_filename)
+		script_filename = ScriptName;
+	var t = '', i, a = simpleRead(script_filename + '.wsf'), l = a ? a
+			.match(/[^\\\/:*?"<>|'\r\n]+\.js/gi) : [ script_filename + '.js' ];
 
 	for (i in l)
-		if (l[i] != SN + '.js' && (a = simpleRead(l[i])))
+		if (l[i] != script_filename + '.js' && (a = simpleRead(l[i])))
 			t += a;
 	return t;
 };
 
 
-//var OK=addCode('alert,simpleWrite',['alert','NewLine','AllFuncCode']);if(typeof OK=='string')simpleWrite('try.js',OK),alert('done');else alert('OK:'+OK);
+//var OK=addCode('alert,simpleWrite',['alert','NewLine','get_all_functions']);if(typeof OK=='string')simpleWrite('try.js',OK),alert('done');else alert('OK:'+OK);
 //addCode('複製 -backup.js');
 /*
 {var ss=[23,23.456,undefined,Attribute,null,Array,'567','abc'],l=80,repF='tmp.txt',sa=ss,st=addCode('',['ss']),t;
@@ -22802,7 +23955,7 @@ function AllFuncCode(SN) {
 //	number var,string var,object var,date var,undefined  var)
 
 //e.g.,
-//	[function.js](OS,NewLine,dirSp,dirSpR,'var ScriptName=getScriptName();',ForReading,ForWriting,ForAppending,TristateUseDefault,TristateTrue,TristateFalse,WshShell,fso,args,'initWScriptObj();',initWScriptObj,setTool,JSalert,Str2Date,Date2Str,decplaces,dQuote,setObjValue,getScriptFullName,getScriptName,'setTool();',WinEnvironment,SpecialFolder,Network,NetDrive,NetPrinter,getEnvironment,'getEnvironment();',dateUTCdiff,gDate)
+//	[function.js](OS,NewLine,dirSp,dirSpR,'var ScriptName=getScriptName();',ForReading,ForWriting,ForAppending,TristateUseDefault,TristateTrue,TristateFalse,WshShell,fso,args,'initWScriptObj();',initWScriptObj,setTool,JSalert,Str2Date,Date2Str,decplaces,dQuote,set_obj_value,getScriptFullName,getScriptName,'setTool();',WinEnvironment,SpecialFolder,Network,NetDrive,NetPrinter,getEnvironment,'getEnvironment();',dateUTCdiff,gDate)
 //e.g.,
 //	[function.js]("var NewLine='\n',OS='unix',dirSp=dirSpR='/';",dQuote,setTool,product,decplaces,countS,getText,turnUnicode,trimStr_,trimStr,StrToDate,DateToStr,reducePath,getPathOnly,getFN,getFP,dBasePath,trigger,setTopP,setAstatusOS,setAstatus,setAstatusOver,setAstatusOut,doAlertResize,doAlertInit,doAlert,doAlertAccess,doAlertScroll,setCookie,getCookie,scrollTo,disableKM,setCookieS,*disabledKM=0;,scrollToXY,scrollToInterval,scrollToOK,doAlertDivName,doAlertOldScrollLocation,parse_Function,dealPopup,sPopP,sPopF,sPopInit,sPopInit,sPop,setTextT,setText)
 
@@ -23101,7 +24254,7 @@ bug:
 to top BEFORE ANY FUNCTIONS:
 generate_code.dLK='dependencyList';	//	dependency List Key
 */
-//generate_code[generate_code.dLK]='setObjValue,dQuote';
+//generate_code[generate_code.dLK]='set_obj_value,dQuote';
 generate_code.ddI='*';	//	default directInput symbol
 generate_code.dsp=',';	//	default separator
 function generate_code(Vlist,NL,directInput){	//	變數list,NewLine,直接輸入用辨識碼
@@ -23164,9 +24317,9 @@ function generate_code(Vlist,NL,directInput){	//	變數list,NewLine,直接輸入
   else if(vType=='object'&&/*val.constructor==Error  "[object Error]" */(''+val.constructor).indexOf('Error')!=-1)
    t='new Error'+(val.number||val.description?'('+(val.number||'')+(val.description?(val.number?',':'')+dQuote(val.description):'')+')':'');
 /*
-  else if(vName=='setObjValueFlag'){	//	明白宣示在這裡就插入依存函數：不如用 setObjValueFlag,'setObjValue();'
-   if(!vars['setObjValue']||!vars['dQuote'])Vlist=Vlist.slice(0,i).concat('setObjValue','dQuote',Vlist.slice(i));
-   Vlist[i--]=directInput+'var setObjValueFlag;';continue;
+  else if(vName=='set_obj_value.F'){	//	明白宣示在這裡就插入依存函數：不如用 set_obj_value.F,'set_obj_value();'
+   if(!vars['set_obj_value']||!vars['dQuote'])Vlist=Vlist.slice(0,i).concat('set_obj_value','dQuote',Vlist.slice(i));
+   Vlist[i--]=directInput+'var set_obj_value.F;';continue;
   }
 */
   else if(vType=='object'&&(val.constructor==Object||val.constructor==Array)){// instanceof
@@ -23202,11 +24355,11 @@ function generate_code(Vlist,NL,directInput){	//	變數list,NewLine,直接輸入
     T+=T_;
    }
    if(T){
-    if(!vars['setObjValue']||!vars['dQuote']){
-     Vlist.push('setObjValue','dQuote');	//	假如沒有setObjValue則須將之與其所依存之函數（dQuote）一同加入
-     if(!vars['setObjValueFlag'])Vlist.push(directInput+'var setObjValueFlag;');
+    if(!vars['set_obj_value']||!vars['dQuote']){
+     Vlist.push('set_obj_value','dQuote');	//	假如沒有set_obj_value則須將之與其所依存之函數（dQuote）一同加入
+     if(!vars['set_obj_value.F'])Vlist.push(directInput+'var set_obj_value.F;');
     }
-    afterCode+="setObjValue('"+vName+"','"+T.slice(0,-1)+"'"+(_i?_i==1?",1":",.1":t?",1":'')+t+");"+NL,t=1;
+    afterCode+="set_obj_value('"+vName+"','"+T.slice(0,-1)+"'"+(_i?_i==1?",1":",.1":t?",1":'')+t+");"+NL,t=1;
    }else t=vType=='Object'?'{}':'[]';//new Object(), new Array()
   }else if(vType=='object'&&val.constructor==RegExp)t=val;
   else if(vType=='undefined')t=1;	//	有定義(var)但沒設定值，可計算undefined數目

@@ -4,7 +4,7 @@
  * @example
  * //	load library
  * <script type="text/javascript" src="../ce.js"></script>
- * //	預防 initial process 到一半彈出警告視窗，所以設大一點。
+ * //	預防 initialization 到一半彈出警告視窗，所以設大一點。
  * CeL.log.max_length = 20;
  * //	set debug
  * CeL.set_debug();
@@ -22,6 +22,15 @@ CeL.env=function(){};
 CeL.env.prototype={};
 
 	/**
+	 * default extension of script file.
+	 * 設定成 '.' 時由 CeL.get_script_base_path 設定
+	 * @type	String
+	 * @see
+	 * <a href="http://soswitcher.blogspot.com/2009/05/blogger-host-javascript-file-for-free.html" accessdate="2010/3/11 23:30">Blogger - Host Javascript File for Free - Blogger,Javascript - Blogger Blog by Switcher</a>
+	 * @name	CeL.env.script_extension
+	 */
+CeL.env.script_extension="";	//	typeof WScript === 'undefined' ? '.' : '.js';//'.txt'
+	/**
 	 * library main file base name<br/>
 	 * full path: {@link CeL.env.registry_path} + {@link CeL.env.main_script}
 	 * @example:
@@ -29,7 +38,7 @@ CeL.env.prototype={};
 	 * @name	CeL.env.main_script
 	 * @type	String
 	 */
-CeL.env.main_script='ce.js';
+CeL.env.main_script="";	//	'ce' + env.script_extension;
 	/**
 	 * module 中的這 member 定義了哪些 member 不被 extend
 	 * @name	CeL.env.not_to_extend_keyword
@@ -117,15 +126,37 @@ CeL.env.library_base_path="";	//	this.get_script_full_name(); // 以 reg 代替
  */
 CeL.data=function(){};
 /**
- * 將字串 set 分作 Object
- * @param valueSet
- * @param pointerC
- * @param endC
+ * 運算式值的二進位表示法	已最佳化:5.82s/100000次dec_to_bin(20,8)@300(?)MHz,2.63s/100000次dec_to_bin(20)@300(?)MHz
+ * @param {Number} number	number
+ * @param places	places,字元數,使用前置0來填補回覆值
  * @return
- * @since	2006/9/6 20:55
+ * @example
+ * {var d=new Date,i,b;for(i=0;i<100000;i++)b=dec_to_bin(20);alert(gDate(new Date-d));}
  * @memberOf	CeL.data
  */
-CeL.data.split_String_to_Object=function(valueSet, pointerC, endC){};
+CeL.data.dec_to_bin=function(number, places){};
+/**
+ * 設定object之值，輸入item=[value][,item=[value]..]。
+ * value未設定會自動累加。
+ * 使用前不必需先宣告…起碼在現在的JS版本中
+ * @param obj	object name that need to operate at
+ * @param value	valueto set
+ * @param type	累加 / value type
+ * @param mode	mode / value type
+ * @return
+ * @memberOf	CeL.data
+ */
+CeL.data.set_obj_value=function(obj, value, type, mode){};
+/**
+ * 將字串組分作 Object
+ * @param {String} value_set	字串組, e.g., 'a=12,b=34'
+ * @param assignment_char	char to assign values, e.g., '='
+ * @param end_char	end char of assignment
+ * @return
+ * @since	2006/9/6 20:55, 2010/4/12 23:06:04
+ * @memberOf	CeL.data
+ */
+CeL.data.split_String_to_Object=function(value_set, assignment_char, end_char){};
 /**
  * null module constructor
  * @class	CSV data 的 functions
@@ -174,6 +205,46 @@ CeL.locale=function(msg){};
  */
 CeL.math=function(){};
 /**
+ * Hamming code
+ * @class	Hamming Code 的 constructor
+ * @constructor
+ */
+CeL.math.Hamming=function(){};
+/**
+ * 是否左右顛倒。
+ * default: data[1,2,..] 左至右, reverse: data[..,2,1] 右至左
+ * @memberOf	CeL.math.Hamming
+ */
+CeL.math.Hamming.reverse=false;
+/**
+ * encode data to Hamming Code.
+ * @param data	data stream
+ * @param no_reverse	forced NO reverse
+ * @return	{String} encoded Hamming Code
+ * @memberOf	CeL.math.Hamming
+ */
+CeL.math.Hamming.encode=function(data, no_reverse){};
+/**
+ * 將 Hamming Code 分成 data & check bits
+ * @param code	Hamming Code to split
+ * @return	[資料位元 data bits, 檢查位元 check bits (parity bits)]
+ * @memberOf	CeL.math.Hamming
+ */
+CeL.math.Hamming.split_code=function(code){};
+/**
+ * decode Hamming Code to data
+ * @param code
+ * @return
+ * @memberOf	CeL.math.Hamming
+ */
+CeL.math.Hamming.decode=function(code){};
+/**
+ * 顯示 Hamming Code 的計算方法
+ * @param {Number} bit_length	bit length. e.g., 8, 16.
+ * @memberOf	CeL.math.Hamming
+ */
+CeL.math.Hamming.show=function(bit_length){};
+/**
  * polynomial test
  * @memberOf	CeL
  * @param	msg	msg
@@ -221,6 +292,67 @@ CeL.math.quotient.parse_base=function(number, base, digit_char){};
  * @class	native objects 的 functions
  */
 CeL.native=function(){};
+/**
+ * 顯示格式化日期 string
+ * @param date_value	要轉換的 date, 值過小時當作時間
+ * @param mode	要轉換的 mode
+ * @param zero_fill	對 0-9 是否補零
+ * @param date_separator	date separator
+ * @param time_separator	time separator
+ * @return	{String}	格式化日期
+ * @example
+ * alert(format_date());
+ * @since	2003/10/18 1:04 修正
+ * @since	2010/4/16 10:37:30	重構(refactoring)
+ * @requires setTool,decplaces
+ * @see
+ * http://www.merlyn.demon.co.uk/js-dates.htm,
+ * http://aa.usno.navy.mil/data/docs/JulianDate.html
+ * @memberOf	CeL.native
+ */
+CeL.native.format_date=function format_date(date_value, mode, zero_fill, date_separator, time_separator){};
+/**
+ * 函數的文字解譯/取得函數的語法
+ * @param function_name	function name
+ * @param flag	=1: reduce
+ * @return
+ * @example
+ * parsed_data = new parse_Function(function_name);
+ * @see
+ * http://www.interq.or.jp/student/exeal/dss/ref/jscript/object/function.html,
+ * Syntax error: http://msdn.microsoft.com/library/en-us/script56/html/js56jserrsyntaxerror.asp
+ * @memberOf	CeL.native
+ */
+CeL.native.parse_Function=function parse_Function(function_name, flag){};
+/**
+ * 重新設定 RegExp object 之 flag
+ * @param {RegExp} regexp	RegExp object to set
+ * @param {String} flag	flag of RegExp
+ * @return
+ * @example
+ * 附帶 'g' flag 的 RegExp 對相同字串作 .test() 時，第二次並不會重設。因此像下面的 expression 兩次並不會得到相同結果。
+ * var r=/,/g,t='a,b';
+ * WScript.Echo(r.test(t)+','+r.test(t));
+ * 
+ * //	改成這樣就可以了：
+ * var r=/,/g,t='a,b',s=renew_RegExp_flag(r,'-g');
+ * WScript.Echo(s.test(t)+','+s.test(t));
+ * 
+ * //	這倒沒問題：
+ * r=/,/g,a='a,b';
+ * if(r.test(a))alert(a.replace(r,'_'));
+ * 
+ * //	delete r.lastIndex; 無效，得用 r.lastIndex=0; 因此下面的亦可：
+ * if(r.global)r.lastIndex=0;
+ * if(r.test(a)){~}
+ * 
+ * @see
+ * http://msdn.microsoft.com/zh-tw/library/x9h97e00(VS.80).aspx,
+ * 如果規則運算式已經設定了全域旗標，test 將會從 lastIndex 值表示的位置開始搜尋字串。如果未設定全域旗標，則 test 會略過 lastIndex 值，並從字串之首開始搜尋。
+ * http://www.aptana.com/reference/html/api/RegExp.html
+ * @memberOf	CeL.native
+ */
+CeL.native.renew_RegExp_flag=function(regexp, flag){};
 /**
  * math test
  * @memberOf	CeL
@@ -451,13 +583,40 @@ CeL.net.SVG.draw_long_division=function(dividend, divisor, svgO, _color, _font){
  */
 CeL.net.web=function(){};
 /**
+ * trigger/swap display and visibility.
+ * display:none or visibility:hidden.
+ * TODO: computed style
+ * @param element	HTML element
+ * @param {String,Number} type	show or hidden or set the status type:
+ * 			{Number}: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change
+ * 			{String}: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?
+ * @return	display status
+ * @since	2010/4/1 10:24:43 rewrite
+ * @see
+ * http://www.w3schools.com/CSS/pr_class_visibility.asp
+ * http://www.w3schools.com/css/pr_class_display.asp
+ * http://www.javaeye.com/topic/140784
+ * 	通過element.style對象只能取得內聯的樣式，也就是說只能取得html標籤裡寫的屬性。 
+ * @requires	[_.get_element],[_.get_style]
+ * @memberOf	CeL.net.web
+ */
+CeL.net.web.trigger_display=function(element, type){};
+/**
+ * replace HTML
+ * @param o
+ * @param html
+ * @return
+ * @memberOf	CeL.net.web
+ */
+CeL.net.web.replace_HTML=function(o,html){};
+/**
  * 移除 node
  * @param o
  * @param tag	tag===1: only child, undefined: remove only self, others: only <tag> child
  * @return
  * @memberOf	CeL.net.web
  */
-CeL.net.web.remove_node=function(o,tag){};
+CeL.net.web.remove_node=function remove_node(o, tag){};
 /**
  * set/get/remove attribute of a element<br/>
  * in IE: setAttribute does not work when used with the style attribute (or with event handlers, for that matter).
@@ -480,7 +639,7 @@ CeL.net.web.set_attribute=function(_e,propertyO){};
  * @since	2007/1/20 14:12
  * @memberOf	CeL.net.web
  */
-CeL.net.web.add_node=function(node, child_list){};
+CeL.net.web.add_node=function add_node(node, child_list){};
 /**
  * create new HTML/XML <a href="https://developer.mozilla.org/en/DOM/node">node</a>(<a href="https://developer.mozilla.org/en/DOM/element">element</a>)
  * @param tag	tag name
@@ -494,6 +653,35 @@ CeL.net.web.add_node=function(node, child_list){};
  * @memberOf	CeL.net.web
  */
 CeL.net.web.XML_node=function(tag,propertyO,insertBeforeO,innerObj,styleO){};
+/**
+ * Parses URI
+ * @param {String} URI	URI to parse
+ * @return	parsed object
+ * @example
+ * alert(parse_URI('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23#hhh').hostname);
+ * @since	2010/4/13 23:53:14 from parseURI+parseURL
+ * @memberOf	CeL.net.web
+ * @see
+ * RFC 1738, RFC 2396, RFC 3986,
+ * Uniform Resource Identifier (URI): Generic Syntax,
+ * http://tools.ietf.org/html/rfc3987,
+ * http://flanders.co.nz/2009/11/08/a-good-url-regular-expression-repost/,
+ * http://www.mattfarina.com/2009/01/08/rfc-3986-url-validation,
+ * also see batURL.htm
+ */
+CeL.net.web.parse_URI=function(URI){};
+/**
+ * 簡化 document.getElementById 並配合 loadReference()
+ * @since 2004/6/25 19:33
+ * @param id	所欲找尋之 element id
+ * @param flag
+ *            {HTML Object} object: 參考此 document object
+ *            {Number} flag: 參見 code
+ * @return	{HTML Object} Object
+ * @requires	referenceDoc,loadReferenceDone,`get_element();`
+ * @memberOf	CeL.net.web
+ */
+CeL.net.web.get_element=function get_element(id, flag){};
 /**
  * Sets / adds class of specified element.<br/>
  * TODO:<br/>
@@ -513,6 +701,27 @@ CeL.net.web.XML_node=function(tag,propertyO,insertBeforeO,innerObj,styleO){};
  * @memberOf	CeL.net.web
  */
 CeL.net.web.set_class=function(element, class_name, flag){};
+/**
+ * get current computed style property of specified HTML element.
+ * TODO: 整合 get_node_position, _.set_style
+ * @param element	HTML element
+ * @param name	W3C style property name (e.g., no '-webkit-background-clip')
+ * @return
+ * @see
+ * curCss @ jQuery, http://api.jquery.com/category/css/,
+ * <a href="http://www.quirksmode.org/dom/getstyles.html" accessdate="2010/4/1 15:44">JavaScript - Get Styles</a>,
+ * <a href="http://www.javaeye.com/topic/140784?page=2" accessdate="2010/4/1 15:41">style.display取值不\u23545，\u38590道是\u27983\u35272器bug？\u35752\u35770第2\u39029:  - JavaScript - web - JavaEye\u35770\u22363</a>
+ * 大體上， currentStyle 相當於getComputedStyle，而runtimeStyle相當於getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。
+ * document.defaultView在mozilla中是指向window obj的,但是很有可能在其他broswer中就不指向window obj...因為w3c中沒有強行規定document.defaultView一定是一個global obj.
+ * 
+ * 返回頁內樣式表定義的類，那麼可以使用DOM樣式表對象來訪問：
+ * var oCssRulers = document.styleSheets[0].cssRulers || document.styleSheets[0].rulers;
+ * (前者是DOM方法，後者是IE私有方法)
+ * alert(oCssRulers[0].style.display);
+ * @since	2010/4/2 00:14:09	rewrite
+ * @memberOf	CeL.net.web
+ */
+CeL.net.web.get_style=function(element, name, not_computed){};
 /**
  * get the actual position [left,top,width,height] of an HTML node object
  * @param obj
@@ -978,7 +1187,7 @@ CeL.code.compatibility=function(){};
  * use lazy evaluation
  * @memberOf	CeL.code.compatibility
  */
-CeL.code.compatibility.is_web=function(W3CDOM){};
+CeL.code.compatibility.is_web=function is_web(W3CDOM){};
 /**
  * Are we run in HTA?<br/>
  * ** HTA 中應該在 onload 中呼叫，否則 document.getElementsByTagName 不會有東西！
@@ -994,7 +1203,7 @@ CeL.code.compatibility.is_web=function(W3CDOM){};
  * lazy evaluation
  * http://peter.michaux.ca/articles/lazy-function-definition-pattern
  */
-CeL.code.compatibility.is_HTA=function(id){};
+CeL.code.compatibility.is_HTA=function is_HTA(id){};
 
 //	null constructor for [CeL.code.log]
 CeL.code.log=function(){};
@@ -1045,21 +1254,15 @@ CeL.code.log.prototype.message_prefix={
  */
 CeL.code.log.get_error_message=function(e, new_line, caller){};
 /**
- * get new extend instance
- * @param	{String, object HTMLElement} [obj]	message area element or id
- * @return	{Array} [ instance of this module, log function, warning function, error function ]
- * @example
- * //	status logger
- * var SL=new CeL.code.log('log'),sl=SL[1],warn=SL[2],err=SL[3];
- * sl(msg);
- * sl(msg,clear);
+ * get node description
+ * @param	node	HTML node
  * @memberOf	CeL.code.log
- * @since	2009/8/24 20:15:31
  */
-CeL.code.log.extend=function(obj, className_set){};
+CeL.code.log.node_description=function(node, flag){};
 /**
- * null module constructor
+ * reorganize functions
  * @class	程式碼重整相關之 function。
+ * @constructor
  */
 CeL.code.reorganize=function(){};
 /**
@@ -1128,20 +1331,20 @@ _.parse_CSV.td="";	//	'"\'';
 _.parse_CSV.hasTitle;//null;
 /**
  * 本 library 專用之 evaluate()
- * @param code	code to eval
- * @return	value that eval() returned
+ * @param code	script code to evaluate
+ * @return	value that evaluate process returned
  */
-eval=function(code){};
+eval_code=function eval_code(code){};
 /**
  * simple evaluates to get value of specified various name
  * @param {String} various_name	various name
- * @param {Object} [name_space]	initial name-space. default: global
+ * @param {Object} [name_space]	initialize name-space. default: global
  * @return	value of specified various name
  * @since	2010/1/1 18:11:40
  * @note
  * 'namespace' 是 JScript.NET 的保留字
  */
-eval_various=function(various_name, name_space){};
+get_various=function(various_name, name_space){};
 /**
  * 取得執行 script 之 path, 在 .hta 中取代 WScript.ScriptFullName。
  * @return	{String}	執行 script 之 path
@@ -1162,7 +1365,7 @@ get_script_name=function(){};
  * @param value	環境變數之值
  * @return	舊環境變數之值
  */
-env=function(name, value){};
+env=function env(name, value){};
 /**
  * 判斷為何種 type。主要用在 Array 等 native object 之判別。
  * @param	value	various or class instance to test
@@ -1245,19 +1448,30 @@ _get_hash_key=function(text){};
  * 可能的話請改用 {@link CeL.native.parse_Function}(F).funcName
  * @since	2010/1/7 22:10:27
  */
-get_Function_name=function(fr, ns, force_load){};
+get_Function_name=function get_Function_name(fr, ns, force_load){};
 /**
- * 延展物件 (learned from jQuery)
- * @since	2009/11/25 21:17:44
- * @param	variable_set	variable set
- * @param	name_space	extend to what name-space
- * @param	from_name_space	When inputing function names, we need a base name-space to search these functions.
- * @return	library names-pace
- * @see
- * <a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/03/01/jquery-extend.aspx" accessdate="2009/11/17 1:24" title="jQuery.extend的用法 - 黑暗執行緒">jQuery.extend的用法</a>,
- * <a href="http://www.cnblogs.com/rubylouvre/archive/2009/11/21/1607072.html" accessdate="2010/1/1 1:40">jQuery源\u30721\u23398\u20064\u31508\u35760三 - Ruby's Louvre - 博客\u22253</a>
+ * get new extend instance
+ * @param	{String, object HTMLElement} [obj]	message area element or id
+ * @return	{Array} [ instance of this module, log function, warning function, error function ]
+ * @example
+ * 
+ * //	status logger
+ * var SL=new CeL.code.log('log'),sl=SL[1],warn=SL[2],err=SL[3];
+ * sl(msg);
+ * sl(msg,clear);
+ * 
+ * //	general log
+ * function_set = new CeL.code.log.extend('panel',{});
+ * // 1.
+ * function_set = new CeL.code.log.extend('panel',{});
+ * logger = function_set[1];
+ * // 2.
+ * log_only = (new CeL.code.log.extend('panel',{}))[1];
+ * 
+ * @_memberOf	CeL.code.log
+ * @since	2009/8/24 20:15:31
  */
-extend=function(variable_set, name_space, from_name_space){};
+extend=function(obj, className_set){};
 /**
  * Get file resource<br/>
  * 用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br/>
@@ -1289,17 +1503,22 @@ get_file=function(path, encoding){};
  * @throws	error
  * @since	2010/1/2 00:40:42
  */
-require_netscape_privilege=function(privilege, callback){};
+require_netscape_privilege=function require_netscape_privilege(privilege, callback){};
 /**
  * 當需要要求權限時，是否執行。（這樣可能彈出對話框）
  * @type	Boolean
  */
 require_netscape_privilege.enabled=true;
 /**
- * default extension of script file.
- * @type	String
+ * 得知 script file 之相對 base path
+ * @param	{String} JSFN	script file name
+ * @return	{String} 相對 base path
+ * @example
+ * <script type="text/javascript" src="../baseFunc.js"></script>
+ * //	引數為本.js檔名。若是更改.js檔名，亦需要同步更動此值！
+ * var basePath=get_script_base_path('baseFunc.js');
  */
-script_extension="";	//	'.js';//'.txt'
+get_script_base_path=function(JSFN){};
 /**
  * get the path of specified module
  * @param {String} module_name	module name
@@ -1341,7 +1560,7 @@ simplify_path=function(path){};
  * @note
  * 'use' 是 JScript.NET 的保留字
  */
-use=function(module, callback, extend_to){};
+use=function requires(module, callback, extend_to){};
 /**
  * include other JavaScript/CSS files
  * @param {String} resource path
@@ -1349,7 +1568,7 @@ use=function(module, callback, extend_to){};
  * @param {Boolean} [use_write]	use document.write() instead of insert a element
  * @param {Boolean} [type]	1: is a .css file, others: script
  */
-include_resource=function(path, callback, use_write, type){};
+include_resource=function include_resource(path, callback, use_write, type){};
 /**
  * 已經 include_resource 了哪些 JavaScript 檔（存有其路徑）
  * loaded{路徑} = count
@@ -1385,6 +1604,12 @@ include_module_resource=function(file_name, module_name){};
  * @return	undefined	something error, e.g., 未成功 load，code_for_including return null, ..
  */
 setup_module=function(module_name, code_for_including){};
+/**
+ * 是否 cache code。
+ * 若不是要重構 code 則不需要。
+ * @type	Boolean
+ */
+cache_code=false;
 /**
  * 模擬 inherits
  * @param {String} module_name	欲繼承的 module_name
@@ -1423,6 +1648,35 @@ is_loaded=function(module_name){};
  * 2009/12/31 22:21:23	add 類似 'data.' 的形式，為 module。
  */
 use_function=function(function_list, return_extend){};
+/**
+ * clone native Object
+ * @param {Object} object
+ * @param {Boolean} not_trivial
+ * @return
+ * @since	2008/7/19 11:13:10
+ */
+clone_object=function(object, not_trivial){};
+/**
+ * 測出各字元的出現率。
+ * 普通使用字元@0-127：9-10,13,32-126，reduce後常用：9,32-95,97-125
+ * @param text	文檔
+ * @return
+ */
+charCount=function(text){};
+/**
+ * 計算字數 word counts.
+ * @param text
+ * @param flag
+ * @return
+ */
+wordCount=function(text, flag){};
+/**
+ * test if 2 string is at the same length
+ * @param s1	string 1
+ * @param s2	string 2
+ * @return
+ */
+same_length=function(s1, s2){};
 	/**
 	 * 本 library / module 之 id
 	 */
@@ -1434,7 +1688,7 @@ lib_name='debug';
  * @param times	max 次數
  * @return	連分數序列
  */
-mutual_division=function(n1, n2, times){};
+mutual_division=function mutual_division(n1, n2, times){};
 /**
  * 取得連分數序列的數值
  * @param sequence	序列
@@ -1454,7 +1708,8 @@ continued_fraction=function(sequence, max_no){};
  * to_rational_number(4088/783)
  * @param number	number
  * @param rate	比例在rate以上
- * @param max_no	最多取至序列第max_no個//TODO:並小於l:limit
+ * @param max_no	最多取至序列第 max_no 個
+ * 					TODO : 並小於 l:limit
  * @return	[分子, 分母, 誤差]
  * @requires	mutual_division,continued_fraction
  * @see
@@ -1499,27 +1754,29 @@ factorization=function(number){};
  */
 hex=function(number){};
 /**
- * 補數
+ * 補數計算。
+ * 正數的補數即為自身。若要求得互補之後的數字，請設成負數。
  * @param {Number} number
  * @return	{Number} base	1: 1's Complement, 2: 2's Complement, (TODO: 3, 4, ..)
  * @example
  * alert(complement())
  * @see
  * http://www.tomzap.com/notes/DigitalSystemsEngEE316/1sAnd2sComplement.pdf
+ * http://en.wikipedia.org/wiki/Method_of_complements
+ * http://en.wikipedia.org/wiki/Signed_number_representations
+ * @since	2010/3/12 23:47:52
  */
 complement=function(){};
 /**
- * 函數的文字解譯/取得函數的語法
- * @param function_name	function name
- * @param flag	=1: reduce
- * @return
- * @example
- * parsed_data = new parse_Function(function_name);
- * @see
- * http://www.interq.or.jp/student/exeal/dss/ref/jscript/object/function.html,
- * 
+ * String pattern (e.g., "/a+/g") to RegExp pattern.
+ * qq// in perl.
+ * String.prototype.toRegExp = function(f) { return to_RegExp_pattern(this.valueOf(), f); };
+ * @param {String} pattern	pattern text
+ * @param {Boolean, String} RegExp_flag	flags when need to return RegExp object
+ * @param {RegExp} escape_pattern	char pattern need to escape
+ * @return	{RegExp} RegExp object
  */
-parse_Function=function(function_name, flag){};
+to_RegExp_pattern=function(pattern, RegExp_flag, escape_pattern){};
 /**
  * 取至小數d位，
  * 原因：JScript即使在做加減運算時，有時還是會出現1.4000000000000001，0.0999999999999998等數值。此函數可取至1.4與0.1
@@ -1531,9 +1788,15 @@ parse_Function=function(function_name, flag){};
  * IEEE754\u12398丸\u12417演算\u12399最\u12418報告\u12373\u12428\u12427ES3「\u12496\u12464」\u12391\u12354\u12427。
  * http://www.jibbering.com/faq/#FAQ4_6
  * @example
- * {var d=new Date,v=0.09999998,i=0,a;for(;i<100000;i++)a=v.decp(2);alert(v+'\n→'+a+'\ntime:'+gDate(new Date-d));}
+ * {var d=new Date,v=0.09999998,i=0,a;for(;i<100000;i++)a=v.decp(2);alert(v+'\n→'+a+'\ntime:'+format_date(new Date-d));}
  */
 decplaces=function(digits, max){};
+/**
+ * 轉換字串成數值，包括分數等。分數亦將轉為分數。
+ * @param number
+ * @return
+ */
+parse_number=function(number){};
 /**
  * 改變網卡的IP地址: change IP, set IP
  * @param to_s	IP or {IP:''||[], Subnet:''||[], DNS:''||[], Gateway:''||[], GatewayOrder:''||[]}
@@ -1554,13 +1817,6 @@ decplaces=function(digits, max){};
  */
 setNetInfo=function(to_s, from){};
 /**
- * replace HTML
- * @param o
- * @param html
- * @return
- */
-replace_HTML=function(o,html){};
-/**
  * If HTML element has specified class
  * 
  * @param element	HTML elements
@@ -1573,7 +1829,8 @@ has_class=function(element, class_name){};
  * **	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。
  * **	NOT TESTED!!
  * @param type	listen to what event type
- * @param listener	listener function/function array
+ * @param listener	listener function/function array/function string,
+ * 				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"
  * @param [document_object]	bind/attach to what document object
  * @param [pFirst]	parentNode first
  * @return
@@ -1581,7 +1838,7 @@ has_class=function(element, class_name){};
  * @see
  * c.f., GEvent.add_listener()
  */
-add_listener=function(type, listener, document_object, pFirst){};
+add_listener=function add_listener(type, listener, document_object, pFirst){};
 /**
  * useCapture: parentNode first
  * @see
@@ -1613,25 +1870,6 @@ add_listener.default_adder=function(type, listener, pFirst, document_object){};
  */
 Big5JPToUnicodeJP=function(U){};
 /**
- * 簡易型 net.web.XML_node
- * @param tag	p.appendChild tag
- * @param p	parent node
- * @param t	text
- * @param classN	className
- * @return
- */
-create_DO=function(tag, p, t, classN){};
-/**
- * get scrollbar height
- * @return
- * @since	2008/9/3 23:31:21
- * @see
- * http://jdsharp.us/jQuery/minute/calculate-scrollbar-width.php
- * lazy evaluation
- * http://peter.michaux.ca/articles/lazy-function-definition-pattern
- */
-scrollbar_width=function(){};
-/**
  * scroll 到可以看到 object
  * TODO:
  * 考慮可能沒 scrollbar
@@ -1650,6 +1888,30 @@ scroll_to_show=function(o, p){};
  */
 menu_creater=function(o, l){};
 /**
+ * determine base path.
+ * 給定 base path 的結構後，藉由 path_now 推測 base path 的 full path
+ * @param {String} base_path_structure	base path 的範本結構
+ * @param {String} path_now
+ * @return	{String}	推測的 base path full path
+ * @example
+ * alert(dBasePath('kanashimi/www/cgi-bin/game/'));
+ * @requres	reducePath,getPathOnly,dirSp,dirSpR
+ */
+dBasePath=function(base_path_structure, path_now){};
+/**
+ * cf: getFN()
+ * @param {String} path	path name
+ * @return
+ */
+parse_path=function(path){};
+/**
+ * is absolute or relative path, not very good solution
+ * @param {String} path
+ * @return
+ * @requires	dirSp,dirSpR
+ */
+is_absolute_path=function(path){};
+/**
  * 
  * @param FN
  * @param format
@@ -1663,7 +1925,7 @@ open_template=function(FN, format, io_mode){};
 autodetectStringEncode=function(str){};
 /**
  * 判斷為 DOM。
- * @param	name	various name
+ * @param	name	various name @ name-space window. e.g., document, location
  * @return	{Boolean}	various is object of window
  * @since	2010/1/14 22:04:37
  */
@@ -1680,3 +1942,11 @@ is_DOM=function(name){};
  * @see	<a href="http://msdn.microsoft.com/library/en-us/script56/html/wsmthpopup.asp">Popup Method</a>
  */
 JSalert=function(message, wait, title, type){};
+/**
+ * 取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。
+ * 若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
+ * @param {String} script_filename
+ * @return
+ * @requires	ScriptName,simpleRead
+ */
+get_all_functions=function(script_filename){};
