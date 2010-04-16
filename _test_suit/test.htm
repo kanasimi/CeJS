@@ -74,6 +74,8 @@ You may need to check the configuration of the browser, <a href="#" onclick="his
 <b onclick="show_question();" style="cursor: pointer;">show</b>
 |
 <b onclick="run_code();" style="cursor: pointer;">run</b>
+<input id="run_times" style="width:5em;"/>
+times
 
 <div id="panel_for_SVG">
 </div>
@@ -125,7 +127,7 @@ bits: <input id="bits" value="8" style="width:3em;"/>
 <label for="diminished" title="diminished radix complement"><input type="checkbox" id="diminished"/>diminished</label>
 <a href="#" onclick="return calc_complement();">←</a>
 <a href="#" onclick="return calc_value();">→</a>
-（正負整數）<input id="value" value="16"/><span class="down">10</span>
+（正負整數）<input id="complement_value" value="16"/><span class="down">10</span>
 <hr />
 </div>
 
@@ -133,15 +135,17 @@ bits: <input id="bits" value="8" style="width:3em;"/>
 |
 <div onclick="CeL.trigger_display('Hamming_panel');" class="test_trigger">Hamming code</div>
 <div id="Hamming_panel" class="test_panel">
-data(/^[01]{,20}$/): <input id="h_data" value="1101"/>
+data(/^[01]{,20}$/): <input id="h_data" value="1101" pattern="[01]{0,20}"/>
 <a href="#" onclick="return Hamming.dec();" title="decode">←</a>
 <a href="#" onclick="return Hamming.enc();" title="encode">→</a>
-code(/^[01]{,20}$/): <input id="h_code"/>
+code(/^[01]{,20}$/): <input id="h_code" pattern="[01]{0,20}"/>
 <label for="h_reverse"><input type="checkbox" id="h_reverse"/>reverse</label>
 |
 show
 <a href="#" onclick="Hamming.show(8);return false;" title="encode">8</a>
 <a href="#" onclick="Hamming.show(16);return false;" title="encode">16</a>
+
+
 
 <hr />
 </div>
@@ -177,22 +181,33 @@ test A||B
 	var SVG_object, Hamming;
 
 	function show_question() {
-		var num = CeL.get_element('question').value, m = num
-				.match(/(\d+)([+\-*\/])(\d+)/);
+		var num = CeL.get_element('question').value,
+		m = num.match(/(\d+)([+\-*\/])(\d+)/);
 
 		if (m)
-			CeL.SVG['draw_' + {
-				'+' : 'addition',
-				'-' : 'subtraction',
-				'*' : 'multiplication',
-				'/' : 'long_division'
-			}[m[2]]](m[1], m[3], SVG_object);
+			try {
+				CeL.SVG['draw_' + {
+					'+' : 'addition',
+					'-' : 'subtraction',
+					'*' : 'multiplication',
+					'/' : 'long_division'
+				}[m[2]]](m[1], m[3], SVG_object);
+			} catch (e) {
+				CeL.err(e);
+			}
 	}
 
 	function run_code() {
+		var i = 0, t, v = CeL.get_element('question').value, times = parseInt(CeL.get_element('run_times').value);
 		try {
-			CeL.log(eval(CeL.get_element('question').value));
+			if(times>1)
+				eval('for (t = new Date; i < '+times+'; i++){'+v+'}; t = new Date - t;'),v=(t/times)+'ms/time, '+t+'ms total: '+eval(v);
+			else
+				v=eval(v);
+			CeL.log(v);
 		} catch (e) {
+			if(t)
+				CeL.log('error @ '+i+'/'+times+'(use '+(new Date - t)+'ms)');
 			CeL.err(e);
 		}
 	}
@@ -217,7 +232,7 @@ test A||B
 		c.bits = CeL.get_element('bits').value;
 		c.from(0, CeL.get_element('base').value,
 				CeL.get_element('diminished').checked);
-		c.set(CeL.get_element('value').value);
+		c.set(CeL.get_element('complement_value').value);
 		CeL.get_element('number').value = c.to();
 		return false;
 	}
@@ -227,7 +242,7 @@ test A||B
 		c.bits = CeL.get_element('bits').value;
 		c.from(CeL.get_element('number').value, CeL.get_element('base').value, CeL
 				.get_element('diminished').checked);
-		CeL.get_element('value').value = c.valueOf();
+		CeL.get_element('complement_value').value = c.valueOf();
 		return false;
 	}
 
@@ -355,6 +370,25 @@ test A||B
 		CeL.debug('net.web',2);
 		CeL.use('net.web');
 		//CeL.copy_to_clipboard('已經複製');
+		//CeL.debug(CeL.parse_URI('ftp://ftp.is.co.za/rfc/rfc1808.txt').path);
+
+
+		CeL.debug('attach set',2);
+		(new CeL.select_input('run_times', [ 1, 100, 1000, 10000, 100000, 1000000, 10000000 ],'always'))
+			.set_verify('|natural');
+
+		//(new CeL.select_input('number1')).set_verify('integer');
+		(new CeL.select_input('base1', [ 2, 8, 10, 16 ],'always')).set_verify('natural');
+		(new CeL.select_input('base2', [ 2, 8, 10, 16 ],'always')).set_verify('natural');
+
+		//(new CeL.select_input('number')).set_verify(/^-?\d+$/);
+		(new CeL.select_input('base', [ 2, 8, 10, 16 ],'always')).set_verify('natural');
+		(new CeL.select_input('bits', [ 4, 8, 16 ],'always')).set_verify('natural');
+		(new CeL.select_input('complement_value')).set_verify('integer');
+
+		//	just setup pattern
+		new CeL.select_input('h_data');
+		new CeL.select_input('h_code');
 
 
 		//CeL.log('long interger test: 36578368923657238645067315413986475314666666666666666666666666864506731541398647531466666666666666666666666666666666666666666666666666666666666666666666666666666622222222222222222222222222222222222222');
