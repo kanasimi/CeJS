@@ -55,6 +55,12 @@ http://www.w3school.com.cn/html5/html5_script.asp
 <script type="text/javascript" async="true" src="path/to/function.js"></script>
 <script type="application/javascript;version=1.7" async="true" src="path/to/function.js"></script>
 
+JSDoc:
+	http://code.google.com/p/jsdoc-toolkit/w/list
+	http://jsdoc.sourceforge.net/
+
+Javadoc:
+	http://java.sun.com/j2se/javadoc/writingdoccomments/
 
 */
 
@@ -83,6 +89,11 @@ in case of
 
 
 
+/*
+use <a href="http://prototyp.ical.ly/index.php/2007/03/01/javascript-design-patterns-1-the-singleton/" accessdate="2010/4/25 0:23" title="prototyp.ical.ly  &amp;raquo; Javascript Design Patterns - 1. The Singleton">Singleton pattern</a>,
+Module 模式或單例模式（<a href="http://zh.wikipedia.org/wiki/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F" accessdate="2010/4/25 0:25" title="单例模式">Singleton</a>）<a href="http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K950.aspx" accessdate="2010/4/25 0:24" title="那些相见恨晚的 JavaScript 技巧 - 基于 COMSHARP CMS">為 Douglas Crockford 所推崇</a>，並被大量應用在 Yahoo User Interface Library YUI。
+
+*/
 //void(
 //typeof CeL !== 'function' &&
 (
@@ -95,7 +106,7 @@ in case of
  * 用在比較或是 return undefined<br/>
  * 在舊的 browser 中，undefined 可能不存在。
  */
-function(global, undefined){
+function(global, undefined) {
 
 
 //if(typeof global !== 'function') throw new Error('No global object specified!');
@@ -169,8 +180,9 @@ for(i in _Global)alert(i);
  * @name	CeL
  * @class	Colorless echo JavaScript kit/library: base name-space declaration
  */
-function _(){
-	//	function CeL	//	declaration for debug
+function _() {
+	//	function CeL: library root
+	//	declaration for debug
 	//this.global = arguments[0] || arguments.callee.ce_doc;
 	return new (_.init.apply(global, arguments));
 };
@@ -221,17 +233,30 @@ eval_code = function eval_code(code) {
 	return global && global.eval && global.eval !== eval_code ? global.eval.call(global, code) : eval(code);
 };
 
+CeL.ce
+.
+/**
+ * evaluate @ Global scope.
+ * By the ECMA-262, new Function() will 'Pass in the Global Environment as the Scope parameter.'
+ * @param code	script code to evaluate
+ * @return	value that evaluate process returned
+ */
+global_eval = new Function('code', 'return eval(code);');
+
 
 CeL.ce
 .
 /**
  * simple evaluates to get value of specified various name
  * @param {String} various_name	various name
- * @param {Object} [name_space]	initialize name-space. default: global
+ * @param {Object|Function} [name_space]	initialize name-space. default: global
  * @return	value of specified various name
  * @since	2010/1/1 18:11:40
  * @note
  * 'namespace' 是 JScript.NET 的保留字
+ * 
+ * 在兩個子層(a.b.c)下，這樣作效率較差 @User agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.29 Safari/533.4:
+ * function(v){try{return(new Function('return('+v+')'))();}catch(e){}}
  */
 get_various = function(various_name, name_space) {
 	//this.debug('get value of [' + various_name + ']');
@@ -241,7 +266,10 @@ get_various = function(various_name, name_space) {
 	var i = 0,
 	s = various_name.split('.'),
 	l = s.length,
-	v = name_space || _.env.global;
+	v = name_space ||
+		//_.env.global
+		global
+		;
 	//this.debug('global.' + this.Class + ' = ' + _.env.global[this.Class]);
 
 	try {
@@ -313,13 +341,14 @@ CeL.ce
  * 取得/設定環境變數 enumeration<br/>
  * （雖然不喜歡另開 name-space，但以 2009 當下的 JsDoc Toolkit 來說，似乎沒辦法創造 enumeration。）
  * @class	環境變數 (environment variables) 與程式會用到的 library 相關變數。
- * @param name	環境變數名稱
+ * @param {String} name	環境變數名稱
  * @param value	環境變數之值
  * @return	舊環境變數之值
  */
 env = function env(name, value) {
 	if (!name)
-		return undefined;
+		//return undefined;
+		return;
 
 	var _s = env, v = _s[name];
 
@@ -352,7 +381,7 @@ null
  * A cache to the function we use to get the type of specified value.<br/>
  * Get the [[Class]] property of this object.<br/>
  * 不使用 Object.toString() 是怕被 overridden
- * @type	Function
+ * @type	{Function}
  * @inner
  */
 var get_object_type = Object.prototype.toString;
@@ -360,7 +389,7 @@ var get_object_type = Object.prototype.toString;
 CeL.ce
 .
 /**
- * 判斷為何種 type。主要用在 Array 等 native object 之判別。
+ * 判斷為何種 type。主要用在 Error, DOMException 等 native object 之判別。
  * @param	value	various or class instance to test
  * @param	{String} [want_type]	type to compare: number, string, boolean, undefined, object, function
  * @param	{Boolean} [get_Class]	get the class name of a class(function) instance.
@@ -445,42 +474,81 @@ CeL.ce
 object_tester = function(want_type, toString_reference) {
 	var t = '[object ' + want_type + ']';
 
+/*
+	return new Function('v', 'return "' + t + '"==='
+				+ (toString_reference ||
+						//	在 Google Chrome 中 'Object.prototype.toString' 可以與其 reference 同速度，但其他的 reference 會快些。
+						'Object.prototype.toString'
+						//'get_object_type'
+						)
+				+ '.call(v);');
+*/
+
 	return typeof toString_reference === 'string'
 		&& toString_reference ?
 			new Function('v', 'return "' + t
-				+ '"===' + toString_reference + '.call(v)')
-			: function(v) {
-				return t === get_object_type.call(v);
-			};
+				+ '"===' + toString_reference + '.call(v);')
+
+			//	slow@Chrome
+			: function(v) { return t === get_object_type.call(v); };
+			//	fast@Chrome
+			//: new Function('v', 'return "' + t + '"===Object.prototype.toString.call(v);');
+
 };
 
 CeL.ce
 .
 /**
  * Test if the value is a native Array.
- * @param	v	object value
+ * @param	v	value to test
  * @return	{Boolean}	the value is a native Array.
  * @since	2009/12/20 08:38:26
  */
-is_Array = _.object_tester('Array');
+is_Array =
+	// _.object_tester('Array');
+	function(v) {
+		// instanceof 比 Object.prototype.toString 快
+		return v instanceof Array
+				|| get_object_type.call(v) === '[object Array]';
+	};
 
 CeL.ce
 .
 /**
  * Test if the value is a native Object.
- * @param	v	object value
+ * @param	v	value to test
  * @return	{Boolean}	the value is a native Object.
  * @since	2009/12/20 08:38:26
  */
-is_Object = _.object_tester('Object');
+is_Object =
+	//_.object_tester('Object');
+	function(v) {
+		//	非如此不得與 jQuery 平起平坐…
+		return get_object_type.call(v) === '[object Object]';
+	};
+
+CeL.ce
+.
+/**
+ * Test if the value is a native Function.
+ * @param	v	value to test
+ * @return	{Boolean}	the value is a native Function.
+ * @since	2009/12/20 08:38:26
+ */
+is_Function =
+	//_.object_tester('Function');
+	function(v) {
+		//	typeof 比 Object.prototype.toString 快
+		return typeof v === 'function' || get_object_type.call(v) === '[object Function]';
+	};
 
 
 CeL.ce
 .
 /**
  * Setup environment variables
- * @param	{string}[OS_type]	type of OS
- * @return	environment variables set
+ * @param	{String} [OS_type]	type of OS
+ * @return	{Object}	environment variables set
  */
 initial_env = function(OS_type){
 	//this.env = {};
@@ -631,12 +699,12 @@ CeL.ce
 .
 /**
  * Tell if it's now debugging.
- * @param {int}[debug_level]	if it's now in this debug level.
+ * @param {Integral} [debug_level]	if it's now in this debug level.
  * @return	{Boolean}	It's now in specified debug level.
  * @return	{Number}	It's now in what debug level(Integral).
  */
 is_debug = function(debug_level){
-	return debug_level === undefined ? debug
+	return typeof debug_level === 'undefined' ? debug
 				: debug >= debug_level;
 };
 
@@ -644,7 +712,7 @@ CeL.ce
 .
 /**
  * Set debugging level
- * @param {int}[debug_level]	The debugging level to set.
+ * @param {Integral} [debug_level]	The debugging level to set.
  * @type	Integral
  * @return	{Number} debugging level now
  */
@@ -652,7 +720,7 @@ set_debug = function(debug_level){
 	if (!isNaN(debug_level))
 		debug = debug_level;
 
-	else if (debug_level === undefined && !debug)
+	else if (typeof debug_level === 'undefined' && !debug)
 		debug = 1;
 
 	return debug;
@@ -788,9 +856,10 @@ _.debug = _.err = _.warn = _.log = function log(m) {
 	/*
 	 * 請注意:
 	 * _.log.buffer !== log.buffer
-	 * 在 WScript 中 需要用 _.log，其他則用 _.log
+	 * 在 WScript 中 需要用 _.log，其他則用 _.log。
+	 * 因此應該將所有類似的值指定給雙方，並注意非[常數]的情況。
 	 */
-	var _s = log.buffer ? log : _.log;
+	var _s = log;
 	//_s.function_to_call.apply(null,arguments);
 	//_s.function_to_call.apply(global, arguments);
 
@@ -815,12 +884,19 @@ _.debug = _.err = _.warn = _.log = function log(m) {
  * 
  * @inner
  */
-_.log.buffer = [];
-_.log.max_length = 0;
+//_.debug.buffer = _.err.buffer = _.warn.buffer =
+_.log.buffer =
+log.buffer = [];
+
+//_.debug.max_length = _.err.max_length = _.warn.max_length =
+_.log.max_length =
+log.max_length = 0;
 
 
 var max_log_length = 1000;
+//_.debug.function_to_call = _.err.function_to_call = _.warn.function_to_call =
 _.log.function_to_call =
+log.function_to_call =
 	typeof JSalert === 'function' ? JSalert :
 	typeof WScript === 'object' ? function(m){m=''+m;if(m.length>2*max_log_length)m=m.slice(0,max_log_length)+'\n\n..\n\n'+m.slice(-max_log_length);WScript.Echo(m);} :
 	typeof alert === 'object' || typeof alert === 'function' ? function(m){m=''+m;if(m.length>2*max_log_length)m=m.slice(0,max_log_length)+'\n\n..\n\n'+m.slice(-max_log_length);alert(m);} :
@@ -843,7 +919,7 @@ test_obj.test_print('OK!');
 	this
 )
 //)	//	void(
-;
+;﻿
 
 
 
@@ -894,11 +970,11 @@ extend = function extend(variable_set, name_space, from_name_space){
 */
 	var _s, i, l;
 
-	if(name_space === undefined || name_space === null)
+	if(typeof name_space === 'undefined' || name_space === null)
 		//	如果沒有指定擴展的對象，則擴展到自身
 		name_space = this;
 
-	if(from_name_space === undefined)
+	if(typeof from_name_space === 'undefined')
 		from_name_space = this;
 
 	if(typeof variable_set === 'function'){
@@ -1015,7 +1091,8 @@ get_file = function(path, encoding){
 	//	else: This browser does not support XMLHttpRequest.
 
 	//	firefox: This function must return a result of type any
-	return undefined;
+	//return undefined;
+	return;
 };
 
 
@@ -1025,8 +1102,8 @@ CeL.ce
  * Ask privilege in mozilla projects.
  * enablePrivilege 似乎只能在執行的 function 本身或 caller 呼叫才有效果，跳出函數即無效，不能 cache，因此提供 callback。
  * 就算按下「記住此決定」，重開瀏覽器後需要再重新授權。
- * @param {String,Error} privilege	privilege that asked 或因權限不足導致的 Error
- * @param {Function,Number} callback	Run this callback if getting the privilege. If it's not a function but a number(經過幾層/loop層數), detect if there's a loop or run the caller.
+ * @param {String|Error} privilege	privilege that asked 或因權限不足導致的 Error
+ * @param {Function|Number} callback	Run this callback if getting the privilege. If it's not a function but a number(經過幾層/loop層數), detect if there's a loop or run the caller.
  * @return	OK / the return of callback
  * @throws	error
  * @since	2010/1/2 00:40:42
@@ -1208,7 +1285,7 @@ get_module_path = function(module_name, file_name){
 	module_path += this.split_module_name(module_name).join(/\//.test(module_path)?'/':'\\') + _.env.script_extension;
 	//this.debug(module_path);
 
-	if (file_name !== undefined)
+	if (typeof file_name !== 'undefined')
 		module_path = module_path.replace(/[^\/]+$/, file_name);
 	else if (this.getFP)
 		module_path = this.getFP(module_path, 1);
@@ -1279,8 +1356,8 @@ CeL.ce
 /**
  * 轉化所有 /., /.., //
  * @since	2009/11/23 22:32:52
- * @param {string} path	欲轉化之 path
- * @return	{string} path
+ * @param {String} path	欲轉化之 path
+ * @return	{String} path
  */
 simplify_path = function(path){
 	if(typeof path === 'string'){
@@ -1346,7 +1423,7 @@ CeL.ce
  * **	預設會 extend 到 library 本身下！
  * @param	{String} module	module name
  * @param	{Function} [callback]	callback function
- * @param	{Object, Boolean} [extend_to]	extend to which name-space<br/>
+ * @param	{Object|Boolean} [extend_to]	extend to which name-space<br/>
  * false:	just load, don't extend to library name-space<br/>
  * this:	extend to global<br/>
  * object:	extend to specified name-space that you can use [name_space]._func_ to run it<br/>
@@ -1378,7 +1455,7 @@ use = function requires(module, callback, extend_to){
 	}
 	*/
 
-	if (this.is_type(module, 'Array')) {
+	if (this.is_Array(module)) {
 		var error;
 		for (i = 0, l = module.length; i < l; i++)
 			if (error = _s.call(this, module[i], callback, extend_to))
@@ -1409,7 +1486,7 @@ use = function requires(module, callback, extend_to){
 		}
 
 		if (i) {
-			if (callback && window !== undefined) {
+			if (callback && typeof window !== 'undefined') {
 				// TODO: 在指定 callback 時使 name_space 依然有效。
 				this.include_resource(module_path, {
 					module : module,
@@ -1544,7 +1621,7 @@ CeL.ce
 /**
  * include other JavaScript/CSS files
  * @param {String} resource path
- * @param {Function, Object} callback	callback function / 	{callback: callback function, module: module name, global: global object when run callback}
+ * @param {Function|Object} callback	callback function / 	{callback: callback function, module: module name, global: global object when run callback}
  * @param {Boolean} [use_write]	use document.write() instead of insert a element
  * @param {Boolean} [type]	1: is a .css file, others: script
  */
@@ -1571,7 +1648,7 @@ include_resource = function include_resource(path, callback, use_write, type) {
 	if(path in _s.loaded)
 		return;
 
-	if (type === undefined)
+	if (typeof type === 'undefined')
 		type = /\.css$/i.test(path) ? 1 : 0;
 
 	t = 'text/' + (type === 1 ? 'css' : 'javascript');
@@ -1653,6 +1730,7 @@ include_resource.count = 0;
 
 CeL.ce
 .
+include_resource.wait_to_call =
 include_resource.wait_to_call = function wait_to_call(callback) {
 	//alert('include_resource.wait_to_call:\n' + _.to_module_name(callback.module));
 
@@ -2725,11 +2803,11 @@ function try1(){
 //	TODO: 對 encodeCode/decodeCode/reduceCode 嚴厲的測試（笑）
 {var tr=1,c=simpleRead('function.js'),testF='try.txt',p='',range=99	,sp='='.x(80)+NewLine,tr2=tr,i,j,t,d,d0=new Date,da,db,dc;try{simpleWrite('try.js',c=reduceCode(c),TristateTrue);
  do{da=new Date;t=''+encodeCode(c,p);db=new Date;d=''+decodeCode(t,p);dc=new Date;}while(--tr&&new Date-d0<2e4&&c==d);	//	find different
- //if(d)alert('['+c.length+']→['+t.length+']	( '+(100*t.length/c.length).decp(2)+' %)\n'+t.slice(0,range)+'\n..\n\ndecode →\n'+d.slice(0,range));//+'\n'+c
+ //if(d)alert('['+c.length+']→['+t.length+']	( '+(100*t.length/c.length).to_fixed(2)+' %)\n'+t.slice(0,range)+'\n..\n\ndecode →\n'+d.slice(0,range));//+'\n'+c
  for(i=0,j=[];i<c.length;i++)j.push((i%80?'':NewLine)+c.charCodeAt(i));c+=j;
  for(i=0,j=[];i<t.length;i++)j.push((i%80?'':NewLine)+t.charCodeAt(i));t+=j;
  for(i=0,j=[];i<d.length;i++)j.push((i%80?'':NewLine)+d.charCodeAt(i));d+=j;
- simpleWrite(testF,'start at '+gDate(da)+NewLine+'encode: '+gDate(db-da)+NewLine+'decode: '+gDate(dc-db)+NewLine+sp+'['+c.length+']→['+t.length+']	( '+(100*t.length/c.length).decp(2)+' %)'+NewLine+c+NewLine+NewLine+t+NewLine+sp+(typeof encodeCodeC!='undefined'?encodeCodeC+sp:'')+NewLine+d+NewLine+sp+(typeof decodeCodeC!='undefined'?decodeCodeC+sp:'')+'try '+(tr2-tr)+' times '+(c==d?'OK!':'failed @ '+(i=same(c,d))+' .'+NewLine+c.substr(i-9,range)+NewLine+'-'.x(20)+NewLine+d.substr(i-9,range))+NewLine,TristateTrue);
+ simpleWrite(testF,'start at '+gDate(da)+NewLine+'encode: '+gDate(db-da)+NewLine+'decode: '+gDate(dc-db)+NewLine+sp+'['+c.length+']→['+t.length+']	( '+(100*t.length/c.length).to_fixed(2)+' %)'+NewLine+c+NewLine+NewLine+t+NewLine+sp+(typeof encodeCodeC!='undefined'?encodeCodeC+sp:'')+NewLine+d+NewLine+sp+(typeof decodeCodeC!='undefined'?decodeCodeC+sp:'')+'try '+(tr2-tr)+' times '+(c==d?'OK!':'failed @ '+(i=same(c,d))+' .'+NewLine+c.substr(i-9,range)+NewLine+'-'.x(20)+NewLine+d.substr(i-9,range))+NewLine,TristateTrue);
  alert('Test encodeCode over!');
 }catch(e){simpleWrite(testF,popErr(e));}}	*/
 //{a=simpleRead('function.js');for(i=0;i<encodeCodeDwordsRef.length;i++)a=a.replace(encodeCodeDwordsRef[i].replace(/([()])/g,'\\$1'),'');simpleWrite('try.txt',a);}
@@ -3036,7 +3114,7 @@ dec_to_bin = function(number, places) {
 	*後段
 		數字表累加
 		'int'表整數int，累加1
-		'float'表示浮點數float，累加.1	bug:應該用.decp()
+		'float'表示浮點數float，累加.1	bug:應該用.to_fixed()
 		不輸入或非數字表示string
 
 	mode
@@ -3329,8 +3407,8 @@ function same_length(s1, s2) {
 	http://wawa.club.hinet.net/cboard1/HCB_Dis.asp?BrdNo=78&SubNo=78761&Club=0&ClsName=%B1%D0%A8%7C%BE%C7%B2%DF
 	http://bbs.thu.edu.tw/cgi-bin/bbscon?board=English&file=M.1046073664.A&num=106
 */
-//turnSI[generateCode.dLK]='setTool,decplaces,-turnSI.n,-turnSI.v';
-function turnSI(num,d){
+//to_SI[generateCode.dLK]='setTool,to_fixed,-to_SI.n,-to_SI.v';
+function to_SI(num,d){
  var _f=arguments.callee,p=0,v=_f.v;
  if(!v){
   _f.v=v=[1024];	//	1000 in disk space
@@ -3341,7 +3419,7 @@ function turnSI(num,d){
   return num;
 
  while(num>=v[p])p++;
- return (num/v[--p]).decp(isNaN(d)?2:d) + _f.n[p];
+ return (num/v[--p]).to_fixed(isNaN(d)?2:d) + _f.n[p];
 }
 
 //	將漢字轉為阿拉伯數字表示法(0-99999)
@@ -3736,7 +3814,7 @@ CeL.math
 */
 
 /*
-//{var v=Math.LN2,d=mutual_division(v),q=to_rational_number(v);alert('值	'+v+'\n序列	'+d+'\n近似值	'+q[0]+' / '+q[1]+'\n約	'+(q=q[0]/q[1])+'\n值-近似	'+(q-=v)+'\n差'+(Math.abs(q=10000*q/v)>1?'萬分之'+q.decp(2)+' ( '+q+' / 10000 )':'億分之'+(q*=10000).decp(2)+' ( '+q+' / 100000000 )'),0,'近似值	'+v);}
+//{var v=Math.LN2,d=mutual_division(v),q=to_rational_number(v);alert('值	'+v+'\n序列	'+d+'\n近似值	'+q[0]+' / '+q[1]+'\n約	'+(q=q[0]/q[1])+'\n值-近似	'+(q-=v)+'\n差'+(Math.abs(q=10000*q/v)>1?'萬分之'+q.to_fixed(2)+' ( '+q+' / 10000 )':'億分之'+(q*=10000).to_fixed(2)+' ( '+q+' / 100000000 )'),0,'近似值	'+v);}
 
 //{var d=new Date,a=.142857,b=1000000,i=0,c;for(i=0;i<10000;i++)c=mutual_division(a);alert(c+'\n'+gDate(new Date-d));}
 */
@@ -3744,29 +3822,43 @@ CeL.math
 CeL.math
 .
 /**
- * 輾轉相除
- * @param n1	number 1
- * @param n2	number 2
- * @param times	max 次數
- * @return	連分數序列
+ * 輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數
+ * @param {Number} n1	number 1
+ * @param {Number} [n2]	number 2
+ * @param {Number} times	max 次數, 1,2,..
+ * @return	{Array}	連分數序列 ** 負數視 _.mutual_division.done 而定!
  */
 mutual_division = function mutual_division(n1, n2, times) {
 	var q = [], c;
 	if (isNaN(times) || times <= 0)
-		times = 40;
+		times = 80;
 	if (!n2 || isNaN(n2))
 		n2 = 1;
+
 	if (n1 != Math.floor(n1)) {
 		c = n1;
 		var i = 9, f = n2;
 		while (i--)
-			//	整數運算比較快！這樣會造成整數多4%，浮點數多1/3倍的時間，但仍值得。
+			//	以整數運算比較快！這樣會造成整數多4%，浮點數多1/3倍的時間，但仍值得。
 			if (f *= 10, c *= 10, c === Math.floor(c)) {
 				n1 = c, n2 = f;
 				break;
 			}
 	}
-	/*
+
+	//	連分數負數之處理。更沒問題的: (n1 < 0?1:0) ^ (n2 < 0?1:0)
+	if (_.mutual_division.mode && ((n1 < 0) ^ (n2 < 0))) {
+		// 使兩數皆為正
+		if (n2 < 0)
+			n2 = -n2;
+		else
+			n1 = -n1;
+
+		q.push(-(1 + (n1 - (c = n1 % n2)) / n2));
+		n1 = n2, n2 -= c;
+	}
+
+	/* old:
 	 while(b&&n--)
 	  d.push((a-(c=a%b))/b),a=b,b=c;	//	2.08s@10000	可能因為少設定（=）一次c所以較快。但（若輸入不為整數）不確保d為整數？用Math.floor((a-(c=a%b))/b)可確保，速度與下式一樣快。
 	  //d.push(c=Math.floor(a/b)),c=a-b*c,a=b,b=c;	//	2.14s@10000:mutual_division(.142857)
@@ -3779,7 +3871,9 @@ mutual_division = function mutual_division(n1, n2, times) {
 		if (n2)
 			q.push((n1 - (c = n1 % n2)) / n2), n1 = n2, n2 = c;
 		else {
-			q.push(mutual_division.done, n1);
+			//	[ .. , done mark, (最後非零的餘數。若原 n1, n2 皆為整數，則此值為 GCD。但請注意:這邊是已經經過前面為了以整數運算，增加倍率過的數值!!) ]
+			q.push(_.mutual_division.done, n1);
+			//library_namespace.debug('done: ' + q);
 			break;
 		}
 
@@ -3792,14 +3886,21 @@ mutual_division = function mutual_division(n1, n2, times) {
 };
 CeL.math
 .
-done = -7.2;//''
+mutual_division.done = -7;//''
+
+CeL.math
+.
+/**
+ * !!mode:連分數處理，對負數僅有最初一數為負。
+ */
+mutual_division.mode = 0;
 
 CeL.math
 .
 /**
  * 取得連分數序列的數值
- * @param sequence	序列
- * @param max_no	取至第 max_no 個
+ * @param {Array} sequence	序列
+ * @param {Number} [max_no]	取至第 max_no 個
  * @requires	mutual_division.done
  * @return
  * @see
@@ -3841,14 +3942,14 @@ CeL.math
 .
 /**
  * The best rational approximation. 取得值最接近之有理數 (use 連分數 continued fraction), 取近似值.
- * c.f.,調日法
+ * c.f., 調日法
  * 在分子或分母小於下一個漸進分數的分數中，其值是最接近精確值的近似值。
  * @example
  * to_rational_number(4088/783)
- * @param number	number
- * @param rate	比例在rate以上
- * @param max_no	最多取至序列第 max_no 個
- * 					TODO : 並小於 l:limit
+ * @param {Number} number	number
+ * @param {Number} [rate]	比例在 rate 以上
+ * @param {Number} [max_no]	最多取至序列第 max_no 個
+ * 					TODO : 並小於 l: limit
  * @return	[分子, 分母, 誤差]
  * @requires	mutual_division,continued_fraction
  * @see
@@ -3856,19 +3957,36 @@ CeL.math
  */
 to_rational_number = function(number, rate, max_no) {
 	if (!rate)
-		rate = 99;
-	var d = _.mutual_division(number, 1, max_no && max_no > 0 ? max_no : 20), i = 0, a, b = d[0];
+		//	This is a magic number: 我們無法準確得知其界限為何。
+		rate = 65536;
+	var d = _.mutual_division(number, 1, max_no && max_no > 0 ? max_no : 20),
+	i = 0, a, b = d[0], done = _.mutual_division.done;
+
 	if (!b)
 		b = d[++i];
-	while (++i < d.length && (a = d[i]))
+	while (++i < d.length && (a = d[i]) !== done)
 		if (a / b < rate)
 			b = a;
 		else
 			break;
 
-	//library_namespace.debug(d + ': ' + d.length + ',' + i + ',' + d[i]);
+	if(0)
+		library_namespace.debug(
+			number + ' ' +
+			//	連分數表示
+			(d.length > 1 && d[d.length - 2] === _.mutual_division.done ?
+				'=' + ' [<em>' + d[0] + ';' + d.slice(1, i).join(', ') + '</em>'
+					+ (i < d.length - 2 ? ', ' + d.slice(i, -2).join(', ') : '')
+					+ '] .. ' + d.slice(-1) :
+				//	約等於的符號是≈或≒，不等於的符號是≠。
+				//	http://zh.wikipedia.org/wiki/%E7%AD%89%E4%BA%8E
+				'≈' + ' [<em>' + d[0] + ';' + d.slice(1, i).join(', ') + '</em>'
+					+ (i < d.length ? ', ' + d.slice(i).join(', ') : '') + ']: '
+					+ d.length + ',' + i + ',' + d[i]
+			)
+		);
 	d = _.continued_fraction(d, i);
-	//library_namespace.debug(d);
+	//library_namespace.debug('→ ' + d[0] + '/' + d[1]);
 	if (d[1] < 0)
 		d[0] = -d[0], d[1] = -d[1];
 
@@ -4496,19 +4614,19 @@ function fromUTCString(str,format){
 
 try:
 '2003/1/4  12:53:5'.toDate();
-StrToDate.m.join('<br/>');
+String_to_Date.m.join('<br/>');
 	$2:year
 	$3:month
 	$5:mday
 
 
 */
-StrToDate.pd=/(([12]\d{3}|1\d{2}|[2-9]\d)[\/.\-年])?([01]?\d)([\/.\-月]([0-3]?\d)日?)?/;	//	pattern of date
-StrToDate.pt=/([0-2]?\d)[:時]([0-5]?\d)([:分]([0-5]?\d)(\.\d+)?)?\s*(([PA])M)?/i;	//	pattern of time
-StrToDate.r1=new RegExp(StrToDate.pd.source+'(\\s+'+StrToDate.pt.source+')?','i');	//	date [time]
-StrToDate.r2=new RegExp(StrToDate.pt.source+'(\\s+'+StrToDate.pd.source+')?','i');	//	time [date]
-//StrToDate.m;	//	matched string
-function StrToDate(s,f,diff){	//	date string, force parse(no Date.parse() try), 時差 in hour(例如 TW: UTC+8 → 8, 可使用.5)
+String_to_Date.pd=/(([12]\d{3}|1\d{2}|[2-9]\d)[\/.\-年])?([01]?\d)([\/.\-月]([0-3]?\d)日?)?/;	//	pattern of date
+String_to_Date.pt=/([0-2]?\d)[:時]([0-5]?\d)([:分]([0-5]?\d)(\.\d+)?)?\s*(([PA])M)?/i;	//	pattern of time
+String_to_Date.r1=new RegExp(String_to_Date.pd.source+'(\\s+'+String_to_Date.pt.source+')?','i');	//	date [time]
+String_to_Date.r2=new RegExp(String_to_Date.pt.source+'(\\s+'+String_to_Date.pd.source+')?','i');	//	time [date]
+//String_to_Date.m;	//	matched string
+function String_to_Date(s,f,diff){	//	date string, force parse(no Date.parse() try), 時差 in hour(例如 TW: UTC+8 → 8, 可使用.5)
  if(!s)s=this.valueOf();//.toString();
  var m,a,b,c;
  if(!f&&!diff&&(m=Date.parse(s)))return new Date(m);	//	有diff時不使用 Date.parse
@@ -4518,31 +4636,33 @@ function StrToDate(s,f,diff){	//	date string, force parse(no Date.parse() try), 
  f=1911;	//	小於此年份會加上此年份。for 民國
  if(diff)diff=(new Date).getTimezoneOffset()+parseInt(60*diff);
  if(!diff)diff=0;
- if(m=s.match(StrToDate.r1))
+ if(m=s.match(String_to_Date.r1))
   //	日期先
   //for(var i=1;i<11;i++)m[i]=m[i]?Math.floor(m[i]):0;	//	needless
   a=new Date((b=m[2]-0)&&b<200?b+f:b,m[3]?m[3]-1:0,m[5]||1,	m[12]=='P'||m[13]=='p'?m[7]-0+12:m[7],m[8]-diff,m[10],m[11]*1e3);
 
- if((!m||!isNaN(m[0]))&&(c=s.match(StrToDate.r2)))	//	不match或僅有一數字
+ if((!m||!isNaN(m[0]))&&(c=s.match(String_to_Date.r2)))	//	不match或僅有一數字
   //	時間先
   m=c,a=new Date((b=m[10]-0)&&b<200?b+f:b,m[11]?m[11]-1:0,m[13]||1,	m[7]=='P'||m[7]=='p'?m[1]-0+12:m[1],m[2]-diff,m[4],m[5]*1e3);
 
  //var t="match:\n"+s+"\n\n";for(var i=0;i<m.length;i++){t+=(i>9?i:' '+i)+': '+m[i]+'\n';}if(!m[1]||!m[2]||!m[4])alert(t);
 
- if(StrToDate.m=m){
+ if (String_to_Date.m = m) {
   //	判別未輸入時預設年份設對了沒：以最接近 now 的為基準
-  if(!b && a-new Date(0,0,2)>0 && (
-		m=new Date(a),
-		a.setFullYear(s=(b=new Date).getFullYear()),
-		m.setFullYear(a-b>0?s-1:s+1),
-		a-b>0&&a-b>b-m||a-b<0&&a-b<b-m
-	))a=m;
+  if (!b && a - new Date(0, 0, 2) > 0) {
+					m = new Date(a);
+					a.setFullYear(s = (b = new Date).getFullYear());
+					m.setFullYear(a - b > 0 ? s - 1 : s + 1);
+					if (a - b > 0 && a - b > b - m || a - b < 0
+							&& a - b < b - m)
+						a = m;
+				}
   return a;
  }
 }
 
 //	Turn to RFC 822 date-time
-//DateToRFC822[generateCode.dLK]='setTool,StrToDate';
+//DateToRFC822[generateCode.dLK]='setTool,String_to_Date';
 function DateToRFC822(d) {
 	if (!(d instanceof Date))
 		d = ('' + d).toDate();
@@ -4552,7 +4672,7 @@ function DateToRFC822(d) {
 };
 
 //	要用更多樣化的，請使用format_date()
-function DateToStr(sp) {
+function Date_to_String(sp) {
 	if (!sp)
 		sp = '/';
 	with (this)
@@ -4593,7 +4713,7 @@ CeL.native
 .
 /**
  * 顯示格式化日期 string
- * @param date_value	要轉換的 date, 值過小時當作時間
+ * @param date_value	要轉換的 date, 值過小時當作時間, <0 轉成當下時間
  * @param mode	要轉換的 mode
  * @param zero_fill	對 0-9 是否補零
  * @param date_separator	date separator
@@ -4603,14 +4723,14 @@ CeL.native
  * alert(format_date());
  * @since	2003/10/18 1:04 修正
  * @since	2010/4/16 10:37:30	重構(refactoring)
- * @requires setTool,decplaces
+ * @requires setTool,to_fixed
  * @see
  * http://www.merlyn.demon.co.uk/js-dates.htm,
  * http://aa.usno.navy.mil/data/docs/JulianDate.html
  * @memberOf	CeL.native
  */
 format_date = function format_date(date_value, mode, zero_fill, date_separator, time_separator) {
-	//library_namespace.debug('[' + (typeof date_value) + '] ' + date_value + ', ' + mode);
+	//library_namespace.debug('[' + (typeof date_value) + '] ' + date_value + ', mode: ' + mode);
 
 	// initiate
 	if (!mode)
@@ -4641,7 +4761,7 @@ format_date = function format_date(date_value, mode, zero_fill, date_separator, 
 	if (b === 'number' && date_value >= 0){
 		// 全球標準時間(UCT)與本地時間之差距
 		// UTC time = local time + format_date.UTC_offset(ms)
-		if (a && isNaN(a = format_date.UTC_offset))
+		if (!a && isNaN(a = format_date.UTC_offset))
 			//	input UTC 時之差距(ms)
 			//	.getTimezoneOffset() is in minute. 60*1000(ms)=6e4(ms)
 			a = format_date.UTC_offset = 6e4 * (new Date).getTimezoneOffset();
@@ -4703,7 +4823,7 @@ format_date = function format_date(date_value, mode, zero_fill, date_separator, 
 						: (output_UTC ? date_value.getUTCSeconds()
 								+ date_value.getUTCMilliseconds() / 1e3
 								: date_value.getSeconds() + date_value.getMilliseconds() / 1e3
-							).decp(3));
+							).to_fixed(3));
 		}
 	}
 
@@ -4920,8 +5040,8 @@ CeL.native
  * qq// in perl.
  * String.prototype.toRegExp = function(f) { return to_RegExp_pattern(this.valueOf(), f); };
  * @param {String} pattern	pattern text
- * @param {Boolean, String} RegExp_flag	flags when need to return RegExp object
- * @param {RegExp} escape_pattern	char pattern need to escape
+ * @param {Boolean|String} [RegExp_flag]	flags when need to return RegExp object
+ * @param {RegExp} [escape_pattern]	char pattern need to escape
  * @return	{RegExp} RegExp object
  */
 to_RegExp_pattern = function(pattern, RegExp_flag, escape_pattern) {
@@ -5030,54 +5150,59 @@ memo:
 */
 
 //	萬用字元 RegExp source, ReadOnly
-turnWildcardToRegExp.w_chars='*?\\[\\]';
+turnWildcardToRegExp.w_chars = '*?\\[\\]';
 
-function turnWildcardToRegExp(p,f){	//	pattern, flag
+function turnWildcardToRegExp(p, f) { // pattern, flag
 
- if(p instanceof RegExp)return p;
- if(!p||typeof p!='string')return;
+	if (p instanceof RegExp)
+		return p;
+	if (!p || typeof p != 'string')
+		return;
 
- var ic=arguments.callee.w_chars,r;
- if((f&1) && !new RegExp('['+ic+']').test(p))
-  return p;
+	var ic = arguments.callee.w_chars, r;
+	if ((f & 1) && !new RegExp('[' + ic + ']').test(p))
+		return p;
 
- ic='[^'+ic+']';
- r=p
-	//	old: 考慮 \
-	//.replace(/(\\*)(\*+|\?+|\.)/g,function($0,$1,$2){var c=$2.charAt(0);return $1.length%2?$0:$1+(c=='*'?ic+'*':c=='?'?ic+'{'+$2.length+'}':'\\'+$2);})
+	ic = '[^' + ic + ']';
+	r = p
+		//	old: 考慮 \
+		//.replace(/(\\*)(\*+|\?+|\.)/g,function($0,$1,$2){var c=$2.charAt(0);return $1.length%2?$0:$1+(c=='*'?ic+'*':c=='?'?ic+'{'+$2.length+'}':'\\'+$2);})
 
-	//	處理目錄分隔字元：多轉一，'/' → '\\' 或相反
-	.replace(/[\\\/]+/g,typeof dirSp=='string'?dirSp:'\\')
+		//	處理目錄分隔字元：多轉一，'/' → '\\' 或相反
+		.replace(/[\\\/]+/g, typeof dirSp === 'string' ? dirSp : '\\')
 
-	//	在 RegExp 中有作用，但非萬用字元，在檔名中無特殊作用的
-	.replace(/([().^$\-])/g,'\\$1')
+		//	在 RegExp 中有作用，但非萬用字元，在檔名中無特殊作用的
+		.replace(/([().^$\-])/g, '\\$1')
 
-	//	* 代表任意檔案字元
-	.replace(/\*+/g,'\0*')
+		//	* 代表任意檔案字元
+		.replace(/\*+/g, '\0*')
 
-	//	? 代表一個檔案字元
-	.replace(/\?+/g,function($0){return '\0{'+$0.length+'}'})
+		//	? 代表一個檔案字元
+		.replace(/\?+/g, function($0) {
+			return '\0{' + $0.length + '}'
+		})
 
-	//	translate wildcard characters
-	.replace(/\0+/g,ic)
+		//	translate wildcard characters
+		.replace(/\0+/g, ic)
 
-	//	[ ] 代表選擇其中一個字元
-	//pass
+		//	[ ] 代表選擇其中一個字元
+		//pass
 
-	//	[! ] 代表除外的一個字元
-	.replace(/\[!([^\]]*)\]/g,'[^$1]')
+		//	[! ] 代表除外的一個字元
+		.replace(/\[!([^\]]*)\]/g, '[^$1]')
 
 	;
 
 
- //	有變化的時候才 return RegExp
- if(!(f&1) || p!=r)try{
-  p=new RegExp(f&2?'^'+r+'$':r,'i');
- }catch(e){
-  //	輸入了不正確的 RegExp：未預期的次數符號等
- }
+	// 有變化的時候才 return RegExp
+	if (!(f & 1) || p !== r)
+		try {
+			p = new RegExp(f & 2 ? '^' + r + '$' : r, 'i');
+		} catch (e) {
+			//	輸入了不正確的 RegExp：未預期的次數符號等
+		}
 
- return p;
+	return p;
 }
 
 
@@ -5086,19 +5211,19 @@ function turnWildcardToRegExp(p,f){	//	pattern, flag
 //	string & Number處理	-----------------------------------------------
 
 //	set prototype's function of 內建物件 for 相容性(not good way..)
-//setTool[generateCode.dLK]='*setTool();';//,product,countS,decplaces,getText,turnUnicode,trimStr,StrToDate,DateToStr,JSalert
+//setTool[generateCode.dLK]='*setTool();';//,product,countS,to_fixed,getText,turnUnicode,trimStr,String_to_Date,Date_to_String,JSalert
 function setTool(){
- if(!String.prototype.x&&typeof product=='function')String.prototype.x=product;
- if(!String.prototype.count&&typeof countS=='function')String.prototype.count=countS;
- if(!Number.prototype.decp&&typeof decplaces=='function')Number.prototype.decp=decplaces;
- if(!String.prototype.gText&&typeof getText=='function')String.prototype.gText=getText;
- if(!String.prototype.turnU&&typeof turnUnicode=='function')String.prototype.turnU=turnUnicode;
- if(!String.prototype.trim&&typeof trimStr=='function')String.prototype.trim=trimStr;
- //if(!Array.prototype.unique&&typeof Aunique=='function')Array.prototype.unique=Aunique;	//	建議不用，因為在for(in Array)時會..
+ if(!String.prototype.x&&typeof product==='function')String.prototype.x=product;
+ if(!String.prototype.count&&typeof countS==='function')String.prototype.count=countS;
+ if(!Number.prototype.to_fixed&&typeof to_fixed==='function')Number.prototype.to_fixed=to_fixed;
+ if(!String.prototype.gText&&typeof getText==='function')String.prototype.gText=getText;
+ if(!String.prototype.turnU&&typeof turnUnicode==='function')String.prototype.turnU=turnUnicode;
+ if(!String.prototype.trim&&typeof trimStr==='function')String.prototype.trim=trimStr;
+ //if(!Array.prototype.unique&&typeof Aunique==='function')Array.prototype.unique=Aunique;	//	建議不用，因為在for(in Array)時會..
 
- if(!String.prototype.toDate&&typeof StrToDate=='function')String.prototype.toDate=StrToDate;
- if(!Date.prototype.toStr&&typeof DateToStr=='function')Date.prototype.toStr=DateToStr;
- if(typeof alert=='undefined'&&typeof JSalert=='function')alert=JSalert;	//	在HTML中typeof alert=='object'
+ if(!String.prototype.toDate&&typeof String_to_Date==='function')String.prototype.toDate=String_to_Date;
+ if(!Date.prototype.toStr&&typeof Date_to_String==='function')Date.prototype.toStr=Date_to_String;
+ if(typeof alert=='undefined'&&typeof JSalert==='function')alert=JSalert;	//	在HTML中typeof alert=='object'
 }
 
 function Aunique(){return uniqueArray(this);}
@@ -5112,36 +5237,43 @@ function uniqueArray(a,f){	//	array,sortFunction
  return a;
 }
 
-function product(c){
- if(isNaN(c)||(c=Math.floor(c))<1)return '';
- var i,r='',s=[];s[i=1]=this;
- while(i+i<=c)s[i+i]=s[i]+s[i],i+=i;
- while(c){if(i<=c)r+=s[i],c-=i;i/=2;}
- return r;//in VB:String(c,this)
+function product(c) {
+	if (isNaN(c) || (c = Math.floor(c)) < 1)
+		return '';
+	var i, r = '', s = [];
+	s[i = 1] = this;
+	while (i + i <= c)
+		s[i + i] = s[i] + s[i], i += i;
+	while (c) {
+		if (i <= c)
+			r += s[i], c -= i;
+		i /= 2;
+	}
+	return r;//in VB:String(c,this)
 }
 //	計算string中出現k之次數	用s///亦可@perl
-function countS(k){	//	k亦可用RegExp
- //var c=0,s=this,i=0,l;if(k&&typeof k=='string'){l=k.length;while((i=this.indexOf(k,i))!=-1)c++,i+=l;}return c;
- return (this.length-this.replace(k,'').length)/k.length;
+function countS(k) { // k亦可用RegExp
+	//var c=0,s=this,i=0,l;if(k&&typeof k=='string'){l=k.length;while((i=this.indexOf(k,i))!=-1)c++,i+=l;}return c;
+	return (this.length - this.replace(k, '').length) / k.length;
 }
 
 
 CeL.native
 .
 /**
- * 取至小數d位，
- * 原因：JScript即使在做加減運算時，有時還是會出現1.4000000000000001，0.0999999999999998等數值。此函數可取至1.4與0.1
- * @param digits	number of decimal places shown
- * @param max	max digits	max==0:round() else floor()
+ * 取至小數 d 位，
+ * 肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1
+ * @param {Number} digits	1,2,..: number of decimal places shown
+ * @param {Number} [max]	max digits	max===0:round() else floor()
  * @return
  * @see
  * https://bugzilla.mozilla.org/show_bug.cgi?id=5856
  * IEEE754の丸め演算は最も報告されるES3「バグ」である。
  * http://www.jibbering.com/faq/#FAQ4_6
  * @example
- * {var d=new Date,v=0.09999998,i=0,a;for(;i<100000;i++)a=v.decp(2);alert(v+'\n→'+a+'\ntime:'+format_date(new Date-d));}
+ * {var d=new Date,v=0.09999998,i=0,a;for(;i<100000;i++)a=v.to_fixed(2);alert(v+'\n→'+a+'\ntime:'+format_date(new Date-d));}
  */
-decplaces = function(digits, max) {
+to_fixed = function(digits, max) {
 	var v = this.valueOf(),
 	i, n;
 
@@ -5160,11 +5292,11 @@ decplaces = function(digits, max) {
 	if (v < 0)
 		// 負數
 		n = 1, v = -v;
-	if ((i = (v = v.toString(10)).indexOf('e')) != -1)
+	if ((i = (v = v.toString(10)).indexOf('e')) !== -1)
 		return v.charAt(i + 1) == '-' ? 0 : v;
 
 	//library_namespace.debug(v);
-	if (i = v.indexOf('.'), i != -1) {
+	if ((i = v.indexOf('.')) !== -1) {
 		if (i + 1 + digits < v.length)
 			if (max)
 				v = v.slice(0, i + 1 + digits);
@@ -5180,7 +5312,7 @@ decplaces = function(digits, max) {
 	return v ? parseFloat((n ? '-' : '') + v) : 0;
 };
 /*	old:very slow
-function decplaces(d,m){
+function to_fixed(d,m){
  var v=this.valueOf(),i;if(isNaN(v))return v;
  if(isNaN(d)||d<0)d=8;	//	內定：8位
  if(!m){
@@ -5231,30 +5363,54 @@ function dQuote(s,len,sp){	//	string,分割長度(會採用'~'+"~"的方式),sep
  return q+s+q;
 }
 
-/*	2006/10/27 16:36
-	from program\database\BaseF.pm
-	check input string send to SQL server
-*/
-function checkSQLInput(str){
- if(!str)return '';
- // 限制長度
- if(maxInput&&str.length>maxInput)str=str.slice(0,maxInput);
- return str
-	// for \uxxxx
-	.replace(/\\u([\da-f]{4})/g,function($0,$1){return String.fromCharCode($1);})
-	.replace(/\\/g,'\\\\')
-	.replace(/\x00/g,'\\0')	//	.replace(/[\x00-\x31]/g,'')
-	//.replace(/\x09/g,'\\t')
-	//.replace(/\x1a/g,'\\Z')
-	.replace(/\r/g,'\\r').replace(/\n/g,'\\n')	//	.replace(/\r\n/g,' ')
-	.replace(/'/g,"''")	//	.replace(/"/g,'\\"')
-	;
+
+/**
+ * check input string send to SQL server
+ * @param {String} string	input string
+ * @return	{String}	轉換過的 string
+ * @since	2006/10/27 16:36
+ * @see
+ * from lib/perl/BaseF.pm (or program/database/BaseF.pm)
+ */
+function checkSQLInput(string) {
+	if (!string)
+		return '';
+
+	// 限制長度
+	if (maxInput && string.length > maxInput)
+		string = string.slice(0, maxInput);
+
+	return string
+		// for \uxxxx
+		.replace(/\\u([\da-f]{4})/g, function($0, $1) {
+			return String.fromCharCode($1);
+		}).replace(/\\/g, '\\\\')
+	
+		// .replace(/[\x00-\x31]/g,'')
+		.replace(/\x00/g, '\\0')
+	
+		// .replace(/\x09/g,'\\t')
+		// .replace(/\x1a/g,'\\Z')
+	
+		// .replace(/\r\n/g,' ')
+		.replace(/\r/g, '\\r').replace(/\n/g, '\\n')
+	
+		// .replace(/"/g,'\\"')
+		.replace(/'/g, "''");
 }
-// 去掉前後space
-function checkSQLInput_noSpace(str) {
-	return str ? checkSQLInput(str
-			//.replace(/[\s\n]+$|^[\s\n]+/g,'')
-			.replace(/\s+$|^\s+/g, '')) : '';
+
+/**
+ * check input string send to SQL server 並去掉前後 space
+ * @param {String} string	input string
+ * @return	{String}	轉換過的 string
+ * @since	2006/10/27 16:36
+ * @see
+ * from lib/perl/BaseF.pm (or program/database/BaseF.pm)
+ */
+function checkSQLInput_noSpace(string) {
+	return string ? checkSQLInput(string
+		//.replace(/[\s\n]+$|^[\s\n]+/g,'')
+		.replace(/\s+$|^\s+/g, '')) : '';
 }
 
 
@@ -5262,7 +5418,7 @@ CeL.native
 .
 /**
  * 轉換字串成數值，包括分數等。分數亦將轉為分數。
- * @param number
+ * @param {String} number	欲轉換之值
  * @return
  */
 parse_number = function(number) {
@@ -6441,14 +6597,73 @@ function getNetInfo(type){	//	default type: ip setted interfaces only, 1: all in
 }
 
 
-//default DNS
-setNetInfo.default_DNS = '168.95.1.1';
+/**
+ * get CIDR data
+ * @param {Number} CIDR	CIDR mask bits, 0~32
+ * @param {String} IP	IPv4, e.g., 1.2.3.4
+ * @return	CIDR data
+ * @since	2010/4/21 22:56:16
+ */
+function CIDR_to_IP(CIDR, IP) {
+	if (isNaN(CIDR) || CIDR < 0 || CIDR > 32)
+		return;
+
+	if (typeof IP === 'string')
+		IP = IP.split('.');
+	else if (!(IP instanceof Array))
+		IP = [];
+
+	var i = 0, r = {
+		//	geteway IP
+		geteway : [],
+		//	subnet mask
+		mask : [],
+		//	wildcard mask
+		wildcard : [],
+		//	subnet start IP,the entire network
+		subnet : [],
+		//	subnet end IP, broadcast address
+		broadcast : [],
+		//	Maximum Addresses, range IP count
+		//	.count now = Maximum Subnets
+		count : 1 << (32 - CIDR)
+	};
+
+	for (; i < 4; i++) {
+		if (CIDR > 7) {
+			CIDR -= 8;
+			r.wildcard[i] = 0;
+			r.mask[i] = 255;
+			r.subnet[i] = r.broadcast[i] = IP[i] || 0;
+		} else if (CIDR) {
+			r.broadcast[i] = (IP[i] || 0) | (r.wildcard[i] = CIDR = (1 << (8 - CIDR)) - 1);
+			r.subnet[i] = (IP[i] || 0) & (r.mask[i] = 255 - CIDR);
+			CIDR = 0;
+		} else
+			r.broadcast[i] = r.wildcard[i] = 255,
+			r.subnet[i] = r.mask[i] = 0;
+	}
+
+	if (r.count > 2)
+		r.count -= 2;
+	r.geteway = r.broadcast.join(',').split(',');
+	//	[the entire network, .., geteway, broadcast address]
+	r.geteway[3] -= 1;
+
+	//alert(r.geteway + '\n' + r.subnet + '\n' + r.broadcast + '\n' + r.wildcard + '\n' + r.subnet + '\n' + r.count);
+	return r;
+};
+
+
+// default DNS
+// 168.95.1.1,8.8.4.4
+set_net_info.default_DNS = '8.8.8.8';
 // http://en.wikipedia.org/wiki/CIDR_notation
-setNetInfo.CIDR_notation = 24;
+set_net_info.CIDR_notation = 24;
 
 /**
  * 改變網卡的IP地址: change IP, set IP
- * @param to_s	IP or {IP:''||[], Subnet:''||[], DNS:''||[], Gateway:''||[], GatewayOrder:''||[]}
+ * @param to_s	IP or {IP:''||[], CIDR:24||.CIDR_notation, Subnet:''||[], DNS:''||[], Gateway:254||[], GatewayOrder:''||[]}
  * @param from	IP or netif No.
  * @since
  * 2009/5/7 0:24:5	加強
@@ -6460,44 +6675,53 @@ setNetInfo.CIDR_notation = 24;
  * <a href="http://www.dotblogs.com.tw/PowerHammer/archive/2008/03/24/2060.aspx" accessdate="2010/3/3 13:15">使用 WMI 更改IP、子網路遮罩、閘道、DNS - 強力鎯頭 VB BLOG - 點部落</a>
  * Using NetSh.exe (no reboot required): <a href="http://techsupt.winbatch.com/webcgi/webbatch.exe?techsupt/tsleft.web+WinBatch/How~To+Change~Ip~Address.txt" accessdate="2010/3/3 13:12">WWW Tech Support/WinBatch/How To\Change Ip Address.txt</a>
  * @example
- * setNetInfo({IP:'163.16.20.212',Gateway:254});
- * sl(setNetInfo({IP:'163.16.20.30',Gateway:254}));WScript.Quit();
- * @requires	getWMIData,VBA,JSArrayToSafeArray
+ * set_net_info({IP:'163.16.20.212',Gateway:254});
+ * sl(set_net_info({IP:'163.16.20.30',Gateway:254}));WScript.Quit();
+ * @requires	getWMIData,VBA,JSArrayToSafeArray,CIDR_to_IP
  */
-function setNetInfo(to_s, from) {
+function set_net_info(to_s, from) {
 
-	var _f = arguments.callee, r, count = 0, IPA, i = function(ip) {
+	var _f = set_net_info, r, count, IPA, i = function(ip) {
 		if (!(ip instanceof Array))
-			if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip = ''+ip))
+			if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip = '' + ip))
 				ip = [ ip ];
 			else
 				return;
 		return JSArrayToSafeArray(ip);
 	};
 
-	if (typeof to_s != 'object' || to_s instanceof Array)
+	if (typeof to_s === 'string'
+			&& (r = to_s
+					.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(\/(\d{1,2}))?$/))) {
+		count = r[1];
+		to_s = {
+			IP : count
+		};
+
+		if ((r = r[3]) > 15) {
+			r = CIDR_to_IP(r, count);
+			to_s.Gateway = r.geteway.join('.');
+			to_s.Subnet = r.mask.join('.');
+		}
+
+	}else if (typeof to_s !== 'object' || to_s instanceof Array)
 		// treat as IP
 		to_s = {
 			IP : to_s
 		};
 
 	if (!isNaN(to_s.Gateway))
-		to_s.Gateway = (to_s.IP instanceof Array ? to_s.IP.join(',') : to_s.IP)
+		to_s.Gateway = (to_s.IP instanceof Array ? to_s.IP.join('.') : to_s.IP)
 				.replace(/\d+$/, to_s.Gateway);
 
+	//	SubnetMask: Subnet masks that complement the values in the IPAddress parameter. Example: 255.255.0.0. 
 	if (!('Subnet' in to_s) || !isNaN(to_s.Subnet)) {
-		IPA = [];
-		r = isNaN(to_s.Subnet) ? _f.CIDR_notation : to_s.Subnet;
-		while (r > 7)
-			r -= 8, IPA.push(255);
-		IPA.push(parseInt('11111111'.slice(0, r) + '00000000'.slice(r), 2));
-		while (IPA.length < 4)
-			IPA.push(0);
-		to_s.Subnet = IPA.join('.');
+		r = CIDR_to_IP(to_s.Subnet || _f.CIDR_notation, to_s.IP);
+		to_s.Subnet = r.subnet.join('.');
 	}
 
-	//sl('setNetInfo:\n[' + from + '] → [' + to_s.IP + '/' + to_s.Subnet + ']\nGateway: [' + to_s.Gateway + ']\nDNS: [' + ('DNS' in to_s ? to_s.DNS : _f.default_DNS) + ']');
-	//return -1;
+	//sl('set_net_info:\n[' + from + '] → [' + to_s.IP + '/' + to_s.Subnet + ']\nGateway: [' + to_s.Gateway + ']\nDNS: [' + ('DNS' in to_s ? to_s.DNS : _f.default_DNS) + ']');
+	// return -1;
 
 	to_s.Subnet = i(to_s.Subnet);
 	to_s.IP = i(to_s.IP);
@@ -6512,17 +6736,18 @@ function setNetInfo(to_s, from) {
 			to_s.GatewayOrder = [ to_s.GatewayOrder ];
 
 	r = -1;
+	count = 0;
 	if (!from)
 		from = 0;
 	getWMIData(
 			{
 				from : 'Win32_NetworkAdapterConfiguration',
-				//	這判別法不是很好
+				// 這判別法不是很好
 				where : 'MACAddress!=NULL AND (DHCPEnabled=TRUE OR IPEnabled=TRUE)'// OR IPXEnabled=TRUE
 			},
 			function(o) {
-				//alert('Get if: ' + o.Caption + '\n' + from + ',' + count);
-				//	通常我們不會設定無線連線
+				// alert('Get if: ' + o.Caption + '\n' + from + ',' + count);
+				// 通常我們不會設定無線連線
 				if(/wireless/i.test(o.Caption))
 					return;
 
@@ -6540,18 +6765,20 @@ function setNetInfo(to_s, from) {
 												to_s.GatewayOrder)
 										|| typeof to_s.DNS !== 'undefined'
 										&& o.SetDNSServerSearchOrder(to_s.DNS);
-							//alert('Set if:\n'+o.Caption+'\nto: '+to_s.IP+'\nerrno: '+r)
-							//	TODO: error detection
+						//alert('Set if:\n'+o.Caption+'\nto: '+to_s.IP+'\nerrno: '+r);
+							// TODO: error detection
 							return 1;
 						}
 					}
 				}
 			});
 
-	//	not found / error
-	//	http://msdn.microsoft.com/en-us/library/aa390383%28VS.85%29.aspx
+	// not found / error
+	// http://msdn.microsoft.com/en-us/library/aa390383%28VS.85%29.aspx
 	return r;
-}
+};
+
+
 
 
 
@@ -8326,6 +8553,8 @@ getT:function(e,o){
  try{return (o||this.doc()).getElementsByTagName(e);}catch(e){}
 },
 //	name/id, HTML object to get frame, return document object or not
+//	.getElementsByName()
+//	http://www.w3school.com.cn/htmldom/met_doc_getelementsbyname.asp
 frame:function(n,f,d){
  try{
   f=f?f.getElementsByTagName('frame'):this.getT('frame');
@@ -12227,6 +12456,9 @@ http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K902.aspx
 http://www.nczonline.net/blog/2010/01/12/history-of-the-user-agent-string/
 當 IE 初次推出它們的 User Agent 標誌的時候，是這個樣子：
 MSIE/3.0 (Win95; U)
+
+TODO:
+don't use .innerHTML
 */
 
 if (typeof CeL === 'function'){
@@ -12448,7 +12680,7 @@ CeL.net.web
  * display:none or visibility:hidden.
  * TODO: computed style
  * @param element	HTML element
- * @param {String,Number} type	show or hidden or set the status type:
+ * @param {String|Number} type	show or hidden or set the status type:
  * 			{Number}: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change
  * 			{String}: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?
  * @return	display status
@@ -12566,7 +12798,9 @@ node_want_to_replace.removeNode(new_node)
 CeL.net.web
 .
 /**
- * 移除 node
+ * 移除 node.
+ * TODO:
+ * also remove event handlers
  * @param o
  * @param tag	tag===1: only child, undefined: remove only self, others: only <tag> child
  * @return
@@ -12891,47 +13125,6 @@ XML_node = function(tag,propertyO,insertBeforeO,innerObj,styleO){
 
 
 
-/*	增加table的列(row)
-	please set addTABLEelement.tbodyObj first!!
-	e.g.,	addTABLEelement.tbodyObj='placeCostListT';
-
-	addTABLEelement([list1],[list2],..)
-	e.g.,	addTABLEelement([1,2,3,4],[4,5,3,4]);
-	addTABLEelement([[list1],[list2],..])
-	e.g.,	addTABLEelement( [ [1,2,3,4],[4,5,3,4] ] );
-
-	下面調到檔案頭
-addTABLEelement.tbodyObj=null,addTABLEelement.doClean=1,addTABLEelement.DtagName='td';	//	addTABLEelement.DtagName: td/th
-*/
-function addTABLEelement(){
- if(typeof addTABLEelement.tbodyObj!='object')
-  addTABLEelement.tbodyObj=document.getElementById(addTABLEelement.tbodyObj);
- var l=arguments;
- if(!addTABLEelement.tbodyObj||!l.length)return;
-
- if(addTABLEelement.doClean)try{
-  addTABLEelement.tbodyObj.innerHTML='';	//	moz
- }catch(e){
-  try{
-   //alert(addTABLEelement.tbodyObj.rows.length);
-   for(var i=addTABLEelement.tbodyObj.rows.length;i>0;)	//	IE
-    addTABLEelement.tbodyObj.deleteRow(--i);
-  }catch(e){}
- }
-
- if(l.length==1&&typeof l[0]=='object'&&typeof l[0][0]=='object')l=l[0];
- for(var i=0,j,o,list;i<l.length;i++){
-  list=l[i];
-  if(typeof list!='object'||!list)continue;
-  o=document.createElement('tr');
-  for(j=0;j<list.length;j++){
-   var s=document.createElement(addTABLEelement.DtagName);
-   s.innerHTML=(j in list)?list[j]:'';
-   o.appendChild(s);
-  }
-  addTABLEelement.tbodyObj.appendChild(o);
- }
-}
 
 
 /*	對付IE與Moz不同的text取得方法。現階段不應用innerText，應該用此函數來取得或設定內部text
@@ -13026,9 +13219,91 @@ function setAstatusOver(){
 function setAstatusOut(){
  //var o=event.srcElement;if(typeof o.ostatus!='undefined'){window.status=o.ostatus;return true;}
  window.status=setAstatusOS;return true;
-}
+};
 
 
+
+
+
+CeL.net.web
+.
+/**
+ * fill data to table.
+ * 增加 table 的列(row)
+ * @param {Array|Object} data	data list
+ * @param table	table element
+ * @param {Array} header	header list
+ * @return
+ * @example
+ * table_list([list1],[list2],..)
+ * e.g.,	table_list([1,2,3,4],[4,5,3,4]);
+ * table_list([[list1],[list2],..])
+ * e.g.,	table_list( [ [1,2,3,4],[4,5,3,4] ] );
+ * @since	2010/05/03 14:13:18
+ * @memberOf	CeL.net.web
+ * @see
+ * http://www.datatables.net/
+ */
+table_list = function(data, table, header, do_clean) {
+	var i = 0, l, add_list = function(array, d) {
+		if (!library_namespace.is_Array(array))
+			return;
+
+		var j = 0, tr = document.createElement('tr'), td, array, L = array.length;
+		for (; j < L; j++) {
+			td = document.createElement(d || 'td');
+			td.appendChild(document.createTextNode(array[j]));
+			tr.appendChild(td);
+		}
+		table.appendChild(tr);
+	};
+
+	if (typeof table === 'string')
+		table = document.getElementById(table);
+
+	/*
+	//	in  Chrome/5.0.342.9 @ Ubuntu, 加了會出問題。
+	try{
+		if(l=table.getElementsByTagName('tbody'))
+			table=l[0];
+	}catch(e){}
+	*/
+
+	if (do_clean)
+		table.innerHTML = '';
+		/*
+		try {
+			// moz
+			table.innerHTML = '';
+		} catch (e) {
+			try {
+				// alert(table.rows.length);
+				// IE
+				for ( var i = table.rows.length; i > 0;)
+					table.deleteRow(--i);
+			} catch (e) {
+			}
+		}
+		*/
+
+	if (header)
+		add_list(header, 'th');
+
+	if (data.length === 1 && typeof (l=data[0]) === 'object'
+			&& library_namespace.is_Array(l[0]))
+		data = l;
+
+	if (library_namespace.is_Array(data))
+		for (l = data.length; i < l; i++) {
+			add_list(data[i]);
+		}
+	else if (library_namespace.is_Object(data)) {
+		for (i in data) {
+			add_list( [ i, data[i] ]);
+		}
+	} else
+		library_namespace.debug('Error input: not legal data!');
+};
 
 
 
@@ -14177,6 +14452,23 @@ include function:
 	String.x()
 	parseFunction()
 	setObjValue()
+
+TODO:
+submenu
+	http://dynamicdrive.com/dynamicindex1/popupmenu.htm
+
+How to Create a Valid Non-Javascript Lightbox | Carsonified
+http://carsonified.com/blog/design/css/how-to-create-a-valid-non-javascript-lightbox/
+
+move/resize/最小化: popup dialog
+	http://deluxepopupwindow.com/html-popup-dialog-vista-graphite.html
+
+獨佔 window, 訊息列, 多功能(HTML+Script)內容
+	http://vision-media.ca/resources/jquery/jquery-popup-plugin-review
+
+key (Esc)
+time limit
+
 */
 var sPopP={}	//	sPop properties object
 	,sPopF	//	flag
@@ -15054,6 +15346,8 @@ function locObj(obj,loc,margin,flag){
 
 
 //	2007/4/25-27 0:48:22	RFC 3492 IDNA Punycode	未最佳化
+//	http://stackoverflow.com/questions/183485/can-anyone-recommend-a-good-free-javascript-for-punycode-to-unicode-conversion
+//	http://xn-punycode.com/
 function Punycode(){}
 
 Punycode.map='abcdefghijklmnopqrstuvwxyz0123456789',
@@ -15257,9 +15551,13 @@ CeL.net.web
  * bind/add listener<br/>
  * **	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。
  * **	NOT TESTED!!
+ * TODO:
+ * removeEventListener
+ * remove_listener()
  * @param type	listen to what event type
  * @param listener	listener function/function array/function string,
  * 				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"
+ * 			function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}
  * @param [document_object]	bind/attach to what document object
  * @param [pFirst]	parentNode first
  * @return
@@ -15323,7 +15621,8 @@ CeL.net.web
 /**
  * useCapture: parentNode first
  * @see
- * http://www.w3.org/TR/DOM-Level-3-Events/events.html#Events-flow
+ * <a href="http://www.w3.org/TR/DOM-Level-3-Events/#event-flow" accessdate="2010/4/16 22:40">Document Object Model (DOM) Level 3 Events Specification</a>,
+ * <a href="http://www.w3.org/TR/DOM-Level-3-Events/#interface-EventTarget" accessdate="2010/4/16 22:42">Interface EventTarget</a>
  */
 add_listener.pFirst = false;
 
@@ -15335,10 +15634,10 @@ CeL.net.web
 add_listener.get_adder = function() {
 	/**
 	 * moz, saf1.2, ow5b6.1: window.addEventListener
-	 * 
 	 * @ignore
-	 * @see http://developer.mozilla.org/en/docs/DOM:element.addEventListener
-	 *      http://simonwillison.net/2004/May/26/addLoadEvent/
+	 * @see
+	 * <a href="https://developer.mozilla.org/en/DOM/element.addEventListener" accessdate="2010/4/16 22:35">element.addEventListener - MDC</a>
+	 * <a href="http://simonwillison.net/2004/May/26/addLoadEvent/" accessdate="2010/4/16 22:36">Executing JavaScript on page load</a>
 	 */
 	return window.addEventListener ||
 	/*
@@ -16102,22 +16401,23 @@ initI=function(o,prefix){
   return i.slice(c+1);
  };
  a.setSearch('includeKey');
- a.setProperty('onfocus',function(){
-  var c=_p.cityI.setValue(),d=_p.districtI.setValue();
-  if(c && (c in ZIP) && typeof ZIP[c]=='object' && (d in ZIP[c])){
-   _p.zipI.triggerToInput(0);
-   _p.cityI.triggerToInput(0);
-   _p.districtI.triggerToInput(0);
-   //sl('addressI.onfocus: '+(_t.useZIP5?'Use':'Do not use')+' zip5.');
-   if(_p.addressI.doFunc)_p.addressI.doFunc=0;
-   else if(_t.useZIP5)
-    _p.addressI.setAllList(getZIP5(ZIP[c][d])),
-    _p.addressI.onInput();
-  }
- });
- a.verify=function(k){
-  if(!k||k.length<5)return 1;
- };
+ a.setProperty('onfocus', function() {
+		var c = _p.cityI.setValue(), d = _p.districtI.setValue();
+		if (c && (c in ZIP) && typeof ZIP[c] === 'object' && (d in ZIP[c])) {
+			_p.zipI.triggerToInput(0);
+			_p.cityI.triggerToInput(0);
+			_p.districtI.triggerToInput(0);
+			// sl('addressI.onfocus: '+(_t.useZIP5?'Use':'Do not use')+' zip5.');
+			if (_p.addressI.doFunc)
+				_p.addressI.doFunc = 0;
+			else if (_t.useZIP5)
+				_p.addressI.setAllList(getZIP5(ZIP[c][d])), _p.addressI.onInput();
+		}
+	});
+ a.verify = function(k) {
+		if (!k || k.length < 5)
+			return 1;
+	};
 
  _t.setNamePrefix(prefix);
 
@@ -16250,7 +16550,7 @@ setNamePrefix:function(p){
 
 setAddress:function(adr){
  var _p=pv(this),r;
- if(typeof adr=='object')
+ if(typeof adr==='object')
   _p.zipI.setValue(adr.zip),_p.cityI.setValue(adr.city),_p.districtI.setValue(adr.district),_p.addressI.setValue(adr.address);
 
  r={zip:_p.zipI.setValue(),city:_p.cityI.setValue(),district:_p.districtI.setValue(),address:_p.addressI.setValue()};
@@ -16290,13 +16590,24 @@ addFunc:function(t,f){	//	(text, function)
 
 
 //	(focus on what <input>, focus or blur)
-focus:function(i,f){
- var j,_p=pv(this),alias={a:'addressI',z:'zipI',d:'districtI',c:'cityI'};
- if(i in alias)i=alias[i];else if(i+'I' in _p)i+='I';
- if(i in _p)
-  _p[i].focus(f);
- else if(!i)	//	to all
-  for(j in alias)_p[alias[j]].focus(f);
+focus : function(i, f) {
+	var j, _p = pv(this), alias = {
+		a : 'addressI',
+		z : 'zipI',
+		d : 'districtI',
+		c : 'cityI'
+	};
+
+	if (i in alias)
+		i = alias[i];
+	else if (i + 'I' in _p)
+		i += 'I';
+	if (i in _p)
+		_p[i].focus(f);
+	else if (!i)
+		// to all
+		for (j in alias)
+			_p[alias[j]].focus(f);
 },
 
 
@@ -16709,6 +17020,11 @@ _ = library_namespace.inherits('net.form.select_input', function() {
 	_t.setSearch('includeKeyWC');
 	_t.setAllList(_t.default_list);
 
+	_t.setProperty('onblur', function() {
+		if(!_t.clickNow)
+			_t.triggerToInput(0);
+	});
+
 	// show arrow
 	_t.triggerToInput(1);
 	_t.focus(0);
@@ -16768,9 +17084,20 @@ CeL.setup_module(module_name, code_for_including);
 TODO:
 HTML 5 <datalist> Tag
 
-set focus/blue image
 
+set focus/blue background-image instead of HTML 5 placeholder text
+	http://dev.w3.org/html5/spec/Overview.html#the-placeholder-attribute
+	The placeholder attribute represents a short hint (a word or short phrase) intended to aid the user with data entry.
+e.g., background-image: url(http://www.google.com/cse/intl/en/images/google_custom_search_watermark.gif); background-attachment: initial; background-origin: initial; background-clip: initial; background-color: rgb(255, 255, 255); background-position: 0% 50%; background-repeat: no-repeat no-repeat;
+or
+http://perldoc.perl.org/
+usually show a <div>. show <input> only at focus.
+
+
+http://miketaylr.com/pres/html5/forms2.html
+http://people.opera.com/brucel/demo/html5-forms-demo.html
 http://www.erichynds.com/examples/jquery-multiselect/examples.htm
+http://x.wawooo.com/archives/891
 
 http://www.google.com.tw/dictionary
 鍵盤選擇時同時改變值
@@ -17201,22 +17528,40 @@ searchInList=function(f,o){	//	o: 傳入 (list, index, key)
 },
 
 
-//	切換 input/inputted span
-triggerToInput=function(y){	//	切換至 input or not
- var _t=this,_p=pv(_t);
- if(y||typeof y==='undefined'){
-  //	to input
-  _p.inputtedO.style.display='none';
-  if(_t.allListCount)_p.arrowO.style.display='inline';
-  _p.inputO.style.display='inline';
-  return 1;
- }else{
-  //	to inputted span
-  _t.showList(0);
-  _t.setInputted();
-  _p.arrowO.style.display=_p.inputO.style.display='none';
-  _p.inputtedO.style.display='inline';
- }
+/**
+ * 切換 [input] / inputted [span]
+ * @param {Boolean|undefined} to_input	切換至 input or not. default: 切換至 [input]
+ * @return
+ */
+triggerToInput = function(to_input) {
+	var _t = this, _p = pv(_t);
+	if (to_input || typeof to_input === 'undefined') {
+		//	to <input>
+		_p.inputtedO.style.display = 'none';
+		if (_t.allListCount)
+			_p.arrowO.style.display = 'inline';
+		_p.inputO.style.display = 'inline';
+		return 1;
+	} else {
+		//	to inputted <span>
+		_t.showList(0);
+		_t.setInputted();
+
+		if (to_input = library_namespace.get_style
+				&& parseInt(library_namespace.get_style(_p.inputO, 'width'))){
+			//library_namespace.debug(to_input);
+			//	TODO: +16, +10: magic number
+			_p.inputtedO.style.width = (to_input+parseInt(library_namespace.get_style(_p.arrowO, 'width'))+16)+'px';
+			_p.inputtedO.style.height = (parseInt(library_namespace.get_style(_p.inputO, 'height'))+10)+'px';
+		}
+
+		_p.arrowO.style.display = _p.inputO.style.display = 'none';
+		if(!_p.inputtedO.innerHTML)
+			_p.inputtedO.innerHTML='&nbsp;';
+
+		//_p.inputtedO.style.border = '3px #aaa dotted';
+		_p.inputtedO.style.display = to_input ? 'inline-block' : 'inline';
+	}
 },
 
 
@@ -17529,6 +17874,7 @@ _.classNameSet={
  item:'~item',
  item_select:'~item_select',
  functionB:'~function',
+
  functionT:'~functionText',
  error:'~error',
  warning:'~warning'
@@ -17790,7 +18136,9 @@ instance=instance.destroy();
 or if you has something more to do:
 instance.destroy()&&instance=null;
 */
-destroy:function(){pv(this,1);}
+destroy : function(){
+	pv(this, 1);
+}
 
 };	//	_.prototype=
 
@@ -17821,35 +18169,54 @@ CeL.setup_module(module_name, code_for_including);
 
 
 
-(function (){
+/**
+ * @name	CeL check function
+ * @fileoverview
+ * 本檔案包含了 check 處理的 functions。
+ * @since	
+ */
 
-	/**
-	 * 本 library / module 之 id
-	 */
-	var lib_name = 'SVG';
 
-	//	若 CeL 尚未 loaded 或本 library 已經 loaded 則跳出。
-	if(typeof CeL !== 'function' || CeL.Class !== 'CeL' || CeL.is_loaded(lib_name))
-		return;
-
+if (typeof CeL === 'function'){
 
 /**
- * math test
- * @memberOf	CeL
- * @param	msg	msg
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
  */
-CeL.SVG = function(msg){
-	alert(msg);
+var module_name = 'misc.check';
+
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.misc.check
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function(library_namespace, load_arguments) {
+
+/**
+ * null module constructor
+ * @class	check 處理的 functions
+ */
+CeL.misc.check
+= function() {
+	//	null module constructor
 };
 
-
-
-//CeL.extend(lib_name, {});
-
-})();
-
-
-
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.misc.check
+.prototype = {
+};
 
 
 
@@ -17975,6 +18342,20 @@ function isLuckyNum(num){	//	return luck kind
 
 }
 
+
+
+
+
+return (
+	CeL.misc.check
+);
+};
+
+//===================================================
+
+CeL.setup_module(module_name, code_for_including);
+
+};
 
 
 
@@ -18558,7 +18939,7 @@ CeL.math.quotient
  * 數字集
  * @memberOf	CeL.math.quotient
  * @see
- * http://en.wikipedia.org/wiki/Numerical_digit
+ * <a href="http://en.wikipedia.org/wiki/Numerical_digit" accessdate="2010/4/16 20:47">Numerical digit</a>
  */
 digit_char = '0123456789abcdefghijklmnopqrstuvwxyz';//.split('')
 
@@ -18575,7 +18956,10 @@ CeL.math.quotient
  * @memberOf	CeL.math.quotient
  * @example
  * var q=parse_base('10000.'+_.repetend_separator+'3',11);
- * if(!q)alert('bad input!');else library_namespace.debug('<br/>'+q.base(8)+','+q.base()+' , '+q.to_print_mode()+','+q.print(1)+','+q.to_print_mode(2)+','+q.to_print_mode(3,0,'',5));
+ * if(!q)
+ * 	alert('bad input!');
+ * else
+ * 	library_namespace.debug('<br/>'+q.base(8)+','+q.base()+' , '+q.to_print_mode()+','+q.print(1)+','+q.to_print_mode(2)+','+q.to_print_mode(3,0,'',5));
  */
 parse_base = function(number, base, digit_char) {
 	// if(!num) num = 0;
@@ -18659,7 +19043,7 @@ reduce : function() {
  * @param q2	the second quotient
  * @return	計算後的結果
  * @see
- * http://www.javaworld.com.tw/jute/post/view?bid=35&id=30169&tpg=1&ppg=1&sty=1&age=0#30169
+ * <a href="http://www.javaworld.com.tw/jute/post/view?bid=35&amp;id=30169&amp;tpg=1&amp;ppg=1&amp;sty=1&amp;age=0#30169" accessdate="2010/4/16 20:47">JavaWorld@TW Java論壇 - post.view</a>
  * @name	CeL.math.quotient.prototype.count
  */
 count : function(op, q2) {
@@ -18709,8 +19093,8 @@ count : function(op, q2) {
  * @param digit_char	循環小數 digit 字集
  * @return	(decimal/數字部分string,repunitIndex/循環節Repetend出現在)
  * @see
- * http://mathworld.wolfram.com/RepeatingDecimal.html
- * http://hk.geocities.com/goodprimes/OFrp.htm
+ * <a href="http://mathworld.wolfram.com/RepeatingDecimal.html" accessdate="2010/4/16 20:47">Repeating Decimal -- from Wolfram MathWorld</a>
+ * <a href="http://hk.geocities.com/goodprimes/OFrp.htm">循環小數與素數。素之異類。</a>
  * @name	CeL.math.quotient.prototype.to_base
  */
 to_base : function(base, digit_char) {
@@ -18869,7 +19253,7 @@ Precision is the number of digits in a number. Scale is the number of digits to 
 */
 
 /**
- * 顯示數字
+ * 顯示成各種不同模式的數字
  * @since	2004/7/9 14:23
  * @param mode	顯示模式
  * 0	假分數 improper fraction,
@@ -19453,9 +19837,9 @@ CeL.IO.Windows.file
  * move/rename files, ** use RegExp, but no global flag **<br/>
  * 可用 move_file_filter() 來排除不要的<br/>
  * 本函數可能暫時改變目前工作目錄！
- * @param from
- * @param to
- * @param base_path
+ * @param {String} from	from file
+ * @param {String} to	to file
+ * @param {String} base_path	base path
  * @param flag
  * @param {Function} filter	可用 filter() 來排除不要的
  * @return	{Object} report
@@ -19463,18 +19847,18 @@ CeL.IO.Windows.file
  * @requires	path_separator,fso,WshShell,new_line,Enumerator
  * @memberOf	CeL.IO.Windows.file
  */
-move_file = function(from, to, base_path, flag, filter) {
-	var _s = arguments.callee, _f = _s.f
+move_file = function move_file(from, to, base_path, flag, filter) {
+	var _s = move_file.f ? move_file : _.move_file, _f = _s.f,
 	// '.?': 一定會match
 	default_from = new RegExp('.?'), t, CurrentDirectory, report = {};
-	// alert(typeof from+','+from.constructor);
+	//library_namespace.debug(typeof from + ',' + from.constructor);
 	if (flag & _f.reverse)
 		//flag-=_f.reverse,
 		t = from, from = to, to = t;
 	if (!from)
 		from = default_from;
-	else if (typeof from != 'string'
-		&& (typeof from != 'object' || !(from instanceof RegExp)
+	else if (typeof from !== 'string'
+		&& (typeof from !== 'object' || !(from instanceof RegExp)
 				&& !(from = '' + from)))
 		from = default_from;
 	report.list = [], report.succeed = report.failed = 0,
@@ -19493,7 +19877,7 @@ move_file = function(from, to, base_path, flag, filter) {
 	if (typeof fso === 'undefined')
 		fso = new ActiveXObject("Scripting.FileSystemObject");
 	else if (typeof fso !== 'object')
-		throw new Error(1, 'fso was already seted!');
+		throw new Error(1, 'FSO was already seted!');
 	try {
 		dir = fso.GetFolder(base_path);
 	} catch (e) {
@@ -19516,19 +19900,19 @@ move_file = function(from, to, base_path, flag, filter) {
 	var i, f = new Enumerator(dir.Files), use_exact = typeof from === 'string', overwrite = flag
 	& _f.overwrite, not_test = !(flag & _f.Test), func = flag
 	& _f.copy ? 'copy' : to === _f.remove || flag & _f.remove
-			&& !to ? 'delete' : from != default_from || to ? 'move'
+			&& !to ? 'delete' : from !== default_from || to ? 'move'
 					: 'list';
 	// if(func=='delete')to=_f.remove; // 反正不是用這個判別的
-	//alert('use_exact: '+use_exact+'\nbase_path: '+base_path+'\nfrom: '+from);
+	//library_namespace.debug('use_exact: ' + use_exact + '\nbase_path: ' + base_path + '\nfrom: ' + from);
 	// BUG: 這樣順序會亂掉，使得 traverse (遍歷)不完全
 	for (; !f.atEnd(); f.moveNext())
-		if (i = f.item(), use_exact && i.Name == from || !use_exact
+		if (i = f.item(), use_exact && i.Name === from || !use_exact
 				&& from.test(i.Name)) {
 			report.list.push(i.Name);
 
 			if (typeof filter == 'function' && !filter(i.Name))
 				continue;
-			t = func == 'copy' || func == 'move' ? i.Name.replace(from,
+			t = func === 'copy' || func === 'move' ? i.Name.replace(from,
 					typeof to === 'object' ? to.source : to) : '';
 
 			if (t)
@@ -19536,16 +19920,16 @@ move_file = function(from, to, base_path, flag, filter) {
 					report.log += func + ' [' + i.Name + ']'
 					+ (t ? ' to [' + t + '] ' : '');
 					var u = '';
-					t = (base_path == default_from ? base_path : '')
+					t = (base_path === default_from ? base_path : '')
 					+ t;
-					if (func == 'delete') {
+					if (func === 'delete') {
 						if (not_test)
 							i.Delete(overwrite);
 					} else if (!fso.FileExists(t) || overwrite) {
 						if (not_test) {
 							if (overwrite && fso.FileExists(t))
 								fso.DeleteFile(t);
-							if (func == 'copy')
+							if (func === 'copy')
 								//	Copy() 用的是 FileSystemObject.CopyFile or FileSystemObject.CopyFolder, 亦可用萬用字元(wildcard characters)
 								i.Copy(t, overwrite);
 							else
@@ -19561,16 +19945,16 @@ move_file = function(from, to, base_path, flag, filter) {
 				} catch (e) {
 					report.log += 'failed.' + new_line, report.failed++;
 				}
-				//alert(i.Name+','+t);
+				//library_namespace.debug(i.Name + ',' + t);
 		}
 
 	if (flag & _f.include_subfolder && CurrentDirectory)
 		WshShell.CurrentDirectory = CurrentDirectory;
 	report.log += new_line + (not_test ? '' : '(test)') + func + ' ['
-	+ from + '] to [' + to + ']' + new_line
-	+ (typeof gDate == 'function' ? gDate() + '	' : '')
-	+ 'done ' + report.succeed + '/' + report.list.length
-	+ new_line;
+				+ from + '] to [' + to + ']' + new_line
+				+ (typeof gDate === 'function' ? gDate() + '	' : '')
+				+ 'done ' + report.succeed + '/' + report.list.length
+				+ new_line;
 	return report;
 };
 
@@ -19639,9 +20023,10 @@ CeL.IO.Windows.file
  * @requires	fso,get_folder,getFN,initWScriptObj
  * @memberOf	CeL.IO.Windows.file
  */
-mv = function(from, to, dir, onlyFN, reverse) {
-	if (!from || !to || from == to)
+move_1_file = function(from, to, dir, only_filename, reverse) {
+	if (!from || !to || from === to)
 		return new Error(1, 'filename error.');
+
 	var e;
 	dir = get_folder(dir);
 
@@ -19649,15 +20034,15 @@ mv = function(from, to, dir, onlyFN, reverse) {
 		e = from, from = to, to = e;
 	e = function(_i) {
 		return fso.FileExists(_i) ? _i : dir ? dir
-				+ (onlyFN ? getFN(_i) : _i) : null;
+				+ (only_filename ? getFN(_i) : _i) : null;
 	};
 
 	try {
-		// alert('mv():\n'+dir+'\n\n'+e(from)+'\n→\n'+e(to));
+		//library_namespace.debug('move_1_file:\n' + dir + '\n\n' + e(from) + '\n→\n' + e(to));
 		fso.MoveFile(e(from), e(to));
 		return;
 	} catch (e) {
-		e.message = 'mv():\n' + from + '\n→\n' 
+		e.message = 'move_1_file:\n' + from + '\n→\n' 
 				+ to// +'\n\n'+e.message
 				;
 		return e;
@@ -19666,7 +20051,7 @@ mv = function(from, to, dir, onlyFN, reverse) {
 
 
 /*
-function mv(from,to,dir,onlyFN,reverse){
+function mv(from,to,dir,only_filename,reverse){
  var e,_f,_t;
  dir=get_folder(dir);
 
@@ -19675,7 +20060,7 @@ function mv(from,to,dir,onlyFN,reverse){
  _t=to;
  to=0;
  e=function(_i){
-  return fso.FileExists(_i)?_i:dir&&fso.FileExists(_i=dir+(onlyFN?getFN(_i):_i))?_i:0;
+  return fso.FileExists(_i)?_i:dir&&fso.FileExists(_i=dir+(only_filename?getFN(_i):_i))?_i:0;
  };
 
  try{
@@ -19690,7 +20075,7 @@ function mv(from,to,dir,onlyFN,reverse){
 }
 
 
-function mv(from,to,dir,onlyFN,reverse){
+function mv(from,to,dir,only_filename,reverse){
  var e,_f,_t;
  dir=get_folder(dir);
 
@@ -19698,8 +20083,8 @@ function mv(from,to,dir,onlyFN,reverse){
  _f=from,_t=to,to=e=0;
 
  try{
-  if(!fso.FileExists(_f)&&(!dir||!fso.FileExists(_f=dir+(onlyFN?getFN(_f):_f))))to=1;
-  else if(fso.FileExists(_t)&&(!dir||fso.FileExists(_t=dir+(onlyFN?getFN(_t):_t))))to=2;
+  if(!fso.FileExists(_f)&&(!dir||!fso.FileExists(_f=dir+(only_filename?getFN(_f):_f))))to=1;
+  else if(fso.FileExists(_t)&&(!dir||fso.FileExists(_t=dir+(only_filename?getFN(_t):_t))))to=2;
   else{
    alert('mv():\n'+dir+'\n'+_f+'\n→\n'+_t);
    //fso.MoveFile(_f,_t);
@@ -20010,7 +20395,7 @@ open_template = function(FN, format, io_mode) {
 
 //var openOut.f;	//	default format
 function openOut(FN,io_mode,format){
- var OUT,OUTs,_f=arguments.callee.f;
+ var OUT,OUTs,_f=openOut.f;
  if(!io_mode)io_mode=_.iomode.ForWriting;
  if(!format)format=_f=='string'&&_f?_f:_.open_format.TristateUseDefault;
  try{
@@ -20269,8 +20654,8 @@ CeL.IO.Windows.file
  * <a href="http://www.hawk.34sp.com/stdpls/dwsh/charset_adodb.html">Hawk&apos;s W3 Laboratory : Disposable WSH : 番外編：文字エンコーディングとADODB.Stream</a>
  * @memberOf	CeL.IO.Windows.file
  */
-translate_AdoStream_binary_data=function(data,len,type){
-	var _s = arguments.callee,_i=0,charArray,val,DOM=_s.XMLDOM,pos,txt;
+translate_AdoStream_binary_data = function translate_AdoStream_binary_data(data, len, type) {
+	var _s = translate_AdoStream_binary_data,_i=0,charArray,val,DOM=_s.XMLDOM,pos,txt;
  if(!DOM)
   try{
 	DOM=_s.XMLDOM=(new ActiveXObject("Microsoft.XMLDOM")).createElement('tmp');	//	要素名は何でも良い
@@ -20527,10 +20912,10 @@ CeL.IO.Windows.file
  * @param io_mode	open mode, e.g., iomode.ForWriting
  * @memberOf	CeL.IO.Windows.file
  */
-open_file=function(FN,format,io_mode){
+open_file = function open_file(FN, format, io_mode) {
  //if(!FN||typeof isAbsPath=='function'&&typeof getFN=='function'&&!isAbsPath(FN)&&!(FN=getFN(FN)))return;
  //if(!FN||typeof getFP=='function'&&!(FN=getFP(FN)))return;
-	var _s = arguments.callee;
+	var _s = open_file;
  if(typeof format=='string'){
   if(!_s.returnADO&&typeof AdoStream!='undefined')
    try{AdoStream.Close();AdoStream=null;}catch(e){}
@@ -21097,7 +21482,11 @@ function turnBinStr(t,_enc){
   return t;
 */
  }
- try{fso.DeleteFile(turnBinStr.tmpF);}catch(e){}	//	有時會出錯
+ // 有時會出錯
+ try {
+	 fso.DeleteFile(turnBinStr.tmpF);
+ } catch (e) {
+ }
 }
 
 
@@ -21176,15 +21565,15 @@ CeL.IO.Windows.file
  * @memberOf	CeL.IO.Windows.file
  * @constant
  */
-folder_info.f={
-	noNewObj:-1,
-	files:0,
-	dirs:1,
-	fsize:2,
-	size:3,
-	Tsize:3,
-	Tfiles:4,
-	Tdirs:5
+folder_info.f = {
+		noNewObj : -1,
+		files : 0,
+		dirs : 1,
+		fsize : 2,
+		size : 3,
+		Tsize : 3,
+		Tfiles : 4,
+		Tdirs : 5
 };
 
 
@@ -21244,7 +21633,7 @@ CeL.IO.Windows.file
  * @return
  * @memberOf	CeL.IO.Windows.file
  */
-iconv_file=function(fileName, toCode, fromCode, encodeFunction) {
+iconv_file = function(fileName, toCode, fromCode, encodeFunction) {
 	return iconv(_.read_all_file(fileName, fromCode), toCode,
 			encodeFunction);
 };
@@ -21382,8 +21771,8 @@ CeL.IO.Windows.file
  * @memberOf	CeL.IO.Windows.file
  * @see	<a href="http://msdn.microsoft.com/library/en-us/script56/html/0fa93e5b-b657-408d-9dd3-a43846037a0e.asp">FileSystemObject</a>
  */
-traverse_file_system = function(FS_function_array, path, filter, flag){
-	var _s = arguments.callee, _f = _s.f;
+traverse_file_system = function traverse_file_system(FS_function_array, path, filter, flag) {
+	var _s = traverse_file_system, _f = _s.f;
 
 	// initial
 	// 預設 flag
@@ -21558,6 +21947,7 @@ CeL.IO.Windows.file
  * @memberOf	CeL.IO.Windows.file
  * @constant
  */
+traverse_file_system.f =
 traverse_file_system.f = {
 		/**
 		 * return object
@@ -23006,6 +23396,7 @@ emergency/urgent situation alert
 「不再顯示」功能
 .format()
 	將 div format 成 log panel。
+分群
 */
 
 

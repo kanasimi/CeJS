@@ -217,6 +217,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.math.quotient.html">CeL.math.quotient</a></li>
 	
+	<li><a href="../symbols/CeL.misc.check.html">CeL.misc.check</a></li>
+	
 	<li><a href="../symbols/CeL.native.html">CeL.native</a></li>
 	
 	<li><a href="../symbols/CeL.net.form.address.html">CeL.net.form.address</a></li>
@@ -803,18 +805,18 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.IO.Windows.file.<b><a href="../symbols/CeL.IO.Windows.file.html#.move_file">move_file</a></b>(from, to, base_path, flag, filter)
+								<div class="fixedFont">CeL.IO.Windows.file.<b><a href="../symbols/CeL.IO.Windows.file.html#.move_1_file">move_1_file</a></b>(from, to, dir, only_filename, reverse)
 								</div>
-								<div class="description">move/rename files, ** use RegExp, but no global flag **<br/>可用 move_file_filter() 來排除不要的<br/>本函數可能暫時改變目前工作目錄！</div>
+								<div class="description">move file</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.IO.Windows.file.<b><a href="../symbols/CeL.IO.Windows.file.html#.mv">mv</a></b>(from, to, dir, onlyFN, reverse)
+								<div class="fixedFont">CeL.IO.Windows.file.<b><a href="../symbols/CeL.IO.Windows.file.html#.move_file">move_file</a></b>(from, to, base_path, flag, filter)
 								</div>
-								<div class="description">move file</div>
+								<div class="description">move/rename files, ** use RegExp, but no global flag **<br/>可用 move_file_filter() 來排除不要的<br/>本函數可能暫時改變目前工作目錄！</div>
 							</td>
 						</tr>
 					
@@ -2289,15 +2291,15 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name=".move_file"> </a>
+					<a name=".move_1_file"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
-					<span class="light">{Object}</span>
-					<span class="light">CeL.IO.Windows.file.</span><b>move_file</b>(from, to, base_path, flag, filter)
+					
+					<span class="light">CeL.IO.Windows.file.</span><b>move_1_file</b>(from, to, dir, only_filename, reverse)
 					
 					</div>
 					<div class="description">
-						move/rename files, ** use RegExp, but no global flag **<br/>可用 move_file_filter() 來排除不要的<br/>本函數可能暫時改變目前工作目錄！
+						move file
 						
 						
 					</div>
@@ -2321,10 +2323,77 @@ ul.inheritsList
 								<dd></dd>
 							
 								<dt>
-									<b>base_path</b>
+									<b>dir</b>
 									
 								</dt>
 								<dd></dd>
+							
+								<dt>
+									<b>only_filename</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>reverse</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>fso,get_folder,getFN,initWScriptObj</dd>
+							
+							</dl>
+						
+						
+
+					<hr />
+				
+					<a name=".move_file"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{Object}</span>
+					<span class="light">CeL.IO.Windows.file.</span><b>move_file</b>(from, to, base_path, flag, filter)
+					
+					</div>
+					<div class="description">
+						move/rename files, ** use RegExp, but no global flag **<br/>可用 move_file_filter() 來排除不要的<br/>本函數可能暫時改變目前工作目錄！
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>from</b>
+									
+								</dt>
+								<dd>from file</dd>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>to</b>
+									
+								</dt>
+								<dd>to file</dd>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>base_path</b>
+									
+								</dt>
+								<dd>base path</dd>
 							
 								<dt>
 									<b>flag</b>
@@ -2362,73 +2431,6 @@ ul.inheritsList
 							<dt class="heading">Requires:</dt>
 							
 								<dd>path_separator,fso,WshShell,new_line,Enumerator</dd>
-							
-							</dl>
-						
-						
-
-					<hr />
-				
-					<a name=".mv"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">CeL.IO.Windows.file.</span><b>mv</b>(from, to, dir, onlyFN, reverse)
-					
-					</div>
-					<div class="description">
-						move file
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>from</b>
-									
-								</dt>
-								<dd></dd>
-							
-								<dt>
-									<b>to</b>
-									
-								</dt>
-								<dd></dd>
-							
-								<dt>
-									<b>dir</b>
-									
-								</dt>
-								<dd></dd>
-							
-								<dt>
-									<b>onlyFN</b>
-									
-								</dt>
-								<dd></dd>
-							
-								<dt>
-									<b>reverse</b>
-									
-								</dt>
-								<dd></dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Requires:</dt>
-							
-								<dd>fso,get_folder,getFN,initWScriptObj</dd>
 							
 							</dl>
 						
@@ -2813,7 +2815,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Fri Apr 16 2010 20:35:51 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu May 06 2010 12:12:17 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

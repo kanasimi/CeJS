@@ -74,43 +74,48 @@
 <span class='line'> 67</span> </span><span class="WHIT">	</span><span class="NAME">_t.setSearch</span><span class="PUNC">(</span><span class="STRN">'includeKeyWC'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'> 68</span> </span><span class="WHIT">	</span><span class="NAME">_t.setAllList</span><span class="PUNC">(</span><span class="NAME">_t.default_list</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'> 69</span> 
-<span class='line'> 70</span> </span><span class="WHIT">	</span><span class="COMM">// show arrow</span><span class="WHIT">
-<span class='line'> 71</span> </span><span class="WHIT">	</span><span class="NAME">_t.triggerToInput</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 72</span> </span><span class="WHIT">	</span><span class="NAME">_t.focus</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 73</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 70</span> </span><span class="WHIT">	</span><span class="NAME">_t.setProperty</span><span class="PUNC">(</span><span class="STRN">'onblur'</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 71</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">_t.clickNow</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'> 72</span> </span><span class="WHIT">			</span><span class="NAME">_t.triggerToInput</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 73</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'> 74</span> 
-<span class='line'> 75</span> 
-<span class='line'> 76</span> </span><span class="COMM">//	class public interface	---------------------------</span><span class="WHIT">
-<span class='line'> 77</span> 
-<span class='line'> 78</span> 
+<span class='line'> 75</span> </span><span class="WHIT">	</span><span class="COMM">// show arrow</span><span class="WHIT">
+<span class='line'> 76</span> </span><span class="WHIT">	</span><span class="NAME">_t.triggerToInput</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 77</span> </span><span class="WHIT">	</span><span class="NAME">_t.focus</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 78</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'> 79</span> 
 <span class='line'> 80</span> 
-<span class='line'> 81</span> </span><span class="COMM">//	instance public interface	-------------------</span><span class="WHIT">
+<span class='line'> 81</span> </span><span class="COMM">//	class public interface	---------------------------</span><span class="WHIT">
 <span class='line'> 82</span> 
-<span class='line'> 83</span> </span><span class="COMM">//	最高教育程度	http://wwwc.moex.gov.tw/ct.asp?xItem=250&CtNode=1054</span><span class="WHIT">
-<span class='line'> 84</span> </span><span class="NAME">_.prototype.default_list</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT">
-<span class='line'> 85</span> </span><span class="WHIT">	</span><span class="COMM">//請填寫</span><span class="WHIT">
-<span class='line'> 86</span> </span><span class="WHIT">	</span><span class="STRN">'博士（含）以上,碩士/研究所,學士/大學院校,副學士/專科,高中/高職,國中/國民中學,國小（含）以下,其他：請說明'</span><span class="WHIT">
-<span class='line'> 87</span> </span><span class="WHIT">	</span><span class="PUNC">.</span><span class="NAME">split</span><span class="PUNC">(</span><span class="STRN">','</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 88</span> 
-<span class='line'> 89</span> 
-<span class='line'> 90</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'> 91</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	(function(){</span><span class="WHIT">
-<span class='line'> 92</span> 
-<span class='line'> 93</span> </span><span class="COMM">//	===================================================</span><span class="WHIT">
+<span class='line'> 83</span> 
+<span class='line'> 84</span> 
+<span class='line'> 85</span> 
+<span class='line'> 86</span> </span><span class="COMM">//	instance public interface	-------------------</span><span class="WHIT">
+<span class='line'> 87</span> 
+<span class='line'> 88</span> </span><span class="COMM">//	最高教育程度	http://wwwc.moex.gov.tw/ct.asp?xItem=250&CtNode=1054</span><span class="WHIT">
+<span class='line'> 89</span> </span><span class="NAME">_.prototype.default_list</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT">
+<span class='line'> 90</span> </span><span class="WHIT">	</span><span class="COMM">//請填寫</span><span class="WHIT">
+<span class='line'> 91</span> </span><span class="WHIT">	</span><span class="STRN">'博士（含）以上,碩士/研究所,學士/大學院校,副學士/專科,高中/高職,國中/國民中學,國小（含）以下,其他：請說明'</span><span class="WHIT">
+<span class='line'> 92</span> </span><span class="WHIT">	</span><span class="PUNC">.</span><span class="NAME">split</span><span class="PUNC">(</span><span class="STRN">','</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 93</span> 
 <span class='line'> 94</span> 
-<span class='line'> 95</span> 
-<span class='line'> 96</span> </span><span class="WHIT"></span><span class="WHIT">
+<span class='line'> 95</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 96</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	(function(){</span><span class="WHIT">
 <span class='line'> 97</span> 
-<span class='line'> 98</span> 
-<span class='line'> 99</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT">
-<span class='line'>100</span> </span><span class="WHIT">	</span><span class="NAME">CeL.net.form.education</span><span class="WHIT">
-<span class='line'>101</span> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>102</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 98</span> </span><span class="COMM">//	===================================================</span><span class="WHIT">
+<span class='line'> 99</span> 
+<span class='line'>100</span> 
+<span class='line'>101</span> </span><span class="WHIT"></span><span class="WHIT">
+<span class='line'>102</span> 
 <span class='line'>103</span> 
-<span class='line'>104</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
-<span class='line'>105</span> 
-<span class='line'>106</span> </span><span class="NAME">CeL.setup_module</span><span class="PUNC">(</span><span class="NAME">module_name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>107</span> 
-<span class='line'>108</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>109</span> </span></pre></body></html>
+<span class='line'>104</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT">
+<span class='line'>105</span> </span><span class="WHIT">	</span><span class="NAME">CeL.net.form.education</span><span class="WHIT">
+<span class='line'>106</span> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>107</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>108</span> 
+<span class='line'>109</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
+<span class='line'>110</span> 
+<span class='line'>111</span> </span><span class="NAME">CeL.setup_module</span><span class="PUNC">(</span><span class="NAME">module_name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>112</span> 
+<span class='line'>113</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>114</span> </span></pre></body></html>

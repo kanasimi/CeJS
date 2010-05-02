@@ -217,6 +217,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.math.quotient.html">CeL.math.quotient</a></li>
 	
+	<li><a href="../symbols/CeL.misc.check.html">CeL.misc.check</a></li>
+	
 	<li><a href="../symbols/CeL.native.html">CeL.native</a></li>
 	
 	<li><a href="../symbols/CeL.net.form.address.html">CeL.net.form.address</a></li>
@@ -290,19 +292,9 @@ ul.inheritsList
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
 								<div class="fixedFont">
-								<b><a href="../symbols/_global_.html#is_Array">is_Array</a></b>
+								<b><a href="../symbols/_global_.html#global_eval">global_eval</a></b>
 								</div>
-								<div class="description">Test if the value is a native Array.</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">
-								<b><a href="../symbols/_global_.html#is_Object">is_Object</a></b>
-								</div>
-								<div class="description">Test if the value is a native Object.</div>
+								<div class="description">evaluate @ Global scope.</div>
 							</td>
 						</tr>
 					
@@ -350,7 +342,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#add_listener">add_listener</a></b>(type, listener, document_object, pFirst)
 								</div>
-								<div class="description">bind/add listener<br/>**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。**	NOT TESTED!!</div>
+								<div class="description">bind/add listener<br/>**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。**	NOT TESTED!!TODO:removeEventListenerremove_listener()</div>
 							</td>
 						</tr>
 					
@@ -375,6 +367,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#CIDR_to_IP">CIDR_to_IP</a></b>(CIDR, IP)
+								</div>
+								<div class="description">get CIDR data</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#complement">complement</a></b>(number)
 								</div>
 								<div class="description">補數計算。正數的補數即為自身。若要求得互補之後的數字，請設成負數。</div>
@@ -387,15 +388,6 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#continued_fraction">continued_fraction</a></b>(sequence, max_no)
 								</div>
 								<div class="description">取得連分數序列的數值</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#decplaces">decplaces</a></b>(digits, max)
-								</div>
-								<div class="description">取至小數d位，原因：JScript即使在做加減運算時，有時還是會出現1.4000000000000001，0.0999999999999998等數值。此函數可取至1.4與0.1</div>
 							</td>
 						</tr>
 					
@@ -573,6 +565,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#is_Array">is_Array</a></b>(v)
+								</div>
+								<div class="description">Test if the value is a native Array.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#is_debug">is_debug</a></b>(debug_level)
 								</div>
 								<div class="description">Tell if it's now debugging.</div>
@@ -591,6 +592,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#is_Function">is_Function</a></b>(v)
+								</div>
+								<div class="description">Test if the value is a native Function.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#is_loaded">is_loaded</a></b>(module_name)
 								</div>
 								<div class="description">判斷 module 是否存在，以及是否破損。</div>
@@ -600,9 +610,18 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#is_Object">is_Object</a></b>(v)
+								</div>
+								<div class="description">Test if the value is a native Object.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#is_type">is_type</a></b>(value, want_type, get_Class)
 								</div>
-								<div class="description">判斷為何種 type。主要用在 Array 等 native object 之判別。</div>
+								<div class="description">判斷為何種 type。主要用在 Error, DOMException 等 native object 之判別。</div>
 							</td>
 						</tr>
 					
@@ -611,7 +630,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#mutual_division">mutual_division</a></b>(n1, n2, times)
 								</div>
-								<div class="description">輾轉相除</div>
+								<div class="description">輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數</div>
 							</td>
 						</tr>
 					
@@ -663,7 +682,7 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#setNetInfo">setNetInfo</a></b>(to_s, from)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#set_net_info">set_net_info</a></b>(to_s, from)
 								</div>
 								<div class="description">改變網卡的IP地址: change IP, set IP</div>
 							</td>
@@ -699,6 +718,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#to_fixed">to_fixed</a></b>(digits, max)
+								</div>
+								<div class="description">取至小數 d 位，肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#to_rational_number">to_rational_number</a></b>(number, rate, max_no)
 								</div>
 								<div class="description">The best rational approximation.</div>
@@ -711,6 +739,15 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#to_RegExp_pattern">to_RegExp_pattern</a></b>(pattern, RegExp_flag, escape_pattern)
 								</div>
 								<div class="description">String pattern (e.g.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#triggerToInput">triggerToInput</a></b>(to_input)
+								</div>
+								<div class="description">切換 [input] / inputted [span]</div>
 							</td>
 						</tr>
 					
@@ -775,15 +812,15 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="is_Array"> </a>
+					<a name="global_eval"> </a>
 					<div class="fixedFont">
 					
-					<span class="light">{Boolean}</span>
-					<b>is_Array</b>
+					
+					<b>global_eval</b>
 					
 					</div>
 					<div class="description">
-						Test if the value is a native Array.
+						evaluate @ Global scope.By the ECMA-262, new Function() will 'Pass in the Global Environment as the Scope parameter.'
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -794,41 +831,6 @@ ul.inheritsList
 					
 
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2009/12/20 08:38:26</dd>
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name="is_Object"> </a>
-					<div class="fixedFont">
-					
-					<span class="light">{Boolean}</span>
-					<b>is_Object</b>
-					
-					</div>
-					<div class="description">
-						Test if the value is a native Object.
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
-						
-						
-					</div>
-					
-					
-
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2009/12/20 08:38:26</dd>
-							</dl>
 						
 						
 						
@@ -954,7 +956,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						bind/add listener<br/>**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。**	NOT TESTED!!
+						bind/add listener<br/>**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。**	NOT TESTED!!TODO:removeEventListenerremove_listener()
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_web.origin.js.html">web.origin.js</a>.
@@ -978,7 +980,7 @@ ul.inheritsList
 									<b>listener</b>
 									
 								</dt>
-								<dd>listener function/function array/function string,				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"</dd>
+								<dd>listener function/function array/function string,				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"			function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}</dd>
 							
 								<dt>
 									<b>document_object</b>
@@ -1101,6 +1103,64 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="CIDR_to_IP"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>CIDR_to_IP</b>(CIDR, IP)
+					
+					</div>
+					<div class="description">
+						get CIDR data
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_OS_WMI.origin.js.html">WMI.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>CIDR</b>
+									
+								</dt>
+								<dd>CIDR mask bits, 0~32</dd>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>IP</b>
+									
+								</dt>
+								<dd>IPv4, e.g., 1.2.3.4</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/4/21 22:56:16</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>CIDR data</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name="complement"> </a>
 					<div class="fixedFont">
 					
@@ -1187,14 +1247,14 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>sequence</b>
+									<span class="light fixedFont">{Array}</span> <b>sequence</b>
 									
 								</dt>
 								<dd>序列</dd>
 							
 								<dt>
-									<b>max_no</b>
-									
+									<span class="light fixedFont">{Number}</span> <b>max_no</b>
+									<i>Optional</i>
 								</dt>
 								<dd>取至第 max_no 個</dd>
 							
@@ -1224,69 +1284,6 @@ ul.inheritsList
 							<dt class="heading">See:</dt>
 							
 								<dd>var a=continued_fraction([1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]);alert(a+'\n'+a[0]/a[1]+'\n'+Math.SQRT2+'\n'+(Math.SQRT2-a[0]/a[1])+'\n'+mutual_division(a[0],a[1]));</dd>
-							
-							</dl>
-						
-
-					<hr />
-				
-					<a name="decplaces"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>decplaces</b>(digits, max)
-					
-					</div>
-					<div class="description">
-						取至小數d位，原因：JScript即使在做加減運算時，有時還是會出現1.4000000000000001，0.0999999999999998等數值。此函數可取至1.4與0.1
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_native.origin.js.html">native.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-					<pre class="code"></pre>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>digits</b>
-									
-								</dt>
-								<dd>number of decimal places shown</dd>
-							
-								<dt>
-									<b>max</b>
-									
-								</dt>
-								<dd>max digits	max==0:round() else floor()</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd></dd>
-							
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd>https://bugzilla.mozilla.org/show_bug.cgi?id=5856IEEE754の丸め演算は最も報告されるES3「バグ」である。http://www.jibbering.com/faq/#FAQ4_6</dd>
 							
 							</dl>
 						
@@ -1979,7 +1976,7 @@ ul.inheritsList
 								<dd>various name</dd>
 							
 								<dt>
-									<span class="light fixedFont">{Object}</span> <b>name_space</b>
+									<span class="light fixedFont">{Object|Function}</span> <b>name_space</b>
 									<i>Optional</i>
 								</dt>
 								<dd>initialize name-space. default: global</dd>
@@ -2278,7 +2275,7 @@ ul.inheritsList
 					<a name="initial_env"> </a>
 					<div class="fixedFont">
 					
-					
+					<span class="light">{Object}</span>
 					<b>initial_env</b>(OS_type)
 					
 					</div>
@@ -2298,7 +2295,7 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<span class="light fixedFont">{string}</span> <b>OS_type</b>
+									<span class="light fixedFont">{String}</span> <b>OS_type</b>
 									<i>Optional</i>
 								</dt>
 								<dd>type of OS</dd>
@@ -2312,7 +2309,59 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>environment variables set</dd>
+								<dd><span class="light fixedFont">{Object}</span> environment variables set</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="is_Array"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{Boolean}</span>
+					<b>is_Array</b>(v)
+					
+					</div>
+					<div class="description">
+						Test if the value is a native Array.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>v</b>
+									
+								</dt>
+								<dd>value to test</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2009/12/20 08:38:26</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Boolean}</span> the value is a native Array.</dd>
 							
 							</dl>
 						
@@ -2344,7 +2393,7 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<span class="light fixedFont">{int}</span> <b>debug_level</b>
+									<span class="light fixedFont">{Integral}</span> <b>debug_level</b>
 									<i>Optional</i>
 								</dt>
 								<dd>if it's now in this debug level.</dd>
@@ -2421,6 +2470,58 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="is_Function"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{Boolean}</span>
+					<b>is_Function</b>(v)
+					
+					</div>
+					<div class="description">
+						Test if the value is a native Function.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>v</b>
+									
+								</dt>
+								<dd>value to test</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2009/12/20 08:38:26</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Boolean}</span> the value is a native Function.</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name="is_loaded"> </a>
 					<div class="fixedFont">
 					
@@ -2467,6 +2568,58 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="is_Object"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{Boolean}</span>
+					<b>is_Object</b>(v)
+					
+					</div>
+					<div class="description">
+						Test if the value is a native Object.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>v</b>
+									
+								</dt>
+								<dd>value to test</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2009/12/20 08:38:26</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Boolean}</span> the value is a native Object.</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name="is_type"> </a>
 					<div class="fixedFont">
 					
@@ -2475,7 +2628,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						判斷為何種 type。主要用在 Array 等 native object 之判別。
+						判斷為何種 type。主要用在 Error, DOMException 等 native object 之判別。
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -2549,12 +2702,12 @@ ul.inheritsList
 					<a name="mutual_division"> </a>
 					<div class="fixedFont">
 					
-					
+					<span class="light">{Array}</span>
 					<b>mutual_division</b>(n1, n2, times)
 					
 					</div>
 					<div class="description">
-						輾轉相除
+						輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math.origin.js.html">math.origin.js</a>.
@@ -2569,22 +2722,22 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>n1</b>
+									<span class="light fixedFont">{Number}</span> <b>n1</b>
 									
 								</dt>
 								<dd>number 1</dd>
 							
 								<dt>
-									<b>n2</b>
-									
+									<span class="light fixedFont">{Number}</span> <b>n2</b>
+									<i>Optional</i>
 								</dt>
 								<dd>number 2</dd>
 							
 								<dt>
-									<b>times</b>
+									<span class="light fixedFont">{Number}</span> <b>times</b>
 									
 								</dt>
-								<dd>max 次數</dd>
+								<dd>max 次數, 1,2,..</dd>
 							
 							</dl>
 						
@@ -2595,7 +2748,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>連分數序列</dd>
+								<dd><span class="light fixedFont">{Array}</span> 連分數序列 ** 負數視 _.mutual_division.done 而定!</dd>
 							
 							</dl>
 						
@@ -2747,10 +2900,10 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>number</b>
+									<span class="light fixedFont">{String}</span> <b>number</b>
 									
 								</dt>
-								<dd></dd>
+								<dd>欲轉換之值</dd>
 							
 							</dl>
 						
@@ -2861,7 +3014,7 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<span class="light fixedFont">{int}</span> <b>debug_level</b>
+									<span class="light fixedFont">{Integral}</span> <b>debug_level</b>
 									<i>Optional</i>
 								</dt>
 								<dd>The debugging level to set.</dd>
@@ -2884,11 +3037,11 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="setNetInfo"> </a>
+					<a name="set_net_info"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>setNetInfo</b>(to_s, from)
+					<b>set_net_info</b>(to_s, from)
 					
 					</div>
 					<div class="description">
@@ -2902,7 +3055,7 @@ ul.inheritsList
 					
 					
 					
-					<pre class="code">setNetInfo({IP:'163.16.20.212',Gateway:254});sl(setNetInfo({IP:'163.16.20.30',Gateway:254}));WScript.Quit();</pre>
+					<pre class="code">set_net_info({IP:'163.16.20.212',Gateway:254});sl(set_net_info({IP:'163.16.20.30',Gateway:254}));WScript.Quit();</pre>
 					
 					
 					
@@ -2914,7 +3067,7 @@ ul.inheritsList
 									<b>to_s</b>
 									
 								</dt>
-								<dd>IP or {IP:''||[], Subnet:''||[], DNS:''||[], Gateway:''||[], GatewayOrder:''||[]}</dd>
+								<dd>IP or {IP:''||[], CIDR:24||.CIDR_notation, Subnet:''||[], DNS:''||[], Gateway:254||[], GatewayOrder:''||[]}</dd>
 							
 								<dt>
 									<b>from</b>
@@ -2938,7 +3091,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Requires:</dt>
 							
-								<dd>getWMIData,VBA,JSArrayToSafeArray</dd>
+								<dd>getWMIData,VBA,JSArrayToSafeArray,CIDR_to_IP</dd>
 							
 							</dl>
 						
@@ -3012,7 +3165,7 @@ ul.inheritsList
 					<a name="simplify_path"> </a>
 					<div class="fixedFont">
 					
-					<span class="light">{string}</span>
+					<span class="light">{String}</span>
 					<b>simplify_path</b>(path)
 					
 					</div>
@@ -3032,7 +3185,7 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<span class="light fixedFont">{string}</span> <b>path</b>
+									<span class="light fixedFont">{String}</span> <b>path</b>
 									
 								</dt>
 								<dd>欲轉化之 path</dd>
@@ -3052,7 +3205,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd><span class="light fixedFont">{string}</span> path</dd>
+								<dd><span class="light fixedFont">{String}</span> path</dd>
 							
 							</dl>
 						
@@ -3107,6 +3260,69 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="to_fixed"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>to_fixed</b>(digits, max)
+					
+					</div>
+					<div class="description">
+						取至小數 d 位，肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_native.origin.js.html">native.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code"></pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>digits</b>
+									
+								</dt>
+								<dd>1,2,..: number of decimal places shown</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>max</b>
+									<i>Optional</i>
+								</dt>
+								<dd>max digits	max===0:round() else floor()</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>https://bugzilla.mozilla.org/show_bug.cgi?id=5856IEEE754の丸め演算は最も報告されるES3「バグ」である。http://www.jibbering.com/faq/#FAQ4_6</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
 					<a name="to_rational_number"> </a>
 					<div class="fixedFont">
 					
@@ -3115,7 +3331,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						The best rational approximation. 取得值最接近之有理數 (use 連分數 continued fraction), 取近似值.c.f.,調日法在分子或分母小於下一個漸進分數的分數中，其值是最接近精確值的近似值。
+						The best rational approximation. 取得值最接近之有理數 (use 連分數 continued fraction), 取近似值.c.f., 調日法在分子或分母小於下一個漸進分數的分數中，其值是最接近精確值的近似值。
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_math.origin.js.html">math.origin.js</a>.
@@ -3134,22 +3350,22 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>number</b>
+									<span class="light fixedFont">{Number}</span> <b>number</b>
 									
 								</dt>
 								<dd>number</dd>
 							
 								<dt>
-									<b>rate</b>
-									
+									<span class="light fixedFont">{Number}</span> <b>rate</b>
+									<i>Optional</i>
 								</dt>
-								<dd>比例在rate以上</dd>
+								<dd>比例在 rate 以上</dd>
 							
 								<dt>
-									<b>max_no</b>
-									
+									<span class="light fixedFont">{Number}</span> <b>max_no</b>
+									<i>Optional</i>
 								</dt>
-								<dd>最多取至序列第 max_no 個					TODO : 並小於 l:limit</dd>
+								<dd>最多取至序列第 max_no 個					TODO : 並小於 l: limit</dd>
 							
 							</dl>
 						
@@ -3213,13 +3429,13 @@ ul.inheritsList
 							
 								<dt>
 									<span class="light fixedFont">{Boolean|String}</span> <b>RegExp_flag</b>
-									
+									<i>Optional</i>
 								</dt>
 								<dd>flags when need to return RegExp object</dd>
 							
 								<dt>
 									<span class="light fixedFont">{RegExp}</span> <b>escape_pattern</b>
-									
+									<i>Optional</i>
 								</dt>
 								<dd>char pattern need to escape</dd>
 							
@@ -3233,6 +3449,52 @@ ul.inheritsList
 							<dt class="heading">Returns:</dt>
 							
 								<dd><span class="light fixedFont">{RegExp}</span> RegExp object</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="triggerToInput"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>triggerToInput</b>(to_input)
+					
+					</div>
+					<div class="description">
+						切換 [input] / inputted [span]
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_form_select_input.origin.js.html">select_input.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Boolean|undefined}</span> <b>to_input</b>
+									
+								</dt>
+								<dd>切換至 input or not. default: 切換至 [input]</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
 							
 							</dl>
 						
@@ -3381,7 +3643,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Fri Apr 16 2010 20:35:51 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu May 06 2010 12:12:16 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

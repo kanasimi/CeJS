@@ -3,6 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head><meta http-equiv="content-type" content="text/html;charset=utf-8"/>
 <style type="text/css"><!--
+@import url(reset.css);
+
 body{margin:0;padding:0;}
 .test_trigger{color:#e6d;display:inline;cursor:pointer;}
 .test_panel{display:none;}
@@ -15,6 +17,15 @@ body{margin:0;padding:0;}
 <script type="text/javascript" src="http://neterr.hostwq.net/JS/ce.js"></script>
 -->
 
+<script type="text/javascript">//<!--
+	//window.status=11;
+	for(var i=0,j=0;i<1e8;i++)j++;
+//--></script>
+
+
+<!--
+http://code.jquery.com/jquery-nightly.js
+-->
 <script type="text/javascript" src="jquery-nightly.js"></script>
 
 <script type="text/javascript" src="../ce.js"></script>
@@ -22,6 +33,8 @@ body{margin:0;padding:0;}
 
 
 <script type="text/javascript">//<!--
+
+// TODO: http://www.11gz.com/blog/2010/03/20/html5-doctype-use/
 
 //	相對於 library 本身來說的路徑
 CeL.include_module_resource('../../game/game.css');
@@ -54,13 +67,16 @@ function test1() {
 	CeL.warn('a WARNING level message');
 }
 
+
+
+
 //--></script>
-<title>test suit</title></head>
+<title>test suite</title></head>
 
 <body class="bgn">
 
 
-<div id="error_load_panel" style="color:#f00;background-color:#ff8;padding:.5em;/* hack for NS4 */position:absolute;top:-800px;">
+<div id="error_load_panel" style="color:#f00;background-color:#ff8;padding:.5em;/* hack for NS4 */position:absolute;top:-800px;*top:0px/* hack for IE7 @ wine: no javascript allowed. ** 事實上應該對所有讀得懂 CSS 但 javascript 無作用的 browser 作處理。 */;">
 <hr />
 <h2>Loading error</h2>
 JavaScript doesn't work or XMLHttpRequest loading error?<br />
@@ -153,9 +169,13 @@ show
 </div>
 
 
+<b style="cursor:pointer;" onclick="start_count(1);return false;">start count</b>
+<div id="clock" style="font-size:26em;font-family:'FZZhunYuan-M02','Maiandra GD';"></div>
+
+
 
 <hr />
-[test suit] log:
+[test suite] log panel:
 <!--
 <a href="#" onclick="clipboardFunction(0,'panel_for_log');return false;">paste code</a>
 <b class="sp">|</b>
@@ -172,6 +192,34 @@ Page loaded. Initializing the framework. Please wait..
 
 
 <script type="text/javascript">
+
+
+//	2010/4/17 09:54:35
+//	TODO: stop/pause
+function start_count(restart){
+	var timer,
+	timeout=10*60*1000,
+	timeout1=2*60*1000,
+	diff=1000;//100
+
+	//CeL.log(start_count.start_stamp);
+	if(restart||!start_count.start_stamp){
+		start_count.start_stamp=new Date;
+		//	若之前已經在跑則 return
+		if(start_count.handle)return;
+	}
+
+	timer=parseInt((timeout-(new Date-start_count.start_stamp))/1000)*1000;
+	if(Math.abs(timer-timeout1)<4000)
+		//	提醒
+		window.focus();
+	//	顯示
+	document.getElementById('clock').innerHTML=timer>timeout1?CeL.format_date(timer):'<span style="color:#f88">'+CeL.format_date(timer)+'</span>';
+
+	if(timer>0)
+		start_count.handle=setTimeout('start_count();',diff);
+}
+
 
 /*
 test short circuit
@@ -251,7 +299,10 @@ test A||B
 	}
 
 
-
+	/**
+	 * 初始工作
+	 * @return
+	 */
 	function init_work() {
 
 		//	test the biggest 10^?	取得能準確計算的最大值
@@ -271,6 +322,9 @@ test A||B
 
 		CeL.use('code.compatibility');
 
+		CeL.use('native');
+		Number.prototype.to_fixed = CeL.to_fixed;
+
 		//CeL.debug(CeL.is_type(window.navigator));
 		if (CeL.is_DOM('navigator')){
 			//	http://blogs.msdn.com/ie/archive/2010/03/23/introducing-ie9-s-user-agent-string.aspx
@@ -288,7 +342,9 @@ test A||B
 				+ ScriptEngineMinorVersion() + '.'
 				+ ScriptEngineBuildVersion(),2);
 
-		CeL.use('code.log.no_exist_module_to_test');
+
+		//CeL.debug('no exist module test',2);
+		//CeL.use('code.log.no_exist_module_to_test');
 		//CeL.warn('a WARNING level message');
 
 		//	base test
@@ -322,7 +378,7 @@ test A||B
 		c = CeL.get_various_from_code(c);
 		c = CeL.get_code_from_generated_various(c);
 		CeL.debug(c.replace(/\n/g,'<br />'));
-		 */
+		*/
 
 		CeL.debug('form.select_input',2);
 		// function aaa(v){alert('mmm='+mmm);var r={};r[v]=222;return r;}
@@ -461,13 +517,21 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 	};
 
 
+	/**
+	 * 初始化 initialization
+	 * @return
+	 */
 	function init_setup() {
 		try {
 			CeL.cache_code = true;
 			//	Initialize log function
 			CeL.use('code.log');
-			if (!CeL.is_loaded('code.log'))
-				throw 1;
+			if (!CeL.is_loaded('code.log')){
+
+				if(location.protocol === 'file:' && navigator.userAgent.indexOf('Chrome')!==-1)
+					document.getElementById('error_load_panel').innerHTML += 'You may <a href="http://code.google.com/p/chromium/issues/detail?id=4197#c26">add a flag</a> --allow-file-access-from-files to run this tool.<br/>e.g., run '+(navigator.userAgent.indexOf('Linux')!==-1?'/opt/google/chrome/google-chrome %U --allow-file-access-from-files&':'Chrome --allow-file-access-from-files')+'<hr/>';
+				throw new Error('Loading error!');
+			}
 
 			CeL.Log.set_board('panel_for_log');
 			CeL.debug('Log panel OK.');
@@ -485,23 +549,33 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 
 		} catch (e) {
 			//	show the error panel
-			document.getElementById('error_load_panel').style.position = 'static';
+			try{
+				document.getElementById('error_load_panel').style.position = 'static';
+			} catch (e) {
+			}
 		}
 	};
 
-	//CeL.use('net.web',func
+	//CeL.use('net.web',function(){});
+
 </script>
 
 <script type="text/javascript">
 /*
 	本 script 段落之存在是為了預防萬一。因此只能放最簡單的 script parser 亦能讀懂的 code。
 
-	假設：通常能夠讀懂 CSS display:none; 的也能使用 DOM 來控制 error_load_panel 的顯示。
+	基本假設：通常能夠讀懂 CSS display:none; 的也能使用 DOM 來控制 error_load_panel 的顯示。
 	但很遺憾的，對讀得懂 CSS 卻沒有 document.getElementById 的 Netscape Navigator 4，這不成立。
 	因此不能用 display:none; 以從一開始避免顯示。
+
+	此外，得考慮讀得懂 CSS 但關閉了 JavaScript 或因故不能執行的狀況。
 	** limit: 上一段 code 不能出錯
 */
 
+	/**
+	 * 初始環境偵測
+	 * @return
+	 */
 	function load_detect() {
 		if (typeof init_setup == 'function')
 			init_setup();
@@ -525,6 +599,7 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 	}
 
 	window.onload = load_detect;
+	//for(var i=0,j=0;i<1e9;i++)j++;
 
 </script>
 

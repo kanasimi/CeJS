@@ -473,11 +473,11 @@
 <span class='line'>466</span> //	TODO: 對 encodeCode/decodeCode/reduceCode 嚴厲的測試（笑）
 <span class='line'>467</span> {var tr=1,c=simpleRead('function.js'),testF='try.txt',p='',range=99	,sp='='.x(80)+NewLine,tr2=tr,i,j,t,d,d0=new Date,da,db,dc;try{simpleWrite('try.js',c=reduceCode(c),TristateTrue);
 <span class='line'>468</span>  do{da=new Date;t=''+encodeCode(c,p);db=new Date;d=''+decodeCode(t,p);dc=new Date;}while(--tr&&new Date-d0&lt;2e4&&c==d);	//	find different
-<span class='line'>469</span>  //if(d)alert('['+c.length+']→['+t.length+']	( '+(100*t.length/c.length).decp(2)+' %)\n'+t.slice(0,range)+'\n..\n\ndecode →\n'+d.slice(0,range));//+'\n'+c
+<span class='line'>469</span>  //if(d)alert('['+c.length+']→['+t.length+']	( '+(100*t.length/c.length).to_fixed(2)+' %)\n'+t.slice(0,range)+'\n..\n\ndecode →\n'+d.slice(0,range));//+'\n'+c
 <span class='line'>470</span>  for(i=0,j=[];i&lt;c.length;i++)j.push((i%80?'':NewLine)+c.charCodeAt(i));c+=j;
 <span class='line'>471</span>  for(i=0,j=[];i&lt;t.length;i++)j.push((i%80?'':NewLine)+t.charCodeAt(i));t+=j;
 <span class='line'>472</span>  for(i=0,j=[];i&lt;d.length;i++)j.push((i%80?'':NewLine)+d.charCodeAt(i));d+=j;
-<span class='line'>473</span>  simpleWrite(testF,'start at '+gDate(da)+NewLine+'encode: '+gDate(db-da)+NewLine+'decode: '+gDate(dc-db)+NewLine+sp+'['+c.length+']→['+t.length+']	( '+(100*t.length/c.length).decp(2)+' %)'+NewLine+c+NewLine+NewLine+t+NewLine+sp+(typeof encodeCodeC!='undefined'?encodeCodeC+sp:'')+NewLine+d+NewLine+sp+(typeof decodeCodeC!='undefined'?decodeCodeC+sp:'')+'try '+(tr2-tr)+' times '+(c==d?'OK!':'failed @ '+(i=same(c,d))+' .'+NewLine+c.substr(i-9,range)+NewLine+'-'.x(20)+NewLine+d.substr(i-9,range))+NewLine,TristateTrue);
+<span class='line'>473</span>  simpleWrite(testF,'start at '+gDate(da)+NewLine+'encode: '+gDate(db-da)+NewLine+'decode: '+gDate(dc-db)+NewLine+sp+'['+c.length+']→['+t.length+']	( '+(100*t.length/c.length).to_fixed(2)+' %)'+NewLine+c+NewLine+NewLine+t+NewLine+sp+(typeof encodeCodeC!='undefined'?encodeCodeC+sp:'')+NewLine+d+NewLine+sp+(typeof decodeCodeC!='undefined'?decodeCodeC+sp:'')+'try '+(tr2-tr)+' times '+(c==d?'OK!':'failed @ '+(i=same(c,d))+' .'+NewLine+c.substr(i-9,range)+NewLine+'-'.x(20)+NewLine+d.substr(i-9,range))+NewLine,TristateTrue);
 <span class='line'>474</span>  alert('Test encodeCode over!');
 <span class='line'>475</span> }catch(e){simpleWrite(testF,popErr(e));}}	*/</span><span class="WHIT">
 <span class='line'>476</span> </span><span class="COMM">//{a=simpleRead('function.js');for(i=0;i&lt;encodeCodeDwordsRef.length;i++)a=a.replace(encodeCodeDwordsRef[i].replace(/([()])/g,'\\$1'),'');simpleWrite('try.txt',a);}</span><span class="WHIT">
@@ -784,7 +784,7 @@
 <span class='line'>777</span> 	*後段
 <span class='line'>778</span> 		數字表累加
 <span class='line'>779</span> 		'int'表整數int，累加1
-<span class='line'>780</span> 		'float'表示浮點數float，累加.1	bug:應該用.decp()
+<span class='line'>780</span> 		'float'表示浮點數float，累加.1	bug:應該用.to_fixed()
 <span class='line'>781</span> 		不輸入或非數字表示string
 <span class='line'>782</span> 
 <span class='line'>783</span> 	mode
@@ -1077,8 +1077,8 @@
 <span class='line'>1070</span> 	http://wawa.club.hinet.net/cboard1/HCB_Dis.asp?BrdNo=78&SubNo=78761&Club=0&ClsName=%B1%D0%A8%7C%BE%C7%B2%DF
 <span class='line'>1071</span> 	http://bbs.thu.edu.tw/cgi-bin/bbscon?board=English&file=M.1046073664.A&num=106
 <span class='line'>1072</span> */</span><span class="WHIT">
-<span class='line'>1073</span> </span><span class="COMM">//turnSI[generateCode.dLK]='setTool,decplaces,-turnSI.n,-turnSI.v';</span><span class="WHIT">
-<span class='line'>1074</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">turnSI</span><span class="PUNC">(</span><span class="NAME">num</span><span class="PUNC">,</span><span class="NAME">d</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>1073</span> </span><span class="COMM">//to_SI[generateCode.dLK]='setTool,to_fixed,-to_SI.n,-to_SI.v';</span><span class="WHIT">
+<span class='line'>1074</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">to_SI</span><span class="PUNC">(</span><span class="NAME">num</span><span class="PUNC">,</span><span class="NAME">d</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>1075</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">_f</span><span class="PUNC">=</span><span class="NAME">arguments.callee</span><span class="PUNC">,</span><span class="NAME">p</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">v</span><span class="PUNC">=</span><span class="NAME">_f.v</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1076</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">v</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>1077</span> </span><span class="WHIT">  </span><span class="NAME">_f.v</span><span class="PUNC">=</span><span class="NAME">v</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="NUMB">1024</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	1000 in disk space</span><span class="WHIT">
@@ -1089,7 +1089,7 @@
 <span class='line'>1082</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">num</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1083</span> 
 <span class='line'>1084</span> </span><span class="WHIT"> </span><span class="KEYW">while</span><span class="PUNC">(</span><span class="NAME">num</span><span class="PUNC">>=</span><span class="NAME">v</span><span class="PUNC">[</span><span class="NAME">p</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="NAME">p</span><span class="PUNC">++</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>1085</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">num</span><span class="PUNC">/</span><span class="NAME">v</span><span class="PUNC">[</span><span class="PUNC">--</span><span class="NAME">p</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">decp</span><span class="PUNC">(</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">d</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="NUMB">2</span><span class="PUNC">:</span><span class="NAME">d</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">_f.n</span><span class="PUNC">[</span><span class="NAME">p</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1085</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">num</span><span class="PUNC">/</span><span class="NAME">v</span><span class="PUNC">[</span><span class="PUNC">--</span><span class="NAME">p</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">to_fixed</span><span class="PUNC">(</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">d</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="NUMB">2</span><span class="PUNC">:</span><span class="NAME">d</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">_f.n</span><span class="PUNC">[</span><span class="NAME">p</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1086</span> </span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'>1087</span> 
 <span class='line'>1088</span> </span><span class="COMM">//	將漢字轉為阿拉伯數字表示法(0-99999)</span><span class="WHIT">

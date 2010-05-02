@@ -271,7 +271,7 @@ CeL.math.quotient.repetend_separator="";	//	'_';//' '
  * 數字集
  * @memberOf	CeL.math.quotient
  * @see
- * http://en.wikipedia.org/wiki/Numerical_digit
+ * <a href="http://en.wikipedia.org/wiki/Numerical_digit" accessdate="2010/4/16 20:47">Numerical digit</a>
  */
 CeL.math.quotient.digit_char="";	//	'0123456789abcdefghijklmnopqrstuvwxyz';//.split('')
 /**
@@ -284,7 +284,10 @@ CeL.math.quotient.digit_char="";	//	'0123456789abcdefghijklmnopqrstuvwxyz';//.sp
  * @memberOf	CeL.math.quotient
  * @example
  * var q=parse_base('10000.'+_.repetend_separator+'3',11);
- * if(!q)alert('bad input!');else library_namespace.debug('<br/>'+q.base(8)+','+q.base()+' , '+q.to_print_mode()+','+q.print(1)+','+q.to_print_mode(2)+','+q.to_print_mode(3,0,'',5));
+ * if(!q)
+ * 	alert('bad input!');
+ * else
+ * 	library_namespace.debug('<br/>'+q.base(8)+','+q.base()+' , '+q.to_print_mode()+','+q.print(1)+','+q.to_print_mode(2)+','+q.to_print_mode(3,0,'',5));
  */
 CeL.math.quotient.parse_base=function(number, base, digit_char){};
 /**
@@ -294,7 +297,7 @@ CeL.math.quotient.parse_base=function(number, base, digit_char){};
 CeL.native=function(){};
 /**
  * 顯示格式化日期 string
- * @param date_value	要轉換的 date, 值過小時當作時間
+ * @param date_value	要轉換的 date, 值過小時當作時間, <0 轉成當下時間
  * @param mode	要轉換的 mode
  * @param zero_fill	對 0-9 是否補零
  * @param date_separator	date separator
@@ -304,7 +307,7 @@ CeL.native=function(){};
  * alert(format_date());
  * @since	2003/10/18 1:04 修正
  * @since	2010/4/16 10:37:30	重構(refactoring)
- * @requires setTool,decplaces
+ * @requires setTool,to_fixed
  * @see
  * http://www.merlyn.demon.co.uk/js-dates.htm,
  * http://aa.usno.navy.mil/data/docs/JulianDate.html
@@ -587,7 +590,7 @@ CeL.net.web=function(){};
  * display:none or visibility:hidden.
  * TODO: computed style
  * @param element	HTML element
- * @param {String,Number} type	show or hidden or set the status type:
+ * @param {String|Number} type	show or hidden or set the status type:
  * 			{Number}: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change
  * 			{String}: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?
  * @return	display status
@@ -610,7 +613,9 @@ CeL.net.web.trigger_display=function(element, type){};
  */
 CeL.net.web.replace_HTML=function(o,html){};
 /**
- * 移除 node
+ * 移除 node.
+ * TODO:
+ * also remove event handlers
  * @param o
  * @param tag	tag===1: only child, undefined: remove only self, others: only <tag> child
  * @return
@@ -653,6 +658,24 @@ CeL.net.web.add_node=function add_node(node, child_list){};
  * @memberOf	CeL.net.web
  */
 CeL.net.web.XML_node=function(tag,propertyO,insertBeforeO,innerObj,styleO){};
+/**
+ * fill data to table.
+ * 增加 table 的列(row)
+ * @param {Array|Object} data	data list
+ * @param table	table element
+ * @param {Array} header	header list
+ * @return
+ * @example
+ * table_list([list1],[list2],..)
+ * e.g.,	table_list([1,2,3,4],[4,5,3,4]);
+ * table_list([[list1],[list2],..])
+ * e.g.,	table_list( [ [1,2,3,4],[4,5,3,4] ] );
+ * @since	2010/05/03 14:13:18
+ * @memberOf	CeL.net.web
+ * @see
+ * http://www.datatables.net/
+ */
+CeL.net.web.table_list=function(data, table, header, do_clean){};
 /**
  * Parses URI
  * @param {String} URI	URI to parse
@@ -787,6 +810,16 @@ CeL.net.form.education=function(){};
 */
 CeL.net.form.select_input=function(){};
 
+//	null constructor for [CeL.misc]
+CeL.misc=function(){};
+CeL.misc.prototype={};
+
+/**
+ * null module constructor
+ * @class	check 處理的 functions
+ */
+CeL.misc.check=function(){};
+
 //	null constructor for [CeL.IO]
 CeL.IO=function(){};
 CeL.IO.prototype={};
@@ -855,9 +888,9 @@ CeL.IO.Windows.file.open_format={
  * move/rename files, ** use RegExp, but no global flag **<br/>
  * 可用 move_file_filter() 來排除不要的<br/>
  * 本函數可能暫時改變目前工作目錄！
- * @param from
- * @param to
- * @param base_path
+ * @param {String} from	from file
+ * @param {String} to	to file
+ * @param {String} base_path	base path
  * @param flag
  * @param {Function} filter	可用 filter() 來排除不要的
  * @return	{Object} report
@@ -865,7 +898,7 @@ CeL.IO.Windows.file.open_format={
  * @requires	path_separator,fso,WshShell,new_line,Enumerator
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.move_file=function(from, to, base_path, flag, filter){};
+CeL.IO.Windows.file.move_file=function move_file(from, to, base_path, flag, filter){};
 /**
  * <a href="#.move_file">move_file</a> 的 flag enumeration
  * @constant
@@ -924,7 +957,7 @@ CeL.IO.Windows.file.move_file.f={
  * @requires	fso,get_folder,getFN,initWScriptObj
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.mv=function(from, to, dir, onlyFN, reverse){};
+CeL.IO.Windows.file.move_1_file=function(from, to, dir, only_filename, reverse){};
 /**
  * get file details (readonly)
  * @example
@@ -1025,7 +1058,7 @@ CeL.IO.Windows.file.openDataTest=function(FN, NOTexist, io_mode){};
  * <a href="http://www.hawk.34sp.com/stdpls/dwsh/charset_adodb.html">Hawk&apos;s W3 Laboratory : Disposable WSH : 番外編：文字\u12456\u12531\u12467\u12540\u12487\u12451\u12531\u12464\u12392ADODB.Stream</a>
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.translate_AdoStream_binary_data=function(data,len,type){};
+CeL.IO.Windows.file.translate_AdoStream_binary_data=function translate_AdoStream_binary_data(data, len, type){};
 /**
  * 轉換以 adTypeBinary 讀到的資料
  * @param	data	以 adTypeBinary 讀到的資料
@@ -1045,7 +1078,7 @@ CeL.IO.Windows.file.Ado_binary.prototype={};
  * @param io_mode	open mode, e.g., iomode.ForWriting
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.open_file=function(FN,format,io_mode){};
+CeL.IO.Windows.file.open_file=function open_file(FN, format, io_mode){};
 /**
  * 讀取檔案
  * @param FN	file path
@@ -1086,14 +1119,14 @@ CeL.IO.Windows.file.folder_info=function(folder_path,file_filter,traverseSubDire
  * @constant
  */
 CeL.IO.Windows.file.folder_info.f={
-	noNewObj:-1,
-	files:0,
-	dirs:1,
-	fsize:2,
-	size:3,
-	Tsize:3,
-	Tfiles:4,
-	Tdirs:5
+		noNewObj : -1,
+		files : 0,
+		dirs : 1,
+		fsize : 2,
+		size : 3,
+		Tsize : 3,
+		Tfiles : 4,
+		Tdirs : 5
 };
 /**
  * 將編碼為fromCode之檔案fileName中所有不合編碼toCode之char以encodeFunction轉換
@@ -1115,59 +1148,7 @@ CeL.IO.Windows.file.iconv_file=function(fileName, toCode, fromCode, encodeFuncti
  * @memberOf	CeL.IO.Windows.file
  * @see	<a href="http://msdn.microsoft.com/library/en-us/script56/html/0fa93e5b-b657-408d-9dd3-a43846037a0e.asp">FileSystemObject</a>
  */
-CeL.IO.Windows.file.traverse_file_system=function(FS_function_array, path, filter, flag){};
-/**
- * <a href="#.traverse_file_system">traverse_file_system</a> 的 flag enumeration
- * @memberOf	CeL.IO.Windows.file
- * @constant
- */
-CeL.IO.Windows.file.traverse_file_system.f={
-		/**
-		 * return object
-		 * @memberOf	CeL.IO.Windows.file
-		 */
-		get_object : -2,
-		/**
-		 * null flag
-		 * @private
-		 * @memberOf	CeL.IO.Windows.file
-		 */
-		NULL : -1,
-		/**
-		 * 用於指示 file
-		 * @private
-		 * @memberOf	CeL.IO.Windows.file
-		 */
-		file : 0,
-		/**
-		 * 用於指示 folder
-		 * @private
-		 * @memberOf	CeL.IO.Windows.file
-		 */
-		folder : 1,
-		/**
-		 * 用於指示 driver
-		 * @private
-		 * @memberOf	CeL.IO.Windows.file
-		 */
-		driver : 2,
-		/**
-		 * handle function 應有的長度
-		 * @private
-		 * @memberOf	CeL.IO.Windows.file
-		 */
-		func_length : 3,
-		/**
-		 * 深入下層子目錄及檔案
-		 * @memberOf	CeL.IO.Windows.file
-		 */
-		traverse : 0,
-		/**
-		 * 不深入下層子目錄及檔案
-		 * @memberOf	CeL.IO.Windows.file
-		 */
-		no_traverse : 4
-};
+CeL.IO.Windows.file.traverse_file_system=function traverse_file_system(FS_function_array, path, filter, flag){};
 
 //	null constructor for [CeL.code]
 CeL.code=function(){};
@@ -1336,13 +1317,23 @@ _.parse_CSV.hasTitle;//null;
  */
 eval_code=function eval_code(code){};
 /**
+ * evaluate @ Global scope.
+ * By the ECMA-262, new Function() will 'Pass in the Global Environment as the Scope parameter.'
+ * @param code	script code to evaluate
+ * @return	value that evaluate process returned
+ */
+global_eval;//new Function('code', 'return eval(code);');
+/**
  * simple evaluates to get value of specified various name
  * @param {String} various_name	various name
- * @param {Object} [name_space]	initialize name-space. default: global
+ * @param {Object|Function} [name_space]	initialize name-space. default: global
  * @return	value of specified various name
  * @since	2010/1/1 18:11:40
  * @note
  * 'namespace' 是 JScript.NET 的保留字
+ * 
+ * 在兩個子層(a.b.c)下，這樣作效率較差 @User agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.4 (KHTML, like Gecko) Chrome/5.0.375.29 Safari/533.4:
+ * function(v){try{return(new Function('return('+v+')'))();}catch(e){}}
  */
 get_various=function(various_name, name_space){};
 /**
@@ -1361,13 +1352,13 @@ get_script_name=function(){};
  * 取得/設定環境變數 enumeration<br/>
  * （雖然不喜歡另開 name-space，但以 2009 當下的 JsDoc Toolkit 來說，似乎沒辦法創造 enumeration。）
  * @class	環境變數 (environment variables) 與程式會用到的 library 相關變數。
- * @param name	環境變數名稱
+ * @param {String} name	環境變數名稱
  * @param value	環境變數之值
  * @return	舊環境變數之值
  */
 env=function env(name, value){};
 /**
- * 判斷為何種 type。主要用在 Array 等 native object 之判別。
+ * 判斷為何種 type。主要用在 Error, DOMException 等 native object 之判別。
  * @param	value	various or class instance to test
  * @param	{String} [want_type]	type to compare: number, string, boolean, undefined, object, function
  * @param	{Boolean} [get_Class]	get the class name of a class(function) instance.
@@ -1399,35 +1390,21 @@ is_type=function(value, want_type, get_Class){};
  */
 object_tester=function(want_type, toString_reference){};
 /**
- * Test if the value is a native Array.
- * @param	v	object value
- * @return	{Boolean}	the value is a native Array.
- * @since	2009/12/20 08:38:26
- */
-is_Array;//_.object_tester('Array');
-/**
- * Test if the value is a native Object.
- * @param	v	object value
- * @return	{Boolean}	the value is a native Object.
- * @since	2009/12/20 08:38:26
- */
-is_Object;//_.object_tester('Object');
-/**
  * Setup environment variables
- * @param	{string}[OS_type]	type of OS
- * @return	environment variables set
+ * @param	{String} [OS_type]	type of OS
+ * @return	{Object}	environment variables set
  */
 initial_env=function(OS_type){};
 /**
  * Tell if it's now debugging.
- * @param {int}[debug_level]	if it's now in this debug level.
+ * @param {Integral} [debug_level]	if it's now in this debug level.
  * @return	{Boolean}	It's now in specified debug level.
  * @return	{Number}	It's now in what debug level(Integral).
  */
 is_debug=function(debug_level){};
 /**
  * Set debugging level
- * @param {int}[debug_level]	The debugging level to set.
+ * @param {Integral} [debug_level]	The debugging level to set.
  * @type	Integral
  * @return	{Number} debugging level now
  */
@@ -1497,8 +1474,8 @@ get_file=function(path, encoding){};
  * Ask privilege in mozilla projects.
  * enablePrivilege 似乎只能在執行的 function 本身或 caller 呼叫才有效果，跳出函數即無效，不能 cache，因此提供 callback。
  * 就算按下「記住此決定」，重開瀏覽器後需要再重新授權。
- * @param {String,Error} privilege	privilege that asked 或因權限不足導致的 Error
- * @param {Function,Number} callback	Run this callback if getting the privilege. If it's not a function but a number(經過幾層/loop層數), detect if there's a loop or run the caller.
+ * @param {String|Error} privilege	privilege that asked 或因權限不足導致的 Error
+ * @param {Function|Number} callback	Run this callback if getting the privilege. If it's not a function but a number(經過幾層/loop層數), detect if there's a loop or run the caller.
  * @return	OK / the return of callback
  * @throws	error
  * @since	2010/1/2 00:40:42
@@ -1529,8 +1506,8 @@ get_module_path=function(module_name, file_name){};
 /**
  * 轉化所有 /., /.., //
  * @since	2009/11/23 22:32:52
- * @param {string} path	欲轉化之 path
- * @return	{string} path
+ * @param {String} path	欲轉化之 path
+ * @return	{String} path
  */
 simplify_path=function(path){};
 /**
@@ -1546,7 +1523,7 @@ simplify_path=function(path){};
  * **	預設會 extend 到 library 本身下！
  * @param	{String} module	module name
  * @param	{Function} [callback]	callback function
- * @param	{Object, Boolean} [extend_to]	extend to which name-space<br/>
+ * @param	{Object|Boolean} [extend_to]	extend to which name-space<br/>
  * false:	just load, don't extend to library name-space<br/>
  * this:	extend to global<br/>
  * object:	extend to specified name-space that you can use [name_space]._func_ to run it<br/>
@@ -1564,7 +1541,7 @@ use=function requires(module, callback, extend_to){};
 /**
  * include other JavaScript/CSS files
  * @param {String} resource path
- * @param {Function, Object} callback	callback function / 	{callback: callback function, module: module name, global: global object when run callback}
+ * @param {Function|Object} callback	callback function / 	{callback: callback function, module: module name, global: global object when run callback}
  * @param {Boolean} [use_write]	use document.write() instead of insert a element
  * @param {Boolean} [type]	1: is a .css file, others: script
  */
@@ -1682,17 +1659,21 @@ same_length=function(s1, s2){};
 	 */
 lib_name='debug';
 /**
- * 輾轉相除
- * @param n1	number 1
- * @param n2	number 2
- * @param times	max 次數
- * @return	連分數序列
+ * 輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數
+ * @param {Number} n1	number 1
+ * @param {Number} [n2]	number 2
+ * @param {Number} times	max 次數, 1,2,..
+ * @return	{Array}	連分數序列 ** 負數視 _.mutual_division.done 而定!
  */
 mutual_division=function mutual_division(n1, n2, times){};
 /**
+ * !!mode:連分數處理，對負數僅有最初一數為負。
+ */
+mutual_division.mode;//0;
+/**
  * 取得連分數序列的數值
- * @param sequence	序列
- * @param max_no	取至第 max_no 個
+ * @param {Array} sequence	序列
+ * @param {Number} [max_no]	取至第 max_no 個
  * @requires	mutual_division.done
  * @return
  * @see
@@ -1702,14 +1683,14 @@ mutual_division=function mutual_division(n1, n2, times){};
 continued_fraction=function(sequence, max_no){};
 /**
  * The best rational approximation. 取得值最接近之有理數 (use 連分數 continued fraction), 取近似值.
- * c.f.,調日法
+ * c.f., 調日法
  * 在分子或分母小於下一個漸進分數的分數中，其值是最接近精確值的近似值。
  * @example
  * to_rational_number(4088/783)
- * @param number	number
- * @param rate	比例在rate以上
- * @param max_no	最多取至序列第 max_no 個
- * 					TODO : 並小於 l:limit
+ * @param {Number} number	number
+ * @param {Number} [rate]	比例在 rate 以上
+ * @param {Number} [max_no]	最多取至序列第 max_no 個
+ * 					TODO : 並小於 l: limit
  * @return	[分子, 分母, 誤差]
  * @requires	mutual_division,continued_fraction
  * @see
@@ -1772,34 +1753,60 @@ complement=function(){};
  * qq// in perl.
  * String.prototype.toRegExp = function(f) { return to_RegExp_pattern(this.valueOf(), f); };
  * @param {String} pattern	pattern text
- * @param {Boolean, String} RegExp_flag	flags when need to return RegExp object
- * @param {RegExp} escape_pattern	char pattern need to escape
+ * @param {Boolean|String} [RegExp_flag]	flags when need to return RegExp object
+ * @param {RegExp} [escape_pattern]	char pattern need to escape
  * @return	{RegExp} RegExp object
  */
 to_RegExp_pattern=function(pattern, RegExp_flag, escape_pattern){};
 /**
- * 取至小數d位，
- * 原因：JScript即使在做加減運算時，有時還是會出現1.4000000000000001，0.0999999999999998等數值。此函數可取至1.4與0.1
- * @param digits	number of decimal places shown
- * @param max	max digits	max==0:round() else floor()
+ * 取至小數 d 位，
+ * 肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1
+ * @param {Number} digits	1,2,..: number of decimal places shown
+ * @param {Number} [max]	max digits	max===0:round() else floor()
  * @return
  * @see
  * https://bugzilla.mozilla.org/show_bug.cgi?id=5856
  * IEEE754\u12398丸\u12417演算\u12399最\u12418報告\u12373\u12428\u12427ES3「\u12496\u12464」\u12391\u12354\u12427。
  * http://www.jibbering.com/faq/#FAQ4_6
  * @example
- * {var d=new Date,v=0.09999998,i=0,a;for(;i<100000;i++)a=v.decp(2);alert(v+'\n→'+a+'\ntime:'+format_date(new Date-d));}
+ * {var d=new Date,v=0.09999998,i=0,a;for(;i<100000;i++)a=v.to_fixed(2);alert(v+'\n→'+a+'\ntime:'+format_date(new Date-d));}
  */
-decplaces=function(digits, max){};
+to_fixed=function(digits, max){};
+/**
+ * check input string send to SQL server
+ * @param {String} string	input string
+ * @return	{String}	轉換過的 string
+ * @since	2006/10/27 16:36
+ * @see
+ * from lib/perl/BaseF.pm (or program/database/BaseF.pm)
+ */
+checkSQLInput=function(string){};
+/**
+ * check input string send to SQL server 並去掉前後 space
+ * @param {String} string	input string
+ * @return	{String}	轉換過的 string
+ * @since	2006/10/27 16:36
+ * @see
+ * from lib/perl/BaseF.pm (or program/database/BaseF.pm)
+ */
+checkSQLInput_noSpace=function(string){};
 /**
  * 轉換字串成數值，包括分數等。分數亦將轉為分數。
- * @param number
+ * @param {String} number	欲轉換之值
  * @return
  */
 parse_number=function(number){};
 /**
+ * get CIDR data
+ * @param {Number} CIDR	CIDR mask bits, 0~32
+ * @param {String} IP	IPv4, e.g., 1.2.3.4
+ * @return	CIDR data
+ * @since	2010/4/21 22:56:16
+ */
+CIDR_to_IP=function(CIDR, IP){};
+/**
  * 改變網卡的IP地址: change IP, set IP
- * @param to_s	IP or {IP:''||[], Subnet:''||[], DNS:''||[], Gateway:''||[], GatewayOrder:''||[]}
+ * @param to_s	IP or {IP:''||[], CIDR:24||.CIDR_notation, Subnet:''||[], DNS:''||[], Gateway:254||[], GatewayOrder:''||[]}
  * @param from	IP or netif No.
  * @since
  * 2009/5/7 0:24:5	加強
@@ -1811,11 +1818,11 @@ parse_number=function(number){};
  * <a href="http://www.dotblogs.com.tw/PowerHammer/archive/2008/03/24/2060.aspx" accessdate="2010/3/3 13:15">使用 WMI 更改IP、子網路遮罩、閘道、DNS - 強力鎯頭 VB BLOG - 點部落</a>
  * Using NetSh.exe (no reboot required): <a href="http://techsupt.winbatch.com/webcgi/webbatch.exe?techsupt/tsleft.web+WinBatch/How~To+Change~Ip~Address.txt" accessdate="2010/3/3 13:12">WWW Tech Support/WinBatch/How To\Change Ip Address.txt</a>
  * @example
- * setNetInfo({IP:'163.16.20.212',Gateway:254});
- * sl(setNetInfo({IP:'163.16.20.30',Gateway:254}));WScript.Quit();
- * @requires	getWMIData,VBA,JSArrayToSafeArray
+ * set_net_info({IP:'163.16.20.212',Gateway:254});
+ * sl(set_net_info({IP:'163.16.20.30',Gateway:254}));WScript.Quit();
+ * @requires	getWMIData,VBA,JSArrayToSafeArray,CIDR_to_IP
  */
-setNetInfo=function(to_s, from){};
+set_net_info=function(to_s, from){};
 /**
  * If HTML element has specified class
  * 
@@ -1828,9 +1835,13 @@ has_class=function(element, class_name){};
  * bind/add listener<br/>
  * **	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。
  * **	NOT TESTED!!
+ * TODO:
+ * removeEventListener
+ * remove_listener()
  * @param type	listen to what event type
  * @param listener	listener function/function array/function string,
  * 				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"
+ * 			function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}
  * @param [document_object]	bind/attach to what document object
  * @param [pFirst]	parentNode first
  * @return
@@ -1842,7 +1853,8 @@ add_listener=function add_listener(type, listener, document_object, pFirst){};
 /**
  * useCapture: parentNode first
  * @see
- * http://www.w3.org/TR/DOM-Level-3-Events/events.html#Events-flow
+ * <a href="http://www.w3.org/TR/DOM-Level-3-Events/#event-flow" accessdate="2010/4/16 22:40">Document Object Model (DOM) Level 3 Events Specification</a>,
+ * <a href="http://www.w3.org/TR/DOM-Level-3-Events/#interface-EventTarget" accessdate="2010/4/16 22:42">Interface EventTarget</a>
  */
 add_listener.pFirst=false;
 /**
@@ -1887,6 +1899,12 @@ scroll_to_show=function(o, p){};
  * @return
  */
 menu_creater=function(o, l){};
+/**
+ * 切換 [input] / inputted [span]
+ * @param {Boolean|undefined} to_input	切換至 input or not. default: 切換至 [input]
+ * @return
+ */
+triggerToInput=function(to_input){};
 /**
  * determine base path.
  * 給定 base path 的結構後，藉由 path_now 推測 base path 的 full path
