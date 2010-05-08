@@ -19,7 +19,7 @@ body{margin:0;padding:0;}
 
 <script type="text/javascript">//<!--
 	//window.status=11;
-	for(var i=0,j=0;i<1e8;i++)j++;
+	//for(var i=0,j=0;i<1e8;i++)j++;
 //--></script>
 
 
@@ -76,7 +76,7 @@ function test1() {
 <body class="bgn">
 
 
-<div id="error_load_panel" style="color:#f00;background-color:#ff8;padding:.5em;/* hack for NS4 */position:absolute;top:-800px;*top:0px/* hack for IE7 @ wine: no javascript allowed. ** 事實上應該對所有讀得懂 CSS 但 javascript 無作用的 browser 作處理。 */;">
+<div id="error_load_panel" style="color:#f00;background-color:#ff8;padding:.5em;/* hack for NS4 */position:absolute;top:-800px;*top:0px;_top:-800px/* hack for IE7 @ wine: no javascript allowed. ** 事實上應該對所有讀得懂 CSS 但 javascript 無作用的 browser 作處理。 */;">
 <hr />
 <h2>Loading error</h2>
 JavaScript doesn't work or XMLHttpRequest loading error?<br />
@@ -169,6 +169,7 @@ show
 </div>
 
 
+|
 <b style="cursor:pointer;" onclick="start_count(1);return false;">start count</b>
 <div id="clock" style="font-size:26em;font-family:'FZZhunYuan-M02','Maiandra GD';"></div>
 
@@ -532,6 +533,7 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 					document.getElementById('error_load_panel').innerHTML += 'You may <a href="http://code.google.com/p/chromium/issues/detail?id=4197#c26">add a flag</a> --allow-file-access-from-files to run this tool.<br/>e.g., run '+(navigator.userAgent.indexOf('Linux')!==-1?'/opt/google/chrome/google-chrome %U --allow-file-access-from-files&':'Chrome --allow-file-access-from-files')+'<hr/>';
 				throw new Error('Loading error!');
 			}
+			//document.getElementById('error_load_panel').style.display = 'none';
 
 			CeL.Log.set_board('panel_for_log');
 			CeL.debug('Log panel OK.');
