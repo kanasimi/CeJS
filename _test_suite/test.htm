@@ -171,11 +171,11 @@ show
 
 |
 <b style="cursor:pointer;" onclick="start_count(1);return false;">start count</b>
-<div id="clock" style="font-size:26em;font-family:'FZZhunYuan-M02','Maiandra GD';"></div>
+<div id="clock" style="font-size:26em;font-family:'FZZhunYuan-M02','Maiandra GD';clear:both;"></div>
 
 
 
-<hr />
+<hr style="clear: both;" />
 [test suite] log panel:
 <!--
 <a href="#" onclick="clipboardFunction(0,'panel_for_log');return false;">paste code</a>
@@ -215,7 +215,8 @@ function start_count(restart){
 		//	提醒
 		window.focus();
 	//	顯示
-	document.getElementById('clock').innerHTML=timer>timeout1?CeL.format_date(timer):'<span style="color:#f88">'+CeL.format_date(timer)+'</span>';
+	CeL.get_element('clock').innerHTML=timer>timeout1?CeL.format_date(timer):'<span style="color:#f88">'+CeL.format_date(timer)+'</span>';
+	CeL.get_element('clock').style.marginTop='50pt';
 
 	if(timer>0)
 		start_count.handle=setTimeout('start_count();',diff);
