@@ -1,0 +1,15 @@
+<html><head></head><body>
+<script>
+	//	IE5 test OK.
+	//	2010/6/14 23:34:26
+	var a='var mm="m1",hhh=function(){var _=function(){};var tt,qq;_._post=function(){tt=aaaa.m2.tt,qq=aaaa.m2.qq;}; _.ee=function(){return qq()+"ee";};_.ii=function(){return "ii";};return _;};aaaa(mm,hhh);',
+	    b='var mm="m2",hhh=function(){var _=function(){};var ee,ii;_._post=function(){ee=aaaa.m1.ee,ii=aaaa.m1.ii;}; _.tt=function(){return ii()+"tt";};_.qq=function(){return "qq";};return _;};aaaa(mm,hhh);';
+	function aaaa(a1,a2){aaaa[a1]=a2();}
+	eval(a);eval(b);
+	aaaa.m1._post();
+	delete aaaa.m1._post;
+	aaaa.m2._post();
+	delete aaaa.m2._post;
+	alert(aaaa.m1.ee()+','+aaaa.m2.tt());
+</script>
+</body></html>
