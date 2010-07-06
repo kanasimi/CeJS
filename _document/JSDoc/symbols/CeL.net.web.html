@@ -193,6 +193,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.html">CeL</a></li>
 	
+	<li><a href="../symbols/CeL.code.API.html">CeL.code.API</a></li>
+	
 	<li><a href="../symbols/CeL.code.compatibility.html">CeL.code.compatibility</a></li>
 	
 	<li><a href="../symbols/CeL.code.log.html">CeL.code.log</a></li>
@@ -307,6 +309,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.add_listener">add_listener</a></b>(type, listener, document_object, p_first)
+								</div>
+								<div class="description">bind/add listener.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.add_node">add_node</a></b>(node, child_list)
 								</div>
 								<div class="description">append children node to specified element</div>
@@ -316,18 +327,9 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.code_for_including-code_for_including-deal_barcode">code_for_including-code_for_including-deal_barcode</a></b>(callback)
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.deal_barcode">deal_barcode</a></b>(callback)
 								</div>
 								<div class="description">條碼器(Barcode Scanner)/雷射讀碼器的輸入可用 onkeypress 取得</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.code_for_including-code_for_including-toHTML">code_for_including-code_for_including-toHTML</a></b>(text, mode)
-								</div>
-								<div class="description">translate Unicode text to HTML</div>
 							</td>
 						</tr>
 					
@@ -352,9 +354,54 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.get_query">get_query</a></b>(query_string, add_to)
+								</div>
+								<div class="description">Translate a query string to a native Object contains key/value pair set.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.get_style">get_style</a></b>(element, name, not_computed)
 								</div>
 								<div class="description">get current computed style property of specified HTML element.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.is_element_node">is_element_node</a></b>(value)
+								</div>
+								<div class="description">判斷為 HTML Element。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.is_HTML_element">is_HTML_element</a></b>(value)
+								</div>
+								<div class="description">判斷為 HTML Element。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.is_HTML_element_type">is_HTML_element_type</a></b>(value, type)
+								</div>
+								<div class="description">判斷為指定 nodeType 之 HTML Element。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.on_load">on_load</a></b>()
+								</div>
+								<div class="description">比較好點的 add onload。比起 add_listener()，本函數在已經 load 時依然會執行，而 add_listener 因為是用榜定的方法，因此 load 完就不再觸發(?)。這東西頂多只能擺在 include 的 JS file 中，不能 runtime include。</div>
 							</td>
 						</tr>
 					
@@ -388,7 +435,7 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.set_attribute">set_attribute</a></b>(_e, propertyO)
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.set_attribute">set_attribute</a></b>(_e, propertyO, ns)
 								</div>
 								<div class="description">set/get/remove attribute of a element<br/>in IE: setAttribute does not work when used with the style attribute (or with event handlers, for that matter).</div>
 							</td>
@@ -409,6 +456,24 @@ ul.inheritsList
 								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.table_list">table_list</a></b>(data, table, header, do_clean)
 								</div>
 								<div class="description">fill data to table.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.to_query_string">to_query_string</a></b>(query_Object)
+								</div>
+								<div class="description">Translate a native Object contains key/value pair set to a query string.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.toHTML">toHTML</a></b>(text, mode)
+								</div>
+								<div class="description">translate Unicode text to HTML</div>
 							</td>
 						</tr>
 					
@@ -478,6 +543,80 @@ ul.inheritsList
 					Method Detail
 				</div>
 				
+					<a name=".add_listener"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.net.web.</span><b>add_listener</b>(type, listener, document_object, p_first)
+					
+					</div>
+					<div class="description">
+						bind/add listener.listener 應該加上 try{}catch{}，否則會搞不清楚哪裡出問題。**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 p_first 而改變。**	NOT TESTED!!TODO:removeEventListener,remove_listener(),default 'this'
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>type</b>
+									
+								</dt>
+								<dd>listen to what event type</dd>
+							
+								<dt>
+									<b>listener</b>
+									
+								</dt>
+								<dd>listener function/function array/function string,				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"			function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}</dd>
+							
+								<dt>
+									<b>document_object</b>
+									<i>Optional</i>
+								</dt>
+								<dd>bind/attach to what document object</dd>
+							
+								<dt>
+									<b>p_first</b>
+									<i>Optional</i>
+								</dt>
+								<dd>parentNode first</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/1/20 23:42:51</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>c.f., GEvent.add_listener()</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
 					<a name=".add_node"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
@@ -533,11 +672,11 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name=".code_for_including-code_for_including-deal_barcode"> </a>
+					<a name=".deal_barcode"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">CeL.net.web.</span><b>code_for_including-code_for_including-deal_barcode</b>(callback)
+					<span class="light">CeL.net.web.</span><b>deal_barcode</b>(callback)
 					
 					</div>
 					<div class="description">
@@ -578,55 +717,6 @@ ul.inheritsList
 							<dt class="heading">Returns:</dt>
 							
 								<dd></dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".code_for_including-code_for_including-toHTML"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					<span class="light">{String}</span>
-					<span class="light">CeL.net.web.</span><b>code_for_including-code_for_including-toHTML</b>(text, mode)
-					
-					</div>
-					<div class="description">
-						translate Unicode text to HTML
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{String}</span> <b>text</b>
-									
-								</dt>
-								<dd>Unicode text</dd>
-							
-								<dt>
-									<b>mode</b>
-									
-								</dt>
-								<dd>mode='x':&#xhhh;</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd><span class="light fixedFont">{String}</span> HTML</dd>
 							
 							</dl>
 						
@@ -740,7 +830,69 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>http://msdn.microsoft.com/library/en-us/dndude/html/dude04032000.asphttp://www.mail-archive.com/mochikit@googlegroups.com/msg00584.htmlhttp://hartshorne.ca/2006/01/20/javascript_positioning/</dd>
+								<dd>http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,http://msdn.microsoft.com/library/en-us/dndude/html/dude04032000.asp,http://www.mail-archive.com/mochikit@googlegroups.com/msg00584.html,http://hartshorne.ca/2006/01/20/javascript_positioning/</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".get_query"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{Object}</span>
+					<span class="light">CeL.net.web.</span><b>get_query</b>(query_string, add_to)
+					
+					</div>
+					<div class="description">
+						Translate a query string to a native Object contains key/value pair set.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>query_string</b>
+									
+								</dt>
+								<dd>query string. default: location.search</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Object}</span> <b>add_to</b>
+									
+								</dt>
+								<dd>append to this object</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/6/16 15:18:50</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>key/value pairs</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd></dd>
 							
 							</dl>
 						
@@ -808,7 +960,224 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>curCss @ jQuery, http://api.jquery.com/category/css/,<a href="http://www.quirksmode.org/dom/getstyles.html" accessdate="2010/4/1 15:44">JavaScript - Get Styles</a>,<a href="http://www.javaeye.com/topic/140784?page=2" accessdate="2010/4/1 15:41">style.display取值不对，难道是浏览器bug？讨论第2页:  - JavaScript - web - JavaEye论坛</a>大體上， currentStyle 相當於getComputedStyle，而runtimeStyle相當於getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。document.defaultView在mozilla中是指向window obj的,但是很有可能在其他broswer中就不指向window obj...因為w3c中沒有強行規定document.defaultView一定是一個global obj.返回頁內樣式表定義的類，那麼可以使用DOM樣式表對象來訪問：var oCssRulers = document.styleSheets[0].cssRulers || document.styleSheets[0].rulers;(前者是DOM方法，後者是IE私有方法)alert(oCssRulers[0].style.display);</dd>
+								<dd>http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,curCss @ jQuery, http://api.jquery.com/category/css/,<a href="http://www.quirksmode.org/dom/getstyles.html" accessdate="2010/4/1 15:44">JavaScript - Get Styles</a>,<a href="http://www.javaeye.com/topic/140784?page=2" accessdate="2010/4/1 15:41">style.display取值不对，难道是浏览器bug？讨论第2页:  - JavaScript - web - JavaEye论坛</a>大體上， currentStyle 相當於getComputedStyle，而runtimeStyle相當於getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。document.defaultView在mozilla中是指向window obj的,但是很有可能在其他broswer中就不指向window obj...因為w3c中沒有強行規定document.defaultView一定是一個global obj.返回頁內樣式表定義的類，那麼可以使用DOM樣式表對象來訪問：var oCssRulers = document.styleSheets[0].cssRulers || document.styleSheets[0].rulers;(前者是DOM方法，後者是IE私有方法)alert(oCssRulers[0].style.display);</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".is_element_node"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{Boolean}</span>
+					<span class="light">CeL.net.web.</span><b>is_element_node</b>(value)
+					
+					</div>
+					<div class="description">
+						判斷為 HTML Element。
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>value</b>
+									
+								</dt>
+								<dd>value to test</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/6/23 02:32:41</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Boolean}</span> value is HTML Element</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,http://www.w3.org/DOM/</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".is_HTML_element"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{Boolean}</span>
+					<span class="light">CeL.net.web.</span><b>is_HTML_element</b>(value)
+					
+					</div>
+					<div class="description">
+						判斷為 HTML Element。
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>value</b>
+									
+								</dt>
+								<dd>value to test</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/6/23 02:32:41</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Boolean}</span> value is HTML Element</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,http://www.w3.org/DOM/</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".is_HTML_element_type"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{Boolean}</span>
+					<span class="light">CeL.net.web.</span><b>is_HTML_element_type</b>(value, type)
+					
+					</div>
+					<div class="description">
+						判斷為指定 nodeType 之 HTML Element。
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>value</b>
+									
+								</dt>
+								<dd>value to test</dd>
+							
+								<dt>
+									<b>type</b>
+									
+								</dt>
+								<dd>type</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/6/23 02:32:41</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Boolean}</span> value is the type of HTML Element</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,http://www.w3.org/DOM/</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".on_load"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.net.web.</span><b>on_load</b>()
+					
+					</div>
+					<div class="description">
+						比較好點的 add onload。比起 add_listener()，本函數在已經 load 時依然會執行，而 add_listener 因為是用榜定的方法，因此 load 完就不再觸發(?)。這東西頂多只能擺在 include 的 JS file 中，不能 runtime include。
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code">CeL.use('net.web');CeL.on_load(function(){sl(1);},'sl(2);');</pre>
+					
+					
+					
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>_.add_listener,_.DOM_loaded</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>jQuery: $(document).ready(listener);DOMContentLoaded	http://webdesign.piipo.com/jquery/jquery_events可直接參考 SWFObject。TODO:<a href="http://javascript.nwbox.com/IEContentLoaded/" accessdate="2010/6/3 11:15" title="IEContentLoaded - An alternative for DOMContentLoaded on Internet Explorer">IEContentLoaded</a>DOMContentLoaded是firefox下特有的Event, 當所有DOM解析完以後會觸發這個事件。DOMContentLoaded與DOM中的onLoad事件與其相近。但onload要等到所有頁面元素加載完成才會觸發, 包括頁面上的圖片等等。<a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/06/05/jquery-ready-vs-load.aspx" accessdate="2010/6/3 11:17">jQuery ready vs load - 黑暗執行緒</a>$(document).ready(fn)發生在"網頁本身的HTML"載入後就觸發，而$(window).load(fn)則會等到"網頁HTML 標籤中引用的圖檔、內嵌物件(如Flash)、IFrame"等拉哩拉雜的東西都載入後才會觸發。</dd>
 							
 							</dl>
 						
@@ -977,7 +1346,7 @@ ul.inheritsList
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">CeL.net.web.</span><b>set_attribute</b>(_e, propertyO)
+					<span class="light">CeL.net.web.</span><b>set_attribute</b>(_e, propertyO, ns)
 					
 					</div>
 					<div class="description">
@@ -1003,6 +1372,12 @@ ul.inheritsList
 									
 								</dt>
 								<dd>attributes object (array if you just want to get)</dd>
+							
+								<dt>
+									<b>ns</b>
+									
+								</dt>
+								<dd></dd>
 							
 							</dl>
 						
@@ -1077,7 +1452,7 @@ ul.inheritsList
 									<b>flag</b>
 									
 								</dt>
-								<dd>(flag&1)==1:	reset className (else just add)(flag&2)==1:	return {className1:, className2:, ..}(flag&4)==1:	remove className</dd>
+								<dd>default: just add the specified className(flag&1)==1:	reset className (else just add)(flag&2)==1:	return {className1:, className2:, ..}(flag&4)==1:	remove className</dd>
 							
 							</dl>
 						
@@ -1178,6 +1553,105 @@ ul.inheritsList
 								<dd>http://www.datatables.net/</dd>
 							
 							</dl>
+						
+
+					<hr />
+				
+					<a name=".to_query_string"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{String}</span>
+					<span class="light">CeL.net.web.</span><b>to_query_string</b>(query_Object)
+					
+					</div>
+					<div class="description">
+						Translate a native Object contains key/value pair set to a query string.TODO
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Object}</span> <b>query_Object</b>
+									
+								</dt>
+								<dd>query Object.</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> query string</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>jQuery.param</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".toHTML"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{String}</span>
+					<span class="light">CeL.net.web.</span><b>toHTML</b>(text, mode)
+					
+					</div>
+					<div class="description">
+						translate Unicode text to HTML
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>text</b>
+									
+								</dt>
+								<dd>Unicode text</dd>
+							
+								<dt>
+									<b>mode</b>
+									
+								</dt>
+								<dd>mode='x':&#xhhh;</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> HTML</dd>
+							
+							</dl>
+						
+						
 						
 
 					<hr />
@@ -1343,7 +1817,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu May 06 2010 12:12:18 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Tue Jul 06 2010 18:24:08 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

@@ -160,8 +160,8 @@
 <span class='line'>153</span> prog example:
 <span class='line'>154</span> 	function move_file_filter(fn){var n=fn.match(/0000(\d+)\(\d\)\.pdf/);if(!n)return true;n=n[1];if(n!=0&&n!=1&&n!=7&&n!=10&&n!=13&&n!=15&&n!=26&&n!=28)return true;try{n=fn.match(/(\d+)\(\d\)\.pdf/);FileSystemObject.MoveFile(n[1]+'('+(n[1]?vol-1:vol-2)+').pdf',n[1]+'.pdf');}catch(e){}return;}
 <span class='line'>155</span> 	var vol=11,doMove=move_file(new RegExp('(\\d+)\\('+vol+'\\)\\.pdf'),'$1.pdf');
-<span class='line'>156</span> 	write_to_file('move.log','-'.x(60)+new_line+doMove.log,open_format.TristateTrue,ForAppending);
-<span class='line'>157</span> 	write_to_file('move.undo.'+vol+'.txt',doMove.undo,open_format.TristateTrue),write_to_file('move.undo.'+vol+'.bat',doMove.undo);//bat不能用open_format.TristateTrue
+<span class='line'>156</span> 	write_file('move.log','-'.x(60)+new_line+doMove.log,open_format.TristateTrue,ForAppending);
+<span class='line'>157</span> 	write_file('move.undo.'+vol+'.txt',doMove.undo,open_format.TristateTrue),write_file('move.undo.'+vol+'.bat',doMove.undo);//bat不能用open_format.TristateTrue
 <span class='line'>158</span> 	alert('Done '+doMove.succeed+'/'+doMove.list.length);
 <span class='line'>159</span> 
 <span class='line'>160</span> 	for Win98, turn lower case:
@@ -994,8 +994,8 @@
 <span class='line'>987</span>  * 轉換以 adTypeBinary 讀到的資料
 <span class='line'>988</span>  * @example
 <span class='line'>989</span>  * //	較安全的讀檔：
-<span class='line'>990</span>  * t=translate_AdoStream_binary_data(read_all_file(FP,'binary'));
-<span class='line'>991</span>  * write_to_file(FP,t,'iso-8859-1');
+<span class='line'>990</span>  * t=translate_AdoStream_binary_data(read_file(FP,'binary'));
+<span class='line'>991</span>  * write_file(FP,t,'iso-8859-1');
 <span class='line'>992</span>  * @see
 <span class='line'>993</span>  * &lt;a href="http://www.hawk.34sp.com/stdpls/dwsh/charset_adodb.html">Hawk&apos;s W3 Laboratory : Disposable WSH : 番外編：文字エンコーディングとADODB.Stream&lt;/a>
 <span class='line'>994</span>  * @memberOf	CeL.IO.Windows.file
@@ -1252,7 +1252,7 @@
 <span class='line'>1245</span> </span><span class="NAME">CeL.IO.Windows.file</span><span class="WHIT">
 <span class='line'>1246</span> </span><span class="PUNC">.</span><span class="WHIT">
 <span class='line'>1247</span> </span><span class="COMM">/**
-<span class='line'>1248</span>  * 提供給 &lt;a href="#.read_all_file">read_all_file&lt;/a>, &lt;a href="#.write_to_file">write_to_file&lt;/a> 使用的簡易開檔函數
+<span class='line'>1248</span>  * 提供給 &lt;a href="#.read_file">read_file&lt;/a>, &lt;a href="#.write_file">write_file&lt;/a> 使用的簡易開檔函數
 <span class='line'>1249</span>  * @param FN	file path
 <span class='line'>1250</span>  * @param format	open format, e.g., open_format.TristateUseDefault
 <span class='line'>1251</span>  * @param io_mode	open mode, e.g., iomode.ForWriting
@@ -1307,9 +1307,9 @@
 <span class='line'>1300</span> </span><span class="WHIT">	</span><span class="NAME">CeL.IO.Windows.file</span><span class="WHIT">
 <span class='line'>1301</span> </span><span class="WHIT">	</span><span class="PUNC">.</span><span class="NAME">open_format.TristateUseDefault</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1302</span> 
-<span class='line'>1303</span> </span><span class="COMM">//_.read_all_file[generateCode.dLK]=_.write_to_file[generateCode.dLK]='simpleFileErr,simpleFileAutodetectEncode,simpleFileDformat,initWScriptObj';//_.open_file,autodetectEncode,getFP,_.open_format.TristateUseDefault</span><span class="WHIT">
-<span class='line'>1304</span> </span><span class="COMM">//_.read_all_file[generateCode.dLK]+=',ForReading';_.write_to_file[generateCode.dLK]+=',ForWriting';</span><span class="WHIT">
-<span class='line'>1305</span> </span><span class="COMM">//_.read_all_file[generateCode.dLK]+=',translate_AdoStream_binary_data';	//	for _.read_all_file(FP,'binary')</span><span class="WHIT">
+<span class='line'>1303</span> </span><span class="COMM">//_.read_file[generateCode.dLK]=_.write_file[generateCode.dLK]='simpleFileErr,simpleFileAutodetectEncode,simpleFileDformat,initWScriptObj';//_.open_file,autodetectEncode,getFP,_.open_format.TristateUseDefault</span><span class="WHIT">
+<span class='line'>1304</span> </span><span class="COMM">//_.read_file[generateCode.dLK]+=',ForReading';_.write_file[generateCode.dLK]+=',ForWriting';</span><span class="WHIT">
+<span class='line'>1305</span> </span><span class="COMM">//_.read_file[generateCode.dLK]+=',translate_AdoStream_binary_data';	//	for _.read_file(FP,'binary')</span><span class="WHIT">
 <span class='line'>1306</span> </span><span class="NAME">CeL.IO.Windows.file</span><span class="WHIT">
 <span class='line'>1307</span> </span><span class="PUNC">.</span><span class="WHIT">
 <span class='line'>1308</span> </span><span class="COMM">/**
@@ -1321,7 +1321,7 @@
 <span class='line'>1314</span>  * @return {String} 檔案內容
 <span class='line'>1315</span>  * @memberOf	CeL.IO.Windows.file
 <span class='line'>1316</span>  */</span><span class="WHIT">
-<span class='line'>1317</span> </span><span class="NAME">read_all_file</span><span class="PUNC">=</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">FN</span><span class="PUNC">,</span><span class="NAME">format</span><span class="PUNC">,</span><span class="NAME">io_mode</span><span class="PUNC">,</span><span class="NAME">func</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>1317</span> </span><span class="NAME">read_file</span><span class="PUNC">=</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">FN</span><span class="PUNC">,</span><span class="NAME">format</span><span class="PUNC">,</span><span class="NAME">io_mode</span><span class="PUNC">,</span><span class="NAME">func</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>1318</span> </span><span class="WHIT"> </span><span class="NAME">simpleFileErr</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">format</span><span class="PUNC">==</span><span class="NAME">simpleFileAutodetectEncode</span><span class="PUNC">)</span><span class="WHIT">
 <span class='line'>1319</span> </span><span class="WHIT">  </span><span class="NAME">format</span><span class="PUNC">=</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">autodetectEncode</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">?</span><span class="NAME">autodetectEncode</span><span class="PUNC">(</span><span class="NAME">FN</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="NAME">simpleFileDformat</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1320</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">FN</span><span class="PUNC">||</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">getFP</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">&&</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">FN</span><span class="PUNC">=</span><span class="NAME">getFP</span><span class="PUNC">(</span><span class="NAME">FN</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
@@ -1352,7 +1352,7 @@
 <span class='line'>1345</span> </span><span class="WHIT">   </span><span class="NAME">AdoStream.LoadFromFile</span><span class="PUNC">(</span><span class="NAME">FN</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1346</span> </span><span class="WHIT">   </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">AdoStream.Type</span><span class="PUNC">==</span><span class="NAME">AdoEnums.adTypeBinary</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>1347</span> </span><span class="WHIT">    </span><span class="NAME">a</span><span class="PUNC">=</span><span class="NAME">AdoStream.Read</span><span class="PUNC">(</span><span class="NAME">AdoEnums.adReadAll</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	讀 binary data 用 'iso-8859-1' 會 error encoding.</span><span class="WHIT">
-<span class='line'>1348</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">_.read_all_file.turnBinToStr</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">translate_AdoStream_binary_data</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">a</span><span class="PUNC">=</span><span class="NAME">translate_AdoStream_binary_data</span><span class="PUNC">(</span><span class="NAME">a</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1348</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">_.read_file.turnBinToStr</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">translate_AdoStream_binary_data</span><span class="PUNC">==</span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="NAME">a</span><span class="PUNC">=</span><span class="NAME">translate_AdoStream_binary_data</span><span class="PUNC">(</span><span class="NAME">a</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1349</span> </span><span class="WHIT">   </span><span class="PUNC">}</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">)</span><span class="WHIT">
 <span class='line'>1350</span> </span><span class="WHIT">    </span><span class="KEYW">while</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">AdoStream.EOS</span><span class="PUNC">)</span><span class="NAME">func</span><span class="PUNC">(</span><span class="NAME">AdoStream.ReadText</span><span class="PUNC">(</span><span class="NAME">AdoEnums.adReadLine</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1351</span> </span><span class="COMM">/*
@@ -1373,7 +1373,7 @@
 <span class='line'>1366</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">a</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1367</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1368</span> </span><span class="NAME">CeL.IO.Windows.file</span><span class="WHIT">
-<span class='line'>1369</span> </span><span class="PUNC">.</span><span class="NAME">read_all_file.turnBinToStr</span><span class="PUNC">=</span><span class="KEYW">true</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1369</span> </span><span class="PUNC">.</span><span class="NAME">read_file.turnBinToStr</span><span class="PUNC">=</span><span class="KEYW">true</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1370</span> 
 <span class='line'>1371</span> 
 <span class='line'>1372</span> </span><span class="NAME">CeL.IO.Windows.file</span><span class="WHIT">
@@ -1389,7 +1389,7 @@
 <span class='line'>1382</span>  * @return error No.
 <span class='line'>1383</span>  * @memberOf	CeL.IO.Windows.file
 <span class='line'>1384</span>  */</span><span class="WHIT">
-<span class='line'>1385</span> </span><span class="NAME">write_to_file</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">FN</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">content</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">format</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">io_mode</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">N_O</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>1385</span> </span><span class="NAME">write_file</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">FN</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">content</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">format</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">io_mode</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">N_O</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>1386</span> </span><span class="WHIT">	</span><span class="NAME">simpleFileErr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1387</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">format</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="NAME">simpleFileAutodetectEncode</span><span class="PUNC">)</span><span class="WHIT">
 <span class='line'>1388</span> </span><span class="WHIT">		</span><span class="NAME">format</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">autodetectEncode</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">autodetectEncode</span><span class="PUNC">(</span><span class="NAME">FN</span><span class="PUNC">)</span><span class="WHIT">
@@ -1453,14 +1453,14 @@
 <span class='line'>1446</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1447</span> 
 <span class='line'>1448</span> </span><span class="COMM">//	TODO: unfinished</span><span class="WHIT">
-<span class='line'>1449</span> </span><span class="COMM">//simpleDealFile[generateCode.dLK]='autodetectEncode,_.read_all_file,_.write_to_file';</span><span class="WHIT">
+<span class='line'>1449</span> </span><span class="COMM">//simpleDealFile[generateCode.dLK]='autodetectEncode,_.read_file,_.write_file';</span><span class="WHIT">
 <span class='line'>1450</span> </span><span class="NAME">CeL.IO.Windows.file</span><span class="WHIT">
 <span class='line'>1451</span> </span><span class="PUNC">.</span><span class="WHIT">
 <span class='line'>1452</span> </span><span class="NAME">simpleDealFile</span><span class="PUNC">=</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">inFN</span><span class="PUNC">,</span><span class="NAME">func</span><span class="PUNC">,</span><span class="NAME">outFN</span><span class="PUNC">,</span><span class="NAME">format</span><span class="PUNC">,</span><span class="NAME">io_mode</span><span class="PUNC">,</span><span class="NAME">N_O</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>1453</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">inFN</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1454</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">outFN</span><span class="PUNC">)</span><span class="NAME">outFN</span><span class="PUNC">=</span><span class="NAME">inFN</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>1455</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">=</span><span class="NAME">autodetectEncode</span><span class="PUNC">(</span><span class="NAME">inFN</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NAME">_.read_all_file</span><span class="PUNC">(</span><span class="NAME">inFN</span><span class="PUNC">,</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">o</span><span class="PUNC">=</span><span class="NAME">_.read_all_file</span><span class="PUNC">(</span><span class="NAME">outFN</span><span class="PUNC">,</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">t</span><span class="PUNC">=</span><span class="NAME">func</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">,</span><span class="NAME">inFN</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>1456</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">==</span><span class="STRN">'string'</span><span class="PUNC">&&</span><span class="NAME">o</span><span class="PUNC">!=</span><span class="NAME">t</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_.write_to_file</span><span class="PUNC">(</span><span class="NAME">outFN</span><span class="PUNC">,</span><span class="NAME">t</span><span class="PUNC">,</span><span class="NAME">e</span><span class="PUNC">,</span><span class="NAME">N_O</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1455</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">=</span><span class="NAME">autodetectEncode</span><span class="PUNC">(</span><span class="NAME">inFN</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NAME">_.read_file</span><span class="PUNC">(</span><span class="NAME">inFN</span><span class="PUNC">,</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">o</span><span class="PUNC">=</span><span class="NAME">_.read_file</span><span class="PUNC">(</span><span class="NAME">outFN</span><span class="PUNC">,</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">t</span><span class="PUNC">=</span><span class="NAME">func</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">,</span><span class="NAME">inFN</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1456</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">==</span><span class="STRN">'string'</span><span class="PUNC">&&</span><span class="NAME">o</span><span class="PUNC">!=</span><span class="NAME">t</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_.write_file</span><span class="PUNC">(</span><span class="NAME">outFN</span><span class="PUNC">,</span><span class="NAME">t</span><span class="PUNC">,</span><span class="NAME">e</span><span class="PUNC">,</span><span class="NAME">N_O</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1457</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1458</span> 
 <span class='line'>1459</span> </span><span class="COMM">/*
@@ -1540,7 +1540,7 @@
 <span class='line'>1533</span> TODO:
 <span class='line'>1534</span> 只檢測常用的幾個字，無法判別才廣泛測試。
 <span class='line'>1535</span> */</span><span class="WHIT">
-<span class='line'>1536</span> </span><span class="COMM">//var FN='I:\\Documents and Settings\\kanashimi\\My Documents\\kanashimi\\www\\cgi-bin\\game\\sjis.txt',enc=autodetectEncode(FN);alert('['+enc+'] '+FN+'\n'+_.read_all_file(FN,enc).slice(0,900));</span><span class="WHIT">
+<span class='line'>1536</span> </span><span class="COMM">//var FN='I:\\Documents and Settings\\kanashimi\\My Documents\\kanashimi\\www\\cgi-bin\\game\\sjis.txt',enc=autodetectEncode(FN);alert('['+enc+'] '+FN+'\n'+_.read_file(FN,enc).slice(0,900));</span><span class="WHIT">
 <span class='line'>1537</span> </span><span class="COMM">/*	自動判別檔案（或字串）之編碼	文字エンコーディング判定を行う
 <span class='line'>1538</span> 	http://www.hawk.34sp.com/stdpls/dwsh/charset_adodb.html
 <span class='line'>1539</span> 	http://www.ericphelps.com/q193998/
@@ -1816,14 +1816,14 @@
 <span class='line'>1809</span> </span><span class="WHIT">  </span><span class="COMM">//t+='';</span><span class="WHIT">
 <span class='line'>1810</span> </span><span class="WHIT">  </span><span class="COMM">//if(t.replace(/[^\x00-\x7f]+/g,''))return t;</span><span class="WHIT">
 <span class='line'>1811</span> </span><span class="WHIT">  </span><span class="COMM">//var _q=t.replace(/[^?]+/g,'').length,_t,_j=0;</span><span class="WHIT">
-<span class='line'>1812</span> </span><span class="WHIT">  </span><span class="NAME">_.write_to_file</span><span class="PUNC">(</span><span class="NAME">turnBinStr.tmpF</span><span class="PUNC">,</span><span class="STRN">''</span><span class="PUNC">+</span><span class="NAME">t</span><span class="PUNC">,</span><span class="STRN">'iso-8859-1'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>1813</span> </span><span class="WHIT">  </span><span class="COMM">//alert(turnBinStr.tmpF+'\n'+simpleFileErr.description+'\n'+t+'\n'+_.read_all_file(turnBinStr.tmpF,'utf-8'));</span><span class="WHIT">
-<span class='line'>1814</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_.read_all_file</span><span class="PUNC">(</span><span class="NAME">turnBinStr.tmpF</span><span class="PUNC">,</span><span class="STRN">'utf-8'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1812</span> </span><span class="WHIT">  </span><span class="NAME">_.write_file</span><span class="PUNC">(</span><span class="NAME">turnBinStr.tmpF</span><span class="PUNC">,</span><span class="STRN">''</span><span class="PUNC">+</span><span class="NAME">t</span><span class="PUNC">,</span><span class="STRN">'iso-8859-1'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1813</span> </span><span class="WHIT">  </span><span class="COMM">//alert(turnBinStr.tmpF+'\n'+simpleFileErr.description+'\n'+t+'\n'+_.read_file(turnBinStr.tmpF,'utf-8'));</span><span class="WHIT">
+<span class='line'>1814</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_.read_file</span><span class="PUNC">(</span><span class="NAME">turnBinStr.tmpF</span><span class="PUNC">,</span><span class="STRN">'utf-8'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1815</span> </span><span class="COMM">/*
 <span class='line'>1816</span>   if(!_enc)_enc='utf-8,Big5,shift_jis,euc-jp,GB2312'.split(',');
 <span class='line'>1817</span>   else if(!(_enc instanceof Array))_enc=[_enc];
 <span class='line'>1818</span>   for(;_j&lt;_enc.length;_j++)
-<span class='line'>1819</span>    if((_t=_.read_all_file(turnBinStr.tmpF,_enc[_j])).replace(/[^?]+/g,'').length==_q)
+<span class='line'>1819</span>    if((_t=_.read_file(turnBinStr.tmpF,_enc[_j])).replace(/[^?]+/g,'').length==_q)
 <span class='line'>1820</span>     return _t;//'['+_enc[_j]+']'+
 <span class='line'>1821</span>   return t;
 <span class='line'>1822</span> */</span><span class="WHIT">
@@ -1980,7 +1980,7 @@
 <span class='line'>1973</span>  * @memberOf	CeL.IO.Windows.file
 <span class='line'>1974</span>  */</span><span class="WHIT">
 <span class='line'>1975</span> </span><span class="NAME">iconv_file</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">fileName</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">toCode</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">fromCode</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">encodeFunction</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>1976</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">iconv</span><span class="PUNC">(</span><span class="NAME">_.read_all_file</span><span class="PUNC">(</span><span class="NAME">fileName</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">fromCode</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">toCode</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>1976</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">iconv</span><span class="PUNC">(</span><span class="NAME">_.read_file</span><span class="PUNC">(</span><span class="NAME">fileName</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">fromCode</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">toCode</span><span class="PUNC">,</span><span class="WHIT">
 <span class='line'>1977</span> </span><span class="WHIT">			</span><span class="NAME">encodeFunction</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1978</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>1979</span> 
@@ -2060,7 +2060,7 @@
 <span class='line'>2053</span> */</span><span class="WHIT">
 <span class='line'>2054</span> 
 <span class='line'>2055</span> 
-<span class='line'>2056</span> </span><span class="COMM">//var kkk='';_.traverse_file_system(function(fileItem,itemType){kkk+=(itemType==_.traverse_file_system.f.driver?fileItem.DriveLetter+':('+fileItem.VolumeName+')':fileItem.Name+(itemType==_.traverse_file_system.f.folder?path_separator:''))+'\n';},'I:\\Documents and Settings\\kanashimi\\My Documents\\kanashimi\\www\\cgi-bin\\program');_.write_to_file('tmp.txt',kkk,'unicode');</span><span class="WHIT">
+<span class='line'>2056</span> </span><span class="COMM">//var kkk='';_.traverse_file_system(function(fileItem,itemType){kkk+=(itemType==_.traverse_file_system.f.driver?fileItem.DriveLetter+':('+fileItem.VolumeName+')':fileItem.Name+(itemType==_.traverse_file_system.f.folder?path_separator:''))+'\n';},'I:\\Documents and Settings\\kanashimi\\My Documents\\kanashimi\\www\\cgi-bin\\program');_.write_file('tmp.txt',kkk,'unicode');</span><span class="WHIT">
 <span class='line'>2057</span> </span><span class="COMM">/*
 <span class='line'>2058</span> 
 <span class='line'>2059</span> _.traverse_file_system(FS_function_array)	省略path會當作所有Drives

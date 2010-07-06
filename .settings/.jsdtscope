@@ -5,7 +5,7 @@
 			<attribute name="hide" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry excluding="_structure/|_built/|_document/|_include/|_test_suite/" kind="src" path=""/>
+	<classpathentry excluding="_structure/|_build/|_document/|_include/|_test_suite/" kind="src" path=""/>
 	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.baseBrowserLibrary"/>
 	<classpathentry kind="con" path="org.eclipse.wst.jsdt.USER_LIBRARY/CeL.for_include"/>

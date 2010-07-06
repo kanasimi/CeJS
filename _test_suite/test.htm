@@ -1,47 +1,48 @@
-<?xml version="1.1" encoding="UTF-8"?>
+﻿<?xml version="1.1" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head><meta http-equiv="content-type" content="text/html;charset=utf-8"/>
-<style type="text/css"><!--
-/*
+<style type="text/css">
+/* <![CDATA[
+
 	CSS reset
 */
-@import url(reset.css);
+@import url(lib/reset.css);
 
 body{margin:0;padding:0;}
 .test_trigger{color:#e6d;display:inline;cursor:pointer;}
 .test_panel{display:none;}
 
 #address,#legal_domicile{font-size:.9em;}
---></style>
+/*]]>*/</style>
 
 <!--
 <script type="text/javascript" src="http://sites.google.com/site/cejsph/lib/ce.txt"></script>
 <script type="text/javascript" src="http://neterr.hostwq.net/JS/ce.js"></script>
 -->
 
-<script type="text/javascript">//<!--
+<script type="text/javascript">//<![CDATA[
 	//window.status=11;
 	//for(var i=0,j=0;i<1e8;i++)j++;
-//--></script>
+//]]></script>
 
 
 <!--
 http://code.jquery.com/jquery-nightly.js
 -->
-<script type="text/javascript" src="jquery-nightly.js"></script>
+<script type="text/javascript" src="lib/jquery-nightly.js"></script>
+
+<script type="text/javascript" src="lib/swfobject.js"></script>
 
 <script type="text/javascript" src="../ce.js"></script>
 
 
-
-<script type="text/javascript">//<!--
+<script type="text/javascript">//<![CDATA[
 
 // TODO: http://www.11gz.com/blog/2010/03/20/html5-doctype-use/
 
 //	相對於 library 本身來說的路徑
 CeL.include_module_resource('../../game/game.css');
-
 
 //	預防彈出警告視窗
 CeL.log.max_length = 20;
@@ -73,7 +74,7 @@ function test1() {
 
 
 
-//--></script>
+//]]></script>
 <title>test suite</title></head>
 
 <body class="bgn">
@@ -100,6 +101,12 @@ times
 
 <div id="panel_for_SVG">
 </div>
+
+<div id="panel_for_test">
+</div>
+<!--
+<OBJECT id=tts_flash codeBase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=5,0,0,0" classid=clsid:D27CDB6E-AE6D-11cf-96B8-444553540000 width=18 height=18><PARAM NAME="_cx" VALUE="476"><PARAM NAME="_cy" VALUE="476"><PARAM NAME="FlashVars" VALUE=""><PARAM NAME="Movie" VALUE="http://www.gstatic.com/translate/sound_player.swf"><PARAM NAME="Src" VALUE="http://www.gstatic.com/translate/sound_player.swf"><PARAM NAME="WMode" VALUE="Transparent"><PARAM NAME="Play" VALUE="0"><PARAM NAME="Loop" VALUE="-1"><PARAM NAME="Quality" VALUE="High"><PARAM NAME="SAlign" VALUE=""><PARAM NAME="Menu" VALUE="-1"><PARAM NAME="Base" VALUE=""><PARAM NAME="AllowScriptAccess" VALUE="always"><PARAM NAME="Scale" VALUE="ShowAll"><PARAM NAME="DeviceFont" VALUE="0"><PARAM NAME="EmbedMovie" VALUE="0"><PARAM NAME="BGColor" VALUE=""><PARAM NAME="SWRemote" VALUE=""><PARAM NAME="MovieData" VALUE=""><PARAM NAME="SeamlessTabbing" VALUE="1"><PARAM NAME="Profile" VALUE="0"><PARAM NAME="ProfileAddress" VALUE=""><PARAM NAME="ProfilePort" VALUE="0"><PARAM NAME="AllowNetworking" VALUE="all"><PARAM NAME="AllowFullScreen" VALUE="false"></OBJECT>
+-->
 
 <hr />
 </div>
@@ -195,7 +202,7 @@ Page loaded. Initializing the framework. Please wait..
 
 
 
-<script type="text/javascript">
+<script type="text/javascript">//<![CDATA[
 
 
 //	2010/4/17 09:54:35
@@ -514,6 +521,65 @@ test A||B
 
 
 
+
+		if(0)
+		CeL.use('code.API',
+				function(){
+
+					CeL.use_API('Bing',
+						function(){
+							//	http://msdn.microsoft.com/en-us/library/ff512406.aspx
+							//	http://msdn.microsoft.com/en-us/library/ff512445.aspx
+							Microsoft.Translator.translate('Hello!', 'en', 'zh-TW', function(translation) { CeL.log(translation); });
+						}
+					);
+
+					if(0)
+					CeL.use_API('GAPI',
+						function(){
+							google.load("search", 1);
+							google.setOnLoadCallback(function(){
+								if(new google.search.SearchControl())
+									CeL.log('API load OK.');
+							});
+						}
+					);
+				}
+		);
+
+
+
+		if(0)
+		rrtt=CeL.new_node({
+			object : [
+					{
+						param : null,
+						name : "a",
+						value : "as"
+					} ],
+			//data : "h",
+			id:'test_o'
+		},'panel_for_test');
+
+		//CeL.get_element('panel_for_test').innerHTML='<OBJECT id=tts_flash codeBase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=5,0,0,0" classid=clsid:D27CDB6E-AE6D-11cf-96B8-444553540000 width=18 height=18><PARAM NAME="_cx" VALUE="476"><PARAM NAME="_cy" VALUE="476"><PARAM NAME="FlashVars" VALUE=""><PARAM NAME="Movie" VALUE="http://www.gstatic.com/translate/sound_player.swf"><PARAM NAME="Src" VALUE="http://www.gstatic.com/translate/sound_player.swf"><PARAM NAME="WMode" VALUE="Transparent"><PARAM NAME="Play" VALUE="0"><PARAM NAME="Loop" VALUE="-1"><PARAM NAME="Quality" VALUE="High"><PARAM NAME="SAlign" VALUE=""><PARAM NAME="Menu" VALUE="-1"><PARAM NAME="Base" VALUE=""><PARAM NAME="AllowScriptAccess" VALUE="always"><PARAM NAME="Scale" VALUE="ShowAll"><PARAM NAME="DeviceFont" VALUE="0"><PARAM NAME="EmbedMovie" VALUE="0"><PARAM NAME="BGColor" VALUE=""><PARAM NAME="SWRemote" VALUE=""><PARAM NAME="MovieData" VALUE=""><PARAM NAME="SeamlessTabbing" VALUE="1"><PARAM NAME="Profile" VALUE="0"><PARAM NAME="ProfileAddress" VALUE=""><PARAM NAME="ProfilePort" VALUE="0"><PARAM NAME="AllowNetworking" VALUE="all"><PARAM NAME="AllowFullScreen" VALUE="false"></OBJECT>'
+/*
+		//CeL.get_element('test_o').data='dd';
+		CeL.get_element('panel_for_test').appendChild(rrtt);
+		CeL.log(CeL.get_element('test_o').parentNode.innerHTML.replace(/</g,'&lt;'));
+		CeL.log(CeL.get_element('test_o').outerHTML.replace(/</g,'&lt;'));
+		//CeL.get_element('test_o').outerHTML=CeL.get_element('test_o').outerHTML.replace(/<OBJECT\s/,'<OBJECT data="'+'ddfsd'+'"');
+		alert(CeL.get_element('test_o').parentNode.innerHTML.replace(/<OBJECT\s/,'<OBJECT data="'+'ddfsd'+'"'));
+		//alert((CeL.get_element('test_o').outerHTML));
+		alert(CeL.get_element('test_o').parentNode.innerHTML);
+		CeL.log(CeL.get_element('test_o').outerHTML.replace(/</g,'&lt;'));
+*/
+		//swfobject.embedSWF("http://www.gstatic.com/translate/sound_player.swf", "panel_for_test", "18", "18", "9.0.0");
+
+		//CeL.log(CeL.get_element('panel_for_test').outerHTML.replace(/</g,'&lt;'));
+
+
+
+
 /*
 scope bug test
 https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
@@ -529,6 +595,9 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 		test_num*=1024;
 		CeL.log(test_num+' → '+CeL.to_SI_prefix(test_num));
 */
+
+
+		//CeL.new_node({div:[1234,':',{p:{b:null}}]},0);
 
 
 	};
@@ -552,7 +621,7 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 			//document.getElementById('error_load_panel').style.display = 'none';
 
 			CeL.Log.set_board('panel_for_log');
-			CeL.debug('Log panel OK.');
+			CeL.debug('Log panel setted.');
 
 			var e = 0;
 			try {
@@ -576,9 +645,21 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 
 	//CeL.use('net.web',function(){});
 
-</script>
+//]]></script>
 
+<!--
+<script src="http://www.google.com/jsapi?key=ABQIAAAA8YsRfLuORC22bc07JTNYsBS3JAeykUxPSpDNfPvIbcz6s5aBrRRdn1nyUM_9cYox7ymS-IgI-2CNuA" type="text/javascript"></script>
 <script type="text/javascript">
+google.load("search", 1);
+google.setOnLoadCallback(function(){
+	if(new google.search.SearchControl())
+		CeL.debug('API load OK.');
+});
+</script>
+-->
+
+
+<script type="text/javascript">//<![CDATA[
 /*
 	本 script 段落之存在是為了預防萬一。因此只能放最簡單的 script parser 亦能讀懂的 code。
 
@@ -621,7 +702,7 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 
 	//for(var i=0,j=0;i<1e9;i++)j++;
 
-</script>
+//]]></script>
 
 
 </body>

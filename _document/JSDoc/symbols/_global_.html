@@ -193,6 +193,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.html">CeL</a></li>
 	
+	<li><a href="../symbols/CeL.code.API.html">CeL.code.API</a></li>
+	
 	<li><a href="../symbols/CeL.code.compatibility.html">CeL.code.compatibility</a></li>
 	
 	<li><a href="../symbols/CeL.code.log.html">CeL.code.log</a></li>
@@ -298,6 +300,16 @@ ul.inheritsList
 							</td>
 						</tr>
 					
+						<tr>
+							<td class="attributes">&lt;private&gt; &lt;inner&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/_global_.html#-post_execute">post_execute</a></b>
+								</div>
+								<div class="description">post_execute[module name] = module load 之後需要執行的函數。//post_execute[module name] 存在表示 load 之後需要執行 module[post_execute_function_name]當 require 時還未 load 的話，就只好等 load 之後再來設定這些東西了。TODO: 不過還是會有問題，因此需要設定 require 時必需已 load 之 module。</div>
+							</td>
+						</tr>
+					
 					</tbody>
 				</table>
 				
@@ -340,9 +352,9 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#add_listener">add_listener</a></b>(type, listener, document_object, pFirst)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#add_Microsoft_translate">add_Microsoft_translate</a></b>(text, callback, from_enc, to_enc)
 								</div>
-								<div class="description">bind/add listener<br/>**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。**	NOT TESTED!!TODO:removeEventListenerremove_listener()</div>
+								<div class="description">為 Microsoft Translator 設置</div>
 							</td>
 						</tr>
 					
@@ -396,7 +408,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#eval_code">eval_code</a></b>(code)
 								</div>
-								<div class="description">本 library 專用之 evaluate()</div>
+								<div class="description">本 library 專用之 evaluate()。若在 function 中 eval 以獲得 local various，在舊 browser 中須加 var。e.g.</div>
 							</td>
 						</tr>
 					
@@ -415,6 +427,15 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#factorization">factorization</a></b>(number)
 								</div>
 								<div class="description">取得某數的質因數，因式分解/素因子分解, factorization, get floor factor.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#find_class">find_class</a></b>(class_name, parent, tag_name, flag)
+								</div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
@@ -457,7 +478,7 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_Function_name">get_Function_name</a></b>(fr, ns, force_load)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_function_name">get_function_name</a></b>(fr, ns, force_load)
 								</div>
 								<div class="description">獲得函數名</div>
 							</td>
@@ -504,7 +525,16 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_various">get_various</a></b>(various_name, name_space)
 								</div>
-								<div class="description">simple evaluates to get value of specified various name</div>
+								<div class="description">simple evaluates to get value of specified various identifier name.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#has_class">has_class</a></b>(element, class_name)
+								</div>
+								<div class="description">If HTML element has specified class</div>
 							</td>
 						</tr>
 					
@@ -583,15 +613,6 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#is_DOM">is_DOM</a></b>(name)
-								</div>
-								<div class="description">判斷為 DOM。</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#is_Function">is_Function</a></b>(v)
 								</div>
 								<div class="description">Test if the value is a native Function.</div>
@@ -637,6 +658,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#new_node">new_node</a></b>(nodes, layer)
+								</div>
+								<div class="description">instead of createNode().</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#object_tester">object_tester</a></b>(want_type, toString_reference)
 								</div>
 								<div class="description">get a type test function</div>
@@ -664,6 +694,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#replace_function">replace_function</a></b>(name_space, function_name, new_function)
+								</div>
+								<div class="description">workaround.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#require_netscape_privilege">require_netscape_privilege</a></b>(privilege, callback)
 								</div>
 								<div class="description">Ask privilege in mozilla projects.</div>
@@ -685,6 +724,15 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#set_net_info">set_net_info</a></b>(to_s, from)
 								</div>
 								<div class="description">改變網卡的IP地址: change IP, set IP</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;private&gt; &lt;inner&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#-set_post_execute">set_post_execute</a></b>(module_name, post_execute_function)
+								</div>
+								<div class="description">設定 module load 之後需要執行的函數。</div>
 							</td>
 						</tr>
 					
@@ -720,7 +768,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#to_fixed">to_fixed</a></b>(digits, max)
 								</div>
-								<div class="description">取至小數 d 位，肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1</div>
+								<div class="description">取至小數 d 位，肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1。c.f.</div>
 							</td>
 						</tr>
 					
@@ -745,6 +793,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#to_SI_prefix">to_SI_prefix</a></b>(number, digits)
+								</div>
+								<div class="description">將數字轉為 K, M, G 等 SI prefixes 表示方式，例如 6458 轉成 6.31K。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#triggerToInput">triggerToInput</a></b>(to_input)
 								</div>
 								<div class="description">切換 [input] / inputted [span]</div>
@@ -757,6 +814,15 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#use">use</a></b>(module, callback, extend_to)
 								</div>
 								<div class="description">Include specified module<br/>注意：以下的 code 中，CeL.warn 不一定會被執行（可能會、可能不會），因為執行時 code.log 尚未被 include。<br/>此時應該改用 CeL.use('code.log', callback);<br/>code in head/script/:<pre>CeL.use('code.log');CeL.warn('a WARNING');</pre>**	在指定 callback 時 name_space 無效！**	預設會 extend 到 library 本身下！</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#use_API">use_API</a></b>(API, callback)
+								</div>
+								<div class="description">自動挑選 domain</div>
 							</td>
 						</tr>
 					
@@ -821,6 +887,31 @@ ul.inheritsList
 					</div>
 					<div class="description">
 						evaluate @ Global scope.By the ECMA-262, new Function() will 'Pass in the Global Environment as the Scope parameter.'
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="-post_execute"> </a>
+					<div class="fixedFont">&lt;private&gt; &lt;inner&gt; 
+					
+					<span class="light">{Object}</span>
+					<b>post_execute</b>
+					
+					</div>
+					<div class="description">
+						post_execute[module name] = module load 之後需要執行的函數。//post_execute[module name] 存在表示 load 之後需要執行 module[post_execute_function_name]當 require 時還未 load 的話，就只好等 load 之後再來設定這些東西了。TODO: 不過還是會有問題，因此需要設定 require 時必需已 load 之 module。
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -948,18 +1039,18 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="add_listener"> </a>
+					<a name="add_Microsoft_translate"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>add_listener</b>(type, listener, document_object, pFirst)
+					<b>add_Microsoft_translate</b>(text, callback, from_enc, to_enc)
 					
 					</div>
 					<div class="description">
-						bind/add listener<br/>**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。**	NOT TESTED!!TODO:removeEventListenerremove_listener()
+						為 Microsoft Translator 設置
 						
 							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_web.origin.js.html">web.origin.js</a>.
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_API.origin.js.html">API.origin.js</a>.
 						
 						
 					</div>
@@ -971,38 +1062,32 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>type</b>
+									<b>text</b>
 									
 								</dt>
-								<dd>listen to what event type</dd>
+								<dd>test to translate</dd>
 							
 								<dt>
-									<b>listener</b>
+									<b>callback</b>
 									
 								</dt>
-								<dd>listener function/function array/function string,				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"			function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}</dd>
+								<dd>callback(from text,to text)</dd>
 							
 								<dt>
-									<b>document_object</b>
+									<b>from_enc</b>
 									<i>Optional</i>
 								</dt>
-								<dd>bind/attach to what document object</dd>
+								<dd></dd>
 							
 								<dt>
-									<b>pFirst</b>
+									<b>to_enc</b>
 									<i>Optional</i>
 								</dt>
-								<dd>parentNode first</dd>
+								<dd></dd>
 							
 							</dl>
 						
 						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2010/1/20 23:42:51</dd>
-							</dl>
-							</dl>
 						
 						
 						
@@ -1018,7 +1103,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>c.f., GEvent.add_listener()</dd>
+								<dd>http://msdn.microsoft.com/en-us/library/ff512406.aspx</dd>
 							
 							</dl>
 						
@@ -1298,7 +1383,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						本 library 專用之 evaluate()
+						本 library 專用之 evaluate()。若在 function 中 eval 以獲得 local various，在舊 browser 中須加 var。e.g., 'var local_various=' + ..不加 var 在舊 browser 中會變成 global 變數。
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -1332,6 +1417,13 @@ ul.inheritsList
 							</dl>
 						
 						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>window.eval === window.parent.eval</dd>
+							
+							</dl>
 						
 
 					<hr />
@@ -1452,6 +1544,77 @@ ul.inheritsList
 							<dt class="heading">See:</dt>
 							
 								<dd><a href="http://homepage2.nifty.com/m_kamada/math/10001.htm" accessdate="2010/3/11 18:7">Factorizations of 100...001</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name="find_class"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>find_class</b>(class_name, parent, tag_name, flag)
+					
+					</div>
+					<div class="description">
+						
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_web.origin.js.html">web.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>class_name</b>
+									
+								</dt>
+								<dd>class name || {class name 1:, class name 2:, ..}</dd>
+							
+								<dt>
+									<b>parent</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>tag_name</b>
+									
+								</dt>
+								<dd>tag name</dd>
+							
+								<dt>
+									<b>flag</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>document.getElementsByClassName in prototype.js</dd>
 							
 							</dl>
 						
@@ -1700,11 +1863,11 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="get_Function_name"> </a>
+					<a name="get_function_name"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>get_Function_name</b>(fr, ns, force_load)
+					<b>get_function_name</b>(fr, ns, force_load)
 					
 					</div>
 					<div class="description">
@@ -1764,7 +1927,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>可能的話請改用 {@link CeL.native.parse_Function}(F).funcName</dd>
+								<dd>可能的話請改用 {@link CeL.native.parse_function}(F).funcName</dd>
 							
 							</dl>
 						
@@ -1841,7 +2004,7 @@ ul.inheritsList
 					
 					
 					
-					<pre class="code"><script type="text/javascript" src="../baseFunc.js"></script>//	引數為本.js檔名。若是更改.js檔名，亦需要同步更動此值！var basePath=get_script_base_path('baseFunc.js');</pre>
+					<pre class="code"><script type="text/javascript" src="../baseFunc.js"></script>//	引數為本.js檔名。若是更改.js檔名，亦需要同步更動此值！var basePath=get_script_base_path('baseFunc.js');perl: use File::Basename;</pre>
 					
 					
 					
@@ -1864,7 +2027,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd><span class="light fixedFont">{String}</span> 相對 base path</dd>
+								<dd><span class="light fixedFont">{String}</span> relative base path</dd>
 							
 							</dl>
 						
@@ -1955,7 +2118,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						simple evaluates to get value of specified various name
+						simple evaluates to get value of specified various identifier name.不使用 eval().
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -1973,7 +2136,7 @@ ul.inheritsList
 									<span class="light fixedFont">{String}</span> <b>various_name</b>
 									
 								</dt>
-								<dd>various name</dd>
+								<dd>various identifier name. e.g., /[a-z\d$_]+(.[a-z\d_]+)+/i</dd>
 							
 								<dt>
 									<span class="light fixedFont">{Object|Function}</span> <b>name_space</b>
@@ -1996,7 +2159,59 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>value of specified various name</dd>
+								<dd>value of specified various identifier name</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="has_class"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>has_class</b>(element, class_name)
+					
+					</div>
+					<div class="description">
+						If HTML element has specified class
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_web.origin.js.html">web.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>element</b>
+									
+								</dt>
+								<dd>HTML elements</dd>
+							
+								<dt>
+									<b>class_name</b>
+									
+								</dt>
+								<dd>class name || {class name 1:, class name 2:, ..}</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
 							
 							</dl>
 						
@@ -2188,7 +2403,7 @@ ul.inheritsList
 									<span class="light fixedFont">{Function|Object}</span> <b>callback</b>
 									
 								</dt>
-								<dd>callback function / 	{callback: callback function, module: module name, global: global object when run callback}</dd>
+								<dd>use_write ? test function{return } : callback function		/	{callback: callback function, module: module name, global: global object when run callback}</dd>
 							
 								<dt>
 									<span class="light fixedFont">{Boolean}</span> <b>use_write</b>
@@ -2410,58 +2625,6 @@ ul.inheritsList
 								<dd><span class="light fixedFont">{Boolean}</span> It's now in specified debug level.</dd>
 							
 								<dd><span class="light fixedFont">{Number}</span> It's now in what debug level(Integral).</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name="is_DOM"> </a>
-					<div class="fixedFont">
-					
-					<span class="light">{Boolean}</span>
-					<b>is_DOM</b>(name)
-					
-					</div>
-					<div class="description">
-						判斷為 DOM。
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_compatibility.origin.js.html">compatibility.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>name</b>
-									
-								</dt>
-								<dd>various name @ name-space window. e.g., document, location</dd>
-							
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2010/1/14 22:04:37</dd>
-							</dl>
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd><span class="light fixedFont">{Boolean}</span> various is object of window</dd>
 							
 							</dl>
 						
@@ -2757,6 +2920,64 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="new_node"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>new_node</b>(nodes, layer)
+					
+					</div>
+					<div class="description">
+						instead of createNode().TODO: 分割功能(set_attrib, add_child, ..), 簡化
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_web.origin.js.html">web.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>nodes</b>
+									
+								</dt>
+								<dd>node structure</dd>
+							
+								<dt>
+									<b>layer</b>
+									
+								</dt>
+								<dd>where to layer this node. e.g., parent node</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/6/21 13:45:02</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name="object_tester"> </a>
 					<div class="fixedFont">
 					
@@ -2915,6 +3136,68 @@ ul.inheritsList
 							<dt class="heading">Returns:</dt>
 							
 								<dd></dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="replace_function"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>replace_function</b>(name_space, function_name, new_function)
+					
+					</div>
+					<div class="description">
+						workaround.把 name_space 下的 function_name (name_space[function_name]) 換成 new_function。
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code">library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix);</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>name_space</b>
+									
+								</dt>
+								<dd>which name-space</dd>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>function_name</b>
+									
+								</dt>
+								<dd>name_space.function_name</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Function}</span> <b>new_function</b>
+									
+								</dt>
+								<dd>replace to what function</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>new_function</dd>
 							
 							</dl>
 						
@@ -3106,6 +3389,58 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="-set_post_execute"> </a>
+					<div class="fixedFont">&lt;private&gt; &lt;inner&gt; 
+					
+					
+					<b>set_post_execute</b>(module_name, post_execute_function)
+					
+					</div>
+					<div class="description">
+						設定 module load 之後需要執行的函數。
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>module_name</b>
+									
+								</dt>
+								<dd>module name</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Function}</span> <b>post_execute_function</b>
+									
+								</dt>
+								<dd>module load 之後需要執行的函數</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name="setup_module"> </a>
 					<div class="fixedFont">
 					
@@ -3268,7 +3603,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						取至小數 d 位，肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1
+						取至小數 d 位，肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1。c.f., round()
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_native.origin.js.html">native.origin.js</a>.
@@ -3316,7 +3651,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>https://bugzilla.mozilla.org/show_bug.cgi?id=5856IEEE754の丸め演算は最も報告されるES3「バグ」である。http://www.jibbering.com/faq/#FAQ4_6</dd>
+								<dd>https://bugzilla.mozilla.org/show_bug.cgi?id=5856IEEE754の丸め演算は最も報告されるES3「バグ」である。http://www.jibbering.com/faq/#FAQ4_6http://en.wikipedia.org/wiki/Rounding</dd>
 							
 							</dl>
 						
@@ -3457,6 +3792,65 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="to_SI_prefix"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>to_SI_prefix</b>(number, digits)
+					
+					</div>
+					<div class="description">
+						將數字轉為 K, M, G 等 SI prefixes 表示方式，例如 6458 轉成 6.31K。
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_data.origin.js.html">data.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>number</b>
+									
+								</dt>
+								<dd>數字</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>digits</b>
+									
+								</dt>
+								<dd>to fixed digit</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> SI prefixes 表示方式</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>setTool,to_fixed</dd>
+							
+							</dl>
+						
+						
+
+					<hr />
+				
 					<a name="triggerToInput"> </a>
 					<div class="fixedFont">
 					
@@ -3506,7 +3900,7 @@ ul.inheritsList
 					<a name="use"> </a>
 					<div class="fixedFont">
 					
-					<span class="light">{Error object, , undefined}</span>
+					<span class="light">{Error, , undefined}</span>
 					<b>use</b>(module, callback, extend_to)
 					
 					</div>
@@ -3556,15 +3950,80 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd><span class="light fixedFont">{Error object}</span> </dd>
+								<dd><span class="light fixedFont">{Error}</span> </dd>
 							
-								<dd>-1	will execute callback after load</dd>
+								<dd>-1	will execute callback after load, 不代表一定 load 了!</dd>
 							
 								<dd><span class="light fixedFont">{undefined}</span> no error, OK</dd>
 							
 							</dl>
 						
 						
+						
+
+					<hr />
+				
+					<a name="use_API"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>use_API</b>(API, callback)
+					
+					</div>
+					<div class="description">
+						自動挑選 domain
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_API.origin.js.html">API.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>API</b>
+									
+								</dt>
+								<dd>API name</dd>
+							
+								<dt>
+									<b>callback</b>
+									
+								</dt>
+								<dd>null: do NOT load</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2010/6/20 22:12:23</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>[ API url, API key ]</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd></dd>
+							
+							</dl>
 						
 
 					<hr />
@@ -3613,7 +4072,7 @@ ul.inheritsList
 						
 							<dl class="detailList">
 							<dt class="heading">Since:</dt>
-								<dd>2009/12/26 02:36:312009/12/31 22:21:23	add 類似 'data.' 的形式，為 module。</dd>
+								<dd>2009/12/26 02:36:312009/12/31 22:21:23	add 類似 'data.' 的形式，為 module。2010/6/14 22:58:18	避免相互 require</dd>
 							</dl>
 							</dl>
 						
@@ -3643,7 +4102,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.2 on Thu May 06 2010 12:12:16 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Tue Jul 06 2010 18:24:06 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

@@ -1,8 +1,8 @@
 ﻿
 /*
 	本檔案為自動生成，請勿編輯！
-	This file is auto created from _structure\structure.js, base.js, package.js, init.js
-		by tool: build_main_script.
+	This file is auto created from _structure\structure.js, base.js, package.js, initialization.js
+		by tool: .
 */
 
 
@@ -62,6 +62,14 @@ JSDoc:
 Javadoc:
 	http://java.sun.com/j2se/javadoc/writingdoccomments/
 
+VSdoc:
+	JScript IntelliSense in Visual Studio
+	http://weblogs.asp.net/bleroy/archive/2007/04/23/the-format-for-javascript-doc-comments.aspx
+	http://blogs.msdn.com/b/webdevtools/archive/2008/11/07/hotfix-to-enable-vsdoc-js-intellisense-doc-files-is-now-available.aspx
+	Create JScript XML Code Comments
+	http://msdn.microsoft.com/zh-tw/library/bb514138.aspx
+	http://blog.miniasp.com/post/2010/04/Visual-Studio-2010-jQuery-Development-Tips.aspx
+
 */
 
 
@@ -84,7 +92,7 @@ in case of
 
 //try{
 
-
+
 
 
 
@@ -93,7 +101,10 @@ in case of
 use <a href="http://prototyp.ical.ly/index.php/2007/03/01/javascript-design-patterns-1-the-singleton/" accessdate="2010/4/25 0:23" title="prototyp.ical.ly  &amp;raquo; Javascript Design Patterns - 1. The Singleton">Singleton pattern</a>,
 Module 模式或單例模式（<a href="http://zh.wikipedia.org/wiki/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F" accessdate="2010/4/25 0:25" title="单例模式">Singleton</a>）<a href="http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K950.aspx" accessdate="2010/4/25 0:24" title="那些相见恨晚的 JavaScript 技巧 - 基于 COMSHARP CMS">為 Douglas Crockford 所推崇</a>，並被大量應用在 Yahoo User Interface Library YUI。
 
+http://wiki.forum.nokia.com/index.php/JavaScript_Performance_Best_Practices
+http://ioio.name/core-javascript-pitfalls.html
 */
+
 //void(
 //typeof CeL !== 'function' &&
 (
@@ -120,16 +131,18 @@ var
 	 * @type	{Integral}
 	 * @ignore
 	 */
-	,debug = 0
+	, debug = 0
 
 	//,window
 
-	,old_library_namespace
+	, old_library_namespace
 
 	//	library base name-space
-	,_
+	, _
 
-	//,_base_function_to_extend
+	//, _base_function_to_extend
+
+	, function_name_pattern
 	;
 
 
@@ -187,12 +200,14 @@ function _() {
 	return new (_.init.apply(global, arguments));
 };
 
+CeL
+.
 /**
  * JavaScript library framework main class name.
  * @see	<a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMA-262</a>: Object.Class: A string value indicating the kind of this object.
  * @constant
  */
-_.Class = library_name;
+Class = library_name;
 
 
 /**
@@ -204,22 +219,29 @@ global[library_name] = _;
 
 
 if (!_.prototype)
-/**
- * framework main prototype definition
- * for JSDT: 有 prototype 才會將之當作 Class
- */
-_.prototype = {
-};
+	CeL
+	.
+	/**
+	 * framework main prototype definition
+	 * for JSDT: 有 prototype 才會將之當作 Class
+	 */
+	prototype = {
+	};
 
 
 
 
-CeL.ce
+CeL
 .
 /**
- * 本 library 專用之 evaluate()
+ * 本 library 專用之 evaluate()。
+ * 
+ * 若在 function 中 eval 以獲得 local various，在舊 browser 中須加 var。
+ * e.g., 'var local_various=' + ..
+ * 不加 var 在舊 browser 中會變成 global 變數。
  * @param code	script code to evaluate
  * @return	value that evaluate process returned
+ * @see	window.eval === window.parent.eval
  */
 eval_code = function eval_code(code) {
 	/*
@@ -233,7 +255,8 @@ eval_code = function eval_code(code) {
 	return global && global.eval && global.eval !== eval_code ? global.eval.call(global, code) : eval(code);
 };
 
-CeL.ce
+
+CeL
 .
 /**
  * evaluate @ Global scope.
@@ -244,13 +267,14 @@ CeL.ce
 global_eval = new Function('code', 'return eval(code);');
 
 
-CeL.ce
+CeL
 .
 /**
- * simple evaluates to get value of specified various name
- * @param {String} various_name	various name
+ * simple evaluates to get value of specified various identifier name.
+ * 不使用 eval().
+ * @param {String} various_name	various identifier name. e.g., /[a-z\d$_]+(.[a-z\d_]+)+/i
  * @param {Object|Function} [name_space]	initialize name-space. default: global
- * @return	value of specified various name
+ * @return	value of specified various identifier name
  * @since	2010/1/1 18:11:40
  * @note
  * 'namespace' 是 JScript.NET 的保留字
@@ -264,6 +288,8 @@ get_various = function(various_name, name_space) {
 		return various_name;
 
 	var i = 0,
+	//	TODO: 可處理 e.g., obj1  . obj2 [ ' obj3.4 * \[ ' ] [''] . obj5 [ " obj6 \" \' \] . " ]
+	//	or detect obj1 .. obj2
 	s = various_name.split('.'),
 	l = s.length,
 	v = name_space ||
@@ -292,20 +318,20 @@ get_various = function(various_name, name_space) {
 
 
 
-CeL.ce
+CeL
 .
 /**
  * 取得執行 script 之 path, 在 .hta 中取代 WScript.ScriptFullName。
  * @return	{String}	執行 script 之 path
  * @return	''	unknown environment
  */
-get_script_full_name = function(){
-	return	typeof WScript === 'object'? WScript.ScriptFullName
-			: typeof location === 'object'? unescape(location.pathname)
-			: '';
+get_script_full_name = function() {
+	return typeof WScript === 'object' && !_.is_Object(WScript) && WScript.ScriptFullName
+		|| typeof location === 'object' && location === window.location && unescape(location.pathname)
+		|| '';
 };
 
-CeL.ce
+CeL
 .
 /**
  * 取得執行 script 之名稱
@@ -315,13 +341,13 @@ CeL.ce
 get_script_name = function(){
 	var n, i, j;
 
-	if (typeof WScript === 'object') {
+	if (typeof WScript === 'object' && !_.is_Object(WScript)) {
 		n = WScript.ScriptName;
 		i = n.lastIndexOf('.');
 		return i == -1 ? n : n.slice(0, i);
 	}
 
-	if (typeof location === 'object') {
+	if (typeof location === 'object' && location === window.location) {
 		n = unescape(location.pathname), j = n.lastIndexOf('.');
 		if (!(i = n.lastIndexOf('\\') + 1))
 			//	location.pathname 在 .hta 中會回傳 '\' 形式的 path
@@ -335,7 +361,7 @@ get_script_name = function(){
 
 
 
-CeL.ce
+CeL
 .
 /**
  * 取得/設定環境變數 enumeration<br/>
@@ -386,7 +412,7 @@ null
  */
 var get_object_type = Object.prototype.toString;
 
-CeL.ce
+CeL
 .
 /**
  * 判斷為何種 type。主要用在 Error, DOMException 等 native object 之判別。
@@ -416,17 +442,14 @@ is_type = function(value, want_type, get_Class) {
 				//	get the class name of a class
 				//	若 value 為 function 時，測試其本身之 Class。
 				type = value.Class;
-			else if (type === 'function' || type === 'object') {
-				get_Class = value.constructor;
-				if (get_Class.Class)
+			else if (type === 'function' || type === 'object')
+				if (('constructor' in value) && (get_Class = value.constructor).Class)
 					// get the class name of a class instance
 					// 若 value 為 function 且無 Class，或為 object 時，測試其 constructor 之 Class。
 					type = get_Class.Class;
-				else if (get_Class = ('' + get_Class)
-						.match(/^\s*function\s([^\(\s]+)\s*\(/))
+				else if (get_Class = this.get_function_name(get_Class))
 					// get Class by function name
-					type = get_Class[1];
-			}
+					type = get_Class;
 		} catch (e) {
 			this.err(this.Class + '.is_type: Fault to get ths class name of value!');
 		}
@@ -454,7 +477,7 @@ is_type = function(value, want_type, get_Class) {
 };
 
 
-CeL.ce
+CeL
 .
 /**
  * get a type test function
@@ -496,7 +519,7 @@ object_tester = function(want_type, toString_reference) {
 
 };
 
-CeL.ce
+CeL
 .
 /**
  * Test if the value is a native Array.
@@ -512,7 +535,7 @@ is_Array =
 				|| get_object_type.call(v) === '[object Array]';
 	};
 
-CeL.ce
+CeL
 .
 /**
  * Test if the value is a native Object.
@@ -527,7 +550,7 @@ is_Object =
 		return get_object_type.call(v) === '[object Object]';
 	};
 
-CeL.ce
+CeL
 .
 /**
  * Test if the value is a native Function.
@@ -538,12 +561,16 @@ CeL.ce
 is_Function =
 	//_.object_tester('Function');
 	function(v) {
-		//	typeof 比 Object.prototype.toString 快
-		return typeof v === 'function' || get_object_type.call(v) === '[object Function]';
+		//	typeof 比 Object.prototype.toString 快，不過得注意有些 native object 可能 type 是 'function'，但不具有 function 特性。
+		return get_object_type.call(v) === '[object Function]';
+
+		//	須注意，在 firefox 3 中，typeof [object HTMLObjectElement] 之外的 HTMLElement 皆 === 'function'，
+		//	因此光用 typeof() === 'function' 而執行下去會得出 [XPCWrappedNative_NoHelper] Component is not available
+		//return typeof v === 'function' || get_object_type.call(v) === '[object Function]';
 	};
 
 
-CeL.ce
+CeL
 .
 /**
  * Setup environment variables
@@ -565,14 +592,21 @@ initial_env = function(OS_type){
 	env.script_extension = typeof WScript === 'undefined' ? '.' : '.js';//'.txt'
 
 	/**
-	 * library main file base name<br/>
+	 * library main file base name
+	 * @name	CeL.env.main_script_name
+	 * @type	String
+	 */
+	env.main_script_name = 'ce';
+
+	/**
+	 * library main file name<br/>
 	 * full path: {@link CeL.env.registry_path} + {@link CeL.env.main_script}
 	 * @example:
 	 * CeL.log('full path: ['+CeL.env.registry_path+CeL.env.main_script+']');
 	 * @name	CeL.env.main_script
 	 * @type	String
 	 */
-	env.main_script = 'ce' + env.script_extension;
+	env.main_script = env.main_script_name + env.script_extension;
 
 	/**
 	 * module 中的這 member 定義了哪些 member 不被 extend
@@ -658,7 +692,7 @@ initial_env = function(OS_type){
 	 * @name	CeL.env.module_name_separator
 	 * @type	String
 	 */
-	env.module_name_separator='.';
+	env.module_name_separator = '.';
 	/**
 	 * path_separator in 通用(regular)運算式
 	 * @name	CeL.env.path_separator_RegExp
@@ -666,7 +700,7 @@ initial_env = function(OS_type){
 	 */
 	env.path_separator_RegExp = this.to_RegExp_pattern ? this
 			.to_RegExp_pattern(env.path_separator)
-			: (env.path_separator == '\\' ? '\\' : '') + env.path_separator;
+			: (env.path_separator === '\\' ? '\\' : '') + env.path_separator;
 	/**
 	 * 預設語系
 	 * 0x404:中文-台灣,0x0411:日文-日本
@@ -689,13 +723,44 @@ initial_env = function(OS_type){
 	 */
 	env.library_base_path = this.get_script_full_name(); // 以 reg 代替
 
+	/**
+	 * Legal identifier name in RegExp.
+	 * 這 pattern 會佔去兩個筆紀錄: first letter, and least.
+	 * .replace(/_/ [g],'for first letter')
+	 * .replace(/\\d/,'for least')
+	 * 這邊列出的只是合法 identifier 的子集且未去除 reserved words!
+	 * @name	CeL.env.identifier_RegExp
+	 * @see
+	 * ECMA-262	7.6 Identifier Names and Identifiers
+	 */
+	env.identifier_RegExp = /([a-zA-Z$_]|\\u[\da-fA-F]{4})([a-zA-Z$_\d]+|\\u[\da-fA-F]{4}){0,63}/;
+
+	/**
+	 * Legal identifier name in String from env.identifier_RegExp.
+	 * @name	CeL.env.identifier_String
+	 */
+	env.identifier_String = env.identifier_RegExp.source;
+
 	return env;
 };
 
 
+CeL
+.
+get_identifier_RegExp = function(pattern, flag,add_for_first, add_for_least) {
+	var s = this.env.identifier_String;
+	if (add_for_first)
+		s = s.replace(/_/[g], 'for first letter');
+	if (add_for_least)
+		s = s.replace(/\\d/, 'for least');
+
+	return new RegExp(
+			(get_object_type.call(pattern) === '[object RegExp]' ? pattern.source
+					: pattern).replace(/$identifier/g, s), flag || '');
+};
 
 
-CeL.ce
+CeL
 .
 /**
  * Tell if it's now debugging.
@@ -708,7 +773,7 @@ is_debug = function(debug_level){
 				: debug >= debug_level;
 };
 
-CeL.ce
+CeL
 .
 /**
  * Set debugging level
@@ -741,7 +806,7 @@ set .name
 
 
 
-CeL.ce
+CeL
 .
 /**
  * Get the hash key of text.
@@ -757,7 +822,36 @@ _get_hash_key = function(text) {
 };
 
 
-CeL.ce
+//	for JScript<=5
+try {
+	function_name_pattern = new RegExp('^function[\\s\\n]+(\\w+)[\\s\\n]*\\(');
+} catch (e) {
+	function_name_pattern = function emulate_function_name(fs) {
+		fs = '' + fs;
+		var l = 'function ', r, s;
+
+		if (fs.indexOf(l) === 0) {
+			l = l.length;
+			s = {
+					' ' : 1,
+					'\n' : 1,
+					'\r' : 1,
+					'\t' : 1
+			};
+			while (fs.charAt(l) in s)
+				l++;
+			r = fs.indexOf('(', l);
+			while (fs.charAt(--r) in s)
+				;
+
+			return [ , fs.slice(l, r + 1) ];
+		}
+	};
+	if (typeof RegExp != 'object')
+		eval('RegExp = function(){};');
+}
+
+CeL
 .
 /**
  * 獲得函數名
@@ -766,11 +860,11 @@ CeL.ce
  * @param {Boolean} force_load	force reload this name-space
  * @return
  * @see
- * 可能的話請改用 {@link CeL.native.parse_Function}(F).funcName
+ * 可能的話請改用 {@link CeL.native.parse_function}(F).funcName
  * @since	2010/1/7 22:10:27
  */
-get_Function_name = function get_Function_name(fr, ns, force_load) {
-	var _s = get_Function_name,
+get_function_name = function get_function_name(fr, ns, force_load) {
+	var _s = get_function_name,
 	//	初始化變數 'm'
 	m = 0, ft, b, load, k, i;
 	if (!fr)
@@ -790,11 +884,11 @@ get_Function_name = function get_Function_name(fr, ns, force_load) {
 		ft = '' + fr;
 
 	//	以函數的解譯文字獲得函數名
-	m = ft.match(
-			//	包含引數:	/^\s*function\s+(\w+)[^(]*\(([^)]*)\)/
-			/^function[\s\n]+([^(\s{\n]+)/
-			);
-	//this.debug('matched ' + m, 1, this.Class + '.get_Function_name');
+	m = function_name_pattern instanceof RegExp ?
+			ft.match(function_name_pattern)
+			: function_name_pattern(ft);
+
+	//this.debug('matched ' + m, 1, this.Class + '.get_function_name');
 	if (m)
 		//	包含引數:	+ '(' + (f ? m[2] : '') + ')';
 		return m[1];
@@ -814,7 +908,7 @@ get_Function_name = function get_Function_name(fr, ns, force_load) {
 		for (i in ns)
 			if (typeof ns[i] === 'function'){
 				k = this._get_hash_key('' + ns[i]);
-				m = ns.Class + '.' + i;
+				m = ns.Class + this.env.module_name_separator + i;
 				//this.debug(m + ': ' + k + (', ' + ns[i]).slice(0, 200));
 				if(!(m in load)){
 					load[m] = 1;
@@ -844,7 +938,7 @@ get_Function_name = function get_Function_name(fr, ns, force_load) {
 
 
 
-CeL.ce
+CeL
 .
 null_function = function() {};
 
@@ -852,14 +946,14 @@ null_function = function() {};
 //	Initialization
 
 //	temporary decoration in case we call for nothing and raise error
-_.debug = _.err = _.warn = _.log = function log(m) {
+_.debug = _.err = _.warn = _.log = function(m) {
 	/*
 	 * 請注意:
 	 * _.log.buffer !== log.buffer
-	 * 在 WScript 中 需要用 _.log，其他則用 _.log。
+	 * 在 WScript 中 需要用 _.log，其他則可用 log。
 	 * 因此應該將所有類似的值指定給雙方，並注意非[常數]的情況。
 	 */
-	var _s = log;
+	var _s = _.log;
 	//_s.function_to_call.apply(null,arguments);
 	//_s.function_to_call.apply(global, arguments);
 
@@ -885,22 +979,21 @@ _.debug = _.err = _.warn = _.log = function log(m) {
  * @inner
  */
 //_.debug.buffer = _.err.buffer = _.warn.buffer =
-_.log.buffer =
-log.buffer = [];
+_.log.buffer = [];
+
 
 //_.debug.max_length = _.err.max_length = _.warn.max_length =
-_.log.max_length =
-log.max_length = 0;
+_.log.max_length = 0;
 
 
 var max_log_length = 1000;
 //_.debug.function_to_call = _.err.function_to_call = _.warn.function_to_call =
 _.log.function_to_call =
-log.function_to_call =
 	typeof JSalert === 'function' ? JSalert :
 	typeof WScript === 'object' ? function(m){m=''+m;if(m.length>2*max_log_length)m=m.slice(0,max_log_length)+'\n\n..\n\n'+m.slice(-max_log_length);WScript.Echo(m);} :
 	typeof alert === 'object' || typeof alert === 'function' ? function(m){m=''+m;if(m.length>2*max_log_length)m=m.slice(0,max_log_length)+'\n\n..\n\n'+m.slice(-max_log_length);alert(m);} :
 	_.null_function;
+
 
 _.initial_env();
 
@@ -919,11 +1012,11 @@ test_obj.test_print('OK!');
 	this
 )
 //)	//	void(
-;﻿
+;
 
 
 
-
+
 
 
 
@@ -933,7 +1026,10 @@ TODO:
 
 use -> using because of 'use' is a keyword of JScript.
 
-No eval.
+等呼叫時才 initialization
+
+
+do not eval.
 以其他方法取代 eval 的使用。
 
 http://msdn.microsoft.com/en-us/library/2b36h1wa(VS.71).aspx
@@ -946,17 +1042,18 @@ typeof CeL === 'function' &&
 function(){
 
 
-var _ = this;
+CeL
+= this;
 
 
 
-CeL.ce
+CeL
 .
 /**
  * 延展物件 (learned from jQuery)
  * @since	2009/11/25 21:17:44
  * @param	variable_set	variable set
- * @param	name_space	extend to what name-space
+ * @param	{Object|Function} name_space	extend to what name-space
  * @param	from_name_space	When inputing function names, we need a base name-space to search these functions.
  * @return	library names-pace
  * @see
@@ -974,8 +1071,10 @@ extend = function extend(variable_set, name_space, from_name_space){
 		//	如果沒有指定擴展的對象，則擴展到自身
 		name_space = this;
 
-	if(typeof from_name_space === 'undefined')
+	if (typeof from_name_space === 'undefined')
 		from_name_space = this;
+	else if (variable_set === null && _.is_Function(from_name_space))
+		variable_set = from_name_space;
 
 	if(typeof variable_set === 'function'){
 		if(this.parse_function){
@@ -997,12 +1096,14 @@ extend = function extend(variable_set, name_space, from_name_space){
 				_.warn(this.Class + '.extend:\n' + e.message);
 			}
 
-	}else if(variable_set instanceof Array){
+	} else if (this.is_Array(variable_set)) {
 		for (_s = extend, i = 0, l = variable_set.length; i < l; i++) {
 			_s.call(this, variable_set[i], name_space, from_name_space);
 		}
 
-	}else if(variable_set instanceof Object){
+	} else if (this.is_Object(variable_set)
+			//|| this.is_Function(variable_set)
+			) {
 		for(i in variable_set){
 			name_space[i] = variable_set[i];
 		}
@@ -1012,7 +1113,29 @@ extend = function extend(variable_set, name_space, from_name_space){
 };
 
 
-CeL.ce
+CeL
+.
+/**
+ * workaround.
+ * 把 name_space 下的 function_name (name_space[function_name]) 換成 new_function。
+ * @example
+ * library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix);
+ * @param name_space	which name-space
+ * @param {String} function_name	name_space.function_name
+ * @param {Function} new_function	replace to what function
+ * @return	new_function
+ */
+replace_function = function(name_space, function_name, new_function) {
+	var old_function = name_space[function_name];
+	name_space[function_name] = new_function;
+	//	search for other extends
+	if (this[function_name] === old_function)
+		this[function_name] = new_function;
+	return new_function;
+};
+
+
+CeL
 .
 /**
  * Get file resource<br/>
@@ -1074,6 +1197,15 @@ get_file = function(path, encoding){
 
 			//e.object = o;	//	[XPCWrappedNative_NoHelper] Cannot modify properties of a WrappedNative @ firefox
 
+			if (location
+							&& (o = path.match(/:(\/\/)?([^\/]+)/))
+							&& o[2] !== location.hostname) {
+				this.warn('get_file: 所要求檔案之 domain [' + o[2]
+							+ '] 與所處之 domain [' + location.hostname + '] 不同!<br/>\n您可能需要嘗試使用 '
+							+ this.Class + '.include_resource()!');
+				throw new Error('Different domain!');
+			}
+
 			o = this.require_netscape_privilege(e, 2);
 			//this.debug('require_netscape_privilege return [' + typeof (o) + ('] ' + o).slice(0, 200) + ' ' + (e === o ? '=' : '!') + '== ' + 'error (' + e + ')');
 			if (e === o)
@@ -1096,7 +1228,7 @@ get_file = function(path, encoding){
 };
 
 
-CeL.ce
+CeL
 .
 /**
  * Ask privilege in mozilla projects.
@@ -1191,7 +1323,7 @@ require_netscape_privilege = function require_netscape_privilege(privilege, call
 		return callback();
 };
 
-CeL.ce
+CeL
 .
 /**
  * 當需要要求權限時，是否執行。（這樣可能彈出對話框）
@@ -1201,16 +1333,17 @@ require_netscape_privilege.enabled = true;
 
 
 
-CeL.ce
+CeL
 .
 /**
  * 得知 script file 之相對 base path
  * @param	{String} JSFN	script file name
- * @return	{String} 相對 base path
+ * @return	{String} relative base path
  * @example
  * <script type="text/javascript" src="../baseFunc.js"></script>
  * //	引數為本.js檔名。若是更改.js檔名，亦需要同步更動此值！
  * var basePath=get_script_base_path('baseFunc.js');
+ * perl: use File::Basename;
  */
 get_script_base_path = function(JSFN){
 	//alert(JSFN);
@@ -1230,18 +1363,18 @@ get_script_base_path = function(JSFN){
 			return '';
 
 	//	form dojo: d.config.baseUrl = src.substring(0, m.index);
-	var i, j, b, o = document.getElementsByTagName('script');
+	var i = 0, o = document.getElementsByTagName('script'), l = o.length, j, b, I;
 
-	for (i in o)
+	for (; i < l; i++)
 		try {
 			//	o[i].src 多是 full path, o[i].getAttribute('src') 僅取得其值，因此可能是相對的。
 			j = o[i].getAttribute ? o[i].getAttribute('src') : o[i].src;
-			i = j.lastIndexOf(JSFN);
-			//alert(j + ',' + JSFN + ',' + i);
-			if (i !== -1){
+			I = j.lastIndexOf(JSFN);
+			//alert(j + ',' + JSFN + ',' + I);
+			if (I !== -1){
 				//	TODO: dirty hack
 				if (_.env.script_extension === '.') {
-					b = j.slice(i + JSFN.length);
+					b = j.slice(I + JSFN.length);
 					if (b === 'js' || b === 'txt')
 						_.env.script_extension += b,
 						_.env.main_script += b;
@@ -1252,7 +1385,7 @@ get_script_base_path = function(JSFN){
 					}
 				}
 				//	TODO: test 是否以 JSFN 作為結尾
-				b = j.slice(0, i);
+				b = j.slice(0, I);
 			}
 		} catch (e) {
 		}
@@ -1264,7 +1397,7 @@ get_script_base_path = function(JSFN){
 };
 
 
-CeL.ce
+CeL
 .
 /**
  * get the path of specified module
@@ -1322,7 +1455,7 @@ a/..		.
 
 //	2009/11/23 22:12:5
 if(0)
-CeL.ce
+CeL
 .
 deprecated_simplify_path = function(path){
 	if(typeof path === 'string'){
@@ -1334,7 +1467,11 @@ deprecated_simplify_path = function(path){
 			path = p;
 		_.debug('1. '+p);
 
-		while( path !== (p=path.replace(/\/([^\/]+)\/\.\.(\/|$)/g,function($0,$1,$2){alert([$0,$1,$2].join('\n'));return $1 === '..'? $0: $2;})) )
+		while (path !== (p = path.replace(
+				/\/([^\/]+)\/\.\.(\/|$)/g, function($0, $1, $2) {
+					alert( [ $0, $1, $2 ].join('\n'));
+					return $1 === '..' ? $0 : $2;
+				})))
 			path = p;
 		_.debug('2. '+p);
 
@@ -1351,7 +1488,7 @@ deprecated_simplify_path = function(path){
 	return path;
 };
 
-CeL.ce
+CeL
 .
 /**
  * 轉化所有 /., /.., //
@@ -1407,144 +1544,17 @@ simplify_path = function(path){
 
 
 
-
-CeL.ce
+CeL
 .
-/**
- * Include specified module<br/>
- * 注意：以下的 code 中，CeL.warn 不一定會被執行（可能會、可能不會），因為執行時 code.log 尚未被 include。<br/>
- * 此時應該改用 CeL.use('code.log', callback);<br/>
- * code in head/script/:
- * <pre>
- * CeL.use('code.log');
- * CeL.warn('a WARNING');
- * </pre>
- * **	在指定 callback 時 name_space 無效！
- * **	預設會 extend 到 library 本身下！
- * @param	{String} module	module name
- * @param	{Function} [callback]	callback function
- * @param	{Object|Boolean} [extend_to]	extend to which name-space<br/>
- * false:	just load, don't extend to library name-space<br/>
- * this:	extend to global<br/>
- * object:	extend to specified name-space that you can use [name_space]._func_ to run it<br/>
- * (others, including undefined):	extend to root of this library. e.g., call CeL._function_name_ and we can get the specified function.
- * @return	{Error object}
- * @return	-1	will execute callback after load
- * @return	{undefined}	no error, OK
- * @example
- * CeL.use('code.log', function(){..});
- * CeL.use(['code.log', 'code.debug']);
- * @note
- * 'use' 是 JScript.NET 的保留字
- */
-use = function requires(module, callback, extend_to){
-	var _s = requires, i, l, module_path;
-
-	if (!module)
-		return;
-
-	/*
-	if (arguments.length > 3) {
-		l = arguments.length;
-		name_space = arguments[--l];
-		callback = arguments[--l];
-		--l;
-		for (i = 0; i < l; i++)
-			_s.call(this, arguments[i], callback, name_space);
-		return;
-	}
-	*/
-
-	if (this.is_Array(module)) {
-		var error;
-		for (i = 0, l = module.length; i < l; i++)
-			if (error = _s.call(this, module[i], callback, extend_to))
-				return error;
-		return null;
-	}
-
-	if (!(module_path = this.get_module_path(module)) || this.is_loaded(module))
-		return null;
-
-	//this.debug('load [' + module + ']:\ntry to load [' + module_path + ']');
-
-	//	including code
-	try {
-		try{
-			// this.debug('load ['+module_path+']');
-			// this.debug('load ['+module_path+']:\n'+this.get_file(module_path, this.env.source_encoding));
-			//WScript.Echo(this.eval);
-			if (i = this.get_file(module_path, this.env.source_encoding))
-				//	eval @ global. 這邊可能會出現 security 問題。
-				//	TODO: 以其他方法取代 eval 的使用。
-				this.eval_code(i);
-			else
-				this.warn('Get nothing from [' + module_path + ']! Some error occurred?');
-			i = 0;
-		} catch (e) {
-			i = e;
-		}
-
-		if (i) {
-			if (callback && typeof window !== 'undefined') {
-				// TODO: 在指定 callback 時使 name_space 依然有效。
-				this.include_resource(module_path, {
-					module : module,
-					callback : callback,
-					global : this
-				});
-				return -1;
-			}
-			throw i;
-		} else
-			typeof callback === 'function' && callback();
-
-	} catch (e) {
-		//this.err(e);
-
-		// http://www.w3.org/TR/DOM-Level-2-Core/ecma-script-binding.html
-		// http://reference.sitepoint.com/javascript/DOMException
-		if (this.is_type(e, 'DOMException') && e.code === 1012)
-			this.err(this.Class
-					+ '.use:\n'
-					+ e.message
-					+ '\n'
-					+ module_path
-					+ '\n\n程式可能呼叫了一個'
-					+ (typeof location === 'object'
-						&& location.protocol === 'file:' ? '不存在的，\n或是繞經上層目錄'
-								: 'cross domain')
-								+ '的檔案？\n\n請嘗試使用相對路徑，\n或 '
-								+ this.Class
-								+ '.use(module, callback function, name_space)');
-		else if (this.is_type(e, 'Error') && (e.number & 0xFFFF) == 5
-				|| this.is_type(e, 'XPCWrappedNative_NoHelper')
-						&& ('' + e.message).indexOf('NS_ERROR_FILE_NOT_FOUND') !== -1) {
-			this.err(this.Class + '.use: 檔案可能不存在？\n[' + module_path + ']' +
-					(this.get_error_message
-							? ('<br/>' + this.get_error_message(e))
-							: '\n' + e.message
-					)
-				);
-		} else
-			this.err(this.Class + '.use: Cannot load [<a href="' + module_path + '">' + module + '</a>]!'
-					+ (this.get_error_message
-							? ('<br/>' + this.get_error_message(e) + '<br/>')
-							: '\n[' + (e.constructor) + '] ' + (e.number ? (e.number & 0xFFFF) : e.code) + ': ' + e.message + '\n'
-					)
-					+ '抱歉！在載入其他網頁時發生錯誤，有些功能可能失常。\n重新讀取(reload)，或是過段時間再嘗試或許可以解決問題。');
-		//this.log('Cannot load [' + module + ']!', this.log.ERROR, e);
-
-		return e;
-	}
-
+extend_module_member = function(module, extend_to, callback) {
+	var i, l;
 
 	//typeof name_space !== 'undefined' && this.debug(name_space);
 	//	處理 extend to what name-space
 	if (!extend_to && extend_to !== false
 			//	若是在 .setup_module 中的話，可以探測得到 name_space？（忘了）
 			//|| typeof name_space !== 'function'
-			|| !(extend_to instanceof Object))
+			|| !this.is_Object(extend_to))
 		//	預設會 extend 到 library 本身下
 		extend_to = this;
 
@@ -1559,11 +1569,11 @@ use = function requires(module, callback, extend_to){
 
 			if (typeof l === 'string') {
 				no_extend[l] = 1;
-			} else if (l instanceof Array) {
-				for (i=0;i<l.length;i++)
+			} else if (this.is_Array(l)) {
+				for (i = 0; i < l.length; i++)
 					//WScript.Echo('no_extend '+l[i]),
 					no_extend[l[i]] = 1;
-			} else if (l instanceof Object) {
+			} else if (this.is_Object(l)) {
 				no_extend = l;
 			}
 
@@ -1596,7 +1606,157 @@ use = function requires(module, callback, extend_to){
 
 	}
 
+
+	try {
+		i = typeof callback === 'function' && callback();
+	} catch (e) {
+	}
+	return i;
 };
+
+CeL
+.
+/**
+ * Include specified module<br/>
+ * 注意：以下的 code 中，CeL.warn 不一定會被執行（可能會、可能不會），因為執行時 code.log 尚未被 include。<br/>
+ * 此時應該改用 CeL.use('code.log', callback);<br/>
+ * code in head/script/:
+ * <pre>
+ * CeL.use('code.log');
+ * CeL.warn('a WARNING');
+ * </pre>
+ * **	在指定 callback 時 name_space 無效！
+ * **	預設會 extend 到 library 本身下！
+ * @param	{String} module	module name
+ * @param	{Function} [callback]	callback function
+ * @param	{Object|Boolean} [extend_to]	extend to which name-space<br/>
+ * false:	just load, don't extend to library name-space<br/>
+ * this:	extend to global<br/>
+ * object:	extend to specified name-space that you can use [name_space]._func_ to run it<br/>
+ * (others, including undefined):	extend to root of this library. e.g., call CeL._function_name_ and we can get the specified function.
+ * @return	{Error}
+ * @return	-1	will execute callback after load, 不代表一定 load 了!
+ * @return	{undefined}	no error, OK
+ * @example
+ * CeL.use('code.log', function(){..});
+ * CeL.use(['code.log', 'code.debug']);
+ * @note
+ * 'use' 是 JScript.NET 的保留字
+ */
+use = function requires(module, callback, extend_to){
+	var _s = requires, i, l, module_path;
+
+	if (!module)
+		return;
+
+	/*
+	if (arguments.length > 3) {
+		l = arguments.length;
+		name_space = arguments[--l];
+		callback = arguments[--l];
+		--l;
+		for (i = 0; i < l; i++)
+			_s.call(this, arguments[i], callback, name_space);
+		return;
+	}
+	*/
+
+	if (this.is_Array(module)) {
+		var error;
+		for (i = 0, l = module.length; i < l; i++)
+			if (error = _s.call(this, module[i], 0, extend_to))
+				return error;
+		try {
+			i = typeof callback === 'function' && callback();
+		} catch (e) {
+		}
+		return i;
+	}
+
+	if (!(module_path = this.get_module_path(module)) || this.is_loaded(module)){
+		try {
+			i = typeof callback === 'function' && callback();
+		} catch (e) {
+		}
+		return i;
+	}
+
+	//this.debug('load [' + module + ']:\ntry to load [' + module_path + ']');
+
+	//	including code
+	try {
+		try{
+			// this.debug('load ['+module_path+']');
+			// this.debug('load ['+module_path+']:\n'+this.get_file(module_path, this.env.source_encoding));
+			//WScript.Echo(this.eval);
+			if (i = this.get_file(module_path, this.env.source_encoding))
+				//	eval @ global. 這邊可能會出現 security 問題。
+				//	TODO: 以其他方法取代 eval 的使用。
+				this.eval_code(i);
+			else
+				this.warn('Get nothing from [' + module_path + ']! Some error occurred?');
+			i = 0;
+		} catch (e) {
+			i = e;
+		}
+
+		if (i) {
+			//	不能直接用 get_file()，得採用其他方法。
+			if (typeof window !== 'undefined') {
+				// TODO: 在指定 callback 時使 name_space 依然有效。
+				this.include_resource(module_path, {
+					module : module,
+					callback : function(){
+							this.extend_module_member(module, extend_to, callback);
+					},
+					global : this
+				});
+				return -1;
+			}
+			throw i;
+		} else
+			return this.extend_module_member(module, extend_to, callback);
+
+	} catch (e) {
+		//this.err(e);
+
+		// http://www.w3.org/TR/DOM-Level-2-Core/ecma-script-binding.html
+		// http://reference.sitepoint.com/javascript/DOMException
+		if (this.is_type(e, 'DOMException') && e.code === 1012)
+			this.err(this.Class
+					+ '.use:\n'
+					+ e.message + '\n'
+					+ module_path
+					+ '\n\n程式可能呼叫了一個'
+					+ (typeof location === 'object'
+						&& location.protocol === 'file:' ? '不存在的，\n或是繞經上層目錄'
+								: 'cross domain')
+								+ '的檔案？\n\n請嘗試使用相對路徑，\n或 '
+								+ this.Class
+								+ '.use(module, callback function, name_space)');
+		else if (this.is_type(e, 'Error') && (e.number & 0xFFFF) == 5
+				|| this.is_type(e, 'XPCWrappedNative_NoHelper')
+						&& ('' + e.message).indexOf('NS_ERROR_FILE_NOT_FOUND') !== -1) {
+			this.err(this.Class + '.use: 檔案可能不存在？\n[' + module_path + ']' +
+					(this.get_error_message
+							? ('<br/>' + this.get_error_message(e))
+							: '\n' + e.message
+					)
+				);
+		} else
+			this.err(this.Class + '.use: Cannot load [<a href="' + module_path + '">' + module + '</a>]!'
+					+ (this.get_error_message
+							? ('<br/>' + this.get_error_message(e) + '<br/>')
+							: '\n[' + (e.constructor) + '] ' + (e.number ? (e.number & 0xFFFF) : e.code) + ': ' + e.message + '\n'
+					)
+					+ '抱歉！在載入其他網頁時發生錯誤，有些功能可能失常。\n重新讀取(reload)，或是過段時間再嘗試或許可以解決問題。');
+		//this.log('Cannot load [' + module + ']!', this.log.ERROR, e);
+
+		return e;
+	}
+
+};
+
 
 
 /*
@@ -1616,17 +1776,20 @@ encode
 */
 ;
 
-CeL.ce
+CeL
 .
 /**
  * include other JavaScript/CSS files
  * @param {String} resource path
- * @param {Function|Object} callback	callback function / 	{callback: callback function, module: module name, global: global object when run callback}
+ * @param {Function|Object} callback
+ * 		use_write ? test function{return } : callback function
+ * 		/	{callback: callback function, module: module name, global: global object when run callback}
  * @param {Boolean} [use_write]	use document.write() instead of insert a element
  * @param {Boolean} [type]	1: is a .css file, others: script
  */
 include_resource = function include_resource(path, callback, use_write, type) {
-	var _s = include_resource, s, t, h;
+	var _s = _.include_resource, s, t, h;
+	//this.debug('Loading [' + path + '].');
 
 	if (!_s.loaded){
 		s = this.get_include_resource();
@@ -1639,14 +1802,17 @@ include_resource = function include_resource(path, callback, use_write, type) {
 		_s.count = s[1];
 	}
 
-	if (path instanceof Array) {
+	if (this.is_Array(path)) {
 		for (s = 0, t = path.length; s < t; s++)
 			_s(path[s], callback, use_write, type);
 		return;
 	}
 
-	if(path in _s.loaded)
+	if(path in _s.loaded){
+		//	已經 load
+		typeof callback === 'function' && _s.wait_to_call(callback);
 		return;
+	}
 
 	if (typeof type === 'undefined')
 		type = /\.css$/i.test(path) ? 1 : 0;
@@ -1668,7 +1834,29 @@ include_resource = function include_resource(path, callback, use_write, type) {
 			else
 				//	TODO: see jquery-1.4a2.js: globalEval
 				//	if (is_code) s.text = path;
+				//s.setAttribute('src', path);
 				s.src = path;
+
+			//	http://wiki.forum.nokia.com/index.php/JavaScript_Performance_Best_Practices
+			//	** onload 在 local 好像無效
+			var done = false;
+			s.onload = s.onreadstatechange = function() {
+				var r;
+				//_.debug('Loading [' + path + '] .. ' + this.readyState);
+				if (!done && (!(r = this.readyState) || r === 'loaded' || r === 'complete')) {
+					done = true;
+					//_.debug('[' + (this.src || s.href) + '] loaded.');
+
+					//this.onload = this.onreadystatechange = null;
+					delete this.onload;
+					delete this.onreadystatechange;
+
+					_s.loaded[path] = _s.count++;
+
+					if(callback)
+						_s.wait_to_call(callback);
+				}
+			};
 
 			h = (document.getElementsByTagName('head')[0] || document.body.parentNode
 					.appendChild(document.createElement('head')));
@@ -1693,45 +1881,48 @@ include_resource = function include_resource(path, callback, use_write, type) {
 			return s;
 
 		} catch (e) {
-			use_write = 1;
 		}
 
-	if (use_write)
-		document.write(type === 1 ? '<link type="' + t
-				+ '" rel="stylesheet" href="' + path + '"><\/link>'
+	//this.debug('Writing code for [' + path + '].');
+	if (use_write
+			|| typeof use_write === 'undefined'
+			)
+		document.write(type === 1 ?
+				'<link type="' + t + '" rel="stylesheet" href="' + path + '"><\/link>'
 				: '<script type="' + t + '" src="' + path
-				// language="JScript"
-				+ '"><\/script>');
+					// language="JScript"
+					+ '"><\/script>');
 
+	//	若是到這邊還沒 load，會造成問題。
 	_s.loaded[path] = _s.count++;
 
 	if (callback)
 		_s.wait_to_call(callback);
 };
 
-CeL.ce
+CeL
 .
 /**
- * 已經 include_resource 了哪些 JavaScript 檔（存有其路徑）
- * loaded{路徑} = count
- * 本行可省略(only for document)
+ * 已經 include_resource 了哪些 JavaScript 檔（存有其路徑）.
+ * loaded{路徑} = count,
+ * 本定義可省略(only for documentation)
+ * @type	{Object}
  */
 include_resource.loaded = null;
 
 
-CeL.ce
+CeL
 .
 /**
- * 已經 include_resource 了多少個 JavaScript 檔
+ * 已經 include_resource 了多少個 JavaScript 檔.
+ * 本定義可省略(only for documentation)
  * @type Number
- * 本行可省略(only for document)
  */
 include_resource.count = 0;
 
-CeL.ce
+CeL
 .
-include_resource.wait_to_call =
-include_resource.wait_to_call = function wait_to_call(callback) {
+include_resource.wait_to_call = function(callback, do_test) {
 	//alert('include_resource.wait_to_call:\n' + _.to_module_name(callback.module));
 
 	if (typeof callback === 'function')
@@ -1739,28 +1930,33 @@ include_resource.wait_to_call = function wait_to_call(callback) {
 		//	TODO: 等太久時 error handle
 		window.setTimeout(callback, 200);
 
-	else if (callback.global.is_loaded(callback.module)){
-		if (typeof callback.callback === 'function')
-			callback.callback();
-		else if (typeof callback.callback === 'string')
-			this.use(callback.callback);
-		//	TODO
-		//else..
+	else if (_.is_Object(callback) && callback.global)
+		if (callback.global.is_loaded(callback.module))
+			if (typeof callback.callback === 'function')
+				callback.callback();
+			else if (typeof callback.callback === 'string')
+				_.use(callback.callback);
+			// TODO
+			// else..
 
-	}else {
-		/**
-		 * the function it self, not 'this'.
-		 * @inner
-		 * @ignore
-		 */
-		var _s = wait_to_call, _t = this;
-		window.setTimeout(function() {
-			_s.call(_t, callback);
-		}, 10);
-	}
+		else {
+			/**
+			 * 還沒 load，所以再等一下。 the function it self, not 'this'.
+			 * @inner
+			 * @ignore
+			 */
+			var _s = _.include_resource.wait_to_call, _t = this;
+			window.setTimeout(function() {
+				_s.call(_t, callback);
+			}, 50);
+		}
 };
 
-CeL.ce
+//if (typeof include_resource === 'function')
+//	_.extend(null, include_resource, _.include_resource);
+
+
+CeL
 .
 get_include_resource = function(split) {
 	if (typeof document !== 'object' || !document.getElementsByTagName)
@@ -1795,7 +1991,7 @@ get_include_resource = function(split) {
 };
 
 
-CeL.ce
+CeL
 .
 /**
  * include resource of module.
@@ -1817,7 +2013,7 @@ include_module_resource = function(file_name, module_name) {
 
 
 
-CeL.ce
+CeL
 .
 get_module = function(module_name) {
 	module_name = this.split_module_name.call(this, module_name);
@@ -1840,7 +2036,7 @@ get_module = function(module_name) {
 
 
 
-CeL.ce
+CeL
 .
 /**
  * 預先準備好下層 module 定義時的環境。<br/>
@@ -1920,7 +2116,7 @@ setup_module = function(module_name, code_for_including) {
 
 
 
-CeL.ce
+CeL
 .
 /**
  * 是否 cache code。
@@ -1938,7 +2134,7 @@ var loaded_module = {
 };
 
 
-CeL.ce
+CeL
 .
 /**
  * 模擬 inherits
@@ -1965,7 +2161,7 @@ inherits = function(module_name, initial_arguments) {
 };
 
 
-CeL.ce
+CeL
 .
 /**
  * 將輸入的 string 分割成各 module 單元。<br/>
@@ -1979,7 +2175,7 @@ split_module_name = function(module_name) {
 	if (typeof module_name === 'string')
 		module_name = module_name.replace(/\.\.+|\\\\+|\/\/+/g, '.').split(/\.|\\|\/|::/);
 
-	if (module_name instanceof Array) {
+	if (this.is_Array(module_name)) {
 		//	去除 library name
 		if (module_name.length>1 && this.Class === module_name[0])
 			module_name.shift();
@@ -1990,20 +2186,22 @@ split_module_name = function(module_name) {
 
 
 
-CeL.ce
+CeL
 .
 to_module_name = function(module, separator) {
 	if (typeof module === 'function')
 		module = module.Class;
+	else if (module === this.env.main_script_name)
+		module = this.Class;
 
 	if (typeof module === 'string')
 		module = this.split_module_name(module);
 
 	var name = '';
-	if (module instanceof Array) {
+	if (this.is_Array(module)) {
 		if (typeof separator !== 'string')
 			separator = this.env.module_name_separator;
-		if (module[0] != this.Class)
+		if (module[0] !== this.Class)
 			name = this.Class + separator;
 		name += module.join(separator);
 	}
@@ -2014,20 +2212,20 @@ to_module_name = function(module, separator) {
 
 
 //TODO
-CeL.ce
+CeL
 .
 get_requires = function(func){
 	if (typeof func === 'function' || typeof func === 'object')
 		return func.requires;
 };
 
-CeL.ce
+CeL
 .
 unload_module = function(module, g){
 };
 
 
-CeL.ce
+CeL
 .
 /**
  * 判斷 module 是否存在，以及是否破損。
@@ -2042,7 +2240,7 @@ is_loaded = function(module_name) {
 
 
 
-CeL.ce
+CeL
 .
 set_loaded = function(module_name, code_for_including) {
 	//this.debug(this.to_module_name(module_name));
@@ -2050,7 +2248,48 @@ set_loaded = function(module_name, code_for_including) {
 };
 
 
-CeL.ce
+/**
+ * module 的 require 紀錄。
+ * use_function_require_queue[module name] = require time.
+ * 當 require 超過 2 次則 skip，這是為了預防 Stack overflow。非 1 次即跳出是為了預防發生錯誤的情況。
+ * @inner
+ * @private
+ * @type Object
+ */
+var use_function_require_queue = {},
+
+/**
+ * post_execute[module name] = module load 之後需要執行的函數。
+ * //post_execute[module name] 存在表示 load 之後需要執行 module[post_execute_function_name]
+ * 當 require 時還未 load 的話，就只好等 load 之後再來設定這些東西了。
+ * TODO: 不過還是會有問題，因此需要設定 require 時必需已 load 之 module。
+ * @inner
+ * @private
+ * @type Object
+ */
+post_execute = {};
+
+//post_execute_function_name = '_post_execute_' + Math.random();
+
+
+CeL
+.
+/**
+ * 設定 module load 之後需要執行的函數。
+ * @param	{String} module_name	module name
+ * @param	{Function} post_execute_function	module load 之後需要執行的函數
+ * @return
+ * @inner	僅供內部使用
+ * @private
+ */
+set_post_execute = function(module_name, post_execute_function) {
+	if(module_name)
+		//this.debug('Set post function of module [' + module_name + ']: [' + post_execute_function + ']'),
+		post_execute[module_name] = post_execute_function;
+};
+
+
+CeL
 .
 /**
  * module 中需要 include function 時使用。<br/>
@@ -2064,8 +2303,21 @@ CeL.ce
  * @since
  * 2009/12/26 02:36:31
  * 2009/12/31 22:21:23	add 類似 'data.' 的形式，為 module。
+ * 2010/6/14 22:58:18	避免相互 require
  */
 use_function = function(function_list, return_extend) {
+	///	<returns>error</returns>
+
+/*
+	//	若本身已經在需求名單中則放行，避免相互需要造成堆疊空間不足(Out of stack space)或 Stack overflow。..無效，因為 module_name 可能未定義。
+	if (typeof module_name === 'string' && module_name)
+		if (module_name in use_function_require_queue)
+			return 0;
+		else
+			this.debug('Skip to load module [' + module_name + '] because it is already in the require queue.'),
+			use_function_require_queue[module_name] = 1;
+*/
+
 	var list = this.is_Array(function_list) ? function_list
 			: typeof function_list === 'string' ? function_list
 					.split(',') : 0;
@@ -2073,7 +2325,7 @@ use_function = function(function_list, return_extend) {
 	if (!list || !list.length)
 		return 1;
 
-	//this.debug('load function [' + list + ']');
+	//this.debug('load function [' + list + ']' + (typeof module_name === 'string' && module_name ? ' from [' + module_name + ']' : ''));
 
 	var i = 0, m, l = list.length, n,
 	old_module_name,
@@ -2098,43 +2350,94 @@ use_function = function(function_list, return_extend) {
 
 	m = [];
 	for (i in module_hash)
-		//this.debug('prepare to load module ['+i+']'),
-		m.push(i);
+		if ((i in use_function_require_queue ? ++use_function_require_queue[i] : (use_function_require_queue[i] = 1)) < 2)
+			//this.debug('prepare to load module ['+i+']'),
+			m.push(i);
+		//else this.debug('Skip to load module [' + i + '] because it is already in the require queue with many times.');
 
-	//this.debug('module [' + (typeof module_name === 'string' ? module_name: undefined) + '] load:\n' + m);
 
-	// include required modules
-	m = this.use(
-		m,
-		//	module_name 為呼叫 modele，在 .use() 中會被重設：eval 時由 modele 裡面的 code 設定。但在 IE 中為 undefined。
-		old_module_name = typeof module_name === 'string' ? module_name
-				: undefined);
+	if (m.length){
+		//this.debug('module [' + (typeof module_name === 'string' ? module_name: undefined) + '] load:\n' + m);
+	
+		// include required modules
+		try{
+		m = this.use(
+			n = m,
+			//	module_name 為呼叫 modele，在 .use() 中會被重設：eval 時由 modele 裡面的 code 設定。但在 IE 中為 undefined。
+			old_module_name = typeof module_name === 'string' ? module_name
+					: undefined);
+		}catch (e) {
+			m=2;// TODO: handle exception
+		}
+	
+		//	消除 require 紀錄：不可不做。因為有時同樣的 module 有不同的 function require。
+		for (i = 0; i < n.length; i++)
+			;//delete use_function_require_queue[n[i]];
+	
+		//	回存已被更改的 module_name，/*並消除 require 紀錄。*/
+		if (old_module_name)
+			//delete use_function_require_queue[module_name = old_module_name];
+			module_name = old_module_name;
+	
+		//	use 失敗: 需要 callback？
+		//if (m) this.debug('use [' + function_list + '] 失敗!');
+		if (m)
+			return 2;
 
-	if (old_module_name)
-		module_name = old_module_name;
+		module_hash = 0;
+	}
+	else
+		//	所有需求皆已在 queue 中，因此最後總**有機會（不包括發生錯誤的情況！）**會被 load，故 skip。
+		module_hash = [];
 
-	//	use 失敗: 需要 callback？
-	if (m)
-		return 2;
+
+	//	每次 include 皆執行，盡量早一點設定 reference，預防有 M_A loading 中 要求 M_B.F_B，被這麼跳過而未執行，造成 M_A 中 呼叫 F_B（實為 M_B.F_B） 時 error；因為尚未設定，直接跳出了的情形。
+	for (i in post_execute)
+		try {
+			//this.debug('execute post function of module [' + i + ']: [' + post_execute[i] + ']');
+			post_execute[i]();
+			//this.debug('delete post function of module [' + i + ']');
+			delete post_execute[i];
+		} catch (e) {
+			// TODO: unknown error
+		}
+
 
 	if(!return_extend)
 		l = [];
-	for (i in variable_hash) {
-		m = this.get_various(n = variable_hash[i]);
-		//this.debug('load [' + n + ']: ' + m);
 
-		//	test if this function exists
-		if (typeof m !== 'function') {
+	//	設定 required variables
+	for (i in variable_hash) {
+		n = variable_hash[i];
+		//this.debug('load [' + n + ']: ' + this.get_various(n));
+
+		if (!module_hash &&
+				//	test if this function exists
+				typeof (m = this.get_various(n)) !== 'function') {
+			//	delete it if doesn't exists
 			delete variable_hash[i];
-			this.err(this.Class + '.use_function: load [' + n
-					+ '] error: ' + (m || "Doesn't defined?"));
-		} else if (!return_extend)
-			l.push(i + '=' + n);
+			this.err(this.Class + '.use_function: load [' + n + '] error: ' + (m || "Doesn't defined?"));
+		} else if (!return_extend) {
+			l.push(i + '=' +
+					//	預防有保留字，所以用 bracket notation。例如 Chrome 中會出現 'Unexpected token native'。
+					//	Dot Notation and Square Bracket Notation in JavaScript	http://www.dev-archive.net/articles/js-dot-notation/
+					n.replace(/\.([a-z\d_]+)/gi, '["$1"]'));
+			if (module_hash)
+				module_hash.push(i);
+		}
 	}
 
-	//if (!return_extend)this.debug('@[' + module_name + ']: var ' + l.join(',') + ';0');
+	//if (!return_extend) this.debug('@[' + (typeof module_name === 'string' ? module_name: undefined) + ']: ' + (l.length ? 'var ' + ( module_hash ? module_hash.join(',') + ';library_namespace.set_post_execute(module_name,function(){' + l.join(',') + ';})' : l.join(',') ) + ';0' : ''));
 
-	return return_extend ? variable_hash : l.length ? 'var ' + l.join(',') + ';0' : '';
+	//	應注意 module_name 為保留字之類的情況，會掛在這邊 return 後的 eval。
+	return return_extend ? variable_hash :
+		l.length ? 'var ' + (
+			module_hash ?
+				module_hash.join(',') + ';library_namespace.set_post_execute(module_name,function(){' + l.join(',') + ';})' :
+				l.join(',')
+		) + ';0'
+		//	error?
+		: '';
 };
 
 
@@ -2178,7 +2481,7 @@ environment_adapter();
 
 
 
-
+
 
 
 //setTool(),oldVadapter();	//	當用此檔debug時請執行此行
@@ -2369,6 +2672,11 @@ var module_name = 'data';
  */
 var code_for_including = function(library_namespace, load_arguments) {
 
+//	requires
+if (eval(library_namespace.use_function(
+	'native.to_fixed')))
+		return;
+
 /**
  * null module constructor
  * @class	data 處理的 functions
@@ -2450,234 +2758,6 @@ function getQuoteIndex(quote,str){	//	quote:['"/]，[/]可能不太適用，除�
 
 
 
-/*	2008/12/21 18:53:42
-	value to json
-	JavaScript Object Notation	ECMA-262 3rd Edition
-
-	http://stackoverflow.com/questions/1500745/how-to-pass-parameters-in-eval-in-an-object-form
-	json={name:'~',values:..,description:'~'}
-	window[json.name].apply(null, json.values)
-
-
-usage:
-json(value)
-
-parse:
-data=eval('('+data+')');	//	字串的前後記得要加上刮號 ()，這是用來告知 Javascript Interpreter 這是個物件描述，不是要執行的 statement。
-eval('data='+data);
-
-TODO:
-
-useObj
-	加入function object成員，.prototype可用with()。加入函數相依性(dependency)
-
-array用name:
-(function(){
- var o;
- o=[..];
- var i,v={..};
- for(i in v)o[i]=v[i];
- return o; 
-})()
-
-
-據說toJSONString跟parseJSON有可能成為ECMAScript第四版的標準
-
-
-recursion 循環參照
-(function(){
- var o;
- o={a:[]};
- o['b']=[o['a']],
- o['a'].push([o['b']]);
- return o; 
-})()
-
-
-
-BUG:
-function 之名稱被清除掉了，這可能會產生問題！
-(function(){
- var f=function(){..};
- f.a=..;
- f.b=..;
- f.prototype={
-  a:..,
-  b:..
- }
- return f; 
-})()
-
-
-*/
-//json[generateCode.dLK]='qNum,dQuote';
-
-json.dL='dependencyList';	//	dependency List Key
-json.forceArray=1;
-
-json.indentString='	';
-json.NewLine='\n';
-json.separator=' ';
-function json(val,name,type){	//	type==2: inside object, treat undefined as ''
- var _f=arguments.callee,expA=[],expC=[],vType=typeof val
-	,addE=function(o,l,n){
-		if(l){
-		 o=_f(o,0,2);
-		 n=typeof n=='undefined'||n===''?''
-			:(/^(\d{1,8})?(\.\d{1,8})?$/.test(n)||/^[a-z_][a-z_\d]{0,30}$/i.test(n)?n:dQuote(n))+':'+_f.separator;
-		 expA.push(n,o[1]);
-
-		 //expC.push(_f.indentString+n+o[0].join(_f.NewLine+_f.indentString)+',');
-		 o=o[0];
-		 o[0]=n+(typeof o[0]=='undefined'?'':o[0]);
-		 o[o.length-1]+=',';
-		 for(var i=0;i<o.length;i++)
-		  o[i]=_f.indentString+(typeof o[i]=='undefined'?'':o[i]);
-		 expC=expC.concat(o);
-		}else expA.push(o),expC.push(o);
-	}
-	//	去掉最後一組的 ',' 並作結
-	,closeB=function(c){
-		var v=expC[expC.length-1];
-		if(v.charAt(v.length-1)==',')
-		 expC[expC.length-1]=v.slice(0,v.length-1);
-		addE(c);
-	};
-
- switch(vType){
-  case 'number':
-	//	http://msdn2.microsoft.com/zh-tw/library/y382995a(VS.80).aspx
-	//	isFinite(value) ? String(value)
-	var k=0,m='MAX_VALUE,MIN_VALUE,NEGATIVE_INFINITY,POSITIVE_INFINITY,NaN'.split(','),t=0;
-	if(val===NaN||val===Infinity||val===-Infinity)t=''+val;
-	else for(;k<m.length;k++)
-	 if(val===Number[m[k]]){t='Number.'+m[k];break;}
-	if(!t){
-	 //	http://msdn2.microsoft.com/zh-tw/library/shydc6ax(VS.80).aspx
-	 for(k=0,m='E,LN10,LN2,LOG10E,LOG2E,PI,SQRT1_2,SQRT2'.split(',');k<m.length;k++)
-	  if(val===Math[m[k]]){t='Math.'+m[k];break;}
-	 if(!t)
-	  if(k=(''+val).match(/^(-?\d*[1-9])(0{3,})$/))
-	   t=k[1]+'e'+k[2].length;
-	  else{
-
-	   //	有理數判別
-	   k=qNum(val);
-
-	   //	小數不以分數顯示. m==1:非分數
-	   m=k[1];
-	   while(m%2==0)m/=2;
-	   while(m%5==0)m/=5;
-
-	   t=k[2]==0 && m!=1?k[0]+'/'+k[1]:
-		//	TODO: 加速(?)
-		(t=Math.floor(val))==val&&(''+t).length>(t='0x'+val.toString(16)).length?t:val;
-	  }
-
-	}
-	addE(t);
-	break;
-  case 'null':
-	addE(''+val);
-	break;
-  case 'boolean':
-	addE(val);
-	break;
-  case 'string':
-	addE(dQuote(val));
-	break;
-  case 'undefined':
-	addE(type==2?'':'undefined');
-	break;
-
-  case 'function':
-	//	加入function object成員，.prototype可用with()。加入函數相依性(dependency)
-	var toS,f;
-	//	這在多執行緒有機會出問題！
-	if(typeof val.toString!='undefined'){toS=val.toString;delete val.toString;}
-	f=''+val;
-	if(typeof toS!='undefined')val.toString=toS;
-
-	f=f.replace(/\r?\n/g,_f.NewLine);	//	function 才會產生 \r\n 問題，所以先處理掉
-	var r=/^function\s+([^(\s]+)/,m=f.match(r),t;
-	if(m)m=m[1],addE('//	function ['+m+']'),t=f.replace(r,'function'+_f.separator);
-	if(m&&t.indexOf(m)!=-1)alert('function ['+m+'] 之名稱被清除掉了，這可能會產生問題！');
-	addE(t||f);
-	//	UNDO
-	break;
-
-  case 'object':
-   try{
-	if(val===null){addE(''+val);break;}
-	var c=val.constructor;
-	if(c==RegExp){
-	 addE(val);
-	 break;
-	}
-	if(c==Date || vType=='date'){	//	typeof val.getTime=='function'
-	 //	與 now 相隔過短(<1e7, 約3h)視為 now。但若是 new Date()+3 之類的會出現誤差！
-	 addE('new Date'+((val-new Date)>1e7?'('+val.getTime()+')':''));	//	date被當作object
-	 break;
-	}
-	if((''+c).indexOf('Error')!=-1){
-	 addE('new Error'+(val.number||val.description?'('+(val.number||'')+(val.description?(val.number?',':'')+dQuote(val.description):'')+')':''));
-	 break;
-	}
-
-	var useObj=0;
-	if(c==Array){
-	 var i,l=0;
-	 if(!_f.forceArray)for(i in val)
-	  if(isNaN(i)){useObj=1;break;}else l++;
-
-	 if(_f.forceArray || !useObj && l>val.length*.8){
-	  addE('[');
-	  for(i=0;i<val.length;i++)
-	   addE(val[i],1);
-	  closeB(']');
-	  break;
-	 }else useObj=1;
-	}
-
-	if(useObj||c==Object){// instanceof
-	 addE('{');
-	 for(var i in val)
-	  addE(val[i],1,i);
-	 closeB('}');
-	 break;
-	}
-	addE(dQuote(val));
-	break;
-   }catch(e){
-    if(28==(e.number&0xFFFF))
-     alert('json: Too much recursion?\n循環參照？');
-    return;
-   }
-
-  case 'unknown':	//	sometimes we have this kind of type
-  default:
-	alert('Unknown type: ['+vType+'] (constructor: '+val.constructor+'), please contract me!\n'+val);
-	break;
-	//alert(vType);
- }
- return type?[expC,expA]:expC.join(_f.NewLine);
-}
-
-/*
-var a=[],b;a.push(b=[a]);json(a);
-
-recursion 循環參照
-(function(){
- var o,_1;
- _1=[o];
- o.push(_1];
- return o; 
-})()
-
-*/
-
-
-
 
 
 //{var a=[],b,t='',i;a[20]=4,a[12]=8,a[27]=4,a[29]=4,a[5]=6,a.e=60,a.d=17,a.c=1;alert(a);b=sortValue(a);alert(a+'\n'+b);for(i in b)t+='\n'+b[i]+'	'+a[b[i]];alert(t);}
@@ -2747,44 +2827,41 @@ alert(getIndexSortByIndex(array,'	',[0,1],[0,2]));
 alert(array.join('\n'));	//	已被separator分割！
 
 */
-function getIndexSortByIndex(array,separator,indexArray,isNumberIndex){
- //	判定與事前準備(設定sortByIndex_I,sortByIndex_Datatype)
- if(typeof indexArray=='number')sortByIndex_I=[indexArray];
- else if(typeof indexArray!='object'||indexArray.constructor!=Array)sortByIndex_I=[0];
- else sortByIndex_I=indexArray;
- var i,sortByIndex_A=[];
- sortByIndex_Datatype={};
- if(typeof isNumberIndex=='object'){
-  if(isNumberIndex.constructor==Array){
-   sortByIndex_Datatype={};
-   for(i=0;i<isNumberIndex.length;i++)sortByIndex_Datatype[isNumberIndex[i]]=1;
-  }else sortByIndex_Datatype=isNumberIndex;
-  for(i in sortByIndex_Datatype)
-   if(isNaN(sortByIndex_Datatype[i])||parseInt(sortByIndex_Datatype[i])!=sortByIndex_Datatype[i])delete sortByIndex_Datatype[i];
- }
- if(typeof array!='object')return;
+function getIndexSortByIndex(array, separator, indexArray, isNumberIndex) {
+	//	判定與事前準備(設定sortByIndex_I,sortByIndex_Datatype)
+	if (typeof indexArray === 'number') sortByIndex_I = [indexArray];
+	else if (typeof indexArray !== 'object' || indexArray.constructor != Array) sortByIndex_I = [0];
+	else sortByIndex_I = indexArray;
+	var i, sortByIndex_A = [];
+	sortByIndex_Datatype = {};
+	if (typeof isNumberIndex == 'object') {
+		if (isNumberIndex.constructor == Array) {
+			sortByIndex_Datatype = {};
+			for (i = 0; i < isNumberIndex.length; i++) sortByIndex_Datatype[isNumberIndex[i]] = 1;
+		} else sortByIndex_Datatype = isNumberIndex;
+		for (i in sortByIndex_Datatype)
+			if (isNaN(sortByIndex_Datatype[i]) || parseInt(sortByIndex_Datatype[i]) != sortByIndex_Datatype[i]) delete sortByIndex_Datatype[i];
+	}
+	if (typeof array != 'object') return;
 
- //	main work: 可以不用重造array資料的話..
- for(i in array){
-  if(separator)array[i]=array[i].split(separator);
-  sortByIndex_A.push(i);
- }
- sortByIndex_A.sort(function (a,b){return sortByIndex(array[a],array[b]);});
+	//	main work: 可以不用重造array資料的話..
+	for (i in array) {
+		if (separator) array[i] = array[i].split(separator);
+		sortByIndex_A.push(i);
+	}
+	sortByIndex_A.sort(function (a, b) { return sortByIndex(array[a], array[b]); });
 
-/*	for: 重造array資料
- var getIndexSortByIndexArray=array;
- for(i in getIndexSortByIndexArray){
-  if(separator)getIndexSortByIndexArray[i]=getIndexSortByIndexArray[i].split(separator);
-  sortByIndex_A.push(i);
- }
- sortByIndex_A.sort(function (a,b){return sortByIndex(getIndexSortByIndexArray[a],getIndexSortByIndexArray[b]);});
-*/
+	/*	for: 重造array資料
+	var getIndexSortByIndexArray=array;
+	for(i in getIndexSortByIndexArray){
+	if(separator)getIndexSortByIndexArray[i]=getIndexSortByIndexArray[i].split(separator);
+	sortByIndex_A.push(i);
+	}
+	sortByIndex_A.sort(function (a,b){return sortByIndex(getIndexSortByIndexArray[a],getIndexSortByIndexArray[b]);});
+	*/
 
- return sortByIndex_A;
+	return sortByIndex_A;
 }
-
-
-
 
 
 
@@ -2903,84 +2980,88 @@ function encodeCode(code,K){	//	code,key
  //alert(toCharCode(p)+'\n'+toCharCode(rc));//4,55,54,25,25	53,56,86,22,22,54,86,22
  return p+rc;
 }
-function toCharCode(s){
- s+='';if(!s)return;var i=0,c=[];
- for(;i<s.length;i++)c.push(s.charCodeAt(i));
- return c;
+function toCharCode(s) {
+	s += ''; if (!s) return; var i = 0, c = [];
+	for (; i < s.length; i++) c.push(s.charCodeAt(i));
+	return c;
 }
-//	解程式碼
+//  解程式碼
 function decodeCode(c,K){	//	code,key
- if(!c)return;//c:encoded code
- //var ucC=encodeCodeCC.ucC,lucC=encodeCodeCC.lucC,wordC=encodeCodeCC.wordC,wordS=encodeCodeCC.wordS,words=encodeCodeDwordsRef.join('\0').split('\0')
- var ucC=1,lucC=6,wordC=8,wordS=127,words=['function ','return ','return','undefined','for(','var ','.length','typeof','continue;','if(','else','while(','break;','this.','try{','}catch(','true','false','eval(','new ','Array','Object','RegExp','.replace(','.match(','.push(','.pop(','.split(','isNaN(','.indexOf(','.substr(','with(']	//	精簡實戰版
- ,i,k,l,p,q,r='',w=1,cr=[]
- //	tr:b===''時return a之char code，其他無b時return a之index code，有b時return a-b之char set。出錯時無return
- ,trSet={},tr=function(s,a,b){if(!isNaN(b)&&b){var c,t="";while(a<b)if(!isNaN(c=s.ind[s.c.charCodeAt(a++)])&&!isNaN(c=s.ch[(c+s.k[s.count%s.k.length])%s.ch.length]))t+=String.fromCharCode(c);else return;return t;}else if(!isNaN(a=s.ind[s.c.charCodeAt(a)])&&((a=(a+s.k[s.count%s.k.length])%s.ch.length),typeof b!="string"||!isNaN(a=s.ch[a])))return a;}
- ,ind=[],ch=[];	//	設定解碼chars：ind:index
- //	設定解碼chars
- for(i=1,p=0;i<128;i++){
-  if(i!=10&&i!=13&&i!=34&&i!=92)ind[i]=p++;
-  if(i!=11&&i!=12&&i!=30&&i!=31)ch.push(i);
- }
- //	取得及設定解碼key
- if(!(p=ind[c.charCodeAt(q=0)])){
-  if(typeof K=='string')for(i=0,p=K,K=[];i<p.length;i++)K.push(ch.length-p.charCodeAt(i)%ch.length);
-  if(K instanceof Array&&K.length)p=ind[c.charCodeAt(++q)];else return;
- }else K=[];	//	需要密碼
- for(k=[],l=ind[c.charCodeAt(++q)],p+=i=q+1;i<p;i++)k.push(ch.length-ind[c.charCodeAt(i)]);
- if(K.length)k=K.concat(k);
- trSet.c=c=c.substr(p),
- trSet.ind=ind,trSet.ch=ch,trSet.k=k,trSet.count=l;
+if(!c)return;//c:encoded code
+//var ucC=encodeCodeCC.ucC,lucC=encodeCodeCC.lucC,wordC=encodeCodeCC.wordC,wordS=encodeCodeCC.wordS,words=encodeCodeDwordsRef.join('\0').split('\0')
+var ucC=1,lucC=6,wordC=8,wordS=127,words=['function ','return ','return','undefined','for(','var ','.length','typeof','continue;','if(','else','while(','break;','this.','try{','}catch(','true','false','eval(','new ','Array','Object','RegExp','.replace(','.match(','.push(','.pop(','.split(','isNaN(','.indexOf(','.substr(','with(']	//	精簡實戰版
+,i,k,l,p,q,r='',w=1,cr=[]
+//	tr:b===''時return a之char code，其他無b時return a之index code，有b時return a-b之char set。出錯時無return
+,trSet={},tr=function(s,a,b){if(!isNaN(b)&&b){var c,t="";while(a<b)if(!isNaN(c=s.ind[s.c.charCodeAt(a++)])&&!isNaN(c=s.ch[(c+s.k[s.count%s.k.length])%s.ch.length]))t+=String.fromCharCode(c);else return;return t;}else if(!isNaN(a=s.ind[s.c.charCodeAt(a)])&&((a=(a+s.k[s.count%s.k.length])%s.ch.length),typeof b!="string"||!isNaN(a=s.ch[a])))return a;}
+,ind=[],ch=[];	//	設定解碼chars：ind:index
+//	設定解碼chars
+for(i=1,p=0;i<128;i++){
+if(i!=10&&i!=13&&i!=34&&i!=92)ind[i]=p++;
+if(i!=11&&i!=12&&i!=30&&i!=31)ch.push(i);
+}
+//	取得及設定解碼key
+if(!(p=ind[c.charCodeAt(q=0)])){
+if(typeof K=='string')for(i=0,p=K,K=[];i<p.length;i++)K.push(ch.length-p.charCodeAt(i)%ch.length);
+if(K instanceof Array&&K.length)p=ind[c.charCodeAt(++q)];else return;
+}else K=[];	//	需要密碼
+for(k=[],l=ind[c.charCodeAt(++q)],p+=i=q+1;i<p;i++)k.push(ch.length-ind[c.charCodeAt(i)]);
+if(K.length)k=K.concat(k);
+trSet.c=c=c.substr(p),
+trSet.ind=ind,trSet.ch=ch,trSet.k=k,trSet.count=l;
 
- //decodeCodeC=['words:'+words+NewLine,k.length,l+NewLine].concat(k);decodeCodeC.push(NewLine+'-'.x(9)+NewLine+'c:	');var mm;for(i=0;i<c.length;i++)decodeCodeC.push(c.charCodeAt(i));decodeCodeC.push(NewLine+'-'.x(9)+NewLine);if(K.length)decodeCodeC.push('use password['+K.length+']'+K+NewLine);
- i=-1;//alert('-1:'+i);
- //	開始解碼
- while((trSet.count+=l),++i<c.length){
-  //if((p=c.charCodeAt(i))>127)trSet.c=c=c.slice(0,)+;
-  //decodeCodeC.push(trSet.count+'	ch[(ind['+(q=c.charCodeAt(i))+']='+ind[q]+' +k['+(q=trSet.count%k.length)+']='+(q=k[q])+'('+(ch.length-q)+') )%'+ch.length+'='+(q=(ind[c.charCodeAt(i)]+q)%ch.length)+' ]=[ '+ch[q]+' ]',tr(trSet,i,'')+NewLine);
-  //decodeCodeC.push(trSet.count+'	ch[(ind['+(q=c.charCodeAt(i+1))+']='+ind[q]+' +k['+(q=trSet.count%k.length)+']='+(q=k[q])+'('+(ch.length-q)+') )%'+ch.length+'='+(q=(ind[c.charCodeAt(i+1)]+q)%ch.length)+' ]=[ '+ch[q]+' ]',tr(trSet,i+1,'')+NewLine);
-  //decodeCodeC.push(trSet.count+'	ch[(ind['+(q=c.charCodeAt(i+2))+']='+ind[q]+' +k['+(q=trSet.count%k.length)+']='+(q=k[q])+'('+(ch.length-q)+') )%'+ch.length+'='+(q=(ind[c.charCodeAt(i+2)]+q)%ch.length)+' ]=[ '+ch[q]+' ]',tr(trSet,i+2,'')+NewLine);
-  if(isNaN(p=tr(trSet,i,''))){
-   alert('decodeCode filed: illegal char ('+c.charCodeAt(i)+') @ '+i+'/'+c.length+'\n'+r);for(i=0,p=String.fromCharCode(k.length,l);i<k.length;i++)p+=String.fromCharCode(k[i]);return p+','+r;
-   return;
-  }	//	illegal
-  //	[ucC|lucC]+unicode, [wordC]+片語index, [wordS]+[ (3 upper bits+) 4 len bits]+[片語index]+words
-  if(p==wordS)
-   q=tr(trSet,++i),p=tr(trSet,++i),r+=words[p]=tr(trSet,++i,i+q),i+=q-1
-   //,mm='設定片語 長'+q+'['+p+']:'+words[p]
-   ;
-  else if(p==wordC)r+=words[tr(trSet,++i)]
-   //,mm='片語'+tr(trSet,i)+'['+words[tr(trSet,i)]+']'
-   ;
-  else if(p==lucC||p==lucC+1)
-   p+=tr(trSet,++i)-lucC,r+=String.fromCharCode(p<32?p:p+95)
-   //,mm='low unicode['+r.charCodeAt(r.length-1)+','+r.slice(-1)+'][p='+p+']'
-   ;
-  else if(ucC<=p&&p<ucC+5)
-   r+=String.fromCharCode(((p-ucC)*123+tr(trSet,++i))*123+tr(trSet,++i))
-   //,mm='unicode['+r.charCodeAt(r.length-1)+','+r.slice(-1)+'][p='+p+']'
-   ;
-  else
-   r+=String.fromCharCode(p)
-   //,mm='普通char('+p+')['+String.fromCharCode(p)+']'
-   ;	//	普通char
+//decodeCodeC=['words:'+words+NewLine,k.length,l+NewLine].concat(k);decodeCodeC.push(NewLine+'-'.x(9)+NewLine+'c:	');var mm;for(i=0;i<c.length;i++)decodeCodeC.push(c.charCodeAt(i));decodeCodeC.push(NewLine+'-'.x(9)+NewLine);if(K.length)decodeCodeC.push('use password['+K.length+']'+K+NewLine);
+i=-1;//alert('-1:'+i);
+//	開始解碼
+while((trSet.count+=l),++i<c.length){
+//if((p=c.charCodeAt(i))>127)trSet.c=c=c.slice(0,)+;
+//decodeCodeC.push(trSet.count+'	ch[(ind['+(q=c.charCodeAt(i))+']='+ind[q]+' +k['+(q=trSet.count%k.length)+']='+(q=k[q])+'('+(ch.length-q)+') )%'+ch.length+'='+(q=(ind[c.charCodeAt(i)]+q)%ch.length)+' ]=[ '+ch[q]+' ]',tr(trSet,i,'')+NewLine);
+//decodeCodeC.push(trSet.count+'	ch[(ind['+(q=c.charCodeAt(i+1))+']='+ind[q]+' +k['+(q=trSet.count%k.length)+']='+(q=k[q])+'('+(ch.length-q)+') )%'+ch.length+'='+(q=(ind[c.charCodeAt(i+1)]+q)%ch.length)+' ]=[ '+ch[q]+' ]',tr(trSet,i+1,'')+NewLine);
+//decodeCodeC.push(trSet.count+'	ch[(ind['+(q=c.charCodeAt(i+2))+']='+ind[q]+' +k['+(q=trSet.count%k.length)+']='+(q=k[q])+'('+(ch.length-q)+') )%'+ch.length+'='+(q=(ind[c.charCodeAt(i+2)]+q)%ch.length)+' ]=[ '+ch[q]+' ]',tr(trSet,i+2,'')+NewLine);
+if(isNaN(p=tr(trSet,i,''))){
+alert('decodeCode filed: illegal char ('+c.charCodeAt(i)+') @ '+i+'/'+c.length+'\n'+r);for(i=0,p=String.fromCharCode(k.length,l);i<k.length;i++)p+=String.fromCharCode(k[i]);return p+','+r;
+return;
+}	//	illegal
+//	[ucC|lucC]+unicode, [wordC]+片語index, [wordS]+[ (3 upper bits+) 4 len bits]+[片語index]+words
+if(p==wordS)
+q=tr(trSet,++i),p=tr(trSet,++i),r+=words[p]=tr(trSet,++i,i+q),i+=q-1
+//,mm='設定片語 長'+q+'['+p+']:'+words[p]
+;
+else if(p==wordC)r+=words[tr(trSet,++i)]
+//,mm='片語'+tr(trSet,i)+'['+words[tr(trSet,i)]+']'
+;
+else if(p==lucC||p==lucC+1)
+p+=tr(trSet,++i)-lucC,r+=String.fromCharCode(p<32?p:p+95)
+//,mm='low unicode['+r.charCodeAt(r.length-1)+','+r.slice(-1)+'][p='+p+']'
+;
+else if(ucC<=p&&p<ucC+5)
+r+=String.fromCharCode(((p-ucC)*123+tr(trSet,++i))*123+tr(trSet,++i))
+//,mm='unicode['+r.charCodeAt(r.length-1)+','+r.slice(-1)+'][p='+p+']'
+;
+else
+r+=String.fromCharCode(p)
+//,mm='普通char('+p+')['+String.fromCharCode(p)+']'
+;	//	普通char
 
-  //alert(mm+'\n'+r);
-  //decodeCodeC.length--,decodeCodeC.push('	'+mm+NewLine);
- }
-
- return r;
+//alert(mm+'\n'+r);
+//decodeCodeC.length--,decodeCodeC.push('	'+mm+NewLine);
 }
 
-//simpleWrite('charCount report3.txt',charCount(simpleRead('function.js')+simpleRead('accounts.js')));
-//{var t=reduceCode(simpleRead('function.js')+simpleRead('accounts.js'));simpleWrite('charCount source.js',t),simpleWrite('charCount report.txt',charCount(t));}	//	所費時間：十數秒（…太扯了吧！）
+return r;
+}
+
+//simpleWrite('char_frequency report3.txt',char_frequency(simpleRead('function.js')+simpleRead('accounts.js')));
+//{var t=reduceCode(simpleRead('function.js')+simpleRead('accounts.js'));simpleWrite('char_frequency source.js',t),simpleWrite('char_frequency report.txt',char_frequency(t));}	//	所費時間：十數秒（…太扯了吧！）
+CeL.data
+.
 /**
- * 測出各字元的出現率。
- * 普通使用字元@0-127：9-10,13,32-126，reduce後常用：9,32-95,97-125
- * @param text	文檔
+ * 測出各字元的出現率。 普通使用字元@0-127：9-10,13,32-126，reduce後常用：9,32-95,97-125
+ * 
+ * @param {String} text
+ *            文檔
  * @return
+ * @memberOf CeL.data
  */
-function charCount(text) {
+char_frequency=function (text) {
 	var i, a, c = [], d, t = '' + text, l = t.length, used = '', unused = '', u1 = -1, u2 = u1;
 	for (i = 0; i < l; i++)
 		if (c[a = t.charCodeAt(i)])
@@ -3028,13 +3109,18 @@ Flesch-Kincaid grade level：和Gunning-Fog Index相似，分數越低可讀性�
 
 DO.normalize(): 合併所有child成一String, may crash IE6 Win!	http://www.quirksmode.org/dom/tests/splittext.html
 */
+CeL.data
+.
 /**
  * 計算字數 word counts.
- * @param text
+ * 
+ * @param {String} text
+ *            文檔
  * @param flag
  * @return
+ * @memberOf CeL.data
  */
-function wordCount(text, flag) {
+count_word=function(text, flag) {
 	var isHTML = flag & 2;
 
 	//	is HTML object
@@ -3359,13 +3445,16 @@ function test_contain_substring(){
 
 */
 
+CeL.data
+.
 /**
  * test if 2 string is at the same length
  * @param s1	string 1
  * @param s2	string 2
  * @return
+ * @memberOf	CeL.data
  */
-function same_length(s1, s2) {
+same_length=function(s1, s2) {
 	if (typeof m !== 'string' || typeof n !== 'string')
 		return;
 	if (!s1 || !s2)
@@ -3399,7 +3488,8 @@ function same_length(s1, s2) {
 
 
 
-/*	將數字轉為 K, M, G 等 SI prefixes 表示方式，例如 6458 轉成 6.31K
+/*	
+	http://www.bipm.org/en/si/si_brochure/chapter3/prefixes.html
 	http://en.wikipedia.org/wiki/International_System_of_Units
 	http://www.merlyn.demon.co.uk/js-maths.htm#RComma
 	http://physics.nist.gov/cuu/Units/prefixes.html
@@ -3407,20 +3497,49 @@ function same_length(s1, s2) {
 	http://wawa.club.hinet.net/cboard1/HCB_Dis.asp?BrdNo=78&SubNo=78761&Club=0&ClsName=%B1%D0%A8%7C%BE%C7%B2%DF
 	http://bbs.thu.edu.tw/cgi-bin/bbscon?board=English&file=M.1046073664.A&num=106
 */
-//to_SI[generateCode.dLK]='setTool,to_fixed,-to_SI.n,-to_SI.v';
-function to_SI(num,d){
- var _f=arguments.callee,p=0,v=_f.v;
- if(!v){
-  _f.v=v=[1024];	//	1000 in disk space
-  for(var i=1,n=_f.n='k,M,G,T,P,E,Z,Y'.split(','),l=n.length;i<l;i++)
-   v[i]=v[i-1]*v[0];
- }
- if(num<v[0])
-  return num;
+//to_SI_prefix[generateCode.dLK]='setTool,to_fixed,-to_SI_prefix.n,-to_SI_prefix.v';
 
- while(num>=v[p])p++;
- return (num/v[--p]).to_fixed(isNaN(d)?2:d) + _f.n[p];
-}
+
+CeL.data
+.
+/**
+ * 將數字轉為 K, M, G 等 SI prefixes 表示方式，例如 6458 轉成 6.31K。
+ * @param {Number} number	數字
+ * @param {Number} digits	to fixed digit
+ * @type	{String}
+ * @return	{String}	SI prefixes 表示方式
+ * @requires	setTool,to_fixed
+ * @memberOf	CeL.data
+ */
+to_SI_prefix = function (number, digits) {
+	function to_SI_prefix(number, digits) {
+		var p = 1, v = to_SI_prefix.v;
+		if (number < v[0])
+			return number;
+
+		while (number >= v[p])
+			p++;
+
+		return to_fixed.call(number / v[--p], isNaN(digits) ? 2 : digits)
+				+ to_SI_prefix.s[p];
+	}
+
+	//	Initialization
+	//	在 IE5 中，因為 base 沒有預先定義，因此在這邊會出現錯誤。
+	var _s = _.to_SI_prefix, base = _s.base,
+	N = base, v = to_SI_prefix.v = [ base ],
+	l = (to_SI_prefix.s = _s.symbol.split(',')).length;
+	while (l--)
+		v.push(N *= base);
+
+	return library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix)
+			.apply(this, arguments);
+};
+
+//	define what is "1k"
+_.to_SI_prefix.base = 1024;
+_.to_SI_prefix.symbol = 'k,M,G,T,P,E,Z,Y';
+
 
 //	將漢字轉為阿拉伯數字表示法(0-99999)
 function turnKanjiToNumbers(num){
@@ -3441,36 +3560,36 @@ function turnKanjiToNumbers(num){
 //alert(turnKanjiToNumbers('四萬〇三百七十九'));
 //alert(turnKanjiToNumbers('十'));
 
-//	將數字轉為大寫漢字表示的讀法	,turnToKanjiD,turnToKanjiInit,"turnToKanjiInit();",_turnToKanji,turnToKanji
-var turnToKanjiD;
-//turnToKanjiInit[generateCode.dLK]='turnToKanjiD';
-function turnToKanjiInit(){
- turnToKanjiD={
+//	將阿拉伯數字轉為中文數字大、小兩種表示法/讀法	,to_Chinese_numeralD,to_Chinese_numeralInit,"to_Chinese_numeralInit();",_to_Chinese_numeral,to_Chinese_numeral
+var to_Chinese_numeralD;
+//to_Chinese_numeralInit[generateCode.dLK]='to_Chinese_numeralD';
+function to_Chinese_numeralInit(){
+ to_Chinese_numeralD={
   'num':['〇,一,二,三,四,五,六,七,八,九'.split(','),'零,壹,貳,參,肆,伍,陸,柒,捌,玖'.split(',')]	//	數字	叄
-  //	http://zh.wikipedia.org/wiki/%E5%8D%81%E8%BF%9B%E5%88%B6	http://zh.wikipedia.org/wiki/%E4%B8%AD%E6%96%87%E6%95%B0%E5%AD%97	http://lists.w3.org/Archives/Public/www-style/2003Apr/0063.html	http://forum.moztw.org/viewtopic.php?t=3043	http://www.moroo.com/uzokusou/misc/suumei/suumei.html	http://espero.51.net/qishng/zhao.htm	http://www.nchu.edu.tw/~material/nano/newsbook1.htm
+  //	http://zh.wikipedia.org/wiki/%E4%B8%AD%E6%96%87%E6%95%B0%E5%AD%97	http://zh.wikipedia.org/wiki/%E5%8D%81%E8%BF%9B%E5%88%B6	http://zh.wikipedia.org/wiki/%E4%B8%AD%E6%96%87%E6%95%B0%E5%AD%97	http://lists.w3.org/Archives/Public/www-style/2003Apr/0063.html	http://forum.moztw.org/viewtopic.php?t=3043	http://www.moroo.com/uzokusou/misc/suumei/suumei.html	http://espero.51.net/qishng/zhao.htm	http://www.nchu.edu.tw/~material/nano/newsbook1.htm
   //	十億（吉）,兆（萬億）,千兆（拍）,百京（艾）,十垓（澤）,秭（堯）,秭:禾予;溝(土旁);,無量大數→,無量,大數;[載]之後的[極]有的用[報]	異體：阿僧[禾氏],For Korean:阿僧祗;秭:禾予,抒,杼,For Korean:枾	For Korean:不可思議(不:U+4E0D→U+F967)
   //	Espana應該是梵文所譯 因為根據「大方廣佛華嚴經卷第四十五卷」中在「無量」這個數位以後還有無邊、無等、不可數、不可稱、不可思、不可量、不可說、不可說不可說，Espana應該是指上面其中一個..因為如果你有心查查Espana其實應該是解作西班牙文的「西班牙」
-  ,'d':',萬,億,兆,京,垓,秭,穰,溝,澗,正,載,極,恒河沙,阿僧祇,那由他,不可思議,無量大數,Espana'	//	denomination, 單位
+  ,'d':',萬,億,兆,京,垓,秭,穰,溝,澗,正,載,極,恒河沙,阿僧祇,那由他,不可思議,無量,大數,Espana'	//	denomination, 單位
   //	http://zh.wikipedia.org/wiki/%E5%8D%81%E9%80%80%E4%BD%8D
   //	比漠微細的，是自天竺的佛經上的數字。而這些「佛經數字」已成為「古代用法」了。
   //	小數單位(十退位)：分,釐(厘),毫(毛),絲,忽,微,纖,沙,塵（納）,埃,渺,漠(皮),模糊,逡巡,須臾（飛）,瞬息,彈指,剎那（阿）,六德(德),虛,空,清,淨	or:,虛,空,清,淨→,空虛,清淨（仄）,阿賴耶,阿摩羅,涅槃寂靜（攸）
   ,'bd':0	//	暫時定義
  };
- with(turnToKanjiD)
-  bd=[(',十,百,千'+turnToKanjiD.d).split(','),(',拾,佰,仟'+turnToKanjiD.d).split(',')]	//	base denomination
+ with(to_Chinese_numeralD)
+  bd=[(',十,百,千'+to_Chinese_numeralD.d).split(','),(',拾,佰,仟'+to_Chinese_numeralD.d).split(',')]	//	base denomination
   ,d=d.split(',');
 }
-turnToKanjiInit();
+to_Chinese_numeralInit();
 /*	處理1-99999的數,尚有bug
 	東漢時期的《數述記遺》
 		一是上法，為自乘系統: 萬萬為億，億億為兆，兆兆為京。
 		二是中法，為萬進系統，皆以萬遞進
-		三是下法，為十進系統，皆以十遞進←現代的科學技術上用的“兆”，以及_turnToKanji()用的
+		三是下法，為十進系統，皆以十遞進←現代的科學技術上用的“兆”，以及_to_Chinese_numeral()用的
 */
-//_turnToKanji[generateCode.dLK]='turnToKanjiD,*turnToKanjiInit();';
-function _turnToKanji(numStr,kind){
+//_to_Chinese_numeral[generateCode.dLK]='to_Chinese_numeralD,*to_Chinese_numeralInit();';
+function _to_Chinese_numeral(numStr,kind){
  if(!kind)kind=0;
- var i=0,r='',l=numStr.length-1,d,tnum=turnToKanjiD.num[kind],tbd=turnToKanjiD.bd[kind],zero=tnum[0];	//	用r=[]約多花一倍時間!
+ var i=0,r='',l=numStr.length-1,d,tnum=to_Chinese_numeralD.num[kind],tbd=to_Chinese_numeralD.bd[kind],zero=tnum[0];	//	用r=[]約多花一倍時間!
  for(;i<=l;i++)
   if((d=numStr.charAt(i))!='0')//if(d=parseInt(numStr.charAt(i)))比較慢
    r+=tnum[d]+tbd[l-i];//'〇一二三四五六七八'.charAt(d) 比較慢
@@ -3478,12 +3597,12 @@ function _turnToKanji(numStr,kind){
  return r;
 }
 //2.016,2.297,2.016
-//{var d=new Date,v='12345236',i=0,a;for(;i<10000;i++)a=turnToKanji(v);alert(v+'\n→'+a+'\ntime:'+gDate(new Date-d));}
+//{var d=new Date,v='12345236',i=0,a;for(;i<10000;i++)a=to_Chinese_numeral(v);alert(v+'\n→'+a+'\ntime:'+gDate(new Date-d));}
 
 //	將數字轉為漢字表示法	num>1京時僅會取概數，此時得轉成string再輸入！
 //	統整:尚有bug	廿卅
-//turnToKanji[generateCode.dLK]='turnToKanjiD,turnToKanjiInit,_turnToKanji,turnToKanji';//,*turnToKanjiInit();
-function turnToKanji(num,kind){
+//to_Chinese_numeral[generateCode.dLK]='to_Chinese_numeralD,to_Chinese_numeralInit,_to_Chinese_numeral,to_Chinese_numeral';//,*to_Chinese_numeralInit();
+function to_Chinese_numeral(num,kind){
  //num=parseFloat(num);
  if(typeof num=='number')num=num.toString(10);
  num=(''+num).replace(/[,\s]/g,'');
@@ -3491,7 +3610,7 @@ function turnToKanji(num,kind){
  if(num.match(/(-?[\d.]+)/))num=RegExp.$1;
  if(!kind)kind=0;
 
- var j,i,d=num.indexOf('.'),k,l,m,addZero=false,tnum=turnToKanjiD.num[kind],zero=tnum[0],td=turnToKanjiD.d;//i:integer,整數;d:decimal,小數
+ var j,i,d=num.indexOf('.'),k,l,m,addZero=false,tnum=to_Chinese_numeralD.num[kind],zero=tnum[0],td=to_Chinese_numeralD.d;//i:integer,整數;d:decimal,小數
  if(d==-1)d=0;
  else for(num=num.replace(/0+$/,''),i=num.substr(d+1),num=num.slice(0,d),d='',j=0;j<i.length;j++)
 	d+=tnum[i.charAt(j)];	//	小數
@@ -3501,8 +3620,8 @@ function turnToKanji(num,kind){
  num=num.replace(/^0+/,'');
 
  for(m=num.length%4,j=m-4,l=(num.length-(m||4))/4;j<num.length;m=0,l--)//addZero=false,	l=Math.floor((num.length-1)/4)
-  if(Math.floor(m=m?num.slice(0,m):num.substr(j+=4,4)))	//	這邊不能用parseInt: parseInt('0~')會用八進位，其他也有奇怪的效果。
-   m=_turnToKanji(m,kind),addZero=addZero&&m.charAt(0)!=zero
+  if(Math.floor(m=m?num.slice(0,m):num.substr(j+=4,4)))	//	這邊不能用 parseInt: parseInt('0~')會用八進位，其他也有奇怪的效果。
+   m=_to_Chinese_numeral(m,kind),addZero=addZero&&m.charAt(0)!=zero
    ,i+=(addZero?(addZero=false,zero):'')+m+td[l];
   else addZero=true;
 
@@ -3510,9 +3629,9 @@ function turnToKanji(num,kind){
 }
 
 //	轉換成金錢表示法
-//turnToMoney[generateCode.dLK]='turnToKanji';
+//turnToMoney[generateCode.dLK]='to_Chinese_numeral';
 function turnToMoney(num){
- var i=(num=turnToKanji(num,1)).indexOf('點');
+ var i=(num=to_Chinese_numeral(num,1)).indexOf('點');
  return i==-1?num+'圓整':num.slice(0,i)+'圓'+num.charAt(++i)+'角'+(++i==num.length?'':num.charAt(i++)+'分')+num.substr(i);
 }
 
@@ -3635,32 +3754,55 @@ CeL.setup_module(module_name, code_for_including);
 
 
 
-(function (){
+/**
+ * @name	CeL function for locale
+ * @fileoverview
+ * 本檔案包含了 locale 的 functions。
+ * @since	
+ */
 
-	/**
-	 * 本 library / module 之 id
-	 */
-	var lib_name = 'locale';
+if (typeof CeL === 'function'){
 
-	//	若 CeL 尚未 loaded 或本 library 已經 loaded 則跳出。
-	if(typeof CeL !== 'function' || CeL.Class !== 'CeL' || CeL.is_loaded(lib_name))
-		return;
+/**
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
+ */
+var module_name = 'locale';
+
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.locale
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function(library_namespace, load_arguments) {
 
 
 /**
- * compatibility/相容性 test
- * @memberOf	CeL
- * @param	msg	msg
+ * null module constructor
+ * @class	locale 的 functions
  */
-CeL.locale = function(msg){
-	alert(msg);
+CeL.locale
+= function() {
+	//	null module constructor
 };
 
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.locale
+.prototype = {
+};
 
-
-//CeL.extend(lib_name, {});
-
-})();
 
 
 
@@ -3735,6 +3877,17 @@ function getMessage(message,language){
 
 
 
+
+return (
+	CeL.locale
+);
+};
+
+//===================================================
+
+CeL.setup_module(module_name, code_for_including);
+
+};
 
 
 
@@ -4509,10 +4662,10 @@ var module_name = 'native';
  */
 var code_for_including = function(library_namespace, load_arguments) {
 
-//	requires
-if (eval(library_namespace.use_function(
-		'data.split_String_to_Object')))
-	return;
+//	requires 必須放在 '_' 後！
+	if (eval(library_namespace.use_function(
+			'data.split_String_to_Object')))
+		return;
 
 
 /**
@@ -4523,6 +4676,7 @@ CeL.native
 = function() {
 	//	null module constructor
 };
+
 
 /**
  * for JSDT: 有 prototype 才會將之當作 Class
@@ -4714,11 +4868,11 @@ CeL.native
 /**
  * 顯示格式化日期 string
  * @param date_value	要轉換的 date, 值過小時當作時間, <0 轉成當下時間
- * @param mode	要轉換的 mode
- * @param zero_fill	對 0-9 是否補零
- * @param date_separator	date separator
- * @param time_separator	time separator
- * @return	{String}	格式化日期
+ * @param {Number} mode	要轉換的 mode
+ * @param {Boolean} zero_fill	對 0-9 是否補零
+ * @param {String} date_separator	date separator
+ * @param {String} time_separator	time separator
+ * @return	{String}	格式化後的日期
  * @example
  * alert(format_date());
  * @since	2003/10/18 1:04 修正
@@ -4835,15 +4989,15 @@ format_date = function format_date(date_value, mode, zero_fill, date_separator, 
 /*
 	function經ScriptEngine會轉成/取用'function'開始到'}'為止的字串
 
-	用[var thisFuncName=parse_Function().funcName]可得本身之函數名
-	if(_detect_)alert('double run '+parse_Function().funcName+'() by '+parse_Function(arguments.callee.caller).funcName+'()!');
+	用[var thisFuncName=parse_function().funcName]可得本身之函數名
+	if(_detect_)alert('double run '+parse_function().funcName+'() by '+parse_function(arguments.callee.caller).funcName+'()!');
 
 You may use this.constructor
 
 
 TODO:
-to call: parse_Function(this,arguments)
-e.g., parent_func.child_func=function(){var name=parse_Function(this,arguments);}
+to call: parse_function(this,arguments)
+e.g., parent_func.child_func=function(){var name=parse_function(this,arguments);}
 
 bug:
 函數定義 .toString() 時無法使用。
@@ -4852,70 +5006,49 @@ CeL.native
 .
 /**
  * 函數的文字解譯/取得函數的語法
- * @param function_name	function name
+ * @param {Function|String} function_name	function name or function structure
  * @param flag	=1: reduce
  * @return
  * @example
- * parsed_data = new parse_Function(function_name);
+ * parsed_data = new parse_function(function_name);
  * @see
  * http://www.interq.or.jp/student/exeal/dss/ref/jscript/object/function.html,
  * Syntax error: http://msdn.microsoft.com/library/en-us/script56/html/js56jserrsyntaxerror.asp
  * @memberOf	CeL.native
+ * @since	2010/5/16 23:04:54
  */
-parse_Function = function parse_Function(function_name, flag) {
+parse_function = function parse_function(function_name, flag) {
 	if (!function_name
-			&& typeof (function_name = parse_Function.caller) !== 'function')
+			&& typeof (function_name = parse_function.caller) !== 'function')
 		return;
-	if (typeof function_name === 'string')
-		this.oriName = function_name,
-		// 不加var會變成global變數
-		eval('var function_name=' + function_name);
+	if (typeof function_name === 'string'
+			&& !(function_name = library_namespace.get_various(function_name)))
+		return;
 
-	//	原先：functionRegExp=/^\s*function\s+(\w+) ..	因為有function(~){~}這種的，所以改變。
-	var functionRegExp// =/^\s*function\s*(\w*)\s*\(([\w\s,]*)\)\s*\{\s*((.|\n)*)\s*\}\s*$/m
-		, functionArguments, functionContents, functionString;
+	var fs = '' + function_name, m = fs.match(/^function[\s\n]+(\w*)[\s\n]*\(([\w,\s\n]*)\)[\s\n]*\{[\s\n]*((.|\n)*)[\s\n]*\}[\s\n]*$/);
+	//library_namespace.debug(typeof function_name + '\n' + fs + '\n' + m);
 
-	//	for JScript<=5
-	try {
-		functionRegExp = new RegExp(
-			'^\\s*function\\s*(\\w*)\\s*\\(([\\w\\s,]*)\\)\\s*\\{\\s*((.|\\n)*)\\s*\\}\\s*$', 'm');
-	} catch (e) {
-	}
+	// detect error, 包含引數
+	// 原先：functionRegExp=/^\s*function\s+(\w+) ..
+	// 因為有function(~){~}這種的，所以改變。
+	if (!m)
+		// JScript5 不能用throw!
+		// http://www.oldversion.com/Internet-Explorer.html
+		throw new Error(1002, 'Syntax error (語法錯誤)');
 
-	this.func = function_name;
-	functionString = '' + function_name;
-	//alert(typeof functionString+'\n'+functionString+'\n'+functionString.match(functionRegExp))
-	//	detect error
-	if (!functionString.match(functionRegExp))
-		//	JScript5 不能用throw!	http://www.oldversion.com/Internet-Explorer.html
-		//throw new Error(1002,'Syntax error(語法錯誤)');
-		return 1002;
+	if (function_name != m[1])
+		library_namespace.warn('Function name unmatch (函數名稱不相符，可能是用了reference？)');
 
-	//	可能是用了dupF=oF
-	//if(functionString!=RegExp.$1)throw new Error(1,'Function name unmatch(函數名稱不相符)');
+	//library_namespace.debug('function ' + m[1] + '(' + m[2] + '){\n' + m[3] + '\n}');
 
-
-	function_name = RegExp.$1;
-	functionArguments = RegExp.$2.split(',');
-	functionContents = RegExp.$3;
-	for ( var i = 0; i < functionArguments.length; i++) {
-		functionArguments[i] = functionArguments[i].replace(/\s+$|^\s+/g, '')
-				// 去除前後空白
-				// .replace(/\s+$/,'').replace(/^\s+/,'')
-				;
-		if (functionArguments[i].match(/\s/))
-			//throw new Error(1002,'Syntax error at arguments(語法錯誤)');
-			return 1002;
-	}
-
-	//	在HTML中用this.name=會改變window.name!
-	this.funcName = function_name;
-	this.arguments = functionArguments;
-	this.contents = functionContents;
-	//this.parse=[functionArguments,functionContents];
-	//alert('function '+this.name+'('+this.arguments+'){\n'+this.contents+'}')
-	return this;
-}
+	return {
+		string : fs,
+		name : m[1],
+		// 去除前後空白
+		arguments : m[2].replace(/[\s\n]+/g, '').split(','),
+		code : m[3]
+	};
+};
 
 
 
@@ -4954,27 +5087,66 @@ if (typeof c == 'object') {
 
 
 
-/*	2008/8/2 10:10:49
-	對付有時 charCodeAt 會傳回 >256 的數值。	http://www.alanwood.net/demos/charsetdiffs.html
-	若確定編碼是 ASCII (char code 是 0~255) 即可使用此函數替代 charCodeAt
-*/
-function toASCIIcode(s,a){	//	string, at
- var _f=arguments.callee,c;
+CeL.native
+.
+/**
+ * 對付有時 charCodeAt 會傳回 >256 的數值。
+ * 若確定編碼是 ASCII (char code 是 0~255) 即可使用此函數替代 charCodeAt。
+ * @param text	string
+ * @param position	at what position
+ * @return
+ * @since	2008/8/2 10:10:49
+ * @see
+ * http://www.alanwood.net/demos/charsetdiffs.html
+ * @memberOf	CeL.native
+ */
+toASCIIcode=function (text, position) {
+	var _f = arguments.callee, c;
 
- if(!_f.t){
-  //	initial
-  var i=129,t=_f.t=[],l={8364:128,8218:130,402:131,8222:132,8230:133,8224:134,8225:135,710:136,8240:137,352:138,8249:139,338:140,381:142,8216:145,8217:146,8220:147,8221:148,8226:149,8211:150,8212:151,732:152,8482:153,353:154,8250:155,339:156,382:158,376:159};
-  for(;i<256;i+=2)
-   t[i]=i;
-  for(i in l)
-   //sl(i+' = '+l[i]),
-   t[Math.floor(i)]=l[i];
- }
+	if (!_f.t) {
+		// initial
+		var i = 129, t = _f.t = [], l = {
+			8364 : 128,
+			8218 : 130,
+			402 : 131,
+			8222 : 132,
+			8230 : 133,
+			8224 : 134,
+			8225 : 135,
+			710 : 136,
+			8240 : 137,
+			352 : 138,
+			8249 : 139,
+			338 : 140,
+			381 : 142,
+			8216 : 145,
+			8217 : 146,
+			8220 : 147,
+			8221 : 148,
+			8226 : 149,
+			8211 : 150,
+			8212 : 151,
+			732 : 152,
+			8482 : 153,
+			353 : 154,
+			8250 : 155,
+			339 : 156,
+			382 : 158,
+			376 : 159
+		};
+		for (; i < 256; i += 2)
+			t[i] = i;
+		for (i in l)
+			// sl(i+' = '+l[i]),
+			t[Math.floor(i)] = l[i];
+	}
 
- if(a<0&&!isNaN(s))c=s;
- else c=s.charCodeAt(a||0);
+	if (position < 0 && !isNaN(text))
+		c = text;
+	else
+		c = text.charCodeAt(position || 0);
 
- return c<128?c:_f.t[c]||c;
+	return c < 128 ? c : _f.t[c] || c;
 }
 
 
@@ -5061,7 +5233,7 @@ CeL.native
  * 重新設定 RegExp object 之 flag
  * @param {RegExp} regexp	RegExp object to set
  * @param {String} flag	flag of RegExp
- * @return
+ * @return	{RegExp}
  * @example
  * 附帶 'g' flag 的 RegExp 對相同字串作 .test() 時，第二次並不會重設。因此像下面的 expression 兩次並不會得到相同結果。
  * var r=/,/g,t='a,b';
@@ -5114,7 +5286,12 @@ renew_RegExp_flag = function(regexp, flag) {
 					&& regexp[i])
 				F += flag_set[i];
 
-	return new RegExp(regexp.source, F);
+	// for JScript<=5
+	try{
+		return new RegExp(regexp.source, F);
+	}catch (e) {
+		// TODO: handle exception
+	}
 };
 
 
@@ -5262,7 +5439,8 @@ CeL.native
 .
 /**
  * 取至小數 d 位，
- * 肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1
+ * 肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1。
+ * c.f., round()
  * @param {Number} digits	1,2,..: number of decimal places shown
  * @param {Number} [max]	max digits	max===0:round() else floor()
  * @return
@@ -5270,8 +5448,10 @@ CeL.native
  * https://bugzilla.mozilla.org/show_bug.cgi?id=5856
  * IEEE754の丸め演算は最も報告されるES3「バグ」である。
  * http://www.jibbering.com/faq/#FAQ4_6
+ * http://en.wikipedia.org/wiki/Rounding
  * @example
  * {var d=new Date,v=0.09999998,i=0,a;for(;i<100000;i++)a=v.to_fixed(2);alert(v+'\n→'+a+'\ntime:'+format_date(new Date-d));}
+ * @memberOf	CeL.native
  */
 to_fixed = function(digits, max) {
 	var v = this.valueOf(),
@@ -5296,6 +5476,8 @@ to_fixed = function(digits, max) {
 		return v.charAt(i + 1) == '-' ? 0 : v;
 
 	//library_namespace.debug(v);
+	//	TODO: using +.5 的方法
+	//	http://clip.artchiu.org/2009/06/26/%E4%BB%A5%E6%95%B8%E5%AD%B8%E7%9A%84%E5%8E%9F%E7%90%86%E8%99%95%E7%90%86%E3%80%8C%E5%9B%9B%E6%8D%A8%E4%BA%94%E5%85%A5%E3%80%8D/
 	if ((i = v.indexOf('.')) !== -1) {
 		if (i + 1 + digits < v.length)
 			if (max)
@@ -5364,6 +5546,8 @@ function dQuote(s,len,sp){	//	string,分割長度(會採用'~'+"~"的方式),sep
 }
 
 
+CeL.native
+.
 /**
  * check input string send to SQL server
  * @param {String} string	input string
@@ -5371,8 +5555,9 @@ function dQuote(s,len,sp){	//	string,分割長度(會採用'~'+"~"的方式),sep
  * @since	2006/10/27 16:36
  * @see
  * from lib/perl/BaseF.pm (or program/database/BaseF.pm)
+ * @memberOf	CeL.native
  */
-function checkSQLInput(string) {
+checkSQLInput=function (string) {
 	if (!string)
 		return '';
 
@@ -5406,12 +5591,33 @@ function checkSQLInput(string) {
  * @since	2006/10/27 16:36
  * @see
  * from lib/perl/BaseF.pm (or program/database/BaseF.pm)
+ * function strip() @ Prototype JavaScript framework
+ * @memberOf	CeL.native
  */
 function checkSQLInput_noSpace(string) {
 	return string ? checkSQLInput(string
-		//.replace(/[\s\n]+$|^[\s\n]+/g,'')
-		.replace(/\s+$|^\s+/g, '')) : '';
+			// .replace(/[\s\n]+$|^[\s\n]+/g,'')
+			.replace(/^\s+|\s+$/g, ''))
+		: '';
 }
+;
+/*
+
+2010/6/1
+test time:
+
+'   fhdgjk   lh gjkl ;sfdf d  hf gj '
+
+.replace(/^\s+|\s+$/g, '')
+~<
+.replace(/\s+$|^\s+/g, '')
+<
+.replace(/^\s+/, '').replace(/\s+$/, '')
+~<
+.replace(/\s+$/, '').replace(/^\s+/, '')
+
+*/
+
 
 
 CeL.native
@@ -5420,6 +5626,7 @@ CeL.native
  * 轉換字串成數值，包括分數等。分數亦將轉為分數。
  * @param {String} number	欲轉換之值
  * @return
+ * @memberOf	CeL.native
  */
 parse_number = function(number) {
 	var m = typeof number;
@@ -5472,32 +5679,59 @@ CeL.setup_module(module_name, code_for_including);
 
 
 
-(function (){
+/**
+ * @name	CeL function for net
+ * @fileoverview
+ * 本檔案包含了 net 的 functions。
+ * @since	
+ */
 
-	/**
-	 * 本 library / module 之 id
-	 */
-	var lib_name = 'SVG';
+if (typeof CeL === 'function'){
 
-	//	若 CeL 尚未 loaded 或本 library 已經 loaded 則跳出。
-	if(typeof CeL !== 'function' || CeL.Class !== 'CeL' || CeL.is_loaded(lib_name))
-		return;
+/**
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
+ */
+var module_name = 'net';
+
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.net
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function(library_namespace, load_arguments) {
 
 
 /**
- * math test
- * @memberOf	CeL
- * @param	msg	msg
+ * null module constructor
+ * @class	net 的 functions
  */
-CeL.SVG = function(msg){
-	alert(msg);
+CeL.net
+= function() {
+	//	null module constructor
+};
+
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.net
+.prototype = {
 };
 
 
 
-//CeL.extend(lib_name, {});
 
-})();
+
 
 
 
@@ -5732,7 +5966,7 @@ SOCKS host:port - 調用指定SOCKS代理(host:port)
 如果是選用由分號分割的多塊設置，按照從左向右，最左邊的代理會被最優先調用，除非瀏覽器無法成功和proxy建立連接，那麼下一個配置就會被調 用。如果瀏覽器遇到不可用的代理服務器，瀏覽器將在30分鐘後自動重試先前無響應的代理服務器，一個小時後會再次進行嘗試，依此類推，每次間隔時間為 30 分鐘。
 */
 function FindProxyForURL(url, host){	//	url: 完整的URL字串, host: 在 URL字串中遠端伺服器的網域名稱。該參數祇是為了 方便而設定的，是與URL在 :// 和 / 中的文字是一模 一樣。但是傳輸阜（The port number）並不包含其中 。當需要的時候可以從URL字串解讀出來。
- var lch=host.toLowerCase();
+ var lch = host.toLowerCase();
 
 	//isPlainHostName(lch) || isInNet(lch,"192.168.0.0","255.255.0.0") || isInNet(lch,"127.0.0.0","255.255.0.0") || dnsDomainIs(lch,".tw") ?"DIRECT";
  return //dnsDomainIs(lch,"holyseal.net") || dnsDomainIs(lch,".fuzzy2.com") ? "PROXY 211.22.213.114:8000; DIRECT":	//	可再插入第二、三順位的proxy
@@ -5751,6 +5985,9 @@ curl --connect-timeout 5 -x 66.98.238.8:3128 http://www.getchu.com/ | grep Getch
 						//	slow:	http://www.cybersyndrome.net/country.html
 	dnsDomainIs(lch,".tactics.ne.jp")	? "PROXY 202.175.95.171:8080; PROXY 203.138.90.141:80; DIRECT":
 	//dnsDomainIs(lch,".ys168.com")		? "PROXY 76.29.160.230:8000; DIRECT":	//	永硕E盘专业网络硬盘服务
+
+	//	高屏澎區網中心網頁代理伺服器
+	//	http://proxy.kpprc.edu.tw/proxy.pac
 
 	//	國立高雄師範大學圖書館	69771202	qwer1234
 	!host.indexOf("140.127.53.") && !url.indexOf("http:")	//	isInNet(host, "140.127.53.13", "255.255.255.0")
@@ -5776,30 +6013,43 @@ curl --connect-timeout 5 -x 66.98.238.8:3128 http://www.getchu.com/ | grep Getch
 //	http://help.globalscape.com/help/cuteftppro8/
 //setupCuteFTPSite[generateCode.dLK]='parse_URI';
 function setupCuteFTPSite(targetS,site){
- if(typeof targetS=='string')targetS=parse_URI(targetS,'ftp:');
- if(!targetS)return;
+ if (typeof targetS === 'string')
+		targetS = parse_URI(targetS, 'ftp:');
+	if (!targetS)
+		return;
 
- if(site){
-  try{site.Disconnect();}catch(e){}
-  try{site.Close();}catch(e){}
- }
- try{
-  site=null;
-  site=WScript.CreateObject("CuteFTPPro.TEConnection");
-  site.Host=targetS.host;
-  //	http://help.globalscape.com/help/cuteftppro8/setting_protocols.htm
-  site.Protocol=targetS.protocol.replace(/:$/,'').toUpperCase();	//	The default Protocol is FTP, however SFTP (SSH2), FTPS (SSL), HTTP, and HTTPS can also be used)
-  if(targetS.username)site.Login=targetS.username;
-  if(targetS.password)site.Password=targetS.password;
+	if (site) {
+		try {
+			site.Disconnect();
+		} catch (e) {
+		}
+		try {
+			site.Close();
+		} catch (e) {
+		}
+	}
+	try {
+		site = null;
+		site = WScript.CreateObject("CuteFTPPro.TEConnection");
+		site.Host = targetS.host;
+		// http://help.globalscape.com/help/cuteftppro8/setting_protocols.htm
+		// The default Protocol is FTP, however SFTP (SSH2), FTPS (SSL), HTTP, and HTTPS can also be used.
+		site.Protocol = targetS.protocol.replace(/:$/, '').toUpperCase();
+		if (targetS.username)
+			site.Login = targetS.username;
+		if (targetS.password)
+			site.Password = targetS.password;
 
-  site.useProxy="off";
-  site.TransferType='binary';
+		site.useProxy = "off";
+		site.TransferType = 'binary';
 
-  site.Connect();
+		site.Connect();
 
-  //site.TransferURL("http://lyrics.meicho.com.tw/run.js");
- }catch(e){return;}
- return site;
+		// site.TransferURL("http://lyrics.meicho.com.tw/run.js");
+	} catch (e) {
+		return;
+	}
+	return site;
 }
 
 
@@ -5846,6 +6096,18 @@ function transferURL(fromURI,toURI){
 }
 
 
+
+
+return (
+	CeL.net
+);
+};
+
+//===================================================
+
+CeL.setup_module(module_name, code_for_including);
+
+};
 
 
 
@@ -6172,32 +6434,55 @@ CeL.setup_module(module_name, code_for_including);
 
 
 
-(function (){
+/**
+ * @name	CeL function for WMI
+ * @fileoverview
+ * 本檔案包含了 WMI 的 functions。
+ * @since	
+ */
 
-	/**
-	 * 本 library / module 之 id
-	 */
-	var lib_name = 'OS.Windows.WMI';
-
-	//	若 CeL 尚未 loaded 或本 library 已經 loaded 則跳出。
-	if(typeof CeL !== 'function' || CeL.Class !== 'CeL' || CeL.is_loaded(lib_name))
-		return;
-
+if (typeof CeL === 'function'){
 
 /**
- * Windows.WMI test
- * @memberOf	CeL
- * @param	msg	msg
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
  */
-CeL.OS.Windows.WMI = function(msg){
-	alert(msg);
+var module_name = 'OS.Windows.WMI';
+
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.OS.WMI
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function(library_namespace, load_arguments) {
+
+/**
+ * null module constructor
+ * @class	WMI 的 functions
+ */
+CeL.OS.WMI
+= function() {
+	//	null module constructor
+};
+
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.OS.WMI
+.prototype = {
 };
 
 
-
-//CeL.extend(lib_name, {});
-
-})();
 
 
 
@@ -6597,14 +6882,17 @@ function getNetInfo(type){	//	default type: ip setted interfaces only, 1: all in
 }
 
 
+CeL.OS.WMI
+.
 /**
  * get CIDR data
  * @param {Number} CIDR	CIDR mask bits, 0~32
  * @param {String} IP	IPv4, e.g., 1.2.3.4
  * @return	CIDR data
  * @since	2010/4/21 22:56:16
+ * @memberOf	CeL.OS.WMI
  */
-function CIDR_to_IP(CIDR, IP) {
+CIDR_to_IP=function (CIDR, IP) {
 	if (isNaN(CIDR) || CIDR < 0 || CIDR > 32)
 		return;
 
@@ -6655,12 +6943,18 @@ function CIDR_to_IP(CIDR, IP) {
 };
 
 
+CeL.OS.WMI
+.
 // default DNS
 // 168.95.1.1,8.8.4.4
 set_net_info.default_DNS = '8.8.8.8';
+CeL.OS.WMI
+.
 // http://en.wikipedia.org/wiki/CIDR_notation
 set_net_info.CIDR_notation = 24;
 
+CeL.OS.WMI
+.
 /**
  * 改變網卡的IP地址: change IP, set IP
  * @param to_s	IP or {IP:''||[], CIDR:24||.CIDR_notation, Subnet:''||[], DNS:''||[], Gateway:254||[], GatewayOrder:''||[]}
@@ -6678,8 +6972,9 @@ set_net_info.CIDR_notation = 24;
  * set_net_info({IP:'163.16.20.212',Gateway:254});
  * sl(set_net_info({IP:'163.16.20.30',Gateway:254}));WScript.Quit();
  * @requires	getWMIData,VBA,JSArrayToSafeArray,CIDR_to_IP
+ * @memberOf	CeL.OS.WMI
  */
-function set_net_info(to_s, from) {
+set_net_info=function (to_s, from) {
 
 	var _f = set_net_info, r, count, IPA, i = function(ip) {
 		if (!(ip instanceof Array))
@@ -6699,7 +6994,7 @@ function set_net_info(to_s, from) {
 		};
 
 		if ((r = r[3]) > 15) {
-			r = CIDR_to_IP(r, count);
+			r = _.CIDR_to_IP(r, count);
 			to_s.Gateway = r.geteway.join('.');
 			to_s.Subnet = r.mask.join('.');
 		}
@@ -6716,7 +7011,7 @@ function set_net_info(to_s, from) {
 
 	//	SubnetMask: Subnet masks that complement the values in the IPAddress parameter. Example: 255.255.0.0. 
 	if (!('Subnet' in to_s) || !isNaN(to_s.Subnet)) {
-		r = CIDR_to_IP(to_s.Subnet || _f.CIDR_notation, to_s.IP);
+		r = _.CIDR_to_IP(to_s.Subnet || _f.CIDR_notation, to_s.IP);
 		to_s.Subnet = r.subnet.join('.');
 	}
 
@@ -6804,23 +7099,33 @@ test:
 var h='Public',ip=getIPofHost(h);alert(ip?h+':\n'+ip:'Computer [\\'+h+'] is unreachable!');
 
 */
-getIPofHost[generateCode.dLK]='getWMIData';
-function getIPofHost(h){
- var qIP=getWMIData({from:'Win32_PingStatus',where:"Address='"+h+"'"}).item();
- if(!qIP.StatusCode&&qIP.StatusCode!=null)return qIP.ProtocolAddress;
+//getIPofHost[generateCode.dLK]='getWMIData';
+function getIPofHost(h) {
+	var qIP = getWMIData( {
+		from : 'Win32_PingStatus',
+		where : "Address='" + h + "'"
+	}).item();
+	if (!qIP.StatusCode && qIP.StatusCode != null)
+		return qIP.ProtocolAddress;
 }
 
 //	終止進程	http://msdn2.microsoft.com/en-us/library/aa393907.aspx
-killProcess[generateCode.dLK]='getWMIData';
-function killProcess(n,isPID){
- var k=0;
- if(typeof isPID=='undefined')isPID=!isNaN(n);
- getWMIData('Win32_Process',function(p){
-  with(p)if(isPID)
-   if(ProcessId==n){Terminate();k=1;return 1;}
-   else if(Caption==n)Terminate(),k++;
- });
- return k;
+//killProcess[generateCode.dLK]='getWMIData';
+function killProcess(n, isPID) {
+	var k = 0;
+	if (typeof isPID == 'undefined')
+		isPID = !isNaN(n);
+	getWMIData('Win32_Process', function(p) {
+		with (p)
+		if (isPID)
+			if (ProcessId == n) {
+				Terminate();
+				k = 1;
+				return 1;
+			} else if (Caption == n)
+				Terminate(), k++;
+	});
+	return k;
 }
 
 
@@ -6836,25 +7141,29 @@ for(i=0,p=getProcess();i<p.length;i++)with(p[i])
 	+'Time in kernel mode: '+KernelModeTime+' ms\n'+ExecutablePath+'\n'+CommandLine+'\n'+CreationDate.toLocaleString()
 	);
 */
-getProcess[generateCode.dLK]='getWMIData';
-function getProcess(){
- var r=[];
- getWMIData('Win32_Process',function(p){with(p)r[Caption]=r[r.push({
-	ProcessId:ProcessId,
-	Caption:Caption,
-	ExecutablePath:ExecutablePath,
-	CommandLine:CommandLine,
-	Name:Name,	//	==Caption
-	Description:Description,	//	==Caption
-	CSName:CSName,
-	HandleCount:HandleCount,
-	OSName:OSName,
-	MinimumWorkingSetSize:MinimumWorkingSetSize,
-	MaximumWorkingSetSize:MaximumWorkingSetSize,
-	KernelModeTime:p.KernelModeTime/1e5,	//	100000ms
-	CreationDate:getWMIData.DateStringToDate(CreationDate)
- })-1]});
- return r;
+//getProcess[generateCode.dLK]='getWMIData';
+function getProcess() {
+	var r = [];
+	getWMIData('Win32_Process', function(p) {
+		with (p)
+		r[Caption] = r[r.push( {
+			ProcessId : ProcessId,
+			Caption : Caption,
+			ExecutablePath : ExecutablePath,
+			CommandLine : CommandLine,
+			Name : Name, // ==Caption
+			Description : Description, // ==Caption
+			CSName : CSName,
+			HandleCount : HandleCount,
+			OSName : OSName,
+			MinimumWorkingSetSize : MinimumWorkingSetSize,
+			MaximumWorkingSetSize : MaximumWorkingSetSize,
+			KernelModeTime : p.KernelModeTime / 1e5, //	100000ms
+			CreationDate : getWMIData
+			.DateStringToDate(CreationDate)
+		}) - 1];
+	});
+	return r;
 }
 
 
@@ -6868,28 +7177,31 @@ alert(getService()['Event Log'].Description);
 for(i=0,s=getService();i<s.length;i++){t=i+' / '+s.length;for(j in s[i])t+='\n'+j+': '+s[i][j];alert(t);}
 */
 //getService[generateCode.dLK]='getWMIData';
-function getService(){
- var r=[];
- getWMIData('Win32_Service',function(s){with(s)r[Caption]=r[r.push({
-	AcceptPause:AcceptPause,
-	AcceptStop:AcceptStop,
-	Caption:Caption,
-	Description:Description,
-	DisplayName:DisplayName,
-	ExitCode:ExitCode,
-	InstallDate:getWMIData.DateStringToDate(InstallDate),
-	Name:Name,
-	Pathname:Pathname,
-	ProcessId:ProcessId,
-	ServiceSpecificExitCode:ServiceSpecificExitCode,
-	Started:Started,
-	StartMode:StartMode,
-	StartName:StartName,
-	State:State,
-	Status:Status,
-	SystemName:SystemName
- })-1]});
- return r;
+function getService() {
+	var r = [];
+	getWMIData('Win32_Service', function(s) {
+		with (s)
+		r[Caption] = r[r.push( {
+			AcceptPause : AcceptPause,
+			AcceptStop : AcceptStop,
+			Caption : Caption,
+			Description : Description,
+			DisplayName : DisplayName,
+			ExitCode : ExitCode,
+			InstallDate : getWMIData.DateStringToDate(InstallDate),
+			Name : Name,
+			Pathname : Pathname,
+			ProcessId : ProcessId,
+			ServiceSpecificExitCode : ServiceSpecificExitCode,
+			Started : Started,
+			StartMode : StartMode,
+			StartName : StartName,
+			State : State,
+			Status : Status,
+			SystemName : SystemName
+		}) - 1];
+	});
+	return r;
 }
 
 
@@ -6934,7 +7246,7 @@ TODO:
 function runas(p){
  if(!p)p=typeof WScript=='object'?WScript.ScriptFullName:unescape(location.pathname);
  var a={js:'wscript.exe',vbs:'wscript.exe',hta:'mshta.exe'},ext=p.match(/([^.]+)$/);
- a=ext&&(ext=ext[1].toLowerCase(),ext in a)?a[ext]:'';
+ a=ext&&((ext=ext[1].toLowerCase()) in a)?a[ext]:'';
  //	判斷是否有權限
  if(!registryF.checkAccess('HKLM\\SOFTWARE\\')){
   //	以管理者權限另外執行新的	It will get the UAC prompt if this feature is not disabled.
@@ -7093,38 +7405,81 @@ function shutdown(mode,time/*,message*/){
 
 
 
+return (
+	CeL.OS.WMI
+);
+};
+
+//===================================================
+
+CeL.setup_module(module_name, code_for_including);
+
+};
+
+
+
+
 //--------------------------------------------------------------------------------//
 
 
 
 
-(function (){
+/**
+ * @name	CeL function for Windows job
+ * @fileoverview
+ * 本檔案包含了 Windows job 的 functions。
+ * @since	
+ */
 
-	/**
-	 * 本 library / module 之 id
-	 */
-	var lib_name = 'OS.Windows';
+if (typeof CeL === 'function'){
 
-	//	若 CeL 尚未 loaded 或本 library 已經 loaded 則跳出。
-	if(typeof CeL !== 'function' || CeL.Class !== 'CeL' || CeL.is_loaded(lib_name))
-		return;
+/**
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
+ */
+var module_name = 'OS.Windows.job';
 
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.OS.Windows.job
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function(library_namespace, load_arguments) {
+
+//	requires
+if (eval(library_namespace.use_function(
+		'code.compatibility.is_DOM')))
+	return;
 
 
 /**
- * Windows test
- * @memberOf	CeL
- * @param	msg	msg
+ * null module constructor
+ * @class	Windows job 的 functions
  */
-CeL.OS.Windows = function(msg){
-	alert(msg);
+CeL.OS.Windows.job
+= function() {
+	//	null module constructor
+};
+
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.OS.Windows.job
+.prototype = {
 };
 
 
 
-//CeL.extend(lib_name, {});
-
-})();
 
 
 
@@ -7391,6 +7746,17 @@ function tempGUID(){
 
 
 
+return (
+	CeL.OS.Windows.job
+);
+};
+
+//===================================================
+
+CeL.setup_module(module_name, code_for_including);
+
+};
+
 
 
 
@@ -7399,34 +7765,63 @@ function tempGUID(){
 
 
 
-(function (){
+/**
+ * @name	CeL function for Windows registry
+ * @fileoverview
+ * 本檔案包含了 Windows registry 的 functions。
+ * @since	
+ */
 
-	/**
-	 * 本 library / module 之 id
-	 */
-	var lib_name = 'OS.Windows.registry';
+if (typeof CeL === 'function'){
 
-	//	若 CeL 尚未 loaded 或本 library 已經 loaded 則跳出。
-	if(typeof CeL !== 'function' || CeL.Class !== 'CeL' || CeL.is_loaded(lib_name))
-		return;
+/**
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
+ */
+var module_name = 'OS.Windows.registry';
 
-	CeL.set_library(lib_name);
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.OS.Windows.registry
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function(library_namespace, load_arguments) {
+
+//	requires
+if (eval(library_namespace.use_function(
+		'code.compatibility.is_DOM')))
+	return;
 
 
 /**
- * Windows.registry test
- * @memberOf	CeL
- * @param	msg	msg
+ * null module constructor
+ * @class	Windows registry 的 functions
  */
-CeL.OS.Windows.registry = function(msg){
-	alert(msg);
+CeL.OS.Windows.registry
+= function() {
+	//	null module constructor
+};
+
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.OS.Windows.registry
+.prototype = {
 };
 
 
 
-//CeL.extend(lib_name, {});
 
-})();
 
 
 
@@ -8067,7 +8462,20 @@ function _iF(){
  //if(typeof WshShell!='object')WshShell=new ActiveXObject("WScript.Shell");
 }
 
-CeL.extend({registryF:registryF,_iF:_iF});
+//CeL.extend({registryF:registryF,_iF:_iF});
+
+
+
+return (
+	CeL.OS.Windows.registry
+);
+};
+
+//===================================================
+
+CeL.setup_module(module_name, code_for_including);
+
+};
 
 
 
@@ -8077,32 +8485,61 @@ CeL.extend({registryF:registryF,_iF:_iF});
 
 
 
-(function (){
+/**
+ * @name	CeL function for Ajax
+ * @fileoverview
+ * 本檔案包含了 web Ajax 的 functions。
+ * @since	
+ */
 
-	/**
-	 * 本 library / module 之 id
-	 */
-	var lib_name = 'HTA';
+if (typeof CeL === 'function'){
 
-	//	若 CeL 尚未 loaded 或本 library 已經 loaded 則跳出。
-	if(typeof CeL !== 'function' || CeL.Class !== 'CeL' || CeL.is_loaded(lib_name))
-		return;
+/**
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
+ */
+var module_name = 'net.Ajax';
+
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.net.Ajax
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function(library_namespace, load_arguments) {
+
+//	requires
+if (eval(library_namespace.use_function(
+		'code.compatibility.is_DOM')))
+	return;
 
 
 /**
- * compatibility/相容性 test
- * @memberOf	CeL
- * @param	msg	msg
+ * null module constructor
+ * @class	web Ajax 的 functions
  */
-CeL.HTA = function(msg){
-	alert(msg);
+CeL.net.Ajax
+= function() {
+	//	null module constructor
+};
+
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.net.Ajax
+.prototype = {
 };
 
 
-
-//CeL.extend(lib_name, {});
-
-})();
 
 
 
@@ -8395,37 +8832,78 @@ getURL.clean=function(i,force){
 
 
 
+return (
+	CeL.net.Ajax
+);
+};
+
+//===================================================
+
+CeL.setup_module(module_name, code_for_including);
+
+};
+
+
+
+
 //--------------------------------------------------------------------------------//
 
 
 
 
-(function (){
+/**
+ * @name	CeL function for HTA
+ * @fileoverview
+ * 本檔案包含了 web HTA 的 functions。
+ * @since	
+ */
 
-	/**
-	 * 本 library / module 之 id
-	 */
-	var lib_name = 'HTA';
+if (typeof CeL === 'function'){
 
-	//	若 CeL 尚未 loaded 或本 library 已經 loaded 則跳出。
-	if(typeof CeL !== 'function' || CeL.Class !== 'CeL' || CeL.is_loaded(lib_name))
-		return;
+/**
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
+ */
+var module_name = 'net.HTA';
+
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.net.HTA
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function(library_namespace, load_arguments) {
+
+//	requires
+if (eval(library_namespace.use_function(
+		'code.compatibility.is_DOM')))
+	return;
 
 
 /**
- * compatibility/相容性 test
- * @memberOf	CeL
- * @param	msg	msg
+ * null module constructor
+ * @class	web HTA 的 functions
  */
-CeL.HTA = function(msg){
-	alert(msg);
+CeL.net.HTA
+= function() {
+	//	null module constructor
 };
 
-
-
-//CeL.extend(lib_name, {});
-
-})();
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.net.HTA
+.prototype = {
+};
 
 
 
@@ -8680,6 +9158,18 @@ var getClipboardText=setClipboardText;
 
 
 
+return (
+	CeL.net.HTA
+);
+};
+
+//===================================================
+
+CeL.setup_module(module_name, code_for_including);
+
+};
+
+
 
 
 //--------------------------------------------------------------------------------//
@@ -8755,385 +9245,9 @@ CeL.net.map
 
 
 
-/*	2008/5/29 20:6:23-6/4 2:10:21
-7/3 13:34	showNeighbor: 可拖曳 loc->name/address, 有資料的提高優先權, bug fix: 有些太遠的還是會被列入, 有些近的可能因為不是住址而不會被列入
-7/9 13:9:15	context menu
-7/9 21:12:3	getLocations
-2009/7/20 20:27:58	稍作修正
 
 
-bug:
-名稱相同時會出現被覆蓋的情況!
 
-
-TO TEST:
-
-
-showClass.setRepository('_ev_');
-
-sC=showClass.showOnScope;
-
-sC('mp',GLog.write);
-
-sC('Fb','mp');
-
-sC('y','Fb');
-
-sC('A','y');
-
-
-to use:
-
-<script type="text/javascript" src="map.js"></script>
-<script type="text/javascript">//<![CDATA[
-wAPIcode('Gmap');
-//]]></script>
-
-
-TODO:
-分類(Categories)&分顏色顯示
-Auto Zoom Out	http://esa.ilmari.googlepages.com/sorry.htm
-search data only
-preload map & markers
-GDirections
-圈選
-用經緯度查詢
-
-c.f. http://jmaps.digitalspaghetti.me.uk/
-
-http://www.ascc.sinica.edu.tw/nl/90/1706/02.txt
-臺灣地區地名網站
-http://tgnis.ascc.net
-http://placesearch.moi.gov.tw/index_tw.php
-
-地名學名詞解釋彙編
-http://webgis.sinica.edu.tw/geo/Termquery.asp
-
-臺灣地區地名相關文獻查詢系統
-http://webgis.sinica.edu.tw/geo/reference.html
-
-經濟部中央地質調查所-地質資料整合查詢
-http://datawarehouse.moeacgs.gov.tw/geo/index/GISSearch/MSDefault.htm
-
-
-http://gissrv3.sinica.edu.tw/tgnis_query/link.php?cid=1
-http://www.edu.geo.ntnu.edu.tw/modules/wordpress/2008/06/08/yxaewaweaeobmh/
-
-
-http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=1&d_database=25k_2002
-http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=1085&d_database=5000_1
-http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=01663&d_database=chen_quo
-http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=1663&d_database=chen_jen
-http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=11880&d_database=tw_fort
-http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=02713&d_database=ching
-
-http://gissrv3.sinica.edu.tw/input/detail.php?input_id=45875
-
-資料庫	編號	類型(類別)	名稱	地理座標(經緯度)	所屬縣市鄉鎮(所屬行政區,地點)	別稱	註記(所在圖號)	意義(說明)
-
-
-
-http://www.isp.tw/zip.php
-
-小工具
-
-1.溫度轉換
-2.進位換算
-3.BMI值及熱量需求計算
-4.角度徑度換算
-5.度量衡計算
-6.區碼國碼查詢
-7.郵遞區號查詢
-8.金融機構代號查詢
-9.色彩表示法查詢
-10.摩斯密碼及字母述語
-11.生肖星座查詢
-12.婦女安全期計算
-13.花言花語查詢
-14.常用機關電話查詢
-15.航空公司機場代碼查詢
-16.簡易匯率換算
-17.國曆農曆換算
-18.急救及疾病忌口寶典
-19.尺碼對照表
-20.自訂公式計算
-21.股票投資組合管理
-
-
-*/
-
-
-
-var formToolPath='../order/formTool.js';
-
-
-
-
-
-/*	初始化 Google Gears
-	http://code.google.com/apis/gears/gears_init.js
-	http://blog.ericsk.org/archives/978
-	http://chuiwenchiu.spaces.live.com/blog/cns!CA5D9227DF9E78E8!1063.entry
-
-	Google Gears退休: Gears功能正被整合到HTML5規格中
-	we expect developers to use HTML5 for these features moving forward as it's a standards-based approach that will be available across all browsers.
-	http://it.solidot.org/article.pl?sid=09/12/03/0539248
-*/
-function initGGears(){
- // 檢查是否已經定義 Google Gear
- if(window.google&&google.gears)return;
-
- var factory=null;
- // 依據不同的瀏覽器，採用不同方式產生 GearFactory
- if(typeof GearsFactory!='undefined')
-  //	Firefox
-  factory=new GearsFactory();
- else try{
-  //	IE
-  factory = new ActiveXObject('Gears.Factory');
-  // privateSetGlobalObject is only required and supported on WinCE.
-  if(factory.getBuildInfo().indexOf('ie_mobile')!=-1)
-   factory.privateSetGlobalObject(this);
- }catch(e){
-  //	Safari
-  if(typeof navigator.mimeTypes!='undefined' && navigator.mimeTypes["application/x-googlegears"]){
-   factory=document.createElement("object");
-   factory.style.display="none";
-   factory.width=factory.height=0;
-   factory.type="application/x-googlegears";
-   document.documentElement.appendChild(factory);
-  }
- }
- if(!factory)
-  return 1;
-
- if(!window.google)window.google={};
- if(!google.gears)google.gears={factory:factory};
-
-}
-
-
-/*
-f={catch:true/false/update, restore:false/true.}
-*/
-catchFile.ls=0;	//	localServer
-catchFile.sn='catch-files';	//	storeName: 定義 Managed Store 的名稱，這個名稱可用於 createManagedStore, removeManagedStore 和 openManagedStore 三個 API
-catchFile.s=0;	//	managed store
-//
-catchFile.f=function(url,success,captureId){};
-catchFile.fL=[location.pathname];	//	file list
-catchFile.doCache=1;
-catchFile.noAsk=1;
-function catchFile(fList,f){
- var _f=arguments.callee;
- if(!_f.doCache)return;
-
- if(window.location.protocol=='file:'){
-  sl('catchFile: Google Gears 不能在本機上執行或測試！');
-  return 0;
- }
-
- if(initGGears()){
-  if(_f.answered)return 0;
-  _f.answered=1;
-  if(!_f.noAsk&&confirm('使用本功能必須安裝 Google Gears，請問您要安裝嗎？'))
-   window.location.href='http://gears.google.com/';//?action=install&message=加入你的訊息&return=安裝後要導回的網址
-  else
-   sl('<em>catchFile: 若不安裝 Google Gears 則將無法使用本功能！</em>');
-  return 1;
- }
-
- if(!_f.ls)try{
-  // 建立 Local Server
-  _f.ls=window.google.gears.factory.create('beta.localserver','1.0');
- }catch(e){
-  sl('catchFile: Could not create local server: ['+(e.number&0xFFFF)+'] '+e.message);
-  return 2;
- }
-
- if(!_f.s)try{
-  // 建立儲存空間
-  _f.s=_f.ls.createManagedStore(_f.sn);
-  _f.s=_f.ls.createStore(_f.sn);
- }catch(e){
-  if(window.location.protocol=='file:')sl('Google Gears 不能在本機上執行測試!');
-  else sl('catchFile: Could not create managed store: ['+(e.number&0xFFFF)+'] '+e.message);
-  return 3;
- }
-
- if((fList instanceof String)&&fList){
-  //	untested
-  // 指定 json 的 url
-  _f.s.manifestUrl(fList);
-  // 開始確定版本及同步
-  _f.s.checkForUpdate();
-
-  // 為了確認是否同步結束了，可以加入下列的 timer 來檢查：
-  var timer = google.gears.factory.create('beta.timer');
-  // 每 500ms 檢查一下
-  var timerId = timer.setInterval(function() {
-   // 同步完成
-   if (store.currentVersion) {
-    timer.clearInterval(timerId);
-    sl('同步完成');
-   }
-  }, 500);
- }else if((fList instanceof Array)&&fList.length)
-  _f.fL=_f.fL.concat(fList);
-
- // If the store already exists, it will be opened
- if(_f.s)try{
-  _f.s.capture(_f.fL,_f.f);
- }catch(e){
-  if(e.message=='Url is not from the same origin')sl('需要在同樣的 domain!');
-  else sl('catchFile: Could not capture file: ['+(e.number&0xFFFF)+'] '+e.message);
-  return 4;
- }
-
-/*
-//	uncapture
-for (var i=0;i<fList.length;i++){
- _f.s.remove(fList[i]);
-}
-//	removeStore
-if(localServer.openStore(storeName)){
- localServer.removeStore(storeName);
- _f.s=null;
-}
-*/
-
-}
-
-
-
-/*	http://blog.wctang.info/2007/07/use-google-map-api-without-api-key.html
-	驗證的程式叫 GValidateKey，是定義在 main.js，但呼叫的動作是寫在 maps.js 裡
-
-
-
-function showClass(c,n){
- var i,sp='<hr style="width:40%;float:left;"/><br style="clear:both;"/>',h='<span style="color:#bbb;font-size:.8em;">'
-	,p=function(m,p){sl(h+n+(p?'.prototype':'')+'.</span><em>'+m+'</em> '+h+'=</span> '+f(c[m]));}
-	,f=function(f){return (f+'').replace(/\n/g,'<br/>').replace(/ /g,'&nbsp;');};
- if(typeof c=='string'){
-  if(!n)n=c;
-  c=eval(c);
- }
- if(!n)n='';
- sl('<hr/>Show class: ('+(typeof c)+')'+(n?' [<em>'+n+'</em>]':'')+'<br/>'
-	//+(n?'<em>'+n+'</em> '+h+'=</span> ':'')
-	+f(c));
- if(c){
-  sl(sp+'class member:');
-  for(i in c)
-   if(i!='prototype')p(i);
-  sl(sp+'prototype:');
-  c=c.prototype;
-  for(i in c)
-   p(i,1);
- }
- sl('<hr/>');
-}
-
-//showClass('GValidateKey');
-
-_v={};
-eval('_v.lp=lp;',GValidateKey);
-//showClass(_v.lp,'lp');
-
-eval('_v.j=j;',GValidateKey);
-//showClass(_v.j,'j');
-
-eval('_v.ep=ep;',GValidateKey);
-showClass(_v.ep,'ep');
-
-//sl(_v.lp('http:', 'lyrics.meicho.com.tw', '/game/index.htm').join('<br/>'));
-
-var b = _v.lp('http:', 'lyrics.meicho.com.tw', '/game/index.htm');
-    for (var c = 0; c < b.length; ++c) {
-        var d = b[c];
-        sl(d+'; '+_v.ep(d));
-    }
-
-*/
-wAPIcode.hl='zh-TW';	//	語系: zh-TW, ja, en
-function wAPIcode(w){
- var hl=arguments.callee.hl||'',APIkey={
-  Google:{
-
- /*	在本機上試用 Google Map API 並不需要去申請 API Key
-	2008/7/15 20:40:49	但幾天前起 GClientGeocoder 需要。而在 Firefox，即使在 file:// 也不可行??
- */
-
-
-/*
-	//	by fan0123321
-	'http://lyrics.meicho.com.tw/':'ABQIAAAAx1BFd-K0IXzdNnudsKfW3BR_OWH2p1vlzGygO-LFq-ywbfjcNBQ4wJpNt5E4VTHG4JLZ_HX8LQxVEQ',
-	'https://lyrics.meicho.com.tw/':'ABQIAAAAx1BFd-K0IXzdNnudsKfW3BQ2grkpcb8ONU70KrnysR7Wz3iAOhQ7rov77Kc_pTW2t8r5-BSiIg5j6w',
-	'http://kanashimi.meicho.com.tw/':'ABQIAAAAx1BFd-K0IXzdNnudsKfW3BSETOz6DhT-d0fFy_mIERGWK3ymyxQKcydi2zFol0W_QslvBsxp3BffQQ',
-	'https://kanashimi.meicho.com.tw/':'ABQIAAAAx1BFd-K0IXzdNnudsKfW3BTFY8WBNAy3k9U7ZNA5kvqHv9VA-BSzdXmlU2Sm9WU6hvuSysY85kLdGw',
-*/
-	//	by kanasimi
-	'http://lyrics.meicho.com.tw/':'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RR_OWH2p1vlzGygO-LFq-ywbfjcNBQcZtd9Bp9zMEQhrEtSnBy9_wJQmg',
-	//	事實上 domain-key 就夠了。
-	//'http://lyrics.meicho.com.tw/program/map/':'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RQQofoUntuAmbaLi2tPP0I7mS20HxSIGUQ5BPerzSbJB2mFqHQq07idRg',
-	'https://lyrics.meicho.com.tw/':'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RQ2grkpcb8ONU70KrnysR7Wz3iAOhS24gkxeP-OqUBmABKA7PZQoacWHQ',
-	'http://kanashimi.meicho.com.tw/':'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RSETOz6DhT-d0fFy_mIERGWK3ymyxSPw4AHxgM4dHjkgesM0FKx4ui2BQ',
-	'https://kanashimi.meicho.com.tw/':'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RTFY8WBNAy3k9U7ZNA5kvqHv9VA-BRu-OKx8fvfBtyuqJZfb5PK0HllUQ'
-
-/*	事實上 [*.]*.com.tw 用下面這個也行。
-	'http://com.tw/':'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RTXVjoday36ta5qc6JGQW5WaWldDhTZrWmq9ZDX6Bhhzgk7MlY9qQXvzA',
-
-對 http://lyrics.meicho.com.tw/game/ 會檢查的：
-http://lyrics.meicho.com.tw/game/
-http://lyrics.meicho.com.tw/
-http://www.lyrics.meicho.com.tw/game/
-http://www.lyrics.meicho.com.tw/
-http://meicho.com.tw/game/
-http://meicho.com.tw/
-http://com.tw/game/
-http://com.tw/
-
-*/
-
-
-  },
-  Yahoo:{
-	//	by colorlessecho for Yahoo! map
-	'http://lyrics.meicho.com.tw/':'XX9YCu_V34G1xvKMy7EOmVkPFtALrHIkVP_qG5ANRAzuTNlQKuoXVssSTBYiGSX9gjssAA--'
-  },
-
-	'Gmap':['Google',function(k){return 'http://maps.google.com/maps?file=api&amp;v=2&amp;hl='+hl+'&amp;key='+k;}],
-	'API':['Google',function(k){return 'http://www.google.com/jsapi?hl='+hl+'&amp;key='+k;}],
-
-	'YMap':['Yahoo',function(k){return 'http://api.maps.yahoo.com/ajaxymap?v=3.8&appid='+k;}],
-	'twYMap':['Yahoo',function(k){return 'http://tw.api.maps.yahoo.com/ajaxymap?v=3.8&appid='+k;}],
-
-	'':0
- };
-
-
-
- var l=window.location,h,a;
-
- if(!(w in APIkey)||!((a=APIkey[w]) instanceof Array)||!(a[0] in APIkey)||typeof (a=APIkey[a[0]])!='object')
-  throw 'wAPIcode: This kind ['+w+'] is not included in our code pool!';
-
- if(l.protocol=='file:')
-  //	取得任何 legal key
-  for(h in a){if(typeof a[h]=='string')break;}
- else if(!((h=l.href.slice(0,l.href.lastIndexOf(l.pathname)+1)) in a))	//	this is for domain
- //else if(!((h=l.href.replace(/[^\/]+$/,'')) in a))	//	this is for domain+path
-  throw 'This domain ['+h+'] is not included in '+APIkey[w][0]+' code pool!';
- //alert('['+h+']\n'+a[h]+'\n'+l.href+'\n'+l.pathname);
-
- iJS(h=APIkey[w][1](l=a[h]||''),1);	//	Firefox 使用 createElement('script') 不被接受！
- sl('wAPIcode: load ['+APIkey[w][0]+'] '+w+' [<a href="'+h+'">'+h+'</a>]');
- return [l,h];
-}
-
-
-
 //	init function
 
 var SL=new Debug.log,sl=function(){SL.log.apply(SL,arguments);},err=function(){SL.err.apply(SL,arguments);},warn=function(){SL.warn.apply(SL,arguments);};
@@ -10957,6 +11071,9 @@ CeL.setup_module(module_name, code_for_including);
 /*
 TODO
 對無顯示 SVG 的多一項警告。
+
+ASCIIsvg.js
+http://www1.chapman.edu/~jipsen/svg/asciisvg.html
 */
 
 if (typeof CeL === 'function'){
@@ -12459,6 +12576,13 @@ MSIE/3.0 (Win95; U)
 
 TODO:
 don't use .innerHTML
+
+
+功能探測 vs 瀏覽器探測
+http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K987.aspx
+Mark Pilgrim 有一個清單，它可以讓你探測任何功能。
+http://diveintohtml5.org/everything.html
+
 */
 
 if (typeof CeL === 'function'){
@@ -12516,6 +12640,143 @@ CeL.net.web
 /*
 	HTML only	-------------------------------------------------------
 */
+
+/**
+ * NodeType: const unsigned short.
+ * @see
+ * http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-1950641247
+ * @inner
+ */
+var ELEMENT_NODE = 1,
+	TEXT_NODE = 3,
+	DOCUMENT_NODE = 9;
+
+if(is_DOM('document'))
+	ELEMENT_NODE = document.ELEMENT_NODE,
+	TEXT_NODE = document.TEXT_NODE,
+	DOCUMENT_NODE = document.DOCUMENT_NODE;
+
+//	IE 中 Object.prototype.toString.call(HTML Element)==='[object Object]', 得用 ''+node
+var get_object_type = Object.prototype.toString,
+element_pattern = /^\[object HTML([A-U][A-Za-z]{1,15})?Element\]$/;
+
+
+
+CeL.net.web
+.
+/**
+ * 判斷為 HTML Element。
+ * @param	value	value to test
+ * @return	{Boolean}	value is HTML Element
+ * @since	2010/6/23 02:32:41
+ * @memberOf	CeL.net.web
+ * @see
+ * http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
+ * http://www.w3.org/DOM/
+ */
+is_HTML_element = function(value) {
+	// return get_object_type.call(value).indexOf('[object HTML')===0;
+	return element_pattern.test(get_object_type.call(value));
+	// return get_object_type.call(value).match(element_pattern);
+};
+
+CeL.net.web
+.
+/**
+ * 判斷為指定 nodeType 之 HTML Element。
+ * @param	value	value to test
+ * @param	type	type
+ * @return	{Boolean}	value is the type of HTML Element
+ * @since	2010/6/23 02:32:41
+ * @memberOf	CeL.net.web
+ * @see
+ * http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
+ * http://www.w3.org/DOM/
+ */
+is_HTML_element_type = function(value, type) {
+	return element_pattern.test(get_object_type.call(value)) && value.nodeType === type;
+};
+
+CeL.net.web
+.
+/**
+ * 判斷為 HTML Element。
+ * @param	value	value to test
+ * @return	{Boolean}	value is HTML Element
+ * @since	2010/6/23 02:32:41
+ * @memberOf	CeL.net.web
+ * @see
+ * http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
+ * http://www.w3.org/DOM/
+ */
+is_element_node = function(value) {
+	//library_namespace.debug('Test '+get_object_type.call(value)+' '+((typeof value==='object'||typeof value==='function')&&value.nodeType||'')+': '+element_pattern.test(get_object_type.call(value))+','+(value.nodeType === 1));
+	return element_pattern.test(get_object_type.call(value)) && value.nodeType === 1;
+};
+
+/*
+
+IE5DOM @ IE9 test:
+IE7DOM @ IE9 test:
+node <DIV>: type object, toString.call: [object Object], ""+node: [object], nodeType: 1:
+
+IE8:
+IE8DOM @ IE9 test:
+IE9DOM @ IE9 test:
+node <DIV>: type object, toString.call: [object Object], ""+node: [object HTMLDivElement], nodeType: 1:
+
+IE8:
+node <A>: type object, toString.call: [object Object], ""+node: , nodeType: 1:
+node <OBJECT>: type object, toString.call: [object Object], ""+node: [object], nodeType: 1:
+
+*/
+function show_node(node) {
+	library_namespace.debug('node'
+			+ (node.tagName ? ' &lt;' + node.tagName
+					+ (node.id ? '#' + node.id : '') + '&gt;' : '') + ': type '
+			+ typeof node + ', toString.call: ' + get_object_type.call(node)
+			+ ', ""+node: ' + ('' + node) + ', nodeType: ' + node.nodeType
+			+ ('innerHTML' in node ? ': ' + node.innerHTML : ''));
+}
+
+try {
+	// workaround for IE, 因用 General type, 效能較差
+	var d = document.createElement('div'),
+	s = element_pattern.test(get_object_type.call(d));
+	// alert('toString test: ' + s);
+
+	if (d.nodeType !== 1)
+		throw 0;
+
+	if (!s) {
+		if (element_pattern.test('' + d))
+			// IE8-9
+			_.is_HTML_element = function(value) {
+				return element_pattern.test('' + value)
+						// for IE8
+						|| typeof value === 'object' && value.nodeType === 1// && value.tagName === "OBJECT"
+							&& "[object NamedNodeMap]" === '' + value.attributes;
+			};
+		else if (get_object_type.call(d) === '[object Object]')
+			// IE5-7, 這種判別方法有漏洞!
+			_.is_HTML_element = function(value) {
+				return '[object Object]' === get_object_type.call(value) && typeof value.nodeType === 'number';
+			};
+		else
+			throw 1;
+
+		//	General type
+		_.is_HTML_element_type = function(value, type) {
+			return _.is_HTML_element(value) && value.nodeType === type;
+		};
+		_.is_element_node = function(value) {
+			return _.is_HTML_element(value) && value.nodeType === 1;
+		};
+	}
+} catch (e) {
+	// TODO: handle exception
+}
+
 
 
 /*	test if can use flash
@@ -12758,18 +13019,22 @@ importNode() 比較像是 cloneNode() 加上變更 ownerDocument。
  * @return
  * @memberOf	CeL.net.web
  */
-replace_HTML = function(o,html){
+replace_HTML = function(o, html){
 	if (typeof o === 'string')
 		o = document.getElementById(o);
-	if (!o || typeof o != 'object')
+	if (!o || typeof o !== 'object')
 		return;
-	/*@cc_on	// Pure innerHTML is slightly faster in IE
-	 o.innerHTML=html||'';
-	 return o;
-	@*/
-	var n = o.cloneNode(false);
-	n.innerHTML = html || '';
-	o.parentNode.replaceChild(n, o);
+	try{
+		/*@cc_on	// Pure innerHTML is slightly faster in IE
+		 o.innerHTML=html||'';
+		 return o;
+		@*/
+		var n = o.cloneNode(false);
+		n.innerHTML = html || '';
+		o.parentNode.replaceChild(n, o);
+	}catch (e) {
+		library_namespace.err(e);
+	}
 	// Since we just removed the old element from the DOM, return a reference to the new element, which can be used to restore variable references.
 	return n;
 };
@@ -12823,6 +13088,7 @@ remove_node = function remove_node(o, tag) {
 
 		// don't use for()
 		// http://weblogs.macromedia.com/mesh/archives/2006/01/removing_html_e.html
+		//	TODO: 直接用 replaceNode 就不用 recursion
 		i = o.childNodes.length;
 		while (i--)
 			if (tag === 1 || tag == o.childNodes[i].tagName.toLowerCase())
@@ -12857,7 +13123,7 @@ CeL.net.web
  * @since	2006/12/10 21:25 分離 separate from XML_node()
  * @memberOf	CeL.net.web
  */
-set_attribute = function(_e,propertyO){
+set_attribute = function(_e, propertyO, ns){
  if(typeof _e==='string')_e=typeof _.get_element==='function'?_.get_element(_e):document.getElementById(_e);
  if(!_e||!propertyO/*||_e.nodeType==3/* TEXT_NODE */)return;
 
@@ -12868,8 +13134,9 @@ set_attribute = function(_e,propertyO){
 	 ,html5:'TR/html5'
 	};
  if(typeof propertyO=='string')propertyO=/[=:]/.test(propertyO)?split_String_to_Object(propertyO):propertyO.split(',');
- if(propertyO instanceof Array)
-  _g=propertyO.length==1?propertyO[0]:1,propertyO=split_String_to_Object(propertyO.join(','));
+ if (propertyO instanceof Array)
+		_g = propertyO.length == 1 ? propertyO[0] : 1,
+		propertyO = split_String_to_Object(propertyO.join(','));
 
  for(_l in propertyO){
   if(_l=='class'&&!propertyO['className'])propertyO[_l='className']=propertyO['class'];
@@ -12915,7 +13182,7 @@ add_node = function add_node(node, child_list) {
 	}
 
 	if (!node || !child_list
-			// || node.nodeType === 3/* TEXT_NODE */
+			// || node.nodeType == 3/* TEXT_NODE */
 	)
 		return;
 
@@ -12960,6 +13227,423 @@ add_node = function add_node(node, child_list) {
 };
 
 
+/*
+
+var alias={
+	//	'child' || 'c' || '$' || '0' || ..
+	$:'childNode',
+	//	class: 'className' || 'c' ..
+	c:'className'
+	s:'style'
+};
+
+輸入 ( [{tag1:{attb:attb_val,child:[inner objects]}}, {tag2:{}}, 'br'], insertBeforeO)
+e.g.,
+([
+	{
+		p:{span:'>>test<<'},
+		id:'a',
+		c:'cls',
+		s:{color:'#123'}
+	},
+	//	width:12 === width:'12px'
+	{
+		span:['<<test2>>','text'],
+		s:{color:'',width:12}
+	},
+	'<<test3>>',
+	{'hr':0},
+	{'br':0},
+	{
+		$:tag_name,
+		tag_name:[]
+	},
+	{
+		tag_ns:0,
+		ns:'http://~'
+	}
+], insertSetting)
+
+insertSetting:
+	(null)		just create & return the node
+	以下：===0 則設成 document.body
+	parent/id		appendChild
+	[refO,0-4]	0:appendChild (add as lastChild), 1: add as firstChild, 2: add as nextSibling, 3: add as priviusSibling, 4: add as parent
+
+
+*/
+//[{tag1:{attb:attb_val,child:[inner objects]}}, {tag2:{}}, 'br'];
+
+
+
+CeL.net.web
+.
+/**
+ * instead of createNode().
+ * TODO: 分割功能(set_attrib, add_child, ..), 簡化
+ * @param nodes	node structure
+ * @param layer	where to layer this node. e.g., parent node
+ * @return
+ * @since	2010/6/21 13:45:02
+ */
+new_node = function(nodes, layer) {
+	// parent: parent node
+	var _s = _.new_node, node, for_each, parent, children, handle = _s.handle;
+
+	if (!is_DOM('document')
+		|| !document.createElement //&& !document.createElementNS
+		) {
+		library_namespace.warn('new_node: DOM error? Cannot create node [' + nodes + '].');
+		return;
+	}
+
+	if (typeof nodes === 'number')
+		//.toString();
+		nodes += '';
+
+	if (library_namespace.is_Object(nodes)) {
+		var tag = nodes.$, n = 'className', ns, s, ignore = {
+			// tag
+			$ : null,
+			// attrib
+			A : null
+/*
+			// namespace
+			NS : null,
+			// class
+			C : null,
+			// style
+			S : null
+*/
+		};
+
+		if (typeof tag === 'undefined')
+			for (node in nodes)
+				if(!(node in ignore)){
+					tag = node;
+					break;
+				}
+		else if (!tag){
+			//	just set attributes
+			if (!_.is_element_node(layer)) {
+				library_namespace.warn('new_node: There is no tag and the layer is NOT a HTML Element!');
+				return;
+			}
+			tag = layer;
+		}else if (typeof tag !== 'undefined')
+			node = tag;
+
+		//	set/create node
+		if (_.is_HTML_element(tag))
+			node = tag;
+
+		else if (typeof tag !== 'string'){
+			library_namespace.err('new_node: Error create tag: ['+(typeof tag)+'][' + tag + ']');
+			return;
+
+		} else {
+			if ('NS' in nodes)
+				ignore.NS = null,
+				ns = nodes.NS;
+			else if (s = tag.match(/^(.+):([^:]+)$/))
+				tag = s[2], ns = s[1];
+
+			try {
+				if (ns && document.createElementNS){
+					if(ns in (s = _s.ns))
+						ns = 'http://www.w3.org/' + s[ns];
+					node = document.createElementNS(ns, tag);
+				} else
+					node = document.createElement(ns ? ns + ':' + tag : tag);
+			} catch (_e) {
+				library_namespace.err('new_node: Error create tag: [' + tag + ']');
+				node = null;
+				return;
+			}
+		}
+
+		if (_.is_element_node(node)) {
+			s = node.setAttributeNS ? function(n, v) {
+				var _n = n.match(/^(.+):([^:]+)$/);
+				if (_n)
+					n = _n[2], _n = _n[1];
+				if(_n)
+					node.setAttributeNS(
+						_n in _s.ns ? 'http://www.w3.org/' + _s.ns[_n]
+								: ns, n, v);
+				else
+					node.setAttribute(n, v);
+			} : node.setAttribute;
+
+			//	對常用的特別處理
+			// class name
+			/*
+				XML 中id不能以setAttribute設定。
+				class不能以setAttribute設定@IE。
+				http://www.quirksmode.org/bugreports/archives/2005/03/setAttribute_does_not_work_in_IE_when_used_with_th.html
+				IE ignores the "class" setting, and Mozilla will have both a "class" and "className" attribute defined
+			 */
+			if ((n in nodes) || ((n = 'class') in nodes) || ((n = 'C') in nodes))
+				ignore[n] = null,
+				node.className = nodes[n];
+
+			// IE需要先appendChild才能操作style，moz不用..??
+			if (((n = 'style') in nodes) || ((n = 'S') in nodes)) {
+				ignore[n] = null;
+				n = nodes[n];
+				var i, style = node.style;
+				if (typeof n === 'string')
+					style.cssText = n;
+				else if (library_namespace.is_Object(n))
+					for (i in n)
+						// isIE?"styleFloat":"cssFloat"
+						style[i === 'float' ? 'cssFloat' : i] = n[i];
+				else
+					library_namespace.warn('new_node: Error set style: [' + styleO + ']');
+			}
+
+			// children nodes
+			ignore[tag] = null;
+			children = nodes[tag];
+
+			//	自動作 list 的轉換
+			if (tag in {
+						ol : 1,
+						ul : 1
+					} && library_namespace.is_Array(children))
+			{
+				for ( var i = 0, o = [], l = children.length, t, c; i < l; i++)
+					if (c = children[i]) {
+						if (typeof c === 'string')
+							t = 1;
+						if (!t) {
+							t = c.$;
+							if (!t)
+								for (i in c) {
+									t = i;
+									break;
+								}
+							t = t.toLowerCase() !== 'li';
+						}
+						if (t)
+							o.push( {
+								li : c
+							});
+					}
+
+				// 盡量別動到原來的
+				children = o;
+
+			}else if(tag === 'select' && library_namespace.is_Object(children)){
+				var i;
+				for (i in children)
+					break;
+
+				if (i !== 'option') {
+					var o = [];
+					for (i in children)
+						o.push( {
+							option : children[i],
+							value : i
+						});
+
+					// 盡量別動到原來的
+					children = o;
+				}
+			}
+
+
+			// attributes
+			if('A' in nodes){
+				var a = nodes.A;
+				if (typeof a === 'string')
+					a = split_String_to_Object(a);
+
+				for (n in a)
+					s(n, a[n]);
+			}
+
+			for (n in nodes)
+				if (!(n in ignore)){
+					//library_namespace.debug('new_node: set attribute ['+n+'] = ['+nodes[n]+']'),
+					s(n, nodes[n]);
+					//library_namespace.debug('new_node: get attribute ['+n+'] = ['+node.getAttribute(n)+']');
+				}
+		} else
+			show_node(node),
+			library_namespace.warn('new_node: node is not a HTML Element!');
+
+	} else if (typeof nodes !== 'string' && !library_namespace.is_Array(nodes)
+			&& isNaN(nodes.nodeType)) {
+		//	for Safari: library_namespace.is_Array(nodes)
+		if(nodes)
+			library_namespace.warn('new_node: Unknown nodes [' + nodes + ']');
+
+		node = null;
+		return;
+	} else
+		node = nodes;
+
+
+	// layer 處理: 插入document中。
+	if (typeof layer !== 'undefined' && layer !== null) {
+		// 正規化 layer
+		// for_each: type→deal function
+		if (library_namespace.is_Function(layer))
+			for_each = layer;
+		else {
+			if (library_namespace.is_Array(layer))
+				for_each = layer[1], layer = layer[0];
+
+			if (layer === 0)
+				layer = document.body;
+			else if (typeof layer === 'string')
+				layer = _.get_element(layer);
+			//	[object HTMLLIElement]
+			if (!_.is_element_node(layer))
+				//library_namespace.warn('is_element_node: ' + _.is_element_node),
+				show_node(layer),
+				library_namespace.warn('new_node: layer is not a HTML Element!');
+
+			if (for_each == 1 && (parent = layer.firstChild))
+				// add as firstChild
+				for_each = handle[1];
+
+			else if (for_each > 1 && for_each < 5) {
+				if (parent = layer.parentNode) {
+					if (for_each == 2)
+						// add as nextSibling
+						for_each = handle[2];
+					else if (for_each == 3)
+						// add as priviusSibling
+						for_each = handle[4];
+					else
+						// if (f == 4)
+						// add as parent
+						for_each = handle[4];
+				} else
+					// 輸入的 layer 為create出來的?
+					library_namespace.warn('new_node: No parent node found!');
+
+			} else if (_.is_element_node(layer)){
+				//	若輸入 [id, null] 則先清空，相當於 replace
+				if (for_each === null)
+					layer = _.remove_all_child(layer);
+				// appendChild (add as lastChild)
+				for_each = handle[0];
+			}
+		}
+
+	}
+
+	if (!library_namespace.is_Function(for_each))
+		for_each = false;
+
+	if (library_namespace.is_Array(node)) {
+		node = [];
+		//	不宜個個重新呼叫是為了效能
+		for ( var i = 0, l = nodes.length, n, _l=layer, _p=parent; i < l; i++){
+			node.push(n = _s(nodes[i], for_each&&function(n){for_each(n, _l, _p);}||null));
+			/*
+			node.push(n = _s(nodes[i], for_each));
+			if (for_each)
+				try {
+					for_each(n, layer, parent);
+				} catch (e) {
+					library_namespace.err(e);
+					library_namespace.err('new_node: handle function execution error for node Array['+i+'/'+l+']!<br/>' + for_each);
+				}
+			*/
+		}
+
+	} else{
+		if (typeof node === 'string' && for_each !== handle[0])
+			node = document.createTextNode(nodes);
+
+		if (for_each)
+			try {
+				for_each(node, layer, parent);
+			} catch (e) {
+				library_namespace.err(e);
+				library_namespace.err('new_node: handle function execution error!<br/>' + for_each);
+			}
+
+		//	設定 childNodes
+		//	先插入document而後設定childNodes是因為IE有Cross-Page Leaks.
+		//	http://www.blogjava.net/tim-wu/archive/2006/05/29/48729.html
+		//	http://www-128.ibm.com/developerworks/tw/library/x-matters41.html
+		//	Try to use createDocumentFragment()
+		//	http://wiki.forum.nokia.com/index.php/JavaScript_Performance_Best_Practices
+		if (children !== null && typeof children !== 'undefined')
+			_s(children, node);
+	}
+
+
+	//	this helps to fix the memory leak issue
+	//	http://www.hedgerwow.com/360/dhtml/ie6_memory_leak_fix/
+	//	http://jacky.seezone.net/2008/09/05/2114/
+	try {
+		return typeof node === 'string' ? document.createTextNode(node) : node;
+	} finally {
+		node = null;
+	}
+};
+
+_.new_node.handle = [
+	function(n, l) {
+		var is_e = _.is_element_node(l), t = is_e ? l.tagName.toLowerCase() : null;
+		if (typeof n === 'number')
+			n += '';
+
+		if (t in {
+				textarea : 1,
+				input : 1,
+				text : 1
+			})
+			l.value = (l.value || '') + (is_e ? n.innerHTML : n);
+
+		else {
+			if (typeof n === 'string' && n.indexOf('<') === -1){
+				if (t === 'option' && !l.value)
+					l.value = n;
+				n = document.createTextNode(n);
+			}
+
+			if (typeof n === 'string')
+				// this may throw error: -2146827687 未知的執行階段錯誤
+				l.innerHTML += n;
+			else{
+				t=l.innerHTML;
+				l.appendChild(n);
+				if(t === l.innerHTML)
+					;//library_namespace.warn('new_node.handle[0]: The addition does not change the layer!');
+			}
+		}
+		n = null;
+	}, function(n, l, p) {
+		l.insertBefore(n, p);
+	}, function(n, l, p) {
+		p.insertBefore(n, l.nextSibling);
+	}, function(n, l, p) {
+		p.insertBefore(n, l);
+	}, function(n, l, p) {
+		n.appendChild(p.replaceChild(n, l));
+	}
+];
+
+_.new_node.ns = {
+	// Namespaces: SVG,MathML,XHTML,XLink,..
+	svg : '2000/svg',
+	mathml : '1998/Math/MathML',
+	xhtml : '1999/xhtml',
+	xlink : '1999/xlink',
+	// 亦可用'1999/xhtml'
+	html : 'TR/REC-html40',
+	html4:'TR/REC-html40',
+	html5:'TR/html5'
+};
+
+
 
 /*
 XML_node('div','id:idName');	doesn't insert, just return the object
@@ -12978,9 +13662,13 @@ XML_node('div','id:idName',[0,refNode]);	insert before refNode: document.body.in
 XML_node('div','id:idName',[0]);	append after all: document.body.appendChild(_newNode_,refNode)
 
 XML_node('div','id:idName',0,'asas');	insert 'asas' as innerText
+	new_node({div:'asas',id:'idName'},0);
 XML_node('div','id:idName',0,'<a>sas</a>');	insert 'asas' as innerHTML
+	new_node({div:{a:'sas'},id:'idName'},0);
 XML_node('div','id:idName',0,obj);	insert obj as childNode
+	new_node({div:obj,id:'idName'},0);
 XML_node('div','id:idName',0,[o1,o2]);	insert o1,o2 as childNodes
+	new_node({div:[o1,o2],id:'idName'},0);
 
 
 有用到新建 HTML element 的函數執行完畢應該將所有變數，尤其是 object 重設；
@@ -13003,22 +13691,6 @@ TODO:
 XML 中 insertBefore(),appendChild()似乎無反應？	http://developer.mozilla.org/en/docs/SVG:Namespaces_Crash_Course
 insertAfter
 
-輸入 ( [tagName,{attr1:val1,..},[inner object]], insertBeforeO)
-e.g.,
-([
-	['b',{id:'',class:'',style:{color:''}},
-		['span',0,'>>test<<']
-	],
-	['span',{style:{color:''}},'<<test2>>'],
-],insertSetting)
-
-insertSetting:
-	(null)		just create & return
-	以下：obj===0 則設成 document.body
-	parent		appendChild
-	[refO,0-4]	0:appendChild, 1: add as firstChild, 2: add as nextSibling, 3: add as priviusSibling
-
-
 */
 CeL.net.web
 .
@@ -13034,121 +13706,205 @@ CeL.net.web
  * @since	2006/9/6 20:29,11/12 22:13
  * @memberOf	CeL.net.web
  */
-XML_node = function(tag,propertyO,insertBeforeO,innerObj,styleO){ 
- //	XML 中沒有document.body！
- //if(typeof document.body=='undefined')document.body=document.getElementsByTagName('body')[0];
+XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
+	//	XML 中沒有document.body！
+	//if(typeof document.body=='undefined')document.body=document.getElementsByTagName('body')[0];
 
- if(typeof document!='object'||(!document.createElement&&!document.createElementNS)||!document.body){
-  alert('Warning: Cannot create tag ['+tag+'].');
-  return;
- }
+	if (typeof document !== 'object'
+			|| (!document.createElement && !document.createElementNS)
+			|| !document.body) {
+		library_namespace.warn('XML_node: Cannot create tag [' + tag + '].');
+		return;
+	}
 
- var _i={svg:'2000/svg',mathml:'1998/Math/MathML',xhtml:'1999/xhtml',xlink:'1999/xlink'	//	Namespaces:SVG,MathML,XHTML,XLink
-		,html:'TR/REC-html40'	//	亦可用'1999/xhtml'
-	},_NS,_DOM2=document.createElementNS?1:0	//	use Namespaces or not	//	buggy now.
-	,_e='http://www.w3.org/'	//	Namespaces base
-	;
-/*
- //	依styleO指定 Namespace
- if(typeof styleO=='string'){
-  if(styleO.indexOf('://')!=-1)_NS=styleO,styleO=0;
-  else if(_i[styleO])_NS=_e+_i[styleO],styleO=0;
- }else _DOM2=0;	//	buggy now.	//else _NS=styleO===null?null:_e+_i['XHTML'];//undefined==null
-*/
- //	指定 Namespace
- if(tag)if(_NS=tag.match(/^(.+):([^:]+)$/)){
-  tag=_NS[2];
-  _NS=_NS[1];
-  if(_NS.indexOf('://')==-1&&_i[_NS.toLowerCase()])_NS=_e+_i[_NS];
-  //alert('XML_node: Add ['+tag+'] of\n'+_NS);
- }
+	var _NS,
+	//	Namespaces: SVG,MathML,XHTML,XLink
+	_i = {
+		svg : '2000/svg',
+		mathml : '1998/Math/MathML',
+		xhtml : '1999/xhtml',
+		xlink : '1999/xlink',
+		//	亦可用'1999/xhtml'
+		html : 'TR/REC-html40'
+	},
+	//	use Namespaces or not
+	//	buggy now.
+	_DOM2 = document.createElementNS ? 1 : 0,
+	//	Namespaces base
+	_e = 'http://www.w3.org/';
 
- /*
-	for MathML:
-		IE: document.createElement('m:'+tag)	(surely 'mml:', but 'm:' is default of MathPlayer, so now <html> works without the xmlns attribute)
-		NS: document.createElementNS('http://www.w3.org/1998/Math/MathML',tag)
- */
- try{_e=tag?_DOM2&&_NS?document.createElementNS(_NS,tag):document.createElement(tag/*.replace(/[<>\/]/g,'')*/):document.createTextNode(innerObj||'');
- }catch(_e){alert('XML_node: Error create tag:\n'+tag/*+'\n'+_e.description*/);return;}
- if(tag)_.set_attribute(_e,propertyO);
+	/*
+	//	依styleO指定 Namespace
+	if (typeof styleO === 'string') {
+		if (styleO.indexOf('://') != -1)
+			_NS = styleO, styleO = 0;
+		else if (_i[styleO])
+			_NS = _e + _i[styleO], styleO = 0;
+	} else
+		// buggy now.
+		_DOM2 = 0;//_NS = styleO === null ? null : _e + _i['XHTML'];//undefined==null
+	*/
 
- //	IE需要先appendChild才能操作style，moz不用..??
- if(tag&&styleO&&_e.style)
-  if(typeof styleO=='string')_e.style.cssText=styleO;
-  else if(typeof styleO=='object')for(_i in styleO)_e.style[_i=='float'?'cssFloat':_i]=styleO[_i];	//	isIE?"styleFloat":"cssFloat"
-  //else alert('XML_node: Error set style:\n['+styleO+']');
+	//	指定 Namespace
+	if (tag)
+		if (_NS = tag.match(/^(.+):([^:]+)$/)) {
+			tag = _NS[2];
+			_NS = _NS[1];
+			if (_NS.indexOf('://') === -1 && (_i = _i[_NS.toLowerCase()]))
+				_NS = _e + _i;
+			// library_namespace.warn('XML_node: Add ['+tag+'] of\n'+_NS);
+		}
+
+	/*
+		for MathML:
+			IE: document.createElement('m:'+tag)
+				(surely 'mml:', but 'm:' is default of MathPlayer, so now <html> works without the xmlns attribute)
+			NS: document.createElementNS('http://www.w3.org/1998/Math/MathML', tag)
+	*/
+	try {
+		_e = tag ? _DOM2 && _NS ? document.createElementNS(_NS, tag)
+				: document.createElement(tag/* .replace(/[<>\/]/g,'') */)
+				: document.createTextNode(innerObj || '');
+	} catch (_e) {
+		library_namespace.warn('XML_node: Error create tag:\n' + tag/* + '\n' + _e.description */);
+		return;
+	}
+	if (tag)
+		_.set_attribute(_e, propertyO);
+
+	//	IE需要先appendChild才能操作style，moz不用..??
+	if (tag && styleO && _e.style)
+		if (typeof styleO === 'string')
+			_e.style.cssText = styleO;
+		else if (typeof styleO === 'object')
+			for (_i in styleO)
+				//	isIE?"styleFloat":"cssFloat"
+				_e.style[_i === 'float' ? 'cssFloat' : _i] = styleO[_i];
+	//else library_namespace.warn('XML_node: Error set style:\n[' + styleO + ']');
 
 
- //	插入document中。先插入document而後設定childNodes是因為IE有Cross-Page Leaks	http://www.blogjava.net/tim-wu/archive/2006/05/29/48729.html
- if(insertBeforeO){	//	http://www-128.ibm.com/developerworks/tw/library/x-matters41.html
-  var rO=undefined/* [][1] */,tO=function(_o){return typeof _o=='string'&&(_i=document.getElementById(_o))?_i:_o;},iO=tO(insertBeforeO);
-  if(iO instanceof Array&&iO.length)	//	Opera9 need .constructor==Array
-   //	在disable CSS時可能會 Warning: reference to undefined property iO[1]
-   rO=iO.length>1&&tO(iO[1])||0,iO=tO(iO[0]);	//	rO: referrer object, 以此決定以appendChild()或insertBefore()的形式插入
-  if( typeof iO!='object' && (iO=document.body, typeof rO=='undefined') )rO=0;
-  if(typeof rO=='undefined')iO=(rO=iO).parentNode;
-  if(iO)	//	預防輸入的rO為create出來的
-   if(rO)try{iO.insertBefore(_e,rO==1?iO.firstChild:rO);}catch(e){alert('XML_node: '+e.message+'\niO:'+iO+'\nrO:'+rO);}//	.firstChild == .childNodes[0]
-   else iO.appendChild(_e);//document.body.insertBefore(_e,iO);
- }
+	//	插入document中。先插入document而後設定childNodes是因為IE有Cross-Page Leaks
+	//	http://www.blogjava.net/tim-wu/archive/2006/05/29/48729.html
+	//	http://www-128.ibm.com/developerworks/tw/library/x-matters41.html
+	if (insertBeforeO) {
+		var rO = undefined/* [][1] */, tO = function(_o) {
+			return typeof _o == 'string' && (_i = document.getElementById(_o)) ? _i
+					: _o;
+		}, iO = tO(insertBeforeO);
+		// Opera9 need .constructor===Array
+		if (library_namespace.is_Array(iO) && iO.length)
+			// 在disable CSS時可能會 Warning: reference to undefined property iO[1]
+			// rO: referrer object,
+			// 以此決定以appendChild()或insertBefore()的形式插入
+			rO = iO.length > 1 && tO(iO[1]) || 0, iO = tO(iO[0]);
+
+		//if(typeof iO !== 'object' && (iO = document.body, typeof rO === 'undefined')) rO = 0;
+		if (typeof iO !== 'object') {
+			iO = document.body;
+			if (typeof rO === 'undefined')
+				rO = 0;
+		}
+
+		if (typeof rO === 'undefined')
+			iO = (rO = iO).parentNode;
+		if (iO)
+			// 預防輸入的rO為create出來的
+			if (rO)
+				try {
+					//	.firstChild == .childNodes[0]
+					iO.insertBefore(_e, rO === 1 ? iO.firstChild : rO);
+				} catch (e) {
+					library_namespace.warn('XML_node: ' + e.message + '\niO:'
+							+ iO + '\nrO:' + rO);
+				}
+				else
+					//document.body.insertBefore(_e, iO);
+					iO.appendChild(_e);
+	}
 
 
- //	設定 childNodes
- if(tag)_.add_node(_e,innerObj);
-/*
- if(tag&&innerObj)
-  (_i=function(_o){
-   if(typeof _o=='object'){
-    if(_o)
-     if(_o instanceof Array)//&&_o.length
-      for(var _j=0;_j<_o.length;_j++)_i(_o[_j]);
-     else _e.appendChild(_o);
-    return;
-   }
-   if(typeof _o=='number'&&!isNaN(_o))_o=_o.toString();//_o+='';
-   if(typeof _o=='string')
-    if(_o.indexOf('<')!=-1)_e.innerHTML+=_o;
-    else _e.appendChild(document.createTextNode(_o));
-   //else alert('XML_node: Error insert contents:\n['+_o+']');
-  })(innerObj);
-*/
+	//	設定 childNodes
+	if (tag)
+		_.add_node(_e, innerObj);
+	/*
+	 if (tag && innerObj)
+		(_i = function(_o) {
+			if (typeof _o == 'object') {
+				if (_o)
+					if (_o instanceof Array)// &&_o.length
+						for ( var _j = 0; _j < _o.length; _j++)
+							_i(_o[_j]);
+					else
+						_e.appendChild(_o);
+				return;
+			}
+			if (typeof _o == 'number' && !isNaN(_o))
+				// _o+='';
+				_o = _o.toString();
+			if (typeof _o == 'string')
+				if (_o.indexOf('<') != -1)
+					_e.innerHTML += _o;
+				else
+					_e.appendChild(document.createTextNode(_o));
+			//else library_namespace.warn('XML_node: Error insert contents:\n[' + _o + ']');
+		})(innerObj);
+	*/
 
- //	this helps to fix the memory leak issue
- //	http://www.hedgerwow.com/360/dhtml/ie6_memory_leak_fix/
- //	http://jacky.seezone.net/2008/09/05/2114/
- try{
-  return _e;
- }finally{
-  _e=null;
- }
+	//	this helps to fix the memory leak issue
+	//	http://www.hedgerwow.com/360/dhtml/ie6_memory_leak_fix/
+	//	http://jacky.seezone.net/2008/09/05/2114/
+	try {
+		return _e;
+	} finally {
+		_e = null;
+	}
 };
 
 
 
 
 
-/*	對付IE與Moz不同的text取得方法。現階段不應用innerText，應該用此函數來取得或設定內部text
-	http://www.klstudio.com/post/94.html
-	DOM: 用.nodeValue
-*/
-var setTextT;
-//setText[generateCode.dLK]='setTextT';
-function setText(o,txt){
- if(!o||typeof window!='object'||typeof window.document!='object'
-	|| typeof o=='string' && !(o=document.getElementById(o)) )
-  return;
- if(typeof setTextT!='string'||!setTextT)
-  with(window.document)
-   setTextT=typeof document.body.textContent=='string'?'textContent'
-	:typeof document.body.innerText=='string'?'innerText'
-	:'innerHTML';
- var p=typeof o.value=='string'?'value':setTextT;
- if(typeof txt!='undefined')o[p]=txt;
- //	http://www-128.ibm.com/developerworks/tw/library/x-matters41.html
- if(o.nodeType==3||o.nodeType==4)return o.data;
- //var i=0,t=[];for(;i<o.childNodes.length;i++)t.push(setText(o.childNodes[i]));return t.join('');
- return o[p];
-}
+CeL.net.web
+.
+/**
+ * 設定 HTML element 的 text。
+ * 對付IE與Moz不同的text取得方法。現階段不應用innerText，應該用此函數來取得或設定內部text。
+ * TODO: DOM: 用.nodeValue
+ * @param element	HTML element
+ * @param {String} text	the text to be set
+ * @return
+ * @see
+ * http://www.klstudio.com/post/94.html
+ * @memberOf	CeL.net.web
+ */
+set_text=function (element, text) {
+	if (!element || typeof window !== 'object' || typeof window.document !== 'object'
+			|| typeof o === 'string' && !(element = document.getElementById(element)))
+		return;
+
+	var text_p=_.set_text.p;
+	if (typeof text_p !== 'string' || !text_p)
+		_.set_text.p=text_p = typeof document.body.textContent === 'string' ? 'textContent'
+				: typeof document.body.innerText === 'string' ? 'innerText'
+				: 'innerHTML';
+
+	var p = typeof element.value === 'string' ? 'value' : text_p;
+	if (typeof text !== 'undefined')
+		element[p] = text;
+
+	//	http://www-128.ibm.com/developerworks/tw/library/x-matters41.html
+	if (element.nodeType === 3 || element.nodeType === 4)
+		return element.data;
+
+	/*
+	var i = 0, t = [];
+	for (; i < element.childNodes.length; i++)
+		t.push(set_text(element.childNodes[i]));
+	return t.join('');
+	*/
+
+	return element[p];
+};
 
 
 /*	用在top的index.htm中，當setTopP()後指定特殊頁面	2005/1/26 21:46
@@ -13186,7 +13942,7 @@ var setTopPDTopP,setTopP_doTest=.234372464;	//	default top page(file) path
 function setTopP(l,s){
  if(!setTopPDTopP)return 2;
  if(!l)l=dBasePath(setTopPDTopP)+getFN(setTopPDTopP);//alert(l);
- if(typeof s=='undefined')try{s=window./*self.*/location.search;}catch(e){return;}	//	IE在about:blank的情況下呼叫網頁，網頁完全載入前location無法呼叫。例如從FireFox拉進IE時使用location.*有可能'沒有使用權限'，reload即可。
+ if(typeof s=='undefined')try{s=window/*self*/.location.search;}catch(e){return;}	//	IE在about:blank的情況下呼叫網頁，網頁完全載入前location無法呼叫。例如從FireFox拉進IE時使用location.*有可能'沒有使用權限'，reload即可。
  var t,r=/[\/\\]$/i,ri=/[\/\\](index.s?html?)?$/i;
  try{
   t=window.top.location.href.replace(/[?#](.*)$/,'');	//	top.location.pathname在遇到local file時可能出問題。若不同domain時top.location也不能取用，應改成window.top!=window.window
@@ -13964,35 +14720,39 @@ get_element = function get_element(id, flag) {
 			'refOnly' : 2
 		};
 
-	if (!id || typeof window != 'object' || typeof document != 'object'
-			|| document != window.document)
+	if (!id || typeof window !== 'object' || typeof document !== 'object'
+			|| document !== window.document)
 		return null;
 	// if(flag)alert('get_element: '+id+','+flag);
 
 	// 後面暫時沒用到
 	// if(!flag)flag=_f.self;
 
-	if (typeof document != 'object' || !document.body)
+	if (
+			//typeof document !== 'object' || 
+			!document.body)
 		// document 尚未 load
 		return;
+
+	if(_.is_HTML_element(id))
+		return id;
+
 	var o;
-	if (flag != _f.refOnly)
+	if (flag !== _f.refOnly)
 		// 僅參考 reference page 時不設定
 		o = document.getElementById ? document.getElementById(id)
 			: document.all ? document.all[id]
-			: document.layers ? document.layers[id] : window[id]
-			|| null;
+			: document.layers ? document.layers[id]
+			: window[id];
 	//if(flag)alert('get_element: '+id+','+flag+'\nloadReferenceDone='+loadReferenceDone+'\nreferenceDoc: '+referenceDoc+'\no: '+o+'\nreferenceDoc.get: '+referenceDoc.getElementById(id)+'\n'+referenceDoc.body.innerHTML.slice(0,200));
 	try {
 		// 偶爾還是有可能'沒有使用權限'
-		if (typeof flag == 'object' && typeof flag.getElementById == 'function'
-				&& (o = flag.getElementById(id)) || o || flag
-				&& loadReferenceDone == 1
-				&& (o = referenceDoc.getElementById(id)))
-			return o;
+		typeof flag === 'object' && typeof flag.getElementById === 'function' && (o = flag.getElementById(id))
+		|| o
+		|| flag && loadReferenceDone === 1 && (o = referenceDoc.getElementById(id));
 	} catch (e) {
 	}
-	return null;
+	return o || null;
 };
 
 
@@ -14282,6 +15042,7 @@ CeL.net.web
  * @param element	HTML elements
  * @param class_name	class name || {class name 1:, class name 2:, ..}
  * @param flag
+ * default: just add the specified className
  * (flag&1)==1:	reset className (else just add)
  * (flag&2)==1:	return {className1:, className2:, ..}
  * (flag&4)==1:	remove className
@@ -14343,6 +15104,8 @@ set_class = function(element, class_name, flag) {
 };
 
 //	if cN instanceof RegExp, cN should has NO global flag.
+CeL.net.web
+.
 /**
  * If HTML element has specified class
  * 
@@ -14350,7 +15113,7 @@ set_class = function(element, class_name, flag) {
  * @param class_name	class name || {class name 1:, class name 2:, ..}
  * @return
  */
-function has_class(element, class_name) {
+has_class = function(element, class_name) {
 	var _s = has_class, n = element.className, i;
 	//class_name = class_name.replace(/\s+$|^\s+/g, '');
 	if (!n || !class_name)
@@ -14373,13 +15136,29 @@ function has_class(element, class_name) {
 	return (' '+n+' ').indexOf(' ' + class_name + ' ')!==-1;
 };
 
-//	document.getElementsByClassName in prototype.js
-function findClassN(cN,p,tagN){	//	className, parentElement, tag name, flag
- var i,c=[],o=(p||document.body).getElementsByTagName(tagN||'*'),r=new RegExp('(^|\\s)'+cN+'(\\s|$)'/*,i*/);
- if(o&&cN)for(i=0;i<o.length;i++)
-  if(r.test(o[i].className)/*has_class(o,r)*/)c.push(o[i]);
- return c;
-}
+
+CeL.net.web
+.
+/**
+ * 
+ * @param class_name	class name || {class name 1:, class name 2:, ..}
+ * @param parent
+ * @param tag_name	tag name
+ * @return
+ * @see
+ * document.getElementsByClassName in prototype.js
+ */
+find_class = function(class_name, parent, tag_name, flag) {
+	if (tag_name = class_name && (parent || document.body).getElementsByTagName(tag_name || '*')){
+		var i = 0, c = [], l = tag_name.length,
+		r = new RegExp('(^|\\s)' + class_name + '(\\s|$)'/* ,i */);
+		for (; i < l; i++)
+			if (r.test(tag_name[i].className)/* has_class(tag_name, r) */)
+				c.push(tag_name[i]);
+		return c;
+	}
+	return null;
+};
 
 
 /*	處理popup用
@@ -14739,7 +15518,7 @@ function addValid(v,tf){	//	object to insert valid, target window/frame
  if(!v)v='valid';if(typeof v!='object')v=document.getElementById(v);
  if(!v)return 1;if(v.innerHTML.replace(/&nbsp;/g,'').replace(/\s+/g,''))return 2;
 
- if(typeof tf=='undefined')tf='valid_window';//tf=dQuote(tf);//tf?' target="'+tf+'"':'';
+ if(typeof tf==='undefined')tf='valid_window';//tf=dQuote(tf);//tf?' target="'+tf+'"':'';
  var i=0,t='',d,addValidData=[
 	'Valid XHTML 1.1! by W3C	http://validator.w3.org/check?uri=referer	http://www.w3.org/Icons/valid-xhtml11'
 	//,'Valid XML 1.0! by W3C	'
@@ -14936,6 +15715,7 @@ CeL.net.web
  * @param name	W3C style property name (e.g., no '-webkit-background-clip')
  * @return
  * @see
+ * http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,
  * curCss @ jQuery, http://api.jquery.com/category/css/,
  * <a href="http://www.quirksmode.org/dom/getstyles.html" accessdate="2010/4/1 15:44">JavaScript - Get Styles</a>,
  * <a href="http://www.javaeye.com/topic/140784?page=2" accessdate="2010/4/1 15:41">style.display取值不对，难道是浏览器bug？讨论第2页:  - JavaScript - web - JavaEye论坛</a>
@@ -14984,6 +15764,7 @@ get_style = function(element, name, not_computed) {
 	//	IE 5-8
 	else if (style_interface = element.currentStyle)
 		//	IE: \w+\W\w+ (e.g., margin-bottom), firefox, chorme, safari: \w+-\w+
+		//	IE8 中 with 可能 === "auto"!!
 		value = style_interface[name === 'float' ? 'styleFloat' : name.replace(/-([a-z])/g, function($0, $1) { return $1.toUpperCase(); })];
 		//	Dean Edwards（Base2類庫的作者）的hack	http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
 
@@ -15010,8 +15791,9 @@ CeL.net.web
  * @return
  * @memberOf	CeL.net.web
  * @see
- * http://msdn.microsoft.com/library/en-us/dndude/html/dude04032000.asp
- * http://www.mail-archive.com/mochikit@googlegroups.com/msg00584.html
+ * http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,
+ * http://msdn.microsoft.com/library/en-us/dndude/html/dude04032000.asp,
+ * http://www.mail-archive.com/mochikit@googlegroups.com/msg00584.html,
  * http://hartshorne.ca/2006/01/20/javascript_positioning/
  */
 get_node_position = function(obj) {
@@ -15518,81 +16300,105 @@ function addonload(s,where){
 }
 */
 
-/*	比較好點的 add onload
-這東西頂多只能擺在 include 的 JS file 中，不能 runtime include。
 
-TODO:
-http://javascript.nwbox.com/IEContentLoaded/
-try{document.documentElement.doScroll('left');}
-catch(e){setTimeout(arguments.callee, 50);return;}
-instead of onload
-
-可直接參考 SWFObject
-
-DOMContentLoaded是firefox下特有的Event, 當所有DOM解析完以後會觸發這個事件。
-DOMContentLoaded與DOM中的onLoad事件與其相近。但onload要等到所有頁面元素加載完成才會觸發, 包括頁面上的圖片等等。
-
-usage: on_load(function(){sl(1);},'sl(2);');
-*/
-//on_load[generateCode.dLK]='add_listener';
 CeL.net.web
 .
-on_load = function() {
-	for ( var i = 0, a = arguments; i < a.length; i++)
-		add_listener( {
-			load : a[i]
-		});
+DOM_loaded=function() {
+	if(document.body)
+		return _.DOM_loaded=function(){return true;};
+	else
+		return false;
+};
+
+
+/*
+// The DOM ready check for Internet Explorer
+try{document.documentElement.doScroll('left');}
+catch(e){setTimeout(arguments.callee, 50);return;}
+
+*/
+CeL.net.web
+.
+/**
+ * 比較好點的 add onload。
+ * 比起 add_listener()，本函數在已經 load 時依然會執行，而 add_listener 因為是用榜定的方法，因此 load 完就不再觸發(?)。
+ * 這東西頂多只能擺在 include 的 JS file 中，不能 runtime include。
+ * @example
+ * CeL.use('net.web');
+ * CeL.on_load(function(){sl(1);},'sl(2);');
+ * @requires	_.add_listener,_.DOM_loaded
+ * @see
+ * jQuery: $(document).ready(listener);
+ * DOMContentLoaded	http://webdesign.piipo.com/jquery/jquery_events
+ * 可直接參考 SWFObject。
+ * TODO:
+ * <a href="http://javascript.nwbox.com/IEContentLoaded/" accessdate="2010/6/3 11:15" title="IEContentLoaded - An alternative for DOMContentLoaded on Internet Explorer">IEContentLoaded</a>
+ * DOMContentLoaded是firefox下特有的Event, 當所有DOM解析完以後會觸發這個事件。
+ * DOMContentLoaded與DOM中的onLoad事件與其相近。但onload要等到所有頁面元素加載完成才會觸發, 包括頁面上的圖片等等。
+ * <a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/06/05/jquery-ready-vs-load.aspx" accessdate="2010/6/3 11:17">jQuery ready vs load - 黑暗執行緒</a>
+ * $(document).ready(fn)發生在"網頁本身的HTML"載入後就觸發，而$(window).load(fn)則會等到"網頁HTML 標籤中引用的圖檔、內嵌物件(如Flash)、IFrame"等拉哩拉雜的東西都載入後才會觸發。
+ * @memberOf	CeL.net.web
+ */
+on_load = function on_load() {
+	var _s = _.on_load, loaded=_.DOM_loaded(),i = 0, a = arguments, l = a.length;
+	for (; i < l; i++)
+		if(loaded)
+			a[i].call(document);
+		else
+			_.add_listener('load', a[i], document);
 };
 
 
 CeL.net.web
 .
 /**
- * bind/add listener<br/>
- * **	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 pFirst 而改變。
+ * bind/add listener.
+ * listener 應該加上 try{}catch{}，否則會搞不清楚哪裡出問題。
+ * **	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 p_first 而改變。
  * **	NOT TESTED!!
  * TODO:
- * removeEventListener
- * remove_listener()
+ * removeEventListener,
+ * remove_listener(),
+ * default 'this'
  * @param type	listen to what event type
  * @param listener	listener function/function array/function string,
  * 				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"
  * 			function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}
  * @param [document_object]	bind/attach to what document object
- * @param [pFirst]	parentNode first
+ * @param [p_first]	parentNode first
  * @return
  * @since	2010/1/20 23:42:51
  * @see
  * c.f., GEvent.add_listener()
+ * @memberOf	CeL.net.web
  */
-add_listener = function add_listener(type, listener, document_object, pFirst) {
+add_listener = function add_listener(type, listener, document_object, p_first) {
 	if (!type || !listener)
 		return;
 
 	if (typeof listener === 'string')
 		listener = new Function('e', listener);
 
-	if(typeof pFirst !== 'bool')
-		pFirst = typeof pFirst === 'undefined' ? _s.pFirst : !!pFirst;
+	var _s = _.add_listener, i, adder;
 
-	var _s = add_listener, i, adder;
-
+	if(typeof p_first !== 'bool')
+		p_first = typeof p_first === 'undefined' ? _s.p_first : !!p_first;
 
 	//	進階功能
-	if (typeof type === 'object')
+	if (library_namespace.is_Object(type))
 		// usage: add_listener({unload:Unload});
 		// usage: add_listener({load:{true:[function(){sl(1);},'sl(2);']}});
 		for (i in type)
-			_s(i, type[i], document_object);// ,sl(i+': '+type[i])
+			_s(i, type[i], document_object, p_first);// ,sl(i+': '+type[i])
 
 	else if (typeof listener === 'object')
 		// usage: add_listener('unload',{true:Unload1});
 		// usage: add_listener('unload',[Unload1,Unload2]);
 		// 因為 Array 會從最小的開始照順序出，所以這邊不再判別是否為 Array。
 		for (i in listener)
-			// if(isNaN(f))sl('add_listener: to '+i),_s.pFirst=i==='true';//||i==1||i===true
+			// if(isNaN(f))sl('add_listener: to '+i),_s.p_first=i==='true';//||i==1||i===true
 			_s(type, listener[i], document_object,
-					i === 'true' || (i === 'false' ? false : undefined));// ,sl((typeof i)+' ['+i+'] '+_s.pFirst)
+					i === 'true' || (i === 'false' ? false : undefined));// ,sl((typeof i)+' ['+i+'] '+_s.p_first)
 
 	else{
 		/*
@@ -15603,17 +16409,19 @@ add_listener = function add_listener(type, listener, document_object, pFirst) {
 		else if (!(adder = _s.global_adder) && adder !== null)
 			_s.global_adder = adder = _s.get_adder();
 
+		//$(document).ready(listener);
 
 		// 主要核心動作設定之處理
-		// sl(type+' ('+((typeof pFirst=='undefined'?_s.pFirst:pFirst?true:false)?'pFirst':'run first')+'): '+listener);
+		// sl(type+' ('+((typeof p_first=='undefined'?_s.p_first:p_first?true:false)?'p_first':'run first')+'): '+listener);
 		return adder ?
-			adder(type, listener, pFirst)
+			adder(type, listener, p_first)
 		: document_object && (adder = document_object.attachEvent) ?
 			// http://msdn.microsoft.com/en-us/library/ms536343(VS.85).aspx
 			adder('on' + type, listener)
-		: _s.default_adder(type, listener, pFirst, document_object)
+		: _s.default_adder(type, listener, p_first, document_object)
 		;
 	}
+
 };
 
 CeL.net.web
@@ -15624,16 +16432,17 @@ CeL.net.web
  * <a href="http://www.w3.org/TR/DOM-Level-3-Events/#event-flow" accessdate="2010/4/16 22:40">Document Object Model (DOM) Level 3 Events Specification</a>,
  * <a href="http://www.w3.org/TR/DOM-Level-3-Events/#interface-EventTarget" accessdate="2010/4/16 22:42">Interface EventTarget</a>
  */
-add_listener.pFirst = false;
+add_listener.p_first = false;
 
 CeL.net.web
 .
 /**
- * get (native) global listener adding function
+ * get (native) global listener adding function.
+ * TODO: 只設定一次
  */
 add_listener.get_adder = function() {
 	/**
-	 * moz, saf1.2, ow5b6.1: window.addEventListener
+	 * moz (gecko), safari 1.2, ow5b6.1, konqueror, W3C standard: window.addEventListener
 	 * @ignore
 	 * @see
 	 * <a href="https://developer.mozilla.org/en/DOM/element.addEventListener" accessdate="2010/4/16 22:35">element.addEventListener - MDC</a>
@@ -15641,14 +16450,14 @@ add_listener.get_adder = function() {
 	 */
 	return window.addEventListener ||
 	/*
-	 * op7.50, ie5.0w, ie5.5w, ie6w: window.attachEvent op7.50:
-	 * document.attachEvent
+	 * opera 7.50, ie5.0w, ie5.5w, ie6w: window.attachEvent
+	 * opera 7.50: document.attachEvent
 	 */
 	window.attachEvent ? function(t, l) {
 		window.attachEvent('on' + t, l);
 	} :
 	/*
-	 * MSN/OSX, op7.50, saf1.2, ow5b6.1: document.addEventListener
+	 * MSN/OSX, opera 7.50, safari 1.2, ow5b6.1: document.addEventListener
 	 */
 	document.addEventListener ||
 	/*
@@ -15662,23 +16471,25 @@ CeL.net.web
 .
 /**
  * 含括其他情況。
- * all: window.onload
+ * all: window.onload.
+ * TODO: use queue
  * @param type	listen to what event type
  * @param listener	listener function/function array
- * @param [pFirst]	parentNode first
+ * @param [p_first]	parentNode first
  * @param [document_object]	bind/attach to what document object
  * @return
  * @see
  * http://blog.othree.net/log/2007/02/06/third-argument-of-addeventlistener/
  */
-add_listener.default_adder = function(type, listener, pFirst, document_object) {
+add_listener.default_adder = function(type, listener, p_first, document_object) {
 	if(!document_object)
 		document_object = window;
 
 	var old = document_object[type = 'on' + type];
 	return document_object[type] =
 		old ?
-			pFirst ? function() {
+			//	TODO: typeof old==='string'
+			p_first ? function() {
 				old();
 				listener();
 			} : function() {
@@ -15689,6 +16500,26 @@ add_listener.default_adder = function(type, listener, pFirst, document_object) {
 			listener
 		;
 };
+
+CeL.net.web
+.
+/**
+ * TODO:
+ * listener list.
+ * 當無法執行 DOM 操作時（尚未載入、版本太舊不提供支援等）以此為主。
+ * add_listener.list[node][event type]=[listener list]
+ */
+add_listener.list = {};
+
+CeL.net.web
+.
+/**
+ * TODO:
+ * 觸發函數.
+ * 當無法執行 DOM 操作時（尚未載入、版本太舊不提供支援等）以此為主。
+ * add_listener.list[type]=[listener list]
+ */
+add_listener.list = {};
 
 
 
@@ -15919,6 +16750,61 @@ function TxtToCSS(T,r,sp){	//	r:radio,sp:separator
 }
 
 
+CeL.net.web
+.
+/**
+ * Translate a query string to a native Object contains key/value pair set.
+ * @param	{String} query_string	query string. default: location.search
+ * @param	{Object} add_to	append to this object
+ * @return	key/value pairs
+ * @type	Object
+ * @since	2010/6/16 15:18:50
+ * @memberOf	CeL.net.web
+ * @see
+ */
+get_query = function(query_string, add_to) {
+	if (!query_string)
+		query_string = window/* self */.location.search.slice(1);
+	// else if(typeof query_string!=='string')..
+
+	var i, q = query_string.replace(/\+/g, ' ').split('&'), p, s = add_to || {}, k, v;
+	for (i in q)
+		try {
+			if (p = q[i].match(/^([^=]*)=(.*)$/)) {
+				k = decodeURIComponent(p[1]);
+				v = decodeURIComponent(p[2]);
+				if (k in s)
+					if (typeof s[k] === 'string')
+						s[k] = [ s[k], v ];
+					else
+						s[k].push(v);
+				else
+					s[k] = v;
+			} else
+				s[decodeURIComponent(q[i])] = undefined;
+		} catch (e) {
+			// TODO: handle exception
+		}
+
+	return s;
+};
+
+
+CeL.net.web
+.
+/**
+ * Translate a native Object contains key/value pair set to a query string.
+ * TODO
+ * @param	{Object} query_Object	query Object.
+ * @return	{String} query string
+ * @type	String
+ * @memberOf	CeL.net.web
+ * @see
+ * jQuery.param
+ */
+to_query_string = function(query_Object) {
+	;
+};
 
 /*	簡化 HTML (word)
 	simplify HTML
@@ -16002,14 +16888,16 @@ function reduceHTML(t){
 }
 
 
+CeL.net.web
+.
 /**
  * 將 BIG5 日文假名碼修改為 Unicode 日文假名
- * @param U
+ * @param {String} U	Unicode text
  * @return
  * @see
  * from Unicode 補完計畫 jrename.js
  */
-function Big5JPToUnicodeJP(U) {
+Big5JPToUnicodeJP=function (U) {
 	var H = '', t, i = 0;
 	for (; i < U.length; i++)
 		t = c.charCodeAt(0)
@@ -16801,10 +17689,11 @@ getDigital=function(id){
    }
 
  if(!d.length)d=max=min=0;
- else if(d.length==1)d=max=min=d[0];
+ else if(d.length===1)d=max=min=d[0];
 
  //sl('getDigital: '+o.name+' '+min+'-'+max);
- o.maxD=max,o.minD=min;
+ o.maxD=max;
+ o.minD=min;
 
  return max;
 },
@@ -16899,7 +17788,8 @@ _p.setInputType=function(t,i){	//	(type,id)
  var _t=this;
  if(t)_t.inputAs=t,i=i||-1;
  t=_t.inputAs;
- if(i)_t.setMaxLength(t==2?mainLen:t==3?branchLen:i<0?20:getDigital(i)?mainLen+getDigital(i):20);	//	mainLen+getDigital(i): 看來似乎必要這麼做
+ //	mainLen+getDigital(i): 看來似乎得加上原來銀行代號 mainLen 碼。最起碼郵局是這樣。
+ if(i)_t.setMaxLength(t==2?mainLen:t==3?branchLen:i<0?20:getDigital(i)?mainLen+getDigital(i):20);
  return t;
 };
 
@@ -16914,14 +17804,24 @@ _p.onSelect=function(l,i){
  return bankNow?i:l[i].id;
 };
 
-_p.verify=function(k){
- //sl('verify ['+k+']');
- var m;
- if(!k&&k!==0)return 1;
- if(!/^\d+$/.test(k))return 2;
- if(k.length>=mainLen)
-  if(!bank[m=Math.floor(k.slice(0,mainLen))] || k.length>=branchLen&&bank[m].branch&&!(k.slice(0,branchLen) in bank[m].branch))
-   return 1;
+_p.verify = function(k) {
+	// sl('verify ['+k+']');
+	var m;
+
+	if (!k && k !== 0)
+		return 1;
+
+	if (!/^\d+$/.test(k))
+		return 2;
+
+	if (k.length >= mainLen)
+		if (!bank[m = Math.floor(k.slice(0, mainLen))]
+				|| k.length >= branchLen
+				&& (m = bank[m].branch)
+				&& !(k.slice(0, branchLen) in m)
+				//	為郵局(branch length:10)特設
+				&& (k.slice(0, 3) !== '700' || !((k.slice(0, 10) in m))))
+			return 1;
 };
 
 return _;
@@ -17084,6 +17984,9 @@ CeL.setup_module(module_name, code_for_including);
 TODO:
 HTML 5 <datalist> Tag
 
+http://plugins.jquery.com/search/node/Autocomplete+type%3Aproject_project
+http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/
+	http://jsgears.com/thread-114-1-1.html
 
 set focus/blue background-image instead of HTML 5 placeholder text
 	http://dev.w3.org/html5/spec/Overview.html#the-placeholder-attribute
@@ -17203,6 +18106,8 @@ function scrollbar_width() {
  * @param [p]	parentNode to scroll
  * @return
  * @since	2008/9/3 23:31:29
+ * @inner
+ * @ignore
  */
 function scroll_to_show(o, p) {
 	if (!p) {
@@ -17260,6 +18165,8 @@ selectName.options[i]=new Options("option_value","option_Text", defaultSelected,
  * @param o
  * @param l
  * @return
+ * @inner
+ * @ignore
  */
 function menu_creater(o, l) {
 
@@ -17532,6 +18439,9 @@ searchInList=function(f,o){	//	o: 傳入 (list, index, key)
  * 切換 [input] / inputted [span]
  * @param {Boolean|undefined} to_input	切換至 input or not. default: 切換至 [input]
  * @return
+ * @private
+ * @inner
+ * @ignore
  */
 triggerToInput = function(to_input) {
 	var _t = this, _p = pv(_t);
@@ -17551,8 +18461,13 @@ triggerToInput = function(to_input) {
 				&& parseInt(library_namespace.get_style(_p.inputO, 'width'))){
 			//library_namespace.debug(to_input);
 			//	TODO: +16, +10: magic number
-			_p.inputtedO.style.width = (to_input+parseInt(library_namespace.get_style(_p.arrowO, 'width'))+16)+'px';
-			_p.inputtedO.style.height = (parseInt(library_namespace.get_style(_p.inputO, 'height'))+10)+'px';
+			try {
+				//	.get_style(_p.arrowO, 'width') 可能回傳 'auto' @ IE8
+				_p.inputtedO.style.width = (to_input+parseInt(library_namespace.get_style(_p.arrowO, 'width'))+16)+'px';
+				_p.inputtedO.style.height = (parseInt(library_namespace.get_style(_p.inputO, 'height'))+10)+'px';
+			} catch (e) {
+				// TODO: handle exception
+			}
 		}
 
 		_p.arrowO.style.display = _p.inputO.style.display = 'none';
@@ -17564,6 +18479,10 @@ triggerToInput = function(to_input) {
 	}
 },
 
+//	TODO: http://blog.xuite.net/sugopili/computerblog/17695447
+set_source=function(URL){
+	;
+},
 
 /*	配置元件
 
@@ -17579,7 +18498,7 @@ arguments:
 <select> 會被當作選項
 others: container
 */
-dispose=function(o){
+layout=function(o){
  var _t=this,_p=pv(_t),t;
 
  if(typeof o!=='object')
@@ -17587,7 +18506,7 @@ dispose=function(o){
 
  if(!o || (o.tagName.toLowerCase() in {hr:1,br:1}))return;	//	** 這邊應該檢查 o 是不是 <hr/> 等不能加 child 的！
 
- //library_namespace.debug(('dispose: use <'+o.tagName+(o.id?'#'+o.id:'')+'>: '+o.innerHTML).replace(/</g,'&lt;'));
+ //library_namespace.debug(('layout: use <'+o.tagName+(o.id?'#'+o.id:'')+'>: '+o.innerHTML).replace(/</g,'&lt;'));
 
  //	TODO: 這邊應該有一個更完善的刪除策略
  if(_t.loaded){
@@ -17595,7 +18514,7 @@ dispose=function(o){
   //	不必多做功，已經達到所需配置了。
   if(t===o.parentNode)return;
   for(var i=0,e='inputO,inputtedO,arrowO,listO'.split(',');i<e.length;i++)
-   //library_namespace.debug('dispose: removeChild '+e[i]),
+   //library_namespace.debug('layout: removeChild '+e[i]),
    _p[e[i]].parentNode.removeChild(_p[e[i]]);//t.removeChild(_p[e[i]]);
   if(!t.childNodes.length)t.parentNode.removeChild(t);
  }
@@ -17751,7 +18670,7 @@ initI=function(o,l,s){	//	(HTML object, list: Array or Object)
  instanceL.push(_t);	//	for destructor
 
  if(o)
-  dispose.call(this,o);
+	layout.call(this,o);
 /*
  else{
   //throw new Error(1,'Can not get document object'+(o?' ['+o+']':'')+'!');
@@ -18096,7 +19015,7 @@ triggerToInput:function(){
 attach:function(o){	//	(input or select object)
  //sl('attach: '+o);
  //o.replaceNode(_p.inputO);
- o=dispose.call(this,o);
+ o=layout.call(this,o);
  this.setAllList(this.setAllList());
  return o;
 },
@@ -18418,8 +19337,6 @@ var code_for_including = function(library_namespace, load_arguments) {
 //	definition of module Hamming
 
 var
-/*
-*/
 /**
  * Hamming code
  * @class	Hamming Code 的 constructor
@@ -18629,32 +19546,58 @@ CeL.setup_module(module_name, code_for_including);
 
 
 
-(function (){
+/**
+ * @name	CeL polynomial function
+ * @fileoverview
+ * 本檔案包含了數學多項式的 functions。
+ * @since	
+ */
 
-	/**
-	 * 本 library / module 之 id
-	 */
-	var lib_name = 'math.polynomial';
 
-	//	若 CeL 尚未 loaded 或本 library 已經 loaded 則跳出。
-	if(typeof CeL !== 'function' || CeL.Class !== 'CeL' || CeL.is_loaded(lib_name))
-		return;
-
+if (typeof CeL === 'function'){
 
 /**
- * polynomial test
- * @memberOf	CeL
- * @param	msg	msg
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
  */
-CeL.math.polynomial = function(msg){
-	alert(msg);
+var module_name = 'math.polynomial';
+
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.math.polynomial
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function (library_namespace, load_arguments) {
+
+
+var 
+/**
+ * null module constructor
+ * @class 數學多項式相關之 function。
+ * @constructor
+ */
+CeL.math.polynomial
+= function () {
+	//	null module constructor
 };
 
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.math.polynomial
+.prototype = {};
 
 
-//CeL.extend(lib_name, {});
-
-})();
 
 
 
@@ -18801,6 +19744,18 @@ function getPbyR(roots){
 
 
 
+
+
+return (
+CeL.math.polynomial
+);
+};
+
+//===================================================
+
+CeL.setup_module(module_name, code_for_including);
+
+};
 
 
 
@@ -19338,21 +20293,26 @@ CeL.setup_module(module_name, code_for_including);
  * @name	CeL file function
  * @fileoverview
  * 本檔案包含了 file functions。
- * @since	
+ * @since
+ * @see
+ * <a href="http://dev.w3.org/2006/webapi/FileAPI/" accessdate="2010/6/20 14:49">File API</a>	
  */
 
 
+/*
 
+
+*/
 
 if (typeof CeL === 'function'){
 
-	/**
-	 * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
-	 * @type	String
-	 * @constant
-	 * @inner
-	 * @ignore
-	 */
+/**
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
+ */
 var module_name = 'IO.file';
 
 //===================================================
@@ -19457,22 +20417,22 @@ function getPathOnly(p){
 /*	2003/10/1 15:57
 	pn(path now)相對於bp(base path)之path(增加../等)
 */
-//relatePath[generateCode.dLK]='reducePath,is_absolute_path,same_length,dirSp,dirSpR';
+//relative_path[generateCode.dLK]='reducePath,is_absolute_path,same_length,dirSp,dirSpR';
 //,WScript,WshShell
-function relatePath(bp,pn){
+function relative_path(bp,pn){
  if(!pn)pn=typeof location=='object'?location.href:typeof WScript=='object'?WScript.ScriptFullName:'';
  if(!bp)bp=typeof location=='object'?location.href:typeof WshShell=='object'?WshShell.CurrentDirectory:typeof WScript=='object'?WScript.ScriptFullName:'';
- //alert('relatePath: parse 1\n'+bp+'\n'+pn);
+ //alert('relative_path: parse 1\n'+bp+'\n'+pn);
  var p=reducePath(pn);
  if(!p)return;
  var d=reducePath(bp,1);
  if(!d||!is_absolute_path(d))return p;	//	bp需要是絕對路徑
 
- //alert('relatePath: parse 2\n'+d+'\n'+p);
+ //alert('relative_path: parse 2\n'+d+'\n'+p);
  if(!is_absolute_path(p)){	//	p非絕對路徑時先處理成絕對路徑
   var q=p.indexOf(dirSp,1);	//	預防第一字元為dirSp
   if(q==-1)q=p;else q=p.slice(0,q);	//	取得第一識別用目錄名
-  //alert('relatePath: parse 3\n'+d+'\n'+q);
+  //alert('relative_path: parse 3\n'+d+'\n'+q);
   q=d.indexOf(q);
   if(q==-1)return p;
   p=d.slice(0,q)+p;
@@ -19497,21 +20457,25 @@ function relatePath(bp,pn){
  return s>0?d.substr(s).replace(new RegExp('([^'+dirSpR+']+'+dirSpR+')','g'),'..'+dirSp)+p.substr(s):p;
 }
 //	想要保持 Protocol，但卻是不同機器時	http://nedbatchelder.com/blog/200710.html#e20071017T215538
-//alert(relatePath('//lyrics.meicho.com.tw/game/game.pl?seg=diary21','cgi-bin/game/photo/'));WScript.Quit();
+//alert(relative_path('//lyrics.meicho.com.tw/game/game.pl?seg=diary21','cgi-bin/game/photo/'));WScript.Quit();
 
 
 
+CeL.IO.file
+.
 /**
  * determine base path.
- * 給定 base path 的結構後，藉由 path_now 推測 base path 的 full path
+ * 給定 base path 的結構後，藉由 path_now 推測 base path 的 full path.
+ * cf. 
  * @param {String} base_path_structure	base path 的範本結構
  * @param {String} path_now
  * @return	{String}	推測的 base path full path
  * @example
- * alert(dBasePath('kanashimi/www/cgi-bin/game/'));
+ * alert(determine_base_path('kanashimi/www/cgi-bin/game/'));
  * @requres	reducePath,getPathOnly,dirSp,dirSpR
+ * @memberOf	CeL.IO.file
  */
-function dBasePath(base_path_structure, path_now) {
+determine_base_path=function (base_path_structure, path_now) {
 	if (!path_now)
 		path_now = library_namespace.get_base_path();
 
@@ -19541,17 +20505,20 @@ function dBasePath(base_path_structure, path_now) {
 		//alert("Can't find base directory of this file!\n" + path_name + '\n\nTreat base directory as:\n' + p);
 		return p;
 
-	//alert('dBasePath:\nbp='+bp+'\npn='+pn+'\n\n'+p.slice(0,j)+'\n'+t+'\n'+(t.replace(new RegExp('([^'+dirSpR+']+'+dirSpR+')','g'),' ').length-1));
+	//alert('determine_base_path:\nbp='+bp+'\npn='+pn+'\n\n'+p.slice(0,j)+'\n'+t+'\n'+(t.replace(new RegExp('([^'+dirSpR+']+'+dirSpR+')','g'),' ').length-1));
 	return p.slice(0, j) + t;
-}
+};
 
 
+CeL.IO.file
+.
 /**
  * cf: getFN()
  * @param {String} path	path name
  * @return
+ * @memberOf	CeL.IO.file
  */
-function parse_path(path) {
+parse_path=function (path) {
 	if (typeof path !== 'string' || !path)
 		return;
 
@@ -19577,13 +20544,16 @@ function parse_path(path) {
 };
 
 
+CeL.IO.file
+.
 /**
  * is absolute or relative path, not very good solution
  * @param {String} path
  * @return
  * @requires	dirSp,dirSpR
+ * @memberOf	CeL.IO.file
  */
-function is_absolute_path(path) {
+is_absolute_path=function (path) {
 	//alert(typeof path + '\n' + path);
 	return path
 		&& (dirSp === '/' && path.charAt(0) === dirSp || new RegExp(
@@ -19607,15 +20577,15 @@ function getFilePath(p){
 	在Win/DOS下輸入'\'..會加上base driver
 	若只要相對路徑，可用reducePath()。取得如'..\out'的絕對路徑可用getFP('../out',1)
 */
-//getFP[generateCode.dLK]='dBasePath,reducePath,is_absolute_path,getPathOnly,relatePath';
+//getFP[generateCode.dLK]='determine_base_path,reducePath,is_absolute_path,getPathOnly,relative_path';
 function getFP(p,m,bp){	//	path,mode=0:傳回auto(維持原狀),1:傳回絕對路徑,2:傳回相對路徑,base path
  //old:	return (p.lastIndexOf('\\')==-1&&p.lastIndexOf('/')==-1?getFolder(getScriptFullName()):'')+p;//getF
  if(!p)return'';
- if(p.charAt(0)=='\\'&&dBasePath(bp).match(/^(\\\\|[A-Za-z]+:)/))p=RegExp.$1+p;
+ if(p.charAt(0)=='\\'&&determine_base_path(bp).match(/^(\\\\|[A-Za-z]+:)/))p=RegExp.$1+p;
  p=reducePath(p);
  if(m==1){
-  if(!is_absolute_path(p))p=reducePath((bp?getPathOnly(bp):dBasePath())+p);	//	當為相對路徑時前置base path
- }else if(m==2&&is_absolute_path(p))p=relatePath(dBasePath(bp),p);
+  if(!is_absolute_path(p))p=reducePath((bp?getPathOnly(bp):determine_base_path())+p);	//	當為相對路徑時前置base path
+ }else if(m==2&&is_absolute_path(p))p=relative_path(determine_base_path(bp),p);
  return p;
 }
 //	傳回檔名部分，the return value include ? #
@@ -19814,8 +20784,8 @@ usage example:
 prog example:
 	function move_file_filter(fn){var n=fn.match(/0000(\d+)\(\d\)\.pdf/);if(!n)return true;n=n[1];if(n!=0&&n!=1&&n!=7&&n!=10&&n!=13&&n!=15&&n!=26&&n!=28)return true;try{n=fn.match(/(\d+)\(\d\)\.pdf/);FileSystemObject.MoveFile(n[1]+'('+(n[1]?vol-1:vol-2)+').pdf',n[1]+'.pdf');}catch(e){}return;}
 	var vol=11,doMove=move_file(new RegExp('(\\d+)\\('+vol+'\\)\\.pdf'),'$1.pdf');
-	write_to_file('move.log','-'.x(60)+new_line+doMove.log,open_format.TristateTrue,ForAppending);
-	write_to_file('move.undo.'+vol+'.txt',doMove.undo,open_format.TristateTrue),write_to_file('move.undo.'+vol+'.bat',doMove.undo);//bat不能用open_format.TristateTrue
+	write_file('move.log','-'.x(60)+new_line+doMove.log,open_format.TristateTrue,ForAppending);
+	write_file('move.undo.'+vol+'.txt',doMove.undo,open_format.TristateTrue),write_file('move.undo.'+vol+'.bat',doMove.undo);//bat不能用open_format.TristateTrue
 	alert('Done '+doMove.succeed+'/'+doMove.list.length);
 
 	for Win98, turn lower case:
@@ -20648,8 +21618,8 @@ CeL.IO.Windows.file
  * 轉換以 adTypeBinary 讀到的資料
  * @example
  * //	較安全的讀檔：
- * t=translate_AdoStream_binary_data(read_all_file(FP,'binary'));
- * write_to_file(FP,t,'iso-8859-1');
+ * t=translate_AdoStream_binary_data(read_file(FP,'binary'));
+ * write_file(FP,t,'iso-8859-1');
  * @see
  * <a href="http://www.hawk.34sp.com/stdpls/dwsh/charset_adodb.html">Hawk&apos;s W3 Laboratory : Disposable WSH : 番外編：文字エンコーディングとADODB.Stream</a>
  * @memberOf	CeL.IO.Windows.file
@@ -20906,7 +21876,7 @@ AdoEnums = {
 CeL.IO.Windows.file
 .
 /**
- * 提供給 <a href="#.read_all_file">read_all_file</a>, <a href="#.write_to_file">write_to_file</a> 使用的簡易開檔函數
+ * 提供給 <a href="#.read_file">read_file</a>, <a href="#.write_file">write_file</a> 使用的簡易開檔函數
  * @param FN	file path
  * @param format	open format, e.g., open_format.TristateUseDefault
  * @param io_mode	open mode, e.g., iomode.ForWriting
@@ -20961,9 +21931,9 @@ var simpleFileErr,
 	CeL.IO.Windows.file
 	.open_format.TristateUseDefault;
 
-//_.read_all_file[generateCode.dLK]=_.write_to_file[generateCode.dLK]='simpleFileErr,simpleFileAutodetectEncode,simpleFileDformat,initWScriptObj';//_.open_file,autodetectEncode,getFP,_.open_format.TristateUseDefault
-//_.read_all_file[generateCode.dLK]+=',ForReading';_.write_to_file[generateCode.dLK]+=',ForWriting';
-//_.read_all_file[generateCode.dLK]+=',translate_AdoStream_binary_data';	//	for _.read_all_file(FP,'binary')
+//_.read_file[generateCode.dLK]=_.write_file[generateCode.dLK]='simpleFileErr,simpleFileAutodetectEncode,simpleFileDformat,initWScriptObj';//_.open_file,autodetectEncode,getFP,_.open_format.TristateUseDefault
+//_.read_file[generateCode.dLK]+=',ForReading';_.write_file[generateCode.dLK]+=',ForWriting';
+//_.read_file[generateCode.dLK]+=',translate_AdoStream_binary_data';	//	for _.read_file(FP,'binary')
 CeL.IO.Windows.file
 .
 /**
@@ -20975,7 +21945,7 @@ CeL.IO.Windows.file
  * @return {String} 檔案內容
  * @memberOf	CeL.IO.Windows.file
  */
-read_all_file=function(FN,format,io_mode,func){
+read_file=function(FN,format,io_mode,func){
  simpleFileErr=0;if(format==simpleFileAutodetectEncode)
   format=typeof autodetectEncode=='function'?autodetectEncode(FN):simpleFileDformat;
  if(!FN||typeof getFP=='function'&&!(FN=getFP(FN)))return;
@@ -21006,7 +21976,7 @@ read_all_file=function(FN,format,io_mode,func){
    AdoStream.LoadFromFile(FN);
    if(AdoStream.Type==AdoEnums.adTypeBinary){
     a=AdoStream.Read(AdoEnums.adReadAll);	//	讀 binary data 用 'iso-8859-1' 會 error encoding.
-    if(_.read_all_file.turnBinToStr&&typeof translate_AdoStream_binary_data=='function')a=translate_AdoStream_binary_data(a);
+    if(_.read_file.turnBinToStr&&typeof translate_AdoStream_binary_data=='function')a=translate_AdoStream_binary_data(a);
    }else if(func)
     while(!AdoStream.EOS)func(AdoStream.ReadText(AdoEnums.adReadLine));
 /*
@@ -21027,7 +21997,7 @@ read_all_file=function(FN,format,io_mode,func){
  return a;
 };
 CeL.IO.Windows.file
-.read_all_file.turnBinToStr=true;
+.read_file.turnBinToStr=true;
 
 
 CeL.IO.Windows.file
@@ -21043,7 +22013,7 @@ CeL.IO.Windows.file
  * @return error No.
  * @memberOf	CeL.IO.Windows.file
  */
-write_to_file = function(FN, content, format, io_mode, N_O) {
+write_file = function(FN, content, format, io_mode, N_O) {
 	simpleFileErr = 0;
 	if (format == simpleFileAutodetectEncode)
 		format = typeof autodetectEncode == 'function' ? autodetectEncode(FN)
@@ -21107,14 +22077,14 @@ write_to_file = function(FN, content, format, io_mode, N_O) {
 };
 
 //	TODO: unfinished
-//simpleDealFile[generateCode.dLK]='autodetectEncode,_.read_all_file,_.write_to_file';
+//simpleDealFile[generateCode.dLK]='autodetectEncode,_.read_file,_.write_file';
 CeL.IO.Windows.file
 .
 simpleDealFile=function(inFN,func,outFN,format,io_mode,N_O){
  if(!inFN)return;
  if(!outFN)outFN=inFN;
- var e=autodetectEncode(inFN),i=_.read_all_file(inFN,e),o=_.read_all_file(outFN,e),t=func(i,inFN);
- if(typeof t=='string'&&o!=t)return _.write_to_file(outFN,t,e,N_O);
+ var e=autodetectEncode(inFN),i=_.read_file(inFN,e),o=_.read_file(outFN,e),t=func(i,inFN);
+ if(typeof t=='string'&&o!=t)return _.write_file(outFN,t,e,N_O);
 };
 
 /*
@@ -21194,7 +22164,7 @@ setObjValue('autodetectEncodeCode','GB2312=3000,Big5=3000,shift_jis=900,iso-8859
 TODO:
 只檢測常用的幾個字，無法判別才廣泛測試。
 */
-//var FN='I:\\Documents and Settings\\kanashimi\\My Documents\\kanashimi\\www\\cgi-bin\\game\\sjis.txt',enc=autodetectEncode(FN);alert('['+enc+'] '+FN+'\n'+_.read_all_file(FN,enc).slice(0,900));
+//var FN='I:\\Documents and Settings\\kanashimi\\My Documents\\kanashimi\\www\\cgi-bin\\game\\sjis.txt',enc=autodetectEncode(FN);alert('['+enc+'] '+FN+'\n'+_.read_file(FN,enc).slice(0,900));
 /*	自動判別檔案（或字串）之編碼	文字エンコーディング判定を行う
 	http://www.hawk.34sp.com/stdpls/dwsh/charset_adodb.html
 	http://www.ericphelps.com/q193998/
@@ -21470,14 +22440,14 @@ function turnBinStr(t,_enc){
   //t+='';
   //if(t.replace(/[^\x00-\x7f]+/g,''))return t;
   //var _q=t.replace(/[^?]+/g,'').length,_t,_j=0;
-  _.write_to_file(turnBinStr.tmpF,''+t,'iso-8859-1');
-  //alert(turnBinStr.tmpF+'\n'+simpleFileErr.description+'\n'+t+'\n'+_.read_all_file(turnBinStr.tmpF,'utf-8'));
-  return _.read_all_file(turnBinStr.tmpF,'utf-8');
+  _.write_file(turnBinStr.tmpF,''+t,'iso-8859-1');
+  //alert(turnBinStr.tmpF+'\n'+simpleFileErr.description+'\n'+t+'\n'+_.read_file(turnBinStr.tmpF,'utf-8'));
+  return _.read_file(turnBinStr.tmpF,'utf-8');
 /*
   if(!_enc)_enc='utf-8,Big5,shift_jis,euc-jp,GB2312'.split(',');
   else if(!(_enc instanceof Array))_enc=[_enc];
   for(;_j<_enc.length;_j++)
-   if((_t=_.read_all_file(turnBinStr.tmpF,_enc[_j])).replace(/[^?]+/g,'').length==_q)
+   if((_t=_.read_file(turnBinStr.tmpF,_enc[_j])).replace(/[^?]+/g,'').length==_q)
     return _t;//'['+_enc[_j]+']'+
   return t;
 */
@@ -21634,7 +22604,7 @@ CeL.IO.Windows.file
  * @memberOf	CeL.IO.Windows.file
  */
 iconv_file = function(fileName, toCode, fromCode, encodeFunction) {
-	return iconv(_.read_all_file(fileName, fromCode), toCode,
+	return iconv(_.read_file(fileName, fromCode), toCode,
 			encodeFunction);
 };
 
@@ -21714,7 +22684,7 @@ fileProperty=folderProperty.slice(0,12);//folderProperty.sort();
 */
 
 
-//var kkk='';_.traverse_file_system(function(fileItem,itemType){kkk+=(itemType==_.traverse_file_system.f.driver?fileItem.DriveLetter+':('+fileItem.VolumeName+')':fileItem.Name+(itemType==_.traverse_file_system.f.folder?path_separator:''))+'\n';},'I:\\Documents and Settings\\kanashimi\\My Documents\\kanashimi\\www\\cgi-bin\\program');_.write_to_file('tmp.txt',kkk,'unicode');
+//var kkk='';_.traverse_file_system(function(fileItem,itemType){kkk+=(itemType==_.traverse_file_system.f.driver?fileItem.DriveLetter+':('+fileItem.VolumeName+')':fileItem.Name+(itemType==_.traverse_file_system.f.folder?path_separator:''))+'\n';},'I:\\Documents and Settings\\kanashimi\\My Documents\\kanashimi\\www\\cgi-bin\\program');_.write_file('tmp.txt',kkk,'unicode');
 /*
 
 _.traverse_file_system(FS_function_array)	省略path會當作所有Drives
@@ -21772,7 +22742,7 @@ CeL.IO.Windows.file
  * @see	<a href="http://msdn.microsoft.com/library/en-us/script56/html/0fa93e5b-b657-408d-9dd3-a43846037a0e.asp">FileSystemObject</a>
  */
 traverse_file_system = function traverse_file_system(FS_function_array, path, filter, flag) {
-	var _s = traverse_file_system, _f = _s.f;
+	var _s = _.traverse_file_system, _f = _s.f;
 
 	// initial
 	// 預設 flag
@@ -22212,19 +23182,26 @@ _a='((|[^"\''+_f.fd+'\\n][^'+_f.fd+'\\n]*|"((""|[^"]|\\n)*)"|\'((\'\'|[^\']|\\n)
 	// _r=[ [L1_1,L1_2,..], [L2_1,L2_2,..],.. ]
 	return _r;
 };
+
+CeL.data.CSV
+.
 /**
- * field delimiter
- */
-_.parse_CSV.fd = '\\t,;';// :\s
+* field delimiter
+*/
+parse_CSV.fd = '\\t,;';// :\s
+CeL.data.CSV
+.
 /**
- * text delimiter
- */
-_.parse_CSV.td = '"\'';
+* text delimiter
+*/
+parse_CSV.td = '"\'';
 //_.parse_CSV.ld	line delimiter: only \n, \r will be ignored.
+CeL.data.CSV
+.
 /**
- * auto detect.. no title
- */
-_.parse_CSV.hasTitle = null;
+* auto detect.. no title
+*/
+parse_CSV.hasTitle = null;
 //_.parse_CSV.title_word='t';	//	data[parse_CSV.title_word]=title row array
 //_.parse_CSV.fd=';',parse_CSV.td='"',alert(parse_CSV('"dfdf\nsdff";"sdf""sadf\n""as""dfsdf";sdfsadf;"dfsdfdf""dfsadf";sfshgjk',1).join('\n'));WScript.Quit();
 
@@ -22811,6 +23788,673 @@ CeL.setup_module(module_name, code_for_including);
 
 
 /**
+ * @name	CeL function for API
+ * @fileoverview
+ * 本檔案包含了 include API 專用的 functions。
+ * @since	2010/6/20 13:28:50
+ */
+
+/*
+
+*/
+
+if (typeof CeL === 'function'){
+
+/**
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
+ */
+var module_name = 'code.API';
+
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.code.API
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function(library_namespace, load_arguments) {
+
+//	**	no requires
+
+
+/**
+ * null module constructor
+ * @class	相容性 test 專用的 functions
+ */
+CeL.code.API
+= function() {
+	//	null module constructor
+};
+
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.code.API
+.prototype = {
+};
+
+
+
+
+
+/*	2008/5/29 20:6:23-6/4 2:10:21
+7/3 13:34	showNeighbor: 可拖曳 loc->name/address, 有資料的提高優先權, bug fix: 有些太遠的還是會被列入, 有些近的可能因為不是住址而不會被列入
+7/9 13:9:15	context menu
+7/9 21:12:3	getLocations
+2009/7/20 20:27:58	稍作修正
+
+
+bug:
+名稱相同時會出現被覆蓋的情況!
+
+
+TO TEST:
+
+
+showClass.setRepository('_ev_');
+
+sC=showClass.showOnScope;
+
+sC('mp',GLog.write);
+
+sC('Fb','mp');
+
+sC('y','Fb');
+
+sC('A','y');
+
+
+to use:
+
+<script type="text/javascript" src="map.js"></script>
+<script type="text/javascript">//<![CDATA[
+wAPIcode('Gmap');
+//]]></script>
+
+
+TODO:
+分類(Categories)&分顏色顯示
+Auto Zoom Out	http://esa.ilmari.googlepages.com/sorry.htm
+search data only
+preload map & markers
+GDirections
+圈選
+用經緯度查詢
+
+c.f. http://jmaps.digitalspaghetti.me.uk/
+
+http://www.ascc.sinica.edu.tw/nl/90/1706/02.txt
+臺灣地區地名網站
+http://tgnis.ascc.net
+http://placesearch.moi.gov.tw/index_tw.php
+
+地名學名詞解釋彙編
+http://webgis.sinica.edu.tw/geo/Termquery.asp
+
+臺灣地區地名相關文獻查詢系統
+http://webgis.sinica.edu.tw/geo/reference.html
+
+經濟部中央地質調查所-地質資料整合查詢
+http://datawarehouse.moeacgs.gov.tw/geo/index/GISSearch/MSDefault.htm
+
+
+http://gissrv3.sinica.edu.tw/tgnis_query/link.php?cid=1
+http://www.edu.geo.ntnu.edu.tw/modules/wordpress/2008/06/08/yxaewaweaeobmh/
+
+
+http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=1&d_database=25k_2002
+http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=1085&d_database=5000_1
+http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=01663&d_database=chen_quo
+http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=1663&d_database=chen_jen
+http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=11880&d_database=tw_fort
+http://gissrv3.sinica.edu.tw/search/left2_detail.php?d_number=02713&d_database=ching
+
+http://gissrv3.sinica.edu.tw/input/detail.php?input_id=45875
+
+資料庫	編號	類型(類別)	名稱	地理座標(經緯度)	所屬縣市鄉鎮(所屬行政區,地點)	別稱	註記(所在圖號)	意義(說明)
+
+
+
+http://www.isp.tw/zip.php
+
+小工具
+
+1.溫度轉換
+2.進位換算
+3.BMI值及熱量需求計算
+4.角度徑度換算
+5.度量衡計算
+6.區碼國碼查詢
+7.郵遞區號查詢
+8.金融機構代號查詢
+9.色彩表示法查詢
+10.摩斯密碼及字母述語
+11.生肖星座查詢
+12.婦女安全期計算
+13.花言花語查詢
+14.常用機關電話查詢
+15.航空公司機場代碼查詢
+16.簡易匯率換算
+17.國曆農曆換算
+18.急救及疾病忌口寶典
+19.尺碼對照表
+20.自訂公式計算
+21.股票投資組合管理
+
+
+*/
+
+
+
+
+/*	初始化 Google Gears
+http://code.google.com/apis/gears/gears_init.js
+http://blog.ericsk.org/archives/978
+http://chuiwenchiu.spaces.live.com/blog/cns!CA5D9227DF9E78E8!1063.entry
+
+Google Gears退休: Gears功能正被整合到HTML5規格中
+we expect developers to use HTML5 for these features moving forward as it's a standards-based approach that will be available across all browsers.
+http://it.solidot.org/article.pl?sid=09/12/03/0539248
+*/
+function init_Google_Gears() {
+	// 檢查是否已經定義 Google Gear
+	if (window.google && google.gears)
+		return;
+
+	var factory = null;
+	// 依據不同的瀏覽器，採用不同方式產生 GearFactory
+	if (typeof GearsFactory != 'undefined')
+		// Firefox
+		factory = new GearsFactory();
+	else
+		try {
+			// IE
+			factory = new ActiveXObject('Gears.Factory');
+			// privateSetGlobalObject is only required and supported on WinCE.
+			if (factory.getBuildInfo().indexOf('ie_mobile') != -1)
+				factory.privateSetGlobalObject(this);
+		} catch (e) {
+			// Safari
+			if (typeof navigator.mimeTypes != 'undefined'
+					&& navigator.mimeTypes["application/x-googlegears"]) {
+				factory = document.createElement("object");
+				factory.style.display = "none";
+				factory.width = factory.height = 0;
+				factory.type = "application/x-googlegears";
+				document.documentElement.appendChild(factory);
+			}
+		}
+	if (!factory)
+		return 1;
+
+	if (!window.google)
+		window.google = {};
+	if (!google.gears)
+		google.gears = {
+			factory : factory
+		};
+
+}
+
+
+/*
+f={catch:true/false/update, restore:false/true.}
+*/
+catchFile.ls=0;	//	localServer
+catchFile.sn='catch-files';	//	storeName: 定義 Managed Store 的名稱，這個名稱可用於 createManagedStore, removeManagedStore 和 openManagedStore 三個 API
+catchFile.s=0;	//	managed store
+//
+catchFile.f=function(url,success,captureId){};
+catchFile.fL=[location.pathname];	//	file list
+catchFile.doCache=1;
+catchFile.noAsk=1;
+function catchFile(fList, f) {
+	var _f = arguments.callee;
+	if (!_f.doCache)
+		return;
+
+	if (window.location.protocol == 'file:') {
+		sl('catchFile: Google Gears 不能在本機上執行或測試！');
+		return 0;
+	}
+
+	if (init_Google_Gears()) {
+		if (_f.answered)
+			return 0;
+		_f.answered = 1;
+		if (!_f.noAsk && confirm('使用本功能必須安裝 Google Gears，請問您要安裝嗎？'))
+			// ?action=install&message=加入你的訊息&return=安裝後要導回的網址
+			window.location.href = 'http://gears.google.com/';
+		else
+			sl('<em>catchFile: 若不安裝 Google Gears 則將無法使用本功能！</em>');
+		return 1;
+	}
+
+	if (!_f.ls)
+		try {
+			// 建立 Local Server
+			_f.ls = window.google.gears.factory.create('beta.localserver',
+			'1.0');
+		} catch (e) {
+			sl('catchFile: Could not create local server: ['
+					+ (e.number & 0xFFFF) + '] ' + e.message);
+			return 2;
+		}
+
+	if (!_f.s)
+		try {
+			// 建立儲存空間
+			_f.s = _f.ls.createManagedStore(_f.sn);
+			_f.s = _f.ls.createStore(_f.sn);
+		} catch (e) {
+			if (window.location.protocol == 'file:')
+				sl('Google Gears 不能在本機上執行測試!');
+			else
+				sl('catchFile: Could not create managed store: ['
+						+ (e.number & 0xFFFF) + '] ' + e.message);
+			return 3;
+		}
+
+	if ((fList instanceof String) && fList) {
+		// TODO: untested!!
+		// 指定 json 的 url
+		_f.s.manifestUrl(fList);
+		// 開始確定版本及同步
+		_f.s.checkForUpdate();
+
+		// 為了確認是否同步結束了，可以加入下列的 timer 來檢查：
+		var timer = google.gears.factory.create('beta.timer');
+		// 每 500ms 檢查一下
+		var timerId = timer.setInterval(function() {
+			// 同步完成
+			if (store.currentVersion) {
+				timer.clearInterval(timerId);
+				sl('同步完成');
+			}
+		}, 500);
+	} else if ((fList instanceof Array) && fList.length)
+		_f.fL = _f.fL.concat(fList);
+
+	// If the store already exists, it will be opened
+	if (_f.s)
+		try {
+			_f.s.capture(_f.fL, _f.f);
+		} catch (e) {
+			if (e.message == 'Url is not from the same origin')
+				sl('需要在同樣的 domain!');
+			else
+				sl('catchFile: Could not capture file: [' + (e.number & 0xFFFF)
+						+ '] ' + e.message);
+			return 4;
+		}
+
+/*
+	// uncapture
+	for ( var i = 0; i < fList.length; i++) {
+		_f.s.remove(fList[i]);
+	}
+	// removeStore
+	if (localServer.openStore(storeName)) {
+		localServer.removeStore(storeName);
+		_f.s = null;
+	}
+ */
+
+};
+
+
+
+/*	http://blog.wctang.info/2007/07/use-google-map-api-without-api-key.html
+驗證的程式叫 GValidateKey，是定義在 main.js，但呼叫的動作是寫在 maps.js 裡
+
+
+
+function showClass(c, n) {
+	var i, sp = '<hr style="width:40%;float:left;"/><br style="clear:both;"/>', h = '<span style="color:#bbb;font-size:.8em;">', p = function(
+			m, p) {
+		sl(h + n + (p ? '.prototype' : '') + '.</span><em>' + m + '</em> ' + h
+				+ '=</span> ' + f(c[m]));
+	}, f = function(f) {
+		return (f + '').replace(/\n/g, '<br/>').replace(/ /g, '&nbsp;');
+	};
+	if (typeof c == 'string') {
+		if (!n)
+			n = c;
+		c = eval(c);
+	}
+	if (!n)
+		n = '';
+	sl('<hr/>Show class: (' + (typeof c) + ')'
+			+ (n ? ' [<em>' + n + '</em>]' : '') + '<br/>'
+			// +(n?'<em>'+n+'</em> '+h+'=</span> ':'')
+			+ f(c));
+	if (c) {
+		sl(sp + 'class member:');
+		for (i in c)
+			if (i != 'prototype')
+				p(i);
+		sl(sp + 'prototype:');
+		c = c.prototype;
+		for (i in c)
+			p(i, 1);
+	}
+	sl('<hr/>');
+}
+
+//showClass('GValidateKey');
+
+_v = {};
+eval('_v.lp=lp;', GValidateKey);
+//showClass(_v.lp,'lp');
+
+eval('_v.j=j;', GValidateKey);
+//showClass(_v.j,'j');
+
+eval('_v.ep=ep;', GValidateKey);
+showClass(_v.ep, 'ep');
+
+//sl(_v.lp('http:', 'lyrics.meicho.com.tw', '/game/index.htm').join('<br/>'));
+
+var b = _v.lp('http:', 'lyrics.meicho.com.tw', '/game/index.htm');
+for ( var c = 0; c < b.length; ++c) {
+	var d = b[c];
+	sl(d + '; ' + _v.ep(d));
+}
+
+*/
+
+
+
+
+
+CeL.code.API
+.
+/**
+ * 自動挑選 domain
+ * @param	API	API name
+ * @param	callback	null: do NOT load
+ * @return	[ API url, API key ]
+ * @since	2010/6/20 22:12:23
+ * @see
+ * 
+ */
+use_API = function(API, callback) {
+	var _s = _.use_API,
+	url_set = _s.API_URL, url = window.location,
+	key_set = _s.API_key, API_key;
+
+	if (	!library_namespace.is_Array(url_set = url_set[API]) || typeof url_set[1] !== 'function' ||
+			!library_namespace.is_Object(key_set = key_set[url_set[0]])
+			){
+		CeL.err(url = 'use_API: The kind of API [' + API + '] is not included in the code pool!');
+		throw new Error(url);
+	}
+
+	if (url.protocol === 'file:')
+		// 取得任何 legal key
+		for (url in key_set){
+			if (typeof key_set[url] === 'string')
+				break;
+		}
+
+	//	this is for domain + path
+	//else if ((url = url.href.replace(/[^\/]+$/, '')) in key_set) ;
+
+	//	this is for domain. 不能用 .pathname: IE 會作特殊處置
+	else if (!(url = url.href.match(/^([a-z-]+:\/\/[^\/]+\/)/)) || !((url = url[1]) in key_set)){
+		CeL.err(url = 'use_API: This domain [' + url + '] is not included in ' + url_set[0] + ' code pool!');
+		throw new Error(url);
+	}
+
+	//library_namespace.debug('[' + url + ']\n' + key_set[url] + '\n' + location.href + '\n' + location.pathname);
+
+	url = url_set[1](API_key = key_set[url] || '', _s.language || '');
+
+	if (callback !== null){
+		library_namespace.include_resource(
+			url,
+			callback
+			//	某些舊版 Firefox 使用 createElement('script') 不被接受，因此可能需要用寫的。
+			, 0
+			, 0
+			);
+
+		library_namespace.debug('load [' + url_set[0] + '] ' + API + ': [<a href="' + url + '">' + url + '</a>].');
+	}
+
+	return [ url, API_key ];
+};
+
+CeL.code.API
+.
+/**
+ * 語系. e.g., zh-TW, ja, en
+ */
+use_API.language = 'zh-TW';
+
+CeL.code.API
+.
+use_API.API_key = {
+	Google : {
+		/*
+		 * 在本機上試用 Google Map API 並不需要去申請 API Key。
+		 * 2008/7/15 20:40:49	但幾天前起 GClientGeocoder 需要。而在 Firefox，即使在 file:// 也不可行??
+		 */
+
+		/*
+		//	by account fan0123321
+		'http://lyrics.meicho.com.tw/' : 'ABQIAAAAx1BFd-K0IXzdNnudsKfW3BR_OWH2p1vlzGygO-LFq-ywbfjcNBQ4wJpNt5E4VTHG4JLZ_HX8LQxVEQ',
+		'https://lyrics.meicho.com.tw/' : 'ABQIAAAAx1BFd-K0IXzdNnudsKfW3BQ2grkpcb8ONU70KrnysR7Wz3iAOhQ7rov77Kc_pTW2t8r5-BSiIg5j6w',
+		'http://kanashimi.meicho.com.tw/' : 'ABQIAAAAx1BFd-K0IXzdNnudsKfW3BSETOz6DhT-d0fFy_mIERGWK3ymyxQKcydi2zFol0W_QslvBsxp3BffQQ',
+		'https://kanashimi.meicho.com.tw/' : 'ABQIAAAAx1BFd-K0IXzdNnudsKfW3BTFY8WBNAy3k9U7ZNA5kvqHv9VA-BSzdXmlU2Sm9WU6hvuSysY85kLdGw',
+		 */
+
+		// by account cedegree
+		//	AJAX Search API Key:	http://code.google.com/intl/zh-TW/apis/ajaxsearch/signup.html
+		'http://meicho.com.tw/' : 'ABQIAAAA8YsRfLuORC22bc07JTNYsBS3JAeykUxPSpDNfPvIbcz6s5aBrRRdn1nyUM_9cYox7ymS-IgI-2CNuA',
+		'http://211.22.213.114/' : 'ABQIAAAA8YsRfLuORC22bc07JTNYsBS3JAeykUxPSpDNfPvIbcz6s5aBrRRdn1nyUM_9cYox7ymS-IgI-2CNuA',
+
+		// by account kanasimi
+		'http://lyrics.meicho.com.tw/' : 'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RR_OWH2p1vlzGygO-LFq-ywbfjcNBQcZtd9Bp9zMEQhrEtSnBy9_wJQmg',
+		// 事實上 domain-key 就夠了。
+		//'http://lyrics.meicho.com.tw/program/map/' : 'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RQQofoUntuAmbaLi2tPP0I7mS20HxSIGUQ5BPerzSbJB2mFqHQq07idRg',
+		'https://lyrics.meicho.com.tw/' : 'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RQ2grkpcb8ONU70KrnysR7Wz3iAOhS24gkxeP-OqUBmABKA7PZQoacWHQ',
+		'http://kanashimi.meicho.com.tw/' : 'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RSETOz6DhT-d0fFy_mIERGWK3ymyxSPw4AHxgM4dHjkgesM0FKx4ui2BQ',
+		'https://kanashimi.meicho.com.tw/' : 'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RTFY8WBNAy3k9U7ZNA5kvqHv9VA-BRu-OKx8fvfBtyuqJZfb5PK0HllUQ'
+
+/*
+	事實上 [*.]*.com.tw 用下面這個也行。
+'http://com.tw/':'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RTXVjoday36ta5qc6JGQW5WaWldDhTZrWmq9ZDX6Bhhzgk7MlY9qQXvzA',
+
+對 http://lyrics.meicho.com.tw/game/ 會檢查的：
+http://lyrics.meicho.com.tw/game/
+http://lyrics.meicho.com.tw/
+http://www.lyrics.meicho.com.tw/game/
+http://www.lyrics.meicho.com.tw/
+http://meicho.com.tw/game/
+http://meicho.com.tw/
+http://com.tw/game/
+http://com.tw/
+*/
+
+	},
+
+	Yahoo : {
+		// by account colorlessecho for Yahoo! map
+		'http://lyrics.meicho.com.tw/' : 'XX9YCu_V34G1xvKMy7EOmVkPFtALrHIkVP_qG5ANRAzuTNlQKuoXVssSTBYiGSX9gjssAA--'
+	},
+
+	Microsoft : {
+		// by account cedegree@hotmail.com for VLS
+		//	http://www.bing.com/developers/
+		'' : 'BCBE2B0C4E58461B987145E3EBB1BFAB96FBCCD0',
+		'http://meicho.com.tw/' : 'BCBE2B0C4E58461B987145E3EBB1BFAB96FBCCD0',
+		'http://211.22.213.114/' : 'BCBE2B0C4E58461B987145E3EBB1BFAB96FBCCD0'
+	}
+};
+
+CeL.code.API
+.
+use_API.API_URL = {
+	Gmap : [
+			'Google',
+			function(k, l) {
+				return 'http://maps.google.com/maps?file=api&v=2&hl=' + l + '&key=' + k;
+			} ],
+	GAPI : [ 'Google', function(k, l) {
+		return 'http://www.google.com/jsapi?hl=' + l + '&key=' + k;
+	} ],
+
+	YMap : [ 'Yahoo', function(k) {
+		return 'http://api.maps.yahoo.com/ajaxymap?v=3.8&appid=' + k;
+	} ],
+	twYMap : [ 'Yahoo', function(k) {
+		return 'http://tw.api.maps.yahoo.com/ajaxymap?v=3.8&appid=' + k;
+	} ],
+
+	Bing: [ 'Microsoft', function(k) {
+		return 'http://api.microsofttranslator.com/V1/Ajax.svc/Embed?appId=' + k;
+	} ]
+};
+
+
+
+
+
+
+CeL.code.API
+.
+/**
+ * 為 Microsoft Translator 設置
+ * @param text	test to translate
+ * @param callback	callback(from text,to text)
+ * @param [from_enc]
+ * @param [to_enc]
+ * @return
+ * @see
+ * http://msdn.microsoft.com/en-us/library/ff512406.aspx
+ */
+add_Microsoft_translate = function(text, callback, from_enc, to_enc) {
+	if (!text || !callback)
+		return;
+
+	var _s = _.add_Microsoft_translate, url = _s.url, name = _s.reference_name, count;
+	// 初始化 initialization
+	if (!url)
+		_s.url = url = 'http://api.microsofttranslator.com/V2/Ajax.svc/Translate?appId=' +
+				_.use_API('Bing', null)[1];
+
+	//library_namespace.debug('<a href="' + url + encodeURIComponent(text) + '">' + url + encodeURIComponent(text) + '</a>');
+
+	_s.buffer[count = _s.counter++] = [ text, callback ];
+	// response, count, function name of add_Microsoft_translate
+	_s['c' + count] = new Function('r',
+			name + '.callback(r,' + count + ',"' + name + '");'
+			);
+	library_namespace.include_resource(
+			url
+				+ '&from=' + (from_enc || _s.from)
+				+ '&to=' + (to_enc || _s.to)
+				+ '&text=' + encodeURIComponent(text)
+				+ '&oncomplete=' + name + '.c' + count,
+			0,
+			0
+	);
+};
+
+CeL.code.API
+.
+add_Microsoft_translate.from = 'en';
+
+CeL.code.API
+.
+add_Microsoft_translate.to = 'zh-cht';
+
+CeL.code.API
+.
+add_Microsoft_translate.reference_name = library_namespace.Class + '.add_Microsoft_translate';
+
+
+
+CeL.code.API
+.
+/**
+ * @inner
+ * @private
+ */
+add_Microsoft_translate.counter = 0;
+
+CeL.code.API
+.
+/**
+ * @inner
+ * @private
+ */
+add_Microsoft_translate.buffer = [];
+
+var ELEMENT_NODE = 1;
+
+CeL.code.API
+.
+/**
+ * @inner
+ * @private
+ */
+add_Microsoft_translate.callback = function(response, count, name) {
+	try{
+		var _s = library_namespace.get_various(name),
+		origin = _s.buffer[count],
+		callback = origin[1];
+		origin = origin[0];
+		delete _s.buffer[count];
+		delete _s['c' + count];
+		if (typeof callback === 'function') {
+			callback(response, origin);
+		} else {
+			if (typeof callback === 'string')
+				callback = document.getElementById(callback);
+			if (typeof callback === 'object'
+				&& callback.nodeType === ELEMENT_NODE)
+				callback.appendChild(document.createTextNode(response));
+		}
+	}catch (e) {
+		library_namespace.warn('add_Microsoft_translate.callback: '+name+': error!');
+	}
+};
+
+
+
+
+
+return (
+	CeL.code.API
+);
+};
+
+//===================================================
+
+CeL.setup_module(module_name, code_for_including);
+
+};
+
+
+
+
+//--------------------------------------------------------------------------------//
+
+
+
+
+/**
  * @name	CeL function for compatibility
  * @fileoverview
  * 本檔案包含了相容性 test 專用的 functions。
@@ -22822,7 +24466,7 @@ CeL.setup_module(module_name, code_for_including);
 /*
 http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K875.aspx
 8進制數字表示被禁止， 010 代表 10 而不是 8
-引入備受歡迎的 JSON 對象
+引入 JSON
 Array 對象內置了一些標準函數，如 indexOf(), map(), filter(), reduce()
 # Object.keys() 會列出對象中所有可以枚舉的屬性
 # Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性
@@ -22905,7 +24549,8 @@ function oldVadapter(){
  if(typeof decodeURIComponent!='function'&&typeof decodeURI=='function')decodeURIComponent=decodeURI;
 }
 
-function Apush(o){this[this.length]=o;return this;}
+//	在 FF3 僅用 this[this.length]=o; 效率略好於 Array.push()，但 Chrome 6 相反。
+function Apush(o){this[this.length]=o;return this.length;}
 //	將 element_toPush 加入 array_pushTo 並篩選重複的（本來已經加入的並不會變更）
 //	array_reverse[value of element_toPush]=index of element_toPush
 function pushUnique(array_pushTo,element_toPush,array_reverse){
@@ -22922,7 +24567,7 @@ function pushUnique(array_pushTo,element_toPush,array_reverse){
  for(i in element_toPush)
   if(!array_reverse[element_toPush])
    //array_pushTo.push(element_toPush),array_reverse[element_toPush]=array_pushTo.length;
-   array_reverse[array_pushTo[l=array_pushTo.length]=element_toPush[i]]=l;
+   array_reverse[array_pushTo[l = array_pushTo.length] = element_toPush[i]] = l;
 
  return array_pushTo;
 }
@@ -22992,7 +24637,8 @@ classParent.prototype.methodOfParent.call(objChild, ..);	//	基底プロトタ�
 /**
  * @ignore
  */
-if(0)function Fapply(/* object */ oThis /* = null */, /* Array */ arrayArgs /* = null */) {
+if(0)
+function Fapply(/* object */ oThis /* = null */, /* Array */ arrayArgs /* = null */) {
  if(oThis == null || oThis == undefined)	//	グローバルオブジェクトに適用
   return arrayArgs == null || arrayArgs == undefined? this(): this(arrayArgs);
  if(!(oThis instanceof Object))
@@ -23020,7 +24666,8 @@ call 方法是用來呼叫代表另一個物件的方法。call 方法可讓您�
 /**
  * @ignore
  */
-if(0)function Fcall(/* object */ oThis /* = null [, arg1[, arg2[, ... [, argN]]]]] */){
+if(0)
+function Fcall(/* object */ oThis /* = null [, arg1[, arg2[, ... [, argN]]]]] */){
  var argu=[];//Array.prototype.slice.call(arguments);
  for(var i=1;i<arguments.length;i++)
   argu[i-1]=arguments[i];	//	argu.push(arguments[i]);
@@ -23070,6 +24717,7 @@ CeL.code.compatibility
  * @param	name	various name @ name-space window. e.g., document, location
  * @return	{Boolean}	various is object of window
  * @since	2010/1/14 22:04:37
+ * @memberOf	CeL.code.compatibility
  */
 is_DOM = function(name) {
 	var r = _.is_web();
@@ -23122,18 +24770,274 @@ is_HTA = function is_HTA(id) {
 
 
 //	版本檢查
-function checkVer(ver){
- if(!ver||ver<5)ver=5;	//WScript.FullName,WScript.Path
- with(WScript)if(Version<ver)with(WshShell){
-  var promptTitle=Locale==0x411?'アップグレードしませんか？':'請升級'
-  ,promptC=Locale==0x411?"今使ってる "+WScript.Name+" のバージョンは古過ぎるから、\nMicrosoft Windows スクリプト テクノロジ Web サイトより\nバージョン "
-	+Version+" から "+ver+" 以上にアップグレードしましょう。":"正使用的 "+WScript.Name+" 版本過舊，\n請至 Microsoft Windows 網站將版本由 "
-	+Version+" 升級到 "+ver+" 以上。"
-  ,url=/*Locale==0x411?*/"http://www.microsoft.com/japan/developer/scripting/default.htm";
-  if(1==Popup(promptC,0,promptTitle,1+48))Run(url);
-  Quit(1);
- }
+function checkVer(ver) {
+	if (!ver || ver < 5)
+		ver = 5; // WScript.FullName,WScript.Path
+	with (WScript)
+	if (Version < ver)
+		with (WshShell) {
+		var promptTitle = Locale == 0x411 ? 'アップグレードしませんか？'
+				: '請升級', promptC = Locale == 0x411 ? "今使ってる "
+						+ WScript.Name
+						+ " のバージョンは古過ぎるから、\nMicrosoft Windows スクリプト テクノロジ Web サイトより\nバージョン "
+						+ Version + " から " + ver + " 以上にアップグレードしましょう。"
+						: "正使用的 "
+							+ WScript.Name
+							+ " 版本過舊，\n請至 Microsoft Windows 網站將版本由 "
+							+ Version + " 升級到 " + ver + " 以上。", url = /* Locale==0x411? */"http://www.microsoft.com/japan/developer/scripting/default.htm";
+		if (1 == Popup(promptC, 0, promptTitle, 1 + 48))
+			Run(url);
+		Quit(1);
+	}
 }
+
+
+
+
+
+
+
+/*	2008/12/21 18:53:42
+value to json
+JavaScript Object Notation	ECMA-262 3rd Edition
+
+http://stackoverflow.com/questions/1500745/how-to-pass-parameters-in-eval-in-an-object-form
+json={name:'~',values:..,description:'~'}
+window[json.name].apply(null, json.values)
+
+
+usage:
+json(value)
+
+parse:
+data=eval('('+data+')');	//	字串的前後記得要加上刮號 ()，這是用來告知 Javascript Interpreter 這是個物件描述，不是要執行的 statement。
+eval('data='+data);
+
+TODO:
+
+useObj
+加入function object成員，.prototype可用with()。加入函數相依性(dependency)
+
+array用name:
+(function(){
+var o;
+o=[..];
+var i,v={..};
+for(i in v)o[i]=v[i];
+return o; 
+})()
+
+
+recursion 循環參照
+(function(){
+var o;
+o={a:[]};
+o['b']=[o['a']],
+o['a'].push([o['b']]);
+return o; 
+})()
+
+
+
+BUG:
+function 之名稱被清除掉了，這可能會產生問題！
+(function(){
+var f=function(){..};
+f.a=..;
+f.b=..;
+f.prototype={
+a:..,
+b:..
+}
+return f; 
+})()
+
+
+*/
+//json[generateCode.dLK]='qNum,dQuote';
+
+
+
+/*
+var a=[],b;a.push(b=[a]);json(a);
+
+test recursion 循環參照
+(function(){
+var o=[],_1=[o];
+o.push(_1);
+return o; 
+})();
+
+*/
+
+/*
+改用 window.JSON, jQuery.parseJSON
+據說toJSONString跟parseJSON有可能成為ECMAScript第四版的標準
+
+須判別來源是否為 String or Number!
+
+
+九个PHP很有用的功能 | 酷壳 - CoolShell.cn
+http://coolshell.cn/?p=2394
+你是否會把一個比較複雜的數據結構存到數據庫或是文件中？你並不需要自己去寫自己的算法。PHP早已為你做好了，其提供了兩個函數：?serialize()  和 unserialize()
+JSON越來越流行，所以在PHP5.2以後，PHP開始支持JSON，你可以使用 json_encode() 和 json_decode() 函數。但是對於一些非常複雜的數據結構，可能會造成數據丟失。
+
+
+json.dL='dependencyList';	//	dependency List Key
+json.forceArray=1;
+
+json.indentString='	';
+json.NewLine='\n';
+json.separator=' ';
+function json(val,name,type){	//	type==2: inside object, treat undefined as ''
+var _f=json,expA=[],expC=[],vType=typeof val
+,addE=function(o,l,n){
+	if(l){
+	 o=_f(o,0,2);
+	 n=typeof n=='undefined'||n===''?''
+		:(/^(\d{1,8})?(\.\d{1,8})?$/.test(n)||/^[a-z_][a-z_\d]{0,30}$/i.test(n)?n:dQuote(n))+':'+_f.separator;
+	 expA.push(n,o[1]);
+
+	 //expC.push(_f.indentString+n+o[0].join(_f.NewLine+_f.indentString)+',');
+	 o=o[0];
+	 o[0]=n+(typeof o[0]=='undefined'?'':o[0]);
+	 o[o.length-1]+=',';
+	 for(var i=0;i<o.length;i++)
+	  o[i]=_f.indentString+(typeof o[i]=='undefined'?'':o[i]);
+	 expC=expC.concat(o);
+	}else expA.push(o),expC.push(o);
+}
+//	去掉最後一組的 ',' 並作結
+,closeB=function(c){
+	var v=expC[expC.length-1];
+	if(v.charAt(v.length-1)==',')
+	 expC[expC.length-1]=v.slice(0,v.length-1);
+	addE(c);
+};
+
+switch(vType){
+case 'number':
+//	http://msdn2.microsoft.com/zh-tw/library/y382995a(VS.80).aspx
+//	isFinite(value) ? String(value)
+var k=0,m='MAX_VALUE,MIN_VALUE,NEGATIVE_INFINITY,POSITIVE_INFINITY,NaN'.split(','),t=0;
+if(val===NaN||val===Infinity||val===-Infinity)t=''+val;
+else for(;k<m.length;k++)
+ if(val===Number[m[k]]){t='Number.'+m[k];break;}
+if(!t){
+ //	http://msdn2.microsoft.com/zh-tw/library/shydc6ax(VS.80).aspx
+ for(k=0,m='E,LN10,LN2,LOG10E,LOG2E,PI,SQRT1_2,SQRT2'.split(',');k<m.length;k++)
+  if(val===Math[m[k]]){t='Math.'+m[k];break;}
+ if(!t)
+  if(k=(''+val).match(/^(-?\d*[1-9])(0{3,})$/))
+   t=k[1]+'e'+k[2].length;
+  else{
+
+   //	有理數判別
+   k=qNum(val);
+
+   //	小數不以分數顯示. m==1:非分數
+   m=k[1];
+   while(m%2==0)m/=2;
+   while(m%5==0)m/=5;
+
+   t=k[2]==0 && m!=1?k[0]+'/'+k[1]:
+	//	TODO: 加速(?)
+	(t=Math.floor(val))==val&&(''+t).length>(t='0x'+val.toString(16)).length?t:val;
+  }
+
+}
+addE(t);
+break;
+case 'null':
+addE(''+val);
+break;
+case 'boolean':
+addE(val);
+break;
+case 'string':
+addE(dQuote(val));
+break;
+case 'undefined':
+addE(type==2?'':'undefined');
+break;
+
+case 'function':
+//	加入function object成員，.prototype可用with()。加入函數相依性(dependency)
+var toS,f;
+//	這在多執行緒有機會出問題！
+if(typeof val.toString!='undefined'){toS=val.toString;delete val.toString;}
+f=''+val;
+if(typeof toS!='undefined')val.toString=toS;
+
+f=f.replace(/\r?\n/g,_f.NewLine);	//	function 才會產生 \r\n 問題，所以先處理掉
+var r=/^function\s+([^(\s]+)/,m=f.match(r),t;
+if(m)m=m[1],addE('//	function ['+m+']'),t=f.replace(r,'function'+_f.separator);
+if(m&&t.indexOf(m)!=-1)alert('function ['+m+'] 之名稱被清除掉了，這可能會產生問題！');
+addE(t||f);
+//	UNDO
+break;
+
+case 'object':
+try{
+if(val===null){addE(''+val);break;}
+var c=val.constructor;
+if(c==RegExp){
+ addE(val);
+ break;
+}
+if(c==Date || vType=='date'){	//	typeof val.getTime=='function'
+ //	與 now 相隔過短(<1e7, 約3h)視為 now。但若是 new Date()+3 之類的會出現誤差！
+ addE('new Date'+((val-new Date)>1e7?'('+val.getTime()+')':''));	//	date被當作object
+ break;
+}
+if((''+c).indexOf('Error')!=-1){
+ addE('new Error'+(val.number||val.description?'('+(val.number||'')+(val.description?(val.number?',':'')+dQuote(val.description):'')+')':''));
+ break;
+}
+
+var useObj=0;
+if(c==Array){
+ var i,l=0;
+ if(!_f.forceArray)for(i in val)
+  if(isNaN(i)){useObj=1;break;}else l++;
+
+ if(_f.forceArray || !useObj && l>val.length*.8){
+  addE('[');
+  for(i=0;i<val.length;i++)
+   addE(val[i],1);
+  closeB(']');
+  break;
+ }else useObj=1;
+}
+
+if(useObj||c==Object){// instanceof
+ addE('{');
+ for(var i in val)
+  addE(val[i],1,i);
+ closeB('}');
+ break;
+}
+addE(dQuote(val));
+break;
+}catch(e){
+if(28==(e.number&0xFFFF))
+ alert('json: Too much recursion?\n循環參照？');
+return;
+}
+
+case 'unknown':	//	sometimes we have this kind of type
+default:
+alert('Unknown type: ['+vType+'] (constructor: '+val.constructor+'), please contract me!\n'+val);
+break;
+//alert(vType);
+}
+return type?[expC,expA]:expC.join(_f.NewLine);
+}
+
+*/
+
+
+
 
 
 
@@ -23158,31 +25062,69 @@ CeL.setup_module(module_name, code_for_including);
 
 
 
-(function (){
+/**
+ * @name	CeL function for debug
+ * @fileoverview
+ * 本檔案包含了 debug 的 functions。
+ * @since	
+ */
 
-	/**
-	 * 本 library / module 之 id
-	 */
-	var lib_name = 'debug';
+/*
 
-	//	若 CeL 尚未 loaded 或本 library 已經 loaded 則跳出。
-	if(typeof CeL !== 'function' || CeL.Class !== 'CeL' || CeL.is_loaded(lib_name))
-		return;
+http://code.google.com/apis/ajax/playground/
 
-	CeL.set_library(lib_name);
+*/
+
+if (typeof CeL === 'function'){
 
 /**
- * setup debug library
- * @namespace	debug library
- * @memberOf	CeL
+ * 本 module 之 name(id)，<span style="text-decoration:line-through;">不設定時會從呼叫時之 path 取得</span>。
+ * @type	String
+ * @constant
+ * @inner
+ * @ignore
  */
-CeL.debug = function() {
+var module_name = 'code.debug';
+
+//===================================================
+/**
+ * 若欲 include 整個 module 時，需囊括之 code。
+ * @type	Function
+ * @param	{Function} library_namespace	namespace of library
+ * @param	load_arguments	呼叫時之 argument(s)
+ * @return
+ * @name	CeL.code.debug
+ * @constant
+ * @inner
+ * @ignore
+ */
+var code_for_including = function(library_namespace, load_arguments) {
+
+//	requires
+/*
+if (eval(library_namespace.use_function(
+		'code.compatibility.is_DOM,data.split_String_to_Object')))
+	return;
+*/
+
+
+/**
+ * null module constructor
+ * @class	code.debug 的 functions
+ */
+CeL.code.debug
+= function() {
+	//	null module constructor
+};
+
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.code.debug
+.prototype = {
 };
 
 
-CeL.set_loaded(lib_name);
-
-})();
 
 
 
@@ -23191,6 +25133,8 @@ CeL.set_loaded(lib_name);
 
 
 //JSalert[generateCode.dLK]='getScriptName';//,*var ScriptName=getScriptName();
+CeL.code.debug
+.
 /**
  * 顯示訊息視窗<br/>
  * alert() 改用VBScript的MsgBox可產生更多效果，但NS不支援的樣子。
@@ -23201,8 +25145,9 @@ CeL.set_loaded(lib_name);
  * @return	{Integer} number of the button the user clicked to dismiss the message box.
  * @requires	CeL.get_script_name
  * @see	<a href="http://msdn.microsoft.com/library/en-us/script56/html/wsmthpopup.asp">Popup Method</a>
+ * @memberOf	CeL.code.debug
  */
-function JSalert(message, wait, title, type) {
+JSalert=function (message, wait, title, type) {
 	var _f=arguments.callee;
 	if (typeof _f.cmd === 'undefined') // 控制是否彈跳出視窗
 		_f.cmd = typeof WScript === 'object'
@@ -23244,7 +25189,7 @@ function JSalert(message, wait, title, type) {
 			'' + message,
 			wait, title, type
 			);
-}
+};
 
 // popup object Error(錯誤)
 //popErr[generateCode.dLK]='JSalert,setTool,parse_Function';
@@ -23373,6 +25318,22 @@ function showObj(obj,mode,searchKey,printmode,range){//object,mode,search string
 
 
 
+return (
+	CeL.code.debug
+);
+
+};
+
+
+//===================================================
+
+
+CeL.setup_module(module_name, code_for_including);
+
+};
+
+
+
 
 //--------------------------------------------------------------------------------//
 
@@ -23389,6 +25350,9 @@ function showObj(obj,mode,searchKey,printmode,range){//object,mode,search string
  * <a href="http://www.mozilla.org/projects/venkman/" accessdate="2010/1/1 16:43">Venkman JavaScript Debugger project page</a>
  */
 
+//	http://blogs.msdn.com/b/webdevtools/archive/2007/03/02/jscript-intellisense-in-orcas.aspx
+///	<reference path="../ce.js"/>
+
 /*
 TODO:
 emergency/urgent situation alert
@@ -23396,7 +25360,7 @@ emergency/urgent situation alert
 「不再顯示」功能
 .format()
 	將 div format 成 log panel。
-分群
+分群, http://developer.yahoo.com/yui/examples/uploader/uploader-simple-button.html
 */
 
 
@@ -23602,7 +25566,7 @@ dependency:
 
  * @constructor
  * @name	CeL.code.log
- * @param	{String, object HTMLElement} obj	log target: message area element or id
+ * @param	{String|object HTMLElement} obj	log target: message area element or id
  * @param	{Object} [className_set]	class name set
  */
 _tmp;CeL.code.log
@@ -23724,21 +25688,30 @@ CeL.code.log
  * Specifies the name of the type of the error.
  * Possible values include Error, EvalError, RangeError, ReferenceError, SyntaxError, TypeError, and URIError.
  */
-get_error_message = function(e, new_line, caller) {
+get_error_message = function get_error_message(e, new_line, caller) {
 	if (!new_line)
 		new_line = _.prototype.save_new_line;
 
-	if (!caller)
-		//	TODO: do not use arguments
-		caller = arguments.callee.caller;
+	if (!caller || typeof caller !== 'string'){
+		if (typeof caller !== 'function')
+			// TODO: do not use .caller
+			caller = get_error_message.caller;
+
+		if (caller === null)
+			caller = 'from the top level';
+		else if (typeof caller === 'function')
+			caller = '@' + (library_namespace.get_function_name(caller) || caller);
+		else
+			caller = '@' + library_namespace.Class;
+	}
+
 
 	// from popErr()
 	//	type
 	var T = library_namespace.is_type(e),
 	//	message
 	m = T === 'Error' ?
-			'Error '
-			+ (caller === null ? 'from the top level: ' : '@' + library_namespace.Class + ': ')
+			'Error ' + caller + ': '
 			+ (e.number & 0xFFFF) + (e.name ? ' [' + e.name + '] ' : ' ')
 			+ '(facility code ' + (e.number >> 16 & 0x1FFF) + '): '
 			+ new_line
@@ -23750,7 +25723,6 @@ get_error_message = function(e, new_line, caller) {
 					+ new_line
 					+ ('' + e.description).replace(/\r?\n/g, '<br/>')
 			)
-			//	Firefox has (new Error).stack
 
 		: T === 'DOMException'?
 			//	http://www.w3.org/TR/DOM-Level-3-Core/core.html#ID-17189187
@@ -23764,12 +25736,16 @@ get_error_message = function(e, new_line, caller) {
 	if (library_namespace.is_debug(2) && typeof e === 'object' && e)
 		for (T in e)
 			try{
+				//	Firefox has (new Error).stack
+				//	http://eriwen.com/javascript/js-stack-trace/
 				m += '<br/> <span class="debug_debug">' + T + '</span>: '
-						+ (T === 'stack' ? ('' + e[T]).replace(
-							/[\r\n]+$/, '').replace(/\n/g, '<br/>- ') : e[T]);
+						+ (typeof e[T] === 'string' && T === 'stack' ?
+								e[T].replace(/[\r\n]+$/, '').replace(/(@)([a-z\-]+:\/\/.+)(:)(\d+)$/gm, '$1<a href="view-source:$2#$4" target="_blank">$2</a>$3$4').replace(/\n/g, '<br/>- ')
+								: typeof e[T] === 'string' && T === 'fileName' ? '<a href="view-source:' + e[T] + '" target="_blank">' + e[T] + '</a>'
+								: e[T]);
 			}catch (e) {}
 
-	//m += ' (' + arguments.callee.caller + ')';
+	// m += ' (' + arguments.callee.caller + ')';
 	return m;
 };
 
@@ -23778,8 +25754,10 @@ CeL.code.log
 .
 /**
  * get node description
- * @param	node	HTML node
- * @memberOf	CeL.code.log
+ * 
+ * @param node
+ *            HTML node
+ * @memberOf CeL.code.log
  */
 node_description = function(node, flag) {
 	if (typeof node === 'string')
@@ -23810,18 +25788,20 @@ node_description = function(node, flag) {
 
 
 //預設以訊息框代替
-_.default_log_target=
+CeL.code.log
+.
+default_log_target =
 	new Function('m',
-		(typeof JSalert === 'function' ? 'JSalert':
-			typeof WScript === 'object' ? 'WScript.Echo':
-		'alert') +
-		"(typeof m==='object'?'['+m.l+'] '+m.m:m);");
+			(typeof JSalert === 'function' ? 'JSalert'
+					: typeof WScript === 'object' ? 'WScript.Echo' : 'alert')
+			+ "(typeof m==='object'?'['+m.l+'] '+m.m:m);");
+
 
 CeL.code.log
 .
 /**
  * get new extend instance
- * @param	{String, object HTMLElement} [obj]	message area element or id
+ * @param	{String|object HTMLElement} [obj]	message area element or id
  * @return	{Array} [ instance of this module, log function, warning function, error function ]
  * @example
  * 
@@ -23852,6 +25832,7 @@ extend = function(obj, className_set) {
 	var o = new _// JSDT:_module_
 			(obj || _.default_log_target, className_set);
 
+	// TODO: do not use arguments
 	return [ o, function() {
 		o.log.apply(o, arguments);
 	}, function() {
@@ -24056,10 +26037,15 @@ warn : function(m, clean) {
  * deal with error message
  * @name	CeL.code.log.prototype.err
  */
-err : function(e, clean) {
+err : function err(e, clean) {
+	var caller = err.caller;
+	if (('' + caller).indexOf('.err.apply(') !== -1)
+		// ** 判斷 call from _.extend. 應該避免!
+		caller = caller.caller;
+
 	this.log(_.get_error_message(e, this.save_new_line,
-			//	TODO: do not use arguments
-			arguments.callee.caller), clean, 'err');
+			// TODO: do not use .caller
+			caller), clean, 'err');
 },
 
 
@@ -24216,7 +26202,7 @@ if (!CeL.Log) {
 		if (CeL.is_debug(l)){
 			if(!caller)
 				//	TODO: do not use arguments
-				caller = CeL.get_Function_name(arguments.callee.caller);
+				caller = CeL.get_function_name(arguments.callee.caller);
 
 			CeL.Log.log.call(
 					CeL.Log,
@@ -24277,28 +26263,25 @@ var module_name = 'code.reorganize';
  * @inner
  * @ignore
  */
-var code_for_including = function(library_namespace, load_arguments) {
+var code_for_including = function (library_namespace, load_arguments) {
 
 
-var
-/*
-*/
+var 
 /**
- * reorganize functions
- * @class	程式碼重整相關之 function。
+ * null module constructor
+ * @class 程式碼重整相關之 function。
  * @constructor
  */
 CeL.code.reorganize
-= function() {
-	return this.encode.apply(this, arguments);
+= function () {
+	//	null module constructor
 };
 
 /**
  * for JSDT: 有 prototype 才會將之當作 Class
  */
 CeL.code.reorganize
-.prototype = {
-};
+.prototype = {};
 
 
 
@@ -24308,17 +26291,17 @@ CeL.code.reorganize
 CeL.code.reorganize
 .
 /**
- * 取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。
- * 若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
- * @param {String} script_filename
- * @return
- * @requires	ScriptName,simpleRead
- */
-get_all_functions = function(script_filename) {
+* 取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。
+* 若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
+* @param {String} script_filename
+* @return
+* @requires	ScriptName,simpleRead
+*/
+get_all_functions = function (script_filename) {
 	if (!script_filename)
 		script_filename = ScriptName;
 	var t = '', i, a = simpleRead(script_filename + '.wsf'), l = a ? a
-			.match(/[^\\\/:*?"<>|'\r\n]+\.js/gi) : [ script_filename + '.js' ];
+			.match(/[^\\\/:*?"<>|'\r\n]+\.js/gi) : [script_filename + '.js'];
 
 	for (i in l)
 		if (l[i] != script_filename + '.js' && (a = simpleRead(l[i])))
@@ -24331,14 +26314,14 @@ get_all_functions = function(script_filename) {
 //addCode('複製 -backup.js');
 /*
 {var ss=[23,23.456,undefined,Attribute,null,Array,'567','abc'],l=80,repF='tmp.txt',sa=ss,st=addCode('',['ss']),t;
- ss='(reseted)';try{eval(st);}catch(e){}t=(sa===ss)+': '+typeof sa+'→'+typeof ss+'\n';
- simpleWrite(repF,t+sa+'\n→\n'+ss+'\n\n◎eval:\n'+st);
- alert(t+(sa=''+sa,sa.length<l?sa:sa.slice(0,l/2)+'\n..'+sa.slice(sa.length-l/2))+'\n→\n'+(ss=''+ss,ss.length<l?ss:ss.slice(0,l/2)+'\n..'+ss.slice(ss.length-l/2))+'\n\n'+(ss=''+st,ss.length<l?ss:ss.slice(0,200)+'\n..\n'+ss.slice(ss.length-200)));
+ss='(reseted)';try{eval(st);}catch(e){}t=(sa===ss)+': '+typeof sa+'→'+typeof ss+'\n';
+simpleWrite(repF,t+sa+'\n→\n'+ss+'\n\n◎eval:\n'+st);
+alert(t+(sa=''+sa,sa.length<l?sa:sa.slice(0,l/2)+'\n..'+sa.slice(sa.length-l/2))+'\n→\n'+(ss=''+ss,ss.length<l?ss:ss.slice(0,l/2)+'\n..'+ss.slice(ss.length-l/2))+'\n\n'+(ss=''+st,ss.length<l?ss:ss.slice(0,200)+'\n..\n'+ss.slice(ss.length-200)));
 }
 */
 
 /*	將各function加入檔案中，可做成HTML亦可用之格式
-	加入識別格式：
+加入識別格式：
 //	from function.js	-------------------------------------------------------------------
 
 //e.g.,
@@ -24358,253 +26341,255 @@ get_all_functions = function(script_filename) {
 TODO:
 .htm 加入 .replace(/\//g,'\\/')
 */
-addCode.report=false;	//	是否加入報告
+addCode.report = false; //	是否加入報告
 //addCode[generate_code.dLK]='NewLine,isFile,simpleRead,autodetectEncode,generate_code,JSalert,setTool,*setTool();';
-function addCode(FN,Vlist,startStr,endStr){	//FN:filename(list),Vlist:多加添的function/var list
- if(!startStr)startStr='//	['+WScript.ScriptName+']';
- if(!endStr)endStr=startStr+'End';
- //alert(isFile(FN)+'\n'+startStr+'\n'+endStr);
+function addCode(FN, Vlist, startStr, endStr) {	//FN:filename(list),Vlist:多加添的function/var list
+	if (!startStr) startStr = '//	[' + WScript.ScriptName + ']';
+	if (!endStr) endStr = startStr + 'End';
+	//alert(isFile(FN)+'\n'+startStr+'\n'+endStr);
 
- if(typeof FN=='string')FN=[isFile(FN)?FN:startStr+(FN?'('+FN+')':'')+NewLine+endStr+NewLine];
- if(typeof Vlist=='string')Vlist=[Vlist];else if(typeof Vlist!='object')Vlist=[];
+	if (typeof FN == 'string') FN = [isFile(FN) ? FN : startStr + (FN ? '(' + FN + ')' : '') + NewLine + endStr + NewLine];
+	if (typeof Vlist == 'string') Vlist = [Vlist]; else if (typeof Vlist != 'object') Vlist = [];
 
- var i,j,F,a,A,start,end,codeHead,b,c,d,f,m,OK=0
- ,s='()[]{}<>\u300c\u300d\u300e\u300f\u3010\u3011\u3008\u3009\u300a\u300b\u3014\u3015\uff5b\uff5d\ufe35\ufe36\ufe39\ufe3a\ufe37\ufe38\ufe3b\ufe3c\ufe3f\ufe40\ufe3d\ufe3e\ufe41\ufe42\ufe43\ufe44\uff08\uff09\u300c\u300d\u300e\u300f\u2018\u2019\u201c\u201d\u301d\u301e\u2035\u2032'//「」『』【】〈〉《》〔〕｛｝︵︶︹︺︷︸︻︼︿﹀︽︾﹁﹂﹃﹄（）「」『』‘’“”〝〞‵′
- ,endC,req,directInput='*',tmpExt='.tmp',encode,oriC;
-
-
- for(i in FN)try{
-  if(a=oriC=isFile(FN[i])?simpleRead(FN[i],encode=autodetectEncode(FN[i])):FN[i],!a)continue;A='',dones=[],doneS=0;
-  //sl(a.slice(0,200));
-
-/*	判斷NL這段將三種資料作比較就能知道為何這麼搞。
-
-~\r:
-
-\r	123
-\n	1
-\r\n	2
-\n-\r	-120
+	var i, j, F, a, A, start, end, codeHead, b, c, d, f, m, OK = 0
+, s = '()[]{}<>\u300c\u300d\u300e\u300f\u3010\u3011\u3008\u3009\u300a\u300b\u3014\u3015\uff5b\uff5d\ufe35\ufe36\ufe39\ufe3a\ufe37\ufe38\ufe3b\ufe3c\ufe3f\ufe40\ufe3d\ufe3e\ufe41\ufe42\ufe43\ufe44\uff08\uff09\u300c\u300d\u300e\u300f\u2018\u2019\u201c\u201d\u301d\u301e\u2035\u2032'//「」『』【】〈〉《》〔〕｛｝︵︶︹︺︷︸︻︼︿﹀︽︾﹁﹂﹃﹄（）「」『』‘’“”〝〞‵′
+, endC, req, directInput = '*', tmpExt = '.tmp', encode, oriC;
 
 
-~\n:
+	for (i in FN) try {
+		if (a = oriC = isFile(FN[i]) ? simpleRead(FN[i], encode = autodetectEncode(FN[i])) : FN[i], !a) continue; A = '', dones = [], doneS = 0;
+		//sl(a.slice(0,200));
 
-\r	1
-\n	123
-\r\n	2
-\n-\r	120
+		/*	判斷NL這段將三種資料作比較就能知道為何這麼搞。
+
+		~\r:
+
+		\r	123
+		\n	1
+		\r\n	2
+		\n-\r	-120
 
 
-~\r\n:
+		~\n:
 
-\r	123
-\n	123
-\r\n	123
-\n-\r	-2~2
-*/
-  NL=a.replace(/[^\n]+/g,'').length,b=a.replace(/[^\r]+/g,'').length;
-  if(NL!=b&&NL&&b){
-   alert("There're some encode problems in the file:\n"+FN[i]+'\n\\n: '+NL+'\n\\r: '+b);
-   NL=Math.max(NL,b)>10*Math.abs(NL-b)?'\r\n':NL>b?'\n':'\r';
-  }else NL=NL?b?'\r\n':'\n':'\r';
+		\r	1
+		\n	123
+		\r\n	2
+		\n-\r	120
 
-  //sl(a.indexOf(startStr)+'\n'+startStr+'\n'+a.slice(0,200));
-  // TODO: a=a.replace(/(startReg)(.*?)(endReg)/g,function($0,$1,$2,$3){.. return $1+~+$3;});
-  while((start=a.indexOf(startStr))!=-1){//&&(end=a.indexOf(endStr,start+startStr.length))!=-1
-   //	initial reset
-   codeHead=codeText=endC='',req=[],j=0;
-   //	判斷 end index
-   if((end=a.indexOf(endStr,start+startStr.length))==-1){
-    alert('addCode: There is start mark without end mark!\nendStr:\n'+endStr);
-    //	未找到格式則 skip
-    break;
-   }
-   //	b=inner text
-   b=a.slice(start+startStr.length,end);
-   b=b.split(NL);//b=b.split(NL=b.indexOf('\r\n')!=-1?'\r\n':b.indexOf('\n')!=-1?'\n':'\r');	//	test檔案型式：DOS or UNIX.最後一位元已被split掉
-   if(c=b[0].match(/^\s*([^\w])/)){
-    codeHead+=b[0].slice(0,RegExp.lastIndex),b[0]=b[0].slice(RegExp.lastIndex);
-    if(s.indexOf(c=c[1])%2==0)endC=s.charAt(s.indexOf(c)+1);else endC=c;
-   }
-   //NL=b[0].slice(-1)=='\r'?'\r\n':'\n';	//	移到前面：因為需要以NL作split	test檔案型式：DOS or UNIX.最後一位元已被split掉
-   //alert('endC='+endC+',j='+j+',d='+d+'\n'+b[0]+'\nNewLine:'+(NL=='\n'?'\\n':NL=='\r\n'?'\\r\\n':'\\r')+'\ncodeHead:\n'+codeHead);
 
-   do{
-    if(!j)d=0;else if(b[j].slice(0,2)!='//')continue;else d=2;//if(d==b[j].length)continue;	//	不需要d>=b[j].length
-    for(;;){
-     //alert('search '+b[j].slice(d));
-     if( (c=b[j].slice(d).match(/^[,\s]*([\'\"])/)) && (f=d+RegExp.lastIndex)<=b[j].length &&
-    		 	//	(c=c[1], f<b[j].length)
-    			(c=c[1]) && f<b[j].length
-     		){	//	.search(
-      //alert(b[j].charAt(f)+'\n'+c+'\n^(.*[^\\\\])['+c+']');
-      if(b[j].charAt(f)==c){alert('addCode: 包含['+c+c+']:\n'+b[j].slice(f));continue;}	//	'',""等
-      if(c=b[j].slice(f).match(new RegExp('^(.+?[^\\\\])['+c+']'))){d=f+RegExp.lastIndex;req.push(directInput/*+b[j].charAt(f-1) 改進後不需要了*/+c[1]);continue;}
-      alert('addCode: Can not find end quota:\n'+b[j].slice(f));
-     }
-     //alert(d+','+b[j].length+'\nsearch to '+b[j].slice(d));
+		~\r\n:
 
-     //	出現奇怪現象請加"()"
-     //if((c=b[j].slice(d).match(/([^,\s]+)([,\s]*)/))&& ( (d+=RegExp.lastIndex)==b[j].length || /[,\n]/.test(c[2])&&d<b[j].length ) ){	//	不需要\s\r
-     if((c=b[j].slice(d).match(/([^,\s]+)[,\s]*/))&&(d+=RegExp.lastIndex)<=b[j].length){	//	不需要\s\r
-      //if(!/[,\n]/.test(c[2])&&d<b[j].length)break;
-      //alert(RegExp.index+','+d+','+b[j].length+','+endC+'\n['+c[1]+']\n['+c[2]+']\n'+b[j].slice(d));
-      if(!endC||(m=c[1].indexOf(endC))==-1)req.push(c[1]);
-      else{if(m)req.push(c[1].slice(0,m));endC='';break;}
-     }else break;
-    }
-    codeHead+=b[j]+NL;
-    //alert('output startStr:\n'+startStr+'\ncodeHead:\n'+codeHead);
-   }while(endC&&++j<b.length);
-   //for(j=0,b=[];j<req.length;j++)b.push(req[j]);	//	不能用b=req：object是用參考的，這樣會改到req本身！
-   //for(j=0;j<Vlist.length;j++)b.push(Vlist[j]);	//	加入附加的變數
+		\r	123
+		\n	123
+		\r\n	123
+		\n-\r	-2~2
+		*/
+		NL = a.replace(/[^\n]+/g, '').length, b = a.replace(/[^\r]+/g, '').length;
+		if (NL != b && NL && b) {
+			alert("There're some encode problems in the file:\n" + FN[i] + '\n\\n: ' + NL + '\n\\r: ' + b);
+			NL = Math.max(NL, b) > 10 * Math.abs(NL - b) ? '\r\n' : NL > b ? '\n' : '\r';
+		} else NL = NL ? b ? '\r\n' : '\n' : '\r';
 
-   b=generate_code(req.concat(Vlist),NL,directInput);
-   codeText=codeHead+(arguments.callee.report?'/*	addCode @ '+gDate('',1)	//	report
-	+(req.length?NL+'	request variables ['+req.length+']:	'+req:'')
-	+(Vlist.length?NL+'	addition lists ['+Vlist.length+']:	'+Vlist:'')
-	+(req.length&&Vlist.length&&b[2].length<req.length+Vlist.length?NL+'	Total request ['+b[2].length+']:	'+b[2]:'')
-	+(b[4].length?NL+'	really done ['+b[4].length+']:	'+b[4]:'')
-	+(b[5].length?NL+'	cannot found ['+b[5].length+']:	'+b[5]:'')
-	+(b[6].length?NL+'	all listed ['+b[6].length+']:	'+b[6]:'')
-	//+(b[3].length?NL+'	included function ['+b[3].length+']:	'+b[3]:'')
-	+NL+'	*/':'')+NL+reduceCode(b[0]).replace(/([};])function(\s)/g,'$1'+NL+'function$2').replace(/}var(\s)/g,'}'+NL+'var$1')/*.replace(/([;}])([a-z\._\d]+=)/ig,'$1'+NL+'$2')*/+NL+b[1]+NL;
-   //alert(start+','+end+'\n'+a.length+','+end+','+endStr.length+','+(end+endStr.length)+'\n------------\n'+codeText);//+a.slice(end+endStr.length)
-   A+=a.slice(0,start+startStr.length)+codeText+a.substr(end,endStr.length),a=a.substr(end+endStr.length);
-  }
+		//sl(a.indexOf(startStr)+'\n'+startStr+'\n'+a.slice(0,200));
+		// TODO: a=a.replace(/(startReg)(.*?)(endReg)/g,function($0,$1,$2,$3){.. return $1+~+$3;});
+		while ((start = a.indexOf(startStr)) != -1) {//&&(end=a.indexOf(endStr,start+startStr.length))!=-1
+			//	initial reset
+			codeHead = codeText = endC = '', req = [], j = 0;
+			//	判斷 end index
+			if ((end = a.indexOf(endStr, start + startStr.length)) == -1) {
+				alert('addCode: There is start mark without end mark!\nendStr:\n' + endStr);
+				//	未找到格式則 skip
+				break;
+			}
+			//	b=inner text
+			b = a.slice(start + startStr.length, end);
+			b = b.split(NL); //b=b.split(NL=b.indexOf('\r\n')!=-1?'\r\n':b.indexOf('\n')!=-1?'\n':'\r');	//	test檔案型式：DOS or UNIX.最後一位元已被split掉
+			if (c = b[0].match(/^\s*([^\w])/)) {
+				codeHead += b[0].slice(0, RegExp.lastIndex), b[0] = b[0].slice(RegExp.lastIndex);
+				if (s.indexOf(c = c[1]) % 2 == 0) endC = s.charAt(s.indexOf(c) + 1); else endC = c;
+			}
+			//NL=b[0].slice(-1)=='\r'?'\r\n':'\n';	//	移到前面：因為需要以NL作split	test檔案型式：DOS or UNIX.最後一位元已被split掉
+			//alert('endC='+endC+',j='+j+',d='+d+'\n'+b[0]+'\nNewLine:'+(NL=='\n'?'\\n':NL=='\r\n'?'\\r\\n':'\\r')+'\ncodeHead:\n'+codeHead);
 
-  if(FN.length==1&&!isFile(FN[i]))
-   return A;
-  else if(A&&oriC!=A+a)	//	有變化才寫入
-   if(!simpleWrite(FN[i]+tmpExt,A+a,encode))
-    try{fso.DeleteFile(FN[i]);fso.MoveFile(FN[i]+tmpExt,FN[i]);OK++;}catch(e){}//popErr(e);
-   else try{fso.DeleteFile(FN[i]+tmpExt);}catch(e){}//popErr(simpleFileErr);popErr(e);
-  //else{alert('addCode error:\n'+e.message);continue;}
- }catch(e){
-  //popErr(e);
-  throw e;
- }
+			do {
+				if (!j) d = 0; else if (b[j].slice(0, 2) != '//') continue; else d = 2; //if(d==b[j].length)continue;	//	不需要d>=b[j].length
+				for (; ; ) {
+					//alert('search '+b[j].slice(d));
+					if ((c = b[j].slice(d).match(/^[,\s]*([\'\"])/)) && (f = d + RegExp.lastIndex) <= b[j].length &&
+					//	(c=c[1], f<b[j].length)
+    		(c = c[1]) && f < b[j].length
+     	) {	//	.search(
+						//alert(b[j].charAt(f)+'\n'+c+'\n^(.*[^\\\\])['+c+']');
+						if (b[j].charAt(f) == c) { alert('addCode: 包含[' + c + c + ']:\n' + b[j].slice(f)); continue; } //	'',""等
+						if (c = b[j].slice(f).match(new RegExp('^(.+?[^\\\\])[' + c + ']'))) { d = f + RegExp.lastIndex; req.push(directInput/*+b[j].charAt(f-1) 改進後不需要了*/ + c[1]); continue; }
+						alert('addCode: Can not find end quota:\n' + b[j].slice(f));
+					}
+					//alert(d+','+b[j].length+'\nsearch to '+b[j].slice(d));
 
- return FN.length==1&&OK==1?A:OK;	//	A:成功的最後一個檔之內容
+					//	出現奇怪現象請加"()"
+					//if((c=b[j].slice(d).match(/([^,\s]+)([,\s]*)/))&& ( (d+=RegExp.lastIndex)==b[j].length || /[,\n]/.test(c[2])&&d<b[j].length ) ){	//	不需要\s\r
+					if ((c = b[j].slice(d).match(/([^,\s]+)[,\s]*/)) && (d += RegExp.lastIndex) <= b[j].length) {	//	不需要\s\r
+						//if(!/[,\n]/.test(c[2])&&d<b[j].length)break;
+						//alert(RegExp.index+','+d+','+b[j].length+','+endC+'\n['+c[1]+']\n['+c[2]+']\n'+b[j].slice(d));
+						if (!endC || (m = c[1].indexOf(endC)) == -1) req.push(c[1]);
+						else { if (m) req.push(c[1].slice(0, m)); endC = ''; break; }
+					} else break;
+				}
+				codeHead += b[j] + NL;
+				//alert('output startStr:\n'+startStr+'\ncodeHead:\n'+codeHead);
+			} while (endC && ++j < b.length);
+			//for(j=0,b=[];j<req.length;j++)b.push(req[j]);	//	不能用b=req：object是用參考的，這樣會改到req本身！
+			//for(j=0;j<Vlist.length;j++)b.push(Vlist[j]);	//	加入附加的變數
+
+			b = generate_code(req.concat(Vlist), NL, directInput);
+			codeText = codeHead + (arguments.callee.report ? '/*	addCode @ ' + gDate('', 1)	//	report
++ (req.length ? NL + '	request variables [' + req.length + ']:	' + req : '')
++ (Vlist.length ? NL + '	addition lists [' + Vlist.length + ']:	' + Vlist : '')
++ (req.length && Vlist.length && b[2].length < req.length + Vlist.length ? NL + '	Total request [' + b[2].length + ']:	' + b[2] : '')
++ (b[4].length ? NL + '	really done [' + b[4].length + ']:	' + b[4] : '')
++ (b[5].length ? NL + '	cannot found [' + b[5].length + ']:	' + b[5] : '')
++ (b[6].length ? NL + '	all listed [' + b[6].length + ']:	' + b[6] : '')
+			//+(b[3].length?NL+'	included function ['+b[3].length+']:	'+b[3]:'')
++ NL + '	*/' : '') + NL + reduceCode(b[0]).replace(/([};])function(\s)/g, '$1' + NL + 'function$2').replace(/}var(\s)/g, '}' + NL + 'var$1')/*.replace(/([;}])([a-z\._\d]+=)/ig,'$1'+NL+'$2')*/ + NL + b[1] + NL;
+			//alert(start+','+end+'\n'+a.length+','+end+','+endStr.length+','+(end+endStr.length)+'\n------------\n'+codeText);//+a.slice(end+endStr.length)
+			A += a.slice(0, start + startStr.length) + codeText + a.substr(end, endStr.length), a = a.substr(end + endStr.length);
+		}
+
+		if (FN.length == 1 && !isFile(FN[i]))
+			return A;
+		else if (A && oriC != A + a)	//	有變化才寫入
+			if (!simpleWrite(FN[i] + tmpExt, A + a, encode))
+				try { fso.DeleteFile(FN[i]); fso.MoveFile(FN[i] + tmpExt, FN[i]); OK++; } catch (e) { } //popErr(e);
+			else try { fso.DeleteFile(FN[i] + tmpExt); } catch (e) { } //popErr(simpleFileErr);popErr(e);
+		//else{alert('addCode error:\n'+e.message);continue;}
+	} catch (e) {
+		//popErr(e);
+		throw e;
+	}
+
+	return FN.length == 1 && OK == 1 ? A : OK; //	A:成功的最後一個檔之內容
 }
 
 
 /*	script終結者…
 try.wsf
-	<package><job id="try"><script type="text/javascript" language="JScript" src="function.js"></script><script type="text/javascript" language="JScript" src="try.js"></script></job></package>
+<package><job id="try"><script type="text/javascript" language="JScript" src="function.js"></script><script type="text/javascript" language="JScript" src="try.js"></script></job></package>
 try.js
-	destoryScript('WshShell=WScript.CreateObject("WScript.Shell");'+NewLine+NewLine+alert+NewLine+NewLine+'alert("資料讀取錯誤！\\n請檢查設定是否有錯！");');
+destoryScript('WshShell=WScript.CreateObject("WScript.Shell");'+NewLine+NewLine+alert+NewLine+NewLine+'alert("資料讀取錯誤！\\n請檢查設定是否有錯！");');
 */
-function destoryScript(code,addFN){try{	//	input indepent code, additional files
- var SN=getScriptName(),F,a,listJs,i,len,self=SN+'.js';
- if(!code)code='';//SN='try';
- a=simpleRead(SN+'.wsf');if(!a)a='';
- listJs=a.match(/[^\\\/:*?"<>|'\r\n]+\.(js|vbs|hta|s?html?|txt|wsf|pac)/gi);	//	一網打盡
- //,listWsf=(SN+'.wsf\n'+a).match(/[^\\\/:*?"<>|'\r\n]+\.wsf/gi);
- for(i=0,F={};i<listJs.length;i++)F[listJs[i]]=1;
- if(typeof addFN=='object')for(i in addFN)F[addFN[i]]=1;
- else if(addFN)F[addFN]=1;
- listJs=[];for(i in F)listJs[listJs.length]=i;	//	避免重複
- //alert(listJs.join('\n'));
+function destoryScript(code, addFN) {
+	try {	//	input indepent code, additional files
+		var SN = getScriptName(), F, a, listJs, i, len, self = SN + '.js';
+		if (!code) code = ''; //SN='try';
+		a = simpleRead(SN + '.wsf'); if (!a) a = '';
+		listJs = a.match(/[^\\\/:*?"<>|'\r\n]+\.(js|vbs|hta|s?html?|txt|wsf|pac)/gi); //	一網打盡
+		//,listWsf=(SN+'.wsf\n'+a).match(/[^\\\/:*?"<>|'\r\n]+\.wsf/gi);
+		for (i = 0, F = {}; i < listJs.length; i++) F[listJs[i]] = 1;
+		if (typeof addFN == 'object') for (i in addFN) F[addFN[i]] = 1;
+		else if (addFN) F[addFN] = 1;
+		listJs = []; for (i in F) listJs[listJs.length] = i; //	避免重複
+		//alert(listJs.join('\n'));
 
- //done all .js @ .wsf & files @ additional list without self
- for(i=0;i<listJs.length;i++)if(listJs[i]!=self)try{	//	除了self外殺無赦
-  if(!listJs[i].match(/\.js$/i)&&listJs[i]!=SN+'.wsf'){try{fso.DeleteFile(listJs[i],true);}catch(e){}continue;}	//	非.js就讓他死
-  if(changeAttributes(F=fso.GetFile(listJs[i]),'-ReadOnly'))throw 0;	//	取消唯讀
-  a=addNullCode(F.size);//a=listJs[i].match(/\.js$/i)?addNullCode(F.size):'';	先確認檔案存在，再幹掉他
-  //alert('done '+listJs[i]+'('+F.size+')\n'+(a.length<500?a:a.slice(0,500)+'..'));
-  simpleWrite(listJs[i],a);
- }catch(e){
-  //popErr(e);
- }
+		//done all .js @ .wsf & files @ additional list without self
+		for (i = 0; i < listJs.length; i++) if (listJs[i] != self) try {	//	除了self外殺無赦
+			if (!listJs[i].match(/\.js$/i) && listJs[i] != SN + '.wsf') { try { fso.DeleteFile(listJs[i], true); } catch (e) { } continue; } //	非.js就讓他死
+			if (changeAttributes(F = fso.GetFile(listJs[i]), '-ReadOnly')) throw 0; //	取消唯讀
+			a = addNullCode(F.size); //a=listJs[i].match(/\.js$/i)?addNullCode(F.size):'';	先確認檔案存在，再幹掉他
+			//alert('done '+listJs[i]+'('+F.size+')\n'+(a.length<500?a:a.slice(0,500)+'..'));
+			simpleWrite(listJs[i], a);
+		} catch (e) {
+			//popErr(e);
+		}
 
- //done .wsf
- try{
-  if(changeAttributes(F=fso.GetFile(SN+'.wsf'),'-ReadOnly'))throw 0;
-  a='<package><job id="'+SN+'"><script type="text/javascript" src="'+SN+'.js"><\/script><\/job><\/package>';
-  //alert('done '+SN+'.wsf'+'('+F.size+')\n'+a);
-  //a='<package><job id="'+SN+'"><script type="text/javascript" src="function.js"><\/script><script type="text/javascript" src="'+SN+'.js"><\/script><\/job><\/package>';
-  simpleWrite(SN+'.wsf',a);
- }catch(e){
-  //popErr(e);
- }
+		//done .wsf
+		try {
+			if (changeAttributes(F = fso.GetFile(SN + '.wsf'), '-ReadOnly')) throw 0;
+			a = '<package><job id="' + SN + '"><script type="text/javascript" src="' + SN + '.js"><\/script><\/job><\/package>';
+			//alert('done '+SN+'.wsf'+'('+F.size+')\n'+a);
+			//a='<package><job id="'+SN+'"><script type="text/javascript" src="function.js"><\/script><script type="text/javascript" src="'+SN+'.js"><\/script><\/job><\/package>';
+			simpleWrite(SN + '.wsf', a);
+		} catch (e) {
+			//popErr(e);
+		}
 
- //done self
- if(listJs.length)try{
-  if(changeAttributes(F=fso.GetFile(self),'-ReadOnly')<0)throw 0;
-  a=(F.size-code.length)/2,a=addNullCode(a)+code+addNullCode(a);
-  if(F.Attributes%2)F.Attributes--;	//	取消唯讀
-  //alert('done '+self+'('+F.size+')\n'+(a.length<500?a:a.slice(0,500)+'..'));
-  //a='setTool(),destoryScript();';
-  simpleWrite(self,a);
- }catch(e){
-  //popErr(e);
- }
+		//done self
+		if (listJs.length) try {
+			if (changeAttributes(F = fso.GetFile(self), '-ReadOnly') < 0) throw 0;
+			a = (F.size - code.length) / 2, a = addNullCode(a) + code + addNullCode(a);
+			if (F.Attributes % 2) F.Attributes--; //	取消唯讀
+			//alert('done '+self+'('+F.size+')\n'+(a.length<500?a:a.slice(0,500)+'..'));
+			//a='setTool(),destoryScript();';
+			simpleWrite(self, a);
+		} catch (e) {
+			//popErr(e);
+		}
 
- //run self & WScript.Quit()
- //return WshShell.Run('"'+getScriptFullName()+'"');
- return 0;
-}catch(e){return 1;}}
+		//run self & WScript.Quit()
+		//return WshShell.Run('"'+getScriptFullName()+'"');
+		return 0;
+	} catch (e) { return 1; }
+}
 
 /*	for version<5.1:因為不能用.wsf，所以需要合併成一個檔。
-	請將以下函數copy至.js主檔後做適當之變更
-	getScriptName(),mergeScript(FN),preCheck(ver)
+請將以下函數copy至.js主檔後做適當之變更
+getScriptName(),mergeScript(FN),preCheck(ver)
 */
 //	將script所需之檔案合併
 //	因為常由preCheck()呼叫，所以所有功能亦需內含。
-function mergeScript(FN){
- var i,n,t,SN=getScriptName(),NewLine,fso,ForReading,ForWriting,ForAppending;
- if(!NewLine)NewLine='\r\n';
- if(!fso)fso=WScript.CreateObject("Scripting.FileSystemObject");
- if(!ForReading)ForReading=1,ForWriting=2,ForAppending=8;
-try{
+function mergeScript(FN) {
+	var i, n, t, SN = getScriptName(), NewLine, fso, ForReading, ForWriting, ForAppending;
+	if (!NewLine) NewLine = '\r\n';
+	if (!fso) fso = WScript.CreateObject("Scripting.FileSystemObject");
+	if (!ForReading) ForReading = 1, ForWriting = 2, ForAppending = 8;
+	try {
 
- //	from .wsf
- /*var F=fso.OpenTextFile(SN+'.wsf',ForReading)
- //,R=new RegExp('src\s*=\s*["\']?(.+\.js)["\']?\s*','gi')
- ,a=F.ReadAll();F.Close();*/
- a=simpleRead(SN+'.wsf'),
- S=fso.OpenTextFile(FN,ForWriting,true/*create*/);
+		//	from .wsf
+		/*var F=fso.OpenTextFile(SN+'.wsf',ForReading)
+		//,R=new RegExp('src\s*=\s*["\']?(.+\.js)["\']?\s*','gi')
+		,a=F.ReadAll();F.Close();*/
+		a = simpleRead(SN + '.wsf'),
+S = fso.OpenTextFile(FN, ForWriting, true/*create*/);
 
-try{
- //t=a.match(/<\s*resource\s+id=(['"].*['"])\s*>((.|\r\n)*?)<\/\s*resource\s*>/gi);
- //	5.1版以下果然還是不能成功實行，因為改變regexp不能達到目的：沒能找到t。所以在下面第一次test失敗後即放棄；改用.ini設定。
- var r=new RegExp("<\\s*resource\\s+id=(['\"].*['\"])\\s*>((.|\\r\\n)*?)<\\/\\s*resource\\s*>","ig");
- t=a.match(r);
- S.WriteLine('//	mergeScript: from '+SN+'.wsf');
- S.WriteLine("function getResource(id){");
- if(!t||!t.length)S.WriteLine(" return ''");
- else for(i=0;i<t.length;i++){
-  //alert(i+':'+t[i]);
-  //n=t[i].match(/<\s*resource\s+id=(['"].*['"])\s*>((.|\r\n)*?)<\/\s*resource\s*>/i);
-  r=new RegExp("<\\s*resource\\s+id=(['\"].*['\"])\\s*>((.|\\r\\n)*?)<\\/\\s*resource\\s*>","i");
-  n=t[i].match(r);
-  S.WriteLine(
-	" "
-	+(i?":":"return ")
-	+"id=="+n[1]
-	+"?'"
-	+n[2].replace(/\r?\n/g,'\\n')
-	+"'"
-  );
- }
- S.WriteLine(" :'';"+NewLine+"}"+NewLine);
-}catch(e){}
+		try {
+			//t=a.match(/<\s*resource\s+id=(['"].*['"])\s*>((.|\r\n)*?)<\/\s*resource\s*>/gi);
+			//	5.1版以下果然還是不能成功實行，因為改變regexp不能達到目的：沒能找到t。所以在下面第一次test失敗後即放棄；改用.ini設定。
+			var r = new RegExp("<\\s*resource\\s+id=(['\"].*['\"])\\s*>((.|\\r\\n)*?)<\\/\\s*resource\\s*>", "ig");
+			t = a.match(r);
+			S.WriteLine('//	mergeScript: from ' + SN + '.wsf');
+			S.WriteLine("function getResource(id){");
+			if (!t || !t.length) S.WriteLine(" return ''");
+			else for (i = 0; i < t.length; i++) {
+				//alert(i+':'+t[i]);
+				//n=t[i].match(/<\s*resource\s+id=(['"].*['"])\s*>((.|\r\n)*?)<\/\s*resource\s*>/i);
+				r = new RegExp("<\\s*resource\\s+id=(['\"].*['\"])\\s*>((.|\\r\\n)*?)<\\/\\s*resource\\s*>", "i");
+				n = t[i].match(r);
+				S.WriteLine(
+" "
++ (i ? ":" : "return ")
++ "id==" + n[1]
++ "?'"
++ n[2].replace(/\r?\n/g, '\\n')
++ "'"
+);
+			}
+			S.WriteLine(" :'';" + NewLine + "}" + NewLine);
+		} catch (e) { }
 
- //	from .js
- t=a.match(/src\s*=\s*["']?(.+\.js)["']?\s*/gi);
- for(i=0;i<t.length;i++){
-  //alert(i+':'+t[i].match(/src\s*=\s*["']?(.+\.js)["']?\s*/i)[1]);
-  //try{F=fso.OpenTextFile(n=t[i].match(/src\s*=\s*["']?(.+\.js)["']?\s*/i)[1],ForReading);}
-  //catch(e){continue;}
-  //S.WriteLine('//	mergeScript: from script	'+n);S.WriteBlankLines(1);S.WriteLine(F.ReadAll());
-  //S.WriteLine('//	mergeScript: from script	'+n+NewLine+NewLine+F.ReadAll());
-  //F.Close();
-  S.WriteLine('//	mergeScript: from script	'+(n=t[i].match(/src\s*=\s*["']?(.+\.js)["']?\s*/i)[1])+NewLine+NewLine+simpleRead(n));
- }
- S.Close();
-}catch(e){return 1;}
- return 0;
+		//	from .js
+		t = a.match(/src\s*=\s*["']?(.+\.js)["']?\s*/gi);
+		for (i = 0; i < t.length; i++) {
+			//alert(i+':'+t[i].match(/src\s*=\s*["']?(.+\.js)["']?\s*/i)[1]);
+			//try{F=fso.OpenTextFile(n=t[i].match(/src\s*=\s*["']?(.+\.js)["']?\s*/i)[1],ForReading);}
+			//catch(e){continue;}
+			//S.WriteLine('//	mergeScript: from script	'+n);S.WriteBlankLines(1);S.WriteLine(F.ReadAll());
+			//S.WriteLine('//	mergeScript: from script	'+n+NewLine+NewLine+F.ReadAll());
+			//F.Close();
+			S.WriteLine('//	mergeScript: from script	' + (n = t[i].match(/src\s*=\s*["']?(.+\.js)["']?\s*/i)[1]) + NewLine + NewLine + simpleRead(n));
+		}
+		S.Close();
+	} catch (e) { return 1; }
+	return 0;
 }
 
 
@@ -24613,12 +26598,12 @@ try{
 
 //var fa=function(a,s){return '"'+a+k+"'";},fb=function kk(a,t){return a;},fc=new Function('return b+b;'),Locale2=fa,Locale3=fb,Locale4=fc,r=generate_code(['fa','fb','fc','Locale2','Locale3','Locale4','kk']);alert(r.join('\n★'));try{eval(r[0]);alert(fa);}catch(e){alert('error!');}
 /*	use for JSON (JavaScript Object Notation)
-	利用[*現有的環境*]及變數設定生成code，因此並不能完全重現所有設定，也無法判別函數間的相依關係。
-	DirectlyInput:	[directInput]string
-	輸出string1（可reduceCode）,輸出string2（主要為object definition，不需reduceCode，以.replace(/\r\n/g,'')即可reduce）,總共要求的變數（去掉重複）,包含的函數（可能因參考而有添加）,包含的變數（可能因參考而有添加）,未包含的變數
+利用[*現有的環境*]及變數設定生成code，因此並不能完全重現所有設定，也無法判別函數間的相依關係。
+DirectlyInput:	[directInput]string
+輸出string1（可reduceCode）,輸出string2（主要為object definition，不需reduceCode，以.replace(/\r\n/g,'')即可reduce）,總共要求的變數（去掉重複）,包含的函數（可能因參考而有添加）,包含的變數（可能因參考而有添加）,未包含的變數
 
-	未來：對Array與Object能確實設定之	尚未對應：Object遞迴/special Object(WScript,Excel.Application,內建Object等)/special function(內建函數如Math.floor與其他如WScript.CreateObject等)
-	JScript中對應資料型態，應考慮到內建(intrinsic 或 built-in)物件(Boolean/Date/Function/Number/Array/Object(需注意遞迴:Object之值可為Object))/Time/Error/RegExp/Regular Expression/String/Math)/string/integer/Byte/number(float/\d[de]+-\d/Number.MAX_VALUE/Number.MIN_VALUE)/special number(NaN/正無限值:Number.POSITIVE_INFINITY/負無限值:Number.NEGATIVE_INFINITY/正零/負零)/date/Boolean/undefined(尚未設定值)/undcleared(尚未宣告)/Null/normal Array/normal Object/special Object(WScript,Automation物件如Excel.Application,內建Object等)/function(實體/參考/anonymous)/special function(內建函數如isNaN,Math之屬性&方法Math[.{property|method}]與其他如WScript.CreateObject等)/unknown(others)
+未來：對Array與Object能確實設定之	尚未對應：Object遞迴/special Object(WScript,Excel.Application,內建Object等)/special function(內建函數如Math.floor與其他如WScript.CreateObject等)
+JScript中對應資料型態，應考慮到內建(intrinsic 或 built-in)物件(Boolean/Date/Function/Number/Array/Object(需注意遞迴:Object之值可為Object))/Time/Error/RegExp/Regular Expression/String/Math)/string/integer/Byte/number(float/\d[de]+-\d/Number.MAX_VALUE/Number.MIN_VALUE)/special number(NaN/正無限值:Number.POSITIVE_INFINITY/負無限值:Number.NEGATIVE_INFINITY/正零/負零)/date/Boolean/undefined(尚未設定值)/undcleared(尚未宣告)/Null/normal Array/normal Object/special Object(WScript,Automation物件如Excel.Application,內建Object等)/function(實體/參考/anonymous)/special function(內建函數如isNaN,Math之屬性&方法Math[.{property|method}]與其他如WScript.CreateObject等)/unknown(others)
 
 **	需同步更改 json()
 
@@ -24646,206 +26631,206 @@ to top BEFORE ANY FUNCTIONS:
 generate_code.dLK='dependencyList';	//	dependency List Key
 */
 //generate_code[generate_code.dLK]='set_obj_value,dQuote';
-generate_code.ddI='*';	//	default directInput symbol
-generate_code.dsp=',';	//	default separator
-function generate_code(Vlist,NL,directInput){	//	變數list,NewLine,直接輸入用辨識碼
- var codeText='',afterCode='',vars=[],vari=[],func=[],done=[],undone=[],t,i=0,c=0,val,vName,vType;	//	vars:處理過的variables（不論是合法或非合法）,c:陳述是否已完結
- if(!NL)NL=NewLine;if(!directInput)directInput=generate_code.ddI;
- if(typeof Vlist=='string')Vlist=Vlist.split(generate_code.dsp);
+generate_code.ddI = '*'; //	default directInput symbol
+generate_code.dsp = ','; //	default separator
+function generate_code(Vlist, NL, directInput) {	//	變數list,NewLine,直接輸入用辨識碼
+	var codeText = '', afterCode = '', vars = [], vari = [], func = [], done = [], undone = [], t, i = 0, c = 0, val, vName, vType; //	vars:處理過的variables（不論是合法或非合法）,c:陳述是否已完結
+	if (!NL) NL = NewLine; if (!directInput) directInput = generate_code.ddI;
+	if (typeof Vlist == 'string') Vlist = Vlist.split(generate_code.dsp);
 
- for(;i<Vlist.length;i++)if(!((vName=''+Vlist[i]) in vars)){	//	c(continue)=1:var未截止,vName:要加添的變數內容
-  vars[vName]=vari.length,vari.push(vName);	//	避免重複
+	for (; i < Vlist.length; i++) if (!((vName = '' + Vlist[i]) in vars)) {	//	c(continue)=1:var未截止,vName:要加添的變數內容
+		vars[vName] = vari.length, vari.push(vName); //	避免重複
 
-  //	不加入的
-  if(vName.charAt(0)=='-'){
-   vars[vName.slice(1)]=-1;
-   continue;
-  }
+		//	不加入的
+		if (vName.charAt(0) == '-') {
+			vars[vName.slice(1)] = -1;
+			continue;
+		}
 
-  //	直接輸出
-  if(vName.slice(0,directInput.length)==directInput){
-   if(c)codeText+=';'+NL,c=0;codeText+=val=vName.substr(directInput.length);
-   done.push('(DirectlyInput)'+val);continue;
-  }
-  try{eval('vType=typeof(val='+vName+');');}//void
-  catch(e){undone.push((vType?'('+vType+')':'')+vName+'(error '+(e.number&0xFFFF)+':'+e.description+')');continue;}	//	.constructor	b:type,c:已起始[var ];catch b:語法錯誤等,m:未定義
+		//	直接輸出
+		if (vName.slice(0, directInput.length) == directInput) {
+			if (c) codeText += ';' + NL, c = 0; codeText += val = vName.substr(directInput.length);
+			done.push('(DirectlyInput)' + val); continue;
+		}
+		try { eval('vType=typeof(val=' + vName + ');'); } //void
+		catch (e) { undone.push((vType ? '(' + vType + ')' : '') + vName + '(error ' + (e.number & 0xFFFF) + ':' + e.description + ')'); continue; } //	.constructor	b:type,c:已起始[var ];catch b:語法錯誤等,m:未定義
 
 
-  if(vType=='function'){	//	or use switch-case
-   //	加入function object成員，.prototype可用with()。加入函數相依性(dependency)
-   try{eval("var j,k;for(j in "+vName+")if(j=='"+generate_code.dLK+"'&&(k=typeof "+vName+"."+generate_code.dLK+",k=='string'||"+vName+"."+generate_code.dLK+" instanceof Array)){j="+vName+"."+generate_code.dLK+";if(k=='string')j=j.split(',');for(k in j)if(j[k])Vlist.push(j[k]);}else Vlist.push('"+vName+".'+j);for(j in "+vName+".prototype)Vlist.push('"+vName+".prototype.'+j);");}
-   catch(e){undone.push('('+vType+')'+vName+'.[child]'+'(error '+(e.number&0xFFFF)+':'+e.description+')');}
+		if (vType == 'function') {	//	or use switch-case
+			//	加入function object成員，.prototype可用with()。加入函數相依性(dependency)
+			try { eval("var j,k;for(j in " + vName + ")if(j=='" + generate_code.dLK + "'&&(k=typeof " + vName + "." + generate_code.dLK + ",k=='string'||" + vName + "." + generate_code.dLK + " instanceof Array)){j=" + vName + "." + generate_code.dLK + ";if(k=='string')j=j.split(',');for(k in j)if(j[k])Vlist.push(j[k]);}else Vlist.push('" + vName + ".'+j);for(j in " + vName + ".prototype)Vlist.push('" + vName + ".prototype.'+j);"); }
+			catch (e) { undone.push('(' + vType + ')' + vName + '.[child]' + '(error ' + (e.number & 0xFFFF) + ':' + e.description + ')'); }
 
-   val=(''+val).replace(/[\r\n]/g,NL);	//	function 才會產生 \r\n 問題，所以先處理掉
-   if( (t=val.match(/^\s*function\s*\(/)) || val.match(/^\s*function\s+([\w_]*)([^(]*)\(/) )	//	這種判別法不好！
-    if(t||(t=RegExp.$1)=='anonymous'){
-     func.push(vName);vType=(typeof t=='string'?t:'no named')+' '+vType;
-     if(t=='anonymous'){	//	忠於原味（笑）anonymous是從new Function(文字列を使って)來的
-      var m=val.match(/\(([^)]*)\)\s*{/),l=RegExp.lastIndex,q=val.match(/[^}]*$/);q=RegExp.index;
-      if(!m){undone.push('(anonymous function error:'+val+')'+vName);continue;}
-      if(t=m[1].replace(/,/g,"','"))t="'"+t+"',";t='new Function('+t+dQuote(reduceCode(val.slice(l,q-1)))+')';
-     }else t=val;
-    }else if(t==vName){	//	関数(function): http://www.interq.or.jp/student/exeal/dss/ejs/1/2.html
-     if(c)codeText+=';'+NL,c=0;func.push(vName),codeText+=val+NL;continue;
-    }else if(val.indexOf('[native code]')!=-1){undone.push('(native code function error:'+val+')'+vName);continue;}	//	內建(intrinsic 或 built-in)函數：這種判別法不好！
-    else if(t in vars)done.push('('+vType+')'+vName),func.push(vName);	//	已經登錄過了，所以就這麼下去..
-    else{if(c)codeText+=';'+NL;codeText+=val+NL;vars[t]=vari.length,done.push('('+vType+')'+t),func.push(t,vName),c=0;}
-   else{undone.push('(function error:'+val+')'+vName);continue;}//unknown
-  }else if(vType=='number'){
-   //	http://msdn2.microsoft.com/zh-tw/library/y382995a(VS.80).aspx
-   var k=0,m='MAX_VALUE,MIN_VALUE,NEGATIVE_INFINITY,POSITIVE_INFINITY,NaN'.split(',');
-   if(val===NaN||val===Infinity||val===-Infinity)t=''+val;
-   else for(t=0;k<m.length;k++)if(val===Number[m[k]]){t='Number.'+m[k];break;}
-   if(!t){
-    //	http://msdn2.microsoft.com/zh-tw/library/shydc6ax(VS.80).aspx
-    for(k=0,m='E,LN10,LN2,LOG10E,LOG2E,PI,SQRT1_2,SQRT2'.split(',');k<m.length;k++)if(val===Math[m[k]]){t='Math.'+m[k];break;}
-    if(!t)t=(t=Math.floor(val))==val&&(''+t).length>(t='0x'+val.toString(16)).length?t:val;
-   }
-  }else if(vType=='boolean'||val===null)t=val;//String(val)//val.toString()	//	typeof null is 'object'
-  else if(vType=='string')t=dQuote(val);
-  else if(vType=='object'&&typeof val.getTime=='function'||vType=='date')t='new Date('+((val-new Date)>999?val.getTime():'')+')';	//	date被當作object
-  //	http://msdn2.microsoft.com/en-us/library/dww52sbt.aspx
-  else if(vType=='object'&&/*val.constructor==Error  "[object Error]" */(''+val.constructor).indexOf('Error')!=-1)
-   t='new Error'+(val.number||val.description?'('+(val.number||'')+(val.description?(val.number?',':'')+dQuote(val.description):'')+')':'');
-/*
-  else if(vName=='set_obj_value.F'){	//	明白宣示在這裡就插入依存函數：不如用 set_obj_value.F,'set_obj_value();'
-   if(!vars['set_obj_value']||!vars['dQuote'])Vlist=Vlist.slice(0,i).concat('set_obj_value','dQuote',Vlist.slice(i));
-   Vlist[i--]=directInput+'var set_obj_value.F;';continue;
-  }
-*/
-  else if(vType=='object'&&(val.constructor==Object||val.constructor==Array)){// instanceof
-   var k,T='',T_='',T_2='',_i=0,cmC='\\u002c',eqC='\\u003d',NL_="'"+NL+"+'",maxLen=300-NL_.length;	//	type;loop用,Text,間距,integer?
-   if(val.constructor==Object){
-    t='';
-    //	http://fillano.blog.ithome.com.tw/post/257/59403
-    //	** 一些內建的物件，他的屬性可能會是[[DontEnum]]，也就是不可列舉的，而自訂的物件在下一版的ECMA-262中，也可以這樣設定他的屬性。
-    for(k in val)
-     if(typeof val[k]=='object'||typeof val[k]=='function')
-      Vlist.push(vName+'.'+k);	//	簡單的Object遞迴
-     else{
-      T_2=k.replace(/,/g,cmC).replace(/=/g,eqC)+'='+(''+val[k]).replace(/,/g,cmC).replace(/=/g,eqC)+',';
-      if(T_.length+T_2.length>maxLen)T+=T_+NL_,T_=T_2;else T_+=T_2;
-      if(!_i&&parseInt(val[k])==val[k])_i=1;else if(_i<2&&parseFloat(val[k])==val[k]&&parseInt(val[k])!=val[k])_i=2;
-     }
-    T+=T_;
-   }else{// if(val.constructor==Array)
-    var base=16,d_,d=-1,k_,kA=[];
-    for(k in val)
-     if(typeof val[k]=='object'||typeof val[k]=='function')
-      Vlist.push(vName+'.'+k);	//	簡單的Object遞迴
-     else kA.push(parseInt(k)==k?parseInt(k):k);	//	因為Array中仍有可能存在非數字index
-    kA.sort(),vType='Array',t=','+base;
-    for(k_=0;k_<kA.length;k_++){
-     if(!((k=kA[k_]) in val)){if(d_!='*')if(k-d==1)d_+=',';else d_='*';}
-     else{
-      T_2=(k-d==1?'':d_!='*'&&k-d<3/*k.toString(base).length-1*/?d_:(isNaN(k)?k.replace(/,/g,cmC).replace(/=/g,eqC):k.toString(base))+'=')+(''+val[k]).replace(/,/g,cmC).replace(/=/g,eqC)+',',d_='';
-      if(T_.length+T_2.length>maxLen)T+=T_+NL_,T_=T_2;else T_+=T_2;
-     }
-     d=k;if(!_i&&parseInt(val[k])==val[k])_i=1;else if(_i<2&&parseFloat(val[k])==val[k]&&parseInt(val[k])!=val[k])_i=2;
-    }
-    T+=T_;
-   }
-   if(T){
-    if(!vars['set_obj_value']||!vars['dQuote']){
-     Vlist.push('set_obj_value','dQuote');	//	假如沒有set_obj_value則須將之與其所依存之函數（dQuote）一同加入
-     if(!vars['set_obj_value.F'])Vlist.push(directInput+'var set_obj_value.F;');
-    }
-    afterCode+="set_obj_value('"+vName+"','"+T.slice(0,-1)+"'"+(_i?_i==1?",1":",.1":t?",1":'')+t+");"+NL,t=1;
-   }else t=vType=='Object'?'{}':'[]';//new Object(), new Array()
-  }else if(vType=='object'&&val.constructor==RegExp)t=val;
-  else if(vType=='undefined')t=1;	//	有定義(var)但沒設定值，可計算undefined數目
-  else if(t=1,vType!='unknown')
-   if((''+val).match(/^\s*\[[Oo]bject\s*(\w+)\]\s*$/))t=RegExp.$1;	//	僅對Math有效？
-   else vType='unknown type: '+vType+' (constructor: '+val.constructor+')',alert(vName+': '+vType+', please contract me!\n'+val);	//	未知
-  else alert('The type of '+vName+' is "'+vType+'"!');	//	unknown
-  if(typeof t!='undefined'){
-   if(vName.indexOf('.')==-1)codeText+=(c?',':'var ')+vName+(t===1&&vType!='number'?'':'='+t),c=1;//alert(codeText.substr(codeText.length-200));
-   else if(t!==1||vType=='number')codeText+=(c?';':'')+vName+'='+t+';',c=0;
-  }
-  done.push('('+vType+')'+vName);
- }
- if(c)codeText+=';'+NL;//,c=0;//alert(codeText.substr(codeText.length-200));//alert(afterCode);
- return [codeText,afterCode,vari,func,done,undone,Vlist];
+			val = ('' + val).replace(/[\r\n]/g, NL); //	function 才會產生 \r\n 問題，所以先處理掉
+			if ((t = val.match(/^\s*function\s*\(/)) || val.match(/^\s*function\s+([\w_]*)([^(]*)\(/))	//	這種判別法不好！
+				if (t || (t = RegExp.$1) == 'anonymous') {
+					func.push(vName); vType = (typeof t == 'string' ? t : 'no named') + ' ' + vType;
+					if (t == 'anonymous') {	//	忠於原味（笑）anonymous是從new Function(文字列を使って)來的
+						var m = val.match(/\(([^)]*)\)\s*{/), l = RegExp.lastIndex, q = val.match(/[^}]*$/); q = RegExp.index;
+						if (!m) { undone.push('(anonymous function error:' + val + ')' + vName); continue; }
+						if (t = m[1].replace(/,/g, "','")) t = "'" + t + "',"; t = 'new Function(' + t + dQuote(reduceCode(val.slice(l, q - 1))) + ')';
+					} else t = val;
+				} else if (t == vName) {	//	関数(function): http://www.interq.or.jp/student/exeal/dss/ejs/1/2.html
+					if (c) codeText += ';' + NL, c = 0; func.push(vName), codeText += val + NL; continue;
+				} else if (val.indexOf('[native code]') != -1) { undone.push('(native code function error:' + val + ')' + vName); continue; } //	內建(intrinsic 或 built-in)函數：這種判別法不好！
+				else if (t in vars) done.push('(' + vType + ')' + vName), func.push(vName); //	已經登錄過了，所以就這麼下去..
+				else { if (c) codeText += ';' + NL; codeText += val + NL; vars[t] = vari.length, done.push('(' + vType + ')' + t), func.push(t, vName), c = 0; }
+			else { undone.push('(function error:' + val + ')' + vName); continue; } //unknown
+		} else if (vType == 'number') {
+			//	http://msdn2.microsoft.com/zh-tw/library/y382995a(VS.80).aspx
+			var k = 0, m = 'MAX_VALUE,MIN_VALUE,NEGATIVE_INFINITY,POSITIVE_INFINITY,NaN'.split(',');
+			if (val === NaN || val === Infinity || val === -Infinity) t = '' + val;
+			else for (t = 0; k < m.length; k++) if (val === Number[m[k]]) { t = 'Number.' + m[k]; break; }
+			if (!t) {
+				//	http://msdn2.microsoft.com/zh-tw/library/shydc6ax(VS.80).aspx
+				for (k = 0, m = 'E,LN10,LN2,LOG10E,LOG2E,PI,SQRT1_2,SQRT2'.split(','); k < m.length; k++) if (val === Math[m[k]]) { t = 'Math.' + m[k]; break; }
+				if (!t) t = (t = Math.floor(val)) == val && ('' + t).length > (t = '0x' + val.toString(16)).length ? t : val;
+			}
+		} else if (vType == 'boolean' || val === null) t = val; //String(val)//val.toString()	//	typeof null is 'object'
+		else if (vType == 'string') t = dQuote(val);
+		else if (vType == 'object' && typeof val.getTime == 'function' || vType == 'date') t = 'new Date(' + ((val - new Date) > 999 ? val.getTime() : '') + ')'; //	date被當作object
+		//	http://msdn2.microsoft.com/en-us/library/dww52sbt.aspx
+		else if (vType == 'object' && /*val.constructor==Error  "[object Error]" */('' + val.constructor).indexOf('Error') != -1)
+			t = 'new Error' + (val.number || val.description ? '(' + (val.number || '') + (val.description ? (val.number ? ',' : '') + dQuote(val.description) : '') + ')' : '');
+		/*
+		else if(vName=='set_obj_value.F'){	//	明白宣示在這裡就插入依存函數：不如用 set_obj_value.F,'set_obj_value();'
+		if(!vars['set_obj_value']||!vars['dQuote'])Vlist=Vlist.slice(0,i).concat('set_obj_value','dQuote',Vlist.slice(i));
+		Vlist[i--]=directInput+'var set_obj_value.F;';continue;
+		}
+		*/
+		else if (vType == 'object' && (val.constructor == Object || val.constructor == Array)) {// instanceof
+			var k, T = '', T_ = '', T_2 = '', _i = 0, cmC = '\\u002c', eqC = '\\u003d', NL_ = "'" + NL + "+'", maxLen = 300 - NL_.length; //	type;loop用,Text,間距,integer?
+			if (val.constructor == Object) {
+				t = '';
+				//	http://fillano.blog.ithome.com.tw/post/257/59403
+				//	** 一些內建的物件，他的屬性可能會是[[DontEnum]]，也就是不可列舉的，而自訂的物件在下一版的ECMA-262中，也可以這樣設定他的屬性。
+				for (k in val)
+					if (typeof val[k] == 'object' || typeof val[k] == 'function')
+						Vlist.push(vName + '.' + k); //	簡單的Object遞迴
+					else {
+						T_2 = k.replace(/,/g, cmC).replace(/=/g, eqC) + '=' + ('' + val[k]).replace(/,/g, cmC).replace(/=/g, eqC) + ',';
+						if (T_.length + T_2.length > maxLen) T += T_ + NL_, T_ = T_2; else T_ += T_2;
+						if (!_i && parseInt(val[k]) == val[k]) _i = 1; else if (_i < 2 && parseFloat(val[k]) == val[k] && parseInt(val[k]) != val[k]) _i = 2;
+					}
+				T += T_;
+			} else {// if(val.constructor==Array)
+				var base = 16, d_, d = -1, k_, kA = [];
+				for (k in val)
+					if (typeof val[k] == 'object' || typeof val[k] == 'function')
+						Vlist.push(vName + '.' + k); //	簡單的Object遞迴
+					else kA.push(parseInt(k) == k ? parseInt(k) : k); //	因為Array中仍有可能存在非數字index
+				kA.sort(), vType = 'Array', t = ',' + base;
+				for (k_ = 0; k_ < kA.length; k_++) {
+					if (!((k = kA[k_]) in val)) { if (d_ != '*') if (k - d == 1) d_ += ','; else d_ = '*'; }
+					else {
+						T_2 = (k - d == 1 ? '' : d_ != '*' && k - d < 3/*k.toString(base).length-1*/ ? d_ : (isNaN(k) ? k.replace(/,/g, cmC).replace(/=/g, eqC) : k.toString(base)) + '=') + ('' + val[k]).replace(/,/g, cmC).replace(/=/g, eqC) + ',', d_ = '';
+						if (T_.length + T_2.length > maxLen) T += T_ + NL_, T_ = T_2; else T_ += T_2;
+					}
+					d = k; if (!_i && parseInt(val[k]) == val[k]) _i = 1; else if (_i < 2 && parseFloat(val[k]) == val[k] && parseInt(val[k]) != val[k]) _i = 2;
+				}
+				T += T_;
+			}
+			if (T) {
+				if (!vars['set_obj_value'] || !vars['dQuote']) {
+					Vlist.push('set_obj_value', 'dQuote'); //	假如沒有set_obj_value則須將之與其所依存之函數（dQuote）一同加入
+					if (!vars['set_obj_value.F']) Vlist.push(directInput + 'var set_obj_value.F;');
+				}
+				afterCode += "set_obj_value('" + vName + "','" + T.slice(0, -1) + "'" + (_i ? _i == 1 ? ",1" : ",.1" : t ? ",1" : '') + t + ");" + NL, t = 1;
+			} else t = vType == 'Object' ? '{}' : '[]'; //new Object(), new Array()
+		} else if (vType == 'object' && val.constructor == RegExp) t = val;
+		else if (vType == 'undefined') t = 1; //	有定義(var)但沒設定值，可計算undefined數目
+		else if (t = 1, vType != 'unknown')
+			if (('' + val).match(/^\s*\[[Oo]bject\s*(\w+)\]\s*$/)) t = RegExp.$1; //	僅對Math有效？
+			else vType = 'unknown type: ' + vType + ' (constructor: ' + val.constructor + ')', alert(vName + ': ' + vType + ', please contract me!\n' + val); //	未知
+		else alert('The type of ' + vName + ' is "' + vType + '"!'); //	unknown
+		if (typeof t != 'undefined') {
+			if (vName.indexOf('.') == -1) codeText += (c ? ',' : 'var ') + vName + (t === 1 && vType != 'number' ? '' : '=' + t), c = 1; //alert(codeText.substr(codeText.length-200));
+			else if (t !== 1 || vType == 'number') codeText += (c ? ';' : '') + vName + '=' + t + ';', c = 0;
+		}
+		done.push('(' + vType + ')' + vName);
+	}
+	if (c) codeText += ';' + NL; //,c=0;//alert(codeText.substr(codeText.length-200));//alert(afterCode);
+	return [codeText, afterCode, vari, func, done, undone, Vlist];
 }
 
 
 
 //	null code series
 //simpleWrite('try.js',addNullCode(50000));
-var nullCodeData,nullCodeDataL,addNullCodeD;	//	處理nullCode的變數暫存,nullCodeData[變數名]=變數值,nullCodeDataL=length,addNullCodeD:addNullCode data,因為每次都重新執行nullCode()很費時間
-function addNullCode(len,type){	//	為了基底才能加入function而作
- var s='',t,l,i,j;if(typeof addNullCodeD!='object')addNullCodeD=[];qq=0;
- while(s.length<len){
-/*  t=Math.random()<.5?'function':'';
-  s+=len-s.length>9?nullCode((len/2>999?999:len/2)+'-'+len,t):nullCode(len,t);*/
-  l=len-s.length>9?len>2e3?999:len/2:len;
-  j=0;for(i in addNullCodeD)if(i>l)break;else j=i;
-  if(j&&j>99){if(len-s.length>99)t=nullCode(nullCode(99,0)),s+=(addNullCodeD[t.length]=t);while(len-s.length>j)s+=addNullCodeD[j];}
-  s+=j&&len-s.length-j<50?addNullCodeD[j]
-                                       //	:(t=nullCode(l),addNullCodeD[t.length]=t);
-                                       :(t=nullCode(l)?addNullCodeD[t.length]=t:'');
- }
- return s;
+var nullCodeData, nullCodeDataL, addNullCodeD; //	處理nullCode的變數暫存,nullCodeData[變數名]=變數值,nullCodeDataL=length,addNullCodeD:addNullCode data,因為每次都重新執行nullCode()很費時間
+function addNullCode(len, type) {	//	為了基底才能加入function而作
+	var s = '', t, l, i, j; if (typeof addNullCodeD != 'object') addNullCodeD = []; qq = 0;
+	while (s.length < len) {
+		/*  t=Math.random()<.5?'function':'';
+		s+=len-s.length>9?nullCode((len/2>999?999:len/2)+'-'+len,t):nullCode(len,t);*/
+		l = len - s.length > 9 ? len > 2e3 ? 999 : len / 2 : len;
+		j = 0; for (i in addNullCodeD) if (i > l) break; else j = i;
+		if (j && j > 99) { if (len - s.length > 99) t = nullCode(nullCode(99, 0)), s += (addNullCodeD[t.length] = t); while (len - s.length > j) s += addNullCodeD[j]; }
+		s += j && len - s.length - j < 50 ? addNullCodeD[j]
+		//	:(t=nullCode(l),addNullCodeD[t.length]=t);
+                                    : (t = nullCode(l) ? addNullCodeD[t.length] = t : '');
+	}
+	return s;
 }
-function nullCodeDataAdd(vari,val){	//	variables,value
- if(vari){
-  if(typeof nullCodeData!='object')nullCodeData={},nullCodeDataI=[],nullCodeDataL=0;
-  if(!(vari in nullCodeData))nullCodeDataI.push(vari),nullCodeDataL++;
-  nullCodeData[vari]=val;
- }
+function nullCodeDataAdd(vari, val) {	//	variables,value
+	if (vari) {
+		if (typeof nullCodeData != 'object') nullCodeData = {}, nullCodeDataI = [], nullCodeDataL = 0;
+		if (!(vari in nullCodeData)) nullCodeDataI.push(vari), nullCodeDataL++;
+		nullCodeData[vari] = val;
+	}
 }
 //var t=nullCode('230-513','function');alert(t.length+'\n'+t);
 //	產生無用的垃圾碼
 //	其他方法（有閒情逸致時再加）：/**/,//,var vari=num+-*/num,str+-str,if(typeof vari=='~'){},try{eval('~');}catch(e){},eval('try{}catch(e){}');if()WScript.Echo();
-function nullCode(len,type){	//	len:\d-\d
- var t='',vari=[],u,d;	//	variables;up,down:長度上下限
- if(typeof nullCodeData!='object')nullCodeData={},nullCodeDataI=[],nullCodeDataL=0;
- if(typeof len=='number')u=d=Math.floor(len);
- else if(len=''+len,(i=len.indexOf('-'))!=-1)d=parseInt(len.slice(0,i)),u=parseInt(len.substr(i+1));
- if(u<d){var a=d;d=u,u=a;}if(!len||!u||len<0)return'';
- if(typeof type!='string')type=typeof type;
+function nullCode(len, type) {	//	len:\d-\d
+	var t = '', vari = [], u, d; //	variables;up,down:長度上下限
+	if (typeof nullCodeData != 'object') nullCodeData = {}, nullCodeDataI = [], nullCodeDataL = 0;
+	if (typeof len == 'number') u = d = Math.floor(len);
+	else if (len = '' + len, (i = len.indexOf('-')) != -1) d = parseInt(len.slice(0, i)), u = parseInt(len.substr(i + 1));
+	if (u < d) { var a = d; d = u, u = a; } if (!len || !u || len < 0) return '';
+	if (typeof type != 'string') type = typeof type;
 
- //if(type=='boolean'){return Math.random()<.5?1:0;}
- if(type=='number'){return Math.floor(Math.random()*(u-d)+d);}
- if(type=='n2'){if(u<9&&d<9)d=Math.pow(10,d),u=Math.pow(10,u);return Math.floor(Math.random()*(u-d)+d);}
- if(type=='string'){
-	 //	if(d<0&&(d=0,u<0))
-	 if(d<0&&u<(d=0))
-		 return'';for(var i=0,l=nullCode(d+'-'+u,0),t=[];i<l;i++)t.push(nullCode('32-128',0));return fromCharCode(t);
- }
- if(type=='vari'){	//	變數variables
-  if(d)d--;u--;if(u>32)u=32;else if(u<1)u=1;	//	最長變數:32
-  var a,i,l,c=0;
-  do{
-   t=[],a=nullCode('65-123',0),i=0,l=nullCode(d+'-'+u,0);
-   if(a>90&&a<97)a=95;t.push(a);
-   for(;i<l;i++){a=nullCode('55-123',0);if(a>90&&a<97)a=95;else if(a<65)a-=7;t.push(a);}	//	code:48-57,65-90,95,97-122;
-   t=fromCharCode(t);try{eval('a=typeof '+t+'!="undefined";');}catch(e){}	//	確保是新的變數
-   if(c%9==0&&d<u)++d;
-  }while(++c<99&&(a||(t in nullCodeData)));	//	不能確保是新變數的話，給個新的：繼續作。★此作法可能導致長時間的迴圈delay！因此限制最多99次。
-  //if(c==99){alert('重複：['+a+']'+t);WScript.Quit();}
-  return t;
- }
- if(type=='function'){
-  var i=0,l=nullCode('0-9',0),fN=nullCode('2-30','vari'),a=NewLine+'function '+fN+'(',b=NewLine+'}'+NewLine,v,D=[];	//	fN:函數名
-  nullCodeDataAdd(fN,'function');	//	只加入函數名
-  if(l){for(;i<l;i++)v=nullCode('2-30','vari'),a+=v+',',D.push(v);a=a.slice(0,-1);}a+='){';
-  l=(a+b).length+NewLine.length;
-  if(u<l)return nullCode(len);
-  return a+(NewLine+nullCode((d<l?0:d-l)+'-'+(u-l))).replace(/\n/g,'\n	')+b;
- }
- //	others:type=='code'
- var l=nullCode(len,0);
- while(t.length<l){
-  var a,v,va=(Math.random()<.5?(va=nullCode('1-6',0)):dQuote(va=nullCode('5-'+(u-t.length>50?50:u-t.length),'string')));
-  if(u-t.length>20&&Math.random()<.9){
-   if(Math.random()<.7&&nullCodeDataL>9)v=nullCodeDataI[nullCode(0+'-'+nullCodeDataL,0)],a=v+'='+va;
-   else v=nullCode('1-9','vari'),a='var '+v+(Math.random()<.3?'':'='+va);
-   a+=';'+(Math.random()<.4?NewLine:'');nullCodeDataAdd(v,va);
-  }else{a=Math.floor(Math.random()*4);a=a==1?'	':a||u<t.length+NewLine.length?' ':NewLine;}
-  if(t.length+a.length<=u)t+=a;
- }
- return t;
+	//if(type=='boolean'){return Math.random()<.5?1:0;}
+	if (type == 'number') { return Math.floor(Math.random() * (u - d) + d); }
+	if (type == 'n2') { if (u < 9 && d < 9) d = Math.pow(10, d), u = Math.pow(10, u); return Math.floor(Math.random() * (u - d) + d); }
+	if (type == 'string') {
+		//	if(d<0&&(d=0,u<0))
+		if (d < 0 && u < (d = 0))
+			return ''; for (var i = 0, l = nullCode(d + '-' + u, 0), t = []; i < l; i++) t.push(nullCode('32-128', 0)); return fromCharCode(t);
+	}
+	if (type == 'vari') {	//	變數variables
+		if (d) d--; u--; if (u > 32) u = 32; else if (u < 1) u = 1; //	最長變數:32
+		var a, i, l, c = 0;
+		do {
+			t = [], a = nullCode('65-123', 0), i = 0, l = nullCode(d + '-' + u, 0);
+			if (a > 90 && a < 97) a = 95; t.push(a);
+			for (; i < l; i++) { a = nullCode('55-123', 0); if (a > 90 && a < 97) a = 95; else if (a < 65) a -= 7; t.push(a); } //	code:48-57,65-90,95,97-122;
+			t = fromCharCode(t); try { eval('a=typeof ' + t + '!="undefined";'); } catch (e) { } //	確保是新的變數
+			if (c % 9 == 0 && d < u) ++d;
+		} while (++c < 99 && (a || (t in nullCodeData))); //	不能確保是新變數的話，給個新的：繼續作。★此作法可能導致長時間的迴圈delay！因此限制最多99次。
+		//if(c==99){alert('重複：['+a+']'+t);WScript.Quit();}
+		return t;
+	}
+	if (type == 'function') {
+		var i = 0, l = nullCode('0-9', 0), fN = nullCode('2-30', 'vari'), a = NewLine + 'function ' + fN + '(', b = NewLine + '}' + NewLine, v, D = []; //	fN:函數名
+		nullCodeDataAdd(fN, 'function'); //	只加入函數名
+		if (l) { for (; i < l; i++) v = nullCode('2-30', 'vari'), a += v + ',', D.push(v); a = a.slice(0, -1); } a += '){';
+		l = (a + b).length + NewLine.length;
+		if (u < l) return nullCode(len);
+		return a + (NewLine + nullCode((d < l ? 0 : d - l) + '-' + (u - l))).replace(/\n/g, '\n	') + b;
+	}
+	//	others:type=='code'
+	var l = nullCode(len, 0);
+	while (t.length < l) {
+		var a, v, va = (Math.random() < .5 ? (va = nullCode('1-6', 0)) : dQuote(va = nullCode('5-' + (u - t.length > 50 ? 50 : u - t.length), 'string')));
+		if (u - t.length > 20 && Math.random() < .9) {
+			if (Math.random() < .7 && nullCodeDataL > 9) v = nullCodeDataI[nullCode(0 + '-' + nullCodeDataL, 0)], a = v + '=' + va;
+			else v = nullCode('1-9', 'vari'), a = 'var ' + v + (Math.random() < .3 ? '' : '=' + va);
+			a += ';' + (Math.random() < .4 ? NewLine : ''); nullCodeDataAdd(v, va);
+		} else { a = Math.floor(Math.random() * 4); a = a == 1 ? '	' : a || u < t.length + NewLine.length ? ' ' : NewLine; }
+		if (t.length + a.length <= u) t += a;
+	}
+	return t;
 }
 //	↑null code series
 
@@ -24895,52 +26880,52 @@ for(.*;;)
 
 */
 /*	精簡程式碼部分：去掉\n,;前後的空白等，應由reduceCode()呼叫
-	http://dean.edwards.name/packer/
+http://dean.edwards.name/packer/
 */
-function reduceCode_subR(code){
- //code=code.replace(/\s*\n+\s/g,'');	//	比下一行快很多，但為了正確性而放棄。
- code=code.replace(/([^\s]?)\s*\n+\s*([^\s]?)/g,function($0,$1,$2){var a=$1,b=$2;return a+(a&&b&&a.match(/\w/)&&b.match(/\w/)?' ':'')+b;})	//	當每一行都去除\n也可時方能使用！否則會出現「需要;」的錯誤！
-	.replace(/\s+$|^\s+/g,'');
- //if(code.match(/\s+$/))code=code.slice(0,RegExp.index);
- //if(code.match(/^\s+/))code=code.substr(RegExp.lastIndex);
+function reduceCode_subR(code) {
+	//code=code.replace(/\s*\n+\s/g,'');	//	比下一行快很多，但為了正確性而放棄。
+	code = code.replace(/([^\s]?)\s*\n+\s*([^\s]?)/g, function ($0, $1, $2) { var a = $1, b = $2; return a + (a && b && a.match(/\w/) && b.match(/\w/) ? ' ' : '') + b; })	//	當每一行都去除\n也可時方能使用！否則會出現「需要;」的錯誤！
+.replace(/\s+$|^\s+/g, '');
+	//if(code.match(/\s+$/))code=code.slice(0,RegExp.index);
+	//if(code.match(/^\s+/))code=code.substr(RegExp.lastIndex);
 
-/*	對喜歡將\n當作;的，請使用下面的；但這可能造成失誤，例如[a=(b+c)\nif(~)]與[if(~)\nif(~)]
- var m,a;
- while(m=code.match(/\s*\n+\s*(.?)/))
-  a=RegExp.lastIndex,code=code.slice(0,RegExp.index)+(m[1].match(/\w/)?';':'')+code.substr(a-(m[1]?1:0));
- if(m=code.match(/\s+$/))code=code.slice(0,RegExp.index);
- if(m=code.match(/^\s+(.?)/)){code=code.substr(RegExp.lastIndex-1);if((m[0].indexOf('\n')!=-1&&m[1].match(/\w/)))code=';'+code;}
-*/
- code=code//.replace(/([^;])\s*\n+\s*/g,'$1;').replace(/\s*\n+\s*/g,'')	//	最後再作
+	/*	對喜歡將\n當作;的，請使用下面的；但這可能造成失誤，例如[a=(b+c)\nif(~)]與[if(~)\nif(~)]
+	var m,a;
+	while(m=code.match(/\s*\n+\s*(.?)/))
+	a=RegExp.lastIndex,code=code.slice(0,RegExp.index)+(m[1].match(/\w/)?';':'')+code.substr(a-(m[1]?1:0));
+	if(m=code.match(/\s+$/))code=code.slice(0,RegExp.index);
+	if(m=code.match(/^\s+(.?)/)){code=code.substr(RegExp.lastIndex-1);if((m[0].indexOf('\n')!=-1&&m[1].match(/\w/)))code=';'+code;}
+	*/
+	code = code//.replace(/([^;])\s*\n+\s*/g,'$1;').replace(/\s*\n+\s*/g,'')	//	最後再作
 
- //.replace(/for\s*\(([^;]*);\s*;/g,'for;#$1#')	//	因為直接執行下行敘述會將for(~;;也變成for(~;，所以需先作處理。
- //.replace(/\s*;+\s*/g,';')	//	在''等之中執行此行可能出問題，因此另外置此函數。
- //.replace(/for;#([^#]*)#/g,'for($1;;')
+	//.replace(/for\s*\(([^;]*);\s*;/g,'for;#$1#')	//	因為直接執行下行敘述會將for(~;;也變成for(~;，所以需先作處理。
+	//.replace(/\s*;+\s*/g,';')	//	在''等之中執行此行可能出問題，因此另外置此函數。
+	//.replace(/for;#([^#]*)#/g,'for($1;;')
 
- //.replace(/(.)\s+([+\-]+)/g,function($0,$1,$2){return $1+($1=='+'||$1=='-'?' ':'')+$2;}).replace(/([+-]+)\s+(.)/g,function($0,$1,$2){return $1+($2=='+'||$2=='-'?' ':'')+$2;})	//	+ ++ +
- .replace(/([+\-])\s+([+\-])/g,'$1 $2').replace(/([^+\-])\s+([+-])/g,'$1$2').replace(/([+\-])\s+([^+\-])/g,'$1$2')	//	+ ++ +
+	//.replace(/(.)\s+([+\-]+)/g,function($0,$1,$2){return $1+($1=='+'||$1=='-'?' ':'')+$2;}).replace(/([+-]+)\s+(.)/g,function($0,$1,$2){return $1+($2=='+'||$2=='-'?' ':'')+$2;})	//	+ ++ +
+.replace(/([+\-])\s+([+\-])/g, '$1 $2').replace(/([^+\-])\s+([+-])/g, '$1$2').replace(/([+\-])\s+([^+\-])/g, '$1$2')	//	+ ++ +
 
- .replace(/\s*([()\[\]&|^{*\/%<>,~!?:.]+)\s*/g,'$1')	//	.replace(/\s*([()\[\]&|{}/%,!]+)\s*/g,'$1')	//	去掉'}'，因為可能是=function(){};或={'ucC':1};
- .replace(/([a-zA-Z])\s+([=+\-])/g,'$1$2').replace(/([=+\-])\s+([a-zA-Z])/g,'$1$2')
- .replace(/\s*([+\-*\/%=!&^<>]+=)\s*/g,'$1')//.replace(/\s*([{}+\-*/%,!]|[+\-*\/=!<>]?=|++|--)\s*/g,'$1')
+.replace(/\s*([()\[\]&|^{*\/%<>,~!?:.]+)\s*/g, '$1')	//	.replace(/\s*([()\[\]&|{}/%,!]+)\s*/g,'$1')	//	去掉'}'，因為可能是=function(){};或={'ucC':1};
+.replace(/([a-zA-Z])\s+([=+\-])/g, '$1$2').replace(/([=+\-])\s+([a-zA-Z])/g, '$1$2')
+.replace(/\s*([+\-*\/%=!&^<>]+=)\s*/g, '$1')//.replace(/\s*([{}+\-*/%,!]|[+\-*\/=!<>]?=|++|--)\s*/g,'$1')
 
- .replace(/for\(([^;]*);;/g,'for;#$1#')	//	因為直接執行下行敘述會將for(~;;也變成for(~;，所以需先作處理。
- //.replace(/};+/g,'}')	/*.replace(/;{2,}{/g,'{')*/.replace(/{;+/g,'{')//.replace(/;*{;*/g,'{')//在quotation作修正成效不彰
- .replace(/\s*([{;]);+\s*/g,'$1')//.replace(/\s*([{};]);+\s*/g,'$1')	//	去掉'}'，因為可能是=function(){};或={'ucC':1};
- .replace(/for;#([^#]*)#/g,'for($1;;')
+.replace(/for\(([^;]*);;/g, 'for;#$1#')	//	因為直接執行下行敘述會將for(~;;也變成for(~;，所以需先作處理。
+	//.replace(/};+/g,'}')	/*.replace(/;{2,}{/g,'{')*/.replace(/{;+/g,'{')//.replace(/;*{;*/g,'{')//在quotation作修正成效不彰
+.replace(/\s*([{;]);+\s*/g, '$1')//.replace(/\s*([{};]);+\s*/g,'$1')	//	去掉'}'，因為可能是=function(){};或={'ucC':1};
+.replace(/for;#([^#]*)#/g, 'for($1;;')
 
- .replace(/\s{2,}/g,' ')
- .replace(/([^)]);}/g,'$1}')	//	~;while(~);}	but: ~;i=(~);} , {a.b();}
- ;
- //if(code.charAt(0)=="'")code=(code.charAt(1)=='}'?'}':code.charAt(1)==';'?'':code.charAt(1))+code.substr(2);
- return code;
+.replace(/\s{2,}/g, ' ')
+.replace(/([^)]);}/g, '$1}')	//	~;while(~);}	but: ~;i=(~);} , {a.b();}
+;
+	//if(code.charAt(0)=="'")code=(code.charAt(1)=='}'?'}':code.charAt(1)==';'?'':code.charAt(1))+code.substr(2);
+	return code;
 }
 /*	精簡程式碼：去掉註解與\s\n	use for JSON (JavaScript Object Notation)
-	bug:
-	當每一行都去除\n也可時方能使用！否則會出現「需要;」的錯誤！
-	可能會lose條件式編譯（@cc_on等）的資訊或判別錯誤！另外，尚不保證不會lose或更改程式碼！
+bug:
+當每一行都去除\n也可時方能使用！否則會出現「需要;」的錯誤！
+可能會lose條件式編譯（@cc_on等）的資訊或判別錯誤！另外，尚不保證不會lose或更改程式碼！
 
-	http://www.dreamprojections.com/syntaxhighlighter/Default.aspx
+http://www.dreamprojections.com/syntaxhighlighter/Default.aspx
 
 TODO:
 將 local various 甚至 global 依頻率縮短，合併以字串組合代替。	selectable
@@ -24952,13 +26937,13 @@ compress: eval("~")
 (function(~){~})(~);
 
 var fascii2ascii = (function(){
-  var cclass
-   = '['+String.fromCharCode(0xff01)+'-'+String.fromCharCode(0xff5e)+']';
-  var re_fullwidth = new RegExp(cclass, 'g');
-  var substitution = function(m){
-    return String.fromCharCode(m.charCodeAt(0) - 0xfee0); // 0xff00 - 0x20
-  };
-  return function(s){ return s.replace(re_fullwidth, substitution) };
+var cclass
+= '['+String.fromCharCode(0xff01)+'-'+String.fromCharCode(0xff5e)+']';
+var re_fullwidth = new RegExp(cclass, 'g');
+var substitution = function(m){
+return String.fromCharCode(m.charCodeAt(0) - 0xfee0); // 0xff00 - 0x20
+};
+return function(s){ return s.replace(re_fullwidth, substitution) };
 })();
 
 
@@ -24981,160 +26966,161 @@ http://alex.dojotoolkit.org/shrinksafe/
 http://www.saltstorm.net/depo/esc/introduction.wbm
 */
 //reduceCode[generate_code.dLK]='reduceCode_subR';
-function reduceCode(code,mode){	//	code:輸入欲精簡之程式碼,mode=1:''中unicode轉\uHHHH
- if(!code)return'';	//sss=0,mmm=90;
- var A='',a=''+code,m,b,q,c,Begin,End;
- //reduceCodeM=[''];
- while(a.match(/['"\/]/)){
-  with(RegExp)Begin=index,End=lastIndex,m=lastMatch;
-//alert(a);
-  if(Begin&&a.charAt(Begin-1)=='$'){A+=reduceCode_subR(a.slice(0,Begin))+m,a=a.substr(End);continue;}	//	RegExp.$'等
+function reduceCode(code, mode) {	//	code:輸入欲精簡之程式碼,mode=1:''中unicode轉\uHHHH
+	if (!code) return ''; //sss=0,mmm=90;
+	var A = '', a = '' + code, m, b, q, c, Begin, End;
+	//reduceCodeM=[''];
+	while (a.match(/['"\/]/)) {
+		with (RegExp) Begin = index, End = lastIndex, m = lastMatch;
+		//alert(a);
+		if (Begin && a.charAt(Begin - 1) == '$') { A += reduceCode_subR(a.slice(0, Begin)) + m, a = a.substr(End); continue; } //	RegExp.$'等
 
-  if(m=='/')if(m=a.charAt(RegExp.lastIndex),m=='*'||m=='/'){	//	comment
-   //if(++sss>mmm-2&&alert('sss='+sss+NewLine+a),sss>mmm){alert('comment');break;}
-   //A+=reduceCode_subR(a.slice(0,Begin)),b=m=='*'?'*/':'\n',m=a.indexOf(b,End+1);//A+=a.slice(0,RegExp.index),b=m=='*'?'*/':'\n',m=a.substr(RegExp.lastIndex).indexOf(b);//
-   A+=reduceCode_subR(a.slice(0,Begin)),b=m=='*'?'*/':'\n';
-   m=End+1;
-   do{m=a.indexOf(b,m);if(a.charAt(m-1)=='\\')m+=2;else break;}while(m!=-1);	//	預防「\*/」…其實其他地方（如["']）也需要預防，但沒那精力了。
-   //reduceCodeM.push('find comment:	Begin='+Begin+',End='+End+',m='+m+',b='+b.replace(/\n/g,'\\n')+NewLine+(m-End>200||m==-1?a.substr(Begin,200)+'..':a.slice(Begin,m))+NewLine+NewLine+'continue:'+NewLine+a.substr(m+b.length,200)+'..');
-   if(m==-1)if(b=='\n'){a='';break;/*return A;*/}else throw new Error(1,'[/*] without [*/]!\n'+a.substr(Begin,200));
-   else if(7+End<m&&	//	7: 最起碼應該有這麼多 char 的 comment 才列入查核
-	/^@[cei][a-z_]+/.test(a.substring(End+1,m-5))//a.substring(End+1,m-5).indexOf('@cc_on')==0	不一定只有 cc_on
-	)
-    //alert('There is conditional compilation detected,\n you may need pay attention to:\n'+a.substring(End+1,m-5)),
-    A+=a.slice(End-1,m+b.length).replace(/\s*(\/\/[^\r\n]*)?(\r?\n)\s*/g,'$2'),a=a.slice(m+b.length);	//	對條件式編譯全選，預防資訊lose。僅有'/*@cc_on'才列入，\/*\s+@\s+cc_on不可！
-   else if(a=a.substr(m+b.length),A.match(/\w$/)&&a.match(/^\s*\w/))A+=' ';	//	預防return /*~*/a被轉為returna
-  }else{	//	RegExp
-   //reduceCodeM.push('find RegExp:	Begin='+Begin+NewLine+a.substr(Begin,200)+NewLine+'-'.x(20)+NewLine+A.substr(A.length-200)+'..');
-   b=a.slice(0,Begin),m=1;//c=Begin,q=End
+		if (m == '/') if (m = a.charAt(RegExp.lastIndex), m == '*' || m == '/') {	//	comment
+			//if(++sss>mmm-2&&alert('sss='+sss+NewLine+a),sss>mmm){alert('comment');break;}
+			//A+=reduceCode_subR(a.slice(0,Begin)),b=m=='*'?'*/':'\n',m=a.indexOf(b,End+1);//A+=a.slice(0,RegExp.index),b=m=='*'?'*/':'\n',m=a.substr(RegExp.lastIndex).indexOf(b);//
+			A += reduceCode_subR(a.slice(0, Begin)), b = m == '*' ? '*/' : '\n';
+			m = End + 1;
+			do { m = a.indexOf(b, m); if (a.charAt(m - 1) == '\\') m += 2; else break; } while (m != -1); //	預防「\*/」…其實其他地方（如["']）也需要預防，但沒那精力了。
+			//reduceCodeM.push('find comment:	Begin='+Begin+',End='+End+',m='+m+',b='+b.replace(/\n/g,'\\n')+NewLine+(m-End>200||m==-1?a.substr(Begin,200)+'..':a.slice(Begin,m))+NewLine+NewLine+'continue:'+NewLine+a.substr(m+b.length,200)+'..');
+			if (m == -1) if (b == '\n') { a = ''; break; /*return A;*/ } else throw new Error(1, '[/*] without [*/]!\n' + a.substr(Begin, 200));
+			else if (7 + End < m && //	7: 最起碼應該有這麼多 char 的 comment 才列入查核
+/^@[cei][a-z_]+/.test(a.substring(End + 1, m - 5))//a.substring(End+1,m-5).indexOf('@cc_on')==0	不一定只有 cc_on
+)
+			//alert('There is conditional compilation detected,\n you may need pay attention to:\n'+a.substring(End+1,m-5)),
+				A += a.slice(End - 1, m + b.length).replace(/\s*(\/\/[^\r\n]*)?(\r?\n)\s*/g, '$2'), a = a.slice(m + b.length); //	對條件式編譯全選，預防資訊lose。僅有'/*@cc_on'才列入，\/*\s+@\s+cc_on不可！
+			else if (a = a.substr(m + b.length), A.match(/\w$/) && a.match(/^\s*\w/)) A += ' '; //	預防return /*~*/a被轉為returna
+		} else {	//	RegExp
+			//reduceCodeM.push('find RegExp:	Begin='+Begin+NewLine+a.substr(Begin,200)+NewLine+'-'.x(20)+NewLine+A.substr(A.length-200)+'..');
+			b = a.slice(0, Begin), m = 1; //c=Begin,q=End
 
-   if(b.match(/(^|[(;+=!{}&|:\\\?,])\s*$/))m=1;	//	RegExp:以起頭的'/'前面的字元作判別，前面是這些則為RegExp
-   else if(b.match(/[\w)\]]\s*$/))m=0;	//	前面是這些則為op
-   else throw new Error(1,'Unknown [/]! Please check it and add rules!\n'+b+'\n-------------\n'+a.slice(0,End+80)
-	//+'\n-------------\n'+A
-	);	//	需再加強前兩項判別之處
+			if (b.match(/(^|[(;+=!{}&|:\\\?,])\s*$/)) m = 1; //	RegExp:以起頭的'/'前面的字元作判別，前面是這些則為RegExp
+			else if (b.match(/[\w)\]]\s*$/)) m = 0; //	前面是這些則為op
+			else throw new Error(1, 'Unknown [/]! Please check it and add rules!\n' + b + '\n-------------\n' + a.slice(0, End + 80)
+			//+'\n-------------\n'+A
+); //	需再加強前兩項判別之處
 
-   if(!m)A+=reduceCode_subR(a.slice(0,End)),a=a.substr(End);//if(!m)A+=a.slice(0,q),a=a.substr(q);//	應該是op之類//
-   else{A+=reduceCode_subR(a.slice(0,Begin)),a=a.substr(Begin),c=0;//else{A+=a.slice(0,c),a=a.substr(c),c=0;//
-    //if(++sss>mmm-2&&alert('sss='+sss+'\n'+a),sss>mmm){alert('reg');break;}
-    while(m=a.substr(c).match(/([^\\]|[\\]{2,})([[\/\n])/)){	//	去掉[]
-     //reduceCodeM.push('find RegExp [ or / or \\n :'+NewLine+a.substr(c+RegExp.index+1,20));
-     if(m[1].length>1&&m[1].length%2==1){c+=RegExp.lastIndex-1;continue;}	//	奇數個[\]後
-     else if(m=m[2],m=='/')break;
-     if(m=='[')
-      while((m=a.substr(c+=RegExp.lastIndex).match(/([^\\]|[\\]{2,})\]/))){	//	不用c+=RegExp.index+1是因[]中一定得有字元
-       if(m[1].length>1&&m[1].length%2==1){c+=RegExp.lastIndex-1;continue;}	//	奇數個[\]後
-       c+=RegExp.lastIndex-1;m=1;break;	//	-1:因為偵測'['時需要前一個字元
-	//if(++sss>mmm-2&&alert('sss='+sss+'\nc='+c+'\n'+a.substr(c)),sss>mmm){alert('reg 2');break;}
-      }
-     if(m!=1)throw new Error(1,'RegExp error!\nbegin with:\n'+a.substr(Begin,200));
-    }
-    //reduceCodeM.push('find RegExp 2:'+NewLine+a.slice(0,c+RegExp.lastIndex));
-    A+=a.slice(0,c+=RegExp.lastIndex),a=a.substr(c);//q=RegExp.lastIndex,alert('reg:'+Begin+','+c+','+q+'\n'+a.slice(0,Begin)+'\n-------\n'+a.slice(Begin,c+q)+'\n-------\n'+a.substr(c+q,200));return A;
-    //q=RegExp.lastIndex,A+=reduceCode_subR(a.slice(0,Begin))+a.slice(Begin,c+=q),a=a.substr(c);//A+=a.slice(0,c+=RegExp.lastIndex),a=a.substr(c);//
-   }
-  }else{	//	quotation
-//alert('quotation:\n'+a)
-   //reduceCodeM.push('find quotation:'+NewLine+a.substr(RegExp.index,200));
-   //if(++sss>mmm-2&&alert('sss='+sss+'\n'+a),sss>mmm){alert('quo');break;}
-   //c=RegExp.index,b=a.substr(RegExp.lastIndex-1).match(new RegExp('[^\\\\]('+(q=m)+'|\\n)'));	較正式
-
-
-
-/*
-
-   q=m;	//	2009/8/16 15:59:02 FAILED
-
-function test_quotation(){
-'\';		//	Error
-'\\\';		//	Error
-'\\\\\';	//	Error
-'';
-'n';
-'\\';
-'nn';
-'\\n';
-'n\\';
-'n\\n';
-'\\\\';
-'\\\\n';
-'n\\\\';
-'n\\\\n';
-'nn\\\\';
-'nn\\\\n';
-'nnn\\\\';
-'nnn\\\\n';
-}
-alert(reduceCode(test_quotation));
-
-alert(reduceCode(reduceCode));
+			if (!m) A += reduceCode_subR(a.slice(0, End)), a = a.substr(End); //if(!m)A+=a.slice(0,q),a=a.substr(q);//	應該是op之類//
+			else {
+				A += reduceCode_subR(a.slice(0, Begin)), a = a.substr(Begin), c = 0; //else{A+=a.slice(0,c),a=a.substr(c),c=0;//
+				//if(++sss>mmm-2&&alert('sss='+sss+'\n'+a),sss>mmm){alert('reg');break;}
+				while (m = a.substr(c).match(/([^\\]|[\\]{2,})([[\/\n])/)) {	//	去掉[]
+					//reduceCodeM.push('find RegExp [ or / or \\n :'+NewLine+a.substr(c+RegExp.index+1,20));
+					if (m[1].length > 1 && m[1].length % 2 == 1) { c += RegExp.lastIndex - 1; continue; } //	奇數個[\]後
+					else if (m = m[2], m == '/') break;
+					if (m == '[')
+						while ((m = a.substr(c += RegExp.lastIndex).match(/([^\\]|[\\]{2,})\]/))) {	//	不用c+=RegExp.index+1是因[]中一定得有字元
+							if (m[1].length > 1 && m[1].length % 2 == 1) { c += RegExp.lastIndex - 1; continue; } //	奇數個[\]後
+							c += RegExp.lastIndex - 1; m = 1; break; //	-1:因為偵測'['時需要前一個字元
+							//if(++sss>mmm-2&&alert('sss='+sss+'\nc='+c+'\n'+a.substr(c)),sss>mmm){alert('reg 2');break;}
+						}
+					if (m != 1) throw new Error(1, 'RegExp error!\nbegin with:\n' + a.substr(Begin, 200));
+				}
+				//reduceCodeM.push('find RegExp 2:'+NewLine+a.slice(0,c+RegExp.lastIndex));
+				A += a.slice(0, c += RegExp.lastIndex), a = a.substr(c); //q=RegExp.lastIndex,alert('reg:'+Begin+','+c+','+q+'\n'+a.slice(0,Begin)+'\n-------\n'+a.slice(Begin,c+q)+'\n-------\n'+a.substr(c+q,200));return A;
+				//q=RegExp.lastIndex,A+=reduceCode_subR(a.slice(0,Begin))+a.slice(Begin,c+=q),a=a.substr(c);//A+=a.slice(0,c+=RegExp.lastIndex),a=a.substr(c);//
+			}
+		} else {	//	quotation
+			//alert('quotation:\n'+a)
+			//reduceCodeM.push('find quotation:'+NewLine+a.substr(RegExp.index,200));
+			//if(++sss>mmm-2&&alert('sss='+sss+'\n'+a),sss>mmm){alert('quo');break;}
+			//c=RegExp.index,b=a.substr(RegExp.lastIndex-1).match(new RegExp('[^\\\\]('+(q=m)+'|\\n)'));	較正式
 
 
-   //	找到 '\n' 為止，考慮 [\\\\]\\r?\\n
-   c=Begin+1,b='';
-   while((c=a.indexOf('\n',c))!=-1){
-    q=a.charAt(c-1);
-    if(q=='\\'||q=='\r'&&a.charAt(c-2)=='\\'){
-     c++;
-     continue;
-    }
+
+			/*
+
+			q=m;	//	2009/8/16 15:59:02 FAILED
+
+			function test_quotation(){
+			'\';		//	Error
+			'\\\';		//	Error
+			'\\\\\';	//	Error
+			'';
+			'n';
+			'\\';
+			'nn';
+			'\\n';
+			'n\\';
+			'n\\n';
+			'\\\\';
+			'\\\\n';
+			'n\\\\';
+			'n\\\\n';
+			'nn\\\\';
+			'nn\\\\n';
+			'nnn\\\\';
+			'nnn\\\\n';
+			}
+			alert(reduceCode(test_quotation));
+
+			alert(reduceCode(reduceCode));
+
+
+			//	找到 '\n' 為止，考慮 [\\\\]\\r?\\n
+			c=Begin+1,b='';
+			while((c=a.indexOf('\n',c))!=-1){
+			q=a.charAt(c-1);
+			if(q=='\\'||q=='\r'&&a.charAt(c-2)=='\\'){
+			c++;
+			continue;
+			}
      
-   }
-   ;
-   if(a.charAt(c-1))
+			}
+			;
+			if(a.charAt(c-1))
 
-   //alert('use RegExp: '+new RegExp('^([^\\\\\\r\\n]*|[\\\\][^\\r\\n]|[\\\\]\\r?\\n)*('+q+'|\\n)'));
-   b=a.slice(Begin+1).match(new RegExp('^([^\\\\\\r\\n]*|[\\\\][^\\r\\n]|[\\\\]\\r?\\n)*('+q+'|\\n)'));	//	too slow!
-alert('test string:\n'+a.slice(Begin+1))
-   if(!b||b[2]=='\n')
-    throw new Error(1,'There is a start quotation mark ['+q+'] without a end quotation mark!\nbegin with:\n'+a.substr(Begin,200));	//	語法錯誤?
-   q=RegExp.lastIndex+1;
+			//alert('use RegExp: '+new RegExp('^([^\\\\\\r\\n]*|[\\\\][^\\r\\n]|[\\\\]\\r?\\n)*('+q+'|\\n)'));
+			b=a.slice(Begin+1).match(new RegExp('^([^\\\\\\r\\n]*|[\\\\][^\\r\\n]|[\\\\]\\r?\\n)*('+q+'|\\n)'));	//	too slow!
+			alert('test string:\n'+a.slice(Begin+1))
+			if(!b||b[2]=='\n')
+			throw new Error(1,'There is a start quotation mark ['+q+'] without a end quotation mark!\nbegin with:\n'+a.substr(Begin,200));	//	語法錯誤?
+			q=RegExp.lastIndex+1;
 
-*/
+			*/
 
-   //	未考慮 '\n' (不能 check error!)
-   c=Begin,q=m;
-   while(b=a.substr(c).match(new RegExp('([^\\\\\\r]|\\\\{2,})('+q+'|\\r?\\n)')))	//	考慮 [\\\\]\\r?\\n
-    if(b[1].length>1&&b[1].length%2==1)
-     c=RegExp.lastIndex-1;
-    else break;
+			//	未考慮 '\n' (不能 check error!)
+			c = Begin, q = m;
+			while (b = a.substr(c).match(new RegExp('([^\\\\\\r]|\\\\{2,})(' + q + '|\\r?\\n)')))	//	考慮 [\\\\]\\r?\\n
+				if (b[1].length > 1 && b[1].length % 2 == 1)
+					c = RegExp.lastIndex - 1;
+				else break;
 
-   if(!b||b[2]=='\n')
-    throw new Error(1,'There is a start quotation mark ['+q+'] without a end quotation mark!\nget:['+b+']\nbegin with:\n'+a.substr(Begin,200));	//	語法錯誤?
-   //reduceCodeM.push('find quota ['+q+']:'+NewLine+a.substr(c,RegExp.lastIndex)+NewLine+'continue:'+NewLine+a.substr(c+RegExp.lastIndex,99));
+			if (!b || b[2] == '\n')
+				throw new Error(1, 'There is a start quotation mark [' + q + '] without a end quotation mark!\nget:[' + b + ']\nbegin with:\n' + a.substr(Begin, 200)); //	語法錯誤?
+			//reduceCodeM.push('find quota ['+q+']:'+NewLine+a.substr(c,RegExp.lastIndex)+NewLine+'continue:'+NewLine+a.substr(c+RegExp.lastIndex,99));
 
-   q=RegExp.lastIndex;
+			q = RegExp.lastIndex;
 
 
 
-   //alert('q='+q+',['+b[0]+']');
-   //alert(b[1]);
-   //alert(b[2]);
+			//alert('q='+q+',['+b[0]+']');
+			//alert(b[1]);
+			//alert(b[2]);
 
-   b=a.substr(Begin,q).replace(/\\\r?\n/g,'');
-   //alert('mode='+mode);
-   if(mode==1){
-    m='';
-    for(var i=0;i<=q;i++)
-     m+=b.charCodeAt(i)>127?'\\u'+b.charCodeAt(i).toString(16):b.charAt(i);
-   }
-   else m=b;
+			b = a.substr(Begin, q).replace(/\\\r?\n/g, '');
+			//alert('mode='+mode);
+			if (mode == 1) {
+				m = '';
+				for (var i = 0; i <= q; i++)
+					m += b.charCodeAt(i) > 127 ? '\\u' + b.charCodeAt(i).toString(16) : b.charAt(i);
+			}
+			else m = b;
 
-   A+=reduceCode_subR(a.slice(0,Begin))+m,a=a.substr(Begin+q);//A+=a.slice(0,c+=RegExp.lastIndex),a=a.substr(c);//
+			A += reduceCode_subR(a.slice(0, Begin)) + m, a = a.substr(Begin + q); //A+=a.slice(0,c+=RegExp.lastIndex),a=a.substr(c);//
 
-   //alert('A='+A);
-   //alert('a='+a);
+			//alert('A='+A);
+			//alert('a='+a);
 
-   //if(!/^[\s\r\n]*\}/.test(a))A+=';';	//	對於 ~';{ → ~'{ 或  ~';if → ~'if  不被接受。
-  }
- }
+			//if(!/^[\s\r\n]*\}/.test(a))A+=';';	//	對於 ~';{ → ~'{ 或  ~';if → ~'if  不被接受。
+		}
+	}
 
- //	後續處理
- A+=reduceCode_subR(a);
- //A=A.replace(/([^;])\s*\n+\s*/g,'$1;');	//	這兩行在reduceCode_subR()中已處理
- //A=A.replace(/\s*\n+\s*/g,'');//while(A.match(/\s*\n\s*/))A=A.replace(/\s*\n\s*/g,'');//
+	//	後續處理
+	A += reduceCode_subR(a);
+	//A=A.replace(/([^;])\s*\n+\s*/g,'$1;');	//	這兩行在reduceCode_subR()中已處理
+	//A=A.replace(/\s*\n+\s*/g,'');//while(A.match(/\s*\n\s*/))A=A.replace(/\s*\n\s*/g,'');//
 
- return A;
+	return A;
 }
 
 
@@ -25153,67 +27139,67 @@ TODO:
 
 */
 //reduceScript[generate_code.dLK]='autodetectEncode,simpleRead,simpleWrite,reduceCode,isFile';
-function reduceScript(originScriptFileName,outScriptFileName,flag){	//	origin javascript file name, target javascript file name
- if(!originScriptFileName)
-  originScriptFileName=WScript.ScriptFullName;
+function reduceScript(originScriptFileName, outScriptFileName, flag) {	//	origin javascript file name, target javascript file name
+	if (!originScriptFileName)
+		originScriptFileName = WScript.ScriptFullName;
 
- if(!outScriptFileName)
-  outScriptFileName=originScriptFileName+'.reduced.js';//.compressed.js	//	getFP(originScriptFileName.replace(/\.ori/,''),1);
+	if (!outScriptFileName)
+		outScriptFileName = originScriptFileName + '.reduced.js'; //.compressed.js	//	getFP(originScriptFileName.replace(/\.ori/,''),1);
 
- if(!flag)flag={};
+	if (!flag) flag = {};
 
- if(!fso)fso=new ActiveXObject("Scripting.FileSystemObject");
+	if (!fso) fso = new ActiveXObject("Scripting.FileSystemObject");
 
- //	同檔名偵測（若自行把 .ori 改成標的檔等，把標的檔先 copy 成原來檔案。）
- if(originScriptFileName==outScriptFileName){
-  if(2==WshShell.Popup('origin file and output file is the same!'+(flag.originFile?"\nI'll try to copy it back.":''),0,'Copy target as origin file',1+48))return;
-  if(!flag.originFile)return;
-  if(isFile(originScriptFileName=flag.originFile)){
-   alert('origin file is exist! Please rename the file!');
-   return;
-  }
-  try{fso.CopyFile(outScriptFileName,originScriptFileName);}catch(e){alert('Failed to copy file!');return;}
- }
+	//	同檔名偵測（若自行把 .ori 改成標的檔等，把標的檔先 copy 成原來檔案。）
+	if (originScriptFileName == outScriptFileName) {
+		if (2 == WshShell.Popup('origin file and output file is the same!' + (flag.originFile ? "\nI'll try to copy it back." : ''), 0, 'Copy target as origin file', 1 + 48)) return;
+		if (!flag.originFile) return;
+		if (isFile(originScriptFileName = flag.originFile)) {
+			alert('origin file is exist! Please rename the file!');
+			return;
+		}
+		try { fso.CopyFile(outScriptFileName, originScriptFileName); } catch (e) { alert('Failed to copy file!'); return; }
+	}
 
- if(!isFile(originScriptFileName)){
-  alert("Origin javascript file doesn't not found!\n"+originScriptFileName);
-  return;
- }
+	if (!isFile(originScriptFileName)) {
+		alert("Origin javascript file doesn't not found!\n" + originScriptFileName);
+		return;
+	}
 
- var sp='='.x(80)+NewLine,reduceCodeM=[],enc=autodetectEncode(originScriptFileName),i,outenc=autodetectEncode(outScriptFileName);
+	var sp = '='.x(80) + NewLine, reduceCodeM = [], enc = autodetectEncode(originScriptFileName), i, outenc = autodetectEncode(outScriptFileName);
 
- if(!flag.outEnc)
-  flag.outEnc=outenc||enc||TristateTrue;
+	if (!flag.outEnc)
+		flag.outEnc = outenc || enc || TristateTrue;
 
 
- try{
-  var f=simpleRead(originScriptFileName,enc),ot=simpleRead(outScriptFileName,flag.outEnc),r='';
-  if(typeof f!='string')throw new Error(1,"Can't read file ["+originScriptFileName+"]!");
-  t=flag.runBefore?flag.runBefore(f)||f:f;
-  if(flag.startFrom)
-   if(typeof flag.startFrom=='string'){
-    if((i=t.indexOf(flag.startFrom))!=-1)t=t.slice(i);
-   }else if(flag.startFrom instanceof RegExp)
-    t=t.replace(flag.startFrom,'');
-  t=reduceCode(t);
-  t=(flag.addBefore||'')+t.replace(/([};])function(\s)/g,'$1\nfunction$2').replace(/}var(\s)/g,'}\nvar$1')/*.replace(/([;}])([a-z\._\d]+=)/ig,'$1\n$2')*/+reduceCodeM.join(NewLine+sp);
-  //	不相同才 run
-  if(t)if(t!=ot||outenc!=flag.outEnc)simpleWrite(outScriptFileName,t,flag.outEnc);else r='* 欲寫入之內容('+t.length+' chars)與標的檔相同。檔案並未變更。\n';
+	try {
+		var f = simpleRead(originScriptFileName, enc), ot = simpleRead(outScriptFileName, flag.outEnc), r = '';
+		if (typeof f != 'string') throw new Error(1, "Can't read file [" + originScriptFileName + "]!");
+		t = flag.runBefore ? flag.runBefore(f) || f : f;
+		if (flag.startFrom)
+			if (typeof flag.startFrom == 'string') {
+				if ((i = t.indexOf(flag.startFrom)) != -1) t = t.slice(i);
+			} else if (flag.startFrom instanceof RegExp)
+				t = t.replace(flag.startFrom, '');
+		t = reduceCode(t);
+		t = (flag.addBefore || '') + t.replace(/([};])function(\s)/g, '$1\nfunction$2').replace(/}var(\s)/g, '}\nvar$1')/*.replace(/([;}])([a-z\._\d]+=)/ig,'$1\n$2')*/ + reduceCodeM.join(NewLine + sp);
+		//	不相同才 run
+		if (t) if (t != ot || outenc != flag.outEnc) simpleWrite(outScriptFileName, t, flag.outEnc); else r = '* 欲寫入之內容(' + t.length + ' chars)與標的檔相同。檔案並未變更。\n';
 
-  if(flag.doTest)eval('if(0){if(0){if(0){'+t+'}}}');//void	//should use windows.eval	//if(WScript.ScriptName!=outScriptFileName)eval(t);
-  if(flag.doReport)alert('OK!\n'+r+'\n'+f.length+'→'+t.length+'(origin output: '+ot.length+') ('+(100*t.length/f.length).decp(2)+'%)\n\n['+enc+'] '+originScriptFileName+'\n→\n['+flag.outEnc+'] '+outScriptFileName);
- }catch(e){
-  if(6==alert('reduceScript: Error occured!\nDo you want to write error message to target file?\n'+outScriptFileName,0,0,3+32))
-   simpleWrite(outScriptFileName,popErr(e)+NewLine+NewLine+reduceCodeM.join(NewLine+sp),TristateTrue/*enc*/,0,true);
-  if(flag.copyOnFailed)try{fso.CopyFile(originScriptFileName,outScriptFileName);}catch(e){alert('Failed to copy file!');return;}
- }
+		if (flag.doTest) eval('if(0){if(0){if(0){' + t + '}}}'); //void	//should use windows.eval	//if(WScript.ScriptName!=outScriptFileName)eval(t);
+		if (flag.doReport) alert('OK!\n' + r + '\n' + f.length + '→' + t.length + '(origin output: ' + ot.length + ') (' + (100 * t.length / f.length).decp(2) + '%)\n\n[' + enc + '] ' + originScriptFileName + '\n→\n[' + flag.outEnc + '] ' + outScriptFileName);
+	} catch (e) {
+		if (6 == alert('reduceScript: Error occured!\nDo you want to write error message to target file?\n' + outScriptFileName, 0, 0, 3 + 32))
+			simpleWrite(outScriptFileName, popErr(e) + NewLine + NewLine + reduceCodeM.join(NewLine + sp), TristateTrue/*enc*/, 0, true);
+		if (flag.copyOnFailed) try { fso.CopyFile(originScriptFileName, outScriptFileName); } catch (e) { alert('Failed to copy file!'); return; }
+	}
 }
 
 
 
 
 /*	縮減 HTML 用 .js大小+自動判別	2008/7/31 17:40:40
-	!! arguments unfinished !!
+!! arguments unfinished !!
 
 usage: include code in front:
 //	[function.js]_iF,rJS
@@ -25229,22 +27215,22 @@ TODO:
 自動選擇 target 之模式（不一定是 .ori）
 */
 //rJS[generate_code.dLK]='reduceScript';
-function rJS(f){	//	flag
- if(typeof WScript=='object'){
-  var o=WScript,t,n;
-  if(typeof reduceScript!='function')
-   o.Echo('Please include function.js to generate code.');
-  else
-   f=f||{},n=o.ScriptFullName,t=n.replace(/\.ori/,''),
-   reduceScript(n,t,{
-	doReport:1,
-	outEnc:'UTF-8',
-	startFrom:f.cut||/^(.|\n)+code\s+start\r?\n/,
-	addBefore:f.add,
-	originFile:t.replace(f.ori||/(\.[^.]+)$/,'.ori$1')
-   });
-  o.Quit();
- }
+function rJS(f) {	//	flag
+	if (typeof WScript == 'object') {
+		var o = WScript, t, n;
+		if (typeof reduceScript != 'function')
+			o.Echo('Please include function.js to generate code.');
+		else
+			f = f || {}, n = o.ScriptFullName, t = n.replace(/\.ori/, ''),
+reduceScript(n, t, {
+doReport: 1,
+outEnc: 'UTF-8',
+startFrom: f.cut || /^(.|\n)+code\s+start\r?\n/,
+addBefore: f.add,
+originFile: t.replace(f.ori || /(\.[^.]+)$/, '.ori$1')
+});
+		o.Quit();
+	}
 }
 
 
@@ -25256,39 +27242,39 @@ try{var　o;try{o=new ActiveXObject('Microsoft.XMLHTTP')}catch(e){o=new XMLHttpR
 CeL.code.reorganize
 .
 /**
- * for 引用：　include library 自 registry 中的 path
- * @since	2009/11/25 22:59:02
- * @memberOf	CeL.code.reorganize
- */
-library_loader_by_registry = function() {
+* for 引用：　include library 自 registry 中的 path
+* @since	2009/11/25 22:59:02
+* @_memberOf	_module_
+*/
+library_loader_by_registry = function () {
 	//if (typeof WScript == "object")
+	try {
+		var o;
 		try {
-			var o;
-			try {
-				o = new ActiveXObject('Microsoft.XMLHTTP');
-			} catch (e) {
-				o = new XMLHttpRequest();
-			}
-			with (o)
-				open('GET', (new ActiveXObject("WScript.Shell")).RegRead(library_namespace.env.registry_key), false),
+			o = new ActiveXObject('Microsoft.XMLHTTP');
+		} catch (e) {
+			o = new XMLHttpRequest();
+		}
+		with (o)
+			open('GET', (new ActiveXObject("WScript.Shell")).RegRead(library_namespace.env.registry_key), false),
 				send(null),
 				eval(responseText);
-		} catch (e) {
-		}
+	} catch (e) {
+	}
 };
 
 
 CeL.code.reorganize
 .
 /**
- * get various from code
- * @param {String} code	程式碼
- * @param {Boolean} fill_code	(TODO) 不只是定義，在 .code 填入程式碼。
- * @return	{Object}	root namespace
- * @since	2009/12/5 15:04:42, 2009/12/20 14:33:30
- * @memberOf	CeL.code.reorganize
- */
-get_various_from_code = function(code, fill_code) {
+* get various from code
+* @param {String} code	程式碼
+* @param {Boolean} fill_code	(TODO) 不只是定義，在 .code 填入程式碼。
+* @return	{Object}	root namespace
+* @since	2009/12/5 15:04:42, 2009/12/20 14:33:30
+* @_memberOf	_module_
+*/
+get_various_from_code = function (code, fill_code) {
 	//library_namespace.log(''+code.slice(0, 100));
 
 	//	使用 .split(/\r?\n/) 應注意：這實際上等於 .split(/(\r?\n)+/) (??)
@@ -25297,12 +27283,14 @@ get_various_from_code = function(code, fill_code) {
 	var i, m, last_code = [],
 	/**
 	 * 現在所處之 line
+	 * 
 	 * @inner
 	 * @ignore
 	 */
 	line = '',
 	/**
 	 * code.length, 加快速度用
+	 * 
 	 * @constant
 	 * @inner
 	 * @ignore
@@ -25310,18 +27298,21 @@ get_various_from_code = function(code, fill_code) {
 	l = code.length,
 	/**
 	 * root namespace
+	 * 
 	 * @inner
 	 * @ignore
 	 */
-	ns={},
+	ns = {},
 	/**
 	 * 暫存 code(變數定義)
+	 * 
 	 * @inner
 	 * @ignore
 	 */
 	tmp_code,
 	/**
 	 * 名稱暫存變數
+	 * 
 	 * @inner
 	 * @ignore
 	 */
@@ -25329,6 +27320,7 @@ get_various_from_code = function(code, fill_code) {
 	/**
 	 * arguments 暫存變數<br/>
 	 * e.g., 變數 name
+	 * 
 	 * @inner
 	 * @ignore
 	 */
@@ -25336,73 +27328,197 @@ get_various_from_code = function(code, fill_code) {
 	/**
 	 * 本變數之 properties。<br/>
 	 * properties = { property: text contents of this property }
+	 * 
 	 * @inner
 	 * @ignore
 	 */
 	properties,
 	/**
 	 * 最後一次定義的變數名，用於之後若有變數需要繼承 namespace 時。
+	 * 
 	 * @inner
 	 * @ignore
 	 */
 	latest_name,
 	/**
+	 * 紀錄有意義的註解所在行號.
+	 * 預防需要把註解之前的也讀進來。有 bug!
+	 * 
+	 * @inner
+	 * @ignore
+	 */
+	origin_index,
+	new_line=library_namespace.env.new_line,
+	/**
+	 * 將 jsdoc properties 轉換成 vsdoc
+	 * 
+	 * @inner
+	 * @ignore
+	 * @see
+	 * http://weblogs.asp.net/bleroy/archive/2007/04/23/the-format-for-javascript-doc-comments.aspx
+	 */
+	jsdoc_to_vsdoc = function() {
+		var p = [ '' ], n, V, a, i, l, t_p = function(v) {	
+			//CeL.log(n + ':\n' + properties[n]);
+			v = typeof v === 'string' ? v
+					.replace(/^[\s\n]+|[\s\n]+$/g, '')
+					.replace(/\r?\n\s+|\s+\r?\n/g, new_line)
+					//.replace(/</g,'&lt;')
+					: '';
+			a = '';
+
+			switch (n) {
+
+			case 'description':
+			case 'summary':
+				if (!v || /^[\s\n]*$/.test(v))
+					return;
+				n = 'summary';
+				break;
+
+			case 'param':
+				if (a = v.match(/^({([a-zA-Z_\d.$\|\s]+)}\s*)?([a-zA-Z_\d$]+|\[([a-zA-Z_\d.$]+)\])\s*(.*?)$/))
+					v = a[5],
+					a = ' name="' + (a[4]||a[3]) + '" type="' + a[2].replace(/\s+/g, '') + '" optional="'+(!!a[4])+'"';
+				else
+					a = '';
+				break;
+
+			case 'type':
+				return;
+
+			case 'return':
+				n += 's';
+			case 'returns':
+				if (a = v.match(/^({([a-zA-Z_\d$.\|\s]+)})?(.*)$/)){
+					v = a[3].replace(/^[\s\n]+/g, '');
+					a = a[2].replace(/\s+/g, '') || properties.type;
+					a = a ? ' type="' + a + '"' : '';
+				}else
+					a = '';
+				break;
+
+			default:
+			}
+
+			if (v.indexOf(new_line) === -1 && a.indexOf(new_line) === -1)
+				p.push('<' + n + a + (v ? '>' + v + '</' + n + '>' : '/>'));
+			else{
+				p.push('<' + n + a + '>');
+				p = p.concat(v.split(new_line));
+				p.push('</' + n + '>');
+			}
+		};
+
+		for (n in properties)
+			if (library_namespace.is_Array(V = properties[n]))
+				for (i = 0, l = V.length; i < l; i++)
+					t_p(V[i]);
+			else
+				t_p(V);
+
+		return p.length>1 ? p.join(new_line + '	///	') + new_line
+						+ new_line : '';
+	},
+	/**
 	 * 從變數定義取得變數名。
-	 * @param	{String} _	變數定義
+	 * 
+	 * @param {String} _
+	 *            變數定義
 	 * @inner
 	 * @ignore
 	 */
 	set_name = function(_) {
-		name = (properties.name || (properties.memberOf ? (_.replace(
-				/[\s\n]+/g, '').indexOf(properties.memberOf + '.') === -1 ? properties.memberOf + '.'
-						: '')
-						+ _ /* .replace(/^(.+)\./,'') */
-						: properties.property ? latest_name ? latest_name + '.prototype.'
-								+ _.replace(/^(.+)\./, '') : '' : _)).replace(
-										/[\s\n]+/g, '');
+		name = properties.name;
+		if (!name) {
+			name = [];
+			var i = origin_index, l;
+			while (i > 0)
+				if (/[;{})]\s*$/.test(l = code[--i].replace(/\/\/.*$/, '')))
+					if ((name = name.join(' ')
+							// 除去註解後
+							.replace(/\/\*(.*?)\*\//g, ' '))
+							// 已無註解的話
+							.indexOf('*/') === -1){
+						_ = name.replace(/^\s*var(\s+|$)/, '') + _;
+						break;
+					} else
+						name = [ l, name ];
+				else if(l)
+					name.unshift(l);
+
+			//if(!i):	Error!
+			//if(_.match(/var/)) library_namespace.warn(name+'\n'+_);
+
+			name = properties.memberOf ?
+							(_.replace(/[\s\n]+/g, '').indexOf(properties.memberOf + '.') === -1 ?
+									properties.memberOf + '.' : '')
+							+ _ /* .replace(/^(.+)\./,'') */
+					: 'property' in properties ?
+							latest_name ? latest_name + '.prototype.' + _.replace(/^(.+)\./, '') : ''
+					: _;
+		}
+
+		// 除去 space
+		name = name.replace(/[\s\n]+/g, '');
 	};
 
 	for (i = 0; i < l; i++) {
-		line = code[i];
+		//	一行一行判斷
+		//	TODO: 提升效率
+		line = code[origin_index = i];
 
 		if (/^\s*\/\*\*/.test(line)) {
 			//	處理 '/**' 之註解（這些是有意義的）
 			properties = {};
 			//	都沒有 '@' 時，預設為 @description
-			properties[name = 'description'] = '';
+			name = 'description';
 			tmp_code = [];
+			various=[];
 			//library_namespace.log('' + line);
-			while (i < l && line.indexOf('*/') === -1) {
+			while (i < l) {
 				//library_namespace.log('' + line);
 				tmp_code.push(line);
-				if (m = line.match(/^\s+\*\s+@([_a-zA-Z\d\$.]+)\s+([^\s].+)$/))
-					properties[name = m[1]] = m[2];
-				else if (m = line.match(/^\s+\*\s+@([_a-zA-Z\d\$.]+)/))
-					properties[name = m[1]] = 1;
-				else if (m = line.match(/^\s+\*\s+([^\s].+)$/)) {
-					if (properties[name] === 1)
-						properties[name] = m[2];
+
+				//	判別
+				if (line.indexOf('*/') !== -1 || (m = line.match(/^\s+\*\s+@([_a-zA-Z\d\$.]+)(\s+([^\s].*)?\s*)?$/))) {
+					//	設定 name = various
+					various = various.join(new_line);
+					if (name in properties)
+						if (library_namespace.is_Array(properties[name]))
+							properties[name].push(various);
+						else
+							properties[name] = [ properties[name], various ];
 					else
-						properties[name] += (properties[name] ? '\n' : '') + m[2];
-				}
+						properties[name] = various;
+
+					if (line.indexOf('*/') !== -1)
+						break;
+
+					name = m[1], various = [ m[3] ];
+
+				} else
+					various.push((m = line.match(/^\s+\*\s+([^\s].+)$/)) ? m[1] : line.replace(/^(.*)\/\*\*/, ''));
+
 				line = code[++i];
 			}
 
 			//library_namespace.log('[' + i + ']' + '\n' + tmp_code.join('\n') + '\n' + line);
 			if (m = line.match(/(.*?\*\/)/)) {
-				tmp_code.push(m[1]);
+				//tmp_code.push(m[1]);
 				line = line.replace(/(.*?)\*\//, '');
 
 				//	初始化函式名
 				name = '';
 
 				/*
-				 * 註解處理完了，接下來是變數。先把整個定義區放到 line。
-				 * 這邊處理三種定義法:
-				 * function name() {};
-				 * var name = function(){};
-				 * var name = 123;
-				 */
+				* 註解處理完了，接下來是變數。先把整個定義區放到 line。
+				* 這邊處理幾種定義法:
+				* function name() {};
+				* var name = function(){};
+				* var name = new Function();
+				* var name = 123;
+				*/
 				while (!/^\s*function\s$/.test(line) && !/[=;,]/.test(line))
 					line += ' ' + code[++i];
 
@@ -25413,7 +27529,8 @@ get_various_from_code = function(code, fill_code) {
 					while (i < l && various.indexOf(')') === -1)
 						various += code[++i];
 					m = various.match(/^[^)]*/);
-					tmp_code.push(name + '=function(' + m[0] + '){};');
+					tmp_code.push(name + '=function(' + m[0] + '){'
+									+ jsdoc_to_vsdoc() + '};');
 
 				} else if (m = line
 						.match(/^\s*(var\s+)?([_a-zA-Z\d\$.]+)\s*=\s*(.+)/)) {
@@ -25424,13 +27541,21 @@ get_various_from_code = function(code, fill_code) {
 						while (i < l && various.indexOf(')') === -1)
 							various += code[++i];
 						m = various.match(/^[^)]+\)/);
-						tmp_code.push(name + '=' + m[0] + '{};');
+						tmp_code.push(name + '=' + m[0] + '{' + jsdoc_to_vsdoc() + '};');
+
+					} else if (/^\s*new\s+Function\s*\(/.test(various)) {
+						// var name = new Function();
+						if (m = various.match(/^\s*new\s+Function\s*\(.+\)\s*;?\s*$/)) {
+							//	TODO
+							tmp_code.push(name + '=new Function("");');
+						} else
+							tmp_code.push(name + '=new Function();');
 
 					} else {
 						// var name = 123;
 						if (!properties.type)
 							if (/^['"]/.test(various)) {
-								properties.type = 'string';
+								properties.type = 'String';
 							} else if (!isNaN(various)) {
 								properties.type = 'number';
 							} else if (/^(true|false)([\s;,]|$)/.test(various)) {
@@ -25448,113 +27573,132 @@ get_various_from_code = function(code, fill_code) {
 						//if (name === 'module_name');
 
 						switch ((properties.type || '').toLowerCase()) {
-						case 'string':
-							m = various.replace(/\s*[,;]*\s*$/, '');
-							//library_namespace.log('['+m+']');
-							if (/^'[^\\']*'$/.test(m)
+							case 'string':
+								m = various.replace(/\s*[,;]*\s*$/, '');
+								//library_namespace.log('['+m+']');
+								if (/^'[^\\']*'$/.test(m)
 									|| /^"[^\\"]*"$/.test(m)) {
-								various = '=' + m + ';';
-							} else {
-								various = '="";	//	' + various;
-							}
-							break;
-						case 'bool':
-						case 'boolean':
-							if (m = various.toLowerCase().match(
+									various = '=' + m + ';';
+								} else {
+									various = '="";	//	' + various;
+								}
+								properties.type='String';
+								break;
+
+							case 'bool':
+							case 'boolean':
+								if (m = various.toLowerCase().match(
 									/^(true|false)([\s,;]|$)/i)) {
-								various = '=' + m[1] + ';';
-							} else {
-								various = '=true;	//	' + various;
-							}
-							break;
-						case 'number':
-						case 'int':
-						case 'integer':
-							if (!isNaN(various)) {
-								various = '=' + various + ';';
-							} else {
-								various = '=0;	//	' + various;
-							}
-							break;
-						case 'array':
-							various = '=' + '[];';
-							break;
-						case 'object':
-							if (various.charAt(0) === '{') {
-								while (i < l){
-									if (various.lastIndexOf('}') !== -1) {
-										m = various.slice(1, various.lastIndexOf('}'));
-										if (m.lastIndexOf('/*') === -1
+									various = '=' + m[1] + ';';
+								} else {
+									various = '=true;	//	' + various;
+								}
+								properties.type='Boolean';
+								break;
+
+							case 'number':
+								properties.type='Number';
+							case 'int':
+							case 'integer':
+								if (!isNaN(various)) {
+									various = '=' + various + ';';
+								} else {
+									various = '=0;	//	' + various;
+								}
+								break;
+
+							case 'array':
+								various = '=' + '[];';
+								properties.type='Array';
+								break;
+
+							case 'object':
+								if (various.charAt(0) === '{') {
+									while (i < l) {
+										if (various.lastIndexOf('}') !== -1) {
+											m = various.slice(1, various.lastIndexOf('}'));
+											if (m.lastIndexOf('/*') === -1
 												|| m.lastIndexOf('/*') < m
 														.lastIndexOf('*/'))
-											break;
+												break;
+										}
+										various += '\n' + code[++i];
 									}
-									various += '\n' + code[++i];
-								}
-								m = various.replace(/\s*\/\/[^\n]*/g, '').replace(
+									m = various.replace(/\s*\/\/[^\n]*/g, '').replace(
 										/\/\*((.|\n)*?)\*\//g, '').replace(/}(.*)$/,
 										'}');
-								if (0 && m.length > 3)
-									library_namespace.log(name + '\n' + m
+									if (0 && m.length > 3)
+										library_namespace.log(name + '\n' + m
 									// + '\n'+v
 									);
-								if (/^{([\s\n]*(('[^']*'|"[^"]*"|[_a-zA-Z\d\$.]+))[\s\n]*:('[^']*'|"[^"]*"|[\s\n\d+\-*\/()\^]+|true|false|null)+|,)*}/
+									if (/^{([\s\n]*(('[^']*'|"[^"]*"|[_a-zA-Z\d\$.]+))[\s\n]*:('[^']*'|"[^"]*"|[\s\n\d+\-*\/()\^]+|true|false|null)+|,)*}/
 										.test(m))
-									various = '=' + various.replace(/}(.*)$/, '}') + ';';
-								else
+										various = '=' + various.replace(/}(.*)$/, '}') + ';';
+									else
+										various = '=' + '{};';
+								} else
 									various = '=' + '{};';
-							} else
-								various = '=' + '{};';
-							break;
-						case 'regexp':
-							if (/^\/.+\/$/.test(various))
-								various = '=' + various + ';';
-							else {
-								various = '=' + '/^regexp$/;	//	' + various;
-							}
-							break;
-						default:
-							if (/^[_a-zA-Z\d\$.]/.test(various)) {
-								// reference
-								various = ';//' + (properties.type ? '[' + properties.type + ']' : '')
+								properties.type='Object';
+								break;
+
+							case 'regexp':
+								if (/^\/.+\/$/.test(various))
+									various = '=' + various + ';';
+								else {
+									various = '=' + '/^regexp$/;	//	' + various;
+								}
+								properties.type='RegExp';
+								break;
+
+							default:
+								if (/^[_a-zA-Z\d\$.]/.test(various)) {
+									// reference
+									various = ';//' + (properties.type ? '[' + properties.type + ']' : '')
 										+ various;
-							} else {
-								// unknown code
-								various = ';	//	'
+								} else {
+									// unknown code
+									various = ';	//	'
 										+ (properties.type ? '[' + properties.type + ']' : '')
 										+ various;
-							}
+								}
 						}
-						tmp_code.push(name + various);
+
+						tmp_code.push((/^=/.test(various) ? '' : '//') + name + various);
 					}
 				}
 
-				if (name && !properties.ignore && !properties.inner && !properties.private){
-					if (!properties.property)
+				if (name && !('ignore' in properties) && !('inner' in properties) && !('private' in properties)) {
+					if (!('property' in properties))
 						//	定義最後一次變數名
 						latest_name = name;
 
-					name = name.split('.');
+					name = name.split(library_namespace.env.module_name_separator);
+
+					//	對可能的錯誤發出警告
+					if (name[0] !== library_namespace.Class)
+						library_namespace.warn(i + ': line [' + name.join(library_namespace.env.module_name_separator) + '] NOT initial as '+library_namespace.Class+'\n'
+								+ code.slice(i - 6, i + 6).join('\n'));
+
 					//	將變數定義設置到 ns
 					var np = ns, nl = name.length - 1, n;
-					for (m = 0; m < nl; m++){
+					for (m = 0; m < nl; m++) {
 						n = name[m];
 						if (!(n in np))
 							// 初始設定 namespace
 							np[n] = {
-										'this' : ''
-									};
-						else if (typeof np[n] !== 'object')
+								'this': ''
+							};
+						else if (!library_namespace.is_Object(np[n]))
 							np[n] = {
-										'this' : np[n]
-									};
+								'this': np[n]
+							};
 						np = np[n];
 					}
 
 					n = name[nl];
-					//if (n in np) library_namespace.log('get_various_from_code: get duplicate various: [' + name.join('.') + ']');
+					//if (n in np) library_namespace.log('get_various_from_code: get duplicate various: [' + name.join(library_namespace.env.module_name_separator) + ']');
 
-					np[n] = tmp_code.join(library_namespace.env.new_line);
+					np[n] = tmp_code.join(new_line);
 				}
 			}
 		}
@@ -25567,16 +27711,16 @@ get_various_from_code = function(code, fill_code) {
 CeL.code.reorganize
 .
 /**
- * 把 get_various_from_code 生成的 namespace 轉成 code
- * @param	{Object} ns	root namespace
- * @param	{String} [prefix]	(TODO) prefix of root namespace
- * @param	{Array}	[code_array]	inner use, please don't specify this value.
- * @return	{String}	code
- * @since	2009/12/20 14:51:52
- * @memberOf	CeL.code.reorganize
- */
-get_code_from_generated_various = function(ns, prefix, code_array) {
-	var _s = arguments.callee, i, return_text = 0;
+* 把 get_various_from_code 生成的 namespace 轉成 code
+* @param	{Object} ns	root namespace
+* @param	{String} [prefix]	(TODO) prefix of root namespace
+* @param	{Array}	[code_array]	inner use, please don't specify this value.
+* @return	{String}	code
+* @since	2009/12/20 14:51:52
+* @_memberOf	_module_
+*/
+get_code_from_generated_various = function (ns, prefix, code_array) {
+	var _s = _.get_code_from_generated_various, i, return_text = 0;
 
 	if (!code_array)
 		code_array = [], return_text = 1;
@@ -25605,13 +27749,13 @@ get_code_from_generated_various = function(ns, prefix, code_array) {
 
 	return return_text ? code_array
 					.join(library_namespace.env.new_line)
-					//.replace(/[\r\n]+/g,library_namespace.env.new_line)
+	//.replace(/[\r\n]+/g,library_namespace.env.new_line)
 					: code_array;
 };
 
 
 
-return (
+	return (
 	CeL.code.reorganize
 );
 };
