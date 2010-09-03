@@ -197,6 +197,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.code.compatibility.html">CeL.code.compatibility</a></li>
 	
+	<li><a href="../symbols/CeL.code.debug.html">CeL.code.debug</a></li>
+	
 	<li><a href="../symbols/CeL.code.log.html">CeL.code.log</a></li>
 	
 	<li><a href="../symbols/CeL.code.reorganize.html">CeL.code.reorganize</a></li>
@@ -207,21 +209,27 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.data.XML.html">CeL.data.XML</a></li>
 	
-	<li><a href="../symbols/CeL.debug.html">CeL.debug</a></li>
-	
 	<li><a href="../symbols/CeL.IO.file.html">CeL.IO.file</a></li>
 	
 	<li><a href="../symbols/CeL.IO.Windows.file.html">CeL.IO.Windows.file</a></li>
 	
+	<li><a href="../symbols/CeL.locale.html">CeL.locale</a></li>
+	
 	<li><a href="../symbols/CeL.math.html">CeL.math</a></li>
 	
 	<li><a href="../symbols/CeL.math.Hamming.html">CeL.math.Hamming</a></li>
+	
+	<li><a href="../symbols/CeL.math.polynomial.html">CeL.math.polynomial</a></li>
 	
 	<li><a href="../symbols/CeL.math.quotient.html">CeL.math.quotient</a></li>
 	
 	<li><a href="../symbols/CeL.misc.check.html">CeL.misc.check</a></li>
 	
 	<li><a href="../symbols/CeL.native.html">CeL.native</a></li>
+	
+	<li><a href="../symbols/CeL.net.html">CeL.net</a></li>
+	
+	<li><a href="../symbols/CeL.net.Ajax.html">CeL.net.Ajax</a></li>
 	
 	<li><a href="../symbols/CeL.net.form.address.html">CeL.net.form.address</a></li>
 	
@@ -231,13 +239,21 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.net.form.select_input.html">CeL.net.form.select_input</a></li>
 	
+	<li><a href="../symbols/CeL.net.HTA.html">CeL.net.HTA</a></li>
+	
 	<li><a href="../symbols/CeL.net.map.html">CeL.net.map</a></li>
 	
 	<li><a href="../symbols/CeL.net.SVG.html">CeL.net.SVG</a></li>
 	
 	<li><a href="../symbols/CeL.net.web.html">CeL.net.web</a></li>
 	
-	<li><a href="../symbols/CeL.html#.OS.Windows">CeL.OS.Windows</a></li>
+	<li><a href="../symbols/CeL.OS.Windows.html">CeL.OS.Windows</a></li>
+	
+	<li><a href="../symbols/CeL.OS.Windows.job.html">CeL.OS.Windows.job</a></li>
+	
+	<li><a href="../symbols/CeL.OS.Windows.registry.html">CeL.OS.Windows.registry</a></li>
+	
+	<li><a href="../symbols/CeL.OS.WMI.html">CeL.OS.WMI</a></li>
 	
 	<li><a href="../symbols/env.html">env</a></li>
 	
@@ -309,6 +325,24 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">CeL.native.<b><a href="../symbols/CeL.native.html#.checkSQLInput">checkSQLInput</a></b>(string)
+								</div>
+								<div class="description">check input string send to SQL server</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.native.<b><a href="../symbols/CeL.native.html#.checkSQLInput_noSpace">checkSQLInput_noSpace</a></b>(string)
+								</div>
+								<div class="description">check input string send to SQL server 並去掉前後 space</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">CeL.native.<b><a href="../symbols/CeL.native.html#.format_date">format_date</a></b>(date_value, mode, zero_fill, date_separator, time_separator)
 								</div>
 								<div class="description">顯示格式化日期 string</div>
@@ -327,9 +361,36 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">CeL.native.<b><a href="../symbols/CeL.native.html#.parse_number">parse_number</a></b>(number)
+								</div>
+								<div class="description">轉換字串成數值，包括分數等。分數亦將轉為分數。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">CeL.native.<b><a href="../symbols/CeL.native.html#.renew_RegExp_flag">renew_RegExp_flag</a></b>(regexp, flag)
 								</div>
 								<div class="description">重新設定 RegExp object 之 flag</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.native.<b><a href="../symbols/CeL.native.html#.to_fixed">to_fixed</a></b>(digits, max)
+								</div>
+								<div class="description">取至小數 d 位，肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1。c.f.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.native.<b><a href="../symbols/CeL.native.html#.toASCIIcode">toASCIIcode</a></b>(text, position)
+								</div>
+								<div class="description">對付有時 charCodeAt 會傳回 >256 的數值。若確定編碼是 ASCII (char code 是 0~255) 即可使用此函數替代 charCodeAt。</div>
 							</td>
 						</tr>
 					
@@ -380,6 +441,118 @@ ul.inheritsList
 				<div class="sectionTitle">
 					Method Detail
 				</div>
+				
+					<a name=".checkSQLInput"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{String}</span>
+					<span class="light">CeL.native.</span><b>checkSQLInput</b>(string)
+					
+					</div>
+					<div class="description">
+						check input string send to SQL server
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>string</b>
+									
+								</dt>
+								<dd>input string</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2006/10/27 16:36</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> 轉換過的 string</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>from lib/perl/BaseF.pm (or program/database/BaseF.pm)</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".checkSQLInput_noSpace"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{String}</span>
+					<span class="light">CeL.native.</span><b>checkSQLInput_noSpace</b>(string)
+					
+					</div>
+					<div class="description">
+						check input string send to SQL server 並去掉前後 space
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>string</b>
+									
+								</dt>
+								<dd>input string</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2006/10/27 16:36</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> 轉換過的 string</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>from lib/perl/BaseF.pm (or program/database/BaseF.pm)function strip() @ Prototype JavaScript framework</dd>
+							
+							</dl>
+						
+
+					<hr />
 				
 					<a name=".format_date"> </a>
 					<div class="fixedFont">&lt;static&gt; 
@@ -538,6 +711,49 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name=".parse_number"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.native.</span><b>parse_number</b>(number)
+					
+					</div>
+					<div class="description">
+						轉換字串成數值，包括分數等。分數亦將轉為分數。
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>number</b>
+									
+								</dt>
+								<dd>欲轉換之值</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name=".renew_RegExp_flag"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
@@ -596,6 +812,128 @@ ul.inheritsList
 							</dl>
 						
 
+					<hr />
+				
+					<a name=".to_fixed"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.native.</span><b>to_fixed</b>(digits, max)
+					
+					</div>
+					<div class="description">
+						取至小數 d 位，肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1。c.f., round()
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code"></pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>digits</b>
+									
+								</dt>
+								<dd>1,2,..: number of decimal places shown</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>max</b>
+									<i>Optional</i>
+								</dt>
+								<dd>max digits	max===0:round() else floor()</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>https://bugzilla.mozilla.org/show_bug.cgi?id=5856IEEE754の丸め演算は最も報告されるES3「バグ」である。http://www.jibbering.com/faq/#FAQ4_6http://en.wikipedia.org/wiki/Rounding</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".toASCIIcode"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.native.</span><b>toASCIIcode</b>(text, position)
+					
+					</div>
+					<div class="description">
+						對付有時 charCodeAt 會傳回 >256 的數值。若確定編碼是 ASCII (char code 是 0~255) 即可使用此函數替代 charCodeAt。
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>text</b>
+									
+								</dt>
+								<dd>string</dd>
+							
+								<dt>
+									<b>position</b>
+									
+								</dt>
+								<dd>at what position</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2008/8/2 10:10:49</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://www.alanwood.net/demos/charsetdiffs.html</dd>
+							
+							</dl>
+						
+
 					
 				
 			
@@ -610,7 +948,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Tue Jul 06 2010 18:24:07 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Wed Jul 07 2010 07:38:46 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

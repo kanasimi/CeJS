@@ -1,41 +1,8 @@
-/**
- * 本 JavaScript framework 的框架基本宣告<br/>
- * base name-space declaration of JavaScript library framework
- * @example
- * //	load library
- * <script type="text/javascript" src="../ce.js"></script>
- * //	預防 initialization 到一半彈出警告視窗，所以設大一點。
- * CeL.log.max_length = 20;
- * //	set debug
- * CeL.set_debug();
- *
- * //	判別是否已經 load 過
- * if(typeof CeL !== 'function' || CeL.Class !== 'CeL')
- * 	;	//	CeL has not been loaded
- * @name	CeL
- * @class	Colorless echo JavaScript kit/library: base name-space declaration
- */
-CeL=function(){
-	///	<summary>
-	///	本 JavaScript framework 的框架基本宣告<br/>
-	///	base name-space declaration of JavaScript library framework
-	///	</summary>
-	///	<example>
-	///	//	load library
-	///	<script type="text/javascript" src="../ce.js"></script>
-	///	//	預防 initialization 到一半彈出警告視窗，所以設大一點。
-	///	CeL.log.max_length = 20;
-	///	//	set debug
-	///	CeL.set_debug();
-	///	*
-	///	//	判別是否已經 load 過
-	///	if(typeof CeL !== 'function' || CeL.Class !== 'CeL')
-	///	;	//	CeL has not been loaded
-	///	</example>
-	///	<name>CeL</name>
-	///	<class>Colorless echo JavaScript kit/library: base name-space declaration</class>
 
-};
+//	null constructor for [CeL]
+CeL=function(){};
+CeL.prototype={};
+
 /**
  * JavaScript library framework main class name.
  * @see	<a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMA-262</a>: Object.Class: A string value indicating the kind of this object.
@@ -156,13 +123,13 @@ CeL.env=function env(name, value){
 	 * <a href="http://soswitcher.blogspot.com/2009/05/blogger-host-javascript-file-for-free.html" accessdate="2010/3/11 23:30">Blogger - Host Javascript File for Free - Blogger,Javascript - Blogger Blog by Switcher</a>
 	 * @name	CeL.env.script_extension
 	 */
-CeL.env.script_extension="";	//	typeof WScript === 'undefined' ? '.' : '.js';//'.txt'
+CeL.script_extension=CeL.env.script_extension="";	//	typeof WScript === 'undefined' ? '.' : '.js';
 	/**
 	 * library main file base name
 	 * @name	CeL.env.main_script_name
 	 * @type	String
 	 */
-CeL.env.main_script_name='ce';
+CeL.main_script_name=CeL.env.main_script_name='ce';
 	/**
 	 * library main file name<br/>
 	 * full path: {@link CeL.env.registry_path} + {@link CeL.env.main_script}
@@ -171,68 +138,68 @@ CeL.env.main_script_name='ce';
 	 * @name	CeL.env.main_script
 	 * @type	String
 	 */
-CeL.env.main_script="";	//	env.main_script_name + env.script_extension;
+CeL.main_script=CeL.env.main_script="";	//	env.main_script_name + env.script_extension;
 	/**
 	 * module 中的這 member 定義了哪些 member 不被 extend
 	 * @name	CeL.env.not_to_extend_keyword
 	 * @type	String
 	 */
-CeL.env.not_to_extend_keyword='no_extend';
+CeL.not_to_extend_keyword=CeL.env.not_to_extend_keyword='no_extend';
 	/**
 	 * 本 library source 檔案使用之 encoding<br/>
 	 * 不使用會產生語法錯誤
 	 * @name	CeL.env.source_encoding
 	 * @type	String
 	 */
-CeL.env.source_encoding='UTF-16';
+CeL.source_encoding=CeL.env.source_encoding='UTF-16';
 	/**
 	 * default global object
 	 * @name	CeL.env.global
 	 * @type	Object
 	 */
-CeL.env.global={};
+CeL.global=CeL.env.global={};
 	/**
 	 * creator group
 	 * @name	CeL.env.company
 	 * @type	String
 	 */
-CeL.env.company='Colorless echo';
+CeL.company=CeL.env.company='Colorless echo';
 		/**
 		 * 存放在 registry 中的 path
 		 * @name	CeL.env.registry_path
 		 */
-//CeL.env.registry_path;	//	(WScript.CreateObject("WScript.Shell"))
+//CeL.registry_path=CeL.env.registry_path;	//	(WScript.CreateObject("WScript.Shell"))
 	/**
 	 * 本次執行所在 OS 平台
 	 * @name	CeL.env.OS
 	 * @type	String
 	 */
-CeL.env.OS="";	//	OS = typeof OS_type === 'string' ? OS_type
+CeL.OS=CeL.env.OS="";	//	OS = typeof OS_type === 'string' ? OS_type
 	/**
 	 * 文件預設 new line
 	 * @name	CeL.env.new_line
 	 * @type	String
 	 */
-CeL.env.new_line="";	//	OS == 'unix' ? '\n' : OS == 'Mac' ? '\r' : '\r\n';	//	in VB: vbCrLf
+CeL.new_line=CeL.env.new_line="";	//	OS == 'unix' ? '\n' : OS == 'Mac' ? '\r' : '\r\n';
 	/**
 	 * file system 預設 path separator<br/>
 	 * platform-dependent path separator character, 決定目錄(directory)分隔
 	 * @name	CeL.env.path_separator
 	 * @type	String
 	 */
-CeL.env.path_separator="";	//	OS == 'unix' ? '/' : '\\';
+CeL.path_separator=CeL.env.path_separator="";	//	OS == 'unix' ? '/' : '\\';
 	/**
 	 * 預設 module name separator
 	 * @name	CeL.env.module_name_separator
 	 * @type	String
 	 */
-CeL.env.module_name_separator='.';
+CeL.module_name_separator=CeL.env.module_name_separator='.';
 	/**
 	 * path_separator in 通用(regular)運算式
 	 * @name	CeL.env.path_separator_RegExp
 	 * @type	RegExp
 	 */
-CeL.env.path_separator_RegExp=/^regexp$/;	//	this.to_RegExp_pattern ? this
+CeL.path_separator_RegExp=CeL.env.path_separator_RegExp=/^regexp$/;	//	this.to_RegExp_pattern ? this
 	/**
 	 * 預設語系
 	 * 0x404:中文-台灣,0x0411:日文-日本
@@ -240,19 +207,19 @@ CeL.env.path_separator_RegExp=/^regexp$/;	//	this.to_RegExp_pattern ? this
 	 * @see	<a href="http://msdn.microsoft.com/zh-tw/library/system.globalization.cultureinfo(VS.80).aspx">CultureInfo 類別</a>
 	 * @type	Number
 	 */
-CeL.env.locale=0;	//	0x404;
+CeL.locale=CeL.env.locale=0;	//	0x404;
 	/**
 	 * script name
 	 * @name	CeL.env.script_name
 	 * @type	String
 	 */
-CeL.env.script_name="";	//	this.get_script_name();
+CeL.script_name=CeL.env.script_name="";	//	this.get_script_name();
 	/**
 	 * base path of library
 	 * @name	CeL.env.library_base_path
 	 * @type	String
 	 */
-CeL.env.library_base_path="";	//	this.get_script_full_name(); // 以 reg 代替
+CeL.library_base_path=CeL.env.library_base_path="";	//	this.get_script_full_name();
 	/**
 	 * Legal identifier name in RegExp.
 	 * 這 pattern 會佔去兩個筆紀錄: first letter, and least.
@@ -263,12 +230,12 @@ CeL.env.library_base_path="";	//	this.get_script_full_name(); // 以 reg 代替
 	 * @see
 	 * ECMA-262	7.6 Identifier Names and Identifiers
 	 */
-CeL.env.identifier_RegExp=/^regexp$/;	//	/([a-zA-Z$_]|\\u[\da-fA-F]{4})([a-zA-Z$_\d]+|\\u[\da-fA-F]{4}){0,63}/;
+CeL.identifier_RegExp=CeL.env.identifier_RegExp=/^regexp$/;	//	/([a-zA-Z$_]|\\u[\da-fA-F]{4})([a-zA-Z$_\d]+|\\u[\da-fA-F]{4}){0,63}/;
 	/**
 	 * Legal identifier name in String from env.identifier_RegExp.
 	 * @name	CeL.env.identifier_String
 	 */
-//CeL.env.identifier_String;//env.identifier_RegExp.source;
+//CeL.identifier_String=CeL.env.identifier_String;//env.identifier_RegExp.source;
 /**
  * 判斷為何種 type。主要用在 Error, DOMException 等 native object 之判別。
  * @param	value	various or class instance to test
@@ -333,13 +300,54 @@ CeL.object_tester=function(want_type, toString_reference){
 
 };
 /**
+ * Test if the value is a native Array.
+ * @param	v	value to test
+ * @return	{Boolean}	the value is a native Array.
+ * @since	2009/12/20 08:38:26
+ */
+CeL.is_Array=function(v){
+	///	<summary>Test if the value is a native Array.</summary>
+	///	<param name="v" type="" optional="false">value to test</param>
+	///	<returns type="Boolean">the value is a native Array.</returns>
+	///	<since>2009/12/20 08:38:26</since>
+
+};
+/**
+ * Test if the value is a native Object.
+ * @param	v	value to test
+ * @return	{Boolean}	the value is a native Object.
+ * @since	2009/12/20 08:38:26
+ */
+CeL.is_Object=function(v){
+	///	<summary>Test if the value is a native Object.</summary>
+	///	<param name="v" type="" optional="false">value to test</param>
+	///	<returns type="Boolean">the value is a native Object.</returns>
+	///	<since>2009/12/20 08:38:26</since>
+
+};
+/**
+ * Test if the value is a native Function.
+ * @param	v	value to test
+ * @return	{Boolean}	the value is a native Function.
+ * @since	2009/12/20 08:38:26
+ */
+CeL.is_Function=function(v){
+	///	<summary>Test if the value is a native Function.</summary>
+	///	<param name="v" type="" optional="false">value to test</param>
+	///	<returns type="Boolean">the value is a native Function.</returns>
+	///	<since>2009/12/20 08:38:26</since>
+
+};
+/**
  * Setup environment variables
  * @param	{String} [OS_type]	type of OS
+ * @param	{Boolean} [reset]	reset the environment variables 
  * @return	{Object}	environment variables set
  */
-CeL.initial_env=function(OS_type){
+CeL.initial_env=function(OS_type, reset){
 	///	<summary>Setup environment variables</summary>
 	///	<param name="OS_type" type="String" optional="true">type of OS</param>
+	///	<param name="reset" type="Boolean" optional="true">reset the environment variables</param>
 	///	<returns type="Object">environment variables set</returns>
 
 };
@@ -358,13 +366,13 @@ CeL.is_debug=function(debug_level){
 };
 /**
  * Set debugging level
- * @param {Integral} [debug_level]	The debugging level to set.
- * @type	Integral
+ * @param {Integer} [debug_level]	The debugging level to set.
+ * @type	Integer
  * @return	{Number} debugging level now
  */
 CeL.set_debug=function(debug_level){
 	///	<summary>Set debugging level</summary>
-	///	<param name="debug_level" type="Integral" optional="true">The debugging level to set.</param>
+	///	<param name="debug_level" type="Integer" optional="true" integer="true">The debugging level to set.</param>
 	///	<returns type="Number">debugging level now</returns>
 
 };
@@ -400,22 +408,26 @@ CeL.get_function_name=function get_function_name(fr, ns, force_load){
 
 };
 /**
- * 延展物件 (learned from jQuery)
+ * 延展物件 (learned from jQuery):
+ * 將 from_name_space 下的 variable_set 延展/覆蓋到 name_space。
  * @since	2009/11/25 21:17:44
  * @param	variable_set	variable set
  * @param	{Object|Function} name_space	extend to what name-space
- * @param	from_name_space	When inputing function names, we need a base name-space to search these functions.
+ * @param	{Object|Function} from_name_space	When inputing function names, we need a base name-space to search these functions.
  * @return	library names-pace
  * @see
  * <a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/03/01/jquery-extend.aspx" accessdate="2009/11/17 1:24" title="jQuery.extend的用法 - 黑暗執行緒">jQuery.extend的用法</a>,
  * <a href="http://www.cnblogs.com/rubylouvre/archive/2009/11/21/1607072.html" accessdate="2010/1/1 1:40">jQuery源\u30721\u23398\u20064\u31508\u35760三 - Ruby's Louvre - 博客\u22253</a>
  */
-CeL.extend=function extend(variable_set, name_space, from_name_space){
-	///	<summary>延展物件 (learned from jQuery)</summary>
+CeL.extend=function(variable_set, name_space, from_name_space){
+	///	<summary>
+	///	延展物件 (learned from jQuery):
+	///	將 from_name_space 下的 variable_set 延展/覆蓋到 name_space。
+	///	</summary>
 	///	<since>2009/11/25 21:17:44</since>
 	///	<param name="variable_set" type="" optional="false">variable set</param>
 	///	<param name="name_space" type="Object|Function" optional="false">extend to what name-space</param>
-	///	<param name="from_name_space" type="" optional="false">When inputing function names, we need a base name-space to search these functions.</param>
+	///	<param name="from_name_space" type="Object|Function" optional="false">When inputing function names, we need a base name-space to search these functions.</param>
 	///	<returns>library names-pace</returns>
 	///	<see>
 	///	<a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/03/01/jquery-extend.aspx" accessdate="2009/11/17 1:24" title="jQuery.extend的用法 - 黑暗執行緒">jQuery.extend的用法</a>,
@@ -426,23 +438,32 @@ CeL.extend=function extend(variable_set, name_space, from_name_space){
 /**
  * workaround.
  * 把 name_space 下的 function_name (name_space[function_name]) 換成 new_function。
+ * for Lazy Function Definition Pattern.
  * @example
  * library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix);
  * @param name_space	which name-space
  * @param {String} function_name	name_space.function_name
  * @param {Function} new_function	replace to what function
  * @return	new_function
+ * @see
+ * http://realazy.org/blog/2007/08/16/lazy-function-definition-pattern/,
+ * http://peter.michaux.ca/article/3556
  */
 CeL.replace_function=function(name_space, function_name, new_function){
 	///	<summary>
 	///	workaround.
 	///	把 name_space 下的 function_name (name_space[function_name]) 換成 new_function。
+	///	for Lazy Function Definition Pattern.
 	///	</summary>
 	///	<example>library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix);</example>
 	///	<param name="name_space" type="" optional="false">which name-space</param>
 	///	<param name="function_name" type="String" optional="false">name_space.function_name</param>
 	///	<param name="new_function" type="Function" optional="false">replace to what function</param>
 	///	<returns>new_function</returns>
+	///	<see>
+	///	http://realazy.org/blog/2007/08/16/lazy-function-definition-pattern/,
+	///	http://peter.michaux.ca/article/3556
+	///	</see>
 
 };
 /**
@@ -517,7 +538,7 @@ CeL.require_netscape_privilege=function require_netscape_privilege(privilege, ca
  * 當需要要求權限時，是否執行。（這樣可能彈出對話框）
  * @type	Boolean
  */
-CeL.require_netscape_privilege.enabled=true;
+CeL.enabled=CeL.require_netscape_privilege.enabled=true;
 /**
  * 得知 script file 之相對 base path
  * @param	{String} JSFN	script file name
@@ -578,7 +599,7 @@ CeL.simplify_path=function(path){
  * **	在指定 callback 時 name_space 無效！
  * **	預設會 extend 到 library 本身下！
  * @param	{String} module	module name
- * @param	{Function} [callback]	callback function
+ * @param	{Function} [callback]	callback function | [callback, 進度改變時之 function (TODO)]
  * @param	{Object|Boolean} [extend_to]	extend to which name-space<br/>
  * false:	just load, don't extend to library name-space<br/>
  * this:	extend to global<br/>
@@ -607,7 +628,7 @@ CeL.use=function requires(module, callback, extend_to){
 	///	**	預設會 extend 到 library 本身下！
 	///	</summary>
 	///	<param name="module" type="String" optional="false">module name</param>
-	///	<param name="callback" type="Function" optional="true">callback function</param>
+	///	<param name="callback" type="Function" optional="true">callback function | [callback, 進度改變時之 function (TODO)]</param>
 	///	<param>
 	///	{Object|Boolean} [extend_to]	extend to which name-space<br/>
 	///	false:	just load, don't extend to library name-space<br/>
@@ -652,13 +673,13 @@ CeL.include_resource=function include_resource(path, callback, use_write, type){
  * 本定義可省略(only for documentation)
  * @type	{Object}
  */
-//CeL.include_resource.loaded;//[{Object}]null;
+//CeL.loaded=CeL.include_resource.loaded;//[{Object}]null;
 /**
  * 已經 include_resource 了多少個 JavaScript 檔.
  * 本定義可省略(only for documentation)
  * @type Number
  */
-CeL.include_resource.count=0;	//	0;
+CeL.count=CeL.include_resource.count=0;	//	0;
 /**
  * include resource of module.
  * @example
@@ -801,6 +822,10 @@ CeL.data=function(){
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.data.prototype={};
+/**
  * clone native Object
  * @param {Object} object
  * @param {Boolean} not_trivial
@@ -823,7 +848,7 @@ CeL.data.clone_object=clone_object=function(object, not_trivial){
  * @return
  * @memberOf CeL.data
  */
-CeL.data.char_frequency=function (text){
+CeL.char_frequency=CeL.data.char_frequency=function (text){
 	///	<summary>
 	///	測出各字元的出現率。 普通使用字元@0-127：9-10,13,32-126，reduce後常用：9,32-95,97-125
 	///	*
@@ -842,7 +867,7 @@ CeL.data.char_frequency=function (text){
  * @return
  * @memberOf CeL.data
  */
-CeL.data.count_word=function(text, flag){
+CeL.count_word=CeL.data.count_word=function(text, flag){
 	///	<summary>
 	///	計算字數 word counts.
 	///	*
@@ -862,7 +887,7 @@ CeL.data.count_word=function(text, flag){
  * {var d=new Date,i,b;for(i=0;i<100000;i++)b=dec_to_bin(20);alert(gDate(new Date-d));}
  * @memberOf	CeL.data
  */
-CeL.data.dec_to_bin=function(number, places){
+CeL.dec_to_bin=CeL.data.dec_to_bin=function(number, places){
 	///	<summary>運算式值的二進位表示法	已最佳化:5.82s/100000次dec_to_bin(20,8)@300(?)MHz,2.63s/100000次dec_to_bin(20)@300(?)MHz</summary>
 	///	<param name="number" type="Number" optional="false">number</param>
 	///	<param name="places" type="" optional="false">places,字元數,使用前置0來填補回覆值</param>
@@ -882,7 +907,7 @@ CeL.data.dec_to_bin=function(number, places){
  * @return
  * @memberOf	CeL.data
  */
-CeL.data.set_obj_value=function(obj, value, type, mode){
+CeL.set_obj_value=CeL.data.set_obj_value=function(obj, value, type, mode){
 	///	<summary>
 	///	設定object之值，輸入item=[value][,item=[value]..]。
 	///	value未設定會自動累加。
@@ -905,7 +930,7 @@ CeL.data.set_obj_value=function(obj, value, type, mode){
  * @since	2006/9/6 20:55, 2010/4/12 23:06:04
  * @memberOf	CeL.data
  */
-CeL.data.split_String_to_Object=function(value_set, assignment_char, end_char){
+CeL.split_String_to_Object=CeL.data.split_String_to_Object=function(value_set, assignment_char, end_char){
 	///	<summary>將字串組分作 Object</summary>
 	///	<param name="value_set" type="String" optional="false">字串組, e.g., 'a=12,b=34'</param>
 	///	<param name="assignment_char" type="" optional="false">char to assign values, e.g., '='</param>
@@ -922,7 +947,7 @@ CeL.data.split_String_to_Object=function(value_set, assignment_char, end_char){
  * @return
  * @memberOf	CeL.data
  */
-CeL.data.same_length=function(s1, s2){
+CeL.same_length=CeL.data.same_length=function(s1, s2){
 	///	<summary>test if 2 string is at the same length</summary>
 	///	<param name="s1" type="" optional="false">string 1</param>
 	///	<param name="s2" type="" optional="false">string 2</param>
@@ -939,7 +964,7 @@ CeL.data.same_length=function(s1, s2){
  * @requires	setTool,to_fixed
  * @memberOf	CeL.data
  */
-CeL.data.to_SI_prefix=function (number, digits){
+CeL.to_SI_prefix=CeL.data.to_SI_prefix=function (number, digits){
 	///	<summary>將數字轉為 K, M, G 等 SI prefixes 表示方式，例如 6458 轉成 6.31K。</summary>
 	///	<param name="number" type="Number" optional="false">數字</param>
 	///	<param name="digits" type="Number" optional="false">to fixed digit</param>
@@ -952,11 +977,15 @@ CeL.data.to_SI_prefix=function (number, digits){
  * null module constructor
  * @class	CSV data 的 functions
  */
-CeL.data.CSV=function(){
+CeL.CSV=CeL.data.CSV=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>CSV data 的 functions</class>
 
 };
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.data.CSV.prototype={};
 /**
  * parse CSV data to JSON	讀入 CSV 檔
  * @param {String} _t	CSV text data
@@ -982,7 +1011,7 @@ CeL.data.CSV=function(){
  * <a href="http://www.jsdb.org/" accessdate="2010/1/1 0:53">JSDB: JavaScript for databases</a>,
  * <a href="http://hax.pie4.us/2009/05/lesson-of-regexp-50x-faster-with-just.html" accessdate="2010/1/1 0:53">John Hax: A lesson of RegExp: 50x faster with just one line patch</a>
  */
-CeL.data.CSV.parse_CSV=function(_t, doCheck, hasTitle){
+CeL.parse_CSV=CeL.data.CSV.parse_CSV=function(_t, doCheck, hasTitle){
 	///	<summary>parse CSV data to JSON	讀入 CSV 檔</summary>
 	///	<param name="_t" type="String" optional="false">CSV text data</param>
 	///	<param name="doCheck" type="Boolean" optional="false">check if data is valid</param>
@@ -1013,24 +1042,28 @@ CeL.data.CSV.parse_CSV=function(_t, doCheck, hasTitle){
 /**
 * field delimiter
 */
-CeL.data.CSV.parse_CSV.fd="";	//	'\\t,;';// :\s
+CeL.fd=CeL.data.CSV.parse_CSV.fd="";	//	'\\t,;';
 /**
 * text delimiter
 */
-CeL.data.CSV.parse_CSV.td="";	//	'"\'';
+CeL.td=CeL.data.CSV.parse_CSV.td="";	//	'"\'';
 /**
 * auto detect.. no title
 */
-//CeL.data.CSV.parse_CSV.hasTitle;//null;
+//CeL.hasTitle=CeL.data.CSV.parse_CSV.hasTitle;//null;
 /**
  * null module constructor
  * @class	XML 操作相關之 function。
  */
-CeL.data.XML=function(){
+CeL.XML=CeL.data.XML=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>XML 操作相關之 function。</class>
 
 };
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.data.XML.prototype={};
 /**
  * null module constructor
  * @class	locale 的 functions
@@ -1041,6 +1074,10 @@ CeL.locale=function(){
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.locale.prototype={};
+/**
  * null module constructor
  * @class	math 的 functions
  */
@@ -1050,13 +1087,17 @@ CeL.math=function(){
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.math.prototype={};
+/**
  * 輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數
  * @param {Number} n1	number 1
  * @param {Number} [n2]	number 2
  * @param {Number} times	max 次數, 1,2,..
  * @return	{Array}	連分數序列 ** 負數視 _.mutual_division.done 而定!
  */
-CeL.math.mutual_division=function mutual_division(n1, n2, times){
+CeL.mutual_division=CeL.math.mutual_division=function mutual_division(n1, n2, times){
 	///	<summary>輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數</summary>
 	///	<param name="n1" type="Number" optional="false">number 1</param>
 	///	<param name="n2" type="Number" optional="true">number 2</param>
@@ -1067,7 +1108,7 @@ CeL.math.mutual_division=function mutual_division(n1, n2, times){
 /**
  * !!mode:連分數處理，對負數僅有最初一數為負。
  */
-//CeL.math.mutual_division.mode;//0;
+//CeL.mode=CeL.math.mutual_division.mode;//0;
 /**
  * 取得連分數序列的數值
  * @param {Array} sequence	序列
@@ -1078,7 +1119,7 @@ CeL.math.mutual_division=function mutual_division(n1, n2, times){
  * var a=continued_fraction([1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]);
  * alert(a+'\n'+a[0]/a[1]+'\n'+Math.SQRT2+'\n'+(Math.SQRT2-a[0]/a[1])+'\n'+mutual_division(a[0],a[1]));
  */
-CeL.math.continued_fraction=function(sequence, max_no){
+CeL.continued_fraction=CeL.math.continued_fraction=function(sequence, max_no){
 	///	<summary>取得連分數序列的數值</summary>
 	///	<param name="sequence" type="Array" optional="false">序列</param>
 	///	<param name="max_no" type="Number" optional="true">取至第 max_no 個</param>
@@ -1105,7 +1146,7 @@ CeL.math.continued_fraction=function(sequence, max_no){
  * @see
  * http://en.wikipedia.org/wiki/Continued_fraction#Best_to_rational_numbers
  */
-CeL.math.to_rational_number=function(number, rate, max_no){
+CeL.to_rational_number=CeL.math.to_rational_number=function(number, rate, max_no){
 	///	<summary>
 	///	The best rational approximation. 取得值最接近之有理數 (use 連分數 continued fraction), 取近似值.
 	///	c.f., 調日法
@@ -1129,7 +1170,7 @@ CeL.math.to_rational_number=function(number, rate, max_no){
  * @param n2	number 2
  * @return	GCD of the 2 numbers
  */
-CeL.math.gcd=function(n1, n2){
+CeL.gcd=CeL.math.gcd=function(n1, n2){
 	///	<summary>Get GCD of 2 numbers</summary>
 	///	<param name="n1" type="" optional="false">number 1</param>
 	///	<param name="n2" type="" optional="false">number 2</param>
@@ -1147,7 +1188,7 @@ CeL.math.gcd=function(n1, n2){
  * <a href="http://www.azillionmonkeys.com/qed/sqroot.html" accessdate="2010/3/11 18:37">Paul Hsieh's Square Root page</a>
  * <a href="http://www.embeddedrelated.com/usenet/embedded/show/114789-1.php" accessdate="2010/3/11 18:34">Suitable Integer Square Root Algorithm for 32-64-Bit Integers on Inexpensive Microcontroller? | Comp.Arch.Embedded | EmbeddedRelated.com</a>
  */
-CeL.math.floor_sqrt=function(number){
+CeL.floor_sqrt=CeL.math.floor_sqrt=function(number){
 	///	<summary>
 	///	得到平方數，相當於 Math.floor(Math.sqrt(number)).
 	///	get integer square root
@@ -1170,7 +1211,7 @@ CeL.math.floor_sqrt=function(number){
  * <a href="http://homepage2.nifty.com/m_kamada/math/10001.htm" accessdate="2010/3/11 18:7">Factorizations of 100...001</a>
  * @requires	floor_sqrt
  */
-CeL.math.factorization=function(number){
+CeL.factorization=CeL.math.factorization=function(number){
 	///	<summary>
 	///	取得某數的質因數，因式分解/素因子分解, factorization, get floor factor.
 	///	唯一分解定理(The Unique Factorization Theorem)告訴我們素因子分解是唯一的，這即是稱為算術基本定理 (The Fundamental Theorem of Arithmeric) 的數學金科玉律。
@@ -1188,7 +1229,7 @@ CeL.math.factorization=function(number){
  * @example
  * alert('0x'+CeL.hex(16725))
  */
-CeL.math.hex=function(number){
+CeL.hex=CeL.math.hex=function(number){
 	///	<summary>VBScript has a Hex() function but JScript does not.</summary>
 	///	<param name="number" type="Number" optional="false"/>
 	///	<returns type="String">number in hex</returns>
@@ -1208,7 +1249,7 @@ CeL.math.hex=function(number){
  * http://en.wikipedia.org/wiki/Signed_number_representations
  * @since	2010/3/12 23:47:52
  */
-CeL.math.complement=function(){
+CeL.complement=CeL.math.complement=function(){
 	///	<summary>
 	///	補數計算。
 	///	正數的補數即為自身。若要求得互補之後的數字，請設成負數。
@@ -1229,7 +1270,7 @@ CeL.math.complement=function(){
  * @class	Hamming Code 的 constructor
  * @constructor
  */
-CeL.math.Hamming=function(){
+CeL.Hamming=CeL.math.Hamming=function(){
 	///	<summary>Hamming code</summary>
 	///	<class>Hamming Code 的 constructor</class>
 
@@ -1239,7 +1280,7 @@ CeL.math.Hamming=function(){
  * default: data[1,2,..] 左至右, reverse: data[..,2,1] 右至左
  * @memberOf	CeL.math.Hamming
  */
-CeL.math.Hamming.reverse=false;
+CeL.reverse=CeL.math.Hamming.reverse=false;
 /**
  * encode data to Hamming Code.
  * @param data	data stream
@@ -1247,7 +1288,7 @@ CeL.math.Hamming.reverse=false;
  * @return	{String} encoded Hamming Code
  * @memberOf	CeL.math.Hamming
  */
-CeL.math.Hamming.encode=function(data, no_reverse){
+CeL.encode=CeL.math.Hamming.encode=function(data, no_reverse){
 	///	<summary>encode data to Hamming Code.</summary>
 	///	<param name="data" type="" optional="false">data stream</param>
 	///	<param name="no_reverse" type="" optional="false">forced NO reverse</param>
@@ -1261,7 +1302,7 @@ CeL.math.Hamming.encode=function(data, no_reverse){
  * @return	[資料位元 data bits, 檢查位元 check bits (parity bits)]
  * @memberOf	CeL.math.Hamming
  */
-CeL.math.Hamming.split_code=function(code){
+CeL.split_code=CeL.math.Hamming.split_code=function(code){
 	///	<summary>將 Hamming Code 分成 data & check bits</summary>
 	///	<param name="code" type="" optional="false">Hamming Code to split</param>
 	///	<returns>[資料位元 data bits, 檢查位元 check bits (parity bits)]</returns>
@@ -1274,7 +1315,7 @@ CeL.math.Hamming.split_code=function(code){
  * @return
  * @memberOf	CeL.math.Hamming
  */
-CeL.math.Hamming.decode=function(code){
+CeL.decode=CeL.math.Hamming.decode=function(code){
 	///	<summary>decode Hamming Code to data</summary>
 	///	<param name="code" type="" optional="false"/>
 	///	<returns/>
@@ -1286,7 +1327,7 @@ CeL.math.Hamming.decode=function(code){
  * @param {Number} bit_length	bit length. e.g., 8, 16.
  * @memberOf	CeL.math.Hamming
  */
-CeL.math.Hamming.show=function(bit_length){
+CeL.show=CeL.math.Hamming.show=function(bit_length){
 	///	<summary>顯示 Hamming Code 的計算方法</summary>
 	///	<param name="bit_length" type="Number" optional="false">bit length. e.g., 8, 16.</param>
 	///	<memberOf>CeL.math.Hamming</memberOf>
@@ -1297,11 +1338,15 @@ CeL.math.Hamming.show=function(bit_length){
  * @class 數學多項式相關之 function。
  * @constructor
  */
-CeL.math.polynomial=function (){
+CeL.polynomial=CeL.math.polynomial=function (){
 	///	<summary>null module constructor</summary>
 	///	<class>數學多項式相關之 function。</class>
 
 };
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.math.polynomial.prototype={};
 /**
  * 有理數 rational number，有理\u25968全体\u12398\u12388\u12367\u12427集合\u12399\u12375\u12400\u12375\u12400、商\u12434意味\u12377\u12427 quotient \u12398頭文字\u12434\u12392\u12426、太字\u12398 Q \u12391表\u12377。<br/>
  * 若要輸入不同基底的數值，請用 parse_base()
@@ -1313,7 +1358,7 @@ CeL.math.polynomial=function (){
  * @class	quotient 的 functions
  * @constructor
  */
-CeL.math.quotient=function(numerator, denominator, approximate){
+CeL.quotient=CeL.math.quotient=function(numerator, denominator, approximate){
 	///	<summary>
 	///	有理數 rational number，有理\u25968全体\u12398\u12388\u12367\u12427集合\u12399\u12375\u12400\u12375\u12400、商\u12434意味\u12377\u12427 quotient \u12398頭文字\u12434\u12392\u12426、太字\u12398 Q \u12391表\u12377。<br/>
 	///	若要輸入不同基底的數值，請用 parse_base()
@@ -1329,14 +1374,14 @@ CeL.math.quotient=function(numerator, denominator, approximate){
  * 循環節分隔符號：整數.小數__repetend_separator__循環節
  * @memberOf	CeL.math.quotient
  */
-CeL.math.quotient.repetend_separator="";	//	'_';//' '
+CeL.repetend_separator=CeL.math.quotient.repetend_separator='_';
 /**
  * 數字集
  * @memberOf	CeL.math.quotient
  * @see
  * <a href="http://en.wikipedia.org/wiki/Numerical_digit" accessdate="2010/4/16 20:47">Numerical digit</a>
  */
-CeL.math.quotient.digit_char="";	//	'0123456789abcdefghijklmnopqrstuvwxyz';//.split('')
+CeL.digit_char=CeL.math.quotient.digit_char='0123456789abcdefghijklmnopqrstuvwxyz';
 /**
  * 轉換指定進位的數字成為 quotient 物件
  * @since	2004/7/9 16:13
@@ -1352,7 +1397,7 @@ CeL.math.quotient.digit_char="";	//	'0123456789abcdefghijklmnopqrstuvwxyz';//.sp
  * else
  * 	library_namespace.debug('<br/>'+q.base(8)+','+q.base()+' , '+q.to_print_mode()+','+q.print(1)+','+q.to_print_mode(2)+','+q.to_print_mode(3,0,'',5));
  */
-CeL.math.quotient.parse_base=function(number, base, digit_char){
+CeL.parse_base=CeL.math.quotient.parse_base=function(number, base, digit_char){
 	///	<summary>轉換指定進位的數字成為 quotient 物件</summary>
 	///	<since>2004/7/9 16:13</since>
 	///	<param name="number" type="" optional="false">數字</param>
@@ -1379,6 +1424,10 @@ CeL.native=function(){
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.native.prototype={};
+/**
  * 顯示格式化日期 string
  * @param date_value	要轉換的 date, 值過小時當作時間, <0 轉成當下時間
  * @param {Number} mode	要轉換的 mode
@@ -1396,7 +1445,7 @@ CeL.native=function(){
  * http://aa.usno.navy.mil/data/docs/JulianDate.html
  * @memberOf	CeL.native
  */
-CeL.native.format_date=function format_date(date_value, mode, zero_fill, date_separator, time_separator){
+CeL.format_date=CeL.native.format_date=function format_date(date_value, mode, zero_fill, date_separator, time_separator){
 	///	<summary>顯示格式化日期 string</summary>
 	///	<param name="date_value" type="" optional="false">要轉換的 date, 值過小時當作時間, <0 轉成當下時間</param>
 	///	<param name="mode" type="Number" optional="false">要轉換的 mode</param>
@@ -1428,7 +1477,7 @@ CeL.native.format_date=function format_date(date_value, mode, zero_fill, date_se
  * @memberOf	CeL.native
  * @since	2010/5/16 23:04:54
  */
-CeL.native.parse_function=function parse_function(function_name, flag){
+CeL.parse_function=CeL.native.parse_function=function parse_function(function_name, flag){
 	///	<summary>函數的文字解譯/取得函數的語法</summary>
 	///	<param name="function_name" type="Function|String" optional="false">function name or function structure</param>
 	///	<param name="flag" type="" optional="false">=1: reduce</param>
@@ -1453,7 +1502,7 @@ CeL.native.parse_function=function parse_function(function_name, flag){
  * http://www.alanwood.net/demos/charsetdiffs.html
  * @memberOf	CeL.native
  */
-CeL.native.toASCIIcode=function (text, position){
+CeL.toASCIIcode=CeL.native.toASCIIcode=function (text, position){
 	///	<summary>
 	///	對付有時 charCodeAt 會傳回 >256 的數值。
 	///	若確定編碼是 ASCII (char code 是 0~255) 即可使用此函數替代 charCodeAt。
@@ -1475,7 +1524,7 @@ CeL.native.toASCIIcode=function (text, position){
  * @param {RegExp} [escape_pattern]	char pattern need to escape
  * @return	{RegExp} RegExp object
  */
-CeL.native.to_RegExp_pattern=function(pattern, RegExp_flag, escape_pattern){
+CeL.to_RegExp_pattern=CeL.native.to_RegExp_pattern=function(pattern, RegExp_flag, escape_pattern){
 	///	<summary>
 	///	String pattern (e.g., "/a+/g") to RegExp pattern.
 	///	qq// in perl.
@@ -1515,7 +1564,7 @@ CeL.native.to_RegExp_pattern=function(pattern, RegExp_flag, escape_pattern){
  * http://www.aptana.com/reference/html/api/RegExp.html
  * @memberOf	CeL.native
  */
-CeL.native.renew_RegExp_flag=function(regexp, flag){
+CeL.renew_RegExp_flag=CeL.native.renew_RegExp_flag=function(regexp, flag){
 	///	<summary>重新設定 RegExp object 之 flag</summary>
 	///	<param name="regexp" type="RegExp" optional="false">RegExp object to set</param>
 	///	<param name="flag" type="String" optional="false">flag of RegExp</param>
@@ -1562,7 +1611,7 @@ CeL.native.renew_RegExp_flag=function(regexp, flag){
  * {var d=new Date,v=0.09999998,i=0,a;for(;i<100000;i++)a=v.to_fixed(2);alert(v+'\n→'+a+'\ntime:'+format_date(new Date-d));}
  * @memberOf	CeL.native
  */
-CeL.native.to_fixed=function(digits, max){
+CeL.to_fixed=CeL.native.to_fixed=function(digits, max){
 	///	<summary>
 	///	取至小數 d 位，
 	///	肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1。
@@ -1590,7 +1639,7 @@ CeL.native.to_fixed=function(digits, max){
  * from lib/perl/BaseF.pm (or program/database/BaseF.pm)
  * @memberOf	CeL.native
  */
-CeL.native.checkSQLInput=function (string){
+CeL.checkSQLInput=CeL.native.checkSQLInput=function (string){
 	///	<summary>check input string send to SQL server</summary>
 	///	<param name="string" type="String" optional="false">input string</param>
 	///	<returns type="String">轉換過的 string</returns>
@@ -1609,7 +1658,7 @@ CeL.native.checkSQLInput=function (string){
  * function strip() @ Prototype JavaScript framework
  * @memberOf	CeL.native
  */
-CeL.native.checkSQLInput_noSpace=function(string){
+CeL.checkSQLInput_noSpace=CeL.native.checkSQLInput_noSpace=function(string){
 	///	<summary>check input string send to SQL server 並去掉前後 space</summary>
 	///	<param name="string" type="String" optional="false">input string</param>
 	///	<returns type="String">轉換過的 string</returns>
@@ -1627,7 +1676,7 @@ CeL.native.checkSQLInput_noSpace=function(string){
  * @return
  * @memberOf	CeL.native
  */
-CeL.native.parse_number=function(number){
+CeL.parse_number=CeL.native.parse_number=function(number){
 	///	<summary>轉換字串成數值，包括分數等。分數亦將轉為分數。</summary>
 	///	<param name="number" type="String" optional="false">欲轉換之值</param>
 	///	<returns/>
@@ -1644,32 +1693,48 @@ CeL.net=function(){
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.net.prototype={};
+/**
  * null module constructor
  * @class	web Ajax 的 functions
  */
-CeL.net.Ajax=function(){
+CeL.Ajax=CeL.net.Ajax=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>web Ajax 的 functions</class>
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.net.Ajax.prototype={};
+/**
  * null module constructor
  * @class	web HTA 的 functions
  */
-CeL.net.HTA=function(){
+CeL.HTA=CeL.net.HTA=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>web HTA 的 functions</class>
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.net.HTA.prototype={};
+/**
  * null module constructor
  * @class	map 的 functions
  */
-CeL.net.map=function(){
+CeL.map=CeL.net.map=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>map 的 functions</class>
 
 };
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.net.map.prototype={};
 /**
  * module SVG 物件之 constructor。<br/>
  * 設定 SVG document fragment 並將之插入網頁中。
@@ -1684,7 +1749,7 @@ CeL.net.map=function(){
  * @constructor
  * @param	{int} _width	width of the canvas
  * @param	{int} _height	height of the canvas
- * @param	{color string} [_backgroundColor]	background color of the canvas (UNDO)
+ * @param	{color String} [_backgroundColor]	background color of the canvas (UNDO)
  * @requires	set_attribute,XML_node,remove_all_child//removeNode
  * @type	CeL.net.SVG
  * @return	{CeL.net.SVG} CeL.net.SVG object created
@@ -1695,7 +1760,7 @@ CeL.net.map=function(){
  * <a href="http://volity.org/wiki/index.cgi?SVG_Script_Tricks" accessdate="2009/11/15 16:31">Volity Wiki: SVG Script Tricks</a><br/>
  * <a href="http://pilat.free.fr/english/routines/js_dom.htm" accessdate="2009/11/15 16:31">Javascript SVG et DOM</a>
  */
-CeL.net.SVG=function(_width, _height, _backgroundColor){
+CeL.SVG=CeL.net.SVG=function(_width, _height, _backgroundColor){
 	///	<summary>
 	///	module SVG 物件之 constructor。<br/>
 	///	設定 SVG document fragment 並將之插入網頁中。
@@ -1712,7 +1777,7 @@ CeL.net.SVG=function(_width, _height, _backgroundColor){
 	///	</deprecated>
 	///	<param name="_width" type="int" optional="false">width of the canvas</param>
 	///	<param name="_height" type="int" optional="false">height of the canvas</param>
-	///	<param name="_backgroundColor" type="colorstring" optional="true">background color of the canvas (UNDO)</param>
+	///	<param name="_backgroundColor" type="colorString" optional="true">background color of the canvas (UNDO)</param>
 	///	<requires>set_attribute,XML_node,remove_all_child//removeNode</requires>
 	///	<returns type="CeL.net.SVG">CeL.net.SVG object created</returns>
 	///	<see>
@@ -1730,19 +1795,19 @@ CeL.net.SVG=function(_width, _height, _backgroundColor){
   * @property
   * @see	<a href="http://www.w3.org/TR/SVG/struct.html#NewDocument" accessdate="2009/11/15 16:53">Defining an SVG document fragment: the 'svg' element</a>
   */
-//CeL.net.SVG.prototype.svg;//_s=	//	raw
+//CeL.svg=CeL.net.SVG.prototype.svg;//_s=
  /**
   * 包含了插入元件的原始資訊。<br/>
   * Use {@link #addContain} to add contains.
   * @property
   * @type	Array
   */
-CeL.net.SVG.prototype.contains=[];
+CeL.contains=CeL.net.SVG.prototype.contains=[];
  /**
   * 所插入之網頁元素
   * @property
   */
-//CeL.net.SVG.prototype.div;//null;
+//CeL.div=CeL.net.SVG.prototype.div;//null;
 /**
  * default stroke width. 單位: px
  * 
@@ -1750,7 +1815,13 @@ CeL.net.SVG.prototype.contains=[];
  * @type Number
  * @memberOf CeL.net.SVG
  */
-CeL.net.SVG.defaultStrokeWidth=0;	//	.5;	
+CeL.defaultStrokeWidth=CeL.net.SVG.defaultStrokeWidth=0;	//	.5;	
+/**
+ * 所有造出 id 之 prefix
+ * @type	string
+ * @memberOf	CeL.net.SVG
+ */
+CeL.idPrefix=CeL.net.SVG.idPrefix="";	//	library_namespace.to_module_name(module_name) + '.';
 /**
  * 改變 text
  * @param text_node	text object
@@ -1761,7 +1832,7 @@ CeL.net.SVG.defaultStrokeWidth=0;	//	.5;
  * <a href="http://www.w3.org/TR/SVG/text.html" accessdate="2009/12/15 0:2">Text - SVG 1.1 - 20030114</a>
  * <tref xlink:href="#ReferencedText"/>
  */
-CeL.net.SVG.changeText=function(text_node, text){
+CeL.changeText=CeL.net.SVG.changeText=function(text_node, text){
 	///	<summary>改變 text</summary>
 	///	<param name="text_node" type="" optional="false">text object</param>
 	///	<param name="text" type="" optional="false">change to this text</param>
@@ -1783,7 +1854,7 @@ CeL.net.SVG.changeText=function(text_node, text){
  * @return	module SVG object
  * @memberOf	CeL.net.SVG
  */
-CeL.net.SVG.draw_circle=function(_r, svgO, _color, _fill){
+CeL.draw_circle=CeL.net.SVG.draw_circle=function(_r, svgO, _color, _fill){
 	///	<summary>繪製圓形。</summary>
 	///	<since>2006/12/19 18:05</since>
 	///	<param name="_r" type="" optional="false"/>
@@ -1804,7 +1875,7 @@ CeL.net.SVG.draw_circle=function(_r, svgO, _color, _fill){
  * @return	module SVG object
  * @memberOf	CeL.net.SVG
  */
-CeL.net.SVG.draw_ellipse=function(_rx, _ry, svgO, _color, _fill){
+CeL.draw_ellipse=CeL.net.SVG.draw_ellipse=function(_rx, _ry, svgO, _color, _fill){
 	///	<summary>繪製橢圓。</summary>
 	///	<param name="_rx" type="" optional="false"/>
 	///	<param name="_ry" type="" optional="false"/>
@@ -1829,7 +1900,7 @@ CeL.net.SVG.draw_ellipse=function(_rx, _ry, svgO, _color, _fill){
  * @return	module SVG object
  * @memberOf	CeL.net.SVG
  */
-CeL.net.SVG.draw_quadrilateral=function(_ds, _h, _d, _us, svgO, _color, _fill){
+CeL.draw_quadrilateral=CeL.net.SVG.draw_quadrilateral=function(_ds, _h, _d, _us, svgO, _color, _fill){
 	///	<summary>畫簡單梯形。</summary>
 	///	<since>2006/12/17 12:38</since>
 	///	<requires>split_String_to_Object,set_attribute,XML_node,removeNode,remove_all_child,g_SVG,draw_quadrilateral</requires>
@@ -1857,7 +1928,7 @@ CeL.net.SVG.draw_quadrilateral=function(_ds, _h, _d, _us, svgO, _color, _fill){
  * @return	module SVG object
  * @memberOf	CeL.net.SVG
  */
-CeL.net.SVG.draw_triangle=function(_ds, _h, _d, svgO, _color, _fill){
+CeL.draw_triangle=CeL.net.SVG.draw_triangle=function(_ds, _h, _d, svgO, _color, _fill){
 	///	<summary>畫簡單三角形。</summary>
 	///	<since>2006/12/17 12:38</since>
 	///	<requires>split_String_to_Object,set_attribute,XML_node,removeNode,remove_all_child,g_SVG,draw_triangle</requires>
@@ -1882,7 +1953,7 @@ CeL.net.SVG.draw_triangle=function(_ds, _h, _d, svgO, _color, _fill){
  * @return	module SVG object
  * @memberOf	CeL.net.SVG
  */
-CeL.net.SVG.draw_addition=function(num1, num2, svgO, _color, _font){
+CeL.draw_addition=CeL.net.SVG.draw_addition=function(num1, num2, svgO, _color, _font){
 	///	<summary>利用 module SVG 物件來演示直式加法。</summary>
 	///	<since>2006/12/26 17:47</since>
 	///	<param name="num1" type="" optional="false"/>
@@ -1905,7 +1976,7 @@ CeL.net.SVG.draw_addition=function(num1, num2, svgO, _color, _font){
  * @return	module SVG object
  * @memberOf	CeL.net.SVG
  */
-CeL.net.SVG.draw_subtraction=function(num1, num2, svgO, _color, _font){
+CeL.draw_subtraction=CeL.net.SVG.draw_subtraction=function(num1, num2, svgO, _color, _font){
 	///	<summary>呼叫 draw_subtraction 來演示直式減法。因為直式加減法的運算與機制過程非常相似，因此我們以 draw_addition 來一併的處理這兩個相似的運算過程。</summary>
 	///	<since>2006/12/26 17:47</since>
 	///	<param name="num1" type="" optional="false"/>
@@ -1931,7 +2002,7 @@ CeL.net.SVG.draw_subtraction=function(num1, num2, svgO, _color, _font){
  * @see
  * <a href="http://203.71.239.19/math/courses/cs04/M4_6.php" accessdate="2010/1/20 18:5">小數篇：小數的乘法</a>
  */
-CeL.net.SVG.draw_multiplication=function(num1, num2, svgO, _color, _font){
+CeL.draw_multiplication=CeL.net.SVG.draw_multiplication=function(num1, num2, svgO, _color, _font){
 	///	<summary>
 	///	利用 module SVG 物件來演示直式乘法。<br/>
 	///	TODO: 小數的乘法
@@ -1977,7 +2048,7 @@ CeL.net.SVG.draw_multiplication=function(num1, num2, svgO, _color, _font){
  * CeL.draw_long_division(100, 7, SVG_object);
  * @memberOf	CeL.net.SVG
  */
-CeL.net.SVG.draw_long_division=function(dividend, divisor, svgO, _color, _font){
+CeL.draw_long_division=CeL.net.SVG.draw_long_division=function(dividend, divisor, svgO, _color, _font){
 	///	<summary>
 	///	利用 module SVG 物件來展示<a href="http://en.wikipedia.org/wiki/Long_division" title="long division">直式除法</a>。<br/>
 	///	!! 尚有許多 bug<br/>
@@ -2015,13 +2086,17 @@ CeL.net.SVG.draw_long_division=function(dividend, divisor, svgO, _color, _font){
  * null module constructor
  * @class	web 的 functions
  */
-CeL.net.web=function(){
+CeL.web=CeL.net.web=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>web 的 functions</class>
 
 };
 /**
- * 判斷為 HTML Element。
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.net.web.prototype={};
+/**
+ * 判斷是否為 HTML Element。
  * @param	value	value to test
  * @return	{Boolean}	value is HTML Element
  * @since	2010/6/23 02:32:41
@@ -2030,8 +2105,8 @@ CeL.net.web=function(){
  * http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
  * http://www.w3.org/DOM/
  */
-CeL.net.web.is_HTML_element=function(value){
-	///	<summary>判斷為 HTML Element。</summary>
+CeL.is_HTML_element=CeL.net.web.is_HTML_element=function(value){
+	///	<summary>判斷是否為 HTML Element。</summary>
 	///	<param name="value" type="" optional="false">value to test</param>
 	///	<returns type="Boolean">value is HTML Element</returns>
 	///	<since>2010/6/23 02:32:41</since>
@@ -2053,7 +2128,7 @@ CeL.net.web.is_HTML_element=function(value){
  * http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
  * http://www.w3.org/DOM/
  */
-CeL.net.web.is_HTML_element_type=function(value, type){
+CeL.is_HTML_element_type=CeL.net.web.is_HTML_element_type=function(value, type){
 	///	<summary>判斷為指定 nodeType 之 HTML Element。</summary>
 	///	<param name="value" type="" optional="false">value to test</param>
 	///	<param name="type" type="" optional="false">type</param>
@@ -2076,7 +2151,7 @@ CeL.net.web.is_HTML_element_type=function(value, type){
  * http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-58190037,
  * http://www.w3.org/DOM/
  */
-CeL.net.web.is_element_node=function(value){
+CeL.is_element_node=CeL.net.web.is_element_node=function(value){
 	///	<summary>判斷為 HTML Element。</summary>
 	///	<param name="value" type="" optional="false">value to test</param>
 	///	<returns type="Boolean">value is HTML Element</returns>
@@ -2089,13 +2164,13 @@ CeL.net.web.is_element_node=function(value){
 
 };
 /**
- * trigger/swap display and visibility.
+ * toggle/swap display and visibility.
  * display:none or visibility:hidden.
  * TODO: computed style
  * @param element	HTML element
- * @param {String|Number} type	show or hidden or set the status type:
- * 			{Number}: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change
- * 			{String}: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?
+ * @param	{String|Number} type	show or hidden or set the status type:
+ * 			{Number} type: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change
+ * 			{String} type: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?
  * @return	display status
  * @since	2010/4/1 10:24:43 rewrite
  * @see
@@ -2106,17 +2181,17 @@ CeL.net.web.is_element_node=function(value){
  * @requires	[_.get_element],[_.get_style]
  * @memberOf	CeL.net.web
  */
-CeL.net.web.trigger_display=function(element, type){
+CeL.toggle_display=CeL.net.web.toggle_display=function(element, type){
 	///	<summary>
-	///	trigger/swap display and visibility.
+	///	toggle/swap display and visibility.
 	///	display:none or visibility:hidden.
 	///	TODO: computed style
 	///	</summary>
 	///	<param name="element" type="" optional="false">HTML element</param>
 	///	<param>
 	///	{String|Number} type	show or hidden or set the status type:
-	///	{Number}: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change
-	///	{String}: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?
+	///	{Number} type: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change
+	///	{String} type: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?
 	///	</param>
 	///	<returns>display status</returns>
 	///	<since>2010/4/1 10:24:43 rewrite</since>
@@ -2137,7 +2212,7 @@ CeL.net.web.trigger_display=function(element, type){
  * @return
  * @memberOf	CeL.net.web
  */
-CeL.net.web.replace_HTML=function(o, html){
+CeL.replace_HTML=CeL.net.web.replace_HTML=function(o, html){
 	///	<summary>replace HTML</summary>
 	///	<param name="o" type="" optional="false"/>
 	///	<param name="html" type="" optional="false"/>
@@ -2154,7 +2229,7 @@ CeL.net.web.replace_HTML=function(o, html){
  * @return
  * @memberOf	CeL.net.web
  */
-CeL.net.web.remove_node=function remove_node(o, tag){
+CeL.remove_node=CeL.net.web.remove_node=function remove_node(o, tag){
 	///	<summary>
 	///	移除 node.
 	///	TODO:
@@ -2179,7 +2254,7 @@ CeL.net.web.remove_node=function remove_node(o, tag){
  * @since	2006/12/10 21:25 分離 separate from XML_node()
  * @memberOf	CeL.net.web
  */
-CeL.net.web.set_attribute=function(_e, propertyO, ns){
+CeL.set_attribute=CeL.net.web.set_attribute=function(_e, propertyO, ns){
 	///	<summary>
 	///	set/get/remove attribute of a element<br/>
 	///	in IE: setAttribute does not work when used with the style attribute (or with event handlers, for that matter).
@@ -2204,7 +2279,7 @@ CeL.net.web.set_attribute=function(_e, propertyO, ns){
  * @since	2007/1/20 14:12
  * @memberOf	CeL.net.web
  */
-CeL.net.web.add_node=function add_node(node, child_list){
+CeL.add_node=CeL.net.web.add_node=function add_node(node, child_list){
 	///	<summary>append children node to specified element</summary>
 	///	<param name="node" type="" optional="false">node / node id</param>
 	///	<param name="child_list" type="" optional="false">children node array</param>
@@ -2214,21 +2289,23 @@ CeL.net.web.add_node=function add_node(node, child_list){
 
 };
 /**
- * instead of createNode().
+ * 創建新的 DOM 節點(node)。
+ * createNode() 的功能補充加強版。
  * TODO: 分割功能(set_attrib, add_child, ..), 簡化
- * @param nodes	node structure
- * @param layer	where to layer this node. e.g., parent node
- * @return
+ * @param	{Object|Array} nodes	node structure
+ * @param	{String|Array|HTMLElement} [layer]	where to layer this node. e.g., parent node
+ * @return	{HTMLElement}	new node created
  * @since	2010/6/21 13:45:02
  */
-CeL.net.web.new_node=function(nodes, layer){
+CeL.new_node=CeL.net.web.new_node=function(nodes, layer){
 	///	<summary>
-	///	instead of createNode().
+	///	創建新的 DOM 節點(node)。
+	///	createNode() 的功能補充加強版。
 	///	TODO: 分割功能(set_attrib, add_child, ..), 簡化
 	///	</summary>
-	///	<param name="nodes" type="" optional="false">node structure</param>
-	///	<param name="layer" type="" optional="false">where to layer this node. e.g., parent node</param>
-	///	<returns/>
+	///	<param name="nodes" type="Object|Array" optional="false">node structure</param>
+	///	<param name="layer" type="String|Array|HTMLElement" optional="true" domElement="true">where to layer this node. e.g., parent node</param>
+	///	<returns type="HTMLElement">new node created</returns>
 	///	<since>2010/6/21 13:45:02</since>
 
 };
@@ -2244,7 +2321,7 @@ CeL.net.web.new_node=function(nodes, layer){
  * @since	2006/9/6 20:29,11/12 22:13
  * @memberOf	CeL.net.web
  */
-CeL.net.web.XML_node=function(tag, propertyO, insertBeforeO, innerObj, styleO){
+CeL.XML_node=CeL.net.web.XML_node=function(tag, propertyO, insertBeforeO, innerObj, styleO){
 	///	<summary>create new HTML/XML <a href="https://developer.mozilla.org/en/DOM/node">node</a>(<a href="https://developer.mozilla.org/en/DOM/element">element</a>)</summary>
 	///	<param name="tag" type="" optional="false">tag name</param>
 	///	<param name="propertyO" type="" optional="false">attributes object</param>
@@ -2268,7 +2345,7 @@ CeL.net.web.XML_node=function(tag, propertyO, insertBeforeO, innerObj, styleO){
  * http://www.klstudio.com/post/94.html
  * @memberOf	CeL.net.web
  */
-CeL.net.web.set_text=function (element, text){
+CeL.set_text=CeL.net.web.set_text=function (element, text){
 	///	<summary>
 	///	設定 HTML element 的 text。
 	///	對付IE與Moz不同的text取得方法。現階段不應用innerText，應該用此函數來取得或設定內部text。
@@ -2298,7 +2375,7 @@ CeL.net.web.set_text=function (element, text){
  * @see
  * http://www.datatables.net/
  */
-CeL.net.web.table_list=function(data, table, header, do_clean){
+CeL.table_list=CeL.net.web.table_list=function(data, table, header, do_clean){
 	///	<summary>
 	///	fill data to table.
 	///	增加 table 的列(row)
@@ -2334,7 +2411,7 @@ CeL.net.web.table_list=function(data, table, header, do_clean){
  * http://www.mattfarina.com/2009/01/08/rfc-3986-url-validation,
  * also see batURL.htm
  */
-CeL.net.web.parse_URI=function(URI){
+CeL.parse_URI=CeL.net.web.parse_URI=function(URI){
 	///	<summary>Parses URI</summary>
 	///	<param name="URI" type="String" optional="false">URI to parse</param>
 	///	<returns>parsed object</returns>
@@ -2352,6 +2429,101 @@ CeL.net.web.parse_URI=function(URI){
 
 };
 /**
+ * 設定document.cookie.
+ * You can store up to 20 name=value pairs in a cookie, and the cookie is always returned as a string of all the cookies that apply to the page.
+ * TODO:
+ * HTML5 localStorage (name/value item pairs).
+ * test various values.
+ * document.cookie.setPath("/");
+
+ * @example
+	範例：
+//	delete domain
+set_cookie('domain',0);
+//	一個月(30 days)
+set_cookie('expires',30);
+//	設定name之值為jj
+set_cookie(name,'jj');
+//	設定name之值為56
+set_cookie(name,56);
+//	除去name
+set_cookie(name);
+//	設給本host全部使用
+set_cookie(_.set_cookie.f.set_root);
+//	設給本domain使用
+set_cookie(_.set_cookie.f.set_domain);
+//	依現有設定除去所有值
+set_cookie(_.set_cookie.f.delete_all);
+//	除去所有值
+set_cookie(_.set_cookie.f.delete_all_root);
+//	永久儲存（千年）
+set_cookie(_.set_cookie.f.forever);
+//	準確設定這之後只在這次瀏覽使用這些cookie，也可用set_cookie('expires',-1);
+set_cookie(_.set_cookie.f.moment);
+//	將expires設定成forever或moment後再改回來（不加expires設定）
+set_cookie('expires',0);
+
+ * @param {String|Object|_module_.set_cookie.f} name	set_cookie.f flag | varoius name
+ * @param value	varoius value
+ * @param {Boolean|Object} config	若對於特殊設定僅暫時設定時，設定此項。
+ * @returns
+ * @see
+ * Chrome doesn't support cookies for local files unless you start it with the --enable-file-cookies flag.
+ * chrome.exe --allow-file-access-from-files --enable-extension-timeline-api --enable-file-cookies
+ * http://stackoverflow.com/questions/335244/why-does-chrome-ignore-local-jquery-cookies
+ * http://code.google.com/p/chromium/issues/detail?id=535
+ * @memberOf	CeL.net.web
+ */
+CeL.set_cookie=CeL.net.web.set_cookie=function (name, value, config){
+	///	<summary>
+	///	設定document.cookie.
+	///	You can store up to 20 name=value pairs in a cookie, and the cookie is always returned as a string of all the cookies that apply to the page.
+	///	TODO:
+	///	HTML5 localStorage (name/value item pairs).
+	///	test various values.
+	///	document.cookie.setPath("/");
+	///	</summary>
+	///	<example>
+	///	範例：
+	///	//	delete domain
+	///	set_cookie('domain',0);
+	///	//	一個月(30 days)
+	///	set_cookie('expires',30);
+	///	//	設定name之值為jj
+	///	set_cookie(name,'jj');
+	///	//	設定name之值為56
+	///	set_cookie(name,56);
+	///	//	除去name
+	///	set_cookie(name);
+	///	//	設給本host全部使用
+	///	set_cookie(_.set_cookie.f.set_root);
+	///	//	設給本domain使用
+	///	set_cookie(_.set_cookie.f.set_domain);
+	///	//	依現有設定除去所有值
+	///	set_cookie(_.set_cookie.f.delete_all);
+	///	//	除去所有值
+	///	set_cookie(_.set_cookie.f.delete_all_root);
+	///	//	永久儲存（千年）
+	///	set_cookie(_.set_cookie.f.forever);
+	///	//	準確設定這之後只在這次瀏覽使用這些cookie，也可用set_cookie('expires',-1);
+	///	set_cookie(_.set_cookie.f.moment);
+	///	//	將expires設定成forever或moment後再改回來（不加expires設定）
+	///	set_cookie('expires',0);
+	///	</example>
+	///	<param name="name" type="String|Object|_module_.set_cookie.f" optional="false">set_cookie.f flag | varoius name</param>
+	///	<param name="value" type="" optional="false">varoius value</param>
+	///	<param name="config" type="Boolean|Object" optional="false">若對於特殊設定僅暫時設定時，設定此項。</param>
+	///	<returns/>
+	///	<see>
+	///	Chrome doesn't support cookies for local files unless you start it with the --enable-file-cookies flag.
+	///	chrome.exe --allow-file-access-from-files --enable-extension-timeline-api --enable-file-cookies
+	///	http://stackoverflow.com/questions/335244/why-does-chrome-ignore-local-jquery-cookies
+	///	http://code.google.com/p/chromium/issues/detail?id=535
+	///	</see>
+	///	<memberOf>CeL.net.web</memberOf>
+
+};
+/**
  * 簡化 document.getElementById 並配合 loadReference()
  * @since 2004/6/25 19:33
  * @param id	所欲找尋之 element id
@@ -2362,7 +2534,7 @@ CeL.net.web.parse_URI=function(URI){
  * @requires	referenceDoc,loadReferenceDone,`get_element();`
  * @memberOf	CeL.net.web
  */
-CeL.net.web.get_element=function get_element(id, flag){
+CeL.get_element=CeL.net.web.get_element=function get_element(id, flag){
 	///	<summary>簡化 document.getElementById 並配合 loadReference()</summary>
 	///	<since>2004/6/25 19:33</since>
 	///	<param name="id" type="" optional="false">所欲找尋之 element id</param>
@@ -2395,7 +2567,7 @@ CeL.net.web.get_element=function get_element(id, flag){
  * <a href="https://developer.mozilla.org/En/DOM/Element.className" accessdate="2009/12/14 22:27">element.className - MDC</a>
  * @memberOf	CeL.net.web
  */
-CeL.net.web.set_class=function(element, class_name, flag){
+CeL.set_class=CeL.net.web.set_class=function(element, class_name, flag){
 	///	<summary>
 	///	Sets / adds class of specified element.<br/>
 	///	TODO:<br/>
@@ -2427,7 +2599,7 @@ CeL.net.web.set_class=function(element, class_name, flag){
  * @param class_name	class name || {class name 1:, class name 2:, ..}
  * @return
  */
-CeL.net.web.has_class=function(element, class_name){
+CeL.has_class=CeL.net.web.has_class=function(element, class_name){
 	///	<summary>
 	///	If HTML element has specified class
 	///	*
@@ -2444,29 +2616,44 @@ CeL.net.web.has_class=function(element, class_name){
  * @param tag_name	tag name
  * @return
  * @see
- * document.getElementsByClassName in prototype.js
+ * document.getElementsByClassName in prototype.js,
+ * jquery('.class')
  */
-CeL.net.web.find_class=function(class_name, parent, tag_name, flag){
+CeL.find_class=CeL.net.web.find_class=function(class_name, parent, tag_name, call_function, flag){
 	///	<summary>*</summary>
 	///	<param name="class_name" type="" optional="false">class name || {class name 1:, class name 2:, ..}</param>
 	///	<param name="parent" type="" optional="false"/>
 	///	<param name="tag_name" type="" optional="false">tag name</param>
 	///	<returns/>
-	///	<see>document.getElementsByClassName in prototype.js</see>
+	///	<see>
+	///	document.getElementsByClassName in prototype.js,
+	///	jquery('.class')
+	///	</see>
+
+};
+/**
+ * 取得當前 window status
+ * @param node	HTML element or Event object
+ * @returns {Object}	status
+ */
+CeL.get_window_status=CeL.net.web.get_window_status=function (node){
+	///	<summary>取得當前 window status</summary>
+	///	<param name="node" type="" optional="false">HTML element or Event object</param>
+	///	<returns type="Object">status</returns>
 
 };
 /**
  * get current computed style property of specified HTML element.
- * TODO: 整合 get_node_position, _.set_style
+ * TODO: 整合 get_node_offset, _.set_style
  * @param element	HTML element
  * @param name	W3C style property name (e.g., no '-webkit-background-clip')
  * @return
  * @see
  * http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,
- * curCss @ jQuery, http://api.jquery.com/category/css/,
+ * curCSS @ jQuery, http://api.jquery.com/category/css/,
  * <a href="http://www.quirksmode.org/dom/getstyles.html" accessdate="2010/4/1 15:44">JavaScript - Get Styles</a>,
  * <a href="http://www.javaeye.com/topic/140784?page=2" accessdate="2010/4/1 15:41">style.display取值不\u23545，\u38590道是\u27983\u35272器bug？\u35752\u35770第2\u39029:  - JavaScript - web - JavaEye\u35770\u22363</a>
- * 大體上， currentStyle 相當於getComputedStyle，而runtimeStyle相當於getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。
+ * 大體上，currentStyle 相當於 getComputedStyle，而 runtimeStyle 相當於 getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。
  * document.defaultView在mozilla中是指向window obj的,但是很有可能在其他broswer中就不指向window obj...因為w3c中沒有強行規定document.defaultView一定是一個global obj.
  * 
  * 返回頁內樣式表定義的類，那麼可以使用DOM樣式表對象來訪問：
@@ -2476,20 +2663,20 @@ CeL.net.web.find_class=function(class_name, parent, tag_name, flag){
  * @since	2010/4/2 00:14:09	rewrite
  * @memberOf	CeL.net.web
  */
-CeL.net.web.get_style=function(element, name, not_computed){
+CeL.get_style=CeL.net.web.get_style=function(element, name, not_computed){
 	///	<summary>
 	///	get current computed style property of specified HTML element.
-	///	TODO: 整合 get_node_position, _.set_style
+	///	TODO: 整合 get_node_offset, _.set_style
 	///	</summary>
 	///	<param name="element" type="" optional="false">HTML element</param>
 	///	<param name="name" type="" optional="false">W3C style property name (e.g., no '-webkit-background-clip')</param>
 	///	<returns/>
 	///	<see>
 	///	http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,
-	///	curCss @ jQuery, http://api.jquery.com/category/css/,
+	///	curCSS @ jQuery, http://api.jquery.com/category/css/,
 	///	<a href="http://www.quirksmode.org/dom/getstyles.html" accessdate="2010/4/1 15:44">JavaScript - Get Styles</a>,
 	///	<a href="http://www.javaeye.com/topic/140784?page=2" accessdate="2010/4/1 15:41">style.display取值不\u23545，\u38590道是\u27983\u35272器bug？\u35752\u35770第2\u39029:  - JavaScript - web - JavaEye\u35770\u22363</a>
-	///	大體上， currentStyle 相當於getComputedStyle，而runtimeStyle相當於getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。
+	///	大體上，currentStyle 相當於 getComputedStyle，而 runtimeStyle 相當於 getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。
 	///	document.defaultView在mozilla中是指向window obj的,但是很有可能在其他broswer中就不指向window obj...因為w3c中沒有強行規定document.defaultView一定是一個global obj.
 	///	*
 	///	返回頁內樣式表定義的類，那麼可以使用DOM樣式表對象來訪問：
@@ -2503,25 +2690,31 @@ CeL.net.web.get_style=function(element, name, not_computed){
 };
 /**
  * get the actual position [left,top,width,height] of an HTML node object
- * @param obj
+ * @param node	HTML node object
  * @return
  * @memberOf	CeL.net.web
+ * @deprecated	use get_style(), jQuery.offset(), jQuery.position()
  * @see
  * http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,
  * http://msdn.microsoft.com/library/en-us/dndude/html/dude04032000.asp,
  * http://www.mail-archive.com/mochikit@googlegroups.com/msg00584.html,
- * http://hartshorne.ca/2006/01/20/javascript_positioning/
+ * http://hartshorne.ca/2006/01/20/javascript_positioning/,
+ * http://www.jb51.net/article/18340.htm,
+ * http://blog.csdn.net/wangjj_016/archive/2010/04/09/5467507.aspx
  */
-CeL.net.web.get_node_position=function(obj){
+CeL.get_node_offset=CeL.net.web.get_node_offset=function(node){
 	///	<summary>get the actual position [left,top,width,height] of an HTML node object</summary>
-	///	<param name="obj" type="" optional="false"/>
+	///	<param name="node" type="" optional="false">HTML node object</param>
 	///	<returns/>
 	///	<memberOf>CeL.net.web</memberOf>
+	///	<deprecated>use get_style(), jQuery.offset(), jQuery.position()</deprecated>
 	///	<see>
 	///	http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,
 	///	http://msdn.microsoft.com/library/en-us/dndude/html/dude04032000.asp,
 	///	http://www.mail-archive.com/mochikit@googlegroups.com/msg00584.html,
-	///	http://hartshorne.ca/2006/01/20/javascript_positioning/
+	///	http://hartshorne.ca/2006/01/20/javascript_positioning/,
+	///	http://www.jb51.net/article/18340.htm,
+	///	http://blog.csdn.net/wangjj_016/archive/2010/04/09/5467507.aspx
 	///	</see>
 
 };
@@ -2545,7 +2738,7 @@ CeL.net.web.get_node_position=function(obj){
  * $(document).ready(fn)發生在"網頁本身的HTML"載入後就觸發，而$(window).load(fn)則會等到"網頁HTML 標籤中引用的圖檔、內嵌物件(如Flash)、IFrame"等拉哩拉雜的東西都載入後才會觸發。
  * @memberOf	CeL.net.web
  */
-CeL.net.web.on_load=function on_load(){
+CeL.on_load=CeL.net.web.on_load=function on_load(){
 	///	<summary>
 	///	比較好點的 add onload。
 	///	比起 add_listener()，本函數在已經 load 時依然會執行，而 add_listener 因為是用榜定的方法，因此 load 完就不再觸發(?)。
@@ -2583,7 +2776,7 @@ CeL.net.web.on_load=function on_load(){
  * @param listener	listener function/function array/function string,
  * 				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"
  * 			function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}
- * @param [document_object]	bind/attach to what document object
+ * @param [target_element]	bind/attach to what HTML element
  * @param [p_first]	parentNode first
  * @return
  * @since	2010/1/20 23:42:51
@@ -2591,7 +2784,7 @@ CeL.net.web.on_load=function on_load(){
  * c.f., GEvent.add_listener()
  * @memberOf	CeL.net.web
  */
-CeL.net.web.add_listener=function add_listener(type, listener, document_object, p_first){
+CeL.add_listener=CeL.net.web.add_listener=function add_listener(type, listener, target_element, p_first){
 	///	<summary>
 	///	bind/add listener.
 	///	listener 應該加上 try{}catch{}，否則會搞不清楚哪裡出問題。
@@ -2608,7 +2801,7 @@ CeL.net.web.add_listener=function add_listener(type, listener, document_object, 
 	///	須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"
 	///	function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}
 	///	</param>
-	///	<param name="document_object" type="" optional="true">bind/attach to what document object</param>
+	///	<param name="target_element" type="" optional="true">bind/attach to what HTML element</param>
 	///	<param name="p_first" type="" optional="true">parentNode first</param>
 	///	<returns/>
 	///	<since>2010/1/20 23:42:51</since>
@@ -2622,15 +2815,17 @@ CeL.net.web.add_listener=function add_listener(type, listener, document_object, 
  * <a href="http://www.w3.org/TR/DOM-Level-3-Events/#event-flow" accessdate="2010/4/16 22:40">Document Object Model (DOM) Level 3 Events Specification</a>,
  * <a href="http://www.w3.org/TR/DOM-Level-3-Events/#interface-EventTarget" accessdate="2010/4/16 22:42">Interface EventTarget</a>
  */
-CeL.net.web.add_listener.p_first=false;
+CeL.p_first=CeL.net.web.add_listener.p_first=false;
 /**
  * get (native) global listener adding function.
  * TODO: 只設定一次
+ * historical for Netscape Navigator, mozilla: window.captureEvents, document.captureEvents
  */
-CeL.net.web.add_listener.get_adder=function(){
+CeL.get_adder=CeL.net.web.add_listener.get_adder=function(){
 	///	<summary>
 	///	get (native) global listener adding function.
 	///	TODO: 只設定一次
+	///	historical for Netscape Navigator, mozilla: window.captureEvents, document.captureEvents
 	///	</summary>
 
 };
@@ -2641,12 +2836,12 @@ CeL.net.web.add_listener.get_adder=function(){
  * @param type	listen to what event type
  * @param listener	listener function/function array
  * @param [p_first]	parentNode first
- * @param [document_object]	bind/attach to what document object
+ * @param [target_element]	bind/attach to what HTML element
  * @return
  * @see
  * http://blog.othree.net/log/2007/02/06/third-argument-of-addeventlistener/
  */
-CeL.net.web.add_listener.default_adder=function(type, listener, p_first, document_object){
+CeL.default_adder=CeL.net.web.add_listener.default_adder=function(type, listener, p_first, target_element){
 	///	<summary>
 	///	含括其他情況。
 	///	all: window.onload.
@@ -2655,7 +2850,7 @@ CeL.net.web.add_listener.default_adder=function(type, listener, p_first, documen
 	///	<param name="type" type="" optional="false">listen to what event type</param>
 	///	<param name="listener" type="" optional="false">listener function/function array</param>
 	///	<param name="p_first" type="" optional="true">parentNode first</param>
-	///	<param name="document_object" type="" optional="true">bind/attach to what document object</param>
+	///	<param name="target_element" type="" optional="true">bind/attach to what HTML element</param>
 	///	<returns/>
 	///	<see>http://blog.othree.net/log/2007/02/06/third-argument-of-addeventlistener/</see>
 
@@ -2666,7 +2861,76 @@ CeL.net.web.add_listener.default_adder=function(type, listener, p_first, documen
  * 當無法執行 DOM 操作時（尚未載入、版本太舊不提供支援等）以此為主。
  * add_listener.list[type]=[listener list]
  */
-CeL.net.web.add_listener.list={};
+CeL.list=CeL.net.web.add_listener.list={};
+/**
+ * 阻止 JavaScript 事件冒泡傳遞，使 event 不傳到 parentNode。
+ * @param e	event handle
+ * @param c	cancel bubble
+ * @see
+ * http://www.jb51.net/html/200705/23/9858.htm
+ * @memberOf	CeL.net.web
+ */
+CeL.stop_event=CeL.net.web.stop_event=function(e, c){
+	///	<summary>阻止 JavaScript 事件冒泡傳遞，使 event 不傳到 parentNode。</summary>
+	///	<param name="e" type="" optional="false">event handle</param>
+	///	<param name="c" type="" optional="false">cancel bubble</param>
+	///	<see>http://www.jb51.net/html/200705/23/9858.htm</see>
+	///	<memberOf>CeL.net.web</memberOf>
+
+};
+/**
+ * 獲取頁面上選中的選取區資訊。
+ * 
+ * @example
+ * CeL.add_listener('mouseup', function (e) { var s = CeL.get_selection(); if (s && s.text) CeL.debug('select @' + this + '(' + s.element + ')' + ' (' + s.left + '+' + s.width + ',' + s.top + '+' + s.height + '), (' + e.pageX + ',' + e.pageY + '): ' + s.text); }, target_element);
+ * 
+ * @param	{Number} [index]	TODO: 第幾選取區, default: all or 0 if there's only ONE/ZERO selection
+ * @return	{Object}
+ * 	{
+ * 		left: {Number} in px,
+ * 		top: {Number} in px,
+ * 		width: {Number} in px,
+ * 		height: {Number} in px,
+ * 		text: {String} 文字,
+ * 		element: {HTMLElement},
+ * 		selection: selection object (browser dependent)
+ * 	}
+ * @return	{undefined}	error.
+ * @see
+ * http://plugins.jquery.com/project/selectedText,
+ * Gecko: https://developer.mozilla.org/en/DOM/Selection
+ * @memberOf	CeL.net.web
+ */
+CeL.get_selection=CeL.net.web.get_selection=function(index){
+	///	<summary>
+	///	獲取頁面上選中的選取區資訊。
+	///	*
+	///	</summary>
+	///	<example>
+	///	CeL.add_listener('mouseup', function (e) { var s = CeL.get_selection(); if (s && s.text) CeL.debug('select @' + this + '(' + s.element + ')' + ' (' + s.left + '+' + s.width + ',' + s.top + '+' + s.height + '), (' + e.pageX + ',' + e.pageY + '): ' + s.text); }, target_element);
+	///	*
+	///	</example>
+	///	<param name="index" type="Number" optional="true">TODO: 第幾選取區, default: all or 0 if there's only ONE/ZERO selection</param>
+	///	<returns>
+	///	{Object}
+	///	* 	{
+	///	left: {Number} in px,
+	///	top: {Number} in px,
+	///	width: {Number} in px,
+	///	height: {Number} in px,
+	///	text: {String} 文字,
+	///	element: {HTMLElement},
+	///	selection: selection object (browser dependent)
+	///	* 	}
+	///	</returns>
+	///	<returns type="undefined">error.</returns>
+	///	<see>
+	///	http://plugins.jquery.com/project/selectedText,
+	///	Gecko: https://developer.mozilla.org/en/DOM/Selection
+	///	</see>
+	///	<memberOf>CeL.net.web</memberOf>
+
+};
 /**
  * 條碼器(Barcode Scanner)/雷射讀碼器的輸入可用 onkeypress 取得
  * @param callback	callback
@@ -2681,7 +2945,7 @@ CeL.net.web.add_listener.list={};
  * });
  * @memberOf	CeL.net.web
  */
-CeL.net.web.deal_barcode=function(callback){
+CeL.deal_barcode=CeL.net.web.deal_barcode=function (callback){
 	///	<summary>條碼器(Barcode Scanner)/雷射讀碼器的輸入可用 onkeypress 取得</summary>
 	///	<param name="callback" type="" optional="false">callback</param>
 	///	<returns/>
@@ -2698,17 +2962,49 @@ CeL.net.web.deal_barcode=function(callback){
 
 };
 /**
- * translate Unicode text to HTML
+ * Translate HTML code to Unicode text
+ * @param {String} HTML	HTML code
+ * @param {Boolean} only_digital
+ * @returns
+ * @memberOf	CeL.net.web
+ */
+CeL.HTML_to_Unicode=CeL.net.web.HTML_to_Unicode=function (HTML, only_digital){
+	///	<summary>Translate HTML code to Unicode text</summary>
+	///	<param name="HTML" type="String" optional="false">HTML code</param>
+	///	<param name="only_digital" type="Boolean" optional="false"/>
+	///	<returns/>
+	///	<memberOf>CeL.net.web</memberOf>
+
+};
+/**
+ * Translate Unicode text to HTML
  * @param {String} text	Unicode text
  * @param mode	mode='x':&#xhhh;
  * @return {String}	HTML
  * @memberOf	CeL.net.web
  */
-CeL.net.web.toHTML=function(text, mode){
-	///	<summary>translate Unicode text to HTML</summary>
+CeL.to_HTML=CeL.net.web.to_HTML=function (text, mode){
+	///	<summary>Translate Unicode text to HTML</summary>
 	///	<param name="text" type="String" optional="false">Unicode text</param>
 	///	<param name="mode" type="" optional="false">mode='x':&#xhhh;</param>
 	///	<returns type="String">HTML</returns>
+	///	<memberOf>CeL.net.web</memberOf>
+
+};
+/**
+ * Translate Unicode text to HTML code
+ * @param text	Unicode text
+ * @param flags	flags, f&1!=0: turn \t, (f&2)==0: \n→<br/>, f==4: to quoted
+ * @param	ignore_tags	e.g., {object:{src:/^https?:\/\//},img:{src:/^https?:\/\//},a:{href:/^https?:\/\//}}
+ * @return
+ * @memberOf	CeL.net.web
+ */
+CeL.Unicode_to_HTML=CeL.net.web.Unicode_to_HTML=function (text, flags, ignore_tags){
+	///	<summary>Translate Unicode text to HTML code</summary>
+	///	<param name="text" type="" optional="false">Unicode text</param>
+	///	<param name="flags" type="" optional="false">flags, f&1!=0: turn \t, (f&2)==0: \n→<br/>, f==4: to quoted</param>
+	///	<param name="ignore_tags" type="" optional="false">e.g., {object:{src:/^https?:\/\//},img:{src:/^https?:\/\//},a:{href:/^https?:\/\//}}</param>
+	///	<returns/>
 	///	<memberOf>CeL.net.web</memberOf>
 
 };
@@ -2722,7 +3018,7 @@ CeL.net.web.toHTML=function(text, mode){
  * @memberOf	CeL.net.web
  * @see
  */
-CeL.net.web.get_query=function(query_string, add_to){
+CeL.get_query=CeL.net.web.get_query=function(query_string, add_to){
 	///	<summary>Translate a query string to a native Object contains key/value pair set.</summary>
 	///	<param name="query_string" type="String" optional="false">query string. default: location.search</param>
 	///	<param name="add_to" type="Object" optional="false">append to this object</param>
@@ -2742,7 +3038,7 @@ CeL.net.web.get_query=function(query_string, add_to){
  * @see
  * jQuery.param
  */
-CeL.net.web.to_query_string=function(query_Object){
+CeL.to_query_string=CeL.net.web.to_query_string=function(query_Object){
 	///	<summary>
 	///	Translate a native Object contains key/value pair set to a query string.
 	///	TODO
@@ -2754,15 +3050,15 @@ CeL.net.web.to_query_string=function(query_Object){
 
 };
 /**
- * 將 BIG5 日文假名碼修改為 Unicode 日文假名
- * @param {String} U	Unicode text
+ * 將 BIG5 日文假名碼修改為 Unicode 日文假名。
+ * @param {String} text	Unicode text
  * @return
  * @see
  * from Unicode 補完計畫 jrename.js
  */
-CeL.net.web.Big5JPToUnicodeJP=function (U){
-	///	<summary>將 BIG5 日文假名碼修改為 Unicode 日文假名</summary>
-	///	<param name="U" type="String" optional="false">Unicode text</param>
+CeL.Big5_kana_fix=CeL.net.web.Big5_kana_fix=function(text){
+	///	<summary>將 BIG5 日文假名碼修改為 Unicode 日文假名。</summary>
+	///	<param name="text" type="String" optional="false">Unicode text</param>
 	///	<returns/>
 	///	<see>from Unicode 補完計畫 jrename.js</see>
 
@@ -2777,7 +3073,7 @@ CeL.net.form.prototype={};
  * 現有台灣(.TW)可用。
  * @class	form 的 functions
  */
-CeL.net.form.address=function(){
+CeL.address=CeL.net.form.address=function(){
 	///	<summary>
 	///	JavaScript 地址輸入表單支援 (address input form)，
 	///	現有台灣(.TW)可用。
@@ -2786,21 +3082,29 @@ CeL.net.form.address=function(){
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.net.form.address.prototype={};
+/**
  * null module constructor
  * @class	輸入 bank account 的 functions
  */
-CeL.net.form.bank_account=function(){
+CeL.bank_account=CeL.net.form.bank_account=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>輸入 bank account 的 functions</class>
 
 };
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.net.form.bank_account.prototype={};
 /**
  * null module constructor
  * @class	輸入教育程度的 functions
  * @example
  * var education_form = new CeL.education.TW('education');
  */
-CeL.net.form.education=function(){
+CeL.education=CeL.net.form.education=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>輸入教育程度的 functions</class>
 	///	<example>var education_form = new CeL.education.TW('education');</example>
@@ -2812,7 +3116,7 @@ CeL.net.form.education=function(){
 * @see
 * http://dojocampus.org/explorer/#Dijit_Form%20Controls_Filtering%20Select_Basic
 */
-CeL.net.form.select_input=function(){
+CeL.select_input=CeL.net.form.select_input=function(){
 	///	<summary>
 	///	* 提供有選單的  input
 	///	* @class	form 的 functions
@@ -2836,23 +3140,35 @@ CeL.OS.Windows=function(){
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.OS.Windows.prototype={};
+/**
  * null module constructor
  * @class	Windows job 的 functions
  */
-CeL.OS.Windows.job=function(){
+CeL.job=CeL.OS.Windows.job=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>Windows job 的 functions</class>
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.OS.Windows.job.prototype={};
+/**
  * null module constructor
  * @class	Windows registry 的 functions
  */
-CeL.OS.Windows.registry=function(){
+CeL.registry=CeL.OS.Windows.registry=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>Windows registry 的 functions</class>
 
 };
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.OS.Windows.registry.prototype={};
 /**
  * null module constructor
  * @class	WMI 的 functions
@@ -2863,6 +3179,10 @@ CeL.OS.WMI=function(){
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.OS.WMI.prototype={};
+/**
  * get CIDR data
  * @param {Number} CIDR	CIDR mask bits, 0~32
  * @param {String} IP	IPv4, e.g., 1.2.3.4
@@ -2870,7 +3190,7 @@ CeL.OS.WMI=function(){
  * @since	2010/4/21 22:56:16
  * @memberOf	CeL.OS.WMI
  */
-CeL.OS.WMI.CIDR_to_IP=function (CIDR, IP){
+CeL.CIDR_to_IP=CeL.OS.WMI.CIDR_to_IP=function (CIDR, IP){
 	///	<summary>get CIDR data</summary>
 	///	<param name="CIDR" type="Number" optional="false">CIDR mask bits, 0~32</param>
 	///	<param name="IP" type="String" optional="false">IPv4, e.g., 1.2.3.4</param>
@@ -2898,7 +3218,7 @@ CeL.OS.WMI.CIDR_to_IP=function (CIDR, IP){
  * @requires	getWMIData,VBA,JSArrayToSafeArray,CIDR_to_IP
  * @memberOf	CeL.OS.WMI
  */
-CeL.OS.WMI.set_net_info=function (to_s, from){
+CeL.set_net_info=CeL.OS.WMI.set_net_info=function (to_s, from){
 	///	<summary>改變網卡的IP地址: change IP, set IP</summary>
 	///	<param name="to_s" type="" optional="false">IP or {IP:''||[], CIDR:24||.CIDR_notation, Subnet:''||[], DNS:''||[], Gateway:254||[], GatewayOrder:''||[]}</param>
 	///	<param name="from" type="" optional="false">IP or netif No.</param>
@@ -2930,11 +3250,15 @@ CeL.misc.prototype={};
  * null module constructor
  * @class	check 處理的 functions
  */
-CeL.misc.check=function(){
+CeL.check=CeL.misc.check=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>check 處理的 functions</class>
 
 };
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.misc.check.prototype={};
 
 //	null constructor for [CeL.IO]
 CeL.IO=function(){};
@@ -2950,6 +3274,10 @@ CeL.IO.file=function(){
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.IO.file.prototype={};
+/**
  * determine base path.
  * 給定 base path 的結構後，藉由 path_now 推測 base path 的 full path.
  * cf. 
@@ -2961,7 +3289,7 @@ CeL.IO.file=function(){
  * @requres	reducePath,getPathOnly,dirSp,dirSpR
  * @memberOf	CeL.IO.file
  */
-CeL.IO.file.determine_base_path=function (base_path_structure, path_now){
+CeL.determine_base_path=CeL.IO.file.determine_base_path=function (base_path_structure, path_now){
 	///	<summary>
 	///	determine base path.
 	///	給定 base path 的結構後，藉由 path_now 推測 base path 的 full path.
@@ -2981,7 +3309,7 @@ CeL.IO.file.determine_base_path=function (base_path_structure, path_now){
  * @return
  * @memberOf	CeL.IO.file
  */
-CeL.IO.file.parse_path=function (path){
+CeL.parse_path=CeL.IO.file.parse_path=function (path){
 	///	<summary>cf: getFN()</summary>
 	///	<param name="path" type="String" optional="false">path name</param>
 	///	<returns/>
@@ -2995,7 +3323,7 @@ CeL.IO.file.parse_path=function (path){
  * @requires	dirSp,dirSpR
  * @memberOf	CeL.IO.file
  */
-CeL.IO.file.is_absolute_path=function (path){
+CeL.is_absolute_path=CeL.IO.file.is_absolute_path=function (path){
 	///	<summary>is absolute or relative path, not very good solution</summary>
 	///	<param name="path" type="String" optional="false"/>
 	///	<returns/>
@@ -3012,17 +3340,21 @@ CeL.IO.Windows.prototype={};
  * null module constructor
  * @class	Windows 下，檔案操作相關之 function。
  */
-CeL.IO.Windows.file=function(){
+CeL.file=CeL.IO.Windows.file=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>Windows 下，檔案操作相關之 function。</class>
 
 };
 /**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.IO.Windows.file.prototype={};
+/**
  * FileSystemObject Object I/O mode enumeration
  * @see	<a href="http://msdn.microsoft.com/en-us/library/314cz14s%28VS.85%29.aspx" accessdate="2009/11/28 17:42" title="OpenTextFile Method">OpenTextFile Method</a>
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.iomode={
+CeL.iomode=CeL.IO.Windows.file.iomode={
 	// * @_description <a href="#.iomode">iomode</a>: Open a file for reading only. You can't write to this file.
 	/**
 	 * Open a file for reading only. You can't write to this file.
@@ -3045,7 +3377,7 @@ CeL.IO.Windows.file.iomode={
  * @see	<a href="http://msdn.microsoft.com/en-us/library/314cz14s%28VS.85%29.aspx" accessdate="2009/11/28 17:42" title="OpenTextFile Method">OpenTextFile Method</a>
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.open_format={
+CeL.open_format=CeL.IO.Windows.file.open_format={
 	/**
 	 * Opens the file using the system default.
 	 * @memberOf	CeL.IO.Windows.file
@@ -3076,7 +3408,7 @@ CeL.IO.Windows.file.open_format={
  * @requires	path_separator,fso,WshShell,new_line,Enumerator
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.move_file=function move_file(from, to, base_path, flag, filter){
+CeL.move_file=CeL.IO.Windows.file.move_file=function move_file(from, to, base_path, flag, filter){
 	///	<summary>
 	///	move/rename files, ** use RegExp, but no global flag **<br/>
 	///	可用 move_file_filter() 來排除不要的<br/>
@@ -3098,7 +3430,7 @@ CeL.IO.Windows.file.move_file=function move_file(from, to, base_path, flag, filt
  * @constant
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.move_file.f={
+CeL.f=CeL.IO.Windows.file.move_file.f={
 		/**
 		 * null flag
 		 * @memberOf CeL.IO.Windows.file
@@ -3151,7 +3483,7 @@ CeL.IO.Windows.file.move_file.f={
  * @requires	fso,get_folder,getFN,initWScriptObj
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.move_1_file=function(from, to, dir, only_filename, reverse){
+CeL.move_1_file=CeL.IO.Windows.file.move_1_file=function(from, to, dir, only_filename, reverse){
 	///	<summary>move file</summary>
 	///	<requires>fso,get_folder,getFN,initWScriptObj</requires>
 	///	<memberOf>CeL.IO.Windows.file</memberOf>
@@ -3166,7 +3498,7 @@ CeL.IO.Windows.file.move_1_file=function(from, to, dir, only_filename, reverse){
  * @see	<a href="http://msdn.microsoft.com/en-us/library/bb787870%28VS.85%29.aspx" accessdate="2009/11/29 22:52" title="GetDetailsOf Method (Folder)">GetDetailsOf Method (Folder)</a>
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.get_file_details=function(fileObj, parentDirObj){
+CeL.get_file_details=CeL.IO.Windows.file.get_file_details=function(fileObj, parentDirObj){
 	///	<summary>get file details (readonly)</summary>
 	///	<example>
 	///	get_file_details('path');
@@ -3184,7 +3516,7 @@ CeL.IO.Windows.file.get_file_details=function(fileObj, parentDirObj){
  * @memberOf	CeL.IO.Windows.file
  * @since	2010/1/9 08:33:36
  */
-CeL.IO.Windows.file.fso_attributes={
+CeL.fso_attributes=CeL.IO.Windows.file.fso_attributes={
 	/**
 	 * Default. No attributes are set.
 	 * @memberOf	CeL.IO.Windows.file
@@ -3245,7 +3577,7 @@ CeL.IO.Windows.file.fso_attributes={
  * change_attributes(path,'-ReadOnly');
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.change_attributes=function(F, A){
+CeL.change_attributes=CeL.IO.Windows.file.change_attributes=function(F, A){
 	///	<summary>
 	///	改變檔案之屬性。
 	///	chmod @ UNIX
@@ -3266,7 +3598,7 @@ CeL.IO.Windows.file.change_attributes=function(F, A){
  * @requires	fso,WshShell,iomode
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.openDataTest=function(FN, NOTexist, io_mode){
+CeL.openDataTest=CeL.IO.Windows.file.openDataTest=function(FN, NOTexist, io_mode){
 	///	<summary>
 	///	開檔處理<br/>
 	///	測試是否已開啟資料檔之測試與重新開啟資料檔
@@ -3286,7 +3618,7 @@ CeL.IO.Windows.file.openDataTest=function(FN, NOTexist, io_mode){
  * @param io_mode
  * @return
  */
-CeL.IO.Windows.file.open_template=function(FN, format, io_mode){
+CeL.open_template=CeL.IO.Windows.file.open_template=function(FN, format, io_mode){
 	///	<summary>*</summary>
 	///	<param name="FN" type="" optional="false"/>
 	///	<param name="format" type="" optional="false"/>
@@ -3304,7 +3636,7 @@ CeL.IO.Windows.file.open_template=function(FN, format, io_mode){
  * <a href="http://www.hawk.34sp.com/stdpls/dwsh/charset_adodb.html">Hawk&apos;s W3 Laboratory : Disposable WSH : 番外編：文字\u12456\u12531\u12467\u12540\u12487\u12451\u12531\u12464\u12392ADODB.Stream</a>
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.translate_AdoStream_binary_data=function translate_AdoStream_binary_data(data, len, type){
+CeL.translate_AdoStream_binary_data=CeL.IO.Windows.file.translate_AdoStream_binary_data=function translate_AdoStream_binary_data(data, len, type){
 	///	<summary>轉換以 adTypeBinary 讀到的資料</summary>
 	///	<example>
 	///	//	較安全的讀檔：
@@ -3322,7 +3654,7 @@ CeL.IO.Windows.file.translate_AdoStream_binary_data=function translate_AdoStream
  * @since	2007/9/19 20:58:26
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.Ado_binary=function(data,pos){
+CeL.Ado_binary=CeL.IO.Windows.file.Ado_binary=function(data,pos){
 	///	<summary>轉換以 adTypeBinary 讀到的資料</summary>
 	///	<param name="data" type="" optional="false">以 adTypeBinary 讀到的資料</param>
 	///	<param name="pos" type="" optional="false">position</param>
@@ -3333,7 +3665,7 @@ CeL.IO.Windows.file.Ado_binary=function(data,pos){
 /**
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.Ado_binary.prototype={};
+CeL.prototype=CeL.IO.Windows.file.Ado_binary.prototype={};
 /**
  * 提供給 <a href="#.read_file">read_file</a>, <a href="#.write_file">write_file</a> 使用的簡易開檔函數
  * @param FN	file path
@@ -3341,7 +3673,7 @@ CeL.IO.Windows.file.Ado_binary.prototype={};
  * @param io_mode	open mode, e.g., iomode.ForWriting
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.open_file=function open_file(FN, format, io_mode){
+CeL.open_file=CeL.IO.Windows.file.open_file=function open_file(FN, format, io_mode){
 	///	<summary>提供給 <a href="#.read_file">read_file</a>, <a href="#.write_file">write_file</a> 使用的簡易開檔函數</summary>
 	///	<param name="FN" type="" optional="false">file path</param>
 	///	<param name="format" type="" optional="false">open format, e.g., open_format.TristateUseDefault</param>
@@ -3358,7 +3690,7 @@ CeL.IO.Windows.file.open_file=function open_file(FN, format, io_mode){
  * @return {String} 檔案內容
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.read_file=function(FN,format,io_mode,func){
+CeL.read_file=CeL.IO.Windows.file.read_file=function(FN,format,io_mode,func){
 	///	<summary>讀取檔案</summary>
 	///	<param name="FN" type="" optional="false">file path</param>
 	///	<param name="format" type="" optional="false">open encode = simpleFileDformat</param>
@@ -3379,7 +3711,7 @@ CeL.IO.Windows.file.read_file=function(FN,format,io_mode,func){
  * @return error No.
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.write_file=function(FN, content, format, io_mode, N_O){
+CeL.write_file=CeL.IO.Windows.file.write_file=function(FN, content, format, io_mode, N_O){
 	///	<summary>
 	///	將 content 寫入 file
 	///	** ADODB.Stream does not support appending!
@@ -3396,7 +3728,7 @@ CeL.IO.Windows.file.write_file=function(FN, content, format, io_mode, N_O){
 /**
  * 靠常用字自動判別字串之編碼	string,預設編碼
  */
-CeL.IO.Windows.file.autodetectStringEncode=function(str){
+CeL.autodetectStringEncode=CeL.IO.Windows.file.autodetectStringEncode=function(str){
 	///	<summary>靠常用字自動判別字串之編碼	string,預設編碼</summary>
 
 };
@@ -3411,7 +3743,7 @@ CeL.IO.Windows.file.autodetectStringEncode=function(str){
  * @deprecated	以 <a href="#.traverse_file_system">traverse_file_system</a> 代替
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.folder_info=function(folder_path,file_filter,traverseSubDirectory){
+CeL.folder_info=CeL.IO.Windows.file.folder_info=function(folder_path,file_filter,traverseSubDirectory){
 	///	<summary>Get the infomation of folder</summary>
 	///	<param name="folder_path" type="" optional="false">folder path</param>
 	///	<param name="file_filter" type="" optional="false"/>
@@ -3427,7 +3759,7 @@ CeL.IO.Windows.file.folder_info=function(folder_path,file_filter,traverseSubDire
  * @memberOf	CeL.IO.Windows.file
  * @constant
  */
-CeL.IO.Windows.file.folder_info.f={
+CeL.f=CeL.IO.Windows.file.folder_info.f={
 		noNewObj : -1,
 		files : 0,
 		dirs : 1,
@@ -3446,7 +3778,7 @@ CeL.IO.Windows.file.folder_info.f={
  * @return
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.IO.Windows.file.iconv_file=function(fileName, toCode, fromCode, encodeFunction){
+CeL.iconv_file=CeL.IO.Windows.file.iconv_file=function(fileName, toCode, fromCode, encodeFunction){
 	///	<summary>將編碼為fromCode之檔案fileName中所有不合編碼toCode之char以encodeFunction轉換</summary>
 	///	<param name="fileName" type="" optional="false"/>
 	///	<param name="toCode" type="" optional="false"/>
@@ -3466,7 +3798,7 @@ CeL.IO.Windows.file.iconv_file=function(fileName, toCode, fromCode, encodeFuncti
  * @memberOf	CeL.IO.Windows.file
  * @see	<a href="http://msdn.microsoft.com/library/en-us/script56/html/0fa93e5b-b657-408d-9dd3-a43846037a0e.asp">FileSystemObject</a>
  */
-CeL.IO.Windows.file.traverse_file_system=function traverse_file_system(FS_function_array, path, filter, flag){
+CeL.traverse_file_system=CeL.IO.Windows.file.traverse_file_system=function traverse_file_system(FS_function_array, path, filter, flag){
 	///	<summary>巡覽 file system 的公用函數</summary>
 	///	<param name="FS_function_array" type="" optional="false">file system handle function array</param>
 	///	<param name="path" type="" optional="false">target path</param>
@@ -3477,6 +3809,12 @@ CeL.IO.Windows.file.traverse_file_system=function traverse_file_system(FS_functi
 	///	<see><a href="http://msdn.microsoft.com/library/en-us/script56/html/0fa93e5b-b657-408d-9dd3-a43846037a0e.asp">FileSystemObject</a></see>
 
 };
+/**
+ * <a href="#.traverse_file_system">traverse_file_system</a> 的 flag enumeration
+ * @memberOf	CeL.IO.Windows.file
+ * @constant
+ */
+//CeL.f=CeL.IO.Windows.file.traverse_file_system.f;//traverse_file_system.f = {
 
 //	null constructor for [CeL.code]
 CeL.code=function(){};
@@ -3486,11 +3824,15 @@ CeL.code.prototype={};
  * null module constructor
  * @class	相容性 test 專用的 functions
  */
-CeL.code.API=function(){
+CeL.API=CeL.code.API=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>相容性 test 專用的 functions</class>
 
 };
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.code.API.prototype={};
 /**
  * 自動挑選 domain
  * @param	API	API name
@@ -3500,7 +3842,7 @@ CeL.code.API=function(){
  * @see
  * 
  */
-CeL.code.API.use_API=function(API, callback){
+CeL.use_API=CeL.code.API.use_API=function(API, callback){
 	///	<summary>自動挑選 domain</summary>
 	///	<param name="API" type="" optional="false">API name</param>
 	///	<param name="callback" type="" optional="false">null: do NOT load</param>
@@ -3512,7 +3854,7 @@ CeL.code.API.use_API=function(API, callback){
 /**
  * 語系. e.g., zh-TW, ja, en
  */
-CeL.code.API.use_API.language='zh-TW';
+CeL.language=CeL.code.API.use_API.language='zh-TW';
 /**
  * 為 Microsoft Translator 設置
  * @param text	test to translate
@@ -3521,27 +3863,35 @@ CeL.code.API.use_API.language='zh-TW';
  * @param [to_enc]
  * @return
  * @see
- * http://msdn.microsoft.com/en-us/library/ff512406.aspx
+ * <a href="http://msdn.microsoft.com/en-us/library/ff512406.aspx" accessdate="2010/7/12 20:22">Translate Method</a>,
+ * <a href="http://www.west-wind.com/Weblog/posts/107136.aspx" accessdate="2010/7/12 20:22">JSONP for cross-site Callbacks - Rick Strahl's Web Log</a>
  */
-CeL.code.API.add_Microsoft_translate=function(text, callback, from_enc, to_enc){
+CeL.add_Microsoft_translate=CeL.code.API.add_Microsoft_translate=function(text, callback, from_enc, to_enc){
 	///	<summary>為 Microsoft Translator 設置</summary>
 	///	<param name="text" type="" optional="false">test to translate</param>
 	///	<param name="callback" type="" optional="false">callback(from text,to text)</param>
 	///	<param name="from_enc" type="" optional="true"/>
 	///	<param name="to_enc" type="" optional="true"/>
 	///	<returns/>
-	///	<see>http://msdn.microsoft.com/en-us/library/ff512406.aspx</see>
+	///	<see>
+	///	<a href="http://msdn.microsoft.com/en-us/library/ff512406.aspx" accessdate="2010/7/12 20:22">Translate Method</a>,
+	///	<a href="http://www.west-wind.com/Weblog/posts/107136.aspx" accessdate="2010/7/12 20:22">JSONP for cross-site Callbacks - Rick Strahl's Web Log</a>
+	///	</see>
 
 };
 /**
  * null module constructor
  * @class	相容性 test 專用的 functions
  */
-CeL.code.compatibility=function(){
+CeL.compatibility=CeL.code.compatibility=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>相容性 test 專用的 functions</class>
 
 };
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.code.compatibility.prototype={};
 /**
  * Are we in a web environment?
  * @param W3CDOM	Are we in a W3C DOM environment?
@@ -3551,7 +3901,7 @@ CeL.code.compatibility=function(){
  * use lazy evaluation
  * @memberOf	CeL.code.compatibility
  */
-CeL.code.compatibility.is_web=function is_web(W3CDOM){
+CeL.is_web=CeL.code.compatibility.is_web=function is_web(W3CDOM){
 	///	<summary>Are we in a web environment?</summary>
 	///	<param name="W3CDOM" type="" optional="false">Are we in a W3C DOM environment?</param>
 	///	<returns>We're in a web environment.</returns>
@@ -3567,7 +3917,7 @@ CeL.code.compatibility.is_web=function is_web(W3CDOM){
  * @since	2010/1/14 22:04:37
  * @memberOf	CeL.code.compatibility
  */
-CeL.code.compatibility.is_DOM=function(name){
+CeL.is_DOM=CeL.code.compatibility.is_DOM=function(name){
 	///	<summary>判斷為 DOM。</summary>
 	///	<param name="name" type="" optional="false">various name @ name-space window. e.g., document, location</param>
 	///	<returns type="Boolean">various is object of window</returns>
@@ -3590,7 +3940,7 @@ CeL.code.compatibility.is_DOM=function(name){
  * lazy evaluation
  * http://peter.michaux.ca/articles/lazy-function-definition-pattern
  */
-CeL.code.compatibility.is_HTA=function is_HTA(id){
+CeL.is_HTA=CeL.code.compatibility.is_HTA=function is_HTA(id){
 	///	<summary>
 	///	Are we run in HTA?<br/>
 	///	** HTA 中應該在 onload 中呼叫，否則 document.getElementsByTagName 不會有東西！
@@ -3613,11 +3963,15 @@ CeL.code.compatibility.is_HTA=function is_HTA(id){
  * null module constructor
  * @class	code.debug 的 functions
  */
-CeL.code.debug=function(){
+CeL.debug=CeL.code.debug=function(){
 	///	<summary>null module constructor</summary>
 	///	<class>code.debug 的 functions</class>
 
 };
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.code.debug.prototype={};
 /**
  * 顯示訊息視窗<br/>
  * alert() 改用VBScript的MsgBox可產生更多效果，但NS不支援的樣子。
@@ -3630,7 +3984,7 @@ CeL.code.debug=function(){
  * @see	<a href="http://msdn.microsoft.com/library/en-us/script56/html/wsmthpopup.asp">Popup Method</a>
  * @memberOf	CeL.code.debug
  */
-CeL.code.debug.JSalert=function (message, wait, title, type){
+CeL.JSalert=CeL.code.debug.JSalert=function (message, wait, title, type){
 	///	<summary>
 	///	顯示訊息視窗<br/>
 	///	alert() 改用VBScript的MsgBox可產生更多效果，但NS不支援的樣子。
@@ -3655,12 +4009,12 @@ CeL.code.log.prototype={};
 	 * log 時 warning/error message 之 className
 	 * @name	CeL.code.log.prototype.className_set
 	 */
-//CeL.code.log.prototype.className_set;//className_set || {
+//CeL.className_set=CeL.code.log.prototype.className_set;//className_set || {
 	/**
 	 * log 時 warning/error message 之 prefix
 	 * @name	CeL.code.log.prototype.message_prefix
 	 */
-CeL.code.log.prototype.message_prefix={
+CeL.message_prefix=CeL.code.log.prototype.message_prefix={
 			/**
 			 * @description	當呼叫 {@link CeL.code.log.prototype.log} 時使用的 prefix, DEFAULT prefix.
 			 * @name	CeL.code.log.prototype.message_prefix.log
@@ -3693,7 +4047,7 @@ CeL.code.log.prototype.message_prefix={
  * Specifies the name of the type of the error.
  * Possible values include Error, EvalError, RangeError, ReferenceError, SyntaxError, TypeError, and URIError.
  */
-CeL.code.log.get_error_message=function get_error_message(e, new_line, caller){
+CeL.get_error_message=CeL.code.log.get_error_message=function get_error_message(e, new_line, caller){
 	///	<summary>對各種不同 error object 作應對，獲得可理解的 error message。</summary>
 	///	<param name="e" type="" optional="false">error object</param>
 	///	<param name="new_line" type="" optional="false">new_line</param>
@@ -3718,7 +4072,7 @@ CeL.code.log.get_error_message=function get_error_message(e, new_line, caller){
  *            HTML node
  * @memberOf CeL.code.log
  */
-CeL.code.log.node_description=function(node, flag){
+CeL.node_description=CeL.code.log.node_description=function(node, flag){
 	///	<summary>
 	///	get node description
 	///	*
@@ -3749,9 +4103,9 @@ CeL.code.log.node_description=function(node, flag){
  * @_memberOf	CeL.code.log
  * @since	2009/8/24 20:15:31
  */
-CeL.code.log.extend=function(obj, className_set){
+CeL.extend=CeL.code.log.extend=function(obj, className_set){
 	///	<summary>get new extend instance</summary>
-	///	<param name="obj" type="String|objectHTMLElement" optional="true">message area element or id</param>
+	///	<param name="obj" type="String|objectHTMLElement" optional="true" domElement="true">message area element or id</param>
 	///	<returns type="Array">[ instance of this module, log function, warning function, error function ]</returns>
 	///	<example>
 	///	*
@@ -3778,11 +4132,15 @@ CeL.code.log.extend=function(obj, className_set){
  * @class 程式碼重整相關之 function。
  * @constructor
  */
-CeL.code.reorganize=function (){
+CeL.reorganize=CeL.code.reorganize=function (){
 	///	<summary>null module constructor</summary>
 	///	<class>程式碼重整相關之 function。</class>
 
 };
+/**
+ * for JSDT: 有 prototype 才會將之當作 Class
+ */
+CeL.prototype=CeL.code.reorganize.prototype={};
 /**
 * 取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。
 * 若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
@@ -3790,7 +4148,7 @@ CeL.code.reorganize=function (){
 * @return
 * @requires	ScriptName,simpleRead
 */
-CeL.code.reorganize.get_all_functions=function (script_filename){
+CeL.get_all_functions=CeL.code.reorganize.get_all_functions=function (script_filename){
 	///	<summary>
 	///	* 取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。
 	///	* 若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
@@ -3805,7 +4163,7 @@ CeL.code.reorganize.get_all_functions=function (script_filename){
 * @since	2009/11/25 22:59:02
 * @_memberOf	_module_
 */
-CeL.code.reorganize.library_loader_by_registry=function (){
+CeL.library_loader_by_registry=CeL.code.reorganize.library_loader_by_registry=function (){
 	///	<summary>
 	///	* for 引用：　include library 自 registry 中的 path
 	///	* @since	2009/11/25 22:59:02
@@ -3818,16 +4176,16 @@ CeL.code.reorganize.library_loader_by_registry=function (){
 * @param {String} code	程式碼
 * @param {Boolean} fill_code	(TODO) 不只是定義，在 .code 填入程式碼。
 * @return	{Object}	root namespace
-* @since	2009/12/5 15:04:42, 2009/12/20 14:33:30
+* @since	2009/12/5 15:04:42, 2009/12/20 14:33:30, 2010/7/7 10:58:22
 * @_memberOf	_module_
 */
-CeL.code.reorganize.get_various_from_code=function (code, fill_code){
+CeL.get_various_from_code=CeL.code.reorganize.get_various_from_code=function (code, fill_code){
 	///	<summary>
 	///	* get various from code
 	///	* @param {String} code	程式碼
 	///	* @param {Boolean} fill_code	(TODO) 不只是定義，在 .code 填入程式碼。
 	///	* @return	{Object}	root namespace
-	///	* @since	2009/12/5 15:04:42, 2009/12/20 14:33:30
+	///	* @since	2009/12/5 15:04:42, 2009/12/20 14:33:30, 2010/7/7 10:58:22
 	///	* @_memberOf	_module_
 	///	</summary>
 
@@ -3841,7 +4199,7 @@ CeL.code.reorganize.get_various_from_code=function (code, fill_code){
 * @since	2009/12/20 14:51:52
 * @_memberOf	_module_
 */
-CeL.code.reorganize.get_code_from_generated_various=function (ns, prefix, code_array){
+CeL.get_code_from_generated_various=CeL.code.reorganize.get_code_from_generated_various=function (ns, prefix, code_array){
 	///	<summary>
 	///	* 把 get_various_from_code 生成的 namespace 轉成 code
 	///	* @param	{Object} ns	root namespace
@@ -3851,5 +4209,32 @@ CeL.code.reorganize.get_code_from_generated_various=function (ns, prefix, code_a
 	///	* @since	2009/12/20 14:51:52
 	///	* @_memberOf	_module_
 	///	</summary>
+
+};
+/**
+ * 讀入CSV檔<br/>
+ * !! slow !!
+ * @since 2007/8/6 17:53:57-22:11:22
+ * @see 可參考 JKL.ParseXML.CSV.prototype.parse_CSV	2007/11/4 15:49:4
+ * @deprecated 廢棄: use parse_CSV() instead
+ * @param FP file path
+ * @param FD field delimiter([,;:	]|\s+)
+ * @param TD text delimiter['"]
+ * @param hasTitle the data has a title line
+ * @return Array contains data
+ */
+readCSVdata=function(FP,FD,TD,hasTitle,enc){
+	///	<summary>
+	///	讀入CSV檔<br/>
+	///	!! slow !!
+	///	</summary>
+	///	<since>2007/8/6 17:53:57-22:11:22</since>
+	///	<see>可參考 JKL.ParseXML.CSV.prototype.parse_CSV	2007/11/4 15:49:4</see>
+	///	<deprecated>廢棄: use parse_CSV() instead</deprecated>
+	///	<param name="FP" type="" optional="false">file path</param>
+	///	<param name="FD" type="" optional="false">field delimiter([,;:	]|\s+)</param>
+	///	<param name="TD" type="" optional="false">text delimiter['"]</param>
+	///	<param name="hasTitle" type="" optional="false">the data has a title line</param>
+	///	<returns>Array contains data</returns>
 
 };

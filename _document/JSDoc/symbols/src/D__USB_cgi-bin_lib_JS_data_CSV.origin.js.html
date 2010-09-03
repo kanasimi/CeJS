@@ -202,137 +202,144 @@
 <span class='line'>195</span> </span><span class="WHIT">	</span><span class="COMM">// _r=[ [L1_1,L1_2,..], [L2_1,L2_2,..],.. ]</span><span class="WHIT">
 <span class='line'>196</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">_r</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>197</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>198</span> </span><span class="COMM">/**
-<span class='line'>199</span>  * field delimiter
-<span class='line'>200</span>  */</span><span class="WHIT">
-<span class='line'>201</span> </span><span class="NAME">_.parse_CSV.fd</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'\\t,;'</span><span class="PUNC">;</span><span class="COMM">// :\s</span><span class="WHIT">
-<span class='line'>202</span> </span><span class="COMM">/**
-<span class='line'>203</span>  * text delimiter
-<span class='line'>204</span>  */</span><span class="WHIT">
-<span class='line'>205</span> </span><span class="NAME">_.parse_CSV.td</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'"\''</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>206</span> </span><span class="COMM">//_.parse_CSV.ld	line delimiter: only \n, \r will be ignored.</span><span class="WHIT">
+<span class='line'>198</span> 
+<span class='line'>199</span> </span><span class="NAME">CeL.data.CSV</span><span class="WHIT">
+<span class='line'>200</span> </span><span class="PUNC">.</span><span class="WHIT">
+<span class='line'>201</span> </span><span class="COMM">/**
+<span class='line'>202</span> * field delimiter
+<span class='line'>203</span> */</span><span class="WHIT">
+<span class='line'>204</span> </span><span class="NAME">parse_CSV.fd</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'\\t,;'</span><span class="PUNC">;</span><span class="COMM">// :\s</span><span class="WHIT">
+<span class='line'>205</span> </span><span class="NAME">CeL.data.CSV</span><span class="WHIT">
+<span class='line'>206</span> </span><span class="PUNC">.</span><span class="WHIT">
 <span class='line'>207</span> </span><span class="COMM">/**
-<span class='line'>208</span>  * auto detect.. no title
-<span class='line'>209</span>  */</span><span class="WHIT">
-<span class='line'>210</span> </span><span class="NAME">_.parse_CSV.hasTitle</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>211</span> </span><span class="COMM">//_.parse_CSV.title_word='t';	//	data[parse_CSV.title_word]=title row array</span><span class="WHIT">
-<span class='line'>212</span> </span><span class="COMM">//_.parse_CSV.fd=';',parse_CSV.td='"',alert(parse_CSV('"dfdf\nsdff";"sdf""sadf\n""as""dfsdf";sdfsadf;"dfsdfdf""dfsadf";sfshgjk',1).join('\n'));WScript.Quit();</span><span class="WHIT">
-<span class='line'>213</span> 
-<span class='line'>214</span> 
-<span class='line'>215</span> 
-<span class='line'>216</span> </span><span class="COMM">//	2007/8/6 17:53:57-22:11:22</span><span class="WHIT">
-<span class='line'>217</span> 
-<span class='line'>218</span> </span><span class="COMM">/*
-<span class='line'>219</span> test:
-<span class='line'>220</span> 'dfgdfg,"fgd",dfg'
-<span class='line'>221</span> 'dfgdfg,"fgd",dfg'
+<span class='line'>208</span> * text delimiter
+<span class='line'>209</span> */</span><span class="WHIT">
+<span class='line'>210</span> </span><span class="NAME">parse_CSV.td</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'"\''</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>211</span> </span><span class="COMM">//_.parse_CSV.ld	line delimiter: only \n, \r will be ignored.</span><span class="WHIT">
+<span class='line'>212</span> </span><span class="NAME">CeL.data.CSV</span><span class="WHIT">
+<span class='line'>213</span> </span><span class="PUNC">.</span><span class="WHIT">
+<span class='line'>214</span> </span><span class="COMM">/**
+<span class='line'>215</span> * auto detect.. no title
+<span class='line'>216</span> */</span><span class="WHIT">
+<span class='line'>217</span> </span><span class="NAME">parse_CSV.hasTitle</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>218</span> </span><span class="COMM">//_.parse_CSV.title_word='t';	//	data[parse_CSV.title_word]=title row array</span><span class="WHIT">
+<span class='line'>219</span> </span><span class="COMM">//_.parse_CSV.fd=';',parse_CSV.td='"',alert(parse_CSV('"dfdf\nsdff";"sdf""sadf\n""as""dfsdf";sdfsadf;"dfsdfdf""dfsadf";sfshgjk',1).join('\n'));WScript.Quit();</span><span class="WHIT">
+<span class='line'>220</span> 
+<span class='line'>221</span> 
 <span class='line'>222</span> 
-<span class='line'>223</span> 'sdfsdf','ssdfdf'',''sdf'
+<span class='line'>223</span> </span><span class="COMM">//	2007/8/6 17:53:57-22:11:22</span><span class="WHIT">
 <span class='line'>224</span> 
-<span class='line'>225</span> */</span><span class="WHIT">
-<span class='line'>226</span> </span><span class="COMM">/**
-<span class='line'>227</span>  * 讀入CSV檔&lt;br/>
-<span class='line'>228</span>  * !! slow !!
-<span class='line'>229</span>  * @since 2007/8/6 17:53:57-22:11:22
-<span class='line'>230</span>  * @see 可參考 JKL.ParseXML.CSV.prototype.parse_CSV	2007/11/4 15:49:4
-<span class='line'>231</span>  * @deprecated 廢棄: use parse_CSV() instead
-<span class='line'>232</span>  * @param FP file path
-<span class='line'>233</span>  * @param FD field delimiter([,;:	]|\s+)
-<span class='line'>234</span>  * @param TD text delimiter['"]
-<span class='line'>235</span>  * @param hasTitle the data has a title line
-<span class='line'>236</span>  * @return Array contains data
-<span class='line'>237</span>  */</span><span class="WHIT">
-<span class='line'>238</span> </span><span class="COMM">//readCSVdata[generateCode.dLK]='autodetectEncode,simpleRead,simpleFileAutodetectEncode';</span><span class="WHIT">
-<span class='line'>239</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">readCSVdata</span><span class="PUNC">(</span><span class="NAME">FP</span><span class="PUNC">,</span><span class="NAME">FD</span><span class="PUNC">,</span><span class="NAME">TD</span><span class="PUNC">,</span><span class="NAME">hasTitle</span><span class="PUNC">,</span><span class="NAME">enc</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>240</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">=</span><span class="NAME">simpleRead</span><span class="PUNC">(</span><span class="NAME">FP</span><span class="PUNC">,</span><span class="NAME">enc</span><span class="PUNC">||</span><span class="NAME">simpleFileAutodetectEncode</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/^[\r\n\s]+/</span><span class="PUNC">,</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">reg</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>241</span> </span><span class="WHIT">	</span><span class="STRN">'"'</span><span class="PUNC">:</span><span class="REGX">/"?(([^"]+|"")+)"?([,;:	]|[ \r\n]+)/g</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>242</span> </span><span class="WHIT">	</span><span class="STRN">"'"</span><span class="PUNC">:</span><span class="REGX">/'?(([^']+|'')+)'?([,;:	]|[ \r\n]+)/g</span><span class="WHIT">
-<span class='line'>243</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>244</span> </span><span class="WHIT"> </span><span class="COMM">//	detect delimiter</span><span class="WHIT">
-<span class='line'>245</span> </span><span class="COMM">/*
-<span class='line'>246</span>  if(!FD||!TD){
-<span class='line'>247</span>   var a,b,i=0,F='[,;:	\s]',T='[\'"]',r=new RegExp('(^'+(TD||T)+'|('+(TD||T)+')('+(FD||F)+')('+(TD||T)+')|'+(TD||T)+'$)','g');
-<span class='line'>248</span>   F={},T={};
-<span class='line'>249</span>   try{
-<span class='line'>250</span>    t.replace(/(^['"]|(['"])([,;:	\s])(['"])|['"]$)/g,function($0,$1,$2,$3,$4){
-<span class='line'>251</span>     if(!$2)T[$0]=(T[$0]||0)+1;
-<span class='line'>252</span>     else if($2==$4)T[$2]=(T[$2]||0)+1,F[$3]=(F[$3]||0)+1;
-<span class='line'>253</span>     if(i++>20)break;
-<span class='line'>254</span>     return $0;
-<span class='line'>255</span>    });
-<span class='line'>256</span>   }catch(e){}
-<span class='line'>257</span>   if(!FD){a=b=0;for(i in F)if(F[i]>a)a=F[b=i];FD=b;}
-<span class='line'>258</span>   if(!TD){a=b=0;for(i in T)if(T[i]>a)a=T[b=i];TD=b;}
-<span class='line'>259</span>  }
-<span class='line'>260</span> */</span><span class="WHIT">
-<span class='line'>261</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">TD</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>262</span> </span><span class="WHIT">  </span><span class="NAME">l</span><span class="PUNC">=</span><span class="NAME">t.indexOf</span><span class="PUNC">(</span><span class="STRN">'\n'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>263</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">l</span><span class="PUNC">==</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="NAME">t.indexOf</span><span class="PUNC">(</span><span class="STRN">'\r'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>264</span> </span><span class="WHIT">  </span><span class="NAME">l</span><span class="PUNC">=</span><span class="PUNC">(</span><span class="NAME">l</span><span class="PUNC">==</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">?</span><span class="NAME">t</span><span class="PUNC">:</span><span class="NAME">t.slice</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">l</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>265</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">l.replace</span><span class="PUNC">(</span><span class="NAME">reg</span><span class="PUNC">[</span><span class="STRN">'"'</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">TD</span><span class="PUNC">=</span><span class="STRN">'"'</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>266</span> </span><span class="WHIT">  </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">l.replace</span><span class="PUNC">(</span><span class="NAME">reg</span><span class="PUNC">[</span><span class="STRN">"'"</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">TD</span><span class="PUNC">=</span><span class="STRN">"'"</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>267</span> </span><span class="WHIT">  </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>268</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>269</span> </span><span class="WHIT"> </span><span class="NAME">reg</span><span class="PUNC">=</span><span class="NAME">reg</span><span class="PUNC">[</span><span class="NAME">TD</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>270</span> 
-<span class='line'>271</span> </span><span class="WHIT"> </span><span class="NAME">l</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">hasTitle</span><span class="PUNC">)</span><span class="NAME">r.length</span><span class="PUNC">=</span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>272</span> </span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">t</span><span class="PUNC">+</span><span class="STRN">'\n'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="NAME">reg</span><span class="PUNC">,</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">$0</span><span class="PUNC">,</span><span class="NAME">$1</span><span class="PUNC">,</span><span class="NAME">$2</span><span class="PUNC">,</span><span class="NAME">$3</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>273</span> </span><span class="WHIT">	</span><span class="NAME">l.push</span><span class="PUNC">(</span><span class="NAME">$1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>274</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="REGX">/\r\n/</span><span class="PUNC">.</span><span class="NAME">test</span><span class="PUNC">(</span><span class="NAME">$3</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">r.push</span><span class="PUNC">(</span><span class="NAME">l</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">l</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>275</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>276</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>277</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">hasTitle</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>278</span> </span><span class="WHIT">  </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">l</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">r.t</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="NAME">l</span><span class="PUNC">&lt;</span><span class="NAME">r</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">length</span><span class="PUNC">;</span><span class="NAME">l</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="NAME">r.t</span><span class="PUNC">[</span><span class="NAME">r</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">[</span><span class="NAME">l</span><span class="PUNC">]</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">l</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>279</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>280</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>281</span> 
-<span class='line'>282</span> 
-<span class='line'>283</span> </span><span class="NAME">toCSV.fd</span><span class="PUNC">=</span><span class="STRN">','</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	field delimiter</span><span class="WHIT">
-<span class='line'>284</span> </span><span class="NAME">toCSV.td</span><span class="PUNC">=</span><span class="STRN">'"'</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	text delimiter</span><span class="WHIT">
-<span class='line'>285</span> </span><span class="NAME">toCSV.force_td</span><span class="PUNC">=</span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	是否強制加上 text delimiter</span><span class="WHIT">
-<span class='line'>286</span> </span><span class="NAME">toCSV.ld</span><span class="PUNC">=</span><span class="STRN">'\n'</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	line delimiter</span><span class="WHIT">
-<span class='line'>287</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">toCSV</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">,</span><span class="NAME">title</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>288</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">CSV</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">_f</span><span class="PUNC">=</span><span class="NAME">arguments.callee</span><span class="PUNC">,</span><span class="NAME">s</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">,</span><span class="NAME">td</span><span class="PUNC">=</span><span class="NAME">_f.td</span><span class="PUNC">,</span><span class="NAME">a</span><span class="PUNC">=</span><span class="NAME">td</span><span class="PUNC">,</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">t</span><span class="PUNC">=</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">t</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>289</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">l</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>290</span> </span><span class="WHIT">	</span><span class="KEYW">for</span><span class="PUNC">(</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">t.length</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>291</span> </span><span class="WHIT">	 </span><span class="NAME">l.push</span><span class="PUNC">(</span><span class="NAME">s</span><span class="PUNC">&&</span><span class="NAME">s.test</span><span class="PUNC">(</span><span class="NAME">t</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="NAME">t</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="NAME">r</span><span class="PUNC">,</span><span class="NAME">a</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="NAME">t</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>292</span> </span><span class="WHIT">	</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NAME">_f.force_td</span><span class="PUNC">?</span><span class="PUNC">(</span><span class="NAME">td</span><span class="PUNC">||</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>293</span> </span><span class="WHIT">	</span><span class="NAME">CSV.push</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">+</span><span class="NAME">l.join</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">+</span><span class="NAME">_f.fd</span><span class="PUNC">+</span><span class="NAME">i</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="NAME">i</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>294</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>295</span> 
-<span class='line'>296</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">a</span><span class="PUNC">)</span><span class="NAME">s</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">RegExp</span><span class="PUNC">(</span><span class="STRN">'\\'</span><span class="PUNC">+</span><span class="NAME">a</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">RegExp</span><span class="PUNC">(</span><span class="STRN">'\\'</span><span class="PUNC">+</span><span class="NAME">a</span><span class="PUNC">,</span><span class="STRN">'g'</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">a</span><span class="PUNC">+</span><span class="PUNC">=</span><span class="NAME">a</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>297</span> </span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">toCSV.ld</span><span class="PUNC">==</span><span class="STRN">'\n'</span><span class="PUNC">)</span><span class="NAME">s</span><span class="PUNC">=</span><span class="REGX">/\n/</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">=</span><span class="REGX">/\n/g</span><span class="PUNC">,</span><span class="NAME">a</span><span class="PUNC">=</span><span class="STRN">'\\n'</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>298</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">title</span><span class="PUNC">)</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">title</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="NAME">t</span><span class="PUNC">(</span><span class="NAME">title</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>299</span> 
-<span class='line'>300</span> </span><span class="WHIT"> </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">o.length</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="NAME">t</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>301</span> 
-<span class='line'>302</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">CSV.join</span><span class="PUNC">(</span><span class="NAME">_f.ld</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>303</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>304</span> </span><span class="COMM">/*	old:
-<span class='line'>305</span> function quoteCSVfield(t,d){
-<span class='line'>306</span>  if(!d)d='"';
-<span class='line'>307</span>  for(var i=0,j,rd=new RegExp(d,'g'),d2=d+d;i&lt;t.length;i++){
-<span class='line'>308</span>   for(j=0;j&lt;t[i].length;j++)
-<span class='line'>309</span>    if(typeof t[i][j]=='string')t[i][j]=d+t[i][j].replace(rd,d2)+d;
-<span class='line'>310</span>   if(t[i] instanceof Array)t[i]=t[i].join(',');
-<span class='line'>311</span>  }
-<span class='line'>312</span>  return t.join('\n')+'\n';
-<span class='line'>313</span> }
-<span class='line'>314</span> */</span><span class="WHIT">
-<span class='line'>315</span> 
-<span class='line'>316</span> 
-<span class='line'>317</span> 
-<span class='line'>318</span> 
-<span class='line'>319</span> 
-<span class='line'>320</span> 
-<span class='line'>321</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT">
-<span class='line'>322</span> </span><span class="WHIT">	</span><span class="NAME">CeL.data.CSV</span><span class="WHIT">
-<span class='line'>323</span> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>324</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>225</span> </span><span class="COMM">/*
+<span class='line'>226</span> test:
+<span class='line'>227</span> 'dfgdfg,"fgd",dfg'
+<span class='line'>228</span> 'dfgdfg,"fgd",dfg'
+<span class='line'>229</span> 
+<span class='line'>230</span> 'sdfsdf','ssdfdf'',''sdf'
+<span class='line'>231</span> 
+<span class='line'>232</span> */</span><span class="WHIT">
+<span class='line'>233</span> </span><span class="COMM">/**
+<span class='line'>234</span>  * 讀入CSV檔&lt;br/>
+<span class='line'>235</span>  * !! slow !!
+<span class='line'>236</span>  * @since 2007/8/6 17:53:57-22:11:22
+<span class='line'>237</span>  * @see 可參考 JKL.ParseXML.CSV.prototype.parse_CSV	2007/11/4 15:49:4
+<span class='line'>238</span>  * @deprecated 廢棄: use parse_CSV() instead
+<span class='line'>239</span>  * @param FP file path
+<span class='line'>240</span>  * @param FD field delimiter([,;:	]|\s+)
+<span class='line'>241</span>  * @param TD text delimiter['"]
+<span class='line'>242</span>  * @param hasTitle the data has a title line
+<span class='line'>243</span>  * @return Array contains data
+<span class='line'>244</span>  */</span><span class="WHIT">
+<span class='line'>245</span> </span><span class="COMM">//readCSVdata[generateCode.dLK]='autodetectEncode,simpleRead,simpleFileAutodetectEncode';</span><span class="WHIT">
+<span class='line'>246</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">readCSVdata</span><span class="PUNC">(</span><span class="NAME">FP</span><span class="PUNC">,</span><span class="NAME">FD</span><span class="PUNC">,</span><span class="NAME">TD</span><span class="PUNC">,</span><span class="NAME">hasTitle</span><span class="PUNC">,</span><span class="NAME">enc</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>247</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">t</span><span class="PUNC">=</span><span class="NAME">simpleRead</span><span class="PUNC">(</span><span class="NAME">FP</span><span class="PUNC">,</span><span class="NAME">enc</span><span class="PUNC">||</span><span class="NAME">simpleFileAutodetectEncode</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/^[\r\n\s]+/</span><span class="PUNC">,</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">reg</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>248</span> </span><span class="WHIT">	</span><span class="STRN">'"'</span><span class="PUNC">:</span><span class="REGX">/"?(([^"]+|"")+)"?([,;:	]|[ \r\n]+)/g</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>249</span> </span><span class="WHIT">	</span><span class="STRN">"'"</span><span class="PUNC">:</span><span class="REGX">/'?(([^']+|'')+)'?([,;:	]|[ \r\n]+)/g</span><span class="WHIT">
+<span class='line'>250</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>251</span> </span><span class="WHIT"> </span><span class="COMM">//	detect delimiter</span><span class="WHIT">
+<span class='line'>252</span> </span><span class="COMM">/*
+<span class='line'>253</span>  if(!FD||!TD){
+<span class='line'>254</span>   var a,b,i=0,F='[,;:	\s]',T='[\'"]',r=new RegExp('(^'+(TD||T)+'|('+(TD||T)+')('+(FD||F)+')('+(TD||T)+')|'+(TD||T)+'$)','g');
+<span class='line'>255</span>   F={},T={};
+<span class='line'>256</span>   try{
+<span class='line'>257</span>    t.replace(/(^['"]|(['"])([,;:	\s])(['"])|['"]$)/g,function($0,$1,$2,$3,$4){
+<span class='line'>258</span>     if(!$2)T[$0]=(T[$0]||0)+1;
+<span class='line'>259</span>     else if($2==$4)T[$2]=(T[$2]||0)+1,F[$3]=(F[$3]||0)+1;
+<span class='line'>260</span>     if(i++>20)break;
+<span class='line'>261</span>     return $0;
+<span class='line'>262</span>    });
+<span class='line'>263</span>   }catch(e){}
+<span class='line'>264</span>   if(!FD){a=b=0;for(i in F)if(F[i]>a)a=F[b=i];FD=b;}
+<span class='line'>265</span>   if(!TD){a=b=0;for(i in T)if(T[i]>a)a=T[b=i];TD=b;}
+<span class='line'>266</span>  }
+<span class='line'>267</span> */</span><span class="WHIT">
+<span class='line'>268</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">TD</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>269</span> </span><span class="WHIT">  </span><span class="NAME">l</span><span class="PUNC">=</span><span class="NAME">t.indexOf</span><span class="PUNC">(</span><span class="STRN">'\n'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>270</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">l</span><span class="PUNC">==</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="NAME">t.indexOf</span><span class="PUNC">(</span><span class="STRN">'\r'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>271</span> </span><span class="WHIT">  </span><span class="NAME">l</span><span class="PUNC">=</span><span class="PUNC">(</span><span class="NAME">l</span><span class="PUNC">==</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">?</span><span class="NAME">t</span><span class="PUNC">:</span><span class="NAME">t.slice</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">l</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>272</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">l.replace</span><span class="PUNC">(</span><span class="NAME">reg</span><span class="PUNC">[</span><span class="STRN">'"'</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">TD</span><span class="PUNC">=</span><span class="STRN">'"'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>273</span> </span><span class="WHIT">  </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">l.replace</span><span class="PUNC">(</span><span class="NAME">reg</span><span class="PUNC">[</span><span class="STRN">"'"</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">TD</span><span class="PUNC">=</span><span class="STRN">"'"</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>274</span> </span><span class="WHIT">  </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>275</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>276</span> </span><span class="WHIT"> </span><span class="NAME">reg</span><span class="PUNC">=</span><span class="NAME">reg</span><span class="PUNC">[</span><span class="NAME">TD</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>277</span> 
+<span class='line'>278</span> </span><span class="WHIT"> </span><span class="NAME">l</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">hasTitle</span><span class="PUNC">)</span><span class="NAME">r.length</span><span class="PUNC">=</span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>279</span> </span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">t</span><span class="PUNC">+</span><span class="STRN">'\n'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="NAME">reg</span><span class="PUNC">,</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">$0</span><span class="PUNC">,</span><span class="NAME">$1</span><span class="PUNC">,</span><span class="NAME">$2</span><span class="PUNC">,</span><span class="NAME">$3</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>280</span> </span><span class="WHIT">	</span><span class="NAME">l.push</span><span class="PUNC">(</span><span class="NAME">$1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>281</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="REGX">/\r\n/</span><span class="PUNC">.</span><span class="NAME">test</span><span class="PUNC">(</span><span class="NAME">$3</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="NAME">r.push</span><span class="PUNC">(</span><span class="NAME">l</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">l</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>282</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>283</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>284</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">hasTitle</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>285</span> </span><span class="WHIT">  </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">l</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">r.t</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="NAME">l</span><span class="PUNC">&lt;</span><span class="NAME">r</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">length</span><span class="PUNC">;</span><span class="NAME">l</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="NAME">r.t</span><span class="PUNC">[</span><span class="NAME">r</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">[</span><span class="NAME">l</span><span class="PUNC">]</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">l</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>286</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">r</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>287</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>288</span> 
+<span class='line'>289</span> 
+<span class='line'>290</span> </span><span class="NAME">toCSV.fd</span><span class="PUNC">=</span><span class="STRN">','</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	field delimiter</span><span class="WHIT">
+<span class='line'>291</span> </span><span class="NAME">toCSV.td</span><span class="PUNC">=</span><span class="STRN">'"'</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	text delimiter</span><span class="WHIT">
+<span class='line'>292</span> </span><span class="NAME">toCSV.force_td</span><span class="PUNC">=</span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	是否強制加上 text delimiter</span><span class="WHIT">
+<span class='line'>293</span> </span><span class="NAME">toCSV.ld</span><span class="PUNC">=</span><span class="STRN">'\n'</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	line delimiter</span><span class="WHIT">
+<span class='line'>294</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">toCSV</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">,</span><span class="NAME">title</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>295</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">CSV</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NAME">_f</span><span class="PUNC">=</span><span class="NAME">arguments.callee</span><span class="PUNC">,</span><span class="NAME">s</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">,</span><span class="NAME">td</span><span class="PUNC">=</span><span class="NAME">_f.td</span><span class="PUNC">,</span><span class="NAME">a</span><span class="PUNC">=</span><span class="NAME">td</span><span class="PUNC">,</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">t</span><span class="PUNC">=</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">t</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>296</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">l</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>297</span> </span><span class="WHIT">	</span><span class="KEYW">for</span><span class="PUNC">(</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">t.length</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>298</span> </span><span class="WHIT">	 </span><span class="NAME">l.push</span><span class="PUNC">(</span><span class="NAME">s</span><span class="PUNC">&&</span><span class="NAME">s.test</span><span class="PUNC">(</span><span class="NAME">t</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="NAME">t</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="NAME">r</span><span class="PUNC">,</span><span class="NAME">a</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="NAME">t</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>299</span> </span><span class="WHIT">	</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NAME">_f.force_td</span><span class="PUNC">?</span><span class="PUNC">(</span><span class="NAME">td</span><span class="PUNC">||</span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>300</span> </span><span class="WHIT">	</span><span class="NAME">CSV.push</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">+</span><span class="NAME">l.join</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">+</span><span class="NAME">_f.fd</span><span class="PUNC">+</span><span class="NAME">i</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="NAME">i</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>301</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>302</span> 
+<span class='line'>303</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">a</span><span class="PUNC">)</span><span class="NAME">s</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">RegExp</span><span class="PUNC">(</span><span class="STRN">'\\'</span><span class="PUNC">+</span><span class="NAME">a</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">RegExp</span><span class="PUNC">(</span><span class="STRN">'\\'</span><span class="PUNC">+</span><span class="NAME">a</span><span class="PUNC">,</span><span class="STRN">'g'</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">a</span><span class="PUNC">+</span><span class="PUNC">=</span><span class="NAME">a</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>304</span> </span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">toCSV.ld</span><span class="PUNC">==</span><span class="STRN">'\n'</span><span class="PUNC">)</span><span class="NAME">s</span><span class="PUNC">=</span><span class="REGX">/\n/</span><span class="PUNC">,</span><span class="NAME">r</span><span class="PUNC">=</span><span class="REGX">/\n/g</span><span class="PUNC">,</span><span class="NAME">a</span><span class="PUNC">=</span><span class="STRN">'\\n'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>305</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">title</span><span class="PUNC">)</span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">title</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="NAME">t</span><span class="PUNC">(</span><span class="NAME">title</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>306</span> 
+<span class='line'>307</span> </span><span class="WHIT"> </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">o.length</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="NAME">t</span><span class="PUNC">(</span><span class="NAME">o</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>308</span> 
+<span class='line'>309</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">CSV.join</span><span class="PUNC">(</span><span class="NAME">_f.ld</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>310</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>311</span> </span><span class="COMM">/*	old:
+<span class='line'>312</span> function quoteCSVfield(t,d){
+<span class='line'>313</span>  if(!d)d='"';
+<span class='line'>314</span>  for(var i=0,j,rd=new RegExp(d,'g'),d2=d+d;i&lt;t.length;i++){
+<span class='line'>315</span>   for(j=0;j&lt;t[i].length;j++)
+<span class='line'>316</span>    if(typeof t[i][j]=='string')t[i][j]=d+t[i][j].replace(rd,d2)+d;
+<span class='line'>317</span>   if(t[i] instanceof Array)t[i]=t[i].join(',');
+<span class='line'>318</span>  }
+<span class='line'>319</span>  return t.join('\n')+'\n';
+<span class='line'>320</span> }
+<span class='line'>321</span> */</span><span class="WHIT">
+<span class='line'>322</span> 
+<span class='line'>323</span> 
+<span class='line'>324</span> 
 <span class='line'>325</span> 
-<span class='line'>326</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
+<span class='line'>326</span> 
 <span class='line'>327</span> 
-<span class='line'>328</span> </span><span class="NAME">CeL.setup_module</span><span class="PUNC">(</span><span class="NAME">module_name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>329</span> 
-<span class='line'>330</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>331</span> </span></pre></body></html>
+<span class='line'>328</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT">
+<span class='line'>329</span> </span><span class="WHIT">	</span><span class="NAME">CeL.data.CSV</span><span class="WHIT">
+<span class='line'>330</span> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>331</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>332</span> 
+<span class='line'>333</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
+<span class='line'>334</span> 
+<span class='line'>335</span> </span><span class="NAME">CeL.setup_module</span><span class="PUNC">(</span><span class="NAME">module_name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>336</span> 
+<span class='line'>337</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>338</span> </span></pre></body></html>

@@ -197,6 +197,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.code.compatibility.html">CeL.code.compatibility</a></li>
 	
+	<li><a href="../symbols/CeL.code.debug.html">CeL.code.debug</a></li>
+	
 	<li><a href="../symbols/CeL.code.log.html">CeL.code.log</a></li>
 	
 	<li><a href="../symbols/CeL.code.reorganize.html">CeL.code.reorganize</a></li>
@@ -207,21 +209,27 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.data.XML.html">CeL.data.XML</a></li>
 	
-	<li><a href="../symbols/CeL.debug.html">CeL.debug</a></li>
-	
 	<li><a href="../symbols/CeL.IO.file.html">CeL.IO.file</a></li>
 	
 	<li><a href="../symbols/CeL.IO.Windows.file.html">CeL.IO.Windows.file</a></li>
 	
+	<li><a href="../symbols/CeL.locale.html">CeL.locale</a></li>
+	
 	<li><a href="../symbols/CeL.math.html">CeL.math</a></li>
 	
 	<li><a href="../symbols/CeL.math.Hamming.html">CeL.math.Hamming</a></li>
+	
+	<li><a href="../symbols/CeL.math.polynomial.html">CeL.math.polynomial</a></li>
 	
 	<li><a href="../symbols/CeL.math.quotient.html">CeL.math.quotient</a></li>
 	
 	<li><a href="../symbols/CeL.misc.check.html">CeL.misc.check</a></li>
 	
 	<li><a href="../symbols/CeL.native.html">CeL.native</a></li>
+	
+	<li><a href="../symbols/CeL.net.html">CeL.net</a></li>
+	
+	<li><a href="../symbols/CeL.net.Ajax.html">CeL.net.Ajax</a></li>
 	
 	<li><a href="../symbols/CeL.net.form.address.html">CeL.net.form.address</a></li>
 	
@@ -231,13 +239,21 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.net.form.select_input.html">CeL.net.form.select_input</a></li>
 	
+	<li><a href="../symbols/CeL.net.HTA.html">CeL.net.HTA</a></li>
+	
 	<li><a href="../symbols/CeL.net.map.html">CeL.net.map</a></li>
 	
 	<li><a href="../symbols/CeL.net.SVG.html">CeL.net.SVG</a></li>
 	
 	<li><a href="../symbols/CeL.net.web.html">CeL.net.web</a></li>
 	
-	<li><a href="../symbols/CeL.html#.OS.Windows">CeL.OS.Windows</a></li>
+	<li><a href="../symbols/CeL.OS.Windows.html">CeL.OS.Windows</a></li>
+	
+	<li><a href="../symbols/CeL.OS.Windows.job.html">CeL.OS.Windows.job</a></li>
+	
+	<li><a href="../symbols/CeL.OS.Windows.registry.html">CeL.OS.Windows.registry</a></li>
+	
+	<li><a href="../symbols/CeL.OS.WMI.html">CeL.OS.WMI</a></li>
 	
 	<li><a href="../symbols/env.html">env</a></li>
 	
@@ -282,7 +298,7 @@ ul.inheritsList
 							<div class="fixedFont">
 								<b><a href="../symbols/CeL.code.reorganize.html#constructor">CeL.code.reorganize</a></b>()
 							</div>
-							<div class="description">reorganize functions</div>
+							<div class="description">null module constructor</div>
 						</td>
 					</tr>
 				</tbody>
@@ -293,51 +309,6 @@ ul.inheritsList
 			
 
 <!-- ============================== methods summary ======================== -->
-			
-				
-				
-				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class CeL.code.reorganize.">
-					<caption>Method Summary</caption>
-					<thead>
-						<tr>
-							<th scope="col">Method Attributes</th>
-							<th scope="col">Method Name and Description</th>
-						</tr>
-					</thead>
-					<tbody>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">CeL.code.reorganize.<b><a href="../symbols/CeL.code.reorganize.html#.get_code_from_generated_various">get_code_from_generated_various</a></b>(ns, prefix, code_array)
-								</div>
-								<div class="description">把 get_various_from_code 生成的 namespace 轉成 code</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">CeL.code.reorganize.<b><a href="../symbols/CeL.code.reorganize.html#.get_various_from_code">get_various_from_code</a></b>(code, fill_code)
-								</div>
-								<div class="description">get various from code</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&lt;static&gt; &nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">CeL.code.reorganize.<b><a href="../symbols/CeL.code.reorganize.html#.library_loader_by_registry">library_loader_by_registry</a></b>()
-								</div>
-								<div class="description">for 引用：　include library 自 registry 中的 path</div>
-							</td>
-						</tr>
-					
-					</tbody>
-				</table>
-				
-				
-				
 			
 <!-- ============================== events summary ======================== -->
 			
@@ -354,7 +325,7 @@ ul.inheritsList
 				</div>
 				
 				<div class="description">
-					reorganize functions
+					null module constructor
 					
 				</div>
 				
@@ -377,158 +348,6 @@ ul.inheritsList
 
 <!-- ============================== method details ========================= -->		
 			
-				<div class="sectionTitle">
-					Method Detail
-				</div>
-				
-					<a name=".get_code_from_generated_various"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					<span class="light">{String}</span>
-					<span class="light">CeL.code.reorganize.</span><b>get_code_from_generated_various</b>(ns, prefix, code_array)
-					
-					</div>
-					<div class="description">
-						把 get_various_from_code 生成的 namespace 轉成 code
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{Object}</span> <b>ns</b>
-									
-								</dt>
-								<dd>root namespace</dd>
-							
-								<dt>
-									<span class="light fixedFont">{String}</span> <b>prefix</b>
-									<i>Optional</i>
-								</dt>
-								<dd>(TODO) prefix of root namespace</dd>
-							
-								<dt>
-									<span class="light fixedFont">{Array}</span> <b>code_array</b>
-									<i>Optional</i>
-								</dt>
-								<dd>inner use, please don't specify this value.</dd>
-							
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2009/12/20 14:51:52</dd>
-							</dl>
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd><span class="light fixedFont">{String}</span> code</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".get_various_from_code"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					<span class="light">{Object}</span>
-					<span class="light">CeL.code.reorganize.</span><b>get_various_from_code</b>(code, fill_code)
-					
-					</div>
-					<div class="description">
-						get various from code
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{String}</span> <b>code</b>
-									
-								</dt>
-								<dd>程式碼</dd>
-							
-								<dt>
-									<span class="light fixedFont">{Boolean}</span> <b>fill_code</b>
-									
-								</dt>
-								<dd>(TODO) 不只是定義，在 .code 填入程式碼。</dd>
-							
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2009/12/5 15:04:42, 2009/12/20 14:33:30</dd>
-							</dl>
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd><span class="light fixedFont">{Object}</span> root namespace</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".library_loader_by_registry"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					
-					<span class="light">CeL.code.reorganize.</span><b>library_loader_by_registry</b>()
-					
-					</div>
-					<div class="description">
-						for 引用：　include library 自 registry 中的 path
-						
-						
-					</div>
-					
-					
-					
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2009/11/25 22:59:02</dd>
-							</dl>
-							</dl>
-						
-						
-						
-						
-						
-
-					
-				
-			
 			
 <!-- ============================== event details ========================= -->		
 			
@@ -540,7 +359,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Tue Jul 06 2010 18:24:07 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Wed Jul 07 2010 07:38:45 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

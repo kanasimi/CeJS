@@ -10,7 +10,7 @@
 @import url(lib/reset.css);
 
 body{margin:0;padding:0;}
-.test_trigger{color:#e6d;display:inline;cursor:pointer;}
+.test_toggle{color:#e6d;display:inline;cursor:pointer;}
 .test_panel{display:none;}
 
 #address,#legal_domicile{font-size:.9em;}
@@ -41,14 +41,14 @@ http://code.jquery.com/jquery-nightly.js
 
 // TODO: http://www.11gz.com/blog/2010/03/20/html5-doctype-use/
 
-//	相對於 library 本身來說的路徑
-CeL.include_module_resource('../../game/game.css');
-
 //	預防彈出警告視窗
 CeL.log.max_length = 20;
 
 CeL.set_debug();
 //CeL.set_debug(2);
+
+//	相對於 library 本身來說的路徑
+CeL.include_module_resource('../../game/game.css');
 
 try {
 	dojo.require("dojo.NodeList-fx");
@@ -90,7 +90,7 @@ You may need to check the configuration of the browser, <a href="#" onclick="his
 
 
 
-<div onclick="CeL.trigger_display('eval_panel');" class="test_trigger">eval test</div>
+<div onclick="CeL.toggle_display('eval_panel');" class="test_toggle">eval test</div>
 <div id="eval_panel" class="test_panel" style="display:block;">
 <input id="question" value="43/21"/>
 <b onclick="show_question();" style="cursor: pointer;">show</b>
@@ -113,8 +113,9 @@ times
 
 
 <span>|</span>
-<div id="choose" onclick="CeL.trigger_display('choose_panel');" class="test_trigger">choose test</div>
+<div id="choose" onclick="CeL.toggle_display('choose_panel');" class="test_toggle">choose test</div>
 <div id="choose_panel" class="test_panel">
+<h3>地址住址輸入表單</h3>
 <div id="legal_domicile">戶籍地址 </div>
 <div id="address">通訊地址 </div>
 
@@ -135,7 +136,7 @@ hr: <hr id="attach_hr" style="width:2em;"/>
 
 
 |
-<div onclick="CeL.trigger_display('change_base_panel');" class="test_trigger">換底</div>
+<div onclick="CeL.toggle_display('change_base_panel');" class="test_toggle">換底</div>
 <div id="change_base_panel" class="test_panel">
 number（正負整數、分數與小數）: <input id="number1" value="1000"/>
 in base: <input id="base1" value="10" style="width:3em;"/>
@@ -147,7 +148,7 @@ change to base: <input id="base2" value="2" style="width:3em;"/>
 
 
 |
-<div onclick="CeL.trigger_display('complement_panel');" class="test_trigger">補數</div>
+<div onclick="CeL.toggle_display('complement_panel');" class="test_toggle">補數</div>
 <div id="complement_panel" class="test_panel">
 number（整數）: <input id="number" value="1000"/>
 base: <input id="base" value="2" style="width:3em;"/>
@@ -161,7 +162,7 @@ bits: <input id="bits" value="8" style="width:3em;"/>
 
 
 |
-<div onclick="CeL.trigger_display('Hamming_panel');" class="test_trigger">Hamming code</div>
+<div onclick="CeL.toggle_display('Hamming_panel');" class="test_toggle">Hamming code</div>
 <div id="Hamming_panel" class="test_panel">
 data(/^[01]{,20}$/): <input id="h_data" value="1101" pattern="[01]{0,20}"/>
 <a href="#" onclick="return Hamming.dec();" title="decode">←</a>
@@ -195,7 +196,7 @@ show
 -->
 <a href="#" onclick="CeL.Log.clear();return false;" title="清除訊息">clear log</a>
 <b class="sp">|</b>
-<a href="#" onclick="CeL.Log.trigger();return false;" title="顯示/隱藏訊息">show/hidden log</a>
+<a href="#" onclick="CeL.Log.toggle();return false;" title="顯示/隱藏訊息">show/hidden log</a>
 <div id="panel_for_log">
 Page loaded. Initializing the framework. Please wait..
 </div>
@@ -600,6 +601,22 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 		//CeL.new_node({div:[1234,':',{p:{b:null}}]},0);
 
 
+		//var handle_select = function (e) { var s = CeL.get_selection(); if (s && s.text) CeL.debug('select @' + this + '(' + s.element + ')' + ' (' + s.left + '+' + s.width + ',' + s.top + '+' + s.height + '), (' + e.pageX + ',' + e.pageY + '): ' + s.text); };
+		//CeL.add_listener('mouseup', handle_select, 'panel_for_log');
+		//$('#panel_for_log').bind('mouseup', handle_select);
+		//$('#panel_for_log').select(function () { CeL.log(this); });
+
+
+		if(0){
+			var cookie_name='cookie test';
+			CeL.debug(cookie_name+': '+CeL.get_cookie(cookie_name));
+			CeL.set_cookie(CeL.set_cookie.f.set_root);	//	Gecko need this
+			CeL.set_cookie(cookie_name,'test~~"OK"!');
+		}
+
+
+
+
 	};
 
 
@@ -618,7 +635,6 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 					document.getElementById('error_load_panel').innerHTML += 'You may <a href="http://code.google.com/p/chromium/issues/detail?id=4197#c26">add a flag</a> --allow-file-access-from-files to run this tool.<br/>e.g., run '+(navigator.userAgent.indexOf('Linux')!==-1?'/opt/google/chrome/google-chrome %U --allow-file-access-from-files&':'Chrome --allow-file-access-from-files')+'<hr/>';
 				throw new Error('Loading error!');
 			}
-			//document.getElementById('error_load_panel').style.display = 'none';
 
 			CeL.Log.set_board('panel_for_log');
 			CeL.debug('Log panel setted.');
@@ -626,6 +642,7 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 			var e = 0;
 			try {
 				initialization_work();
+				CeL.get_element('error_load_panel').style.display = 'none';
 			} catch (e) {
 				CeL.warn('Initialization failed!');
 				CeL.err(e);

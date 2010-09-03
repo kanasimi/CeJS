@@ -41,6 +41,9 @@ function addCode
 CeL.package
 
 
+駝峰式大小寫命名規則 CamelCase → embedded_underscore/Snake case
+
+
 單一JS引用：
 //	[function.js]_iF
 function _iF(){}_iF.p='HKCU\\Software\\Colorless echo\\function.js.path';if(typeof WScript=="object")try{eval(getU((new ActiveXObject("WScript.Shell")).RegRead(_iF.p)));}catch(e){}
@@ -197,7 +200,7 @@ function _() {
 	//	function CeL: library root
 	//	declaration for debug
 	//this.global = arguments[0] || arguments.callee.ce_doc;
-	return new (_.init.apply(global, arguments));
+	return new (this.init.apply(global, arguments));
 };
 
 CeL
@@ -293,10 +296,10 @@ get_various = function(various_name, name_space) {
 	s = various_name.split('.'),
 	l = s.length,
 	v = name_space ||
-		//_.env.global
+		//this.env.global
 		global
 		;
-	//this.debug('global.' + this.Class + ' = ' + _.env.global[this.Class]);
+	//this.debug('global.' + this.Class + ' = ' + this.env.global[this.Class]);
 
 	try {
 		while (i < l)
@@ -307,6 +310,7 @@ get_various = function(various_name, name_space) {
 				throw 1;
 	} catch (e) {
 		s[i - 1] = '<em>' + s[i - 1] + '</em><span class="debug_weaken">';
+		//alert(this.log.buffer.length+','+this.log.max_length+'\n'+this.debug);
 		this.debug('Can\'t get [<span title="' + various_name + '">'
 				+ s.join('.') + '</span></span>]!');
 		return;
@@ -341,7 +345,7 @@ CeL
 get_script_name = function(){
 	var n, i, j;
 
-	if (typeof WScript === 'object' && !_.is_Object(WScript)) {
+	if (typeof WScript === 'object' && !this.is_Object(WScript)) {
 		n = WScript.ScriptName;
 		i = n.lastIndexOf('.');
 		return i == -1 ? n : n.slice(0, i);
@@ -514,7 +518,7 @@ object_tester = function(want_type, toString_reference) {
 
 			//	slow@Chrome
 			: function(v) { return t === get_object_type.call(v); };
-			//	fast@Chrome
+			//	faster@Chrome
 			//: new Function('v', 'return "' + t + '"===Object.prototype.toString.call(v);');
 
 };
@@ -575,10 +579,13 @@ CeL
 /**
  * Setup environment variables
  * @param	{String} [OS_type]	type of OS
+ * @param	{Boolean} [reset]	reset the environment variables 
  * @return	{Object}	environment variables set
  */
-initial_env = function(OS_type){
-	//this.env = {};
+initial_env = function(OS_type, reset){
+	if (reset)
+		this.env = {};
+
 	var OS, env = this.env;
 
 	/**
@@ -777,8 +784,8 @@ CeL
 .
 /**
  * Set debugging level
- * @param {Integral} [debug_level]	The debugging level to set.
- * @type	Integral
+ * @param {Integer} [debug_level]	The debugging level to set.
+ * @type	Integer
  * @return	{Number} debugging level now
  */
 set_debug = function(debug_level){
@@ -949,11 +956,11 @@ null_function = function() {};
 _.debug = _.err = _.warn = _.log = function(m) {
 	/*
 	 * 請注意:
-	 * _.log.buffer !== log.buffer
+	 * _.log.buffer === this.log.buffer !== log.buffer
 	 * 在 WScript 中 需要用 _.log，其他則可用 log。
 	 * 因此應該將所有類似的值指定給雙方，並注意非[常數]的情況。
 	 */
-	var _s = _.log;
+	var _s = this.log;
 	//_s.function_to_call.apply(null,arguments);
 	//_s.function_to_call.apply(global, arguments);
 
@@ -1050,17 +1057,18 @@ CeL
 CeL
 .
 /**
- * 延展物件 (learned from jQuery)
+ * 延展物件 (learned from jQuery):
+ * 將 from_name_space 下的 variable_set 延展/覆蓋到 name_space。
  * @since	2009/11/25 21:17:44
  * @param	variable_set	variable set
  * @param	{Object|Function} name_space	extend to what name-space
- * @param	from_name_space	When inputing function names, we need a base name-space to search these functions.
+ * @param	{Object|Function} from_name_space	When inputing function names, we need a base name-space to search these functions.
  * @return	library names-pace
  * @see
  * <a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/03/01/jquery-extend.aspx" accessdate="2009/11/17 1:24" title="jQuery.extend的用法 - 黑暗執行緒">jQuery.extend的用法</a>,
  * <a href="http://www.cnblogs.com/rubylouvre/archive/2009/11/21/1607072.html" accessdate="2010/1/1 1:40">jQuery源码学习笔记三 - Ruby's Louvre - 博客园</a>
  */
-extend = function extend(variable_set, name_space, from_name_space){
+extend = function(variable_set, name_space, from_name_space) {
 /*
 	if(this.is_debug())
 		throw new Error('UNDO');
@@ -1096,9 +1104,10 @@ extend = function extend(variable_set, name_space, from_name_space){
 				_.warn(this.Class + '.extend:\n' + e.message);
 			}
 
-	} else if (this.is_Array(variable_set)) {
-		for (_s = extend, i = 0, l = variable_set.length; i < l; i++) {
-			_s.call(this, variable_set[i], name_space, from_name_space);
+	} else if (this.is_Array(variable_set)
+						&& !this.is_Array(name_space)) {
+		for (_s = _.extend, i = 0, l = variable_set.length; i < l; i++) {
+			_s(variable_set[i], name_space, from_name_space);
 		}
 
 	} else if (this.is_Object(variable_set)
@@ -1118,20 +1127,36 @@ CeL
 /**
  * workaround.
  * 把 name_space 下的 function_name (name_space[function_name]) 換成 new_function。
+ * for Lazy Function Definition Pattern.
  * @example
  * library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix);
  * @param name_space	which name-space
  * @param {String} function_name	name_space.function_name
  * @param {Function} new_function	replace to what function
  * @return	new_function
+ * @see
+ * http://realazy.org/blog/2007/08/16/lazy-function-definition-pattern/,
+ * http://peter.michaux.ca/article/3556
  */
 replace_function = function(name_space, function_name, new_function) {
-	var old_function = name_space[function_name];
+	if(!name_space)
+		return;
+
+	var old_function = name_space[function_name], type = typeof new_function;
+
+	//	TODO: RegExp
+	if (type === 'bool' || type === 'string' || type === 'number')
+		new_function = new Function('return'
+				//	對 String 只是做簡單處理，勢必得再加強。
+				+ (type === 'string' ? '"' + type.replace(/\\/g, '\\').replace(/"/g, '\"').replace(/\n/g, '\\n')
+						+ '"' : ' '+type));
+
 	name_space[function_name] = new_function;
 	//	search for other extends
 	if (this[function_name] === old_function)
 		this[function_name] = new_function;
-	return new_function;
+
+	return new_function.apply(name_space, arguments);
 };
 
 
@@ -1175,7 +1200,14 @@ get_file = function(path, encoding){
 	}
 
 	if (o) {
-		o.open('GET', path, false);
+		var data, type = 'GET';
+		if (typeof path === 'string' && path.length > 4096
+				&& (data = path.match(/^([^?]{6,200})\?(.+)$/)))
+			path = data[1], data = data[2], type = 'PUT';
+		else
+			data = null;
+
+		o.open(type, path, false);
 
 		if (encoding && o.overrideMimeType)
 			/*
@@ -1187,7 +1219,7 @@ get_file = function(path, encoding){
 		try {
 			//	http://www.w3.org/TR/2007/WD-XMLHttpRequest-20070227/#dfn-send
 			//	Invoking send() without the data argument must give the same result as if it was invoked with null as argument.
-			o.send(null);
+			o.send(data);
 
 		} catch (e) {
 			//	Apple Safari 3.0.3 may throw NETWORK_ERR: XMLHttpRequest Exception 101
@@ -1203,7 +1235,7 @@ get_file = function(path, encoding){
 				this.warn('get_file: 所要求檔案之 domain [' + o[2]
 							+ '] 與所處之 domain [' + location.hostname + '] 不同!<br/>\n您可能需要嘗試使用 '
 							+ this.Class + '.include_resource()!');
-				throw new Error('Different domain!');
+				throw new Error('get_file: Different domain!');
 			}
 
 			o = this.require_netscape_privilege(e, 2);
@@ -1218,7 +1250,7 @@ get_file = function(path, encoding){
 		//	因此，在 local 失敗時，僅 IE 可由 status 探測，其他得由 responseText 判別。
 		//this.debug('Get [' + path + '], status: [' + o.status + '] ' + o.statusText);
 
-		return o.responseText;
+		return Math.floor(o.status / 100) > 3 ? [ o.status, o.responseText ] : o.responseText;
 	}
 	//	else: This browser does not support XMLHttpRequest.
 
@@ -1397,6 +1429,7 @@ get_script_base_path = function(JSFN){
 };
 
 
+var cached_module_path;
 CeL
 .
 /**
@@ -1410,10 +1443,12 @@ get_module_path = function(module_name, file_name){
 		return module_name;
 
 	//this.debug('load [' + module_name + ']');
-	var module_path = this.env.registry_path
-				|| this.get_script_base_path(this.env.main_script)
-				|| this.get_script_base_path()
-				;
+	var module_path = cached_module_path
+	|| (cached_module_path =
+			this.env.registry_path
+			|| this.get_script_base_path(this.env.main_script)
+			|| this.get_script_base_path()
+		);
 
 	module_path += this.split_module_name(module_name).join(/\//.test(module_path)?'/':'\\') + _.env.script_extension;
 	//this.debug(module_path);
@@ -1628,7 +1663,7 @@ CeL
  * **	在指定 callback 時 name_space 無效！
  * **	預設會 extend 到 library 本身下！
  * @param	{String} module	module name
- * @param	{Function} [callback]	callback function
+ * @param	{Function} [callback]	callback function | [callback, 進度改變時之 function (TODO)]
  * @param	{Object|Boolean} [extend_to]	extend to which name-space<br/>
  * false:	just load, don't extend to library name-space<br/>
  * this:	extend to global<br/>
@@ -1700,22 +1735,25 @@ use = function requires(module, callback, extend_to){
 			i = e;
 		}
 
-		if (i) {
-			//	不能直接用 get_file()，得採用其他方法。
+		if (i && callback) {
+			//	不能直接用 get_file()，得採用其他方法。但只在有 callback 時才 include，否則當下 block 的都沒執行，可能出亂子。
 			if (typeof window !== 'undefined') {
 				// TODO: 在指定 callback 時使 name_space 依然有效。
 				this.include_resource(module_path, {
 					module : module,
 					callback : function(){
-							this.extend_module_member(module, extend_to, callback);
+							_.extend_module_member(module, extend_to, callback);
 					},
 					global : this
 				});
+				//	TODO: 一次指定多個 module 時可以知道進度，全部 load 完才 callback()。
+				//	此時 callback=[callback, 進度改變時之 function]
+				//	return 進度 Object
 				return -1;
 			}
 			throw i;
 		} else
-			return this.extend_module_member(module, extend_to, callback);
+			return _.extend_module_member(module, extend_to, callback);
 
 	} catch (e) {
 		//this.err(e);
@@ -1785,7 +1823,7 @@ CeL
  * 		use_write ? test function{return } : callback function
  * 		/	{callback: callback function, module: module name, global: global object when run callback}
  * @param {Boolean} [use_write]	use document.write() instead of insert a element
- * @param {Boolean} [type]	1: is a .css file, others: script
+ * @param {Number} [type]	1: is a .css file, others: script
  */
 include_resource = function include_resource(path, callback, use_write, type) {
 	var _s = _.include_resource, s, t, h;
@@ -1848,8 +1886,13 @@ include_resource = function include_resource(path, callback, use_write, type) {
 					//_.debug('[' + (this.src || s.href) + '] loaded.');
 
 					//this.onload = this.onreadystatechange = null;
-					delete this.onload;
-					delete this.onreadystatechange;
+					try{
+						delete this.onload;
+						delete this.onreadystatechange;
+					}catch (e) {
+						//	error on IE5~7: Error: Object doesn't support this action
+						this.onload = this.onreadystatechange = null;
+					}
 
 					_s.loaded[path] = _s.count++;
 
@@ -1875,8 +1918,12 @@ include_resource = function include_resource(path, callback, use_write, type) {
 			 */
 			//h.insertBefore(s, h.firstChild);
 
-			//	.css 移除後會失效
-			//h.removeChild(s);
+			//	隨即移除會無效。 .css 移除會失效。
+			if (type !== 1)
+				setTimeout(function() {
+					h.removeChild(s);
+					h = s = null;
+				}, 8000);
 
 			return s;
 
@@ -3532,8 +3579,7 @@ to_SI_prefix = function (number, digits) {
 	while (l--)
 		v.push(N *= base);
 
-	return library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix)
-			.apply(this, arguments);
+	return library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix);
 };
 
 //	define what is "1k"
@@ -11135,7 +11181,7 @@ animation
  * @constructor
  * @param	{int} _width	width of the canvas
  * @param	{int} _height	height of the canvas
- * @param	{color string} [_backgroundColor]	background color of the canvas (UNDO)
+ * @param	{color String} [_backgroundColor]	background color of the canvas (UNDO)
  * @requires	set_attribute,XML_node,remove_all_child//removeNode
  * @type	CeL.net.SVG
  * @return	{CeL.net.SVG} CeL.net.SVG object created
@@ -12576,6 +12622,7 @@ MSIE/3.0 (Win95; U)
 
 TODO:
 don't use .innerHTML
+通盤確認所有 HTMLElement 變數已經設成 null
 
 
 功能探測 vs 瀏覽器探測
@@ -12645,13 +12692,17 @@ CeL.net.web
  * NodeType: const unsigned short.
  * @see
  * http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-1950641247
+ * http://www.w3.org/TR/DOM-Level-2-Core/core.html
+ * ELEMENT_NODE,ATTRIBUTE_NODE,TEXT_NODE,CDATA_SECTION_NODE,ENTITY_REFERENCE_NODE,ENTITY_NODE,PROCESSING_INSTRUCTION_NODE,COMMENT_NODE,DOCUMENT_NODE,DOCUMENT_TYPE_NODE,DOCUMENT_FRAGMENT_NODE,NOTATION_NODE
  * @inner
  */
 var ELEMENT_NODE = 1,
 	TEXT_NODE = 3,
 	DOCUMENT_NODE = 9;
 
-if(is_DOM('document'))
+if(is_DOM('document') &&
+		//	IE8: undefined
+		!isNaN(document.ELEMENT_NODE))
 	ELEMENT_NODE = document.ELEMENT_NODE,
 	TEXT_NODE = document.TEXT_NODE,
 	DOCUMENT_NODE = document.DOCUMENT_NODE;
@@ -12665,7 +12716,7 @@ element_pattern = /^\[object HTML([A-U][A-Za-z]{1,15})?Element\]$/;
 CeL.net.web
 .
 /**
- * 判斷為 HTML Element。
+ * 判斷是否為 HTML Element。
  * @param	value	value to test
  * @return	{Boolean}	value is HTML Element
  * @since	2010/6/23 02:32:41
@@ -12676,7 +12727,9 @@ CeL.net.web
  */
 is_HTML_element = function(value) {
 	// return get_object_type.call(value).indexOf('[object HTML')===0;
-	return element_pattern.test(get_object_type.call(value));
+	return element_pattern.test(get_object_type.call(value))
+		|| '[object Text]' === get_object_type.call(value)
+		&& value.nodeType === TEXT_NODE;
 	// return get_object_type.call(value).match(element_pattern);
 };
 
@@ -12694,7 +12747,9 @@ CeL.net.web
  * http://www.w3.org/DOM/
  */
 is_HTML_element_type = function(value, type) {
-	return element_pattern.test(get_object_type.call(value)) && value.nodeType === type;
+	return type === TEXT_NODE ?
+			'[object Text]' === get_object_type.call(value) && value.nodeType === TEXT_NODE
+			: element_pattern.test(get_object_type.call(value)) && value.nodeType === type;
 };
 
 CeL.net.web
@@ -12711,8 +12766,9 @@ CeL.net.web
  */
 is_element_node = function(value) {
 	//library_namespace.debug('Test '+get_object_type.call(value)+' '+((typeof value==='object'||typeof value==='function')&&value.nodeType||'')+': '+element_pattern.test(get_object_type.call(value))+','+(value.nodeType === 1));
-	return element_pattern.test(get_object_type.call(value)) && value.nodeType === 1;
+	return element_pattern.test(get_object_type.call(value)) && value.nodeType === ELEMENT_NODE;
 };
+
 
 /*
 
@@ -12731,7 +12787,8 @@ node <OBJECT>: type object, toString.call: [object Object], ""+node: [object], n
 
 */
 function show_node(node) {
-	library_namespace.debug('node'
+	if(_.is_element_node(node))
+		library_namespace.debug('node'
 			+ (node.tagName ? ' &lt;' + node.tagName
 					+ (node.id ? '#' + node.id : '') + '&gt;' : '') + ': type '
 			+ typeof node + ', toString.call: ' + get_object_type.call(node)
@@ -12741,26 +12798,26 @@ function show_node(node) {
 
 try {
 	// workaround for IE, 因用 General type, 效能較差
-	var d = document.createElement('div'),
-	s = element_pattern.test(get_object_type.call(d));
-	// alert('toString test: ' + s);
+	var d = document.createElement('div'), s;
+	// alert('toString test: ' + element_pattern.test(get_object_type.call(d)));
 
-	if (d.nodeType !== 1)
+	if(d.nodeType !== ELEMENT_NODE)
+		//	doesn't support W3C DOM?
 		throw 0;
 
-	if (!s) {
+	if (!(s = element_pattern.test(get_object_type.call(d)))) {
 		if (element_pattern.test('' + d))
 			// IE8-9
 			_.is_HTML_element = function(value) {
 				return element_pattern.test('' + value)
-						// for IE8
-						|| typeof value === 'object' && value.nodeType === 1// && value.tagName === "OBJECT"
+						// for IE8. value 可能是 null!
+						|| typeof value === 'object' && value !== null && value.nodeType === ELEMENT_NODE// && value.tagName === "OBJECT"
 							&& "[object NamedNodeMap]" === '' + value.attributes;
 			};
 		else if (get_object_type.call(d) === '[object Object]')
 			// IE5-7, 這種判別方法有漏洞!
 			_.is_HTML_element = function(value) {
-				return '[object Object]' === get_object_type.call(value) && typeof value.nodeType === 'number';
+				return '[object Object]' === get_object_type.call(value) && value !== null && typeof value.nodeType === 'number';
 			};
 		else
 			throw 1;
@@ -12770,11 +12827,14 @@ try {
 			return _.is_HTML_element(value) && value.nodeType === type;
 		};
 		_.is_element_node = function(value) {
-			return _.is_HTML_element(value) && value.nodeType === 1;
+			return _.is_HTML_element(value) && value.nodeType === ELEMENT_NODE;
 		};
 	}
+
 } catch (e) {
 	// TODO: handle exception
+} finally {
+	d = null;
 }
 
 
@@ -12810,26 +12870,35 @@ if ( plugin ) {
 }
 */
 
-//	從後面調過來的
-var setCookieS,disabledKM=0,scrollToXY,scrollToInterval,scrollToOK,doAlertDivName,doAlertOldScrollLocation;
-//setObjValue('setCookieS','moment=-1,expires=0,path=0,domain=0,secure=0,DeleteAll=2,DeleteAllRoot,setRoot,setDomain,forever',1);
-setCookieS={
-		moment:-1,expires:0,path:0,domain:0,secure:0,DeleteAll:2,DeleteAllRoot:3,setRoot:4,setDomain:5,forever:6
-		};
-
-
 //	copy from base.js
 //window.onerror=HandleError;
-function HandleError(message,url,line){
- // if(window.confirm())_DO_CONTINUE_
- if(window.navigator.appName=="Microsoft Internet Explorer")return !window.confirm(url+'\n\nJavaScript Error: '+line+'\n'+message+'\n\nSee more details?');
- else if(window.navigator.appName=="Netscape")window.navigate('javascript:');//document.location.href="javascript:";
- //return message;	'Warning: function HandleError does not always return a value' in some Firebird with	user_pref("javascript.options.strict", true);	@ prefs.js
+function HandleError(message, url, line) {
+	// if(window.confirm())_DO_CONTINUE_
+	if (window.navigator.appName == "Microsoft Internet Explorer")
+		return !window.confirm(url + '\n\nJavaScript Error: ' + line
+				+ '\n' + message + '\n\nSee more details?');
+	else if (window.navigator.appName == "Netscape")
+		// document.location.href="javascript:";
+		window.navigate('javascript:');
+
+	//return message;	'Warning: function HandleError does not always return a value' in some Firebird with	user_pref("javascript.options.strict", true);	@ prefs.js
 }
+
 //window.onresize=OnResize;	//	預防(舊版)NS resize時版面亂掉
-function OnResize(){history.go(0);}//location.replace(),location.reload()
-//	回上一頁	history.go(-1),history.back()/history.forward()	this.location.replace(document.referrer)	//	Opera's document.referrer returns only null if referrer logging is disabled
-if(typeof document=='object')write=document.write;//IE only!!	http://blog.livedoor.jp/dankogai/archives/50952477.html	DOM時代のdocument.write()
+function OnResize() {
+	//	回上一頁	history.go(-1),history.back()/history.forward()	this.location.replace(document.referrer)
+	//	Opera's document.referrer returns only null if referrer logging is disabled
+	//location.replace(),location.reload()
+	history.go(0);
+}
+
+/*
+IE only!!
+	http://blog.livedoor.jp/dankogai/archives/50952477.html	DOM時代のdocument.write()
+
+if (typeof document == 'object')
+	write = document.write;
+*/
 
 /*
 http://blog.taragana.com/index.php/archive/how-to-enable-windowstatus-in-firefox/
@@ -12901,7 +12970,9 @@ if(disabledKM){with(document.body)	//	已lock時不執行多餘的動作與覆�
   if(typeof onselectstart!='undefined')document.body.Oonselectstart=onselectstart;
   if(typeof oncontextmenu!='undefined')document.body.Ooncontextmenu=oncontextmenu;
   if(typeof ondragstart!='undefined')document.body.Oondragstart=ondragstart;
-  ondragstart=oncontextmenu=onselectstart=function(){return false;}//new Function("return false;");
+  ondragstart=oncontextmenu=onselectstart=
+	//new Function("return false;");
+	function(){return false;};
  }
  //	不要在 document 对象中设置 expando 属性，在 window 对象上设置 expando 属性。
  with(window){
@@ -12926,7 +12997,9 @@ if(disabledKM){with(document.body)	//	已lock時不執行多餘的動作與覆�
  //	window.captureEvents(Event.MOUSEUP|Event.MOUSEDOWN);
  //	window.onmousedown=function(e){if(e.which==1){window.captureEvents(Event.MOUSEMOVE);window.onmousemove=rf;}};
  //	window.onmouseup=function(e){if(e.which==1){window.releaseEvents(Event.MOUSEMOVE);window.onmousemove=null;}};
- if(!disabledKM && window.captureEvents)
+ //	Navigator 4.0x
+ //	http://topic.csdn.net/t/20020125/13/498661.html
+ if(!disabledKM && window.Event && window.captureEvents)
 	window.captureEvents(Event.MOUSEDOWN),
 	window.captureEvents(Event.KEYDOWN);
 
@@ -12937,13 +13010,13 @@ if(disabledKM){with(document.body)	//	已lock時不執行多餘的動作與覆�
 CeL.net.web
 .
 /**
- * trigger/swap display and visibility.
+ * toggle/swap display and visibility.
  * display:none or visibility:hidden.
  * TODO: computed style
  * @param element	HTML element
- * @param {String|Number} type	show or hidden or set the status type:
- * 			{Number}: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change
- * 			{String}: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?
+ * @param	{String|Number} type	show or hidden or set the status type:
+ * 			{Number} type: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change
+ * 			{String} type: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?
  * @return	display status
  * @since	2010/4/1 10:24:43 rewrite
  * @see
@@ -12954,7 +13027,7 @@ CeL.net.web
  * @requires	[_.get_element],[_.get_style]
  * @memberOf	CeL.net.web
  */
-trigger_display = function(element, type){
+toggle_display = function(element, type){
 	// showObj(div);
 	if (typeof element === 'string')
 		element = typeof _.get_element === 'function' ? _.get_element(element)
@@ -12993,7 +13066,7 @@ trigger_display = function(element, type){
 
 	return type;
 };
-//simpleWrite('a.txt',reduceCode([f,trigger,setObjValue]));
+//simpleWrite('a.txt',reduceCode([f,toggle,setObjValue]));
 //for(var i in style)tt+=i+'='+document.getElementById("others").style[i]+"<br/>";document.write(tt);
 
 
@@ -13075,7 +13148,7 @@ remove_node = function remove_node(o, tag) {
 	var _f = remove_node, i;
 	if (typeof o === 'string')
 		o = document.getElementById(o);
-	if (!o || typeof o != 'object')
+	if (!o || typeof o !== 'object')
 		return;
 
 	// remove child
@@ -13097,7 +13170,8 @@ remove_node = function remove_node(o, tag) {
 	}
 
 	// remove self
-	return tag || !(i = o.parentNode) ? o : i.removeChild(o); //	if(o.parentNode): 預防輸入的o為create出來的
+	//	測試 o.parentNode: 預防輸入的o為create出來的
+	return tag || !(i = o.parentNode) ? o : i.removeChild(o);
 };
 
 CeL.net.web
@@ -13123,24 +13197,27 @@ CeL.net.web
  * @since	2006/12/10 21:25 分離 separate from XML_node()
  * @memberOf	CeL.net.web
  */
-set_attribute = function(_e, propertyO, ns){
- if(typeof _e==='string')_e=typeof _.get_element==='function'?_.get_element(_e):document.getElementById(_e);
- if(!_e||!propertyO/*||_e.nodeType==3/* TEXT_NODE */)return;
+set_attribute = function(_e, propertyO, ns) {
+	if (typeof _e === 'string')
+		_e = typeof _.get_element === 'function' ? _.get_element(_e)
+				: document.getElementById(_e);
+		if (!_e || !propertyO/* ||_e.nodeType==3/* TEXT_NODE */)
+			return;
 
- var _l,_m,_g,_N={svg:'2000/svg',mathml:'1998/Math/MathML',xhtml:'1999/xhtml',xlink:'1999/xlink'	//	Namespaces:SVG,MathML,XHTML,XLink
-	 //	亦可用'1999/xhtml'
-	 ,html:'TR/REC-html40'
-	 ,html4:'TR/REC-html40'
-	 ,html5:'TR/html5'
-	};
- if(typeof propertyO=='string')propertyO=/[=:]/.test(propertyO)?split_String_to_Object(propertyO):propertyO.split(',');
- if (propertyO instanceof Array)
-		_g = propertyO.length == 1 ? propertyO[0] : 1,
-		propertyO = split_String_to_Object(propertyO.join(','));
+ var _l,_m,_g,
+	//	Namespaces:SVG,MathML,XHTML,XLink
+ _N=_.new_node.ns;
+ if (typeof propertyO == 'string')
+	 propertyO = /[=:]/.test(propertyO) ? split_String_to_Object(propertyO)
+			 : propertyO.split(',');
+	 if (propertyO instanceof Array)
+		 _g = propertyO.length == 1 ? propertyO[0] : 1,
+				 propertyO = split_String_to_Object(propertyO.join(','));
 
- for(_l in propertyO){
-  if(_l=='class'&&!propertyO['className'])propertyO[_l='className']=propertyO['class'];
-  if(_g||(_l in propertyO)&&propertyO[_l]!=null)
+		 for (_l in propertyO) {
+			 if (_l == 'class' && !propertyO['className'])
+				 propertyO[_l = 'className'] = propertyO['class'];
+			 if (_g || (_l in propertyO) && propertyO[_l] != null)
    if(_l=='className'||typeof propertyO[_l]=='function')if(_g)propertyO[_l]=_e[_l];else _e[_l]=propertyO[_l];//_l=='id'||
 	/*
 		XML 中id不能以setAttribute設定。
@@ -13148,14 +13225,23 @@ set_attribute = function(_e, propertyO, ns){
 		http://www.quirksmode.org/bugreports/archives/2005/03/setAttribute_does_not_work_in_IE_when_used_with_th.html
 		IE ignores the "class" setting, and Mozilla will have both a "class" and "className" attribute defined
 	*/
-   else if(_e.setAttributeNS&&(_m=_l.match(/^(.+):([^:]+)$/))){
-    _m=_m[1];
-    if(_m.indexOf('://')==-1&&_N[_m.toLowerCase()])_m='http://www.w3.org/'+_N[_m.toLowerCase()];
-    if(_g)propertyO[_l]=_e.getAttributeNS(_m,_l);
-    else _e.setAttributeNS(_m,_l,propertyO[_l]);//try{_e.setAttributeNS(_m,_l,propertyO[_l]);}catch(e){alert('set_attribute: Error!');}
-   }else if(_g)propertyO[_l]=_e.getAttribute(_l);else _e.setAttribute(_l,propertyO[_l]);//_e.setAttributeNS?_e.setAttributeNS(null,_l,propertyO[_l]):_e.setAttribute(_l,propertyO[_l]);
+   else if (_e.setAttributeNS
+		   && (_m = _l.match(/^(.+):([^:]+)$/))) {
+	   _m = _m[1];
+	   if (_m.indexOf('://') == -1 && _N[_m.toLowerCase()])
+		   _m = 'http://www.w3.org/' + _N[_m.toLowerCase()];
+	   if (_g)
+		   propertyO[_l] = _e.getAttributeNS(_m, _l);
+	   else
+		   _e.setAttributeNS(_m, _l, propertyO[_l]);// try{_e.setAttributeNS(_m,_l,propertyO[_l]);}catch(e){alert('set_attribute:
+	   // Error!');}
+   } else if (_g)
+	   propertyO[_l] = _e.getAttribute(_l);
+   else
+	   _e.setAttribute(_l, propertyO[_l]);// _e.setAttributeNS?_e.setAttributeNS(null,_l,propertyO[_l]):_e.setAttribute(_l,propertyO[_l]);
  }
- return typeof _g=='string'?propertyO[_g]:propertyO;
+
+ return typeof _g == 'string' ? propertyO[_g] : propertyO;
 };
 
 
@@ -13206,7 +13292,7 @@ add_node = function add_node(node, child_list) {
 		child_list += '';
 	if (typeof child_list === 'string') {
 		var tag_name = node.tagName.toLowerCase();
-		if (tag_name === 'textarea' || tag_name === 'select'
+		if (tag_name === 'textarea' || tag_name === 'select' || tag_name === 'option'
 			|| (tag_name === 'input' && node.type === 'text'))
 			node.value = child_list;
 		else if (tag_name === 'option') {
@@ -13218,10 +13304,12 @@ add_node = function add_node(node, child_list) {
 			//try{
 				node.innerHTML += child_list;
 			//}catch(e){node.appendChild(XML_node('span',0,0,child_list));}
+
 		else
 			//try{
 				node.appendChild(document.createTextNode(child_list));
 			//}catch(e){alert(e.description);}
+
 		// else alert('add_node: Error insert contents:\n['+child_list+']');
 	}
 };
@@ -13279,19 +13367,23 @@ insertSetting:
 CeL.net.web
 .
 /**
- * instead of createNode().
+ * 創建新的 DOM 節點(node)。
+ * createNode() 的功能補充加強版。
  * TODO: 分割功能(set_attrib, add_child, ..), 簡化
- * @param nodes	node structure
- * @param layer	where to layer this node. e.g., parent node
- * @return
+ * @param	{Object|Array} nodes	node structure
+ * @param	{String|Array|HTMLElement} [layer]	where to layer this node. e.g., parent node
+ * @return	{HTMLElement}	new node created
  * @since	2010/6/21 13:45:02
  */
 new_node = function(nodes, layer) {
+	var _s = _.new_node, node, for_each,
 	// parent: parent node
-	var _s = _.new_node, node, for_each, parent, children, handle = _s.handle;
+	parent,
+	children, handle = _s.handle;
 
 	if (!is_DOM('document')
-		|| !document.createElement //&& !document.createElementNS
+		|| !document.createElement
+		//&& !document.createElementNS
 		) {
 		library_namespace.warn('new_node: DOM error? Cannot create node [' + nodes + '].');
 		return;
@@ -13323,8 +13415,8 @@ new_node = function(nodes, layer) {
 					tag = node;
 					break;
 				}
-		else if (!tag){
-			//	just set attributes
+		else if (tag === 0) {
+			//	0: just set attributes
 			if (!_.is_element_node(layer)) {
 				library_namespace.warn('new_node: There is no tag and the layer is NOT a HTML Element!');
 				return;
@@ -13349,12 +13441,15 @@ new_node = function(nodes, layer) {
 				tag = s[2], ns = s[1];
 
 			try {
-				if (ns && document.createElementNS){
-					if(ns in (s = _s.ns))
+				if (ns && document.createElementNS) {
+					if (ns in (s = _s.ns))
 						ns = 'http://www.w3.org/' + s[ns];
 					node = document.createElementNS(ns, tag);
 				} else
-					node = document.createElement(ns ? ns + ':' + tag : tag);
+					node = tag ? document.createElement(ns ? ns + ':' + tag : tag)
+							//: document.createTextNode();
+							//	由後面判定。
+							: nodes[tag];
 			} catch (_e) {
 				library_namespace.err('new_node: Error create tag: [' + tag + ']');
 				node = null;
@@ -13364,16 +13459,26 @@ new_node = function(nodes, layer) {
 
 		if (_.is_element_node(node)) {
 			s = node.setAttributeNS ? function(n, v) {
+				if (library_namespace.is_Function(v)) {
+					node[n] = v;
+					//	TODO: _.add_listener();
+					return;
+				}
 				var _n = n.match(/^(.+):([^:]+)$/);
 				if (_n)
 					n = _n[2], _n = _n[1];
-				if(_n)
+				if (_n)
 					node.setAttributeNS(
-						_n in _s.ns ? 'http://www.w3.org/' + _s.ns[_n]
-								: ns, n, v);
+							_n in _s.ns ? 'http://www.w3.org/'
+									+ _s.ns[_n] : ns, n, v);
 				else
 					node.setAttribute(n, v);
-			} : node.setAttribute;
+			} : function(n, v) {
+				if (library_namespace.is_Function(v))
+					node[n] = v;
+				else
+					node.setAttribute(n, v);
+			};
 
 			//	對常用的特別處理
 			// class name
@@ -13387,7 +13492,12 @@ new_node = function(nodes, layer) {
 				ignore[n] = null,
 				node.className = nodes[n];
 
-			// IE需要先appendChild才能操作style，moz不用..??
+			// IE 需要先 appendChild 才能操作 style，moz不用..??
+			//	http://www.peterbe.com/plog/setAttribute-style-IE
+			//	或需要將 font-size -> fontSize 之類?
+			// IE6 (no firefox or IE7~) 可設定:
+			//	oNewDiv.style.setAttribute('border', '1px solid #000');
+			//	oNewDiv.style.setAttribute('backgroundColor', '#fff');
 			if (((n = 'style') in nodes) || ((n = 'S') in nodes)) {
 				ignore[n] = null;
 				n = nodes[n];
@@ -13396,8 +13506,8 @@ new_node = function(nodes, layer) {
 					style.cssText = n;
 				else if (library_namespace.is_Object(n))
 					for (i in n)
-						// isIE?"styleFloat":"cssFloat"
-						style[i === 'float' ? 'cssFloat' : i] = n[i];
+						// is_IE?"styleFloat":"cssFloat"
+						style[i === 'float' ? 'cssFloat' in style ? 'cssFloat' : 'styleFloat' : i] = n[i];
 				else
 					library_namespace.warn('new_node: Error set style: [' + styleO + ']');
 			}
@@ -13412,27 +13522,29 @@ new_node = function(nodes, layer) {
 						ul : 1
 					} && library_namespace.is_Array(children))
 			{
-				for ( var i = 0, o = [], l = children.length, t, c; i < l; i++)
+				var i = 0, o = [], l = children.length, t, c, change = false;
+				for (; i < l; i++)
 					if (c = children[i]) {
-						if (typeof c === 'string')
-							t = 1;
-						if (!t) {
+						t = typeof c === 'string'
+							|| typeof c === 'number';
+						if (!t && library_namespace.is_Object(t)) {
 							t = c.$;
 							if (!t)
-								for (i in c) {
-									t = i;
+								for (t in c)
 									break;
-								}
 							t = t.toLowerCase() !== 'li';
 						}
-						if (t)
-							o.push( {
-								li : c
-							});
+
+						if(t)
+							change = true;
+						o.push(t ? {
+							li : c
+						} : c);
 					}
 
 				// 盡量別動到原來的
-				children = o;
+				if (change)
+					children = o;
 
 			}else if(tag === 'select' && library_namespace.is_Object(children)){
 				var i;
@@ -13469,7 +13581,7 @@ new_node = function(nodes, layer) {
 					s(n, nodes[n]);
 					//library_namespace.debug('new_node: get attribute ['+n+'] = ['+node.getAttribute(n)+']');
 				}
-		} else
+		} else if(tag && !_.is_HTML_element(node))
 			show_node(node),
 			library_namespace.warn('new_node: node is not a HTML Element!');
 
@@ -13542,8 +13654,10 @@ new_node = function(nodes, layer) {
 	if (library_namespace.is_Array(node)) {
 		node = [];
 		//	不宜個個重新呼叫是為了效能
-		for ( var i = 0, l = nodes.length, n, _l=layer, _p=parent; i < l; i++){
-			node.push(n = _s(nodes[i], for_each&&function(n){for_each(n, _l, _p);}||null));
+		for ( var i = 0, l = nodes.length, n, _l = layer, _p = parent; i < l; i++) {
+			node.push(n = _s(nodes[i], for_each && function(n) {
+					for_each(n, _l, _p);
+				} || null));
 			/*
 			node.push(n = _s(nodes[i], for_each));
 			if (for_each)
@@ -13579,7 +13693,7 @@ new_node = function(nodes, layer) {
 	}
 
 
-	//	this helps to fix the memory leak issue
+	//	This helps to fix the memory leak issue.
 	//	http://www.hedgerwow.com/360/dhtml/ie6_memory_leak_fix/
 	//	http://jacky.seezone.net/2008/09/05/2114/
 	try {
@@ -13596,6 +13710,7 @@ _.new_node.handle = [
 			n += '';
 
 		if (t in {
+				//	no <select>!
 				textarea : 1,
 				input : 1,
 				text : 1
@@ -13613,9 +13728,9 @@ _.new_node.handle = [
 				// this may throw error: -2146827687 未知的執行階段錯誤
 				l.innerHTML += n;
 			else{
-				t=l.innerHTML;
+				t = l.innerHTML;
 				l.appendChild(n);
-				if(t === l.innerHTML)
+				if (t === l.innerHTML)
 					;//library_namespace.warn('new_node.handle[0]: The addition does not change the layer!');
 			}
 		}
@@ -13719,14 +13834,7 @@ XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
 
 	var _NS,
 	//	Namespaces: SVG,MathML,XHTML,XLink
-	_i = {
-		svg : '2000/svg',
-		mathml : '1998/Math/MathML',
-		xhtml : '1999/xhtml',
-		xlink : '1999/xlink',
-		//	亦可用'1999/xhtml'
-		html : 'TR/REC-html40'
-	},
+	_i = _.new_node.ns,
 	//	use Namespaces or not
 	//	buggy now.
 	_DOM2 = document.createElementNS ? 1 : 0,
@@ -13778,8 +13886,8 @@ XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
 			_e.style.cssText = styleO;
 		else if (typeof styleO === 'object')
 			for (_i in styleO)
-				//	isIE?"styleFloat":"cssFloat"
-				_e.style[_i === 'float' ? 'cssFloat' : _i] = styleO[_i];
+				//	is_IE?"styleFloat":"cssFloat"
+				_e.style[_i === 'float' ? 'cssFloat' in _e.style ? 'cssFloat' : 'styleFloat' : _i] = styleO[_i];
 	//else library_namespace.warn('XML_node: Error set style:\n[' + styleO + ']');
 
 
@@ -13879,12 +13987,13 @@ CeL.net.web
  */
 set_text=function (element, text) {
 	if (!element || typeof window !== 'object' || typeof window.document !== 'object'
-			|| typeof o === 'string' && !(element = document.getElementById(element)))
+			|| typeof o === 'string' && !(element = _.get_element(element)))
 		return;
 
 	var text_p=_.set_text.p;
 	if (typeof text_p !== 'string' || !text_p)
-		_.set_text.p=text_p = typeof document.body.textContent === 'string' ? 'textContent'
+		_.set_text.p = text_p =
+				typeof document.body.textContent === 'string' ? 'textContent'
 				: typeof document.body.innerText === 'string' ? 'innerText'
 				: 'innerHTML';
 
@@ -13933,48 +14042,76 @@ function setFrame(){
   window.open(l,f);//if((l=window.open(l,f).top).focus(),alert(l!=self.top),l!=self.top)self.top.close();//alert(l+'\n'+f),	//	moz需要等到frame load之後才能得到window.frames[f].location.href==l的結果，所以可以考慮作setTimeout的延遲。但是假如真的不是預設的page，這樣會造成多load一遍。
  //setTimeout('alert(window.frames["'+f+'"].location.href);',900);
 }
-/*	set window.top page to certain location
+/*
+	set window.top page to certain location
 	setTopP(location,search)
 	search===setTopP_doTest: do a test, return window.top不為指定頁?1:0
 */
 var setTopPDTopP,setTopP_doTest=.234372464;	//	default top page(file) path
 //setTopP[generateCode.dLK]='dBasePath,getFN,setTopPDTopP,setTopP_doTest';
-function setTopP(l,s){
- if(!setTopPDTopP)return 2;
- if(!l)l=dBasePath(setTopPDTopP)+getFN(setTopPDTopP);//alert(l);
- if(typeof s=='undefined')try{s=window/*self*/.location.search;}catch(e){return;}	//	IE在about:blank的情況下呼叫網頁，網頁完全載入前location無法呼叫。例如從FireFox拉進IE時使用location.*有可能'沒有使用權限'，reload即可。
- var t,r=/[\/\\]$/i,ri=/[\/\\](index.s?html?)?$/i;
- try{
-  t=window.top.location.href.replace(/[?#](.*)$/,'');	//	top.location.pathname在遇到local file時可能出問題。若不同domain時top.location也不能取用，應改成window.top!=window.window
- }catch(e){t='';}
- //alert(t+'\n'+l+'\n'+(t!=l));
- if( t!=l && !(r.test(l)&&ri.test(t)) && !(ri.test(l)&&r.test(t)) )
-  if(s===setTopP_doTest)return 1;
-  //	replace() 方法可以開啟檔案，但是卻不會更動瀏覽器的瀏覽歷程（history）內容
-  //	IE6若location.href長度超過2KB，光是'location.search'這項敘述就會導致異常
-  else window.top.location.replace(l+s+'#'+encodeURIComponent(location.href));	//	預設page：xx/和xx/index.htm相同
-}
+function setTopP(l, s) {
+	if (!setTopPDTopP)
+		return 2;
+	if (!l)
+		l = dBasePath(setTopPDTopP) + getFN(setTopPDTopP);
+	// alert(l);
+	if (typeof s == 'undefined')
+		try {
+			//	IE在about:blank的情況下呼叫網頁，網頁完全載入前location無法呼叫。
+			//	例如從FireFox拉進IE時使用location.*有可能'沒有使用權限'，reload即可。
+			s = window/* self */.location.search;
+		} catch (e) {
+			return;
+		}
+	var t, r = /[\/\\]$/i, ri = /[\/\\](index.s?html?)?$/i;
+	try {
+		//	top.location.pathname在遇到local file時可能出問題。
+		//	若不同domain時top.location也不能取用，應改成window.top!=window.window
+		t = window.top.location.href.replace(/[?#](.*)$/, '');
+	} catch (e) {
+		t = '';
+	}
+	// alert(t+'\n'+l+'\n'+(t!=l));
+	if (t != l && !(r.test(l) && ri.test(t)) && !(ri.test(l) && r.test(t)))
+		if (s === setTopP_doTest)
+			return 1;
+		// replace() 方法可以開啟檔案，但是卻不會更動瀏覽器的瀏覽歷程（history）內容.
+		// IE6若location.href長度超過2KB，光是'location.search'這項敘述就會導致異常.
+		else
+			// 預設page：xx/和xx/index.htm相同
+			window.top.location.replace(l + s + '#'
+					+ encodeURIComponent(location.href));
+};
+
 
 //	設在body.onload，改變所有<a>在滑鼠移入移出時的status
 var setAstatusOS;	//	old status,也可設定event.srcElement.ostatus等等，但考慮到將造成記憶體浪費…
 //setAstatus[generateCode.dLK]='setAstatusOver,setAstatusOut';
-function setAstatus(){
- if(typeof event=='undefined')return;//||typeof event.srcElement=='undefined'	//	預防版本過低(4以下)的瀏覽器出現錯誤：event至IE4才出現
- var i,o,l;
- if(o=document.getElementsByTagName('A'))
-  for(i=0,l=o.length;i<l;i++)
-   if(o[i].title&&!o[i].onmouseover&&!o[i].onmouseout)
-    o[i].onmouseover=setAstatusOver,
-    o[i].onmouseout=setAstatusOut;
-}
+function setAstatus() {
+	if (typeof event == 'undefined'
+			//||typeof event.srcElement=='undefined'
+		)
+		// 預防版本過低(4以下)的瀏覽器出現錯誤：event至IE4才出現
+		return;
+	var i, o, l;
+	if (o = document.getElementsByTagName('a'))
+		for (i = 0, l = o.length; i < l; i++)
+			if (o[i].title && !o[i].onmouseover && !o[i].onmouseout)
+				o[i].onmouseover = setAstatusOver,
+				o[i].onmouseout = setAstatusOut;
+};
 //setAstatusOver[generateCode.dLK]=setAstatusOut[generateCode.dLK]='setAstatusOS';
-function setAstatusOver(){
- var o=event.srcElement;
- if(o.title){setAstatusOS=window.status,window.status=o.title;return true;}
-}
-function setAstatusOut(){
- //var o=event.srcElement;if(typeof o.ostatus!='undefined'){window.status=o.ostatus;return true;}
- window.status=setAstatusOS;return true;
+function setAstatusOver() {
+	var o = event.srcElement;
+	if (o.title) {
+		setAstatusOS = window.status, window.status = o.title;
+		return true;
+	}
+};
+function setAstatusOut() {
+	//var o=event.srcElement;if(typeof o.ostatus!='undefined'){window.status=o.ostatus;return true;}
+	window.status = setAstatusOS;
+	return true;
 };
 
 
@@ -14213,7 +14350,7 @@ parse_URI = function(URI) {
 	clipboardFunction(2,'dcfvdf')	set clipboard by string
 	clipboardFunction(3,divObj)	Copies divObj to the clipboard/set clipboard and then deletes it. *return the value set to clipboard
 */
-var clipboardFunctionObj='clipboardFunctionDiv';
+var clipboardFunctionObj = 'clipboardFunctionDiv';
 //clipboardFunction[generateCode.dLK]='clipboardFunctionObj';
 function clipboardFunction(m,o){	//	method,object/(string)set value
 if(window.navigator.appName=="Microsoft Internet Explorer"){
@@ -14305,155 +14442,260 @@ copy_to_clipboard = function(text) {
 /*	2009/5/13 21:21:49
 	unfinished
 */
-function clipB(){
+function clipB() {
 }
-clipB.start_op=function(){
- var o=this.temp_obj;
- if(!o){
-  document.body.appendChild(o=document.createElement('div'));
-  o.contentEditable=true;	//	for modify
-  //o.style.height=0;o.style.width=0;
-  this.temp_obj=o;
- }
+clipB.start_op = function() {
+	var o = this.temp_obj;
+	if (!o) {
+		document.body.appendChild(o = document.createElement('div'));
+		// for modify
+		o.contentEditable = true;
+		// o.style.height=0;o.style.width=0;
+		this.temp_obj = o;
+	}
 
- document.selection.empty();
- o.innerHTML='';	//	initial
- o.style.display='block';	//	得出現才能 focus(), execCommand()
- o.focus();
- return o;
+	document.selection.empty();
+	// initial
+	o.innerHTML = '';
+	// 得出現才能 focus(), execCommand()
+	o.style.display = 'block';
+	o.focus();
+	return o;
 };
-clipB.end_op=function(){
- var o=this.temp_obj;
- document.selection.empty();
- if(o)
-  o.style.display='none';
+clipB.end_op = function() {
+	var o = this.temp_obj;
+	document.selection.empty();
+	if (o)
+		o.style.display = 'none';
 };
 //	return [text, obj]
-clipB.get_obj=function(t){
- var o;
- if(typeof t=='object' && 'innerHTML' in t || (o=document.getElementById(''+t)) && (t=o))
-  return [t.innerHTML,t];
- return [t];
+clipB.get_obj = function(t) {
+	var o;
+	if (typeof t == 'object' && 'innerHTML' in t
+			|| (o = document.getElementById('' + t)) && (t = o))
+		return [ t.innerHTML, t ];
+	return [ t ];
 };
-clipB.paste_to=function(o){
- o=this.get_obj(o);
- if(o=o[1])
-  o.innerHTML=this.get(1);
+clipB.paste_to = function(o) {
+	o = this.get_obj(o);
+	if (o = o[1])
+		o.innerHTML = this.get(1);
 };
-clipB.set=function(o){
- o=this.get_obj(o);
- 
+clipB.set = function(o) {
+	o = this.get_obj(o);
 };
-clipB.get=function(h){	//	get HTML
- var o=this.start_op(),r=document.selection.createRange(),t;
- r.select();
- r.execCommand('Paste');
- t=h?r.htmlText:r.text;
- this.end_op();
- return h?o.innerHTML:o.innerText;
+//	get HTML
+clipB.get = function(h) {
+	var o = this.start_op(), r = document.selection.createRange(), t;
+	r.select();
+	r.execCommand('Paste');
+	t = h ? r.htmlText : r.text;
+	this.end_op();
+	return h ? o.innerHTML : o.innerText;
 };
-clipB.cut_from=function(o){
- o=this.get_obj(o);
- 
+clipB.cut_from = function(o) {
+	o = this.get_obj(o);
 };
 
 
-/*	設定document.cookie	You can store up to 20 name=value pairs in a cookie, and the cookie is always returned as a string of all the cookies that apply to the page.
+//從後面調過來的
+var disabledKM=0,scrollToXY,scrollToInterval,scrollToOK,doAlertDivName,doAlertOldScrollLocation;
 
+
+CeL.net.web
+.
+/**
+ * 設定document.cookie.
+ * You can store up to 20 name=value pairs in a cookie, and the cookie is always returned as a string of all the cookies that apply to the page.
+ * TODO:
+ * HTML5 localStorage (name/value item pairs).
+ * test various values.
+ * document.cookie.setPath("/");
+
+ * @example
 	範例：
-setCookie('domain',0);	//	delete domain
-setCookie('expires',30);	//	一個月(30 days)
-setCookie(name,'jj');	//	設定name之值為jj
-setCookie(name,56);	//	設定name之值為56
-setCookie(name);	//	除去name
-setCookie(setCookieS.setRoot);	//	設給本host全部使用
-setCookie(setCookieS.setDomain);	//	設給本domain使用
-setCookie(setCookieS.DeleteAll);	//	依現有設定除去所有值
-setCookie(setCookieS.DeleteAllRoot);	//	除去所有值
-setCookie(setCookieS.forever);	//	永久儲存（千年）
-setCookie(setCookieS.moment);	//	準確設定這之後只在這次瀏覽使用這些cookie，也可用setCookie('expires',-1);
-setCookie('expires',0);	//	將expires設定成forever或moment後再改回來（不加expires設定）
+//	delete domain
+set_cookie('domain',0);
+//	一個月(30 days)
+set_cookie('expires',30);
+//	設定name之值為jj
+set_cookie(name,'jj');
+//	設定name之值為56
+set_cookie(name,56);
+//	除去name
+set_cookie(name);
+//	設給本host全部使用
+set_cookie(_.set_cookie.f.set_root);
+//	設給本domain使用
+set_cookie(_.set_cookie.f.set_domain);
+//	依現有設定除去所有值
+set_cookie(_.set_cookie.f.delete_all);
+//	除去所有值
+set_cookie(_.set_cookie.f.delete_all_root);
+//	永久儲存（千年）
+set_cookie(_.set_cookie.f.forever);
+//	準確設定這之後只在這次瀏覽使用這些cookie，也可用set_cookie('expires',-1);
+set_cookie(_.set_cookie.f.moment);
+//	將expires設定成forever或moment後再改回來（不加expires設定）
+set_cookie('expires',0);
 
-	下面調到檔案頭
-var setCookieS;
-setObjValue('setCookieS','moment=-1,expires=0,path=0,domain=0,secure=0,DeleteAll=2,DeleteAllRoot,setRoot,setDomain,forever',1);
+ * @param {String|Object|_module_.set_cookie.f} name	set_cookie.f flag | varoius name
+ * @param value	varoius value
+ * @param {Boolean|Object} config	若對於特殊設定僅暫時設定時，設定此項。
+ * @returns
+ * @see
+ * Chrome doesn't support cookies for local files unless you start it with the --enable-file-cookies flag.
+ * chrome.exe --allow-file-access-from-files --enable-extension-timeline-api --enable-file-cookies
+ * http://stackoverflow.com/questions/335244/why-does-chrome-ignore-local-jquery-cookies
+ * http://code.google.com/p/chromium/issues/detail?id=535
+ * @memberOf	CeL.net.web
+ */
+set_cookie = function (name, value, config) {
+	if (!is_DOM('document') || typeof document.cookie !== 'string'
+				|| typeof name === 'undefined')
+		return;
 
-TODO:
-test various values
-document.cookie.setPath("/");
+	var _s = _.set_cookie, flag = _s.f, m;
+	if (!config)
+		//	預設傳到 default
+		config = _s.c;
+	else if (!library_namespace.is_Object(config))
+		//	document.cookie 不須每次詳細設定，但這樣可以選擇 {} / {..} / true
+		config = library_namespace.extend(_s.c, {});
 
-*/
-//setCookie[generateCode.dLK]='setCookieS';
-function setCookie(name,value){//,flagOnceTime
- if(typeof name=='undefined'||typeof document=='undefined')return;
- try{
-  //	This will cause error in Phoenix 0.1:
-  // Error: uncaught exception: [Exception... "Component returned failure code: 0x8000ffff (NS_ERROR_UNEXPECTED) [nsIDOMNavigator.cookieEnabled]"  nsresult: "0x8000ffff (NS_ERROR_UNEXPECTED)"  location: "JS frame :: http://lyrics.meicho.com.tw/game/game.js :: setCookie :: line 737"  data: no]
-  if(!window.navigator.cookieEnabled)throw 1;
- }catch(e){window.status='We cannot use cookie!';return;}
- if(name===setCookieS.setRoot)name='path',value='/';	//	設給本host全部使用
- else if(name===setCookieS.setDomain)name='domain',value=location.hostname.replace(/^[^.]+\./,'.');	//	設給本domain使用，尚不是很好的判別法。
- else if(name===setCookieS.forever)name='expires',value=1e14;	//	永久儲存，date之time值不能>1e16
- else if(name===setCookieS.moment)name='expires',value=-1;	//	準確設定這之後只在這次瀏覽使用這些cookie
+	if (library_namespace.is_Object(name)) {
+		for ( var i in name)
+			_s(i, name[i], config);
+		return config;
+	}
 
- if(typeof name=='string'&&name.match(/^(expires|path|domain|secure)$/i)){	//	detect special set
-  name=RegExp.$1;
-  if(name=='expires'&&typeof value=='number'&&value){
-   //if(value<8000)value*=86400000;//幾日，86400000=1000*60*60*24
-   //value=(new Date(value<3e13?(new Date).getTime()+value:1e14)).toUTCString();	//	3e13~千年
-   value=(new Date(value<1e14?value<0?0:(new Date).getTime()+(value<8e3?value*86400000:value):1e14)).toUTCString();
-  }
-  setCookieS[name]=value;
-  return name+'='+value+';';
- }else{var set;
-  if(name===setCookieS.DeleteAllRoot)set='expires='+(new Date(0)).toUTCString()+';path=/;';
-  else with(setCookieS)set=(typeof value=='undefined'?'expires='+(new Date(0)).toUTCString()+';':expires?'expires='+expires+';':'')+(path?'path='+path+';':'')+(domain?'domain='+domain+';':'')+(secure?'secure;':'');
+	try {
+		//	This will cause error in Phoenix 0.1:
+		// Error: uncaught exception: [Exception... "Component returned failure code: 0x8000ffff (NS_ERROR_UNEXPECTED) [nsIDOMNavigator.cookieEnabled]"  nsresult: "0x8000ffff (NS_ERROR_UNEXPECTED)"  location: "JS frame :: http://lyrics.meicho.com.tw/game/game.js :: set_cookie :: line 737"  data: no]
+		if (window.navigator && !window.navigator.cookieEnabled)
+			throw 1;
+	} catch (e) {
+		CeL.warn('set_cookie: We cannot use cookie!');
+		return;
+	}
 
-  if(name===setCookieS.DeleteAll||name===setCookieS.DeleteAllRoot){
-/*
-   var c=document.cookie;
-   while(c.match(/([^=;]+)(=[^;]{0,})?/)){
-    c=c.substr(RegExp.lastIndex);
-    if(!/expires/i.test(RegExp.$1))document.cookie=RegExp.$1+'=;'+set;
-   }
-*/
-   for(var p=document.cookie.split(';'),n,i=0;i<p.length;i++)
-    if(!/^\s*expires\s*$/i.test(n=c[i].split('=')[0]))document.cookie=n+'=;'+set;
-   return document.cookie;
-  }else{
-   //	可用escape(value)/unescape()來設定，速度會比較快，但佔空間。
-   //value=name+'='+(typeof value=='undefined'?'':dQuote(''+value).replace(/([\01-\11\13-\14\16-\40=;])/g,function($0,$1){var c=$1.charCodeAt(0),d=c.toString(16);return'\\x'+(c<16?'0':'')+d;}))+';'+set;
-   //	2004/11/23 21:11	因為cookie儲存成中文時會fault,所以只好還是使用escape()
-   value=name+'='+(typeof value=='undefined'?'':escape(value))+';'+set;
-   return value.length<4096&&(document.cookie=value)?value:-1;	//	長度過長時（約4KB）會清空，連原先的值都不復存在！
-  }
+	//library_namespace.debug('set_cookie: ' + name + ' = [' + value + ']', 1);
+	if (name === flag.set_root)
+		// 設給本 host 全部使用
+		name = 'path', value = '/';
+	else if (name === flag.set_domain)
+		// 設給本 domain 使用，尚不是很好的判別法。
+		name = 'domain', value = location.hostname.replace(/^[^.]+\./, '.');
+	else if (name === flag.forever)
+		// 永久儲存，date之time值不能>1e16
+		name = 'expires', value = 1e14;
+	else if (name === flag.moment)
+		// 準確設定這之後只在這次瀏覽使用這些cookie
+		name = 'expires', value = -1;
 
- }
-}
+	// detect special config / 特殊設定
+	if (typeof name === 'string'
+			&& (m = name.match(/^(expires|path|domain|secure)$/i))) {
+		name = m[1];
+		if (name === 'expires' && typeof value === 'number' && value) {
+			//if(value<8000)value*=86400000;//幾日，86400000=1000*60*60*24
+			//value=(new Date(value<3e13?(new Date).getTime()+value:1e14)).toUTCString();	//	3e13~千年
+			value = (new Date(value < 1e14 ? value < 0 ? 0 : (new Date).getTime()
+					+ (value < 8e3 ? value * 86400000 : value) : 1e14)).toUTCString();
+		}
+		config[name] = value;
+		//library_namespace.debug('set_cookie: ' + name + ' = [' + value + ']', 1);
+		return name + '=' + value + ';';
+
+	} else {
+		var set = name === flag.delete_all_root ? 'expires=' + (new Date(0)).toUTCString() + ';path=/;'
+			: (typeof value === 'undefined' ? 'expires=' + (new Date(0)).toUTCString() + ';'
+			: config.expires ? 'expires=' + config.expires + ';' : '')
+				+ (config.path ? 'path=' + config.path + ';' : '')
+				+ (config.domain ? 'domain=' + config.domain + ';' : '')
+				+ (config.secure ? 'secure;' : '');
+
+		if (name === flag.delete_all || name === flag.delete_all_root) {
+			/*
+			   var c=document.cookie;
+			   while(c.match(/([^=;]+)(=[^;]{0,})?/)){
+			    c=c.substr(RegExp.lastIndex);
+			    if(!/expires/i.test(RegExp.$1))document.cookie=RegExp.$1+'=;'+set;
+			   }
+			*/
+			for ( var p = document.cookie.split(';'), n, l = p.length, i = 0; i < l; i++)
+				if (!/^\s*expires\s*$/i.test(n = c[i].split('=')[0]))
+					document.cookie = n + '=;' + set;
+			return document.cookie;
+
+		} else {
+			//	可用escape(value)/unescape()來設定，速度會比較快，但佔空間。
+			//value=name+'='+(typeof value=='undefined'?'':dQuote(''+value).replace(/([\01-\11\13-\14\16-\40=;])/g,function($0,$1){var c=$1.charCodeAt(0),d=c.toString(16);return'\\x'+(c<16?'0':'')+d;}))+';'+set;
+			//	2004/11/23 21:11	因為cookie儲存成中文時會fault,所以只好還是使用escape()
+			value = escape(name) + '='
+					+ (typeof value == 'undefined' ? '' : escape(value)) + ';'
+					+ set;
+			//library_namespace.debug('set_cookie: [' + value + ']', 1);
+			//library_namespace.debug('set_cookie: [' + document.cookie + ']', 1);
+			// 長度過長時（約4KB）會清空，連原先的值都不復存在！
+			return value.length < 4096 && (document.cookie = value) ? value
+					: -1;
+		}
+
+	}
+};
+
+CeL.net.web
+.
+set_cookie.f = {
+		moment : -1,
+		delete_all : 2,
+		delete_all_root : 3,
+		set_root : 4,
+		set_domain : 5,
+		forever : 6
+};
+
+CeL.net.web
+.
+//	特殊設定
+set_cookie.c = {
+		expires : 0,
+		path : 0,
+		domain : 0,
+		secure : 0
+};
 
 /*	取得document.cookie中所需之值	看起來只能取得相同domain，有設定的path之cookie
 
-	flag=0: only get the first matched value;
+	flag=0: only get the lastest matched value;
 	flag=1: only get all matched in a array;
 	other flag: auto detect by name
 
-getCookie(name);	//	取得name之值，亦可用RegExp：if(c=getCookie())c['name1']==value1;
-getCookie('nn[^=]*');	//	取得所有nn開頭之組合
-getCookie();	//	取得所有name=value組
+get_cookie(name);	//	取得name之值，亦可用RegExp：if(c=get_cookie())c['name1']==value1;
+get_cookie('nn[^=]*');	//	取得所有nn開頭之組合
+get_cookie();	//	取得所有name=value組
 
 因為 cookie 較容易遭到竄改或是出問題，建議設定 verify。
 */
-//getCookie[generateCode.dLK]='renew_RegExp_flag';
-function getCookie(name,flag,verify){
- if(typeof document!='object'||!document.cookie)return;
+CeL.net.web
+.
+//get_cookie[generateCode.dLK]='renew_RegExp_flag';
+get_cookie=function (name,flag,verify){
+ if(!is_DOM('document')||!document.cookie)return;
  if(!name)name='[^;=\\s]+';//\w+
- var c,R=name instanceof RegExp?name:new RegExp('('+name+')\\s*=\\s*([^;=\\s]*)','g')
+ var c,R=name instanceof RegExp?name:new RegExp('('+escape(name)+')\\s*=\\s*([^;=\\s]*)','g')
 	,m=document.cookie.match(R);
- //alert(R+'\n'+m);//alert(R+'\n'+m+'\n'+document.cookie);
+ //library_namespace.debug('get_cookie: [' + R + '] = ['+m+']', 1);
+ //library_namespace.debug('get_cookie: [' + document.cookie + ']', 1);
  if(!m)return;
- if(R.global)R=renew_RegExp_flag(R,'-g');
- if(m.length>1)if(flag==0 || typeof flag=='undefined'&&typeof name=='string')m=[m.slice(-1)];	//	取最後一個
- if(m.length==1&&typeof m[0]=='string'&&(c=m[0].match(R))[1]==name){	//	表示不是因name為RegExp而得出之值
+ if(R.global)R=library_namespace.renew_RegExp_flag(R,'-g');
+ if(m.length>1)
+	 //	取最後一個
+	 if(flag==0 || typeof flag=='undefined'&&typeof name=='string')
+		 m=m.slice(-1);
+ //	表示不是因name為RegExp而得出之值
+ if(m.length===1&&typeof m[0]==='string'&&(c=m[0].match(R))[1]===escape(name)){	
 /*
   if((m=c[2])&&((c=m.charAt(0))=='"'||c=="'")&&c==m.slice(-1))	//	將值為".."或'..'轉為引號中表示之值
    try{
@@ -14468,8 +14710,8 @@ function getCookie(name,flag,verify){
  //alert(document.cookie+'\n'+R+'\n'+m.length+'\n'+m);
 
  for(;i<m.length;i++)
-  if(typeof m[i]=='string'&&(M=m[i].match(R)))
-   r[M[1]]=unescape(M[2]);
+  if(typeof m[i]==='string'&&(M=m[i].match(R)))
+   r[unescape(M[1])]=unescape(M[2]);
 /*
  for(;i<m.length;i++){
   M=m[i].match(R),v=unescape(M[2]);
@@ -14483,7 +14725,7 @@ function getCookie(name,flag,verify){
 */
 
  return r;
-}
+};
 
 
 /*	取得註解部份資料：這個值會連 NewLine 都保存下來
@@ -14494,24 +14736,24 @@ div	從哪裡開始找
 level	最多往下找幾層
 retType	回傳0:node本身,1:註解值
 */
-function getComment(div,level,retType){
- if(!div)div=window.document;
- var i=0,d,_f=getComment;
- if(isNaN(_f.endLevel))_f.endLevel=2;
- if(isNaN(level)||level===-1)_f.a=[],level=_f.endLevel;
- else if(typeof _f.a!='object')_f.a=[];
- div=div.childNodes;
- for(;i<div.length;i++){
-  d=div[i];//if(d.nodeType==8)alert(d.tagName+'\n'+d.nodeName+'\n'+d.nodeType+(d.nodeValue?'\n'+d.nodeValue.slice(0,30):''));
-  if(d.tagName&&d.tagName=='!')_f.a.push(retType?d:d.text.replace(/^<!(--)?/,'').replace(/(--)?>$/,''));//,alert(d.tagName+'\n'+d.text.slice(0,30));
-  else if(d.nodeType==8)_f.a.push(retType?d:d.nodeValue);//alert('*	'+_f.a.length+'\n'+d.nodeValue.slice(0,30));	//	NS	http://allabout.co.jp/career/javascript/closeup/CU20040307/index.htm?FM=cukj&GS=javascript
-	//	http://www.w3.org/TR/DOM-Level-2-Core/core.html
-	//	ELEMENT_NODE,ATTRIBUTE_NODE,TEXT_NODE,CDATA_SECTION_NODE,ENTITY_REFERENCE_NODE,ENTITY_NODE,PROCESSING_INSTRUCTION_NODE,COMMENT_NODE,DOCUMENT_NODE,DOCUMENT_TYPE_NODE,DOCUMENT_FRAGMENT_NODE,NOTATION_NODE
-  if(level&&d.childNodes)_f(d,level-1,retType);
- }
- return _f.a;
+function get_comments(div, level, retType) {
+	if (!div) div = window.document;
+	var i = 0, d, _f = get_comments;
+	if (isNaN(_f.endLevel)) _f.endLevel = 2;
+	if (isNaN(level) || level === -1) _f.a = [], level = _f.endLevel;
+	else if (typeof _f.a != 'object') _f.a = [];
+	div = div.childNodes;
+	for (; i < div.length; i++) {
+		d = div[i]; //if(d.nodeType==8)alert(d.tagName+'\n'+d.nodeName+'\n'+d.nodeType+(d.nodeValue?'\n'+d.nodeValue.slice(0,30):''));
+		if (d.tagName && d.tagName == '!') _f.a.push(retType ? d : d.text.replace(/^<!(--)?/, '').replace(/(--)?>$/, '')); //,alert(d.tagName+'\n'+d.text.slice(0,30));
+		else if (d.nodeType == 8) _f.a.push(retType ? d : d.nodeValue); //alert('*	'+_f.a.length+'\n'+d.nodeValue.slice(0,30));	//	NS	http://allabout.co.jp/career/javascript/closeup/CU20040307/index.htm?FM=cukj&GS=javascript
+		//	http://www.w3.org/TR/DOM-Level-2-Core/core.html
+		//	ELEMENT_NODE,ATTRIBUTE_NODE,TEXT_NODE,CDATA_SECTION_NODE,ENTITY_REFERENCE_NODE,ENTITY_NODE,PROCESSING_INSTRUCTION_NODE,COMMENT_NODE,DOCUMENT_NODE,DOCUMENT_TYPE_NODE,DOCUMENT_FRAGMENT_NODE,NOTATION_NODE
+		if (level && d.childNodes) _f(d, level - 1, retType);
+	}
+	return _f.a;
 }
-//window.onload=function(){getComment();alert(getComment.a.length);for(var i=0;i<getComment.a.length;i++)alert('['+getComment.a[i]+']');};
+//window.onload=function(){get_comments();alert(get_comments.a.length);for(var i=0;i<get_comments.a.length;i++)alert('['+get_comments.a[i]+']');};
 
 
 
@@ -14550,7 +14792,7 @@ P.S. 2007/11/11 似乎已修正？
 	**	本函數正著load！請將優先度高的排前面！
 
 	To use:
-	,setCookieS,setCookie,getCookie,bgLoadImgId,bgLoadImgI,bgLoadImg
+	,set_cookie,get_cookie,bgLoadImgId,bgLoadImgI,bgLoadImg
 	bgLoadImgId='id_of_this_session',bgLoadImgA='img_url1,img_url2,..';	//	** MUST string!
 	function getObjURL(bgLoadImgA_element){return the real URL of bgLoadImgA_element;}
 	window.onload="bgLoadImg();"
@@ -14558,48 +14800,67 @@ P.S. 2007/11/11 似乎已修正？
 var bgLoadImgId='bg',bgLoadImgI;	//	loaded index
 */
 //bgLoadImg[generateCode.dLK]='bgLoadImgId,bgLoadImgI';
-function bgLoadImg(i){
- var bgLoadImgM='bgLoadImgOK_'+bgLoadImgId;
-//alert('_'+bgLoadImgM+','+bgLoadImgI)
- if(typeof bgLoadImgA!='object'){
-  if(!bgLoadImgA||location.protocol=='file:')return;	//	needless
-  var r=document.readyState;	//	http://msdn.microsoft.com/workshop/author/dhtml/reference/properties/readystate_1.asp
-  if(typeof r=='string'&&r!='complete'){setTimeout('bgLoadImg();',500);return;}
-  //	initialization
-  bgLoadImgA=bgLoadImgA.replace(/,\s*,/g,',').split(',');
-  if(typeof getCookie!='function'||getCookie(bgLoadImgM)!=bgLoadImgA.length){	//	全部OK後就別再來了。
-   if(isNaN(bgLoadImgI))bgLoadImgI=0;
-   if(typeof r!='string'){setTimeout('bgLoadImg();',5e3);return;}
-  }else return;
- }
+function bgLoadImg(i) {
+	var bgLoadImgM = 'bgLoadImgOK_' + bgLoadImgId;
+	// alert('_'+bgLoadImgM+','+bgLoadImgI)
+	if (typeof bgLoadImgA != 'object') {
+		// needless
+		if (!bgLoadImgA || location.protocol === 'file:')
+			return;
+		// http://msdn.microsoft.com/workshop/author/dhtml/reference/properties/readystate_1.asp
+		var r = document.readyState;
+		if (typeof r === 'string' && r !== 'complete') {
+			setTimeout(bgLoadImg, 500);
+			return;
+		}
+		// initialization
+		bgLoadImgA = bgLoadImgA.replace(/,\s*,/g, ',').split(',');
+		if (typeof get_cookie != 'function'
+			|| get_cookie(bgLoadImgM) != bgLoadImgA.length) { // 全部OK後就別再來了。
+			if (isNaN(bgLoadImgI))
+				bgLoadImgI = 0;
+			if (typeof r != 'string') {
+				setTimeout(bgLoadImg, 5e3);
+				return;
+			}
+		} else
+			return;
+	}
 
  //if(!isNaN(i)&&!bgLoadImgA[i].complete);	//	timeout
  if(!isNaN(i)&&i<bgLoadImgI-1)return;	//	防止timeout的備援
 
- if(typeof setCookie=='function')	//	假如一個圖一個圖標記，setCookie在超過二十個之後好像就沒效了…被限制？
-  setCookie(bgLoadImgM,bgLoadImgI);	//	標記已load counter
+ //	標記已load counter
+ //	假如一個圖一個圖標記，set_cookie在超過二十個之後好像就沒效了…被限制？
+ _.set_cookie(bgLoadImgM,bgLoadImgI);
 
  if(bgLoadImgI==bgLoadImgA.length)bgLoadImgI++,setTimeout('bgLoadImg();',500);	//	馬上進入判別，最後一個尚未complete
  else if(bgLoadImgI<bgLoadImgA.length){
   var bgLoadImgURL=typeof getObjURL=='function'?getObjURL(bgLoadImgA[bgLoadImgI]):bgLoadImgA[bgLoadImgI];
   //setTimeout('bgLoadImg('+bgLoadImgI+')',5e3);	//	set timeout
   with(bgLoadImgA[bgLoadImgI++]=new Image(1,1))
-	onload=function(){setTimeout('bgLoadImg();',0);},	//	這是個多執行緒技巧：假如使用onload=bgLoadImg，有可能在下一指令碼前就已onload，這樣會造成Stack overflow
+	//	這是個多執行緒技巧：假如使用onload=bgLoadImg，有可能在下一指令碼前就已onload，這樣會造成Stack overflow
+	onload=function(){setTimeout('bgLoadImg();',0);},
 	src=bgLoadImgURL;
   window.status='bgLoadImg ['+bgLoadImgURL+']: '+bgLoadImgI+' / '+bgLoadImgA.length+'..';
  }else{
 /*
   var f=[];
   for(i=0;i<bgLoadImgA.length;i++)if(!bgLoadImgA[i].complete)f.push(bgLoadImgA[i].src);
-  if(f.length)setCookie(bgLoadImgM,0);
+  if(f.length)_.set_cookie(bgLoadImgM,0);
   window.status='bgLoadImg '+(f.length?'end: failed '+f.length+' / '+bgLoadImgA.length+' ('+f+')':'complete!'),bgLoadImgA=0;
 */
-  var f=0;
-  for(i=0;i<bgLoadImgA.length;i++)if(!bgLoadImgA[i].complete)f++;
-  if(f)setCookie(bgLoadImgM,0);
-  window.status='bgLoadImg '+(f?'end: failed '+f+' / '+bgLoadImgA.length:'complete!'),bgLoadImgA=0;
- }
-}
+	 var f = 0;
+	 for (i = 0; i < bgLoadImgA.length; i++)
+		 if (!bgLoadImgA[i].complete)
+			 f++;
+	 if (f)
+		 _.set_cookie(bgLoadImgM, 0);
+	 window.status = 'bgLoadImg '
+		 + (f ? 'end: failed ' + f + ' / ' + bgLoadImgA.length
+				 : 'complete!'), bgLoadImgA = 0;
+	}
+};
 
 
 
@@ -14621,9 +14882,10 @@ TODO:
 排除名單
 對於較多的entries,也許需要使用到Object[key]來代替String.indexOf(key)
 */
-//cookieForm[generateCode.dLK]='getCookie,setCookie';
+//cookieForm[generateCode.dLK]='get_cookie,set_cookie';
 function cookieForm(formIdA,expires,targetItemA){
- if(typeof document!='object')return;
+	if (typeof document != 'object')
+		return;
  if(!formIdA)formIdA=document.getElementsByTagName('FORM');else if(typeof formIdA=='string')formIdA=[formIdA];
  var i,n,o,dealO=function(o){	//	メソッドをプロトタイプではなく、オブジェクト自身にセットしていることです。これでは継承できませんし、ECMAScript のプロトタイプベースのセマンティクスから外れてしまいます。
   for(var j=0,c=o.childNodes,sp=';',e,cn,cv,tp;j<c.length;j++){
@@ -14634,7 +14896,7 @@ function cookieForm(formIdA,expires,targetItemA){
     //alert((isNaN(expires)?'load':'save')+'\n'+n+'::'+e.name+'['+e.type+']='+e.value);
     cn='cookieForm_'+n+'_'+e.name;cv=e.value;
     tp=e.type.toLowerCase();//e.tagName=='INPUT'?e.type.toLowerCase():'';
-    if(isNaN(expires)){if(typeof(cn=getCookie(cn))!='undefined'){
+    if(isNaN(expires)){if(typeof(cn=get_cookie(cn))!='undefined'){
      if(tp=='radio'){
       if(cv==cn)e.checked=true;
      }else if(tp=='checkbox'){
@@ -14647,14 +14909,15 @@ function cookieForm(formIdA,expires,targetItemA){
      if(tp=='radio'){if(!e.checked)continue;}
      else if(tp=='checkbox')
       if(cv.indexOf(sp)!=-1)continue;	//	value不能包含sp	checkbox之cookie形式:[;value1;;value2;value3;;value4;]:value1,3:checked
-      else cv=((tp=getCookie(cn))&&tp.indexOf(sp+cv+sp)==-1?tp:sp)+cv+sp+(e.checked?sp:'');
+      else cv=((tp=get_cookie(cn))&&tp.indexOf(sp+cv+sp)==-1?tp:sp)+cv+sp+(e.checked?sp:'');
      //else if(tp=='select-one')cv=e.options[e.selectedIndex].value;	//	可省略!	用.selectedIndex會比較快，但更改原文件可能會造成index錯誤
      else if(tp=='select-multiple'){
       cv=sp+cv+sp;
       for(var i=e.selectedIndex+1;i<e.options.length;i++)
        if(e.options[i].selected)cv+=e.options[i].value+sp;
      }
-     if(expires)setCookie(cn,cv);else setCookie(cn);
+     if(expires)_.set_cookie(cn,cv);
+     else _.set_cookie(cn);
     }
    }
   }
@@ -14667,14 +14930,14 @@ function cookieForm(formIdA,expires,targetItemA){
  if(expires==='')expires=NaN;
  if(!isNaN(expires)){
   if(expires)expires=7;	//	預設days
-  setCookie(setCookieS.setRoot);	//	Gecko need this
-  setCookie('expires',expires);
+  _.set_cookie(_.set_cookie.f.set_root);	//	Gecko need this
+  _.set_cookie('expires',expires);
  }
  for(i=0;i<formIdA.length;i++)if(o=formIdA[i]){
   if(typeof o=='string')o=document.getElementById(n=o);else if(!(n=o.id))n=o.name;
   if(o&&(o.tagName||'').toLowerCase()=='form'&&n&&typeof n=='string')dealO(o);
  }
- if(!isNaN(expires))setCookie('expires',0);
+ if(!isNaN(expires))_.set_cookie('expires',0);
 
 }
 
@@ -14859,7 +15122,7 @@ var setAutoScrollTimer,setAutoScrollInterval;
 //setAutoScroll[generateCode.dLK]='setAutoScrollTimer,setAutoScrollInterval';
 function setAutoScroll(interval,force){
  if(!force)if(typeof document!='object'||setAutoScrollTimer||document.onmousedown||document.ondblclick)return;
- if(interval)setAutoScrollInterval=interval;else if(!setAutoScrollInterval&&!(setAutoScrollInterval=getCookie('setAutoScrollInterval')))setAutoScrollInterval=200;//5,50,100,200,500
+ if(interval)setAutoScrollInterval=interval;else if(!setAutoScrollInterval&&!(setAutoScrollInterval=get_cookie('setAutoScrollInterval')))setAutoScrollInterval=200;//5,50,100,200,500
  clearInterval(setAutoScrollTimer),setAutoScrollTimer=0;	//	無論如何，先把執行中的幹掉。
  if(setAutoScrollInterval<0){document.onmousedown=document.ondblclick=null;return;}
  document.onmousedown=function(){if(setAutoScrollTimer)window.clearInterval(setAutoScrollTimer),setAutoScrollTimer=0;};
@@ -14871,7 +15134,7 @@ function setAutoScroll(interval,force){
 	下面一行調到檔案頭
 var scrollToXY,scrollToInterval,scrollToOK;
 */
-//scrollTo[generateCode.dLK]='scrollToXY,scrollToInterval,scrollToOK,getWinStatus';
+//scrollTo[generateCode.dLK]='scrollToXY,scrollToInterval,scrollToOK,get_window_status';
 function scrollTo(y,x){
  //	initial
  if(typeof scrollToXY!='object')scrollToXY={};
@@ -14882,11 +15145,11 @@ function scrollTo(y,x){
  if(isNaN(scrollToXY.x))scrollToXY.x=0;if(isNaN(scrollToXY.y))scrollToXY.y=0;
 
  setTimeout('window.scrollTo(scrollToXY.x,scrollToXY.y);',9);	//	main function
- var _w=getWinStatus();
+ var _w=get_window_status();
  //status=scrollToInterval+','+scrollToOK+';'+_w.scrollX+','+scrollToXY.x+';'+_w.scrollY+','+scrollToXY.y;
  if(_w.scrollX==scrollToXY.x&&_w.scrollY==scrollToXY.y){
   if(!--scrollToOK&&scrollToInterval)window.clearInterval(scrollToInterval),scrollToInterval=0;
- }else if(!scrollToInterval)scrollToInterval=window.setInterval('scrollTo();',90),scrollToOK=3;	//	預防萬一：總會跳回原處
+ }else if(!scrollToInterval)scrollToInterval=window.setInterval(scrollTo,90),scrollToOK=3;	//	預防萬一：總會跳回原處
 }
 
 /*	doAlert() & doAlertAccess：彈出使用注意事項視窗
@@ -14926,7 +15189,7 @@ function init(){doAlertInit('kousi');}
 <hr style="color:#928cd9"/>
 <table style="width:90%;text-align:center;"><tr><td><input type="button" onclick="top.location.href='http://www.hinet.net';" value="誰管你！"/></td>
 <td><input type="button" onclick="doAlertAccess();//this.parentNode.parentNode.parentNode.parentNode.parentNode.id" value="我願意遵守上述規定"/></td>
-<td><input type="button" onclick="setCookie(setCookieS.forever),setCookie('doAlert',doAlertDivName),doAlertAccess();" value="我往後皆會遵守上述規定"/></td></tr></table>
+<td><input type="button" onclick="set_cookie(set_cookie.f.forever),set_cookie('doAlert',doAlertDivName),doAlertAccess();" value="我往後皆會遵守上述規定"/></td></tr></table>
 </div>
 
 <a href="#" onclick="doAlert();">注意事項</a>
@@ -14955,12 +15218,12 @@ function doAlertResize(){	//	確保置中
  }
 }
 //	初始化
-//doAlertInit[generateCode.dLK]='setCookie,doAlert';
+//doAlertInit[generateCode.dLK]='set_cookie,doAlert';
 function doAlertInit(n){	//	n:div name
  //if(typeof doAlertDone!='undefined'&&doAlertDone)return;	//	防止重複執行
  if(!n){	//	doAlertInit()重設
-  setCookie(setCookieS.setRoot);	//	Gecko need this
-  setCookie('doAlert');
+	 _.set_cookie(_.set_cookie.f.set_root);	//	Gecko need this
+	 _.set_cookie('doAlert');
   return;
  }
  var d=document.getElementById(n);
@@ -14970,7 +15233,7 @@ function doAlertInit(n){	//	n:div name
  }
 }
 //	出現警告
-//doAlert[generateCode.dLK]='doAlertInit,doAlertResize,doAlertAccess,doAlertScroll,doAlertDivName,doAlertOldScrollLocation,getCookie,getWinStatus';
+//doAlert[generateCode.dLK]='doAlertInit,doAlertResize,doAlertAccess,doAlertScroll,doAlertDivName,doAlertOldScrollLocation,get_cookie,get_window_status';
 function doAlert(n,m,iconContent){	//	n:name,m:mode=1:use alert(),icon div的文字內容
  if(!n&&typeof doAlertDivName=='string'&&doAlertDivName)n=doAlertDivName;
  var o=document.getElementById(n),oBg=document.getElementById(n+'Bg'),oI=document.getElementById(n+'I');
@@ -14991,8 +15254,8 @@ function doAlert(n,m,iconContent){	//	n:name,m:mode=1:use alert(),icon div的文
   o.style.position='fixed';
   with(oBg.style)position='fixed',opacity=oBg.style['-moz-opacity']=.3,left=top=0,width=height='100%';
  }
- if(getCookie('doAlert')==n)doAlertAccess(n);
- else o=getWinStatus(),doAlertOldScrollLocation=[o.scrollX,o.scrollY],setTimeout('scrollTo(0,0);',0);	//	奇怪的是，直接執行scrollTo(0,0)沒啥用。
+ if(get_cookie('doAlert')==n)doAlertAccess(n);
+ else o=get_window_status(),doAlertOldScrollLocation=[o.scrollX,o.scrollY],setTimeout('scrollTo(0,0);',0);	//	奇怪的是，直接執行scrollTo(0,0)沒啥用。
 }
 //	pass
 function doAlertAccess(n){
@@ -15005,7 +15268,7 @@ function doAlertAccess(n){
  doAlertScroll(1);
 }
 //	icon div的捲動：置於右上角
-//doAlertScroll[generateCode.dLK]='getWinStatus';
+//doAlertScroll[generateCode.dLK]='get_window_status';
 function doAlertScroll(m){var oI;
  if(typeof doAlertDivName!='string'||!doAlertDivName||!(oI=document.getElementById(doAlertDivName+'I')))return;
  if(typeof m!='undefined'){
@@ -15025,7 +15288,7 @@ function doAlertScroll(m){var oI;
   }
  }
  //window.status=m=window.scrollX+','+window.scrollY+','+window.innerWidth+','+window.innerHeight+';'+document.body.scrollLeft+','+document.body.scrollTop+','+document.body.offsetWidth+','+document.body.clientWidth+','+oI.offsetWidth+','+document.body.scrollWidth;alert(m);
- m=getWinStatus();
+ m=get_window_status();
  oI.style.left=m.scrollX+m.windowW-oI.doAlertScrollL+'px';//-document.body.leftMargin-document.body.rightMargin
  oI.style.top=m.scrollY-oI.doAlertScrollT+'px';	//	只有在padding用px時有效！
 }
@@ -15146,19 +15409,26 @@ CeL.net.web
  * @param tag_name	tag name
  * @return
  * @see
- * document.getElementsByClassName in prototype.js
+ * document.getElementsByClassName in prototype.js,
+ * jquery('.class')
  */
-find_class = function(class_name, parent, tag_name, flag) {
-	if (tag_name = class_name && (parent || document.body).getElementsByTagName(tag_name || '*')){
-		var i = 0, c = [], l = tag_name.length,
-		r = new RegExp('(^|\\s)' + class_name + '(\\s|$)'/* ,i */);
-		for (; i < l; i++)
-			if (r.test(tag_name[i].className)/* has_class(tag_name, r) */)
-				c.push(tag_name[i]);
+find_class = function(class_name, parent, tag_name, call_function, flag) {
+	var elements = class_name && (parent || document.body).getElementsByTagName(tag_name || '*'),
+		c, r, l = elements && elements.length;
+
+	if (l){
+		for (i = 0, c = [], r = new RegExp('(^|\\s)' + class_name + '(\\s|$)'/* ,i */); i < l; i++)
+			if (r.test(elements[i].className)/* has_class(elements, r) */ &&
+					( !call_function || call_function.call(elements[i]) ) )
+				c.push(elements[i]);
 		return c;
 	}
+
 	return null;
 };
+
+
+
 
 
 /*	處理popup用
@@ -15366,7 +15636,9 @@ if(repop){
  //	設定className與position
  sPopP.left=0,sPopP.top=20;	//	popup left,popup top初始值
  if( !oPos || typeof oPos!='object')
-  try{sPopP.left+=event.offsetX,sPopP.top+=event.offsetY;}catch(e){}	//	popup在滑鼠指標處	getMouseLoc()	event.layerX || event.offsetX	http://hartshorne.ca/2006/01/18/javascript_events/
+  //	popup 在滑鼠指標處
+  //	see: add_listener()	
+  try{sPopP.left+=event.offsetX,sPopP.top+=event.offsetY;}catch(e){}
  else if( !oPos.className && sPopP.DclassName[tp] ){
   if(!classN&&(classN=document.body.className)&&!sPopP.bgS[classN])classN=0;
   oPos.className=sPopP.DclassName[tp]+(classN?'_'+classN:'');
@@ -15618,7 +15890,7 @@ function VBalert(prompt,buttons,title,helpfile,context){
 
 
 /*	get window status	取得視窗可利用的size。現在還得用種方法，真是羞恥。	2005/1/13 20:0
-	getWinStatus(event object)
+	get_window_status(event object)
 	http://www.mozilla.org/docs/dom/domref/dom_window_ref.html
 	http://msdn.microsoft.com/workshop/author/dhtml/reference/objects/body.asp
 	http://www.howtocreate.co.uk/tutorials/index.php?tut=0&part=16
@@ -15631,95 +15903,192 @@ function VBalert(prompt,buttons,title,helpfile,context){
 */
 
 //var eventObj;
-function getWinStatus(o){
- var r={};//var _f=getWinStatus,r={};
- //	已經scroll到哪
- //r.scrollX	=	_f.scrollX();
- //r.scrollY	=	_f.scrollY();
- //	已經scroll到哪	IE7遵照標準，不用 document.body.scrollLeft 而用 document.documentElement.scrollLeft	http://hkom.blog1.fc2.com/blog-entry-423.html	http://diaspar.jp/node/47
- r.scrollX	=	typeof window.pageXOffset!='undefined'?window.pageXOffset: typeof document.body.scrollLeft!='undefined'?document.body.scrollLeft: typeof document.documentElement.scrollLeft!='undefined'?document.documentElement.scrollLeft:  typeof window.scrollX!='undefined'?window.scrollX:null;	//	pageXOffset:之前的?
- r.scrollY	=	typeof window.pageYOffset!='undefined'?window.pageYOffset: typeof document.body.scrollTop!='undefined'?document.body.scrollTop: typeof document.documentElement.scrollTop!='undefined'?document.documentElement.scrollTop: typeof window.scrollY!='undefined'?window.scrollY: null;
- //	能scroll的範圍:不準,yet test	The height of the total page (usually the body element)
- //	t:test, true:all but Explorer Mac, false:Explorer Mac, would also work in Explorer 6 Strict, Mozilla and Safari
- var t=typeof document.body.scrollHeight!='undefined'&&typeof document.body.offsetHeight!='undefined'&&document.body.scrollHeight>document.body.offsetHeight;
- r.scrollW	=	t?document.body.scrollWidth: typeof document.body.offsetWidth!='undefined'?document.body.offsetWidth: null;
- r.scrollH	=	t?document.body.scrollHeight: typeof document.body.offsetHeight!='undefined'?document.body.offsetHeight: null;
- //	window大小
- var NewIE=navigator.appVersion.indexOf("MSIE") != -1 && parseInt(navigator.appVersion.split("MSIE")[1])>6;	//	2009/3/23 1:15:29
- r.windowW	=	typeof window.innerWidth!='undefined'?window.innerWidth: /*typeof offsetWidth!='undefined'?offsetWidth:*/ !NewIE && typeof document.body.clientWidth!='undefined'?document.body.clientWidth: document.documentElement && !isNaN(document.documentElement.clientWidth)?document.documentElement.clientWidth: null;//+offsetLeft
- r.windowH	=	typeof window.innerHeight!='undefined'?window.innerHeight: /*typeof offsetHeight!='undefined'?offsetHeight:*/ !NewIE && typeof document.body.clientHeight!='undefined'?document.body.clientHeight: document.documentElement && !isNaN(document.documentElement.clientHeight)?document.documentElement.clientHeight: null;//+offsetTop
+CeL.net.web
+.
+/**
+ * 取得當前 window status
+ * @param node	HTML element or Event object
+ * @returns {Object}	status
+ */
+get_window_status = function (node) {
+	var _s = get_window_status, t = _s.scroll, r = {
+			scrollLeft : t[0],
+			scrollTop : t[1]
+	};
 
- var noEmu;
- if(!o)o=typeof e=='object'?e:typeof event=='object'?event:typeof eventObj=='object'?(noEmu=1,eventObj):null;
- if(o){
-  var isSafari=/Safari/i.test(window.navigator.appName);//yet test
-  //	window相對於screen位置:不準,yet test
-  r.windowX	=	o.clientX - (( isSafari) ? r.scrollX : 0);
-  r.windowY	=	o.clientY - (( isSafari) ? r.scrollY : 0);
-  //	mouse位置	http://msdn.microsoft.com/workshop/author/dhtml/reference/objects/obj_event.asp	http://www.mozilla.org/docs/dom/domref/dom_event_ref.html
-  r.mouseX	=	o.clientX + ((!isSafari) ? r.scrollX : 0);
-  r.mouseY	=	o.clientY + ((!isSafari) ? r.scrollY : 0);
-  if(!noEmu)eventObj={'clientX':o.clientX,'clientY':o.clientY};	//	模擬event obj，因為event obj不能在event發生時之function執行完後再取得
-  //alert(r.scrollX+','+r.scrollY+'\n'+o.clientX+','+o.clientY);
- }
+	//	能scroll的範圍:不準,yet test	The height of the total page (usually the body element)
+	//	t:test, true:all but Explorer Mac, false:Explorer Mac, would also work in Explorer 6 Strict, Mozilla and Safari
+	var t = typeof document.body.scrollHeight != 'undefined'
+		&& typeof document.body.offsetHeight != 'undefined'
+			&& document.body.scrollHeight > document.body.offsetHeight;
 
- return r;
+	r.scrollW = t ? document.body.scrollWidth
+			: typeof document.body.offsetWidth != 'undefined' ? document.body.offsetWidth
+					: null;
+	r.scrollH = t ? document.body.scrollHeight
+			: typeof document.body.offsetHeight != 'undefined' ? document.body.offsetHeight
+					: null;
+
+	// window大小
+	// 2009/3/23 1:15:29
+	var NewIE = navigator.appVersion.indexOf("MSIE") != -1
+		&& parseInt(navigator.appVersion.split("MSIE")[1]) > 6;
+	r.windowW = typeof window.innerWidth != 'undefined' ? window.innerWidth
+			: /* typeof offsetWidth!='undefined'?offsetWidth: */!NewIE
+			&& typeof document.body.clientWidth != 'undefined' ? document.body.clientWidth
+					: document.documentElement
+					&& !isNaN(document.documentElement.clientWidth) ? document.documentElement.clientWidth
+							: null;// +offsetLeft
+	r.windowH = typeof window.innerHeight != 'undefined' ? window.innerHeight
+			: /* typeof offsetHeight!='undefined'?offsetHeight: */!NewIE
+			&& typeof document.body.clientHeight != 'undefined' ? document.body.clientHeight
+					: document.documentElement
+					&& !isNaN(document.documentElement.clientHeight) ? document.documentElement.clientHeight
+							: null;// +offsetTop
+
+	var noEmu;
+	if (!node)
+		if (typeof window.event === 'object')
+			node = window.event;
+		else if (typeof e === 'object')
+			node = e;
+		else if (typeof eventObj === 'object')
+			noEmu = true, node = eventObj;
+
+	if (node) {
+		// Safari: yet test
+		var isSafari = /Safari/i.test(window.navigator.appName);
+
+		// window相對於screen位置:不準, yet test
+		r.windowX = node.clientX - ((isSafari) ? r.scrollX : 0);
+		r.windowY = node.clientY - ((isSafari) ? r.scrollY : 0);
+		// mouse位置
+		// http://msdn.microsoft.com/workshop/author/dhtml/reference/objects/obj_event.asp
+		// http://www.mozilla.org/docs/dom/domref/dom_event_ref.html
+		r.mouseX = node.clientX + ((!isSafari) ? r.scrollX : 0);
+		r.mouseY = node.clientY + ((!isSafari) ? r.scrollY : 0);
+		if (!noEmu)
+			//	模擬event obj，因為event obj不能在event發生時之function執行完後再取得
+			eventObj = {
+					'clientX' : node.clientX,
+					'clientY' : node.clientY
+			};
+			// alert(r.scrollX+','+r.scrollY+'\n'+o.clientX+','+o.clientY);
+	}
+
+	return r;
 };
-//	Lazy Function Definition Pattern	http://realazy.org/blog/2007/08/16/lazy-function-definition-pattern/	http://peter.michaux.ca/article/3556
-//	IE7遵照標準，不用 document.body.scrollLeft 而用 document.documentElement.scrollLeft	http://hkom.blog1.fc2.com/blog-entry-423.html	http://diaspar.jp/node/47
-getWinStatus.scrollX=function(){
- return (this.scrollX=
-	typeof window.pageXOffset=='number'?function(){return window.pageXOffset;}:	//	pageXOffset: 之前的?
-	typeof document.body.scrollLeft!='undefined'?function(){return document.body.scrollLeft;}:
-	typeof document.documentElement.scrollLeft!='undefined'?function(){return document.documentElement.scrollLeft;}:
-	typeof window.scrollX!='undefined'?function(){return window.scrollX;}:
-	function(){return NaN;})();
-};
-getWinStatus.scrollY=function(){
- return (this.scrollY=
-	typeof window.pageYOffset=='number'?function(){return window.pageYOffset;}:	//	pageYOffset: 之前的?
-	typeof document.body.scrollTop!='undefined'?function(){return document.body.scrollTop;}:
-	typeof document.documentElement.scrollTop!='undefined'?function(){return document.documentElement.scrollTop;}:
-	typeof window.scrollY!='undefined'?function(){return window.scrollY;}:
-	function(){return NaN;})();
-};
+
+CeL.net.web
+.
+//	IE7遵照標準，不用 document.body.scrollLeft 而用 document.documentElement.scrollLeft
+//	http://hkom.blog1.fc2.com/blog-entry-423.html
+//	http://diaspar.jp/node/47
+get_window_status.scroll = function (node) {
+	var box_model, od = node && node.ownerDocument;
+
+	try{
+		//	from jQuery
+		var div = document.createElement('div');
+		div.style.width = div.style.paddingLeft = '1px';
+	
+		document.body.appendChild(div);
+		_.get_window_status.box_model = box_model = div.offsetWidth === 2;
+		if(!node)
+			od = div.ownerDocument;
+		document.body.removeChild(div).style.display = 'none';
+	
+		div = null;
+
+	}catch (e) {
+		// TODO: handle exception
+	}
+
+	//	到這邊，若是 od 未設定，則所有取值與 node 無關。
+	//	因為大多有 ownerDocument，所以預設編入。
+	//	新的 browser，od 與 dv 皆應有設定。
+
+/*
+
+Firefox/3.6.6: ownerDocument: [object HTMLDocument], defaultView: [object Window], box_model: true, pageXOffset: 0, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: 0
+Chrome/6.0.453.1 Safari/534.2: ownerDocument: [object HTMLDocument], defaultView: [object DOMWindow], box_model: true, pageXOffset: 0, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: 0
+Safari/533.16: ownerDocument: [object HTMLDocument], defaultView: [object DOMWindow], box_model: true, pageXOffset: 0, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: 0
+Opera/9.80 Presto/2.6.30: ownerDocument: [object HTMLDocument], defaultView: [object Window], box_model: true, pageXOffset: 0, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: 0
 
 
+MSIE 5.0 @ MSIE 9.0 test: ownerDocument: [object], defaultView: undefined, box_model: false, pageXOffset: undefined, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: undefined
+MSIE 7.0 @ MSIE 9.0 test: ownerDocument: [object], defaultView: undefined, box_model: true, pageXOffset: undefined, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: undefined
 
-/*	取得滑鼠座標
-	http://hartshorne.ca/2006/01/23/javascript_cursor_position/
-	init
-if(typeof Event=='object')document.captureEvents(Event.MOUSEMOVE);	//	for moz
-document.onmousemove=getMouseLoc;
-var mouseLoc={};
+MSIE 8.0: ownerDocument: [object HTMLDocument], defaultView: undefined, box_model: true, pageXOffset: undefined, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: undefined
+MSIE 9.0 test: ownerDocument: [object HTMLDocument], defaultView: [object Window], box_model: true, pageXOffset: 0, body.scrollLeft: 0, documentElement.scrollLeft: 0, scrollX: undefined
+
 */
-//getMouseLoc[generateCode.dLK]='getWinStatus';
-function getMouseLoc(e){
- var l,t;
- if(typeof Event=='object')l=e.pageX,t=e.pageY;
- else	t=getWinStatus(),
-	l=window.event.clientX+t.scrollX-(document.documentElement.clientLeft||0),
-	t=window.event.clientY+t.scrollY-(document.documentElement.clientTop||0);
- //if(l<0)l=0;if(t<0)t=0;
- mouseLoc.left=l,mouseLoc.top=t;
- return true;
-}
+	//	IE5-8: od: true, dv: false
+
+	var doc = node && od || window.document,
+	body = doc.body, dv = doc.defaultView, win = dv || doc.parentWindow;
+	library_namespace.debug('ownerDocument: ' + od + ', defaultView: ' + dv + ', box_model: ' + box_model + ', pageXOffset: ' + win.pageXOffset + ', body.scrollLeft: ' + body.scrollLeft + ', documentElement.scrollLeft: ' + doc.documentElement.scrollLeft + ', scrollX: ' + win.scrollX, 2, 'get_window_status.scroll');
+
+	//	** 順序有關係! 但在未設置 box_model 前，body.scrollLeft 排在 documentElement.scrollLeft 前面。現在已按照 jQuery 改過。
+	//	TODO: do test
+	//	[scrollLeft, scrollTop, clientLeft, clientTop]
+	return (_.get_window_status.scroll =
+		!isNaN(win.pageXOffset) ?
+			//	預設 box_model === true
+			function (n) {
+				//	'|| window.document': for Range (see get_selection())
+				var d = n && n.ownerDocument || window.document,
+				w = d.defaultView;
+				d = d.documentElement;
+				return [ w.pageXOffset, w.pageYOffset, d.clientLeft, d.clientTop ];
+			} :
+
+		//	IE7(6?)~8
+		box_model && !isNaN(doc.documentElement.scrollLeft) ?
+			function (n) {
+				var d = (n && n.ownerDocument || window.document).documentElement;
+				return [ d.scrollLeft, d.scrollTop, d.clientLeft, d.clientTop ];
+			} :
+
+		//	IE5(6?)
+		!isNaN(body.scrollLeft) ?
+			function (n) {
+				var b = (n && n.ownerDocument || window.document).body;
+				return [ b.scrollLeft, b.scrollTop, b.clientLeft, b.clientTop ];
+			} :
+
+		!isNaN(win.scrollX) ?
+			//	untested
+			function() {
+				var b = document.body;
+				return [ window.scrollX, window.scrollY, b.clientLeft, b.clientTop ];
+			} :
+
+		function() {
+			return [ 0, 0, 0, 0 ];
+		}
+	)(node);
+
+};
+
+
+
 
 
 CeL.net.web
 .
 /**
  * get current computed style property of specified HTML element.
- * TODO: 整合 get_node_position, _.set_style
+ * TODO: 整合 get_node_offset, _.set_style
  * @param element	HTML element
  * @param name	W3C style property name (e.g., no '-webkit-background-clip')
  * @return
  * @see
  * http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,
- * curCss @ jQuery, http://api.jquery.com/category/css/,
+ * curCSS @ jQuery, http://api.jquery.com/category/css/,
  * <a href="http://www.quirksmode.org/dom/getstyles.html" accessdate="2010/4/1 15:44">JavaScript - Get Styles</a>,
  * <a href="http://www.javaeye.com/topic/140784?page=2" accessdate="2010/4/1 15:41">style.display取值不对，难道是浏览器bug？讨论第2页:  - JavaScript - web - JavaEye论坛</a>
- * 大體上， currentStyle 相當於getComputedStyle，而runtimeStyle相當於getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。
+ * 大體上，currentStyle 相當於 getComputedStyle，而 runtimeStyle 相當於 getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。
  * document.defaultView在mozilla中是指向window obj的,但是很有可能在其他broswer中就不指向window obj...因為w3c中沒有強行規定document.defaultView一定是一個global obj.
  * 
  * 返回頁內樣式表定義的類，那麼可以使用DOM樣式表對象來訪問：
@@ -15747,14 +16116,17 @@ get_style = function(element, name, not_computed) {
 		try {
 			if ((value = element.ownerDocument) && (value = value.defaultView))
 				style_interface = value;
-			else library_namespace.debug('Can not get .ownerDocument.defaultView of ' + library_namespace.node_description(element) + ' !');
+			else
+				library_namespace.debug('Can not get .ownerDocument.defaultView of '
+						+ library_namespace.node_description(element) + ' !');
 
 			//if (/[A-Z]/.test(name)) name = name.replace(/([A-Z])/g, '-$1').toLowerCase();
+			//	width 之類可能 === "auto"!!
 			value = style_interface.getComputedStyle(element, null)
 					// [name]
 					.getPropertyValue(name);
 
-			//	from curCss @ jQuery: return a number for opacity
+			//	from curCSS @ jQuery: return a number for opacity
 			if(name === 'opacity' && value === '')
 				value = 1;
 		} catch (e) {
@@ -15764,7 +16136,7 @@ get_style = function(element, name, not_computed) {
 	//	IE 5-8
 	else if (style_interface = element.currentStyle)
 		//	IE: \w+\W\w+ (e.g., margin-bottom), firefox, chorme, safari: \w+-\w+
-		//	IE8 中 with 可能 === "auto"!!
+		//	IE8 中 width 之類可能 === "auto"!!
 		value = style_interface[name === 'float' ? 'styleFloat' : name.replace(/-([a-z])/g, function($0, $1) { return $1.toUpperCase(); })];
 		//	Dean Edwards（Base2類庫的作者）的hack	http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
 
@@ -15787,32 +16159,54 @@ CeL.net.web
 .
 /**
  * get the actual position [left,top,width,height] of an HTML node object
- * @param obj
+ * @param node	HTML node object
  * @return
  * @memberOf	CeL.net.web
+ * @deprecated	use get_style(), jQuery.offset(), jQuery.position()
  * @see
  * http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,
  * http://msdn.microsoft.com/library/en-us/dndude/html/dude04032000.asp,
  * http://www.mail-archive.com/mochikit@googlegroups.com/msg00584.html,
- * http://hartshorne.ca/2006/01/20/javascript_positioning/
+ * http://hartshorne.ca/2006/01/20/javascript_positioning/,
+ * http://www.jb51.net/article/18340.htm,
+ * http://blog.csdn.net/wangjj_016/archive/2010/04/09/5467507.aspx
  */
-get_node_position = function(obj) {
-	if (typeof obj === 'string') {
-		//	若 obj 為id
-		var _o = document.getElementById(obj);
-		if (_o)
-			obj = _o;
-	}
+get_node_offset = function(node) {
+	if (typeof node === 'string')
+		//	若 node 為 id
+		node = _.get_element(node);
+	if(!_.is_element_node(node))
+		return {};
 
-	if (typeof obj === 'object' && typeof obj.offsetLeft !== 'undefined') {
-		//	若obj為Document Object
-		//alert(obj.id+':'+obj.offsetLeft+','+obj.offsetTop+';'+obj.offsetWidth+','+obj.offsetHeight);
-		var l = 0, t = 0, p,
+	var _s = _.get_node_offset,
+	offset = 'offsetWidth' in node ? {
+		width : node.offsetWidth,
+		height : node.offsetHeight
+	} : {};
+
+
+	if(node.getBoundingClientRect){
+
+		//	also see: getClientRects()
+
+		var s = _.get_window_status.scroll(node),
+		box = node.getBoundingClientRect();
+
+		offset = {
+				left : box.left + s[0] - s[2],
+				top : box.top + s[1] - s[3],
+				width : box.right - box.left,
+				height : box.bottom - box.top
+		};
+
+	} else if (_.is_HTML_element(node)) {
+		//alert(node.id+':'+node.offsetLeft+','+node.offsetTop+';'+node.offsetWidth+','+node.offsetHeight);
+		var l = 0, t = 0, p;
 			// n,countH=window.navigator.userAgent.indexOf("MSIE")>=0,add=1,outsideBLOCK=1,
-			r = [];
-		if (typeof obj.offsetWidth !== 'undefined') {
-			var _w = obj.offsetWidth, _h = obj.offsetHeight
-				// ,_o=window.getComputedStyle?document.defaultView.getComputedStyle(obj,null):null
+		if(0)
+		if (typeof node.offsetWidth !== 'undefined') {
+			var _w = node.offsetWidth, _h = node.offsetHeight
+				// ,_o=window.getComputedStyle?document.defaultView.getComputedStyle(node,null):null
 				;
 			//	http://www.quirksmode.org/dom/getstyles.html
 			/*
@@ -15820,20 +16214,20 @@ get_node_position = function(obj) {
 				//alert(_o.getPropertyValue('border-left-width')+','+_o.getPropertyValue('border-right-width')),
 				_w+=parseInt(_o.getPropertyValue('border-left-width'))+parseInt(_o.getPropertyValue('border-right-width')),
 				_h+=parseInt(_o.getPropertyValue('border-top-width'))+parseInt(_o.getPropertyValue('border-bottom-width'));
-			   else if(_o=obj.currentStyle)	//	IE
+			   else if(_o=node.currentStyle)	//	IE
 				//	IE的offset已經包含margin+border+padding的部份??另，這些值可能會有'em'等等的出現，不一定都是px。
 				_w+=parseInt(_o['borderLeftWidth'])+parseInt(_o['borderRightWidth']),
 				_h+=parseInt(_o['borderTopWidth'])+parseInt(_o['borderBottomWidt都是px;
 			*/
-			r[2] = r.width = r.w = r.W = _w,
-			r[3] = r.height = r.h = r.H = _h;
+			r.width = _w,
+			r.height = _h;
 		}
 
 		//	下面這段依瀏覽器而有不同 (-_-)!!
 		//	position:absolute
 		//var tt='';	//	for debug
 		//	2006/2/14: 經由 offset 一個個溯源
-		var _o = obj;
+		var _o = node;
 		while(_o&&!isNaN(_o.offsetLeft)){	//	IE在用style:class時會出現誤差。
 			/*
 			   n=_o.tagName;
@@ -15850,23 +16244,24 @@ get_node_position = function(obj) {
 		}
 
 		//		有些會用到overflow，影響位置。	2008/5/31 0:10:7
-		_o = obj;
+		_o = node;
 		while ((_o = _o.parentNode) && _o.tagName.toLowerCase() != 'body')
 			l -= _o.scrollLeft || 0, t -= _o.scrollTop || 0;
 
 		//		need to enable definition of tt above
 		//alert('l '+l+',t '+t+',w '+r.w+',h '+r.h+(typeof tt=='string'?'\n'+tt:''));
 
-		r[0] = r.left = r.l = r.L = l, r[1] = r.top = r.t = r.T = t;
-		return r;
+		offset.left = l;
+		offset.top = t;
 	}
-	//return null;
+
+	return offset;
 };
 
 
 /*
 //	get the [left,top,width,height] of obj
-function get_node_position2(obj){
+function get_node_offset2(obj){
  if(typeof obj=='string'){var o=document.getElementById(obj);if(o)obj=o;}	//	若loc為id
  if(typeof obj=='object'&&typeof obj.offsetLeft!='undefined'){	//	若obj為Document Object
   //alert(obj.id+':'+obj.offsetLeft+','+obj.offsetTop+';'+obj.offsetWidth+','+obj.offsetHeight);
@@ -15902,7 +16297,7 @@ loc:
 margin:
 	0/num=[num,num]/[offset x,offset y]
 		在可能的情況下（不會造成超出window範圍）與loc之間空出的距離（所作的位移）。假如未輸入則自動設定。
-flag:	locObjF.~	!表示未實作
+flag:	locate_elementF.~	!表示未實作
 	下面幾項為預設模式
 	auto[Locate]	自動調整位置(default)，若設定abs/rel則不會自動調整。
 	resizable	可調整obj大小(default) <-> noResize
@@ -15930,194 +16325,334 @@ flag:	locObjF.~	!表示未實作
 *	假如在事件中設定'eventObj=event'可掌握mouse event
 
 TODO:
-locObjClip=[l,t,w,h]:	resizable時將obj限制在這個範圍內
+locate_elementClip=[l,t,w,h]:	resizable時將obj限制在這個範圍內
 
 to top:
-var locObjF;
-setObjValue('locObjF','resizable=0,moveable=0,autoLocate=0,auto=0,absolute=1,abs=1,relative=2,rel=2,asDialog=3,dialog=3,modeFlag=3,dialogDown=3,dialogUp=7,dialogRight=11,dialogLeft=15,dialogFlag=15,dialogForce=16,noResize=32,noMove=64,keepDisplay=128,create=256',1);	//	revise
+var locate_elementF;
+setObjValue('locate_elementF','resizable=0,moveable=0,autoLocate=0,auto=0,absolute=1,abs=1,relative=2,rel=2,asDialog=3,dialog=3,modeFlag=3,dialogDown=3,dialogUp=7,dialogRight=11,dialogLeft=15,dialogFlag=15,dialogForce=16,noResize=32,noMove=64,keepDisplay=128,create=256',1);	//	revise
 */
-//locObj[generateCode.dLK]='eventObj,locObjF,getWinStatus,locObj';
-function locObj(obj,loc,margin,flag){
- //	前置處理
- //	setup obj
- if(!flag)flag=locObjF.auto;
- if(!obj)return;
- if(typeof obj=='string'){
-  var id=obj;
-  if( !(obj=document.getElementById(id)) && (flag&locObjF.create) )
-   document.body.appendChild(obj=document.createElement('div')),obj.id=id;
- }
+//locate_element[generateCode.dLK]='eventObj,locate_elementF,get_window_status,locate_element';
+function locate_element(obj, loc, margin, flag) {
+	// 前置處理
 
- var dMargin={'X':2,'Y':2}	//	在dialog時之預設位移
- ,Display=flag&locObjF.keepDisplay?obj.style.display:'block',Visibility=flag&locObjF.keepDisplay?obj.style.visibility:'visible'
- ,win,dialog=(flag&locObjF.modeFlag)==locObjF.dialog?flag&locObjF.dialogFlag:0
- ,turnPercent=function(p,v){
-	if(typeof p=='string'){
-	 var t=parseFloat(p.match(/([\d.]+)/));
-	 p=t?t<2?t*v:t<200?t*v/100:t:0;
-	}else if(isNaN(p))p=0;//typeof p1='undefined'&&
-	return p;
- },dealPercent=function(o,t){	//	t:0:loc,1:margin
-	var d=0;	//	是否重新指定
-	if(typeof o=='string')o=o.split(','),d=1;
-	if(!dialog&&typeof o=='object'){	//	取百分比%
-	 if(typeof o[t?'L':'X']=='undefined'&&typeof o[0]!='undefined')d=1,o=t?{'X':o[0],'Y':o[1]}:{'L':o[0],'T':o[1],'W':o[2],'H':o[3]};	//	假如o[2]未定義，W也會未定義（但有index）
-	 if(t)o.X=turnPercent(o.X,win.windowW),o.Y=turnPercent(o.Y,win.windowH);
-	 else{
-	  o.L=turnPercent(o.L,win.windowW),o.T=turnPercent(o.T,win.windowH);
-	  if(typeof o.W=='undefined'){delete o.W;delete o.H;}
-	  else o.W=turnPercent(o.W,win.windowW),o.H=turnPercent(o.H,win.windowH);
-	 }
+	// setup obj
+	if (!flag)
+		flag = locate_elementF.auto;
+	if (!obj)
+		return;
+	if (typeof obj == 'string') {
+		var id = obj;
+		if (!(obj = document.getElementById(id)) && (flag & locate_elementF.create))
+			document.body.appendChild(obj = document.createElement('div')),
+					obj.id = id;
 	}
-	if(d)if(t)margin=o;else loc=o;
- },makeFit=function(l,t,r,b,hc){	//	test if out of range & 將box調整在range[left,top,right,bottom]內：先move，再resize
-	if(boxL<l)boxL=l;if(boxT<t)boxT=t;
-	var d=r-obj.offsetWidth;
-	if(boxL>d)if(l>d)boxW=r-(boxL=l);else boxL=d;
-	d=b-obj.offsetHeight;
-	if(boxT>d)if(t>d)boxH=b-(boxT=t);else boxT=d;
-	else if(hc&&(boxT=hc-obj.offsetHeight/2)<t)boxT=t;
- };
 
- with(obj.style){
-  overflow=visibility='hidden';
-  if(width)width='';if(height)height='';	//	重設obj。
-  display='block';	//	得設定obj之display，因為不這樣不能定offset。但可不顯現出來…只是好像沒啥效果。
- }
+	// 在 dialog 時之預設位移
+	var dMargin = {
+		'X' : 2,
+		'Y' : 2
+	}
+	, Display = flag & locate_elementF.keepDisplay ? obj.style.display : 'block', Visibility = flag
+			& locate_elementF.keepDisplay ? obj.style.visibility : 'visible', win, dialog = (flag & locate_elementF.modeFlag) == locate_elementF.dialog ? flag
+			& locate_elementF.dialogFlag
+			: 0, turnPercent = function(p, v) {
+		if (typeof p == 'string') {
+			var t = parseFloat(p.match(/([\d.]+)/));
+			p = t ? t < 2 ? t * v : t < 200 ? t * v / 100 : t : 0;
+		} else if (
+				// typeof p1='undefined'&&
+				isNaN(p))
+			p = 0;
+		return p;
+	}, dealPercent = function(o, t) {
+		// t: 0:loc, 1:margin
 
- //if(dialog!=locObjF.dialogDown&&dialog!=locObjF.dialogUp)dialog=0;
- //	setup loc#1: deal dialog
- if(typeof loc=='string'){var o=document.getElementById(loc);if(o)loc=o;}	//	若loc為id
- if(typeof loc=='object'&&typeof loc.offsetLeft!='undefined'){	//	若loc為Document Object
-/*
-  //alert(loc.id+':'+loc.offsetLeft+','+loc.offsetTop+';'+loc.offsetWidth+','+loc.offsetHeight);
-  var l=loc.offsetLeft,t=loc.offsetTop,w,h,n,add,outsideBLOCK,countH=window.navigator.userAgent.indexOf("MSIE")>=0;	//	真妙..moz表示在<H\d>中的obj時不把H\d當作parent算進去
-  if(typeof loc.offsetWidth!='undefined')w=loc.offsetWidth,h=loc.offsetHeight;	//	loc.offsetWidth可能未定義？
-  //var tt=loc.tagName+':'+loc.offsetLeft+','+loc.offsetTop+'\n';	//	for debug
-  //	下面這段依瀏覽器而有不同 (-_-)!!
-  while(isNaN((loc=loc.parentNode).offsetLeft)){	//	IE在用style:class時會出現誤差。
-   n=loc.tagName;
-   //if( !/^T(ABLE|BODY|R)$/.test(n=loc.tagName) && (countH||!/^H\d$/.test(n)) )l+=loc.offsetLeft,t+=loc.offsetTop;
-   if(n=='DIV')add=outsideBLOCK;
-   else if(n=='TD' || countH&&/^H\d$/.test(n))add=1;
-   outsideBLOCK= n=='TABLE'||n=='DIV';	//	loc.style.display
-   //tt+=(add?'':'#')+n+(loc.style.display?'('+loc.style.display+')':'')+':'+loc.offsetLeft+','+loc.offsetTop+(outsideBLOCK?', outside BLOCK':'')+'\n';
-   if(add)add=0,l+=loc.offsetLeft,t+=loc.offsetTop;
-  }
-  //alert(l+','+t+'\n'+tt);	//	need to enable definition of tt above
-  loc={'L':l,'T':t,'W':w,'H':h};
-*/
-  loc=get_node_position(loc);
-  if((flag&locObjF.modeFlag)==locObjF.auto)flag+=locObjF.dialog-locObjF.auto,dialog=locObjF.dialog;
- }
- //	setup margin
- win=getWinStatus();
- if(!margin)margin=dMargin;//dialog?dMargin:{'X':0,'Y':0};
- else dealPercent(margin,1);
- //	setup loc#2: deal abs/rel
- if(!loc||loc=='mouse')loc={L:win.mouseX||0,T:win.mouseY||0};
- else{
-  if((flag&locObjF.modeFlag)==locObjF.auto&&typeof loc=='string'&&/[%.]/.test(loc))
-   flag+=locObjF.rel-locObjF.auto;
-  dealPercent(loc);
- }
- //alert(loc.L+','+loc.T+';'+margin.X+','+margin.Y);
- if((flag&locObjF.modeFlag)==locObjF.auto)	//	到這裡還沒決定就很奇怪了
-  flag+=locObjF[loc.W&&loc.H&&loc.T<win.windowH&&loc.L<win.windowW?(dialog=locObjF.dialog,'dialog'):'abs']-locObjF.auto;
+		// 是否重新指定
+		var d = 0;
+		if (typeof o == 'string')
+			o = o.split(','), d = 1;
+		if (!dialog && typeof o == 'object') {
+			// 取百分比%
+			if (typeof o[t ? 'L' : 'X'] == 'undefined'
+					&& typeof o[0] != 'undefined')
+				d = 1, o = t ? {
+					'X' : o[0],
+					'Y' : o[1]
+				} : {
+					'L' : o[0],
+					'T' : o[1],
+					// 假如o[2]未定義，W也會未定義（但有index）
+					'W' : o[2],
+					'H' : o[3]
+				};
+			if (t)
+				o.X = turnPercent(o.X, win.windowW), o.Y = turnPercent(o.Y,
+						win.windowH);
+			else {
+				o.L = turnPercent(o.L, win.windowW), o.T = turnPercent(o.T,
+						win.windowH);
+				if (typeof o.W == 'undefined') {
+					delete o.W;
+					delete o.H;
+				} else
+					o.W = turnPercent(o.W, win.windowW), o.H = turnPercent(o.H,
+							win.windowH);
+			}
+		}
+		if (d)
+			if (t)
+				margin = o;
+			else
+				loc = o;
+	}, makeFit = function(l, t, r, b, hc) {
+		//	test if out of range & 將box調整在range[left,top,right,bottom]內：先move，再resize
+		if (boxL < l)
+			boxL = l;
+		if (boxT < t)
+			boxT = t;
+		var d = r - obj.offsetWidth;
+		if (boxL > d)
+			if (l > d)
+				boxW = r - (boxL = l);
+			else
+				boxL = d;
+		d = b - obj.offsetHeight;
+		if (boxT > d)
+			if (t > d)
+				boxH = b - (boxT = t);
+			else
+				boxT = d;
+		else if (hc && (boxT = hc - obj.offsetHeight / 2) < t)
+			boxT = t;
+	};
 
- //	調整與判別
- //alert(loc.L+','+loc.T+';'+margin.X+','+margin.Y);
- //alert(loc.L+margin.X+','+(loc.T+margin.Y));
- //alert('dialog:'+dialog);
+	with (obj.style) {
+		overflow = visibility = 'hidden';
+		if (width)
+			width = '';
+		if (height)
+			//	重設obj。
+			height = '';
+		//	得設定obj之display，因為不這樣不能定offset。但可不顯現出來…只是好像沒啥效果。
+		display = 'block';
+	}
 
- if((flag&locObjF.modeFlag)==locObjF.rel)	//	改成絕對座標。此後僅存abs/dialog
-  flag+=locObjF.abs-locObjF.rel//-(flag&locObjF.modeFlag)
-  ,loc.L+=win.scrollX,loc.T+=win.scrollY
-  ;
+	// if(dialog!=locate_elementF.dialogDown&&dialog!=locate_elementF.dialogUp)dialog=0;
+	// setup loc#1: deal dialog
+	if (typeof loc == 'string') {
+		// 若loc為id
+		var o = document.getElementById(loc);
+		if (o)
+			loc = o;
+	}
+	if (typeof loc == 'object' && typeof loc.offsetLeft != 'undefined') {
+		//	若loc為Document Object
 
- var resizable=!(flag&locObjF.noResize),boxL=loc.L,boxT=loc.T,boxW=-1,boxH=-1;	//	最後要設定的值
- if(flag&locObjF.noMove)
-  if(resizable)makeFit((boxL+=margin.X)-margin.X,(boxT+=margin.Y)-margin.Y,win.scrollX+win.windowW,win.scrollY+win.windowH);
-  else{
-   if(margin.X<0||boxL+margin.X>=win.scrollX&&boxL+margin.X+obj.offsetWidth<win.scrollX+win.windowW)boxL+=margin.X;
-   if(margin.Y<0||boxT+margin.Y>=win.scrollY&&boxT+margin.Y+obj.offsetHeight<win.scrollY+win.windowH)boxT+=margin.Y;
-  }
- else if(!dialog)	//	abs
-  boxL+=margin.X,boxT+=margin.Y,makeFit(win.scrollX,win.scrollY,win.scrollX+win.windowW,win.scrollY+win.windowH);
- else{	//	自動調整位置
-  if(dialog){if(!loc.W)loc.W=0;if(!loc.H)loc.H=0;}
-  else loc={'L':win.scrollX,'T':win.scrollY,'W':0,'H':0};	//	abs時,相當於dialog在(0,0)大小(0,0)
-  if(!obj.innerHTML)obj.innerHTML='&nbsp;';	//	起碼先設定個大小以安排位置
-  var lA=win.scrollY+win.windowH-loc.T-loc.H,lB=loc.T-win.scrollY,lC=win.scrollX+win.windowW-loc.L-loc.W,lD=loc.L-win.scrollX
-  ,m1=win.scrollX,m2=win.scrollY,m3=win.scrollX+win.windowW,m4=win.scrollY+win.windowH	//	args for makeFit()
-  ,movekind;	//	move kind set use locObjF.dialog~ flag
-  //alert(lA+','+lB+','+lC+','+lD+'\n'+obj.offsetWidth+','+obj.offsetHeight);
-/*
-	+---------------------+
-	|        ^            |
-	|        | lB         |	<--screen (active frame)
-	|        |            |
-	|<---->#####<-------->|	###:reference obj
-	|  lD    |      lC    |
-	|        |            |
-	|        | lA         |
-	|        |            |
-	+---------------------+
-*/
-  //	決定mode
-  if(dialog&&(flag&locObjF.dialogForce))movekind=dialog;
-  else{
-   if( obj.offsetWidth<win.windowW &&
-	(dialog!=locObjF.dialogRight&&dialog!=locObjF.dialogLeft||obj.offsetHeight>=win.windowH) )
-    if(obj.offsetHeight<lA&&(dialog!=locObjF.dialogUp||obj.offsetHeight>=lB))movekind=locObjF.dialogDown;
-    else if(obj.offsetHeight<lB)movekind=locObjF.dialogUp;
-   if(!movekind&&obj.offsetHeight<win.windowH)
-    if(obj.offsetWidth<lC&&(dialog!=locObjF.dialogLeft||obj.offsetWidth>=lD))movekind=locObjF.dialogRight;
-    else if(obj.offsetWidth<lD)movekind=locObjF.dialogLeft;
-   if(!movekind)
-    movekind=	//	以較大、可視的為準
-	dialog!=locObjF.dialogRight&&dialog!=locObjF.dialogLeft?
-		lA<lB&&resizable?locObjF.dialogUp:locObjF.dialogDown:	//	沒考慮假如lA<5時..
-		lC<lD&&resizable?locObjF.dialogLeft:locObjF.dialogRight;
-  }
+		/*
+		  //alert(loc.id+':'+loc.offsetLeft+','+loc.offsetTop+';'+loc.offsetWidth+','+loc.offsetHeight);
+		  var l=loc.offsetLeft,t=loc.offsetTop,w,h,n,add,outsideBLOCK,countH=window.navigator.userAgent.indexOf("MSIE")>=0;	//	真妙..moz表示在<H\d>中的obj時不把H\d當作parent算進去
+		  if(typeof loc.offsetWidth!='undefined')w=loc.offsetWidth,h=loc.offsetHeight;	//	loc.offsetWidth可能未定義？
+		  //var tt=loc.tagName+':'+loc.offsetLeft+','+loc.offsetTop+'\n';	//	for debug
+		  //	下面這段依瀏覽器而有不同 (-_-)!!
+		  while(isNaN((loc=loc.parentNode).offsetLeft)){	//	IE在用style:class時會出現誤差。
+		   n=loc.tagName;
+		   //if( !/^T(ABLE|BODY|R)$/.test(n=loc.tagName) && (countH||!/^H\d$/.test(n)) )l+=loc.offsetLeft,t+=loc.offsetTop;
+		   if(n=='DIV')add=outsideBLOCK;
+		   else if(n=='TD' || countH&&/^H\d$/.test(n))add=1;
+		   outsideBLOCK= n=='TABLE'||n=='DIV';	//	loc.style.display
+		   //tt+=(add?'':'#')+n+(loc.style.display?'('+loc.style.display+')':'')+':'+loc.offsetLeft+','+loc.offsetTop+(outsideBLOCK?', outside BLOCK':'')+'\n';
+		   if(add)add=0,l+=loc.offsetLeft,t+=loc.offsetTop;
+		  }
+		  //alert(l+','+t+'\n'+tt);	//	need to enable definition of tt above
+		  loc={'L':l,'T':t,'W':w,'H':h};
+		*/
+		loc = get_node_offset(loc);
+		if ((flag & locate_elementF.modeFlag) == locate_elementF.auto)
+			flag += locate_elementF.dialog - locate_elementF.auto, dialog = locate_elementF.dialog;
+	}
 
-  //alert(movekind);
-  //	決定location
-  if(movekind==locObjF.dialogDown)	m2=loc.T+loc.H,boxT+=loc.H;
-  else if(movekind==locObjF.dialogUp)	m4=loc.T,boxT-=obj.offsetHeight,margin.Y=-margin.Y;
-  else if(movekind==locObjF.dialogRight)m1=loc.L+loc.W,boxL+=loc.W;
-  else					m3=loc.L,boxL-=obj.offsetWidth,margin.X=-margin.X;//else if(movekind==locObjF.dialogLeft)
+	// setup margin
+	win = get_window_status();
+	if (!margin)
+		margin =
+			// dialog?dMargin:{'X':0,'Y':0};
+			dMargin;
+	else
+		dealPercent(margin, 1);
 
-  boxL+=margin.X,boxT+=margin.Y;	//	加上偏移
-  if(!resizable){
-   if(boxL<m1&&margin.X<0||boxL+obj.offsetWidth>m3&&margin.X>0)boxL-=margin.X;
-   if(boxT<m2&&margin.Y<0||boxT+obj.offsetHeight>m4&&margin.Y>0)boxT-=margin.Y;
-   m3+=obj.offsetWidth,m4+=obj.offsetHeight;	//	確保不會撞到
-  }
-  //	奇怪的是，alert(obj.offsetWidth)後obj.offsetWidth就變成0了。可能因為這值需要出函數之後再改。
-  //alert(resizable+'\n'+m1+','+m2+','+m3+','+m4+','+movekind+'\n'+obj.offsetWidth+','+obj.offsetHeight);
-  makeFit(m1,m2,m3,m4,movekind==locObjF.dialogRight||movekind==locObjF.dialogLeft?loc.T:0);
- }
+	// setup loc#2: deal abs/rel
+	if (!loc || loc == 'mouse')
+		loc = {
+			L : win.mouseX || 0,
+			T : win.mouseY || 0
+		};
+	else {
+		if ((flag & locate_elementF.modeFlag) == locate_elementF.auto && typeof loc == 'string'
+				&& /[%.]/.test(loc))
+			flag += locate_elementF.rel - locate_elementF.auto;
+		dealPercent(loc);
+	}
+	// alert(loc.L+','+loc.T+';'+margin.X+','+margin.Y);
+	if ((flag & locate_elementF.modeFlag) == locate_elementF.auto)
+		// 到這裡還沒決定就很奇怪了
+		flag += locate_elementF[loc.W && loc.H && loc.T < win.windowH
+				&& loc.L < win.windowW ? (dialog = locate_elementF.dialog) && 'dialog'
+				: 'abs']
+				- locate_elementF.auto;
 
- //	設定位置
- //alert(boxL+','+boxT+','+boxW+','+boxH+','+Display);
- with(obj.style){
-  position	=	'absolute';
-  left		=	boxL+'px';
-  top		=	boxT+'px';
-  if(boxW>=0||boxH>=0){
-   overflow	=	'auto';
-   //alert(width+','+height+'\n'+typeof width+'\n->w,h:'+boxW+','+boxH);
-   if(boxW>=0)width=	boxW+'px';
-   if(boxH>=0)height=	boxH+'px';
-  }
-  display	=	Display;
-  visibility	=	Visibility;
- }
+	// 調整與判別
+	// alert(loc.L+','+loc.T+';'+margin.X+','+margin.Y);
+	// alert(loc.L+margin.X+','+(loc.T+margin.Y));
+	// alert('dialog:'+dialog);
 
- //alert(obj.style.width+','+obj.style.height+'\n'+obj.offsetWidth+','+obj.offsetHeight);
- return obj;
-}
+	if ((flag & locate_elementF.modeFlag) == locate_elementF.rel)
+		// 改成絕對座標。此後僅存abs/dialog
+		flag += locate_elementF.abs - locate_elementF.rel// -(flag&locate_elementF.modeFlag)
+		, loc.L += win.scrollX, loc.T += win.scrollY;
+
+	// 最後要設定的值
+	var resizable = !(flag & locate_elementF.noResize), boxL = loc.L, boxT = loc.T, boxW = -1, boxH = -1;
+	if (flag & locate_elementF.noMove)
+		if (resizable)
+			makeFit((boxL += margin.X) - margin.X, (boxT += margin.Y)
+					- margin.Y, win.scrollX + win.windowW, win.scrollY
+					+ win.windowH);
+		else {
+			if (margin.X < 0
+					|| boxL + margin.X >= win.scrollX
+					&& boxL + margin.X + obj.offsetWidth < win.scrollX
+							+ win.windowW)
+				boxL += margin.X;
+			if (margin.Y < 0
+					|| boxT + margin.Y >= win.scrollY
+					&& boxT + margin.Y + obj.offsetHeight < win.scrollY
+							+ win.windowH)
+				boxT += margin.Y;
+		}
+	else if (!dialog)
+		// abs
+		boxL += margin.X, boxT += margin.Y, makeFit(win.scrollX, win.scrollY,
+				win.scrollX + win.windowW, win.scrollY + win.windowH);
+	else {
+		// 自動調整位置
+		if (dialog) {
+			if (!loc.W)
+				loc.W = 0;
+			if (!loc.H)
+				loc.H = 0;
+		} else
+			// abs時,相當於dialog在(0,0)大小(0,0)
+			loc = {
+				'L' : win.scrollX,
+				'T' : win.scrollY,
+				'W' : 0,
+				'H' : 0
+			};
+		if (!obj.innerHTML)
+			// 起碼先設定個大小以安排位置
+			obj.innerHTML = '&nbsp;';
+
+		var lA = win.scrollY + win.windowH - loc.T - loc.H, lB = loc.T
+				- win.scrollY, lC = win.scrollX + win.windowW - loc.L - loc.W, lD = loc.L
+				- win.scrollX,
+				//	args for makeFit()
+				m1 = win.scrollX, m2 = win.scrollY,
+				m3 = win.scrollX + win.windowW, m4 = win.scrollY + win.windowH
+				// move kind set use locate_elementF.dialog~ flag
+				, movekind;
+		// alert(lA+','+lB+','+lC+','+lD+'\n'+obj.offsetWidth+','+obj.offsetHeight);
+
+	/*
+		+---------------------+
+		|        ^            |
+		|        | lB         |	<--screen (active frame)
+		|        |            |
+		|<---->#####<-------->|	###:reference obj
+		|  lD    |      lC    |
+		|        |            |
+		|        | lA         |
+		|        |            |
+		+---------------------+
+	*/
+		// 決定 mode
+		if (dialog && (flag & locate_elementF.dialogForce))
+			movekind = dialog;
+		else {
+			if (obj.offsetWidth < win.windowW
+					&& (dialog != locate_elementF.dialogRight
+							&& dialog != locate_elementF.dialogLeft || obj.offsetHeight >= win.windowH))
+				if (obj.offsetHeight < lA
+						&& (dialog != locate_elementF.dialogUp || obj.offsetHeight >= lB))
+					movekind = locate_elementF.dialogDown;
+				else if (obj.offsetHeight < lB)
+					movekind = locate_elementF.dialogUp;
+			if (!movekind && obj.offsetHeight < win.windowH)
+				if (obj.offsetWidth < lC
+						&& (dialog != locate_elementF.dialogLeft || obj.offsetWidth >= lD))
+					movekind = locate_elementF.dialogRight;
+				else if (obj.offsetWidth < lD)
+					movekind = locate_elementF.dialogLeft;
+			if (!movekind)
+				movekind =
+					// 以較大、可視的為準
+					dialog != locate_elementF.dialogRight && dialog != locate_elementF.dialogLeft ?
+						// 沒考慮假如lA<5時..
+						lA < lB && resizable ? locate_elementF.dialogUp : locate_elementF.dialogDown :
+						//
+						lC < lD && resizable ? locate_elementF.dialogLeft : locate_elementF.dialogRight;
+		}
+
+		// alert(movekind);
+		// 決定location
+		if (movekind == locate_elementF.dialogDown)
+			m2 = loc.T + loc.H, boxT += loc.H;
+		else if (movekind == locate_elementF.dialogUp)
+			m4 = loc.T, boxT -= obj.offsetHeight, margin.Y = -margin.Y;
+		else if (movekind == locate_elementF.dialogRight)
+			m1 = loc.L + loc.W, boxL += loc.W;
+		else
+			m3 = loc.L, boxL -= obj.offsetWidth, margin.X = -margin.X;
+		//else if(movekind==locate_elementF.dialogLeft)
+
+		// 加上偏移
+		boxL += margin.X, boxT += margin.Y;
+		if (!resizable) {
+			if (boxL < m1 && margin.X < 0 || boxL + obj.offsetWidth > m3
+					&& margin.X > 0)
+				boxL -= margin.X;
+			if (boxT < m2 && margin.Y < 0 || boxT + obj.offsetHeight > m4
+					&& margin.Y > 0)
+				boxT -= margin.Y;
+			//	確保不會撞到
+			m3 += obj.offsetWidth, m4 += obj.offsetHeight;
+		}
+		// 奇怪的是，alert(obj.offsetWidth)後obj.offsetWidth就變成0了。可能因為這值需要出函數之後再改。
+		// alert(resizable+'\n'+m1+','+m2+','+m3+','+m4+','+movekind+'\n'+obj.offsetWidth+','+obj.offsetHeight);
+		makeFit(m1, m2, m3, m4, movekind == locate_elementF.dialogRight
+				|| movekind == locate_elementF.dialogLeft ? loc.T : 0);
+	}
+
+	// 設定位置
+	// alert(boxL+','+boxT+','+boxW+','+boxH+','+Display);
+	with (obj.style) {
+		position = 'absolute';
+		left = boxL + 'px';
+		top = boxT + 'px';
+		if (boxW >= 0 || boxH >= 0) {
+			overflow = 'auto';
+			//alert(width+','+height+'\n'+typeof width+'\n->w,h:'+boxW+','+boxH);
+			if (boxW >= 0)
+				width = boxW + 'px';
+			if (boxH >= 0)
+				height = boxH + 'px';
+		}
+		display = Display;
+		visibility = Visibility;
+	}
+
+	// alert(obj.style.width+','+obj.style.height+'\n'+obj.offsetWidth+','+obj.offsetHeight);
+	return obj;
+};
 
 
 
@@ -16303,9 +16838,9 @@ function addonload(s,where){
 
 CeL.net.web
 .
-DOM_loaded=function() {
-	if(document.body)
-		return _.DOM_loaded=function(){return true;};
+DOM_loaded = function () {
+	if (document.body)
+		return _.DOM_loaded = function () { return true; };
 	else
 		return false;
 };
@@ -16364,7 +16899,7 @@ CeL.net.web
  * @param listener	listener function/function array/function string,
  * 				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"
  * 			function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}
- * @param [document_object]	bind/attach to what document object
+ * @param [target_element]	bind/attach to what HTML element
  * @param [p_first]	parentNode first
  * @return
  * @since	2010/1/20 23:42:51
@@ -16372,12 +16907,15 @@ CeL.net.web
  * c.f., GEvent.add_listener()
  * @memberOf	CeL.net.web
  */
-add_listener = function add_listener(type, listener, document_object, p_first) {
+add_listener = function add_listener(type, listener, target_element, p_first) {
 	if (!type || !listener)
 		return;
 
 	if (typeof listener === 'string')
 		listener = new Function('e', listener);
+
+	if (typeof target_element === 'string')
+		target_element = _.get_element(target_element);
 
 	var _s = _.add_listener, i, adder;
 
@@ -16389,36 +16927,84 @@ add_listener = function add_listener(type, listener, document_object, p_first) {
 		// usage: add_listener({unload:Unload});
 		// usage: add_listener({load:{true:[function(){sl(1);},'sl(2);']}});
 		for (i in type)
-			_s(i, type[i], document_object, p_first);// ,sl(i+': '+type[i])
+			_s(i, type[i], target_element, p_first);// ,sl(i+': '+type[i])
 
-	else if (typeof listener === 'object')
+	//	Array or Object
+	else if (library_namespace.is_Object(listener))
 		// usage: add_listener('unload',{true:Unload1});
 		// usage: add_listener('unload',[Unload1,Unload2]);
 		// 因為 Array 會從最小的開始照順序出，所以這邊不再判別是否為 Array。
 		for (i in listener)
 			// if(isNaN(f))sl('add_listener: to '+i),_s.p_first=i==='true';//||i==1||i===true
-			_s(type, listener[i], document_object,
+			_s(type, listener[i], target_element,
 					i === 'true' || (i === 'false' ? false : undefined));// ,sl((typeof i)+' ['+i+'] '+_s.p_first)
 
-	else{
+	else if(library_namespace.is_Function(listener)){
 		/*
 		 * 先設定好 native listener adding function
 		 */
-		if (document_object)
-			adder = document_object.addEventListener;
+		if (target_element)
+			adder = target_element.addEventListener;
 		else if (!(adder = _s.global_adder) && adder !== null)
 			_s.global_adder = adder = _s.get_adder();
 
 		//$(document).ready(listener);
 
+		//	使 listener 能以 this 取得 target_element
+		i = function(e) {
+			if(!e)
+				e = window.event;
+
+			//	正規化 Document Object Model (DOM) Level 3 Events
+			//	http://www.w3.org/TR/2009/WD-DOM-Level-3-Events-20090908/#interface-Event
+			if(!e.currentTarget)
+				e.currentTarget = target_element;
+			if(!e.target)
+				e.target = e.srcElement || target_element;
+
+			//	from fix in jQuery
+
+			// check if target is a textnode (safari)
+			if ( e.target.nodeType === 3 )
+				e.target = e.target.parentNode;
+
+			// Add relatedTarget, if necessary
+			if ( !e.relatedTarget && e.fromElement )
+				e.relatedTarget = e.fromElement === e.target ? e.toElement : e.fromElement;
+
+			//	取得滑鼠座標
+			//	http://hartshorne.ca/2006/01/23/javascript_cursor_position/
+			//	http://hartshorne.ca/2006/01/18/javascript_events/
+			if ( isNaN(e.pageX) && !isNaN(e.clientX) ) {
+				var s = _.get_window_status.scroll();
+				e.pageX = e.clientX + s[0] - s[2];
+				e.pageY = e.clientY + s[1] - s[3];
+			}
+
+			listener.call(target_element, e);
+		};
+
 		// 主要核心動作設定之處理
+		//	TODO: 在 onload 時使 target_element = null
 		// sl(type+' ('+((typeof p_first=='undefined'?_s.p_first:p_first?true:false)?'p_first':'run first')+'): '+listener);
-		return adder ?
-			adder(type, listener, p_first)
-		: document_object && (adder = document_object.attachEvent) ?
+		if(adder){
+			try{
+				//	直接用 target_element.addEventListener 不會有問題。
+				//	.call(window.document): for Chrome 'Illegal invocation' issue
+				//	http://stackoverflow.com/questions/1007340/javascript-function-aliasing-doesnt-seem-to-work
+				//	但 IE9 需要 .call(target_element) 或者別用 .call，否則會得到 "Invalid procedure call or argument"
+				adder.call(target_element, type, i, p_first);
+			}catch(e){
+				adder.call(window.document, type, i, p_first);
+			}
+			return;
+		}
+
+		return target_element && (adder = target_element.attachEvent) ?
 			// http://msdn.microsoft.com/en-us/library/ms536343(VS.85).aspx
-			adder('on' + type, listener)
-		: _s.default_adder(type, listener, p_first, document_object)
+			adder('on' + type, i)
+
+		: _s.default_adder(type, i, p_first, target_element)
 		;
 	}
 
@@ -16439,6 +17025,7 @@ CeL.net.web
 /**
  * get (native) global listener adding function.
  * TODO: 只設定一次
+ * historical for Netscape Navigator, mozilla: window.captureEvents, document.captureEvents
  */
 add_listener.get_adder = function() {
 	/**
@@ -16476,25 +17063,26 @@ CeL.net.web
  * @param type	listen to what event type
  * @param listener	listener function/function array
  * @param [p_first]	parentNode first
- * @param [document_object]	bind/attach to what document object
+ * @param [target_element]	bind/attach to what HTML element
  * @return
  * @see
  * http://blog.othree.net/log/2007/02/06/third-argument-of-addeventlistener/
  */
-add_listener.default_adder = function(type, listener, p_first, document_object) {
-	if(!document_object)
-		document_object = window;
+add_listener.default_adder = function(type, listener, p_first, target_element) {
+	if(!target_element)
+		target_element = window;
 
-	var old = document_object[type = 'on' + type];
-	return document_object[type] =
+	var old = target_element[type = 'on' + type];
+
+	return target_element[type] =
 		old ?
 			//	TODO: typeof old==='string'
-			p_first ? function() {
-				old();
-				listener();
-			} : function() {
-				listener();
-				old();
+			p_first ? function(e) {
+				old.call(target_element, e || window.event);
+				listener.call(target_element, e || window.event);
+			} : function(e) {
+				listener.call(target_element, e || window.event);
+				old.call(target_element, e || window.event);
 			}
 		:
 			listener
@@ -16523,13 +17111,24 @@ add_listener.list = {};
 
 
 
-//	阻止 JavaScript 事件冒泡傳遞，使 event 不傳到 parentNode	http://www.jb51.net/html/200705/23/9858.htm
-function stopEvent(e,c){
+CeL.net.web
+.
+/**
+ * 阻止 JavaScript 事件冒泡傳遞，使 event 不傳到 parentNode。
+ * @param e	event handle
+ * @param c	cancel bubble
+ * @see
+ * http://www.jb51.net/html/200705/23/9858.htm
+ * @memberOf	CeL.net.web
+ */
+stop_event = function(e, c) {
+	if (!e)
+		e = window.event;
+
 	if(e.preventDefault)
 		e.preventDefault();
 	else
-		// window.event
-		e.returnValue=false;
+		e.returnValue = false;
 
 	if(c)
 		// cancelBubble 在IE下有效，stopPropagation 在 Firefox 下有效。
@@ -16537,18 +17136,137 @@ function stopEvent(e,c){
 		if(e.stopPropagation)
 			e.stopPropagation();
 		else
-			// window.event
-			e.cancelBubble=true;
+			e.cancelBubble = true;
 };
 
 
 
-/*	↑HTML only	-------------------------------------------------------
-*/
+CeL.net.web
+.
+/**
+ * 獲取頁面上選中的選取區資訊。
+ * 
+ * @example
+ * CeL.add_listener('mouseup', function (e) { var s = CeL.get_selection(); if (s && s.text) CeL.debug('select @' + this + '(' + s.element + ')' + ' (' + s.left + '+' + s.width + ',' + s.top + '+' + s.height + '), (' + e.pageX + ',' + e.pageY + '): ' + s.text); }, target_element);
+ * 
+ * @param	{Number} [index]	TODO: 第幾選取區, default: all or 0 if there's only ONE/ZERO selection
+ * @return	{Object}
+ * 	{
+ * 		left: {Number} in px,
+ * 		top: {Number} in px,
+ * 		width: {Number} in px,
+ * 		height: {Number} in px,
+ * 		text: {String} 文字,
+ * 		element: {HTMLElement},
+ * 		selection: selection object (browser dependent)
+ * 	}
+ * @return	{undefined}	error.
+ * @see
+ * http://plugins.jquery.com/project/selectedText,
+ * Gecko: https://developer.mozilla.org/en/DOM/Selection
+ * @memberOf	CeL.net.web
+ */
+get_selection = function(index) {
+};
+
+
+try{
+
+	if (window.getSelection)
+		_.get_selection = function(index) {
+			//	Firefox, Opera, Safari
+			//	http://help.dottoro.com/ljcvonpc.php
+			//	Although the selection object is supported by Opera, it is only partially suppported. The window.getSelection method provides more complex functionality in that browser.
+			//	http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
+			var e = document.activeElement,
+			//	在 Opera 中，e 為 [object Text]
+			tag = e && e.tagName && e.tagName.toLowerCase(),
+			s = window.getSelection();
+			if(!s.rangeCount)
+				//	點擊而無選擇?
+				//	最起碼回應能得知的資訊
+				return {
+					text : '',
+					element: s,
+					selection: s
+				};
+
+			//	超出範圍可能會 Error: INDEX_SIZE_ERR: DOM Exception 1
+			s = s.getRangeAt(!isNaN(index) && 0 <= index
+					&& index < s.rangeCount ? index : 0);
+
+			//	Gecko: https://developer.mozilla.org/en/DOM/range
+			//	除了 Gecko 外，都有 s.getBoundingClientRect 但無 s.endContainer.getBoundingClientRect。
+			//	Gecko 可以取 mouse event 作 workaround
+			//library_namespace.debug(s.endContainer.parentNode);
+			var offset = _.get_node_offset(
+					s.getBoundingClientRect ? s : s.endContainer.parentNode
+				);
+
+			return {
+				//	TODO: offset
+				//	TODO: do test
+				//s.startOffset,
+				left : offset.left,
+				top : offset.top,
+				//s.endOffset,
+				width : offset.width,
+				height : offset.height,
+				text : tag === 'textarea' || tag === 'input'
+						? e.value.substring(e.selectionStart, e.selectionEnd)
+						: s.toString(),
+				element: s,//s.endContainer,
+				selection: s
+			};
+	
+		};
+
+	else if (document.selection && document.selection.createRange) {
+		// Internet Explorer
+		// http://msdn.microsoft.com/en-us/library/ms534692%28VS.85%29.aspx
+		// TODO: http://help.dottoro.com/ljefwsqm.php
+
+		document.execCommand
+		&& document.execCommand('MultipleSelection', true, true);
+
+		_.get_selection = function(input) {
+			var s = document.selection.createRange();
+
+			return s.type !== 'None' && {
+				//	TODO: do test
+				//	http://msdn.microsoft.com/en-us/library/ms535872%28v=VS.85%29.aspx
+				//	s.offsetLeft, s.offsetTop 較不準
+				left : s.boundingLeft,
+				top : s.boundingTop,
+				width : s.boundingWidth,
+				height : s.boundingHeight,
+				text : s.text,
+				//	TODO
+				//element: null,
+				selection: s
+			};
+
+		};
+
+	} else if (document.getSelection)
+		_.get_selection = function(input) {
+			return {
+				//	TODO: get offset from mouse location
+				text : document.getSelection()
+			};
+		};
+
+}catch (e) {
+	// TODO: handle exception
+}
+
+/*
+	↑HTML only	-------------------------------------------------------
+*/
 
 
 
-var isIE=/*@cc_on!@*/!true;
+var is_IE=/*@cc_on!@*/!true;
 
 /*
 http://www.real-blog.com/programming/259
@@ -16580,6 +17298,8 @@ http://www.cnlei.org/blog/article.asp?id=337
 >> 不支持charCode，值為 undefined
 
 */
+CeL.net.web
+.
 /**
  * 條碼器(Barcode Scanner)/雷射讀碼器的輸入可用 onkeypress 取得
  * @param callback	callback
@@ -16594,7 +17314,7 @@ http://www.cnlei.org/blog/article.asp?id=337
  * });
  * @memberOf	CeL.net.web
  */
-function deal_barcode(callback) {
+deal_barcode = function (callback) {
 	var k, lt = 0, st = 0;
 	document.onkeypress = function(e) {
 		var c = new Date();
@@ -16607,7 +17327,7 @@ function deal_barcode(callback) {
 			k = "";
 		}
 		lt = c;
-		c = e || event;
+		c = e || window.event;
 		c = c.keyCode || c.which || c.charCode;
 		if (c > 32 && c < 120)
 			k += String.fromCharCode(c);
@@ -16628,7 +17348,7 @@ function addEngine(){
 
 //	for string encoding	-------------------------------------------------------
 //	將HTML:&#ddd; → Unicode text
-//	此函數只能用一次，為輸入資料良好之情況下使用。完整版： HTMLToUnicode
+//	此函數只能用一次，為輸入資料良好之情況下使用。完整版： HTML_to_Unicode
 //turnUnicode[generateCode.dLK]='setTool,getText';
 function turnUnicode(b){
  //s=s.replace(/&#(\d+);/g,String.fromCharCode("$1"));//行不通
@@ -16651,102 +17371,169 @@ function turnUnicode(b){
  ;
  if(b)s=s.gText();
  return s;
-}
+};
 //	可適用perl: HTML::Entities::encode_entities()
 //	需要escape的: [\<\>\"\'\%\;\)\(\&\+], tr/A-Za-z0-9\ //dc	http://www.cert.org/tech_tips/malicious_code_mitigation.html
-function HTMLToUnicode(H,onlyDigital){
- //	使用\0可能會 Warning: non-octal digit in an escape sequence that doesn't match a back-reference
- var t=H.valueOf();
- if(!onlyDigital)
-  t=t	.replace(/\0\0/g,'')	//	自動clip null character
-	.replace(/&nbsp;/g,' ')
-	.replace(/&lt;/g,'<')
-	.replace(/&gt;/g,'>')
-	.replace(/&quot;/g,'"')
-	.replace(/&apos;/g,"'")
-	.replace(/&reg;/g,"®")
-	;
-
- t=t	.replace(/&#(0*38|[xX]0*26);/g,"\0\0")	//預防&#38;：&#38;=&
-	.replace(/&#0*(\d{2,7});/g,function($0,$1){return $1>1114111?$0:String.fromCharCode($1);})	//預防error之版本,~10FFFF=1114111
-	.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g,function($0,$1){var t=parseInt($1,16);return t>1114111?$0:String.fromCharCode(t);})
-	;
-
- if(!onlyDigital)
-  t=t	.replace(/\0\0/g,"&")	//預防&#38;回復
-	.replace(/&amp;/g,'&')
-	;
-
- return t;
-}
+CeL.net.web
+.
 /**
- * translate Unicode text to HTML
+ * Translate HTML code to Unicode text
+ * @param {String} HTML	HTML code
+ * @param {Boolean} only_digital
+ * @returns
+ * @memberOf	CeL.net.web
+ */
+HTML_to_Unicode=function (HTML, only_digital) {
+	//	使用\0可能會 Warning: non-octal digit in an escape sequence that doesn't match a back-reference
+	var t = HTML.valueOf();
+
+	if (!only_digital)
+		t = t
+			//	自動clip null character
+			.replace(/\0\0/g, '')
+			.replace(/&nbsp;/g, ' ')
+			.replace(/&lt;/g, '<')
+			.replace(/&gt;/g, '>')
+			.replace(/&quot;/g, '"')
+			.replace(/&apos;/g, "'")
+			.replace(/&reg;/g, "®")
+			;
+
+	t = t
+		//預防&#38;：&#38;=&
+		.replace(/&#(0*38|[xX]0*26);/g, "\0\0")
+		//預防error之版本,~10FFFF=1114111
+		.replace(/&#0*(\d{2,7});/g, function ($0, $1) { return $1 > 1114111 ? $0 : String.fromCharCode($1); })
+		.replace(/&#[xX]0*([a-fA-F\d]{2,6});/g, function ($0, $1) { var t = parseInt($1, 16); return t > 1114111 ? $0 : String.fromCharCode(t); })
+		;
+
+	if (!only_digital)
+		t = t
+			//預防&#38;回復
+			.replace(/\0\0/g, "&")
+			.replace(/&amp;/g, '&')
+			;
+
+	return t;
+};
+
+CeL.net.web
+.
+/**
+ * Translate Unicode text to HTML
  * @param {String} text	Unicode text
  * @param mode	mode='x':&#xhhh;
  * @return {String}	HTML
  * @memberOf	CeL.net.web
  */
-function toHTML(text, mode) {
+to_HTML=function (text, mode) {
 	var html = '', t, i = 0;
 	for (; i < text.length; i++)
 		t = text.charCodeAt(i), html += '&#' + (mode === 'x' ? 'x' + t
 				.toString(16) : t) + ';';
 	return html;
 };
-function UnicodeToHTML(U,f){	//	f:flag, f&1!=0: turn \t, (f&2)==0: \n→<br/>, f==4: to quoted
- U=(''+U).replace(/&/g,'&amp;')
-	.replace(/&amp;amp;/gi,'&amp;')	//	就是會出現這奇怪情況。
-	.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-	;
+CeL.net.web
+.
+/**
+ * Translate Unicode text to HTML code
+ * @param text	Unicode text
+ * @param flags	flags, f&1!=0: turn \t, (f&2)==0: \n→<br/>, f==4: to quoted
+ * @param	ignore_tags	e.g., {object:{src:/^https?:\/\//},img:{src:/^https?:\/\//},a:{href:/^https?:\/\//}}
+ * @return
+ * @memberOf	CeL.net.web
+ */
+Unicode_to_HTML=function (text, flags, ignore_tags) {
+	text = ('' + text)
+		.replace(/&/g, '&amp;')
+		//	就是會出現這奇怪情況。
+		.replace(/&amp;amp;/gi, '&amp;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		;
 
- if(f==4)return U;
+	if (ignore_tags)
+		text = text.replace(
+		/<([^>]+)>/g,
+		function($0, $1) {
+			if (!($1 in ignore_tags))
+				return '&lt;' + $1;
+			var s = $1.split(/ /), i = 1, l = s.length, c = ignore_tags[$1];
+			for (; i < l; i++) {
+				m = s[i].match(/^([^=]+)(.+?)/);
+				if (!(m[1] in c)
+						|| !(library_namespace.is_type(
+								c[m[1]], 'RegExp')
+								&& c[m[1]].test(m[2]) || library_namespace
+								.is_Function(c[m[1]])
+								&& c[m[1]](m[2])))
+					s[i] = '';
+				return s.join(' ');
+			}
+		});
+	else
+		text = text.replace(/</g, '&lt;');
 
- U=U.replace(/ /g,'&nbsp;');
+	if (flags == 4) return text;
 
- //if(!f)f=0;
- if(f&1)U=U.replace(/	/g,'<span style="margin-left:3em;">&nbsp;</span>');
- if(!(f&2))U=U.replace(/(\r?\n)/g,'<br/>$1');//+'<br/>\n';
- return U;
+	text = text.replace(/ /g, '&nbsp;');
+
+	//if(!f)f=0;
+	if (flags & 1)
+		text = text.replace(/	/g, '<span style="margin-left:3em;">&nbsp;</span>');
+	if (!(flags & 2))
+		text = text.replace(/(\r?\n)/g, '<br/>$1'); //+'<br/>\n';
+	return text;
+};
+
+// Ucode:\uhhhh及\xhh之意
+function UcodeToTxt(U) {
+	var T = U.replace(/\\\\|\\u005[cC]|\\x5[cC]|\\134/g, "\0")
+		/*
+		//way 1
+		.replace(/\\u([a-fA-F\d]{4})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
+		.replace(/\\x([a-fA-F\d]{2})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
+		.replace(/\\([0-7]{1,3})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
+		//way 2
+		.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2})/g,function($0,$1){return String.fromCharCode(parseInt($1.substr(1),16));})
+		.replace(/\\([0-7]{1,3})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
+		*/
+		//way 3
+		.replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2}|[0-7]{1,3})/g, function ($0, $1) { var t = $1.charAt(0); return String.fromCharCode(parseInt(t == 'u' || t == 'x' ? $1.substr(1) : $1, 16)); })
+		;
+
+	if (T.indexOf("\\") != -1)
+		T = T
+			.replace(/\\t/g, "<Tab>")
+			.replace(/\\n/g, "<Line Feed>")
+			.replace(/\\v/g, "<Vertical Tab>")
+			.replace(/\\f/g, "<Form Feed>")
+			.replace(/\\r/g, "<Carriage Return>")
+			.replace(/\\(.)/g, "$1");
+
+	return T.replace(/\0/g, "\\");
 }
-
-function UcodeToTxt(U){	// Ucode:\uhhhh及\xhh之意
- var T=U.replace(/\\\\|\\u005[cC]|\\x5[cC]|\\134/g,"\0")
-/*
- //way 1
- .replace(/\\u([a-fA-F\d]{4})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
- .replace(/\\x([a-fA-F\d]{2})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
- .replace(/\\([0-7]{1,3})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
- //way 2
- .replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2})/g,function($0,$1){return String.fromCharCode(parseInt($1.substr(1),16));})
- .replace(/\\([0-7]{1,3})/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
-*/
- //way 3
- .replace(/\\(u[a-fA-F\d]{4}|x[a-fA-F\d]{2}|[0-7]{1,3})/g,function($0,$1){var t=$1.charAt(0);return String.fromCharCode(parseInt(t=='u'||t=='x'?$1.substr(1):$1,16));})
- ;
-
- if(T.indexOf("\\")!=-1)T=T.replace(/\\t/g,"<Tab>").replace(/\\n/g,"<Line Feed>").replace(/\\v/g,"<Vertical Tab>").replace(/\\f/g,"<Form Feed>").replace(/\\r/g,"<Carriage Return>").replace(/\\(.)/g,"$1");
- return T.replace(/\0/g,"\\");
+function TxtToUcode(T, l) {
+	var i = 0, U = '', t;
+	if (!l) l = 0;
+	for (; i < T.length; i++)
+		U += (t = T.charCodeAt(i)) < l ? T.charAt(i) :  "\\u0000".substr(0, 6 - (t = t.toString(16)).length) + t;
+	return U;
 }
-function TxtToUcode(T,l){
- var i=0,U='',t;
- if(!l)l=0;
- for(;i<T.length;i++)
-  U+= (t=T.charCodeAt(i))<l? T.charAt(i) : (t=t.toString(16),"\\u0000".substr(0,6-t.length)+t);
- return U;
+function CSSToTxt(C) {
+	return C.replace(/\\\\|\\0{0,4}5[cC][ \t\r\n\f]?/g, "\0")
+		.replace(/\\([a-fA-F\d]{1,6})[ \t\r\n\f]?/g, function ($0, $1) { return String.fromCharCode(parseInt($1, 16)); })
+		.replace(/\\(.)/g, "$1").replace(/\0/g, "\\");
 }
-function CSSToTxt(C){
- return C.replace(/\\\\|\\0{0,4}5[cC][ \t\r\n\f]?/g,"\0")
- .replace(/\\([a-fA-F\d]{1,6})[ \t\r\n\f]?/g,function($0,$1){return String.fromCharCode(parseInt($1,16));})
- .replace(/\\(.)/g,"$1").replace(/\0/g,"\\");
-}
-function TxtToCSS(T,r,sp){	//	r:radio,sp:separator
- var i=0,C='',t,p=r&&r>3&&r<9?'0'.x(r-1):'';
- if(!sp)sp='';sp+='\\';
+function TxtToCSS(T, r, sp) {
+	//	r:radio,sp:separator
+	var i = 0, C = '', t, p = r && r > 3 && r < 9 ? '0'.x(r - 1) : '';
+	if (!sp) sp = ''; sp += '\\';
 
- for(;i<T.length;i++)
-  t=T.charCodeAt(i).toString(16)
-  ,C+=sp+p.substr(0,r-t.length)+t;	//(p&&r>t.length?p.substr(0,r-t.length):''):如果length是0或負值，會傳回空字串。
- return C.slice(sp.length-1);
+	for (; i < T.length; i++)
+		t = T.charCodeAt(i).toString(16)
+		, C += sp + p.substr(0, r - t.length) + t; //(p&&r>t.length?p.substr(0,r-t.length):''):如果length是0或負值，會傳回空字串。
+	return C.slice(sp.length - 1);
 }
 
 
@@ -16815,91 +17602,105 @@ TODO:
 
 //	保留 color: return style string to add
 //reduceHTML.keep_color=
-reduceHTML._keep_color=
-function(c){
- if(c!='black')return c;
+reduceHTML._keep_color =
+	function (c) {
+		if (c !== 'black')
+			return c;
+	};
+reduceHTML.file = function (FP, enc) {
+	//sl('reduceHTML [' + FP + ']');
+	var t = simpleRead(FP, enc || simpleFileAutodetectEncode), l;
+	if (!t) {
+		err('Open [' + FP + '] failed.');
+		return;
+	}
+
+	l = t.length;
+	t = this(t);
+
+	FP = FP.replace(/\.s?html?$/i, function ($0) { return '.reduced' + $0; });
+	//sl('reduceHTML: ' + l + '→' + t.length + ' (' + parseInt(100 * t.length / l) + '%)' + ', save to [<a href="' + encodeURI(FP) + '">' + FP + '</a>].');
+	simpleWrite(FP, t, 'utf-8');
 };
-reduceHTML.file=function(FP,enc){
- sl('reduceHTML ['+FP+']');
- var t=simpleRead(FP,enc||simpleFileAutodetectEncode),l;
- if(!t){
-  err('Open ['+FP+'] failed.');
-  return;
- }
+function reduceHTML(t) {
+	if (!t)
+		return;
+	var _f = reduceHTML, f = function($0, $1, $2) {
+		return $1 != $2 || ($1.toLowerCase() in {
+			a : 1,
+			p : 1,
+			head : 1
+		}) ? $0 : '';
+	};
+	//if(m=t.match(/<!--\[if [^\]]+\]>(.|\n)*?<!\[endif\]-->/))sl(m[0].replace(/</g,'&lt;'));
+	//if(m=t.match(/<!\[if !vml\]>((.|\n)*?)<!\[endif\]>/))sl(m[0]);
 
- l=t.length;
- t=this(t);
+	t = t
+		.replace(/[\s\n]*<(t[dh])([^>]+)>[\s\n]*/ig, function ($0, $1, $2) { var a = $2.match(/[\s\n](col|row)span=['"]?\d{1,3}['"]?/ig); return '<' + $1 + (a ? a.join('') : '') + '>'; })
+		.replace(/<\?xml:namespace[^>]+>/g, '')
+		.replace(/[\s\n]*(<\/t[dh]>)[\s\n]*/ig, '$1')
+		.replace(/<wbr([^>]*)>/ig, '<br/>')
+		.replace(/<([bh]r)[\s\n]+([^>]*)\/?>/ig, function ($0, $1, $2) { var m = $2.match(/[\s\n;"'][\s\n]*page-break-before[\s\n]*:[\s\n]*([^\s\n;"']+)/); return '<' + $1 + (m ? ' style="page-break-before:' + m[1] + '"' : '') + '>'; })
+		.replace(/<(span|font|p|div|b|u|i)[\s\n]+([^>]*)>/ig, function ($0, $1, $2) {
+			var t = '<' + $1, s = '', m;
+			if (
+					//	/Italic/i.test($2)
+					$2.indexOf('Italic') !== -1)
+				s += 'font-style:italic;';
+			//	TODO: <u>, <b>
+			if (_f.keep_color && (m = $2.match(/[\s\n;"'][\s\n]*color[\s\n]*:[\s\n]*([^\s\n;"']+)/)) && (m = _f.keep_color(m[1])))
+				//	保留 color
+				s += 'color:' + m + ';';
+			return t + (s ? ' style="' + s + '"' : '') + '>';
+		})
+		.replace(/<(tr|table)[\s\n]+([^>]*)>/ig, '<$1>')
+		.replace(/<span>((.|\n)*?)<\/span>/ig, '$1')	//	不能用 .+|\n ，IE8 sometimes crash
+		.replace(/<span>((.|\n)*?)<\/span>/ig, '$1')	//	need several times
+		.replace(/<font>((.|\n)*?)<\/font>/ig, '$1')
+		.replace(/<([a-z\d]+)>[\s\n]*<\/([a-z\d]+)>/ig, f)
+		.replace(/<([a-z\d]+)>[\s\n]*<\/([a-z\d]+)>/ig, f)	//	2 times
+		.replace(/<o:p>((.|\n)*?)<\/o:p>/ig, '$1')
+		.replace(/<st1:[^>]+>((.|\n)*?)<\/st1:[^>]+>/ig, '$1')
+		.replace(/<!\[if !vml\]>((.|\n)*?)<!\[endif\]>/ig, '$1')
+		.replace(/<o:SmartTagType [^>]+\/>/ig, '')
+		/*
+		<td>
+		<p>&nbsp;</p>
+		</td>
+		*/
+		.replace(/<(span|p|div|t[dr])([^>]*>)<(span|p)>(([\s\n]+|&nbsp;)*?)<\/(span|p)><\/(span|p|div|t[dr])>/ig, '<$1$2$4</$7>')
+		.replace(/<link rel=(File-List|colorSchemeMapping|themeData|Edit-Time-Data)[^>]+>/ig, '')
+		.replace(/^\s*<html[^>]*>(\r?\n)*/, '<html>')
+		.replace(/(\r?\n)*<body[^>]+>(\r?\n)*/, '<body>')
+		.replace(/(\r?\n)*<!--\[if [^\]]+\]>(.|\n)*?<!\[endif\]-->(\r?\n)*/ig, '')
+		.replace(/(\r?\n)*<style[^>]*>(.|\n)*?<\/style>(\r?\n)*/ig, '')
+		.replace(/(\r?\n)*<meta[\s\n][^>]+>(\r?\n)*/ig, '')
+	
+		//	from HTML_to_Unicode()
+		.replace(/&#0*(\d{2,7});/ig, function ($0, $1) { return $1 > 1114111 ? $0 : String.fromCharCode($1); })	//預防error之版本,~10FFFF=1114111
+		.replace(/([\s\n]+|&nbsp;)+$|^([\s\n]+|&nbsp;)+/g, '')
+		;
 
- FP=FP.replace(/\.s?html?$/i,function($0){return '.reduced'+$0;});
- sl('reduceHTML: '+l+'→'+t.length+' ('+parseInt(100*t.length/l)+'%)'+', save to [<a href="'+encodeURI(FP)+'">'+FP+'</a>].');
- simpleWrite(FP,t,'utf-8');
+	if (/<table[\s>\r\n]/.test(t))
+		//sl('Has table'),
+		t = t.replace(/<\/head>/i, '<style type="text/css">table,th,td{border:1px solid #888;border-collapse:collapse;}</style></head>');
+
+	return t;
 };
-function reduceHTML(t){
- if(!t)return;
- var _f=reduceHTML,f=function($0,$1,$2){return $1!=$2||($1.toLowerCase() in {a:1,p:1,head:1})?$0:'';};
- //if(m=t.match(/<!--\[if [^\]]+\]>(.|\n)*?<!\[endif\]-->/))sl(m[0].replace(/</g,'&lt;'));
- //if(m=t.match(/<!\[if !vml\]>((.|\n)*?)<!\[endif\]>/))sl(m[0]);
-
- t=t
-	.replace(/[\s\n]*<(t[dh])([^>]+)>[\s\n]*/ig,function($0,$1,$2){var a=$2.match(/[\s\n](col|row)span=['"]?\d{1,3}['"]?/ig);return '<'+$1+(a?a.join(''):'')+'>';})
-	.replace(/<\?xml:namespace[^>]+>/g,'')
-	.replace(/[\s\n]*(<\/t[dh]>)[\s\n]*/ig,'$1')
-	.replace(/<wbr([^>]*)>/ig,'<br/>')
-	.replace(/<([bh]r)[\s\n]+([^>]*)\/?>/ig,function($0,$1,$2){var m=$2.match(/[\s\n;"'][\s\n]*page-break-before[\s\n]*:[\s\n]*([^\s\n;"']+)/);return '<'+$1+(m?' style="page-break-before:'+m[1]+'"':'')+'>';})
-	.replace(/<(span|font|p|div|b|u|i)[\s\n]+([^>]*)>/ig,function($0,$1,$2){var t='<'+$1,s='',m;
-		if($2.indexOf('Italic')!=-1)s+='font-style:italic;';	//	if(/Italic/i.test($2))s+='font-style:italic;';
-		//	TODO: <u>, <b>
-		if(_f.keep_color && (m=$2.match(/[\s\n;"'][\s\n]*color[\s\n]*:[\s\n]*([^\s\n;"']+)/)) && (m=_f.keep_color(m[1])))
-		 s+='color:'+m+';';	//	保留 color
-		return t+(s?' style="'+s+'"':'')+'>';})
-	.replace(/<(tr|table)[\s\n]+([^>]*)>/ig,'<$1>')
-	.replace(/<span>((.|\n)*?)<\/span>/ig,'$1')	//	不能用 .+|\n ，IE8 sometimes crash
-	.replace(/<span>((.|\n)*?)<\/span>/ig,'$1')	//	need several times
-	.replace(/<font>((.|\n)*?)<\/font>/ig,'$1')
-	.replace(/<([a-z\d]+)>[\s\n]*<\/([a-z\d]+)>/ig,f)
-	.replace(/<([a-z\d]+)>[\s\n]*<\/([a-z\d]+)>/ig,f)	//	2 times
-	.replace(/<o:p>((.|\n)*?)<\/o:p>/ig,'$1')
-	.replace(/<st1:[^>]+>((.|\n)*?)<\/st1:[^>]+>/ig,'$1')
-	.replace(/<!\[if !vml\]>((.|\n)*?)<!\[endif\]>/ig,'$1')
-	.replace(/<o:SmartTagType [^>]+\/>/ig,'')
-/*
-  <td>
-  <p>&nbsp;</p>
-  </td>
-*/
-	.replace(/<(span|p|div|t[dr])([^>]*>)<(span|p)>(([\s\n]+|&nbsp;)*?)<\/(span|p)><\/(span|p|div|t[dr])>/ig,'<$1$2$4</$7>')
-	.replace(/<link rel=(File-List|colorSchemeMapping|themeData|Edit-Time-Data)[^>]+>/ig,'')
-	.replace(/^\s*<html[^>]*>(\r?\n)*/,'<html>')
-	.replace(/(\r?\n)*<body[^>]+>(\r?\n)*/,'<body>')
-	.replace(/(\r?\n)*<!--\[if [^\]]+\]>(.|\n)*?<!\[endif\]-->(\r?\n)*/ig,'')
-	.replace(/(\r?\n)*<style[^>]*>(.|\n)*?<\/style>(\r?\n)*/ig,'')
-	.replace(/(\r?\n)*<meta[\s\n][^>]+>(\r?\n)*/ig,'')
-
-	//	from HTMLToUnicode()
-	.replace(/&#0*(\d{2,7});/ig,function($0,$1){return $1>1114111?$0:String.fromCharCode($1);})	//預防error之版本,~10FFFF=1114111
-	.replace(/([\s\n]+|&nbsp;)+$|^([\s\n]+|&nbsp;)+/g,'')
-	;
-
- if(/<table[\s>\r\n]/.test(t))
-  //sl('Has table'),
-  t=t.replace(/<\/head>/i,'<style type="text/css">table,th,td{border:1px solid #888;border-collapse:collapse;}</style></head>');
-
- return t;
-}
 
 
 CeL.net.web
 .
 /**
- * 將 BIG5 日文假名碼修改為 Unicode 日文假名
- * @param {String} U	Unicode text
+ * 將 BIG5 日文假名碼修改為 Unicode 日文假名。
+ * @param {String} text	Unicode text
  * @return
  * @see
  * from Unicode 補完計畫 jrename.js
  */
-Big5JPToUnicodeJP=function (U) {
+Big5_kana_fix = function(text) {
 	var H = '', t, i = 0;
-	for (; i < U.length; i++)
+	for (; i < text.length; i++)
 		t = c.charCodeAt(0)
 		// 某次破解Windows Installer所用的資料
 		// ,H+=String.fromCharCode(t>61300?t-48977:t);
@@ -16908,7 +17709,7 @@ Big5JPToUnicodeJP=function (U) {
 				t >= 63223 && t <= 63305 ? t - 50870 :
 				// カタカナ
 				t >= 63306 && t <= 63391 ? t - 50857 :
-				// U.charAt(i);
+				// text.charAt(i);
 				t);
 	return H;
 };
@@ -16948,6 +17749,8 @@ CeL.setup_module(module_name, code_for_including);
 
 /*
 改成僅用單一格子
+http://blog.darkthread.net/blogs/darkthreadtw/archive/2010/06/01/taiwan-addr-helper.aspx
+輸入*,?
 */
 
 if (typeof CeL === 'function'){
@@ -17983,6 +18786,10 @@ CeL.setup_module(module_name, code_for_including);
 /*
 TODO:
 HTML 5 <datalist> Tag
+date
+http://plugins.jquery.com/project/timepicker
+http://digitalbush.com/projects/masked-input-plugin/
+
 
 http://plugins.jquery.com/search/node/Autocomplete+type%3Aproject_project
 http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/
@@ -18033,7 +18840,7 @@ var code_for_including = function(library_namespace, load_arguments) {
 
 //	requires
 if (eval(library_namespace.use_function(
-		'net.web.get_node_position,net.web.parse_URI')))
+		'net.web.get_node_offset,net.web.parse_URI')))
 	return;
 
 library_namespace.include_module_resource('select_input.css',module_name);
@@ -18239,11 +19046,11 @@ showList=function(show){	//	():get, 0:hide, 1:show
  if(!o)return;
  s=o.style;
  if(show){
-  c=get_node_position(_p.inputO);
-  s.top=c[1]+c[3]+2+'px';
-  s.left=c[0]+'px';
+  c=get_node_offset(_p.inputO);
+  s.top = c.top + c.height + 2 + 'px';
+  s.left=c.left+'px';
 
-  s.width=_p.inputO.offsetWidth+'px';
+  s.width=c.width+'px';
   s.height='';	//	reset
   c=s.display='block';
   if(_t.maxListHeight&&o.offsetHeight>_t.maxListHeight)
@@ -24261,7 +25068,7 @@ use_API.API_key = {
 		// by account cedegree
 		//	AJAX Search API Key:	http://code.google.com/intl/zh-TW/apis/ajaxsearch/signup.html
 		'http://meicho.com.tw/' : 'ABQIAAAA8YsRfLuORC22bc07JTNYsBS3JAeykUxPSpDNfPvIbcz6s5aBrRRdn1nyUM_9cYox7ymS-IgI-2CNuA',
-		'http://211.22.213.114/' : 'ABQIAAAA8YsRfLuORC22bc07JTNYsBS3JAeykUxPSpDNfPvIbcz6s5aBrRRdn1nyUM_9cYox7ymS-IgI-2CNuA',
+		'http://211.22.213.114/' : 'ABQIAAAA8YsRfLuORC22bc07JTNYsBQ1Uh1TD6YMX-95u9UsztRVu87z9xSXJOXSHjEtKMQm2v4PGPwji5o2oA',
 
 		// by account kanasimi
 		'http://lyrics.meicho.com.tw/' : 'ABQIAAAAgGipxXX8cQ5RHLEVH9TO-RR_OWH2p1vlzGygO-LFq-ywbfjcNBQcZtd9Bp9zMEQhrEtSnBy9_wJQmg',
@@ -24341,7 +25148,8 @@ CeL.code.API
  * @param [to_enc]
  * @return
  * @see
- * http://msdn.microsoft.com/en-us/library/ff512406.aspx
+ * <a href="http://msdn.microsoft.com/en-us/library/ff512406.aspx" accessdate="2010/7/12 20:22">Translate Method</a>,
+ * <a href="http://www.west-wind.com/Weblog/posts/107136.aspx" accessdate="2010/7/12 20:22">JSONP for cross-site Callbacks - Rick Strahl's Web Log</a>
  */
 add_Microsoft_translate = function(text, callback, from_enc, to_enc) {
 	if (!text || !callback)
@@ -24726,8 +25534,7 @@ is_DOM = function(name) {
 
 	// CeL.debug(CeL.is_type(window[name]));
 	try {
-		eval('r=' + name);
-		r = r === window[name];
+		r = eval(name + '===window.' + name);
 	} catch (e) {
 		r = false;
 	}
@@ -25498,8 +26305,7 @@ w = function(id) {
 
 	//if(_t.auto_hide)B.style.display=B.innerHTML?'block':'none';
 	if (B && _t.auto_scroll)
-		with (B)
-			scrollTop = scrollHeight - clientHeight;
+		B.scrollTop = B.scrollHeight - B.clientHeight;
 },
 
 
@@ -25516,11 +26322,10 @@ s = function(m, id, force) {
 		return;
 
 	if (m)
-		_p.sbuf
-				.push(m = (_t.save_date && typeof gDate == 'function' ? _t.save_new_line
-						+ gDate() + _t.save_new_line
-						: '')
-						+ m);
+		_p.sbuf.push(m = (_t.save_date && typeof gDate == 'function' ? _t.save_new_line
+				+ gDate() + _t.save_new_line
+				: '')
+				+ m);
 
 	if (force || _t.flush || _p.sbufL > _t.save_limit)
 		try {
@@ -25783,7 +26588,9 @@ node_description = function(node, flag) {
 		description = description.replace(/</g, '&lt;');
 	}
 
-	return description || '(null description node)';
+	//	TODO: 對 Range object 之類的處理
+	//	http://help.dottoro.com/ljxsqnoi.php
+	return description || '(null description node: ' + library_namespace.is_type(node) + ')';
 };
 
 
@@ -26310,13 +27117,22 @@ get_all_functions = function (script_filename) {
 };
 
 
-//var OK=addCode('alert,simpleWrite',['alert','NewLine','get_all_functions']);if(typeof OK=='string')simpleWrite('try.js',OK),alert('done');else alert('OK:'+OK);
+Keyword = 'break,do,instanceof,typeof,case,else,new,var,catch,finally,return,void,continue,for,switch,while,debugger,function,this,with,default,if,throw,delete,in,try';
+FutureReservedWord = 'class,enum,extends,super,const,export,import';
+NullLiteral = 'null';
+BooleanLiteral = 'true,false';
+
+JS.is_reserved_word;
+
+
+//var OK = addCode('alert,simpleWrite', ['alert', 'NewLine', 'get_all_functions']);if (typeof OK == 'string') simpleWrite('try.js', OK), alert('done'); else alert('OK:' + OK);
 //addCode('複製 -backup.js');
 /*
-{var ss=[23,23.456,undefined,Attribute,null,Array,'567','abc'],l=80,repF='tmp.txt',sa=ss,st=addCode('',['ss']),t;
-ss='(reseted)';try{eval(st);}catch(e){}t=(sa===ss)+': '+typeof sa+'→'+typeof ss+'\n';
-simpleWrite(repF,t+sa+'\n→\n'+ss+'\n\n◎eval:\n'+st);
-alert(t+(sa=''+sa,sa.length<l?sa:sa.slice(0,l/2)+'\n..'+sa.slice(sa.length-l/2))+'\n→\n'+(ss=''+ss,ss.length<l?ss:ss.slice(0,l/2)+'\n..'+ss.slice(ss.length-l/2))+'\n\n'+(ss=''+st,ss.length<l?ss:ss.slice(0,200)+'\n..\n'+ss.slice(ss.length-200)));
+{
+	var ss = [23, 23.456, undefined, Attribute, null, Array, '567', 'abc'], l = 80, repF = 'tmp.txt', sa = ss, st = addCode('', ['ss']), t;
+	ss = '(reseted)'; try { eval(st); } catch (e) { } t = (sa === ss) + ': ' + typeof sa + '→' + typeof ss + '\n';
+	simpleWrite(repF, t + sa + '\n→\n' + ss + '\n\n◎eval:\n' + st);
+	alert(t + (sa = '' + sa, sa.length < l ? sa : sa.slice(0, l / 2) + '\n..' + sa.slice(sa.length - l / 2)) + '\n→\n' + (ss = '' + ss, ss.length < l ? ss : ss.slice(0, l / 2) + '\n..' + ss.slice(ss.length - l / 2)) + '\n\n' + (ss = '' + st, ss.length < l ? ss : ss.slice(0, 200) + '\n..\n' + ss.slice(ss.length - 200)));
 }
 */
 
@@ -26787,7 +27603,9 @@ function nullCode(len, type) {	//	len:\d-\d
 	if (typeof nullCodeData != 'object') nullCodeData = {}, nullCodeDataI = [], nullCodeDataL = 0;
 	if (typeof len == 'number') u = d = Math.floor(len);
 	else if (len = '' + len, (i = len.indexOf('-')) != -1) d = parseInt(len.slice(0, i)), u = parseInt(len.substr(i + 1));
-	if (u < d) { var a = d; d = u, u = a; } if (!len || !u || len < 0) return '';
+	if (u < d) { var a = d; d = u, u = a; }
+	if (!len || !u || len < 0)
+		return '';
 	if (typeof type != 'string') type = typeof type;
 
 	//if(type=='boolean'){return Math.random()<.5?1:0;}
@@ -27271,7 +28089,7 @@ CeL.code.reorganize
 * @param {String} code	程式碼
 * @param {Boolean} fill_code	(TODO) 不只是定義，在 .code 填入程式碼。
 * @return	{Object}	root namespace
-* @since	2009/12/5 15:04:42, 2009/12/20 14:33:30
+* @since	2009/12/5 15:04:42, 2009/12/20 14:33:30, 2010/7/7 10:58:22
 * @_memberOf	_module_
 */
 get_various_from_code = function (code, fill_code) {
@@ -27350,12 +28168,14 @@ get_various_from_code = function (code, fill_code) {
 	origin_index,
 	new_line=library_namespace.env.new_line,
 	/**
-	 * 將 jsdoc properties 轉換成 vsdoc
+	 * 將 jsdoc properties 轉換成 VSdoc(JScript IntelliSense in Visual Studio)
 	 * 
 	 * @inner
 	 * @ignore
 	 * @see
-	 * http://weblogs.asp.net/bleroy/archive/2007/04/23/the-format-for-javascript-doc-comments.aspx
+	 * http://weblogs.asp.net/bleroy/archive/2007/04/23/the-format-for-javascript-doc-comments.aspx,
+	 * http://msdn.microsoft.com/zh-tw/library/bb385682.aspx,
+	 * http://www.codeproject.com/Articles/60661/Visual-Studio-JavaScript-Intellisense-Revisited.aspx
 	 */
 	jsdoc_to_vsdoc = function() {
 		var p = [ '' ], n, V, a, i, l, t_p = function(v) {	
@@ -27377,10 +28197,16 @@ get_various_from_code = function (code, fill_code) {
 				break;
 
 			case 'param':
-				if (a = v.match(/^({([a-zA-Z_\d.$\|\s]+)}\s*)?([a-zA-Z_\d$]+|\[([a-zA-Z_\d.$]+)\])\s*(.*?)$/))
-					v = a[5],
-					a = ' name="' + (a[4]||a[3]) + '" type="' + a[2].replace(/\s+/g, '') + '" optional="'+(!!a[4])+'"';
-				else
+				if (a = v.match(/^({([a-zA-Z_\d.$\|\s]+)}\s*)?([a-zA-Z_\d$]+|\[([a-zA-Z_\d.$]+)\])\s*(.*?)$/)){
+					var t = a[2].replace(/\s+/g, '');
+					v = a[5], a = ' name="' + (a[4] || a[3]) + '" type="' + t + '" optional="' + (!!a[4]) + '"';
+
+					if (/integer/i.test(t))
+						a += ' integer="true"';
+					//	from CeL.net.web
+					if (/HTML([A-U][A-Za-z]{1,15})?Element/i.test(t))
+						a += ' domElement="true"';
+				}else
 					a = '';
 				break;
 
@@ -27393,7 +28219,14 @@ get_various_from_code = function (code, fill_code) {
 				if (a = v.match(/^({([a-zA-Z_\d$.\|\s]+)})?(.*)$/)){
 					v = a[3].replace(/^[\s\n]+/g, '');
 					a = a[2].replace(/\s+/g, '') || properties.type;
+
 					a = a ? ' type="' + a + '"' : '';
+
+					if (/integer/i.test(t))
+						a += ' integer="true"';
+					//	from CeL.net.web
+					if (/HTML([A-U][A-Za-z]{1,15})?Element/i.test(t))
+						a += ' domElement="true"';
 				}else
 					a = '';
 				break;
@@ -27461,6 +28294,12 @@ get_various_from_code = function (code, fill_code) {
 
 		// 除去 space
 		name = name.replace(/[\s\n]+/g, '');
+	},
+	handle_name = function() {
+		var m = name
+		.match(/^([a-zA-Z_$\d]+)\.[^.].+[^.]\.([a-zA-Z_$\d]+)$/);
+		return m && m[1] === library_namespace.Class ? m[1] + '.'
+				+ m[2] + '=' + name : name;
 	};
 
 	for (i = 0; i < l; i++) {
@@ -27505,8 +28344,12 @@ get_various_from_code = function (code, fill_code) {
 
 			//library_namespace.log('[' + i + ']' + '\n' + tmp_code.join('\n') + '\n' + line);
 			if (m = line.match(/(.*?\*\/)/)) {
-				//tmp_code.push(m[1]);
 				line = line.replace(/(.*?)\*\//, '');
+				while (i < l
+						&& !/=\s*[^\s]|{/.test(line = line.replace(
+								/\s*\/\/[^\n]*/g, '').replace(
+										/\/\*((.|\n)*?)\*\//g, '')))
+					line += code[++i];
 
 				//	初始化函式名
 				name = '';
@@ -27529,7 +28372,7 @@ get_various_from_code = function (code, fill_code) {
 					while (i < l && various.indexOf(')') === -1)
 						various += code[++i];
 					m = various.match(/^[^)]*/);
-					tmp_code.push(name + '=function(' + m[0] + '){'
+					tmp_code.push(handle_name() + '=function(' + m[0] + '){'
 									+ jsdoc_to_vsdoc() + '};');
 
 				} else if (m = line
@@ -27541,15 +28384,15 @@ get_various_from_code = function (code, fill_code) {
 						while (i < l && various.indexOf(')') === -1)
 							various += code[++i];
 						m = various.match(/^[^)]+\)/);
-						tmp_code.push(name + '=' + m[0] + '{' + jsdoc_to_vsdoc() + '};');
+						tmp_code.push(handle_name() + '=' + m[0] + '{' + jsdoc_to_vsdoc() + '};');
 
 					} else if (/^\s*new\s+Function\s*\(/.test(various)) {
 						// var name = new Function();
 						if (m = various.match(/^\s*new\s+Function\s*\(.+\)\s*;?\s*$/)) {
 							//	TODO
-							tmp_code.push(name + '=new Function("");');
+							tmp_code.push(handle_name() + '=new Function("");');
 						} else
-							tmp_code.push(name + '=new Function();');
+							tmp_code.push(handle_name() + '=new Function();');
 
 					} else {
 						// var name = 123;
@@ -27597,9 +28440,12 @@ get_various_from_code = function (code, fill_code) {
 								break;
 
 							case 'number':
-								properties.type='Number';
+								properties.type = 'Number';
 							case 'int':
 							case 'integer':
+								if (/int(eger)?/i.test(properties.type))
+									properties.type = 'Integer';
+
 								if (!isNaN(various)) {
 									various = '=' + various + ';';
 								} else {
@@ -27609,7 +28455,7 @@ get_various_from_code = function (code, fill_code) {
 
 							case 'array':
 								various = '=' + '[];';
-								properties.type='Array';
+								properties.type = 'Array';
 								break;
 
 							case 'object':
@@ -27624,9 +28470,10 @@ get_various_from_code = function (code, fill_code) {
 										}
 										various += '\n' + code[++i];
 									}
-									m = various.replace(/\s*\/\/[^\n]*/g, '').replace(
-										/\/\*((.|\n)*?)\*\//g, '').replace(/}(.*)$/,
-										'}');
+									m = various
+										.replace(/\s*\/\/[^\n]*/g, '')
+										.replace(/\/\*((.|\n)*?)\*\//g, '')
+										.replace(/}(.*)$/,'}');
 									if (0 && m.length > 3)
 										library_namespace.log(name + '\n' + m
 									// + '\n'+v
@@ -27638,7 +28485,7 @@ get_various_from_code = function (code, fill_code) {
 										various = '=' + '{};';
 								} else
 									various = '=' + '{};';
-								properties.type='Object';
+								properties.type = 'Object';
 								break;
 
 							case 'regexp':
@@ -27647,10 +28494,11 @@ get_various_from_code = function (code, fill_code) {
 								else {
 									various = '=' + '/^regexp$/;	//	' + various;
 								}
-								properties.type='RegExp';
+								properties.type = 'RegExp';
 								break;
 
 							default:
+								//	TODO: T1|T2|..
 								if (/^[_a-zA-Z\d\$.]/.test(various)) {
 									// reference
 									various = ';//' + (properties.type ? '[' + properties.type + ']' : '')
@@ -27663,7 +28511,7 @@ get_various_from_code = function (code, fill_code) {
 								}
 						}
 
-						tmp_code.push((/^=/.test(various) ? '' : '//') + name + various);
+						tmp_code.push((/^=/.test(various) ? '' : '//') + handle_name() + various);
 					}
 				}
 
@@ -27675,7 +28523,7 @@ get_various_from_code = function (code, fill_code) {
 					name = name.split(library_namespace.env.module_name_separator);
 
 					//	對可能的錯誤發出警告
-					if (name[0] !== library_namespace.Class)
+					if (name[0] !== library_namespace.Class && !('deprecated' in properties))
 						library_namespace.warn(i + ': line [' + name.join(library_namespace.env.module_name_separator) + '] NOT initial as '+library_namespace.Class+'\n'
 								+ code.slice(i - 6, i + 6).join('\n'));
 
@@ -27756,8 +28604,8 @@ get_code_from_generated_various = function (ns, prefix, code_array) {
 
 
 	return (
-	CeL.code.reorganize
-);
+		CeL.code.reorganize
+	);
 };
 
 //===================================================

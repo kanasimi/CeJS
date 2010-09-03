@@ -197,6 +197,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.code.compatibility.html">CeL.code.compatibility</a></li>
 	
+	<li><a href="../symbols/CeL.code.debug.html">CeL.code.debug</a></li>
+	
 	<li><a href="../symbols/CeL.code.log.html">CeL.code.log</a></li>
 	
 	<li><a href="../symbols/CeL.code.reorganize.html">CeL.code.reorganize</a></li>
@@ -207,21 +209,27 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.data.XML.html">CeL.data.XML</a></li>
 	
-	<li><a href="../symbols/CeL.debug.html">CeL.debug</a></li>
-	
 	<li><a href="../symbols/CeL.IO.file.html">CeL.IO.file</a></li>
 	
 	<li><a href="../symbols/CeL.IO.Windows.file.html">CeL.IO.Windows.file</a></li>
 	
+	<li><a href="../symbols/CeL.locale.html">CeL.locale</a></li>
+	
 	<li><a href="../symbols/CeL.math.html">CeL.math</a></li>
 	
 	<li><a href="../symbols/CeL.math.Hamming.html">CeL.math.Hamming</a></li>
+	
+	<li><a href="../symbols/CeL.math.polynomial.html">CeL.math.polynomial</a></li>
 	
 	<li><a href="../symbols/CeL.math.quotient.html">CeL.math.quotient</a></li>
 	
 	<li><a href="../symbols/CeL.misc.check.html">CeL.misc.check</a></li>
 	
 	<li><a href="../symbols/CeL.native.html">CeL.native</a></li>
+	
+	<li><a href="../symbols/CeL.net.html">CeL.net</a></li>
+	
+	<li><a href="../symbols/CeL.net.Ajax.html">CeL.net.Ajax</a></li>
 	
 	<li><a href="../symbols/CeL.net.form.address.html">CeL.net.form.address</a></li>
 	
@@ -231,13 +239,21 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.net.form.select_input.html">CeL.net.form.select_input</a></li>
 	
+	<li><a href="../symbols/CeL.net.HTA.html">CeL.net.HTA</a></li>
+	
 	<li><a href="../symbols/CeL.net.map.html">CeL.net.map</a></li>
 	
 	<li><a href="../symbols/CeL.net.SVG.html">CeL.net.SVG</a></li>
 	
 	<li><a href="../symbols/CeL.net.web.html">CeL.net.web</a></li>
 	
-	<li><a href="../symbols/CeL.html#.OS.Windows">CeL.OS.Windows</a></li>
+	<li><a href="../symbols/CeL.OS.Windows.html">CeL.OS.Windows</a></li>
+	
+	<li><a href="../symbols/CeL.OS.Windows.job.html">CeL.OS.Windows.job</a></li>
+	
+	<li><a href="../symbols/CeL.OS.Windows.registry.html">CeL.OS.Windows.registry</a></li>
+	
+	<li><a href="../symbols/CeL.OS.WMI.html">CeL.OS.WMI</a></li>
 	
 	<li><a href="../symbols/env.html">env</a></li>
 	
@@ -309,9 +325,36 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">CeL.data.<b><a href="../symbols/CeL.data.html#.char_frequency">char_frequency</a></b>(text)
+								</div>
+								<div class="description">測出各字元的出現率。 普通使用字元@0-127：9-10,13,32-126，reduce後常用：9,32-95,97-125</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.data.<b><a href="../symbols/CeL.data.html#.count_word">count_word</a></b>(text, flag)
+								</div>
+								<div class="description">計算字數 word counts.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">CeL.data.<b><a href="../symbols/CeL.data.html#.dec_to_bin">dec_to_bin</a></b>(number, places)
 								</div>
 								<div class="description">運算式值的二進位表示法	已最佳化:5.82s/100000次dec_to_bin(20,8)@300(?)MHz,2.63s/100000次dec_to_bin(20)@300(?)MHz</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.data.<b><a href="../symbols/CeL.data.html#.same_length">same_length</a></b>(s1, s2)
+								</div>
+								<div class="description">test if 2 string is at the same length</div>
 							</td>
 						</tr>
 					
@@ -330,6 +373,15 @@ ul.inheritsList
 								<div class="fixedFont">CeL.data.<b><a href="../symbols/CeL.data.html#.split_String_to_Object">split_String_to_Object</a></b>(value_set, assignment_char, end_char)
 								</div>
 								<div class="description">將字串組分作 Object</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.data.<b><a href="../symbols/CeL.data.html#.to_SI_prefix">to_SI_prefix</a></b>(number, digits)
+								</div>
+								<div class="description">將數字轉為 K, M, G 等 SI prefixes 表示方式，例如 6458 轉成 6.31K。</div>
 							</td>
 						</tr>
 					
@@ -381,6 +433,98 @@ ul.inheritsList
 					Method Detail
 				</div>
 				
+					<a name=".char_frequency"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.data.</span><b>char_frequency</b>(text)
+					
+					</div>
+					<div class="description">
+						測出各字元的出現率。 普通使用字元@0-127：9-10,13,32-126，reduce後常用：9,32-95,97-125
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>text</b>
+									
+								</dt>
+								<dd>文檔</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name=".count_word"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.data.</span><b>count_word</b>(text, flag)
+					
+					</div>
+					<div class="description">
+						計算字數 word counts.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>text</b>
+									
+								</dt>
+								<dd>文檔</dd>
+							
+								<dt>
+									<b>flag</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name=".dec_to_bin"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
@@ -415,6 +559,55 @@ ul.inheritsList
 									
 								</dt>
 								<dd>places,字元數,使用前置0來填補回覆值</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name=".same_length"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.data.</span><b>same_length</b>(s1, s2)
+					
+					</div>
+					<div class="description">
+						test if 2 string is at the same length
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>s1</b>
+									
+								</dt>
+								<dd>string 1</dd>
+							
+								<dt>
+									<b>s2</b>
+									
+								</dt>
+								<dd>string 2</dd>
 							
 							</dl>
 						
@@ -554,6 +747,62 @@ ul.inheritsList
 						
 						
 
+					<hr />
+				
+					<a name=".to_SI_prefix"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.data.</span><b>to_SI_prefix</b>(number, digits)
+					
+					</div>
+					<div class="description">
+						將數字轉為 K, M, G 等 SI prefixes 表示方式，例如 6458 轉成 6.31K。
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>number</b>
+									
+								</dt>
+								<dd>數字</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>digits</b>
+									
+								</dt>
+								<dd>to fixed digit</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> SI prefixes 表示方式</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>setTool,to_fixed</dd>
+							
+							</dl>
+						
+						
+
 					
 				
 			
@@ -568,7 +817,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Tue Jul 06 2010 18:24:07 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Wed Jul 07 2010 07:38:45 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

@@ -197,6 +197,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.code.compatibility.html">CeL.code.compatibility</a></li>
 	
+	<li><a href="../symbols/CeL.code.debug.html">CeL.code.debug</a></li>
+	
 	<li><a href="../symbols/CeL.code.log.html">CeL.code.log</a></li>
 	
 	<li><a href="../symbols/CeL.code.reorganize.html">CeL.code.reorganize</a></li>
@@ -207,21 +209,27 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.data.XML.html">CeL.data.XML</a></li>
 	
-	<li><a href="../symbols/CeL.debug.html">CeL.debug</a></li>
-	
 	<li><a href="../symbols/CeL.IO.file.html">CeL.IO.file</a></li>
 	
 	<li><a href="../symbols/CeL.IO.Windows.file.html">CeL.IO.Windows.file</a></li>
 	
+	<li><a href="../symbols/CeL.locale.html">CeL.locale</a></li>
+	
 	<li><a href="../symbols/CeL.math.html">CeL.math</a></li>
 	
 	<li><a href="../symbols/CeL.math.Hamming.html">CeL.math.Hamming</a></li>
+	
+	<li><a href="../symbols/CeL.math.polynomial.html">CeL.math.polynomial</a></li>
 	
 	<li><a href="../symbols/CeL.math.quotient.html">CeL.math.quotient</a></li>
 	
 	<li><a href="../symbols/CeL.misc.check.html">CeL.misc.check</a></li>
 	
 	<li><a href="../symbols/CeL.native.html">CeL.native</a></li>
+	
+	<li><a href="../symbols/CeL.net.html">CeL.net</a></li>
+	
+	<li><a href="../symbols/CeL.net.Ajax.html">CeL.net.Ajax</a></li>
 	
 	<li><a href="../symbols/CeL.net.form.address.html">CeL.net.form.address</a></li>
 	
@@ -231,13 +239,21 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.net.form.select_input.html">CeL.net.form.select_input</a></li>
 	
+	<li><a href="../symbols/CeL.net.HTA.html">CeL.net.HTA</a></li>
+	
 	<li><a href="../symbols/CeL.net.map.html">CeL.net.map</a></li>
 	
 	<li><a href="../symbols/CeL.net.SVG.html">CeL.net.SVG</a></li>
 	
 	<li><a href="../symbols/CeL.net.web.html">CeL.net.web</a></li>
 	
-	<li><a href="../symbols/CeL.html#.OS.Windows">CeL.OS.Windows</a></li>
+	<li><a href="../symbols/CeL.OS.Windows.html">CeL.OS.Windows</a></li>
+	
+	<li><a href="../symbols/CeL.OS.Windows.job.html">CeL.OS.Windows.job</a></li>
+	
+	<li><a href="../symbols/CeL.OS.Windows.registry.html">CeL.OS.Windows.registry</a></li>
+	
+	<li><a href="../symbols/CeL.OS.WMI.html">CeL.OS.WMI</a></li>
 	
 	<li><a href="../symbols/env.html">env</a></li>
 	
@@ -291,6 +307,16 @@ ul.inheritsList
 						</tr>
 					
 						<tr>
+							<td class="attributes">&lt;constant&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/_global_.html#Class">Class</a></b>
+								</div>
+								<div class="description">JavaScript library framework main class name.</div>
+							</td>
+						</tr>
+					
+						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
 								<div class="fixedFont">
@@ -307,6 +333,16 @@ ul.inheritsList
 								<b><a href="../symbols/_global_.html#-post_execute">post_execute</a></b>
 								</div>
 								<div class="description">post_execute[module name] = module load 之後需要執行的函數。//post_execute[module name] 存在表示 load 之後需要執行 module[post_execute_function_name]當 require 時還未 load 的話，就只好等 load 之後再來設定這些東西了。TODO: 不過還是會有問題，因此需要設定 require 時必需已 load 之 module。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/_global_.html#prototype">prototype</a></b>
+								</div>
+								<div class="description">framework main prototype definitionfor JSDT: 有 prototype 才會將之當作 Class</div>
 							</td>
 						</tr>
 					
@@ -370,18 +406,18 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b>c</b>(r)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#Big5JPToUnicodeJP">Big5JPToUnicodeJP</a></b>(U)
 								</div>
-								<div class="description"></div>
+								<div class="description">將 BIG5 日文假名碼修改為 Unicode 日文假名</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#CIDR_to_IP">CIDR_to_IP</a></b>(CIDR, IP)
+								<div class="fixedFont"><b>c</b>(r)
 								</div>
-								<div class="description">get CIDR data</div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
@@ -469,6 +505,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_code_from_generated_various">get_code_from_generated_various</a></b>(ns, prefix, code_array)
+								</div>
+								<div class="description">把 get_various_from_code 生成的 namespace 轉成 code</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_file">get_file</a></b>(path, encoding)
 								</div>
 								<div class="description">Get file resource<br/>用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br/>除 Ajax，本函數亦可用在 CScript 執行中。</div>
@@ -526,6 +571,15 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_various">get_various</a></b>(various_name, name_space)
 								</div>
 								<div class="description">simple evaluates to get value of specified various identifier name.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_various_from_code">get_various_from_code</a></b>(code, fill_code)
+								</div>
+								<div class="description">get various from code</div>
 							</td>
 						</tr>
 					
@@ -649,6 +703,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#library_loader_by_registry">library_loader_by_registry</a></b>()
+								</div>
+								<div class="description">for 引用：　include library 自 registry 中的 path</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#mutual_division">mutual_division</a></b>(n1, n2, times)
 								</div>
 								<div class="description">輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數</div>
@@ -685,15 +748,6 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#parse_number">parse_number</a></b>(number)
-								</div>
-								<div class="description">轉換字串成數值，包括分數等。分數亦將轉為分數。</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#replace_function">replace_function</a></b>(name_space, function_name, new_function)
 								</div>
 								<div class="description">workaround.</div>
@@ -715,15 +769,6 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#set_debug">set_debug</a></b>(debug_level)
 								</div>
 								<div class="description">Set debugging level</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#set_net_info">set_net_info</a></b>(to_s, from)
-								</div>
-								<div class="description">改變網卡的IP地址: change IP, set IP</div>
 							</td>
 						</tr>
 					
@@ -766,15 +811,6 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#to_fixed">to_fixed</a></b>(digits, max)
-								</div>
-								<div class="description">取至小數 d 位，肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1。c.f.</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#to_rational_number">to_rational_number</a></b>(number, rate, max_no)
 								</div>
 								<div class="description">The best rational approximation.</div>
@@ -787,24 +823,6 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#to_RegExp_pattern">to_RegExp_pattern</a></b>(pattern, RegExp_flag, escape_pattern)
 								</div>
 								<div class="description">String pattern (e.g.</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#to_SI_prefix">to_SI_prefix</a></b>(number, digits)
-								</div>
-								<div class="description">將數字轉為 K, M, G 等 SI prefixes 表示方式，例如 6458 轉成 6.31K。</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#triggerToInput">triggerToInput</a></b>(to_input)
-								</div>
-								<div class="description">切換 [input] / inputted [span]</div>
 							</td>
 						</tr>
 					
@@ -878,6 +896,38 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="Class"> </a>
+					<div class="fixedFont">&lt;constant&gt; 
+					
+					
+					<b>Class</b>
+					
+					</div>
+					<div class="description">
+						JavaScript library framework main class name.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+							<dd><a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMA-262</a>: Object.Class: A string value indicating the kind of this object.</dd>
+							
+							</dl>
+						
+						
+
+					<hr />
+				
 					<a name="global_eval"> </a>
 					<div class="fixedFont">
 					
@@ -912,6 +962,31 @@ ul.inheritsList
 					</div>
 					<div class="description">
 						post_execute[module name] = module load 之後需要執行的函數。//post_execute[module name] 存在表示 load 之後需要執行 module[post_execute_function_name]當 require 時還未 load 的話，就只好等 load 之後再來設定這些東西了。TODO: 不過還是會有問題，因此需要設定 require 時必需已 load 之 module。
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="prototype"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>prototype</b>
+					
+					</div>
+					<div class="description">
+						framework main prototype definitionfor JSDT: 有 prototype 才會將之當作 Class
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -1149,6 +1224,59 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="Big5JPToUnicodeJP"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>Big5JPToUnicodeJP</b>(U)
+					
+					</div>
+					<div class="description">
+						將 BIG5 日文假名碼修改為 Unicode 日文假名
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_web.origin.js.html">web.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>U</b>
+									
+								</dt>
+								<dd>Unicode text</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>from Unicode 補完計畫 jrename.js</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
 					<a name="c"> </a>
 					<div class="fixedFont">
 					
@@ -1182,64 +1310,6 @@ ul.inheritsList
 						
 						
 						
-						
-						
-						
-
-					<hr />
-				
-					<a name="CIDR_to_IP"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>CIDR_to_IP</b>(CIDR, IP)
-					
-					</div>
-					<div class="description">
-						get CIDR data
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_OS_WMI.origin.js.html">WMI.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{Number}</span> <b>CIDR</b>
-									
-								</dt>
-								<dd>CIDR mask bits, 0~32</dd>
-							
-								<dt>
-									<span class="light fixedFont">{String}</span> <b>IP</b>
-									
-								</dt>
-								<dd>IPv4, e.g., 1.2.3.4</dd>
-							
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2010/4/21 22:56:16</dd>
-							</dl>
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd>CIDR data</dd>
-							
-							</dl>
 						
 						
 						
@@ -1783,6 +1853,70 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="get_code_from_generated_various"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{String}</span>
+					<b>get_code_from_generated_various</b>(ns, prefix, code_array)
+					
+					</div>
+					<div class="description">
+						把 get_various_from_code 生成的 namespace 轉成 code
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_reorganize.origin.js.html">reorganize.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Object}</span> <b>ns</b>
+									
+								</dt>
+								<dd>root namespace</dd>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>prefix</b>
+									<i>Optional</i>
+								</dt>
+								<dd>(TODO) prefix of root namespace</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Array}</span> <b>code_array</b>
+									<i>Optional</i>
+								</dt>
+								<dd>inner use, please don't specify this value.</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2009/12/20 14:51:52</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> code</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name="get_file"> </a>
 					<div class="fixedFont">
 					
@@ -2160,6 +2294,64 @@ ul.inheritsList
 							<dt class="heading">Returns:</dt>
 							
 								<dd>value of specified various identifier name</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="get_various_from_code"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{Object}</span>
+					<b>get_various_from_code</b>(code, fill_code)
+					
+					</div>
+					<div class="description">
+						get various from code
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_reorganize.origin.js.html">reorganize.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>code</b>
+									
+								</dt>
+								<dd>程式碼</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Boolean}</span> <b>fill_code</b>
+									
+								</dt>
+								<dd>(TODO) 不只是定義，在 .code 填入程式碼。</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2009/12/5 15:04:42, 2009/12/20 14:33:30</dd>
+							</dl>
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Object}</span> root namespace</dd>
 							
 							</dl>
 						
@@ -2862,6 +3054,40 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="library_loader_by_registry"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>library_loader_by_registry</b>()
+					
+					</div>
+					<div class="description">
+						for 引用：　include library 自 registry 中的 path
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_reorganize.origin.js.html">reorganize.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2009/11/25 22:59:02</dd>
+							</dl>
+							</dl>
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="mutual_division"> </a>
 					<div class="fixedFont">
 					
@@ -3098,52 +3324,6 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="parse_number"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>parse_number</b>(number)
-					
-					</div>
-					<div class="description">
-						轉換字串成數值，包括分數等。分數亦將轉為分數。
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_native.origin.js.html">native.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{String}</span> <b>number</b>
-									
-								</dt>
-								<dd>欲轉換之值</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd></dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
 					<a name="replace_function"> </a>
 					<div class="fixedFont">
 					
@@ -3277,7 +3457,7 @@ ul.inheritsList
 					<a name="set_debug"> </a>
 					<div class="fixedFont">
 					
-					<span class="light">{Integral}</span>
+					<span class="light">{Integer}</span>
 					<b>set_debug</b>(debug_level)
 					
 					</div>
@@ -3297,7 +3477,7 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<span class="light fixedFont">{Integral}</span> <b>debug_level</b>
+									<span class="light fixedFont">{Integer}</span> <b>debug_level</b>
 									<i>Optional</i>
 								</dt>
 								<dd>The debugging level to set.</dd>
@@ -3316,75 +3496,6 @@ ul.inheritsList
 							</dl>
 						
 						
-						
-
-					<hr />
-				
-					<a name="set_net_info"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>set_net_info</b>(to_s, from)
-					
-					</div>
-					<div class="description">
-						改變網卡的IP地址: change IP, set IP
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_OS_WMI.origin.js.html">WMI.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-					<pre class="code">set_net_info({IP:'163.16.20.212',Gateway:254});sl(set_net_info({IP:'163.16.20.30',Gateway:254}));WScript.Quit();</pre>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<b>to_s</b>
-									
-								</dt>
-								<dd>IP or {IP:''||[], CIDR:24||.CIDR_notation, Subnet:''||[], DNS:''||[], Gateway:254||[], GatewayOrder:''||[]}</dd>
-							
-								<dt>
-									<b>from</b>
-									
-								</dt>
-								<dd>IP or netif No.</dd>
-							
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Since:</dt>
-								<dd>2009/5/7 0:24:5	加強2010/3/3 10:41:17	a work version</dd>
-							</dl>
-							</dl>
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Requires:</dt>
-							
-								<dd>getWMIData,VBA,JSArrayToSafeArray,CIDR_to_IP</dd>
-							
-							</dl>
-						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd><a href="http://msdn.microsoft.com/en-us/library/aa394217%28VS.85%29.aspx" accessdate="2010/3/3 13:15">Win32_NetworkAdapterConfiguration Class (Windows)</a><a href="http://www.yongfa365.com/item/Use-WMi-Change-IP-VBS-yongfa365.html" accessdate="2010/3/3 13:14">通过 WMI 改变网卡的IP地址 ChangeIP.vbs - 柳永法(yongfa365)'Blog</a><a href="http://www.microsoft.com/technet/scriptcenter/topics/networking/01_atnc_intro.mspx">Automating TCP/IP Networking on Clients: Part 1: Introduction</a><a href="http://www.dotblogs.com.tw/PowerHammer/archive/2008/03/24/2060.aspx" accessdate="2010/3/3 13:15">使用 WMI 更改IP、子網路遮罩、閘道、DNS - 強力鎯頭 VB BLOG - 點部落</a>Using NetSh.exe (no reboot required): <a href="http://techsupt.winbatch.com/webcgi/webbatch.exe?techsupt/tsleft.web+WinBatch/How~To+Change~Ip~Address.txt" accessdate="2010/3/3 13:12">WWW Tech Support/WinBatch/How To\Change Ip Address.txt</a></dd>
-							
-							</dl>
 						
 
 					<hr />
@@ -3595,69 +3706,6 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="to_fixed"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>to_fixed</b>(digits, max)
-					
-					</div>
-					<div class="description">
-						取至小數 d 位，肇因： JScript即使在做加減運算時，有時還是會出現 1.4000000000000001、0.0999999999999998 等數值。此函數可取至 1.4 與 0.1。c.f., round()
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_native.origin.js.html">native.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-					<pre class="code"></pre>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{Number}</span> <b>digits</b>
-									
-								</dt>
-								<dd>1,2,..: number of decimal places shown</dd>
-							
-								<dt>
-									<span class="light fixedFont">{Number}</span> <b>max</b>
-									<i>Optional</i>
-								</dt>
-								<dd>max digits	max===0:round() else floor()</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd></dd>
-							
-							</dl>
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">See:</dt>
-							
-								<dd>https://bugzilla.mozilla.org/show_bug.cgi?id=5856IEEE754の丸め演算は最も報告されるES3「バグ」である。http://www.jibbering.com/faq/#FAQ4_6http://en.wikipedia.org/wiki/Rounding</dd>
-							
-							</dl>
-						
-
-					<hr />
-				
 					<a name="to_rational_number"> </a>
 					<div class="fixedFont">
 					
@@ -3784,111 +3832,6 @@ ul.inheritsList
 							<dt class="heading">Returns:</dt>
 							
 								<dd><span class="light fixedFont">{RegExp}</span> RegExp object</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name="to_SI_prefix"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>to_SI_prefix</b>(number, digits)
-					
-					</div>
-					<div class="description">
-						將數字轉為 K, M, G 等 SI prefixes 表示方式，例如 6458 轉成 6.31K。
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_data.origin.js.html">data.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{Number}</span> <b>number</b>
-									
-								</dt>
-								<dd>數字</dd>
-							
-								<dt>
-									<span class="light fixedFont">{Number}</span> <b>digits</b>
-									
-								</dt>
-								<dd>to fixed digit</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd><span class="light fixedFont">{String}</span> SI prefixes 表示方式</dd>
-							
-							</dl>
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Requires:</dt>
-							
-								<dd>setTool,to_fixed</dd>
-							
-							</dl>
-						
-						
-
-					<hr />
-				
-					<a name="triggerToInput"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>triggerToInput</b>(to_input)
-					
-					</div>
-					<div class="description">
-						切換 [input] / inputted [span]
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_form_select_input.origin.js.html">select_input.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{Boolean|undefined}</span> <b>to_input</b>
-									
-								</dt>
-								<dd>切換至 input or not. default: 切換至 [input]</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd></dd>
 							
 							</dl>
 						
@@ -4102,7 +4045,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Tue Jul 06 2010 18:24:06 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Wed Jul 07 2010 07:38:45 GMT+0800 (CST)
 		</div>
 	</body>
 </html>
