@@ -96,7 +96,7 @@
 <span class='line'> 89</span> // and security blocked creation of the objects.
 <span class='line'> 90</span>  ;//else..
 <span class='line'> 91</span> @end@*/</span><span class="WHIT">
-<span class='line'> 92</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 92</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'> 93</span> 
 <span class='line'> 94</span> 
 <span class='line'> 95</span> 
@@ -143,7 +143,7 @@
 <span class='line'>136</span> 
 <span class='line'>137</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">o</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>138</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="COMM">//catch(e){}</span><span class="WHIT">
-<span class='line'>139</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>139</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>140</span> </span><span class="COMM">//a=addUser();for(i in a){d=[];for(j in a[i])d.push(j+': '+a[i][j]);alert(d.join('\n'));}</span><span class="WHIT">
 <span class='line'>141</span> 
 <span class='line'>142</span> 
@@ -209,109 +209,138 @@
 <span class='line'>202</span> </span><span class="WHIT"> </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">j.Count</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">+</span><span class="PUNC">=</span><span class="NUMB">2</span><span class="PUNC">)</span><span class="NAME">NetDrive</span><span class="PUNC">[</span><span class="NAME">j.Item</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="NAME">j.Item</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="STRN">'Volatile'</span><span class="PUNC">+</span><span class="NAME">k</span><span class="PUNC">++</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">NetDrive</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">/</span><span class="NUMB">2</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">j.Item</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">+</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>203</span> </span><span class="WHIT"> </span><span class="NAME">j</span><span class="PUNC">=</span><span class="NAME">o.EnumPrinterConnections</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">k</span><span class="PUNC">=</span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>204</span> </span><span class="WHIT"> </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">j.Count</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">+</span><span class="PUNC">=</span><span class="NUMB">2</span><span class="PUNC">)</span><span class="NAME">NetPrinter</span><span class="PUNC">[</span><span class="NAME">j.Item</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">)</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">NetPrinter</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">/</span><span class="NUMB">2</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">j.Item</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">+</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>205</span> </span><span class="PUNC">}</span><span class="WHIT">	</span><span class="COMM">//	function getEnvironment()</span><span class="WHIT">
+<span class='line'>205</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	function getEnvironment()</span><span class="WHIT">
 <span class='line'>206</span> 
 <span class='line'>207</span> 
 <span class='line'>208</span> 
 <span class='line'>209</span> 
-<span class='line'>210</span> </span><span class="COMM">//	VB的Nothing</span><span class="WHIT">
-<span class='line'>211</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">VBNothing</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>212</span> </span><span class="WHIT"> </span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>213</span> </span><span class="WHIT">  </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">rs</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">"ADODB.RecordSet"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>214</span> </span><span class="WHIT">  </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">rs.ActiveConnection</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>215</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>216</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>217</span> 
-<span class='line'>218</span> </span><span class="COMM">//	VB的array</span><span class="WHIT">
-<span class='line'>219</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">VBA</span><span class="PUNC">(</span><span class="NAME">vba</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>220</span> </span><span class="WHIT"> </span><span class="KEYW">try</span><span class="PUNC">{</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">VBArray</span><span class="PUNC">(</span><span class="NAME">vba</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">toArray</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>221</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>222</span> 
-<span class='line'>223</span> </span><span class="COMM">//	SafeArrayToJSArray: plaese use new VBArray()	http://www.microsoft.com/japan/msdn/japan/msdn/library/ja/script56/html/js56jsobjvbarray.asp</span><span class="WHIT">
-<span class='line'>224</span> </span><span class="COMM">//	VB的SafeArray	JScriptの配列は実際にはCSV文字列だったりする。VBScriptのvartypeに食わせると8(VT_STRING)が返ってくることからもわかる。</span><span class="WHIT">
-<span class='line'>225</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">JSArrayToSafeArray</span><span class="PUNC">(</span><span class="NAME">ar</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>226</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">ar</span><span class="PUNC">!=</span><span class="STRN">'object'</span><span class="PUNC">)</span><span class="NAME">ar</span><span class="PUNC">=</span><span class="PUNC">[</span><span class="NAME">ar</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>227</span> </span><span class="WHIT"> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">dic</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">"Scripting.Dictionary"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>228</span> </span><span class="WHIT"> </span><span class="KEYW">for</span><span class="PUNC">(</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">&lt;</span><span class="NAME">ar.length</span><span class="PUNC">;</span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="NAME">dic.add</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">,</span><span class="NAME">ar</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>229</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">dic.items</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>230</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>231</span> 
-<span class='line'>232</span> 
-<span class='line'>233</span> 
-<span class='line'>234</span> 
-<span class='line'>235</span> </span><span class="COMM">/*	http://www.eggheadcafe.com/forumarchives/scriptingVisualBasicscript/Mar2006/post26047035.asp
-<span class='line'>236</span> 	Application.DoEvents();
-<span class='line'>237</span> */</span><span class="WHIT">
-<span class='line'>238</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">DoEvents</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>239</span> </span><span class="WHIT"> </span><span class="COMM">//Triggers screen updates in an HTA...</span><span class="WHIT">
-<span class='line'>240</span> </span><span class="WHIT"> </span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>241</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">DoEvents.w</span><span class="PUNC">)</span><span class="NAME">DoEvents.w</span><span class="PUNC">=</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WshShell</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="PUNC">?</span><span class="NAME">WshShell</span><span class="PUNC">:</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">"WScript.Shell"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>242</span> </span><span class="WHIT">  </span><span class="NAME">DoEvents.w.Run</span><span class="PUNC">(</span><span class="STRN">"%COMSPEC% /c exit"</span><span class="PUNC">,</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="KEYW">true</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>243</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>244</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>245</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">DoNothing</span><span class="PUNC">=</span><span class="NAME">DoEvents</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>246</span> 
-<span class='line'>247</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Sleep</span><span class="PUNC">(</span><span class="NAME">_sec</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>248</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">_sec</span><span class="PUNC">)</span><span class="PUNC">||</span><span class="NAME">_sec</span><span class="PUNC">&lt;</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="NAME">_sec</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>249</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WScript</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="PUNC">)</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="NAME">WScript.Sleep</span><span class="PUNC">(</span><span class="NAME">_sec</span><span class="PUNC">*</span><span class="NUMB">1</span><span class="NAME">e3</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">	</span><span class="COMM">//	Win98的JScript沒有WScript.Sleep</span><span class="WHIT">
-<span class='line'>250</span> </span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="COMM">//if(typeof window!='object')</span><span class="WHIT">
-<span class='line'>251</span> </span><span class="WHIT">  </span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>252</span> </span><span class="WHIT">   </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">Sleep.w</span><span class="PUNC">)</span><span class="NAME">Sleep.w</span><span class="PUNC">=</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WshShell</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="PUNC">?</span><span class="NAME">WshShell</span><span class="PUNC">:</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">"WScript.Shell"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>253</span> </span><span class="WHIT">   </span><span class="NAME">Sleep.w.Run</span><span class="PUNC">(</span><span class="NAME">_sec</span><span class="PUNC">?</span><span class="STRN">"%COMSPEC% /c ping -n "</span><span class="PUNC">+</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">+</span><span class="NAME">_sec</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="STRN">" 127.0.0.1>nul 2>nul"</span><span class="PUNC">:</span><span class="STRN">"%COMSPEC% /c exit"</span><span class="PUNC">,</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="KEYW">true</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>254</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>255</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>256</span> 
-<span class='line'>257</span> 
-<span class='line'>258</span> 
-<span class='line'>259</span> 
+<span class='line'>210</span> </span><span class="NAME">CeL.OS.Windows</span><span class="WHIT">
+<span class='line'>211</span> </span><span class="PUNC">.</span><span class="WHIT">
+<span class='line'>212</span> </span><span class="COMM">/**
+<span class='line'>213</span>  * 取得 VB 的 Nothing
+<span class='line'>214</span>  * @returns	VB 的 Nothing
+<span class='line'>215</span>  * @memberOf	CeL.OS.Windows
+<span class='line'>216</span>  */</span><span class="WHIT">
+<span class='line'>217</span> </span><span class="NAME">VBNothing</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>218</span> </span><span class="WHIT">	</span><span class="KEYW">try</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>219</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">"ADODB.RecordSet"</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">ActiveConnection</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>220</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">catch</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>221</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>222</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>223</span> 
+<span class='line'>224</span> </span><span class="NAME">CeL.OS.Windows</span><span class="WHIT">
+<span class='line'>225</span> </span><span class="PUNC">.</span><span class="WHIT">
+<span class='line'>226</span> </span><span class="COMM">/**
+<span class='line'>227</span>  * 轉換 VB 的 Safe Array 成為 JS Array.
+<span class='line'>228</span>  * @param vba	VB 的 array
+<span class='line'>229</span>  * @returns
+<span class='line'>230</span>  * @memberOf	CeL.OS.Windows
+<span class='line'>231</span>  */</span><span class="WHIT">
+<span class='line'>232</span> </span><span class="NAME">VBA_to_JSA</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">vba</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>233</span> </span><span class="WHIT">	</span><span class="KEYW">try</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>234</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">VBArray</span><span class="PUNC">(</span><span class="NAME">vba</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">toArray</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>235</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">catch</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>236</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>237</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>238</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>239</span> 
+<span class='line'>240</span> </span><span class="NAME">CeL.OS.Windows</span><span class="WHIT">
+<span class='line'>241</span> </span><span class="PUNC">.</span><span class="WHIT">
+<span class='line'>242</span> </span><span class="COMM">/**
+<span class='line'>243</span>  * 轉換JS Array成為VB的Safe Array.
+<span class='line'>244</span>  * Safe Array To JS Array: plaese use new VBArray().
+<span class='line'>245</span>  * JScriptの配列は実際にはCSV文字列だったりする。VBScriptのvartypeに食わせると8(VT_STRING)が返ってくることからもわかる。
+<span class='line'>246</span>  * @param array
+<span class='line'>247</span>  * @returns
+<span class='line'>248</span>  * @see
+<span class='line'>249</span>  * http://www.microsoft.com/japan/msdn/japan/msdn/library/ja/script56/html/js56jsobjvbarray.asp
+<span class='line'>250</span>  * @memberOf	CeL.OS.Windows
+<span class='line'>251</span>  */</span><span class="WHIT">
+<span class='line'>252</span> </span><span class="NAME">JSA_to_VBA</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">array</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>253</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">array</span><span class="WHIT"> </span><span class="PUNC">!=</span><span class="WHIT"> </span><span class="STRN">'object'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>254</span> </span><span class="WHIT">		</span><span class="NAME">array</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="WHIT"> </span><span class="NAME">array</span><span class="WHIT"> </span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>255</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">dic</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">"Scripting.Dictionary"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>256</span> </span><span class="WHIT">	</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">array.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>257</span> </span><span class="WHIT">		</span><span class="NAME">dic.add</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">array</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>258</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">dic.items</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>259</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>260</span> 
-<span class='line'>261</span> </span><span class="COMM">/*	送key到application	http://msdn.microsoft.com/library/en-us/script56/html/wsmthsendkeys.asp
-<span class='line'>262</span> 	SendKeys('a')	送a
-<span class='line'>263</span> 	SendKeys("a{1}4{2}5");	送a,等1/10s,送4,等2/10s,送5
-<span class='line'>264</span> 	timeOut:	&lt;0:loop, 0 or not set:1 time, >0:be the time(ms)
-<span class='line'>265</span> */</span><span class="WHIT">
-<span class='line'>266</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">SendKeysU</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>267</span> </span><span class="NAME">SendKeys</span><span class="PUNC">[</span><span class="NAME">generateCode.dLK</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'Sleep'</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>268</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">SendKeys</span><span class="PUNC">(</span><span class="NAME">keys</span><span class="PUNC">,</span><span class="NAME">appTitle</span><span class="PUNC">,</span><span class="NAME">timeOut</span><span class="PUNC">,</span><span class="NAME">timeInterval</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>269</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WshShell</span><span class="PUNC">!=</span><span class="STRN">'object'</span><span class="PUNC">||</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WshShell</span><span class="PUNC">!=</span><span class="STRN">'object'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">WshShell</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">"WScript.Shell"</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">!=</span><span class="STRN">'object'</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>270</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">timeInterval</span><span class="PUNC">)</span><span class="PUNC">||</span><span class="NAME">timeInterval</span><span class="PUNC">&lt;</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="NAME">timeInterval</span><span class="PUNC">=</span><span class="NUMB">100</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	時間間隔</span><span class="WHIT">
-<span class='line'>271</span> </span><span class="WHIT"> </span><span class="NAME">timeOut</span><span class="PUNC">=</span><span class="NAME">timeOut</span><span class="PUNC">?</span><span class="NAME">timeOut</span><span class="PUNC">&lt;</span><span class="NUMB">0</span><span class="PUNC">?</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">:</span><span class="NAME">Math.floor</span><span class="PUNC">(</span><span class="NAME">timeOut</span><span class="PUNC">/</span><span class="NAME">timeInterval</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="NUMB">1</span><span class="PUNC">:</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>272</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">appTitle</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>273</span> </span><span class="WHIT">  </span><span class="KEYW">while</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">WshShell.AppActivate</span><span class="PUNC">(</span><span class="NAME">appTitle</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>274</span> </span><span class="WHIT">   </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">timeOut</span><span class="PUNC">--</span><span class="PUNC">)</span><span class="NAME">Sleep</span><span class="PUNC">(</span><span class="NAME">timeInterval</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NUMB">2</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>275</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">SendKeysU</span><span class="PUNC">)</span><span class="NAME">SendKeysU</span><span class="PUNC">=</span><span class="NUMB">100</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	時間間隔單位</span><span class="WHIT">
-<span class='line'>276</span> </span><span class="WHIT"> </span><span class="KEYW">while</span><span class="PUNC">(</span><span class="NAME">keys.match</span><span class="PUNC">(</span><span class="REGX">/\{([.\d]+)\}/</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>277</span> </span><span class="WHIT">  </span><span class="NAME">WshShell.SendKeys</span><span class="PUNC">(</span><span class="NAME">keys.substr</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">RegExp.index</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>278</span> </span><span class="WHIT">  </span><span class="NAME">Sleep</span><span class="PUNC">(</span><span class="NAME">SendKeysU</span><span class="PUNC">*</span><span class="NAME">RegExp.$1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>279</span> </span><span class="WHIT">  </span><span class="NAME">keys</span><span class="PUNC">=</span><span class="NAME">keys.substr</span><span class="PUNC">(</span><span class="NAME">RegExp.lastIndex</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>280</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>281</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">WshShell.SendKeys</span><span class="PUNC">(</span><span class="NAME">keys</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>282</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>283</span> 
-<span class='line'>284</span> 
+<span class='line'>261</span> 
+<span class='line'>262</span> 
+<span class='line'>263</span> 
+<span class='line'>264</span> </span><span class="COMM">/*	http://www.eggheadcafe.com/forumarchives/scriptingVisualBasicscript/Mar2006/post26047035.asp
+<span class='line'>265</span> 	Application.DoEvents();
+<span class='line'>266</span> */</span><span class="WHIT">
+<span class='line'>267</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">DoEvents</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>268</span> </span><span class="WHIT"> </span><span class="COMM">//Triggers screen updates in an HTA...</span><span class="WHIT">
+<span class='line'>269</span> </span><span class="WHIT"> </span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>270</span> </span><span class="WHIT">  </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">DoEvents.w</span><span class="PUNC">)</span><span class="NAME">DoEvents.w</span><span class="PUNC">=</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WshShell</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="PUNC">?</span><span class="NAME">WshShell</span><span class="PUNC">:</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">"WScript.Shell"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>271</span> </span><span class="WHIT">  </span><span class="NAME">DoEvents.w.Run</span><span class="PUNC">(</span><span class="STRN">"%COMSPEC% /c exit"</span><span class="PUNC">,</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="KEYW">true</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>272</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>273</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>274</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">DoNothing</span><span class="PUNC">=</span><span class="NAME">DoEvents</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>275</span> 
+<span class='line'>276</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">Sleep</span><span class="PUNC">(</span><span class="NAME">_sec</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>277</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">_sec</span><span class="PUNC">)</span><span class="PUNC">||</span><span class="NAME">_sec</span><span class="PUNC">&lt;</span><span class="NUMB">0</span><span class="PUNC">)</span><span class="NAME">_sec</span><span class="PUNC">=</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>278</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WScript</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="PUNC">)</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="NAME">WScript.Sleep</span><span class="PUNC">(</span><span class="NAME">_sec</span><span class="PUNC">*</span><span class="NUMB">1</span><span class="NAME">e3</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">	</span><span class="COMM">//	Win98的JScript沒有WScript.Sleep</span><span class="WHIT">
+<span class='line'>279</span> </span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="COMM">//if(typeof window!='object')</span><span class="WHIT">
+<span class='line'>280</span> </span><span class="WHIT">  </span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>281</span> </span><span class="WHIT">   </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">Sleep.w</span><span class="PUNC">)</span><span class="NAME">Sleep.w</span><span class="PUNC">=</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WshShell</span><span class="PUNC">==</span><span class="STRN">'object'</span><span class="PUNC">?</span><span class="NAME">WshShell</span><span class="PUNC">:</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">"WScript.Shell"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>282</span> </span><span class="WHIT">   </span><span class="NAME">Sleep.w.Run</span><span class="PUNC">(</span><span class="NAME">_sec</span><span class="PUNC">?</span><span class="STRN">"%COMSPEC% /c ping -n "</span><span class="PUNC">+</span><span class="PUNC">(</span><span class="NUMB">1</span><span class="PUNC">+</span><span class="NAME">_sec</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="STRN">" 127.0.0.1>nul 2>nul"</span><span class="PUNC">:</span><span class="STRN">"%COMSPEC% /c exit"</span><span class="PUNC">,</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="KEYW">true</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>283</span> </span><span class="WHIT">  </span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>284</span> </span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'>285</span> 
 <span class='line'>286</span> 
-<span class='line'>287</span> </span><span class="COMM">// Create an object reference: hack?!</span><span class="WHIT">
-<span class='line'>288</span> </span><span class="COMM">//var windows=new WScript();</span><span class="WHIT">
-<span class='line'>289</span> </span><span class="COMM">// Run the calculator program</span><span class="WHIT">
-<span class='line'>290</span> </span><span class="COMM">//windows.explorer.run('calc.exe');</span><span class="WHIT">
-<span class='line'>291</span> </span><span class="COMM">// Writing the local computer name to the screen</span><span class="WHIT">
-<span class='line'>292</span> </span><span class="COMM">//document.write(windows.network.computerName);</span><span class="WHIT">
-<span class='line'>293</span> </span><span class="COMM">// Copy files from one folder to another</span><span class="WHIT">
-<span class='line'>294</span> </span><span class="COMM">//windows.fileSystem.copyFile('c:\\mydocuments\\*.txt', 'c:\\tempfolder\\');</span><span class="WHIT">
-<span class='line'>295</span> 
-<span class='line'>296</span> 
-<span class='line'>297</span> 
-<span class='line'>298</span> 
-<span class='line'>299</span> 
-<span class='line'>300</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT">
-<span class='line'>301</span> </span><span class="WHIT">	</span><span class="NAME">CeL.OS.Windows</span><span class="WHIT">
-<span class='line'>302</span> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>303</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>304</span> 
-<span class='line'>305</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
-<span class='line'>306</span> 
-<span class='line'>307</span> </span><span class="NAME">CeL.setup_module</span><span class="PUNC">(</span><span class="NAME">module_name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>308</span> 
-<span class='line'>309</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>310</span> </span></pre></body></html>
+<span class='line'>287</span> 
+<span class='line'>288</span> 
+<span class='line'>289</span> 
+<span class='line'>290</span> </span><span class="COMM">/*	送key到application	http://msdn.microsoft.com/library/en-us/script56/html/wsmthsendkeys.asp
+<span class='line'>291</span> 	SendKeys('a')	送a
+<span class='line'>292</span> 	SendKeys("a{1}4{2}5");	送a,等1/10s,送4,等2/10s,送5
+<span class='line'>293</span> 	timeOut:	&lt;0:loop, 0 or not set:1 time, >0:be the time(ms)
+<span class='line'>294</span> */</span><span class="WHIT">
+<span class='line'>295</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">SendKeysU</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>296</span> </span><span class="NAME">SendKeys</span><span class="PUNC">[</span><span class="NAME">generateCode.dLK</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="STRN">'Sleep'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>297</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">SendKeys</span><span class="PUNC">(</span><span class="NAME">keys</span><span class="PUNC">,</span><span class="NAME">appTitle</span><span class="PUNC">,</span><span class="NAME">timeOut</span><span class="PUNC">,</span><span class="NAME">timeInterval</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>298</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WshShell</span><span class="PUNC">!=</span><span class="STRN">'object'</span><span class="PUNC">||</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">WshShell</span><span class="PUNC">!=</span><span class="STRN">'object'</span><span class="PUNC">&&</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">WshShell</span><span class="PUNC">=</span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">ActiveXObject</span><span class="PUNC">(</span><span class="STRN">"WScript.Shell"</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">!=</span><span class="STRN">'object'</span><span class="PUNC">)</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>299</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">isNaN</span><span class="PUNC">(</span><span class="NAME">timeInterval</span><span class="PUNC">)</span><span class="PUNC">||</span><span class="NAME">timeInterval</span><span class="PUNC">&lt;</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="NAME">timeInterval</span><span class="PUNC">=</span><span class="NUMB">100</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	時間間隔</span><span class="WHIT">
+<span class='line'>300</span> </span><span class="WHIT"> </span><span class="NAME">timeOut</span><span class="PUNC">=</span><span class="NAME">timeOut</span><span class="PUNC">?</span><span class="NAME">timeOut</span><span class="PUNC">&lt;</span><span class="NUMB">0</span><span class="PUNC">?</span><span class="PUNC">-</span><span class="NUMB">1</span><span class="PUNC">:</span><span class="NAME">Math.floor</span><span class="PUNC">(</span><span class="NAME">timeOut</span><span class="PUNC">/</span><span class="NAME">timeInterval</span><span class="PUNC">)</span><span class="PUNC">+</span><span class="NUMB">1</span><span class="PUNC">:</span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>301</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">appTitle</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>302</span> </span><span class="WHIT">  </span><span class="KEYW">while</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">WshShell.AppActivate</span><span class="PUNC">(</span><span class="NAME">appTitle</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>303</span> </span><span class="WHIT">   </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="NAME">timeOut</span><span class="PUNC">--</span><span class="PUNC">)</span><span class="NAME">Sleep</span><span class="PUNC">(</span><span class="NAME">timeInterval</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NUMB">2</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>304</span> </span><span class="WHIT"> </span><span class="KEYW">if</span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">SendKeysU</span><span class="PUNC">)</span><span class="NAME">SendKeysU</span><span class="PUNC">=</span><span class="NUMB">100</span><span class="PUNC">;</span><span class="WHIT">	</span><span class="COMM">//	時間間隔單位</span><span class="WHIT">
+<span class='line'>305</span> </span><span class="WHIT"> </span><span class="KEYW">while</span><span class="PUNC">(</span><span class="NAME">keys.match</span><span class="PUNC">(</span><span class="REGX">/\{([.\d]+)\}/</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>306</span> </span><span class="WHIT">  </span><span class="NAME">WshShell.SendKeys</span><span class="PUNC">(</span><span class="NAME">keys.substr</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="NAME">RegExp.index</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>307</span> </span><span class="WHIT">  </span><span class="NAME">Sleep</span><span class="PUNC">(</span><span class="NAME">SendKeysU</span><span class="PUNC">*</span><span class="NAME">RegExp.$1</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>308</span> </span><span class="WHIT">  </span><span class="NAME">keys</span><span class="PUNC">=</span><span class="NAME">keys.substr</span><span class="PUNC">(</span><span class="NAME">RegExp.lastIndex</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>309</span> </span><span class="WHIT"> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>310</span> </span><span class="WHIT"> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">WshShell.SendKeys</span><span class="PUNC">(</span><span class="NAME">keys</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>311</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>312</span> 
+<span class='line'>313</span> 
+<span class='line'>314</span> 
+<span class='line'>315</span> 
+<span class='line'>316</span> </span><span class="COMM">// Create an object reference: hack?!</span><span class="WHIT">
+<span class='line'>317</span> </span><span class="COMM">//var windows=new WScript();</span><span class="WHIT">
+<span class='line'>318</span> </span><span class="COMM">// Run the calculator program</span><span class="WHIT">
+<span class='line'>319</span> </span><span class="COMM">//windows.explorer.run('calc.exe');</span><span class="WHIT">
+<span class='line'>320</span> </span><span class="COMM">// Writing the local computer name to the screen</span><span class="WHIT">
+<span class='line'>321</span> </span><span class="COMM">//document.write(windows.network.computerName);</span><span class="WHIT">
+<span class='line'>322</span> </span><span class="COMM">// Copy files from one folder to another</span><span class="WHIT">
+<span class='line'>323</span> </span><span class="COMM">//windows.fileSystem.copyFile('c:\\mydocuments\\*.txt', 'c:\\tempfolder\\');</span><span class="WHIT">
+<span class='line'>324</span> 
+<span class='line'>325</span> 
+<span class='line'>326</span> 
+<span class='line'>327</span> 
+<span class='line'>328</span> 
+<span class='line'>329</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT">
+<span class='line'>330</span> </span><span class="WHIT">	</span><span class="NAME">CeL.OS.Windows</span><span class="WHIT">
+<span class='line'>331</span> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>332</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>333</span> 
+<span class='line'>334</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
+<span class='line'>335</span> 
+<span class='line'>336</span> </span><span class="NAME">CeL.setup_module</span><span class="PUNC">(</span><span class="NAME">module_name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>337</span> 
+<span class='line'>338</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>339</span> </span></pre></body></html>

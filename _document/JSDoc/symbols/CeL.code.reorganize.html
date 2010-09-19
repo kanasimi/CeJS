@@ -209,6 +209,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.data.XML.html">CeL.data.XML</a></li>
 	
+	<li><a href="../symbols/CeL.env.html">CeL.env</a></li>
+	
 	<li><a href="../symbols/CeL.IO.file.html">CeL.IO.file</a></li>
 	
 	<li><a href="../symbols/CeL.IO.Windows.file.html">CeL.IO.Windows.file</a></li>
@@ -255,8 +257,6 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.OS.WMI.html">CeL.OS.WMI</a></li>
 	
-	<li><a href="../symbols/env.html">env</a></li>
-	
 </ul>
 <hr />
 			<!-- end publish.classesIndex -->
@@ -274,7 +274,7 @@ ul.inheritsList
 				
 				
 			
-				程式碼重整相關之 function。
+				程式碼重整重構相關之 functions。
 				
 				
 					<br /><i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_reorganize.origin.js.html">reorganize.origin.js</a>.
@@ -309,6 +309,96 @@ ul.inheritsList
 			
 
 <!-- ============================== methods summary ======================== -->
+			
+				
+				
+				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class CeL.code.reorganize.">
+					<caption>Method Summary</caption>
+					<thead>
+						<tr>
+							<th scope="col">Method Attributes</th>
+							<th scope="col">Method Name and Description</th>
+						</tr>
+					</thead>
+					<tbody>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.code.reorganize.<b><a href="../symbols/CeL.code.reorganize.html#.destory_script">destory_script</a></b>(code, addFN)
+								</div>
+								<div class="description">script終結者…</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.code.reorganize.<b><a href="../symbols/CeL.code.reorganize.html#.generate_code">generate_code</a></b>(Vlist, new_line, direct_input)
+								</div>
+								<div class="description">利用[*現有的環境*]及變數設定生成code，因此並不能完全重現所有設定，也無法判別函數間的相依關係。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.code.reorganize.<b><a href="../symbols/CeL.code.reorganize.html#.get_all_functions">get_all_functions</a></b>(script_filename)
+								</div>
+								<div class="description">取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.code.reorganize.<b><a href="../symbols/CeL.code.reorganize.html#.null_code">null_code</a></b>(length, type)
+								</div>
+								<div class="description">產生無用的垃圾碼</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.code.reorganize.<b><a href="../symbols/CeL.code.reorganize.html#.reduce_code">reduce_code</a></b>(code, mode)
+								</div>
+								<div class="description">精簡程式碼：去掉註解與\s\n。use for JSON (JavaScript Object Notation)</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.code.reorganize.<b><a href="../symbols/CeL.code.reorganize.html#.reduce_code_space">reduce_code_space</a></b>(code)
+								</div>
+								<div class="description">精簡程式碼部分：去掉\n,;前後的空白等，應由 reduce_code() 呼叫。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.code.reorganize.<b><a href="../symbols/CeL.code.reorganize.html#.reduce_script">reduce_script</a></b>(original_ScriptFileName, output_ScriptFileName, flag)
+								</div>
+								<div class="description">精簡整個檔的程式碼…and test程式是否有語法不全處（例如沒加';'）</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.code.reorganize.<b><a href="../symbols/CeL.code.reorganize.html#.rJS">rJS</a></b>(flag)
+								</div>
+								<div class="description">縮減 HTML 用 .js大小+自動判別。TODO:自動選擇 target 之模式（不一定是 .ori）</div>
+							</td>
+						</tr>
+					
+					</tbody>
+				</table>
+				
+				
+				
 			
 <!-- ============================== events summary ======================== -->
 			
@@ -348,6 +438,445 @@ ul.inheritsList
 
 <!-- ============================== method details ========================= -->		
 			
+				<div class="sectionTitle">
+					Method Detail
+				</div>
+				
+					<a name=".destory_script"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.code.reorganize.</span><b>destory_script</b>(code, addFN)
+					
+					</div>
+					<div class="description">
+						script終結者…
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>code</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>addFN</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name=".generate_code"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.code.reorganize.</span><b>generate_code</b>(Vlist, new_line, direct_input)
+					
+					</div>
+					<div class="description">
+						利用[*現有的環境*]及變數設定生成code，因此並不能完全重現所有設定，也無法判別函數間的相依關係。
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Array}</span> <b>Vlist</b>
+									
+								</dt>
+								<dd>變數 list</dd>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>new_line</b>
+									
+								</dt>
+								<dd>new line</dd>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>direct_input</b>
+									
+								</dt>
+								<dd>直接輸入用辨識碼</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>set_obj_value,dQuote</dd>
+							
+							</dl>
+						
+						
+
+					<hr />
+				
+					<a name=".get_all_functions"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.code.reorganize.</span><b>get_all_functions</b>(script_filename)
+					
+					</div>
+					<div class="description">
+						取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>script_filename</b>
+									
+								</dt>
+								<dd>script filename</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Deprecated:</dt>
+							<dt>
+								若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
+							</dt>
+							</dl>
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>ScriptName,simpleRead</dd>
+							
+							</dl>
+						
+						
+
+					<hr />
+				
+					<a name=".null_code"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{String}</span>
+					<span class="light">CeL.code.reorganize.</span><b>null_code</b>(length, type)
+					
+					</div>
+					<div class="description">
+						產生無用的垃圾碼
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>length</b>
+									
+								</dt>
+								<dd>\d || \d-\d</dd>
+							
+								<dt>
+									<b>type</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> 無用的垃圾碼</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".reduce_code"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{String}</span>
+					<span class="light">CeL.code.reorganize.</span><b>reduce_code</b>(code, mode)
+					
+					</div>
+					<div class="description">
+						精簡程式碼：去掉註解與\s\n。use for JSON (JavaScript Object Notation)
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>code</b>
+									
+								</dt>
+								<dd>欲精簡之程式碼</dd>
+							
+								<dt>
+									<b>mode</b>
+									
+								</dt>
+								<dd>mode=1:''中unicode轉\uHHHH</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> 精簡後之程式碼</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>reduce_code_space</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".reduce_code_space"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{String}</span>
+					<span class="light">CeL.code.reorganize.</span><b>reduce_code_space</b>(code)
+					
+					</div>
+					<div class="description">
+						精簡程式碼部分：去掉\n,;前後的空白等，應由 reduce_code() 呼叫。
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>code</b>
+									
+								</dt>
+								<dd>輸入欲精簡之程式碼</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> 精簡後之程式碼</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://dean.edwards.name/packer/</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".reduce_script"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.code.reorganize.</span><b>reduce_script</b>(original_ScriptFileName, output_ScriptFileName, flag)
+					
+					</div>
+					<div class="description">
+						精簡整個檔的程式碼…and test程式是否有語法不全處（例如沒加';'）
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>original_ScriptFileName</b>
+									
+								</dt>
+								<dd>origin javascript file name</dd>
+							
+								<dt>
+									<b>output_ScriptFileName</b>
+									
+								</dt>
+								<dd>target javascript file name</dd>
+							
+								<dt>
+									<b>flag</b>
+									
+								</dt>
+								<dd>flag={doTest:bool,doReport:bool,outEnc:(enc),copyOnFailed:bool,startFrom:// | '',addBefore:'',runBefore:function}	startFrom 若為 // 則應為 startAfter!!</dd>
+							
+							</dl>
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Deprecated:</dt>
+							<dt>
+								use <a href="http://closure-compiler.appspot.com/" accessdate="2009/12/3 12:13">Closure Compiler Service</a>
+							</dt>
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>autodetectEncode,simpleRead,simpleWrite,reduce_code,isFile</dd>
+							
+							</dl>
+						
+						
+
+					<hr />
+				
+					<a name=".rJS"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.code.reorganize.</span><b>rJS</b>(flag)
+					
+					</div>
+					<div class="description">
+						縮減 HTML 用 .js大小+自動判別。TODO:自動選擇 target 之模式（不一定是 .ori）
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>flag</b>
+									
+								</dt>
+								<dd>flag</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2008/7/31 17:40:40</dd>
+							</dl>
+							</dl>
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Requires:</dt>
+							
+								<dd>reduce_script</dd>
+							
+							</dl>
+						
+						
+
+					
+				
+			
 			
 <!-- ============================== event details ========================= -->		
 			
@@ -359,7 +888,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Wed Jul 07 2010 07:38:45 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Sun Sep 19 2010 08:43:50 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

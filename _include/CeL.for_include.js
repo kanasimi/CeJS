@@ -103,6 +103,7 @@ CeL.get_script_name=function(){
  * @param {String} name	環境變數名稱
  * @param value	環境變數之值
  * @return	舊環境變數之值
+ * @memberOf	CeL
  */
 CeL.env=function env(name, value){
 	///	<summary>
@@ -113,6 +114,7 @@ CeL.env=function env(name, value){
 	///	<param name="name" type="String" optional="false">環境變數名稱</param>
 	///	<param name="value" type="" optional="false">環境變數之值</param>
 	///	<returns>舊環境變數之值</returns>
+	///	<memberOf>CeL</memberOf>
 
 };
 	/**
@@ -167,8 +169,9 @@ CeL.company=CeL.env.company='Colorless echo';
 		/**
 		 * 存放在 registry 中的 path
 		 * @name	CeL.env.registry_path
+		 * @type	String
 		 */
-//CeL.registry_path=CeL.env.registry_path;	//	(WScript.CreateObject("WScript.Shell"))
+CeL.registry_path=CeL.env.registry_path="";	//	(WScript.CreateObject("WScript.Shell"))
 	/**
 	 * 本次執行所在 OS 平台
 	 * @name	CeL.env.OS
@@ -229,6 +232,7 @@ CeL.library_base_path=CeL.env.library_base_path="";	//	this.get_script_full_name
 	 * @name	CeL.env.identifier_RegExp
 	 * @see
 	 * ECMA-262	7.6 Identifier Names and Identifiers
+	 * @type	RegExp
 	 */
 CeL.identifier_RegExp=CeL.env.identifier_RegExp=/^regexp$/;	//	/([a-zA-Z$_]|\\u[\da-fA-F]{4})([a-zA-Z$_\d]+|\\u[\da-fA-F]{4}){0,63}/;
 	/**
@@ -439,6 +443,7 @@ CeL.extend=function(variable_set, name_space, from_name_space){
  * workaround.
  * 把 name_space 下的 function_name (name_space[function_name]) 換成 new_function。
  * for Lazy Function Definition Pattern.
+ * 惰性求值（Lazy Evaluation），又稱懶惰求值、懶漢求值
  * @example
  * library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix);
  * @param name_space	which name-space
@@ -454,6 +459,7 @@ CeL.replace_function=function(name_space, function_name, new_function){
 	///	workaround.
 	///	把 name_space 下的 function_name (name_space[function_name]) 換成 new_function。
 	///	for Lazy Function Definition Pattern.
+	///	惰性求值（Lazy Evaluation），又稱懶惰求值、懶漢求值
 	///	</summary>
 	///	<example>library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix);</example>
 	///	<param name="name_space" type="" optional="false">which name-space</param>
@@ -647,16 +653,22 @@ CeL.use=function requires(module, callback, extend_to){
 
 };
 /**
- * include other JavaScript/CSS files
+ * include other JavaScript/CSS files.
+ * TODO:
+ * callback 完 .js 自動移除
  * @param {String} resource path
  * @param {Function|Object} callback
  * 		use_write ? test function{return } : callback function
  * 		/	{callback: callback function, module: module name, global: global object when run callback}
  * @param {Boolean} [use_write]	use document.write() instead of insert a element
- * @param {Boolean} [type]	1: is a .css file, others: script
+ * @param {Number} [type]	1: is a .css file, others: script
  */
 CeL.include_resource=function include_resource(path, callback, use_write, type){
-	///	<summary>include other JavaScript/CSS files</summary>
+	///	<summary>
+	///	include other JavaScript/CSS files.
+	///	TODO:
+	///	callback 完 .js 自動移除
+	///	</summary>
 	///	<param name="resource" type="String" optional="false">path</param>
 	///	<param>
 	///	{Function|Object} callback
@@ -664,13 +676,15 @@ CeL.include_resource=function include_resource(path, callback, use_write, type){
 	///	/	{callback: callback function, module: module name, global: global object when run callback}
 	///	</param>
 	///	<param name="use_write" type="Boolean" optional="true">use document.write() instead of insert a element</param>
-	///	<param name="type" type="Boolean" optional="true">1: is a .css file, others: script</param>
+	///	<param name="type" type="Number" optional="true">1: is a .css file, others: script</param>
 
 };
 /**
  * 已經 include_resource 了哪些 JavaScript 檔（存有其路徑）.
- * loaded{路徑} = count,
+ * loaded{路徑} = index,
  * 本定義可省略(only for documentation)
+ * TODO:
+ * data[index] = [time stamp, path],
  * @type	{Object}
  */
 //CeL.loaded=CeL.include_resource.loaded;//[{Object}]null;
@@ -1079,11 +1093,11 @@ CeL.locale=function(){
 CeL.prototype=CeL.locale.prototype={};
 /**
  * null module constructor
- * @class	math 的 functions
+ * @class	數學相關的 functions
  */
 CeL.math=function(){
 	///	<summary>null module constructor</summary>
-	///	<class>math 的 functions</class>
+	///	<class>數學相關的 functions</class>
 
 };
 /**
@@ -1723,6 +1737,24 @@ CeL.HTA=CeL.net.HTA=function(){
  */
 CeL.prototype=CeL.net.HTA.prototype={};
 /**
+ * Internet Explorer Automation tool
+ * @param {String} [URL]	initial URL
+ * @returns {IEA}
+ * @memberOf	CeL.net.HTA
+ */
+CeL.IEA=CeL.net.HTA.IEA=function (URL){
+	///	<summary>Internet Explorer Automation tool</summary>
+	///	<param name="URL" type="String" optional="true">initial URL</param>
+	///	<returns type="IEA"/>
+	///	<memberOf>CeL.net.HTA</memberOf>
+
+};
+/**
+ * WSH 環境中取得剪貼簿的資料
+ * @memberOf	CeL.net.HTA
+ */
+//CeL.getClipboardText=CeL.net.HTA.getClipboardText;//setClipboardText;
+/**
  * null module constructor
  * @class	map 的 functions
  */
@@ -1735,6 +1767,19 @@ CeL.map=CeL.net.map=function(){
  * for JSDT: 有 prototype 才會將之當作 Class
  */
 CeL.prototype=CeL.net.map.prototype={};
+/**
+ * 解析地址
+ * @param {String} address	地址
+ * @returns
+ * @memberOf	CeL.net.map
+ */
+CeL.parse_address=CeL.net.map.parse_address=function (address){
+	///	<summary>解析地址</summary>
+	///	<param name="address" type="String" optional="false">地址</param>
+	///	<returns/>
+	///	<memberOf>CeL.net.map</memberOf>
+
+};
 /**
  * module SVG 物件之 constructor。<br/>
  * 設定 SVG document fragment 並將之插入網頁中。
@@ -2553,7 +2598,8 @@ CeL.get_element=CeL.net.web.get_element=function get_element(id, flag){
  * TODO:<br/>
  * 1. 一次處理多個 className。<br/>
  * 2. 以字串處理可能較快。<br/>
- * 3. 用 +/- 設定。
+ * 3. 用 +/- 設定。<br/>
+ * 4. https://developer.mozilla.org/en/DOM/element.classList
  * @param element	HTML elements
  * @param class_name	class name || {class name 1:, class name 2:, ..}
  * @param flag
@@ -2573,7 +2619,8 @@ CeL.set_class=CeL.net.web.set_class=function(element, class_name, flag){
 	///	TODO:<br/>
 	///	1. 一次處理多個 className。<br/>
 	///	2. 以字串處理可能較快。<br/>
-	///	3. 用 +/- 設定。
+	///	3. 用 +/- 設定。<br/>
+	///	4. https://developer.mozilla.org/en/DOM/element.classList
 	///	</summary>
 	///	<param name="element" type="" optional="false">HTML elements</param>
 	///	<param name="class_name" type="" optional="false">class name || {class name 1:, class name 2:, ..}</param>
@@ -2594,40 +2641,44 @@ CeL.set_class=CeL.net.web.set_class=function(element, class_name, flag){
 };
 /**
  * If HTML element has specified class
- * 
- * @param element	HTML elements
- * @param class_name	class name || {class name 1:, class name 2:, ..}
- * @return
+ * @param {HTMLElement} element	HTML elements
+ * @param {String} class_name	class_name_1[ class_name_2 ..]
+ * @return	{Boolean}
  */
 CeL.has_class=CeL.net.web.has_class=function(element, class_name){
-	///	<summary>
-	///	If HTML element has specified class
-	///	*
-	///	</summary>
-	///	<param name="element" type="" optional="false">HTML elements</param>
-	///	<param name="class_name" type="" optional="false">class name || {class name 1:, class name 2:, ..}</param>
-	///	<returns/>
+	///	<summary>If HTML element has specified class</summary>
+	///	<param name="element" type="HTMLElement" optional="false" domElement="true">HTML elements</param>
+	///	<param name="class_name" type="String" optional="false">class_name_1[ class_name_2 ..]</param>
+	///	<returns type="Boolean"/>
 
 };
 /**
- * 
- * @param class_name	class name || {class name 1:, class name 2:, ..}
- * @param parent
- * @param tag_name	tag name
- * @return
+ * @param {String} class_name	class_name_1[ class_name_2 ..]
+ * @param {HTMLElement} element	HTML elements
+ * @param {HTMLElement} parent_node	parent node
+ * @param {String} tag_name	tag name
+ * @return	{[HTMLElement]}	nodes
  * @see
  * document.getElementsByClassName in prototype.js,
  * jquery('.class')
+ * 
+ * document.querySelector()
+ * http://www.w3.org/TR/selectors-api/
+ * http://blog.darkthread.net/blogs/darkthreadtw/archive/2008/04/17/document-queryselector-in-ie8.aspx
  */
-CeL.find_class=CeL.net.web.find_class=function(class_name, parent, tag_name, call_function, flag){
-	///	<summary>*</summary>
-	///	<param name="class_name" type="" optional="false">class name || {class name 1:, class name 2:, ..}</param>
-	///	<param name="parent" type="" optional="false"/>
-	///	<param name="tag_name" type="" optional="false">tag name</param>
-	///	<returns/>
+CeL.find_class=CeL.net.web.find_class=function(class_name, parent_node, tag_name, call_function,		flag){
+	///	<param name="class_name" type="String" optional="false">class_name_1[ class_name_2 ..]</param>
+	///	<param name="element" type="HTMLElement" optional="false" domElement="true">HTML elements</param>
+	///	<param name="parent_node" type="HTMLElement" optional="false" domElement="true">parent node</param>
+	///	<param name="tag_name" type="String" optional="false">tag name</param>
+	///	<returns>{[HTMLElement]}	nodes</returns>
 	///	<see>
 	///	document.getElementsByClassName in prototype.js,
 	///	jquery('.class')
+	///	*
+	///	document.querySelector()
+	///	http://www.w3.org/TR/selectors-api/
+	///	http://blog.darkthread.net/blogs/darkthreadtw/archive/2008/04/17/document-queryselector-in-ie8.aspx
 	///	</see>
 
 };
@@ -3144,6 +3195,52 @@ CeL.OS.Windows=function(){
  */
 CeL.prototype=CeL.OS.Windows.prototype={};
 /**
+ * 取得 VB 的 Nothing
+ * @returns	VB 的 Nothing
+ * @memberOf	CeL.OS.Windows
+ */
+CeL.VBNothing=CeL.OS.Windows.VBNothing=function (){
+	///	<summary>取得 VB 的 Nothing</summary>
+	///	<returns>VB 的 Nothing</returns>
+	///	<memberOf>CeL.OS.Windows</memberOf>
+
+};
+/**
+ * 轉換 VB 的 Safe Array 成為 JS Array.
+ * @param vba	VB 的 array
+ * @returns
+ * @memberOf	CeL.OS.Windows
+ */
+CeL.VBA_to_JSA=CeL.OS.Windows.VBA_to_JSA=function (vba){
+	///	<summary>轉換 VB 的 Safe Array 成為 JS Array.</summary>
+	///	<param name="vba" type="" optional="false">VB 的 array</param>
+	///	<returns/>
+	///	<memberOf>CeL.OS.Windows</memberOf>
+
+};
+/**
+ * 轉換JS Array成為VB的Safe Array.
+ * Safe Array To JS Array: plaese use new VBArray().
+ * JScript\u12398配列\u12399\u23455際\u12395\u12399CSV文字列\u12384\u12387\u12383\u12426\u12377\u12427。VBScript\u12398vartype\u12395食\u12431\u12379\u12427\u123928(VT_STRING)\u12364返\u12387\u12390\u12367\u12427\u12371\u12392\u12363\u12425\u12418\u12431\u12363\u12427。
+ * @param array
+ * @returns
+ * @see
+ * http://www.microsoft.com/japan/msdn/japan/msdn/library/ja/script56/html/js56jsobjvbarray.asp
+ * @memberOf	CeL.OS.Windows
+ */
+CeL.JSA_to_VBA=CeL.OS.Windows.JSA_to_VBA=function (array){
+	///	<summary>
+	///	轉換JS Array成為VB的Safe Array.
+	///	Safe Array To JS Array: plaese use new VBArray().
+	///	JScript\u12398配列\u12399\u23455際\u12395\u12399CSV文字列\u12384\u12387\u12383\u12426\u12377\u12427。VBScript\u12398vartype\u12395食\u12431\u12379\u12427\u123928(VT_STRING)\u12364返\u12387\u12390\u12367\u12427\u12371\u12392\u12363\u12425\u12418\u12431\u12363\u12427。
+	///	</summary>
+	///	<param name="array" type="" optional="false"/>
+	///	<returns/>
+	///	<see>http://www.microsoft.com/japan/msdn/japan/msdn/library/ja/script56/html/js56jsobjvbarray.asp</see>
+	///	<memberOf>CeL.OS.Windows</memberOf>
+
+};
+/**
  * null module constructor
  * @class	Windows job 的 functions
  */
@@ -3183,6 +3280,28 @@ CeL.OS.WMI=function(){
  */
 CeL.prototype=CeL.OS.WMI.prototype={};
 /**
+ * 取得網卡設定的IP地址
+ * @param type	default type: ip setted interfaces only, 1: all interfaces, 2: 實體 net interfaces(網路卡，無線)
+ * @returns
+ * @example
+ * IP=get_net_info().netif[0].IPAddress[0];
+ * with(get_net_info())alert(UserName+'\n'+Name+'\n'+Workgroup+'\n'+Domain+'\n'+BootupState);
+ * @requires	WMI_data,VBA_to_JSA
+ * @memberOf	CeL.OS.WMI
+ */
+CeL.get_net_info=CeL.OS.WMI.get_net_info=function(type){
+	///	<summary>取得網卡設定的IP地址</summary>
+	///	<param name="type" type="" optional="false">default type: ip setted interfaces only, 1: all interfaces, 2: 實體 net interfaces(網路卡，無線)</param>
+	///	<returns/>
+	///	<example>
+	///	IP=get_net_info().netif[0].IPAddress[0];
+	///	with(get_net_info())alert(UserName+'\n'+Name+'\n'+Workgroup+'\n'+Domain+'\n'+BootupState);
+	///	</example>
+	///	<requires>WMI_data,VBA_to_JSA</requires>
+	///	<memberOf>CeL.OS.WMI</memberOf>
+
+};
+/**
  * get CIDR data
  * @param {Number} CIDR	CIDR mask bits, 0~32
  * @param {String} IP	IPv4, e.g., 1.2.3.4
@@ -3215,7 +3334,7 @@ CeL.CIDR_to_IP=CeL.OS.WMI.CIDR_to_IP=function (CIDR, IP){
  * @example
  * set_net_info({IP:'163.16.20.212',Gateway:254});
  * sl(set_net_info({IP:'163.16.20.30',Gateway:254}));WScript.Quit();
- * @requires	getWMIData,VBA,JSArrayToSafeArray,CIDR_to_IP
+ * @requires	WMI_data,VBA_to_JSA,JSArrayToSafeArray,CIDR_to_IP
  * @memberOf	CeL.OS.WMI
  */
 CeL.set_net_info=CeL.OS.WMI.set_net_info=function (to_s, from){
@@ -3237,7 +3356,7 @@ CeL.set_net_info=CeL.OS.WMI.set_net_info=function (to_s, from){
 	///	set_net_info({IP:'163.16.20.212',Gateway:254});
 	///	sl(set_net_info({IP:'163.16.20.30',Gateway:254}));WScript.Quit();
 	///	</example>
-	///	<requires>getWMIData,VBA,JSArrayToSafeArray,CIDR_to_IP</requires>
+	///	<requires>WMI_data,VBA_to_JSA,JSArrayToSafeArray,CIDR_to_IP</requires>
 	///	<memberOf>CeL.OS.WMI</memberOf>
 
 };
@@ -4129,12 +4248,12 @@ CeL.extend=CeL.code.log.extend=function(obj, className_set){
 };
 /**
  * null module constructor
- * @class 程式碼重整相關之 function。
+ * @class 程式碼重整重構相關之 functions。
  * @constructor
  */
 CeL.reorganize=CeL.code.reorganize=function (){
 	///	<summary>null module constructor</summary>
-	///	<class>程式碼重整相關之 function。</class>
+	///	<class>程式碼重整重構相關之 functions。</class>
 
 };
 /**
@@ -4142,20 +4261,134 @@ CeL.reorganize=CeL.code.reorganize=function (){
  */
 CeL.prototype=CeL.code.reorganize.prototype={};
 /**
-* 取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。
-* 若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
-* @param {String} script_filename
-* @return
-* @requires	ScriptName,simpleRead
-*/
+ * 取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。
+ * @param {String} script_filename	script filename
+ * @return
+ * @requires ScriptName,simpleRead
+ * @deprecated	若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
+ * @memberOf CeL.code.reorganize
+ */
 CeL.get_all_functions=CeL.code.reorganize.get_all_functions=function (script_filename){
+	///	<summary>取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。</summary>
+	///	<param name="script_filename" type="String" optional="false">script filename</param>
+	///	<returns/>
+	///	<requires>ScriptName,simpleRead</requires>
+	///	<deprecated>若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。</deprecated>
+	///	<memberOf>CeL.code.reorganize</memberOf>
+
+};
+/**
+ * script終結者…
+ * @memberOf	CeL.code.reorganize
+ */
+CeL.destory_script=CeL.code.reorganize.destory_script=function (code, addFN){
+	///	<summary>script終結者…</summary>
+	///	<memberOf>CeL.code.reorganize</memberOf>
+
+};
+/**
+ * 利用[*現有的環境*]及變數設定生成code，因此並不能完全重現所有設定，也無法判別函數間的相依關係。
+ * @param {Array} Vlist	變數 list
+ * @param {String} new_line	new line
+ * @param {String} direct_input	直接輸入用辨識碼
+ * @requires	set_obj_value,dQuote
+ * @memberOf	CeL.code.reorganize
+ */
+CeL.generate_code=CeL.code.reorganize.generate_code=function (Vlist, new_line, direct_input){
+	///	<summary>利用[*現有的環境*]及變數設定生成code，因此並不能完全重現所有設定，也無法判別函數間的相依關係。</summary>
+	///	<param name="Vlist" type="Array" optional="false">變數 list</param>
+	///	<param name="new_line" type="String" optional="false">new line</param>
+	///	<param name="direct_input" type="String" optional="false">直接輸入用辨識碼</param>
+	///	<requires>set_obj_value,dQuote</requires>
+	///	<memberOf>CeL.code.reorganize</memberOf>
+
+};
+/**
+ * 產生無用的垃圾碼
+ * @param length	\d || \d-\d
+ * @returns	{String}	無用的垃圾碼
+ * @see
+ * @memberOf	CeL.code.reorganize
+ */
+CeL.null_code=CeL.code.reorganize.null_code=function (length, type){
+	///	<summary>產生無用的垃圾碼</summary>
+	///	<param name="length" type="" optional="false">\d || \d-\d</param>
+	///	<returns type="String">無用的垃圾碼</returns>
+	///	<see/>
+	///	<memberOf>CeL.code.reorganize</memberOf>
+
+};
+/**
+ * 精簡程式碼：去掉註解與\s\n。
+ * use for JSON (JavaScript Object Notation)
+ * @param code	欲精簡之程式碼
+ * @param mode	mode=1:''中unicode轉\uHHHH
+ * @returns	{String}	精簡後之程式碼
+ * @see
+ * @requires	reduce_code_space
+ * @memberOf	CeL.code.reorganize
+ */
+CeL.reduce_code=CeL.code.reorganize.reduce_code=function (code, mode){
 	///	<summary>
-	///	* 取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。
-	///	* 若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
-	///	* @param {String} script_filename
-	///	* @return
-	///	* @requires	ScriptName,simpleRead
+	///	精簡程式碼：去掉註解與\s\n。
+	///	use for JSON (JavaScript Object Notation)
 	///	</summary>
+	///	<param name="code" type="" optional="false">欲精簡之程式碼</param>
+	///	<param name="mode" type="" optional="false">mode=1:''中unicode轉\uHHHH</param>
+	///	<returns type="String">精簡後之程式碼</returns>
+	///	<see/>
+	///	<requires>reduce_code_space</requires>
+	///	<memberOf>CeL.code.reorganize</memberOf>
+
+};
+/**
+ * 精簡整個檔的程式碼
+ * …and test程式是否有語法不全處（例如沒加';'）
+ * @param original_ScriptFileName	origin javascript file name
+ * @param output_ScriptFileName	target javascript file name
+ * @param flag
+ * 	flag={doTest:bool,doReport:bool,outEnc:(enc),copyOnFailed:bool,startFrom:// | '',addBefore:'',runBefore:function}
+ * 	startFrom 若為 // 則應為 startAfter!!
+ * @requires	autodetectEncode,simpleRead,simpleWrite,reduce_code,isFile
+ * @deprecated use <a href="http://closure-compiler.appspot.com/" accessdate="2009/12/3 12:13">Closure Compiler Service</a>
+ * @memberOf	CeL.code.reorganize
+ */
+CeL.reduce_script=CeL.code.reorganize.reduce_script=function (original_ScriptFileName, output_ScriptFileName, flag){
+	///	<summary>
+	///	精簡整個檔的程式碼
+	///	…and test程式是否有語法不全處（例如沒加';'）
+	///	</summary>
+	///	<param name="original_ScriptFileName" type="" optional="false">origin javascript file name</param>
+	///	<param name="output_ScriptFileName" type="" optional="false">target javascript file name</param>
+	///	<param>
+	///	flag
+	///	flag={doTest:bool,doReport:bool,outEnc:(enc),copyOnFailed:bool,startFrom:// | '',addBefore:'',runBefore:function}
+	///	startFrom 若為 // 則應為 startAfter!!
+	///	</param>
+	///	<requires>autodetectEncode,simpleRead,simpleWrite,reduce_code,isFile</requires>
+	///	<deprecated>use <a href="http://closure-compiler.appspot.com/" accessdate="2009/12/3 12:13">Closure Compiler Service</a></deprecated>
+	///	<memberOf>CeL.code.reorganize</memberOf>
+
+};
+/**
+ * 縮減 HTML 用 .js大小+自動判別。
+ * TODO:
+ * 自動選擇 target 之模式（不一定是 .ori）
+ * @param flag	flag
+ * @requires	reduce_script
+ * @since	2008/7/31 17:40:40
+ * @memberOf	CeL.code.reorganize
+ */
+CeL.rJS=CeL.code.reorganize.rJS=function (flag){
+	///	<summary>
+	///	縮減 HTML 用 .js大小+自動判別。
+	///	TODO:
+	///	自動選擇 target 之模式（不一定是 .ori）
+	///	</summary>
+	///	<param name="flag" type="" optional="false">flag</param>
+	///	<requires>reduce_script</requires>
+	///	<since>2008/7/31 17:40:40</since>
+	///	<memberOf>CeL.code.reorganize</memberOf>
 
 };
 /**
@@ -4211,6 +4444,42 @@ CeL.get_code_from_generated_various=CeL.code.reorganize.get_code_from_generated_
 	///	</summary>
 
 };
+
+//	null constructor for [_]
+_=function(){};
+_.prototype={};
+
+
+//	null constructor for [_.IEA]
+_.IEA=function(){};
+_.IEA.prototype={};
+
+/**
+ * get <frame>
+ * @param document_object	document object
+ * @param name	frame name
+ * @returns
+ */
+_.IEA.frame=function(document_object, name){
+	///	<summary>get <frame></summary>
+	///	<param name="document_object" type="" optional="false">document object</param>
+	///	<param name="name" type="" optional="false">frame name</param>
+	///	<returns/>
+
+};
+
+//	null constructor for [_.generate_code]
+_.generate_code=function(){};
+_.generate_code.prototype={};
+
+/**
+ * default directInput symbol
+ */
+_.generate_code.ddI='*';
+/**
+ * default separator
+ */
+_.generate_code.dsp=',';
 /**
  * 讀入CSV檔<br/>
  * !! slow !!
@@ -4236,5 +4505,46 @@ readCSVdata=function(FP,FD,TD,hasTitle,enc){
 	///	<param name="TD" type="" optional="false">text delimiter['"]</param>
 	///	<param name="hasTitle" type="" optional="false">the data has a title line</param>
 	///	<returns>Array contains data</returns>
+
+};
+
+//	null constructor for [op[/]:word/wordword/=word~:/\\{0,2,4,6,]
+op[/]:word/wordword/=word~:/\\{0,2,4,6,=function(){};
+op[/]:word/wordword/=word~:/\\{0,2,4,6,.prototype={};
+
+
+//	null constructor for [op[/]:word/wordword/=word~:/\\{0,2,4,6,.]
+op[/]:word/wordword/=word~:/\\{0,2,4,6,.=function(){};
+op[/]:word/wordword/=word~:/\\{0,2,4,6,..prototype={};
+
+
+//	null constructor for [op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL]
+op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL=function(){};
+op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.prototype={};
+
+
+//	null constructor for [op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code]
+op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code=function(){};
+op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.prototype={};
+
+
+//	null constructor for [op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize]
+op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize=function(){};
+op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize.prototype={};
+
+/**
+ * 精簡程式碼部分：去掉\n,;前後的空白等，應由 reduce_code() 呼叫。
+ * @param code	輸入欲精簡之程式碼
+ * @returns	{String}	精簡後之程式碼
+ * @see
+ * http://dean.edwards.name/packer/
+ * @memberOf	CeL.code.reorganize
+ */
+op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize.reduce_code_space=function (code){
+	///	<summary>精簡程式碼部分：去掉\n,;前後的空白等，應由 reduce_code() 呼叫。</summary>
+	///	<param name="code" type="" optional="false">輸入欲精簡之程式碼</param>
+	///	<returns type="String">精簡後之程式碼</returns>
+	///	<see>http://dean.edwards.name/packer/</see>
+	///	<memberOf>CeL.code.reorganize</memberOf>
 
 };

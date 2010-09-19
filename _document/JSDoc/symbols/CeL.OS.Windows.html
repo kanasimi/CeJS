@@ -209,6 +209,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.data.XML.html">CeL.data.XML</a></li>
 	
+	<li><a href="../symbols/CeL.env.html">CeL.env</a></li>
+	
 	<li><a href="../symbols/CeL.IO.file.html">CeL.IO.file</a></li>
 	
 	<li><a href="../symbols/CeL.IO.Windows.file.html">CeL.IO.Windows.file</a></li>
@@ -254,8 +256,6 @@ ul.inheritsList
 	<li><a href="../symbols/CeL.OS.Windows.registry.html">CeL.OS.Windows.registry</a></li>
 	
 	<li><a href="../symbols/CeL.OS.WMI.html">CeL.OS.WMI</a></li>
-	
-	<li><a href="../symbols/env.html">env</a></li>
 	
 </ul>
 <hr />
@@ -310,6 +310,51 @@ ul.inheritsList
 
 <!-- ============================== methods summary ======================== -->
 			
+				
+				
+				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class CeL.OS.Windows.">
+					<caption>Method Summary</caption>
+					<thead>
+						<tr>
+							<th scope="col">Method Attributes</th>
+							<th scope="col">Method Name and Description</th>
+						</tr>
+					</thead>
+					<tbody>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.OS.Windows.<b><a href="../symbols/CeL.OS.Windows.html#.JSA_to_VBA">JSA_to_VBA</a></b>(array)
+								</div>
+								<div class="description">轉換JS Array成為VB的Safe Array.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.OS.Windows.<b><a href="../symbols/CeL.OS.Windows.html#.VBA_to_JSA">VBA_to_JSA</a></b>(vba)
+								</div>
+								<div class="description">轉換 VB 的 Safe Array 成為 JS Array.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.OS.Windows.<b><a href="../symbols/CeL.OS.Windows.html#.VBNothing">VBNothing</a></b>()
+								</div>
+								<div class="description">取得 VB 的 Nothing</div>
+							</td>
+						</tr>
+					
+					</tbody>
+				</table>
+				
+				
+				
+			
 <!-- ============================== events summary ======================== -->
 			
 
@@ -348,6 +393,136 @@ ul.inheritsList
 
 <!-- ============================== method details ========================= -->		
 			
+				<div class="sectionTitle">
+					Method Detail
+				</div>
+				
+					<a name=".JSA_to_VBA"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.OS.Windows.</span><b>JSA_to_VBA</b>(array)
+					
+					</div>
+					<div class="description">
+						轉換JS Array成為VB的Safe Array.Safe Array To JS Array: plaese use new VBArray().JScriptの配列は実際にはCSV文字列だったりする。VBScriptのvartypeに食わせると8(VT_STRING)が返ってくることからもわかる。
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>array</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://www.microsoft.com/japan/msdn/japan/msdn/library/ja/script56/html/js56jsobjvbarray.asp</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".VBA_to_JSA"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.OS.Windows.</span><b>VBA_to_JSA</b>(vba)
+					
+					</div>
+					<div class="description">
+						轉換 VB 的 Safe Array 成為 JS Array.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>vba</b>
+									
+								</dt>
+								<dd>VB 的 array</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name=".VBNothing"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.OS.Windows.</span><b>VBNothing</b>()
+					
+					</div>
+					<div class="description">
+						取得 VB 的 Nothing
+						
+						
+					</div>
+					
+					
+					
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd>VB 的 Nothing</dd>
+							
+							</dl>
+						
+						
+						
+
+					
+				
+			
 			
 <!-- ============================== event details ========================= -->		
 			
@@ -359,7 +534,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Wed Jul 07 2010 07:38:46 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Sun Sep 19 2010 08:43:52 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

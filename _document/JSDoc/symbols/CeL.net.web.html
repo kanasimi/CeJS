@@ -209,6 +209,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.data.XML.html">CeL.data.XML</a></li>
 	
+	<li><a href="../symbols/CeL.env.html">CeL.env</a></li>
+	
 	<li><a href="../symbols/CeL.IO.file.html">CeL.IO.file</a></li>
 	
 	<li><a href="../symbols/CeL.IO.Windows.file.html">CeL.IO.Windows.file</a></li>
@@ -254,8 +256,6 @@ ul.inheritsList
 	<li><a href="../symbols/CeL.OS.Windows.registry.html">CeL.OS.Windows.registry</a></li>
 	
 	<li><a href="../symbols/CeL.OS.WMI.html">CeL.OS.WMI</a></li>
-	
-	<li><a href="../symbols/env.html">env</a></li>
 	
 </ul>
 <hr />
@@ -325,7 +325,7 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.add_listener">add_listener</a></b>(type, listener, document_object, p_first)
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.add_listener">add_listener</a></b>(type, listener, target_element, p_first)
 								</div>
 								<div class="description">bind/add listener.</div>
 							</td>
@@ -361,7 +361,7 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.get_node_position">get_node_position</a></b>(obj)
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.get_node_offset">get_node_offset</a></b>(node)
 								</div>
 								<div class="description">get the actual position [left,top,width,height] of an HTML node object</div>
 							</td>
@@ -379,9 +379,27 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.get_selection">get_selection</a></b>(index)
+								</div>
+								<div class="description">獲取頁面上選中的選取區資訊。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.get_style">get_style</a></b>(element, name, not_computed)
 								</div>
 								<div class="description">get current computed style property of specified HTML element.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.HTML_to_Unicode">HTML_to_Unicode</a></b>(HTML, only_digital)
+								</div>
+								<div class="description">Translate HTML code to Unicode text</div>
 							</td>
 						</tr>
 					
@@ -399,7 +417,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.is_HTML_element">is_HTML_element</a></b>(value)
 								</div>
-								<div class="description">判斷為 HTML Element。</div>
+								<div class="description">判斷是否為 HTML Element。</div>
 							</td>
 						</tr>
 					
@@ -469,9 +487,27 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.set_cookie">set_cookie</a></b>(name, value, config)
+								</div>
+								<div class="description">設定document.cookie.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.set_text">set_text</a></b>(element, text)
 								</div>
 								<div class="description">設定 HTML element 的 text。對付IE與Moz不同的text取得方法。現階段不應用innerText，應該用此函數來取得或設定內部text。TODO: DOM: 用.nodeValue</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.stop_event">stop_event</a></b>(e, c)
+								</div>
+								<div class="description">阻止 JavaScript 事件冒泡傳遞，使 event 不傳到 parentNode。</div>
 							</td>
 						</tr>
 					
@@ -487,6 +523,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.to_HTML">to_HTML</a></b>(text, mode)
+								</div>
+								<div class="description">Translate Unicode text to HTML</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;static&gt; &nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.to_query_string">to_query_string</a></b>(query_Object)
 								</div>
 								<div class="description">Translate a native Object contains key/value pair set to a query string.</div>
@@ -496,18 +541,18 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.toHTML">toHTML</a></b>(text, mode)
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.toggle_display">toggle_display</a></b>(element, type)
 								</div>
-								<div class="description">translate Unicode text to HTML</div>
+								<div class="description">toggle/swap display and visibility.</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&lt;static&gt; &nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.trigger_display">trigger_display</a></b>(element, type)
+								<div class="fixedFont">CeL.net.web.<b><a href="../symbols/CeL.net.web.html#.Unicode_to_HTML">Unicode_to_HTML</a></b>(text, flags, ignore_tags)
 								</div>
-								<div class="description">trigger/swap display and visibility.</div>
+								<div class="description">Translate Unicode text to HTML code</div>
 							</td>
 						</tr>
 					
@@ -572,7 +617,7 @@ ul.inheritsList
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">CeL.net.web.</span><b>add_listener</b>(type, listener, document_object, p_first)
+					<span class="light">CeL.net.web.</span><b>add_listener</b>(type, listener, target_element, p_first)
 					
 					</div>
 					<div class="description">
@@ -600,10 +645,10 @@ ul.inheritsList
 								<dd>listener function/function array/function string,				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"			function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}</dd>
 							
 								<dt>
-									<b>document_object</b>
+									<b>target_element</b>
 									<i>Optional</i>
 								</dt>
-								<dd>bind/attach to what document object</dd>
+								<dd>bind/attach to what HTML element</dd>
 							
 								<dt>
 									<b>p_first</b>
@@ -812,11 +857,11 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name=".get_node_position"> </a>
+					<a name=".get_node_offset"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">CeL.net.web.</span><b>get_node_position</b>(obj)
+					<span class="light">CeL.net.web.</span><b>get_node_offset</b>(node)
 					
 					</div>
 					<div class="description">
@@ -832,13 +877,20 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>obj</b>
+									<b>node</b>
 									
 								</dt>
-								<dd></dd>
+								<dd>HTML node object</dd>
 							
 							</dl>
 						
+						
+							<dl class="detailList">
+							<dt class="heading">Deprecated:</dt>
+							<dt>
+								use get_style(), jQuery.offset(), jQuery.position()
+							</dt>
+							</dl>
 						
 						
 						
@@ -855,7 +907,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,http://msdn.microsoft.com/library/en-us/dndude/html/dude04032000.asp,http://www.mail-archive.com/mochikit@googlegroups.com/msg00584.html,http://hartshorne.ca/2006/01/20/javascript_positioning/</dd>
+								<dd>http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,http://msdn.microsoft.com/library/en-us/dndude/html/dude04032000.asp,http://www.mail-archive.com/mochikit@googlegroups.com/msg00584.html,http://hartshorne.ca/2006/01/20/javascript_positioning/,http://www.jb51.net/article/18340.htm,http://blog.csdn.net/wangjj_016/archive/2010/04/09/5467507.aspx</dd>
 							
 							</dl>
 						
@@ -924,6 +976,62 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name=".get_selection"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{Object, undefined}</span>
+					<span class="light">CeL.net.web.</span><b>get_selection</b>(index)
+					
+					</div>
+					<div class="description">
+						獲取頁面上選中的選取區資訊。
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code">CeL.add_listener('mouseup', function (e) { var s = CeL.get_selection(); if (s && s.text) CeL.debug('select @' + this + '(' + s.element + ')' + ' (' + s.left + '+' + s.width + ',' + s.top + '+' + s.height + '), (' + e.pageX + ',' + e.pageY + '): ' + s.text); }, target_element);</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Number}</span> <b>index</b>
+									<i>Optional</i>
+								</dt>
+								<dd>TODO: 第幾選取區, default: all or 0 if there's only ONE/ZERO selection</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Object}</span> {		left: {Number} in px,		top: {Number} in px,		width: {Number} in px,		height: {Number} in px,		text: {String} 文字,		element: {HTMLElement},		selection: selection object (browser dependent)	}</dd>
+							
+								<dd><span class="light fixedFont">{undefined}</span> error.</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://plugins.jquery.com/project/selectedText,Gecko: https://developer.mozilla.org/en/DOM/Selection</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
 					<a name=".get_style"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
@@ -932,7 +1040,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						get current computed style property of specified HTML element.TODO: 整合 get_node_position, _.set_style
+						get current computed style property of specified HTML element.TODO: 整合 get_node_offset, _.set_style
 						
 						
 					</div>
@@ -985,9 +1093,58 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,curCss @ jQuery, http://api.jquery.com/category/css/,<a href="http://www.quirksmode.org/dom/getstyles.html" accessdate="2010/4/1 15:44">JavaScript - Get Styles</a>,<a href="http://www.javaeye.com/topic/140784?page=2" accessdate="2010/4/1 15:41">style.display取值不对，难道是浏览器bug？讨论第2页:  - JavaScript - web - JavaEye论坛</a>大體上， currentStyle 相當於getComputedStyle，而runtimeStyle相當於getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。document.defaultView在mozilla中是指向window obj的,但是很有可能在其他broswer中就不指向window obj...因為w3c中沒有強行規定document.defaultView一定是一個global obj.返回頁內樣式表定義的類，那麼可以使用DOM樣式表對象來訪問：var oCssRulers = document.styleSheets[0].cssRulers || document.styleSheets[0].rulers;(前者是DOM方法，後者是IE私有方法)alert(oCssRulers[0].style.display);</dd>
+								<dd>http://en.wikipedia.org/wiki/Internet_Explorer_box_model_bug, http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K983.aspx,curCSS @ jQuery, http://api.jquery.com/category/css/,<a href="http://www.quirksmode.org/dom/getstyles.html" accessdate="2010/4/1 15:44">JavaScript - Get Styles</a>,<a href="http://www.javaeye.com/topic/140784?page=2" accessdate="2010/4/1 15:41">style.display取值不对，难道是浏览器bug？讨论第2页:  - JavaScript - web - JavaEye论坛</a>大體上，currentStyle 相當於 getComputedStyle，而 runtimeStyle 相當於 getOverrideStyle。但是它們還是有很重要的區別。那就是，IE的CSS計算步驟其實是不合標準的。document.defaultView在mozilla中是指向window obj的,但是很有可能在其他broswer中就不指向window obj...因為w3c中沒有強行規定document.defaultView一定是一個global obj.返回頁內樣式表定義的類，那麼可以使用DOM樣式表對象來訪問：var oCssRulers = document.styleSheets[0].cssRulers || document.styleSheets[0].rulers;(前者是DOM方法，後者是IE私有方法)alert(oCssRulers[0].style.display);</dd>
 							
 							</dl>
+						
+
+					<hr />
+				
+					<a name=".HTML_to_Unicode"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.net.web.</span><b>HTML_to_Unicode</b>(HTML, only_digital)
+					
+					</div>
+					<div class="description">
+						Translate HTML code to Unicode text
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>HTML</b>
+									
+								</dt>
+								<dd>HTML code</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Boolean}</span> <b>only_digital</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
 						
 
 					<hr />
@@ -1056,7 +1213,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						判斷為 HTML Element。
+						判斷是否為 HTML Element。
 						
 						
 					</div>
@@ -1450,7 +1607,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						Sets / adds class of specified element.<br/>TODO:<br/>1. 一次處理多個 className。<br/>2. 以字串處理可能較快。<br/>3. 用 +/- 設定。
+						Sets / adds class of specified element.<br/>TODO:<br/>1. 一次處理多個 className。<br/>2. 以字串處理可能較快。<br/>3. 用 +/- 設定。<br/>4. https://developer.mozilla.org/en/DOM/element.classList
 						
 						
 					</div>
@@ -1498,6 +1655,97 @@ ul.inheritsList
 							<dt class="heading">See:</dt>
 							
 								<dd><a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-95362176" accessdate="2009/12/14 22:26">className of type DOMString</a>,<a href="https://developer.mozilla.org/En/DOM/Element.className" accessdate="2009/12/14 22:27">element.className - MDC</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".set_cookie"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.net.web.</span><b>set_cookie</b>(name, value, config)
+					
+					</div>
+					<div class="description">
+						設定document.cookie.You can store up to 20 name=value pairs in a cookie, and the cookie is always returned as a string of all the cookies that apply to the page.TODO:HTML5 localStorage (name/value item pairs).test various values.document.cookie.setPath("/");
+						
+						
+					</div>
+					
+					
+					
+					<pre class="code">
+	範例：
+//	delete domain
+set_cookie('domain',0);
+//	一個月(30 days)
+set_cookie('expires',30);
+//	設定name之值為jj
+set_cookie(name,'jj');
+//	設定name之值為56
+set_cookie(name,56);
+//	除去name
+set_cookie(name);
+//	設給本host全部使用
+set_cookie(_.set_cookie.f.set_root);
+//	設給本domain使用
+set_cookie(_.set_cookie.f.set_domain);
+//	依現有設定除去所有值
+set_cookie(_.set_cookie.f.delete_all);
+//	除去所有值
+set_cookie(_.set_cookie.f.delete_all_root);
+//	永久儲存（千年）
+set_cookie(_.set_cookie.f.forever);
+//	準確設定這之後只在這次瀏覽使用這些cookie，也可用set_cookie('expires',-1);
+set_cookie(_.set_cookie.f.moment);
+//	將expires設定成forever或moment後再改回來（不加expires設定）
+set_cookie('expires',0);</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String|Object|_module_.set_cookie.f}</span> <b>name</b>
+									
+								</dt>
+								<dd>set_cookie.f flag | varoius name</dd>
+							
+								<dt>
+									<b>value</b>
+									
+								</dt>
+								<dd>varoius value</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Boolean|Object}</span> <b>config</b>
+									
+								</dt>
+								<dd>若對於特殊設定僅暫時設定時，設定此項。</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>Chrome doesn't support cookies for local files unless you start it with the --enable-file-cookies flag.chrome.exe --allow-file-access-from-files --enable-extension-timeline-api --enable-file-cookieshttp://stackoverflow.com/questions/335244/why-does-chrome-ignore-local-jquery-cookieshttp://code.google.com/p/chromium/issues/detail?id=535</dd>
 							
 							</dl>
 						
@@ -1554,6 +1802,55 @@ ul.inheritsList
 							<dt class="heading">See:</dt>
 							
 								<dd>http://www.klstudio.com/post/94.html</dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name=".stop_event"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.net.web.</span><b>stop_event</b>(e, c)
+					
+					</div>
+					<div class="description">
+						阻止 JavaScript 事件冒泡傳遞，使 event 不傳到 parentNode。
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>e</b>
+									
+								</dt>
+								<dd>event handle</dd>
+							
+								<dt>
+									<b>c</b>
+									
+								</dt>
+								<dd>cancel bubble</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://www.jb51.net/html/200705/23/9858.htm</dd>
 							
 							</dl>
 						
@@ -1638,6 +1935,55 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name=".to_HTML"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					<span class="light">{String}</span>
+					<span class="light">CeL.net.web.</span><b>to_HTML</b>(text, mode)
+					
+					</div>
+					<div class="description">
+						Translate Unicode text to HTML
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>text</b>
+									
+								</dt>
+								<dd>Unicode text</dd>
+							
+								<dt>
+									<b>mode</b>
+									
+								</dt>
+								<dd>mode='x':&#xhhh;</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{String}</span> HTML</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name=".to_query_string"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
@@ -1688,64 +2034,15 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name=".toHTML"> </a>
-					<div class="fixedFont">&lt;static&gt; 
-					
-					<span class="light">{String}</span>
-					<span class="light">CeL.net.web.</span><b>toHTML</b>(text, mode)
-					
-					</div>
-					<div class="description">
-						translate Unicode text to HTML
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{String}</span> <b>text</b>
-									
-								</dt>
-								<dd>Unicode text</dd>
-							
-								<dt>
-									<b>mode</b>
-									
-								</dt>
-								<dd>mode='x':&#xhhh;</dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd><span class="light fixedFont">{String}</span> HTML</dd>
-							
-							</dl>
-						
-						
-						
-
-					<hr />
-				
-					<a name=".trigger_display"> </a>
+					<a name=".toggle_display"> </a>
 					<div class="fixedFont">&lt;static&gt; 
 					
 					
-					<span class="light">CeL.net.web.</span><b>trigger_display</b>(element, type)
+					<span class="light">CeL.net.web.</span><b>toggle_display</b>(element, type)
 					
 					</div>
 					<div class="description">
-						trigger/swap display and visibility.display:none or visibility:hidden.TODO: computed style
+						toggle/swap display and visibility.display:none or visibility:hidden.TODO: computed style
 						
 						
 					</div>
@@ -1766,7 +2063,7 @@ ul.inheritsList
 									<span class="light fixedFont">{String|Number}</span> <b>type</b>
 									
 								</dt>
-								<dd>show or hidden or set the status type:			{Number}: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change			{String}: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?</dd>
+								<dd>show or hidden or set the status type:			{Number} type: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change			{String} type: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?</dd>
 							
 							</dl>
 						
@@ -1802,6 +2099,61 @@ ul.inheritsList
 								<dd>http://www.w3schools.com/CSS/pr_class_visibility.asphttp://www.w3schools.com/css/pr_class_display.asphttp://www.javaeye.com/topic/140784	通過element.style對象只能取得內聯的樣式，也就是說只能取得html標籤裡寫的屬性。</dd>
 							
 							</dl>
+						
+
+					<hr />
+				
+					<a name=".Unicode_to_HTML"> </a>
+					<div class="fixedFont">&lt;static&gt; 
+					
+					
+					<span class="light">CeL.net.web.</span><b>Unicode_to_HTML</b>(text, flags, ignore_tags)
+					
+					</div>
+					<div class="description">
+						Translate Unicode text to HTML code
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>text</b>
+									
+								</dt>
+								<dd>Unicode text</dd>
+							
+								<dt>
+									<b>flags</b>
+									
+								</dt>
+								<dd>flags, f&1!=0: turn \t, (f&2)==0: \n→<br/>, f==4: to quoted</dd>
+							
+								<dt>
+									<b>ignore_tags</b>
+									
+								</dt>
+								<dd>e.g., {object:{src:/^https?:\/\//},img:{src:/^https?:\/\//},a:{href:/^https?:\/\//}}</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd></dd>
+							
+							</dl>
+						
+						
 						
 
 					<hr />
@@ -1898,7 +2250,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Wed Jul 07 2010 07:38:46 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Sun Sep 19 2010 08:43:51 GMT+0800 (CST)
 		</div>
 	</body>
 </html>

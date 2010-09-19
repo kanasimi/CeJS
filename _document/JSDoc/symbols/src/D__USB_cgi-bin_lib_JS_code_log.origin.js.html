@@ -164,292 +164,292 @@
 <span class='line'>157</span> 
 <span class='line'>158</span> </span><span class="WHIT">	</span><span class="COMM">//if(_t.auto_hide)B.style.display=B.innerHTML?'block':'none';</span><span class="WHIT">
 <span class='line'>159</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">B</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">_t.auto_scroll</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>160</span> </span><span class="WHIT">		</span><span class="KEYW">with</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">B</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>161</span> </span><span class="WHIT">			</span><span class="NAME">scrollTop</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">scrollHeight</span><span class="WHIT"> </span><span class="PUNC">-</span><span class="WHIT"> </span><span class="NAME">clientHeight</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>162</span> </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>160</span> </span><span class="WHIT">		</span><span class="NAME">B.scrollTop</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">B.scrollHeight</span><span class="WHIT"> </span><span class="PUNC">-</span><span class="WHIT"> </span><span class="NAME">B.clientHeight</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>161</span> </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>162</span> 
 <span class='line'>163</span> 
-<span class='line'>164</span> 
-<span class='line'>165</span> </span><span class="COMM">/**
-<span class='line'>166</span>  * save log
-<span class='line'>167</span>  * @ignore
-<span class='line'>168</span>  * @param	m	message
-<span class='line'>169</span>  * @param	{string} id	element id
-<span class='line'>170</span>  * @param	force	force to clean the message area
-<span class='line'>171</span>  */</span><span class="WHIT">
-<span class='line'>172</span> </span><span class="NAME">s</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">m</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">id</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">force</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>173</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">_p</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">p</span><span class="PUNC">[</span><span class="NAME">id</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">_t</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_p.instance</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">f</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_p.logF</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">s</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_t.save_log</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>174</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">s</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">s</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="PUNC">!</span><span class="NAME">s</span><span class="PUNC">(</span><span class="NAME">m</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">l</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>175</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>176</span> 
-<span class='line'>177</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">m</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>178</span> </span><span class="WHIT">		</span><span class="NAME">_p.sbuf</span><span class="WHIT">
-<span class='line'>179</span> </span><span class="WHIT">				</span><span class="PUNC">.</span><span class="NAME">push</span><span class="PUNC">(</span><span class="NAME">m</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">_t.save_date</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">gDate</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">_t.save_new_line</span><span class="WHIT">
-<span class='line'>180</span> </span><span class="WHIT">						</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">gDate</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">_t.save_new_line</span><span class="WHIT">
-<span class='line'>181</span> </span><span class="WHIT">						</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>182</span> </span><span class="WHIT">						</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">m</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>183</span> 
-<span class='line'>184</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">force</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">_t.flush</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">_p.sbufL</span><span class="WHIT"> </span><span class="PUNC">></span><span class="WHIT"> </span><span class="NAME">_t.save_limit</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>185</span> </span><span class="WHIT">		</span><span class="KEYW">try</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>186</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">f</span><span class="WHIT">
-<span class='line'>187</span> </span><span class="WHIT">					</span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">_t.log_file</span><span class="WHIT">
-<span class='line'>188</span> </span><span class="WHIT">					</span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">f</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_p.logF</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">fso.OpenTextFile</span><span class="PUNC">(</span><span class="NAME">_t.log_file</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>189</span> </span><span class="WHIT">							</span><span class="NUMB">8</span><span class="COMM">/* ForAppending */</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="COMM">/* create */</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>190</span> </span><span class="WHIT">							</span><span class="NAME">_t.log_encoding</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>191</span> </span><span class="WHIT">				</span><span class="NAME">f.Write</span><span class="PUNC">(</span><span class="NAME">_p.sbuf.join</span><span class="PUNC">(</span><span class="NAME">_t.save_new_line</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">_p.sbuf</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>192</span> </span><span class="WHIT">						</span><span class="NAME">_p.sbufL</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">_t.error_message</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>193</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">catch</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>194</span> </span><span class="WHIT">			</span><span class="NAME">_t.error_message</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">;</span><span class="COMM">// err(e);</span><span class="WHIT">
-<span class='line'>195</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>196</span> </span><span class="WHIT">	</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">m</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>197</span> </span><span class="WHIT">		</span><span class="NAME">_p.sbufL</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">m.length</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>198</span> </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>199</span> 
-<span class='line'>200</span> </span><span class="COMM">//	instance constructor	---------------------------</span><span class="WHIT">
-<span class='line'>201</span> </span><span class="COMM">//	(document object)</span><span class="WHIT">
-<span class='line'>202</span> </span><span class="COMM">/*
+<span class='line'>164</span> </span><span class="COMM">/**
+<span class='line'>165</span>  * save log
+<span class='line'>166</span>  * @ignore
+<span class='line'>167</span>  * @param	m	message
+<span class='line'>168</span>  * @param	{string} id	element id
+<span class='line'>169</span>  * @param	force	force to clean the message area
+<span class='line'>170</span>  */</span><span class="WHIT">
+<span class='line'>171</span> </span><span class="NAME">s</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">m</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">id</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">force</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>172</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">_p</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">p</span><span class="PUNC">[</span><span class="NAME">id</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">_t</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_p.instance</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">f</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_p.logF</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">s</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_t.save_log</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>173</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">s</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">s</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="PUNC">!</span><span class="NAME">s</span><span class="PUNC">(</span><span class="NAME">m</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">l</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>174</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>175</span> 
+<span class='line'>176</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">m</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>177</span> </span><span class="WHIT">		</span><span class="NAME">_p.sbuf.push</span><span class="PUNC">(</span><span class="NAME">m</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">_t.save_date</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">gDate</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">_t.save_new_line</span><span class="WHIT">
+<span class='line'>178</span> </span><span class="WHIT">				</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">gDate</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">_t.save_new_line</span><span class="WHIT">
+<span class='line'>179</span> </span><span class="WHIT">				</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>180</span> </span><span class="WHIT">				</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">m</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>181</span> 
+<span class='line'>182</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">force</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">_t.flush</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">_p.sbufL</span><span class="WHIT"> </span><span class="PUNC">></span><span class="WHIT"> </span><span class="NAME">_t.save_limit</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>183</span> </span><span class="WHIT">		</span><span class="KEYW">try</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>184</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">f</span><span class="WHIT">
+<span class='line'>185</span> </span><span class="WHIT">					</span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">_t.log_file</span><span class="WHIT">
+<span class='line'>186</span> </span><span class="WHIT">					</span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">f</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_p.logF</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">fso.OpenTextFile</span><span class="PUNC">(</span><span class="NAME">_t.log_file</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>187</span> </span><span class="WHIT">							</span><span class="NUMB">8</span><span class="COMM">/* ForAppending */</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">true</span><span class="COMM">/* create */</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>188</span> </span><span class="WHIT">							</span><span class="NAME">_t.log_encoding</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>189</span> </span><span class="WHIT">				</span><span class="NAME">f.Write</span><span class="PUNC">(</span><span class="NAME">_p.sbuf.join</span><span class="PUNC">(</span><span class="NAME">_t.save_new_line</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">_p.sbuf</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>190</span> </span><span class="WHIT">						</span><span class="NAME">_p.sbufL</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">_t.error_message</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>191</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">catch</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>192</span> </span><span class="WHIT">			</span><span class="NAME">_t.error_message</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">;</span><span class="COMM">// err(e);</span><span class="WHIT">
+<span class='line'>193</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>194</span> </span><span class="WHIT">	</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">m</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>195</span> </span><span class="WHIT">		</span><span class="NAME">_p.sbufL</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">m.length</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>196</span> </span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>197</span> 
+<span class='line'>198</span> </span><span class="COMM">//	instance constructor	---------------------------</span><span class="WHIT">
+<span class='line'>199</span> </span><span class="COMM">//	(document object)</span><span class="WHIT">
+<span class='line'>200</span> </span><span class="COMM">/*
+<span class='line'>201</span> 
+<span class='line'>202</span> _=this
 <span class='line'>203</span> 
-<span class='line'>204</span> _=this
-<span class='line'>205</span> 
-<span class='line'>206</span> 
-<span class='line'>207</span> TODO:
-<span class='line'>208</span> set class in each input
-<span class='line'>209</span> input array
-<span class='line'>210</span> show file path & directory functional	可從 FSO operation.hta 移植
-<span class='line'>211</span> 增加 group 以便在多次輸入時亦可 trigger 或排版
-<span class='line'>212</span> 
-<span class='line'>213</span> count
-<span class='line'>214</span> c.f.: GLog
+<span class='line'>204</span> 
+<span class='line'>205</span> TODO:
+<span class='line'>206</span> set class in each input
+<span class='line'>207</span> input array
+<span class='line'>208</span> show file path & directory functional	可從 FSO operation.hta 移植
+<span class='line'>209</span> 增加 group 以便在多次輸入時亦可 toggle 或排版
+<span class='line'>210</span> 
+<span class='line'>211</span> count
+<span class='line'>212</span> c.f.: GLog
+<span class='line'>213</span> 
+<span class='line'>214</span> dependency:
 <span class='line'>215</span> 
-<span class='line'>216</span> dependency:
-<span class='line'>217</span> 
-<span class='line'>218</span> */</span><span class="WHIT">
-<span class='line'>219</span> </span><span class="COMM">/**
-<span class='line'>220</span>  * initial a log tool's instance/object
-<span class='line'>221</span>  * @class	log function
-<span class='line'>222</span>  * @see	usage: &lt;a href="#.extend">CeL.code.log.extend&lt;/a>
-<span class='line'>223</span>  * @since	2008/8/20 23:9:48
-<span class='line'>224</span>  * @requires	gDate(),NewLine,fso
-<span class='line'>225</span> 
-<span class='line'>226</span>  * @constructor
-<span class='line'>227</span>  * @name	CeL.code.log
-<span class='line'>228</span>  * @param	{String|object HTMLElement} obj	log target: message area element or id
-<span class='line'>229</span>  * @param	{Object} [className_set]	class name set
-<span class='line'>230</span>  */</span><span class="WHIT">
-<span class='line'>231</span> </span><span class="NAME">_tmp</span><span class="PUNC">;</span><span class="NAME">CeL.code.log</span><span class="WHIT">
-<span class='line'>232</span> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">obj</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">className_set</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>233</span> </span><span class="WHIT">	</span><span class="COMM">// Initial instance object. You can set it yourself.</span><span class="WHIT">
-<span class='line'>234</span> </span><span class="WHIT">	</span><span class="COMM">/**
-<span class='line'>235</span> 	 * log 時 warning/error message 之 className
-<span class='line'>236</span> 	 * @name	CeL.code.log.prototype.className_set
-<span class='line'>237</span> 	 */</span><span class="WHIT">
-<span class='line'>238</span> </span><span class="WHIT">	</span><span class="NAME">this.className_set</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">className_set</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>239</span> </span><span class="WHIT">			</span><span class="COMM">/**
-<span class='line'>240</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.log} 時使用的 className, DEFAULT className.
-<span class='line'>241</span> 			 * @name	CeL.code.log.prototype.className_set.log
-<span class='line'>242</span> 			 */</span><span class="WHIT">
-<span class='line'>243</span> </span><span class="WHIT">			</span><span class="NAME">log</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'debug_log'</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>244</span> </span><span class="WHIT">			</span><span class="COMM">/**
-<span class='line'>245</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.warn} 時使用的 className
-<span class='line'>246</span> 			 * @name	CeL.code.log.prototype.className_set.warn
-<span class='line'>247</span> 			 */</span><span class="WHIT">
-<span class='line'>248</span> </span><span class="WHIT">			</span><span class="NAME">warn</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'debug_warn'</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>249</span> </span><span class="WHIT">			</span><span class="COMM">/**
-<span class='line'>250</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.err} 時使用的 className
-<span class='line'>251</span> 			 * @name	CeL.code.log.prototype.className_set.err
-<span class='line'>252</span> 			 */</span><span class="WHIT">
-<span class='line'>253</span> </span><span class="WHIT">			</span><span class="NAME">err</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'debug_err'</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>254</span> </span><span class="WHIT">			</span><span class="COMM">/**
-<span class='line'>255</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.set_board} 時設定 log panel 使用的 className
-<span class='line'>256</span> 			 * @name	CeL.code.log.prototype.className_set.panel
-<span class='line'>257</span> 			 */</span><span class="WHIT">
-<span class='line'>258</span> </span><span class="WHIT">			</span><span class="NAME">panel</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'debug_panel'</span><span class="WHIT">
-<span class='line'>259</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>260</span> 
-<span class='line'>261</span> </span><span class="WHIT">	</span><span class="COMM">/**
-<span class='line'>262</span> 	 * log 時 warning/error message 之 prefix
-<span class='line'>263</span> 	 * @name	CeL.code.log.prototype.message_prefix
-<span class='line'>264</span> 	 */</span><span class="WHIT">
-<span class='line'>265</span> </span><span class="WHIT">	</span><span class="NAME">this.message_prefix</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>266</span> </span><span class="WHIT">			</span><span class="COMM">/**
-<span class='line'>267</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.log} 時使用的 prefix, DEFAULT prefix.
-<span class='line'>268</span> 			 * @name	CeL.code.log.prototype.message_prefix.log
-<span class='line'>269</span> 			 */</span><span class="WHIT">
-<span class='line'>270</span> </span><span class="WHIT">			</span><span class="NAME">log</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>271</span> </span><span class="WHIT">			</span><span class="COMM">/**
-<span class='line'>272</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.warn} 時使用的 prefix
-<span class='line'>273</span> 			 * @name	CeL.code.log.prototype.message_prefix.warn
-<span class='line'>274</span> 			 */</span><span class="WHIT">
-<span class='line'>275</span> </span><span class="WHIT">			</span><span class="NAME">warn</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>276</span> </span><span class="WHIT">			</span><span class="COMM">/**
-<span class='line'>277</span> 			 * @description	表示當呼叫 {@link CeL.code.log.prototype.err}, 是錯誤 error message 時使用的 prefix
-<span class='line'>278</span> 			 * @name	CeL.code.log.prototype.message_prefix.err
-<span class='line'>279</span> 			 */</span><span class="WHIT">
-<span class='line'>280</span> </span><span class="WHIT">			</span><span class="NAME">err</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'&lt;em>!! Error !!&lt;/em> '</span><span class="WHIT">
-<span class='line'>281</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>282</span> 
-<span class='line'>283</span> </span><span class="WHIT">	</span><span class="NAME">this.id</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">p.length</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>284</span> </span><span class="WHIT">	</span><span class="NAME">p.push</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>285</span> </span><span class="WHIT">		</span><span class="NAME">instance</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>286</span> </span><span class="WHIT">		</span><span class="COMM">/**
-<span class='line'>287</span> 		 * write buffer
-<span class='line'>288</span> 		 */</span><span class="WHIT">
-<span class='line'>289</span> </span><span class="WHIT">		</span><span class="NAME">buf</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>290</span> </span><span class="WHIT">		</span><span class="COMM">/**
-<span class='line'>291</span> 		 * save buffer when we need to save the messages
-<span class='line'>292</span> 		 */</span><span class="WHIT">
-<span class='line'>293</span> </span><span class="WHIT">		</span><span class="NAME">sbuf</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>294</span> </span><span class="WHIT">		</span><span class="COMM">/**
-<span class='line'>295</span> 		 * length of save buffer
-<span class='line'>296</span> 		 */</span><span class="WHIT">
-<span class='line'>297</span> </span><span class="WHIT">		</span><span class="NAME">sbufL</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>298</span> </span><span class="WHIT">		</span><span class="COMM">/**
-<span class='line'>299</span> 		 * now logged buffer
-<span class='line'>300</span> 		 */</span><span class="WHIT">
-<span class='line'>301</span> </span><span class="WHIT">		</span><span class="NAME">lbuf</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="WHIT">
-<span class='line'>302</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="WHIT">
-<span class='line'>303</span> </span><span class="WHIT">	</span><span class="NAME">this.set_board</span><span class="PUNC">(</span><span class="NAME">obj</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>304</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>216</span> */</span><span class="WHIT">
+<span class='line'>217</span> </span><span class="COMM">/**
+<span class='line'>218</span>  * initial a log tool's instance/object
+<span class='line'>219</span>  * @class	log function
+<span class='line'>220</span>  * @see	usage: &lt;a href="#.extend">CeL.code.log.extend&lt;/a>
+<span class='line'>221</span>  * @since	2008/8/20 23:9:48
+<span class='line'>222</span>  * @requires	gDate(),NewLine,fso
+<span class='line'>223</span> 
+<span class='line'>224</span>  * @constructor
+<span class='line'>225</span>  * @name	CeL.code.log
+<span class='line'>226</span>  * @param	{String|object HTMLElement} obj	log target: message area element or id
+<span class='line'>227</span>  * @param	{Object} [className_set]	class name set
+<span class='line'>228</span>  */</span><span class="WHIT">
+<span class='line'>229</span> </span><span class="NAME">_tmp</span><span class="PUNC">;</span><span class="NAME">CeL.code.log</span><span class="WHIT">
+<span class='line'>230</span> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">obj</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">className_set</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>231</span> </span><span class="WHIT">	</span><span class="COMM">// Initial instance object. You can set it yourself.</span><span class="WHIT">
+<span class='line'>232</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>233</span> 	 * log 時 warning/error message 之 className
+<span class='line'>234</span> 	 * @name	CeL.code.log.prototype.className_set
+<span class='line'>235</span> 	 */</span><span class="WHIT">
+<span class='line'>236</span> </span><span class="WHIT">	</span><span class="NAME">this.className_set</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">className_set</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>237</span> </span><span class="WHIT">			</span><span class="COMM">/**
+<span class='line'>238</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.log} 時使用的 className, DEFAULT className.
+<span class='line'>239</span> 			 * @name	CeL.code.log.prototype.className_set.log
+<span class='line'>240</span> 			 */</span><span class="WHIT">
+<span class='line'>241</span> </span><span class="WHIT">			</span><span class="NAME">log</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'debug_log'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>242</span> </span><span class="WHIT">			</span><span class="COMM">/**
+<span class='line'>243</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.warn} 時使用的 className
+<span class='line'>244</span> 			 * @name	CeL.code.log.prototype.className_set.warn
+<span class='line'>245</span> 			 */</span><span class="WHIT">
+<span class='line'>246</span> </span><span class="WHIT">			</span><span class="NAME">warn</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'debug_warn'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>247</span> </span><span class="WHIT">			</span><span class="COMM">/**
+<span class='line'>248</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.err} 時使用的 className
+<span class='line'>249</span> 			 * @name	CeL.code.log.prototype.className_set.err
+<span class='line'>250</span> 			 */</span><span class="WHIT">
+<span class='line'>251</span> </span><span class="WHIT">			</span><span class="NAME">err</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'debug_err'</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>252</span> </span><span class="WHIT">			</span><span class="COMM">/**
+<span class='line'>253</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.set_board} 時設定 log panel 使用的 className
+<span class='line'>254</span> 			 * @name	CeL.code.log.prototype.className_set.panel
+<span class='line'>255</span> 			 */</span><span class="WHIT">
+<span class='line'>256</span> </span><span class="WHIT">			</span><span class="NAME">panel</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'debug_panel'</span><span class="WHIT">
+<span class='line'>257</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>258</span> 
+<span class='line'>259</span> </span><span class="WHIT">	</span><span class="COMM">/**
+<span class='line'>260</span> 	 * log 時 warning/error message 之 prefix
+<span class='line'>261</span> 	 * @name	CeL.code.log.prototype.message_prefix
+<span class='line'>262</span> 	 */</span><span class="WHIT">
+<span class='line'>263</span> </span><span class="WHIT">	</span><span class="NAME">this.message_prefix</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>264</span> </span><span class="WHIT">			</span><span class="COMM">/**
+<span class='line'>265</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.log} 時使用的 prefix, DEFAULT prefix.
+<span class='line'>266</span> 			 * @name	CeL.code.log.prototype.message_prefix.log
+<span class='line'>267</span> 			 */</span><span class="WHIT">
+<span class='line'>268</span> </span><span class="WHIT">			</span><span class="NAME">log</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>269</span> </span><span class="WHIT">			</span><span class="COMM">/**
+<span class='line'>270</span> 			 * @description	當呼叫 {@link CeL.code.log.prototype.warn} 時使用的 prefix
+<span class='line'>271</span> 			 * @name	CeL.code.log.prototype.message_prefix.warn
+<span class='line'>272</span> 			 */</span><span class="WHIT">
+<span class='line'>273</span> </span><span class="WHIT">			</span><span class="NAME">warn</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>274</span> </span><span class="WHIT">			</span><span class="COMM">/**
+<span class='line'>275</span> 			 * @description	表示當呼叫 {@link CeL.code.log.prototype.err}, 是錯誤 error message 時使用的 prefix
+<span class='line'>276</span> 			 * @name	CeL.code.log.prototype.message_prefix.err
+<span class='line'>277</span> 			 */</span><span class="WHIT">
+<span class='line'>278</span> </span><span class="WHIT">			</span><span class="NAME">err</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'&lt;em>!! Error !!&lt;/em> '</span><span class="WHIT">
+<span class='line'>279</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>280</span> 
+<span class='line'>281</span> </span><span class="WHIT">	</span><span class="NAME">this.id</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">p.length</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>282</span> </span><span class="WHIT">	</span><span class="NAME">p.push</span><span class="PUNC">(</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>283</span> </span><span class="WHIT">		</span><span class="NAME">instance</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">this</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>284</span> </span><span class="WHIT">		</span><span class="COMM">/**
+<span class='line'>285</span> 		 * write buffer
+<span class='line'>286</span> 		 */</span><span class="WHIT">
+<span class='line'>287</span> </span><span class="WHIT">		</span><span class="NAME">buf</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>288</span> </span><span class="WHIT">		</span><span class="COMM">/**
+<span class='line'>289</span> 		 * save buffer when we need to save the messages
+<span class='line'>290</span> 		 */</span><span class="WHIT">
+<span class='line'>291</span> </span><span class="WHIT">		</span><span class="NAME">sbuf</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>292</span> </span><span class="WHIT">		</span><span class="COMM">/**
+<span class='line'>293</span> 		 * length of save buffer
+<span class='line'>294</span> 		 */</span><span class="WHIT">
+<span class='line'>295</span> </span><span class="WHIT">		</span><span class="NAME">sbufL</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>296</span> </span><span class="WHIT">		</span><span class="COMM">/**
+<span class='line'>297</span> 		 * now logged buffer
+<span class='line'>298</span> 		 */</span><span class="WHIT">
+<span class='line'>299</span> </span><span class="WHIT">		</span><span class="NAME">lbuf</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="WHIT">
+<span class='line'>300</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="WHIT">
+<span class='line'>301</span> </span><span class="WHIT">	</span><span class="NAME">this.set_board</span><span class="PUNC">(</span><span class="NAME">obj</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>302</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>303</span> 
+<span class='line'>304</span> 
 <span class='line'>305</span> 
-<span class='line'>306</span> 
+<span class='line'>306</span> </span><span class="COMM">//	class public interface	---------------------------</span><span class="WHIT">
 <span class='line'>307</span> 
-<span class='line'>308</span> </span><span class="COMM">//	class public interface	---------------------------</span><span class="WHIT">
-<span class='line'>309</span> 
-<span class='line'>310</span> </span><span class="NAME">CeL.code.log</span><span class="WHIT">
-<span class='line'>311</span> </span><span class="PUNC">.</span><span class="WHIT">
-<span class='line'>312</span> </span><span class="COMM">/**
-<span class='line'>313</span>  * do the log action
-<span class='line'>314</span>  * @memberOf	CeL.code.log
-<span class='line'>315</span>  * @private
-<span class='line'>316</span>  */</span><span class="WHIT">
-<span class='line'>317</span> </span><span class="NAME">do_log</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>318</span> </span><span class="COMM">/*	這段應該只在 module namespace 重複定義時才會發生
-<span class='line'>319</span>  var I=p[id];
-<span class='line'>320</span>  if(!I){
-<span class='line'>321</span>   alert('.do_log: not exist: ['+id+']');
-<span class='line'>322</span>   return;
-<span class='line'>323</span>  }
-<span class='line'>324</span>  I=I.instance;
-<span class='line'>325</span> */</span><span class="WHIT">
-<span class='line'>326</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">I</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">p</span><span class="PUNC">[</span><span class="NAME">id</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">instance</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>327</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">I.do_log</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>328</span> </span><span class="WHIT">		</span><span class="NAME">I.do_log</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>329</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>330</span> 
-<span class='line'>331</span> 
-<span class='line'>332</span> </span><span class="NAME">CeL.code.log</span><span class="WHIT">
-<span class='line'>333</span> </span><span class="PUNC">.</span><span class="WHIT">
-<span class='line'>334</span> </span><span class="COMM">/**
-<span class='line'>335</span>  * 對各種不同 error object 作應對，獲得可理解的 error message。
-<span class='line'>336</span>  * @param	e	error object
-<span class='line'>337</span>  * @param	new_line	new_line
-<span class='line'>338</span>  * @param	caller	function caller
-<span class='line'>339</span>  * @memberOf	CeL.code.log
-<span class='line'>340</span>  * @see
-<span class='line'>341</span>  * http://msdn.microsoft.com/en-us/library/ms976144.aspx
-<span class='line'>342</span>  * The facility code establishes who originated the error. For example, all internal script engine errors generated by the JScript engine have a facility code of "A".
-<span class='line'>343</span>  * http://msdn.microsoft.com/en-us/library/ms690088(VS.85).aspx
-<span class='line'>344</span>  * 
-<span class='line'>345</span>  * http://msdn.microsoft.com/en-us/library/t9zk6eay.aspx
-<span class='line'>346</span>  * http://msdn.microsoft.com/en-us/library/microsoft.jscript.errorobject.aspx
-<span class='line'>347</span>  * Specifies the name of the type of the error.
-<span class='line'>348</span>  * Possible values include Error, EvalError, RangeError, ReferenceError, SyntaxError, TypeError, and URIError.
-<span class='line'>349</span>  */</span><span class="WHIT">
-<span class='line'>350</span> </span><span class="NAME">get_error_message</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">get_error_message</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">new_line</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>351</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">new_line</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>352</span> </span><span class="WHIT">		</span><span class="NAME">new_line</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_.prototype.save_new_line</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>353</span> 
-<span class='line'>354</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="STRN">'string'</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>355</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>356</span> </span><span class="WHIT">			</span><span class="COMM">// TODO: do not use .caller</span><span class="WHIT">
-<span class='line'>357</span> </span><span class="WHIT">			</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">get_error_message.caller</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>358</span> 
-<span class='line'>359</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>360</span> </span><span class="WHIT">			</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'from the top level'</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>361</span> </span><span class="WHIT">		</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>362</span> </span><span class="WHIT">			</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'@'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">library_namespace.get_function_name</span><span class="PUNC">(</span><span class="NAME">caller</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>363</span> </span><span class="WHIT">		</span><span class="KEYW">else</span><span class="WHIT">
-<span class='line'>364</span> </span><span class="WHIT">			</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'@'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">library_namespace.Class</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>365</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>366</span> 
-<span class='line'>367</span> 
-<span class='line'>368</span> </span><span class="WHIT">	</span><span class="COMM">// from popErr()</span><span class="WHIT">
-<span class='line'>369</span> </span><span class="WHIT">	</span><span class="COMM">//	type</span><span class="WHIT">
-<span class='line'>370</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">library_namespace.is_type</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>371</span> </span><span class="WHIT">	</span><span class="COMM">//	message</span><span class="WHIT">
-<span class='line'>372</span> </span><span class="WHIT">	</span><span class="NAME">m</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'Error'</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT">
-<span class='line'>373</span> </span><span class="WHIT">			</span><span class="STRN">'Error '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">': '</span><span class="WHIT">
-<span class='line'>374</span> </span><span class="WHIT">			</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e.number</span><span class="WHIT"> </span><span class="PUNC">&</span><span class="WHIT"> </span><span class="NUMB">0xFFFF</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e.name</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="STRN">' ['</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e.name</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'] '</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">' '</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>375</span> </span><span class="WHIT">			</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'(facility code '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e.number</span><span class="WHIT"> </span><span class="PUNC">>></span><span class="WHIT"> </span><span class="NUMB">16</span><span class="WHIT"> </span><span class="PUNC">&</span><span class="WHIT"> </span><span class="NUMB">0x1FFF</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'): '</span><span class="WHIT">
-<span class='line'>376</span> </span><span class="WHIT">			</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">new_line</span><span class="WHIT">
-<span class='line'>377</span> </span><span class="WHIT">			</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e.message</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/\r?\n/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'&lt;br/>'</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>378</span> </span><span class="WHIT">			</span><span class="COMM">//	.message 為主，.description 是舊的。</span><span class="WHIT">
-<span class='line'>379</span> </span><span class="WHIT">			</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">e.description</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">e.description</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">e.message</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT">
-<span class='line'>380</span> </span><span class="WHIT">				</span><span class="STRN">''</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT">
-<span class='line'>381</span> </span><span class="WHIT">				</span><span class="NAME">new_line</span><span class="WHIT">
-<span class='line'>382</span> </span><span class="WHIT">					</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">new_line</span><span class="WHIT">
-<span class='line'>383</span> </span><span class="WHIT">					</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="STRN">''</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e.description</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/\r?\n/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'&lt;br/>'</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>384</span> </span><span class="WHIT">			</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>385</span> 
-<span class='line'>386</span> </span><span class="WHIT">		</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'DOMException'</span><span class="PUNC">?</span><span class="WHIT">
-<span class='line'>387</span> </span><span class="WHIT">			</span><span class="COMM">//	http://www.w3.org/TR/DOM-Level-3-Core/core.html#ID-17189187</span><span class="WHIT">
-<span class='line'>388</span> </span><span class="WHIT">			</span><span class="STRN">'['</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'] '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e.code</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">': '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e.message</span><span class="WHIT">
+<span class='line'>308</span> </span><span class="NAME">CeL.code.log</span><span class="WHIT">
+<span class='line'>309</span> </span><span class="PUNC">.</span><span class="WHIT">
+<span class='line'>310</span> </span><span class="COMM">/**
+<span class='line'>311</span>  * do the log action
+<span class='line'>312</span>  * @memberOf	CeL.code.log
+<span class='line'>313</span>  * @private
+<span class='line'>314</span>  */</span><span class="WHIT">
+<span class='line'>315</span> </span><span class="NAME">do_log</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">id</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>316</span> </span><span class="COMM">/*	這段應該只在 module namespace 重複定義時才會發生
+<span class='line'>317</span>  var I=p[id];
+<span class='line'>318</span>  if(!I){
+<span class='line'>319</span>   alert('.do_log: not exist: ['+id+']');
+<span class='line'>320</span>   return;
+<span class='line'>321</span>  }
+<span class='line'>322</span>  I=I.instance;
+<span class='line'>323</span> */</span><span class="WHIT">
+<span class='line'>324</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">I</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">p</span><span class="PUNC">[</span><span class="NAME">id</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">instance</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>325</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">I.do_log</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>326</span> </span><span class="WHIT">		</span><span class="NAME">I.do_log</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>327</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>328</span> 
+<span class='line'>329</span> 
+<span class='line'>330</span> </span><span class="NAME">CeL.code.log</span><span class="WHIT">
+<span class='line'>331</span> </span><span class="PUNC">.</span><span class="WHIT">
+<span class='line'>332</span> </span><span class="COMM">/**
+<span class='line'>333</span>  * 對各種不同 error object 作應對，獲得可理解的 error message。
+<span class='line'>334</span>  * @param	e	error object
+<span class='line'>335</span>  * @param	new_line	new_line
+<span class='line'>336</span>  * @param	caller	function caller
+<span class='line'>337</span>  * @memberOf	CeL.code.log
+<span class='line'>338</span>  * @see
+<span class='line'>339</span>  * http://msdn.microsoft.com/en-us/library/ms976144.aspx
+<span class='line'>340</span>  * The facility code establishes who originated the error. For example, all internal script engine errors generated by the JScript engine have a facility code of "A".
+<span class='line'>341</span>  * http://msdn.microsoft.com/en-us/library/ms690088(VS.85).aspx
+<span class='line'>342</span>  * 
+<span class='line'>343</span>  * http://msdn.microsoft.com/en-us/library/t9zk6eay.aspx
+<span class='line'>344</span>  * http://msdn.microsoft.com/en-us/library/microsoft.jscript.errorobject.aspx
+<span class='line'>345</span>  * Specifies the name of the type of the error.
+<span class='line'>346</span>  * Possible values include Error, EvalError, RangeError, ReferenceError, SyntaxError, TypeError, and URIError.
+<span class='line'>347</span>  */</span><span class="WHIT">
+<span class='line'>348</span> </span><span class="NAME">get_error_message</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">get_error_message</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">new_line</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>349</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">new_line</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>350</span> </span><span class="WHIT">		</span><span class="NAME">new_line</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">_.prototype.save_new_line</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>351</span> 
+<span class='line'>352</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="STRN">'string'</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>353</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>354</span> </span><span class="WHIT">			</span><span class="COMM">// TODO: do not use .caller</span><span class="WHIT">
+<span class='line'>355</span> </span><span class="WHIT">			</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">get_error_message.caller</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>356</span> 
+<span class='line'>357</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>358</span> </span><span class="WHIT">			</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'from the top level'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>359</span> </span><span class="WHIT">		</span><span class="KEYW">else</span><span class="WHIT"> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'function'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>360</span> </span><span class="WHIT">			</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'@'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">library_namespace.get_function_name</span><span class="PUNC">(</span><span class="NAME">caller</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>361</span> </span><span class="WHIT">		</span><span class="KEYW">else</span><span class="WHIT">
+<span class='line'>362</span> </span><span class="WHIT">			</span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'@'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">library_namespace.Class</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>363</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>364</span> 
+<span class='line'>365</span> 
+<span class='line'>366</span> </span><span class="WHIT">	</span><span class="COMM">// from popErr()</span><span class="WHIT">
+<span class='line'>367</span> </span><span class="WHIT">	</span><span class="COMM">//	type</span><span class="WHIT">
+<span class='line'>368</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">library_namespace.is_type</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>369</span> </span><span class="WHIT">	</span><span class="COMM">//	message</span><span class="WHIT">
+<span class='line'>370</span> </span><span class="WHIT">	</span><span class="NAME">m</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'Error'</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT">
+<span class='line'>371</span> </span><span class="WHIT">			</span><span class="STRN">'Error '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">caller</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">': '</span><span class="WHIT">
+<span class='line'>372</span> </span><span class="WHIT">			</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e.number</span><span class="WHIT"> </span><span class="PUNC">&</span><span class="WHIT"> </span><span class="NUMB">0xFFFF</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e.name</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="STRN">' ['</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e.name</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'] '</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">' '</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>373</span> </span><span class="WHIT">			</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'(facility code '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e.number</span><span class="WHIT"> </span><span class="PUNC">>></span><span class="WHIT"> </span><span class="NUMB">16</span><span class="WHIT"> </span><span class="PUNC">&</span><span class="WHIT"> </span><span class="NUMB">0x1FFF</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'): '</span><span class="WHIT">
+<span class='line'>374</span> </span><span class="WHIT">			</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">new_line</span><span class="WHIT">
+<span class='line'>375</span> </span><span class="WHIT">			</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e.message</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/\r?\n/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'&lt;br/>'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>376</span> </span><span class="WHIT">			</span><span class="COMM">//	.message 為主，.description 是舊的。</span><span class="WHIT">
+<span class='line'>377</span> </span><span class="WHIT">			</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">e.description</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">e.description</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="NAME">e.message</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT">
+<span class='line'>378</span> </span><span class="WHIT">				</span><span class="STRN">''</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT">
+<span class='line'>379</span> </span><span class="WHIT">				</span><span class="NAME">new_line</span><span class="WHIT">
+<span class='line'>380</span> </span><span class="WHIT">					</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">new_line</span><span class="WHIT">
+<span class='line'>381</span> </span><span class="WHIT">					</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="STRN">''</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e.description</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/\r?\n/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'&lt;br/>'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>382</span> </span><span class="WHIT">			</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>383</span> 
+<span class='line'>384</span> </span><span class="WHIT">		</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'DOMException'</span><span class="PUNC">?</span><span class="WHIT">
+<span class='line'>385</span> </span><span class="WHIT">			</span><span class="COMM">//	http://www.w3.org/TR/DOM-Level-3-Core/core.html#ID-17189187</span><span class="WHIT">
+<span class='line'>386</span> </span><span class="WHIT">			</span><span class="STRN">'['</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'] '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e.code</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">': '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e.message</span><span class="WHIT">
+<span class='line'>387</span> 
+<span class='line'>388</span> </span><span class="WHIT">		</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">!</span><span class="NAME">e</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'string'</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">e</span><span class="WHIT">
 <span class='line'>389</span> 
-<span class='line'>390</span> </span><span class="WHIT">		</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">!</span><span class="NAME">e</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'string'</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="NAME">e</span><span class="WHIT">
+<span class='line'>390</span> </span><span class="WHIT">		</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'['</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'] '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e.message</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>391</span> 
-<span class='line'>392</span> </span><span class="WHIT">		</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">'['</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'] '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e.message</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>393</span> 
-<span class='line'>394</span> 
-<span class='line'>395</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">library_namespace.is_debug</span><span class="PUNC">(</span><span class="NUMB">2</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">e</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'object'</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>396</span> </span><span class="WHIT">		</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">T</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>397</span> </span><span class="WHIT">			</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>398</span> </span><span class="WHIT">				</span><span class="COMM">//	Firefox has (new Error).stack</span><span class="WHIT">
-<span class='line'>399</span> </span><span class="WHIT">				</span><span class="COMM">//	http://eriwen.com/javascript/js-stack-trace/</span><span class="WHIT">
-<span class='line'>400</span> </span><span class="WHIT">				</span><span class="NAME">m</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'&lt;br/> &lt;span class="debug_debug">'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'&lt;/span>: '</span><span class="WHIT">
-<span class='line'>401</span> </span><span class="WHIT">						</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'string'</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'stack'</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT">
-<span class='line'>402</span> </span><span class="WHIT">								</span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/[\r\n]+$/</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/(@)([a-z\-]+:\/\/.+)(:)(\d+)$/gm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'$1&lt;a href="view-source:$2#$4" target="_blank">$2&lt;/a>$3$4'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/\n/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'&lt;br/>- '</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>403</span> </span><span class="WHIT">								</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'string'</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'fileName'</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="STRN">'&lt;a href="view-source:'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'" target="_blank">'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'&lt;/a>'</span><span class="WHIT">
-<span class='line'>404</span> </span><span class="WHIT">								</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>405</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>406</span> 
-<span class='line'>407</span> </span><span class="WHIT">	</span><span class="COMM">// m += ' (' + arguments.callee.caller + ')';</span><span class="WHIT">
-<span class='line'>408</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">m</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>409</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>410</span> 
-<span class='line'>411</span> 
-<span class='line'>412</span> </span><span class="NAME">CeL.code.log</span><span class="WHIT">
-<span class='line'>413</span> </span><span class="PUNC">.</span><span class="WHIT">
-<span class='line'>414</span> </span><span class="COMM">/**
-<span class='line'>415</span>  * get node description
-<span class='line'>416</span>  * 
-<span class='line'>417</span>  * @param node
-<span class='line'>418</span>  *            HTML node
-<span class='line'>419</span>  * @memberOf CeL.code.log
-<span class='line'>420</span>  */</span><span class="WHIT">
-<span class='line'>421</span> </span><span class="NAME">node_description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">node</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">flag</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>422</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">node</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'string'</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>423</span> </span><span class="WHIT">		</span><span class="NAME">node</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">document.getElementById</span><span class="PUNC">(</span><span class="NAME">node</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>424</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">node</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>425</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>392</span> 
+<span class='line'>393</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">library_namespace.is_debug</span><span class="PUNC">(</span><span class="NUMB">2</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">e</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'object'</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>394</span> </span><span class="WHIT">		</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">T</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>395</span> </span><span class="WHIT">			</span><span class="KEYW">try</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>396</span> </span><span class="WHIT">				</span><span class="COMM">//	Firefox has (new Error).stack</span><span class="WHIT">
+<span class='line'>397</span> </span><span class="WHIT">				</span><span class="COMM">//	http://eriwen.com/javascript/js-stack-trace/</span><span class="WHIT">
+<span class='line'>398</span> </span><span class="WHIT">				</span><span class="NAME">m</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'&lt;br/> &lt;span class="debug_debug">'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'&lt;/span>: '</span><span class="WHIT">
+<span class='line'>399</span> </span><span class="WHIT">						</span><span class="PUNC">+</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'string'</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'stack'</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT">
+<span class='line'>400</span> </span><span class="WHIT">								</span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/[\r\n]+$/</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/(@)([a-z\-]+:\/\/.+)(:)(\d+)$/gm</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'$1&lt;a href="view-source:$2#$4" target="_blank">$2&lt;/a>$3$4'</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/\n/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'&lt;br/>- '</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>401</span> </span><span class="WHIT">								</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'string'</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">T</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'fileName'</span><span class="WHIT"> </span><span class="PUNC">?</span><span class="WHIT"> </span><span class="STRN">'&lt;a href="view-source:'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'" target="_blank">'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'&lt;/a>'</span><span class="WHIT">
+<span class='line'>402</span> </span><span class="WHIT">								</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">[</span><span class="NAME">T</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>403</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="KEYW">catch</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>404</span> 
+<span class='line'>405</span> </span><span class="WHIT">	</span><span class="COMM">// m += ' (' + arguments.callee.caller + ')';</span><span class="WHIT">
+<span class='line'>406</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">m</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>407</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>408</span> 
+<span class='line'>409</span> 
+<span class='line'>410</span> </span><span class="NAME">CeL.code.log</span><span class="WHIT">
+<span class='line'>411</span> </span><span class="PUNC">.</span><span class="WHIT">
+<span class='line'>412</span> </span><span class="COMM">/**
+<span class='line'>413</span>  * get node description
+<span class='line'>414</span>  * 
+<span class='line'>415</span>  * @param node
+<span class='line'>416</span>  *            HTML node
+<span class='line'>417</span>  * @memberOf CeL.code.log
+<span class='line'>418</span>  */</span><span class="WHIT">
+<span class='line'>419</span> </span><span class="NAME">node_description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">node</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">flag</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>420</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">node</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'string'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>421</span> </span><span class="WHIT">		</span><span class="NAME">node</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">document.getElementById</span><span class="PUNC">(</span><span class="NAME">node</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>422</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">node</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>423</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>424</span> 
+<span class='line'>425</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>426</span> 
-<span class='line'>427</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>428</span> 
-<span class='line'>429</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">node.id</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>430</span> </span><span class="WHIT">		</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'#'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">node.id</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>431</span> 
-<span class='line'>432</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">node.className</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>433</span> </span><span class="WHIT">		</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'.'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">node.className</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>434</span> 
-<span class='line'>435</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">node.tagName</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>436</span> </span><span class="WHIT">		</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'&lt;'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">node.tagName</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'&gt;'</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>437</span> 
-<span class='line'>438</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">node.innerHTML</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>439</span> </span><span class="WHIT">		</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">node.innerHTML</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>440</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">description.length</span><span class="WHIT"> </span><span class="PUNC">></span><span class="WHIT"> </span><span class="NUMB">40</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'>441</span> </span><span class="WHIT">			</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">description.slice</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">40</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>442</span> </span><span class="WHIT">		</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">description.replace</span><span class="PUNC">(</span><span class="REGX">/&lt;/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'&lt;'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>443</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>444</span> 
-<span class='line'>445</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="STRN">'(null description node)'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>427</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">node.id</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>428</span> </span><span class="WHIT">		</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'#'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">node.id</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>429</span> 
+<span class='line'>430</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">node.className</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>431</span> </span><span class="WHIT">		</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'.'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">node.className</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>432</span> 
+<span class='line'>433</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">node.tagName</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>434</span> </span><span class="WHIT">		</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">'&lt;'</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">node.tagName</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">'&gt;'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>435</span> 
+<span class='line'>436</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">node.innerHTML</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>437</span> </span><span class="WHIT">		</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">node.innerHTML</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>438</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">description.length</span><span class="WHIT"> </span><span class="PUNC">></span><span class="WHIT"> </span><span class="NUMB">40</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>439</span> </span><span class="WHIT">			</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">description.slice</span><span class="PUNC">(</span><span class="NUMB">0</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">40</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>440</span> </span><span class="WHIT">		</span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">description.replace</span><span class="PUNC">(</span><span class="REGX">/&lt;/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'&lt;'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>441</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>442</span> 
+<span class='line'>443</span> </span><span class="WHIT">	</span><span class="COMM">//	TODO: 對 Range object 之類的處理</span><span class="WHIT">
+<span class='line'>444</span> </span><span class="WHIT">	</span><span class="COMM">//	http://help.dottoro.com/ljxsqnoi.php</span><span class="WHIT">
+<span class='line'>445</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">description</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="STRN">'(null description node: '</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">library_namespace.is_type</span><span class="PUNC">(</span><span class="NAME">node</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">')'</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>446</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>447</span> 
 <span class='line'>448</span> 
@@ -753,9 +753,9 @@
 <span class='line'>746</span> 
 <span class='line'>747</span> </span><span class="COMM">/**
 <span class='line'>748</span>  * show/hide log board
-<span class='line'>749</span>  * @name	CeL.code.log.prototype.trigger
+<span class='line'>749</span>  * @name	CeL.code.log.prototype.toggle
 <span class='line'>750</span>  */</span><span class="WHIT">
-<span class='line'>751</span> </span><span class="NAME">trigger</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">s</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>751</span> </span><span class="NAME">toggle</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">s</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>752</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">_s</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">p</span><span class="PUNC">[</span><span class="NAME">this.id</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">board.style</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>753</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">_s</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>754</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="WHIT"> </span><span class="NAME">s</span><span class="WHIT"> </span><span class="PUNC">===</span><span class="WHIT"> </span><span class="STRN">'undefined'</span><span class="PUNC">)</span><span class="WHIT">

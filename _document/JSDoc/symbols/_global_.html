@@ -209,6 +209,8 @@ ul.inheritsList
 	
 	<li><a href="../symbols/CeL.data.XML.html">CeL.data.XML</a></li>
 	
+	<li><a href="../symbols/CeL.env.html">CeL.env</a></li>
+	
 	<li><a href="../symbols/CeL.IO.file.html">CeL.IO.file</a></li>
 	
 	<li><a href="../symbols/CeL.IO.Windows.file.html">CeL.IO.Windows.file</a></li>
@@ -254,8 +256,6 @@ ul.inheritsList
 	<li><a href="../symbols/CeL.OS.Windows.registry.html">CeL.OS.Windows.registry</a></li>
 	
 	<li><a href="../symbols/CeL.OS.WMI.html">CeL.OS.WMI</a></li>
-	
-	<li><a href="../symbols/env.html">env</a></li>
 	
 </ul>
 <hr />
@@ -406,9 +406,9 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#Big5JPToUnicodeJP">Big5JPToUnicodeJP</a></b>(U)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#Big5_kana_fix">Big5_kana_fix</a></b>(text)
 								</div>
-								<div class="description">將 BIG5 日文假名碼修改為 Unicode 日文假名</div>
+								<div class="description">將 BIG5 日文假名碼修改為 Unicode 日文假名。</div>
 							</td>
 						</tr>
 					
@@ -451,9 +451,9 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#extend">extend</a></b>(obj, className_set)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#extend">extend</a></b>(variable_set, name_space, from_name_space)
 								</div>
-								<div class="description">get new extend instance</div>
+								<div class="description">延展物件 (learned from jQuery):將 from_name_space 下的 variable_set 延展/覆蓋到 name_space。</div>
 							</td>
 						</tr>
 					
@@ -469,7 +469,7 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#find_class">find_class</a></b>(class_name, parent, tag_name, flag)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#find_class">find_class</a></b>(class_name, element, parent_node, tag_name, flag)
 								</div>
 								<div class="description"></div>
 							</td>
@@ -490,15 +490,6 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#gcd">gcd</a></b>(n1, n2)
 								</div>
 								<div class="description">Get GCD of 2 numbers</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_all_functions">get_all_functions</a></b>(script_filename)
-								</div>
-								<div class="description">取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。</div>
 							</td>
 						</tr>
 					
@@ -586,6 +577,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_window_status">get_window_status</a></b>(node)
+								</div>
+								<div class="description">取得當前 window status</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#has_class">has_class</a></b>(element, class_name)
 								</div>
 								<div class="description">If HTML element has specified class</div>
@@ -624,7 +624,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#include_resource">include_resource</a></b>(resource, callback, use_write, type)
 								</div>
-								<div class="description">include other JavaScript/CSS files</div>
+								<div class="description">include other JavaScript/CSS files.</div>
 							</td>
 						</tr>
 					
@@ -640,7 +640,7 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#initial_env">initial_env</a></b>(OS_type)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#initial_env">initial_env</a></b>(OS_type, reset)
 								</div>
 								<div class="description">Setup environment variables</div>
 							</td>
@@ -723,7 +723,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#new_node">new_node</a></b>(nodes, layer)
 								</div>
-								<div class="description">instead of createNode().</div>
+								<div class="description">創建新的 DOM 節點(node)。createNode() 的功能補充加強版。TODO: 分割功能(set_attrib, add_child, .</div>
 							</td>
 						</tr>
 					
@@ -1178,7 +1178,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>http://msdn.microsoft.com/en-us/library/ff512406.aspx</dd>
+								<dd><a href="http://msdn.microsoft.com/en-us/library/ff512406.aspx" accessdate="2010/7/12 20:22">Translate Method</a>,<a href="http://www.west-wind.com/Weblog/posts/107136.aspx" accessdate="2010/7/12 20:22">JSONP for cross-site Callbacks - Rick Strahl's Web Log</a></dd>
 							
 							</dl>
 						
@@ -1224,15 +1224,15 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="Big5JPToUnicodeJP"> </a>
+					<a name="Big5_kana_fix"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>Big5JPToUnicodeJP</b>(U)
+					<b>Big5_kana_fix</b>(text)
 					
 					</div>
 					<div class="description">
-						將 BIG5 日文假名碼修改為 Unicode 日文假名
+						將 BIG5 日文假名碼修改為 Unicode 日文假名。
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_web.origin.js.html">web.origin.js</a>.
@@ -1247,7 +1247,7 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<span class="light fixedFont">{String}</span> <b>U</b>
+									<span class="light fixedFont">{String}</span> <b>text</b>
 									
 								</dt>
 								<dd>Unicode text</dd>
@@ -1501,22 +1501,18 @@ ul.inheritsList
 					<a name="extend"> </a>
 					<div class="fixedFont">
 					
-					<span class="light">{Array}</span>
-					<b>extend</b>(obj, className_set)
+					
+					<b>extend</b>(variable_set, name_space, from_name_space)
 					
 					</div>
 					<div class="description">
-						get new extend instance
+						延展物件 (learned from jQuery):將 from_name_space 下的 variable_set 延展/覆蓋到 name_space。
 						
 							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_log.origin.js.html">log.origin.js</a>.
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
 						
 						
 					</div>
-					
-					
-					
-					<pre class="code">//	status loggervar SL=new CeL.code.log('log'),sl=SL[1],warn=SL[2],err=SL[3];sl(msg);sl(msg,clear);//	general logfunction_set = new CeL.code.log.extend('panel',{});// 1.function_set = new CeL.code.log.extend('panel',{});logger = function_set[1];// 2.log_only = (new CeL.code.log.extend('panel',{}))[1];</pre>
 					
 					
 					
@@ -1525,16 +1521,22 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<span class="light fixedFont">{String|object HTMLElement}</span> <b>obj</b>
-									<i>Optional</i>
-								</dt>
-								<dd>message area element or id</dd>
-							
-								<dt>
-									<b>className_set</b>
+									<b>variable_set</b>
 									
 								</dt>
-								<dd></dd>
+								<dd>variable set</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Object|Function}</span> <b>name_space</b>
+									
+								</dt>
+								<dd>extend to what name-space</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Object|Function}</span> <b>from_name_space</b>
+									
+								</dt>
+								<dd>When inputing function names, we need a base name-space to search these functions.</dd>
 							
 							</dl>
 						
@@ -1542,7 +1544,7 @@ ul.inheritsList
 						
 							<dl class="detailList">
 							<dt class="heading">Since:</dt>
-								<dd>2009/8/24 20:15:31</dd>
+								<dd>2009/11/25 21:17:44</dd>
 							</dl>
 							</dl>
 						
@@ -1551,11 +1553,18 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd><span class="light fixedFont">{Array}</span> [ instance of this module, log function, warning function, error function ]</dd>
+								<dd>library names-pace</dd>
 							
 							</dl>
 						
 						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/03/01/jquery-extend.aspx" accessdate="2009/11/17 1:24" title="jQuery.extend的用法 - 黑暗執行緒">jQuery.extend的用法</a>,<a href="http://www.cnblogs.com/rubylouvre/archive/2009/11/21/1607072.html" accessdate="2010/1/1 1:40">jQuery源码学习笔记三 - Ruby's Louvre - 博客园</a></dd>
+							
+							</dl>
 						
 
 					<hr />
@@ -1623,8 +1632,8 @@ ul.inheritsList
 					<a name="find_class"> </a>
 					<div class="fixedFont">
 					
-					
-					<b>find_class</b>(class_name, parent, tag_name, flag)
+					<span class="light">{[HTMLElement]}</span>
+					<b>find_class</b>(class_name, element, parent_node, tag_name, flag)
 					
 					</div>
 					<div class="description">
@@ -1643,19 +1652,25 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>class_name</b>
+									<span class="light fixedFont">{String}</span> <b>class_name</b>
 									
 								</dt>
-								<dd>class name || {class name 1:, class name 2:, ..}</dd>
+								<dd>class_name_1[ class_name_2 ..]</dd>
 							
 								<dt>
-									<b>parent</b>
+									<span class="light fixedFont">{HTMLElement}</span> <b>element</b>
 									
 								</dt>
-								<dd></dd>
+								<dd>HTML elements</dd>
 							
 								<dt>
-									<b>tag_name</b>
+									<span class="light fixedFont">{HTMLElement}</span> <b>parent_node</b>
+									
+								</dt>
+								<dd>parent node</dd>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>tag_name</b>
 									
 								</dt>
 								<dd>tag name</dd>
@@ -1675,7 +1690,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd></dd>
+								<dd><span class="light fixedFont">{[HTMLElement]}</span> nodes</dd>
 							
 							</dl>
 						
@@ -1684,7 +1699,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">See:</dt>
 							
-								<dd>document.getElementsByClassName in prototype.js</dd>
+								<dd>document.getElementsByClassName in prototype.js,jquery('.class')document.querySelector()http://www.w3.org/TR/selectors-api/http://blog.darkthread.net/blogs/darkthreadtw/archive/2008/04/17/document-queryselector-in-ie8.aspx</dd>
 							
 							</dl>
 						
@@ -1795,59 +1810,6 @@ ul.inheritsList
 							
 							</dl>
 						
-						
-						
-
-					<hr />
-				
-					<a name="get_all_functions"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>get_all_functions</b>(script_filename)
-					
-					</div>
-					<div class="description">
-						取得[script_filename].wsf中不包括自己（[script_filename].js），其餘所有 .js 的code。若想在低版本中利用eval(get_all_functions(ScriptName))來補足，有時會出現奇怪的現象，還是別用好了。
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_code_reorganize.origin.js.html">reorganize.origin.js</a>.
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
-								<dt>
-									<span class="light fixedFont">{String}</span> <b>script_filename</b>
-									
-								</dt>
-								<dd></dd>
-							
-							</dl>
-						
-						
-						
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Returns:</dt>
-							
-								<dd></dd>
-							
-							</dl>
-						
-						
-							<dl class="detailList">
-							<dt class="heading">Requires:</dt>
-							
-								<dd>ScriptName,simpleRead</dd>
-							
-							</dl>
 						
 						
 
@@ -2342,7 +2304,7 @@ ul.inheritsList
 						
 							<dl class="detailList">
 							<dt class="heading">Since:</dt>
-								<dd>2009/12/5 15:04:42, 2009/12/20 14:33:30</dd>
+								<dd>2009/12/5 15:04:42, 2009/12/20 14:33:30, 2010/7/7 10:58:22</dd>
 							</dl>
 							</dl>
 						
@@ -2360,10 +2322,56 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="get_window_status"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{Object}</span>
+					<b>get_window_status</b>(node)
+					
+					</div>
+					<div class="description">
+						取得當前 window status
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_web.origin.js.html">web.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>node</b>
+									
+								</dt>
+								<dd>HTML element or Event object</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Object}</span> status</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
 					<a name="has_class"> </a>
 					<div class="fixedFont">
 					
-					
+					<span class="light">{Boolean}</span>
 					<b>has_class</b>(element, class_name)
 					
 					</div>
@@ -2383,16 +2391,16 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>element</b>
+									<span class="light fixedFont">{HTMLElement}</span> <b>element</b>
 									
 								</dt>
 								<dd>HTML elements</dd>
 							
 								<dt>
-									<b>class_name</b>
+									<span class="light fixedFont">{String}</span> <b>class_name</b>
 									
 								</dt>
-								<dd>class name || {class name 1:, class name 2:, ..}</dd>
+								<dd>class_name_1[ class_name_2 ..]</dd>
 							
 							</dl>
 						
@@ -2403,7 +2411,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd></dd>
+								<dd><span class="light fixedFont">{Boolean}</span> </dd>
 							
 							</dl>
 						
@@ -2571,7 +2579,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						include other JavaScript/CSS files
+						include other JavaScript/CSS files.TODO:callback 完 .js 自動移除
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -2604,7 +2612,7 @@ ul.inheritsList
 								<dd>use document.write() instead of insert a element</dd>
 							
 								<dt>
-									<span class="light fixedFont">{Boolean}</span> <b>type</b>
+									<span class="light fixedFont">{Number}</span> <b>type</b>
 									<i>Optional</i>
 								</dt>
 								<dd>1: is a .css file, others: script</dd>
@@ -2683,7 +2691,7 @@ ul.inheritsList
 					<div class="fixedFont">
 					
 					<span class="light">{Object}</span>
-					<b>initial_env</b>(OS_type)
+					<b>initial_env</b>(OS_type, reset)
 					
 					</div>
 					<div class="description">
@@ -2706,6 +2714,12 @@ ul.inheritsList
 									<i>Optional</i>
 								</dt>
 								<dd>type of OS</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Boolean}</span> <b>reset</b>
+									<i>Optional</i>
+								</dt>
+								<dd>reset the environment variables</dd>
 							
 							</dl>
 						
@@ -3149,12 +3163,12 @@ ul.inheritsList
 					<a name="new_node"> </a>
 					<div class="fixedFont">
 					
-					
+					<span class="light">{HTMLElement}</span>
 					<b>new_node</b>(nodes, layer)
 					
 					</div>
 					<div class="description">
-						instead of createNode().TODO: 分割功能(set_attrib, add_child, ..), 簡化
+						創建新的 DOM 節點(node)。createNode() 的功能補充加強版。TODO: 分割功能(set_attrib, add_child, ..), 簡化
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_net_web.origin.js.html">web.origin.js</a>.
@@ -3169,14 +3183,14 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>nodes</b>
+									<span class="light fixedFont">{Object|Array}</span> <b>nodes</b>
 									
 								</dt>
 								<dd>node structure</dd>
 							
 								<dt>
-									<b>layer</b>
-									
+									<span class="light fixedFont">{String|Array|HTMLElement}</span> <b>layer</b>
+									<i>Optional</i>
 								</dt>
 								<dd>where to layer this node. e.g., parent node</dd>
 							
@@ -3195,7 +3209,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd></dd>
+								<dd><span class="light fixedFont">{HTMLElement}</span> new node created</dd>
 							
 							</dl>
 						
@@ -3332,7 +3346,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						workaround.把 name_space 下的 function_name (name_space[function_name]) 換成 new_function。
+						workaround.把 name_space 下的 function_name (name_space[function_name]) 換成 new_function。for Lazy Function Definition Pattern.惰性求值（Lazy Evaluation），又稱懶惰求值、懶漢求值
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -3382,6 +3396,13 @@ ul.inheritsList
 							</dl>
 						
 						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd>http://realazy.org/blog/2007/08/16/lazy-function-definition-pattern/,http://peter.michaux.ca/article/3556</dd>
+							
+							</dl>
 						
 
 					<hr />
@@ -3876,7 +3897,7 @@ ul.inheritsList
 									<span class="light fixedFont">{Function}</span> <b>callback</b>
 									<i>Optional</i>
 								</dt>
-								<dd>callback function</dd>
+								<dd>callback function | [callback, 進度改變時之 function (TODO)]</dd>
 							
 								<dt>
 									<span class="light fixedFont">{Object|Boolean}</span> <b>extend_to</b>
@@ -4045,7 +4066,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.3.3-beta on Wed Jul 07 2010 07:38:45 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Sun Sep 19 2010 08:43:49 GMT+0800 (CST)
 		</div>
 	</body>
 </html>
