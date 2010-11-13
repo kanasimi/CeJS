@@ -91,6 +91,7 @@ function test1() {
 <h2>Loading error</h2>
 JavaScript doesn't work or XMLHttpRequest loading error?<br />
 You may need to check the configuration of the browser, <a href="#" onclick="history.go(0);return false;">reload the page</a>, or start from <a href="basic/basic_test_1.htm">the basic test</a>.
+<div id="loading_error_message"></div>
 <hr />
 </div>
 
@@ -637,8 +638,14 @@ https://mail.mozilla.org/pipermail/es-discuss/2008-September/007498.html
 			//	Initialize log function
 			CeL.use('code.log');
 			if (!CeL.is_loaded('code.log')){
-				if(location.protocol === 'file:' && navigator.userAgent.indexOf('Chrome') !== -1)
-					document.getElementById('error_load_panel').innerHTML += 'You may <a href="http://code.google.com/p/chromium/issues/detail?id=4197#c26">add a flag</a> --allow-file-access-from-files to run this tool.<br/>e.g., run '+(navigator.userAgent.indexOf('Linux')!==-1?'/opt/google/chrome/google-chrome %U --allow-file-access-from-files&':'Chrome --allow-file-access-from-files')+'<hr/>';
+				if(location.protocol === 'file:')
+					document.getElementById('loading_error_message').innerHTML =
+						 navigator.userAgent.indexOf('Chrome') === -1?
+							'Loading local file error!'
+						:
+							'You may <a href="http://code.google.com/p/chromium/issues/detail?id=4197#c26">add a flag</a> --allow-file-access-from-files to run this tool.<br/>e.g., run '
+							+(navigator.userAgent.indexOf('Linux')!==-1?'/opt/google/chrome/google-chrome %U --allow-file-access-from-files&':'Chrome --allow-file-access-from-files')
+							+'<hr/>';
 				throw new Error('Loading error!');
 			}
 
