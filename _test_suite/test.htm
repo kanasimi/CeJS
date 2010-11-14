@@ -159,8 +159,8 @@ Page loaded. Initializing the framework. Please wait..
 			if (!CeL.is_loaded('code.log')){
 				if(location.protocol === 'file:')
 					document.getElementById('loading_error_message').innerHTML =
-						 navigator.userAgent.indexOf('Chrome') === -1?
-							'Loading local file error!'
+						navigator.userAgent.indexOf('Chrome') === -1?
+							CeL.get_file.error || 'Loading local file error!'
 						:
 							'You may <a href="http://code.google.com/p/chromium/issues/detail?id=4197#c26">add a flag</a> --allow-file-access-from-files to run this tool.<br/>e.g., run '
 							+(navigator.userAgent.indexOf('Linux')!==-1?'/opt/google/chrome/google-chrome %U --allow-file-access-from-files&':'Chrome --allow-file-access-from-files')
