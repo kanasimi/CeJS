@@ -155,19 +155,26 @@ CeL.not_to_extend_keyword=CeL.env.not_to_extend_keyword='no_extend';
 	 */
 CeL.source_encoding=CeL.env.source_encoding='UTF-16';
 	/**
-	 * default global object
+	 * default global object.
+	 * 有可能為 undefined!
 	 * @name	CeL.env.global
 	 * @type	Object
 	 */
 CeL.global=CeL.env.global={};
 	/**
-	 * creator group
-	 * @name	CeL.env.company
+	 * creator group / 組織名稱 organization name
+	 * @name	CeL.env.organization
 	 * @type	String
 	 */
-CeL.company=CeL.env.company='Colorless echo';
+CeL.organization=CeL.env.organization='Colorless echo';
+	/**
+	 * 在 registry 中存放 library 在 File System 中的 base path 的 key name
+	 * @name	CeL.env.registry_base
+	 * @type	String
+	 */
+CeL.registry_base=CeL.env.registry_base="";	//	env.registry_base + 'path';
 		/**
-		 * 存放在 registry 中的 path
+		 * 存放在 registry 中的 path，通常指的是 library 在 File System 中的 base path
 		 * @name	CeL.env.registry_path
 		 * @type	String
 		 */
@@ -218,23 +225,28 @@ CeL.locale=CeL.env.locale=0;	//	0x404;
 	 */
 CeL.script_name=CeL.env.script_name="";	//	this.get_script_name();
 	/**
-	 * base path of library
-	 * @name	CeL.env.library_base_path
+	 * base path of script.
+	 * TODO
+	 * 以 reg 代替
+	 * @name	CeL.env.script_base_path
 	 * @type	String
 	 */
-CeL.library_base_path=CeL.env.library_base_path="";	//	this.get_script_full_name();
+CeL.script_base_path=CeL.env.script_base_path="";	//	this.get_script_full_name()
 	/**
 	 * Legal identifier name in RegExp.
 	 * 這 pattern 會佔去兩個筆紀錄: first letter, and least.
 	 * .replace(/_/ [g],'for first letter')
 	 * .replace(/\\d/,'for least')
 	 * 這邊列出的只是合法 identifier 的子集且未去除 reserved words!
+	 * 
+	 * 不用 \d 而用 0-9 是因為 \d 還包括了 MATHEMATICAL BOLD DIGIT。
+	 * <a href="http://blog.est.im/archives/3229" accessdate="2010/11/16 20:6">基于正\u21017的URL匹配安全性考\u34385</a>
 	 * @name	CeL.env.identifier_RegExp
 	 * @see
 	 * ECMA-262	7.6 Identifier Names and Identifiers
 	 * @type	RegExp
 	 */
-CeL.identifier_RegExp=CeL.env.identifier_RegExp=/^regexp$/;	//	/([a-zA-Z$_]|\\u[\da-fA-F]{4})([a-zA-Z$_\d]+|\\u[\da-fA-F]{4}){0,63}/;
+CeL.identifier_RegExp=CeL.env.identifier_RegExp=/^regexp$/;	//	/([a-zA-Z$_]|\\u[0-9a-fA-F]{4})([a-zA-Z$_0-9]+|\\u[0-9a-fA-F]{4}){0,63}/;
 	/**
 	 * Legal identifier name in String from env.identifier_RegExp.
 	 * @name	CeL.env.identifier_String
@@ -518,23 +530,23 @@ CeL.get_file=function(path, encoding){
 
 };
 /**
- * Ask privilege in mozilla projects.
+ * Ask privilege in mozilla projects: Firefox 2, 3.
  * enablePrivilege 似乎只能在執行的 function 本身或 caller 呼叫才有效果，跳出函數即無效，不能 cache，因此提供 callback。
  * 就算按下「記住此決定」，重開瀏覽器後需要再重新授權。
  * @param {String|Error} privilege	privilege that asked 或因權限不足導致的 Error
- * @param {Function|Number} callback	Run this callback if getting the privilege. If it's not a function but a number(經過幾層/loop層數), detect if there's a loop or run the caller.
+ * @param {Function|Array} callback|[callback,arguments]	Run this callback if getting the privilege. If it's not a function but a number(經過幾層/loop層數), detect if there's a loop or run the caller.
  * @return	OK / the return of callback
  * @throws	error
  * @since	2010/1/2 00:40:42
  */
 CeL.require_netscape_privilege=function require_netscape_privilege(privilege, callback){
 	///	<summary>
-	///	Ask privilege in mozilla projects.
+	///	Ask privilege in mozilla projects: Firefox 2, 3.
 	///	enablePrivilege 似乎只能在執行的 function 本身或 caller 呼叫才有效果，跳出函數即無效，不能 cache，因此提供 callback。
 	///	就算按下「記住此決定」，重開瀏覽器後需要再重新授權。
 	///	</summary>
 	///	<param name="privilege" type="String|Error" optional="false">privilege that asked 或因權限不足導致的 Error</param>
-	///	<param name="callback" type="Function|Number" optional="false">Run this callback if getting the privilege. If it's not a function but a number(經過幾層/loop層數), detect if there's a loop or run the caller.</param>
+	///	<param name="callback" type="Function|Array" optional="false">|[callback,arguments]	Run this callback if getting the privilege. If it's not a function but a number(經過幾層/loop層數), detect if there's a loop or run the caller.</param>
 	///	<returns>OK / the return of callback</returns>
 	///	<throws>error</throws>
 	///	<since>2010/1/2 00:40:42</since>
@@ -3599,12 +3611,12 @@ CeL.f=CeL.IO.Windows.file.move_file.f={
 };
 /**
  * move file
- * @requires	fso,get_folder,getFN,initWScriptObj
+ * @requires	fso,get_folder,get_file_name,initWScriptObj
  * @memberOf	CeL.IO.Windows.file
  */
 CeL.move_1_file=CeL.IO.Windows.file.move_1_file=function(from, to, dir, only_filename, reverse){
 	///	<summary>move file</summary>
-	///	<requires>fso,get_folder,getFN,initWScriptObj</requires>
+	///	<requires>fso,get_folder,get_file_name,initWScriptObj</requires>
 	///	<memberOf>CeL.IO.Windows.file</memberOf>
 
 };
@@ -3773,7 +3785,7 @@ CeL.translate_AdoStream_binary_data=CeL.IO.Windows.file.translate_AdoStream_bina
  * @since	2007/9/19 20:58:26
  * @memberOf	CeL.IO.Windows.file
  */
-CeL.Ado_binary=CeL.IO.Windows.file.Ado_binary=function(data,pos){
+CeL.Ado_binary=CeL.IO.Windows.file.Ado_binary=function(data, pos){
 	///	<summary>轉換以 adTypeBinary 讀到的資料</summary>
 	///	<param name="data" type="" optional="false">以 adTypeBinary 讀到的資料</param>
 	///	<param name="pos" type="" optional="false">position</param>
@@ -4278,11 +4290,54 @@ CeL.get_all_functions=CeL.code.reorganize.get_all_functions=function (script_fil
 
 };
 /**
- * script終結者…
+ * 將各 function 加入檔案中，可做成 HTML 亦可用之格式。
+ * @example
+ * add_code('複製 -backup.js');
+ * @param file_name	file name (list)
+ * @param Vlist	多加添的 function/various list
+ * @param {String} start_string	start string
+ * @param {String} end_string	ending string
+ * @returns
+ * @request	NewLine,is_file,simpleRead,autodetectEncode,generate_code,JSalert,setTool,*setTool();
+ * @memberOf	CeL.code.reorganize
+ */
+CeL.add_code=CeL.code.reorganize.add_code=function (file_name, Vlist, start_string, end_string){
+	///	<summary>將各 function 加入檔案中，可做成 HTML 亦可用之格式。</summary>
+	///	<example>add_code('複製 -backup.js');</example>
+	///	<param name="file_name" type="" optional="false">file name (list)</param>
+	///	<param name="Vlist" type="" optional="false">多加添的 function/various list</param>
+	///	<param name="start_string" type="String" optional="false">start string</param>
+	///	<param name="end_string" type="String" optional="false">ending string</param>
+	///	<returns/>
+	///	<request>NewLine,is_file,simpleRead,autodetectEncode,generate_code,JSalert,setTool,*setTool();</request>
+	///	<memberOf>CeL.code.reorganize</memberOf>
+
+};
+/**
+ * add libary use
+ * @param	{String} code	script code
+ * @returns 
+ * @memberOf	CeL.code.reorganize
+ */
+CeL.add_use=CeL.code.reorganize.add_use=function (code){
+	///	<summary>add libary use</summary>
+	///	<param name="code" type="String" optional="false">script code</param>
+	///	<returns/>
+	///	<memberOf>CeL.code.reorganize</memberOf>
+
+};
+/**
+ * script 終結者…
+ * @param	{String} code	script code
+ * @param	addFN
+ * @returns	error no. 
  * @memberOf	CeL.code.reorganize
  */
 CeL.destory_script=CeL.code.reorganize.destory_script=function (code, addFN){
-	///	<summary>script終結者…</summary>
+	///	<summary>script 終結者…</summary>
+	///	<param name="code" type="String" optional="false">script code</param>
+	///	<param name="addFN" type="" optional="false"/>
+	///	<returns>error no.</returns>
 	///	<memberOf>CeL.code.reorganize</memberOf>
 
 };
@@ -4303,6 +4358,28 @@ CeL.generate_code=CeL.code.reorganize.generate_code=function (Vlist, new_line, d
 	///	<memberOf>CeL.code.reorganize</memberOf>
 
 };
+
+//	null constructor for [CeL.code.reorganize._]
+CeL.code.reorganize._=function(){};
+CeL.code.reorganize._.prototype={};
+
+
+//	null constructor for [CeL.code.reorganize._.generate_code]
+CeL.code.reorganize._.generate_code=function(){};
+CeL.code.reorganize._.generate_code.prototype={};
+
+/**
+ * default direct input symbol
+ * @type	String
+ * @memberOf	CeL.code.reorganize
+ */
+CeL.ddI=CeL.code.reorganize._.generate_code.ddI='*';
+/**
+ * default separator
+ * @type	String
+ * @memberOf	CeL.code.reorganize
+ */
+CeL.dsp=CeL.code.reorganize._.generate_code.dsp=',';
 /**
  * 產生無用的垃圾碼
  * @param length	\d || \d-\d
@@ -4324,8 +4401,11 @@ CeL.null_code=CeL.code.reorganize.null_code=function (length, type){
  * @param code	欲精簡之程式碼
  * @param mode	mode=1:''中unicode轉\uHHHH
  * @returns	{String}	精簡後之程式碼
+ * @example
+ * CeL.use('code.reorganize');
+ * CeL.reduce_code('a + v  = ddd;');
  * @see
- * @requires	reduce_code_space
+ * @requires	
  * @memberOf	CeL.code.reorganize
  */
 CeL.reduce_code=CeL.code.reorganize.reduce_code=function (code, mode){
@@ -4336,8 +4416,12 @@ CeL.reduce_code=CeL.code.reorganize.reduce_code=function (code, mode){
 	///	<param name="code" type="" optional="false">欲精簡之程式碼</param>
 	///	<param name="mode" type="" optional="false">mode=1:''中unicode轉\uHHHH</param>
 	///	<returns type="String">精簡後之程式碼</returns>
+	///	<example>
+	///	CeL.use('code.reorganize');
+	///	CeL.reduce_code('a + v  = ddd;');
+	///	</example>
 	///	<see/>
-	///	<requires>reduce_code_space</requires>
+	///	<requires/>
 	///	<memberOf>CeL.code.reorganize</memberOf>
 
 };
@@ -4349,7 +4433,7 @@ CeL.reduce_code=CeL.code.reorganize.reduce_code=function (code, mode){
  * @param flag
  * 	flag={doTest:bool,doReport:bool,outEnc:(enc),copyOnFailed:bool,startFrom:// | '',addBefore:'',runBefore:function}
  * 	startFrom 若為 // 則應為 startAfter!!
- * @requires	autodetectEncode,simpleRead,simpleWrite,reduce_code,isFile
+ * @requires	autodetectEncode,simpleRead,simpleWrite,reduce_code,is_file
  * @deprecated use <a href="http://closure-compiler.appspot.com/" accessdate="2009/12/3 12:13">Closure Compiler Service</a>
  * @memberOf	CeL.code.reorganize
  */
@@ -4365,7 +4449,7 @@ CeL.reduce_script=CeL.code.reorganize.reduce_script=function (original_ScriptFil
 	///	flag={doTest:bool,doReport:bool,outEnc:(enc),copyOnFailed:bool,startFrom:// | '',addBefore:'',runBefore:function}
 	///	startFrom 若為 // 則應為 startAfter!!
 	///	</param>
-	///	<requires>autodetectEncode,simpleRead,simpleWrite,reduce_code,isFile</requires>
+	///	<requires>autodetectEncode,simpleRead,simpleWrite,reduce_code,is_file</requires>
 	///	<deprecated>use <a href="http://closure-compiler.appspot.com/" accessdate="2009/12/3 12:13">Closure Compiler Service</a></deprecated>
 	///	<memberOf>CeL.code.reorganize</memberOf>
 
@@ -4468,18 +4552,95 @@ _.IEA.frame=function(document_object, name){
 
 };
 
-//	null constructor for [_.generate_code]
-_.generate_code=function(){};
-_.generate_code.prototype={};
+//	null constructor for [_.add_code]
+_.add_code=function(){};
+_.add_code.prototype={};
 
 /**
- * default directInput symbol
+ * 是否加入報告
+ * @type	Boolean
  */
-_.generate_code.ddI='*';
+_.add_code.report=false;
 /**
- * default separator
+ * uncompress archive
+ * @param archive	compressed file path
+ * @param eTo	where to uncompress/target
+ * @param {Object} flag	flags
+ * @returns
  */
-_.generate_code.dsp=',';
+uncompress=function(archive, eTo, flag){
+	///	<summary>uncompress archive</summary>
+	///	<param name="archive" type="" optional="false">compressed file path</param>
+	///	<param name="eTo" type="" optional="false">where to uncompress/target</param>
+	///	<param name="flag" type="Object" optional="false">flags</param>
+	///	<returns/>
+
+};
+/**
+ * 是否為檔案
+ * @param path	file path
+ * @param create	create if not exist
+ * @returns
+ */
+is_file=function(path, create){
+	///	<summary>是否為檔案</summary>
+	///	<param name="path" type="" optional="false">file path</param>
+	///	<param name="create" type="" optional="false">create if not exist</param>
+	///	<returns/>
+
+};
+/**
+ * 是否為目錄
+ * @param path	file path
+ * @param create	create if not exist
+ * @returns	0:not folder, 1:absolute, 2:relative path
+ */
+is_folder=function(path, create){
+	///	<summary>是否為目錄</summary>
+	///	<param name="path" type="" optional="false">file path</param>
+	///	<param name="create" type="" optional="false">create if not exist</param>
+	///	<returns>0:not folder, 1:absolute, 2:relative path</returns>
+
+};
+/**
+ * get directory name of a path
+ * @param folder_path
+ * @param mode	0:path, 1:filename
+ * @returns
+ */
+get_folder=function(folder_path, mode){
+	///	<summary>get directory name of a path</summary>
+	///	<param name="folder_path" type="" optional="false"/>
+	///	<param name="mode" type="" optional="false">0:path, 1:filename</param>
+	///	<returns/>
+
+};
+/**
+ * 取得下一個序號的檔名，如輸入pp\aa.txt將嘗試pp\aa.txt→pp\aa[pattern].txt
+ * @param file_path	file path
+ * @param begin_serial	begin serial
+ * @param pattern	增添主檔名的模式，包含Ser的部分將被轉換為序號
+ * @returns
+ */
+getNextSerialFN=function(file_path, begin_serial, pattern){
+	///	<summary>取得下一個序號的檔名，如輸入pp\aa.txt將嘗試pp\aa.txt→pp\aa[pattern].txt</summary>
+	///	<param name="file_path" type="" optional="false">file path</param>
+	///	<param name="begin_serial" type="" optional="false">begin serial</param>
+	///	<param name="pattern" type="" optional="false">增添主檔名的模式，包含Ser的部分將被轉換為序號</param>
+	///	<returns/>
+
+};
+/**
+ * 判斷HTML檔是否有charset設定
+ * @param file_contents	file contents
+ * @returns
+ */
+autodetectHTMLEncode=function(file_contents){
+	///	<summary>判斷HTML檔是否有charset設定</summary>
+	///	<param name="file_contents" type="" optional="false">file contents</param>
+	///	<returns/>
+
+};
 /**
  * 讀入CSV檔<br/>
  * !! slow !!
@@ -4532,6 +4693,11 @@ op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.prototype={};
 op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize=function(){};
 op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize.prototype={};
 
+
+//	null constructor for [op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize.reduce_code]
+op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize.reduce_code=function(){};
+op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize.reduce_code.prototype={};
+
 /**
  * 精簡程式碼部分：去掉\n,;前後的空白等，應由 reduce_code() 呼叫。
  * @param code	輸入欲精簡之程式碼
@@ -4540,7 +4706,7 @@ op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize.prot
  * http://dean.edwards.name/packer/
  * @memberOf	CeL.code.reorganize
  */
-op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize.reduce_code_space=function (code){
+op[/]:word/wordword/=word~:/\\{0,2,4,6,..}$/註解comment:CeL.code.reorganize.reduce_code.reduce_space=function (code){
 	///	<summary>精簡程式碼部分：去掉\n,;前後的空白等，應由 reduce_code() 呼叫。</summary>
 	///	<param name="code" type="" optional="false">輸入欲精簡之程式碼</param>
 	///	<returns type="String">精簡後之程式碼</returns>
