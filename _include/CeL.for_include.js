@@ -97,9 +97,111 @@ CeL.get_script_name=function(){
 
 };
 /**
+ * 判斷為何種 type。主要用在 Error, DOMException 等 native object 之判別。
+ * @param	value	various or class instance to test
+ * @param	{String} [want_type]	type to compare: number, string, boolean, undefined, object, function
+ * @param	{Boolean} [get_Class]	get the class name of a class(function) instance.
+ * @return	{Boolean}	The type is matched.
+ * @return	{String}	The type of value
+ * @return	{undefined}	error occurred
+ * @example
+ * CeL.is_type(value_to_test, 'Array');
+ * @since	2009/12/14 19:50:14
+ * @see
+ * <a href="http://lifesinger.org/blog/2009/02/javascript-type-check-2/" accessdate="2009/12/6 19:10">JavaScript\u31867型\u26816\u27979小\u32467（下） - \u23681月如歌</a><br/>
+ * <a href="http://thinkweb2.com/projects/prototype/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/" accessdate="2009/12/6 19:10">Perfection kills &raquo; `instanceof` considered harmful (or how to write a robust `isArray`)</a>
+ */
+CeL.is_type=function(value, want_type, get_Class){
+	///	<summary>判斷為何種 type。主要用在 Error, DOMException 等 native object 之判別。</summary>
+	///	<param name="value" type="" optional="false">various or class instance to test</param>
+	///	<param name="want_type" type="String" optional="true">type to compare: number, string, boolean, undefined, object, function</param>
+	///	<param name="get_Class" type="Boolean" optional="true">get the class name of a class(function) instance.</param>
+	///	<returns type="Boolean">The type is matched.</returns>
+	///	<returns type="String">The type of value</returns>
+	///	<returns type="undefined">error occurred</returns>
+	///	<example>CeL.is_type(value_to_test, 'Array');</example>
+	///	<since>2009/12/14 19:50:14</since>
+	///	<see>
+	///	<a href="http://lifesinger.org/blog/2009/02/javascript-type-check-2/" accessdate="2009/12/6 19:10">JavaScript\u31867型\u26816\u27979小\u32467（下） - \u23681月如歌</a><br/>
+	///	<a href="http://thinkweb2.com/projects/prototype/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/" accessdate="2009/12/6 19:10">Perfection kills &raquo; `instanceof` considered harmful (or how to write a robust `isArray`)</a>
+	///	</see>
+
+};
+/**
+ * get a type test function
+ * @param	{String} want_type	object type to compare
+ * @param	{String} [toString_reference]	a reference name to Object.prototype.toString
+ * @return	{Function}	type test function
+ * @since	2009/12/20 08:38:26
+ * @example
+ * // 大量驗證時，推薦另外在本身 scope 中造出捷徑：
+ * this.OtS = Object.prototype.toString;
+ * var is_Array = CeL.object_tester('Array', 'OtS');
+ * // test
+ * if(is_Array(value))
+ * 	//	it's really a native Array
+ * 	;
+ */
+CeL.object_tester=function(want_type, toString_reference){
+	///	<summary>get a type test function</summary>
+	///	<param name="want_type" type="String" optional="false">object type to compare</param>
+	///	<param name="toString_reference" type="String" optional="true">a reference name to Object.prototype.toString</param>
+	///	<returns type="Function">type test function</returns>
+	///	<since>2009/12/20 08:38:26</since>
+	///	<example>
+	///	// 大量驗證時，推薦另外在本身 scope 中造出捷徑：
+	///	this.OtS = Object.prototype.toString;
+	///	var is_Array = CeL.object_tester('Array', 'OtS');
+	///	// test
+	///	if(is_Array(value))
+	///	//	it's really a native Array
+	///	* 	;
+	///	</example>
+
+};
+/**
+ * Test if the value is a native Array.
+ * @param	v	value to test
+ * @return	{Boolean}	the value is a native Array.
+ * @since	2009/12/20 08:38:26
+ */
+CeL.is_Array=function(v){
+	///	<summary>Test if the value is a native Array.</summary>
+	///	<param name="v" type="" optional="false">value to test</param>
+	///	<returns type="Boolean">the value is a native Array.</returns>
+	///	<since>2009/12/20 08:38:26</since>
+
+};
+/**
+ * Test if the value is a native Object.
+ * @param	v	value to test
+ * @return	{Boolean}	the value is a native Object.
+ * @since	2009/12/20 08:38:26
+ */
+CeL.is_Object=function(v){
+	///	<summary>Test if the value is a native Object.</summary>
+	///	<param name="v" type="" optional="false">value to test</param>
+	///	<returns type="Boolean">the value is a native Object.</returns>
+	///	<since>2009/12/20 08:38:26</since>
+
+};
+/**
+ * Test if the value is a native Function.
+ * @param	v	value to test
+ * @return	{Boolean}	the value is a native Function.
+ * @since	2009/12/20 08:38:26
+ */
+CeL.is_Function=function(v){
+	///	<summary>Test if the value is a native Function.</summary>
+	///	<param name="v" type="" optional="false">value to test</param>
+	///	<returns type="Boolean">the value is a native Function.</returns>
+	///	<since>2009/12/20 08:38:26</since>
+
+};
+/**
  * 取得/設定環境變數 enumeration<br/>
  * （雖然不喜歡另開 name-space，但以 2009 當下的 JsDoc Toolkit 來說，似乎沒辦法創造 enumeration。）
- * @class	環境變數 (environment variables) 與程式會用到的 library 相關變數。
+ * @class	環境變數 (environment variables) 與程式會用到的 library 相關變數 / configuration。
  * @param {String} name	環境變數名稱
  * @param value	環境變數之值
  * @return	舊環境變數之值
@@ -110,7 +212,7 @@ CeL.env=function env(name, value){
 	///	取得/設定環境變數 enumeration<br/>
 	///	（雖然不喜歡另開 name-space，但以 2009 當下的 JsDoc Toolkit 來說，似乎沒辦法創造 enumeration。）
 	///	</summary>
-	///	<class>環境變數 (environment variables) 與程式會用到的 library 相關變數。</class>
+	///	<class>環境變數 (environment variables) 與程式會用到的 library 相關變數 / configuration。</class>
 	///	<param name="name" type="String" optional="false">環境變數名稱</param>
 	///	<param name="value" type="" optional="false">環境變數之值</param>
 	///	<returns>舊環境變數之值</returns>
@@ -237,7 +339,8 @@ CeL.script_base_path=CeL.env.script_base_path="";	//	this.get_script_full_name()
 	 * 這 pattern 會佔去兩個筆紀錄: first letter, and least.
 	 * .replace(/_/ [g],'for first letter')
 	 * .replace(/\\d/,'for least')
-	 * 這邊列出的只是合法 identifier 的子集且未去除 reserved words!
+	 * 這邊列出的只是合法 identifier 的*子集*，且未去除 reserved words!
+	 * 請注意實際判別須加入 ^..$
 	 * 
 	 * 不用 \d 而用 0-9 是因為 \d 還包括了 MATHEMATICAL BOLD DIGIT。
 	 * <a href="http://blog.est.im/archives/3229" accessdate="2010/11/16 20:6">基于正\u21017的URL匹配安全性考\u34385</a>
@@ -253,108 +356,6 @@ CeL.identifier_RegExp=CeL.env.identifier_RegExp=/^regexp$/;	//	/([a-zA-Z$_]|\\u[
 	 */
 //CeL.identifier_String=CeL.env.identifier_String;//env.identifier_RegExp.source;
 /**
- * 判斷為何種 type。主要用在 Error, DOMException 等 native object 之判別。
- * @param	value	various or class instance to test
- * @param	{String} [want_type]	type to compare: number, string, boolean, undefined, object, function
- * @param	{Boolean} [get_Class]	get the class name of a class(function) instance.
- * @return	{Boolean}	The type is matched.
- * @return	{String}	The type of value
- * @return	{undefined}	error occurred
- * @example
- * CeL.is_type(value_to_test, 'Array');
- * @since	2009/12/14 19:50:14
- * @see
- * <a href="http://lifesinger.org/blog/2009/02/javascript-type-check-2/" accessdate="2009/12/6 19:10">JavaScript\u31867型\u26816\u27979小\u32467（下） - \u23681月如歌</a><br/>
- * <a href="http://thinkweb2.com/projects/prototype/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/" accessdate="2009/12/6 19:10">Perfection kills &raquo; `instanceof` considered harmful (or how to write a robust `isArray`)</a>
- */
-CeL.is_type=function(value, want_type, get_Class){
-	///	<summary>判斷為何種 type。主要用在 Error, DOMException 等 native object 之判別。</summary>
-	///	<param name="value" type="" optional="false">various or class instance to test</param>
-	///	<param name="want_type" type="String" optional="true">type to compare: number, string, boolean, undefined, object, function</param>
-	///	<param name="get_Class" type="Boolean" optional="true">get the class name of a class(function) instance.</param>
-	///	<returns type="Boolean">The type is matched.</returns>
-	///	<returns type="String">The type of value</returns>
-	///	<returns type="undefined">error occurred</returns>
-	///	<example>CeL.is_type(value_to_test, 'Array');</example>
-	///	<since>2009/12/14 19:50:14</since>
-	///	<see>
-	///	<a href="http://lifesinger.org/blog/2009/02/javascript-type-check-2/" accessdate="2009/12/6 19:10">JavaScript\u31867型\u26816\u27979小\u32467（下） - \u23681月如歌</a><br/>
-	///	<a href="http://thinkweb2.com/projects/prototype/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/" accessdate="2009/12/6 19:10">Perfection kills &raquo; `instanceof` considered harmful (or how to write a robust `isArray`)</a>
-	///	</see>
-
-};
-/**
- * get a type test function
- * @param	{String} want_type	object type to compare
- * @param	{String} [toString_reference]	a reference name to Object.prototype.toString
- * @return	{Function}	type test function
- * @since	2009/12/20 08:38:26
- * @example
- * // 大量驗證時，推薦另外在本身 scope 中造出捷徑：
- * this.OtS = Object.prototype.toString;
- * var is_Array = CeL.object_tester('Array', 'OtS');
- * // test
- * if(is_Array(value))
- * 	//	it's really a native Array
- * 	;
- */
-CeL.object_tester=function(want_type, toString_reference){
-	///	<summary>get a type test function</summary>
-	///	<param name="want_type" type="String" optional="false">object type to compare</param>
-	///	<param name="toString_reference" type="String" optional="true">a reference name to Object.prototype.toString</param>
-	///	<returns type="Function">type test function</returns>
-	///	<since>2009/12/20 08:38:26</since>
-	///	<example>
-	///	// 大量驗證時，推薦另外在本身 scope 中造出捷徑：
-	///	this.OtS = Object.prototype.toString;
-	///	var is_Array = CeL.object_tester('Array', 'OtS');
-	///	// test
-	///	if(is_Array(value))
-	///	//	it's really a native Array
-	///	* 	;
-	///	</example>
-
-};
-/**
- * Test if the value is a native Array.
- * @param	v	value to test
- * @return	{Boolean}	the value is a native Array.
- * @since	2009/12/20 08:38:26
- */
-CeL.is_Array=function(v){
-	///	<summary>Test if the value is a native Array.</summary>
-	///	<param name="v" type="" optional="false">value to test</param>
-	///	<returns type="Boolean">the value is a native Array.</returns>
-	///	<since>2009/12/20 08:38:26</since>
-
-};
-/**
- * Test if the value is a native Object.
- * @param	v	value to test
- * @return	{Boolean}	the value is a native Object.
- * @since	2009/12/20 08:38:26
- */
-CeL.is_Object=function(v){
-	///	<summary>Test if the value is a native Object.</summary>
-	///	<param name="v" type="" optional="false">value to test</param>
-	///	<returns type="Boolean">the value is a native Object.</returns>
-	///	<since>2009/12/20 08:38:26</since>
-
-};
-/**
- * Test if the value is a native Function.
- * @param	v	value to test
- * @return	{Boolean}	the value is a native Function.
- * @since	2009/12/20 08:38:26
- */
-CeL.is_Function=function(v){
-	///	<summary>Test if the value is a native Function.</summary>
-	///	<param name="v" type="" optional="false">value to test</param>
-	///	<returns type="Boolean">the value is a native Function.</returns>
-	///	<since>2009/12/20 08:38:26</since>
-
-};
-/**
  * Setup environment variables
  * @param	{String} [OS_type]	type of OS
  * @param	{Boolean} [reset]	reset the environment variables 
@@ -369,15 +370,15 @@ CeL.initial_env=function(OS_type, reset){
 };
 /**
  * Tell if it's now debugging.
- * @param {Integral} [debug_level]	if it's now in this debug level.
+ * @param {Integer} [debug_level]	if it's now in this debug level.
  * @return	{Boolean}	It's now in specified debug level.
- * @return	{Number}	It's now in what debug level(Integral).
+ * @return	{Number}	It's now in what debug level (Integer).
  */
 CeL.is_debug=function(debug_level){
 	///	<summary>Tell if it's now debugging.</summary>
-	///	<param name="debug_level" type="Integral" optional="true">if it's now in this debug level.</param>
+	///	<param name="debug_level" type="Integer" optional="true" integer="true">if it's now in this debug level.</param>
 	///	<returns type="Boolean">It's now in specified debug level.</returns>
-	///	<returns type="Number">It's now in what debug level(Integral).</returns>
+	///	<returns type="Number">It's now in what debug level (Integer).</returns>
 
 };
 /**
@@ -386,7 +387,7 @@ CeL.is_debug=function(debug_level){
  * @type	Integer
  * @return	{Number} debugging level now
  */
-CeL.set_debug=function(debug_level){
+CeL.set_debug=function (debug_level){
 	///	<summary>Set debugging level</summary>
 	///	<param name="debug_level" type="Integer" optional="true" integer="true">The debugging level to set.</param>
 	///	<returns type="Number">debugging level now</returns>
@@ -413,7 +414,7 @@ CeL._get_hash_key=function(text){
  * 可能的話請改用 {@link CeL.native.parse_function}(F).funcName
  * @since	2010/1/7 22:10:27
  */
-CeL.get_function_name=function get_function_name(fr, ns, force_load){
+CeL.get_function_name=function(fr, ns, force_load){
 	///	<summary>獲得函數名</summary>
 	///	<param name="fr" type="Function" optional="false">function reference</param>
 	///	<param name="ns" type="String" optional="false">name-space</param>
@@ -435,7 +436,7 @@ CeL.get_function_name=function get_function_name(fr, ns, force_load){
  * <a href="http://blog.darkthread.net/blogs/darkthreadtw/archive/2009/03/01/jquery-extend.aspx" accessdate="2009/11/17 1:24" title="jQuery.extend的用法 - 黑暗執行緒">jQuery.extend的用法</a>,
  * <a href="http://www.cnblogs.com/rubylouvre/archive/2009/11/21/1607072.html" accessdate="2010/1/1 1:40">jQuery源\u30721\u23398\u20064\u31508\u35760三 - Ruby's Louvre - 博客\u22253</a>
  */
-CeL.extend=function(variable_set, name_space, from_name_space){
+CeL.extend=function extend(variable_set, name_space, from_name_space){
 	///	<summary>
 	///	延展物件 (learned from jQuery):
 	///	將 from_name_space 下的 variable_set 延展/覆蓋到 name_space。
@@ -458,7 +459,7 @@ CeL.extend=function(variable_set, name_space, from_name_space){
  * 惰性求值（Lazy Evaluation），又稱懶惰求值、懶漢求值
  * @example
  * library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix);
- * @param name_space	which name-space
+ * @param name_space	in which name-space
  * @param {String} function_name	name_space.function_name
  * @param {Function} new_function	replace to what function
  * @return	new_function
@@ -474,7 +475,7 @@ CeL.replace_function=function(name_space, function_name, new_function){
 	///	惰性求值（Lazy Evaluation），又稱懶惰求值、懶漢求值
 	///	</summary>
 	///	<example>library_namespace.replace_function(_, 'to_SI_prefix', to_SI_prefix);</example>
-	///	<param name="name_space" type="" optional="false">which name-space</param>
+	///	<param name="name_space" type="" optional="false">in which name-space</param>
 	///	<param name="function_name" type="String" optional="false">name_space.function_name</param>
 	///	<param name="new_function" type="Function" optional="false">replace to what function</param>
 	///	<returns>new_function</returns>
@@ -485,7 +486,7 @@ CeL.replace_function=function(name_space, function_name, new_function){
 
 };
 /**
- * Get file resource<br/>
+ * Get file resource by {@link XMLHttpRequest}<br/>
  * 用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br/>
  * 除 Ajax，本函數亦可用在 CScript 執行中。
  * @example
@@ -506,7 +507,7 @@ CeL.replace_function=function(name_space, function_name, new_function){
  */
 CeL.get_file=function(path, encoding){
 	///	<summary>
-	///	Get file resource<br/>
+	///	Get file resource by {@link XMLHttpRequest}<br/>
 	///	用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br/>
 	///	除 Ajax，本函數亦可用在 CScript 執行中。
 	///	</summary>
@@ -531,6 +532,7 @@ CeL.get_file=function(path, encoding){
 };
 /**
  * Ask privilege in mozilla projects: Firefox 2, 3.
+ * get_file() 遇到需要提高權限時使用。
  * enablePrivilege 似乎只能在執行的 function 本身或 caller 呼叫才有效果，跳出函數即無效，不能 cache，因此提供 callback。
  * 就算按下「記住此決定」，重開瀏覽器後需要再重新授權。
  * @param {String|Error} privilege	privilege that asked 或因權限不足導致的 Error
@@ -542,6 +544,7 @@ CeL.get_file=function(path, encoding){
 CeL.require_netscape_privilege=function require_netscape_privilege(privilege, callback){
 	///	<summary>
 	///	Ask privilege in mozilla projects: Firefox 2, 3.
+	///	get_file() 遇到需要提高權限時使用。
 	///	enablePrivilege 似乎只能在執行的 function 本身或 caller 呼叫才有效果，跳出函數即無效，不能 cache，因此提供 callback。
 	///	就算按下「記住此決定」，重開瀏覽器後需要再重新授權。
 	///	</summary>
@@ -580,6 +583,21 @@ CeL.get_script_base_path=function(JSFN){
 
 };
 /**
+ * test 是否符合 module pattern.
+ * TODO: improve
+ * @param {String} test_string	string to test
+ * @return	{Boolean}	是否符合 module pattern
+ */
+CeL.is_module_pattern=function(test_string){
+	///	<summary>
+	///	test 是否符合 module pattern.
+	///	TODO: improve
+	///	</summary>
+	///	<param name="test_string" type="String" optional="false">string to test</param>
+	///	<returns type="Boolean">是否符合 module pattern</returns>
+
+};
+/**
  * get the path of specified module
  * @param {String} module_name	module name
  * @param	{String} file_name	取得在同一目錄下檔名為 file_name 之 path。若填入 '' 可取得 parent 目錄。
@@ -603,6 +621,63 @@ CeL.simplify_path=function(path){
 	///	<since>2009/11/23 22:32:52</since>
 	///	<param name="path" type="String" optional="false">欲轉化之 path</param>
 	///	<returns type="String">path</returns>
+
+};
+/**
+ * 預先準備好下層 module 定義時的環境。<br/>
+ * 請盡量先 call 上層 name-space 再定義下層的。
+ * @param	{String} module_name	module name to register
+ * @param	{Function} code_for_including	若欲 include 整個 module 時，需囊括之 code。
+ * @return	null	invalid module
+ * @return	{Object}	下層 module 之 name-space
+ * @return	undefined	something error, e.g., 未成功 load，code_for_including return null, ..
+ */
+CeL.setup_module=function(module_name, code_for_including){
+	///	<summary>
+	///	預先準備好下層 module 定義時的環境。<br/>
+	///	請盡量先 call 上層 name-space 再定義下層的。
+	///	</summary>
+	///	<param name="module_name" type="String" optional="false">module name to register</param>
+	///	<param name="code_for_including" type="Function" optional="false">若欲 include 整個 module 時，需囊括之 code。</param>
+	///	<returns>null	invalid module</returns>
+	///	<returns type="Object">下層 module 之 name-space</returns>
+	///	<returns>undefined	something error, e.g., 未成功 load，code_for_including return null, ..</returns>
+
+};
+/**
+ * 是否 cache code。
+ * 若不是要重構 code 則不需要。
+ * undefined: 依照預設
+ * Boolean: 明確設定，但如此即無法繼承。
+ * @type	Boolean, undefined
+ */
+//CeL.cache_code;//[Boolean, undefined]undefined;
+/**
+ * 將輸入的 string 分割成各 module 單元。<br/>
+ * need environment_adapter()<br/>
+ * ** 並沒有對 module 做完善的審核!
+ * @param {String} module_name	module name
+ * @return	{Array}	module unit array
+ */
+CeL.split_module_name=function(module_name){
+	///	<summary>
+	///	將輸入的 string 分割成各 module 單元。<br/>
+	///	need environment_adapter()<br/>
+	///	** 並沒有對 module 做完善的審核!
+	///	</summary>
+	///	<param name="module_name" type="String" optional="false">module name</param>
+	///	<returns type="Array">module unit array</returns>
+
+};
+/**
+ * 判斷 module 是否存在，以及是否破損。
+ * @param	{String} module_name	module name
+ * @return	{Boolean} module 是否存在以及良好。
+ */
+CeL.is_loaded=function(module_name){
+	///	<summary>判斷 module 是否存在，以及是否破損。</summary>
+	///	<param name="module_name" type="String" optional="false">module name</param>
+	///	<returns type="Boolean">module 是否存在以及良好。</returns>
 
 };
 /**
@@ -630,7 +705,7 @@ CeL.simplify_path=function(path){
  * CeL.use('code.log', function(){..});
  * CeL.use(['code.log', 'code.debug']);
  * @note
- * 'use' 是 JScript.NET 的保留字
+ * 'use' 是 JScript.NET 的保留字.
  */
 CeL.use=function requires(module, callback, extend_to){
 	///	<summary>
@@ -661,25 +736,25 @@ CeL.use=function requires(module, callback, extend_to){
 	///	CeL.use('code.log', function(){..});
 	///	CeL.use(['code.log', 'code.debug']);
 	///	</example>
-	///	<note>'use' 是 JScript.NET 的保留字</note>
+	///	<note>'use' 是 JScript.NET 的保留字.</note>
 
 };
 /**
- * include other JavaScript/CSS files.
+ * Including other JavaScript/CSS files asynchronously.
  * TODO:
- * callback 完 .js 自動移除
+ * http://headjs.com/#theory
  * @param {String} resource path
  * @param {Function|Object} callback
  * 		use_write ? test function{return } : callback function
  * 		/	{callback: callback function, module: module name, global: global object when run callback}
- * @param {Boolean} [use_write]	use document.write() instead of insert a element
+ * @param {Boolean} [use_write]	use document.write() instead of insert a element to <head>
  * @param {Number} [type]	1: is a .css file, others: script
  */
 CeL.include_resource=function include_resource(path, callback, use_write, type){
 	///	<summary>
-	///	include other JavaScript/CSS files.
+	///	Including other JavaScript/CSS files asynchronously.
 	///	TODO:
-	///	callback 完 .js 自動移除
+	///	http://headjs.com/#theory
 	///	</summary>
 	///	<param name="resource" type="String" optional="false">path</param>
 	///	<param>
@@ -687,7 +762,7 @@ CeL.include_resource=function include_resource(path, callback, use_write, type){
 	///	use_write ? test function{return } : callback function
 	///	/	{callback: callback function, module: module name, global: global object when run callback}
 	///	</param>
-	///	<param name="use_write" type="Boolean" optional="true">use document.write() instead of insert a element</param>
+	///	<param name="use_write" type="Boolean" optional="true">use document.write() instead of insert a element to <head></param>
 	///	<param name="type" type="Number" optional="true">1: is a .css file, others: script</param>
 
 };
@@ -731,34 +806,32 @@ CeL.include_module_resource=function(file_name, module_name){
 
 };
 /**
- * 預先準備好下層 module 定義時的環境。<br/>
- * 請盡量先 call 上層 name-space 再定義下層的。
- * @param	{String} module_name	module name
- * @param	{Function} code_for_including	若欲 include 整個 module 時，需囊括之 code。
- * @return	null	invalid module
- * @return	{Object}	下層 module 之 name-space
- * @return	undefined	something error, e.g., 未成功 load，code_for_including return null, ..
+ * control/setup source codes to run.
+ * 基本上使用非同步(asynchronous)的方式，除非所需資源已經載入，或是有辦法以 {@link XMLHttpRequest} 取得資源。
+ * @param	{Array}	running sequence: Array of
+ * 		{Function} function to run
+ * 		| {Integer} timeout (ms): 僅能保證上次 function 執行至此次 function 一定會等超過這段時間
+ * 		| {String} library module name to import
+ * 		| {String} file path (image/JavaScript files/CSS)
+ * @since	2011/8/4 22:31:47
  */
-CeL.setup_module=function(module_name, code_for_including){
+CeL.set_run=function(){
 	///	<summary>
-	///	預先準備好下層 module 定義時的環境。<br/>
-	///	請盡量先 call 上層 name-space 再定義下層的。
+	///	control/setup source codes to run.
+	///	基本上使用非同步(asynchronous)的方式，除非所需資源已經載入，或是有辦法以 {@link XMLHttpRequest} 取得資源。
 	///	</summary>
-	///	<param name="module_name" type="String" optional="false">module name</param>
-	///	<param name="code_for_including" type="Function" optional="false">若欲 include 整個 module 時，需囊括之 code。</param>
-	///	<returns>null	invalid module</returns>
-	///	<returns type="Object">下層 module 之 name-space</returns>
-	///	<returns>undefined	something error, e.g., 未成功 load，code_for_including return null, ..</returns>
+	///	<param>
+	///	{Array}	running sequence: Array of
+	///	{Function} function to run
+	///	| {Integer} timeout (ms): 僅能保證上次 function 執行至此次 function 一定會等超過這段時間
+	///	| {String} library module name to import
+	///	| {String} file path (image/JavaScript files/CSS)
+	///	</param>
+	///	<since>2011/8/4 22:31:47</since>
 
 };
 /**
- * 是否 cache code。
- * 若不是要重構 code 則不需要。
- * @type	Boolean
- */
-CeL.cache_code=false;
-/**
- * 模擬 inherits
+ * module 中模擬 inherit 時使用。
  * @param {String} module_name	欲繼承的 module_name
  * @param initial_arguments	繼承時的 initial arguments
  * @return
@@ -766,8 +839,8 @@ CeL.cache_code=false;
  * <a href="http://fillano.blog.ithome.com.tw/post/257/17355" accessdate="2010/1/1 0:6">Fillano's Learning Notes | 物件導向Javascript - 實作繼承的效果</a>,
  * <a href="http://www.crockford.com/javascript/inheritance.html" accessdate="2010/1/1 0:6">Classical Inheritance in JavaScript</a>
  */
-CeL.inherits=function(module_name, initial_arguments){
-	///	<summary>模擬 inherits</summary>
+CeL.inherit=function(module_name, initial_arguments){
+	///	<summary>module 中模擬 inherit 時使用。</summary>
 	///	<param name="module_name" type="String" optional="false">欲繼承的 module_name</param>
 	///	<param name="initial_arguments" type="" optional="false">繼承時的 initial arguments</param>
 	///	<returns/>
@@ -778,44 +851,17 @@ CeL.inherits=function(module_name, initial_arguments){
 
 };
 /**
- * 將輸入的 string 分割成各 module 單元。<br/>
- * need environment_adapter()<br/>
- * ** 並沒有對 module 做完善的審核!
- * @param {String} module_name	module name
- * @return	{Array}	module unit array
- */
-CeL.split_module_name=function(module_name){
-	///	<summary>
-	///	將輸入的 string 分割成各 module 單元。<br/>
-	///	need environment_adapter()<br/>
-	///	** 並沒有對 module 做完善的審核!
-	///	</summary>
-	///	<param name="module_name" type="String" optional="false">module name</param>
-	///	<returns type="Array">module unit array</returns>
-
-};
-/**
- * 判斷 module 是否存在，以及是否破損。
- * @param	{String} module_name	module name
- * @return	{Boolean} module 是否存在以及良好。
- */
-CeL.is_loaded=function(module_name){
-	///	<summary>判斷 module 是否存在，以及是否破損。</summary>
-	///	<param name="module_name" type="String" optional="false">module name</param>
-	///	<returns type="Boolean">module 是否存在以及良好。</returns>
-
-};
-/**
  * module 中需要 include function 時使用。<br/>
  * TODO: 輸入 function name 即可
  * @example
  * //	requires (inside module)
+ * if(library_namespace.use_function('data.split_String_to_Object'))return;
  * if(eval(library_namespace.use_function('data.split_String_to_Object')))return;
  * @param function_list	function list
  * @param [return_extend]	設定時將回傳 object
- * @return	error
- * @since
- * 2009/12/26 02:36:31
+ * @return	{Number} error code
+ * 		1: can't parse function_list
+ * @since	2009/12/26 02:36:31
  * 2009/12/31 22:21:23	add 類似 'data.' 的形式，為 module。
  * 2010/6/14 22:58:18	避免相互 require
  */
@@ -826,11 +872,15 @@ CeL.use_function=function(function_list, return_extend){
 	///	</summary>
 	///	<example>
 	///	//	requires (inside module)
+	///	if(library_namespace.use_function('data.split_String_to_Object'))return;
 	///	if(eval(library_namespace.use_function('data.split_String_to_Object')))return;
 	///	</example>
 	///	<param name="function_list" type="" optional="false">function list</param>
 	///	<param name="return_extend" type="" optional="true">設定時將回傳 object</param>
-	///	<returns>error</returns>
+	///	<returns>
+	///	{Number} error code
+	///	1: can't parse function_list
+	///	</returns>
 	///	<since>
 	///	2009/12/26 02:36:31
 	///	2009/12/31 22:21:23	add 類似 'data.' 的形式，為 module。
@@ -885,22 +935,22 @@ CeL.char_frequency=CeL.data.char_frequency=function (text){
 
 };
 /**
- * 計算字數 word counts.
+ * 計算字數 count words.
  * 
  * @param {String} text
  *            文檔
- * @param flag
- * @return
+ * @param {Number} flag	文檔格式/處理方法
+ * @return	{Number} 字數 
  * @memberOf CeL.data
  */
 CeL.count_word=CeL.data.count_word=function(text, flag){
 	///	<summary>
-	///	計算字數 word counts.
+	///	計算字數 count words.
 	///	*
 	///	</summary>
 	///	<param name="text" type="String" optional="false">文檔</param>
-	///	<param name="flag" type="" optional="false"/>
-	///	<returns/>
+	///	<param name="flag" type="Number" optional="false">文檔格式/處理方法</param>
+	///	<returns type="Number">字數</returns>
 	///	<memberOf>CeL.data</memberOf>
 
 };
@@ -2827,7 +2877,7 @@ CeL.on_load=CeL.net.web.on_load=function on_load(){
 
 };
 /**
- * bind/add listener.
+ * bind/add listener. register event control, setup code to run.
  * listener 應該加上 try{}catch{}，否則會搞不清楚哪裡出問題。
  * **	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 p_first 而改變。
  * **	NOT TESTED!!
@@ -2835,7 +2885,9 @@ CeL.on_load=CeL.net.web.on_load=function on_load(){
  * removeEventListener,
  * remove_listener(),
  * default 'this'
- * @param type	listen to what event type
+ * 自訂 event
+ * 
+ * @param {string} type	listen to what event type. event name/action
  * @param listener	listener function/function array/function string,
  * 				須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"
  * 			function(e){var target=e?e.target:(e=window.event).srcElement;if(e.stopPropagation)e.stopPropagation();else e.cancelBubble=true;if(e.preventDefault)e.preventDefault();else e.returnValue=false;return false;}
@@ -2849,7 +2901,7 @@ CeL.on_load=CeL.net.web.on_load=function on_load(){
  */
 CeL.add_listener=CeL.net.web.add_listener=function add_listener(type, listener, target_element, p_first){
 	///	<summary>
-	///	bind/add listener.
+	///	bind/add listener. register event control, setup code to run.
 	///	listener 應該加上 try{}catch{}，否則會搞不清楚哪裡出問題。
 	///	**	對同樣的 object，事件本身還是會依照 call add_listener() 的順序跑，不會因為 p_first 而改變。
 	///	**	NOT TESTED!!
@@ -2857,8 +2909,10 @@ CeL.add_listener=CeL.net.web.add_listener=function add_listener(type, listener, 
 	///	removeEventListener,
 	///	remove_listener(),
 	///	default 'this'
+	///	自訂 event
+	///	*
 	///	</summary>
-	///	<param name="type" type="" optional="false">listen to what event type</param>
+	///	<param name="type" type="string" optional="false">listen to what event type. event name/action</param>
 	///	<param>
 	///	listener	listener function/function array/function string,
 	///	須 String 之 recursive function 時可 "(function(){return function f(){f();};})()"
@@ -4528,6 +4582,33 @@ CeL.get_code_from_generated_various=CeL.code.reorganize.get_code_from_generated_
 	///	</summary>
 
 };
+/**
+ * set_run 的 queue
+ * {remain:剩下尚未處理的 sequence}
+ * @type Array
+ */
+sr_queue=[];
+/**
+ * main process.
+ * 不修改 .remain，直接以 start 為開始值。
+ * @since	2011/8/4 22:31:47
+ */
+sr_check=function(queue_index){
+	///	<summary>
+	///	main process.
+	///	不修改 .remain，直接以 start 為開始值。
+	///	</summary>
+	///	<since>2011/8/4 22:31:47</since>
+
+};
+	/**
+	 * 非同步 loading 了幾個 resources
+	 */
+//j=start,resource_count;//0,
+	/**
+	 * 已設定之 timeout (ms)
+	 */
+//j=start,resource_count=0,resource_setted,timeout;//0,
 
 //	null constructor for [_]
 _=function(){};

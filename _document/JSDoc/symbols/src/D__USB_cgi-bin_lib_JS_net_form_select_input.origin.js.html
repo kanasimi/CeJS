@@ -761,7 +761,7 @@
 <span class='line'>754</span> </span><span class="COMM">//	get private variables (instance[,destroy]), init private variables (instance[,access function list[, instance destructor]])</span><span class="WHIT">
 <span class='line'>755</span> </span><span class="NAME">pv</span><span class="PUNC">=</span><span class="KEYW">function</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">,</span><span class="NAME">d</span><span class="PUNC">,</span><span class="NAME">k</span><span class="PUNC">)</span><span class="PUNC">{</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">V</span><span class="PUNC">,</span><span class="NAME">K</span><span class="PUNC">=</span><span class="NAME">_p</span><span class="PUNC">(</span><span class="STRN">'k'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">arguments.callee.caller</span><span class="PUNC">===</span><span class="NAME">_p</span><span class="PUNC">(</span><span class="STRN">'i'</span><span class="PUNC">)</span><span class="PUNC">?</span><span class="PUNC">(</span><span class="NAME">V</span><span class="PUNC">=</span><span class="NAME">_p</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">[</span><span class="NAME">K</span><span class="PUNC">]</span><span class="PUNC">=</span><span class="NAME">_p</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="NAME">V.O</span><span class="PUNC">=</span><span class="NAME">i</span><span class="PUNC">,</span><span class="NAME">V.L</span><span class="PUNC">=</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="PUNC">(</span><span class="NAME">K</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">)</span><span class="PUNC">&&</span><span class="PUNC">(</span><span class="NAME">V</span><span class="PUNC">=</span><span class="NAME">_p</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">[</span><span class="NAME">K</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">&&</span><span class="NAME">i</span><span class="PUNC">===</span><span class="NAME">V.O</span><span class="PUNC">?</span><span class="NAME">d</span><span class="PUNC">?</span><span class="PUNC">(</span><span class="NAME">_p</span><span class="PUNC">(</span><span class="NAME">i</span><span class="PUNC">[</span><span class="NAME">K</span><span class="PUNC">]</span><span class="PUNC">,</span><span class="NUMB">1</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="KEYW">delete</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">[</span><span class="NAME">K</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">:</span><span class="NAME">V.L</span><span class="PUNC">:</span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>756</span> 
-<span class='line'>757</span> </span><span class="COMM">//	(for inherits)	不要 inherit 的把這段刪掉即可。</span><span class="WHIT">
+<span class='line'>757</span> </span><span class="COMM">//	(for inherit)	不要 inherit 的把這段刪掉即可。</span><span class="WHIT">
 <span class='line'>758</span> </span><span class="COMM">//(_.clone=arguments.callee).toString=function(){return '[class_template]';};</span><span class="WHIT">
 <span class='line'>759</span> 
 <span class='line'>760</span> 
@@ -1107,15 +1107,16 @@
 <span class='line'>1100</span> </span><span class="COMM">//	prevent re-use. 防止再造 </span><span class="WHIT">
 <span class='line'>1101</span> </span><span class="COMM">//delete _.clone;</span><span class="WHIT">
 <span class='line'>1102</span> 
-<span class='line'>1103</span> 
-<span class='line'>1104</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT">
-<span class='line'>1105</span> </span><span class="WHIT">	</span><span class="NAME">CeL.net.form.select_input</span><span class="WHIT">
-<span class='line'>1106</span> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>1107</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>1108</span> 
-<span class='line'>1109</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
-<span class='line'>1110</span> 
-<span class='line'>1111</span> </span><span class="NAME">CeL.setup_module</span><span class="PUNC">(</span><span class="NAME">module_name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>1112</span> 
-<span class='line'>1113</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>1114</span> </span></pre></body></html>
+<span class='line'>1103</span> </span><span class="NAME">_.allow_inherit</span><span class="PUNC">=</span><span class="KEYW">true</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1104</span> 
+<span class='line'>1105</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="WHIT">
+<span class='line'>1106</span> </span><span class="WHIT">	</span><span class="NAME">CeL.net.form.select_input</span><span class="WHIT">
+<span class='line'>1107</span> </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1108</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1109</span> 
+<span class='line'>1110</span> </span><span class="COMM">//===================================================</span><span class="WHIT">
+<span class='line'>1111</span> 
+<span class='line'>1112</span> </span><span class="NAME">CeL.setup_module</span><span class="PUNC">(</span><span class="NAME">module_name</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">code_for_including</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1113</span> 
+<span class='line'>1114</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>1115</span> </span></pre></body></html>

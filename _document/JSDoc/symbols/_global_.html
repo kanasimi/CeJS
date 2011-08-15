@@ -302,7 +302,7 @@ ul.inheritsList
 								<div class="fixedFont">
 								<b><a href="../symbols/_global_.html#cache_code">cache_code</a></b>
 								</div>
-								<div class="description">是否 cache code。若不是要重構 code 則不需要。</div>
+								<div class="description">是否 cache code。若不是要重構 code 則不需要。undefined: 依照預設Boolean: 明確設定，但如此即無法繼承。</div>
 							</td>
 						</tr>
 					
@@ -343,6 +343,26 @@ ul.inheritsList
 								<b><a href="../symbols/_global_.html#prototype">prototype</a></b>
 								</div>
 								<div class="description">framework main prototype definitionfor JSDT: 有 prototype 才會將之當作 Class</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/_global_.html#resource_count">resource_count</a></b>
+								</div>
+								<div class="description">非同步 loading 了幾個 resources</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/_global_.html#timeout">timeout</a></b>
+								</div>
+								<div class="description">已設定之 timeout (ms)</div>
 							</td>
 						</tr>
 					
@@ -507,7 +527,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#get_file">get_file</a></b>(path, encoding)
 								</div>
-								<div class="description">Get file resource<br/>用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br/>除 Ajax，本函數亦可用在 CScript 執行中。</div>
+								<div class="description">Get file resource by XMLHttpRequest<br/>用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br/>除 Ajax，本函數亦可用在 CScript 執行中。</div>
 							</td>
 						</tr>
 					
@@ -624,16 +644,16 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#include_resource">include_resource</a></b>(resource, callback, use_write, type)
 								</div>
-								<div class="description">include other JavaScript/CSS files.</div>
+								<div class="description">Including other JavaScript/CSS files asynchronously.</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#inherits">inherits</a></b>(module_name, initial_arguments)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#inherit">inherit</a></b>(module_name, initial_arguments)
 								</div>
-								<div class="description">模擬 inherits</div>
+								<div class="description">module 中模擬 inherit 時使用。</div>
 							</td>
 						</tr>
 					
@@ -679,6 +699,15 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#is_loaded">is_loaded</a></b>(module_name)
 								</div>
 								<div class="description">判斷 module 是否存在，以及是否破損。</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#is_module_pattern">is_module_pattern</a></b>(test_string)
+								</div>
+								<div class="description">test 是否符合 module pattern.</div>
 							</td>
 						</tr>
 					
@@ -784,6 +813,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#set_run">set_run</a></b>(running)
+								</div>
+								<div class="description">control/setup source codes to run.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#setup_module">setup_module</a></b>(module_name, code_for_including)
 								</div>
 								<div class="description">預先準備好下層 module 定義時的環境。<br/>請盡量先 call 上層 name-space 再定義下層的。</div>
@@ -874,12 +912,12 @@ ul.inheritsList
 					<a name="cache_code"> </a>
 					<div class="fixedFont">
 					
-					<span class="light">{Boolean}</span>
+					<span class="light">{Boolean, undefined}</span>
 					<b>cache_code</b>
 					
 					</div>
 					<div class="description">
-						是否 cache code。若不是要重構 code 則不需要。
+						是否 cache code。若不是要重構 code 則不需要。undefined: 依照預設Boolean: 明確設定，但如此即無法繼承。
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -987,6 +1025,56 @@ ul.inheritsList
 					</div>
 					<div class="description">
 						framework main prototype definitionfor JSDT: 有 prototype 才會將之當作 Class
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="resource_count"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>resource_count</b>
+					
+					</div>
+					<div class="description">
+						非同步 loading 了幾個 resources
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="timeout"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>timeout</b>
+					
+					</div>
+					<div class="description">
+						已設定之 timeout (ms)
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -1887,7 +1975,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						Get file resource<br/>用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br/>除 Ajax，本函數亦可用在 CScript 執行中。
+						Get file resource by XMLHttpRequest<br/>用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br/>除 Ajax，本函數亦可用在 CScript 執行中。
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -2579,7 +2667,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						include other JavaScript/CSS files.TODO:callback 完 .js 自動移除
+						Including other JavaScript/CSS files asynchronously.TODO:http://headjs.com/#theory
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -2609,7 +2697,7 @@ ul.inheritsList
 									<span class="light fixedFont">{Boolean}</span> <b>use_write</b>
 									<i>Optional</i>
 								</dt>
-								<dd>use document.write() instead of insert a element</dd>
+								<dd>use document.write() instead of insert a element to <head></dd>
 							
 								<dt>
 									<span class="light fixedFont">{Number}</span> <b>type</b>
@@ -2628,15 +2716,15 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="inherits"> </a>
+					<a name="inherit"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>inherits</b>(module_name, initial_arguments)
+					<b>inherit</b>(module_name, initial_arguments)
 					
 					</div>
 					<div class="description">
-						模擬 inherits
+						module 中模擬 inherit 時使用。
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -2814,7 +2902,7 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<span class="light fixedFont">{Integral}</span> <b>debug_level</b>
+									<span class="light fixedFont">{Integer}</span> <b>debug_level</b>
 									<i>Optional</i>
 								</dt>
 								<dd>if it's now in this debug level.</dd>
@@ -2830,7 +2918,7 @@ ul.inheritsList
 							
 								<dd><span class="light fixedFont">{Boolean}</span> It's now in specified debug level.</dd>
 							
-								<dd><span class="light fixedFont">{Number}</span> It's now in what debug level(Integral).</dd>
+								<dd><span class="light fixedFont">{Number}</span> It's now in what debug level (Integer).</dd>
 							
 							</dl>
 						
@@ -2929,6 +3017,52 @@ ul.inheritsList
 							<dt class="heading">Returns:</dt>
 							
 								<dd><span class="light fixedFont">{Boolean}</span> module 是否存在以及良好。</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="is_module_pattern"> </a>
+					<div class="fixedFont">
+					
+					<span class="light">{Boolean}</span>
+					<b>is_module_pattern</b>(test_string)
+					
+					</div>
+					<div class="description">
+						test 是否符合 module pattern.TODO: improve
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>test_string</b>
+									
+								</dt>
+								<dd>string to test</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Boolean}</span> 是否符合 module pattern</dd>
 							
 							</dl>
 						
@@ -3368,7 +3502,7 @@ ul.inheritsList
 									<b>name_space</b>
 									
 								</dt>
-								<dd>which name-space</dd>
+								<dd>in which name-space</dd>
 							
 								<dt>
 									<span class="light fixedFont">{String}</span> <b>function_name</b>
@@ -3415,7 +3549,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						Ask privilege in mozilla projects: Firefox 2, 3.enablePrivilege 似乎只能在執行的 function 本身或 caller 呼叫才有效果，跳出函數即無效，不能 cache，因此提供 callback。就算按下「記住此決定」，重開瀏覽器後需要再重新授權。
+						Ask privilege in mozilla projects: Firefox 2, 3.get_file() 遇到需要提高權限時使用。enablePrivilege 似乎只能在執行的 function 本身或 caller 呼叫才有效果，跳出函數即無效，不能 cache，因此提供 callback。就算按下「記住此決定」，重開瀏覽器後需要再重新授權。
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
@@ -3573,6 +3707,51 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="set_run"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>set_run</b>(running)
+					
+					</div>
+					<div class="description">
+						control/setup source codes to run.基本上使用非同步(asynchronous)的方式，除非所需資源已經載入，或是有辦法以 XMLHttpRequest 取得資源。
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/D__USB_cgi-bin_lib_JS_ce.origin.js.html">ce.origin.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{Array}</span> <b>running</b>
+									
+								</dt>
+								<dd>sequence: Array of		{Function} function to run		| {Integer} timeout (ms): 僅能保證上次 function 執行至此次 function 一定會等超過這段時間		| {String} library module name to import		| {String} file path (image/JavaScript files/CSS)</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Since:</dt>
+								<dd>2011/8/4 22:31:47</dd>
+							</dl>
+							</dl>
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="setup_module"> </a>
 					<div class="fixedFont">
 					
@@ -3599,7 +3778,7 @@ ul.inheritsList
 									<span class="light fixedFont">{String}</span> <b>module_name</b>
 									
 								</dt>
-								<dd>module name</dd>
+								<dd>module name to register</dd>
 							
 								<dt>
 									<span class="light fixedFont">{Function}</span> <b>code_for_including</b>
@@ -3995,7 +4174,7 @@ ul.inheritsList
 					<a name="use_function"> </a>
 					<div class="fixedFont">
 					
-					
+					<span class="light">{Number}</span>
 					<b>use_function</b>(function_list, return_extend)
 					
 					</div>
@@ -4010,7 +4189,7 @@ ul.inheritsList
 					
 					
 					
-					<pre class="code">//	requires (inside module)if(eval(library_namespace.use_function('data.split_String_to_Object')))return;</pre>
+					<pre class="code">//	requires (inside module)if(library_namespace.use_function('data.split_String_to_Object'))return;if(eval(library_namespace.use_function('data.split_String_to_Object')))return;</pre>
 					
 					
 					
@@ -4045,7 +4224,7 @@ ul.inheritsList
 							<dl class="detailList">
 							<dt class="heading">Returns:</dt>
 							
-								<dd>error</dd>
+								<dd><span class="light fixedFont">{Number}</span> error code		1: can't parse function_list</dd>
 							
 							</dl>
 						
@@ -4066,7 +4245,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Tue Nov 16 2010 20:29:38 GMT+0800 (CST)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Fri Aug 05 2011 17:45:23 GMT+0800 (CST)
 		</div>
 	</body>
 </html>
