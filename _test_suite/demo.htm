@@ -717,7 +717,7 @@ google.setOnLoadCallback(function(){
 	 */
 	function load_detect() {
 		if (typeof initialization_setup == 'function')
-			setTimeout(initialization_setup, 0);
+			setTimeout(initialization_setup, 1);
 		else if(typeof window == 'object' && typeof document == 'object' && window.document == document){
 			//	message handle
 			var mh = document.layers && document.layers['error_load_panel'];
