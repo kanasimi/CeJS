@@ -78,7 +78,7 @@ function test1() {
 
 
 //]]></script>
-<title>test suite</title></head>
+<title>CeL test / demo suite</title></head>
 
 <body class="bgn">
 
@@ -329,7 +329,6 @@ function start_count(restart) {
 	 */
 	function initialization_work() {
 
-
 		//	test the biggest 10^?	取得能準確計算的最大值
 		var biggest_exponent_of_10 = 0, test_num = 1;
 		while (
@@ -341,6 +340,7 @@ function start_count(restart) {
 			//,CeL.debug('10^'+biggest_exponent_of_10+'='+test_num+'; '+(parseInt(test_num-1,10)))
 			;
 		//CeL.debug('biggest exponent of 10: ' + biggest_exponent_of_10);
+
 
 		sr( [ 'code.compatibility', 'native' ], function() {
 			Number.prototype.to_fixed = CeL.to_fixed;
@@ -363,8 +363,12 @@ function start_count(restart) {
 						+ ScriptEngineBuildVersion(), 2);
 		});
 
-		//CeL.debug('no exist module test',2);
-		//CeL.use('code.log.no_exist_module_to_test');
+		CeL.debug('no-exist module test', 2);
+		//	下面測試在 MSIE6 中會發生 throw
+		sr('code.log.no_exist_module_to_test', function(){
+			CeL.debug('no-exist module test end.');
+		});
+
 		//CeL.warn('a WARNING level message');
 
 		//	base test
@@ -621,6 +625,8 @@ function start_count(restart) {
 
 
 				});
+
+
 	};
 
 	/**
@@ -661,7 +667,11 @@ function start_count(restart) {
 
 								CeL.log.max_length = 0;
 								CeL.log('Initialization ' + (e ? 'error' : 'finished') + '.');
-							}, "lib/jquery-nightly.js", "lib/swfobject.js" ]);
+							},
+							"lib/jquery-nightly.js",
+							"lib/swfobject.js"
+					]
+			);
 
 		} catch (e) {
 			//	show the error panel
