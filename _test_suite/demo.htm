@@ -42,6 +42,8 @@ http://www.11gz.com/blog/2010/03/20/html5-doctype-use/
 
 JavaScript Shell
 http://nio127.blogspot.com/2008/11/javascript-shell-web-developerhacker.html
+
+本範例於 MSIE 8.0 local 會要求主動式內容!
 */
 
 //	預防彈出警告視窗
@@ -59,8 +61,6 @@ try {
 } catch (e) {
 	//CeL.debug(e.message);
 }
-
-//CeL.use('code.log2');
 
 //CeL.debug(111);
 //CeL.debug(CeL.simplify_path('a/../b'));
@@ -342,7 +342,7 @@ function start_count(restart) {
 		//CeL.debug('biggest exponent of 10: ' + biggest_exponent_of_10);
 
 
-		sr( [ 'code.compatibility', 'native' ], function() {
+		sr( [ 'data.code.compatibility', 'data.native' ], function() {
 			Number.prototype.to_fixed = CeL.to_fixed;
 
 			//CeL.debug(CeL.is_type(window.navigator));
@@ -376,8 +376,8 @@ function start_count(restart) {
 
 		//if(0)CeL.debug(2223);test1();
 
-		CeL.debug('net.SVG', 2);
-		sr('net.SVG', function() {
+		CeL.debug('SVG', 2);
+		sr('interact.integrate.SVG', function() {
 
 			//CeL.debug('CeL.SVG = ' + CeL.SVG, 0, 1);
 			//CeL.debug('CeL.log = ' + CeL.log, 0, 1);
@@ -407,9 +407,9 @@ function start_count(restart) {
 		CeL.debug(c.replace(/\n/g,'<br \/>'));
 		 */
 
-		sr('net.web', function() {
+		CeL.debug('DOM', 2);
+		sr('interact.DOM', function() {
 
-			CeL.debug('net.web', 2);
 			//CeL.copy_to_clipboard('已經複製');
 			//CeL.debug(CeL.parse_URI('ftp://ftp.is.co.za/rfc/rfc1808.txt').path);
 
@@ -418,35 +418,35 @@ function start_count(restart) {
 		//CeL.log('long interger test: 36578368923657238645067315413986475314666666666666666666666666864506731541398647531466666666666666666666666666666666666666666666666666666666666666666666666666666622222222222222222222222222222222222222');
 
 		CeL.debug('phase: math test', 2);
-		if(0)sr(['math','math.quotient'],function(){
-			//var p = 20374345, q = CeL.math.floor_sqrt(p = p * p - 1); CeL.log(q + '<br \/>' + (q * q) + '<br />' + p + '<br />' + (++q * q));
+		sr( [ 'data.math', 'data.math.quotient' ], function() {
+				//var p = 20374345, q = CeL.data.math.floor_sqrt(p = p * p - 1); CeL.log(q + '_$tag__' + (q * q) + '_$tag_' + p + '_$tag_' + (++q * q));
 
-			//CeL.debug(CeL.get_module_path('math.quotient')+': '+CeL.is_loaded('math.quotient')+': '+CeL.math.quotient);
-			//var q1=CeL.quotient.parse_base('.110011001100110011001100110011001100',2);
-			//CeL.log(q1.to_base());
-			//q1=CeL.quotient.parse_base('.110011001100110011001100110011001100110011001100110011001100110011001100',2);
-			//CeL.log(q1.to_base());
-			//CeL.log(CeL.quotient.parse_base('65.43'.toLowerCase(),8).to_base(16).replace(/_([^\(]+)/,'_<i style="text-decoration:overline">$1</i>'));
-			//CeL.log((new CeL.quotient(3,4)).count('*',new CeL.quotient(2,7)).reduce().to_print_mode());
-			//CeL.log(CeL.quotient.turnBaseQ('4565.5',16).to_print_mode(3,2));
+				//CeL.debug(CeL.get_module_path('math.quotient')+': '+CeL.is_loaded('math.quotient')+': '+CeL.data.math.quotient);
+				//var q1=CeL.quotient.parse_base('.110011001100110011001100110011001100',2);
+				//CeL.log(q1.to_base());
+				//q1=CeL.quotient.parse_base('.110011001100110011001100110011001100110011001100110011001100110011001100',2);
+				//CeL.log(q1.to_base());
+				//CeL.log(CeL.quotient.parse_base('65.43'.toLowerCase(),8).to_base(16).replace(/_([^\(]+)/,'__$tag_______________________________$1_$ta'));
+				//CeL.log((new CeL.quotient(3,4)).count('*',new CeL.quotient(2,7)).reduce().to_print_mode());
+				//CeL.log(CeL.quotient.turnBaseQ('4565.5',16).to_print_mode(3,2));
 
-			/*
-			 var c1 = new CeL.complement, c2 = new CeL.complement;
-			 c1.bits = c2.bits = 4;
-			 //c1.bits = 16;
-			 //c1.from(1000 , 1);
-			 //c1.set(-1000);
-			 //CeL.log(c1.valueOf() + ', ' + c1.to());
-			 for ( var i = -9; i < 10; i++ ){
-			 c1.set(i);
-			 c2.from(c1.to());//c2.from(c1.to(0,1),0,1);
-			 CeL.log(c2.valueOf() + ', ' + c1.valueOf() + ', ' + c1.to());//CeL.log(c2.valueOf() + ', ' + c1.valueOf() + ', ' + c1.to(0,1));
-			 }
-			 */
-		});
+				/*
+				 var c1 = new CeL.complement, c2 = new CeL.complement;
+				 c1.bits = c2.bits = 4;
+				 //c1.bits = 16;
+				 //c1.from(1000 , 1);
+				 //c1.set(-1000);
+				 //CeL.log(c1.valueOf() + ', ' + c1.to());
+				 for ( var i = -9; i < 10; i++ ){
+				 c1.set(i);
+				 c2.from(c1.to());//c2.from(c1.to(0,1),0,1);
+				 CeL.log(c2.valueOf() + ', ' + c1.valueOf() + ', ' + c1.to());//CeL.log(c2.valueOf() + ', ' + c1.valueOf() + ', ' + c1.to(0,1));
+				 }
+				 */
+			});
 
-		sr('math.Hamming', function(){
-			Hamming = CeL.math.Hamming;
+		sr('data.math.Hamming', function() {
+			Hamming = CeL.data.math.Hamming;
 			//Hamming.show(16);
 			Hamming.dec = function() {
 				try {
@@ -471,9 +471,8 @@ function start_count(restart) {
 
 		});
 
-
 		if (0)
-			CeL.use('code.API', function() {
+			CeL.use('data.code.API', function() {
 
 				CeL.use_API('Bing', function() {
 					//	http://msdn.microsoft.com/en-us/library/ff512406.aspx
@@ -505,7 +504,7 @@ function start_count(restart) {
 				id : 'test_o'
 			}, 'panel_for_test');
 
-		//CeL.get_element('panel_for_test').innerHTML='<OBJECT id=tts_flash codeBase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=5,0,0,0" classid=clsid:D27CDB6E-AE6D-11cf-96B8-444553540000 width=18 height=18><PARAM NAME="_cx" VALUE="476"><PARAM NAME="_cy" VALUE="476"><PARAM NAME="FlashVars" VALUE=""><PARAM NAME="Movie" VALUE="http://www.gstatic.com/translate/sound_player.swf"><PARAM NAME="Src" VALUE="http://www.gstatic.com/translate/sound_player.swf"><PARAM NAME="WMode" VALUE="Transparent"><PARAM NAME="Play" VALUE="0"><PARAM NAME="Loop" VALUE="-1"><PARAM NAME="Quality" VALUE="High"><PARAM NAME="SAlign" VALUE=""><PARAM NAME="Menu" VALUE="-1"><PARAM NAME="Base" VALUE=""><PARAM NAME="AllowScriptAccess" VALUE="always"><PARAM NAME="Scale" VALUE="ShowAll"><PARAM NAME="DeviceFont" VALUE="0"><PARAM NAME="EmbedMovie" VALUE="0"><PARAM NAME="BGColor" VALUE=""><PARAM NAME="SWRemote" VALUE=""><PARAM NAME="MovieData" VALUE=""><PARAM NAME="SeamlessTabbing" VALUE="1"><PARAM NAME="Profile" VALUE="0"><PARAM NAME="ProfileAddress" VALUE=""><PARAM NAME="ProfilePort" VALUE="0"><PARAM NAME="AllowNetworking" VALUE="all"><PARAM NAME="AllowFullScreen" VALUE="false"></OBJECT>'
+		//CeL.get_element('panel_for_test').innerHTML='_$tag_____________________________________________________________________________________________________________________________________________________________________________________<PARAM NAME="_cx" VALUE="476">_$tag_________________________<PARAM NAME="FlashVars" VALUE="">_$tag_________________________________________________________________________<PARAM NAME="Src" VALUE="http://www.gstatic.com/translate/sound_player.swf">_$tag___________________________________<PARAM NAME="Play" VALUE="0">_$tag_________________________<PARAM NAME="Quality" VALUE="High">_$tag_________________________<PARAM NAME="Menu" VALUE="-1">_$tag_______________________<PARAM NAME="AllowScriptAccess" VALUE="always">_$tag_______________________________<PARAM NAME="DeviceFont" VALUE="0">_$tag______________________________<PARAM NAME="BGColor" VALUE="">_$tag___________________________<PARAM NAME="MovieData" VALUE="">_$tag___________________________________<PARAM NAME="Profile" VALUE="0">_$tag_________________________________<PARAM NAME="ProfilePort" VALUE="0">_$tag_____________________________________<PARAM NAME="AllowFullScreen" VALUE="false">_$tag____'
 		/*
 		 //CeL.get_element('test_o').data='dd';
 		 CeL.get_element('panel_for_test').appendChild(rrtt);
@@ -546,18 +545,19 @@ function start_count(restart) {
 			CeL.set_cookie(cookie_name, 'test~~"OK"!');
 		}
 
-
 		CeL.debug('form.select_input test', 2);
 		sr(
-				[ 'net.form.address', 'net.form.bank_account',
-						'net.form.education' ],
+				[ 'interact.form.address', 'interact.form.bank_account',
+						'interact.form.education' ],
 				function() {
 
 					// function aaa(v){alert('mmm='+mmm);var r={};r[v]=222;return r;}
 					// var fff3=33;eval('var mmm=1;(function(){var included=aaa("fff");alert(included.fff);})()');alert(fff);
 					//CeL.use('net.form.select_input');
-					if(0)CeL.use( [ 'net.form.address', 'net.form.bank_account',
-							'net.form.education' ]);
+					if (0)
+						CeL.use( [ 'interact.form.address',
+								'interact.form.bank_account',
+								'interact.form.education' ]);
 
 					var qi = new CeL.select_input('question', [ '4232+552',
 							'4232-552', '4232*34', '4232/34' ], 'includeKeyWC');
@@ -565,8 +565,9 @@ function start_count(restart) {
 					//qi.setSearch('includeKeyWC');
 
 					CeL.debug('phase: attach test', 2);
-					var a_sp = new CeL.select_input('attach_span', [ 5, 6, 55, 555, 7 ]), a_i = new CeL.select_input(
-							0, [ 1, 2, 3, 4, 5 ]), a_s = new CeL.select_input, a_h = new CeL.select_input;
+					var a_sp = new CeL.select_input('attach_span', [ 5, 6, 55,
+							555, 7 ]), a_i = new CeL.select_input(0, [ 1, 2, 3,
+							4, 5 ]), a_s = new CeL.select_input, a_h = new CeL.select_input;
 
 					//sl('set attach_span: '+a_sp.loaded);
 					a_sp.attach('attach_span');
@@ -582,10 +583,10 @@ function start_count(restart) {
 					a_h.setAllList( [ 1, 2, 3, 6 ]);
 					a_h.setSearch('includeKeyWC');
 
-
 					CeL.debug('attach set', 2);
-					(new CeL.select_input('run_times', [ 1, 100, 1000, 10000, 100000,
-							1000000, 10000000 ], 'always')).set_verify('|natural');
+					(new CeL.select_input('run_times', [ 1, 100, 1000, 10000,
+							100000, 1000000, 10000000 ], 'always'))
+							.set_verify('|natural');
 
 					//(new CeL.select_input('number1')).set_verify('integer');
 					(new CeL.select_input('base1', [ 2, 8, 10, 16 ], 'always'))
@@ -598,12 +599,12 @@ function start_count(restart) {
 							.set_verify('natural');
 					(new CeL.select_input('bits', [ 4, 8, 16 ], 'always'))
 							.set_verify('natural');
-					(new CeL.select_input('complement_value')).set_verify('integer');
+					(new CeL.select_input('complement_value'))
+							.set_verify('integer');
 
 					//	just setup pattern
 					new CeL.select_input('h_data');
 					new CeL.select_input('h_code');
-
 
 					CeL.debug('set education form', 2);
 					var education_form = new CeL.education.TW('education');
@@ -623,9 +624,7 @@ function start_count(restart) {
 						addF.focus(0, 0);
 					});
 
-
 				});
-
 
 	};
 
@@ -645,7 +644,7 @@ function start_count(restart) {
 			sr = CeL.set_run;
 
 			sr(
-					'code.log',
+					'application.debug.log',
 					[
 							function() {
 								CeL.Log.set_board('panel_for_log');
@@ -654,10 +653,11 @@ function start_count(restart) {
 								var e = 0;
 								try {
 									sr(
-											'net.web',
+											'interact.DOM',
 											initialization_work,
 											function() {
-												CeL.get_element('error_load_panel').style.display = 'none';
+												CeL
+														.get_element('error_load_panel').style.display = 'none';
 											});
 
 								} catch (e) {
@@ -666,12 +666,9 @@ function start_count(restart) {
 								}
 
 								CeL.log.max_length = 0;
-								CeL.log('Initialization ' + (e ? 'error' : 'finished') + '.');
-							},
-							"lib/jquery-nightly.js",
-							"lib/swfobject.js"
-					]
-			);
+								CeL.log('Initialization '
+										+ (e ? 'error' : 'finished') + '.');
+							}, "lib/jquery-nightly.js", "lib/swfobject.js" ]);
 
 		} catch (e) {
 			//	show the error panel
@@ -681,10 +678,10 @@ function start_count(restart) {
 					//	** 較新之 browser 通常需要使用 callback 的方法，不能使用 "CeL.use('module');_do_some_thing_;"!!
 					navigator.userAgent.indexOf('Chrome') === -1 ? CeL.get_file.error
 							|| 'Loading local file error!'
-							: 'You may <a href="http://code.google.com/p/chromium/issues/detail?id=4197#c26">add a flag</a> --allow-file-access-from-files to run this tool.<br/>e.g., run '
+							: 'You may <a href="http://code.google.com/p/chromium/issues/detail?id=4197#c26">add a flag_$ta --allow-file-access-from-files to run this tool._$tage.g., run '
 									+ (navigator.userAgent.indexOf('Linux') !== -1 ? '/opt/google/chrome/google-chrome %U --allow-file-access-from-files&'
 											: 'Chrome --allow-file-access-from-files')
-									+ '<hr \/>';
+									+ '_$tag__';
 
 				document.getElementById('error_load_panel').style.position = 'static';
 			} catch (e) {
