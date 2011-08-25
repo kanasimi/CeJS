@@ -642,17 +642,15 @@ function start_count(restart) {
 			//CeL.cache_code = true;
 			//	Initialize log function
 
-			/**
-			 * alias of CeL.set_run
-			 */
-			sr = CeL.set_run;
-
-			sr(
+			CeL.set_run(
 					'application.debug.log',
 					[
 							function() {
 								CeL.Log.set_board('panel_for_log');
 								CeL.debug('Log panel setted.');
+								/**
+								 * alias of CeL.set_run
+								 */
 								sr = CeL.set_run;
 
 								var e = 0;
@@ -749,7 +747,12 @@ google.setOnLoadCallback(function(){
 		//else alert('Initialization error!');
 	}
 
-	window.onload = load_detect;
+
+	if(typeof CeL === 'function' && typeof CeL.set_run === 'function')
+		CeL.set_run(load_detect);
+	else
+		window.onload = load_detect;
+
 	//CeL.use('net.web');CeL.on_load(load_detect);
 
 	//for(var i=0,j=0;i<1e9;i++)j++;
