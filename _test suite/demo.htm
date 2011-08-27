@@ -346,6 +346,26 @@ function start_count(restart) {
 		//CeL.debug('biggest exponent of 10: ' + biggest_exponent_of_10);
 
 
+
+		CeL.debug('.set_variable test', 2);
+		if(0){
+			var value_to_set=657845,variable_name='a_test_variable',got_modify_action,test_namespace={a:234};
+			CeL.debug('get_variable '+variable_name+' = '+CeL.get_variable(variable_name,function(v,n){CeL.debug('收到訊息：設定 '+n+' = '+v);got_modify_action=1;},test_namespace));
+			CeL.debug('set_variable:'+CeL.set_variable(variable_name,value_to_set,test_namespace));
+			CeL.debug('after set_variable, get_variable '+variable_name+' = '+CeL.get_variable(variable_name,0,test_namespace));
+			CeL.debug('after set_variable, get global variable '+variable_name+' = '+CeL.get_variable(variable_name));
+			try{
+				var get_value=(test_namespace?test_namespace.a_test_variable:a_test_variable);
+				CeL.debug('after set_variable, 設定'+(got_modify_action&&get_value===value_to_set?'成功':'<em>失敗</em>')+'. 直接取值 '+variable_name+' = '+get_value);
+			}catch(e){
+				CeL.warn('after set_variable, 設定失敗');
+			}
+			CeL.debug('set_variable:'+CeL.set_variable(variable_name,undefined,test_namespace));
+			CeL.debug('after 2nd set_variable, get_variable '+variable_name+' = '+CeL.get_variable(variable_name,0,test_namespace));
+		}
+
+
+
 		sr( [ 'data.code.compatibility', 'data.native' ], function() {
 			Number.prototype.to_fixed = CeL.to_fixed;
 
