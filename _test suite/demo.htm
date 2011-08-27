@@ -350,7 +350,7 @@ function start_count(restart) {
 			Number.prototype.to_fixed = CeL.to_fixed;
 
 			//CeL.debug(CeL.is_type(window.navigator));
-			if (CeL.is_DOM('navigator')) {
+			if (window.navigator) {
 				//	http://blogs.msdn.com/ie/archive/2010/03/23/introducing-ie9-s-user-agent-string.aspx
 				CeL.debug('User agent: ' + navigator.userAgent);
 				for ( var i in navigator)
@@ -360,7 +360,7 @@ function start_count(restart) {
 
 			//CeL.debug(CeL.is_type(window.ScriptEngineMajorVersion));
 			//	for IE only
-			if (CeL.is_DOM('ScriptEngineMajorVersion'))
+			if (window.ScriptEngineMajorVersion)
 				CeL.debug('Script engine: ' + ScriptEngine() + ' '
 						+ ScriptEngineMajorVersion() + '.'
 						+ ScriptEngineMinorVersion() + '.'
