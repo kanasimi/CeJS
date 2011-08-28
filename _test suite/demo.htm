@@ -213,6 +213,7 @@ Page loaded. Initializing the framework. Please wait..
 
 
 <script type="text/javascript">//<![CDATA[
+'use strict';
 
 
 //	2010/4/17 09:54:35
@@ -252,6 +253,10 @@ function start_count(restart) {
 	 test A||B
 	 */
 
+	/**
+	 * alias of CeL.set_run
+	 */
+	var sr;
 	var SVG_object, Hamming;
 	var OtS = Object.prototype.toString;
 	var is_Function = CeL.object_tester('Function', 'OtS');
@@ -669,9 +674,7 @@ function start_count(restart) {
 							function() {
 								CeL.Log.set_board('panel_for_log');
 								CeL.debug('Log panel setted.');
-								/**
-								 * alias of CeL.set_run
-								 */
+
 								sr = CeL.set_run;
 
 								var e = 0;
@@ -680,8 +683,7 @@ function start_count(restart) {
 											'interact.DOM',
 											initialization_work,
 											function() {
-												CeL
-														.get_element('error_load_panel').style.display = 'none';
+												CeL.get_element('error_load_panel').style.display = 'none';
 											});
 
 								} catch (e) {
