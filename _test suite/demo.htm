@@ -82,7 +82,8 @@ function test1() {
 
 
 //]]></script>
-<title>CeL test / demo suite</title></head>
+<title>CeL test / demo suite</title>
+</head>
 
 <body class="bgn">
 
@@ -649,6 +650,9 @@ function start_count(restart) {
 
 				});
 
+		sr('interact.DND',function(){
+			CeL.set_drop_target('panel_for_log');
+		});
 	};
 
 	/**
