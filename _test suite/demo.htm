@@ -209,7 +209,15 @@ show
 <b class="sp">|</b>
 <a href="#" onclick="CeL.Log.toggle();return false;" title="顯示/隱藏訊息">show/hidden log</a>
 <div id="panel_for_log">
-Page loaded. Initializing the framework. Please wait.. (<a href="#" onclick="try{self.applicationCache.update();}catch(e){}return false;">Update cache</a>)
+Page loaded. Initializing the framework. Please wait.. (<a href="#" onclick="
+try {
+	var appCache = self.applicationCache;
+	appCache.update();
+	if (appCache.status === appCache.UPDATEREADY)
+		appCache.swapCache();
+} catch (e) {
+}
+return false;">Update cache</a>)
 </div>
 
 
