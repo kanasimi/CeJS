@@ -1,12 +1,15 @@
 ﻿CACHE MANIFEST
-# HTML5 本地/離線存儲
+# HTML5 本地/離線存儲.
 # http://www.w3.org/TR/html5/offline.html
 # http://www.qianduan.net/responsive-web-design.html
 # http://zetajames.wordpress.com/2010/03/02/html5-manifest/
  # comments can have spaces before them, but must be alone on the line
 
+# 2011/11/6 15:19:03
+
 # 引用 manifest 文件的頁面會自動 cache。
-# 使用離線存儲似乎需要列入*所有*需要的離線檔案
+# 使用離線存儲似乎需要列入*所有*需要的離線檔案。
+
 
 # 沒有標識，預設為離線時需要使用到的檔案
 

@@ -104,9 +104,9 @@ You may need to check the configuration of the browser, <a href="#" onclick="his
 <div onclick="CeL.toggle_display('eval_panel');" class="test_toggle">eval test</div>
 <div id="eval_panel" class="test_panel" style="display:block;">
 <input id="question" value="43/21"/>
-<b onclick="show_question();" style="cursor: pointer;">show</b>
+<a href="#" onclick="show_question();return false;">show</a>
 |
-<b onclick="run_code();" style="cursor: pointer;">run</b>
+<a href="#" onclick="run_code();return false;">run</a>
 <input id="run_times" style="width:5em;"/>
 times
 
@@ -209,7 +209,7 @@ show
 <b class="sp">|</b>
 <a href="#" onclick="CeL.Log.toggle();return false;" title="顯示/隱藏訊息">show/hidden log</a>
 <div id="panel_for_log">
-Page loaded. Initializing the framework. Please wait.. (<b style="cursor:pointer" onclick="try{self.applicationCache.update();}catch(e){}">Update cache</b>)
+Page loaded. Initializing the framework. Please wait.. (<a href="#" onclick="try{self.applicationCache.update();}catch(e){}return false;">Update cache</a>)
 </div>
 
 
