@@ -1,13 +1,11 @@
 ﻿<?xml version="1.1" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" manifest="test suite.manifest">
 <head><meta http-equiv="content-type" content="text/html;charset=utf-8"/>
 <style type="text/css">
 /* <![CDATA[
 
-	CSS reset
 */
-@import url(lib/reset.css);
 
 body{margin:0;padding:0;}
 .test_toggle{color:#e6d;display:inline;cursor:pointer;}
@@ -58,6 +56,9 @@ CeL.set_debug();
 
 //	相對於 library 本身來說的路徑
 CeL.include_module_resource('../../game/game.css');
+//	CSS reset
+CeL.include_module_resource('_test suite/lib/reset.css');
+
 
 try {
 	dojo.require("dojo.NodeList-fx");
@@ -208,7 +209,7 @@ show
 <b class="sp">|</b>
 <a href="#" onclick="CeL.Log.toggle();return false;" title="顯示/隱藏訊息">show/hidden log</a>
 <div id="panel_for_log">
-Page loaded. Initializing the framework. Please wait..
+Page loaded. Initializing the framework. Please wait.. (<b style="cursor:pointer" onclick="try{self.applicationCache.update();}catch(e){}">Update cache</b>)
 </div>
 
 
