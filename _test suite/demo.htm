@@ -659,7 +659,7 @@ function start_count(restart) {
 
 				});
 
-		sr('interact.DND',function(){
+		sr('interact.DND', function(){
 			CeL.set_drop_target('panel_for_log');
 		});
 	};
@@ -700,7 +700,10 @@ function start_count(restart) {
 								CeL.log.max_length = 0;
 								CeL.log('Initialization '
 										+ (e ? 'error' : 'finished') + '.');
-							}, "lib/jquery-nightly.js", "lib/swfobject.js" ]);
+							}
+							//, "lib/jquery-nightly.js"
+							//, "lib/swfobject.js"
+							]);
 
 		} catch (e) {
 			//	show the error panel
