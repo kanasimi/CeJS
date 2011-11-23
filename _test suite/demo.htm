@@ -205,9 +205,11 @@ show
 <a href="#" onclick="var t=CeL.Log.get_log();clipboardFunction(t?2:1,t?(t+'').replace(/^\[\d+\]/,''):'result');return false;">copy result</a>
 <b class="sp">|</b>
 -->
-<a href="#" onclick="CeL.Log.clear();return false;" title="清除訊息">clear log</a>
+<a href="#" onclick="CeL.Log.clear();return false;" title="清除所有訊息">clear log</a>
 <b class="sp">|</b>
-<a href="#" onclick="CeL.Log.toggle();return false;" title="顯示/隱藏訊息">show/hidden log</a>
+<a href="#" onclick="CeL.Log.toggle();return false;" title="顯示/隱藏所有訊息">toggle log</a>
+<b class="sp">|</b>
+<a href="#" onclick="CeL.toggle_debug();return false;" title="顯示/隱藏 debug 訊息">toggle debug</a>
 <div id="panel_for_log">
 Page loaded. Initializing the framework. Please wait.. (<a href="#" onclick="
 try {
