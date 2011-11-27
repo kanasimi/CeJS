@@ -1,11 +1,12 @@
 /**
  * @name framework loader for node.js.
  * @example
- * runnung under shell:<br />
+ * for including:<br />
  * <code>
  * require("path/to/node.loader.js");
  * </code>
  * @since 2011/11/26 23:33:32
+ * @see	http://nodejs.org/
  */
 
 
@@ -33,6 +34,7 @@ try {
 
 		// console.log(typeof main_lib_binary.length);
 
+		//	a simplified .get_file
 		for (; i < l;) {
 			// console.log(main_lib_binary[i] + ',' + main_lib_binary[i + 1]);
 			script_code.push(String.fromCharCode(main_lib_binary[i++] + 256
@@ -71,8 +73,8 @@ if (0 && typeof CeL === 'function') {
 			.slice(0, 300)
 			.replace(/[\u0100-\uffff]/g, '.'));
 
-	CeL.set_run( [ 'data.math', 'data.native' ], function() {
+	CeL.set_run( 'data.math', function() {
 		var n1 = 123, n2 = 234;
-		console.log('GCD(' + n1 + ', ' + n2 + ') = ' + CeL.GCD(n1, n2));
+		CeL.log('GCD(' + n1 + ', ' + n2 + ') = ' + CeL.GCD(n1, n2));
 	});
 }
