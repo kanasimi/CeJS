@@ -1,3 +1,6 @@
+//	usage:
+//	node "path/to/node.demo.js"
+
 require("../_for include/node.loader.js");
 
 CeL.set_run('data.math', function() {

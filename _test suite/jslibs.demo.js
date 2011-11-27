@@ -1,3 +1,6 @@
+//	usage:
+//	jshost "path/to/jslibs.demo.js"
+
 LoadModule('jsio');
 
 eval(new File(
