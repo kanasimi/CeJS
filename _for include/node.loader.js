@@ -1,23 +1,28 @@
 /**
  * @name framework loader for node.js.
- * @example runnung under shell:<br />
- *          <code>
- * node node.loader.js
+ * @example
+ * runnung under shell:<br />
+ * <code>
+ * require("path/to/node.loader.js");
  * </code>
  * @since 2011/11/26 23:33:32
  */
 
+
 try {
-	// main lib path
-	var main_lib_script = 'ce.js';
+	//	node.js requires this method to setup global various.
+	Function('return this')().CeL = {
+		// main lib path relative to the loader script.
+		library_path : '../ce.js'
+	};
 
 	(function() {
 
-		var fs = require('fs'),
+		var script_code = [], fs = require('fs'),
 		// http://nodejs.org/docs/latest/api/fs.html#fs.readFileSync
-		main_lib_binary = fs
-				.readFileSync(/[\\\/]/.test(main_lib_script) ? main_lib_script
-						: __filename.replace(/[^\\\/]+$/, main_lib_script)
+		main_lib_binary =
+			fs.readFileSync(/^[\\\/]/.test(CeL.library_path) ? CeL.library_path
+						: __filename.replace(/[^\\\/]+$/, CeL.library_path)
 				// encoding can be 'utf8', 'ascii', or 'base64'.
 				// , 'binary'
 				),
@@ -28,13 +33,13 @@ try {
 
 		// console.log(typeof main_lib_binary.length);
 
-		for (main_lib_script = []; i < l;) {
+		for (; i < l;) {
 			// console.log(main_lib_binary[i] + ',' + main_lib_binary[i + 1]);
-			main_lib_script.push(String.fromCharCode(main_lib_binary[i++] + 256
+			script_code.push(String.fromCharCode(main_lib_binary[i++] + 256
 					* main_lib_binary[i++]));
 		}
 
-		main_lib_script = main_lib_script.join('');
+		CeL.library_code = script_code.join('');
 
 		if (0) {
 			console.log(main_lib.length);
@@ -48,23 +53,26 @@ try {
 
 	})();
 
-	eval(main_lib_script);
-	main_lib_script = null;
-	// console.log('CeL: ' + typeof CeL);
+	eval(CeL.library_code);
+	//console.log('CeL: ' + typeof CeL);
+	//console.log(CeL.set_debug);
 
-	CeL.set_debug();
+	delete CeL.get_old_namespace().script_code;
 
 } catch (e) {
-	// TODO: handle exception
+	console.error(e);
 }
 
-if (typeof CeL === 'function') {
+if (0 && typeof CeL === 'function') {
+	CeL.set_debug();
+
 	if(0)
 		console.log(CeL.get_file('data.js')
 			.slice(0, 300)
 			.replace(/[\u0100-\uffff]/g, '.'));
 
 	CeL.set_run( [ 'data.math', 'data.native' ], function() {
-		console.log(123);
+		var n1 = 123, n2 = 234;
+		console.log('GCD(' + n1 + ', ' + n2 + ') = ' + CeL.GCD(n1, n2));
 	});
 }

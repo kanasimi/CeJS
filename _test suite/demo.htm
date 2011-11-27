@@ -49,7 +49,8 @@ http://nio127.blogspot.com/2008/11/javascript-shell-web-developerhacker.html
 */
 
 //	預防彈出警告視窗
-CeL.log.max_length = 20;
+if(!isNaN(CeL.log.max_length))
+	CeL.log.max_length = 20;
 
 CeL.set_debug();
 //CeL.set_debug(2);
@@ -699,7 +700,8 @@ function start_count(restart) {
 									CeL.err(e);
 								}
 
-								CeL.log.max_length = 0;
+								if(!isNaN(CeL.log.max_length))
+									CeL.log.max_length = 0;
 								CeL.log('Initialization '
 										+ (e ? 'error' : 'finished') + '.');
 							}
