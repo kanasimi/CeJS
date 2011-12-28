@@ -1,7 +1,7 @@
 ﻿<?xml version="1.1" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" manifest="test suite.manifest">
-<head><meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 <style type="text/css">
 /* <![CDATA[
 
@@ -10,6 +10,9 @@
 body{margin:0;padding:0;}
 .test_toggle{color:#e6d;display:inline;cursor:pointer;}
 .test_panel{display:none;}
+
+/* copy from 維基百科 */
+.Unicode{font-family: "Segoe UI","TITUS Cyberbit Basic","Code2000","Doulos SIL","Chrysanthi Unicode","Bitstream Cyberbit","Bitstream CyberBase","Thryomanes","Gentium","GentiumAlt","Visual Geez Unicode","Lucida Grande","Arial Unicode MS","Microsoft Sans Serif","Lucida Sans Unicode";}
 
 #address,#legal_domicile{font-size:.9em;}
 /*]]>*/</style>
@@ -292,21 +295,38 @@ function start_count(restart) {
 	}
 
 	function run_code() {
-		var i = 0, t, v = CeL.get_element('question').value, times = parseInt(CeL
-				.get_element('run_times').value);
+		var i = 0, t, t0, T, v = CeL.get_element('question').value,
+		times = parseInt(CeL.get_element('run_times').value);
 		try {
-			if (times > 1)
-				eval('for (t = new Date; i < ' + times + '; i++){' + v
-						+ '}; t = new Date - t;'), v = t + ' ms / ' + times + ' = ' + t
-						/ times + ' ms. Get: ' + eval(v);
-			else
+			if (times > 0){
+				//	Initializing script engine
+				eval('T='+Math.random()+';'+ 'true' + ';');
+				//	對照組
+				for (t0 = new Date; i < times; i++){
+					eval('T='+Math.random()+';'+ 'true' + ';');
+				}
+				t0 = new Date - t0;
+				//	實驗組
+				for (i=0,t = new Date; i < times; i++){
+					eval('T='+Math.random()+';' + v + ';');
+				}
+				t = new Date - t;
+				//CeL.debug([t0,t]);
+				t-= t0;
+				v = t + ' ms / ' + times + ' times ≈ ' + t / times + ' ms. Get: ' + eval(v);
+			}else
 				v = eval(v);
 			CeL.log(v);
 		} catch (e) {
-			if (t)
-				CeL.log('error @ ' + i + '/' + times + '(use ' + (new Date - t)
-						+ 'ms)');
-			CeL.err(e);
+			if (/^[\u0020-\uffffffff]{1,20}$/.test(v) && e.message === 'illegal character') {
+				for (i = 0; i < v.length; i++)
+					CeL.log('[<em class="Unicode">' + v.charAt(i) + '</em>]: U+' + v.charCodeAt(i).toString(16).toUpperCase() + ' (' + v.charCodeAt(i) + '<span class="down">10</span>)');
+			} else {
+
+				if (t)
+					CeL.log('error @ ' + i + '/' + times + '(use ' + (new Date - t) + 'ms)');
+				CeL.err(e);
+			}
 		}
 	}
 
