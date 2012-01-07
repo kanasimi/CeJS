@@ -2,91 +2,36 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" manifest="test suite.manifest">
 <head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-<style type="text/css">
-/* <![CDATA[
+<style type="text/css">/* <![CDATA[ */
+body {
+	margin: 0;
+	padding: 0;
+}
 
-*/
+.test_toggle {
+	color: #e6d;
+	display: inline;
+	cursor: pointer;
+}
 
-body{margin:0;padding:0;}
-.test_toggle{color:#e6d;display:inline;cursor:pointer;}
-.test_panel{display:none;}
+.test_panel {
+	display: none;
+}
 
 /* copy from 維基百科 */
-.Unicode{font-family: "Segoe UI","TITUS Cyberbit Basic","Code2000","Doulos SIL","Chrysanthi Unicode","Bitstream Cyberbit","Bitstream CyberBase","Thryomanes","Gentium","GentiumAlt","Visual Geez Unicode","Lucida Grande","Arial Unicode MS","Microsoft Sans Serif","Lucida Sans Unicode";}
+.Unicode {
+	font-family: "Segoe UI", "TITUS Cyberbit Basic", "Code2000",
+		"Doulos SIL", "Chrysanthi Unicode", "Bitstream Cyberbit",
+		"Bitstream CyberBase", "Thryomanes", "Gentium", "GentiumAlt",
+		"Visual Geez Unicode", "Lucida Grande", "Arial Unicode MS",
+		"Microsoft Sans Serif", "Lucida Sans Unicode";
+}
 
-#address,#legal_domicile{font-size:.9em;}
+#address,#legal_domicile {
+	font-size: .9em;
+}
 /*]]>*/</style>
 
-<!--
-<script type="text/javascript" src="http://sites.google.com/site/cejsph/lib/ce.txt"></script>
-<script type="text/javascript" src="http://neterr.hostwq.net/JS/ce.js"></script>
--->
-
-<script type="text/javascript">//<![CDATA[
-	//window.status=11;
-	//for(var i=0,j=0;i<1e8;i++)j++;
-//]]></script>
-
-
-<!--
-http://code.jquery.com/jquery-nightly.js
--->
-
-<script type="text/javascript" src="../ce.js">
-{
-	"set_run" : "test.js"
-}
-</script>
-
-
-<script type="text/javascript">//<![CDATA[
-
-/*
-TODO:
-http://www.11gz.com/blog/2010/03/20/html5-doctype-use/
-
-JavaScript Shell
-http://nio127.blogspot.com/2008/11/javascript-shell-web-developerhacker.html
-
-本範例於 MSIE 8.0 local 會要求主動式內容!
-*/
-
-//	預防彈出警告視窗
-if(!isNaN(CeL.log.max_length))
-	CeL.log.max_length = 20;
-
-CeL.set_debug();
-//CeL.set_debug(2);
-
-//	相對於 library 本身來說的路徑
-CeL.include_module_resource('../../game/game.css');
-//	CSS reset
-CeL.include_module_resource('_test suite/lib/reset.css');
-
-
-try {
-	dojo.require("dojo.NodeList-fx");
-	//dojo.require("dojo.NodeList-fx33");
-} catch (e) {
-	//CeL.debug(e.message);
-}
-
-//CeL.debug(111);
-//CeL.debug(CeL.simplify_path('a/../b'));
-//if(CeL.warn)CeL.warn('a WARNING');
-
-setTimeout(function() {
-	//alert(document.body.innerHTML);
-	}, 200);
-
-function test1() {
-	CeL.warn('a WARNING level message');
-}
-
-
-
-
-//]]></script>
 <title>CeL test / demo suite</title>
 </head>
 
@@ -751,7 +696,7 @@ function start_count(restart) {
 	//CeL.use('net.web',function(){});
 
 	//
-</script>
+//]]></script>
 
 <!--
 <script src="http://www.google.com/jsapi?key=ABQIAAAA8YsRfLuORC22bc07JTNYsBS3JAeykUxPSpDNfPvIbcz6s5aBrRRdn1nyUM_9cYox7ymS-IgI-2CNuA" type="text/javascript"></script>
@@ -766,6 +711,8 @@ google.setOnLoadCallback(function(){
 
 
 <script type="text/javascript">//<![CDATA[
+'use strict';
+
 /*
 	本 script 段落之存在是為了預防萬一。因此只能放最簡單的 script parser 亦能讀懂的 code。
 
@@ -777,41 +724,106 @@ google.setOnLoadCallback(function(){
 	** limit: 上一段 code 不能出錯
 */
 
-	/**
-	 * 初始環境偵測
-	 * @return
-	 */
-	function load_detect() {
-		if (typeof initialization_setup == 'function')
-			setTimeout(initialization_setup, 1);
-		else if(typeof window == 'object' && typeof document == 'object' && window.document == document){
-			//	message handle
-			var mh = document.layers && document.layers['error_load_panel'];
-			if (mh)
-				//	NS4
-				//mh.position = 'static';	指定 position 對 NS4 事實上無效用。
-				mh.top = 8;
+/**
+ * 初始環境偵測
+ * 
+ * @return
+ */
+function load_detect() {
+	if (typeof initialization_setup == 'function')
+		setTimeout(initialization_setup, 1);
+	else if (typeof window == 'object' && typeof document == 'object'
+			&& window.document == document) {
 
-			else if(typeof error_load_panel == 'object' && (mh = error_load_panel.style))
-				//	IE4
-				//mh.position = 'static';	指定 position 對 IE4 事實上無效用。
-				mh.top = '8px';
+		var message_handle = document.layers && document.layers['error_load_panel'];
+		if (message_handle)
+			// NS4
+			// message_handle.position = 'static'; 指定 position 對 NS4 事實上無效用。
+			message_handle.top = 8;
 
-			//	下面的不行：NS3 會顯示出來 error_load_panel，但也會 alert。
-			//else if(typeof alert != 'undefined') alert('Initialization error!');
-		}
-		//else alert('Initialization error!');
+		else if (typeof error_load_panel == 'object'
+				&& (message_handle = error_load_panel.style))
+			// IE4
+			// message_handle.position = 'static'; 指定 position 對 IE4 事實上無效用。
+			message_handle.top = '8px';
+
+		// 下面的不行：NS3 會顯示出來 error_load_panel，但也會 alert。
+		// else if(typeof alert != 'undefined') alert('Initialization error!');
 	}
+	// else alert('Initialization error!');
+}
+
+if (typeof CeL == 'function' && typeof CeL.set_run == 'function')
+	CeL.set_run(load_detect);
+else
+	window.onload = load_detect;
+
+// CeL.use('net.web');CeL.on_load(load_detect);
+
+// for(var i=0,j=0;i<1e9;i++)j++;
+
+//]]></script>
 
 
-	if(typeof CeL === 'function' && typeof CeL.set_run === 'function')
-		CeL.set_run(load_detect);
-	else
-		window.onload = load_detect;
+<!--
+<script type="text/javascript" src="http://sites.google.com/site/cejsph/lib/ce.txt"></script>
+<script type="text/javascript" src="http://neterr.hostwq.net/JS/ce.js"></script>
 
-	//CeL.use('net.web');CeL.on_load(load_detect);
+http://code.jquery.com/jquery-nightly.js
+-->
 
-	//for(var i=0,j=0;i<1e9;i++)j++;
+
+<script type="text/javascript" src="../ce.js">
+{
+	"set_run" : "no_exist_module_to_test.js"
+}
+</script>
+
+
+<script type="text/javascript">//<![CDATA[
+'use strict';
+
+/*
+TODO:
+http://www.11gz.com/blog/2010/03/20/html5-doctype-use/
+
+JavaScript Shell
+http://nio127.blogspot.com/2008/11/javascript-shell-web-developerhacker.html
+
+本範例於 MSIE 8.0 local 會要求主動式內容!
+*/
+
+//	預防彈出警告視窗
+if(!isNaN(CeL.log.max_length))
+	CeL.log.max_length = 20;
+
+CeL.set_debug();
+//CeL.set_debug(2);
+
+//	相對於 library 本身來說的路徑
+CeL.include_module_resource('../../game/game.css');
+//	CSS reset
+CeL.include_module_resource('_test suite/lib/reset.css');
+
+
+try {
+	dojo.require("dojo.NodeList-fx");
+	//dojo.require("dojo.NodeList-fx33");
+} catch (e) {
+	//CeL.debug(e.message);
+}
+
+//CeL.debug(111);
+//CeL.debug(CeL.simplify_path('a/../b'));
+//if(CeL.warn)CeL.warn('a WARNING');
+
+setTimeout(function() {
+	//alert(document.body.innerHTML);
+	}, 200);
+
+function test1() {
+	CeL.warn('a WARNING level message');
+}
 
 //]]></script>
 
