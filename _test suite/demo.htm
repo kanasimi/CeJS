@@ -52,11 +52,11 @@ You may need to check the configuration of the browser, <a href="#" onclick="his
 
 <div onclick="CeL.toggle_display('eval_panel');" class="test_toggle">eval test</div>
 <div id="eval_panel" class="test_panel" style="display:block;">
-<input id="question" value="43/21"/>
+<input id="question" value="43/21" />
 <a href="#" onclick="show_question();return false;">show</a>
 |
 <a href="#" onclick="run_code();return false;">run</a>
-<input id="run_times" style="width:5em;"/>
+<input id="run_times" style="width:5em;" />
 times
 
 <div id="panel_for_SVG">
@@ -87,9 +87,9 @@ times
 
 attach test:<br />
 span: <span id="attach_span">test: </span>
-input: <input id="attach_input" value="input test" style="background-color:#ffb;"/>
+input: <input id="attach_input" value="input test" style="background-color:#ffb;" />
 select: <select id="attach_select"><option value="A">option A</option><option value="B">option B</option><option value="C">option C</option><option value="select" selected="selected">option selected</option></select>
-hr: <hr id="attach_hr" style="width:2em;"/>
+hr: <hr id="attach_hr" style="width:2em;" />
 
 <hr />
 </div>
@@ -98,10 +98,10 @@ hr: <hr id="attach_hr" style="width:2em;"/>
 |
 <div onclick="CeL.toggle_display('change_base_panel');" class="test_toggle">換底</div>
 <div id="change_base_panel" class="test_panel">
-number（正負整數、分數與小數）: <input id="number1" value="1000"/>
-in base: <input id="base1" value="10" style="width:3em;"/>
+number（正負整數、分數與小數）: <input id="number1" value="1000" />
+in base: <input id="base1" value="10" style="width:3em;" />
 <br />
-change to base: <input id="base2" value="2" style="width:3em;"/>
+change to base: <input id="base2" value="2" style="width:3em;" />
 <a href="#" onclick="return calc_base();">do</a>
 <hr />
 </div>
@@ -110,13 +110,13 @@ change to base: <input id="base2" value="2" style="width:3em;"/>
 |
 <div onclick="CeL.toggle_display('complement_panel');" class="test_toggle">補數</div>
 <div id="complement_panel" class="test_panel">
-number（整數）: <input id="number" value="1000"/>
-base: <input id="base" value="2" style="width:3em;"/>
-bits: <input id="bits" value="8" style="width:3em;"/>
-<label for="diminished" title="diminished radix complement"><input type="checkbox" id="diminished"/>diminished</label>
+number（整數）: <input id="number" value="1000" />
+base: <input id="base" value="2" style="width:3em;" />
+bits: <input id="bits" value="8" style="width:3em;" />
+<label for="diminished" title="diminished radix complement"><input type="checkbox" id="diminished" />diminished</label>
 <a href="#" onclick="return calc_complement();">←</a>
 <a href="#" onclick="return calc_value();">→</a>
-（正負整數）<input id="complement_value" value="16"/><span class="down">10</span>
+（正負整數）<input id="complement_value" value="16" /><span class="down">10</span>
 <hr />
 </div>
 
@@ -124,11 +124,11 @@ bits: <input id="bits" value="8" style="width:3em;"/>
 |
 <div onclick="CeL.toggle_display('Hamming_panel');" class="test_toggle">Hamming code</div>
 <div id="Hamming_panel" class="test_panel">
-data(/^[01]{,20}$/): <input id="h_data" value="1101" pattern="[01]{0,20}"/>
+data(/^[01]{,20}$/): <input id="h_data" value="1101" pattern="[01]{0,20}" />
 <a href="#" onclick="return Hamming.dec();" title="decode">←</a>
 <a href="#" onclick="return Hamming.enc();" title="encode">→</a>
-code(/^[01]{,20}$/): <input id="h_code" pattern="[01]{0,20}"/>
-<label for="h_reverse"><input type="checkbox" id="h_reverse"/>reverse</label>
+code(/^[01]{,20}$/): <input id="h_code" pattern="[01]{0,20}" />
+<label for="h_reverse"><input type="checkbox" id="h_reverse" />reverse</label>
 |
 show
 <a href="#" onclick="Hamming.show(8);return false;" title="encode">8</a>
