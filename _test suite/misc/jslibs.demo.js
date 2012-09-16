@@ -4,7 +4,7 @@
 LoadModule('jsio');
 
 eval(new File(
-		//'../_for include/jslibs.loader.js'
+		//'../../_for include/jslibs.loader.js'
 		"D:\\USB\\cgi-bin\\lib\\JS\\_for include\\jslibs.loader.js"
 		).Open('r').Read()
 		//	jslibs needs this, and string == string.replace(..)!

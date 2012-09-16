@@ -34,7 +34,7 @@ try {
 
 		// console.log(typeof main_lib_binary.length);
 
-		//	a simplified .get_file
+		//	a simplified .get_file() for UTF-32.
 		for (; i < l;) {
 			// console.log(main_lib_binary[i] + ',' + main_lib_binary[i + 1]);
 			script_code.push(String.fromCharCode(main_lib_binary[i++] + 256

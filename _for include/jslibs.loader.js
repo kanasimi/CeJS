@@ -34,7 +34,7 @@ try {
 
 		//	_configuration.stdout( main_lib_binary.length );
 
-		//	a simplified .get_file
+		//	a simplified .get_file() for UTF-32.
 		var c1, c2, i = 2, l = main_lib_binary.length;
 		for (; i < l;) {
 			c1 = main_lib_binary.charCodeAt(i++);
