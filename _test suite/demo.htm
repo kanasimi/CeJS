@@ -218,7 +218,7 @@ function start_count(restart) {
 
 	function show_question() {
 		var num = CeL.get_element('question').value, m = num
-				.match(/(\d+)([+\-*\/])(\d+)/);
+				.match(/([+\-]?(?:\d+,)*\d+(?:\.\d+)?)\s*([+\-*\/])\s*([+\-]?(?:\d+,)*\d+(?:\.\d+)?)/);
 
 		if (m)
 			try {
