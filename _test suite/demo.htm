@@ -254,7 +254,8 @@ function start_count(restart) {
 				t-= t0;
 				v = t + ' ms / ' + times + ' times ≈ ' + t / times + ' ms. Get: ' + eval(v);
 			}else
-				v = eval(v);
+				//	這裡不將回傳當作 node 來 parse。
+				v = '' + eval(v);
 			CeL.log(v);
 		} catch (e) {
 			if (/^[\u0020-\uffffffff]{1,20}$/.test(v) && e.message === 'illegal character') {
