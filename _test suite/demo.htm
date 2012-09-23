@@ -170,6 +170,14 @@ return false;">Update cache</a>)
 <script type="text/javascript">//<![CDATA[
 'use strict';
 
+if (1)
+//	設下障礙，測試 framework 是否健全。
+Array.prototype.test_Array_prototype = function() {
+	try {
+		console.warn('對 Array 不能用 for..in: 不能保證，亦不能限制使用者不改變 Array.prototype。');
+	} catch (e) {
+	}
+};
 
 //	2010/4/17 09:54:35
 //	TODO: stop/pause
@@ -346,7 +354,7 @@ function start_count(restart) {
 
 
 		sr( [ 'data.code.compatibility', 'data.native' ], function() {
-			Number.prototype.to_fixed = CeL.to_fixed;
+			//Number.prototype.to_fixed = CeL.to_fixed;
 
 			//CeL.debug(CeL.is_type(window.navigator));
 			if (window.navigator) {
