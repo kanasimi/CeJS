@@ -49,13 +49,10 @@ You may need to check the configuration of the browser, <a href="#" onclick="his
 </div>
 
 
-
-<div onclick="CeL.toggle_display('eval_panel');" class="test_toggle">eval test</div>
+<div class="test_toggle" onclick="CeL.toggle_display('eval_panel');">evaluation test</div>
 <div id="eval_panel" class="test_panel" style="display:block;">
-<input id="question" value="43.423432/2.423" />
-<a href="#" onclick="show_question();return false;">show</a>
-|
-<a href="#" onclick="run_code();return false;">run</a>
+<input id="eval_code" value="43.423432/2.423" style="width:20em;" />
+<a href="#" id="execute" onclick="run_code();return false;">show/run</a>
 <input id="run_times" style="width:5em;" />
 times
 
@@ -224,9 +221,10 @@ function start_count(restart) {
 	var OtS = Object.prototype.toString;
 	//var is_Function = CeL.object_tester('Function', 'OtS');
 
-	function show_question() {
-		var num = CeL.get_element('question').value, m = num
-				.match(/([+\-]?(?:\d+,)*\d+(?:\.\d+)?)\s*([+\-*\/])\s*([+\-]?(?:\d+,)*\d+(?:\.\d+)?)/);
+	function show_question(expression) {
+		var
+		//.match(/([+\-]?(?:\d+,)*\d+(?:\.\d+)?)\s*([+\-*\/])\s*([+\-]?(?:\d+,)*\d+(?:\.\d+)?)/);
+		m = expression.match(/^\s*([+\-]?[\d, .]+)([+\-*\/])([+\-]?[\d, .]+)\s*$/);
 
 		if (m)
 			try {
@@ -239,11 +237,19 @@ function start_count(restart) {
 			} catch (e) {
 				CeL.err(e);
 			}
+		else
+			SVG_object.show(0);
 	}
 
-	function run_code() {
-		var i = 0, t, t0, T, v = CeL.get_element('question').value,
+	function run_code(code) {
+		var i = 0, t, t0, T,
+		//
+		v = code || CeL.get_element('eval_code').value,
+		//
 		times = parseInt(CeL.get_element('run_times').value);
+
+		show_question(v);
+
 		try {
 			if (times > 0){
 				//	Initializing script engine
@@ -264,7 +270,8 @@ function start_count(restart) {
 			}else
 				//	這裡不將回傳當作 node 來 parse。
 				v = '' + eval(v);
-			CeL.log(v);
+			CeL.log('run_code: return [' + v + ']');
+
 		} catch (e) {
 			if (/^[\u0020-\uffffffff]{1,20}$/.test(v) && e.message === 'illegal character') {
 				for (i = 0; i < v.length; i++)
@@ -332,6 +339,11 @@ function start_count(restart) {
 			;
 		//CeL.debug('biggest exponent of 10: ' + biggest_exponent_of_10);
 
+
+		CeL.get_element('eval_code').onkeypress = function(e) {
+			if (13 === (e.keyCode || e.which || e.charCode))
+				run_code();
+		};
 
 
 		CeL.debug('.set_variable test', 2);
@@ -563,9 +575,9 @@ function start_count(restart) {
 								'interact.form.bank_account',
 								'interact.form.education' ]);
 
-					var qi = new CeL.select_input('question', [ '423.2+5523',
+					var qi = new CeL.select_input('eval_code', [ '423.2+5523',
 							'423243-5542.52', '423.2*34.42', '42342332.4323/34.4' ], 'includeKeyWC');
-					//qi.attach('question');
+					//qi.attach('eval_code');
 					//qi.setSearch('includeKeyWC');
 
 					CeL.debug('phase: attach test', 2);
