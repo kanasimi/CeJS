@@ -5,7 +5,7 @@
 # http://zetajames.wordpress.com/2010/03/02/html5-manifest/
  # comments can have spaces before them, but must be alone on the line
 
-# 2012/9/9 19:52:02
+# 2012/9/25 23:31:33
 
 # 引用 manifest 文件的頁面會自動 cache。
 # 使用離線存儲似乎需要列入*所有*需要的離線檔案。
@@ -22,33 +22,33 @@ NETWORK:
 CACHE:
 # 離線時需要使用到的檔案 another part
 #lib/reset.css
-../../../ColorlessB.png
-../../../css.css
-../../../game/game.css
-../application/debug/icon/debug.png
-../application/debug/icon/em.png
-../application/debug/icon/err.png
-../application/debug/icon/log.png
-../application/debug/icon/warn.png
-../application/debug/log.css
-../application/debug/log.js
-../ce.js
-../data.js
-../data/CSV.js
-../data/code/compatibility.js
-../data/math.js
-../data/math/Hamming.js
-../data/math/quotient.js
-../data/native.js
-../interact/DND.js
-../interact/DOM.js
-../interact/form/address.js
-../interact/form/bank_account.js
-../interact/form/education.js
-../interact/form/select_input.css
-../interact/form/select_input.js
-../interact/integrate/SVG.js
-lib/reset.css
+#../../../ColorlessB.png
+#../../../css.css
+#../../../game/game.css
+#../application/debug/icon/debug.png
+#../application/debug/icon/em.png
+#../application/debug/icon/err.png
+#../application/debug/icon/log.png
+#../application/debug/icon/warn.png
+#../application/debug/log.css
+#../application/debug/log.js
+#../ce.js
+#../data.js
+#../data/CSV.js
+#../data/code/compatibility.js
+#../data/math.js
+#../data/math/Hamming.js
+#../data/math/quotient.js
+#../data/native.js
+#../interact/DND.js
+#../interact/DOM.js
+#../interact/form/address.js
+#../interact/form/bank_account.js
+#../interact/form/education.js
+#../interact/form/select_input.css
+#../interact/form/select_input.js
+#../interact/integrate/SVG.js
+#lib/reset.css
 
 
 FALLBACK:

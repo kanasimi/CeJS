@@ -52,7 +52,7 @@ You may need to check the configuration of the browser, <a href="#" onclick="his
 <div class="test_toggle" onclick="CeL.toggle_display('eval_panel');">evaluation test</div>
 <div id="eval_panel" class="test_panel" style="display:block;">
 <input id="eval_code" value="43.423432/2.423" style="width:20em;" />
-<a href="#" id="execute" onclick="run_code();return false;">show/run</a>
+<a href="#" id="execute" onclick="CeL.get_element('eval_code').focus();run_code();return false;">show/run</a>
 <input id="run_times" style="width:5em;" />
 times
 
