@@ -224,7 +224,7 @@ function start_count(restart) {
 	function show_question(expression) {
 		var
 		//.match(/([+\-]?(?:\d+,)*\d+(?:\.\d+)?)\s*([+\-*\/])\s*([+\-]?(?:\d+,)*\d+(?:\.\d+)?)/);
-		m = expression.match(/^\s*([+\-]?[\d, .]+)([+\-*\/])([+\-]?[\d, .]+)\s*$/);
+		m = expression.match(/^(\s*[+\-]?[\d, .]+)([+\-*\/])(\s*[+\-]?[\d, .]+)$/);
 
 		if (m)
 			try {
