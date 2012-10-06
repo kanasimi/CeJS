@@ -234,8 +234,10 @@ function start_count(restart) {
 					'*' : 'multiplication',
 					'/' : 'long_division'
 				}[m[2]]](m[1], m[3], SVG_object);
+				SVG_object.show(1);
 			} catch (e) {
 				CeL.err(e);
+				SVG_object.show(0);
 			}
 		else
 			SVG_object.show(0);
@@ -251,7 +253,7 @@ function start_count(restart) {
 		show_question(v);
 
 		try {
-			if (times > 0){
+			if (times > 0) {
 				//	Initializing script engine
 				eval('T='+Math.random()+';'+ 'true' + ';');
 				//	對照組
@@ -260,14 +262,14 @@ function start_count(restart) {
 				}
 				t0 = new Date - t0;
 				//	實驗組
-				for (i=0,t = new Date; i < times; i++){
-					eval('T='+Math.random()+';' + v + ';');
+				for (i = 0, t = new Date; i < times; i++) {
+					eval('T=' + Math.random() + ';' + v + ';');
 				}
 				t = new Date - t;
 				//CeL.debug([t0,t]);
 				t-= t0;
 				v = t + ' ms / ' + times + ' times ≈ ' + t / times + ' ms. Get: ' + eval(v);
-			}else
+			} else
 				//	這裡不將回傳當作 node 來 parse。
 				v = '' + eval(v);
 			CeL.log('run_code: return [' + v + ']');
@@ -402,7 +404,7 @@ function start_count(restart) {
 			//CeL.debug(CeL.drawLongDivision);
 			SVG_object = new CeL.SVG(20, 20);
 			//CeL.debug('type of SVG_object = ' + CeL.is_type(SVG_object,0,1));
-			SVG_object.attach('panel_for_SVG').show(1);
+			SVG_object.attach('panel_for_SVG');
 			//CeL.debug('SVG panel = ' + SVG_object);
 			//alert(SVG_object);
 
