@@ -1,0 +1,21 @@
+CACHE MANIFEST
+
+CACHE:
+application/debug/icon/debug.png
+application/debug/icon/em.png
+application/debug/icon/err.png
+application/debug/icon/log.png
+application/debug/icon/warn.png
+application/debug/log.css
+application/debug/log.js
+application/locale.js
+ce.js
+data.js
+data/code/compatibility.js
+data/native.js
+interact/DOM.js
+
+NETWORK:
+*
+
+# build date: Sat Oct 6 23:47:45 UTC+0800 2012
