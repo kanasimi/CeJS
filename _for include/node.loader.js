@@ -11,7 +11,7 @@
 
 
 try {
-	//	node.js requires this method to setup global various.
+	//	node.js requires this method to setup REALLY global various: require isn't actually a global but rather local to each module.
 	Function('return this')().CeL = {
 		// main lib path relative to the loader script.
 		library_path : '../ce.js'
@@ -44,9 +44,9 @@ try {
 		CeL.library_code = script_code.join('');
 
 		if (0) {
-			console.log(main_lib.length);
-			// console.log(main_lib.slice(0, 30));
-			console.log('[' + main_lib.slice(0, 300)
+			console.log(script_code.length);
+			// console.log(script_code.slice(0, 30));
+			console.log('[' + script_code.slice(0, 300)
 			// .replace(/[\x00-\x1f]/g, '.')
 			.replace(/[\u0100-\uffff]/g, '.')
 			// .charCodeAt(0)
@@ -56,9 +56,14 @@ try {
 	})();
 
 	eval(CeL.library_code);
-	//console.log('CeL: ' + typeof CeL);
-	//console.log(CeL.set_debug);
+	if (0) {
+		console.log('CeL === global.CeL: ' + (CeL === global.CeL));
+		console.log('typeof CeL: ' + typeof CeL);
+		console.log('CeL: ' + CeL);
+		console.log('CeL.set_debug: ' + CeL.set_debug);
+	}
 
+	//	delete cache.
 	delete CeL.get_old_namespace().script_code;
 
 } catch (e) {
