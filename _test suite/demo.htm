@@ -224,7 +224,7 @@ function start_count(restart) {
 	function show_question(expression) {
 		var
 		//.match(/([+\-]?(?:\d+,)*\d+(?:\.\d+)?)\s*([+\-*\/])\s*([+\-]?(?:\d+,)*\d+(?:\.\d+)?)/);
-		m = expression.match(/^(\s*[+\-]?[\d, .]+)([+\-*\/])(\s*[+\-]?[\d, .]+)$/);
+		m = expression.match(/^(\s*[+\-]?[\d, .]+)([+\-*\/×÷])(\s*[+\-]?[\d, .]+)$/);
 
 		if (m)
 			try {
@@ -232,7 +232,9 @@ function start_count(restart) {
 					'+' : 'addition',
 					'-' : 'subtraction',
 					'*' : 'multiplication',
-					'/' : 'long_division'
+					'×' : 'multiplication',
+					'/' : 'long_division',
+					'÷' : 'long_division'
 				}[m[2]]](m[1], m[3], SVG_object);
 				SVG_object.show(1);
 			} catch (e) {
