@@ -614,7 +614,7 @@ function start_count(restart) {
 					(new CeL.select_input('base2', [ 2, 8, 10, 16 ], 'always'))
 							.set_verify('natural');
 
-					//(new CeL.select_input('number')).set_verify(/^-?\d+$/);
+					//(new CeL.select_input('number')).set_verify(/^[+-]?\d+$/);
 					(new CeL.select_input('base', [ 2, 8, 10, 16 ], 'always'))
 							.set_verify('natural');
 					(new CeL.select_input('bits', [ 4, 8, 16 ], 'always'))
