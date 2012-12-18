@@ -214,7 +214,7 @@ function start_count(restart) {
 	 */
 
 	/**
-	 * alias of CeL.set_run
+	 * alias of CeL.run
 	 */
 	var sr;
 	var SVG_object, Hamming;
@@ -567,7 +567,8 @@ function start_count(restart) {
 
 		CeL.debug('form.select_input test', 2);
 		sr(
-				[ 'interact.form.address', 'interact.form.bank_account',
+				[ 'interact.form.address',
+						'interact.form.bank_account',
 						'interact.form.education' ],
 				function() {
 
@@ -661,14 +662,14 @@ function start_count(restart) {
 			//CeL.cache_code = true;
 			//	Initialize log function
 
-			CeL.set_run(
+			CeL.run(
 					'application.debug.log',
 					[
 							function() {
 								CeL.Log.set_board('panel_for_log');
 								CeL.debug('Log panel setted.');
 
-								sr = CeL.set_run;
+								sr = CeL.run;
 
 								var e = 0;
 								try {
@@ -772,8 +773,8 @@ function load_detect() {
 	// else alert('Initialization error!');
 }
 
-if (typeof CeL == 'function' && typeof CeL.set_run == 'function')
-	CeL.set_run(load_detect);
+if (typeof CeL == 'function' && typeof CeL.run == 'function')
+	CeL.run(load_detect);
 else
 	window.onload = load_detect;
 
@@ -794,7 +795,7 @@ http://code.jquery.com/jquery-nightly.js
 
 <script type="text/javascript" src="../ce.js">
 {
-	"set_run" : "no_exist_module_to_test.js"
+	"run" : "no_exist_code_to_test.js"
 }
 </script>
 
@@ -812,7 +813,7 @@ http://nio127.blogspot.com/2008/11/javascript-shell-web-developerhacker.html
 本範例於 MSIE 8.0 local 會要求主動式內容!
 */
 
-if (typeof CeL == 'function' && typeof CeL.set_run == 'function') {
+if (typeof CeL == 'function' && typeof CeL.run == 'function') {
 
 //	預防彈出警告視窗
 if(!isNaN(CeL.log.max_length))
