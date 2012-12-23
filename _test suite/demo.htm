@@ -350,21 +350,21 @@ function start_count(restart) {
 		};
 
 
-		CeL.debug('.set_variable test', 2);
+		CeL.debug('.set_value test', 2);
 		if(0){
 			var value_to_set=657845,variable_name='a_test_variable',got_modify_action,test_namespace={a:234};
-			CeL.debug('get_variable '+variable_name+' = '+CeL.get_variable(variable_name,function(v,n){CeL.debug('收到訊息：設定 '+n+' = '+v);got_modify_action=1;},test_namespace));
-			CeL.debug('set_variable:'+CeL.set_variable(variable_name,value_to_set,test_namespace));
-			CeL.debug('after set_variable, get_variable '+variable_name+' = '+CeL.get_variable(variable_name,0,test_namespace));
-			CeL.debug('after set_variable, get global variable '+variable_name+' = '+CeL.get_variable(variable_name));
+			CeL.debug('value_of '+variable_name+' = '+CeL.value_of(variable_name,function(v,n){CeL.debug('收到訊息：設定 '+n+' = '+v);got_modify_action=1;},test_namespace));
+			CeL.debug('set_value:'+CeL.set_value(variable_name,value_to_set,test_namespace));
+			CeL.debug('after set_value, value_of '+variable_name+' = '+CeL.value_of(variable_name,0,test_namespace));
+			CeL.debug('after set_value, get global variable '+variable_name+' = '+CeL.value_of(variable_name));
 			try{
 				var get_value=(test_namespace?test_namespace.a_test_variable:a_test_variable);
-				CeL.debug('after set_variable, 設定'+(got_modify_action&&get_value===value_to_set?'成功':'<em>失敗</em>')+'. 直接取值 '+variable_name+' = '+get_value);
+				CeL.debug('after set_value, 設定'+(got_modify_action&&get_value===value_to_set?'成功':'<em>失敗</em>')+'. 直接取值 '+variable_name+' = '+get_value);
 			}catch(e){
-				CeL.warn('after set_variable, 設定失敗');
+				CeL.warn('after set_value, 設定失敗');
 			}
-			CeL.debug('set_variable:'+CeL.set_variable(variable_name,undefined,test_namespace));
-			CeL.debug('after 2nd set_variable, get_variable '+variable_name+' = '+CeL.get_variable(variable_name,0,test_namespace));
+			CeL.debug('set_value:'+CeL.set_value(variable_name,undefined,test_namespace));
+			CeL.debug('after 2nd set_value, value_of '+variable_name+' = '+CeL.value_of(variable_name,0,test_namespace));
 		}
 
 
@@ -441,7 +441,7 @@ function start_count(restart) {
 		sr( [ 'data.math', 'data.math.quotient' ], function() {
 				//var p = 20374345, q = CeL.data.math.floor_sqrt(p = p * p - 1); CeL.log(q + '_$tag__' + (q * q) + '_$tag_' + p + '_$tag_' + (++q * q));
 
-				//CeL.debug(CeL.get_module_path('math.quotient')+': '+CeL.is_loaded('math.quotient')+': '+CeL.data.math.quotient);
+				//CeL.debug(CeL.get_module_path('math.quotient')+': '+CeL.is_included('data.math.quotient')+': '+CeL.data.math.quotient);
 				//var q1=CeL.quotient.parse_base('.110011001100110011001100110011001100',2);
 				//CeL.log(q1.to_base());
 				//q1=CeL.quotient.parse_base('.110011001100110011001100110011001100110011001100110011001100110011001100',2);
@@ -795,7 +795,7 @@ http://code.jquery.com/jquery-nightly.js
 
 <script type="text/javascript" src="../ce.js">
 {
-	"run" : "no_exist_code_to_test.js"
+	"run" : "../code/log/no_exist_module_to_test.js"
 }
 </script>
 
@@ -823,9 +823,9 @@ CeL.set_debug();
 //CeL.set_debug(2);
 
 //	相對於 library 本身來說的路徑
-CeL.include_module_resource('../../game/game.css');
+CeL.run(CeL.get_module_path('','../../game/game.css'));
 //	CSS reset
-CeL.include_module_resource('_test suite/lib/reset.css');
+CeL.run(CeL.get_module_path('','_test suite/lib/reset.css'));
 
 }
 
