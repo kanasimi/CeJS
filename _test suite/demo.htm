@@ -782,6 +782,7 @@ else
 
 // for(var i=0,j=0;i<1e9;i++)j++;
 
+
 //]]></script>
 
 
@@ -820,15 +821,23 @@ if(!isNaN(CeL.log.max_length))
 	CeL.log.max_length = 20;
 
 CeL.set_debug();
-//CeL.set_debug(2);
+CeL.set_debug(2);
 
 //	相對於 library 本身來說的路徑
-CeL.run(CeL.get_module_path('','../../game/game.css'));
+CeL.run(CeL.get_module_path('', '../../game/game.css'));
 //	CSS reset
-CeL.run(CeL.get_module_path('','_test suite/lib/reset.css'));
+CeL.run(CeL.get_module_path('', '_test suite/lib/reset.css'));
 
+} else {
+	try {
+		eval("if('' in {'':1});");
+		alert('The library is not loaded!');
+	} catch(e) {
+		//	Internet Explorer 5.01 (5.00.3314.2100) 中，無法使用 "if('' in {})"！
+		if (typeof alert !== 'undefined')
+			alert('無法使用 "if(\'\' in {})"！\n這將使得 library 無法載入！');
+	}
 }
-
 
 try {
 	dojo.require("dojo.NodeList-fx");
