@@ -8,6 +8,17 @@ body {
 	padding: 0;
 }
 
+#error_load_panel {
+	color:#f00;background-color:#ff8;padding:.5em;
+	/* hack for NS4 */
+	/*position:absolute;*/
+	top:-800px;*top:0px;
+	/* hack for IE7 @ wine: no javascript allowed.
+	 * 事實上應該對所有讀得懂 CSS 但 javascript 無作用的 browser 作處理。
+	 */
+	_top:-800px;
+}
+
 .test_toggle {
 	color: #e6d;
 	display: inline;
@@ -16,6 +27,21 @@ body {
 
 .test_panel {
 	display: none;
+}
+
+#single_line_toggle {
+	color:#3c2;
+	font-size: .9em;
+	cursor: pointer;
+}
+#eval_code {
+	width:20em;
+}
+#eval_code_block {
+	color: #3a0;
+	background-color:#eff;
+	width:100%;
+	height:20em;
 }
 
 /* copy from 維基百科 */
@@ -39,7 +65,7 @@ body {
 
 <h1 style="float:right;">CeL Test Suite</h1>
 
-<div id="error_load_panel" style="color:#f00;background-color:#ff8;padding:.5em;/* hack for NS4 */position:absolute;top:-800px;*top:0px;_top:-800px/* hack for IE7 @ wine: no javascript allowed. ** 事實上應該對所有讀得懂 CSS 但 javascript 無作用的 browser 作處理。 */;">
+<div id="error_load_panel">
 <hr />
 <h2>Loading error</h2>
 JavaScript doesn't work or XMLHttpRequest loading error?<br />
@@ -51,10 +77,13 @@ You may need to check the configuration of the browser, <a href="#" onclick="his
 
 <div class="test_toggle" onclick="CeL.toggle_display('eval_panel');">evaluation test</div>
 <div id="eval_panel" class="test_panel" style="display:block;">
-<input id="eval_code" value="43.423432/2.423" style="width:20em;" />
-<a href="#" id="execute" onclick="CeL.get_element('eval_code').focus();run_code();return false;">show/run</a>
+<b id="single_line_toggle" href="#"></b><div id="single_line_code_panel" style="display:none;"><input id="eval_code" title="code to run" /></div>
+<textarea id="eval_code_block" title="code to run"></textarea>
+<a href="#" id="execute" onclick="return evaluate_code();">show/run</a>
 <input id="run_times" style="width:5em;" />
 times
+
+<textarea id="eval_result" style="width:99%;height:8em;" title="result"></textarea>
 
 <div id="panel_for_SVG">
 </div>
@@ -176,6 +205,32 @@ Array.prototype.test_Array_prototype = function() {
 	}
 };
 
+
+
+var getElementById = document.getElementById ? function(id) {
+	return document.getElementById(id);
+} : document.all ? function(id) {
+	return document.all[id];
+} : document.layer ? function(id) {
+	return document.layer[id];
+} : function(id) {
+	return window[id];
+};
+
+//	僅用在不能初始化時。
+function evaluate_code() {
+	var c = getElementById('eval_code_block'), r = getElementById('eval_result');
+	try {
+		if (c && (c = c.value))
+			r.value = eval(c);
+	} catch (e) {
+		r.value = (e.name ? e.name + ': ' : '') + e.message;
+	}
+	return false;
+}
+
+
+
 //	2010/4/17 09:54:35
 //	TODO: stop/pause
 function start_count(restart) {
@@ -221,6 +276,33 @@ function start_count(restart) {
 	var OtS = Object.prototype.toString;
 	//var is_Function = CeL.object_tester('Function', 'OtS');
 
+	var TO_MULTI_LINE='▼';
+	function is_now_single_line_code(){
+		var single_line_toggle_panel=CeL.get_element('single_line_toggle');
+		return single_line_toggle_panel.innerHTML===TO_MULTI_LINE;
+	}
+	//	切換單行/多行模式。
+	function toggle_single_line_panel(is_single_line) {
+		var single_line_toggle_panel=CeL.get_element('single_line_toggle'),
+		//
+		is_now_single_line=is_now_single_line_code();
+
+		is_single_line=arguments.length==0?!is_now_single_line:!!is_single_line;
+
+		if (is_now_single_line!==is_single_line){
+			is_now_single_line=is_single_line;
+			CeL.toggle_display('single_line_code_panel', is_now_single_line&&'inline');
+			CeL.toggle_display('eval_code_block', !is_now_single_line);
+			single_line_toggle_panel.innerHTML=is_now_single_line?TO_MULTI_LINE:'縮減成單行模式';
+			single_line_toggle_panel.title=is_now_single_line?'擴展成多行模式。':'縮減成單行模式。';
+			var old_value=CeL.get_element(is_now_single_line?'eval_code_block':'eval_code').value,
+			new_input=CeL.get_element(is_now_single_line?'eval_code':'eval_code_block');
+			new_input.value=old_value;
+			new_input.focus();
+		}
+		return false;
+	}
+
 	function show_question(expression) {
 		var
 		//.match(/([+\-]?(?:\d+,)*\d+(?:\.\d+)?)\s*([+\-*\/])\s*([+\-]?(?:\d+,)*\d+(?:\.\d+)?)/);
@@ -248,7 +330,7 @@ function start_count(restart) {
 	function run_code(code) {
 		var i = 0, t, t0, T,
 		//
-		v = code || CeL.get_element('eval_code').value,
+		v = code || CeL.get_element(is_now_single_line_code()?'eval_code':'eval_code_block').value,
 		//
 		times = parseInt(CeL.get_element('run_times').value);
 
@@ -330,6 +412,41 @@ function start_count(restart) {
 	 * @return
 	 */
 	function initialization_work() {
+		//throw 1;
+		toggle_single_line_panel(true);
+		CeL.toggle_display('eval_result', false);
+
+		CeL.get_element('eval_code').onkeypress = function(e) {
+			if (13 === (e.keyCode || e.which || e.charCode))
+				run_code();
+		};
+
+		CeL.get_element('execute').onclick = function(e) {
+			CeL.get_element(is_now_single_line_code()?'eval_code':'eval_code_block').focus();
+			run_code();
+			return false;
+		};
+
+		CeL.get_element('single_line_toggle').onclick = function(e) {
+			return toggle_single_line_panel();
+		};
+
+		CeL.get_element(is_now_single_line_code()?'eval_code':'eval_code_block').autofocus="autofocus";
+
+		if (false)
+			CeL.run('extension.children2', function() {
+				CeL.children2_function('test!');
+			});
+
+		if (false)
+			CeL.run([ 'data', 'data.code.compatibility' ], [ function() {
+				CeL.log('test 1');
+			}, function() {
+				CeL.log('test 2');
+			} ], function() {
+				CeL.log('done');
+			});
+
 
 		//	test the biggest 10^?	取得能準確計算的最大值
 		var biggest_exponent_of_10 = 0, test_num = 1;
@@ -344,14 +461,8 @@ function start_count(restart) {
 		//CeL.debug('biggest exponent of 10: ' + biggest_exponent_of_10);
 
 
-		CeL.get_element('eval_code').onkeypress = function(e) {
-			if (13 === (e.keyCode || e.which || e.charCode))
-				run_code();
-		};
-
-
 		CeL.debug('.set_value test', 2);
-		if(0){
+		if (false) {
 			var value_to_set=657845,variable_name='a_test_variable',got_modify_action,test_namespace={a:234};
 			CeL.debug('value_of '+variable_name+' = '+CeL.value_of(variable_name,function(v,n){CeL.debug('收到訊息：設定 '+n+' = '+v);got_modify_action=1;},test_namespace));
 			CeL.debug('set_value:'+CeL.set_value(variable_name,value_to_set,test_namespace));
@@ -394,7 +505,7 @@ function start_count(restart) {
 		//	base test
 		//CeL.log('split length: '+'.'.split(/\./).length);
 
-		//if(0)CeL.debug(2223);test1();
+		//if(false)CeL.debug(2223);test1();
 
 		CeL.debug('SVG', 2);
 		sr('interact.integrate.SVG', function() {
@@ -491,7 +602,7 @@ function start_count(restart) {
 
 		});
 
-		if (0)
+		if (false)
 			CeL.use('data.code.API', function() {
 
 				CeL.use_API('Bing', function() {
@@ -503,7 +614,7 @@ function start_count(restart) {
 							});
 				});
 
-				if (0)
+				if (false)
 					CeL.use_API('GAPI', function() {
 						google.load("search", 1);
 						google.setOnLoadCallback(function() {
@@ -513,7 +624,7 @@ function start_count(restart) {
 					});
 			});
 
-		if (0)
+		if (false)
 			rrtt = CeL.new_node( {
 				object : [ {
 					param : null,
@@ -558,7 +669,7 @@ function start_count(restart) {
 		//CeL.add_listener('mouseup', handle_select, 'panel_for_log');
 		//$('#panel_for_log').bind('mouseup', handle_select);
 		//$('#panel_for_log').select(function () { CeL.log(this); });
-		if (0) {
+		if (false) {
 			var cookie_name = 'cookie test';
 			CeL.debug(cookie_name + ': ' + CeL.get_cookie(cookie_name));
 			CeL.set_cookie(CeL.set_cookie.f.set_root); //	Gecko need this
@@ -575,7 +686,7 @@ function start_count(restart) {
 					// function aaa(v){alert('mmm='+mmm);var r={};r[v]=222;return r;}
 					// var fff3=33;eval('var mmm=1;(function(){var included=aaa("fff");alert(included.fff);})()');alert(fff);
 					//CeL.use('net.form.select_input');
-					if (0)
+					if (false)
 						CeL.use( [ 'interact.form.address',
 								'interact.form.bank_account',
 								'interact.form.education' ]);
