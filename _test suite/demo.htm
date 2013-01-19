@@ -56,6 +56,16 @@ body {
 #address,#legal_domicile {
 	font-size: .9em;
 }
+
+
+.lang_select{
+	color:#59e;
+	cursor:pointer;
+}
+.lang_selected{
+	background-color:#fdd;
+}
+
 /*]]>*/</style>
 
 <title>CeL test / demo suite</title>
@@ -77,11 +87,11 @@ You may need to check the configuration of the browser, <a href="#" onclick="his
 
 <div class="test_toggle" onclick="CeL.toggle_display('eval_panel');">evaluation test</div>
 <div id="eval_panel" class="test_panel" style="display:block;">
-<b id="single_line_toggle" href="#"></b><div id="single_line_code_panel" style="display:none;"><input id="eval_code" title="code to run" /></div>
+<b id="single_line_toggle" href="#"></b><div id="single_line_code_panel" style="display:none;"><input id="eval_code" title="code to run" type="text" speech="Text" continue="true" nospeechtimeout="60000" x-webkit-speech="x-webkit-speech" x-webkit-grammar="builtin:translate"/></div>
 <textarea id="eval_code_block" title="code to run"></textarea>
 <a href="#" id="execute" onclick="return evaluate_code();">show/run</a>
 <input id="run_times" style="width:5em;" />
-times
+times<br />
 
 <textarea id="eval_result" style="width:99%;height:8em;" title="result"></textarea>
 
@@ -420,6 +430,43 @@ function start_count(restart) {
 			if (13 === (e.keyCode || e.which || e.charCode))
 				run_code();
 		};
+
+		if ('onwebkitspeechchange' in CeL.get_element('eval_code')) {
+			var speech_list=[],last_lang_select,speech_lang_select=function(){
+				var m=this.id.match(/^lang_select_(.+)$/);
+				if (m){
+					m=m[1];
+					CeL.debug('語音語言種類：['+m+']');
+					if(last_lang_select)
+						last_lang_select.className='lang_select';
+					last_lang_select=this;
+					this.className+=' lang_selected';
+					CeL.get_element('eval_code').lang=m;
+				}
+				return false;
+			};
+			CeL.new_node([
+				{b:'中文',id:'lang_select_zh-TW',	C:"lang_select",onclick:speech_lang_select}, ' | ',
+				{b:'日本語',id:'lang_select_ja',	C:"lang_select",onclick:speech_lang_select}, ' | ',
+				{b:'English',id:'lang_select_en',	C:"lang_select",onclick:speech_lang_select}, ' | ',
+				{b:'Show',	S:'cursor:pointer;',onclick:function(){var e=CeL.get_element('lang_select_list');if(CeL.toggle_display(e))e.value=speech_list.join('\n');}},
+				{br:null},
+				{textarea:'',id:'lang_select_list',S:'display:none;width:20em;height:10em;'}
+				], ["eval_result", 0]);
+			speech_lang_select.call(CeL.get_element('lang_select_zh-TW'));
+
+			//	語言識別成功，且文字輸入到文本框後觸發
+			CeL.get_element('eval_code').onwebkitspeechchange =
+			//CeL.get_element('eval_code').onspeechchange =
+			function(e) {
+				//	http://www.w3.org/2005/Incubator/htmlspeech/2010/10/google-api-draft.html
+				//	http://lists.w3.org/Archives/Public/public-webapps/2011OctDec/att-1696/speechapi.html
+				var speech_token=CeL.get_element('eval_code').value;
+				speech_list.push(speech_token);
+				CeL.info(speech_token);
+			};
+		}
+
 
 		CeL.get_element('execute').onclick = function(e) {
 			CeL.get_element(is_now_single_line_code()?'eval_code':'eval_code_block').focus();
