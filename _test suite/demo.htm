@@ -344,6 +344,9 @@ function start_count(restart) {
 		//
 		times = parseInt(CeL.get_element('run_times').value);
 
+		if (!v)
+			return;
+
 		show_question(v);
 
 		try {
