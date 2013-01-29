@@ -547,7 +547,11 @@ function start_count(restart) {
 		CeL.debug('no-exist module test', 2);
 		//	下面測試在 MSIE6 中會發生 throw
 		sr('code.log.no_exist_module_to_test', function(){
-			CeL.debug('no-exist module test end.');
+			CeL.warn('no-exist module tested 但仍持續執行.');
+		});
+
+		sr({name:'code.log.no_exist_module_to_ignore',skip_error:true,timeout:80}, function(){
+			CeL.debug('no-exist module to ignore test end.');
 		});
 
 		//CeL.warn('a WARNING level message');
