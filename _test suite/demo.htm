@@ -435,11 +435,22 @@ function start_count(restart) {
 		};
 
 		if ('onwebkitspeechchange' in CeL.get_element('eval_code')) {
-			var speech_list=[],last_lang_select,speech_lang_select=function(){
+			var speech_list=[],last_lang_select,lang_list=['zh','ja','en'],lang_to_select={},punctuation={
+					//	標點符號.
+					頓號:'、',
+					逗號:'，',
+					破折號:'——',
+					驚嘆號:'！',
+					嘆號:'！',
+					引號:'「」',
+					上引號:'「',
+					下引號:'」',
+					句號:'。'
+				},speech_lang_select=function(){
 				var m=this.id.match(/^lang_select_(.+)$/);
 				if (m){
 					m=m[1];
-					CeL.debug('語音語言種類：['+m+']');
+					CeL.debug('語音語言種類：'+CeL.gettext.get_alias(m)+' ('+CeL.gettext.to_standard(m)+')');
 					if(last_lang_select)
 						last_lang_select.className='lang_select';
 					last_lang_select=this;
@@ -448,24 +459,35 @@ function start_count(restart) {
 				}
 				return false;
 			};
-			CeL.new_node([
-				{b:'中文',id:'lang_select_zh-TW',	C:"lang_select",onclick:speech_lang_select}, ' | ',
-				{b:'日本語',id:'lang_select_ja',	C:"lang_select",onclick:speech_lang_select}, ' | ',
-				{b:'English',id:'lang_select_en',	C:"lang_select",onclick:speech_lang_select}, ' | ',
-				{b:'Show',	S:'cursor:pointer;',onclick:function(){var e=CeL.get_element('lang_select_list');if(CeL.toggle_display(e))e.value=speech_list.join('\n');}},
+
+			for(var i=0,lang,lang_code;i<lang_list.length;i++){
+				lang_to_select[lang_code=CeL.gettext.to_standard(lang_list[i])]=lang=CeL.gettext.get_alias(lang_list[i]);
+				speech_list.push({b:lang,id:'lang_select_'+lang_code,C:"lang_select",onclick:speech_lang_select},' | ');
+			}
+			speech_list.push(
+				{b:'Show',	S:'cursor:pointer;',onclick:function(){var e=CeL.get_element('lang_select_list');if(CeL.toggle_display(e)){speech_list=speech_list.join('\n').replace(/([「」、，。！])\n/g,'$1');e.value=speech_list;speech_list=speech_list.split('\n');}}},
 				{br:null},
 				{textarea:'',id:'lang_select_list',S:'display:none;width:20em;height:10em;'}
-				], ["eval_result", 0]);
-			speech_lang_select.call(CeL.get_element('lang_select_zh-TW'));
+			);
+			CeL.new_node(speech_list, ["eval_result", 0]);
+			speech_lang_select.call(CeL.get_element('lang_select_'+CeL.gettext.to_standard(lang_list[0])));
 
+			speech_list=[];
 			//	語言識別成功，且文字輸入到文本框後觸發
 			CeL.get_element('eval_code').onwebkitspeechchange =
 			//CeL.get_element('eval_code').onspeechchange =
 			function(e) {
 				//	http://www.w3.org/2005/Incubator/htmlspeech/2010/10/google-api-draft.html
 				//	http://lists.w3.org/Archives/Public/public-webapps/2011OctDec/att-1696/speechapi.html
-				var speech_token=CeL.get_element('eval_code').value;
-				speech_list.push(speech_token);
+				var speech_token=CeL.get_element('eval_code').value,select_lang=CeL.get_element('lang_select_'+CeL.gettext.to_standard(speech_token));
+				if(select_lang){
+					speech_lang_select.call(select_lang);
+					speech_token=speech_token+' ('+CeL.gettext.to_standard(speech_token)+')';
+				}else if(speech_list.length&&(speech_token in punctuation))
+					speech_list[speech_list.length-1]+=punctuation[speech_token];
+				else
+					speech_list.push(speech_token);
+
 				CeL.info(speech_token);
 			};
 		}
@@ -991,7 +1013,10 @@ CeL.set_debug();
 //	相對於 library 本身來說的路徑
 CeL.run(CeL.get_module_path('', '../../game/game.css'));
 //	CSS reset
-CeL.run(CeL.get_module_path('', '_test suite/lib/reset.css'));
+CeL.run(CeL.get_module_path('',
+	//'_test suite/lib/reset.css'
+	'_test suite/lib/normalize.css'
+));
 
 } else {
 	try {
