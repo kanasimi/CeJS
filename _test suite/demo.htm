@@ -73,7 +73,7 @@ body {
 
 <body class="bgn">
 
-<h1 style="float:right;">CeL Test Suite</h1>
+<h1 style="float: right; font-size: 1em; margin: 0;">CeL Test Suite</h1>
 
 <div id="error_load_panel">
 <hr />
@@ -430,6 +430,8 @@ function start_count(restart) {
 		CeL.toggle_display('eval_result', false);
 
 		CeL.get_element('eval_code').onkeypress = function(e) {
+			if (!e)
+				e = window.event;
 			if (13 === (e.keyCode || e.which || e.charCode))
 				run_code();
 		};
@@ -450,7 +452,7 @@ function start_count(restart) {
 				var m=this.id.match(/^lang_select_(.+)$/);
 				if (m){
 					m=m[1];
-					CeL.debug('語音語言種類：'+CeL.gettext.get_alias(m)+' ('+CeL.gettext.to_standard(m)+')');
+					CeL.debug(['語音語言種類：',{span:CeL.gettext.get_alias(m),S:'color:#1a3;'},' (',CeL.gettext.to_standard(m),')']);
 					if(last_lang_select)
 						last_lang_select.className='lang_select';
 					last_lang_select=this;
