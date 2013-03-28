@@ -183,7 +183,7 @@ show
 
 
 <hr style="clear: both;" />
-[test suite] log panel:
+[test suite] <span title="紀錄欄">log panel</span>:
 <!--
 <a href="#" onclick="clipboardFunction(0,'panel_for_log');return false;">paste code</a>
 <b class="sp">|</b>
@@ -198,7 +198,7 @@ try {
 		appCache.swapCache();
 } catch (e) {
 }
-return false;">Update cache</a>)
+return false;">Update cache</a>) 已載入網頁。正進行程式初始化作業，請稍待片刻…
 </div>
 
 
@@ -876,6 +876,7 @@ function start_count(restart) {
 
 								if(!isNaN(CeL.log.max_length))
 									CeL.log.max_length = 0;
+								// Initializated. 初始化完畢。您可開始進行操作。
 								CeL.log('Initialization '
 										+ (e ? 'error' : 'finished') + '.');
 							}
