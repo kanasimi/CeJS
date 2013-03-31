@@ -96,6 +96,7 @@ function draw_era(hierarchy) {
 
 					if (!(name in draw_era.date_cache) && !isNaN(period.end)) {
 						var end_time = new Date(period.end);
+						// 警告: .setDate(-1) 此為權宜之計。
 						end_time.setDate(end_time.getDate() - 1);
 						draw_era.date_cache[name] = {
 							start : new Date(period.start)
@@ -110,6 +111,7 @@ function draw_era(hierarchy) {
 					SVG_object.addText(name, from_x
 							+ (width - name.length * font_size) / 2,
 							layer_from_y + (layer_height + font_size) / 2, {
+								color : '#15a',
 								cursor : 'pointer',
 								'font-size' : font_size + 'px'
 							});
@@ -134,28 +136,28 @@ function draw_era(hierarchy) {
 	draw_era.draw_navigation(hierarchy);
 }
 
-draw_era.draw_navigation = function(hierarchy) {
+draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 	var period_hierarchy = '',
 	// 
 	navigation_list = [ {
-		span : {
-			a : '所有國家',
-			href : '#',
-			onclick : draw_title_era
-		}
+		a : '所有國家',
+		href : '#',
+		onclick : draw_title_era
 	} ];
 
 	if (Array.isArray(hierarchy))
-		hierarchy.forEach(function(name) {
+		hierarchy.forEach(function(name, index) {
 			period_hierarchy += (period_hierarchy ? era_name_classifier : '')
 					+ name;
-			navigation_list.push(' » ', {
-				span : {
-					a : name,
-					href : '#',
-					title : period_hierarchy,
-					onclick : draw_title_era
-				}
+			navigation_list.push(' » ', last_is_Era
+					&& index === hierarchy.length - 1 ? {
+				span : name,
+				title : period_hierarchy
+			} : {
+				a : name,
+				href : '#',
+				title : period_hierarchy,
+				onclick : draw_title_era
 			});
 			if (name in draw_era.date_cache) {
 				name = draw_era.date_cache[name];
@@ -187,7 +189,7 @@ draw_era.click_navigation_date = function() {
 
 draw_era.click_Era = function() {
 	var hierarchy = this.dataset.hierarchy.split(era_name_classifier);
-	draw_era.draw_navigation(hierarchy);
+	draw_era.draw_navigation(hierarchy, true);
 	era_input_object.setValue(CeL.era(hierarchy.join('')).format({
 		format : '%朝代%君主%紀年%年年%月月%日日',
 		locale : 'cmn-Hant-TW'
@@ -257,14 +259,15 @@ function translate_era(era) {
 		var format = output_format_object.setValue();
 		if (!format)
 			format = output_format_object.setValue('公元%Y年%m月%d日');
-		date = format === '共存紀年' ? '<b class="共存紀年">'
-				+ (date.共存紀年 || []).join('</b>, <b class="共存紀年">') + '<b>'
-				: date.format({
-					parser : 'CE',
-					format : format,
-					locale : 'cmn-Hant-TW',
-					numeral : output_numeral
-				});
+		date = format === '共存紀年' ? Array.isArray(date.共存紀年)
+				&& date.共存紀年.length > 0 ? '<b class="共存紀年">'
+				+ date.共存紀年.join('</b>, <b class="共存紀年">') + '</b>'
+				: '<span class="fadeout">(無共存紀年)</span>' : date.format({
+			parser : 'CE',
+			format : format,
+			locale : 'cmn-Hant-TW',
+			numeral : output_numeral
+		});
 
 		CeL.node_value('#era_output', output_numeral === 'Chinese' ? CeL
 				.to_Chinese_numeral(date) : date);
