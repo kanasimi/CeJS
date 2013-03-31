@@ -183,7 +183,7 @@ show
 
 
 <hr style="clear: both;" />
-[test suite] <span title="紀錄欄">log panel</span>:
+[test suite] <span title="訊息提示與紀錄欄">log panel</span>:
 <!--
 <a href="#" onclick="clipboardFunction(0,'panel_for_log');return false;">paste code</a>
 <b class="sp">|</b>
@@ -432,6 +432,7 @@ function start_count(restart) {
 		CeL.get_element('eval_code').onkeypress = function(e) {
 			if (!e)
 				e = window.event;
+			// press [Enter]
 			if (13 === (e.keyCode || e.which || e.charCode))
 				run_code();
 		};
@@ -594,10 +595,15 @@ function start_count(restart) {
 			//alert(CeL.SVG);
 			//CeL.debug(CeL.drawLongDivision);
 			SVG_object = new CeL.SVG(20, 20);
-			//CeL.debug('type of SVG_object = ' + CeL.is_type(SVG_object,0,1));
-			SVG_object.attach('panel_for_SVG');
-			//CeL.debug('SVG panel = ' + SVG_object);
-			//alert(SVG_object);
+			if(SVG_object.status_OK()) {
+				//CeL.debug('type of SVG_object = ' + CeL.is_type(SVG_object,0,1));
+				SVG_object.attach('panel_for_SVG');
+				//CeL.debug('SVG panel = ' + SVG_object);
+				//alert(SVG_object);
+			} else {
+				//SVG_object = null;
+				CeL.warn('您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉。');
+			}
 
 			//CeL.SVG.draw_long_division(452, 34, SVG_object);
 			//CeL.draw_long_division(10000000000, 7, SVG_object);

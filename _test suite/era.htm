@@ -1,0 +1,124 @@
+﻿<?xml version="1.1" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<style type="text/css">
+/* <![CDATA[ */
+#era_input {
+	width: 15em;
+}
+
+#era_output {
+	background-color: #efa;
+}
+
+.共存紀年 {
+	background-color: #fce;
+}
+
+#note_botton_layer {
+	background-color: #eef;
+}
+
+.note_botton {
+	color: #2c2;
+	background-color: #dde;
+}
+
+.note_panel {
+	/*	display: none; */
+	background-color: #eff;
+}
+
+.selected {
+	background-color: #f74;
+}
+
+.unselected {
+	color: #333;
+	background-color: #aaa;
+}
+
+#era_graph {
+	display: none;
+	width: 100%;
+	height: 500px;
+}
+
+#era_graph_navigation {
+	background-color: #def;
+}
+
+/*]]>*/
+</style>
+
+<title>紀年轉換工具</title>
+</head>
+
+<body>
+
+	取得
+	<input id="era_input" title="來源紀年與日期" /> 之
+	<input id="output_format" title="輸出格式" />
+	<a href="#"
+		onclick="output_numeral=output_numeral==='Chinese'?'':'Chinese';this.className=output_numeral==='Chinese'?'selected':'unselected';
+	translate_era();return false;"
+		title="輸出中文數字">中</a>
+	<a href="#" id="translate" title="執行轉換">→</a>
+	<span id="era_output"></span>
+
+	<div id="note_botton_layer"></div>
+	<div id="example" class="note_panel">測試範例：</div>
+	<div id="input_history" class="note_panel">
+		之前輸入資料：
+		<!-- 清除 -->
+	</div>
+	<div id="FAQ" class="note_panel">
+		使用說明：
+		<ul>
+			<li>本工具可作中西曆轉換。其資料來源為<a href="http://sinocal.sinica.edu.tw/"
+				accessdate="2013/3/25 22:18" target="_blank">中央研究院 兩千年中西曆轉換</a>
+				2013年版。但請注意，此"中央研究院 兩千年中西曆轉換"於 CE 4 停閏。惟本工具之紀元功能採 proleptic Julian
+				calendar，因此修正其為閏年。
+			</li>
+			<li>您可參照測試範例，先輸入來源紀年與日期，後選取輸出格式，按下轉換執行鍵「→」即可獲得轉換結果。</li>
+			<li>請幫助測試本工具之正確性。</li>
+			<li>本函式庫希望能納入日、韓、越之紀年，以及 BCE 841 共和元年之後的中國曆數。請幫助我們取得這些王朝之數字化曆數資料。</li>
+			<li>本函式庫以歷史上使用過的曆數為準。用意不在推導曆法，而在對過去時間作正確轉換。因此僅用查表法，不作繁複天文計算。更深入的資料結構，可參見
+				<a
+				href="https://github.com/kanasimi/CeJS/blob/master/data/date/era_data.js"
+				target="_blank">era_data.js</a>。
+			</li>
+			<li>本工具在初始化完畢後，不會再透過網路傳輸資料。若下載整組套件，則可離線使用。</li>
+			<li>本函式庫可自行批次轉換紀年時間日期、提供程式化支援，並提供多樣的輸出格式。</li>
+			<li>本函式庫與系統時間結合，可做到「精確到辰」；或對頒行時憲曆、改日96刻後之日期，可精確到刻。</li>
+			<li>本函式庫為 <a href="https://github.com/kanasimi/CeJS/wiki"
+				target="_blank">CeJS</a> 計畫的一部分。若有任何建議以及疑問、錯誤回報等，請移步 <a
+				href="https://plus.google.com/u/1/101633590909790225455"
+				target="_blank">Google+</a>。
+			</li>
+		</ul>2013/3/31 13:36:27
+	</div>
+
+	<div id="era_graph">
+		<div id="era_graph_navigation">導航</div>
+	</div>
+
+	<hr />
+	紀年轉換工具 訊息提示與紀錄欄：
+	<div id="panel_for_log">
+		<b style="color: red;">已載入網頁。正進行程式初始化作業，請稍待片刻…</b>
+	</div>
+
+	<script type="text/javascript" src="../ce.js">{"run":"era.js"}</script>
+	<script type="text/javascript">
+	CeL.env.same_origin_policy = true;
+	</script>
+
+	<!-- 
+	<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+	-->
+
+</body>
+</html>
