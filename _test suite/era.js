@@ -1,6 +1,8 @@
 ﻿'use strict';
 
 /**
+ * TODO: 對紀年時間過短時，線圖之處理。
+ * 
  * @note <code>
 
  var g=CeL.SVG.createNode('g'),
@@ -390,6 +392,7 @@ function affairs() {
 	// -----------------------------
 
 	SVG_object = CeL.get_element('era_graph');
+	// 紀年線圖按滑鼠右鍵可回上一層。
 	SVG_object.onclick =
 	// Chrome use this.
 	SVG_object.onmousedown = function(e) {
