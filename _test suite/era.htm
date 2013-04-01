@@ -5,6 +5,46 @@
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
 <style type="text/css">
 /* <![CDATA[ */
+body {
+	color: #118;
+	background-color: #ffe;
+}
+
+/* copy from game.css */
+em {
+	color: #f24071;
+	font-weight: 900;
+}
+
+.timeStamp { /*display:block;*/
+	text-align: right;
+	color: #9D9D9D;
+	font-size: .8em;
+}
+
+table {
+	color: #137;
+	border: 1px solid #58b;
+	padding: 0;
+}
+
+caption {
+	color: #f67;
+}
+
+th {
+	color: #74b;
+	background-color: #eef;
+	border-right: 1px solid #888;
+	border-bottom: 1pt solid #42b;
+}
+
+td {
+	border-right: 1px solid #888;
+	border-bottom: 1px solid #888;
+}
+
+/* ↑ copy from game.css */
 #era_input {
 	width: 15em;
 }
@@ -26,8 +66,13 @@
 }
 
 .note_botton {
+	color: #080;
+	background-color: #ccd;
+}
+
+.note_botton.selected {
 	color: #2c2;
-	background-color: #dde;
+	background-color: #eff;
 }
 
 .note_panel {
@@ -83,13 +128,9 @@
 		<!-- 清除 -->
 	</div>
 	<div id="FAQ" class="note_panel">
-		使用說明：
+		<h3>使用說明</h3>
 		<ul>
-			<li>本工具可作中西曆轉換。其資料來源為<a href="http://sinocal.sinica.edu.tw/"
-				accessdate="2013/3/25 22:18" target="_blank">中央研究院 兩千年中西曆轉換</a>
-				2013年版。但請注意，此"中央研究院 兩千年中西曆轉換"於 CE 4 停閏。惟本工具之紀元功能採 proleptic Julian
-				calendar，因此修正其為閏年。
-			</li>
+			<li>本工具可作中西曆轉換。</li>
 			<li>您可參照測試範例，先輸入來源紀年與日期，後選取輸出格式，按下轉換執行鍵「→」即可獲得轉換結果。</li>
 			<li>請幫助測試本工具之正確性。</li>
 			<li>本函式庫希望能納入日、韓、越之紀年，以及 BCE 841
@@ -98,6 +139,12 @@
 				<a
 				href="https://github.com/kanasimi/CeJS/blob/master/data/date/era_data.js"
 				target="_blank">era_data.js</a>。
+			</li>
+			<li>西曆以1582年10月15日為改曆分界點，Julian calendar（儒略曆）1582年10月4日的下一日為
+				Gregorian calendar（格里高利曆）1582年10月15日。公元初期 (CE 4) 之前，包括公元前之日期，則採 <a
+				href="http://en.wikipedia.org/wiki/Proleptic_Julian_calendar"
+				accessdate="2013/3/31 16:54" title="Proleptic Julian calendar">proleptic
+					Julian calendar</a>
 			</li>
 			<li>本工具在初始化完畢後，不會再透過網路傳輸資料。若下載整組套件，則可離線使用。</li>
 			<li>本函式庫可自行批次轉換紀年時間日期、提供程式化支援，並提供多樣的輸出格式。</li>
@@ -108,11 +155,46 @@
 				target="_blank">Google+</a>。
 			</li>
 		</ul>
-		2013/3/31 13:36:27
+		<div class="timeStamp">2013/3/31 13:36:27</div>
+
+		<table>
+			<caption>資料來源</caption>
+			<tr>
+				<th>紀年、日期</th>
+				<th>資料來源</th>
+				<th>附注</th>
+			</tr>
+			<tr>
+				<td>CE 1-2100 之中曆</td>
+				<td>林晰、邱展毅、劉智漢、鄭垂平、鄭垂平等研究者之<a
+					href="http://sinocal.sinica.edu.tw/" accessdate="2013/3/25 22:18"
+					target="_blank">中央研究院 兩千年中西曆轉換</a>2013年版
+				</td>
+				<td><a href="http://sinocal.sinica.edu.tw/lusodoc.html"
+					accessdate="2013/3/28 19:24" title="「兩千年中西曆轉換」資料庫介紹">此程式使用的主要是<span
+						class="proper_noun">薛仲三</span>、<span class="proper_noun">歐陽頤</span>兩位研究者所編著的<span
+						class="creation_title">兩千年中西曆對照表</span></a>。<br />請注意，<em>此中西曆轉換於
+						CE 4 停閏</em>。惟本工具之紀元功能採 proleptic Julian calendar，因此修正其為閏年。</td>
+			</tr>
+			<tr>
+				<td>滿洲國曆數</td>
+				<td><a
+					href="http://ja.wikipedia.org/wiki/%E5%A4%A7%E5%90%8C_(%E6%BA%80%E5%B7%9E)"
+					accessdate="2013/4/1 19:32" title="大同 (満州)">大同 (満州)</a>.
+					(2013/3/17). In Wikipedia. Retrieved 2013/4/1. <br />
+				<a href="http://ja.wikipedia.org/wiki/%E5%BA%B7%E5%BE%B3"
+					accessdate="2013/4/1 19:33">康徳</a>. (2013/3/16). In Wikipedia.
+					Retrieved 2013/4/1.<br /> <a href="http://www.jacar.go.jp/"
+					accessdate="2013/4/1 19:16" title="国立公文書館 アジア歴史資料センター">アジア歴史資料センター</a>（満州国建国宣言、満洲国
+					時憲書）<br />姜念东. (1980). 伪满洲国史. 吉林人民出版社.<br />解学诗. (1995). 伪满洲国史新编.
+					人民出版社.</td>
+				<td>滿洲國採用 Gregorian calendar。</td>
+			</tr>
+		</table>
 	</div>
 
 	<div id="era_graph">
-		<div id="era_graph_navigation">導航</div>
+		<div id="era_graph_navigation">導覽列</div>
 	</div>
 
 	<hr />

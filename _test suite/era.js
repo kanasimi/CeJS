@@ -53,7 +53,7 @@ function draw_title_era() {
 	return false;
 }
 
-// 畫個簡單的線圖。
+// 畫個簡單的時間軸線圖。
 function draw_era(hierarchy) {
 
 	// 清理場地。
@@ -111,8 +111,9 @@ function draw_era(hierarchy) {
 					SVG_object.addText(name, from_x
 							+ (width - name.length * font_size) / 2,
 							layer_from_y + (layer_height + font_size) / 2, {
-								color : '#15a',
+								color : layer_count === 1 ? '#15a' : '#a2e',
 								cursor : 'pointer',
+								'font-family' : '標楷體,DFKai-SB',
 								'font-size' : font_size + 'px'
 							});
 					// TODO: SVG <title> tag
@@ -131,6 +132,7 @@ function draw_era(hierarchy) {
 			});
 		});
 
+		draw_era.last_hierarchy = hierarchy;
 	}
 
 	draw_era.draw_navigation(hierarchy);
@@ -139,7 +141,7 @@ function draw_era(hierarchy) {
 draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 	var period_hierarchy = '',
 	// 
-	navigation_list = [ {
+	navigation_list = [ '導覽列：', {
 		a : '所有國家',
 		href : '#',
 		onclick : draw_title_era
@@ -231,14 +233,31 @@ function select_panel(id, show) {
 		return;
 
 	if (last_selected === id) {
-		CeL.toggle_display(last_selected, show);
-		if (!show)
+		show = CeL.toggle_display(last_selected, show) === 'none';
+		CeL.set_class(last_selected + click_panel.postfix, 'selected', {
+			remove : show
+		});
+		if (show)
 			last_selected = null;
 		return;
 	}
-	if (last_selected)
+
+	if (last_selected) {
 		CeL.toggle_display(last_selected, false);
+		CeL.set_class(last_selected + click_panel.postfix, 'selected', {
+			remove : true
+		});
+	}
+
+	CeL.set_class(id + click_panel.postfix, 'selected');
 	CeL.toggle_display(last_selected = id, true);
+}
+
+click_panel.postfix = '_panel';
+click_panel.postfix_RegExp = new RegExp(click_panel.postfix + '$');
+function click_panel(e) {
+	select_panel(this.id.replace(click_panel.postfix_RegExp, ''));
+	return false;
 }
 
 // ---------------------------------------
@@ -259,18 +278,33 @@ function translate_era(era) {
 		var format = output_format_object.setValue();
 		if (!format)
 			format = output_format_object.setValue('公元%Y年%m月%d日');
-		date = format === '共存紀年' ? Array.isArray(date.共存紀年)
-				&& date.共存紀年.length > 0 ? '<b class="共存紀年">'
-				+ date.共存紀年.join('</b>, <b class="共存紀年">') + '</b>'
-				: '<span class="fadeout">(無共存紀年)</span>' : date.format({
-			parser : 'CE',
-			format : format,
-			locale : 'cmn-Hant-TW',
-			numeral : output_numeral
-		});
 
-		CeL.node_value('#era_output', output_numeral === 'Chinese' ? CeL
-				.to_Chinese_numeral(date) : date);
+		if (format === '共存紀年')
+			if (Array.isArray(date = date.共存紀年))
+				date.forEach(function(era, index) {
+					date[index] = [
+							' [' + (index + 1) + '] ',
+							{
+								b : output_numeral === 'Chinese' ? CeL
+										.to_Chinese_numeral(era) : era,
+								C : '共存紀年'
+							} ];
+				});
+			else
+				date = {
+					span : '無共存紀年',
+					C : 'fadeout'
+				};
+		else
+			date = date.format({
+				parser : 'CE',
+				format : format,
+				locale : 'cmn-Hant-TW',
+				numeral : output_numeral
+			});
+
+		CeL.remove_all_child('era_output');
+		CeL.new_node(date, 'era_output');
 
 		if (era && era !== last_input)
 			CeL.new_node({
@@ -356,6 +390,26 @@ function affairs() {
 	// -----------------------------
 
 	SVG_object = CeL.get_element('era_graph');
+	SVG_object.onclick =
+	// Chrome use this.
+	SVG_object.onmousedown = function(e) {
+		if (!e)
+			e = window.event;
+		// http://stackoverflow.com/questions/2405771/is-right-click-a-javascript-event
+		if (
+		// Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+		'which' in e ? e.which === 3
+		// IE, Opera
+		: 'button' in e && e.button === 2) {
+			var hierarchy = draw_era.last_hierarchy;
+			if (Array.isArray(hierarchy) && hierarchy.length > 0) {
+				hierarchy.pop();
+				draw_era(hierarchy);
+				return false;
+			}
+		}
+	};
+
 	// 為取得 offsetHeight
 	CeL.toggle_display(SVG_object, true);
 	era_name_classifier = CeL.era.pack.era_name_classifier;
@@ -372,7 +426,7 @@ function affairs() {
 		draw_era();
 	} else {
 		SVG_object = null;
-		CeL.warn('您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉，無法繪製紀年線圖。');
+		CeL.warn('您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉，無法繪製紀年時間軸線圖。');
 	}
 
 	// -----------------------------
@@ -383,10 +437,10 @@ function affairs() {
 		if (select_panels[i])
 			list.push({
 				a : select_panels[i],
+				id : i + click_panel.postfix,
 				href : "#",
 				C : 'note_botton',
-				onclick : new Function('select_panel("' + i
-						+ '");return false;')
+				onclick : click_panel
 			}, ' | ');
 		else
 			delete select_panels[i];
