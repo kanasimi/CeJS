@@ -195,7 +195,7 @@ draw_era.click_Era = function() {
 	var hierarchy = this.dataset.hierarchy.split(era_name_classifier);
 	draw_era.draw_navigation(hierarchy, true);
 	era_input_object.setValue(CeL.era(hierarchy.join('')).format({
-		format : '%朝代%君主%紀年%年年%月月%日日',
+		format : '%紀年名%年年%月月%日日',
 		locale : 'cmn-Hant-TW'
 	}));
 	translate_era();
@@ -357,7 +357,7 @@ function affairs() {
 
 	output_format_object = new CeL.select_input('output_format', {
 		'公元%Y年%m月%d日' : '公元日期',
-		'%朝代%君主%紀年%年年%月月%日日' : '朝代紀年日期',
+		'%紀年名%年年%月月%日日' : '朝代紀年日期',
 		'%年干支年%月干支月%日干支日' : '年月日干支',
 		'%年干支年%月干支月%日干支日%時干支時' : '年月日時干支',
 		'%年干支%月干支%日干支%時干支' : '四柱八字',
