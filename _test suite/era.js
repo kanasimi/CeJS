@@ -45,7 +45,7 @@ function initialization() {
 
 // ---------------------------------------
 
-var era_name_classifier;
+var era_name_classifier, MIN_FONT_SIZE = 8;
 
 function draw_title_era() {
 	var hierarchy = this.title;
@@ -92,9 +92,9 @@ function draw_era(hierarchy) {
 					//
 					width = (period.end - period.start) * ratio,
 					//
-					font_size = Math.min(
+					font_size = Math.max(MIN_FONT_SIZE, Math.min(
 					//
-					layer_height / 2, width / name.length);
+					layer_height / 2, width / name.length));
 
 					if (!(name in draw_era.date_cache) && !isNaN(period.end)) {
 						var end_time = new Date(period.end);
@@ -170,7 +170,7 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 					href : '#',
 					title : name.start,
 					onclick : draw_era.click_navigation_date
-				}, '~', {
+				}, '－', {
 					a : name.end,
 					href : '#',
 					title : name.end,
@@ -226,8 +226,11 @@ draw_era.date_cache = {};
 
 var last_selected, select_panels = {
 	example : '測試範例',
-	input_history : '之前輸入資料',
-	FAQ : '使用說明'
+	// 之前輸入資料
+	input_history : '輸入紀錄',
+	FAQ : '使用說明',
+	era_graph : '紀年線圖',
+	pack_data : '壓縮曆數'
 };
 
 function select_panel(id, show) {
@@ -273,7 +276,7 @@ function input_era(key) {
 function translate_era(era) {
 	if (!era)
 		era = era_input_object.setValue();
-	var date = CeL.era(era, {
+	var output, date = CeL.era(era, {
 		numeral : output_numeral
 	});
 	if (date) {
@@ -282,9 +285,9 @@ function translate_era(era) {
 			format = output_format_object.setValue('公元%Y年%m月%d日');
 
 		if (format === '共存紀年')
-			if (Array.isArray(date = date.共存紀年))
-				date.forEach(function(era, index) {
-					date[index] = [
+			if (Array.isArray(output = date.共存紀年))
+				output.forEach(function(era, index) {
+					output[index] = [
 							' [' + (index + 1) + '] ',
 							{
 								b : output_numeral === 'Chinese' ? CeL
@@ -293,20 +296,32 @@ function translate_era(era) {
 							} ];
 				});
 			else
-				date = {
+				output = {
 					span : '無共存紀年',
 					C : 'fadeout'
 				};
-		else
-			date = date.format({
+		else {
+			output = date.format({
 				parser : 'CE',
 				format : format,
 				locale : 'cmn-Hant-TW',
 				numeral : output_numeral
 			});
+			if (date.注) {
+				output = [ output ];
+				date.注.forEach(function(note) {
+					output.push({
+						br : null
+					}, '注：', {
+						span : note,
+						C : 'note'
+					});
+				});
+			}
+		}
 
 		CeL.remove_all_child('era_output');
-		CeL.new_node(date, 'era_output');
+		CeL.new_node(output, 'era_output');
 
 		if (era && era !== last_input)
 			CeL.new_node({
@@ -423,12 +438,12 @@ function affairs() {
 			- CeL.get_element('era_graph_navigation').offsetHeight;
 
 	SVG_object = new CeL.SVG(SVG_object.offsetWidth, SVG_object.offsetHeight);
-	if (select_panels['era_graph'] = SVG_object.status_OK()) {
+	if (SVG_object.status_OK()) {
 		SVG_object.attach('era_graph');
-		select_panels['era_graph'] = '紀年線圖';
 		draw_era();
 	} else {
 		SVG_object = null;
+		delete select_panels['era_graph'];
 		CeL.warn('您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉，無法繪製紀年時間軸線圖。');
 	}
 
