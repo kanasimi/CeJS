@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<base target="_blank" />
 <style type="text/css">
 /* <![CDATA[ */
 body {
@@ -148,12 +149,11 @@ td {
 			<li>紀年線圖按滑鼠右鍵可回上一層。</li>
 			<li>您可參照測試範例，先輸入來源紀年與日期，後選取輸出格式，按下轉換執行鍵「→」即可獲得轉換結果。</li>
 			<li>請幫助測試本工具之正確性。</li>
-			<li>本函式庫希望能納入日、韓、越之紀年，以及 841 BCE
-				共和元年之後的中國曆數。請幫助我們取得這些王朝之數字化曆數資料。</li>
-			<li>本函式庫以歷史上實際施行、使用過的曆數為準。用意不在推導曆法，而在對過去時間作正確轉換。因此僅用查表法，盡可能採用學術界或官方認可的曆數，不作繁複天文計算。更深入的資料結構，可參見
+			<li>本函式庫希望能納入日、韓、越之紀年，以及共和元年(841
+				BCE)之後的中國曆數。請幫助我們取得這些王朝之數字化曆數資料。</li>
+			<li>本函式庫以歷史上實際施行、使用過的曆數為準。用意不在推導曆法，而在<b>對過去時間作正確轉換</b>。因此僅用查表法，盡可能採用學術界或官方認可的曆數，不作繁複天文計算。更深入的資料結構，可參見
 				<a
-				href="https://github.com/kanasimi/CeJS/blob/master/data/date/era_data.js"
-				target="_blank">era_data.js</a>。
+				href="https://github.com/kanasimi/CeJS/blob/master/data/date/era_data.js">era_data.js</a>。
 			</li>
 			<li>西曆(<a href="http://en.wikipedia.org/wiki/Common_Era"
 				accessdate="2013/4/5 21:9" title="Common Era">CE</a>)以1582年10月15日為改曆分界點，Julian
@@ -168,12 +168,18 @@ td {
 					Gregorian calendars</a>。
 			</li>
 			<li>本工具在初始化完畢後，不會再透過網路傳輸資料。若下載整組套件，則可離線使用。</li>
+			<li>本函式庫除特殊標注外，可精確到日。自<a
+				href="http://tambingblog.wordpress.com/2012/12/01/%E5%86%8D%E8%AB%96%E5%AD%90%E6%99%82%E6%8F%9B%E6%97%A5/"
+				accessdate="2013/4/8 19:37"
+				title="再論子時換日 | 治曆者言 on WordPress.com
+據《舊唐書．傅仁均列傳》所載，傅仁均上呈《戊寅元曆》時，列出時辰制度改革之理據，其文曰：「前代造曆，命辰不從子半，命度不起虛中。臣今造曆，命辰起子半，度起於虛六，度命合辰，得中於子，符陰陽之始，會曆術之宜。」傅仁均以子時之中（子正）為一日之始，此後中國歷代曆法所用之時辰算法皆「命子半算外」，即是以子半（子正）為夜半
+隋代及以前之時辰制度，除卻東漢《四分曆》外，子時為00:00 – 02:00；唐代至今之時辰制度，子時為23:00 – 01:00。">唐初頒行戊寅元曆後</a>至清末之日期，可精確到時辰；或對清初頒行時憲曆、改日96刻後至清末之日期，可精確到刻。
+			</li>
 			<li>本函式庫可自行批次轉換紀年時間日期、提供程式化支援，並提供多樣的輸出格式。</li>
-			<li>本函式庫與系統時間結合，因此可精確到時辰；或對清初頒行時憲曆、改日96刻後至清末之日期，可精確到刻。</li>
-			<li>本函式庫為 <a href="https://github.com/kanasimi/CeJS/wiki"
-				target="_blank">CeJS</a> 計畫的一部分。若有任何建議以及疑問、錯誤回報等，請移步 <a
-				href="https://plus.google.com/u/1/101633590909790225455"
-				target="_blank">Google+</a>。
+			<li>本函式庫與系統時間結合，因此可方便作程式化操作。</li>
+			<li>本函式庫為 <a href="https://github.com/kanasimi/CeJS/wiki">CeJS</a>
+				計畫的一部分。若有任何建議以及疑問、錯誤回報等，請移步 <a
+				href="https://plus.google.com/u/1/101633590909790225455">Google+</a>。
 			</li>
 		</ul>
 		<div class="timeStamp">2013/3/31 13:36:27</div>
@@ -182,19 +188,19 @@ td {
 			<caption>主要資料來源</caption>
 			<tr>
 				<th>紀年、日期</th>
-				<th>資料來源</th>
+				<th>直接資料來源</th>
 				<th>附注</th>
 			</tr>
 			<tr>
 				<td>1－2100 CE 之中曆</td>
 				<td>林晰、邱展毅、劉智漢、鄭垂平、鄭垂平等研究者之<a
-					href="http://sinocal.sinica.edu.tw/" accessdate="2013/3/25 22:18"
-					target="_blank">中央研究院 兩千年中西曆轉換</a> 2013年2月版。
+					href="http://sinocal.sinica.edu.tw/" accessdate="2013/3/25 22:18">中央研究院
+						兩千年中西曆轉換</a> 2013年2月版。
 				</td>
 				<td><a href="http://sinocal.sinica.edu.tw/lusodoc.html"
 					accessdate="2013/3/28 19:24" title="「兩千年中西曆轉換」資料庫介紹">此程式採用的主要是<span
 						class="proper_noun">薛仲三</span>、<span class="proper_noun">歐陽頤</span>兩位研究者所編著的<span
-						class="creation_title">兩千年中西曆對照表</span></a>。至 2100 CE 之農曆則<a
+						class="creation_title">兩千年中西曆對照表</span></a>(1940)。至 2100 CE 之農曆則<a
 					href="http://sinocal.sinica.edu.tw/lusochangelog.html"
 					accessdate="2013/4/5 19:8" title="兩千年中西曆轉換工具 - 更新紀錄">似參照氣象局資料</a>。<br />請注意，<em>此中西曆對照表於
 						4 CE 停閏</em>。惟本工具之紀元功能採 proleptic Julian calendar，因此修改 4 CE 為閏年。<br />此中西曆轉換於太平天曆的部分有誤。因此須作更正。
@@ -202,28 +208,45 @@ td {
 			</tr>
 			<tr>
 				<td>太平天曆</td>
-				<td>罗尔纲。<span class="creation_title">太平天国史</span>卷三十二 志第十一 天历 <a
+				<td>罗尔纲(1991)<span class="creation_title">太平天国史</span>卷三十二 志第十一
+					天历 <a
 					href="http://lib.ecit.edu.cn/guoxue/%C6%E4%CB%FB%C0%FA%CA%B7%CA%E9%BC%AE/%D7%A8%CC%E2%C0%E0/%C0%FA%CA%B7/%CC%AB%C6%BD%CC%EC%B9%FA%CA%B7/Resource/Book/Edu/JXCKS/TS010014/0061_ts010014.htm"
-					accessdate="2013/4/5 18:7" title="">四 天历与夏历阳历对照及简表</a><br />吴善中。太平天国历法研究述评<br />吴善中。太平天国天历干支、礼拜提前一天原因考
+					accessdate="2013/4/5 18:7" title="">四 天历与夏历阳历对照及简表</a><br />吴善中(1998)太平天国天历干支、礼拜提前一天原因考<br />吴善中(2005)太平天国历法研究述评
 				</td>
-				<td>雖可顯示干支，但尚無法解析干支。</td>
+				<td>雖可顯示年月日干支與星期，但尚無法解析干支。</td>
 			</tr>
 			<tr>
 				<td>明鄭時期<em>處理中</em></td>
+				<td><a
+					href="http://tambingblog.wordpress.com/author/tambingblog/"
+					accessdate="2013/4/8 19:48"
+					title="Posts by 譚冰 | 治曆者言 on WordPress.com">譚冰</a>（陳泳昌）(2012)<a
+					href="http://tambingblog.wordpress.com/2012/09/01/%E8%A1%93%E6%95%B8%E5%BE%B5%E9%A9%97%E9%97%9C%E9%8D%B5%E4%B9%8B%E7%90%86/"
+					accessdate="2013/4/8 19:49"
+					title="術數徵驗關鍵之理 | 治曆者言 on WordPress.com">術數徵驗關鍵之理</a>（<em>現尚未確認此是否為考證過之朔閏資料，且資料未能含括永曆37年(1683
+						CE)。現永曆37年採用的是清時憲曆，但極可能為錯誤資料！</em>）<br />Wikipedia 相關頁面。</td>
 				<td>數位典藏與自動推論實驗室 數位典藏研究發展中心 <a
 					href="http://140.112.30.230/datemap/index.php"
 					accessdate="2013/4/5 19:2"
 					title="中西曆對照查詢系統（明代以降） || Chinse and
-						Western Dates Mapping System (Later than Ming Dynasty)">中西曆對照查詢系統（明代以降）</a><br />Wikipedia
-					相關頁面。
+						Western Dates Mapping System (Later than Ming Dynasty)">中西曆對照查詢系統（明代以降）</a>的資料沿用清時憲曆，因此恐非實際施行、使用過的曆數。<br />因非身在學界，若有能提供相關資料，包括王叔武(1979)<a
+					href="http://www.cnki.com.cn/Article/CJFDTotal-SXZX197903021.htm"
+					accessdate="2013/4/8 23:51"
+					title="南明史料朔闰考异——《行在阳秋》札记
+《思想战线》 1979年03期">南明史料朔闰考异——《行在阳秋》札记</a>」一文者，不勝感謝。
 				</td>
-				<td></td>
 			</tr>
 			<tr>
-				<td>1500－1 BCE<em>處理中</em></td>
+				<td>1500－841 BCE 之中國地區朔閏<em>處理中</em></td>
 				<td>许剑伟(2011 v5.05)寿星天文历</td>
-				<td>寿星天文历於 721 BCE 起的數據主要採用张培瑜 1997年第二版<span
-					class="creation_title">三千五百年历日天象</span>。<br />张培瑜<span
+				<td>寿星天文历於 721 BCE 起的數據主要採用张培瑜教授 1997年第二版<span
+					class="creation_title">三千五百年历日天象</span>。
+				</td>
+			</tr>
+			<tr>
+				<td>841－1 BCE 之中曆<em>處理中</em></td>
+				<td>徐锡祺(1997)西周（共和）至西汉历谱</td>
+				<td>未以寿星天文历（<span class="creation_title">三千五百年历日天象</span>）為準。张培瑜<span
 					class="creation_title">三千五百年历日天象</span>與董作賓(1960)<span
 					class="creation_title">中國年曆總譜</span>兩書曆數獲得方法不同，<a
 					href="http://www.lw23.com/paper_107739541_8/"
@@ -233,7 +256,12 @@ td {
 （4）根据早期历法推出的朔闰表，如董作宾《中国年历总谱》、黄伯录《中西年月通考》及《天象》一书中的《春秋朔闰表》和《战国朔闰表》等。
 
 共和以前的西周历法和商代历法目前还都不清楚，用后世历法数据推出的朔闰干支也未必正确。因此这些年历的先秦部分，有不少可商之处。">尚有可議之處</a>。據<span
-					class="creation_title">三千五百年历日天象</span>一書前言，「远古时期，中国早期历法是根据观测实际天象..颁行的，而不是事先推步得出的。」因此先以此書為準，未來若有更可靠之來源時再作更改。
+					class="creation_title">三千五百年历日天象</span>一書前言，「远古时期，中国早期历法是根据观测实际天象..颁行的，而不是事先推步得出的。」因此原先欲以此書為準，未來若有更可靠之來源時再作更改。惟近年來不少書簡出土，發現舊的曆譜有不少謬誤，只得取用較新的資料。<br />經黃一農教授<a
+					href="http://hss.nthu.edu.tw/~ylh/list.php?category=%E6%9B%86%E6%B3%95%E5%AD%B8%E5%8F%B2"
+					accessdate="2013/4/8 23:1"
+					title="黃一農，2001，〈漢初百年朔閏析究──兼訂《史記》和《漢書》紀日干支訛誤〉，《中央研究院歷史語言研究所集刊》（臺北），第72本第4分，頁753-800。">漢初百年朔閏析究</a>一文介紹，發現有<span
+					class="creation_title">西周（共和）至西汉历谱</span>一書，決定用之。惟此書尚未有電子化版本，因此尚須作番處理，恐需耗些時日。<br />另，於
+					246－104 BCE 的部分，仍將參照下述更後期考校的來源。
 				</td>
 			</tr>
 			<tr>
@@ -245,12 +273,20 @@ td {
 				<td>日本の旧暦、和暦<em>處理中</em></td>
 				<td><span class="proper_noun" title="かみつな しゅうじ">上綱秀治</span>さんの<a
 					href="http://www.asahi-net.or.jp/~ax2s-kmtn/ref/month_ls.html"
-					accessdate="2013/4/5 17:52">月の大小</a><br />こよみのページ<a
+					accessdate="2013/4/5 17:52">月の大小</a>と<a
+					href="http://www.asahi-net.or.jp/~ax2s-kmtn/ref/year_jw.html"
+					accessdate="2013/4/9 20:24" title="西暦・和暦対照表 - CyberLibrarian">西暦・和暦対照表</a><br />こよみのページ<a
 					href="http://koyomi.vis.ne.jp/kyuureki.htm"
 					accessdate="2013/4/5 18:47" title="旧暦（和暦）のページ">旧暦のページ</a><br />海上保安庁海洋情報部<a
 					href="http://www1.kaiho.mlit.go.jp/KOHO/reki/kyuu9700.htm"
 					accessdate="2013/4/5 18:42">1997-2010年の新暦・旧暦対応表</a>(非公式)</td>
-				<td></td>
+				<td>「月の大小」は以下の文献を参考にした。<br />暦を知る事典 / 岡田芳朗[ほか]著 東京堂出版, 2006.5<br />日本暦日原典.
+					第4版 / 内田正男編著 雄山閣出版, 1992.6<br />日本暦日総覧 / 古川麒一郎[ほか]共編 本の友社,
+					1992.5-1995.2<br />「西暦・和暦対照表」は以下の文献を参考にした。<br />暦の百科事典 : 2000年版 /
+					暦の会編著 本の友社, 1999.11<br />暦を知る事典 / 岡田芳朗[ほか]著 東京堂出版, 2006.5<br />日本陰陽暦日対照表
+					/ 加唐興三郎編 ニットー, 1991.11-1993.9<br />日本暦日原典. 第4版 / 内田正男編著 雄山閣出版,
+					1992.6
+				</td>
 			</tr>
 			<tr>
 				<td>日本明治以降</td>
@@ -275,11 +311,6 @@ td {
 				<td>滿洲國採用 Gregorian calendar，與當時的日本相同。</td>
 			</tr>
 			<tr>
-				<td>تقويم هجري(伊斯蘭曆、回曆)<em>研究中</em></td>
-				<td></td>
-				<td></td>
-			</tr>
-			<tr>
 				<td>韓曆<em>研究中</em></td>
 				<td></td>
 				<td>因不諳韓語，因此恐僅能獲得大概年分。</td>
@@ -290,8 +321,12 @@ td {
 				<td><a
 					href="http://www.nomna.org/Lich-Viet-Nam/Am-lich-Viet-Nam/50-Gioi_thieu_Am_lich_Viet_Nam"
 					accessdate="2013/4/5 18:56" title="Âm lịch Việt Nam">最多恐怕僅能上溯至
-						1306 CE</a>。且因不諳越南語，因此恐僅能獲得大概年分。
-				</td>
+						1306 CE</a>。且因不諳越南語，因此恐僅能獲得大概年分。</td>
+			</tr>
+			<tr>
+				<td>تقويم هجري(伊斯蘭曆、回曆)<em>研究中</em></td>
+				<td></td>
+				<td></td>
 			</tr>
 		</table>
 	</div>
@@ -300,6 +335,8 @@ td {
 		<div id="era_graph_navigation">導覽列</div>
 	</div>
 
+	<div id="calendar"></div>
+
 	<div id="pack_data">
 		<textarea id="pack_source">/文宗/天曆|1329/8/25~|2/8=30;29;29;30;30	29;30;30;29</textarea>
 		<br /> <em>請注意：本欄僅供開發人員使用。</em> <a href="#"
@@ -307,7 +344,7 @@ td {
 //為方便所作的權益措施。
 .replace(/\\t/g,'\t'));return false;">壓縮紀年的曆數資料</a>
 		| <a href="#"
-			onclick="var calendar=CeL.era.set(CeL.get_element('pack_source').value,{extract_only:true}).calendar;calendar.forEach(function(year_data,index){calendar[index]=year_data.join('\t');});CeL.get_element('pack_result').value=calendar.join('\n');return false;">解析紀年的曆數資料</a><br />
+			onclick="var calendar=CeL.era.set(CeL.get_element('pack_source').value.replace(/\\t/g,'\t'),{extract_only:true}).calendar;calendar.forEach(function(year_data,index){if(year_data.leap)year_data[year_data.leap]='閏'+year_data[year_data.leap];calendar[index]=year_data.join('\t');});CeL.get_element('pack_result').value=calendar.join('\n');return false;">解析紀年的曆數資料</a><br />
 		<textarea id="pack_result"></textarea>
 	</div>
 

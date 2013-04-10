@@ -45,6 +45,72 @@ function initialization() {
 
 // ---------------------------------------
 
+// 文字式年曆。
+function show_calendar(era_name) {
+	var dates = CeL.era.dates(era_name);
+	if (!dates)
+		return;
+
+	dates.forEach(function(date, index) {
+		var list = [];
+		if (date.共存紀年) {
+			date.共存紀年.forEach(function(era, index) {
+				list.push('[' + (index + 1) + ']', {
+					b : output_numeral === 'Chinese' ? CeL
+							.to_Chinese_numeral(era) : era,
+					C : '共存紀年'
+				});
+			});
+			date.共存紀年 = list;
+		}
+
+		list = [];
+		date.format({
+			parser : 'CE',
+			format : '%紀年名%年年%月月%日日|公元%Y年%m月%d日|%年干支年%月干支月%日干支日|%JDN',
+			locale : 'cmn-Hant-TW'
+		}).split('|').forEach(function(data) {
+			list.push({
+				td : data
+			});
+		});
+
+		list.push({
+			td : date.共存紀年 || ''
+		});
+
+		dates[index] = {
+			tr : list
+		};
+	});
+
+	dates.unshift({
+		tr : [ {
+			th : '朝代紀年日期'
+		}, {
+			th : '公元日期'
+		}, {
+			th : '年月日干支'
+		}, {
+			th : 'JDN'
+		}, {
+			th : '共存紀年'
+		} ]
+	});
+
+	CeL.remove_all_child('calendar');
+	CeL.new_node({
+		table : [ {
+			caption : era_name + '年間曆譜'
+		}, {
+			tbody : dates
+		} ]
+	}, 'calendar');
+	select_panel('calendar');
+}
+
+// ---------------------------------------
+
 var era_name_classifier, MIN_FONT_SIZE = 8;
 
 function draw_title_era() {
@@ -55,7 +121,13 @@ function draw_title_era() {
 	return false;
 }
 
-// 畫個簡單的時間軸線圖。
+/**
+ * 畫個簡單的時間軸線圖。<br />
+ * TODO: 太窄時，採垂直排列。
+ * 
+ * @param hierarchy
+ * @returns
+ */
 function draw_era(hierarchy) {
 
 	// 清理場地。
@@ -192,13 +264,15 @@ draw_era.click_navigation_date = function() {
 };
 
 draw_era.click_Era = function() {
-	var hierarchy = this.dataset.hierarchy.split(era_name_classifier);
+	var hierarchy = this.dataset.hierarchy.split(era_name_classifier), era = CeL
+			.era(hierarchy.join(''));
 	draw_era.draw_navigation(hierarchy, true);
-	era_input_object.setValue(CeL.era(hierarchy.join('')).format({
+	era_input_object.setValue(era.format({
 		format : '%紀年名%年年%月月%日日',
 		locale : 'cmn-Hant-TW'
 	}));
 	translate_era();
+	show_calendar(era.紀年名);
 	return false;
 };
 
@@ -230,6 +304,8 @@ var last_selected, select_panels = {
 	input_history : '輸入紀錄',
 	FAQ : '使用說明',
 	era_graph : '紀年線圖',
+	// 年表
+	calendar : '曆譜',
 	pack_data : '壓縮曆數'
 };
 
@@ -307,12 +383,19 @@ function translate_era(era) {
 				locale : 'cmn-Hant-TW',
 				numeral : output_numeral
 			});
+
+			if (date.曆法)
+				output = [ output, {
+					br : null
+				}, '採用曆法: ', date.曆法 ];
+
 			if (date.注) {
-				output = [ output ];
-				date.注.forEach(function(note) {
+				if (!Array.isArray(output))
+					output = [ output ];
+				date.注.forEach(function(note, index) {
 					output.push({
 						br : null
-					}, '注：', {
+					}, '注 ' + (index + 1) + '：', {
 						span : note,
 						C : 'note'
 					});
@@ -335,6 +418,8 @@ function translate_era(era) {
 	}
 
 }
+
+// ---------------------------------------
 
 function try_example() {
 	var era = this.title;
@@ -442,6 +527,7 @@ function affairs() {
 		SVG_object.attach('era_graph');
 		draw_era();
 	} else {
+		CeL.get_element('era_graph').style.display = 'none';
 		SVG_object = null;
 		delete select_panels['era_graph'];
 		CeL.warn('您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉，無法繪製紀年時間軸線圖。');
