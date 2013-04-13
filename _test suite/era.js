@@ -43,21 +43,52 @@ function initialization() {
 	}, affairs);
 }
 
-// ---------------------------------------
+// ---------------------------------------------------------------------//
 
 // 文字式年曆。
 function show_calendar(era_name) {
-	var dates = CeL.era.dates(era_name);
+	var era_caption, output = [], 前紀年名, 後紀年名,
+	//
+	dates = CeL.era.dates(era_name, {
+		含參照用 : /明治|大正|昭和|明仁/.test(era_name)
+	});
+
 	if (!dates)
 		return;
 
-	dates.forEach(function(date, index) {
+	function add_traveler(name, is_next) {
+		if (name)
+			output.push({
+				tr : {
+					td : [
+					// icon
+					is_next ? '↓' : '↑', {
+						a : name,
+						title : name,
+						href : '#',
+						onclick : click_title_as_era
+					} ],
+					colspan : 5
+				}
+			});
+	}
+
+	dates.forEach(function(date) {
+		if (!era_caption)
+			era_caption = era_name.indexOf(date.紀年名) !== -1 ? date.紀年名
+			//
+			: /[\/年]/.test(era_name) ? date.紀年 : era_name;
+
 		var list = [];
 		if (date.共存紀年) {
 			date.共存紀年.forEach(function(era, index) {
+				if (output_numeral === 'Chinese')
+					era = CeL.to_Chinese_numeral(era);
 				list.push('[' + (index + 1) + ']', {
-					b : output_numeral === 'Chinese' ? CeL
-							.to_Chinese_numeral(era) : era,
+					a : era,
+					title : era,
+					href : '#',
+					onclick : click_title_as_era,
 					C : '共存紀年'
 				});
 			});
@@ -79,12 +110,29 @@ function show_calendar(era_name) {
 			td : date.共存紀年 || ''
 		});
 
-		dates[index] = {
+		// 處理改朝換代巡覽。
+		var 未延續 = 後紀年名 !== date.紀年名;
+		if (date.後紀年 !== 後紀年名) {
+			if (未延續)
+				add_traveler(後紀年名, true);
+			後紀年名 = date.後紀年;
+		}
+		if (date.前紀年 !== 前紀年名) {
+			if (未延續)
+				add_traveler(date.前紀年);
+			前紀年名 = date.前紀年;
+		}
+
+		output.push({
 			tr : list
-		};
+		});
+
 	});
 
-	dates.unshift({
+	if (後紀年名)
+		add_traveler(後紀年名, true);
+
+	output.unshift({
 		tr : [ {
 			th : '朝代紀年日期'
 		}, {
@@ -94,24 +142,28 @@ function show_calendar(era_name) {
 		}, {
 			th : 'JDN'
 		}, {
-			th : '共存紀年'
+			th : '本日共存紀年'
 		} ]
 	});
+
+	era_caption = era_caption ? [ {
+		b : era_caption
+	}, '曆譜（共有 ' + dates.length + ' 個年段紀錄）' ] : '無可供列出之曆譜！';
 
 	CeL.remove_all_child('calendar');
 	CeL.new_node({
 		table : [ {
-			caption : era_name + '年間曆譜'
+			caption : era_caption
 		}, {
-			tbody : dates
+			tbody : output
 		} ]
 	}, 'calendar');
-	select_panel('calendar');
+	select_panel('calendar', true);
 }
 
-// ---------------------------------------
+// ---------------------------------------------------------------------//
 
-var era_name_classifier, MIN_FONT_SIZE = 8;
+var era_name_classifier, MIN_FONT_SIZE = 10;
 
 function draw_title_era() {
 	var hierarchy = this.title;
@@ -119,6 +171,38 @@ function draw_title_era() {
 		hierarchy = hierarchy.split(era_name_classifier);
 	draw_era(hierarchy);
 	return false;
+}
+
+function set_SVG_text_properties(recover) {
+	var parent, style, def_style,
+	//
+	def = document.getElementById(String(this.getAttribute('xlink:href'))
+			.replace(/^#/, ''));
+
+	if (def) {
+		// bring to top
+		// http://raphaeljs.com/reference.html#Element.toFront
+		// this.parentNode.appendChild(this);
+
+		style = this.style;
+		def_style = def.style;
+		recover = typeof recover === 'boolean' && recover;
+
+		if (!recover) {
+			def.base_font_size = def_style['font-size'];
+			def.base_color = def_style.color;
+		}
+
+		style['font-size'] = def_style['font-size']
+		//
+		= recover ? def.base_font_size : (3 * MIN_FONT_SIZE) + 'px';
+
+		def_style.color = style.color = recover ? def.base_color : '#f00';
+	}
+}
+
+function recover_SVG_text_properties() {
+	set_SVG_text_properties.call(this, true);
 }
 
 /**
@@ -154,8 +238,9 @@ function draw_era(hierarchy) {
 			region.forEach(function(period_list) {
 
 				period_list.forEach(function(period) {
+					var style,
 					// Era.name 為 Array。
-					var is_Era = Array.isArray(period.name),
+					is_Era = Array.isArray(period.name),
 					//
 					name = is_Era ? period.name[0] : period.name,
 					//
@@ -164,9 +249,16 @@ function draw_era(hierarchy) {
 					//
 					width = (period.end - period.start) * ratio,
 					//
-					font_size = Math.max(MIN_FONT_SIZE, Math.min(
+					vertical_text = width < layer_height,
 					//
-					layer_height / 2, width / name.length));
+					font_size = vertical_text
+					//
+					? Math.min(width * .8, layer_height / name.length)
+					//
+					: Math.min(layer_height * .8, width / name.length);
+
+					if (font_size < MIN_FONT_SIZE)
+						font_size = MIN_FONT_SIZE;
 
 					if (!(name in draw_era.date_cache) && !isNaN(period.end)) {
 						var end_time = new Date(period.end);
@@ -182,14 +274,43 @@ function draw_era(hierarchy) {
 					SVG_object.addRect(width, layer_height, from_x,
 							layer_from_y, null, 1, '#eef');
 
-					SVG_object.addText(name, from_x
-							+ (width - name.length * font_size) / 2,
-							layer_from_y + (layer_height + font_size) / 2, {
-								color : layer_count === 1 ? '#15a' : '#a2e',
-								cursor : 'pointer',
-								'font-family' : '標楷體,DFKai-SB',
-								'font-size' : font_size + 'px'
-							});
+					style = {
+						color : layer_count === 1 ? '#15a' : '#a2e',
+						cursor : 'pointer',
+						// 清晰的小字體
+						'font-family' : '標楷體,DFKai-SB',
+						'font-size' : font_size + 'px'
+					};
+					if (vertical_text) {
+						// top to bottom
+						style['writing-mode'] = 'tb';
+						// no rotation
+						style['glyph-orientation-vertical'] = 0;
+
+						// 置中: x軸設在中線。
+						SVG_object.addText(name, from_x + width / 2,
+								layer_from_y
+										+ (layer_height - name.length
+												* font_size) / 2, style);
+					} else
+						// 置中
+						SVG_object.addText(name, from_x
+								+ (width - name.length * font_size) / 2,
+						// .7:
+						// 經驗法則，don't
+						// know why.
+						layer_from_y + (layer_height + font_size * .7) / 2,
+								style);
+
+					if (font_size === MIN_FONT_SIZE) {
+						SVG_object.lastAdd.onmouseover
+						//
+						= set_SVG_text_properties;
+						SVG_object.lastAdd.onmouseout
+						//
+						= recover_SVG_text_properties;
+					}
+
 					// TODO: SVG <title> tag
 					if (!SVG_object.lastAdd.dataset)
 						// 目前僅 Chrome 支援。
@@ -272,7 +393,6 @@ draw_era.click_Era = function() {
 		locale : 'cmn-Hant-TW'
 	}));
 	translate_era();
-	show_calendar(era.紀年名);
 	return false;
 };
 
@@ -296,7 +416,7 @@ draw_era.date_options = {
 
 draw_era.date_cache = {};
 
-// ---------------------------------------
+// ---------------------------------------------------------------------//
 
 var last_selected, select_panels = {
 	example : '測試範例',
@@ -341,7 +461,7 @@ function click_panel(e) {
 	return false;
 }
 
-// ---------------------------------------
+// ---------------------------------------------------------------------//
 
 var original_input, era_input_object, output_format_object, last_input, output_numeral, SVG_object;
 function input_era(key) {
@@ -356,6 +476,10 @@ function translate_era(era) {
 		numeral : output_numeral
 	});
 	if (date) {
+		if (date.紀年名)
+			// 因為紀年可能橫跨不同時代(朝代)，因此只要確定找得到，那就以原先的名稱為主。
+			show_calendar(era);
+
 		var format = output_format_object.setValue();
 		if (!format)
 			format = output_format_object.setValue('公元%Y年%m月%d日');
@@ -412,16 +536,16 @@ function translate_era(era) {
 					a : last_input = era,
 					title : era,
 					href : '#',
-					onclick : try_example
+					onclick : click_title_as_era
 				}
 			}, 'input_history');
 	}
 
 }
 
-// ---------------------------------------
+// ---------------------------------------------------------------------//
 
-function try_example() {
+function click_title_as_era() {
 	var era = this.title;
 	era_input_object.setValue(era);
 	translate_era(era);
@@ -483,7 +607,7 @@ function affairs() {
 				a : era,
 				title : era,
 				href : '#',
-				onclick : try_example
+				onclick : click_title_as_era
 			}
 		});
 	});
