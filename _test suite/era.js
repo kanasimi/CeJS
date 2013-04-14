@@ -47,7 +47,7 @@ function initialization() {
 
 // 文字式年曆。
 function show_calendar(era_name) {
-	var era_caption, output = [], 前紀年名, 後紀年名,
+	var era_caption, output = [], 前年名, 前月名, 前紀年名, 後紀年名,
 	//
 	dates = CeL.era.dates(era_name, {
 		含參照用 : /明治|大正|昭和|明仁/.test(era_name)
@@ -72,6 +72,9 @@ function show_calendar(era_name) {
 				}
 			});
 	}
+
+	if (dates.previous)
+		add_traveler(dates.previous);
 
 	dates.forEach(function(date) {
 		if (!era_caption)
@@ -100,7 +103,24 @@ function show_calendar(era_name) {
 			parser : 'CE',
 			format : '%紀年名%年年%月月%日日|公元%Y年%m月%d日|%年干支年%月干支月%日干支日|%JDN',
 			locale : 'cmn-Hant-TW'
-		}).split('|').forEach(function(data) {
+		}).split('|').forEach(function(data, index) {
+			var matched;
+			if (index === 0 && (matched = data
+			//
+			.match(/^(.*[^\d]\d+年)(.{0,2}\d+月)(\d+日)$/)))
+				data = [ matched[1] === 前年名 ? 前年名 : {
+					a : 前年名 = matched[1],
+					title : matched[1],
+					href : '#',
+					C : 'to_select',
+					onclick : click_title_as_era
+				}, matched[2] === 前月名 ? 前月名 : {
+					a : 前月名 = matched[2],
+					title : matched[1] + matched[2],
+					href : '#',
+					C : 'to_select',
+					onclick : click_title_as_era
+				}, matched[3] ];
 			list.push({
 				td : data
 			});
@@ -132,6 +152,9 @@ function show_calendar(era_name) {
 	if (後紀年名)
 		add_traveler(後紀年名, true);
 
+	if (dates.next)
+		add_traveler(dates.next, true);
+
 	output.unshift({
 		tr : [ {
 			th : '朝代紀年日期'
@@ -147,8 +170,13 @@ function show_calendar(era_name) {
 	});
 
 	era_caption = era_caption ? [ {
-		b : era_caption
-	}, '曆譜（共有 ' + dates.length + ' 個年段紀錄）' ] : '無可供列出之曆譜！';
+		a : era_caption,
+		title : era_caption,
+		href : '#',
+		C : 'to_select',
+		onclick : click_title_as_era
+	}, '曆譜（共有 ' + dates.length + ' 個' + (dates.type ? '時' : '年') + '段紀錄）' ]
+			: '無可供列出之曆譜！';
 
 	CeL.remove_all_child('calendar');
 	CeL.new_node({
@@ -201,6 +229,8 @@ function set_SVG_text_properties(recover) {
 	}
 }
 
+var support_vertical_text = !/Firefox/i.test(navigator.userAgent);
+
 function recover_SVG_text_properties() {
 	set_SVG_text_properties.call(this, true);
 }
@@ -249,7 +279,8 @@ function draw_era(hierarchy) {
 					//
 					width = (period.end - period.start) * ratio,
 					//
-					vertical_text = width < layer_height,
+					vertical_text = support_vertical_text
+							&& width < layer_height,
 					//
 					font_size = vertical_text
 					//
