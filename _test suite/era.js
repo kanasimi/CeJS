@@ -68,7 +68,7 @@ function show_calendar(era_name) {
 						href : '#',
 						onclick : click_title_as_era
 					} ],
-					colspan : 5
+					colspan : 6
 				}
 			});
 	}
@@ -101,7 +101,7 @@ function show_calendar(era_name) {
 		list = [];
 		date.format({
 			parser : 'CE',
-			format : '%紀年名%年年%月月%日日|公元%Y年%m月%d日|%年干支年%月干支月%日干支日|%JDN',
+			format : '%紀年名%年年%月月%日日|%Y/%m/%d|%年干支年%月干支月%日干支日|%JDN',
 			locale : 'cmn-Hant-TW'
 		}).split('|').forEach(function(data, index) {
 			var matched;
@@ -127,6 +127,8 @@ function show_calendar(era_name) {
 		});
 
 		list.push({
+			td : date.to_Tabular().slice(0, 3).join('/')
+		}, {
 			td : date.共存紀年 || ''
 		});
 
@@ -163,7 +165,9 @@ function show_calendar(era_name) {
 		}, {
 			th : '年月日干支'
 		}, {
-			th : 'JDN'
+			th : {a:'JDN',R:'Julian Day Number',href:'http://en.wikipedia.org/wiki/Julian_day'}
+		}, {
+			th : {a:'伊斯蘭曆',R:'Tabular Islamic calendar',href:'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar'}
 		}, {
 			th : '本日共存紀年'
 		} ]
@@ -521,8 +525,11 @@ function translate_era(era) {
 					output[index] = [
 							' [' + (index + 1) + '] ',
 							{
-								b : output_numeral === 'Chinese' ? CeL
+								a : output_numeral === 'Chinese' ? CeL
 										.to_Chinese_numeral(era) : era,
+								title : era,
+								href : '#',
+								onclick : click_title_as_era,
 								C : '共存紀年'
 							} ];
 				});
