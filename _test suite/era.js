@@ -47,7 +47,34 @@ function initialization() {
 
 // 文字式年曆。
 function show_calendar(era_name) {
-	var era_caption, output = [], 前年名, 前月名, 前紀年名, 後紀年名,
+	var era_caption, title = [ {
+		th : '朝代紀年日期'
+	}, {
+		th : '公元日期'
+	}, {
+		th : '歲次'
+	}, {
+		th : '月建',
+		R : '月建/大小月'
+	}, {
+		th : '朔日'
+	}, {
+		th : {
+			a : 'JDN',
+			R : 'Julian Day Number',
+			href : 'http://en.wikipedia.org/wiki/Julian_day'
+		}
+	}, {
+		th : {
+			a : '伊斯蘭曆',
+			R : 'Tabular Islamic calendar',
+			href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar'
+		}
+	}, {
+		th : '本日共存紀年'
+	} ], output = [ {
+		tr : title
+	} ], 前年名, 前月名, 前紀年名, 後紀年名,
 	//
 	dates = CeL.era.dates(era_name, {
 		含參照用 : /明治|大正|昭和|明仁/.test(era_name)
@@ -68,7 +95,7 @@ function show_calendar(era_name) {
 						href : '#',
 						onclick : click_title_as_era
 					} ],
-					colspan : 6
+					colspan : title.length
 				}
 			});
 	}
@@ -82,7 +109,7 @@ function show_calendar(era_name) {
 			//
 			: /[\/年]/.test(era_name) ? date.紀年 : era_name;
 
-		var list = [];
+		var tmp, matched, list = [];
 		if (date.共存紀年) {
 			date.共存紀年.forEach(function(era, index) {
 				if (output_numeral === 'Chinese')
@@ -98,29 +125,31 @@ function show_calendar(era_name) {
 			date.共存紀年 = list;
 		}
 
-		list = [];
-		date.format({
+		tmp = date.format({
 			parser : 'CE',
-			format : '%紀年名%年年%月月%日日|%Y/%m/%d|%年干支年%月干支月%日干支日|%JDN',
+			format : '%紀年名%年年%月月%日日|%Y/%m/%d|%年干支|%月干支%大小月|%日干支|%JDN',
 			locale : 'cmn-Hant-TW'
-		}).split('|').forEach(function(data, index) {
-			var matched;
-			if (index === 0 && (matched = data
-			//
-			.match(/^(.*[^\d]\d+年)(.{0,2}\d+月)(\d+日)$/)))
-				data = [ matched[1] === 前年名 ? 前年名 : {
-					a : 前年名 = matched[1],
-					title : matched[1],
-					href : '#',
-					C : 'to_select',
-					onclick : click_title_as_era
-				}, matched[2] === 前月名 ? 前月名 : {
-					a : 前月名 = matched[2],
-					title : matched[1] + matched[2],
-					href : '#',
-					C : 'to_select',
-					onclick : click_title_as_era
-				}, matched[3] ];
+		}).split('|');
+
+		if (matched = tmp[0]
+		// 後處理。
+		.match(/^(.*[^\d]\d+年)(.{0,2}\d+月)(\d+日)$/))
+			tmp[0] = [ matched[1] === 前年名 ? 前年名 : {
+				a : 前年名 = matched[1],
+				title : matched[1],
+				href : '#',
+				C : 'to_select',
+				onclick : click_title_as_era
+			}, matched[2] === 前月名 ? 前月名 : {
+				a : 前月名 = matched[2],
+				title : matched[1] + matched[2],
+				href : '#',
+				C : 'to_select',
+				onclick : click_title_as_era
+			}, matched[3] ];
+
+		list = [];
+		tmp.forEach(function(data, index) {
 			list.push({
 				td : data
 			});
@@ -156,22 +185,6 @@ function show_calendar(era_name) {
 
 	if (dates.next)
 		add_traveler(dates.next, true);
-
-	output.unshift({
-		tr : [ {
-			th : '朝代紀年日期'
-		}, {
-			th : '公元日期'
-		}, {
-			th : '年月日干支'
-		}, {
-			th : {a:'JDN',R:'Julian Day Number',href:'http://en.wikipedia.org/wiki/Julian_day'}
-		}, {
-			th : {a:'伊斯蘭曆',R:'Tabular Islamic calendar',href:'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar'}
-		}, {
-			th : '本日共存紀年'
-		} ]
-	});
 
 	era_caption = era_caption ? [ {
 		a : era_caption,
