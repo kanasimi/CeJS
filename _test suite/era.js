@@ -50,7 +50,7 @@ function show_calendar(era_name) {
 	var era_caption, title = [ {
 		th : '朝代紀年日期'
 	}, {
-		th : '公元日期'
+		th : '公元'
 	}, {
 		th : '歲次'
 	}, {
@@ -68,7 +68,8 @@ function show_calendar(era_name) {
 		th : {
 			a : '伊斯蘭曆',
 			R : 'Tabular Islamic calendar',
-			href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar'
+			href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
+			S : 'font-size:.8em;'
 		}
 	}, {
 		th : '本日共存紀年'
