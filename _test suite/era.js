@@ -134,7 +134,8 @@ function show_calendar(era_name) {
 
 		if (matched = tmp[0]
 		// 後處理。
-		.match(/^(.*[^\d]\d+年)(.{0,2}\d+月)(\d+日)$/))
+		// 月名: 正/臘/閏12/後12
+		.match(/^(.*[^\d]\d+年)(.{1,3}月)(\d+日)$/))
 			tmp[0] = [ matched[1] === 前年名 ? 前年名 : {
 				a : 前年名 = matched[1],
 				title : matched[1],
