@@ -1,7 +1,6 @@
 ﻿'use strict';
 
 /**
- * TODO: 對紀年時間過短時，線圖之處理。
  * 
  * @note <code>
 
@@ -57,7 +56,10 @@ function show_calendar(era_name) {
 		th : '月建',
 		R : '月建/大小月'
 	}, {
-		th : '朔日'
+		th : era_name.indexOf('月') === -1 ? '朔日' : {
+			span : '日干支',
+			S : 'font-size:.7em;'
+		}
 	}, {
 		th : {
 			a : 'JDN',
@@ -164,14 +166,9 @@ function show_calendar(era_name) {
 		});
 
 		// 處理改朝換代巡覽。
-		var 未延續 = 後紀年名 !== date.紀年名;
-		if (date.後紀年 !== 後紀年名) {
-			if (未延續)
-				add_traveler(後紀年名, true);
-			後紀年名 = date.後紀年;
-		}
+		var 未延續前紀年 = (後紀年名 !== date.紀年名);
 		if (date.前紀年 !== 前紀年名) {
-			if (未延續)
+			if (未延續前紀年)
 				add_traveler(date.前紀年);
 			前紀年名 = date.前紀年;
 		}
@@ -180,6 +177,11 @@ function show_calendar(era_name) {
 			tr : list
 		});
 
+		if (date.後紀年 !== 後紀年名) {
+			if (未延續前紀年)
+				add_traveler(後紀年名, true);
+			後紀年名 = date.後紀年;
+		}
 	});
 
 	if (後紀年名)
@@ -206,6 +208,50 @@ function show_calendar(era_name) {
 		} ]
 	}, 'calendar');
 	select_panel('calendar', true);
+}
+
+// ---------------------------------------------------------------------//
+// 開發人員使用 function。
+
+function 壓縮曆數() {
+	CeL.get_element('pack_result').value = CeL.era.pack(CeL
+			.get_element('pack_source').value
+	// 為方便所作的權益措施。
+	.replace(/\\t/g, '\t'));
+	return false;
+}
+
+function 解壓縮曆數() {
+	var data = CeL.get_element('pack_source').value.replace(/\\t/g, '\t')
+			.split('|');
+
+	if (data.length > 1) {
+		data[2] = CeL.era.extract(data[2]);
+		data = data.join('|');
+
+	} else
+		data = CeL.era.extract(data[0]);
+
+	CeL.get_element('pack_result').value = data;
+
+	return false;
+}
+
+function 解析曆數() {
+	var calendar = CeL.era.set(CeL.get_element('pack_source').value.replace(
+			/\\t/g, '\t'), {
+		extract_only : true
+	});
+
+	if (calendar && Array.isArray(calendar = calendar.calendar)) {
+		calendar.forEach(function(year_data, index) {
+			if (year_data.leap)
+				year_data[year_data.leap] = '閏' + year_data[year_data.leap];
+			calendar[index] = year_data.join('\t');
+		});
+		CeL.get_element('pack_result').value = calendar.join('\n');
+	}
+	return false;
 }
 
 // ---------------------------------------------------------------------//
@@ -256,7 +302,7 @@ function recover_SVG_text_properties() {
 
 /**
  * 畫個簡單的時間軸線圖。<br />
- * TODO: 太窄時，採垂直排列。
+ * TODO: 加上年代。
  * 
  * @param hierarchy
  * @returns
@@ -297,7 +343,7 @@ function draw_era(hierarchy) {
 							* ratio,
 					//
 					width = (period.end - period.start) * ratio,
-					//
+					// 對紀年時間過短，太窄時，線圖之處理:採垂直排列。
 					vertical_text = support_vertical_text
 							&& width < layer_height,
 					//
@@ -476,7 +522,7 @@ var last_selected, select_panels = {
 	era_graph : '紀年線圖',
 	// 年表
 	calendar : '曆譜',
-	pack_data : '壓縮曆數'
+	pack_data : '曆數處理'
 };
 
 function select_panel(id, show) {

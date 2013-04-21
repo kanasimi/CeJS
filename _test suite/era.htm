@@ -238,7 +238,7 @@ td {
 				<td>現雖尚未能確認「術數徵驗關鍵之理」所載是否為考證過之朔閏資料，但經交叉比對（見<a
 					href="https://docs.google.com/spreadsheet/pub?key=0AnMb73DFKnSFdC1uZ2kzNFpZWXNmeDMtRnp6RUxBQXc"
 					accessdate="2013/4/13 19:44">明鄭時期清《時憲曆》與明《大統曆》曆數比對</a>），其與「中央研究院
-					兩千年中西曆轉換」僅於最後一個月（1661年中曆12月）有出入。因此先以其所載為準。<br />數位典藏與自動推論實驗室
+					兩千年中西曆轉換」僅於交接的一個月（1661年中曆12月）有出入。因此先以其所載為準。<br />數位典藏與自動推論實驗室
 					數位典藏研究發展中心 <a href="http://140.112.30.230/datemap/index.php"
 					accessdate="2013/4/5 19:2"
 					title="中西曆對照查詢系統（明代以降） || Chinse and
@@ -378,12 +378,9 @@ td {
 
 	<div id="pack_data">
 		<textarea id="pack_source">/文宗/天曆|1329/8/25~|2/8=30;29;29;30;30	29;30;30;29</textarea>
-		<br /> <em>請注意：本欄僅供開發人員使用。</em> <a href="#"
-			onclick="CeL.get_element('pack_result').value=CeL.era.pack(CeL.get_element('pack_source').value
-//為方便所作的權益措施。
-.replace(/\\t/g,'\t'));return false;">壓縮紀年的曆數資料</a>
-		| <a href="#"
-			onclick="var calendar=CeL.era.set(CeL.get_element('pack_source').value.replace(/\\t/g,'\t'),{extract_only:true}).calendar;calendar.forEach(function(year_data,index){if(year_data.leap)year_data[year_data.leap]='閏'+year_data[year_data.leap];calendar[index]=year_data.join('\t');});CeL.get_element('pack_result').value=calendar.join('\n');return false;">解析紀年的曆數資料</a><br />
+		<br /> <em>請注意：本欄僅供開發人員使用。</em> <a href="#" onclick="return 壓縮曆數();">壓縮</a>
+		| <a href="#" onclick="return 解壓縮曆數();">解壓縮</a> | <a href="#"
+			onclick="return 解析曆數();">解析</a> 紀年的曆數資料<br />
 		<textarea id="pack_result"></textarea>
 	</div>
 
