@@ -94,6 +94,14 @@ td {
 	background-color: #f74;
 }
 
+tr.selected>td {
+	background-color: #fba;
+}
+
+tr.selected>td a {
+	color: #c21;
+}
+
 .unselected {
 	color: #333;
 	background-color: #aaa;
@@ -162,6 +170,7 @@ td {
 			<li>請各位先進幫助測試本工具之正確性，看看是否有謬誤之處。更希望能幫忙到有需要的文史前輩們。</li>
 			<li>本函式庫希望能納入日、韓、越之紀年，以及共和元年(841
 				BCE)之後的中國曆數。請幫助我們取得這些王朝之數字化曆數資料。</li>
+			<li>本函式庫已針對某些紀年，如秦漢歷、唐肅宗、武后、太平天囯等時期作特殊處理。</li>
 			<li>本函式庫以歷史上實際施行、使用過的曆數為準。用意不在推導曆法，而在<b>對過去時間作正確轉換</b>。因此僅用查表法，盡可能採用學術界或官方認可的曆數，未打算作繁複天文計算。更深入的資料結構，可參見
 				<a
 				href="https://github.com/kanasimi/CeJS/blob/master/data/date/era_data.js">era_data.js</a>。
@@ -192,7 +201,7 @@ td {
 				href="https://plus.google.com/u/1/101633590909790225455">Google+</a>。
 			</li>
 		</ul>
-		<div class="timeStamp">2013/3/31 13:36:27</div>
+		<div class="timeStamp">2013/4/21 17:54:53</div>
 
 		<table>
 			<caption>主要資料來源</caption>
@@ -251,17 +260,16 @@ td {
 			</tr>
 			<tr>
 				<td>1500－841 BCE 之中國地區朔閏</td>
-				<td><em><s>處理中</s>現暫緩處理，待有機會取得可靠的朔閏表後再開工。</em><br />许剑伟(2011
-					v5.05)寿星天文历</td>
-				<td>寿星天文历於 721 BCE 起的數據主要採用张培瑜教授 1997年第二版<span
-					class="creation_title">三千五百年历日天象</span>。
+				<td>许剑伟(2011 v5.05)寿星天文历</td>
+				<td><em><s>處理中</s>現暫緩處理，待有機會取得可靠的朔閏表或日與日間對照表後再開工。</em><br />寿星天文历於
+					721 BCE 起的數據主要採用张培瑜教授 1997年第二版<span class="creation_title">三千五百年历日天象</span>。
 				</td>
 			</tr>
 			<tr>
 				<td>841－1 BCE 之中曆</td>
-				<td><em><s>處理中</s>現暫緩處理，待有機會取得可靠的朔閏表後再開工。</em><br />饶尚宽(2006-3)<span
-					class="creation_title">春秋战国秦汉朔闰表（公元前722年公元220年）</span></td>
-				<td>未以寿星天文历（<span class="creation_title">三千五百年历日天象</span>）為準。张培瑜<span
+				<td>饶尚宽(2006-3)<span class="creation_title">春秋战国秦汉朔闰表（公元前722年公元220年）</span></td>
+				<td><em><s>處理中</s>現暫緩處理，待有機會取得可靠的朔閏表或日與日間對照表後再開工。</em><br />未以寿星天文历（<span
+					class="creation_title">三千五百年历日天象</span>）為準。张培瑜<span
 					class="creation_title">三千五百年历日天象</span>與董作賓(1960)<span
 					class="creation_title">中國年曆總譜</span>兩書曆數獲得方法不同，<a
 					href="http://www.lw23.com/paper_107739541_8/"
@@ -279,8 +287,7 @@ td {
 					class="creation_title">春秋战国秦汉朔闰表（公元前722年公元220年）</span>，卻發現兩書皆按<span
 					class="creation_title">三千五百年历日天象</span>之曆數，於 104 BCE 與<span
 					class="creation_title">秦至汉初(前246 至前104)历法研究</span>出入甚大，只能放棄使用。此外，此兩書尚未有電子化版本，因此還須作番處理，恐需耗些時日。<br />於
-					246－104 BCE 的部分，已如下述，採用更後期考校過的來源。
-				</td>
+					246－104 BCE 的部分，已如下述，採用更後期考校過的來源。</td>
 			</tr>
 			<tr>
 				<td>246－104 BCE</td>
@@ -338,23 +345,48 @@ td {
 					(2013/3/17). In Wikipedia. Retrieved 2013/4/1.<br /> <a
 					href="http://ja.wikipedia.org/wiki/%E5%BA%B7%E5%BE%B3"
 					accessdate="2013/4/1 19:33">康徳</a>. (2013/3/16). In Wikipedia.
-					Retrieved 2013/4/1.<br /> <a href="http://www.jacar.go.jp/"
-					accessdate="2013/4/1 19:16" title="国立公文書館 アジア歴史資料センター">アジア歴史資料センター</a>（満州国建国宣言、満洲国
-					時憲書）<br />姜念东. (1980). 伪满洲国史. 吉林人民出版社.<br />解学诗. (1995). 伪满洲国史新编.
-					人民出版社.</td>
-				<td>滿洲國採用 Gregorian calendar，與當時的日本相同。</td>
+					Retrieved 2013/4/1.</td>
+				<td>滿洲國採用 Gregorian calendar，與當時的日本相同。<br /> <a
+					href="http://www.jacar.go.jp/" accessdate="2013/4/1 19:16"
+					title="国立公文書館 アジア歴史資料センター">アジア歴史資料センター</a>（満州国建国宣言、満洲国 時憲書）<br />姜念东.
+					(1980). 伪满洲国史. 吉林人民出版社.<br />解学诗. (1995). 伪满洲国史新编. 人民出版社.
+				</td>
 			</tr>
 			<tr>
-				<td>韓曆<em>研究中</em></td>
-				<td><em>現暫緩處理，待有機會取得可靠的日與日間對照表後再開工。</em></td>
-				<td>因不諳韓語，恐僅能獲得大概年分。</td>
-			</tr>
-			<tr>
-				<td>越南曆<em>研究中</em></td>
-				<td><em>現暫緩處理，待有機會取得可靠的日與日間對照表後再開工。</em></td>
 				<td><a
-					href="http://www.nomna.org/Lich-Viet-Nam/Am-lich-Viet-Nam/50-Gioi_thieu_Am_lich_Viet_Nam"
-					accessdate="2013/4/5 18:56" title="Âm lịch Việt Nam">「精確到日」最多恐怕僅能上溯至
+					href="http://ko.wikipedia.org/wiki/%ED%95%9C%EA%B5%AD%EC%9D%98_%EC%97%B0%ED%98%B8"
+					accessdate="2013/4/28 17:39" title="韓國紀年/韓曆">한국의 연호</a> 918－2050 CE</td>
+				<td><a
+					href="http://ko.wikipedia.org/wiki/%ED%95%9C%EA%B5%AD%EA%B3%BC%ED%95%99%EA%B8%B0%EC%88%A0%EC%A0%95%EB%B3%B4%EC%97%B0%EA%B5%AC%EC%9B%90"
+					accessdate="2013/4/27 16:22"
+					title="한국과학기술정보연구원(韓國科學機術情報硏究院, Korea Institute of Science and Technology Information, KISTI)">KISTI</a>
+					<a href="http://manse.kisti.re.kr/index.html"
+					accessdate="2013/4/27 15:43" title="韓國標準年歷">한국표준연력</a></td>
+				<td>所取之韓國標準年歷似來自<a
+					href="http://www.dibrary.net/search/dibrary/SearchDetail.nl?category_code=ct&amp;service=KOLIS&amp;vdkvgwkey=14615755&amp;colltype=YON_ART&amp;place_code_info=132&amp;place_name_info=%EB%94%94%EC%A7%80%ED%84%B8%EC%97%B4%EB%9E%8C%EC%8B%A4&amp;manage_code=MABR&amp;shape_code=B"
+					accessdate="2013/4/27 15:43"
+					title="韓國標準年歷 DB system construction
+한국의 표준연력 DB 시스템 구축 = (The)data base system for the date conversion between lunisolar and solar calendar in Korea / 안영숙, 한보식, 안부영
+
+수록자료: 한국과학사학회지. 韓國科學史學會. 26권 1호(2004년 6월), p. 105-120 26:1<105 (011001)KSE199500737, 1229-7895 
+저자: 안영숙, 한국천문연구원
+저자: 한보식, 영남대하교
+저자: 안부영, 한국과학기술정보연구원
+">한국의
+						표준연력 DB 시스템 구축</a>之研究結果。<em>此線上轉換程式似有十數處輸入錯誤(typo)，已按照曆法規則加以修正；惟無法保證完全準確。</em>轉入過程可參考<a
+					href="https://docs.google.com/file/d/0B3Mb73DFKnSFaEdrY01pVllpbFk/edit">未整理之記錄</a>。<br />其他可參考之文獻如<a
+					href="http://books.google.com.tw/books?id=7dEQAQAAMAAJ"
+					accessdate="2013/4/27 16:11">三國時代年歷表</a>(2009)。因不諳韓語，無法作深入研究。
+				</td>
+			</tr>
+			<tr>
+				<td>Âm lịch (越南陰曆)</td>
+				<td><a href="http://www.informatik.uni-leipzig.de/~duc/amlich/"
+					accessdate="2013/4/28 17:45" title="Âm lịch Việt Nam">Âm lịch
+						VN</a></td>
+				<td><a
+					href="http://www.informatik.uni-leipzig.de/~duc/amlich/histcal.html"
+					accessdate="2013/4/27 21:56" title="Âm lịch Việt Nam">「精確到日」最多恐怕僅能上溯至
 						1306 CE</a>。且因不諳越南語，恐僅能獲得大概年分。</td>
 			</tr>
 			<tr>
@@ -366,6 +398,11 @@ td {
 						Islamic calendar。</em><br />伊斯蘭曆每日以日落時刻分日。例如 AH 1/1/1 可與公元 622/7/16
 					互換，但 AH 1/1/1 事實上是從 622/7/15 的日落時算起，一直到 622/7/16 的日落前為止。
 				</td>
+			</tr>
+			<tr>
+				<td>蒙古曆<em>研究中</em></td>
+				<td></td>
+				<td></td>
 			</tr>
 		</table>
 	</div>

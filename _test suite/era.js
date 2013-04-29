@@ -74,10 +74,13 @@ function show_calendar(era_name) {
 			S : 'font-size:.8em;'
 		}
 	}, {
-		th : '本日共存紀年'
+		th : '本日共存紀年',
+		title : '對未有詳實資料者，僅約略準確至年！'
 	} ], output = [ {
 		tr : title
 	} ], 前年名, 前月名, 前紀年名, 後紀年名,
+	//
+	main_date_value = CeL.era(era_name),
 	//
 	dates = CeL.era.dates(era_name, {
 		含參照用 : /明治|大正|昭和|明仁/.test(era_name)
@@ -85,6 +88,14 @@ function show_calendar(era_name) {
 
 	if (!dates)
 		return;
+
+	if (main_date_value)
+		if (main_date_value.日 == 1 && era_name.indexOf('日') === -1)
+			main_date_value = null;
+		else {
+			main_date_value.setHours(0, 0, 0, 0);
+			main_date_value = main_date_value.getTime();
+		}
 
 	function add_traveler(name, is_next) {
 		if (name)
@@ -128,11 +139,13 @@ function show_calendar(era_name) {
 			date.共存紀年 = list;
 		}
 
-		tmp = date.format({
-			parser : 'CE',
-			format : '%紀年名%年年%月月%日日|%Y/%m/%d|%年干支|%月干支%大小月|%日干支|%JDN',
-			locale : 'cmn-Hant-TW'
-		}).split('|');
+		tmp = date.format(
+				{
+					parser : 'CE',
+					format : date.準確 === '年' ? '%紀年名%年年|%Y年|%年干支|||'
+							: '%紀年名%年年%月月%日日|%Y/%m/%d|%年干支|%月干支%大小月|%日干支|%JDN',
+					locale : 'cmn-Hant-TW'
+				}).split('|');
 
 		if (matched = tmp[0]
 		// 後處理。
@@ -160,7 +173,8 @@ function show_calendar(era_name) {
 		});
 
 		list.push({
-			td : date.to_Tabular().slice(0, 3).join('/')
+			td : date.準確 === '年' ? date.to_Tabular()[0] + '年' : date
+					.to_Tabular().slice(0, 3).join('/')
 		}, {
 			td : date.共存紀年 || ''
 		});
@@ -173,8 +187,16 @@ function show_calendar(era_name) {
 			前紀年名 = date.前紀年;
 		}
 
+		if (main_date_value
+		//
+		&& main_date_value === date.getTime())
+			tmp = 'selected', main_date_value = null;
+		else
+			tmp = '';
+
 		output.push({
-			tr : list
+			tr : list,
+			C : tmp
 		});
 
 		if (date.後紀年 !== 後紀年名) {
@@ -368,10 +390,12 @@ function draw_era(hierarchy) {
 					}
 
 					SVG_object.addRect(width, layer_height, from_x,
-							layer_from_y, null, 1, '#eef');
+							layer_from_y, null, 1, period.準確 === '年' ? '#ddd'
+									: '#eef');
 
 					style = {
-						color : layer_count === 1 ? '#15a' : '#a2e',
+						color : period.準確 === '年' ? '#444'
+								: layer_count === 1 ? '#15a' : '#a2e',
 						cursor : 'pointer',
 						// 清晰的小字體
 						'font-family' : '標楷體,DFKai-SB',
@@ -484,8 +508,9 @@ draw_era.click_Era = function() {
 	var hierarchy = this.dataset.hierarchy.split(era_name_classifier), era = CeL
 			.era(hierarchy.join(''));
 	draw_era.draw_navigation(hierarchy, true);
+
 	era_input_object.setValue(era.format({
-		format : '%紀年名%年年%月月%日日',
+		format : era.準確 === '年' ? '%紀年名%年年' : '%紀年名%年年%月月%日日',
 		locale : 'cmn-Hant-TW'
 	}));
 	translate_era();
@@ -578,7 +603,9 @@ function translate_era(era) {
 
 		var format = output_format_object.setValue();
 		if (!format)
-			format = output_format_object.setValue('公元%Y年%m月%d日');
+			format = output_format_object.setValue(
+			//
+			'公元%Y年' + (date.準確 === '年' ? '' : '%m月%d日'));
 
 		if (format === '共存紀年')
 			if (Array.isArray(output = date.共存紀年))
@@ -622,6 +649,14 @@ function translate_era(era) {
 						span : note,
 						C : 'note'
 					});
+				});
+			}
+
+			if (date.準確 === '年') {
+				if (!Array.isArray(output))
+					output = [ output ];
+				output.unshift({
+					em : '此輸出值僅約略準確至年：'
 				});
 			}
 		}
