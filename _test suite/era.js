@@ -46,37 +46,44 @@ function initialization() {
 
 // 文字式年曆。
 function show_calendar(era_name) {
-	var era_caption, title = [ {
-		th : '朝代紀年日期'
-	}, {
-		th : '公元'
-	}, {
-		th : '歲次'
-	}, {
-		th : '月建',
-		R : '月建/大小月'
-	}, {
-		th : era_name.indexOf('月') === -1 ? '朔日' : {
-			span : '日干支',
-			S : 'font-size:.7em;'
-		}
-	}, {
-		th : {
-			a : 'JDN',
-			R : 'Julian Day Number',
-			href : 'http://en.wikipedia.org/wiki/Julian_day'
-		}
-	}, {
-		th : {
-			a : '伊斯蘭曆',
-			R : 'Tabular Islamic calendar',
-			href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
-			S : 'font-size:.8em;'
-		}
-	}, {
-		th : '本日共存紀年',
-		title : '對未有詳實資料者，僅約略準確至年！'
-	} ], output = [ {
+	var era_caption, title = [
+			{
+				th : '朝代紀年日期'
+			},
+			{
+				th : '公元'
+			},
+			{
+				th : '歲次'
+			},
+			{
+				th : '月建',
+				R : '月建/大小月'
+			},
+			{
+				th : era_name.indexOf('月') === -1 ? '朔日' : {
+					span : '日干支',
+					S : 'font-size:.7em;'
+				}
+			},
+			{
+				th : {
+					a : 'JDN',
+					R : 'Julian Day Number.\n以 UTC 相同日期當天正午為準。\ne.g., 2000/1/1: 2451545',
+					href : 'http://en.wikipedia.org/wiki/Julian_day'
+				}
+			},
+			{
+				th : {
+					a : '伊斯蘭曆',
+					R : 'Tabular Islamic calendar',
+					href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
+					S : 'font-size:.8em;'
+				}
+			}, {
+				th : '本日共存紀年',
+				title : '對未有詳實資料者，僅約略準確至年！'
+			} ], output = [ {
 		tr : title
 	} ], 前年名, 前月名, 前紀年名, 後紀年名,
 	//
