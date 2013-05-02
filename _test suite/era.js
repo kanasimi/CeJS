@@ -591,7 +591,17 @@ function click_panel(e) {
 
 // ---------------------------------------------------------------------//
 
-var original_input, era_input_object, output_format_object, last_input, output_numeral, SVG_object;
+var original_input, era_input_object, last_input, output_numeral, SVG_object, output_format_object, output_format_types = {
+	'公元%Y年%m月%d日' : '公元日期',
+	'%紀年名%年年%月月%日日' : '朝代紀年日期',
+	'共存紀年' : '共存紀年',
+	'%年干支年%月干支月%日干支日' : '年月日干支',
+	'%年干支年%月干支月%日干支日%時干支時' : '年月日時干支',
+	'%年干支%月干支%日干支%時干支' : '四柱八字',
+	'%JDN' : 'Julian Day Number',
+	'%JD' : 'Julian Day'
+};
+
 function input_era(key) {
 	CeL.log(key + ',' + list + ',' + force);
 	original_input.apply(this, arguments);
@@ -720,23 +730,32 @@ function affairs() {
 		return false;
 	};
 
-	output_format_object = new CeL.select_input('output_format', {
-		'公元%Y年%m月%d日' : '公元日期',
-		'%紀年名%年年%月月%日日' : '朝代紀年日期',
-		'%年干支年%月干支月%日干支日' : '年月日干支',
-		'%年干支年%月干支月%日干支日%時干支時' : '年月日時干支',
-		'%年干支%月干支%日干支%時干支' : '四柱八字',
-		'共存紀年' : '共存紀年',
-		'%JDN' : 'Julian Day Number',
-		'%JD' : 'Julian Day'
-	}, 'includeKeyWC');
+	var i, list = [];
+	for (i in output_format_types)
+		list.push({
+			span : output_format_types[i],
+			R : output_format_types[i],
+			D : {
+				format : i
+			},
+			C : 'format_button',
+			onclick : function() {
+				output_format_object.setValue(this.dataset.format);
+				translate_era();
+				return false;
+			}
+		}, ' ');
+	CeL.new_node(list, 'format_type_bar');
+
+	output_format_object = new CeL.select_input('output_format',
+			output_format_types, 'includeKeyWC');
 	// original_input = era_input_object.onInput;
 	// era_input_object.onInput = input_era;
 	// era_input_object.setSearch(set_search_list);
 
 	// CeL.Log.toggle(false);
 
-	var i, list = [];
+	list = [];
 	[ '546/3/1', '1546-3-1', '一八八〇年四月二十一日七時', '一八八〇年庚辰月庚辰日7時',
 			'一八八〇年庚辰月庚辰日庚辰時', '初始元年11月1日', '明思宗崇禎1年1月26日', '天聰二年甲寅月戊子日',
 			'天聰2年寅月戊子日', '清德宗光緒六年三月十三日', '清德宗光緒庚辰年三月十三日', '清德宗光緒庚辰年庚辰月庚辰日',

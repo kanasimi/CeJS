@@ -47,7 +47,16 @@ td {
 
 /* ↑ copy from game.css */
 #era_input {
-	width: 15em;
+	width: 18em;
+	font-size: 1.3em;
+	font-family: 標楷體, DFKai-SB;
+}
+
+#output_format {
+	font-size: .6em;
+	width: 20em;
+	color: #1aa;
+	background-color: #eff;
 }
 
 #era_output {
@@ -136,6 +145,20 @@ tr.selected>td a {
 	height: 10em;
 }
 
+.format_button {
+	color: #34f;
+	background-color: #fa7;
+	font-size: .7em;
+	cursor: pointer;
+	padding-right: .5em;
+	padding-left: .5em;
+	margin-right: .5em;
+	border-radius: .5em;
+	margin-right: .5em;
+	margin-right: .5em;
+	white-space: nowrap;
+}
+
 /*]]>*/
 </style>
 
@@ -146,6 +169,8 @@ tr.selected>td a {
 
 	取得
 	<input id="era_input" title="來源紀年與日期" /> 之
+	<span id="format_type_bar"></span>
+	<br /> 輸出格式:
 	<input id="output_format" title="輸出格式" />
 	<a href="#"
 		onclick="output_numeral=output_numeral==='Chinese'?'':'Chinese';this.className=output_numeral==='Chinese'?'selected':'unselected';
