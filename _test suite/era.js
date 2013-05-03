@@ -51,7 +51,8 @@ function show_calendar(era_name) {
 				th : '朝代紀年日期'
 			},
 			{
-				th : '公元'
+				th : '公元(星期)',
+				R : '0: 周日/星期日/禮拜天, 1: 周一, 餘類推'
 			},
 			{
 				th : '歲次'
@@ -124,94 +125,96 @@ function show_calendar(era_name) {
 	if (dates.previous)
 		add_traveler(dates.previous);
 
-	dates.forEach(function(date) {
-		if (!era_caption)
-			era_caption = era_name.indexOf(date.紀年名) !== -1 ? date.紀年名
-			//
-			: /[\/年]/.test(era_name) ? date.紀年 : era_name;
+	dates
+			.forEach(function(date) {
+				if (!era_caption)
+					era_caption = era_name.indexOf(date.紀年名) !== -1 ? date.紀年名
+					//
+					: /[\/年]/.test(era_name) ? date.紀年 : era_name;
 
-		var tmp, matched, list = [];
-		if (date.共存紀年) {
-			date.共存紀年.forEach(function(era, index) {
-				if (output_numeral === 'Chinese')
-					era = CeL.to_Chinese_numeral(era);
-				list.push('[' + (index + 1) + ']', {
-					a : era,
-					title : era,
-					href : '#',
-					onclick : click_title_as_era,
-					C : '共存紀年'
+				var tmp, matched, list = [];
+				if (date.共存紀年) {
+					date.共存紀年.forEach(function(era, index) {
+						if (output_numeral === 'Chinese')
+							era = CeL.to_Chinese_numeral(era);
+						list.push('[' + (index + 1) + ']', {
+							a : era,
+							title : era,
+							href : '#',
+							onclick : click_title_as_era,
+							C : '共存紀年'
+						});
+					});
+					date.共存紀年 = list;
+				}
+
+				tmp = date
+						.format(
+								{
+									parser : 'CE',
+									format : date.準確 === '年' ? '%紀年名%年年|%Y年|%年干支|||'
+											: '%紀年名%年年%月月%日日|%Y/%m/%d(%w)|%年干支|%月干支%大小月|%日干支|%JDN',
+									locale : 'cmn-Hant-TW'
+								}).split('|');
+
+				if (matched = tmp[0]
+				// 後處理。
+				// 月名: 正/臘/閏12/後12
+				.match(/^(.*[^\d]\d+年)(.{1,3}月)(\d+日)$/))
+					tmp[0] = [ matched[1] === 前年名 ? 前年名 : {
+						a : 前年名 = matched[1],
+						title : matched[1],
+						href : '#',
+						C : 'to_select',
+						onclick : click_title_as_era
+					}, matched[2] === 前月名 ? 前月名 : {
+						a : 前月名 = matched[2],
+						title : matched[1] + matched[2],
+						href : '#',
+						C : 'to_select',
+						onclick : click_title_as_era
+					}, matched[3] ];
+
+				list = [];
+				tmp.forEach(function(data, index) {
+					list.push({
+						td : data
+					});
 				});
+
+				list.push({
+					td : date.準確 === '年' ? date.to_Tabular()[0] + '年' : date
+							.to_Tabular().slice(0, 3).join('/')
+				}, {
+					td : date.共存紀年 || ''
+				});
+
+				// 處理改朝換代巡覽。
+				var 未延續前紀年 = (後紀年名 !== date.紀年名);
+				if (date.前紀年 !== 前紀年名) {
+					if (未延續前紀年)
+						add_traveler(date.前紀年);
+					前紀年名 = date.前紀年;
+				}
+
+				if (main_date_value
+				//
+				&& main_date_value === date.getTime())
+					tmp = 'selected', main_date_value = null;
+				else
+					tmp = '';
+
+				output.push({
+					tr : list,
+					C : tmp
+				});
+
+				if (date.後紀年 !== 後紀年名) {
+					if (未延續前紀年)
+						add_traveler(後紀年名, true);
+					後紀年名 = date.後紀年;
+				}
 			});
-			date.共存紀年 = list;
-		}
-
-		tmp = date.format(
-				{
-					parser : 'CE',
-					format : date.準確 === '年' ? '%紀年名%年年|%Y年|%年干支|||'
-							: '%紀年名%年年%月月%日日|%Y/%m/%d|%年干支|%月干支%大小月|%日干支|%JDN',
-					locale : 'cmn-Hant-TW'
-				}).split('|');
-
-		if (matched = tmp[0]
-		// 後處理。
-		// 月名: 正/臘/閏12/後12
-		.match(/^(.*[^\d]\d+年)(.{1,3}月)(\d+日)$/))
-			tmp[0] = [ matched[1] === 前年名 ? 前年名 : {
-				a : 前年名 = matched[1],
-				title : matched[1],
-				href : '#',
-				C : 'to_select',
-				onclick : click_title_as_era
-			}, matched[2] === 前月名 ? 前月名 : {
-				a : 前月名 = matched[2],
-				title : matched[1] + matched[2],
-				href : '#',
-				C : 'to_select',
-				onclick : click_title_as_era
-			}, matched[3] ];
-
-		list = [];
-		tmp.forEach(function(data, index) {
-			list.push({
-				td : data
-			});
-		});
-
-		list.push({
-			td : date.準確 === '年' ? date.to_Tabular()[0] + '年' : date
-					.to_Tabular().slice(0, 3).join('/')
-		}, {
-			td : date.共存紀年 || ''
-		});
-
-		// 處理改朝換代巡覽。
-		var 未延續前紀年 = (後紀年名 !== date.紀年名);
-		if (date.前紀年 !== 前紀年名) {
-			if (未延續前紀年)
-				add_traveler(date.前紀年);
-			前紀年名 = date.前紀年;
-		}
-
-		if (main_date_value
-		//
-		&& main_date_value === date.getTime())
-			tmp = 'selected', main_date_value = null;
-		else
-			tmp = '';
-
-		output.push({
-			tr : list,
-			C : tmp
-		});
-
-		if (date.後紀年 !== 後紀年名) {
-			if (未延續前紀年)
-				add_traveler(後紀年名, true);
-			後紀年名 = date.後紀年;
-		}
-	});
 
 	if (後紀年名)
 		add_traveler(後紀年名, true);
