@@ -70,7 +70,7 @@ function show_calendar(era_name) {
 			{
 				th : {
 					a : 'JDN',
-					R : 'Julian Day Number.\n以 UTC 相同日期當天正午為準。\ne.g., 2000/1/1: 2451545',
+					R : 'Julian Day Number.\n以 UTC 相同日期當天正午為準。\n因此 2000/1/1 轉為 2451545。',
 					href : 'http://en.wikipedia.org/wiki/Julian_day'
 				}
 			},
@@ -154,7 +154,8 @@ function show_calendar(era_name) {
 									parser : 'CE',
 									format : date.準確 === '年' ? '%紀年名%年年|%Y年|%年干支|||'
 											: '%紀年名%年年%月月%日日|%Y/%m/%d(%w)|%年干支|%月干支%大小月|%日干支|%JDN',
-									locale : 'cmn-Hant-TW'
+									locale : 'cmn-Hant-TW',
+									as_UTC_time : true
 								}).split('|');
 
 				if (matched = tmp[0]
@@ -651,7 +652,8 @@ function translate_era(era) {
 				parser : 'CE',
 				format : format,
 				locale : 'cmn-Hant-TW',
-				numeral : output_numeral
+				numeral : output_numeral,
+				as_UTC_time : true
 			});
 
 			if (date.曆法)
