@@ -81,6 +81,10 @@ td {
 }
 
 .note_botton {
+	display: inline-block;
+	border: solid 1px #78a;
+	padding: .05em;
+	border-radius: .2em;
 	color: #080;
 	background-color: #ccd;
 }
@@ -88,6 +92,7 @@ td {
 .note_botton.selected {
 	color: #2c2;
 	background-color: #eff;
+	border-color: #efa;
 }
 
 .note_panel {
@@ -166,6 +171,10 @@ tr.selected>td a {
 </head>
 
 <body>
+
+	<div style="float: right;">
+		<g:plusone></g:plusone>
+	</div>
 
 	取得
 	<input id="era_input" title="來源紀年與日期" type="text" speech="Text"
@@ -248,8 +257,8 @@ tr.selected>td a {
 				<td><a href="http://sinocal.sinica.edu.tw/lusodoc.html"
 					accessdate="2013/3/28 19:24" title="「兩千年中西曆轉換」資料庫介紹">此程式採用的主要是<span
 						class="proper_noun">薛仲三</span>、<span class="proper_noun">歐陽頤</span>兩位研究者所編著的<span
-						class="creation_title">兩千年中西曆對照表</span></a>(1940)。至 2100 CE 之農曆則<a
-					href="http://sinocal.sinica.edu.tw/lusochangelog.html"
+						class="creation_title">兩千年中西曆對照表</span></a>(1940)。2010 CE 至 2100 CE
+					之農曆則<a href="http://sinocal.sinica.edu.tw/lusochangelog.html"
 					accessdate="2013/4/5 19:8" title="兩千年中西曆轉換工具 - 更新紀錄">似參照氣象局資料</a>。<br />請注意，<em>此中西曆對照表於
 						4 CE 停閏</em>。惟本工具之紀元功能採 proleptic Julian calendar，因此修改 4 CE 為閏年。<br />此中西曆轉換於太平天曆的部分有誤。因此須作更正。<br />東晉統治地區出現的其他年號、桓楚政權年號、五胡十六國時期：未能確定是否使用與中原相同曆數。尚需文獻指證。
 					<hr />其他相關資料：<br /> <a
@@ -552,16 +561,34 @@ tr.selected>td a {
 		<textarea id="pack_result"></textarea>
 	</div>
 
+	<div id="comments">
+		<div class="g-comments"
+			data-href="http://lyrics.meicho.com.tw/lib/JS/_test%20suite/era.htm"
+			data-width="800" data-first_party_property="BLOGGER"
+			data-view_type="FILTERED_POSTMOD"></div>
+		<div id="fb-root"></div>
+		<div class="fb-comments" data-href="http://lyrics.meicho.com.tw"
+			data-width="800" data-num-posts="10"></div>
+	</div>
+
 	<hr />
 	紀年轉換工具 訊息提示與紀錄欄：
 	<div id="panel_for_log">
-		<b style="color: red;">已載入網頁。正進行程式初始化作業，請稍待片刻…</b>
+		<b style="color: red;">已載入主網頁。正進行程式初始化作業，請稍待片刻…</b>
 	</div>
 
 	<script type="text/javascript" src="../ce.js">{"run":"era.js"}</script>
 	<script type="text/javascript">
 	CeL.env.same_origin_policy = true;
 	</script>
+
+	<script>/*(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/zh_TW/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));*/</script>
 
 	<!-- 
 	<script type="text/javascript" src="http://www.google.com/jsapi"></script>

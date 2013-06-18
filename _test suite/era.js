@@ -39,7 +39,7 @@ function initialization() {
 		// loaded.
 		// google.setOnLoadCallback(affairs);
 
-	}, affairs);
+	}, affairs, 'http://apis.google.com/js/plusone.js');
 }
 
 // ---------------------------------------------------------------------//
@@ -557,7 +557,8 @@ var last_selected, select_panels = {
 	era_graph : '紀年線圖',
 	// 年表
 	calendar : '曆譜',
-	pack_data : '曆數處理'
+	pack_data : '曆數處理',
+	comments : '問題回報'
 };
 
 function select_panel(id, show) {
