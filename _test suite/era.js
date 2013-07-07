@@ -336,7 +336,8 @@ function recover_SVG_text_properties() {
  * 畫個簡單的時間軸線圖。<br />
  * TODO: 加上年代。
  * 
- * @param hierarchy
+ * @param {Array}hierarchy
+ *            指定之紀年層次。
  * @returns
  */
 function draw_era(hierarchy) {
@@ -351,11 +352,24 @@ function draw_era(hierarchy) {
 			+ era_name_classifier
 			: '';
 
+	// 尺規最小刻度寬。
+	if (isNaN(draw_era.ruler_min_scale_pixel))
+		// 4: 經驗法則，don't know why.
+		draw_era.ruler_min_scale_pixel = SVG_object.addText.defaultCharWidthPx * 4;
+
 	if (Array.isArray(periods) && periods.length > 0) {
 
 		var start_time = periods.start,
 		// draw era width / (時間跨度 time span)。
-		ratio = draw_era.width / (periods.end - start_time);
+		ratio = draw_era.width / (periods.end - start_time),
+		// 前一個尺規刻度。
+		previous_ruler_scale = -Infinity,
+		// 取得 period 之起始 x 座標。
+		get_from_x = function(period) {
+			return draw_era.left
+			//
+			+ (period ? (period.start - start_time) * ratio : draw_era.width);
+		};
 
 		periods.forEach(function(region) {
 			var layer_count = region.length, layer_from_y = draw_era.top,
@@ -364,15 +378,14 @@ function draw_era(hierarchy) {
 
 			region.forEach(function(period_list) {
 
-				period_list.forEach(function(period) {
-					var style,
+				period_list.forEach(function(period, index) {
+					var style, period_start = new Date(period.start),
 					// Era.name 為 Array。
 					is_Era = Array.isArray(period.name),
 					//
 					name = is_Era ? period.name[0] : period.name,
 					//
-					from_x = draw_era.left + (period.start - start_time)
-							* ratio,
+					from_x = get_from_x(period),
 					//
 					width = (period.end - period.start) * ratio,
 					// 對紀年時間過短，太窄時，線圖之處理:採垂直排列。
@@ -393,8 +406,7 @@ function draw_era(hierarchy) {
 						// 警告: .setDate(-1) 此為權宜之計。
 						end_time.setDate(end_time.getDate() - 1);
 						draw_era.date_cache[name] = {
-							start : new Date(period.start)
-									.format(draw_era.date_options),
+							start : period_start.format(draw_era.date_options),
 							end : end_time.format(draw_era.date_options)
 						};
 					}
@@ -402,6 +414,27 @@ function draw_era(hierarchy) {
 					SVG_object.addRect(width, layer_height, from_x,
 							layer_from_y, null, 1, period.準確 === '年' ? '#ddd'
 									: '#eef');
+
+					// 繪製/加上時間軸線圖年代刻度。
+					if (
+					// 尺規最小刻度寬。
+					draw_era.ruler_min_scale_pixel
+					// 測試本尺規刻度與上一尺規刻度距離是否過密。
+					< from_x - previous_ruler_scale
+					// 測試本尺規是否過窄。
+					&& draw_era.ruler_min_scale_pixel
+					//
+					< get_from_x(period_list[index + 1]) - from_x)
+						SVG_object.addText(
+						//
+						period_start.format(draw_era.ruler_date_options),
+						//
+						previous_ruler_scale = from_x,
+						//
+						layer_from_y + SVG_object.addText.defaultCharWidthPx
+								* 2, {
+							color : '#f42'
+						});
 
 					style = {
 						color : period.準確 === '年' ? '#444'
@@ -444,7 +477,7 @@ function draw_era(hierarchy) {
 					// TODO: SVG <title> tag
 					if (!SVG_object.lastAdd.dataset)
 						// 目前僅 Chrome 支援。
-						SVG_object.lastAdd.dataset = {};
+						SVG_object.lastAdd.dataset = CeL.null_Object();
 					SVG_object.lastAdd.dataset.hierarchy
 					//
 					= period_hierarchy + name;
@@ -537,15 +570,20 @@ draw_era.left = 10;
 draw_era.top = 0;
 draw_era.width = 1000;
 draw_era.height = 400;
-// 尺規高度。
-draw_era.rule_height = 50;
+// 底部預留高度。
+draw_era.bottom_height = 0;
 
 draw_era.date_options = {
 	parser : 'CE',
 	format : '%Y/%m/%d'
 };
 
-draw_era.date_cache = {};
+draw_era.ruler_date_options = {
+	parser : 'CE',
+	format : '%Y.%m'
+};
+
+draw_era.date_cache = CeL.null_Object();
 
 // ---------------------------------------------------------------------//
 
@@ -808,7 +846,7 @@ function affairs() {
 	draw_era.width = SVG_object.offsetWidth - 2 * draw_era.left;
 	// 須扣掉 era_graph_navigation 高度。
 	draw_era.height = SVG_object.offsetHeight - draw_era.top
-			- draw_era.rule_height
+			- draw_era.bottom_height
 			- CeL.get_element('era_graph_navigation').offsetHeight;
 
 	SVG_object = new CeL.SVG(SVG_object.offsetWidth, SVG_object.offsetHeight);
