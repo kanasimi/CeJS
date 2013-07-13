@@ -379,7 +379,9 @@ function draw_era(hierarchy) {
 			region.forEach(function(period_list) {
 
 				period_list.forEach(function(period, index) {
-					var style, period_start = new Date(period.start),
+					var style,
+					// IE 中，period.start 可能為 Date 或 Number。
+					period_start = new Date(period.start - 0),
 					// Era.name 為 Array。
 					is_Era = Array.isArray(period.name),
 					//
@@ -402,7 +404,7 @@ function draw_era(hierarchy) {
 						font_size = MIN_FONT_SIZE;
 
 					if (!(name in draw_era.date_cache) && !isNaN(period.end)) {
-						var end_time = new Date(period.end);
+						var end_time = new Date(period.end - 0);
 						// 警告: .setDate(-1) 此為權宜之計。
 						end_time.setDate(end_time.getDate() - 1);
 						draw_era.date_cache[name] = {
@@ -425,16 +427,15 @@ function draw_era(hierarchy) {
 					&& draw_era.ruler_min_scale_pixel
 					//
 					< get_from_x(period_list[index + 1]) - from_x)
-						SVG_object.addText(
+						SVG_object.addText(period_start.format(
 						//
-						period_start.format(draw_era.ruler_date_options),
-						//
-						previous_ruler_scale = from_x,
-						//
-						layer_from_y + SVG_object.addText.defaultCharWidthPx
-								* 2, {
-							color : '#f42'
-						});
+						period.準確 === '年' ? draw_era.ruler_date_year_options
+								: draw_era.ruler_date_options),
+								previous_ruler_scale = from_x, layer_from_y
+										+ SVG_object.addText.defaultCharWidthPx
+										* 2, {
+									color : '#f42'
+								});
 
 					style = {
 						color : period.準確 === '年' ? '#444'
@@ -582,6 +583,10 @@ draw_era.ruler_date_options = {
 	parser : 'CE',
 	format : '%Y.%m'
 };
+draw_era.ruler_date_year_options = {
+	parser : 'CE',
+	format : '%Y'
+};
 
 draw_era.date_cache = CeL.null_Object();
 
@@ -633,15 +638,17 @@ function click_panel(e) {
 
 // ---------------------------------------------------------------------//
 
-var original_input, era_input_object, last_input, output_numeral, SVG_object, output_format_object, output_format_types = {
-	'公元%Y年%m月%d日' : '公元日期',
-	'%紀年名%年年%月月%日日' : '朝代紀年日期',
+var original_input, era_input_object, last_input, output_numeral, SVG_object, output_format_object,
+// 正解
+output_format_types = {
+	'公元日期' : '公元%Y年%m月%d日',
+	'朝代紀年日期' : '%紀年名%年年%月月%日日',
 	'共存紀年' : '共存紀年',
-	'%年干支年%月干支月%日干支日' : '年月日干支',
-	'%年干支年%月干支月%日干支日%時干支時' : '年月日時干支',
-	'%年干支%月干支%日干支%時干支' : '四柱八字',
-	'%JDN' : 'Julian Day Number',
-	'%JD' : 'Julian Day'
+	'年月日干支' : '%年干支年%月干支月%日干支日',
+	'年月日時干支' : '%年干支年%月干支月%日干支日%時干支時',
+	'四柱八字' : '%年干支%月干支%日干支%時干支',
+	'Julian Day Number' : '%JDN',
+	'Julian Day' : '%JD'
 };
 
 function input_era(key) {
@@ -740,7 +747,20 @@ function translate_era(era) {
 // ---------------------------------------------------------------------//
 
 function click_title_as_era() {
-	var era = this.title;
+	var era = String(this.title), matched = era.split(':');
+	if (matched && matched.length === 2
+	//
+	&& (matched[0] = matched[0].trim())
+	//
+	&& (matched[1] = matched[1].trim())) {
+		era = matched[1];
+		// set output format
+		matched = matched[0];
+		if (matched in output_format_types)
+			matched = output_format_types[matched];
+		output_format_object.setValue(matched);
+	}
+
 	era_input_object.setValue(era);
 	translate_era(era);
 	return false;
@@ -773,13 +793,15 @@ function affairs() {
 		return false;
 	};
 
-	var i, list = [];
+	var i, list = [],
+	// output_format_types 反解: auto-generated
+	output_format_types_reversed = CeL.null_Object();
 	for (i in output_format_types)
 		list.push({
-			span : output_format_types[i],
-			R : output_format_types[i],
+			span : i,
+			R : output_format_types_reversed[output_format_types[i]] = i,
 			D : {
-				format : i
+				format : output_format_types[i]
 			},
 			C : 'format_button',
 			onclick : function() {
@@ -791,7 +813,7 @@ function affairs() {
 	CeL.new_node(list, 'format_type_bar');
 
 	output_format_object = new CeL.select_input('output_format',
-			output_format_types, 'includeKeyWC');
+			output_format_types_reversed, 'includeKeyWC');
 	// original_input = era_input_object.onInput;
 	// era_input_object.onInput = input_era;
 	// era_input_object.setSearch(set_search_list);
@@ -799,9 +821,10 @@ function affairs() {
 	// CeL.Log.toggle(false);
 
 	list = [];
-	[ '546/3/1', '1546-3-1', '一八八〇年四月二十一日七時', '一八八〇年庚辰月庚辰日7時',
-			'一八八〇年庚辰月庚辰日庚辰時', '初始元年11月1日', '明思宗崇禎1年1月26日', '天聰二年甲寅月戊子日',
-			'天聰2年寅月戊子日', '清德宗光緒六年三月十三日', '清德宗光緒庚辰年三月十三日', '清德宗光緒庚辰年庚辰月庚辰日',
+	[ '共存紀年:546/3/1', '共存紀年:1546-3-1', '年月日時干支:一八八〇年四月二十一日七時',
+			'年月日時干支:一八八〇年庚辰月庚辰日7時', '公元日期:一八八〇年庚辰月庚辰日庚辰時', '初始元年11月1日',
+			'明思宗崇禎1年1月26日', '公元日期:天聰二年甲寅月戊子日', '公元日期:天聰2年寅月戊子日',
+			'清德宗光緒六年三月十三日', '清德宗光緒庚辰年三月十三日', '清德宗光緒庚辰年庚辰月庚辰日',
 			'清德宗光緒六年三月十三日辰正一刻', '魏少帝嘉平4年5月1日', '魏少帝嘉平4年閏5月1日', '魏少帝嘉平4年閏月1日',
 			'景元元年', '景元元年7月', '元文宗天曆2年8月8日', '元文宗天曆3/1/2' ].forEach(function(
 			era) {
