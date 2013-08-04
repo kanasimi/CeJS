@@ -14,7 +14,7 @@ See [demo page](http://lyrics.meicho.com.tw/lib/JS/_test suite/demo.htm).
 
 ## Dependencies
 * 本 library 須使用新一點的瀏覽器。
-* 本 library 將使用到 global 變數 "CeL"。
+* 本 library 將使用到 global 變數 ```CeL```。
 
 ## Concept
 詳細請參閱[概念介紹頁](http://lyrics.meicho.com.tw/game/game.pl?seg=CeJS)。
@@ -23,4 +23,4 @@ See [demo page](http://lyrics.meicho.com.tw/lib/JS/_test suite/demo.htm).
 Contact us at [Google+](https://plus.google.com/101633590909790225455) or [github](https://github.com/kanasimi/CeJS/issues).
 
 (This document is written by [GitHub Flavored Markdown](https://help.github.com/articles/github-flavored-markdown).)
-![visit](http://lyrics.meicho.com.tw/visit/git)
+![visit](http://lyrics.meicho.com.tw/visit/git.png)
