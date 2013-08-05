@@ -51,8 +51,8 @@ function show_calendar(era_name) {
 				th : '朝代紀年日期'
 			},
 			{
-				th : '公元(星期)',
-				R : '0: 周日/星期日/禮拜天, 1: 周一, 餘類推'
+				th : '公元(星期)'
+				// , R : '0: 周日/星期日/禮拜天, 1: 周一, 餘類推'
 			},
 			{
 				th : '歲次'
@@ -150,13 +150,13 @@ function show_calendar(era_name) {
 		}
 
 		tmp = date.format({
-			parser : 'CE',
-			format : date.準確 === '年' ? '%紀年名%年年|%Y年|%年干支|||'
+			parser: 'CE',
+			format: date.準確 === '年' ? '%紀年名%年年|%Y年|%年干支|||'
 			//
 			: '%紀年名%年年%月月%日日|%Y/%m/%d(%w)|%年干支|%月干支%大小月|%日干支|%JDN',
-			locale : 'cmn-Hant-TW',
-			as_UTC_time : true
-		}).split('|');
+			locale: 'cmn-Hant-TW',
+			as_UTC_time: true
+		}).replace(/星期/, '').split('|');
 
 		if (matched = tmp[0]
 		// 後處理。
@@ -826,7 +826,7 @@ function affairs() {
 			'明思宗崇禎1年1月26日', '公元日期:天聰二年甲寅月戊子日', '公元日期:天聰2年寅月戊子日',
 			'清德宗光緒六年三月十三日', '清德宗光緒庚辰年三月十三日', '清德宗光緒庚辰年庚辰月庚辰日',
 			'清德宗光緒六年三月十三日辰正一刻', '魏少帝嘉平4年5月1日', '魏少帝嘉平4年閏5月1日', '魏少帝嘉平4年閏月1日',
-			'景元元年', '景元元年7月', '元文宗天曆2年8月8日', '元文宗天曆3/1/2' ].forEach(function(
+			'景元元年', '景元元年7月', '元文宗天曆2年8月8日', '元文宗天曆3/1/2', '共存紀年:JD2032189' ].forEach(function(
 			era) {
 		list.push({
 			div : {
