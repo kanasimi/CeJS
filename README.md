@@ -23,4 +23,5 @@ See [demo page](http://lyrics.meicho.com.tw/lib/JS/_test suite/demo.htm).
 Contact us at [Google+](https://plus.google.com/101633590909790225455) or [github](https://github.com/kanasimi/CeJS/issues).
 
 (This document is written by [GitHub Flavored Markdown](https://help.github.com/articles/github-flavored-markdown).)
+
 ![logo](http://lyrics.meicho.com.tw/logo.png)
