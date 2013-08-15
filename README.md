@@ -2,7 +2,7 @@
 This is a JavaScript module framework that is simple to use.
 本計畫希望能建立一個能簡單上手的 JavaScript 模組架構。
 
-## Feature and examples
+## Feature and example
 For further introduction, please see [wiki](https://github.com/kanasimi/CeJS/wiki).
 進一步介紹請參閱本計畫之 [wiki](https://github.com/kanasimi/CeJS/wiki)。
 
