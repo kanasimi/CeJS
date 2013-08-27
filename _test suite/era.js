@@ -924,6 +924,14 @@ function affairs() {
 	 </code>
 	 */
 
+	// 直接 search。
+	if ((i = location.hash.slice(1))
+			|| (i = location.search.match(/[?&]era=([^&]+)/))
+			&& (i = decodeURIComponent(i[1])))
+		click_title_as_era.call({
+			title : i
+		});
+
 }
 
 CeL.run(initialization);
