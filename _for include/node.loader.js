@@ -1,28 +1,35 @@
 /**
  * @name framework loader for node.js.
  * @example
+ * 
  * for including:<br />
  * <code>
  * require("path/to/node.loader.js");
  * </code>
+ * 
  * @since 2011/11/26 23:33:32
- * @see	http://nodejs.org/
+ * @see http://nodejs.org/
  */
 
+"use strict";
 
 try {
-	//	node.js requires this method to setup REALLY global various: require isn't actually a global but rather local to each module.
+	// http://nodejs.org/api/globals.html
+	// node.js requires this method to setup REALLY global various:
+	// require isn't actually a global but rather local to each module.
 	Function('return this')().CeL = {
 		// main lib path relative to the loader script.
-		library_path : '../ce.js'
+		library_path: '../ce.js'
 	};
+	if (false && !global.require && typeof require === 'funtion')
+		global.require = require;
 
-	(function() {
+	(function () {
 
 		var script_code = [], fs = require('fs'),
 		// http://nodejs.org/docs/latest/api/fs.html#fs.readFileSync
-		main_lib_binary =
-			fs.readFileSync(/^[\\\/]/.test(CeL.library_path) ? CeL.library_path
+		main_lib_binary = fs
+				.readFileSync(/^[\\\/]/.test(CeL.library_path) ? CeL.library_path
 						: __filename.replace(/[^\\\/]+$/, CeL.library_path)
 				// encoding can be 'utf8', 'ascii', or 'base64'.
 				// , 'binary'
@@ -34,7 +41,7 @@ try {
 
 		// console.log(typeof main_lib_binary.length);
 
-		//	a simplified .get_file() for UTF-32.
+		// a simplified .get_file() for UTF-32.
 		for (; i < l;) {
 			// console.log(main_lib_binary[i] + ',' + main_lib_binary[i + 1]);
 			script_code.push(String.fromCharCode(main_lib_binary[i++] + 256
@@ -63,22 +70,23 @@ try {
 		console.log('CeL.set_debug: ' + CeL.set_debug);
 	}
 
-	//	delete cache.
+	// delete cache.
 	delete CeL.get_old_namespace().script_code;
 
 } catch (e) {
 	console.error(e);
 }
 
+// CeL.run('application.platform.nodejs', 'data.CSV');
+
 if (0 && typeof CeL === 'function') {
 	CeL.set_debug();
 
-	if(0)
-		console.log(CeL.get_file('data.js')
-			.slice(0, 300)
-			.replace(/[\u0100-\uffff]/g, '.'));
+	if (0)
+		console.log(CeL.get_file('data.js').slice(0, 300).replace(
+				/[\u0100-\uffff]/g, '.'));
 
-	CeL.run( 'data.math', function() {
+	CeL.run('data.math', function () {
 		var n1 = 123, n2 = 234;
 		CeL.log('GCD(' + n1 + ', ' + n2 + ') = ' + CeL.GCD(n1, n2));
 	});
