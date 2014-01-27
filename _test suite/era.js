@@ -692,7 +692,9 @@ function translate_era(era) {
 					span : '無共存紀年',
 					C : 'fadeout'
 				};
+
 		else {
+			// get the result
 			output = date.format({
 				parser : 'CE',
 				format : format,
@@ -700,6 +702,13 @@ function translate_era(era) {
 				numeral : output_numeral,
 				as_UTC_time : true
 			});
+			if (output !== era)
+				output = {
+					a : output,
+					title : output,
+					href : '#',
+					onclick : click_title_as_era
+				};
 
 			if (date.曆法)
 				output = [ output, {
