@@ -882,13 +882,16 @@ function affairs() {
 			- CeL.get_element('era_graph_navigation').offsetHeight;
 
 	SVG_object = new CeL.SVG(SVG_object.offsetWidth, SVG_object.offsetHeight);
-	if (SVG_object.status_OK()) {
+	var is_IE11 = /Trident\/7/.test(navigator.appVersion);
+	if (SVG_object.status_OK() && !is_IE11) {
 		SVG_object.attach('era_graph');
 		draw_era();
 	} else {
 		CeL.get_element('era_graph').style.display = 'none';
 		SVG_object = null;
 		delete select_panels['era_graph'];
+		if (is_IE11)
+			CeL.err('IE 11 尚無法使用線圖。請考慮使用 Chrome 或 Firefox 等網頁瀏覽器。');
 		CeL.warn('您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉，無法繪製紀年時間軸線圖。');
 	}
 
