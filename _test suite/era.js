@@ -728,11 +728,11 @@ function translate_era(era) {
 				});
 			}
 
-			if (date.準確 === '年') {
+			if (date.準確) {
 				if (!Array.isArray(output))
 					output = [ output ];
 				output.unshift({
-					em : '此輸出值僅約略準確至年：'
+					em : '此輸出值僅約略準確至' + date.準確 + '：'
 				});
 			}
 		}
