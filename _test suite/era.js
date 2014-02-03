@@ -912,6 +912,8 @@ function affairs() {
 			delete select_panels[i];
 	}
 	list.pop();
+	CeL.remove_all_child('note_botton_layer');
+	CeL.clear_class('note_botton_layer');
 	CeL.new_node(list, 'note_botton_layer');
 
 	select_panel('era_graph' in select_panels ? 'era_graph' : 'FAQ');

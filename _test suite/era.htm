@@ -81,6 +81,13 @@ td {
 	background-color: #eef;
 }
 
+#note_botton_layer.LOADING {
+	font-size: 3em;
+	color: #e11;
+	background-color: #ff1;
+	padding: .3em;
+}
+
 .note_botton {
 	display: inline-block;
 	border: solid 1px #78a;
@@ -193,11 +200,12 @@ tr.selected>td a {
 	<a href="#" id="translate" title="執行轉換">→</a>
 	<span id="era_output"></span>
 
-	<div id="note_botton_layer"></div>
+	<div id="note_botton_layer" class="LOADING">正進行程式初始化作業，請稍待片刻…</div>
 	<div id="example" class="note_panel"></div>
 	<div id="input_history" class="note_panel">
 		<!-- TODO: 清除 -->
 	</div>
+
 	<div id="FAQ" class="note_panel">
 		<ul>
 			<li>本工具可作東亞各王朝紀年與公曆間之轉換，包括中西曆轉換。現已完成 1－2100 CE
@@ -305,7 +313,8 @@ tr.selected>td a {
 				<td>黃一農(1992)<a class="creation_title"
 					href="http://hss.nthu.edu.tw/~ylh/abstract.php?paper_serial=92"
 					accessdate="2014/1/27 16:19">中國史曆表朔閏訂正舉隅──以唐《麟德曆》行用時期為例</a></td>
-				<td>乾封一年至開元七年照<span class="creation_title">中國史曆表朔閏訂正舉隅</span>一文更改，未採用中央研究院版本。麟德曆正式使用應始於麟德三年（乾封元年）。
+				<td>麟德曆正式使用應始於麟德三年（乾封元年）。乾封一年至開元七年照<span class="creation_title">中國史曆表朔閏訂正舉隅</span>一文更改，未採用中央研究院版本。<br />於唐玄宗開元10年閏月，以及開元14年5月，由於無法按文更改，仍使用舊朔閏表。
+
 				</td>
 			</tr>
 			<tr>
@@ -357,14 +366,14 @@ tr.selected>td a {
 			</tr>
 			<tr>
 				<td>1500－841 BCE 之中國地區朔閏</td>
-				<td>许剑伟(2011 v5.05)寿星天文历</td>
+				<td><a href="http://bbs.nongli.net/dispbbs_2_14995.html" accessdate="2014/2/1 11:19" title="寿星万年历5.05(测试版) [中华农历论坛]">许剑伟(2011 v5.05)寿星天文历</a></td>
 				<td><em><s>處理中</s>現暫緩處理，待有機會取得可靠的朔閏表或日與日間對照表後再開工。</em><br />寿星天文历於
-					721 BCE 起的數據主要採用张培瑜教授 1997年第二版<span class="creation_title">三千五百年历日天象</span>。
+					721 BCE 起的數據已與张培瑜教授 1997年第二版<span class="creation_title">三千五百年历日天象</span>核對。
 				</td>
 			</tr>
 			<tr>
 				<td>841－1 BCE 之中曆</td>
-				<td>饶尚宽(2006-3)<span class="creation_title">春秋战国秦汉朔闰表（公元前722年－公元220年）</span><br />关立行，关立言(2007-11)<span
+				<td>饶尚宽(2006-3)<span class="creation_title">春秋战国秦汉朔闰表（公元前722年－公元220年）</span><br />关立行，关立言(2007/11)<span
 					class="creation_title">春秋时期鲁国历法研究</span>（公元前722年－公元前480年）
 				</td>
 				<td><em><s>處理中</s>現暫緩處理，待有機會取得可靠的朔閏表或日與日間對照表後再開工。</em><br />未以寿星天文历（<span
