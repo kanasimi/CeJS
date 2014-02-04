@@ -964,9 +964,9 @@ function load_detect() {
 			message_handle.top = '8px';
 
 		// 下面的不行：NS3 會顯示出來 error_load_panel，但也會 alert。
-		// else if(typeof alert != 'undefined') alert('Initialization error!');
+		// else if(typeof alert != 'undefined') alert('Initialization failed!');
 	}
-	// else alert('Initialization error!');
+	// else alert('Initialization failed!');
 }
 
 if (typeof CeL == 'function' && typeof CeL.run == 'function')

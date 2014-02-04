@@ -26,12 +26,23 @@
  </code>
  */
 
+// for gettext;
+CeL.env.domain_location = 'resource/';
+var _ = function(m) {
+	return m;
+};
+
 // google.load('visualization', '1', {packages: ['corechart']});
-function initialization() {
-	CeL.run([ 'interact.DOM', 'application.debug.log', 'data.date.era',
-			'interact.form.select_input', 'interact.integrate.SVG' ],
+function initializer() {
+	CeL.run([ 'application.locale', 'interact.DOM', 'application.debug.log',
+			'data.date.era', 'interact.form.select_input',
+			'interact.integrate.SVG' ],
 	//
 	function() {
+		// using CeL.gettext
+		_ = CeL.gettext;
+		// _.use_domain('ja',affairs,true);
+
 		CeL.Log.set_board('panel_for_log');
 		// CeL.set_debug();
 
@@ -48,42 +59,46 @@ function initialization() {
 function show_calendar(era_name) {
 	var era_caption, title = [
 			{
-				th : '朝代紀年日期'
+				th : _('朝代紀年日期')
 			},
 			{
-				th : '公元(星期)'
+				th : _('公元') + '(' + _('星期') + ')'
 			// , R : '0: 周日/星期日/禮拜天, 1: 周一, 餘類推'
 			},
 			{
-				th : '歲次'
+				th : _('歲次')
 			},
 			{
-				th : '月建',
-				R : '月建/大小月'
+				th : {
+					span : _('月干支'),
+					S : 'font-size:.7em;'
+				},
+				R : '月干支/大小月'
 			},
 			{
 				th : era_name.indexOf('月') === -1 ? '朔日' : {
-					span : '日干支',
+					span : _('日干支'),
 					S : 'font-size:.7em;'
 				}
 			},
 			{
 				th : {
 					a : 'JDN',
-					R : 'Julian Day Number.\n以 UTC 相同日期當天正午為準。\n因此 2000/1/1 轉為 2451545。',
+					R : _('Julian Day Number')
+							+ '\n以 UTC 相同日期當天正午為準。\n因此 2000/1/1 轉為 2451545。',
 					href : 'http://en.wikipedia.org/wiki/Julian_day'
 				}
 			},
 			{
 				th : {
-					a : '伊斯蘭曆',
+					a : _('伊斯蘭曆'),
 					R : 'Tabular Islamic calendar',
 					href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
 					S : 'font-size:.8em;'
 				}
 			}, {
-				th : '本日共存紀年',
-				title : '對未有詳實資料者，僅約略準確至年！'
+				th : _('共存紀年'),
+				title : '本日/本年共存紀年。對未有詳實資料者，僅約略準確至年！'
 			} ], output = [ {
 		tr : title
 	} ], 前年名, 前月名, 前紀年名, 後紀年名,
@@ -149,14 +164,17 @@ function show_calendar(era_name) {
 			list = [];
 		}
 
-		tmp = date.format({
-			parser : 'CE',
-			format : date.準確 === '年' ? '%紀年名%年年|%Y年|%年干支|||'
-			//
-			: '%紀年名%年年%月月%日日|%Y/%m/%d(%w)|%年干支|%月干支%大小月|%日干支|%JDN',
-			locale : 'cmn-Hant-TW',
-			as_UTC_time : true
-		}).replace(/星期/, '').split('|');
+		tmp = date.format(
+				{
+					parser : 'CE',
+					format : date.準確 === '年' ? '%紀年名%年年|%Y年|%年干支|||'
+					//
+					: '%紀年名%年年%月月%日日|%Y/%m/%d('
+							+ (_.is_domain_name('ja') ? '%曜日' : '%w')
+							+ ')|%年干支|%月干支%大小月|%日干支|%JDN',
+					locale : 'cmn-Hant-TW',
+					as_UTC_time : true
+				}).replace(/星期/, '').split('|');
 
 		if (matched = tmp[0]
 		// 後處理。
@@ -222,14 +240,16 @@ function show_calendar(era_name) {
 	if (dates.next)
 		add_traveler(dates.next, true);
 
-	era_caption = era_caption ? [ {
-		a : era_caption,
-		title : era_caption,
-		href : '#',
-		C : 'to_select',
-		onclick : click_title_as_era
-	}, '曆譜（共有 ' + dates.length + ' 個' + (dates.type ? '時' : '年') + '段紀錄）' ]
-			: '無可供列出之曆譜！';
+	era_caption = era_caption ? [
+			{
+				a : era_caption,
+				title : era_caption,
+				href : '#',
+				C : 'to_select',
+				onclick : click_title_as_era
+			},
+			_('曆譜') + '（共有 ' + dates.length + ' 個' + (dates.type ? '時' : '年')
+					+ '段紀錄）' ] : '無可供列出之曆譜！';
 
 	CeL.remove_all_child('calendar');
 	CeL.new_node({
@@ -592,17 +612,7 @@ draw_era.date_cache = CeL.null_Object();
 
 // ---------------------------------------------------------------------//
 
-var last_selected, select_panels = {
-	example : '測試範例',
-	// 之前輸入資料
-	input_history : '輸入紀錄',
-	FAQ : '使用說明',
-	era_graph : '紀年線圖',
-	// 年表
-	calendar : '曆譜',
-	pack_data : '曆數處理',
-	comments : '問題回報'
-};
+var last_selected, select_panels;
 
 function select_panel(id, show) {
 	if (!(id in select_panels))
@@ -776,8 +786,10 @@ function click_title_as_era() {
 }
 
 function affairs() {
-
-	CeL.log('初始化完畢。您可開始進行操作。', true);
+	CeL.log({
+		T : 'Initializing..'
+	}, true);
+	document.title = _('紀年轉換工具');
 
 	// google.visualization.CandlestickChart
 	// Org Chart 組織圖
@@ -882,6 +894,19 @@ function affairs() {
 			- CeL.get_element('era_graph_navigation').offsetHeight;
 
 	SVG_object = new CeL.SVG(SVG_object.offsetWidth, SVG_object.offsetHeight);
+
+	select_panels = {
+		example : _('測試範例'),
+		// 之前輸入資料
+		input_history : _('輸入紀錄'),
+		FAQ : _('使用說明'),
+		era_graph : _('紀年線圖'),
+		// 年表
+		calendar : _('曆譜'),
+		pack_data : _('曆數處理'),
+		comments : _('問題回報')
+	}
+
 	var is_IE11 = /Trident\/7/.test(navigator.appVersion);
 	if (SVG_object.status_OK() && !is_IE11) {
 		SVG_object.attach('era_graph');
@@ -939,6 +964,7 @@ function affairs() {
 	 */
 
 	// 直接 search。
+	// e.g., "era.htm?era=%E5%A4%A7%E6%B0%B82%E5%B9%B4"
 	if ((i = location.hash.slice(1))
 			|| (i = location.search.match(/[?&]era=([^&]+)/))
 			&& (i = decodeURIComponent(i[1])))
@@ -946,6 +972,12 @@ function affairs() {
 			title : i
 		});
 
+	CeL
+			.new_node(
+					'<a title="visitor" href="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&point=T"><img src="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&mode=pic&page=CeL&point=era" /></a>',
+					'analysis');
+
+	CeL.log('初始化完畢。您可開始進行操作。');
 }
 
-CeL.run(initialization);
+CeL.run(initializer);
