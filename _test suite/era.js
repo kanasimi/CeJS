@@ -26,18 +26,20 @@
  </code>
  */
 
-// declaration for gettext;
+// define gettext() user domain resource location.
+// gettext() will auto load (CeL.env.domain_location + language + '.js').
+// e.g., resource/cmn-Hant-TW.js, resource/ja-JP.js
 CeL.env.domain_location = 'resource/';
+// declaration for gettext()
 var _;
 
 // google.load('visualization', '1', {packages: ['corechart']});
 function initializer() {
-	CeL.run([ 'application.locale', 'interact.DOM', 'application.debug.log',
-			'data.date.era', 'interact.form.select_input',
-			'interact.integrate.SVG' ],
+	CeL.run([ 'interact.DOM', 'application.debug.log', 'data.date.era',
+			'interact.form.select_input', 'interact.integrate.SVG' ],
 	//
 	function() {
-		// using CeL.gettext
+		// alias for CeL.gettext, then we can use _('message').
 		_ = CeL.gettext;
 
 		CeL.Log.set_board('panel_for_log');
@@ -709,6 +711,8 @@ function translate_era(era) {
 				numeral : output_numeral,
 				as_UTC_time : true
 			});
+			if (output_numeral === 'Chinese')
+				output = CeL.to_Chinese_numeral(output);
 			if (output !== era)
 				output = {
 					a : output,
@@ -786,7 +790,12 @@ function affairs() {
 	CeL.log({
 		T : 'Initializing..'
 	}, true);
-	document.title = _('紀年轉換工具');
+	document.title = _(document.title);
+
+	// translate all nodes to show in Chinese
+	CeL.gettext.translate_nodes();
+
+	// -----------------------------
 
 	// google.visualization.CandlestickChart
 	// Org Chart 組織圖
@@ -811,15 +820,21 @@ function affairs() {
 		return false;
 	};
 
-	var i, list = [],
+	var i, v, o = output_format_types, list = [],
 	// output_format_types 反解: auto-generated
 	output_format_types_reversed = CeL.null_Object();
-	for (i in output_format_types)
+	// reset output_format_types to local language expression.
+	output_format_types = CeL.null_Object();
+	if (_.is_domain_name('ja'))
+		o['六曜'] = '%六曜';
+	for (i in o) {
+		v = o[i];
+		output_format_types[_(i)] = v;
 		list.push({
-			span : i,
-			R : output_format_types_reversed[output_format_types[i]] = i,
+			span : _(i),
+			R : output_format_types_reversed[v] = i,
 			D : {
-				format : output_format_types[i]
+				format : v
 			},
 			C : 'format_button',
 			onclick : function() {
@@ -828,6 +843,7 @@ function affairs() {
 				return false;
 			}
 		}, ' ');
+	}
 	CeL.new_node(list, 'format_type_bar');
 
 	output_format_object = new CeL.select_input('output_format',
