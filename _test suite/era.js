@@ -26,11 +26,9 @@
  </code>
  */
 
-// for gettext;
+// declaration for gettext;
 CeL.env.domain_location = 'resource/';
-var _ = function(m) {
-	return m;
-};
+var _;
 
 // google.load('visualization', '1', {packages: ['corechart']});
 function initializer() {
@@ -41,7 +39,6 @@ function initializer() {
 	function() {
 		// using CeL.gettext
 		_ = CeL.gettext;
-		// _.use_domain('ja',affairs,true);
 
 		CeL.Log.set_board('panel_for_log');
 		// CeL.set_debug();
@@ -971,11 +968,6 @@ function affairs() {
 		click_title_as_era.call({
 			title : i
 		});
-
-	CeL
-			.new_node(
-					'<a title="visitor" href="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&point=T"><img src="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&mode=pic&page=CeL&point=era" /></a>',
-					'analysis');
 
 	CeL.log('初始化完畢。您可開始進行操作。');
 }
