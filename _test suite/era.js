@@ -58,25 +58,37 @@ function initializer() {
 function show_calendar(era_name) {
 	var era_caption, title = [
 			{
-				th : _('朝代紀年日期')
+				th : {
+					T : '朝代紀年日期'
+				}
 			},
 			{
-				th : _('公元') + '(' + _('星期') + ')'
+				th : [ {
+					T : '公元'
+				}, '(', {
+					T : '星期'
+				}, ')' ]
 			// , R : '0: 周日/星期日/禮拜天, 1: 周一, 餘類推'
 			},
 			{
-				th : _('歲次')
+				th : {
+					T : '歲次'
+				}
 			},
 			{
 				th : {
-					span : _('月干支'),
+					span : {
+						T : '月干支'
+					},
 					S : 'font-size:.7em;'
 				},
 				R : '月干支/大小月'
 			},
 			{
 				th : era_name.indexOf('月') === -1 ? '朔日' : {
-					span : _('日干支'),
+					span : {
+						T : '日干支'
+					},
 					S : 'font-size:.7em;'
 				}
 			},
@@ -90,13 +102,17 @@ function show_calendar(era_name) {
 			},
 			{
 				th : {
-					a : _('伊斯蘭曆'),
+					a : {
+						T : '伊斯蘭曆'
+					},
 					R : 'Tabular Islamic calendar',
 					href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
 					S : 'font-size:.8em;'
 				}
 			}, {
-				th : _('共存紀年'),
+				th : {
+					T : '共存紀年'
+				},
 				title : '本日/本年共存紀年。對未有詳實資料者，僅約略準確至年！'
 			} ], output = [ {
 		tr : title
@@ -239,16 +255,16 @@ function show_calendar(era_name) {
 	if (dates.next)
 		add_traveler(dates.next, true);
 
-	era_caption = era_caption ? [
-			{
-				a : era_caption,
-				title : era_caption,
-				href : '#',
-				C : 'to_select',
-				onclick : click_title_as_era
-			},
-			_('曆譜') + '（共有 ' + dates.length + ' 個' + (dates.type ? '時' : '年')
-					+ '段紀錄）' ] : '無可供列出之曆譜！';
+	era_caption = era_caption ? [ {
+		a : era_caption,
+		title : era_caption,
+		href : '#',
+		C : 'to_select',
+		onclick : click_title_as_era
+	}, {
+		T : '曆譜'
+	}, '（共有 ' + dates.length + ' 個' + (dates.type ? '時' : '年') + '段紀錄）' ]
+			: '無可供列出之曆譜！';
 
 	CeL.remove_all_child('calendar');
 	CeL.new_node({
@@ -388,7 +404,7 @@ function draw_era(hierarchy) {
 			return draw_era.left
 			//
 			+ (period ? (period.start - start_time) * ratio : draw_era.width);
-		};
+		}, short_period = [];
 
 		periods.forEach(function(region) {
 			var layer_count = region.length, layer_from_y = draw_era.top,
@@ -398,7 +414,7 @@ function draw_era(hierarchy) {
 			region.forEach(function(period_list) {
 
 				period_list.forEach(function(period, index) {
-					var style,
+					var style, unobvious,
 					// IE 中，period.start 可能為 Date 或 Number。
 					period_start = new Date(period.start - 0),
 					// Era.name 為 Array。
@@ -409,7 +425,7 @@ function draw_era(hierarchy) {
 					from_x = get_from_x(period),
 					//
 					width = (period.end - period.start) * ratio,
-					// 對紀年時間過短，太窄時，線圖之處理:採垂直排列。
+					// 對紀年時間過短，太窄時，線圖之處理：採垂直排列。
 					vertical_text = support_vertical_text
 							&& width < layer_height,
 					//
@@ -419,8 +435,28 @@ function draw_era(hierarchy) {
 					//
 					: Math.min(layer_height * .8, width / name.length);
 
-					if (font_size < MIN_FONT_SIZE)
+					if (font_size < MIN_FONT_SIZE) {
 						font_size = MIN_FONT_SIZE;
+						// 難辨識、不清楚、不顯著、隱晦不明顯時段。
+						unobvious = true;
+						var duration = [ '(',
+						//
+						period_start.format(draw_era.date_options), ];
+						if (!isNaN(period.end))
+							duration.push('－', (new Date(period.end - 0))
+									.format(draw_era.date_options));
+						duration.push(') ');
+						short_period.push({
+							a : name,
+							href : '#',
+							title : period_hierarchy + name,
+							onclick : is_Era ? click_title_as_era
+									: draw_title_era
+						}, {
+							span : duration,
+							C : 'duration'
+						});
+					}
 
 					if (!(name in draw_era.date_cache) && !isNaN(period.end)) {
 						var end_time = new Date(period.end - 0);
@@ -434,7 +470,7 @@ function draw_era(hierarchy) {
 
 					SVG_object.addRect(width, layer_height, from_x,
 							layer_from_y, null, 1, period.準確 === '年' ? '#ddd'
-									: '#eef');
+									: unobvious ? '#ffa' : '#eef');
 
 					// 繪製/加上時間軸線圖年代刻度。
 					if (
@@ -480,8 +516,7 @@ function draw_era(hierarchy) {
 						SVG_object.addText(name, from_x
 								+ (width - name.length * font_size) / 2,
 						// .7:
-						// 經驗法則，don't
-						// know why.
+						// 經驗法則，don't know why.
 						layer_from_y + (layer_height + font_size * .7) / 2,
 								style);
 
@@ -511,6 +546,15 @@ function draw_era(hierarchy) {
 		});
 
 		draw_era.last_hierarchy = hierarchy;
+
+		if (short_period.length) {
+			short_period.unshift({
+				// 過短紀年
+				T : '難辨識時段：'
+			});
+			CeL.remove_all_child('era_graph_unobvious');
+			CeL.new_node(short_period, 'era_graph_unobvious');
+		}
 	}
 
 	draw_era.draw_navigation(hierarchy);
@@ -519,8 +563,12 @@ function draw_era(hierarchy) {
 draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 	var period_hierarchy = '',
 	// 
-	navigation_list = [ '導覽列：', {
-		a : '所有國家',
+	navigation_list = [ {
+		T : '導覽列：'
+	}, {
+		a : {
+			T : '所有國家'
+		},
 		href : '#',
 		onclick : draw_title_era
 	} ];
@@ -611,7 +659,21 @@ draw_era.date_cache = CeL.null_Object();
 
 // ---------------------------------------------------------------------//
 
-var last_selected, select_panels;
+var last_selected, select_panels = {
+	example : '測試範例',
+	// 之前輸入資料
+	input_history : '輸入紀錄',
+
+	// concept:'工具說明',
+	// 使用技巧
+	FAQ : '使用說明',
+
+	era_graph : '紀年線圖',
+	// 年表
+	calendar : '曆譜',
+	pack_data : '曆數處理',
+	comments : '問題回報'
+};
 
 function select_panel(id, show) {
 	if (!(id in select_panels))
@@ -726,6 +788,17 @@ function translate_era(era) {
 					br : null
 				}, '採用曆法: ', date.曆法 ];
 
+			if (date.據) {
+				if (!Array.isArray(output))
+					output = [ output ];
+				output.push({
+					br : null
+				}, '出典：', {
+					span : date.據,
+					C : 'note'
+				});
+			}
+
 			if (date.注) {
 				if (!Array.isArray(output))
 					output = [ output ];
@@ -831,7 +904,9 @@ function affairs() {
 		v = o[i];
 		output_format_types[_(i)] = v;
 		list.push({
-			span : _(i),
+			span : {
+				T : i
+			},
 			R : output_format_types_reversed[v] = i,
 			D : {
 				format : v
@@ -875,7 +950,7 @@ function affairs() {
 
 	// -----------------------------
 
-	SVG_object = CeL.get_element('era_graph');
+	SVG_object = CeL.get_element('era_graph_SVG');
 	// 紀年線圖按滑鼠右鍵可回上一層。
 	SVG_object.onclick =
 	// Chrome use this.
@@ -897,7 +972,8 @@ function affairs() {
 		}
 	};
 
-	// 為取得 offsetHeight
+	// 為取得 offsetHeight，暫時先 display。
+	CeL.toggle_display('era_graph', true);
 	CeL.toggle_display(SVG_object, true);
 	era_name_classifier = CeL.era.pack.era_name_classifier;
 	draw_era.width = SVG_object.offsetWidth - 2 * draw_era.left;
@@ -908,21 +984,9 @@ function affairs() {
 
 	SVG_object = new CeL.SVG(SVG_object.offsetWidth, SVG_object.offsetHeight);
 
-	select_panels = {
-		example : _('測試範例'),
-		// 之前輸入資料
-		input_history : _('輸入紀錄'),
-		FAQ : _('使用說明'),
-		era_graph : _('紀年線圖'),
-		// 年表
-		calendar : _('曆譜'),
-		pack_data : _('曆數處理'),
-		comments : _('問題回報')
-	}
-
 	var is_IE11 = /Trident\/7/.test(navigator.appVersion);
 	if (SVG_object.status_OK() && !is_IE11) {
-		SVG_object.attach('era_graph');
+		SVG_object.attach('era_graph_SVG');
 		draw_era();
 	} else {
 		CeL.get_element('era_graph').style.display = 'none';
@@ -940,7 +1004,9 @@ function affairs() {
 		CeL.toggle_display(i, false);
 		if (select_panels[i])
 			list.push({
-				a : select_panels[i],
+				a : {
+					T : select_panels[i]
+				},
 				id : i + click_panel.postfix,
 				href : "#",
 				C : 'note_botton',

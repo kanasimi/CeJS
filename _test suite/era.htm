@@ -47,6 +47,14 @@ td {
 }
 
 /* ↑ copy from game.css */
+#language {
+	font-size: .8em;
+	background-color: #fef;
+	border: 1px solid #faa;
+	border-radius: .2em;
+	padding: .2em;
+}
+
 #era_input {
 	width: 18em;
 	font-size: 1.3em;
@@ -82,7 +90,7 @@ td {
 }
 
 #note_botton_layer.LOADING {
-	font-size: 3em;
+	font-size: 2em;
 	color: #e11;
 	background-color: #ff1;
 	padding: .3em;
@@ -135,8 +143,6 @@ tr.selected>td a {
 
 #era_graph {
 	display: none;
-	width: 100%;
-	height: 500px;
 }
 
 #era_graph_navigation {
@@ -145,6 +151,23 @@ tr.selected>td a {
 
 #era_graph_navigation>span {
 	color: #f94;
+}
+
+#era_graph_SVG {
+	width: 100%;
+	height: 500px;
+}
+
+#era_graph_unobvious {
+	color: #67c;
+	background-color: #ffa;
+	padding: .3em;
+	border-radius: .3em;
+}
+
+#era_graph_unobvious>.duration {
+	font-size: .6em;
+	color: #999;
 }
 
 #pack_source,#pack_result {
@@ -183,6 +206,12 @@ tr.selected>td a {
 			href="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&point=T"><img
 			src="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&mode=pic&page=CeL&point=era" /></a>
 		<g:plusone></g:plusone>
+	</div>
+
+	<div id="language" style="float: right;">
+		<span data-gettext="Language"></span>: <a href="#"
+			onclick="return _.adapt_domain(this.title);" title="zh-TW">繁體中文</a> <a
+			href="#" onclick="return _.adapt_domain(this.title);" title="ja">日本語</a>
 	</div>
 
 	<span data-gettext="取得紀年"></span>
@@ -603,15 +632,18 @@ tr.selected>td a {
 	</div>
 
 	<div id="era_graph">
-		<div id="era_graph_navigation">導覽列</div>
+		<div id="era_graph_navigation">&nbsp;</div>
+		<div id="era_graph_SVG"></div>
+		<div id="era_graph_unobvious"></div>
 	</div>
 
 	<div id="calendar"></div>
 
 	<div id="pack_data">
 		<textarea id="pack_source">/文宗/天曆|1329/8/25~|2/8=30;29;29;30;30	29;30;30;29</textarea>
-		<br /> <em>請注意：本欄僅供開發人員使用。</em> <a href="#" onclick="return 壓縮曆數();">壓縮</a>
-		| <a href="#" onclick="return 解壓縮曆數();">解壓縮</a> | <a href="#"
+		<br /> <em data-gettext="請注意：本欄僅供開發人員使用。"></em> <a href="#"
+			onclick="return 壓縮曆數();">壓縮</a> | <a href="#"
+			onclick="return 解壓縮曆數();">解壓縮</a> | <a href="#"
 			onclick="return 解析曆數();">展開</a> 紀年的曆數資料<br />
 		<textarea id="pack_result"></textarea>
 	</div>
@@ -627,7 +659,7 @@ tr.selected>td a {
 			data-width="800" data-num-posts="10"></div>
 	</div>
 
-	<hr />
+	<hr style="clear: both;" />
 	紀年轉換工具 訊息提示與紀錄欄：
 	<div id="panel_for_log">
 		<b style="color: red;">已載入主網頁。正進行程式初始化作業，請稍待片刻…</b>
