@@ -310,12 +310,8 @@ tr.selected>td a {
 					<ul>
 						<li><em>此中西曆對照表於 4 CE 停閏</em>。惟本工具之紀元功能採 proleptic Julian
 							calendar，因此修改 4 CE 為閏年。</li>
-						<li>此中西曆對照表，於太平天曆、《麟德曆》行用時期的部分有誤。本工具已作更正，詳見下述。</li>
+						<li>此中西曆對照表，於太初曆、麟德曆、太平天曆行用時期的朔閏有誤。本工具已作更正，詳見下述。</li>
 						<li>東晉統治地區出現的其他年號、桓楚政權年號、五胡十六國時期：未能確定是否使用與中原相同曆數。尚需文獻指證。</li>
-						<li>當前所見幾乎所有的太初曆譜，皆為僅依<span class="creation_title">漢書
-								律曆志</span>「朔不得中，是謂閏月」置閏規則排算所得，未考慮「中氣在朔若二日，則前月閏也」，<b>非實際頒行曆數</b>。實際曆數可能不是光以算法，即能得到的。詳見：斯琴毕力格，关守义，罗见今(2007)；<span
-							class="creation_title">太初历特殊置闰问题</span>。例如後漢光武帝建武三年應為閏正月戊子朔。由於當前所見長曆譜皆未排出實際使用之曆數，<em>待有機會取得可靠的朔閏表或日與日間對照表後再行更正</em>。
-						</li>
 					</ul>
 					<hr />其他相關資料：<br /> <a
 					href="http://authority.ddbc.edu.tw/time/index.php"
@@ -457,6 +453,18 @@ tr.selected>td a {
 					href="https://docs.google.com/spreadsheet/pub?key=0AnMb73DFKnSFdDFKWklnTTIwQXJ4NXNwcnJoQUgyWmc"
 					accessdate="2013/4/14 21:57">[李忠林](2012)秦至汉初朔闰表</a>。
 					<hr />另可參考：許名瑲(2013/9)<a
+					href="http://www.bsm.org.cn/show_article.php?id=1918"
+					accessdate="2014/2/8 15:35"
+					title="簡帛網&gt;&gt;簡帛文庫&gt;&gt;漢　　簡&gt;&gt;漢初月朔考索">漢初月朔考索——以出土簡牘為線索</a>。
+				</td>
+			</tr>
+			<tr>
+				<td>104 BCE－84 CE 之中曆</td>
+				<td>陈久金(1989/12)<span class="creation_title">敦煌、居延汉简中的历谱</span>所附<span
+					class="creation_title">太初元年至元和二年朔闰表</span></td>
+				<td>當前所見幾乎所有的長曆譜所附太初曆譜，皆為僅依<span class="creation_title">漢書
+						律曆志</span>「朔不得中，是謂閏月」置閏規則排算所得，未考慮「中氣在朔若二日，則前月閏也」，<b>非實際頒行曆數</b>。實際曆數可能不是光以算法，即能得到的。詳見：斯琴毕力格，关守义，罗见今(2007)；<span
+					class="creation_title">太初历特殊置闰问题</span>。例如後漢光武帝建武三年應為閏正月戊子朔。<br />漢武帝元封7年、太初1年參考：张培瑜(2007)根据新出历日简牍试论秦和汉初的历法、許名瑲(2013/9)<a
 					href="http://www.bsm.org.cn/show_article.php?id=1918"
 					accessdate="2014/2/8 15:35"
 					title="簡帛網&gt;&gt;簡帛文庫&gt;&gt;漢　　簡&gt;&gt;漢初月朔考索">漢初月朔考索——以出土簡牘為線索</a>。
@@ -651,7 +659,9 @@ tr.selected>td a {
 		<br /> <em data-gettext="請注意：本欄僅供開發人員使用。"></em> <a href="#"
 			onclick="return 壓縮曆數();">壓縮</a> | <a href="#"
 			onclick="return 解壓縮曆數();">解壓縮</a> | <a href="#"
-			onclick="return 解析曆數();">展開</a> 紀年的曆數資料<br />
+			onclick="return 解析曆數();">展開</a> 紀年的曆數資料 <a href="#"
+			onclick="CeL.set_text('pack_source', CeL.set_text('pack_result'));return false;"
+			title="copy to">↑</a><br />
 		<textarea id="pack_result"></textarea>
 	</div>
 

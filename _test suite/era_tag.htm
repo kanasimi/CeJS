@@ -1,0 +1,248 @@
+﻿<?xml version="1.1" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<style type="text/css">
+/* <![CDATA[ */
+.article {
+	color: #221;
+	background-color: #eff;
+	padding: 1em;
+	border: 1pt solid #ea3;
+	border-radius: 1em;
+}
+
+.era_text {
+	color: #34c;
+}
+
+.era_popup {
+	width: 20em;
+	padding-bottom: .3em;
+	color: #34c;
+	background-color: #efc;
+	border: 1pt solid #deb;
+	border-top: none;
+	border-left: none;
+	border-radius: .4em;
+	opacity: 0.95;
+}
+
+/* http://webdesign.about.com/od/beginningcss/a/style_hr_tag.htm */
+.era_popup hr {
+	margin: .2em;
+	margin-left: 0;
+}
+
+.era_popupd {
+	background-color: #efc;
+}
+
+/*]]>*/
+</style>
+<title>紀年日期標注示範</title>
+</head>
+<body>
+	<div id="analysis" style="float: right;">
+		<a title="visitor"
+			href="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&point=T"><img
+			src="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&mode=pic&page=CeL&point=era" /></a>
+		<g:plusone></g:plusone>
+	</div>
+
+	<h2>紀年日期標注之文本示範</h2>
+	<p>
+		請稍等，待<b>日期文字</b>變色後，可將滑鼠移至變色文字上觀看效果。
+	</p>
+
+	<h3>示意圖</h3>
+	<img
+		src="https://lh4.googleusercontent.com/-Ds8c7ka6qwQ/Uvc7ujJeWkI/AAAAAAAAAjY/gg5z81Ixzdg/w500-h244-no/20140209.%25E7%25B4%2580%25E5%25B9%25B4%25E6%2597%25A5%25E6%259C%259F%25E6%25A8%2599%25E6%25B3%25A8%25E4%25B9%258B%25E6%2596%2587%25E6%259C%25AC%25E7%25A4%25BA%25E7%25AF%2584.clip.png"
+		alt="示意圖" />
+
+	<h3>示範文本</h3>
+	<p class="article">
+		<a
+			href="https://zh.wikisource.org/wiki/%E8%88%8A%E5%94%90%E6%9B%B8/%E5%8D%B711"
+			target="_blank">舊唐書/卷11</a><br /> <span data-era="~">寶應元年</span>..<br />
+		<span data-era="~">二年</span>..<br /> <span data-era="~">二月甲午</span>，回紇登裏可汗辭歸蕃。<span
+			data-era="~">三月甲辰朔</span>，襄州右兵馬使梁崇義殺大將李昭，據城自固，仍授崇義襄州刺史、山南東道節度使。<span
+			data-era="~">丁未</span>，袁傪破袁晁之眾於浙東。玄宗、肅宗歸祔山陵。自<span data-era="~">三月一日</span>廢朝，至於<span
+			data-era="~">晦日</span>，百僚素服詣延英門通名起居。
+	</p>
+
+	<p class="article">
+		<a
+			href="https://zh.wikisource.org/wiki/%E6%98%8E%E5%8F%B2/%E5%8D%B715"
+			target="_blank">明史/卷15</a><br /> <span data-era="弘治~">十年春正月庚戌</span>，大祀天地於南郊。<span
+			data-era="~">三月辛亥</span>，以旱霾修省，求直言。<span data-era="~">甲子</span>，召大學士劉健、李東陽、謝遷於文華殿議庶政，後以為常。<br />
+		<span data-era="~">夏五月戊辰</span>，小王子犯潮河川。<span data-era="~">己巳</span>，犯大同。<span
+			data-era="~">六月己卯</span>，侍郎劉大夏、李介理宣府、大同軍餉。
+	</p>
+
+	<hr />
+	<p>可參照原始碼以了解使用方法。只要標注代表日期的文字，即可自動產生日期轉換之標籤。</p>
+	<p>
+		另提供<a href="era.htm" target="_blank">紀年轉換工具</a>。亦歡迎您協助我們，改善 <a
+			href="https://github.com/kanasimi/CeJS" target="_blank"
+			accessdate="2014/2/9 14:21" title="kanasimi/CeJS · GitHub">CeJS</a>。
+	</p>
+
+	<script type="text/javascript">
+		//return [range] || {String}date
+		function caculate_era(node, era_only) {
+			var era, date, tmp = CeL.DOM_data(node, 'era');
+			if (!tmp)
+				// no era data.
+				return;
+
+			era = CeL.DOM_data(node, 'era_parsed');
+			if (!era) {
+				// 解析 era。
+				era = tmp.replace(
+				// /~/:如英語字典之省略符號
+				/~/, CeL.set_text(node));
+				date = CeL.era(era, {
+					parse_only : true
+				});
+
+				// date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
+				if (!date[1]) {
+					date = null;
+					// 自身不完整。溯前尋找 base。
+					tmp = node;
+					while (tmp = tmp.previousSibling)
+						// 向前取第一個可以找出日期的。
+						if (date = caculate_era(tmp, true))
+							break;
+					if (!date)
+						return;
+
+					date = CeL.era(era, {
+						parse_only : true,
+						base : date
+					});
+					if (!date[1])
+						return;
+				}
+
+				// assert: date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
+
+				tmp = date.shift();
+				if (tmp && tmp.size > 1)
+					CeL.warn('caculate_era: 共取得 ' + tmp.size + ' 個可能的紀年名稱！');
+				else
+					tmp = null;
+
+				if (Array.isArray(era = date.shift().name))
+					// 當有多個可能的紀年名稱時，僅取紀年名，保留最大可能性。
+					era = tmp ? era[0] : era.slice(0, 2).reverse().join('');
+
+				if (tmp = date.shift()) {
+					era += tmp + '年';
+					if (tmp = date.shift()) {
+						era += tmp + '月';
+						if (tmp = date.shift())
+							era += tmp + '日';
+					}
+				}
+
+				// assert: {String}era
+
+				// cache.
+				CeL.DOM_data(node, 'era_parsed', era);
+			}
+
+			if (era_only)
+				return era;
+
+			node = CeL.era(era);
+			date = node.format(caculate_era.era_format);
+
+			tmp = CeL.era(era, {
+				get_range : -1
+			});
+			tmp[0] = tmp[0].format(caculate_era.format);
+			tmp[1] = tmp[1].format(caculate_era.format);
+			if (tmp[0] === tmp[1])
+				//	起始、結束於相同一天。
+				tmp = tmp[0];
+			else {
+				tmp = tmp[0] + '－' + tmp[1];
+				date += '起';
+			}
+
+			tmp = [ era, date, tmp ];
+			if (node.共存紀年)
+				tmp.push('<hr />共存紀年：<br />' + node.共存紀年.join('<br />'));
+			return tmp;
+		}
+
+		// 紀年名
+		caculate_era.era_format = {
+			parser : 'CE',
+			format : '%紀年名%年年%月月%日日(%日干支)',
+			locale : 'cmn-Hant-TW'
+		};
+		// range
+		caculate_era.format = {
+			parser : 'CE',
+			format : '公元%Y年%m月%d日'
+		};
+
+		function popup_era() {
+			var era = this.era_popup;
+			if (era)
+				// had cached
+				CeL.toggle_display(this.era_popup, true);
+
+			else if (era = caculate_era(this))
+				// TODO: 檢驗若無法設定 this.era_popup
+				CeL.locate_node(this.era_popup = CeL.new_node({
+					div : era.join('<br />'),
+					C : 'era_popup'
+				}, document.body), this);
+
+			if (era)
+				CeL.set_class(this, 'era_popupd');
+
+			return false;
+		}
+
+		popup_era.clear = function() {
+			CeL.toggle_display(this.era_popup, false);
+			CeL.set_class(this, 'era_popupd', {
+				remove : true
+			});
+
+			return false;
+		};
+
+		function set_up_node_era() {
+			// var last_era;
+			CeL.for_nodes(function(node) {
+				if (CeL.DOM_data(node, 'era')) {
+					node.onmouseover = popup_era;
+					node.onmouseout = popup_era.clear;
+					CeL.set_class(node, 'era_text');
+				}
+			}, 'span');
+		}
+
+		function initializer() {
+			var queue = [ [ 'data.date.era', 'interact.DOM' ], set_up_node_era ];
+
+			if (location.protocol !== 'file:')
+				queue.push('http://apis.google.com/js/plusone.js');
+
+			CeL.run(queue);
+		}
+	</script>
+
+	<script type="text/javascript" src="../ce.js">
+		//{"run":"initializer"}
+	</script>
+
+</body>
+</html>

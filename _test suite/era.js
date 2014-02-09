@@ -90,7 +90,9 @@ function show_calendar(era_name) {
 				R : '月干支/大小月'
 			},
 			{
-				th : era_name.indexOf('月') === -1 ? '朔日' : {
+				th : era_name.indexOf('月') === -1 ? {
+					T : '朔日'
+				} : {
 					span : {
 						T : '日干支'
 					},
@@ -286,16 +288,15 @@ function show_calendar(era_name) {
 // 開發人員使用 function。
 
 function 壓縮曆數() {
-	CeL.get_element('pack_result').value = CeL.era.pack(CeL
-			.get_element('pack_source').value
+	CeL.set_text('pack_result', CeL.era.pack(CeL.set_text('pack_source').trim()
 	// 為方便所作的權益措施。
-	.replace(/\\t/g, '\t'));
+	.replace(/\\t/g, '\t')));
 	return false;
 }
 
 function 解壓縮曆數() {
-	var data = CeL.get_element('pack_source').value.replace(/\\t/g, '\t')
-			.split('|');
+	var data = CeL.set_text('pack_source').trim().replace(/\\t/g, '\t').split(
+			'|');
 
 	if (data.length > 1) {
 		data[2] = CeL.era.extract(data[2]);
@@ -304,13 +305,13 @@ function 解壓縮曆數() {
 	} else
 		data = CeL.era.extract(data[0]);
 
-	CeL.get_element('pack_result').value = data;
+	CeL.set_text('pack_result', data);
 
 	return false;
 }
 
 function 解析曆數() {
-	var calendar = CeL.era.set(CeL.get_element('pack_source').value.replace(
+	var calendar = CeL.era.set(CeL.set_text('pack_source').trim().replace(
 			/\\t/g, '\t'), {
 		extract_only : true
 	});
@@ -321,7 +322,7 @@ function 解析曆數() {
 				year_data[year_data.leap] = '閏' + year_data[year_data.leap];
 			calendar[index] = year_data.join('\t');
 		});
-		CeL.get_element('pack_result').value = calendar.join('\n');
+		CeL.set_text('pack_result', calendar.join('\n'));
 	}
 	return false;
 }
