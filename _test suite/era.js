@@ -35,21 +35,26 @@ var _;
 
 // google.load('visualization', '1', {packages: ['corechart']});
 function initializer() {
-	CeL.run([ 'interact.DOM', 'application.debug.log', 'data.date.era',
-			'interact.form.select_input', 'interact.integrate.SVG' ],
-	//
-	function() {
-		// alias for CeL.gettext, then we can use _('message').
-		_ = CeL.gettext;
+	var queue = [
+			[ 'interact.DOM', 'application.debug.log', 'data.date.era',
+					'interact.form.select_input', 'interact.integrate.SVG' ],
+			function() {
+				// alias for CeL.gettext, then we can use _('message').
+				_ = CeL.gettext;
 
-		CeL.Log.set_board('panel_for_log');
-		// CeL.set_debug();
+				CeL.Log.set_board('panel_for_log');
+				// CeL.set_debug();
 
-		// Set a callback to run when the Google Visualization API is
-		// loaded.
-		// google.setOnLoadCallback(affairs);
+				// Set a callback to run when the Google Visualization API is
+				// loaded.
+				// google.setOnLoadCallback(affairs);
 
-	}, affairs, 'http://apis.google.com/js/plusone.js');
+			}, affairs ];
+
+	if (location.protocol !== 'file:')
+		queue.push('http://apis.google.com/js/plusone.js');
+
+	CeL.run(queue);
 }
 
 // ---------------------------------------------------------------------//
@@ -470,7 +475,10 @@ function draw_era(hierarchy) {
 
 					SVG_object.addRect(width, layer_height, from_x,
 							layer_from_y, null, 1, period.準確 === '年' ? '#ddd'
-									: unobvious ? '#ffa' : '#eef');
+									: unobvious ?
+									// 此處需要與 #era_graph_unobvious 之
+									// background-color 一致。
+									'#ffa' : '#eef');
 
 					// 繪製/加上時間軸線圖年代刻度。
 					if (
@@ -901,8 +909,7 @@ function affairs() {
 	if (_.is_domain_name('ja'))
 		o['六曜'] = '%六曜';
 	for (i in o) {
-		v = o[i];
-		output_format_types[_(i)] = v;
+		output_format_types[_(i)] = v = o[i];
 		list.push({
 			span : {
 				T : i
