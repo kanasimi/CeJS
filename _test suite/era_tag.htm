@@ -39,6 +39,11 @@
 	background-color: #efc;
 }
 
+#note_botton_layer {
+	color: #a2d;
+	font-weight: bold;
+}
+
 /*]]>*/
 </style>
 <title>紀年日期標注示範</title>
@@ -53,7 +58,7 @@
 
 	<h2>紀年日期標注之文本示範</h2>
 	<p>
-		請稍等，待<b>日期文字</b>變色後，可將滑鼠移至變色文字上觀看效果。
+		請稍等，待<b>日期文字</b>（具紀年日期資訊的文字）變色後，可將滑鼠移至變色文字上觀看效果。
 	</p>
 
 	<h3>示意圖</h3>
@@ -62,6 +67,9 @@
 		alt="示意圖" />
 
 	<h3>示範文本</h3>
+	<div id="note_botton_layer">
+		正進行程式初始化作業，請稍待片刻…<br />Loading... 少しお待ちください。
+	</div>
 	<p class="article">
 		<a
 			href="https://zh.wikisource.org/wiki/%E8%88%8A%E5%94%90%E6%9B%B8/%E5%8D%B711"
@@ -81,7 +89,19 @@
 			data-era="~">六月己卯</span>，侍郎劉大夏、李介理宣府、大同軍餉。
 	</p>
 
+	<!-- 
+	<a>更多示範文本</a>
+	<div>
+	<p></p>
+	
+	
+	</div>
+	-->
+
 	<hr />
+
+	<!-- Browser compatibility -->
+
 	<p>可參照原始碼以了解使用方法。只要標注代表日期的文字，即可自動產生日期轉換之標籤。</p>
 	<p>
 		另提供<a href="era.htm" target="_blank">紀年轉換工具</a>。亦歡迎您協助我們，改善 <a
@@ -232,7 +252,10 @@
 
 		function initializer() {
 			//CeL.set_debug(2);
-			var queue = [ [ 'data.date.era', 'interact.DOM' ], set_up_node_era ];
+			var queue = [ [ 'data.date.era', 'interact.DOM' ], set_up_node_era,
+					function() {
+						CeL.toggle_display('note_botton_layer', false);
+					} ];
 
 			if (location.protocol !== 'file:')
 				queue.push('http://apis.google.com/js/plusone.js');

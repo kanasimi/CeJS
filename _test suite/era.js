@@ -872,7 +872,6 @@ function affairs() {
 	CeL.log({
 		T : 'Initializing..'
 	}, true);
-	document.title = _(document.title);
 
 	// translate all nodes to show in Chinese
 	CeL.gettext.translate_nodes();
