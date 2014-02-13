@@ -21,7 +21,7 @@ table,th,td {
 }
 
 em {
-	color: #a53;
+	color: #c73;
 	font-style: normal;
 	font-weight: bold;
 }
@@ -339,24 +339,29 @@ em {
 				//去掉「〇」
 				+ CeL.Chinese_numerals_Normal_digits.slice(1) + '十廿卅]{1,4}年',
 				//
-				月 = '[春夏秋冬王]?[正臘' + CeL.Chinese_numerals_Normal_digits.slice(1)
+				月 = '[春夏秋冬王]?[正臘閏'
+						+ CeL.Chinese_numerals_Normal_digits.slice(1)
 						+ '十]{1,3}月',
 				//
-				日 = '(?:[' + CeL.STEM_LIST + '][' + CeL.BRANCH_LIST + ']朔?|初?['
+				日 = '(?:[' + CeL.STEM_LIST + '][' + CeL.BRANCH_LIST
+						+ '][朔晦望]?旦?|初?['
 						+ CeL.Chinese_numerals_Normal_digits.slice(1)
-						+ '十廿元]{1,3}日[朔晦望]?|[朔晦望]日)';
+						+ '十廿元]{1,3}日[朔晦望]?旦?|[朔晦望]日)';
 
-				era_pattern = new RegExp('((?:' + 紀年 + ')*' + 年 + '(?:' + 月 + 日
-						+ '?)?|(' + 月 + ')?' + 日 + '|' + 月 + ')', 'g');
+				// TODO: 地皇三年，天鳳六年改為地皇。
+				// e.g., 以建平二年為太初元年, 一年中地再動, 大酺五日, 乃元康四年嘉谷
+				era_pattern = new RegExp('(^|[^為酺乃])((?:' + 紀年 + ')*' + 年
+						+ '(?:' + 月 + 日 + '?)?|(?:' + 月 + ')?' + 日 + '|' + 月
+						+ ')([^中]|$)', 'g');
 			}
 
 			if (text === undefined)
 				text = document.getElementById('original_text').value;
 
-			//TODO: 以建平二年為太初元年
 			document.getElementById('parsed_text').innerHTML = text.replace(
 					/ +/g, '').replace(era_pattern,
-					'<span data-era="~">$1</span>').replace(/\n/g, '<br />');
+					'$1<span data-era="~">$2</span>$3')
+					.replace(/\n/g, '<br />');
 
 			set_up_node_era();
 
