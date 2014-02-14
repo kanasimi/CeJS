@@ -24,6 +24,8 @@ em {
 	font-size: .8em;
 }
 
+image {border:none;}
+
 table {
 	color: #137;
 	border: 1px solid #58b;
@@ -53,6 +55,12 @@ td {
 	border: 1px solid #faa;
 	border-radius: .2em;
 	padding: .2em;
+}
+
+#language select,
+#language option{
+	color: #44f;
+	background-color: #eef;
 }
 
 #era_input {
@@ -104,6 +112,7 @@ td {
 	color: #080;
 	background-color: #ccd;
 	text-decoration: none;
+	padding: 1pt;
 }
 
 .note_botton.selected {
@@ -209,11 +218,7 @@ tr.selected>td a {
 		<g:plusone></g:plusone>
 	</div>
 
-	<div id="language" style="float: right;">
-		<span data-gettext="Language"></span>: <a href="#"
-			onclick="return _.adapt_domain(this.title);" title="zh-TW">繁體中文</a> <a
-			href="#" onclick="return _.adapt_domain(this.title);" title="ja">日本語</a>
-	</div>
+	<div id="language" style="float: right;"></div>
 
 	<span data-gettext="取得紀年"></span>
 	<input id="era_input" title="來源紀年與日期" type="text" speech="Text"

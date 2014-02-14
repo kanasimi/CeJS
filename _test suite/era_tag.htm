@@ -132,7 +132,6 @@ em {
 	<div>
 	<p></p>
 	
-	
 	</div>
 	-->
 
@@ -330,6 +329,9 @@ em {
 
 		var era_pattern;
 		function parse_text(text) {
+			if (!CeL.era)
+				return false;
+
 			if (!era_pattern) {
 				//(紀年)?年(月(日)?)?|(月)?日|月
 				var 紀年 = CeL.era.era_list().join('|').replace(/\s*\([^()]*\)/g,

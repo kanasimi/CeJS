@@ -873,8 +873,10 @@ function affairs() {
 		T : 'Initializing..'
 	}, true);
 
-	// translate all nodes to show in Chinese
-	CeL.gettext.translate_nodes();
+	_.create_menu('language', [ 'TW', 'ja', 'en' ]);
+
+	// translate all nodes to show in default domain.
+	_.translate_nodes();
 
 	// -----------------------------
 
