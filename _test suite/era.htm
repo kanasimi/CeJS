@@ -24,7 +24,9 @@ em {
 	font-size: .8em;
 }
 
-image {border:none;}
+image {
+	border: none;
+}
 
 table {
 	color: #137;
@@ -48,6 +50,17 @@ td {
 	border-bottom: 1px solid #888;
 }
 
+.creation_title {
+	quotes: "《" "》" "〈" "〉";
+}
+
+.creation_title:before {
+	content: open-quote;
+}
+
+.creation_title:after {
+	content: close-quote;
+}
 /* ↑ copy from game.css */
 #language {
 	font-size: .8em;
@@ -57,8 +70,7 @@ td {
 	padding: .2em;
 }
 
-#language select,
-#language option{
+#language select,#language option {
 	color: #44f;
 	background-color: #eef;
 }
@@ -231,8 +243,7 @@ tr.selected>td a {
 	<span data-gettext="輸出格式:"></span>
 	<input id="output_format" title="輸出格式" />
 	<a href="#"
-		onclick="output_numeral=output_numeral==='Chinese'?'':'Chinese';this.className=output_numeral==='Chinese'?'selected':'unselected';
-	translate_era();return false;"
+		onclick="output_numeral=output_numeral==='Chinese'?'':'Chinese';this.className=output_numeral==='Chinese'?'selected':'unselected';translate_era();return false;"
 		data-gettext="中文數字" title="輸出中文數字"></a>
 	<a href="#" id="translate" title="執行轉換">→</a>
 	<span id="era_output"></span>
@@ -247,7 +258,7 @@ tr.selected>td a {
 
 	<div id="FAQ" class="note_panel">
 		<ul>
-			<li>本工具可作東亞各王朝紀年與公曆間之轉換，包括中西曆轉換。現已完成 1－2100 CE
+			<li>本工具可作東亞各王朝紀年與公曆間之轉換，包括中西曆轉換。現已完成 246 BCE－2100 CE
 				之中曆、太平天曆、日本元号等之轉換工作；並已針對某些紀年，如秦漢歷、唐肅宗、武后、太平天囯等時期作特殊處理。詳如主要資料來源表述；但遠非完善。</li>
 			<li>請使用新一點的瀏覽器，方可產生紀年線圖。<em>據測試，IE 11 尚無法使用線圖。</em>此外由於頻寬不足，加上載入時須做初始化，本頁面在載入時得稍微等一下。
 			</li>
@@ -351,7 +362,11 @@ tr.selected>td a {
 					href="http://hss.nthu.edu.tw/~ylh/abstract.php?paper_serial=92"
 					accessdate="2014/1/27 16:19">中國史曆表朔閏訂正舉隅──以唐《麟德曆》行用時期為例</a></td>
 				<td>麟德曆正式使用應始於麟德三年（乾封元年）。乾封一年至開元七年照<span class="creation_title">中國史曆表朔閏訂正舉隅</span>一文更改，未採用中央研究院版本。<br />於唐玄宗開元10年閏月，以及開元14年5月，由於無法按文更改，仍使用舊朔閏表。
-
+					<hr />另可參考：
+					<ul>
+						<li>王化昆(2012/5/1)<span class="creation_title">金石与唐代历日</span>（若有能提供本書者，不勝感謝。）
+						</li>
+					</ul>
 				</td>
 			</tr>
 			<tr>
@@ -459,16 +474,18 @@ tr.selected>td a {
 					accessdate="2013/4/14 21:57">[李忠林](2012)秦至汉初朔闰表</a>。
 					<hr />另可參考：
 					<ul>
-						<li>許名瑲(2013/7)<a
+						<li>許名瑲(2013/7)<a class="creation_title"
 							href="http://www.bsm.org.cn/show_article.php?id=1871"
 							accessdate="2014/2/11 13:8"
 							title="簡帛網&gt;&gt;簡帛文庫&gt;&gt;秦　　簡&gt;&gt;秦曆朔日復原">秦曆朔日復原——以出土簡牘為線索</a></li>
-						<li>許名瑲(2013/9)<a
+						<li>許名瑲(2013/9)<a class="creation_title"
 							href="http://www.bsm.org.cn/show_article.php?id=1918"
 							accessdate="2014/2/8 15:35"
 							title="簡帛網&gt;&gt;簡帛文庫&gt;&gt;漢　　簡&gt;&gt;漢初月朔考索">漢初月朔考索——以出土簡牘為線索</a>
 						</li>
-					</ul>此兩文朔閏與李忠林之研究結果幾乎相同。
+						<li>朱桂昌(2012/6)<span class="creation_title">颛顼日历表</span>（若有能提供本書者，不勝感謝。）
+						</li>
+					</ul>許名瑲兩文朔閏與李忠林之研究結果幾乎相同。
 				</td>
 			</tr>
 			<tr>
@@ -585,9 +602,12 @@ tr.selected>td a {
 저자: 안부영, 한국과학기술정보연구원
 ">한국의
 						표준연력 DB 시스템 구축</a>之研究結果。<em>此線上轉換程式似有十數處輸入錯誤(typo)，已按照曆法規則加以修正；惟無法保證完全準確。</em>轉入過程可參考<a
-					href="https://docs.google.com/file/d/0B3Mb73DFKnSFaEdrY01pVllpbFk/edit">未整理之記錄</a>。<br />其他可參考之文獻如<a
+					href="https://docs.google.com/file/d/0B3Mb73DFKnSFaEdrY01pVllpbFk/edit">未整理之記錄</a>。<br />其他可參考之文獻如삼국시대
+					연력표(<a class="creation_title"
 					href="http://books.google.com.tw/books?id=7dEQAQAAMAAJ"
-					accessdate="2013/4/27 16:11">三國時代年歷表</a>(2009)。因不諳韓語，無法作深入研究校正。
+					accessdate="2013/4/27 16:11">三國時代 年曆表</a>, 57 BCE－935
+					CE)(2009)、高麗時代年歷表(2009)、조선시대 연력표(한국표준연력표
+					3)(2009)、韓甫植(1987)韓國年曆大典(한국년력대전)。因不諳韓語，無法作深入研究校正。
 				</td>
 			</tr>
 			<tr>
@@ -654,7 +674,9 @@ tr.selected>td a {
 			<tr>
 				<td>敦煌曆<em>研究中</em></td>
 				<td></td>
-				<td>因非身在學界，若有能提供相關資料，例如藤枝晃(1973.09.20)敦煌暦日譜一書者，不勝感謝。</td>
+				<td>因非身在學界，若有能提供相關資料，例如藤枝晃(1973.09.20)<span
+					class="creation_title">敦煌暦日譜</span>一書者，不勝感謝。
+				</td>
 			</tr>
 		</table>
 	</div>
