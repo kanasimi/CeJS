@@ -134,6 +134,12 @@ function show_calendar(era_name) {
 	if (!dates)
 		return;
 
+	if (dates.length > show_calendar.LIMIT) {
+		CeL.warn('show_calendar: 輸出年段/時段紀錄過長（' + dates.length
+				+ ' 筆），已超過輸出總筆數限制！將截取前 ' + show_calendar.LIMIT + ' 筆。');
+		dates.length = show_calendar.LIMIT;
+	}
+
 	if (main_date_value)
 		if (main_date_value.日 == 1 && era_name.indexOf('日') === -1)
 			main_date_value = null;
@@ -284,6 +290,8 @@ function show_calendar(era_name) {
 	select_panel('calendar', true);
 }
 
+show_calendar.LIMIT = 200;
+
 // ---------------------------------------------------------------------//
 // 開發人員使用 function。
 
@@ -367,6 +375,9 @@ function set_SVG_text_properties(recover) {
 	}
 }
 
+// Firefox/30.0 尚未支援 writing-mode。IE, Chrome 支援。
+// https://bugzilla.mozilla.org/show_bug.cgi?id=145503
+// https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/writing-mode
 var support_vertical_text = !/Firefox/i.test(navigator.userAgent);
 
 function recover_SVG_text_properties() {
@@ -479,7 +490,7 @@ function draw_era(hierarchy) {
 									: unobvious ?
 									// 此處需要與 #era_graph_unobvious 之
 									// background-color 一致。
-									'#ffa' : '#eef');
+									'#ffa' : '#ddf');
 
 					// 繪製/加上時間軸線圖年代刻度。
 					if (
