@@ -345,10 +345,11 @@ em {
 						+ CeL.Chinese_numerals_Normal_digits.slice(1)
 						+ '十]{1,3}月',
 				//
-				日 = '(?:[' + CeL.STEM_LIST + '][' + CeL.BRANCH_LIST
-						+ '][朔晦望]?旦?|初?['
+				日 = '(?:(?:[' + CeL.STEM_LIST + '][' + CeL.BRANCH_LIST
+						+ ']|初[' + CeL.Chinese_numerals_Normal_digits.slice(1)
+						+ ']|[十廿]?[元'
 						+ CeL.Chinese_numerals_Normal_digits.slice(1)
-						+ '十廿元]{1,3}日[朔晦望]?旦?|[朔晦望]日)';
+						+ ']日)[朔晦望]?旦?|[朔晦望]日)';
 
 				// TODO: 地皇三年，天鳳六年改為地皇。
 				// e.g., 以建平二年為太初元年, 一年中地再動, 大酺五日, 乃元康四年嘉谷
