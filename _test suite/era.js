@@ -35,6 +35,8 @@ var _;
 
 // google.load('visualization', '1', {packages: ['corechart']});
 function initializer() {
+	// CeL.env.no_catch = true;
+
 	var queue = [
 			[ 'interact.DOM', 'application.debug.log', 'data.date.era',
 					'interact.form.select_input', 'interact.integrate.SVG' ],
