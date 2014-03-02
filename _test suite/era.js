@@ -838,7 +838,9 @@ function translate_era(era) {
 				if (!Array.isArray(output))
 					output = [ output ];
 				output.unshift({
-					em : '此輸出值僅約略準確至' + date.準確 + '：'
+					em : '此輸出值僅約略準確至'
+							+ (/^\d+[年月日]$/.test(date.準確) ? '前後' : '')
+							+ date.準確 + '： '
 				});
 			}
 		}
