@@ -321,8 +321,15 @@ function 解壓縮曆數() {
 }
 
 function 解析曆數() {
-	var calendar = CeL.era.set(CeL.set_text('pack_source').trim().replace(
-			/\\t/g, '\t'), {
+	var calendar = CeL.set_text('pack_source').trim().replace(/\\t/g, '\t');
+
+	calendar = calendar.indexOf('|') === -1
+	// 當作紀年名
+	? CeL.era(calendar, {
+		get_era : true
+	})
+	// 當作曆數資料
+	: CeL.era.set(calendar, {
 		extract_only : true
 	});
 
@@ -753,6 +760,7 @@ function translate_era(era) {
 	if (!era)
 		era = era_input_object.setValue();
 	var output, date = CeL.era(era, {
+		// 尋準確 : 4,
 		numeral : output_numeral
 	});
 	if (date) {
