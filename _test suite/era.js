@@ -35,8 +35,6 @@ var _;
 
 // google.load('visualization', '1', {packages: ['corechart']});
 function initializer() {
-	// CeL.env.no_catch = true;
-
 	var queue = [
 			[ 'interact.DOM', 'application.debug.log', 'data.date.era',
 					'interact.form.select_input', 'interact.integrate.SVG' ],
@@ -53,7 +51,10 @@ function initializer() {
 
 			}, affairs ];
 
-	if (location.protocol !== 'file:')
+	if (location.protocol === 'file:')
+		// 當 include 程式碼，執行時不 catch error 以作防範。
+		CeL.env.no_catch = true;
+	else
 		queue.push('http://apis.google.com/js/plusone.js');
 
 	CeL.run(queue);
