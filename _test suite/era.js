@@ -123,7 +123,7 @@ function show_calendar(era_name) {
 				th : {
 					T : '共存紀年'
 				},
-				title : '本日/本年共存紀年。對未有詳實資料者，僅約略準確至年！'
+				title : '本日/本年共存紀年。對未有詳實資料者，僅約略準確至所列日期！'
 			} ], output = [ {
 		tr : title
 	} ], 前年名, 前月名, 前紀年名, 後紀年名,
@@ -198,7 +198,7 @@ function show_calendar(era_name) {
 		tmp = date.format(
 				{
 					parser : 'CE',
-					format : date.準確 === '年' ? '%紀年名%年年|%Y年|%年干支|||'
+					format : date.精 === '年' ? '%紀年名%年年|%Y年|%年干支|||'
 					//
 					: '%紀年名%年年%月月%日日|%Y/%m/%d('
 							+ (_.is_domain_name('ja') ? '%曜日' : '%w')
@@ -232,7 +232,7 @@ function show_calendar(era_name) {
 		});
 
 		list.push({
-			td : date.準確 === '年' ? date.to_Tabular()[0] + '年' : date
+			td : date.精 === '年' ? date.to_Tabular()[0] + '年' : date
 					.to_Tabular().slice(0, 3).join('/')
 		}, {
 			td : date.共存紀年 || ''
@@ -394,6 +394,13 @@ function recover_SVG_text_properties() {
 	set_SVG_text_properties.call(this, true);
 }
 
+// TODO
+// area width, height.
+// return [top, left, width, height]
+function get_area(width, height, periods) {
+	;
+}
+
 /**
  * 畫個簡單的時間軸線圖。<br />
  * TODO: 加上年代。
@@ -442,6 +449,11 @@ function draw_era(hierarchy) {
 
 				period_list.forEach(function(period, index) {
 					var style, unobvious,
+					//
+					存疑資料 = period.準 || period.精,
+					//
+					date_options = period.精 === '年' ? draw_era.year_options
+							: draw_era.date_options,
 					// IE 中，period.start 可能為 Date 或 Number。
 					period_start = new Date(period.start - 0),
 					// Era.name 為 Array。
@@ -468,10 +480,10 @@ function draw_era(hierarchy) {
 						unobvious = true;
 						var duration = [ '(',
 						//
-						period_start.format(draw_era.date_options), ];
+						period_start.format(date_options), ];
 						if (!isNaN(period.end))
 							duration.push('－', (new Date(period.end - 0))
-									.format(draw_era.date_options));
+									.format(date_options));
 						duration.push(') ');
 						short_period.push({
 							a : name,
@@ -490,17 +502,16 @@ function draw_era(hierarchy) {
 						// 警告: .setDate(-1) 此為權宜之計。
 						end_time.setDate(end_time.getDate() - 1);
 						draw_era.date_cache[name] = {
-							start : period_start.format(draw_era.date_options),
-							end : end_time.format(draw_era.date_options)
+							start : period_start.format(date_options),
+							end : end_time.format(date_options)
 						};
 					}
 
 					SVG_object.addRect(width, layer_height, from_x,
-							layer_from_y, null, 1, period.準確 === '年' ? '#ddd'
-									: unobvious ?
-									// 此處需要與 #era_graph_unobvious 之
-									// background-color 一致。
-									'#ffa' : '#ddf');
+							layer_from_y, null, 1, 存疑資料 ? '#ddd' : unobvious ?
+							// 此處需要與 #era_graph_unobvious 之
+							// background-color 一致。
+							'#ffa' : '#ddf');
 
 					// 繪製/加上時間軸線圖年代刻度。
 					if (
@@ -514,7 +525,7 @@ function draw_era(hierarchy) {
 					< get_from_x(period_list[index + 1]) - from_x)
 						SVG_object.addText(period_start.format(
 						//
-						period.準確 === '年' ? draw_era.ruler_date_year_options
+						period.精 === '年' ? draw_era.ruler_date_year_options
 								: draw_era.ruler_date_options),
 								previous_ruler_scale = from_x, layer_from_y
 										+ SVG_object.addText.defaultCharWidthPx
@@ -523,8 +534,8 @@ function draw_era(hierarchy) {
 								});
 
 					style = {
-						color : period.準確 === '年' ? '#444'
-								: layer_count === 1 ? '#15a' : '#a2e',
+						color : 存疑資料 ? '#444' : layer_count === 1 ? '#15a'
+								: '#a2e',
 						cursor : 'pointer',
 						// 清晰的小字體
 						'font-family' : '標楷體,DFKai-SB',
@@ -651,7 +662,7 @@ draw_era.click_Era = function() {
 	draw_era.draw_navigation(hierarchy, true);
 
 	era_input_object.setValue(era.format({
-		format : era.準確 === '年' ? '%紀年名%年年' : '%紀年名%年年%月月%日日',
+		format : era.精 === '年' ? '%紀年名%年年' : '%紀年名%年年%月月%日日',
 		locale : 'cmn-Hant-TW'
 	}));
 	translate_era();
@@ -674,6 +685,10 @@ draw_era.bottom_height = 0;
 draw_era.date_options = {
 	parser : 'CE',
 	format : '%Y/%m/%d'
+};
+draw_era.year_options = {
+	parser : 'CE',
+	format : '%Y'
 };
 
 draw_era.ruler_date_options = {
@@ -748,8 +763,8 @@ output_format_types = {
 	'年月日干支' : '%年干支年%月干支月%日干支日',
 	'年月日時干支' : '%年干支年%月干支月%日干支日%時干支時',
 	'四柱八字' : '%年干支%月干支%日干支%時干支',
-	'Julian Day Number' : '%JDN',
-	'Julian Day' : '%JD'
+	// 'Julian Day' : 'JD%JD',
+	'Julian Day Number' : 'JDN%JDN'
 };
 
 function input_era(key) {
@@ -757,11 +772,16 @@ function input_era(key) {
 	original_input.apply(this, arguments);
 }
 
+var 準_MSG = {
+	疑 : '尚存疑',
+	傳說 : '為傳說時代之資料'
+};
+
 function translate_era(era) {
 	if (!era)
 		era = era_input_object.setValue();
 	var output, date = CeL.era(era, {
-		// 尋準確 : 4,
+		// 尋精準 : 4,
 		numeral : output_numeral
 	});
 	if (date) {
@@ -773,7 +793,7 @@ function translate_era(era) {
 		if (!format)
 			format = output_format_object.setValue(
 			//
-			'公元%Y年' + (date.準確 === '年' ? '' : '%m月%d日'));
+			'公元%Y年' + (date.精 === '年' ? '' : '%m月%d日'));
 
 		if (format === '共存紀年')
 			if (Array.isArray(output = date.共存紀年))
@@ -843,14 +863,20 @@ function translate_era(era) {
 				});
 			}
 
-			if (date.準確) {
+			if (date.準 || date.精) {
 				if (!Array.isArray(output))
 					output = [ output ];
-				output.unshift({
-					em : '此輸出值僅約略準確至'
-							+ (/^\d+[年月日]$/.test(date.準確) ? '前後' : '')
-							+ date.準確 + '： '
-				});
+				output
+						.unshift({
+							em : [
+									'此輸出值',
+									準_MSG[date.準]
+											|| '僅約略準確至'
+											+ (date.準 || date.精)
+											+ (/^\d+[年月日]$/.test(date.準
+													|| date.精) ? '前後' : ''),
+									'，僅供參考： ' ]
+						});
 			}
 		}
 
@@ -913,8 +939,9 @@ function affairs() {
 	era_input_object = new CeL.select_input('era_input', CeL.era
 			.get_candidate(), 'includeKeyWC');
 
-	CeL.get_element('era_input').onkeypress = CeL.get_element('output_format').onkeypress = function(
-			e) {
+	CeL.get_element('era_input').onkeypress
+	//
+	= CeL.get_element('output_format').onkeypress = function(e) {
 		if (!e)
 			e = window.event;
 		// press [Enter]
@@ -922,7 +949,9 @@ function affairs() {
 			translate_era();
 	};
 
-	CeL.get_element('output_format').onchange = CeL.get_element('translate').onclick = function() {
+	CeL.get_element('output_format').onchange
+	//
+	= CeL.get_element('translate').onclick = function() {
 		translate_era();
 		return false;
 	};
