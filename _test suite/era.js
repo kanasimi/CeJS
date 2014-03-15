@@ -132,7 +132,7 @@ function show_calendar(era_name) {
 	//
 	dates = CeL.era.dates(era_name, {
 		含參照用 : /明治|大正|昭和|明仁/.test(era_name)
-	});
+	}), is_年譜;
 
 	if (!dates)
 		return;
@@ -195,10 +195,12 @@ function show_calendar(era_name) {
 			list = [];
 		}
 
+		if (tmp = date.精 === '年')
+			is_年譜 = true;
 		tmp = date.format(
 				{
 					parser : 'CE',
-					format : date.精 === '年' ? '%紀年名%年年|%Y年|%年干支|||'
+					format : tmp ? '%紀年名%年年|%Y年|%年干支|||'
 					//
 					: '%紀年名%年年%月月%日日|%Y/%m/%d('
 							+ (_.is_domain_name('ja') ? '%曜日' : '%w')
@@ -278,7 +280,7 @@ function show_calendar(era_name) {
 		C : 'to_select',
 		onclick : click_title_as_era
 	}, {
-		T : '曆譜'
+		T : is_年譜 ? '年譜' : '曆譜'
 	}, '（共有 ' + dates.length + ' 個' + (dates.type ? '時' : '年') + '段紀錄）' ]
 			: '無可供列出之曆譜！';
 
@@ -918,6 +920,7 @@ function click_title_as_era() {
 	return false;
 }
 
+var SVG_min_width = 600, SVG_min_height = 500, SVG_padding = 30;
 function affairs() {
 	CeL.log({
 		T : 'Initializing..'
@@ -1038,13 +1041,24 @@ function affairs() {
 	CeL.toggle_display('era_graph', true);
 	CeL.toggle_display(SVG_object, true);
 	era_name_classifier = CeL.era.pack.era_name_classifier;
-	draw_era.width = SVG_object.offsetWidth - 2 * draw_era.left;
+	var SVG_width = SVG_object.offsetWidth, SVG_height = SVG_object.offsetHeight;
+	CeL.debug('SVG: ' + SVG_width + '×' + SVG_height);
+	if (SVG_width < SVG_min_width || SVG_height < SVG_min_height) {
+		CeL.err('當前視窗過小。將採用螢幕之大小，請將視窗放到最大。');
+		if (SVG_width < SVG_min_width)
+			SVG_width = Math.max((screen.availWidth || screen.width)
+					- SVG_padding, SVG_min_width);
+		if (SVG_height < SVG_min_height)
+			SVG_height = Math.max((screen.availHeight || screen.height)
+					- SVG_padding, SVG_min_height);
+
+	}
+	draw_era.width = SVG_width - 2 * draw_era.left;
 	// 須扣掉 era_graph_navigation 高度。
-	draw_era.height = SVG_object.offsetHeight - draw_era.top
-			- draw_era.bottom_height
+	draw_era.height = SVG_height - draw_era.top - draw_era.bottom_height
 			- CeL.get_element('era_graph_navigation').offsetHeight;
 
-	SVG_object = new CeL.SVG(SVG_object.offsetWidth, SVG_object.offsetHeight);
+	SVG_object = new CeL.SVG(SVG_width, SVG_height);
 
 	var is_IE11 = /Trident\/7/.test(navigator.appVersion);
 	if (SVG_object.status_OK() && !is_IE11) {
