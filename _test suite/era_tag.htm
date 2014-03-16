@@ -333,27 +333,27 @@ em {
 				return false;
 
 			if (!era_pattern) {
-				//(紀年)?年(月(日)?)?|(月)?日|月
+				// (紀年)?年(月(日)?)?|(月)?日|月
 				var 紀年 = CeL.era.era_list().join('|').replace(/\s*\([^()]*\)/g,
 						''),
 				//
 				年 = '[元'
-				//去掉「〇」
+				// 去掉「〇」
 				+ CeL.Chinese_numerals_Normal_digits.slice(1) + '十廿卅]{1,4}年',
 				//
 				月 = '[春夏秋冬王]?[正臘閏'
 						+ CeL.Chinese_numerals_Normal_digits.slice(1)
 						+ '十]{1,3}月',
 				//
-				日 = '(?:(?:[' + CeL.STEM_LIST + '][' + CeL.BRANCH_LIST
-						+ ']|初[' + CeL.Chinese_numerals_Normal_digits.slice(1)
+				日 = '(?:(?:[' + CeL.STEM_LIST + '][' + CeL.BRANCH_LIST + ']|初['
+						+ CeL.Chinese_numerals_Normal_digits.slice(1)
 						+ ']|[十廿]?[元'
 						+ CeL.Chinese_numerals_Normal_digits.slice(1)
 						+ ']日)[朔晦望]?旦?|[朔晦望]日)';
 
 				// TODO: 地皇三年，天鳳六年改為地皇。
-				// e.g., 以建平二年為太初元年, 一年中地再動, 大酺五日, 乃元康四年嘉谷
-				era_pattern = new RegExp('(^|[^為酺乃])((?:' + 紀年 + ')*' + 年
+				// e.g., 以建平二年為太初元年, 一年中地再動, 大酺五日, 乃元康四年嘉谷, （玄宗開元）十年
+				era_pattern = new RegExp('(^|[^為酺乃])((?:' + 紀年 + ')*(?:）\0|\\))?' + 年
 						+ '(?:' + 月 + 日 + '?)?|(?:' + 月 + ')?' + 日 + '|' + 月
 						+ ')([^中]|$)', 'g');
 			}
@@ -361,10 +361,17 @@ em {
 			if (text === undefined)
 				text = document.getElementById('original_text').value;
 
-			document.getElementById('parsed_text').innerHTML = text.replace(
-					/ +/g, '').replace(era_pattern,
-					'$1<span data-era="~">$2</span>$3')
-					.replace(/\n/g, '<br />');
+			document.getElementById('parsed_text').innerHTML = text
+			// 因為 era_pattern 於會利用到 pattern 前後，這部分會被吃掉，
+			// 像 "十年，七月庚辰" 就會在 match 了 "十年，" 後，無法 match 到 "七月"。
+			// 因此先將可能出現問題的做處理，多墊個字元以備不時之需。
+			.replace(/([，。；！）])/g, '$1\0')
+			// search
+			.replace(era_pattern, '$1<span data-era="~">$2</span>$3')
+			// 回復
+			.replace(/([，。；！）])\0/g, '$1')
+			// format
+			.replace(/\n/g, '<br />');
 
 			set_up_node_era();
 

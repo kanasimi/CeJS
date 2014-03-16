@@ -349,7 +349,9 @@ function 解析曆數() {
 
 // ---------------------------------------------------------------------//
 
-var era_name_classifier, MIN_FONT_SIZE = 10;
+var era_name_classifier, MIN_FONT_SIZE = 10,
+// 經驗值: Chrome 35 在字體太大時會化ける。
+MAX_FONT_SIZE = /WebKit/i.test(navigator.userAgent) ? 250 : Infinity;
 
 function draw_title_era() {
 	var hierarchy = this.title;
@@ -497,7 +499,8 @@ function draw_era(hierarchy) {
 							span : duration,
 							C : 'duration'
 						});
-					}
+					} else if (font_size > MAX_FONT_SIZE)
+						font_size = MAX_FONT_SIZE;
 
 					if (!(name in draw_era.date_cache) && !isNaN(period.end)) {
 						var end_time = new Date(period.end - 0);
