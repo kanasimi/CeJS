@@ -721,6 +721,8 @@ var last_selected, select_panels = {
 	era_graph : '紀年線圖',
 	// 年表
 	calendar : '曆譜',
+	// 整批轉換
+	batch_processing : '批次轉換',
 	pack_data : '曆數處理',
 	comments : '問題回報'
 };
@@ -923,6 +925,39 @@ function click_title_as_era() {
 	return false;
 }
 
+// ---------------------------------------------------------------------//
+
+function 批次轉換() {
+	var date, count = 0, data = CeL.set_text('batch_source').trim().split('\n'),
+	//
+	prefix = CeL.set_text('batch_prefix'),
+	//
+	format = output_format_object.setValue(),
+	//
+	period_end = CeL.set_text('batch_period_end') === '結束';
+	if (!format)
+		format = output_format_object.setValue('%Y/%m/%d');
+	format = {
+		parser : 'CE',
+		format : format,
+		locale : 'cmn-Hant-TW',
+		numeral : output_numeral,
+		as_UTC_time : true
+	};
+	// 開始轉換。
+	data.forEach(function(line, index) {
+		if ((line = line.trim()) && (date = CeL.era(prefix + line, {
+			period_end : period_end
+		})))
+			count++, data[index] = date.format(format);
+	});
+	CeL.set_text('batch_result', data.join('\n'));
+	CeL.log('共轉換 ' + count + '/' + data.length + ' 筆。');
+	return false;
+}
+
+// ---------------------------------------------------------------------//
+
 var SVG_min_width = 600, SVG_min_height = 500, SVG_padding = 30;
 function affairs() {
 	CeL.log({
@@ -998,23 +1033,26 @@ function affairs() {
 	// CeL.Log.toggle(false);
 
 	list = [];
-	[ '共存紀年:546/3/1', '共存紀年:1546-3-1', '年月日時干支:一八八〇年四月二十一日七時',
+	o = [];
+	i = [ '共存紀年:546/3/1', '共存紀年:1546-3-1', '年月日時干支:一八八〇年四月二十一日七時',
 			'年月日時干支:一八八〇年庚辰月庚辰日7時', '公元日期:一八八〇年庚辰月庚辰日庚辰時', '初始元年11月1日',
 			'明思宗崇禎1年1月26日', '公元日期:天聰二年甲寅月戊子日', '公元日期:天聰2年寅月戊子日',
 			'清德宗光緒六年三月十三日', '清德宗光緒庚辰年三月十三日', '清德宗光緒庚辰年庚辰月庚辰日',
 			'清德宗光緒六年三月十三日辰正一刻', '魏少帝嘉平4年5月1日', '魏少帝嘉平4年閏5月1日', '魏少帝嘉平4年閏月1日',
-			'景元元年', '景元元年7月', '元文宗天曆2年8月8日', '元文宗天曆3/1/2', '共存紀年:JD2032189' ]
-			.forEach(function(era) {
-				list.push({
-					div : {
-						a : era,
-						title : era,
-						href : '#',
-						onclick : click_title_as_era
-					}
-				});
-			});
+			'景元元年', '景元元年7月', '元文宗天曆2年8月8日', '元文宗天曆3/1/2', '共存紀年:JD2032189' ];
+	i.forEach(function(era) {
+		list.push({
+			div : {
+				a : era,
+				title : era,
+				href : '#',
+				onclick : click_title_as_era
+			}
+		});
+		o.push(era.replace(/^[^:]+:/, ''));
+	});
 	CeL.new_node(list, 'example');
+	CeL.set_text('batch_source', o.join('\n'));
 
 	// -----------------------------
 
