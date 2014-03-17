@@ -14,16 +14,21 @@ table,th,td {
 	border: solid 1px #aaa;
 }
 
-#original_text {
-	margin-left: 2em;
-	height: 8em;
-	width: 95%;
-}
-
 em {
 	color: #c73;
 	font-style: normal;
 	font-weight: bold;
+}
+
+#note_botton_layer {
+	color: #a2d;
+	font-weight: bold;
+}
+
+#original_text {
+	margin-left: 2em;
+	height: 8em;
+	width: 95%;
 }
 
 .article {
@@ -32,37 +37,6 @@ em {
 	padding: 1em;
 	border: 1pt solid #ea3;
 	border-radius: 1em;
-}
-
-.era_text {
-	color: #34c;
-}
-
-.era_popup {
-	width: 20em;
-	padding-bottom: .3em;
-	color: #34c;
-	background-color: #efc;
-	border: 1pt solid #deb;
-	border-top: none;
-	border-left: none;
-	border-radius: .4em;
-	opacity: 0.95;
-}
-
-/* http://webdesign.about.com/od/beginningcss/a/style_hr_tag.htm */
-.era_popup hr {
-	margin: .2em;
-	margin-left: 0;
-}
-
-.era_popupd {
-	background-color: #efc;
-}
-
-#note_botton_layer {
-	color: #a2d;
-	font-weight: bold;
 }
 
 /*]]>*/
@@ -184,197 +158,14 @@ em {
 	</table>
 
 	<script type="text/javascript">
-		//return [range] || {String}date
-		function caculate_node_era(node, era_only) {
-			var era, date, tmp = CeL.DOM_data(node, 'era');
-			if (!tmp)
-				// no era data.
-				return;
-
-			era = CeL.DOM_data(node, 'era_parsed');
-			if (!era) {
-				// 解析 era。
-				era = tmp.replace(
-				// /~/:如英語字典之省略符號
-				/~/, CeL.set_text(node));
-				date = CeL.era(era, {
-					parse_only : true
-				});
-
-				// date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
-				if (!date[1]) {
-					date = null;
-					// 自身不完整。溯前尋找 base。
-					tmp = node;
-					while (tmp = tmp.previousSibling)
-						// 向前取第一個可以找出日期的。
-						if (date = caculate_node_era(tmp, true))
-							break;
-					if (!date)
-						return;
-
-					date = CeL.era(era, {
-						parse_only : true,
-						base : date
-					});
-					if (!date[1])
-						return;
-				}
-
-				// assert: date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
-
-				tmp = date.shift();
-				if (tmp && tmp.size > 1)
-					CeL.warn('caculate_node_era: 共取得 ' + tmp.size
-							+ ' 個可能的紀年名稱！');
-				else
-					tmp = null;
-
-				if (Array.isArray(era = date.shift().name))
-					// 當有多個可能的紀年名稱時，僅取紀年名，保留最大可能性。
-					era = tmp ? era[0] : era.slice(0, 2).reverse().join('');
-
-				if (tmp = date.shift()) {
-					era += tmp + '年';
-					if (tmp = date.shift()) {
-						era += tmp + '月';
-						if (tmp = date.shift())
-							era += tmp + '日';
-					}
-				}
-
-				// assert: {String}era
-
-				// cache.
-				CeL.DOM_data(node, 'era_parsed', era);
-			}
-
-			if (era_only)
-				return era;
-
-			node = CeL.era(era);
-			date = node.format(caculate_node_era.era_format);
-
-			tmp = CeL.era(era, {
-				get_range : -1
-			});
-			tmp[0] = tmp[0].format(caculate_node_era.format);
-			tmp[1] = tmp[1].format(caculate_node_era.format);
-			if (tmp[0] === tmp[1])
-				// 起始、結束於相同一天。
-				tmp = tmp[0];
-			else {
-				tmp = tmp[0] + '－' + tmp[1];
-				date += '起';
-			}
-
-			tmp = [ era, date, tmp ];
-			if (node.共存紀年)
-				tmp.push('<hr />共存紀年：<br />' + node.共存紀年.join('<br />'));
-			return tmp;
-		}
-
-		// 紀年名
-		caculate_node_era.era_format = {
-			parser : 'CE',
-			format : '%紀年名%年年%月月%日日(%日干支)',
-			locale : 'cmn-Hant-TW'
-		};
-		// range
-		caculate_node_era.format = {
-			parser : 'CE',
-			format : '公元%Y年%m月%d日'
-		};
-
-		function popup_era() {
-			var era = this.era_popup;
-			if (era)
-				// had cached
-				CeL.toggle_display(this.era_popup, true);
-
-			else if (era = caculate_node_era(this))
-				// TODO: 檢驗若無法設定 this.era_popup
-				CeL.locate_node(this.era_popup = CeL.new_node({
-					div : era.join('<br />'),
-					C : 'era_popup'
-				}, document.body), this);
-
-			if (era)
-				CeL.set_class(this, 'era_popupd');
-
-			return false;
-		}
-
-		popup_era.clear = function() {
-			CeL.toggle_display(this.era_popup, false);
-			CeL.set_class(this, 'era_popupd', {
-				remove : true
-			});
-
-			return false;
-		};
-
-		function set_up_node_era(tag) {
-			// var last_era;
-			CeL.for_nodes(function(node) {
-				if (CeL.DOM_data(node, 'era')) {
-					node.onmouseover = popup_era;
-					node.onmouseout = popup_era.clear;
-					CeL.set_class(node, 'era_text');
-				}
-			}, tag || 'span');
-		}
-
-		// -----------------------------------------------------------
-
-		var era_pattern;
 		function parse_text(text) {
 			if (!CeL.era)
 				return false;
 
-			if (!era_pattern) {
-				// (紀年)?年(月(日)?)?|(月)?日|月
-				var 紀年 = CeL.era.era_list().join('|').replace(/\s*\([^()]*\)/g,
-						''),
-				//
-				年 = '(?:[元'
-				// 去掉「〇」
-				+ CeL.Chinese_numerals_Normal_digits.slice(1)
-						+ ']|[十廿卅]有?){1,4}年',
-				//春王正月 冬十有二月
-				月 = '[春夏秋冬]?王?(?:[正臘閏'
-						+ CeL.Chinese_numerals_Normal_digits.slice(1)
-						+ ']|十有?){1,3}月',
-				//
-				日 = '(?:(?:[' + CeL.STEM_LIST + '][' + CeL.BRANCH_LIST + ']|初['
-						+ CeL.Chinese_numerals_Normal_digits.slice(1)
-						+ ']|[十廿卅]?有?[元'
-						+ CeL.Chinese_numerals_Normal_digits.slice(1)
-						+ ']日)[朔晦望]?旦?|[朔晦望]日)';
-
-				// TODO: 地皇三年，天鳳六年改為地皇。
-				// e.g., 以建平二年為太初元年, 一年中地再動, 大酺五日, 乃元康四年嘉谷, （玄宗開元）十年
-				era_pattern = new RegExp('(^|[^為酺乃])((?:' + 紀年
-						+ ')*(?:）\0|\\))?' + 年 + '(?:' + 月 + 日 + '?)?|(?:' + 月
-						+ ')?' + 日 + '|' + 月 + ')([^中]|$)', 'g');
-			}
-
 			if (text === undefined)
 				text = document.getElementById('original_text').value;
 
-			document.getElementById('parsed_text').innerHTML = text
-			// 因為 era_pattern 於會利用到 pattern 前後，這部分會被吃掉，
-			// 像 "十年，七月庚辰" 就會在 match 了 "十年，" 後，無法 match 到 "七月"。
-			// 因此先將可能出現問題的做處理，多墊個字元以備不時之需。
-			.replace(/([，。；！）])/g, '$1\0')
-			// search
-			.replace(era_pattern, '$1<span data-era="~">$2</span>$3')
-			// 回復
-			.replace(/([，。；！）])\0/g, '$1')
-			// format
-			.replace(/\n/g, '<br />');
-
-			set_up_node_era();
+			CeL.era.to_HTML(text, 'parsed_text');
 
 			return false;
 		}
@@ -383,10 +174,11 @@ em {
 
 		function initializer() {
 			// CeL.set_debug(2);
-			var queue = [ [ 'data.date.era', 'interact.DOM' ], set_up_node_era,
-					function() {
-						CeL.toggle_display('note_botton_layer', false);
-					} ];
+			var queue = [ [ 'data.date.era', 'interact.DOM' ], function() {
+				CeL.era.setup_nodes();
+			}, function() {
+				CeL.toggle_display('note_botton_layer', false);
+			} ];
 
 			if (location.protocol !== 'file:')
 				queue.push('http://apis.google.com/js/plusone.js');

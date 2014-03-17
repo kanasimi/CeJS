@@ -723,6 +723,7 @@ var last_selected, select_panels = {
 	calendar : '曆譜',
 	// 整批轉換
 	batch_processing : '批次轉換',
+	tag_text : '標注文本',
 	pack_data : '曆數處理',
 	comments : '問題回報'
 };
@@ -953,6 +954,20 @@ function 批次轉換() {
 	});
 	CeL.set_text('batch_result', data.join('\n'));
 	CeL.log('共轉換 ' + count + '/' + data.length + ' 筆。');
+	return false;
+}
+
+// ---------------------------------------------------------------------//
+
+function parse_text(text) {
+	if (!CeL.era)
+		return false;
+
+	if (text === undefined)
+		text = document.getElementById('original_text').value;
+
+	CeL.era.to_HTML(text, 'parsed_text');
+
 	return false;
 }
 

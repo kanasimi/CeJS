@@ -204,6 +204,20 @@ tr.selected>td a {
 	background-color: #ffd;
 }
 
+#original_text {
+	margin-left: 2em;
+	height: 8em;
+	width: 95%;
+}
+
+.article {
+	color: #221;
+	background-color: #eff;
+	padding: 1em;
+	border: 1pt solid #ea3;
+	border-radius: 1em;
+}
+
 #pack_source,#pack_result {
 	width: 90%;
 	height: 4em;
@@ -749,13 +763,23 @@ tr.selected>td a {
 	<div id="calendar"></div>
 
 	<div id="batch_processing">
-		<span data-gettext="批次轉換"></span>：每項一行，採用上方所列之輸出格式。<br />
-		<span data-gettext="前綴"></span>: <input id="batch_prefix" /> 取得<a
+		<span data-gettext="批次轉換"></span>：每項一行，採用上方所列之輸出格式。<br /> <span
+			data-gettext="前綴"></span>: <input id="batch_prefix" /> 取得<a
 			id="batch_period_end" href="#"
 			onclick="this.innerHTML=this.innerHTML==='結束'?'開始':'結束';return false;">開始</a>時間。<a
 			href="#" onclick="return 批次轉換();">執行轉換</a><br />
 		<textarea id="batch_source" title="source" onmouseup="this.select();"></textarea>
 		<textarea id="batch_result" title="result" onmouseup="this.select();"></textarea>
+	</div>
+
+	<div id="tag_text">
+		請貼上<b>首句包含紀年名稱</b>的史書原文： <br />
+		<textarea id="original_text">嘉靖元年春正月癸丑，享太廟。己未，大祀天地於南郊。清甯宮後殿災。命稱孝宗皇考，慈壽皇太后聖母，興獻帝后為本生父母。己巳，甘州兵亂，殺巡撫都禦史許銘。
+二月己卯，耕耤田。
+三月辛亥，弗提衛獻生豹，卻之。</textarea>
+		<br /> <a href="#" onclick="return parse_text();">自動判別與轉換→</a>
+		<p id="parsed_text" class="article"></p>
+		<em>此自動判別功能尚有闕漏。祈不吝指教。</em>
 	</div>
 
 	<div id="pack_data">
