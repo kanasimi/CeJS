@@ -96,7 +96,9 @@ em {
 初元元年春正月辛丑，孝宣皇帝葬杜陵。賜諸侯王、公主、列侯黃金，吏二千石以下錢、帛，各有差。大赦天下。
 
 三月，封皇太后兄侍中中郎將王舜為安平侯。丙午，立皇后王氏。以三輔、太常、郡國公田及苑可省者振業貧民，訾不滿千錢者賦貸種、食。封外祖父平恩戴侯同產弟子中常侍許嘉為平恩侯，奉戴侯後。</textarea>
-	<br />
+	<br />先指定：
+	<a href="#"
+		onclick="this.innerHTML=(parse_text.add_date=!parse_text.add_date)?'<em>添加</em>':'不添加';return false;">不添加</a>公元日期於紀年後，而後作
 	<a href="#" onclick="return parse_text();">自動判別與轉換→</a>
 	<p id="parsed_text" class="article"></p>
 	<em>此自動判別功能尚有闕漏。祈不吝指教。</em>
@@ -165,7 +167,9 @@ em {
 			if (text === undefined)
 				text = document.getElementById('original_text').value;
 
-			CeL.era.to_HTML(text, 'parsed_text');
+			CeL.era.to_HTML(text, 'parsed_text', parse_text.add_date ? {
+				add_date : true
+			} : null);
 
 			return false;
 		}

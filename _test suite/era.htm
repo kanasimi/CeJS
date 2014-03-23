@@ -779,7 +779,9 @@ tr.selected>td a {
 二月己卯，耕耤田。
 
 三月辛亥，弗提衛獻生豹，卻之。</textarea>
-		<br /> <a href="#" onclick="return parse_text();">自動判別與轉換→</a>
+		<br /> 先指定：<a href="#"
+			onclick="this.innerHTML=(parse_text.add_date=!parse_text.add_date)?'<em>添加</em>':'不添加';return false;">不添加</a>公元日期於紀年後，而後作<a
+			href="#" onclick="return parse_text();">自動判別與轉換→</a>
 		<p id="parsed_text" class="article"></p>
 		<em>此自動判別功能尚有闕漏。祈不吝指教。</em>
 	</div>

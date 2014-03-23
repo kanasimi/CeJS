@@ -966,7 +966,9 @@ function parse_text(text) {
 	if (text === undefined)
 		text = document.getElementById('original_text').value;
 
-	CeL.era.to_HTML(text, 'parsed_text');
+	CeL.era.to_HTML(text, 'parsed_text', parse_text.add_date ? {
+		add_date : true
+	} : null);
 
 	return false;
 }
