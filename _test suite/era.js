@@ -36,9 +36,9 @@ var _;
 // google.load('visualization', '1', {packages: ['corechart']});
 function initializer() {
 	var queue = [
-			[ 'interact.DOM', 'application.debug.log', 'data.date.calendar', 'data.date.era',
-					'interact.form.select_input', 'interact.integrate.SVG' ],
-			function() {
+			[ 'interact.DOM', 'application.debug.log', 'data.date.calendar',
+					'data.date.era', 'interact.form.select_input',
+					'interact.integrate.SVG' ], function() {
 				// alias for CeL.gettext, then we can use _('message').
 				_ = CeL.gettext;
 
@@ -62,78 +62,52 @@ function initializer() {
 
 // ---------------------------------------------------------------------//
 
+// 欄位
+var selected_title = {
+	JDN : true
+},
+// 可選用的文字式年曆 title。 = { id : [th, function (date) {} ] }
+calendar_title,
+//
+default_title = [ {
+	T : '朝代紀年日期'
+}, [ {
+	T : '公元'
+}, '(', {
+	T : '星期'
+}, ')' ]
+// , R : '0: 周日/星期日/禮拜天, 1: 周一, 餘類推'
+, {
+	T : '歲次'
+}, {
+	span : {
+		T : '月干支'
+	},
+	S : 'font-size:.7em;',
+	R : '月干支/大小月'
+}, {
+	span : {
+		T : '日干支'
+	},
+	S : 'font-size:.7em;'
+} ];
+
+function remove_calendar_title() {
+	var n = this.title.match(/: (.+)$/);
+	if (n)
+		delete selected_title[n[1]];
+	translate_era();
+}
+
+function add_calendar_title() {
+	selected_title[this.title] = true;
+	translate_era();
+	return false;
+}
+
 // 文字式年曆。
 function show_calendar(era_name) {
-	var era_caption, title = [
-			{
-				th : {
-					T : '朝代紀年日期'
-				}
-			},
-			{
-				th : [ {
-					T : '公元'
-				}, '(', {
-					T : '星期'
-				}, ')' ]
-			// , R : '0: 周日/星期日/禮拜天, 1: 周一, 餘類推'
-			},
-			{
-				th : {
-					T : '歲次'
-				}
-			},
-			{
-				th : {
-					span : {
-						T : '月干支'
-					},
-					S : 'font-size:.7em;'
-				},
-				R : '月干支/大小月'
-			},
-			{
-				th : era_name.indexOf('月') === -1 ? {
-					T : '朔日'
-				} : {
-					span : {
-						T : '日干支'
-					},
-					S : 'font-size:.7em;'
-				}
-			},
-			{
-				th : {
-					a : 'JDN',
-					R : _('Julian Day Number')
-							+ '\n以 UTC 相同日期當天正午為準。\n因此 2000/1/1 轉為 2451545。',
-					href : 'http://en.wikipedia.org/wiki/Julian_day'
-				}
-			},
-			{
-				th : {
-					a : {
-						T : '伊斯蘭曆'
-					},
-					R : 'Tabular Islamic calendar',
-					href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
-					S : 'font-size:.8em;'
-				}
-			}, {
-				th : {
-					a : {
-						T : '傣曆',
-					},
-					R : '西雙版納傣曆',
-					href : 'http://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86',
-					S : 'font-size:.8em;'
-				}
-			}, {
-				th : {
-					T : '共存紀年'
-				},
-				title : '本日/本年共存紀年。對未有詳實資料者，僅約略準確至所列日期！'
-			} ], output = [ {
+	var era_caption, title = default_title.slice(), output = [ {
 		tr : title
 	} ], 前年名, 前月名, 前紀年名, 後紀年名,
 	//
@@ -141,7 +115,7 @@ function show_calendar(era_name) {
 	//
 	dates = CeL.era.dates(era_name, {
 		含參照用 : /明治|大正|昭和|明仁/.test(era_name)
-	}), is_年譜;
+	}), is_年譜, i, j, hided_title = [];
 
 	if (!dates)
 		return;
@@ -151,6 +125,39 @@ function show_calendar(era_name) {
 				+ ' 筆），已超過輸出總筆數限制！將截取前 ' + show_calendar.LIMIT + ' 筆。');
 		dates.length = show_calendar.LIMIT;
 	}
+
+	if (era_name.indexOf('月') === -1)
+		title.splice(-1, 1, {
+			th : {
+				T : '朔日'
+			}
+		});
+
+	for (i in calendar_title) {
+		if (selected_title[i])
+			title.push({
+				th : [ calendar_title[i][0], ' ', {
+					span : '×',
+					title : _('除去此欄') + ': ' + i,
+					C : 'remove_mark',
+					onclick : remove_calendar_title
+				} ]
+			});
+		else {
+			j = calendar_title[i][0];
+			if (!j.T && j.a)
+				j = j.a;
+			hided_title.push({
+				span : j.T ? {
+					T : j.T
+				} : i,
+				title : i,
+				C : 'add_mark',
+				onclick : add_calendar_title
+			}, ' | ');
+		}
+	}
+	hided_title.pop();
 
 	if (main_date_value)
 		if (main_date_value.日 == 1 && era_name.indexOf('日') === -1)
@@ -209,11 +216,11 @@ function show_calendar(era_name) {
 		tmp = date.format(
 				{
 					parser : 'CE',
-					format : tmp ? '%紀年名%年年|%Y年|%年干支|||'
+					format : tmp ? '%紀年名%年年|%Y年|%年干支||'
 					//
 					: '%紀年名%年年%月月%日日|%Y/%m/%d('
 							+ (_.is_domain_name('ja') ? '%曜日' : '%w')
-							+ ')|%年干支|%月干支%大小月|%日干支|%JDN',
+							+ ')|%年干支|%月干支%大小月|%日干支',
 					locale : 'cmn-Hant-TW',
 					as_UTC_time : true
 				}).replace(/星期/, '').split('|');
@@ -242,14 +249,12 @@ function show_calendar(era_name) {
 			});
 		});
 
-		list.push({
-			td : date.精 === '年' ? date.to_Tabular()[0] + '年' : date
-					.to_Tabular().slice(0, 3).join('/')
-		}, {
-			td : date - CeL.Dai_Date.epoch < 0 || isNaN((tmp = date.to_Dai())[0]) ? '' : date.精 === '年' ? tmp[0] + '年' : tmp.join('/')
-		}, {
-			td : date.共存紀年 || ''
-		});
+		for (tmp in calendar_title) {
+			if (selected_title[tmp])
+				list.push({
+					td : calendar_title[tmp][1](date)
+				});
+		}
 
 		// 處理改朝換代巡覽。
 		var 未延續前紀年 = (後紀年名 !== date.紀年名);
@@ -295,14 +300,22 @@ function show_calendar(era_name) {
 	}, '（共有 ' + dates.length + ' 個' + (dates.type ? '時' : '年') + '段紀錄）' ]
 			: '無可供列出之曆譜！';
 
-	CeL.remove_all_child('calendar');
-	CeL.new_node({
+	title = {
 		table : [ {
 			caption : era_caption
 		}, {
 			tbody : output
 		} ]
-	}, 'calendar');
+	};
+	if (hided_title.length > 0)
+		title = [ {
+			div : [ {
+				T : '增加此欄'
+			}, ': ', hided_title ],
+			C : 'add_mark_layer'
+		}, title ];
+	CeL.remove_all_child('calendar');
+	CeL.new_node(title, 'calendar');
 	select_panel('calendar', true);
 }
 
@@ -1166,6 +1179,60 @@ function affairs() {
 	CeL.new_node(list, 'note_botton_layer');
 
 	select_panel('era_graph' in select_panels ? 'era_graph' : 'FAQ');
+
+	// -----------------------------
+
+	calendar_title = {
+		JDN : [
+				{
+					a : 'JDN',
+					R : _('Julian Day Number')
+							+ '\n以 UTC 相同日期當天正午為準。\n因此 2000/1/1 轉為 2451545。',
+					href : 'http://en.wikipedia.org/wiki/Julian_day'
+				}, function(date) {
+					return CeL.Date_to_JDN(date);
+				} ],
+		Tabular : [
+				{
+					a : {
+						T : '伊斯蘭曆'
+					},
+					R : 'Tabular Islamic calendar',
+					href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
+					S : 'font-size:.8em;'
+				},
+				function(date) {
+					return date.精 === '年' ? date.to_Tabular()[0] + '年' : date
+							.to_Tabular().slice(0, 3).join('/');
+				} ],
+		Dai : [
+				{
+					a : {
+						T : '傣曆',
+					},
+					R : '西雙版納傣曆\n完全按张公瑾:《西双版纳傣文〈历法星卜要略〉历法部分译注》、《傣历中的纪元纪时法》計算公式推算，加上過去暦書多有出入，因此與實暦恐有一兩天差距。',
+					href : 'http://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86'
+				},
+				function(date) {
+					var dai;
+					return date - CeL.Dai_Date.epoch < 0
+							|| isNaN((dai = date.to_Dai())[0]) ? ''
+							: date.精 === '年' ? dai[0] + '年' : dai.join('/')
+									+ ' (周' + (date.getDay() + 1) + ')';
+				} ],
+		contemporary : [ {
+			T : '共存紀年',
+			R : '本日/本年共存紀年。對未有詳實資料者，僅約略準確至所列日期！'
+		}, function(date) {
+			return date.共存紀年 || '';
+		} ]
+	};
+
+	default_title.forEach(function(i, index) {
+		default_title[index] = {
+			th : i
+		};
+	});
 
 	// -----------------------------
 
