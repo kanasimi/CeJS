@@ -36,7 +36,7 @@ var _;
 // google.load('visualization', '1', {packages: ['corechart']});
 function initializer() {
 	var queue = [
-			[ 'interact.DOM', 'application.debug.log', 'data.date.era',
+			[ 'interact.DOM', 'application.debug.log', 'data.date.calendar', 'data.date.era',
 					'interact.form.select_input', 'interact.integrate.SVG' ],
 			function() {
 				// alias for CeL.gettext, then we can use _('message').
@@ -117,6 +117,15 @@ function show_calendar(era_name) {
 					},
 					R : 'Tabular Islamic calendar',
 					href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
+					S : 'font-size:.8em;'
+				}
+			}, {
+				th : {
+					a : {
+						T : '傣曆',
+					},
+					R : '西雙版納傣曆',
+					href : 'http://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86',
 					S : 'font-size:.8em;'
 				}
 			}, {
@@ -236,6 +245,8 @@ function show_calendar(era_name) {
 		list.push({
 			td : date.精 === '年' ? date.to_Tabular()[0] + '年' : date
 					.to_Tabular().slice(0, 3).join('/')
+		}, {
+			td : date - CeL.Dai_Date.epoch < 0 || isNaN((tmp = date.to_Dai())[0]) ? '' : date.精 === '年' ? tmp[0] + '年' : tmp.join('/')
 		}, {
 			td : date.共存紀年 || ''
 		});
