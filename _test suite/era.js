@@ -62,7 +62,34 @@ function initializer() {
 
 // ---------------------------------------------------------------------//
 
-// 欄位
+// 年差距/位移
+function Year_numbering(shift) {
+	shift |= 0;
+	return function(date) {
+		var year_only = date.精 === '年', year;
+		date = date.format({
+			parser : 'CE',
+			format : '%Y/%m/%d'
+		}).split('/');
+		if ((year = shift + (date[0] | 0)) <= 0)
+			// 紀元前。
+			year--;
+		return year + (year_only ? '年' : '/' + date[1] + '/' + date[2]);
+	};
+
+	// Gregorian calendar only.
+	return function(date) {
+		var year = date.getFullYear() + shift | 0;
+		if (year <= 0)
+			// 紀元前。
+			year--;
+		return year
+				+ (date.精 === '年' ? '年' : '/' + (date.getMonth() + 1) + '/'
+						+ date.getDate());
+	}
+}
+
+// 選用的文字式年曆欄位
 var selected_title = {
 	JDN : true
 },
@@ -97,6 +124,7 @@ function remove_calendar_title() {
 	if (n)
 		delete selected_title[n[1]];
 	translate_era();
+	return false;
 }
 
 function add_calendar_title() {
@@ -1190,8 +1218,23 @@ function affairs() {
 							+ '\n以 UTC 相同日期當天正午為準。\n因此 2000/1/1 轉為 2451545。',
 					href : 'http://en.wikipedia.org/wiki/Julian_day'
 				}, function(date) {
-					return CeL.Date_to_JDN(date);
+					return CeL.Date_to_JDN(date) + (date.精 === '年' ? '－' : '');
 				} ],
+
+		Julian : [ {
+			a : {
+				T : 'Julian'
+			},
+			R : 'Julian calendar',
+			href : 'https://en.wikipedia.org/wiki/Julian_calendar',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return date.format({
+				parser : 'Julian',
+				format : date.精 === '年' ? '%Y年' : '%Y/%m/%d'
+			});
+		} ],
+
 		Tabular : [
 				{
 					a : {
@@ -1205,12 +1248,13 @@ function affairs() {
 					return date.精 === '年' ? date.to_Tabular()[0] + '年' : date
 							.to_Tabular().slice(0, 3).join('/');
 				} ],
+
 		Dai : [
 				{
 					a : {
 						T : '傣曆',
 					},
-					R : '西雙版納傣曆',
+					R : '西雙版納傣曆紀元始於公元638年3月22日',
 					href : 'http://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86'
 				},
 				function(date) {
@@ -1218,14 +1262,61 @@ function affairs() {
 					return date - CeL.Dai_Date.epoch < 0
 							|| isNaN((dai = date.to_Dai())[0]) ? ''
 							: date.精 === '年' ? dai[0] + '年' : dai.join('/')
-									+ ' (周' + (date.getDay() + 1) + ')';
+									+ '(周' + (date.getDay() + 1) + ')';
 				} ],
+
 		contemporary : [ {
 			T : '共存紀年',
 			R : '本日/本年共存紀年。對未有詳實資料者，僅約略準確至所列日期！'
 		}, function(date) {
 			return date.共存紀年 || '';
-		} ]
+		} ],
+
+		// Chinese Buddhist calendar
+		Buddhist : [
+				{
+					T : '佛曆'
+				},
+				function(date) {
+					var year = date.getFullYear() | 0;
+					if (year < 1911)
+						return '';
+
+					var era = CeL.era('中曆', {
+						get_era : true
+					});
+					if (date - era.start > 0) {
+						era = era.Date_to_date_index(date);
+						// 過佛誕日（農曆四月初八）再加1年。
+						// era: index (0~)
+						if (era[1] > 3 || era[1] === 3 && era[2] >= 7)
+							year++;
+					}
+					return (year + 543)
+							+ (date.精 === '年' ? '年' : '/'
+									+ (date.getMonth() + 1) + '/'
+									+ date.getDate());
+				} ],
+
+		// 紀年/編年方法。
+		Minguo : [ {
+			T : '民國',
+			R : '民國紀年'
+		}, Year_numbering(-1911) ],
+
+		Dangi : [ {
+			T : '檀紀',
+			R : '단군기원(檀君紀元) 또는 단기(檀紀)'
+		}, Year_numbering(2333) ],
+
+		Huangdi : [ {
+			T : '黃帝紀元'
+		}, Year_numbering(2698) ],
+
+		Thai_Buddhist : [ {
+			T : '泰國佛曆',
+			R : '泰國官方之佛曆年 = 公曆年 + 543'
+		}, Year_numbering(543) ]
 	};
 
 	default_title.forEach(function(i, index) {
