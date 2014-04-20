@@ -889,7 +889,7 @@ function translate_era(era) {
 			if (output !== era)
 				output = {
 					a : output,
-					title : output,
+					title : (/^公元\d/.test(output) ? '共存紀年:' : '') + output,
 					href : '#',
 					onclick : click_title_as_era
 				};
@@ -990,19 +990,23 @@ function 批次轉換() {
 	period_end = CeL.set_text('batch_period_end') === '結束';
 	if (!format)
 		format = output_format_object.setValue('%Y/%m/%d');
-	format = {
-		parser : 'CE',
-		format : format,
-		locale : 'cmn-Hant-TW',
-		numeral : output_numeral,
-		as_UTC_time : true
-	};
+	if (format !== '共存紀年')
+		format = {
+			parser : 'CE',
+			format : format,
+			locale : 'cmn-Hant-TW',
+			numeral : output_numeral,
+			as_UTC_time : true
+		};
 	// 開始轉換。
 	data.forEach(function(line, index) {
 		if ((line = line.trim()) && (date = CeL.era(prefix + line, {
 			period_end : period_end
-		})))
-			count++, data[index] = date.format(format);
+		}))) {
+			count++;
+			data[index] = format === '共存紀年' ? date.共存紀年 || '' : date
+					.format(format);
+		}
 	});
 	CeL.set_text('batch_result', data.join('\n'));
 	CeL.log('共轉換 ' + count + '/' + data.length + ' 筆。');
