@@ -1258,7 +1258,7 @@ function affairs() {
 					a : {
 						T : '傣曆',
 					},
-					R : '西雙版納傣曆紀元始於公元638年3月22日',
+					R : '西雙版納傣曆紀元始於公元638年3月22日，可轉換之範圍於傣曆714年至3190年期間內。',
 					href : 'http://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86'
 				},
 				function(date) {
@@ -1279,7 +1279,10 @@ function affairs() {
 		// Chinese Buddhist calendar
 		Buddhist : [
 				{
-					T : '佛曆'
+					a : {
+						T : '佛曆'
+					},
+					href : 'https://zh.wikipedia.org/wiki/%E4%BD%9B%E6%9B%86'
 				},
 				function(date) {
 					var year = date.getFullYear() | 0;
@@ -1303,24 +1306,41 @@ function affairs() {
 				} ],
 
 		// 紀年/編年方法。
-		Minguo : [ {
-			T : '民國',
-			R : '民國紀年'
-		}, Year_numbering(-1911) ],
+		Minguo : [
+				{
+					a : {
+						T : '民國'
+					},
+					R : '民國紀年',
+					href : 'http://zh.wikipedia.org/wiki/%E6%B0%91%E5%9C%8B%E7%B4%80%E5%B9%B4'
+				}, Year_numbering(-1911) ],
 
-		Dangi : [ {
-			T : '檀紀',
-			R : '단군기원(檀君紀元) 또는 단기(檀紀)'
-		}, Year_numbering(2333) ],
+		Dangi : [
+				{
+					a : {
+						T : '檀紀'
+					},
+					R : '단군기원(檀君紀元) 또는 단기(檀紀)',
+					href : 'https://ko.wikipedia.org/wiki/%EB%8B%A8%EA%B5%B0%EA%B8%B0%EC%9B%90'
+				}, Year_numbering(2333) ],
 
-		Huangdi : [ {
-			T : '黃帝紀元'
-		}, Year_numbering(2698) ],
+		Huangdi : [
+				{
+					a : {
+						T : '黃帝紀元'
+					},
+					R : '依據中華民國建國時官方認定的黃帝紀元，清末辛亥年（孔子紀元2462年，西元1911年）為黃帝紀元4609年，民國元年為黃帝紀元4610年。黃帝紀元比孔子紀元早2147年，比西元早2698年。',
+					href : 'http://zh.wikipedia.org/wiki/%E9%BB%84%E5%B8%9D%E7%BA%AA%E5%85%83'
+				}, Year_numbering(2698) ],
 
-		Thai_Buddhist : [ {
-			T : '泰國佛曆',
-			R : '泰國官方之佛曆年 = 公曆年 + 543'
-		}, Year_numbering(543) ]
+		Thai_Buddhist : [
+				{
+					a : {
+						T : '泰國佛曆'
+					},
+					R : 'ปฏิทินสุริยคติไทย: 泰國陽曆/泰國官方之佛曆年 = 公曆年 + 543',
+					href : 'https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2'
+				}, Year_numbering(543) ]
 	};
 
 	default_title.forEach(function(i, index) {
