@@ -36,9 +36,9 @@ var _;
 // google.load('visualization', '1', {packages: ['corechart']});
 function initializer() {
 	var queue = [
-			[ 'interact.DOM', 'application.debug.log', 'data.date.calendar',
-					'data.date.era', 'interact.form.select_input',
-					'interact.integrate.SVG' ], function() {
+			[ 'interact.DOM', 'application.debug.log',
+					'interact.form.select_input', 'interact.integrate.SVG',
+					'data.date.era' ], 'data.date.calendar', function() {
 				// alias for CeL.gettext, then we can use _('message').
 				_ = CeL.gettext;
 
@@ -1265,8 +1265,12 @@ function affairs() {
 					var dai;
 					return date - CeL.Dai_Date.epoch < 0
 							|| isNaN((dai = date.to_Dai())[0]) ? ''
-							: date.精 === '年' ? dai[0] + '年' : dai.join('/')
-									+ '(周' + (date.getDay() + 1) + ')';
+							: date.精 === '年' ? dai[0] + '年' : dai.slice(0, 3)
+									.join('/')
+									+ '(周'
+									+ (date.getDay() + 1)
+									+ ')'
+									+ (dai[3] ? ' ' + dai[3] : '');
 				} ],
 
 		contemporary : [ {
@@ -1282,6 +1286,7 @@ function affairs() {
 					a : {
 						T : '佛曆'
 					},
+					R : '1911－。佛曆年 = 公曆年 + 543，若過佛誕日（印度曆二月初八，農曆四月初八。）再加1年。',
 					href : 'https://zh.wikipedia.org/wiki/%E4%BD%9B%E6%9B%86'
 				},
 				function(date) {
@@ -1330,7 +1335,8 @@ function affairs() {
 						T : '黃帝紀元'
 					},
 					R : '依據中華民國建國時官方認定的黃帝紀元，清末辛亥年（孔子紀元2462年，西元1911年）為黃帝紀元4609年，民國元年為黃帝紀元4610年。黃帝紀元比孔子紀元早2147年，比西元早2698年。',
-					href : 'http://zh.wikipedia.org/wiki/%E9%BB%84%E5%B8%9D%E7%BA%AA%E5%85%83'
+					href : 'http://zh.wikipedia.org/wiki/%E9%BB%84%E5%B8%9D%E7%BA%AA%E5%85%83',
+					S : 'font-size:.8em;'
 				}, Year_numbering(2698) ],
 
 		Thai_Buddhist : [
@@ -1339,7 +1345,8 @@ function affairs() {
 						T : '泰國佛曆'
 					},
 					R : 'ปฏิทินสุริยคติไทย: 泰國陽曆/泰國官方之佛曆年 = 公曆年 + 543',
-					href : 'https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2'
+					href : 'https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2',
+					S : 'font-size:.8em;'
 				}, Year_numbering(543) ]
 	};
 
