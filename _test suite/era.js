@@ -1253,6 +1253,19 @@ function affairs() {
 							.to_Tabular().slice(0, 3).join('/');
 				} ],
 
+		Long_Count : [
+				{
+					a : {
+						T : '長紀曆'
+					},
+					R : '中美洲長紀曆 / 馬雅長紀曆',
+					href : 'https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar'
+				},
+				function(date) {
+					return CeL.Maya_Date.to_Long_Count(date)
+							+ (date.精 === '年' ? '－' : '');
+				} ],
+
 		Dai : [
 				{
 					a : {
@@ -1338,6 +1351,15 @@ function affairs() {
 					href : 'http://zh.wikipedia.org/wiki/%E9%BB%84%E5%B8%9D%E7%BA%AA%E5%85%83',
 					S : 'font-size:.8em;'
 				}, Year_numbering(2698) ],
+
+		Koki : [
+				{
+					a : {
+						T : '皇紀'
+					},
+					R : '神武天皇即位紀元（じんむてんのうそくいきげん）。略称は皇紀（こうき）という。外にも、皇暦（すめらこよみ、こうれき）、神武暦（じんむれき）、神武紀元（じんむきげん）、日紀（にっき）などともいう。',
+					href : 'https://ja.wikipedia.org/wiki/%E7%A5%9E%E6%AD%A6%E5%A4%A9%E7%9A%87%E5%8D%B3%E4%BD%8D%E7%B4%80%E5%85%83'
+				}, Year_numbering(660) ],
 
 		Thai_Buddhist : [
 				{
