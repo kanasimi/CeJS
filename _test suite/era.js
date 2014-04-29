@@ -65,14 +65,17 @@ function initializer() {
 // 年差距/位移
 function Year_numbering(shift) {
 	shift |= 0;
-	return function(date) {
-		var year_only = date.精 === '年', year;
+	return function(date, year_only) {
+		if (date.精 === '年')
+			year_only = true;
 		date = date.format({
 			parser : 'CE',
-			format : '%Y/%m/%d'
+			format : '%Y/%m/%d',
+			no_year_0 : false
 		}).split('/');
-		if ((year = shift + (date[0] | 0)) <= 0)
-			// 紀元前。
+		var year = shift + (date[0] | 0);
+		if (year <= 0)
+			// 本紀元前。
 			year--;
 		return year + (year_only ? '年' : '/' + date[1] + '/' + date[2]);
 	};
@@ -1214,9 +1217,11 @@ function affairs() {
 
 	// -----------------------------
 
+	// for 皇紀.
 	var kyuureki = CeL.era('旧暦', {
 		get_era : true
-	}), Koki_year_offset = 660 + kyuureki.calendar.start;
+	}), Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset);
+	Koki_year_offset += kyuureki.calendar.start;
 
 	calendar_title = {
 		JDN : [
@@ -1389,18 +1394,14 @@ function affairs() {
 					if (date.精 === '年'
 							|| date - kyuureki.start < 0
 							|| kyuureki.end - date < 0
-							|| !(date_index = kyuureki.Date_to_date_index(date))) {
-						date = date.getFullYear() + 660;
-						if (date <= 0)
-							// 紀元前。
-							date--;
-						return date + '年';
-					} else {
-						date_index[0] += Koki_year_offset;
-						date_index[1]++;
-						date_index[2]++;
-						return date_index.join('/');
-					}
+							|| !(date_index = kyuureki.Date_to_date_index(date)))
+						return Koki_year(date, true);
+
+					date_index[0] += Koki_year_offset;
+					date_index[1]++;
+					date_index[2]++;
+					return date_index.join('/');
+
 				} ],
 
 		Thai_Buddhist : [
