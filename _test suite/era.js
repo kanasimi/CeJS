@@ -1214,15 +1214,39 @@ function affairs() {
 
 	// -----------------------------
 
+	var kyuureki = CeL.era('旧暦', {
+		get_era : true
+	}), Koki_year_offset = 660 + kyuureki.calendar.start;
+
 	calendar_title = {
 		JDN : [
 				{
 					a : 'JDN',
 					R : _('Julian Day Number')
-							+ '\n以 UTC 相同日期當天正午為準。\n因此 2000/1/1 轉為 2451545。',
+							+ '\n以 UTC 相同日期當天正午12時為準。\n因此 2000/1/1 轉為 2451545。',
+					href : 'https://en.wikipedia.org/wiki/Julian_Day_Number'
+				},
+				function(date) {
+					var date_String = CeL.Date_to_JDN(date.adapt_offset(0))
+							+ (date.精 === '年' ? '－' : '');
+					// 還原 local 之時間。
+					date.adapt_offset('');
+					return date_String;
+				} ],
+
+		JD : [
+				{
+					a : 'JD',
+					R : _('Julian Day')
+							+ '\n以「紀元使用地真正之時間」相同日期當天凌晨零時為準。\n因此在中國之 2000/1/1 轉為 2451544.1666...',
 					href : 'http://en.wikipedia.org/wiki/Julian_day'
-				}, function(date) {
-					return CeL.Date_to_JDN(date) + (date.精 === '年' ? '－' : '');
+				},
+				function(date) {
+					var date_String = CeL.Date_to_JD(date.adapt_offset())
+							+ (date.精 === '年' ? '－' : '');
+					// 還原 local 之時間。
+					date.adapt_offset('');
+					return date_String;
 				} ],
 
 		Julian : [ {
@@ -1357,9 +1381,27 @@ function affairs() {
 					a : {
 						T : '皇紀'
 					},
-					R : '神武天皇即位紀元（じんむてんのうそくいきげん）。略称は皇紀（こうき）という。外にも、皇暦（すめらこよみ、こうれき）、神武暦（じんむれき）、神武紀元（じんむきげん）、日紀（にっき）などともいう。',
+					R : '神武天皇即位紀元（じんむてんのうそくいきげん）。略称は皇紀（こうき）という。外にも、皇暦（すめらこよみ、こうれき）、神武暦（じんむれき）、神武紀元（じんむきげん）、日紀（にっき）などともいう。\n神武天皇即位紀元の元年は、キリスト紀元（西暦）前660年である。日本では明治6年（1873年）を紀元2533年と定め公式に使用した。',
 					href : 'https://ja.wikipedia.org/wiki/%E7%A5%9E%E6%AD%A6%E5%A4%A9%E7%9A%87%E5%8D%B3%E4%BD%8D%E7%B4%80%E5%85%83'
-				}, Year_numbering(660) ],
+				},
+				function(date) {
+					var date_index;
+					if (date.精 === '年'
+							|| date - kyuureki.start < 0
+							|| kyuureki.end - date < 0
+							|| !(date_index = kyuureki.Date_to_date_index(date))) {
+						date = date.getFullYear() + 660;
+						if (date <= 0)
+							// 紀元前。
+							date--;
+						return date + '年';
+					} else {
+						date_index[0] += Koki_year_offset;
+						date_index[1]++;
+						date_index[2]++;
+						return date_index.join('/');
+					}
+				} ],
 
 		Thai_Buddhist : [
 				{
