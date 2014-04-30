@@ -1242,7 +1242,7 @@ function affairs() {
 		JD : [
 				{
 					a : 'JD',
-					R : _('Julian Day')
+					R : _('Julian Date')
 							+ '\n以「紀元使用地真正之時間」相同日期當天凌晨零時為準。\n因此在中國之 2000/1/1 轉為 2451544.1666...',
 					href : 'http://en.wikipedia.org/wiki/Julian_day'
 				},
@@ -1256,7 +1256,7 @@ function affairs() {
 
 		Julian : [ {
 			a : {
-				T : 'Julian'
+				T : 'Julian calendar'
 			},
 			R : 'Julian calendar',
 			href : 'https://en.wikipedia.org/wiki/Julian_calendar',
@@ -1287,13 +1287,38 @@ function affairs() {
 					a : {
 						T : '長紀曆'
 					},
-					R : '中美洲長紀曆 / 馬雅長紀曆',
+					R : 'Mesoamerican Long Count calendar / 馬雅長紀曆',
 					href : 'https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar'
 				},
 				function(date) {
 					return CeL.Maya_Date.to_Long_Count(date)
 							+ (date.精 === '年' ? '－' : '');
 				} ],
+
+		Tzolkin : [
+				{
+					a : {
+						T : "Maya Tzolk'in"
+					},
+					R : "馬雅 Tzolk'in 曆",
+					href : 'https://en.wikipedia.org/wiki/Tzolk%27in',
+					S : 'font-size:.8em;'
+				},
+				function(date) {
+					return CeL.Maya_Date.to_Tzolkin(date)
+							+ (date.精 === '年' ? '－' : '');
+				} ],
+
+		Haab : [ {
+			a : {
+				T : "Maya Haab'"
+			},
+			R : "馬雅 Haab' 曆",
+			href : 'https://en.wikipedia.org/wiki/Haab%27',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return CeL.Maya_Date.to_Haab(date) + (date.精 === '年' ? '－' : '');
+		} ],
 
 		Dai : [
 				{
