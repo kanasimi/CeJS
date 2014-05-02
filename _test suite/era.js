@@ -92,8 +92,9 @@ function Year_numbering(shift) {
 	}
 }
 
+var CE_name = '公元',CE_PATTERN=new RegExp('^'+CE_name+'-?\\d'),
 // 選用的文字式年曆欄位
-var selected_title = {
+selected_title = {
 	JDN : true
 },
 // 可選用的文字式年曆 title。 = { id : [th, function (date) {} ] }
@@ -102,7 +103,7 @@ calendar_title,
 default_title = [ {
 	T : '朝代紀年日期'
 }, [ {
-	T : '公元'
+	T : CE_name
 }, '(', {
 	T : '星期'
 }, ')' ]
@@ -820,7 +821,7 @@ function click_panel(e) {
 var original_input, era_input_object, last_input, output_numeral, SVG_object, output_format_object,
 // 正解
 output_format_types = {
-	'公元日期' : '公元%Y年%m月%d日',
+	'公元日期' : CE_name+'%Y年%m月%d日',
 	'朝代紀年日期' : '%紀年名%年年%月月%日日',
 	'共存紀年' : '共存紀年',
 	'年月日干支' : '%年干支年%月干支月%日干支日',
@@ -856,7 +857,7 @@ function translate_era(era) {
 		if (!format)
 			format = output_format_object.setValue(
 			//
-			'公元%Y年' + (date.精 === '年' ? '' : '%m月%d日'));
+			CE_name+'%Y年' + (date.精 === '年' ? '' : '%m月%d日'));
 
 		if (format === '共存紀年')
 			if (Array.isArray(output = date.共存紀年))
@@ -892,7 +893,7 @@ function translate_era(era) {
 			if (output !== era)
 				output = {
 					a : output,
-					title : (/^公元\d/.test(output) ? '共存紀年:' : '') + output,
+					title : (CE_PATTERN.test(output) ? '共存紀年:' : '') + output,
 					href : '#',
 					onclick : click_title_as_era
 				};
