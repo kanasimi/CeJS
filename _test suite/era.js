@@ -1219,10 +1219,7 @@ function affairs() {
 	// -----------------------------
 
 	// for 皇紀.
-	var kyuureki = CeL.era('旧暦', {
-		get_era : true
-	}), Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset);
-	Koki_year_offset += kyuureki.calendar.start;
+	var kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset);
 
 	calendar_title = {
 		JDN : [
@@ -1416,6 +1413,14 @@ function affairs() {
 					href : 'https://ja.wikipedia.org/wiki/%E7%A5%9E%E6%AD%A6%E5%A4%A9%E7%9A%87%E5%8D%B3%E4%BD%8D%E7%B4%80%E5%85%83'
 				},
 				function(date) {
+					if (!kyuureki) {
+						// IE8 中，直到執行 affairs() 時 CeL.era 可能還沒準備好，
+						// 因此 kyuureki === null。
+						kyuureki = CeL.era('旧暦', {
+							get_era : true
+						});
+						Koki_year_offset += kyuureki.calendar.start;
+					}
 					var date_index;
 					if (date.精 === '年'
 							|| date - kyuureki.start < 0
