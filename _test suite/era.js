@@ -23,6 +23,24 @@
  g.setAttribute('transform','translate(20,30)');
 
 
+
+
+
+ CeL.era.periods()[0].forEach(function(row){row.forEach(function(country){
+ var dynasties=[];
+ for(var name in country.sub)
+ dynasties.push(country.sub[name]);
+ dynasties.sort(CeL.era.compare_start);
+ dynasties.forEach(function(dynasty){CeL.log(
+ dynasty.toString('period')
+ );});
+ });});
+
+
+ ''+CeL.era.periods(['中國','燕國'])[0]
+
+
+
  </code>
  */
 
@@ -1045,6 +1063,9 @@ function affairs() {
 
 	// translate all nodes to show in default domain.
 	_.translate_nodes();
+	if (!CeL.support_dataset)
+		// IE8 中，除了 document.title，本工具大部分顯示皆能以 translate_nodes() 處理。
+		document.title = 'Era Conversion Tool';
 
 	// -----------------------------
 
@@ -1241,7 +1262,7 @@ function affairs() {
 				{
 					a : 'JD',
 					R : _('Julian Date')
-							+ '\n以「紀元使用地真正之時間」相同日期當天凌晨零時為準。\n因此在中國之 2000/1/1 轉為 2451544.1666...',
+							+ '\n以「紀元使用地真正之時間」相同日期當天凌晨零時為準。\n因此在中國之 2000/1/1 轉為 2451544.1666... (2000/1/1 0:0 UTC+8)',
 					href : 'http://en.wikipedia.org/wiki/Julian_day'
 				},
 				function(date) {
