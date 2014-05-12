@@ -1,48 +1,46 @@
 ﻿'use strict';
 
 /**
- * 
  * @note <code>
-
- var g=CeL.SVG.createNode('g'),
- l=CeL.SVG.createNode('line',{
- x1 : 0,
- y1 : 0,
- x2 : 10,
- y2 : 30,
- stroke : '#a76',
- 'stroke-width' : 1
- });
- g.appendChild(l);
- SVG_object.svg.appendChild(g);
-
- g.style.setProperty('display','none');
- g.style.setProperty('display','');
-
- //http://www.w3.org/TR/SVG11/coords.html#TransformAttribute
- g.setAttribute('transform','translate(20,30)');
-
-
-
-
-
- CeL.era.periods()[0].forEach(function(row){row.forEach(function(country){
- var dynasties=[];
- for(var name in country.sub)
- dynasties.push(country.sub[name]);
- dynasties.sort(CeL.era.compare_start);
- dynasties.forEach(function(dynasty){CeL.log(
- dynasty.toString('period')
- );});
- });});
-
-
- ''+CeL.era.periods(['中國','燕國'])[0]
-
-
-
  </code>
  */
+if (false) {
+
+	var g = CeL.SVG.createNode('g'), l = CeL.SVG.createNode('line', {
+		x1 : 0,
+		y1 : 0,
+		x2 : 10,
+		y2 : 30,
+		stroke : '#a76',
+		'stroke-width' : 1
+	});
+	g.appendChild(l);
+	SVG_object.svg.appendChild(g);
+
+	g.style.setProperty('display', 'none');
+	g.style.setProperty('display', '');
+
+	// http://www.w3.org/TR/SVG11/coords.html#TransformAttribute
+	g.setAttribute('transform', 'translate(20,30)');
+
+	//
+
+	CeL.era.periods()[0].forEach(function(row) {
+		row.forEach(function(country) {
+			var dynasties = [];
+			for ( var name in country.sub)
+				dynasties.push(country.sub[name]);
+			dynasties.sort(CeL.era.compare_start);
+			dynasties.forEach(function(dynasty) {
+				CeL.log(dynasty.toString('period'));
+			});
+		});
+	});
+
+	//
+
+	'' + CeL.era.periods([ '中國', '燕國' ])[0];
+}
 
 // define gettext() user domain resource location.
 // gettext() will auto load (CeL.env.domain_location + language + '.js').
@@ -1299,6 +1297,20 @@ function affairs() {
 				function(date) {
 					return date.精 === '年' ? date.to_Tabular()[0] + '年' : date
 							.to_Tabular().slice(0, 3).join('/');
+				} ],
+
+		Hebrew : [
+				{
+					a : {
+						T : '希伯來曆'
+					},
+					R : 'Hebrew calendar, 猶太曆',
+					href : 'https://en.wikipedia.org/wiki/Hebrew_calendar',
+					S : 'font-size:.8em;'
+				},
+				function(date) {
+					return date.精 === '年' ? date.to_Hebrew()[0] + '年' : date
+							.to_Hebrew(true).slice(0, 3).reverse().join(' ');
 				} ],
 
 		Long_Count : [
