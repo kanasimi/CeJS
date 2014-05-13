@@ -1237,8 +1237,11 @@ function affairs() {
 
 	// -----------------------------
 
+	// copy from data.date.
+	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
+	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
 	// for 皇紀.
-	var kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset);
+	kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset);
 
 	calendar_title = {
 		JDN : [
@@ -1283,6 +1286,33 @@ function affairs() {
 				parser : 'Julian',
 				format : date.精 === '年' ? '%Y年' : '%Y/%m/%d'
 			});
+		} ],
+
+		ordinal_date : [ {
+			a : {
+				T : '年日期'
+			},
+			R : '表示年內的天數',
+			href : 'https://en.wikipedia.org/wiki/Ordinal_date',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			var year = date.getFullYear() | 0;
+			return date.精 === '年' ? year + '年'
+			//
+			: year.pad(4) + '-' + CeL.ordinal_date(date).pad(3);
+		} ],
+
+		week_date : [ {
+			a : {
+				T : '週日期'
+			},
+			R : '表示年內的星期數天數，再加上星期內第幾天。',
+			href : 'https://en.wikipedia.org/wiki/ISO_week_date',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return date.精 === '年' ? date.getFullYear() + '年'
+			//
+			: CeL.week_date(date, true);
 		} ],
 
 		Tabular : [
@@ -1373,7 +1403,7 @@ function affairs() {
 
 		contemporary : [ {
 			T : '共存紀年',
-			R : '本日/本年共存紀年。對未有詳實資料者，僅約略準確至所列日期！'
+			R : '本日/本年同時期存在之其他紀年。對未有詳實資料者，僅約略準確至所列日期！'
 		}, function(date) {
 			return date.共存紀年 || '';
 		} ],
