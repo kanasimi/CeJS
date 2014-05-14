@@ -1288,13 +1288,26 @@ function affairs() {
 			});
 		} ],
 
+		ISO : [ {
+			a : {
+				T : 'ISO 8601'
+			},
+			R : 'YYYY-MM-DD\nThe standard uses the Gregorian calendar.',
+			href : 'https://en.wikipedia.org/wiki/ISO_8601',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			var year = date.getFullYear() | 0;
+			return date.精 === '年' ? year + '年'
+			//
+			: year.pad(year < 0 ? 5 : 4) + date.format('-%2m-%2d');
+		} ],
+
 		ordinal_date : [ {
 			a : {
 				T : '年日期'
 			},
 			R : '表示年內的天數',
 			href : 'https://en.wikipedia.org/wiki/Ordinal_date',
-			S : 'font-size:.8em;'
 		}, function(date) {
 			var year = date.getFullYear() | 0;
 			return date.精 === '年' ? year + '年'
@@ -1308,7 +1321,6 @@ function affairs() {
 			},
 			R : '表示年內的星期數天數，再加上星期內第幾天。',
 			href : 'https://en.wikipedia.org/wiki/ISO_week_date',
-			S : 'font-size:.8em;'
 		}, function(date) {
 			return date.精 === '年' ? date.getFullYear() + '年'
 			//
@@ -1322,11 +1334,13 @@ function affairs() {
 					},
 					R : 'Tabular Islamic calendar',
 					href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
-					S : 'font-size:.8em;'
 				},
 				function(date) {
 					return date.精 === '年' ? date.to_Tabular()[0] + '年' : date
-							.to_Tabular().slice(0, 3).join('/');
+							.to_Tabular().slice(0, 3).join('/')
+							+ '; '
+							+ date.to_Tabular(true).slice(0, 3).reverse().join(
+									' ');
 				} ],
 
 		Hebrew : [
@@ -1336,11 +1350,13 @@ function affairs() {
 					},
 					R : 'Hebrew calendar, 猶太曆',
 					href : 'https://en.wikipedia.org/wiki/Hebrew_calendar',
-					S : 'font-size:.8em;'
 				},
 				function(date) {
 					return date.精 === '年' ? date.to_Hebrew()[0] + '年' : date
-							.to_Hebrew(true).slice(0, 3).reverse().join(' ');
+							.to_Hebrew().slice(0, 3).join('/')
+							+ '; '
+							+ date.to_Hebrew(true).slice(0, 3).reverse().join(
+									' ');
 				} ],
 
 		Long_Count : [
