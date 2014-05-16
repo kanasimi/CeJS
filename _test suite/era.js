@@ -1417,6 +1417,19 @@ function affairs() {
 									+ (dai[3] ? ' ' + dai[3] : '');
 				} ],
 
+		Coptic : [
+				{
+					a : {
+						T : '科普特曆'
+					},
+					R : 'Coptic calendar',
+					href : 'https://en.wikipedia.org/wiki/Coptic_calendar',
+				},
+				function(date) {
+					return date.精 === '年' ? date.to_Coptic()[0] + '年' : date
+							.to_Coptic().slice(0, 3).join('/');
+				} ],
+
 		contemporary : [ {
 			T : '共存紀年',
 			R : '本日/本年同時期存在之其他紀年。對未有詳實資料者，僅約略準確至所列日期！'
