@@ -1327,21 +1327,19 @@ function affairs() {
 			: CeL.week_date(date, true);
 		} ],
 
-		Tabular : [
-				{
-					a : {
-						T : '伊斯蘭曆'
-					},
-					R : 'Tabular Islamic calendar',
-					href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
-				},
-				function(date) {
-					return date.精 === '年' ? date.to_Tabular()[0] + '年' : date
-							.to_Tabular().slice(0, 3).join('/')
-							+ '; '
-							+ date.to_Tabular(true).slice(0, 3).reverse().join(
-									' ');
-				} ],
+		Tabular : [ {
+			a : {
+				T : '伊斯蘭曆'
+			},
+			R : 'Tabular Islamic calendar',
+			href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
+		}, function(date) {
+			return date.精 === '年' ? date.to_Tabular({
+				format : 'serial'
+			})[0] + '年' : date.to_Tabular({
+				format : 'serial'
+			}).slice(0, 3).join('/') + '; ' + date.to_Tabular();
+		} ],
 
 		Hebrew : [
 				{
@@ -1353,10 +1351,10 @@ function affairs() {
 				},
 				function(date) {
 					return date.精 === '年' ? date.to_Hebrew()[0] + '年' : date
-							.to_Hebrew().slice(0, 3).join('/')
-							+ '; '
-							+ date.to_Hebrew(true).slice(0, 3).reverse().join(
-									' ');
+							.to_Hebrew({
+								format : 'serial'
+							}).slice(0, 3).join('/')
+							+ '; ' + date.to_Hebrew();
 				} ],
 
 		Long_Count : [
@@ -1428,12 +1426,10 @@ function affairs() {
 				function(date) {
 					return date.精 === '年' ? date.to_Indian_national()[0] + '年'
 							: date.to_Indian_national({
-								format : 'numerical'
+								format : 'serial'
 							}).slice(0, 3).join('/')
 							//
-							+ ' (' + date.to_Indian_national({
-								format : 'text'
-							}) + ')';
+							+ '; ' + date.to_Indian_national();
 				} ],
 
 		Bahai : [
@@ -1448,10 +1444,8 @@ function affairs() {
 					return date.精 === '年' ? date.to_Bahai().slice(0, 2).join(
 							'-')
 							+ '年' : date.to_Bahai({
-						numerical_date : true
-					}).slice(0, 5).join('/') + ' ('
-							+ date.to_Bahai().slice(0, 5).reverse().join(' ')
-							+ ')';
+						format : 'serial'
+					}).slice(0, 5).join('/') + '; ' + date.to_Bahai();
 				} ],
 
 		Coptic : [
