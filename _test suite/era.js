@@ -1429,8 +1429,8 @@ function affairs() {
 					return date.精 === '年' ? date.to_Bahai().slice(0, 2).join(
 							'-')
 							+ '年' : date.to_Bahai({
-						month_name : true
-					}).slice(0, 5).join('/');
+						numerical_date : true
+					}).slice(0, 5).join('/') +' ('+date.to_Bahai().slice(0, 5).reverse().join(' ')+')';
 				} ],
 
 		Coptic : [
