@@ -1417,6 +1417,25 @@ function affairs() {
 									+ (dai[3] ? ' ' + dai[3] : '');
 				} ],
 
+		Indian_national : [
+				{
+					a : {
+						T : '印度國定曆'
+					},
+					R : 'भारतीय राष्ट्रीय पंचांग / Indian national calendar',
+					href : 'https://en.wikipedia.org/wiki/Indian_national_calendar',
+				},
+				function(date) {
+					return date.精 === '年' ? date.to_Indian_national()[0] + '年'
+							: date.to_Indian_national({
+								format : 'numerical'
+							}).slice(0, 3).join('/')
+							//
+							+ ' (' + date.to_Indian_national({
+								format : 'text'
+							}) + ')';
+				} ],
+
 		Bahai : [
 				{
 					a : {
@@ -1430,7 +1449,9 @@ function affairs() {
 							'-')
 							+ '年' : date.to_Bahai({
 						numerical_date : true
-					}).slice(0, 5).join('/') +' ('+date.to_Bahai().slice(0, 5).reverse().join(' ')+')';
+					}).slice(0, 5).join('/') + ' ('
+							+ date.to_Bahai().slice(0, 5).reverse().join(' ')
+							+ ')';
 				} ],
 
 		Coptic : [
