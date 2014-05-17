@@ -1417,6 +1417,22 @@ function affairs() {
 									+ (dai[3] ? ' ' + dai[3] : '');
 				} ],
 
+		Bahai : [
+				{
+					a : {
+						T : '巴哈伊曆'
+					},
+					R : "Bahá'í / Badí‘ calendar",
+					href : "https://en.wikipedia.org/wiki/Bah%C3%A1'%C3%AD_calendar",
+				},
+				function(date) {
+					return date.精 === '年' ? date.to_Bahai().slice(0, 2).join(
+							'-')
+							+ '年' : date.to_Bahai({
+						month_name : true
+					}).slice(0, 5).join('/');
+				} ],
+
 		Coptic : [
 				{
 					a : {
