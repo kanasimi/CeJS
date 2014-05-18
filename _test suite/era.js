@@ -246,13 +246,8 @@ function show_calendar(era_name) {
 			date.共存紀年.forEach(function(era, index) {
 				if (output_numeral === 'Chinese')
 					era = CeL.to_Chinese_numeral(era);
-				list.push('[' + (index + 1) + ']', {
-					a : era,
-					title : era,
-					href : '#',
-					onclick : click_title_as_era,
-					C : '共存紀年'
-				});
+				list.push('[' + (index + 1) + ']', add_contemporary(era,
+						output_numeral));
 			});
 			date.共存紀年 = list;
 			// reset
@@ -855,12 +850,63 @@ function input_era(key) {
 var 準_MSG = {
 	疑 : '尚存疑',
 	傳說 : '為傳說時代之資料'
-};
+}, J_translate = {
+	H : '平成',
+	S : '昭和',
+	T : '大正',
+	M : '明治'
+}, country_color = {
+	天皇 : '#9cf',
+
+	朝鮮 : '#ccf',
+	新羅 : '#ccf',
+	百濟 : '#ccf',
+	高句麗 : '#ccf',
+	高麗 : '#ccf',
+	대한민국 : '#ccf',
+	'일제 강점기' : '#ccf',
+	조선주체연호 : '#ccf',
+
+	越南 : '#9f9',
+	黎 : '#9f9',
+	阮 : '#9f9',
+	莫 : '#9f9'
+}, country_PATTERN;
+
+(function() {
+	country_PATTERN = [];
+	for ( var n in country_color)
+		country_PATTERN.push(n);
+	country_PATTERN = new RegExp('(' + country_PATTERN.join('|') + ')', 'i');
+})();
+
+function add_contemporary(era, output_numeral) {
+	var o = {
+		a : output_numeral === 'Chinese' ? CeL.to_Chinese_numeral(era) : era,
+		title : era,
+		href : '#',
+		onclick : click_title_as_era,
+		C : '共存紀年'
+	}, matched = era.match(country_PATTERN);
+	if (matched)
+		o.S = 'background-color: ' + country_color[matched[1]] + ';';
+	return o;
+}
 
 function translate_era(era) {
 	if (!era)
 		era = era_input_object.setValue();
-	var output, date = CeL.era(era, {
+
+	var output, date;
+
+	// 前置處理。
+	era = era.trim();
+	// http://maechan.net/kanreki/index.php
+	// 和暦入力時の元号は、『明治』『大正』『昭和』『平成』に限り、各々『M』『T』『S』『H』の頭文字でも入力できます。
+	if (date = era.match(/^([HSTM])\s*(\d+)([^\d].*)?$/i))
+		era = J_translate[date[1]] + date[2] + (date[3] || '年');
+
+	date = CeL.era(era, {
 		// 尋精準 : 4,
 		numeral : output_numeral
 	});
@@ -878,16 +924,8 @@ function translate_era(era) {
 		if (format === '共存紀年')
 			if (Array.isArray(output = date.共存紀年))
 				output.forEach(function(era, index) {
-					output[index] = [
-							' [' + (index + 1) + '] ',
-							{
-								a : output_numeral === 'Chinese' ? CeL
-										.to_Chinese_numeral(era) : era,
-								title : era,
-								href : '#',
-								onclick : click_title_as_era,
-								C : '共存紀年'
-							} ];
+					output[index] = [ ' [' + (index + 1) + '] ',
+							add_contemporary(era, output_numeral) ];
 				});
 			else
 				output = {
@@ -1331,7 +1369,7 @@ function affairs() {
 			a : {
 				T : '伊斯蘭曆'
 			},
-			R : 'Tabular Islamic calendar',
+			R : 'Tabular Islamic calendar\n日落後為隔日。',
 			href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
 		}, function(date) {
 			return date.精 === '年' ? date.to_Tabular({
@@ -1346,7 +1384,7 @@ function affairs() {
 					a : {
 						T : '希伯來曆'
 					},
-					R : 'Hebrew calendar, 猶太曆',
+					R : 'Hebrew calendar, 猶太曆\n日落後為隔日。\na Jewish "day" begins and ends at shkiah (sunset)',
 					href : 'https://en.wikipedia.org/wiki/Hebrew_calendar',
 				},
 				function(date) {
@@ -1458,7 +1496,26 @@ function affairs() {
 				},
 				function(date) {
 					return date.精 === '年' ? date.to_Coptic()[0] + '年' : date
-							.to_Coptic().slice(0, 3).join('/');
+							.to_Coptic({
+								format : 'serial'
+							}).slice(0, 3).join('/')
+							+ '; ' + date.to_Coptic();
+				} ],
+
+		Ethiopian : [
+				{
+					a : {
+						T : '衣索比亞曆'
+					},
+					R : 'Ethiopian calendar',
+					href : 'https://en.wikipedia.org/wiki/Ethiopian_calendar',
+				},
+				function(date) {
+					return date.精 === '年' ? date.to_Ethiopian()[0] + '年' : date
+							.to_Ethiopian({
+								format : 'serial'
+							}).slice(0, 3).join('/')
+							+ '; ' + date.to_Ethiopian();
 				} ],
 
 		contemporary : [ {
