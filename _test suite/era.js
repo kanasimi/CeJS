@@ -1386,13 +1386,12 @@ function affairs() {
 					},
 					R : 'Hebrew calendar, 猶太曆\n日落後為隔日。\na Jewish "day" begins and ends at shkiah (sunset)',
 					href : 'https://en.wikipedia.org/wiki/Hebrew_calendar',
-				},
-				function(date) {
-					return date.精 === '年' ? date.to_Hebrew()[0] + '年' : date
-							.to_Hebrew({
-								format : 'serial'
-							}).slice(0, 3).join('/')
-							+ '; ' + date.to_Hebrew();
+				}, function(date) {
+					return date.精 === '年' ? date.to_Hebrew({
+						format : 'serial'
+					})[0] + '年' : date.to_Hebrew({
+						format : 'serial'
+					}).slice(0, 3).join('/') + '; ' + date.to_Hebrew();
 				} ],
 
 		Long_Count : [
@@ -1444,79 +1443,73 @@ function affairs() {
 				function(date) {
 					var dai;
 					return date - CeL.Dai_Date.epoch < 0
-							|| isNaN((dai = date.to_Dai())[0]) ? ''
-							: date.精 === '年' ? dai[0] + '年' : dai.slice(0, 3)
-									.join('/')
-									+ '(周'
-									+ (date.getDay() + 1)
-									+ ')'
-									+ (dai[3] ? ' ' + dai[3] : '');
-				} ],
-
-		Indian_national : [
-				{
-					a : {
-						T : '印度國定曆'
-					},
-					R : 'भारतीय राष्ट्रीय पंचांग / Indian national calendar',
-					href : 'https://en.wikipedia.org/wiki/Indian_national_calendar',
-				},
-				function(date) {
-					return date.精 === '年' ? date.to_Indian_national()[0] + '年'
-							: date.to_Indian_national({
-								format : 'serial'
-							}).slice(0, 3).join('/')
-							//
-							+ '; ' + date.to_Indian_national();
-				} ],
-
-		Bahai : [
-				{
-					a : {
-						T : '巴哈伊曆'
-					},
-					R : "Bahá'í / Badí‘ calendar",
-					href : "https://en.wikipedia.org/wiki/Bah%C3%A1'%C3%AD_calendar",
-				},
-				function(date) {
-					return date.精 === '年' ? date.to_Bahai().slice(0, 2).join(
-							'-')
-							+ '年' : date.to_Bahai({
+					// 超出可轉換之範圍。
+					|| isNaN((dai = date.to_Dai({
 						format : 'serial'
-					}).slice(0, 5).join('/') + '; ' + date.to_Bahai();
+					}))[0]) ? ''
+					//
+					: date.精 === '年' ? dai[0] + '年' : dai.slice(0, 3).join('/')
+							+ '(周' + (date.getDay() + 1) + ')'
+							+ (dai[3] ? ' ' + dai[3] : '');
 				} ],
 
-		Coptic : [
-				{
-					a : {
-						T : '科普特曆'
-					},
-					R : 'Coptic calendar',
-					href : 'https://en.wikipedia.org/wiki/Coptic_calendar',
-				},
-				function(date) {
-					return date.精 === '年' ? date.to_Coptic()[0] + '年' : date
-							.to_Coptic({
-								format : 'serial'
-							}).slice(0, 3).join('/')
-							+ '; ' + date.to_Coptic();
-				} ],
+		Indian_national : [ {
+			a : {
+				T : '印度國定曆'
+			},
+			R : 'भारतीय राष्ट्रीय पंचांग / Indian national calendar',
+			href : 'https://en.wikipedia.org/wiki/Indian_national_calendar',
+		}, function(date) {
+			return date.精 === '年' ? date.to_Indian_national({
+				format : 'serial'
+			})[0] + '年' : date.to_Indian_national({
+				format : 'serial'
+			}).slice(0, 3).join('/')
+			//
+			+ '; ' + date.to_Indian_national();
+		} ],
 
-		Ethiopian : [
-				{
-					a : {
-						T : '衣索比亞曆'
-					},
-					R : 'Ethiopian calendar',
-					href : 'https://en.wikipedia.org/wiki/Ethiopian_calendar',
-				},
-				function(date) {
-					return date.精 === '年' ? date.to_Ethiopian()[0] + '年' : date
-							.to_Ethiopian({
-								format : 'serial'
-							}).slice(0, 3).join('/')
-							+ '; ' + date.to_Ethiopian();
-				} ],
+		Bahai : [ {
+			a : {
+				T : '巴哈伊曆'
+			},
+			R : "Bahá'í / Badí‘ calendar",
+			href : "https://en.wikipedia.org/wiki/Bah%C3%A1'%C3%AD_calendar",
+		}, function(date) {
+			return date.精 === '年' ? date.to_Bahai({
+				format : 'serial'
+			}).slice(0, 2).join('-') + '年' : date.to_Bahai({
+				format : 'serial'
+			}).slice(0, 5).join('/') + '; ' + date.to_Bahai();
+		} ],
+
+		Coptic : [ {
+			a : {
+				T : '科普特曆'
+			},
+			R : 'Coptic calendar',
+			href : 'https://en.wikipedia.org/wiki/Coptic_calendar',
+		}, function(date) {
+			return date.精 === '年' ? date.to_Coptic({
+				format : 'serial'
+			})[0] + '年' : date.to_Coptic({
+				format : 'serial'
+			}).slice(0, 3).join('/') + '; ' + date.to_Coptic();
+		} ],
+
+		Ethiopian : [ {
+			a : {
+				T : '衣索比亞曆'
+			},
+			R : 'Ethiopian calendar',
+			href : 'https://en.wikipedia.org/wiki/Ethiopian_calendar',
+		}, function(date) {
+			return date.精 === '年' ? date.to_Ethiopian({
+				format : 'serial'
+			})[0] + '年' : date.to_Ethiopian({
+				format : 'serial'
+			}).slice(0, 3).join('/') + '; ' + date.to_Ethiopian();
+		} ],
 
 		contemporary : [ {
 			T : '共存紀年',

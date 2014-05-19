@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-<title data-gettext="紀年轉換工具">Initializing..</title>
+<title data-gettext="紀年轉換工具">紀年轉換工具</title>
 <base target="_blank" />
 <style type="text/css">
 /* <![CDATA[ */
@@ -905,11 +905,15 @@ tr.selected>td a {
 	</div>
 
 	<hr style="clear: both;" />
-	紀年轉換工具 訊息提示與紀錄欄：
+	<span data-gettext="紀年轉換工具"></span>
+	<span data-gettext="訊息提示與紀錄欄"></span>：
 	<div id="panel_for_log">
 		<b style="color: red;">已載入主網頁。正進行程式初始化作業，請稍待片刻…</b>
 	</div>
 
+	<script type="text/javascript">
+		document.title = 'Initializing...';
+	</script>
 	<script type="text/javascript" src="../ce.js">
 		//{"run":"era.js"}
 	</script>
