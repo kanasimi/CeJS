@@ -984,17 +984,18 @@ function translate_era(era) {
 			if (date.準 || date.精) {
 				if (!Array.isArray(output))
 					output = [ output ];
-				output
-						.unshift({
-							em : [
-									'此輸出值',
-									準_MSG[date.準]
-											|| '僅約略準確至'
-											+ (date.準 || date.精)
-											+ (/^\d+[年月日]$/.test(date.準
-													|| date.精) ? '前後' : ''),
-									'，僅供參考： ' ]
-						});
+				output.unshift({
+					em : [ '此輸出值', 準_MSG[date.準] || '僅約略準確至'
+					//
+					+ (date.準 || date.精)
+					//
+					+ (/^\d+[年月日]$/.test(date.準 || date.精) ? '前後' : ''),
+							'，僅供參考： ' ]
+				}
+
+				)
+
+				;
 			}
 		}
 
@@ -1097,11 +1098,12 @@ function affairs() {
 
 	_.create_menu('language', [ 'TW', 'ja', 'en' ]);
 
-	// translate all nodes to show in default domain.
+	// handle with document.title in IE 8.
+	if (CeL.set_text.need_check_title)
+		_.document_title = document_title;
+
+	// translate all nodes to show in specified language (or default domain).
 	_.translate_nodes();
-	if (!CeL.support_dataset)
-		// IE8 中，除了 document.title，本工具大部分顯示皆能以 translate_nodes() 處理。
-		document.title = 'Era Conversion Tool';
 
 	// -----------------------------
 
