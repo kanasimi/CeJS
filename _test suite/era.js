@@ -108,7 +108,9 @@ function Year_numbering(shift) {
 	}
 }
 
-var CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
+var NOT_FOUND = -1,
+//
+CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
 // 選用的文字式年曆欄位
 selected_title = {
 	JDN : true
@@ -174,7 +176,7 @@ function show_calendar(era_name) {
 		dates.length = show_calendar.LIMIT;
 	}
 
-	if (era_name.indexOf('月') === -1)
+	if (era_name.indexOf('月') === NOT_FOUND)
 		title.splice(-1, 1, {
 			th : {
 				T : '朔日'
@@ -208,7 +210,7 @@ function show_calendar(era_name) {
 	hided_title.pop();
 
 	if (main_date_value)
-		if (main_date_value.日 == 1 && era_name.indexOf('日') === -1)
+		if (main_date_value.日 == 1 && era_name.indexOf('日') === NOT_FOUND)
 			main_date_value = null;
 		else {
 			main_date_value.setHours(0, 0, 0, 0);
@@ -237,7 +239,7 @@ function show_calendar(era_name) {
 
 	dates.forEach(function(date) {
 		if (!era_caption)
-			era_caption = era_name.indexOf(date.紀年名) !== -1 ? date.紀年名
+			era_caption = era_name.indexOf(date.紀年名) !== NOT_FOUND ? date.紀年名
 			//
 			: /[\/年]/.test(era_name) ? date.紀年 : era_name;
 
@@ -285,6 +287,14 @@ function show_calendar(era_name) {
 				C : 'to_select',
 				onclick : click_title_as_era
 			}, matched[3] ];
+
+		// 後處理。
+		// 公曆換月。
+		if (tmp[1].indexOf('\/1(') !== NOT_FOUND)
+			tmp[1] = {
+				span : tmp[1],
+				S : 'color:#f80'
+			};
 
 		tmp.forEach(function(data, index) {
 			list.push({
@@ -393,7 +403,7 @@ function 解壓縮曆數() {
 function 解析曆數() {
 	var calendar = CeL.set_text('pack_source').trim().replace(/\\t/g, '\t');
 
-	calendar = calendar.indexOf('|') === -1
+	calendar = calendar.indexOf('|') === NOT_FOUND
 	// 當作紀年名
 	? CeL.era(calendar, {
 		get_era : true
@@ -1439,7 +1449,7 @@ function affairs() {
 					a : {
 						T : '傣曆',
 					},
-					R : '西雙版納傣曆紀元始於公元638年3月22日，可轉換之範圍於傣曆714年至3190年期間內。',
+					R : '西雙版納傣曆紀元始於公元638年3月22日，可轉換之範圍於傣曆714年（1352/3/28－）至3190年期間內。',
 					href : 'http://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86'
 				},
 				function(date) {
