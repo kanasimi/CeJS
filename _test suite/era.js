@@ -155,9 +155,13 @@ function add_calendar_title() {
 	return false;
 }
 
+
+
 // 文字式年曆。
 function show_calendar(era_name) {
-	var era_caption, title = default_title.slice(), output = [ {
+	var era_caption,
+	// 為了不更動到原先的 default_title。作 deep clone.
+	title = CeL.clone(default_title, true), output = [ {
 		tr : title
 	} ], 前年名, 前月名, 前紀年名, 後紀年名,
 	//
