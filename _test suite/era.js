@@ -113,7 +113,8 @@ var NOT_FOUND = -1,
 CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
 // 選用的文字式年曆欄位
 selected_title = {
-	JDN : true
+	JDN : true,
+	contemporary : true
 },
 // 可選用的文字式年曆 title。 = { id : [th, function (date) {} ] }
 calendar_title,
@@ -154,8 +155,6 @@ function add_calendar_title() {
 	translate_era();
 	return false;
 }
-
-
 
 // 文字式年曆。
 function show_calendar(era_name) {
