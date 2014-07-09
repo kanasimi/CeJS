@@ -1260,6 +1260,7 @@ function affairs() {
 		SVG_object = null;
 		delete select_panels['era_graph'];
 		if (is_IE11)
+			// 多按幾次就會 hang 住。
 			CeL.err('IE 11 尚無法使用線圖。請考慮使用 Chrome 或 Firefox 等網頁瀏覽器。');
 		CeL.warn('您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉，無法繪製紀年時間軸線圖。');
 	}
