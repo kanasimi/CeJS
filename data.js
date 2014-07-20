@@ -1068,6 +1068,9 @@ function Pair(source, options) {
 		// 前置處理。
 		options = library_namespace.null_Object();
 
+	if (!Array.isArray(this.new_keys))
+		this.new_keys = [];
+
 	// Warning: 手動設定 .keys, .pair 非常危險!
 	if (!library_namespace.is_Object(this.pair)) {
 		// initialization.
@@ -1109,7 +1112,7 @@ library_namespace.set_method(Pair, {
 		})).pair;
 	},
 
-	// 排除注解 (//, /* */)。
+	// 排除/移除注解 (//, /* */)。
 	// strip/remove javascript comments.
 	// @see http://vrana.github.io/JsShrink/
 	// @see http://trinithis.awardspace.com/commentStripper/stripper.html
@@ -1168,6 +1171,8 @@ library_namespace.set_method(Pair.prototype, {
 				// key / value 分隔符號。
 				separator = options.separator || this.separator,
 				//
+				new_keys = !options.path && this.new_keys,
+				//
 				item_processor = typeof options.item_processor === 'function' ? options.item_processor
 						: null;
 
@@ -1202,11 +1207,14 @@ library_namespace.set_method(Pair.prototype, {
 							// 可能是為了確保不被改變而設定。
 						}
 						if (key in pair)
+							// 後來覆蓋前面的。
 							library_namespace.warn('Pair.add: Duplicated key [' + key + '] → [' + pair[key]
 							+ '] will changed to [' + value + ']');
 						pair[key] = value;
 						if (keys)
 							keys.push(key);
+						if (new_keys)
+							new_keys.push(key);
 					}
 				});
 			}
@@ -1223,6 +1231,10 @@ library_namespace.set_method(Pair.prototype, {
 
 	add_path : function(options) {
 		var source = library_namespace.get_file(this.path);
+		if (!options || !options.path)
+			options = Object.assign({
+				path : this.path
+			}, options);
 		if (source)
 			// 載入 resource。
 			this.add(source, options);
@@ -1234,12 +1246,15 @@ library_namespace.set_method(Pair.prototype, {
 		return this;
 	},
 
-	save : function(path, encoding) {
+	save : function(path, encoding, save_new) {
 		if (!library_namespace.write_file)
 			throw new Error('Please include application.OS.Windows.file first!');
 
-		if (!path)
+		if (!path || path !== this.path) {
+			if (!save_new && this.remove_comments)
+				library_namespace.warn('移除注解後再存檔，會失去原先的注解！請考慮設定 save_new flag。');
 			path = this.path;
+		}
 
 		if (!encoding)
 			encoding = library_namespace.guess_encoding
@@ -1248,12 +1263,21 @@ library_namespace.set_method(Pair.prototype, {
 		library_namespace.debug([ '(' + encoding, ') [', path, ']' ]);
 
 		var _t = this, pair = this.pair, line, data = [];
-		for (var key in pair) {
-			if (Array.isArray(line = pair[key]))
-				line = line.join('\t');
-			data.push(key + '\t' + line);
-		}
-		library_namespace.write_file(path, data.join('\n'), encoding);
+		if (save_new)
+			this.new_keys.forEach(function (key) {
+				if (Array.isArray(line = pair[key]))
+					line = line.join('\t');
+				data.push(key + '\t' + line);
+			});
+		else
+			for (var key in pair) {
+				if (Array.isArray(line = pair[key]))
+					line = line.join('\t');
+				data.push(key + '\t' + line);
+			}
+		library_namespace.write_file(path, data.join('\n'), encoding,
+		//
+		save_new ? CeL.IO_mode.ForAppending : undefined);
 
 		library_namespace.log([ data.length, ' records saved. [', {
 			// 重新紀錄.
@@ -1266,6 +1290,10 @@ library_namespace.set_method(Pair.prototype, {
 		}, ']' ]);
 
 		return this;
+	},
+
+	save_new : function(path, encoding) {
+		return this.save(path, encoding, true);
 	},
 
 	pattern : function(flag) {
@@ -1377,6 +1405,7 @@ library_namespace.set_method(Pair.prototype, {
 			keys.sort(options.compare_function || this.compare_function);
 
 		this.keys = keys;
+		this.new_keys = keys.slice();
 		this.pair = pair;
 		return this;
 	},

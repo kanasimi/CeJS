@@ -88,8 +88,8 @@ _// JSDT:_module_
  * @see	<a href="http://msdn.microsoft.com/en-US/library/314cz14s.aspx" accessdate="2009/11/28 17:42" title="OpenTextFile Method">OpenTextFile Method</a>
  * @_memberOf	_module_
  */
-iomode = {
-	// * @_description <a href="#.iomode">iomode</a>: Open a file for reading only. You can't write to this file.
+IO_mode = {
+	// * @_description <a href="#.IO_mode">IO_mode</a>: Open a file for reading only. You can't write to this file.
 	/**
 	 * Open a file for reading only. You can't write to this file.
 	 * @_memberOf	_module_
@@ -685,18 +685,18 @@ _// JSDT:_module_
  * 測試是否已開啟資料檔之測試與重新開啟資料檔
  * @param FN	file name
  * @param NOTexist	if NOT need exist
- * @param io_mode	IO mode
+ * @param IO_mode	open I/O mode
  * @return
- * @requires	FSO,WshShell,iomode
+ * @requires	FSO,WshShell,IO_mode
  * @_memberOf	_module_
  */
-openDataTest = function(FN, NOTexist, io_mode) {
+openDataTest = function(FN, NOTexist, IO_mode) {
 	if (!FN)
 		return 3;
 	if (NOTexist && !FSO.FileExists(FN))
 		return 0;
-	if (!io_mode)
-		io_mode = _.iomode.ForAppending;
+	if (!IO_mode)
+		IO_mode = _.IO_mode.ForAppending;
 	for (;;)
 		try {
 			var Fs = FSO.OpenTextFile(FN, ForAppending);
@@ -725,12 +725,17 @@ _// JSDT:_module_
 .
 /**
  * 
- * @param FN
- * @param format
- * @param io_mode
+ * @param {String}file_path
+ *            file path
+ * @param {Number|open_format}format
+ *            open format, e.g., open_format.TristateUseDefault.<br />
+ *            default: auto-detecting
+ * @param {Number|IO_mode}IO_mode
+ *            open I/O mode, e.g., IO_mode.ForAppending.<br />
+ *            default: ForReading
  * @return
  */
-open_template = function(FN, format, io_mode) {
+open_template = function(file_path, format, IO_mode) {
 	/**
 	 * file
 	 * @inner
@@ -743,14 +748,14 @@ open_template = function(FN, format, io_mode) {
 	 * @ignore
 	 */
 	Fs;
-	if (!io_mode)
-		io_mode = _.iomode.ForReading;
+	if (!IO_mode)
+		IO_mode = _.IO_mode.ForReading;
 	if (!format)
 		format = _.open_format.TristateUseDefault;// TristateTrue
 	try {
-		F = FSO.GetFile(FN);
-		//Fs=open_file(FN,format,io_mode);
-		Fs = F.OpenAsTextStream(io_mode, format);
+		F = FSO.GetFile(file_path);
+		//Fs=open_file(file_path,format,IO_mode);
+		Fs = F.OpenAsTextStream(IO_mode, format);
 	} catch (e) {
 		// 指定的檔案不存在?
 		pErr(e);
@@ -759,22 +764,34 @@ open_template = function(FN, format, io_mode) {
 	return Fs;
 };
 
+/**
+ * 
+ * @param {String}file_path
+ *            file path
+ * @param {Number|IO_mode}IO_mode
+ *            open I/O mode, e.g., IO_mode.ForAppending.<br />
+ *            default: ForReading
+ * @param {Number|open_format}format
+ *            open format, e.g., open_format.TristateUseDefault.<br />
+ *            default: auto-detecting
+ * @return
+ */
 //var openOut.f;	//	default format
-function openOut(FN,io_mode,format){
+function openOut(file_path,IO_mode,format){
  var OUT,OUTs,_f=openOut.f;
- if(!io_mode)io_mode=_.iomode.ForWriting;
+ if(!IO_mode)IO_mode=_.IO_mode.ForWriting;
  if(!format)format=_f=='string'&&_f?_f:_.open_format.TristateUseDefault;
  try{
-  OUT=FSO.GetFile(FN);
+  OUT=FSO.GetFile(file_path);
  }
  catch(e){try{
   //指定的檔案不存在
-  var tmp=FSO.CreateTextFile(FN,true);
+  var tmp=FSO.CreateTextFile(file_path,true);
   tmp.Close();
-  OUT=FSO.GetFile(FN);
+  OUT=FSO.GetFile(file_path);
  }catch(e){pErr(e);}}
 
- try{OUTs=OUT.OpenAsTextStream(io_mode,format);}catch(e){pErr(e);}
+ try{OUTs=OUT.OpenAsTextStream(IO_mode,format);}catch(e){pErr(e);}
 
  return OUTs;
 };
@@ -1320,8 +1337,8 @@ var AdoEnums = {
  * @param {Number|open_format}format
  *            open format, e.g., open_format.TristateUseDefault.<br />
  *            default: auto-detecting
- * @param {Number|iomode}io_mode
- *            open IO mode, e.g., iomode.ForAppending.<br />
+ * @param {Number|IO_mode}IO_mode
+ *            open I/O mode, e.g., IO_mode.ForAppending.<br />
  *            default: ForReading
  * 
  * @returns {Error}
@@ -1339,7 +1356,7 @@ var AdoEnums = {
  *      <a href="http://msdn.microsoft.com/en-us/library/6kxy1a51.aspx"
  *      accessdate="2012/3/29 18:21" title="FileSystemObject">FSO</a>
  */
-function open_file(file_path, format, io_mode) {
+function open_file(file_path, format, IO_mode) {
 	if (false) {
 		if (!file_path || _.is_absolute_path && library_namespace.get_file_path
 				&& !_.is_absolute_path(file_path)
@@ -1395,6 +1412,18 @@ function open_file(file_path, format, io_mode) {
 			}
 		}
 
+		if (IO_mode == _.IO_mode.ForAppending)
+			if (FSO.FileExists(file_path))
+				// 因為 appending，將指標設至檔尾。
+				file_stream.Position = file_stream.Size;
+			else
+				// 無此檔時改 writing。
+				IO_mode = _.IO_mode.ForWriting;
+		// else: assert: file_stream.Position === 0
+		if (false && IO_mode == _.IO_mode.ForWriting)
+			// truncate file
+			file_stream.SetEOS();
+
 		file_stream.Open();
 		// file_stream.Position = 0, file_stream.LineSeparator = AdoEnums.adLF;
 		try {
@@ -1415,14 +1444,14 @@ function open_file(file_path, format, io_mode) {
 
 		// 使用某些防毒軟體(如諾頓 Norton)時，.OpenTextFile() 可能會被攔截，因而延宕。
 		try {
-			if (io_mode == _.iomode.ForAppending && !FSO.FileExists(file_path))
+			if (IO_mode == _.IO_mode.ForAppending && !FSO.FileExists(file_path))
 				// 無此檔時改 writing.
-				io_mode = _.iomode.ForWriting;
+				IO_mode = _.IO_mode.ForWriting;
 
-			file_stream = FSO.OpenTextFile(file_path, io_mode
-					|| _.iomode.ForReading,
+			file_stream = FSO.OpenTextFile(file_path, IO_mode
+					|| _.IO_mode.ForReading,
 			// writing 則自動 create.
-			io_mode == _.iomode.ForWriting,
+			IO_mode == _.IO_mode.ForWriting,
 					format == _.open_format.TristateTrue
 							|| format == _.open_format.TristateFalse ? format
 							: _.open_format.TristateUseDefault);
@@ -1452,8 +1481,8 @@ open_file.OS_alias = {
  * @param {Number|open_format}format
  *            open format, e.g., open_format.TristateUseDefault.<br />
  *            default: auto-detecting
- * @param {Number|iomode}io_mode
- *            open IO mode, e.g., iomode.ForAppending.<br />
+ * @param {Number|IO_mode}IO_mode
+ *            open I/O mode, e.g., IO_mode.ForAppending.<br />
  *            default: ForReading
  * @param {Function}line_handle
  *            TODO: do this function per line, or use [line_handle, maxsize]
@@ -1463,9 +1492,9 @@ open_file.OS_alias = {
  * 
  * @_memberOf _module_
  */
-function read_file(file_path, format, io_mode, line_handle) {
-	var contents, file_stream = open_file(file_path, format, io_mode
-			|| _.iomode.ForReading);
+function read_file(file_path, format, IO_mode, line_handle) {
+	var contents, file_stream = open_file(file_path, format, IO_mode
+			|| _.IO_mode.ForReading);
 
 	if (library_namespace.is_type(file_stream, 'Error')) {
 		return file_stream;
@@ -1484,8 +1513,8 @@ function read_file(file_path, format, io_mode, line_handle) {
 			if (file_stream.Type === AdoEnums.adTypeBinary) {
 				// 讀 binary data 用 'ISO-8859-1' 會 error encoding.
 				contents = file_stream.Read(AdoEnums.adReadAll);
-				//	此時 io_mode === true 表示不將 binary data 轉換為 String!
-				if (!io_mode)
+				//	此時 IO_mode === true 表示不將 binary data 轉換為 String!
+				if (!IO_mode)
 					contents = translate_ADO_Stream_binary_data(contents);
 			} else if (line_handle) {
 				while (!file_stream.EOS)
@@ -1545,8 +1574,8 @@ function read_file(file_path, format, io_mode, line_handle) {
  * @param {Number|open_format}format
  *            open format, e.g., open_format.TristateUseDefault.<br />
  *            default: auto-detecting
- * @param {Number|iomode}io_mode
- *            open IO mode, e.g., iomode.ForAppending.<br />
+ * @param {Number|IO_mode}IO_mode
+ *            open I/O mode, e.g., IO_mode.ForAppending.<br />
  *            default: ForWriting
  * @param {Boolean}no_overwrite
  *            DO NOT overwrite
@@ -1555,15 +1584,15 @@ function read_file(file_path, format, io_mode, line_handle) {
  * 
  * @_memberOf _module_
  */
-function write_file(file_path, contents, format, io_mode, no_overwrite) {
+function write_file(file_path, contents, format, IO_mode, no_overwrite) {
 	//	以內容判斷 encoding.
 	if (typeof format === 'undefined' && !is_file(file_path)) {
 		format = /^[\x20-\x7e\t\r\n]*$/.test(contents)
 		? _.open_format.TristateUseDefault : _.open_format.TristateTrue;
 	}
 
-	var file_stream = open_file(file_path, format, io_mode
-			|| _.iomode.ForWriting);
+	var file_stream = open_file(file_path, format, IO_mode
+			|| _.IO_mode.ForWriting);
 	if (library_namespace.is_type(file_stream, 'Error')) {
 		return file_stream;
 	}
@@ -1575,12 +1604,19 @@ function write_file(file_path, contents, format, io_mode, no_overwrite) {
 			else
 				file_stream.Write(contents);
 
-			// .SaveToFile() 須在 .Write 之後！
-			file_stream.SaveToFile(file_path, io_mode
-					|| AdoEnums.adSaveCreateOverWrite);
 			// 設定 end of the stream 後，將 truncate 之後的內容。
-			// http://msdn.microsoft.com/en-us/library/windows/desktop/ms676745%28v=vs.85%29.aspx
-			file_stream.SetEOS(true);
+			// http://msdn.microsoft.com/en-us/library/windows/desktop/ms676745.aspx
+			library_namespace.debug('設定 end of the stream from: ' + file_stream.Position + '/' + file_stream.Size + ', EOS:' + file_stream.EOS, 2);
+			//file_stream.Position = file_stream.Size;
+			// .SetEOS() 不能傳入 arguments，只能直接將當前 .Position 作為 EOS。
+			file_stream.SetEOS();
+			// assert: file_stream.Position === file_stream.Size && file_stream.EOS === true
+			library_namespace.debug('設定 end of the stream to: ' + file_stream.Position + '/' + file_stream.Size + ', EOS:' + file_stream.EOS, 3);
+			library_namespace.debug('Writing ' + contents.length + ' characters / file: ' + file_stream.Size + ' bytes to (' + format + ') [' + file_path + ']');
+
+			// .SaveToFile() 須在 .Write 之後！
+			file_stream.SaveToFile(file_path, IO_mode
+					|| AdoEnums.adSaveCreateOverWrite);
 			file_stream.Close();
 
 		} else {
@@ -1625,7 +1661,7 @@ write_file = write_file;
 //simpleDealFile[generateCode.dLK]='guess_encoding,read_file,write_file';
 _// JSDT:_module_
 .
-simpleDealFile = function(inFN, func, outFN, format, io_mode, N_O) {
+simpleDealFile = function(inFN, func, outFN, format, IO_mode, N_O) {
 	if (!inFN)
 		return;
 	if (!outFN)
@@ -2533,7 +2569,7 @@ function cacher(cache_file, options) {
 }
 
 /**
- * write log.
+ * write / save log.
  */
 function cacher_log(new_path) {
 	if (!library_namespace.write_file) {

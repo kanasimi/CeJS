@@ -1359,7 +1359,7 @@ if (typeof CeL === 'function')
 			setup_Files.conversion = {};
 			setup_Files.setup = function() {
 				library_namespace.debug('Trying setup Files.', 1,
-						'setup_Files.setup');
+								'setup_Files.setup');
 				library_namespace.is_included([ 'application.storage.file',
 						'application.OS.Windows.file',
 						'application.locale.encoding' ], true);
@@ -1439,7 +1439,7 @@ if (typeof CeL === 'function')
 						+ path
 						+ ']'
 						+ (path === target ? ': original = decided'
-								: '<br />→ [' + target + ']'));
+								: '<br />→ [' + target + ']'), 2);
 				return target;
 			}
 
@@ -1576,13 +1576,13 @@ if (typeof CeL === 'function')
 					//
 					text = read_file(path, encoding);
 					library_namespace.debug('(' + encoding + ') [' + path
-							+ ']: ' + text.length + ' chars.', 3);
+							+ ']: ' + text.length + ' characters.', 3);
 
 					if (modify) {
 						text = modify(text, path);
 						library_namespace.debug(
 						//
-						'→ ' + text.length + ' chars.', 3);
+						'→ ' + text.length + ' characters.', 3);
 						if (text.length === 0)
 							library_namespace.warn('[' + path
 									+ ']: 經 modify 後，無內容回傳！');
@@ -1597,7 +1597,8 @@ if (typeof CeL === 'function')
 				if (!encoding)
 					encoding = FSO.FileExists(target)
 							&& detect_encoding(this, target) || this.encoding;
-				library_namespace.debug('Save ' + this.list().length
+				if (library_namespace.is_debug(3))
+					library_namespace.debug('Merge ' + this.list().length
 						+ ' files to (' + encoding + ') [' + target + '].');
 
 				add_text('head', target);
@@ -1608,8 +1609,9 @@ if (typeof CeL === 'function')
 				if (typeof options.modify_all === 'function')
 					text_Array = options.modify_all(text_Array);
 
-				library_namespace.debug('writing ' + text_Array.length
-						+ ' chars to (' + encoding + ') [' + target + '].');
+				library_namespace.debug('Merge ' + this.order.length
+						+ ' files, writing ' + text_Array.length
+						+ ' characters to (' + encoding + ') [' + target + '].');
 				write_file(target, text_Array, encoding);
 
 				(this.data = {})[target] = {};
