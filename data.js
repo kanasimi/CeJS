@@ -1292,32 +1292,41 @@ library_namespace.set_method(Pair.prototype, {
 		return this.keys;
 	},
 
-	// if operator(key, value) return Object,
-	// then the loop will stop, and the Object will be returned.
 	for_each : function(operator, options) {
 		var pair = this.pair;
 		if (Array.isArray(this.keys))
-			try {
-				this.keys.forEach(function(key) {
-					var value = operator(key, pair[key]);
-					if (value && library_namespace.is_Object(value)) {
-						pair = null;
-						throw value;
-					}
-				});
-			} catch (e) {
-				if (pair)
-					// re-throw
-					throw e;
-				return e;
-			}
+			this.keys.forEach(function(key) {
+				operator(key, pair[key]);
+			});
 		else
-			for (var key in pair) {
-				var value = operator(key, pair[key]);
-				if (value && library_namespace.is_Object(value))
+			for (var key in pair)
+				operator(key, pair[key]);
+		return this;
+	},
+
+	select : function(selector, options) {
+		if (!selector) {
+			var flag = this.flag,
+			//
+			target = options && options.target;
+			if (!target)
+				return;
+			selector = function() {
+				return (new RegExp(key, flag)).test(target) && value;
+			};
+		}
+
+		var pair = this.pair, key, value;
+		if (Array.isArray(this.keys))
+			for (var i = 0, keys = this.keys, length = keys.length; i < length; i++) {
+				if (value = selector(key = keys[i], pair[key]))
 					return value;
 			}
-		return this;
+		else
+			for (key in pair) {
+				if (value = selector(key, pair[key]))
+					return value;
+			}
 	},
 
 	// convert from key to value.

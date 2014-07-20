@@ -104,7 +104,7 @@ td {
 	padding: .2em;
 }
 
-#language select,#language option {
+#language select, #language option {
 	color: #44f;
 	background-color: #eef;
 }
@@ -231,7 +231,7 @@ tr.selected>td a {
 	background-color: #cef;
 }
 
-#batch_source,#batch_result {
+#batch_source, #batch_result {
 	float: left;
 	width: 45%;
 	height: 20em;
@@ -253,7 +253,7 @@ tr.selected>td a {
 	border-radius: 1em;
 }
 
-#pack_source,#pack_result {
+#pack_source, #pack_result {
 	width: 90%;
 	height: 4em;
 	color: #735;
@@ -303,8 +303,9 @@ tr.selected>td a {
 	<span id="format_type_bar"></span>
 	<br />
 	<!-- http://www.fileformat.info/info/emoji/list.htm -->
-	<!-- ⌚ ⌛ ⏰ ⏱ ⏲   -->	
-	📅 <span data-gettext="輸出格式:"></span>
+	<!-- ⌚ ⌛ ⏰ ⏱ ⏲   -->
+	📅
+	<span data-gettext="輸出格式:"></span>
 	<input id="output_format" title="輸出格式" />
 	<a href="#"
 		onclick="output_numeral=output_numeral==='Chinese'?'':'Chinese';this.className=output_numeral==='Chinese'?'selected':'unselected';translate_era();return false;"
@@ -338,20 +339,23 @@ tr.selected>td a {
 				<a
 				href="https://github.com/kanasimi/CeJS/blob/master/data/date/era_data.js">era_data.js</a>。
 			</li>
-			<li>西曆(<a href="http://en.wikipedia.org/wiki/Common_Era"
+			<li>西曆(<a rel="nofollow"
+				href="http://en.wikipedia.org/wiki/Common_Era"
 				accessdate="2013/4/5 21:9" title="Common Era">CE</a>)以1582年10月15日為改曆分界點，Julian
 				calendar（儒略曆）1582年10月4日的下一日為 Gregorian
 				calendar（格里高利曆）1582年10月15日。公元初期之前，包括 4 CE 與公元前之日期，則採 <a
+				rel="nofollow"
 				href="http://en.wikipedia.org/wiki/Proleptic_Julian_calendar"
 				accessdate="2013/3/31 16:54">proleptic Julian calendar</a>；因此 4 CE,
 				1 BCE 為閏年。且 1 CE 的前一年是 1 BCE，沒有 0 CE。另請注意，由於 proleptic Julian
 				calendar 的誤差，會造成西元前日期延後，甚至如冬至發生在1月的情況。年代越早，差距越大。尚可參考 <a
+				rel="nofollow"
 				href="http://en.wikipedia.org/wiki/Conversion_between_Julian_and_Gregorian_calendars"
 				accessdate="2013/4/5 20:22">Conversion between Julian and
 					Gregorian calendars</a>。
 			</li>
 			<li>本工具在初始化完畢後，不會再透過網路傳輸資料。若下載整組套件，則可離線使用。</li>
-			<li>本函式庫除特殊標注外，可精確到日。中曆自<a
+			<li>本函式庫除特殊標注外，可精確到日。中曆自<a rel="nofollow"
 				href="http://tambingblog.wordpress.com/2012/12/01/%E5%86%8D%E8%AB%96%E5%AD%90%E6%99%82%E6%8F%9B%E6%97%A5/"
 				accessdate="2013/4/8 19:37"
 				title="再論子時換日 | 治曆者言 on WordPress.com
@@ -377,17 +381,19 @@ tr.selected>td a {
 			</tr>
 			<tr>
 				<td>1－2100 CE 之中曆</td>
-				<td>林晰、邱展毅、劉智漢、鄭垂平、鄭垂平等研究者之<a
+				<td>林晰、邱展毅、劉智漢、鄭垂平、鄭垂平等研究者之<a rel="nofollow"
 					href="http://sinocal.sinica.edu.tw/" accessdate="2013/3/25 22:18">中央研究院
-						兩千年中西曆轉換</a><br />2013年2月版。<br /> <a
+						兩千年中西曆轉換</a><br />2013年2月版。<br /> <a rel="nofollow"
 					href="http://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E5%B9%B4%E5%8F%B7%E7%B4%A2%E5%BC%95"
 					accessdate="2013/5/2 20:36">中國年號列表</a>。
 				</td>
-				<td><a href="http://sinocal.sinica.edu.tw/lusodoc.html"
+				<td><a rel="nofollow"
+					href="http://sinocal.sinica.edu.tw/lusodoc.html"
 					accessdate="2013/3/28 19:24" title="「兩千年中西曆轉換」資料庫介紹">此程式採用的主要是<span
 						class="proper_noun">薛仲三</span>、<span class="proper_noun">歐陽頤</span>兩位研究者所編著的<span
 						class="creation_title">兩千年中西曆對照表</span></a>(1940)。2010 CE 至 2100 CE
-					之農曆則<a href="http://sinocal.sinica.edu.tw/lusochangelog.html"
+					之農曆則<a rel="nofollow"
+					href="http://sinocal.sinica.edu.tw/lusochangelog.html"
 					accessdate="2013/4/5 19:8" title="兩千年中西曆轉換工具 - 更新紀錄">似參照氣象局資料</a>。<br />請注意：
 					<ul>
 						<li><em>此中西曆對照表於 4 CE 停閏</em>。惟本工具之紀元功能採 proleptic Julian
@@ -397,36 +403,39 @@ tr.selected>td a {
 							class="creation_title">南汉历法初考</span>一文者，不勝感謝。
 						</li>
 					</ul>
-					<hr />其他相關資料：<br /> <a
+					<hr />其他相關資料：<br /> <a rel="nofollow"
 					href="http://authority.ddbc.edu.tw/time/index.php"
 					accessdate="2013/5/2 20:25">時間規範資料庫</a><br />數位典藏與自動推論實驗室
-					數位典藏研究發展中心 <a href="http://140.112.30.230/datemap/index.php"
+					數位典藏研究發展中心 <a rel="nofollow"
+					href="http://140.112.30.230/datemap/index.php"
 					accessdate="2013/4/5 19:2"
 					title="中西曆對照查詢系統（明代以降） || Chinse and
 						Western Dates Mapping System (Later than Ming Dynasty)">中西曆對照查詢系統（明代以降）</a><br />歷代帝王/年號紀年
-					→ 公元紀年: <a href="http://jpkc.gxun.edu.cn/kj-skwjjs/gongju31.html"
+					→ 公元紀年: <a rel="nofollow"
+					href="http://jpkc.gxun.edu.cn/kj-skwjjs/gongju31.html"
 					accessdate="2013/5/2 21:28">表譜和圖錄 常用表譜介紹</a><br /> <a
-					href="http://www.chinese-artists.net/year/"
+					rel="nofollow" href="http://www.chinese-artists.net/year/"
 					accessdate="2013/5/2 20:34">中華藝術家網站‧歷代紀年速查</a><br />周家發 世界歷史筆記 <a
-					href="http://chowkafat.net/Hisnote.html#Reigntitle"
+					rel="nofollow" href="http://chowkafat.net/Hisnote.html#Reigntitle"
 					accessdate="2013/5/2 20:38">東亞各國歷代年號</a><br />小林さん <a
+					rel="nofollow"
 					href="http://homepage1.nifty.com/history/history/list.htm"
 					accessdate="2013/5/2 21:15"
 					title="おりえんとひすとりい【東洋歴史】中国・モンゴル・朝鮮半島・琉球王国・日本の歴史年表！アジア東洋史研究中！">東洋歴史年表リスト</a><br />
-					<a
+					<a rel="nofollow"
 					href="http://www.ihp.sinica.edu.tw/~twsung/data/05/data05main.html#56"
-					accessdate="2013/5/2 21:25">年代、年號及大事表</a><br /> <a
+					accessdate="2013/5/2 21:25">年代、年號及大事表</a><br /> <a rel="nofollow"
 					href="http://311ztx.blog.163.com/blog/static/33487905200792253937736/"
-					accessdate="2013/5/2 21:24">历史纪年之间的换算</a><br /> <a
+					accessdate="2013/5/2 21:24">历史纪年之间的换算</a><br /> <a rel="nofollow"
 					href="http://www.fanren8.com/read-htm-tid-1798.html"
 					accessdate="2013/5/2 21:22"
 					title="历代(帝/王/年号)纪年--公元纪年对照表（前841年--1911年）| 历史天空 - 凡人大传 — 记录当代 网罗过去 传承千万祀">历代(帝/王/年号)纪年--公元纪年对照表（前841年--1911年）</a><br />
-					<a href="http://www.cfarmcale2100.com.tw/"
+					<a rel="nofollow" href="http://www.cfarmcale2100.com.tw/"
 					accessdate="2013/5/2 20:18">電子農民曆 CFarmCale2100</a></td>
 			</tr>
 			<tr>
 				<td>唐乾封元年－開元七年 (666－719 CE)</td>
-				<td>黃一農(1992)<a class="creation_title"
+				<td>黃一農(1992)<a rel="nofollow" class="creation_title"
 					href="http://hss.nthu.edu.tw/~ylh/abstract.php?paper_serial=92"
 					accessdate="2014/1/27 16:19">中國史曆表朔閏訂正舉隅──以唐《麟德曆》行用時期為例</a></td>
 				<td>麟德曆正式使用應始於麟德三年（乾封元年）。乾封一年至開元七年照<span class="creation_title">中國史曆表朔閏訂正舉隅</span>一文更改，未採用中央研究院版本。<br />於唐玄宗開元10年閏月，以及開元14年5月，由於無法按文更改，仍使用舊朔閏表。
@@ -438,11 +447,11 @@ tr.selected>td a {
 				</td>
 			</tr>
 			<tr>
-				<td><a
+				<td><a rel="nofollow"
 					href="http://zh.wikipedia.org/wiki/%E5%A4%AA%E5%B9%B3%E5%A4%A9%E6%9B%86"
 					accessdate="2014/2/24 8:31">太平天曆</a><br />太平新曆 1851－1869 CE</td>
 				<td>罗尔纲(1991)<span class="creation_title">太平天国史</span>卷三十二 志第十一
-					天历 <a
+					天历 <a rel="nofollow"
 					href="http://lib.ecit.edu.cn/guoxue/%C6%E4%CB%FB%C0%FA%CA%B7%CA%E9%BC%AE/%D7%A8%CC%E2%C0%E0/%C0%FA%CA%B7/%CC%AB%C6%BD%CC%EC%B9%FA%CA%B7/Resource/Book/Edu/JXCKS/TS010014/0061_ts010014.htm"
 					accessdate="2013/4/5 18:7" title="">四 天历与夏历阳历对照及简表</a><br />吴善中(1998)太平天国天历干支、礼拜提前一天原因考<br />吴善中(2005)太平天国历法研究述评
 				</td>
@@ -450,13 +459,15 @@ tr.selected>td a {
 			</tr>
 			<tr>
 				<td>南明、明鄭時期 (臺灣鄭氏政權) 1644－1683 CE</td>
-				<td><a
+				<td><a rel="nofollow"
 					href="http://tambingblog.wordpress.com/author/tambingblog/"
 					accessdate="2013/4/8 19:48"
 					title="Posts by 譚冰 | 治曆者言 on WordPress.com">譚冰</a>（陳泳昌）(2012)<a
+					rel="nofollow"
 					href="http://tambingblog.wordpress.com/2012/09/01/%E8%A1%93%E6%95%B8%E5%BE%B5%E9%A9%97%E9%97%9C%E9%8D%B5%E4%B9%8B%E7%90%86/"
 					accessdate="2013/4/8 19:49"
 					title="術數徵驗關鍵之理 | 治曆者言 on WordPress.com">術數徵驗關鍵之理</a><br /> <a
+					rel="nofollow"
 					href="http://oldchinesebooks.wordpress.com/2012/01/02/southern-ming-calendars/"
 					accessdate="2014/2/5 11:21"
 					title="Southern Ming calendars | SERICA on WordPress.com">英國倫敦博物館藏</a><span
@@ -478,10 +489,12 @@ tr.selected>td a {
 					href="https://docs.google.com/spreadsheet/pub?key=0AnMb73DFKnSFdC1uZ2kzNFpZWXNmeDMtRnp6RUxBQXc"
 					accessdate="2013/4/13 19:44">明鄭時期清《時憲曆》與明《大統曆》曆數比對</a>），其與「中央研究院
 					兩千年中西曆轉換」僅於交接的一個月（1661年中曆12月）有出入。現以其所載為準。
-					<hr /> <a href="http://140.112.30.230/datemap/index.php"
+					<hr /> <a rel="nofollow"
+					href="http://140.112.30.230/datemap/index.php"
 					accessdate="2013/4/5 19:2"
 					title="中西曆對照查詢系統（明代以降） || Chinse and
 						Western Dates Mapping System (Later than Ming Dynasty)">中西曆對照查詢系統（明代以降）</a>的資料沿用清時憲曆，因此恐非實際施行、使用過的曆數。<br />因非身在學界，若有能提供相關資料，包括王叔武(1979)<a
+					rel="nofollow"
 					href="http://www.cnki.com.cn/Article/CJFDTotal-SXZX197903021.htm"
 					accessdate="2013/4/8 23:51"
 					title="南明史料朔闰考异——《行在阳秋》札记
@@ -491,7 +504,8 @@ tr.selected>td a {
 			</tr>
 			<tr>
 				<td>1500－841 BCE 之中國地區朔閏</td>
-				<td><a href="http://bbs.nongli.net/dispbbs_2_14995.html"
+				<td><a rel="nofollow"
+					href="http://bbs.nongli.net/dispbbs_2_14995.html"
 					accessdate="2014/2/1 11:19" title="寿星万年历5.05(测试版) [中华农历论坛]">许剑伟(2011
 						v5.05)寿星天文历</a></td>
 				<td><em><s>處理中</s>現暫緩處理，待有機會取得可靠的朔閏表或日與日間對照表後再開工。</em><br />寿星天文历於
@@ -506,7 +520,7 @@ tr.selected>td a {
 					<hr /> <em><s>處理中</s>現暫緩處理，待有機會取得可靠的朔閏表或日與日間對照表後再開工。</em><br />未以寿星天文历（<span
 					class="creation_title">三千五百年历日天象</span>）為準。张培瑜<span
 					class="creation_title">三千五百年历日天象</span>與董作賓(1960)<span
-					class="creation_title">中國年曆總譜</span>兩書曆數獲得方法不同，<a
+					class="creation_title">中國年曆總譜</span>兩書曆數獲得方法不同，<a rel="nofollow"
 					href="http://www.lw23.com/paper_107739541_8/"
 					accessdate="2013/4/5 19:24"
 					title="宋会群(1998)先秦年代学研究的理论与方法初探
@@ -515,6 +529,7 @@ tr.selected>td a {
 
 共和以前的西周历法和商代历法目前还都不清楚，用后世历法数据推出的朔闰干支也未必正确。因此这些年历的先秦部分，有不少可商之处。">尚有可議之處</a>。據<span
 					class="creation_title">三千五百年历日天象</span>一書前言，「远古时期，中国早期历法是根据观测实际天象..颁行的，而不是事先推步得出的。」因此原先欲以此書為準，未來若有更可靠之來源時再作更改。惟近年來不少簡牘出土，發現舊的曆譜有不少謬誤，只得取用較新的資料。<br />經黃一農教授<a
+					rel="nofollow"
 					href="http://hss.nthu.edu.tw/~ylh/list.php?category=%E6%9B%86%E6%B3%95%E5%AD%B8%E5%8F%B2"
 					accessdate="2013/4/8 23:1"
 					title="黃一農，2001，〈漢初百年朔閏析究──兼訂《史記》和《漢書》紀日干支訛誤〉，《中央研究院歷史語言研究所集刊》（臺北），第72本第4分，頁753-800。">漢初百年朔閏析究</a>一文介紹，發現有徐锡祺(1997)<span
@@ -543,11 +558,11 @@ tr.selected>td a {
 					accessdate="2013/4/14 21:57">[李忠林](2012)秦至汉初朔闰表</a>。
 					<hr />另可參考：
 					<ul>
-						<li>許名瑲(2013/7)<a class="creation_title"
+						<li>許名瑲(2013/7)<a rel="nofollow" class="creation_title"
 							href="http://www.bsm.org.cn/show_article.php?id=1871"
 							accessdate="2014/2/11 13:8"
 							title="簡帛網&gt;&gt;簡帛文庫&gt;&gt;秦　　簡&gt;&gt;秦曆朔日復原">秦曆朔日復原——以出土簡牘為線索</a></li>
-						<li>許名瑲(2013/9)<a class="creation_title"
+						<li>許名瑲(2013/9)<a rel="nofollow" class="creation_title"
 							href="http://www.bsm.org.cn/show_article.php?id=1918"
 							accessdate="2014/2/8 15:35"
 							title="簡帛網&gt;&gt;簡帛文庫&gt;&gt;漢　　簡&gt;&gt;漢初月朔考索">漢初月朔考索——以出土簡牘為線索</a>
@@ -564,6 +579,7 @@ tr.selected>td a {
 				<td>當前所見幾乎所有的長曆譜所附太初曆譜，皆為僅依<span class="creation_title">漢書
 						律曆志</span>「朔不得中，是謂閏月」置閏規則排算所得，未考慮「中氣在朔若二日，則前月閏也」，<b>非實際頒行曆數</b>。實際曆數可能不是光以算法，即能得到的。詳見：斯琴毕力格，关守义，罗见今(2007)；<span
 					class="creation_title">太初历特殊置闰问题</span>。例如後漢光武帝建武三年應為閏正月戊子朔。<br />漢武帝元封7年、太初1年參考：张培瑜(2007)根据新出历日简牍试论秦和汉初的历法、許名瑲(2013/9)<a
+					rel="nofollow"
 					href="http://www.bsm.org.cn/show_article.php?id=1918"
 					accessdate="2014/2/8 15:35"
 					title="簡帛網&gt;&gt;簡帛文庫&gt;&gt;漢　　簡&gt;&gt;漢初月朔考索">漢初月朔考索——以出土簡牘為線索</a>。另可參考：朱桂昌(2013/10)<span
@@ -572,28 +588,30 @@ tr.selected>td a {
 			</tr>
 			<tr>
 				<td>五胡十六國、魏晉南北朝、五代十國、西夏</td>
-				<td><a href="http://authority.ddbc.edu.tw/time/index.php"
+				<td><a rel="nofollow"
+					href="http://authority.ddbc.edu.tw/time/index.php"
 					accessdate="2013/5/2 20:25">時間規範資料庫</a><br />Wikipedia 相關頁面</td>
 				<td><em>本部分資料尚未仔細測試與校正、驗證！</em>
-					<hr />另可參考：<a
+					<hr />另可參考：<a rel="nofollow"
 					href="http://blog.sina.com.cn/s/blog_a2e8e3c60101m8hg.html"
 					accessdate="2014/3/13 22:36" title="輯錄有關十國朔閏年月日干支具備者（未完）_陳來瘋_新浪博客">輯錄有關十國朔閏年月日干支具備者（未完）</a></td>
 			</tr>
 			<tr>
 				<td>上古天皇の在位年</td>
-				<td><a
+				<td><a rel="nofollow"
 					href="http://ja.wikipedia.org/wiki/%E4%B8%8A%E5%8F%A4%E5%A4%A9%E7%9A%87%E3%81%AE%E5%9C%A8%E4%BD%8D%E5%B9%B4%E3%81%A8%E8%A5%BF%E6%9A%A6%E5%AF%BE%E7%85%A7%E8%A1%A8%E3%81%AE%E4%B8%80%E8%A6%A7"
 					accessdate="2013/5/2 17:54">上古天皇の在位年と西暦対照表の一覧</a></td>
 				<td>いずれも『古事記』・『日本書紀』に記述される在位期間を機械的に西暦に置き換えた年代であり、考古学的に確証はない。</td>
 			</tr>
 			<tr>
 				<td>日本の旧暦、和暦 593－1872 CE</td>
-				<td>Wikipedia <a
+				<td>Wikipedia <a rel="nofollow"
 					href="http://ja.wikipedia.org/wiki/%E5%A4%A9%E7%9A%87%E3%81%AE%E4%B8%80%E8%A6%A7"
-					accessdate="2013/4/11 19:40">天皇の一覧</a>、<a
+					accessdate="2013/4/11 19:40">天皇の一覧</a>、<a rel="nofollow"
 					href="http://ja.wikipedia.org/wiki/%E5%85%83%E5%8F%B7%E4%B8%80%E8%A6%A7_(%E6%97%A5%E6%9C%AC)"
 					accessdate="2013/4/11 19:44">日本の元号一覧</a>。<br /> <span
 					class="proper_noun" title="かみつな しゅうじ">上綱秀治</span>さんの<a
+					rel="nofollow"
 					href="http://www.asahi-net.or.jp/~ax2s-kmtn/ref/month_ls.html"
 					accessdate="2013/4/5 17:52">月の大小</a>
 				</td>
@@ -607,38 +625,47 @@ tr.selected>td a {
 					<hr />「月の大小」は以下の文献を参考にしました。<br />暦を知る事典 / 岡田芳朗[ほか]著 東京堂出版, 2006.5<br />日本暦日原典.
 					第4版 / 内田正男編著 雄山閣出版, 1992.6<br />日本暦日総覧 / 古川麒一郎[ほか]共編 本の友社,
 					1992.5-1995.2
-					<hr />他の情報源： <br /> <a href="http://maechan.net/kanreki/"
-					accessdate="2013/5/2 19:7">【換暦】暦変換ツール</a> <br /> <a
+					<hr />他の情報源： <br /> <a rel="nofollow"
+					href="http://maechan.net/kanreki/" accessdate="2013/5/2 19:7">【換暦】暦変換ツール</a>
+					<br /> <a rel="nofollow"
 					href="http://koyomi.vis.ne.jp/9reki/otonidx06c.htm"
 					accessdate="2013/5/2 19:16">和暦年別表目次 （6世紀）</a> <br /> <a
-					href="http://hosi.org/a/index.html" accessdate="2013/5/2 19:19"
-					title="suchowan's Home Page">suchowan</a>: <a
-					href="http://hosi.org:3000/" accessdate="2013/5/2 19:20">Calendars
-						and Eras</a> <br /> <a href="http://www.wagoyomi.info/"
+					rel="nofollow" href="http://hosi.org/a/index.html"
+					accessdate="2013/5/2 19:19" title="suchowan's Home Page">suchowan</a>:
+					<a rel="nofollow" href="http://hosi.org:3000/"
+					accessdate="2013/5/2 19:20">Calendars and Eras</a> <br /> <a
+					rel="nofollow" href="http://www.wagoyomi.info/"
 					accessdate="2013/5/2 19:22">和暦（わごよみ）</a> <br />CASIO <a
+					rel="nofollow"
 					href="http://keisan.casio.jp/menu/system/000000000180"
 					accessdate="2013/5/2 19:28">こよみの計算</a>（此和暦・西暦+時刻換算工具大小月未甚準確？見<a
+					rel="nofollow"
 					href="http://ja.wikipedia.org/wiki/%E5%AF%9B%E6%94%BF%E6%9A%A6"
-					accessdate="2013/5/2 19:31">寛政暦</a>、<a
+					accessdate="2013/5/2 19:31">寛政暦</a>、<a rel="nofollow"
 					href="http://keisan.casio.jp/exec/system/1239884744"
 					accessdate="2013/5/2 19:31">和暦から西暦変換（年間朔日）</a>）<br /> <a
+					rel="nofollow"
 					href="http://www.asahi-net.or.jp/~jc1y-ishr/Kyuureki/"
 					accessdate="2013/5/2 19:38">旧暦／グレゴリオ暦対照表</a><br /> <a
+					rel="nofollow"
 					href="http://rnavi.ndl.go.jp/research_guide/entry/theme-honbun-400108.php"
 					accessdate="2013/5/2 19:33"
 					title="新暦と旧暦を対照できる資料を調べる | 調べ方案内 | 国立国会図書館">新暦と旧暦を対照できる資料を調べる</a><br />
-					<a href="http://www.ndl.go.jp/koyomi/rekishi/03_chihou.html"
+					<a rel="nofollow"
+					href="http://www.ndl.go.jp/koyomi/rekishi/03_chihou.html"
 					accessdate="2013/5/2 19:39"
 					　title="古くは、三島・南都・丹生の諸暦、江戸時代に入ってから版行された伊勢暦や江戸暦など、それぞれ特色ある形態と内容を持っていたが、貞享の改暦以降は統制され、暦注などの内容は統一された。">日本全国の地方暦</a><br />
-					<a href="http://park.geocities.jp/okugesan_com2/"
+					<a rel="nofollow" href="http://park.geocities.jp/okugesan_com2/"
 					accessdate="2014/2/4 13:16" title="公卿類別譜（公家の歴史）-和暦・西暦対応表〔インデックス〕">公卿類別譜
 						～公家の歴史～</a></td>
 			</tr>
 			<tr>
 				<td>日本の旧暦 1872－2070 CE</td>
-				<td>こよみのページ<a href="http://koyomi.vis.ne.jp/kyuureki.htm"
+				<td>こよみのページ<a rel="nofollow"
+					href="http://koyomi.vis.ne.jp/kyuureki.htm"
 					accessdate="2013/4/5 18:47" title="旧暦（和暦）のページ">旧暦のページ</a></td>
 				<td>今ネットで入手できるデータはこよみのページだけなので、使わせて頂きました。<br />當前所能獲得之來源以こよみのページ為主。其他可參照來源為海上保安庁海洋情報部<a
+					rel="nofollow"
 					href="http://www1.kaiho.mlit.go.jp/KOHO/reki/kyuu9700.htm"
 					accessdate="2013/4/5 18:42">1997-2010年の新暦・旧暦対応表</a>(非公式)，惟尚不夠全面。
 				</td>
@@ -647,36 +674,38 @@ tr.selected>td a {
 				<td>明治以降の和暦 1872 CE－</td>
 				<td>Wikipedia 相關頁面</td>
 				<td>明治5年（1872年）に、従来の太陰太陽暦を廃して翌年から太陽暦を採用することが布告された。「來ル十二月三日ヲ以テ明治六年一月一日ト被定候事」(<a
+					rel="nofollow"
 					href="http://ja.wikipedia.org/wiki/%E3%82%B0%E3%83%AC%E3%82%B4%E3%83%AA%E3%82%AA%E6%9A%A6#.E6.97.A5.E6.9C.AC.E3.81.AB.E3.81.8A.E3.81.91.E3.82.8B.E3.82.B0.E3.83.AC.E3.82.B4.E3.83.AA.E3.82.AA.E6.9A.A6.E5.B0.8E.E5.85.A5"
 					accessdate="2013/4/1 23:29">グレゴリオ暦#日本におけるグレゴリオ暦導入</a>)
 				</td>
 			</tr>
 			<tr>
 				<td>滿洲國曆數 1932－1945 CE</td>
-				<td><a
+				<td><a rel="nofollow"
 					href="http://ja.wikipedia.org/wiki/%E5%A4%A7%E5%90%8C_(%E6%BA%80%E5%B7%9E)"
 					accessdate="2013/4/1 19:32" title="大同 (満州)">大同 (満州)</a>.
 					(2013/3/17). In Wikipedia. Retrieved 2013/4/1.<br /> <a
+					rel="nofollow"
 					href="http://ja.wikipedia.org/wiki/%E5%BA%B7%E5%BE%B3"
 					accessdate="2013/4/1 19:33">康徳</a>. (2013/3/16). In Wikipedia.
 					Retrieved 2013/4/1.</td>
-				<td>滿洲國採用 Gregorian calendar，與當時的日本相同。<br /> <a
+				<td>滿洲國採用 Gregorian calendar，與當時的日本相同。<br /> <a rel="nofollow"
 					href="http://www.jacar.go.jp/" accessdate="2013/4/1 19:16"
 					title="国立公文書館 アジア歴史資料センター">アジア歴史資料センター</a>（満州国建国宣言、満洲国 時憲書）<br />姜念东.
 					(1980). 伪满洲国史. 吉林人民出版社.<br />解学诗. (1995). 伪满洲国史新编. 人民出版社.
 				</td>
 			</tr>
 			<tr>
-				<td><a
+				<td><a rel="nofollow"
 					href="http://ko.wikipedia.org/wiki/%ED%95%9C%EA%B5%AD%EC%9D%98_%EC%97%B0%ED%98%B8"
 					accessdate="2013/4/28 17:39" title="韓國紀年/韓曆">한국의 연호</a> 918－2050 CE</td>
-				<td><a
+				<td><a rel="nofollow"
 					href="http://ko.wikipedia.org/wiki/%ED%95%9C%EA%B5%AD%EA%B3%BC%ED%95%99%EA%B8%B0%EC%88%A0%EC%A0%95%EB%B3%B4%EC%97%B0%EA%B5%AC%EC%9B%90"
 					accessdate="2013/4/27 16:22"
 					title="한국과학기술정보연구원(韓國科學機術情報硏究院, Korea Institute of Science and Technology Information, KISTI)">KISTI</a>
-					<a href="http://manse.kisti.re.kr/index.html"
+					<a rel="nofollow" href="http://manse.kisti.re.kr/index.html"
 					accessdate="2013/4/27 15:43" title="韓國標準年歷">한국표준연력</a></td>
-				<td>所取之韓國標準年歷似來自<a
+				<td>所取之韓國標準年歷似來自<a rel="nofollow"
 					href="http://www.dibrary.net/search/dibrary/SearchDetail.nl?category_code=ct&amp;service=KOLIS&amp;vdkvgwkey=14615755&amp;colltype=YON_ART&amp;place_code_info=132&amp;place_name_info=%EB%94%94%EC%A7%80%ED%84%B8%EC%97%B4%EB%9E%8C%EC%8B%A4&amp;manage_code=MABR&amp;shape_code=B"
 					accessdate="2013/4/27 15:43"
 					title="韓國標準年歷 DB system construction
@@ -694,15 +723,16 @@ tr.selected>td a {
 				</td>
 			</tr>
 			<tr>
-				<td><a
+				<td><a rel="nofollow"
 					href="https://zh.wikipedia.org/wiki/%E6%9C%9D%E9%B2%9C%E4%B8%89%E5%9B%BD%E6%97%B6%E4%BB%A3"
 					accessdate="2014/3/2 20:41" title="삼국 시대">朝鮮三國時代</a></td>
-				<td><a href="http://authority.ddbc.edu.tw/time/index.php"
-					accessdate="2013/5/2 20:25">時間規範資料庫</a><br /> <a
+				<td><a rel="nofollow"
+					href="http://authority.ddbc.edu.tw/time/index.php"
+					accessdate="2013/5/2 20:25">時間規範資料庫</a><br /> <a rel="nofollow"
 					href="https://zh.wikipedia.org/wiki/%E6%9C%9D%E9%B2%9C%E5%8D%8A%E5%B2%9B%E5%90%9B%E4%B8%BB%E5%88%97%E8%A1%A8"
 					accessdate="2014/3/14 19:1">朝鮮半島君主列表</a></td>
 				<td><em>本部分資料尚未仔細測試與校正、驗證！</em><br />其他可參考之文獻如<span
-					class="creation_title">삼국시대 연력표</span>(2009)(<a
+					class="creation_title">삼국시대 연력표</span>(2009)(<a rel="nofollow"
 					class="creation_title"
 					href="http://books.google.com.tw/books?id=7dEQAQAAMAAJ"
 					accessdate="2013/4/27 16:11">三國時代 年曆表</a>, 57 BCE－935 CE)、韓甫植(1987)<span
@@ -710,54 +740,56 @@ tr.selected>td a {
 			</tr>
 			<tr>
 				<td>越南王朝</td>
-				<td><a
+				<td><a rel="nofollow"
 					href="https://zh.wikipedia.org/wiki/%E8%B6%8A%E5%8D%97%E5%90%9B%E4%B8%BB%E5%88%97%E8%A1%A8"
-					accessdate="2014/3/15 10:8">越南君主列表</a><br /> <a
+					accessdate="2014/3/15 10:8">越南君主列表</a><br /> <a rel="nofollow"
 					class="creation_title"
 					href="https://zh.wikisource.org/wiki/%E5%A4%A7%E8%B6%8A%E5%8F%B2%E8%A8%98%E5%85%A8%E6%9B%B8"
 					accessdate="2014/3/15 12:49">大越史記全書</a></td>
 				<td><em>本部分資料尚未仔細測試與校正、驗證！</em></td>
 			</tr>
 			<tr>
-				<td><a href="http://vi.wikipedia.org/wiki/%C3%82m_l%E1%BB%8Bch"
+				<td><a rel="nofollow"
+					href="http://vi.wikipedia.org/wiki/%C3%82m_l%E1%BB%8Bch"
 					accessdate="2014/2/24 8:22">Âm lịch</a> (越南陰曆) 1800－2100 CE</td>
-				<td>Hồ Ngọc Đức <a
+				<td>Hồ Ngọc Đức <a rel="nofollow"
 					href="http://www.informatik.uni-leipzig.de/~duc/amlich/"
 					accessdate="2013/4/28 17:45" title="Âm lịch Việt Nam">Âm lịch
-						VN</a><br /> <a
+						VN</a><br /> <a rel="nofollow"
 					href="http://vi.wikipedia.org/wiki/Ni%C3%AAn_hi%E1%BB%87u_Vi%E1%BB%87t_Nam"
 					accessdate="2013/5/1 17:43" title="越南年號">Niên hiệu Việt Nam</a><br />
-					<a
+					<a rel="nofollow"
 					href="http://zh.wikipedia.org/wiki/%E8%B6%8A%E5%8D%97%E5%B9%B4%E5%8F%B7%E5%88%97%E8%A1%A8"
 					accessdate="2013/5/1 17:52">越南年號列表</a></td>
-				<td>越南與中國相同，民間仍常以 "Âm lịch" (陰曆)，而非 "<a
+				<td>越南與中國相同，民間仍常以 "Âm lịch" (陰曆)，而非 "<a rel="nofollow"
 					href="http://vi.wikipedia.org/wiki/%C3%82m_d%C6%B0%C6%A1ng_l%E1%BB%8Bch"
 					accessdate="2014/2/24 8:26">Âm dương lịch</a>" (陰陽曆)來稱呼傳統陰陽暦法。<br />
 					<em>南北越時期，北越採用 UTC+8，因之與中曆日期相同。南越採 UTC+9，可使用本工具所列曆數。</em><br /> <em>1943年至1967年官方數次改變時區，請參考<a
+						rel="nofollow"
 						href="http://www.informatik.uni-leipzig.de/~duc/amlich/histcal.html"
 						accessdate="2013/4/27 21:56"
 						title="Âm lịch Việt Nam qua các thời kỳ lịch sử">歷史上不同時期的越南農曆</a>一文。
 				</em>另依此文，「精確到日」最多恐怕僅能上溯至陳朝 1306 CE。且 1306 CE 之後至西山朝末 1802 CE
 					史料未全；除本工具已列出的曆數外，所有與中國曆不同的曆數，皆尚未有足夠的史料以復原之。因不諳越南語，無法作深入研究校正。
-					<hr />其他相關資料：<br /> <a
+					<hr />其他相關資料：<br /> <a rel="nofollow"
 					href="http://nomfoundation.org/vn/Lich_Am/Chuyen-doi-am-duong-lich"
 					accessdate="2013/5/2 19:56" title="Chuyển đổi âm-dương lịch">Chuyển
-						đổi giữa Dương lịch và Âm lịch</a><br /> <a
+						đổi giữa Dương lịch và Âm lịch</a><br /> <a rel="nofollow"
 					href="http://huyenbi.net/" accessdate="2013/5/2 19:52">Huyền bí</a><br />
-					<a href="http://www.blogphongthuy.com/?p=3250"
+					<a rel="nofollow" href="http://www.blogphongthuy.com/?p=3250"
 					accessdate="2013/5/2 19:58"
 					title="Đổi Ngày Dương Sang Ngày Âm - Tra Lịch Dương sang Lịch Âm | Phong Thủy cho người Việt">Đổi
-						ngày dương lịch sang ngày âm lịch</a>. <a
+						ngày dương lịch sang ngày âm lịch</a>. <a rel="nofollow"
 					href="http://www.blogphongthuy.com/?p=3251"
 					accessdate="2013/5/2 19:59"
 					title="Đổi Ngày Âm Sang Ngày Dương - Tra Lịch Âm sang Lịch Dương | Phong Thủy cho người Việt">Đổi
-						ngày âm lịch sang ngày dương lịch</a>.<br />越南君主: <a
+						ngày âm lịch sang ngày dương lịch</a>.<br />越南君主: <a rel="nofollow"
 					href="http://www.hannom.org.vn/detail.asp?param=1020&amp;Catid=493"
 					accessdate="2013/5/2 20:3" title="Viện nghiên cứu Hán nôm">BẢNG
-						TRA NIÊN ĐẠI CÁC TRIỀU VUA VIÊT NAM</a>, <a
+						TRA NIÊN ĐẠI CÁC TRIỀU VUA VIÊT NAM</a>, <a rel="nofollow"
 					href="http://www.hannom.org.vn/detail.asp?param=900&amp;Catid=493"
 					accessdate="2013/5/2 20:3" title="Viện nghiên cứu Hán nôm">BẢNG
-						TRA NIÊN HIỆU CÁC TRIỀU VUA VIỆT NAM</a><br /> <a
+						TRA NIÊN HIỆU CÁC TRIỀU VUA VIỆT NAM</a><br /> <a rel="nofollow"
 					href="http://news.ifeng.com/history/special/zhengyankanyuenan/detail_2010_05/17/1526018_3.shtml"
 					accessdate="2013/5/2 20:9"
 					title="明清时期的中越关系：明朝为何撤出越南_历史_凤凰网
@@ -765,7 +797,7 @@ tr.selected>td a {
 			</tr>
 			<tr>
 				<td>تقويم هجري(伊斯蘭曆、回曆、Hajra calendar)</td>
-				<td>Wikipedia <a
+				<td>Wikipedia <a rel="nofollow"
 					href="http://en.wikipedia.org/wiki/Tabular_Islamic_calendar">Tabular
 						Islamic calendar</a></td>
 				<td>請注意，<em>伊斯蘭曆有數種類，這邊採用的是毋須觀測天象，可直接由規律推斷的 Tabular
@@ -774,7 +806,7 @@ tr.selected>td a {
 				</td>
 			</tr>
 			<tr>
-				<td>西雙版納<a
+				<td>西雙版納<a rel="nofollow"
 					href="https://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86"
 					accessdate="2014/4/12 22:26">傣曆</a></td>
 				<td><span class="proper_noun">张公瑾</span><span
@@ -786,7 +818,7 @@ tr.selected>td a {
 			</tr>
 			<tr>
 				<td>馬雅長紀曆</td>
-				<td><a
+				<td><a rel="nofollow"
 					href="https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar"
 					accessdate="2014/4/28 22:15"
 					title="Mesoamerican Long Count calendar">中部美洲長紀曆</a></td>
@@ -797,15 +829,16 @@ tr.selected>td a {
 			<tr>
 				<td>הַלּוּחַ הָעִבְרִי / Hebrew calendar / Jewish Calendar /
 					希伯來曆 / 猶太曆</td>
-				<td><a href="http://www.stevemorse.org/jcal/rules.htm"
+				<td><a rel="nofollow"
+					href="http://www.stevemorse.org/jcal/rules.htm"
 					accessdate="2014/4/21 23:4">Jewish Calendar Rules</a><br /> <a
-					href="http://www.fourmilab.ch/documents/calendar/">Calendar
+					rel="nofollow" href="http://www.fourmilab.ch/documents/calendar/">Calendar
 						Converter</a></td>
 				<td>以色列現行曆法。</td>
 			</tr>
 			<tr>
 				<td>भारतीय राष्ट्रीय पंचांग / 印度國定曆</td>
-				<td><a
+				<td><a rel="nofollow"
 					href="https://en.wikipedia.org/wiki/Indian_national_calendar"
 					accessdate="2014/5/17 22:43">Indian national calendar</a></td>
 				<td>Usage officially started at Chaitra 1, 1879 Saka Era, or
@@ -813,21 +846,24 @@ tr.selected>td a {
 			</tr>
 			<tr>
 				<td>巴哈伊曆 / Bahá'í calendar / Badí‘ calendar</td>
-				<td><a
+				<td><a rel="nofollow"
 					href="https://en.wikipedia.org/wiki/Bah%C3%A1'%C3%AD_calendar"
 					accessdate="2014/5/17 17:46">Bahá'í calendar</a></td>
 				<td>現行巴哈伊曆與公曆同步。</td>
 			</tr>
 			<tr>
 				<td>科普特曆</td>
-				<td><a href="http://orthodoxwiki.org/Coptic_calendar"
+				<td><a rel="nofollow"
+					href="http://orthodoxwiki.org/Coptic_calendar"
 					accessdate="2014/5/16 23:47">Coptic Calendar - OrthodoxWiki</a></td>
-				<td><a href="https://en.wikipedia.org/wiki/Coptic_calendar"
+				<td><a rel="nofollow"
+					href="https://en.wikipedia.org/wiki/Coptic_calendar"
 					accessdate="2014/5/16 23:46">Coptic calendar</a></td>
 			</tr>
 			<tr>
 				<td>衣索比亞曆</td>
-				<td><a href="https://en.wikipedia.org/wiki/Ethiopian_calendar"
+				<td><a rel="nofollow"
+					href="https://en.wikipedia.org/wiki/Ethiopian_calendar"
 					accessdate="2014/5/18 17:9">Ethiopian calendar</a></td>
 				<td>月份起始與 Coptic Calendar 相同。</td>
 			</tr>
@@ -835,7 +871,7 @@ tr.selected>td a {
 				<td>現行藏曆（時輪曆）<em>研究中</em></td>
 				<td></td>
 				<td>恐僅能獲得大概年分？<em>現暫緩處理，待有機會取得可靠的朔閏表或藏漢曆日與日間對照表後再開工。</em>
-					<hr />其他相關資料：<br /> <a
+					<hr />其他相關資料：<br /> <a rel="nofollow"
 					href="http://www.tibetinfor.com.cn/tibetzt/zangli/"
 					accessdate="2013/5/2 20:4">藏历漫谈</a><br />陈久金、黄明信：<span
 					class="creation_title">藏历的原理与实践</span> 民族出版社1987年出版（若有能提供本書者，不勝感謝。）
@@ -895,6 +931,9 @@ tr.selected>td a {
 	</div>
 
 	<div id="comments">
+		<a rel="nofollow" href="http://services.nexodyne.com/email/"
+			title="email/contact address">✉<img
+			src="http://services.nexodyne.com/email/icon/94fLdogG3w%3D%3D/xi8K%2Btk%3D/R01haWw%3D/0/image.png" /></a>
 		<div class="g-comments"
 			data-href="http://lyrics.meicho.com.tw/lib/JS/_test%20suite/era.htm"
 			data-width="800" data-first_party_property="BLOGGER"

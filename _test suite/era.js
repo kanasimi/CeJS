@@ -1094,9 +1094,23 @@ function parse_text(text) {
 	if (text === undefined)
 		text = document.getElementById('original_text').value;
 
-	CeL.era.to_HTML(text, 'parsed_text', parse_text.add_date ? {
-		add_date : true
-	} : null);
+	// 標注文本 點擊(點選解析)功能。
+	CeL.era.to_HTML(text, 'parsed_text', {
+		add_date : parse_text.add_date,
+		onclick : function() {
+			var era = CeL.era.node_era(this, 'String');
+			if (era) {
+				era = era.to_Date('era').format({
+					parser : 'CE',
+					format : '%紀年名%年年%月月%日日',
+					locale : 'cmn-Hant-TW'
+				});
+				era_input_object.setValue(era);
+				translate_era(era);
+			} else
+				CeL.warn('解析結果為 [' + era + ']');
+		}
+	});
 
 	return false;
 }

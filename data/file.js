@@ -1252,8 +1252,7 @@ if (typeof CeL === 'function')
 					library_namespace.warn('Files_add_object: 無法辨識 path ['
 							+ path + ']!');
 
-				library_namespace.debug('Select ' + count + ' files of ['
-						+ path + ']');
+				library_namespace.debug('Get ' + count + ' files.', 2);
 			}
 
 			function Files_add(path_list, options) {
@@ -1439,13 +1438,13 @@ if (typeof CeL === 'function')
 				library_namespace.debug('['
 						+ path
 						+ ']'
-						+ (path === target ? ' original = decided'
+						+ (path === target ? ': original = decided'
 								: '<br />→ [' + target + ']'));
 				return target;
 			}
 
 			/**
-			 * <code>
+			 * @example <code>
 				// Files_encode('target encoding')
 				// if set save_to, then backup_to will be ignored.
 				options = {
@@ -1652,9 +1651,14 @@ if (typeof CeL === 'function')
 			 * @returns {String}contents
 			 * @since 2014/7/19 23:9:41
 			 */
-			function HTML_contents(HTML) {
+			function HTML_contents(HTML, use_RegExp) {
+				if (use_RegExp)
+					return HTML.replace(/[\s\n]*<\/body>(.+|\n)*$/i, '')
+					// default 不用 RegExp，因為 RegExp 太慢。
+					.replace(/^(.+|\n)*<body>[\s\n]*/i, '');
+
 				var foot = HTML.lastIndexOf('</body>'),
-				// 不用 RegExp，因為 RegExp 太慢。
+				//
 				head = HTML.indexOf('<body');
 
 				// 去尾。
