@@ -1359,7 +1359,7 @@ if (typeof CeL === 'function')
 			setup_Files.conversion = {};
 			setup_Files.setup = function() {
 				library_namespace.debug('Trying setup Files.', 1,
-								'setup_Files.setup');
+						'setup_Files.setup');
 				library_namespace.is_included([ 'application.storage.file',
 						'application.OS.Windows.file',
 						'application.locale.encoding' ], true);
@@ -1599,7 +1599,8 @@ if (typeof CeL === 'function')
 							&& detect_encoding(this, target) || this.encoding;
 				if (library_namespace.is_debug(3))
 					library_namespace.debug('Merge ' + this.list().length
-						+ ' files to (' + encoding + ') [' + target + '].');
+					//
+					+ ' files to (' + encoding + ') [' + target + '].');
 
 				add_text('head', target);
 				this.list().forEach(handle_file, this);
@@ -1609,9 +1610,11 @@ if (typeof CeL === 'function')
 				if (typeof options.modify_all === 'function')
 					text_Array = options.modify_all(text_Array);
 
-				library_namespace.debug('Merge ' + this.order.length
-						+ ' files, writing ' + text_Array.length
-						+ ' characters to (' + encoding + ') [' + target + '].');
+				library_namespace
+						.debug('Merge ' + this.order.length
+								+ ' files, writing ' + text_Array.length
+								+ ' characters to (' + encoding + ') ['
+								+ target + '].');
 				write_file(target, text_Array, encoding);
 
 				(this.data = {})[target] = {};

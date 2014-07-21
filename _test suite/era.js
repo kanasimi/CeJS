@@ -276,7 +276,7 @@ function show_calendar(era_name) {
 		if (matched = tmp[0]
 		// 後處理。
 		// 月名: 正/臘/閏12/後12
-		.match(/^(.*[^\d]\d+年)(.{1,3}月)(\d+日)$/))
+		.match(/^(.*\D\d+年)(.{1,3}月)(\d+日)$/))
 			tmp[0] = [ matched[1] === 前年名 ? 前年名 : {
 				a : 前年名 = matched[1],
 				title : matched[1],
@@ -916,7 +916,7 @@ function translate_era(era) {
 	era = era.trim();
 	// http://maechan.net/kanreki/index.php
 	// 和暦入力時の元号は、『明治』『大正』『昭和』『平成』に限り、各々『M』『T』『S』『H』の頭文字でも入力できます。
-	if (date = era.match(/^([HSTM])\s*(\d+)([^\d].*)?$/i))
+	if (date = era.match(/^([HSTM])\s*(\d+)(\D.*)?$/i))
 		era = J_translate[date[1]] + date[2] + (date[3] || '年');
 
 	date = CeL.era(era, {

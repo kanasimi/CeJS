@@ -1038,8 +1038,30 @@ new_Array=[,,]:	可以使用 Array 常值中的空白元素來建立零星稀疏
  * 整合 application.OS.Windows.file.cacher
  * 
  * @example <code>
- * var conversion = new CeL.pair(CeL.get_file(path));
- * text = conversion.convert(text);
+
+// example 1
+var conversion = new CeL.pair(CeL.get_file(path));
+text = conversion.convert(text);
+
+
+// example 2
+CeL.run([ 'data.file', 'application.OS.Windows.file' ]);
+var cache_file = 'work.codes/get_work_information.cache.txt', cache_pair,
+// target encoding
+target_encoding = 'UTF-8';
+
+cache_pair = new CeL.pair(null, {
+	path : cache_file,
+	encoding : target_encoding,
+	remove_comments : true
+});
+
+cache_pair.add([ [ 'key 1', 'value 1' ] ]);
+
+CeL.log(cache_pair.select('key 1'));
+
+cache_pair.save_new();
+
  * </code>
  * 
  * @param {Object|Array}source
@@ -1176,21 +1198,21 @@ library_namespace.set_method(Pair.prototype, {
 				item_processor = typeof options.item_processor === 'function' ? options.item_processor
 						: null;
 
-				if (!separator) {
+				if (!separator && typeof source[0] === 'string') {
 					// 遍歷 source 以偵測是 key=value,key=value，
 					// 或 key \t value \n key \t value
 					for (var i = 0; i < length; i++)
 						if (typeof source[i] === 'string'
 						&& (separator = source[i].match(/[^\n]([\t=])[^\n]/))) {
 							separator = separator[1];
-							library_namespace.debug('Use assignment sign: ' + new RegExp(separator), 1, 'Pair.add');
+							library_namespace.debug('Use assignment sign: ' + new RegExp(separator), 3, 'Pair.add');
 							break;
 						}
 					if (!separator)
 						throw new Error('Pair.add: No assignment sign detected! 請手動指定！');
 				}
 
-				library_namespace.debug('Add ' + source.length + ' pairs..', 1, 'Pair.add');
+				library_namespace.debug('Add ' + source.length + ' pairs..', 3, 'Pair.add');
 				source.forEach(function(item) {
 					if (item_processor)
 						item = item_processor(item);
@@ -1207,9 +1229,12 @@ library_namespace.set_method(Pair.prototype, {
 							// 可能是為了確保不被改變而設定。
 						}
 						if (key in pair)
-							// 後來覆蓋前面的。
-							library_namespace.warn('Pair.add: Duplicated key [' + key + '] → [' + pair[key]
-							+ '] will changed to [' + value + ']');
+							if (value == pair[key])
+								return;
+							else
+								// 後來覆蓋前面的。
+								library_namespace.warn('Pair.add: Duplicated key [' + key
+										+ '], value will be change: [' + pair[key] + '] → [' + value + ']');
 						pair[key] = value;
 						if (keys)
 							keys.push(key);
@@ -1230,18 +1255,23 @@ library_namespace.set_method(Pair.prototype, {
 	},
 
 	add_path : function(options) {
-		var source = library_namespace.get_file(this.path);
-		if (!options || !options.path)
-			options = Object.assign({
-				path : this.path
-			}, options);
-		if (source)
+		var source;
+		try {
+			source = library_namespace.get_file(this.path);
+		} catch (e) {
+			// TODO: handle exception
+		}
+		if (source) {
+			if (!options || !options.path)
+				options = Object.assign({
+					path : this.path
+				}, options);
 			// 載入 resource。
 			this.add(source, options);
-		else
+		} else
 			library_namespace.warn(
 			//
-			'Pair.add_path: Can not get contents of [' + path
+			'Pair.add_path: Can not get contents of [' + this.path
 					+ ']!');
 		return this;
 	},
@@ -1250,11 +1280,10 @@ library_namespace.set_method(Pair.prototype, {
 		if (!library_namespace.write_file)
 			throw new Error('Please include application.OS.Windows.file first!');
 
-		if (!path || path !== this.path) {
-			if (!save_new && this.remove_comments)
-				library_namespace.warn('移除注解後再存檔，會失去原先的注解！請考慮設定 save_new flag。');
+		if (path !== this.path)
 			path = this.path;
-		}
+		else if (!save_new && this.remove_comments)
+				library_namespace.warn('移除注解後再存檔，會失去原先的注解！請考慮設定 save_new flag。');
 
 		if (!encoding)
 			encoding = library_namespace.guess_encoding
@@ -1262,33 +1291,44 @@ library_namespace.set_method(Pair.prototype, {
 			|| library_namespace.open_format.TristateTrue;
 		library_namespace.debug([ '(' + encoding, ') [', path, ']' ]);
 
-		var _t = this, pair = this.pair, line, data = [];
-		if (save_new)
+		var _t = this, pair = this.pair, line, data = [],
+		//
+		separator = this.separator || '\t';
+		if (save_new) {
+			// 與之前的紀錄分行。
+			data.push('');
 			this.new_keys.forEach(function (key) {
 				if (Array.isArray(line = pair[key]))
-					line = line.join('\t');
-				data.push(key + '\t' + line);
+					line = line.join(separator);
+				data.push(key + separator + line);
 			});
-		else
+			// reset (.new_keys).
+			this.new_keys = [];
+		} else
 			for (var key in pair) {
 				if (Array.isArray(line = pair[key]))
-					line = line.join('\t');
-				data.push(key + '\t' + line);
+					line = line.join(separator);
+				data.push(key + separator + line);
 			}
-		library_namespace.write_file(path, data.join('\n'), encoding,
-		//
-		save_new ? CeL.IO_mode.ForAppending : undefined);
+		if (data.length > 0)
+			library_namespace.write_file(path,
+					//
+					data.join(this.field_separator || library_namespace.env.line_separator), encoding,
+					//
+					save_new ? library_namespace.IO_mode.ForAppending : undefined);
 
 		library_namespace.log([ data.length, ' records saved. [', {
 			// 重新紀錄.
 			a : 'save again',
 			href : '#',
 			onclick : function() {
-				_t.save(path, encoding);
+				_t.save(path, encoding, save_new);
 				return false;
 			}
 		}, ']' ]);
 
+		// release memory.
+		data = null;
 		return this;
 	},
 
@@ -1333,18 +1373,34 @@ library_namespace.set_method(Pair.prototype, {
 	},
 
 	select : function(selector, options) {
-		if (!selector) {
-			var flag = this.flag,
-			//
-			target = options && options.target;
+		var pair = this.pair, key, value;
+
+		if (typeof selector !== 'function') {
+			var target = selector || options && options.target;
 			if (!target)
 				return;
-			selector = function() {
-				return (new RegExp(key, flag)).test(target) && value;
-			};
+
+			if (library_namespace.is_RegExp(target))
+				selector = function() {
+					return target.test(key) && value;
+				};
+			else {
+				var flag = this.flag;
+				selector = function() {
+					var reg;
+					try {
+						reg = typeof flag === 'function' ? flag(key)
+								: new RegExp(key, flag);
+					} catch (e) {
+						// Error key?
+						library_namespace.err('Pair.select: key ' + (reg || '[' + key + ']')
+								+ ': ' + e.message);
+					}
+					return reg.test(target) && value;
+				};
+			}
 		}
 
-		var pair = this.pair, key, value;
 		if (Array.isArray(this.keys))
 			for (var i = 0, keys = this.keys, length = keys.length; i < length; i++) {
 				if (value = selector(key = keys[i], pair[key]))
@@ -1373,7 +1429,8 @@ library_namespace.set_method(Pair.prototype, {
 		this.for_each(function(key, value) {
 			var reg;
 			try {
-				reg = new RegExp(key, flag);
+				reg = typeof flag === 'function' ? flag(key)
+						: new RegExp(key, flag);
 				text = text.replace(reg, value);
 			} catch (e) {
 				// Error key?
@@ -1434,6 +1491,222 @@ library_namespace.set_method(Pair.prototype, {
 
 _.pair = Pair;
 
+//---------------------------------------------------------------------//
+//for bencode & torrent file data
+
+/**
+ * [ key_1, value_1, key_2, value_2, key_3, value_3 ]<br /> →<br /> { key_1:
+ * value_1, key_2: value_2, key_3: value_3 }
+ * 
+ * @param {Array}list
+ *            list to convert
+ * 
+ * @returns {Object} pair Object converted
+ * @since 2014/7/21 23:17:32
+ */
+function list_to_Object(list) {
+	var i = 0, length = list.length, pair = library_namespace.null_Object();
+	if (length % 2 !== 0)
+		library_namespace.warn('list_to_Object: The length (' + length
+				+ ') of list is not an even number!');
+
+	for (; i < length; i += 2) {
+		if (typeof list[i] !== 'string')
+			library_namespace.warn(
+			// Set key to non-string type. e.g., integer
+			'Set (' + (typeof list[i]) + ') [' + list[i] + '] as key.');
+		if (list[i] in pair)
+			library_namespace.warn('Duplicated key: [' + list[i] + ']');
+
+		library_namespace.debug('pair[' + list[i] + '] = [' + list[i + 1] + ']');
+		pair[list[i]] = list[i + 1];
+	}
+
+	return pair;
+}
+
+/**
+ * parse bencode data
+ * 
+ * @param {String}data
+ *            bencode data
+ * @param {Object}[status]
+ *            get the parse status
+ * 
+ * @returns
+ * 
+ * @see https://zh.wikipedia.org/wiki/Bencode
+ * 
+ * @since 2014/7/21 23:17:32
+ */
+function parse_bencode(data, status) {
+
+	function make_end() {
+		// assert: object_now === queue.pop()
+		if ((tmp = object_now) !== queue.pop()) {
+			library_namespace.err('Bad data structure!');
+			// assert: queue.length === 0
+			if (queue !== object_now)
+				// 回存。
+				queue.push(object_now);
+		} else {
+			if (tmp.d)
+				tmp = list_to_Object(tmp);
+			// assert: queue.length > 0
+			(object_now = queue[queue.length - 1]).push(tmp);
+		}
+	}
+
+	var index = 0, tmp, queue = [],
+	// 即使在 data 有缺陷的情況下，也盡可能解析出資料。
+	// 因此先將 data 設定成 list。
+	object_now = queue,
+	// 為了多行程，因此這些 pattern 應該放在函數內，不可為 global 為其他行程存取。
+	PATTERN_controller = /(.*?)([ldei\d])/g,
+	// 為了盡快 match，所以盡可能選擇可能 match 的 pattern，之後再來檢查是否相符。
+	PATTERN_integer = /(-?\d*)(\D)/g, PATTERN_string_length = /(\d*)(\D)/g;
+
+	for (;;) {
+		PATTERN_controller.lastIndex = index;
+		if (!(tmp = PATTERN_controller.exec(data))) {
+			if (index < data.length)
+				library_namespace.err('Last data skipped! (' + data.slice(index) + ')');
+			break;
+		}
+
+		if (tmp[1]) {
+			index += tmp[1].length;
+			// control char should be next char.
+			library_namespace.err('Some data skipped! (' + tmp[1] + ')');
+		}
+
+		switch (tmp[2]) {
+		case 'l':
+			// list 列表
+		case 'd':
+			// dictionary 關聯數組
+			++index;
+			queue.push(object_now = []);
+			if (tmp[2] === 'd')
+				object_now.d = true;
+			break;
+		case 'e':
+			// ending
+			++index;
+			make_end();
+			break;
+
+		case 'i':
+			// integer 整數
+			PATTERN_integer.lastIndex = ++index;
+			tmp = PATTERN_integer.exec(data);
+			if (tmp && tmp[2] === 'e') {
+				// 確定為 /i\d+e/
+				if (!tmp[1])
+					library_namespace.err('No integer specified ("ie" instead of /i\d+e/)!');
+				else if (PATTERN_integer.lastIndex !== index + tmp[0].length)
+					library_namespace.err('Some integer data skipped! ('
+							+ data.slice(index, PATTERN_integer.lastIndex
+									- tmp[0].length) + ')');
+				object_now.push(parseInt(tmp[1]));
+				index = PATTERN_integer.lastIndex;
+			} else {
+				// fatal error
+				library_namespace.err('Bad integer format! Exit parse!');
+				index = data.length;
+			}
+			break;
+
+		default:
+			// assert: 接下來是 string (\d+:.+) 字串
+			PATTERN_string_length.lastIndex = index;
+			tmp = PATTERN_string_length.exec(data);
+			if (tmp && tmp[2] === ':') {
+				// 確定為 /\d+:/
+				if (!tmp[1] || !(tmp[1] | 0))
+					library_namespace.err('No string length specified! (' + tmp[1] + ')');
+				else if (PATTERN_string_length.lastIndex !== index
+						+ tmp[0].length)
+					library_namespace.err('Some string data skipped! ('
+							+ data.slice(index, PATTERN_string_length.lastIndex
+									- tmp[0].length) + ')');
+				if ((index = PATTERN_string_length.lastIndex)
+						+ (tmp = tmp[1] | 0) > data.length)
+					library_namespace.err(
+					//
+					'The end of string is beyond the end of data! (ask '
+					//
+					+ (index + tmp) + ' - data left ' + data.length
+							+ ' = lost ' + (index + tmp - data.length) + ')');
+				// tmp: length of string.
+				library_namespace.debug(index + '+' + tmp, 3);
+				// TODO: 需要對 non-ASCII string 特別處理:此時因取得 Unicode，
+				// 所指定之 length > 實際 length。
+				object_now.push(data.substr(index, tmp));
+				index += tmp;
+			} else {
+				// fatal error
+				library_namespace.err('Bad string format! Exit parse!');
+				index = data.length;
+			}
+		}
+	}
+
+	if (queue.length > 1)
+		library_namespace.warn('Illegal data: 有錯誤或缺陷!');
+	while (queue.length > 1 && Array.isArray(queue[queue.length - 1]))
+		make_end();
+
+	if (status)
+		if (queue.length !== 1)
+			status.error = true;
+
+	return queue.length === 1 ? queue[0] : queue;
+}
+
+/**
+ * parse torrent file data
+ * 
+ * @param {String}path
+ *            torrent file path.
+ * @param {Boolean}name_only
+ *            get the torrent name only.
+ * 
+ * @returns {Object} torrent file data
+ * @since 2014/7/21 23:17:32
+ */
+function parse_torrent(path, name_only) {
+	var data = library_namespace.get_file(path), status = {};
+	if (!data || data.charAt(0) !== 'd') {
+		library_namespace.err((data ? 'Illegal' : 'Can not get') + ' torrent data of ['
+				+ path + ']!');
+		return;
+	}
+	library_namespace.debug(data);
+
+	if (name_only) {
+		// a fast way to get torrent name.
+		var PATTERN_name = /4:name(\d+):/,
+		// fix for non-ASCII chars, it will be change to Unicode,
+		// and the real length will less then length specified.
+		matched = data.indexOf('12:piece lengthi');
+		if (matched !== -1)
+			data = data.slice(0, matched);
+		matched = data.match(PATTERN_name);
+		library_namespace.debug('[' + path + '] length: ' + matched[1]);
+		return matched && data.substr(PATTERN_name.lastIndex, matched[1]);
+	}
+
+	data = parse_bencode(data, status);
+
+	return data;
+}
+
+
+_.list_to_Object = list_to_Object;
+_.parse_bencode = parse_bencode;
+_.parse_torrent = parse_torrent;
+
 
 //---------------------------------------------------------------------//
 
@@ -1444,4 +1717,3 @@ return (
 
 
 });
-

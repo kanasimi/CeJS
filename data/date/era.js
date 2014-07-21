@@ -5360,7 +5360,7 @@ if (typeof CeL === 'function')
 							if ((tmp = tmp2.pop())
 									&& (tmp = library_namespace
 											.from_Chinese_numeral(tmp).replace(
-													/^[^\d]+/, '').replace(
+													/^\D+/, '').replace(
 													/[^\d時分秒]+$/, ''))
 									&& (tmp = String_to_Date(tmp))
 									&& (tmp -= new Date(tmp.getTime())
