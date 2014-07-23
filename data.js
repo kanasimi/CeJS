@@ -148,7 +148,6 @@ function index_of_quote(string, quote) {
 
 
 
-
 //{var a=[],b,t='',i;a[20]=4,a[12]=8,a[27]=4,a[29]=4,a[5]=6,a.e=60,a.d=17,a.c=1;alert(a);b=sortValue(a);alert(a+'\n'+b);for(i in b)t+='\n'+b[i]+'	'+a[b[i]];alert(t);}
 //	依值排出key array…起碼到現在，我還看不出此函數有啥大功用。
 //	array,否則會出現error!	mode=1:相同value的以','合併,mode=2:相同value的以array填入
@@ -1257,6 +1256,7 @@ library_namespace.set_method(Pair.prototype, {
 	add_path : function(options) {
 		var source;
 		try {
+			// 注意:此方法不可跨 domain!
 			source = library_namespace.get_file(this.path);
 		} catch (e) {
 			// TODO: handle exception
@@ -1317,7 +1317,7 @@ library_namespace.set_method(Pair.prototype, {
 					//
 					save_new ? library_namespace.IO_mode.ForAppending : undefined);
 
-		library_namespace.log([ data.length, ' records saved. [', {
+		library_namespace.log([ data.length, ' new records saved. [', {
 			// 重新紀錄.
 			a : 'save again',
 			href : '#',
@@ -1380,9 +1380,14 @@ library_namespace.set_method(Pair.prototype, {
 			if (!target)
 				return;
 
+			library_namespace.debug('target: ' + target + ', options: ' + options, 3);
 			if (library_namespace.is_RegExp(target))
 				selector = function() {
 					return target.test(key) && value;
+				};
+			else if (options === true && typeof target === 'string')
+				selector = function() {
+					return target === key && value;
 				};
 			else {
 				var flag = this.flag;
@@ -1557,6 +1562,7 @@ function parse_bencode(data, status) {
 		}
 	}
 
+	// 盡可能不動到 data，因為 data 可能很大。
 	var index = 0, tmp, queue = [],
 	// 即使在 data 有缺陷的情況下，也盡可能解析出資料。
 	// 因此先將 data 設定成 list。
@@ -1667,6 +1673,16 @@ function parse_bencode(data, status) {
 /**
  * parse torrent file data
  * 
+ * @example <code>
+
+// @ JScript
+CeL.run('data', function () {
+	// http://www.ubuntu.com/download/alternative-downloads
+	CeL.log(CeL.parse_torrent('http://releases.ubuntu.com/14.04/ubuntu-14.04-desktop-i386.iso.torrent', true));
+});
+
+ * </code>
+ * 
  * @param {String}path
  *            torrent file path.
  * @param {Boolean}name_only
@@ -1676,6 +1692,7 @@ function parse_bencode(data, status) {
  * @since 2014/7/21 23:17:32
  */
 function parse_torrent(path, name_only) {
+	// 注意:此方法不可跨 domain!
 	var data = library_namespace.get_file(path), status = {};
 	if (!data || data.charAt(0) !== 'd') {
 		library_namespace.err((data ? 'Illegal' : 'Can not get') + ' torrent data of ['
@@ -1686,15 +1703,17 @@ function parse_torrent(path, name_only) {
 
 	if (name_only) {
 		// a fast way to get torrent name.
-		var PATTERN_name = /4:name(\d+):/,
-		// fix for non-ASCII chars, it will be change to Unicode,
-		// and the real length will less then length specified.
-		matched = data.indexOf('12:piece lengthi');
-		if (matched !== -1)
-			data = data.slice(0, matched);
-		matched = data.match(PATTERN_name);
-		library_namespace.debug('[' + path + '] length: ' + matched[1]);
-		return matched && data.substr(PATTERN_name.lastIndex, matched[1]);
+		var PATTERN_name = /4:name(\d{1,4}):/, matched = data.match(PATTERN_name), index;
+		if (matched && (matched = matched[1] | 0) > 0) {
+			library_namespace.debug('[' + path + '] length: ' + matched, 3);
+			// fix for non-ASCII chars, it will be change to Unicode,
+			// and the real length will less then length specified.
+			// assert: 'piece length' 恰好在 PATTERN_name 之後。
+			index = data.indexOf('12:piece lengthi') - PATTERN_name.lastIndex;
+			return data.substr(PATTERN_name.lastIndex,
+					index > 0 ? Math.min(index, matched) : matched);
+		}
+		return;
 	}
 
 	data = parse_bencode(data, status);
