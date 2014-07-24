@@ -201,7 +201,7 @@ for(i in array)array[i]=array[i].split('	');
 array.sort(sortByIndex);
 alert(array.join('\n'));
 */
-var sortByIndex_I,sortByIndex_Datatype;
+var sortByIndex_I, sortByIndex_Datatype;
 function sortByIndex(a, b) {
 	// alert(a+'\n'+b);
 	for (var i = 0, n; i < sortByIndex_I.length; i++)
@@ -239,10 +239,10 @@ function getIndexSortByIndex(array, separator, indexArray, isNumberIndex) {
 	else if (typeof indexArray !== 'object' || indexArray.constructor != Array) sortByIndex_I = [0];
 	else sortByIndex_I = indexArray;
 	var i, sortByIndex_A = [];
-	sortByIndex_Datatype = {};
+	sortByIndex_Datatype = library_namespace.null_Object();
 	if (typeof isNumberIndex == 'object') {
 		if (isNumberIndex.constructor == Array) {
-			sortByIndex_Datatype = {};
+			sortByIndex_Datatype = library_namespace.null_Object();
 			for (i = 0; i < isNumberIndex.length; i++) sortByIndex_Datatype[isNumberIndex[i]] = 1;
 		} else sortByIndex_Datatype = isNumberIndex;
 		for (i in sortByIndex_Datatype)
@@ -1497,7 +1497,64 @@ library_namespace.set_method(Pair.prototype, {
 _.pair = Pair;
 
 //---------------------------------------------------------------------//
-//for bencode & torrent file data
+// UTF-8 char and bytes.
+
+/**
+ * 計算指定 UTF-8 char code 之 bytes。<br />
+ * TODO:<br />
+ * 加快速度。
+ * 
+ * @param {Number}code
+ *            指定之 UTF-8 char code。
+ * @returns {Number} 指定 UTF-8 char code 之 bytes。
+ * @see https://en.wikipedia.org/wiki/UTF-8#Description
+ */
+function bytes_of_UTF8_char_code(code) {
+	return code < 0x0080 ? 1 : code < 0x0800 ? 2 : code < 0x10000 ? 3
+			: code < 0x200000 ? 4 : code < 0x4000000 ? 5
+					: code < 0x80000000 ? 6 : 7;
+}
+
+/**
+ * 計算指定 UTF-8 text 之 bytes。
+ * 
+ * @param {String}text
+ *            指定之 UTF-8 text。
+ * @returns {Number} 指定 UTF-8 text 之 bytes。
+ */
+function byte_count_of_UTF8(text) {
+	var i = 0, length = text.length, bytes = 0;
+	for (; i < length; i++)
+		bytes += bytes_of_UTF8_char_code(text.charCodeAt(i));
+	return bytes;
+}
+
+/**
+ * 將 UTF-8 text 截成指定 byte 長度。
+ * 
+ * @param {String}text
+ *            指定之 UTF-8 text。
+ * @param {Number}byte_length
+ *            指定之 byte 長度。
+ * @returns {String} UTF-8 text, length <= byte_length.
+ */
+function cut_UTF8_by_bytes(text, byte_length) {
+	var i = 0, length = text.length;
+	for (; byte_length > 0 && i < length; i++) {
+		byte_length -= bytes_of_UTF8_char_code(text.charCodeAt(i));
+		if (byte_length < 0)
+			i--;
+	}
+	return i === length ? text : text.slice(0, i);
+}
+
+_.bytes_of_char_code = bytes_of_UTF8_char_code;
+_.byte_count = byte_count_of_UTF8;
+_.cut_by_bytes = cut_UTF8_by_bytes;
+
+
+//---------------------------------------------------------------------//
+// for bencode & torrent file data.
 
 /**
  * [ key_1, value_1, key_2, value_2, key_3, value_3 ]<br /> →<br /> { key_1:
@@ -1523,7 +1580,7 @@ function list_to_Object(list) {
 		if (list[i] in pair)
 			library_namespace.warn('Duplicated key: [' + list[i] + ']');
 
-		library_namespace.debug('pair[' + list[i] + '] = [' + list[i + 1] + ']');
+		library_namespace.debug('pair[' + list[i] + '] = [' + list[i + 1] + ']', 3);
 		pair[list[i]] = list[i + 1];
 	}
 
@@ -1537,6 +1594,8 @@ function list_to_Object(list) {
  *            bencode data
  * @param {Object}[status]
  *            get the parse status
+ * @param {Boolean}[is_ASCII]
+ *            若設定為真，則當作 ASCII 處理。若設定為假，則當作 UTF-8 處理。
  * 
  * @returns
  * 
@@ -1544,7 +1603,7 @@ function list_to_Object(list) {
  * 
  * @since 2014/7/21 23:17:32
  */
-function parse_bencode(data, status) {
+function parse_bencode(data, status, is_ASCII) {
 
 	function make_end() {
 		// assert: object_now === queue.pop()
@@ -1646,10 +1705,16 @@ function parse_bencode(data, status) {
 							+ ' = lost ' + (index + tmp - data.length) + ')');
 				// tmp: length of string.
 				library_namespace.debug(index + '+' + tmp, 3);
-				// TODO: 需要對 non-ASCII string 特別處理:此時因取得 Unicode，
-				// 所指定之 length > 實際 length。
-				object_now.push(data.substr(index, tmp));
-				index += tmp;
+				if (is_ASCII) {
+					object_now.push(data.substr(index, tmp));
+					index += tmp;
+				} else {
+					// 對 UTF-8 (non-ASCII string) 特別處理:
+					// 此時因取得 Unicode，所指定之 length >= 實際 length。
+					tmp = cut_UTF8_by_bytes(data.substr(index, tmp), tmp);
+					object_now.push(tmp);
+					index += tmp.length;
+				}
 			} else {
 				// fatal error
 				library_namespace.err('Bad string format! Exit parse!');
@@ -1693,13 +1758,14 @@ CeL.run('data', function () {
  */
 function parse_torrent(path, name_only) {
 	// 注意:此方法不可跨 domain!
-	var data = library_namespace.get_file(path), status = {};
+	// JScript 下，XMLHttpRequest 會將檔案當作 UTF-8 讀取。
+	var data = library_namespace.get_file(path), status = library_namespace.null_Object();
 	if (!data || data.charAt(0) !== 'd') {
 		library_namespace.err((data ? 'Illegal' : 'Can not get') + ' torrent data of ['
 				+ path + ']!');
 		return;
 	}
-	library_namespace.debug(data);
+	library_namespace.debug(data, 4);
 
 	if (name_only) {
 		// a fast way to get torrent name.
@@ -1707,11 +1773,14 @@ function parse_torrent(path, name_only) {
 		if (matched && (matched = matched[1] | 0) > 0) {
 			library_namespace.debug('[' + path + '] length: ' + matched, 3);
 			// fix for non-ASCII chars, it will be change to Unicode,
-			// and the real length will less then length specified.
-			// assert: 'piece length' 恰好在 PATTERN_name 之後。
-			index = data.indexOf('12:piece lengthi') - PATTERN_name.lastIndex;
-			return data.substr(PATTERN_name.lastIndex,
-					index > 0 ? Math.min(index, matched) : matched);
+			// and the real length <= length specified.
+			if (false) {
+				// assert: 'piece length' 恰好在 PATTERN_name 之後。
+				index = data.indexOf('12:piece lengthi') - PATTERN_name.lastIndex;
+				return data.substr(PATTERN_name.lastIndex,
+						index > 0 ? Math.min(index, matched) : matched);
+			}
+			return cut_UTF8_by_bytes(data.substr(PATTERN_name.lastIndex, matched), matched);
 		}
 		return;
 	}
