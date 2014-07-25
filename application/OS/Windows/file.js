@@ -1412,31 +1412,33 @@ function open_file(file_path, format, IO_mode) {
 			}
 		}
 
-		if (IO_mode == _.IO_mode.ForAppending)
-			if (FSO.FileExists(file_path))
-				// 因為 appending，將指標設至檔尾。
-				file_stream.Position = file_stream.Size;
-			else
-				// 無此檔時改 writing。
-				IO_mode = _.IO_mode.ForWriting;
-		// else: assert: file_stream.Position === 0
+		if (IO_mode == _.IO_mode.ForAppending && !FSO.FileExists(file_path))
+			// 無此檔時改 writing。
+			IO_mode = _.IO_mode.ForWriting;
 		if (false && IO_mode == _.IO_mode.ForWriting)
 			// truncate file
 			file_stream.SetEOS();
 
 		file_stream.Open();
-		// file_stream.Position = 0, file_stream.LineSeparator = AdoEnums.adLF;
-		try {
-			if (file_path && FSO.FileExists(file_path)) {
+
+		// file_stream.Position = 0;
+		// file_stream.LineSeparator = AdoEnums.adLF;
+		if (file_path && FSO.FileExists(file_path))
+			try {
+
 				// library_namespace.debug('Load [' + file_path + ']', 2);
 				file_stream.LoadFromFile(file_path);
+			} catch (e) {
+				library_namespace.debug('ADO Stream error.', 1, 'open_file');
+				library_namespace.err(e);
+				reset();
+				return e;
 			}
-		} catch (e) {
-			library_namespace.debug('ADO Stream error.', 1, 'open_file');
-			library_namespace.err(e);
-			reset();
-			return e;
-		}
+
+		if (IO_mode == _.IO_mode.ForAppending)
+			// 因為 appending，將指標設至檔尾。
+			file_stream.Position = file_stream.Size;
+		// else: assert: file_stream.Position === 0
 
 	} else {
 		if (!file_path)
@@ -1615,8 +1617,7 @@ function write_file(file_path, contents, format, IO_mode, no_overwrite) {
 			library_namespace.debug('Writing ' + contents.length + ' characters / file: ' + file_stream.Size + ' bytes to (' + format + ') [' + file_path + ']');
 
 			// .SaveToFile() 須在 .Write 之後！
-			file_stream.SaveToFile(file_path, IO_mode
-					|| AdoEnums.adSaveCreateOverWrite);
+			file_stream.SaveToFile(file_path, AdoEnums.adSaveCreateOverWrite);
 			file_stream.Close();
 
 		} else {

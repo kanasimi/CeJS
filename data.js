@@ -35,6 +35,7 @@ _// JSDT:_module_
 };
 
 
+var NOT_FOUND = -1;
 
 
 /*
@@ -504,8 +505,8 @@ set_Object_value = function(obj, value, type, mode) {
 		n = -type;
 
 	for (; i < value.length; i++) {
-		if (value[i].indexOf(p) === -1)
-			value[i] = mode ? p + value[i] : value[i] + p;// if(v[i].indexOf(p)==-1&&m)v[i]=p+v[i];//
+		if (value[i].indexOf(p) === NOT_FOUND)
+			value[i] = mode ? p + value[i] : value[i] + p;// if(v[i].indexOf(p)==NOT_FOUND&&m)v[i]=p+v[i];//
 			if (mode && value[i] === p) {
 				n += type;
 				continue;
@@ -930,7 +931,7 @@ library_namespace.set_initializor(to_1024_prefix);
 //	<a href="http://msdn.microsoft.com/en-us/library/s4esdbwz%28v=VS.85%29.aspx" accessdate="2010/4/16 20:4">Version Information (Windows Scripting - JScript)</a>
 function StringToArray(s, mode) {
 	var a = [], last = 0, i;
-	while ((i = s.indexOf(sp, last)) != -1) {
+	while ((i = s.indexOf(sp, last)) != NOT_FOUND) {
 		if (mode == 0 || last != i)
 			a[a.length] = s.slice(last, i);
 		last = i + 1;
@@ -944,7 +945,7 @@ function StringToArray(s, mode) {
 function disposeSpace(s) {
 	if (!s) return s;
 	var r = "", i, last;
-	while ((i = s.indexOf(' ', last)) != -1)
+	while ((i = s.indexOf(' ', last)) != NOT_FOUND)
 		r += s.slice(last, i), last = i + 1;
 	r += s.slice(last);
 	return r;
@@ -969,7 +970,7 @@ function changeV(s, l, m) {
 //以label置換s,先找到先贏
 function changeV(s) {
 	for (var i, j = 0; j < labelN.length; j++)
-		if ((i = s.indexOf(labelN[j])) != -1)
+		if ((i = s.indexOf(labelN[j])) != NOT_FOUND)
 			s = s.slice(0, i) + labelV[j] + s.slice(i + labelN[j].length)
 			, j = 0; //research from begin
 	return s;
@@ -1289,7 +1290,7 @@ library_namespace.set_method(Pair.prototype, {
 			encoding = library_namespace.guess_encoding
 			&& library_namespace.guess_encoding(path)
 			|| library_namespace.open_format.TristateTrue;
-		library_namespace.debug([ '(' + encoding, ') [', path, ']' ]);
+		library_namespace.debug([ '(' + encoding, ') [', path, ']' ], 2, 'Pair.save');
 
 		var _t = this, pair = this.pair, line, data = [],
 		//
@@ -1304,18 +1305,24 @@ library_namespace.set_method(Pair.prototype, {
 			});
 			// reset (.new_keys).
 			this.new_keys = [];
+			if (data.length === 1)
+				data = [];
 		} else
 			for (var key in pair) {
 				if (Array.isArray(line = pair[key]))
 					line = line.join(separator);
 				data.push(key + separator + line);
 			}
-		if (data.length > 0)
+		if (data.length > 0) {
+			library_namespace.debug([ save_new ? 'Appending ' : 'Writing ',
+					data.length, ' data to (' + encoding, ') [', path, ']' ], 2, 'Pair.save');
+			library_namespace.debug(data.join('<br />'), 3, 'Pair.save');
 			library_namespace.write_file(path,
 					//
 					data.join(this.field_separator || library_namespace.env.line_separator), encoding,
 					//
 					save_new ? library_namespace.IO_mode.ForAppending : undefined);
+		}
 
 		library_namespace.log([ data.length, ' new records saved. [', {
 			// 重新紀錄.
@@ -1381,13 +1388,12 @@ library_namespace.set_method(Pair.prototype, {
 				return;
 
 			library_namespace.debug('target: ' + target + ', options: ' + options, 3);
+			if (options === true)
+				return pair[target];
+
 			if (library_namespace.is_RegExp(target))
 				selector = function() {
 					return target.test(key) && value;
-				};
-			else if (options === true && typeof target === 'string')
-				selector = function() {
-					return target === key && value;
 				};
 			else {
 				var flag = this.flag;
