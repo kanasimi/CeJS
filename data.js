@@ -35,6 +35,7 @@ _// JSDT:_module_
 };
 
 
+// 基本上與程式碼設計合一，僅表示名義，不可更改。
 var NOT_FOUND = -1;
 
 
@@ -1234,7 +1235,7 @@ library_namespace.set_method(Pair.prototype, {
 							else
 								// 後來覆蓋前面的。
 								library_namespace.warn('Pair.add: Duplicated key [' + key
-										+ '], value will be change: [' + pair[key] + '] → [' + value + ']');
+										+ '], value will be changed: [' + pair[key] + '] → [' + value + ']');
 						pair[key] = value;
 						if (keys)
 							keys.push(key);
