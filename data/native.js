@@ -792,6 +792,52 @@ function split_String_by_length(l, m) {
 /**
  * get string between head and foot.<br />
  * 取得 text 中，head 與 foot 之間的字串。不包括 head 與 foot。<br />
+ * 可以 [3] last index 是否回傳 NOT_FOUND (-1) 檢測到底是有找到，只是回傳空字串，或是沒找到。
+ * 
+ * @example <code>
+
+CeL.assert([ '0123456789123456789'.between('567', '345'), '8912' ]);
+CeL.assert([ '0123456789123456789'.between('567', '89'), '' ]);
+CeL.assert([ '0123456789123456789'.between('54'), '' ]);
+CeL.assert([ CeL.get_intermediate([ '0123456789123456789', '54' ])[3], -1 ]);
+CeL.assert([ '0123456789123456789'.between('567'), '89123456789' ]);
+CeL.assert([ '0123456789123456789'.between(null, '345'), '012' ]);
+
+ * </code>
+ * 
+ * @param {Array}data
+ *            [ text 欲篩選字串, head 首字串, foot 尾字串, start index ]
+ * 
+ * @returns [ 0: text 欲篩選字串, 1: head 首字串, 2: foot 尾字串, 3: last index, 4: head 與 foot 之間的字串 ]
+ * 
+ * @since 2014/8/4 21:34:31
+ */
+function get_intermediate_Array(data) {
+	if (data && data[0]
+	// = String(data[0])
+	) {
+		// start index of intermediate. 
+		var index;
+		if (!data[1])
+			index = 0;
+		else if ((index = data[0].indexOf(data[1], data[3])) !== NOT_FOUND)
+			index += data[1].length;
+		library_namespace.debug('head index: ' + index, 4);
+
+		if((data[3] = index) !== NOT_FOUND
+				&& (!data[2] || (data[3] = data[0].indexOf(data[2], index)) !== NOT_FOUND))
+			data[4] = data[2] ? data[0].slice(index, data[3])
+			//
+			: index ? data[0].slice(index)
+			//
+			: data[0];
+	}
+	return data;
+}
+
+/**
+ * get string between head and foot.<br />
+ * 取得 text 中，head 與 foot 之間的字串。不包括 head 與 foot。<br />
  * 可以是否回傳 undefined 檢測到底是有找到，只是回傳空字串，或是沒找到。
  * 
  * @example <code>
@@ -816,25 +862,81 @@ CeL.assert([ '0123456789123456789'.between(null, '345'), '012' ]);
  * 
  * @since 2014/7/26 11:28:18
  */
-function get_intermediate(text, head, foot) {
+function get_intermediate(text, head, foot, index, return_data) {
+	if (return_data)
+		// [ last index, head 與 foot 之間的字串 ]
+		return_data = [ NOT_FOUND, ];
+
 	if (text
 	// = String(text)
 	) {
-		var index;
+		// start index of intermediate. 
 		if (!head)
 			index = 0;
-		else if ((index = text.indexOf(head)) !== NOT_FOUND)
+		else if ((index = text.indexOf(head, index | 0)) !== NOT_FOUND)
 			index += head.length;
-		CeL.debug('head index: ' + index, 4);
+		library_namespace.debug('head index: ' + index, 4);
 
 		if (index !== NOT_FOUND
-				&& (!foot || (foot = text.indexOf(foot, index)) !== NOT_FOUND))
-			return foot ? text.slice(index, foot) : index ? text.slice(index)
+				&& (!foot || (foot = text.indexOf(foot, index)) !== NOT_FOUND)) {
+			head = foot ? text.slice(index, foot) : index ? text.slice(index)
 					: text;
+			if (return_data)
+				return_data = [ foot || text.length, head ];
+			else
+				return head;
+		}
 	}
+
+	if (return_data)
+		return return_data;
 }
 
 _.get_intermediate = get_intermediate;
+
+/*
+
+var data = html.set_intermediate('>', '<'), text;
+
+text = data.find().find().find().toString();
+
+while (data.next()) {
+	text = data.toString();
+}
+
+while (typeof (text = data.find()) === 'string') {
+	;
+}
+
+*/
+function next_intermediate(index) {
+	if (this[3] !== NOT_FOUND) {
+		var data = get_intermediate(this[0], this[1], this[2], this[3], true);
+		library_namespace.debug('Get [' + data + ']', 4);
+		if((this[3] = data[0]) !== NOT_FOUND) {
+			this[4] = data[1];
+			return this;
+		}
+	}
+}
+function find_intermediate(index) {
+	this.next();
+	return this;
+}
+function intermediate_result() {
+	return this[3] !== NOT_FOUND && this[4] || '';
+}
+function intermediate_between() {
+	return String.prototype.between.apply(this.toString(), arguments);
+}
+function set_intermediate(head, foot) {
+	var data = [ this, head, foot ];
+	data.next = next_intermediate;
+	data.find = find_intermediate;
+	data.toString = intermediate_result;
+	//data.between = intermediate_between;
+	return data;
+}
 
 
 //---------------------------------------------------------------------//
@@ -1602,10 +1704,15 @@ set_method(String.prototype, {
 	split_by : split_String_by_length,
 	pad : set_bind(pad, true),
 	toRegExp : set_bind(String_to_RegExp, true),
-	between : function(head, foot) {
+	between : function(head, foot, index, return_data) {
 		// 確保可用 string.between().between() 的方法來作簡易篩選。
-		return get_intermediate(this, head, foot) || '';
-	}
+		/*
+		var data = get_intermediate([ this, head, foot, index ]);
+		return data[3] !== NOT_FOUND && data[4] || '';
+		*/
+		return get_intermediate(this, head, foot, index, return_data) || '';
+	},
+	set_intermediate : set_intermediate
 });
 
 set_method(Number.prototype, {
@@ -1664,9 +1771,9 @@ if (isNaN(Date.parse('0000-01-01T00:00:00.000Z'))) {
 
 	IE_ISO_date.parse = function(ISO_date_String) {
 		if (false) {
-			CeL.debug(ISO_date_String.replace(/\.\d{3}Z$/, '')
+			library_namespace.debug(ISO_date_String.replace(/\.\d{3}Z$/, '')
 					.replace(/-/, '/'));
-			CeL.debug(Date.parse(ISO_date_String.replace(/\.\d{3}Z$/, '')
+			library_namespace.debug(Date.parse(ISO_date_String.replace(/\.\d{3}Z$/, '')
 					.replace(/-/, '/')));
 		}
 		return Date.parse(ISO_date_String.replace(/\.\d{3}Z$/, '').replace(/-/,

@@ -640,7 +640,7 @@ function new_IEA(new_1) {
 
 
 function get_HTML(url) {
-	if (!get_HTML.no_directly) {
+	if (url && !get_HTML.no_directly) {
 		library_namespace.debug('Directly get:<br />' + url, 2);
 		try {
 			// 當大量 access 時，可能被網站擋下。e.g., Google.
@@ -658,7 +658,8 @@ function get_HTML(url) {
 	if(!new_IEA())
 		return '';
 
-	IEA_instance.go(url);
+	if (url)
+		IEA_instance.go(url);
 	IEA_instance.wait();
 
 	// https://ipv4.google.com/sorry/IndexRedirect?continue=_url_
@@ -668,12 +669,17 @@ function get_HTML(url) {
 		throw new Error('如要繼續，請輸入人機驗證 (Captcha) 字元。');
 	}
 
-	var HTML = IEA_instance.doc().getElementsByTagName('html');
-	if (HTML)
-		return HTML[0].outerHTML;
+	var doc = IEA_instance.doc(), HTML;
+	if (doc) {
+		// alert(IEA.instance.doc().getElementsByTagName('html')[0].outerHTML);
+		if (HTML = doc.getElementsByTagName('html'))
+			return HTML[0].outerHTML;
 
-	library_namespace.warn('No html tag found! Use body.');
-	return IEA_instance.doc().body.outerHTML;
+		library_namespace.warn('No html element found! Use body.');
+		return doc.body.outerHTML;
+	}
+
+	library_namespace.warn('No document node found!');
 }
 
 _.IEA.get_HTML = get_HTML;
