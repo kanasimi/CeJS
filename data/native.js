@@ -1034,20 +1034,29 @@ function unique_Array(a, f) {
  * @param {String|RegExp}search
  *            搜尋對象。
  * @param {Integer}[position]
- *            開始搜尋的位置。
+ *            開始搜尋的位置(start index)。
  * 
  * @returns {Integer} string 中出現 search 之次數。
  * 
  * @see http://jsperf.com/count-string-occurrence-in-string,
  *      http://jsperf.com/count-the-number-of-occurances-in-string
+ *      http://stackoverflow.com/questions/881085/count-the-number-of-occurences-of-a-character-in-a-string-in-javascript
  * 
  * @since 2013/2/13 11:12:38 重構
+ * @since 2014/8/11 12:54:34 重構
  */
 function count_occurrence(string, search, position) {
 	// 正規化 position 成 index (0, 1, ..)。
 	// 注意:過大的 position 在 |0 時會變成負數!
 	if (isNaN(position) || (position |= 0) < 0)
 		position = 0;
+
+	if (position > 0)
+		string = string.slice(position);
+
+	return string.split(search).length - 1;
+
+	// 以下放棄。
 
 	if (library_namespace.is_RegExp(search))
 		return (string = (position > 0 ? string.slice(position) : string)

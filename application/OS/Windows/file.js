@@ -1061,7 +1061,7 @@ translate_ADO_Stream_binary_data = function translate_ADO_Stream_binary_data(bin
 	else
 		position = _s.position, text = _s.text;
 
-	if (isNaN(length) || length > text.length / 2)
+	if ((length |= 0) < 1 || length > text.length / 2)
 		length = text.length / 2;
 
 	if (type) {
@@ -2127,15 +2127,17 @@ traverse_file_system.f = {
 
 //	send in file manager, list/open by file manager. 檔案管理器/文件管理器.
 //	Windows 檔案總管檢視. Views in Windows Explorer.
-//	http://support.microsoft.com/kb/307856/zh-tw
+//	http://support.microsoft.com/kb/307856
+//	Windows 檔案總管的命令列參數
+//	http://support.microsoft.com/kb/130510
 _// JSDT:_module_
 .
 show_in_file_manager = function(path) {
-	if (FSO.FileExists(path)||FSO.FolderExists(path))
+	if (FSO.FileExists(path) || FSO.FolderExists(path))
 		//	若不存在，會 popup。
-		WshShell.Run('Explorer.exe /select, "'+path+'"',1,1);
+		WshShell.Run('EXPLORER.EXE /select,"' + path + '"', 1, 1);
 	else
-		library_namespace.warn('Path not found: ['+path+']');
+		library_namespace.warn('Path not found: [' + path + ']');
 };
 
 
@@ -2527,7 +2529,7 @@ function cacher(cache_file, options) {
 
 	// 前置處理。
 	if (!library_namespace.is_Object(options)) {
-		options = typeof options==='string' ? {
+		options = typeof options === 'string' ? {
 			encoding : options
 		} : library_namespace.null_Object();
 	}
@@ -2542,8 +2544,9 @@ function cacher(cache_file, options) {
 	}
 
 	if (!this.data) {
-		var text = (library_namespace.read_file ? library_namespace.read_file(cache_file, this.encoding)
-				: library_namespace.get_file(path)), i = 0, length, line,key, data = {};
+		var i = 0, length, line,key, data = {},
+		// library_namespace.application.OS.Windows.file.read_file()
+		text = (library_namespace.file && library_namespace.file.read_file || library_namespace.get_file)(cache_file, this.encoding);
 
 		if (typeof text !== 'string'){
 			//	Error to open file?
