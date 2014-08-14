@@ -1054,7 +1054,8 @@ if (false) {
 				path[0] = '.';
 
 			path = path.join(_.env.path_separator)
-				.replace(/[\\\/]{2,}/g, _.env.path_separator)
+				// 預防有些情況下需要 '//'。對 archive.org 之類的網站，不可以簡化 '//'。
+				//.replace(/[\\\/]{2,}/g, _.env.path_separator)
 				.replace(is_absolute ? /^([\\\/]\.\.)+/g : /^(\.[\\\/])+/g, '')
 			;
 
