@@ -1629,7 +1629,7 @@ if (typeof CeL === 'function')
 			/**
 			 * batch operation
 			 * 
-			 * @param {Function}callback
+			 * @param {Function}callback callback(path, data)
 			 * @param {Function}sort_function
 			 * @returns {@Files}
 			 */

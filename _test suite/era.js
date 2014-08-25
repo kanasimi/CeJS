@@ -431,7 +431,8 @@ function 解析曆數() {
 
 var era_name_classifier, MIN_FONT_SIZE = 10,
 // 經驗值: Chrome 35 在字體太大時會化ける。
-MAX_FONT_SIZE = /WebKit/i.test(navigator.userAgent) ? 250 : Infinity;
+// Chrome/38 (WebKit/537.36): OK
+MAX_FONT_SIZE = /WebKit/i.test(navigator.userAgent) ? Infinity : Infinity;
 
 function draw_title_era() {
 	var hierarchy = this.title;
@@ -468,6 +469,43 @@ function set_SVG_text_properties(recover) {
 		def_style.color = style.color = recover ? def.base_color : '#f00';
 	}
 }
+
+
+// 計算大略的時間間隔。
+function count_roughly_duration(start, end) {
+	if (!end)
+		end = new Date;
+	var difference = end - start, diff, diff2;
+	if (!(difference >= 0) || !isFinite(difference))
+		return;
+
+	if (!CeL.is_Date(start))
+		start = new Date(start);
+	if (!CeL.is_Date(end))
+		end = new Date(end);
+	diff2 = end.getMonth() - start.getMonth();
+	if (diff = end.getFullYear() - start.getFullYear())
+		return (diff + diff2 / 12).to_fixed(1) + 'Y';
+
+	if (diff2)
+		return (diff2 + (end.getDate() - start.getDate()) / 30).to_fixed(1) + 'M';
+
+
+	if (difference < 1000)
+		return difference + 'ms';
+
+	if ((difference /= 1000) < 60)
+		return difference.to_fixed(1) + 's';
+
+	if ((difference /= 60) < 60)
+		return difference.to_fixed(1) + 'm';
+
+	if ((difference /= 60) < 24)
+		return difference.to_fixed(1) + 'h';
+
+	return (difference / 24).to_fixed(1) + 'D';
+}
+
 
 // Firefox/30.0 尚未支援 writing-mode。IE, Chrome 支援。
 // https://bugzilla.mozilla.org/show_bug.cgi?id=145503
@@ -720,7 +758,16 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 					href : '#',
 					title : name.start,
 					onclick : draw_era.click_navigation_date
-				}, '－', {
+				}, {
+					span : '－',
+					title : count_roughly_duration(name.start.to_Date({
+						parser : 'CE',
+						year_padding : 0
+					}), name.end.to_Date({
+						parser : 'CE',
+						year_padding : 0
+					}))
+				}, {
 					a : name.end,
 					href : '#',
 					title : name.end,
@@ -1468,7 +1515,7 @@ function affairs() {
 					a : {
 						T : '傣曆',
 					},
-					R : '西雙版納傣曆紀元始於公元638年3月22日，可轉換之範圍於傣曆714年（1352/3/28－）至3190年期間內。',
+					R : '西雙版納傣曆紀元始於公元638年3月22日，可轉換之範圍於傣曆714年（1352/3/28－）至3190年期間內。\n有0年。非精確時，可能有最多前後2年的誤差。',
 					href : 'http://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86'
 				},
 				function(date) {
@@ -1477,7 +1524,9 @@ function affairs() {
 					// 超出可轉換之範圍。
 					|| isNaN((dai = date.to_Dai({
 						format : 'serial'
-					}))[0]) ? ''
+					}))[0]) ? '約' + date.to_Dai({
+						ignore_year_limit : true
+					})[0] + '年'
 					//
 					: date.精 === '年' ? dai[0] + '年' : dai.slice(0, 3).join('/')
 							+ '(周' + (date.getDay() + 1) + ')'
@@ -1555,13 +1604,17 @@ function affairs() {
 					a : {
 						T : '佛曆'
 					},
-					R : '1911－。佛曆年 = 公曆年 + 543，若過佛誕日（印度曆二月初八，農曆四月初八。）再加1年。',
+					R : '1911－。佛曆年 = 公曆年 + 543，若過佛誕日（印度曆二月初八，農曆四月初八。）再加1年。\n有採用0年。非精確時，可能有最多前後一年的誤差。',
 					href : 'https://zh.wikipedia.org/wiki/%E4%BD%9B%E6%9B%86'
 				},
 				function(date) {
 					var year = date.getFullYear() | 0;
-					if (year < 1911)
-						return '';
+					if (year < 1911) {
+						year += 543;
+						if (date.getMonth() >= 4)
+							year++;
+						return '約' + year + '年';
+					}
 
 					var era = CeL.era('中曆', {
 						get_era : true
@@ -1647,7 +1700,19 @@ function affairs() {
 					R : 'ปฏิทินสุริยคติไทย: 泰國陽曆/泰國官方之佛曆年 = 公曆年 + 543',
 					href : 'https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2',
 					S : 'font-size:.8em;'
-				}, Year_numbering(543) ]
+				}, Year_numbering(543) ],
+
+		AUC : [
+				{
+					a : {
+						T : '羅馬建城'
+					},
+					R : 'AUC (Ab urbe condita), 羅馬建城紀年. 有採用0年。非精確時，可能有最多前後一年的誤差。',
+					href : 'https://en.wikipedia.org/wiki/Ab_urbe_condita',
+					S : 'font-size:.8em;'
+				}, function(date) {
+					return '約' + (date.getFullYear() + 754) + '年';
+				} ]
 	};
 
 	default_title.forEach(function(i, index) {
