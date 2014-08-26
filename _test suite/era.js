@@ -112,14 +112,14 @@ var NOT_FOUND = -1,
 //
 CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
 // 選用的文字式年曆欄位
-selected_title = {
+selected_column = {
 	JDN : true,
 	contemporary : true
 },
 // 可選用的文字式年曆 title。 = { id : [th, function (date) {} ] }
-calendar_title,
+calendar_column,
 //
-default_title = [ {
+default_column = [ {
 	T : '朝代紀年日期'
 }, [ {
 	T : CE_name
@@ -142,16 +142,16 @@ default_title = [ {
 	S : 'font-size:.7em;'
 } ];
 
-function remove_calendar_title() {
+function remove_calendar_column() {
 	var n = this.title.match(/: (.+)$/);
 	if (n)
-		delete selected_title[n[1]];
+		delete selected_column[n[1]];
 	translate_era();
 	return false;
 }
 
-function add_calendar_title() {
-	selected_title[this.title] = true;
+function add_calendar_column() {
+	selected_column[this.title] = true;
 	translate_era();
 	return false;
 }
@@ -159,8 +159,8 @@ function add_calendar_title() {
 // 文字式年曆。
 function show_calendar(era_name) {
 	var era_caption,
-	// 為了不更動到原先的 default_title。作 deep clone.
-	title = CeL.clone(default_title, true), output = [ {
+	// 為了不更動到原先的 default_column。作 deep clone.
+	title = CeL.clone(default_column, true), output = [ {
 		tr : title
 	} ], 前年名, 前月名, 前紀年名, 後紀年名,
 	//
@@ -168,7 +168,7 @@ function show_calendar(era_name) {
 	//
 	dates = CeL.era.dates(era_name, {
 		含參照用 : /明治|大正|昭和|明仁/.test(era_name)
-	}), is_年譜, i, j, hided_title = [];
+	}), is_年譜, i, j, hidden_column = [];
 
 	if (!dates)
 		return;
@@ -186,31 +186,31 @@ function show_calendar(era_name) {
 			}
 		});
 
-	for (i in calendar_title) {
-		if (selected_title[i])
+	for (i in calendar_column) {
+		if (selected_column[i])
 			title.push({
-				th : [ calendar_title[i][0], ' ', {
+				th : [ calendar_column[i][0], ' ', {
 					span : '×',
 					title : _('除去此欄') + ': ' + i,
 					C : 'remove_mark',
-					onclick : remove_calendar_title
+					onclick : remove_calendar_column
 				} ]
 			});
 		else {
-			j = calendar_title[i][0];
+			j = calendar_column[i][0];
 			if (!j.T && j.a)
 				j = j.a;
-			hided_title.push({
+			hidden_column.push({
 				span : j.T ? {
 					T : j.T
 				} : i,
 				title : i,
 				C : 'add_mark',
-				onclick : add_calendar_title
+				onclick : add_calendar_column
 			}, ' | ');
 		}
 	}
-	hided_title.pop();
+	hidden_column.pop();
 
 	if (main_date_value)
 		if (main_date_value.日 == 1 && era_name.indexOf('日') === NOT_FOUND)
@@ -305,10 +305,10 @@ function show_calendar(era_name) {
 			});
 		});
 
-		for (tmp in calendar_title) {
-			if (selected_title[tmp])
+		for (tmp in calendar_column) {
+			if (selected_column[tmp])
 				list.push({
-					td : calendar_title[tmp][1](date)
+					td : calendar_column[tmp][1](date)
 				});
 		}
 
@@ -363,11 +363,11 @@ function show_calendar(era_name) {
 			tbody : output
 		} ]
 	};
-	if (hided_title.length > 0)
+	if (hidden_column.length > 0)
 		title = [ {
 			div : [ {
 				T : '增加此欄'
-			}, ': ', hided_title ],
+			}, ': ', hidden_column ],
 			C : 'add_mark_layer'
 		}, title ];
 	CeL.remove_all_child('calendar');
@@ -971,6 +971,8 @@ function translate_era(era) {
 		numeral : output_numeral
 	});
 	if (date) {
+		set_era_by_url_data(era);
+
 		if (date.紀年名)
 			// 因為紀年可能橫跨不同時代(朝代)，因此只要確定找得到，那就以原先的名稱為主。
 			show_calendar(era);
@@ -1072,7 +1074,6 @@ function translate_era(era) {
 				}
 			}, 'input_history');
 	}
-
 }
 
 // ---------------------------------------------------------------------//
@@ -1160,6 +1161,49 @@ function parse_text(text) {
 	});
 
 	return false;
+}
+
+// ---------------------------------------------------------------------//
+
+var set_era_by_url_data_running;
+function set_era_by_url_data(era) {
+	if (set_era_by_url_data_running)
+		return;
+	set_era_by_url_data_running = true;
+
+	if (typeof era === 'string')
+		location.hash = '#era=' + era;
+
+	else {
+
+		// 直接處理 hash / search。
+		// e.g., "era.htm#era=%E5%A4%A7%E6%B0%B82%E5%B9%B4"
+		var column, data = location.hash.slice(1) || location.search.slice(1);
+
+		if (column = data.match(/(?:^|&)column=([^&]+)/)) {
+			column = decodeURIComponent(column[1]).split(',');
+			column.forEach(function(item) {
+				var remove;
+				if (remove = item.charAt(0) === '-')
+					item = item.slice(1);
+				selected_column[item] = !remove;
+			});
+		}
+
+		if (era = data.match(/(?:^|&)era=([^&]+)/)) {
+			era = era[1];
+		} else if (!/[&=#?]/.test(data))
+			era = data;
+
+		if (era)
+			click_title_as_era.call({
+				title : decodeURIComponent(era)
+			});
+		else if (column && era_input_object.setValue())
+			translate_era();
+	}
+
+	set_era_by_url_data_running = false;
 }
 
 // ---------------------------------------------------------------------//
@@ -1359,7 +1403,7 @@ function affairs() {
 	// for 皇紀.
 	kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset);
 
-	calendar_title = {
+	calendar_column = {
 		JDN : [
 				{
 					a : 'JDN',
@@ -1523,7 +1567,7 @@ function affairs() {
 					return date - CeL.Dai_Date.epoch < 0
 					// 超出可轉換之範圍。
 					|| isNaN((dai = date.to_Dai({
-						format : 'serial'
+						// format : 'serial'
 					}))[0]) ? '約' + date.to_Dai({
 						ignore_year_limit : true
 					})[0] + '年'
@@ -1715,8 +1759,8 @@ function affairs() {
 				} ]
 	};
 
-	default_title.forEach(function(i, index) {
-		default_title[index] = {
+	default_column.forEach(function(i, index) {
+		default_column[index] = {
 			th : i
 		};
 	});
@@ -1741,14 +1785,8 @@ function affairs() {
 	 </code>
 	 */
 
-	// 直接 search。
-	// e.g., "era.htm?era=%E5%A4%A7%E6%B0%B82%E5%B9%B4"
-	if ((i = location.hash.slice(1))
-			|| (i = location.search.match(/[?&]era=([^&]+)/))
-			&& (i = decodeURIComponent(i[1])))
-		click_title_as_era.call({
-			title : i
-		});
+	// https://developer.mozilla.org/en-US/docs/Web/API/Window.onhashchange
+	(window.onhashchange = set_era_by_url_data)();
 
 	CeL.log('初始化完畢。您可開始進行操作。');
 }
