@@ -1249,15 +1249,15 @@ function FindProxyForURL(url, host) {	//	url: 完整的URL字串, host: 在 URL�
 	curl --connect-timeout 5 -x 64.34.113.100:80 http://www.getchu.com/ | grep Getchu.com
 	curl --connect-timeout 5 -x 66.98.238.8:3128 http://www.getchu.com/ | grep Getchu.com
 	*/
-	dnsDomainIs(lch, ".cn") || dnsDomainIs(lch, "pkucn.com")
-						? "PROXY proxy.hinet.net:80; DIRECT" :	//	2009/8/16 14:20:32	用 HiNet 網際網路 Proxy Server 上大陸網速度還滿快的	http://www.ltivs.ilc.edu.tw/proxy/proxy/hinet.htm
-	dnsDomainIs(lch, ".getchu.com") ? "PROXY 219.163.8.163:3128; PROXY 64.34.113.100:80; PROXY 66.98.238.8:3128; DIRECT" :
-	dnsDomainIs(lch, ".minori.ph") ? "PROXY 219.94.198.110:3128; PROXY 221.186.108.237:80; DIRECT" :	//	Japan Distorting Open Proxy List	http://www.xroxy.com/proxy--Distorting-JP-nossl.htm
+	//dnsDomainIs(lch, ".cn") || dnsDomainIs(lch, "pkucn.com") ? "PROXY proxy.hinet.net:80; DIRECT" :	//	2009/8/16 14:20:32	用 HiNet 網際網路 Proxy Server 上大陸網速度還滿快的	http://www.ltivs.ilc.edu.tw/proxy/proxy/hinet.htm
+	//dnsDomainIs(lch, ".getchu.com") ? "PROXY 219.163.8.163:3128; PROXY 64.34.113.100:80; PROXY 66.98.238.8:3128; DIRECT" :
+	//dnsDomainIs(lch, ".minori.ph") ? "PROXY 219.94.198.110:3128; PROXY 221.186.108.237:80; DIRECT" :	//	Japan Distorting Open Proxy List	http://www.xroxy.com/proxy--Distorting-JP-nossl.htm
 	//	slow:	http://www.cybersyndrome.net/country.html
-	dnsDomainIs(lch, ".tactics.ne.jp") ? "PROXY 202.175.95.171:8080; PROXY 203.138.90.141:80; DIRECT" :
+	//dnsDomainIs(lch, ".tactics.ne.jp") ? "PROXY 202.175.95.171:8080; PROXY 203.138.90.141:80; DIRECT" :
 	//dnsDomainIs(lch,".ys168.com")		? "PROXY 76.29.160.230:8000; DIRECT":	//	永硕E盘专业网络硬盘服务
+	dnsDomainIs(lch, "erogamescape.dyndns.org") ? "PROXY 211.22.213.114:8000; DIRECT"
 
-	"DIRECT";//:/^[a-z\.\d_\-]+$/.test(lch)?"DIRECT":"PROXY dnsrelay.twnic.net.tw:3127";	//	http://www.twnic.net.tw/proxy.pac	將中文網域名稱轉成英文網域名稱
+	: "DIRECT";//:/^[a-z\.\d_\-]+$/.test(lch)?"DIRECT":"PROXY dnsrelay.twnic.net.tw:3127";	//	http://www.twnic.net.tw/proxy.pac	將中文網域名稱轉成英文網域名稱
 }
 
 
