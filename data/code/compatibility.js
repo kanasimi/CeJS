@@ -354,10 +354,14 @@ set_method(Array.prototype, {
 		return NOT_FOUND;
 	},
 	fill : function fill(value, start, end) {
-		if (end === undefined)
+		// Array.prototype.fill() 只會作用於 0~原先的 length 範圍內！
+		if (isNaN(end) || this.length < (end |= 0))
 			end = this.length;
+		else if (end < 0)
+			end += this.length;
 		for (var index = start || 0; index < end;)
 			this[index++] = value;
+		return this;
 	},
 	/**
 	 * 對於舊版沒有 Array.push() 等函數時之判別及處置。

@@ -327,18 +327,24 @@ function start_count(restart) {
 	function show_question(expression) {
 		var
 		//.match(/([+\-]?(?:\d+,)*\d+(?:\.\d+)?)\s*([+\-*\/])\s*([+\-]?(?:\d+,)*\d+(?:\.\d+)?)/);
-		m = expression.match(/^(\s*[+\-]?[\d, .]+)([+\-*\/×÷])(\s*[+\-]?[\d, .]+)$/);
+		m = expression.match(/^(\s*[+\-]?[\d, .]+)([+\-*\/×÷])(\s*[+\-]?[\d, .]+)$/)
+		//
+		|| expression.match(/^(\s*[+\-]?[\d, .]+)([\/÷])(\s*[+\-]?[\d, .]+)\/(\d+)$/);
 
 		if (m)
 			try {
-				CeL.SVG['draw_' + {
+				var f = CeL.SVG['draw_' + {
 					'+' : 'addition',
 					'-' : 'subtraction',
 					'*' : 'multiplication',
 					'×' : 'multiplication',
 					'/' : 'long_division',
 					'÷' : 'long_division'
-				}[m[2]]](m[1], m[3], SVG_object);
+				}[m[2]]];
+				if (m[4])
+					f(m[1], m[3], m[4], SVG_object);
+				else
+					f(m[1], m[3], SVG_object);
 				SVG_object.show(1);
 			} catch (e) {
 				CeL.err(e);
@@ -787,7 +793,7 @@ function start_count(restart) {
 								'interact.form.education' ]);
 
 					var qi = new CeL.select_input('eval_code', [ '423.2+5523',
-							'423243-5542.52', '423.2*34.42', '42342332.4323/34.4' ], 'includeKeyWC');
+							'423243-5542.52', '423.2*34.42', '42342332.4323/34.4', '42342332.4323/34.4/2' ], 'includeKeyWC');
 					//qi.attach('eval_code');
 					//qi.setSearch('includeKeyWC');
 

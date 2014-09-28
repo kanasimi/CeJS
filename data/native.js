@@ -838,7 +838,7 @@ function get_intermediate_Array(data) {
 /**
  * get string between head and foot.<br />
  * 取得 text 中，head 與 foot 之間的字串。不包括 head 與 foot。<br />
- * 可以是否回傳 undefined 檢測到底是有找到，只是回傳空字串，或是沒找到。
+ * 回傳 undefined 表示沒找到。只是回傳空字串表示其間為空字串。
  * 
  * @example <code>
 
@@ -858,7 +858,7 @@ CeL.assert([ '0123456789123456789'.between(null, '345'), '012' ]);
  * @param {String}[foot]
  *            尾字串。
  * 
- * @returns head 與 foot 之間的字串。
+ * @returns head 與 foot 之間的字串。undefined 表示沒找到。
  * 
  * @since 2014/7/26 11:28:18
  */
@@ -1418,7 +1418,7 @@ function append_to_Array(list, index) {
 
 // to inherit from native object:
 
-function Child(){
+function Child() {
 	// Parent: native object
 	var instance = new Parent;
 
@@ -1443,10 +1443,13 @@ Object.setPrototypeOf(Child.prototype, Parent.prototype);
 Child.prototype.property = property;
 Child.prototype.method = function () { };
 
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create
+
 */
 
 // subclass and inherit from Array
-// 注意:此處的繼承重視原生 Array 之功能，因此 instance instanceof SubArray 於 IE8 等舊版中不成立。
+// 注意: 此處的繼承重視原生 Array 之功能，因此 instance instanceof SubArray 於 IE8 等舊版中不成立。
 function new_Array_instance(array_type, no_proto, items) {
 	var instance;
 	// 除 Array 外，其他 TypedArray，如 Uint32Array 有不同行為。
@@ -1464,15 +1467,23 @@ function new_Array_instance(array_type, no_proto, items) {
 		// if there is no prototype chain, we should copy the properties manually.
 		// TODO: 此方法極無效率！此外，由於並未使用 .prototype，因此即使採用 delete instance[property]，也無法得到預設值，且不能探測是否為 instance 特有 property。
 		set_method(instance, this.prototype, null);
-	else
+	else {
 		Object.setPrototypeOf(instance, this.prototype);
+		//TODO: NG:
+		//instance.prototype = Object.create(this.prototype);
+	}
+
 	return instance;
 }
 
 function Array_derive(sub_class, array_type) {
 	if (!array_type)
 		array_type = Array;
+
 	Object.setPrototypeOf(sub_class.prototype, array_type.prototype);
+	//TODO: NG:
+	//sub_class.prototype = Object.create(array_type.prototype);
+
 	return new_Array_instance.bind(sub_class, array_type, false);
 }
 
@@ -1485,7 +1496,7 @@ function Array_derive_no_proto(sub_class, array_type) {
 
 // @example
 
-function SubArray(){
+function SubArray() {
 	var instance = SubArray.new_instance(arguments);
 
 	// do something need to initialize
