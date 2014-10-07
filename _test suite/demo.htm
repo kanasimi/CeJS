@@ -95,6 +95,9 @@ times<br />
 
 <textarea id="eval_result" style="width:99%;height:8em;" title="result"></textarea>
 
+<div id="panel_for_math">
+</div>
+
 <div id="panel_for_SVG">
 </div>
 
@@ -290,15 +293,15 @@ function start_count(restart) {
 	 */
 
 	/**
-	 * alias of CeL.run
+	 * alias of CeL.run()
 	 */
-	var sr;
+	// var sr;
 	var SVG_object, Hamming;
 	var OtS = Object.prototype.toString;
 	//var is_Function = CeL.type_tester('Function', 'OtS');
 
 	var TO_MULTI_LINE='▼';
-	function is_now_single_line_code(){
+	function is_now_single_line_code() {
 		var single_line_toggle_panel=CeL.get_element('single_line_toggle');
 		return single_line_toggle_panel.innerHTML===TO_MULTI_LINE;
 	}
@@ -331,6 +334,7 @@ function start_count(restart) {
 		//
 		|| expression.match(/^(\s*[+\-]?[\d, .]+)([\/÷])(\s*[+\-]?[\d, .]+)\/(\d+)$/);
 
+		CeL.remove_all_child('panel_for_math');
 		if (m)
 			try {
 				var f = CeL.SVG['draw_' + {
@@ -350,8 +354,12 @@ function start_count(restart) {
 				CeL.err(e);
 				SVG_object.show(0);
 			}
-		else
+		else {
 			SVG_object.show(0);
+			if (/^\s*\d+\s*(?:,\s*\d+\s*)*$/.test(expression)) {
+				CeL.draw_short_division(expression.split(/\s*,\s*/), [ 'panel_for_math', 2 ]);
+			}
+		}
 	}
 
 	function run_code(code) {
@@ -455,7 +463,7 @@ function start_count(restart) {
 		};
 
 		if ('onwebkitspeechchange' in CeL.get_element('eval_code')) {
-			var speech_list=[],last_lang_select,lang_list=['zh','ja','en'],lang_to_select={},punctuation={
+			var speech_list=[], last_lang_select,lang_list = ['zh','ja','en'], lang_to_select={}, punctuation = {
 					//	標點符號.
 					頓號:'、',
 					逗號:'，',
@@ -466,7 +474,7 @@ function start_count(restart) {
 					上引號:'「',
 					下引號:'」',
 					句號:'。'
-				},speech_lang_select=function(){
+				}, speech_lang_select = function() {
 				var m=this.id.match(/^lang_select_(.+)$/);
 				if (m){
 					m=m[1];
@@ -572,7 +580,7 @@ function start_count(restart) {
 
 
 
-		sr( [ 'data.code.compatibility', 'data.native' ], function() {
+		CeL.run( [ 'data.code.compatibility', 'data.native' ], function() {
 			//Number.prototype.to_fixed = CeL.to_fixed;
 
 			//CeL.debug(CeL.is_type(window.navigator));
@@ -588,11 +596,11 @@ function start_count(restart) {
 
 		CeL.debug('no-exist module test', 2);
 		//	下面測試在 MSIE6 中會發生 throw
-		sr('code.log.no_exist_module_to_test', function(){
+		CeL.run('code.log.no_exist_module_to_test', function(){
 			CeL.warn('no-exist module tested 但仍持續執行.');
 		});
 
-		sr({name:'code.log.no_exist_module_to_ignore',skip_error:true,timeout:80}, function(){
+		CeL.run({name:'code.log.no_exist_module_to_ignore',skip_error:true,timeout:80}, function(){
 			CeL.debug('no-exist module to ignore test end.');
 		});
 
@@ -604,7 +612,7 @@ function start_count(restart) {
 		//if(false)CeL.debug(2223);test1();
 
 		CeL.debug('SVG', 2);
-		sr('interact.integrate.SVG', function() {
+		CeL.run('interact.integrate.SVG', function() {
 
 			//CeL.debug('CeL.SVG = ' + CeL.SVG, 0, 1);
 			//CeL.debug('CeL.log = ' + CeL.log, 0, 1);
@@ -640,7 +648,7 @@ function start_count(restart) {
 		 */
 
 		CeL.debug('DOM', 2);
-		sr('interact.DOM', function() {
+		CeL.run('interact.DOM', function() {
 
 			//CeL.copy_to_clipboard('已經複製');
 			//CeL.debug(CeL.parse_URI('ftp://ftp.is.co.za/rfc/rfc1808.txt').path);
@@ -650,7 +658,7 @@ function start_count(restart) {
 		//CeL.log('long interger test: 36578368923657238645067315413986475314666666666666666666666666864506731541398647531466666666666666666666666666666666666666666666666666666666666666666666666666666622222222222222222222222222222222222222');
 
 		CeL.debug('phase: math test', 2);
-		sr( [ 'data.math', 'data.math.quotient' ], function() {
+		CeL.run( [ 'data.math', 'data.math.quotient' ], function() {
 				//var p = 20374345, q = CeL.data.math.floor_sqrt(p = p * p - 1); CeL.log(q + '_$tag__' + (q * q) + '_$tag_' + p + '_$tag_' + (++q * q));
 
 				//CeL.debug(CeL.get_module_path('math.quotient')+': '+CeL.is_included('data.math.quotient')+': '+CeL.data.math.quotient);
@@ -677,7 +685,7 @@ function start_count(restart) {
 				 */
 			});
 
-		sr('data.math.Hamming', function() {
+		CeL.run('data.math.Hamming', function() {
 			Hamming = CeL.data.math.Hamming;
 			//Hamming.show(16);
 			Hamming.dec = function() {
@@ -702,6 +710,8 @@ function start_count(restart) {
 			};
 
 		});
+
+		CeL.run('application.math');
 
 		if (false)
 			CeL.use('data.code.API', function() {
@@ -778,7 +788,7 @@ function start_count(restart) {
 		}
 
 		CeL.debug('form.select_input test', 2);
-		sr(
+		CeL.run(
 				[ 'interact.form.address',
 						'interact.form.bank_account',
 						'interact.form.education' ],
@@ -793,7 +803,7 @@ function start_count(restart) {
 								'interact.form.education' ]);
 
 					var qi = new CeL.select_input('eval_code', [ '423.2+5523',
-							'423243-5542.52', '423.2*34.42', '42342332.4323/34.4', '42342332.4323/34.4/2' ], 'includeKeyWC');
+							'423243-5542.52', '423.2*34.42', '42342332.4323/34.4', '42342332.4323/34.4/2', '120', '70,195', '24,60,18,90,150' ], 'includeKeyWC');
 					//qi.attach('eval_code');
 					//qi.setSearch('includeKeyWC');
 
@@ -859,7 +869,7 @@ function start_count(restart) {
 
 				});
 
-		sr('interact.DND', function(){
+		CeL.run('interact.DND', function(){
 			CeL.set_drop_target('panel_for_log');
 		});
 	};
@@ -881,11 +891,11 @@ function start_count(restart) {
 								CeL.Log.set_board('panel_for_log');
 								CeL.debug('Log panel setted.');
 
-								sr = CeL.run;
+								//sr = CeL.run;
 
 								var e = 0;
 								try {
-									sr(
+									CeL.run(
 											'interact.DOM',
 											initialization_work,
 											function() {
