@@ -202,6 +202,29 @@ tr.selected>td a {
 	display: none;
 }
 
+#era_graph_notice {
+	/*
+	font-size: .9em;
+	font-weight: bold;
+	*/
+	text-align: center;
+	color: #f94;
+	background-color: #fef;
+}
+#era_graph_notice a {
+	text-decoration: none;
+}
+
+#era_graph_target {
+	float: right;
+	padding-left: .2em;
+	padding-right: .2em;
+	margin-right: 1em;
+	border-radius: .2em;
+	color: #68f;
+	background-color: #fa7;
+}
+
 #era_graph_navigation {
 	background-color: #def;
 }
@@ -329,7 +352,7 @@ tr.selected>td a {
 				(越南陰曆)等之轉換工作；並已針對某些紀年，如秦漢歷、唐肅宗、武后、太平天囯等時期作特殊處理。詳如主要資料來源表述；但遠非完善。</li>
 			<li>請使用新一點的瀏覽器，方可產生紀年線圖。<em>據測試，IE 11 尚無法使用線圖。</em>此外由於頻寬不足，加上載入時須做初始化，本頁面在載入時得稍微等一下。
 			</li>
-			<li>紀年線圖按滑鼠右鍵可回上一層。</li>
+			<li>紀年線圖操作提示：按下滑鼠左鍵可進入下一階層。按滑鼠右鍵可返回上一層。</li>
 			<li>您可參照測試範例，先輸入來源紀年與日期，後選取輸出格式，按下轉換執行鍵「→」即可獲得轉換結果。</li>
 			<li>感謝孫郁興教授、譚冰等研究者，親自提供本工具之資料來源與指導。</li>
 			<li>請各位先進幫助測試本工具之正確性，看看是否有謬誤之處。更希望能幫忙到有需要的文史前輩們。</li>
@@ -888,6 +911,8 @@ tr.selected>td a {
 	</div>
 
 	<div id="era_graph">
+		<div id="era_graph_notice">按下滑鼠左鍵可進入下一階層。按滑鼠右鍵可返回上一層。 <a href="#" onclick="CeL.toggle_display('era_graph_notice', false);return false;">[×]</a></div>
+		<div id="era_graph_target"></div>
 		<div id="era_graph_navigation">&nbsp;</div>
 		<div id="era_graph_SVG"></div>
 		<div id="era_graph_unobvious"></div>

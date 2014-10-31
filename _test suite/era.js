@@ -452,6 +452,7 @@ function set_SVG_text_properties(recover) {
 		// bring to top
 		// http://raphaeljs.com/reference.html#Element.toFront
 		// this.parentNode.appendChild(this);
+		CeL.set_text('era_graph_target', this.title);
 
 		style = this.style;
 		def_style = def.style;
@@ -513,6 +514,7 @@ function count_roughly_duration(start, end) {
 var support_vertical_text = !/Firefox/i.test(navigator.userAgent);
 
 function recover_SVG_text_properties() {
+	CeL.remove_all_child('era_graph_target');
 	set_SVG_text_properties.call(this, true);
 }
 
@@ -684,23 +686,25 @@ function draw_era(hierarchy) {
 						layer_from_y + (layer_height + font_size * .7) / 2,
 								style);
 
+					var lastAdd = SVG_object.lastAdd;
 					if (font_size === MIN_FONT_SIZE) {
-						SVG_object.lastAdd.onmouseover
+						lastAdd.title = name;
+						lastAdd.onmouseover
 						//
 						= set_SVG_text_properties;
-						SVG_object.lastAdd.onmouseout
+						lastAdd.onmouseout
 						//
 						= recover_SVG_text_properties;
 					}
 
 					// TODO: SVG <title> tag
-					if (!SVG_object.lastAdd.dataset)
+					if (!lastAdd.dataset)
 						// 目前僅 Chrome 支援。
-						SVG_object.lastAdd.dataset = CeL.null_Object();
-					SVG_object.lastAdd.dataset.hierarchy
+						lastAdd.dataset = CeL.null_Object();
+					lastAdd.dataset.hierarchy
 					//
 					= period_hierarchy + name;
-					SVG_object.lastAdd.onclick
+					lastAdd.onclick
 					//
 					= is_Era ? draw_era.click_Era : draw_era.click_Period;
 				});
@@ -837,6 +841,7 @@ draw_era.date_cache = CeL.null_Object();
 // ---------------------------------------------------------------------//
 
 var last_selected, select_panels = {
+	// 查詢範例
 	example : '測試範例',
 	// 之前輸入資料
 	input_history : '輸入紀錄',

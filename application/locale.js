@@ -199,7 +199,8 @@ Chinese_numerals_Formal_digits = '零壹貳參肆伍陸柒捌玖',
 Chinese_numerals_Formal_digits_Array = Chinese_numerals_Formal_digits.split(''),
 Chinese_numerals_Formal_digits_pattern = to_search_pattern(Chinese_numerals_Formal_digits_Array),
 
-//蘇州碼子又稱花碼、番仔碼、草碼、菁仔碼
+// http://thdl.ntu.edu.tw/suzhou/
+// 蘇州碼子又稱花碼、番仔碼、草碼、菁仔碼
 Suzhou_numerals_digits = '〇〡〢〣〤〥〦〧〨〩',
 // 全形阿拉伯數字 U+FF10~U+FF19 FULLWIDTH DIGIT
 FULLWIDTH_DIGITS = '０１２３４５６７８９',

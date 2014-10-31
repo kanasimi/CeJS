@@ -1614,7 +1614,7 @@ function write_file(file_path, contents, format, IO_mode, no_overwrite) {
 			file_stream.SetEOS();
 			// assert: file_stream.Position === file_stream.Size && file_stream.EOS === true
 			library_namespace.debug('設定 end of the stream to: ' + file_stream.Position + '/' + file_stream.Size + ', EOS:' + file_stream.EOS, 3);
-			library_namespace.debug('Writing ' + contents.length + ' characters / file: ' + file_stream.Size + ' bytes to (' + format + ') [' + file_path + ']');
+			library_namespace.debug('Writing ' + contents.length + ' characters / file: ' + file_stream.Size + ' bytes to (' + format + ') [<a href="' + file_path + '">' + file_path + '</a>]');
 
 			// .SaveToFile() 須在 .Write 之後！
 			file_stream.SaveToFile(file_path, AdoEnums.adSaveCreateOverWrite);
