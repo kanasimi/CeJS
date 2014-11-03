@@ -1,5 +1,11 @@
 ﻿'use strict';
 
+/*
+
+https://en.wikipedia.org/wiki/Before_Present
+
+*/
+
 /**
  * @note <code>
  </code>
@@ -430,9 +436,9 @@ function 解析曆數() {
 // ---------------------------------------------------------------------//
 
 var era_name_classifier, MIN_FONT_SIZE = 10,
-// 經驗值: Chrome 35 在字體太大時會化ける。
+// 250: 經驗值。Chrome 35 在字體太大時會化ける。
 // Chrome/38 (WebKit/537.36): OK
-MAX_FONT_SIZE = /WebKit/i.test(navigator.userAgent) ? Infinity : Infinity;
+MAX_FONT_SIZE = /WebKit/i.test(navigator.userAgent) ? 250 : Infinity;
 
 function draw_title_era() {
 	var hierarchy = this.title;
@@ -443,31 +449,40 @@ function draw_title_era() {
 }
 
 function set_SVG_text_properties(recover) {
-	var parent, style, def_style,
-	//
-	def = document.getElementById(String(this.getAttribute('xlink:href'))
+	var def = document.getElementById(String(this.getAttribute('xlink:href'))
 			.replace(/^#/, ''));
 
-	if (def) {
-		// bring to top
-		// http://raphaeljs.com/reference.html#Element.toFront
-		// this.parentNode.appendChild(this);
-		CeL.set_text('era_graph_target', this.title);
+	if (def && this.working !==
+	// 避免重複設定。
+	(recover = typeof recover === 'boolean' && recover)) {
+		this.working = recover;
 
-		style = this.style;
-		def_style = def.style;
-		recover = typeof recover === 'boolean' && recover;
-
-		if (!recover) {
-			def.base_font_size = def_style['font-size'];
-			def.base_color = def_style.color;
+		var def_style = def.style;
+		if (recover)
+			CeL.remove_all_child('era_graph_target');
+		else {
+			CeL.set_text('era_graph_target', this.title);
+			// 在 Firefox/36.0 中，或許因字體改變，造成 onmouseover 會執行兩次。
+			if (!def.base_font_size) {
+				def.base_font_size = def_style['font-size'];
+				def.base_color = def_style.color;
+			}
+			// bring to top. put it on top.
+			// http://www.carto.net/papers/svg/manipulating_svg_with_dom_ecmascript/
+			this.parentNode.appendChild(this);
 		}
+		CeL.debug((recover ? 'recover' : 'settle'), 1, 'set_SVG_text_properties');
 
+		var style = this.style;
 		style['font-size'] = def_style['font-size']
 		//
 		= recover ? def.base_font_size : (3 * MIN_FONT_SIZE) + 'px';
-
+		// '': default
+		def_style['stroke'] = recover ? '' : '#000000';
 		def_style.color = style.color = recover ? def.base_color : '#f00';
+
+		if (recover)
+			delete this.working;
 	}
 }
 
@@ -514,15 +529,19 @@ function count_roughly_duration(start, end) {
 var support_vertical_text = !/Firefox/i.test(navigator.userAgent);
 
 function recover_SVG_text_properties() {
-	CeL.remove_all_child('era_graph_target');
 	set_SVG_text_properties.call(this, true);
 }
 
 // TODO
 // area width, height.
 // return [top, left, width, height]
-function get_area(width, height, periods) {
-	;
+function show_area(date_range, height_range, text) {
+	var start_time = SVG_object.start,
+	//
+	end_time = SVG_object.end;
+
+	return SVG_object.addRect(width, layer_height, from_x,
+			layer_from_y, null, 1, '#ddd');
 }
 
 /**
@@ -562,152 +581,158 @@ function draw_era(hierarchy) {
 			return draw_era.left
 			//
 			+ (period ? (period.start - start_time) * ratio : draw_era.width);
-		}, short_period = [];
+		}, short_period = [],
+		// @ periods.forEach()
+		layer_count, layer_from_y, layer_height,
+		//
+		period_list,
+		// 真正執行繪製之 function。
+		draw_period = function(period, index) {
+			var style, unobvious,
+			//
+			存疑資料 = period.準 || period.精,
+			//
+			date_options = period.精 === '年' ? draw_era.year_options
+					: draw_era.date_options,
+			// IE 中，period.start 可能為 Date 或 Number。
+			period_start = new Date(period.start - 0),
+			// Era.name 為 Array。
+			is_Era = Array.isArray(period.name),
+			//
+			name = is_Era ? period.name[0] : period.name,
+			//
+			from_x = get_from_x(period),
+			//
+			width = (period.end - period.start) * ratio,
+			// 對紀年時間過短，太窄時，線圖之處理：採垂直排列。
+			vertical_text = support_vertical_text
+					&& width < layer_height,
+			//
+			font_size = vertical_text
+			//
+			? Math.min(width * .8, layer_height / name.length)
+			//
+			: Math.min(layer_height * .8, width / name.length);
+
+			if (font_size < MIN_FONT_SIZE) {
+				font_size = MIN_FONT_SIZE;
+				// 難辨識、不清楚、不顯著、隱晦不明顯時段。
+				unobvious = true;
+				var duration = [ '(',
+				//
+				period_start.format(date_options), ];
+				if (!isNaN(period.end))
+					duration.push('－', (new Date(period.end - 0))
+							.format(date_options));
+				duration.push(') ');
+				short_period.push({
+					a : name,
+					href : '#',
+					title : period_hierarchy + name,
+					onclick : is_Era ? click_title_as_era
+							: draw_title_era
+				}, {
+					span : duration,
+					C : 'duration'
+				});
+			} else if (font_size > MAX_FONT_SIZE)
+				font_size = MAX_FONT_SIZE;
+
+			if (!(name in draw_era.date_cache) && !isNaN(period.end)) {
+				var end_time = new Date(period.end - 0);
+				// 警告: .setDate(-1) 此為權宜之計。
+				end_time.setDate(end_time.getDate() - 1);
+				draw_era.date_cache[name] = {
+					start : period_start.format(date_options),
+					end : end_time.format(date_options)
+				};
+			}
+
+			SVG_object.addRect(width, layer_height, from_x,
+					layer_from_y, null, 1, 存疑資料 ? '#ddd' : unobvious ?
+					// 此處需要與 #era_graph_unobvious 之
+					// background-color 一致。
+					'#ffa' : '#ddf');
+
+			// 繪製/加上時間軸線圖年代刻度。
+			if (
+			// 尺規最小刻度寬。
+			draw_era.ruler_min_scale_pixel
+			// 測試本尺規刻度與上一尺規刻度距離是否過密。
+			< from_x - previous_ruler_scale
+			// 測試本尺規是否過窄。
+			&& draw_era.ruler_min_scale_pixel
+			//
+			< get_from_x(period_list[index + 1]) - from_x)
+				SVG_object.addText(period_start.format(
+				//
+				period.精 === '年' ? draw_era.ruler_date_year_options
+						: draw_era.ruler_date_options),
+						previous_ruler_scale = from_x, layer_from_y
+								+ SVG_object.addText.defaultCharWidthPx
+								* 2, {
+							color : '#f42'
+						});
+
+			style = {
+				color : 存疑資料 ? '#444' : layer_count === 1 ? '#15a'
+						: '#a2e',
+				cursor : 'pointer',
+				// 清晰的小字體
+				'font-family' : '標楷體,DFKai-SB',
+				'font-size' : font_size + 'px'
+			};
+			if (vertical_text) {
+				// top to bottom
+				style['writing-mode'] = 'tb';
+				// no rotation
+				style['glyph-orientation-vertical'] = 0;
+
+				// 置中: x軸設在中線。
+				SVG_object.addText(name, from_x + width / 2,
+						layer_from_y
+								+ (layer_height - name.length
+										* font_size) / 2, style);
+			} else
+				// 置中
+				SVG_object.addText(name, from_x
+						+ (width - name.length * font_size) / 2,
+				// .7:
+				// 經驗法則，don't know why.
+				layer_from_y + (layer_height + font_size * .7) / 2,
+						style);
+
+			var lastAdd = SVG_object.lastAdd;
+			if (font_size === MIN_FONT_SIZE) {
+				lastAdd.title = name;
+				lastAdd.onmouseover
+				//
+				= set_SVG_text_properties;
+				lastAdd.onmouseout
+				//
+				= recover_SVG_text_properties;
+			}
+
+			// TODO: SVG <title> tag
+			if (!lastAdd.dataset)
+				// 目前僅 Chrome 支援。
+				lastAdd.dataset = CeL.null_Object();
+			lastAdd.dataset.hierarchy
+			//
+			= period_hierarchy + name;
+			lastAdd.onclick
+			//
+			= is_Era ? draw_era.click_Era : draw_era.click_Period;
+		};
 
 		periods.forEach(function(region) {
-			var layer_count = region.length, layer_from_y = draw_era.top,
-			//
+			layer_count = region.length;
+			layer_from_y = draw_era.top;
 			layer_height = draw_era.height / layer_count;
 
-			region.forEach(function(period_list) {
+			region.forEach(function(pl) {
 
-				period_list.forEach(function(period, index) {
-					var style, unobvious,
-					//
-					存疑資料 = period.準 || period.精,
-					//
-					date_options = period.精 === '年' ? draw_era.year_options
-							: draw_era.date_options,
-					// IE 中，period.start 可能為 Date 或 Number。
-					period_start = new Date(period.start - 0),
-					// Era.name 為 Array。
-					is_Era = Array.isArray(period.name),
-					//
-					name = is_Era ? period.name[0] : period.name,
-					//
-					from_x = get_from_x(period),
-					//
-					width = (period.end - period.start) * ratio,
-					// 對紀年時間過短，太窄時，線圖之處理：採垂直排列。
-					vertical_text = support_vertical_text
-							&& width < layer_height,
-					//
-					font_size = vertical_text
-					//
-					? Math.min(width * .8, layer_height / name.length)
-					//
-					: Math.min(layer_height * .8, width / name.length);
-
-					if (font_size < MIN_FONT_SIZE) {
-						font_size = MIN_FONT_SIZE;
-						// 難辨識、不清楚、不顯著、隱晦不明顯時段。
-						unobvious = true;
-						var duration = [ '(',
-						//
-						period_start.format(date_options), ];
-						if (!isNaN(period.end))
-							duration.push('－', (new Date(period.end - 0))
-									.format(date_options));
-						duration.push(') ');
-						short_period.push({
-							a : name,
-							href : '#',
-							title : period_hierarchy + name,
-							onclick : is_Era ? click_title_as_era
-									: draw_title_era
-						}, {
-							span : duration,
-							C : 'duration'
-						});
-					} else if (font_size > MAX_FONT_SIZE)
-						font_size = MAX_FONT_SIZE;
-
-					if (!(name in draw_era.date_cache) && !isNaN(period.end)) {
-						var end_time = new Date(period.end - 0);
-						// 警告: .setDate(-1) 此為權宜之計。
-						end_time.setDate(end_time.getDate() - 1);
-						draw_era.date_cache[name] = {
-							start : period_start.format(date_options),
-							end : end_time.format(date_options)
-						};
-					}
-
-					SVG_object.addRect(width, layer_height, from_x,
-							layer_from_y, null, 1, 存疑資料 ? '#ddd' : unobvious ?
-							// 此處需要與 #era_graph_unobvious 之
-							// background-color 一致。
-							'#ffa' : '#ddf');
-
-					// 繪製/加上時間軸線圖年代刻度。
-					if (
-					// 尺規最小刻度寬。
-					draw_era.ruler_min_scale_pixel
-					// 測試本尺規刻度與上一尺規刻度距離是否過密。
-					< from_x - previous_ruler_scale
-					// 測試本尺規是否過窄。
-					&& draw_era.ruler_min_scale_pixel
-					//
-					< get_from_x(period_list[index + 1]) - from_x)
-						SVG_object.addText(period_start.format(
-						//
-						period.精 === '年' ? draw_era.ruler_date_year_options
-								: draw_era.ruler_date_options),
-								previous_ruler_scale = from_x, layer_from_y
-										+ SVG_object.addText.defaultCharWidthPx
-										* 2, {
-									color : '#f42'
-								});
-
-					style = {
-						color : 存疑資料 ? '#444' : layer_count === 1 ? '#15a'
-								: '#a2e',
-						cursor : 'pointer',
-						// 清晰的小字體
-						'font-family' : '標楷體,DFKai-SB',
-						'font-size' : font_size + 'px'
-					};
-					if (vertical_text) {
-						// top to bottom
-						style['writing-mode'] = 'tb';
-						// no rotation
-						style['glyph-orientation-vertical'] = 0;
-
-						// 置中: x軸設在中線。
-						SVG_object.addText(name, from_x + width / 2,
-								layer_from_y
-										+ (layer_height - name.length
-												* font_size) / 2, style);
-					} else
-						// 置中
-						SVG_object.addText(name, from_x
-								+ (width - name.length * font_size) / 2,
-						// .7:
-						// 經驗法則，don't know why.
-						layer_from_y + (layer_height + font_size * .7) / 2,
-								style);
-
-					var lastAdd = SVG_object.lastAdd;
-					if (font_size === MIN_FONT_SIZE) {
-						lastAdd.title = name;
-						lastAdd.onmouseover
-						//
-						= set_SVG_text_properties;
-						lastAdd.onmouseout
-						//
-						= recover_SVG_text_properties;
-					}
-
-					// TODO: SVG <title> tag
-					if (!lastAdd.dataset)
-						// 目前僅 Chrome 支援。
-						lastAdd.dataset = CeL.null_Object();
-					lastAdd.dataset.hierarchy
-					//
-					= period_hierarchy + name;
-					lastAdd.onclick
-					//
-					= is_Era ? draw_era.click_Era : draw_era.click_Period;
-				});
+				(period_list = pl).forEach(draw_period);
 
 				layer_from_y += layer_height;
 			});
@@ -1213,6 +1238,15 @@ function set_era_by_url_data(era) {
 
 // ---------------------------------------------------------------------//
 
+// 設定是否擋住一次 contextmenu。
+var no_contextmenu;
+window.oncontextmenu = function (e) {
+	if (no_contextmenu) {
+		no_contextmenu = false;
+		return false;
+	}
+};
+
 var SVG_min_width = 600, SVG_min_height = 500, SVG_padding = 30;
 function affairs() {
 	CeL.log({
@@ -1320,7 +1354,7 @@ function affairs() {
 	// 紀年線圖按滑鼠右鍵可回上一層。
 	SVG_object.onclick =
 	// Chrome use this.
-	SVG_object.onmousedown = function(e) {
+	SVG_object.onmousedown = function era_graph_move_up(e) {
 		if (!e)
 			e = window.event;
 		// http://stackoverflow.com/questions/2405771/is-right-click-a-javascript-event
@@ -1328,11 +1362,13 @@ function affairs() {
 		// Gecko (Firefox), WebKit (Safari/Chrome) & Opera
 		'which' in e ? e.which === 3
 		// IE, Opera
-		: 'button' in e && e.button === 2) {
+		: ('button' in e) && e.button === 2) {
 			var hierarchy = draw_era.last_hierarchy;
 			if (Array.isArray(hierarchy) && hierarchy.length > 0) {
 				hierarchy.pop();
 				draw_era(hierarchy);
+				no_contextmenu = true;
+				e.stopPropagation();
 				return false;
 			}
 		}
