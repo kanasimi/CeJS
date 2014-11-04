@@ -125,17 +125,17 @@ CeL.assert(["135/2/1",CeL.era('陽嘉3年', {get_range : true})[1].format({parse
 CeL.assert(["136/2/20",CeL.era('陽嘉', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉.末');
 // 參照紀年演算機制
 CeL.assert([8,CeL.era('明宣宗宣德',{get_era:1}).calendar[7].leap],'明宣宗宣德8年閏8月');
-//setup 8月－
+//setup 8月–
 CeL.era.set('曆A|1433/8/18~9/17|:宣德');
-//setup 閏8月－
+//setup 閏8月–
 CeL.era.set('曆B|1433/9/18~10/17|:宣德');
-//setup 9月－
+//setup 9月–
 CeL.era.set('曆C|1433/10/18~11/17|:宣德');
 //test
 var _c0;
-_c0=CeL.era('曆A',{get_era:1}).calendar[0];CeL.assert(['8,6,1',[_c0.start,_c0.length,+_c0.leap].join()],'測試參照紀年演算機制:8月－');
-_c0=CeL.era('曆B',{get_era:1}).calendar[0];CeL.assert(['9,5,0',[_c0.start,_c0.length,+_c0.leap].join()],'測試參照紀年演算機制:閏8月－');
-_c0=CeL.era('曆C',{get_era:1}).calendar[0];CeL.assert(['9,4,NaN',[_c0.start,_c0.length,+_c0.leap].join()],'測試參照紀年演算機制:9月－');
+_c0=CeL.era('曆A',{get_era:1}).calendar[0];CeL.assert(['8,6,1',[_c0.start,_c0.length,+_c0.leap].join()],'測試參照紀年演算機制:8月–');
+_c0=CeL.era('曆B',{get_era:1}).calendar[0];CeL.assert(['9,5,0',[_c0.start,_c0.length,+_c0.leap].join()],'測試參照紀年演算機制:閏8月–');
+_c0=CeL.era('曆C',{get_era:1}).calendar[0];CeL.assert(['9,4,NaN',[_c0.start,_c0.length,+_c0.leap].join()],'測試參照紀年演算機制:9月–');
 
 CeL.info('測試全部通過。');
 
@@ -268,7 +268,7 @@ if (typeof CeL === 'function')
 			中氣日_days = 3,
 			// 中氣發生於每月此日起 (中氣日_days - 1) 日間。
 			// assert: 在整個作業年代中，此中氣日皆有效。起碼須包含
-			// proleptic Gregorian calendar -1500 － 2100 CE。
+			// proleptic Gregorian calendar -1500 – 2100 CE。
 			中氣日 = [ 19, 18, 20, 19, 20, 20, 22, 22, 22, 22, 21, 20 ],
 
 			// 基本上與程式碼設計合一，僅表示名義，不可更改。
@@ -707,7 +707,7 @@ if (typeof CeL === 'function')
 						: standard_time_format;
 				name.push(' (', (is_Date(start) ? start : new Date(start))
 						.format(format),
-				// '－'
+				// [\-–－—~～〜至]
 				'~', new Date(object.end
 				// 向前一天以取得最後一日。
 				- ONE_DAY_LENGTH_VALUE).format(format), ')');
@@ -3275,7 +3275,7 @@ if (typeof CeL === 'function')
 				if (!month_data) {
 					if (accept_end && 日序 === 0)
 						// 剛好在邊界上，越過年。
-						// assert: date-this.end === 0 － ONE_DAY_LENGTH_VALUE
+						// assert: date-this.end === 0 – ONE_DAY_LENGTH_VALUE
 						return [ 歲序 - 1, 0, 0 ];
 
 					// 可能只是 to_era_Date() 在作測試，看是否能成功解析。
@@ -3452,7 +3452,7 @@ if (typeof CeL === 'function')
 				var tmp;
 				if (typeof date === 'string' && (tmp = date.match(
 				// [ matched, parser, 起, 訖1, 訖2 ]
-				/^(?:([^:]+):)?([^~～至－:]*)(?:[~～至－](.*)|(\+\d+))\s*$/)))
+				/^(?:([^:]+):)?([^–－—~～〜至:]*)(?:[–－—~～〜至](.*)|(\+\d+))\s*$/)))
 					date = [ tmp[2], tmp[3] || tmp[4], tmp[1] ];
 
 				if (Array.isArray(date) && date.length > 0) {
@@ -3462,7 +3462,7 @@ if (typeof CeL === 'function')
 						// 針對從下一筆紀年調來的資料。
 						if (typeof tmp === 'string' && (tmp = tmp
 						//
-						.match(/^(?:([^:]+):)?([^~～至－:]*)/)))
+						.match(/^(?:([^:]+):)?([^–－—~～〜至:]*)/)))
 							date = [ tmp[2], date[1], tmp[1] ];
 					}
 
@@ -3614,7 +3614,7 @@ if (typeof CeL === 'function')
 							紀年 : era[0],
 							起訖 : parse_duration(era[1], era[0])
 							// assert: 已經警示過了。
-							|| era[1].split(/[~～至－]/),
+							|| era[1].split(/[–－—~～〜至]/),
 							曆數 : era[2]
 						};
 					}
@@ -4042,7 +4042,7 @@ if (typeof CeL === 'function')
 					// assert: isNaN(起訖時間[1])
 					起訖時間[1] = normalize_date(起訖時間[1], 起訖時間[2] || PASS_PARSER);
 				// 去掉相同年分。
-				// 800/1/1－800/2/1 → 800/1/1－2/1
+				// 800/1/1－800/2/1 → 800/1/1–2/1
 				if ((i = 起訖時間[0].match(/^[^\/]+\//))
 						&& 起訖時間[1].indexOf(i = i[0]) === 0)
 					起訖時間[1] = 起訖時間[1].slice(i.length);
@@ -4161,7 +4161,7 @@ if (typeof CeL === 'function')
 				// 因此得使用 new Date(0, 0)。
 				後 = new Date(0, 0);
 
-				// incase year 0－99
+				// incase year 0–99
 				前.setFullYear(year, 0, 1);
 				後.setFullYear(year + 1, 0, 1);
 
@@ -4377,7 +4377,7 @@ if (typeof CeL === 'function')
 								.setDate(tmp);
 
 					} else
-						// 訖時間 "－y/m/d"
+						// 訖時間 "–y/m/d"
 						起訖[1] = normalize_date(起訖[1], 起訖[2], tmp, true);
 
 					tmp = {
@@ -4496,7 +4496,7 @@ if (typeof CeL === 'function')
 							tmp.forEach(function(name) {
 								if (name && 紀年.indexOf(name) === NOT_FOUND) {
 									add_to_era_by_key(name,
-									// 對 i 不為 0－2 的情況，將 last_era_data 直接加進去。
+									// 對 i 不為 0–2 的情況，將 last_era_data 直接加進去。
 									i >= 0 ? 紀年[i] : last_era_data);
 
 									// TODO:
@@ -5302,7 +5302,7 @@ if (typeof CeL === 'function')
 								// 去除同一年。
 								&& 年[1] === tmp2[1])
 									tmp = tmp.replace(紀年, '');
-								date += '－' + tmp;
+								date += '–' + tmp;
 							}
 							// for 公元前。
 							return date.replace(/-(\d+年)/g, '前$1');
@@ -5922,7 +5922,7 @@ if (typeof CeL === 'function')
 				tmp = to_era_Date(era, {
 					get_range_String : caculate_node_era.format
 				});
-				if (tmp.indexOf('－') !== NOT_FOUND)
+				if (tmp.indexOf('–') !== NOT_FOUND)
 					date += '起';
 
 				tmp = [ era, date, tmp ];

@@ -163,7 +163,7 @@ _// JSDT:_module_
  * http://www.w3.org/DOM/
  */
 is_DOM_NODE = function(object) {
-	return object && object.nodeType > 0 && object.nodeType === object.nodeType | 0
+	return object && object.nodeType > 0 && object.nodeType === (object.nodeType | 0)
 	// SVG element 無 .getElementById()，有 .getElementsByTagName()。
 	&& typeof object.getElementsByTagName === 'function';
 };
@@ -1118,7 +1118,7 @@ node_value = function node_value(node, value, base_space) {
 		return;
 	}
 
-	var tag_name = _.is_DOM_NODE(node) ? node.tagName.toLowerCase() : '', type;
+	var tag_name = _.is_ELEMENT_NODE(node) ? node.tagName.toLowerCase() : '', type;
 	//library_namespace.debug('Node &lt;' + tag_name + '&gt;', 1, 'node_value');
 	if ((tag_name in {
 			textarea : 1,
@@ -1339,7 +1339,7 @@ function new_node(nodes, layer) {
 		'' + nodes;
 
 	else if (library_namespace.is_Object(nodes)) {
-		var tag_key = '$', tag = nodes.$, n = 'className', ns, s, ignore = {
+		var tag_key, tag = nodes.$, n = 'className', ns, s, ignore = {
 			// tag
 			$ : null,
 			// attrib
@@ -1391,7 +1391,7 @@ function new_node(nodes, layer) {
 				//	{ T : [ gettext id, ..] }
 				//	→
 				//	{ 基本 text node : null, T : [ gettext id, ..] }
-				tag = 'span';
+				tag_key = tag = 'span';
 			}
 
 			if ('NS' in nodes)
@@ -1511,8 +1511,8 @@ function new_node(nodes, layer) {
 			}
 
 			// 設定 children nodes
-			ignore[tag_key] = null;
-			children = nodes[tag_key];
+			ignore[tag_key || tag] = null;
+			children = nodes[tag_key || tag];
 
 			//	自動作 list 的轉換
 			if (tag in {

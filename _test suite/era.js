@@ -669,7 +669,7 @@ function draw_era(hierarchy) {
 				//
 				period_start.format(date_options), ];
 				if (!isNaN(period.end))
-					duration.push('－', (new Date(period.end - 0))
+					duration.push('–', (new Date(period.end - 0))
 							.format(date_options));
 				duration.push(') ');
 				short_period.push({
@@ -841,7 +841,7 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 					title : name.start,
 					onclick : draw_era.click_navigation_date
 				}, {
-					span : '－',
+					span : '–',
 					title : count_roughly_duration(name.start.to_Date({
 						parser : 'CE',
 						year_padding : 0
@@ -1045,15 +1045,16 @@ function translate_era(era) {
 	var output, date;
 	if ('era_graph' in select_panels) {
 		// 可繪製特定時段，例如展現在世期間所占比例。
-		// e.g., "漢和帝劉肇（79年－106年2月13日）"
-		output = era.match(/^(.+)\s*[–\-~－]\s*(.+)$/);
+		// e.g., "漢和帝劉肇（79年–106年2月13日）"
+		output = era.match(/^(.+)\s*[\-–－—~～〜]\s*(.+)$/);
 		date = output && CeL.era(output[1], {
 			date_only : true
 		});
 		if (date) {
-			show_range([ date, CeL.era(output[2], {
+			output = CeL.era(output[2], {
 				date_only : true
-			}) ], 80, era, {
+			});
+			show_range([ date, output ], 80, era + ' (' + count_roughly_duration(date, output) + ')', {
 				color : '#e92'
 			});
 			select_panel('era_graph', true);
@@ -1405,7 +1406,7 @@ function affairs() {
 			'清德宗光緒六年三月十三日', '清德宗光緒庚辰年三月十三日', '清德宗光緒庚辰年庚辰月庚辰日',
 			'清德宗光緒六年三月十三日辰正一刻', '魏少帝嘉平4年5月1日', '魏少帝嘉平4年閏5月1日', '魏少帝嘉平4年閏月1日',
 			'景元元年', '景元元年7月', '元文宗天曆2年8月8日', '元文宗天曆3/1/2', '共存紀年:JD2032189',
-			'平成26年6月8日', 'H26.6.8', '漢和帝劉肇（79年－106年2月13日）' ];
+			'平成26年6月8日', 'H26.6.8', '漢和帝劉肇（79年–106年2月13日）' ];
 	i.forEach(function(era) {
 		list.push({
 			div : {
@@ -1526,7 +1527,7 @@ function affairs() {
 				},
 				function(date) {
 					var date_String = CeL.Date_to_JDN(date.adapt_offset(0))
-							+ (date.精 === '年' ? '－' : '');
+							+ (date.精 === '年' ? '–' : '');
 					// 還原 local 之時間。
 					date.adapt_offset('');
 					return date_String;
@@ -1541,7 +1542,7 @@ function affairs() {
 				},
 				function(date) {
 					var date_String = CeL.Date_to_JD(date.adapt_offset())
-							+ (date.精 === '年' ? '－' : '');
+							+ (date.精 === '年' ? '–' : '');
 					// 還原 local 之時間。
 					date.adapt_offset('');
 					return date_String;
@@ -1639,7 +1640,7 @@ function affairs() {
 				},
 				function(date) {
 					return CeL.Maya_Date.to_Long_Count(date)
-							+ (date.精 === '年' ? '－' : '');
+							+ (date.精 === '年' ? '–' : '');
 				} ],
 
 		Tzolkin : [
@@ -1653,7 +1654,7 @@ function affairs() {
 				},
 				function(date) {
 					return CeL.Maya_Date.to_Tzolkin(date)
-							+ (date.精 === '年' ? '－' : '');
+							+ (date.精 === '年' ? '–' : '');
 				} ],
 
 		Haab : [ {
@@ -1664,7 +1665,7 @@ function affairs() {
 			href : 'https://en.wikipedia.org/wiki/Haab%27',
 			S : 'font-size:.8em;'
 		}, function(date) {
-			return CeL.Maya_Date.to_Haab(date) + (date.精 === '年' ? '－' : '');
+			return CeL.Maya_Date.to_Haab(date) + (date.精 === '年' ? '–' : '');
 		} ],
 
 		Dai : [
@@ -1672,7 +1673,7 @@ function affairs() {
 					a : {
 						T : '傣曆',
 					},
-					R : '西雙版納傣曆紀元始於公元638年3月22日，可轉換之範圍於傣曆714年（1352/3/28－）至3190年期間內。\n有0年。非精確時，可能有最多前後2年的誤差。',
+					R : '西雙版納傣曆紀元始於公元638年3月22日，可轉換之範圍於傣曆714年（1352/3/28–）至3190年期間內。\n有0年。非精確時，可能有最多前後2年的誤差。',
 					href : 'http://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86'
 				},
 				function(date) {
@@ -1761,7 +1762,7 @@ function affairs() {
 					a : {
 						T : '佛曆'
 					},
-					R : '1911－。佛曆年 = 公曆年 + 543，若過佛誕日（印度曆二月初八，農曆四月初八。）再加1年。\n有採用0年。非精確時，可能有最多前後一年的誤差。',
+					R : '1911–。佛曆年 = 公曆年 + 543，若過佛誕日（印度曆二月初八，農曆四月初八。）再加1年。\n有採用0年。非精確時，可能有最多前後一年的誤差。',
 					href : 'https://zh.wikipedia.org/wiki/%E4%BD%9B%E6%9B%86'
 				},
 				function(date) {
