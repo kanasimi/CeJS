@@ -211,6 +211,7 @@ tr.selected>td a {
 	color: #f94;
 	background-color: #fef;
 }
+
 #era_graph_notice a {
 	text-decoration: none;
 	background-color: #fa5;
@@ -914,7 +915,10 @@ tr.selected>td a {
 	</div>
 
 	<div id="era_graph">
-		<div id="era_graph_notice">紀年線圖操作提示：在區塊上方按下滑鼠<b>左鍵</b>可進入下一階層。按下<b>右鍵</b>可返回上一層。 <a href="#" onclick="CeL.toggle_display('era_graph_notice', false);return false;">×</a></div>
+		<div id="era_graph_notice">
+			紀年線圖操作提示：在區塊上方按下滑鼠<b>左鍵</b>可進入下一階層。按下<b>右鍵</b>可返回上一層。 <a href="#"
+				onclick="CeL.toggle_display('era_graph_notice', false);return false;">×</a>
+		</div>
 		<div id="era_graph_target"></div>
 		<div id="era_graph_navigation">&nbsp;</div>
 		<div id="era_graph_SVG"></div>
@@ -962,7 +966,8 @@ tr.selected>td a {
 		<p>
 			<a rel="nofollow" href="http://services.nexodyne.com/email/"
 				title="email/contact address">✉<img
-				src="http://services.nexodyne.com/email/icon/94fLdogG3w%3D%3D/xi8K%2Btk%3D/R01haWw%3D/0/image.png" /></a> （請手動繕打電子郵件位址）
+				src="http://services.nexodyne.com/email/icon/94fLdogG3w%3D%3D/xi8K%2Btk%3D/R01haWw%3D/0/image.png" /></a>
+			（請手動繕打電子郵件位址）
 		</p>
 		<div class="g-comments"
 			data-href="http://lyrics.meicho.com.tw/lib/JS/_test%20suite/era.htm"
@@ -993,13 +998,21 @@ tr.selected>td a {
 	</script>
 
 	<script>
-		/*(function(d, s, id) {
-		var js, fjs = d.getElementsByTagName(s)[0];
-		if (d.getElementById(id)) return;
-		js = d.createElement(s); js.id = id;
-		js.src = "//connect.facebook.net/zh_TW/all.js#xfbml=1";
-		fjs.parentNode.insertBefore(js, fjs);
-		}(document, 'script', 'facebook-jssdk'));*/
+		/**
+		 * @memo <code>
+
+			(function(d, s, id) {
+				var js, fjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(id))
+					return;
+				js = d.createElement(s);
+				js.id = id;
+				js.src = "//connect.facebook.net/zh_TW/all.js#xfbml=1";
+				fjs.parentNode.insertBefore(js, fjs);
+			}(document, 'script', 'facebook-jssdk'));
+
+		 </code>
+		 */
 	</script>
 
 	<!-- 

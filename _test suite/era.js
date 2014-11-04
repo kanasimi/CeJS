@@ -1,13 +1,16 @@
 ﻿'use strict';
 
-/*
+/**
+ * @memo <code>
 
-https://en.wikipedia.org/wiki/Before_Present
+ https://en.wikipedia.org/wiki/Before_Present
 
-*/
+ </code>
+ */
 
 /**
  * @note <code>
+
  </code>
  */
 if (false) {
@@ -47,6 +50,8 @@ if (false) {
 
 	'' + CeL.era.periods([ '中國', '燕國' ])[0];
 }
+
+// ---------------------------------------------------------------------//
 
 // define gettext() user domain resource location.
 // gettext() will auto load (CeL.env.domain_location + language + '.js').
@@ -438,6 +443,7 @@ function 解析曆數() {
 var era_name_classifier, MIN_FONT_SIZE = 10,
 // 250: 經驗值。Chrome 35 在字體太大時會化ける。
 // Chrome/38 (WebKit/537.36): OK
+// Chrome/40: NG
 MAX_FONT_SIZE = /WebKit/i.test(navigator.userAgent) ? 250 : Infinity;
 
 function draw_title_era() {
@@ -471,7 +477,8 @@ function set_SVG_text_properties(recover) {
 			// http://www.carto.net/papers/svg/manipulating_svg_with_dom_ecmascript/
 			this.parentNode.appendChild(this);
 		}
-		CeL.debug((recover ? 'recover' : 'settle'), 1, 'set_SVG_text_properties');
+		CeL.debug((recover ? 'recover' : 'settle'), 1,
+				'set_SVG_text_properties');
 
 		var style = this.style;
 		style['font-size'] = def_style['font-size']
@@ -485,7 +492,6 @@ function set_SVG_text_properties(recover) {
 			delete this.working;
 	}
 }
-
 
 // 計算大略的時間間隔。
 function count_roughly_duration(start, end) {
@@ -504,8 +510,8 @@ function count_roughly_duration(start, end) {
 		return (diff + diff2 / 12).to_fixed(1) + 'Y';
 
 	if (diff2)
-		return (diff2 + (end.getDate() - start.getDate()) / 30).to_fixed(1) + 'M';
-
+		return (diff2 + (end.getDate() - start.getDate()) / 30).to_fixed(1)
+				+ 'M';
 
 	if (difference < 1000)
 		return difference + 'ms';
@@ -522,7 +528,6 @@ function count_roughly_duration(start, end) {
 	return (difference / 24).to_fixed(1) + 'D';
 }
 
-
 // Firefox/30.0 尚未支援 writing-mode。IE, Chrome 支援。
 // https://bugzilla.mozilla.org/show_bug.cgi?id=145503
 // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/writing-mode
@@ -532,17 +537,59 @@ function recover_SVG_text_properties() {
 	set_SVG_text_properties.call(this, true);
 }
 
-// TODO
 // area width, height.
-// return [top, left, width, height]
-function show_area(date_range, height_range, text) {
-	var start_time = SVG_object.start,
-	//
-	end_time = SVG_object.end;
+// TODO: return [top, left, width, height]
+function show_range(date_range, height_range, title, style) {
+	var ratio = SVG_object && SVG_object.ratio;
+	if (!ratio) {
+		CeL.warn('尚未設定 ratio!');
+		return;
+	}
 
-	return SVG_object.addRect(width, layer_height, from_x,
-			layer_from_y, null, 1, '#ddd');
+	if (!Array.isArray(date_range))
+		date_range = [ date_range ];
+	if (!Array.isArray(height_range))
+		height_range = [ height_range ];
+
+	// date_range: Date
+	date_range[1] -= date_range[0];
+	date_range[1] *= ratio;
+	if (!(show_range.min_width <= date_range[1]))
+		date_range[1] = show_range.min_width;
+	date_range[0] -= SVG_object.start;
+	date_range[0] *= ratio;
+
+	// height_range: px
+	height_range[1] -= height_range[0];
+	if (!(show_range.min_height <= height_range[1]))
+		height_range[1] = show_range.min_height;
+
+	SVG_object.addRect(date_range[1], height_range[1], date_range[0],
+			height_range[0], null, 1, style && style.color || '#e92');
+
+	var lastAdd = SVG_object.lastAdd;
+	if (title)
+		// using SVG <title> tag.
+		lastAdd.appendChild(CeL.new_node({
+			'svg:title' : title
+		}));
+
+	return lastAdd;
 }
+// px
+show_range.min_width = 3;
+show_range.min_height = 3;
+
+/**
+ * @memo <code>
+
+ var d = show_range([ new Date(1899, 0, 1), new Date(1939, 0, 1) ], 80,
+ 'test block', {
+ color : '#e92'
+ });
+
+ </code>
+ */
 
 /**
  * 畫個簡單的時間軸線圖。<br />
@@ -556,6 +603,7 @@ function draw_era(hierarchy) {
 
 	// 清理場地。
 	SVG_object.clean();
+	delete SVG_object.start;
 
 	var periods = CeL.era.periods(hierarchy),
 	//
@@ -605,8 +653,7 @@ function draw_era(hierarchy) {
 			//
 			width = (period.end - period.start) * ratio,
 			// 對紀年時間過短，太窄時，線圖之處理：採垂直排列。
-			vertical_text = support_vertical_text
-					&& width < layer_height,
+			vertical_text = support_vertical_text && width < layer_height,
 			//
 			font_size = vertical_text
 			//
@@ -629,8 +676,7 @@ function draw_era(hierarchy) {
 					a : name,
 					href : '#',
 					title : period_hierarchy + name,
-					onclick : is_Era ? click_title_as_era
-							: draw_title_era
+					onclick : is_Era ? click_title_as_era : draw_title_era
 				}, {
 					span : duration,
 					C : 'duration'
@@ -648,11 +694,15 @@ function draw_era(hierarchy) {
 				};
 			}
 
-			SVG_object.addRect(width, layer_height, from_x,
-					layer_from_y, null, 1, 存疑資料 ? '#ddd' : unobvious ?
+			SVG_object.addRect(width, layer_height, from_x, layer_from_y, null,
+					1, 存疑資料 ? '#ddd' : unobvious ?
 					// 此處需要與 #era_graph_unobvious 之
 					// background-color 一致。
 					'#ffa' : '#ddf');
+			// using SVG <title> tag.
+			SVG_object.lastAdd.appendChild(CeL.new_node({
+				'svg:title' : name
+			}));
 
 			// 繪製/加上時間軸線圖年代刻度。
 			if (
@@ -669,14 +719,12 @@ function draw_era(hierarchy) {
 				period.精 === '年' ? draw_era.ruler_date_year_options
 						: draw_era.ruler_date_options),
 						previous_ruler_scale = from_x, layer_from_y
-								+ SVG_object.addText.defaultCharWidthPx
-								* 2, {
+								+ SVG_object.addText.defaultCharWidthPx * 2, {
 							color : '#f42'
 						});
 
 			style = {
-				color : 存疑資料 ? '#444' : layer_count === 1 ? '#15a'
-						: '#a2e',
+				color : 存疑資料 ? '#444' : layer_count === 1 ? '#15a' : '#a2e',
 				cursor : 'pointer',
 				// 清晰的小字體
 				'font-family' : '標楷體,DFKai-SB',
@@ -689,20 +737,21 @@ function draw_era(hierarchy) {
 				style['glyph-orientation-vertical'] = 0;
 
 				// 置中: x軸設在中線。
-				SVG_object.addText(name, from_x + width / 2,
-						layer_from_y
-								+ (layer_height - name.length
-										* font_size) / 2, style);
+				SVG_object.addText(name, from_x + width / 2, layer_from_y
+						+ (layer_height - name.length * font_size) / 2, style);
 			} else
 				// 置中
 				SVG_object.addText(name, from_x
 						+ (width - name.length * font_size) / 2,
 				// .7:
 				// 經驗法則，don't know why.
-				layer_from_y + (layer_height + font_size * .7) / 2,
-						style);
+				layer_from_y + (layer_height + font_size * .7) / 2, style);
 
 			var lastAdd = SVG_object.lastAdd;
+			// using SVG <title> tag.
+			lastAdd.appendChild(CeL.new_node({
+				'svg:title' : name
+			}));
 			if (font_size === MIN_FONT_SIZE) {
 				lastAdd.title = name;
 				lastAdd.onmouseover
@@ -713,7 +762,6 @@ function draw_era(hierarchy) {
 				= recover_SVG_text_properties;
 			}
 
-			// TODO: SVG <title> tag
 			if (!lastAdd.dataset)
 				// 目前僅 Chrome 支援。
 				lastAdd.dataset = CeL.null_Object();
@@ -724,6 +772,11 @@ function draw_era(hierarchy) {
 			//
 			= is_Era ? draw_era.click_Era : draw_era.click_Period;
 		};
+
+		// 登記。
+		SVG_object.start = start_time;
+		SVG_object.end = periods.end;
+		SVG_object.ratio = ratio;
 
 		periods.forEach(function(region) {
 			layer_count = region.length;
@@ -987,10 +1040,29 @@ function translate_era(era) {
 	if (!era)
 		era = era_input_object.setValue();
 
+	era = era.trim();
+
 	var output, date;
+	if ('era_graph' in select_panels) {
+		// 可繪製特定時段，例如展現在世期間所占比例。
+		// e.g., "漢和帝劉肇（79年－106年2月13日）"
+		output = era.match(/^(.+)\s*[–\-~－]\s*(.+)$/);
+		date = output && CeL.era(output[1], {
+			date_only : true
+		});
+		if (date) {
+			show_range([ date, CeL.era(output[2], {
+				date_only : true
+			}) ], 80, era, {
+				color : '#e92'
+			});
+			select_panel('era_graph', true);
+			return;
+		}
+	}
 
 	// 前置處理。
-	era = era.trim();
+
 	// http://maechan.net/kanreki/index.php
 	// 和暦入力時の元号は、『明治』『大正』『昭和』『平成』に限り、各々『M』『T』『S』『H』の頭文字でも入力できます。
 	if (date = era.match(/^([HSTM])\s*(\d+)(\D.*)?$/i))
@@ -1240,7 +1312,7 @@ function set_era_by_url_data(era) {
 
 // 設定是否擋住一次 contextmenu。
 var no_contextmenu;
-window.oncontextmenu = function (e) {
+window.oncontextmenu = function(e) {
 	if (no_contextmenu) {
 		no_contextmenu = false;
 		return false;
@@ -1333,7 +1405,7 @@ function affairs() {
 			'清德宗光緒六年三月十三日', '清德宗光緒庚辰年三月十三日', '清德宗光緒庚辰年庚辰月庚辰日',
 			'清德宗光緒六年三月十三日辰正一刻', '魏少帝嘉平4年5月1日', '魏少帝嘉平4年閏5月1日', '魏少帝嘉平4年閏月1日',
 			'景元元年', '景元元年7月', '元文宗天曆2年8月8日', '元文宗天曆3/1/2', '共存紀年:JD2032189',
-			'平成26年6月8日', 'H26.6.8' ];
+			'平成26年6月8日', 'H26.6.8', '漢和帝劉肇（79年－106年2月13日）' ];
 	i.forEach(function(era) {
 		list.push({
 			div : {
@@ -1608,7 +1680,7 @@ function affairs() {
 					return date - CeL.Dai_Date.epoch < 0
 					// 超出可轉換之範圍。
 					|| isNaN((dai = date.to_Dai({
-						// format : 'serial'
+					// format : 'serial'
 					}))[0]) ? '約' + date.to_Dai({
 						ignore_year_limit : true
 					})[0] + '年'
@@ -1787,17 +1859,16 @@ function affairs() {
 					S : 'font-size:.8em;'
 				}, Year_numbering(543) ],
 
-		AUC : [
-				{
-					a : {
-						T : '羅馬建城'
-					},
-					R : 'AUC (Ab urbe condita), 羅馬建城紀年. 有採用0年。非精確時，可能有最多前後一年的誤差。',
-					href : 'https://en.wikipedia.org/wiki/Ab_urbe_condita',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					return '約' + (date.getFullYear() + 754) + '年';
-				} ]
+		AUC : [ {
+			a : {
+				T : '羅馬建城'
+			},
+			R : 'AUC (Ab urbe condita), 羅馬建城紀年. 有採用0年。非精確時，可能有最多前後一年的誤差。',
+			href : 'https://en.wikipedia.org/wiki/Ab_urbe_condita',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return '約' + (date.getFullYear() + 754) + '年';
+		} ]
 	};
 
 	default_column.forEach(function(i, index) {
@@ -1811,17 +1882,17 @@ function affairs() {
 	/**
 	 * @memo <code>
 
-	 var data = google.visualization.arrayToDataTable([
-	 [ 'Mon', 28, 28, 38, 38 ], [ 'Tue', 31, 38, 55, 66 ]
-	 // Treat first row as data as well.
-	 ], true);
+	var data = google.visualization.arrayToDataTable([
+			[ 'Mon', 28, 28, 38, 38 ], [ 'Tue', 31, 38, 55, 66 ]
+	// Treat first row as data as well.
+	], true);
 
-	 // https://developers.google.com/chart/interactive/docs/gallery/candlestickchart
-	 var chart = new google.visualization.CandlestickChart(document
-	 .getElementById('era_graph'));
-	 chart.draw(data, {
-	 legend : 'none'
-	 });
+	// https://developers.google.com/chart/interactive/docs/gallery/candlestickchart
+	var chart = new google.visualization.CandlestickChart(document
+			.getElementById('era_graph'));
+	chart.draw(data, {
+		legend : 'none'
+	});
 
 	 </code>
 	 */
