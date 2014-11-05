@@ -564,6 +564,11 @@ function show_range(date_range, height_range, title, style) {
 	if (!(show_range.min_height <= height_range[1]))
 		height_range[1] = show_range.min_height;
 
+	if (date_range[1] < show_range.min_width
+	|| date_range[0] + date_range[1] < 0
+	|| draw_era.width <= date_range[0])
+		CeL.warn('所欲顯示之範圍不在當前圖表內！');
+
 	SVG_object.addRect(date_range[1], height_range[1], date_range[0],
 			height_range[0], null, 1, style && style.color || '#e92');
 

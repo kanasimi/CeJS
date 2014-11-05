@@ -153,7 +153,7 @@ is_HTML_element_type = function(object, test_type) {
 _// JSDT:_module_
 .
 /**
- * 判斷是否為 DOM NODE。<br />
+ * 判斷是否為 DOM node。<br />
  * 包含 TEXT_NODE, DOCUMENT_NODE, SVG element 等。
  * @param	object	object to test
  * @returns	{Boolean}	object is DOM node
@@ -163,9 +163,13 @@ _// JSDT:_module_
  * http://www.w3.org/DOM/
  */
 is_DOM_NODE = function(object) {
-	return object && object.nodeType > 0 && object.nodeType === (object.nodeType | 0)
+	return object
+	//&& object.nodeType > 0
+	&& object.nodeType === (object.nodeType | 0)
 	// SVG element 無 .getElementById()，有 .getElementsByTagName()。
-	&& typeof object.getElementsByTagName === 'function';
+	// IE8 無 .getElementsByTagName()。
+	//&& typeof object.getElementsByTagName === 'function';
+	&& ('nextSibling' in object);
 };
 
 _// JSDT:_module_
