@@ -14,6 +14,8 @@
  * CeL.era('二年春正月丁亥朔',{after:'寶應元年'})<br />
  * CeL.era('丁亥朔',{after:'寶應二年春正月'})<br />
  * CeL.era('寶應元年',{period_end:true})<br />
+ * CeL.era('1627年',{date_only:true,period_end:true})==='1627年'.to_Date({date_only:true,period_end:true})<br />
+ * 月令別名<br />
  * 西周金文紀時術語. e.g., 初吉，既生霸，既望，既死霸
  * (http://wywu.pixnet.net/blog/post/22412573-%E6%9C%88%E7%9B%B8%E8%A8%98%E6%97%A5%E8%A1%A8)
  * 

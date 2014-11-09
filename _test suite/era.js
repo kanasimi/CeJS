@@ -1057,9 +1057,10 @@ function translate_era(era) {
 		});
 		if (date) {
 			output = CeL.era(output[2], {
-				date_only : true
+				date_only : true,
+				period_end : true
 			});
-			show_range([ date, output ], 80, era + ' (' + count_roughly_duration(date, output) + ')', {
+			show_range([ date, output ], 80, era + '\n(' + date.format(draw_era.date_options)+'–'+output.format(draw_era.date_options)+', '+count_roughly_duration(date, output) + ')', {
 				color : '#e92'
 			});
 			select_panel('era_graph', true);
