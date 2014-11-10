@@ -3,7 +3,21 @@
 /**
  * @memo <code>
 
+ TODO:
+ 視覺化互動式史地資訊平台:整合 GIS
+
  https://en.wikipedia.org/wiki/Before_Present
+
+ 圖層 layer:
+ +重大地震
+ 臺灣地震年表 http://921kb.sinica.edu.tw/history/quake_history.html
+ 地震列表	https://zh.wikipedia.org/wiki/%E5%9C%B0%E9%9C%87%E5%88%97%E8%A1%A8
+ +著名事件/歷史年表/大事記
+ 台灣地方志寶鑑 http://140.112.30.230/Fangjr/
+ 戰後臺灣歷史年表 http://twstudy.iis.sinica.edu.tw/twht/
+ +著名人物/歷史名人生卒,出生逝世年份月日
+ +君主
+ 中國皇帝壽命列表 https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E7%9A%87%E5%B8%9D%E5%AF%BF%E5%91%BD%E5%88%97%E8%A1%A8
 
  </code>
  */
@@ -139,17 +153,14 @@ default_column = [ {
 }, ')' ]
 // , R : '0: 周日/星期日/禮拜天, 1: 周一, 餘類推'
 , {
-	T : '歲次'
+	T : '歲次',
+	R : '年干支'
 }, {
-	span : {
-		T : '月干支'
-	},
-	S : 'font-size:.7em;',
-	R : '月干支/大小月'
+	T : '月干支',
+	R : '月干支/大小月',
+	S : 'font-size:.7em;'
 }, {
-	span : {
-		T : '日干支'
-	},
+	T : '日干支',
 	S : 'font-size:.7em;'
 } ];
 
@@ -493,8 +504,14 @@ function set_SVG_text_properties(recover) {
 	}
 }
 
-// 計算大略的時間間隔。
-function count_roughly_duration(start, end) {
+/**
+ * 計算大略的時間間隔。
+ * 
+ * @param start
+ * @param end
+ * @param options
+ */
+function count_roughly_duration(start, end, options) {
 	if (!end)
 		end = new Date;
 	var difference = end - start, diff, diff2;
@@ -537,53 +554,194 @@ function recover_SVG_text_properties() {
 	set_SVG_text_properties.call(this, true);
 }
 
-// area width, height.
-// TODO: return [top, left, width, height]
-function show_range(date_range, height_range, title, style) {
+function date_to_loc(date, start_date) {
 	var ratio = SVG_object && SVG_object.ratio;
 	if (!ratio) {
-		CeL.warn('尚未設定 ratio!');
+		CeL.warn('date_to_loc: 尚未設定 ratio!');
 		return;
 	}
 
-	if (!Array.isArray(date_range))
+	return draw_era.left + (date - (start_date || SVG_object.start)) * ratio
+			| 0;
+}
+
+// area width, height.
+// TODO: return [top, left, width, height]
+/*
+ * show_range(CeL.era('清德宗光緒六年三月十三日'), 80, '清德宗光緒六年三月十三日');
+ */
+function show_range(date_range, height_range, title, style) {
+	var ratio = SVG_object && SVG_object.ratio;
+	if (!ratio) {
+		CeL.warn('show_range: 尚未設定 ratio!');
+		return;
+	}
+
+	if (Array.isArray(date_range))
+		// 不改變原 arguments。
+		date_range = date_range.slice();
+	else
 		date_range = [ date_range ];
-	if (!Array.isArray(height_range))
+	if (Array.isArray(height_range))
+		// 不改變原 arguments。
+		height_range = height_range.slice();
+	else
 		height_range = [ height_range ];
 
 	// date_range: Date
-	date_range[1] -= date_range[0];
-	date_range[1] *= ratio;
-	if (!(show_range.min_width <= date_range[1]))
-		date_range[1] = show_range.min_width;
-	date_range[0] -= SVG_object.start;
-	date_range[0] *= ratio;
+	if (date_range[1] < date_range[0]) {
+		// swap date_range
+		var tmp = date_range[0];
+		date_range[0] = date_range[1];
+		date_range[1] = tmp;
+	}
+	date_range[1] = date_to_loc(date_range[1], date_range[0]);
+	date_range[0] = date_to_loc(date_range[0]);
 
-	// height_range: px
-	height_range[1] -= height_range[0];
-	if (!(show_range.min_height <= height_range[1]))
-		height_range[1] = show_range.min_height;
+	if (CeL.is_debug(2) && (
+	// 於之後
+	draw_era.width <= date_range[0]
+	// 於之前
+	|| date_range[0] + date_range[1] <= 0))
+		CeL.warn('show_range: 所欲顯示之範圍不在當前圖表內！ [' + (title || date_range) + ']');
+	height_range[0] |= 0;
+	if (!(0 < height_range[0] && height_range[0] < draw_era.height))
+		CeL.warn('show_range: 所欲顯示之範圍高度不在當前圖表內！ [' + height_range + ']');
 
-	if (date_range[1] < show_range.min_width
-	|| date_range[0] + date_range[1] < 0
-	|| draw_era.width <= date_range[0])
-		CeL.warn('所欲顯示之範圍不在當前圖表內！');
+	if (show_range.min_width <= date_range[1]) {
+		// height_range: px
+		height_range[1] -= height_range[0];
+		if (!(show_range.min_height <= height_range[1]))
+			height_range[1] = show_range.min_height;
 
-	SVG_object.addRect(date_range[1], height_range[1], date_range[0],
-			height_range[0], null, 1, style && style.color || '#e92');
+		SVG_object.addRect(date_range[1], height_range[1], date_range[0],
+				height_range[0], null, 1, style && style.color || '#e92');
+	} else {
+		// 去掉 [1]
+		date_range.length = 1;
+		SVG_object.addCircle(show_range.radius, date_range[0], height_range[0],
+				style && style.color || '#0f0', 1, '#f00');
+	}
 
 	var lastAdd = SVG_object.lastAdd;
+	lastAdd.range = date_range[1];
 	if (title)
-		// using SVG <title> tag.
-		lastAdd.appendChild(CeL.new_node({
-			'svg:title' : title
-		}));
+		SVG_object.addTitle(title);
 
 	return lastAdd;
 }
-// px
+// in px
+show_range.radius = 3;
 show_range.min_width = 3;
 show_range.min_height = 3;
+
+/**
+ * 可繪製特定時段，例如展現在世期間所占比例。
+ * 
+ * @example <code>
+ * 
+ add_tag('漢和帝劉肇（79年–106年2月13日）');
+ add_tag('清德宗光緒六年三月十三日');
+
+ </code>
+ * 
+ * @param {String}period
+ * @param {Object}[data]
+ * @param {String}[group]
+ */
+function add_tag(period, data, group) {
+	if (!period || !(period = String(period).trim()))
+		return;
+
+	var title = typeof data === 'string' && data || CeL.is_Object(data)
+			&& data.title,
+	//
+	arg_passed = period.match(add_tag.PATTERN),
+	// from date
+	date = CeL.era(arg_passed ? arg_passed[1] : period, {
+		date_only : true
+	});
+
+	if (!date) {
+		CeL.warn('add_tag: Can not parse [' + period + ']');
+		return;
+	}
+
+	if (arg_passed) {
+		// to date
+		arg_passed = CeL.era(arg_passed[2], {
+			date_only : true,
+			period_end : true
+		});
+		if (!title)
+			title = period + '\n(' + date.format(draw_era.date_options) + '–'
+					+ arg_passed.format(draw_era.date_options) + ', '
+					+ count_roughly_duration(date, arg_passed) + ')';
+		arg_passed = [ [ date, arg_passed ], , title
+		// , { color : '' }
+		];
+	} else {
+		if (!title)
+			title = period + '\n(' + date.format(draw_era.date_options) + ')';
+		arg_passed = [ date, , title
+		// , { color : '' }
+		];
+	}
+
+	arg_passed.period = period;
+	// arg_passed.title = title;
+
+	if (group)
+		arg_passed.group = group;
+	if (data)
+		arg_passed.data = data;
+
+	var target = draw_era.tags[group || draw_era.default_group];
+	if (target[period]) {
+		CeL.warn('add_tag: 已經有此時段存在！將跳過之，不會以新的覆蓋舊的。 '
+				+ (group ? '[' + group + ']' : '') + '[' + period + ']');
+		return;
+	}
+
+	CeL.debug('登錄 ' + (group ? '[' + group + ']' : '') + '[' + period + ']', 2,
+			'add_tag');
+	add_tag.show(target[period] = arg_passed);
+	select_panel('era_graph', true);
+
+}
+
+// add_tag.group_count[group] = {Interger}count
+add_tag.group_count = CeL.null_Object();
+
+add_tag.PATTERN = /^(.+)\s*[\-–－—~～〜]\s*(.+)$/;
+
+add_tag.show = function(array_data) {
+	var group = array_data.group || draw_era.default_group,
+	// 決定高度。
+	height = (10 + 20 * (add_tag.group_count[group] = (add_tag.group_count[group] | 0) + 1))
+			% draw_era.height;
+	array_data[1] = height;
+
+	var lastAdd = show_range.apply(null, array_data);
+
+	// 點擊後消除。
+	lastAdd.style.cursor = 'pointer';
+	lastAdd.onclick = add_tag.remove_self;
+
+	// settle search id
+	lastAdd.period = array_data.period;
+	if (array_data.group)
+		lastAdd.group = array_data.group;
+
+	return lastAdd;
+};
+
+add_tag.remove_self = function() {
+	CeL.debug('去除登錄 ' + (this.group ? '[' + this.group + ']' : '') + '['
+			+ this.period + ']', 2, 'add_tag.remove_self');
+	delete draw_era.tags[this.group || draw_era.default_group][this.period];
+	return SVG_object.removeSelf.call(this);
+};
 
 /**
  * @memo <code>
@@ -598,7 +756,9 @@ show_range.min_height = 3;
 
 /**
  * 畫個簡單的時間軸線圖。<br />
- * TODO: 加上年代。
+ * TODO:<br />
+ * 加上年代。<br />
+ * 使用 or 擴展成甘特圖 Gantt chart API。<br />
  * 
  * @param {Array}hierarchy
  *            指定之紀年層次。
@@ -609,6 +769,7 @@ function draw_era(hierarchy) {
 	// 清理場地。
 	SVG_object.clean();
 	delete SVG_object.start;
+	add_tag.group_count = CeL.null_Object();
 
 	var periods = CeL.era.periods(hierarchy),
 	//
@@ -704,10 +865,7 @@ function draw_era(hierarchy) {
 					// 此處需要與 #era_graph_unobvious 之
 					// background-color 一致。
 					'#ffa' : '#ddf');
-			// using SVG <title> tag.
-			SVG_object.lastAdd.appendChild(CeL.new_node({
-				'svg:title' : name
-			}));
+			SVG_object.addTitle(name);
 
 			// 繪製/加上時間軸線圖年代刻度。
 			if (
@@ -751,12 +909,9 @@ function draw_era(hierarchy) {
 				// .7:
 				// 經驗法則，don't know why.
 				layer_from_y + (layer_height + font_size * .7) / 2, style);
+			SVG_object.addTitle(name);
 
 			var lastAdd = SVG_object.lastAdd;
-			// using SVG <title> tag.
-			lastAdd.appendChild(CeL.new_node({
-				'svg:title' : name
-			}));
 			if (font_size === MIN_FONT_SIZE) {
 				lastAdd.title = name;
 				lastAdd.onmouseover
@@ -809,7 +964,21 @@ function draw_era(hierarchy) {
 	}
 
 	draw_era.draw_navigation(hierarchy);
+
+	// 額外圖資。
+	if (CeL.is_Object(draw_era.tags)) {
+		for ( var group in draw_era.tags) {
+			var data = draw_era.tags[group];
+			for ( var period in data)
+				add_tag.show(data[period]);
+		}
+	}
+
 }
+
+// draw_era.tags[group][period] = [ date_range, height_range, title, style ];
+(draw_era.tags = CeL.null_Object())[draw_era.default_group = ''] = CeL
+		.null_Object();
 
 draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 	var period_hierarchy = '',
@@ -1048,25 +1217,8 @@ function translate_era(era) {
 	era = era.trim();
 
 	var output, date;
-	if ('era_graph' in select_panels) {
-		// 可繪製特定時段，例如展現在世期間所占比例。
-		// e.g., "漢和帝劉肇（79年–106年2月13日）"
-		output = era.match(/^(.+)\s*[\-–－—~～〜]\s*(.+)$/);
-		date = output && CeL.era(output[1], {
-			date_only : true
-		});
-		if (date) {
-			output = CeL.era(output[2], {
-				date_only : true,
-				period_end : true
-			});
-			show_range([ date, output ], 80, era + '\n(' + date.format(draw_era.date_options)+'–'+output.format(draw_era.date_options)+', '+count_roughly_duration(date, output) + ')', {
-				color : '#e92'
-			});
-			select_panel('era_graph', true);
-			return;
-		}
-	}
+	if (('era_graph' in select_panels) && add_tag.PATTERN.test(era))
+		return add_tag(era);
 
 	// 前置處理。
 
@@ -1768,7 +1920,7 @@ function affairs() {
 					a : {
 						T : '佛曆'
 					},
-					R : '1911–。佛曆年 = 公曆年 + 543，若過佛誕日（印度曆二月初八，農曆四月初八。）再加1年。\n有採用0年。非精確時，可能有最多前後一年的誤差。',
+					R : '佛紀，1911–。佛曆年 = 公曆年 + 543，若過佛誕日（印度曆二月初八，農曆四月初八。）再加1年。\n有採用0年。非精確時，可能有最多前後一年的誤差。',
 					href : 'https://zh.wikipedia.org/wiki/%E4%BD%9B%E6%9B%86'
 				},
 				function(date) {

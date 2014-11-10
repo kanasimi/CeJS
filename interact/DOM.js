@@ -1495,8 +1495,10 @@ function new_node(nodes, layer) {
 					dataset(node, gettext.DOM_id_key, n[0]);
 					for ( var i = 1; i < n.length; i++)
 						dataset(node, gettext.DOM_id_key + i, n[i]);
-				} else
-					n = [dataset(node, gettext.DOM_id_key, n)];
+				} else {
+					dataset(node, gettext.DOM_id_key, n);
+					n = [ n ];
+				}
 				// assert: Array.isArray(n)
 
 				if (!(children = nodes[tag]))
