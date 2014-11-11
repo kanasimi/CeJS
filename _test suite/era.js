@@ -601,6 +601,7 @@ function show_range(date_range, height_range, title, style) {
 	}
 	date_range[1] = date_to_loc(date_range[1], date_range[0]);
 	date_range[0] = date_to_loc(date_range[0]);
+	// assert: date_range = [ left, width ]
 
 	if (CeL.is_debug(2) && (
 	// 於之後
@@ -756,6 +757,9 @@ add_tag.show = function(array_data) {
 	// 決定高度。
 	height = (10 + 20 * (add_tag.group_count[group] = (add_tag.group_count[group] | 0) + 1))
 			% draw_era.height;
+	if (height < 5)
+		// 確定不會過小。
+		height = 5;
 	array_data[1] = height;
 
 	var lastAdd = show_range.apply(null, array_data);
@@ -808,7 +812,7 @@ add_tag.load = function(id, callback) {
 
 add_tag.data_file = {
 	'臺灣地震' : [ 'resource/quake.js',
-	// data source, URL
+	// 資料來源, URL
 	'臺灣地震年表', 'http://921kb.sinica.edu.tw/history/quake_history.html' ]
 };
 
@@ -1739,7 +1743,7 @@ function affairs() {
 					add_tag.load(group, function() {
 						this.className += ' loaded';
 						CeL.new_node([ ' ... ', {
-							T : '已載入',
+							T : [ '已載入 %1 筆資料。', add_tag.group_count[group] ],
 							C : 'status'
 						} ], this.parentNode);
 					}.bind(this));
@@ -1749,7 +1753,9 @@ function affairs() {
 
 		i = v[i];
 		if (i[1])
-			o = [ o, ' (data source: ', i[2] ? {
+			o = [ o, ' (', {
+				T : '資料來源'
+			}, ': ', i[2] ? {
 				a : i[1],
 				href : i[2],
 				target : '_blank'

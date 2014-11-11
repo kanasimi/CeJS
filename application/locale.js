@@ -796,7 +796,34 @@ CeL.run('application.locale', function() {
 CeL.gettext.use_domain('TW', function() {
 	CeL.assert([ '載入中…', CeL.gettext('Loading..') ]);
 	CeL.assert([ '已載入 20%…', CeL.gettext('Loading %1%..', 20) ]);
-	CeL.log('System message test OK');
+	CeL.info('System message test OK.');
+},
+// 強制使用此 domain。 forces to this domain.
+true);
+
+
+
+//	###單數複數形式 (plural) test
+CeL.gettext.set_text({
+	'已載入 %1 筆資料。' : function(domain_name, arg) {
+		// with error detection:
+		//return (arg[1] < 2 ? (arg[1] ? arg[1] === 1 ? 'One' : 'ERROR: %1' : 'No') + ' entry' : '%1 entries') + ' loaded.';
+
+		// No, One & more.
+		return (arg[1] < 2 ? (arg[1] ? 'One' : 'No') + ' entry' : '%1 entries') + ' loaded.';
+
+		// More simplified:
+		// arg[>>>1<<<] : from %>>>1<<<'s "1"
+		//return '%1 ' + (1 < arg[1] ? 'entries' : 'entry') + ' loaded.';
+	}
+}, 'en');
+
+CeL.gettext.use_domain('en', function() {
+	CeL.assert([ 'No entry loaded.', CeL.gettext('已載入 %1 筆資料。', 0) ]);
+	CeL.assert([ 'One entry loaded.', CeL.gettext('已載入 %1 筆資料。', 1) ]);
+	CeL.assert([ '2 entries loaded.', CeL.gettext('已載入 %1 筆資料。', 2) ]);
+	CeL.assert([ '3 entries loaded.', CeL.gettext('已載入 %1 筆資料。', 3) ]);
+	CeL.info('單數複數形式 (plural) test OK.');
 }, true);
 
 
@@ -880,12 +907,12 @@ function gettext(text_id) {
 	var arg = arguments, length = arg.length, domain_name = gettext_domain_name, domain = gettext_texts[domain_name],
 
 	// 轉換 / convert function.
-	convert = function(t, _d) {
-		if (typeof t !== 'function' && t in domain)
-			t = domain[t];
+	convert = function(text_id, domain_specified) {
+		if (typeof text_id !== 'function' && (text_id in domain))
+			text_id = domain[text_id];
 
-		return typeof t === 'function' ? t(domain_name, _d)
-				: t;
+		return typeof text_id === 'function' ? text_id(domain_name, arg, domain_specified)
+				: text_id;
 	},
 
 	text = ''
@@ -907,7 +934,7 @@ function gettext(text_id) {
 					// argument NO.
 					NO = Number(NO);
 					if (NO < length
-							&& (!(format || (format = object_name)) || format in gettext.conversion)) {
+							&& (!(format || (format = object_name)) || (format in gettext.conversion))) {
 						// 避免 %0 形成 infinite loop。
 						if (NO && domain_specified) {
 							var d = domain, dn = domain_name,
@@ -927,16 +954,16 @@ function gettext(text_id) {
 						} else
 							conversion = NO ? convert(arg[NO])
 									: text_id;
-							if (format)
-								conversion = Array
-								.isArray(object_name = gettext.conversion[format]) ? gettext_conversion_Array(
-										conversion,
-										object_name,
-										format)
-										: object_name(
-												conversion,
-												domain_specified
-												|| domain_name);
+						if (format)
+							conversion = Array
+							.isArray(object_name = gettext.conversion[format]) ? gettext_conversion_Array(
+									conversion,
+									object_name,
+									format)
+									: object_name(
+											conversion,
+											domain_specified
+											|| domain_name);
 					} else
 						library_namespace
 						.warn('gettext: '
@@ -993,7 +1020,7 @@ function gettext_check_resource(domain_name, type,
 
 /**
  * 當設定 conversion 為 Array 時，將預設採用此 function。<br />
- * 可用在複數形式 (plural) 之表示上。
+ * 可用在單數複數形式 (plural) 之表示上。
  * 
  * @param {Integer}amount
  *            數量。
