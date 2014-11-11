@@ -10,7 +10,6 @@
 
  圖層 layer:
  +重大地震
- 臺灣地震年表 http://921kb.sinica.edu.tw/history/quake_history.html
  地震列表	https://zh.wikipedia.org/wiki/%E5%9C%B0%E9%9C%87%E5%88%97%E8%A1%A8
  +著名事件/歷史年表/大事記
  台灣地方志寶鑑 http://140.112.30.230/Fangjr/
@@ -561,9 +560,14 @@ function date_to_loc(date, start_date) {
 		return;
 	}
 
-	return draw_era.left + (date - (start_date || SVG_object.start)) * ratio
-			| 0;
+	date = (date - (start_date || SVG_object.start)) * ratio | 0;
+	if (!start_date)
+		// 此時取得 left，需要加上 draw_era.left。else 取得 width。
+		date += draw_era.left;
+	return date;
 }
+
+// ---------------------------------------------------------------------//
 
 // area width, height.
 // TODO: return [top, left, width, height]
@@ -635,6 +639,24 @@ show_range.radius = 3;
 show_range.min_width = 3;
 show_range.min_height = 3;
 
+// Durations
+function parse_period(period) {
+	var matched = period.match(parse_period.PATTERN);
+	if (matched
+	// 預防 "10月22日夜7-8時"
+	&& !/[時分秒]/.test(matched[2].match(/^(?:.*?)([年月日時分秒])/)[1])) {
+		(period = matched).shift();
+		if (period[1].indexOf('月') === NOT_FOUND
+				&& (matched = period[0].match(/[^年月]+月/)))
+			period[1] = matched[0] + period[1];
+		if (period[1].indexOf('年') === NOT_FOUND
+				&& (matched = period[0].match(/[^年]+年/)))
+			period[1] = matched[0] + period[1];
+	}
+	return period;
+}
+parse_period.PATTERN = /^(.+)\s*[\-–－—~～〜]\s*(.+)$/;
+
 /**
  * 可繪製特定時段，例如展現在世期間所占比例。
  * 
@@ -653,50 +675,67 @@ function add_tag(period, data, group) {
 	if (!period || !(period = String(period).trim()))
 		return;
 
-	var title = typeof data === 'string' && data || CeL.is_Object(data)
-			&& data.title,
+	var title = '',
 	//
-	arg_passed = period.match(add_tag.PATTERN),
+	arg_passed = parse_period(period),
 	// from date
-	date = CeL.era(arg_passed ? arg_passed[1] : period, {
+	date = CeL.era(Array.isArray(arg_passed) ? arg_passed[0] : period, {
 		date_only : true
 	});
 
 	if (!date) {
-		CeL.warn('add_tag: Can not parse [' + period + ']');
+		// Cannot parse
+		CeL.warn('add_tag: 無法解析 [' + period + ']!');
 		return;
 	}
 
-	if (arg_passed) {
+	if (Array.isArray(arg_passed)) {
 		// to date
-		arg_passed = CeL.era(arg_passed[2], {
+		arg_passed = CeL.era(arg_passed[1], {
 			date_only : true,
 			period_end : true
 		});
-		if (!title)
-			title = period + '\n(' + date.format(draw_era.date_options) + '–'
-					+ arg_passed.format(draw_era.date_options) + ', '
-					+ count_roughly_duration(date, arg_passed) + ')';
-		arg_passed = [ [ date, arg_passed ], , title
+		if (!arg_passed) {
+			CeL.warn('add_tag: 無法解析 [' + period + ']!');
+			return;
+		}
+		title = '–' + arg_passed.format(draw_era.date_options) + ', '
+				+ count_roughly_duration(date, arg_passed);
+		arg_passed = [ [ date, arg_passed ], ,
 		// , { color : '' }
 		];
 	} else {
-		if (!title)
-			title = period + '\n(' + date.format(draw_era.date_options) + ')';
-		arg_passed = [ date, , title
+		arg_passed = [ date, ,
 		// , { color : '' }
 		];
 	}
+
+	// title: [group] data.title \n period (date) \n data.description
+	title = [ (group ? '[' + group + '] ' : '')
+	//
+	+ (data && (typeof data === 'string' ? data : data.title) || ''),
+	//
+	period + ' (' + date.format(draw_era.date_options) + title + ')' ];
+	if (data && data.description)
+		title.push(data.description);
+	arg_passed[2] = title.join('\n');
 
 	arg_passed.period = period;
 	// arg_passed.title = title;
 
-	if (group)
+	if (group && (group = String(group).trim()))
 		arg_passed.group = group;
 	if (data)
 		arg_passed.data = data;
 
-	var target = draw_era.tags[group || draw_era.default_group];
+	var target = group || draw_era.default_group;
+	CeL.debug('Using group [' + target + ']', 2);
+	if (!draw_era.tags[target]) {
+		if (target !== draw_era.default_group)
+			CeL.log('add_tag: create new group [' + target + ']');
+		draw_era.tags[target] = CeL.null_Object();
+	}
+	target = draw_era.tags[target];
 	if (target[period]) {
 		CeL.warn('add_tag: 已經有此時段存在！將跳過之，不會以新的覆蓋舊的。 '
 				+ (group ? '[' + group + ']' : '') + '[' + period + ']');
@@ -707,13 +746,10 @@ function add_tag(period, data, group) {
 			'add_tag');
 	add_tag.show(target[period] = arg_passed);
 	select_panel('era_graph', true);
-
 }
 
 // add_tag.group_count[group] = {Interger}count
 add_tag.group_count = CeL.null_Object();
-
-add_tag.PATTERN = /^(.+)\s*[\-–－—~～〜]\s*(.+)$/;
 
 add_tag.show = function(array_data) {
 	var group = array_data.group || draw_era.default_group,
@@ -739,9 +775,44 @@ add_tag.show = function(array_data) {
 add_tag.remove_self = function() {
 	CeL.debug('去除登錄 ' + (this.group ? '[' + this.group + ']' : '') + '['
 			+ this.period + ']', 2, 'add_tag.remove_self');
-	delete draw_era.tags[this.group || draw_era.default_group][this.period];
+	var target = draw_era.tags[this.group || draw_era.default_group];
+	if (target)
+		delete target[this.period];
 	return SVG_object.removeSelf.call(this);
 };
+
+// add_tag.load('臺灣地震');
+/*
+ * if(add_tag.load('臺灣地震',true)) return;
+ */
+add_tag.load = function(id, callback) {
+	var data = add_tag.data_file[id];
+
+	if (!data) {
+		CeL.err('未設定之資料圖層: [' + id + ']');
+		return 'ERROR';
+	}
+	if (callback && (typeof callback !== 'function'))
+		return data.loaded;
+
+	if (!data.loaded) {
+		data.loaded = 'loading @ ' + new Date;
+		// [0]: path
+		CeL.run(data[0], function() {
+			data.loaded = 'loaded @ ' + new Date;
+			if (typeof callback === 'function')
+				callback(id, data);
+		});
+	}
+};
+
+add_tag.data_file = {
+	'臺灣地震' : [ 'resource/quake.js',
+	// data source, URL
+	'臺灣地震年表', 'http://921kb.sinica.edu.tw/history/quake_history.html' ]
+};
+
+// ---------------------------------------------------------------------//
 
 /**
  * @memo <code>
@@ -968,17 +1039,19 @@ function draw_era(hierarchy) {
 	// 額外圖資。
 	if (CeL.is_Object(draw_era.tags)) {
 		for ( var group in draw_era.tags) {
+			CeL.debug('Draw group: [' + group + ']', 2);
 			var data = draw_era.tags[group];
 			for ( var period in data)
 				add_tag.show(data[period]);
 		}
-	}
+	} else
+		CeL.debug('No group found.', 2);
 
 }
 
+draw_era.default_group = '\n';
 // draw_era.tags[group][period] = [ date_range, height_range, title, style ];
-(draw_era.tags = CeL.null_Object())[draw_era.default_group = ''] = CeL
-		.null_Object();
+draw_era.tags = CeL.null_Object();
 
 draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 	var period_hierarchy = '',
@@ -1103,6 +1176,7 @@ var last_selected, select_panels = {
 	FAQ : '使用說明',
 
 	era_graph : '紀年線圖',
+	data_layer : '資料圖層',
 	// 年表
 	calendar : '曆譜',
 	// 整批轉換
@@ -1217,7 +1291,7 @@ function translate_era(era) {
 	era = era.trim();
 
 	var output, date;
-	if (('era_graph' in select_panels) && add_tag.PATTERN.test(era))
+	if (('era_graph' in select_panels) && parse_period.PATTERN.test(era))
 		return add_tag(era);
 
 	// 前置處理。
@@ -1641,6 +1715,52 @@ function affairs() {
 			CeL.err('IE 11 尚無法使用線圖。請考慮使用 Chrome 或 Firefox 等網頁瀏覽器。');
 		CeL.warn('您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉，無法繪製紀年時間軸線圖。');
 	}
+
+	// -----------------------------
+
+	list = [ {
+		div : {
+			T : '請選擇所欲載入之資料圖層。'
+		}
+	} ];
+
+	v = add_tag.data_file;
+	for (i in v) {
+		o = {
+			a : i,
+			href : '#',
+			title : i,
+			C : 'data_item',
+			onclick : function() {
+				var group = this.title, status = add_tag.load(group, true);
+				if (status)
+					CeL.info('data layer [' + group + ']: ' + status);
+				else
+					add_tag.load(group, function() {
+						this.className += ' loaded';
+						CeL.new_node([ ' ... ', {
+							T : '已載入',
+							C : 'status'
+						} ], this.parentNode);
+					}.bind(this));
+				return false;
+			}
+		};
+
+		i = v[i];
+		if (i[1])
+			o = [ o, ' (data source: ', i[2] ? {
+				a : i[1],
+				href : i[2],
+				target : '_blank'
+			} : i[1], ')' ];
+
+		list.push({
+			div : o
+		});
+	}
+
+	CeL.new_node(list, 'data_layer');
 
 	// -----------------------------
 

@@ -106,7 +106,7 @@ td {
 
 #language select, #language option {
 	color: #44f;
-	background-color: #eef;
+	background-color: #ddf;
 }
 
 #era_input {
@@ -253,6 +253,30 @@ tr.selected>td a {
 #era_graph_unobvious>.duration {
 	font-size: .6em;
 	color: #999;
+}
+
+#data_layer {
+	margin: .5em;
+	padding: .5em;
+	background-color: #eef;
+	border-radius: .5em;
+}
+
+#data_layer div {
+	margin-top: 1em;
+}
+
+.data_item {
+	margin-left: 1em;
+	color: #2a5;
+}
+
+.data_item.loaded {
+	color: #aaa;
+}
+
+#data_layer .status {
+	color: #9a2;
 }
 
 #batch_prefix {
@@ -917,13 +941,16 @@ tr.selected>td a {
 	<div id="era_graph">
 		<div id="era_graph_notice">
 			紀年線圖操作提示：在區塊上方按下滑鼠<b>左鍵</b>可進入下一階層。按下<b>右鍵</b>可返回上一層。 <a href="#"
-				onclick="CeL.toggle_display('era_graph_notice', false);return false;" title="隱藏">×</a>
+				onclick="CeL.toggle_display('era_graph_notice', false);return false;"
+				title="隱藏">×</a>
 		</div>
 		<div id="era_graph_target"></div>
 		<div id="era_graph_navigation">&nbsp;</div>
 		<div id="era_graph_SVG"></div>
 		<div id="era_graph_unobvious"></div>
 	</div>
+
+	<div id="data_layer"></div>
 
 	<div id="calendar"></div>
 
