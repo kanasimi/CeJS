@@ -6,8 +6,6 @@
  TODO:
  視覺化互動式史地資訊平台:整合 GIS
 
- https://en.wikipedia.org/wiki/Before_Present
-
  圖層 layer:
  +重大地震
  地震列表	https://zh.wikipedia.org/wiki/%E5%9C%B0%E9%9C%87%E5%88%97%E8%A1%A8
@@ -453,7 +451,7 @@ function 解析曆數() {
 var era_name_classifier, MIN_FONT_SIZE = 10,
 // 250: 經驗值。Chrome 35 在字體太大時會化ける。
 // Chrome/38 (WebKit/537.36): OK
-// Chrome/40: NG
+// Chrome/40: NG @ 300.
 MAX_FONT_SIZE = /WebKit/i.test(navigator.userAgent) ? 250 : Infinity;
 
 function draw_title_era() {
@@ -734,7 +732,11 @@ function add_tag(period, data, group) {
 	if (!draw_era.tags[target]) {
 		if (target !== draw_era.default_group)
 			CeL.log('add_tag: create new group [' + target + ']');
-		draw_era.tags[target] = CeL.null_Object();
+		Object.defineProperty(
+		//
+		draw_era.tags[target] = CeL.null_Object(), 'hide', {
+			writable : true
+		});
 	}
 	target = draw_era.tags[target];
 	if (target[period]) {
@@ -753,6 +755,10 @@ function add_tag(period, data, group) {
 add_tag.group_count = CeL.null_Object();
 
 add_tag.show = function(array_data) {
+	if (!Array.isArray(array_data))
+		// illegal data.
+		return;
+
 	var group = array_data.group || draw_era.default_group,
 	// 決定高度。
 	height = (10 + 20 * (add_tag.group_count[group] = (add_tag.group_count[group] | 0) + 1))
@@ -1028,26 +1034,59 @@ function draw_era(hierarchy) {
 
 		draw_era.last_hierarchy = hierarchy;
 
-		if (short_period.length) {
+		if (period_hierarchy = short_period.length > 0) {
 			short_period.unshift({
 				// 過短紀年
 				T : '難辨識時段：'
 			});
+			// 清理場地。
 			CeL.remove_all_child('era_graph_unobvious');
 			CeL.new_node(short_period, 'era_graph_unobvious');
 		}
+		CeL.toggle_display('era_graph_unobvious', period_hierarchy);
 	}
 
 	draw_era.draw_navigation(hierarchy);
 
+	// -----------------------------
+
 	// 額外圖資。
 	if (CeL.is_Object(draw_era.tags)) {
+		periods = [];
 		for ( var group in draw_era.tags) {
 			CeL.debug('Draw group: [' + group + ']', 2);
 			var data = draw_era.tags[group];
-			for ( var period in data)
-				add_tag.show(data[period]);
+			periods.push({
+				b : group === draw_era.default_group ? [ '(', {
+					T : 'default'
+				}, ')' ] : group,
+				C : data.hide ? 'hide' : '',
+				onclick : function() {
+					data.hide = !data.hide;
+					draw_era(hierarchy);
+					return false;
+				}
+			});
+			if (!data.hide)
+				for ( var period in data)
+					add_tag.show(data[period]);
+			data.hide = !!data.hide;
 		}
+
+		if (period_hierarchy = periods.length > 0) {
+			periods.unshift({
+				T : '資料圖層',
+				onclick : function() {
+					select_panel('data_layer');
+					return false;
+				},
+				S : 'cursor: pointer;'
+			}, ' : ');
+			// 清理場地。
+			CeL.remove_all_child('data_layer_menu');
+			CeL.new_node(periods, 'data_layer_menu');
+		}
+		CeL.toggle_display('data_layer_menu', period_hierarchy);
 	} else
 		CeL.debug('No group found.', 2);
 
@@ -2153,7 +2192,18 @@ function affairs() {
 			S : 'font-size:.8em;'
 		}, function(date) {
 			return '約' + (date.getFullYear() + 754) + '年';
+		} ],
+
+		BP : [ {
+			a : {
+				T : 'Before Present'
+			},
+			R : 'Before Present (BP) years, 距今。',
+			href : 'https://en.wikipedia.org/wiki/Before_Present'
+		}, function(date) {
+			return '約' + (1950 - date.getFullYear()) + '年';
 		} ]
+
 	};
 
 	default_column.forEach(function(i, index) {
