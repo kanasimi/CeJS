@@ -817,6 +817,7 @@ add_tag.load = function(id, callback) {
 };
 
 add_tag.data_file = {
+	// 臺灣歷史地震視覺化
 	'臺灣地震' : [ 'resource/quake.js',
 	// 資料來源, URL
 	'臺灣地震年表', 'http://921kb.sinica.edu.tw/history/quake_history.html' ]
@@ -852,6 +853,7 @@ function draw_era(hierarchy) {
 	delete SVG_object.start;
 	add_tag.group_count = CeL.null_Object();
 
+	SVG_object.hierarchy = hierarchy;
 	var periods = CeL.era.periods(hierarchy),
 	//
 	period_hierarchy = Array.isArray(hierarchy) && hierarchy.length > 0 ? hierarchy
@@ -1056,21 +1058,25 @@ function draw_era(hierarchy) {
 		for ( var group in draw_era.tags) {
 			CeL.debug('Draw group: [' + group + ']', 2);
 			var data = draw_era.tags[group];
-			periods.push({
-				b : group === draw_era.default_group ? [ '(', {
-					T : 'default'
-				}, ')' ] : group,
-				C : data.hide ? 'hide' : '',
-				onclick : function() {
-					data.hide = !data.hide;
-					draw_era(hierarchy);
-					return false;
-				}
-			});
 			if (!data.hide)
 				for ( var period in data)
 					add_tag.show(data[period]);
-			data.hide = !!data.hide;
+			periods.push({
+				b : [group === draw_era.default_group ? [ '(', {
+					T : 'general'
+				}, ')' ] : group, {
+					span : add_tag.group_count[group] || '',
+					C : 'count'
+				}],
+				R : group,
+				C : data.hide ? 'hide' : '',
+				onclick : function() {
+					var data = draw_era.tags[this.title];
+					data.hide = !data.hide;
+					draw_era(SVG_object.hierarchy);
+					return false;
+				}
+			});
 		}
 
 		if (period_hierarchy = periods.length > 0) {
@@ -1081,7 +1087,7 @@ function draw_era(hierarchy) {
 					return false;
 				},
 				S : 'cursor: pointer;'
-			}, ' : ');
+			}, ' :');
 			// 清理場地。
 			CeL.remove_all_child('data_layer_menu');
 			CeL.new_node(periods, 'data_layer_menu');
@@ -1555,23 +1561,34 @@ function set_era_by_url_data(era) {
 	else {
 
 		// 直接處理 hash / search。
-		// e.g., "era.htm#era=%E5%A4%A7%E6%B0%B82%E5%B9%B4"
-		var column, data = location.hash.slice(1) || location.search.slice(1);
+		// e.g., "era.htm#era=%E5%A4%A7%E6%B0%B82%E5%B9%B4&column="
+		// #era=景元元年&column=-contemporary&layer=臺灣地震
+		// #hierarchy=中國/東漢/安帝
+		var column, items, data = CeL.parse_URI.parse_search(location.search.slice(1), CeL.parse_URI.parse_search(location.hash.slice(1)));
 
-		if (column = data.match(/(?:^|&)column=([^&]+)/)) {
-			column = decodeURIComponent(column[1]).split(',');
-			column.forEach(function(item) {
-				var remove;
-				if (remove = item.charAt(0) === '-')
+		if (column = data.column) {
+			(Array.isArray(column) ? column : [ column ])
+			//
+			.forEach(function(item) {
+				var to_remove;
+				if (to_remove = item.charAt(0) === '-')
 					item = item.slice(1);
-				selected_column[item] = !remove;
+				selected_column[item] = !to_remove;
 			});
 		}
 
-		if (era = data.match(/(?:^|&)era=([^&]+)/)) {
-			era = era[1];
-		} else if (!/[&=#?]/.test(data))
-			era = data;
+		if (!(era = data.era)
+		//
+		&& !/[&=]/.test(items = location.search.slice(1) || location.hash.slice(1)))
+			era = items;
+
+		if (items = data.layer) {
+			if (!Array.isArray(items))
+				items = items.split(',')
+			items.forEach(function(item) {
+				add_tag.load(item);
+			});
+		}
 
 		if (era)
 			click_title_as_era.call({
@@ -1579,6 +1596,8 @@ function set_era_by_url_data(era) {
 			});
 		else if (column && era_input_object.setValue())
 			translate_era();
+		else if (items = data.hierarchy)
+			draw_era(Array.isArray(items) ? items : items.split(/[,\/]/));
 	}
 
 	set_era_by_url_data_running = false;
@@ -1780,6 +1799,10 @@ function affairs() {
 					CeL.info('data layer [' + group + ']: ' + status);
 				else
 					add_tag.load(group, function() {
+						CeL.new_node({
+							span : '✓',
+							C : 'loaded_mark'
+						}, [ this.parentNode, 1 ]);
 						this.className += ' loaded';
 						CeL.new_node([ ' ... ', {
 							T : [ '已載入 %1 筆資料。', add_tag.group_count[group] ],
@@ -1801,7 +1824,8 @@ function affairs() {
 			} : i[1], ')' ];
 
 		list.push({
-			div : o
+			div : o,
+			C : 'data_line'
 		});
 	}
 

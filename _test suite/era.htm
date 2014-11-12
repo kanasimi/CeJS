@@ -256,17 +256,27 @@ tr.selected>td a {
 }
 
 #data_layer_menu {
-	padding: 1em;
+	padding: .5em;
 	background-color: #efe;
 	border-radius: .5em;
 }
 
 #data_layer_menu b {
 	cursor: pointer;
-	margin: .5em;
-	padding: .5em;
+	margin: .3em;
+	padding: .3em;
+	padding-left: .5em;
+	padding-right: .5em;
 	background-color: #ada;
 	border-radius: .5em;
+}
+
+#data_layer_menu b .count {
+	padding-left: .3em;
+	color: #f2f;
+	font-weight: normal;
+	font-size: .7em;
+	vertical-align: sub;
 }
 
 #data_layer_menu b.hide {
@@ -285,8 +295,17 @@ tr.selected>td a {
 	margin-top: 1em;
 }
 
-.data_item {
+#data_layer div.data_line {
 	margin-left: 1em;
+}
+
+#data_layer .loaded_mark {
+	color : #0b0;
+	font-weight: bold;
+	margin-right: .3em;
+}
+
+.data_item {
 	color: #2a5;
 }
 

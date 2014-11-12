@@ -174,7 +174,7 @@ function parse_URI(URI) {
 		host: location.host,
 		// local file @ IE: C:\xx\xx\ff, others: /C:/xx/xx/ff
 		pathname: location.pathname
-	} : {};
+	} : library_namespace.null_Object();
 	URI.URI = href;
 
 	if (tmp = matched[1])
@@ -260,31 +260,52 @@ function parse_URI(URI) {
 }
 
 
-parse_URI.parse_search = function parse_search(string, param) {
+parse_URI.parse_search = function parse_search(string, param, options) {
 	var data = typeof string === 'string' ? string.replace(/\+/g, '%20').split(/&/) : [], i = 0, l = data.length, name, value, matched;
 	if (!library_namespace.is_Object(param))
-		param = {};
+		param = library_namespace.null_Object();
+	if (!library_namespace.is_Object(options))
+		options = library_namespace.null_Object();
 
-	for (; i < l; i++) {
+	for (; i < l; i++) if (data[i]) {
 		if (matched = data[i].match(/^([^=]+)=(.*)$/)) {
 			name = matched[1];
 			value = decodeURIComponent(matched[2]);
 		} else {
 			name = data[i];
-			value = undefined;
+			value = 'default_value' in options ? options.default_value : name;
 		}
 
-		if (name in param) {
-			if (!Array.isArray(param[name])) {
-				param[name] = [param[name]];
-			}
-			param[name].push(value);
-			library_namespace.debug('[' + (i + 1) + '/' + l + '] <span style="color:#888;">(' + param[name].length + ')</span> [' + name + '] += [' + value + ']', 2);
-		} else {
-			library_namespace.debug('[' + (i + 1) + '/' + l + '] [' + name + '] = [' + value + ']', 2);
-			param[name] = value;
-		}
+		if (library_namespace.is_debug(2))
+			library_namespace.debug('[' + (i + 1) + '/' + l + '] '
+				+ (param[name] ? '<span style="color:#888;">(' + param[name].length + ')</span> [' + name + '] += [' + value + ']' : '[' + name + '] = [' + value + ']'));
+
+		if (options.split_pattern
+		//
+		&& (matched = value.split(options.split_pattern)).length > 1) {
+			if (name in param)
+				if (Array.isArray(param[name]))
+					Array.prototype.push.apply(param[name], matched);
+				else {
+					matched.unshift(param[name]);
+					param[name] = matched;
+				}
+			else
+				param[name] = matched;
+		} else
+			if (name in param) {
+				if (Array.isArray(param[name]))
+					param[name].push(value);
+				else
+					param[name] = [ param[name], value ];
+			} else
+				param[name] = value;
 	}
+
+	if (options.Array_only)
+		for (name in param)
+			if (!Array.isArray(param[name]))
+				param[name] = [ param[name] ];
 
 	return param;
 };
@@ -516,7 +537,7 @@ URI_accessor.module = {
 
 		//library_namespace.debug('URI_accessor.setting.temporary_file:'+URI_accessor.setting.temporary_file, 2, 'URI_accessor.module.curl');
 		//library_namespace.debug('user_setting.temporary_file:'+user_setting.temporary_file, 2, 'URI_accessor.module.curl');
-		var setting = new library_namespace.setting_pair({}, URI_accessor.setting, user_setting), value = setting('user_agent'), tmp = '" "',
+		var setting = new library_namespace.setting_pair(library_namespace.null_Object(), URI_accessor.setting, user_setting), value = setting('user_agent'), tmp = '" "',
 		command_array = [
 				'curl --remote-time --insecure --compressed '
 				+ (library_namespace.is_debug(2) ? '-v ' : '')
@@ -548,7 +569,7 @@ URI_accessor.module = {
 	},
 
 	wget: function (user_setting) {
-		var setting = new library_namespace.setting_pair({}, URI_accessor.setting, user_setting), value = setting('user_agent'), tmp = '" "',
+		var setting = new library_namespace.setting_pair(library_namespace.null_Object(), URI_accessor.setting, user_setting), value = setting('user_agent'), tmp = '" "',
 		command_array = ['wget --timestamping --keep-session-cookies --no-check-certificate '
 				+ (library_namespace.is_debug(2) ? '-d ' : '')
 				+ (setting('additional_options') ? setting('additional_options') + ' ' : '')
@@ -826,7 +847,7 @@ function get_video(video_url, download_to, options) {
 		video_url = [video_url];
 	}
 
-	var count = video_url.length, error_count = 0, i, info_hash = {}, video_info, result,
+	var count = video_url.length, error_count = 0, i, info_hash = library_namespace.null_Object(), video_info, result,
 	/**
 	 * for message show
 	 */
