@@ -14,7 +14,6 @@
  * CeL.era('二年春正月丁亥朔',{after:'寶應元年'})<br />
  * CeL.era('丁亥朔',{after:'寶應二年春正月'})<br />
  * CeL.era('寶應元年',{period_end:true})<br />
- * CeL.era('1627年',{date_only:true,period_end:true})==='1627年'.to_Date({date_only:true,period_end:true})<br />
  * CeL.era('嘉慶十六年二月二十四日寅刻')===CeL.era('嘉慶十六年二月二十四日寅時')<br />
  * Period 獨立成 class<br />
  * 月令別名<br />
@@ -127,19 +126,27 @@ CeL.assert(["134/7/29",CeL.era('陽嘉3年6月20日', {get_range : true})[1].for
 CeL.assert(["134/8/8",CeL.era('陽嘉3年6月', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年6月.末');
 CeL.assert(["135/2/1",CeL.era('陽嘉3年', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年.末');
 CeL.assert(["136/2/20",CeL.era('陽嘉', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉.末');
-// 參照紀年演算機制
+
+// 參照紀年之演算機制
 CeL.assert([8,CeL.era('明宣宗宣德',{get_era:1}).calendar[7].leap],'明宣宗宣德8年閏8月');
-//setup 8月–
-CeL.era.set('曆A|1433/8/18~9/17|:宣德');
+//setup 8月–, CE~CE
+CeL.era.set('曆A|1433/8/15~9/13|:宣德');
 //setup 閏8月–
-CeL.era.set('曆B|1433/9/18~10/17|:宣德');
+CeL.era.set('曆B|1433/9/14~10/12|:宣德');
 //setup 9月–
-CeL.era.set('曆C|1433/10/18~11/17|:宣德');
-//test
-var _c0;
-_c0=CeL.era('曆A',{get_era:1}).calendar[0];CeL.assert(['8,6,1',[_c0.start,_c0.length,+_c0.leap].join()],'測試參照紀年演算機制:8月–');
-_c0=CeL.era('曆B',{get_era:1}).calendar[0];CeL.assert(['9,5,0',[_c0.start,_c0.length,+_c0.leap].join()],'測試參照紀年演算機制:閏8月–');
-_c0=CeL.era('曆C',{get_era:1}).calendar[0];CeL.assert(['9,4,NaN',[_c0.start,_c0.length,+_c0.leap].join()],'測試參照紀年演算機制:9月–');
+CeL.era.set('曆C|1433/10/13~11/11|:宣德');
+//test part
+var _c0=CeL.era('宣德',{get_era:1}).calendar[8-1];
+CeL.assert(['30,29,30,29,29,30,29,30,29,30,30,30,29',_c0.join(',')],'宣德8年 calendar data');
+// 取得 era 第一年之 calendar data, and do test.
+_c0=CeL.era('曆A',{get_era:1}).calendar[0];CeL.assert(['8,6,1',[_c0.start,_c0.length,+_c0.leap].join()],'測試 參照紀年之演算機制:8月–');
+_c0=CeL.era('曆B',{get_era:1}).calendar[0];CeL.assert(['9,5,0',[_c0.start,_c0.length,+_c0.leap].join()],'測試 參照紀年之演算機制:閏8月–');
+_c0=CeL.era('曆C',{get_era:1}).calendar[0];CeL.assert(['9,4,NaN',[_c0.start,_c0.length,+_c0.leap].join()],'測試 參照紀年之演算機制:9月–');
+
+// test period_end of era()
+CeL.assert([CeL.era('1627年',{date_only:true,period_end:true}).format('CE'), '1627年'.to_Date({parser:'CE',period_end:true}).format('CE')]);
+CeL.assert([CeL.era('1627年9月',{date_only:true,period_end:true}).format('CE'), '1627年9月'.to_Date({parser:'CE',period_end:true}).format('CE')]);
+CeL.assert([CeL.era('1627年9月3日',{date_only:true,period_end:true}).format('CE'), '1627年9月3日'.to_Date({parser:'CE',period_end:true}).format('CE')]);
 
 CeL.info('測試全部通過。');
 
@@ -1838,7 +1845,7 @@ if (typeof CeL === 'function')
 						date_name[2] = tmp;
 
 						/**
-						 * 參照紀年演算機制：定 this.year_start 與 this.calendar 之過程。
+						 * 參照紀年之演算機制：定 this.year_start 與 this.calendar 之過程。
 						 * <dl>
 						 * <dt>查找下一參照紀元。</dt>
 						 * <dd>優先取用：
@@ -5202,7 +5209,7 @@ if (typeof CeL === 'function')
 						// 有多個選擇，因此嚐試嚴格篩選。
 						options.strict = true;
 					if (tmp = options.period_end) {
-						// 取得結束時間。else: 取得開始時間
+						// 取得結束時間。else: 取得開始時間。
 						tmp = 日 ? 1 : 月 ? 2 : 年 ? 3 : 4;
 					}
 					// 從紀年、日期篩選可用之紀年，取得 Date。
@@ -5313,12 +5320,17 @@ if (typeof CeL === 'function')
 						}
 
 					} else if (年 && !isNaN(年 = numeralize_date_name(年))) {
-						date = ((年 < 0 ? 年 : 年.pad(4)) + '/'
+						date = ((年 < 0 ? 年 : 年.pad(4)) + '年'
 						//
-						+ (numeralize_date_name(月) || START_MONTH)
+						+ (月?(numeralize_date_name(月) || START_MONTH)+ '月'
 						//
-						+ '/' + (numeralize_date_name(日) || START_DATE))
-								.to_Date(standard_time_parser);
+						+ (日?(numeralize_date_name(日) || START_DATE)+'日':'')
+						//
+						:''))
+								.to_Date({
+									parser : standard_time_parser,
+									period_end : options.period_end
+								});
 
 						if (!date || isNaN(date.getTime())) {
 							// 可能到這邊的:如 '1880年庚辰月庚辰日庚辰時'。

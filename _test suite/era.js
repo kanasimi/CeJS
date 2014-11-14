@@ -9,10 +9,11 @@
  圖層 layer:
  +重大地震
  地震列表	https://zh.wikipedia.org/wiki/%E5%9C%B0%E9%9C%87%E5%88%97%E8%A1%A8
- +著名事件/歷史年表/大事記
+ +著名事件/歷史大事紀年表/大事記
+ 與歷史事件結合，能夠直觀的藉點取時間軸，即獲得當時世界上所有已知發生之事件以及出處依據（參考文獻來源、出典考據）、註解。
  台灣地方志寶鑑 http://140.112.30.230/Fangjr/
  戰後臺灣歷史年表 http://twstudy.iis.sinica.edu.tw/twht/
- +著名人物/歷史名人生卒,出生逝世年份月日
+ +著名人物/歷史名人生辰,生卒,出生逝世年份月日@線圖
  +君主
  中國皇帝壽命列表 https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E7%9A%87%E5%B8%9D%E5%AF%BF%E5%91%BD%E5%88%97%E8%A1%A8
 
@@ -698,6 +699,8 @@ function add_tag(period, data, group) {
 			CeL.warn('add_tag: 無法解析 [' + period + ']!');
 			return;
 		}
+		// 因為是 period_end，因此須取前一單位。
+		arg_passed = new Date(arg_passed - 1);
 		title = '–' + arg_passed.format(draw_era.date_options) + ', '
 				+ count_roughly_duration(date, arg_passed);
 		arg_passed = [ [ date, arg_passed ], ,
@@ -709,7 +712,7 @@ function add_tag(period, data, group) {
 		];
 	}
 
-	// title: [group] data.title \n period (date) \n data.description
+	// 處理 title: [group] data.title \n period (date) \n data.description
 	title = [ (group ? '[' + group + '] ' : '')
 	//
 	+ (data && (typeof data === 'string' ? data : data.title) || ''),
@@ -717,7 +720,7 @@ function add_tag(period, data, group) {
 	period + ' (' + date.format(draw_era.date_options) + title + ')' ];
 	if (data && data.description)
 		title.push(data.description);
-	arg_passed[2] = title.join('\n');
+	arg_passed[2] = title.join('\n').trim();
 
 	arg_passed.period = period;
 	// arg_passed.title = title;
@@ -817,9 +820,9 @@ add_tag.load = function(id, callback) {
 };
 
 add_tag.data_file = {
-	// 臺灣歷史地震視覺化
+	// 臺灣歷史地震時間軸視覺化（英文：Visulation）
 	'臺灣地震' : [ 'resource/quake.js',
-	// 資料來源, URL
+	// 資料來源 title, URL
 	'臺灣地震年表', 'http://921kb.sinica.edu.tw/history/quake_history.html' ]
 };
 
@@ -851,6 +854,7 @@ function draw_era(hierarchy) {
 	// 清理場地。
 	SVG_object.clean();
 	delete SVG_object.start;
+	CeL.remove_all_child('era_graph_target');
 	add_tag.group_count = CeL.null_Object();
 
 	SVG_object.hierarchy = hierarchy;
@@ -1564,6 +1568,7 @@ function set_era_by_url_data(era) {
 		// e.g., "era.htm#era=%E5%A4%A7%E6%B0%B82%E5%B9%B4&column="
 		// #era=景元元年&column=-contemporary&layer=臺灣地震
 		// #hierarchy=中國/東漢/安帝
+		// #hierarchy=中國/清&layer=臺灣地震
 		var column, items, data = CeL.parse_URI.parse_search(location.search.slice(1), CeL.parse_URI.parse_search(location.hash.slice(1)));
 
 		if (column = data.column) {
