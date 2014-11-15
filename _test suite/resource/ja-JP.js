@@ -21,6 +21,11 @@ if (typeof CeL === 'function')
 
 		'前綴' : '接頭辞',
 
+		'增加此欄' : 'この列を追加する',
+		'除去此欄' : 'この列を削除する',
+		//
+		'reform' : '改暦',
+
 		'Before Present' : '何年前',
 		'Holocene calendar' : '人類紀元',
 		'Unix time' : 'Unix時間',
@@ -45,8 +50,33 @@ if (typeof CeL === 'function')
 		// http://suchowan.at.webry.info/201407/article_8.html
 		'塞琉古紀元' : 'セレウコス紀元',
 
-		'增加此欄' : 'この列を追加する',
-		'除去此欄' : 'この列を削除する',
+		// region
+		'Italy' : 'イタリア',
+		'Spain' : 'スペイン',
+		'Portugal' : 'ポルトガル',
+		'Poland' : 'ポーランド',
+		'France' : 'フランス',
+		'Luxembourg' : 'ルクセンブルク',
+		'Netherlands' : 'オランダ',
+		'Bavaria' : 'バイエルン',
+		'Austria' : 'オーストリア',
+		'Switzerland' : 'スイス',
+		'Hungary' : 'ハンガリー',
+		'Germany' : 'ドイツ',
+		'Norway' : 'ノルウェー',
+		'Denmark' : 'デンマーク',
+		'Great Britain' : 'イギリス',
+		'Sweden' : 'スウェーデン',
+		'Finland' : 'フィンランド',
+		'Japan' : '日本',
+		'China' : '中国',
+		'Bulgaria' : 'ブルガリア',
+		'Soviet Union' : 'ソ連',
+		'Serbia' : 'セルビア',
+		'Romania' : 'ルーマニア',
+		'Greece' : 'ギリシャ',
+		'Turkey' : 'トルコ',
+		'Egypt' : 'エジプト',
 
 		'朝代紀年日期' : '紀年/元号暦日',
 		'Julian calendar' : 'ユリウス暦',

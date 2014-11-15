@@ -544,12 +544,6 @@ String_to_Date.default_parser = String_to_Date_default_parser;
 
 String_to_Date.parser = {
 
-	//紀年法:日本年號,元号/年号
-	Japan : function() {
-		//	TODO
-		throw new Error('String_to_Date.parser.元号: Not Yet Implemented!');
-	},
-
 	Julian: Julian_String_to_Date,
 	//	Common Era / Before the Common Era, CE / BCE. 公元/西元.
 	CE : function(date_string, minute_offset, options) {
@@ -559,7 +553,7 @@ String_to_Date.parser = {
 			options.no_year_0 = true;
 		var date_value = String_to_Date_default_parser(
 				date_string, minute_offset, options);
-		return date_value < (options.reform || _.Gregorian_reform_date)
+		return date_value < Gregorian_reform_of(options.reform)
 		//
 		? Julian_String_to_Date(date_string, minute_offset,
 				options) : date_value;
@@ -819,20 +813,6 @@ function Date_to_String(date_value, options) {
 Date_to_String.default_parser = strftime;
 
 Date_to_String.parser = {
-	//	中國傳統曆法。
-	Chinese : function(date_value, format, locale) {
-		//	TODO
-		throw new Error('Date_to_String.parser.Chinese: Not Yet Implemented!');
-	},
-	//	中國農曆日期和韓國農曆日期也不一致。日本從1685年開始，就自行編製農曆，一直到明治六年。
-	Japan : function(date_value, format, locale) {
-		//	TODO
-		throw new Error('Date_to_String.parser.Japan: Not Yet Implemented!');
-	},
-	Korean : function(date_value, format, locale) {
-		//	TODO
-		throw new Error('Date_to_String.parser.Korean: Not Yet Implemented!');
-	},
 
 	//	<a href="http://php.net/manual/en/function.date.php" accessdate="2012/3/23 20:51">PHP: date - Manual</a>
 	PHP : function(date_value, format, locale) {
@@ -863,7 +843,7 @@ Date_to_String.parser = {
 		if (!('no_year_0' in options))
 			options.no_year_0 = true;
 
-		return (date_value < (options.reform || _.Gregorian_reform_date) ? Date_to_Julian : Date_to_Gregorian)(date_value, format, locale, options);
+		return (date_value < Gregorian_reform_of(options.reform) ? Date_to_Julian : Date_to_Gregorian)(date_value, format, locale, options);
 	},
 
 	//	Turn to RFC 822 date-time
@@ -1688,7 +1668,6 @@ Julian_Date_offset = String_to_Date('-4713/1/1 12:0', {
 
 // 預設的 Gregorian calendar 改曆日期:
 // Julian calendar → Gregorian calendar.
-// https://en.wikipedia.org/wiki/Adoption_of_the_Gregorian_calendar#Timeline
 //
 // 這天之前使用 Julian calendar。
 // e.g., UTC/Gregorian 1582/10/14 → Julian 1582/10/4.
@@ -1697,6 +1676,64 @@ Julian_Date_offset = String_to_Date('-4713/1/1 12:0', {
 // 西曆以1582年10月15日為改曆分界點，Julian calendar（儒略曆）1582年10月4日的下一日為 Gregorian calendar（格里高利曆）1582年10月15日。
 var reform_year = 1582;
 _.Gregorian_reform_date = new Date(reform_year, 10 - 1, 15);
+
+
+// gcal-3.6/doc/GREG-REFORM
+// http://www.tondering.dk/claus/cal/gregorian.php
+// http://www.webexhibits.org/calendars/year-countries.html
+// http://sizes.com/time/cal_Gregadoption.htm
+var reform_by_region = {
+	'Italy' : '1582/10/15',
+	'Spain' : '1582/10/15',
+	'Portugal' : '1582/10/15',
+	'Poland' : '1582/10/15',
+	'France' : '1582/12/20',
+	'Luxembourg' : '1583/1/1',
+	'Netherlands' : '1583/1/1',
+	'Bavaria' : '1583/10/16',
+	'Austria' : '1584/1/17',
+	'Switzerland' : '1584/1/22',
+	'Hungary' : '1587/11/1',
+	'Germany' : '1700/3/1',
+	'Norway' : '1700/3/1',
+	'Denmark' : '1700/3/1',
+	// 大不列顛王國, 英國
+	'Great Britain' : '1752/9/14',
+	'Sweden' : '1753/3/1',
+	'Finland' : '1753/3/1',
+	'Japan' : '1873/1/1',
+	'China' : '1911/11/20',
+	'Bulgaria' : '1916/4/14',
+	// USSR, U.S.S.R.
+	'Soviet Union' : '1918/2/14',
+	'Serbia' : '1919/2/1',
+	'Romania' : '1919/2/1',
+	'Greece' : '1924/3/23',
+	'Turkey' : '1926/1/1',
+	'Egypt' : '1928/10/1'
+};
+
+(function() {
+	for ( var region in reform_by_region)
+		reform_by_region[region] = Date.parse(reform_by_region[region]);
+})();
+
+/**
+ * 取得特定區域之 Gregorian calendar 改曆日期。
+ * 
+ * @param {String}region
+ *            {String}region, {Date}reform date, {Number}Date value
+ * @returns {Number}reform Date value
+ */
+function Gregorian_reform_of(region) {
+	if (is_Date(region))
+		region = region.getTime();
+	else if (typeof region === 'string' && (region in reform_by_region))
+		region = reform_by_region[region];
+	return Number.isFinite(region) ? region : _.Gregorian_reform_date;
+}
+Gregorian_reform_of.regions = reform_by_region;
+_.Gregorian_reform_of = Gregorian_reform_of;
 
 //---------------------------------------------------------------------------//
 //	文化功能。
@@ -1890,7 +1927,8 @@ String_to_Date.parser.Chinese = function(date_string, minute_offset, options) {
 
 /*
 
-for(i=0;i<60;i++)CeL.assert([i,CeL.stem_branch_index(CeL.to_stem_branch(i))]);
+for (i = 0; i < 60; i++)
+	CeL.assert([ i, CeL.stem_branch_index(CeL.to_stem_branch(i)) ]);
 
 */
 

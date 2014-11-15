@@ -23,6 +23,11 @@ if (typeof CeL === 'function')
 
 		'中文數字' : 'To Chinese numerals',
 
+		'增加此欄' : 'Add the column',
+		'除去此欄' : 'Remove the column',
+		'分類' : 'Group',
+		// 'reform' : 'Adoption of the Gregorian calendar',
+
 		'伊斯蘭曆' : 'Islamic Calendar',
 		'希伯來曆' : 'Hebrew calendar',
 		'傣曆' : 'Dai Calendar',
@@ -43,9 +48,6 @@ if (typeof CeL === 'function')
 		'皇紀' : 'Japanese imperial year',
 		'羅馬建城' : 'Ab urbe condita',
 		'塞琉古紀元' : 'Seleucid era',
-
-		'增加此欄' : 'Add the column',
-		'除去此欄' : 'Remove the column',
 
 		'年日期' : 'Ordinal date',
 		'週日期' : 'Week date',

@@ -213,7 +213,7 @@ function show_calendar(era_name) {
 	//
 	dates = CeL.era.dates(era_name, {
 		含參照用 : /明治|大正|昭和|明仁/.test(era_name)
-	}), is_年譜, i, j, hidden_column = [];
+	}), is_年譜, i, j, matched, hidden_column = [], group;
 
 	if (!dates)
 		return;
@@ -245,6 +245,17 @@ function show_calendar(era_name) {
 			j = calendar_column[i][0];
 			if (!j.T && j.a)
 				j = j.a;
+			if ((matched = i.match(/^([^\/]+)\//)) && matched[1] !== group) {
+				group = matched[1];
+				hidden_column.pop();
+				hidden_column.push([ {
+					hr : null
+				}, {
+					T : '分類'
+				}, ': ', {
+					T : group
+				}, ' ' ]);
+			}
 			hidden_column.push({
 				span : j.T ? {
 					T : j.T
@@ -275,6 +286,7 @@ function show_calendar(era_name) {
 						a : name,
 						title : name,
 						href : '#',
+						target : '_self',
 						onclick : click_title_as_era
 					} ],
 					colspan : title.length
@@ -326,12 +338,14 @@ function show_calendar(era_name) {
 				a : 前年名 = matched[1],
 				title : matched[1],
 				href : '#',
+				target : '_self',
 				C : 'to_select',
 				onclick : click_title_as_era
 			}, matched[2] === 前月名 ? 前月名 : {
 				a : 前月名 = matched[2],
 				title : matched[1] + matched[2],
 				href : '#',
+				target : '_self',
 				C : 'to_select',
 				onclick : click_title_as_era
 			}, matched[3] ];
@@ -394,6 +408,7 @@ function show_calendar(era_name) {
 		a : era_caption,
 		title : era_caption,
 		href : '#',
+		target : '_self',
 		C : 'to_select',
 		onclick : click_title_as_era
 	}, {
@@ -408,13 +423,23 @@ function show_calendar(era_name) {
 			tbody : output
 		} ]
 	};
-	if (hidden_column.length > 0)
+	if (hidden_column.length > 0) {
+		hidden_column.unshift(': ');
 		title = [ {
 			div : [ {
-				T : '增加此欄'
-			}, ': ', hidden_column ],
+				T : '增加此欄',
+				S : 'cursor: pointer;',
+				onclick : function() {
+					CeL.toggle_display('column_to_select');
+					return false;
+				}
+			}, {
+				span : hidden_column,
+				id : 'column_to_select'
+			} ],
 			C : 'add_mark_layer'
 		}, title ];
+	}
 	CeL.remove_all_child('calendar');
 	CeL.new_node(title, 'calendar');
 	select_panel('calendar', true);
@@ -953,6 +978,7 @@ function draw_era(hierarchy) {
 				short_period.push({
 					a : name,
 					href : '#',
+					target : '_self',
 					title : period_hierarchy + name,
 					onclick : is_Era ? click_title_as_era : draw_title_era
 				}, {
@@ -1141,6 +1167,7 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 			T : '所有國家'
 		},
 		href : '#',
+		target : '_self',
 		onclick : draw_title_era
 	} ];
 
@@ -1155,6 +1182,7 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 			} : {
 				a : name,
 				href : '#',
+				target : '_self',
 				title : period_hierarchy,
 				onclick : draw_title_era
 			});
@@ -1163,6 +1191,7 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 				navigation_list.push(' (', {
 					a : name.start,
 					href : '#',
+					target : '_self',
 					title : name.start,
 					onclick : draw_era.click_navigation_date
 				}, {
@@ -1177,6 +1206,7 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 				}, {
 					a : name.end,
 					href : '#',
+					target : '_self',
 					title : name.end,
 					onclick : draw_era.click_navigation_date
 				}, ')');
@@ -1354,6 +1384,7 @@ function add_contemporary(era, output_numeral) {
 		a : output_numeral === 'Chinese' ? CeL.to_Chinese_numeral(era) : era,
 		title : era,
 		href : '#',
+		target : '_self',
 		onclick : click_title_as_era,
 		C : '共存紀年'
 	}, matched = era.match(country_PATTERN);
@@ -1424,6 +1455,7 @@ function translate_era(era) {
 					a : output,
 					title : (CE_PATTERN.test(output) ? '共存紀年:' : '') + output,
 					href : '#',
+					target : '_self',
 					onclick : click_title_as_era
 				};
 
@@ -1483,6 +1515,7 @@ function translate_era(era) {
 					a : last_input = era,
 					title : era,
 					href : '#',
+					target : '_self',
 					onclick : click_title_as_era
 				}
 			}, 'input_history');
@@ -1739,6 +1772,7 @@ function affairs() {
 				a : era,
 				title : era,
 				href : '#',
+				target : '_self',
 				onclick : click_title_as_era
 			}
 		});
@@ -1823,6 +1857,7 @@ function affairs() {
 		o = {
 			a : i,
 			href : '#',
+			target : '_self',
 			title : i,
 			C : 'data_item',
 			onclick : function() {
@@ -2308,6 +2343,25 @@ function affairs() {
 		} ]
 
 	};
+
+	for (i in CeL.Gregorian_reform_of.regions) {
+		o = function(date) {
+			return date.format({
+				parser : 'CE',
+				format : '%Y/%m/%d',
+				no_year_0 : false,
+				reform : this.r
+			});
+		}.bind({
+			r : i
+		});
+		calendar_column['reform/' + i] = [ {
+			T : i,
+			R : i + ', reforms on '
+			//
+			+ new Date(CeL.Gregorian_reform_of.regions[i]).format('%Y/%m/%d')
+		}, o ];
+	}
 
 	default_column.forEach(function(i, index) {
 		default_column[index] = {

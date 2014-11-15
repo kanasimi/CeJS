@@ -1343,6 +1343,9 @@ function new_node(nodes, layer) {
 		'' + nodes;
 
 	else if (library_namespace.is_Object(nodes)) {
+		// 不更動到原先的 arguments。
+		nodes = Object.assign(library_namespace.null_Object(), nodes);
+
 		var tag_key, tag = nodes.$, n = 'className', ns, s, ignore = {
 			// tag
 			$ : null,
@@ -1497,6 +1500,7 @@ function new_node(nodes, layer) {
 						dataset(node, gettext.DOM_id_key + i, n[i]);
 				} else {
 					dataset(node, gettext.DOM_id_key, n);
+					// for gettext.apply(null, n);
 					n = [ n ];
 				}
 				// assert: Array.isArray(n)
