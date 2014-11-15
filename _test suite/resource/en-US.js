@@ -42,6 +42,7 @@ if (typeof CeL === 'function')
 		'長紀曆' : 'Long Count',
 		'皇紀' : 'Japanese imperial year',
 		'羅馬建城' : 'Ab urbe condita',
+		'塞琉古紀元' : 'Seleucid era',
 
 		'增加此欄' : 'Add the column',
 		'除去此欄' : 'Remove the column',

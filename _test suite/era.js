@@ -102,8 +102,28 @@ function initializer() {
 // ---------------------------------------------------------------------//
 
 // 年差距/位移
-function Year_numbering(shift) {
-	shift |= 0;
+function Year_numbering(year_shift, year_only, has_year_0, reverse) {
+	year_shift |= 0;
+	if (year_only)
+		return function(date) {
+			var year = date.format({
+				parser : 'CE',
+				format : '%Y',
+				no_year_0 : false
+			});
+			if (reverse)
+				// 反向記數, reverse counting.
+				year = year_shift - year;
+			else
+				year = year_shift + (year | 0);
+			if (!has_year_0 && year <= 0)
+				// 本紀元前。
+				year--;
+			return {
+				T : [ '約%1年', year ]
+			};
+		};
+
 	return function(date, year_only) {
 		if (date.精 === '年')
 			year_only = true;
@@ -112,8 +132,13 @@ function Year_numbering(shift) {
 			format : '%Y/%m/%d',
 			no_year_0 : false
 		}).split('/');
-		var year = shift + (date[0] | 0);
-		if (year <= 0)
+		var year = date[0];
+		if (reverse)
+			// 反向記數, reverse counting.
+			year = year_shift - year;
+		else
+			year = year_shift + (year | 0);
+		if (!has_year_0 && year <= 0)
 			// 本紀元前。
 			year--;
 		return year + (year_only ? '年' : '/' + date[1] + '/' + date[2]);
@@ -121,7 +146,7 @@ function Year_numbering(shift) {
 
 	// Gregorian calendar only.
 	return function(date) {
-		var year = date.getFullYear() + shift | 0;
+		var year = date.getFullYear() + year_shift | 0;
 		if (year <= 0)
 			// 紀元前。
 			year--;
@@ -1066,12 +1091,12 @@ function draw_era(hierarchy) {
 				for ( var period in data)
 					add_tag.show(data[period]);
 			periods.push({
-				b : [group === draw_era.default_group ? [ '(', {
+				b : [ group === draw_era.default_group ? [ '(', {
 					T : 'general'
 				}, ')' ] : group, {
 					span : add_tag.group_count[group] || '',
 					C : 'count'
-				}],
+				} ],
 				R : group,
 				C : data.hide ? 'hide' : '',
 				onclick : function() {
@@ -1569,7 +1594,8 @@ function set_era_by_url_data(era) {
 		// #era=景元元年&column=-contemporary&layer=臺灣地震
 		// #hierarchy=中國/東漢/安帝
 		// #hierarchy=中國/清&layer=臺灣地震
-		var column, items, data = CeL.parse_URI.parse_search(location.search.slice(1), CeL.parse_URI.parse_search(location.hash.slice(1)));
+		var column, items, data = CeL.parse_URI.parse_search(location.search
+				.slice(1), CeL.parse_URI.parse_search(location.hash.slice(1)));
 
 		if (column = data.column) {
 			(Array.isArray(column) ? column : [ column ])
@@ -1583,8 +1609,9 @@ function set_era_by_url_data(era) {
 		}
 
 		if (!(era = data.era)
-		//
-		&& !/[&=]/.test(items = location.search.slice(1) || location.hash.slice(1)))
+				//
+				&& !/[&=]/.test(items = location.search.slice(1)
+						|| location.hash.slice(1)))
 			era = items;
 
 		if (items = data.layer) {
@@ -2216,21 +2243,68 @@ function affairs() {
 			a : {
 				T : '羅馬建城'
 			},
-			R : 'AUC (Ab urbe condita), 羅馬建城紀年. 有採用0年。非精確時，可能有最多前後一年的誤差。',
+			R : 'AUC (Ab urbe condita), 羅馬建城紀年. 有採用0年。非精確時。',
 			href : 'https://en.wikipedia.org/wiki/Ab_urbe_condita',
 			S : 'font-size:.8em;'
-		}, function(date) {
-			return '約' + (date.getFullYear() + 754) + '年';
-		} ],
+		}, Year_numbering(754 - 1, true, false) ],
+
+		Seleucid : [ {
+			a : {
+				T : '塞琉古紀元'
+			},
+			R : 'Seleucid era or Anno Graecorum, 塞琉古紀元。非精確時，可能有最多前後一年的誤差。',
+			href : 'https://en.wikipedia.org/wiki/Seleucid_era',
+			S : 'font-size:.8em;'
+		}, Year_numbering(311, true) ],
 
 		BP : [ {
 			a : {
 				T : 'Before Present'
 			},
-			R : 'Before Present (BP) years, 距今。',
+			R : 'Before Present (BP) years, 距今。非精確時。usage: 2950±110 BP.',
 			href : 'https://en.wikipedia.org/wiki/Before_Present'
+		}, Year_numbering(1950, true, true, true) ],
+
+		HE : [ {
+			a : {
+				T : 'Holocene calendar'
+			},
+			R : 'Holocene calendar, 全新世紀年或人類紀年. 有採用0年。 1 BCE = 10000 HE',
+			href : 'https://en.wikipedia.org/wiki/Holocene_calendar'
+		}, Year_numbering(10000) ],
+
+		Unix : [ {
+			a : {
+				T : 'Unix time'
+			},
+			R : 'Unix time (a.k.a. POSIX time or Epoch time), Unix時間戳記不考慮閏秒。',
+			href : 'https://en.wikipedia.org/wiki/Unix_time'
+		}, CeL.date.Unix_time ],
+
+		Excel : [ {
+			a : {
+				T : 'Excel'
+			},
+			R : 'Microsoft Excel for Windows 使用 1900 日期系統。',
+			href : 'http://support.microsoft.com/kb/214094',
+			S : 'font-size:.8em;'
 		}, function(date) {
-			return '約' + (1950 - date.getFullYear()) + '年';
+			return (date = CeL.date.Excel_date(date))
+			//
+			&& (date | 0) || CeL.Excel_date.error_value;
+		} ],
+
+		Excel_Mac : [ {
+			a : {
+				T : 'Excel Mac'
+			},
+			R : 'Microsoft Excel for Mac 使用 1904 日期系統。',
+			href : 'http://support.microsoft.com/kb/214094',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return (date = CeL.date.Excel_date.Mac(date))
+			//
+			&& (date | 0) || CeL.Excel_date.error_value;
 		} ]
 
 	};

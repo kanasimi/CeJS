@@ -21,6 +21,10 @@ if (typeof CeL === 'function')
 
 		'前綴' : '接頭辞',
 
+		'Before Present' : '何年前',
+		'Holocene calendar' : '人類紀元',
+		'Unix time' : 'Unix時間',
+
 		'伊斯蘭曆' : 'ヒジュラ暦',
 		'希伯來曆' : 'ユダヤ暦',
 		'傣曆' : 'タイ暦',
@@ -38,6 +42,8 @@ if (typeof CeL === 'function')
 		"Maya Tzolk'in" : 'マヤ神聖暦',
 		"Maya Haab'" : 'マヤ文化暦',
 		'羅馬建城' : 'ローマ建国紀元',
+		// http://suchowan.at.webry.info/201407/article_8.html
+		'塞琉古紀元' : 'セレウコス紀元',
 
 		'增加此欄' : 'この列を追加する',
 		'除去此欄' : 'この列を削除する',

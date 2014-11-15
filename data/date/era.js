@@ -5322,15 +5322,16 @@ if (typeof CeL === 'function')
 					} else if (年 && !isNaN(年 = numeralize_date_name(年))) {
 						date = ((年 < 0 ? 年 : 年.pad(4)) + '年'
 						//
-						+ (月?(numeralize_date_name(月) || START_MONTH)+ '月'
+						+ (月 ? (numeralize_date_name(月) || START_MONTH)
+								+ '月'
+								//
+								+ (日 ? (numeralize_date_name(日) || START_DATE)
+										+ '日' : '')
 						//
-						+ (日?(numeralize_date_name(日) || START_DATE)+'日':'')
-						//
-						:''))
-								.to_Date({
-									parser : standard_time_parser,
-									period_end : options.period_end
-								});
+						: '')).to_Date({
+							parser : standard_time_parser,
+							period_end : options.period_end
+						});
 
 						if (!date || isNaN(date.getTime())) {
 							// 可能到這邊的:如 '1880年庚辰月庚辰日庚辰時'。
