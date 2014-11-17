@@ -395,7 +395,10 @@ function String_to_Date_default_parser(date_string,
 
 	var date_data, period_end = options.period_end,
 	// matched string
-	matched;
+	matched,
+	//
+	no_year_0 = 'no_year_0' in options ? options.no_year_0
+			: String_to_Date.no_year_0;
 
 	date_string = date_string.trim();
 	if (isNaN(minute_offset))
@@ -407,13 +410,20 @@ function String_to_Date_default_parser(date_string,
 			'').trim();
 
 	if (matched = date_string
-			.match(/^[^\d\/\-:日月年]*([0-4]?\d{3}|[前\-−‐]\d{1,4})[^\d\/\-:日月]*$/)) {
-		// 僅有 xxx/1xxx/2xxx 年(year)時的bug
-		date_string = matched[1];
-		if (period_end)
-			date_string++,
+	// U+2212 '−': minus sign
+	.match(/^[^\d\/\-:日月年前]*([0-4]?\d{3}|([前\-−‐]?\d{1,4})年|[前\-−‐]\d{1,4})[^\d\/\-:日月年前]*$/)) {
+		// 僅有 xxx/1xxx/2xxx 年(year) 時。
+		date_string = (matched[2] || matched[1]).replace(/^[前−]/, '-000');
+		if (period_end) {
+			matched = date_string.indexOf('00') !== NOT_FOUND;
+			if (!++date_string)
+				// 預防 前1年 → 0年。
+				date_string = no_year_0 ? '0001' : '0000';
+			else if (matched && (date_string = '00' + date_string).length < 4)
+				date_string = '0' + date_string;
 			// 已處理過 period_end，因此除去此 flag。
 			period_end = false;
+		}
 		date_string += '/1';
 	} else
 		// 依照中文之習慣，日期 + 時間中間可不加空格。
@@ -447,10 +457,7 @@ function String_to_Date_default_parser(date_string,
 	library_namespace.debug(date_data.join('<br />'), 2,
 	'String_to_Date_default_parser');
 
-	var year, tmp = date_data.pop(),
-	//
-	no_year_0 = 'no_year_0' in options ? options.no_year_0
-			: String_to_Date.no_year_0;
+	var year, tmp = date_data.pop();
 
 	if (tmp === 'P' || tmp === 'p')
 		// is PM (else: AM or 24-hour format)
@@ -553,7 +560,7 @@ String_to_Date.parser = {
 			options.no_year_0 = true;
 		var date_value = String_to_Date_default_parser(
 				date_string, minute_offset, options);
-		return date_value < Gregorian_reform_of(options.reform)
+		return date_value - Gregorian_reform_of(options.reform) < 0
 		//
 		? Julian_String_to_Date(date_string, minute_offset,
 				options) : date_value;
@@ -843,7 +850,9 @@ Date_to_String.parser = {
 		if (!('no_year_0' in options))
 			options.no_year_0 = true;
 
-		return (date_value < Gregorian_reform_of(options.reform) ? Date_to_Julian : Date_to_Gregorian)(date_value, format, locale, options);
+		return (date_value - Gregorian_reform_of(options.reform) < 0
+		//
+		? Date_to_Julian : Date_to_Gregorian)(date_value, format, locale, options);
 	},
 
 	//	Turn to RFC 822 date-time

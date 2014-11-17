@@ -1343,8 +1343,8 @@ function new_node(nodes, layer) {
 		'' + nodes;
 
 	else if (library_namespace.is_Object(nodes)) {
-		// 不更動到原先的 arguments。
-		nodes = Object.assign(library_namespace.null_Object(), nodes);
+		// 不更動到原先的 arguments。但無作用。
+		//nodes = Object.assign(library_namespace.null_Object(), nodes);
 
 		var tag_key, tag = nodes.$, n = 'className', ns, s, ignore = {
 			// tag

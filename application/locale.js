@@ -1803,6 +1803,8 @@ gettext.conversion = {
 		},
 		// 打折扣。e.g., 打六折、打七二折、30% off（30﹪折扣，70% on sale）。
 		// https://zh.wikipedia.org/wiki/%E6%8A%98%E6%89%A3
+		// "% off" may use "⁒ off" 'COMMERCIAL MINUS SIGN' (U+2052).
+		// commercial minus sign is used in commercial or tax related forms or publications in several European countries, including Germany and Scandinavia.
 		折 : function (number) {
 			number = (100 * number).to_fixed(0);
 			// check

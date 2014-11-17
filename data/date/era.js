@@ -144,9 +144,14 @@ _c0=CeL.era('曆B',{get_era:1}).calendar[0];CeL.assert(['9,5,0',[_c0.start,_c0.l
 _c0=CeL.era('曆C',{get_era:1}).calendar[0];CeL.assert(['9,4,NaN',[_c0.start,_c0.length,+_c0.leap].join()],'測試 參照紀年之演算機制:9月–');
 
 // test period_end of era()
-CeL.assert([CeL.era('1627年',{date_only:true,period_end:true}).format('CE'), '1627年'.to_Date({parser:'CE',period_end:true}).format('CE')]);
-CeL.assert([CeL.era('1627年9月',{date_only:true,period_end:true}).format('CE'), '1627年9月'.to_Date({parser:'CE',period_end:true}).format('CE')]);
-CeL.assert([CeL.era('1627年9月3日',{date_only:true,period_end:true}).format('CE'), '1627年9月3日'.to_Date({parser:'CE',period_end:true}).format('CE')]);
+CeL.assert([CeL.era('1627年',{date_only:true,period_end:true}).format('CE'), '1627年'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 年');
+CeL.assert([CeL.era('1627年9月',{date_only:true,period_end:true}).format('CE'), '1627年9月'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 月');
+CeL.assert([CeL.era('1627年9月3日',{date_only:true,period_end:true}).format('CE'), '1627年9月3日'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 日');
+CeL.assert(['0001年'.to_Date().format(),'0001/1/1'.to_Date().format()],'1/1/1');
+CeL.assert(['前1年'.to_Date().format(),'-1年'.to_Date().format()],'year -1');
+CeL.assert(['前1年'.to_Date({parser:'CE',period_end:true}).format('CE'),'0001年'.to_Date('CE').format('CE')],'period_end of CE');
+CeL.assert([CeL.era('前1年',{period_end:true}).format('CE'),'0001年'.to_Date('CE').format('CE')],'period_end of CE@era()');
+
 
 CeL.info('測試全部通過。');
 
@@ -483,11 +488,11 @@ if (typeof CeL === 'function')
 				天皇 : 1,
 				// 自唐朝以後，廟號在前、諡號在後的連稱方式，構成已死帝王的全號。
 				// 唐朝以前的皇帝有廟號者較少，所以對歿世的皇帝一般簡稱諡號，如漢武帝、隋明帝，不稱廟號。唐朝以後，由於皇帝有廟號者佔絕大多數，所以多稱廟號，如唐太宗、宋太宗等。
-				// 諡 : 1,
-				// 廟號 : 1,
+				諡 : 1,
+				廟號 : 1,
 				// 尊號: 君主、后妃在世時的稱呼。不需避諱
 				// 尊號 : 1,
-				// 封號 : 1,
+				封號 : 1,
 				分期 : 1,
 
 				// period
@@ -497,9 +502,14 @@ if (typeof CeL === 'function')
 				政權 : 2,
 				國號 : 2,
 
+				// state 州
+				// Ancient Chinese states
+				// https://en.wikipedia.org/wiki/Ancient_Chinese_states
 				諸侯國 : 3,
 				// country
 				國家 : 3
+				// nation
+				//民族 : 3
 			},
 
 			// era data refrence 對應

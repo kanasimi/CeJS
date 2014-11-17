@@ -15,7 +15,6 @@
  戰後臺灣歷史年表 http://twstudy.iis.sinica.edu.tw/twht/
  +著名人物/歷史名人生辰,生卒,出生逝世年份月日@線圖
  +君主
- 中國皇帝壽命列表 https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E7%9A%87%E5%B8%9D%E5%AF%BF%E5%91%BD%E5%88%97%E8%A1%A8
 
  </code>
  */
@@ -428,7 +427,7 @@ function show_calendar(era_name) {
 		title = [ {
 			div : [ {
 				T : '增加此欄',
-				S : 'cursor: pointer;',
+				C : 'column_select_button',
 				onclick : function() {
 					CeL.toggle_display('column_to_select');
 					return false;
@@ -605,7 +604,8 @@ function recover_SVG_text_properties() {
 function date_to_loc(date, start_date) {
 	var ratio = SVG_object && SVG_object.ratio;
 	if (!ratio) {
-		CeL.warn('date_to_loc: 尚未設定 ratio!');
+		CeL.warn('date_to_loc: '
+		+(SVG_object ? '尚未設定 ratio!' : no_SVG_message));
 		return;
 	}
 
@@ -750,7 +750,11 @@ function add_tag(period, data, group) {
 			return;
 		}
 		// 因為是 period_end，因此須取前一單位。
-		arg_passed = new Date(arg_passed - 1);
+		if (arg_passed.format(draw_era.date_options) === '1/1/1')
+			// TODO: 以更好的方法考慮 no_year_0 的問題。
+			arg_passed = '-1/12/31 23:59:59.999'.to_Date('CE');
+		else
+			arg_passed = new Date(arg_passed - 1);
 		title = '–' + arg_passed.format(draw_era.date_options) + ', '
 				+ count_roughly_duration(date, arg_passed);
 		arg_passed = [ [ date, arg_passed ], ,
@@ -822,6 +826,9 @@ add_tag.show = function(array_data) {
 	array_data[1] = height;
 
 	var lastAdd = show_range.apply(null, array_data);
+	if (!lastAdd)
+		// no SVG support?
+		return;
 
 	// 點擊後消除。
 	lastAdd.style.cursor = 'pointer';
@@ -869,11 +876,31 @@ add_tag.load = function(id, callback) {
 	}
 };
 
+add_tag.parse = function(group, data, line_separator, date_index, title_index, description_index, field_separator) {
+	if (!field_separator)
+		field_separator = '\t';
+	if (isNaN(date_index))
+		date_index = 0;
+	if (isNaN(title_index))
+		title_index = 1;
+	data.split(line_separator || '|').forEach(function(line) {
+		if (!line)
+			return;
+		line = line.split(field_separator);
+		line.title = line[title_index];
+		if (description_index && line[description_index])
+			line.description = line[description_index];
+		add_tag(line[date_index], line, group);
+	});
+};
+
 add_tag.data_file = {
+	'中國皇帝生卒' : [ 'resource/emperor.js',
+	// 資料來源 title, URL, memo
+	'中國皇帝壽命列表', 'https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E7%9A%87%E5%B8%9D%E5%AF%BF%E5%91%BD%E5%88%97%E8%A1%A8' ],
+
 	// 臺灣歷史地震時間軸視覺化（英文：Visulation）
-	'臺灣地震' : [ 'resource/quake.js',
-	// 資料來源 title, URL
-	'臺灣地震年表', 'http://921kb.sinica.edu.tw/history/quake_history.html' ]
+	'臺灣地震' : [ 'resource/quake.js', '臺灣地震年表', 'http://921kb.sinica.edu.tw/history/quake_history.html' ]
 };
 
 // ---------------------------------------------------------------------//
@@ -1679,7 +1706,9 @@ window.oncontextmenu = function(e) {
 	}
 };
 
-var SVG_min_width = 600, SVG_min_height = 500, SVG_padding = 30;
+var SVG_min_width = 600, SVG_min_height = 500, SVG_padding = 30,
+//
+no_SVG_message = '您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉，無法繪製紀年時間軸線圖。';
 function affairs() {
 	CeL.log({
 		T : 'Initializing..'
@@ -1838,10 +1867,11 @@ function affairs() {
 		CeL.get_element('era_graph').style.display = 'none';
 		SVG_object = null;
 		delete select_panels['era_graph'];
+		delete select_panels['data_layer'];
 		if (is_IE11)
 			// 多按幾次就會 hang 住。
 			CeL.err('IE 11 尚無法使用線圖。請考慮使用 Chrome 或 Firefox 等網頁瀏覽器。');
-		CeL.warn('您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉，無法繪製紀年時間軸線圖。');
+		CeL.warn(no_SVG_message);
 	}
 
 	// -----------------------------
@@ -1890,13 +1920,20 @@ function affairs() {
 				target : '_blank'
 			} : i[1], ')' ];
 
+		if (i[3]) {
+			if (!Array.isArray(o))
+				o = [ o ];
+			o.push(i[3]);
+		}
+
 		list.push({
 			div : o,
 			C : 'data_line'
 		});
 	}
 
-	CeL.new_node(list, 'data_layer');
+	if (SVG_object)
+		CeL.new_node(list, 'data_layer');
 
 	// -----------------------------
 
