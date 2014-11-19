@@ -605,7 +605,7 @@ function date_to_loc(date, start_date) {
 	var ratio = SVG_object && SVG_object.ratio;
 	if (!ratio) {
 		CeL.warn('date_to_loc: '
-		+(SVG_object ? '尚未設定 ratio!' : no_SVG_message));
+				+ (SVG_object ? '尚未設定 ratio!' : no_SVG_message));
 		return;
 	}
 
@@ -876,7 +876,8 @@ add_tag.load = function(id, callback) {
 	}
 };
 
-add_tag.parse = function(group, data, line_separator, date_index, title_index, description_index, field_separator) {
+add_tag.parse = function(group, data, line_separator, date_index, title_index,
+		description_index, field_separator) {
 	if (!field_separator)
 		field_separator = '\t';
 	if (isNaN(date_index))
@@ -895,12 +896,16 @@ add_tag.parse = function(group, data, line_separator, date_index, title_index, d
 };
 
 add_tag.data_file = {
-	'中國皇帝生卒' : [ 'resource/emperor.js',
-	// 資料來源 title, URL, memo
-	'中國皇帝壽命列表', 'https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E7%9A%87%E5%B8%9D%E5%AF%BF%E5%91%BD%E5%88%97%E8%A1%A8', '僅列到年份，尚不夠精確。' ],
+	'中國皇帝生卒' : [
+			'resource/emperor.js',
+			// 資料來源 title, URL, memo
+			'中國皇帝壽命列表',
+			'https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E7%9A%87%E5%B8%9D%E5%AF%BF%E5%91%BD%E5%88%97%E8%A1%A8',
+			'僅列到年份，尚不夠精確。' ],
 
 	// 臺灣歷史地震時間軸視覺化（英文：Visulation）
-	'臺灣地震' : [ 'resource/quake.js', '臺灣地震年表', 'http://921kb.sinica.edu.tw/history/quake_history.html' ]
+	'臺灣地震' : [ 'resource/quake.js', '臺灣地震年表',
+			'http://921kb.sinica.edu.tw/history/quake_history.html' ]
 };
 
 // ---------------------------------------------------------------------//

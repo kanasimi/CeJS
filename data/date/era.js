@@ -484,6 +484,7 @@ if (typeof CeL === 'function')
 				君主 : 1,
 				// 君主姓名
 				君主名 : 1,
+				// 君主字 : 1,
 				帝王 : 1,
 				天皇 : 1,
 				// 自唐朝以後，廟號在前、諡號在後的連稱方式，構成已死帝王的全號。
@@ -508,8 +509,8 @@ if (typeof CeL === 'function')
 				諸侯國 : 3,
 				// country
 				國家 : 3
-				// nation
-				//民族 : 3
+			// nation
+			// 民族 : 3
 			},
 
 			// era data refrence 對應
@@ -613,22 +614,37 @@ if (typeof CeL === 'function')
 			// search_index 必須允許以 ({String}key in search_index)
 			// 的方式來偵測是否具有此 key。
 
-			function for_each_era_of_key(key, operator) {
-				var eras = search_index[key];
+			function for_each_era_of_key(key, operator, queue) {
+				// 預防循環參照用。
+				function not_in_queue(key) {
+					if (!queue.has(key)) {
+						queue.add(key);
+						return true;
+					}
+					library_namespace.debug('skip [' + eras[i] + ']. (queue: ['
+							+ queue.values() + '])', 1, 'for_each_era_of_key');
+				}
+
+				var eras = search_index[key],
+				//
+				for_single = function(era) {
+					if (not_in_queue(era))
+						operator(era);
+				};
+
+				if (!library_namespace.is_Set(queue))
+					queue = new Set;
+				// assert: queue is Set.
 
 				// era: Era, Set, []
 				if (Array.isArray(eras)) {
-					eras[0].forEach(function(era) {
-						operator(era);
-					});
+					eras[0].forEach(for_single);
 
 					for (var i = 1; i < eras.length; i++)
-						for_each_era_of_key(eras[i], operator);
-
+						if (not_in_queue(eras[i]))
+							for_each_era_of_key(eras[i], operator, queue);
 				} else
-					eras.forEach(function(era) {
-						operator(era);
-					});
+					eras.forEach(for_single);
 			}
 
 			// bug: 當擅自改變子紀年時，將因 cache 而無法得到正確的 size。
@@ -642,10 +658,10 @@ if (typeof CeL === 'function')
 
 					if (Array.isArray(queue)) {
 						if (queue.indexOf(key) !== NOT_FOUND) {
-							library_namespace.err(
-							//
-							'era_count_of_key: 別名設定存在循環參照！您應該改正別名設定: '
-									+ queue.join('→') + '→' + key);
+							library_namespace.debug(
+							// 將造成之後遇到此 key 時，使 for_each_era_of_key() 不斷循環參照。
+							'別名設定存在循環參照！您應該改正別名設定: ' + queue.join('→') + '→'
+									+ key, 1, 'era_count_of_key');
 							return 0;
 						}
 						queue.push(key);
@@ -672,6 +688,7 @@ if (typeof CeL === 'function')
 						set = library_namespace.Set_from_Array(eras[0]);
 						for (; i < length; i++)
 							for_each_era_of_key(eras[i], function(era) {
+								console.log(String(era));
 								set.add(era);
 							});
 						eras.cache = set;
