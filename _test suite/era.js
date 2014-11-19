@@ -869,7 +869,7 @@ add_tag.load = function(id, callback) {
 		data.loaded = 'loading @ ' + new Date;
 		// [0]: path
 		CeL.run(data[0], function() {
-			data.loaded = 'loaded @ ' + new Date;
+			data.loaded = 'loaded @ ' + (new Date).format();
 			if (typeof callback === 'function')
 				callback(id, data);
 		});
@@ -897,7 +897,7 @@ add_tag.parse = function(group, data, line_separator, date_index, title_index, d
 add_tag.data_file = {
 	'中國皇帝生卒' : [ 'resource/emperor.js',
 	// 資料來源 title, URL, memo
-	'中國皇帝壽命列表', 'https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E7%9A%87%E5%B8%9D%E5%AF%BF%E5%91%BD%E5%88%97%E8%A1%A8' ],
+	'中國皇帝壽命列表', 'https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E7%9A%87%E5%B8%9D%E5%AF%BF%E5%91%BD%E5%88%97%E8%A1%A8', '僅列到年份，尚不夠精確。' ],
 
 	// 臺灣歷史地震時間軸視覺化（英文：Visulation）
 	'臺灣地震' : [ 'resource/quake.js', '臺灣地震年表', 'http://921kb.sinica.edu.tw/history/quake_history.html' ]
@@ -1923,7 +1923,7 @@ function affairs() {
 		if (i[3]) {
 			if (!Array.isArray(o))
 				o = [ o ];
-			o.push(i[3]);
+			o.push(' ', i[3]);
 		}
 
 		list.push({

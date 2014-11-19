@@ -1710,8 +1710,8 @@ var reform_by_region = {
 	'Great Britain' : '1752/9/14',
 	'Sweden' : '1753/3/1',
 	'Finland' : '1753/3/1',
-	'Japan' : '1873/1/1',
-	'China' : '1911/11/20',
+	// 'Japan' : '1873/1/1',
+	// 'China' : '1911/11/20',
 	'Bulgaria' : '1916/4/14',
 	// USSR, U.S.S.R.
 	'Soviet Union' : '1918/2/14',

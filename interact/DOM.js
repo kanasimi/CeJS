@@ -2514,6 +2514,15 @@ _// JSDT:_module_
 table_list = table_list;
 
 
+/*
+
+Array.from_table(CeL.get_file(file_name))
+//
+.forEach(function(field) {
+	// field === [ tr ];
+});
+
+*/
 function Array_from_table(table_element, options) {
 	if (typeof table_element === 'string')
 		if (/<table\s/i.test(table_element)) {
