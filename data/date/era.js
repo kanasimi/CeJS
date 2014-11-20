@@ -53,8 +53,8 @@ CeL.log(['今天是農曆: ', 今天的農曆日期]);
 CeL.run('data.date.era', function() {
 
 // 設計上所要求必須通過之測試範例：測試正確性。
-CeL.assert(['孺子嬰',CeL.era('初始').君主]);
-CeL.assert(['孺子嬰','初始元年11月1日'.to_Date('era').君主]);
+CeL.assert(['孺子嬰',CeL.era('初始').君主],'初始.君主: 孺子嬰#1');
+CeL.assert(['孺子嬰','初始元年11月1日'.to_Date('era').君主],'初始.君主: 孺子嬰#2');
 CeL.assert(['庚辰年庚辰月庚辰日庚辰時','一八八〇年四月二十一日七時'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'可提供統一時間標準與各干支間的轉換。統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。');
 CeL.assert(['清德宗光緒六年三月十三日',CeL.to_Chinese_numeral('一八八〇年四月二十一日七時'.to_Date('era').format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'}))],'查詢一八八〇年四月二十一日七時的中曆日期');
 CeL.assert(['1628年3月1日','明思宗崇禎1年1月26日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
@@ -466,10 +466,13 @@ if (typeof CeL === 'function')
 			參照_PATTERN = /^(?:(.*?)=)?:(.+)$/,
 
 			// 可指示尚存疑資料，例如傳說時代之資料。
-			準_ENUM = {
+			準確程度_ENUM = {
 				疑 : '尚存疑',
+				// 為傳說時代之資料
 				傳說 : '傳說時代'
 			},
+
+			主要索引名稱 = '紀年,君主,朝代,國家'.split(','),
 
 			// 配合 parse_era() 與 get_next_era()。
 			// 因為須從範圍小的開始搜尋，因此範圍小的得排前面！
@@ -484,6 +487,7 @@ if (typeof CeL === 'function')
 				君主 : 1,
 				// 君主姓名
 				君主名 : 1,
+				// 表字,小字
 				// 君主字 : 1,
 				帝王 : 1,
 				天皇 : 1,
@@ -595,6 +599,12 @@ if (typeof CeL === 'function')
 				Object.seal(CE_REFORM_YEAR_DATA);
 			})();
 
+			if (false)
+				// assert: this is already done.
+				主要索引名稱.forEach(function(name, index) {
+					紀年名稱索引值[name] = index;
+				});
+
 			// 預設國家。
 			// parse_era.default_country = '中國';
 
@@ -688,7 +698,7 @@ if (typeof CeL === 'function')
 						set = library_namespace.Set_from_Array(eras[0]);
 						for (; i < length; i++)
 							for_each_era_of_key(eras[i], function(era) {
-								console.log(String(era));
+								// console.log(String(era));
 								set.add(era);
 							});
 						eras.cache = set;
@@ -3350,9 +3360,11 @@ if (typeof CeL === 'function')
 				// 依該年之月分資料，找出此時間點相應之月分、日碼(date of month)。
 				date.name = this.name;
 				date.紀年名 = this.toString();
-				for (tmp in 紀年名稱索引值)
-					if (tmp2 = this.name[紀年名稱索引值[tmp]])
-						date[tmp] = tmp2;
+				// for '初始.君主: 孺子嬰#1'
+				主要索引名稱.forEach(function(name, index) {
+					if (tmp = this.name[index])
+						date[name] = tmp;
+				}, this);
 
 				if (this.曆法)
 					date.曆法 = this.曆法;
@@ -4559,14 +4571,14 @@ if (typeof CeL === 'function')
 
 					// 處理 accuracy/準度/誤差/正確度。
 					if (!last_era_data.準)
-						for (i in 準_ENUM)
+						for (i in 準確程度_ENUM)
 							if (last_era_data[i]) {
 								last_era_data.準 = i;
 								break;
 							}
 					// check 準度。
 					if (i = last_era_data.準) {
-						if (!/^\d*[年月日]$/.test(i) && !(i in 準_ENUM))
+						if (!/^\d*[年月日]$/.test(i) && !(i in 準確程度_ENUM))
 							library_namespace.warn('parse_era: 未支援紀年[' + 紀年
 									+ ']所指定之準確度：[' + i + ']');
 						if (!last_era_data.calendar && !last_era_data.精)

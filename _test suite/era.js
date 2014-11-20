@@ -1378,7 +1378,7 @@ function input_era(key) {
 	original_input.apply(this, arguments);
 }
 
-var 準_MSG = {
+var 準確程度_MESSAGE = {
 	疑 : '尚存疑',
 	傳說 : '為傳說時代之資料'
 }, J_translate = {
@@ -1426,6 +1426,27 @@ function add_contemporary(era, output_numeral) {
 }
 
 function translate_era(era) {
+
+	function add_注(key, name) {
+		function add_item(note, index) {
+			output.push({
+				br : null
+			}, name || key, isNaN(index) ? '' : ' ' + (index + 1), '：', {
+				span : note,
+				C : 'note'
+			});
+		}
+
+		if (date[key]) {
+			if (!Array.isArray(output))
+				output = [ output ];
+			if (Array.isArray(date[key]))
+				date[key].forEach(add_item);
+			else
+				add_item(date[key]);
+		}
+	}
+
 	if (!era)
 		era = era_input_object.setValue();
 
@@ -1491,40 +1512,20 @@ function translate_era(era) {
 					onclick : click_title_as_era
 				};
 
-			if (date.曆法)
-				output = [ output, {
-					br : null
-				}, '採用曆法: ', date.曆法 ];
-
-			if (date.據) {
-				if (!Array.isArray(output))
-					output = [ output ];
-				output.push({
-					br : null
-				}, '出典：', {
-					span : date.據,
-					C : 'note'
-				});
-			}
-
-			if (date.注) {
-				if (!Array.isArray(output))
-					output = [ output ];
-				date.注.forEach(function(note, index) {
-					output.push({
-						br : null
-					}, '注 ' + (index + 1) + '：', {
-						span : note,
-						C : 'note'
-					});
-				});
-			}
+			add_注('曆法', '採用曆法');
+			add_注('據', '出典');
+			add_注('君主名', '君主名字');
+			// add_注('君主');
+			add_注('君主字');
+			add_注('諡');
+			add_注('廟號');
+			add_注('注');
 
 			if (date.準 || date.精) {
 				if (!Array.isArray(output))
 					output = [ output ];
 				output.unshift({
-					em : [ '此輸出值', 準_MSG[date.準] || '僅約略準確至'
+					em : [ '此輸出值', 準確程度_MESSAGE[date.準] || '僅約略準確至'
 					//
 					+ (date.準 || date.精)
 					//
