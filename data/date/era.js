@@ -506,12 +506,13 @@ if (typeof CeL === 'function')
 				朝代 : 2,
 				政權 : 2,
 				國號 : 2,
-
 				// state 州
 				// Ancient Chinese states
 				// https://en.wikipedia.org/wiki/Ancient_Chinese_states
-				諸侯國 : 3,
+				諸侯國 : 2,
+
 				// country
+				// e.g., 中國, 日本
 				國家 : 3
 			// nation
 			// 民族 : 3
@@ -521,6 +522,7 @@ if (typeof CeL === 'function')
 			// sorted by: start Date 標準時間(如UTC+8) → parse_era() 插入順序.
 			era_list = [],
 
+			// era tree.
 			// period_root[國家]
 			// = 次階層 Period
 			period_root = new Period,
@@ -685,8 +687,9 @@ if (typeof CeL === 'function')
 				return size;
 			}
 
+			// 取得以 key 登錄之所有 era。
 			// get era Set of {String}key
-			function get_era_Set_of_key(key) {
+			function get_era_Set_of_key(key, list) {
 				var eras = search_index[key];
 
 				if (Array.isArray(eras))
@@ -708,6 +711,7 @@ if (typeof CeL === 'function')
 				return eras;
 			}
 
+			// 登錄 key，使 search_index[key] 可以找到 era。
 			// 可處理重複 key 之情況，而不覆蓋原有值。
 			function add_to_era_by_key(key, era) {
 				if (!key || !era || key === era)
@@ -986,10 +990,20 @@ if (typeof CeL === 'function')
 			// ---------------------------------------------------------------------//
 
 			// 時期/時段 class。
-			function Period(start, end) {
+			function Period(start, end, name) {
+				// {Integer}
 				this.start = start;
+				// {Integer}
 				this.end = end;
+				// this.sub[sub Period name] = sub Period
 				this.sub = library_namespace.null_Object();
+				// 屬性值 attributes
+				// e.g., this.attribute[君主名] = {String}君主名
+				this.attribute = library_namespace.null_Object();
+
+				// {String}
+				if (name)
+					this.name = name;
 
 				// 階層序數: 0, 1, 2..
 				// this.bar = [ [], [], ..];
@@ -3358,13 +3372,22 @@ if (typeof CeL === 'function')
 				// 若年分起始未初始化，則初始化、解壓縮之。
 				// 依年分起始 Date value，以 binary search 找到年分。
 				// 依該年之月分資料，找出此時間點相應之月分、日碼(date of month)。
-				date.name = this.name;
+				date.name = this.name.slice();
 				date.紀年名 = this.toString();
 				// for '初始.君主: 孺子嬰#1'
 				主要索引名稱.forEach(function(name, index) {
 					if (tmp = this.name[index])
 						date[name] = tmp;
 				}, this);
+
+				for (var tmp = this.name.length,
+				// 設定其他屬性。
+				tmp2 = period_root; tmp > 0;) {
+					tmp2 = tmp2.sub[this.name[--tmp]];
+					if (!tmp2)
+						break;
+					Object.assign(date, tmp2.attribute);
+				}
 
 				if (this.曆法)
 					date.曆法 = this.曆法;
@@ -3458,7 +3481,7 @@ if (typeof CeL === 'function')
 								.to_standard('Chinese')
 					});
 
-				// 後期修正。
+				// 後期修正。post fix.
 				if (typeof this.fix === 'function')
 					this.fix(date);
 
@@ -4474,16 +4497,19 @@ if (typeof CeL === 'function')
 					i = 紀年名稱索引值.國家;
 					k = undefined;
 					tmp = period_root;
+					// [ , 君主, 朝代, 國家 ]
+					var period_attribute_hierarchy = [];
 					for (var start = 起訖[0].getTime(),
 					//
 					end = 起訖[1].getTime();;) {
-						// 擴張 period 之時間範圍。
+						// 若本 era 之時間範圍於原 period 外，
+						// 則擴張 period 之時間範圍以包含本 era。
 						if (!(tmp.start <= start))
 							tmp.start = start;
 						if (!(end <= tmp.end))
 							tmp.end = end;
 
-						if (!(j = 紀年[i--]) || i < 0) {
+						if (!(j = 紀年[i]) || i <= 0) {
 							if (j || (j = k)) {
 								if (!tmp.era)
 									tmp.era = library_namespace.null_Object();
@@ -4510,12 +4536,11 @@ if (typeof CeL === 'function')
 						}
 
 						k = j;
-						if (j in tmp.sub)
-							tmp = tmp.sub[j];
-						else
-							(tmp = tmp.sub[j] = new Period(start, end))
-							//
-							.name = j;
+						if (!(j in tmp.sub))
+							tmp.sub[j] = new Period(start, end, j);
+						period_attribute_hierarchy[i--]
+						// move to sub-period.
+						= (tmp = tmp.sub[j]).attribute;
 					}
 
 					library_namespace.debug('設定紀年[' + 紀年 + ']搜尋用 index。', 2);
@@ -4531,20 +4556,40 @@ if (typeof CeL === 'function')
 					for (i in 附加屬性) {
 						j = 附加屬性[i];
 						if (i in 紀年名稱索引值) {
-							i = 紀年名稱索引值[i];
+							i = 紀年名稱索引值[tmp = i];
+							// now: tmp = name,
+							// i = 紀年名稱索引值 index of name
+							// e.g., tmp = 君主名, i = 1
 
+							// 解開屬性值。
+							// j = 'a;b' → k = [ 'a', 'b' ]
 							if (Array.isArray(j)) {
-								tmp = [];
+								k = [];
 								j.forEach(function(name) {
-									Array_push(tmp, name
+									Array_push(k, name
 									//
 									.split(pack_era.era_name_separator));
 								});
 
 							} else
-								tmp = j.split(pack_era.era_name_separator);
+								k = j.split(pack_era.era_name_separator);
 
-							tmp.forEach(function(name) {
+							// i === 0，即紀元本身時，毋須搬移。
+							if (0 < i) {
+								// j: attribute of hierarchy[i]
+								j = period_attribute_hierarchy[i];
+								if (tmp in j)
+									// 解決重複設定、多重設定問題。
+									// assert: Array.isArray(j[tmp])
+									Array_push(j[tmp], k);
+								else
+									j[tmp] = k;
+								// 將此屬性搬移、設定到 period_root 之 tree 中。
+								delete 附加屬性[tmp];
+							}
+
+							// 設定所有屬性值之 index
+							k.forEach(function(name) {
 								if (name && 紀年.indexOf(name) === NOT_FOUND) {
 									add_to_era_by_key(name,
 									// 對 i 不為 0–2 的情況，將 last_era_data 直接加進去。
@@ -4939,7 +4984,7 @@ if (typeof CeL === 'function')
 					}
 				}
 
-				// 取交集。
+				// 取 key 與 (紀年_list) 之交集。
 				function get_intersection(key) {
 					if (key.start && key.end) {
 						origin = false;
@@ -4950,7 +4995,7 @@ if (typeof CeL === 'function')
 						return 紀年_list;
 					}
 
-					library_namespace.debug('取交集 [' + key + ']', 2,
+					library_namespace.debug('Get 紀年 list of [' + key + ']', 2,
 							'to_era_Date');
 					var list = get_era_Set_of_key(key);
 					if (!list ||
@@ -4964,6 +5009,8 @@ if (typeof CeL === 'function')
 						return 紀年_list = list;
 					}
 
+					library_namespace.debug('取交集 of [' + key + ']', 2,
+							'to_era_Date');
 					紀年_list.forEach(function(era) {
 						if (!list.has(era))
 							check_to_modify(), 紀年_list['delete'](era);

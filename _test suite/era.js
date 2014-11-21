@@ -1431,7 +1431,7 @@ function translate_era(era) {
 		function add_item(note, index) {
 			output.push({
 				br : null
-			}, name || key, isNaN(index) ? '' : ' ' + (index + 1), '：', {
+			}, name || key, 0 < index ? ' ' + (index + 1) : '', '：', {
 				span : note,
 				C : 'note'
 			});
@@ -1531,11 +1531,7 @@ function translate_era(era) {
 					//
 					+ (/^\d+[年月日]$/.test(date.準 || date.精) ? '前後' : ''),
 							'，僅供參考： ' ]
-				}
-
-				)
-
-				;
+				});
 			}
 		}
 
