@@ -1427,11 +1427,13 @@ function add_contemporary(era, output_numeral) {
 
 function translate_era(era) {
 
-	function add_注(key, name) {
+	function add_注(key, name, add_node) {
 		function add_item(note, index) {
 			output.push({
 				br : null
-			}, name || key, 0 < index ? ' ' + (index + 1) : '', '：', {
+			}, {
+				T : name || key
+			}, 0 < index ? ' ' + (index + 1) : '', '：', add_node && add_node(note) || {
 				span : note,
 				C : 'note'
 			});
@@ -1514,7 +1516,13 @@ function translate_era(era) {
 
 			add_注('曆法', '採用曆法');
 			add_注('據', '出典');
-			add_注('君主名', '君主名字');
+			add_注('君主名', '君主姓名', function (note) {
+				return {
+					a : note,
+					href : 'https://zh.wikipedia.org/wiki/' + note,
+					C : 'note'
+				};
+			});
 			// add_注('君主');
 			add_注('君主字');
 			add_注('諡');

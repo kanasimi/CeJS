@@ -488,7 +488,7 @@ if (typeof CeL === 'function')
 				// 君主姓名
 				君主名 : 1,
 				// 表字,小字
-				// 君主字 : 1,
+				君主字 : 1,
 				帝王 : 1,
 				天皇 : 1,
 				// 自唐朝以後，廟號在前、諡號在後的連稱方式，構成已死帝王的全號。
@@ -990,7 +990,7 @@ if (typeof CeL === 'function')
 			// ---------------------------------------------------------------------//
 
 			// 時期/時段 class。
-			function Period(start, end, name) {
+			function Period(start, end) {
 				// {Integer}
 				this.start = start;
 				// {Integer}
@@ -1001,13 +1001,20 @@ if (typeof CeL === 'function')
 				// e.g., this.attribute[君主名] = {String}君主名
 				this.attribute = library_namespace.null_Object();
 
-				// {String}
-				if (name)
-					this.name = name;
+				// .name, .parent: see Period.prototype.add_sub()
 
 				// 階層序數: 0, 1, 2..
 				// this.bar = [ [], [], ..];
 			}
+
+			Period.prototype.add_sub = function(start, end, name) {
+				var sub = this.sub[name] = new Period(start, end);
+				// {String}
+				sub.name = name;
+				sub.parent = this;
+				// return this;
+				return sub;
+			};
 
 			Period.prototype.toString = function(type) {
 				var name = this.name;
@@ -3372,13 +3379,12 @@ if (typeof CeL === 'function')
 				// 若年分起始未初始化，則初始化、解壓縮之。
 				// 依年分起始 Date value，以 binary search 找到年分。
 				// 依該年之月分資料，找出此時間點相應之月分、日碼(date of month)。
-				date.name = this.name.slice();
+
+				// Object.seal(紀年);
+				// date.name = this.name.slice();
+				date.name = this.name;
+
 				date.紀年名 = this.toString();
-				// for '初始.君主: 孺子嬰#1'
-				主要索引名稱.forEach(function(name, index) {
-					if (tmp = this.name[index])
-						date[name] = tmp;
-				}, this);
 
 				for (var tmp = this.name.length,
 				// 設定其他屬性。
@@ -3388,6 +3394,18 @@ if (typeof CeL === 'function')
 						break;
 					Object.assign(date, tmp2.attribute);
 				}
+
+				// for '初始.君主: 孺子嬰#1'
+				主要索引名稱.forEach(function(name, index) {
+					if (tmp = this.name[index])
+						if (date[name])
+							if (Array.isArray(date[name]))
+								date[name].unshift(tmp);
+							else
+								date[name] = [ tmp, date[name] ];
+						else
+							date[name] = tmp;
+				}, this);
 
 				if (this.曆法)
 					date.曆法 = this.曆法;
@@ -4537,7 +4555,7 @@ if (typeof CeL === 'function')
 
 						k = j;
 						if (!(j in tmp.sub))
-							tmp.sub[j] = new Period(start, end, j);
+							tmp.add_sub(start, end, j);
 						period_attribute_hierarchy[i--]
 						// move to sub-period.
 						= (tmp = tmp.sub[j]).attribute;
@@ -4754,6 +4772,27 @@ if (typeof CeL === 'function')
 
 			// ---------------------------------------------------------------------//
 			// 工具函數。
+
+			// callback(dynasty_name, dynasty);
+			function for_dynasty(callback, filter) {
+				for (var nation_name in period_root.sub) {
+					var nations = period_root.sub[nation_name].sub;
+					for (var dynasty_name in nations)
+						callback(dynasty_name, nations[dynasty_name]);
+				}
+			}
+
+			// callback(monarch_name, monarch);
+			function for_monarch(callback, filter) {
+				for (var nation_name in period_root.sub) {
+					var nations = period_root.sub[nation_name].sub;
+					for (var dynasty_name in nations) {
+						var dynasty = nations[dynasty_name].sub;
+						for (var monarch_name in dynasty)
+							callback(monarch_name, nations[monarch_name]);
+					}
+				}
+			}
 
 			function add_contemporary(date, 指定紀年, options) {
 				var tmp, date_index,
@@ -6342,6 +6381,8 @@ if (typeof CeL === 'function')
 				get_candidate : get_candidate,
 				dates : get_dates,
 				era_list : create_era_search_pattern,
+				for_dynasty : for_dynasty,
+				for_monarch : for_monarch,
 				numeralize : numeralize_date_name,
 				compare_start : compare_start_date,
 				// 網頁應用功能。
