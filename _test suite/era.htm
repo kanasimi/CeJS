@@ -63,6 +63,15 @@ td {
 }
 
 /* ↑ copy from game.css */
+#analysis, #language {
+	float: right;
+}
+
+#input_panel {
+	/* 一開始先 hidden */
+	display: none;
+}
+
 .column_select_button {
 	color: #a4d;
 	font-weight: bold;
@@ -159,6 +168,30 @@ td {
 	color: #e11;
 	background-color: #ff1;
 	padding: .3em;
+}
+
+.onprogress {
+	margin-left: 1em;
+	padding: .2em;
+	border-radius: .2em;
+	color: #bbb;
+}
+
+.onprogress.loaded {
+	color: #2a2;
+}
+
+.onprogress.loading {
+	color: #f63;
+	background-color: #afa;
+}
+
+.onprogress.loaded:before {
+	content: "✓ ";
+}
+
+.onprogress.loading:before {
+	content: "→ ";
 }
 
 .note_botton {
@@ -384,38 +417,37 @@ tr.selected>td a {
 
 <body>
 
-	<div id="analysis" style="float: right;">
+	<div id="analysis">
 		<a title="visitor"
 			href="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&point=T"><img
 			src="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&mode=pic&page=CeL&point=era" /></a>
 		<g:plusone></g:plusone>
 	</div>
 
-	<div id="language" style="float: right;"></div>
+	<div id="language"></div>
 
-	<span data-gettext="取得紀年"></span>
-	<!-- https://www.google.com/intl/en/chrome/demos/speech.html -->
-	<input id="era_input" title="來源紀年與日期" type="text" speech="Text"
-		continue="true" nospeechtimeout="60000"
-		x-webkit-speech="x-webkit-speech" x-webkit-grammar="builtin:translate"
-		lang="cmn-Hant-TW" />
-	<span data-gettext="之"></span>
-	<span id="format_type_bar"></span>
-	<br />
-	<!-- http://www.fileformat.info/info/emoji/list.htm -->
-	<!-- ⌚ ⌛ ⏰ ⏱ ⏲   -->
-	📅
-	<span data-gettext="輸出格式:"></span>
-	<input id="output_format" title="輸出格式" />
-	<a href="#"
-		onclick="output_numeral=output_numeral==='Chinese'?'':'Chinese';this.className=output_numeral==='Chinese'?'selected':'unselected';translate_era();return false;"
-		data-gettext="中文數字" title="輸出中文數字"></a>
-	<a href="#" id="translate" title="執行轉換">→</a>
-	<span id="era_output"></span>
+	<div id="input_panel">
+		<span data-gettext="取得紀年"></span>
+		<!-- https://www.google.com/intl/en/chrome/demos/speech.html -->
+		<input id="era_input" title="來源紀年與日期" type="text" speech="Text"
+			continue="true" nospeechtimeout="60000"
+			x-webkit-speech="x-webkit-speech"
+			x-webkit-grammar="builtin:translate" lang="cmn-Hant-TW" /> <span
+			data-gettext="之"></span> <span id="format_type_bar"></span> <br />
+		<!-- http://www.fileformat.info/info/emoji/list.htm -->
+		<!-- ⌚ ⌛ ⏰ ⏱ ⏲   -->
+		📅 <span data-gettext="輸出格式:"></span> <input id="output_format"
+			title="輸出格式" /> <a href="#"
+			onclick="output_numeral=output_numeral==='Chinese'?'':'Chinese';this.className=output_numeral==='Chinese'?'selected':'unselected';translate_era();return false;"
+			data-gettext="中文數字" title="輸出中文數字"></a> <a href="#" id="translate"
+			title="執行轉換">→</a> <span id="era_output"></span>
+	</div>
 
 	<div id="note_botton_layer" class="LOADING">
-		正進行程式初始化作業，請稍待片刻…<br />⏰ Loading... 少しお待ちください。<br />如等待超過30秒，請<a
-			href="#" onclick="history.go(0);return false;">重新整理</a>試試。
+		<div id="loading_progress" title="loading progress bar">
+			正進行程式初始化作業，請稍待片刻…<br />⏰ Loading... 少しお待ちください。
+		</div>
+		如等待超過30秒，請<a href="#" onclick="history.go(0);return false;">重新整理</a>試試。
 	</div>
 	<div id="example" class="note_panel"></div>
 	<div id="input_history" class="note_panel">

@@ -87,13 +87,51 @@ function initializer() {
 				// loaded.
 				// google.setOnLoadCallback(affairs);
 
-			}, affairs ];
+			} ];
 
 	if (location.protocol === 'file:')
 		// 當 include 程式碼，執行時不 catch error 以作防範。
 		CeL.env.no_catch = true;
 	else
 		queue.push('http://apis.google.com/js/plusone.js');
+
+	// console.info('Starting to load..');
+	// 因為載入時間較長，使用此功能可降低反應倦怠感，改善體驗。
+	CeL.env.era_data_load = function(country, list) {
+		if (CeL.is_Object(country)) {
+			console.info('Starting ' + list);
+			var nodes = [ {
+				T : 'Loading..'
+			} ], length = list.length;
+			if (!length)
+				throw new Error('No era data got!');
+
+			list.forEach(function(country) {
+				nodes.push({
+					T : country,
+					id : 'loading_progress' + --length,
+					C : 'onprogress'
+				});
+			});
+			nodes[1].C += ' loading';
+
+			CeL.remove_all_child('loading_progress');
+			CeL.new_node(nodes, 'loading_progress');
+
+		} else if (!list) {
+			console.info('all loaded.');
+			setTimeout(affairs, 0);
+
+		} else {
+			console.info(list);
+			CeL.set_class('loading_progress' + list.length, {
+				loading : false,
+				loaded : true,
+			});
+			if (0 <= (list = list.length - 1))
+				CeL.set_class('loading_progress' + list, 'loading');
+		}
+	};
 
 	CeL.run(queue);
 }
@@ -1433,10 +1471,11 @@ function translate_era(era) {
 				br : null
 			}, {
 				T : name || key
-			}, 0 < index ? ' ' + (index + 1) : '', '：', add_node && add_node(note) || {
-				span : note,
-				C : 'note'
-			});
+			}, 0 < index ? ' ' + (index + 1) : '', '：', add_node
+					&& add_node(note) || {
+						span : note,
+						C : 'note'
+					});
 		}
 
 		if (date[key]) {
@@ -1516,7 +1555,7 @@ function translate_era(era) {
 
 			add_注('曆法', '採用曆法');
 			add_注('據', '出典');
-			add_注('君主名', '君主姓名', function (note) {
+			add_注('君主名', '君主姓名', function(note) {
 				return {
 					a : note,
 					href : 'https://zh.wikipedia.org/wiki/' + note,
@@ -1723,6 +1762,8 @@ function affairs() {
 	CeL.log({
 		T : 'Initializing..'
 	}, true);
+
+	CeL.toggle_display('input_panel', true);
 
 	_.create_menu('language', [ 'TW', 'ja', 'en' ]);
 
@@ -2441,5 +2482,8 @@ function affairs() {
 
 	CeL.log('初始化完畢。您可開始進行操作。');
 }
+
+// 改善體驗，降低反應倦怠感。
+document.getElementById('loading_progress').innerHTML = 'The main page is loaded. Initializing the library...<br />已載入主網頁。正進行程式初始化作業，請稍待片刻…';
 
 CeL.run(initializer);

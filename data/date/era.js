@@ -4775,20 +4775,20 @@ if (typeof CeL === 'function')
 
 			// callback(dynasty_name, dynasty);
 			function for_dynasty(callback, filter) {
-				for (var nation_name in period_root.sub) {
+				for ( var nation_name in period_root.sub) {
 					var nations = period_root.sub[nation_name].sub;
-					for (var dynasty_name in nations)
+					for ( var dynasty_name in nations)
 						callback(dynasty_name, nations[dynasty_name]);
 				}
 			}
 
 			// callback(monarch_name, monarch);
 			function for_monarch(callback, filter) {
-				for (var nation_name in period_root.sub) {
+				for ( var nation_name in period_root.sub) {
 					var nations = period_root.sub[nation_name].sub;
-					for (var dynasty_name in nations) {
+					for ( var dynasty_name in nations) {
 						var dynasty = nations[dynasty_name].sub;
-						for (var monarch_name in dynasty)
+						for ( var monarch_name in dynasty)
 							callback(monarch_name, nations[monarch_name]);
 					}
 				}
@@ -6417,7 +6417,7 @@ if (typeof CeL === 'function')
 						library_namespace.get_module_path(this.id).replace(
 								/[^.]+$/, 'css'),
 						// TODO: set timeout
-						// 載入各紀年期間曆數資料。
+						// 載入各紀年期間曆數資料 (era_data.js)。
 						library_namespace.get_module_path(this.id + '_data')
 				//
 				], waiting);

@@ -3711,7 +3711,7 @@ function doAlertScroll(m){var oI;
  * 3. 用 +/- 設定。<br />
  * 4. https://developer.mozilla.org/en/DOM/element.classList
  * @param element	HTML elements
- * @param class_name	class name || TODO: {class name 1:, class name 2:, ..}
+ * @param class_name	class name || TODO: {class name 1: true, class name 2: false, ..}
  * @param options
  * default: just add the specified className
  * options.reset:	reset className (else just add)
@@ -3731,11 +3731,11 @@ function set_class(element, class_name, options) {
 		return;
 
 	if (!options)
-		options = {};
+		options = library_namespace.null_Object();
 
 	var c;
 
-	if (class_name && !options.remove) {
+	if (class_name && !library_namespace.is_Object(class_name) && !options.remove) {
 		c = Array.isArray(class_name) ? class_name.join(' ') : class_name;
 		if (!options.reset)
 			// add 時不 detect 是為了速度.
@@ -3748,11 +3748,21 @@ function set_class(element, class_name, options) {
 
 	//library_namespace.debug('set_class: remove [' + class_name + '] from [' + o.className + ']');
 	c = element.className.split(/\s+/);
-	var r = {}, i, changed;
+	var r = library_namespace.null_Object(), i, changed = options.reset;
 
 	//	設定原先的 className. TODO: 增進效率。
-	for (i in c)
-		r[c[i]] = true;
+	if (!changed)
+		for (i in c)
+			r[c[i]] = true;
+
+	if (library_namespace.is_Object(class_name)) {
+		for (c in class_name)
+			if (r[c] !== !!class_name[c])
+				changed = true,
+				r[c] = !!class_name[c];
+		// 已處理過，忽略 options.remove，不再處理。
+		class_name = null;
+	}
 
 	if (options.remove && class_name) {
 		if (!Array.isArray(class_name))
@@ -3765,13 +3775,15 @@ function set_class(element, class_name, options) {
 				delete r[c];
 			}
 		}
-		if (changed) {
-			c = [];
-			for (i in r)
+	}
+
+	if (changed) {
+		c = [];
+		for (i in r)
+			if (r[i])
 				c.push(i);
-			element.className = c.join(' ').trim();
-			//library_namespace.debug('set_class: → ['+element.className+']');
-		}
+		element.className = c.join(' ').trim();
+		// library_namespace.debug('set_class: → ['+element.className+']');
 	}
 
 	return r;
