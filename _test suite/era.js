@@ -983,7 +983,7 @@ function draw_era(hierarchy) {
 	add_tag.group_count = CeL.null_Object();
 
 	SVG_object.hierarchy = hierarchy;
-	var periods = CeL.era.periods(hierarchy),
+	var periods = CeL.era.periods(hierarchy, draw_era.options),
 	//
 	period_hierarchy = Array.isArray(hierarchy) && hierarchy.length > 0 ? hierarchy
 			.join(era_name_classifier)
@@ -1239,6 +1239,10 @@ function draw_era(hierarchy) {
 		CeL.debug('No group found.', 2);
 
 }
+
+draw_era.options = {
+	merge_periods : true
+};
 
 draw_era.default_group = '\n';
 // draw_era.tags[group][period] = [ date_range, height_range, title, style ];
@@ -1953,64 +1957,87 @@ function affairs() {
 
 	// -----------------------------
 
-	list = [ {
-		div : {
-			T : '請選擇所欲載入之資料圖層。'
-		}
-	} ];
+	if (SVG_object) {
 
-	v = add_tag.data_file;
-	for (i in v) {
-		o = {
-			a : i,
-			href : '#',
-			target : '_self',
-			title : i,
-			C : 'data_item',
+		// 設置選項
+		CeL.new_node([ {
+			T : '紀年線圖選項：'
+		}, {
+			T : '合併歷史時期',
 			onclick : function() {
-				var group = this.title, status = add_tag.load(group, true);
-				if (status)
-					CeL.info('data layer [' + group + ']: ' + status);
-				else
-					add_tag.load(group, function() {
-						CeL.new_node({
-							span : '✓',
-							C : 'loaded_mark'
-						}, [ this.parentNode, 1 ]);
-						this.className += ' loaded';
-						CeL.new_node([ ' ... ', {
-							T : [ '已載入 %1 筆資料。', add_tag.group_count[group] ],
-							C : 'status'
-						} ], this.parentNode);
-					}.bind(this));
+				CeL.set_class(this, 'setted', {
+					remove : draw_era.options.merge_periods
+				});
+				draw_era.options.merge_periods
+				//
+				= !draw_era.options.merge_periods;
 				return false;
+			},
+			C : 'option' + (draw_era.options.merge_periods ? ' setted' : '')
+		} ], 'era_graph_options');
+
+		// 資料圖層
+		list = [ {
+			div : {
+				T : '請選擇所欲載入之資料圖層。'
 			}
-		};
+		} ];
 
-		i = v[i];
-		if (i[1])
-			o = [ o, ' (', {
-				T : '資料來源'
-			}, ': ', i[2] ? {
-				a : i[1],
-				href : i[2],
-				target : '_blank'
-			} : i[1], ')' ];
+		v = add_tag.data_file;
+		for (i in v) {
+			o = {
+				a : i,
+				href : '#',
+				target : '_self',
+				title : i,
+				C : 'data_item',
+				onclick : function() {
+					var group = this.title, status = add_tag.load(group, true);
+					if (status)
+						CeL.info('data layer [' + group + ']: ' + status);
+					else
+						add_tag.load(group, function() {
+							CeL.new_node({
+								span : '✓',
+								C : 'loaded_mark'
+							}, [ this.parentNode, 1 ]);
+							this.className += ' loaded';
+							CeL.new_node([
+									' ... ',
+									{
+										T : [ '已載入 %1 筆資料。',
+												add_tag.group_count[group] ],
+										C : 'status'
+									} ], this.parentNode);
+						}.bind(this));
+					return false;
+				}
+			};
 
-		if (i[3]) {
-			if (!Array.isArray(o))
-				o = [ o ];
-			o.push(' ', i[3]);
+			i = v[i];
+			if (i[1])
+				o = [ o, ' (', {
+					T : '資料來源'
+				}, ': ', i[2] ? {
+					a : i[1],
+					href : i[2],
+					target : '_blank'
+				} : i[1], ')' ];
+
+			if (i[3]) {
+				if (!Array.isArray(o))
+					o = [ o ];
+				o.push(' ', i[3]);
+			}
+
+			list.push({
+				div : o,
+				C : 'data_line'
+			});
 		}
 
-		list.push({
-			div : o,
-			C : 'data_line'
-		});
-	}
-
-	if (SVG_object)
 		CeL.new_node(list, 'data_layer');
+	}
 
 	// -----------------------------
 

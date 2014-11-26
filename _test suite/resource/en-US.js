@@ -67,6 +67,9 @@ if (typeof CeL === 'function')
 
 		'難辨識時段：' : 'Unobvious periods: ',
 
+		'紀年線圖選項：' : 'Options of era graph:',
+		'合併歷史時期' : 'Combine historical periods',
+
 		'請選擇所欲載入之資料圖層。' : 'Please select the layer you want to load.',
 		'資料來源' : 'Data source',
 		'已載入 %1 筆資料。' : function(domain_name, arg) {

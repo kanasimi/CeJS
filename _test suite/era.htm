@@ -298,6 +298,27 @@ tr.selected>td a {
 	color: #999;
 }
 
+#era_graph_options .option {
+	cursor: pointer;
+	color: #aaa;
+	background-color: #fef;
+	margin-left: .5em;
+	padding: .2em;
+	border-radius: .2em;
+}
+
+#era_graph_options .option:before {
+	content: "✗ ";
+}
+
+#era_graph_options .setted {
+	color: #52b;
+}
+
+#era_graph_options .setted:before {
+	content: "✓ ";
+}
+
 #data_layer_menu {
 	padding: .5em;
 	background-color: #efe;
@@ -1029,6 +1050,7 @@ tr.selected>td a {
 		<div id="era_graph_SVG"></div>
 		<div id="data_layer_menu"></div>
 		<div id="era_graph_unobvious"></div>
+		<div id="era_graph_options"></div>
 	</div>
 
 	<div id="data_layer"></div>

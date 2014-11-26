@@ -5826,7 +5826,8 @@ if (typeof CeL === 'function')
 					}
 				}
 
-				return period_now.bar[PERIOD_KEY]
+				return options && options.merge_periods
+						&& period_now.bar[PERIOD_KEY]
 				//
 				? period_now.bar[PERIOD_KEY][''] : period_now.bar;
 			}
