@@ -3756,10 +3756,11 @@ function set_class(element, class_name, options) {
 			r[c[i]] = true;
 
 	if (library_namespace.is_Object(class_name)) {
+		// 僅更動 class_name 指涉的部分。
 		for (c in class_name)
-			if (r[c] !== !!class_name[c])
+			if (r[c] !== (i = !!class_name[c]))
 				changed = true,
-				r[c] = !!class_name[c];
+				r[c] = i;
 		// 已處理過，忽略 options.remove，不再處理。
 		class_name = null;
 	}

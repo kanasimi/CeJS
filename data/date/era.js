@@ -311,6 +311,12 @@ if (typeof CeL === 'function')
 
 			COUNT_KEY = 'count',
 
+			PERIOD_KEY = '時期',
+			//
+			PERIOD_PREFIX = 'p:',
+			//
+			PERIOD_PATTERN = new RegExp('^' + PERIOD_PREFIX + '(.+)$'),
+
 			// set normal month count of a year.
 			MONTH_COUNT = 12,
 
@@ -500,8 +506,6 @@ if (typeof CeL === 'function')
 				封號 : 1,
 				分期 : 1,
 
-				// period
-				時期 : 2,
 				// dynasty
 				朝代 : 2,
 				政權 : 2,
@@ -510,6 +514,9 @@ if (typeof CeL === 'function')
 				// Ancient Chinese states
 				// https://en.wikipedia.org/wiki/Ancient_Chinese_states
 				諸侯國 : 2,
+				// 歷史時期 period. e.g., 魏晉南北朝, 五代十國
+				時期 : 2,
+				// period : 2,
 
 				// country
 				// e.g., 中國, 日本
@@ -776,8 +783,10 @@ if (typeof CeL === 'function')
 					return [];
 
 				if (!start_key)
+					// .start
 					start_key = 'start';
 				if (!end_key)
+					// .end
 					end_key = 'end';
 
 				var bars = [], all_end = -Infinity,
@@ -998,20 +1007,43 @@ if (typeof CeL === 'function')
 				// this.sub[sub Period name] = sub Period
 				this.sub = library_namespace.null_Object();
 				// 屬性值 attributes
-				// e.g., this.attribute[君主名] = {String}君主名
-				this.attribute = library_namespace.null_Object();
+				// e.g., this.attributes[君主名] = {String}君主名
+				this.attributes = library_namespace.null_Object();
 
-				// .name, .parent: see Period.prototype.add_sub()
+				// .name, .parent, .level: see Period.prototype.add_sub()
 
 				// 階層序數: 0, 1, 2..
+				// see get_periods()
 				// this.bar = [ [], [], ..];
 			}
 
+			Period.is_Period = function(value) {
+				return value.constructor === Period;
+			};
+
 			Period.prototype.add_sub = function(start, end, name) {
-				var sub = this.sub[name] = new Period(start, end);
+				var sub;
+				if (typeof start === 'object' && start.start) {
+					sub = start;
+					name = end;
+				} else
+					sub = new Period(start, end);
+
+				if (!name)
+					name = sub.name;
+
+				// 若子 period/era 之時間範圍於原 period (this) 外，
+				// 則擴張原 period 之時間範圍，以包含本 period/era。
+				if (!(this.start <= sub.start))
+					this.start = sub.start;
+				if (!(sub.end <= this.end))
+					this.end = sub.end;
+
+				this.sub[name] = sub;
 				// {String}
 				sub.name = name;
 				sub.parent = this;
+				sub.level = (this.level | 0) + 1;
 				// return this;
 				return sub;
 			};
@@ -3392,7 +3424,7 @@ if (typeof CeL === 'function')
 					tmp2 = tmp2.sub[this.name[--tmp]];
 					if (!tmp2)
 						break;
-					Object.assign(date, tmp2.attribute);
+					Object.assign(date, tmp2.attributes);
 				}
 
 				// for '初始.君主: 孺子嬰#1'
@@ -4556,9 +4588,10 @@ if (typeof CeL === 'function')
 						k = j;
 						if (!(j in tmp.sub))
 							tmp.add_sub(start, end, j);
+
 						period_attribute_hierarchy[i--]
 						// move to sub-period.
-						= (tmp = tmp.sub[j]).attribute;
+						= (tmp = tmp.sub[j]).attributes;
 					}
 
 					library_namespace.debug('設定紀年[' + 紀年 + ']搜尋用 index。', 2);
@@ -4594,7 +4627,7 @@ if (typeof CeL === 'function')
 
 							// i === 0，即紀元本身時，毋須搬移。
 							if (0 < i) {
-								// j: attribute of hierarchy[i]
+								// j: attributes of hierarchy[i]
 								j = period_attribute_hierarchy[i];
 								if (tmp in j)
 									// 解決重複設定、多重設定問題。
@@ -5614,6 +5647,88 @@ if (typeof CeL === 'function')
 				return list;
 			}
 
+			// 將 era object 增加到 list 結構中。
+			function add_period(object, list, options) {
+				var has_period;
+				function add_object(o) {
+					list.push(o);
+					// 掃描有無時期設定。
+					// era 無 .attributes
+					if (o.attributes && o.attributes[PERIOD_KEY])
+						// assert: Array.isArray(o.attributes.時期);
+						// assert: o.level === 2
+						// === 主要索引名稱.length - 紀年名稱索引值.時期
+						o.attributes[PERIOD_KEY].forEach(function(p) {
+							if (!list[PERIOD_KEY][p]) {
+								has_period = true;
+								(list[PERIOD_KEY][p] = new Period).name
+								//
+								= PERIOD_PREFIX + p;
+							}
+							list[PERIOD_KEY][p].add_sub(o);
+						});
+					else
+						list[PERIOD_KEY][''].push(o);
+				}
+
+				var is_created = !list[PERIOD_KEY];
+				if (is_created)
+					list[PERIOD_KEY] = {
+						'' : []
+					};
+
+				for ( var name in object) {
+					if (!Array.isArray(name = object[name]))
+						name = [ name ];
+
+					name.forEach(function(o) {
+						// 去除循環相依。
+						if (o === object)
+							return;
+
+						if (!options.含參照用 && Period.is_Period(o)) {
+							var i;
+							// 只要 .sub, .era
+							// 有任一個不是"參照用"，那就顯示出來。
+							for (i in o.sub) {
+								if (!o.sub[i].參照用) {
+									add_object(o);
+									return;
+								}
+							}
+							for (i in o.era) {
+								if (!o.era[i].參照用) {
+									add_object(o);
+									return;
+								}
+							}
+
+						} else if (options.含參照用 || !o.參照用) {
+							add_object(o);
+							return;
+						}
+
+						if (library_namespace.is_debug())
+							library_namespace.info([ 'add_period: ', {
+								T : [ '跳過 [%1]：本[%2]僅供參照用。', o, 'period' ]
+							} ]);
+					});
+				}
+
+				if (has_period) {
+					for ( var p in list[PERIOD_KEY])
+						if (p !== '')
+							list[PERIOD_KEY][''].push(list[PERIOD_KEY][p]);
+				} else if (is_created)
+					// 無時期之標注。
+					delete list[PERIOD_KEY];
+
+				// return list;
+			}
+
+			// get_periods('中國/p:魏晉南北朝'.split('/'))
+			// get_periods('中國/p:魏晉南北朝/成漢'.split('/'))
+			// get_periods('中國/成漢'.split('/'))
 			/**
 			 * 取得指定層次/關鍵字之紀年列表。<br />
 			 * 
@@ -5640,16 +5755,25 @@ if (typeof CeL === 'function')
 
 				if (hierarchy)
 					if (!Array.isArray(hierarchy))
-						if (hierarchy.constructor === Period)
+						if (Period.is_Period(hierarchy))
 							period_now = hierarchy.sub, hierarchy = null;
 						else
 							hierarchy = [ hierarchy ];
 
-				// 將 period_now 指到指定層次。
+				// 將 period_now 推到指定層次。
 				if (hierarchy && hierarchy.length)
 					hierarchy.forEach(function(name) {
-						if (period_now)
-							period_now = period_now.sub[name];
+						// skip 時期/分類/分區.
+						if (!period_now)
+							return;
+						var matched = name.match(PERIOD_PATTERN);
+						period_now =
+						//
+						matched && period_now[PERIOD_KEY][matched = matched[1]]
+						//
+						? period_now[PERIOD_KEY][matched]
+						//
+						: period_now.sub[name];
 					});
 
 				if (!period_now) {
@@ -5659,55 +5783,52 @@ if (typeof CeL === 'function')
 				}
 
 				if (!period_now.bar) {
-					var list = [], name, add = function(object) {
-						for (name in object) {
-							(Array.isArray(name = object[name]) ? name
-									: [ name ]).forEach(function(o) {
-								// 去除循環相依。
-								if (o === object)
-									return;
-
-								if (!options.含參照用 && o.sub) {
-									// is Period
-									var i;
-									// 只要 .sub, .era
-									// 有任一個不是"參照用"，那就顯示出來。
-									for (i in o.sub)
-										if (!o.sub[i].參照用) {
-											list.push(o);
-											return;
-										}
-									for (i in o.era)
-										if (!o.era[i].參照用) {
-											list.push(o);
-											return;
-										}
-
-								} else if (options.含參照用 || !o.參照用) {
-									list.push(o);
-									return;
-								}
-
-								if (library_namespace.is_debug())
-									library_namespace.info([
-											'get_periods: ',
-											{
-												T : [ '跳過 [%1]：本[%2]僅供參照用。', o,
-														'period' ]
-											} ]);
-							});
-						}
-					};
 					// 前置處理。
 					if (!library_namespace.is_Object(options))
 						options = library_namespace.null_Object();
-					add(period_now.sub);
-					add(period_now.era);
+					var list = [];
+					add_period(period_now.sub, list, options);
+					add_period(period_now.era, list, options);
 					// 作 cache。
 					period_now.bar = order_bar(list.sort(compare_start_date));
+					if (list = list[PERIOD_KEY]) {
+						period_now.bar[PERIOD_KEY] = library_namespace
+								.null_Object();
+						period_now[PERIOD_KEY] = library_namespace
+								.null_Object();
+						for ( var period_name in list) {
+							var period_list = list[period_name];
+							if (Array.isArray(period_list))
+								period_list = order_bar(period_list
+										.sort(compare_start_date));
+							else {
+								// assert: period_name && period_name !== ''
+								// assert: Period.is_Period(list[period_name])
+								var period_data
+								//
+								= period_now[PERIOD_KEY][period_name]
+								//
+								= period_list;
+								period_list = [];
+								for ( var _p in period_data.sub)
+									period_list.push(period_data.sub[_p]);
+								period_list = order_bar(period_list
+										.sort(compare_start_date));
+								period_data.bar = period_list;
+							}
+
+							(period_now.bar[PERIOD_KEY][period_name]
+							//
+							= period_list)
+							//
+							.name = PERIOD_PREFIX + period_name;
+						}
+					}
 				}
 
-				return period_now.bar;
+				return period_now.bar[PERIOD_KEY]
+				//
+				? period_now.bar[PERIOD_KEY][''] : period_now.bar;
 			}
 
 			// 文字式曆譜:年曆,朔閏表,曆日譜。
@@ -6388,7 +6509,8 @@ if (typeof CeL === 'function')
 				// 網頁應用功能。
 				node_era : caculate_node_era,
 				setup_nodes : set_up_era_nodes,
-				to_HTML : era_text_to_HTML
+				to_HTML : era_text_to_HTML,
+				PERIOD_PATTERN : PERIOD_PATTERN
 			});
 
 			library_namespace.十二生肖_LIST = 十二生肖_LIST;

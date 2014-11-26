@@ -95,11 +95,18 @@ function initializer() {
 	else
 		queue.push('http://apis.google.com/js/plusone.js');
 
-	// console.info('Starting to load..');
+	// console.info('Start loading..');
 	// 因為載入時間較長，使用此功能可降低反應倦怠感，改善體驗。
 	CeL.env.era_data_load = function(country, list) {
+		function set_done(index) {
+			CeL.set_class('loading_progress' + index, {
+				loading : false,
+				loaded : true,
+			});
+		}
+
 		if (CeL.is_Object(country)) {
-			console.info('Starting ' + list);
+			// console.info('Starting ' + list);
 			var nodes = [ {
 				T : 'Loading..'
 			} ], length = list.length;
@@ -119,15 +126,13 @@ function initializer() {
 			CeL.new_node(nodes, 'loading_progress');
 
 		} else if (!list) {
-			console.info('all loaded.');
+			// console.info('all loaded.');
+			set_done(0);
 			setTimeout(affairs, 0);
 
 		} else {
-			console.info(list);
-			CeL.set_class('loading_progress' + list.length, {
-				loading : false,
-				loaded : true,
-			});
+			// console.info(list);
+			set_done(list.length);
 			if (0 <= (list = list.length - 1))
 				CeL.set_class('loading_progress' + list, 'loading');
 		}
@@ -1022,17 +1027,27 @@ function draw_era(hierarchy) {
 			//
 			name = is_Era ? period.name[0] : period.name,
 			//
+			name_showed = name.match(CeL.era.PERIOD_PATTERN),
+			//
+			is_歷史時期 = !!(name_showed = name_showed && name_showed[1]),
+			//
 			from_x = get_from_x(period),
 			//
 			width = (period.end - period.start) * ratio,
 			// 對紀年時間過短，太窄時，線圖之處理：採垂直排列。
 			vertical_text = support_vertical_text && width < layer_height,
 			//
+			font_size;
+
+			// name_showed = is_歷史時期 ? '[' + name_showed + ']' : name;
+			if (!name_showed)
+				name_showed = name;
+
 			font_size = vertical_text
 			//
-			? Math.min(width * .8, layer_height / name.length)
+			? Math.min(width * .8, layer_height / name_showed.length)
 			//
-			: Math.min(layer_height * .8, width / name.length);
+			: Math.min(layer_height * .8, width / name_showed.length);
 
 			if (font_size < MIN_FONT_SIZE) {
 				font_size = MIN_FONT_SIZE;
@@ -1046,7 +1061,7 @@ function draw_era(hierarchy) {
 							.format(date_options));
 				duration.push(') ');
 				short_period.push({
-					a : name,
+					a : name_showed,
 					href : '#',
 					target : '_self',
 					title : period_hierarchy + name,
@@ -1072,7 +1087,7 @@ function draw_era(hierarchy) {
 					1, 存疑資料 ? '#ddd' : unobvious ?
 					// 此處需要與 #era_graph_unobvious 之
 					// background-color 一致。
-					'#ffa' : '#ddf');
+					'#ffa' : is_歷史時期 ? '#afa' : '#ddf');
 			SVG_object.addTitle(name);
 
 			// 繪製/加上時間軸線圖年代刻度。
@@ -1108,12 +1123,14 @@ function draw_era(hierarchy) {
 				style['glyph-orientation-vertical'] = 0;
 
 				// 置中: x軸設在中線。
-				SVG_object.addText(name, from_x + width / 2, layer_from_y
-						+ (layer_height - name.length * font_size) / 2, style);
+				SVG_object.addText(name_showed, from_x + width / 2,
+						layer_from_y
+								+ (layer_height - name_showed.length
+										* font_size) / 2, style);
 			} else
 				// 置中
-				SVG_object.addText(name, from_x
-						+ (width - name.length * font_size) / 2,
+				SVG_object.addText(name_showed, from_x
+						+ (width - name_showed.length * font_size) / 2,
 				// .7:
 				// 經驗法則，don't know why.
 				layer_from_y + (layer_height + font_size * .7) / 2, style);
@@ -1245,12 +1262,15 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 		hierarchy.forEach(function(name, index) {
 			period_hierarchy += (period_hierarchy ? era_name_classifier : '')
 					+ name;
+			var name_showed = name.match(CeL.era.PERIOD_PATTERN);
+			name_showed = name_showed ? '[' + name_showed[1] + ']' : name;
+
 			navigation_list.push(' » ', last_is_Era
 					&& index === hierarchy.length - 1 ? {
-				span : name,
+				span : name_showed,
 				title : period_hierarchy
 			} : {
-				a : name,
+				a : name_showed,
 				href : '#',
 				target : '_self',
 				title : period_hierarchy,
@@ -1759,6 +1779,12 @@ var SVG_min_width = 600, SVG_min_height = 500, SVG_padding = 30,
 //
 no_SVG_message = '您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉，無法繪製紀年時間軸線圖。';
 function affairs() {
+	if (!_) {
+		console.warn('程式初始化作業尚未完成。');
+		setTimeout(affairs, 80);
+		return;
+	}
+
 	CeL.log({
 		T : 'Initializing..'
 	}, true);
@@ -2483,7 +2509,9 @@ function affairs() {
 	CeL.log('初始化完畢。您可開始進行操作。');
 }
 
+document.getElementById('loading_progress').innerHTML
 // 改善體驗，降低反應倦怠感。
-document.getElementById('loading_progress').innerHTML = 'The main page is loaded. Initializing the library...<br />已載入主網頁。正進行程式初始化作業，請稍待片刻…';
+= 'The main page is loaded. Initializing the library...<br />已載入主網頁。正進行程式初始化作業，請稍待片刻…';
 
+// CeL.set_debug(2);
 CeL.run(initializer);
