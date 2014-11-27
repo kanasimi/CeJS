@@ -1784,7 +1784,7 @@ var SVG_min_width = 600, SVG_min_height = 500, SVG_padding = 30,
 no_SVG_message = '您的瀏覽器不支援 SVG，或是 SVG 動態繪圖功能已被關閉，無法繪製紀年時間軸線圖。';
 function affairs() {
 	if (!_) {
-		console.warn('程式初始化作業尚未完成。');
+		// console.warn('程式初始化作業尚未完成。');
 		setTimeout(affairs, 80);
 		return;
 	}
@@ -1965,12 +1965,13 @@ function affairs() {
 		}, {
 			T : '合併歷史時期',
 			onclick : function() {
+				var merge_periods = draw_era.options.merge_periods;
 				CeL.set_class(this, 'setted', {
-					remove : draw_era.options.merge_periods
+					remove : merge_periods
 				});
 				draw_era.options.merge_periods
 				//
-				= !draw_era.options.merge_periods;
+				= !merge_periods;
 				return false;
 			},
 			C : 'option' + (draw_era.options.merge_periods ? ' setted' : '')
