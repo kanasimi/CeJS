@@ -2,13 +2,16 @@
 'use strict';
 if (typeof CeL === 'function')
 	CeL.gettext.set_text({
-		'Julian calendar' : '儒略曆',
+		'calendar' : '曆法',
+		'Year numbering' : '編年方法',
+		// Julian/Gregorian reforms
+		'Gregorian reform' : '公曆改曆',
 
+		'Gregorian calendar' : '格里曆',
+		'Julian calendar' : '儒略曆',
 		'Before Present' : '距今',
 		'Holocene calendar' : '全新世紀年',
 		'Unix time' : 'Unix時間',
-
-		'reform' : '改曆',
 
 		// region
 		'Italy' : '意大利',

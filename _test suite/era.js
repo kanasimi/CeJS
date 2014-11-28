@@ -108,7 +108,7 @@ function initializer() {
 		if (CeL.is_Object(country)) {
 			// console.info('Starting ' + list);
 			var nodes = [ {
-				T : 'Loading..'
+				T : 'Loading...'
 			} ], length = list.length;
 			if (!length)
 				throw new Error('No era data got!');
@@ -568,7 +568,10 @@ function set_SVG_text_properties(recover) {
 		if (recover)
 			CeL.remove_all_child('era_graph_target');
 		else {
-			CeL.set_text('era_graph_target', this.title);
+			var name_showed = this.title.match(CeL.era.PERIOD_PATTERN);
+			name_showed = name_showed ? '[' + name_showed[1] + ']' : this.title;
+
+			CeL.set_text('era_graph_target', name_showed);
 			// 在 Firefox/36.0 中，或許因字體改變，造成 onmouseover 會執行兩次。
 			if (!def.base_font_size) {
 				def.base_font_size = def_style['font-size'];
@@ -1790,7 +1793,7 @@ function affairs() {
 	}
 
 	CeL.log({
-		T : 'Initializing..'
+		T : 'Initializing...'
 	}, true);
 
 	CeL.toggle_display('input_panel', true);
@@ -1837,6 +1840,7 @@ function affairs() {
 	output_format_types_reversed = CeL.null_Object();
 	// reset output_format_types to local language expression.
 	output_format_types = CeL.null_Object();
+	// 在地化的輸出格式。
 	if (_.is_domain_name('ja'))
 		o['六曜'] = '%六曜';
 	for (i in o) {
@@ -1964,6 +1968,7 @@ function affairs() {
 			T : '紀年線圖選項：'
 		}, {
 			T : '合併歷史時期',
+			title : 'e.g., 三國兩晉南北朝, 五代十國',
 			onclick : function() {
 				var merge_periods = draw_era.options.merge_periods;
 				CeL.set_class(this, 'setted', {
@@ -2073,10 +2078,14 @@ function affairs() {
 	// for 皇紀.
 	kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset);
 
-	calendar_column = {
+	// calendar_column
+	list = {
+		// 公曆日期格式
 		JDN : [
 				{
-					a : 'JDN',
+					a : {
+						T : 'JDN'
+					},
 					R : _('Julian Day Number')
 							+ '\n以 UTC 相同日期當天正午12時為準。\n因此 2000/1/1 轉為 2451545。',
 					href : 'https://en.wikipedia.org/wiki/Julian_Day_Number'
@@ -2091,7 +2100,9 @@ function affairs() {
 
 		JD : [
 				{
-					a : 'JD',
+					a : {
+						T : 'JD'
+					},
 					R : _('Julian Date')
 							+ '\n以「紀元使用地真正之時間」相同日期當天凌晨零時為準。\n因此對中國之朝代、紀年，2000/1/1 將轉為 2451544.1666... (2000/1/1 0:0 UTC+8)',
 					href : 'http://en.wikipedia.org/wiki/Julian_day'
@@ -2103,6 +2114,17 @@ function affairs() {
 					date.adapt_offset('');
 					return date_String;
 				} ],
+
+		Gregorian : [ {
+			a : {
+				T : 'Gregorian calendar'
+			},
+			R : 'Gregorian calendar',
+			href : 'https://en.wikipedia.org/wiki/Gregorian_calendar',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return date.format('%Y/%m/%d');
+		} ],
 
 		Julian : [ {
 			a : {
@@ -2156,6 +2178,96 @@ function affairs() {
 			//
 			: CeL.week_date(date, true);
 		} ],
+
+		BP : [ {
+			a : {
+				T : 'Before Present'
+			},
+			R : 'Before Present (BP) years, 距今。非精確時。usage: 2950±110 BP.',
+			href : 'https://en.wikipedia.org/wiki/Before_Present'
+		}, Year_numbering(1950, true, true, true) ],
+
+		HE : [ {
+			a : {
+				T : 'Holocene calendar'
+			},
+			R : 'Holocene calendar, 全新世紀年或人類紀年. 有採用0年。 1 BCE = 10000 HE',
+			href : 'https://en.wikipedia.org/wiki/Holocene_calendar'
+		}, Year_numbering(10000) ],
+
+		Unix : [ {
+			a : {
+				T : 'Unix time'
+			},
+			R : 'Unix time (a.k.a. POSIX time or Epoch time), Unix時間戳記不考慮閏秒。',
+			href : 'https://en.wikipedia.org/wiki/Unix_time'
+		}, CeL.date.Unix_time ],
+
+		Excel : [ {
+			a : {
+				T : 'Excel'
+			},
+			R : 'Microsoft Excel for Windows 使用 1900 日期系統。',
+			href : 'http://support.microsoft.com/kb/214094',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return (date = CeL.date.Excel_date(date))
+			//
+			&& (date | 0) || CeL.Excel_date.error_value;
+		} ],
+
+		Excel_Mac : [ {
+			a : {
+				T : 'Excel Mac'
+			},
+			R : 'Microsoft Excel for Mac 使用 1904 日期系統。',
+			href : 'http://support.microsoft.com/kb/214094',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return (date = CeL.date.Excel_date.Mac(date))
+			//
+			&& (date | 0) || CeL.Excel_date.error_value;
+		} ],
+
+		contemporary : [ {
+			T : '共存紀年',
+			R : '本日/本年同時期存在之其他紀年。對未有詳實資料者，僅約略準確至所列日期！'
+		}, function(date) {
+			return date.共存紀年 || '';
+		} ],
+
+		// --------------------------------------------------------------------
+		曆注 : null,
+		// TODO: 農民曆
+
+		六曜 : [ {
+			a : {
+				T : '六曜'
+			},
+			R : '日本の暦注の一つ',
+			href : 'https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C',
+		}, function(date) {
+			return /* !date.準 && */!date.精 && date.六曜 || '';
+		} ],
+
+		曜日 : [ {
+			a : {
+				T : '曜日'
+			},
+			R : '日本の暦注の一つ, Japanese names of week day',
+			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5',
+		}, function(date) {
+			return /* !date.準 && */!date.精 && date.曜日 ? {
+				span : date.曜日 + '曜日',
+				S : date.曜日 === '日' ? 'color:#f34'
+				//
+				: date.曜日 === '土' ? 'color:#2b3' : ''
+			} : '';
+		} ],
+
+		// --------------------------------------------------------------------
+		// 曆法 Historical calendar
+		calendar : null,
 
 		Tabular : [ {
 			a : {
@@ -2305,13 +2417,6 @@ function affairs() {
 			}).slice(0, 3).join('/') + '; ' + date.to_Ethiopian();
 		} ],
 
-		contemporary : [ {
-			T : '共存紀年',
-			R : '本日/本年同時期存在之其他紀年。對未有詳實資料者，僅約略準確至所列日期！'
-		}, function(date) {
-			return date.共存紀年 || '';
-		} ],
-
 		// Chinese Buddhist calendar
 		Buddhist : [
 				{
@@ -2346,7 +2451,10 @@ function affairs() {
 									+ date.getDate());
 				} ],
 
+		// --------------------------------------------------------------------
 		// 紀年/編年方法。
+		'Year numbering' : null,
+
 		Minguo : [
 				{
 					a : {
@@ -2432,59 +2540,17 @@ function affairs() {
 			R : 'Seleucid era or Anno Graecorum, 塞琉古紀元。非精確時，可能有最多前後一年的誤差。',
 			href : 'https://en.wikipedia.org/wiki/Seleucid_era',
 			S : 'font-size:.8em;'
-		}, Year_numbering(311, true) ],
-
-		BP : [ {
-			a : {
-				T : 'Before Present'
-			},
-			R : 'Before Present (BP) years, 距今。非精確時。usage: 2950±110 BP.',
-			href : 'https://en.wikipedia.org/wiki/Before_Present'
-		}, Year_numbering(1950, true, true, true) ],
-
-		HE : [ {
-			a : {
-				T : 'Holocene calendar'
-			},
-			R : 'Holocene calendar, 全新世紀年或人類紀年. 有採用0年。 1 BCE = 10000 HE',
-			href : 'https://en.wikipedia.org/wiki/Holocene_calendar'
-		}, Year_numbering(10000) ],
-
-		Unix : [ {
-			a : {
-				T : 'Unix time'
-			},
-			R : 'Unix time (a.k.a. POSIX time or Epoch time), Unix時間戳記不考慮閏秒。',
-			href : 'https://en.wikipedia.org/wiki/Unix_time'
-		}, CeL.date.Unix_time ],
-
-		Excel : [ {
-			a : {
-				T : 'Excel'
-			},
-			R : 'Microsoft Excel for Windows 使用 1900 日期系統。',
-			href : 'http://support.microsoft.com/kb/214094',
-			S : 'font-size:.8em;'
-		}, function(date) {
-			return (date = CeL.date.Excel_date(date))
-			//
-			&& (date | 0) || CeL.Excel_date.error_value;
-		} ],
-
-		Excel_Mac : [ {
-			a : {
-				T : 'Excel Mac'
-			},
-			R : 'Microsoft Excel for Mac 使用 1904 日期系統。',
-			href : 'http://support.microsoft.com/kb/214094',
-			S : 'font-size:.8em;'
-		}, function(date) {
-			return (date = CeL.date.Excel_date.Mac(date))
-			//
-			&& (date | 0) || CeL.Excel_date.error_value;
-		} ]
+		}, Year_numbering(311, true) ]
 
 	};
+
+	calendar_column = CeL.null_Object();
+	o = null;
+	for (i in list)
+		if (list[i])
+			calendar_column[o ? o + '/' + i : i] = list[i];
+		else
+			o = i;
 
 	for (i in CeL.Gregorian_reform_of.regions) {
 		o = function(date) {
@@ -2497,9 +2563,9 @@ function affairs() {
 		}.bind({
 			r : i
 		});
-		calendar_column['reform/' + i] = [ {
+		calendar_column['Gregorian reform/' + i] = [ {
 			T : i,
-			R : i + ', reforms on '
+			R : i + ', Gregorian reform on '
 			//
 			+ new Date(CeL.Gregorian_reform_of.regions[i]).format('%Y/%m/%d')
 		}, o ];

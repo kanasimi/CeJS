@@ -24,7 +24,11 @@ if (typeof CeL === 'function')
 		'增加此欄' : 'この列を追加する',
 		'除去此欄' : 'この列を削除する',
 		//
-		'reform' : '改暦',
+		'曆注' : '暦注',
+		'Year numbering' : '紀年法',
+		'Gregorian reform' : 'グレゴリオ改暦',
+
+		'calendar' : '暦法',
 
 		'Before Present' : '何年前',
 		'Holocene calendar' : '人類紀元',
@@ -79,10 +83,13 @@ if (typeof CeL === 'function')
 		'Egypt' : 'エジプト',
 
 		'朝代紀年日期' : '紀年/元号暦日',
+		'Gregorian calendar' : 'グレゴリオ暦',
 		'Julian calendar' : 'ユリウス暦',
 		// Julian Day Number : ユリウス日数
 		// http://members.jcom.home.ne.jp/ino-kei/jdtoasyu.htm
 		// http://www.e-yakushiyo.net/Calendario_Maya_Dias.htm
+		'JDN' : 'ユリウス通日',
+		'JD' : 'ユリウス日',
 		'Julian Day Number' : 'ユリウス通日',
 		'Julian Date' : 'ユリウス日',
 		// http://www.funaba.org/calendar-conversion
@@ -90,8 +97,10 @@ if (typeof CeL === 'function')
 		'週日期' : '週日付',
 		'公元' : '西暦',
 		'星期' : '曜日',
+		// 干支年
 		'歲次' : '年の干支',
 		'月干支' : '月の干支',
+		// 干支日
 		'日干支' : '日の干支',
 
 		'公元日期' : '西暦日付',

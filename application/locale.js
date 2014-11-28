@@ -794,8 +794,8 @@ CeL.run('application.locale', function() {
 
 //	###System message test
 CeL.gettext.use_domain('TW', function() {
-	CeL.assert([ '載入中…', CeL.gettext('Loading..') ]);
-	CeL.assert([ '已載入 20%…', CeL.gettext('Loading %1%..', 20) ]);
+	CeL.assert([ '載入中…', CeL.gettext('Loading...') ]);
+	CeL.assert([ '已載入 20%…', CeL.gettext('Loading %1%...', 20) ]);
 	CeL.info('System message test OK.');
 },
 // 強制使用此 domain。 forces to this domain.

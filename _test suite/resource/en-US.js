@@ -26,7 +26,10 @@ if (typeof CeL === 'function')
 		'增加此欄' : 'Add the column',
 		'除去此欄' : 'Remove the column',
 		'分類' : 'Group',
-		// 'reform' : 'Adoption of the Gregorian calendar',
+
+		'曆注' : 'Calendar note',
+		'Year numbering' : 'Year naming and numbering',
+		'Gregorian reform' : 'Adoption of the Gregorian calendar',
 
 		'伊斯蘭曆' : 'Islamic Calendar',
 		'希伯來曆' : 'Hebrew calendar',
