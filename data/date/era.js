@@ -16,8 +16,9 @@
  * CeL.era('寶應元年',{period_end:true})<br />
  * CeL.era('嘉慶十六年二月二十四日寅刻')===CeL.era('嘉慶十六年二月二十四日寅時')<br />
  * Period 獨立成 class<br />
- * 月令別名, 月の異称 http://140.112.30.230/datemap/monthalias.php
- * http://www.geocities.jp/okugesan_com/yougo.html<br />
+ * 南明紹宗隆武1年閏6月月干支!=甲申, should be 癸未<br />
+ * 月令別名 http://140.112.30.230/datemap/monthalias.php<br />
+ * 月の異称 http://www.geocities.jp/okugesan_com/yougo.html<br />
  * 西周金文紀時術語. e.g., 初吉，既生霸，既望，既死霸
  * (http://wywu.pixnet.net/blog/post/22412573-%E6%9C%88%E7%9B%B8%E8%A8%98%E6%97%A5%E8%A1%A8)
  * 
@@ -490,7 +491,7 @@ if (typeof CeL === 'function')
 				// 紀年法: 日本年號, 元号/年号
 				元号 : 0,
 
-				// 領袖, 首領
+				// 領袖, 首領, ruler
 				君主 : 1,
 				// 君主姓名
 				君主名 : 1,
@@ -512,6 +513,9 @@ if (typeof CeL === 'function')
 				朝代 : 2,
 				政權 : 2,
 				國號 : 2,
+
+				// 王朝, 帝國, Empire
+
 				// state 州
 				// Ancient Chinese states
 				// https://en.wikipedia.org/wiki/Ancient_Chinese_states

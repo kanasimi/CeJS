@@ -1591,8 +1591,25 @@ function translate_era(era) {
 			});
 			// add_注('君主');
 			add_注('君主字');
-			add_注('諡');
 			add_注('廟號');
+			add_注('諡');
+
+			if (date.name[1].indexOf('天皇') !== NOT_FOUND)
+				// append name.
+				if (Array.isArray(date.天皇))
+					// 不動到原 data。
+					(date.天皇 = date.天皇.slice()).unshift(date.name[1]);
+				else
+					date.天皇 = date.天皇 ? [ date.name[1], date.天皇 ] : [ date.name[1] ];
+			add_注('天皇', '漢風諡号・追号', function(note) {
+				return {
+					a : note,
+					href : 'https://ja.wikipedia.org/wiki/' + note,
+					C : 'note'
+				};
+			});
+			// add_注('諱');
+
 			add_注('注');
 
 			if (date.準 || date.精) {
