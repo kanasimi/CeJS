@@ -281,7 +281,7 @@ toASCIIcode = function (text, position) {
 	var _f = arguments.callee, c;
 
 	if (!_f.t) {
-		// initial
+		// initialize
 		var i = 129, t = _f.t = [], l = {
 			8364 : 128,
 			8218 : 130,
@@ -1717,6 +1717,61 @@ search_sorted_Array.default_comparator = function(a, b) {
 _.search_sorted_Array = search_sorted_Array;
 
 
+// https://en.wikipedia.org/wiki/Letter_case#Headings_and_publication_titles
+// http://adminsecret.monster.com/training/articles/358-what-to-capitalize-in-a-title
+// http://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
+// to_title_case()
+// Capitalize the first letter of string
+// also use CSS: text-transform:capitalize;
+function toTitleCase(to_lower_first) {
+	var title = this.trim();
+	if (to_lower_first)
+		title = title.toLowerCase();
+	return title.replace(/(?:^|\s)((\w)(\w*))/g, function($0, $1, $2, $3) {
+		// console.log($0);
+		return $1 in toTitleCase.lower ? $0 : $1 in toTitleCase.upper ? $0.toUpperCase() : ' ' + $2.toUpperCase() + $3;
+	})
+	// capitalize the first and last word of the title itself.
+	// in case title === ''
+	.replace(/^\w/, function($0) {
+		return $0.toUpperCase();
+	}).replace(/\s(\w)([\w\-]*)$/, function($0, $1, $2) {
+		return ' ' + $1.toUpperCase() + $2;
+	});
+}
+
+/**
+ * add exception words
+ * 
+ * @param {String|Array}words
+ *            exception words
+ */
+toTitleCase.add_exception = function(words, upper) {
+	// initialize
+	if (!toTitleCase.lower)
+		toTitleCase.lower = library_namespace.null_Object();
+	if (!toTitleCase.upper)
+		toTitleCase.upper = library_namespace.null_Object();
+
+	var target = upper ? toTitleCase.upper : toTitleCase.lower;
+
+	if (typeof words === 'string')
+		words = words.split(',');
+
+	if (Array.isArray(words))
+		words.forEach(function(word) {
+			target[word] = true;
+		});
+	else
+		Object.assign(target, words);
+};
+
+toTitleCase
+	.add_exception('at,by,down,for,from,in,into,like,near,of,off,on,onto,over,past,to,upon,with,and,but,or,yet,for,nor,so,as,if,once,than,that,till,when,to,a,an,the');
+toTitleCase
+	.add_exception('id,tv,i,ii,iii,iv,v,vi,vii,viii,ix,x,xi,xii,xiii', true);
+
+
 set_method(String.prototype, {
 	count_of : set_bind(count_occurrence, true),
 	//gText : getText,
@@ -1724,6 +1779,7 @@ set_method(String.prototype, {
 	split_by : split_String_by_length,
 	pad : set_bind(pad, true),
 	toRegExp : set_bind(String_to_RegExp, true),
+	toTitleCase : toTitleCase,
 	between : function(head, foot, index, return_data) {
 		// 確保可用 string.between().between() 的方法來作簡易篩選。
 		/*

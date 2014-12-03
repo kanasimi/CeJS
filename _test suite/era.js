@@ -1600,7 +1600,8 @@ function translate_era(era) {
 					// 不動到原 data。
 					(date.天皇 = date.天皇.slice()).unshift(date.name[1]);
 				else
-					date.天皇 = date.天皇 ? [ date.name[1], date.天皇 ] : [ date.name[1] ];
+					date.天皇 = date.天皇 ? [ date.name[1], date.天皇 ]
+							: [ date.name[1] ];
 			add_注('天皇', '漢風諡号・追号', function(note) {
 				return {
 					a : note,
