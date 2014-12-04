@@ -1727,9 +1727,9 @@ function toTitleCase(to_lower_first) {
 	var title = this.trim();
 	if (to_lower_first)
 		title = title.toLowerCase();
-	return title.replace(/(?:^|\s)((\w)(\w*))/g, function($0, $1, $2, $3) {
+	return title.replace(/(^|\s)((\w)(\w*))/g, function($0, $1, $2, $3, $4) {
 		// console.log($0);
-		return $1 in toTitleCase.lower ? $0 : $1 in toTitleCase.upper ? $0.toUpperCase() : ' ' + $2.toUpperCase() + $3;
+		return $2 in toTitleCase.lower ? $0 : $2 in toTitleCase.upper ? $0.toUpperCase() : ($1 ? ' ' : '') + $3.toUpperCase() + $4;
 	})
 	// capitalize the first and last word of the title itself.
 	// in case title === ''

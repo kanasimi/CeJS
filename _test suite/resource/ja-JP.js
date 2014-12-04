@@ -2,6 +2,11 @@
 'use strict';
 if (typeof CeL === 'function')
 	CeL.gettext.set_text({
+		'中國' : '中国',
+		'한국' : '朝鮮',
+		'Việt Nam' : 'ベトナム',
+		'Maya' : 'マヤ',
+
 		'取得紀年' : '暦日',
 		'之' : 'の',
 		'輸出格式:' : '出力形式:',

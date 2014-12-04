@@ -1091,6 +1091,7 @@ _.Hebrew_Date = Hebrew_Date;
 // <a href="https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar" accessdate="2014/4/28 22:15" title="Mesoamerican Long Count calendar">中美洲長紀曆</a>
 
 // GMT correlation: starting-point is equivalent to August 11, 3114 BCE in the proleptic Gregorian calendar
+// GMT 584283
 // https://en.wikipedia.org/wiki/Template:Maya_Calendar
 var Maya_epoch = (new Date(-3114 + 1, 8 - 1, 11)).getTime(),
 // Era Base date, the date of creation is expressed as 13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.0.0.0.0 4 Ajaw 8 Kumk'u

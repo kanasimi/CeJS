@@ -198,7 +198,7 @@ function Year_numbering(year_shift, year_only, has_year_0, reverse) {
 	}
 }
 
-var NOT_FOUND = -1,
+var NOT_FOUND = -1, PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
 //
 CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
 // 選用的文字式年曆欄位
@@ -641,7 +641,7 @@ function count_roughly_duration(start, end, options) {
 // Firefox/30.0 尚未支援 writing-mode。IE, Chrome 支援。
 // https://bugzilla.mozilla.org/show_bug.cgi?id=145503
 // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/writing-mode
-var support_vertical_text = !/Firefox/i.test(navigator.userAgent);
+var support_writing_mode = !/Firefox/i.test(navigator.userAgent);
 
 function recover_SVG_text_properties() {
 	set_SVG_text_properties.call(this, true);
@@ -1037,14 +1037,21 @@ function draw_era(hierarchy) {
 			from_x = get_from_x(period),
 			//
 			width = (period.end - period.start) * ratio,
-			// 對紀年時間過短，太窄時，線圖之處理：採垂直排列。
-			vertical_text = support_vertical_text && width < layer_height,
+			//
+			vertical_text,
 			//
 			font_size;
 
 			// name_showed = is_歷史時期 ? '[' + name_showed + ']' : name;
 			if (!name_showed)
 				name_showed = name;
+			name_showed = _(name_showed);
+
+			// 對紀年時間過短，太窄時，線圖之處理：採垂直排列。
+			vertical_text = name_showed.length > 1
+					&& (support_writing_mode ? width < layer_height
+					// 縮緊條件:基本上能正的看字，還是以正的為好。
+					: width < layer_height / 2);
 
 			font_size = vertical_text
 			//
@@ -1119,7 +1126,9 @@ function draw_era(hierarchy) {
 				'font-family' : '標楷體,DFKai-SB',
 				'font-size' : font_size + 'px'
 			};
-			if (vertical_text) {
+			if (vertical_text && support_writing_mode
+			// 若全部都是英文字母，則以旋轉為主。
+			&& PATTERN_NOT_ALL_ALPHABET.test(name_showed)) {
 				// top to bottom
 				style['writing-mode'] = 'tb';
 				// no rotation
@@ -1130,13 +1139,20 @@ function draw_era(hierarchy) {
 						layer_from_y
 								+ (layer_height - name_showed.length
 										* font_size) / 2, style);
-			} else
+			} else {
 				// 置中
 				SVG_object.addText(name_showed, from_x
 						+ (width - name_showed.length * font_size) / 2,
 				// .7:
 				// 經驗法則，don't know why.
 				layer_from_y + (layer_height + font_size * .7) / 2, style);
+
+				if (vertical_text)
+					// 文字以方塊的中心為原點，順時針旋轉90度。
+					SVG_object.lastAdd.setAttribute('transform', 'rotate(90 '
+							+ (from_x + width / 2) + ' '
+							+ (layer_from_y + layer_height / 2) + ')');
+			}
 			SVG_object.addTitle(name);
 
 			var lastAdd = SVG_object.lastAdd;
@@ -1467,7 +1483,7 @@ var 準確程度_MESSAGE = {
 	黎 : '#9f9',
 	阮 : '#9f9',
 	莫 : '#9f9'
-}, country_PATTERN;
+}, had_inputted = CeL.null_Object(), country_PATTERN;
 
 (function() {
 	country_PATTERN = [];
@@ -1538,6 +1554,18 @@ function translate_era(era) {
 	if (date) {
 		set_era_by_url_data(era);
 
+		if (!(date.國家 in had_inputted)) {
+			if (date.國家 === 'Maya')
+				// 自動增加此欄。
+				selected_column['calendar/Long_Count']
+				//
+				= selected_column['calendar/Tzolkin']
+				//
+				= selected_column['calendar/Haab'] = true;
+
+			had_inputted[date.國家] = true;
+		}
+
 		if (date.紀年名)
 			// 因為紀年可能橫跨不同時代(朝代)，因此只要確定找得到，那就以原先的名稱為主。
 			show_calendar(era);
@@ -1585,7 +1613,9 @@ function translate_era(era) {
 			add_注('君主名', '君主姓名', function(note) {
 				return {
 					a : note,
-					href : 'https://zh.wikipedia.org/wiki/' + note,
+					href : 'https://'
+							+ (PATTERN_NOT_ALL_ALPHABET.test(note) ? 'zh'
+									: 'en') + '.wikipedia.org/wiki/' + note,
 					C : 'note'
 				};
 			});

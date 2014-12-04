@@ -2,6 +2,12 @@
 'use strict';
 if (typeof CeL === 'function')
 	CeL.gettext.set_text({
+		// 國家 country
+		'中國' : 'Chinese',
+		'日本' : 'Japan',
+		'한국' : 'Korea',
+		'Việt Nam' : 'Vietnam',
+
 		'取得紀年' : 'Get',
 		'之' : "'s",
 		'輸出格式:' : 'Output format:',

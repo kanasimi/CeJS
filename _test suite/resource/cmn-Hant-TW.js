@@ -2,6 +2,11 @@
 'use strict';
 if (typeof CeL === 'function')
 	CeL.gettext.set_text({
+		// 國家 country
+		'한국' : '韓國',
+		'Việt Nam' : '越南',
+		'Maya' : '瑪雅',
+
 		'calendar' : '曆法',
 		'Year numbering' : '編年方法',
 		// Julian/Gregorian reforms
