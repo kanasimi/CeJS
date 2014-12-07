@@ -537,12 +537,15 @@ URI_accessor.module = {
 
 		//library_namespace.debug('URI_accessor.setting.temporary_file:'+URI_accessor.setting.temporary_file, 2, 'URI_accessor.module.curl');
 		//library_namespace.debug('user_setting.temporary_file:'+user_setting.temporary_file, 2, 'URI_accessor.module.curl');
-		var setting = new library_namespace.setting_pair(library_namespace.null_Object(), URI_accessor.setting, user_setting), value = setting('user_agent'), tmp = '" "',
+		var setting = new library_namespace.setting_pair(library_namespace.null_Object(), URI_accessor.setting, user_setting), value = setting('user_agent'),
+		tmp = setting('cookie') || setting('cookie_file'),
 		command_array = [
 				'curl --remote-time --insecure --compressed '
 				+ (library_namespace.is_debug(2) ? '-v ' : '')
 				+ (setting('additional_options') ? setting('additional_options') + ' ' : '')
-				+ (setting('cookie_file') ? '--cookie "' + setting('cookie_file') + '" --cookie-jar "' + setting('cookie_file') + '" ' : '')
+				// --cookie STRING/FILE  String or file to read cookies from (H)
+				+ (tmp ? '--cookie "' + tmp + '" ' : '')
+				+ ((tmp = setting('cookie_file') || setting('cookie')) ? '--cookie-jar "' + tmp + '" ' : '')
 				+ '--output "',
 			'', (value ? '" --user-agent "' + value : '') + '"'];
 
@@ -553,6 +556,7 @@ URI_accessor.module = {
 
 		command_array[command_array.length - 1] += ' --referer "';
 
+		tmp = '" "';
 		if (value = setting('referer')) {
 			library_namespace.debug(['referer: ', { a: value, href: value }], 2, 'URI_accessor.module.curl');
 			command_array[command_array.length - 1] += value + tmp;
@@ -1008,7 +1012,11 @@ function get_video(video_url, download_to, options) {
 }
 
 get_video.getter_setting = {
-	additional_options: '--location'
+	additional_options: '--location',
+	// 2014/12/6 對於 "150 這部影片無法在您的國家/地區播放。"，需要是自己的影片，有 cookies 才行。
+	cookie : "",
+	cookie_file : 'youtube.cookie.txt',
+	referer : 'http://www.youtube.com/'
 };
 
 // get video data.
@@ -1021,8 +1029,8 @@ get_video.get_information = function get_video_information(video_hash, download_
 		download_to = '';
 	// 2014/1/14 加上 sts 才能使下面 parse signature 正常作動。eurl 似乎沒必要。
 	// 2014/5/2 某些版權影片需要 eurl。
-	get_URI('http://www.youtube.com/get_video_info?eurl=http%3A%2F%2Fwww.wordpress.com&sts=1586&video_id='
-			+ encodeURIComponent(video_hash), data, get_video.getter_setting);
+	get_URI(encodeURI('http://www.youtube.com/get_video_info?eurl='
+		+ get_video.getter_setting.referer + '&sts=1586&video_id=' + video_hash), data, get_video.getter_setting);
 
 	try {
 		html = library_namespace.get_file(data);

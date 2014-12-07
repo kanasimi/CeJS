@@ -738,9 +738,9 @@ show_range.min_height = 3;
 // Durations
 function parse_period(period) {
 	var matched = period.match(parse_period.PATTERN);
-	if (matched
+	if (matched && (!/[日時]/.test(matched[2])
 	// 預防 "10月22日夜7-8時"
-	&& !/[時分秒]/.test(matched[2].match(/^(?:.*?)([年月日時分秒])/)[1])) {
+	|| !/[時分秒\/]/.test(matched[2].match(/^(?:.*?)([年月日時分秒\/])/)[1]))) {
 		(period = matched).shift();
 		if (period[1].indexOf('月') === NOT_FOUND
 				&& (matched = period[0].match(/[^年月]+月/)))
@@ -767,7 +767,7 @@ parse_period.PATTERN = /^(.+)\s*[\-–－—~～〜]\s*(.+)$/;
  * @param {Object}[data]
  * @param {String}[group]
  */
-function add_tag(period, data, group) {
+function add_tag(period, data, group, register_only) {
 	if (!period || !(period = String(period).trim()))
 		return;
 
@@ -850,8 +850,12 @@ function add_tag(period, data, group) {
 
 	CeL.debug('登錄 ' + (group ? '[' + group + ']' : '') + '[' + period + ']', 2,
 			'add_tag');
-	add_tag.show(target[period] = arg_passed);
-	select_panel('era_graph', true);
+	target[period] = arg_passed;
+
+	if (!register_only) {
+		add_tag.show(arg_passed);
+		select_panel('era_graph', true);
+	}
 }
 
 // add_tag.group_count[group] = {Interger}count
@@ -999,12 +1003,35 @@ function draw_era(hierarchy) {
 		draw_era.ruler_min_scale_pixel = SVG_object.addText.defaultCharWidthPx * 4;
 
 	if (Array.isArray(periods) && periods.length > 0) {
+		var start_time = periods.start, ratio = periods.end;
 
-		var start_time = periods.start,
+		if (periods.生 && periods.卒) {
+			if (draw_era.options.adapt_lifetime) {
+				// 若君主在世時段於本 period 之外，則擴張範圍。
+				start_time = Math.min(start_time - 0, CeL.era(periods.生[0], {
+					date_only : true
+				}) - 0);
+				ratio = Math.max(ratio - 0, CeL.era(periods.卒[0], {
+					date_only : true
+				}) - 0);
+			}
+			// 以 tag 顯示君主生卒。
+			if (!periods.added) {
+				periods.added = true;
+				add_tag(periods.生[0] + '-' + periods.卒[0], period_hierarchy,
+						'君主生卒', true);
+			}
+		}
+
+		// 登記。
+		SVG_object.start = start_time;
+		SVG_object.end = ratio;
+		SVG_object.ratio =
 		// draw era width / (時間跨度 time span)。
-		ratio = draw_era.width / (periods.end - start_time),
+		ratio = draw_era.width / (ratio - start_time);
+
 		// 前一個尺規刻度。
-		previous_ruler_scale = -Infinity,
+		var previous_ruler_scale = -Infinity,
 		// 取得 period 之起始 x 座標。
 		get_from_x = function(period) {
 			return draw_era.left
@@ -1177,11 +1204,6 @@ function draw_era(hierarchy) {
 			= is_Era ? draw_era.click_Era : draw_era.click_Period;
 		};
 
-		// 登記。
-		SVG_object.start = start_time;
-		SVG_object.end = periods.end;
-		SVG_object.ratio = ratio;
-
 		periods.forEach(function(region) {
 			layer_count = region.length;
 			layer_from_y = draw_era.top;
@@ -1261,6 +1283,18 @@ function draw_era(hierarchy) {
 
 draw_era.options = {
 	merge_periods : true
+};
+
+// click and change the option of this.title
+draw_era.change_option = function() {
+	var option = this.title.replace(/\s[\s\S]*/, ''), setted = draw_era.options[option];
+	CeL.set_class(this, 'setted', {
+		remove : setted
+	});
+	draw_era.options[option]
+	//
+	= !setted;
+	return false;
 };
 
 draw_era.default_group = '\n';
@@ -1623,6 +1657,24 @@ function translate_era(era) {
 			add_注('君主字');
 			add_注('廟號');
 			add_注('諡');
+			add_注('生', '君主出生日期', function(note) {
+				return {
+					a : note,
+					title : '共存紀年:' + note,
+					href : '#',
+					onclick : click_title_as_era,
+					C : 'note'
+				};
+			});
+			add_注('卒', '君主逝世日期', function(note) {
+				return {
+					a : note,
+					title : '共存紀年:' + note,
+					href : '#',
+					onclick : click_title_as_era,
+					C : 'note'
+				};
+			});
 
 			if (date.name[1].indexOf('天皇') !== NOT_FOUND)
 				// append name.
@@ -2016,18 +2068,14 @@ function affairs() {
 			T : '紀年線圖選項：'
 		}, {
 			T : '合併歷史時期',
-			title : 'e.g., 三國兩晉南北朝, 五代十國',
-			onclick : function() {
-				var merge_periods = draw_era.options.merge_periods;
-				CeL.set_class(this, 'setted', {
-					remove : merge_periods
-				});
-				draw_era.options.merge_periods
-				//
-				= !merge_periods;
-				return false;
-			},
+			title : 'merge_periods\ne.g., 三國兩晉南北朝, 五代十國',
+			onclick : draw_era.change_option,
 			C : 'option' + (draw_era.options.merge_periods ? ' setted' : '')
+		}, {
+			T : '擴張範圍至君主在世時段',
+			title : 'adapt_lifetime',
+			onclick : draw_era.change_option,
+			C : 'option' + (draw_era.options.adapt_lifetime ? ' setted' : '')
 		} ], 'era_graph_options');
 
 		// 資料圖層

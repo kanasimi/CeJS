@@ -15,6 +15,7 @@ if (typeof CeL === 'function')
 		'測試範例' : 'EXAMPLE',
 		'輸入紀錄' : 'RECORD',
 		'使用說明' : 'CONCEPT',
+		// timeline 時間軸
 		'紀年線圖' : 'ERA GRAPH',
 		'資料圖層' : 'DATA LAYER',
 		'曆譜' : 'CALENDAR',
@@ -78,6 +79,7 @@ if (typeof CeL === 'function')
 
 		'紀年線圖選項：' : 'Options of era graph:',
 		'合併歷史時期' : 'Combine historical periods',
+		'擴張範圍至君主在世時段' : 'Adapt lifetime of rulers',
 
 		'請選擇所欲載入之資料圖層。' : 'Please select the layer you want to load.',
 		'資料來源' : 'Data source',

@@ -532,6 +532,13 @@ if (typeof CeL === 'function')
 			// 地區, 區域. e,g, 中亞, 北亞, 東北亞
 			},
 
+			Period_屬性歸屬 = Object.assign({
+				// 君主出生日期
+				生 : 1,
+				// 君主逝世日期
+				卒 : 1
+			}, 紀年名稱索引值),
+
 			// era data refrence 對應
 			// sorted by: start Date 標準時間(如UTC+8) → parse_era() 插入順序.
 			era_list = [],
@@ -3405,49 +3412,63 @@ if (typeof CeL === 'function')
 			function add_comment(date, options) {
 				add_adapt_offset(date, this);
 
-				var date_index, tmp, tmp2;
-				// 根據/出典/原始參考文獻/資料引用來源。
-				if (this.據)
-					date.據 = this.據;
-				date.注 = Array.isArray(tmp = this.注) ? tmp
-				//
-				: tmp ? [ tmp ] : [];
+				var date_index = this.comment, tmp, tmp2;
 
-				// 查詢某時間點（時刻）的日期資訊，如月干支等：
-				// 對所有紀年，找出此時間點相應之曆數：
-				// 若年分起始未初始化，則初始化、解壓縮之。
-				// 依年分起始 Date value，以 binary search 找到年分。
-				// 依該年之月分資料，找出此時間點相應之月分、日碼(date of month)。
+				if (!date_index) {
+					date_index = this.comment
+					// do cache.
+					= library_namespace.null_Object();
 
-				// Object.seal(紀年);
-				// date.name = this.name.slice();
-				date.name = this.name;
+					add_comment.copy_attributes.forEach(function(key) {
+						if (this[key])
+							date_index[key] = this[key];
+					}, this);
 
-				date.紀年名 = this.toString();
+					date_index.注 = Array.isArray(tmp = this.注) ? tmp
+					//
+					: tmp ? [ tmp ] : [];
 
-				for (var tmp = this.name.length,
-				// 設定其他屬性。
-				tmp2 = period_root; tmp > 0;) {
-					tmp2 = tmp2.sub[this.name[--tmp]];
-					if (!tmp2)
-						break;
-					Object.assign(date, tmp2.attributes);
+					// 查詢某時間點（時刻）的日期資訊，如月干支等：
+					// 對所有紀年，找出此時間點相應之曆數：
+					// 若年分起始未初始化，則初始化、解壓縮之。
+					// 依年分起始 Date value，以 binary search 找到年分。
+					// 依該年之月分資料，找出此時間點相應之月分、日碼(date of month)。
+
+					// Object.seal(紀年);
+					// date_index.name = this.name.slice();
+					date_index.name = this.name;
+
+					date_index.紀年名 = this.toString();
+
+					for (var tmp = this.name.length,
+					// 設定其他屬性。
+					tmp2 = period_root; tmp > 0;) {
+						tmp2 = tmp2.sub[this.name[--tmp]];
+						if (!tmp2)
+							break;
+						Object.assign(date_index, tmp2.attributes);
+					}
+
+					// for '初始.君主: 孺子嬰#1'
+					主要索引名稱.forEach(function(name, index) {
+						if (tmp = this.name[index])
+							if (date_index[name])
+								if (Array.isArray(date_index[name]))
+									date_index[name].unshift(tmp);
+								else
+									date_index[name]
+									//
+									= [ tmp, date_index[name] ];
+							else
+								date_index[name] = tmp;
+					}, this);
+
 				}
 
-				// for '初始.君主: 孺子嬰#1'
-				主要索引名稱.forEach(function(name, index) {
-					if (tmp = this.name[index])
-						if (date[name])
-							if (Array.isArray(date[name]))
-								date[name].unshift(tmp);
-							else
-								date[name] = [ tmp, date[name] ];
-						else
-							date[name] = tmp;
-				}, this);
+				// copy 屬於本紀年的曆注。
+				Object.assign(date, date_index);
 
-				if (this.曆法)
-					date.曆法 = this.曆法;
+				// 接著 copy 僅屬於本日期的曆注。
 
 				// [ 歲序, 月序, 日序 | 0 ]
 				date_index = this.Date_to_date_index(date);
@@ -3465,9 +3486,7 @@ if (typeof CeL === 'function')
 					// date.七曜 =
 					date.曜日 = 曜日_LIST.charAt(date.getDay());
 
-					if (this.準)
-						date.準 = this.準;
-					// 精密度至年
+					// 精密度至年。
 					if (this.精 && (date.精 = this.精) === '年')
 						date.年 = this.歲名(date_index[0]);
 					else {
@@ -3548,6 +3567,10 @@ if (typeof CeL === 'function')
 
 				return date;
 			}
+
+			// 預設會 copy 的紀年曆注。
+			// 據: 根據/出典/原始參考文獻/資料引用來源。
+			add_comment.copy_attributes = '據,準,曆法'.split(',');
 
 			Object.assign(Era.prototype, {
 				// 月次，歲次與 index 之互換。
@@ -4258,6 +4281,7 @@ if (typeof CeL === 'function')
 
 			// 避免覆蓋原有值。
 			// object[key] = value
+			// TODO: {Array}value
 			function add_attribute(object, key, value) {
 				var v = object[key];
 				if (Array.isArray(v))
@@ -4613,10 +4637,10 @@ if (typeof CeL === 'function')
 
 					for (i in 附加屬性) {
 						j = 附加屬性[i];
-						if (i in 紀年名稱索引值) {
-							i = 紀年名稱索引值[tmp = i];
+						if (i in Period_屬性歸屬) {
+							i = Period_屬性歸屬[tmp = i];
 							// now: tmp = name,
-							// i = 紀年名稱索引值 index of name
+							// i = Period_屬性歸屬 index of name
 							// e.g., tmp = 君主名, i = 1
 
 							// 解開屬性值。
@@ -4632,10 +4656,12 @@ if (typeof CeL === 'function')
 							} else
 								k = j.split(pack_era.era_name_separator);
 
+							// 將屬性值搬移至 period_root 之 tree 中。
 							// i === 0，即紀元本身時，毋須搬移。
 							if (0 < i) {
 								// j: attributes of hierarchy[i]
 								j = period_attribute_hierarchy[i];
+								// assert: Object.isObject(j)
 								if (tmp in j)
 									// 解決重複設定、多重設定問題。
 									// assert: Array.isArray(j[tmp])
@@ -4646,23 +4672,26 @@ if (typeof CeL === 'function')
 								delete 附加屬性[tmp];
 							}
 
-							// 設定所有屬性值之 index
-							k.forEach(function(name) {
-								if (name && 紀年.indexOf(name) === NOT_FOUND) {
-									add_to_era_by_key(name,
-									// 對 i 不為 0–2 的情況，將 last_era_data 直接加進去。
-									i >= 0 ? 紀年[i] : last_era_data);
+							if (i in 紀年名稱索引值)
+								// 設定所有屬性值之 search index。
+								k.forEach(function(name) {
+									if (name
+									//
+									&& 紀年.indexOf(name) === NOT_FOUND) {
+										add_to_era_by_key(name,
+										// 對 i 不為 0–2 的情況，將 last_era_data 直接加進去。
+										i >= 0 ? 紀年[i] : last_era_data);
 
-									// TODO:
-									// 對其他同性質的亦能加入此屬性。
-									// 例如設定
-									// "朝代=曹魏"
-									// 則所有曹魏紀年皆能加入此屬性，
-									// 如此則不須每個紀年皆個別設定。
-									if (i === 0)
-										紀年.push(name);
-								}
-							});
+										// TODO:
+										// 對其他同性質的亦能加入此屬性。
+										// 例如設定
+										// "朝代=曹魏"
+										// 則所有曹魏紀年皆能加入此屬性，
+										// 如此則不須每個紀年皆個別設定。
+										if (i === 0)
+											紀年.push(name);
+									}
+								});
 
 						} else if (i === '月名' || i === MONTH_NAME_KEY) {
 							if (j = parse_month_name(j,
@@ -5793,11 +5822,19 @@ if (typeof CeL === 'function')
 					// 前置處理。
 					if (!library_namespace.is_Object(options))
 						options = library_namespace.null_Object();
+
 					var list = [];
 					add_period(period_now.sub, list, options);
 					add_period(period_now.era, list, options);
 					// 作 cache。
 					period_now.bar = order_bar(list.sort(compare_start_date));
+
+					get_periods.copy_attributes.forEach(function(key) {
+						if (period_now.attributes[key])
+							period_now.bar[key] = period_now.attributes[key];
+					}, this);
+
+					// 處理歷史時期的 bar。
 					if (list = list[PERIOD_KEY]) {
 						period_now.bar[PERIOD_KEY] = library_namespace
 								.null_Object();
@@ -5838,6 +5875,10 @@ if (typeof CeL === 'function')
 				//
 				? period_now.bar[PERIOD_KEY][''] : period_now.bar;
 			}
+
+			// 預設會 copy 的 period 屬性。
+			// 生卒年月日 Date of Birth and Death, lifetime.
+			get_periods.copy_attributes = '生,卒'.split(',');
 
 			// 文字式曆譜:年曆,朔閏表,曆日譜。
 			// 會更改 options!
