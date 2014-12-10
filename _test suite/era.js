@@ -737,7 +737,7 @@ show_range.min_height = 3;
 
 // Durations
 function parse_period(period) {
-	var matched = period.match(parse_period.PATTERN);
+	var matched = period.trim().match(parse_period.PATTERN);
 	if (matched && (!/[日時]/.test(matched[2])
 	// 預防 "10月22日夜7-8時"
 	|| !/[時分秒\/]/.test(matched[2].match(/^(?:.*?)([年月日時分秒\/])/)[1]))) {
@@ -748,10 +748,11 @@ function parse_period(period) {
 		if (period[1].indexOf('年') === NOT_FOUND
 				&& (matched = period[0].match(/[^年]+年/)))
 			period[1] = matched[0] + period[1];
-	}
+	} else if (CeL.is_debug(2))
+		CeL.warn('parse_period: Can not parse period [' + period + ']');
 	return period;
 }
-parse_period.PATTERN = /^(.+)\s*[\-–－—~～〜]\s*(.+)$/;
+parse_period.PATTERN = /^(.+)\s*[\-–－—─~～〜﹣]\s*([^\-].+)$/;
 
 /**
  * 可繪製特定時段，例如展現在世期間所占比例。
