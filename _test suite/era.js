@@ -97,7 +97,7 @@ function initializer() {
 
 	// console.info('Start loading..');
 	// 因為載入時間較長，使用此功能可降低反應倦怠感，改善體驗。
-	CeL.env.era_data_load = function(country, list) {
+	CeL.env.era_data_load = function(country, queue) {
 		function set_done(index) {
 			CeL.set_class('loading_progress' + index, {
 				loading : false,
@@ -106,14 +106,14 @@ function initializer() {
 		}
 
 		if (CeL.is_Object(country)) {
-			// console.info('Starting ' + list);
+			// console.info('Starting ' + queue);
 			var nodes = [ {
 				T : 'Loading...'
-			} ], length = list.length;
+			} ], length = queue.length;
 			if (!length)
 				throw new Error('No era data got!');
 
-			list.forEach(function(country) {
+			queue.forEach(function(country) {
 				nodes.push({
 					T : country,
 					id : 'loading_progress' + --length,
@@ -125,16 +125,16 @@ function initializer() {
 			CeL.remove_all_child('loading_progress');
 			CeL.new_node(nodes, 'loading_progress');
 
-		} else if (!list) {
+		} else if (!queue) {
 			// console.info('all loaded.');
 			set_done(0);
 			setTimeout(affairs, 0);
 
 		} else {
-			// console.info(list);
-			set_done(list.length);
-			if (0 <= (list = list.length - 1))
-				CeL.set_class('loading_progress' + list, 'loading');
+			// console.info(queue);
+			set_done(queue.length);
+			if (0 <= (queue = queue.length - 1))
+				CeL.set_class('loading_progress' + queue, 'loading');
 		}
 	};
 
@@ -615,13 +615,29 @@ function count_roughly_duration(start, end, options) {
 		start = new Date(start);
 	if (!CeL.is_Date(end))
 		end = new Date(end);
-	diff2 = end.getMonth() - start.getMonth();
-	if (diff = end.getFullYear() - start.getFullYear())
-		return (diff + diff2 / 12).to_fixed(1) + 'Y';
+	diff2 = end.getMonth() - start.getMonth()
+	//
+	+ (end.getDate() - start.getDate()) / 30;
+	if (diff = end.getFullYear() - start.getFullYear()) {
+		// assert: {Integer}diff 年 {Float}diff2 月, diff > 0.
+		// → difference = {Float} 年（至小數）
+		difference = diff + diff2 / 12;
+		// diff = {String} format to show
+		if (options && options.月) {
+			diff += 'Y' + Math.round(diff2) + 'M';
+		} else
+			diff = difference.to_fixed(1) + 'Y';
+		if (options && options.歲)
+			// 計算年齡(虛歲)幾歲。
+			// TODO:因無法判別春節（農曆正月初一）日期，此方法尚有誤差！
+			// + 1: 一出生即虛歲一歲(YO, years old, "Y/O.")。
+			diff = (Math.ceil(difference) + 1) + '歲, ' + diff;
 
-	if (diff2)
-		return (diff2 + (end.getDate() - start.getDate()) / 30).to_fixed(1)
-				+ 'M';
+		return diff;
+	}
+
+	if (diff2 >= 1)
+		return diff2.to_fixed(1) + 'M';
 
 	if (difference < 1000)
 		return difference + 'ms';
@@ -768,7 +784,7 @@ parse_period.PATTERN = /^(.+)\s*[\-–－—─~～〜﹣]\s*([^\-].+)$/;
  * @param {Object}[data]
  * @param {String}[group]
  */
-function add_tag(period, data, group, register_only) {
+function add_tag(period, data, group, register_only, options) {
 	if (!period || !(period = String(period).trim()))
 		return;
 
@@ -803,7 +819,7 @@ function add_tag(period, data, group, register_only) {
 		else
 			arg_passed = new Date(arg_passed - 1);
 		title = '–' + arg_passed.format(draw_era.date_options) + ', '
-				+ count_roughly_duration(date, arg_passed);
+				+ count_roughly_duration(date, arg_passed, options);
 		arg_passed = [ [ date, arg_passed ], ,
 		// , { color : '' }
 		];
@@ -1016,11 +1032,13 @@ function draw_era(hierarchy) {
 					date_only : true
 				}) - 0);
 			}
-			// 以 tag 顯示君主生卒。
+			// 以 tag 顯示君主生卒標記。
 			if (!periods.added) {
 				periods.added = true;
 				add_tag(periods.生[0] + '-' + periods.卒[0], period_hierarchy,
-						'君主生卒', true);
+						'君主生卒', true, {
+							歲 : true
+						});
 			}
 		}
 
@@ -1059,7 +1077,7 @@ function draw_era(hierarchy) {
 			name = is_Era ? period.name[0] : period.name,
 			//
 			name_showed = name.match(CeL.era.PERIOD_PATTERN),
-			//
+			// 線圖階層:歷史時期。
 			is_歷史時期 = !!(name_showed = name_showed && name_showed[1]),
 			//
 			from_x = get_from_x(period),
@@ -1121,12 +1139,14 @@ function draw_era(hierarchy) {
 				};
 			}
 
+			var duration = count_roughly_duration(period.start, period.end);
 			SVG_object.addRect(width, layer_height, from_x, layer_from_y, null,
 					1, 存疑資料 ? '#ddd' : unobvious ?
 					// 此處需要與 #era_graph_unobvious 之
 					// background-color 一致。
-					'#ffa' : is_歷史時期 ? '#afa' : '#ddf');
-			SVG_object.addTitle(name);
+					'#ffa' : is_歷史時期 ? '#afa' : '#ddf')
+			//
+			.addTitle(name + ' (' + duration + ')');
 
 			// 繪製/加上時間軸線圖年代刻度。
 			if (
@@ -1181,7 +1201,7 @@ function draw_era(hierarchy) {
 							+ (from_x + width / 2) + ' '
 							+ (layer_from_y + layer_height / 2) + ')');
 			}
-			SVG_object.addTitle(name);
+			SVG_object.addTitle(name + ' (' + duration + ')');
 
 			var lastAdd = SVG_object.lastAdd;
 			if (font_size === MIN_FONT_SIZE) {
@@ -1676,6 +1696,7 @@ function translate_era(era) {
 					C : 'note'
 				};
 			});
+			add_注('在位');
 
 			if (date.name[1].indexOf('天皇') !== NOT_FOUND)
 				// append name.

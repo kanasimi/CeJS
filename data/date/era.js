@@ -51,8 +51,19 @@ CeL.log(['今天是農曆: ', 今天的農曆日期]);
 CeL.log(['今天是農曆: ', 今天的農曆日期]);
 
 
+CeL.env.era_data_load = function(country, queue) {
+	if (!queue)
+		// 判斷是否已載入。
+		CeL.log('era data loaded.');
+};
 
-CeL.run('data.date.era', function() {
+
+function test_era_data() {
+	// 判斷是否已載入曆數資料。
+	if (!CeL.era.loaded) {
+		setTimeout(test_era_data, 80);
+		return;
+	}
 
 // 設計上所要求必須通過之測試範例：測試正確性。
 CeL.assert(['孺子嬰',CeL.era('初始').君主],'初始.君主: 孺子嬰#1');
@@ -157,7 +168,9 @@ CeL.assert([CeL.era('前1年',{period_end:true}).format('CE'),'0001年'.to_Date(
 
 CeL.info('測試全部通過。');
 
-});
+}
+
+CeL.run('data.date.era', test_era_data);
 
 
  // should be error: 清任一紀年無第一八八〇年。
@@ -536,7 +549,9 @@ if (typeof CeL === 'function')
 				// 君主出生日期
 				生 : 1,
 				// 君主逝世日期
-				卒 : 1
+				卒 : 1,
+				// 君主在位期間
+				在位 : 1
 			}, 紀年名稱索引值),
 
 			// era data refrence 對應
