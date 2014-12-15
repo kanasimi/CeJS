@@ -412,6 +412,7 @@ if (typeof CeL === 'function')
 			// matched: [ , 閏, 月分號碼 ]
 			// TODO: 冬月, 臘月.
 			// TODO: [閏後]
+			// TODO: 闰月
 			MONTH_NAME_PATTERN = /^(閏)?([正元]|[01]?\d)月?$/,
 
 			干支_PATTERN = generate_pattern('^干支$'),
@@ -4884,9 +4885,10 @@ if (typeof CeL === 'function')
 				// 共存紀年.start <= date < 共存紀年.end
 				共存紀年,
 				// 某時間點（時刻）搜尋演算：
+				era_index = (options && Array.isArray(options.list)
 				// 查詢某時間點（時刻）存在的所有紀年與資訊：
 				// 依紀年開始時間，以 binary search 找到插入點 index。
-				era_index = era_list.search_sorted({
+				? options.list : era_list).search_sorted({
 					start : date
 				}, {
 					comparator : compare_start_date,
@@ -5075,6 +5077,61 @@ if (typeof CeL === 'function')
 					date.adapt_offset = adapt_minute_offset;
 				}
 			}
+
+			// ---------------------------------------------------------------------//
+			// 應用功能。
+
+			/**
+			 * 取得 year CE 當年，特定之月日之日期。
+			 * 
+			 * @example <code>
+
+			CeL.era.Date_of_CE_year(1850, 1, 1, '中國');
+			CeL.era.Date_of_CE_year(1850);
+
+			 </code>
+			 * 
+			 * @param {Integer}year
+			 *            CE year
+			 * @param {Integer}[月]
+			 *            month of era. default: START_MONTH = 1.
+			 * @param {Integer}[日]
+			 *            date of era. default: START_DATE = 1.
+			 * @param {String}[era_key]
+			 *            e.g., '中國'
+			 * 
+			 * @returns {Date}
+			 * 
+			 * @since 2014/12/15 20:32:43
+			 * 
+			 */
+			function get_Date_of_key_by_CE(year, 月, 日, era_key) {
+				var 日期,
+				// 7: 年中， (1 + MONTH_COUNT >> 1)
+				date = new Date((year < 0 ? year : '000' + year) + '/7/1'),
+				//
+				共存紀年 = add_contemporary(date, null, {
+					era_only : true,
+					尋精準 : true,
+					list : !era_key
+							|| !(era_key = get_Date_of_key_by_CE.default_key)
+					//
+					? era_list : get_era_Set_of_key(era_key).values()
+				});
+
+				共存紀年.forEach(function(紀年) {
+					if (!日期) {
+						// [ 歲序, 月序, 日序 | 0 ]
+						var date_index = 紀年.Date_to_date_index(date);
+						日期 = 紀年.date_name_to_Date(紀年.歲名(date_index[0]), 月, 日,
+								true);
+					}
+				});
+
+				return 日期;
+			}
+
+			get_Date_of_key_by_CE.default_key = '中國';
 
 			// ---------------------------------------------------------------------//
 			// 應用功能。
@@ -6570,10 +6627,12 @@ if (typeof CeL === 'function')
 				for_monarch : for_monarch,
 				numeralize : numeralize_date_name,
 				compare_start : compare_start_date,
+				Date_of_CE_year : get_Date_of_key_by_CE,
 				// 網頁應用功能。
 				node_era : caculate_node_era,
 				setup_nodes : set_up_era_nodes,
 				to_HTML : era_text_to_HTML,
+				//
 				PERIOD_PATTERN : PERIOD_PATTERN
 			});
 
@@ -6593,6 +6652,8 @@ if (typeof CeL === 'function')
 						+ date_string + ']', 3, 'String_to_Date.parser.era');
 				return to_era_Date(date_string, options);
 			};
+
+			library_namespace.date.age_of.get_new_year = get_Date_of_key_by_CE;
 
 			// ---------------------------------------
 

@@ -597,63 +597,6 @@ function set_SVG_text_properties(recover) {
 	}
 }
 
-/**
- * 計算大略的時間間隔。
- * 
- * @param start
- * @param end
- * @param options
- */
-function count_roughly_duration(start, end, options) {
-	if (!end)
-		end = new Date;
-	var difference = end - start, diff, diff2;
-	if (!(difference >= 0) || !isFinite(difference))
-		return;
-
-	if (!CeL.is_Date(start))
-		start = new Date(start);
-	if (!CeL.is_Date(end))
-		end = new Date(end);
-	diff2 = end.getMonth() - start.getMonth()
-	//
-	+ (end.getDate() - start.getDate()) / 30;
-	if (diff = end.getFullYear() - start.getFullYear()) {
-		// assert: {Integer}diff 年 {Float}diff2 月, diff > 0.
-		// → difference = {Float} 年（至小數）
-		difference = diff + diff2 / 12;
-		// diff = {String} format to show
-		if (options && options.月) {
-			diff += 'Y' + Math.round(diff2) + 'M';
-		} else
-			diff = difference.to_fixed(1) + 'Y';
-		if (options && options.歲)
-			// 計算年齡(虛歲)幾歲。
-			// TODO:因無法判別春節（農曆正月初一）日期，此方法尚有誤差！
-			// + 1: 一出生即虛歲一歲(YO, years old, "Y/O.")。
-			diff = (Math.ceil(difference) + 1) + '歲, ' + diff;
-
-		return diff;
-	}
-
-	if (diff2 >= 1)
-		return diff2.to_fixed(1) + 'M';
-
-	if (difference < 1000)
-		return difference + 'ms';
-
-	if ((difference /= 1000) < 60)
-		return difference.to_fixed(1) + 's';
-
-	if ((difference /= 60) < 60)
-		return difference.to_fixed(1) + 'm';
-
-	if ((difference /= 60) < 24)
-		return difference.to_fixed(1) + 'h';
-
-	return (difference / 24).to_fixed(1) + 'D';
-}
-
 // Firefox/30.0 尚未支援 writing-mode。IE, Chrome 支援。
 // https://bugzilla.mozilla.org/show_bug.cgi?id=145503
 // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/writing-mode
@@ -751,25 +694,6 @@ show_range.radius = 3;
 show_range.min_width = 3;
 show_range.min_height = 3;
 
-// Durations
-function parse_period(period) {
-	var matched = period.trim().match(parse_period.PATTERN);
-	if (matched && (!/[日時]/.test(matched[2])
-	// 預防 "10月22日夜7-8時"
-	|| !/[時分秒\/]/.test(matched[2].match(/^(?:.*?)([年月日時分秒\/])/)[1]))) {
-		(period = matched).shift();
-		if (period[1].indexOf('月') === NOT_FOUND
-				&& (matched = period[0].match(/[^年月]+月/)))
-			period[1] = matched[0] + period[1];
-		if (period[1].indexOf('年') === NOT_FOUND
-				&& (matched = period[0].match(/[^年]+年/)))
-			period[1] = matched[0] + period[1];
-	} else if (CeL.is_debug(2))
-		CeL.warn('parse_period: Can not parse period [' + period + ']');
-	return period;
-}
-parse_period.PATTERN = /^(.+)\s*[\-–－—─~～〜﹣]\s*([^\-].+)$/;
-
 /**
  * 可繪製特定時段，例如展現在世期間所占比例。
  * 
@@ -790,7 +714,7 @@ function add_tag(period, data, group, register_only, options) {
 
 	var title = '',
 	//
-	arg_passed = parse_period(period),
+	arg_passed = CeL.parse_period(period),
 	// from date
 	date = CeL.era(Array.isArray(arg_passed) ? arg_passed[0] : period, {
 		date_only : true
@@ -819,7 +743,7 @@ function add_tag(period, data, group, register_only, options) {
 		else
 			arg_passed = new Date(arg_passed - 1);
 		title = '–' + arg_passed.format(draw_era.date_options) + ', '
-				+ count_roughly_duration(date, arg_passed, options);
+				+ date.age(arg_passed, options);
 		arg_passed = [ [ date, arg_passed ], ,
 		// , { color : '' }
 		];
@@ -1139,7 +1063,7 @@ function draw_era(hierarchy) {
 				};
 			}
 
-			var duration = count_roughly_duration(period.start, period.end);
+			var duration = CeL.age_of(period.start, period.end);
 			SVG_object.addRect(width, layer_height, from_x, layer_from_y, null,
 					1, 存疑資料 ? '#ddd' : unobvious ?
 					// 此處需要與 #era_graph_unobvious 之
@@ -1277,7 +1201,7 @@ function draw_era(hierarchy) {
 				onclick : function() {
 					var data = draw_era.tags[this.title];
 					data.hide = !data.hide;
-					draw_era(SVG_object.hierarchy);
+					draw_era.redraw();
 					return false;
 				}
 			});
@@ -1306,6 +1230,10 @@ draw_era.options = {
 	merge_periods : true
 };
 
+draw_era.redraw = function() {
+	draw_era(SVG_object.hierarchy);
+};
+
 // click and change the option of this.title
 draw_era.change_option = function() {
 	var option = this.title.replace(/\s[\s\S]*/, ''), setted = draw_era.options[option];
@@ -1315,6 +1243,7 @@ draw_era.change_option = function() {
 	draw_era.options[option]
 	//
 	= !setted;
+	draw_era.redraw();
 	return false;
 };
 
@@ -1364,10 +1293,10 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 					onclick : draw_era.click_navigation_date
 				}, {
 					span : '–',
-					title : count_roughly_duration(name.start.to_Date({
+					title : name.start.to_Date({
 						parser : 'CE',
 						year_padding : 0
-					}), name.end.to_Date({
+					}).age(name.end.to_Date({
 						parser : 'CE',
 						year_padding : 0
 					}))
@@ -1592,7 +1521,7 @@ function translate_era(era) {
 	era = era.trim();
 
 	var output, date;
-	if (('era_graph' in select_panels) && parse_period.PATTERN.test(era))
+	if (('era_graph' in select_panels) && CeL.parse_period.PATTERN.test(era))
 		return add_tag(era);
 
 	// 前置處理。
@@ -1920,7 +1849,9 @@ function affairs() {
 
 	CeL.toggle_display('input_panel', true);
 
-	_.create_menu('language', [ 'TW', 'ja', 'en' ]);
+	_.create_menu('language', [ 'TW', 'ja', 'en' ], function() {
+		draw_era.redraw();
+	});
 
 	// handle with document.title in IE 8.
 	if (CeL.set_text.need_check_title)

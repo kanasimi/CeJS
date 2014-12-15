@@ -943,6 +943,9 @@ function set_intermediate(head, foot) {
 
 
 function set_bind(handler, need_meny_arg) {
+	if (typeof need_meny_arg !== 'boolean')
+		need_meny_arg = handler.length > 1;
+
 	return need_meny_arg ?
 	function(args) {
 		if(arguments.length < 2)

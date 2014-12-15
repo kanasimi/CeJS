@@ -5,6 +5,8 @@ if (typeof CeL === 'function')
 		'中國' : '中国',
 		'한국' : '朝鮮',
 		'Việt Nam' : 'ベトナム',
+		'Thời kỳ phong kiến phương Bắc đô hộ' : '北属期',
+		'Thời kỳ độc lập' : '独立王朝時代',
 		'Maya' : 'マヤ',
 
 		'取得紀年' : '暦日',

@@ -5,6 +5,8 @@ if (typeof CeL === 'function')
 		// 國家 country
 		'한국' : '韓國',
 		'Việt Nam' : '越南',
+		'Thời kỳ phong kiến phương Bắc đô hộ' : '北屬時期',
+		'Thời kỳ độc lập' : '獨立時期',
 		'Maya' : '瑪雅',
 
 		'calendar' : '曆法',

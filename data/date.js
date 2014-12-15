@@ -2074,6 +2074,105 @@ strftime.set_conversion(Object.assign({
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 
+/**
+ * 計算大略的時間間隔，以適當的單位簡略顯示。 count roughly duration, count date.
+ * 
+ * @param {Date|Number}start
+ * @param {Date|Number}[end]
+ * @param {Object}[options]
+ */
+function age_of(start, end, options) {
+	if (!end)
+		// count till now.
+		end = new Date;
+	var difference = end - start, diff, diff2;
+	if (!(difference >= 0) || !isFinite(difference))
+		return;
+
+	if (!is_Date(start))
+		start = new Date(start);
+	if (!is_Date(end))
+		end = new Date(end);
+	diff2 = end.getMonth() - start.getMonth()
+	//
+	+ (end.getDate() - start.getDate()) / 30;
+	if (diff = end.getFullYear() - start.getFullYear()) {
+		// assert: {Integer}diff 年 {Float}diff2 月, diff > 0.
+		// → difference = {Float} 年（至小數）
+		difference = diff + diff2 / 12;
+		// diff = {String} format to show
+		if (options && options.月) {
+			diff += 'Y' + Math.round(diff2) + 'M';
+		} else
+			diff = difference.to_fixed(1) + 'Y';
+		if (options && options.歲) {
+			// 計算年齡(虛歲)幾歲。
+			// + 1: 一出生即虛歲一歲(YO, years old, "Y/O.")。之後過年長一歲。
+			difference = end.getFullYear() - start.getFullYear() + 1;
+			if (start - age_of.get_new_year(start.getFullYear()) < 0)
+				difference++;
+			if (end - age_of.get_new_year(end.getFullYear()) < 0)
+				difference--;
+			diff = difference + '歲, ' + diff;
+		}
+
+		return diff;
+	}
+
+	if (diff2 >= 1)
+		return diff2.to_fixed(1) + 'M';
+
+	if (difference < 1000)
+		return difference + 'ms';
+
+	if ((difference /= 1000) < 60)
+		return difference.to_fixed(1) + 's';
+
+	if ((difference /= 60) < 60)
+		return difference.to_fixed(1) + 'm';
+
+	if ((difference /= 60) < 24)
+		return difference.to_fixed(1) + 'h';
+
+	return (difference / 24).to_fixed(1) + 'D';
+}
+
+age_of.get_new_year = function(year) {
+	// 取平均值。因無法準確判別春節（農曆正月初一）日期，此方法尚有誤差！
+	return new Date((year < 0 ? year : '000' + year) + '/2/1');
+};
+
+
+_.age_of = age_of;
+
+
+
+// Durations
+function parse_period(period) {
+	var matched = period.trim().match(parse_period.PATTERN);
+	if (matched && (!/[日時]/.test(matched[2])
+	// 預防 "10月22日夜7-8時"
+	|| !/[時分秒\/]/.test(matched[2].match(/^(?:.*?)([年月日時分秒\/])/)[1]))) {
+		(period = matched).shift();
+		if (period[1].indexOf('月') === NOT_FOUND
+				&& (matched = period[0].match(/[^年月]+月/)))
+			period[1] = matched[0] + period[1];
+		if (period[1].indexOf('年') === NOT_FOUND
+				&& (matched = period[0].match(/[^年]+年/)))
+			period[1] = matched[0] + period[1];
+	} else if (library_namespace.is_debug(2))
+		library_namespace.warn('parse_period: Can not parse period [' + period + ']');
+	return period;
+}
+
+parse_period.PATTERN = /^(.+)\s*[\-–－—─~～〜﹣]\s*([^\-].+)$/;
+
+_.parse_period = parse_period;
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+
 
 /*
 mode:
@@ -2251,7 +2350,8 @@ library_namespace.set_method(String.prototype, {
 
 
 library_namespace.set_method(Date.prototype, {
-	format: set_bind(Date_to_String)
+	age : set_bind(age_of, true),
+	format : set_bind(Date_to_String)
 });
 
 

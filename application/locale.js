@@ -1454,6 +1454,9 @@ gettext.adapt_domain = function(language) {
 	gettext.use_domain(language, function() {
 		library_namespace.debug(language + ' loaded.');
 		gettext.translate_nodes();
+		create_domain_menu.onchange.forEach(function(handler) {
+			handler();
+		});
 	}, true);
 
 	// 可能用於 element 中，直接用 return gettext.adapt_domain() 即可。
@@ -1466,7 +1469,7 @@ gettext.adapt_domain = function(language) {
  * @param node
  * @param domain_Array
  */
-function create_domain_menu(node, domain_Array) {
+function create_domain_menu(node, domain_Array, onchange) {
 	if (!node || !domain_Array
 		//
 		|| !library_namespace.new_node)
@@ -1489,7 +1492,7 @@ function create_domain_menu(node, domain_Array) {
 
 	menu = {
 		select : menu,
-		onchange : function() {
+		onchange : function(e) {
 			gettext.adapt_domain(library_namespace.node_value(this));
 		}
 	};
@@ -1499,10 +1502,13 @@ function create_domain_menu(node, domain_Array) {
 			T : tmp
 		}, ': ', menu ];
 
+	if (typeof onchange === 'function')
+		create_domain_menu.onchange.push(onchange);
 	library_namespace.new_node(menu, node);
 }
 
 create_domain_menu.tag = 'Language';
+create_domain_menu.onchange = [];
 
 gettext.create_menu = create_domain_menu;
 

@@ -1346,6 +1346,9 @@ function new_node(nodes, layer) {
 		// 不更動到原先的 arguments。但無作用。
 		//nodes = Object.assign(library_namespace.null_Object(), nodes);
 
+		// for test.
+		//Object.seal(nodes);
+
 		var tag_key, tag = nodes.$, n = 'className', ns, s, ignore = {
 			// tag
 			$ : null,
@@ -1505,24 +1508,36 @@ function new_node(nodes, layer) {
 				}
 				// assert: Array.isArray(n)
 
-				if (!(children = nodes[tag]))
-					nodes[tag] = gettext.apply(null, n);
-				else if (typeof children === 'string' || typeof children === 'number')
-					nodes[tag] = gettext(dataset(node, gettext.DOM_id_key, children));
+				if (!(children = nodes[tag])) {
+					// 不改變 nodes，否則可能造成重複利用時出現問題。
+					//nodes[tag] =
+					children = gettext.apply(null, n);
+				} else if (typeof children === 'string' || typeof children === 'number') {
+					//nodes[tag] =
+					children = gettext(dataset(node, gettext.DOM_id_key, children));
+				}
 			}
 
 			if((n = 'R') in nodes) {
 				ignore[n] = null;
 				if (n = nodes[n]) {
-					'title' in nodes || (nodes.title = n);
-					if (tag === 'img' && n.length < 20)
-						'alt' in nodes || (nodes.alt = n);
+					if (!('title' in nodes)) {
+						//nodes.title = n;
+						node.title = n;
+					}
+					if (tag === 'img' && n.length < 20
+					//
+					&& !('alt' in nodes)) {
+						//nodes.alt = n;
+						node.alt = n;
+					}
 				}
 			}
 
 			// 設定 children nodes
 			ignore[tag_key || tag] = null;
-			children = nodes[tag_key || tag];
+			if (!children)
+				children = nodes[tag_key || tag];
 
 			//	自動作 list 的轉換
 			if (tag in {
