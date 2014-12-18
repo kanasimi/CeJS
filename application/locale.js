@@ -829,6 +829,10 @@ CeL.gettext.use_domain('en', function() {
 
 
 //	###basic test
+CeL.gettext.use_domain('zh-TW', function() {
+	;
+}, true);
+
 //	設定欲轉換的文字格式。
 CeL.gettext.set_text({
 	'%n1 smart ways to spend %c2' : '%Chinese/n1個花%c2的聰明方法'
@@ -872,6 +876,13 @@ CeL.assert([ '四萬〇三十五個花新臺幣伍佰玖拾捌萬陸仟玖佰貳
 CeL.gettext.use_domain('en-US', true);
 CeL.assert([ '10 smart ways to spend US$70,000',
 		CeL.gettext('%smart way@1 to spend %c2', 10, 70000) ]);
+
+
+CeL.assert([ "二十世紀八十年代", CeL.gettext('%數1世紀%數2年代', 20, 80) ], 'conversion:小寫中文數字');
+CeL.assert([ "央行上調基準利率2碼", CeL.gettext('央行上調基準利率%碼1', .005) ], 'conversion:碼');
+
+CeL.assert([ "女人401枝花", CeL.gettext('女人%1|1枝花', 40) ], 'index 可以 "|" 終結#1');
+CeL.assert([ "女人四十1枝花", CeL.gettext('女人%數1|1枝花', 40) ], 'index 可以 "|" 終結#2');
 
 
  * </code>
@@ -922,12 +933,13 @@ function gettext(text_id) {
 	if (length > 1)
 		text = text
 		.replace(
-				/%(?:(%)|(?:([^%@\s\/]+)\/)?(?:([^%@\s\d]{1,3})|([^%@]+)@)?([0-9]{1,2}))/g,
+				/%(?:(%)|(?:([^%@\s\/]+)\/)?(?:([^%@\s\d]{1,3})|([^%@]+)@)?(\d{1,2})\|?)/g,
 				function(conversion, is_escaped,
 						domain_specified, format,
 						object_name, NO) {
 					// whole conversion specification:
 					// %% || %index || %\w(conversion format specifier)\d{1,2}(index) || %[conversion specifications@]index
+					// index 可以 "|" 終結。
 					if (is_escaped)
 						return is_escaped;
 
@@ -1821,6 +1833,12 @@ gettext.conversion = {
 			number = to_positional_Chinese_numeral(number).replace(/(.)〇/, '$1');
 			return number + '折';
 		},
+
+		// 基準利率 1碼 = 0.25% = 1 / 400，碼翻譯自 quarter。
+		碼 : function (number) {
+			return (400 * number) + '碼';
+		},
+
 		// percentage, 百分比, ％（全形百分號）
 		'％' : function (number) {
 			return (100 * number).to_fixed() + '%';
