@@ -279,7 +279,7 @@ Chinese_numerals_Normal_Full_matched = new RegExp('^(?:負?[' + Chinese_numerals
 		+ '\\d '+Chinese_numerals_Normal_base_denomination.join('')
 		+ '又]+|分之)+$'),
 //
-numeral_value = {};
+numeral_value = library_namespace.null_Object();
 
 
 _.Chinese_numerals_Normal_digits = Chinese_numerals_Normal_digits;
@@ -919,6 +919,8 @@ function gettext(text_id) {
 
 	// 轉換 / convert function.
 	convert = function(text_id, domain_specified) {
+		// 未設定個別 domain 者，將以此訊息(text_id)顯示。
+		// text_id 一般應採用原文(original)，或最常用語言；亦可以代碼表示，但須設定所有可能使用的語言。
 		if (typeof text_id !== 'function' && (text_id in domain))
 			text_id = domain[text_id];
 
@@ -1011,7 +1013,7 @@ function gettext_check_resource(domain_name, type,
 
 	var domain = gettext_resource[domain_name];
 	if (!domain)
-		gettext_resource[domain_name] = domain = {};
+		gettext_resource[domain_name] = domain = library_namespace.null_Object();
 
 	if (type)
 		if (type = [ , 'system', 'user' ][type]) {
@@ -1164,7 +1166,7 @@ gettext.use_domain = function(domain_name, callback, force) {
 
 		gettext_domain_name = domain_name;
 		if (!(domain_name in gettext_texts))
-			gettext_texts[domain_name] = {};
+			gettext_texts[domain_name] = library_namespace.null_Object();
 
 		var need_to_load = [];
 		// TODO: use <a href="http://en.wikipedia.org/wiki/JSONP" accessdate="2012/9/14 23:50">JSONP</a>
@@ -1862,13 +1864,14 @@ gettext.conversion = {
 //	initialization
 
 var gettext_DOM_id,
-gettext_main_alias = {}, gettext_aliases = {},
-gettext_texts = {},
+gettext_main_alias = library_namespace.null_Object(),
+gettext_aliases = library_namespace.null_Object(),
+gettext_texts = library_namespace.null_Object(),
 gettext_domain_name,
 // CeL.env.domain_location = 'resource/';
 // CeL.gettext.use_domain_location('resource/');
 gettext_location = library_namespace.env.domain_location,
-gettext_resource = {};
+gettext_resource = library_namespace.null_Object();
 
 
 //TODO: lazy evaluation

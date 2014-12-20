@@ -1690,7 +1690,12 @@ _.Gregorian_reform_date = new Date(reform_year, 10 - 1, 15);
 // gcal-3.6/doc/GREG-REFORM
 // http://www.tondering.dk/claus/cal/gregorian.php
 // http://www.webexhibits.org/calendars/year-countries.html
-// http://sizes.com/time/cal_Gregadoption.htm
+/*
+http://sizes.com/time/cal_Gregadoption.htm
+
+使用公共轉換組「外國地名翻譯」
+https://zh.wikipedia.org/wiki/%E6%A8%A1%E5%9D%97:CGroup/%E5%9C%B0%E5%90%8D
+*/
 var reform_by_region = {
 	'Italy' : '1582/10/15',
 	'Spain' : '1582/10/15',
@@ -1706,14 +1711,16 @@ var reform_by_region = {
 	'Germany' : '1700/3/1',
 	'Norway' : '1700/3/1',
 	'Denmark' : '1700/3/1',
-	// 大不列顛王國, 英國
+	// Kingdom of Great Britain, 大不列顛王國, グレートブリテン王国, 英國
 	'Great Britain' : '1752/9/14',
 	'Sweden' : '1753/3/1',
 	'Finland' : '1753/3/1',
+	// 日本
 	// 'Japan' : '1873/1/1',
+	// 中國
 	// 'China' : '1911/11/20',
 	'Bulgaria' : '1916/4/14',
-	// USSR, U.S.S.R.
+	// USSR, U.S.S.R., 蘇聯
 	'Soviet Union' : '1918/2/14',
 	'Serbia' : '1919/2/1',
 	'Romania' : '1919/2/1',
@@ -2172,6 +2179,55 @@ _.parse_period = parse_period;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
+/**
+ * 泰國佛曆
+ * @see https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2
+ * @see https://th.wikipedia.org/wiki/%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B9%88%E0%B8%AD%E0%B8%A2:%E0%B9%80%E0%B8%AB%E0%B8%95%E0%B8%B8%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%93%E0%B9%8C%E0%B8%9B%E0%B8%B1%E0%B8%88%E0%B8%88%E0%B8%B8%E0%B8%9A%E0%B8%B1%E0%B8%99
+ */
+function Date_to_Thai(date, month, year, weekday) {
+	if (is_Date(date)) {
+		weekday = date.getDay();
+		year = 543 + date.getFullYear();
+		month = date.getMonth();
+		date = date.getDate();
+	} else if (month > 0)
+		// month start from 0.
+		month--;
+	else
+		month = null;
+
+	date = [
+			(weekday = Date_to_Thai.weekday_name[weekday]) ? 'วัน' + weekday
+					: '', date || '', Date_to_Thai.month_name[month] || '',
+			year || '' ];
+	if (date[0] && (date[1] || date[2] || date[3]))
+		date[0] += 'ที่';
+
+	if (!date[2] && !isNaN(date[3]))
+		// year only?
+		date[3] = 'พ.ศ. ' + date[3];
+
+	year = [];
+	date.forEach(function(n) {
+		if (n)
+			year.push(n);
+	});
+	return year.join(' ');
+}
+
+// start from 0.
+Date_to_Thai.month_name = 'มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม'
+		.split('|');
+
+// 0: Sunday.
+Date_to_Thai.weekday_name = 'อาทิตย์|จันทร์|อังคาร|พุธ|พฤหัสบดี|ศุกร์|เสาร์'
+		.split('|');
+
+
+_.Date_to_Thai = Date_to_Thai;
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
 
 
 /*
@@ -2350,6 +2406,7 @@ library_namespace.set_method(String.prototype, {
 
 
 library_namespace.set_method(Date.prototype, {
+	to_Thai : set_bind(Date_to_Thai),
 	age : set_bind(age_of, true),
 	format : set_bind(Date_to_String)
 });

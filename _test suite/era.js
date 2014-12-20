@@ -201,12 +201,12 @@ function Year_numbering(year_shift, year_only, has_year_0, reverse) {
 var NOT_FOUND = -1, PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
 //
 CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
-// 選用的文字式年曆欄位
+// 可選用的文字式年曆欄位。
 selected_column = {
 	JDN : true,
 	contemporary : true
 },
-// 可選用的文字式年曆 title。 = { id : [th, function (date) {} ] }
+// 可選用的文字式年曆 title = { id : [th, function (date) {} ] }
 calendar_column,
 //
 default_column = [ {
@@ -1627,7 +1627,7 @@ function translate_era(era) {
 			});
 			add_注('在位');
 
-			if (date.name[1].indexOf('天皇') !== NOT_FOUND)
+			if (date.name[1] && date.name[1].indexOf('天皇') !== NOT_FOUND)
 				// append name.
 				if (Array.isArray(date.天皇))
 					// 不動到原 data。
@@ -1643,6 +1643,7 @@ function translate_era(era) {
 				};
 			});
 			// add_注('諱');
+			add_注('據', '資料來源');
 
 			add_注('注');
 
@@ -1849,7 +1850,7 @@ function affairs() {
 
 	CeL.toggle_display('input_panel', true);
 
-	_.create_menu('language', [ 'TW', 'ja', 'en' ], function() {
+	_.create_menu('language', [ 'TW', 'CN', 'ja', 'en' ], function() {
 		draw_era.redraw();
 	});
 
@@ -2125,7 +2126,9 @@ function affairs() {
 	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
 	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
 	// for 皇紀.
-	kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset);
+	kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset),
+	// for 泰國佛曆
+	THAI_Year_numbering = Year_numbering(543);
 
 	// calendar_column
 	list = {
@@ -2571,7 +2574,15 @@ function affairs() {
 					R : 'ปฏิทินสุริยคติไทย: 泰國陽曆/泰國官方之佛曆年 = 公曆年 + 543',
 					href : 'https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2',
 					S : 'font-size:.8em;'
-				}, Year_numbering(543) ],
+				},
+				function(date) {
+					var numeral = THAI_Year_numbering(date), tmp = numeral
+							.split('/');
+					if (!date.精 && !date.準 && tmp.length === 3)
+						numeral = CeL.Date_to_Thai(tmp[2], tmp[1], tmp[0], date
+								.getDay());
+					return numeral;
+				} ],
 
 		AUC : [ {
 			a : {
