@@ -632,11 +632,15 @@ importNode() 比較像是 cloneNode() 加上變更 ownerDocument。
  * @return
  * @_memberOf	_module_
  */
-replace_HTML = function(o, html){
-	if (typeof o === 'string')
+replace_HTML = function(o, html) {
+	if (o && typeof o === 'string')
 		o = document.getElementById(o);
-	if (!_.is_ELEMENT_NODE(o))
+
+	// _.is_ELEMENT_NODE(<math>) === false ("[object Element]" @ Firefox/37.0)
+	//if (!_.is_ELEMENT_NODE(o)) return;
+	if (!o || !o.innerHTML)
 		return;
+
 	try {
 		/*@cc_on	// Pure innerHTML is slightly faster in IE
 		 o.innerHTML=html||'';
@@ -651,6 +655,10 @@ replace_HTML = function(o, html){
 		o.innerHTML = html || '';
 
 	} catch (e) {
+		/*
+		http://msdn.microsoft.com/en-us/library/ms532998.aspx#TOM_Create
+		the innerText and innerHTML properties of the table and tr objects are read-only.
+		*/
 		library_namespace.warn('replace_HTML() error!');
 		library_namespace.err(e);
 	}
@@ -704,7 +712,8 @@ remove_node = function remove_node(o, tag) {
 			tag = tag.toLowerCase();
 
 		//	safer: if you have any asynchronous events going. But node.hasChildNodes() will always do an evaluation.
-		//while(o.hasChildNodes()&&(i=o.firstChild))o.removeChild(i);
+		//while(o.hasChildNodes()&&(i=o.lastChild))o.removeChild(i);
+		//while(o.hasChildNodes())o.removeChild(o.lastChild);
 
 		// don't use for()
 		// http://weblogs.macromedia.com/mesh/archives/2006/01/removing_html_e.html
@@ -721,6 +730,10 @@ remove_node = function remove_node(o, tag) {
 	return tag || !(i = o.parentNode) ? o : i.removeChild(o);
 };
 
+
+/*
+empty node
+*/
 _// JSDT:_module_
 .
 remove_all_child = _.replace_HTML;
@@ -941,6 +954,7 @@ fill_form = function fill_form(pair, config) {
 			};
 	},
 	set_node = function(name) {
+		//if (!name) throw 1;
 		node = base.getElementById(name);
 		library_namespace.debug('.getElementById(' + name + ') = ' + node, 3, 'fill_form.set_node');
 		//	IE9 quirks mode 中， .getElementById() 可以得到 .getElementsByName()[0]。
@@ -1310,7 +1324,7 @@ insertSetting:
  * @return	{HTMLElement}	new node created
  * @since	2010/6/21 13:45:02
  */
-function new_node(nodes, layer) {
+function new_node(nodes, layer, ns) {
 	var node, for_each,
 	// parent: parent node of layer or layer.firstChild
 	parent,
@@ -1349,7 +1363,7 @@ function new_node(nodes, layer) {
 		// for test.
 		//Object.seal(nodes);
 
-		var tag_key, tag = nodes.$, n = 'className', ns, s, ignore = {
+		var tag_key, tag = nodes.$, n = 'className', s, ignore = {
 			// tag
 			$ : null,
 			// attrib
@@ -1687,7 +1701,7 @@ function new_node(nodes, layer) {
 				} || null
 				; i < l; i++) {
 			//alert('node['+i+']\n'+nodes[i]);
-			node.push(n = new_node(nodes[i], f));
+			node.push(n = new_node(nodes[i], f, ns));
 			/*
 			node.push(n = new_node(nodes[i], for_each));
 			if (for_each)
@@ -1720,7 +1734,7 @@ function new_node(nodes, layer) {
 		//	Try to use createDocumentFragment()
 		//	http://wiki.forum.nokia.com/index.php/JavaScript_Performance_Best_Practices
 		if (children !== null && typeof children !== 'undefined')
-			new_node(children, node);
+			new_node(children, node, ns);
 	}
 
 
@@ -1781,7 +1795,9 @@ new_node.handler = [
 					}
 				}
 
-			} else if (_.is_HTML_element(n)) {
+			} else if (//_.is_HTML_element(n)
+				// for <math>
+				_.is_DOM_NODE(n)) {
 				t = l.innerHTML;
 				l.appendChild(n);
 				/*
@@ -2097,6 +2113,7 @@ function select_node(selector, base_space, options) {
 		pattern = /\s*([>+~])?\s*(([^#.$\[:>+~\s]*)(?:(::?|[#.$])([^#.$\[:>+~\s]+)|\[([^\]]+)\])|[^#.$\[:>+~\s]+)/g,
 		//	.getElementById()
 		get_id = function(id) {
+			//if (!id) throw 1;
 			//	IE 8 中 .getElementById 可能是 'object'!
 			var node = typeof result.getElementById !== 'undefined' ?
 					result.getElementById(id)
@@ -3739,7 +3756,7 @@ function doAlertScroll(m){var oI;
  * @_memberOf	_module_
  */
 function set_class(element, class_name, options) {
-	if (typeof element === 'string')
+	if (element && typeof element === 'string')
 		element = document.getElementById(element);
 
 	if (!_.is_ELEMENT_NODE(element))
@@ -3809,7 +3826,7 @@ _// JSDT:_module_
 set_class = set_class;
 
 function clear_class(element) {
-	if (typeof element === 'string')
+	if (element && typeof element === 'string')
 		element = document.getElementById(element);
 
 	if (('className' in element) && _.is_ELEMENT_NODE(element))
@@ -4601,7 +4618,7 @@ _// JSDT:_module_
  * @_memberOf	_module_
  */
 get_style = function(element, name, not_computed) {
-	if (typeof element === 'string')
+	if (element && typeof element === 'string')
 		element = document.getElementById(element);
 
 	//	opacity

@@ -1733,6 +1733,7 @@ gettext.date = function(date, domain_name) {
 		return date.format('%Y年%m月%d日 %H時%M分%S秒', {
 			locale : domain_name
 		});
+		// 19世紀80年代, 20世紀60年代
 
 	default:
 		return date;
