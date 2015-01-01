@@ -298,153 +298,7 @@ if (false) {
 	};
 
 
-
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------//
-
-	/**
-	 * XMLHttpRequest object type cache.
-	 * {Number} 0: no XMLHttpRequest, 1: new XMLHttpRequest_type(), 2: new ActiveXObject('Microsoft.XMLHTTP').
-	 * @inner
-	 * @ignore
-	 */
-	var XMLHttpRequest_type = 0;
-
-	var is_Opera = _.is_WWW(true) && navigator.appName === 'Opera';
-
-	/**
-	 * 最基本之資源取得功能。<br />
-	 * Get file resource by {@link XMLHttpRequest}.<br />
-	 * 依序載入 resource，用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br />
-	 * 除 Ajax，本函數亦可用在 CScript 執行中。
-	 * @example
-	 * //	get contents of [path/to/file]:
-	 * var file_contents = CeL.get_file('path/to/file');
-	 * @param	{String} path	URI / full path. <em style="text-decoration:line-through;">不能用相對path！</em>
-	 * @param	{String} [encoding]	file encoding
-	 * @returns	{String} data	content of path
-	 * @returns	{undefined}	when error occurred: no Ajax function, ..
-	 * @throws	uncaught exception @ Firefox: 0x80520012 (NS_ERROR_FILE_NOT_FOUND), <a href="http://www.w3.org/TR/2007/WD-XMLHttpRequest-20070227/#exceptions">NETWORK_ERR</a> exception
-	 * @throws	'Access to restricted URI denied' 當 access 到上一層目錄時 @ Firefox
-	 * @see
-	 * <a href=http://blog.joycode.com/saucer/archive/2006/10/03/84572.aspx">Cross Site AJAX</a>,
-	 * <a href="http://domscripting.com/blog/display/91">Cross-domain Ajax</a>,
-	 * <a href="http://forums.mozillazine.org/viewtopic.php?f=25&amp;t=737645" accessdate="2010/1/1 19:37">FF3 issue with iFrames and XSLT standards</a>,
-	 * <a href="http://kb.mozillazine.org/Security.fileuri.strict_origin_policy" accessdate="2010/1/1 19:38">Security.fileuri.strict origin policy - MozillaZine Knowledge Base</a>
-	 * Chrome: <a href="http://code.google.com/p/chromium/issues/detail?id=37586" title="between builds 39339 (good) and 39344 (bad)">NETWORK_ERR: XMLHttpRequest Exception 101</a>
-	 */
-	function get_file(path, encoding) {
-		//with(typeof window.XMLHttpRequest=='undefined'?new ActiveXObject('Microsoft.XMLHTTP'):new XMLHttpRequest()){
-
-		//_.debug('XMLHttpRequest type: ' + XMLHttpRequest_type, 1, 'get_file');
-
-		var data,
-		type = 'GET',
-		/**
-		 * XMLHttpRequest object.
-		 * Can't cache this object.
-		 * @inner
-		 * @ignore
-		 */
-		o = XMLHttpRequest_type === 1 ?
-				new XMLHttpRequest()
-				: new ActiveXObject('Microsoft.XMLHTTP');
-
-		//	4096: URL 長度限制，與瀏覽器有關。
-		if (typeof path === 'string' && path.length > 4096
-				&& (data = path.match(/^([^?]{6,200})\?(.+)$/)))
-			path = data[1], data = data[2], type = 'PUT';
-		else
-			data = null;
-
-		try {
-			//	IE 10 中，local 光 .open() 就 throw 了。
-			o.open(type, path, false);
-
-			if (encoding && o.overrideMimeType)
-				/*
-				 * old: o.overrideMimeType('text/xml;charset='+encoding);
-				 * 但這樣會被當作 XML 解析，產生語法錯誤。
-				 */
-				o.overrideMimeType('application/json;charset=' + encoding);
-
-			//	http://www.w3.org/TR/2007/WD-XMLHttpRequest-20070227/#dfn-send
-			//	Invoking send() without the data argument must give the same result as if it was invoked with null as argument.
-
-			//	若檔案不存在，會 throw.
-			o.send(data);
-
-			if(65533 === o.responseText.charCodeAt(0)
-				// e.g., @ "Mozilla/5.0 (Windows NT 6.1; rv:29.0) Gecko/20100101 Firefox/29.0"
-				&& navigator.userAgent.indexOf(' Gecko/2') !== -1) {
-				_.env.same_origin_policy = true;
-				throw new Error('get_file: Can not parse UTF-32 encoding of [' + path + '] @ Firefox!');
-			}
-
-			delete get_file.error;
-
-		} catch (e) {
-			if (e.number === -1072896658
-				//|| e.message.indexOf('c00ce56e') !== -1
-				)
-				// http://support.microsoft.com/kb/304625
-				throw new Error('指定的資源回傳了系統不支援的文字編碼，因此無法解碼資料。請檢查此網頁回傳之 header，確認系統可解碼 Content-Type 之 charset。');
-
-			//	Chome: XMLHttpRequest cannot load file:///X:/*.js. Cross origin requests are only supported for HTTP.
-			//	Opera 11.50: 不會 throw，但是 .responseText === ''。
-			//	Apple Safari 3.0.3 may throw NETWORK_ERR: XMLHttpRequest Exception 101
-			get_file.error = e;
-
-			if (_.is_debug(2)) {
-				_.warn(_.Class + '.get_file: Loading [' + path + '] failed!');
-				_.err(e);
-			}
-
-			//e.object = o;	//	[XPCWrappedNative_NoHelper] Cannot modify properties of a WrappedNative @ firefox
-
-			if (
-				// 5: 系統找不到指定的資源。/存取被拒。
-				//	IE 10 中，5: "存取被拒。"。same origin policy 下，即使是檔案存在，值一樣為 5，因此無法以資判別。
-				//(e.number & 0xFFFF) !== 5 &&
-					_.is_WWW() &&
-					(_.is_local() || ((o = path.match(/:(\/\/)?([^\/]+)/))
-							&& o[2] !== window.location.hostname))) {
-				// 八九不離十: no Cross-site scripting (XSS).
-				if (_.is_debug()) {
-					_.warn('get_file: '
-							+ (_.is_local() ? '呼叫了上層 local file' : '所要求檔案之 domain [' + o[2]
-									+ '] 與所處之 domain [' + window.location.hostname + '] 不同')
-							+ '！<br />\n您可能需要嘗試使用 ' + _.Class
-							+ '.run()!\nSet up <a href="http://en.wikipedia.org/wiki/Same_origin_policy" accessdate="2012/12/2 18:19">same origin policy</a> flag.');
-				}
-				_.env.same_origin_policy = true;
-				throw new Error('get_file: Different domain!');
-			}
-
-			o = _.require_netscape_privilege(e, [get_file, arguments]);
-			//_.debug('require_netscape_privilege return [' + typeof (o) + ('] ' + o).slice(0, 200) + ' ' + (e === o ? '=' : '!') + '== ' + 'error (' + e + ')');
-			if (e === o)
-				throw e;
-
-			return o;
-		}
-
-		//	workaround for Opera: Opera 11.50: 不會 throw，但是 .responseText === ''。
-		if (o.responseText === '' && is_Opera)
-			throw new Error('get_file: Nothing get @ Opera');
-
-		//	當在 local 時，成功的話 status === 0。失敗的話，除 IE 外，status 亦總是 0。
-		//	status was introduced in Windows Internet Explorer 7.	http://msdn.microsoft.com/en-us/library/ms534650%28VS.85%29.aspx
-		//	因此，在 local 失敗時，僅 IE 可由 status 探測，其他得由 responseText 判別。
-		//_.debug('Get [' + path + '], status: [' + o.status + '] ' + o.statusText);
-
-		// .responseXML
-		return o.status === 400 ? [o.status, o.responseText] : o.responseText;
-	}
-
-	_// JSDT:_module_
-	.
-	get_file = get_file;
-
 
 	_.is_HTA = _.is_WWW()
 		//	http://msdn.microsoft.com/en-us/library/ms536496(v=vs.85).aspx
@@ -453,150 +307,171 @@ if (false) {
 		&& window.ActiveXObject
 		&& document.getElementsByTagName('APPLICATION').length === 1;
 
-	try {
-		//	在 HTA 中，XMLHttpRequest() 比 ActiveXObject('Microsoft.XMLHTTP') 更容易遇到拒絕存取。例如在同一目錄下的 .txt 檔。
-		//	但在 IE 中，ActiveXObject 可能造成主動式內容之問題。
-		if (_.is_HTA && new ActiveXObject('Microsoft.XMLHTTP'))
-			XMLHttpRequest_type = 2;
-		else
-			throw 1;
-	} catch (e) {
+
+	function new_XMLHttpRequest() {
+		return new XMLHttpRequest();
+	}
+
+	// 'Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'
+	// 'Msxml2.XMLHTTP.6.0','Msxml2.XMLHTTP.5.0','Msxml2.XMLHTTP.4.0','Msxml2.XMLHTTP.3.0',["MSXML2", "Microsoft", "MSXML"].['XMLHTTP','DOMDocument'][".6.0", ".4.0", ".3.0", ""]
+	function new_MS_XMLHTTP() {
+		return new ActiveXObject('Microsoft.XMLHTTP');
+	}
+
+	/**
+	 * 設定取得 XMLHttpRequest object 的方法。<br />
+	 * The XMLHttpRequest object can't be cached.
+	 * So we cache the method to get the XMLHttpRequest controller.<br />
+	 * @inner
+	 * @ignore
+	 */
+	//	在 HTA 中，XMLHttpRequest() 比 ActiveXObject('Microsoft.XMLHTTP') 更容易遇到拒絕存取。例如在同一目錄下的 .txt 檔。<br />
+	//	但在 IE 中，ActiveXObject 可能造成主動式內容之問題。<br />
+	//	jQuery: Microsoft failed to properly implement the XMLHttpRequest in IE7, so we use the ActiveXObject when it is available.
+	if (_.is_HTA)
 		try {
-			if (new XMLHttpRequest())
-				XMLHttpRequest_type = 1;
-			else
-				throw 1;
+			_.new_XMLHttp = new_MS_XMLHTTP() && new_MS_XMLHTTP;
 		} catch (e) {
-			try {
-				if (new ActiveXObject('Microsoft.XMLHTTP'))
-					XMLHttpRequest_type = 2;
-			} catch (e) {
-			}
 		}
-	}
-	//WScript.Echo(XMLHttpRequest_type);
 
-	if (!XMLHttpRequest_type) {
-		if (typeof require === 'function'
-			&& (XMLHttpRequest_type = require('fs'))) {
+	if (!_.new_XMLHttp)
+		try {
+			// normal method to get a new XMLHttpRequest controller.
+			// 相當於 new XMLHttpRequest()
+			// Ajax 程式應該考慮到 server 沒有回應時之處置
+			_.new_XMLHttp = new_XMLHttpRequest() && new_XMLHttpRequest;
+		} catch (e) {
+		}
+
+	// _.is_HTA 的情況，已經測在前面試過了。
+	if (!_.new_XMLHttp && !_.is_HTA)
+		try {
+			_.new_XMLHttp = new_MS_XMLHTTP() && new_MS_XMLHTTP;
+		} catch (e) {
+		}
+
+	//	皆無：use XMLDocument.
+	//	The document.all().XMLDocument is a Microsoft IE subset of JavaScript.
+	//	http://www.bindows.net/
+	//	http://www.java2s.com/Code/JavaScriptReference/Javascript-Properties/XMLDocument.htm
+
+	if (_.new_XMLHttp) {
+
+	} else if (typeof require === 'function'
+	//	for node.js
+	&& (_.new_XMLHttp = require('fs'))) {
+		_.new_XMLHttp = _.new_XMLHttp.readFileSync;
+		_.get_file = function (path, encoding) {
 			//	for node.js
-			XMLHttpRequest_type = XMLHttpRequest_type.readFileSync;
-			_.get_file = function (path, encoding) {
-				//	for node.js
-				var data, i, l, tmp;
-				try {
-					data = XMLHttpRequest_type(path, encoding);
-				} catch (e) {
-					data = XMLHttpRequest_type(path);
-				}
+			var data, i, l, tmp;
+			try {
+				data = _.new_XMLHttp(path, encoding);
+			} catch (e) {
+				data = _.new_XMLHttp(path);
+			}
 
-				if (typeof data !== 'string') {
-					// auto detect encoding
-					l = data.length;
-					tmp = [];
-					if (data[0] === 255 && data[1] === 254) {
-						//_.debug(path + ': UTF-16LE');
-						// pass byte order mark (BOM), the first 2 bytes.
-						i = 2;
-						while (i < l)
-							tmp.push(String.fromCharCode(data[i++] + 256 * data[i++]));
-					} else if (data[0] === 254 && data[1] === 255) {
-						//_.debug(path + ': UTF-16BE');
-						// pass byte order mark (BOM), the first 2 bytes.
-						i = 2;
-						while (i < l)
-							tmp.push(String.fromCharCode(data[i++] * 256 + data[i++]));
-					} else {
-						if (l > 1)
-							console.log('get_file: Unknown byte order mark (BOM): ' + data[0] + ',' + data[1]);
-						//	ascii
-						i = 0;
-						while (i < l)
-							tmp.push(String.fromCharCode(data[i++]));
-					}
-					data = tmp.join('');
-				}
-
-				return data;
-			};
-
-		} else if (typeof _configuration === 'object'
-							&& typeof File === 'function') {
-			//	for jslibs
-			LoadModule('jsio');
-			_.get_file = function (path) {
-				//_configuration.stderr(path);
-				var c, i,
-				data = new File(path).Open('r').Read(),
-				l = data.length, tmp = [],
-				next_code = function () {
-					c = data.charCodeAt(i++);
-					return c < 0 ? c + 256 : c;
-				};
-
-				_configuration.stderr(path + ': ' + data.charCodeAt(0) + ',' + data.charCodeAt(1));
-				if (data.charCodeAt(0) === -1 && data.charCodeAt(1) === -2) {
+			if (typeof data !== 'string') {
+				// auto detect encoding
+				l = data.length;
+				tmp = [];
+				if (data[0] === 255 && data[1] === 254) {
 					//_.debug(path + ': UTF-16LE');
-					for (i = 2; i < l;)
-						tmp.push(String.fromCharCode(next_code() + 256 * next_code()));
-					data = tmp.join('');
-				} else if (data.charCodeAt(0) === -2 && data.charCodeAt(1) === -1) {
+					// pass byte order mark (BOM), the first 2 bytes.
+					i = 2;
+					while (i < l)
+						tmp.push(String.fromCharCode(data[i++] + 256 * data[i++]));
+				} else if (data[0] === 254 && data[1] === 255) {
 					//_.debug(path + ': UTF-16BE');
-					for (i = 2; i < l;)
-						tmp.push(String.fromCharCode(next_code() * 256 + next_code()));
-					data = tmp.join('');
-				}
-
-				return data;
-			};
-
-		} else if (typeof Stream === 'function') {
-			//	for JSDB
-			_.get_file = function (path) {
-				//_.log('get_file: ' + path);
-				try {
-					return new Stream(path
-							//, 'r'
-							).readFile();
-				} catch (e) {
-					//_.log(e.message);
-				}
-
-				var data = new Stream(path, 'b'), tmp = [],
-				//	The byte order mark (BOM).
-				BOM = [data.readUInt8(), data.readUInt8()];
-				if (BOM[0] === 255 && BOM[1] === 254) {
-					// _.debug(path + ': UTF-16LE');
-					while (!data.eof)
-						tmp.push(String.fromCharCode(data.readUInt8() + 256 * data.readUInt8()));
-				} else if (BOM[0] === 254 && BOM[1] === 255) {
-					// _.debug(path + ': UTF-16BE');
-					while (!data.eof)
-						tmp.push(String.fromCharCode(data.readUInt8() * 256 + data.readUInt8()));
+					// pass byte order mark (BOM), the first 2 bytes.
+					i = 2;
+					while (i < l)
+						tmp.push(String.fromCharCode(data[i++] * 256 + data[i++]));
 				} else {
-					data.rewind();
-					while (!data.eof)
-						tmp.push(data.get());
+					if (l > 1)
+						console.log('get_file: Unknown byte order mark (BOM): ' + data[0] + ',' + data[1]);
+					//	ascii
+					i = 0;
+					while (i < l)
+						tmp.push(String.fromCharCode(data[i++]));
 				}
-				data.close();
-				return tmp.join('');
+				data = tmp.join('');
+			}
+
+			return data;
+		};
+
+	} else if (typeof _configuration === 'object'
+		//	for jslibs
+		&& typeof File === 'function') {
+		LoadModule('jsio');
+		_.get_file = function (path) {
+			//_configuration.stderr(path);
+			var c, i,
+			data = new File(path).Open('r').Read(),
+			l = data.length, tmp = [],
+			next_code = function () {
+				c = data.charCodeAt(i++);
+				return c < 0 ? c + 256 : c;
 			};
 
-		} else
-			_.get_file = function () {
-				// No XMLHttpRequest object.
+			_configuration.stderr(path + ': ' + data.charCodeAt(0) + ',' + data.charCodeAt(1));
+			if (data.charCodeAt(0) === -1 && data.charCodeAt(1) === -2) {
+				//_.debug(path + ': UTF-16LE');
+				for (i = 2; i < l;)
+					tmp.push(String.fromCharCode(next_code() + 256 * next_code()));
+				data = tmp.join('');
+			} else if (data.charCodeAt(0) === -2 && data.charCodeAt(1) === -1) {
+				//_.debug(path + ': UTF-16BE');
+				for (i = 2; i < l;)
+					tmp.push(String.fromCharCode(next_code() * 256 + next_code()));
+				data = tmp.join('');
+			}
 
-				var m = 'get_file: This scripting engine does not support XMLHttpRequest.';
-				_.warn(m);
-				throw new Error(m);
-				// firefox: This function must return a result of type any.
-				//return undefined;
-			};
+			return data;
+		};
 
-	}
+	} else if (typeof Stream === 'function') {
+		//	for JSDB
+		_.get_file = function (path) {
+			//_.log('get_file: ' + path);
+			try {
+				return new Stream(path
+						//, 'r'
+						).readFile();
+			} catch (e) {
+				//_.log(e.message);
+			}
 
+			var data = new Stream(path, 'b'), tmp = [],
+			//	The byte order mark (BOM).
+			BOM = [data.readUInt8(), data.readUInt8()];
+			if (BOM[0] === 255 && BOM[1] === 254) {
+				// _.debug(path + ': UTF-16LE');
+				while (!data.eof)
+					tmp.push(String.fromCharCode(data.readUInt8() + 256 * data.readUInt8()));
+			} else if (BOM[0] === 254 && BOM[1] === 255) {
+				// _.debug(path + ': UTF-16BE');
+				while (!data.eof)
+					tmp.push(String.fromCharCode(data.readUInt8() * 256 + data.readUInt8()));
+			} else {
+				data.rewind();
+				while (!data.eof)
+					tmp.push(data.get());
+			}
+			data.close();
+			return tmp.join('');
+		};
 
+	} else
+		_.get_file = function () {
+			// No XMLHttpRequest controller.
 
+			var m = 'get_file: This scripting engine does not support XMLHttpRequest.';
+			_.warn(m);
+			throw new Error(m);
+			// firefox: This function must return a result of type any.
+			//return undefined;
+		};
 
 
 	_// JSDT:_module_
@@ -720,6 +595,153 @@ if (false) {
 	_// JSDT:_module_
 	.
 	require_netscape_privilege.enabled = false;
+
+
+	//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+	var is_Opera = _.is_WWW(true) && navigator.appName === 'Opera';
+
+	/**
+	 * 以同時依序(synchronously)的方式，載入最基本之資源取得功能。<br />
+	 * Get file resource by {@link XMLHttpRequest}.<br />
+	 * 依序載入 resource，用於 include JavaScript 檔之類需求時，取得檔案內容之輕量級函數。<br />
+	 * 除 Ajax，本函數亦可用在 CScript 執行中。<br />
+	 * see also: .application.net.Ajax.get_URL()
+	 * 
+	 * @example
+	 * //	get contents of [path/to/file]:
+	 * var file_contents = CeL.get_file('path/to/file');
+	 * @param	{String} path	URI / full path. <em style="text-decoration:line-through;">不能用相對path！</em>
+	 * @param	{String} [encoding]	file encoding
+	 * @returns	{String} data	content of path
+	 * @returns	{undefined}	when error occurred: no Ajax function, ..
+	 * @throws	uncaught exception @ Firefox: 0x80520012 (NS_ERROR_FILE_NOT_FOUND), <a href="http://www.w3.org/TR/2007/WD-XMLHttpRequest-20070227/#exceptions">NETWORK_ERR</a> exception
+	 * @throws	'Access to restricted URI denied' 當 access 到上一層目錄時 @ Firefox
+	 * @see
+	 * <a href=http://blog.joycode.com/saucer/archive/2006/10/03/84572.aspx">Cross Site AJAX</a>,
+	 * <a href="http://domscripting.com/blog/display/91">Cross-domain Ajax</a>,
+	 * <a href="http://forums.mozillazine.org/viewtopic.php?f=25&amp;t=737645" accessdate="2010/1/1 19:37">FF3 issue with iFrames and XSLT standards</a>,
+	 * <a href="http://kb.mozillazine.org/Security.fileuri.strict_origin_policy" accessdate="2010/1/1 19:38">Security.fileuri.strict origin policy - MozillaZine Knowledge Base</a>
+	 * Chrome: <a href="http://code.google.com/p/chromium/issues/detail?id=37586" title="between builds 39339 (good) and 39344 (bad)">NETWORK_ERR: XMLHttpRequest Exception 101</a>
+	 */
+	function get_file(path, encoding, post_data) {
+		if (_.is_Object(encoding)) {
+			post_data = encoding;
+			encoding = null;
+		}
+		if (_.is_Object(path)) {
+			post_data = path.post || post_data;
+			encoding = path.encoding || encoding;
+		}
+
+		var method = post_data ? 'POST' :'GET',
+		/**
+		 * The XMLHttpRequest object can't be cached.
+		 * @inner
+		 * @ignore
+		 */
+		object = _.new_XMLHttp();
+
+		//	4096: URL 長度限制，與瀏覽器有關。
+		if (typeof path === 'string' && path.length > 4096
+				&& (post_data = path.match(/^([^?]{6,200})\?(.+)$/)))
+			path = post_data[1], post_data = post_data[2], method = 'PUT';
+		else
+			post_data = null;
+
+		try {
+			//	IE 10 中，local file 光 .open() 就 throw 了。
+			object.open(method, path, false);
+
+			//	有些版本的 Mozilla 瀏覽器在伺服器送回的資料未含 XML mime-type 檔頭（header）時會出錯。為了避免這個問題，可以用下列方法覆寫伺服器傳回的檔頭，以免傳回的不是 text/xml。
+			//	http://squio.nl/blog/2006/06/27/xmlhttprequest-and-character-encoding/
+			//	http://www.w3.org/TR/XMLHttpRequest/	search encoding
+			if (encoding && object.overrideMimeType)
+				/*
+				 * old: object.overrideMimeType('text/xml;charset=' + encoding);
+				 * 但這樣會被當作 XML 解析，產生語法錯誤。
+				 * TODO: try:
+				 * object.overrideMimeType('text/plain;charset=' + encoding);
+				 */
+				object.overrideMimeType('application/json;charset=' + encoding);
+
+			//	http://www.w3.org/TR/2007/WD-XMLHttpRequest-20070227/#dfn-send
+			//	Invoking send() without the data argument must give the same result as if it was invoked with null as argument.
+
+			//	若檔案不存在，會 throw。
+			object.send(post_data);
+
+			if(65533 === object.responseText.charCodeAt(0)
+				// e.g., @ "Mozilla/5.0 (Windows NT 6.1; rv:29.0) Gecko/20100101 Firefox/29.0"
+				&& navigator.userAgent.indexOf(' Gecko/2') !== -1) {
+				_.env.same_origin_policy = true;
+				throw new Error('get_file: Can not parse UTF-32 encoding of [' + path + '] @ Firefox!');
+			}
+
+			delete get_file.error;
+
+		} catch (e) {
+			if (e.number === -1072896658
+				//|| e.message.indexOf('c00ce56e') !== -1
+				)
+				// http://support.microsoft.com/kb/304625
+				throw new Error('指定的資源回傳了系統不支援的文字編碼，因此無法解碼資料。請檢查此網頁回傳之 header，確認系統可解碼 Content-Type 之 charset。');
+
+			//	Chome: XMLHttpRequest cannot load file:///X:/*.js. Cross origin requests are only supported for HTTP.
+			//	Opera 11.50: 不會 throw，但是 .responseText === ''。
+			//	Apple Safari 3.0.3 may throw NETWORK_ERR: XMLHttpRequest Exception 101
+			get_file.error = e;
+
+			if (_.is_debug(2)) {
+				_.warn(_.Class + '.get_file: Loading [' + path + '] failed!');
+				_.err(e);
+			}
+
+			//e.object = o;	//	[XPCWrappedNative_NoHelper] Cannot modify properties of a WrappedNative @ firefox
+
+			if (
+				// 5: 系統找不到指定的資源。/存取被拒。
+				//	IE 10 中，5: "存取被拒。"。same origin policy 下，即使是檔案存在，值一樣為 5，因此無法以資判別。
+				//(e.number & 0xFFFF) !== 5 &&
+					_.is_WWW() &&
+					(_.is_local() || ((object = path.match(/:(\/\/)?([^\/]+)/))
+							&& object[2] !== window.location.hostname))) {
+				// 八九不離十: no Cross-site scripting (XSS).
+				if (_.is_debug()) {
+					_.warn('get_file: '
+							+ (_.is_local() ? '呼叫了上層 local file' : '所要求檔案之 domain [' + object[2]
+									+ '] 與所處之 domain [' + window.location.hostname + '] 不同')
+							+ '！<br />\n您可能需要嘗試使用 ' + _.Class
+							+ '.run()!\nSet up <a href="http://en.wikipedia.org/wiki/Same_origin_policy" accessdate="2012/12/2 18:19">same origin policy</a> flag.');
+				}
+				_.env.same_origin_policy = true;
+				throw new Error('get_file: Different domain!');
+			}
+
+			object = _.require_netscape_privilege(e, [get_file, arguments]);
+			//_.debug('require_netscape_privilege return [' + typeof (object) + ('] ' + object).slice(0, 200) + ' ' + (e === object ? '=' : '!') + '== ' + 'error (' + e + ')');
+			if (e === object)
+				throw e;
+
+			return object;
+		}
+
+		//	workaround for Opera: Opera 11.50: 不會 throw，但是 .responseText === ''。
+		if (object.responseText === '' && is_Opera)
+			throw new Error('get_file: Nothing get @ Opera');
+
+		//	當在 local 時，成功的話 status === 0。失敗的話，除 IE 外，status 亦總是 0。
+		//	status was introduced in Windows Internet Explorer 7.
+		//	http://msdn.microsoft.com/en-us/library/ms534650%28VS.85%29.aspx
+		//	因此，在 local 失敗時，僅 IE 可由 status 探測，其他得由 responseText 判別。
+		//_.debug('Get [' + path + '], status: [' + object.status + '] ' + object.statusText);
+
+		// .responseXML
+		return object.status === 400 ? [ object.status, object.responseText ] : object.responseText;
+	}
+
+	if (!_.get_file)
+		_.get_file = get_file;
 
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------//

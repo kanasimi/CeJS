@@ -1773,11 +1773,11 @@ if (typeof CeL === 'function')
 		 * Include / requires specified module.<br />
 		 * 
 		 * <p>
-		 * 會先嘗試使用 .get_file()，以 XMLHttpRequest 同時依序(synchronously)的方式依序取得、載入
-		 * module。<br />
+		 * 會先嘗試使用 .get_file()，以 XMLHttpRequest
+		 * 同時依序(synchronously,會掛住,直至收到回應才回傳)的方式依序取得、載入 module。<br />
 		 * 
 		 * 若因為瀏覽器安全策略(browser 安全性設定, e.g., same origin policy)等問題，無法以
-		 * XMLHttpRequest 取得、循序載入時，則會以非同時(asynchronously)的方式載入 module。<br />
+		 * XMLHttpRequest 取得、循序載入時，則會以異序(asynchronously,不同時)的方式載入 module。<br />
 		 * 因為 module 尚未載入，在此階段尚無法判別此 module 所需之 dependency list。
 		 * </p>
 		 * 
@@ -1792,13 +1792,14 @@ if (typeof CeL === 'function')
 		 * @param {Object}[options]
 		 *            load options.
 		 * @param {Function}[caller]
-		 *            當以非同時(asynchronously)的方式載入 module 時，將排入此 caller 作為回調/回撥函式。
+		 *            當以異序(asynchronously,不同時)的方式載入 module 時，將排入此 caller
+		 *            作為回調/回撥函式。
 		 * 
 		 * @returns {Number} status.<br />
 		 *          PROCESSED: done.<br />
 		 *          INCLUDE_FAILED: error occurred. fault.<br />
 		 *          INCLUDING: loading asynchronously,
-		 *          以非同時(asynchronously)的方式載入。<br />
+		 *          以異序(asynchronously,不同時)的方式載入。<br />
 		 */
 		function load_named(item, options, caller) {
 			var id = typeof item === 'string' ? item : is_controller(item)
@@ -2324,7 +2325,7 @@ if (typeof CeL === 'function')
 													+ '抱歉！在載入其他網頁時發生錯誤，有些功能可能失常。\n重新讀取(reload)，或是過段時間再嘗試或許可以解決問題。');
 							}
 
-							// 不能直接用 .get_file()，得採用非同時(asynchronously)的方式載入。
+							// 不能直接用 .get_file()，得採用異序(asynchronously,不同時)的方式載入。
 							library_namespace.debug(
 									'Cannot load [' + id
 											+ ']! 以 .get_file() 依序載入的方法失敗：'
@@ -2342,9 +2343,9 @@ if (typeof CeL === 'function')
 						}
 
 					// ---------------------------------------
-					// loading code: 循序/依序執行的方法失敗，採用非同時(asynchronously)的方式載入。
+					// loading code: 循序/依序執行的方法失敗，採用異序(asynchronously,不同時)的方式載入。
 
-					// 若之前已嘗試取得過 code，則即使失敗也不再使用非同時(asynchronously)的方式載入。
+					// 若之前已嘗試取得過 code，則即使失敗也不再使用異序(asynchronously,不同時)的方式載入。
 					if (!file_contents)
 						if (library_namespace.is_WWW()) {
 							// 動態載入 / Dynamic Loading / Including other
@@ -3726,8 +3727,8 @@ if (typeof CeL === 'function')
 
 		/**
 		 * control/setup source codes to run.<br />
-		 * 基本上使用非同時 (asynchronously)的方式，<br />
-		 * 除非所需資源已經載入，或是有辦法以 {@link XMLHttpRequest} 取得資源。 <br />
+		 * 基本上使用異序(asynchronously,不同時)的方式，<br />
+		 * 除非所需資源已經載入，或是有辦法以 {@link XMLHttpRequest} 取得資源。<br />
 		 * 
 		 * 本函數實為 DOM 載入後，正常 .run 載入處理程序之對外 front end。<br />
 		 * 
