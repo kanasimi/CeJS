@@ -145,7 +145,7 @@ function draw_short_division(naturals, layer, GCD_only) {
 		style: 'width:' + (1 + (length + (1 < length ? 2 : 1)) * cell_width_em | 0) + 'em;background-color:#def',
 		C: 'short_division'
 	};
-	return layer ? library_namespace.new_node(block, layer) : block;
+	return layer ? new_node(block, layer) : block;
 }
 draw_short_division.GCD_style = 'color:#f79;';
 
@@ -190,20 +190,29 @@ CeL.run('application.math', function() {
 */
 
 
-// ------------------------------------------------------------------------- //
+// ---------------------------------------------------------------------------------------------- //
 
-var NOT_FOUND = -1;
-
-var support_MathML;
-
-function check_MathML() {
-	var math_node = library_namespace.new_node({
+// 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+var NOT_FOUND = ''.indexOf('_'),
+//
+new_node = function () {
+	var func = library_namespace.DOM.new_node;
+	if (func)
+		return (new_node = func).apply(null, arguments);
+},
+//
+check_MathML = function() {
+	var math_node = new_node({
 		div : {
 			span : 'normal'
 		},
 		S : 'line-height:1em;visibility:hidden'
 	}, document.body);
-	library_namespace.new_node({
+
+	if (!math_node)
+		return;
+
+	new_node({
 		math : {
 			mfrac : [ {
 				mi : 'test'
@@ -218,42 +227,56 @@ function check_MathML() {
 	// return check_MathML.check.call(math_node, true);
 
 	return check_MathML.check.call(math_node);
-}
+};
 
+// 2015/1/1: Firefox only. 僅 firefox 回傳 true。
 check_MathML.check = function(no_remove) {
 	// library_namespace.debug(this);
 
-	// method 1:
-	// 2/3 之 2 之 offsetTop 應該比 3 更高一點。
-	// 但在 ff 中，沒有 .offsetTop。
-	// var mfrac = this.lastChild.firstChild;
-	// support_MathML = mfrac.firstChild.offsetTop < mfrac.lastChild.offsetTop;
+	Object.defineProperty(_, 'support_MathML', {
+		// method 1:
+		// 分數 2/3 之 2 的 offsetTop 應該比 3 更高一點。
+		// 但在 ff 中，沒有 .offsetTop。
+		// var mfrac = this.lastChild.firstChild;
+		// value : mfrac.firstChild.offsetTop < mfrac.lastChild.offsetTop;
 
-	// method 2: 因為插入 <mfrac>，<div> 應該比一般單行文字更高一點。但在 Chrome，兩者本身即有差別。
-	support_MathML = this.offsetHeight > this.firstChild.offsetHeight + 3;
+		// method 2: 因為插入 <mfrac>，<div> 應該比一般單行文字更高一點。但在 Chrome，兩者本身即有差別。
+		value : this.offsetHeight > this.firstChild.offsetHeight + 3
+	});
 
-	if (support_MathML)
+	if (_.support_MathML)
 		library_namespace.debug('The browser supported MathML.');
 	if (no_remove !== true) {
 		// library_namespace.remove_node(this);
 		document.body.removeChild(this);
 	}
 
-	return support_MathML;
+	return _.support_MathML;
 };
 
-_.support_MathML = check_MathML();
+
+// assert: support MathML 也必定 support Object.defineProperty().
+Object.defineProperty(_, 'support_MathML', {
+	configurable : true,
+	get : check_MathML
+});
+
 
 // ----------------------------------------------------- //
 
 /**
- * 將 HTML 中 <math>expression</math> 皆轉為 MathML。<br />
- * parse math expression & output MathML.
+ * 以 MathML 表現數學運算式。<br />
+ * 將 HTML 中 &lt;math>expression&lt;/math> 皆轉為 MathML。<br />
+ * parse math expression & output MathML.<br />
+ * 
+ * TODO: calculator, vector, ℕℤℚℝℂ, ∈∉
  * 
  * @example <code>
 
 // <script>
-CeL.run('interact.DOM', 'application.math', function() {
+CeL.run([
+	// for new_node()
+	'interact.DOM', 'application.math' ], function() {
 	CeL.application.math.convert_MathML();
 });
 
@@ -264,6 +287,7 @@ CeL.run('interact.DOM', 'application.math', function() {
 <math>3*(5/7)</math>
 <math>(4+5)/2</math>
 <math>5^4*3+2-4^2/5</math>
+<math>(a/b)/(c/d)</math>
 <math>資本收入=資本收益率×資本</math>
 <math>資本收入/國民年收入=資本收益率×(資本存量/國民年收入)</math>
 <math>
@@ -272,9 +296,8 @@ CeL.run('interact.DOM', 'application.math', function() {
 <math>
 43+(54+5*(3+4)/3)*2
 </math>
-<math>
-x_2^4
-</math>
+<math>x_2^4</math>
+<math>x^2+y_1+z_12^34</math>
 <math>
 x_2^4 = 3/2,   y = 4/3,   z = 5/4
 </math>
@@ -305,7 +328,10 @@ z = 5/4
 <math>7^(1/4) , 4√7</math>
 <math>{ a; b; c, d, e }</math>
 <math>{{4, 5, 6}, {7, 8, 9}, {1, 2, 3}}×((3,4,5),(5,6,7),(7,8,9))</math>
+<math>{{1,2},{3,4}}((5),(6))</math>
 <math>x_y^2 x^2+2^(1/3)^8+4^(1/7)^6</math>
+<math>1+(b^2-4a c)^(1/5)</math>
+<math>x=(-b±√(b^2-4a c))/2a</math>
 
 // TODO:
 <math>x_y^2 x^2 2^(1/3)^8 4^(1/7)^6</math>
@@ -315,6 +341,7 @@ z = 5/4
 
 munderover
 <math>∫_2^4 dy/dx</math>
+
 
 // reference
 http://www.w3.org/TR/MathML/chapter3.html#id.3.1.3.2
@@ -327,7 +354,10 @@ http://reference.wolfram.com/language/ref/format/MathML.html
  * @see
  */
 function convert_MathML(handler) {
-	if (!support_MathML) {
+	if (!library_namespace.remove_all_child)
+		return;
+	// assert: library_namespace.DOM is loaded.
+	if (!_.support_MathML) {
 		library_namespace.warn('The browser does not support MathML!');
 		return;
 	}
@@ -363,7 +393,7 @@ function convert_MathML(handler) {
 			var equalities = [ '{' ], j = 1, tmp;
 			for (; j < structure.length; j++) {
 				if (tmp = structure[j])
-					if (Array.isArray(tmp) && /^[=≠≈≒≃≡><]$/.test(tmp[0])) {
+					if (Array.isArray(tmp) && /^[=≠≈≒≃∝≡><≤≥]$/.test(tmp[0])) {
 						equalities.push(tmp);
 					} else if (typeof tmp !== 'string' || tmp.trim()) {
 						equalities = null;
@@ -378,7 +408,7 @@ function convert_MathML(handler) {
 		// library_namespace.debug('convert_MathML: structure:');
 		// library_namespace.debug(structure);
 		library_namespace.remove_all_child(node);
-		library_namespace.new_node(structure, node, 'mathml');
+		new_node(structure, node, 'mathml');
 	}
 }
 
@@ -386,7 +416,7 @@ _.convert_MathML = convert_MathML;
 
 convert_MathML.handler = {
 	// toString()
-	// 運算元,運算子,運算元
+	// 運算元,運算子,運算元(操作符/算符/算子)
 	string : function(operand_1, operator, operand_2) {
 		if (!operator && Array.isArray(operand_1))
 			return operand_1.join(' ');
@@ -504,23 +534,33 @@ convert_MathML.handler = {
 			operand_1 = convert_MathML.parse_scalar(operand_1);
 			operand_2 = convert_MathML.parse_scalar(operand_2);
 			if (operand_2.mfenced)
+				// 去除括號 "()"。
 				// "7^(2/3)" → "<msup>7 2/3</msup>"
 				operand_2 = convert_MathML.parse_scalar(operand_2.mfenced);
-			if (Array.isArray(operand_2.mfrac) && operand_2.mfrac[0].mi == 1)
+			if (Array.isArray(operand_2.mfrac) && operand_2.mfrac[0].mn == 1) {
+				// 去除 operand_1 之括號 "()"。
+				if (operand_1.mfenced)
+					operand_1 = convert_MathML.parse_scalar(operand_1.mfenced);
+				// (operand_1) 的 (operand_2.mfrac[1]) 次方根。
 				// "7^(1/3)" → "<mroot> 7 3 </mroot>"
 				return {
 					mroot : [ operand_1, operand_2.mfrac[1] ]
 				};
+			}
 			return {
 				msup : [ operand_1, operand_2 ]
 			};
 
 		case '√':
-			return {
-				msqrt : operand_1
-			};
 		case '∛':
-			return {
+			// 去除括號 "()"。
+			// "√(1+2)" → "<msqrt>1+2</msqrt>"
+			if (operand_1.mfenced)
+				operand_1 = operand_1.mfenced;
+			// (平)方根 / 立方根
+			return operator === '√' ? {
+				msqrt : operand_1
+			} : {
 				mroot : [ operand_1, {
 					mn : 3
 				} ]
@@ -552,10 +592,10 @@ convert_MathML.operator = [
 	return [ '[]', $1 ];
 } ],
 // exponents.
-[ /(\S+)\^([+\-]?\S+)/, function($0, $1, $2) {
+[ /(\S+)\^([+\-±]?\S+)/, function($0, $1, $2) {
 	// [ , base, power ]
 	return [ '^', $1, $2 ];
-} ], [ /([√∛])([+\-]?\S+)/, function($0, $1, $2) {
+} ], [ /([√∛])([+\-±]?\S+)/, function($0, $1, $2) {
 	// [ , base, power ]
 	return [ $1, $2 ];
 } ],
@@ -567,33 +607,33 @@ convert_MathML.operator = [
 	return [ $2, $1, $3 ];
 } ],
 // addition and subtraction
-[ /(\S+)([+\-])(\S+)/, function($0, $1, $2, $3) {
+[ /(\S+)([+\-±])(\S+)/, function($0, $1, $2, $3) {
 	return [ $2, $1, $3 ];
 } ],
-// assignment
-[ /(\S+)([=≠≈≒≃≡><])(\S+)/, function($0, $1, $2, $3) {
+// relationships, assignment, equalities
+[ /(\S+)([=≠≈≒≃∝≡><≤≥])(\S+)/, function($0, $1, $2, $3) {
 	return [ $2, $1, $3 ];
 } ],
-// items
+// terms
 [ /\S+(?:,\S+)+/, function($0) {
 	($0 = $0.split(',')).unshift(',');
 	return $0;
 } ],
-// items
+// terms
 [ /\S+(?:;\S+)+/, function($0) {
 	($0 = $0.split(';')).unshift(';');
 	return $0;
 } ] ];
 
 // https://en.wikipedia.org/wiki/Mathematical_operators_and_symbols_in_Unicode
-// ±∞~∝
-convert_MathML.non_scalar_chars = '(){}^√∛*\\/⁄∕×⋅÷+\\-=≠≈≒≃≡><,;\r\n';
+// ~
+convert_MathML.non_scalar_chars = '(){}^√∛*\\/⁄∕×⋅÷+\\-±=≠≈≒≃∝≡><≤≥,;\r\n';
 
-convert_MathML.operator.forEach(function(item) {
+convert_MathML.operator.forEach(function(term) {
 	// 不可用 'g'! e.g., 2+3-4+5
-	item[0] = new RegExp(item[0].source.replace(/\\S/g, '[^'
+	term[0] = new RegExp(term[0].source.replace(/\\S/g, '[^'
 			+ convert_MathML.non_scalar_chars + ']'), '');
-	// library_namespace.debug(item[0]);
+	// library_namespace.debug(term[0]);
 });
 
 convert_MathML.process = function(text, order, queue) {
@@ -610,41 +650,44 @@ convert_MathML.process = function(text, order, queue) {
 			// operator[0]);
 		}
 
-		text = text.trim().replace(
-				operator[0],
-				function($0, $1, $2, $3) {
-					// return [ type, text1, text2 ]
-					var expression = operator[1]($0, $1, $2, $3);
-					if (!expression) {
-						library_namespace
-								.err('convert_MathML.process: Can not parse: "'
-										+ $0 + '"');
-						return $0;
-					}
-					changed = true;
+		text = text.trim()
+		//
+		.replace(
+			operator[0],
+			function($0, $1, $2, $3) {
+				// return [ type, text1, text2 ]
+				var expression = operator[1]($0, $1, $2, $3);
+				if (!expression) {
+					library_namespace
+							.err("convert_MathML.process: Can not parse: '"
+									+ $0 + "'");
+					return $0;
+				}
+				changed = true;
 
-					// next order
-					expression.forEach(function(item, index) {
-						if (index > 0)
-							expression[index] = convert_MathML.resolve(
-									convert_MathML.process(item, order, queue),
-									queue);
-					});
-
-					queue.push(expression);
-					return (// queue.separator +
-					queue.prefix
-					// -1: get the real index
-					+ (queue.length - 1) + queue.postfix
-					// + queue.separator
-					);
+				// next order
+				expression.forEach(function(term, index) {
+					if (index > 0)
+						expression[index] = convert_MathML.resolve(
+								convert_MathML.process(term, order, queue),
+								queue);
 				});
+
+				queue.push(expression);
+				return (// queue.separator +
+				queue.prefix
+				// - 1: get the real index
+				+ (queue.length - 1) + queue.postfix
+				// + queue.separator
+				);
+			});
 		// library_namespace.debug('convert_MathML.process: → [' + text + ']');
 	}
 	// library_namespace.debug('convert_MathML.process: return [' + text + ']');
 	return text;
 };
 
+// parse math expression.
 convert_MathML.parse = function(text, queue) {
 	if (!queue) {
 		queue = [];
@@ -669,11 +712,18 @@ convert_MathML.parse = function(text, queue) {
 		queue.pattern = new RegExp(queue.pattern + '|$', 'g');
 	}
 
+	// 前期處理。
+	text = text.replace(/!=/g, '≠').replace(/>=/g, '≥').replace(/<=/g, '≤');
+
+	// TODO: &InvisibleTimes; 用於表示乘法運算中被省略的乘號。
+	// https://zh.wikipedia.org/wiki/%E6%95%B0%E5%AD%A6%E7%BD%AE%E6%A0%87%E8%AF%AD%E8%A8%80#Presentation_MathML
+
 	if (false)
 		text = text.replace(
 		// 處理數學常數。
 		// https://en.wikipedia.org/wiki/Mathematical_constant
 		// 3^2π → 3^(2⋅π)
+		// TODO: &pi;
 		/(\d+(?:\.\d+)?)\s*(pi|[a-z\u0370-\u03FF])([^\da-z\u0370-\u03FF]|$)/ig,
 				'($1⋅$2)$3');
 
@@ -687,10 +737,20 @@ convert_MathML.parse = function(text, queue) {
 	return text;
 };
 
-convert_MathML.is_numeric = function(expression) {
-	return /^(?:[+\-]?\d+(?:\.\d+)?[%°]?|pi|[a-z\u0370-\u03FF])$/i
-			.test(expression);
+// (?:[+\-±]?\d+(?:\.\d+)?[%°]?|pi|PI|Pi|[eiKπδφγλΩ∞ℵ])
+var PATTERN_numeric = /[+\-±]?\d+(?:\.\d+)?[%°∘]?/;
+// [ , 純數, 識別元 ]
+convert_MathML.PATTERN_numeric_prefix = new RegExp('^(' + PATTERN_numeric.source + ')([^\d].*)?$' + '$');
+convert_MathML.is_numeric_prefix = function(expression) {
+	return expression.match(convert_MathML.PATTERN_numeric_prefix);
 };
+
+convert_MathML.PATTERN_numeric = new RegExp('^' + PATTERN_numeric.source + '$');
+// 傳回 {Boolean}，說明運算式是否可做為數字來評估。
+convert_MathML.is_numeric = function(expression) {
+	return convert_MathML.PATTERN_numeric.test(expression);
+};
+
 
 // 解開 queue index
 // for: number, queue index, or the combination.
@@ -718,7 +778,7 @@ convert_MathML.resolve = function(text, queue) {
 		var pre_text = null;
 		if (matched.index > lastIndex) {
 			pre_text = text.substring(lastIndex, matched.index);
-			if (/(?:\s|^)\d+(?:\.\d+)?(?:\s|$)/.test(pre_text))
+			if (/(?:^\s*[+\-±]?|\s)\d+(?:\.\d+)?(?:\s|$)/.test(pre_text))
 				// e.g., "log 3.3"
 				changed = true, Array.prototype.push.apply(array, pre_text
 						.split(/\s+/));
@@ -746,41 +806,58 @@ convert_MathML.parse_scalar = function(text, no_MathML) {
 		return !no_MathML && Array.isArray(text) ? {
 			mrow : text
 		} : text;
-	if (!(text = text.trim()))
-		return text;
-
-	var matched = text.match(/^([+\-]?\d+(?:\.\d+)?)([^\d].*)$/);
-	if (matched)
-		// e.g., "3.3π"
-		return [ {
-			mn : matched[1]
-		}, {
-			mi : matched[2]
-		} ];
-
-	var is_numeric = convert_MathML.is_numeric(text = String(text).trim());
-	if (!is_numeric
-			&& !/^[a-zA-Z_\u2E80-\u30000][a-zA-Z_\u2E80-\u30000\d]*$/
-					.test(text))
-		library_namespace.err('convert_MathML.parse_scalar: Can not parse: "'
-				+ text + '"');
 	if (no_MathML)
 		return text;
+
+	if (!(text = String(text).trim()))
+		return text;
+
+	if(/\s/.test(text)) {
+		text = text.split(/\s+/);
+		// 多項。 e.g., "2a 3b 4ac"
+		text.forEach(function(term, index) {
+			text[index] = convert_MathML.parse_scalar(term);
+		});
+		return text;
+	}
+
+	var is_numeric = convert_MathML.is_numeric(text);
+	// 純數。e.g., "1"
 	if (is_numeric)
 		return {
-			mi : text
+			mn : text
 		};
+
+	// 純數 + 識別元。e.g., "2a", "3.3π"
+	if (is_numeric = convert_MathML.is_numeric_prefix(text))
+		return [{
+			mn : is_numeric[1]
+		}, convert_MathML.parse_scalar(is_numeric[2]) ];
+
+	// 下標。e.g., "log_2"
 	if (is_numeric = text.match(/^([^_]+)_([^_]+)$/))
 		// <msub><mi>x</mi><mi>y</mi></msub>
 		return {
 			msub : [ convert_MathML.parse_scalar(is_numeric[1]),
 					convert_MathML.parse_scalar(is_numeric[2]) ]
 		};
+
+	if (library_namespace.is_debug() &&
+	// a-zA-Z: normal variable. 變量
+	// \u0370-\u03ff: mathematical constant. 數學常數/希臘字母變量. e.g., π
+	// \u2E80-\u30000: Unihan variable
+	!/^[a-zA-Z\u0370-\u03ff∞ℵ\u2E80-\u30000][a-zA-Z\u0370-\u03ff∞ℵ\u2E80-\u30000\d]*$/
+					.test(text))
+		library_namespace.err("convert_MathML.parse_scalar: Can not parse: '"
+				+ text + "'");
+
+	// 純識別元。e.g., "x"
 	return {
 		mi : text
 	};
 };
 
+// 將 convert_MathML.parse() 之結果，reduce 成所須的格式。
 convert_MathML.reduce = function(structure, node, handler) {
 	// library_namespace.debug(structure);
 	if (!Array.isArray(structure))
@@ -793,7 +870,7 @@ convert_MathML.reduce = function(structure, node, handler) {
 		'{}' : true,
 		'[]' : true
 	})
-	// 矩陣
+	// 矩陣。
 	&& structure.length === 2 && Array.isArray(structure[1])
 			&& structure[1][0] === ',') {
 		var matrix = [], i = 0, length = structure[1].length;
@@ -820,7 +897,7 @@ convert_MathML.reduce = function(structure, node, handler) {
 			return handler(matrix, 'm', structure[0]);
 	}
 
-	// 前期處理
+	// 前期處理。
 	var matched;
 
 	if (structure[0] === '^') {
@@ -833,7 +910,7 @@ convert_MathML.reduce = function(structure, node, handler) {
 		// e.g., sin^-1 2π
 		if (typeof structure[2] === 'string'
 				&& (matched = structure[2]
-						.match(/^([+\-]?\d+(?:\.\d+)?)\s+([\S]+)$/))) {
+						.match(/^([+\-±]?\d+(?:\.\d+)?)\s+([\S]+)$/))) {
 			structure[2] = matched[1];
 			structure = [ , structure, matched[2] ];
 		}

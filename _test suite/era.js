@@ -198,7 +198,11 @@ function Year_numbering(year_shift, year_only, has_year_0, reverse) {
 	}
 }
 
-var NOT_FOUND = -1, PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
+//	const
+// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+var NOT_FOUND = ''.indexOf('_'),
+//
+PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
 //
 CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
 // 可選用的文字式年曆欄位。

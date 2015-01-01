@@ -22,7 +22,9 @@ if (typeof CeL === 'function')
 		 * 
 		 * @returns 裸 Object (naked Object)。
 		 */
-		var null_Object = library_namespace.null_Object;
+		var null_Object = library_namespace.null_Object,
+		// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+		NOT_FOUND = ''.indexOf('_');
 
 		// ---------------------------------------------------------------------//
 		// 為一些比較舊的版本或不同瀏覽器而做調適。
@@ -309,7 +311,7 @@ if (typeof CeL === 'function')
 					 *      master · Benvie/harmony-collections ·
 					 *      GitHub">harmony-collections</a>
 					 */
-					var NOT_FOUND = -1, max_hash_length = 80,
+					var max_hash_length = 80,
 					// operator
 					ADD = 1, DELETE = 2,
 					// id 註記。
@@ -1750,9 +1752,9 @@ if (typeof CeL === 'function')
 				no_sheet_onload = no_sheet_onload.toLowerCase();
 
 				// move from 'interact.DOM'.
-				var is_Safari = no_sheet_onload.indexOf('safari') !== -1
-						&& no_sheet_onload.indexOf('chrome') === -1
-						&& no_sheet_onload.indexOf('chromium') === -1,
+				var is_Safari = no_sheet_onload.indexOf('safari') !== NOT_FOUND
+						&& no_sheet_onload.indexOf('chrome') === NOT_FOUND
+						&& no_sheet_onload.indexOf('chromium') === NOT_FOUND,
 				//
 				is_old_Firefox = no_sheet_onload.match(/ Firefox\/(\d+)/i);
 				if (is_old_Firefox)
@@ -2291,7 +2293,7 @@ if (typeof CeL === 'function')
 										|| library_namespace.is_type(e,
 												'XPCWrappedNative_NoHelper')
 										&& ('' + e.message)
-												.indexOf('NS_ERROR_FILE_NOT_FOUND') !== -1) {
+												.indexOf('NS_ERROR_FILE_NOT_FOUND') !== NOT_FOUND) {
 									if (library_namespace.is_debug())
 										library_namespace
 												.err('load_named: 檔案可能不存在或存取被拒？\n['
@@ -3603,7 +3605,7 @@ if (typeof CeL === 'function')
 					'get_module_path');
 			var file_path = library_base_path || setup_library_base_path(),
 			//
-			separator = file_path.indexOf('\\') === -1 ? '/' : '\\';
+			separator = file_path.indexOf('\\') === NOT_FOUND ? '/' : '\\';
 
 			file_path += library_namespace.split_module_name(module_name).join(
 					separator)

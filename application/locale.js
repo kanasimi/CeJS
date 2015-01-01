@@ -21,8 +21,8 @@ name:'application.locale',
 code:function(library_namespace) {
 
 var module_name = this.id,
-//
-NOT_FOUND = -1;
+// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+NOT_FOUND = ''.indexOf('_');
 //	nothing required
 
 
@@ -263,7 +263,8 @@ Chinese_numerals_token_pattern = new RegExp('(.*?)('
 //	http://zh.wikipedia.org/wiki/%E5%8D%81%E9%80%80%E4%BD%8D
 //	比漠微細的，是自天竺的佛經上的數字。而這些「佛經數字」已成為「古代用法」了。
 //	小數單位(十退位)：分,釐(厘),毫(毛),絲,忽,微,纖,沙,塵（納）,埃,渺,漠(皮),模糊,逡巡,須臾（飛）,瞬息,彈指,剎那（阿）,六德(德),虛,空,清,淨	or:,虛,空,清,淨→,空虛,清淨（仄）,阿賴耶,阿摩羅,涅槃寂靜（攸）
-Chinese_numerals_Decimal_denominations = '分厘毫絲忽微纖沙塵埃渺漠',
+//	六釐英金庚款公債條例: 年息定為?釐, 年利率?厘
+Chinese_numerals_Decimal_denominations = '分釐毫絲忽微纖沙塵埃渺漠',
 numerals_Decimal_token_pattern = new RegExp(numerals_Normal_pattern.source
 		+ '([' + Chinese_numerals_Decimal_denominations + '])', 'g'),
 

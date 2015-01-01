@@ -14,7 +14,10 @@ require : 'data.native.to_fixed',
 code : function(library_namespace) {
 
 //requiring
-var to_fixed;
+var to_fixed,
+// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+NOT_FOUND = ''.indexOf('_');
+
 eval(this.use());
 
 
@@ -35,8 +38,6 @@ _// JSDT:_module_
 };
 
 
-// 基本上與程式碼設計合一，僅表示名義，不可更改。
-var NOT_FOUND = -1;
 
 
 /*

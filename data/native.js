@@ -26,6 +26,8 @@ code : function(library_namespace) {
 //var parse_escape;
 //eval(this.use());
 
+// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+var NOT_FOUND = ''.indexOf('_');
 
 /**
  * null module constructor
@@ -44,8 +46,6 @@ _// JSDT:_module_
 .prototype = {
 };
 
-// 基本上與程式碼設計合一，僅表示名義，不可更改。
-var NOT_FOUND = -1;
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -732,7 +732,7 @@ function split_String_by_length_(s, l, m) {
 	var lt, lt2, gt, i = 0, c = l, t = '', I = 0;
 	while (I < s.length) {
 		// 將lt,gt定在下一label之首尾,i為下一次搜尋起點.label定義:/<.+?>/
-		if (i != -1)
+		if (i != NOT_FOUND)
 			if ((lt = s.indexOf('<', i)) != NOT_FOUND) {
 				if ((gt = s.indexOf('>', lt + 1)) == NOT_FOUND)
 					i = lt = NOT_FOUND;

@@ -1797,8 +1797,8 @@ CeL.assert(["1329/2/27 丙戌",'1329/2/丙戌'.to_Date('Chinese').format({format
 */
 
 //	const
-//基本上與程式碼設計合一，僅表示名義，不可更改。
-var NOT_FOUND = -1,
+// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+var NOT_FOUND = ''.indexOf('_'),
 //天干. celestial stem, Heavenly Stem
 STEM_LIST = '甲乙丙丁戊己庚辛壬癸',
 // 地支. Earthly Branches

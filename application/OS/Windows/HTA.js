@@ -15,7 +15,10 @@ require : 'interact.DOM.select_node|interact.DOM.fill_form',
 code : function(library_namespace) {
 
 //	requiring
-var select_node, fill_form;
+var select_node, fill_form,
+// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+NOT_FOUND = ''.indexOf('_');
+
 eval(this.use());
 
 
@@ -147,8 +150,8 @@ _.IEA.prototype = {
 					URL = 'about:blank';// this.init_url;
 
 				if (URL) {
-					if (URL.indexOf(':') === -1
-							//URL.indexOf('://')==-1&&URL.indexOf('about:')==-1
+					if (URL.indexOf(':') === NOT_FOUND
+							//URL.indexOf('://')==NOT_FOUND&&URL.indexOf('about:')==NOT_FOUND
 							) {
 						//	預防操作中 URL 已經改了。
 						this.setBase(this.href());
@@ -251,6 +254,13 @@ instead of onload
 	win : function() {
 		try {
 			return this.doc().parentWindow;
+		} catch (e) {
+			// TODO: handle exception
+		}
+	},
+	eval : function(code, scope) {
+		try {
+			return (scope ? this.g(scope).parentWindow : this.win()).eval(code);
 		} catch (e) {
 			// TODO: handle exception
 		}

@@ -193,7 +193,8 @@ if (typeof CeL === 'function')
 						delete options[filter_name];
 			}
 
-			var NOT_FOUND = -1;
+			// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+			var NOT_FOUND = ''.indexOf('_');
 
 			/**
 			 * 判斷指定字串是否合乎篩選。
