@@ -16,7 +16,7 @@
 if (typeof CeL === 'function')
 CeL.run(
 {
-name:'application.math',
+name : 'application.math',
 require : 'data.math.',
 code : function(library_namespace) {
 

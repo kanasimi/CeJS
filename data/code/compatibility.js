@@ -250,6 +250,7 @@ function hasOwnProperty(key) {
 
 // Object.keys(): get Object keys
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
+// 可用來防止 .prototype 帶來之 properties。e.g., @ IE
 function keys(object) {
 	var key, keys = [], prototype = {};
 

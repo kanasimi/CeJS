@@ -17,14 +17,13 @@ Microsoft | 語言入口網站
 'use strict';
 if (typeof CeL === 'function')
 CeL.run({
-name:'application.locale',
-code:function(library_namespace) {
+name : 'application.locale',
+code : function(library_namespace) {
 
 var module_name = this.id,
 // const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
 NOT_FOUND = ''.indexOf('_');
 //	nothing required
-
 
 
 /**
@@ -1823,7 +1822,7 @@ gettext.conversion = {
 				number = number.replace(/點/, '成');
 			return number;
 		},
-		// 打折扣。e.g., 打六折、打七二折、30% off（30﹪折扣，70% on sale）。
+		// 打折扣/discount。e.g., 打六折、打七二折、30% off（30﹪折扣，70% on sale）。
 		// https://zh.wikipedia.org/wiki/%E6%8A%98%E6%89%A3
 		// "% off" may use "⁒ off" 'COMMERCIAL MINUS SIGN' (U+2052).
 		// commercial minus sign is used in commercial or tax related forms or publications in several European countries, including Germany and Scandinavia.

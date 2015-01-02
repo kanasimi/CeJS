@@ -8,13 +8,11 @@
 
 'use strict';
 if (typeof CeL === 'function')
-CeL.run({name:'application.net.Ajax',
-code:function(library_namespace) {
+CeL.run({
+name : 'application.net.Ajax',
+code : function(library_namespace) {
 
 //	no requiring
-
-// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
-var NOT_FOUND = ''.indexOf('_');
 
 /**
  * null module constructor
@@ -119,6 +117,12 @@ if (false)
 		head : {
 			contentType : 'text/xml'
 		},
+		// location.search
+		search : {
+			contentType : 'text/xml'
+		},
+		// location.hash
+		hash : '',
 		mime : 'text/xml',
 		// onreadystatechange
 		onchange : function() {
@@ -161,9 +165,26 @@ function get_URL(URL, onload, encoding, post_data) {
 	} else
 		options = library_namespace.null_Object();
 
+	if (post_data)
+		post_data = get_URL.param_to_String(post_data);
+
 	if (options.async === false && (onload || options.onchange)
 			|| typeof onload !== 'function')
 		onload = false;
+
+	if (options.search) {
+		URL = URL.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+		URL = URL[0] + (URL[1] ? URL[1] + '&' : '?')
+			+ get_URL.param_to_String(options.search) + (URL[2] || '');
+	}
+
+	if (options.hash) {
+		if (!options.hash.startsWith('#'))
+			URL += '#';
+		URL += options.hash;
+	}
+
+	library_namespace.debug(URL);
 
 	/**
 	 * The XMLHttpRequest object can't be cached.
@@ -185,8 +206,9 @@ function get_URL(URL, onload, encoding, post_data) {
 
 		if (library_namespace.is_Object(options.head)
 				&& XMLHttp.setRequestHeader)
-			for ( var key in options.head)
+			Object.keys(options.head).forEach(function(key) {
 				XMLHttp.setRequestHeader(key, options.head[key]);
+			});
 
 		if (options.mime)
 			// ignore encoding!
@@ -217,15 +239,6 @@ function get_URL(URL, onload, encoding, post_data) {
 					options.onfail(XMLHttp);
 			};
 
-		if (library_namespace.is_Object(post_data)) {
-			encoding = [];
-			for ( var key in post_data)
-				encoding.push(encodeURIComponent(key) + '='
-						+ encodeURIComponent(post_data[key]));
-			post_data = encoding.join('&');
-			library_namespace.debug(post_data, 2);
-		}
-
 		// 若檔案不存在，會 throw。
 		XMLHttp.send(post_data || null);
 
@@ -239,6 +252,23 @@ function get_URL(URL, onload, encoding, post_data) {
 	}
 
 }
+
+// parameters to String
+get_URL.param_to_String = function(param) {
+	if (library_namespace.is_Object(param)) {
+		var array = [];
+		library_namespace.debug(Object.keys(param).join(','), 3, 'get_URL.param_to_String');
+		Object.keys(param).forEach(function(key) {
+			library_namespace.debug(key, 4, 'get_URL.param_to_String.forEach');
+			array.push(encodeURIComponent(key) + '=' + encodeURIComponent(param[key]));
+		});
+		library_namespace.debug(array.join('<br />'), 3, 'get_URL.param_to_String');
+		return array.join('&');
+	}
+
+	// '' + param
+	return param && String(param);
+};
 
 _.get_URL = get_URL;
 
@@ -339,14 +369,6 @@ function deprecated_get_URL(f){	//	(URL,fn) or flag			URL, handle_function handl
   a=arguments,f={URL:f,fn:a[1],method:a[2],sendDoc:a[3]};
  if(f.post)
   f.method='POST',f.sendDoc=f.post;
- if(library_namespace.is_Object(f.sendDoc)){
-  var post_data=[];
-  for(var n in f.sendDoc)
-   post_data.push(encodeURIComponent(n)+'='+encodeURIComponent(f.sendDoc[n]));
-  f.sendDoc=post_data.join('&');
-  library_namespace.log(f.sendDoc);
- }else
-  f.sendDoc=''+f.sendDoc;
 
  if(!f.URL||!(_f.XMLHttp=library_namespace.new_XMLHttp(f.enc,!/\.x(?:ht)?ml$/i.test(f.URL))))return;//throw
  
@@ -473,217 +495,6 @@ deprecated_get_URL.clean=function(i,force){
 
 
 //	↑XMLHttp set	==================
-
-//---------------------------------------------------------------------//
-
-
-/*
-
-CeL.run([
-// .between()
-'data.native', 'interact.DOM',
-// .show_value();
-'application.debug',
-// 
-'application.net.Ajax' ], function() {
-	// CeL.wiki_API.login();
-	// CeL.wiki_API.query('assert=user');
-
-	CeL.wiki_API.page('平均数', function(title, contents) {
-		CeL.info(title);
-		CeL.log(contents);
-	});
-
-	CeL.wiki_API.query('logout');
-});
-
-*/
-
-// [[維基百科:機器人]]
-// https://en.wikipedia.org/w/api.php?action=help&modules=query
-function wiki_API(name, password, base) {
-	if (!this || this.constructor !== wiki_API)
-		return wiki_API.query(name, password, base);
-
-	// setup session.
-	if (base && typeof base === 'string')
-		this.base = base;
-
-	this.token = {
-		// lgusername
-		lgname : name,
-		lgpassword : password
-	};
-
-	this.actions = [];
-}
-
-
-wiki_API.prototype.next = function() {
-	if (this.actions.length === 0)
-		return;
-
-	var _this = this, next = this.actions.shift();
-	switch (next[0]) {
-	case 'page':
-		if (typeof next[1] === 'function')
-			next[1](this.last_page[0], this.last_page[1]);
-		else
-			wiki_API.page(next[1], function(title, contents) {
-				// next[1] : title
-				_this.last_page = [ title, contents ];
-				// next[2] : callback
-				if (typeof next[2] === 'function')
-					next[2](title, contents);
-				_this.next();
-			});
-		break;
-
-	case 'edit':
-		// _this.next();
-		wiki_API.edit(this.last_page[0], next[1], this.token, function() {
-			_this.next();
-		});
-		break;
-
-	case 'login':
-		wiki_API.login(this.token.lgname, this.token.lgpassword, function() {
-			_this.next();
-		});
-		break;
-
-	case 'logout':
-		wiki_API.logout(function() {
-			_this.next();
-		});
-		break;
-
-	default:
-		break;
-	}
-};
-
-wiki_API.prototype.toString = function() {
-	return this.last_page && this.last_page[1];
-};
-
-'page,edit,login,logout'.split(',').forEach(function(method) {
-	wiki_API.prototype[method] = function(arg_1, arg_2) {
-		method = [ method ];
-		if (arg_1 || arg_2)
-			method.push(arg_1);
-		if (arg_2)
-			method.push(arg_2);
-		this.actions.push(method);
-	};
-});
-
-
-wiki_API.base = 'https://zh.wikipedia.org/w/api.php?';
-
-wiki_API.query = function (action, callback, post_data) {
-	library_namespace.debug(action, 1, 'wiki_API.query');
-	if (!/^[a-z]+=/.test(action))
-		action = 'action=' + action;
-	get_URL(wiki_API.base + action, function(XMLHttp) {
-		var response = XMLHttp.responseText;
-		// library_namespace.log(response);
-
-		response = response.between('source-javascript', '</pre>').between('>')
-		// 去掉所有 HTML tag。
-		.replace(/<[^>]+>/g, '');
-
-		// '&#123;' : (")
-		if (response.indexOf('&#') !== NOT_FOUND)
-			response = library_namespace.HTML_to_Unicode(response);
-		// library_namespace.log(response);
-		// library_namespace.log(library_namespace.HTML_to_Unicode(response));
-		if (response)
-			try {
-				response = eval('(' + response + ');');
-			} catch (e) {
-				library_namespace.err('Illegal contents: [' + response + ']');
-				// exit!
-				return;
-			}
-
-		// response = XMLHttp.responseXML;
-		library_namespace.show_value(response);
-		if (typeof callback === 'function')
-			callback(response);
-	}, '', post_data);
-};
-
-
-wiki_API.page = function(title, callback) {
-	// &rvexpandtemplates=1
-	wiki_API.query('query&prop=revisions&rvprop=content&rvlimit=1&titles='
-			+ encodeURIComponent(title), typeof callback === 'function'
-	//
-	&& function(data) {
-		data = data.query.pages;
-		for ( var pageid in data)
-			callback(data[pageid].title, data[pageid].revisions[0]['*']);
-	});
-};
-
-wiki_API.login = function(name, password, callback) {
-	function _done(data) {
-		delete session.token.lgpassword;
-		typeof callback === 'function'
-			&& callback(session.token.lgname);
-		if (data && (data = data.login))
-			wiki_API.login.copy_keys.forEach(function(key) {
-				if (data[key])
-					session.token[key] = data[key];
-			});
-		session.next();
-	}
-	var session = new wiki_API(name, password, callback);
-
-	wiki_API.query('assert=user', function(data) {
-		// 確認尚未登入，才作登入動作。
-		if (data === '') {
-			library_namespace.debug('已登入');
-			_done();
-			return;
-		}
-
-		wiki_API.query('login', function(data) {
-			if (data && data.login && data.login.result === 'NeedToken') {
-				session.token.lgtoken = data.login.token;
-				wiki_API.query('login', _done, session.token);
-			} else
-				library_namespace.err(data);
-		}, session.token);
-	});
-
-	return session;
-};
-wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
-
-wiki_API.edit = function(title, text, token, options) {
-	if (typeof text === 'function') {
-		wiki_API.page(title, function(data) {
-			wiki_API.edit(title, text(data), token, options);
-		});
-		return;
-	}
-
-	options = Object.assign({
-		title : title,
-		text : text
-	}, options);
-
-	wiki_API.query('edit', function(data) {
-		if (typeof options.callback === 'function')
-			options.callback(title, text);
-	}, token);
-};
-
-_.wiki_API = wiki_API;
-
-
 
 
 return (
