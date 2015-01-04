@@ -533,6 +533,7 @@ if (false) {
 
 		f = _s.enablePrivilege;
 		//_.debug('enablePrivilege: ' + f);
+		// '我們需要一點權限來使用 XMLHttpRequest.open。\n* 請勾選記住這項設定的方格。'
 		if (!f && !(_s.enablePrivilege = f =
 						_.value_of('netscape.security.PrivilegeManager.enablePrivilege')))
 			//	更改設定，預防白忙。
@@ -747,8 +748,7 @@ if (false) {
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 	// we only need simple JSON.parse @ .get_script_base_path
-	var parse_JSON = typeof JSON === 'object' && JSON.parse ||
-	function (text, reviver) {
+	var parse_JSON = function(text, reviver) {
 		try {
 			//	borrow from Google, jQuery
 			//	TODO: 對 String 只是做簡單處理，勢必得再加強。
@@ -771,10 +771,23 @@ if (false) {
 				return {};
 		} catch (e) {
 			if (_.is_debug(2))
-				_.err('JSON.parse: SyntaxError: [' + text + ']');
+				_.err('parse_JSON: SyntaxError: [' + text + ']');
 			//throw e;
 		}
 	};
+	if (typeof JSON === 'object' && JSON.parse)
+		(function() {
+			var t;
+			try {
+				t = JSON.parse('{"V":"1","v":1}');
+			} catch (e) {}
+			if (_.is_Object(t) && t.V === '1' && t.v === 1)
+				parse_JSON = JSON.parse;
+			else
+				// 未正確作動。
+				_.err('It seems the JSON.parse() does not work properly');
+		})();
+	_.parse_JSON = parse_JSON;
 
 
 	//	see Array.from of data.code.compatibility.

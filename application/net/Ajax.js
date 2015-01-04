@@ -3,7 +3,7 @@
  * @name	CeL function for Ajax (Asynchronous JavaScript and XML)
  * @fileoverview
  * 本檔案包含了 Ajax 用的 functions。
- * @since	
+ * @since	2015/1/1
  */
 
 'use strict';
@@ -152,18 +152,45 @@ if (false)
  * http://msdn.microsoft.com/en-us/library/ie/ms535874.aspx
  */
 function get_URL(URL, onload, encoding, post_data) {
+	// 前導作業。
 	if (library_namespace.is_Object(encoding)) {
 		post_data = encoding;
 		encoding = null;
 	}
 	var options;
-	if (library_namespace.is_Object(URL)) {
+	if (library_namespace.is_Object(URL) && URL.URL) {
 		onload = URL.onload || onload;
 		post_data = URL.post || post_data;
 		encoding = URL.encoding || encoding;
 		URL = (options = URL).URL;
 	} else
 		options = library_namespace.null_Object();
+
+	if (typeof onload === 'object')
+		// use JSONP. insert page.
+		// need callback.
+		//library_namespace.run(URL);
+		for (var callback_param in onload)
+			if (callback_param && typeof onload[callback_param] === 'function') {
+				var callback_name,
+				node = document.createElement('script'),
+				document_head = document.head || document.getElementsByTagName('head')[0];
+				for (encoding = 0; (callback_name = 'cb' + encoding) in library_namespace;)
+					encoding++;
+				library_namespace[callback_name] = function(data) {
+					library_namespace.debug('[' + URL + ']: callback 完自動移除 .js。', 1, 'get_URL');
+					document_head.removeChild(node);
+					// release
+					node = null;
+					delete library_namespace[callback_name];
+					onload[callback_param](data);
+				};
+				library_namespace.debug('Use callback name: [' + callback_name + ']', 2, 'get_URL');
+				// callback_param: callback parameter
+				node.src = URL + '&' + callback_param + '=' + library_namespace.Class + '.' + callback_name;
+				document_head.appendChild(node);
+				return;
+			}
 
 	if (post_data)
 		post_data = get_URL.param_to_String(post_data);
@@ -192,6 +219,7 @@ function get_URL(URL, onload, encoding, post_data) {
 	var XMLHttp = library_namespace.new_XMLHttp();
 
 	try {
+		// IE:404會throw error, timeout除了throw error, 還會readystatechange; Gecko亦會throw error
 		// IE 10 中，local file 光 .open() 就 throw 了。
 		XMLHttp.open(options.method || (post_data ? 'POST' : 'GET'), URL,
 				!!onload, options.user || '', options.password || '');
@@ -203,6 +231,8 @@ function get_URL(URL, onload, encoding, post_data) {
 					options.onfail(XMLHttp);
 				};
 		}
+		// TODO: 處理有 onload 下之 timeout
+		//	Ajax 程式應該考慮到 server 沒有回應時之處置
 
 		if (library_namespace.is_Object(options.head)
 				&& XMLHttp.setRequestHeader)
@@ -216,7 +246,7 @@ function get_URL(URL, onload, encoding, post_data) {
 		else if (encoding)
 			// old: 'text/xml;charset=' + encoding
 			// 但這樣會被當作 XML 解析，產生語法錯誤。
-			// TODO: try: 'text/plain;charset=' + encoding;
+			// TODO: try: 'text/'+(/\.x(ht)?ml$/i.test(URL)?'xml':'plain')+';charset=' + encoding;
 			encoding = 'application/json;charset=' + encoding;
 
 		// 有些版本的 Mozilla 瀏覽器在伺服器送回的資料未含 XML mime-type
@@ -228,7 +258,12 @@ function get_URL(URL, onload, encoding, post_data) {
 
 		if (onload)
 			XMLHttp.onreadystatechange = function() {
-				// 4: complete
+				//	XMLHttp.readyState 所有可能的值如下：
+				//	0 還沒開始
+				//	1 讀取中 Sending Data
+				//	2 已讀取 Data Sent
+				//	3 資訊交換中 interactive: getting data
+				//	4 一切完成 Completed
 				if (XMLHttp.readyState === 4)
 					return onload(XMLHttp);
 
@@ -243,6 +278,13 @@ function get_URL(URL, onload, encoding, post_data) {
 		XMLHttp.send(post_data || null);
 
 		if (!onload)
+			// XMLHttp.responseText	會把傳回值當字串用
+			// XMLHttp.responseXML	會把傳回值視為 XMLDocument 物件，而後可用 JavaScript DOM 相關函式處理
+			//	IE only(?):
+			//	XMLHttp.responseBody	以unsigned array格式表示binary data
+			//				try{responseBody=(new VBArray(XMLHttp.responseBody)).toArray();}catch(e){}
+			//				http://aspdotnet.cnblogs.com/archive/2005/11/30/287481.html
+			//	XMLHttp.responseStream	return AdoStream
 			return XMLHttp.responseText;
 
 	} catch (e) {
@@ -270,41 +312,19 @@ get_URL.param_to_String = function(param) {
 	return param && String(param);
 };
 
+
 _.get_URL = get_URL;
+
+
+// TODO: 處理 multi requests
+function get_URLs() {
+}
+
 
 //---------------------------------------------------------------------//
 
-/*	set a new XMLHttp
-	Ajax 程式應該考慮到 server 沒有回應時之處置
+/*
 
-return new XMLHttpRequest(for Ajax, Asynchronous JavaScript and XML) controller
-	http://www.xulplanet.com/references/objref/XMLHttpRequest.html
-	http://zh.wikipedia.org/wiki/AJAX
-	http://jpspan.sourceforge.net/wiki/doku.php?id=javascript:xmlhttprequest:behaviour
-	http://www.scss.com.au/family/andrew/webdesign/xmlhttprequest/
-	http://developer.apple.com/internet/webcontent/xmlhttpreq.html
-	http://www.klstudio.com/catalog.asp?cate=4
-	http://wiki.moztw.org/index.php/AJAX_%E4%B8%8A%E6%89%8B%E7%AF%87
-	http://www.15seconds.com/issue/991125.htm
-	http://www.xmlhttp.cn/manual/xmlhttprequest.members.html
-	http://www.blogjava.net/eamoi/archive/2005/10/31/17489.html
-	http://www.kawa.net/works/js/jkl/parsexml.html
-	http://www.twilightuniverse.com/
-
-	XMLHttp.readyState 所有可能的值如下：
-	0 還沒開始
-	1 讀取中 Sending Data
-	2 已讀取 Data Sent
-	3 資訊交換中 interactive: getting data
-	4 一切完成 Completed
-
-	XMLHttp.responseText	會把傳回值當字串用
-	XMLHttp.responseXML	會把傳回值視為 XMLDocument 物件，而後可用 JavaScript DOM 相關函式處理
-	IE only(?):
-	XMLHttp.responseBody	以unsigned array格式表示binary data
-				try{responseBody=(new VBArray(XMLHttp.responseBody)).toArray();}catch(e){}
-				http://aspdotnet.cnblogs.com/archive/2005/11/30/287481.html
-	XMLHttp.responseStream	return AdoStream
 */
 
 
@@ -399,31 +419,31 @@ function deprecated_get_URL(f){	//	(URL,fn) or flag			URL, handle_function handl
   }catch(e){_f.asked++;_f.clean(f.URL);return;}//UniversalBrowserAccess
 
  //if(isNaN(_f.timeout))_f.timeout=300000;//5*60*1000;
- with(_f.XMLHttp)try{	//	IE:404會throw error, timeout除了throw error, 還會readystatechange; Gecko亦會throw error
-  try{setRequestHeader("Accept-Encoding","gzip,deflate");}catch(e){}
+ try{	//	IE:404會throw error, timeout除了throw error, 還會readystatechange; Gecko亦會throw error
+  try{_f.XMLHttp.setRequestHeader("Accept-Encoding","gzip,deflate");}catch(e){}
   //	Set header so the called script knows that it's an XMLHttpRequest
-  //setRequestHeader("X-Requested-With","XMLHttpRequest");
+  //_f.XMLHttp.setRequestHeader("X-Requested-With","XMLHttpRequest");
   //	Set the If-Modified-Since header, if ifModified mode.
-  //setRequestHeader("If-Modified-Since","Thu, 01 Jan 1970 00:00:00 GMT");
+  //_f.XMLHttp.setRequestHeader("If-Modified-Since","Thu, 01 Jan 1970 00:00:00 GMT");
   if(f.method=='POST'){//&&_f.XMLHttp.setRequestHeader
-   //setRequestHeader("Content-Length",f.sendDoc.length);	//	use .getAttribute('method') to get	長度不一定如此
+   //_f.XMLHttp.setRequestHeader("Content-Length",f.sendDoc.length);	//	use .getAttribute('method') to get	長度不一定如此
    //	有些CGI會用Content-Type測試是XMLHttp或是regular form
    //	It may be necessary to specify "application/x-www-form-urlencoded" or "multipart/form-data" for posted XML data to be interpreted on the server.
-   setRequestHeader('Content-Type',Array.isArray(f.fn)&&f.fn[1]?'text/xml':'application/x-www-form-urlencoded');	//	application/x-www-form-urlencoded;charset=utf-8
+   _f.XMLHttp.setRequestHeader('Content-Type',Array.isArray(f.fn)&&f.fn[1]?'text/xml':'application/x-www-form-urlencoded');	//	application/x-www-form-urlencoded;charset=utf-8
   }
-  abort();
-  open(f.method||'GET',f.URL,f.async,f.user||null,f.passwd||null);
+  _f.XMLHttp.abort();
+  _f.XMLHttp.open(f.method||'GET',f.URL,f.async,f.user||null,f.passwd||null);
   //alert((f.method||'GET')+','+f.URL+','+f.async);
   //	 根據 W3C的 XMLHttpRequest 規格書上說，①在呼叫 open 時，如果readyState是4(Loaded) ②呼叫abort之後 ③發生其他錯誤，如網路問題，無窮迴圈等等，則會重設所有的值。使用全域的情況就只有第一次可以執行，因為之後的readyState是4，所以onreadystatechange 放在open之前會被清空，因此，onreadystatechange 必須放在open之後就可以避免這個問題。	http://www.javaworld.com.tw/jute/post/view?bid=49&id=170177&sty=3&age=0&tpg=1&ppg=1
   //	每使用一次XMLHttpRequest，不管成功或失敗，都要重設onreadystatechange一次。onreadystatechange 的初始值是 null
   //	After the initial response, all event listeners will be cleared. Call open() before setting new event listeners.	http://www.xulplanet.com/references/objref/XMLHttpRequest.html
   if(f.async)
 	_f.doing=(_f.doing||0)+1,
-	onreadystatechange=typeof f.fn=='function'?f.fn:function(e){_f.HandleStateChange(e,f.URL,f.fn);},//||null
+	_f.XMLHttp.onreadystatechange=typeof f.fn=='function'?f.fn:function(e){_f.HandleStateChange(e,f.URL,f.fn);},//||null
 	//	應加 clearTimeout( )
 	setTimeout('try{deprecated_get_URL.'+(_f.multi_request?'q['+_f.i[f.URL]+']':'XMLHttp')+'.onreadystatechange();}catch(e){}',_f.timeout||3e5);//5*60*1000;
-  send(f.sendDoc||null);
-  if(!f.fn)return responseText;//responseXML: responseXML.loadXML(text)	//	非async(異步的)能在此就得到response。Safari and Konqueror cannot understand the encoding of text files!	http://www.kawa.net/works/js/jkl/parsexml.html
+  _f.XMLHttp.send(f.sendDoc||null);
+  if(!f.fn)return _f.XMLHttp.responseText;//responseXML: responseXML.loadXML(text)	//	非async(異步的)能在此就得到response。Safari and Konqueror cannot understand the encoding of text files!	http://www.kawa.net/works/js/jkl/parsexml.html
  }catch(e){if(typeof f.fn=='function')f.fn(e);else if(typeof window=='object')window.status=e.message;return e;}
 }
 deprecated_get_URL.timeoutCode=-7732147;
