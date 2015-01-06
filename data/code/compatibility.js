@@ -743,11 +743,9 @@ function endsWith(searchString, endPosition) {
 							searchString.length));
 }
 
-// String.prototype.contains()
-function contains(searchString, position) {
-	return this.indexOf(String(searchString), !position
-			|| !(position |= 0) || position < 0 ? 0
-			: position) !== NOT_FOUND;
+// String.prototype.includes()
+function includes(searchString, position) {
+	return this.indexOf(searchString, position) !== NOT_FOUND;
 }
 
 
@@ -756,7 +754,7 @@ set_method(String.prototype, {
 	trim : trim,
 	startsWith : startsWith,
 	endsWith : endsWith,
-	contains : contains
+	includes : includes
 });
 
 

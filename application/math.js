@@ -381,12 +381,16 @@ function convert_MathML(handler) {
 				//
 				|| !(text = node.firstChild.nodeValue.trim()))
 			continue;
+		// temporary usage.
+		var structure = node.getAttribute('title');
+		if (structure)
+			text = '\n' + structure;
 		node.setAttribute('title', text);
 		if (!node.getAttribute('xmlns'))
 			node.setAttribute('xmlns', "http://www.w3.org/1998/Math/MathML");
 		// library_namespace.debug(node);
 
-		var structure = convert_MathML.parse(text);
+		structure = convert_MathML.parse(text);
 
 		if (!structure[0]) {
 			// 若是所有 children 都是等式，則將之括弧起來。

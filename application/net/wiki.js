@@ -10,7 +10,7 @@
 // TODO: 最大延遲參數 https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
 
 // [[維基百科:機器人]]
-// https://en.wikipedia.org/w/api.php?action=help&modules=query
+// https://en.wikipedia.org/w/api.php
 
 // Wikipedia:沙盒
 // https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92
@@ -98,10 +98,6 @@ function wiki_API(name, password, API_URL) {
 	if (!this || this.constructor !== wiki_API)
 		return wiki_API.query(name, password, API_URL);
 
-	// setup session.
-	if (API_URL && typeof API_URL === 'string')
-		this.API_URL = API_URL;
-
 	this.token = {
 		// lgusername
 		lgname : name,
@@ -110,6 +106,9 @@ function wiki_API(name, password, API_URL) {
 
 	// action queue
 	this.actions = [];
+
+	// setup session.
+	this.set_URL(API_URL);
 }
 
 
@@ -153,7 +152,8 @@ wiki_API.prototype.next = function() {
 			this.next();
 		} else
 			// next[1] : title
-			wiki_API.page(next[1], function(page_data) {
+			// [ {String}API_URL, {String}title ]
+			wiki_API.page([ this.API_URL, next[1] ], function(page_data) {
 				_this.last_page = page_data;
 				// next[2] : callback
 				if (typeof next[2] === 'function')
@@ -168,7 +168,7 @@ wiki_API.prototype.next = function() {
 	case 'fileusage':
 		// get list. e.g., 反向連結/連入頁面.
 		// next[1] : title
-		wiki_API[next[0]](next[1], function(title, titles, pages) {
+		wiki_API[next[0]]([ this.API_URL, next[1] ], function(title, titles, pages) {
 			// last_list
 			_this.last_titles = titles;
 			// page_data
@@ -196,7 +196,7 @@ wiki_API.prototype.next = function() {
 			library_namespace.warn('wiki_API.prototype.next: Denied to edit [' + this.last_page.title + ']');
 			this.next();
 		} else
-			wiki_API.edit(this.last_page,
+			wiki_API.edit([ this.API_URL, this.last_page ],
 			// 因為已有 contents，直接餵給轉換函式。
 			typeof next[1] === 'function' ? next[1](page_contents(this.last_page), this.last_page.title) : next[1],
 			// next[2]: options to edit()
@@ -221,6 +221,12 @@ wiki_API.prototype.next = function() {
 		});
 		break;
 
+	case 'set_URL':
+		if (next[1] && typeof next[1] === 'string')
+			this.API_URL = next[1].indexOf('://') === NOT_FOUND ? wiki_API.api_URL(next[1]) : next[1];
+		this.next();
+		break;
+
 	case 'run':
 		if (typeof next[1] === 'function')
 			next[1].call(this, next[2]);
@@ -237,7 +243,7 @@ wiki_API.prototype.next = function() {
 // wiki_API.prototype.next() 已登記之 methods。
 // 之後會再加入 get_list.type 之 methods。
 // NG: ,login
-wiki_API.prototype.next.methods = 'page,edit,logout,run'
+wiki_API.prototype.next.methods = 'page,edit,logout,run,set_URL'
 	.split(',');
 
 //---------------------------------------------------------------------//
@@ -284,7 +290,7 @@ wiki_API.prototype.work = function(config) {
 		each = config.slice();
 	else
 		library_namespace
-				.err('wiki_API.work: Illegal function for each page!');
+				.err('wiki_API.work: Invalid function for each page!');
 
 	each[1] = Object.assign({
 		// Robot 運作
@@ -362,7 +368,15 @@ wiki_API.prototype.work = function(config) {
 
 //--------------------------------------------------------------------------------------------- //
 
-wiki_API.API_URL = 'https://zh.wikipedia.org/w/api.php?';
+// https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
+// project, domain or language
+wiki_API.api_URL = function(project) {
+	return 'https://' + project + '.wikipedia.org/w/api.php';
+};
+
+// default api URL
+// see also: application.locale
+wiki_API.API_URL = wiki_API.api_URL((navigator.userLanguage || navigator.language || 'en').replace(/-.+$/, ''));
 
 // 列舉型別 (enumeration)
 // options.namespace: https://en.wikipedia.org/wiki/Wikipedia:Namespace
@@ -371,7 +385,7 @@ wiki_API.namespace = function(namespace) {
 		return wiki_API.namespace.hash[namespace];
 	if (isNaN(namespace)) {
 		if (namespace)
-			library_namespace.warn('wiki_API.namespace: Illegal namespace: [' + namespace + ']');
+			library_namespace.warn('wiki_API.namespace: Invalid namespace: [' + namespace + ']');
 		return namespace;
 	}
 	return namespace | 0;
@@ -417,8 +431,20 @@ wiki_API.namespace.hash = {
 
 //---------------------------------------------------------------------//
 
+
+// {String}action or [ {String}api URL, {String}action, {Object}other parameters ]
 wiki_API.query = function (action, callback, post_data) {
-	var to_wait = Date.now() - wiki_API.query.last;
+	// 處理 action
+	library_namespace.debug(action, 2, 'wiki_API.query');
+	if (typeof action === 'string')
+		action = [ , action ];
+	else if (!Array.isArray(action))
+		library_namespace.err('wiki_API.query: Invalid action: [' + action + ']');
+	if (!action[0])
+		action[0] = wiki_API.API_URL;
+
+	// 檢測是否間隔過短。
+	var to_wait = Date.now() - wiki_API.query.last[action[0]];
 	if (to_wait < wiki_API.query.lag) {
 		to_wait = wiki_API.query.lag - to_wait;
 		library_namespace.debug('Waiting ' + to_wait + ' ms..', 2, 'wiki_API.query');
@@ -427,19 +453,30 @@ wiki_API.query = function (action, callback, post_data) {
 		}, to_wait);
 		return;
 	}
+	wiki_API.query.last[action[0]] = Date.now();
 
-	library_namespace.debug(action, 2, 'wiki_API.query');
-	if (!/^[a-z]+=/.test(action))
-		action = 'action=' + action;
+	// https://en.wikipedia.org/w/api.php?action=help&modules=query
+	if (!/^[a-z]+=/.test(action[1]))
+		action[1] = 'action=' + action[1];
 	// https://www.mediawiki.org/wiki/API:Data_formats
 	// 因不在 white-list 中，無法使用 CORS。
-	if (action.indexOf('format=') === NOT_FOUND)
-		action += '&format=json&utf8=1';
-	action = wiki_API.API_URL + action;
+	action[0] += '?' + action[1];
+	// [ {String}api URL, {String}action, {Object}other parameters ]
+	// →
+	// [ {String}URL, {Object}other parameters ]
+	action = library_namespace.is_Object(action[2]) ? [ action[0], action[2] ]
+	//
+	: [ action[2] ? action[0] + action[2] : action[0], library_namespace.null_Object() ];
+	if (!action[1].format)
+		action[0] = get_URL.add_param(action[0], 'format=json&utf8=1');
 
-	wiki_API.query.last = Date.now();
-
-	if (post_data)
+	// 開始處理
+	if (!post_data && wiki_API.query.allow_JSONP)
+		// 須注意：若有 error，將不會執行 callback！
+		get_URL(action, {
+			callback : callback
+		});
+	else
 		get_URL(action, function(XMLHttp) {
 			var response = XMLHttp.responseText;
 			library_namespace.debug(response.replace(/</g, '&lt;'), 3, 'wiki_API.query');
@@ -458,7 +495,7 @@ wiki_API.query = function (action, callback, post_data) {
 				try {
 					response = library_namespace.parse_JSON(response);
 				} catch (e) {
-					library_namespace.err('Illegal contents: [' + response + ']');
+					library_namespace.err('Invalid contents: [' + response + ']');
 					// exit!
 					return;
 				}
@@ -471,43 +508,58 @@ wiki_API.query = function (action, callback, post_data) {
 			if (typeof callback === 'function')
 				callback(response);
 		}, '', post_data);
-	else
-		// 對於可以不用 XMLHttp 的，直接採 JSONP callback 法。
-		get_URL(action, {
-			callback : callback
-		});
-};
-
-wiki_API.query.title_param = function(title, multi) {
-	multi = multi ? 's=' : '=';
-	var pageid;
-	if (library_namespace.is_Object(title))
-		if (title.pageid)
-			pageid = title.pageid;
-		else
-			title = title.title;
-	else if (!title)
-		library_namespace.err('wiki_API.query.title_param: Illegal title: [' + title + ']');
-
-	return isNaN(pageid) ? 'title' + multi + encodeURIComponent(title)
-	//
-	: 'pageid' + multi + pageid;
 };
 
 // 使用5秒的最大延遲參數。
 wiki_API.query.lag = 5000;
 
+// 對於可以不用 XMLHttp 的，直接採 JSONP callback 法。
+wiki_API.query.allow_JSONP = library_namespace.is_WWW(true);
+
+// wiki_API.query.last[URL] = {Date}last query
+wiki_API.query.last = library_namespace.null_Object();
+
+// 取得 page_data 之 title parameter。
+// e.g., {pageid:8,title:'abc'} → 'pageid=8'
+// e.g., {title:'abc'} → 'title=abc'
+// e.g., 'abc' → 'title=abc'
+wiki_API.query.title_param = function(page_data, multi) {
+	multi = multi ? 's=' : '=';
+	var pageid;
+	if (library_namespace.is_Object(page_data))
+		if (page_data.pageid)
+			// 有 pageid 使用之，以加速。
+			pageid = page_data.pageid;
+		else
+			page_data = page_data.title;
+	else if (!page_data)
+		library_namespace.err('wiki_API.query.title_param: Invalid title: [' + page_data + ']');
+
+	return isNaN(pageid) ? 'title' + multi + encodeURIComponent(page_data)
+	//
+	: 'pageid' + multi + pageid;
+};
+
+
 //---------------------------------------------------------------------//
 
 // 讀取
-// callback(page_data)
-// timestamp: e.g., '2015-01-02T02:52:29Z'
+// {String}title or [ {String}API_URL, {String}title ]
+// {Function}callback(page_data)
+// {String}timestamp: e.g., '2015-01-02T02:52:29Z'
 // CeL.wiki.page('道',function(p){CeL.show_value(p);});
 wiki_API.page = function(title, callback, options) {
-	wiki_API.query('query&prop=revisions&rvprop=content|timestamp&rvlimit=1&'
+	// 處理 [ {String}API_URL, {String}title ]
+	if (!Array.isArray(title))
+		title = [ , title ];
+	title[1] = 'query&prop=revisions&rvprop=content|timestamp&rvlimit=1&'
 	// &rvexpandtemplates=1
 	// prop=info|revisions
-	+ wiki_API.query.title_param(title, true), typeof callback === 'function'
+	+ wiki_API.query.title_param(title[1], true);
+	if (!title[0])
+		title = title[1];
+
+	wiki_API.query(title, typeof callback === 'function'
 	//
 	&& function(data) {
 		if (!data || !data.query || !data.query.pages) {
@@ -551,17 +603,20 @@ function get_list(type, title, callback, namespace) {
 	else
 		options.namespace = namespace;
 
-	wiki_API.query('query&' + parameter + '=' + type + '&'
+	// 處理 [ {String}API_URL, {String}title ]
+	if (!Array.isArray(title))
+		title = [ , title ];
+	title[1] = 'query&' + parameter + '=' + type + '&'
 	//
-	+ (parameter === get_list.default_parameter ? prefix : '') + wiki_API.query.title_param(title)
+	+ (parameter === get_list.default_parameter ? prefix : '') + wiki_API.query.title_param(title[1])
 	//
 	+ (0 < options.limit ? '&' + prefix + 'limit=' + options.limit : '')
 	//
-	+ ('namespace' in options ? '&' + prefix + 'namespace=' + options.namespace : ''),
+	+ ('namespace' in options ? '&' + prefix + 'namespace=' + options.namespace : '');
+	if (!title[0])
+		title = title[1];
 
-	typeof callback === 'function'
-	//
-	&& function(data) {
+	wiki_API.query(title, typeof callback === 'function' && function(data) {
 		function add_page(page) {
 			titles.push(page.title);
 			pages.push(page);
@@ -678,12 +733,16 @@ wiki_API.login = function(name, password, callback) {
 			});
 	}
 
+	var action = 'assert=user',
 	// 這裡 callback 當作 API_URL。
-	var session = new wiki_API(name, password, callback);
+	session = new wiki_API(name, password, callback);
 	// hack: 這表示正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。
 	session.actions.push([ 'login' ]);
 
-	wiki_API.query('assert=user', function(data) {
+	if (session.API_URL)
+		action = [ action, session.API_URL ];
+
+	wiki_API.query(action, function(data) {
 		// 確認尚未登入，才作登入動作。
 		if (data === '') {
 			// 您已登入。
@@ -708,12 +767,20 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
 
 //---------------------------------------------------------------------//
 
-// 編輯
+
+wiki_API.get_title = function(page_data) {
+	if (Array.isArray(page_data))
+		page_data = page_data[0];
+	return page_data.title || page_data;
+};
+
+// ({String|Array}title 頁面標題, {String|Function}頁面內容, {Object}“csrf”令牌, {Object}options, {Function}callback, {String}timestamp)
 // {String}text or {Function}text(contents, title)
+// {String}title or [ {String}API_URL, {String}title ]
 // callback(title, error, result)
 wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	if (typeof text === 'function') {
-		library_namespace.debug('先取得內容再 edit [' + (title.title || title) + ']。', 1, 'wiki_API.edit');
+		library_namespace.debug('先取得內容再 edit [' + wiki_API.get_title(title) + ']。', 1, 'wiki_API.edit');
 		wiki_API.page(title, function(page_data) {
 			if (wiki_API.edit.denied(page_data, options.bot_id, options.action)) {
 				library_namespace.warn('wiki_API.edit: Denied to edit [' + page_data.title
@@ -729,6 +796,11 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 		});
 		return;
 	}
+
+	var action = 'edit';
+	// 處理 [ {String}API_URL, {String}title ]
+	if (Array.isArray(title))
+		action = [ title[0], action ], title = title[1];
 
 	// 造出可 modify 的 options。
 	library_namespace.debug('#1: ' + Object.keys(options).join(','), 4, 'wiki_API.edit');
@@ -748,7 +820,7 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	options.token = library_namespace.is_Object(token) ? token.csrftoken : token;
 	library_namespace.debug('#2: ' + Object.keys(options).join(','), 4, 'wiki_API.edit');
 
-	wiki_API.query('edit', function(data) {
+	wiki_API.query(action, function(data) {
 		var error = data.error
 		// 檢查伺服器回應是否有錯誤資訊。
 		? '[' + data.error.code + '] ' + data.error.info
@@ -756,11 +828,11 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 		: data.edit && data.edit.result !== 'Success'
 		&& ('[' + data.edit.result + '] ' + data.edit.info);
 		if (error)
-			library_namespace.warn('wiki_API.edit: Error to edit [' + (title.title || title) + ']: ' + error);
+			library_namespace.warn('wiki_API.edit: Error to edit [' + wiki_API.get_title(title) + ']: ' + error);
 		else if ('nochange' in data.edit)
-			library_namespace.info('wiki_API.edit: [' + (title.title || title) + ']: no change');
+			library_namespace.info('wiki_API.edit: [' + wiki_API.get_title(title) + ']: no change');
 		if (typeof callback === 'function')
-			callback(title.title || title, error, data);
+			callback(wiki_API.get_title(title), error, data);
 	}, options);
 };
 

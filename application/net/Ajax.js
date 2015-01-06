@@ -135,6 +135,10 @@ if (false)
 		}
 	};
 
+var document_head = library_namespace.is_WWW(true) && (document.head || document.getElementsByTagName('head')[0]);
+
+
+
 /**
  * 讀取 URL via XMLHttpRequest。
  * 
@@ -173,8 +177,7 @@ function get_URL(URL, onload, encoding, post_data) {
 		for (var callback_param in onload)
 			if (callback_param && typeof onload[callback_param] === 'function') {
 				var callback_name,
-				node = document.createElement('script'),
-				document_head = document.head || document.getElementsByTagName('head')[0];
+				node = document.createElement('script');
 				for (encoding = 0; (callback_name = 'cb' + encoding) in library_namespace;)
 					encoding++;
 				library_namespace[callback_name] = function(data) {
@@ -185,9 +188,9 @@ function get_URL(URL, onload, encoding, post_data) {
 					delete library_namespace[callback_name];
 					onload[callback_param](data);
 				};
-				library_namespace.debug('Use callback name: [' + callback_name + ']', 2, 'get_URL');
 				// callback_param: callback parameter
 				node.src = URL + '&' + callback_param + '=' + library_namespace.Class + '.' + callback_name;
+				library_namespace.debug('Use script node: [' + node.src + ']', 2, 'get_URL');
 				document_head.appendChild(node);
 				return;
 			}
@@ -199,17 +202,14 @@ function get_URL(URL, onload, encoding, post_data) {
 			|| typeof onload !== 'function')
 		onload = false;
 
-	if (options.search) {
-		URL = URL.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
-		URL = URL[0] + (URL[1] ? URL[1] + '&' : '?')
-			+ get_URL.param_to_String(options.search) + (URL[2] || '');
-	}
+	// https://developer.mozilla.org/en-US/docs/Web/API/URL
+	// [ origin + pathname, search, hash ]
+	// hrer = [].join('')
+	if (Array.isArray(URL))
+		URL = get_URL.add_param(URL[0], URL[1], URL[2]);
 
-	if (options.hash) {
-		if (!options.hash.startsWith('#'))
-			URL += '#';
-		URL += options.hash;
-	}
+	if (options.search || options.hash)
+		URL = get_URL.add_param(URL, options.search, options.hash);
 
 	library_namespace.debug(URL);
 
@@ -296,22 +296,46 @@ function get_URL(URL, onload, encoding, post_data) {
 }
 
 // parameters to String
+// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
 get_URL.param_to_String = function(param) {
 	if (library_namespace.is_Object(param)) {
 		var array = [];
 		library_namespace.debug(Object.keys(param).join(','), 3, 'get_URL.param_to_String');
 		Object.keys(param).forEach(function(key) {
 			library_namespace.debug(key, 4, 'get_URL.param_to_String.forEach');
-			array.push(encodeURIComponent(key) + '=' + encodeURIComponent(param[key]));
+			array.push(encodeURIComponent(key) + '=' + encodeURIComponent(String(param[key])));
 		});
 		library_namespace.debug(array.join('<br />'), 3, 'get_URL.param_to_String');
 		return array.join('&');
 	}
 
 	// '' + param
-	return param && String(param);
+	return param && String(param) || '';
 };
 
+
+get_URL.add_param = function(URL, search, hash) {
+	if (search || hash) {
+		URL = URL.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+		if (search = get_URL.param_to_String(search)) {
+			if (search.startsWith('?')) {
+				if (URL[2])
+					search = URL[2] + '&' + search.slice(1);
+			} else
+				search = (URL[2] ? URL[2] + '&' : '?') + search;
+		}
+
+		if (hash = get_URL.param_to_String(hash)) {
+			if (!hash.startsWith('#'))
+				hash = '#' + hash;
+			hash = (URL[3] || '') + hash;
+		}
+
+		URL = URL[1] + search + hash;
+	}
+
+	return URL;
+};
 
 _.get_URL = get_URL;
 

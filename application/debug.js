@@ -333,6 +333,11 @@ function show_value_children(value, filter) {
 	// key = value = nodes = parent = proto = null;
 }
 
+
+var has_native_log = typeof console === 'object' && typeof console.log === 'function'
+//
+&& /^function [a-z]+\(\)\s*{\s*\[native code]\s*}$/.test(Function.prototype.toString.call(console.log));
+
 /**
  * debug 用: Show contents of object/class.<br />
  * 
@@ -344,6 +349,11 @@ function show_value_children(value, filter) {
  *      Pattern實作AOP">一些內建的物件，他的屬性可能會是[[DontEnum]]，也就是不可列舉的，而自訂的物件在下一版的ECMA-262中，也可以這樣設定他的屬性。</a>
  */
 function show_value(object, name, filter) {
+	if (has_native_log) {
+		console.log(name + ':');
+		console.log(object);
+		return;
+	}
 	if (name === undefined && typeof object !== 'object'
 			&& typeof object !== 'function')
 		try {
@@ -383,7 +393,7 @@ if (false)
 
 
 
-return [JSalert, popErr, show_value];
+return [ JSalert, popErr, show_value ];
 },
 // 'log': 為預防覆寫基底之 log 而加。
 no_extend:'this,log'

@@ -555,6 +555,14 @@ function is_matched(pattern, text, unknown_handler) {
 _.is_matched = is_matched;
 
 
+/*
+
+use (new RegExp(regexp.source, flag)) instead.
+or even (new RegExp(regexp, flag)):
+RexExp constructor no longer throws when the first argument is a RegExp and the second argument is present. Instead it creates a new RegExp using the same patterns as the first arguments and the flags supplied by the second argument.
+
+*/
+
 /**
  * 重新設定 RegExp object 之 flag.
  * change the flag of a RegExp instances.
