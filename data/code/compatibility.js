@@ -327,6 +327,40 @@ set_method(Array, {
 
 
 set_method(Array.prototype, {
+	includes : includes,
+	some : function some(callback, thisArg) {
+		if (!thisArg)
+			thisArg = this;
+		var index = 0, length = this.length;
+		for (; index < length; index++)
+			if (callback.call(thisArg, this[index], index, this))
+				return true;
+		return false;
+	},
+	every : function every(callback, thisArg) {
+		if (!thisArg)
+			thisArg = this;
+		var index = 0, length = this.length;
+		for (; index < length; index++)
+			if (!callback.call(thisArg, this[index], index, this))
+				return false;
+		return true;
+	},
+	map : function map(callback, thisArg) {
+		var result = [];
+		this.forEach(function() {
+			result.push(callback.apply(this, arguments));
+		}, thisArg || this);
+		return result;
+	},
+	filter : function map(callback, thisArg) {
+		var result = [];
+		this.forEach(function(value) {
+			if (callback.apply(this, arguments))
+				result.push(value);
+		}, thisArg || this);
+		return result;
+	},
 	//Array.prototype.indexOf ( searchElement [ , fromIndex ] )
 	indexOf : function indexOf(searchElement, fromIndex) {
 		fromIndex |= 0;
@@ -744,6 +778,7 @@ function endsWith(searchString, endPosition) {
 }
 
 // String.prototype.includes()
+// Array.prototype.includes()
 function includes(searchString, position) {
 	return this.indexOf(searchString, position) !== NOT_FOUND;
 }
@@ -752,9 +787,9 @@ function includes(searchString, position) {
 set_method(String.prototype, {
 	repeat : repeat,
 	trim : trim,
+	includes : includes,
 	startsWith : startsWith,
-	endsWith : endsWith,
-	includes : includes
+	endsWith : endsWith
 });
 
 

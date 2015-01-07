@@ -350,7 +350,8 @@ var has_native_log = typeof console === 'object' && typeof console.log === 'func
  */
 function show_value(object, name, filter) {
 	if (has_native_log) {
-		console.log(name + ':');
+		if (name)
+			console.log(name + ':');
 		console.log(object);
 		return;
 	}

@@ -878,26 +878,43 @@ convert_MathML.reduce = function(structure, node, handler) {
 	&& structure.length === 2 && Array.isArray(structure[1])
 			&& structure[1][0] === ',') {
 		var matrix = [], i = 0, length = structure[1].length;
-		structure[1].forEach(function(operand, index) {
-			if (matrix && index > 0)
-				if (operand[0] === structure[0] && Array.isArray(operand[1])
-						&& operand[1][0] === ',') {
-					if (matrix.length
-							&& matrix[0].length !== operand[1].length - 1) {
-						matrix = null;
-						return;
-					}
-					var m = [];
-					operand[1].forEach(function(expression, index) {
-						if (index > 0)
-							m.push(convert_MathML.reduce(expression, node,
-									handler));
-					});
-					matrix.push(m);
-				} else
-					matrix = null;
-		});
-		if (matrix)
+		if (structure[1].every(function(operand, index) {
+			if (index === 0)
+				// pass the operator
+				return true;
+			// 確認 array 型態相同。
+			if (operand[0] !== structure[0])
+				return;
+
+			// 確認 operand 為 array。
+			if (Array.isArray(operand[1]) && operand[1][0] === ','
+			// 確認 array 大小皆同。
+			&& (!matrix.length || matrix[0].length === operand[1].length - 1)) {
+				// e.g., {{1,2},{3,4}}
+				var m = [];
+				operand[1].forEach(function(expression, index) {
+					if (index > 0)
+						m.push(convert_MathML.reduce(expression, node,
+								handler));
+				});
+				// assert: true === !![].push(0)
+				return matrix.push(m);
+			}
+
+			// 確認 operand 為 array。
+			if (typeof operand[1] !== 'object'
+			// 確認 array 大小皆同。
+			&& (!matrix.length || matrix[0].length === 1))
+				// e.g., ((5),(6))
+				return matrix.push([ operand[1] ]);
+
+			if (library_namespace.is_debug()) {
+				library_namespace.debug('array 型態' + (operand[0] === structure[0] ? '相同' : '不同'));
+				library_namespace.debug(Array.isArray(operand[1]) && operand[1][0] === ',' ? 'operand 為 array' : 'operand 為 ' + (Array.isArray(operand[1]) ? operand[1][0] : operand[1]));
+				if (matrix[0])
+					library_namespace.debug('array 大小: ' + matrix[0].length + ' != ' + (operand[1].length - 1));
+			}
+		}))
 			return handler(matrix, 'm', structure[0]);
 	}
 

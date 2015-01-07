@@ -170,6 +170,17 @@ function get_URL(URL, onload, encoding, post_data) {
 	} else
 		options = library_namespace.null_Object();
 
+	// https://developer.mozilla.org/en-US/docs/Web/API/URL
+	// [ origin + pathname, search, hash ]
+	// hrer = [].join('')
+	if (Array.isArray(URL))
+		URL = get_URL.add_param(URL[0], URL[1], URL[2]);
+
+	if (options.search || options.hash)
+		URL = get_URL.add_param(URL, options.search, options.hash);
+
+	library_namespace.debug(URL, 3, 'get_URL');
+
 	if (typeof onload === 'object')
 		// use JSONP. insert page.
 		// need callback.
@@ -181,7 +192,7 @@ function get_URL(URL, onload, encoding, post_data) {
 				for (encoding = 0; (callback_name = 'cb' + encoding) in library_namespace;)
 					encoding++;
 				library_namespace[callback_name] = function(data) {
-					library_namespace.debug('[' + URL + ']: callback 完自動移除 .js。', 1, 'get_URL');
+					library_namespace.debug('[' + URL + ']: callback 完自動移除 .js。', 2, 'get_URL');
 					document_head.removeChild(node);
 					// release
 					node = null;
@@ -190,7 +201,7 @@ function get_URL(URL, onload, encoding, post_data) {
 				};
 				// callback_param: callback parameter
 				node.src = URL + '&' + callback_param + '=' + library_namespace.Class + '.' + callback_name;
-				library_namespace.debug('Use script node: [' + node.src + ']', 2, 'get_URL');
+				library_namespace.debug('Use script node: [' + node.src + ']', 3, 'get_URL');
 				document_head.appendChild(node);
 				return;
 			}
@@ -201,17 +212,6 @@ function get_URL(URL, onload, encoding, post_data) {
 	if (options.async === false && (onload || options.onchange)
 			|| typeof onload !== 'function')
 		onload = false;
-
-	// https://developer.mozilla.org/en-US/docs/Web/API/URL
-	// [ origin + pathname, search, hash ]
-	// hrer = [].join('')
-	if (Array.isArray(URL))
-		URL = get_URL.add_param(URL[0], URL[1], URL[2]);
-
-	if (options.search || options.hash)
-		URL = get_URL.add_param(URL, options.search, options.hash);
-
-	library_namespace.debug(URL);
 
 	/**
 	 * The XMLHttpRequest object can't be cached.
@@ -323,13 +323,15 @@ get_URL.add_param = function(URL, search, hash) {
 					search = URL[2] + '&' + search.slice(1);
 			} else
 				search = (URL[2] ? URL[2] + '&' : '?') + search;
-		}
+		} else
+			search = URL[2] || '';
 
 		if (hash = get_URL.param_to_String(hash)) {
 			if (!hash.startsWith('#'))
 				hash = '#' + hash;
 			hash = (URL[3] || '') + hash;
-		}
+		} else
+			hash = URL[3] || '';
 
 		URL = URL[1] + search + hash;
 	}
