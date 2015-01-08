@@ -23,19 +23,19 @@ CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
 
 CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ], function() {
 	var wiki = CeL.wiki.login('', '')
-	//
+	// get the content of page
 	.page('Wikipedia:沙盒', function(title, content) {
 		CeL.info(title);
 		CeL.log(content);
 	})
-	//
+	// get the content of page, and then replace it.
 	.page('Wikipedia:沙盒 ').edit('* [[沙盒]]', {
 		section : 'new',
 		sectiontitle : ' 沙盒 test section',
 		summary : ' 沙盒 test edit (section)',
 		nocreate : 1
 	})
-	//
+	// get the content of page, and then modify it.
 	.page('Wikipedia:沙盒 ').edit(function(text) {
 		return text + '\n\n* [[沙盒]]';
 	}, {
@@ -48,11 +48,11 @@ CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ], functio
 		CeL.info(title);
 		CeL.log(content);
 	})
-	//
+	// get the content of page, replace it, and set summary.
 	.edit('text to replace', {
 		summary : 'summary'
 	})
-	//
+	// get the content of page, modify it, and set summary.
 	.edit(function(content) {
 		return 'text to replace';
 	}, {
@@ -183,9 +183,9 @@ wiki_API.prototype.next = function() {
 		// get list. e.g., 反向連結/連入頁面.
 		// next[1] : title
 		wiki_API[next[0]]([ this.API_URL, next[1] ], function(title, titles, pages) {
-			// last_list
+			// [ last_list ]
 			_this.last_titles = titles;
-			// page_data
+			// [ page_data ]
 			_this.last_pages = pages;
 
 			if (typeof next[2] === 'function')
@@ -280,29 +280,28 @@ wiki_API.prototype.next.methods = 'page,edit,logout,run,set_URL'
 });
 
 // 不會推入 this.actions queue，即時執行。因此需要先 get list!
-wiki_API.prototype.work = function(config, list) {
+wiki_API.prototype.work = function(config, pages, titles) {
+	if (typeof config === 'function')
+		config = {
+			each : config
+		};
 	if (!config || !config.each) {
 		library_namespace.warn('wiki_API.work: Bad callback!');
 		return;
 	}
 
-	var pages = this.last_pages, titles = this.last_titles;
-	if (!Array.isArray(pages)) {
+	if (!pages)
+		pages = this.last_pages, titles = this.last_titles;
+	if (!Array.isArray(pages) && !titles) {
 		// 採用推入前一個 this.actions queue 的方法，
 		// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 		library_namespace
 				.warn('wiki_API.work: No list. Please get list first!');
 		return;
 	}
-	if (!Array.isArray(titles) || pages.length !== titles.length) {
-		library_namespace.warn('wiki_API.work: rebuild titles.');
-		titles = [];
-		pages.forEach(function(page) {
-			titles.push(title);
-		});
-	}
 
-	library_namespace.debug('wiki_API.work: 開始執行:先做初始設定。');
+	library_namespace.debug('wiki_API.work: 開始執行:先做環境建構與初始設定。');
+
 	// default handler [ text replace function(title, content), {Object}options, callback(title, error, result) ]
 	var each;
 	if (typeof config.each === 'function')
@@ -342,6 +341,26 @@ wiki_API.prototype.work = function(config, list) {
 	var done = 0, messages = [];
 	messages.start = messages.last = new Date;
 
+	if (false && Array.isArray(pages)
+	//
+	&& (Array.isArray(titles) ? pages.length !== titles.length : !titles)) {
+		library_namespace.warn('wiki_API.work: rebuild titles.');
+		titles = [];
+		pages.forEach(function(page) {
+			titles.push(page.title);
+		});
+	}
+
+	if (Array.isArray(pages) && Array.isArray(titles) && pages.length !== titles.length)
+		library_namespace.warn('wiki_API.work: The length of pages and titles are different!');
+
+	// 一次先取得所有 revisions (page content)。
+	this.page(pages || titles, function(data) {
+		pages = data;
+		messages.push('* 費時 ' + messages.last.age(new Date) + ' 以取得 ' + pages.length + ' 頁面。');
+		messages.last = new Date;
+	});
+
 	if (typeof config.first === 'function')
 		config.first(messages, titles, pages);
 
@@ -374,21 +393,22 @@ wiki_API.prototype.work = function(config, list) {
 			nocreate : 1
 		};
 
-		messages = messages.join('\n');
 		if (log_to)
 			this.page(log_to)
 			// log summary. Robot 運作記錄。
 			// TODO: 以表格呈現。
-			.edit(messages, options, function(title, error, result) {
+			.edit(messages.join('\n'), options, function(title, error, result) {
 				if (error) {
-					//library_namespace.warn('wiki_API.work: Can not write log!');
+					library_namespace.warn('wiki_API.work: Can not write log! Try to write to ['
+					//
+					+ 'User:' + _this.token.lgname + ']');
 					library_namespace.log(messages);
 					// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
-					_this.page('User:' + _this.token.lgname).edit(messages, options);
+					_this.page('User:' + _this.token.lgname).edit(messages.join('\n'), options);
 				}
 			});
 		else
-			library_namespace.log(messages);
+			library_namespace.log(messages.join('<br />\n'));
 	});
 };
 
@@ -553,13 +573,24 @@ wiki_API.query.title_param = function(page_data, multi) {
 	var pageid;
 	if (Array.isArray(page_data)) {
 		pageid = [];
-		page_data.forEach(function(page) {
-			pageid.push(page.pageid || page.title || page);
-		});
-		pageid = pageid.join('|');
-		// 以 [0] 代表所有 page_data 屬性。
-		if (typeof page_data[0] !== 'object' || !('pageid' in page_data[0]))
-			page_data = pageid, pageid = undefined;
+		// 確認所有 page_data 皆有 pageid 屬性。
+		pageid = page_data.every(function(page) {
+			pageid.push(page = page && page.pageid);
+			return page;
+		}) && pageid.join('|');
+		if (!pageid) {
+			if (library_namespace.is_Object(page_data)) {
+				library_namespace.warn('wiki_API.query.title_param: 看似有些非正規之頁面資料。');
+				library_namespace.info('wiki_API.query.title_param: 將採用 title 為主要查詢方法。');
+			}
+			pageid = [];
+			page_data.forEach(function(page) {
+				pageid.push((typeof page === 'object' ? page.title : page) || '');
+			});
+			page_data = pageid.join('|');
+			library_namespace.debug(page_data, 2, 'wiki_API.query.title_param');
+			pageid = undefined;
+		}
 
 	} else if (library_namespace.is_Object(page_data))
 		if (page_data.pageid)
@@ -590,14 +621,17 @@ wiki_API.query.id_of_page = function(page_data, title_only) {
 
 //---------------------------------------------------------------------//
 
-// 讀取
+
+// 讀取頁面內容。可一次處理多個標題。
 // {String}title or [ {String}API_URL, {String}title ]
 // {Function}callback(page_data)
 // {String}timestamp: e.g., '2015-01-02T02:52:29Z'
 // CeL.wiki.page('道',function(p){CeL.show_value(p);});
 wiki_API.page = function(title, callback) {
 	// 處理 [ {String}API_URL, {String}title ]
-	if (!Array.isArray(title))
+	if (!Array.isArray(title)
+	// 為了預防輸入的是問題頁面。
+	|| title.length !== 2 || typeof title[0] === 'object')
 		title = [ , title ];
 	title[1] = wiki_API.query.title_param(title[1], true);
 	if (title[1].indexOf('|') === NOT_FOUND
@@ -614,6 +648,11 @@ wiki_API.page = function(title, callback) {
 	wiki_API.query(title, typeof callback === 'function'
 	//
 	&& function(data) {
+		if (library_namespace.is_debug(2)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+			library_namespace.show_value(data, 'wiki_API.page: data');
+
 		if (!data || !data.query || !data.query.pages) {
 			library_namespace.warn('wiki_API.page: Unknown response: [' + data + ']');
 			if (library_namespace.is_debug()
@@ -622,6 +661,7 @@ wiki_API.page = function(title, callback) {
 				library_namespace.show_value(data);
 			return callback();
 		}
+
 		data = data.query.pages;
 		var pages = [];
 		for ( var pageid in data) {
@@ -630,6 +670,7 @@ wiki_API.page = function(title, callback) {
 			if (!page_content.has_content(page))
 				library_namespace.warn('wiki_API.page: No content: [' + page.title + ']');
 		}
+
 		if (pages.length !== 1 && library_namespace.is_debug())
 			library_namespace.info('wiki_API.page: Get ' + pages.length
 			//
@@ -657,10 +698,11 @@ CeL.wiki.langlinks('語言',function(p){CeL.show_value(p);},10)
 
 */
 
+// 取得 title 在其他語系 (to_lang) 之標題。可一次處理多個標題。
 // return 'title' or {langs:['',''], lang:'title'}
 wiki_API.langlinks = function(title, callback, to_lang) {
 	var from_lang;
-	if (Array.isArray(title))
+	if (Array.isArray(title) && title.length === 2 && (!title[0] || typeof title[0] === 'string'))
 		from_lang = title[0], title = title[1];
 	title = 'query&prop=langlinks&' + wiki_API.query.title_param(title, true);
 	if (to_lang)
@@ -680,6 +722,7 @@ wiki_API.langlinks = function(title, callback, to_lang) {
 				library_namespace.show_value(data);
 			return callback();
 		}
+
 		data = data.query.pages;
 		var pages = [];
 		for ( var pageid in data)
@@ -809,15 +852,19 @@ function get_list(type, title, callback, namespace) {
 //const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== 'list')
 get_list.default_parameter = 'list';
 
-// backlinks: 連結到 title 的頁面
 // [[Special:Whatlinkshere]]
 // https://zh.wikipedia.org/wiki/Help:%E9%93%BE%E5%85%A5%E9%A1%B5%E9%9D%A2
 get_list.type = {
 	// 'type name' : 'prefix' (parameter : 'list')
+	// backlinks: 取得連結到 [[title]] 的頁面。
 	backlinks : 'bl',
+	// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
 	imageusage : 'iu',
 	// 'type name' : [ 'prefix', 'parameter' ]
+	// linkshere: 取得連結到 [[title]] 的頁面。
 	linkshere : ['lh', 'prop' ],
+	// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
+	// 基本上同 imageusage。但可一次處理多個標題。
 	fileusage : ['fu', 'prop' ]
 };
 
@@ -924,7 +971,7 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
 
 //---------------------------------------------------------------------//
 
-
+// 編輯頁面。一次處理一個標題。
 // ({String|Array}title 頁面標題, {String|Function}頁面內容, {Object}“csrf”令牌, {Object}options, {Function}callback, {String}timestamp)
 // {String}text or {Function}text(content, title)
 // {String}title or [ {String}API_URL, {String}title ]
@@ -932,23 +979,31 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
 wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	if (typeof text === 'function') {
 		library_namespace.debug('先取得內容再 edit [' + wiki_API.title_of(title) + ']。', 1, 'wiki_API.edit');
-		wiki_API.page(title, function(page_data) {
+		return wiki_API.page(title, function(page_data) {
 			if (wiki_API.edit.denied(page_data, options.bot_id, options.action)) {
 				library_namespace.warn('wiki_API.edit: Denied to edit [' + page_data.title
 						+ ']');
 				callback(page_data.title, 'denied');
-			} else if (text = text(page_content(page_data), page_data.title))
-				wiki_API.edit(page_data, text, token, options, callback);
-			else {
-				library_namespace.warn('wiki_API.edit: Nothing return for [' + page_data.title
-						+ ']');
-				callback(page_data.title, '內容被清空');
-			}
+			} else
+				wiki_API.edit(page_data, text(page_content(page_data), page_data.title), token, options, callback);
 		});
-		return;
 	}
 
-	var action = 'edit';
+	var action;
+	// 基本檢測。
+	if (text === wiki_API.edit.cancel)
+		action = [ '放棄編輯頁面', '放棄編輯頁面' ];
+	else if (!text)
+		// 內容被清空
+		action = [ 'empty', '未設定編輯內容' ];
+
+	if (action) {
+		title = wiki_API.title_of(title);
+		library_namespace.warn('wiki_API.edit: ' + action[1] + ' [' + title + ']');
+		return callback(title, action[0]);
+	}
+
+	action = 'edit';
 	// 處理 [ {String}API_URL, {String}title ]
 	if (Array.isArray(title))
 		action = [ title[0], action ], title = title[1];
@@ -986,6 +1041,9 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 			callback(wiki_API.title_of(title), error, data);
 	}, options);
 };
+
+// 放棄編輯頁面用。
+wiki_API.edit.cancel = library_namespace.null_Object();
 
 // 處理編輯衝突
 // warning: will modify options!
