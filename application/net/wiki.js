@@ -3,7 +3,7 @@
  * @name	CeL function for Wikipedia / 維基百科
  * @fileoverview
  * 本檔案包含了 Wikipedia / 維基百科 用的 functions。
- * @since 2015/1/1	
+ * @since 2015/1/1
  * @example <code>
 
 // TODO: 使用魔術字{{noexternallanglinks}}禁止條目使用維基數據的連結。
@@ -108,7 +108,8 @@ function wiki_API(name, password, API_URL) {
 	this.actions = [];
 
 	// setup session.
-	this.set_URL(API_URL);
+	//this.set_URL(API_URL);
+	this.API_URL = wiki_API.api_URL(API_URL);
 }
 
 
@@ -125,8 +126,8 @@ wiki_API.title_of = function(page_data) {
 function page_content(page_data) {
 	return page_content.is_page_data(page_data) ?
 	//
-	(page_data = page_content.has_content(page_data)) && page_data['*']
-			: page_data;
+	(page_data = page_content.has_content(page_data)) && page_data['*'] || undefined
+			: String(page_data);
 }
 // return pageid
 page_content.is_page_data = function(page_data) {
@@ -149,29 +150,39 @@ wiki_API.prototype.toString = function(type) {
 
 wiki_API.prototype.next = function() {
 	if (!(this.running = 0 < this.actions.length)) {
-		library_namespace.debug('Done.', 2, 'wiki_API.prototype.next');
+		library_namespace.debug('Empty queue.', 2, 'wiki_API.prototype.next');
 		return;
 	}
 
 	library_namespace.debug('剩餘 ' + this.actions.length + ' action(s)', 2, 'wiki_API.prototype.next');
+	if (library_namespace.is_debug(3))
+		library_namespace.show_value(this.actions.slice());
 	var _this = this, next = this.actions.shift();
-	library_namespace.debug('處理 [' + next + ']', 2, 'wiki_API.prototype.next');
+	library_namespace.debug('處理 ' + (this.token.lgname ? this.token.lgname + ' ' : '') + '[' + next + ']', 2, 'wiki_API.prototype.next');
 	switch (next[0]) {
 	case 'page':
-		if (page_content.is_page_data(next[1])) {
+		// this.page(page data, callback) → 採用所輸入之 page data 作為 this.last_page。
+		if (page_content.is_page_data(next[1]) && page_content.has_content(next[1])) {
+			library_namespace.debug('採用所輸入之 [' + next[1].title + '] 作為 this.last_page。', 2, 'wiki_API.prototype.next');
 			this.last_page = next[1];
+			if (typeof next[2] === 'function')
+				// next[1] : callback
+				next[2].call(this, next[1]);
 			this.next();
-		} if (typeof next[1] === 'function') {
-			next[1](this.last_page, page_content(this.last_page));
+		} else if (typeof next[1] === 'function') {
+			// this.page(callback): callback(last_page)
+			// next[1] : callback
+			next[1].call(this, this.last_page);
 			this.next();
 		} else
+			// this.page(title, callback)
 			// next[1] : title
 			// [ {String}API_URL, {String}title ]
 			wiki_API.page([ this.API_URL, next[1] ], function(page_data) {
 				_this.last_page = Array.isArray(page_data) ? page_data[0] : page_data;
 				// next[2] : callback
 				if (typeof next[2] === 'function')
-					next[2](page_data);
+					next[2].call(_this, page_data);
 				_this.next();
 			});
 		break;
@@ -190,7 +201,7 @@ wiki_API.prototype.next = function() {
 
 			if (typeof next[2] === 'function')
 				// next[2] : callback
-				next[2](title, titles, pages);
+				next[2].call(_this, title, titles, pages);
 			else if (next[2] && next[2].each)
 				// next[2] : 當作 work，處理積存工作。
 				_this.work(next[2]);
@@ -204,10 +215,16 @@ wiki_API.prototype.next = function() {
 	case 'edit':
 		if (!this.last_page) {
 			library_namespace.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first!');
+			// next[3] : callback
+			if (typeof next[3] === 'function')
+				next[3].call(_this, title, 'no page');
 			this.next();
 		} else if (wiki_API.edit.denied(this.last_page, this.token.lgname, next[2] && next[2].action)) {
 			// 採用 this.last_page 的方法，在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 			library_namespace.warn('wiki_API.prototype.next: Denied to edit [' + this.last_page.title + ']');
+			// next[3] : callback
+			if (typeof next[3] === 'function')
+				next[3].call(_this, title, 'denied');
 			this.next();
 		} else
 			wiki_API.edit([ this.API_URL, this.last_page ],
@@ -217,7 +234,7 @@ wiki_API.prototype.next = function() {
 			this.token, next[2], function(title, error, result) {
 				// next[3] : callback
 				if (typeof next[3] === 'function')
-					next[3](title, error, result);
+					next[3].call(_this, title, error, result);
 				_this.next();
 			});
 		break;
@@ -232,7 +249,7 @@ wiki_API.prototype.next = function() {
 		// 結束
 		wiki_API.logout(function() {
 			if (typeof next[1] === 'function')
-				next[1]();
+				next[1].call(_this);
 			_this.next();
 		});
 		break;
@@ -315,7 +332,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	each[1] = Object.assign({
 		// Robot 運作
-		summary : 'Robot: ' + (config.summary ? ': ' + config.summary : ''),
+		summary : 'Robot' + (config.summary ? ': ' + config.summary : ''),
 		nocreate : 1,
 		minor : 1,
 		bot : 1
@@ -323,7 +340,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	if (!each[2])
 		each[2] = function(title, error, result) {
-			if (!error) {
+			if (error)
+				error = ' 結束: ' + error;
+			else {
 				done++;
 				if (result.edit.newrevid)
 					error = ' [[Special:Diff/' + result.edit.newrevid + '|完成]]';
@@ -332,8 +351,8 @@ wiki_API.prototype.work = function(config, pages, titles) {
 					library_namespace.err('無 result.edit.newrevid');
 					error = '完成';
 				}
-			} else
-				error = ' 結束: ' + error;
+			}
+				
 			messages.push('* [[' + title + ']]: 費時 ' + messages.last.age(new Date)
 					+ '，' + (messages.last = new Date).toISOString() + error);
 		};
@@ -354,61 +373,70 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	if (Array.isArray(pages) && Array.isArray(titles) && pages.length !== titles.length)
 		library_namespace.warn('wiki_API.work: The length of pages and titles are different!');
 
-	// 一次先取得所有 revisions (page content)。
+	library_namespace.debug('wiki_API.work: 設定一次先取得所有 revisions (page content)。', 2);
 	this.page(pages || titles, function(data) {
-		pages = data;
-		messages.push('* 費時 ' + messages.last.age(new Date) + ' 以取得 ' + pages.length + ' 頁面。');
+		if (data.length !== pages.length)
+			library_namespace.warn('wiki_API.work: query 所得之 length ' + data.length + ' !== pages.length ' + pages.length + ' !');
+		pages = '* 首先費時 ' + messages.last.age(new Date) + ' 以取得 ' + data.length + ' 頁面內容。';
 		messages.last = new Date;
-	});
+		messages.push(pages);
+		library_namespace.debug(pages, 2, wiki_API.work);
+		library_namespace.show_value(data, 'pages');
+		pages = data;
 
-	if (typeof config.first === 'function')
-		config.first(messages, titles, pages);
+		if (typeof config.first === 'function')
+			config.first(messages, titles, pages);
 
-	library_namespace.debug('wiki_API.work: for each page: 主要機制是把工作全部推入 queue。', 2);
-	pages.forEach(function(page) {
-		this.page(page).edit(function(content, title) {
-			library_namespace.info('wiki_API.work: edit [[' + page.title + ']]');
-			return each[0](content, title, messages, page);
-		}, each[1], each[2]);
-	}, this);
+		library_namespace.debug('wiki_API.work: for each page: 主要機制是把工作全部推入 queue。', 2);
+		pages.forEach(function(page) {
+			if (library_namespace.is_debug(2)
+				// .show_value() @ interact.DOM, application.debug
+				&& library_namespace.show_value)
+				library_namespace.show_value(page, 'page');
+			this.page(page).edit(function(content, title) {
+				library_namespace.info('wiki_API.work: edit [[' + page.title + ']]');
+				return each[0](content, title, messages, page);
+			}, each[1], each[2]);
+		}, this);
 
-	this.run(function() {
-		library_namespace.debug('wiki_API.work: 收尾。');
-		if (config.summary)
-			messages.unshift(config.summary, ': 完成 ' + done + '/' + pages.length
-				+ ' 條目，總共費時 ' + messages.start.age(new Date) + '。');
+		this.run(function() {
+			library_namespace.debug('wiki_API.work: 收尾。');
+			if (config.summary)
+				messages.unshift(config.summary, ': 完成 ' + done + '/' + pages.length
+					+ ' 條目，總共費時 ' + messages.start.age(new Date) + '。');
 
-		if (typeof config.last === 'function')
-			config.last(messages, titles, pages);
+			if (typeof config.last === 'function')
+				config.last(messages, titles, pages);
 
-		var _this = this, log_to = 'log_to' in config ? config.log_to
-		// default log_to
-		: 'User:' + this.token.lgname + '/log/' + (new Date).format('%4Y%2m%2d'),
-		//
-		options = {
-			section : 'new',
-			sectiontitle : '[' + (new Date).toISOString() + '] ' + done
-					+ '/' + pages.length + ' 條目',
-			summary : 'Robot: 完成 ' + done + '/' + pages.length + ' 條目',
-			nocreate : 1
-		};
+			var log_to = 'log_to' in config ? config.log_to
+			// default log_to
+			: 'User:' + this.token.lgname + '/log/' + (new Date).format('%4Y%2m%2d'),
+			//
+			options = {
+				section : 'new',
+				sectiontitle : '[' + (new Date).toISOString() + '] ' + done
+						+ '/' + pages.length + ' 條目',
+				summary : 'Robot: 完成 ' + done + '/' + pages.length + ' 條目',
+				nocreate : 1
+			};
 
-		if (log_to)
-			this.page(log_to)
-			// log summary. Robot 運作記錄。
-			// TODO: 以表格呈現。
-			.edit(messages.join('\n'), options, function(title, error, result) {
-				if (error) {
-					library_namespace.warn('wiki_API.work: Can not write log! Try to write to ['
-					//
-					+ 'User:' + _this.token.lgname + ']');
-					library_namespace.log(messages);
-					// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
-					_this.page('User:' + _this.token.lgname).edit(messages.join('\n'), options);
-				}
-			});
-		else
-			library_namespace.log(messages.join('<br />\n'));
+			if (log_to)
+				this.page(log_to)
+				// log summary. Robot 運作記錄。
+				// TODO: 以表格呈現。
+				.edit(messages.join('\n'), options, function(title, error, result) {
+					if (error) {
+						library_namespace.warn('wiki_API.work: Can not write log to [' + log_to
+						//
+						+ ']! Try to write to [' + 'User:' + this.token.lgname + ']');
+						library_namespace.log('log:<br />\n' + messages.join('<br />\n'));
+						// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
+						this.page('User:' + this.token.lgname).edit(messages.join('\n'), options);
+					}
+				});
+			else
+				library_namespace.log('log:<br />\n' + messages.join('<br />\n'));
+		});
 	});
 };
 
@@ -481,7 +509,7 @@ wiki_API.namespace.hash = {
 // {String}action or [ {String}api URL, {String}action, {Object}other parameters ]
 wiki_API.query = function (action, callback, post_data) {
 	// 處理 action
-	library_namespace.debug(action, 2, 'wiki_API.query');
+	library_namespace.debug('action: ' + action, 2, 'wiki_API.query');
 	if (typeof action === 'string')
 		action = [ , action ];
 	else if (!Array.isArray(action))
@@ -516,21 +544,21 @@ wiki_API.query = function (action, callback, post_data) {
 		action[0] = get_URL.add_param(action[0], 'format=json&utf8=1');
 
 	// 開始處理
-	if (!post_data && wiki_API.query.allow_JSONP)
-		// 須注意：若有 error，將不會執行 callback！
+	if (!post_data && wiki_API.query.allow_JSONP) {
+		library_namespace.debug('採用 JSONP callback 的方法。須注意：若有 error，將不會執行 callback！', 2, 'wiki_API.query');
 		get_URL(action, {
 			callback : callback
 		});
-	else
+	} else
 		get_URL(action, function(XMLHttp) {
 			var response = XMLHttp.responseText;
-			library_namespace.debug(response.replace(/</g, '&lt;'), 3, 'wiki_API.query');
-	
+			library_namespace.debug('response: ' + response.replace(/</g, '&lt;'), 3, 'wiki_API.query');
+
 			if (/<html[\s>]/.test(response.slice(0, 40)))
 				response = response.between('source-javascript', '</pre>').between('>')
 				// 去掉所有 HTML tag。
 				.replace(/<[^>]+>/g, '');
-	
+
 			// '&#123;' : (")
 			if (response.indexOf('&#') !== NOT_FOUND)
 				response = library_namespace.HTML_to_Unicode(response);
@@ -544,7 +572,7 @@ wiki_API.query = function (action, callback, post_data) {
 					// exit!
 					return;
 				}
-	
+
 			// response = XMLHttp.responseXML;
 			if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
@@ -885,7 +913,7 @@ get_list.type = {
 			// assert: 不可改動 method @ IE!
 			var args = [ method ];
 			Array.prototype.push.apply(args, arguments);
-			library_namespace.debug('add action: ' + args.join('|'), 3, 'wiki_API.prototype.' + method);
+			library_namespace.debug('add action: ' + args.join('<br />\n'), 3, 'wiki_API.prototype.' + method);
 			this.actions.push(args);
 			if (!this.running)
 				this.next();
@@ -924,7 +952,7 @@ wiki_API.login = function(name, password, callback) {
 					library_namespace.debug('csrftoken: ' + session.token.csrftoken, 1, 'wiki_API.login');
 				} else {
 					library_namespace.err('wiki_API.login: Unknown response: ['
-					// 
+					//
 					+ (data && data.warnings && data.warnings.tokens && data.warnings.tokens['*'] || data) + ']');
 					if (library_namespace.is_debug()
 						// .show_value() @ interact.DOM, application.debug
@@ -944,8 +972,9 @@ wiki_API.login = function(name, password, callback) {
 	session.actions.push([ 'login' ]);
 
 	if (session.API_URL)
-		action = [ action, session.API_URL ];
+		action = [ session.API_URL, action ];
 
+	library_namespace.debug('準備登入 [' + name + ']。', 1, 'wiki_API.login');
 	wiki_API.query(action, function(data) {
 		// 確認尚未登入，才作登入動作。
 		if (data === '') {
@@ -991,7 +1020,13 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 
 	var action;
 	// 基本檢測。
-	if (text === wiki_API.edit.cancel)
+	if (Array.isArray(text) && text[0] === wiki_API.edit.cancel) {
+		action = text.slice(1);
+		library_namespace.debug('採用個別特殊訊息: ' + action, 2, 'wiki_API.edit');
+		// 可以利用 (return [ CeL.wiki.edit.cancel, 'reason' ];) 來回傳 reason。
+		if (action.length === 1)
+			action[1] = action[0];
+	} else if (text === wiki_API.edit.cancel)
 		action = [ '放棄編輯頁面', '放棄編輯頁面' ];
 	else if (!text)
 		// 內容被清空
