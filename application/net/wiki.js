@@ -107,9 +107,12 @@ function wiki_API(name, password, API_URL) {
 	// action queue
 	this.actions = [];
 
+	this.next_mark = library_namespace.null_Object();
+
 	// setup session.
 	//this.set_URL(API_URL);
-	this.API_URL = wiki_API.api_URL(API_URL);
+	if (API_URL)
+		this.API_URL = wiki_API.api_URL(API_URL);
 }
 
 
@@ -119,6 +122,16 @@ wiki_API.title_of = function(page_data) {
 	if (Array.isArray(page_data))
 		page_data = page_data[1];
 	return page_data.title || page_data;
+};
+
+
+wiki_API.prototype.show_next = typeof JSON === 'object' && JSON.stringify ? function() {
+	return JSON.stringify(this.next_mark);
+} : function() {
+	var line = [];
+	for (var name in this.next_mark)
+		line.push(name + ':"' + this.next_mark[name] + '"');
+	return '{' + line.join(',') + '}';
 };
 
 
@@ -198,6 +211,12 @@ wiki_API.prototype.next = function() {
 			_this.last_titles = titles;
 			// [ page_data ]
 			_this.last_pages = pages;
+			if (library_namespace.is_Object(pages.next)) {
+				// pages.next: 例如 {backlinks:{blcontinue:'[0|12]'}}
+				for ( var type in pages.next)
+					Object.assign(_this.next_mark, pages.next[type]);
+				library_namespace.debug('next: ' + _this.show_next());
+			}
 
 			if (typeof next[2] === 'function')
 				// next[2] : callback
@@ -209,7 +228,7 @@ wiki_API.prototype.next = function() {
 			_this.next();
 		},
 		// next[3] : options
-		next[3]);
+		Object.assign(library_namespace.null_Object(), this.next_mark, next[3]));
 		break;
 
 	case 'edit':
@@ -385,7 +404,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		pages = data;
 
 		if (typeof config.first === 'function')
-			config.first(messages, titles, pages);
+			config.first.call(this, messages, titles, pages);
 
 		library_namespace.debug('wiki_API.work: for each page: 主要機制是把工作全部推入 queue。', 2);
 		pages.forEach(function(page) {
@@ -406,7 +425,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 					+ ' 條目，總共費時 ' + messages.start.age(new Date) + '。');
 
 			if (typeof config.last === 'function')
-				config.last(messages, titles, pages);
+				config.last.call(this, messages, titles, pages);
 
 			var log_to = 'log_to' in config ? config.log_to
 			// default log_to
@@ -780,8 +799,17 @@ wiki_API.langlinks = function(title, callback, to_lang) {
 };
 
 wiki_API.langlinks.parse = function(langlinks, to_lang) {
-	if (Array.isArray(langlinks.langlinks))
+	if (langlinks && Array.isArray(langlinks.langlinks))
 		langlinks = langlinks.langlinks;
+
+	if (!Array.isArray(langlinks)) {
+		if (library_namespace.is_debug()) {
+			library_namespace.warn('wiki_API.langlinks.parse: No langlinks exists?'
+				+ (langlinks && langlinks.title ? ' [[' + langlinks.title + ']]' : ''));
+			library_namespace.show_value(langlinks, 'langlinks.parse');
+		}
+		return;
+	}
 
 	var langs;
 	if (to_lang) {
@@ -825,11 +853,17 @@ function get_list(type, title, callback, namespace) {
 	// 處理 [ {String}API_URL, {String}title ]
 	if (!Array.isArray(title))
 		title = [ , title ];
+
+	if (options[prefix + 'continue'])
+		library_namespace.debug('[' + title[1] + ']: next start from ' + options[prefix + 'continue']);
+
 	title[1] = 'query&' + parameter + '=' + type + '&'
 	//
 	+ (parameter === get_list.default_parameter ? prefix : '') + wiki_API.query.title_param(title[1])
 	//
 	+ (0 < options.limit ? '&' + prefix + 'limit=' + options.limit : '')
+	// next start from here.
+	+ (options[prefix + 'continue'] ? '&' + prefix + 'continue=' + options[prefix + 'continue'] : '')
 	//
 	+ ('namespace' in options ? '&' + prefix + 'namespace=' + options.namespace : '');
 	if (!title[0])
@@ -841,7 +875,14 @@ function get_list(type, title, callback, namespace) {
 			pages.push(page);
 		}
 
+		if (library_namespace.is_debug(2)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+			library_namespace.show_value(data, 'get_list:' + type);
+
 		var titles = [], pages = [];
+		if (data['query-continue'])
+			pages.next = data['query-continue'];
 		if (page_content.is_page_data(title))
 			title = title.title;
 
