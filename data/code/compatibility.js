@@ -46,27 +46,17 @@ NOT_FOUND = ''.indexOf('1');
 
 
 /*
- * In Edition 5, the following new properties are defined on built-in objects
- * that exist in Edition 3: Object.getPrototypeOf,
- * Object.getOwnPropertyDescriptor, Object.getOwnPropertyNames, Object.create,
- * Object.defineProperty, Object.defineProperties, Object.seal, Object.freeze,
- * Object.preventExtensions, Object.isSealed, Object.isFrozen,
- * Object.isExtensible, Object.keys, Function.prototype.bind,
- * Array.prototype.indexOf, Array.prototype.lastIndexOf, Array.prototype.every,
- * Array.prototype.some, Array.prototype.forEach, Array.prototype.map,
- * Array.prototype.filter, Array.prototype.reduce, Array.prototype.reduceRight,
- * Date.now, Date.prototype.toISOString,
- * Date.prototype.toJSON.
- */
+ * TODO:
+Object.getOwnPropertyDescriptor
+Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性
+Object.getPrototypeof() 返回給定對象的原型
+Object.create
+Array.prototype.reduce
+Array.prototype.reduceRight
 
-/*
 http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K875.aspx
 8進制數字表示被禁止， 010 代表 10 而不是 8
 
-Array 對象內置了一些標準函數，如 indexOf(), map(), filter(), reduce()
-# Object.keys() 會列出對象中所有可以枚舉的屬性
-# Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性
-# Object.getPrototypeof() 返回給定對象的原型
 
 http://jquerymobile.com/gbs/
 */
@@ -99,7 +89,7 @@ if (full_version)
 /**
  * 版本檢查.
  * 
- * @param version 最低 version
+ * @param {Number}version 最低 version
  */
 function check_version(version) {
 	if (!library_namespace.is_digits(version) || version < 5)
@@ -248,7 +238,7 @@ function hasOwnProperty(key) {
 }
 
 
-// Object.keys(): get Object keys
+// Object.keys(): get Object keys, 列出對象中所有可以枚舉的屬性
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
 // 可用來防止 .prototype 帶來之 properties。e.g., @ IE
 function keys(object) {
@@ -327,38 +317,59 @@ set_method(Array, {
 
 
 set_method(Array.prototype, {
+	// Array.prototype.includes()
 	includes : includes,
+	// Array.prototype.findIndex()
+	find : function find(predicate, thisArg) {
+		for (var index = 0, length = this.length; index < length; index++)
+			if (thisArg ? predicate.call(thisArg, this[index], index, this)
+			// 不採用 .call() 以加速執行。
+			: predicate(this[index], index, this))
+				return this[index];
+		//return undefined;
+	},
+	// Array.prototype.findIndex()
+	findIndex : function findIndex(predicate, thisArg) {
+		for (var index = 0, length = this.length; index < length; index++)
+			if (thisArg ? predicate.call(thisArg, this[index], index, this)
+			// 不採用 .call() 以加速執行。
+			: predicate(this[index], index, this))
+				return index;
+		return NOT_FOUND;
+	},
+	// Array.prototype.some()
 	some : function some(callback, thisArg) {
-		if (!thisArg)
-			thisArg = this;
-		var index = 0, length = this.length;
-		for (; index < length; index++)
-			if (callback.call(thisArg, this[index], index, this))
+		for (var index = 0, length = this.length; index < length; index++)
+			if (thisArg ? callback.call(thisArg, this[index], index, this)
+			// 不採用 .call() 以加速執行。
+			: callback(this[index], index, this))
 				return true;
 		return false;
 	},
+	// Array.prototype.every()
 	every : function every(callback, thisArg) {
-		if (!thisArg)
-			thisArg = this;
-		var index = 0, length = this.length;
-		for (; index < length; index++)
-			if (!callback.call(thisArg, this[index], index, this))
+		for (var index = 0, length = this.length; index < length; index++)
+			if (!(thisArg ? callback.call(thisArg, this[index], index, this)
+			// 不採用 .call() 以加速執行。
+			: callback(this[index], index, this)))
 				return false;
 		return true;
 	},
+	// Array.prototype.map()
 	map : function map(callback, thisArg) {
 		var result = [];
 		this.forEach(function() {
 			result.push(callback.apply(this, arguments));
-		}, thisArg || this);
+		}, thisArg);
 		return result;
 	},
+	// Array.prototype.filter()
 	filter : function map(callback, thisArg) {
 		var result = [];
 		this.forEach(function(value) {
 			if (callback.apply(this, arguments))
 				result.push(value);
-		}, thisArg || this);
+		}, thisArg);
 		return result;
 	},
 	//Array.prototype.indexOf ( searchElement [ , fromIndex ] )
@@ -388,6 +399,7 @@ set_method(Array.prototype, {
 				return fromIndex;
 		return NOT_FOUND;
 	},
+	// Array.prototype.fill()
 	fill : function fill(value, start, end) {
 		// Array.prototype.fill() 只會作用於 0~原先的 length 範圍內！
 		if (isNaN(end) || this.length < (end |= 0))
@@ -402,6 +414,7 @@ set_method(Array.prototype, {
 	 * 對於舊版沒有 Array.push() 等函數時之判別及處置。
 	 * 不能用t=this.valueOf(); .. this.push(t);
 	 */
+	// Array.prototype.push()
 	push : function push() {
 		var i = 0, l = arguments.length, w = this.length;
 		//	在 FF3 僅用 this[this.length]=o; 效率略好於 Array.push()，但 Chrome 6 相反。
@@ -409,6 +422,7 @@ set_method(Array.prototype, {
 			this[w++] = arguments[i];
 		return w;
 	},
+	// Array.prototype.pop()
 	pop : function pop() {
 		// 不能用 return this[--this.length];
 		var l = this.length, v;
@@ -418,12 +432,14 @@ set_method(Array.prototype, {
 		}
 		return v;
 	},
+	// Array.prototype.shift()
 	shift : function shift() {
 		var v = this[0];
 		//	ECMAScript 不允許設定 this=
 		this.value = this.slice(1);
 		return v;
 	},
+	// Array.prototype.unshift()
 	unshift : function unshift() {
 		// ECMAScript 不允許設定 this =
 		this.value = Array_slice.call(arguments).concat(this);
@@ -830,7 +846,11 @@ set_method(Date, {
 });
 
 set_method(Date.prototype, {
-	// Date.prototype.toISOString
+	// Date.prototype.toJSON()
+	toJSON : function toJSON() {
+		return this.toISOString();
+	},
+	// Date.prototype.toISOString()
 	toISOString : toISOString
 });
 

@@ -6,8 +6,6 @@
  * @since 2015/1/1
  * @example <code>
 
-// TODO: 使用魔術字{{noexternallanglinks}}禁止條目使用維基數據的連結。
-// TODO: 最大延遲參數 https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
 
 // [[維基百科:機器人]]
 // https://en.wikipedia.org/w/api.php
@@ -603,6 +601,7 @@ wiki_API.query = function (action, callback, post_data) {
 };
 
 // 使用5秒的最大延遲參數。
+// https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
 wiki_API.query.lag = 5000;
 
 // 對於可以不用 XMLHttp 的，直接採 JSONP callback 法。
