@@ -364,8 +364,7 @@ if (false) {
 	&& typeof process === 'object' && typeof process.versions === 'object' && process.versions.node
 	//
 	&& typeof console === 'object' && typeof console.log === 'function') {
-		_.platform = 'node ' + process.versions.node;
-		//_.is_node = process.versions.node;
+		_.platform = 'node ' + (_.is_node = process.versions.node);
 
 		// TODO: https://github.com/driverdan/node-XMLHttpRequest/blob/master/lib/XMLHttpRequest.js
 		var node_fs = _.new_XMLHttp = _.new_XMLHttp.readFileSync;
@@ -386,28 +385,28 @@ if (false) {
 				l = data.length;
 				tmp = [];
 				if (data[0] === 255 && data[1] === 254) {
-					//_.debug(path + ': UTF-16LE');
+					_.debug(path + ': UTF-16LE', 4);
 					// pass byte order mark (BOM), the first 2 bytes.
 					i = 2;
 					while (i < l)
 						tmp.push(String.fromCharCode(data[i++] + 256 * data[i++]));
 				} else if (data[0] === 254 && data[1] === 255) {
-					//_.debug(path + ': UTF-16BE');
+					_.debug(path + ': UTF-16BE', 4);
 					// pass byte order mark (BOM), the first 2 bytes.
 					i = 2;
 					while (i < l)
-						tmp.push(String.fromCharCode(data[i++] * 256 + data[i++]));
+						tmp.push(String.fromCharCode(256 * data[i++] + data[i++]));
 				} else if (!encoding && data[0] === 239 && data[1] === 187 && data[2] === 191) {
 					// 或許是存成了 UTF-8？
 					// https://en.wikipedia.org/wiki/Byte_order_mark#Representations_of_byte_order_marks_by_encoding
-					_.debug('get_file: Treat file as UTF-8: [' + path + ']');
+					_.debug('get_file: Treat file as UTF-8: [' + path + ']', 2);
 					tmp = null;
 					// http://nodejs.org/api/fs.html#fs_fs_readfilesync_filename_options
 					data = node_fs(path, 'utf8');
 				} else
 					try {
 						i = node_fs(path, 'utf8');
-						_.debug('get_file: Treat file as UTF-8: [' + path + ']');
+						_.debug('get_file: Treat file as UTF-8: [' + path + ']', 2);
 						tmp = null;
 						data = i;
 					} catch (e) {

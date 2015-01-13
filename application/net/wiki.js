@@ -468,7 +468,9 @@ wiki_API.api_URL = function(project) {
 // default api URL
 // see also: application.locale
 wiki_API.API_URL = wiki_API.api_URL(
+	//
 	(library_namespace.is_WWW() && (navigator.userLanguage || navigator.language) || 'zh')
+	//
 	.toLowerCase().replace(/-.+$/, ''));
 
 // 列舉型別 (enumeration)

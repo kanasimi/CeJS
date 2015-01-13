@@ -32,7 +32,8 @@ _// JSDT:_module_
 
 
 
-//	XMLHttp set	ajax通信処理ライブラリ	==================
+//---------------------------------------------------------------------//
+//	XMLHttp set	ajax通信処理ライブラリ	==================
 
 
 
@@ -98,7 +99,7 @@ function get_page(page_url, encoding, POST_text) {
 	}
 }
 
-//---------------------------------------------------------------------//
+//---------------------------------------------------------------------//
 
 if (false)
 	// default arguments
@@ -135,7 +136,17 @@ if (false)
 		}
 	};
 
-var document_head = library_namespace.is_WWW(true) && (document.head || document.getElementsByTagName('head')[0]);
+
+//	XMLHttp.readyState 所有可能的值如下：
+//	0 還沒開始
+//	1 讀取中 Sending Data
+//	2 已讀取 Data Sent
+//	3 資訊交換中 interactive: getting data
+//	4 一切完成 Completed
+var readyState_done = 4;
+//
+document_head = library_namespace.is_WWW(true) && (document.head || document.getElementsByTagName('head')[0]);
+
 
 
 
@@ -209,7 +220,12 @@ function get_URL(URL, onload, encoding, post_data) {
 	if (post_data)
 		post_data = get_URL.param_to_String(post_data);
 
-	if (options.async === false && (onload || options.onchange)
+	if (!onload && typeof options.onchange === 'function')
+		onload = function() {
+			options.onchange(readyState_done, XMLHttp);
+		};
+
+	if (options.async === false && onload
 			|| typeof onload !== 'function')
 		onload = false;
 
@@ -258,16 +274,10 @@ function get_URL(URL, onload, encoding, post_data) {
 
 		if (onload)
 			XMLHttp.onreadystatechange = function() {
-				//	XMLHttp.readyState 所有可能的值如下：
-				//	0 還沒開始
-				//	1 讀取中 Sending Data
-				//	2 已讀取 Data Sent
-				//	3 資訊交換中 interactive: getting data
-				//	4 一切完成 Completed
-				if (XMLHttp.readyState === 4)
+				if (XMLHttp.readyState === readyState_done)
 					return onload(XMLHttp);
 
-				if (0 < XMLHttp.readyState && XMLHttp.readyState < 4) {
+				if (0 < XMLHttp.readyState && XMLHttp.readyState < readyState_done) {
 					if (typeof options.onchange === 'function')
 						options.onchange(XMLHttp.readyState, XMLHttp);
 				} else if (typeof options.onfail === 'function')
@@ -347,7 +357,7 @@ function get_URLs() {
 }
 
 
-//---------------------------------------------------------------------//
+//---------------------------------------------------------------------//
 
 /*
 
@@ -540,8 +550,130 @@ deprecated_get_URL.clean=function(i,force){
 };
 
 
-//	↑XMLHttp set	==================
+//	↑XMLHttp set	==================
+//---------------------------------------------------------------------//
 
+
+var node_url, node_http, node_https;
+
+
+/**
+ * 讀取 URL via node http/https。<br />
+ * assert: arguments 必須與 get_URL() 相容！
+ * 
+ * @param {String|Object}URL
+ *            請求目的URL or options
+ * @param {Function}[onload]
+ *            callback when successful loaded
+ * @param {String}[encoding]
+ *            encoding. e.g., 'UTF-8', big5, euc-jp,..
+ * @param {String|Object}[post_data]
+ *            text data to send when method is POST
+ * 
+ * @see
+ * http://nodejs.org/api/http.html#http_http_request_options_callback
+ * http://nodejs.org/api/https.html#https_https_request_options_callback
+ */
+function get_URL_node(URL, onload, encoding, post_data) {
+	// 前導作業。
+	if (library_namespace.is_Object(encoding)) {
+		post_data = encoding;
+		encoding = null;
+	}
+	var options;
+	if (library_namespace.is_Object(URL) && URL.URL) {
+		onload = URL.onload || onload;
+		post_data = URL.post || post_data;
+		encoding = URL.encoding || encoding;
+		URL = (options = URL).URL;
+	} else
+		options = library_namespace.null_Object();
+
+	// https://developer.mozilla.org/en-US/docs/Web/API/URL
+	// [ origin + pathname, search, hash ]
+	// hrer = [].join('')
+	if (Array.isArray(URL))
+		URL = get_URL.add_param(URL[0], URL[1], URL[2]);
+
+	if (options.search || options.hash)
+		URL = get_URL.add_param(URL, options.search, options.hash);
+
+	library_namespace.debug('URL: (' + (typeof URL) + ') ' + URL, 3, 'get_URL_node');
+
+	if (typeof onload === 'object')
+		// use JSONP.
+		// need callback.
+		for (var callback_param in onload)
+			if (callback_param && typeof onload[callback_param] === 'function') {
+				// 模擬 callback
+				URL += '&' + callback_param + '=cb';
+				onload = onload[callback_param];
+				break;
+			}
+
+	if (post_data)
+		post_data = get_URL.param_to_String(post_data);
+
+	if (!onload && typeof options.onchange === 'function')
+		onload = function() {
+			options.onchange(readyState_done);
+		};
+
+	if (options.async === false && onload
+			|| typeof onload !== 'function')
+		onload = false;
+
+	var request, _URL = node_url.parse(URL),
+	//
+	_onload = function(result) {
+		//console.log('STATUS: ' + res.statusCode);
+		//console.log('HEADERS: ' + JSON.stringify(res.headers));
+		// 未設定 encoding 的話，將回傳 Buffer。
+		result.setEncoding(encoding || 'utf8');
+		// listener must be a function
+		if (typeof onload === 'function')
+			result.on('data', function(data) {
+				// 模擬 XMLHttp。
+				onload({
+					responseText : data
+				});
+			});
+		else {
+			library_namespace.warn('get_URL_node: get [' + URL + '], but no listener!');
+			//console.log(result);
+		}
+	};
+	if (post_data)
+		_URL.method = 'POST';
+
+	if (_URL.protocol === 'https:')
+		request = node_https.request(_URL, _onload);
+	else
+		request = node_http.request(_URL, _onload);
+
+	if (typeof options.onfail === 'function')
+		request.on('error', options.onfail);
+
+	if (post_data)
+		request.write(post_data);
+
+	request.end();
+}
+
+
+if (library_namespace.is_node) {
+	node_url = require('url');
+	node_http = require('http');
+	node_https = require('https');
+
+	// copy methods
+	get_URL_node.param_to_String = get_URL.param_to_String;
+	get_URL_node.add_param = get_URL.add_param;
+	_.get_URL = get_URL_node;
+}
+
+
+//---------------------------------------------------------------------//
 
 return (
 	_// JSDT:_module_

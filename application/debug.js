@@ -336,7 +336,7 @@ function show_value_children(value, filter) {
 
 var has_native_log = typeof console === 'object' && typeof console.log === 'function'
 //
-&& /^function [a-z]+\(\)\s*{\s*\[native code]\s*}$/.test(Function.prototype.toString.call(console.log));
+&& /^function [a-z]*\(\)\s*{\s*\[native code]\s*}$/.test(Function.prototype.toString.call(console.log));
 
 /**
  * debug 用: Show contents of object/class.<br />
