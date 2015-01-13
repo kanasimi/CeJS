@@ -62,7 +62,7 @@ try {
 	_configuration.stderr(e);
 }
 
-if (0 && typeof CeL === 'function') {
+if (false && typeof CeL === 'function') {
 	CeL.set_debug();
 
 	CeL.run('data.math', function() {

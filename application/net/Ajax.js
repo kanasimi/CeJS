@@ -179,7 +179,7 @@ function get_URL(URL, onload, encoding, post_data) {
 	if (options.search || options.hash)
 		URL = get_URL.add_param(URL, options.search, options.hash);
 
-	library_namespace.debug(URL, 3, 'get_URL');
+	library_namespace.debug('URL: (' + (typeof URL) + ') ' + URL, 3, 'get_URL');
 
 	if (typeof onload === 'object')
 		// use JSONP. insert page.

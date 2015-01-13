@@ -488,6 +488,7 @@ if (typeof CeL === 'function')
 			參照_PATTERN = /^(?:(.*?)=)?:(.+)$/,
 
 			// 可指示尚存疑/爭議資料，例如傳說時代之資料。
+			// https://en.wikipedia.org/wiki/Circa
 			準確程度_ENUM = {
 				疑 : '尚存疑',
 				// 為傳說時代之資料

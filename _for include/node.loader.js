@@ -27,11 +27,12 @@ try {
 	(function() {
 
 		var script_code = [], fs = require('fs'),
-		// http://nodejs.org/docs/latest/api/fs.html#fs.readFileSync
+		// http://nodejs.org/api/fs.html#fs.readFileSync
 		main_lib_binary = fs
 				.readFileSync(/^[\\\/]/.test(CeL.library_path) ? CeL.library_path
 						: __filename.replace(/[^\\\/]+$/, CeL.library_path)
-				// encoding can be 'utf8', 'ascii', or 'base64'.
+				// The encoding can be 'utf8', 'ascii', or 'base64'.
+				// http://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
 				// , 'binary'
 				),
 		// pass the first 2 bytes (BOM)
@@ -50,7 +51,7 @@ try {
 
 		CeL.library_code = script_code.join('');
 
-		if (0) {
+		if (false) {
 			console.log(script_code.length);
 			// console.log(script_code.slice(0, 30));
 			console.log('[' + script_code.slice(0, 300)
@@ -63,7 +64,7 @@ try {
 	})();
 
 	eval(CeL.library_code);
-	if (0) {
+	if (false) {
 		console.log('CeL === global.CeL: ' + (CeL === global.CeL));
 		console.log('typeof CeL: ' + typeof CeL);
 		console.log('CeL: ' + CeL);
@@ -79,10 +80,10 @@ try {
 
 // CeL.run('application.platform.nodejs', 'data.CSV');
 
-if (0 && typeof CeL === 'function') {
+if (false && typeof CeL === 'function') {
 	CeL.set_debug();
 
-	if (0)
+	if (false)
 		console.log(CeL.get_file('data.js').slice(0, 300).replace(
 				/[\u0100-\uffff]/g, '.'));
 

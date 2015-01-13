@@ -244,8 +244,8 @@ check_MathML.check = function(no_remove) {
 		value : this.offsetHeight > this.firstChild.offsetHeight + 3
 	});
 
-	if (_.support_MathML)
-		library_namespace.debug('The browser supported MathML.');
+	if (!_.support_MathML)
+		library_namespace.debug('The browser does not support MathML. 您的瀏覽器不支援 MathML，或是 MathML 功能已被關閉。');
 	if (no_remove !== true) {
 		// library_namespace.remove_node(this);
 		document.body.removeChild(this);
@@ -530,7 +530,8 @@ convert_MathML.handler = {
 			operand_1 = {
 				mfrac : [ operand_1, operand_2 ]
 			};
-			if (operator === '⁄')
+			// 除了這些外，皆當作分數，上下表示。
+			if (operator === '⁄' || operator === '∕')
 				operand_1.bevelled = true;
 			return operand_1;
 
@@ -717,7 +718,8 @@ convert_MathML.parse = function(text, queue) {
 	}
 
 	// 前期處理。
-	text = text.replace(/!=/g, '≠').replace(/>=/g, '≥').replace(/<=/g, '≤');
+	// TODO: °º⁺⁻⁼ ⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾ ±♥´ ₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ ₐₑₒₓₔ½ ⅓⅔ ¼¾ ⅕⅖⅗⅘ ⅙⅚ ⅛⅜⅝⅞
+	text = text.replace(/!=/g, '≠').replace(/>=/g, '≥').replace(/<=/g, '≤').replace(/⅟/g, '1⁄');
 
 	// TODO: &InvisibleTimes; 用於表示乘法運算中被省略的乘號。
 	// https://zh.wikipedia.org/wiki/%E6%95%B0%E5%AD%A6%E7%BD%AE%E6%A0%87%E8%AF%AD%E8%A8%80#Presentation_MathML
@@ -741,8 +743,8 @@ convert_MathML.parse = function(text, queue) {
 	return text;
 };
 
-// (?:[+\-±]?\d+(?:\.\d+)?[%°]?|pi|PI|Pi|[eiKπδφγλΩ∞ℵ])
-var PATTERN_numeric = /[+\-±]?\d+(?:\.\d+)?[%°∘]?/;
+// (?:[+\-±]?\d+(?:\.\d+)?[°∘%％‰]?|pi|PI|Pi|[eiKπδφγλΩ∞ℵ])
+var PATTERN_numeric = /[+\-±]?\d+(?:\.\d+)?[°∘%％‰]?/;
 // [ , 純數, 識別元 ]
 convert_MathML.PATTERN_numeric_prefix = new RegExp('^(' + PATTERN_numeric.source + ')([^\d].*)?$' + '$');
 convert_MathML.is_numeric_prefix = function(expression) {

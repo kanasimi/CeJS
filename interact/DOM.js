@@ -862,7 +862,7 @@ add_node = function add_node(node, child_list) {
 
 // IE 8 中，使用 (element[p] = text) 無效果，需要使用 (document.title) 設定。
 // 並且 document.getElementsByTagName('title')[0].dataset 亦無法取得 dataset。
-var need_check_title = navigator.userAgent.match(/MSIE (\d+)/);
+var need_check_title = library_namespace.is_WWW() && navigator.userAgent.match(/MSIE (\d+)/);
 set_text.need_check_title = need_check_title = need_check_title
 		&& need_check_title[1] < 9;
 
@@ -1784,7 +1784,14 @@ new_node.handler = [
 				if (n.indexOf('<') === -1) {
 					if (t === 'option' && !l.value)
 						l.value = n;
-					l.appendChild(document.createTextNode(n));
+					try {
+						l.appendChild(document.createTextNode(n));
+					} catch (e) {
+						// e.g., <math> @ IE8: 對方法或內容存取發出非預期的呼叫。
+						// [object HTMLUnknownElement]
+						library_namespace.warn('new_node.handler[2]: error: .appendChild(document.createTextNode('+n+'))');
+						library_namespace.err(e);
+					}
 				} else {
 					// this may throw error: -2146827687 未知的執行階段錯誤
 					try {
@@ -1799,7 +1806,14 @@ new_node.handler = [
 				// for <math>
 				_.is_DOM_NODE(n)) {
 				t = l.innerHTML;
-				l.appendChild(n);
+				try {
+					l.appendChild(n);
+				} catch (e) {
+					// e.g., <math> @ IE8: 對方法或內容存取發出非預期的呼叫。
+					// [object HTMLUnknownElement]
+					library_namespace.warn('new_node.handler[2]: error: .appendChild('+n+')');
+					library_namespace.err(e);
+				}
 				/*
 				if (t === l.innerHTML)
 					library_namespace.warn('new_node.handler[2]: The addition does not change the layer!');
@@ -1810,8 +1824,8 @@ new_node.handler = [
 		}
 
 		n = null;
-
 	},
+
 	function(node, layer, p) {
 		//	將 node 插入作為 layer 之 nextSibling.
 		//	p: parent node of layer

@@ -992,7 +992,7 @@ function draw_era(hierarchy) {
 		// 真正執行繪製之 function。
 		draw_period = function(period, index) {
 			var style, unobvious,
-			//
+			// https://en.wikipedia.org/wiki/Circa
 			存疑資料 = period.準 || period.精,
 			//
 			date_options = period.精 === '年' ? draw_era.year_options

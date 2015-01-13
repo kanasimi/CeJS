@@ -359,15 +359,26 @@ if (false) {
 
 	} else if (typeof require === 'function'
 	//	for node.js
-	&& (_.new_XMLHttp = require('fs'))) {
-		_.new_XMLHttp = _.new_XMLHttp.readFileSync;
+	&& (_.new_XMLHttp = require('fs'))
+	//
+	&& typeof process === 'object' && typeof process.versions === 'object' && process.versions.node
+	//
+	&& typeof console === 'object' && typeof console.log === 'function') {
+		_.platform = 'node ' + process.versions.node;
+		//_.is_node = process.versions.node;
+
+		// TODO: https://github.com/driverdan/node-XMLHttpRequest/blob/master/lib/XMLHttpRequest.js
+		var node_fs = _.new_XMLHttp = _.new_XMLHttp.readFileSync;
+
+		// The encoding can be 'utf8', 'ascii', or 'base64'.
+		// http://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
 		_.get_file = function (path, encoding) {
 			//	for node.js
 			var data, i, l, tmp;
 			try {
-				data = _.new_XMLHttp(path, encoding);
+				data = node_fs(path, encoding);
 			} catch (e) {
-				data = _.new_XMLHttp(path);
+				data = node_fs(path);
 			}
 
 			if (typeof data !== 'string') {
@@ -386,15 +397,30 @@ if (false) {
 					i = 2;
 					while (i < l)
 						tmp.push(String.fromCharCode(data[i++] * 256 + data[i++]));
-				} else {
-					if (l > 1)
-						console.log('get_file: Unknown byte order mark (BOM): ' + data[0] + ',' + data[1]);
-					//	ascii
-					i = 0;
-					while (i < l)
-						tmp.push(String.fromCharCode(data[i++]));
-				}
-				data = tmp.join('');
+				} else if (!encoding && data[0] === 239 && data[1] === 187 && data[2] === 191) {
+					// 或許是存成了 UTF-8？
+					// https://en.wikipedia.org/wiki/Byte_order_mark#Representations_of_byte_order_marks_by_encoding
+					_.debug('get_file: Treat file as UTF-8: [' + path + ']');
+					tmp = null;
+					// http://nodejs.org/api/fs.html#fs_fs_readfilesync_filename_options
+					data = node_fs(path, 'utf8');
+				} else
+					try {
+						i = node_fs(path, 'utf8');
+						_.debug('get_file: Treat file as UTF-8: [' + path + ']');
+						tmp = null;
+						data = i;
+					} catch (e) {
+						//console.warn(e);
+						if (l > 1)
+							_.debug('get_file: Unknown byte order mark (BOM) of [' + path + ']: ' + data[0] + ',' + data[1]);
+						//	當作 ASCII 處理。
+						i = 0;
+						while (i < l)
+							tmp.push(String.fromCharCode(data[i++]));
+					}
+				if (tmp)
+					data = tmp.join('');
 			}
 
 			return data;
@@ -403,6 +429,7 @@ if (false) {
 	} else if (typeof _configuration === 'object'
 		//	for jslibs
 		&& typeof File === 'function') {
+		_.platform = 'jsio';
 		LoadModule('jsio');
 		_.get_file = function (path) {
 			//_configuration.stderr(path);
@@ -432,6 +459,7 @@ if (false) {
 
 	} else if (typeof Stream === 'function') {
 		//	for JSDB
+		_.platform = 'JSDB';
 		_.get_file = function (path) {
 			//_.log('get_file: ' + path);
 			try {
