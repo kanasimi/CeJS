@@ -267,7 +267,7 @@ if (typeof c == 'object') {
 _// JSDT:_module_
 .
 /**
- * 對付有時 charCodeAt 會傳回 >256 的數值。
+ * ASCII_code_at, 對付有時 charCodeAt 會傳回 >256 的數值。
  * 若確定編碼是 ASCII (char code 是 0~255) 即可使用此函數替代 charCodeAt。
  * @param text	string
  * @param position	at what position
@@ -315,7 +315,7 @@ toASCIIcode = function (text, position) {
 			t[i] = i;
 		for (i in l)
 			// sl(i+' = '+l[i]),
-			t[Math.floor(i)] = l[i];
+			t[i | 0] = l[i];
 	}
 
 	if (position < 0 && !isNaN(text))
@@ -617,7 +617,7 @@ function renew_RegExp_flag(regexp, flag) {
 	else
 		// f: [+-]~ 的情況，parse flag
 		for (i in flag_set)
-			if ((m = flag.indexOf(flag_set[i], 1) != NOT_FOUND) && a || !m
+			if ((m = flag.indexOf(flag_set[i], 1) !== NOT_FOUND) && a || !m
 					&& regexp[i])
 				F += flag_set[i];
 
@@ -740,21 +740,21 @@ function split_String_by_length_(s, l, m) {
 	var lt, lt2, gt, i = 0, c = l, t = '', I = 0;
 	while (I < s.length) {
 		// 將lt,gt定在下一label之首尾,i為下一次搜尋起點.label定義:/<.+?>/
-		if (i != NOT_FOUND)
-			if ((lt = s.indexOf('<', i)) != NOT_FOUND) {
-				if ((gt = s.indexOf('>', lt + 1)) == NOT_FOUND)
+		if (i !== NOT_FOUND)
+			if ((lt = s.indexOf('<', i)) !== NOT_FOUND) {
+				if ((gt = s.indexOf('>', lt + 1)) === NOT_FOUND)
 					i = lt = NOT_FOUND;
 				else {
 					i = gt + 1;
-					while (lt != NOT_FOUND && (lt2 = s.indexOf('<', lt + 1)) != NOT_FOUND
+					while (lt !== NOT_FOUND && (lt2 = s.indexOf('<', lt + 1)) !== NOT_FOUND
 							&& lt2 < gt)
 						lt = lt2;
 				}
 			} else
 				i = lt = NOT_FOUND;
-		if (false && s.indexOf('') != NOT_FOUND)
+		if (false && s.indexOf('') !== NOT_FOUND)
 			alert(i + ',' + lt + ',' + gt + ';' + l + ',' + c + '\n' + t);
-		if (lt == NOT_FOUND)
+		if (lt === NOT_FOUND)
 			gt = lt = s.length;
 		// 未來:考慮中英文大小，不分隔英文字。前提:'A'<'z'..或許不用
 		while (I + c <= lt) {
@@ -1271,9 +1271,9 @@ function dQuote(s, len, sp) {
 			;
 		s = s.slice(0, q + 1);
 	}
-	if (s.indexOf(q = "'") != NOT_FOUND)
+	if (s.indexOf(q = "'") !== NOT_FOUND)
 		q = '"';
-	if (s.indexOf(q) != NOT_FOUND) {
+	if (s.indexOf(q) !== NOT_FOUND) {
 		library_namespace.debug(
 		//
 		"Can't determine quotation mark, the resource may cause error.\n" + s);

@@ -38,8 +38,8 @@ _// JSDT:_module_
 var Array_slice = Array.prototype.slice,
 // cache
 set_method = library_namespace.set_method,
-// -1: 基本上與程式碼設計合一，僅表示名義，不可更改。
-NOT_FOUND = ''.indexOf('1');
+// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+NOT_FOUND = ''.indexOf('_');
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -242,14 +242,16 @@ function hasOwnProperty(key) {
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
 // 可用來防止 .prototype 帶來之 properties。e.g., @ IE
 function keys(object) {
-	var key, keys = [], prototype = {};
+	var key, keys = [], prototype;
 
 	try {
-		prototype = object.prototype || {};
+		prototype = Object_getPrototypeOf(object);
 	} catch (e) {
 	}
 
 	try {
+		if (!prototype)
+			prototype = library_namespace.null_Object();
 		for (key in object) {
 			// !hasOwnProperty(key)
 			if (!(key in prototype)
@@ -274,7 +276,7 @@ set_method(Object, {
 });
 
 //	會造成幾乎每個使用 for(.. in Object)，而不是使用 Object.keys() 的，都出現問題。
-if(false)
+if (false)
 set_method(Object.prototype, {
 	getPropertyNames : getPropertyNames,
 	hasOwnProperty : hasOwnProperty
@@ -1068,7 +1070,7 @@ function json(val, name, type) {
 			m = m[1], addE('//	function [' + m + ']'),
 			t = f.replace(r, 'function'
 					+ _f.separator);
-		if (m && t.indexOf(m) != NOT_FOUND)
+		if (m && t.indexOf(m) !== NOT_FOUND)
 			alert('function [' + m
 					+ '] 之名稱被清除掉了，這可能會產生問題！');
 		addE(t || f);
@@ -1096,7 +1098,7 @@ function json(val, name, type) {
 								: '')); // date被當作object
 				break;
 			}
-			if (('' + c).indexOf('Error') != NOT_FOUND) {
+			if (('' + c).indexOf('Error') !== NOT_FOUND) {
 				addE('new Error'
 						+ (val.number
 								|| val.description ? '('

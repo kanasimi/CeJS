@@ -315,7 +315,7 @@ get_URL.param_to_String = function(param) {
 			library_namespace.debug(key, 4, 'get_URL.param_to_String.forEach');
 			array.push(encodeURIComponent(key) + '=' + encodeURIComponent(String(param[key])));
 		});
-		library_namespace.debug(array.join('<br />'), 3, 'get_URL.param_to_String');
+		library_namespace.debug(array.length + ' param:<br />\n' + array.join('<br />\n'), 3, 'get_URL.param_to_String');
 		return array.join('&');
 	}
 
@@ -554,7 +554,23 @@ deprecated_get_URL.clean=function(i,force){
 //---------------------------------------------------------------------//
 
 
-var node_url, node_http, node_https;
+var node_url, node_http, node_https,
+// reuse the sockets.
+node_http_agent, node_https_agent;
+
+
+// 快速 merge cookie: 只檢查若沒有重複的，則直接加入。不檢查也不處理。
+function merge_cookie(agent, cookie) {
+	if (!Array.isArray(agent.last_cookie))
+		agent.last_cookie = agent.last_cookie ? [ agent.last_cookie ] : [];
+	if (!Array.isArray(cookie))
+		cookie = cookie ? [ cookie ] : [];
+	cookie.forEach(function(piece) {
+		if (!agent.last_cookie.includes(piece))
+			agent.last_cookie.push(piece);
+	});
+	return agent.last_cookie;
+}
 
 
 /**
@@ -566,13 +582,15 @@ var node_url, node_http, node_https;
  * @param {Function}[onload]
  *            callback when successful loaded
  * @param {String}[encoding]
- *            encoding. e.g., 'UTF-8', big5, euc-jp,..
+ *            encoding. e.g., 'utf8', big5, euc-jp,..
  * @param {String|Object}[post_data]
  *            text data to send when method is POST
  * 
  * @see
  * http://nodejs.org/api/http.html#http_http_request_options_callback
  * http://nodejs.org/api/https.html#https_https_request_options_callback
+ * 
+ * @since	2015/1/13 23:23:38
  */
 function get_URL_node(URL, onload, encoding, post_data) {
 	// 前導作業。
@@ -605,7 +623,7 @@ function get_URL_node(URL, onload, encoding, post_data) {
 		// need callback.
 		for (var callback_param in onload)
 			if (callback_param && typeof onload[callback_param] === 'function') {
-				// 模擬 callback
+				// 模擬 callback。
 				URL += '&' + callback_param + '=cb';
 				onload = onload[callback_param];
 				break;
@@ -625,11 +643,16 @@ function get_URL_node(URL, onload, encoding, post_data) {
 
 	var request, _URL = node_url.parse(URL),
 	//
+	agent = _URL.protocol === 'https:' ? node_https_agent : node_http_agent,
+	//
 	_onload = function(result) {
-		//console.log('STATUS: ' + res.statusCode);
-		//console.log('HEADERS: ' + JSON.stringify(res.headers));
+		library_namespace.debug('STATUS: ' + result.statusCode, 2, 'get_URL_node');
+		library_namespace.debug('HEADERS: ' + JSON.stringify(result.headers), 4, 'get_URL_node');
+		merge_cookie(agent, result.headers['set-cookie']);
 		// 未設定 encoding 的話，將回傳 Buffer。
-		result.setEncoding(encoding || 'utf8');
+		if (encoding !== 'binary')
+			// default encoding: UTF-8.
+			result.setEncoding(encoding || 'utf8');
 		// listener must be a function
 		if (typeof onload === 'function')
 			result.on('data', function(data) {
@@ -643,13 +666,25 @@ function get_URL_node(URL, onload, encoding, post_data) {
 			//console.log(result);
 		}
 	};
-	if (post_data)
-		_URL.method = 'POST';
 
-	if (_URL.protocol === 'https:')
-		request = node_https.request(_URL, _onload);
-	else
-		request = node_http.request(_URL, _onload);
+	if (post_data) {
+		_URL.method = 'POST';
+		_URL.headers = {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			// prevent HTTP 411 錯誤 – 需要內容長度頭 (411 Length Required)
+			'Content-Length': post_data.length
+		};
+	}
+
+	_URL.agent = agent;
+	if (agent.last_cookie) {
+		if (!_URL.headers)
+			_URL.headers = {};
+		library_namespace.debug('Set cookie: ' + JSON.stringify(agent.last_cookie), 3, 'get_URL_node');
+		// cookie is Array @ Wikipedia
+		_URL.headers.Cookie = Array.isArray(agent.last_cookie) ? agent.last_cookie.join(';') : agent.last_cookie;
+	}
+	request = node_https.request(_URL, _onload);
 
 	if (typeof options.onfail === 'function')
 		request.on('error', options.onfail);
@@ -666,9 +701,16 @@ if (library_namespace.is_node) {
 	node_http = require('http');
 	node_https = require('https');
 
+	node_http_agent = new node_http.Agent;
+	node_https_agent = new node_https.Agent;
+	// 不需要。
+	//node_http_agent.maxSockets = 1;
+	//node_https_agent.maxSockets = 1;
+
 	// copy methods
-	get_URL_node.param_to_String = get_URL.param_to_String;
-	get_URL_node.add_param = get_URL.add_param;
+	Object.keys(get_URL).forEach(function(method) {
+		get_URL_node[method] = get_URL[method];
+	});
 	_.get_URL = get_URL_node;
 }
 

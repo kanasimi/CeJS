@@ -1903,6 +1903,16 @@ OS='UNIX'; // unknown
 
 	// 因為 set_method() 會用到 is_debug()，因此須先確保 is_debug() 已 loaded。
 
+	// ^\s*: JScript 6-9 native object 需要這個。
+	// console.log() @ node.js: "function () {..}"
+	var native_pattern = /^\s*function\s(\w*)\s*\(\s*\)\s*{\s*\[native code\]\s*}\s*$/;
+
+	_.is_native_Function = function(variable) {
+		return typeof variable === 'function'
+		//
+		&& native_pattern.test(Function.prototype.toString.call(variable));
+	};
+
 	/**
 	 * 若 variable 為 Standard Built-in ECMAScript Objects / native object /
 	 * native ECMASCript object, 則回傳其 name。<br />
@@ -1913,22 +1923,20 @@ OS='UNIX'; // unknown
 	 * @returns native object 之 name。
 	 */
 	function native_name(variable) {
-		var v,
-		// ^\s*: JScript 6-9 native object 需要這個。
-		native_pattern = /^\s*function\s(\w+)\s*\(\s*\)\s*{\s*\[native code\]\s*}\s*$/,
-		//
-		match;
-
 		try {
+			var value, match;
+
 			// TODO: Function.prototype.bind 可能造成非 native Function 卻形如 "[native
 			// code]" @ Firefox 20。
 			// 注意: '' + Object.create(null) 會 throw TypeError: Cannot convert
 			// object to primitive value
-			if (match = ('' + variable).match(native_pattern))
+			if (typeof variable === 'function'
+			//
+			&& match = Function.prototype.toString.call(variable).match(native_pattern))
 				return match[1];
 
 			match = String(variable.constructor).match(native_pattern);
-			if (match && (v = _.value_of(match[1])) && variable === v.prototype)
+			if (match && (value = _.value_of(match[1])) && variable === value.prototype)
 				return match[1] + '.prototype';
 
 			if (variable === Math)

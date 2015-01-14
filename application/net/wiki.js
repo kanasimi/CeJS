@@ -27,17 +27,17 @@ CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ], functio
 		CeL.log(content);
 	})
 	// get the content of page, and then replace it.
-	.page('Wikipedia:沙盒 ').edit('* [[沙盒]]', {
+	.page('Wikipedia:沙盒').edit('* [[沙盒]]', {
 		section : 'new',
-		sectiontitle : ' 沙盒 test section',
-		summary : ' 沙盒 test edit (section)',
+		sectiontitle : '沙盒 test section',
+		summary : '沙盒 test edit (section)',
 		nocreate : 1
 	})
 	// get the content of page, and then modify it.
-	.page('Wikipedia:沙盒 ').edit(function(text) {
+	.page('Wikipedia:沙盒').edit(function(text) {
 		return text + '\n\n* [[沙盒]]';
 	}, {
-		summary : ' 沙盒 test edit',
+		summary : '沙盒 test edit',
 		nocreate : 1,
 		bot : 1
 	});
@@ -73,16 +73,15 @@ CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ], functio
 if (typeof CeL === 'function')
 CeL.run({
 name : 'application.net.wiki',
+// .includes() @ data.code.compatibility
 // .between() @ data.native
 // (new Date).format('%4Y%2m%2d'), (new Date).toISOString() @ data.date
 // optional: .show_value() @ interact.DOM, application.debug
-require : 'data.native.|application.net.Ajax.get_URL|data.date.',
+require : 'data.code.compatibility.|data.native.|application.net.Ajax.get_URL|data.date.',
 code : function(library_namespace) {
 
 //	requiring
-var get_URL,
-//const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
-NOT_FOUND = ''.indexOf('_');
+var get_URL;
 eval(this.use());
 
 
@@ -462,7 +461,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 // https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
 // project, domain or language
 wiki_API.api_URL = function(project) {
-	return project ? project.indexOf('://') === NOT_FOUND ? 'https://' + project + '.wikipedia.org/w/api.php' : project : wiki_API.API_URL;
+	return project ? project.includes('://') ? project : 'https://' + project + '.wikipedia.org/w/api.php' : wiki_API.API_URL;
 };
 
 // default api URL
@@ -573,7 +572,8 @@ wiki_API.query = function (action, callback, post_data) {
 	} else
 		get_URL(action, function(XMLHttp) {
 			var response = XMLHttp.responseText;
-			library_namespace.debug('response: ' + response.replace(/</g, '&lt;'), 3, 'wiki_API.query');
+			library_namespace.debug('response: '
+				+ (library_namespace.is_node ? '\n' + response : response.replace(/</g, '&lt;')), 3, 'wiki_API.query');
 
 			if (/<html[\s>]/.test(response.slice(0, 40)))
 				response = response.between('source-javascript', '</pre>').between('>')
@@ -581,7 +581,7 @@ wiki_API.query = function (action, callback, post_data) {
 				.replace(/<[^>]+>/g, '');
 
 			// '&#123;' : (")
-			if (response.indexOf('&#') !== NOT_FOUND)
+			if (response.includes('&#'))
 				response = library_namespace.HTML_to_Unicode(response);
 			// library_namespace.log(response);
 			// library_namespace.log(library_namespace.HTML_to_Unicode(response));
@@ -684,9 +684,9 @@ wiki_API.page = function(title, callback) {
 	|| title.length !== 2 || typeof title[0] === 'object')
 		title = [ , title ];
 	title[1] = wiki_API.query.title_param(title[1], true);
-	if (title[1].indexOf('|') === NOT_FOUND
+	if (!title[1].includes('|')
 	//
-	&& title[1].indexOf(encodeURIComponent('|')) === NOT_FOUND)
+	&& !title[1].includes(encodeURIComponent('|')))
 		title[1] = 'rvlimit=1&' + title[1];
 	title[1] = 'query&prop=revisions&rvprop=content|timestamp&'
 	// &rvexpandtemplates=1
@@ -974,7 +974,7 @@ wiki_API.login = function(name, password, callback) {
 	function _next() {
 		if (typeof callback === 'function')
 			callback(session.token.lgname);
-		library_namespace.debug('已登入。自動執行 .next()，處理餘下的工作。', 1, 'wiki_API.login');
+		library_namespace.debug('已登入 [' + session.token.lgname + ']。自動執行 .next()，處理餘下的工作。', 1, 'wiki_API.login');
 		session.actions.shift();
 		session.next();
 	}
@@ -982,18 +982,23 @@ wiki_API.login = function(name, password, callback) {
 	function _done(data) {
 		delete session.token.lgpassword;
 		if (data && (data = data.login))
-			wiki_API.login.copy_keys.forEach(function(key) {
-				if (data[key])
-					session.token[key] = data[key];
-			});
+			if (data.result === 'NeedToken')
+				library_namespace.err('wiki_API.login: login [' + session.token.lgname + '] failed!');
+			else
+				wiki_API.login.copy_keys.forEach(function(key) {
+					if (data[key])
+						session.token[key] = data[key];
+				});
 		if (session.token.csrftoken)
 			_next();
-		else
-			// try to get the csrftoken
+		else {
+			library_namespace.debug('Try to get the csrftoken ...', 1, 'wiki_API.login');
 			wiki_API.query('query&meta=tokens', function(data) {
 				if (data && data.query && data.query.tokens) {
 					session.token.csrftoken = data.query.tokens.csrftoken;
-					library_namespace.debug('csrftoken: ' + session.token.csrftoken, 1, 'wiki_API.login');
+					library_namespace.debug('csrftoken: ' + session.token.csrftoken
+					//
+					+ (session.token.csrftoken === '+\\' ? ' (login as anonymous!)' : ''), 1, 'wiki_API.login');
 				} else {
 					library_namespace.err('wiki_API.login: Unknown response: ['
 					//
@@ -1007,6 +1012,7 @@ wiki_API.login = function(name, password, callback) {
 			},
 			// Tokens may not be obtained when using a callback
 			{});
+		}
 	}
 
 	var action = 'assert=user',
