@@ -47,18 +47,18 @@ NOT_FOUND = ''.indexOf('_');
 
 /*
  * TODO:
-Object.getOwnPropertyDescriptor
-Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性
-Object.getPrototypeof() 返回給定對象的原型
-Object.create
-Array.prototype.reduce
-Array.prototype.reduceRight
+
+Object.create()
+Array.prototype.reduce()
+Array.prototype.reduceRight()
 
 http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K875.aspx
 8進制數字表示被禁止， 010 代表 10 而不是 8
 
 
 http://jquerymobile.com/gbs/
+
+
 */
 
 
@@ -230,7 +230,8 @@ if (!Object.setPrototypeOf) {
 
 function hasOwnProperty(key) {
 	try {
-		return key in this
+		return (key in this)
+		// Object.getPrototypeOf() 返回給定對象的原型。
 		&& this[key] !== Object.getPrototypeOf(this)[key];
 	} catch (e) {
 		// TODO: handle exception
@@ -238,14 +239,15 @@ function hasOwnProperty(key) {
 }
 
 
-// Object.keys(): get Object keys, 列出對象中所有可以枚舉的屬性
+// Object.keys(): get Object keys, 列出對象中所有可以枚舉的屬性 (Enumerable Only)
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
 // 可用來防止 .prototype 帶來之 properties。e.g., @ IE
+// cf. Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性 (enumerable or non-enumerable)
 function keys(object) {
 	var key, keys = [], prototype;
 
 	try {
-		prototype = Object_getPrototypeOf(object);
+		prototype = Object.getPrototypeOf(object);
 	} catch (e) {
 	}
 
@@ -271,7 +273,22 @@ function getPropertyNames() {
 }
 
 
+function getOwnPropertyDescriptor(object, property) {
+	if (property in object)
+		return {
+			configurable : true,
+			enumerable : true,
+			value : object[property],
+			writable : true
+		};
+}
+
 set_method(Object, {
+	// Object.getOwnPropertyDescriptor()
+	getOwnPropertyDescriptor : getOwnPropertyDescriptor,
+	// Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性 (enumerable or non-enumerable)
+	getOwnPropertyNames : keys,
+	// Object.keys(): get Object keys, 列出對象中所有可以枚舉的屬性 (enumerable only)
 	keys : keys
 });
 
@@ -286,26 +303,52 @@ set_method(Object.prototype, {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // Array.*
 
+/*
 
-//	Array.from()
-function Array_from(arrayLike, mapfn, thisArg) {
+{String}string
+string.split('')
+Object(string)
+Array.from(string)
+
+*/
+//	Array.from(Array, String, {length:\d}, Map, Set, other arrayLike)
+function Array_from(items, mapfn, thisArg) {
+	var array, i, iterator = items
+	// 測試是否有 iterator。
+	&& (items['@@iterator'] || (items.entries ? 'entries' : 'values'));
+	if (iterator && typeof items[iterator] === 'function') {
+		array = [];
+
+		// need test library_namespace.env.has_for_of
+		// for(i of items) array.push(i);
+
+		iterator = items[iterator]();
+		while (!(i = iterator.next()).done)
+			array.push(i.value);
+		return array;
+	}
+
 	if (typeof mapfn !== 'function')
 		try {
-			return Array_slice.call(arrayLike);
+			return Array_slice.call(items);
 		} catch (e) {
 			if ((e.number & 0xFFFF) !== 5014)
 				throw e;
-			mapfn = undefined;
+			mapfn = null;
 		}
 
-	var list = [], i = 0, length = nodes && nodes.length || 0;
+	var length = nodes && nodes.length | 0;
+	array = [];
 	if (mapfn)
-		while (i < length)
-			list.push(mapfn.call(thisArg, arrayLike[i], i)), i++;
+		for (i = 0; i < length; i++)
+			array.push(thisArg ? mapfn.call(thisArg, items[i], i)
+			// 不採用 .call() 以加速執行。
+			: mapfn(items[i], i));
 	else
 		while (i < length)
-			list.push(arrayLike[i++]);
-	return list;
+			array.push(items[i++]);
+
+	return array;
 }
 
 

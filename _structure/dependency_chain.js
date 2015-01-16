@@ -168,6 +168,7 @@ if (typeof CeL === 'function')
 		// ---------------------------------------------------------------------//
 		// for Iterator
 
+		// TODO: use Array.from(iterator)
 		function Array_of_Iterator(iterator) {
 			var ir, array = [];
 			// need test library_namespace.env.has_for_of

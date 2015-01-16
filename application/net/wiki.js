@@ -89,7 +89,8 @@ eval(this.use());
 
 
 /**
- * web Wikipedia / 維基百科 用的 functions
+ * web Wikipedia / 維基百科 用的 functions。
+ * 可執行環境: node.js, JScript。
  */
 function wiki_API(name, password, API_URL) {
 	if (!this || this.constructor !== wiki_API)

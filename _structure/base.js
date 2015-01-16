@@ -1932,7 +1932,7 @@ OS='UNIX'; // unknown
 			// object to primitive value
 			if (typeof variable === 'function'
 			//
-			&& match = Function.prototype.toString.call(variable).match(native_pattern))
+			&& (match = Function.prototype.toString.call(variable).match(native_pattern)))
 				return match[1];
 
 			match = String(variable.constructor).match(native_pattern);

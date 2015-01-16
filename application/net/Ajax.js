@@ -555,7 +555,7 @@ deprecated_get_URL.clean=function(i,force){
 
 
 var node_url, node_http, node_https,
-// reuse the sockets.
+// reuse the sockets (keep-alive connection).
 node_http_agent, node_https_agent;
 
 
@@ -707,8 +707,9 @@ if (library_namespace.is_node) {
 	//node_http_agent.maxSockets = 1;
 	//node_https_agent.maxSockets = 1;
 
+	Object.getOwnPropertyNames(get_URL)
 	// copy methods
-	Object.keys(get_URL).forEach(function(method) {
+	.forEach(function(method) {
 		get_URL_node[method] = get_URL[method];
 	});
 	_.get_URL = get_URL_node;
