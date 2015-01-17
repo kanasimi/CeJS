@@ -1780,6 +1780,7 @@ OS='UNIX'; // unknown
 	_.debug_console.debug = _.debug;
 
 	// ---------------------------------------------------------------------//
+	// 補強 (shim, polyfill) 用的 functions。
 	// setup Object.defineProperty()
 
 	/**

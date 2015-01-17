@@ -168,43 +168,33 @@ if (typeof CeL === 'function')
 		// ---------------------------------------------------------------------//
 		// for Iterator
 
-		// TODO: use Array.from(iterator)
-		function Array_of_Iterator(iterator) {
-			var ir, array = [];
-			// need test library_namespace.env.has_for_of
-			// for(ir of iterator) array.push(ir);
-			while (!(ir = iterator.next()).done)
-				array.push(ir.value);
-			return array;
-		}
-		library_namespace.Array_of_Iterator = Array_of_Iterator;
-
 		// for the Iterator interface
 
 		// 直接將 array 轉成 Iterator。
-		function Iterator_from_Array(array) {
+		function Iterator_from(items) {
 			// reset index to next index
 			var index = 0;
-			// define .next() function onto array.
-			Object.defineProperty(array, 'next', {
+			// define .next() function onto items.
+			Object.defineProperty(items, 'next', {
 				// enumerable : false,
 				value : function() {
 					var IteratorResult = null_Object();
 					// the value property may be absent form the
 					// conforming object if it does not inherit an
 					// explicit value property.
-					if (!(IteratorResult.done =
+					IteratorResult.done =
 					// assert: typeof index === 'number'
-					!(index < array.length)))
-						// Arguments may be passed to the next
-						// function but their interpretation and
-						// validity is dependent upon the target
-						// Iterator.
-						IteratorResult.value = array[index++];
+					!(index < items.length);
+					// Arguments may be passed to the next
+					// function but their interpretation and
+					// validity is dependent upon the target
+					// Iterator.
+					IteratorResult.value = IteratorResult.done ? items[index++]
+							: undefined;
 					return IteratorResult;
 				}
 			});
-			return array;
+			return items;
 		}
 
 		/**
@@ -216,32 +206,32 @@ if (typeof CeL === 'function')
 		 *            "key+value"), or next function(index, Iterator, arguments)
 		 */
 		function create_list_iterator(object, kind, use_origin) {
-			var key, Iterator;
+			var key, iterator;
 			if (use_origin && Array.isArray(object))
-				Iterator = object;
+				iterator = object;
 			else
-				for (key in (Iterator = []))
+				for (key in (iterator = []))
 					// delete any properties that can be iterated.
-					delete Iterator[key];
-			// assert: Array.isArray(Iterator)
+					delete iterator[key];
+			// assert: Array.isArray(iterator)
 
 			if (!kind && typeof kind !== 'function')
 				kind = Array.isArray(object) ? 'value'
 				// 當作 Object。視 for(in) 而定。
 				: 'key';
 
-			// define Iterator
+			// define iterator
 			if (typeof object.forEach === 'function')
 				object.forEach(kind === 'value' ? function(value) {
-					Iterator.push(value);
+					iterator.push(value);
 				} : kind === 'key' ? function(value, key) {
-					Iterator.push(key);
+					iterator.push(key);
 				} : function(value, key) {
-					Iterator.push([ key, value ]);
+					iterator.push([ key, value ]);
 				});
 			else
 				for (key in object)
-					Iterator.push(
+					iterator.push(
 					//
 					kind === 'key' ? key
 					//
@@ -249,16 +239,16 @@ if (typeof CeL === 'function')
 					// "key+value"
 					: [ key, object[key] ]);
 
-			return Iterator_from_Array(Iterator);
+			return Iterator_from(iterator);
 		}
 
-		function Iterator() {
+		function _Iterator(iterable) {
+			;
 		}
-		Iterator.from_Array = Iterator_from_Array;
-		Iterator.list = create_list_iterator;
+		_Iterator.list = create_list_iterator;
 
 		// export.
-		library_namespace.Iterator = Iterator;
+		library_namespace.Iterator = _Iterator;
 
 		// ---------------------------------------------------------------------//
 		// 測試是否具有標準的 ES6 Set/Map collections (ECMAScript 6 中的集合類型)。
@@ -764,7 +754,7 @@ if (typeof CeL === 'function')
 						if (list)
 							// 這裡可以檢測 size。
 							// assert: size === list.length
-							return Iterator_from_Array(list);
+							return Iterator_from(list);
 					}
 
 					// public interface of Map.
@@ -901,7 +891,7 @@ if (typeof CeL === 'function')
 							this.values().forEach(function(value, index) {
 								entries.push([ index, value ]);
 							});
-							return Iterator_from_Array(entries);
+							return Iterator_from(entries);
 						},
 						// 在 JScript 10.0.16438 中，兩個 "function forEach()" 宣告，會造成
 						// Map.prototype.forEach 也被設到 Set.prototype.forEach，但
@@ -1078,7 +1068,7 @@ if (typeof CeL === 'function')
 				this.forEach(function(v) {
 					values.push(v);
 				});
-				return Iterator_from_Array(values);
+				return Iterator_from(values);
 			};
 
 		library_namespace.is_Set = is_Set;

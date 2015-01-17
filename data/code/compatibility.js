@@ -2,7 +2,9 @@
 /**
  * @name	CeL function for compatibility
  * @fileoverview
- * 本檔案包含了標準已規定，但先前版本未具備的內建物件功能；以及相容性 test 專用的 functions。
+ * 本檔案包含了標準已規定，但先前版本未具備的內建物件功能；以及相容性 test 專用的 functions。<br />
+ * 部分功能已經包含於 ce.js。
+ * 
  * @since	
  * @see
  * <a href="http://msdn.microsoft.com/en-us/library/s4esdbwz%28v=VS.85%29.aspx" accessdate="2010/4/16 20:4">Version Information (Windows Scripting - JScript)</a>
@@ -303,26 +305,34 @@ set_method(Object.prototype, {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // Array.*
 
-/*
 
-{String}string
-string.split('')
-Object(string)
-Array.from(string)
+//TODO: test:
+//Array.from(Array, String, {length:\d}, Map, Set, other arrayLike)
 
-*/
-//	Array.from(Array, String, {length:\d}, Map, Set, other arrayLike)
+
+//{String}string
+//string.split('')
+//Object(string)
+//Array.from(string)
+
 function Array_from(items, mapfn, thisArg) {
 	var array, i, iterator = items
 	// 測試是否有 iterator。
 	&& (items['@@iterator'] || (items.entries ? 'entries' : 'values'));
-	if (iterator && typeof items[iterator] === 'function') {
+
+	if (iterator) {
 		array = [];
 
 		// need test library_namespace.env.has_for_of
 		// for(i of items) array.push(i);
 
-		iterator = items[iterator]();
+		if (typeof iterator === 'function')
+			iterator = iterator.call(items);
+		else if (iterator && typeof items[iterator] === 'function')
+			iterator = items[iterator]();
+		else
+			throw new Error('Array.from: invalid iterator!');
+
 		while (!(i = iterator.next()).done)
 			array.push(i.value);
 		return array;
@@ -359,6 +369,7 @@ set_method(Array, {
 		return Array_slice.call(arguments);
 	}
 });
+
 
 
 set_method(Array.prototype, {

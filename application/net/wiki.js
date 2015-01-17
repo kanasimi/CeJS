@@ -166,7 +166,9 @@ wiki_API.prototype.next = function() {
 	}
 
 	library_namespace.debug('剩餘 ' + this.actions.length + ' action(s)', 2, 'wiki_API.prototype.next');
-	if (library_namespace.is_debug(3))
+	if (library_namespace.is_debug(3)
+		// .show_value() @ interact.DOM, application.debug
+		&& library_namespace.show_value)
 		library_namespace.show_value(this.actions.slice());
 	var _this = this, next = this.actions.shift();
 	library_namespace.debug('處理 ' + (this.token.lgname ? this.token.lgname + ' ' : '') + '[' + next + ']', 2, 'wiki_API.prototype.next');
@@ -217,7 +219,7 @@ wiki_API.prototype.next = function() {
 			}
 
 			if (typeof next[2] === 'function')
-				// next[2] : callback
+				// next[2] : callback(title, titles, pages)
 				next[2].call(_this, title, titles, pages);
 			else if (next[2] && next[2].each)
 				// next[2] : 當作 work，處理積存工作。
@@ -227,6 +229,22 @@ wiki_API.prototype.next = function() {
 		},
 		// next[3] : options
 		Object.assign(library_namespace.null_Object(), this.next_mark, next[3]));
+		break;
+
+	case 'search':
+		wiki_API.search([ this.API_URL, next[1] ], function(key, pages, hits) {
+			// [ page_data ]
+			_this.last_pages = pages;
+
+			if (typeof next[2] === 'function')
+				// next[2] : callback(key, pages, hits)
+				next[2].call(_this, key, pages, hits);
+			else if (next[2] && next[2].each)
+				// next[2] : 當作 work，處理積存工作。
+				_this.work(next[2]);
+
+			_this.next();
+		}, next[3]);
 		break;
 
 	case 'edit':
@@ -293,7 +311,7 @@ wiki_API.prototype.next = function() {
 // wiki_API.prototype.next() 已登記之 methods。
 // 之後會再加入 get_list.type 之 methods。
 // NG: ,login
-wiki_API.prototype.next.methods = 'page,edit,logout,run,set_URL'
+wiki_API.prototype.next.methods = 'page,edit,search,logout,run,set_URL'
 	.split(',');
 
 //---------------------------------------------------------------------//
@@ -398,7 +416,10 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		messages.last = new Date;
 		messages.push(pages);
 		library_namespace.debug(pages, 2, wiki_API.work);
-		library_namespace.show_value(data, 'pages');
+		if (library_namespace.is_debug()
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+			library_namespace.show_value(data, 'pages');
 		pages = data;
 
 		if (typeof config.first === 'function')
@@ -810,6 +831,9 @@ wiki_API.langlinks.parse = function(langlinks, to_lang) {
 		if (library_namespace.is_debug()) {
 			library_namespace.warn('wiki_API.langlinks.parse: No langlinks exists?'
 				+ (langlinks && langlinks.title ? ' [[' + langlinks.title + ']]' : ''));
+			if (library_namespace.is_debug(2)
+				// .show_value() @ interact.DOM, application.debug
+				&& library_namespace.show_value)
 			library_namespace.show_value(langlinks, 'langlinks.parse');
 		}
 		return;
@@ -1214,6 +1238,44 @@ wiki_API.edit.denied = function(content, bot_id, action) {
 // deny=all, !(allow=all)
 wiki_API.edit.denied.all = /(?:^|[\s,])all(?:$|[\s,])/;
 
+
+//---------------------------------------------------------------------//
+
+// full text search
+// callback(key, pages, hits)
+wiki_API.search = function(key, callback, options) {
+	if (0 < options)
+		options = {
+			srlimit : options
+		};
+	wiki_API.query('query&list=search&' + get_URL.param_to_String(Object.assign({
+		srsearch : key
+	}, wiki_API.search.default_parameter, options)), function(data) {
+		if (library_namespace.is_debug(2)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+			library_namespace.show_value(data, 'wiki_API.search');
+
+		options = data && data['query-continue'];
+		if (data && (data = data.query)) {
+			if (options && (options = options.search))
+				data.search.sroffset = options.sroffset;
+			data.search.hits = data.searchinfo.totalhits;
+			data = data.search;
+		}
+
+		// data: [ page_data ].hits = \d+, .sroffset = next
+		if (typeof callback === 'function')
+			// callback(key, pages, hits)
+			callback(key, data, data.hits);
+	});
+};
+
+wiki_API.search.default_parameter = {
+	srprop : 'redirecttitle',
+	//srlimit : 10,
+	srinterwiki : 1
+};
 
 //---------------------------------------------------------------------//
 
