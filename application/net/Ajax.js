@@ -143,7 +143,7 @@ if (false)
 //	2 已讀取 Data Sent
 //	3 資訊交換中 interactive: getting data
 //	4 一切完成 Completed
-var readyState_done = 4;
+var readyState_done = 4,
 //
 document_head = library_namespace.is_WWW(true) && (document.head || document.getElementsByTagName('head')[0]);
 
@@ -304,6 +304,7 @@ function get_URL(URL, onload, encoding, post_data) {
 	}
 
 }
+
 
 // parameters to String
 // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
@@ -654,14 +655,30 @@ function get_URL_node(URL, onload, encoding, post_data) {
 			// default encoding: UTF-8.
 			result.setEncoding(encoding || 'utf8');
 		// listener must be a function
-		if (typeof onload === 'function')
+		if (typeof onload === 'function') {
+			var chunk = [];
 			result.on('data', function(data) {
+				library_namespace.debug('receive BODY.length: ' + data.length, 3, 'get_URL_node');
+				chunk.push(data);
+			});
+			// https://iojs.org/api/http.html#http_http_request_options_callback
+			result.on('end', function() {
+				//console.log('No more data in response.');
+				if (encoding !== 'binary')
+					chunk = chunk.join('');
+				else {
+					//TODO:  (binary)
+				}
+				if (library_namespace.is_debug(4))
+					library_namespace.debug('BODY: ' + chunk, 1, 'get_URL_node');
 				// 模擬 XMLHttp。
 				onload({
-					responseText : data
+					responseText : chunk
 				});
+				// free
+				chunk = null;
 			});
-		else {
+		} else {
 			library_namespace.warn('get_URL_node: get [' + URL + '], but no listener!');
 			//console.log(result);
 		}
@@ -684,7 +701,7 @@ function get_URL_node(URL, onload, encoding, post_data) {
 		// cookie is Array @ Wikipedia
 		_URL.headers.Cookie = Array.isArray(agent.last_cookie) ? agent.last_cookie.join(';') : agent.last_cookie;
 	}
-	request = node_https.request(_URL, _onload);
+	request = _URL.protocol === 'https:' ? node_https.request(_URL, _onload) : node_http.request(_URL, _onload);
 
 	if (typeof options.onfail === 'function')
 		request.on('error', options.onfail);
@@ -707,7 +724,7 @@ if (library_namespace.is_node) {
 	//node_http_agent.maxSockets = 1;
 	//node_https_agent.maxSockets = 1;
 
-	Object.getOwnPropertyNames(get_URL)
+	Object.keys(get_URL)
 	// copy methods
 	.forEach(function(method) {
 		get_URL_node[method] = get_URL[method];

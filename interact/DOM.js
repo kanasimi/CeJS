@@ -2301,6 +2301,8 @@ function for_nodes(action, nodes, options) {
 		nodes = library_namespace.get_tag_list(nodes);
 
 	var i = 0, length = nodes.length, node, n, traversal, thisArg;
+	if (length > 0)
+		library_namespace.debug('get ' + length + ' nodes.', 2, 'for_nodes');
 
 	if (library_namespace.is_Object(options)) {
 		thisArg = options.self;
@@ -2311,7 +2313,9 @@ function for_nodes(action, nodes, options) {
 			traversal = 2;
 	}
 
-	if (action && Array.isArray(nodes))
+	if (action
+	//&& Array.isArray(nodes)
+	)
 		for (; i < length; i++)
 			if (node = nodes[i]) {
 				if (traversal === 1 && (n = node.childNodes)) {
@@ -6738,6 +6742,46 @@ function auto_TOC(content_node, level, force) {
 				TOC_list.style.height = height + 'px';
 	}
 
+	function add_TOC_node(node)  {
+		library_namespace.debug('&lt;' + node.tagName + '&gt;\n'
+				+ node.innerHTML.slice(0, 200), 3);
+
+		head_array.push(node);
+		title = set_text(node);
+		// l: title 長度在規範內。
+		i = title.length < auto_TOC.max_length;
+		// l: tagName
+		l = node.tagName;
+		if (!node.id && !node.name)
+			// from wiki
+			node.id = encodeURIComponent(title).replace(/%/g, '.').replace(
+					/\s/g, '');
+
+		// 實際上應該用<li>，但<h\d>可能不會有 nested 層疊結構。
+		list_array.push({
+			div : {
+				a : i ? title : [ title.slice(0, auto_TOC.max_length), {
+					span : '..',
+					C : auto_TOC.CSS_prefix + 'more'
+				} ],
+				href : href + (node.id || node.name),
+				// subtitle
+				R : (i ? '' : title + (node.title ? '\n' : ''))
+						+ (node.title || ''),
+				target : '_self',
+				onclick : function() {
+					// 先緊縮目錄。
+					toggle_display(TOC_list, false);
+				}
+			},
+			C : auto_TOC.CSS_prefix
+					+ l
+					+ (l === 'header' ? '' : ' ' + auto_TOC.CSS_prefix
+							+ 'header')
+		});
+
+	}
+
 	var list_array = [], head_array = [], node = content_node.firstChild, matched, title, i, l,
 	// Chrome 22 在遇上 /p/cgi.cgi?_=_ 時，僅指定 href : #~ 會變成 /p/#~。因此需要 workaround。
 	href = location.href.replace(/#.*$/, '') + '#';
@@ -6750,50 +6794,17 @@ function auto_TOC(content_node, level, force) {
 			+ ']|header)$', 'i');
 
 	while (node) {
-		// 實際上應該用<li>，但<h\d>可能不會有 nested 層疊結構。
-		if ((matched = node.tagName) && (matched = matched.match(level))) {
-			library_namespace.debug('&lt;' + node.tagName + '&gt;\n'
-					+ node.innerHTML.slice(0, 200));
-
-			head_array.push(node);
-			title = node.innerHTML.replace(/<[^>]*>/g, '');
-			// l: title 長度在規範內。
-			i = title.length < auto_TOC.max_length;
-			// l: tagName
-			l = matched[1];
-			if (!node.id && !node.name)
-				// from wiki
-				node.id = encodeURIComponent(title).replace(/%/g, '.').replace(
-						/\s/g, '');
-
-			list_array.push({
-				div : {
-					a : i ? title : [ title.slice(0, auto_TOC.max_length), {
-						span : '..',
-						C : auto_TOC.CSS_prefix + 'more'
-					} ],
-					href : href + (node.id || node.name),
-					// subtitle
-					R : (i ? '' : title + (node.title ? '\n' : ''))
-							+ (node.title || ''),
-					target : '_self',
-					onclick : function() {
-						// 先緊縮目錄。
-						toggle_display(TOC_list, false);
-					}
-				},
-				C : auto_TOC.CSS_prefix
-						+ l
-						+ (l === 'header' ? '' : ' ' + auto_TOC.CSS_prefix
-								+ 'header')
-			});
-
-		}
+		if ((matched = node.tagName) && matched.match(level))
+			add_TOC_node(node);
 
 		// 表層遍歷。
 		// TODO: 增加對更深層的探索。
 		node = node.nextSibling;
 	}
+
+	if (list_array.length === 0)
+		// <h2> 為最常利用之中級結構。
+		for_nodes(add_TOC_node, 'h2');
 
 	if (list_array.length > 1) {
 		var TOC_list, id = set_attribute(content_node, 'id'),
@@ -6898,7 +6909,7 @@ function auto_TOC(content_node, level, force) {
 		library_namespace.run(library_namespace.get_module_path(module_name,
 				'auto_TOC.css'));
 	} else
-		library_namespace.warn('auto_TOC: No ' + level + ' detected.');
+		library_namespace.warn('auto_TOC: No ' + level + ' found.');
 
 	// release memory.
 	head_array = list_array = null;

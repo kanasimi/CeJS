@@ -611,7 +611,7 @@ wiki_API.query = function (action, callback, post_data) {
 				try {
 					response = library_namespace.parse_JSON(response);
 				} catch (e) {
-					library_namespace.err('Invalid content: [' + response + ']');
+					library_namespace.err('wiki_API.query: Invalid content: [' + response + ']');
 					// exit!
 					return;
 				}
