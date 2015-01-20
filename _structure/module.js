@@ -403,6 +403,9 @@ if (false) {
 					tmp = null;
 					// http://nodejs.org/api/fs.html#fs_fs_readfilesync_filename_options
 					data = node_fs(path, 'utf8');
+					// or:
+					// http://hi.baidu.com/hellow3c/item/b699cd1d0170c56b3b176e7b
+					//buffer.toString('utf8', 0, length);
 				} else
 					try {
 						i = node_fs(path, 'utf8');

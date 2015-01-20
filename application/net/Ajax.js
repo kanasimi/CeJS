@@ -316,7 +316,7 @@ get_URL.param_to_String = function(param) {
 			library_namespace.debug(key, 4, 'get_URL.param_to_String.forEach');
 			array.push(encodeURIComponent(key) + '=' + encodeURIComponent(String(param[key])));
 		});
-		library_namespace.debug(array.length + ' param:<br />\n' + array.join('<br />\n'), 3, 'get_URL.param_to_String');
+		library_namespace.debug(array.length + ' parameters:<br />\n' + array.join('<br />\n'), 3, 'get_URL.param_to_String');
 		return array.join('&');
 	}
 

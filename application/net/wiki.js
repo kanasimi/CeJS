@@ -190,6 +190,7 @@ wiki_API.prototype.next = function() {
 		} else
 			// this.page(title, callback)
 			// next[1] : title
+			// next[3] : options
 			// [ {String}API_URL, {String}title ]
 			wiki_API.page([ this.API_URL, next[1] ], function(page_data) {
 				_this.last_page = Array.isArray(page_data) ? page_data[0] : page_data;
@@ -197,7 +198,7 @@ wiki_API.prototype.next = function() {
 				if (typeof next[2] === 'function')
 					next[2].call(_this, page_data);
 				_this.next();
-			});
+			}, next[3]);
 		break;
 
 	case 'backlinks':
@@ -411,8 +412,8 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	library_namespace.debug('wiki_API.work: 設定一次先取得所有 revisions (page content)。', 2);
 	this.page(pages || titles, function(data) {
 		if (data.length !== pages.length)
-			library_namespace.warn('wiki_API.work: query 所得之 length ' + data.length + ' !== pages.length ' + pages.length + ' !');
-		pages = '* 首先費時 ' + messages.last.age(new Date) + ' 以取得 ' + data.length + ' 頁面內容。';
+			library_namespace.warn('wiki_API.work: query 所得之 length (' + data.length + ') !== pages.length (' + pages.length + ') !');
+		pages = '* 首先費時 ' + messages.last.age(new Date) + ' 以取得 ' + data.length + ' 個頁面內容。';
 		messages.last = new Date;
 		messages.push(pages);
 		library_namespace.debug(pages, 2, wiki_API.work);
@@ -475,6 +476,8 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			else
 				library_namespace.log('log:<br />\n' + messages.join('<br />\n'));
 		});
+	}, {
+		multi : true
 	});
 };
 
@@ -699,7 +702,7 @@ wiki_API.query.id_of_page = function(page_data, title_only) {
 // {Function}callback(page_data)
 // {String}timestamp: e.g., '2015-01-02T02:52:29Z'
 // CeL.wiki.page('道',function(p){CeL.show_value(p);});
-wiki_API.page = function(title, callback) {
+wiki_API.page = function(title, callback, options) {
 	// 處理 [ {String}API_URL, {String}title ]
 	if (!Array.isArray(title)
 	// 為了預防輸入的是問題頁面。
@@ -749,7 +752,9 @@ wiki_API.page = function(title, callback) {
 			+ ' page(s)! We will pass all pages to callback!');
 		// page 之 structure 按照 wiki 本身之 return！
 		// page = {pageid,ns,title,revisions:[{timestamp,'*'}]}
-		callback(pages.length < 2 ? pages[0] : pages);
+		callback(pages.length < 2
+		//
+		&& (!options || !options.multi) ? pages[0] : pages);
 	});
 };
 
