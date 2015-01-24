@@ -294,6 +294,19 @@ set_method(Object, {
 	keys : keys
 });
 
+
+
+function copy_properties(from, to) {
+	Object.keys(from).forEach(function(property) {
+		to[property] = from[property];
+	});
+	return to;
+}
+// 現在有 Object.keys() 了，使用 Object.keys() 來替代原有之 copy_properties()。
+library_namespace.copy_properties = copy_properties;
+
+
+
 //	會造成幾乎每個使用 for(.. in Object)，而不是使用 Object.keys() 的，都出現問題。
 if (false)
 set_method(Object.prototype, {
@@ -306,19 +319,64 @@ set_method(Object.prototype, {
 // Array.*
 
 
-//TODO: test:
-//Array.from(Array, String, {length:\d}, Map, Set, other arrayLike)
+/*
 
+var a=[1,2,3,1],s=new Set(a),e=s.entries(),v=s.values();
+console.assert(e.next().value.join()==="1,1");
+console.assert(e.next().value.join()==="2,2");
+console.assert(e.next().value.join()==="3,3");
+console.assert(e.next().done);
+console.assert(v.next().value===1);
+console.assert(v.next().value===2);
+console.assert(v.next().value===3);
+console.assert(v.next().done);
+
+v=s.values();
+console.assert(v.next().value===1);
+console.assert(v.next().value===2);
+console.assert(v.next().value===3);
+
+s.add(4);
+console.assert(v.next().value===4);
+console.assert(v.next().done);
+
+e=a.entries();
+console.assert(e.next().value.join()==="0,1");
+console.assert(e.next().value.join()==="1,2");
+console.assert(e.next().value.join()==="2,3");
+console.assert(e.next().value.join()==="3,1");
+console.assert(e.next().done);
 
 //{String}string
 //string.split('')
 //Object(string)
 //Array.from(string)
+console.assert(Array.from('abc').join()==="a,b,c");
+console.assert(Array.from(5).join()==="");
+console.assert(Array.from(true).join()==="");
+console.assert(Array.from(a).join()==="1,2,3,1");
+console.assert(Array.from(a.entries()).join(';')==="0,1;1,2;2,3;3,1");
+console.assert(Array.from({length:4},function(v,i){return i*i;}).join()==="0,1,4,9");
+console.assert(Array.from(new Set(a)).join()==="1,2,3");
+console.assert(Array.from(new Map([[5,1],[7,1],[5,2],[3,1]])).join()==="5,2,7,1,3,1");
+console.assert(Array.from(new Map([[5,1],[7,1],[5,2],[3,1]]).keys()).join()==="5,7,3");
 
+
+TODO: test:
+Array.from(Array, String, {length:\d}, Map, Set, Iterator, other arrayLike)
+
+
+*/
+
+// Array.from()
 function Array_from(items, mapfn, thisArg) {
-	var array, i, iterator = items
+	var array, i, iterator = items && !Array.isArray(items)
 	// 測試是否有 iterator。
-	&& (items['@@iterator'] || (items.entries ? 'entries' : 'values'));
+	&& (items['@@iterator'] || (items.entries ? 'entries' : items.values && 'values'));
+
+	if (!iterator && typeof items.next === 'function')
+		// items itself is an iterator.
+		iterator = items;
 
 	if (iterator) {
 		array = [];
@@ -330,7 +388,7 @@ function Array_from(items, mapfn, thisArg) {
 			iterator = iterator.call(items);
 		else if (iterator && typeof items[iterator] === 'function')
 			iterator = items[iterator]();
-		else
+		else if (!iterator.next)
 			throw new Error('Array.from: invalid iterator!');
 
 		while (!(i = iterator.next()).done)
@@ -340,14 +398,15 @@ function Array_from(items, mapfn, thisArg) {
 
 	if (typeof mapfn !== 'function')
 		try {
-			return Array_slice.call(items);
+			// for IE, Array.prototype.slice.call('ab').join() !== 'a,b'
+			return typeof items === 'string' ? items.split('') : Array_slice.call(items);
 		} catch (e) {
 			if ((e.number & 0xFFFF) !== 5014)
 				throw e;
 			mapfn = null;
 		}
 
-	var length = nodes && nodes.length | 0;
+	var length = items && items.length | 0;
 	array = [];
 	if (mapfn)
 		for (i = 0; i < length; i++)
@@ -361,6 +420,9 @@ function Array_from(items, mapfn, thisArg) {
 	return array;
 }
 
+if (!Array.from)
+	// 做個標記。
+	Set.prototype['@@iterator'] = 'values';
 
 set_method(Array, {
 	from : Array_from,
@@ -372,7 +434,41 @@ set_method(Array, {
 
 
 
+function Array_Iterator_next() {
+	// this: [ index, array, use value ]
+	//library_namespace.debug(this.join(';'));
+	var index = this[0]++;
+	//library_namespace.debug(this.join(';'));
+	if (index < this[1].length)
+		return {
+			value : this[2] ? this[1][index] : [ index, this[1][index] ],
+			done : false
+		};
+
+	// 已經 done 的不能 reuse。
+	this[0] = NaN;
+	return {
+		value : undefined,
+		done : true
+	};
+};
+
+function Array_Iterator(array) {
+	//library_namespace.debug(array);
+	this.next = Array_Iterator_next.bind([ 0, array ]);
+}
+
+
+// Array.prototype.entries()
+function Array_entries() {
+	// [ index, array, use value ]
+	return new Array_Iterator(this);
+}
+
+
 set_method(Array.prototype, {
+	// Array.prototype.entries()
+	entries : Array_entries,
 	// Array.prototype.includes()
 	includes : includes,
 	// Array.prototype.findIndex()

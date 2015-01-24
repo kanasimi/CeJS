@@ -724,12 +724,7 @@ if (library_namespace.is_node) {
 	//node_http_agent.maxSockets = 1;
 	//node_https_agent.maxSockets = 1;
 
-	Object.keys(get_URL)
-	// copy methods
-	.forEach(function(method) {
-		get_URL_node[method] = get_URL[method];
-	});
-	_.get_URL = get_URL_node;
+	_.get_URL = library_namespace.copy_properties(get_URL, get_URL_node);
 }
 
 

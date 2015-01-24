@@ -35,6 +35,7 @@ if (typeof CeL === 'function')
 		var Array_slice = Array.prototype.slice;
 
 		/**
+		 * Function.prototype.apply();
 		 * apply & call: after ECMAScript 3rd Edition.<br />
 		 * 不直接用 value undefined: for JS5.
 		 * 
@@ -87,6 +88,7 @@ if (typeof CeL === 'function')
 		}
 
 		/**
+		 * Function.prototype.call();
 		 * call 方法是用來呼叫代表另一個物件的方法。call 方法可讓您將函式的物件內容從原始內容變成由 thisObj 所指定的新物件。
 		 * 如果未提供 thisObj 的話，將使用 global 物件作為 thisObj。
 		 * 
@@ -99,7 +101,15 @@ if (typeof CeL === 'function')
 			return this.apply(this_obj, Array_slice.call(arguments, 1));
 		}
 
+		function copy_properties(from, to) {
+			for (var property in from)
+				to[property] = from[property];
+			return to;
+		}
+		library_namespace.copy_properties = copy_properties;
+
 		/**
+		 * Function.prototype.bind();
 		 * @since 2011/11/20
 		 * @see <a
 		 *      href="https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function/bind"
@@ -109,17 +119,17 @@ if (typeof CeL === 'function')
 			var func = this, args;
 			if (arguments.length < 2)
 				return this_obj === null || typeof this_obj === 'undefined' ? func
-						: function() {
+						: copy_properties(func, function() {
 							if (false)
 								library_namespace.debug('this_obj: ['
 										+ this_obj + '],<br />\nfunction: ('
 										+ typeof func + ') [' + func + ']', 1,
 										'bind');
 							return func.apply(this_obj, arguments);
-						};
+						});
 
 			args = Array_slice.call(arguments, 1);
-			return function() {
+			return copy_properties(func, function() {
 				var counter = arguments.length, arg, i;
 				if (!counter)
 					return func.apply(this_obj, args);
@@ -130,7 +140,7 @@ if (typeof CeL === 'function')
 				while (counter--)
 					arg[--i] = arguments[counter];
 				return func.apply(this_obj, arg);
-			};
+			});
 		}
 
 		// public interface.
