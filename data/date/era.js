@@ -4642,7 +4642,7 @@ if (typeof CeL === 'function')
 						= (tmp = tmp.sub[j]).attributes;
 					}
 
-					library_namespace.debug('設定紀年[' + 紀年 + ']搜尋用 index。', 2);
+					library_namespace.debug('設定紀年[' + 紀年 + ']之搜尋用 index。', 2);
 
 					紀年.forEach(function(era_token) {
 						add_to_era_by_key(era_token, last_era_data);
@@ -4676,6 +4676,15 @@ if (typeof CeL === 'function')
 							// 將屬性值搬移至 period_root 之 tree 中。
 							// i === 0，即紀元本身時，毋須搬移。
 							if (0 < i) {
+								library_namespace.debug(
+								// 例如: 元太祖→大蒙古國太祖
+								'設定紀年[' + 紀年 + ']之次要搜尋用 index。', 2);
+								k.forEach(function(era_token) {
+									add_to_era_by_key(
+									//
+									era_token, last_era_data);
+								});
+
 								// j: attributes of hierarchy[i]
 								j = period_attribute_hierarchy[i];
 								// assert: Object.isObject(j)
@@ -4685,6 +4694,7 @@ if (typeof CeL === 'function')
 									Array_push(j[tmp], k);
 								else
 									j[tmp] = k;
+
 								// 將此屬性搬移、設定到 period_root 之 tree 中。
 								delete 附加屬性[tmp];
 							}

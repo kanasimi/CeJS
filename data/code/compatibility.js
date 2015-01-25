@@ -318,13 +318,20 @@ set_method(Object.prototype, {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // Array.*
 
+set_method(Array, {
+	// Array.of()
+	of : function of() {
+		return Array_slice.call(arguments);
+	}
+});
+
 
 set_method(Array.prototype, {
 	// Array.prototype.includes()
 	includes : includes,
 	// Array.prototype.entries()
 	entries : function entries() {
-		// [ index, array, use value ]
+		// new Array_Iterator(array, use value)
 		return new library_namespace.Array_Iterator(this);
 	},
 	// Array.prototype.findIndex()

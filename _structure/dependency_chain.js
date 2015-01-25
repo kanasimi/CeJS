@@ -319,7 +319,7 @@ if (typeof CeL === 'function')
 		 */
 
 		// Array.from()
-		function Array_from(items, mapfn, thisArg) {
+		function from(items, mapfn, thisArg) {
 			var array, i, iterator = items
 					&& !Array.isArray(items)
 					// 測試是否有 iterator。
@@ -377,11 +377,7 @@ if (typeof CeL === 'function')
 		}
 
 		library_namespace.set_method(Array, {
-			from : Array_from,
-			// Array.of()
-			of : function Array_of() {
-				return Array_slice.call(arguments);
-			}
+			from : from
 		});
 
 		function Array_Iterator_next() {
