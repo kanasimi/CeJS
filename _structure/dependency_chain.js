@@ -35,7 +35,7 @@ if (typeof CeL === 'function')
 		var Array_slice = Array.prototype.slice;
 
 		/**
-		 * Function.prototype.apply();
+		 * Function.prototype.apply();<br />
 		 * apply & call: after ECMAScript 3rd Edition.<br />
 		 * 不直接用 value undefined: for JS5.
 		 * 
@@ -88,7 +88,7 @@ if (typeof CeL === 'function')
 		}
 
 		/**
-		 * Function.prototype.call();
+		 * Function.prototype.call();<br />
 		 * call 方法是用來呼叫代表另一個物件的方法。call 方法可讓您將函式的物件內容從原始內容變成由 thisObj 所指定的新物件。
 		 * 如果未提供 thisObj 的話，將使用 global 物件作為 thisObj。
 		 * 
@@ -102,7 +102,7 @@ if (typeof CeL === 'function')
 		}
 
 		function copy_properties(from, to) {
-			for (var property in from)
+			for ( var property in from)
 				to[property] = from[property];
 			return to;
 		}
@@ -110,6 +110,7 @@ if (typeof CeL === 'function')
 
 		/**
 		 * Function.prototype.bind();
+		 * 
 		 * @since 2011/11/20
 		 * @see <a
 		 *      href="https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function/bind"
@@ -180,33 +181,6 @@ if (typeof CeL === 'function')
 
 		// for the Iterator interface
 
-		// 直接將 array 轉成 Iterator。
-		function Iterator_from(items) {
-			// reset index to next index
-			var index = 0;
-			// define .next() function onto items.
-			Object.defineProperty(items, 'next', {
-				// enumerable : false,
-				value : function() {
-					var IteratorResult = null_Object();
-					// the value property may be absent form the
-					// conforming object if it does not inherit an
-					// explicit value property.
-					IteratorResult.done =
-					// assert: typeof index === 'number'
-					!(index < items.length);
-					// Arguments may be passed to the next
-					// function but their interpretation and
-					// validity is dependent upon the target
-					// Iterator.
-					IteratorResult.value = IteratorResult.done ? items[index++]
-							: undefined;
-					return IteratorResult;
-				}
-			});
-			return items;
-		}
-
 		/**
 		 * 
 		 * @param object
@@ -215,7 +189,7 @@ if (typeof CeL === 'function')
 		 *            kind (The possible values are: "key", "value",
 		 *            "key+value"), or next function(index, Iterator, arguments)
 		 */
-		function create_list_iterator(object, kind, use_origin) {
+		function create_list_iterator(object, kind, get_Array, use_origin) {
 			var key, iterator;
 			if (use_origin && Array.isArray(object))
 				iterator = object;
@@ -249,16 +223,196 @@ if (typeof CeL === 'function')
 					// "key+value"
 					: [ key, object[key] ]);
 
-			return Iterator_from(iterator);
+			if (get_Array)
+				return iterator;
+
+			return new Array_Iterator(iterator, true);
 		}
 
-		function _Iterator(iterable) {
-			;
+		// ---------------------------------------------------------------------//
+
+		/**
+		 * test code for Map, Set, Array.from():
+		 * 
+		 * @example <code>
+
+		var a = [1, 2, 3, 1],
+			s = new Set(a),
+			e = s.entries(),
+			v = s.values(),
+			m = new Map([
+				[5, 1],
+				[7, 1],
+				[5, 2],
+				[3, 1]
+			]);
+		// CeL.set_debug(6);
+		CeL.assert(e.next().value.join() === "1,1", 'set.entries().value');
+		CeL.assert(e.next().value.join() === "2,2", 'set.entries().value');
+		CeL.assert(e.next().value.join() === "3,3", 'set.entries().value');
+		CeL.assert(e.next().done, 'set.entries().done');
+		CeL.assert(v.next().value === 1, 'set.values().value');
+		CeL.assert(v.next().value === 2, 'set.values().value');
+		CeL.assert(v.next().value === 3, 'set.values().value');
+		CeL.assert(v.next().done, 'set.values().done');
+
+		v = s.values();
+		CeL.assert(v.next().value === 1, 'set.values().value');
+		CeL.assert(v.next().value === 2, 'set.values().value');
+		CeL.assert(v.next().value === 3, 'set.values().value');
+
+		s.add(4);
+		if (v.next().value !== 4)
+			CeL.err('iterator 無法反映 Set 之更動！');
+		CeL.assert(v.next().done, 'set.values().done');
+
+		e = a.entries();
+		CeL.assert(e.next().value.join() === "0,1", 'array.entries().value');
+		CeL.assert(e.next().value.join() === "1,2", 'array.entries().value');
+		CeL.assert(e.next().value.join() === "2,3", 'array.entries().value');
+		CeL.assert(e.next().value.join() === "3,1", 'array.entries().value');
+		CeL.assert(e.next().done, 'array.entries().done');
+
+		e = m.entries();
+		CeL.assert(e.next().value.join() === "5,2", 'map.entries().value');
+		CeL.assert(e.next().value.join() === "7,1", 'map.entries().value');
+		CeL.assert(e.next().value.join() === "3,1", 'map.entries().value');
+		CeL.assert(e.next().done, 'map.entries().done');
+
+		v = m.keys();
+		CeL.assert(v.next().value === 5, 'map.keys().value');
+		CeL.assert(v.next().value === 7, 'map.keys().value');
+		CeL.assert(v.next().value === 3, 'map.keys().value');
+		CeL.assert(v.next().done, 'map.keys().done');
+
+		v = m.values();
+		CeL.assert(v.next().value === 2, 'map.values().value');
+		CeL.assert(v.next().value === 1, 'map.values().value');
+		CeL.assert(v.next().value === 1, 'map.values().value');
+		CeL.assert(v.next().done, 'map.values().done');
+
+		//{String}string
+		//string.split('')
+		//Object(string)
+		//Array.from(string)
+		CeL.assert([ Array.from('abc').join(), "a,b,c" ], 'Array.from(String)');
+		CeL.assert([ Array.from(5).join(), "" ], 'Array.from(Number)');
+		CeL.assert([ Array.from(true).join(), "" ], 'Array.from(Boolean)');
+		CeL.assert([ Array.from(a).join(), "1,2,3,1" ], 'Array.from(Array)');
+		CeL.assert([ Array.from(a.entries()).join(';'), "0,1;1,2;2,3;3,1" ],
+		'Array.from(array.entries())');
+		CeL.assert([ Array.from({
+		length : 4
+		}, function(v, i) {
+		return i * i;
+		}).join(), "0,1,4,9" ], 'Array.from({length:\d})');
+		CeL.assert([ Array.from(s).join(), "1,2,3,4" ], 'Array.from(Set)');
+		CeL.assert([ Array.from(m).join(), "5,2,7,1,3,1" ], 'Array.from(Map)');
+		CeL.assert([ Array.from(m.keys()).join(), "5,7,3" ], 'Array.from(map.keys())');
+
+
+		TODO: test:
+		Array.from(Iterator, other arrayLike)
+
+		 * </code>
+		 * 
+		 */
+
+		// Array.from()
+		function Array_from(items, mapfn, thisArg) {
+			var array, i, iterator = items
+					&& !Array.isArray(items)
+					// 測試是否有 iterator。
+					&& (
+					// items['@@iterator'] ||
+					items.constructor === Set ? 'values'
+							: (items.entries ? 'entries' : items.values
+									&& 'values'));
+
+			if (!iterator && typeof items.next === 'function')
+				// items itself is an iterator.
+				iterator = items;
+
+			if (iterator) {
+				array = [];
+
+				// need test library_namespace.env.has_for_of
+				// for(i of items) array.push(i);
+
+				if (typeof iterator === 'function')
+					iterator = iterator.call(items);
+				else if (iterator && typeof items[iterator] === 'function')
+					iterator = items[iterator]();
+				else if (!iterator.next)
+					throw new Error('Array.from: invalid iterator!');
+
+				while (!(i = iterator.next()).done)
+					array.push(i.value);
+				return array;
+			}
+
+			if (typeof mapfn !== 'function')
+				try {
+					// for IE, Array.prototype.slice.call('ab').join() !== 'a,b'
+					return typeof items === 'string' ? items.split('')
+							: Array_slice.call(items);
+				} catch (e) {
+					if ((e.number & 0xFFFF) !== 5014)
+						throw e;
+					mapfn = null;
+				}
+
+			var length = items && items.length | 0;
+			array = [];
+			if (mapfn)
+				for (i = 0; i < length; i++)
+					array.push(thisArg ? mapfn.call(thisArg, items[i], i)
+					// 不採用 .call() 以加速執行。
+					: mapfn(items[i], i));
+			else
+				while (i < length)
+					array.push(items[i++]);
+
+			return array;
 		}
-		_Iterator.list = create_list_iterator;
+
+		library_namespace.set_method(Array, {
+			from : Array_from,
+			// Array.of()
+			of : function Array_of() {
+				return Array_slice.call(arguments);
+			}
+		});
+
+		function Array_Iterator_next() {
+			// this: [ index, array, use value ]
+			// library_namespace.debug(this.join(';'));
+			var index = this[0]++;
+			// library_namespace.debug(this.join(';'));
+			if (index < this[1].length)
+				return {
+					value : this[2] ? this[1][index]
+							: [ index, this[1][index] ],
+					done : false
+				};
+
+			// 已經 done 的不能 reuse。
+			this[0] = NaN;
+			return {
+				value : undefined,
+				done : true
+			};
+		}
+
+		function Array_Iterator(array, use_value) {
+			// library_namespace.debug(array);
+			// reset index to next index.
+			// define .next() function onto items.
+			this.next = Array_Iterator_next.bind([ 0, array, use_value ]);
+		}
 
 		// export.
-		library_namespace.Iterator = _Iterator;
+		library_namespace.Array_Iterator = Array_Iterator;
 
 		// ---------------------------------------------------------------------//
 		// 測試是否具有標準的 ES6 Set/Map collections (ECMAScript 6 中的集合類型)。
@@ -468,6 +622,9 @@ if (typeof CeL === 'function')
 									// 傳入 OP_*，則表示為 private method。
 									// 回傳 private property 以便操作。
 									return [ hash_map, value_of_id ];
+								if (arguments[0] === OP_VALUES)
+									return create_list_iterator(value_of_id,
+											'value', true);
 
 								// 作出正常表現。
 								return create_list_iterator(value_of_id,
@@ -501,9 +658,11 @@ if (typeof CeL === 'function')
 									iterable.forEach(function(v, k) {
 										this.set(k, v);
 									}, this);
-								else
+								else {
+									throw 1;
 									for ( var k in iterable)
 										this.set(k, iterable[k]);
+								}
 							} catch (e) {
 								throw new TypeError(
 										'Input value is not iterable.');
@@ -548,9 +707,10 @@ if (typeof CeL === 'function')
 							map.size += v;
 						},
 						//
-						add_value = function() {
+						add_value = function(no_size_change) {
 							value_of_id[hash + '_' + index] = value;
-							add_size(1);
+							if (!no_size_change)
+								add_size(1);
 						},
 						//
 						delete_one = function() {
@@ -659,9 +819,9 @@ if (typeof CeL === 'function')
 						// 正規化 hash。
 						hash = hash.slice(0, max_hash_length).replace(
 								/_(\d+)$/, '-$1');
-						if (library_namespace.is_debug(2)
+						if (library_namespace.is_debug(6)
 								&& library_namespace.is_WWW())
-							library_namespace.debug('hash: [' + hash + ']', 3,
+							library_namespace.debug('hash: [' + hash + ']', 0,
 									'hash_of_key');
 
 						if (this.has(hash, OP_HASH)) {
@@ -669,6 +829,10 @@ if (typeof CeL === 'function')
 							// 實際上應該以 SameValue Algorithm 判斷。
 							// NaN 等於 NaN, -0 不等於 +0.
 							index = list.indexOf(key);
+							if (library_namespace.is_debug(6)
+									&& library_namespace.is_WWW())
+								library_namespace.debug('index: [' + index
+										+ ']', 0, 'hash_of_key');
 
 							if (index === NOT_FOUND) {
 								// 測試是否為本身與本身不相等的特殊情形。
@@ -693,14 +857,14 @@ if (typeof CeL === 'function')
 
 							if (index === NOT_FOUND) {
 								if (operator === ADD) {
-									if (library_namespace.is_debug(2)
+									if (library_namespace.is_debug(5)
 											&& library_namespace.is_WWW())
 										library_namespace.debug(
 												'衝突(collision) : ' + type
 														+ ' @ hash [' + hash
 														+ '], index ' + index
 														+ ' / ' + list.length,
-												2, 'hash_of_key');
+												0, 'hash_of_key');
 
 									index = list.push(key) - 1;
 									add_value();
@@ -708,7 +872,10 @@ if (typeof CeL === 'function')
 									hash = undefined;
 
 							} else if (operator === DELETE) {
-								// remove key.
+								if (library_namespace.is_debug(6)
+										&& library_namespace.is_WWW())
+									library_namespace.debug('remove key: ['
+											+ hash + ']', 0, 'hash_of_key');
 								if (list.length < 2)
 									// assert: list.length ===1 && list[0] ===
 									// key.
@@ -718,6 +885,12 @@ if (typeof CeL === 'function')
 									delete list[index];
 								delete_one();
 								return true;
+							} else if (operator === ADD) {
+								if (library_namespace.is_debug(6)
+										&& library_namespace.is_WWW())
+									library_namespace.debug('modify key: ['
+											+ hash + ']', 0, 'hash_of_key');
+								add_value(true);
 							}
 
 						} else if (operator === ADD) {
@@ -761,10 +934,11 @@ if (typeof CeL === 'function')
 								callbackfn(value, key, this);
 						}
 
-						if (list)
+						if (list) {
 							// 這裡可以檢測 size。
 							// assert: size === list.length
-							return Iterator_from(list);
+							return new Array_Iterator(list, true);
+						}
 					}
 
 					// public interface of Map.
@@ -898,16 +1072,18 @@ if (typeof CeL === 'function')
 						},
 						entries : function Set_entries() {
 							var entries = [];
-							this.values().forEach(function(value, index) {
-								entries.push([ index, value ]);
-							});
-							return Iterator_from(entries);
+							this.values(OP_VALUES, 'values', OP_VALUES)
+									.forEach(function(value) {
+										entries.push([ value, value ]);
+									});
+							return new Array_Iterator(entries, true);
 						},
 						// 在 JScript 10.0.16438 中，兩個 "function forEach()" 宣告，會造成
 						// Map.prototype.forEach 也被設到 Set.prototype.forEach，但
 						// Map.prototype.forEach !== Set.prototype.forEach。
 						forEach : function Set_forEach(callbackfn, thisArg) {
-							this.values().forEach(callbackfn, thisArg);
+							this.values(OP_VALUES, 'values', OP_VALUES)
+									.forEach(callbackfn, thisArg);
 						},
 						toString : function() {
 							// Object.prototype.toString.call(new Set)
@@ -926,6 +1102,12 @@ if (typeof CeL === 'function')
 					var global = library_namespace.env.global;
 					global.Set = library_namespace.Set = Set;
 					global.Map = library_namespace.Map = Map;
+
+					if (false && Array.from === Array_from) {
+						library_namespace
+								.debug('做個標記，設定 Set.prototype[@@iterator]。');
+						Set.prototype['@@iterator'] = 'values';
+					}
 
 					is_Set = function(value) {
 						// value.__proto__ === Set.prototype
@@ -1078,7 +1260,7 @@ if (typeof CeL === 'function')
 				this.forEach(function(v) {
 					values.push(v);
 				});
-				return Iterator_from(values);
+				return new Array_Iterator(values, true);
 			};
 
 		library_namespace.is_Set = is_Set;
