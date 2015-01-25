@@ -51,8 +51,6 @@ NOT_FOUND = ''.indexOf('_');
  * TODO:
 
 Object.create()
-Array.prototype.reduce()
-Array.prototype.reduceRight()
 
 http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K875.aspx
 8進制數字表示被禁止， 010 代表 10 而不是 8
@@ -326,9 +324,46 @@ set_method(Array, {
 });
 
 
+
+
 set_method(Array.prototype, {
 	// Array.prototype.includes()
 	includes : includes,
+	// Array.prototype.reduce()
+	reduce : function reduce(callbackfn/*, initialValue*/) {
+		var index = 0, length = this.length, value;
+		if (arguments.length > 1)
+			value = arguments[1];
+		else
+			// initialValue
+			for (; index < length; index++)
+				if (index in this) {
+					value = this[index++];
+					break;
+				}
+		for (; index < length; index++)
+			if (index in this)
+				value = callbackfn(value, this[index], index, this);
+		return value;
+	},
+	// Array.prototype.reduceRight()
+	reduceRight : function reduceRight(callbackfn/*, initialValue*/) {
+		var index = this.length, value;
+		if (arguments.length > 1)
+			value = arguments[1];
+		else
+			// initialValue
+			while (index-- > 0)
+				if (index in this) {
+					value = this[index];
+					break;
+				}
+		while (index-- > 0)
+			if (index in this)
+				value = callbackfn(value, this[index], index, this);
+		return value;
+	},
+
 	// Array.prototype.entries()
 	entries : function entries() {
 		// new Array_Iterator(array, use value)
