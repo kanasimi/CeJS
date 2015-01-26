@@ -325,7 +325,6 @@ set_method(Array, {
 
 
 
-
 set_method(Array.prototype, {
 	// Array.prototype.includes()
 	includes : includes,
@@ -369,15 +368,21 @@ set_method(Array.prototype, {
 		// new Array_Iterator(array, use value)
 		return new library_namespace.Array_Iterator(this);
 	},
-	// Array.prototype.findIndex()
-	find : function find(predicate, thisArg) {
-		for (var index = 0, length = this.length; index < length; index++)
-			if (thisArg ? predicate.call(thisArg, this[index], index, this)
-			// 不採用 .call() 以加速執行。
-			: predicate(this[index], index, this))
-				return this[index];
-		//return undefined;
+	// Array.prototype.values()
+	values : function values() {
+		// new Array_Iterator(array, use value)
+		return new library_namespace.Array_Iterator(this, true);
 	},
+	// Array.prototype.keys()
+	keys : function Array_keys() {
+		var keys = [];
+		for (var key in this)
+			if (/^\d+$/.test(key))
+				keys.push(key | 0);
+		library_namespace.debug('keys: ' + keys, 5, 'Array.prototype.keys');
+		return new library_namespace.Array_Iterator(keys, true);
+	},
+
 	// Array.prototype.findIndex()
 	findIndex : function findIndex(predicate, thisArg) {
 		for (var index = 0, length = this.length; index < length; index++)
@@ -387,6 +392,14 @@ set_method(Array.prototype, {
 				return index;
 		return NOT_FOUND;
 	},
+	// Array.prototype.findIndex()
+	find : function find(predicate, thisArg) {
+		var index = this.findIndex(predicate, thisArg);
+		if (index !== NOT_FOUND)
+			return this[index];
+		//return undefined;
+	},
+
 	// Array.prototype.some()
 	some : function some(callback, thisArg) {
 		for (var index = 0, length = this.length; index < length; index++)
@@ -405,6 +418,7 @@ set_method(Array.prototype, {
 				return false;
 		return true;
 	},
+
 	// Array.prototype.map()
 	map : function map(callback, thisArg) {
 		var result = [];
@@ -422,6 +436,7 @@ set_method(Array.prototype, {
 		}, thisArg);
 		return result;
 	},
+
 	//Array.prototype.indexOf ( searchElement [ , fromIndex ] )
 	indexOf : function indexOf(searchElement, fromIndex) {
 		fromIndex |= 0;

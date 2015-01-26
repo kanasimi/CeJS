@@ -234,6 +234,9 @@ if (typeof CeL === 'function')
 		/**
 		 * test code for Map, Set, Array.from():
 		 * 
+		 * TODO: test:
+		 * Array.from(Iterator, other arrayLike)
+		 * 
 		 * @example <code>
 
 		var a = [1, 2, 3, 1],
@@ -310,10 +313,6 @@ if (typeof CeL === 'function')
 		CeL.assert([ Array.from(m).join(), "5,2,7,1,3,1" ], 'Array.from(Map)');
 		CeL.assert([ Array.from(m.keys()).join(), "5,7,3" ], 'Array.from(map.keys())');
 
-
-		TODO: test:
-		Array.from(Iterator, other arrayLike)
-
 		 * </code>
 		 * 
 		 */
@@ -382,15 +381,16 @@ if (typeof CeL === 'function')
 
 		function Array_Iterator_next() {
 			// this: [ index, array, use value ]
+			library_namespace.debug(this.join(';'), 6, 'Array_Iterator.next');
+			var index;
 			// library_namespace.debug(this.join(';'));
-			var index = this[0]++;
-			// library_namespace.debug(this.join(';'));
-			if (index < this[1].length)
-				return {
-					value : this[2] ? this[1][index]
-							: [ index, this[1][index] ],
-					done : false
-				};
+			while ((index = this[0]++) < this[1].length)
+				if (index in this[1])
+					return {
+						value : this[2] ? this[1][index]
+								: [ index, this[1][index] ],
+						done : false
+					};
 
 			// 已經 done 的不能 reuse。
 			this[0] = NaN;
