@@ -749,7 +749,220 @@ set_method(Math, {
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// RegExp.*
+
+var RegExp_flags = /./g.flags === 'g'
+	// get RegExp.prototype.flags
+	? function(regexp) {
+	return regexp.flags;
+} : function(regexp) {
+	// regexp = RegExp.prototype.toString.call(regexp);
+	regexp = '' + regexp;
+	return regexp.slice(regexp.lastIndexOf('/') + 1);
+
+	var flags = [];
+	for ( var flag in RegExp_flags.flags)
+		if (regexp[flag])
+			flags.push(RegExp_flags.flags[flag]);
+	return flags.join('');
+};
+
+RegExp_flags.flags = {
+		// Proposed for ES6
+		// extended : 'x',
+		global : 'g',
+		ignoreCase : 'i',
+		multiline : 'm',
+		unicode : 'u',
+		sticky : 'y'
+};
+
+library_namespace.RegExp_flags = RegExp_flags;
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // String.*
+
+/**
+ * bug fix (workaround) for String.prototype.split():<br />
+ * 
+ * @see https://github.com/es-shims/es5-shim/blob/master/es5-shim.js
+ * http://blog.stevenlevithan.com/archives/cross-browser-split
+ * http://blog.stevenlevithan.com/archives/fixing-javascript-regexp
+ * 
+ * @since 2010/1/1 19:03:40
+ * 2015/1/28 17:43:0	rewrite
+ * 
+ * @example <code>
+
+
+CeL.assert([ '11,22'.split(/,/).join(';'), '11;22' ]);
+CeL.assert([ '11,'.split(/,/).join(';'), '11;' ]);
+CeL.assert([ ',22'.split(/,/).join(';'), ';22' ]);
+CeL.assert([ '11,22'.split(/,?/).join(';'), '1;1;2;2' ]);
+CeL.assert([ '11,'.split(/,?/).join(';'), '1;1;' ]);
+CeL.assert([ ',22'.split(/,?/).join(';'), ';2;2' ]);
+CeL.assert([ ',,2'.split(/,?/).join(';'), ';;2' ]);
+CeL.assert([ '1'.split(/(,)?/).join(';'), '1' ]);
+CeL.assert([ '11,22'.split(/(,)?/).join(';'), '1;;1;,;2;;2' ]);
+CeL.assert([ '11,'.split(/(,)?/).join(';'), '1;;1;,;' ]);
+CeL.assert([ ',22'.split(/(,)?/).join(';'), ';,;2;;2' ]);
+CeL.assert([ ',,2'.split(/(,)?/).join(';'), ';,;;,;2' ]);
+CeL.assert([ 'ab'.split(new RegExp('(?:ab)*')).join(';'), ';' ]);
+CeL.assert([ '.'.split(/(.?)(.?)/).join(';'), ';.;;' ]);
+CeL.assert([ 'tesst'.split(new RegExp('(s)*')).join(';'), 't;;e;s;t' ]);
+CeL.assert([ 'test'.split(/(?:)/, -1).join(';'), 't;e;s;t' ]);
+CeL.assert([ ''.split(/.?/).length, 0 ]);
+CeL.assert([ '.'.split(/()()/).join(';'), '.' ]);
+CeL.assert([ 'dfg_dfg__shge'.split(/(_+)/).join(';'),
+		'dfg;_;dfg;__;shge' ]);
+CeL.assert([ '.'.split(/(.?)(.?)/).join(';'), ';.;;' ]);
+// [ "aa", "__", "_", "bb", "___", "_", "cc" ]
+CeL.assert([ 'aa__bb___cc'.split(/((_)+)/).join(';'),
+		'aa;__;_;bb;___;_;cc' ]);
+// [ "a", "", undefined, "a", "__", "_", "b", "", undefined, "b", "___",
+// "_", "c", "", undefined, "c" ]
+CeL.assert([ 'aa__bb___cc'.split(/((_)*)/).join(';'),
+		'a;;;a;__;_;b;;;b;___;_;c;;;c' ]);
+CeL.assert([ 'ab'.split(/a*?/).join(';'), 'a;b' ]);
+CeL.assert([ 'ab'.split(new RegExp('a*')).join(';'), ';b' ]);
+CeL.assert([
+		"A<B>bold</B>and<CODE>coded</CODE>".split(/<(\/)?([^<>]+)>/)
+				.join(';'), "A;;B;bold;/;B;and;;CODE;coded;/;CODE;" ]);
+CeL.assert([ '..Word1 Word2..'.split(/([a-z]+)(\d+)/i).join(';'), "..;Word;1; ;Word;2;.."]);
+
+
+ * </code>
+ * 
+ */
+if (
+	// [ "", "" ] @ IE8, [ "", "_", "" ] @ firefox 38
+	'_'.split(/(_)/)[1] !== '_'
+	// 理論上 '.'.split(/\./).length 應該是 2，但 IE 5–8 中卻為 0!
+	// 用 .split('.') 倒是 OK.
+	// || '.'.split(/\./).length === 0
+)
+	(function() {
+		var native_String_split =
+			// 增加可以管控與回復的手段，預防有時需要回到原有行為。
+			library_namespace.native_String_split = String.prototype.split;
+
+		// The length property of the split method is 2.
+		(String.prototype.split = function(separator, limit) {
+			if (!library_namespace.is_RegExp(separator))
+				return native_String_split.apply(this, arguments);
+
+			// 不改變 separator 本身。
+			separator = new RegExp(separator.source,
+					(separator.global ? '' : 'g')
+					+ RegExp_flags(separator));
+			var matched, result = [], last_index = 0;
+			if (0 <= limit)
+				// ToLength()
+				limit >>>= 0;
+				else
+					// Math.pow(2, 32) - 1
+					limit = -1 >>> 0;
+
+					while (result.length < limit && last_index < this.length) {
+						matched = separator.exec(this);
+						if (!matched) {
+							if (false)
+								library_namespace.debug('push (last) ['
+										+ this.slice(last_index) + ']');
+							result.push(this.slice(last_index));
+							break;
+						}
+						if (false) {
+							library_namespace.warn('index: '
+									+ last_index
+									+ '-'
+									+ matched.index
+									+ '-'
+									+ separator.lastIndex
+									+ ' ('
+									+ matched[0].length
+									+ ')'
+									+ ' [<span style="color:#22a;">'
+									+ this.slice(0, last_index)
+									+ '<span style="color:#182;">'
+									+ this.slice(last_index,
+											separator.lastIndex) + '</span>'
+											+ this.slice(separator.lastIndex)
+											+ '</span>]');
+							library_namespace
+							.log('matched 1 ['
+									+ matched
+									.join('<b style="color:#b94;">;</b>')
+									+ ']');
+						}
+						if (false && library_namespace.show_value) {
+							library_namespace.show_value(matched, 'matched');
+							library_namespace.show_value(result.slice(),
+							'result');
+						}
+						// 當有東西時才登記。
+						if (last_index < matched.index || matched[0]) {
+							result.push(this.slice(last_index, matched.index));
+							if (false)
+								library_namespace.debug('push ['
+										+ this.slice(last_index, matched.index)
+										+ ']');
+							if (matched.length > 1
+									&& matched.index < this.length)
+								Array.prototype.push.apply(result, matched
+										.slice(1));
+							// IE 中，匹配到 null string 時，lastIndex 會自動 +1。
+							// /(,?)/g.exec('1') 之 lastIndex = 1，
+							last_index = matched.index + matched[0].length;
+							if (false)
+								library_namespace.debug('last_index: ['
+										+ last_index + ']');
+							if (last_index === this.length) {
+								if (matched[0]) {
+									if (false)
+										library_namespace
+										.debug('push null (last)');
+									result.push('');
+								}
+								break;
+							}
+						} else if (false)
+							library_namespace.debug('Skip this.');
+
+						if (separator.lastIndex === matched.index)
+							// 避免無窮迴圈。
+							separator.lastIndex++;
+
+						if (false && library_namespace.show_value) {
+							library_namespace
+							.info('lastIndex: <span style="color:#905;">'
+									+ separator.lastIndex
+									+ '</span>, next from: [<span style="color:#62a;">'
+									+ this
+									.slice(0,
+											separator.lastIndex)
+											+ '</span>|<span style="color:#a42;">'
+											+ this.slice(separator.lastIndex)
+											+ '</span>]');
+							library_namespace
+							.log('matched 2 ['
+									+ matched
+									.join('<b style="color:#b94;">;</b>')
+									+ ']');
+							library_namespace
+							.log('result ['
+									+ result
+									.join('<b style="color:#b94;">;</b>')
+									+ ']');
+						}
+					}
+
+					return result;
+		})[library_namespace.env('not_native_keyword')] = true;
+	})();
+
+
 
 //String.prototype.repeat()
 //in VB: String(count, this)
@@ -1147,7 +1360,7 @@ function json(val, name, type) {
 				break;
 			}
 			var c = val.constructor;
-			if (c == RegExp) {
+			if (c === RegExp) {
 				addE(val);
 				break;
 			}

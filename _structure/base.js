@@ -149,6 +149,7 @@ function (global) {
 	try {
 		eval('if(undefined!==undefined){throw 1;}');
 	} catch (e) {
+		// or: undefined=void 0
 		eval('undefined=this.undefined;');
 	}
 

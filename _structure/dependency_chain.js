@@ -151,31 +151,6 @@ if (typeof CeL === 'function')
 			bind : bind
 		});
 
-		/**
-		 * workaround:<br />
-		 * 理論上 '.'.split(/\./).length 應該是 2，但 IE 5–8 中卻為 0!<br />
-		 * 用 .split('.') 倒是 OK.<br />
-		 * 
-		 * @since 2010/1/1 19:03:40
-		 */
-		if ('.'.split(/\./).length === 0)
-			(function() {
-				var native_String_split =
-				// 增加可以管控與回復的手段，預防有時需要回到原有行為。
-				library_namespace.native_String_split = String.prototype.split;
-
-				String.prototype.split = function(separator, limit) {
-					return library_namespace.is_RegExp(separator) ? native_String_split
-							.call(this.valueOf().replace(
-									separator.global ? separator :
-									// TODO: 少了 multiline.
-									new RegExp(separator.source,
-											separator.ignoreCase ? 'ig' : 'g'),
-									'\0'), '\0', limit)
-							: native_String_split.apply(this, arguments);
-				};
-			})();
-
 		// ---------------------------------------------------------------------//
 		// for Iterator
 
@@ -234,8 +209,8 @@ if (typeof CeL === 'function')
 		/**
 		 * test code for Map, Set, Array.from():
 		 * 
-		 * TODO: test:
-		 * Array.from(Iterator, other arrayLike)
+		 * TODO:<br />
+		 * test: Array.from(Iterator, other arrayLike)
 		 * 
 		 * @example <code>
 
@@ -383,12 +358,12 @@ if (typeof CeL === 'function')
 			// this: [ index, array, use value ]
 			library_namespace.debug(this.join(';'), 6, 'Array_Iterator.next');
 			var index;
-			// library_namespace.debug(this.join(';'));
 			while ((index = this[0]++) < this[1].length)
 				if (index in this[1])
 					return {
 						value : this[2] ? this[1][index]
-								: [ index, this[1][index] ],
+						//
+						: [ index, this[1][index] ],
 						done : false
 					};
 
@@ -414,9 +389,11 @@ if (typeof CeL === 'function')
 		// 測試是否具有標準的 ES6 Set/Map collections (ECMAScript 6 中的集合類型)。
 
 		var is_Set, is_Map, has_Set, has_Map,
+		//
+		KEY_not_native = 'not_native',
 		// use Object.defineProperty.not_native to test
 		// if the browser don't have native support for Object.defineProperty().
-		has_native_Object_defineProperty = !Object.defineProperty.not_native;
+		has_native_Object_defineProperty = !Object.defineProperty[KEY_not_native];
 
 		try {
 			has_Set = !!(new Set());
@@ -537,6 +514,7 @@ if (typeof CeL === 'function')
 					: function(value) {
 						return value === -0 && 1 / value === -Infinity;
 					};
+					library_namespace.is_negative_zero = is_negative_zero;
 
 					/**
 					 * 鍵值對。
@@ -1096,8 +1074,8 @@ if (typeof CeL === 'function')
 
 					// export.
 					var global = library_namespace.env.global;
-					global.Set = library_namespace.Set = Set;
-					global.Map = library_namespace.Map = Map;
+					(global.Set = library_namespace.Set = Set)[KEY_not_native] = true;
+					(global.Map = library_namespace.Map = Map)[KEY_not_native] = true;
 
 					if (false && Array.from === Array_from) {
 						library_namespace

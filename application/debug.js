@@ -200,6 +200,7 @@ function show_value_single(key, value, filter, key_is_name) {
 										value_String += ':';
 									value_String += val;
 								}
+								//value_String += '<span style="color:#a42;">|</span>';
 								value_String += ', ';
 								full_listed = true;
 							}
@@ -233,7 +234,7 @@ function show_value_single(key, value, filter, key_is_name) {
 					'boolean' : 1
 				} ? {
 					// 對於沒有 children property/method/member 的，例如純量，則不顯示深入連結。
-					span : key ? [ '[', key, ']' ] : '(blank)',
+					span : key ? [ '[', library_namespace.is_negative_zero(value) ? '-0' : key, ']' ] : '(blank)',
 					R : no_more ? '' : '' + value,
 					S : value_String
 				} : {
@@ -257,9 +258,20 @@ function show_value_single(key, value, filter, key_is_name) {
 	try {
 		return nodes;
 	} finally {
+		// free
 		key = name = value_String = no_more = nodes = null;
 	}
 }
+
+
+var RegExp_properties = 'lastIndex,source'.split(',');
+(function () {
+	var r = /./;
+	// RegExp_flags @ data.code.compatibility
+	for (var flag in library_namespace.RegExp_flags.flags)
+		if (typeof r[flag] === 'boolean')
+			RegExp_properties.push(flag);
+})();
 
 function show_value_children(value, filter) {
 	var key, nodes = [], parent = this.parentNode, proto, length;
@@ -272,41 +284,52 @@ function show_value_children(value, filter) {
 	}
 
 	try {
-		length=value.length;
+		length = value && value.length;
 	} catch (e) {
+		library_namespace.warn('show_value_children: ' + e.message);
 	}
 
 	try {
 		//	IE 8, JScript 5.8.23141 中，DOM 可能沒有 .hasOwnProperty()。
 		proto = value.hasOwnProperty && [];
-		for (key in value){
-			if(length&&(key==='0'||key===0))
+		for (key in value) {
+			if (length && (key === '0' || key === 0))
 				//代表已經遍歷過。
-				length=0;
+				length = 0;
 			if (!filter || filter.test(key))
 				(!proto || value.hasOwnProperty(key) ? nodes : proto).push({
-					div : show_value_single(key, value, filter),
-					S : 'margin-left:1em;'
+					div: show_value_single(key, value, filter),
+					S: 'margin-left:1em;'
 				});
 		}
+
+		if (library_namespace.is_RegExp(value))
+			// RegExp 有許多無法 enumerable 的 properties。
+			RegExp_properties.forEach(function (key) {
+				if (!filter || filter.test(key))
+					nodes.push({
+						div: show_value_single(key, value, filter),
+						S: 'margin-left:1em;'
+					});
+			});
 
 	} catch (e) {
 		library_namespace.warn('show_value_children: ' + e.message);
 	}
 
-	if(isNaN(length)||length>0)
+	if(isNaN(length) || length > 0)
 	try {
 		//	處理 childNodes[] 之類。
-		for (key=0;key<length||value[key]!==undefined;key++)
-			if (!filter || filter.test(key)){
+		for (key = 0; key < length || value[key] !== undefined; key++)
+			if (!filter || filter.test(key)) {
 				nodes.push({
-					div : show_value_single(key, value, filter),
-					S : 'margin-left:1em;'
+					div: show_value_single(key, value, filter),
+					S: 'margin-left:1em;'
 				});
 			}
 	} catch (e) {
+		library_namespace.warn('show_value_children: ' + e.message);
 	}
-
 
 	if (proto && proto.length > 0) {
 		nodes.push({
