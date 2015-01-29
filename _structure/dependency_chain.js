@@ -381,6 +381,9 @@ if (typeof CeL === 'function')
 			// define .next() function onto items.
 			this.next = Array_Iterator_next.bind([ 0, array, use_value ]);
 		}
+		Array_Iterator.prototype.toString = function() {
+			return "[object Array Iterator]";
+		};
 
 		// export.
 		library_namespace.Array_Iterator = Array_Iterator;

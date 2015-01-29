@@ -11,6 +11,7 @@ if (typeof CeL === 'function')
 CeL.run(
 {
 name : 'data.date',
+// includes() @ data.code.compatibility.
 require : 'data.code.compatibility.|data.native.set_bind|data.code.parse_escape|data.native.pad',
 
 code : function(library_namespace) {
@@ -415,7 +416,7 @@ function String_to_Date_default_parser(date_string,
 		// 僅有 xxx/1xxx/2xxx 年(year) 時。
 		date_string = (matched[2] || matched[1]).replace(/^[前−]/, '-000');
 		if (period_end) {
-			matched = date_string.indexOf('00') !== NOT_FOUND;
+			matched = date_string.includes('00');
 			if (!++date_string)
 				// 預防 前1年 → 0年。
 				date_string = no_year_0 ? '0001' : '0000';
@@ -986,7 +987,7 @@ strftime.set_conversion = function(conversion, locale, options) {
 			while (v in locale_conversion) {
 				// 處理 alias。
 				locale_conversion[i] = v = locale_conversion[v];
-				if (search.indexOf(v) !== NOT_FOUND)
+				if (search.includes(v))
 					// 預防迴圈。
 					break;
 				search.push(v);
@@ -2161,10 +2162,10 @@ function parse_period(period) {
 	// 預防 "10月22日夜7-8時"
 	|| !/[時分秒\/]/.test(matched[2].match(/^(?:.*?)([年月日時分秒\/])/)[1]))) {
 		(period = matched).shift();
-		if (period[1].indexOf('月') === NOT_FOUND
+		if (!period[1].includes('月')
 				&& (matched = period[0].match(/[^年月]+月/)))
 			period[1] = matched[0] + period[1];
-		if (period[1].indexOf('年') === NOT_FOUND
+		if (!period[1].includes('年')
 				&& (matched = period[0].match(/[^年]+年/)))
 			period[1] = matched[0] + period[1];
 	} else if (library_namespace.is_debug(2))

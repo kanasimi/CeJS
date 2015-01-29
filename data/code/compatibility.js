@@ -12,8 +12,9 @@
 
 'use strict';
 if (typeof CeL === 'function')
-CeL.run({name:'data.code.compatibility',
-code:function(library_namespace) {
+CeL.run({
+name : 'data.code.compatibility',
+code : function(library_namespace) {
 
 //	nothing required.
 //	本 module 為許多 module 所用，應盡可能勿 requiring 其他 module。
@@ -40,7 +41,7 @@ _// JSDT:_module_
 var Array_slice = Array.prototype.slice,
 // cache
 set_method = library_namespace.set_method,
-// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
 NOT_FOUND = ''.indexOf('_');
 
 
@@ -50,6 +51,11 @@ NOT_FOUND = ''.indexOf('_');
 /*
  * TODO:
 
+Array.prototype.copyWithin()
+Math.*
+RegExp.prototype.flags
+String.prototype.codePointAt()
+String.fromCodePoint()
 Object.create()
 
 http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K875.aspx
@@ -156,38 +162,6 @@ if (typeof Object.freeze === 'function')
 	}
 
 
-set_method(Object, {
-	// Object.seal()
-	seal: function seal(object) {
-		// 無法以舊的語法實現。
-		return object;
-	},
-	// Object.isSealed()
-	isSealed: function isSealed(object) {
-		return false;
-	},
-	// Object.preventExtensions()
-	preventExtensions: function preventExtensions(object) {
-		// 無法以舊的語法實現。
-		return object;
-	},
-	// Object.isExtensible()
-	isExtensible: function isExtensible(object) {
-		return true;
-	},
-
-	// Object.freeze()
-	freeze : function freeze(object) {
-		// 無法以舊的語法實現。
-		return object;
-	},
-	// Object.isFrozen()
-	isFrozen : function isFrozen(object) {
-		return false;
-	}
-});
-
-
 
 if (!Object.setPrototypeOf) {
 	var Object_getPrototypeOf, Object_setPrototypeOf;
@@ -284,6 +258,44 @@ function getOwnPropertyDescriptor(object, property) {
 }
 
 set_method(Object, {
+	// Object.seal()
+	seal: function seal(object) {
+		// 無法以舊的語法實現。
+		return object;
+	},
+	// Object.isSealed()
+	isSealed: function isSealed(object) {
+		return false;
+	},
+	// Object.preventExtensions()
+	preventExtensions: function preventExtensions(object) {
+		// 無法以舊的語法實現。
+		return object;
+	},
+	// Object.isExtensible()
+	isExtensible: function isExtensible(object) {
+		return true;
+	},
+
+	// Object.freeze()
+	freeze : function freeze(object) {
+		// 無法以舊的語法實現。
+		return object;
+	},
+	// Object.isFrozen()
+	isFrozen : function isFrozen(object) {
+		return false;
+	},
+
+	// Object.is(): Return SameValue(value1, value2).
+	is : function is(value1, value2) {
+		return value1 === value2 ? value1 !== 0
+		// check +0 and -0
+		|| 1 / value1 === 1 / value2
+		// check NaN. May use Number.isNaN() as well.
+		: value1 !== value1 && value2 !== value2;
+	},
+
 	// Object.getOwnPropertyDescriptor()
 	getOwnPropertyDescriptor : getOwnPropertyDescriptor,
 	// Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性 (enumerable or non-enumerable)
@@ -327,7 +339,20 @@ set_method(Array, {
 
 set_method(Array.prototype, {
 	// Array.prototype.includes()
-	includes : includes,
+	includes : function Array_includes(search_target, position) {
+		if (search_target === search_target)
+			return this.indexOf(search_target, position) !== NOT_FOUND;
+		// assert: search_target is NaN
+		var length = this.length;
+		if (position < 0 && (position += length) < 0)
+			position = 0;
+		else
+			position |= 0;
+		for (; position < length; position++)
+			if (this[position] !== this[position])
+				return true;
+		return false;
+	},
 	// Array.prototype.reduce()
 	reduce : function reduce(callbackfn/*, initialValue*/) {
 		var index = 0, length = this.length, value;
@@ -531,7 +556,7 @@ function ToInteger(value) {
 }
 
 
-//Number.isNaN()
+// Number.isNaN()
 //	http://wiki.ecmascript.org/doku.php?id=harmony:number.isnan
 function is_NaN(value) {
 	return typeof value === 'number' &&
@@ -613,6 +638,7 @@ set_method(Number, {
 	},
 	parseFloat: parseFloat,
 	parseInt: parseInt,
+	// Number.isNaN()
 	isNaN: is_NaN,
 	isFinite: function (value) {
 		return typeof value === 'number' && isFinite(value);
@@ -858,7 +884,7 @@ if (
 					+ RegExp_flags(separator));
 			var matched, result = [], last_index = 0;
 			if (0 <= limit)
-				// ToLength()
+				// ToLength(),  ToUint32()
 				limit >>>= 0;
 				else
 					// Math.pow(2, 32) - 1
@@ -1071,17 +1097,15 @@ function endsWith(searchString, endPosition) {
 							searchString.length));
 }
 
-// String.prototype.includes()
-// Array.prototype.includes()
-function includes(searchString, position) {
-	return this.indexOf(searchString, position) !== NOT_FOUND;
-}
 
 
 set_method(String.prototype, {
 	repeat : repeat,
 	trim : trim,
-	includes : includes,
+	// String.prototype.includes()
+	includes : function includes(searchString, position) {
+		return this.indexOf(searchString, position) !== NOT_FOUND;
+	},
 	startsWith : startsWith,
 	endsWith : endsWith
 });

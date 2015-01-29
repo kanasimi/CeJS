@@ -11,13 +11,12 @@ if (typeof CeL === 'function')
 CeL.run(
 {
 name:'application.OS.Windows.HTA',
-require : 'interact.DOM.select_node|interact.DOM.fill_form',
+// includes() @ data.code.compatibility.
+require : 'data.code.compatibility.|interact.DOM.select_node|interact.DOM.fill_form',
 code : function(library_namespace) {
 
 //	requiring
-var select_node, fill_form,
-// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
-NOT_FOUND = ''.indexOf('_');
+var select_node, fill_form;
 
 eval(this.use());
 
@@ -150,8 +149,8 @@ _.IEA.prototype = {
 					URL = 'about:blank';// this.init_url;
 
 				if (URL) {
-					if (URL.indexOf(':') === NOT_FOUND
-							//URL.indexOf('://')==NOT_FOUND&&URL.indexOf('about:')==NOT_FOUND
+					if (!URL.includes(':')
+							//!URL.includes('://') && !URL.includes('about:')
 							) {
 						//	預防操作中 URL 已經改了。
 						this.setBase(this.href());
@@ -673,7 +672,7 @@ function get_HTML(url) {
 	IEA_instance.wait();
 
 	// https://ipv4.google.com/sorry/IndexRedirect?continue=_url_
-	if (IEA_instance.href().indexOf('.google.com/sorry/IndexRedirect') !== NOT_FOUND) {
+	if (IEA_instance.href().includes('.google.com/sorry/IndexRedirect')) {
 		IEA_instance.show(true);
 		// 如果您使用了自動程式常用的進階字詞，或是快速傳出多項要求，系統可能會要求您進行人機驗證 (Captcha)。
 		throw new Error('如要繼續，請輸入人機驗證 (Captcha) 字元。');

@@ -209,6 +209,7 @@ if (typeof CeL === 'function')
 		// data.native. : for Array.prototype.search_sorted()
 		// data.date. : 干支
 		// application.locale. : 中文數字
+		// includes() @ data.code.compatibility.
 		require : 'data.code.compatibility.'
 				+ '|data.native.|application.locale.|data.date.String_to_Date',
 
@@ -707,7 +708,7 @@ if (typeof CeL === 'function')
 					size = eras[0].size;
 
 					if (Array.isArray(queue)) {
-						if (queue.indexOf(key) !== NOT_FOUND) {
+						if (queue.includes(key)) {
 							library_namespace.debug(
 							// 將造成之後遇到此 key 時，使 for_each_era_of_key() 不斷循環參照。
 							'別名設定存在循環參照！您應該改正別名設定: ' + queue.join('→') + '→'
@@ -1175,7 +1176,7 @@ if (typeof CeL === 'function')
 				//
 				calendar_data_Array = [], initial_month = date_name || '';
 
-				if (initial_month.indexOf('/') !== NOT_FOUND) {
+				if (initial_month.includes('/')) {
 					initial_month = initial_month.split('/');
 					// 須考慮特殊情況。
 					if (initial_month.length === 2 && !initial_month[0])
@@ -1350,9 +1351,9 @@ if (typeof CeL === 'function')
 				// 基本上不加國家名稱。
 				name = name.slice(0, 3).reverse();
 				// 對重複的名稱作適當簡略調整。
-				if (name[0] && name[0].indexOf(name[2]) !== NOT_FOUND
+				if (name[0] && name[0].includes(name[2])
 				//
-				|| name[1] && name[1].indexOf(name[2]) !== NOT_FOUND)
+				|| name[1] && name[1].includes(name[2]))
 					name[2] = '';
 				if (name[1] &&
 				// name[1].startsWith(name[0])
@@ -1738,7 +1739,7 @@ if (typeof CeL === 'function')
 				return era.正統 && (era.正統 === true
 				// 採用"正統"方法，可避免某些情況下因「挑選最後結束之紀年」之演算法，造成最後無可供參照之紀年。
 				// 但這需要手動測試每一種參照 key，並依測試結果添加。非萬全之道。
-				|| key && era.正統.indexOf(key) !== NOT_FOUND);
+				|| key && era.正統.includes(key));
 			}
 
 			// 初始化/parse 紀年之月分日數 data。
@@ -3768,9 +3769,9 @@ if (typeof CeL === 'function')
 					if (typeof era === 'string')
 						era = era.split(pack_era.field_separator);
 					if (Array.isArray(era) && era.length === 1
-							&& era[0].indexOf(
+							&& era[0].includes(
 							//
-							pack_era.month_separator) !== NOT_FOUND)
+							pack_era.month_separator))
 						era.unshift('紀年', '');
 					if (Array.isArray(era) && 1 < era.length) {
 						// 使 pack_era() 可採用 Era / 壓縮過的日期資料 為 input。
@@ -4285,7 +4286,9 @@ if (typeof CeL === 'function')
 							// escape.
 							.replace(/([()])/g, '\\$1')
 							// 處理 space。
-							.replace(/\s+/g, '\\s*') + ')$');
+							.replace(/\s+/g, '\\s*') + ')$',
+					// 對分大小寫之名稱，應允許混用。
+					'i');
 				}
 
 				return get_pattern ? era_search_pattern : era_key_list;
@@ -4361,6 +4364,7 @@ if (typeof CeL === 'function')
 							era_data = [];
 
 						for (i in 紀年名稱索引值)
+							// 當正式名稱闕如時，將附加屬性 copy 作為正式名稱。
 							if (!era_data[j = 紀年名稱索引值[i]] && (i in 附加屬性)) {
 								era_data[j] = 附加屬性[i];
 								delete 附加屬性[i];
@@ -4676,15 +4680,6 @@ if (typeof CeL === 'function')
 							// 將屬性值搬移至 period_root 之 tree 中。
 							// i === 0，即紀元本身時，毋須搬移。
 							if (0 < i) {
-								library_namespace.debug(
-								// 例如: 元太祖→大蒙古國太祖
-								'設定紀年[' + 紀年 + ']之次要搜尋用 index。', 2);
-								k.forEach(function(era_token) {
-									add_to_era_by_key(
-									//
-									era_token, last_era_data);
-								});
-
 								// j: attributes of hierarchy[i]
 								j = period_attribute_hierarchy[i];
 								// assert: Object.isObject(j)
@@ -4699,12 +4694,16 @@ if (typeof CeL === 'function')
 								delete 附加屬性[tmp];
 							}
 
-							if (i in 紀年名稱索引值)
+							if (tmp in 紀年名稱索引值) {
+								library_namespace.debug(
 								// 設定所有屬性值之 search index。
+								'設定紀年[' + 紀年 + ']之次要搜尋用 index ['
+								// 例如: 元太祖→大蒙古國太祖
+								+ tmp + '] (level ' + i + ')。', 2);
 								k.forEach(function(name) {
 									if (name
 									//
-									&& 紀年.indexOf(name) === NOT_FOUND) {
+									&& !紀年.includes(name)) {
 										add_to_era_by_key(name,
 										// 對 i 不為 0–2 的情況，將 last_era_data 直接加進去。
 										i >= 0 ? 紀年[i] : last_era_data);
@@ -4719,6 +4718,7 @@ if (typeof CeL === 'function')
 											紀年.push(name);
 									}
 								});
+							}
 
 						} else if (i === '月名' || i === MONTH_NAME_KEY) {
 							if (j = parse_month_name(j,
@@ -5509,9 +5509,9 @@ if (typeof CeL === 'function')
 							// 可能是相同紀年之延續。現有元文宗天曆、太平天囯具此情況。
 							tmp = [];
 							紀年_list.forEach(function(era) {
-								if (tmp.indexOf(
-								//
-								era = era.toString()) !== NOT_FOUND)
+								if (!tmp.includes(
+								// 謹記祿未重複的紀年，忽略重複的紀年名稱。
+								era = era.toString()))
 									tmp.push(era);
 							});
 							if (tmp.length > 1)
@@ -6318,7 +6318,7 @@ if (typeof CeL === 'function')
 				tmp = to_era_Date(era, {
 					get_range_String : caculate_node_era.format
 				});
-				if (tmp.indexOf('–') !== NOT_FOUND)
+				if (tmp.includes('–'))
 					date += '起';
 
 				tmp = [ era, date, tmp ];

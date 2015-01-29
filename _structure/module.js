@@ -419,6 +419,7 @@ if (false) {
 						//	當作 ASCII 處理。
 						i = 0;
 						while (i < l)
+							// data.toString('utf-8', 0, length);
 							tmp.push(String.fromCharCode(data[i++]));
 					}
 				if (tmp)

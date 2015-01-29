@@ -509,32 +509,32 @@ set_Object_value = function(obj, value, type, mode) {
 	for (; i < value.length; i++) {
 		if (value[i].indexOf(p) === NOT_FOUND)
 			value[i] = mode ? p + value[i] : value[i] + p;// if(v[i].indexOf(p)==NOT_FOUND&&m)v[i]=p+v[i];//
-			if (mode && value[i] === p) {
-				n += type;
-				continue;
-			}
-			a = value[i].split(p);
-			if (!mode && !a[0])
-				//	去掉不合理的(Array可能有NaN index，所以不設條件。)
-				continue;
-			a[0] = a[0].replace(cmC, ',').replace(eqC, '='), a[1] = a[1].replace(
-					cmC, ',').replace(eqC, '=');
-			if (type)
-				if (mode) {
-					if (!a[0])
-						a[0] = (n += type);
-					else if (!isNaN(b = mode > 0 ? parseInt(a[0], mode) : a[0]))
-						n = Tint ? (a[0] = parseInt(b)) : parseFloat(b);
-				} else if (!a[1])
-					a[1] = (n += type);
-				else if (!isNaN(a[1]))
-					n = Tint ? parseInt(a[1]) : parseFloat(a[1]);
-					if (!type || Tint && isNaN(b = parseInt(a[1]))
-							|| isNaN(b = parseFloat(a[1])))
-						b = a[1];
-					a = a[0];
-					e += obj + '[' + (!type || isNaN(a) ? dQuote(a) : a) + ']='
-						+ (!type || isNaN(b) ? dQuote(b) : b) + ';';
+		if (mode && value[i] === p) {
+			n += type;
+			continue;
+		}
+		a = value[i].split(p);
+		if (!mode && !a[0])
+			//	去掉不合理的(Array可能有NaN index，所以不設條件。)
+			continue;
+		a[0] = a[0].replace(cmC, ',').replace(eqC, '='), a[1] = a[1].replace(
+				cmC, ',').replace(eqC, '=');
+		if (type)
+			if (mode) {
+				if (!a[0])
+					a[0] = (n += type);
+				else if (!isNaN(b = mode > 0 ? parseInt(a[0], mode) : a[0]))
+					n = Tint ? (a[0] = parseInt(b)) : parseFloat(b);
+			} else if (!a[1])
+				a[1] = (n += type);
+			else if (!isNaN(a[1]))
+				n = Tint ? parseInt(a[1]) : parseFloat(a[1]);
+				if (!type || Tint && isNaN(b = parseInt(a[1]))
+						|| isNaN(b = parseFloat(a[1])))
+					b = a[1];
+				a = a[0];
+				e += obj + '[' + (!type || isNaN(a) ? dQuote(a) : a) + ']='
+					+ (!type || isNaN(b) ? dQuote(b) : b) + ';';
 	}
 
 	try {

@@ -11,7 +11,8 @@ if (typeof CeL === 'function')
 CeL.run(
 {
 name:'application.net',
-require : 'data.native.|application.OS.Windows.get_WScript_object|interact.DOM.HTML_to_Unicode',
+// includes() @ data.code.compatibility.
+require : 'data.code.compatibility.|data.native.|application.OS.Windows.get_WScript_object|interact.DOM.HTML_to_Unicode',
 code : function(library_namespace) {
 'use strict';
 
@@ -38,7 +39,8 @@ _// JSDT:_module_
 };
 
 
-var NOT_FOUND = -1;
+// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
+var NOT_FOUND = ''.indexOf('_');
 
 
 //gethost[generateCode.dLK]='Sleep';
@@ -876,7 +878,7 @@ function get_video(video_url, download_to, options) {
 			// →
 			// https://www.youtube.com/watch?v=_id_&feature=youtu.be
 			if (URI = parse_URI(video_url[i].replace('//youtu.be/', '//www.youtube.com/watch?v='))) {
-				if (URI.hostname.toLowerCase().indexOf('youtube') !== NOT_FOUND) {
+				if (URI.hostname.toLowerCase().includes('youtube')) {
 					library_namespace.debug('URI.filename: ' + URI.filename, 2, 'get_video');
 					if (URI.filename === 'watch_videos') {
 						matched = URI._search.video_ids.split(',');
@@ -1061,7 +1063,7 @@ get_video.get_information = function get_video_information(video_hash, download_
 		//param = parse_URI.parse_search(param.url, param);
 
 		library_namespace.debug('檢測是否有 error.', 2);
-		if (html.indexOf('status=ok') !== NOT_FOUND) {
+		if (html.includes('status=ok')) {
 			param.hash = video_hash;
 			var i, l, fmt_list = [], list = [], best_score = 0, best_video,
 			set_score = function (d) {
@@ -1183,7 +1185,7 @@ get_video.get_information = function get_video_information(video_hash, download_
 						param_url.sig.push(s);
 						library_namespace.debug('parse signature: →(' + s.length + ')[' + s + ']', 2, 'get_information.parse_signature');
 					});
-				} else if(param_url.url[0].indexOf('&signature=') === NOT_FOUND)
+				} else if(!param_url.url[0].includes('&signature='))
 					library_namespace.err('未發現 signature (signature or sig or s)！');
 			}
 
@@ -1342,7 +1344,7 @@ transferURL(remote URI,remote URI)
 */
 //transferURL[generateCode.dLK]='parsePath,parse_URI,setupCuteFTPSite';
 function transferURL(from_URI, to_URI) {
-	//var connectTo = from_URI.indexOf('://') == NOT_FOUND ? to_URI : from_URI, CuteFTPSite = setupCuteFTPSite(connectTo);
+	//var connectTo = from_URI.includes('://') ? from_URI : to_URI, CuteFTPSite = setupCuteFTPSite(connectTo);
 	var
 	// isD: use download (else upload)
 	isD, CuteFTPSite,
@@ -1350,9 +1352,9 @@ function transferURL(from_URI, to_URI) {
 	lF,
 	// rP: remote path
 	rP;
-	if (from_URI.indexOf('://') != NOT_FOUND)
+	if (from_URI.includes('://'))
 		isD = 0;
-	else if (to_URI.indexOf('://') != NOT_FOUND)
+	else if (to_URI.includes('://'))
 		isD = 1;
 	else
 		// local to local?

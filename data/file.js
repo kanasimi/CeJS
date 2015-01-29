@@ -10,6 +10,7 @@
 if (typeof CeL === 'function')
 	CeL.run({
 		name : 'data.file',
+		// includes() @ data.code.compatibility.
 		require : 'data.code.compatibility.|application.OS.Windows.new_COM'
 				+ '|data.code.thread.Serial_execute',
 		code : function(library_namespace) {
@@ -193,7 +194,7 @@ if (typeof CeL === 'function')
 						delete options[filter_name];
 			}
 
-			// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+			// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
 			var NOT_FOUND = ''.indexOf('_');
 
 			/**
@@ -213,7 +214,7 @@ if (typeof CeL === 'function')
 				//
 				|| (typeof filter === 'string'
 				// String
-				? string.indexOf(filter) !== NOT_FOUND
+				? string.includes(filter)
 				// RegExp
 				: filter.test ? filter.test(string)
 				// function

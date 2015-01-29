@@ -17,7 +17,8 @@ if (typeof CeL === 'function')
 CeL.run(
 {
 name : 'application.math',
-require : 'data.math.',
+// includes() @ data.code.compatibility.
+require : 'data.code.compatibility.|data.math.',
 code : function(library_namespace) {
 
 //		requiring
@@ -192,10 +193,7 @@ CeL.run('application.math', function() {
 
 // ---------------------------------------------------------------------------------------------- //
 
-// 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
-var NOT_FOUND = ''.indexOf('_'),
-//
-new_node = function () {
+var new_node = function () {
 	var func = library_namespace.DOM.new_node;
 	if (func)
 		return (new_node = func).apply(null, arguments);
@@ -699,10 +697,10 @@ convert_MathML.parse = function(text, queue) {
 		// assert: NOT space or operator.
 		queue.prefix = '［';
 		queue.postfix = '］';
-		while (text.indexOf(queue.prefix) !== NOT_FOUND)
+		while (text.includes(queue.prefix))
 			// 維持 open/close quote 相同的長度。
 			queue.prefix += '［', queue.postfix = '］' + queue.postfix;
-		while (text.indexOf(queue.postfix) !== NOT_FOUND)
+		while (text.includes(queue.postfix))
 			queue.prefix += '［', queue.postfix = '］' + queue.postfix;
 		// queue.separator = queue.prefix + queue.postfix;
 

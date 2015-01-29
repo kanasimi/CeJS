@@ -199,10 +199,7 @@ function Year_numbering(year_shift, year_only, has_year_0, reverse) {
 }
 
 //	const
-// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
-var NOT_FOUND = ''.indexOf('_'),
-//
-PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
+var PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
 //
 CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
 // 可選用的文字式年曆欄位。
@@ -270,7 +267,7 @@ function show_calendar(era_name) {
 		dates.length = show_calendar.LIMIT;
 	}
 
-	if (era_name.indexOf('月') === NOT_FOUND)
+	if (!era_name.includes('月'))
 		title.splice(-1, 1, {
 			th : {
 				T : '朔日'
@@ -315,7 +312,7 @@ function show_calendar(era_name) {
 	hidden_column.pop();
 
 	if (main_date_value)
-		if (main_date_value.日 == 1 && era_name.indexOf('日') === NOT_FOUND)
+		if (main_date_value.日 == 1 && !era_name.includes('日'))
 			main_date_value = null;
 		else {
 			main_date_value.setHours(0, 0, 0, 0);
@@ -345,7 +342,7 @@ function show_calendar(era_name) {
 
 	dates.forEach(function(date) {
 		if (!era_caption)
-			era_caption = era_name.indexOf(date.紀年名) !== NOT_FOUND ? date.紀年名
+			era_caption = era_name.includes(date.紀年名) ? date.紀年名
 			//
 			: /[\/年]/.test(era_name) ? date.紀年 : era_name;
 
@@ -398,7 +395,7 @@ function show_calendar(era_name) {
 
 		// 後處理。
 		// 公曆換月。
-		if (tmp[1].indexOf('\/1(') !== NOT_FOUND)
+		if (tmp[1].includes('\/1('))
 			tmp[1] = {
 				span : tmp[1],
 				S : 'color:#f80'
@@ -522,14 +519,14 @@ function 解壓縮曆數() {
 function 解析曆數() {
 	var calendar = CeL.set_text('pack_source').trim().replace(/\\t/g, '\t');
 
-	calendar = calendar.indexOf('|') === NOT_FOUND
+	calendar = calendar.includes('|')
 	// 當作紀年名
-	? CeL.era(calendar, {
-		get_era : true
+	? CeL.era.set(calendar, {
+		extract_only : true
 	})
 	// 當作曆數資料
-	: CeL.era.set(calendar, {
-		extract_only : true
+	: CeL.era(calendar, {
+		get_era : true
 	});
 
 	if (calendar && Array.isArray(calendar = calendar.calendar)) {
@@ -1631,7 +1628,7 @@ function translate_era(era) {
 			});
 			add_注('在位');
 
-			if (date.name[1] && date.name[1].indexOf('天皇') !== NOT_FOUND)
+			if (date.name[1] && date.name[1].includes('天皇'))
 				// append name.
 				if (Array.isArray(date.天皇))
 					// 不動到原 data。
