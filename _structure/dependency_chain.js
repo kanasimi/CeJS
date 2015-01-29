@@ -393,7 +393,7 @@ if (typeof CeL === 'function')
 
 		var is_Set, is_Map, has_Set, has_Map,
 		//
-		KEY_not_native = 'not_native',
+		KEY_not_native = library_namespace.env.not_native_keyword,
 		// use Object.defineProperty.not_native to test
 		// if the browser don't have native support for Object.defineProperty().
 		has_native_Object_defineProperty = !Object.defineProperty[KEY_not_native];
@@ -1279,12 +1279,12 @@ if (typeof CeL === 'function')
 
 		var dc = new CeL.dependency_chain;
 		dc.add(1, 2);
-		CeL.assert(['1', dc.get(2).previous.values().join()]);
+		CeL.assert(['1', Array.from(dc.get(2).previous.values()).join()]);
 		dc.add(2, 3);
-		CeL.assert(['2', dc.get(3).previous.values().join()]);
+		CeL.assert(['2', Array.from(dc.get(3).previous.values()).join()]);
 		CeL.assert([1, dc.independent(3)]);
-		CeL.assert(['', dc.get(3).next.values().join()]);
-		CeL.assert(['1,2,3', dc.get().sort().join()]);
+		CeL.assert(['', Array.from(dc.get(3).next.values()).join()]);
+		CeL.assert(['1,2,3', Array.from(dc.get()).sort().join()]);
 		CeL.assert([1, dc.independent()]);
 		dc.add(0, 1);
 		CeL.assert([0, dc.independent()]);

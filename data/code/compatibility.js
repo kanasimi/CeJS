@@ -51,12 +51,10 @@ NOT_FOUND = ''.indexOf('_');
 /*
  * TODO:
 
-Array.prototype.copyWithin()
-Math.*
-RegExp.prototype.flags
-String.prototype.codePointAt()
-String.fromCodePoint()
-Object.create()
+Array.prototype.copyWithin(target, start [ , end ])
+String.prototype.codePointAt(position)
+String.fromCodePoint(...codePoints)
+Object.create(O [ , Properties ])
 
 http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K875.aspx
 8進制數字表示被禁止， 010 代表 10 而不是 8
@@ -747,13 +745,40 @@ set_method(Math, {
 
 
 set_method(Math, {
+	// TODO: 提高精確度。
+	sinh : function sinh(value) {
+		// If x is −0, the result is −0.
+		return value ? (Math.exp(value) - Math.exp(-value)) / 2 : value;
+	},
+	cosh : function cosh(value) {
+		// If x is −0, the result is −0.
+		return value ? (Math.exp(value) + Math.exp(-value)) / 2 : value;
+	},
+	tanh : function tanh(value) {
+		if (!value)
+			// If x is −0, the result is −0.
+			return value;
+		if (!Number.isFinite(value))
+			// If x is +∞, the result is +1.
+			return value === Infinity ? 1 : -1;
+		var v = Math.exp(-value);
+		value = Math.exp(value);
+		return (value - v) / (value + v);
+	},
+
 	clz32: clz32,
+
 	log2: function log2(value) {
 		return Math.log(value) / Math.LN2;
 	},
 	log10: function log10(value) {
 		return Math.log(value) / Math.LN10;
 	},
+	log1p: function log1p(value) {
+		// If x is −0, the result is −0.
+		return value ? Math.log(1 + value) : value;
+	},
+
 	hypot: hypot,
 	cbrt: function cbrt(value) {
 		return Math.pow(value, 1 / 3);
@@ -794,16 +819,25 @@ var RegExp_flags = /./g.flags === 'g'
 };
 
 RegExp_flags.flags = {
-		// Proposed for ES6
-		// extended : 'x',
-		global : 'g',
-		ignoreCase : 'i',
-		multiline : 'm',
-		unicode : 'u',
-		sticky : 'y'
+	// Proposed for ES6
+	// extended : 'x',
+	global : 'g',
+	ignoreCase : 'i',
+	multiline : 'm',
+	unicode : 'u',
+	sticky : 'y'
 };
 
 library_namespace.RegExp_flags = RegExp_flags;
+
+if (!Object.defineProperty[library_namespace.env.not_native_keyword])
+	// RegExp.prototype.flags
+	// CeL.assert([/./ig.flags, 'gi']);
+	Object.defineProperty(RegExp.prototype, 'flags', {
+		get : function () {
+			return RegExp_flags(this);
+		}
+	});
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
