@@ -343,14 +343,20 @@ function copyWithin(target, start, end) {
 	var length = this.length;
 	start = normalize_position(start, length);
 	end = normalize_position(end || length, length);
-	target = normalize_position(position, length);
-	if (target < start)
+	target = normalize_position(target, length);
+	if (target < start || end <= target)
 		while (start < end)
 			this[target++] = this[start++];
-	else if (target > start)
+	else if (target !== start) {
+		if (length < target + start) {
+			end -= target - start;
+			target = length;
+		} else
+			target += start;
 		// 反向（後→前） copy，確保 copy from 不曾被本操作汙染過。
-		for (target += end - start; start < end;)
+		while (start < end)
 			this[--target] = this[--end];
+	}
 	return this;
 }
 
@@ -766,29 +772,79 @@ set_method(Math, {
 }, 'number');
 
 
+var expm1_error = 1e-5;
+
 set_method(Math, {
-	// TODO: 提高精確度。
+	expm1 : function expm1(value) {
+		// If x is −0, the result is −0.
+		if (!value)
+			return value;
+		// 在這範圍外不會有誤差。
+		// x = 1e-5; Math.expm1(x) === Math.exp(x) - 1
+		if (Math.abs(value) > expm1_error)
+			return Math.exp(value) - 1;
+
+		// 提高精確度。
+		// x = 1e-6; Math.expm1(x) > Math.exp(x) - 1
+
+		// http://www.wolframalpha.com/input/?i=e^x-1
+		// Taylor series: x+x^2/2+x^3/6+x^4/24+x^5/120+O(x^6)
+		var delta = value, index = 1, result = value;
+		// 頂多跑個 2~3 次就該結束了。
+		while (result + (delta *= value / ++index) !== result)
+			result += delta;
+		return result;
+	},
+
+	// hyperbolic functions
+	// https://en.wikipedia.org/wiki/Hyperbolic_function
 	sinh : function sinh(value) {
 		// If x is −0, the result is −0.
-		return value ? (Math.exp(value) - Math.exp(-value)) / 2 : value;
+		return value
+		? Math.abs(value) > expm1_error ? (Math.exp(value) - Math.exp(-value)) / 2
+		: (Math.expm1(value) - Math.expm1(-value)) / 2
+		: value;
 	},
 	cosh : function cosh(value) {
 		// If x is −0, the result is −0.
-		return value ? (Math.exp(value) + Math.exp(-value)) / 2 : value;
+		return value ? (value = Math.abs(value)) < 19 ? (Math.exp(value) + Math.exp(-value)) / 2
+		// value = 19; Math.exp(value) + Math.exp(-value) === Math.exp(value);
+		: Math.exp(value) / 2 : value;
 	},
 	tanh : function tanh(value) {
 		if (!value)
 			// If x is −0, the result is −0.
 			return value;
-		if (!Number.isFinite(value))
+		// value = 19; Math.exp(value) + Math.exp(-value) === Math.exp(value);
+		if (Math.abs(value) > 19)
 			// If x is +∞, the result is +1.
-			return value === Infinity ? 1 : -1;
-		var v = Math.exp(-value);
-		value = Math.exp(value);
-		return (value - v) / (value + v);
+			return value > 0 ? 1 : -1;
+		var e = Math.exp(value), me = Math.exp(-value);
+		return (Math.abs(value) < expm1_error
+		// 提高精確度。
+		? Math.expm1(value) - Math.expm1(-value) : e - me) / (e + me);
 	},
 
-	clz32: clz32,
+	// https://en.wikipedia.org/wiki/Hyperbolic_function#Inverse_functions_as_logarithms
+	// inverse hyperbolic function
+	// https://en.wikipedia.org/wiki/Inverse_hyperbolic_function
+	asinh : function asinh(value) {
+		// If x is −0, the result is −0.
+		if (!value)
+			return value;
+		// http://www.wolframalpha.com/input/?i=asinh+x
+		var v = Math.abs(value);
+		v = Math.log(v + Math.sqrt(v * v + 1));
+		return value < 0 ? -v : v;
+	},
+	acosh : function acosh(value) {
+		// http://www.wolframalpha.com/input/?i=acosh+x
+		return Math.log(value + Math.sqrt(value * value - 1));
+	},
+	atanh : function atanh(value) {
+		// If x is −0, the result is −0.
+		return value ? Math.log((1 + value) / (1 - value)) / 2 : value;
+	},
 
 	log2: function log2(value) {
 		return Math.log(value) / Math.LN2;
@@ -803,8 +859,12 @@ set_method(Math, {
 
 	hypot: hypot,
 	cbrt: function cbrt(value) {
-		return Math.pow(value, 1 / 3);
+		// If x is −0, the result is −0.
+		return value ? Math.pow(value, 1 / 3) : value;
 	},
+
+	clz32: clz32,
+
 	trunc : function trunc(value) {
 		// value >= 0 ? Math.floor(value) : Math.ceil(value)
 		return value > 0 ? Math.floor(value)
@@ -815,7 +875,7 @@ set_method(Math, {
 		: value | 0;
 	},
 	sign : function sign(value) {
-		value = Number(value);
+		// If x is −0, the result is −0.
 		return 0 < value ? 1 : value < 0 ? -1 : value;
 	}
 });
