@@ -51,7 +51,6 @@ NOT_FOUND = ''.indexOf('_');
 /*
  * TODO:
 
-Array.prototype.copyWithin(target, start [ , end ])
 String.prototype.codePointAt(position)
 String.fromCodePoint(...codePoints)
 Object.create(O [ , Properties ])
@@ -334,18 +333,41 @@ set_method(Array, {
 });
 
 
+function normalize_position(position, length) {
+	return position < 0 && (position += length) < 0 ? 0
+	//
+	: (position |= 0) > length ? length : position;
+}
+
+function copyWithin(target, start, end) {
+	var length = this.length;
+	start = normalize_position(start, length);
+	end = normalize_position(end || length, length);
+	target = normalize_position(position, length);
+	if (target < start)
+		while (start < end)
+			this[target++] = this[start++];
+	else if (target > start)
+		// 反向（後→前） copy，確保 copy from 不曾被本操作汙染過。
+		for (target += end - start; start < end;)
+			this[--target] = this[--end];
+	return this;
+}
 
 set_method(Array.prototype, {
+	// Array.prototype.copyWithin(target, start [ , end ])
+	copyWithin : copyWithin,
 	// Array.prototype.includes()
 	includes : function Array_includes(search_target, position) {
 		if (search_target === search_target)
 			return this.indexOf(search_target, position) !== NOT_FOUND;
 		// assert: search_target is NaN
 		var length = this.length;
+		// position = normalize_position(position, length);
 		if (position < 0 && (position += length) < 0)
 			position = 0;
-		else
-			position |= 0;
+		else if ((position |= 0) > length)
+			position = length;
 		for (; position < length; position++)
 			if (this[position] !== this[position])
 				return true;
