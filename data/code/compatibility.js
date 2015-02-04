@@ -1193,6 +1193,8 @@ function trim() {
 
 // String.prototype.startsWith()
 function startsWith(searchString, position) {
+	if (library_namespace.is_RegExp(searchString))
+		throw new Error("Invalid type: searchString can't be a Regular Expression");
 	searchString = String(searchString);
 	if (!position || !(position |= 0) || position < 0)
 		return this.lastIndexOf(searchString, 0) === 0;
@@ -1202,6 +1204,8 @@ function startsWith(searchString, position) {
 
 // String.prototype.endsWith()
 function endsWith(searchString, endPosition) {
+	if (library_namespace.is_RegExp(searchString))
+		throw new Error("Invalid type: searchString can't be a Regular Expression");
 	searchString = String(searchString);
 	var is_tail = endPosition === undefined
 			|| (endPosition |= 0) === this.length,

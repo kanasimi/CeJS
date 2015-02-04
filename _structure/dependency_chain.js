@@ -1416,11 +1416,11 @@ if (typeof CeL === 'function')
 				try {
 					if (!arguments.length) {
 						library_namespace.debug('自 ' + relations.size
-								+ ' 個元素中，隨便取得一個沒 previous 的元素。', 2,
+								+ ' 個元素中，隨便取得一個沒 previous 的元素。', 5,
 								'dependency_chain.independent');
 						// 用 for .. of 會更好。
 						relations.forEach(function(declaration, _item) {
-							library_namespace.debug('item [' + _item + ']', 3,
+							library_namespace.debug('item [' + _item + ']', 6,
 									'dependency_chain.independent');
 							item = _item;
 							if (declaration.previous.size === 0)
@@ -1528,7 +1528,7 @@ if (typeof CeL === 'function')
 		function load_later() {
 			var name = String(this);
 			if (library_namespace.is_debug()) {
-				library_namespace.debug('load_later: 演算 [' + name + ']。', 2,
+				library_namespace.debug('load_later: 演算 [' + name + ']。', 5,
 						'load_later');
 				if (name !== this)
 					library_namespace.warn('變數名與 "this" 不同！');
@@ -1669,14 +1669,14 @@ if (typeof CeL === 'function')
 
 				if (is_module) {
 					library_namespace.debug('treat resource [' + name
-							+ '] as module.', 2, 'get_named');
+							+ '] as module.', 5, 'get_named');
 					declaration.module = id;
 					// 若是先 call URL，再 call module，這時需要補充登記。
 					if (!(id in named_code))
 						named_code[id] = declaration;
 				} else {
 					library_namespace.debug('treat resource [' + name
-							+ '] as URL/path.', 2, 'get_named');
+							+ '] as URL/path.', 5, 'get_named');
 					declaration.URL = id;
 				}
 			}
@@ -1801,7 +1801,7 @@ if (typeof CeL === 'function')
 				library_namespace.debug('解析 [' + declaration.id
 				//
 				+ '] 之 dependency list，以獲得所需之 URL/path/module/variable name: ['
-						+ code_required + ']。', 2, 'parse_require');
+						+ code_required + ']。', 5, 'parse_require');
 
 				if (typeof code_required === 'string')
 					code_required = code_required.split('|');
@@ -1866,7 +1866,7 @@ if (typeof CeL === 'function')
 					library_namespace.debug('檢查並確認 required module/URL，尚須處理 '
 							+ require_now.length + ' 項: ['
 							+ require_now.join('<b style="color:#47e;">|</b>')
-							+ ']。', 2, 'parse_require');
+							+ ']。', 5, 'parse_require');
 					// 臨時/後續/後來新增
 					return [
 							SEQUENTIAL,
@@ -1922,7 +1922,7 @@ if (typeof CeL === 'function')
 
 				no_sheet_onload = is_Safari || is_old_Firefox;
 				library_namespace.debug(
-						'看似需要修補 load events on linking elements.', 2);
+						'看似需要修補 load events on linking elements.', 5);
 			})();
 
 		// TODO: watchdog for link.onload
@@ -2009,7 +2009,7 @@ if (typeof CeL === 'function')
 						library_namespace.debug('繼續完成 ' + callback.size
 								+ ' 個所有原先 ' + name
 								+ ' queue 中之執行緒，或是 named source code 所添加之函數。',
-								2, 'load_named.run_callback');
+								5, 'load_named.run_callback');
 
 						// 作 cache。
 						// 需預防 arguments 可被更改的情況！
@@ -2032,7 +2032,7 @@ if (typeof CeL === 'function')
 								// check_and_run.run。
 								// TODO: using setTimeout?
 								library_namespace.debug('run ' + name + ' of ['
-										+ id + ']: [' + callback + ']', 2,
+										+ id + ']: [' + callback + ']', 5,
 										'load_named.run_callback');
 								if (typeof callback === 'function'
 										&& callback.apply(declaration, args)
@@ -2168,7 +2168,7 @@ if (typeof CeL === 'function')
 						// TODO: alias
 
 						library_namespace.debug('[' + id
-								+ '] 順利執行到最後，準備作 hook 設定。', 2, 'load_named');
+								+ '] 順利執行到最後，準備作 hook 設定。', 3, 'load_named');
 						name_space[name] = initializator;
 
 						// 載入 module 時執行 extend 工作。
@@ -2281,7 +2281,7 @@ if (typeof CeL === 'function')
 									extend_to[i] = initializator[i];
 								}
 						} else
-							library_namespace.debug('跳過擴充 member 之工作。', 2,
+							library_namespace.debug('跳過擴充 member 之工作。', 5,
 									'load_named');
 
 						// 對 name-space 做有必要的操作。
@@ -2339,7 +2339,7 @@ if (typeof CeL === 'function')
 							library_namespace.debug(
 									'由於引用的是 library 外部檔案，自動將之設定為 included '
 											+ (declaration.included ? '成功'
-													: '失敗') + '。', 2,
+													: '失敗') + '。', 5,
 									'load_named.is_external');
 						}
 						return external;
@@ -2347,7 +2347,7 @@ if (typeof CeL === 'function')
 
 					library_namespace.debug(
 							'準備載入 (load) [<a style="color:#ef0;background-color:#018;" href="'
-									+ encodeURI(URL) + '">' + id + '</a>]。', 2,
+									+ encodeURI(URL) + '">' + id + '</a>]。', 5,
 							'load_named');
 
 					// ---------------------------------------
@@ -2372,7 +2372,7 @@ if (typeof CeL === 'function')
 									.replace(/\n/g, '<br />') + ']'
 									//
 									+ (file_contents.length > 200 ? '..' : ''),
-											2, 'load_named');
+											5, 'load_named');
 							if (file_contents) {
 								// 對 cscript/wscript，若 /^var variable =
 								// /.test(file_contents)，會造成 global 無法設定此
@@ -2414,7 +2414,7 @@ if (typeof CeL === 'function')
 							if (declaration.included) {
 								library_namespace.debug(
 										'已 include [<a href="' + encodeURI(URL)
-												+ '">' + id + '</a>]。', 2,
+												+ '">' + id + '</a>]。', 5,
 										'load_named');
 								return PROCESSED;
 							}
@@ -2489,7 +2489,7 @@ if (typeof CeL === 'function')
 							library_namespace.debug(
 									'Cannot load [' + id
 											+ ']! 以 .get_file() 依序載入的方法失敗：'
-											+ e.message, 1, 'load_named');
+											+ e.message, 2, 'load_named');
 
 							// 除非為 eval 錯誤，否則不設定 .included。
 							if (!library_namespace.env.same_origin_policy) {
@@ -2757,7 +2757,7 @@ if (typeof CeL === 'function')
 								declaration.last_call = new Date();
 
 								library_namespace.debug('[' + declaration.id
-										+ ']: need asynchronous. 登記完後直接休眠。', 2,
+										+ ']: need asynchronous. 登記完後直接休眠。', 5,
 										'load_named');
 
 								// 因無法即時載入，先行退出。
@@ -2823,7 +2823,7 @@ if (typeof CeL === 'function')
 
 			} else
 				library_namespace.debug('之前已處理過 [' + id + '] 之載入程序：'
-						+ (declaration.included ? '成功' : '無法') + '載入。', 2,
+						+ (declaration.included ? '成功' : '無法') + '載入。', 5,
 						'load_named');
 
 			// ---------------------------------------
@@ -2836,7 +2836,7 @@ if (typeof CeL === 'function')
 					if (library_namespace.is_debug(2)
 							&& library_namespace.is_WWW())
 						library_namespace.debug('[' + id
-								+ '].finish() 已執行完畢。執行回調/回撥函式…', 2,
+								+ '].finish() 已執行完畢。執行回調/回撥函式…', 5,
 								'load_named');
 				} else {
 					// TODO: 將 callback 納入 dependency chain。
@@ -2844,7 +2844,7 @@ if (typeof CeL === 'function')
 							&& library_namespace.is_WWW())
 						library_namespace.debug('[' + id + '] 已'
 								+ (declaration.included ? '成功' : '')
-								+ '載入完畢。執行回調/回撥函式…', 2, 'load_named');
+								+ '載入完畢。執行回調/回撥函式…', 5, 'load_named');
 
 					// force 僅使用一次。
 					// if (is_controller(item) && item.force) delete item.force;
@@ -2856,7 +2856,7 @@ if (typeof CeL === 'function')
 						if (library_namespace.is_debug(2)
 								&& library_namespace.is_WWW())
 							library_namespace.debug('[' + id
-									+ '].finish() 需要 waiting。等待其執行完畢…', 2,
+									+ '].finish() 需要 waiting。等待其執行完畢…', 5,
 									'load_named');
 						// 因無法即時載入，先行退出。
 						return INCLUDING;
@@ -2869,7 +2869,7 @@ if (typeof CeL === 'function')
 
 				if (library_namespace.is_debug(2) && library_namespace.is_WWW())
 					library_namespace.debug('[' + id
-							+ '] 之善後/收尾工作函式已執行完畢，清除 cache/stack…', 2,
+							+ '] 之善後/收尾工作函式已執行完畢，清除 cache/stack…', 5,
 							'load_named');
 				// release. 早點 delete 以釋放記憶體空間/資源。
 				// 預防出現問題，如 memory leak 等。
@@ -2900,7 +2900,7 @@ if (typeof CeL === 'function')
 										+ '] is <b>NOT YET</b> loaded。通常為 module code 或呼叫 code 之問題。',
 								2, 'load_named');
 
-			library_namespace.debug('[' + id + '] 處理完畢。', 2, 'load_named');
+			library_namespace.debug('[' + id + '] 處理完畢。', 5, 'load_named');
 			return PROCESSED;
 		}
 
@@ -3198,7 +3198,7 @@ if (typeof CeL === 'function')
 					});
 				else
 					this.debug_id = debug_id;
-				if (library_namespace.is_debug(2))
+				if (library_namespace.is_debug(5))
 					library_namespace.log(this.debug_id + ': 初始登記：('
 							+ initial_Array.length + ') [' + initial_Array
 							+ ']。');
@@ -3390,7 +3390,7 @@ if (typeof CeL === 'function')
 							return (declaration.force || !('included' in declaration)) ? parse_require(declaration)
 									: declaration;
 						library_namespace.debug('正規化載入 id [' + declaration.id
-								+ '] 的 controller。', 2,
+								+ '] 的 controller。', 5,
 								'check_and_run_normalize');
 						// 將 declaration.{id,name,URL} copy 至 item。
 						if (false)
@@ -3513,7 +3513,7 @@ if (typeof CeL === 'function')
 						if (sequential = j)
 							library_namespace.debug('自 ' + (i + 1) + '/'
 									+ length
-									+ ' 起依序載入：將元素一個接一個，展開至 relation map。', 2,
+									+ ' 起依序載入：將元素一個接一個，展開至 relation map。', 5,
 									this.debug_id + '.register');
 						else {
 							// 找出下一個所有平行載入元素都載入完後，才能開始的元素。
@@ -3527,7 +3527,7 @@ if (typeof CeL === 'function')
 								next = array;
 							library_namespace.debug((i + 1) + '-' + j + '/'
 									+ length + ' 平行載入：所有 ' + (j - i)
-									+ ' 個元素皆 loaded 之後，才算是處理完了 Array。', 2,
+									+ ' 個元素皆 loaded 之後，才算是處理完了 Array。', 5,
 									this.debug_id + '.register');
 						}
 
@@ -3566,7 +3566,7 @@ if (typeof CeL === 'function')
 							'直接執行 function ['
 									+ (library_namespace
 											.get_function_name(item) || item)
-									+ ']。', 2, this.debug_id + '.run');
+									+ ']。', 5, this.debug_id + '.run');
 					if (library_namespace.env.no_catch)
 						// 當 include 程式碼，執行時不 catch error 以作防範。
 						item();
@@ -3581,20 +3581,20 @@ if (typeof CeL === 'function')
 							library_namespace.debug('<code>'
 									+ ('' + item).replace(/</g, '&lt;')
 											.replace(/\n/g, '<br />')
-									+ '</code>', 2, this.debug_id + '.run');
+									+ '</code>', 5, this.debug_id + '.run');
 							return INCLUDE_FAILED;
 						}
 
 				} else if (Array.isArray(item)) {
 					library_namespace.debug('登記 Array(' + item.length + ') ['
-							+ item + ']。', 2, this.debug_id + '.run');
+							+ item + ']。', 5, this.debug_id + '.run');
 					if (this.register(item) !== PROCESSED)
 						// 不清除。繼續處理 Array。
 						item = null;
 
 				} else if (is_controller(item)) {
 					library_namespace.debug('處理 controller [' + item.id + ']。',
-							2, this.debug_id + '.run');
+							5, this.debug_id + '.run');
 
 					// import controller.
 					// 先處理 options 再載入。
@@ -3612,7 +3612,7 @@ if (typeof CeL === 'function')
 							library_namespace.debug(
 									(is_included(item.id) ? '已經 included'
 											: '之前曾 include 失敗')
-											+ ': [' + item.id + ']!', 2,
+											+ ': [' + item.id + ']!', 5,
 									this.debug_id + '.run');
 						} else {
 							if (library_namespace.is_debug(2)
@@ -3621,7 +3621,7 @@ if (typeof CeL === 'function')
 										+ (is_included(item.id) ? '重新' : '')
 										+ '載入 '
 										+ (item.module ? 'module' : 'resource')
-										+ ' [' + item.id + ']。', 2,
+										+ ' [' + item.id + ']。', 5,
 										this.debug_id + '.run');
 							// include module/URL resource.
 							var result = load_named(item, options, this.run);
@@ -3640,16 +3640,16 @@ if (typeof CeL === 'function')
 								library_namespace.debug('正等待 loading ['
 										+ item.id
 										+ '] 中。推入排程開始蟄伏，waiting for callback。',
-										2, this.debug_id + '.run');
+										5, this.debug_id + '.run');
 								return result;
 							} else if (result === INCLUDE_FAILED)
 								library_namespace.debug('Error to include ['
-										+ item.id + ']', 2, this.debug_id
+										+ item.id + ']', 5, this.debug_id
 										+ '.run');
 							else
 								// assert: PROCESSED
 								library_namespace.debug('[' + item.id
-										+ ']: included.', 2, this.debug_id
+										+ ']: included.', 5, this.debug_id
 										+ '.run');
 						}
 
@@ -3662,7 +3662,7 @@ if (typeof CeL === 'function')
 					library_namespace.debug('已處理過'
 							+ (item.id ? ' [' + item.id + ']' : '此 '
 									+ library_namespace.is_type(item))
-							+ '，消除其相依關係。', 2, this.debug_id + '.run');
+							+ '，消除其相依關係。', 5, this.debug_id + '.run');
 					this.status.set(item, PROCESSED);
 					// 執行完清除 relation map 中之登錄。
 					relation_map['delete'](item);
@@ -3679,7 +3679,7 @@ if (typeof CeL === 'function')
 
 			// destroy this.relation_map。
 			// delete this.relation_map;
-			library_namespace.debug('本次序列已處理完畢。', 2, this.debug_id + '.run');
+			library_namespace.debug('本次序列已處理完畢。', 5, this.debug_id + '.run');
 		}
 
 		// public interface of check_and_run.

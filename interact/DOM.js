@@ -6826,6 +6826,17 @@ function auto_TOC(content_node, level, force) {
 
 		// 回來修改各 <header>
 		for (i = 0, l = head_array.length; i < l; i++) {
+			if (false && i > 0) {
+				// Firefox/38.0 在兩個 hade 相鄰的情況，anchor 似乎無法正常作動。只好手動助之加入 <p>
+				// ** 無用! 需於 <html> 中手動加入!
+				matched = node.nextSibling;
+				while (matched.nodeType === TEXT_NODE)
+					matched = matched.nextSibling;
+				if (matched === head_array[i])
+					new_node({
+						p: ' '
+					}, [ node, 3 ]);
+			}
 			set_class(node = head_array[i], auto_TOC.CSS_prefix + 'head');
 			new_node({
 				a : '📑',

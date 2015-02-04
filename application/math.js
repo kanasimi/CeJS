@@ -395,7 +395,7 @@ function convert_MathML(handler) {
 			var equalities = [ '{' ], j = 1, tmp;
 			for (; j < structure.length; j++) {
 				if (tmp = structure[j])
-					if (Array.isArray(tmp) && /^[=≠≈≒≃∝≡><≤≥]$/.test(tmp[0])) {
+					if (Array.isArray(tmp) && convert_MathML.RELATIONSHIP_PATTERN.test(tmp[0])) {
 						equalities.push(tmp);
 					} else if (typeof tmp !== 'string' || tmp.trim()) {
 						equalities = null;
@@ -583,9 +583,18 @@ convert_MathML.handler = {
 
 convert_MathML.handler['default'] = convert_MathML.handler.mathml;
 
+// relationships, assignment, equalities
+// https://en.wikipedia.org/wiki/Mathematical_operators_and_symbols_in_Unicode
+// [≁-⊋]: ≁≂≃≄≅≆≇≈≉≊≋≌≍≎≏≐≑≒≓≔≕≖≗≘≙≚≛≜≝≞≟≠≡≢≣≤≥≦≧≨≩≪≫≬≭≮≯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋
+// [⋀-⋭]: ⋀⋁⋂⋃⋄⋅⋆⋇⋈⋉⋊⋋⋌⋍⋎⋏⋐⋑⋒⋓⋔⋕⋖⋗⋘⋙⋚⋛⋜⋝⋞⋟⋠⋡⋢⋣⋤⋥⋦⋧⋨⋩⋪⋫⋬⋭
+// TODO: "~"
+convert_MathML.RELATIONSHIP_PATTERN = '=><≁-⊋⋀-⋭';
+
+convert_MathML.non_scalar_chars = '(){}^√∛*\\/⁄∕×⋅÷+\\-±' + convert_MathML.RELATIONSHIP_PATTERN + ',;\r\n';
+
 // operator : [ pattern, handler, object_to_add ]
 // 運算子優先順序最高到最低
-convert_MathML.operator = [
+(convert_MathML.operator = [
 // parentheses
 [ /\(([^()]+)\)/, function($0, $1) {
 	return [ '()', $1 ];
@@ -614,7 +623,7 @@ convert_MathML.operator = [
 	return [ $2, $1, $3 ];
 } ],
 // relationships, assignment, equalities
-[ /(\S+)([=≠≈≒≃∝≡><≤≥])(\S+)/, function($0, $1, $2, $3) {
+[ new RegExp('(\\S+)([' + convert_MathML.RELATIONSHIP_PATTERN + '])(\\S+)'), function($0, $1, $2, $3) {
 	return [ $2, $1, $3 ];
 } ],
 // terms
@@ -626,18 +635,17 @@ convert_MathML.operator = [
 [ /\S+(?:;\S+)+/, function($0) {
 	($0 = $0.split(';')).unshift(';');
 	return $0;
-} ] ];
-
-// https://en.wikipedia.org/wiki/Mathematical_operators_and_symbols_in_Unicode
-// ~
-convert_MathML.non_scalar_chars = '(){}^√∛*\\/⁄∕×⋅÷+\\-±=≠≈≒≃∝≡><≤≥,;\r\n';
-
-convert_MathML.operator.forEach(function(term) {
+} ] ])
+//
+.forEach(function(term) {
 	// 不可用 'g'! e.g., 2+3-4+5
 	term[0] = new RegExp(term[0].source.replace(/\\S/g, '[^'
 			+ convert_MathML.non_scalar_chars + ']'), '');
 	// library_namespace.debug(term[0]);
 });
+
+convert_MathML.RELATIONSHIP_PATTERN = new RegExp('^[' + convert_MathML.RELATIONSHIP_PATTERN + ']$');
+
 
 convert_MathML.process = function(text, order, queue) {
 	// library_namespace.debug('convert_MathML.process: [' + text + '] (' + order
