@@ -972,6 +972,7 @@ CeL.assert([
 		"A<B>bold</B>and<CODE>coded</CODE>".split(/<(\/)?([^<>]+)>/)
 				.join(';'), "A;;B;bold;/;B;and;;CODE;coded;/;CODE;" ]);
 CeL.assert([ '..Word1 Word2..'.split(/([a-z]+)(\d+)/i).join(';'), "..;Word;1; ;Word;2;.."]);
+CeL.info('All test of String.prototype.split() passed. 測試通過。');
 
 
  * </code>

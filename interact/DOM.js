@@ -6751,7 +6751,8 @@ function auto_TOC(content_node, level, force) {
 		// l: title 長度在規範內。
 		i = title.length < auto_TOC.max_length;
 		// l: tagName
-		l = node.tagName;
+		// CSS 分大小寫。
+		l = node.tagName.toLowerCase();
 		if (!node.id && !node.name)
 			// from wiki
 			node.id = encodeURIComponent(title).replace(/%/g, '.').replace(

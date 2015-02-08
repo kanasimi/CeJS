@@ -749,8 +749,8 @@ convert_MathML.parse = function(text, queue) {
 	return text;
 };
 
-// (?:[+\-±]?\d+(?:\.\d+)?[°∘%％‰]?|pi|PI|Pi|[eiKπδφγλΩ∞ℵ])
-var PATTERN_numeric = /[+\-±]?\d+(?:\.\d+)?[°∘%％‰]?/;
+// (?:[+\-±]?\d+(?:\.\d+)?[°∘%％‰‱]?|pi|PI|Pi|[eiKπδφγλΩ∞ℵ])
+var PATTERN_numeric = /[+\-±]?\d+(?:\.\d+)?[°∘%％‰‱]?/;
 // [ , 純數, 識別元 ]
 convert_MathML.PATTERN_numeric_prefix = new RegExp('^(' + PATTERN_numeric.source + ')([^\d].*)?$' + '$');
 convert_MathML.is_numeric_prefix = function(expression) {

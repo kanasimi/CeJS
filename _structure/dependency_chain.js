@@ -287,6 +287,7 @@ if (typeof CeL === 'function')
 		CeL.assert([ Array.from(s).join(), "1,2,3,4" ], 'Array.from(Set)');
 		CeL.assert([ Array.from(m).join(), "5,2,7,1,3,1" ], 'Array.from(Map)');
 		CeL.assert([ Array.from(m.keys()).join(), "5,7,3" ], 'Array.from(map.keys())');
+		CeL.info('All test of Array.from() passed. 測試通過。');
 
 		 * </code>
 		 * 

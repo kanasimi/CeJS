@@ -1822,6 +1822,18 @@ gettext.conversion = {
 				number = number.replace(/點/, '成');
 			return number;
 		},
+		// e.g., 日本語 (Japanese): 2割5分
+		// http://forum.wordreference.com/showthread.php?t=1292655
+		// 1割: one tenth, 3割: three tenths
+		// TODO: 割引: 5分引く (5% off), 1割引く (10% off), 1%割引
+		割 : function (number) {
+			number = to_Chinese_numeral((10 * number).to_fixed(1));
+			if (number.indexOf('點') === NOT_FOUND)
+				number += '割';
+			else
+				number = number.replace(/點/, '割') + '分';
+			return number;
+		},
 		// 打折扣/discount。e.g., 打六折、打七二折、30% off（30﹪折扣，70% on sale）。
 		// https://zh.wikipedia.org/wiki/%E6%8A%98%E6%89%A3
 		// "% off" may use "⁒ off" 'COMMERCIAL MINUS SIGN' (U+2052).
@@ -1842,16 +1854,20 @@ gettext.conversion = {
 			return (400 * number) + '碼';
 		},
 
-		// percentage, 百分比, ％（全形百分號）
+		// https://en.wikipedia.org/wiki/Parts-per_notation
+		// percentage (%), 百分比, ％（全形百分號）
 		'％' : function (number) {
 			return (100 * number).to_fixed() + '%';
 		},
+		// permille (‰), 千分率
 		'‰' : function (number) {
 			return (1000 * number).to_fixed() + '‰';
 		},
+		// permyriad (‱) (Basis point), 萬分率
 		'‱' : function (number) {
 			return (10000 * number).to_fixed() + '‱';
 		},
+		// ppm (parts-per-million, 10–6), ppb (parts-per-billion, 10–9), ppt (parts-per-trillion, 10–12) and ppq (parts-per-quadrillion, 10-15).
 
 		d : gettext.date,
 		t : gettext.time,
