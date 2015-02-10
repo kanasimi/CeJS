@@ -382,6 +382,8 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				done++;
 				if (result.edit.newrevid)
 					error = ' [[Special:Diff/' + result.edit.newrevid + '|完成]]';
+				else if ('nochange' in result.edit)
+					error = '無改變';
 				else {
 					// 有時無 result.edit.newrevid
 					library_namespace.err('無 result.edit.newrevid');
@@ -390,7 +392,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			}
 				
 			messages.push('* [[' + title + ']]: 費時 ' + messages.last.age(new Date)
-					+ '，' + (messages.last = new Date).toISOString() + error);
+					+ '，' + (messages.last = new Date).toISOString() + ' ' + error);
 		};
 
 	var done = 0, messages = [];
