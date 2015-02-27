@@ -65,6 +65,7 @@ CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ], functio
 	wiki.logout();
 });
 
+// TODO: http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 
  </code>
  */
@@ -212,11 +213,11 @@ wiki_API.prototype.next = function() {
 			_this.last_titles = titles;
 			// [ page_data ]
 			_this.last_pages = pages;
-			if (library_namespace.is_Object(pages.next)) {
-				// pages.next: 例如 {backlinks:{blcontinue:'[0|12]'}}
-				for ( var type in pages.next)
-					Object.assign(_this.next_mark, pages.next[type]);
-				library_namespace.debug('next: ' + _this.show_next());
+			if (library_namespace.is_Object(pages.next_index)) {
+				// pages.next_index: 後續檢索用索引值。例如 {backlinks:{blcontinue:'[0|12]'}}。
+				for ( var type in pages.next_index)
+					Object.assign(_this.next_mark, pages.next_index[type]);
+				library_namespace.debug('next index: ' + _this.show_next());
 			}
 
 			if (typeof next[2] === 'function')
@@ -381,13 +382,14 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			else {
 				done++;
 				if (result.edit.newrevid)
-					error = ' [[Special:Diff/' + result.edit.newrevid + '|完成]]';
+					// https://en.wikipedia.org/wiki/Help:Wiki_markup#Linking_to_old_revisions_of_pages.2C_diffs.2C_and_specific_history_pages
+					error = ' [[Special:Diff/' + result.edit.newrevid + '|完成]]。';
 				else if ('nochange' in result.edit)
-					error = '無改變';
+					error = '無改變。';
 				else {
 					// 有時無 result.edit.newrevid
 					library_namespace.err('無 result.edit.newrevid');
-					error = '完成';
+					error = '完成。';
 				}
 			}
 				
@@ -423,6 +425,10 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value)
 			library_namespace.show_value(data, 'pages');
+
+		if (pages = this.show_next())
+			messages.push('* 後續檢索用索引值: ' + pages);
+
 		pages = data;
 
 		if (typeof config.first === 'function')
@@ -590,9 +596,10 @@ wiki_API.query = function (action, callback, post_data) {
 	if (!action[1].format)
 		action[0] = get_URL.add_param(action[0], 'format=json&utf8=1');
 
-	// 開始處理
+	// 開始處理。
 	if (!post_data && wiki_API.query.allow_JSONP) {
 		library_namespace.debug('採用 JSONP callback 的方法。須注意：若有 error，將不會執行 callback！', 2, 'wiki_API.query');
+		library_namespace.debug('callback : (' + (typeof callback) + ') [' + callback + ']', 3, 'wiki_API.query');
 		get_URL(action, {
 			callback : callback
 		});
@@ -869,6 +876,7 @@ wiki_API.langlinks.parse = function(langlinks, to_lang) {
 //---------------------------------------------------------------------//
 
 function get_list(type, title, callback, namespace) {
+	library_namespace.debug(type + '[[' + title + ']], callback: ' + callback, 3);
 	var options, prefix = get_list.type[type], parameter;
 	if (Array.isArray(prefix)) {
 		parameter = prefix[1];
@@ -895,7 +903,7 @@ function get_list(type, title, callback, namespace) {
 	title[1] = 'query&' + parameter + '=' + type + '&'
 	//
 	+ (parameter === get_list.default_parameter ? prefix : '') + wiki_API.query.title_param(title[1])
-	//
+	// 數目限制
 	+ (0 < options.limit ? '&' + prefix + 'limit=' + options.limit : '')
 	// next start from here.
 	+ (options[prefix + 'continue'] ? '&' + prefix + 'continue=' + options[prefix + 'continue'] : '')
@@ -904,7 +912,17 @@ function get_list(type, title, callback, namespace) {
 	if (!title[0])
 		title = title[1];
 
-	wiki_API.query(title, typeof callback === 'function' && function(data) {
+	if (typeof callback !== 'function') {
+		library_namespace.err('callback is NOT function! callback: [' + callback + ']');
+		library_namespace.debug('可能是想要當作 wiki instance，卻未設定好，直接呼叫了 ' + library_namespace.Class
+			+ '.wiki？\ne.g., 想要 var wiki = ' + library_namespace.Class
+			+ '.wiki(user, password) 卻呼叫了 var wiki = ' + library_namespace.Class + '.wiki？', 3);
+		return;
+	}
+
+	wiki_API.query(title,
+	// treat as {Function}callback or {Object}wiki_API.work config.
+	function(data) {
 		function add_page(page) {
 			titles.push(page.title);
 			pages.push(page);
@@ -916,13 +934,20 @@ function get_list(type, title, callback, namespace) {
 			library_namespace.show_value(data, 'get_list:' + type);
 
 		var titles = [], pages = [];
-		if (data['query-continue'])
-			pages.next = data['query-continue'];
+		// 紀錄後續檢索用索引值。
+		// https://www.mediawiki.org/wiki/API:Query/zh#.E5.90.8E.E7.BB.AD.E6.A3.80.E7.B4.A2
+		if (data['query-continue']) {
+			pages.next_index = data['query-continue'];
+			if (library_namespace.is_debug(2)
+				// .show_value() @ interact.DOM, application.debug
+				&& library_namespace.show_value)
+			library_namespace.show_value(pages.next_index, 'get_list:get query-continue');
+		}
 		if (page_content.is_page_data(title))
 			title = title.title;
 
 		if (!data || !data.query) {
-			library_namespace.err('get_list: Unknown response: [' + data + ']');
+			library_namespace.err('Unknown response: [' + data + ']', 1, 'get_list');
 
 		} else if (data.query[type]) {
 			if (Array.isArray(data = data.query[type]))
@@ -957,18 +982,27 @@ function get_list(type, title, callback, namespace) {
 get_list.default_parameter = 'list';
 
 // [[Special:Whatlinkshere]]
+// 使用說明:連入頁面
 // https://zh.wikipedia.org/wiki/Help:%E9%93%BE%E5%85%A5%E9%A1%B5%E9%9D%A2
 get_list.type = {
+
 	// 'type name' : 'prefix' (parameter : 'list')
+
 	// backlinks: 取得連結到 [[title]] 的頁面。
+	// 設定 title 'Template:tl' 可取得使用指定 Template 的頁面。
 	backlinks : 'bl',
+
 	// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
 	imageusage : 'iu',
+
 	// 'type name' : [ 'prefix', 'parameter' ]
+	// ** 可一次處理多個標題，但可能較耗資源、較慢。
+
 	// linkshere: 取得連結到 [[title]] 的頁面。
 	linkshere : ['lh', 'prop' ],
+
 	// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
-	// 基本上同 imageusage。但可一次處理多個標題。
+	// 基本上同 imageusage。
 	fileusage : ['fu', 'prop' ]
 };
 

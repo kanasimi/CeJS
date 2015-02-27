@@ -3695,6 +3695,11 @@ if (typeof CeL === 'function')
 		/**
 		 * library 相對於 HTML file 的 base path。<br />
 		 * 同目錄時，應為 "./"。
+		 *
+		 * @example <code>
+		 * // 在特殊環境下，設置 library base path。
+		 * var CeL = { library_path : 'path/to/ce.js' };
+		 * </code>
 		 */
 		var library_base_path,
 

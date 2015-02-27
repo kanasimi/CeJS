@@ -190,13 +190,13 @@ function get_URL(URL, onload, encoding, post_data) {
 	if (options.search || options.hash)
 		URL = get_URL.add_param(URL, options.search, options.hash);
 
-	library_namespace.debug('URL: (' + (typeof URL) + ') ' + URL, 3, 'get_URL');
+	library_namespace.debug('URL: (' + (typeof URL) + ') [' + URL + ']', 3, 'get_URL');
 
-	if (typeof onload === 'object')
-		// use JSONP. insert page.
-		// need callback.
+	if (typeof onload === 'object') {
+		library_namespace.debug('Trying to JSONP, insert page, need callback.', 3, 'get_URL');
 		//library_namespace.run(URL);
-		for (var callback_param in onload)
+		for (var callback_param in onload) {
+			library_namespace.debug('Trying (' + (typeof onload[callback_param]) + ') [' + callback_param + '] = [' + onload[callback_param] + ']', 3, 'get_URL');
 			if (callback_param && typeof onload[callback_param] === 'function') {
 				var callback_name,
 				node = document.createElement('script');
@@ -216,6 +216,9 @@ function get_URL(URL, onload, encoding, post_data) {
 				document_head.appendChild(node);
 				return;
 			}
+		}
+		library_namespace.debug('Skip JSONP. No callback setted.', 3, 'get_URL');
+	}
 
 	if (post_data)
 		post_data = get_URL.param_to_String(post_data);
