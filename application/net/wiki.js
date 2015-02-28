@@ -375,7 +375,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		minor : 1,
 		// 標記此編輯為機器人編輯。
 		bot : 1,
-		// 設定寫入目標。一般為 debug、test 用。
+		// 設定寫入目標。一般為 debug、test 測試期間用。
 		write_to : ''
 	}, callback;
 
@@ -483,7 +483,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			if (config.summary)
 				messages.unshift(config.summary, ': 完成 ' + done + '/' + pages.length
 				// 使用時間, 費時
-				+ ' 條目，總共使用 ' + messages.start.age(new Date) + '。');
+				+ ' 條目，前後總共 ' + messages.start.age(new Date) + '。');
 
 			if (typeof config.last === 'function')
 				config.last.call(this, messages, titles, pages);
@@ -1241,10 +1241,10 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	if (Array.isArray(title))
 		action = [ title[0], action ], title = title[1];
 	if (options.write_to) {
-		// 設定寫入目標。一般為 debug、test 用。
+		// 設定寫入目標。一般為 debug、test 測試期間用。
 		title = options.write_to;
 		library_namespace.debug('依 options.write_to 寫入至 [[' + title + ']]', 1,
-				'wiki_API.edit');
+			'wiki_API.edit');
 	}
 
 	// 造出可 modify 的 options。

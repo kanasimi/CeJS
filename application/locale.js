@@ -97,7 +97,7 @@ language_tag.parse = function(tag) {
 				return $0.toUpperCase();
 			});
 		//	<a href="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements" accessdate="2012/9/22 16:58">ISO 3166-1 alpha-2 code</a>
-		//	國家/地區/領域代碼。match[] 可能是 undefined。
+		//	國家/地區/區域/領域代碼。match[] 可能是 undefined。
 		this.region = (match[i++] || '').toUpperCase();
 
 		// TODO: variant, extension, privateuse
@@ -129,7 +129,7 @@ language_tag.parse = function(tag) {
 	return this;
 };
 
-// 查表對照轉換
+// 查表對照轉換。
 language_tag.convert = function() {
 	// TODO
 	throw new Error(1,
@@ -147,10 +147,117 @@ new language_tag('x-CJK').language;
 new language_tag('zh-Hant').language;
 */
 
+
+// 語系代碼，應使用 language_tag.language_code(region) 的方法。
+// 主要的應該放後面。
+// mapping: region code (ISO 3166) → default language code (ISO 639)
+// https://en.wikipedia.org/wiki/Template:ISO_639_name
+language_tag.LANGUAGE_CODE = {
+	// 中文
+	ZH : 'zh',
+	// http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+	// Preferred-Value: cmn
+	CN : 'cmn-Hans',
+	HK : 'cmn-Hant',
+	TW : 'cmn-Hant',
+	// ja-JP
+	JP : 'ja',
+	// ko-KR
+	KR : 'ko',
+	GB : 'en',
+	// en-UK
+	UK : 'en',
+	// en-US
+	US : 'en',
+	FR : 'fr',
+	DE : 'de',
+	// ru-RU
+	RU : 'ru'
+};
+
+/**
+ * Get the default language code of region.
+ * 
+ * @param {String}region
+ *            region code (ISO 3166)
+ * @returns {String} language code (ISO 639)
+ */
+language_tag.language_code = function(region, regular_only) {
+	var code = language_tag.LANGUAGE_CODE[language_tag.region_code(region)];
+	if (!code) {
+		if (library_namespace.is_debug())
+			library_namespace.warn('無法辨識之國家/區域：[' + region + ']');
+		if (regular_only)
+			return;
+	}
+	return code || region.toLowerCase();
+}
+
+
+// mapping: region name → region code (ISO 3166)
+// https://en.wikipedia.org/wiki/ISO_3166-1
+language_tag.REGION_CODE = {
+	臺 : 'TW',
+	臺灣 : 'TW',
+	台 : 'TW',
+	台灣 : 'TW',
+	中 : 'CN',
+	// for language_tag.LANGUAGE_CODE
+	中文 : 'ZH',
+	陸 : 'CN',
+	大陸 : 'CN',
+	中國大陸 : 'CN',
+	日 : 'JP',
+	日本 : 'JP',
+	港 : 'HK',
+	香港 : 'HK',
+	韓國 : 'KR',
+	英國 : 'UK',
+	美國 : 'US',
+	法國 : 'FR',
+	德國 : 'DE'
+};
+
+// reverse
+(function() {
+	for (var language_code in language_tag.LANGUAGE_CODE)
+		language_tag.REGION_CODE[language_tag.LANGUAGE_CODE[language_code]] = language_code;
+})();
+
+/**
+ * Get the default region code of region.
+ * 
+ * @param {String}region
+ *            region name
+ * @returns {String} region code (ISO 3166)
+ */
+language_tag.region_code = function(region, regular_only) {
+	var code = language_tag.REGION_CODE[region];
+	if (!code) {
+		// 嘗試解析。
+		if (/^[a-z]+$/.test(region))
+			code = language_tag.REGION_CODE[region.toLowerCase()];
+		else if (code = region.match(/^(.+)[語文]$/)) {
+			code = language_tag.REGION_CODE[code[1]]
+			|| language_tag.REGION_CODE[code[1] + '國'];
+		} else {
+			code = language_tag.REGION_CODE[region + '國'];
+		}
+		if (!code) {
+			// 依舊無法成功。
+			if (library_namespace.is_debug())
+				library_namespace.warn('無法辨識之國家/區域：[' + region + ']');
+			if (regular_only)
+				return;
+			code = region.toUpperCase();
+		}
+	}
+	return code;
+}
+
 _// JSDT:_module_
 .
 language_tag = language_tag;
-
 
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -1891,7 +1998,7 @@ gettext_location = library_namespace.env.domain_location,
 gettext_resource = library_namespace.null_Object();
 
 
-//TODO: lazy evaluation
+// TODO: lazy evaluation
 //	http://www.rfc-editor.org/rfc/bcp/bcp47.txt
 
 //	http://www.w3.org/International/articles/bcp47/
@@ -1899,7 +2006,7 @@ gettext_resource = library_namespace.null_Object();
 //	http://suika.fam.cx/~wakaba/wiki/sw/n/BCP%2047
 
 //	http://www.iana.org/protocols
-//	http://www.iana.org/assignments/language-subtag-registry
+//	http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 //	http://www.iana.org/assignments/language-tag-extensions-registry
 
 //	http://schneegans.de/lv/
@@ -1908,7 +2015,7 @@ gettext.set_alias({
 
 	'arb-Arab' : 'العربية|ar|Arabic|阿拉伯語|ar-arb-Arab',
 
-	//	http://www.iana.org/assignments/language-subtag-registry
+	//	http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 	//	Subtag: cmn, Preferred-Value: cmn
 	'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|简化字|简化中文|簡化字|簡體中文|普通话|中国|Simplified Chinese|Mandarin Chinese',
 	// 國語
