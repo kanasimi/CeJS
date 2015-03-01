@@ -1174,15 +1174,14 @@ OS='UNIX'; // unknown
 				(_.get_script_full_name().indexOf('\\') !== -1 ? 'Windows' : 'UNIX');
 
 		/**
-		 * 文件預設 line separator / NewLine / line delimiter。
+		 * 文件預設 line separator / NewLine / line delimiter。<br />
+		 * in VB: vbCrLf
 		 * 
 		 * @name CeL.env.line_separator
 		 * @type String
 		 */
 		env.line_separator =
-				OS === 'UNIX' ? '\n' : OS === 'Mac' ? '\r' : '\r\n';	// in
-																		// VB:
-																		// vbCrLf
+				OS === 'UNIX' ? '\n' : OS === 'Mac' ? '\r' : '\r\n';
 
 		/**
 		 * file system 預設 path separator。<br />

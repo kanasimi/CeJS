@@ -55,7 +55,7 @@ _// JSDT:_module_
 */
 
 
-//經驗法則。並非依照規格書。
+// 經驗法則。並非依照規格書。
 function is_ADO_Stream(object) {
 	//library_namespace.debug('is_COM: ' + is_COM(object), 2);
 	//library_namespace.debug('typeof object.SetEOS: ' + typeof object.SetEOS, 2);
@@ -68,7 +68,7 @@ _// JSDT:_module_
 .
 is_ADO_Stream = is_ADO_Stream;
 
-//經驗法則。並非依照規格書。
+// 經驗法則。並非依照規格書。
 function is_FSO(object) {
 	return is_COM(object)
 		&& typeof object.FileExists === 'unknown'

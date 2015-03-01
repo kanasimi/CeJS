@@ -75,6 +75,7 @@ function gethost(host) {
 		f = 'ipconfig.tmp.txt';
 		WshShell.Run(c + 'ipconfig > ' + (cmd ? '""' + f + '"" "' : p + f), 0, 1);	//	winipcfg
 		if (t = simpleRead(f = p + f)) {
+			// TODO: use t.between()
 			if (i = t.indexOf('PPP adapter'), i != NOT_FOUND)
 				t = t.slice(i);
 			else if (i = t.indexOf('Ethernet adapter'), i != NOT_FOUND)
@@ -318,6 +319,7 @@ parse_URI = parse_URI;
 
 
 //	2012/10/13 13:31:21
+//	排除會導致error的字元
 //	@see data.is_matched.string_pre_handler(), application.storage.file.get_file_name()
 function to_file_name(file_name, do_escape) {
 	file_name = file_name.trim();

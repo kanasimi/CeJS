@@ -255,6 +255,7 @@ function getOwnPropertyDescriptor(object, property) {
 }
 
 set_method(Object, {
+	// 鎖定物件。
 	// Object.seal()
 	seal: function seal(object) {
 		// 無法以舊的語法實現。
@@ -324,6 +325,57 @@ set_method(Object.prototype, {
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // Array.*
+
+
+// 稀疏矩陣 (sparse matrix) 用的 Array.prototype.some()
+// 要到 index > 1e7 比較感覺得出來。
+// e.g.,
+// a=[];a[1e7]=2;alert(a.some(function(v){return v===2}));
+// a=[];a[1e7]=2;alert(a.sparse_some(function(v){return v===2}));
+function sparse_some(callback, thisArg) {
+	for ( var index in this)
+		if (!isNaN(index))
+			if (thisArg ? callback.call(thisArg, this[index], index, this)
+			// 不採用 .call() 以加速執行。
+			: callback(this[index], index, this))
+				return true;
+	return false;
+}
+
+// 稀疏矩陣 (sparse matrix) 用的 Array.prototype.every()
+// 要到 index > 1e7 比較感覺得出來。
+function sparse_every(callback, thisArg) {
+	for ( var index in this)
+		if (!isNaN(index))
+			if (!(thisArg ? callback.call(thisArg, this[index], index, this)
+			// 不採用 .call() 以加速執行。
+			: callback(this[index], index, this)))
+				return false;
+	return true;
+}
+
+
+// 測試 for ( ... in array ) 時，會依順序提供 index。
+if (typeof Array.prototype.some !== 'function')
+	(function() {
+		var array = [], result = [];
+		array[4] = 4;
+		array[2] = 2;
+		array[0] = 0;
+		for ( var index in array)
+			if (!isNaN(index))
+				result.push(index);
+		// CeL.log(result.join());
+
+		if (library_namespace.env.sequenced_Array = result.join() === '0,2,4')
+			set_method(Array.prototype, {
+				sparse_some : sparse_some,
+				sparse_every : sparse_every
+			});
+	})();
+
+
+
 
 set_method(Array, {
 	// Array.of()
@@ -437,10 +489,11 @@ set_method(Array.prototype, {
 	// Array.prototype.findIndex()
 	findIndex : function findIndex(predicate, thisArg) {
 		for (var index = 0, length = this.length; index < length; index++)
-			if (thisArg ? predicate.call(thisArg, this[index], index, this)
-			// 不採用 .call() 以加速執行。
-			: predicate(this[index], index, this))
-				return index;
+			if (index in this)
+				if (thisArg ? predicate.call(thisArg, this[index], index, this)
+				// 不採用 .call() 以加速執行。
+				: predicate(this[index], index, this))
+					return index;
 		return NOT_FOUND;
 	},
 	// Array.prototype.findIndex()
@@ -454,19 +507,21 @@ set_method(Array.prototype, {
 	// Array.prototype.some()
 	some : function some(callback, thisArg) {
 		for (var index = 0, length = this.length; index < length; index++)
-			if (thisArg ? callback.call(thisArg, this[index], index, this)
-			// 不採用 .call() 以加速執行。
-			: callback(this[index], index, this))
-				return true;
+			if (index in this)
+				if (thisArg ? callback.call(thisArg, this[index], index, this)
+				// 不採用 .call() 以加速執行。
+				: callback(this[index], index, this))
+					return true;
 		return false;
 	},
 	// Array.prototype.every()
 	every : function every(callback, thisArg) {
 		for (var index = 0, length = this.length; index < length; index++)
-			if (!(thisArg ? callback.call(thisArg, this[index], index, this)
-			// 不採用 .call() 以加速執行。
-			: callback(this[index], index, this)))
-				return false;
+			if (index in this)
+				if (!(thisArg ? callback.call(thisArg, this[index], index, this)
+				// 不採用 .call() 以加速執行。
+				: callback(this[index], index, this)))
+					return false;
 		return true;
 	},
 
@@ -912,6 +967,7 @@ RegExp_flags.flags = {
 
 library_namespace.RegExp_flags = RegExp_flags;
 
+// library_namespace.env('not_native_keyword')
 if (!Object.defineProperty[library_namespace.env.not_native_keyword])
 	// RegExp.prototype.flags
 	// CeL.assert([/./ig.flags, 'gi']);
@@ -1102,7 +1158,7 @@ if (
 					}
 
 					return result;
-		})[library_namespace.env('not_native_keyword')] = true;
+		})[library_namespace.env.not_native_keyword] = true;
 	})();
 
 
