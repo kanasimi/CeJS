@@ -11,10 +11,14 @@
 
 if (false)
 	CeL.run('interact.console', function() {
-		var ansi = new CeL.interact.console.SGR('0123456789');
 		// CeL.set_debug(3);
+		var SGR = CeL.interact.console.SGR;
+		SGR.CSI = '*[';
+		SGR.add_color_alias('黑紅綠黃藍紫青白'.split(''));
 
-		CeL.assert([ '0123456789', ansi.text ]);
+		var text = '0123456789', ansi = new SGR(text);
+
+		CeL.assert([ text, ansi.text ]);
 
 		CeL.log('set style {Object}');
 		ansi.style_at(3, {
@@ -37,8 +41,7 @@ if (false)
 
 		CeL.log('Test @ 5');
 		CeL.assert([ 4, ansi.style_at(5).background ]);
-		CeL.assert([ 'blue',
-				CeL.interact.console.SGR.color[ansi.style_at(5).background] ]);
+		CeL.assert([ 'blue', SGR.color[ansi.style_at(5).background] ]);
 
 		CeL.log('set style multi-alias');
 		ansi.style_at(7, '5;-bold');
@@ -47,14 +50,25 @@ if (false)
 		CeL.assert([ false, ansi.style_at(9).bold ], '(9).bold');
 
 		CeL.log('Test all');
-		//CeL.assert([ '\x1b[m', ansi.get_style() ]);
+		text = '012*[1;32;44m34*[1;35;44m56*[22;35;44;5m789';
+		CeL.assert([ text, ansi.toString() ]);
+		CeL.assert([ text, (new SGR(text)).toString() ]);
+
+		CeL.assert([ '0123*[32m4567*[44m890',
+		//
+		(new SGR([ '0123', {
+			fg : '綠'
+		}, '4567', {
+			bg : '藍'
+		}, '890' ])).toString() ]);
 
 		// Not Yet Implemented!
 		// ansi.to_HTML(style_mapping);
-		// ansi.toJSON(style_mapping);
 
 		CeL.info('All test OK.');
 	});
+
+// ------------------------------------------------------------------------------------------------
 
 'use strict';
 if (typeof CeL === 'function')
@@ -80,6 +94,15 @@ if (typeof CeL === 'function')
 			_// JSDT:_module_
 			.prototype = {};
 
+			// ------------------------------------------------------------- //
+
+			/**
+			 * parse style name
+			 * 
+			 * @param style_name
+			 *            style name to parse
+			 * @returns {String} style name
+			 */
 			function SGR_style_name(style_name) {
 				library_namespace.debug('Search style name [' + style_name
 						+ '] in SGR_code.style_name_alias', 3);
@@ -95,6 +118,15 @@ if (typeof CeL === 'function')
 				return style_name;
 			}
 
+			/**
+			 * parse style value
+			 * 
+			 * @param style_value
+			 *            style value to parse
+			 * @param {String}[style_name]
+			 *            style name to referrer
+			 * @returns {String} style value
+			 */
 			function SGR_style_value(style_value, style_name) {
 				if (typeof style_value !== 'object'
 						&& (style_value in SGR_code.color_index)) {
@@ -152,14 +184,28 @@ if (typeof CeL === 'function')
 				return style_value;
 			}
 
-			function is_reset_style(style) {
-				return style === 0 || style === '0';
+			/**
+			 * check if the style value is "reset" or not.
+			 * 
+			 * @param style_value
+			 *            style value to check
+			 * @returns {Boolean} the style value is "reset".
+			 */
+			function is_reset_style(style_value) {
+				return style_value === 0 || style_value === '0';
 			}
 
+			/**
+			 * add style to {SGR_style}(this).
+			 * 
+			 * @param style
+			 *            style to add
+			 * @returns {SGR_style}(this)
+			 */
 			function SGR_style_add(style) {
 				if (!style && !is_reset_style(style))
 					// skip.
-					return;
+					return this;
 
 				library_namespace.debug('Search style (' + (typeof style)
 						+ ') [' + style
@@ -267,6 +313,13 @@ if (typeof CeL === 'function')
 				return this;
 			}
 
+			/**
+			 * SGR style Class
+			 * 
+			 * @param style
+			 *            style to set
+			 * @returns {SGR_style}(this)
+			 */
 			function SGR_style(style, options) {
 				if (false)
 					if (library_namespace.is_Object(options))
@@ -277,6 +330,9 @@ if (typeof CeL === 'function')
 						3);
 			}
 
+			/**
+			 * indicate the color styles
+			 */
 			var color_shift = {
 				foreground : 30,
 				background : 40
@@ -369,6 +425,8 @@ if (typeof CeL === 'function')
 				}
 			});
 
+			// ------------------------------------------------------------- //
+
 			/**
 			 * cf. String.prototype.split ( separator, limit )
 			 * 
@@ -394,38 +452,93 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * 會改變 this!<br />
+			 * 會改變 (this)!<br />
 			 * cf. Array.prototype.concat ( ...arguments )
 			 * 
 			 * @param {String|SGR_code}value
-			 * @returns {SGR_code}
+			 * @returns {SGR_code} (this)
 			 */
 			function SGR_concat(value) {
 				var index = 0, length = argument.length,
 				//
-				text = [ this.text ], value;
+				text_list = [ this.text ], value;
 				for (; index < length; index++)
 					if (is_SGR_code(value = argument[index])) {
 						// treat as {SGR_code}
-						text = text.join('');
+						text_list = text_list.join('');
 						this.style.forEach(function(style, index) {
-							this.style[text.length + index] = style;
+							this.style[text_list.length + index] = style;
 						}, this);
-						text = [ text, value.text ];
+						text_list = [ text_list, value.text ];
 					} else if (value)
 						// treat as {String}
-						text.push(value);
-				this.text = text.join('');
+						text_list.push(value);
+				this.text = text_list.join('');
+				return this;
 			}
 
 			/**
-			 * @param {String}string
-			 *            text
-			 * @returns {SGR_code}
+			 * escape pattern，以利作為 RegExp source 使用。<br />
+			 * e.g., '_[]_' → '_\\[\\]_'
+			 * 
+			 * @param {String}pattern
+			 * @returns {String}
 			 */
-			function SGR_parse(string) {
-				// TODO
-				throw new Error('Not Yet Implemented!');
+			function escape_RegExp_source(pattern) {
+				return pattern ? pattern.replace(/([*?+^$\|\[\]()\\\/])/g,
+						'\\$1') : '';
+			}
+
+			/**
+			 * parse styled text.
+			 * 
+			 * @param {String}styled_text
+			 *            text with style
+			 * @returns {Array} [ text, style ]
+			 */
+			function SGR_parse(styled_text) {
+				var text_now = '', style = [], matched, lastIndex = 0,
+				// 
+				pattern = new RegExp(escape_RegExp_source(SGR_code.CSI)
+						+ '([\\d{1,2}\\s\\' + SGR_code.separator + ']*)'
+						+ escape_RegExp_source(SGR_code.end_code), 'g');
+
+				while (matched = pattern.exec(styled_text)) {
+					library_namespace.debug('' + matched, 3);
+					text_now += styled_text.slice(lastIndex, matched.index);
+					style[text_now.length] = new SGR_style(matched[1] || 0);
+					lastIndex = pattern.lastIndex;
+				}
+
+				return [ text_now + styled_text.slice(lastIndex), style ];
+			}
+
+			/**
+			 * parse text token with style.
+			 * 
+			 * @param {Array}text_Array
+			 *            text token and style.<br /> [ {String}text,
+			 *            {Object}style, {String}text, .. ]<br />
+			 *            預設 [0] 為 text，之後 style, text, style, ... 交替
+			 * @returns {Array} [ text, style ]
+			 */
+			function SGR_parse_list(text_Array) {
+				var text_now = '', style = [],
+				//
+				index = 0, length = text_Array.length, text_length;
+
+				for (; index < length; index++) {
+					if (typeof text_Array[index] !== 'object')
+						text_now += text_Array[index++];
+					if (index < length)
+						if (style[text_length = text_now.length])
+							style[text_length].add(text_Array[index]);
+						else
+							style[text_length] = new SGR_style(
+									text_Array[index]);
+				}
+
+				return [ text_now, style ];
 			}
 
 			/**
@@ -450,7 +563,7 @@ if (typeof CeL === 'function')
 
 					library_namespace.debug('遍歷 to index ' + this_index, 3);
 					if (style_now) {
-						// TODO: reduce
+						// TODO: reduce. 決定最短顯示法。
 						style_now.add(this_style);
 					} else
 						style_now = this_style.clone();
@@ -485,7 +598,14 @@ if (typeof CeL === 'function')
 				return style_now;
 			}
 
-			function SGR_style_to_String(get_Array) {
+			/**
+			 * get full stylied String.
+			 * 
+			 * @param {Boolean}get_Array
+			 *            get Array, else String.
+			 * @returns {String}
+			 */
+			function SGR_style_toString(get_Array) {
 				var sequence = this.text.split('');
 				this.style.forEach(function(style, index) {
 					sequence[index] = style.toString() + sequence[index];
@@ -493,18 +613,24 @@ if (typeof CeL === 'function')
 				return get_Array ? sequence : sequence.join('');
 			}
 
+			/**
+			 * 測試 value 是否為 SGR_code instance。
+			 * 
+			 * @param value
+			 *            測試值
+			 * @returns {Boolean} 測試值為 SGR_code instance
+			 */
 			function is_SGR_code(value) {
 				return value instanceof SGR_code;
 			}
 
 			/**
-			 * ANSI escape code (or escape sequences)
+			 * ANSI escape code (or escape sequences) Class
 			 * 
-			 * @param {String}string
-			 *            text
+			 * @param {String|Array}text
+			 *            text / text token
 			 * @param {Object}options
 			 *            options : { CSI : '' }
-			 * @returns
 			 * 
 			 * @see <a
 			 *      href="https://en.wikipedia.org/wiki/ANSI_escape_code#graphics"
@@ -514,27 +640,36 @@ if (typeof CeL === 'function')
 			 *      <a href="http://vt100.net/docs/vt510-rm/SGR"
 			 *      accessdate="2015/3/1 8:1">SGR—Select Graphic Rendition</a>
 			 */
-			function SGR_code(string, options) {
+			function SGR_code(text, options) {
 				if (false)
 					if (typeof options === 'string')
 						options = {
 							CSI : options
 						};
+
+				if (library_namespace.is_Object(text) && !options) {
+					// 把 text 當作 options。
+					options = text;
+					text = null;
+				}
+
 				if (library_namespace.is_Object(options))
 					this.options = options;
 
-				// 標準化 / normalization
-				this.text = String(string);
+				options = Array.isArray(text) ? SGR_parse_list(text)
+				// String(): 標準化 / normalization
+				: SGR_parse(String(text));
+
+				this.text = options[0];
 
 				// {inner}private properties
-				// style[ index ] = new SGR_style();
-				this.style = [];
+				// this.style[ index ] = new SGR_style();
+				this.style = options[1];
 			}
 
 			Object.assign(SGR_code.prototype, {
 				// SGR_style_to_HTML(style_mapping)
 				// to_HTML : SGR_style_to_HTML,
-				// toJSON : SGR_style_to_JSON,
 
 				// style : SGR_style,
 				slice : SGR_slice,
@@ -542,13 +677,14 @@ if (typeof CeL === 'function')
 				concat : SGR_concat,
 
 				style_at : SGR_style_at,
-				get_style : SGR_style_to_String
-
+				// toJSON : SGR_style_toString,
+				toString : SGR_style_toString
 			});
 
 			/**
 			 * ECMA-48 8.3.117 SGR - SELECT GRAPHIC RENDITION<br />
-			 * 為允許使用者參照，因此放在 public。
+			 * 為允許使用者參照，因此放在 public。<br />
+			 * 
 			 */
 			SGR_code.style_data = {
 				// name : [ on, off ]
@@ -593,23 +729,39 @@ if (typeof CeL === 'function')
 			};
 
 			/**
+			 * 添增 color name alias。
+			 * 
+			 * @example <code>
+
+			// 使設定格式時，可使用中文顏色名稱。
+			CeL.interact.console.SGR.add_color_alias('黑紅綠黃藍紫青白'.split(''));
+
+			 * </code>
+			 * 
+			 * @param {Array}color_list
+			 *            color name list
+			 */
+			function add_color_alias(color_list) {
+				if (Array.isArray(color_list))
+					color_list.forEach(function(color, index) {
+						SGR_code.color_index[color] = index;
+					});
+			}
+
+			/**
 			 * style value alias<br />
 			 * 為允許使用者添增，因此放在 public。
 			 */
 			SGR_code.style_value_alias = {};
 			// SGR_code.color_index.black = 0
 			SGR_code.color_index = {};
-			(SGR_code.color = 'black,red,green,yellow,blue,magenta,cyan,white'
-					.split(',')).forEach(function(color, index) {
-				SGR_code.color_index[color] = index;
-			});
+			SGR_code.color = 'black,red,green,yellow,blue,magenta,cyan,white'
+					.split(',');
 			// 鎖定物件。
 			Object.seal(SGR_code.color);
+			add_color_alias(SGR_code.color);
 
-			// 使中文亦可使用。
-			'黑紅綠黃藍紫青白'.split('').forEach(function(color, index) {
-				SGR_code.color_index[color] = index;
-			});
+			// 一些初始設定。
 
 			// alias of number
 			(function() {
@@ -625,8 +777,7 @@ if (typeof CeL === 'function')
 			Object.seal(SGR_code.style_data);
 
 			Object.assign(SGR_code, {
-				parse : SGR_parse,
-
+				add_color_alias : add_color_alias,
 				/**
 				 * {String} Control Sequence Introducer, or Control Sequence
 				 * Initiator.<br />
@@ -635,7 +786,9 @@ if (typeof CeL === 'function')
 				 */
 				CSI : '\x1b[',
 				separator : ';',
-				end_code : 'm'
+				end_code : 'm',
+
+				is_SGR : is_SGR_code
 			});
 
 			_.SGR = SGR_code;
