@@ -79,8 +79,12 @@ if (typeof CeL === 'function')
 	CeL.run({
 		name : 'interact.console',
 		// includes() @ data.code.compatibility.
-		require : 'data.code.compatibility.',
+		require : 'data.code.compatibility.|data.native.to_RegExp_pattern',
 		code : function(library_namespace) {
+
+			// requiring
+			var to_RegExp_pattern;
+			eval(this.use());
 
 			/**
 			 * null module constructor
@@ -106,6 +110,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param style_name
 			 *            style name to parse
+			 * 
 			 * @returns {String} style name
 			 */
 			function SGR_style_name(style_name) {
@@ -130,6 +135,7 @@ if (typeof CeL === 'function')
 			 *            style value to parse
 			 * @param {String}[style_name]
 			 *            style name to referrer
+			 * 
 			 * @returns {String} style value
 			 */
 			function SGR_style_value(style_value, style_name) {
@@ -197,6 +203,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param style_value
 			 *            style value to check
+			 * 
 			 * @returns {Boolean} the style value is "reset".
 			 */
 			function is_reset_style(style_value) {
@@ -210,6 +217,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param style
 			 *            style to add
+			 * 
 			 * @returns {SGR_style}(this)
 			 */
 			function SGR_style_add(style) {
@@ -328,8 +336,9 @@ if (typeof CeL === 'function')
 			/**
 			 * SGR style Class
 			 * 
-			 * @param style
+			 * @param [style]
 			 *            style to set
+			 * 
 			 * @returns {SGR_style}(this)
 			 */
 			function SGR_style(style, options) {
@@ -477,6 +486,7 @@ if (typeof CeL === 'function')
 			 * cf. Array.prototype.concat ( ...arguments )
 			 * 
 			 * @param {String|SGR_code}value
+			 * 
 			 * @returns {SGR_code} (this)
 			 */
 			function SGR_concat(value) {
@@ -499,23 +509,11 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * escape pattern，以利作為 RegExp source 使用。<br />
-			 * e.g., '_[]_' → '_\\[\\]_'
-			 * 
-			 * @param {String}pattern
-			 * @returns {String}
-			 */
-			function escape_RegExp_source(pattern) {
-				return pattern ? pattern.replace(/([*?+^$\|\[\]()\\\/])/g,
-						'\\$1') : '';
-			}
-
-			/**
 			 * parse styled text.
 			 * 
 			 * @param {String}styled_text
 			 *            text with style
-			 * @param {Object}options
+			 * @param {Object}[options]
 			 *            options : { CSI : '' }
 			 * 
 			 * @returns {Array} [ text, style ]
@@ -523,12 +521,12 @@ if (typeof CeL === 'function')
 			function SGR_parse(styled_text, options) {
 				var text_now = '', style = [], matched, lastIndex = 0,
 				// 
-				pattern = new RegExp(escape_RegExp_source(options.CSI
+				pattern = new RegExp(to_RegExp_pattern(options.CSI
 						|| SGR_code.CSI)
 						+ '([\\d{1,2}\\s\\'
 						+ (options.separator || SGR_code.separator)
 						+ ']*)'
-						+ escape_RegExp_source(options.end_code
+						+ to_RegExp_pattern(options.end_code
 								|| SGR_code.end_code), 'g');
 
 				while (matched = pattern.exec(styled_text)) {
@@ -548,7 +546,7 @@ if (typeof CeL === 'function')
 			 *            text token and style.<br /> [ {String}text,
 			 *            {Object}style, {String}text, .. ]<br />
 			 *            預設 [0] 為 text，之後 style, text, style, ... 交替
-			 * @param {Object}options
+			 * @param {Object}[options]
 			 *            options : { CSI : '' }
 			 * 
 			 * @returns {Array} [ text, style ]
@@ -576,8 +574,10 @@ if (typeof CeL === 'function')
 			 * get / set SGR style.
 			 * 
 			 * @param {integer}index
-			 * @param {Object|String|Boolean}style
-			 * @param {integer}to_index
+			 *            index of text
+			 * @param {Object|String|Boolean}[style]
+			 *            the style to set
+			 * @param {integer}[to_index]
 			 * 
 			 * @returns {SGR_style}
 			 */
@@ -632,7 +632,7 @@ if (typeof CeL === 'function')
 			/**
 			 * get full stylied String.
 			 * 
-			 * @param {Boolean}get_Array
+			 * @param {Boolean}[get_Array]
 			 *            get Array, else String.
 			 * @returns {String}
 			 */
@@ -660,7 +660,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {String|Array}text
 			 *            text / text token
-			 * @param {Object}options
+			 * @param {Object}[options]
 			 *            options : { CSI : '' }
 			 * 
 			 * @see <a
@@ -709,6 +709,7 @@ if (typeof CeL === 'function')
 				concat : SGR_concat,
 				// TODO:
 				// splice : SGR_splice,
+				// chunk : SGR_chunk,
 
 				style_at : SGR_style_at,
 				// toJSON : SGR_style_toString,

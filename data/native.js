@@ -386,29 +386,36 @@ function encodeUC(u, enc) {
 
 
 
-_// JSDT:_module_
-.
 /**
- * String pattern (e.g., "/a+/g") to RegExp pattern.
+ * String pattern (e.g., "/a+/g") to RegExp pattern.<br />
+ * escape RegExp pattern，以利作為 RegExp source 使用。<br />
  * cf. qq// in perl.
  * 
- * String.prototype.to_RegExp_pattern = function(f) { return to_RegExp_pattern(this.valueOf(), f); };
+ * String.prototype.to_RegExp_pattern = function(f) { return
+ * to_RegExp_pattern(this.valueOf(), f); };
  * 
- * @param {String} pattern	pattern text.
- * @param {RegExp} [escape_pattern]	char pattern need to escape.
- * @param {Boolean|String} [RegExp_flag]	flags when need to return RegExp object.
+ * @param {String}pattern
+ *            pattern text.
+ * @param {RegExp}[escape_pattern]
+ *            char pattern need to escape.
+ * @param {Boolean|String}[RegExp_flag]
+ *            flags when need to return RegExp object.
  * 
- * @return	{String|RegExp} escaped RegExp pattern or RegExp object.
+ * @return {String|RegExp} escaped RegExp pattern or RegExp object.
  */
-to_RegExp_pattern = function(pattern, escape_pattern, RegExp_flag) {
-	var r = pattern
-		// 不能用 $0
-		.replace(escape_pattern || /([.+*?|()\[\]\\{}])/g, '\\$1')
-		// 這種方法不完全，例如對 /^\s+|\s+$/g
-		.replace(/^([\^])/, '\\^').replace(/(\$)$/, '\\$');
-	return RegExp_flag ? new RegExp(r, /^[igms]+$/i.test(RegExp_flag) ? RegExp_flag : '') : r;
-};
+function to_RegExp_pattern(pattern, escape_pattern, RegExp_flag) {
+	pattern = pattern
+	// 不能用 $0。
+	.replace(escape_pattern || /([.*?+^$|()\[\]\\{}])/g, '\\$1')
+	// 這種方法不完全，例如對 /^\s+|\s+$/g
+	.replace(/^([\^])/, '\\^').replace(/(\$)$/, '\\$');
 
+	return RegExp_flag ? new RegExp(pattern,
+			/^[igms]+$/i.test(RegExp_flag) ? RegExp_flag : '') : pattern;
+}
+_// JSDT:_module_
+.
+to_RegExp_pattern = to_RegExp_pattern;
 
 
 
@@ -768,8 +775,8 @@ function split_String_by_length_(s, l, m) {
 	}
 	return t;
 }
-/*	將字串以長l分隔
-	m==0: html用, 1:text
+/*	將字串以長l分隔, split String by fixed length.
+	m==0: html用, 1:text.
 */
 //split_String_by_length[generateCode.dLK]='split_String_by_length_';
 function split_String_by_length(l, m) {
@@ -795,6 +802,32 @@ function split_String_by_length(l, m) {
 	}
 	return t.join(sp);
 }
+
+
+
+/**
+ * 將字串以長 size 切割。
+ * 
+ * @param {Integer}size
+ *            切割大小。可以 ((.length / count) | 0 ) 取得。
+ * @returns {Array} chunks
+ * 
+ * @see <a
+ *      href="http://stackoverflow.com/questions/7033639/javascript-split-large-string-in-n-size-chunks"
+ *      accessdate="2015/3/2 23:27">regex - javascript: Split large string in
+ *      n-size chunks - Stack Overflow</a>
+ */
+function chunk(size) {
+	if ((size |= 0) < 1)
+		return [ this ];
+
+	var index = 0, length = this.length, result = [];
+	for (; index < length; index += size)
+		result.push(this.substr(index, size));
+
+	return result;
+}
+
 
 
 /**
@@ -1787,7 +1820,10 @@ set_method(String.prototype, {
 	count_of : set_bind(count_occurrence, true),
 	//gText : getText,
 	//turnU : turnUnicode,
-	split_by : split_String_by_length,
+	
+	//split_by : split_String_by_length,
+	chunk : chunk,
+	
 	pad : set_bind(pad, true),
 	toRegExp : set_bind(String_to_RegExp, true),
 	toTitleCase : toTitleCase,
