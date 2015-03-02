@@ -1,7 +1,7 @@
 /**
  * @name CeL function for console
  * @fileoverview 本檔案包含了 console 操作用的 functions。<br />
- *               a.k.a. BBS ANSI color 轉換程式
+ *               a.k.a. 一般論壇 (BBS) ANSI color 轉換程式
  * @since 2015/3/1 13:16:6
  * @example <code>
 
@@ -52,7 +52,7 @@ if (false)
 		CeL.log('Test all');
 		text = '012*[1;32;44m34*[1;35;44m56*[22;35;44;5m789';
 		CeL.assert([ text, ansi.toString() ]);
-		CeL.assert([ text, (new SGR(text)).toString() ]);
+		CeL.assert([ text, new SGR(text).toString() ]);
 
 		CeL.assert([ '0123*[32m4567*[44m890',
 		//
@@ -61,6 +61,10 @@ if (false)
 		}, '4567', {
 			bg : '藍'
 		}, '890' ])).toString() ]);
+
+		CeL.assert([ '(*[33m1,2*[39m)',
+		//
+		(new SGR([ '(', 'fg=黃', '1,2', '-fg', ')' ])).toString() ]);
 
 		// Not Yet Implemented!
 		// ansi.to_HTML(style_mapping);
@@ -94,7 +98,8 @@ if (typeof CeL === 'function')
 			_// JSDT:_module_
 			.prototype = {};
 
-			// ------------------------------------------------------------- //
+			// -------------------------------------------------------------
+			// //
 
 			/**
 			 * parse style name
@@ -135,23 +140,21 @@ if (typeof CeL === 'function')
 						library_namespace.warn(
 						// Expects value in
 						// color_shift.
-						'Illegal name of color: [' + style_name + '].');
+						'Invalid name of color: [' + style_name + '].');
 						return;
 					}
 					// color_shift[style_name] +
 					return SGR_code.color_index[style_value];
 				}
 
-				if (style_value === 'true')
-					style_value = true;
-				else if (style_value === 'false')
-					style_value = false;
+				if (style_value in SGR_style_value.alias)
+					style_value = SGR_style_value.alias[style_value];
 
 				if (typeof style_value === 'boolean') {
 					if ((style_name in SGR_code.style_data)
 							&& SGR_code.style_data[style_name][style_value ? 0
 									: 1] === undefined) {
-						library_namespace.warn('Illegal value [' + style_value
+						library_namespace.warn('Invalid value [' + style_value
 								+ '] of style: [' + style_name
 								+ ']: boolean value not setted.');
 						return;
@@ -160,7 +163,7 @@ if (typeof CeL === 'function')
 				}
 
 				if (isNaN(style_value) || (style_value |= 0) < 0) {
-					library_namespace.warn('Illegal value [' + style_value
+					library_namespace.warn('Invalid value [' + style_value
 							+ '] of style: [' + style_name
 							+ ']: value is not number.');
 					return;
@@ -174,7 +177,7 @@ if (typeof CeL === 'function')
 						if (style_value >= color_shift[style_name])
 							style_value -= color_shift[style_name];
 					} else {
-						library_namespace.warn('Illegal value [' + style_value
+						library_namespace.warn('Invalid value [' + style_value
 								+ '] of style [' + style_name
 								+ ']: value does not @ '
 								+ SGR_code.style_data[style_name] + '.');
@@ -183,6 +186,11 @@ if (typeof CeL === 'function')
 
 				return style_value;
 			}
+
+			SGR_style_value.alias = {
+				'true' : true,
+				'false' : false
+			};
 
 			/**
 			 * check if the style value is "reset" or not.
@@ -196,7 +204,9 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * add style to {SGR_style}(this).
+			 * parse and add style to {SGR_style}(this).<br />
+			 * 注意: 一般論壇 (BBS) 使用 VT100，遇到 \x20 (space) 即會終止解析而跳出。
+			 * 但本函式依然會跳過空白而解析之。
 			 * 
 			 * @param style
 			 *            style to add
@@ -228,20 +238,22 @@ if (typeof CeL === 'function')
 					else if (isNaN(style)) {
 						library_namespace.debug('test if [' + style
 								+ '] is "[+-] style name".', 3);
-						var matched = style.match(/^([+-])\s*([^\s].*)$/);
+						var matched = style.match(/^([+\-])\s*([^\s].*)$/);
 						if (matched
 								&& (matched[2] = SGR_style_name(matched[2]
 										.trim()))) {
-							if (matched[2] in color_shift)
+							matched[1] = matched[1] === '+';
+							if (undefined === SGR_style_value(matched[1],
+									matched[2]))
 								library_namespace.warn(
 								// Expects integer.
-								'Illegal configuration of style: ['
+								'Invalid configuration of style: ['
 										+ matched[2] + '].');
 							else {
 								library_namespace.debug('Set style "'
-										+ matched[2] + '" = '
-										+ (matched[1] === '+') + '.', 3);
-								this[matched[2]] = matched[1] === '+';
+										+ matched[2] + '" = ' + matched[1]
+										+ '.', 3);
+								this[matched[2]] = matched[1];
 							}
 							return this;
 						}
@@ -331,7 +343,8 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * indicate the color styles
+			 * indicate the color styles.<br />
+			 * 實際上應該列出所有設定值超過一種的格式名。
 			 */
 			var color_shift = {
 				foreground : 30,
@@ -345,9 +358,7 @@ if (typeof CeL === 'function')
 					if (false) {
 						var style_names = Object.keys(this);
 						if (this.options)
-							// remove 'options'
-							// key 很多的話，應該用 delete + 去除
-							// blank.
+							// remove 'options'.
 							style_names.splice(style_names.indexOf('options'),
 									2);
 						style_names.forEach(callback, thisArg || this);
@@ -393,9 +404,16 @@ if (typeof CeL === 'function')
 								+ (typeof value) + ') [' + value + ']', 3,
 								'SGR_style.prototype.to_Array');
 						if (style_name in color_shift) {
-							if (value < color_shift[style_name])
+							if (typeof value === 'boolean')
+								value = SGR_code.style_data[style_name]
+								// 0: on, 1: off.
+								[value ? 0 : 1];
+							else if (value < color_shift[style_name])
 								// 正常情況。
 								value += color_shift[style_name];
+							else if (isNaN(value))
+								library_namespace.warn('Invalid ' + style_name
+										+ ' color [' + value + ']');
 						} else if (typeof value !== 'number')
 							// 正常情況。
 							value = SGR_code.style_data[style_name]
@@ -418,14 +436,17 @@ if (typeof CeL === 'function')
 					var code = this.to_Array().join(SGR_code.separator);
 					library_namespace.debug('code [' + code + ']', 2,
 							'SGR_style.prototype.toString');
-					if (CSI || CSI === undefined)
+					// 假如有設定 .reset，那應該會有 '0'。
+					// 否則代表是空的 style，此時不回傳以避免被當作 reset。
+					if (code && (CSI || CSI === undefined))
 						code = (CSI || SGR_code.CSI) + code
 								+ (end_code || SGR_code.end_code);
 					return code;
 				}
 			});
 
-			// ------------------------------------------------------------- //
+			// -------------------------------------------------------------
+			// //
 
 			/**
 			 * cf. String.prototype.split ( separator, limit )
@@ -434,7 +455,7 @@ if (typeof CeL === 'function')
 			 */
 			function SGR_split(separator, limit) {
 				// TODO
-				throw new Error('Not Yet Implemented!');
+				throw new Error('SGR_split: Not Yet Implemented!');
 			}
 
 			/**
@@ -494,17 +515,24 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {String}styled_text
 			 *            text with style
+			 * @param {Object}options
+			 *            options : { CSI : '' }
+			 * 
 			 * @returns {Array} [ text, style ]
 			 */
-			function SGR_parse(styled_text) {
+			function SGR_parse(styled_text, options) {
 				var text_now = '', style = [], matched, lastIndex = 0,
 				// 
-				pattern = new RegExp(escape_RegExp_source(SGR_code.CSI)
-						+ '([\\d{1,2}\\s\\' + SGR_code.separator + ']*)'
-						+ escape_RegExp_source(SGR_code.end_code), 'g');
+				pattern = new RegExp(escape_RegExp_source(options.CSI
+						|| SGR_code.CSI)
+						+ '([\\d{1,2}\\s\\'
+						+ (options.separator || SGR_code.separator)
+						+ ']*)'
+						+ escape_RegExp_source(options.end_code
+								|| SGR_code.end_code), 'g');
 
 				while (matched = pattern.exec(styled_text)) {
-					library_namespace.debug('' + matched, 3);
+					library_namespace.debug(matched.join(), 3);
 					text_now += styled_text.slice(lastIndex, matched.index);
 					style[text_now.length] = new SGR_style(matched[1] || 0);
 					lastIndex = pattern.lastIndex;
@@ -520,9 +548,12 @@ if (typeof CeL === 'function')
 			 *            text token and style.<br /> [ {String}text,
 			 *            {Object}style, {String}text, .. ]<br />
 			 *            預設 [0] 為 text，之後 style, text, style, ... 交替
+			 * @param {Object}options
+			 *            options : { CSI : '' }
+			 * 
 			 * @returns {Array} [ text, style ]
 			 */
-			function SGR_parse_list(text_Array) {
+			function SGR_parse_list(text_Array, options) {
 				var text_now = '', style = [],
 				//
 				index = 0, length = text_Array.length, text_length;
@@ -656,9 +687,10 @@ if (typeof CeL === 'function')
 				if (library_namespace.is_Object(options))
 					this.options = options;
 
-				options = Array.isArray(text) ? SGR_parse_list(text)
+				options = Array.isArray(text) ? SGR_parse_list(text, options
+						|| {})
 				// String(): 標準化 / normalization
-				: SGR_parse(String(text));
+				: SGR_parse(String(text), options || {});
 
 				this.text = options[0];
 
@@ -675,6 +707,8 @@ if (typeof CeL === 'function')
 				slice : SGR_slice,
 				// split : SGR_split,
 				concat : SGR_concat,
+				// TODO:
+				// splice : SGR_splice,
 
 				style_at : SGR_style_at,
 				// toJSON : SGR_style_toString,
@@ -684,7 +718,8 @@ if (typeof CeL === 'function')
 			/**
 			 * ECMA-48 8.3.117 SGR - SELECT GRAPHIC RENDITION<br />
 			 * 為允許使用者參照，因此放在 public。<br />
-			 * 
+			 * 注意: 一般論壇 (BBS) 使用 VT100，僅支援如 reset, bold, blink, reverse,
+			 * foreground, background。
 			 */
 			SGR_code.style_data = {
 				// name : [ on, off ]
@@ -782,7 +817,7 @@ if (typeof CeL === 'function')
 				 * {String} Control Sequence Introducer, or Control Sequence
 				 * Initiator.<br />
 				 * "\x1b" : [Esc]<br />
-				 * some BBS: 按 Esc 兩次, '\x1b\x1b['。
+				 * some 論壇 (BBS): 按 Esc 兩次, '\x1b\x1b['。
 				 */
 				CSI : '\x1b[',
 				separator : ';',
@@ -791,6 +826,7 @@ if (typeof CeL === 'function')
 				is_SGR : is_SGR_code
 			});
 
+			// export
 			_.SGR = SGR_code;
 
 			return (_// JSDT:_module_

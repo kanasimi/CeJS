@@ -1821,6 +1821,18 @@ set_method(library_namespace.env.global, {
 
 //	建議不用，因為在for(in Array)時會..
 set_method(Array.prototype, {
+	remove_once: function(value) {
+		var index = this.indexOf(value);
+		if (index !== NOT_FOUND)
+			return this.splice(index, 1);
+	},
+	// remove all.
+	// value 很多的話，應該用 delete + 去除 blank。
+	remove: function(value) {
+		var index = 0;
+		while((index = this.indexOf(value, index)) !== NOT_FOUND)
+			this.splice(index, 1);
+	},
 	//clone: Array.prototype.slice,
 	append: append_to_Array,
 	uniq: set_bind(unique_Array),
