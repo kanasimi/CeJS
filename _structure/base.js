@@ -1680,6 +1680,14 @@ OS='UNIX'; // unknown
 			// return console.warn.apply(console, arguments);
 			return console.warn(message);
 		};
+		// info
+		if (console.info)
+			_.info = function (message, clear) {
+				if (clear && console.clear)
+					console.clear();
+				// return console.info.apply(console, arguments);
+				return console.info(message);
+			};
 		_.err = function (message, clear) {
 			if (clear && console.clear)
 				console.clear();

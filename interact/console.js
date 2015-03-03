@@ -688,9 +688,9 @@ if (typeof CeL === 'function')
 					this.options = options;
 
 				options = Array.isArray(text) ? SGR_parse_list(text, options
-						|| {})
+						|| library_namespace.null_Object())
 				// String(): 標準化 / normalization
-				: SGR_parse(String(text), options || {});
+				: SGR_parse(String(text), options || library_namespace.null_Object());
 
 				this.text = options[0];
 
@@ -743,7 +743,7 @@ if (typeof CeL === 'function')
 				// display (text color, foreground color, 文字部份前景色):
 				// 30–37
 				foreground : [ , 39 ],
-				// background color (背景色/底色): 40–47
+				// background color (背景色 / 底色): 40–47
 				background : [ , 49 ],
 				// Overlined / Not overlined
 				overline : [ 53, 55 ]
@@ -788,9 +788,9 @@ if (typeof CeL === 'function')
 			 * style value alias<br />
 			 * 為允許使用者添增，因此放在 public。
 			 */
-			SGR_code.style_value_alias = {};
+			SGR_code.style_value_alias = library_namespace.null_Object();
 			// SGR_code.color_index.black = 0
-			SGR_code.color_index = {};
+			SGR_code.color_index = library_namespace.null_Object();
 			SGR_code.color = 'black,red,green,yellow,blue,magenta,cyan,white'
 					.split(',');
 			// 鎖定物件。

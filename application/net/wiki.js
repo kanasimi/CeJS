@@ -6,6 +6,8 @@
  * @since 2015/1/1
  * @example <code>
 
+ </code>
+ */
 
 // [[維基百科:機器人]]
 // https://en.wikipedia.org/w/api.php
@@ -14,61 +16,62 @@
 // https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92
 // https://zh.wikipedia.org/wiki/Special:API%E6%B2%99%E7%9B%92
 
+if (false) {
+	// for debug: 'interact.DOM', 'application.debug',
+	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
 
-// for debug: 'interact.DOM', 'application.debug',
-CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
+	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ],
+			function() {
+				var wiki = CeL.wiki.login('', '')
+				// get the content of page
+				.page('Wikipedia:沙盒', function(title, content) {
+					CeL.info(title);
+					CeL.log(content);
+				})
+				// get the content of page, and then replace it.
+				.page('Wikipedia:沙盒').edit('* [[沙盒]]', {
+					section : 'new',
+					sectiontitle : '沙盒 test section',
+					summary : '沙盒 test edit (section)',
+					nocreate : 1
+				})
+				// get the content of page, and then modify it.
+				.page('Wikipedia:沙盒').edit(function(text) {
+					return text + '\n\n* [[沙盒]]';
+				}, {
+					summary : '沙盒 test edit',
+					nocreate : 1,
+					bot : 1
+				})
+				// 執行過 .page() 後，與上一種方法相同。
+				.page(function(title, content) {
+					CeL.info(title);
+					CeL.log(content);
+				})
+				// get the content of page, replace it, and set summary.
+				.edit('text to replace', {
+					summary : 'summary'
+				})
+				// get the content of page, modify it, and set summary.
+				.edit(function(content) {
+					return 'text to replace';
+				}, {
+					summary : 'summary'
+				});
 
+				CeL.wiki.page('Wikipedia:沙盒', function(title, content) {
+					CeL.info(title);
+					CeL.log(content);
+				});
 
-CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ], function() {
-	var wiki = CeL.wiki.login('', '')
-	// get the content of page
-	.page('Wikipedia:沙盒', function(title, content) {
-		CeL.info(title);
-		CeL.log(content);
-	})
-	// get the content of page, and then replace it.
-	.page('Wikipedia:沙盒').edit('* [[沙盒]]', {
-		section : 'new',
-		sectiontitle : '沙盒 test section',
-		summary : '沙盒 test edit (section)',
-		nocreate : 1
-	})
-	// get the content of page, and then modify it.
-	.page('Wikipedia:沙盒').edit(function(text) {
-		return text + '\n\n* [[沙盒]]';
-	}, {
-		summary : '沙盒 test edit',
-		nocreate : 1,
-		bot : 1
-	});
-	// 執行過 .page() 後，與上一種方法相同。
-	.page(function(title, content) {
-		CeL.info(title);
-		CeL.log(content);
-	})
-	// get the content of page, replace it, and set summary.
-	.edit('text to replace', {
-		summary : 'summary'
-	})
-	// get the content of page, modify it, and set summary.
-	.edit(function(content) {
-		return 'text to replace';
-	}, {
-		summary : 'summary'
-	});
+				wiki.logout();
+			});
 
-	CeL.wiki.page('Wikipedia:沙盒', function(title, content) {
-		CeL.info(title);
-		CeL.log(content);
-	});
+	// TODO: http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
+}
 
-	wiki.logout();
-});
+//------------------------------------------------------------------------------------------------
 
-// TODO: http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
-
- </code>
- */
 
 'use strict';
 if (typeof CeL === 'function')
@@ -125,12 +128,19 @@ wiki_API.title_of = function(page_data) {
 
 
 wiki_API.prototype.show_next = typeof JSON === 'object' && JSON.stringify ? function() {
-	return JSON.stringify(this.next_mark);
+	return this.next_mark && JSON.stringify(this.next_mark);
 } : function() {
-	var line = [];
-	for (var name in this.next_mark)
-		line.push(name + ':"' + this.next_mark[name] + '"');
-	return '{' + line.join(',') + '}';
+	if (!this.next_mark)
+		return;
+	var line = [], value;
+	for (var name in this.next_mark) {
+		value = this.next_mark[name];
+		line.push(name + ':' + (typeof value === 'string' 
+		//
+		? '"' + value.replace(/"/g, '\\"') + '"' : value));
+	}
+	if (line.length > 0)
+		return '{' + line.join(',') + '}';
 };
 
 
@@ -237,6 +247,9 @@ wiki_API.prototype.next = function() {
 		wiki_API.search([ this.API_URL, next[1] ], function(key, pages, hits) {
 			// [ page_data ]
 			_this.last_pages = pages;
+			// 設定後續檢索用索引值。
+			if (pages.sroffset)
+				_this.next_mark.sroffset = pages.sroffset;
 
 			if (typeof next[2] === 'function')
 				// next[2] : callback(key, pages, hits)
@@ -246,7 +259,9 @@ wiki_API.prototype.next = function() {
 				_this.work(next[2]);
 
 			_this.next();
-		}, next[3]);
+		},
+		// next[3] : options
+		next[3]);
 		break;
 
 	case 'edit':
@@ -1395,8 +1410,9 @@ wiki_API.search = function(key, callback, options) {
 
 		options = data && data['query-continue'];
 		if (data && (data = data.query)) {
-			if (options && (options = options.search))
-				data.search.sroffset = options.sroffset;
+			if (options)
+				// data.search.sroffset = options.search.sroffset;
+				Object.assign(data.search, options.search);
 			data.search.hits = data.searchinfo.totalhits;
 			data = data.search;
 		}

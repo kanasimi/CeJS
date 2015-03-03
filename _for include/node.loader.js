@@ -11,6 +11,36 @@
  * @see http://nodejs.org/
  */
 
+if (false)
+	(function() {
+		// Copy this section in front of the script. Path list from /path.txt/.
+
+		// ----------------------------------------------------------------------------
+		// For node.js loading. Copy from /node.loader.js/.
+		'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS'
+		//
+		.split('|')
+		//
+		.some(
+				function(path) {
+					if (path.charAt(0) !== '#'
+							&& require('fs').existsSync(path)) {
+						var loader = '/_for include/node.loader.js';
+						require(path
+								//
+								+ (path.indexOf('/') !== -1 ? loader : loader
+										.replace(/\//g, '\\')));
+						return true;
+					}
+				});
+		// ----------------------------------------------------------------------------
+
+		CeL.run([ 'data.code.compatibility' ]);
+
+	})();
+
+// ---------------------------------------------------------------------//
+
 "use strict";
 
 try {

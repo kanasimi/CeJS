@@ -14,9 +14,9 @@ http://code.google.com/apis/ajax/playground/
 
 'use strict';
 if (typeof CeL === 'function')
-CeL.run(['data.code.compatibility','interact.DOM'],{
-name:'application.debug',
-code:function(library_namespace) {
+CeL.run([ 'data.code.compatibility', 'interact.DOM' ] , {
+	name : 'application.debug',
+	code : function(library_namespace) {
 
 
 
