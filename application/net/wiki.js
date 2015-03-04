@@ -354,8 +354,13 @@ function add_message(message, title) {
 	},
 	last : function(messages, titles, pages) {
 	},
-	// log summary 運作記錄。
+	// 不作編輯作業。
+	no_edit : true,
+	// 設定寫入目標。一般為 debug、test 測試期間用。
+	write_to : '',
+	// 運作記錄。
 	log_to : 'User:Robot/log/%4Y%2m%2d',
+	// 編輯摘要。「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」
 	summary : ''
 });
 
@@ -403,6 +408,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		// {Function}
 		each = [ config.each ];
 		// 直接將 config 的設定導入 options。
+		// e.g., write_to
 		for (callback in options)
 			if (callback in config)
 				options[callback] = config[callback];
@@ -436,14 +442,14 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				else if ('nochange' in result.edit)
 					error = '無改變。';
 				else {
-					// 有時無 result.edit.newrevid
+					// 有時無 result.edit.newrevid。
 					library_namespace.err('無 result.edit.newrevid');
 					error = '完成。';
 				}
 			}
 
 			// 使用時間, 費時
-			messages.add('使用 ' + messages.last.age(new Date)
+			messages.add('等待 ' + messages.last.age(new Date)
 					+ '，' + (messages.last = new Date).toISOString() + ' ' + error, title);
 		};
 	// each 現在作為對每一頁面執行之工作。
@@ -499,15 +505,22 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
 				library_namespace.show_value(page, 'page');
-			// 取得頁面內容。
-			this.page(page)
-			// 編輯頁面內容。
-			.edit(function(content, title) {
-				library_namespace.info('wiki_API.work: edit '
-				//
-				+ (index + 1) + '/' + pages.length + ' [[' + page.title + ']]');
-				return each(content, title, messages, page);
-			}, options, callback);
+			if (config.no_edit)
+				// 不作編輯作業。
+				// 取得頁面內容。
+				this.page(page, function(page_data) {
+					each(page_content(page_data), wiki_API.title_of(page_data), messages, page_data);
+				});
+			else
+				// 取得頁面內容。
+				this.page(page)
+				// 編輯頁面內容。
+				.edit(function(content, title) {
+					library_namespace.info('wiki_API.work: edit '
+					//
+					+ (index + 1) + '/' + pages.length + ' [[' + page.title + ']]');
+					return each(content, title, messages, page);
+				}, options, callback);
 		}, this);
 
 		this.run(function() {
@@ -853,15 +866,19 @@ wiki_API.page = function(title, callback, options) {
 				library_namespace.warn('wiki_API.page: No content: [' + page.title + ']');
 		}
 
-		if (pages.length !== 1 && library_namespace.is_debug())
-			library_namespace.info('wiki_API.page: Get ' + pages.length
+		if (pages.length < 2
+		// options.multi: 即使只取得單頁面，依舊回傳 Array。
+		&& (!options || !options.multi)) {
+			library_namespace.debug('只取得單頁面，僅回傳此頁面內容，而非 Array。', 2);
+			pages = pages[0];
+		} else
+			library_namespace.debug('Get ' + pages.length
 			//
-			+ ' page(s)! We will pass all pages to callback!');
-		// page 之 structure 按照 wiki 本身之 return！
+			+ ' page(s)! The pages will all passed to callback as Array!', 2);
+
+		// page 之 structure 將按照 wiki 本身之 return！
 		// page = {pageid,ns,title,revisions:[{timestamp,'*'}]}
-		callback(pages.length < 2
-		//
-		&& (!options || !options.multi) ? pages[0] : pages);
+		callback(pages);
 	});
 };
 
@@ -884,7 +901,7 @@ CeL.wiki.langlinks('語言',function(p){CeL.show_value(p);},10)
 
 // 取得 title 在其他語系 (to_lang) 之標題。可一次處理多個標題。
 // return 'title' or {langs:['',''], lang:'title'}
-wiki_API.langlinks = function(title, callback, to_lang) {
+wiki_API.langlinks = function(title, callback, to_lang, options) {
 	var from_lang;
 	if (Array.isArray(title) && title.length === 2 && (!title[0] || typeof title[0] === 'string'))
 		from_lang = title[0], title = title[1];
@@ -911,7 +928,7 @@ wiki_API.langlinks = function(title, callback, to_lang) {
 		var pages = [];
 		for ( var pageid in data)
 			pages.push(data[pageid]);
-		if (pages.length !== 1) {
+		if (pages.length !== 1 || (options && options.multi)) {
 			if (library_namespace.is_debug())
 				library_namespace.info('wiki_API.langlinks: Get ' + pages.length
 				//
@@ -1303,6 +1320,7 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 		action = [ title[0], action ], title = title[1];
 	if (options.write_to) {
 		// 設定寫入目標。一般為 debug、test 測試期間用。
+		// e.g., write_to:'Wikipedia:沙盒',
 		title = options.write_to;
 		library_namespace.debug('依 options.write_to 寫入至 [[' + title + ']]', 1,
 			'wiki_API.edit');
