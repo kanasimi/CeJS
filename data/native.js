@@ -417,7 +417,38 @@ _// JSDT:_module_
 .
 to_RegExp_pattern = to_RegExp_pattern;
 
+// CeL.ignore_first_char_case('abc') === '[Aa]bc'
+function ignore_first_char_case(pattern) {
+	// pattern 無特殊字元！否則應該出警告。
+	var lower_case = pattern.charAt(0),
+	//
+	upper_case = lower_case.toUpperCase();
+	if (upper_case !== lower_case
+	//
+	|| upper_case !== (lower_case = upper_case.toLowerCase()))
+		pattern = '[' + upper_case + lower_case + ']' + pattern.slice(1);
+	return pattern;
+}
+_// JSDT:_module_
+.
+ignore_first_char_case = ignore_first_char_case;
 
+// CeL.ignore_case_pattern('abc') === '[Aa][Bb][Cc]'
+function ignore_case_pattern(pattern, only_first_char) {
+	pattern = pattern.split('');
+	// pattern 無特殊字元！否則應該出警告。
+	pattern.forEach(function (lower_case, index) {
+		var upper_case = lower_case.toUpperCase();
+		if (upper_case !== lower_case
+		//
+		|| upper_case !== (lower_case = upper_case.toLowerCase()))
+			pattern[index] = '[' + upper_case + lower_case + ']';
+	})
+	return pattern.join('');
+}
+_// JSDT:_module_
+.
+ignore_case_pattern = ignore_case_pattern;
 
 /**
  * 將 String pattern (e.g., "/a+/g") 轉成 RegExp。<br />

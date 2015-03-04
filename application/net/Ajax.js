@@ -620,7 +620,7 @@ function get_URL_node(URL, onload, encoding, post_data) {
 	if (options.search || options.hash)
 		URL = get_URL.add_param(URL, options.search, options.hash);
 
-	library_namespace.debug('URL: (' + (typeof URL) + ') ' + URL, 3, 'get_URL_node');
+	library_namespace.debug('URL: (' + (typeof URL) + ') [' + URL + ']', 3, 'get_URL_node');
 
 	if (typeof onload === 'object')
 		// use JSONP.
@@ -704,15 +704,21 @@ function get_URL_node(URL, onload, encoding, post_data) {
 		// cookie is Array @ Wikipedia
 		_URL.headers.Cookie = Array.isArray(agent.last_cookie) ? agent.last_cookie.join(';') : agent.last_cookie;
 	}
+	library_namespace.debug('set protocol ' + _URL.protocol, 3, 'get_URL_node');
 	request = _URL.protocol === 'https:' ? node_https.request(_URL, _onload) : node_http.request(_URL, _onload);
 
-	if (typeof options.onfail === 'function')
-		request.on('error', options.onfail);
-
-	if (post_data)
+	if (post_data) {
+		library_namespace.debug('set post data: length ' + post_data.length, 3, 'get_URL_node');
 		request.write(post_data);
+	}
 
 	request.end();
+
+	library_namespace.debug('set onerror: ' + (options.onfail ? 'user defined' : 'default'), 3, 'get_URL_node');
+	request.on('error', typeof options.onfail === 'function' ? options.onfail : function (err) {
+		console.error(err);
+	});
+	// 遇到 "Unhandled 'error' event"，或許是 print 到 stdout 時出錯了，不一定是本函數的問題。
 }
 
 

@@ -19,6 +19,9 @@
 if (false) {
 	// for debug: 'interact.DOM', 'application.debug',
 	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
+	CeL.assert([ '!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
+	//
+	.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3') ]);
 
 	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ],
 			function() {
@@ -248,6 +251,8 @@ wiki_API.prototype.next = function() {
 			// [ page_data ]
 			_this.last_pages = pages;
 			// 設定後續檢索用索引值。
+			// 若是將錯誤的改正之後，應該重新自 offset 0 開始 search。
+			// 因此這種情況下基本上不應該使用此值。
 			if (pages.sroffset)
 				_this.next_mark.sroffset = pages.sroffset;
 
@@ -376,13 +381,13 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	}
 
 	library_namespace.debug('wiki_API.work: 開始執行:先做環境建構與初始設定。');
+	if (config.summary)
+		library_namespace.info('wiki_API.work: start [' + config.summary + ']');
 
 	// default handler [ text replace function(title, content), {Object}options, callback(title, error, result) ]
 	var each,
 	// options 在此暫時作為 default options。
 	options = config.options || {
-		// Robot 運作
-		summary : 'Robot' + (config.summary ? ': ' + config.summary : ''),
 		// Throw an error if the page doesn't exist.
 		// 若頁面不存在，則產生錯誤。
 		nocreate : 1,
@@ -411,7 +416,13 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	if (each[1])
 		Object.assign(options, each[1]);
-	// assert: 因為要做排程，自此以後不再 modify options。
+	if ((callback = options.summary)
+		//
+		&& !/bot/i.test(callback))
+		// 是為 Robot 運作。
+		options.summary = 'Robot: ' + callback;
+
+	// assert: 因為要做排程，為預防衝突與不穩定的操作結果，自此以後不再 modify options。
 
 	if (!(callback = each[2]))
 		callback = function(title, error, result) {
@@ -458,6 +469,10 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	library_namespace.debug('wiki_API.work: 設定一次先取得所有 revisions (page content)。', 2);
 	this.page(pages || titles, function(data) {
+		if (!data && pages.length === 0) {
+			library_namespace.info('wiki_API.work: 未取得任何頁面。已完成？');
+			data = [];
+		}
 		if (data.length !== pages.length)
 			library_namespace.warn('wiki_API.work: query 所得之 length (' + data.length + ') !== pages.length (' + pages.length + ') !');
 		// pages: 暫存值。
@@ -479,7 +494,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			config.first.call(this, messages, titles, pages);
 
 		library_namespace.debug('wiki_API.work: for each page: 主要機制是把工作全部推入 queue。', 2);
-		pages.forEach(function(page) {
+		pages.forEach(function(page, index) {
 			if (library_namespace.is_debug(2)
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
@@ -488,7 +503,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			this.page(page)
 			// 編輯頁面內容。
 			.edit(function(content, title) {
-				library_namespace.info('wiki_API.work: edit [[' + page.title + ']]');
+				library_namespace.info('wiki_API.work: edit '
+				//
+				+ (index + 1) + '/' + pages.length + ' [[' + page.title + ']]');
 				return each(content, title, messages, page);
 			}, options, callback);
 		}, this);
@@ -540,6 +557,35 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		multi : true
 	});
 };
+
+//--------------------------------------------------------------------------------------------- //
+// 創建 match patten 相關。
+
+/**
+ * 創建 match [[File:file_name]] 之 patten。
+ * 
+ * @param {String}file_name
+ *            file name
+ * @param {String}flag
+ *            RegExp flag
+ * 
+ * @returns {RegExp} 能 match [[File:file_name]] 之 patten。
+ */
+function file_pattern(file_name, flag) {
+	// wiki file 首字不區分大小寫。
+	file_name = library_namespace.ignore_first_char_case(library_namespace.to_RegExp_pattern(
+			file_name.trim()).replace(/[ _]/g, '[ _]'));
+	return new RegExp(file_pattern.source.replace(/name/, file_name), flag
+			|| 'g');
+}
+
+file_pattern.source =
+// [ ':', file name, 接續 ]
+/\[\[\s*(?:(:)\s*)?(?:Tag)\s*:\s*(name)\s*([\|\]])/
+// [[ :File:name]] === [[File:name]]
+.source.replace('Tag', library_namespace.ignore_case_pattern('File|Image|[檔档]案|[圖图]像'));
+
+wiki_API.file_pattern = file_pattern;
 
 //--------------------------------------------------------------------------------------------- //
 

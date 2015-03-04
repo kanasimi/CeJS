@@ -690,7 +690,8 @@ if (typeof CeL === 'function')
 				options = Array.isArray(text) ? SGR_parse_list(text, options
 						|| library_namespace.null_Object())
 				// String(): 標準化 / normalization
-				: SGR_parse(String(text), options || library_namespace.null_Object());
+				: SGR_parse(String(text), options
+						|| library_namespace.null_Object());
 
 				this.text = options[0];
 
