@@ -184,13 +184,15 @@ language_tag.LANGUAGE_CODE = {
  */
 language_tag.language_code = function(region, regular_only) {
 	var code = language_tag.LANGUAGE_CODE[language_tag.region_code(region)];
-	if (!code) {
+	if (!code
+	// identity alias
+	&& !language_tag.LANGUAGE_CODE[code = region.toLowerCase()]) {
 		if (library_namespace.is_debug())
-			library_namespace.warn('無法辨識之國家/區域：[' + region + ']');
+			library_namespace.warn('language_tag.language_code: 無法辨識之國家/區域：[' + region + ']');
 		if (regular_only)
 			return;
 	}
-	return code || region.toLowerCase();
+	return code;
 }
 
 
@@ -220,8 +222,22 @@ language_tag.REGION_CODE = {
 
 // reverse
 (function() {
-	for (var language_code in language_tag.LANGUAGE_CODE)
-		language_tag.REGION_CODE[language_tag.LANGUAGE_CODE[language_code]] = language_code;
+	for (var region_code in language_tag.REGION_CODE) {
+		if ((region_code = language_tag.REGION_CODE[region_code])
+		// identity alias
+		&& !language_tag.REGION_CODE[region_code])
+			language_tag.REGION_CODE[region_code] = region_code;
+	}
+	for (var language_code in language_tag.LANGUAGE_CODE) {
+		// reversed alias
+		// e.g., cmn-hans → CN
+		language_tag.REGION_CODE[language_tag.LANGUAGE_CODE[language_code].toLowerCase()] = language_code;
+
+		if ((language_code = language_tag.LANGUAGE_CODE[language_code])
+		// identity alias
+		&& !language_tag.LANGUAGE_CODE[language_code])
+			language_tag.LANGUAGE_CODE[language_code] = language_code;
+	}
 })();
 
 /**
@@ -235,7 +251,9 @@ language_tag.region_code = function(region, regular_only) {
 	var code = language_tag.REGION_CODE[region];
 	if (!code) {
 		// 嘗試解析。
-		if (/^[a-z]+$/.test(region))
+		if (/^[a-z\-]+$/i.test(region))
+			// 嘗試 reversed alias 的部分。
+			// language_code → region_code
 			code = language_tag.REGION_CODE[region.toLowerCase()];
 		else if (code = region.match(/^(.+)[語文]$/)) {
 			code = language_tag.REGION_CODE[code[1]]
@@ -243,13 +261,14 @@ language_tag.region_code = function(region, regular_only) {
 		} else {
 			code = language_tag.REGION_CODE[region + '國'];
 		}
-		if (!code) {
+		if (!code
+		// identity alias
+		&& !language_tag.REGION_CODE[code = region.toUpperCase()]) {
 			// 依舊無法成功。
 			if (library_namespace.is_debug())
-				library_namespace.warn('無法辨識之國家/區域：[' + region + ']');
+				library_namespace.warn('language_tag.region_code: 無法辨識之國家/區域：[' + region + ']');
 			if (regular_only)
 				return;
-			code = region.toUpperCase();
 		}
 	}
 	return code;

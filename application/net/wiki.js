@@ -449,7 +449,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			}
 
 			// 使用時間, 費時
-			messages.add('等待 ' + messages.last.age(new Date)
+			messages.add('間隔 ' + messages.last.age(new Date)
 					+ '，' + (messages.last = new Date).toISOString() + ' ' + error, title);
 		};
 	// each 現在作為對每一頁面執行之工作。
@@ -1318,7 +1318,7 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	// 處理 [ {String}API_URL, {String}title ]
 	if (Array.isArray(title))
 		action = [ title[0], action ], title = title[1];
-	if (options.write_to) {
+	if (options && options.write_to) {
 		// 設定寫入目標。一般為 debug、test 測試期間用。
 		// e.g., write_to:'Wikipedia:沙盒',
 		title = options.write_to;
@@ -1327,7 +1327,8 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	}
 
 	// 造出可 modify 的 options。
-	library_namespace.debug('#1: ' + Object.keys(options).join(','), 4,
+	if (options)
+		library_namespace.debug('#1: ' + Object.keys(options).join(','), 4,
 			'wiki_API.edit');
 	options = Object.assign({
 		text : text
