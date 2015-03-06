@@ -764,7 +764,7 @@ convert_MathML.is_numeric = function(expression) {
 };
 
 
-// 解開 queue index
+// 解開 queue index。
 // for: number, queue index, or the combination.
 convert_MathML.resolve = function(text, queue) {
 	// library_namespace.debug('convert_MathML.resolve: [' + text + ']');

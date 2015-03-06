@@ -422,11 +422,11 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	if (each[1])
 		Object.assign(options, each[1]);
-	if ((callback = options.summary)
-		//
-		&& !/bot/i.test(callback))
-		// 是為 Robot 運作。
-		options.summary = 'Robot: ' + callback;
+	options.summary = (callback = config.summary)
+	// 是為 Robot 運作。
+	? /bot/i.test(callback) ? callback : 'Robot: ' + callback
+	// 未設置時，一樣添附 Robot。
+	: 'Robot';
 
 	// assert: 因為要做排程，為預防衝突與不穩定的操作結果，自此以後不再 modify options。
 
