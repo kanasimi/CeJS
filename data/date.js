@@ -1209,7 +1209,41 @@ strftime.default_conversion = {
 	//(new Date).format('%JDN')
 	JDN : Date_to_JDN,
 	//(new Date).format('%JD')
-	JD : Date_to_JD
+	JD : Date_to_JD,
+
+	歲次 : guess_year_stem_branch,
+	//	alias
+	年干支 : '歲次',
+	年柱 : '歲次',
+
+	日干支序 : date_stem_branch_index,
+	//	計算距離甲子共有幾日，再於 index_to_stem_branch() 取模數。
+	//	假定為不間斷之循環紀日。
+	日干支 : function(date_value, options) {
+		return index_to_stem_branch(date_stem_branch_index(date_value, options));
+	},
+	日柱 : '日干支',
+
+	// 時辰干支: 計算距離甲子共有幾個時辰，再於 index_to_stem_branch() 取模數。
+	//	時干支不受子初分日(子初換日/子正換日)影響。
+	時干支序 : hour_stem_branch_index,
+	時干支 : function(date_value, options) {
+		return index_to_stem_branch(hour_stem_branch_index(date_value, options));
+	},
+	時柱 : '時干支',
+	//	每刻15分。
+	//	e.g., 子正初刻
+	//	隋後普遍行百刻制，每天100刻。至順治二年（公元1645年）頒行時憲曆後，改為日96刻，每時辰八刻（初初刻、初一刻、初二刻、初三刻、正初刻、正一刻、正二刻、正三刻）[7,13,14]。自此每刻15分，無「四刻」之名。
+	時刻 : function(date_value, options) {
+		if (options && options.original_Date)
+			date_value = options.original_Date;
+		// 12: BRANCH_LIST.length
+		var diff = Math.floor((date_value - HOUR_STEM_BRANCH_OFFSET) / ONE_時辰_LENGTH_VALUE) % 12;
+		if (diff < 0)
+			diff += 12;
+		return BRANCH_LIST.charAt(diff) + (diff % 2 ? '正' : '初')
+				+ '初一二三'.charAt(date_value.getMinutes() / 4 | 0) + '刻';
+	}
 };
 
 strftime.set_conversion(strftime.default_conversion, strftime.null_domain);
@@ -2035,40 +2069,6 @@ _.guess_year_stem_branch = guess_year_stem_branch;
 //Date_to_String.子初分日 = false;
 
 strftime.set_conversion(Object.assign({
-	歲次 : guess_year_stem_branch,
-	//	alias
-	年干支 : '歲次',
-	年柱 : '歲次',
-
-	日干支序 : date_stem_branch_index,
-	//	計算距離甲子共有幾日，再於 index_to_stem_branch() 取模數。
-	//	假定為不間斷之循環紀日。
-	日干支 : function(date_value, options) {
-		return index_to_stem_branch(date_stem_branch_index(date_value, options));
-	},
-	日柱 : '日干支',
-
-	// 時辰干支: 計算距離甲子共有幾個時辰，再於 index_to_stem_branch() 取模數。
-	//	時干支不受子初分日(子初換日/子正換日)影響。
-	時干支序 : hour_stem_branch_index,
-	時干支 : function(date_value, options) {
-		return index_to_stem_branch(hour_stem_branch_index(date_value, options));
-	},
-	時柱 : '時干支',
-	//	每刻15分。
-	//	e.g., 子正初刻
-	//	隋後普遍行百刻制，每天100刻。至順治二年（公元1645年）頒行時憲曆後，改為日96刻，每時辰八刻（初初刻、初一刻、初二刻、初三刻、正初刻、正一刻、正二刻、正三刻）[7,13,14]。自此每刻15分，無「四刻」之名。
-	時刻 : function(date_value, options) {
-		if (options && options.original_Date)
-			date_value = options.original_Date;
-		// 12: BRANCH_LIST.length
-		var diff = Math.floor((date_value - HOUR_STEM_BRANCH_OFFSET) / ONE_時辰_LENGTH_VALUE) % 12;
-		if (diff < 0)
-			diff += 12;
-		return BRANCH_LIST.charAt(diff) + (diff % 2 ? '正' : '初')
-				+ '初一二三'.charAt(date_value.getMinutes() / 4 | 0) + '刻';
-	},
-
 	// 完整民國紀年年份(2 or 3位數的數字，如 98, 102)
 	R : function(date_value) {
 		if((date_value = date_value.getFullYear()) > 900)

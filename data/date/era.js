@@ -590,28 +590,34 @@ if (typeof CeL === 'function')
 			// 基本上僅表示名義。若欲更改，需考慮對外部程式之衝擊。
 			SEARCH_STRING = 'dynasty', WITH_PERIOD = 'period',
 
-			// 十二生肖，或屬相
+			// 十二生肖，或屬相。
 			// Chinese Zodiac
-			十二生肖_LIST = '鼠牛虎兔龍蛇馬羊猴雞狗豬',
+			十二生肖_LIST = '鼠牛虎兔龍蛇馬羊猴雞狗豬'.split(''),
 			// 陰陽五行
 			// The Wu Xing, (五行 wŭ xíng) also known as the Five
 			// Elements, Five
 			// Phases, the Five Agents, the Five Movements, Five
 			// Processes, and
 			// the Five Steps/Stages
-			陰陽五行_LIST = '木火土金水',
+			陰陽五行_LIST = '木火土金水'.split(''),
 
 			// 各月の別名, 日本月名
 			// https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E6%9A%A6#.E5.90.84.E6.9C.88.E3.81.AE.E5.88.A5.E5.90.8D
 			月の別名_LIST = '睦月,如月,弥生,卯月,皐月,水無月,文月,葉月,長月,神無月,霜月,師走'.split(','),
-			// 六曜は元々は、1箇月（≒30日）を5等分して6日を一定の周期とし（30÷5 =
-			// 6）、それぞれの日を星毎に区別する為の単位として使われた。
-			// https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C
-			// 旧暦の月の数字と旧暦の日の数字の和が6の倍数であれば大安となる。
 			// '大安赤口先勝友引先負仏滅'.match(/../g)
 			六曜_LIST = '大安,赤口,先勝,友引,先負,仏滅'.split(','),
 			//
-			曜日_LIST = '日月火水木金土';
+			曜日_LIST = '日月火水木金土'.split(''),
+			//
+			十二直_LIST = '建除満平定執破危成納開閉'.split(''),
+			//
+			二十八宿_LIST = '角亢氐房心尾箕斗牛女虚危室壁奎婁胃昴畢觜参井鬼柳星張翼軫'.split(''),
+			// 二十八宿にあり二十七宿にはない宿は、牛宿である。
+			// will be splited latter.
+			二十七宿_LIST = '角亢氐房心尾箕斗女虚危室壁奎婁胃昴畢觜参井鬼柳星張翼軫',
+			// 旧暦（太陽太陰暦）における月日がわかれば、自動的に二十七宿が決定される。
+			// 各月の朔日の宿
+			二十七宿_offset = '室奎胃畢参鬼張角氐心斗虚'.split('');
 
 			// ---------------------------------------------------------------------//
 			// 初始調整並規範基本常數。
@@ -638,7 +644,18 @@ if (typeof CeL === 'function')
 				// TODO: 無法處理 1582/10/15-30!!
 
 				Object.seal(CE_REFORM_YEAR_DATA);
+
+				a = 二十七宿_offset;
+				d = 二十七宿_LIST.length;
+				// 二十七宿_offset[m] 可得到 m月之 offset。
+				二十七宿_offset = new Array(START_MONTH);
+				a.forEach(function(first) {
+					二十七宿_offset.push(二十七宿_LIST.indexOf(first) - START_DATE);
+				});
+
 			})();
+
+			二十七宿_LIST = 二十七宿_LIST.split('');
 
 			if (false)
 				// assert: this is already done.
@@ -3496,18 +3513,30 @@ if (typeof CeL === 'function')
 				} else {
 					tmp = this.get_year_stem_branch_index() + date_index[0];
 
-					date.生肖 = 十二生肖_LIST.charAt(tmp % 十二生肖_LIST.length);
+					date.生肖 = 十二生肖_LIST[tmp % 十二生肖_LIST.length];
 					date.五行 = (tmp % 2 ? '陰' : '陽')
-							+ 陰陽五行_LIST.charAt((tmp >> 1) % 陰陽五行_LIST.length);
+							+ 陰陽五行_LIST[(tmp >> 1) % 陰陽五行_LIST.length];
 					date.歲次 = library_namespace.to_stem_branch(tmp);
-
-					// date.七曜 =
-					date.曜日 = 曜日_LIST.charAt(date.getDay());
 
 					// 精密度至年。
 					if (this.精 && (date.精 = this.精) === '年')
 						date.年 = this.歲名(date_index[0]);
 					else {
+						// 日本の暦注。
+						// date.七曜 =
+						date.曜日 = 曜日_LIST[date.getDay()];
+
+						// http://koyomi8.com/sub/rekicyuu_doc01.htm
+						// 日の干支などと同様、28日周期で一巡して元に戻り、これを繰り返すだけである。
+						// 8 : 二十八宿_offset
+						tmp = (8
+						// 不可用 "| 0"
+						+ Math.floor(date.getTime() / ONE_DAY_LENGTH_VALUE))
+								% 二十八宿_LIST.length;
+						if (tmp < 0)
+							tmp += 二十八宿_LIST.length;
+						date.二十八宿 = 二十八宿_LIST[tmp];
+
 						// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
 						tmp = this.日名(date_index[2], date_index[1],
 								date_index[0]).reverse();
@@ -3524,15 +3553,41 @@ if (typeof CeL === 'function')
 						date.月 = tmp[1];
 						date.日 = tmp[2];
 
-						// 日本の暦注
 						if (0 < +tmp[1]) {
+							// 日本の暦注。
 							date.月の別名 = 月の別名_LIST[
 							// 新暦に適用すると: date.getMonth()
 							tmp[1] - 1];
+
+							// 警告:對於日本之暦注，應該採用旧暦之日期，否則會出現誤差！
+							// 僅對於日本之旧暦與紀年，方能得到正確之六曜！
 							date.六曜 = 六曜_LIST[
-							//
+							// 六曜は元々は、1箇月（≒30日）を5等分して6日を一定の周期とし（30÷5 =
+							// 6）、それぞれの日を星毎に区別する為の単位として使われた。
+							// https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C
+							// 旧暦の月の数字と旧暦の日の数字の和が6の倍数であれば大安となる。
 							(+tmp[1] + tmp[2]) % 六曜_LIST.length];
+
+							date.二十七宿 = 二十七宿_LIST[
+							// 警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！
+							(二十七宿_offset[tmp[1]] + tmp[2]) % 二十七宿_LIST.length];
+
+							// http://www.geocities.jp/mishimagoyomi/12choku/12choku.htm
+							// 冬至の頃（旧暦11月）に北斗七星のひしゃくの柄の部分が真北（子）に向くため、この日を「建子」の月としました。そこで旧暦11月節（大雪）後の最初の子の日を「建」と定めました。
+
+							// 《通緯·孝經援神契》：「大雪後十五日，斗指子，為冬至，十一月中。陰極而陽始至，日南至，漸長至也。」
+							// 大雪後首子日，十二直為「建」。但12節重複前一日之十二直，因此須先計算12節。
+							// http://koyomi8.com/sub/rekicyuu_doc01.htm#jyuunicyoku
+							if (false)
+								date.十二直 = 十二直_LIST[(十二直_LIST.length - tmp[1]
+								// 誤:日支與當月之月建相同，則十二直為"建"。
+								+ library_namespace.stem_branch_index(date))
+										% 十二直_LIST.length];
 						}
+
+						// TODO: 二十四節氣
+						// 物候(七十二候, 初候/二候/三候, 初候/次候/末候), 候應
+						// 二十四番花信風 http://baike.baidu.com/view/54438.htm
 
 						tmp = this.calendar[date_index[0]][date_index[1]];
 						if (date_index[0] === 0 && date_index[1] === 0
@@ -6584,6 +6639,7 @@ if (typeof CeL === 'function')
 				曜日 : '',
 				六曜 : '',
 				月の別名 : '',
+				二十八宿 : '',
 
 				// 星座 : '',
 

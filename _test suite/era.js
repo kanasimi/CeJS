@@ -198,7 +198,7 @@ function Year_numbering(year_shift, year_only, has_year_0, reverse) {
 	}
 }
 
-//	const
+// const
 var PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
 //
 CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
@@ -270,7 +270,8 @@ function show_calendar(era_name) {
 	if (!era_name.includes('月'))
 		title.splice(-1, 1, {
 			th : {
-				T : '朔日'
+				T : '朔日',
+				R : '實曆朔日，非天文朔日！'
 			}
 		});
 
@@ -2212,7 +2213,7 @@ function affairs() {
 				T : '年日期'
 			},
 			R : '表示年內的天數',
-			href : 'https://en.wikipedia.org/wiki/Ordinal_date',
+			href : 'https://en.wikipedia.org/wiki/Ordinal_date'
 		}, function(date) {
 			var year = date.getFullYear() | 0;
 			return date.精 === '年' ? year + '年'
@@ -2225,7 +2226,7 @@ function affairs() {
 				T : '週日期'
 			},
 			R : '表示年內的星期數天數，再加上星期內第幾天。',
-			href : 'https://en.wikipedia.org/wiki/ISO_week_date',
+			href : 'https://en.wikipedia.org/wiki/ISO_week_date'
 		}, function(date) {
 			return date.精 === '年' ? date.getFullYear() + '年'
 			//
@@ -2291,24 +2292,26 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		曆注 : null,
-		// TODO: 農民曆
+		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
 
-		六曜 : [ {
-			a : {
-				T : '六曜'
-			},
-			R : '日本の暦注の一つ',
-			href : 'https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C',
-		}, function(date) {
-			return /* !date.準 && */!date.精 && date.六曜 || '';
-		} ],
+		六曜 : [
+				{
+					a : {
+						T : '六曜'
+					},
+					R : '日本の暦注の一つ。\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之六曜值可能是錯誤的！\n六輝（ろっき）や宿曜（すくよう）ともいうが、これは七曜との混同を避けるために、明治以後に作られた名称である。',
+					href : 'https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C'
+				}, function(date) {
+					return /* !date.準 && */!date.精 && date.六曜 || '';
+				} ],
 
+		// 暦注上段
 		曜日 : [ {
 			a : {
 				T : '曜日'
 			},
 			R : '日本の暦注の一つ, Japanese names of week day',
-			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5',
+			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && date.曜日 ? {
 				span : date.曜日 + '曜日',
@@ -2317,6 +2320,42 @@ function affairs() {
 				: date.曜日 === '土' ? 'color:#2b3' : ''
 			} : '';
 		} ],
+
+		// 暦注中段
+		// 十二直
+
+		/**
+		 * @see <a
+		 *      href="https://ja.wikipedia.org/wiki/%E6%9A%A6%E6%B3%A8%E4%B8%8B%E6%AE%B5"
+		 *      accessdate="2015/3/7 13:52">暦注下段</a>
+		 */
+		二十八宿 : [
+				{
+					a : {
+						T : '二十八宿'
+					},
+					R : '日本の暦注の一つ',
+					href : 'https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
+					S : 'font-size:.8em;'
+				}, function(date) {
+					return /* !date.準 && */!date.精 && date.二十八宿 || '';
+				} ],
+
+		二十七宿 : [
+				{
+					a : {
+						T : '二十七宿'
+					},
+					R : '日本の暦注の一つ\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！',
+					href : 'https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E4%B8%83%E5%AE%BF',
+					S : 'font-size:.8em;'
+				}, function(date) {
+					return this.name;
+					return /* !date.準 && */!date.精 && date.二十七宿 || '';
+				} ],
+
+		// 九星は年、月、日、時刻それぞれに割り当てられる。
+		// http://koyomi8.com/sub/rekicyuu_doc01.htm#9sei
 
 		// --------------------------------------------------------------------
 		// 曆法 Historical calendar
@@ -2327,7 +2366,7 @@ function affairs() {
 				T : '伊斯蘭曆'
 			},
 			R : 'Tabular Islamic calendar\n日落後為隔日。',
-			href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar',
+			href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Tabular({
 				format : 'serial'
@@ -2342,7 +2381,7 @@ function affairs() {
 						T : '希伯來曆'
 					},
 					R : 'Hebrew calendar, 猶太曆\n日落後為隔日。\na Jewish "day" begins and ends at shkiah (sunset)',
-					href : 'https://en.wikipedia.org/wiki/Hebrew_calendar',
+					href : 'https://en.wikipedia.org/wiki/Hebrew_calendar'
 				}, function(date) {
 					return date.精 === '年' ? date.to_Hebrew({
 						format : 'serial'
@@ -2417,7 +2456,7 @@ function affairs() {
 				T : '印度國定曆'
 			},
 			R : 'भारतीय राष्ट्रीय पंचांग / Indian national calendar',
-			href : 'https://en.wikipedia.org/wiki/Indian_national_calendar',
+			href : 'https://en.wikipedia.org/wiki/Indian_national_calendar'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Indian_national({
 				format : 'serial'
@@ -2433,7 +2472,7 @@ function affairs() {
 				T : '巴哈伊曆'
 			},
 			R : "Bahá'í / Badí‘ calendar",
-			href : "https://en.wikipedia.org/wiki/Bah%C3%A1'%C3%AD_calendar",
+			href : "https://en.wikipedia.org/wiki/Bah%C3%A1'%C3%AD_calendar"
 		}, function(date) {
 			return date.精 === '年' ? date.to_Bahai({
 				format : 'serial'
@@ -2447,7 +2486,7 @@ function affairs() {
 				T : '科普特曆'
 			},
 			R : 'Coptic calendar',
-			href : 'https://en.wikipedia.org/wiki/Coptic_calendar',
+			href : 'https://en.wikipedia.org/wiki/Coptic_calendar'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Coptic({
 				format : 'serial'
@@ -2461,7 +2500,7 @@ function affairs() {
 				T : '衣索比亞曆'
 			},
 			R : 'Ethiopian calendar',
-			href : 'https://en.wikipedia.org/wiki/Ethiopian_calendar',
+			href : 'https://en.wikipedia.org/wiki/Ethiopian_calendar'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Ethiopian({
 				format : 'serial'
