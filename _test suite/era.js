@@ -2293,6 +2293,20 @@ function affairs() {
 		// --------------------------------------------------------------------
 		曆注 : null,
 		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
+		// TODO: 日柱的五行 日の五行
+		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/calendar_j.html
+		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/astrology_j.html
+
+		五行 : [
+				{
+					a : {
+						T : '五行'
+					},
+					R : '陰陽五行',
+					href : 'http://zh.wikipedia.org/wiki/%E4%BA%94%E8%A1%8C#.E4.BA.94.E8.A1.8C.E4.B8.8E.E5.B9.B2.E6.94.AF.E8.A1.A8'
+				}, function(date) {
+					return /* !date.準 && */!date.精 && date.五行 || '';
+				} ],
 
 		六曜 : [
 				{
@@ -2350,7 +2364,6 @@ function affairs() {
 					href : 'https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E4%B8%83%E5%AE%BF',
 					S : 'font-size:.8em;'
 				}, function(date) {
-					return this.name;
 					return /* !date.準 && */!date.精 && date.二十七宿 || '';
 				} ],
 
@@ -2565,6 +2578,8 @@ function affairs() {
 					href : 'https://ko.wikipedia.org/wiki/%EB%8B%A8%EA%B5%B0%EA%B8%B0%EC%9B%90'
 				}, Year_numbering(2333) ],
 
+		// TODO: 黃帝紀元應以農曆為主!
+		// 1912年1月1日，中華民國臨時政府成立，臨時大總統孫中山當日就通電：「中華民國改用陽曆，以黃帝紀元四千六百零九年十一月十三日為中華民國元年元旦。」
 		Huangdi : [
 				{
 					a : {

@@ -73,7 +73,7 @@ if (false) {
 	// TODO: http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 }
 
-//------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------- //
 
 
 'use strict';
@@ -120,31 +120,248 @@ function wiki_API(name, password, API_URL) {
 		this.API_URL = wiki_API.api_URL(API_URL);
 }
 
+//--------------------------------------------------------------------------------------------- //
+//工具函數。
 
-// get title of page
-wiki_API.title_of = function(page_data) {
-	// 處理 [ {String}API_URL, {String}title ]
-	if (Array.isArray(page_data))
-		page_data = page_data[1];
-	return page_data.title || page_data;
-};
+// https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
+// project, domain or language
+function api_URL(project) {
+	return project ? project.includes('://') ? project : 'https://'
+			+ project + '.wikipedia.org/w/api.php' : wiki_API.API_URL;
+}
 
-
-wiki_API.prototype.show_next = typeof JSON === 'object' && JSON.stringify ? function() {
-	return this.next_mark && JSON.stringify(this.next_mark);
-} : function() {
-	if (!this.next_mark)
-		return;
-	var line = [], value;
-	for (var name in this.next_mark) {
-		value = this.next_mark[name];
-		line.push(name + ':' + (typeof value === 'string' 
-		//
-		? '"' + value.replace(/"/g, '\\"') + '"' : value));
+//列舉型別 (enumeration)
+//options.namespace: https://en.wikipedia.org/wiki/Wikipedia:Namespace
+function get_namespace(namespace) {
+	if (namespace in get_namespace.hash)
+		return get_namespace.hash[namespace];
+	if (isNaN(namespace)) {
+		if (namespace)
+			library_namespace.warn('get_namespace: Invalid namespace: [' + namespace + ']');
+		return namespace;
 	}
-	if (line.length > 0)
-		return '{' + line.join(',') + '}';
+	return namespace | 0;
 };
+
+get_namespace.hash = {
+	// Virtual namespaces
+	media : -2,
+	special : -1,
+	// 0: (Main/Article)
+	'' : 0,
+	talk : 1,
+	user : 2,
+	user_talk : 3,
+	// project
+	wikipedia : 4,
+	wikipedia_talk : 5,
+	// image
+	file : 6,
+	file_talk : 7,
+	mediawiki : 8,
+	mediawiki_talk : 9,
+	template : 10,
+	template_talk : 11,
+	help : 12,
+	help_talk : 13,
+	category : 14,
+	category_talk : 15,
+	portal : 100,
+	portal_talk : 101,
+	book : 108,
+	book_talk : 109,
+	draft : 118,
+	draft_talk : 119,
+	education_program : 446,
+	education_program_talk : 447,
+	timedtext : 710,
+	timedtext_talk : 711,
+	module : 828,
+	module_talk : 829,
+	topic : 2600
+};
+
+//---------------------------------------------------------------------//
+// 創建 match patten 相關函數。
+
+function normalize_name_pattern(file_name) {
+	// wiki file 首字不區分大小寫。
+	// the case of the first letter is not significant.
+	return library_namespace.ignore_first_char_case(
+	// escape 特殊字元。注意:照理說來檔案或模板名不應該具有特殊字元!
+	library_namespace.to_RegExp_pattern(file_name.trim())
+	// 不區分空白與底線。
+	.replace(/[ _]/g, '[ _]'));
+}
+
+/**
+* 創建 match [[File:file_name]] 之 patten。
+* 
+* @param {String}file_name
+*            file name
+* @param {String}flag
+*            RegExp flag
+* 
+* @returns {RegExp} 能 match [[File:file_name]] 之 patten。
+*/
+function file_pattern(file_name, flag) {
+	return new RegExp(file_pattern.source.replace(/name/, normalize_name_pattern(file_name)), flag
+			|| 'g');
+}
+
+file_pattern.source =
+//[ ':', file name, 接續 ]
+/\[\[\s*(?:(:)\s*)?(?:Tag)\s*:\s*(name)\s*([\|\]])/
+//[[ :File:name]] === [[File:name]]
+.source.replace('Tag', library_namespace.ignore_case_pattern('File|Image|[檔档]案|[圖图]像'));
+
+
+//---------------------------------------------------------------------//
+
+//模板名#後的內容會忽略。
+//[ , Template name ]
+var TEMPLATE_NAME_PATTERN = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)[|}]/,
+//
+TEMPLATE_START_PATTERN = new RegExp(TEMPLATE_NAME_PATTERN.source.replace(
+		/\[[^[]+$/, ''), 'g');
+
+if (false) {
+	template_token('a{{temp|{{temp2|p{a}r}}}}b', 0, 0)
+	template_token('a{{temp|{{temp2|p{a}r}}}}b', 0, 1)
+	template_token('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 0)
+	template_token('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 1)
+	template_token('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 0)
+	template_token('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 1)
+
+	CeL.assert([ '{{temp|{{temp2|p{a}r}}}}',
+	      		template_token('a{{temp|{{temp2|p{a}r}}}}b')[0] ]);
+	CeL.assert([ '{{temp|{{temp2|p{a}r}}}}',
+		      		template_token('a{{temp|{{temp2|p{a}r}}}}b', 'temp')[0] ]);
+	CeL.assert([ '{{temp2|p{a}r}}',
+		      		template_token('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]);
+}
+
+/**
+* 取得完整的模板token<br />
+* 此功能未來可能會統合於 parser 之中。
+* 
+* @param {String}wikitext
+*            模板前後之 content。<br />
+*            assert: wikitext 為良好結構 (well-constructed)。
+* @param {String}[template_name]
+*            模板名
+* @param {Boolean}parse
+*            是否解析
+* 
+* @returns [ {String}完整的模板token, {String}模板名, {Array}parameters ].count = count('{{') - count('}}')，正常情況下應為 0。
+*/
+function template_token(wikitext, template_name, parse) {
+	// 模板起始
+	var matched = template_name ? new RegExp(/{{[\s\n]*/.source + '('
+			+ normalize_name_pattern(template_name) + ')[|}]', 'gi')
+			: new RegExp(TEMPLATE_NAME_PATTERN.source, 'g');
+	// template_name : start token
+	template_name = matched.exec(wikitext);
+
+	if (!template_name)
+		// not found.
+		return;
+
+	var pattern = new RegExp('}}|'
+	// 不用 TEMPLATE_NAME_PATTERN，預防把模板結尾一起吃掉了。
+	+ TEMPLATE_START_PATTERN.source, 'g'), count = 1;
+	// lastIndex - 1 : the last char is [|}]
+	template_name.lastIndex = pattern.lastIndex = matched.lastIndex - 1;
+
+	while (count > 0 && (matched = pattern.exec(wikitext))) {
+		// 遇到模板結尾 '}}' 則減1，否則增1。
+		if (matched[0] === '}}')
+			count--;
+		else
+			count++;
+	}
+
+	wikitext = pattern.lastIndex > 0 ? wikitext.slice(template_name.index,
+			pattern.lastIndex) : wikitext.slice(template_name.index);
+	// [ {String}完整的模板token, {String}模板名, {Array}parameters ].count =
+	// count('{{') - count('}}')
+	var result = [ wikitext, template_name[1].trim(),
+	// 接下來要作用在已經裁切擷取過的 wikitext 上，需要設定好 index。
+	// assert: 其他餘下 parameters 的部分以 [|}] 起始。
+	// -2: 模板結尾 '}}'.length
+	wikitext.slice(template_name.lastIndex - template_name.index, -2).trim() ];
+	result.count = count;
+
+	if (parse) {
+		// {Array}parameters
+		// 警告:這邊只是單純的以 '|' 分割，但照理來說應該再 call parser 來處理。
+		// 最起碼應該除掉所有可能包含 '|' 的語法，例如 [[~|~]], {{~|~}}。
+		(result[2] = result[2].split('|')).shift();
+	}
+
+	return result;
+}
+
+
+/*
+
+{{outdent|}}
+<code>int m2()</code>
+[[~:~|~]]
+[[~:~:~|~]]
+[~ ~]
+[{{}} ]
+-{}-
+'''~'''
+''~''
+\n{| ~ \n|}
+
+*/
+
+//https://doc.wikimedia.org/mediawiki-core/master/php/html/Parser_8php.html
+//Parser.php: PHP parser that converts wiki markup to HTML.
+/**
+* 
+* @param {String}wikitext
+*            wikitext to parse
+* @param {Object}trigger
+*            觸發器 { node name : function(Array inside node) }
+* 
+* @returns {Array}
+*/
+function parse_wikitext(wikitext, trigger) {
+	if (!wikitext)
+		return [];
+	// 找出一個文件中不可包含的字串，作為解析用之特殊標記。
+	var prefix = '\0', postfix = ';', result = [];
+	wikitext = wikitext.replace(/\0/g, '');
+
+	// 找出完整的最小單元。
+	// TODO
+
+	// https://zh.wikipedia.org/wiki/Help:%E6%A8%A1%E6%9D%BF
+	// TODO: 在模板頁面中，用三個大括弧可以讀取參數
+	// MediaWiki會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
+
+	// 模板（英語：Template，又譯作「樣板」、「範本」）
+	// 模板名#後的內容會忽略。
+	// [ , Template name, parameters ]
+	/{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?(\|[^{}<>\[\]]*)?}}/;
+	/\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/;
+
+	/\[\[([^\|\[\]{}]+)/g;
+	/-{[^{]/g;
+	/}}}?/g;
+
+	// parse_wikitext('a{{temp|{{temp2|p{a}r}}}}b');
+	wikitext = '{{temp|{{temp2|p{a}r{}}}}}';
+	pattern = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)/g;
+	matched = pattern.exec(wikitext);
+	end_index = wikitext.indexOf('}}', pattern.lastIndex);
+}
+
+
+//---------------------------------------------------------------------//
 
 
 // get contents of page
@@ -167,10 +384,28 @@ page_content.has_content = function(page_data) {
 	&& page_data.revisions && page_data.revisions[0];
 };
 
-wiki_API.content_of = page_content;
+
+//--------------------------------------------------------------------------------------------- //
+// instance 相關函數。
 
 wiki_API.prototype.toString = function(type) {
 	return page_content(this.last_page) || '';
+};
+
+wiki_API.prototype.show_next = typeof JSON === 'object' && JSON.stringify ? function() {
+	return this.next_mark && JSON.stringify(this.next_mark);
+} : function() {
+	if (!this.next_mark)
+		return;
+	var line = [], value;
+	for (var name in this.next_mark) {
+		value = this.next_mark[name];
+		line.push(name + ':' + (typeof value === 'string' 
+		//
+		? '"' + value.replace(/"/g, '\\"') + '"' : value));
+	}
+	if (line.length > 0)
+		return '{' + line.join(',') + '}';
 };
 
 wiki_API.prototype.next = function() {
@@ -571,104 +806,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	});
 };
 
-//--------------------------------------------------------------------------------------------- //
-// 創建 match patten 相關。
-
-/**
- * 創建 match [[File:file_name]] 之 patten。
- * 
- * @param {String}file_name
- *            file name
- * @param {String}flag
- *            RegExp flag
- * 
- * @returns {RegExp} 能 match [[File:file_name]] 之 patten。
- */
-function file_pattern(file_name, flag) {
-	// wiki file 首字不區分大小寫。
-	file_name = library_namespace.ignore_first_char_case(library_namespace.to_RegExp_pattern(
-			file_name.trim()).replace(/[ _]/g, '[ _]'));
-	return new RegExp(file_pattern.source.replace(/name/, file_name), flag
-			|| 'g');
-}
-
-file_pattern.source =
-// [ ':', file name, 接續 ]
-/\[\[\s*(?:(:)\s*)?(?:Tag)\s*:\s*(name)\s*([\|\]])/
-// [[ :File:name]] === [[File:name]]
-.source.replace('Tag', library_namespace.ignore_case_pattern('File|Image|[檔档]案|[圖图]像'));
-
-wiki_API.file_pattern = file_pattern;
 
 //--------------------------------------------------------------------------------------------- //
-
-// https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
-// project, domain or language
-wiki_API.api_URL = function(project) {
-	return project ? project.includes('://') ? project : 'https://' + project + '.wikipedia.org/w/api.php' : wiki_API.API_URL;
-};
-
-// default api URL
-// see also: application.locale
-wiki_API.API_URL = wiki_API.api_URL(
-	//
-	(library_namespace.is_WWW() && (navigator.userLanguage || navigator.language) || 'zh')
-	//
-	.toLowerCase().replace(/-.+$/, ''));
-
-// 列舉型別 (enumeration)
-// options.namespace: https://en.wikipedia.org/wiki/Wikipedia:Namespace
-wiki_API.namespace = function(namespace) {
-	if (namespace in wiki_API.namespace.hash)
-		return wiki_API.namespace.hash[namespace];
-	if (isNaN(namespace)) {
-		if (namespace)
-			library_namespace.warn('wiki_API.namespace: Invalid namespace: [' + namespace + ']');
-		return namespace;
-	}
-	return namespace | 0;
-};
-
-wiki_API.namespace.hash = {
-	// Virtual namespaces
-	media : -2,
-	special : -1,
-	// 0: (Main/Article)
-	'' : 0,
-	talk : 1,
-	user : 2,
-	user_talk : 3,
-	// project
-	wikipedia : 4,
-	wikipedia_talk : 5,
-	// image
-	file : 6,
-	file_talk : 7,
-	mediawiki : 8,
-	mediawiki_talk : 9,
-	template : 10,
-	template_talk : 11,
-	help : 12,
-	help_talk : 13,
-	category : 14,
-	category_talk : 15,
-	portal : 100,
-	portal_talk : 101,
-	book : 108,
-	book_talk : 109,
-	draft : 118,
-	draft_talk : 119,
-	education_program : 446,
-	education_program_talk : 447,
-	timedtext : 710,
-	timedtext_talk : 711,
-	module : 828,
-	module_talk : 829,
-	topic : 2600
-};
-
-//---------------------------------------------------------------------//
-
+//泛用，無須 instance。
 
 // {String}action or [ {String}api URL, {String}action, {Object}other parameters ]
 wiki_API.query = function (action, callback, post_data) {
@@ -705,7 +845,8 @@ wiki_API.query = function (action, callback, post_data) {
 	//
 	: [ action[2] ? action[0] + action[2] : action[0], library_namespace.null_Object() ];
 	if (!action[1].format)
-		action[0] = get_URL.add_param(action[0], 'format=json&utf8=1');
+		// 加上 "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
+		action[0] = get_URL.add_param(action[0], 'format=json');
 
 	// 開始處理。
 	if (!post_data && wiki_API.query.allow_JSONP) {
@@ -800,6 +941,7 @@ wiki_API.query.title_param = function(page_data, multi) {
 	//
 	: 'pageid' + multi + pageid;
 };
+
 wiki_API.query.id_of_page = function(page_data, title_only) {
 	if (Array.isArray(page_data))
 		return page_data.map(function(page) {
@@ -1000,7 +1142,7 @@ wiki_API.langlinks.parse = function(langlinks, to_lang) {
  * @param {Function}callback
  *            回調函數。
  * @param {Number|String}namespace
- *            one of wiki_API.namespace.hash
+ *            one of get_namespace.hash
  */
 function get_list(type, title, callback, namespace) {
 	library_namespace.debug(type + '[[' + title + ']], callback: ' + callback,
@@ -1016,7 +1158,7 @@ function get_list(type, title, callback, namespace) {
 	else
 		options = library_namespace.null_Object();
 
-	if (isNaN(namespace = wiki_API.namespace(namespace)))
+	if (isNaN(namespace = get_namespace(namespace)))
 		delete options.namespace;
 	else
 		options.namespace = namespace;
@@ -1495,7 +1637,32 @@ wiki_API.search.default_parameter = {
 	srinterwiki : 1
 };
 
-//---------------------------------------------------------------------//
+// --------------------------------------------------------------------------------------------- //
+
+// export
+Object.assign(wiki_API, {
+	api_URL : api_URL,
+	// default api URL
+	// see also: application.locale
+	API_URL : api_URL((library_namespace.is_WWW()
+			&& (navigator.userLanguage || navigator.language) || 'zh')
+			.toLowerCase().replace(/-.+$/, '')),
+
+	namespace : get_namespace,
+
+	file_pattern : file_pattern,
+	template_token : template_token,
+
+	content_of : page_content,
+	// wiki_API.title_of(): get title of page.
+	// {@seealso} wiki_API.query.title_param()
+	title_of : function(page_data) {
+		// 處理 [ {String}API_URL, {String}title ]
+		if (Array.isArray(page_data))
+			page_data = page_data[1];
+		return page_data.title || page_data;
+	}
+});
 
 
 return wiki_API;
