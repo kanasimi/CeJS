@@ -1076,27 +1076,56 @@ try {
 _.set_bind = need_valueOf ? set_bind_valueOf : set_bind;
 
 
-//	TODO: use CeL.object_hash()
-// array,sortFunction
-function unique_Array(a, f) {
-	if (f)
-		a.sort(f);
+/**
+ * 
+ * @param {Array}array
+ * @param {Function}[sortFunction]
+ * @returns
+ */
+function unique_and_sort_Array(array, sortFunction) {
+	if (sortFunction)
+		array.sort(sortFunction);
 	else
-		a.sort();
+		array.sort();
 
 	var i = 1, j = -1;
-	for (; i < a.length; i++)
-		if (a[i] === a[i - 1]) {
+	for (; i < array.length; i++)
+		if (array[i] === array[i - 1]) {
 			if (j < 0)
 				j = i;
 		} else if (j >= 0)
-			a.splice(j, i - j), i = j, j = -1;
+			array.splice(j, i - j), i = j, j = -1;
 
 	if (j >= 0)
-		a.splice(j, i - j);
-	return a;
+		array.splice(j, i - j);
+	return array;
 }
 
+var type_index = {
+	string : 0,
+	number : 1,
+	boolean : 2,
+	'undefined' : 3
+};
+function unique_Array() {
+	var array = [],
+	// 以 hash 加速純量。
+	hash = library_namespace.null_Object();
+
+	this.forEach(function(element) {
+		var type = typeof element;
+		if (type in type_index) {
+			// TODO: -0
+			if(!(element in hash) || !(type_index[type] in hash[element])) {
+				array.push(element);
+				(hash[element] = [])[type_index[type]] = null;
+			}
+		} else if (array.indexOf(element) === NOT_FOUND)
+			array.push(element);
+	});
+
+	return array;
+}
 
 /**
  * Count occurrence of $search in string.<br />
@@ -1902,7 +1931,7 @@ set_method(Array.prototype, {
 	},
 	//clone: Array.prototype.slice,
 	append: append_to_Array,
-	uniq: set_bind(unique_Array),
+	uniq: unique_Array,
 	search_sorted: set_bind(search_sorted_Array, true)
 });
 

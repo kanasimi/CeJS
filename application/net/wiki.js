@@ -121,7 +121,7 @@ function wiki_API(name, password, API_URL) {
 }
 
 //--------------------------------------------------------------------------------------------- //
-//工具函數。
+// 工具函數。
 
 // https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
 // project, domain or language
@@ -130,8 +130,8 @@ function api_URL(project) {
 			+ project + '.wikipedia.org/w/api.php' : wiki_API.API_URL;
 }
 
-//列舉型別 (enumeration)
-//options.namespace: https://en.wikipedia.org/wiki/Wikipedia:Namespace
+// 列舉型別 (enumeration)
+// options.namespace: https://en.wikipedia.org/wiki/Wikipedia:Namespace
 function get_namespace(namespace) {
 	if (namespace in get_namespace.hash)
 		return get_namespace.hash[namespace];
@@ -184,46 +184,67 @@ get_namespace.hash = {
 //---------------------------------------------------------------------//
 // 創建 match patten 相關函數。
 
-function normalize_name_pattern(file_name) {
+function normalize_name_pattern(file_name, add_group) {
+	if (!file_name)
+		return file_name;
+
+	if (Array.isArray(file_name)) {
+		var files = [];
+		file_name.forEach(function(name) {
+			if (name = normalize_name_pattern(name))
+				files.push(name);
+		});
+		return (add_group ? '(' : '(?:') + files.join('|') + ')';
+	}
+
+	file_name =
 	// wiki file 首字不區分大小寫。
 	// the case of the first letter is not significant.
-	return library_namespace.ignore_first_char_case(
+	library_namespace.ignore_first_char_case(
 	// escape 特殊字元。注意:照理說來檔案或模板名不應該具有特殊字元!
-	library_namespace.to_RegExp_pattern(file_name.trim())
+	library_namespace.to_RegExp_pattern(String(file_name).trim()))
 	// 不區分空白與底線。
-	.replace(/[ _]/g, '[ _]'));
+	.replace(/[ _]/g, '[ _]');
+
+	if (add_group)
+		file_name = '(' + file_name + ')';
+
+	return file_name;
 }
 
 /**
-* 創建 match [[File:file_name]] 之 patten。
-* 
-* @param {String}file_name
-*            file name
-* @param {String}flag
-*            RegExp flag
-* 
-* @returns {RegExp} 能 match [[File:file_name]] 之 patten。
-*/
+ * 創建匹配 [[File:file_name]] 之 patten。
+ * 
+ * @param {String}file_name
+ *            file name
+ * @param {String}flag
+ *            RegExp flag
+ * 
+ * @returns {RegExp} 能 match [[File:file_name]] 之 patten。
+ */
 function file_pattern(file_name, flag) {
-	return new RegExp(file_pattern.source.replace(/name/, normalize_name_pattern(file_name)), flag
-			|| 'g');
+	return (file_name = normalize_name_pattern(file_name, true))
+	//
+	&& new RegExp(file_pattern.source.replace(/name/, file_name), flag || 'g');
 }
 
 file_pattern.source =
 //[ ':', file name, 接續 ]
-/\[\[\s*(?:(:)\s*)?(?:Tag)\s*:\s*(name)\s*([\|\]])/
+/\[\[[\s\n]*(?:(:)[\s\n]*)?(?:Tag)[\s\n]*:[\s\n]*name\s*(\||\]\])/
 //[[ :File:name]] === [[File:name]]
 .source.replace('Tag', library_namespace.ignore_case_pattern('File|Image|[檔档]案|[圖图]像'));
 
 
 //---------------------------------------------------------------------//
 
-//模板名#後的內容會忽略。
-//[ , Template name ]
+// 模板名#後的內容會忽略。
+// [ , Template name ]
 var TEMPLATE_NAME_PATTERN = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)[|}]/,
 //
 TEMPLATE_START_PATTERN = new RegExp(TEMPLATE_NAME_PATTERN.source.replace(
-		/\[[^[]+$/, ''), 'g');
+		/\[[^[]+$/, ''), 'g'),
+// 內部連結
+LINK_NAME_PATTERN = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)(\||\]\])/;
 
 if (false) {
 	template_token('a{{temp|{{temp2|p{a}r}}}}b', 0, 0)
@@ -242,23 +263,25 @@ if (false) {
 }
 
 /**
-* 取得完整的模板token<br />
-* 此功能未來可能會統合於 parser 之中。
-* 
-* @param {String}wikitext
-*            模板前後之 content。<br />
-*            assert: wikitext 為良好結構 (well-constructed)。
-* @param {String}[template_name]
-*            模板名
-* @param {Boolean}parse
-*            是否解析
-* 
-* @returns [ {String}完整的模板token, {String}模板名, {Array}parameters ].count = count('{{') - count('}}')，正常情況下應為 0。
-*/
+ * 取得完整的模板token<br />
+ * 此功能未來可能會統合於 parser 之中。
+ * 
+ * @param {String}wikitext
+ *            模板前後之 content。<br />
+ *            assert: wikitext 為良好結構 (well-constructed)。
+ * @param {String}[template_name]
+ *            模板名
+ * @param {Boolean}parse
+ *            是否解析
+ * 
+ * @returns [ {String}完整的模板token, {String}模板名,
+ *          {Array}parameters ].count = count('{{') -
+ *          count('}}')，正常情況下應為 0。
+ */
 function template_token(wikitext, template_name, parse) {
-	// 模板起始
-	var matched = template_name ? new RegExp(/{{[\s\n]*/.source + '('
-			+ normalize_name_pattern(template_name) + ')[|}]', 'gi')
+	var matched = (template_name = normalize_name_pattern(template_name, true))
+	// 模板起始。
+	? new RegExp(/{{[\s\n]*/.source + template_name + '[|}]', 'gi')
 			: new RegExp(TEMPLATE_NAME_PATTERN.source, 'g');
 	// template_name : start token
 	template_name = matched.exec(wikitext);
@@ -295,7 +318,7 @@ function template_token(wikitext, template_name, parse) {
 	if (parse) {
 		// {Array}parameters
 		// 警告:這邊只是單純的以 '|' 分割，但照理來說應該再 call parser 來處理。
-		// 最起碼應該除掉所有可能包含 '|' 的語法，例如 [[~|~]], {{~|~}}。
+		// 最起碼應該除掉所有可能包含 '|' 的語法，例如內部連結 [[~|~]], 模板 {{~|~}}。
 		(result[2] = result[2].split('|')).shift();
 	}
 
@@ -321,14 +344,15 @@ function template_token(wikitext, template_name, parse) {
 //https://doc.wikimedia.org/mediawiki-core/master/php/html/Parser_8php.html
 //Parser.php: PHP parser that converts wiki markup to HTML.
 /**
-* 
-* @param {String}wikitext
-*            wikitext to parse
-* @param {Object}trigger
-*            觸發器 { node name : function(Array inside node) }
-* 
-* @returns {Array}
-*/
+ * TODO
+ * 
+ * @param {String}wikitext
+ *            wikitext to parse
+ * @param {Object}trigger
+ *            觸發器 { node name : function(Array inside node) }
+ * 
+ * @returns {Array}
+ */
 function parse_wikitext(wikitext, trigger) {
 	if (!wikitext)
 		return [];
@@ -363,15 +387,29 @@ function parse_wikitext(wikitext, trigger) {
 
 //---------------------------------------------------------------------//
 
-
-// get contents of page
+/**
+ * get the contents of page
+ * 
+ * @param {Object}page_data
+ *            page data got from wiki API
+ * 
+ * @returns {String} content of page
+ */
 function page_content(page_data) {
 	return page_content.is_page_data(page_data) ?
 	//
-	(page_data = page_content.has_content(page_data)) && page_data['*'] || undefined
-			: String(page_data);
+	(page_data = page_content.has_content(page_data)) && page_data['*']
+			|| undefined : String(page_data);
 }
-// return pageid
+
+/**
+ * get the id of page
+ * 
+ * @param {Object}page_data
+ *            page data got from wiki API
+ * 
+ * @returns {String|Number} pageid
+ */
 page_content.is_page_data = function(page_data) {
 	return library_namespace.is_Object(page_data) && page_data.title
 			&& page_data.pageid;
@@ -642,11 +680,23 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	if (typeof config.each === 'function') {
 		// {Function}
 		each = [ config.each ];
-		// 直接將 config 的設定導入 options。
-		// e.g., write_to
-		for (callback in options)
-			if (callback in config)
-				options[callback] = config[callback];
+		if (!config.options) {
+			// 直接將 config 的設定導入 options。
+			// e.g., write_to
+			for (callback in options) {
+				if (callback in config) {
+					if (!config[callback] && callback in {
+							nocreate : 1,
+							minor : 1,
+							bot : 1
+						})
+						// 即使設定 minor=0 似乎也會當作設定了，得完全消滅才行。
+						delete options[callback];
+					else
+						options[callback] = config[callback];
+				}
+			}
+		}
 
 	} else if (Array.isArray(config.each))
 		each = config;
@@ -846,7 +896,7 @@ wiki_API.query = function (action, callback, post_data) {
 	: [ action[2] ? action[0] + action[2] : action[0], library_namespace.null_Object() ];
 	if (!action[1].format)
 		// 加上 "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
-		action[0] = get_URL.add_param(action[0], 'format=json');
+		action[0] = get_URL.add_param(action[0], 'format=json&utf8=1');
 
 	// 開始處理。
 	if (!post_data && wiki_API.query.allow_JSONP) {
@@ -861,14 +911,17 @@ wiki_API.query = function (action, callback, post_data) {
 			library_namespace.debug('response: '
 				+ (library_namespace.is_node ? '\n' + response : response.replace(/</g, '&lt;')), 3, 'wiki_API.query');
 
-			if (/<html[\s>]/.test(response.slice(0, 40)))
+			if (/<html[\s>]/.test(response.slice(0, 40))) {
 				response = response.between('source-javascript', '</pre>').between('>')
 				// 去掉所有 HTML tag。
 				.replace(/<[^>]+>/g, '');
 
-			// '&#123;' : (")
-			if (response.includes('&#'))
-				response = library_namespace.HTML_to_Unicode(response);
+				// '&#123;' : (")
+				// 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況?
+				if (response.includes('&#'))
+					response = library_namespace.HTML_to_Unicode(response);
+			}
+
 			// library_namespace.log(response);
 			// library_namespace.log(library_namespace.HTML_to_Unicode(response));
 			if (response)
