@@ -1107,6 +1107,7 @@ var type_index = {
 	boolean : 2,
 	'undefined' : 3
 };
+// 確保順序不變。
 function unique_Array() {
 	var array = [],
 	// 以 hash 加速純量。

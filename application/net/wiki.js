@@ -489,6 +489,7 @@ wiki_API.prototype.next = function() {
 		break;
 
 	case 'backlinks':
+	case 'embeddedin':
 	case 'imageusage':
 	case 'linkshere':
 	case 'fileusage':
@@ -1325,11 +1326,21 @@ get_list.type = {
 
 	// 'type name' : 'prefix' (parameter : 'list')
 
-	// backlinks: 取得連結到 [[title]] 的頁面。
-	// 設定 title 'Template:tl' 可取得使用指定 Template 的頁面。
+	// 取得連結到 [[title]] 的頁面。
+	// e.g., [[name]], [[:Template:name]].
+	// https://www.mediawiki.org/wiki/API:Backlinks
 	backlinks : 'bl',
 
-	// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
+	// 取得所有嵌入包含 title 的頁面。 (transclusion, inclusion)
+	// e.g., {{Template name}}, {{/title}}.
+	// 設定 title 'Template:tl' 可取得使用指定 Template 的頁面。
+	// https://en.wikipedia.org/wiki/Wikipedia:Transclusion
+	// https://www.mediawiki.org/wiki/API:Embeddedin
+	embeddedin : 'ei',
+
+	// 取得所有使用 file 的頁面。
+	// e.g., [[File:title.jpg]].
+	// https://www.mediawiki.org/wiki/API:Imageusage
 	imageusage : 'iu',
 
 	// 'type name' : [ 'prefix', 'parameter' ]

@@ -158,6 +158,7 @@ language_tag.LANGUAGE_CODE = {
 	// http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 	// Preferred-Value: cmn
 	CN : 'cmn-Hans',
+	// 香港國、粵語（cmn-Hant-HK, yue-Hant-HK）
 	HK : 'cmn-Hant',
 	TW : 'cmn-Hant',
 	// ja-JP
