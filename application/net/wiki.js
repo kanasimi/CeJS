@@ -555,19 +555,31 @@ wiki_API.prototype.next = function() {
 			library_namespace.warn('wiki_API.prototype.next: Denied to edit [' + this.last_page.title + ']');
 			// next[3] : callback
 			if (typeof next[3] === 'function')
-				next[3].call(_this, title, 'denied');
+				next[3].call(this, this.last_page.title, 'denied');
 			this.next();
-		} else
-			wiki_API.edit([ this.API_URL, this.last_page ],
-			// 因為已有 contents，直接餵給轉換函式。
-			typeof next[1] === 'function' ? next[1](page_content(this.last_page), this.last_page.title) : next[1], this.token,
-			// next[2]: options to edit()
-			next[2], function(title, error, result) {
+		} else {
+			if (typeof next[1] === 'function')
+				next[1] = next[1](page_content(this.last_page), this.last_page.title);
+			if (next[2] && next[2].skip_nochange
+			// 採用 skip_nochange 可以跳過實際 edit 的動作。
+			&& next[1] === page_content(this.last_page)) {
+				library_namespace.debug('Skip [' + this.last_page.title + ']: The same contents.');
 				// next[3] : callback
 				if (typeof next[3] === 'function')
-					next[3].call(_this, title, error, result);
+					next[3].call(this, this.last_page.title, 'nochange');
 				_this.next();
-			});
+			} else
+				wiki_API.edit([ this.API_URL, this.last_page ],
+				// 因為已有 contents，直接餵給轉換函式。
+				next[1], this.token,
+				// next[2]: options to edit()
+				next[2], function(title, error, result) {
+					// next[3] : callback
+					if (typeof next[3] === 'function')
+						next[3].call(_this, title, error, result);
+					_this.next();
+				});
+		}
 		break;
 
 	case 'login':
@@ -675,8 +687,11 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		// 標記此編輯為機器人編輯。
 		bot : 1,
 		// 設定寫入目標。一般為 debug、test 測試期間用。
-		write_to : ''
-	}, callback;
+		write_to : '',
+		// 採用 skip_nochange 可以跳過實際 edit 的動作。
+		// 對於大部分不會改變頁面的作業，能大幅加快速度。
+		skip_nochange : true
+	}, callback, nochange_count = 0;
 
 	if (typeof config.each === 'function') {
 		// {Function}
@@ -719,7 +734,12 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	if (!(callback = each[2]))
 		callback = function(title, error, result) {
 			if (error)
-				error = ' 結束: ' + error;
+				if (error === 'nochange') {
+					done++;
+					nochange_count++;
+					return;
+				} else
+					error = ' 結束: ' + error;
 			else {
 				done++;
 				if (result.edit.newrevid)
@@ -811,10 +831,15 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 		this.run(function() {
 			library_namespace.debug('wiki_API.work: 收尾。');
+			messages.unshift(': 完成 ' + done + '/' + pages.length + ' 條目，'
+			//
+			+ (nochange_count ? nochange_count + ' 條目未作變更，' : '')
+			// 使用時間, 費時
+			+ '前後總共 ' + messages.start.age(new Date) + '。');
+			if (done === nochange_count)
+				messages.add('全無變更。');
 			if (config.summary)
-				messages.unshift(config.summary, ': 完成 ' + done + '/' + pages.length
-				// 使用時間, 費時
-				+ ' 條目，前後總共 ' + messages.start.age(new Date) + '。');
+				messages.unshift(config.summary);
 
 			if (typeof config.last === 'function')
 				config.last.call(this, messages, titles, pages);
@@ -1230,7 +1255,7 @@ function get_list(type, title, callback, namespace) {
 	+ (parameter === get_list.default_parameter ? prefix : '')
 	//
 	+ wiki_API.query.title_param(title[1])
-	// 數目限制
+	// 數目限制。No more than 500 (5,000 for bots) allowed.
 	+ (0 < options.limit ? '&' + prefix + 'limit=' + options.limit : '')
 	// next start from here.
 	+ (options[prefix + 'continue'] ?
