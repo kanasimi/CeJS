@@ -624,6 +624,8 @@ wiki_API.prototype.next.methods = 'page,edit,search,logout,run,set_URL'
 
 //---------------------------------------------------------------------//
 
+wiki_API.prototype.continue_key = '後續檢索用索引值';
+
 // 規範 log 之格式。
 function add_message(message, title) {
 	this.push('* ' + (title ? '[[' + title + ']]: ' : '') + message);
@@ -789,7 +791,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			library_namespace.warn('wiki_API.work: query 所得之 length (' + data.length + ') !== pages.length (' + pages.length + ') !');
 		// pages: 暫存值。
 		if (pages = this.show_next())
-			messages.add('後續檢索用索引值: ' + pages);
+			messages.add(this.continue_key + ': ' + pages);
 		// 使用時間, 費時
 		pages = '首先使用 ' + messages.last.age(new Date) + ' 以取得 ' + data.length + ' 個頁面內容。';
 		// 在「首先使用」之後才設定 .last，才能正確抓到「首先使用」。
@@ -1038,11 +1040,22 @@ wiki_API.query.id_of_page = function(page_data, title_only) {
 //---------------------------------------------------------------------//
 
 
-// 讀取頁面內容。可一次處理多個標題。
-// {String}title or [ {String}API_URL, {String}title ]
-// {Function}callback(page_data)
-// {String}timestamp: e.g., '2015-01-02T02:52:29Z'
-// CeL.wiki.page('道',function(p){CeL.show_value(p);});
+/**
+ * 讀取頁面內容。可一次處理多個標題。
+ * 
+ * @example <code>
+
+CeL.wiki.page('道', function(p) {
+	CeL.show_value(p);
+});
+
+ </code>
+ * @param {String|Array}title
+ *            title or [ {String}API_URL, {String}title ]
+ * @param {Function}callback
+ *            callback(page_data)
+ * @param options
+ */
 wiki_API.page = function(title, callback, options) {
 	// 處理 [ {String}API_URL, {String}title ]
 	if (!Array.isArray(title)
@@ -1212,7 +1225,66 @@ wiki_API.langlinks.parse = function(langlinks, to_lang) {
 //---------------------------------------------------------------------//
 
 /**
- * get list
+ * 自 title 頁面取得後續檢索用索引值。 e.g., query-continue
+ * 
+ * @param {String|Array}title
+ *            the page title to search continue information
+ * @param {Function|Object}callback
+ *            回調函數 or options。 callback({Object} continue data);
+ */
+function get_continue(title, callback) {
+	var options;
+	if (library_namespace.is_Object(callback))
+		callback = (options = callback).callback;
+	else
+		options = library_namespace.null_Object();
+
+	wiki_API.page(title, function(page_data) {
+		var matched, content = page_content(page_data),
+		// {RegExp}[options.pattern]:
+		// content.match(pattern) === [ , '{type:"continue"}' ]
+		pattern = options.pattern,
+		// {Object} continue data
+		data = library_namespace.null_Object();
+
+		if (!pattern)
+			pattern = new RegExp(library_namespace.to_RegExp_pattern(
+			//
+			(options.continue_key || wiki_API.prototype.continue_key).trim())
+					+ ' *:? *({[^{}]{0,80}})', 'g');
+		library_namespace.debug('pattern: ' + pattern, 2);
+
+		while (matched = pattern.exec(content)) {
+			library_namespace.debug('continue data: [' + matched[1] + ']', 2);
+			data = Object.assign(data,
+			//
+			library_namespace.parse_JSON(matched[1]));
+		}
+
+		// options.get_all: get all continue data.
+		if (!options.get_all) {
+			// {String|Boolean}[options.type]: what type to search.
+			matched = options.type;
+			if (matched in get_list.type)
+				matched = get_list.type[matched] + 'continue';
+
+			content = data;
+			data = library_namespace.null_Object();
+			if (matched in content)
+				data[matched] = content[matched];
+		}
+
+		// callback({Object} continue data);
+		callback(data || library_namespace.null_Object());
+	}, options);
+}
+
+
+//---------------------------------------------------------------------//
+
+/**
+ * get list<br />
+ * 注意:可能會改變 options!
  * 
  * @param {String}type
  *            one of get_list.type
@@ -1245,6 +1317,22 @@ function get_list(type, title, callback, namespace) {
 	// 處理 [ {String}API_URL, {String}title ]
 	if (!Array.isArray(title))
 		title = [ , title ];
+
+	if (options.get_continue) {
+		get_continue([ title[0], options.get_continue ], {
+			type : type,
+			callback : function(continue_data) {
+				// 注意:這裡會改變 options!
+				delete options.get_continue;
+				if (continue_data = continue_data[prefix + 'continue']) {
+					library_namespace.info('get_list: continue from [' + continue_data + ']');
+					options[prefix + 'continue'] = continue_data;
+				}
+				get_list(type, title, callback, options);
+			}
+		});
+		return;
+	}
 
 	if (options[prefix + 'continue'])
 		library_namespace.debug('[[' + title[1] + ']]: start from '
@@ -1503,7 +1591,7 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
  * @param {Function}callback
  *            回調函數。 callback(title, error, result)
  * @param {String}timestamp
- *            頁面時間戳記。
+ *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
  * @returns
  */
 wiki_API.edit = function(title, text, token, options, callback, timestamp) {
