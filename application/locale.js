@@ -158,7 +158,7 @@ language_tag.LANGUAGE_CODE = {
 	// http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 	// Preferred-Value: cmn
 	CN : 'cmn-Hans',
-	// 香港國、粵語（cmn-Hant-HK, yue-Hant-HK）
+	// cmn-Hant-HK, yue-Hant-HK
 	HK : 'cmn-Hant',
 	TW : 'cmn-Hant',
 	// ja-JP
@@ -2019,6 +2019,8 @@ gettext_resource = library_namespace.null_Object();
 
 
 // TODO: lazy evaluation
+//	http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+
 //	http://www.rfc-editor.org/rfc/bcp/bcp47.txt
 
 //	http://www.w3.org/International/articles/bcp47/
@@ -2029,21 +2031,27 @@ gettext_resource = library_namespace.null_Object();
 //	http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 //	http://www.iana.org/assignments/language-tag-extensions-registry
 
+//	http://www-01.sil.org/iso639-3/documentation.asp?id=cmn
+//	http://www.ethnologue.com/language/cmn
+
 //	http://schneegans.de/lv/
 gettext.set_alias({
 	//	最推薦之標準 language tag : '主要別名 (e.g., 當地使用之語言名稱)|最常用之 language tag (e.g., IETF language tag)|其他別名 / other aliases (e.g., 英文名稱, 最細分之標準 language tag)'
 
 	'arb-Arab' : 'العربية|ar|Arabic|阿拉伯語|ar-arb-Arab',
 
-	//	http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 	//	Subtag: cmn, Preferred-Value: cmn
-	'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|简化字|简化中文|簡化字|簡體中文|普通话|中国|Simplified Chinese|Mandarin Chinese',
-	// 國語
-	'cmn-Hant-TW' : '繁體中文|zh-TW|繁體|zh-cmn-Hant-TW|TW|Chinese|傳統中文|正體中文|正體|漢語|華語|中文|中國|臺灣|台灣|Traditional Chinese',
+	'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|简化字|简化中文|簡化字|簡體中文|普通话|中国|官话|Simplified Chinese|Mandarin Chinese',
+	// 現代標準漢語
+	'cmn-Hant-TW' : '繁體中文|zh-TW|繁體|zh-cmn-Hant-TW|TW|Chinese|傳統中文|正體中文|正體|漢語|華語|中文|中國|臺灣|台灣|官話|中華民國國語|Traditional Chinese',
 	// Min Nan Chinese. Macrolanguage: zh.
 	// zh-min-nan: http://taigi-pahkho.wikia.com/wiki/%E9%A0%AD%E9%A0%81
 	// using 臺灣閩南語推薦用字
 	'nan-Hant-TW' : '臺灣閩南語|zh-min-nan|zh-min-nan-Hant-TW|臺語|台語|臺灣話|台灣話|閩南語|河洛話|福老話',
+	//
+	'cmn-Hant-HK' : '香港普通話|zh-yue-Hant-HK|Cantonese|香港華語|香港官話',
+	// 粵語審音配詞字庫 http://humanum.arts.cuhk.edu.hk/Lexis/lexi-can/
+	'yue-Hant-HK' : '香港粵語|zh-yue-Hant-HK|Hong Kong Cantonese|港式粵語|香港話|港式廣東話|港式廣州話',
 
 	//	Subtag: en, Suppress-Script: Latn
 	//	"zh-Hant" and "zh-Hans" represent Chinese written in Traditional and Simplified scripts respectively, while the language subtag "en" has a "Suppress-Script" field in the registry indicating that most English texts are written in the Latin script, discouraging a tag such as "en-Latn-US".

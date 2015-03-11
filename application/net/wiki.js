@@ -833,9 +833,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 		this.run(function() {
 			library_namespace.debug('wiki_API.work: 收尾。');
-			messages.unshift(': 完成 ' + done + '/' + pages.length + ' 條目，'
+			messages.unshift(': 完成 ' + done + (done === pages.length ? '' : '/' + pages.length) + ' 條目，'
 			//
-			+ (nochange_count ? nochange_count + ' 條目未作變更，' : '')
+			+ (nochange_count ? (done === nochange_count ? '所有' : nochange_count + ' ') + '條目未作變更，' : '')
 			// 使用時間, 費時
 			+ '前後總共 ' + messages.start.age(new Date) + '。');
 			if (done === nochange_count)
@@ -853,8 +853,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			options = {
 				section : 'new',
 				sectiontitle : '[' + (new Date).toISOString() + '] ' + done
-						+ '/' + pages.length + ' 條目',
-				summary : 'Robot: 完成 ' + done + '/' + pages.length + ' 條目',
+				//
+				+ (done === pages.length ? '' : '/' + pages.length) + ' 條目',
+				summary : 'Robot: 完成 ' + done + (done === pages.length ? '' : '/' + pages.length) + ' 條目',
 				// Throw an error if the page doesn't exist.
 				// 若頁面不存在，則產生錯誤。
 				nocreate : 1,
