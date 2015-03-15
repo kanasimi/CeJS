@@ -962,7 +962,7 @@ function get_video(video_url, download_to, options) {
 							var setting = get_video.getter_setting,
 							target = download_to + URI_accessor.regularize_file_name((options.prefix || '')
 							//
-							+ (video_info.author ? '[' + video_info.author + '] ' : '') + title + ' (' + URI._search.v + ')', true) + '.' + video_info.best.extension;
+							+ (video_info.author ? '[' + video_info.author + '] ' : '') + title + ' [' + URI._search.v + ']', true) + '.' + video_info.best.extension;
 							if (FSO.FileExists(target)) {
 								library_namespace.warn('File exists: [' + target + ']');
 								continue;

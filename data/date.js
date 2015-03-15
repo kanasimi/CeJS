@@ -2042,12 +2042,33 @@ _.stem_branch_index = function(value, options) {
 };
 
 
-
+/**
+ * guess the year-stem-branch (歲次/年干支) of the date.
+ * 
+ * @param {Date|Integer}date_value
+ *            date specified.
+ * @param {Object|Boolean}options
+ *            true or {get_index:true} : get {Integer}index (年干支序) instead of
+ *            year-stem-branch.
+ * 
+ * @returns {String} year-stem-branch (歲次/年干支)
+ */
 function guess_year_stem_branch(date_value, options) {
 	if (options && options.original_Date)
 		date_value = options.original_Date;
-	var year = date_value.getFullYear() - YEAR_STEM_BRANCH_OFFSET, month = date_value
-			.getMonth(), date;
+
+	var year, month, date;
+	if (is_Date(date_value)) {
+		year = date_value.getFullYear();
+		month = date_value.getMonth();
+	} else if (isNaN(date_value))
+		// TypeError
+		throw new Error('guess_year_stem_branch: Not a Date');
+	else
+		year = date_value | 0, month = 7;
+
+	year -= YEAR_STEM_BRANCH_OFFSET;
+
 	if (month < 2)
 		// 正月初一的日期落在大寒至雨水
 		// （一般在公曆1月19日至2月20日）之間。
@@ -2059,7 +2080,14 @@ function guess_year_stem_branch(date_value, options) {
 			// 無法判別歲次：需要 include 'data.date.era'!
 			return '(' + index_to_stem_branch(year - 1) + '或'
 					+ index_to_stem_branch(year) + ')';
-	return index_to_stem_branch(year);
+
+	if (!options || options !== true && !options.get_index)
+		year = index_to_stem_branch(year);
+	else if ((year %= SEXAGENARY_CYCLE_LENGTH) < 0)
+		// see index_to_stem_branch()
+		year += SEXAGENARY_CYCLE_LENGTH;
+
+	return year;
 }
 
 _.guess_year_stem_branch = guess_year_stem_branch;

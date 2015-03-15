@@ -271,7 +271,7 @@ function show_calendar(era_name) {
 		title.splice(-1, 1, {
 			th : {
 				T : '朔日',
-				R : '實曆朔日，非天文朔日！'
+				R : '實曆每月初一之朔日，非天文朔日！'
 			}
 		});
 
@@ -285,7 +285,8 @@ function show_calendar(era_name) {
 					onclick : remove_calendar_column
 				} ]
 			});
-		else {
+		else if (Array.isArray(calendar_column[i])) {
+			// 增加此欄
 			j = calendar_column[i][0];
 			if (!j.T && j.a)
 				j = j.a;
@@ -297,7 +298,8 @@ function show_calendar(era_name) {
 				}, {
 					T : '分類'
 				}, ': ', {
-					T : group
+					T : group,
+					R : calendar_column[group] || ''
 				}, ' ' ]);
 			}
 			hidden_column.push({
@@ -1742,8 +1744,10 @@ function parse_text(text) {
 	if (!CeL.era)
 		return false;
 
-	if (text === undefined)
-		text = document.getElementById('original_text').value;
+	if (text)
+		CeL.set_text('original_text', text);
+	else
+		text = CeL.set_text('original_text');
 
 	// 標注文本 點擊(點選解析)功能。
 	CeL.era.to_HTML(text, 'parsed_text', {
@@ -2169,44 +2173,20 @@ function affairs() {
 					return date_String;
 				} ],
 
-		Gregorian : [ {
-			a : {
-				T : 'Gregorian calendar'
-			},
-			R : 'Gregorian calendar',
-			href : 'https://en.wikipedia.org/wiki/Gregorian_calendar',
-			S : 'font-size:.8em;'
-		}, function(date) {
-			return date.format('%Y/%m/%d');
-		} ],
-
-		Julian : [ {
-			a : {
-				T : 'Julian calendar'
-			},
-			R : 'Julian calendar',
-			href : 'https://en.wikipedia.org/wiki/Julian_calendar',
-			S : 'font-size:.8em;'
-		}, function(date) {
-			return date.format({
-				parser : 'Julian',
-				format : date.精 === '年' ? '%Y年' : '%Y/%m/%d'
-			});
-		} ],
-
-		ISO : [ {
-			a : {
-				T : 'ISO 8601'
-			},
-			R : 'YYYY-MM-DD\nThe standard uses the Gregorian calendar.',
-			href : 'https://en.wikipedia.org/wiki/ISO_8601',
-			S : 'font-size:.8em;'
-		}, function(date) {
-			var year = date.getFullYear() | 0;
-			return date.精 === '年' ? year + '年'
-			//
-			: year.pad(year < 0 ? 5 : 4) + date.format('-%2m-%2d');
-		} ],
+		ISO : [
+				{
+					a : {
+						T : 'ISO 8601'
+					},
+					R : 'YYYY-MM-DD\nThe standard uses the proleptic Gregorian calendar.',
+					href : 'https://en.wikipedia.org/wiki/ISO_8601',
+					S : 'font-size:.8em;'
+				}, function(date) {
+					var year = date.getFullYear() | 0;
+					return date.精 === '年' ? year + '年'
+					//
+					: year.pad(year < 0 ? 5 : 4) + date.format('-%2m-%2d');
+				} ],
 
 		ordinal_date : [ {
 			a : {
@@ -2232,22 +2212,6 @@ function affairs() {
 			//
 			: CeL.week_date(date, true);
 		} ],
-
-		BP : [ {
-			a : {
-				T : 'Before Present'
-			},
-			R : 'Before Present (BP) years, 距今。非精確時。usage: 2950±110 BP.',
-			href : 'https://en.wikipedia.org/wiki/Before_Present'
-		}, Year_numbering(1950, true, true, true) ],
-
-		HE : [ {
-			a : {
-				T : 'Holocene calendar'
-			},
-			R : 'Holocene calendar, 全新世紀年或人類紀年. 有採用0年。 1 BCE = 10000 HE',
-			href : 'https://en.wikipedia.org/wiki/Holocene_calendar'
-		}, Year_numbering(10000) ],
 
 		Unix : [ {
 			a : {
@@ -2291,88 +2255,35 @@ function affairs() {
 		} ],
 
 		// --------------------------------------------------------------------
-		曆注 : null,
-		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
-		// TODO: 日柱的五行 日の五行
-		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/calendar_j.html
-		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/astrology_j.html
-
-		五行 : [
-				{
-					a : {
-						T : '五行'
-					},
-					R : '陰陽五行',
-					href : 'http://zh.wikipedia.org/wiki/%E4%BA%94%E8%A1%8C#.E4.BA.94.E8.A1.8C.E4.B8.8E.E5.B9.B2.E6.94.AF.E8.A1.A8'
-				}, function(date) {
-					return /* !date.準 && */!date.精 && date.五行 || '';
-				} ],
-
-		六曜 : [
-				{
-					a : {
-						T : '六曜'
-					},
-					R : '日本の暦注の一つ。\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之六曜值可能是錯誤的！\n六輝（ろっき）や宿曜（すくよう）ともいうが、これは七曜との混同を避けるために、明治以後に作られた名称である。',
-					href : 'https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C'
-				}, function(date) {
-					return /* !date.準 && */!date.精 && date.六曜 || '';
-				} ],
-
-		// 暦注上段
-		曜日 : [ {
-			a : {
-				T : '曜日'
-			},
-			R : '日本の暦注の一つ, Japanese names of week day',
-			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5'
-		}, function(date) {
-			return /* !date.準 && */!date.精 && date.曜日 ? {
-				span : date.曜日 + '曜日',
-				S : date.曜日 === '日' ? 'color:#f34'
-				//
-				: date.曜日 === '土' ? 'color:#2b3' : ''
-			} : '';
-		} ],
-
-		// 暦注中段
-		// 十二直
-
-		/**
-		 * @see <a
-		 *      href="https://ja.wikipedia.org/wiki/%E6%9A%A6%E6%B3%A8%E4%B8%8B%E6%AE%B5"
-		 *      accessdate="2015/3/7 13:52">暦注下段</a>
-		 */
-		二十八宿 : [
-				{
-					a : {
-						T : '二十八宿'
-					},
-					R : '日本の暦注の一つ',
-					href : 'https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					return /* !date.準 && */!date.精 && date.二十八宿 || '';
-				} ],
-
-		二十七宿 : [
-				{
-					a : {
-						T : '二十七宿'
-					},
-					R : '日本の暦注の一つ\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！',
-					href : 'https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E4%B8%83%E5%AE%BF',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					return /* !date.準 && */!date.精 && date.二十七宿 || '';
-				} ],
-
-		// 九星は年、月、日、時刻それぞれに割り当てられる。
-		// http://koyomi8.com/sub/rekicyuu_doc01.htm#9sei
-
-		// --------------------------------------------------------------------
 		// 曆法 Historical calendar
-		calendar : null,
+		calendar : '計算日期的方法',
+
+		Julian : [
+				{
+					a : {
+						T : 'Julian calendar'
+					},
+					R : 'In fact, proleptic Julian calendar WITHOUT year 0, 不包含0年的外推儒略曆',
+					href : 'https://en.wikipedia.org/wiki/Proleptic_Julian_calendar',
+					S : 'font-size:.8em;'
+				}, function(date) {
+					return date.format({
+						parser : 'Julian',
+						format : date.精 === '年' ? '%Y年' : '%Y/%m/%d'
+					});
+				} ],
+
+		Gregorian : [
+				{
+					a : {
+						T : 'Gregorian calendar'
+					},
+					R : 'In fact, proleptic Gregorian calendar INCLUDES year 0, 包含0年的外推格里曆',
+					href : 'https://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar',
+					S : 'font-size:.8em;'
+				}, function(date) {
+					return date.format('%Y/%m/%d');
+				} ],
 
 		Tabular : [ {
 			a : {
@@ -2408,7 +2319,7 @@ function affairs() {
 					a : {
 						T : '長紀曆'
 					},
-					R : 'Mesoamerican Long Count calendar / 馬雅長紀曆',
+					R : 'Mesoamerican Long Count calendar / 中美洲馬雅長紀曆',
 					href : 'https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar'
 				},
 				function(date) {
@@ -2416,12 +2327,15 @@ function affairs() {
 							+ (date.精 === '年' ? '–' : '');
 				} ],
 
+		// TODO: 馬雅 Short Count
+		// https://en.wikipedia.org/wiki/Maya_calendar#Short_Count
+
 		Tzolkin : [
 				{
 					a : {
 						T : "Maya Tzolk'in"
 					},
-					R : "馬雅 Tzolk'in 曆",
+					R : "中美洲馬雅 Tzolk'in 曆",
 					href : 'https://en.wikipedia.org/wiki/Tzolk%27in',
 					S : 'font-size:.8em;'
 				},
@@ -2434,7 +2348,7 @@ function affairs() {
 			a : {
 				T : "Maya Haab'"
 			},
-			R : "馬雅 Haab' 曆",
+			R : "中美洲馬雅 Haab' 曆",
 			href : 'https://en.wikipedia.org/wiki/Haab%27',
 			S : 'font-size:.8em;'
 		}, function(date) {
@@ -2557,8 +2471,155 @@ function affairs() {
 				} ],
 
 		// --------------------------------------------------------------------
-		// 紀年/編年方法。
-		'Year numbering' : null,
+		// 列具曆注
+		曆注 : '具注曆譜/曆書之補充注釋，常與風水運勢、吉凶宜忌相關。',
+		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
+		// TODO: 建除十二神(十二值位)、反枳（反支）、血忌等，都被歸入神煞體系
+		// TODO: 節氣、物候、八節、二至啟閉四節、伏臘、八魁、天李、血忌、入官忌、日忌和歸忌
+		// TODO: 日柱的五行 日の五行
+		// see 欽定協紀辨方書
+		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/calendar_j.html
+		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/astrology_j.html
+
+		反支 : [ {
+			a : {
+				T : '反支'
+			},
+			R : '孔家坡《日書》和睡虎地《日書》\n警告：僅適用於中曆、日本！對其他紀年，此處之值可能是錯誤的！',
+			href : 'http://www.bsm.org.cn/show_article.php?id=867'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.反支(date) || '';
+		} ],
+
+		月の別名 : [
+				{
+					a : {
+						T : '月の別名'
+					},
+					R : '各月の別名',
+					href : 'https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E6%9A%A6#.E5.90.84.E6.9C.88.E3.81.AE.E5.88.A5.E5.90.8D'
+				},
+				function(date) {
+					return /* !date.準 && */!date.精 && CeL.era.月の別名(date) || '';
+				} ],
+
+		六曜 : [
+				{
+					a : {
+						T : '六曜'
+					},
+					R : '日本の暦注の一つ。\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之六曜值可能是錯誤的！\n六輝（ろっき）や宿曜（すくよう）ともいうが、これは七曜との混同を避けるために、明治以後に作られた名称である。',
+					href : 'https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C'
+				}, function(date) {
+					return /* !date.準 && */!date.精 && CeL.era.六曜(date) || '';
+				} ],
+
+		// 暦注上段
+		曜日 : [ {
+			a : {
+				T : '曜日'
+			},
+			R : '日本の暦注の一つ, Japanese names of week day',
+			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5'
+		}, function(date) {
+			var 曜日 = /* !date.準 && */!date.精 && date.曜日;
+			return 曜日 ? {
+				span : 曜日 + '曜日',
+				S : 曜日 === '日' ? 'color:#f34'
+				//
+				: 曜日 === '土' ? 'color:#2b3' : ''
+			} : '';
+		} ],
+
+		// 暦注中段
+		// 十二直
+
+		/**
+		 * @see <a
+		 *      href="https://ja.wikipedia.org/wiki/%E6%9A%A6%E6%B3%A8%E4%B8%8B%E6%AE%B5"
+		 *      accessdate="2015/3/7 13:52">暦注下段</a>
+		 */
+		二十八宿 : [
+				{
+					a : {
+						T : '二十八宿'
+					},
+					R : '日本の暦注の一つ',
+					href : 'https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
+					S : 'font-size:.8em;'
+				},
+				function(date) {
+					return /* !date.準 && */!date.精 && CeL.era.二十八宿(date) || '';
+				} ],
+
+		二十七宿 : [
+				{
+					a : {
+						T : '二十七宿'
+					},
+					R : '日本の暦注の一つ\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！',
+					href : 'https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E4%B8%83%E5%AE%BF',
+					S : 'font-size:.8em;'
+				},
+				function(date) {
+					return /* !date.準 && */!date.精 && CeL.era.二十七宿(date) || '';
+				} ],
+
+		// 九星は年、月、日、時刻それぞれに割り当てられる。
+		// http://koyomi8.com/sub/rekicyuu_doc01.htm#9sei
+
+		三元九運 : [
+				{
+					a : {
+						T : '三元九運'
+					},
+					R : '玄空飛星一派風水三元九運，又名「洛書運」。\n* 公曆2月3至5日立春後才改「運」，但此處恆定為2月4日改，會因此造成誤差。',
+					// http://www.hokming.com/fengshui-edit-threeyuennineyun.htm
+					href : 'http://www.twwiki.com/wiki/%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B'
+				}, function(date) {
+					return CeL.era.三元九運(date);
+				} ],
+
+		// --------------------------------------------------------------------
+		// 紀年法/紀年方法。 Cyclic year, year recording/representation method
+		'紀年法' : '區別與紀錄年份的方法，例如循環紀年。',
+
+		生肖 : [ {
+			a : {
+				T : '生肖'
+			},
+			R : '十二生肖紀年，屬相',
+			href : 'https://zh.wikipedia.org/wiki/%E7%94%9F%E8%82%96'
+		}, function(date) {
+			return CeL.era.生肖(date);
+		} ],
+
+		五行 : [
+				{
+					a : {
+						T : '五行'
+					},
+					R : '陰陽五行紀年',
+					href : 'http://zh.wikipedia.org/wiki/%E4%BA%94%E8%A1%8C#.E4.BA.94.E8.A1.8C.E4.B8.8E.E5.B9.B2.E6.94.AF.E8.A1.A8'
+				}, function(date) {
+					return CeL.era.五行(date);
+				} ],
+
+		繞迥 : [ {
+			a : {
+				T : '繞迥'
+			},
+			R : '藏曆(時輪曆)紀年法，繞迥（藏文：རབ་བྱུང༌།，藏語拼音：rabqung，威利：rab-byung）\n'
+			//
+			+ '又稱勝生周。第一繞迥自公元1027年開始。\n此處採公曆改年而非藏曆，可能有最多前後一年的誤差。',
+			href : 'https://zh.wikipedia.org/wiki/%E7%BB%95%E8%BF%A5'
+		}, function(date) {
+			return CeL.era.繞迥(date);
+		} ],
+
+		// --------------------------------------------------------------------
+		// 編年法/編年方法。
+		'Year numbering' : '以數字計算年份的方法',
 
 		Minguo : [
 				{
@@ -2655,18 +2716,37 @@ function affairs() {
 			R : 'Seleucid era or Anno Graecorum, 塞琉古紀元。非精確時，可能有最多前後一年的誤差。',
 			href : 'https://en.wikipedia.org/wiki/Seleucid_era',
 			S : 'font-size:.8em;'
-		}, Year_numbering(311, true) ]
+		}, Year_numbering(311, true) ],
+
+		BP : [ {
+			a : {
+				T : 'Before Present'
+			},
+			R : 'Before Present (BP) years, 距今。非精確時。usage: 2950±110 BP.',
+			href : 'https://en.wikipedia.org/wiki/Before_Present'
+		}, Year_numbering(1950, true, true, true) ],
+
+		HE : [
+				{
+					a : {
+						T : 'Holocene calendar'
+					},
+					R : 'Holocene calendar, 全新世紀年或人類紀年。在公曆年數上多加 10000。有採用0年。 1 BCE = 10000 HE',
+					href : 'https://en.wikipedia.org/wiki/Holocene_calendar'
+				}, Year_numbering(10000) ]
 
 	};
 
 	calendar_column = CeL.null_Object();
 	o = null;
 	for (i in list)
-		if (list[i])
+		if (Array.isArray(list[i]))
 			calendar_column[o ? o + '/' + i : i] = list[i];
 		else
-			o = i;
+			calendar_column[o = i] = list[i];
 
+	v = 'Gregorian reform';
+	calendar_column[v] = '各地啓用格里曆之日期對照';
 	for (i in CeL.Gregorian_reform_of.regions) {
 		o = function(date) {
 			return date.format({
@@ -2678,7 +2758,7 @@ function affairs() {
 		}.bind({
 			r : i
 		});
-		calendar_column['Gregorian reform/' + i] = [ {
+		calendar_column[v + '/' + i] = [ {
 			T : i,
 			R : i + ', Gregorian reform on '
 			//

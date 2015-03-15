@@ -498,10 +498,10 @@ tr.selected>td a {
 				calendar（格里高利曆）1582年10月15日。公元初期之前，包括 4 CE 與公元前之日期，則採 <a
 				rel="nofollow"
 				href="http://en.wikipedia.org/wiki/Proleptic_Julian_calendar"
-				accessdate="2013/3/31 16:54">proleptic Julian calendar</a>；因此 4 CE,
-				1 BCE 為閏年。且 1 CE 的前一年是 1 BCE，沒有 0 CE。另請注意，由於 proleptic Julian
-				calendar 的誤差，會造成西元前日期延後，甚至如冬至發生在1月的情況。年代越早，差距越大。尚可參考 <a
-				rel="nofollow"
+				accessdate="2013/3/31 16:54" title="外推儒略曆">proleptic Julian
+					calendar</a>；因此 4 CE, 1 BCE 為閏年。且 1 CE 的前一年是 1 BCE，沒有 0 CE。另請注意，由於
+				proleptic Julian calendar
+				的誤差，會造成西元前日期延後，甚至如冬至發生在1月的情況。年代越早，差距越大。尚可參考 <a rel="nofollow"
 				href="http://en.wikipedia.org/wiki/Conversion_between_Julian_and_Gregorian_calendars"
 				accessdate="2013/4/5 20:22">Conversion between Julian and
 					Gregorian calendars</a>。
@@ -975,8 +975,11 @@ tr.selected>td a {
 					accessdate="2014/4/28 22:15"
 					title="Mesoamerican Long Count calendar">中部美洲長紀曆</a></td>
 				<td>Using GMT correlation (GMT 換算). The starting-point is
-					equivalent to August 11, 3114 BCE in the proleptic Gregorian
-					calendar, or JDN 584283.</td>
+					equivalent to August 11, 3114 BCE in the <a
+					href="https://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar"
+					accessdate="2015/3/14 12:27" title="外推格里曆">proleptic Gregorian
+						calendar</a>, or JDN 584283.
+				</td>
 			</tr>
 			<tr>
 				<td>הַלּוּחַ הָעִבְרִי / Hebrew calendar / Jewish Calendar /
@@ -1068,14 +1071,23 @@ tr.selected>td a {
 	</div>
 
 	<div id="tag_text">
-		請貼上<b>首句包含紀年名稱</b>的史書原文： <br />
+		請貼上<b>首句包含紀年名稱</b>的史書原文：<br /> <b style="color: red;">✗</b>：<s
+			style="color:#aaa;">春秋左氏傳 隱公三年，春，王二月，己巳，日有食之。</s><br /> <b
+			style="color: green;">✓</b>：<a href="#"
+			onclick="return parse_text(this.innerHTML);">春秋左氏傳
+			魯國隱公三年，春，王二月，己巳，日有食之。</a><br /> <b style="color: red;">✗</b>：<s
+			style="color:#aaa;">魯國 隱公 三年 春 王二月 己巳 日有食之</s><br /> <b
+			style="color: green;">✓</b>：<a href="#"
+			onclick="return parse_text(this.innerHTML);">魯國隱公三年 春 王二月己巳 日有食之</a>（空格亦將影響結果）<br />
+		<b style="color: green;">✓</b>：<a href="#"
+			onclick="return parse_text(this.innerHTML);">魯國隱公三年春王二月己巳 日有食之</a><br />
 		<textarea id="original_text">嘉靖元年春正月癸丑，享太廟。己未，大祀天地於南郊。清甯宮後殿災。命稱孝宗皇考，慈壽皇太后聖母，興獻帝后為本生父母。己巳，甘州兵亂，殺巡撫都禦史許銘。
 
 二月己卯，耕耤田。
 
 三月辛亥，弗提衛獻生豹，卻之。</textarea>
 		<br /> 先指定：<a href="#"
-			onclick="this.innerHTML=(parse_text.add_date=!parse_text.add_date)?'<em>添加</em>':'不添加';return false;">不添加</a>公元日期於紀年後，而後作<a
+			onclick="this.innerHTML = (parse_text.add_date = !parse_text.add_date) ? '<em>添加</em>' : '不添加'; return false;">不添加</a>公元日期於紀年後，而後作<a
 			href="#" onclick="return parse_text();">自動判別與轉換→</a>
 		<p id="parsed_text" class="article"></p>
 		<em>此自動判別功能尚有闕漏。祈不吝指教。</em>

@@ -3446,6 +3446,103 @@ if (typeof CeL === 'function')
 				return [ 歲序, 月序, 日序 | 0 ];
 			}
 
+			function comment_生肖(date) {
+				return date.年干支序 >= 0
+				//
+				? 十二生肖_LIST[date.年干支序 % 十二生肖_LIST.length] : '';
+			}
+
+			function comment_五行(date) {
+				return date.年干支序 >= 0 ? (date.年干支序 % 2 ? '陰' : '陽')
+				//
+				+ 陰陽五行_LIST[(date.年干支序 >> 1) % 陰陽五行_LIST.length] : '';
+			}
+
+			function comment_繞迥(date) {
+				var 生肖 = comment_生肖(date);
+				return '第' + library_namespace.to_Chinese_numeral(
+				// 第一繞迥(rabqung)自公元1027年開始算起
+				// 每60年一繞迥
+				Math.floor((date.getFullYear() - (1027 - 60)) / 60)) + '繞迥'
+				//
+				+ (生肖 ? ' ' + comment_五行(date).replace(/金$/, '鐵') + 生肖 : '');
+			}
+
+			function comment_二十八宿(date) {
+				// http://koyomi8.com/sub/rekicyuu_doc01.htm
+				// 日の干支などと同様、28日周期で一巡して元に戻り、これを繰り返すだけである。
+				// 8 : 二十八宿_offset
+				var index = (8
+				// 不可用 "| 0"
+				+ Math.floor(date.getTime() / ONE_DAY_LENGTH_VALUE))
+						% 二十八宿_LIST.length;
+				if (index < 0)
+					index += 二十八宿_LIST.length;
+				return 二十八宿_LIST[index];
+			}
+
+			function comment_二十七宿(date) {
+				var index = 二十七宿_offset[date.月] + date.日;
+				return date.參照曆法 !== 'CE' && index >= 0
+				// 僅對於日本之旧暦與紀年，方能得到正確之暦注值！
+				? 二十七宿_LIST[index % 二十七宿_LIST.length] : '';
+			}
+
+			function comment_六曜(date) {
+				var index = +date.月 + date.日;
+				return date.參照曆法 !== 'CE' && index >= 0
+				// 六曜は元々は、1箇月（≒30日）を5等分して6日を一定の周期とし（30÷5 =
+				// 6）、それぞれの日を星毎に区別する為の単位として使われた。
+				// https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C
+				// 旧暦の月の数字と旧暦の日の数字の和が6の倍数であれば大安となる。
+				? 六曜_LIST[index % 六曜_LIST.length] : '';
+			}
+
+			function comment_月の別名(date, 新暦) {
+				// 新暦に適用する
+				var index = 新暦 ? date.getMonth() : date.月 - 1;
+				return index >= 0 ? 月の別名_LIST[index] : '';
+			}
+
+			function comment_反支(date) {
+				// 月朔日干支序
+
+				return 'TODO';
+			}
+
+			function comment_三元九運(date) {
+				// 64 CE 甲子:上元花甲 一運
+				// 一個花甲，共有六十年。而三個花甲，總得一百八十年。
+				var index = (date.getFullYear() - 64) % 180;
+				if (index < 0)
+					index += 180;
+
+				if (false && (index - 1 - (date.年干支序
+				// 採用過年改「運」
+				|| library_namespace
+				//
+				.guess_year_stem_branch(date, true))) % 60 === 0)
+					;
+				else {
+					// assert: index % 60 === (date.年干支序 ||
+					// library_namespace.guess_year_stem_branch(date, true))
+				}
+
+				// TODO: 公曆2月3至5日立春後才改「運」，但此處恆定為2月4日改，會因此造成誤差。
+				if (date.getMonth() < 2 && date.getDate() < 4)
+					// assert: 公曆一、二月，中曆過年前。
+					index--;
+
+				// get "運": 二十年一運
+				index = index / 20 | 0;
+
+				return '上中下'.charAt(index / 3 | 0) + '元'
+				// 運 starts from 1.
+				+ library_namespace.to_Chinese_numeral(index + 1)
+				//
+				+ '運';
+			}
+
 			// 增添標記，加上曆注(暦注)之類。
 			function add_comment(date, options) {
 				add_adapt_offset(date, this);
@@ -3514,13 +3611,13 @@ if (typeof CeL === 'function')
 					library_namespace.err('add_comment: 加注日期於紀年 [' + this
 							+ '] 範圍外！');
 				} else {
-					tmp = this.get_year_stem_branch_index() + date_index[0];
+					// 欲使用 date_index，應該採 (date.年, date.月, date.日)。
+					// date.index = date_index;
 
-					date.生肖 = 十二生肖_LIST[tmp % 十二生肖_LIST.length];
-					// http://zh.wikipedia.org/wiki/%E4%BA%94%E8%A1%8C#.E4.BA.94.E8.A1.8C.E4.B8.8E.E5.B9.B2.E6.94.AF.E8.A1.A8
-					// 年五行
-					date.五行 = (tmp % 2 ? '陰' : '陽')
-							+ 陰陽五行_LIST[(tmp >> 1) % 陰陽五行_LIST.length];
+					date.年干支序 = tmp
+					//
+					= this.get_year_stem_branch_index() + date_index[0];
+
 					date.歲次 = library_namespace.to_stem_branch(tmp);
 
 					// 精密度至年。
@@ -3531,17 +3628,6 @@ if (typeof CeL === 'function')
 						// date.七曜 =
 						date.曜日 = 曜日_LIST[date.getDay()];
 
-						// http://koyomi8.com/sub/rekicyuu_doc01.htm
-						// 日の干支などと同様、28日周期で一巡して元に戻り、これを繰り返すだけである。
-						// 8 : 二十八宿_offset
-						tmp = (8
-						// 不可用 "| 0"
-						+ Math.floor(date.getTime() / ONE_DAY_LENGTH_VALUE))
-								% 二十八宿_LIST.length;
-						if (tmp < 0)
-							tmp += 二十八宿_LIST.length;
-						date.二十八宿 = 二十八宿_LIST[tmp];
-
 						// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
 						tmp = this.日名(date_index[2], date_index[1],
 								date_index[0]).reverse();
@@ -3550,7 +3636,7 @@ if (typeof CeL === 'function')
 						&& tmp2.charAt(0) === LEAP_MONTH_PREFIX)
 							tmp2 = tmp2.slice(1);
 						if (0 < tmp2 && tmp2 <= MONTH_COUNT)
-							date.季 = 季_LIST.indexOf((tmp2 - 1) / 4 | 0);
+							date.季 = 季_LIST.charAt((tmp2 - 1) / 4 | 0);
 
 						if (options.numeral)
 							tmp = numeralize_date_format(tmp, options.numeral);
@@ -3558,28 +3644,10 @@ if (typeof CeL === 'function')
 						date.月 = tmp[1];
 						date.日 = tmp[2];
 
+						if (this.參照曆法)
+							date.參照曆法 = this.參照曆法;
+
 						if (0 < +tmp[1]) {
-							// 日本の暦注。
-							date.月の別名 = 月の別名_LIST[
-							// 新暦に適用すると: date.getMonth()
-							tmp[1] - 1];
-
-							// 警告:僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！
-							// 對於日本之暦注，應該採用旧暦之日期，否則會出現誤差！
-							if (this.參照曆法 !== 'CE') {
-								date.六曜 = 六曜_LIST[
-								// 六曜は元々は、1箇月（≒30日）を5等分して6日を一定の周期とし（30÷5 =
-								// 6）、それぞれの日を星毎に区別する為の単位として使われた。
-								// https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C
-								// 旧暦の月の数字と旧暦の日の数字の和が6の倍数であれば大安となる。
-								(+tmp[1] + tmp[2]) % 六曜_LIST.length];
-
-								date.二十七宿 = 二十七宿_LIST[
-								// 僅對於日本之旧暦與紀年，方能得到正確之暦注值！
-								(二十七宿_offset[tmp[1]] + tmp[2])
-										% 二十七宿_LIST.length];
-							}
-
 							// http://www.geocities.jp/mishimagoyomi/12choku/12choku.htm
 							// 冬至の頃（旧暦11月）に北斗七星のひしゃくの柄の部分が真北（子）に向くため、この日を「建子」の月としました。そこで旧暦11月節（大雪）後の最初の子の日を「建」と定めました。
 
@@ -3649,9 +3717,11 @@ if (typeof CeL === 'function')
 				return date;
 			}
 
-			// 預設會 copy 的紀年曆注。
-			// 據: 根據/出典/原始參考文獻/資料引用來源。
-			add_comment.copy_attributes = '據,準,曆法'.split(',');
+			Object.assign(add_comment, {
+				// 預設會 copy 的紀年曆注。
+				// 據: 根據/出典/原始參考文獻/資料引用來源。
+				copy_attributes : '據,準,曆法'.split(',')
+			});
 
 			Object.assign(Era.prototype, {
 				// 月次，歲次與 index 之互換。
@@ -6640,15 +6710,15 @@ if (typeof CeL === 'function')
 				年干支 : '歲次',
 				年柱 : '歲次',
 
-				生肖 : '(十二生肖/屬相)',
+				// 生肖 : '(十二生肖/屬相)',
 				// http://zh.wikipedia.org/wiki/五行#五行與干支表
-				五行 : '(陰陽五行)',
+				// 五行 : '(陰陽五行)',
 
 				曜日 : '',
-				六曜 : '',
-				月の別名 : '',
-				二十八宿 : '',
-				二十七宿 : '',
+				// 六曜 : '',
+				// 月の別名 : '',
+				// 二十八宿 : '',
+				// 二十七宿 : '',
 
 				// 星座 : '',
 
@@ -6705,6 +6775,21 @@ if (typeof CeL === 'function')
 				numeralize : numeralize_date_name,
 				compare_start : compare_start_date,
 				Date_of_CE_year : get_Date_of_key_by_CE,
+
+				// 曆注, comment
+				// 減輕負擔:要這些曆注的自己算。
+				生肖 : comment_生肖,
+				五行 : comment_五行,
+				繞迥 : comment_繞迥,
+				三元九運 : comment_三元九運,
+				//
+				月の別名 : comment_月の別名,
+				//
+				反支 : comment_反支,
+				六曜 : comment_六曜,
+				二十八宿 : comment_二十八宿,
+				二十七宿 : comment_二十七宿,
+
 				// 網頁應用功能。
 				node_era : caculate_node_era,
 				setup_nodes : set_up_era_nodes,
