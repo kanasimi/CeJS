@@ -3446,15 +3446,40 @@ if (typeof CeL === 'function')
 				return [ 歲序, 月序, 日序 | 0 ];
 			}
 
+			// 把一年十二個月和天上的十二辰聯繫起來。
+			// 閏月月建同本月。
+			// 子月：大雪(12月7/8日)至小寒前一日，中氣冬至。
+			// 因此可以與12月7日最接近的月首，作為子月初一。
+			function comment_月建(date) {
+				return date.月干支 && date.月干支.charAt(1) || '';
+			}
+
+			function comment_季(date) {
+				var 月 = date.月;
+				if (isNaN(月) && (月 = 月.match(MONTH_NAME_PATTERN)))
+					月 = 月[2];
+
+				return START_MONTH <= 月
+				// 此非季節，而為「冬十月」之類用。
+				&& 季_LIST.charAt((月 - START_MONTH) / 4 | 0) || '';
+			}
+
+			function comment_旬(date) {
+				var 日 = date.日;
+				return isNaN(日) ? ''
+				// 一個月的第一個十天為上旬，第二個十天為中旬，餘下的天數為下旬。
+				: 日 > 10 ? 日 > 20 ? '下' : '中' : '上';
+			}
+
 			function comment_生肖(date) {
 				return date.年干支序 >= 0
-				//
+				// 屬相
 				? 十二生肖_LIST[date.年干支序 % 十二生肖_LIST.length] : '';
 			}
 
 			function comment_五行(date) {
 				return date.年干支序 >= 0 ? (date.年干支序 % 2 ? '陰' : '陽')
-				//
+				// http://zh.wikipedia.org/wiki/五行#五行與干支表
 				+ 陰陽五行_LIST[(date.年干支序 >> 1) % 陰陽五行_LIST.length] : '';
 			}
 
@@ -3488,6 +3513,11 @@ if (typeof CeL === 'function')
 				? 二十七宿_LIST[index % 二十七宿_LIST.length] : '';
 			}
 
+			function comment_曜日(date) {
+				// 七曜
+				return 曜日_LIST[date.getDay()];
+			}
+
 			function comment_六曜(date) {
 				var index = +date.月 + date.日;
 				return date.參照曆法 !== 'CE' && index >= 0
@@ -3505,9 +3535,48 @@ if (typeof CeL === 'function')
 			}
 
 			function comment_反支(date) {
-				// 月朔日干支序
+				var 朔干支序 = (library_namespace
+				// 月朔日干支序. 36: 能被 library_namespace.BRANCH_LIST.length 整除，且>=大月
+				.stem_branch_index(date) - date.日 + START_DATE + 36)
+						% library_namespace.BRANCH_LIST.length,
+				// 凡反支日，用月朔為正。戌、亥朔，一日反支。申、酉朔，二日反支。午、未朔，三日反支。辰、巳朔，四日反支。寅、卯朔，五日反支。子、丑朔，六日反支。
+				第一反支日 = 6 - (朔干支序 / 2 | 0),
+				//
+				diff = date.日 - 第一反支日, 反支;
+				if (diff % 6 === 0
+				// 月朔日為子日之初一，亦可符合上述條件。
+				&& 0 <= diff) {
+					// 睡虎地和孔家坡:12日一反支
+					反支 = '反支';
+					if (diff % 12 !== 0)
+						// 孔家坡:6日一反支
+						反支 += '*';
+				} else
+					反支 = '';
 
-				return 'TODO';
+				return 反支;
+			}
+
+			function comment_血忌(date) {
+				var index = date.月;
+				if (index > 0) {
+					var 干支序 = ++index / 2 | 0;
+					if (index % 2 === 1)
+						干支序 += 6;
+					if ((library_namespace.stem_branch_index(date)
+					//
+					- 干支序) % 12 === 0)
+						return '血忌';
+				}
+				return '';
+
+				// note:
+				index = [];
+				'丑未寅申卯酉辰戌巳亥午子'.split('').forEach(function(s) {
+					index.push(CeL.stem_branch_index(s));
+				});
+				[ 1, 7, 2, 8, 3, 9, 4, 10, 5, 11, 6, 0 ];
+				return index;
 			}
 
 			function comment_三元九運(date) {
@@ -3538,9 +3607,7 @@ if (typeof CeL === 'function')
 
 				return '上中下'.charAt(index / 3 | 0) + '元'
 				// 運 starts from 1.
-				+ library_namespace.to_Chinese_numeral(index + 1)
-				//
-				+ '運';
+				+ library_namespace.to_Chinese_numeral(index + 1) + '運';
 			}
 
 			// 增添標記，加上曆注(暦注)之類。
@@ -3625,18 +3692,13 @@ if (typeof CeL === 'function')
 						date.年 = this.歲名(date_index[0]);
 					else {
 						// 日本の暦注。
-						// date.七曜 =
-						date.曜日 = 曜日_LIST[date.getDay()];
 
 						// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
 						tmp = this.日名(date_index[2], date_index[1],
 								date_index[0]).reverse();
-						if (date.閏月 = typeof (tmp2 = tmp[1]) === 'string'
+						date.閏月 = typeof (tmp2 = tmp[1]) === 'string'
 						//
-						&& tmp2.charAt(0) === LEAP_MONTH_PREFIX)
-							tmp2 = tmp2.slice(1);
-						if (0 < tmp2 && tmp2 <= MONTH_COUNT)
-							date.季 = 季_LIST.charAt((tmp2 - 1) / 4 | 0);
+						&& tmp2.charAt(0) === LEAP_MONTH_PREFIX;
 
 						if (options.numeral)
 							tmp = numeralize_date_format(tmp, options.numeral);
@@ -3661,7 +3723,8 @@ if (typeof CeL === 'function')
 										% 十二直_LIST.length];
 						}
 
-						// TODO: 二十四節氣
+						// TODO:
+						// 二十四節氣，每月有一個節氣，一個中氣，分別發生在每月的7日和22日前後。
 						// 物候(七十二候, 初候/二候/三候, 初候/次候/末候), 候應
 						// 二十四番花信風 http://baike.baidu.com/view/54438.htm
 
@@ -3675,10 +3738,6 @@ if (typeof CeL === 'function')
 						//
 						: tmp === 大月 ? '大' : tmp === 小月 ? '小' : '(' + tmp
 								+ '日)';
-
-						// 一個月的第一個十天為上旬，第二個十天為中旬，餘下的天數為下旬。
-						date.旬 = date_index[2] < 10 ? '上'
-								: date_index[2] < 20 ? '中' : '下';
 
 						// 取得當年閏月 index。
 						tmp = this.calendar[
@@ -3695,7 +3754,6 @@ if (typeof CeL === 'function')
 						? tmp2 - START_MONTH : 0)
 						// 閏月或在閏月之後的 index，都得減一。
 						- (!tmp || date_index[1] < tmp ? 0 : 1));
-						date.月建 = date.月干支.charAt(1);
 					}
 				}
 
@@ -3720,7 +3778,27 @@ if (typeof CeL === 'function')
 			Object.assign(add_comment, {
 				// 預設會 copy 的紀年曆注。
 				// 據: 根據/出典/原始參考文獻/資料引用來源。
-				copy_attributes : '據,準,曆法'.split(',')
+				copy_attributes : '據,準,曆法'.split(','),
+				// 曆注, comment
+				// 減輕負擔:要這些曆注的自己算。
+				comments : {
+					月建 : comment_月建,
+					季 : comment_季,
+					旬 : comment_旬,
+					生肖 : comment_生肖,
+					五行 : comment_五行,
+					繞迥 : comment_繞迥,
+					三元九運 : comment_三元九運,
+
+					月の別名 : comment_月の別名,
+
+					反支 : comment_反支,
+					血忌 : comment_血忌,
+					曜日 : comment_曜日,
+					六曜 : comment_六曜,
+					二十八宿 : comment_二十八宿,
+					二十七宿 : comment_二十七宿
+				}
 			});
 
 			Object.assign(Era.prototype, {
@@ -6670,8 +6748,43 @@ if (typeof CeL === 'function')
 			// ---------------------------------------------------------------------//
 			// export.
 
-			strftime.set_conversion({
+			Object.assign(to_era_Date, {
+				set : parse_era,
+				pack : pack_era,
+				extract : extract_calendar_data,
+				periods : get_periods,
+				get_candidate : get_candidate,
+				dates : get_dates,
+				era_list : create_era_search_pattern,
+				for_dynasty : for_dynasty,
+				for_monarch : for_monarch,
+				numeralize : numeralize_date_name,
+				compare_start : compare_start_date,
+				Date_of_CE_year : get_Date_of_key_by_CE,
 
+				// 網頁應用功能。
+				node_era : caculate_node_era,
+				setup_nodes : set_up_era_nodes,
+				to_HTML : era_text_to_HTML,
+				//
+				PERIOD_PATTERN : PERIOD_PATTERN
+			}, add_comment.comments);
+
+			// 加工處理。
+			(function() {
+				function comment_proxy(date_value, options) {
+					return this(options
+					//
+					&& options.original_Date || date_value);
+				}
+				var comments = add_comment.comments;
+				for ( var name in comments)
+					comments[name]
+					//
+					= comment_proxy.bind(comments[name]);
+			})();
+
+			Object.assign(add_comment.comments, {
 				// 注意:依 .format() 之設定，在未設定值時將採本處之預設。
 				// 因此對於可能不設定的值，預設得設定為 ''。
 
@@ -6686,11 +6799,6 @@ if (typeof CeL === 'function')
 				紀年 : '',
 				紀年名 : '',
 
-				// 陽曆「二十四節氣」中，每月有一個節氣，一個中氣，分別發生在每月的7日和22日前後。
-				// 節氣 : '',
-				// 此非季節，而為「冬十月」之類用。
-				季 : '(季)',
-
 				// 季節:
 				// 立春到立夏前為春季，立夏到立秋前為夏季，立秋到立冬前為秋季，立冬到立春前為冬季。
 
@@ -6702,23 +6810,15 @@ if (typeof CeL === 'function')
 				// 東漢四分曆以前，用歲星紀年和太歲紀年（歲星:木星）。到現在來用干支紀年。
 				// 干支紀年萌芽於西漢，始行於王莽，通行於東漢後期。
 				歲次 : function(date_value, options) {
-					return (options.original_Date || date_value).歲次
+					return (options
+					//
+					&& options.original_Date || date_value).歲次
 							|| library_namespace.guess_year_stem_branch(
 									date_value, options);
 				},
 				// 重新定義 (override) alias
 				年干支 : '歲次',
 				年柱 : '歲次',
-
-				// 生肖 : '(十二生肖/屬相)',
-				// http://zh.wikipedia.org/wiki/五行#五行與干支表
-				// 五行 : '(陰陽五行)',
-
-				曜日 : '',
-				// 六曜 : '',
-				// 月の別名 : '',
-				// 二十八宿 : '',
-				// 二十七宿 : '',
 
 				// 星座 : '',
 
@@ -6729,16 +6829,8 @@ if (typeof CeL === 'function')
 				// 日干支:'干支紀日',
 				// 月干支:'干支紀月',
 				月柱 : '月干支',
-				// 把一年十二個月和天上的十二辰聯繫起來。
-				// 閏月月建同本月。
-				// 子月：大雪(12月7/8日)至小寒前一日，中氣冬至。
-				// 因此可以與12月7日最接近的月首，作為子月初一。
-				月建 : '(月建)',
 				閏月 : '(是否為閏月)',
 				大小月 : '(大小月)',
-
-				// 一個月的第一個十天為上旬，第二個十天為中旬，餘下的天數為下旬。
-				旬 : '(上中下旬)',
 
 				// 晝夜 : '',
 				// 第一個時辰是子時，半夜十一點到一點。
@@ -6759,47 +6851,16 @@ if (typeof CeL === 'function')
 
 				// 注解
 				注 : ''
-
-			}, library_namespace.gettext.to_standard('Chinese'));
-
-			Object.assign(to_era_Date, {
-				set : parse_era,
-				pack : pack_era,
-				extract : extract_calendar_data,
-				periods : get_periods,
-				get_candidate : get_candidate,
-				dates : get_dates,
-				era_list : create_era_search_pattern,
-				for_dynasty : for_dynasty,
-				for_monarch : for_monarch,
-				numeralize : numeralize_date_name,
-				compare_start : compare_start_date,
-				Date_of_CE_year : get_Date_of_key_by_CE,
-
-				// 曆注, comment
-				// 減輕負擔:要這些曆注的自己算。
-				生肖 : comment_生肖,
-				五行 : comment_五行,
-				繞迥 : comment_繞迥,
-				三元九運 : comment_三元九運,
-				//
-				月の別名 : comment_月の別名,
-				//
-				反支 : comment_反支,
-				六曜 : comment_六曜,
-				二十八宿 : comment_二十八宿,
-				二十七宿 : comment_二十七宿,
-
-				// 網頁應用功能。
-				node_era : caculate_node_era,
-				setup_nodes : set_up_era_nodes,
-				to_HTML : era_text_to_HTML,
-				//
-				PERIOD_PATTERN : PERIOD_PATTERN
 			});
+			strftime.set_conversion(add_comment.comments,
+			//
+			library_namespace.gettext.to_standard('Chinese'));
+			delete add_comment.comments;
 
-			library_namespace.十二生肖_LIST = 十二生肖_LIST;
-			library_namespace.陰陽五行_LIST = 陰陽五行_LIST;
+			Object.assign(library_namespace, {
+				十二生肖_LIST : 十二生肖_LIST,
+				陰陽五行_LIST : 陰陽五行_LIST
+			});
 
 			String_to_Date.parser.era = function(date_string, minute_offset,
 					options) {

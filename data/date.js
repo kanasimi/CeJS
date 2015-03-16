@@ -1834,9 +1834,9 @@ CeL.assert(["1329/2/27 丙戌",'1329/2/丙戌'.to_Date('Chinese').format({format
 //	const
 // const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
 var NOT_FOUND = ''.indexOf('_'),
-//天干. celestial stem, Heavenly Stem
+// 10 天干. celestial stem, Heavenly Stem
 STEM_LIST = '甲乙丙丁戊己庚辛壬癸',
-// 地支. Earthly Branches
+// 12 地支. Earthly Branches
 BRANCH_LIST = '子丑寅卯辰巳午未申酉戌亥',
 // 60: lcm(STEM_LIST.length, BRANCH_LIST.length);
 SEXAGENARY_CYCLE_LENGTH = 60,

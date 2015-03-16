@@ -2474,7 +2474,7 @@ function affairs() {
 		// 列具曆注
 		曆注 : '具注曆譜/曆書之補充注釋，常與風水運勢、吉凶宜忌相關。',
 		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
-		// TODO: 建除十二神(十二值位)、反枳（反支）、血忌等，都被歸入神煞體系
+		// TODO: 建除十二神(十二值位)、血忌等，都被歸入神煞體系
 		// TODO: 節氣、物候、八節、二至啟閉四節、伏臘、八魁、天李、血忌、入官忌、日忌和歸忌
 		// TODO: 日柱的五行 日の五行
 		// see 欽定協紀辨方書
@@ -2485,10 +2485,24 @@ function affairs() {
 			a : {
 				T : '反支'
 			},
-			R : '孔家坡《日書》和睡虎地《日書》\n警告：僅適用於中曆、日本！對其他紀年，此處之值可能是錯誤的！',
-			href : 'http://www.bsm.org.cn/show_article.php?id=867'
+			R : '反枳（反支）依睡虎地《日書》(12日一反支)和孔家坡《日書》(6日一反支*)'
+			//
+			+ '\n警告：僅適用於中曆、日本！對其他紀年，此處之值可能是錯誤的！',
+			href : 'http://www.bsm.org.cn/show_article.php?id=867',
+			S : 'font-size:.8em;'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.反支(date) || '';
+		} ],
+
+		血忌 : [ {
+			a : {
+				T : '血忌'
+			},
+			R : '血忌在唐宋曆書中仍為典型歷注項目，後世因之，直至清末，其推求之法及吉凶宜忌都無改變。',
+			href : 'http://shc2000.sjtu.edu.cn/030901/lishu.htm',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.血忌(date) || '';
 		} ],
 
 		月の別名 : [
@@ -2497,7 +2511,8 @@ function affairs() {
 						T : '月の別名'
 					},
 					R : '各月の別名',
-					href : 'https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E6%9A%A6#.E5.90.84.E6.9C.88.E3.81.AE.E5.88.A5.E5.90.8D'
+					href : 'https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E6%9A%A6#.E5.90.84.E6.9C.88.E3.81.AE.E5.88.A5.E5.90.8D',
+					S : 'font-size:.8em;'
 				},
 				function(date) {
 					return /* !date.準 && */!date.精 && CeL.era.月の別名(date) || '';
@@ -2509,7 +2524,8 @@ function affairs() {
 						T : '六曜'
 					},
 					R : '日本の暦注の一つ。\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之六曜值可能是錯誤的！\n六輝（ろっき）や宿曜（すくよう）ともいうが、これは七曜との混同を避けるために、明治以後に作られた名称である。',
-					href : 'https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C'
+					href : 'https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C',
+					S : 'font-size:.8em;'
 				}, function(date) {
 					return /* !date.準 && */!date.精 && CeL.era.六曜(date) || '';
 				} ],
@@ -2522,7 +2538,7 @@ function affairs() {
 			R : '日本の暦注の一つ, Japanese names of week day',
 			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5'
 		}, function(date) {
-			var 曜日 = /* !date.準 && */!date.精 && date.曜日;
+			var 曜日 = /* !date.準 && */!date.精 && CeL.era.曜日(date);
 			return 曜日 ? {
 				span : 曜日 + '曜日',
 				S : 曜日 === '日' ? 'color:#f34'
