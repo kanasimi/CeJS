@@ -329,7 +329,7 @@ if (typeof CeL === 'function')
 
 			PERIOD_KEY = '時期',
 			//
-			PERIOD_PREFIX = 'p:',
+			PERIOD_PREFIX = 'period:',
 			//
 			PERIOD_PATTERN = new RegExp('^' + PERIOD_PREFIX + '(.+)$'),
 
@@ -3451,7 +3451,9 @@ if (typeof CeL === 'function')
 			// 子月：大雪(12月7/8日)至小寒前一日，中氣冬至。
 			// 因此可以與12月7日最接近的月首，作為子月初一。
 			function comment_月建(date) {
-				return date.月干支 && date.月干支.charAt(1) || '';
+				return date.月干支
+				// assert: (date.月干支) 為干支 e.g., '甲子'
+				&& date.月干支.charAt(1) || '';
 			}
 
 			function comment_季(date) {
@@ -3459,9 +3461,9 @@ if (typeof CeL === 'function')
 				if (isNaN(月) && (月 = 月.match(MONTH_NAME_PATTERN)))
 					月 = 月[2];
 
-				return START_MONTH <= 月
+				return 0 <= (月 -= START_MONTH)
 				// 此非季節，而為「冬十月」之類用。
-				&& 季_LIST.charAt((月 - START_MONTH) / 4 | 0) || '';
+				&& 季_LIST.charAt(月 / 4 | 0) || '';
 			}
 
 			function comment_旬(date) {
@@ -3487,7 +3489,7 @@ if (typeof CeL === 'function')
 				var 生肖 = comment_生肖(date);
 				return '第' + library_namespace.to_Chinese_numeral(
 				// 第一繞迥(rabqung)自公元1027年開始算起
-				// 每60年一繞迥
+				// 每60年一繞迥，library_namespace.SEXAGENARY_CYCLE_LENGTH
 				Math.floor((date.getFullYear() - (1027 - 60)) / 60)) + '繞迥'
 				//
 				+ (生肖 ? ' ' + comment_五行(date).replace(/金$/, '鐵') + 生肖 : '');
@@ -3536,7 +3538,8 @@ if (typeof CeL === 'function')
 
 			function comment_反支(date) {
 				var 朔干支序 = (library_namespace
-				// 月朔日干支序. 36: 能被 library_namespace.BRANCH_LIST.length 整除，且>=大月
+				// 月朔日干支序。
+				// 36: 能被 library_namespace.BRANCH_LIST.length 整除，且>=大月 之數。
 				.stem_branch_index(date) - date.日 + START_DATE + 36)
 						% library_namespace.BRANCH_LIST.length,
 				// 凡反支日，用月朔為正。戌、亥朔，一日反支。申、酉朔，二日反支。午、未朔，三日反支。辰、巳朔，四日反支。寅、卯朔，五日反支。子、丑朔，六日反支。
@@ -3549,7 +3552,7 @@ if (typeof CeL === 'function')
 					// 睡虎地和孔家坡:12日一反支
 					反支 = '反支';
 					if (diff % 12 !== 0)
-						// 孔家坡:6日一反支
+						// 標記孔家坡:6日一反支
 						反支 += '*';
 				} else
 					反支 = '';
@@ -3564,15 +3567,16 @@ if (typeof CeL === 'function')
 					if (index % 2 === 1)
 						干支序 += 6;
 					if ((library_namespace.stem_branch_index(date)
-					//
+					// 12: library_namespace.BRANCH_LIST.length
 					- 干支序) % 12 === 0)
 						return '血忌';
 				}
 				return '';
 
-				// note:
 				index = [];
-				'丑未寅申卯酉辰戌巳亥午子'.split('').forEach(function(s) {
+				CeL.BRANCH_LIST
+				// note: 示例如何計算出各月 index。
+				.split('').forEach(function(s) {
 					index.push(CeL.stem_branch_index(s));
 				});
 				[ 1, 7, 2, 8, 3, 9, 4, 10, 5, 11, 6, 0 ];
@@ -3589,7 +3593,7 @@ if (typeof CeL === 'function')
 				if (false && (index - 1 - (date.年干支序
 				// 採用過年改「運」
 				|| library_namespace
-				//
+				// 60: library_namespace.SEXAGENARY_CYCLE_LENGTH
 				.guess_year_stem_branch(date, true))) % 60 === 0)
 					;
 				else {
@@ -6855,6 +6859,7 @@ if (typeof CeL === 'function')
 			strftime.set_conversion(add_comment.comments,
 			//
 			library_namespace.gettext.to_standard('Chinese'));
+			// 已經作過改變，不再利用之。
 			delete add_comment.comments;
 
 			Object.assign(library_namespace, {

@@ -665,7 +665,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	if (!pages)
 		pages = this.last_pages, titles = this.last_titles;
-	if (!Array.isArray(pages) && !titles) {
+	if (!pages && !titles) {
 		// 採用推入前一個 this.actions queue 的方法，
 		// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 		library_namespace
@@ -987,24 +987,33 @@ wiki_API.query.last = library_namespace.null_Object();
 // e.g., {title:'abc'} → 'title=abc'
 // e.g., 'abc' → 'title=abc'
 wiki_API.query.title_param = function(page_data, multi) {
-	multi = multi ? 's=' : '=';
 	var pageid;
 	if (Array.isArray(page_data)) {
 		pageid = [];
 		// 確認所有 page_data 皆有 pageid 屬性。
-		pageid = page_data.every(function(page) {
-			pageid.push(page = page && page.pageid);
+		if (page_data.every(function(page) {
+			// {Number}page.pageid
+			if (page = page && page.pageid)
+				pageid.push(page);
 			return page;
-		}) && pageid.join('|');
-		if (!pageid) {
+		})) {
+			// auto detect
+			if (multi === undefined)
+				multi = pageid.length > 1;
+			pageid = pageid.join('|');
+		} else {
 			if (library_namespace.is_Object(page_data)) {
 				library_namespace.warn('wiki_API.query.title_param: 看似有些非正規之頁面資料。');
 				library_namespace.info('wiki_API.query.title_param: 將採用 title 為主要查詢方法。');
 			}
 			pageid = [];
 			page_data.forEach(function(page) {
+				// {String}title or {title:'title'}
 				pageid.push((typeof page === 'object' ? page.title : page) || '');
 			});
+			// auto detect
+			if (multi === undefined)
+				multi = pageid.length > 1;
 			page_data = pageid.join('|');
 			library_namespace.debug(page_data, 2, 'wiki_API.query.title_param');
 			pageid = undefined;
@@ -1012,12 +1021,20 @@ wiki_API.query.title_param = function(page_data, multi) {
 
 	} else if (library_namespace.is_Object(page_data))
 		if (page_data.pageid)
-			// 有 pageid 使用之，以加速。
+			// 有 pageid 則使用之，以加速 search。
 			pageid = page_data.pageid;
 		else
 			page_data = page_data.title;
+	else if (typeof page_data === 'number'
+	// {Number}pageid should > 0.
+	// pageid 0 回傳格式不同於 > 0。
+	// https://en.wikipedia.org/w/api.php?action=query&prop=revisions&pageids=0
+	&& page_data > 0 && page_data === page_data | 0)
+		pageid = page_data;
 	else if (!page_data)
 		library_namespace.err('wiki_API.query.title_param: Invalid title: [' + page_data + ']');
+
+	multi = multi ? 's=' : '=';
 
 	return pageid === undefined ? 'title' + multi + encodeURIComponent(page_data)
 	//

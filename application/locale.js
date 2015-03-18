@@ -210,6 +210,7 @@ language_tag.REGION_CODE = {
 	陸 : 'CN',
 	大陸 : 'CN',
 	中國大陸 : 'CN',
+	jpn : 'JP',
 	日 : 'JP',
 	日本 : 'JP',
 	港 : 'HK',
@@ -225,15 +226,18 @@ language_tag.REGION_CODE = {
 (function() {
 	for (var region_code in language_tag.REGION_CODE) {
 		if ((region_code = language_tag.REGION_CODE[region_code])
-		// identity alias
+		// identity alias: REGION_CODE[TW] = 'TW'
 		&& !language_tag.REGION_CODE[region_code])
 			language_tag.REGION_CODE[region_code] = region_code;
 	}
 	for (var language_code in language_tag.LANGUAGE_CODE) {
 		// reversed alias
+		// e.g., ja → JP
 		// e.g., cmn-hans → CN
 		language_tag.REGION_CODE[language_tag.LANGUAGE_CODE[language_code].toLowerCase()] = language_code;
-
+	}
+	// 因為下面的操作會改變 language_tag.LANGUAGE_CODE，因此不能與上面的同時操作。
+	for (var language_code in language_tag.LANGUAGE_CODE) {
 		if ((language_code = language_tag.LANGUAGE_CODE[language_code])
 		// identity alias
 		&& !language_tag.LANGUAGE_CODE[language_code])
@@ -251,17 +255,26 @@ language_tag.REGION_CODE = {
 language_tag.region_code = function(region, regular_only) {
 	var code = language_tag.REGION_CODE[region];
 	if (!code) {
-		// 嘗試解析。
-		if (/^[a-z\-]+$/i.test(region))
-			// 嘗試 reversed alias 的部分。
+		library_namespace.debug('嘗試解析 [' + region + ']。', 3, 'language_tag.region_code');
+		if (/^[a-z\-]+$/i.test(region)) {
+			library_namespace.debug('嘗試 reversed alias 的部分。', 3, 'language_tag.region_code');
 			// language_code → region_code
+			// e.g., cmn-Hant → search cmn-hant
 			code = language_tag.REGION_CODE[region.toLowerCase()];
-		else if (code = region.match(/^(.+)[語文]$/)) {
+
+		} else if (code = region.match(/^(.+)[語文]$/)) {
 			code = language_tag.REGION_CODE[code[1]]
+			// e.g., 英語 → search 英國
 			|| language_tag.REGION_CODE[code[1] + '國'];
 		} else {
+			// e.g., 英 → search 英國
 			code = language_tag.REGION_CODE[region + '國'];
 		}
+
+		if (!code && (code = region.match(/-([a-z]{2,3})$/)))
+			// e.g., zh-tw → search TW
+			code = language_tag.REGION_CODE[code[1].toUpperCase()];
+
 		if (!code
 		// identity alias
 		&& !language_tag.REGION_CODE[code = region.toUpperCase()]) {
@@ -794,9 +807,8 @@ function to_Chinese_numeral(number, formal) {
 		} else
 			addZero = true;
 
-	return (i ? i.slice(0, 2) === '一十'
-		|| i.slice(0, 2) === '一拾' ? i.substr(1) : i
-				: zero)
+	// 習慣用法： 一十 → 十
+	return (i ? i.replace(/^(負)?[一壹]([十拾])/, '$1$2') : zero)
 				+ (d ? '點' + d : '');
 }
 

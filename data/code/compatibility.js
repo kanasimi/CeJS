@@ -263,6 +263,8 @@ set_method(Object, {
 	},
 	// Object.isSealed()
 	isSealed: function isSealed(object) {
+		// 若欲更嚴謹些，可依照經驗法則，避開無法測試的 write-only 物件、或一改變就會產生後續影響的 object，
+		// 並對 object 作變更測試，確保 object 真的具有不可變更之性質。
 		return false;
 	},
 	// Object.preventExtensions()
