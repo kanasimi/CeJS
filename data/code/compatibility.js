@@ -942,8 +942,8 @@ set_method(Math, {
 // RegExp.*
 
 var RegExp_flags = /./g.flags === 'g'
-	// get RegExp.prototype.flags
-	? function(regexp) {
+// get RegExp.prototype.flags
+? function(regexp) {
 	return regexp.flags;
 } : function(regexp) {
 	// regexp = RegExp.prototype.toString.call(regexp);
@@ -969,9 +969,10 @@ RegExp_flags.flags = {
 
 library_namespace.RegExp_flags = RegExp_flags;
 
+// RegExp.prototype.flags
+if (!('flags' in RegExp.prototype)
 // library_namespace.env('not_native_keyword')
-if (!Object.defineProperty[library_namespace.env.not_native_keyword])
-	// RegExp.prototype.flags
+&& !Object.defineProperty[library_namespace.env.not_native_keyword])
 	// CeL.assert([/./ig.flags, 'gi']);
 	Object.defineProperty(RegExp.prototype, 'flags', {
 		get : function () {

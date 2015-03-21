@@ -16,6 +16,9 @@
 // https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92
 // https://zh.wikipedia.org/wiki/Special:API%E6%B2%99%E7%9B%92
 
+'use strict';
+//'use asm';
+
 if (false) {
 	// for debug: 'interact.DOM', 'application.debug',
 	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
@@ -76,7 +79,6 @@ if (false) {
 // --------------------------------------------------------------------------------------------- //
 
 
-'use strict';
 if (typeof CeL === 'function')
 CeL.run({
 name : 'application.net.wiki',

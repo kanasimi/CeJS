@@ -1680,7 +1680,10 @@ function Date_to_JDN(date_value, options) {
 	// 基本上世界每個地方在當地當天 12:0 都有相同的 JDN，但不保證世界每個地方在當地當天 0:0 都有相同的 JDN。
 	return Math.floor(Date_to_JD(date_value, options) + .5);
 }
+// Time Conversion Tool
+// http://ssd.jpl.nasa.gov/tc.cgi
 function JD_to_Date(JD) {
+	// 注意：此輸出常顯示為系統之 proleptic Gregorian calendar，而一般天文計算使用 proleptic Julian calendar！
 	return new Date(Julian_Date_offset
 			+ ONE_DAY_LENGTH_VALUE * JD);
 }
