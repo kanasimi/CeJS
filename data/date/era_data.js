@@ -28,10 +28,8 @@ bug:
 // ----------------------------------//
 
 簡易朔望/天象計算功能/千年 節氣 計算。
-http://bieyu.com/
 http://koyomi8.com/24sekki.htm
 http://koyomi8.com/sub/72kou.htm
-http://www.fjptsz.com/xxjs/xjw/rj/117/index.htm
 http://blog.csdn.net/orbit/article/details/7910220
 http://www.chris.obyrne.com/Eclipses/calculator.html
 http://eclipse.gsfc.nasa.gov/JSEX/JSEX-index.html
