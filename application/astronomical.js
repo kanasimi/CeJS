@@ -4,9 +4,6 @@
  * 
  * @since 2015/3/20 23:5:43
  * 
- * @see 計算順序:
- *      https://github.com/kanasimi/IAU-SOFA/blob/master/doc/sofa_ast_c.pdf
- * 
  * TODO:<br />
  * 大地測量:地球表面兩點間之距離<br />
  * http://wywu.pixnet.net/blog/post/27459116
@@ -20,6 +17,7 @@
  * http://www.fjptsz.com/xxjs/xjw/rj/117/index.htm
  * 
  * 未來發展：<br />
+ * 計算順序: https://github.com/kanasimi/IAU-SOFA/blob/master/doc/sofa_ast_c.pdf
  * 
  */
 
@@ -27,7 +25,12 @@
 // 'use asm';
 
 if (false) {
+	CeL.run('application.astronomical');
+
 	CeL.run('application.astronomical', function() {
+		CeL.assert([ CeL.polynomial_value([ 3, 4, 5, 6 ], 2),
+				3 + 4 * 2 + 5 * 2 * 2 + 6 * 2 * 2 * 2 ], 'polynomial value');
+
 		CeL.assert([ 1.11, Math.round(10 * CeL.deltaT(2010) / 6) / 100 ],
 				'get ΔT of year 2010 in minutes');
 		CeL.assert([ 95.17, Math.round(10 * CeL.deltaT(500) / 6) / 100 ],
@@ -35,12 +38,17 @@ if (false) {
 
 		// 例15.a：表面光滑的太陽圓盤下邊沿視緯度是30′。設太陽的真直徑是32′，氣溫及大氣壓為常規條件。求真位置。
 		CeL.refraction(CeL.refraction.to_real(30 / 60) + 32 / 60) * 60;
-		// get 57.9′
+		// get ≈ 57.9′
 
 		CeL.JD_to_Date(CeL.equinox(1962, 1));
-		// get 1962-06-21 21:24
+		// get ≈ 1962-06-21 21:24
+
+		CeL.nutation(2446895.5);
+		// get ≈ [ -3.788/3600, 9.443/3600 ]
 	});
 }
+
+// ------------------------------------------------------------------------------------------------------------------//
 
 if (typeof CeL === 'function')
 	CeL.run({
@@ -71,26 +79,34 @@ if (typeof CeL === 'function')
 			_// JSDT:_module_
 			.prototype = {};
 
-			// ---------------------------------------------------------------------//
+			// ------------------------------------------------------------------------------------------------------//
 			// 定義基本常數。
 
+			// 周角, turn, perigon, full circle, complete rotation,
+			// 360°, a full rotation in degrees.
+			var TURN_TO_DEGREES = 360,
 			/**
 			 * degrees * DEGREES_TO_RADIANS = radians.
 			 * 1.745329251994329576923691e-2
 			 */
-			var DEGREES_TO_RADIANS = 2 * Math.PI / 360,
+			DEGREES_TO_RADIANS = 2 * Math.PI / TURN_TO_DEGREES,
 			// degrees * DEGREES_TO_ARCSECONDS = arcseconds.
 			DEGREES_TO_ARCSECONDS = 60 * 60,
 			// arcseconds * ARCSECONDS_TO_RADIANS = radians.
 			ARCSECONDS_TO_RADIANS = DEGREES_TO_RADIANS / DEGREES_TO_ARCSECONDS,
 			//
 			ONE_DAY_SECONDS = 24 * 60 * 60,
+			// https://en.wikipedia.org/wiki/Epoch_%28astronomy%29#Julian_years_and_J2000
+			// J2000.0曆元
 			// Reference epoch (J2000.0), Julian Date
 			// https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
 			J2000_epoch = 2451545.0,
 			// Days per Julian century
 			// https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
+			// (365 + 1/4) * 100
 			DAYS_OF_JULIAN_CENTURY = 36525,
+			// 1 astronomical unit = 149597870700 meters (exactly)
+			AU_TO_METERS = 149597870700,
 			//			
 			SOLAR_TERM_NAME =
 			// Chinese name
@@ -98,10 +114,6 @@ if (typeof CeL === 'function')
 					.split(',');
 
 			// 工具函數。
-
-			if (false) {
-				polynomial_value([ 3, 4, 5 ], 2) === 3 + 4 * 2 + 5 * 2 * 2;
-			}
 
 			/**
 			 * use Horner's method to calculate the value of polynomial.
@@ -117,21 +129,91 @@ if (typeof CeL === 'function')
 			 * @see https://en.wikipedia.org/wiki/Horner%27s_method
 			 */
 			function polynomial_value(coefficients, variable) {
-				// or use coefficients.reduce();
-				var i = coefficients.length, value = coefficients[--i];
-				while (i > 0)
-					value = value * variable + coefficients[--i];
-				return value;
+				return coefficients.reduceRight(function(value, coefficient) {
+					return value * variable + coefficient;
+				});
 			}
 
-			// ---------------------------------------------------------------------//
+			_.polynomial_value = polynomial_value;
+
+			function Julian_century(JD) {
+				// J2000.0起算的儒略世紀數.
+				// Interval between fundamental date J2000.0
+				// and given date.
+				return (JD - J2000_epoch) / DAYS_OF_JULIAN_CENTURY;
+			}
+
+			// to proper degree
+			function normalize_degree(degree) {
+				if ((degree %= TURN_TO_DEGREES) < 0)
+					degree += TURN_TO_DEGREES;
+				return degree;
+			}
+
+			function show_degree(degree) {
+				if (!degree)
+					return '0°';
+				var value = Math.floor(degree),
+				//
+				show = value ? value + '°' : '';
+				if (degree -= value) {
+					value = (degree *= 60) | 0;
+					if (value || show)
+						show += value + '′';
+					if (degree -= value)
+						show += degree * 60 + '″';
+				}
+				return show;
+			}
+
+			_.show_degree = show_degree;
+
+			// ------------------------------------------------------------------------------------------------------//
 			// obliquity 轉軸傾角
 
 			/**
-			 * 地球的轉軸傾角。 get mean obliquity of the ecliptic (Earth's axial tilt),
-			 * IAU 2006 precession model.<br />
+			 * 地球的平均轉軸傾角，平黃赤交角。 get mean obliquity of the ecliptic (Earth's
+			 * axial tilt), IAU 2006 precession model.<br />
 			 * 資料來源/資料依據:
 			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/obl06.c
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * 
+			 * @returns {Number} obliquity in degrees
+			 */
+			function mean_obliquity_IAU2006(JD) {
+				return polynomial_value(IAU2006_obliquity_coefficients,
+				// Interval between fundamental date J2000.0
+				// and given date (JC).
+				Julian_century(JD)) / DEGREES_TO_ARCSECONDS;
+			}
+
+			/**
+			 * 地球的平均轉軸傾角，平黃赤交角。 get mean obliquity of the ecliptic (Earth's
+			 * axial tilt).<br />
+			 * 資料來源/資料依據: Laskar, J. (1986). "Secular Terms of Classical
+			 * Planetary Theories Using the Results of General Relativity".<br />
+			 * 
+			 * J. Laskar computed an expression to order T10 good to 0″.02 over
+			 * 1000 years and several arcseconds over 10,000 years.
+			 * 
+			 * @param {Number}JD
+			 *            Julian date, 適用於J2000.0起算前後各10000年的範圍內。
+			 * 
+			 * @returns {Number} obliquity in degrees
+			 */
+			function mean_obliquity_Laskar(JD) {
+				return polynomial_value(Laskar_obliquity_coefficients,
+				// J2000.0起算的儒略萬年數
+				Julian_century(JD) / 100);
+			}
+
+			var mean_obliquity = mean_obliquity_Laskar;
+
+			/**
+			 * 地球的轉軸傾角，平黃赤交角。 get obliquity of the ecliptic (Earth's axial
+			 * tilt).<br />
 			 * 
 			 * @param {Number}JD
 			 *            Julian date
@@ -141,49 +223,13 @@ if (typeof CeL === 'function')
 			 * @see https://en.wikipedia.org/wiki/Axial_tilt
 			 */
 			function obliquity(JD) {
-				return polynomial_value([ 84381.406, -46.836769, -0.0001831,
-						0.00200340, -0.000000576, -0.0000000434 ],
-				// Interval between fundamental date J2000.0 and given date
-				// (JC).
-				(JD - J2000_epoch) / DAYS_OF_JULIAN_CENTURY)
-						/ DEGREES_TO_ARCSECONDS;
+				return mean_obliquity(JD) + nutation(JD)[1];
 			}
 
 			_.obliquity = obliquity;
 
-			// ---------------------------------------------------------------------//
+			// ------------------------------------------------------------------------------------------------------//
 			// ΔT
-
-			// 資料來源/資料依據:
-			// http://www.staff.science.uu.nl/~gent0113/deltat/deltat_old.htm
-			var ΔT_year_start = [ 2150, 2050, 2005, 1986, 1961, 1941, 1920,
-					1900, 1860, 1800, 1700, 1600, 500, -500 ],
-			// http://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html
-			// All values of ΔT based on Morrison and Stephenson [2004]
-			// assume a value for the Moon's secular acceleration of -26
-			// arcsec/cy^2.
-			ΔT_year_diff = [ 1820, 1820, 2000, 2000, 1975, 1950, 1920, 1900,
-					1860, 1800, 1700, 1600, 1000, 0 ],
-			// 為統合、方便計算，在演算方法上作了小幅變動。
-			ΔT_coefficients = [
-					[ -20, 0, 32 ],
-					[ -205.724, 56.28, 32 ],
-					[ 62.92, 32.217, 55.89 ],
-					[ 63.86, 33.45, -603.74, 1727.5, 65181.4, 237359.9 ],
-					[ 45.45, 106.7, -10000 / 260, -1000000 / 718 ],
-					[ 29.07, 40.7, -10000 / 233, 1000000 / 2547 ],
-					[ 21.20, 84.493, -761.00, 2093.6 ],
-					[ -2.79, 149.4119, -598.939, 6196.6, -19700 ],
-					[ 7.62, 57.37, -2517.54, 16806.68, -44736.24,
-							10000000000 / 233174 ],
-					[ 13.72, -33.2447, 68.612, 4111.6, -37436, 121272, -169900,
-							87500 ],
-					[ 8.83, 16.03, -59.285, 133.36, -100000000 / 1174000 ],
-					[ 120, -98.08, -153.2, 1000000 / 7129 ],
-					[ 1574.2, -556.01, 71.23472, 0.319781, -0.8503463,
-							-0.005050998, 0.0083572073 ],
-					[ 10583.6, -1014.41, 33.78311, -5.952053, -0.1798452,
-							0.022174192, 0.0090316521 ] ];
 
 			/**
 			 * get ΔT of year.<br />
@@ -225,7 +271,7 @@ if (typeof CeL === 'function')
 
 			_.deltaT = ΔT;
 
-			// ---------------------------------------------------------------------//
+			// ------------------------------------------------------------------------------------------------------//
 			// Atmospheric refraction
 
 			/**
@@ -254,7 +300,7 @@ if (typeof CeL === 'function')
 			 */
 			function refraction_to_real(apparent, Celsius, kPa) {
 				// (86.63175) get 4.186767499821572e-10
-				// 再多就變負數。
+				// 經測試，再多就變負數。
 				if (apparent > 86.63175)
 					// Jean Meeus: 在90°時，不作第二項修正反而更好。
 					return apparent;
@@ -302,7 +348,7 @@ if (typeof CeL === 'function')
 			 */
 			function refraction(real, Celsius, kPa) {
 				// (89.891580) get 2.226931796052203e-10
-				// 再多就變負數。
+				// 經測試，再多就變負數。
 				if (real > 89.89158)
 					// Jean Meeus: h=90°時，該式算得R不等於零。
 					return real;
@@ -328,18 +374,379 @@ if (typeof CeL === 'function')
 			refraction.to_real = refraction_to_real;
 			_.refraction = refraction;
 
-			// ---------------------------------------------------------------------//
+			// ------------------------------------------------------------------------------------------------------//
 			// 二十四節氣 (solar terms)
 
-			// 資料來源/資料依據:
-			// Jean Meeus, Astronomical Algorithms.
-			// 《天文算法》 chapter 分點和至點.
-
-			// [ 春分, 夏至, 秋分, 冬至 ]
-			// [ March equinox, June Solstice, September equinox,
-			// December Solstice ]
+			/**
+			 * 太陽地心黃經光行差修正量
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms.<br />
+			 * 《天文算法》 chapter 太陽位置計算 "太陽地心黃經光行差修正項" 式.<br />
+			 * 
+			 * @param {Number}R
+			 *            日地距離(天文單位 AU), radius vector in AU。
+			 * 
+			 * @returns {Number} degree
+			 * 
+			 * @see https://en.wikipedia.org/wiki/Aberration_of_light
+			 */
+			function solar_aberration(R) {
+				// 式中分子是光行差常數
+				// κ=20″.49552 arcseconds at J2000
+				// 乘以a*(1-e^2)，與24.5式的分子相同。
+				// 因此24.10中的分子中其實是一個緩慢變化的數，在0年是20".4893，在+4000年是20".4904。
+				return -20.4898 / DEGREES_TO_ARCSECONDS / R;
+				// 24.10式本身不是一個嚴格的準確的運算式，因為它是假設地球軌道是不受攝動的標準橢圓。當受到攝動時，月球的攝動可引起0".01的誤差。
+				// 當需要進行高精度計算時(比使用附錄II計算精度要求更高時)，可用以下方法進行光行差修正...
+			}
 
 			/**
+			 * 分點和至點, 太陽視黃經λ為0°或90°或180°或270°. 在西元1951–2050的誤差 < 1分.
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms.<br />
+			 * 《天文算法》 chapter 分點和至點.<br />
+			 * 
+			 * @param {Integer}year
+			 *            年
+			 * @param {Integer}index
+			 *            0–3: [ 春分, 夏至, 秋分, 冬至 ]<br />
+			 *            aka. [ March equinox, June Solstice, September
+			 *            equinox, December Solstice ]
+			 * 
+			 * @returns {Number} Julian date (JD)
+			 */
+			function equinox(year, index, no_ΔT) {
+				// year is an integer; other values for year, would give
+				// meaningless results!
+				var JD = (year |= 0) < 1000 ? equinox_teams_before_1000
+						: equinox_teams_after_1000;
+				// 計算相應的平分點或平至點的時刻。
+				JD = polynomial_value(JD[index |= 0], (year < 1000 ? year
+						: year - 2000) / 1000);
+
+				var T = Julian_century(JD),
+				//
+				W = (35999.373 * T - 2.47) * DEGREES_TO_RADIANS,
+
+				// 太陽平黃經→太陽視黃經
+				// 要計算的分點或至點時刻(儒略曆書時,即力學時）表達為：
+				λ = JD + 0.00001 *
+				// JDE0 + 0.00001 S / Δλ 日
+				equinox_periodic_terms.reduce(function(S, teams) {
+					return S + teams[0] * Math.cos(teams[1] + teams[2] * T);
+				}, 0) /
+				// Δλ
+				(1 + 0.0334 * Math.cos(W) + 0.0007 * Math.cos(2 * W));
+
+				// λ: 太陽黃經☉是Date黃道分點座標的真幾何黃經。要取得視黃經λ，還應加上精確的黃經章動及光行差。
+				// TODO: 黃經周年光行差修正量：-20".161 (公式(24.10)), 黃經章動效果：Δψ =
+				// -12".965
+				// (詳見第22章), 轉到FK5系統的修正值(-0".09033) (公式(24.9))
+				// 光行差 aberration
+				// 章動 nutation
+
+				if (!no_ΔT)
+					// ΔT(year, month)
+					λ -= ΔT(year, index * 3 + 3.5) / ONE_DAY_SECONDS;
+
+				return λ;
+			}
+
+			_.equinox = equinox;
+
+			/**
+			 * 章動 nutation 修正值
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * 
+			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ]
+			 */
+			function nutation(JD) {
+				// T是J2000.0起算的儒略世紀數：
+				var T = Julian_century(JD),
+				//
+				parameters = [], Δψ = 0, Δε = 0;
+				IAU1980_nutation_parameters.forEach(function(parameter) {
+					parameters.push(polynomial_value(parameter, T)
+							* DEGREES_TO_RADIANS);
+				});
+
+				// IAU1980_nutation_teams[6,8] 有乘以十倍了。
+				T /= 10;
+
+				IAU1980_nutation_teams.forEach(function(team) {
+					var c, argument = 0, i = 0;
+					// 5: parameters.length
+					for (; i < 5; i++)
+						// 正弦(計算Δψ用sin)的角度參數及余弦(計算Δε用cos)的角度參數是D、M、M'、F、Ω這5個基本參數的線性組合。
+						// c常為0
+						if (c = team[i])
+							argument += c * parameters[i];
+
+					if (c = team[5] + team[6] * T)
+						Δψ += c * Math.sin(argument);
+					if (c = team[7] + team[8] * T)
+						Δε += c * Math.cos(argument);
+				});
+
+				// 表中的係數的單位是0".0001。
+				T = 1e4 * DEGREES_TO_ARCSECONDS;
+				return [ Δψ / T, Δε / T ];
+			}
+
+			_.nutation = nutation;
+
+			/**
+			 * 太陽位置計算
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 Example 25.b
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * 
+			 * @returns {Object} { apparent:太陽視黃經, λ:地心黃經(度), β:地心黃緯β(度),
+			 *          Δ:日地距離(m), L:黃經 longitude, B:黃緯 latitude, R:距離 radius
+			 *          vector }
+			 */
+			function solar_coordinate(JD) {
+				var coordinate = VSOP87(JD, 'Earth');
+
+				// 弧度單位日心黃經L → 地心黃經(geocentric longitude)λ(度)
+				// Jean Meeus 文中以 "☉" 表示此處之 λ。
+				var λ = coordinate.L / DEGREES_TO_RADIANS + 180,
+				// 弧度單位日心黃緯B → 地心黃緯β(度)
+				β = -coordinate.B / DEGREES_TO_RADIANS;
+
+				// 轉換到FK5坐標系統。
+				// 太陽黃經☉及黃緯β是P.Bretagnon的VSOP行星理論定義的動力學黃道坐標。這個參考系與標準的FK5坐標系統(詳見20章)僅存在很小的差別。可按以下方法把☉、β轉換到FK5坐標系統中,其中T是J2000起算的儒略世紀數,或T=10τ。
+				// J2000.0的VSOP黃道與J2000.0的FK5黃道存在一個很小的夾角 E =
+				// 0".0554左右，所以作以上修正。
+
+				// 先計算 λ′ = Θ - 1°.397*T - 0°.00031*T^2
+				var tmp = polynomial_value([ λ, -1.397, -0.00031 ],
+						Julian_century(JD))
+						* DEGREES_TO_RADIANS;
+				β += 0.03916 / DEGREES_TO_ARCSECONDS
+						* (Math.cos(tmp) - Math.sin(tmp));
+				λ -= 0.09033 / DEGREES_TO_ARCSECONDS;
+
+				// 修正光行差 aberration
+				// 太陽的視黃經 (apparent longitude)λ(度)
+				// Jean Meeus 文中以 "λ" 表示此處之視黃經 apparent。
+				//
+				// https://en.wikipedia.org/wiki/Apparent_longitude
+				// Apparent longitude is used in the definition of
+				// equinox and solstice.
+				// 節氣以太陽視黃經為準。
+				// ** 問題:但中國古代至點以日長為準。兩者或可能產生出入？
+				var apparent = λ + solar_aberration(coordinate.R);
+
+				// 修正章動 nutation
+				tmp = nutation(JD);
+				apparent += tmp[0];
+
+				// https://en.wikipedia.org/wiki/Ecliptic_coordinate_system#Spherical_coordinates
+				return Object.assign(coordinate, {
+					apparent : normalize_degree(apparent),
+					λ : normalize_degree(λ),
+					β : normalize_degree(β),
+					Δ : coordinate.R * AU_TO_METERS
+				});
+			}
+
+			_.solar_coordinate = solar_coordinate;
+
+			// 黃經0度~
+			// 例24.b
+			function solar_term(year, index) {
+				if (isNaN(index)
+				//
+				&& (index = index ? SOLAR_TERM_NAME.indexOf(index) : 0)) {
+					library_namespace.err('solar_term: Invalid solar term!');
+					return;
+				}
+
+				var JD = equinox(year, index / (24 / 4));
+				if (index % (24 / 4) === 0)
+					return JD;
+
+				// TODO
+
+				return JD;
+			}
+
+			_.solar_term = solar_term;
+
+			// 物侯
+
+			// 無用:因為 items[1,2] 已經是弧度。
+			function initialize_VSOP87(subteams) {
+				if (subteams.init)
+					// 另一 thread 正初始化中。
+					return;
+				subteams.init = true;
+
+				subteams.forEach(function(series) {
+					series.forEach(function(items) {
+						items[1] *= DEGREES_TO_RADIANS;
+						items[2] *= DEGREES_TO_RADIANS;
+					});
+				});
+
+				subteams.initialized = true;
+				delete subteams.init;
+			}
+
+			/**
+			 * VSOP87 行星位置計算
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 chapter 太陽位置計算.
+			 * 
+			 * Jean Meeus
+			 * 從VSOP87中取出一些主要項(詳見附錄II)，利用它計算得到的太陽位置在-2000到6000年範圍內精度是1"。<br />
+			 * 誤差 365.25*24*60*60/360/60/60 = 24.35秒鐘。相當於半分鐘。
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * @param {String}[object]
+			 *            行星
+			 * @param {Array|String}[team]
+			 *            team to get
+			 * 
+			 * @returns {Object} { L:日心黃經 longitude (弧度), B:日心黃緯 latitude (弧度),
+			 *          R:日地距離 radius vector(AU) }
+			 */
+			function VSOP87(JD, object, team) {
+				var object_teams, subteams,
+				// 儒略千年數 millennium
+				τ = Julian_century(JD) / 10,
+				//				
+				coordinate = library_namespace.null_Object();
+				if (!object)
+					// default
+					object = 'Earth';
+				object_teams = VSOP87_teams[object];
+				if (!team)
+					// request
+					// L:黃經 longitude + B:黃緯 latitude + R:距離 radius vector
+					team = 'LBR'.split('');
+				else if (!Array.isArray(team))
+					team = [ team ];
+
+				team.forEach(function(team_name) {
+					var coefficients = [], subteams = object_teams[team_name];
+					if (!subteams) {
+						library_namespace.err('VSOP87: Invalid team name: ['
+								+ team_name + ']');
+						return;
+					}
+
+					// 無用:因為 items[1,2] 已經是弧度。
+					if (false && !subteams.initialized)
+						initialize_VSOP87(subteams);
+
+					// series: 序列 L0,L1,..,B0,B1,..,R0,R1,..
+					subteams.forEach(function(series) {
+						coefficients.push(series.reduce(function(value, items) {
+							return value + items[0] * Math.cos(
+							// items: 三個數字項
+							// [A,B,C]
+							// 每項(表中各行)的值計算表達式是：
+							// A*cos(B+C*τ);
+							items[1] + items[2] * τ);
+						}, 0));
+					});
+
+					coordinate[team_name] =
+					// L=(L0+L1*τ+L2*τ^2+L3*τ^3+L4*τ^4+L5*τ^5)/10^8
+					polynomial_value(coefficients, τ) / 1e8;
+				});
+
+				return team.length > 1 ? coordinate : coordinate[team[0]];
+			}
+
+			_.VSOP87 = VSOP87;
+
+			// ----------------------------------------------------------------------------------------------------------------------------------------------//
+
+			/**
+			 * 以下為計算用天文數據。
+			 */
+
+			// ------------------------------------------------------------------------------------------------------//
+			// teams for obliquity 轉軸傾角
+			var IAU2006_obliquity_coefficients = [ 84381.406, -46.836769,
+					-0.0001831, 0.00200340, -0.000000576, -0.0000000434 ];
+
+			var Laskar_obliquity_coefficients = [
+			// ε = 23° 26′ 21.448″ − 4680.93″ T − 1.55″ T2 + 1999.25″ T3
+			// −
+			// 51.38″ T4 − 249.67″ T5 − 39.05″ T6 + 7.12″ T7 + 27.87″ T8
+			// + 5.79″
+			// T9 + 2.45″ T10
+			23 + 26 * 60 + 21.448 * 60 * 60, -4680.93, -1.55, 1999.25, -51.38,
+					-249.67, -39.05, 7.12, 27.87, 5.79, 2.45 ];
+			Laskar_obliquity_coefficients.forEach(function(v, index) {
+				Laskar_obliquity_coefficients[index] = v
+						/ DEGREES_TO_ARCSECONDS;
+			});
+
+			// ------------------------------------------------------------------------------------------------------//
+			// teams for ΔT
+
+			/**
+			 * teams for function ΔT()
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * http://www.staff.science.uu.nl/~gent0113/deltat/deltat_old.htm
+			 * 
+			 * @inner
+			 */
+			var ΔT_year_start = [ 2150, 2050, 2005, 1986, 1961, 1941, 1920,
+					1900, 1860, 1800, 1700, 1600, 500, -500 ],
+			// http://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html
+			// All values of ΔT based on Morrison and Stephenson [2004]
+			// assume a value for the Moon's secular acceleration of -26
+			// arcsec/cy^2.
+			ΔT_year_diff = [ 1820, 1820, 2000, 2000, 1975, 1950, 1920, 1900,
+					1860, 1800, 1700, 1600, 1000, 0 ],
+			// 為統合、方便計算，在演算方法上作了小幅變動。
+			ΔT_coefficients = [
+					[ -20, 0, 32 ],
+					[ -205.724, 56.28, 32 ],
+					[ 62.92, 32.217, 55.89 ],
+					[ 63.86, 33.45, -603.74, 1727.5, 65181.4, 237359.9 ],
+					[ 45.45, 106.7, -10000 / 260, -1000000 / 718 ],
+					[ 29.07, 40.7, -10000 / 233, 1000000 / 2547 ],
+					[ 21.20, 84.493, -761.00, 2093.6 ],
+					[ -2.79, 149.4119, -598.939, 6196.6, -19700 ],
+					[ 7.62, 57.37, -2517.54, 16806.68, -44736.24,
+							10000000000 / 233174 ],
+					[ 13.72, -33.2447, 68.612, 4111.6, -37436, 121272, -169900,
+							87500 ],
+					[ 8.83, 16.03, -59.285, 133.36, -100000000 / 1174000 ],
+					[ 120, -98.08, -153.2, 1000000 / 7129 ],
+					[ 1574.2, -556.01, 71.23472, 0.319781, -0.8503463,
+							-0.005050998, 0.0083572073 ],
+					[ 10583.6, -1014.41, 33.78311, -5.952053, -0.1798452,
+							0.022174192, 0.0090316521 ] ];
+
+			// ------------------------------------------------------------------------------------------------------//
+
+			/**
+			 * teams for function equinox()
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms.<br />
+			 * 《天文算法》 chapter 分點和至點.<br />
+			 * 
 			 * @inner
 			 */
 			// for years -1000 to 1000
@@ -384,160 +791,123 @@ if (typeof CeL === 'function')
 				teams[2] *= DEGREES_TO_RADIANS;
 			});
 
-			// 太陽地心黃經光行差修正項 (20.10)
-			function solar_aberration(R) {
-				// 式中R是日地距離(天文單位)。分子是光行差常數(κ=20″.49552 arcseconds at
-				// J2000)乘以a*(1-e^2)，與24.5式的分子相同。因此24.10中的分子中其實是一個緩慢變化的數，在0年是20".4893，在+4000年是20".4904。
-				return -20.4898 / R;
-			}
+			// ------------------------------------------------------------------------------------------------------//
+			// 章動 nutation
 
 			/**
-			 * 分點和至點, 太陽視黃經λ為0°或90°或180°或270°. 在西元1951–2050的誤差 < 1分.
+			 * teams for function nutation()
 			 * 
-			 * @param {Integer}year
-			 *            年
-			 * @param {Integer}index
-			 *            0–3: [ 春分, 夏至, 秋分, 冬至 ]
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 table 22.A.<br />
 			 * 
-			 * @returns {Number} Julian date (JD)
 			 */
-			function equinox(year, index, no_ΔT) {
-				// year is an integer; other values for year, would give
-				// meaningless results!
-				var JD = (year |= 0) < 1000 ? equinox_teams_before_1000
-						: equinox_teams_after_1000;
-				// 計算相應的平分點或平至點的時刻。
-				JD = polynomial_value(JD[index |= 0], (year < 1000 ? year
-						: year - 2000) / 1000);
+			// IAU1980_nutation_parameters 單位是度。
+			var IAU1980_nutation_parameters = [
+			// 平距角(日月對地心的角距離)：
+			// D = 297.85036 +445267.111480*T - 0.0019142*T^2 +
+			// T^3/189474
+			[ 297.85036, 445267.111480, -0.0019142, 1 / 189474 ],
+			// 太陽（地球）平近點角：
+			// M = 357.52772 + 35999.050340*T - 0.0001603*T^2 -
+			// T^3/300000
+			[ 357.52772, 35999.050340, -0.0001603, -1 / 300000 ],
+			// 月球平近點角：
+			// M′= 134.96298 + 477198.867398*T + 0.0086972*T^2 +
+			// T^3/56250
+			[ 134.96298, 477198.867398, 0.0086972, 1 / 56250 ],
+			// 月球緯度參數：
+			// F = 93.27191 + 483202.017538*T - 0.0036825*T^2 +
+			// T^3/327270
+			[ 93.27191, 483202.017538, -0.0036825, 1 / 327270 ],
+			// 黃道與月球平軌道升交點黃經，從Date黃道平分點開始測量：
+			// Ω= 125.04452 - 1934.136261*T + 0.0020708*T^2 +
+			// T^3/450000
+			[ 125.04452, -1934.136261, 0.0020708, 1 / 450000 ] ],
 
-				var T = (JD - 2451545.0) / 36525,
-				//
-				W = (35999.373 * T - 2.47) * DEGREES_TO_RADIANS,
+			// 這些項來自IAU1980章動理論，忽略了係數小於0".0003的項。
+			IAU1980_nutation_teams = [
+					[ 0, 0, 0, 0, 1, -171996, -1742, 92025, 89 ],
+					[ -2, 0, 0, 2, 2, -13187, -16, 5736, -31 ],
+					[ 0, 0, 0, 2, 2, -2274, -2, 977, -5 ],
+					[ 0, 0, 0, 0, 2, 2062, 2, -895, 5 ],
+					[ 0, 1, 0, 0, 0, 1426, -34, 54, -1 ],
+					[ 0, 0, 1, 0, 0, 712, 1, -7, 0 ],
+					[ -2, 1, 0, 2, 2, -517, 12, 224, -6 ],
+					[ 0, 0, 0, 2, 1, -386, -4, 200, 0 ],
+					[ 0, 0, 1, 2, 2, -301, 0, 129, -1 ],
+					[ -2, -1, 0, 2, 2, 217, -5, -95, 3 ],
+					[ -2, 0, 1, 0, 0, -158, 0, 0, 0 ],
+					[ -2, 0, 0, 2, 1, 129, 1, -70, 0 ],
+					[ 0, 0, -1, 2, 2, 123, 0, -53, 0 ],
+					[ 2, 0, 0, 0, 0, 63, 0, 0, 0 ],
+					[ 0, 0, 1, 0, 1, 63, 1, -33, 0 ],
+					[ 2, 0, -1, 2, 2, -59, 0, 26, 0 ],
+					[ 0, 0, -1, 0, 1, -58, -1, 32, 0 ],
+					[ 0, 0, 1, 2, 1, -51, 0, 27, 0 ],
+					[ -2, 0, 2, 0, 0, 48, 0, 0, 0 ],
+					[ 0, 0, -2, 2, 1, 46, 0, -24, 0 ],
+					[ 2, 0, 0, 2, 2, -38, 0, 16, 0 ],
+					[ 0, 0, 2, 2, 2, -31, 0, 13, 0 ],
+					[ 0, 0, 2, 0, 0, 29, 0, 0, 0 ],
+					[ -2, 0, 1, 2, 2, 29, 0, -12, 0 ],
+					[ 0, 0, 0, 2, 0, 26, 0, 0, 0 ],
+					[ -2, 0, 0, 2, 0, -22, 0, 0, 0 ],
+					[ 0, 0, -1, 2, 1, 21, 0, -10, 0 ],
+					[ 0, 2, 0, 0, 0, 17, -1, 0, 0 ],
+					[ 2, 0, -1, 0, 1, 16, 0, -8, 0 ],
+					[ -2, 2, 0, 2, 2, -16, 1, 7, 0 ],
+					[ 0, 1, 0, 0, 1, -15, 0, 9, 0 ],
+					[ -2, 0, 1, 0, 1, -13, 0, 7, 0 ],
+					[ 0, -1, 0, 0, 1, -12, 0, 6, 0 ],
+					[ 0, 0, 2, -2, 0, 11, 0, 0, 0 ],
+					[ 2, 0, -1, 2, 1, -10, 0, 5, 0 ],
+					[ 2, 0, 1, 2, 2, -8, 0, 3, 0 ],
+					[ 0, 1, 0, 2, 2, 7, 0, -3, 0 ],
+					[ -2, 1, 1, 0, 0, -7, 0, 0, 0 ],
+					[ 0, -1, 0, 2, 2, -7, 0, 3, 0 ],
+					[ 2, 0, 0, 2, 1, -7, 0, 3, 0 ],
+					[ 2, 0, 1, 0, 0, 6, 0, 0, 0 ],
+					[ -2, 0, 2, 2, 2, 6, 0, -3, 0 ],
+					[ -2, 0, 1, 2, 1, 6, 0, -3, 0 ],
+					[ 2, 0, -2, 0, 1, -6, 0, 3, 0 ],
+					[ 2, 0, 0, 0, 1, -6, 0, 3, 0 ],
+					[ 0, -1, 1, 0, 0, 5, 0, 0, 0 ],
+					[ -2, -1, 0, 2, 1, -5, 0, 3, 0 ],
+					[ -2, 0, 0, 0, 1, -5, 0, 3, 0 ],
+					[ 0, 0, 2, 2, 1, -5, 0, 3, 0 ],
+					[ -2, 0, 2, 0, 1, 4, 0, 0, 0 ],
+					[ -2, 1, 0, 2, 1, 4, 0, 0, 0 ],
+					[ 0, 0, 1, -2, 0, 4, 0, 0, 0 ],
+					[ -1, 0, 1, 0, 0, -4, 0, 0, 0 ],
+					[ -2, 1, 0, 0, 0, -4, 0, 0, 0 ],
+					[ 1, 0, 0, 0, 0, -4, 0, 0, 0 ],
+					[ 0, 0, 1, 2, 0, 3, 0, 0, 0 ],
+					[ 0, 0, -2, 2, 2, -3, 0, 0, 0 ],
+					[ -1, -1, 1, 0, 0, -3, 0, 0, 0 ],
+					[ 0, 1, 1, 0, 0, -3, 0, 0, 0 ],
+					[ 0, -1, 1, 2, 2, -3, 0, 0, 0 ],
+					[ 2, -1, -1, 2, 2, -3, 0, 0, 0 ],
+					[ 0, 0, 3, 2, 2, -3, 0, 0, 0 ],
+					[ 2, -1, 0, 2, 2, -3, 0, 0, 0 ] ];
 
-				// 太陽平黃經→太陽視黃經
-				// 要計算的分點或至點時刻(儒略曆書時,即力學時）表達為：
-				λ = JD + 0.00001 *
-				// JDE0 + 0.00001 S / Δλ 日
-				equinox_periodic_terms.reduce(function(S, teams) {
-					return S + teams[0] * Math.cos(teams[1] + teams[2] * T);
-				}, 0) /
-				// Δλ
-				(1 + 0.0334 * Math.cos(W) + 0.0007 * Math.cos(2 * W));
-
-				// λ: 太陽黃經Θ是Date黃道分點座標的真幾何黃經。要取得視黃經λ，還應加上精確的黃經章動及光行差。
-				// TODO: 黃經周年光行差修正量：-20".161 (公式(24.10)), 黃經章動效果：Δψ = -12".965
-				// (詳見第22章), 轉到FK5系統的修正值(-0".09033) (公式(24.9))
-				// 光行差 aberration
-				// 章動 nutation
-
-				if (!no_ΔT)
-					// ΔT(year, month)
-					λ -= ΔT(year, index * 3 + 3.5) / ONE_DAY_SECONDS;
-
-				return λ;
-			}
-
-			_.equinox = equinox;
-
-			// 黃經0度~
-			function solar_term(year, index) {
-				if (isNaN(index)
-				//
-				&& (index = index ? SOLAR_TERM_NAME.indexOf(index) : 0)) {
-					library_namespace.err('solar_term: Invalid solar term!');
-					return;
-				}
-
-				var JD = equinox(year, index / (24 / 4));
-				if (index % (24 / 4) === 0)
-					return JD;
-
-				// TODO
-				var L = VSOP87(JD, 'Earth', 'L');
-				return L;
-			}
-
-			_.solar_term = solar_term;
-
-			// 物侯
-
-			function initialize_VSOP87(subteams) {
-				subteams.forEach(function(series) {
-					series.forEach(function(items) {
-						items[1] *= DEGREES_TO_RADIANS;
-						items[2] *= DEGREES_TO_RADIANS;
-					});
-				});
-				subteams.initialized = true;
-			}
-
-			// 資料來源/資料依據:
-			// Jean Meeus, Astronomical Algorithms.
-			// 《天文算法》 chapter 太陽位置計算
-			// Jean Meeus
-			// 從VSOP87中取出一些主要項(詳見附錄II)，利用它計算得到的太陽位置在-2000到6000年範圍內精度是1"。
-			// 誤差 365.25*24*60*60/360/60/60 = 24.35秒鐘。相當於半分鐘。
-			function VSOP87(JD, object, team) {
-				var object_teams, subteams,
-				// 儒略千年數 millennium
-				τ = (JD - 2451545.0) / 365250,
-				//				
-				result = library_namespace.null_Object();
-				if (!object)
-					object = 'Earth';
-				object_teams = VSOP87_team[object];
-				if (!team)
-					// request L黃經 longitude + B黃緯 latitude + R距離
-					team = 'LBR'.split('');
-				else if (!Array.isArray(team))
-					team = [ team ];
-
-				team.forEach(function(team_name) {
-					var coefficients = [], subteams = object_teams[team_name];
-					if (!subteams) {
-						library_namespace.err('VSOP87: Invalid team name: ['
-								+ team_name + ']');
-						return;
-					}
-					if (!subteams.initialized)
-						initialize_VSOP87(subteams);
-					// series: 序列 L0,L1,..,B0,B1,..,R0,R1,..
-					subteams.forEach(function(series) {
-						coefficients.push(series.reduce(function(value, items) {
-							return value + items[0] * Math.cos(
-							// items: 三個數字項 [A,B,C]
-							// 每項(表中各行)的值計算表達式是：
-							// A*cos(B+C*τ);
-							items[1] + items[2] * τ);
-						}, 0));
-					});
-
-					subteams =
-					// L=(L0+L1*τ+L2*τ^2+L3*τ^3+L4*τ^4+L5*τ^5)/108
-					polynomial_value(coefficients, τ) / 1e8;
-					if (team_name === 'L' || team_name === 'B')
-						// 日心黃經L、黃緯B 單位是弧度
-						// R的單位是天文單位（AU）
-						subteams /= DEGREES_TO_RADIANS;
-					result[team_name] = subteams;
-				});
-
-				return team.length > 1 ? result : result[team[0]];
-			}
-
-			_.VSOP87 = VSOP87;
-
-			// ---------------------------------------------------------------------//
+			// ------------------------------------------------------------------------------------------------------//
 			// VSOP87 半解析（semi-analytic）理論 periodic terms
-			var VSOP87_team = library_namespace.null_Object();
 
-			// 資料來源/資料依據:
-			// Jean Meeus, Astronomical Algorithms.
-			// 附表3
-			// http://forums.parallax.com/showthread.php/154838-Azimuth-angle-conversion-from-east-to-west
+			var VSOP87_teams = library_namespace.null_Object();
 
-			// VSOP87_team.Earth[L黃經/B黃緯/R距離]=[L0:[[A,B,C],[A,B,C]]];
-			VSOP87_team.Earth = {
+			/**
+			 * teams for function VSOP87()
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 附表3.<br />
+			 * http://forums.parallax.com/showthread.php/154838-Azimuth-angle-conversion-from-east-to-west
+			 */
+
+			// 這邊僅擷取行星 Earth 地球數值，以計算二十四節氣 (solar terms)。
+			// VSOP87_teams.Earth[L黃經/B黃緯/R距離]=[L0:[[A,B,C],[A,B,C]]];
+			VSOP87_teams.Earth = {
 				// 行星 Earth 地球: 日心黃經
 				L : [
 						[ [ 175347046.0, 0, 0 ],
@@ -625,8 +995,7 @@ if (typeof CeL === 'function')
 								[ 1, 3.84, 12566.15 ] ], [ [ 1, 3.14, 0 ] ] ],
 				// 行星 Earth 地球: 日心黃緯
 				B : [
-						[ [ 280.0, 3.199, 84334.662 ],
-								[ 102.0, 5.422, 5507.553 ],
+						[ [ 280, 3.199, 84334.662 ], [ 102, 5.422, 5507.553 ],
 								[ 80, 3.88, 5223.69 ], [ 44, 3.7, 2352.87 ],
 								[ 32, 4, 1577.34 ] ],
 						[ [ 9, 3.9, 5507.55 ], [ 6, 1.73, 5223.69 ] ] ],
@@ -675,7 +1044,7 @@ if (typeof CeL === 'function')
 						[ [ 4, 2.56, 6283.08 ] ] ]
 			};
 
-			// ---------------------------------------------------------------------//
+			// ---------------------------------------------------------------------------------------------------------------------------------------//
 			// export.
 
 			// ---------------------------------------
