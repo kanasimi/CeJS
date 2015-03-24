@@ -153,9 +153,15 @@ if (typeof CeL === 'function')
 			function show_degree(degree) {
 				if (!degree)
 					return '0°';
+
+				var minus = degree < 0;
+				if (minus)
+					degree = -degree;
+
 				var value = Math.floor(degree),
 				//
 				show = value ? value + '°' : '';
+
 				if (degree -= value) {
 					value = (degree *= 60) | 0;
 					if (value || show)
@@ -163,6 +169,9 @@ if (typeof CeL === 'function')
 					if (degree -= value)
 						show += degree * 60 + '″';
 				}
+
+				if (minus)
+					show = '-' + show;
 				return show;
 			}
 
@@ -470,8 +479,9 @@ if (typeof CeL === 'function')
 				//
 				parameters = [], Δψ = 0, Δε = 0;
 				IAU1980_nutation_parameters.forEach(function(parameter) {
-					parameters.push(polynomial_value(parameter, T)
-							* DEGREES_TO_RADIANS);
+					parameters.push((polynomial_value(parameter, T)
+					//
+					% TURN_TO_DEGREES) * DEGREES_TO_RADIANS);
 				});
 
 				// IAU1980_nutation_teams[6,8] 有乘以十倍了。
@@ -486,8 +496,7 @@ if (typeof CeL === 'function')
 						if (c = team[i])
 							argument += c * parameters[i];
 
-					if (c = team[5] + team[6] * T)
-						Δψ += c * Math.sin(argument);
+					Δψ += (team[5] + team[6] * T) * Math.sin(argument);
 					if (c = team[7] + team[8] * T)
 						Δε += c * Math.cos(argument);
 				});
@@ -685,13 +694,20 @@ if (typeof CeL === 'function')
 			var IAU2006_obliquity_coefficients = [ 84381.406, -46.836769,
 					-0.0001831, 0.00200340, -0.000000576, -0.0000000434 ];
 
+			/**
+			 * teams for function equinox()
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 chapter 章動及黃赤交角.<br />
+			 * 
+			 * @inner
+			 */
 			var Laskar_obliquity_coefficients = [
-			// ε = 23° 26′ 21.448″ − 4680.93″ T − 1.55″ T2 + 1999.25″ T3
-			// −
-			// 51.38″ T4 − 249.67″ T5 − 39.05″ T6 + 7.12″ T7 + 27.87″ T8
-			// + 5.79″
-			// T9 + 2.45″ T10
-			23 + 26 * 60 + 21.448 * 60 * 60, -4680.93, -1.55, 1999.25, -51.38,
+			// ε = 23° 26′ 21.448″ − 4680.93″ T − 1.55″ T2
+			// + 1999.25″ T3 − 51.38″ T4 − 249.67″ T5
+			// − 39.05″ T6 + 7.12″ T7 + 27.87″ T8 + 5.79″ T9 + 2.45″ T10
+			23 * 60 * 60 + 26 * 60 + 21.448, -4680.93, -1.55, 1999.25, -51.38,
 					-249.67, -39.05, 7.12, 27.87, 5.79, 2.45 ];
 			Laskar_obliquity_coefficients.forEach(function(v, index) {
 				Laskar_obliquity_coefficients[index] = v
@@ -801,6 +817,7 @@ if (typeof CeL === 'function')
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 table 22.A.<br />
 			 * 
+			 * @inner
 			 */
 			// IAU1980_nutation_parameters 單位是度。
 			var IAU1980_nutation_parameters = [
@@ -894,19 +911,23 @@ if (typeof CeL === 'function')
 			// ------------------------------------------------------------------------------------------------------//
 			// VSOP87 半解析（semi-analytic）理論 periodic terms
 
+			/**
+			 * teams for function VSOP87()
+			 * 
+			 * @inner
+			 */
 			var VSOP87_teams = library_namespace.null_Object();
 
 			/**
-			 * teams for function VSOP87()
+			 * 這邊僅擷取行星 Earth 地球數值，以計算二十四節氣 (solar terms)。
+			 * 
+			 * VSOP87_teams.Earth[L黃經/B黃緯/R距離]=[L0:[[A,B,C],[A,B,C]]];
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 附表3.<br />
 			 * http://forums.parallax.com/showthread.php/154838-Azimuth-angle-conversion-from-east-to-west
 			 */
-
-			// 這邊僅擷取行星 Earth 地球數值，以計算二十四節氣 (solar terms)。
-			// VSOP87_teams.Earth[L黃經/B黃緯/R距離]=[L0:[[A,B,C],[A,B,C]]];
 			VSOP87_teams.Earth = {
 				// 行星 Earth 地球: 日心黃經
 				L : [
