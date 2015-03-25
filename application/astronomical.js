@@ -5,6 +5,7 @@
  * @since 2015/3/20 23:5:43
  * 
  * TODO:<br />
+ * 簡易朔望/天象計算功能/千年 節氣 計算。<br />
  * 大地測量:地球表面兩點間之距離<br />
  * http://wywu.pixnet.net/blog/post/27459116
  * http://iotresearch.wikispaces.com/GPS<br />
@@ -15,6 +16,9 @@
  * http://en.wikipedia.org/wiki/Vincenty's_formulae<br />
  * http://bieyu.com/<br />
  * http://www.fjptsz.com/xxjs/xjw/rj/117/index.htm
+ * 
+ * NASA - Moon Phases: 6000 Year Catalog
+ * http://eclipse.gsfc.nasa.gov/phase/phasecat.html
  * 
  * 未來發展：<br />
  * 計算順序: https://github.com/kanasimi/IAU-SOFA/blob/master/doc/sofa_ast_c.pdf
@@ -54,14 +58,13 @@ if (typeof CeL === 'function')
 	CeL.run({
 		name : 'application.astronomical',
 		//
-		require : 'data.code.compatibility.'
-				+ '|data.native.|application.locale.|data.date.String_to_Date',
+		require : 'data.code.compatibility.',
 
 		code : function(library_namespace) {
 
 			// requiring
-			var String_to_Date;
-			eval(this.use());
+			// var String_to_Date;
+			// eval(this.use());
 
 			/**
 			 * null module constructor
@@ -121,7 +124,13 @@ if (typeof CeL === 'function')
 			SOLAR_TERMS_NAME =
 			// Chinese name
 			'春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,立春,雨水,驚蟄'
-					.split(','), SOLAR_TERMS_COUNT = SOLAR_TERMS_NAME.length;
+					.split(','),
+			// 24
+			SOLAR_TERMS_COUNT = SOLAR_TERMS_NAME.length,
+			// 15
+			DEGREES_BETWEEN_SOLAR_TERMS = TURN_TO_DEGREES / SOLAR_TERMS_COUNT;
+
+			_.SOLAR_TERMS = SOLAR_TERMS_NAME;
 
 			// 工具函數。
 
@@ -160,7 +169,7 @@ if (typeof CeL === 'function')
 				return degree;
 			}
 
-			function show_degrees(degree) {
+			function show_degrees(degree, padding) {
 				if (!degree)
 					return '0°';
 
@@ -170,19 +179,35 @@ if (typeof CeL === 'function')
 
 				var value = Math.floor(degree),
 				//
-				show = value ? value + '°' : '';
+				show = '';
+				if (value) {
+					if (padding >= 0 && value < 100)
+						show = value > 9 ? ' ' : '  ';
+					show += value + '° ';
+				}
 
 				if (degree -= value) {
 					value = (degree *= 60) | 0;
 					if (value || show)
-						show += value + '′';
-					if (degree -= value)
-						show += degree * 60 + '″';
+						show += (padding && value < 10 ? ' ' : '')
+						//
+						+ value + '′ ';
+					if (degree -= value) {
+						degree *= 60;
+						if (padding >= 0)
+							degree = (degree < 10 ? ' ' : '')
+									+ degree.toFixed(padding);
+						show += degree + '″';
+					}
 				}
+
+				if (false)
+					// &nbsp;
+					show = show.replace(/ /g, '\u00a0');
 
 				if (minus)
 					show = '-' + show;
-				return show;
+				return show.replace(/ $/, '');
 			}
 
 			_.show_degrees = show_degrees;
@@ -280,6 +305,10 @@ if (typeof CeL === 'function')
 			 * @returns {Number} ΔT of year in seconds.
 			 * 
 			 * @see https://en.wikipedia.org/wiki/%CE%94T
+			 * @see <a
+			 *      href="http://www.cv.nrao.edu/~rfisher/Ephemerides/times.html"
+			 *      accessdate="2015/3/25 20:35">Astronomical Times</a>
+			 * @see http://njsas.org/projects/speed_of_light/roemer/tt-utc.html
 			 * 
 			 * @since 2015/3/21 9:23:32
 			 */
@@ -639,7 +668,7 @@ if (typeof CeL === 'function')
 					// ↑ 58: maybe 59 = 360/365.25*60 ??
 					// https://www.ptt.cc/bbs/sky/M.1175584311.A.8B8.html
 
-					if (library_namespace.is_debug())
+					if (false)
 						library_namespace.debug('index ' + index
 								+ ': apparent: ' + show_degrees(apparent)
 								+ ', difference in days: ' + difference);
@@ -673,14 +702,14 @@ if (typeof CeL === 'function')
 			_.JD_of_solar_angle = JD_of_solar_angle;
 
 			/**
-			 * 取得指定年分 year 年，指定節氣/分點和至點/物侯之 Julian date。
+			 * 取得指定年分 year 年，指定節氣/分點和至點之 Julian date。
 			 * 
 			 * @param {Integer}year
 			 *            year 年(CE)
 			 * @param {Number}index
 			 *            index. 0: 春分
 			 * @param {Number}[type]
-			 *            1: 分點和至點, 2: 物侯, others (default): 二十四節氣，<br />
+			 *            1: 分點和至點, others (default): 二十四節氣，<br />
 			 *            皆自當年黃經0度(春分)開始。
 			 * 
 			 * @returns {Number} Julian date
@@ -690,12 +719,10 @@ if (typeof CeL === 'function')
 				if (type === 1)
 					angle = (index | 0) * TURN_TO_DEGREES
 							/ EQUINOX_SOLSTICE_COUNT;
-				else if (type === 2)
-					angle = (index | 0) * TURN_TO_DEGREES / SOLAR_TERMS_COUNT;
 				else {
 					if (!index)
 						angle = 0;
-					else if (isNaN(index) && (NOT_FOUND ===
+					else if (isNaN(angle = index) && (NOT_FOUND ===
 					//
 					(angle = SOLAR_TERMS_NAME.indexOf(index)))) {
 						library_namespace.err(
@@ -704,7 +731,7 @@ if (typeof CeL === 'function')
 						return;
 					}
 					index = angle;
-					angle *= TURN_TO_DEGREES / SOLAR_TERMS_COUNT;
+					angle *= DEGREES_BETWEEN_SOLAR_TERMS;
 				}
 
 				// assert: angle is now angle (0~less than 360), from March
@@ -713,6 +740,93 @@ if (typeof CeL === 'function')
 			}
 
 			_.solar_term_JD = solar_term_JD;
+
+			// solar_term_cache[ year ] = [ 春分JD, 清明JD, 穀雨JD, ... 24個 ]
+			var solar_term_cache = [];
+
+			/**
+			 * 取得指定 Julian date 之節氣名。
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * @param {Object}options
+			 *            options
+			 * 
+			 * @returns {String|Undefined}
+			 */
+			function solar_term_of_JD(JD, options) {
+
+				function get_cache(test_next) {
+					var date = library_namespace.JD_to_Date(JD),
+					//
+					year = date.getFullYear();
+
+					index = apparent / DEGREES_BETWEEN_SOLAR_TERMS | 0;
+					if (test_next && ++index === SOLAR_TERMS_COUNT)
+						// 本年春分
+						index = 0;
+					else if (index > SOLAR_TERMS_COUNT / 2
+					// 12: 12個月
+					&& date.getMonth() < 12 / 2)
+						// 每一年春分前末幾個節氣，算前一年的。
+						year--;
+
+					var cache = solar_term_cache[year];
+					if (!cache)
+						solar_term_cache[year] = cache = [];
+					if (!cache[index])
+						cache[index] = solar_term_JD(year, index);
+
+					return cache[index];
+				}
+
+				var apparent = solar_coordinate(JD).apparent, index;
+
+				if (DEGREES_BETWEEN_SOLAR_TERMS
+				// assert: 超過2度，就不會是在同一天。
+				- (apparent % DEGREES_BETWEEN_SOLAR_TERMS) < 2) {
+					// JD 再過一下下便是節氣。
+					// 測試是否距離下一節氣1天內。此範圍內不可能為物候。
+
+					// JD 將被視為當地時間當日0時!
+					if ((JD = get_cache(true) - JD) < 1) {
+						// 初候
+						index = SOLAR_TERMS_NAME[index];
+						if (options && options.time) {
+							index += ' ' + ((JD *= 24) | 0)
+							//
+							+ ':' + ((JD = (JD % 1) * 60) | 0)
+							//
+							+ ':' + Math.round((JD % 1) * 60);
+						}
+						return index;
+					}
+					return;
+				}
+
+				if (options && options.pentads
+				// JD 將被視為當地時間當日0時，因此只要節氣在 JD 之前，皆表示本日非節氣，僅能測試物候。
+				// || (apparent % DEGREES_BETWEEN_SOLAR_TERMS < 2)
+				) {
+					// JD → 與前一個節氣之間距。
+					JD -= get_cache();
+					// 七十二候 (物候, 72 pentads)
+					// 初候 二候 三候
+					// 初候 中候 末候
+					// 5: 又五日
+					if (JD <= 5 && 4 < JD)
+						return SOLAR_TERMS_NAME[index] + ' 二候';
+					if (4 + 5 < JD && JD <= 5 + 5)
+						return SOLAR_TERMS_NAME[index] + ' 三候';
+
+					// return;
+				}
+			}
+
+			_.solar_term_of_JD = solar_term_of_JD;
+
+			// ------------------------------------------------------------------------------------------------------//
+			// VSOP87
 
 			// 無用:因為 items[1,2] 已經是弧度。
 			function initialize_VSOP87(subteams) {
@@ -1034,6 +1148,17 @@ if (typeof CeL === 'function')
 
 			/**
 			 * teams for function VSOP87()
+			 * 
+			 * full data:<br />
+			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/README
+			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/VSOP87D.ear
+			 * 
+			 * VSOP2013
+			 * 
+			 * see also:<br />
+			 * JPL DE422:<br />
+			 * http://ssd.jpl.nasa.gov/?ephemerides
+			 * ftp://ssd.jpl.nasa.gov/pub/eph/planets/ascii/de422/
 			 * 
 			 * @inner
 			 */

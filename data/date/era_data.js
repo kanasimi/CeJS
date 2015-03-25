@@ -13,12 +13,12 @@ TODO:
 https://en.wikipedia.org/wiki/List_of_Roman_emperors
 
 
-http://www.lib.nankai.edu.cn/gj/showwords.asp?airid=251
-先秦古籍所據曆法較為混亂。一般說，《春秋》、《孟子》多用周曆，《楚辭》、《呂氏春秋》用夏曆，《詩經》要看具體詩篇而定。若不瞭解這種情況，而以現行夏曆的時間概念去閱讀古籍，有時就難以理解某些記載，或者會懷疑古人搞錯了時間。如《春秋‧成公八年》記載著「二月無冰」這一現象，因為該書用周曆，二月即夏曆的十二月，是最冷的月份，無冰在當時是罕見的，因而才載入史冊。
-
-
 中國君主列表 (地方政權)
 https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9C%8B%E5%90%9B%E4%B8%BB%E5%88%97%E8%A1%A8_%28%E5%9C%B0%E6%96%B9%E6%94%BF%E6%AC%8A%29
+
+
+http://www.lib.nankai.edu.cn/gj/showwords.asp?airid=251
+先秦古籍所據曆法較為混亂。一般說，《春秋》、《孟子》多用周曆，《楚辭》、《呂氏春秋》用夏曆，《詩經》要看具體詩篇而定。若不瞭解這種情況，而以現行夏曆的時間概念去閱讀古籍，有時就難以理解某些記載，或者會懷疑古人搞錯了時間。如《春秋‧成公八年》記載著「二月無冰」這一現象，因為該書用周曆，二月即夏曆的十二月，是最冷的月份，無冰在當時是罕見的，因而才載入史冊。
 
 
 bug:
@@ -27,7 +27,7 @@ bug:
 
 // ----------------------------------//
 
-簡易朔望/天象計算功能/千年 節氣 計算。
+
 http://koyomi8.com/24sekki.htm
 http://koyomi8.com/sub/72kou.htm
 http://blog.csdn.net/orbit/article/details/7910220
@@ -38,25 +38,6 @@ http://www.informatik.uni-leipzig.de/~duc/amlich/calrules.html
 <a href="http://www.nongli.com/item2/index.html" accessdate="2013/5/2 20:23">农历知识:传统节日,24节气，农历历法，三九，三伏，天文历法,天干地支阴阳五行</a>
 <a href="http://www.chinesefortunecalendar.com/CLC/clcBig5.htm" accessdate="2013/5/2 20:23">如何轉換陰陽曆</a>
 
-NASA - Moon Phases: 6000 Year Catalog
-http://eclipse.gsfc.nasa.gov/phase/phasecat.html
-
-
-
-Astronomical Times
-http://www.cv.nrao.edu/~rfisher/Ephemerides/times.html
-http://njsas.org/projects/speed_of_light/roemer/tt-utc.html
-
-
-JPL DE422
-http://ssd.jpl.nasa.gov/?ephemerides
-ftp://ssd.jpl.nasa.gov/pub/eph/planets/ascii/de422/
-
-VSOP87
-ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/README
-ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/VSOP87D.ear
-
-VSOP2013
 
 
 +二十四節氣
@@ -110,7 +91,6 @@ http://www.math.nus.edu.sg/aslaksen/calendar/indian.html
 
 +Ab urbe condita (AUC)
 
-+曆注
 
 
 +敦煌曆

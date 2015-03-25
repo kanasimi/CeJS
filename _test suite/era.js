@@ -76,7 +76,8 @@ function initializer() {
 	var queue = [
 			[ 'interact.DOM', 'application.debug.log',
 					'interact.form.select_input', 'interact.integrate.SVG',
-					'data.date.era' ], 'data.date.calendar', function() {
+					'data.date.era', 'application.astronomical' ],
+			'data.date.calendar', function() {
 				// alias for CeL.gettext, then we can use _('message').
 				_ = CeL.gettext;
 
@@ -2253,6 +2254,53 @@ function affairs() {
 		}, function(date) {
 			return date.共存紀年 || '';
 		} ],
+
+		// --------------------------------------------------------------------
+		// 天文計算 astronomical calculations
+		astronomical : '天文計算',
+
+		solarterms : [ {
+			a : {
+				T : '天文節氣'
+			},
+			R : '節氣 + 時間或物候。非實曆。\n'
+			//
+			+ '天文計算出的二十四節氣 / 二分點 (春分秋分) 和二至點 (夏至冬至) / 七十二候(物候)',
+			href : 'https://zh.wikipedia.org/wiki/%E8%8A%82%E6%B0%94'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			var JD = CeL.Date_to_JD(date.adapt_offset());
+			// 還原 local 之時間。
+			date.adapt_offset('');
+			return CeL.solar_term_of_JD(JD, {
+				pentads : true,
+				time : true
+			});
+		} ],
+
+		apparent : [
+				{
+					a : {
+						T : 'apparent longitude'
+					},
+					R : '太陽的視黃經, the apparent geocentric celestial longitude of the Sun.',
+					href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
+				},
+				function(date) {
+					if (/* date.準 || */date.精)
+						return '';
+					var JD = CeL.Date_to_JD(date.adapt_offset());
+					// 還原 local 之時間。
+					date.adapt_offset('');
+					return {
+						span : CeL.show_degrees(
+								CeL.solar_coordinate(JD).apparent, 6)
+						// &nbsp;
+						.replace(/ /g, '\u00a0'),
+						C : 'monospaced'
+					};
+				} ],
 
 		// --------------------------------------------------------------------
 		// 曆法 Historical calendar
