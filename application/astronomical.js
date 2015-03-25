@@ -117,7 +117,7 @@ if (typeof CeL === 'function')
 			EQUINOX_SOLSTICE_DEGREES
 			//
 			= TURN_TO_DEGREES / EQUINOX_SOLSTICE_COUNT,
-			//			
+			// 二十四節氣名
 			SOLAR_TERMS_NAME =
 			// Chinese name
 			'春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,立春,雨水,驚蟄'
@@ -597,14 +597,14 @@ if (typeof CeL === 'function')
 			_.solar_coordinate = solar_coordinate;
 
 			/**
-			 * 取得 year 年，指定太陽視黃經角度之 Julian date。
+			 * 取得指定年分 year 年，指定太陽視黃經角度之 Julian date。
 			 * 
 			 * @param {Integer}year
-			 *            year 年
+			 *            year 年(CE)
 			 * @param {Number}degrees
-			 *            angle in degrees.<br />
-			 *            0 ~ less than 360, from March equinox of the year.<br />
-			 *            指定太陽視黃經角度
+			 *            0 ~ less than 360.<br />
+			 *            angle in degrees from March equinox of the year.<br />
+			 *            指定太陽視黃經角度，自當年黃經0度(春分)開始。
 			 * 
 			 * @returns {Number} Julian date
 			 */
@@ -672,24 +672,35 @@ if (typeof CeL === 'function')
 
 			_.JD_of_solar_angle = JD_of_solar_angle;
 
-			// 黃經0度~
-			// type 0: 二十四節氣, <0: 分點和至點, >0: angle in degrees
-			function solar_term(year, index, type) {
-				var angle = 0;
-				if (type > 0) {
-					if (!(angle = +index))
-						angle = 0;
-				} else if (type < 0)
-					angle = (index | 0) * 90;
+			/**
+			 * 取得指定年分 year 年，指定節氣/分點和至點/物侯之 Julian date。
+			 * 
+			 * @param {Integer}year
+			 *            year 年(CE)
+			 * @param {Number}index
+			 *            index. 0: 春分
+			 * @param {Number}[type]
+			 *            1: 分點和至點, 2: 物侯, others (default): 二十四節氣，<br />
+			 *            皆自當年黃經0度(春分)開始。
+			 * 
+			 * @returns {Number} Julian date
+			 */
+			function solar_term_JD(year, index, type) {
+				var angle;
+				if (type === 1)
+					angle = (index | 0) * TURN_TO_DEGREES
+							/ EQUINOX_SOLSTICE_COUNT;
+				else if (type === 2)
+					angle = (index | 0) * TURN_TO_DEGREES / SOLAR_TERMS_COUNT;
 				else {
 					if (!index)
 						angle = 0;
 					else if (isNaN(index) && (NOT_FOUND ===
 					//
 					(angle = SOLAR_TERMS_NAME.indexOf(index)))) {
-						library_namespace
-								.err('solar_term: Invalid solar term [' + index
-										+ ']!');
+						library_namespace.err(
+						//
+						'solar_term_JD: Invalid solar term [' + index + ']!');
 						return;
 					}
 					index = angle;
@@ -701,9 +712,7 @@ if (typeof CeL === 'function')
 				return JD_of_solar_angle(year, angle);
 			}
 
-			_.solar_term = solar_term;
-
-			// 物侯
+			_.solar_term_JD = solar_term_JD;
 
 			// 無用:因為 items[1,2] 已經是弧度。
 			function initialize_VSOP87(subteams) {
