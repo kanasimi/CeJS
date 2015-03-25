@@ -82,9 +82,13 @@ if (typeof CeL === 'function')
 			// ------------------------------------------------------------------------------------------------------//
 			// 定義基本常數。
 
+			var
+			// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
+			NOT_FOUND = ''.indexOf('_'),
+
 			// 周角, turn, perigon, full circle, complete rotation,
 			// 360°, a full rotation in degrees.
-			var TURN_TO_DEGREES = 360,
+			TURN_TO_DEGREES = 360,
 			/**
 			 * degrees * DEGREES_TO_RADIANS = radians.
 			 * 1.745329251994329576923691e-2
@@ -107,11 +111,17 @@ if (typeof CeL === 'function')
 			DAYS_OF_JULIAN_CENTURY = 36525,
 			// 1 astronomical unit = 149597870700 meters (exactly)
 			AU_TO_METERS = 149597870700,
+			// 4
+			EQUINOX_SOLSTICE_COUNT = 2 + 2,
+			// 90
+			EQUINOX_SOLSTICE_DEGREES
+			//
+			= TURN_TO_DEGREES / EQUINOX_SOLSTICE_COUNT,
 			//			
-			SOLAR_TERM_NAME =
+			SOLAR_TERMS_NAME =
 			// Chinese name
 			'春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,立春,雨水,驚蟄'
-					.split(',');
+					.split(','), SOLAR_TERMS_COUNT = SOLAR_TERMS_NAME.length;
 
 			// 工具函數。
 
@@ -143,14 +153,14 @@ if (typeof CeL === 'function')
 				return (JD - J2000_epoch) / DAYS_OF_JULIAN_CENTURY;
 			}
 
-			// to proper degree
-			function normalize_degree(degree) {
+			// to proper degrees
+			function normalize_degrees(degree) {
 				if ((degree %= TURN_TO_DEGREES) < 0)
 					degree += TURN_TO_DEGREES;
 				return degree;
 			}
 
-			function show_degree(degree) {
+			function show_degrees(degree) {
 				if (!degree)
 					return '0°';
 
@@ -175,7 +185,20 @@ if (typeof CeL === 'function')
 				return show;
 			}
 
-			_.show_degree = show_degree;
+			_.show_degrees = show_degrees;
+
+			// 計算角度差距(減法)
+			// return base-target, target 會先趨近於 base。或是說結果會向 0 趨近。
+			// subtract_degrees(base,target)>0:
+			// base>target, base-target>0
+			function subtract_degrees(base, target) {
+				if (Math.abs(base = (base - target) % TURN_TO_DEGREES) >= 180)
+					if (base > 0)
+						base -= 360;
+					else
+						base += 360;
+				return base;
+			}
 
 			// ------------------------------------------------------------------------------------------------------//
 			// obliquity 轉軸傾角
@@ -421,12 +444,12 @@ if (typeof CeL === 'function')
 			 *            年
 			 * @param {Integer}index
 			 *            0–3: [ 春分, 夏至, 秋分, 冬至 ]<br />
-			 *            aka. [ March equinox, June Solstice, September
-			 *            equinox, December Solstice ]
+			 *            aka. [ March equinox, June solstice, September
+			 *            equinox, December solstice ]
 			 * 
 			 * @returns {Number} Julian date (JD)
 			 */
-			function equinox(year, index, no_ΔT) {
+			function equinox(year, index, no_fix) {
 				// year is an integer; other values for year, would give
 				// meaningless results!
 				var JD = (year |= 0) < 1000 ? equinox_teams_before_1000
@@ -434,6 +457,10 @@ if (typeof CeL === 'function')
 				// 計算相應的平分點或平至點的時刻。
 				JD = polynomial_value(JD[index |= 0], (year < 1000 ? year
 						: year - 2000) / 1000);
+
+				if (no_fix)
+					// get 太陽分點和至點"平"黃經
+					return JD;
 
 				var T = Julian_century(JD),
 				//
@@ -456,9 +483,8 @@ if (typeof CeL === 'function')
 				// 光行差 aberration
 				// 章動 nutation
 
-				if (!no_ΔT)
-					// ΔT(year, month)
-					λ -= ΔT(year, index * 3 + 3.5) / ONE_DAY_SECONDS;
+				// ΔT(year, month)
+				λ -= ΔT(year, index * 3 + 3.5) / ONE_DAY_SECONDS;
 
 				return λ;
 			}
@@ -509,7 +535,7 @@ if (typeof CeL === 'function')
 			_.nutation = nutation;
 
 			/**
-			 * 太陽位置計算
+			 * 太陽位置(坐標)計算
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
@@ -561,32 +587,118 @@ if (typeof CeL === 'function')
 
 				// https://en.wikipedia.org/wiki/Ecliptic_coordinate_system#Spherical_coordinates
 				return Object.assign(coordinate, {
-					apparent : normalize_degree(apparent),
-					λ : normalize_degree(λ),
-					β : normalize_degree(β),
+					apparent : normalize_degrees(apparent),
+					λ : normalize_degrees(λ),
+					β : normalize_degrees(β),
 					Δ : coordinate.R * AU_TO_METERS
 				});
 			}
 
 			_.solar_coordinate = solar_coordinate;
 
-			// 黃經0度~
-			// 例24.b
-			function solar_term(year, index) {
-				if (isNaN(index)
-				//
-				&& (index = index ? SOLAR_TERM_NAME.indexOf(index) : 0)) {
-					library_namespace.err('solar_term: Invalid solar term!');
-					return;
+			/**
+			 * 取得 year 年，指定太陽視黃經角度之 Julian date。
+			 * 
+			 * @param {Integer}year
+			 *            year 年
+			 * @param {Number}degrees
+			 *            angle in degrees.<br />
+			 *            0 ~ less than 360, from March equinox of the year.<br />
+			 *            指定太陽視黃經角度
+			 * 
+			 * @returns {Number} Julian date
+			 */
+			function JD_of_solar_angle(year, degrees) {
+				var difference, apparent,
+				// index: 下界 index of 分點和至點, 0~3
+				index = degrees / EQUINOX_SOLSTICE_DEGREES | 0,
+				// JD 近似值(下界)。
+				JD = equinox(year, index, true);
+				// 經測試，有時每天太陽的視黃經 (apparent longitude) 可能會增加近 .95°
+				// NOT 360/365.25
+
+				// 太陽的視黃經最大變化量
+				// http://jpkc.haie.edu.cn/jpkc/dqgl/content.asp?classid=17&id=528
+				// 在遠日點，地球公轉慢，太陽每日黃經差Δλ也慢，為57′
+				// 在近日點，地球公轉快，太陽每日黃經差Δλ也快，為61′
+
+				if (degrees % EQUINOX_SOLSTICE_DEGREES > 0)
+					JD += ((index === 3 ? equinox(year + 1, 0) : equinox(year,
+							index + 1)) - JD)
+							// 以內插法取得近似值。
+							* (degrees - index * EQUINOX_SOLSTICE_DEGREES)
+							/ EQUINOX_SOLSTICE_DEGREES;
+
+				// 最多趨近 JD_of_solar_angle.max_calculations 次。
+				for (index = JD_of_solar_angle.max_calculations; index-- > 0;) {
+					apparent = solar_coordinate(JD).apparent;
+					// 由公式(26.1)得到對“大約時間”的修正量。
+					// +58 sin (k·90° - λ) (26.1)
+					difference = 58 * Math.sin((degrees - apparent)
+							* DEGREES_TO_RADIANS);
+					// ↑ 58: maybe 59 = 360/365.25*60 ??
+					// https://www.ptt.cc/bbs/sky/M.1175584311.A.8B8.html
+
+					if (library_namespace.is_debug())
+						library_namespace.debug('index ' + index
+								+ ': apparent: ' + show_degrees(apparent)
+								+ ', difference in days: ' + difference);
+
+					if (Math.abs(difference) < JD_of_solar_angle.error)
+						// 當 error 設定得很小時，似乎會達到固定循環。
+						break;
+					// adapt 修正量。
+					JD += difference;
 				}
 
-				var JD = equinox(year, index / (24 / 4));
-				if (index % (24 / 4) === 0)
-					return JD;
-
-				// TODO
-
 				return JD;
+			}
+
+			/**
+			 * 最多趨近 JD_of_solar_angle.max_calculations 次。
+			 * 
+			 * @type Integer
+			 */
+			JD_of_solar_angle.max_calculations = 20 | 0;
+
+			/**
+			 * 可接受之最大誤差。<br />
+			 * 即使設為 0，最多也只會計算 JD_of_solar_angle.max_calculations 次。<br />
+			 * 當 error 設定得很小時，似乎會達到固定循環。因此不應該設為0，否則以所採用方法將不會收斂。
+			 * 
+			 * @type Number
+			 */
+			JD_of_solar_angle.error = 2e-10;
+
+			_.JD_of_solar_angle = JD_of_solar_angle;
+
+			// 黃經0度~
+			// type 0: 二十四節氣, <0: 分點和至點, >0: angle in degrees
+			function solar_term(year, index, type) {
+				var angle = 0;
+				if (type > 0) {
+					if (!(angle = +index))
+						angle = 0;
+				} else if (type < 0)
+					angle = (index | 0) * 90;
+				else {
+					if (!index)
+						angle = 0;
+					else if (isNaN(index) && (NOT_FOUND ===
+					//
+					(angle = SOLAR_TERMS_NAME.indexOf(index)))) {
+						library_namespace
+								.err('solar_term: Invalid solar term [' + index
+										+ ']!');
+						return;
+					}
+					index = angle;
+					angle *= TURN_TO_DEGREES / SOLAR_TERMS_COUNT;
+				}
+
+				// assert: angle is now angle (0~less than 360), from March
+				// equinox of year.
+				return JD_of_solar_angle(year, angle);
 			}
 
 			_.solar_term = solar_term;
