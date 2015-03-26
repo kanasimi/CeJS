@@ -956,7 +956,12 @@ if (typeof CeL === 'function')
 			 * teams for function ΔT()
 			 * 
 			 * 資料來源/資料依據:<br />
-			 * http://www.staff.science.uu.nl/~gent0113/deltat/deltat_old.htm
+			 * <a href="http://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html"
+			 * accessdate="2015/3/26 20:8">NASA - Polynomial Expressions for
+			 * Delta T</a><br />
+			 * <a
+			 * href="http://www.staff.science.uu.nl/~gent0113/deltat/deltat_old.htm"
+			 * accessdate="2015/3/26 20:7">Delta T: Pre-Telescopic Era</a>
 			 * 
 			 * @inner
 			 */

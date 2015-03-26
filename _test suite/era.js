@@ -2263,9 +2263,9 @@ function affairs() {
 			a : {
 				T : '天文節氣'
 			},
-			R : '節氣 + 時間或物候。非實曆。\n'
+			R : '節氣 + 交節時刻(@當地時間)或物候。計算得出，非實曆。誤差約在前後十秒鐘內。\n'
 			//
-			+ '天文計算出的二十四節氣 / 二分點 (春分秋分) 和二至點 (夏至冬至) / 七十二候(物候)',
+			+ '二十四節氣 / 二分點 (春分秋分) 和二至點 (夏至冬至) / 七十二候(物候)',
 			href : 'https://zh.wikipedia.org/wiki/%E8%8A%82%E6%B0%94'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -2295,7 +2295,7 @@ function affairs() {
 					date.adapt_offset('');
 					return {
 						span : CeL.show_degrees(
-								CeL.solar_coordinate(JD).apparent, 6)
+								CeL.solar_coordinate(JD).apparent, 2)
 						// &nbsp;
 						.replace(/ /g, '\u00a0'),
 						C : 'monospaced'
@@ -2646,7 +2646,7 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		// 紀年法/紀年方法。 Cyclic year, year recording/representation method
-		'紀年法' : '區別與紀錄年份的方法，例如循環紀年。',
+		'Year naming' : '區別與紀錄年份的方法，例如循環紀年。',
 
 		生肖 : [ {
 			a : {

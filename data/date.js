@@ -1155,33 +1155,45 @@ _.week_date = week_date;
 strftime.default_conversion = {
 	// 完整年份(非兩位數的數字，近十年應為四位數的數字，如2013)
 	Y : function(date_value, options) {
-		return gettext_date.year(date_value.getFullYear(), options.numeral || options.locale);
+		return gettext_date.year(
+		//(options && options.original_Date || date_value)
+		date_value
+		.getFullYear(), options.numeral || options.locale);
 	},
 	// 月分 (1-12)。
 	m : function(date_value, options) {
-		return gettext_date.month(1 + date_value.getMonth(), options.locale);
+		return gettext_date.month(1 +
+		//(options && options.original_Date || date_value)
+		date_value
+		.getMonth(), options.locale);
 	},
 	// 月中的第幾天 (1-31)
 	d : function(date_value, options) {
-		return gettext_date.date(date_value.getDate(), options.locale);
+		return gettext_date.date(
+		//(options && options.original_Date || date_value)
+		date_value
+		.getDate(), options.locale);
 	},
 
 	// 星期 (0-6)
 	w : function(date_value, options) {
-		return gettext_date.week(date_value.getDay(), options.locale);
+		return gettext_date.week(
+		//(options && options.original_Date || date_value)
+		date_value
+		.getDay(), options.locale);
 	},
 
 	// 小時數 (0-23)
-	H : function(date) {
-		return date.getHours();
+	H : function(date_value, options) {
+		return date_value.getHours();
 	},
 	// 分鐘數 (0-59)
-	M : function(date) {
-		return date.getMinutes();
+	M : function(date_value, options) {
+		return date_value.getMinutes();
 	},
 	// 秒數 (0-59)
-	S : function(date) {
-		return date.getSeconds();
+	S : function(date_value, options) {
+		return date_value.getSeconds();
 	},
 	/**
 	 * 毫秒(milliseconds) (000-999)
@@ -1190,19 +1202,19 @@ strftime.default_conversion = {
 	 * %f: zero-padded millisecond / microsecond:
 	 * <a href="http://bugs.python.org/issue1982" accessdate="2012/3/24 12:44">Issue 1982: Feature: extend strftime to accept milliseconds - Python tracker</a>
 	 */
-	f : function(date) {
-		var ms = date.getMilliseconds();
+	f : function(date_value, options) {
+		var ms = date_value.getMilliseconds();
 		return ms > 99 ? ms : ms > 9 ? '0' + ms : '00' + ms;
 	},
 
 	// 年日數
 	// (new Date).format('%4Y-%3o')
-	o : function(date) {
-		return ordinal_date(date);
+	o : function(date_value, options) {
+		return ordinal_date(date_value);
 	},
 	// 週數
-	W : function(date) {
-		return week_date(date)[1];
+	W : function(date_value, options) {
+		return week_date(date_value)[1];
 	},
 
 	//	有相同開頭的時候，長的要放前面！
