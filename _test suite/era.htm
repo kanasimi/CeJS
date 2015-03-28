@@ -228,17 +228,21 @@ td {
 	background-color: #f74;
 }
 
-tr.selected>td {
-	background-color: #fba;
-}
-
-tr.selected>td a {
-	color: #c21;
-}
-
 .unselected {
 	color: #333;
 	background-color: #aaa;
+}
+
+#calendar tr:hover>td {
+	background-color: #cfc;
+}
+
+#calendar tr.selected>td {
+	background-color: #fba;
+}
+
+#calendar .selected a {
+	color: #c21;
 }
 
 .曆譜_em {
@@ -497,7 +501,7 @@ tr.selected>td a {
 			<li>請使用新一點的瀏覽器，方可產生紀年線圖。<em>據測試，IE 11 尚無法使用線圖。</em>此外由於頻寬不足，加上載入時須做初始化，本頁面在載入時得稍微等一下。
 			</li>
 			<li>您可參照測試範例，先輸入來源紀年與日期，後選取輸出格式，按下轉換執行鍵「→」即可獲得轉換結果。</li>
-			<li>感謝孫郁興教授、譚冰等研究者，親自提供本工具之資料來源與指導。</li>
+			<li>感謝孫郁興教授、譚冰等研究者，親自提供本函式庫之資料來源與指導。</li>
 			<li>請各位先進幫助測試本工具之正確性，看看是否有謬誤之處。更希望能幫忙到有需要的文史前輩們。</li>
 			<li>本函式庫希望能納入日、韓、越之紀年，以及共和元年(841
 				BCE)之後的中國曆數。請幫助我們取得這些王朝之數字化曆數資料。</li>
@@ -562,9 +566,9 @@ tr.selected>td a {
 					href="http://sinocal.sinica.edu.tw/lusochangelog.html"
 					accessdate="2013/4/5 19:8" title="兩千年中西曆轉換工具 - 更新紀錄">似參照氣象局資料</a>。<br />請注意：
 					<ul>
-						<li><em>此中西曆對照表於 4 CE 停閏</em>。惟本工具之紀元功能採 proleptic Julian
+						<li><em>此中西曆對照表於 4 CE 停閏</em>。惟本函式庫之紀元功能採 proleptic Julian
 							calendar，因此修改 4 CE 為閏年。</li>
-						<li>此中西曆對照表，於太初曆、麟德曆、太平天曆行用時期的朔閏有誤。本工具已作更正，詳見下述。</li>
+						<li>此中西曆對照表，於太初曆、麟德曆、太平天曆行用時期的朔閏有誤。本函式庫已作更正，詳見下述。</li>
 						<li>東晉統治地區出現的其他年號、桓楚政權年號、五胡十六國、五代十國時期：未能確定是否使用與中原相同曆數。尚需文獻指證。若有能提供张金铣(1996)<span
 							class="creation_title">南汉历法初考</span>一文者，不勝感謝。
 						</li>
@@ -573,7 +577,7 @@ tr.selected>td a {
 					href="http://authority.ddbc.edu.tw/time/index.php"
 					accessdate="2013/5/2 20:25">時間規範資料庫</a><br />數位典藏與自動推論實驗室
 					數位典藏研究發展中心 <a rel="nofollow"
-					href="http://140.112.30.230/datemap/index.php"
+					href="http://thdl.ntu.edu.tw/datemap/index.php"
 					accessdate="2013/4/5 19:2"
 					title="中西曆對照查詢系統（明代以降） || Chinse and
 						Western Dates Mapping System (Later than Ming Dynasty)">中西曆對照查詢系統（明代以降）</a><br />歷代帝王/年號紀年
@@ -763,6 +767,28 @@ tr.selected>td a {
 					accessdate="2014/3/13 22:36" title="輯錄有關十國朔閏年月日干支具備者（未完）_陳來瘋_新浪博客">輯錄有關十國朔閏年月日干支具備者（未完）</a></td>
 			</tr>
 			<tr>
+				<td>明清實曆節氣 (1516–1941 CE)</td>
+				<td><a rel="nofollow"
+					href="http://authority.ddbc.edu.tw/time/index.php"
+					accessdate="2013/5/2 20:25">時間規範資料庫</a><br />數位典藏與自動推論實驗室
+					數位典藏研究發展中心 <a rel="nofollow"
+					href="http://thdl.ntu.edu.tw/datemap/index.php"
+					accessdate="2013/4/5 19:2"
+					title="中西曆對照查詢系統（明代以降） || Chinse and
+						Western Dates Mapping System (Later than Ming Dynasty)">中西曆對照查詢系統（明代以降）</a></td>
+				<td>此系統資料出處為鄭鶴聲《近世中西史日對照表》1994年再版，紀載明武宗正德十年（1516）～
+					清宣統三年（1911）及日本大正元年（1912）～ 昭和十六年（1941）年間，每年二十四節氣日期。<br />鄭鶴聲《近世中西史日對照表》1936年成書。節氣紀載，自清世祖順治二年起，全以《時憲萬年書》為依據﹔以前則依據陽曆推算。
+					<hr /> <em>轉換過程發現有些問題須注意</em>：
+					<ul>
+						<li>除了 1689 CE
+							(約清聖祖康熙28年)整年無數據外，部分日期尚有闕漏謬誤。在匯入過程中，已對可推測的數據做了修改，惟這部分不能確認。即使經手動修改，依舊有許多不甚合理之數據，因無以核對，仍將之保留。</li>
+						<li>依據不同曆法、不同時區，應會算出不同的節氣。惟此資料各年度與各紀年之節氣皆無衝突，僅有單一版本。</li>
+						<li>部分日期與本函式庫所轉換出之日期不同。經觀察測試，似當以 "西元日期" 為準；故所得資料未考量紀年日期之標示。</li>
+					</ul> 細節詳見<a
+					href="https://docs.google.com/spreadsheets/d/1GKidkdK2AN5U5xOliBUwU0BbB1ja4SDixFJf8WqSG58/pubhtml">明清實曆節氣轉換過程</a>。對於這些問題，惜手上無原書，無以核對。其間出入，尚祈熱心人士校核。
+				</td>
+			</tr>
+			<tr>
 				<td>上古天皇の在位年</td>
 				<td><a rel="nofollow"
 					href="http://ja.wikipedia.org/wiki/%E4%B8%8A%E5%8F%A4%E5%A4%A9%E7%9A%87%E3%81%AE%E5%9C%A8%E4%BD%8D%E5%B9%B4%E3%81%A8%E8%A5%BF%E6%9A%A6%E5%AF%BE%E7%85%A7%E8%A1%A8%E3%81%AE%E4%B8%80%E8%A6%A7"
@@ -787,7 +813,7 @@ tr.selected>td a {
 					class="proper_noun" title="かみつな しゅうじ">上綱秀治</span>さんの資料に決めました。<br />
 					<em>旧暦資料來源有些許出入。</em>請參照<a
 					href="https://docs.google.com/spreadsheet/pub?key=0AnMb73DFKnSFdFBxQlZTQ3pRY19ySzBKUW1rQlhSc1E"
-					accessdate="2013/4/11 19:38">旧暦毎月日数の比較</a>。在經過交叉比對後，本工具暫採用上綱秀治「月の大小」作為來源。
+					accessdate="2013/4/11 19:38">旧暦毎月日数の比較</a>。在經過交叉比對後，本函式庫暫採用上綱秀治「月の大小」作為來源。
 					<hr />「月の大小」は以下の文献を参考にしました。<br />暦を知る事典 / 岡田芳朗[ほか]著 東京堂出版, 2006.5<br />日本暦日原典.
 					第4版 / 内田正男編著 雄山閣出版, 1992.6<br />日本暦日総覧 / 古川麒一郎[ほか]共編 本の友社,
 					1992.5-1995.2

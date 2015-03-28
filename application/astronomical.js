@@ -201,10 +201,6 @@ if (typeof CeL === 'function')
 					}
 				}
 
-				if (false)
-					// &nbsp;
-					show = show.replace(/ /g, '\u00a0');
-
 				if (minus)
 					show = '-' + show;
 				return show.replace(/ $/, '');
@@ -741,7 +737,7 @@ if (typeof CeL === 'function')
 
 			_.solar_term_JD = solar_term_JD;
 
-			// solar_term_cache[ year ] = [ 春分JD, 清明JD, 穀雨JD, ... 24個 ]
+			// solar_term_cache[ year ] = [ 春分JD, 清明JD, 穀雨JD, ... 24個節氣 ]
 			var solar_term_cache = [];
 
 			/**
@@ -749,7 +745,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Number}JD
 			 *            Julian date
-			 * @param {Object}options
+			 * @param {Object}[options]
 			 *            options
 			 * 
 			 * @returns {String|Undefined}
@@ -765,19 +761,25 @@ if (typeof CeL === 'function')
 					if (test_next && ++index === SOLAR_TERMS_COUNT)
 						// 本年春分
 						index = 0;
-					else if (index > SOLAR_TERMS_COUNT / 2
-					// 12: 12個月
-					&& date.getMonth() < 12 / 2)
+
+					// 17: SOLAR_TERMS_NAME.indexOf('大雪')
+					// assert: 大雪以及之前的節氣，都會落在本年度內。
+					// 2000 CE 前後千年間，小寒或大寒之前分年。
+					else if (index > 17
+					// 3: assert: 要算作前一年的節氣，都會在3月前。
+					&& date.getMonth() <= 3 - 1)
 						// 每一年春分前末幾個節氣，算前一年的。
 						year--;
 
 					var cache = solar_term_cache[year];
 					if (!cache)
+						// 初始化本年度資料。
 						solar_term_cache[year] = cache = [];
-					if (!cache[index])
-						cache[index] = solar_term_JD(year, index);
+					if (!(date = cache[index]))
+						// 填入節氣JD
+						cache[index] = date = solar_term_JD(year, index);
 
-					return cache[index];
+					return date;
 				}
 
 				var apparent = solar_coordinate(JD).apparent, index;

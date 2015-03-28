@@ -507,7 +507,7 @@ if (typeof CeL === 'function')
 				// 紀年法: 日本年號, 元号/年号
 				元号 : 0,
 
-				// 領袖, 首領, ruler
+				// 領袖, 首領, monarch, ruler
 				君主 : 1,
 				// 君主姓名
 				君主名 : 1,
@@ -3614,7 +3614,13 @@ if (typeof CeL === 'function')
 				+ library_namespace.to_Chinese_numeral(index + 1) + '運';
 			}
 
-			// 增添標記，加上曆注(暦注)之類。
+			/**
+			 * 為 era Date 增添標記，加上曆注(暦注)之類。
+			 * 
+			 * @param {Date}date
+			 * @param {Object}[options]
+			 *            options
+			 */
 			function add_comment(date, options) {
 				add_adapt_offset(date, this);
 
@@ -5084,7 +5090,14 @@ if (typeof CeL === 'function')
 			// ---------------------------------------------------------------------//
 			// 工具函數。
 
-			// callback(dynasty_name, dynasty);
+			/**
+			 * 對於每個朝代，逐一執行 callback。
+			 * 
+			 * @param {Function}callback
+			 *            callback(dynasty_name, dynasty);
+			 * @param {String|RegExp}[filter]
+			 *            TODO
+			 */
 			function for_dynasty(callback, filter) {
 				for ( var nation_name in period_root.sub) {
 					var nations = period_root.sub[nation_name].sub;
@@ -5093,7 +5106,14 @@ if (typeof CeL === 'function')
 				}
 			}
 
-			// callback(monarch_name, monarch);
+			/**
+			 * 對於每個君主，逐一執行 callback。
+			 * 
+			 * @param {Function}callback
+			 *            callback(monarch_name, monarch);
+			 * @param {String|RegExp}[filter]
+			 *            TODO
+			 */
 			function for_monarch(callback, filter) {
 				for ( var nation_name in period_root.sub) {
 					var nations = period_root.sub[nation_name].sub;
@@ -5105,6 +5125,17 @@ if (typeof CeL === 'function')
 				}
 			}
 
+			/**
+			 * 為 era Date 添加上共存紀年。
+			 * 
+			 * @param {Date}date
+			 * @param {Era}[指定紀年]
+			 *            主要紀年
+			 * @param {Object}[options]
+			 *            options
+			 * 
+			 * @returns {Array} 共存紀年
+			 */
 			function add_contemporary(date, 指定紀年, options) {
 				var tmp, date_index,
 				// 沒意外的話，共存紀年應該會照紀年初始時間排序。
@@ -5362,11 +5393,27 @@ if (typeof CeL === 'function')
 			// ---------------------------------------------------------------------//
 			// 應用功能。
 
-			// 轉成具有紀年附加屬性的 Date。
-			// date: duration [start_date, end_date]
-			// date: era string
-			// date: {國家:,朝代:,君主:,紀年:,日期:,..}
-			// options: {base:, ..}
+			/**
+			 * 傳入完整紀年日期，將之轉成具有紀年附加屬性的 Date。
+			 * 
+			 * @param {String|Object|Array|Date}date
+			 *            所欲解析之完整紀年日期。<br />
+			 *            era string<br /> { 國家:'', 朝代:'', 君主:'', 紀年:'', 日期:'' ,
+			 *            ... }<br />
+			 *            duration: [start_date, end_date]
+			 * @param {Object}[options]
+			 *            此 options 可能會被變更!<br />
+			 *            {String|Date}.base: base date<br />
+			 *            {Boolean}.get_era: 僅回傳所解析出之紀年 {Object}。<br />
+			 *            {Boolean}.get_era_list: 僅回傳所解析出之紀年 list: []。<br />
+			 *            {Boolean}.get_range: 僅回傳所解析出之期間: [ "前", "後" ]。<br />
+			 *            {Boolean}.get_range_String: 僅回傳所解析出之期間: "前–後"。<br />
+			 *            {Boolean}.parse_only: 僅回傳所解析出之紀年資訊: [ 紀年_list, 紀年, 年,
+			 *            月, 日 ]<br />
+			 *            {Boolean}.is_era: 找不到可用之紀年時，直接 about 跳出，回傳 undefined。<br />
+			 * 
+			 * @returns {Date} 解析出之日期
+			 */
 			function to_era_Date(date, options) {
 				library_namespace.debug('parse (' + typeof date + ') [' + date
 						+ ']', 3, 'to_era_Date');
@@ -5731,9 +5778,12 @@ if (typeof CeL === 'function')
 							});
 							if (tmp.length > 1)
 								// 有超過1個紀年。
-								library_namespace.warn('to_era_Date: 共取得 '
-										+ tmp.length + ' 個可能的紀年名稱！ ['
-										+ tmp.join(', ') + ']');
+								if (options.pick)
+									tmp = options.pick(tmp) || tmp;
+								else
+									library_namespace.warn('to_era_Date: 共取得 '
+											+ tmp.length + ' 個可能的紀年名稱！ ['
+											+ tmp.join(', ') + ']');
 						}
 
 					} else if (tmp = numeralized.match(
@@ -5752,7 +5802,7 @@ if (typeof CeL === 'function')
 								'將視為標準時間（如公元紀年），嘗試以日期解析器 [',
 								standard_time_parser, '] 解析。' ]);
 
-					// 警告:請勿隨意更改這些回傳值，因為他們也為 module 內部所用!
+					// 警告:請勿隨意更改這些回傳值，因為他們也為 module 內部其他功能所用!
 					if (options.get_era)
 						return 紀年;
 					if (options.get_era_list)
@@ -5811,6 +5861,10 @@ if (typeof CeL === 'function')
 							// for 公元前。
 							return date.replace(/-(\d+年)/g, '前$1');
 						}
+
+					} else if (options.is_era) {
+						// 找不到可用之紀年，卻 must era；直接 about。
+						return;
 
 					} else if (年 && !isNaN(年 = numeralize_date_name(年))) {
 						date = ((年 < 0 ? 年 : 年.pad(4)) + '年'
@@ -6449,8 +6503,9 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {ELEMENT_NODE}node
 			 *            具紀年標記之指定 node。
-			 * @param {Boolean}era_only
+			 * @param {Boolean}[era_only]
 			 *            是否僅回傳 era String。
+			 * 
 			 * @returns [range] || {String}date
 			 */
 			function caculate_node_era(node, return_type) {

@@ -223,6 +223,13 @@ is_NodeList = function(object) {
 };
 
 
+// &nbsp;
+var NBSP = '\u00a0';
+
+_.NBSP = NBSP;
+
+if (false)
+	string = string.replace(/ /g, CeL.DOM.NBSP);
 
 /*
 debug 用。

@@ -489,6 +489,7 @@ function show_calendar(era_name) {
 	}
 	CeL.remove_all_child('calendar');
 	CeL.new_node(title, 'calendar');
+	// text_calendar
 	select_panel('calendar', true);
 }
 
@@ -1832,6 +1833,75 @@ function set_era_by_url_data(era) {
 
 // ---------------------------------------------------------------------//
 
+var thdl_solar_term,
+//
+initialize_thdl_solar_term = function() {
+	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
+	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+	//
+	STARTS_FROM = 14, DIGITS = 4, MAX_DIGITS = 10 + 26,
+	//
+	last_date = null, start_year, result = [],
+	//
+	data = ',,,,,,,,,,,,,,,,,,,,1516-01-10,15,15,15;xohayhfyt;yx7pjq7ut;13mepi9aok;1mmes224b9;xohayhfyt;dhgfgfgggfgfgfffdheffeff;13m8lqq0r8;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;gffgfggfgggffgffgdfeffff;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xt;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;ffgfgfgggfgidffffffefeff;13m8seg9xw;1mmes226ol;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;fgffeifgggfgfffffffefffe;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xr40fw2s5;yx7pjq7ut;13m8seg9xw;1mmes224b9;fffgfgggfggffgfcieffefff;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;yukmozl05;yx7pjq7ut;13m8seg9xw;gfidfggfgggffgffeffeffff;xr4dt80et;yxve4kklh;13m8seg9xx;xohayh6c5;xr4dt80et;yx7pjq7ut;13m8seg9xw;1mmes224b9;fffgfgggfggfgffffeffekaf;yx7pjq7ut;13m8seg9xt;1mmer82a8l;xohb0cv85;yx7pjq7ut;ffgfggfgggfgdhffffefffef;1mmer7lff9;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfez4l;xohayhfyt;yx7pjq5hh;yxvhgfp75;13wxjfez4l;xohayh6hh;yx7pjq5hh;yxvhgfp75;13mephsfv9;xohaqzhg5;xr4dt80ht;f2aum04lt;13mephsfwl;xohayh6hh;xr4dt80et;yx7pr7ww5;13m8seg9xx;xohayh6hh;xr40hri1h;yx7pr7ww5;13m8seg9xw;1mmes226ol;xohb0cv85;yx7pjq7ut;13m8seg9xt;1mmer7lff9;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfj6tx;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfj6tx;xohayhfyt;yul02bio5;yv8rz2dsh;13mephsfv9;fffgfgggfggffgffefffekaf;xr4dt80g5;yxve4kklt;13mephsfv9;xohayh6hh;xr4dt80g5;yx7pr7wwh;fgffggfggggffgffeff00000;,,,,,,,,,,,,,,,,,,,1690-01-05,14,15,15,15;xr40hri1h;yx7pr7ww5;13mephsfvl;xofton505;xohb0cv85;yx7pjq7ut;13m8seg9xw;1mmer83c5x;xohb0cv85;yx7pjq7ut;yxvhgfpsk;1mmer7i9n9;xohb0cv85;yx7pjq7ut;yxvhgfpsh;13wxjfj6tx;xohayhfyt;yx7pjq7ut;13m8seg9ch;13wxjfez4l;xohayhfyt;yx7pjq7ut;yxve4kklt;13mephsfv9;xohayh6hh;xr4dt80g5;yxdmuk2tt;13m8seg9xx;fffgfgggfggffdifefffefff;xr40hri2t;ffgfgfgggfggffffffefdhef;13m8seg9xx;xoftoixat;xohb0cv9h;yx7pjq7ut;13m8seg9xx;xofsuocut;xohb0cv85;yx7pjq7ut;13m8seg9xw;gffgfggfggcjfgffefffefff;xohb0cv8h;yx7pjq7ut;yxvhgfpsl;xofsu28et;xohayhfyt;yx7pjq7v5;13m8p2l5cl;xofsu289h;xohayhfyt;yx7pjq7ut;13m8p2l5cl;xofsu289h;xohayh6hh;yx7c89phh;13m8ov3fpw;1mmer7h7px;xofsuocut;yx7c89n45;yxvdx2vkk;1mm8u451sl;xofsuocut;ymoian3ut;yx7pjq7v5;1mm8u451sl;xofsu7i1h;yx7c89n45;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xr40fw2th;yx7pjq7v5;13m8seg9xx;xofsu6g45;xr40fw2th;yx7pjq7v5;13m8p2l5cl;xoffilq1h;xohayhg05;yx7pjq7v5;fghdggfggfggfffffffeffff;xp3h7ew45;xohayhfyt;yx7pjq7ut;13m8p2l5cl;xofsu289h;xoha4inth;yx7c89phh;13m8ov3gb8;1mm8u451sl;xofsuocut;yx7c89phh;ffgfggfggfgfgfffffefffja;1mm8u451sl;fffgfgdiggfgfgffefffefff;yx7c89n45;yx7pjq7v5;1mbq06iij9;xofsu7i1h;yx7c6e7ut;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xr40fw2th;yy1b0f1ht;13m8p2l5cl;xofsu6g4h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu28et;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu28et;xohayhfyt;yx7c89phh;13m8ov3gb9;xofsu289h;xofsuomc5;yx7c89phh;14sc0lllck;1mm8u451sl;xofsuocut;yx7c89phh;yx7pjq7v8;1mm8u451sl;xofsuocut;yx7c89n45;yx7pjq7v5;1mbq06iij9;xofsu7i1h;yx7c6e7ut;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2mgr9;xofsu28et;xohayhg05;yx7c89pht;13ll0p8hn9;xofsu28et;xofsuomdh;yx7c89pht;13melyfm8l;xo9vqq2hh;xofsuomc5;yx7c89phh;13m8ov3gb9;xo9vqq2c5;xofsuomc5;yx7c89phh;yx7pjq8gk;1mbvx9uogl;xofsuocut;yx7c89phh;yx7pjq7v8;1mbq06iij9;xofstz2mt;xr40fw2th;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu6g45;xohayhg05;yx7c89pht;13wrispzkl;xo9if9k45;xofsuomdh;yx7c89pht;13m8ov3gb9;xo9vr6xat;xofsuomc5;yx7c89phh;13lkn6aa8l;xo9vqq2hh;xofsuomc5;yx7c89phh;yx7pjq8gk;1mbq06iij9;xofsuocut;yx7beaxc5;yx7pjq7v8;1mbq06iij9;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7c89pht;13m8p2l5cl;xofsu6g45;xofsuomdh;yx7c89pht;13m8ov3gb9;xo9vqq2hg;13wxjg1d8l;yx7c89pht;13ll0hqslx;xo9vqq2hh;xofsuomdh;yx7c89pht;13ll0hqslx;xo9vqq2hi;8qguh9mvp;yx7c89phh;yx7pjpwlw;1mbq06iij9;xofsuocut;yx7c89phh;yx7pjq8gk;1mbpwundxx;fffgfggfggfgffgfdfgfefff;xohayhidh;yx7pjq7v8;13m8p2l5cl;xofsu7hud;xohaymqf9;yx7c89pht;13m8p2l5cl;xofsu7i1h;xoftoneit;yx7c89pht;13m8p2l5cl;xo9vqvc45;xofsuomdh;yx7c89pht;13m8ov3dxx;xo9vqq2hh;xofsuomdh;yx7c89pht;13ll0hqslx;xo9vqq2hh;fffgfggfggfgfgfffef00000'
+			.split(';');
+
+	data.forEach(function(year_data, index) {
+		if (year_data.contains(',')) {
+			year_data = year_data.split(',');
+			year_data.forEach(function(solar_term, index) {
+				if (!year_data[index])
+					return;
+				if (year_data[index] > 0) {
+					last_date += year_data[index] * ONE_DAY_LENGTH_VALUE;
+				} else {
+					last_date = year_data[index].to_Date('CE');
+					if (!start_year)
+						result.start = start_year
+						// - 1: 1516 春分前末幾個節氣，算前一年的。
+						= last_date.getFullYear() - 1;
+					last_date = last_date.getTime();
+				}
+				year_data[index] = last_date;
+			});
+
+		} else if (year_data.length === 24) {
+			year_data = year_data.split('');
+
+			year_data.forEach(function(solar_term, index) {
+				last_date += parseInt(solar_term, MAX_DIGITS)
+						* ONE_DAY_LENGTH_VALUE;
+				year_data[index] = last_date;
+			});
+
+		} else {
+			year_data = parseInt(year_data, MAX_DIGITS)
+			//
+			.toString(DIGITS).split('');
+			while (year_data.length < 24)
+				// 補 0。
+				year_data.unshift(0);
+			// assert: year_data.length === 24
+			year_data.forEach(function(solar_term, index) {
+				last_date += ((year_data[index] | 0) + STARTS_FROM)
+						* ONE_DAY_LENGTH_VALUE;
+				year_data[index] = last_date;
+			});
+		}
+
+		// for debug
+		if (false && year_data.length !== 24)
+			throw index + ':' + data[index];
+		result[index + start_year] = year_data;
+	});
+
+	thdl_solar_term = result;
+
+	initialize_thdl_solar_term = null;
+}
+
+// ---------------------------------------------------------------------//
+
 // 設定是否擋住一次 contextmenu。
 var no_contextmenu;
 window.oncontextmenu = function(e) {
@@ -2129,9 +2199,10 @@ function affairs() {
 
 	// -----------------------------
 
+	var
 	// copy from data.date.
 	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
-	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
 	// for 皇紀.
 	kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset),
 	// for 泰國佛曆
@@ -2273,10 +2344,13 @@ function affairs() {
 			var JD = CeL.Date_to_JD(date.adapt_offset());
 			// 還原 local 之時間。
 			date.adapt_offset('');
-			return CeL.solar_term_of_JD(JD, {
+			date = CeL.solar_term_of_JD(JD, {
 				pentads : true,
 				time : true
 			});
+			return !date || date.contains('候') ? date : {
+				b : date
+			};
 		} ],
 
 		apparent : [
@@ -2297,7 +2371,7 @@ function affairs() {
 						span : CeL.show_degrees(
 								CeL.solar_coordinate(JD).apparent, 2)
 						// &nbsp;
-						.replace(/ /g, '\u00a0'),
+						.replace(/ /g, CeL.DOM.NBSP),
 						C : 'monospaced'
 					};
 				} ],
@@ -2528,6 +2602,34 @@ function affairs() {
 		// see 欽定協紀辨方書
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/calendar_j.html
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/astrology_j.html
+
+		Chinese_solar_terms : [ {
+			a : {
+				T : '明清節氣'
+			},
+			R : '明清實曆節氣 (1516–1941 CE) from 時間規範資料庫.\n'
+			//
+			+ '有些問題須注意，見使用說明。',
+			href : 'http://140.112.30.230/datemap/reference.php'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+
+			initialize_thdl_solar_term && initialize_thdl_solar_term();
+
+			var year = date.getFullYear();
+			if (year < thdl_solar_term.start)
+				return '';
+			var year_data = thdl_solar_term[year];
+			if (!year_data
+			//
+			|| (date = date.getTime()) < year_data[0])
+				// 試試看前一年。
+				year_data = thdl_solar_term[--year];
+
+			if (year_data)
+				return CeL.SOLAR_TERMS[year_data.indexOf(date)] || '';
+		} ],
 
 		反支 : [ {
 			a : {
