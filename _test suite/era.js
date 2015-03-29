@@ -371,7 +371,7 @@ function show_calendar(era_name) {
 					format : tmp ? '%紀年名%年年|%Y年|%年干支||'
 					//
 					: '%紀年名%年年%月月%日日|%Y/%m/%d('
-							+ (_.is_domain_name('ja') ? '%曜日' : '%w')
+							+ (_.is_domain_name('ja') ? '%七曜' : '%w')
 							+ ')|%年干支|%月干支%大小月|%日干支',
 					locale : 'cmn-Hant-TW',
 					as_UTC_time : true
@@ -2334,9 +2334,11 @@ function affairs() {
 			a : {
 				T : '天文節氣'
 			},
-			R : '節氣 + 交節時刻(@當地時間)或物候。計算得出，非實曆。誤差約在前後十秒鐘內。\n'
+			R : '節氣 + 交節時刻(@當地時間)或七十二候。計算得出，非實曆。誤差約在前後十秒鐘內。\n'
 			//
-			+ '二十四節氣 / 二分點 (春分秋分) 和二至點 (夏至冬至) / 七十二候(物候)',
+			+ '節氣之後每五日一候，非採用 360/72 = 5° 一候。\n'
+			//
+			+ '二十四節氣 / 二分點 (春分秋分) 和二至點 (夏至冬至) / 七十二候 (物候)',
 			href : 'https://zh.wikipedia.org/wiki/%E8%8A%82%E6%B0%94'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -2596,18 +2598,20 @@ function affairs() {
 		// 列具曆注
 		曆注 : '具注曆譜/曆書之補充注釋，常與風水運勢、吉凶宜忌相關。',
 		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
-		// TODO: 建除十二神(十二值位)、血忌等，都被歸入神煞體系
-		// TODO: 節氣、物候、八節、二至啟閉四節、伏臘、八魁、天李、血忌、入官忌、日忌和歸忌
-		// TODO: 日柱的五行 日の五行
+		// TODO: 建除十二神(十二值位/十二值星/通勝十二建)、血忌等，都被歸入神煞體系
+		// TODO: 八節、二至啟閉四節、伏臘、八魁、天李、入官忌、日忌和歸忌
 		// see 欽定協紀辨方書
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/calendar_j.html
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/astrology_j.html
+
+		// 納音 12直 27宿 7曜 節気/72候/没滅日 大小歳/凶会 下段 雑注 日遊 節月
+		// http://www.wagoyomi.info/guchu.cgi
 
 		Chinese_solar_terms : [ {
 			a : {
 				T : '明清節氣'
 			},
-			R : '明清實曆節氣 (1516–1941 CE) from 時間規範資料庫.\n'
+			R : '明朝、清朝、中國傳統曆法 (1516–1941 CE) 之實曆節氣 from 時間規範資料庫.\n'
 			//
 			+ '有些問題須注意，見使用說明。',
 			href : 'http://140.112.30.230/datemap/reference.php'
@@ -2631,24 +2635,38 @@ function affairs() {
 				return CeL.SOLAR_TERMS[year_data.indexOf(date)] || '';
 		} ],
 
+		// 日柱的五行 日の五行 : 以六十甲子納音代
+		納音 : [ {
+			a : {
+				T : '納音'
+			},
+			R : '六十甲子納音、納音五行。中曆曆注、日本の暦注の一つ。',
+			href : 'https://zh.wikipedia.org/wiki/%E7%B4%8D%E9%9F%B3'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.納音(date) || '';
+		} ],
+
 		反支 : [ {
 			a : {
 				T : '反支'
 			},
-			R : '反枳（反支）依睡虎地《日書》(12日一反支)和孔家坡《日書》(6日一反支*)'
+			R : '反枳（反支）依睡虎地《日書》（12日一反支）和孔家坡《日書》（6日一反支，以淡色標示。）'
 			//
-			+ '\n警告：僅適用於中曆、日本！對其他紀年，此處之值可能是錯誤的！',
+			+ '\n警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
 			href : 'http://www.bsm.org.cn/show_article.php?id=867',
 			S : 'font-size:.8em;'
 		}, function(date) {
-			return /* !date.準 && */!date.精 && CeL.era.反支(date) || '';
+			return /* !date.準 && */!date.精 && CeL.era.反支(date, {
+				span : '反支',
+				S : 'color:#888;'
+			}) || '';
 		} ],
 
 		血忌 : [ {
 			a : {
 				T : '血忌'
 			},
-			R : '血忌在唐宋曆書中仍為典型歷注項目，後世因之，直至清末，其推求之法及吉凶宜忌都無改變。',
+			R : '血忌在唐宋曆書中仍為典型歷注項目，後世因之，直至清末，其推求之法及吉凶宜忌都無改變。血忌被歸入神煞體系。',
 			href : 'http://shc2000.sjtu.edu.cn/030901/lishu.htm',
 			S : 'font-size:.8em;'
 		}, function(date) {
@@ -2680,6 +2698,17 @@ function affairs() {
 					return /* !date.準 && */!date.精 && CeL.era.六曜(date) || '';
 				} ],
 
+		七曜 : [ {
+			a : {
+				T : '七曜'
+			},
+			R : '中曆曆注、日本の暦注の一つ。',
+			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.七曜(date) || '';
+		} ],
+
 		// 暦注上段
 		曜日 : [ {
 			a : {
@@ -2688,17 +2717,29 @@ function affairs() {
 			R : '日本の暦注の一つ, Japanese names of week day',
 			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5'
 		}, function(date) {
-			var 曜日 = /* !date.準 && */!date.精 && CeL.era.曜日(date);
-			return 曜日 ? {
-				span : 曜日 + '曜日',
-				S : 曜日 === '日' ? 'color:#f34'
+			var 七曜 = /* !date.準 && */!date.精 && CeL.era.七曜(date);
+			return 七曜 ? {
+				span : 七曜 + '曜日',
+				S : 七曜 === '日' ? 'color:#f34'
 				//
-				: 曜日 === '土' ? 'color:#2b3' : ''
+				: 七曜 === '土' ? 'color:#2b3' : ''
 			} : '';
 		} ],
 
 		// 暦注中段
 		// 十二直
+		// http://koyomi8.com/sub/rekicyuu_doc01.htm#jyuunicyoku
+		//
+		// 欽定四庫全書 御定星厯考原卷五 日時總類 月建十二神
+		// http://ctext.org/wiki.pl?if=en&chapter=656830
+		// 厯書曰厯家以建除滿平定執破危成收開閉凡十二日周而復始觀所值以定吉凶每月交節則疊兩值日其法從月建上起建與斗杓所指相應如正月建寅則寅日起建順行十二辰是也
+		//
+		// 欽定協紀辨方書·卷四
+		// https://archive.org/details/06056505.cn
+		//
+		// http://blog.sina.com.cn/s/blog_3f5d24310100gj7a.html
+		// http://blog.xuite.net/if0037212000/02/snapshot-view/301956963
+		// https://sites.google.com/site/chailiong/home/zgxx/huangli/huandao
 
 		/**
 		 * @see <a
@@ -2741,7 +2782,8 @@ function affairs() {
 					},
 					R : '玄空飛星一派風水三元九運，又名「洛書運」。\n* 公曆2月3至5日立春後才改「運」，但此處恆定為2月4日改，會因此造成誤差。',
 					// http://www.hokming.com/fengshui-edit-threeyuennineyun.htm
-					href : 'http://www.twwiki.com/wiki/%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B'
+					href : 'http://www.twwiki.com/wiki/%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B',
+					S : 'font-size:.8em;'
 				}, function(date) {
 					return CeL.era.三元九運(date);
 				} ],

@@ -6,7 +6,6 @@
 
 TODO:
 
-
 任意線圖階層，不只(紀年名稱索引值)所示。
 
 
@@ -25,20 +24,6 @@ bug:
 同慶乙酉年
 
 
-// ----------------------------------//
-
-
-http://koyomi8.com/24sekki.htm
-http://koyomi8.com/sub/72kou.htm
-http://blog.csdn.net/orbit/article/details/7910220
-http://www.chris.obyrne.com/Eclipses/calculator.html
-http://eclipse.gsfc.nasa.gov/JSEX/JSEX-index.html
-http://en.wikipedia.org/wiki/New_moon
-http://www.informatik.uni-leipzig.de/~duc/amlich/calrules.html
-<a href="http://www.nongli.com/item2/index.html" accessdate="2013/5/2 20:23">农历知识:传统节日,24节气，农历历法，三九，三伏，天文历法,天干地支阴阳五行</a>
-<a href="http://www.chinesefortunecalendar.com/CLC/clcBig5.htm" accessdate="2013/5/2 20:23">如何轉換陰陽曆</a>
-
-
 
 // ----------------------------------//
 
@@ -51,8 +36,6 @@ https://ja.wikipedia.org/wiki/%E7%A7%81%E5%B9%B4%E5%8F%B7
 
 関東の三島暦では天正10年に閏12月がありますが、京暦では天正11年に閏1月 があり、年初が1か月ずれています[7]。これも京暦に拠りました (1990年ＮＨＫ「歴史誕生」で話題になりました)。
 木場明志	本能寺の変と天正10年の暦	雑誌『文明のクロスロード』第45号(1993)pp.29-37
-
-http://yatanavi.org/toolserch/index.php/search/tag/%E6%97%A7%E6%9A%A6
 
 
 韓國君主列表
@@ -1560,7 +1543,7 @@ this.CeL_era_data = {
 
 		'中曆|1912/2/18~'
 				+ this.CeL_era_data.data.last
-				+ '|1912/=4aa 3q2 3a0542z 3o5 3yoi4h0 4t535es 4ac 3nt150a 4yz 3pno5s9 4h4 4t8i5ew 4ihi3p1 3fe 4f39576 5s9 400j4i9 3ep33u2 3p1 380m42y 591 3qro5uq 4ia 3epu48a 3mw74z9 42y 4of95d1 49w 4pkz5as 3rdk3fu 505 3psm47e 5e1 3swk4a0 5ax 324z3my 4mg7591 4gi 4so55ea 4aa 3b503q2 3a2042z 42d 3yom4h0 5es 3t6s4ac 3nt650a 4yz 3po647d 4h4 4t8l5ew 52s 4g9f3fe 4fxk577 47d 40114i9 3u1 3a903p1 3mi 4mg2591 3qrr5uq 4ia 3epx48a 439 3mms46i 4ofd5dx 49w 4pl25as 48c 4c6c505 46i 4rky5e1 3swm4a9 3q1 32513os 579 4fv74gi 4sob5ea 46q 3b5y3q2 3ot 37w542t 58y 4soy5es 3t6v4ac 47u 3mp14z1 46d 4oer4i0 4t8o5ew 52s 4g9i3fe 4zx 3qk447l 4i9 3eoj3u1 3a933p1 3mi 4mg5591 49e 4pic5aq 3rd448a 439 3mmu46i 59h 3sr849w 5as 3rer50s 4czr505 46i 4rl15e1 4a0 4pp03q1 32543ot 3md 4fva58y 5e9 3t444aa 3qi 38gy3ot|紀年=農曆;陰曆;舊曆;夏曆|注=暫時名稱。農曆又稱夏曆、陰曆、舊曆等。|注=羅爾綱《不應稱舊曆為農曆》（1992，上海《文匯報》） 羅先生說，辛亥革命以後，一般是把舊曆（陰陽曆）叫做「夏曆」。',
+				+ '|1912/=4aa 3q2 3a0542z 3o5 3yoi4h0 4t535es 4ac 3nt150a 4yz 3pno5s9 4h4 4t8i5ew 4ihi3p1 3fe 4f39576 5s9 400j4i9 3ep33u2 3p1 380m42y 591 3qro5uq 4ia 3epu48a 3mw74z9 42y 4of95d1 49w 4pkz5as 3rdk3fu 505 3psm47e 5e1 3swk4a0 5ax 324z3my 4mg7591 4gi 4so55ea 4aa 3b503q2 3a2042z 42d 3yom4h0 5es 3t6s4ac 3nt650a 4yz 3po647d 4h4 4t8l5ew 52s 4g9f3fe 4fxk577 47d 40114i9 3u1 3a903p1 3mi 4mg2591 3qrr5uq 4ia 3epx48a 439 3mms46i 4ofd5dx 49w 4pl25as 48c 4c6c505 46i 4rky5e1 3swm4a9 3q1 32513os 579 4fv74gi 4sob5ea 46q 3b5y3q2 3ot 37w542t 58y 4soy5es 3t6v4ac 47u 3mp14z1 46d 4oer4i0 4t8o5ew 52s 4g9i3fe 4zx 3qk447l 4i9 3eoj3u1 3a933p1 3mi 4mg5591 49e 4pic5aq 3rd448a 439 3mmu46i 59h 3sr849w 5as 3rer50s 4czr505 46i 4rl15e1 4a0 4pp03q1 32543ot 3md 4fva58y 5e9 3t444aa 3qi 38gy3ot|紀年=農曆;陰曆;舊曆;夏曆|注=中國傳統曆法暫時名稱。又稱夏曆、黃曆、皇曆、漢曆、農曆、陰曆、舊曆等。|注=羅爾綱《不應稱舊曆為農曆》（1992，上海《文匯報》） 羅先生說，辛亥革命以後，一般是把舊曆（陰陽曆）叫做「夏曆」。',
 
 		{
 			// 太平天囯（其中「天」字的兩橫上長下短；「囯」字內為「王」字）

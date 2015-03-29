@@ -4,21 +4,34 @@
  * 
  * @since 2015/3/20 23:5:43
  * 
- * TODO:<br />
+ * TODO:
+ * 
  * 簡易朔望/天象計算功能/千年 節氣 計算。<br />
- * 大地測量:地球表面兩點間之距離<br />
+ * http://bieyu.com/<br />
+ * http://www.fjptsz.com/xxjs/xjw/rj/117/index.htm
+ * http://blog.csdn.net/orbit/article/details/7910220
+ * http://www.chris.obyrne.com/Eclipses/calculator.html
+ * http://eclipse.gsfc.nasa.gov/JSEX/JSEX-index.html
+ * http://en.wikipedia.org/wiki/New_moon
+ * http://www.informatik.uni-leipzig.de/~duc/amlich/calrules.html
+ * @see <a href="http://www.nongli.com/item2/index.html" accessdate="2013/5/2
+ *      20:23">农历知识:传统节日,24节气，农历历法，三九，三伏，天文历法,天干地支阴阳五行</a>
+ * @see <a href="http://www.chinesefortunecalendar.com/CLC/clcBig5.htm"
+ *      accessdate="2013/5/2 20:23">如何轉換陰陽曆</a>
+ * 
+ * NASA - Moon Phases: 6000 Year Catalog
+ * http://eclipse.gsfc.nasa.gov/phase/phasecat.html
+ * 
+ * 大地測量:給定地球表面兩個點的經緯度,計算兩點間之距離<br />
+ * 天球上星體距離<br />
+ * http://geographiclib.sourceforge.net/scripts/geod-calc.html
  * http://wywu.pixnet.net/blog/post/27459116
  * http://iotresearch.wikispaces.com/GPS<br />
  * Andoyer 方法最大的誤差約為50公尺，Lambert 方法最大的誤差約30m。
  * http://usenrong.iteye.com/blog/2147341
  * http://en.wikipedia.org/wiki/Haversine_formula
  * http://en.wikipedia.org/wiki/Spherical_law_of_cosines
- * http://en.wikipedia.org/wiki/Vincenty's_formulae<br />
- * http://bieyu.com/<br />
- * http://www.fjptsz.com/xxjs/xjw/rj/117/index.htm
- * 
- * NASA - Moon Phases: 6000 Year Catalog
- * http://eclipse.gsfc.nasa.gov/phase/phasecat.html
+ * http://en.wikipedia.org/wiki/Vincenty's_formulae
  * 
  * 未來發展：<br />
  * 計算順序: https://github.com/kanasimi/IAU-SOFA/blob/master/doc/sofa_ast_c.pdf
@@ -749,6 +762,8 @@ if (typeof CeL === 'function')
 			 *            options
 			 * 
 			 * @returns {String|Undefined}
+			 * 
+			 * @see http://koyomi8.com/24sekki.htm
 			 */
 			function solar_term_of_JD(JD, options) {
 
@@ -815,7 +830,9 @@ if (typeof CeL === 'function')
 					// 七十二候 (物候, 72 pentads)
 					// 初候 二候 三候
 					// 初候 中候 末候
+					// http://koyomi8.com/sub/72kou.htm
 					// 5: 又五日
+					// 節氣之後每五日一候，非採用 360/72 = 5° 一候。
 					if (JD <= 5 && 4 < JD)
 						return SOLAR_TERMS_NAME[index] + ' 二候';
 					if (4 + 5 < JD && JD <= 5 + 5)

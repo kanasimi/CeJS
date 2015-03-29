@@ -606,21 +606,27 @@ if (typeof CeL === 'function')
 			月の別名_LIST = '睦月,如月,弥生,卯月,皐月,水無月,文月,葉月,長月,神無月,霜月,師走'.split(','),
 			// '大安赤口先勝友引先負仏滅'.match(/../g)
 			六曜_LIST = '大安,赤口,先勝,友引,先負,仏滅'.split(','),
-			//
-			曜日_LIST = '日月火水木金土'.split(''),
+			// 七曜, 曜日
+			七曜_LIST = '日月火水木金土'.split(''),
 			// "十二值位星"（十二值:建除十二神,十二值位:十二建星） @ 「通勝」或農民曆
 			// 建、除、滿、平、定、執、破、危、成、收、開、閉。
 			// http://jerry100630902.pixnet.net/blog/post/333011570-%E8%AA%8D%E8%AD%98%E4%BD%A0%E7%9A%84%E5%A2%83%E7%95%8C~-%E9%99%BD%E6%9B%86%E3%80%81%E9%99%B0%E6%9B%86%E3%80%81%E9%99%B0%E9%99%BD%E5%90%88%E6%9B%86---%E7%AF%80%E6%B0%A3-
 			// 十二建星每月兩「建」，即正月建寅、二月建卯、三月建辰……，依此類推。正月為寅月，所以六寅日（甲寅、丙寅、戊寅、庚寅、壬寅）中必須有兩個寅日和「建」遇到一起；二月為卯月，所以六卯日（乙卯、丁卯、己卯、辛卯、癸卯）中必須有兩個卯日和「建」遇到一起，否則就不對。逢節（立春、驚蜇、清明、立夏、芒種、小暑、立秋、白魯、寒露、立冬、大雪、小寒）兩個建星相重，這樣才能保證本月第一個與月支相同之日與「建」相遇。
 			十二直_LIST = '建除満平定執破危成納開閉'.split(''),
-			// "廿八星宿" @ 農民曆
+			// "廿八星宿" @ 農民曆: 東7北7西7南7
 			二十八宿_LIST = '角亢氐房心尾箕斗牛女虚危室壁奎婁胃昴畢觜参井鬼柳星張翼軫'.split(''),
 			// 二十八宿にあり二十七宿にはない宿は、牛宿である。
 			// will be splited latter.
 			二十七宿_LIST = '角亢氐房心尾箕斗女虚危室壁奎婁胃昴畢觜参井鬼柳星張翼軫',
 			// 旧暦（太陽太陰暦）における月日がわかれば、自動的に二十七宿が決定される。
 			// 各月の朔日の宿
-			二十七宿_offset = '室奎胃畢参鬼張角氐心斗虚'.split('');
+			二十七宿_offset = '室奎胃畢参鬼張角氐心斗虚'.split(''),
+			// 六十甲子納音 / 納音五行
+			// 《三命通會》《論納音取象》
+			// http://ctext.org/wiki.pl?if=gb&chapter=212352
+			納音_LIST = ('海中,爐中,大林,路旁,劍鋒,山頭,澗下,城頭,白蠟,楊柳,井泉,屋上,霹靂,松柏,長流,'
+			// 0 ~ 59 干支序轉納音: 納音_LIST[index / 2 | 0]; '/2': 0,1→0; 2,3→1; ...
+			+ '砂中,山下,平地,壁上,金泊,覆燈,天河,大驛,釵釧,桑柘,大溪,沙中,天上,石榴,大海').split(',');
 
 			// ---------------------------------------------------------------------//
 			// 初始調整並規範基本常數。
@@ -649,13 +655,32 @@ if (typeof CeL === 'function')
 				Object.seal(CE_REFORM_YEAR_DATA);
 
 				a = 二十七宿_offset;
-				d = 二十七宿_LIST.length;
+				// d = 二十七宿_LIST.length;
 				// 二十七宿_offset[m] 可得到 m月之 offset。
 				二十七宿_offset = new Array(START_MONTH);
 				a.forEach(function(first) {
 					二十七宿_offset.push(二十七宿_LIST.indexOf(first) - START_DATE);
 				});
 
+				// 為納音配上五行。
+				if (false) {
+					'金火木土金火水土金木水土火木水金火木土金火水土金木水土火木水'
+					// 六十甲子納音 / 納音五行
+					.replace(/(.)/g, function($0, 五行) {
+						var index = '火木水土金'.indexOf(五行);
+						return index === -1 ? $0 : index;
+					});
+					// "401340234123012401340234123012"
+					// 401340234123012
+					// 401 340 234 123 012
+					// 456 345 234 123 012
+				}
+
+				a = '火木水土金';
+				a += a;
+				for (d = 納音_LIST.length; d-- > 0;)
+					// "% 15": 30個 → 15個 loop : 0 ~ 14
+					納音_LIST[d] += a.charAt(4 - ((d % 15) / 3 | 0) + (d % 3));
 			})();
 
 			二十七宿_LIST = 二十七宿_LIST.split('');
@@ -3495,6 +3520,14 @@ if (typeof CeL === 'function')
 				+ (生肖 ? ' ' + comment_五行(date).replace(/金$/, '鐵') + 生肖 : '');
 			}
 
+			function comment_納音(date) {
+				var index = library_namespace.stem_branch_index(date);
+				// 0 ~ 59 干支序轉納音: 納音_LIST[index / 2 | 0];
+				// '/2': 0,1→0; 2,3→1; ...
+				// or [index >>> 1]
+				return 納音_LIST[index / 2 | 0];
+			}
+
 			function comment_二十八宿(date) {
 				// http://koyomi8.com/sub/rekicyuu_doc01.htm
 				// 日の干支などと同様、28日周期で一巡して元に戻り、これを繰り返すだけである。
@@ -3515,9 +3548,9 @@ if (typeof CeL === 'function')
 				? 二十七宿_LIST[index % 二十七宿_LIST.length] : '';
 			}
 
-			function comment_曜日(date) {
-				// 七曜
-				return 曜日_LIST[date.getDay()];
+			function comment_七曜(date) {
+				// 七曜, 曜日
+				return 七曜_LIST[date.getDay()];
 			}
 
 			function comment_六曜(date) {
@@ -3536,7 +3569,7 @@ if (typeof CeL === 'function')
 				return index >= 0 ? 月の別名_LIST[index] : '';
 			}
 
-			function comment_反支(date) {
+			function comment_反支(date, 六日反支標記) {
 				var 朔干支序 = (library_namespace
 				// 月朔日干支序。
 				// 36: 能被 library_namespace.BRANCH_LIST.length 整除，且>=大月 之數。
@@ -3548,16 +3581,15 @@ if (typeof CeL === 'function')
 				diff = date.日 - 第一反支日, 反支;
 				if (diff % 6 === 0
 				// 月朔日為子日之初一，亦可符合上述條件。
-				&& 0 <= diff) {
-					// 睡虎地和孔家坡:12日一反支
-					反支 = '反支';
-					if (diff % 12 !== 0)
+				&& 0 <= diff)
+					if (diff % 12 === 0)
+						// 睡虎地和孔家坡:12日一反支
+						反支 = '反支';
+					else if (六日反支標記)
 						// 標記孔家坡:6日一反支
-						反支 += '*';
-				} else
-					反支 = '';
+						反支 = 六日反支標記;
 
-				return 反支;
+				return 反支 || '';
 			}
 
 			function comment_血忌(date) {
@@ -3804,8 +3836,9 @@ if (typeof CeL === 'function')
 
 					反支 : comment_反支,
 					血忌 : comment_血忌,
-					曜日 : comment_曜日,
+					七曜 : comment_七曜,
 					六曜 : comment_六曜,
+					納音 : comment_納音,
 					二十八宿 : comment_二十八宿,
 					二十七宿 : comment_二十七宿
 				}
