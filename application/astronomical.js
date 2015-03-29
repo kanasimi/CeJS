@@ -336,7 +336,7 @@ if (typeof CeL === 'function')
 					}
 				}
 				return polynomial_value(ΔT_coefficients[index],
-						(year - ΔT_year_diff[index]) / 100);
+						(year - ΔT_year_base[index]) / 100);
 			}
 
 			_.deltaT = ΔT;
@@ -443,6 +443,99 @@ if (typeof CeL === 'function')
 
 			refraction.to_real = refraction_to_real;
 			_.refraction = refraction;
+
+			// ------------------------------------------------------------------------------------------------------//
+			// VSOP87
+
+			// 無用:因為 items[1,2] 已經是弧度。
+			function initialize_VSOP87(subteams) {
+				if (subteams.init)
+					// 另一 thread 正初始化中。
+					return;
+				subteams.init = true;
+
+				subteams.forEach(function(series) {
+					series.forEach(function(items) {
+						items[1] *= DEGREES_TO_RADIANS;
+						items[2] *= DEGREES_TO_RADIANS;
+					});
+				});
+
+				subteams.initialized = true;
+				delete subteams.init;
+			}
+
+			/**
+			 * VSOP87 行星位置計算
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 chapter 太陽位置計算.
+			 * 
+			 * Jean Meeus
+			 * 從VSOP87中取出一些主要項(詳見附錄II)，利用它計算得到的太陽位置在-2000到6000年範圍內精度是1"。<br />
+			 * 誤差 365.25*24*60*60/360/60/60 = 24.35秒鐘。相當於半分鐘。
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * @param {String}[object]
+			 *            行星
+			 * @param {Array|String}[team]
+			 *            team to get
+			 * 
+			 * @returns {Object} { L:日心黃經 longitude (弧度), B:日心黃緯 latitude (弧度),
+			 *          R:日地距離 radius vector(AU) }
+			 */
+			function VSOP87(JD, object, team) {
+				var object_teams, subteams,
+				// 儒略千年數 millennium
+				τ = Julian_century(JD) / 10,
+				//				
+				coordinate = library_namespace.null_Object();
+				if (!object)
+					// default
+					object = 'Earth';
+				object_teams = VSOP87_teams[object];
+				if (!team)
+					// request
+					// L:黃經 longitude + B:黃緯 latitude + R:距離 radius vector
+					team = 'LBR'.split('');
+				else if (!Array.isArray(team))
+					team = [ team ];
+
+				team.forEach(function(team_name) {
+					var coefficients = [], subteams = object_teams[team_name];
+					if (!subteams) {
+						library_namespace.err('VSOP87: Invalid team name: ['
+								+ team_name + ']');
+						return;
+					}
+
+					// 無用:因為 items[1,2] 已經是弧度。
+					if (false && !subteams.initialized)
+						initialize_VSOP87(subteams);
+
+					// series: 序列 L0,L1,..,B0,B1,..,R0,R1,..
+					subteams.forEach(function(series) {
+						coefficients.push(series.reduce(function(value, items) {
+							return value + items[0] * Math.cos(
+							// items: 三個數字項
+							// [A,B,C]
+							// 每項(表中各行)的值計算表達式是：
+							// A*cos(B+C*τ);
+							items[1] + items[2] * τ);
+						}, 0));
+					});
+
+					coordinate[team_name] =
+					// L=(L0+L1*τ+L2*τ^2+L3*τ^3+L4*τ^4+L5*τ^5)/10^8
+					polynomial_value(coefficients, τ) / 1e8;
+				});
+
+				return team.length > 1 ? coordinate : coordinate[team[0]];
+			}
+
+			_.VSOP87 = VSOP87;
 
 			// ------------------------------------------------------------------------------------------------------//
 			// 二十四節氣 (solar terms)
@@ -573,7 +666,7 @@ if (typeof CeL === 'function')
 			_.nutation = nutation;
 
 			/**
-			 * 太陽位置(坐標)計算
+			 * 太陽位置(坐標)計算。
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
@@ -647,7 +740,7 @@ if (typeof CeL === 'function')
 			 * @returns {Number} Julian date
 			 */
 			function JD_of_solar_angle(year, degrees) {
-				var difference, apparent,
+				var offset, apparent,
 				// index: 下界 index of 分點和至點, 0~3
 				index = degrees / EQUINOX_SOLSTICE_DEGREES | 0,
 				// JD 近似值(下界)。
@@ -672,7 +765,7 @@ if (typeof CeL === 'function')
 					apparent = solar_coordinate(JD).apparent;
 					// 由公式(26.1)得到對“大約時間”的修正量。
 					// +58 sin (k·90° - λ) (26.1)
-					difference = 58 * Math.sin((degrees - apparent)
+					offset = 58 * Math.sin((degrees - apparent)
 							* DEGREES_TO_RADIANS);
 					// ↑ 58: maybe 59 = 360/365.25*60 ??
 					// https://www.ptt.cc/bbs/sky/M.1175584311.A.8B8.html
@@ -680,13 +773,13 @@ if (typeof CeL === 'function')
 					if (false)
 						library_namespace.debug('index ' + index
 								+ ': apparent: ' + show_degrees(apparent)
-								+ ', difference in days: ' + difference);
+								+ ', offset in days: ' + offset);
 
-					if (Math.abs(difference) < JD_of_solar_angle.error)
+					if (Math.abs(offset) < JD_of_solar_angle.error)
 						// 當 error 設定得很小時，似乎會達到固定循環。
 						break;
 					// adapt 修正量。
-					JD += difference;
+					JD += offset;
 				}
 
 				return JD;
@@ -844,99 +937,6 @@ if (typeof CeL === 'function')
 
 			_.solar_term_of_JD = solar_term_of_JD;
 
-			// ------------------------------------------------------------------------------------------------------//
-			// VSOP87
-
-			// 無用:因為 items[1,2] 已經是弧度。
-			function initialize_VSOP87(subteams) {
-				if (subteams.init)
-					// 另一 thread 正初始化中。
-					return;
-				subteams.init = true;
-
-				subteams.forEach(function(series) {
-					series.forEach(function(items) {
-						items[1] *= DEGREES_TO_RADIANS;
-						items[2] *= DEGREES_TO_RADIANS;
-					});
-				});
-
-				subteams.initialized = true;
-				delete subteams.init;
-			}
-
-			/**
-			 * VSOP87 行星位置計算
-			 * 
-			 * 資料來源/資料依據:<br />
-			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
-			 * 《天文算法》 chapter 太陽位置計算.
-			 * 
-			 * Jean Meeus
-			 * 從VSOP87中取出一些主要項(詳見附錄II)，利用它計算得到的太陽位置在-2000到6000年範圍內精度是1"。<br />
-			 * 誤差 365.25*24*60*60/360/60/60 = 24.35秒鐘。相當於半分鐘。
-			 * 
-			 * @param {Number}JD
-			 *            Julian date
-			 * @param {String}[object]
-			 *            行星
-			 * @param {Array|String}[team]
-			 *            team to get
-			 * 
-			 * @returns {Object} { L:日心黃經 longitude (弧度), B:日心黃緯 latitude (弧度),
-			 *          R:日地距離 radius vector(AU) }
-			 */
-			function VSOP87(JD, object, team) {
-				var object_teams, subteams,
-				// 儒略千年數 millennium
-				τ = Julian_century(JD) / 10,
-				//				
-				coordinate = library_namespace.null_Object();
-				if (!object)
-					// default
-					object = 'Earth';
-				object_teams = VSOP87_teams[object];
-				if (!team)
-					// request
-					// L:黃經 longitude + B:黃緯 latitude + R:距離 radius vector
-					team = 'LBR'.split('');
-				else if (!Array.isArray(team))
-					team = [ team ];
-
-				team.forEach(function(team_name) {
-					var coefficients = [], subteams = object_teams[team_name];
-					if (!subteams) {
-						library_namespace.err('VSOP87: Invalid team name: ['
-								+ team_name + ']');
-						return;
-					}
-
-					// 無用:因為 items[1,2] 已經是弧度。
-					if (false && !subteams.initialized)
-						initialize_VSOP87(subteams);
-
-					// series: 序列 L0,L1,..,B0,B1,..,R0,R1,..
-					subteams.forEach(function(series) {
-						coefficients.push(series.reduce(function(value, items) {
-							return value + items[0] * Math.cos(
-							// items: 三個數字項
-							// [A,B,C]
-							// 每項(表中各行)的值計算表達式是：
-							// A*cos(B+C*τ);
-							items[1] + items[2] * τ);
-						}, 0));
-					});
-
-					coordinate[team_name] =
-					// L=(L0+L1*τ+L2*τ^2+L3*τ^3+L4*τ^4+L5*τ^5)/10^8
-					polynomial_value(coefficients, τ) / 1e8;
-				});
-
-				return team.length > 1 ? coordinate : coordinate[team[0]];
-			}
-
-			_.VSOP87 = VSOP87;
-
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 
 			/**
@@ -990,7 +990,7 @@ if (typeof CeL === 'function')
 			// All values of ΔT based on Morrison and Stephenson [2004]
 			// assume a value for the Moon's secular acceleration of -26
 			// arcsec/cy^2.
-			ΔT_year_diff = [ 1820, 1820, 2000, 2000, 1975, 1950, 1920, 1900,
+			ΔT_year_base = [ 1820, 1820, 2000, 2000, 1975, 1950, 1920, 1900,
 					1860, 1800, 1700, 1600, 1000, 0 ],
 			// 為統合、方便計算，在演算方法上作了小幅變動。
 			ΔT_coefficients = [

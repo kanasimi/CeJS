@@ -2203,6 +2203,8 @@ function affairs() {
 	// copy from data.date.
 	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
 	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+	//
+	建除_LIST = '建除滿平定執破危成收開閉'.split(''),
 	// for 皇紀.
 	kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset),
 	// for 泰國佛曆
@@ -2598,7 +2600,6 @@ function affairs() {
 		// 列具曆注
 		曆注 : '具注曆譜/曆書之補充注釋，常與風水運勢、吉凶宜忌相關。',
 		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
-		// TODO: 建除十二神(十二值位/十二值星/通勝十二建)、血忌等，都被歸入神煞體系
 		// TODO: 八節、二至啟閉四節、伏臘、八魁、天李、入官忌、日忌和歸忌
 		// see 欽定協紀辨方書
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/calendar_j.html
@@ -2645,6 +2646,45 @@ function affairs() {
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.納音(date) || '';
 		} ],
+
+		// http://koyomi8.com/sub/rekicyuu_doc01.htm#jyuunicyoku
+		//
+		// 欽定四庫全書 御定星厯考原卷五 日時總類 月建十二神
+		// http://ctext.org/wiki.pl?if=en&chapter=656830
+		// 厯書曰厯家以建除滿平定執破危成收開閉凡十二日周而復始觀所值以定吉凶每月交節則疊兩值日其法從月建上起建與斗杓所指相應如正月建寅則寅日起建順行十二辰是也
+		//
+		// 欽定協紀辨方書·卷四
+		// https://archive.org/details/06056505.cn
+		//
+		// http://blog.sina.com.cn/s/blog_3f5d24310100gj7a.html
+		// http://blog.xuite.net/if0037212000/02/snapshot-view/301956963
+		// https://sites.google.com/site/chailiong/home/zgxx/huangli/huandao
+		建除 : [
+				{
+					a : {
+						T : '建除'
+					},
+					R : '中曆曆注、日本の暦注の一つ。(中段十二直)\n建除十二神(十二值位/十二值星/通勝十二建)、血忌等，都被歸入神煞體系。\n交節採天文節氣，非實曆。',
+					href : 'https://zh.wikipedia.org/wiki/%E5%BB%BA%E9%99%A4%E5%8D%81%E4%BA%8C%E7%A5%9E',
+					S : 'font-size:.8em;'
+				}, function(date) {
+					if (/* date.準 || */date.精)
+						return '';
+					var JD = CeL.Date_to_JD(date.adapt_offset());
+					// 還原 local 之時間。
+					date.adapt_offset('');
+
+					var index = CeL.stem_branch_index(date)
+					// .5: 清明、立夏之類方為"節"，
+					// 添上初始 offset (9) 並保證 index >= 0。
+					// -1e-8: 交節當日即開始疊。因此此處之 offset 實際上算到了本日晚 24時，屬明日，需再回調至今日晚。
+					+ 建除_LIST.length + 9 + .5 - 1e-8
+					// 交節則疊兩值日。採天文節氣，非實曆。
+					// 30 = TURN_TO_DEGREES / (SOLAR_TERMS_NAME / 2)
+					// = 360 / (24 / 2)
+					- CeL.solar_coordinate(JD + 1).apparent / 30 | 0;
+					return 建除_LIST[index % 建除_LIST.length];
+				} ],
 
 		反支 : [ {
 			a : {
@@ -2725,21 +2765,6 @@ function affairs() {
 				: 七曜 === '土' ? 'color:#2b3' : ''
 			} : '';
 		} ],
-
-		// 暦注中段
-		// 十二直
-		// http://koyomi8.com/sub/rekicyuu_doc01.htm#jyuunicyoku
-		//
-		// 欽定四庫全書 御定星厯考原卷五 日時總類 月建十二神
-		// http://ctext.org/wiki.pl?if=en&chapter=656830
-		// 厯書曰厯家以建除滿平定執破危成收開閉凡十二日周而復始觀所值以定吉凶每月交節則疊兩值日其法從月建上起建與斗杓所指相應如正月建寅則寅日起建順行十二辰是也
-		//
-		// 欽定協紀辨方書·卷四
-		// https://archive.org/details/06056505.cn
-		//
-		// http://blog.sina.com.cn/s/blog_3f5d24310100gj7a.html
-		// http://blog.xuite.net/if0037212000/02/snapshot-view/301956963
-		// https://sites.google.com/site/chailiong/home/zgxx/huangli/huandao
 
 		/**
 		 * @see <a
