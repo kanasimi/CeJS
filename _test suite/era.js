@@ -2675,22 +2675,22 @@ function affairs() {
 					date.adapt_offset('');
 
 					var index = CeL.stem_branch_index(date)
-					// .5: 清明、立夏之類方為"節"，
+					// .5: 清明、立夏之類方為"節"，因此配合節氣序，需添加之 offset。
 					// 添上初始 offset (9) 並保證 index >= 0。
-					// -1e-8: 交節當日即開始疊。因此此處之 offset 實際上算到了本日晚 24時，屬明日，需再回調至今日晚。
+					// -1e-8: 交節當日即開始疊。因此此處之 offset 實際上算到了當日晚 24時，屬明日，需再回調至當日晚。
 					+ 建除_LIST.length + 9 + .5 - 1e-8
 					// 交節則疊兩值日。採天文節氣，非實曆。
 					// 30 = TURN_TO_DEGREES / (SOLAR_TERMS_NAME / 2)
 					// = 360 / (24 / 2)
 					- CeL.solar_coordinate(JD + 1).apparent / 30 | 0;
-					return 建除_LIST[index % 建除_LIST.length];
+					return 建除_LIST[index % 建除_LIST.length] || '';
 				} ],
 
 		反支 : [ {
 			a : {
 				T : '反支'
 			},
-			R : '反枳（反支）依睡虎地《日書》（12日一反支）和孔家坡《日書》（6日一反支，以淡色標示。）'
+			R : '中曆曆注。反枳（反支）依睡虎地《日書》（12日一反支）和孔家坡《日書》（6日一反支，以淡色標示。）'
 			//
 			+ '\n警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
 			href : 'http://www.bsm.org.cn/show_article.php?id=867',
@@ -2706,7 +2706,7 @@ function affairs() {
 			a : {
 				T : '血忌'
 			},
-			R : '血忌在唐宋曆書中仍為典型歷注項目，後世因之，直至清末，其推求之法及吉凶宜忌都無改變。血忌被歸入神煞體系。',
+			R : '中曆曆注。血忌在唐宋曆書中仍為典型歷注項目，後世因之，直至清末，其推求之法及吉凶宜忌都無改變。血忌被歸入神煞體系。',
 			href : 'http://shc2000.sjtu.edu.cn/030901/lishu.htm',
 			S : 'font-size:.8em;'
 		}, function(date) {
@@ -2776,7 +2776,7 @@ function affairs() {
 					a : {
 						T : '二十八宿'
 					},
-					R : '日本の暦注の一つ',
+					R : '中曆曆注、日本の暦注の一つ。',
 					href : 'https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
 					S : 'font-size:.8em;'
 				},
@@ -2799,6 +2799,15 @@ function affairs() {
 
 		// 九星は年、月、日、時刻それぞれに割り当てられる。
 		// http://koyomi8.com/sub/rekicyuu_doc01.htm#9sei
+		// http://d.hatena.ne.jp/nobml/20121231/1356881216
+		// https://ja.wikipedia.org/wiki/%E4%B9%9D%E6%98%9F#.E6.97.A5.E3.81.AE.E4.B9.9D.E6.98.9F
+		// http://www.fushantang.com/1012/1012d/j4083.html
+		// http://blog.xuite.net/chen992/twblog/99860418-%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B
+		// http://www.kaiun.com.tw/share_detail.asp?niid=33
+		// http://www.gtomb.com/news-31.html
+		// http://wenku.baidu.com/view/3dcb027302768e9951e738c3.html
+		// "冬至上元甲子起" "飛星之法上元甲子一白入中宮"
+		// http://blog.xuite.net/nortonwu1015/twblog/137586855
 
 		三元九運 : [
 				{
@@ -2810,7 +2819,7 @@ function affairs() {
 					href : 'http://www.twwiki.com/wiki/%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B',
 					S : 'font-size:.8em;'
 				}, function(date) {
-					return CeL.era.三元九運(date);
+					return CeL.era.三元九運(date) || '';
 				} ],
 
 		// --------------------------------------------------------------------
@@ -2824,7 +2833,7 @@ function affairs() {
 			R : '十二生肖紀年，屬相',
 			href : 'https://zh.wikipedia.org/wiki/%E7%94%9F%E8%82%96'
 		}, function(date) {
-			return CeL.era.生肖(date);
+			return CeL.era.生肖(date) || '';
 		} ],
 
 		五行 : [
@@ -2835,7 +2844,7 @@ function affairs() {
 					R : '陰陽五行紀年',
 					href : 'http://zh.wikipedia.org/wiki/%E4%BA%94%E8%A1%8C#.E4.BA.94.E8.A1.8C.E4.B8.8E.E5.B9.B2.E6.94.AF.E8.A1.A8'
 				}, function(date) {
-					return CeL.era.五行(date);
+					return CeL.era.五行(date) || '';
 				} ],
 
 		繞迥 : [ {
@@ -2847,7 +2856,7 @@ function affairs() {
 			+ '又稱勝生周。第一繞迥自公元1027年開始。\n此處採公曆改年而非藏曆，可能有最多前後一年的誤差。',
 			href : 'https://zh.wikipedia.org/wiki/%E7%BB%95%E8%BF%A5'
 		}, function(date) {
-			return CeL.era.繞迥(date);
+			return CeL.era.繞迥(date) || '';
 		} ],
 
 		// --------------------------------------------------------------------

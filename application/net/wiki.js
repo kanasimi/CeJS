@@ -216,12 +216,12 @@ function normalize_name_pattern(file_name, add_group) {
 
 /**
  * 創建匹配 [[File:file_name]] 之 patten。
- * 
+ *
  * @param {String}file_name
  *            file name
  * @param {String}flag
  *            RegExp flag
- * 
+ *
  * @returns {RegExp} 能 match [[File:file_name]] 之 patten。
  */
 function file_pattern(file_name, flag) {
@@ -267,7 +267,7 @@ if (false) {
 /**
  * 取得完整的模板token<br />
  * 此功能未來可能會統合於 parser 之中。
- * 
+ *
  * @param {String}wikitext
  *            模板前後之 content。<br />
  *            assert: wikitext 為良好結構 (well-constructed)。
@@ -275,7 +275,7 @@ if (false) {
  *            模板名
  * @param {Boolean}parse
  *            是否解析
- * 
+ *
  * @returns [ {String}完整的模板token, {String}模板名,
  *          {Array}parameters ].count = count('{{') -
  *          count('}}')，正常情況下應為 0。
@@ -347,12 +347,12 @@ function template_token(wikitext, template_name, parse) {
 //Parser.php: PHP parser that converts wiki markup to HTML.
 /**
  * TODO
- * 
+ *
  * @param {String}wikitext
  *            wikitext to parse
  * @param {Object}trigger
  *            觸發器 { node name : function(Array inside node) }
- * 
+ *
  * @returns {Array}
  */
 function parse_wikitext(wikitext, trigger) {
@@ -391,10 +391,10 @@ function parse_wikitext(wikitext, trigger) {
 
 /**
  * get the contents of page
- * 
+ *
  * @param {Object}page_data
  *            page data got from wiki API
- * 
+ *
  * @returns {String} content of page
  */
 function page_content(page_data) {
@@ -406,10 +406,10 @@ function page_content(page_data) {
 
 /**
  * get the id of page
- * 
+ *
  * @param {Object}page_data
  *            page data got from wiki API
- * 
+ *
  * @returns {String|Number} pageid
  */
 page_content.is_page_data = function(page_data) {
@@ -440,7 +440,7 @@ wiki_API.prototype.show_next = typeof JSON === 'object' && JSON.stringify ? func
 	var line = [], value;
 	for (var name in this.next_mark) {
 		value = this.next_mark[name];
-		line.push(name + ':' + (typeof value === 'string' 
+		line.push(name + ':' + (typeof value === 'string'
 		//
 		? '"' + value.replace(/"/g, '\\"') + '"' : value));
 	}
@@ -502,7 +502,7 @@ wiki_API.prototype.next = function() {
 			_this.last_titles = titles;
 			// [ page_data ]
 			_this.last_pages = pages;
-			if (library_namespace.is_Object(pages.next_index)) {
+			if (pages && library_namespace.is_Object(pages.next_index)) {
 				// pages.next_index: 後續檢索用索引值。例如 {backlinks:{blcontinue:'[0|12]'}}。
 				for ( var type in pages.next_index)
 					Object.assign(_this.next_mark, pages.next_index[type]);
@@ -514,8 +514,12 @@ wiki_API.prototype.next = function() {
 				next[2].call(_this, title, titles, pages);
 			else if (next[2] && next[2].each)
 				// next[2] : 當作 work，處理積存工作。
-				_this.work(next[2]);
-
+				if (pages)
+					_this.work(next[2]);
+				else
+					// 只有在本次有處理頁面時，才繼續下去。
+					library_namespace.info('無頁面可處理（已完成？），中斷跳出。');
+					
 			_this.next();
 		},
 		// next[3] : options
@@ -881,6 +885,11 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				});
 			else
 				library_namespace.log('log:<br />\n' + messages.join('<br />\n'));
+
+			// config.callback()
+			// 只有在成功時，才會繼續執行。
+			if (typeof config.after === 'function')
+				this.run(config.after);
 		});
 	}, {
 		multi : true
@@ -1062,7 +1071,7 @@ wiki_API.query.id_of_page = function(page_data, title_only) {
 
 /**
  * 讀取頁面內容。可一次處理多個標題。
- * 
+ *
  * @example <code>
 
 CeL.wiki.page('道', function(p) {
@@ -1246,7 +1255,7 @@ wiki_API.langlinks.parse = function(langlinks, to_lang) {
 
 /**
  * 自 title 頁面取得後續檢索用索引值。 e.g., query-continue
- * 
+ *
  * @param {String|Array}title
  *            the page title to search continue information
  * @param {Function|Object}callback
@@ -1260,7 +1269,7 @@ function get_continue(title, callback) {
 		options = library_namespace.null_Object();
 
 	wiki_API.page(title, function(page_data) {
-		var matched, content = page_content(page_data),
+		var matched, done, content = page_content(page_data),
 		// {RegExp}[options.pattern]:
 		// content.match(pattern) === [ , '{type:"continue"}' ]
 		pattern = options.pattern,
@@ -1276,23 +1285,28 @@ function get_continue(title, callback) {
 
 		while (matched = pattern.exec(content)) {
 			library_namespace.debug('continue data: [' + matched[1] + ']', 2);
-			data = Object.assign(data,
-			//
-			library_namespace.parse_JSON(matched[1]));
+			if (!(done = /^{\s*}$/.test(matched[1])))
+				data = Object.assign(data,
+				//
+				library_namespace.parse_JSON(matched[1]));
 		}
 
 		// options.get_all: get all continue data.
-		if (!options.get_all) {
-			// {String|Boolean}[options.type]: what type to search.
-			matched = options.type;
-			if (matched in get_list.type)
-				matched = get_list.type[matched] + 'continue';
+		if (!options.get_all)
+			if (done) {
+				library_namespace.debug('最後一次之後續檢索用索引值為空，可能已完成？');
+				data = null;
+			} else {
+				// {String|Boolean}[options.type]: what type to search.
+				matched = options.type;
+				if (matched in get_list.type)
+					matched = get_list.type[matched] + 'continue';
 
-			content = data;
-			data = library_namespace.null_Object();
-			if (matched in content)
-				data[matched] = content[matched];
-		}
+				content = data;
+				data = library_namespace.null_Object();
+				if (matched in content)
+					data[matched] = content[matched];
+			}
 
 		// callback({Object} continue data);
 		callback(data || library_namespace.null_Object());
@@ -1305,7 +1319,7 @@ function get_continue(title, callback) {
 /**
  * get list<br />
  * 注意:可能會改變 options!
- * 
+ *
  * @param {String}type
  *            one of get_list.type
  * @param {String}title
@@ -1347,6 +1361,12 @@ function get_list(type, title, callback, namespace) {
 				if (continue_data = continue_data[prefix + 'continue']) {
 					library_namespace.info('get_list: continue from [' + continue_data + ']');
 					options[prefix + 'continue'] = continue_data;
+				} else {
+					//delete options[prefix + 'continue'];
+					library_namespace.debug('Nothing to continue!', 1, 'get_list');
+					if (typeof callback === 'function')
+						callback();
+					return;
 				}
 				get_list(type, title, callback, options);
 			}
@@ -1599,7 +1619,7 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
 
 /**
  * 編輯頁面。一次處理一個標題。
- * 
+ *
  * @param {String|Array}title
  *            頁面標題。 {String}title or [ {String}API_URL, {String}title ]
  * @param {String|Function}text

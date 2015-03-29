@@ -114,7 +114,7 @@ if (typeof CeL === 'function')
 			DEGREES_TO_ARCSECONDS = 60 * 60,
 			// arcseconds * ARCSECONDS_TO_RADIANS = radians.
 			ARCSECONDS_TO_RADIANS = DEGREES_TO_RADIANS / DEGREES_TO_ARCSECONDS,
-			//
+			// 每一天86400秒鐘
 			ONE_DAY_SECONDS = 24 * 60 * 60,
 			// https://en.wikipedia.org/wiki/Epoch_%28astronomy%29#Julian_years_and_J2000
 			// J2000.0曆元
@@ -127,9 +127,9 @@ if (typeof CeL === 'function')
 			DAYS_OF_JULIAN_CENTURY = 36525,
 			// 1 astronomical unit = 149597870700 meters (exactly)
 			AU_TO_METERS = 149597870700,
-			// 4
+			// 每年 2 分點 + 2 至點
 			EQUINOX_SOLSTICE_COUNT = 2 + 2,
-			// 90
+			// 每分至點 90°
 			EQUINOX_SOLSTICE_DEGREES
 			//
 			= TURN_TO_DEGREES / EQUINOX_SOLSTICE_COUNT,
@@ -138,9 +138,9 @@ if (typeof CeL === 'function')
 			// Chinese name
 			'春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,立春,雨水,驚蟄'
 					.split(','),
-			// 24
+			// 每年24節氣
 			SOLAR_TERMS_COUNT = SOLAR_TERMS_NAME.length,
-			// 15
+			// 每節氣 15°
 			DEGREES_BETWEEN_SOLAR_TERMS = TURN_TO_DEGREES / SOLAR_TERMS_COUNT;
 
 			_.SOLAR_TERMS = SOLAR_TERMS_NAME;
@@ -182,6 +182,7 @@ if (typeof CeL === 'function')
 				return degree;
 			}
 
+			// 顯示易懂角度。
 			function show_degrees(degree, padding) {
 				if (!degree)
 					return '0°';
