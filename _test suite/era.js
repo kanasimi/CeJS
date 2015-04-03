@@ -206,6 +206,9 @@ CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
 // 可選用的文字式年曆欄位。
 selected_column = {
 	JDN : true,
+	// 'astronomical/solarterms' : true,
+	// 'astronomical/solarterm_days' : true,
+	// '曆注/日家九星' : true
 	contemporary : true
 },
 // 可選用的文字式年曆 title = { id : [th, function (date) {} ] }
@@ -1843,11 +1846,11 @@ initialize_thdl_solar_term = function() {
 	//
 	last_date = null, start_year, result = [],
 	//
-	data = ',,,,,,,,,,,,,,,,,,,,1516-01-10,15,15,15;xohayhfyt;yx7pjq7ut;13mepi9aok;1mmes224b9;xohayhfyt;dhgfgfgggfgfgfffdheffeff;13m8lqq0r8;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;gffgfggfgggffgffgdfeffff;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xt;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;ffgfgfgggfgidffffffefeff;13m8seg9xw;1mmes226ol;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;fgffeifgggfgfffffffefffe;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xr40fw2s5;yx7pjq7ut;13m8seg9xw;1mmes224b9;fffgfgggfggffgfcieffefff;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;yukmozl05;yx7pjq7ut;13m8seg9xw;gfidfggfgggffgffeffeffff;xr4dt80et;yxve4kklh;13m8seg9xx;xohayh6c5;xr4dt80et;yx7pjq7ut;13m8seg9xw;1mmes224b9;fffgfgggfggfgffffeffekaf;yx7pjq7ut;13m8seg9xt;1mmer82a8l;xohb0cv85;yx7pjq7ut;ffgfggfgggfgdhffffefffef;1mmer7lff9;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfez4l;xohayhfyt;yx7pjq5hh;yxvhgfp75;13wxjfez4l;xohayh6hh;yx7pjq5hh;yxvhgfp75;13mephsfv9;xohaqzhg5;xr4dt80ht;f2aum04lt;13mephsfwl;xohayh6hh;xr4dt80et;yx7pr7ww5;13m8seg9xx;xohayh6hh;xr40hri1h;yx7pr7ww5;13m8seg9xw;1mmes226ol;xohb0cv85;yx7pjq7ut;13m8seg9xt;1mmer7lff9;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfj6tx;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfj6tx;xohayhfyt;yul02bio5;yv8rz2dsh;13mephsfv9;fffgfgggfggffgffefffekaf;xr4dt80g5;yxve4kklt;13mephsfv9;xohayh6hh;xr4dt80g5;yx7pr7wwh;fgffggfggggffgffeff00000;,,,,,,,,,,,,,,,,,,,1690-01-05,14,15,15,15;xr40hri1h;yx7pr7ww5;13mephsfvl;xofton505;xohb0cv85;yx7pjq7ut;13m8seg9xw;1mmer83c5x;xohb0cv85;yx7pjq7ut;yxvhgfpsk;1mmer7i9n9;xohb0cv85;yx7pjq7ut;yxvhgfpsh;13wxjfj6tx;xohayhfyt;yx7pjq7ut;13m8seg9ch;13wxjfez4l;xohayhfyt;yx7pjq7ut;yxve4kklt;13mephsfv9;xohayh6hh;xr4dt80g5;yxdmuk2tt;13m8seg9xx;fffgfgggfggffdifefffefff;xr40hri2t;ffgfgfgggfggffffffefdhef;13m8seg9xx;xoftoixat;xohb0cv9h;yx7pjq7ut;13m8seg9xx;xofsuocut;xohb0cv85;yx7pjq7ut;13m8seg9xw;gffgfggfggcjfgffefffefff;xohb0cv8h;yx7pjq7ut;yxvhgfpsl;xofsu28et;xohayhfyt;yx7pjq7v5;13m8p2l5cl;xofsu289h;xohayhfyt;yx7pjq7ut;13m8p2l5cl;xofsu289h;xohayh6hh;yx7c89phh;13m8ov3fpw;1mmer7h7px;xofsuocut;yx7c89n45;yxvdx2vkk;1mm8u451sl;xofsuocut;ymoian3ut;yx7pjq7v5;1mm8u451sl;xofsu7i1h;yx7c89n45;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xr40fw2th;yx7pjq7v5;13m8seg9xx;xofsu6g45;xr40fw2th;yx7pjq7v5;13m8p2l5cl;xoffilq1h;xohayhg05;yx7pjq7v5;fghdggfggfggfffffffeffff;xp3h7ew45;xohayhfyt;yx7pjq7ut;13m8p2l5cl;xofsu289h;xoha4inth;yx7c89phh;13m8ov3gb8;1mm8u451sl;xofsuocut;yx7c89phh;ffgfggfggfgfgfffffefffja;1mm8u451sl;fffgfgdiggfgfgffefffefff;yx7c89n45;yx7pjq7v5;1mbq06iij9;xofsu7i1h;yx7c6e7ut;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xr40fw2th;yy1b0f1ht;13m8p2l5cl;xofsu6g4h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu28et;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu28et;xohayhfyt;yx7c89phh;13m8ov3gb9;xofsu289h;xofsuomc5;yx7c89phh;14sc0lllck;1mm8u451sl;xofsuocut;yx7c89phh;yx7pjq7v8;1mm8u451sl;xofsuocut;yx7c89n45;yx7pjq7v5;1mbq06iij9;xofsu7i1h;yx7c6e7ut;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2mgr9;xofsu28et;xohayhg05;yx7c89pht;13ll0p8hn9;xofsu28et;xofsuomdh;yx7c89pht;13melyfm8l;xo9vqq2hh;xofsuomc5;yx7c89phh;13m8ov3gb9;xo9vqq2c5;xofsuomc5;yx7c89phh;yx7pjq8gk;1mbvx9uogl;xofsuocut;yx7c89phh;yx7pjq7v8;1mbq06iij9;xofstz2mt;xr40fw2th;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu6g45;xohayhg05;yx7c89pht;13wrispzkl;xo9if9k45;xofsuomdh;yx7c89pht;13m8ov3gb9;xo9vr6xat;xofsuomc5;yx7c89phh;13lkn6aa8l;xo9vqq2hh;xofsuomc5;yx7c89phh;yx7pjq8gk;1mbq06iij9;xofsuocut;yx7beaxc5;yx7pjq7v8;1mbq06iij9;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7c89pht;13m8p2l5cl;xofsu6g45;xofsuomdh;yx7c89pht;13m8ov3gb9;xo9vqq2hg;13wxjg1d8l;yx7c89pht;13ll0hqslx;xo9vqq2hh;xofsuomdh;yx7c89pht;13ll0hqslx;xo9vqq2hi;8qguh9mvp;yx7c89phh;yx7pjpwlw;1mbq06iij9;xofsuocut;yx7c89phh;yx7pjq8gk;1mbpwundxx;fffgfggfggfgffgfdfgfefff;xohayhidh;yx7pjq7v8;13m8p2l5cl;xofsu7hud;xohaymqf9;yx7c89pht;13m8p2l5cl;xofsu7i1h;xoftoneit;yx7c89pht;13m8p2l5cl;xo9vqvc45;xofsuomdh;yx7c89pht;13m8ov3dxx;xo9vqq2hh;xofsuomdh;yx7c89pht;13ll0hqslx;xo9vqq2hh;fffgfggfggfgfgfffef00000'
+	data = ',,,,,,,,,,,,,,,,,,,,1516-01-10,15,15,15;xohayhfyt;yx7pjq7ut;13mepi9aok;1mmes224b9;xohayhfyt;dhgfgfgggfgfgfffdheffeff;13m8lqq0r8;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9yt;gegffgffffgfffgffffgfdff;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;gffgfggfgggffgffgdfeffff;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xt;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;ffgfgfgggfgidffffffefeff;13m8seg9xw;1mmes226ol;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;fgffeifgggfgfffffffefffe;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xr40fw2s5;yx7pjq7ut;13m8seg9xw;1mmes224b9;fffgfgggfggffgfcieffefff;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;yukmozl05;yx7pjq7ut;13m8seg9xw;gfidfggfgggffgffeffeffff;xr4dt80et;yxve4kklh;13m8seg9xx;xohayh6c5;xr4dt80et;yx7pjq7ut;13m8seg9xw;1mmes224b9;fffgfgggfggfgffffeffekaf;yx7pjq7ut;13m8seg9xt;1mmer82a8l;xohb0cv85;yx7pjq7ut;ffgfggfgggfgdhffffefffef;1mmer7lff9;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfez4l;xohayhfyt;yx7pjq5hh;yxvhgfp75;13wxjfez4l;xohayh6hh;yx7pjq5hh;yxvhgfp75;13mephsfv9;xohaqzhg5;xr4dt80ht;f2aum04lt;13mephsfwl;xohayh6hh;xr4dt80et;yx7pr7ww5;13m8seg9xx;xohayh6hh;xr40hri1h;yx7pr7ww5;13m8seg9xw;1mmes226ol;xohb0cv85;yx7pjq7ut;13m8seg9xt;1mmer7lff9;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfj6tx;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfj6tx;xohayhfyt;yul02bio5;yv8rz2dsh;13mephsfv9;fffgfgggfggffgffefffekaf;xr4dt80g5;yxve4kklt;13mephsfv9;xohayh6hh;xr4dt80g5;yx7pr7wwh;fgffggfggggffgffeff00000;,,,,,,,,,,,,,,,,,,,1690-01-05,14,15,15,15;xr40hri1h;yx7pr7ww5;13mephsfvl;xofton505;xohb0cv85;yx7pjq7ut;13m8seg9xw;1mmer83c5x;xohb0cv85;yx7pjq7ut;yxvhgfpsk;1mmer7i9n9;xohb0cv85;yx7pjq7ut;yxvhgfpsh;13wxjfj6tx;xohayhfyt;yx7pjq7ut;13m8seg9ch;13wxjfez4l;xohayhfyt;yx7pjq7ut;yxve4kklt;13mephsfv9;xohayh6hh;xr4dt80g5;yxdmuk2tt;13m8seg9xx;fffgfgggfggffdifefffefff;xr40hri2t;ffgfgfgggfggffffffefdhef;13m8seg9xx;xoftoixat;xohb0cv9h;yx7pjq7ut;13m8seg9xx;xofsuocut;xohb0cv85;yx7pjq7ut;13m8seg9xw;gffgfggfggcjfgffefffefff;xohb0cv8h;yx7pjq7ut;yxvhgfpsl;xofsu28et;xohayhfyt;yx7pjq7v5;13m8p2l5cl;xofsu289h;xohayhfyt;yx7pjq7ut;13m8p2l5cl;xofsu289h;xohayh6hh;yx7c89phh;13m8ov3fpw;1mmer7h7px;xofsuocut;yx7c89n45;yxvdx2vkk;1mm8u451sl;xofsuocut;ymoian3ut;yx7pjq7v5;1mm8u451sl;xofsu7i1h;yx7c89n45;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xr40fw2th;yx7pjq7v5;13m8seg9xx;xofsu6g45;xr40fw2th;yx7pjq7v5;13m8p2l5cl;xoffilq1h;xohayhg05;yx7pjq7v5;fghdggfggfggfffffffeffff;xp3h7ew45;xohayhfyt;yx7pjq7ut;13m8p2l5cl;xofsu289h;xoha4inth;yx7c89phh;13m8ov3gb8;1mm8u451sl;xofsuocut;yx7c89phh;ffgfggfggfgfgfffffefffja;1mm8u451sl;fffgfgdiggfgfgffefffefff;yx7c89n45;yx7pjq7v5;1mbq06iij9;xofsu7i1h;yx7c6e7ut;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xr40fw2th;yy1b0f1ht;13m8p2l5cl;xofsu6g4h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu28et;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu28et;xohayhfyt;yx7c89phh;13m8ov3gb9;xofsu289h;xofsuomc5;yx7c89phh;14sc0lllck;1mm8u451sl;xofsuocut;yx7c89phh;yx7pjq7v8;1mm8u451sl;xofsuocut;yx7c89n45;yx7pjq7v5;1mbq06iij9;xofsu7i1h;yx7c6e7ut;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2mgr9;xofsu28et;xohayhg05;yx7c89pht;13ll0p8hn9;xofsu28et;xofsuomdh;yx7c89pht;13melyfm8l;xo9vqq2hh;xofsuomc5;yx7c89phh;13m8ov3gb9;xo9vqq2c5;xofsuomc5;yx7c89phh;yx7pjq8gk;1mbvx9uogl;xofsuocut;yx7c89phh;yx7pjq7v8;1mbq06iij9;xofstz2mt;xr40fw2th;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu6g45;xohayhg05;yx7c89pht;13wrispzkl;xo9if9k45;xofsuomdh;yx7c89pht;13m8ov3gb9;xo9vr6xat;xofsuomc5;yx7c89phh;13lkn6aa8l;xo9vqq2hh;xofsuomc5;yx7c89phh;yx7pjq8gk;1mbq06iij9;xofsuocut;yx7beaxc5;yx7pjq7v8;1mbq06iij9;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7c89pht;13m8p2l5cl;xofsu6g45;xofsuomdh;yx7c89pht;13m8ov3gb9;xo9vqq2hg;13wxjg1d8l;yx7c89pht;13ll0hqslx;xo9vqq2hh;xofsuomdh;yx7c89pht;13ll0hqslx;xo9vqq2hi;8qguh9mvp;yx7c89phh;yx7pjpwlw;1mbq06iij9;xofsuocut;yx7c89phh;yx7pjq8gk;1mbpwundxx;fffgfggfggfgffgfdfgfefff;xohayhidh;yx7pjq7v8;13m8p2l5cl;xofsu7hud;xohaymqf9;yx7c89pht;13m8p2l5cl;xofsu7i1h;xoftoneit;yx7c89pht;13m8p2l5cl;xo9vqvc45;xofsuomdh;yx7c89pht;13m8ov3dxx;xo9vqq2hh;xofsuomdh;yx7c89pht;13ll0hqslx;xo9vqq2hh;fffgfggfggfgfgfffef00000'
 			.split(';');
 
 	data.forEach(function(year_data, index) {
-		if (year_data.contains(',')) {
+		if (year_data.includes(',')) {
 			year_data = year_data.split(',');
 			year_data.forEach(function(solar_term, index) {
 				if (!year_data[index])
@@ -1899,6 +1902,73 @@ initialize_thdl_solar_term = function() {
 
 	initialize_thdl_solar_term = null;
 }
+
+// ---------------------------------------------------------------------//
+
+var 九星_LIST = '一白水星,二黒土星,三碧木星,四緑木星,五黄土星,六白金星,七赤金星,八白土星,九紫火星'.split(',');
+
+// 日家九星遁起始日
+// http://koyomi8.com/sub/9sei.htm
+// 注意:此處夏至、冬至皆指 CE 當年。例如 2000 年冬至指 2000/12 之冬至。
+function 遁開始日(年, 冬至) {
+	if (年 % 1 >= .5)
+		冬至 = true;
+	年 = Math.floor(年);
+
+	var cache = 遁開始日[冬至 ? '冬' : '夏'];
+	if (年 in cache)
+		return cache[年];
+
+	var 閏,
+	// 60/2=30
+	HALF_LENGTH = CeL.SEXAGENARY_CYCLE_LENGTH / 2 | 0,
+	// 夏至・冬至の日付を計算する
+	// 夏至 90° 節氣序 index 6, 冬至 270° 節氣序 index 18.
+	// 夏至後至冬至間: 夏至 JD, else 冬至 JD.
+	至日JD = CeL.solar_term_JD(年, 冬至 ? 6 + 12 : 6),
+	//
+	至日干支序 = CeL.stem_branch_index(CeL.JD_to_Date(至日JD)),
+	// 取前一個甲子作分界日。
+	開始日JD = 至日JD - 至日干支序;
+
+	CeL.debug(年 + '年' + (冬至 ? '冬至 ' : '夏至 ')
+	//
+	+ CeL.JD_to_Date(至日JD).format(draw_era.date_options), 2);
+
+	if (HALF_LENGTH <= 至日干支序) {
+		// 取後一個甲子，最接近前至日。
+		開始日JD += CeL.SEXAGENARY_CYCLE_LENGTH;
+		// 3=366/2-遁週期(180), 只有在這範圍內才需要檢查是否以閏起始。
+		if (至日干支序 < HALF_LENGTH + 3) {
+			// 年 - 1 : 算前一年的冬至。
+			var 前至日JD = CeL.solar_term_JD(冬至 ? 年 : 年 - 1,
+			//
+			冬至 ? 6 : 6 + 12),
+			//
+			前至日干支序 = CeL.stem_branch_index(
+			//	
+			CeL.JD_to_Date(前至日JD));
+			CeL.debug('前至日 ' + CeL.JD_to_Date(前至日JD).format(
+			//
+			draw_era.date_options) + ' 干支序 ' + 前至日干支序, 2);
+			if (前至日干支序 <= HALF_LENGTH) {
+				// 順便紀錄前至日遁開始日
+				遁開始日[冬至 ? '夏' : '冬'][冬至 ? 年 : 年 - 1] = [ 前至日JD - 前至日干支序 ];
+				CeL.debug('遇日家九星の「閏」，開始日前移' + HALF_LENGTH + '日。', 2);
+				閏 = true;
+				開始日JD -= HALF_LENGTH;
+			}
+		}
+	}
+
+	return 遁開始日[冬至 ? '冬' : '夏'][年] = [ 開始日JD, 閏 ];
+}
+
+// 遁開始日 cache
+// 遁開始日.夏[年] = [ 夏至前後陰遁開始日JD, 閏 ];
+遁開始日.夏 = [];
+// 遁開始日.冬[年] = [ 冬至前後陽遁開始日JD, 閏 ];
+遁開始日.冬 = [];
 
 // ---------------------------------------------------------------------//
 
@@ -2336,7 +2406,7 @@ function affairs() {
 			a : {
 				T : '天文節氣'
 			},
-			R : '節氣 + 交節時刻(@當地時間)或七十二候。計算得出，非實曆。誤差約在前後十秒鐘內。\n'
+			R : '節氣 + 交節時刻(@當地時間)或七十二候。計算得出，非實曆。誤差約前後一分鐘。\n'
 			//
 			+ '節氣之後每五日一候，非採用 360/72 = 5° 一候。\n'
 			//
@@ -2352,9 +2422,29 @@ function affairs() {
 				pentads : true,
 				time : true
 			});
-			return !date || date.contains('候') ? date : {
+			return !date || date.includes('候') ? date : {
 				b : date
 			};
+		} ],
+
+		solarterm_days : [ {
+			a : {
+				T : '節氣經過日數'
+			},
+			R : '天文節氣 經過日數',
+			href : 'https://zh.wikipedia.org/wiki/%E8%8A%82%E6%B0%94',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			var JD = CeL.Date_to_JD(date.adapt_offset());
+			// 還原 local 之時間。
+			date.adapt_offset('');
+
+			date = CeL.solar_term_of_JD(JD, {
+				days : true
+			});
+			return CeL.SOLAR_TERMS[date[0]] + ' ' + date[1];
 		} ],
 
 		apparent : [
@@ -2362,7 +2452,7 @@ function affairs() {
 					a : {
 						T : 'apparent longitude'
 					},
-					R : '太陽的視黃經, the apparent geocentric celestial longitude of the Sun.',
+					R : '紀元使用當地、當日零時，太陽的視黃經, the apparent geocentric celestial longitude of the Sun.',
 					href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
 				},
 				function(date) {
@@ -2614,7 +2704,7 @@ function affairs() {
 			},
 			R : '明朝、清朝、中國傳統曆法 (1516–1941 CE) 之實曆節氣 from 時間規範資料庫.\n'
 			//
-			+ '有些問題須注意，見使用說明。',
+			+ '有些嚴重問題須注意，見使用說明。',
 			href : 'http://140.112.30.230/datemap/reference.php'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -2777,7 +2867,7 @@ function affairs() {
 						T : '二十八宿'
 					},
 					R : '中曆曆注、日本の暦注の一つ。',
-					href : 'https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
+					href : 'https://zh.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
 					S : 'font-size:.8em;'
 				},
 				function(date) {
@@ -2797,10 +2887,12 @@ function affairs() {
 					return /* !date.準 && */!date.精 && CeL.era.二十七宿(date) || '';
 				} ],
 
+		// 日時九星推法
 		// 九星は年、月、日、時刻それぞれに割り当てられる。
+		// http://koyomi.vis.ne.jp/doc/mlwa/201007040.htm
+		// https://ja.wikipedia.org/wiki/%E4%B9%9D%E6%98%9F#.E6.97.A5.E3.81.AE.E4.B9.9D.E6.98.9F
 		// http://koyomi8.com/sub/rekicyuu_doc01.htm#9sei
 		// http://d.hatena.ne.jp/nobml/20121231/1356881216
-		// https://ja.wikipedia.org/wiki/%E4%B9%9D%E6%98%9F#.E6.97.A5.E3.81.AE.E4.B9.9D.E6.98.9F
 		// http://www.fushantang.com/1012/1012d/j4083.html
 		// http://blog.xuite.net/chen992/twblog/99860418-%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B
 		// http://www.kaiun.com.tw/share_detail.asp?niid=33
@@ -2808,17 +2900,68 @@ function affairs() {
 		// http://wenku.baidu.com/view/3dcb027302768e9951e738c3.html
 		// "冬至上元甲子起" "飛星之法上元甲子一白入中宮"
 		// http://blog.xuite.net/nortonwu1015/twblog/137586855
+		日家九星 : [ {
+			a : {
+				T : '日家九星'
+			},
+			R : '日本の暦注の一つ。此處採日本算法。',
+			href : 'http://koyomi8.com/sub/9sei.htm'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			var JD = CeL.Date_to_JD(date.adapt_offset());
+			// 還原 local 之時間。
+			date.adapt_offset('');
+
+			var index, 年 = date.getFullYear();
+			if (date.getMonth() < 6)
+				年 -= .5;
+			// 確定 date 之前一至日。
+			// +1 : JD 為當地當天0時。但交節時刻會在至日0時之後。因此需算到整日過完，即 JD+1。
+			while (遁開始日(年 + .5)[0] <= JD + 1)
+				年 += .5;
+			CeL.debug(遁開始日(年) + ' - ' + JD + ' - ' + 遁開始日(年 + .5)
+			//
+			+ ' (' + (遁開始日(年 + .5)[0] - 遁開始日(年)[0]) + ')', 2);
+			index = 遁開始日(年);
+			var days = JD + 1 - index[0] | 0,
+			//
+			S = days === 0 ? '#faa' : index[1] ? '#afa' : '';
+			// assert: 0 <= days < 210 (or 180=(366/2/60|0)*60)
+			index = days + (index[1] ? CeL.SEXAGENARY_CYCLE_LENGTH : 0);
+			if (年 % 1 === 0) {
+				// 夏至後→冬至間。陰遁、逆飛。
+				if (!S)
+					S = '#efa';
+				// 將 index 轉為逆序。
+				index = (-index - 1) % 九星_LIST.length;
+				if (index < 0)
+					index += 九星_LIST.length;
+			} else
+				// 冬至後→夏至間。
+				index %= 九星_LIST.length;
+
+			index = 九星_LIST[index] + ' (' + days
+			//
+			+ (年 % 1 === 0 ? '↘' : '↗') + ')';
+
+			return S ? {
+				span : index,
+				S : 'background-color:' + S
+			} : index;
+		} ],
 
 		三元九運 : [
 				{
 					a : {
 						T : '三元九運'
 					},
-					R : '玄空飛星一派風水三元九運，又名「洛書運」。\n* 公曆2月3至5日立春後才改「運」，但此處恆定為2月4日改，會因此造成誤差。',
+					R : '二十年一運。玄空飛星一派風水三元九運，又名「洛書運」。\n* 公曆2月3至5日立春後才改「運」，但此處恆定為2月4日改，會因此造成誤差。',
 					// http://www.hokming.com/fengshui-edit-threeyuennineyun.htm
 					href : 'http://www.twwiki.com/wiki/%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B',
 					S : 'font-size:.8em;'
 				}, function(date) {
+					// TODO: 立春後改「運」
 					return CeL.era.三元九運(date) || '';
 				} ],
 
@@ -2861,7 +3004,7 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		// 編年法/編年方法。
-		'Year numbering' : '以數字計算年份的方法',
+		'Year numbering' : '以不重複數字計算年份的方法',
 
 		Minguo : [
 				{

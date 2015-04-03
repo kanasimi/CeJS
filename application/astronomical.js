@@ -14,6 +14,8 @@
  * http://eclipse.gsfc.nasa.gov/JSEX/JSEX-index.html
  * http://en.wikipedia.org/wiki/New_moon
  * http://www.informatik.uni-leipzig.de/~duc/amlich/calrules.html
+ * http://blog.csdn.net/songgz/article/details/2680144
+ * http://www.todayonhistory.com/wnl/lhl.htm
  * @see <a href="http://www.nongli.com/item2/index.html" accessdate="2013/5/2
  *      20:23">农历知识:传统节日,24节气，农历历法，三九，三伏，天文历法,天干地支阴阳五行</a>
  * @see <a href="http://www.chinesefortunecalendar.com/CLC/clcBig5.htm"
@@ -48,6 +50,13 @@ if (false) {
 		CeL.assert([ CeL.polynomial_value([ 3, 4, 5, 6 ], 2),
 				3 + 4 * 2 + 5 * 2 * 2 + 6 * 2 * 2 * 2 ], 'polynomial value');
 
+		// http://songgz.iteye.com/blog/1571007
+		CeL.assert([ 66, Math.round(CeL.deltaT(2008)) ],
+				'get ΔT of year 2008 in seconds');
+		CeL.assert([ 29, Math.round(CeL.deltaT(1950)) ],
+				'get ΔT of year 1950 in seconds');
+		CeL.assert([ 5710, Math.round(CeL.deltaT(500)) ],
+				'get ΔT of year 500 in seconds');
 		CeL.assert([ 1.11, Math.round(10 * CeL.deltaT(2010) / 6) / 100 ],
 				'get ΔT of year 2010 in minutes');
 		CeL.assert([ 95.17, Math.round(10 * CeL.deltaT(500) / 6) / 100 ],
@@ -272,7 +281,7 @@ if (typeof CeL === 'function')
 			 */
 			function mean_obliquity_Laskar(JD) {
 				return polynomial_value(Laskar_obliquity_coefficients,
-				// J2000.0起算的儒略萬年數
+				// J2000.0 起算的儒略萬年數
 				Julian_century(JD) / 100);
 			}
 
@@ -306,6 +315,8 @@ if (typeof CeL === 'function')
 			 * 日常生活中使用 UTC, 接近 Universal Time (UT, 世界時標), 主要為 UT1。<br />
 			 * <br />
 			 * 天文計算用時間 TT = 日常生活時間 UT + ΔT
+			 * 
+			 * NOT △T
 			 * 
 			 * @param {Number}year
 			 *            the year value of time = year + (month - 0.5) / 12
@@ -348,6 +359,7 @@ if (typeof CeL === 'function')
 			/**
 			 * true apparent in degrees ← apparent altitude.<br />
 			 * 大氣折射公式: 真地平緯度 ← 視地平緯度<br />
+			 * 大氣折射又稱蒙氣差、折光差（蒙氣即行星的大氣）
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms.<br />
@@ -484,8 +496,9 @@ if (typeof CeL === 'function')
 			 * @param {Array|String}[team]
 			 *            team to get
 			 * 
-			 * @returns {Object} { L:日心黃經 longitude (弧度), B:日心黃緯 latitude (弧度),
-			 *          R:日地距離 radius vector(AU) }
+			 * @returns {Object} { L:日心黃經 longitude in radians (弧度), B:日心黃緯
+			 *          latitude in radians (弧度), R:日地距離 radius vector in AU
+			 *          (Astronomical Units) }
 			 */
 			function VSOP87(JD, object, team) {
 				var object_teams, subteams,
@@ -519,6 +532,9 @@ if (typeof CeL === 'function')
 					// series: 序列 L0,L1,..,B0,B1,..,R0,R1,..
 					subteams.forEach(function(series) {
 						coefficients.push(series.reduce(function(value, items) {
+							if (items.length === 1)
+								return value + items[0];
+							// assert: items.length === 3
 							return value + items[0] * Math.cos(
 							// items: 三個數字項
 							// [A,B,C]
@@ -529,8 +545,11 @@ if (typeof CeL === 'function')
 					});
 
 					coordinate[team_name] =
-					// L=(L0+L1*τ+L2*τ^2+L3*τ^3+L4*τ^4+L5*τ^5)/10^8
-					polynomial_value(coefficients, τ) / 1e8;
+					// L=(L0+L1*τ+L2*τ^2+L3*τ^3+L4*τ^4+L5*τ^5)/10^8 (倍數: 10^-8)
+					polynomial_value(coefficients, τ);
+					// 倍數
+					if (object_teams.multiplier > 0)
+						coordinate[team_name] *= object_teams.multiplier;
 				});
 
 				return team.length > 1 ? coordinate : coordinate[team[0]];
@@ -538,11 +557,17 @@ if (typeof CeL === 'function')
 
 			_.VSOP87 = VSOP87;
 
+			function VSOP87_add_teams(object, teams) {
+				VSOP87_teams[object] = teams;
+			}
+
+			VSOP87.add_teams = VSOP87_add_teams;
+
 			// ------------------------------------------------------------------------------------------------------//
 			// 二十四節氣 (solar terms)
 
 			/**
-			 * 太陽地心黃經光行差修正量
+			 * 太陽地心黃經光行差修正量。
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms.<br />
@@ -575,7 +600,7 @@ if (typeof CeL === 'function')
 			 * @param {Integer}year
 			 *            年
 			 * @param {Integer}index
-			 *            0–3: [ 春分, 夏至, 秋分, 冬至 ]<br />
+			 *            0–3: [ 3月春分 0°, 6月夏至 90°, 9月秋分 180°, 12月冬至 270° ]<br />
 			 *            aka. [ March equinox, June solstice, September
 			 *            equinox, December solstice ]
 			 * 
@@ -586,12 +611,12 @@ if (typeof CeL === 'function')
 				// meaningless results!
 				var JD = (year |= 0) < 1000 ? equinox_teams_before_1000
 						: equinox_teams_after_1000;
-				// 計算相應的平分點或平至點的時刻。
+				// 計算相應的"平"分點或"平"至點的時刻。
 				JD = polynomial_value(JD[index |= 0], (year < 1000 ? year
 						: year - 2000) / 1000);
 
 				if (no_fix)
-					// get 太陽分點和至點"平"黃經
+					// get 太陽分點和至點"平"黃經。
 					return JD;
 
 				var T = Julian_century(JD),
@@ -624,7 +649,7 @@ if (typeof CeL === 'function')
 			_.equinox = equinox;
 
 			/**
-			 * 章動 nutation 修正值
+			 * 章動 nutation 修正值。
 			 * 
 			 * @param {Number}JD
 			 *            Julian date
@@ -667,7 +692,9 @@ if (typeof CeL === 'function')
 			_.nutation = nutation;
 
 			/**
-			 * 太陽位置(坐標)計算。
+			 * 太陽位置(坐標)計算。<br />
+			 * ObsEcLon (Observer ecliptic lon. & lat.) or PAB-LON (PHASE angle &
+			 * bisector) @ HORIZONS?
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
@@ -787,18 +814,18 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * 最多趨近 JD_of_solar_angle.max_calculations 次。
+			 * 最多計算(趨近) (JD_of_solar_angle.max_calculations) 次。
 			 * 
-			 * @type Integer
+			 * @type Integer > 0
 			 */
 			JD_of_solar_angle.max_calculations = 20 | 0;
 
 			/**
 			 * 可接受之最大誤差。<br />
-			 * 即使設為 0，最多也只會計算 JD_of_solar_angle.max_calculations 次。<br />
-			 * 當 error 設定得很小時，似乎會達到固定循環。因此不應該設為0，否則以所採用方法將不會收斂。
+			 * 即使設為 0，最多也只會計算 (JD_of_solar_angle.max_calculations) 次。<br />
+			 * 當 error 設定得很小時，似乎會達到固定循環。因此此值不應該設為 0，否則以所採用方法將不會收斂。
 			 * 
-			 * @type Number
+			 * @type Number > 0
 			 */
 			JD_of_solar_angle.error = 2e-10;
 
@@ -848,22 +875,27 @@ if (typeof CeL === 'function')
 			var solar_term_cache = [];
 
 			/**
-			 * 取得指定 Julian date 之節氣名。
+			 * 取得指定 Julian date 之節氣名，或已經過日數。
 			 * 
 			 * @param {Number}JD
 			 *            Julian date
 			 * @param {Object}[options]
-			 *            options
+			 *            options :<br />
+			 *            .days: 回傳 [ 節氣序 index, 已經過日數/剩下幾日, 節氣年 year (以"春分"分年,
+			 *            非立春後才過年!) ]。<br />
+			 *            .pentads: 亦標示七十二候 (物候, 72 pentads)<br />
+			 *            .time: 取得節氣名時，亦取得交節時刻。
 			 * 
-			 * @returns {String|Undefined}
+			 * @returns {String|Undefined|Array}
 			 * 
 			 * @see http://koyomi8.com/24sekki.htm
 			 */
 			function solar_term_of_JD(JD, options) {
 
+				// return the nearest (test_next: thie next one) solar term JD.
 				function get_cache(test_next) {
-					var date = library_namespace.JD_to_Date(JD),
-					//
+					if (!date)
+						date = library_namespace.JD_to_Date(JD);
 					year = date.getFullYear();
 
 					index = apparent / DEGREES_BETWEEN_SOLAR_TERMS | 0;
@@ -880,56 +912,76 @@ if (typeof CeL === 'function')
 						// 每一年春分前末幾個節氣，算前一年的。
 						year--;
 
-					var cache = solar_term_cache[year];
+					var cache = solar_term_cache[year], term_JD;
 					if (!cache)
 						// 初始化本年度資料。
 						solar_term_cache[year] = cache = [];
-					if (!(date = cache[index]))
-						// 填入節氣JD
-						cache[index] = date = solar_term_JD(year, index);
 
-					return date;
+					if (!(term_JD = cache[index]))
+						// 填入節氣JD
+						cache[index] = term_JD = solar_term_JD(year, index);
+
+					return term_JD;
 				}
 
-				var apparent = solar_coordinate(JD).apparent, index;
+				// 前置處理。
+				if (!library_namespace.is_Object(options))
+					options = library_namespace.null_Object();
+
+				var index, days, date, year,
+				//
+				apparent = solar_coordinate(JD).apparent;
+
+				// get days, 回傳已經過幾日。
+				if (options.days) {
+					// 先取得 距離上一節氣之日數。
+					days = get_cache(true) - JD | 0;
+					// days === 0: 當天交節。
+					if (days !== 0 && options.days !== 'next')
+						// 'next': 距離下一節氣之日數。天文節氣 剩餘日數。
+						index--, days = Math.ceil(JD - get_cache());
+					// others (passed days): 距離上一節氣之日數。天文節氣 經過日數。
+					return [ index, days, year ];
+				}
 
 				if (DEGREES_BETWEEN_SOLAR_TERMS
 				// assert: 超過2度，就不會是在同一天。
 				- (apparent % DEGREES_BETWEEN_SOLAR_TERMS) < 2) {
 					// JD 再過一下下便是節氣。
-					// 測試是否距離下一節氣1天內。此範圍內不可能為物候。
+					// 測試本日0時是否距離下一節氣發生時間1天內。
+					// assert: 此範圍內不可能為物候。
 
 					// JD 將被視為當地時間當日0時!
-					if ((JD = get_cache(true) - JD) < 1) {
+					if ((days = get_cache(true) - JD) < 1) {
 						// 初候
 						index = SOLAR_TERMS_NAME[index];
-						if (options && options.time) {
-							index += ' ' + ((JD *= 24) | 0)
+						if (options.time) {
+							index += ' ' + ((days *= 24) | 0)
 							//
-							+ ':' + ((JD = (JD % 1) * 60) | 0)
+							+ ':' + ((days = (days % 1) * 60) | 0)
 							//
-							+ ':' + Math.round((JD % 1) * 60);
+							+ ':' + Math.round((days % 1) * 60);
 						}
 						return index;
 					}
 					return;
 				}
 
-				if (options && options.pentads
+				if (options.pentads
 				// JD 將被視為當地時間當日0時，因此只要節氣在 JD 之前，皆表示本日非節氣，僅能測試物候。
 				// || (apparent % DEGREES_BETWEEN_SOLAR_TERMS < 2)
 				) {
-					// JD → 與前一個節氣之間距。
-					JD -= get_cache();
+					// days = 與前一個節氣之間距。
+					days = JD - get_cache();
 					// 七十二候 (物候, 72 pentads)
 					// 初候 二候 三候
 					// 初候 中候 末候
 					// http://koyomi8.com/sub/72kou.htm
 					// 5: 又五日
 					// 節氣之後每五日一候，非採用 360/72 = 5° 一候。
-					if (JD <= 5 && 4 < JD)
+					if (days <= 5 && 4 < days)
 						return SOLAR_TERMS_NAME[index] + ' 二候';
-					if (4 + 5 < JD && JD <= 5 + 5)
+					if (4 + 5 < days && days <= 5 + 5)
 						return SOLAR_TERMS_NAME[index] + ' 三候';
 
 					// return;
@@ -1102,7 +1154,8 @@ if (typeof CeL === 'function')
 			// T^3/450000
 			[ 125.04452, -1934.136261, 0.0020708, 1 / 450000 ] ],
 
-			// 這些項來自IAU1980章動理論，忽略了係數小於0".0003的項。
+			// 這些項來自 IAU 1980 章動理論，忽略了係數小於0".0003的項。
+			// https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut80.c
 			IAU1980_nutation_teams = [
 					[ 0, 0, 0, 0, 1, -171996, -1742, 92025, 89 ],
 					[ -2, 0, 0, 2, 2, -13187, -16, 5736, -31 ],
@@ -1198,8 +1251,13 @@ if (typeof CeL === 'function')
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 附表3.<br />
 			 * http://forums.parallax.com/showthread.php/154838-Azimuth-angle-conversion-from-east-to-west
+			 * 
+			 * @see http://www.neoprogrammics.com/vsop87/source_code_generator_tool/
+			 *      VSOP87B日心黃道球面坐標 Heliocentric LBR - J2000
+			 * @see ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/VSOP87B.ear
 			 */
 			VSOP87_teams.Earth = {
+				multiplier : 1e-8,
 				// 行星 Earth 地球: 日心黃經
 				L : [
 						[ [ 175347046.0, 0, 0 ],

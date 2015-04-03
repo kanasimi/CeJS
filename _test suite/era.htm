@@ -19,7 +19,7 @@ em {
 }
 
 .monospaced {
-	font-family: Courier
+	font-family: Courier;
 }
 
 .timeStamp { /*display:block;*/
@@ -450,6 +450,14 @@ td {
 	white-space: nowrap;
 }
 
+div.box {
+	margin: 1em;
+	padding: .2em;
+	border: 1px dotted #999;
+	background-color: #dff;
+	border: 1px solid #999;
+}
+
 /*]]>*/
 </style>
 </head>
@@ -457,7 +465,7 @@ td {
 <body>
 
 	<div id="analysis">
-		<a title="visitor"
+		<a rel="nofollow" title="visitor"
 			href="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&point=T"><img
 			src="http://lyrics.meicho.com.tw/t.cgi?REQUEST=visit&FN=v&mode=pic&page=CeL&point=era" /></a>
 		<g:plusone></g:plusone>
@@ -476,17 +484,18 @@ td {
 		<!-- http://www.fileformat.info/info/emoji/list.htm -->
 		<!-- ⌚ ⌛ ⏰ ⏱ ⏲   -->
 		📅 <span data-gettext="輸出格式:"></span> <input id="output_format"
-			title="輸出格式" /> <a href="#"
+			title="輸出格式" /> <a rel="nofollow" href="#"
 			onclick="output_numeral=output_numeral==='Chinese'?'':'Chinese';this.className=output_numeral==='Chinese'?'selected':'unselected';translate_era();return false;"
-			data-gettext="中文數字" title="輸出中文數字"></a> <a href="#" id="translate"
-			title="執行轉換">→</a> <span id="era_output"></span>
+			data-gettext="中文數字" title="輸出中文數字"></a> <a rel="nofollow" href="#"
+			id="translate" title="執行轉換">→</a> <span id="era_output"></span>
 	</div>
 
 	<div id="note_botton_layer" class="LOADING">
 		<div id="loading_progress" title="loading progress bar">
 			正進行程式初始化作業，請稍待片刻…<br />⏰ Loading... 少しお待ちください。
 		</div>
-		如等待超過30秒，請<a href="#" onclick="history.go(0);return false;">重新整理</a>試試。
+		如等待超過30秒，請<a rel="nofollow" href="#"
+			onclick="history.go(0);return false;">重新整理</a>試試。
 	</div>
 	<div id="example" class="note_panel"></div>
 	<div id="input_history" class="note_panel">
@@ -535,7 +544,8 @@ td {
 			<li>本函式庫與系統時間結合，因此可方便作程式化操作，並提供多樣的輸出格式。如自行批次轉換紀年時間日期、<a
 				href="era_tag.htm">具備紀年日期標注之文本</a>等等支援。
 			</li>
-			<li>本函式庫為 <a href="https://github.com/kanasimi/CeJS/wiki">CeJS</a>
+			<li>本函式庫為 <a rel="nofollow"
+				href="https://github.com/kanasimi/CeJS/wiki">CeJS</a>
 				計畫的一部分。若有任何建議以及疑問、錯誤回報等，請移步 <a
 				href="https://plus.google.com/101633590909790225455">Google+</a>。
 			</li>
@@ -575,8 +585,7 @@ td {
 					</ul>
 					<hr />其他相關資料：<br /> <a rel="nofollow"
 					href="http://authority.ddbc.edu.tw/time/index.php"
-					accessdate="2013/5/2 20:25">時間規範資料庫</a><br />數位典藏與自動推論實驗室
-					數位典藏研究發展中心 <a rel="nofollow"
+					accessdate="2013/5/2 20:25">時間規範資料庫</a><br /> <a rel="nofollow"
 					href="http://thdl.ntu.edu.tw/datemap/index.php"
 					accessdate="2013/4/5 19:2"
 					title="中西曆對照查詢系統（明代以降） || Chinse and
@@ -698,7 +707,7 @@ td {
 （4）根据早期历法推出的朔闰表，如董作宾《中国年历总谱》、黄伯录《中西年月通考》及《天象》一书中的《春秋朔闰表》和《战国朔闰表》等。
 
 共和以前的西周历法和商代历法目前还都不清楚，用后世历法数据推出的朔闰干支也未必正确。因此这些年历的先秦部分，有不少可商之处。">尚有可議之處</a>。據<span
-					class="creation_title">三千五百年历日天象</span>一書前言，「远古时期，中国早期历法是根据观测实际天象..颁行的，而不是事先推步得出的。」因此原先欲以此書為準，未來若有更可靠之來源時再作更改。惟近年來不少簡牘出土，發現舊的曆譜有不少謬誤，只得取用較新的資料。<br />經黃一農教授<a
+					class="creation_title">三千五百年历日天象</span>一書前言，「远古时期，中国早期历法是根据观测实际天象...颁行的，而不是事先推步得出的。」因此原先欲以此書為準，未來若有更可靠之來源時再作更改。惟近年來不少簡牘出土，發現舊的曆譜有不少謬誤，只得取用較新的資料。<br />經黃一農教授<a
 					rel="nofollow"
 					href="http://hss.nthu.edu.tw/~ylh/list.php?category=%E6%9B%86%E6%B3%95%E5%AD%B8%E5%8F%B2"
 					accessdate="2013/4/8 23:1"
@@ -717,7 +726,7 @@ td {
 					href="https://docs.google.com/file/d/0B3Mb73DFKnSFUW5vbG1jSE8zSU0/edit?pli=1"
 					accessdate="2014/2/3 18:36"
 					title="201402.春秋 note.txt - Google 雲端硬碟">轉換記錄</a>。<br />此時期建正尚未明確（<span
-					class="creation_title">春秋时期鲁国历法研究</span> p63-73），因此<em>所列出的月干支僅供參考</em>。</td>
+					class="creation_title">春秋时期鲁国历法研究</span> p63–73），因此<em>所列出的月干支僅供參考</em>。</td>
 			</tr>
 			<tr>
 				<td>246–104 BCE 之中曆</td>
@@ -776,17 +785,38 @@ td {
 					accessdate="2013/4/5 19:2"
 					title="中西曆對照查詢系統（明代以降） || Chinse and
 						Western Dates Mapping System (Later than Ming Dynasty)">中西曆對照查詢系統（明代以降）</a></td>
-				<td>此系統所列明朝、清朝、中國傳統曆法 (1516–1941 CE, 缺 1689 CE)
-					之實曆節氣，資料出處為鄭鶴聲《近世中西史日對照表》1994年再版，紀載明武宗正德十年（1516）～
-					清宣統三年（1911）及日本大正元年（1912）～ 昭和十六年（1941）年間，每年二十四節氣日期。<br />鄭鶴聲《近世中西史日對照表》1936年成書。節氣紀載，自清世祖順治二年起，全以《時憲萬年書》為依據﹔以前則依據陽曆推算。
+				<td>此系統所列明朝、清朝、中國傳統曆法 (1516–1941 CE, 缺 1689 CE) 之實曆節氣，<q>資料出處為鄭鶴聲《近世中西史日對照表》1994年再版，紀載明武宗正德十年（1516）～
+						清宣統三年（1911）及日本大正元年（1912）～ 昭和十六年（1941）年間，每年二十四節氣日期</q>。<br />鄭鶴聲《近世中西史日對照表》1936年成書。<q>節氣紀載，自清世祖順治二年起，全以《時憲萬年書》為依據﹔以前則依據陽曆推算</q>，故此前與實曆多有數日差異；實例見下。
 					<hr /> <em>轉換過程發現有些問題須注意</em>：
 					<ul>
 						<li>除了 1689 CE
 							(約清聖祖康熙28年)整年無數據外，部分日期尚有闕漏謬誤。在匯入過程中，已對可推測的數據做了修改，惟這部分不能確認。即使經手動修改，依舊有許多不甚合理之數據，因無以核對，仍將之保留。</li>
 						<li>依據不同曆法、不同時區，應會算出不同的節氣。惟此資料各年度與各紀年之節氣皆無衝突，僅有單一版本。</li>
 						<li>部分日期與本函式庫所轉換出之日期不同。經觀察測試，似當以 "西元日期" 為準；故所得資料未考量紀年日期之標示。</li>
+						<li>經與手上<a
+							href="https://lh6.googleusercontent.com/-ye-LJw4NwQI/VR1UWfRV_nI/AAAAAAAAAtM/SdpD5osKua4/w1113-no/%E5%A4%A7%E6%98%8E%E5%98%89%E9%9D%96%E5%85%AD%E5%B9%B4%E5%A4%A7%E7%B5%B1%E6%9B%86%2Bp2.jpg">大明嘉靖六年大統曆第2,4頁</a>校對，發現<em>此系統數據與實曆多有不合。請欲使用者自行參酌之。</em>至於嘉靖六年的部分，已採用手頭上大統曆之資料。<br />題外話，依此實曆，大統曆確實多有失節氣。
+						</li>
 					</ul> 細節詳見<a
-					href="https://docs.google.com/spreadsheets/d/1GKidkdK2AN5U5xOliBUwU0BbB1ja4SDixFJf8WqSG58/pubhtml">明清實曆節氣轉換過程</a>。對於這些問題，惜手上無原書，無以核對。其間出入，尚祈熱心人士校核。
+					href="https://docs.google.com/spreadsheets/d/1BWWUdJnEzdnfJZKez9rswTYJRwg9ubr4rAU9qg9Hkrc/pubhtml">明清實曆節氣轉換過程</a>。對於這些問題，惜手上無原書，無以核對。其間出入，尚祈熱心人士校核。
+				</td>
+			</tr>
+			<tr>
+				<td>曆注</td>
+				<td>附於各欄標頭</td>
+				<td>本工具所列曆注僅供研究用。<br />日時九星推法事實上並無定論，因此做出來的也只能說是一家之言。本工具大致採用<a
+					href="http://koyomi8.com/sub/9sei.htm" title="年家九星・月家九星・日家九星表作成">こよみのページ之日本算法</a>，非採<a
+					href="http://blog.xuite.net/chen992/twblog/99860418"
+					accessdate="2015/4/3 20:55" title="三元九運 @ 太乙真殿 :: 隨意窩 Xuite日誌">玄空飛星一派算法</a>。
+					<div class="box monospaced">
+						自每年"不論前後"最接近冬至之甲子起"陽遁"（ようとん，順飛），<br />
+						至每年"不論前後"最接近夏至之甲子起"陰遁"（いんとん，逆飛），<br /> 每陽遁、陰遁週期應各有 3 (365/2/60|0)
+						甲子 180日。<br /> assert: 陽遁、陰遁週期(180)被九星長度(9)整除，9|180。<br />
+						故每年陽遁、陰遁週期各一次，共360日。<br /> 但一年實有 365日或 366日，因此每年「遁」的起始日會前移五六日。<br />
+						<br /> 若某次週期達 240日而非 180日，則後 60日採"日家九星の「閏」"，「遁」到正半(30日)反「遁」。<br />
+						此時，是次週期起頭在前一至日之前不到 30 日，週期結尾在後一至日之後不到 30 日。<br /> e.g.,<br />
+						................前至日.........................後至日....<br />
+						...反遁..29日......↑......365.25/2≈182.6日.......↑....30日..反遁..
+					</div>
 				</td>
 			</tr>
 			<tr>
@@ -1085,7 +1115,8 @@ td {
 
 	<div id="era_graph">
 		<div id="era_graph_notice">
-			紀年線圖操作提示：在區塊上方按下滑鼠<b>左鍵</b>可進入下一階層。按下<b>右鍵</b>可返回上一層。 <a href="#"
+			紀年線圖操作提示：在區塊上方按下滑鼠<b>左鍵</b>可進入下一階層。按下<b>右鍵</b>可返回上一層。 <a
+				rel="nofollow" href="#"
 				onclick="CeL.toggle_display('era_graph_notice', false);return false;"
 				title="隱藏">×</a>
 		</div>
@@ -1114,20 +1145,20 @@ td {
 	<div id="tag_text">
 		請貼上<b>首句包含紀年名稱</b>的史書原文：<br /> <b class="tag_text_NG">✗</b>：<s
 			style="color:#aaa;">春秋左氏傳 隱公三年，春，王二月，己巳，日有食之。</s><br /> <b
-			class="tag_text_OK">✓</b>：<a href="#"
+			class="tag_text_OK">✓</b>：<a rel="nofollow" href="#"
 			onclick="return parse_text(this.innerHTML);">春秋左氏傳
 			魯國隱公三年，春，王二月，己巳，日有食之。</a>（首句需包含完整紀年名稱）<br /> <b class="tag_text_NG">✗</b>：<s
 			style="color:#aaa;">魯國 隱公 三年 春 王二月 己巳 日有食之</s><br /> <b
-			class="tag_text_OK">✓</b>：<a href="#"
+			class="tag_text_OK">✓</b>：<a rel="nofollow" href="#"
 			onclick="return parse_text(this.innerHTML);">魯國隱公三年 春 王二月己巳 日有食之</a>（紀年名稱需包含國名與王名，中無空格。）<br />
-		<b class="tag_text_OK">✓</b>：<a href="#"
+		<b class="tag_text_OK">✓</b>：<a rel="nofollow" href="#"
 			onclick="return parse_text(this.innerHTML);">魯國隱公三年春王二月己巳 日有食之</a>（空格亦將影響結果，會被斷為兩個日期。）<br />
 		<textarea id="original_text">嘉靖元年春正月癸丑，享太廟。己未，大祀天地於南郊。清甯宮後殿災。命稱孝宗皇考，慈壽皇太后聖母，興獻帝后為本生父母。己巳，甘州兵亂，殺巡撫都禦史許銘。
 
 二月己卯，耕耤田。
 
 三月辛亥，弗提衛獻生豹，卻之。</textarea>
-		<br /> 先指定：<a href="#"
+		<br /> 先指定：<a rel="nofollow" href="#"
 			onclick="this.innerHTML = (parse_text.add_date = !parse_text.add_date) ? '<em>添加</em>' : '不添加'; return false;">不添加</a>公元日期於紀年後，而後作<a
 			href="#" onclick="return parse_text();">自動判別與轉換→</a>
 		<p id="parsed_text" class="article"></p>
@@ -1136,10 +1167,10 @@ td {
 
 	<div id="pack_data">
 		<textarea id="pack_source">/文宗/天曆|1329/8/25~|2/8=30;29;29;30;30	29;30;30;29</textarea>
-		<br /> <em data-gettext="請注意：本欄僅供開發人員使用。"></em> <a href="#"
-			onclick="return 壓縮曆數();">壓縮</a> | <a href="#"
-			onclick="return 解壓縮曆數();">解壓縮</a> | <a href="#"
-			onclick="return 解析曆數();">展開</a> 紀年的曆數資料 <a href="#"
+		<br /> <em data-gettext="請注意：本欄僅供開發人員使用。"></em> <a rel="nofollow"
+			href="#" onclick="return 壓縮曆數();">壓縮</a> | <a rel="nofollow" href="#"
+			onclick="return 解壓縮曆數();">解壓縮</a> | <a rel="nofollow" href="#"
+			onclick="return 解析曆數();">展開</a> 紀年的曆數資料 <a rel="nofollow" href="#"
 			onclick="CeL.set_text('pack_source', CeL.set_text('pack_result'));return false;"
 			title="copy to">↑</a><br />
 		<textarea id="pack_result"></textarea>

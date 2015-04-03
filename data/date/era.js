@@ -587,7 +587,7 @@ if (typeof CeL === 'function')
 
 			// @see get_era_name(type)
 
-			// 基本上僅表示名義。若欲更改，需考慮對外部程式之衝擊。
+			// 基本上僅表示名義。若欲更改，需考慮對外部程式之相容性。
 			SEARCH_STRING = 'dynasty', WITH_PERIOD = 'period',
 
 			// 十二生肖，或屬相。
@@ -613,14 +613,18 @@ if (typeof CeL === 'function')
 			// http://jerry100630902.pixnet.net/blog/post/333011570-%E8%AA%8D%E8%AD%98%E4%BD%A0%E7%9A%84%E5%A2%83%E7%95%8C~-%E9%99%BD%E6%9B%86%E3%80%81%E9%99%B0%E6%9B%86%E3%80%81%E9%99%B0%E9%99%BD%E5%90%88%E6%9B%86---%E7%AF%80%E6%B0%A3-
 			// 十二建星每月兩「建」，即正月建寅、二月建卯、三月建辰……，依此類推。正月為寅月，所以六寅日（甲寅、丙寅、戊寅、庚寅、壬寅）中必須有兩個寅日和「建」遇到一起；二月為卯月，所以六卯日（乙卯、丁卯、己卯、辛卯、癸卯）中必須有兩個卯日和「建」遇到一起，否則就不對。逢節（立春、驚蜇、清明、立夏、芒種、小暑、立秋、白魯、寒露、立冬、大雪、小寒）兩個建星相重，這樣才能保證本月第一個與月支相同之日與「建」相遇。
 			十二直_LIST = '建除満平定執破危成納開閉'.split(''),
-			// "廿八星宿" @ 農民曆: 東7北7西7南7
-			二十八宿_LIST = '角亢氐房心尾箕斗牛女虚危室壁奎婁胃昴畢觜参井鬼柳星張翼軫'.split(''),
-			// 二十八宿にあり二十七宿にはない宿は、牛宿である。
+			// "廿八星宿" @ 農民曆: 東青龍7北玄武7西白虎7南朱雀7
 			// will be splited latter.
-			二十七宿_LIST = '角亢氐房心尾箕斗女虚危室壁奎婁胃昴畢觜参井鬼柳星張翼軫',
+			// jp:角亢氐房心尾箕斗牛女虚危室壁奎婁胃昴畢觜参井鬼柳星張翼軫
+			// diff: 虚, 参
+			// 因始於中國，採中國字。
+			二十八宿_LIST = '角亢氐房心尾箕斗牛女虛危室壁奎婁胃昴畢觜參井鬼柳星張翼軫',
+			// 二十八宿にあり二十七宿にはない宿は、牛宿である。
+			// will be splited and modified latter.
+			二十七宿_LIST = 二十八宿_LIST.replace(/牛/, ''),
 			// 旧暦（太陽太陰暦）における月日がわかれば、自動的に二十七宿が決定される。
 			// 各月の朔日の宿
-			二十七宿_offset = '室奎胃畢参鬼張角氐心斗虚'.split(''),
+			二十七宿_offset = '室奎胃畢參鬼張角氐心斗虛'.split(''),
 			// 六十甲子納音 / 納音五行
 			// 《三命通會》《論納音取象》
 			// http://ctext.org/wiki.pl?if=gb&chapter=212352
@@ -654,6 +658,15 @@ if (typeof CeL === 'function')
 
 				Object.seal(CE_REFORM_YEAR_DATA);
 
+				二十八宿_LIST = 二十八宿_LIST.split('');
+				'蛟龍貉兔狐虎豹獬牛蝠鼠燕豬貐狼狗雉雞烏猴猿犴羊獐馬鹿蛇蚓'.split('')
+				//
+				.forEach(function(動物, index) {
+					二十八宿_LIST[index]
+					// starts from '角木蛟'
+					+= 七曜_LIST[(index + 4) % 七曜_LIST.length] + 動物;
+				});
+
 				a = 二十七宿_offset;
 				// d = 二十七宿_LIST.length;
 				// 二十七宿_offset[m] 可得到 m月之 offset。
@@ -661,6 +674,8 @@ if (typeof CeL === 'function')
 				a.forEach(function(first) {
 					二十七宿_offset.push(二十七宿_LIST.indexOf(first) - START_DATE);
 				});
+
+				二十七宿_LIST = 二十七宿_LIST.split('');
 
 				// 為納音配上五行。
 				if (false) {
@@ -682,8 +697,6 @@ if (typeof CeL === 'function')
 					// "% 15": 30個 → 15個 loop : 0 ~ 14
 					納音_LIST[d] += a.charAt(4 - ((d % 15) / 3 | 0) + (d % 3));
 			})();
-
-			二十七宿_LIST = 二十七宿_LIST.split('');
 
 			if (false)
 				// assert: this is already done.
