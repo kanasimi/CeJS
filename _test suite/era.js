@@ -1905,7 +1905,7 @@ initialize_thdl_solar_term = function() {
 
 // ---------------------------------------------------------------------//
 
-var 九星_LIST = '一白水星,二黒土星,三碧木星,四緑木星,五黄土星,六白金星,七赤金星,八白土星,九紫火星'.split(',');
+var 九星_JP_LIST = '一白水星,二黒土星,三碧木星,四緑木星,五黄土星,六白金星,七赤金星,八白土星,九紫火星'.split(',');
 
 // 日家九星遁起始日
 // http://koyomi8.com/sub/9sei.htm
@@ -2904,7 +2904,7 @@ function affairs() {
 			a : {
 				T : '日家九星'
 			},
-			R : '日本の暦注の一つ。此處採日本算法。',
+			R : '日本の暦注の一つ。此處採日本算法配合天文節氣。',
 			href : 'http://koyomi8.com/sub/9sei.htm'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -2934,16 +2934,16 @@ function affairs() {
 				if (!S)
 					S = '#efa';
 				// 將 index 轉為逆序。
-				index = (-index - 1) % 九星_LIST.length;
+				index = (-index - 1) % 九星_JP_LIST.length;
 				if (index < 0)
-					index += 九星_LIST.length;
+					index += 九星_JP_LIST.length;
 			} else
 				// 冬至後→夏至間。
-				index %= 九星_LIST.length;
+				index %= 九星_JP_LIST.length;
 
-			index = 九星_LIST[index] + ' (' + days
+			index = 九星_JP_LIST[index] + ' ' + days
 			//
-			+ (年 % 1 === 0 ? '↘' : '↗') + ')';
+			+ (年 % 1 === 0 ? '↘' : '↗');
 
 			return S ? {
 				span : index,
@@ -2951,17 +2951,29 @@ function affairs() {
 			} : index;
 		} ],
 
+		// http://ctext.org/wiki.pl?if=en&chapter=457831
+		// 欽定協紀辨方書·卷八 三元九星
+		// https://archive.org/details/06056509.cn
+		年九星 : [ {
+			a : {
+				T : '年九星'
+			},
+			R : '三元年九星以立春交節時刻為界。',
+			href : 'https://archive.org/details/06056509.cn'
+		}, function(date) {
+			return CeL.era.年九星(date) || '';
+		} ],
+
 		三元九運 : [
 				{
 					a : {
 						T : '三元九運'
 					},
-					R : '二十年一運。玄空飛星一派風水三元九運，又名「洛書運」。\n* 公曆2月3至5日立春後才改「運」，但此處恆定為2月4日改，會因此造成誤差。',
+					R : '二十年一運，立春後才改「運」。玄空飛星一派風水三元九運，又名「洛書運」。',
 					// http://www.hokming.com/fengshui-edit-threeyuennineyun.htm
 					href : 'http://www.twwiki.com/wiki/%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B',
 					S : 'font-size:.8em;'
 				}, function(date) {
-					// TODO: 立春後改「運」
 					return CeL.era.三元九運(date) || '';
 				} ],
 

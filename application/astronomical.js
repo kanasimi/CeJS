@@ -71,6 +71,10 @@ if (false) {
 
 		CeL.nutation(2446895.5);
 		// get ≈ [ -3.788/3600, 9.443/3600 ]
+
+		CeL.assert([ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4');
+		CeL.assert([ 2014, CeL.立春年(new Date('2015/2/3')) ], '立春年 2015/2/3');
+
 	});
 }
 
@@ -512,7 +516,8 @@ if (typeof CeL === 'function')
 				object_teams = VSOP87_teams[object];
 				if (!team)
 					// request
-					// L:黃經 longitude + B:黃緯 latitude + R:距離 radius vector
+					// L:黃經 longitude + B:黃緯 latitude + R:距離 radius
+					// vector
 					team = 'LBR'.split('');
 				else if (!Array.isArray(team))
 					team = [ team ];
@@ -534,9 +539,13 @@ if (typeof CeL === 'function')
 						coefficients.push(series.reduce(function(value, items) {
 							if (items.length === 1)
 								return value + items[0];
-							// assert: items.length === 3
+							// assert:
+							// items.length
+							// ===
+							// 3
 							return value + items[0] * Math.cos(
-							// items: 三個數字項
+							// items:
+							// 三個數字項
 							// [A,B,C]
 							// 每項(表中各行)的值計算表達式是：
 							// A*cos(B+C*τ);
@@ -545,7 +554,8 @@ if (typeof CeL === 'function')
 					});
 
 					coordinate[team_name] =
-					// L=(L0+L1*τ+L2*τ^2+L3*τ^3+L4*τ^4+L5*τ^5)/10^8 (倍數: 10^-8)
+					// L=(L0+L1*τ+L2*τ^2+L3*τ^3+L4*τ^4+L5*τ^5)/10^8
+					// (倍數: 10^-8)
 					polynomial_value(coefficients, τ);
 					// 倍數
 					if (object_teams.multiplier > 0)
@@ -864,14 +874,16 @@ if (typeof CeL === 'function')
 					angle *= DEGREES_BETWEEN_SOLAR_TERMS;
 				}
 
-				// assert: angle is now angle (0~less than 360), from March
+				// assert: angle is now angle (0~less than 360), from
+				// March
 				// equinox of year.
 				return JD_of_solar_angle(year, angle);
 			}
 
 			_.solar_term_JD = solar_term_JD;
 
-			// solar_term_cache[ year ] = [ 春分JD, 清明JD, 穀雨JD, ... 24個節氣 ]
+			// solar_term_cache[ year ] = [ 春分JD, 清明JD, 穀雨JD, ... 24個節氣
+			// ]
 			var solar_term_cache = [];
 
 			/**
@@ -892,7 +904,8 @@ if (typeof CeL === 'function')
 			 */
 			function solar_term_of_JD(JD, options) {
 
-				// return the nearest (test_next: thie next one) solar term JD.
+				// return the nearest (test_next: thie next one) solar
+				// term JD.
 				function get_cache(test_next) {
 					if (!date)
 						date = library_namespace.JD_to_Date(JD);
@@ -956,11 +969,10 @@ if (typeof CeL === 'function')
 						// 初候
 						index = SOLAR_TERMS_NAME[index];
 						if (options.time) {
-							index += ' ' + ((days *= 24) | 0)
-							//
-							+ ':' + ((days = (days % 1) * 60) | 0)
-							//
-							+ ':' + Math.round((days % 1) * 60);
+							index += ' ' + ((days *= 24) | 0) + ':';
+							if (options.time > 1)
+								index += ((days = (days % 1) * 60) | 0) + ':';
+							index += Math.round((days % 1) * 60);
 						}
 						return index;
 					}
@@ -989,6 +1001,36 @@ if (typeof CeL === 'function')
 			}
 
 			_.solar_term_of_JD = solar_term_of_JD;
+
+			// ----------------------------------------------------------------------------------------------------------------------------------------------//
+			// 應用功能:需配合 'data.date'。
+
+			// 21
+			var 立春NO = SOLAR_TERMS_NAME.indexOf('立春');
+
+			// 立春，指太陽到達黃經315°時，屬相（生肖）以立春作為起始點。
+			// 中國古時春節曾專指立春，也被視為一年的開始。
+			function 立春年(date, options) {
+				if (!isNaN(date) && -1000 < date && date < 3000) {
+					// get JD of CE year (date)
+					date = solar_term_JD(date - 1, 立春NO);
+					return options ? date : library_namespace.JD_to_Date(date);
+				}
+
+				if (library_namespace.is_Date(date)) {
+					var year = date.getFullYear(), month = date.getMonth();
+					// 快速判別:立春為公曆每年2月3至5日之間
+					if (month !== 1)
+						return month < 1 ? year - 1 : year;
+					// +1: 當天24時之前交節，依舊得算在當日。
+					return library_namespace.Date_to_JD(date) + 1
+					//
+					< solar_term_JD(year - 1, 立春NO) ? year - 1 : year;
+				}
+			}
+
+			// CeL.立春年(2001).format('CE');
+			_.立春年 = 立春年;
 
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 

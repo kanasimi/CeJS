@@ -630,7 +630,11 @@ if (typeof CeL === 'function')
 			// http://ctext.org/wiki.pl?if=gb&chapter=212352
 			納音_LIST = ('海中,爐中,大林,路旁,劍鋒,山頭,澗下,城頭,白蠟,楊柳,井泉,屋上,霹靂,松柏,長流,'
 			// 0 ~ 59 干支序轉納音: 納音_LIST[index / 2 | 0]; '/2': 0,1→0; 2,3→1; ...
-			+ '砂中,山下,平地,壁上,金泊,覆燈,天河,大驛,釵釧,桑柘,大溪,沙中,天上,石榴,大海').split(',');
+			+ '砂中,山下,平地,壁上,金泊,覆燈,天河,大驛,釵釧,桑柘,大溪,沙中,天上,石榴,大海').split(','),
+			//
+			九星_LIST
+			//
+			= '一白水星,二黑土星,三碧木星,四綠木星,五黃土星,六白金星,七赤金星,八白土星,九紫火星'.split(',');
 
 			// ---------------------------------------------------------------------//
 			// 初始調整並規範基本常數。
@@ -3628,10 +3632,34 @@ if (typeof CeL === 'function')
 				return index;
 			}
 
+			var 立春年 = function(date, options) {
+				if (library_namespace.立春年)
+					return (立春年 = library_namespace.立春年)(date, options);
+
+				var year = date.getFullYear(), month = date.getMonth();
+				library_namespace.warn('立春年: 請含入 application.astronomical。'
+						+ '公曆2月3至5日立春後才改「運」，但此處恆定為2月4日改，會因此造成誤差。');
+				if (month < 1 || month === 1 && date.getDate() < 4)
+					// assert: 公曆一、二月，中曆過年前。
+					year--;
+				return year;
+			};
+
+			function comment_年九星(date) {
+				// 64: 64 CE 為甲子:上元花甲 一運。其他如 1684, 1864年(康熙二十三年)亦可。
+				// 180: 一個花甲，共有六十年。而三元三個花甲，總得一百八十年。
+				var index = ((64 - 立春年(date)) % 180) + 180;
+				// assert: index >= 0
+
+				return 九星_LIST[index % 九星_LIST.length]
+				//
+				+ ' (' + library_namespace.to_stem_branch(-index) + ')';
+			}
+
 			function comment_三元九運(date) {
-				// 64 CE 甲子:上元花甲 一運
-				// 一個花甲，共有六十年。而三個花甲，總得一百八十年。
-				var index = (date.getFullYear() - 64) % 180;
+				// 64: 64 CE 為甲子:上元花甲 一運。其他如 1684, 1864年(康熙二十三年)亦可。
+				// 180: 一個花甲，共有六十年。而三元三個花甲，總得一百八十年。
+				var index = (立春年(date) - 64) % 180;
 				if (index < 0)
 					index += 180;
 
@@ -3646,16 +3674,11 @@ if (typeof CeL === 'function')
 					// library_namespace.guess_year_stem_branch(date, true))
 				}
 
-				// TODO: 公曆2月3至5日立春後才改「運」，但此處恆定為2月4日改，會因此造成誤差。
-				if (date.getMonth() < 2 && date.getDate() < 4)
-					// assert: 公曆一、二月，中曆過年前。
-					index--;
-
 				// get "運": 二十年一運
 				index = index / 20 | 0;
 
 				return '上中下'.charAt(index / 3 | 0) + '元'
-				// 運 starts from 1.
+				// + 1 : 運 starts from 1.
 				+ library_namespace.to_Chinese_numeral(index + 1) + '運';
 			}
 
@@ -3843,6 +3866,7 @@ if (typeof CeL === 'function')
 					生肖 : comment_生肖,
 					五行 : comment_五行,
 					繞迥 : comment_繞迥,
+					年九星 : comment_年九星,
 					三元九運 : comment_三元九運,
 
 					月の別名 : comment_月の別名,
