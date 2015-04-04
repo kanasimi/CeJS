@@ -893,8 +893,8 @@ if (typeof CeL === 'function')
 			 *            Julian date
 			 * @param {Object}[options]
 			 *            options :<br />
-			 *            .days: 回傳 [ 節氣序 index, 已經過日數/剩下幾日, 節氣年 year (以"春分"分年,
-			 *            非立春後才過年!) ]。<br />
+			 *            .days: 回傳 [ 節氣年 year (以"春分"分年, 非立春後才過年!), 節氣序 index,
+			 *            已經過日數/剩下幾日 ]。<br />
 			 *            .pentads: 亦標示七十二候 (物候, 72 pentads)<br />
 			 *            .time: 取得節氣名時，亦取得交節時刻。
 			 * 
@@ -954,7 +954,7 @@ if (typeof CeL === 'function')
 						// 'next': 距離下一節氣之日數。天文節氣 剩餘日數。
 						index--, days = Math.ceil(JD - get_cache());
 					// others (passed days): 距離上一節氣之日數。天文節氣 經過日數。
-					return [ index, days, year ];
+					return [ year, index, days ];
 				}
 
 				if (DEGREES_BETWEEN_SOLAR_TERMS
@@ -1005,28 +1005,71 @@ if (typeof CeL === 'function')
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 			// 應用功能:需配合 'data.date'。
 
+			var
+			// 起始年月日。年月日 starts form 1.
+			// 基本上與程式碼設計合一，僅表示名義，不可更改。
+			START_YEAR = 1, START_MONTH = 1, START_DATE = 1,
+			// set normal month count of a year.
+			// 月數12: 每年有12個月.
+			MONTH_COUNT = 12,
+			// = 2. assert: 為整數
+			SOLAR_TERMS_MONTH_RATE = SOLAR_TERMS_NAME.length / MONTH_COUNT | 0,
 			// 21
-			var 立春NO = SOLAR_TERMS_NAME.indexOf('立春');
+			立春NO = SOLAR_TERMS_NAME.indexOf('立春') | 0,
+			// 立春年_OFFSET = 5
+			立春年_OFFSET = (MONTH_COUNT + START_MONTH) * SOLAR_TERMS_MONTH_RATE
+					- 立春NO | 0;
 
+			// 計算以節氣(實為十二節)分年月。每年以立春交節時刻為界。
+			// 十二節年月, 節氣年月, 立春年月
 			// 立春，指太陽到達黃經315°時，屬相（生肖）以立春作為起始點。
 			// 中國古時春節曾專指立春，也被視為一年的開始。
 			function 立春年(date, options) {
 				if (!isNaN(date) && -1000 < date && date < 3000) {
 					// get JD of CE year (date)
-					date = solar_term_JD(date - 1, 立春NO);
+					date = [ date, 1 ];
+				}
+
+				if (Array.isArray(date)) {
+					// [ CE 立春節氣年, 立春節氣月 ]
+					// get JD of CE year (date)
+					if ((date[1] = date[1] * SOLAR_TERMS_MONTH_RATE
+							- 立春年_OFFSET) < 0)
+						date[1] += SOLAR_TERMS_NAME.length, date[0]--;
+					date = solar_term_JD(date[0], date[1]);
+					// options: return JD
 					return options ? date : library_namespace.JD_to_Date(date);
 				}
 
-				if (library_namespace.is_Date(date)) {
-					var year = date.getFullYear(), month = date.getMonth();
-					// 快速判別:立春為公曆每年2月3至5日之間
-					if (month !== 1)
-						return month < 1 ? year - 1 : year;
-					// +1: 當天24時之前交節，依舊得算在當日。
-					return library_namespace.Date_to_JD(date) + 1
-					//
-					< solar_term_JD(year - 1, 立春NO) ? year - 1 : year;
+				if (!library_namespace.is_Date(date))
+					return;
+
+				if (options) {
+					// options: return [ CE 立春節氣年, 立春節氣月 ]
+					date = solar_term_of_JD(
+					// 回傳 [ 節氣年 year (以"春分"分年, 非立春後才過年!),
+					// 節氣序 index, 已經過日數/剩下幾日 ]。
+					library_namespace.Date_to_JD(date), {
+						days : true
+					});
+					date.pop();
+					date[1] = (date[1] + 立春年_OFFSET) / SOLAR_TERMS_MONTH_RATE
+							| 0;
+					// 月數12: 每年有12個月
+					if (date[1] > MONTH_COUNT)
+						date[1] -= MONTH_COUNT, date[0]++;
+					return date;
 				}
+
+				// options: return (CE 立春節氣年)
+				var year = date.getFullYear(), month = date.getMonth();
+				// 快速判別:立春為公曆每年2月3至5日之間
+				if (month !== 1)
+					return month < 1 ? year - 1 : year;
+				// +1: 當天24時之前交節，依舊得算在當日。
+				return library_namespace.Date_to_JD(date) + 1
+				//
+				< solar_term_JD(year - 1, 立春NO) ? year - 1 : year;
 			}
 
 			// CeL.立春年(2001).format('CE');

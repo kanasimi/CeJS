@@ -306,7 +306,7 @@ if (typeof CeL === 'function')
 			// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
 			NOT_FOUND = ''.indexOf('_'),
 
-			// 起始年月日。
+			// 起始年月日。年月日 starts form 1.
 			// 基本上與程式碼設計合一，僅表示名義，不可更改。
 			START_YEAR = 1, START_MONTH = 1, START_DATE = 1,
 
@@ -334,6 +334,7 @@ if (typeof CeL === 'function')
 			PERIOD_PATTERN = new RegExp('^' + PERIOD_PREFIX + '(.+)$'),
 
 			// set normal month count of a year.
+			// 月數12: 每年有12個月.
 			MONTH_COUNT = 12,
 
 			// 可能出現的最大日期值。
@@ -3646,10 +3647,27 @@ if (typeof CeL === 'function')
 			};
 
 			function comment_年九星(date) {
-				// 64: 64 CE 為甲子:上元花甲 一運。其他如 1684, 1864年(康熙二十三年)亦可。
+				// offset 64: 64 CE 為甲子:上元花甲 一運。其他如 1684, 1864年(康熙二十三年)亦可。
 				// 180: 一個花甲，共有六十年。而三元三個花甲，總得一百八十年。
-				var index = ((64 - 立春年(date)) % 180) + 180;
-				// assert: index >= 0
+				var index = (64 - 立春年(date)) % 180;
+				if (index < 0)
+					index += 180;
+				// assert: 0 <= index < 180
+
+				return 九星_LIST[index % 九星_LIST.length]
+				//
+				+ ' (' + library_namespace.to_stem_branch(-index) + ')';
+			}
+
+			// 月九星每15年一輪。
+			function comment_月九星(date) {
+				var index = 立春年(date, true);
+				// 1863年11月:上元甲子月
+				// offset 47 = (1863 * 12 + 11) % 180
+				index = (47 - index[0] * MONTH_COUNT - index[1]) % 180;
+				if (index < 0)
+					index += 180;
+				// assert: 0 <= index < 180
 
 				return 九星_LIST[index % 九星_LIST.length]
 				//
@@ -3657,7 +3675,7 @@ if (typeof CeL === 'function')
 			}
 
 			function comment_三元九運(date) {
-				// 64: 64 CE 為甲子:上元花甲 一運。其他如 1684, 1864年(康熙二十三年)亦可。
+				// offset 64: 64 CE 為甲子:上元花甲 一運。其他如 1684, 1864年(康熙二十三年)亦可。
 				// 180: 一個花甲，共有六十年。而三元三個花甲，總得一百八十年。
 				var index = (立春年(date) - 64) % 180;
 				if (index < 0)
@@ -3867,6 +3885,7 @@ if (typeof CeL === 'function')
 					五行 : comment_五行,
 					繞迥 : comment_繞迥,
 					年九星 : comment_年九星,
+					月九星 : comment_月九星,
 					三元九運 : comment_三元九運,
 
 					月の別名 : comment_月の別名,

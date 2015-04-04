@@ -2444,7 +2444,7 @@ function affairs() {
 			date = CeL.solar_term_of_JD(JD, {
 				days : true
 			});
-			return CeL.SOLAR_TERMS[date[0]] + ' ' + date[1];
+			return CeL.SOLAR_TERMS[date[1]] + ' ' + date[2];
 		} ],
 
 		apparent : [
@@ -2954,13 +2954,25 @@ function affairs() {
 		// http://ctext.org/wiki.pl?if=en&chapter=457831
 		// 欽定協紀辨方書·卷八 三元九星
 		// https://archive.org/details/06056509.cn
+		月九星 : [ {
+			a : {
+				T : '月九星'
+			},
+			R : '三元月九星，每年以立春交節時刻為界，每月以十二節交節時刻為界。此處算法配合天文節氣。',
+			href : 'https://archive.org/details/06056509.cn'
+		}, function(date) {
+			// 入中宫
+			return CeL.era.月九星(date) || '';
+		} ],
+
 		年九星 : [ {
 			a : {
 				T : '年九星'
 			},
-			R : '三元年九星以立春交節時刻為界。',
+			R : '三元年九星，每年以立春交節時刻為界。此處算法配合天文節氣。',
 			href : 'https://archive.org/details/06056509.cn'
 		}, function(date) {
+			// 入中宫
 			return CeL.era.年九星(date) || '';
 		} ],
 
@@ -2969,7 +2981,7 @@ function affairs() {
 					a : {
 						T : '三元九運'
 					},
-					R : '二十年一運，立春後才改「運」。玄空飛星一派風水三元九運，又名「洛書運」。',
+					R : '二十年一運，每年以立春交節時刻為界，立春後才改「運」。玄空飛星一派風水三元九運，又名「洛書運」。',
 					// http://www.hokming.com/fengshui-edit-threeyuennineyun.htm
 					href : 'http://www.twwiki.com/wiki/%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B',
 					S : 'font-size:.8em;'
