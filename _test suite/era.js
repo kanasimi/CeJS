@@ -2275,6 +2275,11 @@ function affairs() {
 	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
 	//
 	建除_LIST = '建除滿平定執破危成收開閉'.split(''),
+	// https://github.com/zealotrush/ben_rime/blob/master/symbols.yaml
+	ZODIAC_SYMBOLS = '♈♉♊♋♌♍♎♏♐♑♒♓'.split(''),
+	// 白羊宮,金牛宮,雙子宮,巨蟹宮,獅子宮,室女宮,天秤宮,天蠍宮,人馬宮,摩羯宮,寶瓶宮,雙魚宮
+	ZODIAC_SIGNS = ('Aries,Taurus,Gemini,Cancer,Leo,Virgo,Libra,'
+			+ 'Scorpio,Sagittarius,Capricorn,Aquarius,Pisces').split(','),
 	// for 皇紀.
 	kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset),
 	// for 泰國佛曆
@@ -2447,28 +2452,27 @@ function affairs() {
 			return CeL.SOLAR_TERMS[date[1]] + ' ' + date[2];
 		} ],
 
-		apparent : [
-				{
-					a : {
-						T : 'apparent longitude'
-					},
-					R : '紀元使用當地、當日零時，太陽的視黃經, the apparent geocentric celestial longitude of the Sun.',
-					href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
-				},
-				function(date) {
-					if (/* date.準 || */date.精)
-						return '';
-					var JD = CeL.Date_to_JD(date.adapt_offset());
-					// 還原 local 之時間。
-					date.adapt_offset('');
-					return {
-						span : CeL.show_degrees(
-								CeL.solar_coordinate(JD).apparent, 2)
-						// &nbsp;
-						.replace(/ /g, CeL.DOM.NBSP),
-						C : 'monospaced'
-					};
-				} ],
+		apparent : [ {
+			a : {
+				T : 'apparent longitude'
+			},
+			R : '紀元使用當地、當日零時，太陽的視黃經,'
+			//
+			+ ' the apparent geocentric celestial longitude of the Sun.',
+			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			var JD = CeL.Date_to_JD(date.adapt_offset());
+			// 還原 local 之時間。
+			date.adapt_offset('');
+			return {
+				span : CeL.show_degrees(CeL.solar_coordinate(JD).apparent, 2)
+				// &nbsp;
+				.replace(/ /g, CeL.DOM.NBSP),
+				C : 'monospaced'
+			};
+		} ],
 
 		// --------------------------------------------------------------------
 		// 曆法 Historical calendar
@@ -2692,7 +2696,7 @@ function affairs() {
 		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
 		// TODO: 八節、二至啟閉四節、伏臘、八魁、天李、入官忌、日忌和歸忌
 		// see 欽定協紀辨方書
-		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/calendar_j.html
+		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/calendar_j.html#zassetsu
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/astrology_j.html
 
 		// 納音 12直 27宿 7曜 節気/72候/没滅日 大小歳/凶会 下段 雑注 日遊 節月
@@ -2913,7 +2917,8 @@ function affairs() {
 			// 還原 local 之時間。
 			date.adapt_offset('');
 
-			var index, 年 = date.getFullYear();
+			// 像是 東晉哀帝隆和1年11月30日 363/1/1 必須多前溯 .5 才能保證後面 days >= 0。
+			var index, 年 = date.getFullYear() - .5;
 			if (date.getMonth() < 6)
 				年 -= .5;
 			// 確定 date 之前一至日。
@@ -2934,15 +2939,14 @@ function affairs() {
 				if (!S)
 					S = '#efa';
 				// 將 index 轉為逆序。
-				index = (-index - 1) % 九星_JP_LIST.length;
-				if (index < 0)
-					index += 九星_JP_LIST.length;
-			} else
-				// 冬至後→夏至間。
-				index %= 九星_JP_LIST.length;
+				index = -index - 1;
+			}// else 冬至後→夏至間。
+
+			if ((index %= 九星_JP_LIST.length) < 0)
+				index += 九星_JP_LIST.length;
 
 			index = 九星_JP_LIST[index] + ' ' + days
-			//
+			// ↘:陰遁, ↗:陽遁
 			+ (年 % 1 === 0 ? '↘' : '↗');
 
 			return S ? {
@@ -2987,6 +2991,28 @@ function affairs() {
 					S : 'font-size:.8em;'
 				}, function(date) {
 					return CeL.era.三元九運(date) || '';
+				} ],
+
+		astrological : [
+				{
+					a : {
+						T : 'zodiac sign'
+					},
+					R : 'Astrological signs, Western zodiac signs',
+					href : 'https://en.wikipedia.org/wiki/Astrological_sign#Western_zodiac_signs',
+					S : 'font-size:.8em;'
+				}, function(date) {
+					if (/* date.準 || */date.精)
+						return '';
+					var JD = CeL.Date_to_JD(date.adapt_offset());
+					// 還原 local 之時間。
+					date.adapt_offset('');
+
+					// +1: 只要當天達到此角度，即算做此宮。
+					var index = CeL.solar_coordinate(JD + 1).apparent / 30 | 0;
+					return [ ZODIAC_SYMBOLS[index], CeL.DOM.NBSP, {
+						T : ZODIAC_SIGNS[index]
+					} ];
 				} ],
 
 		// --------------------------------------------------------------------
