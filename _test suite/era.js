@@ -1905,72 +1905,24 @@ initialize_thdl_solar_term = function() {
 
 // ---------------------------------------------------------------------//
 
-var 九星_JP_LIST = '一白水星,二黒土星,三碧木星,四緑木星,五黄土星,六白金星,七赤金星,八白土星,九紫火星'.split(',');
-
-// 日家九星遁起始日
-// http://koyomi8.com/sub/9sei.htm
-// 注意:此處夏至、冬至皆指 CE 當年。例如 2000 年冬至指 2000/12 之冬至。
-function 遁開始日(年, 冬至) {
-	if (年 % 1 >= .5)
-		冬至 = true;
-	年 = Math.floor(年);
-
-	var cache = 遁開始日[冬至 ? '冬' : '夏'];
-	if (年 in cache)
-		return cache[年];
-
-	var 閏,
-	// 60/2=30
-	HALF_LENGTH = CeL.SEXAGENARY_CYCLE_LENGTH / 2 | 0,
-	// 夏至・冬至の日付を計算する
-	// 夏至 90° 節氣序 index 6, 冬至 270° 節氣序 index 18.
-	// 夏至後至冬至間: 夏至 JD, else 冬至 JD.
-	至日JD = CeL.solar_term_JD(年, 冬至 ? 6 + 12 : 6),
-	//
-	至日干支序 = CeL.stem_branch_index(CeL.JD_to_Date(至日JD)),
-	// 取前一個甲子作分界日。
-	開始日JD = 至日JD - 至日干支序;
-
-	CeL.debug(年 + '年' + (冬至 ? '冬至 ' : '夏至 ')
-	//
-	+ CeL.JD_to_Date(至日JD).format(draw_era.date_options), 2);
-
-	if (HALF_LENGTH <= 至日干支序) {
-		// 取後一個甲子，最接近前至日。
-		開始日JD += CeL.SEXAGENARY_CYCLE_LENGTH;
-		// 3=366/2-遁週期(180), 只有在這範圍內才需要檢查是否以閏起始。
-		if (至日干支序 < HALF_LENGTH + 3) {
-			// 年 - 1 : 算前一年的冬至。
-			var 前至日JD = CeL.solar_term_JD(冬至 ? 年 : 年 - 1,
-			//
-			冬至 ? 6 : 6 + 12),
-			//
-			前至日干支序 = CeL.stem_branch_index(
-			//	
-			CeL.JD_to_Date(前至日JD));
-			CeL.debug('前至日 ' + CeL.JD_to_Date(前至日JD).format(
-			//
-			draw_era.date_options) + ' 干支序 ' + 前至日干支序, 2);
-			if (前至日干支序 <= HALF_LENGTH) {
-				// 順便紀錄前至日遁開始日
-				遁開始日[冬至 ? '夏' : '冬'][冬至 ? 年 : 年 - 1] = [ 前至日JD - 前至日干支序 ];
-				CeL.debug('遇日家九星の「閏」，開始日前移' + HALF_LENGTH + '日。', 2);
-				閏 = true;
-				開始日JD -= HALF_LENGTH;
-			}
+/**
+ * 利用 cookie 記錄前次所選欄位。
+ */
+function column_by_cookie(to_set) {
+	if (to_set) {
+		// 將所選欄位存於 cookie。
+		if (JSON.stringify)
+			CeL.set_cookie('selected_column', JSON.stringify(selected_column));
+	} else
+		// 取得並設定存於 cookie 之欄位。
+		try {
+			var data = CeL.get_cookie('selected_column');
+			if (data && CeL.is_Object(data = JSON.parse(data)))
+				selected_column = data;
+		} catch (e) {
+			// TODO: handle exception
 		}
-	}
-
-	return 遁開始日[冬至 ? '冬' : '夏'][年] = [ 開始日JD, 閏 ];
 }
-
-// 遁開始日 cache
-// 遁開始日.夏[年] = [ 夏至前後陰遁開始日JD, 閏 ];
-遁開始日.夏 = [];
-// 遁開始日.冬[年] = [ 冬至前後陽遁開始日JD, 閏 ];
-遁開始日.冬 = [];
-
-// ---------------------------------------------------------------------//
 
 // 設定是否擋住一次 contextmenu。
 var no_contextmenu;
@@ -2298,10 +2250,8 @@ function affairs() {
 					href : 'https://en.wikipedia.org/wiki/Julian_Day_Number'
 				},
 				function(date) {
-					var date_String = CeL.Date_to_JDN(date.adapt_offset(0))
+					var date_String = CeL.Date_to_JDN(date.minute_offset(0))
 							+ (date.精 === '年' ? '–' : '');
-					// 還原 local 之時間。
-					date.adapt_offset('');
 					return date_String;
 				} ],
 
@@ -2315,10 +2265,8 @@ function affairs() {
 					href : 'http://en.wikipedia.org/wiki/Julian_day'
 				},
 				function(date) {
-					var date_String = CeL.Date_to_JD(date.adapt_offset())
+					var date_String = CeL.Date_to_JD(date.minute_offset())
 							+ (date.精 === '年' ? '–' : '');
-					// 還原 local 之時間。
-					date.adapt_offset('');
 					return date_String;
 				} ],
 
@@ -2420,9 +2368,7 @@ function affairs() {
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
-			var JD = CeL.Date_to_JD(date.adapt_offset());
-			// 還原 local 之時間。
-			date.adapt_offset('');
+			var JD = CeL.Date_to_JD(date.minute_offset());
 			date = CeL.solar_term_of_JD(JD, {
 				pentads : true,
 				time : true
@@ -2442,9 +2388,7 @@ function affairs() {
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
-			var JD = CeL.Date_to_JD(date.adapt_offset());
-			// 還原 local 之時間。
-			date.adapt_offset('');
+			var JD = CeL.Date_to_JD(date.minute_offset());
 
 			date = CeL.solar_term_of_JD(JD, {
 				days : true
@@ -2463,9 +2407,7 @@ function affairs() {
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
-			var JD = CeL.Date_to_JD(date.adapt_offset());
-			// 還原 local 之時間。
-			date.adapt_offset('');
+			var JD = CeL.Date_to_JD(date.minute_offset());
 			return {
 				span : CeL.show_degrees(CeL.solar_coordinate(JD).apparent, 2)
 				// &nbsp;
@@ -2764,9 +2706,7 @@ function affairs() {
 				}, function(date) {
 					if (/* date.準 || */date.精)
 						return '';
-					var JD = CeL.Date_to_JD(date.adapt_offset());
-					// 還原 local 之時間。
-					date.adapt_offset('');
+					var JD = CeL.Date_to_JD(date.minute_offset());
 
 					var index = CeL.stem_branch_index(date)
 					// .5: 清明、立夏之類方為"節"，因此配合節氣序，需添加之 offset。
@@ -2891,19 +2831,6 @@ function affairs() {
 					return /* !date.準 && */!date.精 && CeL.era.二十七宿(date) || '';
 				} ],
 
-		// 日時九星推法
-		// 九星は年、月、日、時刻それぞれに割り当てられる。
-		// http://koyomi.vis.ne.jp/doc/mlwa/201007040.htm
-		// https://ja.wikipedia.org/wiki/%E4%B9%9D%E6%98%9F#.E6.97.A5.E3.81.AE.E4.B9.9D.E6.98.9F
-		// http://koyomi8.com/sub/rekicyuu_doc01.htm#9sei
-		// http://d.hatena.ne.jp/nobml/20121231/1356881216
-		// http://www.fushantang.com/1012/1012d/j4083.html
-		// http://blog.xuite.net/chen992/twblog/99860418-%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B
-		// http://www.kaiun.com.tw/share_detail.asp?niid=33
-		// http://www.gtomb.com/news-31.html
-		// http://wenku.baidu.com/view/3dcb027302768e9951e738c3.html
-		// "冬至上元甲子起" "飛星之法上元甲子一白入中宮"
-		// http://blog.xuite.net/nortonwu1015/twblog/137586855
 		日家九星 : [ {
 			a : {
 				T : '日家九星'
@@ -2913,46 +2840,21 @@ function affairs() {
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
-			var JD = CeL.Date_to_JD(date.adapt_offset());
-			// 還原 local 之時間。
-			date.adapt_offset('');
 
-			// 像是 東晉哀帝隆和1年11月30日 363/1/1 必須多前溯 .5 才能保證後面 days >= 0。
-			var index, 年 = date.getFullYear() - .5;
-			if (date.getMonth() < 6)
-				年 -= .5;
-			// 確定 date 之前一至日。
-			// +1 : JD 為當地當天0時。但交節時刻會在至日0時之後。因此需算到整日過完，即 JD+1。
-			while (遁開始日(年 + .5)[0] <= JD + 1)
-				年 += .5;
-			CeL.debug(遁開始日(年) + ' - ' + JD + ' - ' + 遁開始日(年 + .5)
+			var 九星 = CeL.era.日家九星(date),
 			//
-			+ ' (' + (遁開始日(年 + .5)[0] - 遁開始日(年)[0]) + ')', 2);
-			index = 遁開始日(年);
-			var days = JD + 1 - index[0] | 0,
+			S = 九星.days === 0 ? '#faa' : 九星.閏 ? '#afa'
 			//
-			S = days === 0 ? '#faa' : index[1] ? '#afa' : '';
-			// assert: 0 <= days < 210 (or 180=(366/2/60|0)*60)
-			index = days + (index[1] ? CeL.SEXAGENARY_CYCLE_LENGTH : 0);
-			if (年 % 1 === 0) {
-				// 夏至後→冬至間。陰遁、逆飛。
-				if (!S)
-					S = '#efa';
-				// 將 index 轉為逆序。
-				index = -index - 1;
-			}// else 冬至後→夏至間。
+			: 九星.type === '陰遁' ? '#efa' : '';
 
-			if ((index %= 九星_JP_LIST.length) < 0)
-				index += 九星_JP_LIST.length;
-
-			index = 九星_JP_LIST[index] + ' ' + days
+			九星 = 九星.九星 + ' ' + 九星.days
 			// ↘:陰遁, ↗:陽遁
-			+ (年 % 1 === 0 ? '↘' : '↗');
+			+ (九星.type === '陰遁' ? '↘' : '↗');
 
 			return S ? {
-				span : index,
+				span : 九星,
 				S : 'background-color:' + S
-			} : index;
+			} : 九星;
 		} ],
 
 		// http://ctext.org/wiki.pl?if=en&chapter=457831
@@ -3004,9 +2906,7 @@ function affairs() {
 				}, function(date) {
 					if (/* date.準 || */date.精)
 						return '';
-					var JD = CeL.Date_to_JD(date.adapt_offset());
-					// 還原 local 之時間。
-					date.adapt_offset('');
+					var JD = CeL.Date_to_JD(date.minute_offset());
 
 					// +1: 只要當天達到此角度，即算做此宮。
 					var index = CeL.solar_coordinate(JD + 1).apparent / 30 | 0;
@@ -3206,6 +3106,12 @@ function affairs() {
 			th : i
 		};
 	});
+
+	CeL.add_listener('unload', function() {
+		column_by_cookie(true);
+	});
+
+	column_by_cookie();
 
 	// -----------------------------
 

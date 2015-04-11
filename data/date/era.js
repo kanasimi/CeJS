@@ -615,13 +615,13 @@ if (typeof CeL === 'function')
 			// 十二建星每月兩「建」，即正月建寅、二月建卯、三月建辰……，依此類推。正月為寅月，所以六寅日（甲寅、丙寅、戊寅、庚寅、壬寅）中必須有兩個寅日和「建」遇到一起；二月為卯月，所以六卯日（乙卯、丁卯、己卯、辛卯、癸卯）中必須有兩個卯日和「建」遇到一起，否則就不對。逢節（立春、驚蜇、清明、立夏、芒種、小暑、立秋、白魯、寒露、立冬、大雪、小寒）兩個建星相重，這樣才能保證本月第一個與月支相同之日與「建」相遇。
 			十二直_LIST = '建除満平定執破危成納開閉'.split(''),
 			// "廿八星宿" @ 農民曆: 東青龍7北玄武7西白虎7南朱雀7
-			// will be splited latter.
+			// It will be splitted later.
 			// jp:角亢氐房心尾箕斗牛女虚危室壁奎婁胃昴畢觜参井鬼柳星張翼軫
 			// diff: 虚, 参
 			// 因始於中國，採中國字。
 			二十八宿_LIST = '角亢氐房心尾箕斗牛女虛危室壁奎婁胃昴畢觜參井鬼柳星張翼軫',
 			// 二十八宿にあり二十七宿にはない宿は、牛宿である。
-			// will be splited and modified latter.
+			// It will be splitted and modified later.
 			二十七宿_LIST = 二十八宿_LIST.replace(/牛/, ''),
 			// 旧暦（太陽太陰暦）における月日がわかれば、自動的に二十七宿が決定される。
 			// 各月の朔日の宿
@@ -632,13 +632,16 @@ if (typeof CeL === 'function')
 			納音_LIST = ('海中,爐中,大林,路旁,劍鋒,山頭,澗下,城頭,白蠟,楊柳,井泉,屋上,霹靂,松柏,長流,'
 			// 0 ~ 59 干支序轉納音: 納音_LIST[index / 2 | 0]; '/2': 0,1→0; 2,3→1; ...
 			+ '砂中,山下,平地,壁上,金泊,覆燈,天河,大驛,釵釧,桑柘,大溪,沙中,天上,石榴,大海').split(','),
-			//
-			九星_LIST
-			//
-			= '一白水星,二黑土星,三碧木星,四綠木星,五黃土星,六白金星,七赤金星,八白土星,九紫火星'.split(',');
+			// It will be splitted later.
+			九星_LIST = '一白水星,二黑土星,三碧木星,四綠木星,五黃土星,六白金星,七赤金星,八白土星,九紫火星',
+			// '一白水星,二黒土星,三碧木星,四緑木星,五黄土星,六白金星,七赤金星,八白土星,九紫火星'
+			九星_JP_LIST = 九星_LIST.replace(/黑/, '黒').replace(/綠/, '緑').replace(
+					/黃/, '黄').split(',');
 
 			// ---------------------------------------------------------------------//
 			// 初始調整並規範基本常數。
+
+			九星_LIST = 九星_LIST.split(',');
 
 			(function() {
 				var a = [ 2, 1 ];
@@ -3493,13 +3496,13 @@ if (typeof CeL === 'function')
 			// 閏月月建同本月。
 			// 子月：大雪(12月7/8日)至小寒前一日，中氣冬至。
 			// 因此可以與12月7日最接近的月首，作為子月初一。
-			function comment_月建(date) {
+			function note_月建(date) {
 				return date.月干支
 				// assert: (date.月干支) 為干支 e.g., '甲子'
 				&& date.月干支.charAt(1) || '';
 			}
 
-			function comment_季(date) {
+			function note_季(date) {
 				var 月 = date.月;
 				if (isNaN(月) && (月 = 月.match(MONTH_NAME_PATTERN)))
 					月 = 月[2];
@@ -3509,36 +3512,36 @@ if (typeof CeL === 'function')
 				&& 季_LIST.charAt(月 / 4 | 0) || '';
 			}
 
-			function comment_旬(date) {
+			function note_旬(date) {
 				var 日 = date.日;
 				return isNaN(日) ? ''
 				// 一個月的第一個十天為上旬，第二個十天為中旬，餘下的天數為下旬。
 				: 日 > 10 ? 日 > 20 ? '下' : '中' : '上';
 			}
 
-			function comment_生肖(date) {
+			function note_生肖(date) {
 				return date.年干支序 >= 0
 				// 屬相
 				? 十二生肖_LIST[date.年干支序 % 十二生肖_LIST.length] : '';
 			}
 
-			function comment_五行(date) {
+			function note_五行(date) {
 				return date.年干支序 >= 0 ? (date.年干支序 % 2 ? '陰' : '陽')
 				// http://zh.wikipedia.org/wiki/五行#五行與干支表
 				+ 陰陽五行_LIST[(date.年干支序 >> 1) % 陰陽五行_LIST.length] : '';
 			}
 
-			function comment_繞迥(date) {
-				var 生肖 = comment_生肖(date);
+			function note_繞迥(date) {
+				var 生肖 = note_生肖(date);
 				return '第' + library_namespace.to_Chinese_numeral(
 				// 第一繞迥(rabqung)自公元1027年開始算起
 				// 每60年一繞迥，library_namespace.SEXAGENARY_CYCLE_LENGTH
 				Math.floor((date.getFullYear() - (1027 - 60)) / 60)) + '繞迥'
 				//
-				+ (生肖 ? ' ' + comment_五行(date).replace(/金$/, '鐵') + 生肖 : '');
+				+ (生肖 ? ' ' + note_五行(date).replace(/金$/, '鐵') + 生肖 : '');
 			}
 
-			function comment_納音(date) {
+			function note_納音(date) {
 				var index = library_namespace.stem_branch_index(date);
 				// 0 ~ 59 干支序轉納音: 納音_LIST[index / 2 | 0];
 				// '/2': 0,1→0; 2,3→1; ...
@@ -3546,7 +3549,7 @@ if (typeof CeL === 'function')
 				return 納音_LIST[index / 2 | 0];
 			}
 
-			function comment_二十八宿(date) {
+			function note_二十八宿(date) {
 				// http://koyomi8.com/sub/rekicyuu_doc01.htm
 				// 日の干支などと同様、28日周期で一巡して元に戻り、これを繰り返すだけである。
 				// 8 : 二十八宿_offset
@@ -3559,19 +3562,19 @@ if (typeof CeL === 'function')
 				return 二十八宿_LIST[index];
 			}
 
-			function comment_二十七宿(date) {
+			function note_二十七宿(date) {
 				var index = 二十七宿_offset[date.月] + date.日;
 				return date.參照曆法 !== 'CE' && index >= 0
 				// 僅對於日本之旧暦與紀年，方能得到正確之暦注值！
 				? 二十七宿_LIST[index % 二十七宿_LIST.length] : '';
 			}
 
-			function comment_七曜(date) {
+			function note_七曜(date) {
 				// 七曜, 曜日
 				return 七曜_LIST[date.getDay()];
 			}
 
-			function comment_六曜(date) {
+			function note_六曜(date) {
 				var index = +date.月 + date.日;
 				return date.參照曆法 !== 'CE' && index >= 0
 				// 六曜は元々は、1箇月（≒30日）を5等分して6日を一定の周期とし（30÷5 =
@@ -3581,13 +3584,13 @@ if (typeof CeL === 'function')
 				? 六曜_LIST[index % 六曜_LIST.length] : '';
 			}
 
-			function comment_月の別名(date, 新暦) {
+			function note_月の別名(date, 新暦) {
 				// 新暦に適用する
 				var index = 新暦 ? date.getMonth() : date.月 - 1;
 				return index >= 0 ? 月の別名_LIST[index] : '';
 			}
 
-			function comment_反支(date, 六日反支標記) {
+			function note_反支(date, 六日反支標記) {
 				var 朔干支序 = (library_namespace
 				// 月朔日干支序。
 				// 36: 能被 library_namespace.BRANCH_LIST.length 整除，且>=大月 之數。
@@ -3610,7 +3613,7 @@ if (typeof CeL === 'function')
 				return 反支 || '';
 			}
 
-			function comment_血忌(date) {
+			function note_血忌(date) {
 				var index = date.月;
 				if (index > 0) {
 					var 干支序 = ++index / 2 | 0;
@@ -3624,10 +3627,10 @@ if (typeof CeL === 'function')
 				return '';
 
 				index = [];
-				CeL.BRANCH_LIST
+				library_namespace.BRANCH_LIST
 				// note: 示例如何計算出各月 index。
 				.split('').forEach(function(s) {
-					index.push(CeL.stem_branch_index(s));
+					index.push(library_namespace.stem_branch_index(s));
 				});
 				[ 1, 7, 2, 8, 3, 9, 4, 10, 5, 11, 6, 0 ];
 				return index;
@@ -3646,7 +3649,7 @@ if (typeof CeL === 'function')
 				return year;
 			};
 
-			function comment_年九星(date) {
+			function note_年九星(date) {
 				// offset 64: 64 CE 為甲子:上元花甲 一運。其他如 1684, 1864年(康熙二十三年)亦可。
 				// 180: 一個花甲，共有六十年。而三元三個花甲，總得一百八十年。
 				var index = (64 - 立春年(date)) % 180;
@@ -3660,7 +3663,7 @@ if (typeof CeL === 'function')
 			}
 
 			// 月九星每15年一輪。
-			function comment_月九星(date) {
+			function note_月九星(date) {
 				var index = 立春年(date, true);
 				// 1863年11月:上元甲子月
 				// offset 47 = (1863 * 12 + 11) % 180
@@ -3674,7 +3677,165 @@ if (typeof CeL === 'function')
 				+ ' (' + library_namespace.to_stem_branch(-index) + ')';
 			}
 
-			function comment_三元九運(date) {
+			/**
+			 * 日家九星遁起始日。
+			 * 
+			 * 注意:<br />
+			 * need application.astronomical<br />
+			 * 此處夏至、冬至皆指 CE 當年。例如 2000 年冬至指 2000/12 之冬至。
+			 * 
+			 * @param {Number}年
+			 *            CE 當年
+			 * @param {Boolean}[冬至]
+			 *            取得冬至前後陽遁開始日JD
+			 * 
+			 * @returns {Array} [ 開始日JD, 閏 ]
+			 * 
+			 * @see http://koyomi8.com/sub/9sei.htm
+			 */
+			function 遁開始日(年, 冬至) {
+				if (年 % 1 >= .5)
+					冬至 = true;
+				年 = Math.floor(年);
+
+				var cache = 遁開始日[冬至 ? '冬' : '夏'];
+				if (年 in cache)
+					return cache[年];
+
+				var 閏,
+				// 60/2=30
+				HALF_LENGTH = library_namespace
+				//
+				.SEXAGENARY_CYCLE_LENGTH / 2 | 0,
+				// 夏至・冬至の日付を計算する
+				// 夏至 90° 節氣序 index 6, 冬至 270° 節氣序 index 18.
+				// 夏至後至冬至間: 夏至 JD, else 冬至 JD.
+				至日JD = library_namespace.solar_term_JD(年, 冬至 ? 6 + 12 : 6),
+				//
+				至日干支序 = library_namespace.stem_branch_index(
+				//
+				library_namespace.JD_to_Date(至日JD)),
+				// 取前一個甲子作分界日。
+				開始日JD = 至日JD - 至日干支序;
+
+				library_namespace.debug(
+				//
+				年 + '年' + (冬至 ? '冬至 ' : '夏至 ')
+				//
+				+ library_namespace.JD_to_Date(至日JD).format(
+				//
+				draw_era.date_options), 2);
+
+				if (HALF_LENGTH <= 至日干支序) {
+					// 取後一個甲子，最接近前至日。
+					開始日JD += library_namespace.SEXAGENARY_CYCLE_LENGTH;
+					// 3=366/2-遁週期(180), 只有在這範圍內才需要檢查是否以閏起始。
+					if (至日干支序 < HALF_LENGTH + 3) {
+						// 年 - 1 : 算前一年的冬至。
+						var 前至日JD = library_namespace.solar_term_JD(冬至 ? 年
+								: 年 - 1,
+						//
+						冬至 ? 6 : 6 + 12),
+						//
+						前至日干支序 = library_namespace.stem_branch_index(
+						//	
+						library_namespace.JD_to_Date(前至日JD));
+						library_namespace.debug(
+						//
+						'前至日 ' + library_namespace.JD_to_Date(前至日JD).format(
+						//
+						draw_era.date_options) + ' 干支序 ' + 前至日干支序, 2);
+						if (前至日干支序 <= HALF_LENGTH) {
+							// 順便紀錄前至日遁開始日
+							遁開始日[冬至 ? '夏' : '冬'][冬至 ? 年 : 年 - 1] = [ 前至日JD
+									- 前至日干支序 ];
+							library_namespace.debug('遇日家九星の「閏」，開始日前移'
+									+ HALF_LENGTH + '日。', 2);
+							閏 = true;
+							開始日JD -= HALF_LENGTH;
+						}
+					}
+				}
+
+				return 遁開始日[冬至 ? '冬' : '夏'][年] = [ 開始日JD, 閏 ];
+			}
+
+			/**
+			 * 遁開始日 cache
+			 */
+			// 遁開始日.夏[年] = [ 夏至前後陰遁開始日JD, 閏 ];
+			遁開始日.夏 = [];
+			// 遁開始日.冬[年] = [ 冬至前後陽遁開始日JD, 閏 ];
+			遁開始日.冬 = [];
+
+			// 九星は年、月、日、時刻それぞれに割り当てられる。
+			// http://koyomi.vis.ne.jp/doc/mlwa/201007040.htm
+			// https://ja.wikipedia.org/wiki/%E4%B9%9D%E6%98%9F#.E6.97.A5.E3.81.AE.E4.B9.9D.E6.98.9F
+			// http://koyomi8.com/sub/rekicyuu_doc01.htm#9sei
+			// http://d.hatena.ne.jp/nobml/20121231/1356881216
+			// http://www.fushantang.com/1012/1012d/j4083.html
+			// http://blog.xuite.net/chen992/twblog/99860418-%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B
+			// http://www.kaiun.com.tw/share_detail.asp?niid=33
+			// http://www.gtomb.com/news-31.html
+			// http://wenku.baidu.com/view/3dcb027302768e9951e738c3.html
+			// "冬至上元甲子起" "飛星之法上元甲子一白入中宮"
+			// http://blog.xuite.net/nortonwu1015/twblog/137586855
+			/**
+			 * 日時九星推法
+			 * 
+			 * 注意:<br />
+			 * need application.astronomical<br />
+			 */
+			function note_日家九星(date) {
+				var JD = library_namespace.Date_to_JD(date.minute_offset());
+
+				// 像是 東晉哀帝隆和1年11月30日 363/1/1 必須多前溯 .5 才能保證後面 days >= 0。
+				var index, 年 = date.getFullYear() - .5;
+				if (date.getMonth() < 6)
+					年 -= .5;
+				// 確定 date 之前一至日。
+				// +1 : JD 為當地當天0時。但交節時刻會在至日0時之後。因此需算到整日過完，即 JD+1。
+				while (遁開始日(年 + .5)[0] <= JD + 1)
+					年 += .5;
+				library_namespace.debug(
+				//
+				遁開始日(年) + ' - ' + JD + ' - ' + 遁開始日(年 + .5)
+				//
+				+ ' (' + (遁開始日(年 + .5)[0] - 遁開始日(年)[0]) + ')', 2);
+				index = 遁開始日(年);
+
+				// days: 遁開始日後經過天數。0~179
+				var days = JD + 1 - index[0] | 0,
+				//
+				result = library_namespace.null_Object();
+				result.days = days;
+				result.閏 = index[1];
+
+				// assert: 0 <= days < 210 (or 180=(366/2/60|0)*60)
+				index = days
+				//
+				+ (index[1] ? library_namespace.SEXAGENARY_CYCLE_LENGTH : 0);
+
+				if (年 % 1 === 0) {
+					// 夏至後→冬至間。陰遁、逆飛。
+					result.type = '陰遁';
+					// 將 index 轉為逆序。
+					index = -index - 1;
+				} else {
+					// 冬至後→夏至間。
+					result.type = '陽遁';
+				}
+
+				if ((index %= 九星_JP_LIST.length) < 0)
+					index += 九星_JP_LIST.length;
+
+				result.index = index;
+				result.九星 = 九星_JP_LIST[index];
+
+				return result;
+			}
+
+			function note_三元九運(date) {
 				// offset 64: 64 CE 為甲子:上元花甲 一運。其他如 1684, 1864年(康熙二十三年)亦可。
 				// 180: 一個花甲，共有六十年。而三元三個花甲，總得一百八十年。
 				var index = (立春年(date) - 64) % 180;
@@ -3707,17 +3868,17 @@ if (typeof CeL === 'function')
 			 * @param {Object}[options]
 			 *            options
 			 */
-			function add_comment(date, options) {
+			function add_note(date, options) {
 				add_adapt_offset(date, this);
 
-				var date_index = this.comment, tmp, tmp2;
+				var date_index = this.notes, tmp, tmp2;
 
 				if (!date_index) {
-					date_index = this.comment
+					date_index = this.notes
 					// do cache.
 					= library_namespace.null_Object();
 
-					add_comment.copy_attributes.forEach(function(key) {
+					add_note.copy_attributes.forEach(function(key) {
 						if (this[key])
 							date_index[key] = this[key];
 					}, this);
@@ -3771,7 +3932,7 @@ if (typeof CeL === 'function')
 				// [ 歲序, 月序, 日序 | 0 ]
 				date_index = this.Date_to_date_index(date);
 				if (!date_index) {
-					library_namespace.err('add_comment: 加注日期於紀年 [' + this
+					library_namespace.err('add_note: 加注日期於紀年 [' + this
 							+ '] 範圍外！');
 				} else {
 					// 欲使用 date_index，應該採 (date.年, date.月, date.日)。
@@ -3871,32 +4032,33 @@ if (typeof CeL === 'function')
 				return date;
 			}
 
-			Object.assign(add_comment, {
+			Object.assign(add_note, {
 				// 預設會 copy 的紀年曆注。
 				// 據: 根據/出典/原始參考文獻/資料引用來源。
 				copy_attributes : '據,準,曆法'.split(','),
-				// 曆注, comment
+				// 曆注, note
 				// 減輕負擔:要這些曆注的自己算。
-				comments : {
-					月建 : comment_月建,
-					季 : comment_季,
-					旬 : comment_旬,
-					生肖 : comment_生肖,
-					五行 : comment_五行,
-					繞迥 : comment_繞迥,
-					年九星 : comment_年九星,
-					月九星 : comment_月九星,
-					三元九運 : comment_三元九運,
+				notes : {
+					月建 : note_月建,
+					季 : note_季,
+					旬 : note_旬,
+					生肖 : note_生肖,
+					五行 : note_五行,
+					繞迥 : note_繞迥,
+					年九星 : note_年九星,
+					月九星 : note_月九星,
+					日家九星 : note_日家九星,
+					三元九運 : note_三元九運,
 
-					月の別名 : comment_月の別名,
+					月の別名 : note_月の別名,
 
-					反支 : comment_反支,
-					血忌 : comment_血忌,
-					七曜 : comment_七曜,
-					六曜 : comment_六曜,
-					納音 : comment_納音,
-					二十八宿 : comment_二十八宿,
-					二十七宿 : comment_二十七宿
+					反支 : note_反支,
+					血忌 : note_血忌,
+					七曜 : note_七曜,
+					六曜 : note_六曜,
+					納音 : note_納音,
+					二十八宿 : note_二十八宿,
+					二十七宿 : note_二十七宿
 				}
 			});
 
@@ -3921,7 +4083,7 @@ if (typeof CeL === 'function')
 				date_index_to_Date : date_index_to_Date,
 				Date_to_date_index : Date_to_date_index,
 
-				add_comment : add_comment,
+				add_note : add_note,
 				// 若偵測是否已經存在，則 IE 8 得特別設定。恐怕因原先已經存在?
 				toString : get_era_name
 			});
@@ -5392,24 +5554,35 @@ if (typeof CeL === 'function')
 			//
 			ONE_MINUTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 1)
 					- new Date(0, 0, 1, 0, 0);
-			function adapt_minute_offset(minute_offset) {
+
+			function minute_offset(minute_offset) {
 				if (minute_offset === undefined)
 					minute_offset = this[MINUTE_OFFSET_KEY];
 				else if (minute_offset === '')
+					// 可用來還原 local 之時間。
 					minute_offset = -local_minute_offset;
+
 				if (!isNaN(minute_offset)) {
 					if (isNaN(this.original_value))
 						this.original_value = this.getTime();
-					this.setTime(this.original_value
+					return this.original_value
 							- (minute_offset + local_minute_offset)
-							* ONE_MINUTE_LENGTH_VALUE);
+							* ONE_MINUTE_LENGTH_VALUE;
 				}
+			}
+
+			function adapt_minute_offset(minute_offset) {
+				var offset = this.minute_offset(minute_offset);
+				if (!isNaN(offset))
+					this.setTime(offset);
 				return this;
 			}
 
 			function add_adapt_offset(date, 紀年) {
 				if (MINUTE_OFFSET_KEY in 紀年) {
 					date[MINUTE_OFFSET_KEY] = 紀年[MINUTE_OFFSET_KEY];
+					date.minute_offset = minute_offset;
+
 					// 注意:這邊不更改真正的 date value，使得所得出的值為「把本地當作紀元所使用的當地」所得出之值。
 					// 例如求 "東漢明帝永平1年1月1日"，
 					// 得到的是 date = "58/2/13 0:0 (UTC-5)"，
@@ -5420,7 +5593,8 @@ if (typeof CeL === 'function')
 					// 或 date.adapt_offset(-5*60)，
 					// 或 date.adapt_offset(-(new Date).getTimezoneOffset())，
 					// 可以還原 local 之時間。
-					date.adapt_offset = adapt_minute_offset;
+					if (false)
+						date.adapt_offset = adapt_minute_offset;
 				}
 			}
 
@@ -6072,7 +6246,7 @@ if (typeof CeL === 'function')
 					// 此時未設定 (date.共存紀年)
 					return tmp;
 
-				紀年.add_comment(date, options);
+				紀年.add_note(date, options);
 
 				return date;
 			}
@@ -6341,7 +6515,7 @@ if (typeof CeL === 'function')
 				} : function(date_time, era) {
 					date_list.push(date = new Date(date_time));
 					add_contemporary(date, era, options);
-					era.add_comment(date, options);
+					era.add_note(date, options);
 				};
 
 				if (typeof era === 'string') {
@@ -6550,7 +6724,7 @@ if (typeof CeL === 'function')
 
 				// 警告:此函數會更改原輸入之 date_value!
 
-				紀年.add_comment(date_value, options);
+				紀年.add_note(date_value, options);
 
 				return strftime(date_value,
 				//
@@ -6916,23 +7090,23 @@ if (typeof CeL === 'function')
 				to_HTML : era_text_to_HTML,
 				//
 				PERIOD_PATTERN : PERIOD_PATTERN
-			}, add_comment.comments);
+			}, add_note.notes);
 
 			// 加工處理。
 			(function() {
-				function comment_proxy(date_value, options) {
+				function note_proxy(date_value, options) {
 					return this(options
 					//
 					&& options.original_Date || date_value);
 				}
-				var comments = add_comment.comments;
-				for ( var name in comments)
-					comments[name]
+				var notes = add_note.notes;
+				for ( var name in notes)
+					notes[name]
 					//
-					= comment_proxy.bind(comments[name]);
+					= note_proxy.bind(notes[name]);
 			})();
 
-			Object.assign(add_comment.comments, {
+			Object.assign(add_note.notes, {
 				// 注意:依 .format() 之設定，在未設定值時將採本處之預設。
 				// 因此對於可能不設定的值，預設得設定為 ''。
 
@@ -7000,11 +7174,11 @@ if (typeof CeL === 'function')
 				// 注解
 				注 : ''
 			});
-			strftime.set_conversion(add_comment.comments,
+			strftime.set_conversion(add_note.notes,
 			//
 			library_namespace.gettext.to_standard('Chinese'));
 			// 已經作過改變，不再利用之。
-			delete add_comment.comments;
+			delete add_note.notes;
 
 			Object.assign(library_namespace, {
 				十二生肖_LIST : 十二生肖_LIST,

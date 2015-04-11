@@ -1276,7 +1276,8 @@ function FindProxyForURL(url, host) {	//	url: 完整的URL字串, host: 在 URL�
 	var lch = host.toLowerCase();
 
 	//isPlainHostName(lch) || isInNet(lch,"192.168.0.0","255.255.0.0") || isInNet(lch,"127.0.0.0","255.255.0.0") || dnsDomainIs(lch,".tw") ?"DIRECT";
-	return //dnsDomainIs(lch,"holyseal.net") || dnsDomainIs(lch,".fuzzy2.com") ? "PROXY 211.22.213.114:8000; DIRECT":	//	可再插入第二、三順位的proxy
+	return (
+	//dnsDomainIs(lch,"holyseal.net") || dnsDomainIs(lch,".fuzzy2.com") ? "PROXY 211.22.213.114:8000; DIRECT":	//	可再插入第二、三順位的proxy
 	/*
 	http://www.cybersyndrome.net/
 	
@@ -1293,7 +1294,8 @@ function FindProxyForURL(url, host) {	//	url: 完整的URL字串, host: 在 URL�
 	//dnsDomainIs(lch,".ys168.com")		? "PROXY 76.29.160.230:8000; DIRECT":	//	永硕E盘专业网络硬盘服务
 	dnsDomainIs(lch, "erogamescape.dyndns.org") ? "PROXY 211.22.213.114:8000; DIRECT"
 
-	: "DIRECT";//:/^[a-z\.\d_\-]+$/.test(lch)?"DIRECT":"PROXY dnsrelay.twnic.net.tw:3127";	//	http://www.twnic.net.tw/proxy.pac	將中文網域名稱轉成英文網域名稱
+	: "DIRECT"//:/^[a-z\.\d_\-]+$/.test(lch)?"DIRECT":"PROXY dnsrelay.twnic.net.tw:3127"	//	http://www.twnic.net.tw/proxy.pac	將中文網域名稱轉成英文網域名稱
+	);
 }
 
 

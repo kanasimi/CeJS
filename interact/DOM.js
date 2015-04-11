@@ -1,8 +1,8 @@
 
 /**
- * @name	CeL function for web
+ * @name	CeL function for World Wide Web (www, W3)
  * @fileoverview
- * 本檔案包含了 web 的 functions。
+ * 本檔案包含了 www 的 functions。
  * @since	
  */
 
@@ -1115,12 +1115,12 @@ node_value = function node_value(node, value, base_space) {
 	var set_value_list = function(value) {
 		var i, l, v;
 		if (Array.isArray(value))
-			for (i = 0, l = value.length, v = {}; i < l; i++)
+			for (i = 0, l = value.length, v = library_namespace.null_Object(); i < l; i++)
 				v[value[i]] = true;
 		else if (library_namespace.is_Object(value))
 			v = value;
 		else
-			(v = {})[value] = true;
+			(v = library_namespace.null_Object())[value] = true;
 		return v;
 	};
 
@@ -2405,7 +2405,7 @@ function setFrame(){
  }
  var l,f;
  try{l=location.hash.slice(1);}catch(e){return;}	//	IE在about:blank的情況下呼叫網頁，網頁完全載入前location無法呼叫。例如從FireFox拉進IE時使用location.*有可能'沒有使用權限'，reload即可。
- if(typeof setFrameTargetSet!='object')setFrameTargetSet={};
+ if(typeof setFrameTargetSet!='object')setFrameTargetSet=library_namespace.null_Object();
  if(l)try{l=decodeURIComponent(l);}catch(e){l=unescape(l);}
  //location.hash='';	//	這一項會reload
  if( l && (f=(f=l.match(/([^\/]+)$/)?RegExp.$1:l)&&(f=f.match(/^([^?#]+)/)?RegExp.$1:f)&&(l in setFrameTargetSet)?setFrameTargetSet[f]:setFrameTarget) && f!=window.name && window.frames[f] && window.frames[f].location.href!=l )
@@ -2992,68 +2992,109 @@ set_cookie.c = {
 		secure : 0
 };
 
-/*	取得document.cookie中所需之值	看起來只能取得相同domain，有設定的path之cookie
+/*
+flag=0: only get the lastest matched value;
+flag=1: only get all matched in a array;
+other flag: auto detect by name
 
-	flag=0: only get the lastest matched value;
-	flag=1: only get all matched in a array;
-	other flag: auto detect by name
-
-get_cookie(name);	//	取得name之值，亦可用RegExp：if(c=get_cookie())c['name1']==value1;
-get_cookie('nn[^=]*');	//	取得所有nn開頭之組合
-get_cookie();	//	取得所有name=value組
+//	取得name之值，亦可用RegExp：if(c=get_cookie())c['name1']==value1;
+get_cookie(name);
+//	取得所有nn開頭之組合
+get_cookie('nn[^=]*');
+//	取得所有name=value組
+get_cookie();
 
 因為 cookie 較容易遭到竄改或是出問題，建議設定 verify。
 */
+/**
+ * 取得document.cookie中所需之值。<br />
+ * 只能取得相同domain，有設定的path之cookie。
+ * 
+ * @param {String}name
+ * @param flag
+ * @param verify
+ * 
+ * @returns
+ */
+function get_cookie(name, flag, verify) {
+	if (!library_namespace.is_WWW() || !document.cookie)
+		return;
+
+	var c, R = library_namespace.is_RegExp(name) ? name : new RegExp('('
+			+ (name ? escape(name) :
+			// \w+
+			'[^;=\\s]+') + ')\\s*=\\s*([^;=\\s]*)', 'g'),
+	//
+	m = document.cookie.match(R);
+
+	library_namespace.debug('[' + R + '] = [' + m + ']', 2);
+	library_namespace.debug('cookie: [' + document.cookie + ']', 2);
+	if (!m)
+		return;
+
+	if (R.global)
+		R = library_namespace.renew_RegExp_flag(R, '-g');
+	if (m.length > 1 && (flag == 0
+	// 取最後一個。
+	|| (typeof flag !== 'number' && name && typeof name === 'string')))
+		m = m.slice(-1);
+
+	// 表示不是因name為RegExp而得出之值。
+	// TODO: bug: 找 "count" 可能找到 "data_count"!!
+	if (m.length === 1 && typeof m[0] === 'string'
+			&& (c = m[0].match(R))[1] === escape(name)) {
+
+		if (false) {
+			if ((m = c[2])
+			// 將值為".."或'..'轉為引號中表示之值
+			&& ((c = m.charAt(0)) === '"' || c === "'") && c === m.slice(-1))
+				try {
+					library_namespace.debug(
+					//
+					'get 1:\n' + m + '\n' + unescape(m), 2);
+					window.eval('c=' + m);
+					return c;
+				} catch (e) {
+				}
+			return m;
+		}
+
+		return unescape(c[2]);
+	}
+
+	var r = library_namespace.null_Object(), v, M, i = 0;
+	library_namespace.debug(
+	//
+	document.cookie + '\n' + R + '\n' + m.length + '\n' + m, 2);
+
+	for (; i < m.length; i++)
+		if (typeof m[i] === 'string' && (M = m[i].match(R)))
+			r[unescape(M[1])] = unescape(M[2]);
+
+	if (false) {
+		for (; i < m.length; i++) {
+			M = m[i].match(R), v = unescape(M[2]);
+			if (v && ((c = v.charAt(0)) === '"' || c === "'") && c === v.slice(-1))
+				try {
+					library_namespace.debug(
+					//
+					'get 2:\n' + v + '\n' + unescape(v));
+					window.eval('c=' + v);
+					v = c;
+				} catch (e) {
+				}
+			// 有必要可用unescape()，畢竟那是模範做法。
+			r[M[1]] = v;
+		}
+	}
+
+	return r;
+}
+
 _// JSDT:_module_
 .
 //get_cookie[generateCode.dLK]='renew_RegExp_flag';
-get_cookie=function (name,flag,verify){
- if(!library_namespace.is_WWW()||!document.cookie)return;
- if(!name)name='[^;=\\s]+';//\w+
- var c, R = library_namespace.is_RegExp(name)?name:new RegExp('('+escape(name)+')\\s*=\\s*([^;=\\s]*)','g')
-	,m=document.cookie.match(R);
- //library_namespace.debug('get_cookie: [' + R + '] = ['+m+']', 1);
- //library_namespace.debug('get_cookie: [' + document.cookie + ']', 1);
- if(!m)return;
- if(R.global)R=library_namespace.renew_RegExp_flag(R,'-g');
- if(m.length>1)
-	 //	取最後一個
-	 if(flag==0 || typeof flag=='undefined'&&typeof name=='string')
-		 m=m.slice(-1);
- //	表示不是因name為RegExp而得出之值.
- //	TODO: bug: 找 "count" 可能找到 "data_count"!!
- if(m.length===1&&typeof m[0]==='string'&&(c=m[0].match(R))[1]===escape(name)){	
-/*
-  if((m=c[2])&&((c=m.charAt(0))=='"'||c=="'")&&c==m.slice(-1))	//	將值為".."或'..'轉為引號中表示之值
-   try{
-    //alert('get 1:\n'+m+'\n'+unescape(m));
-    window.eval('c='+m);return c;
-   }catch(e){}
-  return m;
-*/
-  return unescape(c[2]);
- }
-
- var r={},v,M,i=0;
- //alert(document.cookie+'\n'+R+'\n'+m.length+'\n'+m);
-
- for(;i<m.length;i++)
-  if(typeof m[i]==='string'&&(M=m[i].match(R)))
-   r[unescape(M[1])]=unescape(M[2]);
-/*
- for(;i<m.length;i++){
-  M=m[i].match(R),v=unescape(M[2]);
-  if(v&&((c=v.charAt(0))=='"'||c=="'")&&c==v.slice(-1))
-   try{
-    //alert('get 2:\n'+v+'\n'+unescape(v));
-    window.eval('c='+v);v=c;
-   }catch(e){}
-  r[M[1]]=v;	//	有必要可用unescape()，畢竟那是模範做法。
- }
-*/
-
- return r;
-};
+get_cookie = get_cookie;
 
 
 /**
@@ -4048,7 +4089,7 @@ key (Esc)
 time limit
 
 */
-var sPopP={}	//	sPop properties object
+var sPopP=library_namespace.null_Object()	//	sPop properties object
 	,sPopF	//	flag
 	,sPopError//	for error
 	;
@@ -4062,7 +4103,7 @@ function sPopInit(){
 	//	已登記的背景style,請在CSS中加入[sPopC]_[body class name]
 	sPopP.bgS='bgb,bgn';
 {
- var i=0,t=sPopP.bgS.split(',');sPopP.bgS={};
+ var i=0,t=sPopP.bgS.split(',');sPopP.bgS=library_namespace.null_Object();
  for(;i<t.length;i++)sPopP.bgS[t[i]]=i+1;
 }
 	//	popup window style
@@ -4407,7 +4448,7 @@ window.execScript( sExpression, sLanguage );
 */
 //var VBalert_f;VBalert();	//	init
 function VBalert(prompt,buttons,title,helpfile,context){
- if(typeof VBalert_f!='object')VBalert_f={},set_Object_value('VBalert_f','ret=0,'
+ if(typeof VBalert_f!='object')VBalert_f=library_namespace.null_Object(),set_Object_value('VBalert_f','ret=0,'
 	//	http://msdn.microsoft.com/library/en-us/script56/html/vsfctmsgbox.asp
 	+'vbOK=1,vbCancel=2,vbAbort=3,vbRetry=4,vbIgnore=5,vbYes=6,vbNo=7,'
 	+'vbOKOnly=0,vbOKCancel=1,vbAbortRetryIgnore=2,vbYesNoCancel=3,vbYesNo=4,vbRetryCancel=5,'
@@ -4432,7 +4473,7 @@ function VBalert(prompt,buttons,title,helpfile,context){
 
 
 
-// TODO: get_size(node = window) = {}
+// TODO: get_size(node = window) = library_namespace.null_Object();
 
 /*	get window status	取得視窗可利用的size。現在還得用種方法，真是羞恥。	2005/1/13 20:0
 	get_window_status(event object)
@@ -5690,23 +5731,22 @@ add_listener.get_adder = function() {
 	 * <a href="https://developer.mozilla.org/en/DOM/element.addEventListener" accessdate="2010/4/16 22:35">element.addEventListener - MDC</a>
 	 * <a href="http://simonwillison.net/2004/May/26/addLoadEvent/" accessdate="2010/4/16 22:36">Executing JavaScript on page load</a>
 	 */
-	return window.addEventListener ||
+	return window.addEventListener
 	/*
 	 * opera 7.50, ie5.0w, ie5.5w, ie6w: window.attachEvent
 	 * opera 7.50: document.attachEvent
 	 */
-	window.attachEvent ? function(t, l) {
-		window.attachEvent('on' + t, l);
-	} :
+	|| typeof window.attachEvent === 'function' && function(type, listener) {
+		window.attachEvent('on' + type, listener);
+	}
 	/*
 	 * MSN/OSX, opera 7.50, safari 1.2, ow5b6.1: document.addEventListener
 	 */
-	document.addEventListener ||
+	|| document.addEventListener
 	/*
 	 * ie5m, MSN/OSX, ie5.0w, ie5.5w ie6w: document.onreadystatechange
 	 */
-	null;
-
+	|| null;
 };
 
 _// JSDT:_module_
@@ -5762,7 +5802,7 @@ _// JSDT:_module_
  * 當無法執行 DOM 操作時（尚未載入、版本太舊不提供支援等）以此為主。
  * add_listener.list[node][event type]=[listener list]
  */
-add_listener.list = {};
+add_listener.list = library_namespace.null_Object();
 
 _// JSDT:_module_
 .
@@ -5772,7 +5812,7 @@ _// JSDT:_module_
  * 當無法執行 DOM 操作時（尚未載入、版本太舊不提供支援等）以此為主。
  * add_listener.list[type]=[listener list]
  */
-add_listener.list = {};
+add_listener.list = library_namespace.null_Object();
 
 
 
@@ -6265,7 +6305,7 @@ get_query = function(query_string, add_to) {
 		query_string = window/* self */.location.search.slice(1);
 	// else if(typeof query_string!=='string')..
 
-	var i, q = query_string.replace(/\+/g, ' ').split('&'), p, s = add_to || {}, k, v;
+	var i, q = query_string.replace(/\+/g, ' ').split('&'), p, s = add_to || library_namespace.null_Object(), k, v;
 	for (i in q)
 		try {
 			if (p = q[i].match(/^([^=]*)=(.*)$/)) {
@@ -6543,7 +6583,7 @@ function dataset_compatible(node, name, value) {
 	if (!node.dataset)
 		// initialization.
 		// 給予個預設值，省略判斷，簡化流程。
-		node.dataset = {};
+		node.dataset = library_namespace.null_Object();
 
 	if (!name) {
 		//	get all dataset.
