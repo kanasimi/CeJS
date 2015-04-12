@@ -1644,7 +1644,8 @@ function translate_era(era) {
 				else
 					date.天皇 = date.天皇 ? [ date.name[1], date.天皇 ]
 							: [ date.name[1] ];
-			add_注('天皇', '漢風諡号・追号', function(note) {
+			// 漢風諡号・追号
+			add_注('天皇', '天皇名', function(note) {
 				return {
 					a : note,
 					href : 'https://ja.wikipedia.org/wiki/' + note,
@@ -1774,6 +1775,8 @@ function parse_text(text) {
 
 	return false;
 }
+
+parse_text.add_date = true;
 
 // ---------------------------------------------------------------------//
 
@@ -2147,7 +2150,9 @@ function affairs() {
 				title : i,
 				C : 'data_item',
 				onclick : function() {
-					var group = this.title, status = add_tag.load(group, true);
+					var group = this.title,
+					//
+					status = add_tag.load(group, true);
 					if (status)
 						CeL.info('data layer [' + group + ']: ' + status);
 					else
@@ -2157,13 +2162,12 @@ function affairs() {
 								C : 'loaded_mark'
 							}, [ this.parentNode, 1 ]);
 							this.className += ' loaded';
-							CeL.new_node([
-									' ... ',
-									{
-										T : [ '已載入 %1 筆資料。',
-												add_tag.group_count[group] ],
-										C : 'status'
-									} ], this.parentNode);
+							CeL.new_node([ ' ... ', {
+								T : [ '已載入 %1 筆資料。',
+								//
+								add_tag.group_count[group] ],
+								C : 'status'
+							} ], this.parentNode);
 						}.bind(this));
 					return false;
 				}
@@ -2638,6 +2642,7 @@ function affairs() {
 		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
 		// TODO: 八節、二至啟閉四節、伏臘、八魁、天李、入官忌、日忌和歸忌
 		// see 欽定協紀辨方書
+		// http://www.cfarmcale2100.com.tw/
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/calendar_j.html#zassetsu
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/astrology_j.html
 
