@@ -1776,7 +1776,15 @@ function parse_text(text) {
 	return false;
 }
 
-parse_text.add_date = true;
+// parse_text.add_date = true;
+
+function parsed_text_set_date(add_date) {
+	CeL.get_element('parsed_text_add_date').innerHTML
+	//
+	= (parse_text.add_date = typeof add_date === 'boolean' ? add_date
+			: !parse_text.add_date) ? '<em>添加</em>' : '不添加';
+	return false;
+}
 
 // ---------------------------------------------------------------------//
 
@@ -2050,6 +2058,10 @@ function affairs() {
 	});
 	CeL.new_node(list, 'example');
 	CeL.set_text('batch_source', o.join('\n'));
+
+	// 添加公元日期於紀年後
+	(CeL.get_element('parsed_text_add_date').onclick = parsed_text_set_date)
+			(true);
 
 	// -----------------------------
 
