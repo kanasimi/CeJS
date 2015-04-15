@@ -21,9 +21,6 @@
  * @see <a href="http://www.chinesefortunecalendar.com/CLC/clcBig5.htm"
  *      accessdate="2013/5/2 20:23">如何轉換陰陽曆</a>
  * 
- * NASA - Moon Phases: 6000 Year Catalog
- * http://eclipse.gsfc.nasa.gov/phase/phasecat.html
- * 
  * 大地測量:給定地球表面兩個點的經緯度,計算兩點間之距離<br />
  * 天球上星體距離<br />
  * http://geographiclib.sourceforge.net/scripts/geod-calc.html
@@ -44,9 +41,9 @@
 // 'use asm';
 
 if (false) {
-	CeL.run('application.astronomical');
+	CeL.run('application.astronomy');
 
-	CeL.run('application.astronomical', function() {
+	CeL.run('application.astronomy', function() {
 		CeL.assert([ CeL.polynomial_value([ 3, 4, 5, 6 ], 2),
 				3 + 4 * 2 + 5 * 2 * 2 + 6 * 2 * 2 * 2 ], 'polynomial value');
 
@@ -82,7 +79,7 @@ if (false) {
 
 if (typeof CeL === 'function')
 	CeL.run({
-		name : 'application.astronomical',
+		name : 'application.astronomy',
 		//
 		require : 'data.code.compatibility.',
 
@@ -91,6 +88,13 @@ if (typeof CeL === 'function')
 			// requiring
 			// var String_to_Date;
 			// eval(this.use());
+
+			/**
+			 * full module name.
+			 * 
+			 * @type {String}
+			 */
+			var module_name = this.id;
 
 			/**
 			 * null module constructor
@@ -181,8 +185,9 @@ if (typeof CeL === 'function')
 
 			_.polynomial_value = polynomial_value;
 
+			// centuries
 			function Julian_century(JD) {
-				// J2000.0起算的儒略世紀數.
+				// J2000.0 起算的儒略世紀數.
 				// Interval between fundamental date J2000.0
 				// and given date.
 				return (JD - J2000_epoch) / DAYS_OF_JULIAN_CENTURY;
@@ -512,12 +517,12 @@ if (typeof CeL === 'function')
 				coordinate = library_namespace.null_Object();
 				if (!object)
 					// default
-					object = 'Earth';
+					object = 'earth';
 				object_teams = VSOP87_teams[object];
 				if (!team)
 					// request
-					// L:黃經 longitude + B:黃緯 latitude + R:距離 radius
-					// vector
+					// L:黃經 longitude + B:黃緯 latitude
+					// + R:距離 radius vector
 					team = 'LBR'.split('');
 				else if (!Array.isArray(team))
 					team = [ team ];
@@ -537,16 +542,13 @@ if (typeof CeL === 'function')
 					// series: 序列 L0,L1,..,B0,B1,..,R0,R1,..
 					subteams.forEach(function(series) {
 						coefficients.push(series.reduce(function(value, items) {
-							if (items.length === 1)
+							if (false && items.length === 1)
 								return value + items[0];
 							// assert:
-							// items.length
-							// ===
-							// 3
+							// items.length === 3
 							return value + items[0] * Math.cos(
 							// items:
-							// 三個數字項
-							// [A,B,C]
+							// 三個數字項 [A,B,C]
 							// 每項(表中各行)的值計算表達式是：
 							// A*cos(B+C*τ);
 							items[1] + items[2] * τ);
@@ -568,16 +570,26 @@ if (typeof CeL === 'function')
 			_.VSOP87 = VSOP87;
 
 			function VSOP87_add_teams(object, teams) {
+				if (object === 'earth')
+					// reset solar_term_cache
+					solar_term_cache = [];
 				VSOP87_teams[object] = teams;
 			}
 
 			VSOP87.add_teams = VSOP87_add_teams;
 
+			function VSOP87_load_teams(object, callback) {
+				library_namespace.run(module_name + '.VSOP87_'
+						+ object.toLowerCase(), callback);
+			}
+
+			VSOP87.load_teams = VSOP87_load_teams;
+
 			// ------------------------------------------------------------------------------------------------------//
 			// 二十四節氣 (solar terms)
 
 			/**
-			 * 太陽地心黃經光行差修正量。
+			 * solar aberration 太陽地心黃經光行差修正量。
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms.<br />
@@ -591,7 +603,7 @@ if (typeof CeL === 'function')
 			 * @see https://en.wikipedia.org/wiki/Aberration_of_light
 			 */
 			function solar_aberration(R) {
-				// 式中分子是光行差常數
+				// 式中分子是光行差常數 constant of aberration
 				// κ=20″.49552 arcseconds at J2000
 				// 乘以a*(1-e^2)，與24.5式的分子相同。
 				// 因此24.10中的分子中其實是一個緩慢變化的數，在0年是20".4893，在+4000年是20".4904。
@@ -718,7 +730,8 @@ if (typeof CeL === 'function')
 			 *          vector }
 			 */
 			function solar_coordinate(JD) {
-				var coordinate = VSOP87(JD, 'Earth');
+				// 計算日心坐標中地球的位置
+				var coordinate = VSOP87(JD, 'earth');
 
 				// 弧度單位日心黃經L → 地心黃經(geocentric longitude)λ(度)
 				// Jean Meeus 文中以 "☉" 表示此處之 λ。
@@ -731,13 +744,16 @@ if (typeof CeL === 'function')
 				// J2000.0的VSOP黃道與J2000.0的FK5黃道存在一個很小的夾角 E =
 				// 0".0554左右，所以作以上修正。
 
-				// 先計算 λ′ = Θ - 1°.397*T - 0°.00031*T^2
-				var tmp = polynomial_value([ λ, -1.397, -0.00031 ],
-						Julian_century(JD))
-						* DEGREES_TO_RADIANS;
-				β += 0.03916 / DEGREES_TO_ARCSECONDS
-						* (Math.cos(tmp) - Math.sin(tmp));
-				λ -= 0.09033 / DEGREES_TO_ARCSECONDS;
+				var tmp;
+				if (false) {
+					// 先計算 λ′ = Θ - 1°.397*T - 0°.00031*T^2
+					tmp = polynomial_value([ λ, -1.397, -0.00031 ],
+							Julian_century(JD))
+							* DEGREES_TO_RADIANS;
+					β += 0.03916 / DEGREES_TO_ARCSECONDS
+							* (Math.cos(tmp) - Math.sin(tmp));
+					λ -= 0.09033 / DEGREES_TO_ARCSECONDS;
+				}
 
 				// 修正光行差 aberration
 				// 太陽的視黃經 (apparent longitude)λ(度)
@@ -874,16 +890,16 @@ if (typeof CeL === 'function')
 					angle *= DEGREES_BETWEEN_SOLAR_TERMS;
 				}
 
-				// assert: angle is now angle (0~less than 360), from
-				// March
-				// equinox of year.
+				// assert:
+				// angle is now angle (0~less than 360),
+				// from March equinox of year.
 				return JD_of_solar_angle(year, angle);
 			}
 
 			_.solar_term_JD = solar_term_JD;
 
-			// solar_term_cache[ year ] = [ 春分JD, 清明JD, 穀雨JD, ... 24個節氣
-			// ]
+			// solar_term_cache[ year ]
+			// = [ 春分JD, 清明JD, 穀雨JD, ... 24個節氣 ]
 			var solar_term_cache = [];
 
 			/**
@@ -1330,7 +1346,7 @@ if (typeof CeL === 'function')
 			/**
 			 * 這邊僅擷取行星 Earth 地球數值，以計算二十四節氣 (solar terms)。
 			 * 
-			 * VSOP87_teams.Earth[L黃經/B黃緯/R距離]=[L0:[[A,B,C],[A,B,C]]];
+			 * VSOP87_teams.earth[L黃經/B黃緯/R距離]=[L0:[[A,B,C],[A,B,C]]];
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
@@ -1341,7 +1357,7 @@ if (typeof CeL === 'function')
 			 *      VSOP87B日心黃道球面坐標 Heliocentric LBR - J2000
 			 * @see ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/VSOP87B.ear
 			 */
-			VSOP87_teams.Earth = {
+			VSOP87_teams.earth = {
 				multiplier : 1e-8,
 				// 行星 Earth 地球: 日心黃經
 				L : [

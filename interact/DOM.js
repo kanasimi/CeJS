@@ -5657,7 +5657,7 @@ add_listener = function add_listener(type, listener, target_element, p_first) {
 			//	from fix in jQuery
 
 			// check if target is a textnode (safari)
-			if ( e.target.nodeType === 3 )
+			if ( e.target && e.target.nodeType === 3 )
 				e.target = e.target.parentNode;
 
 			// Add relatedTarget, if necessary

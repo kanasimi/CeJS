@@ -3644,7 +3644,7 @@ if (typeof CeL === 'function')
 					return (立春年 = library_namespace.立春年)(date, options);
 
 				var year = date.getFullYear(), month = date.getMonth();
-				library_namespace.warn('立春年: 請含入 application.astronomical。'
+				library_namespace.warn('立春年: 請先載入 application.astronomy。'
 						+ '公曆2月3至5日立春後才改「運」，但此處恆定為2月4日改，會因此造成誤差。');
 				if (month < 1 || month === 1 && date.getDate() < 4)
 					// assert: 公曆一、二月，中曆過年前。
@@ -3686,7 +3686,7 @@ if (typeof CeL === 'function')
 			 * 日家九星遁起始日。
 			 * 
 			 * 注意:<br />
-			 * need application.astronomical<br />
+			 * 請先載入 application.astronomy<br />
 			 * 此處夏至、冬至皆指 CE 當年。例如 2000 年冬至指 2000/12 之冬至。
 			 * 
 			 * @param {Number}年
@@ -3789,7 +3789,7 @@ if (typeof CeL === 'function')
 			 * 日時九星推法
 			 * 
 			 * 注意:<br />
-			 * need application.astronomical<br />
+			 * 請先載入 application.astronomy<br />
 			 */
 			function note_日家九星(date) {
 				var JD = library_namespace.Date_to_JD(date.minute_offset());

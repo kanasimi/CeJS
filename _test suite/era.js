@@ -76,8 +76,10 @@ function initializer() {
 	var queue = [
 			[ 'interact.DOM', 'application.debug.log',
 					'interact.form.select_input', 'interact.integrate.SVG',
-					'data.date.era', 'application.astronomical' ],
-			'data.date.calendar', function() {
+					'data.date.era', 'application.astronomy' ],
+			[ 'data.date.calendar', function() {
+				CeL.VSOP87.load_teams('earth');
+			} ], function() {
 				// alias for CeL.gettext, then we can use _('message').
 				_ = CeL.gettext;
 
@@ -206,8 +208,8 @@ CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
 // 可選用的文字式年曆欄位。
 selected_column = {
 	JDN : true,
-	// 'astronomical/solarterms' : true,
-	// 'astronomical/solarterm_days' : true,
+	// 'astronomy/solarterms' : true,
+	// 'astronomy/solarterm_days' : true,
 	// '曆注/日家九星' : true
 	contemporary : true
 },
@@ -2369,13 +2371,13 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		// 天文計算 astronomical calculations
-		astronomical : '天文計算',
+		astronomy : '天文計算 astronomical calculations',
 
 		solarterms : [ {
 			a : {
 				T : '天文節氣'
 			},
-			R : '節氣 + 交節時刻(@當地時間)或七十二候。計算得出，非實曆。誤差約前後一分鐘。\n'
+			R : '節氣 + 交節時刻(@當地時間)或七十二候。計算得出，非實曆。於 2015 CE 之誤差約前後一分鐘。\n'
 			//
 			+ '節氣之後每五日一候，非採用 360/72 = 5° 一候。\n'
 			//
