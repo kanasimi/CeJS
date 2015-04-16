@@ -119,45 +119,103 @@ if (typeof CeL === 'function')
 			// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
 			NOT_FOUND = ''.indexOf('_'),
 
-			// 周角, turn, perigon, full circle, complete rotation,
-			// 360°, a full rotation in degrees.
+			/**
+			 * 周角 = 360°, 1 turn, 1 revolution, 1 perigon, full circle, complete
+			 * rotation, a full rotation in degrees.
+			 */
 			TURN_TO_DEGREES = 360,
 			/**
 			 * degrees * DEGREES_TO_RADIANS = radians.
+			 * 
+			 * DEGREES_TO_RADIANS = 2π/360 =
+			 * 0.017453292519943295769236907684886127134428718885417254560971... ≈
 			 * 1.745329251994329576923691e-2
+			 * 
+			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
 			 */
 			DEGREES_TO_RADIANS = 2 * Math.PI / TURN_TO_DEGREES,
-			// degrees * DEGREES_TO_ARCSECONDS = arcseconds.
+			/**
+			 * degrees * DEGREES_TO_ARCSECONDS = arcseconds.
+			 * 
+			 * DEGREES_TO_ARCSECONDS = 3600
+			 */
 			DEGREES_TO_ARCSECONDS = 60 * 60,
-			// arcseconds * ARCSECONDS_TO_RADIANS = radians.
+			/**
+			 * Arcseconds in a full circle. 角秒
+			 * 
+			 * TURN_TO_ARCSECONDS = 1296000
+			 * 
+			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
+			 */
+			TURN_TO_ARCSECONDS = TURN_TO_DEGREES * DEGREES_TO_ARCSECONDS,
+			/**
+			 * arcseconds * ARCSECONDS_TO_RADIANS = radians.
+			 * 
+			 * ARCSECONDS_TO_RADIANS = 2π/360/3600 =
+			 * 0.0000048481368110953599358991410235794797595635330237270151558... ≈
+			 * 4.848136811095359935899141e-6
+			 * 
+			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
+			 */
 			ARCSECONDS_TO_RADIANS = DEGREES_TO_RADIANS / DEGREES_TO_ARCSECONDS,
-			// 每一天86400秒鐘
+			/**
+			 * Seconds per day. 每一天 86400 秒鐘。
+			 * 
+			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
+			 */
 			ONE_DAY_SECONDS = 24 * 60 * 60,
-			// https://en.wikipedia.org/wiki/Epoch_%28astronomy%29#Julian_years_and_J2000
-			// J2000.0曆元
-			// Reference epoch (J2000.0), Julian Date
-			// https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
+			/**
+			 * Reference epoch (J2000.0), Julian Date. J2000.0 曆元。
+			 * 
+			 * DAYS_OF_JULIAN_CENTURY = (365 + 1/4) * 100
+			 * 
+			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
+			 * @see https://en.wikipedia.org/wiki/Epoch_%28astronomy%29#Julian_years_and_J2000
+			 */
 			J2000_epoch = 2451545.0,
-			// Days per Julian century
-			// https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
-			// (365 + 1/4) * 100
+			/**
+			 * Days per Julian century
+			 * 
+			 * DAYS_OF_JULIAN_CENTURY = (365 + 1/4) * 100
+			 * 
+			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
+			 */
 			DAYS_OF_JULIAN_CENTURY = 36525,
-			// 1 astronomical unit = 149597870700 meters (exactly)
+			/**
+			 * Astronomical unit (m).<br />
+			 * 1 astronomical unit = 149597870700 meters (exactly)
+			 */
 			AU_TO_METERS = 149597870700,
-			// 每年 2 分點 + 2 至點
+			/**
+			 * 每年 2 分點 + 2 至點。
+			 * 
+			 * EQUINOX_SOLSTICE_COUNT = 4
+			 */
 			EQUINOX_SOLSTICE_COUNT = 2 + 2,
-			// 每分至點 90°
+			/**
+			 * 每分至點 90°。
+			 * 
+			 * EQUINOX_SOLSTICE_DEGREES = 90
+			 */
 			EQUINOX_SOLSTICE_DEGREES
 			//
 			= TURN_TO_DEGREES / EQUINOX_SOLSTICE_COUNT,
-			// 二十四節氣名
+			// 二十四節氣名。
 			SOLAR_TERMS_NAME =
 			// Chinese name
 			'春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,立春,雨水,驚蟄'
 					.split(','),
-			// 每年24節氣
+			/**
+			 * 每年 24節氣。
+			 * 
+			 * SOLAR_TERMS_COUNT = 24
+			 */
 			SOLAR_TERMS_COUNT = SOLAR_TERMS_NAME.length,
-			// 每節氣 15°
+			/**
+			 * 每節氣 15°。
+			 * 
+			 * DEGREES_BETWEEN_SOLAR_TERMS = 15
+			 */
 			DEGREES_BETWEEN_SOLAR_TERMS = TURN_TO_DEGREES / SOLAR_TERMS_COUNT;
 
 			_.SOLAR_TERMS = SOLAR_TERMS_NAME;
@@ -545,10 +603,13 @@ if (typeof CeL === 'function')
 							if (false && items.length === 1)
 								return value + items[0];
 							// assert:
-							// items.length === 3
+							// items.length
+							// ===
+							// 3
 							return value + items[0] * Math.cos(
 							// items:
-							// 三個數字項 [A,B,C]
+							// 三個數字項
+							// [A,B,C]
 							// 每項(表中各行)的值計算表達式是：
 							// A*cos(B+C*τ);
 							items[1] + items[2] * τ);
@@ -670,16 +731,81 @@ if (typeof CeL === 'function')
 
 			_.equinox = equinox;
 
+			var IAU2000B_nutation_offset_Δψ, IAU2000B_nutation_offset_Δε;
+			(function() {
+				var d = 2 * Math.PI / ONE_DAY_SECONDS / 1e3;
+				IAU2000B_nutation_offset_Δψ = -0.135 * d;
+				IAU2000B_nutation_offset_Δε = 0.388 * d;
+			})();
+
 			/**
-			 * 章動 nutation 修正值。
+			 * IAU 2000B model nutation (章動) 修正值。
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Nutation, IAU 2000B model.
 			 * 
 			 * @param {Number}JD
 			 *            Julian date
 			 * 
-			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ]
+			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (radians)
+			 * 
+			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut00b.c
+			 * @see http://www.neoprogrammics.com/nutations/nutations_1980_2000b/index.php
 			 */
-			function nutation(JD) {
-				// T是J2000.0起算的儒略世紀數：
+			function IAU2000B_nutation(JD) {
+				// T 是 J2000.0 起算的儒略世紀數：
+				var T = Julian_century(JD),
+				//
+				parameters = [], Δψ = 0, Δε = 0;
+				IAU2000B_nutation_parameters.forEach(function(parameter) {
+					parameters.push((polynomial_value(parameter, T)
+					//
+					% TURN_TO_ARCSECONDS) * ARCSECONDS_TO_RADIANS);
+				});
+
+				library_namespace.debug('Julian centuries from J2000.0: ' + T,
+						4);
+
+				for (var team,
+				// Summation of luni-solar nutation series
+				// (smallest terms first).
+				index = IAU2000B_nutation_teams.length; index > 0;) {
+					team = IAU2000B_nutation_teams[--index];
+					var argument = 0;
+					// 5: length of parameters
+					for (var i = 0; i < 5; i++)
+						// team[i] 常為0
+						argument += team[i] * parameters[i];
+
+					var _sin = Math.sin(argument), _cos = Math.cos(argument);
+					Δψ += (team[5] + team[6] * T) * _sin + team[7] * _cos;
+					Δε += (team[8] + team[9] * T) * _cos + team[10] * _sin;
+				}
+
+				T = ARCSECONDS_TO_RADIANS / 1e7;
+				// Fixed offsets in lieu of planetary terms
+				Δψ = Δψ * T + IAU2000B_nutation_offset_Δψ;
+				Δε = Δε * T + IAU2000B_nutation_offset_Δε;
+
+				library_namespace.debug(
+				//
+				'IAU2000B nutation 章動修正值 of ' + JD + ' ('
+						+ library_namespace.JD_to_Date(JD).format('CE') + '): '
+						+ Δψ / DEGREES_TO_RADIANS + '°, ' + Δε
+						/ DEGREES_TO_RADIANS + '°', 3);
+				return [ Δψ, Δε ];
+			}
+
+			/**
+			 * IAU 1980 model nutation (章動) 修正值。
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * 
+			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (degrees)
+			 */
+			function IAU1980_nutation(JD) {
+				// T 是 J2000.0 起算的儒略世紀數：
 				var T = Julian_century(JD),
 				//
 				parameters = [], Δψ = 0, Δε = 0;
@@ -696,7 +822,7 @@ if (typeof CeL === 'function')
 					var c, argument = 0, i = 0;
 					// 5: parameters.length
 					for (; i < 5; i++)
-						// 正弦(計算Δψ用sin)的角度參數及余弦(計算Δε用cos)的角度參數是D、M、M'、F、Ω這5個基本參數的線性組合。
+						// 正弦(計算Δψ用sine)的角度參數及餘弦(計算Δε用cosine)的角度參數是D、M、M'、F、Ω這5個基本參數的線性組合。
 						// c常為0
 						if (c = team[i])
 							argument += c * parameters[i];
@@ -711,6 +837,7 @@ if (typeof CeL === 'function')
 				return [ Δψ / T, Δε / T ];
 			}
 
+			var nutation = IAU2000B_nutation;
 			_.nutation = nutation;
 
 			/**
@@ -745,7 +872,7 @@ if (typeof CeL === 'function')
 				// 0".0554左右，所以作以上修正。
 
 				var tmp;
-				if (false) {
+				if (true) {
 					// 先計算 λ′ = Θ - 1°.397*T - 0°.00031*T^2
 					tmp = polynomial_value([ λ, -1.397, -0.00031 ],
 							Julian_century(JD))
@@ -768,7 +895,7 @@ if (typeof CeL === 'function')
 
 				// 修正章動 nutation
 				tmp = nutation(JD);
-				apparent += tmp[0];
+				apparent += tmp[0] / DEGREES_TO_RADIANS;
 
 				// https://en.wikipedia.org/wiki/Ecliptic_coordinate_system#Spherical_coordinates
 				return Object.assign(coordinate, {
@@ -1227,15 +1354,157 @@ if (typeof CeL === 'function')
 			 * teams for function nutation()
 			 * 
 			 * 資料來源/資料依據:<br />
+			 * Nutation, IAU 2000B model.
+			 * 
+			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut00b.c
+			 * @see http://www.neoprogrammics.com/nutations/nutations_1980_2000b/index.php
+			 * 
+			 * @inner
+			 */
+			var IAU2000B_nutation_parameters = [
+			// Mean anomaly of the Moon.
+			[ 485868.249036, 1717915923.2178
+			// , 31.8792, 0.051635, -0.00024470
+			],
+			// Mean anomaly of the Sun.
+			[ 1287104.79305, 129596581.0481
+			// , -0.5532, 0.000136, -0.00001149
+			],
+			// Mean argument of the latitude of the Moon.
+			[ 335779.526232, 1739527262.8478
+			// , -12.7512, -0.001037, 0.00000417
+			],
+			// Mean elongation of the Moon from the Sun.
+			[ 1072260.70369, 1602961601.2090
+			// , -6.3706, 0.006593, -0.00003169
+			],
+			// Mean longitude of the ascending node of the Moon.
+			[ 450160.398036, -6962890.5431
+			// , 7.4722, 0.007702, -0.00005939
+			] ],
+
+			// 0~4: coefficients of l,l',F,D,Om
+			// int nl,nlp,nf,nd,nom;
+			// 5~7: longitude sin, t*sin, cos coefficients
+			// double ps,pst,pc;
+			// 8~10: obliquity cos, t*cos, sin coefficients
+			// double ps,pst,pc;
+			IAU2000B_nutation_teams = [
+					/* 1-10 */
+					[ 0, 0, 0, 0, 1, -172064161, -174666, 33386, 92052331,
+							9086, 15377 ],
+					[ 0, 0, 2, -2, 2, -13170906, -1675, -13696, 5730336, -3015,
+							-4587 ], [ 0, 0, 2, 0, 2,
+					//
+					-2276413, -234, 2796, 978459, -485, 1374 ],
+					[ 0, 0, 0, 0, 2, 2074554, 207, -698, -897492, 470, -291 ],
+					[ 0, 1, 0, 0, 0,
+					//
+					1475877, -3633, 11817, 73871, -184, -1924 ],
+					[ 0, 1, 2, -2, 2,
+					//
+					-516821, 1226, -524, 224386, -677, -174 ],
+					[ 1, 0, 0, 0, 0, 711159, 73, -872, -6750, 0, 358 ],
+					[ 0, 0, 2, 0, 1, -387298, -367, 380, 200728, 18, 318 ],
+					[ 1, 0, 2, 0, 2, -301461, -36, 816, 129025, -63, 367 ],
+					[ 0, -1, 2, -2, 2, 215829, -494, 111, -95929, 299, 132 ],
+
+					/* 11-20 */
+					[ 0, 0, 2, -2, 1, 128227, 137, 181, -68982, -9, 39 ],
+					[ -1, 0, 2, 0, 2, 123457, 11, 19, -53311, 32, -4 ],
+					[ -1, 0, 0, 2, 0, 156994, 10, -168, -1235, 0, 82 ],
+					[ 1, 0, 0, 0, 1, 63110, 63, 27, -33228, 0, -9 ],
+					[ -1, 0, 0, 0, 1, -57976, -63, -189, 31429, 0, -75 ],
+					[ -1, 0, 2, 2, 2, -59641, -11, 149, 25543, -11, 66 ],
+					[ 1, 0, 2, 0, 1, -51613, -42, 129, 26366, 0, 78 ],
+					[ -2, 0, 2, 0, 1, 45893, 50, 31, -24236, -10, 20 ],
+					[ 0, 0, 0, 2, 0, 63384, 11, -150, -1220, 0, 29 ],
+					[ 0, 0, 2, 2, 2, -38571, -1, 158, 16452, -11, 68 ],
+
+					/* 21-30 */
+					[ 0, -2, 2, -2, 2, 32481, 0, 0, -13870, 0, 0 ],
+					[ -2, 0, 0, 2, 0, -47722, 0, -18, 477, 0, -25 ],
+					[ 2, 0, 2, 0, 2, -31046, -1, 131, 13238, -11, 59 ],
+					[ 1, 0, 2, -2, 2, 28593, 0, -1, -12338, 10, -3 ],
+					[ -1, 0, 2, 0, 1, 20441, 21, 10, -10758, 0, -3 ],
+					[ 2, 0, 0, 0, 0, 29243, 0, -74, -609, 0, 13 ],
+					[ 0, 0, 2, 0, 0, 25887, 0, -66, -550, 0, 11 ],
+					[ 0, 1, 0, 0, 1, -14053, -25, 79, 8551, -2, -45 ],
+					[ -1, 0, 0, 2, 1, 15164, 10, 11, -8001, 0, -1 ],
+					[ 0, 2, 2, -2, 2, -15794, 72, -16, 6850, -42, -5 ],
+
+					/* 31-40 */
+					[ 0, 0, -2, 2, 0, 21783, 0, 13, -167, 0, 13 ],
+					[ 1, 0, 0, -2, 1, -12873, -10, -37, 6953, 0, -14 ],
+					[ 0, -1, 0, 0, 1, -12654, 11, 63, 6415, 0, 26 ],
+					[ -1, 0, 2, 2, 1, -10204, 0, 25, 5222, 0, 15 ],
+					[ 0, 2, 0, 0, 0, 16707, -85, -10, 168, -1, 10 ],
+					[ 1, 0, 2, 2, 2, -7691, 0, 44, 3268, 0, 19 ],
+					[ -2, 0, 2, 0, 0, -11024, 0, -14, 104, 0, 2 ],
+					[ 0, 1, 2, 0, 2, 7566, -21, -11, -3250, 0, -5 ],
+					[ 0, 0, 2, 2, 1, -6637, -11, 25, 3353, 0, 14 ],
+					[ 0, -1, 2, 0, 2, -7141, 21, 8, 3070, 0, 4 ],
+
+					/* 41-50 */
+					[ 0, 0, 0, 2, 1, -6302, -11, 2, 3272, 0, 4 ],
+					[ 1, 0, 2, -2, 1, 5800, 10, 2, -3045, 0, -1 ],
+					[ 2, 0, 2, -2, 2, 6443, 0, -7, -2768, 0, -4 ],
+					[ -2, 0, 0, 2, 1, -5774, -11, -15, 3041, 0, -5 ],
+					[ 2, 0, 2, 0, 1, -5350, 0, 21, 2695, 0, 12 ],
+					[ 0, -1, 2, -2, 1, -4752, -11, -3, 2719, 0, -3 ],
+					[ 0, 0, 0, -2, 1, -4940, -11, -21, 2720, 0, -9 ],
+					[ -1, -1, 0, 2, 0, 7350, 0, -8, -51, 0, 4 ],
+					[ 2, 0, 0, -2, 1, 4065, 0, 6, -2206, 0, 1 ],
+					[ 1, 0, 0, 2, 0, 6579, 0, -24, -199, 0, 2 ],
+
+					/* 51-60 */
+					[ 0, 1, 2, -2, 1, 3579, 0, 5, -1900, 0, 1 ],
+					[ 1, -1, 0, 0, 0, 4725, 0, -6, -41, 0, 3 ],
+					[ -2, 0, 2, 0, 2, -3075, 0, -2, 1313, 0, -1 ],
+					[ 3, 0, 2, 0, 2, -2904, 0, 15, 1233, 0, 7 ],
+					[ 0, -1, 0, 2, 0, 4348, 0, -10, -81, 0, 2 ],
+					[ 1, -1, 2, 0, 2, -2878, 0, 8, 1232, 0, 4 ],
+					[ 0, 0, 0, 1, 0, -4230, 0, 5, -20, 0, -2 ],
+					[ -1, -1, 2, 2, 2, -2819, 0, 7, 1207, 0, 3 ],
+					[ -1, 0, 2, 0, 0, -4056, 0, 5, 40, 0, -2 ],
+					[ 0, -1, 2, 2, 2, -2647, 0, 11, 1129, 0, 5 ],
+
+					/* 61-70 */
+					[ -2, 0, 0, 0, 1, -2294, 0, -10, 1266, 0, -4 ],
+					[ 1, 1, 2, 0, 2, 2481, 0, -7, -1062, 0, -3 ],
+					[ 2, 0, 0, 0, 1, 2179, 0, -2, -1129, 0, -2 ],
+					[ -1, 1, 0, 1, 0, 3276, 0, 1, -9, 0, 0 ],
+					[ 1, 1, 0, 0, 0, -3389, 0, 5, 35, 0, -2 ],
+					[ 1, 0, 2, 0, 0, 3339, 0, -13, -107, 0, 1 ],
+					[ -1, 0, 2, -2, 1, -1987, 0, -6, 1073, 0, -2 ],
+					[ 1, 0, 0, 0, 2, -1981, 0, 0, 854, 0, 0 ],
+					[ -1, 0, 0, 1, 0, 4026, 0, -353, -553, 0, -139 ],
+					[ 0, 0, 2, 1, 2, 1660, 0, -5, -710, 0, -2 ],
+
+					/* 71-77 */
+					[ -1, 0, 2, 4, 2, -1521, 0, 9, 647, 0, 4 ],
+					[ -1, 1, 0, 1, 1, 1314, 0, 0, -700, 0, 0 ],
+					[ 0, -2, 2, -2, 1, -1283, 0, 0, 672, 0, 0 ],
+					[ 1, 0, 2, 2, 1, -1331, 0, 8, 663, 0, 4 ],
+					[ -2, 0, 2, 2, 2, 1383, 0, -2, -594, 0, -2 ],
+					[ -1, 0, 0, 0, 2, 1405, 0, 4, -610, 0, 2 ],
+					[ 1, 1, 2, -2, 2, 1290, 0, 0, -556, 0, 0 ] ];
+
+			/**
+			 * teams for function nutation()
+			 * 
+			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 table 22.A.<br />
+			 * 
+			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut80.c
 			 * 
 			 * @inner
 			 */
 			// IAU1980_nutation_parameters 單位是度。
 			var IAU1980_nutation_parameters = [
 			// 平距角(日月對地心的角距離)：
-			// D = 297.85036 +445267.111480*T - 0.0019142*T^2 +
+			// D = 297.85036 + 445267.111480*T - 0.0019142*T^2 +
 			// T^3/189474
 			[ 297.85036, 445267.111480, -0.0019142, 1 / 189474 ],
 			// 太陽（地球）平近點角：
