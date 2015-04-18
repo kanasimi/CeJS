@@ -220,7 +220,7 @@ if (typeof CeL === 'function')
 			eval(this.use());
 
 			// ---------------------------------------------------------------------//
-			// 定義基本常數。
+			// basic constants. 定義基本常數。
 
 			// 工具函數。
 			function generate_pattern(pattern_source, delete_干支, flag) {
@@ -729,11 +729,12 @@ if (typeof CeL === 'function')
 			});
 
 			// ---------------------------------------------------------------------//
-			// private 工具函數：search_index 處理。search_index public interface。
+			// private tool functions. 工具函數
+
+			// search_index 處理。search_index public interface。
 			// TODO: 增加效率。
 			// search_index 必須允許以 ({String}key in search_index)
 			// 的方式來偵測是否具有此 key。
-
 			function for_each_era_of_key(key, operator, queue) {
 				// 預防循環參照用。
 				function not_in_queue(key) {

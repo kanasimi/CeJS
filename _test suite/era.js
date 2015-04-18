@@ -78,7 +78,7 @@ function initializer() {
 					'interact.form.select_input', 'interact.integrate.SVG',
 					'data.date.era', 'application.astronomy' ],
 			[ 'data.date.calendar', function() {
-				CeL.VSOP87.load_teams('earth');
+				CeL.VSOP87.load_teams('Earth');
 			} ], function() {
 				// alias for CeL.gettext, then we can use _('message').
 				_ = CeL.gettext;
@@ -2273,20 +2273,20 @@ function affairs() {
 					return date_String;
 				} ],
 
-		JD : [
-				{
-					a : {
-						T : 'JD'
-					},
-					R : _('Julian Date')
-							+ '\n以「紀元使用地真正之時間」相同日期當天凌晨零時為準。\n因此對中國之朝代、紀年，2000/1/1 將轉為 2451544.1666... (2000/1/1 0:0 UTC+8)',
-					href : 'http://en.wikipedia.org/wiki/Julian_day'
-				},
-				function(date) {
-					var date_String = CeL.Date_to_JD(date.minute_offset())
-							+ (date.精 === '年' ? '–' : '');
-					return date_String;
-				} ],
+		JD : [ {
+			a : {
+				T : 'JD'
+			},
+			R : _('Julian Date') + '\n以「紀元使用地真正之時間」相同日期當天凌晨零時為準。\n'
+			//
+			+ '因此對中國之朝代、紀年，2000/1/1 將轉為 2451544.1666... (2000/1/1 0:0 UTC+8)',
+			href : 'http://en.wikipedia.org/wiki/Julian_day'
+		}, function(date) {
+			var date_String = CeL.Date_to_JD(date.minute_offset())
+			//
+			+ (date.精 === '年' ? '–' : '');
+			return date_String;
+		} ],
 
 		ISO : [
 				{
@@ -2389,7 +2389,7 @@ function affairs() {
 			var JD = CeL.Date_to_JD(date.minute_offset());
 			date = CeL.solar_term_of_JD(JD, {
 				pentads : true,
-				time : true
+				time : 2
 			});
 			return !date || date.includes('候') ? date : {
 				b : date
@@ -2432,6 +2432,23 @@ function affairs() {
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
 			};
+		} ],
+
+		ΔT : [ {
+			a : {
+				T : 'ΔT'
+			},
+			R : '日常生活時間 UT = 天文計算用時間 TT - ΔT',
+			href : 'http://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			var JD = CeL.Date_to_JD(date.minute_offset()),
+			//
+			ΔT = CeL.deltaT(CeL.Julian_century(JD) * 100 + 2000);
+			return CeL.age_of(new Date(0, 0, 0), new Date(0, 0, 0, 0, 0, ΔT))
+			//
+			+ ' (' + ΔT.to_fixed(2) + ' s)';
 		} ],
 
 		// --------------------------------------------------------------------

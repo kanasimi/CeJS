@@ -113,7 +113,7 @@ if (typeof CeL === 'function')
 			.prototype = {};
 
 			// ------------------------------------------------------------------------------------------------------//
-			// 定義基本常數。
+			// basic constants. 定義基本常數。
 
 			var
 			// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
@@ -182,10 +182,20 @@ if (typeof CeL === 'function')
 			 */
 			DAYS_OF_JULIAN_CENTURY = 36525,
 			/**
+			 * speed of light in vacuum (m/s), c
+			 */
+			CELERITAS = 299792458,
+			/**
 			 * Astronomical unit (m).<br />
 			 * 1 astronomical unit = 149597870700 meters (exactly)
 			 */
 			AU_TO_METERS = 149597870700,
+			/**
+			 * light-time for AU distance (days).<br />
+			 * AU_LIGHT_TIME = 149597870700/299792458/86400 ≈
+			 * 0.005775518331436995
+			 */
+			AU_LIGHT_TIME = AU_TO_METERS / CELERITAS / ONE_DAY_SECONDS,
 			/**
 			 * 每年 2 分點 + 2 至點。
 			 * 
@@ -220,7 +230,11 @@ if (typeof CeL === 'function')
 
 			_.SOLAR_TERMS = SOLAR_TERMS_NAME;
 
-			// 工具函數。
+			// ---------------------------------------------------------------------//
+			// 初始調整並規範基本常數。
+
+			// ---------------------------------------------------------------------//
+			// private tool functions. 工具函數
 
 			/**
 			 * use Horner's method to calculate the value of polynomial.
@@ -243,18 +257,28 @@ if (typeof CeL === 'function')
 
 			_.polynomial_value = polynomial_value;
 
-			// centuries
+			/**
+			 * get Julian centuries from J2000.0.<br />
+			 * J2000.0 起算的儒略世紀數.<br />
+			 * Interval between fundamental date J2000.0 and given date.
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * @returns {Number} Julian centuries of JD from J2000.0
+			 */
 			function Julian_century(JD) {
-				// J2000.0 起算的儒略世紀數.
-				// Interval between fundamental date J2000.0
-				// and given date.
 				return (JD - J2000_epoch) / DAYS_OF_JULIAN_CENTURY;
 			}
 
-			// to proper degrees
-			function normalize_degrees(degree) {
+			_.Julian_century = Julian_century;
+
+			// to proper degrees 0 ~ less than 360
+			// near_0: -180 ~ less than 180
+			function normalize_degrees(degree, near_0) {
 				if ((degree %= TURN_TO_DEGREES) < 0)
 					degree += TURN_TO_DEGREES;
+				if (near_0 && degree >= TURN_TO_DEGREES / 2)
+					degree -= TURN_TO_DEGREES;
 				return degree;
 			}
 
@@ -299,15 +323,17 @@ if (typeof CeL === 'function')
 			_.show_degrees = show_degrees;
 
 			// 計算角度差距(減法)
-			// return base-target, target 會先趨近於 base。或是說結果會向 0 趨近。
+			// return (base - target), target 會先趨近於 base。或是說結果會向 0 趨近。
 			// subtract_degrees(base,target)>0:
 			// base>target, base-target>0
 			function subtract_degrees(base, target) {
-				if (Math.abs(base = (base - target) % TURN_TO_DEGREES) >= 180)
+				if (Math.abs(base = (base - target) % TURN_TO_DEGREES)
+				//
+				>= TURN_TO_DEGREES / 2)
 					if (base > 0)
-						base -= 360;
+						base -= TURN_TO_DEGREES;
 					else
-						base += 360;
+						base += TURN_TO_DEGREES;
 				return base;
 			}
 
@@ -316,7 +342,8 @@ if (typeof CeL === 'function')
 
 			/**
 			 * 地球的平均轉軸傾角，平黃赤交角。 get mean obliquity of the ecliptic (Earth's
-			 * axial tilt), IAU 2006 precession model.<br />
+			 * axial tilt), IAU 2006 precession model.
+			 * 
 			 * 資料來源/資料依據:
 			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/obl06.c
 			 * 
@@ -334,9 +361,10 @@ if (typeof CeL === 'function')
 
 			/**
 			 * 地球的平均轉軸傾角，平黃赤交角。 get mean obliquity of the ecliptic (Earth's
-			 * axial tilt).<br />
+			 * axial tilt).
+			 * 
 			 * 資料來源/資料依據: Laskar, J. (1986). "Secular Terms of Classical
-			 * Planetary Theories Using the Results of General Relativity".<br />
+			 * Planetary Theories Using the Results of General Relativity".
 			 * 
 			 * J. Laskar computed an expression to order T10 good to 0″.02 over
 			 * 1000 years and several arcseconds over 10,000 years.
@@ -355,8 +383,8 @@ if (typeof CeL === 'function')
 			var mean_obliquity = mean_obliquity_Laskar;
 
 			/**
-			 * 地球的轉軸傾角，平黃赤交角。 get obliquity of the ecliptic (Earth's axial
-			 * tilt).<br />
+			 * 地球的轉軸傾角，平黃赤交角。<br />
+			 * get obliquity of the ecliptic (Earth's axial tilt).
 			 * 
 			 * @param {Number}JD
 			 *            Julian date
@@ -383,7 +411,7 @@ if (typeof CeL === 'function')
 			 * <br />
 			 * 天文計算用時間 TT = 日常生活時間 UT + ΔT
 			 * 
-			 * NOT △T
+			 * ΔT is NOT △T
 			 * 
 			 * @param {Number}year
 			 *            the year value of time = year + (month - 0.5) / 12
@@ -414,8 +442,13 @@ if (typeof CeL === 'function')
 						break;
 					}
 				}
-				return polynomial_value(ΔT_coefficients[index],
+
+				var deltaT = polynomial_value(ΔT_coefficients[index],
 						(year - ΔT_year_base[index]) / 100);
+				library_namespace.debug('ΔT of year ' + year + ': ' + deltaT
+						+ ' seconds', 3);
+
+				return deltaT;
 			}
 
 			_.deltaT = ΔT;
@@ -525,9 +558,211 @@ if (typeof CeL === 'function')
 			_.refraction = refraction;
 
 			// ------------------------------------------------------------------------------------------------------//
-			// VSOP87
+			// Sun's aberration. 太陽地心黃經光行差修正量。
 
-			// 無用:因為 items[1,2] 已經是弧度。
+			/**
+			 * Sun's aberration. 太陽地心黃經光行差修正量。
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 p.167,168 chapter 太陽位置計算.<br />
+			 * 
+			 * @param {Number}R
+			 *            日地距離(天文單位 AU), radius vector in AU。
+			 * @param {Number}JD
+			 *            Julian date
+			 * 
+			 * @returns {Number} degree
+			 * 
+			 * @see https://en.wikipedia.org/wiki/Aberration_of_light
+			 */
+			function sun_aberration_high(R, JD) {
+				// 儒略千年數 millennium
+				var τ = Julian_century(JD) / 10,
+				// coefficients of Δλ
+				coefficients = [];
+
+				sun_aberration_variation.forEach(function(team) {
+					var coefficient = 0;
+					team.forEach(function(sub_team) {
+						coefficient += sub_team[0]
+								* Math.sin(sub_team[1] + sub_team[2] * τ);
+					});
+					coefficients.push(coefficient);
+				});
+
+				/**
+				 * constant term of Sun's aberration
+				 * 
+				 * If needed with respect to the mean equinox of the date
+				 * instead of to a fixed reference frame, the constant term
+				 * 3548.193 should be replaced by 3548.330.
+				 * 如果Δλ須是在Date黃道中的，則應把常數項3548.193換為3548.330
+				 */
+				coefficients[0] += sun_aberration_variation_constant;
+
+				// Daily variation, in arcseconds, of the geocentric longitude
+				// of the Sun in a fixed reference frame
+				var Δλ = polynomial_value(coefficients, τ),
+				//
+				aberration = -AU_LIGHT_TIME * R * Δλ / DEGREES_TO_ARCSECONDS;
+
+				if (library_namespace.is_debug(3))
+					library_namespace.debug('aberration of radius vector ' + R
+							+ ', JD: ' + JD + ': ' + show_degrees(aberration)
+							+ '. low-precision method: '
+							+ show_degrees(sun_aberration_low(R)));
+
+				return aberration;
+			}
+
+			/**
+			 * Sun's aberration. 太陽地心黃經光行差修正量。
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms.<br />
+			 * 《天文算法》 chapter 太陽位置計算 "太陽地心黃經光行差修正項" 式.<br />
+			 * 
+			 * @param {Number}R
+			 *            日地距離(天文單位 AU), radius vector in AU。
+			 * 
+			 * @returns {Number} degree
+			 * 
+			 * @see https://en.wikipedia.org/wiki/Aberration_of_light
+			 */
+			function sun_aberration_low(R) {
+				// 式中分子是光行差常數 constant of aberration
+				// κ=20″.49552 arcseconds at J2000
+				// 乘以a*(1-e^2)，與24.5式的分子相同。
+				// 因此24.10中的分子中其實是一個緩慢變化的數，在0年是20".4893，在+4000年是20".4904。
+				return -20.4898 / DEGREES_TO_ARCSECONDS / R;
+				// 24.10式本身不是一個嚴格的準確的運算式，因為它是假設地球軌道是不受攝動的標準橢圓。當受到攝動時，月球的攝動可引起0".01的誤差。
+				// 當需要進行高精度計算時(比使用附錄II計算精度要求更高時)，可用以下方法進行光行差修正
+				// sun_aberration_high(R, JD)
+			}
+
+			var sun_aberration = sun_aberration_high;
+
+			// ------------------------------------------------------------------------------------------------------//
+			// nutation 章動
+
+			var IAU2000B_nutation_offset_Δψ, IAU2000B_nutation_offset_Δε;
+			(function() {
+				var d = 2 * Math.PI / ONE_DAY_SECONDS / 1e3;
+				IAU2000B_nutation_offset_Δψ = -0.135 * d;
+				IAU2000B_nutation_offset_Δε = 0.388 * d;
+			})();
+
+			/**
+			 * IAU 2000B model nutation (地球章動) 修正值。
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Nutation, IAU 2000B model.
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * 
+			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (radians)
+			 * 
+			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut00b.c
+			 * @see http://www.neoprogrammics.com/nutations/nutations_1980_2000b/index.php
+			 */
+			function IAU2000B_nutation(JD) {
+				// T 是 J2000.0 起算的儒略世紀數：
+				var T = Julian_century(JD),
+				//
+				parameters = [], Δψ = 0, Δε = 0;
+				IAU2000B_nutation_parameters.forEach(function(parameter) {
+					parameters.push((polynomial_value(parameter, T)
+					//
+					% TURN_TO_ARCSECONDS) * ARCSECONDS_TO_RADIANS);
+				});
+
+				library_namespace.debug('Julian centuries from J2000.0: ' + T,
+						4);
+
+				for (var team,
+				// Summation of luni-solar nutation series
+				// (smallest terms first).
+				index = IAU2000B_nutation_teams.length; index > 0;) {
+					team = IAU2000B_nutation_teams[--index];
+					var argument = 0;
+					// 5: length of parameters
+					for (var i = 0; i < 5; i++)
+						// team[i] 常為0
+						argument += team[i] * parameters[i];
+
+					var _sin = Math.sin(argument), _cos = Math.cos(argument);
+					Δψ += (team[5] + team[6] * T) * _sin + team[7] * _cos;
+					Δε += (team[8] + team[9] * T) * _cos + team[10] * _sin;
+				}
+
+				i = ARCSECONDS_TO_RADIANS / 1e7;
+				// Fixed offsets in lieu of planetary terms
+				Δψ = Δψ * i + IAU2000B_nutation_offset_Δψ;
+				Δε = Δε * i + IAU2000B_nutation_offset_Δε;
+
+				library_namespace.debug(
+				//
+				'IAU2000B nutation 章動修正值 of ' + JD + ' ('
+						+ library_namespace.JD_to_Date(JD).format('CE') + '): '
+						+ Δψ / DEGREES_TO_RADIANS + '°, ' + Δε
+						/ DEGREES_TO_RADIANS + '°', 3);
+				return [ Δψ, Δε ];
+			}
+
+			/**
+			 * IAU 1980 model nutation (地球章動) 修正值。
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * 
+			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (degrees)
+			 */
+			function IAU1980_nutation(JD) {
+				// T 是 J2000.0 起算的儒略世紀數：
+				var T = Julian_century(JD),
+				//
+				parameters = [], Δψ = 0, Δε = 0;
+				IAU1980_nutation_parameters.forEach(function(parameter) {
+					parameters.push((polynomial_value(parameter, T)
+					//
+					% TURN_TO_DEGREES) * DEGREES_TO_RADIANS);
+				});
+
+				// IAU1980_nutation_teams[6,8] 有乘以十倍了。
+				T /= 10;
+
+				IAU1980_nutation_teams.forEach(function(team) {
+					var c, argument = 0, i = 0;
+					// 5: parameters.length
+					for (; i < 5; i++)
+						// 正弦(計算Δψ用sine)的角度參數及餘弦(計算Δε用cosine)的角度參數是D、M、M'、F、Ω這5個基本參數的線性組合。
+						// c常為0
+						if (c = team[i])
+							argument += c * parameters[i];
+
+					Δψ += (team[5] + team[6] * T) * Math.sin(argument);
+					if (c = team[7] + team[8] * T)
+						Δε += c * Math.cos(argument);
+				});
+
+				// 表中的係數的單位是0".0001。
+				T = 1e4 * DEGREES_TO_ARCSECONDS;
+				return [ Δψ / T, Δε / T ];
+			}
+
+			var nutation = IAU2000B_nutation;
+			_.nutation = nutation;
+
+			// ------------------------------------------------------------------------------------------------------//
+			// VSOP87 model
+
+			/**
+			 * 無用:因為 items[1,2] 已經是弧度。
+			 * 
+			 * @deprecated
+			 */
 			function initialize_VSOP87(subteams) {
 				if (subteams.init)
 					// 另一 thread 正初始化中。
@@ -546,46 +781,68 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * VSOP87 行星位置計算
+			 * VSOP87 行星的日心座標位置 (Heliocentric ecliptic spherical coordinates)
+			 * 計算。<br />
+			 * 得到行星在動力學Date平黃道座標(Bretagnon的VSOP定義的)中的日心黃經L、黃緯B。<br />
+			 * <br />
+			 * does not include nutation or aberration.
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 chapter 太陽位置計算.
 			 * 
-			 * Jean Meeus
-			 * 從VSOP87中取出一些主要項(詳見附錄II)，利用它計算得到的太陽位置在-2000到6000年範圍內精度是1"。<br />
-			 * 誤差 365.25*24*60*60/360/60/60 = 24.35秒鐘。相當於半分鐘。
-			 * 
 			 * @param {Number}JD
 			 *            Julian date
-			 * @param {String}[object]
-			 *            行星
-			 * @param {Array|String}[team]
-			 *            team to get
+			 * @param {String}object
+			 *            planets 行星.
+			 * @param {Object}[options]
+			 *            options:<br />
+			 *            {String|Array}options.teams: request teams.<br />
+			 *            L: 日心黃經 the ecliptical longitude in radians (弧度)
+			 *            真黃經，不是軌道經度, NOT the orbital longitude<br />
+			 *            B: 日心黃緯 the ecliptical latitude in radians (弧度)<br />
+			 *            R: 行星到太陽的距離 the radius vector (distance to the Sun) in
+			 *            AU (Astronomical Units)<br />
+			 *            <br />
+			 *            {Boolean}options.FK5: translate VSOP87 coordinate to
+			 *            the FK5 frame. default: true<br />
+			 *            <br />
+			 *            {Boolean}options.degrees: translate radians to
+			 *            degrees.
 			 * 
-			 * @returns {Object} { L:日心黃經 longitude in radians (弧度), B:日心黃緯
-			 *          latitude in radians (弧度), R:日地距離 radius vector in AU
-			 *          (Astronomical Units) }
+			 * @returns {Object} { L:longitude in radians, B:latitude in
+			 *          radians, R:distance in AU }
 			 */
-			function VSOP87(JD, object, team) {
-				var object_teams, subteams,
+			function VSOP87(JD, object, options) {
 				// 儒略千年數 millennium
-				τ = Julian_century(JD) / 10,
+				var τ = Julian_century(JD) / 10,
 				//				
-				coordinate = library_namespace.null_Object();
-				if (!object)
-					// default
-					object = 'earth';
-				object_teams = VSOP87_teams[object];
-				if (!team)
-					// request
-					// L:黃經 longitude + B:黃緯 latitude
-					// + R:距離 radius vector
-					team = 'LBR'.split('');
-				else if (!Array.isArray(team))
-					team = [ team ];
+				coordinate = library_namespace.null_Object(),
+				//
+				object_teams = VSOP87_teams[VSOP87.object_name(object)];
+				if (!object_teams)
+					throw new Error('VSOP87: Invalid object [' + object + ']');
 
-				team.forEach(function(team_name) {
+				// 前置處理。
+				if (!library_namespace.is_Object(options))
+					options = library_namespace.null_Object();
+
+				var teams = options.teams;
+				if (!teams)
+					teams = 'LBR'.split('');
+				else {
+					if (!Array.isArray(teams))
+						teams = [ teams ];
+					if (options.FK5 !== false
+							&& (teams.includes('L') || teams.includes('R'))) {
+						if (!teams.includes('L'))
+							teams.push('L');
+						if (!teams.includes('B'))
+							teams.push('B');
+					}
+				}
+
+				teams.forEach(function(team_name) {
 					var coefficients = [], subteams = object_teams[team_name];
 					if (!subteams) {
 						library_namespace.err('VSOP87: Invalid team name: ['
@@ -594,8 +851,9 @@ if (typeof CeL === 'function')
 					}
 
 					// 無用:因為 items[1,2] 已經是弧度。
-					if (false && !subteams.initialized)
+					if (false && !subteams.initialized) {
 						initialize_VSOP87(subteams);
+					}
 
 					// series: 序列 L0,L1,..,B0,B1,..,R0,R1,..
 					subteams.forEach(function(series) {
@@ -623,17 +881,78 @@ if (typeof CeL === 'function')
 					// 倍數
 					if (object_teams.multiplier > 0)
 						coordinate[team_name] *= object_teams.multiplier;
+					library_namespace.debug(object
+							+ '.'
+							+ team_name
+							+ ' @ '
+							+ JD
+							+ ' ≈ '
+							+ (team_name === 'R' ? coordinate[team_name]
+									+ '  AU' : show_degrees(normalize_degrees(
+									coordinate[team_name] / DEGREES_TO_RADIANS,
+									team_name === 'B'))) + ' (coefficients: '
+							+ coefficients.join(', ') + ')', 3);
 				});
 
-				return team.length > 1 ? coordinate : coordinate[team[0]];
+				/**
+				 * 座標變換: 轉換到FK5(第5基本星表)坐標系統。<br />
+				 * VSOP87 → FK5: translate VSOP87 coordinate to the FK5 frame.
+				 * 
+				 * 資料來源/資料依據:<br />
+				 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+				 * p. 219 formula 32.3
+				 * 
+				 * 太陽黃經☉及黃緯β是P.Bretagnon的VSOP行星理論定義的動力學黃道坐標。這個參考系與標準的FK5坐標系統(詳見20章)僅存在很小的差別。
+				 * 可按以下方法把☉、β轉換到FK5坐標系統中,其中T是J2000起算的儒略世紀數,或T=10τ。
+				 * J2000.0的VSOP黃道與J2000.0的FK5黃道存在一個很小的夾角 E = 0".0554 左右，所以作以上修正。
+				 */
+				if (options.FK5 !== false) {
+					// 先計算 L′ = L - 1°.397*T - 0°.00031*T^2
+					var _L = polynomial_value([ coordinate.L,
+							-1.397 * DEGREES_TO_RADIANS,
+							-0.00031 * DEGREES_TO_RADIANS ], 10 * τ),
+					//
+					cos_L = Math.cos(_L), sin_L = Math.sin(_L);
+
+					// ΔL
+					_L = 0.03916 * ARCSECONDS_TO_RADIANS * (cos_L + sin_L)
+							* Math.tan(coordinate.B) - 0.09033
+							* ARCSECONDS_TO_RADIANS;
+					library_namespace.debug('FK5 correction of ' + object + '.'
+							+ 'L @ ' + JD + ' ≈ ' + coordinate.L + ' + '
+							+ show_degrees(_L / DEGREES_TO_RADIANS), 3);
+					coordinate.L += _L;
+
+					// ΔB
+					_L = 0.03916 * ARCSECONDS_TO_RADIANS * (cos_L - sin_L);
+					library_namespace.debug('FK5 correction of ' + object + '.'
+							+ 'B @ ' + JD + ' ≈ ' + coordinate.B + ' + '
+							+ show_degrees(_L / DEGREES_TO_RADIANS), 3);
+					coordinate.B += _L;
+				}
+
+				if (options.degrees) {
+					if (coordinate.L)
+						coordinate.L /= DEGREES_TO_RADIANS;
+					if (coordinate.B)
+						coordinate.B /= DEGREES_TO_RADIANS;
+				}
+
+				return teams.length > 1 ? coordinate : coordinate[teams[0]];
 			}
 
 			_.VSOP87 = VSOP87;
 
+			VSOP87.object_name = function(object) {
+				if (typeof object === 'string')
+					return object.trim().toLowerCase();
+			};
+
 			function VSOP87_add_teams(object, teams) {
-				if (object === 'earth')
-					// reset solar_term_cache
-					solar_term_cache = [];
+				object = VSOP87.object_name(object);
+				if (object === solar_terms_object)
+					// reset solar_terms_cache
+					solar_terms_cache = [];
 				VSOP87_teams[object] = teams;
 			}
 
@@ -641,37 +960,13 @@ if (typeof CeL === 'function')
 
 			function VSOP87_load_teams(object, callback) {
 				library_namespace.run(module_name + '.VSOP87_'
-						+ object.toLowerCase(), callback);
+						+ VSOP87.object_name(object), callback);
 			}
 
 			VSOP87.load_teams = VSOP87_load_teams;
 
 			// ------------------------------------------------------------------------------------------------------//
-			// 二十四節氣 (solar terms)
-
-			/**
-			 * solar aberration 太陽地心黃經光行差修正量。
-			 * 
-			 * 資料來源/資料依據:<br />
-			 * Jean Meeus, Astronomical Algorithms.<br />
-			 * 《天文算法》 chapter 太陽位置計算 "太陽地心黃經光行差修正項" 式.<br />
-			 * 
-			 * @param {Number}R
-			 *            日地距離(天文單位 AU), radius vector in AU。
-			 * 
-			 * @returns {Number} degree
-			 * 
-			 * @see https://en.wikipedia.org/wiki/Aberration_of_light
-			 */
-			function solar_aberration(R) {
-				// 式中分子是光行差常數 constant of aberration
-				// κ=20″.49552 arcseconds at J2000
-				// 乘以a*(1-e^2)，與24.5式的分子相同。
-				// 因此24.10中的分子中其實是一個緩慢變化的數，在0年是20".4893，在+4000年是20".4904。
-				return -20.4898 / DEGREES_TO_ARCSECONDS / R;
-				// 24.10式本身不是一個嚴格的準確的運算式，因為它是假設地球軌道是不受攝動的標準橢圓。當受到攝動時，月球的攝動可引起0".01的誤差。
-				// 當需要進行高精度計算時(比使用附錄II計算精度要求更高時)，可用以下方法進行光行差修正...
-			}
+			// solar coordinate 太陽位置(坐標) & 二十四節氣 (solar terms)
 
 			/**
 			 * 分點和至點, 太陽視黃經λ為0°或90°或180°或270°. 在西元1951–2050的誤差 < 1分.
@@ -719,7 +1014,7 @@ if (typeof CeL === 'function')
 				// λ: 太陽黃經☉是Date黃道分點座標的真幾何黃經。要取得視黃經λ，還應加上精確的黃經章動及光行差。
 				// TODO: 黃經周年光行差修正量：-20".161 (公式(24.10)), 黃經章動效果：Δψ =
 				// -12".965
-				// (詳見第22章), 轉到FK5系統的修正值(-0".09033) (公式(24.9))
+				// (詳見第22章), 轉到 FK5 系統的修正值(-0".09033) (公式(24.9))
 				// 光行差 aberration
 				// 章動 nutation
 
@@ -731,123 +1026,14 @@ if (typeof CeL === 'function')
 
 			_.equinox = equinox;
 
-			var IAU2000B_nutation_offset_Δψ, IAU2000B_nutation_offset_Δε;
-			(function() {
-				var d = 2 * Math.PI / ONE_DAY_SECONDS / 1e3;
-				IAU2000B_nutation_offset_Δψ = -0.135 * d;
-				IAU2000B_nutation_offset_Δε = 0.388 * d;
-			})();
-
 			/**
-			 * IAU 2000B model nutation (章動) 修正值。
-			 * 
-			 * 資料來源/資料依據:<br />
-			 * Nutation, IAU 2000B model.
-			 * 
-			 * @param {Number}JD
-			 *            Julian date
-			 * 
-			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (radians)
-			 * 
-			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut00b.c
-			 * @see http://www.neoprogrammics.com/nutations/nutations_1980_2000b/index.php
-			 */
-			function IAU2000B_nutation(JD) {
-				// T 是 J2000.0 起算的儒略世紀數：
-				var T = Julian_century(JD),
-				//
-				parameters = [], Δψ = 0, Δε = 0;
-				IAU2000B_nutation_parameters.forEach(function(parameter) {
-					parameters.push((polynomial_value(parameter, T)
-					//
-					% TURN_TO_ARCSECONDS) * ARCSECONDS_TO_RADIANS);
-				});
-
-				library_namespace.debug('Julian centuries from J2000.0: ' + T,
-						4);
-
-				for (var team,
-				// Summation of luni-solar nutation series
-				// (smallest terms first).
-				index = IAU2000B_nutation_teams.length; index > 0;) {
-					team = IAU2000B_nutation_teams[--index];
-					var argument = 0;
-					// 5: length of parameters
-					for (var i = 0; i < 5; i++)
-						// team[i] 常為0
-						argument += team[i] * parameters[i];
-
-					var _sin = Math.sin(argument), _cos = Math.cos(argument);
-					Δψ += (team[5] + team[6] * T) * _sin + team[7] * _cos;
-					Δε += (team[8] + team[9] * T) * _cos + team[10] * _sin;
-				}
-
-				T = ARCSECONDS_TO_RADIANS / 1e7;
-				// Fixed offsets in lieu of planetary terms
-				Δψ = Δψ * T + IAU2000B_nutation_offset_Δψ;
-				Δε = Δε * T + IAU2000B_nutation_offset_Δε;
-
-				library_namespace.debug(
-				//
-				'IAU2000B nutation 章動修正值 of ' + JD + ' ('
-						+ library_namespace.JD_to_Date(JD).format('CE') + '): '
-						+ Δψ / DEGREES_TO_RADIANS + '°, ' + Δε
-						/ DEGREES_TO_RADIANS + '°', 3);
-				return [ Δψ, Δε ];
-			}
-
-			/**
-			 * IAU 1980 model nutation (章動) 修正值。
-			 * 
-			 * @param {Number}JD
-			 *            Julian date
-			 * 
-			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (degrees)
-			 */
-			function IAU1980_nutation(JD) {
-				// T 是 J2000.0 起算的儒略世紀數：
-				var T = Julian_century(JD),
-				//
-				parameters = [], Δψ = 0, Δε = 0;
-				IAU1980_nutation_parameters.forEach(function(parameter) {
-					parameters.push((polynomial_value(parameter, T)
-					//
-					% TURN_TO_DEGREES) * DEGREES_TO_RADIANS);
-				});
-
-				// IAU1980_nutation_teams[6,8] 有乘以十倍了。
-				T /= 10;
-
-				IAU1980_nutation_teams.forEach(function(team) {
-					var c, argument = 0, i = 0;
-					// 5: parameters.length
-					for (; i < 5; i++)
-						// 正弦(計算Δψ用sine)的角度參數及餘弦(計算Δε用cosine)的角度參數是D、M、M'、F、Ω這5個基本參數的線性組合。
-						// c常為0
-						if (c = team[i])
-							argument += c * parameters[i];
-
-					Δψ += (team[5] + team[6] * T) * Math.sin(argument);
-					if (c = team[7] + team[8] * T)
-						Δε += c * Math.cos(argument);
-				});
-
-				// 表中的係數的單位是0".0001。
-				T = 1e4 * DEGREES_TO_ARCSECONDS;
-				return [ Δψ / T, Δε / T ];
-			}
-
-			var nutation = IAU2000B_nutation;
-			_.nutation = nutation;
-
-			/**
-			 * 太陽位置(坐標)計算。<br />
+			 * solar coordinate 太陽位置(坐標)計算。<br />
 			 * ObsEcLon (Observer ecliptic lon. & lat.) or PAB-LON (PHASE angle &
 			 * bisector) @ HORIZONS?
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
-			 * 《天文算法》 Example 25.b
+			 * 《天文算法》 p.166~ p. 169 Example 25.b
 			 * 
 			 * @param {Number}JD
 			 *            Julian date
@@ -857,32 +1043,22 @@ if (typeof CeL === 'function')
 			 *          vector }
 			 */
 			function solar_coordinate(JD) {
-				// 計算日心坐標中地球的位置
-				var coordinate = VSOP87(JD, 'earth');
+				// apply ΔT.
+				// 天文計算用時間 TT = 日常生活時間 UT + ΔT
+				// + 2000: Julian_century(JD) starts from year 2000.
+				JD += ΔT(Julian_century(JD) * 100 + 2000) / ONE_DAY_SECONDS;
+
+				// heliocentric coordinate. 計算日心坐標中地球的位置。
+				var heliocentric = VSOP87(JD, solar_terms_object, {
+					degrees : true
+				});
 
 				// 弧度單位日心黃經L → 地心黃經(geocentric longitude)λ(度)
 				// Jean Meeus 文中以 "☉" 表示此處之 λ。
-				var λ = coordinate.L / DEGREES_TO_RADIANS + 180,
+				var λ = heliocentric.L + TURN_TO_DEGREES / 2,
 				// 弧度單位日心黃緯B → 地心黃緯β(度)
-				β = -coordinate.B / DEGREES_TO_RADIANS;
+				β = -heliocentric.B;
 
-				// 轉換到FK5坐標系統。
-				// 太陽黃經☉及黃緯β是P.Bretagnon的VSOP行星理論定義的動力學黃道坐標。這個參考系與標準的FK5坐標系統(詳見20章)僅存在很小的差別。可按以下方法把☉、β轉換到FK5坐標系統中,其中T是J2000起算的儒略世紀數,或T=10τ。
-				// J2000.0的VSOP黃道與J2000.0的FK5黃道存在一個很小的夾角 E =
-				// 0".0554左右，所以作以上修正。
-
-				var tmp;
-				if (true) {
-					// 先計算 λ′ = Θ - 1°.397*T - 0°.00031*T^2
-					tmp = polynomial_value([ λ, -1.397, -0.00031 ],
-							Julian_century(JD))
-							* DEGREES_TO_RADIANS;
-					β += 0.03916 / DEGREES_TO_ARCSECONDS
-							* (Math.cos(tmp) - Math.sin(tmp));
-					λ -= 0.09033 / DEGREES_TO_ARCSECONDS;
-				}
-
-				// 修正光行差 aberration
 				// 太陽的視黃經 (apparent longitude)λ(度)
 				// Jean Meeus 文中以 "λ" 表示此處之視黃經 apparent。
 				//
@@ -891,18 +1067,22 @@ if (typeof CeL === 'function')
 				// equinox and solstice.
 				// 節氣以太陽視黃經為準。
 				// ** 問題:但中國古代至點以日長為準。兩者或可能產生出入？
-				var apparent = λ + solar_aberration(coordinate.R);
-
-				// 修正章動 nutation
-				tmp = nutation(JD);
-				apparent += tmp[0] / DEGREES_TO_RADIANS;
+				var apparent = λ
+				// 修正太陽光行差 aberration
+				+ sun_aberration(heliocentric.R, JD)
+				// 修正章動 nutation。
+				+ nutation(JD)[0] / DEGREES_TO_RADIANS;
 
 				// https://en.wikipedia.org/wiki/Ecliptic_coordinate_system#Spherical_coordinates
-				return Object.assign(coordinate, {
-					apparent : normalize_degrees(apparent),
+				return Object.assign(heliocentric, {
+					// geocentric
 					λ : normalize_degrees(λ),
 					β : normalize_degrees(β),
-					Δ : coordinate.R * AU_TO_METERS
+					Δ : heliocentric.R * AU_TO_METERS,
+
+					// apparent longitude
+					apparent : normalize_degrees(apparent)
+				// TODO: apparent latitude
 				});
 			}
 
@@ -987,6 +1167,15 @@ if (typeof CeL === 'function')
 			/**
 			 * 取得指定年分 year 年，指定節氣/分點和至點之 Julian date。
 			 * 
+			 * from http://ssd.jpl.nasa.gov/horizons.cgi#results<br />
+			 * DE-0431LE-0431 GEOCENTRIC<br />
+			 * Date__(UT)__HR:MN:SC.fff CT-UT ObsEcLon ObsEcLat<br />
+			 * 0001-Mar-22 21:45:35.500 10518.071036 359.9999962 -0.0001845<br />
+			 * 0001-Mar-22 21:45:36.000 10518.071036 0.0000018 -0.0001845<br />
+			 * <br />
+			 * 2015-Mar-20 22:45:10.000 67.185603 359.9999944 0.0000095<br />
+			 * 2015-Mar-20 22:45:10.500 67.185603 0.0000001 0.0000095
+			 * 
 			 * @param {Integer}year
 			 *            year 年(CE)
 			 * @param {Number}index
@@ -1025,9 +1214,10 @@ if (typeof CeL === 'function')
 
 			_.solar_term_JD = solar_term_JD;
 
-			// solar_term_cache[ year ]
+			var solar_terms_object = 'earth',
+			// solar_terms_cache[ year ]
 			// = [ 春分JD, 清明JD, 穀雨JD, ... 24個節氣 ]
-			var solar_term_cache = [];
+			solar_terms_cache = [];
 
 			/**
 			 * 取得指定 Julian date 之節氣名，或已經過日數。
@@ -1035,11 +1225,11 @@ if (typeof CeL === 'function')
 			 * @param {Number}JD
 			 *            Julian date
 			 * @param {Object}[options]
-			 *            options :<br />
-			 *            .days: 回傳 [ 節氣年 year (以"春分"分年, 非立春後才過年!), 節氣序 index,
-			 *            已經過日數/剩下幾日 ]。<br />
-			 *            .pentads: 亦標示七十二候 (物候, 72 pentads)<br />
-			 *            .time: 取得節氣名時，亦取得交節時刻。
+			 *            options:<br />
+			 *            options.days: 回傳 [ 節氣年 year (以"春分"分年, 非立春後才過年!), 節氣序
+			 *            index, 已經過日數/剩下幾日 ]。<br />
+			 *            options.pentads: 亦標示七十二候 (物候, 72 pentads)<br />
+			 *            options.time: 取得節氣名時，亦取得交節時刻。
 			 * 
 			 * @returns {String|Undefined|Array}
 			 * 
@@ -1068,10 +1258,10 @@ if (typeof CeL === 'function')
 						// 每一年春分前末幾個節氣，算前一年的。
 						year--;
 
-					var cache = solar_term_cache[year], term_JD;
+					var cache = solar_terms_cache[year], term_JD;
 					if (!cache)
 						// 初始化本年度資料。
-						solar_term_cache[year] = cache = [];
+						solar_terms_cache[year] = cache = [];
 
 					if (!(term_JD = cache[index]))
 						// 填入節氣JD
@@ -1113,6 +1303,7 @@ if (typeof CeL === 'function')
 						index = SOLAR_TERMS_NAME[index];
 						if (options.time) {
 							index += ' ' + ((days *= 24) | 0) + ':';
+							// options.time > 1 : add seconds.
 							if (options.time > 1)
 								index += ((days = (days % 1) * 60) | 0) + ':';
 							index += Math.round((days % 1) * 60);
@@ -1221,7 +1412,7 @@ if (typeof CeL === 'function')
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 
 			/**
-			 * 以下為計算用天文數據。
+			 * data section: 以下為計算用天文數據。
 			 */
 
 			// ------------------------------------------------------------------------------------------------------//
@@ -1295,6 +1486,69 @@ if (typeof CeL === 'function')
 							0.022174192, 0.0090316521 ] ];
 
 			// ------------------------------------------------------------------------------------------------------//
+			// Sun's aberration. 太陽地心黃經光行差修正量。
+
+			/**
+			 * constant term of Sun's aberration
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 p.167,168 chapter 太陽位置計算.
+			 * 
+			 * If needed with respect to the mean equinox of the date instead of
+			 * to a fixed reference frame, the constant term 3548.193 should be
+			 * replaced by 3548.330. 如果Δλ須是在Date黃道中的，則應把常數項3548.193換為3548.330
+			 */
+			var sun_aberration_variation_constant = 3548.193,
+			/**
+			 * coefficients of Sun's aberration
+			 * 
+			 * Σ : Σ ([0] * sin ( [1] + [2] τ) )
+			 * 
+			 * daily variation = sun_aberration_variation_constant +
+			 * Σ(variation[0]) + Σ(variation[1])*τ + Σ(variation[2])*τ^2 +
+			 * Σ(variation[3])*τ^3
+			 * 
+			 * τ的係數為359993.7、719987或1079981的週期項，與地球離心率相關。<br />
+			 * τ的係數為4452671、9224660或4092677的週期項，與月球運動相關。<br />
+			 * τ的係數為450369、225184、315560或675553的週期項，與金星攝動相關。<br />
+			 * τ的係數為329645、659289、或299296的週期項，與火星攝動相關。
+			 */
+			sun_aberration_variation = [
+					// τ^0
+					[ [ 118.568, 87.5287, 359993.7286 ],
+							[ 2.476, 85.0561, 719987.4571 ],
+							[ 1.376, 27.8502, 4452671.1152 ],
+							[ 0.119, 73.1375, 450368.8564 ],
+							[ 0.114, 337.2264, 329644.6718 ],
+							[ 0.086, 222.5400, 659289.3436 ],
+							[ 0.078, 162.8136, 9224659.7915 ],
+							[ 0.054, 82.5823, 1079981.1857 ],
+							[ 0.052, 171.5189, 225184.4282 ],
+							[ 0.034, 30.3214, 4092677.3866 ],
+							[ 0.033, 119.8105, 337181.4711 ],
+							[ 0.023, 247.5418, 299295.6151 ],
+							[ 0.023, 325.1526, 315559.5560 ],
+							[ 0.021, 155.1241, 675553.2846 ] ],
+					// τ^1
+					[ [ 7.311, 333.4515, 359993.7286 ],
+							[ 0.305, 330.9814, 719987.4571 ],
+							[ 0.010, 328.5170, 1079981.1857 ] ],
+					// τ^2
+					[ [ 0.309, 241.4518, 359993.7286 ],
+							[ 0.021, 205.0482, 719987.4571 ],
+							[ 0.004, 297.8610, 4452671.1152 ] ],
+					// τ^3
+					[ [ 0.010, 154.7066, 359993.7286 ] ] ];
+
+			sun_aberration_variation.forEach(function(team) {
+				team.forEach(function(sub_team) {
+					sub_team[1] *= DEGREES_TO_RADIANS;
+					sub_team[2] *= DEGREES_TO_RADIANS;
+				});
+			});
+
+			// ------------------------------------------------------------------------------------------------------//
 
 			/**
 			 * teams for function equinox()
@@ -1362,23 +1616,23 @@ if (typeof CeL === 'function')
 			 * @inner
 			 */
 			var IAU2000B_nutation_parameters = [
-			// Mean anomaly of the Moon.
+			// Mean anomaly of the Moon. 月亮平近點角
 			[ 485868.249036, 1717915923.2178
 			// , 31.8792, 0.051635, -0.00024470
 			],
-			// Mean anomaly of the Sun.
+			// Mean anomaly of the Sun. 太陽平近點角
 			[ 1287104.79305, 129596581.0481
 			// , -0.5532, 0.000136, -0.00001149
 			],
-			// Mean argument of the latitude of the Moon.
+			// Mean argument of the latitude of the Moon. 月亮平升交角距
 			[ 335779.526232, 1739527262.8478
 			// , -12.7512, -0.001037, 0.00000417
 			],
-			// Mean elongation of the Moon from the Sun.
+			// Mean elongation of the Moon from the Sun. 日月平角距
 			[ 1072260.70369, 1602961601.2090
 			// , -6.3706, 0.006593, -0.00003169
 			],
-			// Mean longitude of the ascending node of the Moon.
+			// Mean longitude of the ascending node of the Moon. 月亮升交點平黃經
 			[ 450160.398036, -6962890.5431
 			// , 7.4722, 0.007702, -0.00005939
 			] ],
@@ -1595,13 +1849,13 @@ if (typeof CeL === 'function')
 			// VSOP87 半解析（semi-analytic）理論 periodic terms
 
 			/**
-			 * teams for function VSOP87()
+			 * teams for VSOP87 model used in function VSOP87()
 			 * 
 			 * full data:<br />
 			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/README
 			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/VSOP87D.ear
 			 * 
-			 * VSOP2013
+			 * TODO: VSOP2013
 			 * 
 			 * see also:<br />
 			 * JPL DE422:<br />
@@ -1615,11 +1869,15 @@ if (typeof CeL === 'function')
 			/**
 			 * 這邊僅擷取行星 Earth 地球數值，以計算二十四節氣 (solar terms)。
 			 * 
-			 * VSOP87_teams.earth[L黃經/B黃緯/R距離]=[L0:[[A,B,C],[A,B,C]]];
+			 * VSOP87_teams.earth[L黃經/B黃緯/R距離] = [L0:[[A,B,C],[A,B,C]]];
+			 * 
+			 * modified VSOP87: Jean Meeus
+			 * 從VSOP87中取出一些主要項(詳見附錄II)，利用它計算得到的太陽位置在-2000到6000年範圍內精度是1"。<br />
+			 * 誤差 365.25*24*60*60/360/60/60 = 24.35秒鐘。相當於半分鐘。
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
-			 * 《天文算法》 附表3.<br />
+			 * Appendix III 《天文算法》 附表3.<br />
 			 * http://forums.parallax.com/showthread.php/154838-Azimuth-angle-conversion-from-east-to-west
 			 * 
 			 * @see http://www.neoprogrammics.com/vsop87/source_code_generator_tool/
@@ -1719,7 +1977,7 @@ if (typeof CeL === 'function')
 								[ 80, 3.88, 5223.69 ], [ 44, 3.7, 2352.87 ],
 								[ 32, 4, 1577.34 ] ],
 						[ [ 9, 3.9, 5507.55 ], [ 6, 1.73, 5223.69 ] ] ],
-				// 行星 Earth 地球: 到太陽的距離
+				// 行星 Earth 地球: 行星到太陽的距離, 日地距離
 				R : [
 						[ [ 100013989.0, 0, 0 ],
 								[ 1670700.0, 3.0984635, 6283.07585 ],
