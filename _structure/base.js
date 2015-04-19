@@ -123,7 +123,7 @@ function (global) {
 		 */
 		debug = 0,
 		// 原生 console。
-		//typeof console !== 'undefined' && console
+		// typeof console !== 'undefined' && console
 		has_console = typeof console === 'object'
 		//
 		&& (typeof console.log === 'function'
@@ -665,7 +665,8 @@ function (global) {
 	_// JSDT:_module_
 	.
 	/**
-	 * 判斷為何種 type。主要用在 Error, DOMException 等 native methods / native objects / built-in objects 之判別。
+	 * 判斷為何種 type。主要用在 Error, DOMException 等 native methods / native objects /
+	 * built-in objects 之判別。
 	 * 
 	 * @param value
 	 *            variable or class instance to test
@@ -1053,10 +1054,10 @@ function (global) {
 		env.not_to_extend_keyword = 'no_extend';
 
 		/**
-		 * 非 native 的 method (native methods / native objects / built-in objects)，
-		 * 可由 .not_native ([not_native_keyword]) 來判別是否為 native method。<br />
-		 * e.g., use Object.defineProperty.not_native to test
-		 * if the browser don't have native support for Object.defineProperty().
+		 * 非 native 的 method (native methods / native objects / built-in
+		 * objects)， 可由 .not_native ([not_native_keyword]) 來判別是否為 native method。<br />
+		 * e.g., use Object.defineProperty.not_native to test if the browser
+		 * don't have native support for Object.defineProperty().
 		 * 
 		 * @name CeL.env.not_to_extend_keyword
 		 * @type String
@@ -1194,12 +1195,20 @@ OS='UNIX'; // unknown
 				OS === 'UNIX' ? '/' : '\\';
 
 		/**
-		 * library 之外部檔案 (external source files) 放置地。
+		 * library 之外部檔案 (external source files) 放置地。 純目錄名，不加目錄分隔。
 		 * 
 		 * @name CeL.env.external_directory_name
 		 * @type String
 		 */
 		env.external_directory_name = 'external';
+
+		/**
+		 * library 之資源文件 (resource files) 放置地。 純目錄名，不加目錄分隔。
+		 * 
+		 * @name CeL.env.resource_directory_name
+		 * @type String
+		 */
+		env.resource_directory_name = 'resource';
 
 		/**
 		 * 預設 module name separator。

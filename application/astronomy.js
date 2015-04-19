@@ -16,6 +16,7 @@
  * http://www.informatik.uni-leipzig.de/~duc/amlich/calrules.html
  * http://blog.csdn.net/songgz/article/details/2680144
  * http://www.todayonhistory.com/wnl/lhl.htm
+ * http://www.kentauren.info/menu/index1.htm?page=/cgi-bin/planeph_VSOP87d.pl
  * @see <a href="http://www.nongli.com/item2/index.html" accessdate="2013/5/2
  *      20:23">农历知识:传统节日,24节气，农历历法，三九，三伏，天文历法,天干地支阴阳五行</a>
  * @see <a href="http://www.chinesefortunecalendar.com/CLC/clcBig5.htm"
@@ -31,6 +32,8 @@
  * http://en.wikipedia.org/wiki/Haversine_formula
  * http://en.wikipedia.org/wiki/Spherical_law_of_cosines
  * http://en.wikipedia.org/wiki/Vincenty's_formulae
+ * 
+ * LUNAR SOLUTION ELP version ELP/MPP02
  * 
  * 未來發展：<br />
  * 計算順序: https://github.com/kanasimi/IAU-SOFA/blob/master/doc/sofa_ast_c.pdf
@@ -174,7 +177,7 @@ if (typeof CeL === 'function')
 			 */
 			J2000_epoch = 2451545.0,
 			/**
-			 * Days per Julian century
+			 * Days per Julian century. 儒略世紀.
 			 * 
 			 * DAYS_OF_JULIAN_CENTURY = (365 + 1/4) * 100
 			 * 
@@ -182,7 +185,7 @@ if (typeof CeL === 'function')
 			 */
 			DAYS_OF_JULIAN_CENTURY = 36525,
 			/**
-			 * speed of light in vacuum (m/s), c
+			 * speed of light in vacuum (m/s), c 光速.
 			 */
 			CELERITAS = 299792458,
 			/**
@@ -264,6 +267,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Number}JD
 			 *            Julian date
+			 * 
 			 * @returns {Number} Julian centuries of JD from J2000.0
 			 */
 			function Julian_century(JD) {
@@ -348,7 +352,7 @@ if (typeof CeL === 'function')
 			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/obl06.c
 			 * 
 			 * @param {Number}JD
-			 *            Julian date
+			 *            Julian date (JD of 天文計算用時間 TT)
 			 * 
 			 * @returns {Number} obliquity in degrees
 			 */
@@ -570,7 +574,7 @@ if (typeof CeL === 'function')
 			 * @param {Number}R
 			 *            日地距離(天文單位 AU), radius vector in AU。
 			 * @param {Number}JD
-			 *            Julian date
+			 *            Julian date (JD of 天文計算用時間 TT)
 			 * 
 			 * @returns {Number} degree
 			 * 
@@ -660,7 +664,7 @@ if (typeof CeL === 'function')
 			 * Nutation, IAU 2000B model.
 			 * 
 			 * @param {Number}JD
-			 *            Julian date
+			 *            Julian date (JD of 天文計算用時間 TT)
 			 * 
 			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (radians)
 			 * 
@@ -715,7 +719,7 @@ if (typeof CeL === 'function')
 			 * IAU 1980 model nutation (地球章動) 修正值。
 			 * 
 			 * @param {Number}JD
-			 *            Julian date
+			 *            Julian date (JD of 天文計算用時間 TT)
 			 * 
 			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (degrees)
 			 */
@@ -792,7 +796,7 @@ if (typeof CeL === 'function')
 			 * 《天文算法》 chapter 太陽位置計算.
 			 * 
 			 * @param {Number}JD
-			 *            Julian date
+			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {String}object
 			 *            planets 行星.
 			 * @param {Object}[options]
@@ -905,6 +909,8 @@ if (typeof CeL === 'function')
 				 * 太陽黃經☉及黃緯β是P.Bretagnon的VSOP行星理論定義的動力學黃道坐標。這個參考系與標準的FK5坐標系統(詳見20章)僅存在很小的差別。
 				 * 可按以下方法把☉、β轉換到FK5坐標系統中,其中T是J2000起算的儒略世紀數,或T=10τ。
 				 * J2000.0的VSOP黃道與J2000.0的FK5黃道存在一個很小的夾角 E = 0".0554 左右，所以作以上修正。
+				 * 
+				 * @see http://www.astrosurf.com/jephem/astro/ephemeris/et520transfo_en.htm
 				 */
 				if (options.FK5 !== false) {
 					// 先計算 L′ = L - 1°.397*T - 0°.00031*T^2
@@ -959,11 +965,112 @@ if (typeof CeL === 'function')
 			VSOP87.add_teams = VSOP87_add_teams;
 
 			function VSOP87_load_teams(object, callback) {
-				library_namespace.run(module_name + '.VSOP87_'
-						+ VSOP87.object_name(object), callback);
+				library_namespace.run(library_namespace
+						.get_module_path(module_name
+								+ library_namespace.env.path_separator
+								+ 'VSOP87_' + VSOP87.object_name(object)), [
+						function() {
+							library_namespace.info(
+							//
+							'VSOP87_load_teams: resource file of [' + object
+									+ '] loaded.');
+						}, callback ]);
 			}
 
 			VSOP87.load_teams = VSOP87_load_teams;
+
+			/**
+			 * 轉換 VSOP87 file @ node.js。
+			 * 
+			 * TODO: parse VSOP87 file
+			 * 
+			 * @param {String}file_name
+			 *            source file name
+			 * @param {Object}options
+			 *            options
+			 * 
+			 * @since 2015/4/15 ‏‎17:46:12, 2015/4/18 21:36:12
+			 */
+			function convert_VSOP87_file(file_name, options) {
+				// 前置處理。
+				if (!library_namespace.is_Object(options))
+					options = library_namespace.null_Object();
+
+				var encoding = options.encoding || 'ascii',
+				// 需要先設定 fs = require('fs');
+				// https://nodejs.org/api/fs.html
+				fs = require('fs');
+
+				fs.readFile(file_name, {
+					encoding : encoding
+				}, function(error, data) {
+					if (error)
+						throw error;
+
+					// parse VSOP87 file.
+					data = data.split(/\n/);
+
+					var object, type, group,
+					//
+					teams = library_namespace.null_Object();
+
+					data.forEach(function(line) {
+						if (!line)
+							return;
+						var fields = line.trim().split(/\s+/);
+						if (isNaN(fields[0])) {
+							if (!object)
+								// e.g., 'earth'
+								object = fields[3].toLowerCase();
+							// e.g., 'L', 'B', 'R'.
+							var t = fields[6][fields[5]];
+							group = [];
+							if (t === type)
+								teams[type].push(group);
+							else
+								teams[type = t] = [ group ];
+
+							console.log(object + ' ' + type + ' ' + fields[7]
+									+ ' ' + fields[8] + ' teams');
+							return;
+						}
+
+						if (false && teams[type].length === 1
+								&& group.length === 0)
+							console.log(fields);
+						fields = fields.slice(-3);
+						fields.forEach(function(f, index) {
+							fields[index] = +f;
+						});
+
+						// check
+						if (false && fields.length !== 3)
+							throw fields;
+						if (!options.limit || group < options.limit)
+							group.push(fields);
+					});
+
+					var new_line = '\n', prefix = '// auto-generated from '
+					//
+					+ (options.name || 'VSOP87')
+					// e.g., 'D' for VSOP87D.
+					+ (options.type || '') + new_line + library_namespace.Class
+							+ '.' + (options.name || 'VSOP87') + '.add_teams(',
+					//
+					postfix = options.postfix || new_line + ');';
+					fs.writeFile(options.name + '_' + object + '.js', prefix
+							+ JSON.stringify(object)
+							+ ','
+							+ new_line
+							+ JSON.stringify(teams).replace(/(]],)/g,
+									'$1' + new_line) + postfix, {
+						encoding : encoding
+					});
+
+				});
+			}
+
+			VSOP87.convert = convert_VSOP87_file;
 
 			// ------------------------------------------------------------------------------------------------------//
 			// solar coordinate 太陽位置(坐標) & 二十四節氣 (solar terms)
@@ -982,7 +1089,7 @@ if (typeof CeL === 'function')
 			 *            aka. [ March equinox, June solstice, September
 			 *            equinox, December solstice ]
 			 * 
-			 * @returns {Number} Julian date (JD)
+			 * @returns {Number} Julian date (JD of 天文計算用時間 TT)
 			 */
 			function equinox(year, index, no_fix) {
 				// year is an integer; other values for year, would give
@@ -1036,18 +1143,13 @@ if (typeof CeL === 'function')
 			 * 《天文算法》 p.166~ p. 169 Example 25.b
 			 * 
 			 * @param {Number}JD
-			 *            Julian date
+			 *            Julian date (JD of 天文計算用時間 TT)
 			 * 
 			 * @returns {Object} { apparent:太陽視黃經, λ:地心黃經(度), β:地心黃緯β(度),
 			 *          Δ:日地距離(m), L:黃經 longitude, B:黃緯 latitude, R:距離 radius
 			 *          vector }
 			 */
 			function solar_coordinate(JD) {
-				// apply ΔT.
-				// 天文計算用時間 TT = 日常生活時間 UT + ΔT
-				// + 2000: Julian_century(JD) starts from year 2000.
-				JD += ΔT(Julian_century(JD) * 100 + 2000) / ONE_DAY_SECONDS;
-
 				// heliocentric coordinate. 計算日心坐標中地球的位置。
 				var heliocentric = VSOP87(JD, solar_terms_object, {
 					degrees : true
@@ -1098,7 +1200,7 @@ if (typeof CeL === 'function')
 			 *            angle in degrees from March equinox of the year.<br />
 			 *            指定太陽視黃經角度，自當年黃經0度(春分)開始。
 			 * 
-			 * @returns {Number} Julian date
+			 * @returns {Number} Julian date (JD of 日常生活時間 UT)
 			 */
 			function JD_of_solar_angle(year, degrees) {
 				var offset, apparent,
@@ -1109,7 +1211,7 @@ if (typeof CeL === 'function')
 				// 經測試，有時每天太陽的視黃經 (apparent longitude) 可能會增加近 .95°
 				// NOT 360/365.25
 
-				// 太陽的視黃經最大變化量
+				// 太陽的視黃經最大變化量。
 				// http://jpkc.haie.edu.cn/jpkc/dqgl/content.asp?classid=17&id=528
 				// 在遠日點，地球公轉慢，太陽每日黃經差Δλ也慢，為57′
 				// 在近日點，地球公轉快，太陽每日黃經差Δλ也快，為61′
@@ -1142,6 +1244,11 @@ if (typeof CeL === 'function')
 					// adapt 修正量。
 					JD += offset;
 				}
+
+				// apply ΔT: TT → UT.
+				// 日常生活時間 UT = 天文計算用時間 TT - ΔT
+				// + 2000: Julian_century(JD) starts from year 2000.
+				JD -= ΔT(Julian_century(JD) * 100 + 2000) / ONE_DAY_SECONDS;
 
 				return JD;
 			}
@@ -1184,7 +1291,7 @@ if (typeof CeL === 'function')
 			 *            1: 分點和至點, others (default): 二十四節氣，<br />
 			 *            皆自當年黃經0度(春分)開始。
 			 * 
-			 * @returns {Number} Julian date
+			 * @returns {Number} Julian date (JD of 日常生活時間 UT)
 			 */
 			function solar_term_JD(year, index, type) {
 				var angle;
@@ -1223,7 +1330,7 @@ if (typeof CeL === 'function')
 			 * 取得指定 Julian date 之節氣名，或已經過日數。
 			 * 
 			 * @param {Number}JD
-			 *            Julian date
+			 *            Julian date (JD of 日常生活時間 UT)
 			 * @param {Object}[options]
 			 *            options:<br />
 			 *            options.days: 回傳 [ 節氣年 year (以"春分"分年, 非立春後才過年!), 節氣序
@@ -1871,7 +1978,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * VSOP87_teams.earth[L黃經/B黃緯/R距離] = [L0:[[A,B,C],[A,B,C]]];
 			 * 
-			 * modified VSOP87: Jean Meeus
+			 * simplified VSOP87 by Jean Meeus.
 			 * 從VSOP87中取出一些主要項(詳見附錄II)，利用它計算得到的太陽位置在-2000到6000年範圍內精度是1"。<br />
 			 * 誤差 365.25*24*60*60/360/60/60 = 24.35秒鐘。相當於半分鐘。
 			 * 

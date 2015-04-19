@@ -11,12 +11,16 @@
  * @see http://nodejs.org/
  */
 
+"use strict";
+
 if (false)
 	(function() {
 		// Copy this section in front of the script. Path list from /path.txt/.
 
+		"use strict";
+
 		// ----------------------------------------------------------------------------
-		// For node.js loading. Copy from /node.loader.js/.
+		// For node.js loading. Copy from /_for include/node.loader.js.
 		'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS'
 		//
 		.split('|')
@@ -40,8 +44,6 @@ if (false)
 	})();
 
 // ---------------------------------------------------------------------//
-
-"use strict";
 
 try {
 	// http://nodejs.org/api/globals.html

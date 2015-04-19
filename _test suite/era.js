@@ -204,7 +204,7 @@ function Year_numbering(year_shift, year_only, has_year_0, reverse) {
 // const
 var PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
 //
-CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'),
+CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'), pin_column,
 // 可選用的文字式年曆欄位。
 selected_column = {
 	JDN : true,
@@ -235,6 +235,13 @@ default_column = [ {
 	T : '日干支',
 	S : 'font-size:.7em;'
 } ];
+
+function pin_text(gettext) {
+	var text = pin_column ? 'Unpin' : 'Pin';
+	if (gettext)
+		text = _(text);
+	return text;
+}
 
 function remove_calendar_column() {
 	var n = this.title.match(/: (.+)$/);
@@ -476,13 +483,24 @@ function show_calendar(era_name) {
 		} ]
 	};
 	if (hidden_column.length > 0) {
-		hidden_column.unshift(': ');
+		hidden_column.unshift({
+			div : {
+				T : pin_text(),
+				R : 'Click to pin / unpin',
+				onclick : function() {
+					pin_column = !pin_column;
+					this.innerHTML = pin_text(true);
+				}
+			},
+			id : 'column_select_pin_button'
+		}, ': ');
 		title = [ {
 			div : [ {
 				T : '增加此欄',
 				C : 'column_select_button',
 				onclick : function() {
-					CeL.toggle_display('column_to_select');
+					if (CeL.toggle_display('column_to_select') === 'none')
+						pin_column = false;
 					return false;
 				}
 			}, {
@@ -494,6 +512,8 @@ function show_calendar(era_name) {
 	}
 	CeL.remove_all_child('calendar');
 	CeL.new_node(title, 'calendar');
+	if (pin_column)
+		CeL.toggle_display('column_to_select', true);
 	// text_calendar
 	select_panel('calendar', true);
 }

@@ -1829,9 +1829,9 @@ if (typeof CeL === 'function')
 							if (match[2])
 								variable_hash[match[2]]
 								//
-								= library_namespace.to_module_name(match[1],
-										'.')
-										+ '.' + match[2];
+								= library_namespace.to_module_name(
+								//
+								match[1], '.') + '.' + match[2];
 							require_resource[match[1]] = null;
 						} else {
 							// URL/path?
@@ -1896,9 +1896,10 @@ if (typeof CeL === 'function')
 			link : [ 'href', 'css' ],
 			img : [ 'src', 'png|jpg|gif' ]
 		};
-		external_RegExp = new RegExp('(?:^|\\' + external_RegExp
-				+ ')resource\\' + external_RegExp + '|^(?:'
-				+ library_namespace.Class + '\\' + external_RegExp + ')?'
+		external_RegExp = new RegExp('(?:^|\\' + external_RegExp + ')'
+				+ library_namespace.env.resource_directory_name + '\\'
+				+ external_RegExp + '|^(?:' + library_namespace.Class + '\\'
+				+ external_RegExp + ')?'
 				+ library_namespace.env.external_directory_name + '\\'
 				+ external_RegExp);
 
@@ -2126,7 +2127,9 @@ if (typeof CeL === 'function')
 						library_namespace.debug('預先一層一層定義、準備好 [' + id
 								+ '] 之上層 name-space。', 2, 'load_named');
 						var module_name_list = library_namespace
-								.split_module_name(id), i = 0, l = module_name_list.length - 1, name_space = library_namespace, name, sub_name_space;
+								.split_module_name(id),
+						//
+						i = 0, l = module_name_list.length - 1, name_space = library_namespace, name, sub_name_space;
 						for (; i < l; i++) {
 							sub_name_space = name_space[name = module_name_list[i]];
 							if (!sub_name_space) {
@@ -2161,9 +2164,9 @@ if (typeof CeL === 'function')
 								// 處理，而出問題！
 								Object.assign(initializator, name_space[name]);
 							} else
-								library_namespace
-										.warn('load_named: 已存在 name-space ['
-												+ id + ']！');
+								library_namespace.warn(
+								//
+								'load_named: 已存在 name-space [' + id + ']！');
 						// else: 尚未被定義或宣告過
 
 						// TODO: alias
@@ -2559,12 +2562,13 @@ if (typeof CeL === 'function')
 											// 載入卻沒設定 included，算失敗。
 											declaration.included = false;
 										else if (!declaration.variable_hash) {
-											library_namespace
-													.warn('load_named: [<a href="'
-															+ encodeURI(URL)
-															+ '">'
-															+ id
-															+ '</a>] 的程式碼似乎並未使用所規範的方法來載入？');
+											library_namespace.warn(
+											//
+											'load_named: [<a href="'
+											//
+											+ encodeURI(URL) + '">' + id
+											//
+											+ '</a>] 的程式碼似乎並未使用所規範的方法來載入？');
 											// IE 8 中，當測試不存在的檔案時，
 											// 會藉 .readyState ===
 											// 'complete'，執行到這邊。
@@ -2809,14 +2813,16 @@ if (typeof CeL === 'function')
 							}
 
 						} else if (library_namespace.is_debug(2)) {
+							library_namespace.warn(
 							// 誤在非 HTML 環境執行，卻要求 HTML 環境下的 resource？
-							library_namespace
-									.warn('No method availed! 沒有可以載入 resource 的方法！');
+							'load_named: No method availed!'
+									+ ' 沒有可以載入 resource 的方法！');
 						}
 
 					if (!declaration.included)
-						library_namespace.warn('load_named: 載入 [' + id
-								+ '] 失敗！');
+						library_namespace.warn(
+						//
+						'load_named: 載入 [' + id + '] 失敗！');
 				}
 
 				// force 僅使用一次。
@@ -3695,7 +3701,7 @@ if (typeof CeL === 'function')
 		/**
 		 * library 相對於 HTML file 的 base path。<br />
 		 * 同目錄時，應為 "./"。
-		 *
+		 * 
 		 * @example <code>
 		 * // 在特殊環境下，設置 library base path。
 		 * var CeL = { library_path : 'path/to/ce.js' };
@@ -3971,14 +3977,17 @@ if (typeof CeL === 'function')
 									&& URL
 									&& is_controller(URL = get_named(URL
 											.replace(/#[^#?]*$/, '')))) {
-								library_namespace.debug('add included: ['
-										+ URL.id + ']', 2, 'check_resource');
+								library_namespace.debug(
+								//
+								'add included: [' + URL.id + ']', 2,
+										'check_resource');
 								URL.included = true;
 							}
 						});
 			else
-				library_namespace.warn('check_resource: 無法判別 tag [' + tag
-						+ '] 之 URL attribute！');
+				library_namespace.warn(
+				//
+				'check_resource: 無法判別 tag [' + tag + '] 之 URL attribute！');
 		}
 
 		// export.
