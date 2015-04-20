@@ -3793,7 +3793,7 @@ if (typeof CeL === 'function')
 			 * 請先載入 application.astronomy<br />
 			 */
 			function note_日家九星(date) {
-				var JD = library_namespace.Date_to_JD(date.minute_offset());
+				var JD = library_namespace.Date_to_JD(date.offseted_value());
 
 				// 像是 東晉哀帝隆和1年11月30日 363/1/1 必須多前溯 .5 才能保證後面 days >= 0。
 				var index, 年 = date.getFullYear() - .5;
@@ -3875,7 +3875,7 @@ if (typeof CeL === 'function')
 			 *            options
 			 */
 			function add_note(date, options) {
-				add_adapt_offset(date, this);
+				add_offset_function(date, this);
 
 				var date_index = this.notes, tmp, tmp2;
 
@@ -5561,7 +5561,7 @@ if (typeof CeL === 'function')
 			ONE_MINUTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 1)
 					- new Date(0, 0, 1, 0, 0);
 
-			function minute_offset(minute_offset) {
+			function offseted_value(minute_offset) {
 				if (minute_offset === undefined)
 					minute_offset = this[MINUTE_OFFSET_KEY];
 				else if (minute_offset === '')
@@ -5578,16 +5578,16 @@ if (typeof CeL === 'function')
 			}
 
 			function adapt_minute_offset(minute_offset) {
-				var offset = this.minute_offset(minute_offset);
-				if (!isNaN(offset))
-					this.setTime(offset);
+				var offseted_value = this.offseted_value(minute_offset);
+				if (!isNaN(offseted_value))
+					this.setTime(offseted_value);
 				return this;
 			}
 
-			function add_adapt_offset(date, 紀年) {
+			function add_offset_function(date, 紀年) {
 				if (MINUTE_OFFSET_KEY in 紀年) {
 					date[MINUTE_OFFSET_KEY] = 紀年[MINUTE_OFFSET_KEY];
-					date.minute_offset = minute_offset;
+					date.offseted_value = offseted_value;
 
 					// 注意:這邊不更改真正的 date value，使得所得出的值為「把本地當作紀元所使用的當地」所得出之值。
 					// 例如求 "東漢明帝永平1年1月1日"，
@@ -6233,7 +6233,7 @@ if (typeof CeL === 'function')
 
 				if (options.date_only) {
 					if (指定紀年)
-						add_adapt_offset(date, 指定紀年);
+						add_offset_function(date, 指定紀年);
 					return date;
 				}
 
@@ -6517,7 +6517,7 @@ if (typeof CeL === 'function')
 				//
 				add_date = options.date_only ? function(date_time, era) {
 					date_list.push(date = new Date(date_time));
-					add_adapt_offset(date, era);
+					add_offset_function(date, era);
 				} : function(date_time, era) {
 					date_list.push(date = new Date(date_time));
 					add_contemporary(date, era, options);

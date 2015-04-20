@@ -74,12 +74,16 @@ var _;
 // google.load('visualization', '1', {packages: ['corechart']});
 function initializer() {
 	var queue = [
+			'application.astronomy',
+			function() {
+				// for 太陽視黃經
+				CeL.VSOP87.load_teams('Earth');
+				// for 月亮視黃經
+				CeL.LEA406.load_teams('V');
+			},
 			[ 'interact.DOM', 'application.debug.log',
 					'interact.form.select_input', 'interact.integrate.SVG',
-					'data.date.era', 'application.astronomy' ],
-			[ 'data.date.calendar', function() {
-				CeL.VSOP87.load_teams('Earth');
-			} ], function() {
+					'data.date.era', ], 'data.date.calendar', function() {
 				// alias for CeL.gettext, then we can use _('message').
 				_ = CeL.gettext;
 
@@ -2288,7 +2292,7 @@ function affairs() {
 					href : 'https://en.wikipedia.org/wiki/Julian_Day_Number'
 				},
 				function(date) {
-					var date_String = CeL.Date_to_JDN(date.minute_offset(0))
+					var date_String = CeL.Date_to_JDN(date.offseted_value(0))
 							+ (date.精 === '年' ? '–' : '');
 					return date_String;
 				} ],
@@ -2302,7 +2306,7 @@ function affairs() {
 			+ '因此對中國之朝代、紀年，2000/1/1 將轉為 2451544.1666... (2000/1/1 0:0 UTC+8)',
 			href : 'http://en.wikipedia.org/wiki/Julian_day'
 		}, function(date) {
-			var date_String = CeL.Date_to_JD(date.minute_offset())
+			var date_String = CeL.Date_to_JD(date.offseted_value())
 			//
 			+ (date.精 === '年' ? '–' : '');
 			return date_String;
@@ -2406,7 +2410,7 @@ function affairs() {
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
-			var JD = CeL.Date_to_JD(date.minute_offset());
+			var JD = CeL.Date_to_JD(date.offseted_value());
 			date = CeL.solar_term_of_JD(JD, {
 				pentads : true,
 				time : 2
@@ -2426,7 +2430,7 @@ function affairs() {
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
-			var JD = CeL.Date_to_JD(date.minute_offset());
+			var JD = CeL.Date_to_JD(date.offseted_value());
 
 			date = CeL.solar_term_of_JD(JD, {
 				days : true
@@ -2434,20 +2438,75 @@ function affairs() {
 			return CeL.SOLAR_TERMS[date[1]] + ' ' + date[2];
 		} ],
 
-		apparent : [ {
+		sun_apparent : [ {
 			a : {
-				T : 'apparent longitude'
+				// Sun's apparent position
+				// apparent longitude of the Sun
+				T : "Sun's apparent longitude"
 			},
 			R : '紀元使用當地、當日零時，太陽的視黃經,'
 			//
-			+ ' the apparent geocentric celestial longitude of the Sun.',
+			+ ' the apparent geocentric celestial longitude of the Sun.\n'
+			//
+			+ 'Using VSOP87D.ear.',
 			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
-			var JD = CeL.Date_to_JD(date.minute_offset());
+			var JD = CeL.TT(new Date(date.offseted_value()));
 			return {
 				span : CeL.show_degrees(CeL.solar_coordinate(JD).apparent, 2)
+				// &nbsp;
+				.replace(/ /g, CeL.DOM.NBSP),
+				C : 'monospaced'
+			};
+		} ],
+
+		moon_apparent : [ {
+			a : {
+				// Moon's apparent position
+				// apparent longitude of the Moon
+				T : "Moon's apparent longitude"
+			},
+			R : '紀元使用當地、當日零時，月亮的視黃經,'
+			//
+			+ ' the apparent geocentric celestial longitude of the Moon.\n'
+			//
+			+ 'Using LEA-406a.',
+			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			var JD = CeL.TT(new Date(date.offseted_value()));
+			return {
+				span : CeL.show_degrees(CeL.lunar_coordinate(JD).V, 2)
+				// &nbsp;
+				.replace(/ /g, CeL.DOM.NBSP),
+				C : 'monospaced'
+			};
+		} ],
+
+		moon_sun : [ {
+			a : {
+				// 月日視黃經差角
+				T : "月日視黃經差"
+			},
+			R : '紀元使用當地、當日零時，月亮的視黃經-太陽的視黃經,'
+			//
+			+ 'the apparent geocentric celestial longitude: Moon - Sun.\n'
+			//
+			+ 'Using VSOP87D.ear and LEA-406a.',
+			href : 'https://zh.wikipedia.org/wiki/%E8%A1%9D%E6%97%A5'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			var JD = CeL.TT(new Date(date.offseted_value()));
+			return {
+				span : CeL.show_degrees(CeL.normalize_degrees(
+				//
+				CeL.lunar_coordinate(JD).V - CeL.solar_coordinate(JD).apparent,
+				//
+				true), 2)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
@@ -2463,12 +2522,24 @@ function affairs() {
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
-			var JD = CeL.Date_to_JD(date.minute_offset()),
+			var JD = CeL.Date_to_JD(date.offseted_value()),
 			//
-			ΔT = CeL.deltaT(CeL.Julian_century(JD) * 100 + 2000);
+			ΔT = CeL.deltaT.JD(JD);
 			return CeL.age_of(new Date(0, 0, 0), new Date(0, 0, 0, 0, 0, ΔT))
 			//
 			+ ' (' + ΔT.to_fixed(2) + ' s)';
+		} ],
+
+		JD_of_TT : [ {
+			a : {
+				T : 'JD of TT'
+			},
+			R : '紀元使用當地、當日零時之天文計算用時間 TT, apply ΔT to UT.',
+			href : 'https://en.wikipedia.org/wiki/Terrestrial_Time'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			return CeL.TT(new Date(date.offseted_value()));
 		} ],
 
 		// --------------------------------------------------------------------
@@ -2762,7 +2833,7 @@ function affairs() {
 				}, function(date) {
 					if (/* date.準 || */date.精)
 						return '';
-					var JD = CeL.Date_to_JD(date.minute_offset());
+					var JD = CeL.Date_to_JD(date.offseted_value());
 
 					var index = CeL.stem_branch_index(date)
 					// .5: 清明、立夏之類方為"節"，因此配合節氣序，需添加之 offset。
@@ -2962,7 +3033,7 @@ function affairs() {
 				}, function(date) {
 					if (/* date.準 || */date.精)
 						return '';
-					var JD = CeL.Date_to_JD(date.minute_offset());
+					var JD = CeL.Date_to_JD(date.offseted_value());
 
 					// +1: 只要當天達到此角度，即算做此宮。
 					var index = CeL.solar_coordinate(JD + 1).apparent / 30 | 0;

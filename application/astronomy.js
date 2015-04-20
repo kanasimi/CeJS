@@ -17,6 +17,10 @@
  * http://blog.csdn.net/songgz/article/details/2680144
  * http://www.todayonhistory.com/wnl/lhl.htm
  * http://www.kentauren.info/menu/index1.htm?page=/cgi-bin/planeph_VSOP87d.pl
+ * https://pypi.python.org/pypi/astronomia
+ * https://github.com/Hedwig1958/libastro/blob/master/astro.c
+ * https://github.com/soniakeys/meeus/blob/master/solar/solar.go
+ * 
  * @see <a href="http://www.nongli.com/item2/index.html" accessdate="2013/5/2
  *      20:23">农历知识:传统节日,24节气，农历历法，三九，三伏，天文历法,天干地支阴阳五行</a>
  * @see <a href="http://www.chinesefortunecalendar.com/CLC/clcBig5.htm"
@@ -34,6 +38,8 @@
  * http://en.wikipedia.org/wiki/Vincenty's_formulae
  * 
  * LUNAR SOLUTION ELP version ELP/MPP02
+ * 
+ * LEA-406a, LEA-406b https://github.com/infinet/lunar-calendar/
  * 
  * 未來發展：<br />
  * 計算順序: https://github.com/kanasimi/IAU-SOFA/blob/master/doc/sofa_ast_c.pdf
@@ -200,6 +206,13 @@ if (typeof CeL === 'function')
 			 */
 			AU_LIGHT_TIME = AU_TO_METERS / CELERITAS / ONE_DAY_SECONDS,
 			/**
+			 * 地月距離 in km (半長軸 384,399公里, NOT 平均距離)。
+			 * 
+			 * @see https://en.wikipedia.org/wiki/Lunar_distance_%28astronomy%29
+			 * @see http://solarsystem.nasa.gov/planets/profile.cfm?Display=Facts&Object=Moon
+			 */
+			LUNAR_DISTANCE_KM = 384400,
+			/**
 			 * 每年 2 分點 + 2 至點。
 			 * 
 			 * EQUINOX_SOLSTICE_COUNT = 4
@@ -286,6 +299,8 @@ if (typeof CeL === 'function')
 				return degree;
 			}
 
+			_.normalize_degrees = normalize_degrees;
+
 			// 顯示易懂角度。
 			function show_degrees(degree, padding) {
 				if (!degree)
@@ -342,7 +357,7 @@ if (typeof CeL === 'function')
 			}
 
 			// ------------------------------------------------------------------------------------------------------//
-			// obliquity 轉軸傾角
+			// obliquity 轉軸傾角。
 
 			/**
 			 * 地球的平均轉軸傾角，平黃赤交角。 get mean obliquity of the ecliptic (Earth's
@@ -456,6 +471,61 @@ if (typeof CeL === 'function')
 			}
 
 			_.deltaT = ΔT;
+
+			/**
+			 * get ΔT of JD.<br />
+			 * ΔT = TT - UT<br />
+			 * <br />
+			 * 天文計算/星曆表使用 Terrestrial Time (TT, 地球時標)，<br />
+			 * 日常生活中使用 UTC, 接近 Universal Time (UT, 世界時標), 主要為 UT1。<br />
+			 * <br />
+			 * 天文計算用時間 TT = 日常生活時間 UT + ΔT
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * 
+			 * @returns {Number} ΔT of year in seconds.
+			 */
+			function ΔT_of_JD(JD) {
+				// + 2000: Julian_century(JD) starts from year 2000.
+				return ΔT(Julian_century(JD) * 100 + 2000);
+			}
+
+			_.deltaT.JD = ΔT_of_JD;
+
+			/**
+			 * get Terrestrial Time of Universal Time JD, apply ΔT to UT.
+			 * 
+			 * @param {Number}JD
+			 *            Julian date (JD of 日常生活時間 UT)
+			 * @param {Boolean}to_UT
+			 *            reverse, TT → UT. treat JD as 天文計算用時間 TT.
+			 * 
+			 * @returns JD of TT
+			 */
+			function TT_of(JD, to_UT) {
+				if (library_namespace.is_Date(JD))
+					JD = library_namespace.Date_to_JD(JD);
+				var deltaT = ΔT_of_JD(JD) / ONE_DAY_SECONDS;
+				// normal: UT → TT.
+				// to_UT: TT → UT.
+				// 日常生活時間 UT = 天文計算用時間 TT - ΔT
+				return to_UT ? JD - deltaT : JD + deltaT;
+			}
+
+			/**
+			 * get Universal Time of Terrestrial Time JD.
+			 * 
+			 * @param {Number}JD
+			 *            Julian date (JD of 天文計算用時間 TT)
+			 * 
+			 * @returns JD of UT
+			 */
+			function UT_of(JD, to_UT) {
+				return TT_of(JD, true);
+			}
+
+			_.TT = TT_of;
 
 			// ------------------------------------------------------------------------------------------------------//
 			// Atmospheric refraction
@@ -581,7 +651,7 @@ if (typeof CeL === 'function')
 			 * @see https://en.wikipedia.org/wiki/Aberration_of_light
 			 */
 			function sun_aberration_high(R, JD) {
-				// 儒略千年數 millennium
+				// 儒略千年數 Julian millennia since J2000.0.
 				var τ = Julian_century(JD) / 10,
 				// coefficients of Δλ
 				coefficients = [];
@@ -605,7 +675,8 @@ if (typeof CeL === 'function')
 				 */
 				coefficients[0] += sun_aberration_variation_constant;
 
-				// Daily variation, in arcseconds, of the geocentric longitude
+				// Daily variation, in arcseconds, of the geocentric
+				// longitude
 				// of the Sun in a fixed reference frame
 				var Δλ = polynomial_value(coefficients, τ),
 				//
@@ -662,16 +733,18 @@ if (typeof CeL === 'function')
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Nutation, IAU 2000B model.
+			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut00b.c
 			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
+			 * @param {Boolean}Δψ_only
+			 *            only get 黃經章動Δψ
 			 * 
 			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (radians)
 			 * 
-			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut00b.c
 			 * @see http://www.neoprogrammics.com/nutations/nutations_1980_2000b/index.php
 			 */
-			function IAU2000B_nutation(JD) {
+			function IAU2000B_nutation(JD, Δψ_only) {
 				// T 是 J2000.0 起算的儒略世紀數：
 				var T = Julian_century(JD),
 				//
@@ -698,13 +771,16 @@ if (typeof CeL === 'function')
 
 					var _sin = Math.sin(argument), _cos = Math.cos(argument);
 					Δψ += (team[5] + team[6] * T) * _sin + team[7] * _cos;
-					Δε += (team[8] + team[9] * T) * _cos + team[10] * _sin;
+					if (!Δψ_only)
+						Δε += (team[8] + team[9] * T) * _cos + team[10] * _sin;
 				}
 
+				// Convert from 0.1 microarcsec units to radians.
 				i = ARCSECONDS_TO_RADIANS / 1e7;
 				// Fixed offsets in lieu of planetary terms
 				Δψ = Δψ * i + IAU2000B_nutation_offset_Δψ;
-				Δε = Δε * i + IAU2000B_nutation_offset_Δε;
+				if (!Δψ_only)
+					Δε = Δε * i + IAU2000B_nutation_offset_Δε;
 
 				library_namespace.debug(
 				//
@@ -712,7 +788,7 @@ if (typeof CeL === 'function')
 						+ library_namespace.JD_to_Date(JD).format('CE') + '): '
 						+ Δψ / DEGREES_TO_RADIANS + '°, ' + Δε
 						/ DEGREES_TO_RADIANS + '°', 3);
-				return [ Δψ, Δε ];
+				return Δψ_only ? Δψ : [ Δψ, Δε ];
 			}
 
 			/**
@@ -720,10 +796,12 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
+			 * @param {Boolean}Δψ_only
+			 *            only get 黃經章動Δψ
 			 * 
 			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (degrees)
 			 */
-			function IAU1980_nutation(JD) {
+			function IAU1980_nutation(JD, Δψ_only) {
 				// T 是 J2000.0 起算的儒略世紀數：
 				var T = Julian_century(JD),
 				//
@@ -747,13 +825,13 @@ if (typeof CeL === 'function')
 							argument += c * parameters[i];
 
 					Δψ += (team[5] + team[6] * T) * Math.sin(argument);
-					if (c = team[7] + team[8] * T)
+					if (!Δψ_only && (c = team[7] + team[8] * T))
 						Δε += c * Math.cos(argument);
 				});
 
 				// 表中的係數的單位是0".0001。
 				T = 1e4 * DEGREES_TO_ARCSECONDS;
-				return [ Δψ / T, Δε / T ];
+				return Δψ_only ? Δψ / T : [ Δψ / T, Δε / T ];
 			}
 
 			var nutation = IAU2000B_nutation;
@@ -818,7 +896,7 @@ if (typeof CeL === 'function')
 			 *          radians, R:distance in AU }
 			 */
 			function VSOP87(JD, object, options) {
-				// 儒略千年數 millennium
+				// 儒略千年數 Julian millennia since J2000.0.
 				var τ = Julian_century(JD) / 10,
 				//				
 				coordinate = library_namespace.null_Object(),
@@ -899,7 +977,7 @@ if (typeof CeL === 'function')
 				});
 
 				/**
-				 * 座標變換: 轉換到FK5(第5基本星表)坐標系統。<br />
+				 * 座標變換: 轉換到 FK5 (第5基本星表, The Fifth Fundamental Catalogue) 坐標系統。<br />
 				 * VSOP87 → FK5: translate VSOP87 coordinate to the FK5 frame.
 				 * 
 				 * 資料來源/資料依據:<br />
@@ -1022,7 +1100,8 @@ if (typeof CeL === 'function')
 							if (!object)
 								// e.g., 'earth'
 								object = fields[3].toLowerCase();
-							// e.g., 'L', 'B', 'R'.
+							// e.g., 'L', 'B',
+							// 'R'.
 							var t = fields[6][fields[5]];
 							group = [];
 							if (t === type)
@@ -1062,7 +1141,7 @@ if (typeof CeL === 'function')
 							+ JSON.stringify(object)
 							+ ','
 							+ new_line
-							+ JSON.stringify(teams).replace(/(]],)/g,
+							+ JSON.stringify(teams).replace(/(\]\],)/g,
 									'$1' + new_line) + postfix, {
 						encoding : encoding
 					});
@@ -1161,7 +1240,7 @@ if (typeof CeL === 'function')
 				// 弧度單位日心黃緯B → 地心黃緯β(度)
 				β = -heliocentric.B;
 
-				// 太陽的視黃經 (apparent longitude)λ(度)
+				// 太陽的視黃經 (apparent longitude)λ(度)（受光行差及章動影響）
 				// Jean Meeus 文中以 "λ" 表示此處之視黃經 apparent。
 				//
 				// https://en.wikipedia.org/wiki/Apparent_longitude
@@ -1170,10 +1249,10 @@ if (typeof CeL === 'function')
 				// 節氣以太陽視黃經為準。
 				// ** 問題:但中國古代至點以日長為準。兩者或可能產生出入？
 				var apparent = λ
-				// 修正太陽光行差 aberration
+				// 修正太陽光行差 aberration。
 				+ sun_aberration(heliocentric.R, JD)
 				// 修正章動 nutation。
-				+ nutation(JD)[0] / DEGREES_TO_RADIANS;
+				+ nutation(JD, true) / DEGREES_TO_RADIANS;
 
 				// https://en.wikipedia.org/wiki/Ecliptic_coordinate_system#Spherical_coordinates
 				return Object.assign(heliocentric, {
@@ -1246,11 +1325,7 @@ if (typeof CeL === 'function')
 				}
 
 				// apply ΔT: TT → UT.
-				// 日常生活時間 UT = 天文計算用時間 TT - ΔT
-				// + 2000: Julian_century(JD) starts from year 2000.
-				JD -= ΔT(Julian_century(JD) * 100 + 2000) / ONE_DAY_SECONDS;
-
-				return JD;
+				return UT_of(JD);
 			}
 
 			/**
@@ -1516,6 +1591,388 @@ if (typeof CeL === 'function')
 			// CeL.立春年(2001).format('CE');
 			_.立春年 = 立春年;
 
+			// ------------------------------------------------------------------------------------------------------//
+			// LEA-406a & periodic terms
+
+			/**
+			 * the mean longitude of the Moon referred to the moving ecliptic
+			 * and mean equinox of date (Simon et al. 1994). (formula 9)
+			 * 
+			 * Simon (1994): "Numerical expressions for precession formulae and
+			 * mean elements for the Moon and the planets"
+			 * 
+			 * (b.3) Mean elements referred to the mean ecliptic and equinox of
+			 * date (P_1 = 5028″.8200/cy)
+			 * 
+			 * But modified: t as 儒略千年數 Julian millennia since J2000.0.
+			 * 
+			 * LEA406_V_coefficients in arcseconds.
+			 * 
+			 * @inner
+			 */
+			var LEA406_V_coefficients = [ 218.31664563 * DEGREES_TO_ARCSECONDS,
+					17325643723.0470, -527.90, 6.665, -0.5522 ];
+
+			// CeL.LEA406.load_teams('V');
+			// CeL.show_degrees(CeL.LEA406(2457132, 'V'));
+			function LEA406(JD, options) {
+				// 前置處理。
+				if (!library_namespace.is_Object(options))
+					options = typeof options === 'string' ? {
+						teams : options
+					} : library_namespace.null_Object();
+
+				// 儒略千年數 Julian millennia since J2000.0.
+				var τ = Julian_century(JD) / 10,
+				// τ^2
+				τ2 = τ * τ, teams = options.teams,
+				//
+				warn_team = !options.ignore_team,
+				/**
+				 * spherical coordinates of its centre:<br />
+				 * r (geocentric distance) in km<br />
+				 * V (ecliptic longitude reckoned along the moving ecliptic from
+				 * the mean equinox of date)<br />
+				 * U (ecliptic latitude reckoned from the moving ecliptic)
+				 */
+				coordinates = library_namespace.null_Object();
+
+				library_namespace.debug(JD + ': τ: ' + τ + ', τ^2: ' + τ2, 3);
+
+				if (!Array.isArray(teams)) {
+					if (!teams || typeof teams !== 'string') {
+						teams = 'VUR';
+						// 有什麼就用什麼。
+						warn_team = false;
+					}
+					teams = teams.split('');
+				}
+
+				// Geocentric spherical coordinates of the Moon r, V, U are
+				// expanded to Poisson series of the form
+				teams.forEach(function(team) {
+					var subteams = LEA406_teams[team];
+					if (!subteams) {
+						if (warn_team)
+							library_namespace.err(
+							//
+							'LEA406: Invalid team name: [' + team
+									+ ']. You may need to load it first.');
+						return;
+					}
+
+					var sum = 0,
+					// R (formula 6), V (formula 7), U (formula 8)
+					operator = team === 'R' ? Math.cos : Math.sin;
+
+					subteams.forEach(function(T, index) {
+						// T = [ coefficients[4 in arcseconds],
+						// Amp0,Amp1,Phase1,Amp2,Phase2 ]
+						var ω = polynomial_value(T[0], τ);
+						// Amp 常為 0
+						if (T[1])
+							sum += T[1] * operator(ω);
+						if (T[2])
+							sum += T[2] * operator(ω + T[3]) * τ;
+						if (T[4])
+							sum += T[4] * operator(ω + T[5]) * τ2;
+
+						if (false && isNaN(sum)) {
+							console.error(T);
+							throw '內部錯誤 @ index ' + index + ': ' + T;
+						}
+					});
+					library_namespace.debug(JD + '.' + team + ': ' + sum, 3);
+
+					// Amp_to_integer: see convert_LEA406()
+					sum /= Amp_to_integer;
+
+					// R in km
+					if (team !== 'R') {
+						if (team === 'V')
+							sum += polynomial_value(LEA406_V_coefficients, τ);
+						// V, U in arcseconds → degrees
+						sum /= DEGREES_TO_ARCSECONDS;
+					}
+					coordinates[team] = sum;
+				});
+
+				return teams.length === 1
+				//
+				? coordinates[teams[0]] : coordinates;
+			}
+
+			_.LEA406 = LEA406;
+
+			var LEA406_teams = library_namespace.null_Object();
+
+			function LEA406_add_teams(team_name, teams) {
+				// 初始化: 將 sin() 之引數全部轉成 radians。
+				teams.forEach(function(T) {
+					// T = [ coefficients[4 in arcseconds],
+					// Amp0,Amp1,Phase1,Amp2,Phase2 ]
+					T[0].forEach(function(coefficient, index) {
+						T[0][index] *= ARCSECONDS_TO_RADIANS;
+					});
+					// T[2~5] 可能為了節省大小，而為 undefined!
+					var i = 3;
+					T[i] = T[i] ? T[i] * ARCSECONDS_TO_RADIANS : 0;
+					i = 5;
+					T[i] = T[i] ? T[i] * ARCSECONDS_TO_RADIANS : 0;
+				});
+				// .reverse(): smallest terms first
+				LEA406_teams[team_name] = teams.reverse();
+			}
+
+			LEA406.add_teams = LEA406_add_teams;
+
+			// team_name: VUR
+			function LEA406_load_teams(team_name, callback) {
+				library_namespace.run(library_namespace.get_module_path(
+				//
+				module_name + library_namespace.env.path_separator + 'LEA-406-'
+						+ team_name), [
+						function() {
+							library_namespace.info(
+							//
+							'LEA406_load_teams: resource file of [' + team_name
+									+ '] loaded.');
+						}, callback ]);
+			}
+
+			LEA406.load_teams = LEA406_load_teams;
+
+			var convert_LEA406_argument,
+			// 將 Amp 轉整數: Amp *= 1e7 (表格中小數7位數)。
+			Amp_to_integer = 1e7;
+
+			// need data.native, run @ node.js
+			function convert_LEA406(file_name, options) {
+				// 前置處理。
+				if (!library_namespace.is_Object(options))
+					options = library_namespace.null_Object();
+
+				var encoding = options.encoding || 'ascii',
+				//
+				floating = 9,
+				// 需要先設定 fs = require('fs');
+				// https://nodejs.org/api/fs.html
+				fs = require('fs'), argument = convert_LEA406_argument;
+
+				if (!argument)
+					// cache
+					convert_LEA406_argument = argument
+					// @see ReadMe_Eng.pdf, from build_LEA406.txt
+					// all in arcseconds.
+					= [
+							// [0]: 為配合 fields.
+							null,
+							[ 485868.249036, 17179159232.178, 3187.92, 51.635,
+									-2.447 ],
+							[ 1287104.793048, 1295965810.481, -55.32, 0.136,
+									-0.1149 ],
+							[ 335779.526232, 17395272628.478, -1275.12, -1.037,
+									0.0417 ],
+							[ 1072260.703692, 16029616012.09, -637.06, 6.593,
+									-0.3169 ],
+							[ 450160.398036, -69679193.631, 636.02, 7.625,
+									-0.3586 ],
+							[ 908103.259872, 5381016286.88982, -1.92789,
+									0.00639, 0 ],
+							[ 655127.28306, 2106641364.33548, 0.59381,
+									-0.00627, 0 ],
+							[ 361679.244588, 1295977422.83429, -2.04411,
+									-0.00523, 0 ],
+							[ 1279558.798488, 689050774.93988, 0.94264,
+									-0.01043, 0 ],
+							[ 123665.467464, 109256603.77991, -30.60378,
+									0.05706, 0.04667 ],
+							[ 180278.79948, 43996098.55732, 75.61614, -0.16618,
+									-0.11484 ],
+							[ 1130598.018396, 15424811.93933, -1.75083,
+									0.02156, 0 ],
+							[ 1095655.195728, 7865503.20744, 0.21103, -0.00895,
+									0 ],
+							[ 0, 50288.2, 111.2022, 0.0773, -0.2353 ] ];
+
+				fs.readFile(file_name, {
+					encoding : encoding
+				}, function(error, data) {
+					if (error)
+						throw error;
+
+					// parse LEA-406 file.
+					data = data.split(/\n/);
+					// Lines 1-8 give a short description of the data included
+					// to the file.
+					data.splice(0, 8);
+
+					var teams = [];
+
+					data.forEach(function(line) {
+						if (!line)
+							return;
+
+						var fields = line.trim().replace(/(\d)-/g, '$1 -')
+								.split(/\s+/);
+						if (fields.length !== 21)
+							throw line;
+						var i = 15;
+						// 將 Amp 轉整數: Amp *= 1e7 (表格中小數7位數)。
+						fields[i] = Math.round(fields[i] * Amp_to_integer);
+						i++;
+						fields[i] = Math.round(fields[i] * Amp_to_integer);
+						i++;
+						fields[i] = Math.round(fields[i] * Amp_to_integer);
+						i++;
+
+						// 轉整數以作無誤差加減。
+						fields[i] = Math.round(fields[i] * 1e12);
+						i++;
+						fields[i] = Math.round(fields[i] * 1e12);
+						i++;
+						fields[i] = Math.round(fields[i] * 1e12);
+
+						fields[19] -= fields[18];
+						fields[20] -= fields[18];
+
+						i = 18;
+						// ϕ: Phase1, Phase2 → in arcseconds
+						// ϕ: Phase 有 12位數，*DEGREES_TO_ARCSECONDS 之後最多10位數
+						fields[i] = (fields[i]
+						//
+						* (DEGREES_TO_ARCSECONDS / 1e2) / 1e10).to_fixed(10);
+						i++;
+						fields[i] = (fields[i]
+						//
+						* (DEGREES_TO_ARCSECONDS / 1e2) / 1e10).to_fixed(10);
+						i++;
+						fields[i] = (fields[i]
+						//
+						* (DEGREES_TO_ARCSECONDS / 1e2) / 1e10).to_fixed(10);
+
+						var coefficients = [ fields[18], 0, 0, 0, 0 ];
+
+						if (false) {
+							coefficients.forEach(function(i, index) {
+								coefficients[index]
+								//
+								= new CeL.data.math.integer(0);
+							});
+							coefficients[0]
+							//
+							= new CeL.data.math.integer(fields[18]);
+							coefficients[0].divide(1e12, 12);
+						}
+
+						teams.push([ coefficients,
+						// Amp0,Amp1,Phase1,Amp2,Phase2
+						fields[15], fields[16], fields[16] ? fields[19] : 0,
+								fields[17], fields[17] ? fields[20] : 0 ]);
+						i = 1;
+
+						for (var multiplier; i <= 14; i++)
+							if (multiplier = +fields[i])
+								argument[i].forEach(function(a, index) {
+									// a 為整數，coefficients 小數位數最多即為[0]，6位數。
+									// coefficients[index]=(coefficients[index]+(a*multiplier).to_fixed(6)).to_fixed(6);
+									coefficients[index] += a * multiplier;
+									if (false) {
+										coefficients[index].add(
+										//
+										(new CeL.data.math.integer(a))
+												.multiply(multiplier));
+									}
+									if (false &&
+									//
+									!Number.isSafeInteger(coefficients[index]))
+										throw 'Out of range from: ' + fields
+												+ '\ncoefficients: '
+												+ coefficients;
+								});
+						coefficients.forEach(function(c, index) {
+							// coefficients[index]=c*DEGREES_TO_RADIANS;
+							// coefficients[index]=c.to_fixed(6);
+							coefficients[index] = c.to_fixed();
+							// coefficients[index]=coefficients[index].valueOf();
+						});
+					});
+
+					var name = options.name || 'LEA-406',
+					//
+					new_line = '\n', prefix = '// auto-generated from '
+					//
+					+ name
+					// e.g., 'a' for LEA-406a.
+					+ (options.type || '') + new_line + library_namespace.Class
+							+ '.' + name.replace(/-/g, '') + '.add_teams(',
+					//
+					postfix = options.postfix || new_line + ');';
+					fs.writeFile(name + '-' + options.team + '.js', prefix
+							+ JSON.stringify(options.team)
+							+ ','
+							+ new_line
+							+ JSON.stringify(teams).replace(/,0/g, ',')
+									.replace(/,+\]/g, ']').replace(/(\]\],)/g,
+											'$1' + new_line)
+							// .replace(/(\],)/g, '$1' + new_line)
+							+ postfix, {
+						encoding : encoding
+					});
+				});
+			}
+
+			LEA406.convert = convert_LEA406;
+
+			// ------------------------------------------------------------------------------------------------------//
+			// lunar coordinates
+
+			// lunar coordinates, moon's coordinates
+			function lunar_coordinate(JD) {
+				var coordinates = LEA406(JD),
+				// coordinates.R in km
+				r = coordinates.R || LUNAR_DISTANCE_KM;
+
+				if (coordinates.V || coordinates.U) {
+					var n = nutation(JD);
+					if (coordinates.V) {
+						// V, U in arcseconds
+						if (false) {
+							// 修正月亮經度光行差 aberration。忽略對緯度之影響。
+							// http://blog.csdn.net/orbit/article/details/8223751
+							coordinates.V
+							// 1000: 1 km = 1000 m (CELERITAS in m/s)
+							+= r * 1000 / CELERITAS * TURN_TO_DEGREES
+									/ ONE_DAY_SECONDS;
+						}
+						// 修正章動 nutation。
+						coordinates.V += n[0] / DEGREES_TO_RADIANS;
+						coordinates.V = normalize_degrees(coordinates.V);
+					}
+					if (coordinates.U) {
+						// V, U in arcseconds
+						// 修正章動 nutation。
+						coordinates.U += n[1] / DEGREES_TO_RADIANS;
+						coordinates.U = normalize_degrees(coordinates.U);
+					}
+				}
+
+				return coordinates;
+			}
+
+			_.lunar_coordinate = lunar_coordinate;
+
+			// lunar angle, moon's angle
+			function JD_of_lunar_angle(year, degrees) {
+				var coordinates;
+
+				coordinates = lunar_coordinate(coordinates.V);
+
+				// TODO
+			}
+
+			_.JD_of_lunar_angle = JD_of_lunar_angle;
+
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 
 			/**
@@ -1524,6 +1981,15 @@ if (typeof CeL === 'function')
 
 			// ------------------------------------------------------------------------------------------------------//
 			// teams for obliquity 轉軸傾角
+			/**
+			 * IAU2006 obliquity coefficients.<br />
+			 * teams for function mean_obliquity_IAU2006(JD)
+			 * 
+			 * 資料來源/資料依據:
+			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/obl06.c
+			 * 
+			 * @inner
+			 */
 			var IAU2006_obliquity_coefficients = [ 84381.406, -46.836769,
 					-0.0001831, 0.00200340, -0.000000576, -0.0000000434 ];
 
@@ -1537,9 +2003,9 @@ if (typeof CeL === 'function')
 			 * @inner
 			 */
 			var Laskar_obliquity_coefficients = [
-			// ε = 23° 26′ 21.448″ − 4680.93″ T − 1.55″ T2
-			// + 1999.25″ T3 − 51.38″ T4 − 249.67″ T5
-			// − 39.05″ T6 + 7.12″ T7 + 27.87″ T8 + 5.79″ T9 + 2.45″ T10
+			// ε = 23° 26′ 21.448″ - 4680.93″ T - 1.55″ T2
+			// + 1999.25″ T3 - 51.38″ T4 - 249.67″ T5
+			// - 39.05″ T6 + 7.12″ T7 + 27.87″ T8 + 5.79″ T9 + 2.45″ T10
 			23 * 60 * 60 + 26 * 60 + 21.448, -4680.93, -1.55, 1999.25, -51.38,
 					-249.67, -39.05, 7.12, 27.87, 5.79, 2.45 ];
 			Laskar_obliquity_coefficients.forEach(function(v, index) {
@@ -1605,6 +2071,11 @@ if (typeof CeL === 'function')
 			 * If needed with respect to the mean equinox of the date instead of
 			 * to a fixed reference frame, the constant term 3548.193 should be
 			 * replaced by 3548.330. 如果Δλ須是在Date黃道中的，則應把常數項3548.193換為3548.330
+			 * 
+			 * The ICRF is a fixed reference frame. The FK5 based fixed
+			 * reference frame of J2000.0?
+			 * 
+			 * @inner
 			 */
 			var sun_aberration_variation_constant = 3548.193,
 			/**
@@ -1620,6 +2091,8 @@ if (typeof CeL === 'function')
 			 * τ的係數為4452671、9224660或4092677的週期項，與月球運動相關。<br />
 			 * τ的係數為450369、225184、315560或675553的週期項，與金星攝動相關。<br />
 			 * τ的係數為329645、659289、或299296的週期項，與火星攝動相關。
+			 * 
+			 * @inner
 			 */
 			sun_aberration_variation = [
 					// τ^0
@@ -1716,30 +2189,31 @@ if (typeof CeL === 'function')
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Nutation, IAU 2000B model.
+			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut00b.c
 			 * 
-			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut00b.c
 			 * @see http://www.neoprogrammics.com/nutations/nutations_1980_2000b/index.php
 			 * 
 			 * @inner
 			 */
 			var IAU2000B_nutation_parameters = [
-			// Mean anomaly of the Moon. 月亮平近點角
+			// el: Mean anomaly of the Moon. 月亮平近點角
 			[ 485868.249036, 1717915923.2178
 			// , 31.8792, 0.051635, -0.00024470
 			],
-			// Mean anomaly of the Sun. 太陽平近點角
+			// elp(el'): Mean anomaly of the Sun. 太陽平近點角
 			[ 1287104.79305, 129596581.0481
 			// , -0.5532, 0.000136, -0.00001149
 			],
-			// Mean argument of the latitude of the Moon. 月亮平升交角距
+			// f: Mean argument of the latitude of the Moon. 月亮平升交角距
 			[ 335779.526232, 1739527262.8478
 			// , -12.7512, -0.001037, 0.00000417
 			],
-			// Mean elongation of the Moon from the Sun. 日月平角距
+			// d: Mean elongation of the Moon from the Sun. 日月平角距
 			[ 1072260.70369, 1602961601.2090
 			// , -6.3706, 0.006593, -0.00003169
 			],
-			// Mean longitude of the ascending node of the Moon. 月亮升交點平黃經
+			// om(Ω): Mean longitude of the ascending node of the Moon.
+			// 月亮升交點平黃經
 			[ 450160.398036, -6962890.5431
 			// , 7.4722, 0.007702, -0.00005939
 			] ],
