@@ -74,16 +74,15 @@ var _;
 // google.load('visualization', '1', {packages: ['corechart']});
 function initializer() {
 	var queue = [
-			'application.astronomy',
-			function() {
+			[ 'interact.DOM', 'application.debug.log',
+					'interact.form.select_input', 'interact.integrate.SVG',
+					'data.date.era', 'application.astronomy' ],
+			[ 'data.date.calendar', function() {
 				// for 太陽視黃經
 				CeL.VSOP87.load_teams('Earth');
 				// for 月亮視黃經
 				CeL.LEA406.load_teams('V');
-			},
-			[ 'interact.DOM', 'application.debug.log',
-					'interact.form.select_input', 'interact.integrate.SVG',
-					'data.date.era', ], 'data.date.calendar', function() {
+			} ], function() {
 				// alias for CeL.gettext, then we can use _('message').
 				_ = CeL.gettext;
 
@@ -2306,7 +2305,7 @@ function affairs() {
 			+ '因此對中國之朝代、紀年，2000/1/1 將轉為 2451544.1666... (2000/1/1 0:0 UTC+8)',
 			href : 'http://en.wikipedia.org/wiki/Julian_day'
 		}, function(date) {
-			var date_String = CeL.Date_to_JD(date.offseted_value())
+			var date_String = CeL.Date_to_JD(date.offseted_value()).to_fixed(4)
 			//
 			+ (date.精 === '年' ? '–' : '');
 			return date_String;
@@ -2444,9 +2443,9 @@ function affairs() {
 				// apparent longitude of the Sun
 				T : "Sun's apparent longitude"
 			},
-			R : '紀元使用當地、當日零時，太陽的視黃經,'
+			R : '紀元使用當地、當日零時，太陽的視黃經\n'
 			//
-			+ ' the apparent geocentric celestial longitude of the Sun.\n'
+			+ 'the apparent geocentric celestial longitude of the Sun.\n'
 			//
 			+ 'Using VSOP87D.ear.',
 			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
@@ -2455,7 +2454,7 @@ function affairs() {
 				return '';
 			var JD = CeL.TT(new Date(date.offseted_value()));
 			return {
-				span : CeL.show_degrees(CeL.solar_coordinate(JD).apparent, 2)
+				span : CeL.show_degrees(CeL.solar_coordinate(JD).apparent, 0)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
@@ -2468,18 +2467,23 @@ function affairs() {
 				// apparent longitude of the Moon
 				T : "Moon's apparent longitude"
 			},
-			R : '紀元使用當地、當日零時，月亮的視黃經,'
+			R : '紀元使用當地、當日零時，月亮的視黃經\n'
 			//
-			+ ' the apparent geocentric celestial longitude of the Moon.\n'
+			+ 'the apparent geocentric celestial longitude of the Moon.\n'
 			//
 			+ 'Using LEA-406a.',
 			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
-			var JD = CeL.TT(new Date(date.offseted_value()));
+			var JD = CeL.TT(new Date(date.offseted_value())),
+			//
+			V = CeL.lunar_coordinate(JD).V;
+
 			return {
-				span : CeL.show_degrees(CeL.lunar_coordinate(JD).V, 2)
+				span : isNaN(V) ? 'Data is not yet loaded.'
+				//
+				: CeL.show_degrees(V, 0)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
@@ -2491,7 +2495,7 @@ function affairs() {
 				// 月日視黃經差角
 				T : "月日視黃經差"
 			},
-			R : '紀元使用當地、當日零時，月亮的視黃經-太陽的視黃經,'
+			R : '紀元使用當地、當日零時，月亮的視黃經-太陽的視黃經\n'
 			//
 			+ 'the apparent geocentric celestial longitude: Moon - Sun.\n'
 			//
@@ -2500,13 +2504,18 @@ function affairs() {
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
-			var JD = CeL.TT(new Date(date.offseted_value()));
+			var JD = CeL.TT(new Date(date.offseted_value())),
+			//
+			V = CeL.lunar_coordinate(JD).V;
+
 			return {
-				span : CeL.show_degrees(CeL.normalize_degrees(
+				span : isNaN(V) ? 'Data is not yet loaded.'
 				//
-				CeL.lunar_coordinate(JD).V - CeL.solar_coordinate(JD).apparent,
+				: CeL.show_degrees(CeL.normalize_degrees(
 				//
-				true), 2)
+				V - CeL.solar_coordinate(JD).apparent,
+				//
+				true), 0)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'

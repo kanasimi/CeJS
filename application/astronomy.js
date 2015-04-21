@@ -20,6 +20,7 @@
  * https://pypi.python.org/pypi/astronomia
  * https://github.com/Hedwig1958/libastro/blob/master/astro.c
  * https://github.com/soniakeys/meeus/blob/master/solar/solar.go
+ * https://en.wikipedia.org/wiki/Astronomical_symbols
  * 
  * @see <a href="http://www.nongli.com/item2/index.html" accessdate="2013/5/2
  *      20:23">农历知识:传统节日,24节气，农历历法，三九，三伏，天文历法,天干地支阴阳五行</a>
@@ -38,8 +39,6 @@
  * http://en.wikipedia.org/wiki/Vincenty's_formulae
  * 
  * LUNAR SOLUTION ELP version ELP/MPP02
- * 
- * LEA-406a, LEA-406b https://github.com/infinet/lunar-calendar/
  * 
  * 未來發展：<br />
  * 計算順序: https://github.com/kanasimi/IAU-SOFA/blob/master/doc/sofa_ast_c.pdf
@@ -81,6 +80,9 @@ if (false) {
 		CeL.assert([ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4');
 		CeL.assert([ 2014, CeL.立春年(new Date('2015/2/3')) ], '立春年 2015/2/3');
 
+		CeL.LEA406.load_teams('V', function() {
+			CeL.show_degrees(CeL.LEA406(2457132, 'V'));
+		});
 	});
 }
 
@@ -228,7 +230,7 @@ if (typeof CeL === 'function')
 			= TURN_TO_DEGREES / EQUINOX_SOLSTICE_COUNT,
 			// 二十四節氣名。
 			SOLAR_TERMS_NAME =
-			// Chinese name
+			// Chinese name: 中氣,節氣,中氣,節氣,...
 			'春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,立春,雨水,驚蟄'
 					.split(','),
 			/**
@@ -1027,11 +1029,27 @@ if (typeof CeL === 'function')
 
 			_.VSOP87 = VSOP87;
 
+			/**
+			 * 正規化行星名稱。
+			 * 
+			 * @param {String}object
+			 *            planets 行星.
+			 * 
+			 * @returns {String|Undefined} 行星名稱
+			 */
 			VSOP87.object_name = function(object) {
 				if (typeof object === 'string')
 					return object.trim().toLowerCase();
 			};
 
+			/**
+			 * 增加指定行星的計算數據，提供給模組內部函數使用。
+			 * 
+			 * @param {String}object
+			 *            planets 行星.
+			 * @param {Array}teams
+			 *            計算數據.
+			 */
 			function VSOP87_add_teams(object, teams) {
 				object = VSOP87.object_name(object);
 				if (object === solar_terms_object)
@@ -1042,6 +1060,14 @@ if (typeof CeL === 'function')
 
 			VSOP87.add_teams = VSOP87_add_teams;
 
+			/**
+			 * 載入指定行星的計算數據後，執行 callback。提供給模組外部函數使用。
+			 * 
+			 * @param {String}object
+			 *            planets 行星.
+			 * @param {Function}callback
+			 *            callback.
+			 */
 			function VSOP87_load_teams(object, callback) {
 				library_namespace.run(library_namespace
 						.get_module_path(module_name
@@ -1213,7 +1239,7 @@ if (typeof CeL === 'function')
 			_.equinox = equinox;
 
 			/**
-			 * solar coordinate 太陽位置(坐標)計算。<br />
+			 * solar coordinates 太陽位置(坐標)計算。<br />
 			 * ObsEcLon (Observer ecliptic lon. & lat.) or PAB-LON (PHASE angle &
 			 * bisector) @ HORIZONS?
 			 * 
@@ -1396,9 +1422,21 @@ if (typeof CeL === 'function')
 
 			_.solar_term_JD = solar_term_JD;
 
+			/**
+			 * solar_terms 使用之 object name.
+			 * 
+			 * @type {String}
+			 * @inner
+			 */
 			var solar_terms_object = 'earth',
-			// solar_terms_cache[ year ]
-			// = [ 春分JD, 清明JD, 穀雨JD, ... 24個節氣 ]
+			/**
+			 * cache.
+			 * 
+			 * solar_terms_cache[ year ] = [ 春分JD, 清明JD, 穀雨JD, ... 24個節氣 ]
+			 * 
+			 * @type {Array}
+			 * @inner
+			 */
 			solar_terms_cache = [];
 
 			/**
@@ -1478,9 +1516,10 @@ if (typeof CeL === 'function')
 					// JD 再過一下下便是節氣。
 					// 測試本日0時是否距離下一節氣發生時間1天內。
 					// assert: 此範圍內不可能為物候。
+					days = get_cache(true) - JD;
 
 					// JD 將被視為當地時間當日0時!
-					if ((days = get_cache(true) - JD) < 1) {
+					if (0 <= days && days < 1) {
 						// 初候
 						index = SOLAR_TERMS_NAME[index];
 						if (options.time) {
@@ -1613,8 +1652,34 @@ if (typeof CeL === 'function')
 			var LEA406_V_coefficients = [ 218.31664563 * DEGREES_TO_ARCSECONDS,
 					17325643723.0470, -527.90, 6.665, -0.5522 ];
 
-			// CeL.LEA406.load_teams('V');
-			// CeL.show_degrees(CeL.LEA406(2457132, 'V'));
+			/**
+			 * 計算月亮位置(坐標), using LEA-406a.
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * S. M. Kudryavtsev, Long-term harmonic development of lunar
+			 * ephemeris, Astronomy & Astrophysics 471 (2007), 1069-1075.
+			 * http://www.eas.slu.edu/GGP/kudryavtsev/LEA-406.zip
+			 * 
+			 * bug: 1979/1/20 is 大寒, not 1979/1/21 (according to
+			 * http://www.hko.gov.hk/gts/time/calendar/text/T1979c.txt ).
+			 * 
+			 * @param {Number}JD
+			 *            Julian date (JD of 天文計算用時間 TT)
+			 * @param {Object}[options]
+			 *            options:<br />
+			 *            {String|Array}options.teams: request teams.<br />
+			 *            V: 黃經 in degrees. ecliptic longitude reckoned along
+			 *            the moving ecliptic from the mean equinox of date<br />
+			 *            U: 黃緯 in degrees. ecliptic latitude reckoned from the
+			 *            moving ecliptic<br />
+			 *            R: 地心距離 in km. geocentric distance
+			 * 
+			 * @returns {Object} { V:longitude in degrees, U:latitude in
+			 *          degrees, R:distance in km }
+			 * 
+			 * @see http://www.gautschy.ch/~rita/archast/ephemeriden.html
+			 * @see https://github.com/infinet/lunar-calendar/
+			 */
 			function LEA406(JD, options) {
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
@@ -1662,7 +1727,8 @@ if (typeof CeL === 'function')
 					}
 
 					var sum = 0,
-					// R (formula 6), V (formula 7), U (formula 8)
+					// R (formula 6),
+					// V (formula 7), U (formula 8)
 					operator = team === 'R' ? Math.cos : Math.sin;
 
 					subteams.forEach(function(T, index) {
@@ -1704,8 +1770,22 @@ if (typeof CeL === 'function')
 
 			_.LEA406 = LEA406;
 
+			/**
+			 * LEA406_teams[V,U,R] = {teams}
+			 * 
+			 * @type {Object}
+			 * @inner
+			 */
 			var LEA406_teams = library_namespace.null_Object();
 
+			/**
+			 * 增加指定項目的計算數據，提供給模組內部函數使用。
+			 * 
+			 * @param {String}team_name
+			 *            項目名稱 (V,U,R).
+			 * @param {Array}teams
+			 *            計算數據.
+			 */
 			function LEA406_add_teams(team_name, teams) {
 				// 初始化: 將 sin() 之引數全部轉成 radians。
 				teams.forEach(function(T) {
@@ -1726,7 +1806,14 @@ if (typeof CeL === 'function')
 
 			LEA406.add_teams = LEA406_add_teams;
 
-			// team_name: VUR
+			/**
+			 * 載入指定項目的計算數據後，執行 callback。提供給模組外部函數使用。
+			 * 
+			 * @param {String}team_name
+			 *            項目名稱 (V,U,R).
+			 * @param {Function}callback
+			 *            callback.
+			 */
 			function LEA406_load_teams(team_name, callback) {
 				library_namespace.run(library_namespace.get_module_path(
 				//
@@ -1742,11 +1829,29 @@ if (typeof CeL === 'function')
 
 			LEA406.load_teams = LEA406_load_teams;
 
+			/**
+			 * convert_LEA406 使用之行星數據。
+			 * 
+			 * mean longitudes of major planets.
+			 */
 			var convert_LEA406_argument,
 			// 將 Amp 轉整數: Amp *= 1e7 (表格中小數7位數)。
 			Amp_to_integer = 1e7;
 
-			// need data.native, run @ node.js
+			/**
+			 * 轉換 LEA-406 (LEA-406a, LEA-406b) file。
+			 * 
+			 * need data.native, run @ node.js
+			 * 
+			 * TODO: parse LEA-406 file
+			 * 
+			 * @param {String}file_name
+			 *            source file name
+			 * @param {Object}options
+			 *            options
+			 * 
+			 * @since 2015/4/20
+			 */
 			function convert_LEA406(file_name, options) {
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
@@ -1803,7 +1908,8 @@ if (typeof CeL === 'function')
 
 					// parse LEA-406 file.
 					data = data.split(/\n/);
-					// Lines 1-8 give a short description of the data included
+					// Lines 1-8 give a short
+					// description of the data included
 					// to the file.
 					data.splice(0, 8);
 
@@ -1818,7 +1924,8 @@ if (typeof CeL === 'function')
 						if (fields.length !== 21)
 							throw line;
 						var i = 15;
-						// 將 Amp 轉整數: Amp *= 1e7 (表格中小數7位數)。
+						// 將 Amp 轉整數: Amp *= 1e7
+						// (表格中小數7位數)。
 						fields[i] = Math.round(fields[i] * Amp_to_integer);
 						i++;
 						fields[i] = Math.round(fields[i] * Amp_to_integer);
@@ -1837,8 +1944,11 @@ if (typeof CeL === 'function')
 						fields[20] -= fields[18];
 
 						i = 18;
-						// ϕ: Phase1, Phase2 → in arcseconds
-						// ϕ: Phase 有 12位數，*DEGREES_TO_ARCSECONDS 之後最多10位數
+						// ϕ: Phase1, Phase2 →
+						// in arcseconds
+						// ϕ: Phase 有
+						// 12位數，*DEGREES_TO_ARCSECONDS
+						// 之後最多10位數
 						fields[i] = (fields[i]
 						//
 						* (DEGREES_TO_ARCSECONDS / 1e2) / 1e10).to_fixed(10);
@@ -1874,7 +1984,9 @@ if (typeof CeL === 'function')
 						for (var multiplier; i <= 14; i++)
 							if (multiplier = +fields[i])
 								argument[i].forEach(function(a, index) {
-									// a 為整數，coefficients 小數位數最多即為[0]，6位數。
+									// a
+									// 為整數，coefficients
+									// 小數位數最多即為[0]，6位數。
 									// coefficients[index]=(coefficients[index]+(a*multiplier).to_fixed(6)).to_fixed(6);
 									coefficients[index] += a * multiplier;
 									if (false) {
@@ -1915,7 +2027,9 @@ if (typeof CeL === 'function')
 							+ JSON.stringify(teams).replace(/,0/g, ',')
 									.replace(/,+\]/g, ']').replace(/(\]\],)/g,
 											'$1' + new_line)
-							// .replace(/(\],)/g, '$1' + new_line)
+							// .replace(/(\],)/g,
+							// '$1' +
+							// new_line)
 							+ postfix, {
 						encoding : encoding
 					});
@@ -1927,17 +2041,29 @@ if (typeof CeL === 'function')
 			// ------------------------------------------------------------------------------------------------------//
 			// lunar coordinates
 
-			// lunar coordinates, moon's coordinates
+			/**
+			 * lunar coordinates, moon's coordinates 月亮位置(坐標)計算。<br />
+			 * get lunar angle, moon's angle. 僅將 LEA-406 修正章動 nutation。
+			 * 
+			 * @param {Number}JD
+			 *            Julian date (JD of 天文計算用時間 TT)
+			 * 
+			 * @returns {Object} { V:longitude in degrees, U:latitude in
+			 *          degrees, R:distance in km }
+			 */
 			function lunar_coordinate(JD) {
 				var coordinates = LEA406(JD),
 				// coordinates.R in km
 				r = coordinates.R || LUNAR_DISTANCE_KM;
+				// 地球半徑6,357km到6,378km。平均半徑6371km。
+				r -= 6371;
 
 				if (coordinates.V || coordinates.U) {
 					var n = nutation(JD);
 					if (coordinates.V) {
 						// V, U in arcseconds
 						if (false) {
+							// 警告: 此操作在 2057/9/29 會造成中曆2057年9月1日取在不同日子!
 							// 修正月亮經度光行差 aberration。忽略對緯度之影響。
 							// http://blog.csdn.net/orbit/article/details/8223751
 							coordinates.V
@@ -1962,16 +2088,23 @@ if (typeof CeL === 'function')
 
 			_.lunar_coordinate = lunar_coordinate;
 
-			// lunar angle, moon's angle
-			function JD_of_lunar_angle(year, degrees) {
+			// lunar_phase_cache[year][month] = JD of 日常生活時間 UT
+			var lunar_phase_cache = [];
+
+			/**
+			 * get JD of lunar phase. 可用來計算月相、日月合朔、弦、望(滿月，衝)、月食
+			 */
+			function lunar_phase(year_month, phase) {
 				var coordinates;
 
 				coordinates = lunar_coordinate(coordinates.V);
 
+				// the longitudinal angle between the Moon and the Sun
+
 				// TODO
 			}
 
-			_.JD_of_lunar_angle = JD_of_lunar_angle;
+			_.lunar_phase = lunar_phase;
 
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 
