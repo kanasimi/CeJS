@@ -82,6 +82,18 @@ if (false) {
 		CeL.LEA406.load_teams('V', function() {
 			CeL.show_degrees(CeL.LEA406(2457132, 'V'));
 		});
+
+		CeL.lunar_phase(1977, 0, {
+			duration : 1,
+			mean : false,
+			to_Date : true,
+			format : 'CE'
+		});
+
+		CeL.lunar_phase_of_JD(2457101, {
+			time : true
+		});
+
 	});
 }
 
@@ -1966,11 +1978,12 @@ if (typeof CeL === 'function')
 							coefficients.forEach(function(i, index) {
 								coefficients[index]
 								//
-								= new CeL.data.math.integer(0);
+								= new library_namespace.data.math.integer(0);
 							});
 							coefficients[0]
 							//
-							= new CeL.data.math.integer(fields[18]);
+							= new library_namespace.data.math.integer(
+									fields[18]);
 							coefficients[0].divide(1e12, 12);
 						}
 
@@ -1989,8 +2002,9 @@ if (typeof CeL === 'function')
 									if (false) {
 										coefficients[index].add(
 										//
-										(new CeL.data.math.integer(a))
-												.multiply(multiplier));
+										(new library_namespace.data.math
+										//
+										.integer(a)).multiply(multiplier));
 									}
 									if (false &&
 									//
@@ -2111,19 +2125,32 @@ if (typeof CeL === 'function')
 
 			_.lunar_coordinate = lunar_coordinate;
 
+			var lunar_phase_of_JD_cache = [];
+
 			/**
 			 * get the longitudinal angle between the Moon and the Sun.
 			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
+			 * @param {Boolean}normalize_360
+			 *            正規化成 0°~360°，而非 -180°~180°。
 			 * 
-			 * @returns {Object} { V:longitude in degrees, U:latitude in
-			 *          degrees, R:distance in km }
+			 * @returns {Number} degrees
 			 */
-			function lunar_phase_angel_of_JD(JD) {
-				// 可以忽略章動的影響
-				return CeL.normalize_degrees(lunar_coordinate(JD).V
-						- solar_coordinate(JD).apparent, true);
+			function lunar_phase_angel_of_JD(JD, normalize_360) {
+				var degrees;
+
+				if (JD in lunar_phase_of_JD_cache)
+					degrees = lunar_phase_of_JD_cache[JD];
+				else if (!isNaN(degrees
+				// 可以忽略章動的影響。
+				= lunar_coordinate(JD).V - solar_coordinate(JD).apparent))
+					lunar_phase_of_JD_cache[JD] = degrees;
+
+				if (!isNaN(degrees))
+					degrees = library_namespace.normalize_degrees(degrees,
+							!normalize_360);
+				return degrees;
 			}
 
 			_.lunar_phase_angel_of_JD = lunar_phase_angel_of_JD;
@@ -2136,12 +2163,17 @@ if (typeof CeL === 'function')
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 p. 349 formula 49.1.<br />
+			 * 
+			 * @param {Number}year_month
+			 *            帶小數點的年數
+			 * @param {Integer}phase
+			 *            0朔0°, 1上弦90°, 2望180°, 3下弦270°
+			 * @param {Object}options
+			 *            options
+			 * 
+			 * @returns {Number} Julian date (JD of 天文計算用時間 TT)
 			 */
 			function mean_lunar_phase(year_month, phase, options) {
-				// 前置處理。
-				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
-
 				phase /= 4;
 				var k = (year_month - 2000) * 12.3685,
 				// 取 year_month 之後，第一個 phase。
@@ -2162,24 +2194,25 @@ if (typeof CeL === 'function')
 				return JD;
 			}
 
-			// phase: 0朔0°, 1上弦90°, 2望180°, 3下弦270°
-			// lunar_phase_cache[year][4 * month + phase] = JD of 日常生活時間 UT
-			// lunar_phase_cache[year][phase:0~3]=[JD,JD,...]
-			var lunar_phase_cache = [];
-
 			/**
-			 * get JD of lunar phase. 可用來計算月相、日月合朔(黑月/新月)、弦、望(滿月，衝)、月食
+			 * get JD of lunar phase. Using LEA-406a.
+			 * 之精準值。可用來計算月相、日月合朔(黑月/新月)、弦、望(滿月，衝)、月食。
+			 * 
+			 * @param {Number}year_month
+			 *            帶小數點的年數
+			 * @param {Integer}phase
+			 *            0朔0°, 1上弦90°, 2望180°, 3下弦270°
+			 * @param {Object}options
+			 *            options
+			 * 
+			 * @returns {Number} Julian date (JD of 日常生活時間 UT)
 			 * 
 			 * @see http://koyomi8.com/sub/sunmoon_long.htm
 			 * @see http://eco.mtk.nao.ac.jp/cgi-bin/koyomi/cande/phenom_phase.cgi
 			 * @see http://homepage3.nifty.com/ayumi_ho/moon1.htm
 			 * @see http://www2s.biglobe.ne.jp/~yoss/moon/moon.html
 			 */
-			function lunar_phase(year_month, phase, options) {
-				// 前置處理。
-				if (!library_namespace.is_Object(options))
-					options = library_namespace.null_Object();
-
+			function accurate_lunar_phase(year_month, phase, options) {
 				var up_degrees, low_degrees,
 				// 內插法(線性插值)上下限。
 				up_JD, low_JD,
@@ -2187,8 +2220,17 @@ if (typeof CeL === 'function')
 				degrees = phase * 90,
 				// 平月相的時間
 				JD = mean_lunar_phase(year_month, phase, options),
+				//
+				angel = degrees < 90 ? function(_JD) {
+					var d = lunar_phase_angel_of_JD(_JD || JD, true);
+					if (d > TURN_TO_DEGREES - 90)
+						d -= TURN_TO_DEGREES;
+					return d;
+				} : function(_JD) {
+					return lunar_phase_angel_of_JD(_JD || JD, true);
+				},
 				// 誤差常於2°之內。
-				result_degrees = lunar_phase_angel_of_JD(JD);
+				result_degrees = angel();
 
 				// / 12: 月日視黃經差每日必於 12°~13°之內。
 				// 因此每度耗時必小於 1/12 日。此處取最大值。
@@ -2197,13 +2239,13 @@ if (typeof CeL === 'function')
 					up_JD = JD, up_degrees = result_degrees;
 					// 以 result 反推出一個<b>一定</b>小於目標 JD 之下限。
 					low_JD = JD - (result_degrees - degrees) / 12;
-					low_degrees = lunar_phase_angel_of_JD(low_JD);
+					low_degrees = angel(low_JD);
 				} else {
 					// 將 JD 作為下限。
 					low_JD = JD, low_degrees = result_degrees;
 					// 以 result 反推出一個<b>一定</b>大於目標 JD 之上限。
 					up_JD = JD - (result_degrees - degrees) / 12;
-					up_degrees = lunar_phase_angel_of_JD(up_JD);
+					up_degrees = angel(up_JD);
 				}
 
 				library_namespace.debug('初始值: year ' + year_month + ', phase '
@@ -2212,17 +2254,12 @@ if (typeof CeL === 'function')
 						+ show_degrees(result_degrees) + '; JD: ' + low_JD
 						+ '~' + up_JD, 2);
 
-				// whole year
-				// options.duration = 1
-				// 2 years:
-				// options.duration = 2
-
 				while (low_JD < up_JD) {
 					// 估值
 					JD = low_JD + (up_JD - low_JD)
 					//
 					* (degrees - low_degrees) / (up_degrees - low_degrees);
-					result_degrees = lunar_phase_angel_of_JD(JD);
+					result_degrees = angel();
 
 					if (result_degrees < degrees) {
 						if (low_JD === JD) {
@@ -2230,7 +2267,7 @@ if (typeof CeL === 'function')
 							break;
 							// 也可以改變另一項。但效果通常不大，反而浪費時間。
 							up_JD = (low_JD + up_JD) / 2;
-							up_degrees = lunar_phase_angel_of_JD(up_JD);
+							up_degrees = angel(up_JD);
 						} else {
 							low_JD = JD;
 							low_degrees = result_degrees;
@@ -2241,7 +2278,7 @@ if (typeof CeL === 'function')
 							break;
 							// 也可以改變另一項。但效果通常不大，反而浪費時間。
 							low_JD = (low_JD + up_JD) / 2;
-							low_degrees = lunar_phase_angel_of_JD(low_JD);
+							low_degrees = angel(low_JD);
 						} else {
 							up_JD = JD;
 							up_degrees = result_degrees;
@@ -2252,13 +2289,150 @@ if (typeof CeL === 'function')
 
 				library_namespace.debug('JD' + JD + ' ('
 						+ library_namespace.JD_to_Date(JD).format('CE') + '): '
-						+ show_degrees(lunar_phase_angel_of_JD(JD)), 2);
+						+ show_degrees(angel()), 2);
 
 				// apply ΔT: TT → UT.
-				return options.TT ? JD : UT_of(JD);
+				return /* options.TT ? JD : */UT_of(JD);
+			}
+
+			// phase: 0朔0°, 1上弦90°, 2望180°, 3下弦270°
+			// lunar_phase_cache[year][phase:0~3] = [JD of 日常生活時間 UT, JD, ...]
+			var lunar_phase_cache = [];
+
+			/**
+			 * get JD of lunar phases. 取得整年之月相。
+			 * 
+			 * @param {Number}year
+			 *            年數
+			 * @param {Integer}phase
+			 *            0朔0°, 1上弦90°, 2望180°, 3下弦270°
+			 * @param {Object}options
+			 *            options:<br />
+			 *            {Boolean}options.mean: 是否採用平月相。 false: 採用精準值。<br />
+			 *            {Integer}options.duration: 取得年數<br />
+			 *            {Boolean}options.to_Date: return Date<br />
+			 *            {String|Object}options.format: 將 Date 轉成特定 format
+			 * 
+			 * @returns {Array} [ Julian date (JD of 日常生活時間 UT), JD, ... ]
+			 */
+			function lunar_phase(year, phase, options) {
+				if (year === year | 0) {
+					if (options === true)
+						options = 1;
+					if (options > 0 && (options === options | 0))
+						options = {
+							duration : options
+						};
+				}
+				// 前置處理。
+				if (!library_namespace.is_Object(options))
+					options = library_namespace.null_Object();
+
+				var operator;
+				if (typeof options.mean === 'boolean')
+					operator = options.mean ? mean_lunar_phase
+							: accurate_lunar_phase;
+				// whole year
+				// options.duration = 1
+				// 2 years:
+				// options.duration = 2
+				if (!options.duration)
+					return (operator || accurate_lunar_phase)(year, phase,
+							options);
+
+				var phase_JD = [];
+
+				year |= 0;
+				phase |= 0;
+				for (var phase_data,
+				//
+				end = year + options.duration; year < end; year++) {
+					// using cache.
+					phase_data = lunar_phase_cache[year];
+					if (!phase_data)
+						// 初始化。
+						lunar_phase_cache[year] = phase_data = [];
+
+					if (phase_data = phase_data[phase])
+						phase_data = phase_data.slice();
+					else {
+						phase_data = [];
+						for (var year_month = year, JD, date, hours;;
+						// 1 / 12 = .08333333333333
+						// assert: 朔望月長度 < 0.08 year.
+						year_month = Julian_century(JD) * 100 + 2000 + 0.08) {
+							JD = (operator || mean_lunar_phase)(year_month,
+									phase, options);
+							date = library_namespace.JD_to_Date(JD);
+							if (!operator
+							// auto: 在特別可能有問題的時候採用精準值。
+							&& ((hours = date.getHours()) < 2 || hours > 21)) {
+								JD = accurate_lunar_phase(year_month, phase,
+										options);
+								date = library_namespace.JD_to_Date(JD);
+							}
+							date = date.getFullYear();
+							if (date === year)
+								phase_data.push(JD);
+							else if (date - year === 1)
+								break;
+						}
+						if (options.mean === false)
+							lunar_phase_cache[year][phase]
+							//
+							= phase_data.slice();
+					}
+
+					if (options.to_Date)
+						phase_data.forEach(function(JD, index) {
+							JD = library_namespace.JD_to_Date(JD);
+							if (options.format)
+								JD = JD.format(options.format);
+							phase_data[index] = JD;
+						});
+					phase_JD.push(phase_data);
+				}
+
+				return options.duration === 1 ? phase_JD[0] : phase_JD;
 			}
 
 			_.lunar_phase = lunar_phase;
+
+			/**
+			 * get lunar phase of JD. 取得 JD 之月相。
+			 * 
+			 * @param {Number}JD
+			 *            Julian date (JD of 天文計算用時間 TT)
+			 * @param {Object}options
+			 *            {Boolean}options.time: 取得月相時，亦取得時刻。
+			 * 
+			 * @returns {Number} phase: 0朔0°, 1上弦90°, 2望180°, 3下弦270°
+			 */
+			function lunar_phase_of_JD(JD, options) {
+				// 90: TURN_TO_DEGREES / 4相 = 360 / 4
+				var phase = Math.floor(lunar_phase_angel_of_JD(JD + 1) / 90);
+				if (isNaN(phase))
+					// 資料還沒載入。
+					return;
+
+				if (Math.floor(lunar_phase_angel_of_JD(JD) / 90) !== phase) {
+					// phase: -2~1
+					if (phase < 0)
+						phase += 4;
+					if (options && options.time)
+						return [
+								phase,
+								accurate_lunar_phase(
+										Julian_century(JD) * 100 + 2000, phase,
+										{
+											JD : JD,
+											nearest : true
+										}) ];
+					return phase;
+				}
+			}
+
+			_.lunar_phase_of_JD = lunar_phase_of_JD;
 
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 

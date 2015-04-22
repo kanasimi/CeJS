@@ -2269,6 +2269,8 @@ function affairs() {
 	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
 	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
 	//
+	LUNAR_PHASE_NAME = '朔,上弦,望,下弦'.split(','),
+	//
 	建除_LIST = '建除滿平定執破危成收開閉'.split(''),
 	// https://github.com/zealotrush/ben_rime/blob/master/symbols.yaml
 	ZODIAC_SYMBOLS = '♈♉♊♋♌♍♎♏♐♑♒♓'.split(''),
@@ -2520,6 +2522,34 @@ function affairs() {
 						C : 'monospaced'
 					};
 				} ],
+
+		lunar_phase : [ {
+			a : {
+				T : '月相'
+			},
+			R : 'lunar phase, 天文月相',
+			href : 'https://en.wikipedia.org/wiki/Lunar_phase'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+
+			var JD = CeL.TT(new Date(date.offseted_value())),
+			//
+			phase = CeL.lunar_phase_of_JD(JD, {
+				time : true
+			});
+			if (phase)
+				phase = [ {
+					b : {
+						T : LUNAR_PHASE_NAME[phase[0]]
+					}
+				}, ' ', CeL.JD_to_Date(phase[1]).format({
+					parser : 'CE',
+					// format : '%Y/%m/%d %H:%M:%S'
+					format : '%H:%M:%S'
+				}) ];
+			return phase;
+		} ],
 
 		ΔT : [ {
 			a : {
