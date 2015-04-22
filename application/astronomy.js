@@ -12,7 +12,6 @@
  * http://blog.csdn.net/orbit/article/details/7910220
  * http://www.chris.obyrne.com/Eclipses/calculator.html
  * http://eclipse.gsfc.nasa.gov/JSEX/JSEX-index.html
- * http://en.wikipedia.org/wiki/New_moon
  * http://www.informatik.uni-leipzig.de/~duc/amlich/calrules.html
  * http://blog.csdn.net/songgz/article/details/2680144
  * http://www.todayonhistory.com/wnl/lhl.htm
@@ -677,8 +676,7 @@ if (typeof CeL === 'function')
 				 */
 				coefficients[0] += sun_aberration_variation_constant;
 
-				// Daily variation, in arcseconds, of the geocentric
-				// longitude
+				// Daily variation, in arcseconds, of the geocentric longitude
 				// of the Sun in a fixed reference frame
 				var Δλ = polynomial_value(coefficients, τ),
 				//
@@ -688,7 +686,7 @@ if (typeof CeL === 'function')
 					library_namespace.debug('aberration of radius vector ' + R
 							+ ', JD: ' + JD + ': ' + show_degrees(aberration)
 							+ '. low-precision method: '
-							+ show_degrees(sun_aberration_low(R)));
+							+ show_degrees(sun_aberration_low(R)), 0);
 
 				return aberration;
 			}
@@ -786,7 +784,7 @@ if (typeof CeL === 'function')
 
 				library_namespace.debug(
 				//
-				'IAU2000B nutation 章動修正值 of ' + JD + ' ('
+				'IAU2000B nutation 章動修正值 of JD' + JD + ' ('
 						+ library_namespace.JD_to_Date(JD).format('CE') + '): '
 						+ Δψ / DEGREES_TO_RADIANS + '°, ' + Δε
 						/ DEGREES_TO_RADIANS + '°', 3);
@@ -840,7 +838,7 @@ if (typeof CeL === 'function')
 			_.nutation = nutation;
 
 			// ------------------------------------------------------------------------------------------------------//
-			// VSOP87 model
+			// VSOP87 planets model
 
 			/**
 			 * 無用:因為 items[1,2] 已經是弧度。
@@ -1178,7 +1176,7 @@ if (typeof CeL === 'function')
 			VSOP87.convert = convert_VSOP87_file;
 
 			// ------------------------------------------------------------------------------------------------------//
-			// solar coordinate 太陽位置(坐標) & 二十四節氣 (solar terms)
+			// solar coordinates 太陽位置(坐標) & 二十四節氣 (solar terms)
 
 			/**
 			 * 分點和至點, 太陽視黃經λ為0°或90°或180°或270°. 在西元1951–2050的誤差 < 1分.
@@ -1245,7 +1243,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
-			 * 《天文算法》 p.166~ p. 169 Example 25.b
+			 * 《天文算法》 p.166 ~ p. 169 Example 25.b
 			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
@@ -1527,6 +1525,7 @@ if (typeof CeL === 'function')
 							// options.time > 1 : add seconds.
 							if (options.time > 1)
 								index += ((days = (days % 1) * 60) | 0) + ':';
+							// index += ((days % 1) * 60).to_fixed(1);
 							index += Math.round((days % 1) * 60);
 						}
 						return index;
@@ -1631,7 +1630,7 @@ if (typeof CeL === 'function')
 			_.立春年 = 立春年;
 
 			// ------------------------------------------------------------------------------------------------------//
-			// LEA-406a & periodic terms
+			// LEA-406a lunar model & periodic terms
 
 			/**
 			 * the mean longitude of the Moon referred to the moving ecliptic
@@ -1657,10 +1656,11 @@ if (typeof CeL === 'function')
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * S. M. Kudryavtsev, Long-term harmonic development of lunar
-			 * ephemeris, Astronomy & Astrophysics 471 (2007), 1069-1075.
+			 * ephemeris, Astronomy & Astrophysics 471 (2007), pp. 1069-1075.
 			 * http://www.eas.slu.edu/GGP/kudryavtsev/LEA-406.zip
+			 * <q>This is 9–70 times better than the accuracy of the latest analytical theory of lunar motion ELP/MPP02, and the number of terms in the new development is less than that in ELP/MPP02.</q>
 			 * 
-			 * bug: 1979/1/20 is 大寒, not 1979/1/21 (according to
+			 * bug(?): 1979/1/20 is 大寒, not 1979/1/21 (according to
 			 * http://www.hko.gov.hk/gts/time/calendar/text/T1979c.txt ).
 			 * 
 			 * @param {Number}JD
@@ -1908,8 +1908,7 @@ if (typeof CeL === 'function')
 
 					// parse LEA-406 file.
 					data = data.split(/\n/);
-					// Lines 1-8 give a short
-					// description of the data included
+					// Lines 1-8 give a short description of the data included
 					// to the file.
 					data.splice(0, 8);
 
@@ -1921,7 +1920,7 @@ if (typeof CeL === 'function')
 
 						var fields = line.trim().replace(/(\d)-/g, '$1 -')
 								.split(/\s+/);
-						if (fields.length !== 21)
+						if (fields.length !== 21 || isNaN(fields[0]))
 							throw line;
 						var i = 15;
 						// 將 Amp 轉整數: Amp *= 1e7
@@ -1950,7 +1949,7 @@ if (typeof CeL === 'function')
 						// 12位數，*DEGREES_TO_ARCSECONDS
 						// 之後最多10位數
 						fields[i] = (fields[i]
-						//
+						// / 1e2 / 1e10 = / 1e12
 						* (DEGREES_TO_ARCSECONDS / 1e2) / 1e10).to_fixed(10);
 						i++;
 						fields[i] = (fields[i]
@@ -1984,9 +1983,7 @@ if (typeof CeL === 'function')
 						for (var multiplier; i <= 14; i++)
 							if (multiplier = +fields[i])
 								argument[i].forEach(function(a, index) {
-									// a
-									// 為整數，coefficients
-									// 小數位數最多即為[0]，6位數。
+									// a 為整數，coefficients 小數位數最多即為[0]，6位數。
 									// coefficients[index]=(coefficients[index]+(a*multiplier).to_fixed(6)).to_fixed(6);
 									coefficients[index] += a * multiplier;
 									if (false) {
@@ -2039,7 +2036,7 @@ if (typeof CeL === 'function')
 			LEA406.convert = convert_LEA406;
 
 			// ------------------------------------------------------------------------------------------------------//
-			// lunar coordinates
+			// lunar coordinates 月亮位置(坐標)
 
 			/**
 			 * lunar coordinates, moon's coordinates 月亮位置(坐標)計算。<br />
@@ -2052,25 +2049,51 @@ if (typeof CeL === 'function')
 			 *          degrees, R:distance in km }
 			 */
 			function lunar_coordinate(JD) {
-				var coordinates = LEA406(JD),
-				// coordinates.R in km
-				r = coordinates.R || LUNAR_DISTANCE_KM;
-				// 地球半徑6,357km到6,378km。平均半徑6371km。
-				r -= 6371;
+				var coordinates = LEA406(JD);
 
 				if (coordinates.V || coordinates.U) {
 					var n = nutation(JD);
 					if (coordinates.V) {
 						// V, U in arcseconds
+
+						/**
+						 * 修正經度 of 月亮光行時間 light-time correction (Moon's
+						 * light-time)。忽略對緯度之影響。
+						 * 
+						 * 資料來源/資料依據:<br />
+						 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+						 * 《天文算法》 p. 337 formula 49.1.<br />
+						 * <q>the constant term of the effect of the light-time (-0″.70)</q>
+						 * 
+						 * -0″.704:
+						 * <q>formula in: G.M.Clemence, J.G.Porter, D.H.Sadler (1952): "Aberration in the lunar ephemeris", Astronomical Journal 57(5) (#1198) pp.46..47; but computed with the conventional value of 384400 km for the mean distance which gives a different rounding in the last digit.</q>
+						 * http://en.wikipedia.org/wiki/New_moon
+						 * 
+						 * @see http://blog.csdn.net/orbit/article/details/8223751
+						 * @see http://en.wikipedia.org/wiki/Light-time_correction
+						 * @see http://lifesci.net/pod/bbs/board.php?bo_table=B07&wr_id=52
+						 */
+						var light_time = -0.70 / DEGREES_TO_ARCSECONDS;
 						if (false) {
-							// 警告: 此操作在 2057/9/29 會造成中曆2057年9月1日取在不同日子!
-							// 修正月亮經度光行差 aberration。忽略對緯度之影響。
-							// http://blog.csdn.net/orbit/article/details/8223751
-							coordinates.V
+							// 錯誤的方法:
+							// coordinates.R in km
+							var r = coordinates.R || LUNAR_DISTANCE_KM;
+							// 地球半徑6,357km到6,378km。平均半徑6371km。
+							r -= 6371;
 							// 1000: 1 km = 1000 m (CELERITAS in m/s)
-							+= r * 1000 / CELERITAS * TURN_TO_DEGREES
-									/ ONE_DAY_SECONDS;
+							light_time = -r * 1000 / CELERITAS
+									* TURN_TO_DEGREES / ONE_DAY_SECONDS;
+							library_namespace.debug(
+							//
+							'月亮經度光行差 of JD'
+									+ JD
+									+ ' ('
+									+ library_namespace.JD_to_Date(JD).format(
+											'CE') + '): '
+									+ show_degrees(light_time), 3);
 						}
+						coordinates.V += light_time;
+
 						// 修正章動 nutation。
 						coordinates.V += n[0] / DEGREES_TO_RADIANS;
 						coordinates.V = normalize_degrees(coordinates.V);
@@ -2088,20 +2111,151 @@ if (typeof CeL === 'function')
 
 			_.lunar_coordinate = lunar_coordinate;
 
-			// lunar_phase_cache[year][month] = JD of 日常生活時間 UT
+			/**
+			 * get the longitudinal angle between the Moon and the Sun.
+			 * 
+			 * @param {Number}JD
+			 *            Julian date (JD of 天文計算用時間 TT)
+			 * 
+			 * @returns {Object} { V:longitude in degrees, U:latitude in
+			 *          degrees, R:distance in km }
+			 */
+			function lunar_phase_angel_of_JD(JD) {
+				// 可以忽略章動的影響
+				return CeL.normalize_degrees(lunar_coordinate(JD).V
+						- solar_coordinate(JD).apparent, true);
+			}
+
+			_.lunar_phase_angel_of_JD = lunar_phase_angel_of_JD;
+
+			/**
+			 * 平月相的時間，已修正了太陽光差及月球光行時間<br />
+			 * The times of the mean phases of the Moon, already affected by the
+			 * Sun's aberration and by the Moon's light-time
+			 * 
+			 * 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 p. 349 formula 49.1.<br />
+			 */
+			function mean_lunar_phase(year_month, phase, options) {
+				// 前置處理。
+				if (!library_namespace.is_Object(options))
+					options = library_namespace.null_Object();
+
+				phase /= 4;
+				var k = (year_month - 2000) * 12.3685,
+				// 取 year_month 之後，第一個 phase。
+				T = Math.floor(k) + phase;
+				if (options.nearest && T - k > .5)
+					// 取前一個。
+					k = T - 1;
+				else
+					// 取之後最接近的。
+					k = T;
+
+				// T是J2000.0起算的儒略世紀數，用下式可得到足夠的精度：
+				T = k / 1236.85;
+
+				var JD = polynomial_value([ 2451550.09766 + 29.530588861 * k,
+						0, 0.00015437, -0.000000150, 0.00000000073 ], T);
+
+				return JD;
+			}
+
+			// phase: 0朔0°, 1上弦90°, 2望180°, 3下弦270°
+			// lunar_phase_cache[year][4 * month + phase] = JD of 日常生活時間 UT
+			// lunar_phase_cache[year][phase:0~3]=[JD,JD,...]
 			var lunar_phase_cache = [];
 
 			/**
-			 * get JD of lunar phase. 可用來計算月相、日月合朔、弦、望(滿月，衝)、月食
+			 * get JD of lunar phase. 可用來計算月相、日月合朔(黑月/新月)、弦、望(滿月，衝)、月食
+			 * 
+			 * @see http://koyomi8.com/sub/sunmoon_long.htm
+			 * @see http://eco.mtk.nao.ac.jp/cgi-bin/koyomi/cande/phenom_phase.cgi
+			 * @see http://homepage3.nifty.com/ayumi_ho/moon1.htm
+			 * @see http://www2s.biglobe.ne.jp/~yoss/moon/moon.html
 			 */
-			function lunar_phase(year_month, phase) {
-				var coordinates;
+			function lunar_phase(year_month, phase, options) {
+				// 前置處理。
+				if (!library_namespace.is_Object(options))
+					options = library_namespace.null_Object();
 
-				coordinates = lunar_coordinate(coordinates.V);
+				var up_degrees, low_degrees,
+				// 內插法(線性插值)上下限。
+				up_JD, low_JD,
+				// 目標角度。
+				degrees = phase * 90,
+				// 平月相的時間
+				JD = mean_lunar_phase(year_month, phase, options),
+				// 誤差常於2°之內。
+				result_degrees = lunar_phase_angel_of_JD(JD);
 
-				// the longitudinal angle between the Moon and the Sun
+				// / 12: 月日視黃經差每日必於 12°~13°之內。
+				// 因此每度耗時必小於 1/12 日。此處取最大值。
+				if (degrees < result_degrees) {
+					// 將 JD 作為上限。
+					up_JD = JD, up_degrees = result_degrees;
+					// 以 result 反推出一個<b>一定</b>小於目標 JD 之下限。
+					low_JD = JD - (result_degrees - degrees) / 12;
+					low_degrees = lunar_phase_angel_of_JD(low_JD);
+				} else {
+					// 將 JD 作為下限。
+					low_JD = JD, low_degrees = result_degrees;
+					// 以 result 反推出一個<b>一定</b>大於目標 JD 之上限。
+					up_JD = JD - (result_degrees - degrees) / 12;
+					up_degrees = lunar_phase_angel_of_JD(up_JD);
+				}
 
-				// TODO
+				library_namespace.debug('初始值: year ' + year_month + ', phase '
+						+ phase + ' (' + degrees + '°): JD' + JD + ' ('
+						+ library_namespace.JD_to_Date(JD).format('CE') + '), '
+						+ show_degrees(result_degrees) + '; JD: ' + low_JD
+						+ '~' + up_JD, 2);
+
+				// whole year
+				// options.duration = 1
+				// 2 years:
+				// options.duration = 2
+
+				while (low_JD < up_JD) {
+					// 估值
+					JD = low_JD + (up_JD - low_JD)
+					//
+					* (degrees - low_degrees) / (up_degrees - low_degrees);
+					result_degrees = lunar_phase_angel_of_JD(JD);
+
+					if (result_degrees < degrees) {
+						if (low_JD === JD) {
+							// 已經得到相當好的效果。
+							break;
+							// 也可以改變另一項。但效果通常不大，反而浪費時間。
+							up_JD = (low_JD + up_JD) / 2;
+							up_degrees = lunar_phase_angel_of_JD(up_JD);
+						} else {
+							low_JD = JD;
+							low_degrees = result_degrees;
+						}
+					} else if (result_degrees > degrees) {
+						if (up_JD === JD) {
+							// 已經得到相當好的效果。
+							break;
+							// 也可以改變另一項。但效果通常不大，反而浪費時間。
+							low_JD = (low_JD + up_JD) / 2;
+							low_degrees = lunar_phase_angel_of_JD(low_JD);
+						} else {
+							up_JD = JD;
+							up_degrees = result_degrees;
+						}
+					} else
+						break;
+				}
+
+				library_namespace.debug('JD' + JD + ' ('
+						+ library_namespace.JD_to_Date(JD).format('CE') + '): '
+						+ show_degrees(lunar_phase_angel_of_JD(JD)), 2);
+
+				// apply ΔT: TT → UT.
+				return options.TT ? JD : UT_of(JD);
 			}
 
 			_.lunar_phase = lunar_phase;
@@ -2563,7 +2717,7 @@ if (typeof CeL === 'function')
 			// VSOP87 半解析（semi-analytic）理論 periodic terms
 
 			/**
-			 * teams for VSOP87 model used in function VSOP87()
+			 * teams for VSOP87 planets model used in function VSOP87()
 			 * 
 			 * full data:<br />
 			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/README

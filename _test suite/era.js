@@ -2262,7 +2262,9 @@ function affairs() {
 
 	// -----------------------------
 
-	var
+	// Data is not yet loaded.
+	// Data will be loaded as soon as it becomes available.
+	var data_load_message = 'Data will be loaded soon.',
 	// copy from data.date.
 	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
 	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
@@ -2481,7 +2483,7 @@ function affairs() {
 			V = CeL.lunar_coordinate(JD).V;
 
 			return {
-				span : isNaN(V) ? 'Data is not yet loaded.'
+				span : isNaN(V) ? data_load_message
 				//
 				: CeL.show_degrees(V, 0)
 				// &nbsp;
@@ -2490,37 +2492,34 @@ function affairs() {
 			};
 		} ],
 
-		moon_sun : [ {
-			a : {
-				// 月日視黃經差角
-				T : "月日視黃經差"
-			},
-			R : '紀元使用當地、當日零時，月亮的視黃經-太陽的視黃經\n'
-			//
-			+ 'the apparent geocentric celestial longitude: Moon - Sun.\n'
-			//
-			+ 'Using VSOP87D.ear and LEA-406a.',
-			href : 'https://zh.wikipedia.org/wiki/%E8%A1%9D%E6%97%A5'
-		}, function(date) {
-			if (/* date.準 || */date.精)
-				return '';
-			var JD = CeL.TT(new Date(date.offseted_value())),
-			//
-			V = CeL.lunar_coordinate(JD).V;
+		moon_sun : [
+				{
+					a : {
+						// 月日視黃經差角
+						T : "月日視黃經差"
+					},
+					R : '紀元使用當地、當日零時，月亮的視黃經-太陽的視黃經\n'
+							//
+							+ 'the apparent geocentric celestial longitude: Moon - Sun.\n'
+							//
+							+ 'Using VSOP87D.ear and LEA-406a.',
+					href : 'https://zh.wikipedia.org/wiki/%E8%A1%9D_%28%E5%A4%A9%E9%AB%94%E4%BD%8D%E7%BD%AE%29'
+				}, function(date) {
+					if (/* date.準 || */date.精)
+						return '';
+					var JD = CeL.TT(new Date(date.offseted_value())),
+					//
+					degrees = CeL.lunar_phase_angel_of_JD(JD);
 
-			return {
-				span : isNaN(V) ? 'Data is not yet loaded.'
-				//
-				: CeL.show_degrees(CeL.normalize_degrees(
-				//
-				V - CeL.solar_coordinate(JD).apparent,
-				//
-				true), 0)
-				// &nbsp;
-				.replace(/ /g, CeL.DOM.NBSP),
-				C : 'monospaced'
-			};
-		} ],
+					return {
+						span : isNaN(degrees) ? data_load_message
+						//
+						: CeL.show_degrees(degrees, 0)
+						// &nbsp;
+						.replace(/ /g, CeL.DOM.NBSP),
+						C : 'monospaced'
+					};
+				} ],
 
 		ΔT : [ {
 			a : {
