@@ -80,6 +80,13 @@ function initializer() {
 			[ 'data.date.calendar', function() {
 				// for 太陽視黃經
 				CeL.VSOP87.load_teams('Earth');
+				var type = CeL.get_cookie('LEA406_type');
+				if (type)
+					if (type === 'a' || type === 'b') {
+						CeL.LEA406.default_type = type;
+						CeL.info('改採 LEA-406' + type);
+					} else
+						CeL.warn('Invalid type: [' + type + ']');
 				// for 月亮視黃經
 				CeL.LEA406.load_teams('V');
 			} ], function() {
@@ -262,7 +269,7 @@ function add_calendar_column() {
 
 // 文字式年曆。
 function show_calendar(era_name) {
-	var era_caption,
+	var start = new Date, era_caption,
 	// 為了不更動到原先的 default_column。作 deep clone.
 	title = CeL.clone(default_column, true), output = [ {
 		tr : title
@@ -524,6 +531,9 @@ function show_calendar(era_name) {
 		CeL.toggle_display('column_to_select', true);
 	// text_calendar
 	select_panel('calendar', true);
+
+	CeL.debug('本次執行 [' + era_name + '] 使用時間: ' + start.age() + '。 LEA-406'
+			+ CeL.LEA406.default_type);
 }
 
 show_calendar.LIMIT = 200;
@@ -1878,7 +1888,7 @@ function set_era_by_url_data(era) {
 // ---------------------------------------------------------------------//
 
 var thdl_solar_term,
-//
+// 明清節氣
 initialize_thdl_solar_term = function() {
 	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
 	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
@@ -2404,7 +2414,24 @@ function affairs() {
 		// --------------------------------------------------------------------
 		// 天文計算 astronomical calculations
 		astronomy : [ '天文計算 astronomical calculations',
-				'因為採用了完整的 LEA-406a 來計算月亮位置，因此關於月亮位置之項目，每次執行常需耗費數秒至一兩分鐘，敬請見諒。' ],
+				[ '因為採用了完整的 LEA-406' + CeL.LEA406.default_type
+				//
+				+ ' 來計算月亮位置，關於月亮位置之項目，每次執行常需耗費數秒至一兩分鐘，敬請見諒。', {
+					a : '改採 LEA-406'
+					//
+					+ (CeL.LEA406.default_type === 'a' ? 'b' : 'a'),
+					href : '#',
+					S : 'cursor:pointer',
+					onclick : function() {
+						CeL.set_cookie('LEA406_type',
+						//
+						CeL.LEA406.default_type === 'a' ? 'b' : 'a');
+						history.go(0);
+						return false;
+					}
+				}, '（a 較精確，b 較快。', {
+					em : '將重新整理！'
+				}, '）' ] ],
 
 		solarterms : [ {
 			a : {
@@ -2481,7 +2508,7 @@ function affairs() {
 			//
 			+ 'the apparent geocentric celestial longitude of the Moon.\n'
 			//
-			+ 'Using LEA-406a.',
+			+ 'Using LEA-406.',
 			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -2510,7 +2537,7 @@ function affairs() {
 							//
 							+ 'the apparent geocentric celestial longitude: Moon - Sun.\n'
 							//
-							+ 'Using VSOP87D.ear and LEA-406a.',
+							+ 'Using VSOP87D.ear and LEA-406.',
 					href : 'https://zh.wikipedia.org/wiki/%E8%A1%9D_%28%E5%A4%A9%E9%AB%94%E4%BD%8D%E7%BD%AE%29'
 				}, function(date) {
 					if (/* date.準 || */date.精)
@@ -2535,7 +2562,7 @@ function affairs() {
 			},
 			R : 'lunar phase, 天文月相。計算得出，非實曆。\n'
 			//
-			+ 'Using VSOP87D.ear and LEA-406a.',
+			+ 'Using VSOP87D.ear and LEA-406.',
 			href : 'https://zh.wikipedia.org/wiki/%E6%9C%88%E7%9B%B8'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -2580,6 +2607,9 @@ function affairs() {
 			年朔日 = CeL.排曆(date, {
 				月名 : true
 			});
+
+			if (!年朔日)
+				return data_load_message;
 
 			if (JD < 年朔日[0])
 				// date 實際上在上一年。

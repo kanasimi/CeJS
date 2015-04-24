@@ -1663,6 +1663,10 @@ if (typeof CeL === 'function')
 			// ------------------------------------------------------------------------------------------------------//
 			// LEA-406a lunar model & periodic terms
 
+			// 'a' or 'b'. a 相當耗資源。
+			LEA406.default_type = 'a';
+
+			var LEA406_name = 'LEA-406',
 			/**
 			 * the mean longitude of the Moon referred to the moving ecliptic
 			 * and mean equinox of date (Simon et al. 1994). (formula 9)
@@ -1679,7 +1683,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @inner
 			 */
-			var LEA406_V_coefficients = [ 218.31664563 * DEGREES_TO_ARCSECONDS,
+			LEA406_V_coefficients = [ 218.31664563 * DEGREES_TO_ARCSECONDS,
 					17325643723.0470, -527.90, 6.665, -0.5522 ];
 
 			/**
@@ -1747,7 +1751,14 @@ if (typeof CeL === 'function')
 				// Geocentric spherical coordinates of the Moon r, V, U are
 				// expanded to Poisson series of the form
 				teams.forEach(function(team) {
-					var subteams = LEA406_teams[team];
+					var type = options.type || LEA406.default_type,
+					//
+					subteams = LEA406_teams[team + type];
+					if (!subteams) {
+						// try another one.
+						type = type === 'a' ? 'b' : 'a';
+						subteams = LEA406_teams[team + type];
+					}
 					if (!subteams) {
 						if (warn_team)
 							library_namespace.err(
@@ -1802,7 +1813,7 @@ if (typeof CeL === 'function')
 			_.LEA406 = LEA406;
 
 			/**
-			 * LEA406_teams[V,U,R] = {teams}
+			 * LEA406_teams[Va,Ua,Ra;Vb,Ub,Rb] = {teams}
 			 * 
 			 * @type {Object}
 			 * @inner
@@ -1813,7 +1824,7 @@ if (typeof CeL === 'function')
 			 * 增加指定項目的計算數據，提供給模組內部函數使用。
 			 * 
 			 * @param {String}team_name
-			 *            項目名稱 (V,U,R).
+			 *            項目名稱 (Va,Ua,Ra;Vb,Ub,Rb).
 			 * @param {Array}teams
 			 *            計算數據.
 			 */
@@ -1846,19 +1857,49 @@ if (typeof CeL === 'function')
 			 *            callback.
 			 */
 			function LEA406_load_teams(team_name, callback) {
-				library_namespace.run(library_namespace.get_module_path(
-				//
-				module_name + library_namespace.env.path_separator + 'LEA-406-'
-						+ team_name), [
+				var type;
+				if (team_name.length === 2) {
+					type = team_name.charAt(1);
+					team_name = team_name.charAt(0);
+				} else
+					type = LEA406.default_type;
+				var name = LEA406_name + type + '-' + team_name;
+				library_namespace.run(library_namespace
+						.get_module_path(module_name
+						//
+						+ library_namespace.env.path_separator + name), [
 						function() {
 							library_namespace.info(
 							//
-							'LEA406_load_teams: resource file of [' + team_name
-									+ '] loaded.');
+							'LEA406_load_teams: resource file of [' + name
+									+ '] loaded, '
+									+ LEA406_teams[team_name + type].length
+									+ ' series’ terms.');
 						}, callback ]);
 			}
 
 			LEA406.load_teams = LEA406_load_teams;
+
+			/**
+			 * 確定已經載入那些 teams。
+			 * 
+			 * @param {String}[team_name]
+			 *            項目名稱 (V,U,R).
+			 * 
+			 * @returns {Array|String} 已載入 teams。
+			 */
+			function LEA406_loaded(team_name) {
+				if (!team_name)
+					return Object.keys(LEA406_teams);
+				var teams = [], types = 'ab'.split('');
+				types.forEach(function(type) {
+					if ((team_name + type) in LEA406_teams)
+						teams.push(type);
+				});
+				return teams.join('');
+			}
+
+			LEA406.loaded = LEA406_loaded;
 
 			/**
 			 * convert_LEA406 使用之行星數據。
@@ -2040,7 +2081,7 @@ if (typeof CeL === 'function')
 						});
 					});
 
-					var name = options.name || 'LEA-406',
+					var name = options.name || LEA406_name,
 					//
 					new_line = '\n', prefix = '// auto-generated from '
 					//
@@ -2050,8 +2091,10 @@ if (typeof CeL === 'function')
 							+ '.' + name.replace(/-/g, '') + '.add_teams(',
 					//
 					postfix = options.postfix || new_line + ');';
-					fs.writeFile(name + '-' + options.team + '.js', prefix
-							+ JSON.stringify(options.team)
+					fs.writeFile(name + (options.type || '') + '-'
+							+ options.team + '.js', prefix
+							+ JSON.stringify(options.team
+									+ (options.type || ''))
 							+ ','
 							+ new_line
 							+ JSON.stringify(teams).replace(/,0/g, ',')
@@ -2423,8 +2466,6 @@ if (typeof CeL === 'function')
 			/**
 			 * get lunar phase of JD. 取得 JD 之月相。
 			 * 
-			 * TODO: 月齡, 晦
-			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}options
@@ -2498,7 +2539,7 @@ if (typeof CeL === 'function')
 			var 冬至序 = SOLAR_TERMS_NAME.indexOf('冬至');
 
 			/**
-			 * 取得整年之朔日。
+			 * 取得整年之朔日/月齡。
 			 * 
 			 * @param {Integer}CE_year
 			 *            公元年數
@@ -2523,7 +2564,7 @@ if (typeof CeL === 'function')
 				})
 				// 魯僖公五年正月壬子朔旦冬至
 				.map(function(JD) {
-					// 日月合朔時間->朔日0時
+					// 日月合朔時間 → 朔日0時
 					return JD_to_midnight(JD, minute_offset);
 				});
 				年朔日.冬至 = 冬至;
@@ -2535,7 +2576,7 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * 取得年始(建正)為建子之整年朔日。
+			 * 取得年始(建正)為建子之整年朔日/月齡。
 			 * 
 			 * @param {Integer}年
 			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8 ~ 2000/11/25
@@ -2583,7 +2624,7 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * 編排中國傳統曆法(陰陽曆)，取得整年朔日。
+			 * 編排中國傳統曆法(陰陽曆)，取得整年朔日/月齡。
 			 * 
 			 * @param {Integer}年
 			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8 ~ 2000/11/25
@@ -2599,6 +2640,10 @@ if (typeof CeL === 'function')
 			 * @returns {Array} 年朔日 = [ 朔日JD, 朔日JD, ... ]
 			 */
 			function 排曆(年, options) {
+				if (!LEA406_loaded('V'))
+					// 採用低精度之誤差過大，不能用。
+					return;
+
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
 					options = library_namespace.null_Object();
@@ -2619,8 +2664,13 @@ if (typeof CeL === 'function')
 
 				if (isNaN(建正) && NOT_FOUND ===
 				//
-				(建正 = library_namespace.BRANCH_LIST.indexOf(建正)))
+				(建正 = library_namespace.BRANCH_LIST.indexOf(建正))) {
+					// default 建正
+					// 正謂年始，朔謂月初，言王者得政，示從我始，改故用新，隨寅、丑、子所建也。周子，殷丑，夏寅，是改正也；周夜半，殷雞鳴夏平旦，是易朔也。
+					if (isNaN(排曆.建正))
+						排曆.建正 = library_namespace.BRANCH_LIST.indexOf('寅');
 					建正 = 排曆.建正;
+				}
 
 				var 朔日 = 建子朔日(年, minute_offset);
 
@@ -2668,10 +2718,6 @@ if (typeof CeL === 'function')
 				// e.g., [ 1727075.1666666667, 1727104.1666666667, ... ]
 				return 朔日;
 			}
-
-			// default 建正
-			// 正謂年始，朔謂月初，言王者得政，示從我始，改故用新，隨寅、丑、子所建也。周子，殷丑，夏寅，是改正也；周夜半，殷雞鳴夏平旦，是易朔也。
-			排曆.建正 = library_namespace.BRANCH_LIST.indexOf('寅');
 
 			排曆.月名 = function(年朔日) {
 				var 閏 = 年朔日.閏, 月序 = 0;
