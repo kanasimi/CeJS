@@ -2435,11 +2435,13 @@ if (typeof CeL === 'function')
 			function lunar_phase_of_JD(JD, options) {
 				// 90: TURN_TO_DEGREES / 4相 = 360 / 4
 				var phase = Math.floor(lunar_phase_angel_of_JD(JD + 1) / 90);
-				if (isNaN(phase))
-					// 資料還沒載入。
+				if (isNaN(phase)) {
+					library_namespace.debug('資料還沒載入。', 2);
 					return;
+				}
 
-				if (Math.floor(lunar_phase_angel_of_JD(JD) / 90) !== phase) {
+				var _phase = Math.floor(lunar_phase_angel_of_JD(JD) / 90);
+				if (_phase !== phase) {
 					// phase: -2~1
 					if (phase < 0)
 						phase += 4;
@@ -2452,6 +2454,12 @@ if (typeof CeL === 'function')
 						}) ];
 					return phase;
 				}
+
+				if (options.晦 && phase === -1 && 0 ===
+				//
+				Math.floor(lunar_phase_angel_of_JD(JD + 2) / 90))
+					// 晦: -1, -1, 0
+					return options.晦 === true ? '晦' : options.晦;
 			}
 
 			_.lunar_phase_of_JD = lunar_phase_of_JD;

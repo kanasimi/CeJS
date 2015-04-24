@@ -2536,7 +2536,7 @@ function affairs() {
 			R : 'lunar phase, 天文月相。計算得出，非實曆。\n'
 			//
 			+ 'Using VSOP87D.ear and LEA-406a.',
-			href : 'https://en.wikipedia.org/wiki/Lunar_phase'
+			href : 'https://zh.wikipedia.org/wiki/%E6%9C%88%E7%9B%B8'
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
@@ -2544,9 +2544,10 @@ function affairs() {
 			var JD = CeL.TT(new Date(date.offseted_value())),
 			//
 			phase = CeL.lunar_phase_of_JD(JD, {
-				time : true
+				time : true,
+				晦 : '晦日'
 			});
-			if (phase)
+			if (Array.isArray(phase))
 				phase = [ {
 					b : {
 						T : LUNAR_PHASE_NAME[phase[0]]
@@ -2556,6 +2557,12 @@ function affairs() {
 					// format : '%Y/%m/%d %H:%M:%S'
 					format : '%H:%M:%S'
 				}) ];
+			else if (phase)
+				phase = {
+					b : {
+						T : phase
+					}
+				};
 			return phase;
 		} ],
 
