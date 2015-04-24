@@ -76,6 +76,9 @@ if (false) {
 		CeL.nutation(2446895.5);
 		// get ≈ [ -3.788/3600, 9.443/3600 ]
 
+		// 取得 Gregorian calendar 1977 年，中曆 1978 年之冬至日時間
+		CeL.solar_term_JD(1977, 18);
+
 		CeL.assert([ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4');
 		CeL.assert([ 2014, CeL.立春年(new Date('2015/2/3')) ], '立春年 2015/2/3');
 
@@ -83,6 +86,7 @@ if (false) {
 			CeL.show_degrees(CeL.LEA406(2457132, 'V'));
 		});
 
+		// 取得 Gregorian calendar 1977 年之整年度日月合朔時間
 		CeL.lunar_phase(1977, 0, {
 			duration : 1,
 			mean : false,
@@ -93,6 +97,21 @@ if (false) {
 		CeL.lunar_phase_of_JD(2457101, {
 			time : true
 		});
+
+		CeL.排曆(2015).map(function(d) {
+			return d[0] + ': ' + CeL.JD_to_Date(d[1]).format('CE');
+		}).join('\n');
+		// 取得新王莽天鳳3年之天文曆譜。
+		var 年朔日 = CeL.排曆(CeL.era('新王莽天鳳3年'), {
+			建正 : '丑',
+			月名 : true
+		});
+		年朔日.map(function(d, index) {
+			return 年朔日.月名[index] + ': ' + CeL.JD_to_Date(d).format('CE');
+		}).join('\n');
+
+		var index = 年朔日.search_sorted(1727054, true);
+		年朔日.月名[index] + '月' + (1727054 - 年朔日[index] | 0) + '日'
 
 	});
 }
@@ -1664,7 +1683,7 @@ if (typeof CeL === 'function')
 					17325643723.0470, -527.90, 6.665, -0.5522 ];
 
 			/**
-			 * 計算月亮位置(坐標), using LEA-406a.
+			 * 計算月亮位置(坐標)，採用完整的 LEA-406a。 using LEA-406a
 			 * 
 			 * 資料來源/資料依據:<br />
 			 * S. M. Kudryavtsev, Long-term harmonic development of lunar
@@ -2374,8 +2393,11 @@ if (typeof CeL === 'function')
 							date = date.getFullYear();
 							if (date === year)
 								phase_data.push(JD);
-							else if (date - year === 1)
+							else if (date - year === 1) {
+								phase_data.end = JD;
+								// 已經算到次年了。
 								break;
+							}
 						}
 						if (options.mean === false)
 							lunar_phase_cache[year][phase]
@@ -2401,6 +2423,8 @@ if (typeof CeL === 'function')
 			/**
 			 * get lunar phase of JD. 取得 JD 之月相。
 			 * 
+			 * TODO: 月齡, 晦
+			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}options
@@ -2420,19 +2444,236 @@ if (typeof CeL === 'function')
 					if (phase < 0)
 						phase += 4;
 					if (options && options.time)
-						return [
-								phase,
-								accurate_lunar_phase(
-										Julian_century(JD) * 100 + 2000, phase,
-										{
-											JD : JD,
-											nearest : true
-										}) ];
+						return [ phase, accurate_lunar_phase(
+						//
+						Julian_century(JD) * 100 + 2000, phase, {
+							JD : JD,
+							nearest : true
+						}) ];
 					return phase;
 				}
 			}
 
 			_.lunar_phase_of_JD = lunar_phase_of_JD;
+
+			// ------------------------------------------------------------------------------------------------------//
+			// 制曆/排曆/排陰陽曆譜
+			// 中國傳統曆法是一種陰陽合曆，以月相定月份，以太陽定年周期。
+
+			/**
+			 * JD to local midnight (00:00)
+			 * 
+			 * @param {Number}JD
+			 *            Julian date
+			 * @param {Number}minute_offset
+			 *            time-zone offset from UTC in minutes.<br />
+			 *            e.g., UTC+8: 8 * 60 = 480
+			 * 
+			 * @returns {Number}
+			 */
+			function JD_to_midnight(JD, minute_offset) {
+				var day_offset = (minute_offset | 0) / (24 * 60) - .5;
+				return Math.floor(JD + day_offset) - day_offset;
+
+				// -day_offset: to local (JD+.5). 此時把 local 當作 UTC+0.
+				// Math.floor(): reset to local midnight, 00:00
+				// +day_offset: recover to UTC
+			}
+
+			// _.JD_to_midnight = JD_to_midnight;
+
+			/**
+			 * 冬至序 = 18
+			 * 
+			 * @type {Integer}
+			 */
+			var 冬至序 = SOLAR_TERMS_NAME.indexOf('冬至');
+
+			/**
+			 * 取得整年之朔日。
+			 * 
+			 * @param {Integer}CE_year
+			 *            公元年數
+			 * @param {Number}minute_offset
+			 *            time-zone offset from UTC in minutes.<br />
+			 *            e.g., UTC+8: 8 * 60 = 480
+			 * 
+			 * @returns {Array} 年朔日 = [ [JD, JD, ...], 冬至所在月 ]
+			 */
+			function 子月序(CE_year, minute_offset) {
+				if (isNaN(minute_offset))
+					minute_offset = library_namespace
+					//
+					.String_to_Date.default_offset;
+
+				// 冬至所在月為十一月，之後為十二月、正月、二月……復至十一月。
+				var 冬至 = solar_term_JD(CE_year, 冬至序),
+				// 取得整年之朔日。依現行農曆曆法，每年以朔分月（朔日為每月初一）。
+				年朔日 = lunar_phase(CE_year, 0, {
+					duration : 1,
+					mean : false
+				})
+				// 魯僖公五年正月壬子朔旦冬至
+				.map(function(JD) {
+					// 日月合朔時間->朔日0時
+					return JD_to_midnight(JD, minute_offset);
+				});
+				年朔日.冬至 = 冬至;
+
+				var index = 年朔日.search_sorted(冬至, true);
+				// assert: 冬至 >= 年朔日[index];
+
+				return [ 年朔日, index ];
+			}
+
+			/**
+			 * 取得年始(建正)為建子之整年朔日。
+			 * 
+			 * @param {Integer}年
+			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8 ~ 2000/11/25
+			 * @param {Number}minute_offset
+			 *            time-zone offset from UTC in minutes.<br />
+			 *            e.g., UTC+8: 8 * 60 = 480
+			 * 
+			 * @returns {Array} 年朔日 = [ 朔日JD, 朔日JD, ... ]
+			 */
+			function 建子朔日(年, minute_offset) {
+				var 朔日 = 子月序(年 - 1, minute_offset),
+				//
+				次年朔日 = 子月序(年, minute_offset);
+
+				朔日[0].splice(0, 朔日[1]);
+				朔日 = 朔日[0].concat(次年朔日[0].slice(0, 次年朔日[1]));
+				朔日.end = 次年朔日[0][次年朔日[1]];
+
+				if (朔日.length === 13) {
+					// 確定閏月。
+					// 若兩冬至間有13個月（否則應有12個月），則置閏於冬至後第一個沒中氣的月，月序與前一個月相同（閏月在幾月後面，就稱閏幾月）。
+					var 中氣, 中氣序 = 冬至序 + 2, 閏 = 1, year = 年 - 1;
+					for (; 中氣序 !== 冬至序; 中氣序 += 2) {
+						if (中氣序 === SOLAR_TERMS_NAME.length)
+							year++, 中氣序 -= SOLAR_TERMS_NAME.length;
+						中氣 = solar_term_JD(year, 中氣序);
+						朔日[SOLAR_TERMS_NAME[中氣序]] = 中氣;
+						if (中氣 >= 朔日[閏]
+						// 測中氣序: 朔日[閏]: 沒中氣的月
+						&& 中氣 >= 朔日[++閏]) {
+							閏--;
+							// CeL.JD_to_Date(1727046.1666666667).format('CE')
+							// CeL.JD_to_Date(1727076.9971438504).format('CE')
+							library_namespace.debug('沒中氣的月: 朔日[' + 閏 + '] = '
+									+ 朔日[閏] + ', 中氣 ' + 中氣, 3);
+							break;
+						}
+					}
+					朔日.閏 = 閏;
+				} else if (朔日.length !== 12)
+					library_namespace.err(年 + '年有' + 朔日.length + '個月!');
+
+				// [ 朔日JD, 朔日JD, ... ].閏 = {Boolean};
+				return 朔日;
+			}
+
+			/**
+			 * 編排中國傳統曆法(陰陽曆)，取得整年朔日。
+			 * 
+			 * @param {Integer}年
+			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8 ~ 2000/11/25
+			 * @param {Object}[options]
+			 *            options:<br />
+			 *            {Number}options.minute_offset: time-zone offset from
+			 *            UTC in minutes.<br />
+			 *            e.g., UTC+8: 8 * 60 = 480<br />
+			 *            {String|Integer}options.建正: 年始之地支/地支序(0:子)<br />
+			 *            {Integer}options.year_offset: 年數將自動加上此 offset。<br />
+			 *            {Boolean}options.月名: 順便加上 .月名 = [ 月名 ]
+			 * 
+			 * @returns {Array} 年朔日 = [ 朔日JD, 朔日JD, ... ]
+			 */
+			function 排曆(年, options) {
+				// 前置處理。
+				if (!library_namespace.is_Object(options))
+					options = library_namespace.null_Object();
+
+				var 建正 = options.建正,
+				//
+				minute_offset = options.minute_offset;
+				if (library_namespace.is_Date(年)) {
+					if (isNaN(minute_offset))
+						minute_offset = 年[
+						// see data.date.era
+						library_namespace.era.MINUTE_OFFSET_KEY];
+					年 = Math.round(年.getFullYear() + 年.getMonth() / 12);
+				}
+
+				if (!isNaN(options.year_offset))
+					年 += options.year_offset;
+
+				if (isNaN(建正) && NOT_FOUND ===
+				//
+				(建正 = library_namespace.BRANCH_LIST.indexOf(建正)))
+					建正 = 排曆.建正;
+
+				var 朔日 = 建子朔日(年, minute_offset);
+
+				if (建正 === 0)
+					// 曆數
+					return 朔日;
+
+				var 閏 = 朔日.閏 - 建正;
+				library_namespace.debug('建正 ' + 建正 + ', ' + 朔日.閏 + ', 閏=' + 閏,
+						3);
+				// 此處已清掉(朔日.閏)
+				朔日 = 朔日.slice(閏 <= 0 ? 建正 + 1 : 建正);
+				if (閏 > 0)
+					朔日.閏 = 閏;
+
+				var 次年朔日 = 建子朔日(年 + 1, minute_offset);
+				library_namespace.debug('次年 ' + 建正 + ', ' + 次年朔日.閏, 3);
+				閏 = 次年朔日.閏;
+				var index = 閏 <= 建正 ? 建正 + 1 : 建正,
+				//
+				end = 次年朔日[index];
+				library_namespace.debug(
+				//
+				'end[' + index + ']=' + 次年朔日[index], 3);
+				次年朔日 = 次年朔日.slice(0, index);
+				if (閏 <= 建正)
+					if (朔日.閏)
+						// 這將造成無法阻絕一年內可能有兩閏月，以及一年僅有11個月的可能。
+						library_namespace.err(年 + '年有兩個閏月!!');
+					else
+						朔日.閏 = 閏 + 朔日.length;
+
+				閏 = 朔日.閏;
+				library_namespace.debug('閏=' + 閏, 3);
+				// 此處會清掉(朔日.閏)
+				朔日 = 朔日.concat(次年朔日);
+				朔日.end = end;
+				if (閏)
+					朔日.閏 = 閏;
+
+				if (options.月名)
+					朔日.月名 = 排曆.月名(朔日);
+
+				// [ 朔日JD, 朔日JD, ... ].閏 = {Boolean};
+				// e.g., [ 1727075.1666666667, 1727104.1666666667, ... ]
+				return 朔日;
+			}
+
+			// default 建正
+			// 正謂年始，朔謂月初，言王者得政，示從我始，改故用新，隨寅、丑、子所建也。周子，殷丑，夏寅，是改正也；周夜半，殷雞鳴夏平旦，是易朔也。
+			排曆.建正 = library_namespace.BRANCH_LIST.indexOf('寅');
+
+			排曆.月名 = function(年朔日) {
+				var 閏 = 年朔日.閏, 月序 = 0;
+				library_namespace.debug('閏=' + 閏, 3);
+				return 年朔日.map(function(朔, index) {
+					return index === 閏 ? '閏' + 月序 : ++月序;
+				});
+			};
+
+			_.排曆 = 排曆;
 
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 

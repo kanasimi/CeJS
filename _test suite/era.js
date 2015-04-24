@@ -301,7 +301,7 @@ function show_calendar(era_name) {
 					onclick : remove_calendar_column
 				} ]
 			});
-		else if (Array.isArray(calendar_column[i])) {
+		else if (typeof calendar_column[i][1] === 'function') {
 			// 增加此欄
 			j = calendar_column[i][0];
 			if (!j.T && j.a)
@@ -315,8 +315,13 @@ function show_calendar(era_name) {
 					T : '分類'
 				}, ': ', {
 					T : group,
-					R : calendar_column[group] || ''
-				}, ' ' ]);
+					R : calendar_column[group][0] || ''
+				}, calendar_column[group][1] ? [ {
+					span : calendar_column[group][1],
+					C : 'calendar_column_notice'
+				}, {
+					br : null
+				} ] : ' ' ]);
 			}
 			hidden_column.push({
 				span : j.T ? {
@@ -2398,7 +2403,8 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		// 天文計算 astronomical calculations
-		astronomy : '天文計算 astronomical calculations',
+		astronomy : [ '天文計算 astronomical calculations',
+				'因為採用了完整的 LEA-406a 來計算月亮位置，因此關於月亮位置之項目，每次執行常需耗費數秒至一兩分鐘，敬請見諒。' ],
 
 		solarterms : [ {
 			a : {
@@ -2527,7 +2533,9 @@ function affairs() {
 			a : {
 				T : '月相'
 			},
-			R : 'lunar phase, 天文月相',
+			R : 'lunar phase, 天文月相。計算得出，非實曆。\n'
+			//
+			+ 'Using VSOP87D.ear and LEA-406a.',
 			href : 'https://en.wikipedia.org/wiki/Lunar_phase'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -2549,6 +2557,38 @@ function affairs() {
 					format : '%H:%M:%S'
 				}) ];
 			return phase;
+		} ],
+
+		lunisolar : [ {
+			a : {
+				T : 'lunisolar'
+			},
+			R : 'lunisolar calendar. 計算得出之中國傳統曆法(陰陽曆)，非實曆。',
+			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			var JD = CeL.Date_to_JD(date.offseted_value()),
+			//
+			年朔日 = CeL.排曆(date, {
+				月名 : true
+			});
+
+			if (JD < 年朔日[0])
+				// date 實際上在上一年。
+				年朔日 = CeL.排曆(date, {
+					月名 : true,
+					year_offset : -1
+				});
+			else if (JD >= 年朔日.end)
+				// date 實際上在下一年。
+				年朔日 = CeL.排曆(date, {
+					月名 : true,
+					year_offset : 1
+				});
+
+			var index = 年朔日.search_sorted(JD, true);
+			return 年朔日.月名[index] + '月' + (1 + JD - 年朔日[index] | 0) + '日';
 		} ],
 
 		ΔT : [ {
@@ -3240,13 +3280,16 @@ function affairs() {
 	calendar_column = CeL.null_Object();
 	o = null;
 	for (i in list)
-		if (Array.isArray(list[i]))
+		if (Array.isArray(list[i])
+		//		
+		&& typeof list[i][1] === 'function')
 			calendar_column[o ? o + '/' + i : i] = list[i];
 		else
-			calendar_column[o = i] = list[i];
+			calendar_column[o = i] = Array.isArray(list[i]) ? list[i]
+					: [ list[i] ];
 
 	v = 'Gregorian reform';
-	calendar_column[v] = '各地啓用格里曆之日期對照';
+	calendar_column[v] = [ '各地啓用格里曆之日期對照' ];
 	for (i in CeL.Gregorian_reform_of.regions) {
 		o = function(date) {
 			return date.format({

@@ -7089,6 +7089,7 @@ if (typeof CeL === 'function')
 				numeralize : numeralize_date_name,
 				compare_start : compare_start_date,
 				Date_of_CE_year : get_Date_of_key_by_CE,
+				MINUTE_OFFSET_KEY : MINUTE_OFFSET_KEY,
 
 				// 網頁應用功能。
 				node_era : caculate_node_era,
