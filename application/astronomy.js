@@ -274,7 +274,9 @@ if (typeof CeL === 'function')
 			 * 
 			 * DEGREES_BETWEEN_SOLAR_TERMS = 15
 			 */
-			DEGREES_BETWEEN_SOLAR_TERMS = TURN_TO_DEGREES / SOLAR_TERMS_COUNT;
+			DEGREES_BETWEEN_SOLAR_TERMS = TURN_TO_DEGREES / SOLAR_TERMS_COUNT,
+			// 各種月相
+			LUNAR_PHASE_NAME = '朔,上弦,望,下弦'.split(',');
 
 			_.SOLAR_TERMS = SOLAR_TERMS_NAME;
 
@@ -2229,7 +2231,7 @@ if (typeof CeL === 'function')
 			 * @param {Number}year_month
 			 *            帶小數點的年數
 			 * @param {Integer}phase
-			 *            0朔0°, 1上弦90°, 2望180°, 3下弦270°
+			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 * @param {Object}options
 			 *            options
 			 * 
@@ -2258,12 +2260,12 @@ if (typeof CeL === 'function')
 
 			/**
 			 * get JD of lunar phase. Using LEA-406a.
-			 * 之精準值。可用來計算月相、日月合朔(黑月/新月)、弦、望(滿月，衝)、月食。
+			 * 之精準值。可用來計算月相、日月合朔(黑月/新月)、弦、望(滿月，衝)、月食、月齡。
 			 * 
 			 * @param {Number}year_month
 			 *            帶小數點的年數
 			 * @param {Integer}phase
-			 *            0朔0°, 1上弦90°, 2望180°, 3下弦270°
+			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 * @param {Object}options
 			 *            options
 			 * 
@@ -2357,7 +2359,7 @@ if (typeof CeL === 'function')
 				return /* options.TT ? JD : */UT_of(JD);
 			}
 
-			// phase: 0朔0°, 1上弦90°, 2望180°, 3下弦270°
+			// phase: 0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			// lunar_phase_cache[year][phase:0~3] = [JD of 日常生活時間 UT, JD, ...]
 			var lunar_phase_cache = [];
 
@@ -2367,7 +2369,7 @@ if (typeof CeL === 'function')
 			 * @param {Number}year
 			 *            年數
 			 * @param {Integer}phase
-			 *            0朔0°, 1上弦90°, 2望180°, 3下弦270°
+			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 * @param {Object}options
 			 *            options:<br />
 			 *            {Boolean}options.mean: 是否採用平月相。 false: 採用精準值。<br />
@@ -2469,9 +2471,11 @@ if (typeof CeL === 'function')
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}options
-			 *            {Boolean}options.time: 取得月相時，亦取得時刻。
+			 *            {Boolean}options.time: 取得月相時，亦取得時刻。<br />
+			 *            {Boolean|String}options.晦: 顯示晦。<br />
+			 *            {Boolean}options.index: 顯示 index 而非名稱。
 			 * 
-			 * @returns {Number} phase: 0朔0°, 1上弦90°, 2望180°, 3下弦270°
+			 * @returns {Number} phase: 0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 */
 			function lunar_phase_of_JD(JD, options) {
 				// 90: TURN_TO_DEGREES / 4相 = 360 / 4
@@ -2486,14 +2490,16 @@ if (typeof CeL === 'function')
 					// phase: -2~1
 					if (phase < 0)
 						phase += 4;
+					var phase_shown = options.index ? phase
+							: LUNAR_PHASE_NAME[phase];
 					if (options && options.time)
-						return [ phase, accurate_lunar_phase(
+						return [ phase_shown, accurate_lunar_phase(
 						//
 						Julian_century(JD) * 100 + 2000, phase, {
 							JD : JD,
 							nearest : true
 						}) ];
-					return phase;
+					return phase_shown;
 				}
 
 				if (options.晦 && phase === -1 && 0 ===
@@ -2508,6 +2514,21 @@ if (typeof CeL === 'function')
 			// ------------------------------------------------------------------------------------------------------//
 			// 制曆/排曆/排陰陽曆譜
 			// 中國傳統曆法是一種陰陽合曆，以月相定月份，以太陽定年周期。
+
+			/**
+			 * normalize minute offset.
+			 * 
+			 * @param {Number}minute_offset
+			 *            time-zone offset from UTC in minutes.<br />
+			 *            e.g., UTC+8: 8 * 60 = 480
+			 * 
+			 * @returns {Number} normalized minute offset
+			 */
+			function normalize_minute_offset(minute_offset) {
+				return isNaN(minute_offset) ? library_namespace
+				//
+				.String_to_Date.default_offset : minute_offset;
+			}
 
 			/**
 			 * JD to local midnight (00:00)
@@ -2550,10 +2571,7 @@ if (typeof CeL === 'function')
 			 * @returns {Array} 年朔日 = [ [JD, JD, ...], 冬至所在月 ]
 			 */
 			function 子月序(CE_year, minute_offset) {
-				if (isNaN(minute_offset))
-					minute_offset = library_namespace
-					//
-					.String_to_Date.default_offset;
+				minute_offset = normalize_minute_offset(minute_offset);
 
 				// 冬至所在月為十一月，之後為十二月、正月、二月……復至十一月。
 				var 冬至 = solar_term_JD(CE_year, 冬至序),
@@ -2584,9 +2602,11 @@ if (typeof CeL === 'function')
 			 *            time-zone offset from UTC in minutes.<br />
 			 *            e.g., UTC+8: 8 * 60 = 480
 			 * 
-			 * @returns {Array} 年朔日 = [ 朔日JD, 朔日JD, ... ]
+			 * @returns {Array} 年朔日 = [ {Number}朔日JD, 朔日JD, ... ]
 			 */
 			function 建子朔日(年, minute_offset) {
+				minute_offset = normalize_minute_offset(minute_offset);
+
 				var 朔日 = 子月序(年 - 1, minute_offset),
 				//
 				次年朔日 = 子月序(年, minute_offset);
@@ -2619,12 +2639,57 @@ if (typeof CeL === 'function')
 				} else if (朔日.length !== 12)
 					library_namespace.err(年 + '年有' + 朔日.length + '個月!');
 
-				// [ 朔日JD, 朔日JD, ... ].閏 = {Boolean};
+				// [ {Number}朔日JD, 朔日JD, ... ].閏 = {Boolean};
 				return 朔日;
 			}
 
 			/**
-			 * 編排中國傳統曆法(陰陽曆)，取得整年朔日/月齡。
+			 * 年朔日 = 朔日_cache[ 年 + '/' + minute_offset ]<br /> = [
+			 * {Number}朔日JD, 朔日JD, ... ]<br />
+			 * e.g., [ 1727075.1666666667, 1727104.1666666667, ... ]
+			 * 
+			 * 年朔日.閏 = {Boolean};
+			 * 
+			 * @inner
+			 */
+			var 朔日_cache = [];
+
+			/**
+			 * clone 曆數
+			 * 
+			 * @param {String}index
+			 *            cache index
+			 * @param {Object}options
+			 *            options
+			 * @param {Array}[朔日]
+			 *            本初年朔日曆數
+			 * 
+			 * @returns {Array} 年朔日曆數
+			 * 
+			 * @inner
+			 */
+			function clone_朔日(index, options, 朔日) {
+				if (朔日)
+					朔日_cache[index] = 朔日;
+				else if (!(朔日 = 朔日_cache[index]))
+					return;
+
+				if (options.月名 && !朔日.月名)
+					朔日.月名 = 排曆.月名(朔日);
+
+				var clone = 朔日.slice();
+				clone.end = 朔日.end;
+				if (options.月名)
+					// 添加月名
+					clone.月名 = 朔日.月名.slice();
+				if (朔日.閏)
+					clone.閏 = 朔日.閏;
+
+				return clone;
+			}
+
+			/**
+			 * 編排中國傳統曆法（陰陽曆），取得整年朔日/月齡。
 			 * 
 			 * @param {Integer}年
 			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8 ~ 2000/11/25
@@ -2637,7 +2702,7 @@ if (typeof CeL === 'function')
 			 *            {Integer}options.year_offset: 年數將自動加上此 offset。<br />
 			 *            {Boolean}options.月名: 順便加上 .月名 = [ 月名 ]
 			 * 
-			 * @returns {Array} 年朔日 = [ 朔日JD, 朔日JD, ... ]
+			 * @returns {Array} 年朔日 = [ {Number}朔日JD, 朔日JD, ... ]
 			 */
 			function 排曆(年, options) {
 				if (!LEA406_loaded('V'))
@@ -2650,7 +2715,8 @@ if (typeof CeL === 'function')
 
 				var 建正 = options.建正,
 				//
-				minute_offset = options.minute_offset;
+				minute_offset = normalize_minute_offset(options.minute_offset);
+
 				if (library_namespace.is_Date(年)) {
 					if (isNaN(minute_offset))
 						minute_offset = 年[
@@ -2665,18 +2731,30 @@ if (typeof CeL === 'function')
 				if (isNaN(建正) && NOT_FOUND ===
 				//
 				(建正 = library_namespace.BRANCH_LIST.indexOf(建正))) {
-					// default 建正
+					// default 預設建正為建寅
 					// 正謂年始，朔謂月初，言王者得政，示從我始，改故用新，隨寅、丑、子所建也。周子，殷丑，夏寅，是改正也；周夜半，殷雞鳴夏平旦，是易朔也。
-					if (isNaN(排曆.建正))
-						排曆.建正 = library_namespace.BRANCH_LIST.indexOf('寅');
+					if (排曆.建正 && isNaN(排曆.建正)) {
+						排曆.建正 = library_namespace.BRANCH_LIST.indexOf(排曆.建正);
+						if (排曆.建正 === NOT_FOUND) {
+							library_namespace.warn('排曆: Invalid 建正');
+							排曆.建正 = undefined;
+						}
+					}
 					建正 = 排曆.建正;
 				}
 
-				var 朔日 = 建子朔日(年, minute_offset);
+				// 至此已確定: 年, 建正, minute_offset.
+
+				var cache_index = 年 + '/' + 建正 + '/' + minute_offset,
+				//
+				朔日 = clone_朔日(cache_index, options);
+				if (朔日)
+					return 朔日;
+
+				朔日 = 建子朔日(年, minute_offset);
 
 				if (建正 === 0)
-					// 曆數
-					return 朔日;
+					return clone_朔日(cache_index, options, 朔日);
 
 				var 閏 = 朔日.閏 - 建正;
 				library_namespace.debug('建正 ' + 建正 + ', ' + 朔日.閏 + ', 閏=' + 閏,
@@ -2711,13 +2789,11 @@ if (typeof CeL === 'function')
 				if (閏)
 					朔日.閏 = 閏;
 
-				if (options.月名)
-					朔日.月名 = 排曆.月名(朔日);
-
-				// [ 朔日JD, 朔日JD, ... ].閏 = {Boolean};
-				// e.g., [ 1727075.1666666667, 1727104.1666666667, ... ]
-				return 朔日;
+				return clone_朔日(cache_index, options, 朔日);
 			}
+
+			// default 預設建正為建寅
+			排曆.建正 = '寅';
 
 			排曆.月名 = function(年朔日) {
 				var 閏 = 年朔日.閏, 月序 = 0;

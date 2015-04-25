@@ -2277,14 +2277,10 @@ function affairs() {
 
 	// -----------------------------
 
-	// Data is not yet loaded.
-	// Data will be loaded as soon as it becomes available.
-	var data_load_message = 'Data will be loaded soon.',
+	var data_load_message = 'Data will be presented at next calculation.',
 	// copy from data.date.
 	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
 	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
-	//
-	LUNAR_PHASE_NAME = '朔,上弦,望,下弦'.split(','),
 	//
 	建除_LIST = '建除滿平定執破危成收開閉'.split(''),
 	// https://github.com/zealotrush/ben_rime/blob/master/symbols.yaml
@@ -2416,7 +2412,7 @@ function affairs() {
 		astronomy : [ '天文計算 astronomical calculations',
 				[ '因為採用了完整的 LEA-406' + CeL.LEA406.default_type
 				//
-				+ ' 來計算月亮位置，關於月亮位置之項目，每次執行常需耗費數秒至一兩分鐘，敬請見諒。', {
+				+ ' 來計算月亮位置，關於月亮位置之項目，每次執行常需耗費數秒至一兩分鐘，敬請見諒。您可', {
 					a : '改採 LEA-406'
 					//
 					+ (CeL.LEA406.default_type === 'a' ? 'b' : 'a'),
@@ -2429,9 +2425,9 @@ function affairs() {
 						history.go(0);
 						return false;
 					}
-				}, '（a 較精確，b 較快。', {
-					em : '將重新整理！'
-				}, '）' ] ],
+				}, '（a 較精確，b 較快。點選後將', {
+					em : '隨即重新整理'
+				}, '、更改設定！）' ] ],
 
 		solarterms : [ {
 			a : {
@@ -2577,7 +2573,7 @@ function affairs() {
 			if (Array.isArray(phase))
 				phase = [ {
 					b : {
-						T : LUNAR_PHASE_NAME[phase[0]]
+						T : phase[0]
 					}
 				}, ' ', CeL.JD_to_Date(phase[1]).format({
 					parser : 'CE',
@@ -2597,7 +2593,7 @@ function affairs() {
 			a : {
 				T : 'lunisolar'
 			},
-			R : 'lunisolar calendar. 計算得出之中國傳統曆法(陰陽曆)，非實曆。',
+			R : 'lunisolar calendar. 計算得出之中國傳統曆法（陰陽曆），非實曆。預設建正為建寅。',
 			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
 		}, function(date) {
 			if (/* date.準 || */date.精)
