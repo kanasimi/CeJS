@@ -1888,7 +1888,7 @@ function set_era_by_url_data(era) {
 // ---------------------------------------------------------------------//
 
 var thdl_solar_term,
-// 明清節氣
+// 明清實曆節氣
 initialize_thdl_solar_term = function() {
 	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
 	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
@@ -1950,6 +1950,7 @@ initialize_thdl_solar_term = function() {
 	});
 
 	thdl_solar_term = result;
+	thdl_solar_term.準 = 1645;
 
 	initialize_thdl_solar_term = null;
 }
@@ -2801,6 +2802,39 @@ function affairs() {
 			+ '; ' + date.to_Indian_national();
 		} ],
 
+		// Chinese Buddhist calendar
+		Buddhist : [ {
+			a : {
+				T : '佛曆'
+			},
+			R : '佛紀，1911–。佛曆年 = 公曆年 + 543，若過佛誕日（印度曆二月初八，農曆四月初八。）再加1年。\n'
+			//
+			+ '有採用0年。非精確時，可能有最多前後一年的誤差。',
+			href : 'https://zh.wikipedia.org/wiki/%E4%BD%9B%E6%9B%86'
+		}, function(date) {
+			var year = date.getFullYear() | 0;
+			if (year < 1911) {
+				year += 543;
+				if (date.getMonth() >= 4)
+					year++;
+				return '約' + year + '年';
+			}
+
+			var era = CeL.era('中曆', {
+				get_era : true
+			});
+			if (date - era.start > 0) {
+				era = era.Date_to_date_index(date);
+				// 過佛誕日（農曆四月初八）再加1年。
+				// era: index (0~)
+				if (era[1] > 3 || era[1] === 3 && era[2] >= 7)
+					year++;
+			}
+			return (year + 543) + (date.精 === '年' ? '年' : '/'
+			//
+			+ (date.getMonth() + 1) + '/' + date.getDate());
+		} ],
+
 		Bahai : [ {
 			a : {
 				T : '巴哈伊曆'
@@ -2843,39 +2877,21 @@ function affairs() {
 			}).slice(0, 3).join('/') + '; ' + date.to_Ethiopian();
 		} ],
 
-		// Chinese Buddhist calendar
-		Buddhist : [
-				{
-					a : {
-						T : '佛曆'
-					},
-					R : '佛紀，1911–。佛曆年 = 公曆年 + 543，若過佛誕日（印度曆二月初八，農曆四月初八。）再加1年。\n有採用0年。非精確時，可能有最多前後一年的誤差。',
-					href : 'https://zh.wikipedia.org/wiki/%E4%BD%9B%E6%9B%86'
-				},
-				function(date) {
-					var year = date.getFullYear() | 0;
-					if (year < 1911) {
-						year += 543;
-						if (date.getMonth() >= 4)
-							year++;
-						return '約' + year + '年';
-					}
-
-					var era = CeL.era('中曆', {
-						get_era : true
-					});
-					if (date - era.start > 0) {
-						era = era.Date_to_date_index(date);
-						// 過佛誕日（農曆四月初八）再加1年。
-						// era: index (0~)
-						if (era[1] > 3 || era[1] === 3 && era[2] >= 7)
-							year++;
-					}
-					return (year + 543)
-							+ (date.精 === '年' ? '年' : '/'
-									+ (date.getMonth() + 1) + '/'
-									+ date.getDate());
-				} ],
+		Republican : [ {
+			a : {
+				T : 'Calendrier républicain'
+			},
+			R : 'Le calendrier républicain,'
+			//
+			+ ' ou calendrier révolutionnaire français.',
+			href : 'https://fr.wikipedia.org/wiki/Calendrier_r%C3%A9publicain'
+		}, function(date) {
+			return date.精 === '年' ? date.to_Republican({
+				format : 'serial'
+			})[0] + '年' : date.to_Republican({
+				format : 'serial'
+			}).slice(0, 3).join('/') + '; ' + date.to_Republican();
+		} ],
 
 		// --------------------------------------------------------------------
 		// 列具曆注
@@ -2890,33 +2906,42 @@ function affairs() {
 		// 納音 12直 27宿 7曜 節気/72候/没滅日 大小歳/凶会 下段 雑注 日遊 節月
 		// http://www.wagoyomi.info/guchu.cgi
 
-		Chinese_solar_terms : [ {
-			a : {
-				T : '明清節氣'
-			},
-			R : '明朝、清朝、中國傳統曆法 (1516–1941 CE) 之實曆節氣 from 時間規範資料庫.\n'
-			//
-			+ '有些嚴重問題須注意，見使用說明。',
-			href : 'http://140.112.30.230/datemap/reference.php'
-		}, function(date) {
-			if (/* date.準 || */date.精)
-				return '';
+		Chinese_solar_terms : [
+				{
+					a : {
+						T : '明清節氣'
+					},
+					R : '明朝、清朝、中國傳統曆法 (1516–1941 CE) 之實曆節氣 from 時間規範資料庫.\n'
+					//
+					+ '有些嚴重問題須注意，見使用說明。',
+					href : 'http://140.112.30.230/datemap/reference.php'
+				},
+				function(date) {
+					if (/* date.準 || */date.精)
+						return '';
 
-			initialize_thdl_solar_term && initialize_thdl_solar_term();
+					initialize_thdl_solar_term && initialize_thdl_solar_term();
 
-			var year = date.getFullYear();
-			if (year < thdl_solar_term.start)
-				return '';
-			var year_data = thdl_solar_term[year];
-			if (!year_data
-			//
-			|| (date = date.getTime()) < year_data[0])
-				// 試試看前一年。
-				year_data = thdl_solar_term[--year];
+					var year = date.getFullYear();
+					if (year < thdl_solar_term.start)
+						return '';
+					var time, year_data = thdl_solar_term[year];
+					if (!year_data
+					//
+					|| (time = date.getTime()) < year_data[0])
+						// 試試看前一年。
+						year_data = thdl_solar_term[--year];
 
-			if (year_data)
-				return CeL.SOLAR_TERMS[year_data.indexOf(date)] || '';
-		} ],
+					year_data = year_data
+							&& CeL.SOLAR_TERMS[year_data.indexOf(time)] || '';
+					return year_data ? date.getFullYear() < thdl_solar_term.準 ? {
+						span : year_data,
+						R : '推算所得',
+						S : 'color:#888;'
+					}
+							: year_data
+							: '';
+				} ],
 
 		// 日柱的五行 日の五行 : 以六十甲子納音代
 		納音 : [ {

@@ -175,15 +175,15 @@ function new_tester(to_Calendar, to_Date, options) {
 	//
 	month_days = options.month_days, CE_format = options.CE_format, continued_month = options.continued_month;
 
-	return function(start_Date, end_Date, error_limit) {
-		start_Date = typeof start_Date === 'number' ? epoch + (start_Date | 0)
-				* ONE_DAY_LENGTH_VALUE : start_Date - 0;
+	return function(begin_Date, end_Date, error_limit) {
+		begin_Date = typeof begin_Date === 'number' ? epoch + (begin_Date | 0)
+				* ONE_DAY_LENGTH_VALUE : begin_Date - 0;
 		var tmp = typeof end_Date === 'string'
 				&& end_Date.trim().match(/^\+(\d+)$/);
-		end_Date = tmp || typeof end_Date === 'number' ? (tmp ? start_Date
+		end_Date = tmp || typeof end_Date === 'number' ? (tmp ? begin_Date
 				: epoch)
 				+ end_Date * ONE_DAY_LENGTH_VALUE : end_Date - 0;
-		if (isNaN(start_Date) || isNaN(end_Date))
+		if (isNaN(begin_Date) || isNaN(end_Date))
 			return;
 
 		function get_month_serial(month) {
@@ -196,18 +196,18 @@ function new_tester(to_Calendar, to_Date, options) {
 			return month;
 		}
 
-		var start = new Date, date_name, old_date_name, error = [];
+		var begin = new Date, date_name, old_date_name, error = [];
 		if (!(0 < error_limit && error_limit < 1e9))
 			error_limit = new_tester.default_options.error_limit;
 
-		for (; start_Date <= end_Date && error.length < error_limit; start_Date += ONE_DAY_LENGTH_VALUE) {
+		for (; begin_Date <= end_Date && error.length < error_limit; begin_Date += ONE_DAY_LENGTH_VALUE) {
 			// 正解: Date → calendar date
-			date_name = to_Calendar(new Date(start_Date), options);
+			date_name = to_Calendar(new Date(begin_Date), options);
 			if (old_date_name
 					//
 					&& (date_name[2] - old_date_name[2] !== 1 || old_date_name[1] !== date_name[1])) {
 				if (false)
-					library_namespace.log((start_Date - epoch)
+					library_namespace.log((begin_Date - epoch)
 							/ ONE_DAY_LENGTH_VALUE + ': ' + date_name.join());
 				// 確定 old_date_name 的下一個天為 date_name。
 				// 月差距
@@ -225,21 +225,21 @@ function new_tester(to_Calendar, to_Date, options) {
 						|| date_name[2] === old_date_name[2])
 					error.push('日期名未接續: ' + old_date_name.join('/') + ' ⇨ '
 							+ date_name.join('/') + ' ('
-							+ (new Date(start_Date)).format(CE_format) + ')');
+							+ (new Date(begin_Date)).format(CE_format) + ')');
 			}
 			old_date_name = date_name;
 
 			// 反解: calendar date → Date
 			tmp = to_Date(date_name[0], date_name[1], date_name[2]);
-			if (start_Date - tmp !== 0)
-				error.push(start_Date + ' ('
-						+ (new Date(start_Date)).format(CE_format) + ', '
-						+ (start_Date - epoch) / ONE_DAY_LENGTH_VALUE
-						+ ' days): ' + date_name.join('/') + ' → '
+			if (begin_Date - tmp !== 0)
+				error.push(begin_Date + ' ('
+						+ (new Date(begin_Date)).format(CE_format) + ', '
+						+ (begin_Date - epoch) / ONE_DAY_LENGTH_VALUE
+						+ ' days): ' + date_name.join(',') + ' → '
 						+ tmp.format(CE_format));
 		}
 
-		library_namespace.debug((new Date - start) + ' ms, error '
+		library_namespace.debug((new Date - begin) + ' ms, error '
 				+ error.length + '/' + error_limit);
 		return error;
 	};
@@ -354,7 +354,7 @@ function Tabular_Date(year, month, date, shift) {
 	+ (date || 1) - 1) * ONE_DAY_LENGTH_VALUE);
 }
 
-// 622/7/15 18:0 Tabular start offset
+// 622/7/15 18:0 Tabular begin offset
 // 伊斯蘭曆每日以日落時分日。例如 AH 1/1/1 可與公元 622/7/16 互換，
 // 但 AH 1/1/1 事實上是從 622/7/15 的日落時算起，一直到 622/7/16 的日落前為止。
 // '622/7/16'.to_Date('CE').format(): '622/7/19' === new Date(622, 7 - 1, 19)
@@ -645,7 +645,7 @@ Hebrew_Date.month_serial = function(month_name, is_leap_year) {
 // leap year: 0－12
 //
 // for numeral month name (i.e. month serial):
-// Hebrew year start at 7/1, then month 8, 9, .. 12, 1, 2, .. 6.
+// Hebrew year begins on 7/1, then month 8, 9, .. 12, 1, 2, .. 6.
 //
 // common year: 7→0 (Tishri), 8→1, .. 12→5 (Adar),
 // 1→6 (Nisan), 2→7, .. 6→11 (Elul)
@@ -701,7 +701,7 @@ Hebrew_Date.is_leap = function(year) {
 Simplify[12*(year - 1) + (7*year - 6)/19]
 1/19 (-234 + 235 year)
 */
-// 累積 months of new year start (7/1)
+// 累積 months of new year begins (7/1)
 Hebrew_Date.month_count = function(year, month_index) {
 	return Math.floor((235 * year - 234 | 0) / 19) + (month_index | 0);
 };
@@ -758,7 +758,7 @@ Hebrew_Date.delay_days = function(year) {
 
 	// phase 1
 	// http://www.stevemorse.org/jcal/rules.htm
-	// Computing the start of year (Rosh Hashanah):
+	// Computing the beginning of year (Rosh Hashanah):
 	if (delay_days =
 	// (2) If molad Tishri occurs at 18 hr (i.e., noon) or later, Tishri 1 must
 	// be delayed by one day.
@@ -946,13 +946,13 @@ year
 
 test:
 
-var start = new Date;
+var begin = new Date;
 for (var year = 0, new_year_days, days = 0; year <= 1e5; year++)
 	for (new_year_days = CeL.Hebrew_Date.new_year_days(year + 1); days < new_year_days; days++)
 		if (CeL.Hebrew_Date.year_of_days(days) !== year)
 			throw 'CeL.Hebrew_Date.year_of_days(' + days + ') = '
 					+ CeL.Hebrew_Date.year_of_days(days) + ' != ' + year;
-console.log('CeL.Hebrew_Date.year_of_days() 使用時間: ' + (new Date - start) / 1000);
+console.log('CeL.Hebrew_Date.year_of_days() 使用時間: ' + (new Date - begin) / 1000);
 //CeL.Hebrew_Date.year_of_days() 使用時間: 154.131
 
 */
@@ -2320,8 +2320,8 @@ function Coptic_Date(year, month, date, get_days, year_0) {
 			* ONE_DAY_LENGTH_VALUE);
 }
 
-// year 1/1/1 starts at 284/8/29.
-// year 0/1/1 starts at 283/8/30.
+// year 1/1/1 begins on 284/8/29.
+// year 0/1/1 begins on 283/8/30.
 // the Coptic_Date.epoch is Coptic 1/1/1!
 Coptic_Date.epoch = String_to_Date('284/8/29', {
 	parser : 'Julian'
@@ -2412,7 +2412,7 @@ function Ethiopian_Date(year, month, date, year_0) {
 	return Coptic_Date(year, month, date, false, true);
 }
 
-// year 1/1/1 starts at 8/8/29.
+// year 1/1/1 begins on 8/8/29.
 // Ethiopians and followers of the Eritrean churches today use the Incarnation Era, which dates from the Annunciation or Incarnation of Jesus on March 25 of 9 AD (Julian), as calculated by Annianus of Alexandria c. 400; thus its first civil year began seven months earlier on August 29, 8 AD. Meanwhile, Europeans eventually adopted the calculations made by Dionysius Exiguus in 525 AD instead, which placed the Annunciation eight years earlier than had Annianus.
 Ethiopian_Date.epoch = String_to_Date('008/8/29', {
 	parser : 'Julian'
@@ -2464,6 +2464,139 @@ Ethiopian_Date.test = new_tester(Date_to_Ethiopian, Ethiopian_Date, {
 _.Ethiopian_Date = Ethiopian_Date;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// Le calendrier républicain, ou calendrier révolutionnaire français (法國共和曆, French Republican Calendar).
+
+// ** Warning: need application.astronomy
+
+// 每月30天。
+var French_Republican_MONTH_DAYS = 30,
+//French: UTC+1
+French_Republican_UTC_offset = 1 * 60,
+//French year 1: began on 1792 CE
+French_Republican_CE_offset = 1792 - 1,
+//French year 1: begins on French_Republican_year_start[10001]
+French_Republican_cache_offset = 10000,
+//cache Array
+French_Republican_year_start_cache = [],
+//
+French_Republican_month_name = '|Vendémiaire|Brumaire|Frimaire|Nivôse|Pluviôse|Ventôse|Germinal|Floréal|Prairial|Messidor|Thermidor|Fructidor|Jours complémentaires'
+		.split('|'),
+//
+French_Republican_weekday_name = "Primidi|Duodi|Tridi|Quartidi|Quintidi|Sextidi|Septidi|Octidi|Nonidi|Décadi".split('|');
+
+French_Republican_Date.month_name = function(month) {
+	return French_Republican_month_name[month];
+};
+
+function French_Republican_year_starts(year) {
+	var year_start = French_Republican_year_start_cache[year
+			+ French_Republican_cache_offset];
+	if (!year_start) {
+		year_start = library_namespace
+				.JD_to_Date(library_namespace.midnight_of(library_namespace
+						.solar_term_JD(year
+						// 12: CeL.SOLAR_TERMS.indexOf('秋分')
+						+ French_Republican_CE_offset, 12),
+						French_Republican_UTC_offset)
+						+ (French_Republican_UTC_offset - library_namespace.String_to_Date.default_offset)
+						/ 60 / 24);
+		// 歸零用
+		var ms = year_start.getMilliseconds();
+		// 歸零
+		if (ms)
+			year_start.setMilliseconds(Math.round(ms / 500) * 500);
+
+		library_namespace.debug('calendrier républicain year ' + year
+				+ ' begin on ' + year_start.format(), 2);
+		French_Republican_year_start_cache[year
+				+ French_Republican_cache_offset]
+		// cache
+		= year_start = year_start.getTime();
+	}
+
+	return year_start;
+}
+
+/**
+* calendrier républicain → Gregorian Date @ local
+* 
+* TODO: time
+* 
+* @param {Integer}year
+* @param {Integer}month
+*            using 13 for the complementary days.
+* @param {Integer}date
+* 
+* @returns {Date} Gregorian calendar
+*/
+function French_Republican_Date(year, month, date) {
+	// no year 0
+	if (year < 1)
+		year++;
+	return new Date(French_Republican_year_starts(year)
+	// 一年分為12個月，每月30天，每月分為3周，每周10天，廢除星期日，每年最後加5天，閏年加6天。
+	+ ((month - 1) * French_Republican_MONTH_DAYS + date - 1)
+			* ONE_DAY_LENGTH_VALUE);
+}
+
+_.Republican_Date = French_Republican_Date;
+
+function Date_to_French_Republican(date, options) {
+	var year = date.getFullYear() - French_Republican_CE_offset,
+	//
+	month = date.getMonth(), days;
+
+	// 9月之前，位在前一年。
+	if (month < 9 - 1
+	//
+	|| (days = date - French_Republican_year_starts(year)) < 0)
+		days = date - French_Republican_year_starts(--year);
+	// assert: days >= 0
+	days /= ONE_DAY_LENGTH_VALUE;
+
+	date = mod(Math.floor(days), French_Republican_MONTH_DAYS);
+	// year/0/0 → year/1/1
+	date[0]++;
+	date[1]++;
+	if (days %= 1)
+		// Each day was divided in 10 hours of 100 minutes.
+		// 共和曆的時間單位為十進位制，一旬為十日，一日為十小時，一小時為一百分鐘，一分鐘為一百秒
+		date.push(days);
+	// no year 0
+	if (year < 1)
+		year--;
+	date.unshift(year);
+	
+	days = _format(date, options, French_Republican_Date.month_name);
+	if (typeof days === 'string' && (year = days.match(/^(\d+ \D+ )(\d+)$/)))
+		// e.g., output:
+		// Septidi, 7 Floréal an 223
+		// TODO: Septidi, 7 Floréal an CCXXIII
+		days = French_Republican_weekday_name[
+		//
+		(date[2] - 1) % French_Republican_weekday_name.length]
+		//
+		+ ', ' + year[1] + 'an ' + year[2];
+	return days;
+}
+
+/*
+
+CeL.Republican_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
+// "OK"
+
+*/
+French_Republican_Date.test = new_tester(Date_to_French_Republican, French_Republican_Date, {
+	epoch : Date.parse('1792/9/22'),
+	month_days : {
+		'30' : 'common month',
+		'5' : 'common complementary days',
+		'6' : 'complementary days in leap year'
+	}
+});
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // export methods.
 
 
@@ -2479,7 +2612,8 @@ library_namespace.set_method(Date.prototype, {
 	to_Indian_national : set_bind(Date_to_Indian_national),
 	to_Bahai : set_bind(Date_to_Bahai),
 	to_Coptic : set_bind(Date_to_Coptic),
-	to_Ethiopian : set_bind(Date_to_Ethiopian)
+	to_Ethiopian : set_bind(Date_to_Ethiopian),
+	to_Republican : set_bind(Date_to_French_Republican)
 });
 
 

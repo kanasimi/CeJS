@@ -314,7 +314,7 @@ function String_to_Date(date_string, options) {
 
 
 // 本地之 time zone / time offset (UTC offset by minutes)。
-// e.g., UTC+8: 8 * 60 = 480
+// e.g., UTC+8: 8 * 60 = +480
 // e.g., UTC-5: -5 * 60
 // 亦為 Date.parse(date_string) 與 new Date() 會自動附上的當地時間差距。
 // assert: String_to_Date.default_offset 為整數。
@@ -872,6 +872,8 @@ Date_to_String = Date_to_String;
 
 //---------------------------------------------------------
 
+// 一分鐘的 time 值。should be 60 * 1000 = 60000.
+var ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1);
 
 /**
  * 依照指定 strftime 格式輸出日期與時間。
@@ -905,6 +907,13 @@ function strftime(date_value, format, locale, options) {
 	 * 所須搜尋的 conversion specifications (轉換規格) pattern.
 	 */
 	search = strftime.search[locale] || strftime.search[strftime.null_domain];
+
+	// to this minute offset. UTC+8: 8 * 60 = +480
+	if (options.offset && !isNaN(options.offset)) {
+		date_value = new Date(date_value.getTime() + ONE_MINTE_LENGTH_VALUE *
+		//
+		(options.offset - String_to_Date.default_offset));
+	}
 
 	function convertor(s) {
 		return s.replace(search, function($0, $1, $2) {

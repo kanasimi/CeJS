@@ -81,7 +81,29 @@ if (false) {
 		// get ≈ [ -3.788/3600, 9.443/3600 ]
 
 		// 取得 Gregorian calendar 1977 年，中曆 1978 年之冬至日時間。
-		CeL.solar_term_JD(1977, 18);
+		CeL.solar_term_JD(1977, '冬至');
+
+		// 取得 Le calendrier républicain (法國共和曆)行用期間之年首。
+		// method 1: 取得法國當地之 0:0
+		for (var year = 1792; year <= 1805; year++)
+			console.log(CeL.JD_to_Date(
+			// 1: UTC+1 → minute offset
+			CeL.midnight_of(CeL.solar_term_JD(year, '秋分'), 1 * 60)).format({
+				offset : 1 * 60
+			}));
+		// method 2: 將 date 當作 local 之 0:0
+		for (var year = 1792; year <= 1805; year++) {
+			// 1: UTC+1 → minute offset
+			var date = CeL.JD_to_Date(CeL.midnight_of(CeL.solar_term_JD(year,
+					'秋分'), 1 * 60)
+					+ (1 * 60 - CeL.String_to_Date.default_offset) / 60 / 24),
+			// 歸零用
+			ms = date.getMilliseconds();
+			// 歸零
+			if (ms)
+				date.setMilliseconds(Math.round(ms / 500) * 500);
+			console.log(date.format());
+		}
 
 		CeL.assert([ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4');
 		CeL.assert([ 2014, CeL.立春年(new Date('2015/2/3')) ], '立春年 2015/2/3');
@@ -1419,7 +1441,7 @@ if (typeof CeL === 'function')
 			_.JD_of_solar_angle = JD_of_solar_angle;
 
 			/**
-			 * 取得指定年分 year 年，指定節氣/分點和至點之 Julian date。
+			 * 定氣：取得指定年分 year 年，指定節氣/分點和至點之 Julian date。
 			 * 
 			 * from http://ssd.jpl.nasa.gov/horizons.cgi#results<br />
 			 * DE-0431LE-0431 GEOCENTRIC<br />
@@ -1440,7 +1462,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Integer}year
 			 *            year 年(CE)
-			 * @param {Number}index
+			 * @param {Number|String}index
 			 *            index. 0: 春分
 			 * @param {Number}[type]
 			 *            1: 分點和至點, others (default): 二十四節氣，<br />
@@ -1452,6 +1474,12 @@ if (typeof CeL === 'function')
 			 */
 			function solar_term_JD(year, index, type) {
 				var angle;
+
+				if (typeof index === 'string' && NOT_FOUND !==
+				//
+				(angle = SOLAR_TERMS_NAME.indexOf(index)))
+					index = angle, type = 0;
+
 				if (type === 1)
 					angle = (index | 0) * TURN_TO_DEGREES
 							/ EQUINOX_SOLSTICE_COUNT;
@@ -2257,8 +2285,8 @@ if (typeof CeL === 'function')
 			var lunar_phase_of_JD_cache = [];
 
 			/**
-			 * get the longitudinal angle between the Moon and the Sun.
-			 * 計算月日視黃經差。
+			 * get the longitudinal angle between the Moon and the Sun. 計算 JD
+			 * 時的月日視黃經差（月-日）。
 			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
@@ -2341,7 +2369,7 @@ if (typeof CeL === 'function')
 
 			/**
 			 * get JD of lunar phase. Using full LEA-406a or LEA-406b model.
-			 * 之精準值。可用來計算月相、日月合朔(黑月/新月)、弦、望(滿月，衝)、月食、月齡。
+			 * 計算特定月相之時間精準值。可用來計算月相、日月合朔(黑月/新月)、弦、望(滿月，衝)、月食、月齡。
 			 * 
 			 * @param {Number}year_month
 			 *            帶小數點的年數
@@ -2619,17 +2647,17 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * JD to local midnight (00:00)
+			 * JD to local midnight (00:00).
 			 * 
 			 * @param {Number}JD
 			 *            Julian date
-			 * @param {Number}minute_offset
+			 * @param {Number}[minute_offset]
 			 *            time-zone offset from UTC in minutes.<br />
-			 *            e.g., UTC+8: 8 * 60 = 480
+			 *            e.g., UTC+8: 8 * 60 = +480. default: UTC+0.
 			 * 
 			 * @returns {Number}
 			 */
-			function JD_to_midnight(JD, minute_offset) {
+			function midnight_JD_of(JD, minute_offset) {
 				var day_offset = (minute_offset | 0) / (24 * 60) - .5;
 				return Math.floor(JD + day_offset) - day_offset;
 
@@ -2638,7 +2666,7 @@ if (typeof CeL === 'function')
 				// +day_offset: recover to UTC
 			}
 
-			// _.JD_to_midnight = JD_to_midnight;
+			_.midnight_of = midnight_JD_of;
 
 			/**
 			 * 冬至序 = 18
@@ -2671,7 +2699,7 @@ if (typeof CeL === 'function')
 				// 魯僖公五年正月壬子朔旦冬至
 				.map(function(JD) {
 					// 日月合朔時間 → 朔日0時
-					return JD_to_midnight(JD, minute_offset);
+					return midnight_JD_of(JD, minute_offset);
 				});
 				年朔日.冬至 = 冬至;
 
