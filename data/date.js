@@ -1132,7 +1132,7 @@ function week_date(date, to_ISO) {
 		week = 53, year--;
 	// 計算首日是否為 星期四 或 (星期三 + leap)；
 	// 此為有 W53 之條件。
-	else if (week > 52 && (days = ((weekday + 1 - days) % 7 + 7) % 7) !== 4
+	else if (week > 52 && (days = (weekday + 1 - days).mod(7)) !== 4
 			&& (days !== 3 || !is_leap_year(year)))
 		week = 1, year++;
 
@@ -1250,9 +1250,7 @@ strftime.default_conversion = {
 		if (options && options.original_Date)
 			date_value = options.original_Date;
 		// 12: BRANCH_LIST.length
-		var diff = Math.floor((date_value - HOUR_STEM_BRANCH_OFFSET) / ONE_時辰_LENGTH_VALUE) % 12;
-		if (diff < 0)
-			diff += 12;
+		var diff = Math.floor((date_value - HOUR_STEM_BRANCH_OFFSET) / ONE_時辰_LENGTH_VALUE).mod(12);
 		return BRANCH_LIST.charAt(diff) + (diff % 2 ? '正' : '初')
 				+ '初一二三'.charAt(date_value.getMinutes() / 4 | 0) + '刻';
 	}
@@ -1938,7 +1936,7 @@ function convert_stem_branch_date(stem_branch, date_value, end_date_diff) {
 					+ (stem_branch % SEXAGENARY_CYCLE_LENGTH);
 		if (Math.abs(end_date_diff) < stem_branch) {
 			// 找出距離範圍最近的日干支。
-			library_namespace.warn('convert_stem_branch_date: 所欲求之日干支 ['+stem_branch+'] 並不在範圍內！');
+			library_namespace.warn('convert_stem_branch_date: 所欲求之日干支 [' + stem_branch + '] 並不在範圍內！');
 			if (stem_branch - Math.abs(end_date_diff) > SEXAGENARY_CYCLE_LENGTH
 					- stem_branch)
 				stem_branch -= SEXAGENARY_CYCLE_LENGTH;

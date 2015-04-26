@@ -6,25 +6,15 @@
  * 
  * TODO:
  * 
- * 簡易朔望/天象計算功能/千年 節氣 計算。<br />
- * http://bieyu.com/<br />
- * http://www.fjptsz.com/xxjs/xjw/rj/117/index.htm
- * http://blog.csdn.net/orbit/article/details/7910220
- * http://www.chris.obyrne.com/Eclipses/calculator.html
  * http://eclipse.gsfc.nasa.gov/JSEX/JSEX-index.html
- * http://www.informatik.uni-leipzig.de/~duc/amlich/calrules.html
- * http://blog.csdn.net/songgz/article/details/2680144
- * http://www.todayonhistory.com/wnl/lhl.htm
+ * https://web.archive.org/web/http://www.chris.obyrne.com/Eclipses/calculator.html
+ * https://en.wikipedia.org/wiki/Astronomical_symbols
+ * 
+ * Software & coded<br />
  * http://www.kentauren.info/menu/index1.htm?page=/cgi-bin/planeph_VSOP87d.pl
  * https://pypi.python.org/pypi/astronomia
  * https://github.com/Hedwig1958/libastro/blob/master/astro.c
  * https://github.com/soniakeys/meeus/blob/master/solar/solar.go
- * https://en.wikipedia.org/wiki/Astronomical_symbols
- * 
- * @see <a href="http://www.nongli.com/item2/index.html" accessdate="2013/5/2
- *      20:23">农历知识:传统节日,24节气，农历历法，三九，三伏，天文历法,天干地支阴阳五行</a>
- * @see <a href="http://www.chinesefortunecalendar.com/CLC/clcBig5.htm"
- *      accessdate="2013/5/2 20:23">如何轉換陰陽曆</a>
  * 
  * 大地測量:給定地球表面兩個點的經緯度,計算兩點間之距離<br />
  * 天球上星體距離<br />
@@ -42,12 +32,26 @@
  * 未來發展：<br />
  * 計算順序: https://github.com/kanasimi/IAU-SOFA/blob/master/doc/sofa_ast_c.pdf
  * 
+ * @see <a href="http://www.nongli.com/item2/index.html" accessdate="2013/5/2
+ *      20:23">农历知识:传统节日,24节气，农历历法，三九，三伏，天文历法,天干地支阴阳五行</a>
+ * @see <a href="http://www.chinesefortunecalendar.com/CLC/clcBig5.htm"
+ *      accessdate="2013/5/2 20:23">如何轉換陰陽曆</a>
+ * 
+ * 簡易朔望/天象計算功能/千年 節氣 計算。<br />
+ * http://bieyu.com/<br />
+ * http://www.fjptsz.com/xxjs/xjw/rj/117/index.htm
+ * 
+ * 通用万年历 寿星万年历 择吉老黄历 http://www.todayonhistory.com/wnl/lhl.htm
+ * 
  */
 
 'use strict';
 // 'use asm';
 
 if (false) {
+
+	// examples
+
 	CeL.run('application.astronomy');
 
 	CeL.run('application.astronomy', function() {
@@ -76,7 +80,7 @@ if (false) {
 		CeL.nutation(2446895.5);
 		// get ≈ [ -3.788/3600, 9.443/3600 ]
 
-		// 取得 Gregorian calendar 1977 年，中曆 1978 年之冬至日時間
+		// 取得 Gregorian calendar 1977 年，中曆 1978 年之冬至日時間。
 		CeL.solar_term_JD(1977, 18);
 
 		CeL.assert([ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4');
@@ -86,7 +90,11 @@ if (false) {
 			CeL.show_degrees(CeL.LEA406(2457132, 'V'));
 		});
 
-		// 取得 Gregorian calendar 1977 年之整年度日月合朔時間
+		// 取得 2200年01月02日0:0 TT 月亮視黃經。
+		CeL.show_degrees(CeL.lunar_coordinate(CeL.Date_to_JD(new Date(
+				'2200-01-02T00:00:00Z'))).V, 3);
+
+		// 取得 Gregorian calendar 1977 年之整年度日月合朔時間。
 		CeL.lunar_phase(1977, 0, {
 			duration : 1,
 			mean : false,
@@ -98,18 +106,23 @@ if (false) {
 			time : true
 		});
 
-		CeL.排曆(2015).map(function(d) {
-			return d[0] + ': ' + CeL.JD_to_Date(d[1]).format('CE');
+		// 取得今年之天文曆譜。
+		var 年朔日 = CeL.定朔((new Date).getFullYear(), {
+			月名 : true
+		});
+		年朔日.map(function(JD, index) {
+			return 年朔日.月名[index] + ': ' + CeL.JD_to_Date(JD).format('CE');
 		}).join('\n');
+
 		// 取得新王莽天鳳3年之天文曆譜。
-		var 年朔日 = CeL.排曆(CeL.era('新王莽天鳳3年'), {
-			建正 : '丑',
+		var 年朔日 = CeL.定朔(CeL.era('新王莽天鳳3年'), {
+			歲首 : '丑',
 			月名 : true
 		});
 		年朔日.map(function(d, index) {
 			return 年朔日.月名[index] + ': ' + CeL.JD_to_Date(d).format('CE');
 		}).join('\n');
-
+		// 取得月日
 		var index = 年朔日.search_sorted(1727054, true);
 		年朔日.月名[index] + '月' + (1727054 - 年朔日[index] | 0) + '日'
 
@@ -232,7 +245,7 @@ if (typeof CeL === 'function')
 			 */
 			AU_TO_METERS = 149597870700,
 			/**
-			 * light-time for AU distance (days).<br />
+			 * light-time for AU distance (in days).<br />
 			 * AU_LIGHT_TIME = 149597870700/299792458/86400 ≈
 			 * 0.005775518331436995
 			 */
@@ -258,7 +271,7 @@ if (typeof CeL === 'function')
 			EQUINOX_SOLSTICE_DEGREES
 			//
 			= TURN_TO_DEGREES / EQUINOX_SOLSTICE_COUNT,
-			// 二十四節氣名。
+			// 二十四節氣名。每月有一個節氣，一個中氣，分別發生在每月的7日和22日前後。
 			SOLAR_TERMS_NAME =
 			// Chinese name: 中氣,節氣,中氣,節氣,...
 			'春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,立春,雨水,驚蟄'
@@ -275,7 +288,7 @@ if (typeof CeL === 'function')
 			 * DEGREES_BETWEEN_SOLAR_TERMS = 15
 			 */
 			DEGREES_BETWEEN_SOLAR_TERMS = TURN_TO_DEGREES / SOLAR_TERMS_COUNT,
-			// 各種月相
+			// 各種月相: 新月、上弦月、滿月、下弦月。
 			LUNAR_PHASE_NAME = '朔,上弦,望,下弦'.split(',');
 
 			_.SOLAR_TERMS = SOLAR_TERMS_NAME;
@@ -397,7 +410,7 @@ if (typeof CeL === 'function')
 			 * 地球的平均轉軸傾角，平黃赤交角。 get mean obliquity of the ecliptic (Earth's
 			 * axial tilt), IAU 2006 precession model.
 			 * 
-			 * 資料來源/資料依據:
+			 * Reference 資料來源/資料依據:
 			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/obl06.c
 			 * 
 			 * @param {Number}JD
@@ -416,8 +429,9 @@ if (typeof CeL === 'function')
 			 * 地球的平均轉軸傾角，平黃赤交角。 get mean obliquity of the ecliptic (Earth's
 			 * axial tilt).
 			 * 
-			 * 資料來源/資料依據: Laskar, J. (1986). "Secular Terms of Classical
-			 * Planetary Theories Using the Results of General Relativity".
+			 * Reference 資料來源/資料依據: Laskar, J. (1986). "Secular Terms of
+			 * Classical Planetary Theories Using the Results of General
+			 * Relativity".
 			 * 
 			 * J. Laskar computed an expression to order T10 good to 0″.02 over
 			 * 1000 years and several arcseconds over 10,000 years.
@@ -462,7 +476,7 @@ if (typeof CeL === 'function')
 			 * 天文計算/星曆表使用 Terrestrial Time (TT, 地球時標)，<br />
 			 * 日常生活中使用 UTC, 接近 Universal Time (UT, 世界時標), 主要為 UT1。<br />
 			 * <br />
-			 * 天文計算用時間 TT = 日常生活時間 UT + ΔT
+			 * 簡略的說，天文計算用時間 TT = 日常生活時間 UT + ΔT
 			 * 
 			 * ΔT is NOT △T
 			 * 
@@ -513,7 +527,7 @@ if (typeof CeL === 'function')
 			 * 天文計算/星曆表使用 Terrestrial Time (TT, 地球時標)，<br />
 			 * 日常生活中使用 UTC, 接近 Universal Time (UT, 世界時標), 主要為 UT1。<br />
 			 * <br />
-			 * 天文計算用時間 TT = 日常生活時間 UT + ΔT
+			 * 簡略的說，天文計算用時間 TT = 日常生活時間 UT + ΔT
 			 * 
 			 * @param {Number}JD
 			 *            Julian date
@@ -543,7 +557,7 @@ if (typeof CeL === 'function')
 				var deltaT = ΔT_of_JD(JD) / ONE_DAY_SECONDS;
 				// normal: UT → TT.
 				// to_UT: TT → UT.
-				// 日常生活時間 UT = 天文計算用時間 TT - ΔT
+				// 簡略的說，日常生活時間 UT = 天文計算用時間 TT - ΔT
 				return to_UT ? JD - deltaT : JD + deltaT;
 			}
 
@@ -569,7 +583,7 @@ if (typeof CeL === 'function')
 			 * 大氣折射公式: 真地平緯度 ← 視地平緯度<br />
 			 * 大氣折射又稱蒙氣差、折光差（蒙氣即行星的大氣）
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms.<br />
 			 * 《天文算法》 chapter 大氣折射.<br />
 			 * based on: G. G. Bennett. (1982). "The Calculation of Astronomical
@@ -671,7 +685,7 @@ if (typeof CeL === 'function')
 			/**
 			 * Sun's aberration. 太陽地心黃經光行差修正量。
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 p.167,168 chapter 太陽位置計算.<br />
 			 * 
@@ -705,7 +719,7 @@ if (typeof CeL === 'function')
 				 * If needed with respect to the mean equinox of the date
 				 * instead of to a fixed reference frame, the constant term
 				 * 3548.193 should be replaced by 3548.330.
-				 * 如果Δλ須是在Date黃道中的，則應把常數項3548.193換為3548.330
+				 * 如果Δλ須是在Date黃道(瞬時黃道/當日黃道?)中的，則應把常數項3548.193換為3548.330
 				 */
 				coefficients[0] += sun_aberration_variation_constant;
 
@@ -727,7 +741,7 @@ if (typeof CeL === 'function')
 			/**
 			 * Sun's aberration. 太陽地心黃經光行差修正量。
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms.<br />
 			 * 《天文算法》 chapter 太陽位置計算 "太陽地心黃經光行差修正項" 式.<br />
 			 * 
@@ -764,7 +778,7 @@ if (typeof CeL === 'function')
 			/**
 			 * IAU 2000B model nutation (地球章動) 修正值。
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Nutation, IAU 2000B model.
 			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut00b.c
 			 * 
@@ -902,7 +916,7 @@ if (typeof CeL === 'function')
 			 * <br />
 			 * does not include nutation or aberration.
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 chapter 太陽位置計算.
 			 * 
@@ -911,7 +925,7 @@ if (typeof CeL === 'function')
 			 * @param {String}object
 			 *            planets 行星.
 			 * @param {Object}[options]
-			 *            options:<br />
+			 *            options 設定特殊功能:<br />
 			 *            {String|Array}options.teams: request teams.<br />
 			 *            L: 日心黃經 the ecliptical longitude in radians (弧度)
 			 *            真黃經，不是軌道經度, NOT the orbital longitude<br />
@@ -1013,7 +1027,7 @@ if (typeof CeL === 'function')
 				 * 座標變換: 轉換到 FK5 (第5基本星表, The Fifth Fundamental Catalogue) 坐標系統。<br />
 				 * VSOP87 → FK5: translate VSOP87 coordinate to the FK5 frame.
 				 * 
-				 * 資料來源/資料依據:<br />
+				 * Reference 資料來源/資料依據:<br />
 				 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 				 * p. 219 formula 32.3
 				 * 
@@ -1121,8 +1135,8 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {String}file_name
 			 *            source file name
-			 * @param {Object}options
-			 *            options
+			 * @param {Object}[options]
+			 *            options 設定特殊功能
 			 * 
 			 * @since 2015/4/15 ‏‎17:46:12, 2015/4/18 21:36:12
 			 */
@@ -1212,9 +1226,9 @@ if (typeof CeL === 'function')
 			// solar coordinates 太陽位置(坐標) & 二十四節氣 (solar terms)
 
 			/**
-			 * 分點和至點, 太陽視黃經λ為0°或90°或180°或270°. 在西元1951–2050的誤差 < 1分.
+			 * 低精度分點和至點的時刻, 太陽視黃經λ為0°或90°或180°或270°. 在 1951–2050 CE 的誤差 < 1分.
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms.<br />
 			 * 《天文算法》 chapter 分點和至點.<br />
 			 * 
@@ -1254,7 +1268,8 @@ if (typeof CeL === 'function')
 				// Δλ
 				(1 + 0.0334 * Math.cos(W) + 0.0007 * Math.cos(2 * W));
 
-				// λ: 太陽黃經☉是Date黃道分點座標的真幾何黃經。要取得視黃經λ，還應加上精確的黃經章動及光行差。
+				// λ: 太陽黃經☉是Date黃道分點座標(瞬時黃道/當日黃道?)的真幾何黃經。
+				// 要取得視黃經λ，還應加上精確的黃經章動及光行差。
 				// TODO: 黃經周年光行差修正量：-20".161 (公式(24.10)), 黃經章動效果：Δψ =
 				// -12".965
 				// (詳見第22章), 轉到 FK5 系統的修正值(-0".09033) (公式(24.9))
@@ -1274,7 +1289,7 @@ if (typeof CeL === 'function')
 			 * ObsEcLon (Observer ecliptic lon. & lat.) or PAB-LON (PHASE angle &
 			 * bisector) @ HORIZONS?
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 p.166 ~ p. 169 Example 25.b
 			 * 
@@ -1415,6 +1430,14 @@ if (typeof CeL === 'function')
 			 * 2015-Mar-20 22:45:10.000 67.185603 359.9999944 0.0000095<br />
 			 * 2015-Mar-20 22:45:10.500 67.185603 0.0000001 0.0000095
 			 * 
+			 * 注意: 1979/1/20 (中曆1978年12月22日) is 大寒 (300°), not 實曆 1979/1/21
+			 * (according to 中央氣象局
+			 * http://www.cwb.gov.tw/V7/astronomy/cdata/calpdf/calpdf.htm,
+			 * 中国科学院紫金山天文台 公农历查询 http://almanac.pmo.ac.cn/cx/gzn/index.htm and
+			 * 香港天文台 http://www.weather.gov.hk/gts/time/conversionc.htm ).
+			 * According to HORIZONS (DE-431), it seems at about 1979/1/20
+			 * 23:59:55.55.
+			 * 
 			 * @param {Integer}year
 			 *            year 年(CE)
 			 * @param {Number}index
@@ -1424,6 +1447,8 @@ if (typeof CeL === 'function')
 			 *            皆自當年黃經0度(春分)開始。
 			 * 
 			 * @returns {Number} Julian date (JD of 日常生活時間 UT)
+			 * 
+			 * @see http://blog.csdn.net/orbit/article/details/7910220
 			 */
 			function solar_term_JD(year, index, type) {
 				var angle;
@@ -1471,12 +1496,14 @@ if (typeof CeL === 'function')
 			solar_terms_cache = [];
 
 			/**
-			 * 取得指定 Julian date 之節氣名，或已經過日數。
+			 * 取得指定 Julian date 之二十四節氣名，或已經過日數、物候(七十二候, 初候/二候/三候, 初候/次候/末候)。
+			 * 
+			 * TODO: 候應, 二十四番花信風 http://baike.baidu.com/view/54438.htm
 			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 日常生活時間 UT)
 			 * @param {Object}[options]
-			 *            options:<br />
+			 *            options 設定特殊功能:<br />
 			 *            options.days: 回傳 [ 節氣年 year (以"春分"分年, 非立春後才過年!), 節氣序
 			 *            index, 已經過日數/剩下幾日 ]。<br />
 			 *            options.pentads: 亦標示七十二候 (物候, 72 pentads)<br />
@@ -1607,10 +1634,21 @@ if (typeof CeL === 'function')
 			立春年_OFFSET = (MONTH_COUNT + START_MONTH) * SOLAR_TERMS_MONTH_RATE
 					- 立春NO | 0;
 
-			// 計算以節氣(實為十二節)分年月。每年以立春交節時刻為界。
-			// 十二節年月, 節氣年月, 立春年月
-			// 立春，指太陽到達黃經315°時，屬相（生肖）以立春作為起始點。
-			// 中國古時春節曾專指立春，也被視為一年的開始。
+			/**
+			 * 取得立春年歲首。
+			 * 
+			 * TODO: 以立春與節氣排曆。計算以節氣(實為十二節)分年月。每年以立春交節時刻為界。<br />
+			 * 十二節年月, 節氣年月, 立春年月
+			 * 
+			 * 立春，指太陽到達黃經315°時，屬相（生肖）以立春作為起始點。 中國古時春節曾專指立春，也被視為一年的開始。
+			 * 
+			 * @param {Date|Integer}date
+			 *            指定年份或日期
+			 * @param {Object}[options]
+			 *            options 設定特殊功能
+			 * 
+			 * @returns {Date} 指定年份或日期所在立春年之歲首(立春時刻)
+			 */
 			function 立春年(date, options) {
 				if (!isNaN(date) && -1000 < date && date < 3000) {
 					// get JD of CE year (date)
@@ -1663,10 +1701,15 @@ if (typeof CeL === 'function')
 			_.立春年 = 立春年;
 
 			// ------------------------------------------------------------------------------------------------------//
-			// LEA-406a lunar model & periodic terms
+			// LEA-406a, LEA-406b lunar model & periodic terms
 
-			// 'a' or 'b'. a 相當耗資源。
-			LEA406.default_type = 'a';
+			/**
+			 * 預設使用 type，'a' or 'b'。
+			 * 
+			 * a 相當耗資源。當前 HORIZONS 已使用 DE-431 LE-431，與 LEA-406 及 ELP/MPP02
+			 * 相差不小。何況 a, b 常僅差不到 10秒，因此似無必要使用 LEA-406a。
+			 */
+			LEA406.default_type = 'b';
 
 			var LEA406_name = 'LEA-406',
 			/**
@@ -1689,21 +1732,19 @@ if (typeof CeL === 'function')
 					17325643723.0470, -527.90, 6.665, -0.5522 ];
 
 			/**
-			 * 計算月亮位置(坐標)，採用完整的 LEA-406a。 using LEA-406a
+			 * 計算月亮位置(坐標)，採用完整的 LEA-406a, LEA-406b。 Using full LEA-406a or
+			 * LEA-406b model.
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * S. M. Kudryavtsev, Long-term harmonic development of lunar
 			 * ephemeris, Astronomy & Astrophysics 471 (2007), pp. 1069-1075.
 			 * http://www.eas.slu.edu/GGP/kudryavtsev/LEA-406.zip
 			 * <q>This is 9–70 times better than the accuracy of the latest analytical theory of lunar motion ELP/MPP02, and the number of terms in the new development is less than that in ELP/MPP02.</q>
 			 * 
-			 * bug(?): 1979/1/20 is 大寒, not 1979/1/21 (according to
-			 * http://www.hko.gov.hk/gts/time/calendar/text/T1979c.txt ).
-			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}[options]
-			 *            options:<br />
+			 *            options 設定特殊功能:<br />
 			 *            {String|Array}options.teams: request teams.<br />
 			 *            V: 黃經 in degrees. ecliptic longitude reckoned along
 			 *            the moving ecliptic from the mean equinox of date<br />
@@ -1731,11 +1772,15 @@ if (typeof CeL === 'function')
 				//
 				warn_team = !options.ignore_team,
 				/**
-				 * spherical coordinates of its centre:<br />
-				 * r (geocentric distance) in km<br />
-				 * V (ecliptic longitude reckoned along the moving ecliptic from
-				 * the mean equinox of date)<br />
-				 * U (ecliptic latitude reckoned from the moving ecliptic)
+				 * spherical coordinates of its centre:
+				 * 
+				 * r: 地心距離 in km. (geocentric distance)
+				 * 
+				 * V: 從曆元平春分點沿移動黃道的黃經 in degrees. (ecliptic longitude reckoned
+				 * along the moving ecliptic from the mean equinox of date)
+				 * 
+				 * U: 移動黃道計算的黃緯 in degrees. (ecliptic latitude reckoned from the
+				 * moving ecliptic)
 				 */
 				coordinates = library_namespace.null_Object();
 
@@ -1876,7 +1921,8 @@ if (typeof CeL === 'function')
 							'LEA406_load_teams: resource file of [' + name
 									+ '] loaded, '
 									+ LEA406_teams[team_name + type].length
-									+ ' series’ terms.');
+									// Poisson series
+									+ ' terms.');
 						}, callback ]);
 			}
 
@@ -1921,8 +1967,8 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {String}file_name
 			 *            source file name
-			 * @param {Object}options
-			 *            options
+			 * @param {Object}[options]
+			 *            options 設定特殊功能
 			 * 
 			 * @since 2015/4/20
 			 */
@@ -2138,7 +2184,7 @@ if (typeof CeL === 'function')
 						 * 修正經度 of 月亮光行時間 light-time correction (Moon's
 						 * light-time)。忽略對緯度之影響。
 						 * 
-						 * 資料來源/資料依據:<br />
+						 * Reference 資料來源/資料依據:<br />
 						 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 						 * 《天文算法》 p. 337 formula 49.1.<br />
 						 * <q>the constant term of the effect of the light-time (-0″.70)</q>
@@ -2153,7 +2199,11 @@ if (typeof CeL === 'function')
 						 */
 						var light_time = -0.70 / DEGREES_TO_ARCSECONDS;
 						if (false) {
-							// 錯誤的方法:
+							/**
+							 * 錯誤的方法:
+							 * 
+							 * @deprecated
+							 */
 							// coordinates.R in km
 							var r = coordinates.R || LUNAR_DISTANCE_KM;
 							// 地球半徑6,357km到6,378km。平均半徑6371km。
@@ -2172,7 +2222,22 @@ if (typeof CeL === 'function')
 						}
 						coordinates.V += light_time;
 
-						// 修正章動 nutation。
+						/**
+						 * 修正章動 nutation: LEA-406 基於 LE406，未包含 nutations,
+						 * librations。
+						 * 
+						 * @see http://www.projectpluto.com/jpl_eph.htm
+						 * 
+						 * DE405 : Created May 1997; includes both nutations and
+						 * librations. Referred to the International Celestial
+						 * Reference Frame. Covers JED 2305424.50 (1599 DEC 09)
+						 * to JED 2525008.50 (2201 FEB 20)
+						 * 
+						 * DE406 : Created May 1997; includes neither nutations
+						 * nor librations. Referred to the International
+						 * Celestial Reference Frame. Spans JED 0625360.5 (-3000
+						 * FEB 23) to 2816912.50 (+3000 MAY 06)
+						 */
 						coordinates.V += n[0] / DEGREES_TO_RADIANS;
 						coordinates.V = normalize_degrees(coordinates.V);
 					}
@@ -2193,6 +2258,7 @@ if (typeof CeL === 'function')
 
 			/**
 			 * get the longitudinal angle between the Moon and the Sun.
+			 * 計算月日視黃經差。
 			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
@@ -2220,11 +2286,26 @@ if (typeof CeL === 'function')
 			_.lunar_phase_angel_of_JD = lunar_phase_angel_of_JD;
 
 			/**
-			 * 平月相的時間，已修正了太陽光差及月球光行時間<br />
+			 * 平月相的不變時間參數。
+			 * 
+			 * Reference 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 p. 349 formula 49.1.<br />
+			 * 
+			 * @type {Array}
+			 * 
+			 * @inner
+			 */
+			var mean_lunar_phase_coefficients = [ 2451550.09766,
+			// 29.530588861 * k, but k = 1236.85 * T.
+			29.530588861 * 1236.85, 0.00015437, -0.000000150, 0.00000000073 ];
+
+			/**
+			 * 平月相的時間，已修正了太陽光行差及月球光行時間。<br />
 			 * The times of the mean phases of the Moon, already affected by the
 			 * Sun's aberration and by the Moon's light-time
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 p. 349 formula 49.1.<br />
 			 * 
@@ -2232,8 +2313,9 @@ if (typeof CeL === 'function')
 			 *            帶小數點的年數
 			 * @param {Integer}phase
 			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
-			 * @param {Object}options
-			 *            options
+			 * @param {Object}[options]
+			 *            options 設定特殊功能:<br />
+			 *            {Boolean}options.nearest: 取得最接近之月相時間。
 			 * 
 			 * @returns {Number} Julian date (JD of 天文計算用時間 TT)
 			 */
@@ -2252,22 +2334,21 @@ if (typeof CeL === 'function')
 				// T是J2000.0起算的儒略世紀數，用下式可得到足夠的精度：
 				T = k / 1236.85;
 
-				var JD = polynomial_value([ 2451550.09766 + 29.530588861 * k,
-						0, 0.00015437, -0.000000150, 0.00000000073 ], T);
+				var JD = polynomial_value(mean_lunar_phase_coefficients, T);
 
 				return JD;
 			}
 
 			/**
-			 * get JD of lunar phase. Using LEA-406a.
+			 * get JD of lunar phase. Using full LEA-406a or LEA-406b model.
 			 * 之精準值。可用來計算月相、日月合朔(黑月/新月)、弦、望(滿月，衝)、月食、月齡。
 			 * 
 			 * @param {Number}year_month
 			 *            帶小數點的年數
 			 * @param {Integer}phase
 			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
-			 * @param {Object}options
-			 *            options
+			 * @param {Object}[options]
+			 *            options 設定特殊功能
 			 * 
 			 * @returns {Number} Julian date (JD of 日常生活時間 UT)
 			 * 
@@ -2282,9 +2363,9 @@ if (typeof CeL === 'function')
 				up_JD, low_JD,
 				// 目標角度。
 				degrees = phase * 90,
-				// 平月相的時間
+				// 利用平月相的時間，以取得內插法初始近似值。
 				JD = mean_lunar_phase(year_month, phase, options),
-				//
+				// 計算月日視黃經差。
 				angel = degrees < 90 ? function(_JD) {
 					var d = lunar_phase_angel_of_JD(_JD || JD, true);
 					if (d > TURN_TO_DEGREES - 90)
@@ -2318,6 +2399,7 @@ if (typeof CeL === 'function')
 						+ show_degrees(result_degrees) + '; JD: ' + low_JD
 						+ '~' + up_JD, 2);
 
+				// 內插法 main loop
 				while (low_JD < up_JD) {
 					// 估值
 					JD = low_JD + (up_JD - low_JD)
@@ -2366,12 +2448,17 @@ if (typeof CeL === 'function')
 			/**
 			 * get JD of lunar phases. 取得整年之月相。
 			 * 
+			 * 注意: 中曆2057年9月朔日 為 2057/9/29 (0:0)，與 香港天文台 (
+			 * http://www.weather.gov.hk/gts/time/conversionc.htm )、兩千年中西曆轉換 (
+			 * http://sinocal.sinica.edu.tw/ ) 相同。 According to HORIZONS
+			 * (DE-431), it's about 9/28 19:54 (月亮追過太陽) or 9/29 00:08 (視角度差最小).
+			 * 
 			 * @param {Number}year
 			 *            年數
 			 * @param {Integer}phase
 			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
-			 * @param {Object}options
-			 *            options:<br />
+			 * @param {Object}[options]
+			 *            options 設定特殊功能:<br />
 			 *            {Boolean}options.mean: 是否採用平月相。 false: 採用精準值。<br />
 			 *            {Integer}options.duration: 取得年數<br />
 			 *            {Boolean}options.to_Date: return Date<br />
@@ -2470,7 +2557,8 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
-			 * @param {Object}options
+			 * @param {Object}[options]
+			 *            options 設定特殊功能:<br />
 			 *            {Boolean}options.time: 取得月相時，亦取得時刻。<br />
 			 *            {Boolean|String}options.晦: 顯示晦。<br />
 			 *            {Boolean}options.index: 顯示 index 而非名稱。
@@ -2560,7 +2648,7 @@ if (typeof CeL === 'function')
 			var 冬至序 = SOLAR_TERMS_NAME.indexOf('冬至');
 
 			/**
-			 * 取得整年之朔日/月齡。
+			 * 取得整年之月首朔日/月齡。
 			 * 
 			 * @param {Integer}CE_year
 			 *            公元年數
@@ -2594,7 +2682,7 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * 取得年始(建正)為建子之整年朔日/月齡。
+			 * 取得歲首(建正/年始)為建子之整年月首朔日/月齡。
 			 * 
 			 * @param {Integer}年
 			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8 ~ 2000/11/25
@@ -2616,7 +2704,7 @@ if (typeof CeL === 'function')
 				朔日.end = 次年朔日[0][次年朔日[1]];
 
 				if (朔日.length === 13) {
-					// 確定閏月。
+					// 確定/找閏月。
 					// 若兩冬至間有13個月（否則應有12個月），則置閏於冬至後第一個沒中氣的月，月序與前一個月相同（閏月在幾月後面，就稱閏幾月）。
 					var 中氣, 中氣序 = 冬至序 + 2, 閏 = 1, year = 年 - 1;
 					for (; 中氣序 !== 冬至序; 中氣序 += 2) {
@@ -2669,13 +2757,15 @@ if (typeof CeL === 'function')
 			 * @inner
 			 */
 			function clone_朔日(index, options, 朔日) {
+				library_namespace.debug('Get cache index [' + index
+						+ '] (年 /歲首/minute_offset)');
 				if (朔日)
 					朔日_cache[index] = 朔日;
 				else if (!(朔日 = 朔日_cache[index]))
 					return;
 
 				if (options.月名 && !朔日.月名)
-					朔日.月名 = 排曆.月名(朔日);
+					朔日.月名 = 定朔.月名(朔日);
 
 				var clone = 朔日.slice();
 				clone.end = 朔日.end;
@@ -2689,22 +2779,22 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * 編排中國傳統曆法（陰陽曆），取得整年朔日/月齡。
+			 * 以定朔法排曆，編排中國傳統曆法（陰陽曆），取得整年月首朔日/月齡。
 			 * 
 			 * @param {Integer}年
 			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8 ~ 2000/11/25
 			 * @param {Object}[options]
-			 *            options:<br />
+			 *            options 設定特殊功能:<br />
 			 *            {Number}options.minute_offset: time-zone offset from
 			 *            UTC in minutes.<br />
 			 *            e.g., UTC+8: 8 * 60 = 480<br />
-			 *            {String|Integer}options.建正: 年始之地支/地支序(0:子)<br />
+			 *            {String|Integer}options.歲首: 年始之地支/地支序(0:子)<br />
 			 *            {Integer}options.year_offset: 年數將自動加上此 offset。<br />
 			 *            {Boolean}options.月名: 順便加上 .月名 = [ 月名 ]
 			 * 
 			 * @returns {Array} 年朔日 = [ {Number}朔日JD, 朔日JD, ... ]
 			 */
-			function 排曆(年, options) {
+			function 定朔(年, options) {
 				if (!LEA406_loaded('V'))
 					// 採用低精度之誤差過大，不能用。
 					return;
@@ -2713,9 +2803,9 @@ if (typeof CeL === 'function')
 				if (!library_namespace.is_Object(options))
 					options = library_namespace.null_Object();
 
-				var 建正 = options.建正,
+				var 歲首 = options.歲首,
 				//
-				minute_offset = normalize_minute_offset(options.minute_offset);
+				minute_offset = options.minute_offset;
 
 				if (library_namespace.is_Date(年)) {
 					if (isNaN(minute_offset))
@@ -2725,27 +2815,27 @@ if (typeof CeL === 'function')
 					年 = Math.round(年.getFullYear() + 年.getMonth() / 12);
 				}
 
+				minute_offset = normalize_minute_offset(minute_offset);
+
 				if (!isNaN(options.year_offset))
 					年 += options.year_offset;
 
-				if (isNaN(建正) && NOT_FOUND ===
+				if (isNaN(歲首) && NOT_FOUND ===
 				//
-				(建正 = library_namespace.BRANCH_LIST.indexOf(建正))) {
-					// default 預設建正為建寅
-					// 正謂年始，朔謂月初，言王者得政，示從我始，改故用新，隨寅、丑、子所建也。周子，殷丑，夏寅，是改正也；周夜半，殷雞鳴夏平旦，是易朔也。
-					if (排曆.建正 && isNaN(排曆.建正)) {
-						排曆.建正 = library_namespace.BRANCH_LIST.indexOf(排曆.建正);
-						if (排曆.建正 === NOT_FOUND) {
-							library_namespace.warn('排曆: Invalid 建正');
-							排曆.建正 = undefined;
+				(歲首 = library_namespace.BRANCH_LIST.indexOf(歲首))) {
+					if (定朔.歲首 && isNaN(定朔.歲首)) {
+						定朔.歲首 = library_namespace.BRANCH_LIST.indexOf(定朔.歲首);
+						if (定朔.歲首 === NOT_FOUND) {
+							library_namespace.warn('定朔: Invalid 歲首');
+							定朔.歲首 = undefined;
 						}
 					}
-					建正 = 排曆.建正;
+					歲首 = 定朔.歲首;
 				}
 
-				// 至此已確定: 年, 建正, minute_offset.
+				// 至此已確定: 年, 歲首, minute_offset.
 
-				var cache_index = 年 + '/' + 建正 + '/' + minute_offset,
+				var cache_index = 年 + '/' + 歲首 + '/' + minute_offset,
 				//
 				朔日 = clone_朔日(cache_index, options);
 				if (朔日)
@@ -2753,28 +2843,28 @@ if (typeof CeL === 'function')
 
 				朔日 = 建子朔日(年, minute_offset);
 
-				if (建正 === 0)
+				if (歲首 === 0)
 					return clone_朔日(cache_index, options, 朔日);
 
-				var 閏 = 朔日.閏 - 建正;
-				library_namespace.debug('建正 ' + 建正 + ', ' + 朔日.閏 + ', 閏=' + 閏,
+				var 閏 = 朔日.閏 - 歲首;
+				library_namespace.debug('歲首 ' + 歲首 + ', ' + 朔日.閏 + ', 閏=' + 閏,
 						3);
 				// 此處已清掉(朔日.閏)
-				朔日 = 朔日.slice(閏 <= 0 ? 建正 + 1 : 建正);
+				朔日 = 朔日.slice(閏 <= 0 ? 歲首 + 1 : 歲首);
 				if (閏 > 0)
 					朔日.閏 = 閏;
 
 				var 次年朔日 = 建子朔日(年 + 1, minute_offset);
-				library_namespace.debug('次年 ' + 建正 + ', ' + 次年朔日.閏, 3);
+				library_namespace.debug('次年 ' + 歲首 + ', ' + 次年朔日.閏, 3);
 				閏 = 次年朔日.閏;
-				var index = 閏 <= 建正 ? 建正 + 1 : 建正,
+				var index = 閏 <= 歲首 ? 歲首 + 1 : 歲首,
 				//
 				end = 次年朔日[index];
 				library_namespace.debug(
 				//
 				'end[' + index + ']=' + 次年朔日[index], 3);
 				次年朔日 = 次年朔日.slice(0, index);
-				if (閏 <= 建正)
+				if (閏 <= 歲首)
 					if (朔日.閏)
 						// 這將造成無法阻絕一年內可能有兩閏月，以及一年僅有11個月的可能。
 						library_namespace.err(年 + '年有兩個閏月!!');
@@ -2792,10 +2882,11 @@ if (typeof CeL === 'function')
 				return clone_朔日(cache_index, options, 朔日);
 			}
 
-			// default 預設建正為建寅
-			排曆.建正 = '寅';
+			// default 預設歲首為建寅
+			// 正謂年始，朔謂月初，言王者得政，示從我始，改故用新，隨寅、丑、子所建也。周子，殷丑，夏寅，是改正也；周夜半，殷雞鳴夏平旦，是易朔也。
+			定朔.歲首 = '寅';
 
-			排曆.月名 = function(年朔日) {
+			定朔.月名 = function(年朔日) {
 				var 閏 = 年朔日.閏, 月序 = 0;
 				library_namespace.debug('閏=' + 閏, 3);
 				return 年朔日.map(function(朔, index) {
@@ -2803,7 +2894,7 @@ if (typeof CeL === 'function')
 				});
 			};
 
-			_.排曆 = 排曆;
+			_.定朔 = 定朔;
 
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 
@@ -2817,7 +2908,7 @@ if (typeof CeL === 'function')
 			 * IAU2006 obliquity coefficients.<br />
 			 * teams for function mean_obliquity_IAU2006(JD)
 			 * 
-			 * 資料來源/資料依據:
+			 * Reference 資料來源/資料依據:
 			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/obl06.c
 			 * 
 			 * @inner
@@ -2828,7 +2919,7 @@ if (typeof CeL === 'function')
 			/**
 			 * teams for function equinox()
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 chapter 章動及黃赤交角.<br />
 			 * 
@@ -2851,7 +2942,7 @@ if (typeof CeL === 'function')
 			/**
 			 * teams for function ΔT()
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * <a href="http://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html"
 			 * accessdate="2015/3/26 20:8">NASA - Polynomial Expressions for
 			 * Delta T</a><br />
@@ -2896,7 +2987,7 @@ if (typeof CeL === 'function')
 			/**
 			 * constant term of Sun's aberration
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 p.167,168 chapter 太陽位置計算.
 			 * 
@@ -2904,8 +2995,10 @@ if (typeof CeL === 'function')
 			 * to a fixed reference frame, the constant term 3548.193 should be
 			 * replaced by 3548.330. 如果Δλ須是在Date黃道中的，則應把常數項3548.193換為3548.330
 			 * 
-			 * The ICRF is a fixed reference frame. The FK5 based fixed
+			 * The ICRF is a fixed reference frame. The FK5 based on fixed
 			 * reference frame of J2000.0?
+			 * http://blog.csdn.net/songgz/article/details/2680144
+			 * 通過數以千計的恆星位置，反推出春風點在天球上的位置，我們常說的FK5天球坐標系統就與它有關。
 			 * 
 			 * @inner
 			 */
@@ -2965,7 +3058,7 @@ if (typeof CeL === 'function')
 			/**
 			 * teams for function equinox()
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms.<br />
 			 * 《天文算法》 chapter 分點和至點.<br />
 			 * 
@@ -2973,23 +3066,23 @@ if (typeof CeL === 'function')
 			 */
 			// for years -1000 to 1000
 			var equinox_teams_before_1000 = [
-			// March equinox, 春分
+			// March equinox, 春分點時刻
 			[ 1721139.29189, 365242.13740, 0.06134, 0.00111, -0.00071 ],
-			// June Solstice, 夏至
+			// June Solstice, 夏至點時刻
 			[ 1721233.25401, 365241.72562, -0.05323, 0.00907, 0.00025 ],
-			// September equinox, 秋分
+			// September equinox, 秋分點時刻
 			[ 1721325.70455, 365242.49558, -0.11677, -0.00297, 0.00074 ],
-			// December Solstice, 冬至
+			// December Solstice, 冬至點時刻
 			[ 1721414.39987, 365242.88257, -0.00769, -0.00933, -0.00006 ] ],
 			// for years 1000 to 3000
 			equinox_teams_after_1000 = [
-			// March equinox, 春分
+			// March equinox, 春分點時刻
 			[ 2451623.80984, 365242.37404, 0.05169, -0.00411, -0.00057 ],
-			// June Solstice, 夏至
+			// June Solstice, 夏至點時刻
 			[ 2451716.56767, 365241.62603, 0.00325, 0.00888, -0.00030 ],
-			// September equinox, 秋分
+			// September equinox, 秋分點時刻
 			[ 2451810.21715, 365242.01767, -0.11575, 0.00337, 0.00078 ],
-			// December Solstice, 冬至
+			// December Solstice, 冬至點時刻
 			[ 2451900.05952, 365242.74049, -0.06223, -0.00823, 0.00032 ] ],
 			// 週期項
 			equinox_periodic_terms = [
@@ -3019,7 +3112,7 @@ if (typeof CeL === 'function')
 			/**
 			 * teams for function nutation()
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Nutation, IAU 2000B model.
 			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut00b.c
 			 * 
@@ -3160,7 +3253,7 @@ if (typeof CeL === 'function')
 			/**
 			 * teams for function nutation()
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * 《天文算法》 table 22.A.<br />
 			 * 
@@ -3268,7 +3361,10 @@ if (typeof CeL === 'function')
 			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/README
 			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/VSOP87D.ear
 			 * 
-			 * TODO: VSOP2013
+			 * 金文敬. 2015. 太阳系行星和月球历表的发展.<br />
+			 * 球坐標相對於瞬時平黃道和春分點為 VSOP87D 解。
+			 * 
+			 * TODO: VSOP2013, DE-431
 			 * 
 			 * see also:<br />
 			 * JPL DE422:<br />
@@ -3288,7 +3384,7 @@ if (typeof CeL === 'function')
 			 * 從VSOP87中取出一些主要項(詳見附錄II)，利用它計算得到的太陽位置在-2000到6000年範圍內精度是1"。<br />
 			 * 誤差 365.25*24*60*60/360/60/60 = 24.35秒鐘。相當於半分鐘。
 			 * 
-			 * 資料來源/資料依據:<br />
+			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
 			 * Appendix III 《天文算法》 附表3.<br />
 			 * http://forums.parallax.com/showthread.php/154838-Azimuth-angle-conversion-from-east-to-west
@@ -3390,7 +3486,8 @@ if (typeof CeL === 'function')
 								[ 80, 3.88, 5223.69 ], [ 44, 3.7, 2352.87 ],
 								[ 32, 4, 1577.34 ] ],
 						[ [ 9, 3.9, 5507.55 ], [ 6, 1.73, 5223.69 ] ] ],
-				// 行星 Earth 地球: 行星到太陽的距離, 日地距離
+				// 行星 Earth 地球: 行星到太陽的距離, 日地距離, 位置向量（又稱向徑或徑矢 radius vector）
+				// https://zh.wikipedia.org/wiki/%E4%BD%8D%E7%BD%AE%E5%90%91%E9%87%8F
 				R : [
 						[ [ 100013989.0, 0, 0 ],
 								[ 1670700.0, 3.0984635, 6283.07585 ],

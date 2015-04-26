@@ -239,7 +239,7 @@ default_column = [ {
 	R : '年干支'
 }, {
 	T : '月干支',
-	R : '月干支/大小月',
+	R : '月干支/大小月。此為推算所得，於部分非寅正起始之年分可能有誤！',
 	S : 'font-size:.7em;'
 }, {
 	T : '日干支',
@@ -2277,7 +2277,11 @@ function affairs() {
 
 	// -----------------------------
 
-	var data_load_message = 'Data will be presented at next calculation.',
+	var data_load_message = {
+		T : 'Data will be presented at next calculation.',
+		R : 'Data is not yet loaded.',
+		S : 'color:#888;font-size:.8em;'
+	},
 	// copy from data.date.
 	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
 	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
@@ -2425,9 +2429,9 @@ function affairs() {
 						history.go(0);
 						return false;
 					}
-				}, '（a 較精確，b 較快。點選後將', {
+				}, '（a 較精準，b 較快。點選後將', {
 					em : '隨即重新整理'
-				}, '、更改設定！）' ] ],
+				}, '，以更改設定！）' ] ],
 
 		solarterms : [ {
 			a : {
@@ -2556,7 +2560,7 @@ function affairs() {
 			a : {
 				T : '月相'
 			},
-			R : 'lunar phase, 天文月相。計算得出，非實曆。\n'
+			R : 'lunar phase, 天文月相。計算得出之紀元使用當地、當日零時月相，非實曆。\n'
 			//
 			+ 'Using VSOP87D.ear and LEA-406.',
 			href : 'https://zh.wikipedia.org/wiki/%E6%9C%88%E7%9B%B8'
@@ -2593,14 +2597,16 @@ function affairs() {
 			a : {
 				T : 'lunisolar'
 			},
-			R : 'lunisolar calendar. 計算得出之中國傳統曆法（陰陽曆），非實曆。預設建正為建寅。',
+			R : 'lunisolar calendar.\n'
+			//
+			+ '計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
 			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
 			var JD = CeL.Date_to_JD(date.offseted_value()),
 			//
-			年朔日 = CeL.排曆(date, {
+			年朔日 = CeL.定朔(date, {
 				月名 : true
 			});
 
@@ -2609,13 +2615,13 @@ function affairs() {
 
 			if (JD < 年朔日[0])
 				// date 實際上在上一年。
-				年朔日 = CeL.排曆(date, {
+				年朔日 = CeL.定朔(date, {
 					月名 : true,
 					year_offset : -1
 				});
 			else if (JD >= 年朔日.end)
 				// date 實際上在下一年。
-				年朔日 = CeL.排曆(date, {
+				年朔日 = CeL.定朔(date, {
 					月名 : true,
 					year_offset : 1
 				});
@@ -2628,7 +2634,9 @@ function affairs() {
 			a : {
 				T : 'ΔT'
 			},
-			R : '日常生活時間 UT = 天文計算用時間 TT - ΔT',
+			R : 'Universal Time = Terrestrial Time - ΔT\n'
+			//
+			+ '簡略的說，日常生活時間 UT = 天文計算用時間 TT - ΔT',
 			href : 'http://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -3048,7 +3056,7 @@ function affairs() {
 					a : {
 						T : '二十八宿'
 					},
-					R : '中曆曆注、日本の暦注の一つ。',
+					R : '中曆曆注、日本の暦注の一つ。又稱二十八舍或二十八星。',
 					href : 'https://zh.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
 					S : 'font-size:.8em;'
 				},

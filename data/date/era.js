@@ -412,7 +412,7 @@ if (typeof CeL === 'function')
 			已壓縮曆數_PATTERN = /^(?:[\d\/]*=)?[\da-z]{3}[\da-z ]*$/,
 
 			// matched: [ , 閏, 月分號碼 ]
-			// TODO: 冬月, 臘月.
+			// TODO: 11冬月, 12臘月.
 			// TODO: [閏後]
 			// TODO: 闰月
 			MONTH_NAME_PATTERN = /^(閏)?([正元]|[01]?\d)月?$/,
@@ -438,7 +438,7 @@ if (typeof CeL === 'function')
 			// should matched: 月|年/|/日|月/日|/月/日|年/月/|年/月/日
 			// ^(年?/)?月/日|年/|/日|月$
 			// matched: [ , 年, 月, 日 ]
-			// TODO: 冬月, 臘月.
+			// TODO: 11冬月, 12臘月.
 			起始日碼_PATTERN =
 			// [日朔晦望]
 			/^(-?\d+|元)?[\/.\-年](閏?(?:[正元]|[01]?\d))[\/.\-月]?(?:(初?\d{1,2}?|[正元])日?)?$/
@@ -2845,8 +2845,7 @@ if (typeof CeL === 'function')
 									else {
 										if (!(NAME_KEY in calendar_data)) {
 											calendar_data[NAME_KEY] = [];
-											// TODO:
-											// 填補原先應有的名稱。
+											// TODO: 填補原先應有的名稱。
 
 										} else {
 											if (calendar_data[NAME_KEY]
@@ -2952,8 +2951,7 @@ if (typeof CeL === 'function')
 									else {
 										if (!(NAME_KEY in this_year_data)) {
 											this_year_data[NAME_KEY] = [];
-											// TODO:
-											// 填補原先應有的名稱。
+											// TODO: 填補原先應有的名稱。
 
 										} else {
 											if (this_year_data[NAME_KEY]
@@ -3074,13 +3072,6 @@ if (typeof CeL === 'function')
 				}
 			}
 
-			// 保證結果 >=0。
-			function positive_modulo(dividend, divisor) {
-				if ((dividend %= divisor) < 0)
-					dividend += divisor;
-				return dividend;
-			}
-
 			// get （起始）年干支序。
 			// 設定"所求干支序"，將回傳所求干支序之年序。
 			// 未設定"所求干支序"，將回傳紀年首年之年干支index。
@@ -3103,9 +3094,7 @@ if (typeof CeL === 'function')
 							// 中曆年起始於CE年末，則應算作下一年之
 							// YEAR_STEM_BRANCH_OFFSET。
 							+ (年干支.getMonth() > 9 ? 1 : 0) - (offset ? 1 : 0))
-							% library_namespace.SEXAGENARY_CYCLE_LENGTH;
-					if (年干支 < 0)
-						年干支 += library_namespace.SEXAGENARY_CYCLE_LENGTH;
+							.mod(library_namespace.SEXAGENARY_CYCLE_LENGTH);
 					this.起始年干支序 = 年干支;
 				}
 
@@ -3122,6 +3111,7 @@ if (typeof CeL === 'function')
 
 			// 此非紀年首年歲首之月干支序，而是紀年首年首月之月干支序。
 			// 只有在未設定首年起始月數(this.calendar[0][START_KEY])的情況下，兩者才會相等。
+			// TODO: bug: 唐肅宗上元1年閏4月, 干支!==巳!!
 			function get_month_branch_index(月干支, 歲序) {
 				var 曆數 = this.calendar, 起始月干支 = this.起始月干支序, 月序;
 
@@ -3146,8 +3136,14 @@ if (typeof CeL === 'function')
 
 					// 判別此月份所包含之中氣日。
 					// 包冬至 12/21-23 的為建子之月。
-					// 冬至所在月份為冬月、大寒所在月份為臘月、雨水所在月份為正月、春分所在月份為二月、…、小雪所在月份為十月，無中氣的月份為前一個月的閏月。
-					var ST本月中氣起始日, 下個月起始日差距, ST月序, 中氣差距日數, 閏月後,
+					// 冬至所在月份為11冬月、大寒所在月份為12臘月、雨水所在月份為1正月、春分所在月份為2二月、…、小雪所在月份為10十月，無中氣的月份為前一個月的閏月。
+					var ST本月中氣起始日, 下個月起始日差距, ST月序, 中氣差距日數,
+					/**
+					 * 閏月或閏月之後。
+					 * 
+					 * @type {Boolean}
+					 */
+					閏月後,
 					//
 					ST本月起始日 = isNaN(this.歲首序) ? START_DATE_KEY in 曆數 ? 1 : 0
 							: -1;
@@ -3207,7 +3203,6 @@ if (typeof CeL === 'function')
 								// ..月建: 子丑寅卯辰巳午未申酉戌亥
 								// 月建序: 0 1 2 3 4 5 6 7 8 9 A B
 
-								// 閏月或之後。
 								閏月後 = 月序[0] >= 曆數[月序[1]][LEAP_MONTH_KEY];
 								if (library_namespace.is_debug()) {
 									library_namespace.debug('閏月或之後: ' + 閏月後, 1,
@@ -3275,22 +3270,16 @@ if (typeof CeL === 'function')
 							break;
 						}
 
-					閏月後 = library_namespace.BRANCH_LIST.length;
-					// positive_modulo
-					if ((this.歲首月建序 %= 閏月後) < 0)
-						this.歲首月建序 += 閏月後;
+					this.歲首月建序 = this.歲首月建序
+							.mod(library_namespace.BRANCH_LIST.length);
 
-					閏月後 = library_namespace.SEXAGENARY_CYCLE_LENGTH;
 					// 取得月干支。
+					this.起始月干支序 = 起始月干支
 					// 月干支每5年一循環。
 					// (ST月序):紀年首月之月建序差距。
-					起始月干支 = ((this.get_year_stem_branch_index() + 月序[1])
+					= ((this.get_year_stem_branch_index() + 月序[1])
 							* MONTH_COUNT + ST月序)
-							% 閏月後;
-					// positive_modulo
-					if (起始月干支 < 0)
-						起始月干支 += 閏月後;
-					this.起始月干支序 = 起始月干支;
+							.mod(library_namespace.SEXAGENARY_CYCLE_LENGTH);
 				}
 
 				if (月干支 && isNaN(月干支))
@@ -3560,9 +3549,7 @@ if (typeof CeL === 'function')
 				var index = (8
 				// 不可用 "| 0"
 				+ Math.floor(date.getTime() / ONE_DAY_LENGTH_VALUE))
-						% 二十八宿_LIST.length;
-				if (index < 0)
-					index += 二十八宿_LIST.length;
+						.mod(二十八宿_LIST.length);
 				return 二十八宿_LIST[index];
 			}
 
@@ -3597,9 +3584,8 @@ if (typeof CeL === 'function')
 			function note_反支(date, 六日反支標記) {
 				var 朔干支序 = (library_namespace
 				// 月朔日干支序。
-				// 36: 能被 library_namespace.BRANCH_LIST.length 整除，且>=大月 之數。
-				.stem_branch_index(date) - date.日 + START_DATE + 36)
-						% library_namespace.BRANCH_LIST.length,
+				.stem_branch_index(date) - date.日 + START_DATE)
+						.mod(library_namespace.BRANCH_LIST.length),
 				// 凡反支日，用月朔為正。戌、亥朔，一日反支。申、酉朔，二日反支。午、未朔，三日反支。辰、巳朔，四日反支。寅、卯朔，五日反支。子、丑朔，六日反支。
 				第一反支日 = 6 - (朔干支序 / 2 | 0),
 				//
@@ -3640,6 +3626,7 @@ if (typeof CeL === 'function')
 				return index;
 			}
 
+			// a proxy for application.astronomy.立春年()
 			var 立春年 = function(date, options) {
 				if (library_namespace.立春年)
 					return (立春年 = library_namespace.立春年)(date, options);
@@ -3658,9 +3645,7 @@ if (typeof CeL === 'function')
 			function note_年九星(date) {
 				// offset 64: 64 CE 為甲子:上元花甲 一運。其他如 1684, 1864年(康熙二十三年)亦可。
 				// 180: 一個花甲，共有六十年。而三元三個花甲，總得一百八十年。
-				var index = (64 - 立春年(date)) % 180;
-				if (index < 0)
-					index += 180;
+				var index = (64 - 立春年(date)).mod(180);
 				// assert: 0 <= index < 180
 
 				return 九星_LIST[index % 九星_LIST.length]
@@ -3673,9 +3658,7 @@ if (typeof CeL === 'function')
 				var index = 立春年(date, true);
 				// 1863年11月:上元甲子月
 				// offset 47 = (1863 * 12 + 11) % 180
-				index = (47 - index[0] * MONTH_COUNT - index[1]) % 180;
-				if (index < 0)
-					index += 180;
+				index = (47 - index[0] * MONTH_COUNT - index[1]).mod(180);
 				// assert: 0 <= index < 180
 
 				return 九星_LIST[index % 九星_LIST.length]
@@ -3832,10 +3815,7 @@ if (typeof CeL === 'function')
 					result.type = '陽遁';
 				}
 
-				if ((index %= 九星_JP_LIST.length) < 0)
-					index += 九星_JP_LIST.length;
-
-				result.index = index;
+				result.index = index = index.mod(九星_JP_LIST.length);
 				result.九星 = 九星_JP_LIST[index];
 
 				return result;
@@ -3844,9 +3824,7 @@ if (typeof CeL === 'function')
 			function note_三元九運(date) {
 				// offset 64: 64 CE 為甲子:上元花甲 一運。其他如 1684, 1864年(康熙二十三年)亦可。
 				// 180: 一個花甲，共有六十年。而三元三個花甲，總得一百八十年。
-				var index = (立春年(date) - 64) % 180;
-				if (index < 0)
-					index += 180;
+				var index = (立春年(date) - 64).mod(180);
 
 				if (false && (index - 1 - (date.年干支序
 				// 採用過年改「運」
@@ -3872,7 +3850,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Date}date
 			 * @param {Object}[options]
-			 *            options
+			 *            options 設定特殊功能
 			 */
 			function add_note(date, options) {
 				add_offset_function(date, this);
@@ -3985,11 +3963,6 @@ if (typeof CeL === 'function')
 								+ library_namespace.stem_branch_index(date))
 										% 十二直_LIST.length];
 						}
-
-						// TODO:
-						// 二十四節氣，每月有一個節氣，一個中氣，分別發生在每月的7日和22日前後。
-						// 物候(七十二候, 初候/二候/三候, 初候/次候/末候), 候應
-						// 二十四番花信風 http://baike.baidu.com/view/54438.htm
 
 						tmp = this.calendar[date_index[0]][date_index[1]];
 						if (date_index[0] === 0 && date_index[1] === 0
@@ -5389,7 +5362,7 @@ if (typeof CeL === 'function')
 			 * @param {Era}[指定紀年]
 			 *            主要紀年
 			 * @param {Object}[options]
-			 *            options
+			 *            options 設定特殊功能
 			 * 
 			 * @returns {Array} 共存紀年
 			 */
@@ -5671,7 +5644,7 @@ if (typeof CeL === 'function')
 			 *            ... }<br />
 			 *            duration: [start_date, end_date]
 			 * @param {Object}[options]
-			 *            此 options 可能會被變更!<br />
+			 *            options 設定特殊功能. 此 options 可能會被變更!<br />
 			 *            {String|Date}.base: base date<br />
 			 *            {Boolean}.get_era: 僅回傳所解析出之紀年 {Object}。<br />
 			 *            {Boolean}.get_era_list: 僅回傳所解析出之紀年 list: []。<br />
@@ -6684,7 +6657,7 @@ if (typeof CeL === 'function')
 
 			// ---------------------------------------------------------------------//
 
-			// 警告:此函數會更改原輸入之 date_value!
+			// 警告: 此函數會更改原輸入之 date_value!
 			function Date_to_era_String(date_value, format, locale, options) {
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
@@ -6728,7 +6701,7 @@ if (typeof CeL === 'function')
 				if (!('numeral' in options) && ('numeral' in config))
 					options.numeral = config.numeral;
 
-				// 警告:此函數會更改原輸入之 date_value!
+				// 警告: 此函數會更改原輸入之 date_value!
 
 				紀年.add_note(date_value, options);
 
@@ -7006,6 +6979,7 @@ if (typeof CeL === 'function')
 			 * @param {String}text
 			 *            具紀年日期資訊的純文字文本(e.g., 史書原文)
 			 * @param {ELEMENT_NODE}[node]
+			 * 
 			 * @returns {String} 供 set_up_era_node() 用之 HTML。
 			 */
 			function era_text_to_HTML(text, node, options) {

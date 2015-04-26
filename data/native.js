@@ -1280,8 +1280,8 @@ function addDenomination(a,b){
  * 2.4/3=0.7999999999999999 等數值。此函數可取至 1.4 與 0.1，避免 <a href="http://en.wikipedia.org/wiki/Round-off_error" accessdate="2012/9/19 22:21" title="Round-off error">round-off error</a>。<br>
  * c.f., Math.round()
  * 
- * @param {Number}
- *            [decimals] 1,2,..: number of decimal places shown.
+ * @param {Number}[decimals]
+ *            1,2,..: number of decimal places shown.
  * @return
  * 取至小數 digits 位後之數字。
  * 
@@ -1307,6 +1307,27 @@ function native_to_fixed(decimals) {
 
 var to_fixed = slow_to_fixed;
 _.to_fixed = slow_to_fixed;
+
+/**
+ * non-negative modulo, positive modulo.
+ * 保證 modulo 結果 >=0。
+ * 轉成最接近 0 之正 index。
+ * 
+ * @param {Number}dividend
+ *            被除數。
+ * @param {Number}divisor
+ *            除數除數。
+ * 
+ * @returns {Number}remainder 餘數
+ */
+function non_negative_modulo(dividend, divisor) {
+	if (false)
+		return ((dividend % divisor) + divisor) % divisor;
+	if ((dividend %= divisor) < 0)
+		dividend += divisor;
+	return dividend;
+}
+
 
 
 //var sourceF=WScript.ScriptName,targetF='test.js';simpleWrite('tmp.js',alert+'\n'+simpleRead+'\n'+simpleWrite+'\nvar t="",ForReading=1,ForWriting=2,ForAppending=8\n,TristateUseDefault=-2,TristateTrue=-1,TristateFalse=0\n,WshShell=WScript.CreateObject("WScript.Shell"),fso=WScript.CreateObject("Scripting.FileSystemObject");\nt='+dQuote(simpleRead(sourceF),80)+';\nsimpleWrite("'+targetF+'",t);//eval(t);\nalert(simpleRead("'+sourceF+'")==simpleRead("'+targetF+'")?"The same (test dQuote OK!)":"Different!");');//WshShell.Run('"'+getFolder(WScript.ScriptFullName)+targetF+'"');
@@ -1904,6 +1925,7 @@ set_method(Number.prototype, {
 	to_super : superscript_integer,
 	to_sub : subscript_integer,
 	to_fixed : to_fixed,
+	mod : set_bind(non_negative_modulo),
 	pad : set_bind(pad, true)
 });
 
