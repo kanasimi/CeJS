@@ -2581,7 +2581,11 @@ French_Republican_Date.test = new_tester(Date_to_French_Republican, French_Repub
 
 // Eastern Arabic numerals / Perso-Arabic variant
 // https://en.wikipedia.org/wiki/Eastern_Arabic_numerals
-var Perso_digits = '۰۱۲۳۴۵۶۷۸۹'.split('');
+var Perso_digits = '۰۱۲۳۴۵۶۷۸۹',
+//
+Perso_digits_PATTERN = new RegExp('[' + Perso_digits + ']', 'g');
+Perso_digits = Perso_digits.split('');
+
 
 function to_Perso_numerals(natural) {
 	return natural.toString().replace(/\d/g, function(digit) {
@@ -2590,7 +2594,7 @@ function to_Perso_numerals(natural) {
 }
 
 function from_Perso_numerals(Perso) {
-	return +Perso.replace(/[۰۱۲۳۴۵۶۷۸۹]/g, function(digit) {
+	return +Perso.replace(Perso_digits_PATTERN, function(digit) {
 		return Perso_digits.indexOf(digit);
 	});
 }

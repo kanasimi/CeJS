@@ -2715,13 +2715,14 @@ function affairs() {
 					R : 'Solar Hijri calendar / 現代伊朗曆/阿富汗曆(陽曆) / ヒジュラ太陽暦/アフガン暦',
 					href : 'https://fa.wikipedia.org/wiki/%DA%AF%D8%A7%D9%87%E2%80%8C%D8%B4%D9%85%D8%A7%D8%B1%DB%8C_%D9%87%D8%AC%D8%B1%DB%8C_%D8%AE%D9%88%D8%B1%D8%B4%DB%8C%D8%AF%DB%8C'
 				}, function(date) {
-					return date.精 === '年' ? date.to_Solar_Hijri({
+					return date.精 === '年' ? 'SH' + date.to_Solar_Hijri({
 						format : 'serial'
-					})[0] + '年' : [ date.to_Solar_Hijri({
+					})[0] + '年' : [ 'SH' + date.to_Solar_Hijri({
 						format : 'serial'
 					}).slice(0, 3).join('/') + '; ', {
 						span : date.to_Solar_Hijri(),
-						S : 'direction: rtl;'
+						dir : 'rtl',
+						S : 'unicode-bidi: -moz-isolate;'
 					} ];
 				} ],
 
