@@ -79,7 +79,7 @@ function initializer() {
 					'data.date.era', 'application.astronomy' ],
 			[ 'data.date.calendar', function() {
 				// for 太陽視黃經
-				CeL.VSOP87.load_teams('Earth');
+				CeL.VSOP87.load_terms('Earth');
 				var type = CeL.get_cookie('LEA406_type');
 				if (type)
 					if (type === 'a' || type === 'b') {
@@ -88,7 +88,7 @@ function initializer() {
 					} else
 						CeL.warn('Invalid type: [' + type + ']');
 				// for 月亮視黃經
-				CeL.LEA406.load_teams('V');
+				CeL.LEA406.load_terms('V');
 			} ], function() {
 				// alias for CeL.gettext, then we can use _('message').
 				_ = CeL.gettext;
@@ -2417,7 +2417,7 @@ function affairs() {
 		astronomy : [ '天文計算 astronomical calculations',
 				[ '因為採用了完整的 LEA-406' + CeL.LEA406.default_type
 				//
-				+ ' 來計算月亮位置，關於月亮位置之項目，每次執行常需耗費數秒至一兩分鐘，敬請見諒。您可', {
+				+ ' 來計算月亮位置，關於月亮位置之項目，例如黃曆，每次執行常需耗費數秒至一兩分鐘，敬請見諒。您可', {
 					a : '改採 LEA-406'
 					//
 					+ (CeL.LEA406.default_type === 'a' ? 'b' : 'a'),
@@ -2594,43 +2594,6 @@ function affairs() {
 			return phase;
 		} ],
 
-		lunisolar : [ {
-			a : {
-				T : 'lunisolar'
-			},
-			R : 'lunisolar calendar.\n'
-			//
-			+ '計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
-			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
-		}, function(date) {
-			if (/* date.準 || */date.精)
-				return '';
-			var JD = CeL.Date_to_JD(date.offseted_value()),
-			//
-			年朔日 = CeL.定朔(date, {
-				月名 : true
-			});
-
-			if (!年朔日)
-				return data_load_message;
-
-			if (JD < 年朔日[0])
-				// date 實際上在上一年。
-				年朔日 = CeL.定朔(date, {
-					月名 : true,
-					year_offset : -1
-				});
-			else if (JD >= 年朔日.end)
-				// date 實際上在下一年。
-				年朔日 = CeL.定朔(date, {
-					月名 : true,
-					year_offset : 1
-				});
-
-			var index = 年朔日.search_sorted(JD, true);
-			return 年朔日.月名[index] + '月' + (1 + JD - 年朔日[index] | 0) + '日';
-		} ],
-
 		ΔT : [ {
 			a : {
 				T : 'ΔT'
@@ -2664,7 +2627,44 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		// 曆法 Historical calendar
-		calendar : '計算日期的方法',
+		calendar : '計算日期的方法。計算得出，不一定是實暦。',
+
+		lunisolar : [ {
+			a : {
+				T : 'lunisolar'
+			},
+			R : 'lunisolar calendar. 計算速度較慢！\n'
+			//
+			+ '計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
+			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			var JD = CeL.Date_to_JD(date.offseted_value()),
+			//
+			年朔日 = CeL.定朔(date, {
+				月名 : true
+			});
+
+			if (!年朔日)
+				return data_load_message;
+
+			if (JD < 年朔日[0])
+				// date 實際上在上一年。
+				年朔日 = CeL.定朔(date, {
+					月名 : true,
+					year_offset : -1
+				});
+			else if (JD >= 年朔日.end)
+				// date 實際上在下一年。
+				年朔日 = CeL.定朔(date, {
+					月名 : true,
+					year_offset : 1
+				});
+
+			var index = 年朔日.search_sorted(JD, true);
+			return 年朔日.月名[index] + '月' + (1 + JD - 年朔日[index] | 0) + '日';
+		} ],
 
 		Julian : [
 				{
@@ -2706,6 +2706,24 @@ function affairs() {
 				format : 'serial'
 			}).slice(0, 3).join('/') + '; ' + date.to_Tabular();
 		} ],
+
+		Solar_Hijri : [
+				{
+					a : {
+						T : 'گاه‌شماری هجری خورشیدی'
+					},
+					R : 'Solar Hijri calendar / 現代伊朗曆/阿富汗曆(陽曆) / ヒジュラ太陽暦/アフガン暦',
+					href : 'https://fa.wikipedia.org/wiki/%DA%AF%D8%A7%D9%87%E2%80%8C%D8%B4%D9%85%D8%A7%D8%B1%DB%8C_%D9%87%D8%AC%D8%B1%DB%8C_%D8%AE%D9%88%D8%B1%D8%B4%DB%8C%D8%AF%DB%8C'
+				}, function(date) {
+					return date.精 === '年' ? date.to_Solar_Hijri({
+						format : 'serial'
+					})[0] + '年' : [ date.to_Solar_Hijri({
+						format : 'serial'
+					}).slice(0, 3).join('/') + '; ', {
+						span : date.to_Solar_Hijri(),
+						S : 'direction: rtl;'
+					} ];
+				} ],
 
 		Hebrew : [
 				{
@@ -2883,7 +2901,11 @@ function affairs() {
 			},
 			R : 'Le calendrier républicain,'
 			//
-			+ ' ou calendrier révolutionnaire français.',
+			+ ' ou calendrier révolutionnaire français.\n'
+			//
+			+ '法國共和曆行用期間 1792/9/22–1805/12/31 CE，每年第一天都從秋分日開始。'
+			//
+			+ '後來巴黎公社 (1871 CE) 曾一度短暫恢復使用。',
 			href : 'https://fr.wikipedia.org/wiki/Calendrier_r%C3%A9publicain'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Republican({

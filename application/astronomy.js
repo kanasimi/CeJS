@@ -83,20 +83,22 @@ if (false) {
 		// 取得 Gregorian calendar 1977 年，中曆 1978 年之冬至日時間。
 		CeL.solar_term_JD(1977, '冬至');
 
+		// ----------------------------------------------------------------------------
+
 		// 取得 Le calendrier républicain (法國共和曆)行用期間之年首。
 		// method 1: 取得法國當地之 0:0
-		for (var year = 1792; year <= 1805; year++)
+		for (var year = 1792, offset = 1 * 60; year <= 1805; year++)
 			console.log(CeL.JD_to_Date(
 			// 1: UTC+1 → minute offset
-			CeL.midnight_of(CeL.solar_term_JD(year, '秋分'), 1 * 60)).format({
-				offset : 1 * 60
+			CeL.midnight_of(CeL.solar_term_JD(year, '秋分'), offset)).format({
+				offset : offset
 			}));
 		// method 2: 將 date 當作 local 之 0:0
-		for (var year = 1792; year <= 1805; year++) {
+		for (var year = 1792, offset = 1 * 60; year <= 1805; year++) {
 			// 1: UTC+1 → minute offset
 			var date = CeL.JD_to_Date(CeL.midnight_of(CeL.solar_term_JD(year,
-					'秋分'), 1 * 60)
-					+ (1 * 60 - CeL.String_to_Date.default_offset) / 60 / 24),
+					'秋分'), offset)
+					+ (offset - CeL.String_to_Date.default_offset) / 60 / 24),
 			// 歸零用
 			ms = date.getMilliseconds();
 			// 歸零
@@ -104,11 +106,42 @@ if (false) {
 				date.setMilliseconds(Math.round(ms / 500) * 500);
 			console.log(date.format());
 		}
+		// method 3: using solar_term_calendar()
+		for (var c = CeL.solar_term_calendar('秋分', 1 * 60),
+		//
+		year = 1792; year <= 1805; year++)
+			console.log(new Date(c(year)).format());
+
+		// 取得 Iran 當地之春分時刻。
+		for (var year = 1975, offset = 3.5 * 60; year <= 2041; year++)
+			console.log(CeL.JD_to_Date(
+			// 3.5: UTC+3.5 → minute offset
+			CeL.solar_term_JD(year, '春分')).format({
+				offset : offset
+			}));
+
+		// 取得 Solar Hijri calendar (the official calendar in Iran and
+		// Afghanistan from 1979) 年首。
+		for (var year = 1975, offset = (3.5 + 12) * 60; year <= 2041; year++)
+			console.log(CeL.JD_to_Date(
+			// 3.5: UTC+3.5 → minute offset
+			// 12: 移半天可以取代正午之效果。
+			CeL.midnight_of(CeL.solar_term_JD(year, '春分'), offset)).format({
+				offset : offset
+			}));
+
+		// method: using solar_term_calendar()
+		for (var c = CeL.solar_term_calendar('春分', (3.5 + 12) * 60),
+		//
+		year = 1975; year <= 2041; year++)
+			console.log(new Date(c(year)).format());
+
+		// ----------------------------------------------------------------------------
 
 		CeL.assert([ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4');
 		CeL.assert([ 2014, CeL.立春年(new Date('2015/2/3')) ], '立春年 2015/2/3');
 
-		CeL.LEA406.load_teams('V', function() {
+		CeL.LEA406.load_terms('V', function() {
 			CeL.show_degrees(CeL.LEA406(2457132, 'V'));
 		});
 
@@ -311,7 +344,14 @@ if (typeof CeL === 'function')
 			 */
 			DEGREES_BETWEEN_SOLAR_TERMS = TURN_TO_DEGREES / SOLAR_TERMS_COUNT,
 			// 各種月相: 新月、上弦月、滿月、下弦月。
-			LUNAR_PHASE_NAME = '朔,上弦,望,下弦'.split(',');
+			LUNAR_PHASE_NAME = '朔,上弦,望,下弦'.split(','),
+			// 本地之 time zone / time offset (UTC offset by minutes)。
+			// e.g., UTC+8: 8 * 60 = +480
+			// e.g., UTC-5: -5 * 60
+			default_offset = library_namespace.String_to_Date
+			//
+			&& library_namespace.String_to_Date.default_offset
+					|| -(new Date).getTimezoneOffset() || 0;
 
 			_.SOLAR_TERMS = SOLAR_TERMS_NAME;
 
@@ -358,8 +398,8 @@ if (typeof CeL === 'function')
 
 			_.Julian_century = Julian_century;
 
-			// to proper degrees 0 ~ less than 360
-			// near_0: -180 ~ less than 180
+			// to proper degrees 0–less than 360
+			// near_0: -180–less than 180
 			function normalize_degrees(degree, near_0) {
 				if ((degree %= TURN_TO_DEGREES) < 0)
 					degree += TURN_TO_DEGREES;
@@ -726,11 +766,11 @@ if (typeof CeL === 'function')
 				// coefficients of Δλ
 				coefficients = [];
 
-				sun_aberration_variation.forEach(function(team) {
+				sun_aberration_variation.forEach(function(term) {
 					var coefficient = 0;
-					team.forEach(function(sub_team) {
-						coefficient += sub_team[0]
-								* Math.sin(sub_team[1] + sub_team[2] * τ);
+					term.forEach(function(sub_term) {
+						coefficient += sub_term[0]
+								* Math.sin(sub_term[1] + sub_term[2] * τ);
 					});
 					coefficients.push(coefficient);
 				});
@@ -827,21 +867,21 @@ if (typeof CeL === 'function')
 				library_namespace.debug('Julian centuries from J2000.0: ' + T,
 						4);
 
-				for (var team,
+				for (var term,
 				// Summation of luni-solar nutation series
 				// (smallest terms first).
-				index = IAU2000B_nutation_teams.length; index > 0;) {
-					team = IAU2000B_nutation_teams[--index];
+				index = IAU2000B_nutation_terms.length; index > 0;) {
+					term = IAU2000B_nutation_terms[--index];
 					var argument = 0;
 					// 5: length of parameters
 					for (var i = 0; i < 5; i++)
-						// team[i] 常為0
-						argument += team[i] * parameters[i];
+						// term[i] 常為0
+						argument += term[i] * parameters[i];
 
 					var _sin = Math.sin(argument), _cos = Math.cos(argument);
-					Δψ += (team[5] + team[6] * T) * _sin + team[7] * _cos;
+					Δψ += (term[5] + term[6] * T) * _sin + term[7] * _cos;
 					if (!Δψ_only)
-						Δε += (team[8] + team[9] * T) * _cos + team[10] * _sin;
+						Δε += (term[8] + term[9] * T) * _cos + term[10] * _sin;
 				}
 
 				// Convert from 0.1 microarcsec units to radians.
@@ -881,20 +921,20 @@ if (typeof CeL === 'function')
 					% TURN_TO_DEGREES) * DEGREES_TO_RADIANS);
 				});
 
-				// IAU1980_nutation_teams[6,8] 有乘以十倍了。
+				// IAU1980_nutation_terms[6,8] 有乘以十倍了。
 				T /= 10;
 
-				IAU1980_nutation_teams.forEach(function(team) {
+				IAU1980_nutation_terms.forEach(function(term) {
 					var c, argument = 0, i = 0;
 					// 5: parameters.length
 					for (; i < 5; i++)
 						// 正弦(計算Δψ用sine)的角度參數及餘弦(計算Δε用cosine)的角度參數是D、M、M'、F、Ω這5個基本參數的線性組合。
 						// c常為0
-						if (c = team[i])
+						if (c = term[i])
 							argument += c * parameters[i];
 
-					Δψ += (team[5] + team[6] * T) * Math.sin(argument);
-					if (!Δψ_only && (c = team[7] + team[8] * T))
+					Δψ += (term[5] + term[6] * T) * Math.sin(argument);
+					if (!Δψ_only && (c = term[7] + term[8] * T))
 						Δε += c * Math.cos(argument);
 				});
 
@@ -914,21 +954,21 @@ if (typeof CeL === 'function')
 			 * 
 			 * @deprecated
 			 */
-			function initialize_VSOP87(subteams) {
-				if (subteams.init)
+			function initialize_VSOP87(subterms) {
+				if (subterms.init)
 					// 另一 thread 正初始化中。
 					return;
-				subteams.init = true;
+				subterms.init = true;
 
-				subteams.forEach(function(series) {
+				subterms.forEach(function(series) {
 					series.forEach(function(items) {
 						items[1] *= DEGREES_TO_RADIANS;
 						items[2] *= DEGREES_TO_RADIANS;
 					});
 				});
 
-				subteams.initialized = true;
-				delete subteams.init;
+				subterms.initialized = true;
+				delete subterms.init;
 			}
 
 			/**
@@ -948,7 +988,7 @@ if (typeof CeL === 'function')
 			 *            planets 行星.
 			 * @param {Object}[options]
 			 *            options 設定特殊功能:<br />
-			 *            {String|Array}options.teams: request teams.<br />
+			 *            {String|Array}options.terms: request terms.<br />
 			 *            L: 日心黃經 the ecliptical longitude in radians (弧度)
 			 *            真黃經，不是軌道經度, NOT the orbital longitude<br />
 			 *            B: 日心黃緯 the ecliptical latitude in radians (弧度)<br />
@@ -970,44 +1010,44 @@ if (typeof CeL === 'function')
 				//				
 				coordinate = library_namespace.null_Object(),
 				//
-				object_teams = VSOP87_teams[VSOP87.object_name(object)];
-				if (!object_teams)
+				object_terms = VSOP87_terms[VSOP87.object_name(object)];
+				if (!object_terms)
 					throw new Error('VSOP87: Invalid object [' + object + ']');
 
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
 					options = library_namespace.null_Object();
 
-				var teams = options.teams;
-				if (!teams)
-					teams = 'LBR'.split('');
+				var terms = options.terms;
+				if (!terms)
+					terms = 'LBR'.split('');
 				else {
-					if (!Array.isArray(teams))
-						teams = [ teams ];
+					if (!Array.isArray(terms))
+						terms = [ terms ];
 					if (options.FK5 !== false
-							&& (teams.includes('L') || teams.includes('R'))) {
-						if (!teams.includes('L'))
-							teams.push('L');
-						if (!teams.includes('B'))
-							teams.push('B');
+							&& (terms.includes('L') || terms.includes('R'))) {
+						if (!terms.includes('L'))
+							terms.push('L');
+						if (!terms.includes('B'))
+							terms.push('B');
 					}
 				}
 
-				teams.forEach(function(team_name) {
-					var coefficients = [], subteams = object_teams[team_name];
-					if (!subteams) {
-						library_namespace.err('VSOP87: Invalid team name: ['
-								+ team_name + ']');
+				terms.forEach(function(term_name) {
+					var coefficients = [], subterms = object_terms[term_name];
+					if (!subterms) {
+						library_namespace.err('VSOP87: Invalid term name: ['
+								+ term_name + ']');
 						return;
 					}
 
 					// 無用:因為 items[1,2] 已經是弧度。
-					if (false && !subteams.initialized) {
-						initialize_VSOP87(subteams);
+					if (false && !subterms.initialized) {
+						initialize_VSOP87(subterms);
 					}
 
 					// series: 序列 L0,L1,..,B0,B1,..,R0,R1,..
-					subteams.forEach(function(series) {
+					subterms.forEach(function(series) {
 						coefficients.push(series.reduce(function(value, items) {
 							if (false && items.length === 1)
 								return value + items[0];
@@ -1025,23 +1065,23 @@ if (typeof CeL === 'function')
 						}, 0));
 					});
 
-					coordinate[team_name] =
+					coordinate[term_name] =
 					// L=(L0+L1*τ+L2*τ^2+L3*τ^3+L4*τ^4+L5*τ^5)/10^8
 					// (倍數: 10^-8)
 					polynomial_value(coefficients, τ);
 					// 倍數
-					if (object_teams.multiplier > 0)
-						coordinate[team_name] *= object_teams.multiplier;
+					if (object_terms.multiplier > 0)
+						coordinate[term_name] *= object_terms.multiplier;
 					library_namespace.debug(object
 							+ '.'
-							+ team_name
+							+ term_name
 							+ ' @ '
 							+ JD
 							+ ' ≈ '
-							+ (team_name === 'R' ? coordinate[team_name]
+							+ (term_name === 'R' ? coordinate[term_name]
 									+ '  AU' : show_degrees(normalize_degrees(
-									coordinate[team_name] / DEGREES_TO_RADIANS,
-									team_name === 'B'))) + ' (coefficients: '
+									coordinate[term_name] / DEGREES_TO_RADIANS,
+									term_name === 'B'))) + ' (coefficients: '
 							+ coefficients.join(', ') + ')', 3);
 				});
 
@@ -1091,7 +1131,7 @@ if (typeof CeL === 'function')
 						coordinate.B /= DEGREES_TO_RADIANS;
 				}
 
-				return teams.length > 1 ? coordinate : coordinate[teams[0]];
+				return terms.length > 1 ? coordinate : coordinate[terms[0]];
 			}
 
 			_.VSOP87 = VSOP87;
@@ -1114,18 +1154,18 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {String}object
 			 *            planets 行星.
-			 * @param {Array}teams
+			 * @param {Array}terms
 			 *            計算數據.
 			 */
-			function VSOP87_add_teams(object, teams) {
+			function VSOP87_add_terms(object, terms) {
 				object = VSOP87.object_name(object);
 				if (object === solar_terms_object)
 					// reset solar_terms_cache
 					solar_terms_cache = [];
-				VSOP87_teams[object] = teams;
+				VSOP87_terms[object] = terms;
 			}
 
-			VSOP87.add_teams = VSOP87_add_teams;
+			VSOP87.add_terms = VSOP87_add_terms;
 
 			/**
 			 * 載入指定行星的計算數據後，執行 callback。提供給模組外部函數使用。
@@ -1135,7 +1175,7 @@ if (typeof CeL === 'function')
 			 * @param {Function}callback
 			 *            callback.
 			 */
-			function VSOP87_load_teams(object, callback) {
+			function VSOP87_load_terms(object, callback) {
 				library_namespace.run(library_namespace
 						.get_module_path(module_name
 								+ library_namespace.env.path_separator
@@ -1143,12 +1183,12 @@ if (typeof CeL === 'function')
 						function() {
 							library_namespace.info(
 							//
-							'VSOP87_load_teams: resource file of [' + object
+							'VSOP87_load_terms: resource file of [' + object
 									+ '] loaded.');
 						}, callback ]);
 			}
 
-			VSOP87.load_teams = VSOP87_load_teams;
+			VSOP87.load_terms = VSOP87_load_terms;
 
 			/**
 			 * 轉換 VSOP87 file @ node.js。
@@ -1183,7 +1223,7 @@ if (typeof CeL === 'function')
 
 					var object, type, group,
 					//
-					teams = library_namespace.null_Object();
+					terms = library_namespace.null_Object();
 
 					data.forEach(function(line) {
 						if (!line)
@@ -1198,16 +1238,16 @@ if (typeof CeL === 'function')
 							var t = fields[6][fields[5]];
 							group = [];
 							if (t === type)
-								teams[type].push(group);
+								terms[type].push(group);
 							else
-								teams[type = t] = [ group ];
+								terms[type = t] = [ group ];
 
 							console.log(object + ' ' + type + ' ' + fields[7]
-									+ ' ' + fields[8] + ' teams');
+									+ ' ' + fields[8] + ' terms');
 							return;
 						}
 
-						if (false && teams[type].length === 1
+						if (false && terms[type].length === 1
 								&& group.length === 0)
 							console.log(fields);
 						fields = fields.slice(-3);
@@ -1227,14 +1267,14 @@ if (typeof CeL === 'function')
 					+ (options.name || 'VSOP87')
 					// e.g., 'D' for VSOP87D.
 					+ (options.type || '') + new_line + library_namespace.Class
-							+ '.' + (options.name || 'VSOP87') + '.add_teams(',
+							+ '.' + (options.name || 'VSOP87') + '.add_terms(',
 					//
 					postfix = options.postfix || new_line + ');';
 					fs.writeFile(options.name + '_' + object + '.js', prefix
 							+ JSON.stringify(object)
 							+ ','
 							+ new_line
-							+ JSON.stringify(teams).replace(/(\]\],)/g,
+							+ JSON.stringify(terms).replace(/(\]\],)/g,
 									'$1' + new_line) + postfix, {
 						encoding : encoding
 					});
@@ -1266,8 +1306,8 @@ if (typeof CeL === 'function')
 			function equinox(year, index, no_fix) {
 				// year is an integer; other values for year, would give
 				// meaningless results!
-				var JD = (year |= 0) < 1000 ? equinox_teams_before_1000
-						: equinox_teams_after_1000;
+				var JD = (year |= 0) < 1000 ? equinox_terms_before_1000
+						: equinox_terms_after_1000;
 				// 計算相應的"平"分點或"平"至點的時刻。
 				JD = polynomial_value(JD[index |= 0], (year < 1000 ? year
 						: year - 2000) / 1000);
@@ -1284,8 +1324,8 @@ if (typeof CeL === 'function')
 				// 要計算的分點或至點時刻(儒略曆書時,即力學時）表達為：
 				λ = JD + 0.00001 *
 				// JDE0 + 0.00001 S / Δλ 日
-				equinox_periodic_terms.reduce(function(S, teams) {
-					return S + teams[0] * Math.cos(teams[1] + teams[2] * T);
+				equinox_periodic_terms.reduce(function(S, terms) {
+					return S + terms[0] * Math.cos(terms[1] + terms[2] * T);
 				}, 0) /
 				// Δλ
 				(1 + 0.0334 * Math.cos(W) + 0.0007 * Math.cos(2 * W));
@@ -1313,7 +1353,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
-			 * 《天文算法》 p.166 ~ p. 169 Example 25.b
+			 * 《天文算法》 p.166–p. 169 Example 25.b
 			 * 
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
@@ -1369,7 +1409,7 @@ if (typeof CeL === 'function')
 			 * @param {Integer}year
 			 *            year 年(CE)
 			 * @param {Number}degrees
-			 *            0 ~ less than 360.<br />
+			 *            0–less than 360.<br />
 			 *            angle in degrees from March equinox of the year.<br />
 			 *            指定太陽視黃經角度，自當年黃經0度(春分)開始。
 			 * 
@@ -1377,7 +1417,7 @@ if (typeof CeL === 'function')
 			 */
 			function JD_of_solar_angle(year, degrees) {
 				var offset, apparent,
-				// index: 下界 index of 分點和至點, 0~3
+				// index: 下界 index of 分點和至點, 0–3
 				index = degrees / EQUINOX_SOLSTICE_DEGREES | 0,
 				// JD 近似值(下界)。
 				JD = equinox(year, index, true);
@@ -1499,7 +1539,7 @@ if (typeof CeL === 'function')
 				}
 
 				// assert:
-				// angle is now angle (0~less than 360),
+				// angle is now angle (0–less than 360),
 				// from March equinox of year.
 				return JD_of_solar_angle(year, angle);
 			}
@@ -1645,6 +1685,128 @@ if (typeof CeL === 'function')
 			_.solar_term_of_JD = solar_term_of_JD;
 
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
+			// 應用功能:輔助以節氣為年首之曆法
+
+			// copy from data.date.
+			// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
+			var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+			// 小寒(19) 1月5-7日交節，以春分分年的情況，已在下一年。
+			solar_term_starts_year = SOLAR_TERMS_NAME.indexOf('小寒'),
+			// solar_term_calendar_cache[term index / minute_offset]
+			// = { CE year : Date value }
+			solar_term_calendar_cache = [];
+
+			/**
+			 * 取得 calendar 年首。
+			 * 
+			 * @param {Integer}CE_year
+			 *            CE year
+			 * 
+			 * @returns {Integer} Date value
+			 */
+			function solar_term_calendar_year_start(CE_year) {
+				var year_start = this.cache[CE_year |= 0];
+				if (year_start)
+					return year_start;
+
+				year_start = midnight_of(solar_term_JD(
+				// 保證 year_start 與 CE_year 在同一年:
+				// 小寒(19) 1月5-7日交節，之後應該計算前一年的節氣。
+				// 警告:此演算法於小寒不在隔年的情況，將失效。
+				this.term_index < solar_term_starts_year ? CE_year
+						: CE_year - 1, this.term_index), this.minute_offset,
+						true);
+
+				library_namespace.debug('CE ' + CE_year + ' '
+						+ SOLAR_TERMS_NAME[this.term_index] + ' begins on '
+						+ year_start.format(), 2);
+				return this.cache[CE_year]
+				// cache[CE year] = term Date value of year
+				= year_start = year_start.getTime();
+			}
+
+			/**
+			 * Date → [ year, days ]
+			 * 
+			 * @param {Date}date
+			 *            指定日期
+			 * 
+			 * @returns {Array} [ (CE year), (days counts from the first day) ]
+			 */
+			function solar_term_calendar_year_of(date) {
+				var CE_year = date.getFullYear(),
+				//
+				month = date.getMonth(), days;
+
+				// (this.month_start) 月之前，位在前一年。
+				if (month < this.month_start
+				//
+				|| (days = date - this.year_starts(CE_year)) < 0)
+					days = date - this.year_starts(--CE_year);
+				// assert: days >= 0
+
+				// [ CE_year, (days counts from the first day) ]
+				return [ CE_year, days / ONE_DAY_LENGTH_VALUE ];
+			}
+
+			/**
+			 * 輔助以節氣為年首曆法之 handler。
+			 * 
+			 * handler(year) → start of year
+			 * 
+			 * handler.year_of(date) → [ year, days]
+			 * 
+			 * @param {String|Integer}term
+			 *            solar term name / index
+			 * @param {Integer}[minute_offset]
+			 *            indicate the time zone
+			 * @param {Object}[options]
+			 *            options 設定特殊功能
+			 * 
+			 * @returns {Function} handler
+			 * 
+			 * @see solar_term_calendar_year_start(CE_year),
+			 *      solar_term_calendar_year_of(date)
+			 */
+			function solar_term_calendar(term, minute_offset, options) {
+				var term_index = typeof term === 'string' ? SOLAR_TERMS_NAME
+						.indexOf(term) : term;
+				if (!SOLAR_TERMS_NAME[term_index]) {
+					library_namespace.err(
+					//
+					'solar_term_calendar: Invalid term: [' + term + ']');
+					return;
+				}
+
+				var cache = term_index + '/' + (minute_offset |= 0);
+				cache = solar_term_calendar_cache[cache]
+				//
+				|| (solar_term_calendar_cache[cache]
+				//
+				= library_namespace.null_Object());
+
+				// 不動到原 options。
+				options = Object.assign(library_namespace.null_Object(),
+						options);
+
+				var handler = solar_term_calendar_year_start.bind(options);
+				handler.year_of = solar_term_calendar_year_of.bind(options);
+
+				Object.assign(options, {
+					term_index : term_index,
+					minute_offset : minute_offset,
+					cache : cache,
+					year_starts : handler,
+					month_start : (term_index - solar_term_starts_year)
+							.mod(SOLAR_TERMS_NAME.length) / 2 | 0
+				});
+
+				return handler;
+			}
+
+			_.solar_term_calendar = solar_term_calendar;
+
+			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 			// 應用功能:需配合 'data.date'。
 
 			var
@@ -1773,7 +1935,7 @@ if (typeof CeL === 'function')
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}[options]
 			 *            options 設定特殊功能:<br />
-			 *            {String|Array}options.teams: request teams.<br />
+			 *            {String|Array}options.terms: request terms.<br />
 			 *            V: 黃經 in degrees. ecliptic longitude reckoned along
 			 *            the moving ecliptic from the mean equinox of date<br />
 			 *            U: 黃緯 in degrees. ecliptic latitude reckoned from the
@@ -1790,15 +1952,15 @@ if (typeof CeL === 'function')
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
 					options = typeof options === 'string' ? {
-						teams : options
+						terms : options
 					} : library_namespace.null_Object();
 
 				// 儒略千年數 Julian millennia since J2000.0.
 				var τ = Julian_century(JD) / 10,
 				// τ^2
-				τ2 = τ * τ, teams = options.teams,
+				τ2 = τ * τ, terms = options.terms,
 				//
-				warn_team = !options.ignore_team,
+				warn_term = !options.ignore_term,
 				/**
 				 * spherical coordinates of its centre:
 				 * 
@@ -1814,31 +1976,31 @@ if (typeof CeL === 'function')
 
 				library_namespace.debug(JD + ': τ: ' + τ + ', τ^2: ' + τ2, 3);
 
-				if (!Array.isArray(teams)) {
-					if (!teams || typeof teams !== 'string') {
-						teams = 'VUR';
+				if (!Array.isArray(terms)) {
+					if (!terms || typeof terms !== 'string') {
+						terms = 'VUR';
 						// 有什麼就用什麼。
-						warn_team = false;
+						warn_term = false;
 					}
-					teams = teams.split('');
+					terms = terms.split('');
 				}
 
 				// Geocentric spherical coordinates of the Moon r, V, U are
 				// expanded to Poisson series of the form
-				teams.forEach(function(team) {
+				terms.forEach(function(term) {
 					var type = options.type || LEA406.default_type,
 					//
-					subteams = LEA406_teams[team + type];
-					if (!subteams) {
+					subterms = LEA406_terms[term + type];
+					if (!subterms) {
 						// try another one.
 						type = type === 'a' ? 'b' : 'a';
-						subteams = LEA406_teams[team + type];
+						subterms = LEA406_terms[term + type];
 					}
-					if (!subteams) {
-						if (warn_team)
+					if (!subterms) {
+						if (warn_term)
 							library_namespace.err(
 							//
-							'LEA406: Invalid team name: [' + team
+							'LEA406: Invalid term name: [' + term
 									+ ']. You may need to load it first.');
 						return;
 					}
@@ -1846,9 +2008,9 @@ if (typeof CeL === 'function')
 					var sum = 0,
 					// R (formula 6),
 					// V (formula 7), U (formula 8)
-					operator = team === 'R' ? Math.cos : Math.sin;
+					operator = term === 'R' ? Math.cos : Math.sin;
 
-					subteams.forEach(function(T, index) {
+					subterms.forEach(function(T, index) {
 						// T = [ coefficients[4 in arcseconds],
 						// Amp0,Amp1,Phase1,Amp2,Phase2 ]
 						var ω = polynomial_value(T[0], τ);
@@ -1865,80 +2027,80 @@ if (typeof CeL === 'function')
 							throw '內部錯誤 @ index ' + index + ': ' + T;
 						}
 					});
-					library_namespace.debug(JD + '.' + team + ': ' + sum, 3);
+					library_namespace.debug(JD + '.' + term + ': ' + sum, 3);
 
 					// Amp_to_integer: see convert_LEA406()
 					sum /= Amp_to_integer;
 
 					// R in km
-					if (team !== 'R') {
-						if (team === 'V')
+					if (term !== 'R') {
+						if (term === 'V')
 							sum += polynomial_value(LEA406_V_coefficients, τ);
 						// V, U in arcseconds → degrees
 						sum /= DEGREES_TO_ARCSECONDS;
 					}
-					coordinates[team] = sum;
+					coordinates[term] = sum;
 				});
 
-				return teams.length === 1
+				return terms.length === 1
 				//
-				? coordinates[teams[0]] : coordinates;
+				? coordinates[terms[0]] : coordinates;
 			}
 
 			_.LEA406 = LEA406;
 
 			/**
-			 * LEA406_teams[Va,Ua,Ra;Vb,Ub,Rb] = {teams}
+			 * LEA406_terms[Va,Ua,Ra;Vb,Ub,Rb] = {terms}
 			 * 
 			 * @type {Object}
 			 * @inner
 			 */
-			var LEA406_teams = library_namespace.null_Object();
+			var LEA406_terms = library_namespace.null_Object();
 
 			/**
 			 * 增加指定項目的計算數據，提供給模組內部函數使用。
 			 * 
-			 * @param {String}team_name
+			 * @param {String}term_name
 			 *            項目名稱 (Va,Ua,Ra;Vb,Ub,Rb).
-			 * @param {Array}teams
+			 * @param {Array}terms
 			 *            計算數據.
 			 */
-			function LEA406_add_teams(team_name, teams) {
+			function LEA406_add_terms(term_name, terms) {
 				// 初始化: 將 sin() 之引數全部轉成 radians。
-				teams.forEach(function(T) {
+				terms.forEach(function(T) {
 					// T = [ coefficients[4 in arcseconds],
 					// Amp0,Amp1,Phase1,Amp2,Phase2 ]
 					T[0].forEach(function(coefficient, index) {
 						T[0][index] *= ARCSECONDS_TO_RADIANS;
 					});
-					// T[2~5] 可能為了節省大小，而為 undefined!
+					// T[2–5] 可能為了節省大小，而為 undefined!
 					var i = 3;
 					T[i] = T[i] ? T[i] * ARCSECONDS_TO_RADIANS : 0;
 					i = 5;
 					T[i] = T[i] ? T[i] * ARCSECONDS_TO_RADIANS : 0;
 				});
 				// .reverse(): smallest terms first
-				LEA406_teams[team_name] = teams.reverse();
+				LEA406_terms[term_name] = terms.reverse();
 			}
 
-			LEA406.add_teams = LEA406_add_teams;
+			LEA406.add_terms = LEA406_add_terms;
 
 			/**
 			 * 載入指定項目的計算數據後，執行 callback。提供給模組外部函數使用。
 			 * 
-			 * @param {String}team_name
+			 * @param {String}term_name
 			 *            項目名稱 (V,U,R).
 			 * @param {Function}callback
 			 *            callback.
 			 */
-			function LEA406_load_teams(team_name, callback) {
+			function LEA406_load_terms(term_name, callback) {
 				var type;
-				if (team_name.length === 2) {
-					type = team_name.charAt(1);
-					team_name = team_name.charAt(0);
+				if (term_name.length === 2) {
+					type = term_name.charAt(1);
+					term_name = term_name.charAt(0);
 				} else
 					type = LEA406.default_type;
-				var name = LEA406_name + type + '-' + team_name;
+				var name = LEA406_name + type + '-' + term_name;
 				library_namespace.run(library_namespace
 						.get_module_path(module_name
 						//
@@ -1946,33 +2108,33 @@ if (typeof CeL === 'function')
 						function() {
 							library_namespace.info(
 							//
-							'LEA406_load_teams: resource file of [' + name
+							'LEA406_load_terms: resource file of [' + name
 									+ '] loaded, '
-									+ LEA406_teams[team_name + type].length
+									+ LEA406_terms[term_name + type].length
 									// Poisson series
 									+ ' terms.');
 						}, callback ]);
 			}
 
-			LEA406.load_teams = LEA406_load_teams;
+			LEA406.load_terms = LEA406_load_terms;
 
 			/**
-			 * 確定已經載入那些 teams。
+			 * 確定已經載入那些 terms。
 			 * 
-			 * @param {String}[team_name]
+			 * @param {String}[term_name]
 			 *            項目名稱 (V,U,R).
 			 * 
-			 * @returns {Array|String} 已載入 teams。
+			 * @returns {Array|String} 已載入 terms。
 			 */
-			function LEA406_loaded(team_name) {
-				if (!team_name)
-					return Object.keys(LEA406_teams);
-				var teams = [], types = 'ab'.split('');
+			function LEA406_loaded(term_name) {
+				if (!term_name)
+					return Object.keys(LEA406_terms);
+				var terms = [], types = 'ab'.split('');
 				types.forEach(function(type) {
-					if ((team_name + type) in LEA406_teams)
-						teams.push(type);
+					if ((term_name + type) in LEA406_terms)
+						terms.push(type);
 				});
-				return teams.join('');
+				return terms.join('');
 			}
 
 			LEA406.loaded = LEA406_loaded;
@@ -2060,7 +2222,7 @@ if (typeof CeL === 'function')
 					// to the file.
 					data.splice(0, 8);
 
-					var teams = [];
+					var terms = [];
 
 					data.forEach(function(line) {
 						if (!line)
@@ -2123,7 +2285,7 @@ if (typeof CeL === 'function')
 							coefficients[0].divide(1e12, 12);
 						}
 
-						teams.push([ coefficients,
+						terms.push([ coefficients,
 						// Amp0,Amp1,Phase1,Amp2,Phase2
 						fields[15], fields[16], fields[16] ? fields[19] : 0,
 								fields[17], fields[17] ? fields[20] : 0 ]);
@@ -2164,16 +2326,16 @@ if (typeof CeL === 'function')
 					+ name
 					// e.g., 'a' for LEA-406a.
 					+ (options.type || '') + new_line + library_namespace.Class
-							+ '.' + name.replace(/-/g, '') + '.add_teams(',
+							+ '.' + name.replace(/-/g, '') + '.add_terms(',
 					//
 					postfix = options.postfix || new_line + ');';
 					fs.writeFile(name + (options.type || '') + '-'
-							+ options.team + '.js', prefix
-							+ JSON.stringify(options.team
+							+ options.term + '.js', prefix
+							+ JSON.stringify(options.term
 									+ (options.type || ''))
 							+ ','
 							+ new_line
-							+ JSON.stringify(teams).replace(/,0/g, ',')
+							+ JSON.stringify(terms).replace(/,0/g, ',')
 									.replace(/,+\]/g, ']').replace(/(\]\],)/g,
 											'$1' + new_line)
 							// .replace(/(\],)/g,
@@ -2291,7 +2453,7 @@ if (typeof CeL === 'function')
 			 * @param {Number}JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Boolean}normalize_360
-			 *            正規化成 0°~360°，而非 -180°~180°。
+			 *            正規化成 0°–360°，而非 -180°–180°。
 			 * 
 			 * @returns {Number} degrees
 			 */
@@ -2405,7 +2567,7 @@ if (typeof CeL === 'function')
 				// 誤差常於2°之內。
 				result_degrees = angel();
 
-				// / 12: 月日視黃經差每日必於 12°~13°之內。
+				// / 12: 月日視黃經差每日必於 12°–13°之內。
 				// 因此每度耗時必小於 1/12 日。此處取最大值。
 				if (degrees < result_degrees) {
 					// 將 JD 作為上限。
@@ -2425,7 +2587,7 @@ if (typeof CeL === 'function')
 						+ phase + ' (' + degrees + '°): JD' + JD + ' ('
 						+ library_namespace.JD_to_Date(JD).format('CE') + '), '
 						+ show_degrees(result_degrees) + '; JD: ' + low_JD
-						+ '~' + up_JD, 2);
+						+ '–' + up_JD, 2);
 
 				// 內插法 main loop
 				while (low_JD < up_JD) {
@@ -2470,7 +2632,7 @@ if (typeof CeL === 'function')
 			}
 
 			// phase: 0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
-			// lunar_phase_cache[year][phase:0~3] = [JD of 日常生活時間 UT, JD, ...]
+			// lunar_phase_cache[year][phase:0–3] = [JD of 日常生活時間 UT, JD, ...]
 			var lunar_phase_cache = [];
 
 			/**
@@ -2603,7 +2765,7 @@ if (typeof CeL === 'function')
 
 				var _phase = Math.floor(lunar_phase_angel_of_JD(JD) / 90);
 				if (_phase !== phase) {
-					// phase: -2~1
+					// phase: -2–1
 					if (phase < 0)
 						phase += 4;
 					var phase_shown = options.index ? phase
@@ -2641,9 +2803,7 @@ if (typeof CeL === 'function')
 			 * @returns {Number} normalized minute offset
 			 */
 			function normalize_minute_offset(minute_offset) {
-				return isNaN(minute_offset) ? library_namespace
-				//
-				.String_to_Date.default_offset : minute_offset;
+				return isNaN(minute_offset) ? default_offset : minute_offset;
 			}
 
 			/**
@@ -2654,19 +2814,33 @@ if (typeof CeL === 'function')
 			 * @param {Number}[minute_offset]
 			 *            time-zone offset from UTC in minutes.<br />
 			 *            e.g., UTC+8: 8 * 60 = +480. default: UTC+0.
+			 * @param {Boolean}[get_local_Date]
+			 *            轉成當地之 Date
 			 * 
-			 * @returns {Number}
+			 * @returns {Number|Date}
 			 */
-			function midnight_JD_of(JD, minute_offset) {
-				var day_offset = (minute_offset | 0) / (24 * 60) - .5;
-				return Math.floor(JD + day_offset) - day_offset;
-
+			function midnight_of(JD, minute_offset, get_local_Date) {
 				// -day_offset: to local (JD+.5). 此時把 local 當作 UTC+0.
 				// Math.floor(): reset to local midnight, 00:00
 				// +day_offset: recover to UTC
+				var day_offset = (minute_offset | 0) / (24 * 60) - .5;
+				JD = Math.floor(JD + day_offset) - day_offset;
+
+				if (get_local_Date) {
+					JD = library_namespace.JD_to_Date(
+					//
+					JD + (minute_offset - default_offset) / (60 * 24));
+					// 歸零用。
+					var ms = JD.getMilliseconds();
+					// 歸零。
+					if (ms)
+						JD.setMilliseconds(Math.round(ms / 500) * 500);
+				}
+
+				return JD;
 			}
 
-			_.midnight_of = midnight_JD_of;
+			_.midnight_of = midnight_of;
 
 			/**
 			 * 冬至序 = 18
@@ -2699,7 +2873,7 @@ if (typeof CeL === 'function')
 				// 魯僖公五年正月壬子朔旦冬至
 				.map(function(JD) {
 					// 日月合朔時間 → 朔日0時
-					return midnight_JD_of(JD, minute_offset);
+					return midnight_of(JD, minute_offset);
 				});
 				年朔日.冬至 = 冬至;
 
@@ -2713,7 +2887,7 @@ if (typeof CeL === 'function')
 			 * 取得歲首(建正/年始)為建子之整年月首朔日/月齡。
 			 * 
 			 * @param {Integer}年
-			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8 ~ 2000/11/25
+			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8–2000/11/25
 			 * @param {Number}minute_offset
 			 *            time-zone offset from UTC in minutes.<br />
 			 *            e.g., UTC+8: 8 * 60 = 480
@@ -2810,7 +2984,7 @@ if (typeof CeL === 'function')
 			 * 以定朔法排曆，編排中國傳統曆法（陰陽曆），取得整年月首朔日/月齡。
 			 * 
 			 * @param {Integer}年
-			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8 ~ 2000/11/25
+			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8–2000/11/25
 			 * @param {Object}[options]
 			 *            options 設定特殊功能:<br />
 			 *            {Number}options.minute_offset: time-zone offset from
@@ -2931,10 +3105,10 @@ if (typeof CeL === 'function')
 			 */
 
 			// ------------------------------------------------------------------------------------------------------//
-			// teams for obliquity 轉軸傾角
+			// terms for obliquity 轉軸傾角
 			/**
 			 * IAU2006 obliquity coefficients.<br />
-			 * teams for function mean_obliquity_IAU2006(JD)
+			 * terms for function mean_obliquity_IAU2006(JD)
 			 * 
 			 * Reference 資料來源/資料依據:
 			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/obl06.c
@@ -2945,7 +3119,7 @@ if (typeof CeL === 'function')
 					-0.0001831, 0.00200340, -0.000000576, -0.0000000434 ];
 
 			/**
-			 * teams for function equinox()
+			 * terms for function equinox()
 			 * 
 			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
@@ -2965,10 +3139,10 @@ if (typeof CeL === 'function')
 			});
 
 			// ------------------------------------------------------------------------------------------------------//
-			// teams for ΔT
+			// terms for ΔT
 
 			/**
-			 * teams for function ΔT()
+			 * terms for function ΔT()
 			 * 
 			 * Reference 資料來源/資料依據:<br />
 			 * <a href="http://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html"
@@ -3074,17 +3248,17 @@ if (typeof CeL === 'function')
 					// τ^3
 					[ [ 0.010, 154.7066, 359993.7286 ] ] ];
 
-			sun_aberration_variation.forEach(function(team) {
-				team.forEach(function(sub_team) {
-					sub_team[1] *= DEGREES_TO_RADIANS;
-					sub_team[2] *= DEGREES_TO_RADIANS;
+			sun_aberration_variation.forEach(function(term) {
+				term.forEach(function(sub_term) {
+					sub_term[1] *= DEGREES_TO_RADIANS;
+					sub_term[2] *= DEGREES_TO_RADIANS;
 				});
 			});
 
 			// ------------------------------------------------------------------------------------------------------//
 
 			/**
-			 * teams for function equinox()
+			 * terms for function equinox()
 			 * 
 			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms.<br />
@@ -3093,7 +3267,7 @@ if (typeof CeL === 'function')
 			 * @inner
 			 */
 			// for years -1000 to 1000
-			var equinox_teams_before_1000 = [
+			var equinox_terms_before_1000 = [
 			// March equinox, 春分點時刻
 			[ 1721139.29189, 365242.13740, 0.06134, 0.00111, -0.00071 ],
 			// June Solstice, 夏至點時刻
@@ -3103,7 +3277,7 @@ if (typeof CeL === 'function')
 			// December Solstice, 冬至點時刻
 			[ 1721414.39987, 365242.88257, -0.00769, -0.00933, -0.00006 ] ],
 			// for years 1000 to 3000
-			equinox_teams_after_1000 = [
+			equinox_terms_after_1000 = [
 			// March equinox, 春分點時刻
 			[ 2451623.80984, 365242.37404, 0.05169, -0.00411, -0.00057 ],
 			// June Solstice, 夏至點時刻
@@ -3129,16 +3303,16 @@ if (typeof CeL === 'function')
 					[ 9, 227.73, 1222.114 ], [ 8, 15.45, 16859.074 ] ];
 
 			// 把能先做的做一做，加快運算速度。
-			equinox_periodic_terms.forEach(function(teams) {
-				teams[1] *= DEGREES_TO_RADIANS;
-				teams[2] *= DEGREES_TO_RADIANS;
+			equinox_periodic_terms.forEach(function(terms) {
+				terms[1] *= DEGREES_TO_RADIANS;
+				terms[2] *= DEGREES_TO_RADIANS;
 			});
 
 			// ------------------------------------------------------------------------------------------------------//
 			// 章動 nutation
 
 			/**
-			 * teams for function nutation()
+			 * terms for function nutation()
 			 * 
 			 * Reference 資料來源/資料依據:<br />
 			 * Nutation, IAU 2000B model.
@@ -3171,13 +3345,13 @@ if (typeof CeL === 'function')
 			// , 7.4722, 0.007702, -0.00005939
 			] ],
 
-			// 0~4: coefficients of l,l',F,D,Om
+			// 0–4: coefficients of l,l',F,D,Om
 			// int nl,nlp,nf,nd,nom;
-			// 5~7: longitude sin, t*sin, cos coefficients
+			// 5–7: longitude sin, t*sin, cos coefficients
 			// double ps,pst,pc;
-			// 8~10: obliquity cos, t*cos, sin coefficients
+			// 8–10: obliquity cos, t*cos, sin coefficients
 			// double ps,pst,pc;
-			IAU2000B_nutation_teams = [
+			IAU2000B_nutation_terms = [
 					/* 1-10 */
 					[ 0, 0, 0, 0, 1, -172064161, -174666, 33386, 92052331,
 							9086, 15377 ],
@@ -3279,7 +3453,7 @@ if (typeof CeL === 'function')
 					[ 1, 1, 2, -2, 2, 1290, 0, 0, -556, 0, 0 ] ];
 
 			/**
-			 * teams for function nutation()
+			 * terms for function nutation()
 			 * 
 			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
@@ -3314,7 +3488,7 @@ if (typeof CeL === 'function')
 
 			// 這些項來自 IAU 1980 章動理論，忽略了係數小於0".0003的項。
 			// https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut80.c
-			IAU1980_nutation_teams = [
+			IAU1980_nutation_terms = [
 					[ 0, 0, 0, 0, 1, -171996, -1742, 92025, 89 ],
 					[ -2, 0, 0, 2, 2, -13187, -16, 5736, -31 ],
 					[ 0, 0, 0, 2, 2, -2274, -2, 977, -5 ],
@@ -3383,7 +3557,7 @@ if (typeof CeL === 'function')
 			// VSOP87 半解析（semi-analytic）理論 periodic terms
 
 			/**
-			 * teams for VSOP87 planets model used in function VSOP87()
+			 * terms for VSOP87 planets model used in function VSOP87()
 			 * 
 			 * full data:<br />
 			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/README
@@ -3401,12 +3575,12 @@ if (typeof CeL === 'function')
 			 * 
 			 * @inner
 			 */
-			var VSOP87_teams = library_namespace.null_Object();
+			var VSOP87_terms = library_namespace.null_Object();
 
 			/**
 			 * 這邊僅擷取行星 Earth 地球數值，以計算二十四節氣 (solar terms)。
 			 * 
-			 * VSOP87_teams.earth[L黃經/B黃緯/R距離] = [L0:[[A,B,C],[A,B,C]]];
+			 * VSOP87_terms.earth[L黃經/B黃緯/R距離] = [L0:[[A,B,C],[A,B,C]]];
 			 * 
 			 * simplified VSOP87 by Jean Meeus.
 			 * 從VSOP87中取出一些主要項(詳見附錄II)，利用它計算得到的太陽位置在-2000到6000年範圍內精度是1"。<br />
@@ -3421,7 +3595,7 @@ if (typeof CeL === 'function')
 			 *      VSOP87B日心黃道球面坐標 Heliocentric LBR - J2000
 			 * @see ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/VSOP87B.ear
 			 */
-			VSOP87_teams.earth = {
+			VSOP87_terms.earth = {
 				multiplier : 1e-8,
 				// 行星 Earth 地球: 日心黃經
 				L : [

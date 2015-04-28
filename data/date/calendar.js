@@ -17,7 +17,6 @@
 // http://keith-wood.name/calendars.html
 // http://www.cc.kyoto-su.ac.jp/~yanom/pancanga/index.html
 
-
 'use strict';
 if (typeof CeL === 'function')
 CeL.run(
@@ -138,7 +137,7 @@ function _format(date, options, to_name, is_leap) {
 
 	if (typeof to_name === 'function')
 		// 當作 month_to_name。
-		date[1] = to_name(date[1], is_leap);
+		date[1] = to_name(date[1], is_leap, options);
 	else if (Array.isArray(to_name))
 		to_name.forEach(function(func, index) {
 			if (index === 3)
@@ -151,6 +150,10 @@ function _format(date, options, to_name, is_leap) {
 	if (format === 'item')
 		return date;
 
+	if (typeof options.numeral === 'function') {
+		date[0] = options.numeral(date[0]);
+		date[2] = options.numeral(date[2]);
+	}
 	format = date.slice(0, 3).reverse().join(' ');
 	if (date[KEY_WEEK])
 		format = date[KEY_WEEK] + ', ' + format;
@@ -267,7 +270,7 @@ new_tester.default_options = {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 長曆: 伊斯蘭曆
 
-// Tabular Islamic calendar / Hijri calendar / التقويم الهجري المجدول /
+// Tabular Islamic calendar / lunar Hijri calendar (AH) / التقويم الهجري المجدول /
 // http://en.wikipedia.org/wiki/Tabular_Islamic_calendar
 // 伊斯蘭曆(回回曆)
 // 陳垣編的《中西回史日曆》(中華書局1962年修訂重印)。
@@ -1755,7 +1758,7 @@ get_boundary(get_diff, 1, 1, 2);
 get_boundary(get_diff, 1, 2, 3);
 // 2.194003427680059=2+820573/4229683
 
-.194003427680059~~820573/4229683
+.194003427680059≈820573/4229683
 
 1+820573/4229683
 <=k<
@@ -2310,7 +2313,7 @@ function Coptic_Date(year, month, date, get_days, year_0) {
 	if ((year %= 4) < 0)
 		year += 4;
 	days += year * Coptic_common_year_days | 0;
-	// all days @ year 3 of the cycle (0~3) needs to add 1 day for the
+	// all days @ year 3 of the cycle (0–3) needs to add 1 day for the
 	// intercalary day of year 3.
 	if (year === 3)
 		days++;
@@ -2328,7 +2331,7 @@ Coptic_Date.epoch = String_to_Date('284/8/29', {
 }).getTime();
 
 // leap year: 3, 3+4, 3+8, ..
-// e.g., year 3: 286/8/29~287/8/29 CE, 366 days.
+// e.g., year 3: 286/8/29–287/8/29 CE, 366 days.
 Coptic_Date.is_leap = function(year) {
 	// 轉正。保證變數值非負數。
 	if ((year %= 4) < 0)
@@ -2470,94 +2473,68 @@ _.Ethiopian_Date = Ethiopian_Date;
 
 // 每月30天。
 var French_Republican_MONTH_DAYS = 30,
-//French: UTC+1
-French_Republican_UTC_offset = 1 * 60,
-//French year 1: began on 1792 CE
+// year epoch: began on 1792 CE
 French_Republican_CE_offset = 1792 - 1,
-//French year 1: begins on French_Republican_year_start[10001]
-French_Republican_cache_offset = 10000,
-//cache Array
-French_Republican_year_start_cache = [],
-//
+// month name
 French_Republican_month_name = '|Vendémiaire|Brumaire|Frimaire|Nivôse|Pluviôse|Ventôse|Germinal|Floréal|Prairial|Messidor|Thermidor|Fructidor|Jours complémentaires'
 		.split('|'),
-//
-French_Republican_weekday_name = "Primidi|Duodi|Tridi|Quartidi|Quintidi|Sextidi|Septidi|Octidi|Nonidi|Décadi".split('|');
+// weekday name
+French_Republican_weekday_name = 'Primidi|Duodi|Tridi|Quartidi|Quintidi|Sextidi|Septidi|Octidi|Nonidi|Décadi'
+		.split('|'),
+// 預防 load 時尚未 ready.
+French_Republican_year_starts = function(year) {
+	if (library_namespace.solar_term_calendar)
+		return (French_Republican_year_starts
+		// 每年第一天都從秋分日開始。
+		= library_namespace.solar_term_calendar('秋分',
+		// French: UTC+1
+		1 * 60))(year);
+};
+//French_Republican_year_starts.year_of = library_namespace.null_function;
+
+// 先嘗試看看。
+French_Republican_year_starts();
 
 French_Republican_Date.month_name = function(month) {
 	return French_Republican_month_name[month];
 };
 
-function French_Republican_year_starts(year) {
-	var year_start = French_Republican_year_start_cache[year
-			+ French_Republican_cache_offset];
-	if (!year_start) {
-		year_start = library_namespace
-				.JD_to_Date(library_namespace.midnight_of(library_namespace
-						.solar_term_JD(year
-						// 12: CeL.SOLAR_TERMS.indexOf('秋分')
-						+ French_Republican_CE_offset, 12),
-						French_Republican_UTC_offset)
-						+ (French_Republican_UTC_offset - library_namespace.String_to_Date.default_offset)
-						/ 60 / 24);
-		// 歸零用
-		var ms = year_start.getMilliseconds();
-		// 歸零
-		if (ms)
-			year_start.setMilliseconds(Math.round(ms / 500) * 500);
-
-		library_namespace.debug('calendrier républicain year ' + year
-				+ ' begin on ' + year_start.format(), 2);
-		French_Republican_year_start_cache[year
-				+ French_Republican_cache_offset]
-		// cache
-		= year_start = year_start.getTime();
-	}
-
-	return year_start;
-}
-
 /**
-* calendrier républicain → Gregorian Date @ local
-* 
-* TODO: time
-* 
-* @param {Integer}year
-* @param {Integer}month
-*            using 13 for the complementary days.
-* @param {Integer}date
-* 
-* @returns {Date} Gregorian calendar
-*/
-function French_Republican_Date(year, month, date) {
+ * calendrier républicain → Gregorian Date @ local
+ * 
+ * TODO: time
+ * 
+ * @param {Integer}year
+ * @param {Integer}month
+ *            using 13 for the complementary days.
+ * @param {Integer}date
+ * 
+ * @returns {Date} Gregorian calendar
+ */
+function French_Republican_Date(year, month, date, shift) {
 	// no year 0
 	if (year < 1)
 		year++;
-	return new Date(French_Republican_year_starts(year)
-	// 一年分為12個月，每月30天，每月分為3周，每周10天，廢除星期日，每年最後加5天，閏年加6天。
-	+ ((month - 1) * French_Republican_MONTH_DAYS + date - 1)
-			* ONE_DAY_LENGTH_VALUE);
+	return new Date(
+			French_Republican_year_starts(year + French_Republican_CE_offset)
+					// 一年分為12個月，每月30天，每月分為3周，每周10天，廢除星期日，每年最後加5天，閏年加6天。
+					+ ((month - 1) * French_Republican_MONTH_DAYS + date - 1 + (shift || 0))
+					* ONE_DAY_LENGTH_VALUE);
 }
 
 _.Republican_Date = French_Republican_Date;
 
 function Date_to_French_Republican(date, options) {
-	var year = date.getFullYear() - French_Republican_CE_offset,
+	var days = French_Republican_year_starts.year_of(date),
 	//
-	month = date.getMonth(), days;
-
-	// 9月之前，位在前一年。
-	if (month < 9 - 1
-	//
-	|| (days = date - French_Republican_year_starts(year)) < 0)
-		days = date - French_Republican_year_starts(--year);
-	// assert: days >= 0
-	days /= ONE_DAY_LENGTH_VALUE;
+	year = days[0] - French_Republican_CE_offset;
+	days = days[1];
 
 	date = mod(Math.floor(days), French_Republican_MONTH_DAYS);
 	// year/0/0 → year/1/1
 	date[0]++;
 	date[1]++;
+
 	if (days %= 1)
 		// Each day was divided in 10 hours of 100 minutes.
 		// 共和曆的時間單位為十進位制，一旬為十日，一日為十小時，一小時為一百分鐘，一分鐘為一百秒
@@ -2566,7 +2543,7 @@ function Date_to_French_Republican(date, options) {
 	if (year < 1)
 		year--;
 	date.unshift(year);
-	
+
 	days = _format(date, options, French_Republican_Date.month_name);
 	if (typeof days === 'string' && (year = days.match(/^(\d+ \D+ )(\d+)$/)))
 		// e.g., output:
@@ -2577,6 +2554,8 @@ function Date_to_French_Republican(date, options) {
 		(date[2] - 1) % French_Republican_weekday_name.length]
 		//
 		+ ', ' + year[1] + 'an ' + year[2];
+	if (false)
+		days.décade = (((date[2] - 1) / French_Republican_weekday_name.length) | 0) + 1;
 	return days;
 }
 
@@ -2597,6 +2576,146 @@ French_Republican_Date.test = new_tester(Date_to_French_Republican, French_Repub
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// گاه‌شماری هجری خورشیدی (Solar Hijri calendar)
+// 現在伊朗和阿富汗的官方曆。
+
+// Eastern Arabic numerals / Perso-Arabic variant
+// https://en.wikipedia.org/wiki/Eastern_Arabic_numerals
+var Perso_digits = '۰۱۲۳۴۵۶۷۸۹'.split('');
+
+function to_Perso_numerals(natural) {
+	return natural.toString().replace(/\d/g, function(digit) {
+		return Perso_digits[digit];
+	});
+}
+
+function from_Perso_numerals(Perso) {
+	return +Perso.replace(/[۰۱۲۳۴۵۶۷۸۹]/g, function(digit) {
+		return Perso_digits.indexOf(digit);
+	});
+}
+
+// year epoch: began on 622 CE
+var Solar_Hijri_CE_offset = 622 - 1,
+// month name, 春4 夏4 秋4 冬4
+// https://fa.wikipedia.org/wiki/%DA%AF%D8%A7%D9%87%E2%80%8C%D8%B4%D9%85%D8%A7%D8%B1%DB%8C_%D9%87%D8%AC%D8%B1%DB%8C_%D8%AE%D9%88%D8%B1%D8%B4%DB%8C%D8%AF%DB%8C
+Solar_Hijri_month_name = {
+	// 伊朗現代波斯語名稱, گاه‌شماری در ایران
+	'ایران' : '|فروردین|اردیبهشت|خرداد|تیر|مرداد|شهریور|مهر|آبان|آذر|دی|بهمن|اسفند'.split('|'),
+	// 阿富汗波斯語名稱 （古伊朗波斯語名稱）
+	'افغانستان' : '|حمل|ثور|جوزا|سرطان|اسد|سنبله|میزان|عقرب|قوس|جدی|دلو|حوت'.split('|'),
+	// 普什圖語（پښتو），帕圖語
+	'پشتو' : '|وری|غویی|غبرګولی|چنګاښ|زمری|وږی|تله|لړم|لیندۍ|مرغومی|سلواغه|کب'.split('|'),
+	// 庫德語
+	'کردی' : '|خاکه‌لێوه|گوڵان|جۆزەردان|پووشپەڕ|گەلاوێژ|خەرمانان|ڕەزبەر|خەزەڵوەر|سەرماوەز|بەفرانبار|ڕێبەندان|رەشەمە'.split('|')
+},
+// weekday name. In the Iranian calendar, every week begins on Saturday and ends on Friday.
+Solar_Hijri_weekday_name = ''
+		.split('|'),
+// 預防 load 時尚未 ready.
+Solar_Hijri_year_starts = function(year) {
+	if (library_namespace.solar_term_calendar)
+		return (Solar_Hijri_year_starts
+				// 透過從德黑蘭（或東經52.5度子午線）和喀布爾精確的天文觀測，確定每年的第一天（納吾肉孜節）由春分開始。
+				// the first noon is on the last day of one calendar year and the second
+				// noon is on the first day (Nowruz) of the next year.
+				// 如果春分點在連續兩個正午之間，那第一個正午落在上一年的最後一天，第二個正午落在下一年的第一天。
+				//
+				// https://en.wikipedia.org/wiki/Solar_Hijri_calendar#Solar_Hijri_and_Gregorian_calendars
+				= library_namespace.solar_term_calendar('春分',
+						// 3.5: UTC+3.5 → minute offset
+						// 12: 移半天可以取代正午之效果。
+						(3.5 + 12) * 60))(year);
+};
+//Solar_Hijri_year_starts.year_of = library_namespace.null_function;
+
+// 先嘗試看看。
+Solar_Hijri_year_starts();
+
+Solar_Hijri_Date.month_name = function(month, is_leap, options) {
+	return Solar_Hijri_month_name[options && options.locale || 'ایران'][month];
+};
+
+/**
+ * Solar Hijri calendar
+ * 
+ * @param {Integer}year
+ * @param {Integer}month
+ * @param {Integer}date
+ * 
+ * @returns {Date} Gregorian calendar
+ */
+function Solar_Hijri_Date(year, month, date) {
+	// no year 0
+	if (year < 1)
+		year++;
+	return new Date(Solar_Hijri_year_starts(year + Solar_Hijri_CE_offset)
+	// 伊朗曆月名由12 個波斯名字組成。前6個月是每月31天，下5個月是30天，最後一個月平年29天，閏年30天。
+	// The first six months (Farvardin–Shahrivar) have 31 days, the next
+	// five (Mehr–Bahman) have 30 days, and the last month (Esfand) has 29
+	// days or 30 days in leap years.
+	+ (--month * 30 + Math.min(month, 6) + date - 1)
+			* ONE_DAY_LENGTH_VALUE);
+}
+
+_.Solar_Hijri_Date = Solar_Hijri_Date;
+
+function Date_to_Solar_Hijri(date, options) {
+	var days = Solar_Hijri_year_starts.year_of(date),
+	//
+	year = days[0] - Solar_Hijri_CE_offset;
+	days = days[1];
+
+	date = Math.floor(days);
+	if (date < 31 * 6)
+		date = mod(date, 31);
+	else {
+		date = mod(date - 31 * 6, 30);
+		date[0] += 6;
+	}
+	// year/0/0 → year/1/1
+	date[0]++;
+	date[1]++;
+
+	if (days %= 1)
+		date.push(days);
+	// no year 0
+	if (year < 1)
+		year--;
+	date.unshift(year);
+
+	options = Object.assign({
+		numeral : to_Perso_numerals
+	}, options);
+	days = _format(date, options, Solar_Hijri_Date.month_name);
+	return days;
+}
+
+/*
+
+CeL.Solar_Hijri_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
+// "OK"
+
+*/
+Solar_Hijri_Date.test = new_tester(Date_to_Solar_Hijri, Solar_Hijri_Date, {
+	epoch : Date.parse('622/3/22'),
+	month_days : {
+		'31' : 'month 1–6',
+		'30' : 'month 7–11, 12 (leap year)',
+		'29' : 'common month 12'
+	}
+});
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// 
+
+
+// TODO: Persian calendar, Kurdish calendar, Afghan calendar
+// http://www.calendarhome.com/calculate/convert-a-date
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // export methods.
 
 
@@ -2613,7 +2732,8 @@ library_namespace.set_method(Date.prototype, {
 	to_Bahai : set_bind(Date_to_Bahai),
 	to_Coptic : set_bind(Date_to_Coptic),
 	to_Ethiopian : set_bind(Date_to_Ethiopian),
-	to_Republican : set_bind(Date_to_French_Republican)
+	to_Republican : set_bind(Date_to_French_Republican),
+	to_Solar_Hijri : set_bind(Date_to_Solar_Hijri)
 });
 
 
