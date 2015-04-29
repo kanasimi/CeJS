@@ -18,7 +18,7 @@ https://github.com/andrewplummer/Sugar
 if (typeof CeL === 'function')
 CeL.run(
 {
-name:'data.native',
+name : 'data.native',
 //require : '',
 code : function(library_namespace) {
 
@@ -1316,18 +1316,36 @@ _.to_fixed = slow_to_fixed;
  * @param {Number}dividend
  *            被除數。
  * @param {Number}divisor
- *            除數除數。
+ *            除數。
  * 
  * @returns {Number}remainder 餘數
  */
 function non_negative_modulo(dividend, divisor) {
 	if (false)
 		return ((dividend % divisor) + divisor) % divisor;
+
 	if ((dividend %= divisor) < 0)
 		dividend += divisor;
 	return dividend;
 }
 
+/**
+ * 帶餘除法。remainder >= 0.
+ * 
+ * @param {Number}dividend
+ *            被除數。
+ * @param {Number}divisor
+ *            除數。
+ * 
+ * @returns {Array} [ {Number}quotient 商, {Number}remainder 餘數 ]
+ * 
+ * @see http://stackoverflow.com/questions/14997165/fastest-way-to-get-a-positive-modulo-in-c-c
+ */
+function Euclidean_division(dividend, divisor) {
+	return [ Math.floor(dividend / divisor),
+	// 轉正。保證餘數值非負數。
+	(dividend % divisor + divisor) % divisor ];
+}
 
 
 //var sourceF=WScript.ScriptName,targetF='test.js';simpleWrite('tmp.js',alert+'\n'+simpleRead+'\n'+simpleWrite+'\nvar t="",ForReading=1,ForWriting=2,ForAppending=8\n,TristateUseDefault=-2,TristateTrue=-1,TristateFalse=0\n,WshShell=WScript.CreateObject("WScript.Shell"),fso=WScript.CreateObject("Scripting.FileSystemObject");\nt='+dQuote(simpleRead(sourceF),80)+';\nsimpleWrite("'+targetF+'",t);//eval(t);\nalert(simpleRead("'+sourceF+'")==simpleRead("'+targetF+'")?"The same (test dQuote OK!)":"Different!");');//WshShell.Run('"'+getFolder(WScript.ScriptFullName)+targetF+'"');
@@ -1926,6 +1944,7 @@ set_method(Number.prototype, {
 	to_sub : subscript_integer,
 	to_fixed : to_fixed,
 	mod : set_bind(non_negative_modulo),
+	divided : set_bind(Euclidean_division),
 	pad : set_bind(pad, true)
 });
 

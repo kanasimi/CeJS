@@ -2700,11 +2700,15 @@ function affairs() {
 			R : 'Tabular Islamic calendar\n日落後為隔日。',
 			href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar'
 		}, function(date) {
-			return date.精 === '年' ? date.to_Tabular({
+			return date.精 === '年' ? 'AH' + date.to_Tabular({
 				format : 'serial'
-			})[0] + '年' : date.to_Tabular({
+			})[0] : [ 'AH' + date.to_Tabular({
 				format : 'serial'
-			}).slice(0, 3).join('/') + '; ' + date.to_Tabular();
+			}).slice(0, 3).join('/') + '; ', {
+				span : date.to_Tabular(),
+				dir : 'rtl',
+				S : 'unicode-bidi: -moz-isolate;'
+			} ];
 		} ],
 
 		Solar_Hijri : [
@@ -2717,7 +2721,7 @@ function affairs() {
 				}, function(date) {
 					return date.精 === '年' ? 'SH' + date.to_Solar_Hijri({
 						format : 'serial'
-					})[0] + '年' : [ 'SH' + date.to_Solar_Hijri({
+					})[0] : [ 'SH' + date.to_Solar_Hijri({
 						format : 'serial'
 					}).slice(0, 3).join('/') + '; ', {
 						span : date.to_Solar_Hijri(),
@@ -2732,7 +2736,7 @@ function affairs() {
 						T : '希伯來曆'
 					},
 					R : 'Hebrew calendar, 猶太曆\n日落後為隔日。\na Jewish "day" begins and ends at shkiah (sunset)',
-					href : 'https://en.wikipedia.org/wiki/Hebrew_calendar'
+					href : 'https://he.wikipedia.org/wiki/%D7%94%D7%9C%D7%95%D7%97_%D7%94%D7%A2%D7%91%D7%A8%D7%99'
 				}, function(date) {
 					return date.精 === '年' ? date.to_Hebrew({
 						format : 'serial'

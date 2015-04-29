@@ -3,17 +3,13 @@
  * @name	CeL function for calendrical calculations.
  * @fileoverview
  * 本檔案包含了曆法轉換的功能。
- * @since
- * 2014/4/12 15:37:56
  * 
- * TODO:
- * weekday name
+ * @since 2014/4/12 15:37:56
  */
 
 // http://www.funaba.org/calendar-conversion
 // http://www.fourmilab.ch/documents/calendar/
 // http://the-light.com/cal/converter/
-// http://www.viewiran.com/calendar-converter.php
 // http://keith-wood.name/calendars.html
 // http://www.cc.kyoto-su.ac.jp/~yanom/pancanga/index.html
 
@@ -22,6 +18,7 @@ if (typeof CeL === 'function')
 CeL.run(
 {
 name : 'data.date.calendar',
+// |application.astronomy.
 require : 'data.code.compatibility.|data.native.set_bind|data.date.String_to_Date|data.date.is_leap_year',
 
 code : function(library_namespace) {
@@ -60,15 +57,6 @@ var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
 ONE_DAY_HOURS = (new Date(1, 1, 1, -1)).getHours() | 0,
 // set weekday name converter.
 KEY_WEEK = 'week';
-
-// non-negative (positive) modulo
-// return [ 商, 餘數 ]
-// http://stackoverflow.com/questions/14997165/fastest-way-to-get-a-positive-modulo-in-c-c
-// 轉正。保證變數值非負數。
-function mod(dividend, divisor) {
-	return [ Math.floor(dividend / divisor),
-			(dividend % divisor + divisor) % divisor ];
-}
 
 
 function _Date(year, month, date) {
@@ -150,11 +138,19 @@ function _format(date, options, to_name, is_leap) {
 	if (format === 'item')
 		return date;
 
-	if (typeof options.numeral === 'function') {
+	if (options && typeof options.numeral === 'function') {
 		date[0] = options.numeral(date[0]);
 		date[2] = options.numeral(date[2]);
 	}
+	
 	format = date.slice(0, 3).reverse().join(' ');
+	if (options) {
+		if (options.postfix)
+			format += options.postfix;
+		if (options.prefix)
+			format = options.prefix + format;
+	}
+
 	if (date[KEY_WEEK])
 		format = date[KEY_WEEK] + ', ' + format;
 	return format;
@@ -269,6 +265,10 @@ new_tester.default_options = {
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 長曆: 伊斯蘭曆
+// گاه‌شماری هجری قمری
+// https://fa.wikipedia.org/wiki/%DA%AF%D8%A7%D9%87%E2%80%8C%D8%B4%D9%85%D8%A7%D8%B1%DB%8C_%D9%87%D8%AC%D8%B1%DB%8C_%D9%82%D9%85%D8%B1%DB%8C
+// تقويم هجري
+// https://ar.wikipedia.org/wiki/%D8%AA%D9%82%D9%88%D9%8A%D9%85_%D9%87%D8%AC%D8%B1%D9%8A
 
 // Tabular Islamic calendar / lunar Hijri calendar (AH) / التقويم الهجري المجدول /
 // http://en.wikipedia.org/wiki/Tabular_Islamic_calendar
@@ -365,7 +365,7 @@ Tabular_Date.epoch = String_to_Date('622/7/16', {
 	parser : 'CE'
 }).getTime();
 
-var Tabular_month_name_of_serial = '|Muḥarram|Ṣafar|Rabīʿ I|Rabīʿ II|Jumādā I|Jumādā II|Rajab|Shaʿbān|Ramaḍān|Shawwāl|Dhū al-Qaʿda|Dhū al-Ḥijja'.split('|');
+var Tabular_month_name_of_serial = '|محرم|صفر|ربيع الأول|ربيع الثاني|جمادى الأول|جمادى الآخر|رجب |شعبان|رمضان|شوال|ذو القعدة|ذو الحجة'.split('|');
 Tabular_Date.month_name = function(month_serial) {
 	return Tabular_month_name_of_serial[month_serial];
 };
@@ -400,14 +400,19 @@ function Date_to_Tabular(date, options) {
 	year += month;
 	date %= Tabular_common_year_days;
 
+	// 不動到原 options。
+	options = Object.assign({
+		postfix:' هـ'
+	},options);
+
 	// 求出為本年第幾天之序數。
 	// 減去累積到第 month 年首日，應該有幾個閏日。
-	tmp = get_Tabular_leap_count(options && options.shift, month);
+	tmp = get_Tabular_leap_count(options.shift, month);
 	if (date < tmp)
 		// 退位。
 		year--, date += Tabular_common_year_days
 		//
-		- get_Tabular_leap_count(options && options.shift, month - 1);
+		- get_Tabular_leap_count(options.shift, month - 1);
 	else
 		date -= tmp;
 
@@ -841,6 +846,7 @@ if (false)
 
 
 /*
+
 test:
 
 for (var year = 0, d, d2; year <= 1e5; year++) {
@@ -2530,7 +2536,7 @@ function Date_to_French_Republican(date, options) {
 	year = days[0] - French_Republican_CE_offset;
 	days = days[1];
 
-	date = mod(Math.floor(days), French_Republican_MONTH_DAYS);
+	date = Math.floor(days).divided(French_Republican_MONTH_DAYS);
 	// year/0/0 → year/1/1
 	date[0]++;
 	date[1]++;
@@ -2544,16 +2550,16 @@ function Date_to_French_Republican(date, options) {
 		year--;
 	date.unshift(year);
 
+	// 不動到原 options。
+	date[KEY_WEEK] = French_Republican_weekday_name[
+		//
+		(date[2] - 1) % French_Republican_weekday_name.length];
 	days = _format(date, options, French_Republican_Date.month_name);
-	if (typeof days === 'string' && (year = days.match(/^(\d+ \D+ )(\d+)$/)))
+	if (typeof days === 'string' && (year = days.match(/^(.+? \d+ \D+ )(\d+)$/)))
 		// e.g., output:
 		// Septidi, 7 Floréal an 223
 		// TODO: Septidi, 7 Floréal an CCXXIII
-		days = French_Republican_weekday_name[
-		//
-		(date[2] - 1) % French_Republican_weekday_name.length]
-		//
-		+ ', ' + year[1] + 'an ' + year[2];
+		days = year[1] + 'an ' + year[2];
 	if (false)
 		days.décade = (((date[2] - 1) / French_Republican_weekday_name.length) | 0) + 1;
 	return days;
@@ -2576,8 +2582,22 @@ French_Republican_Date.test = new_tester(Date_to_French_Republican, French_Repub
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
-// گاه‌شماری هجری خورشیدی (Solar Hijri calendar)
-// 現在伊朗和阿富汗的官方曆。
+// گاه‌شماری هجری خورشیدی (Solar Hijri calendar, the solar heǰrī calendar)
+
+// ** Warning: need application.astronomy
+
+// 現在伊朗(1925/3/31–)和阿富汗(1922 CE–)的官方曆。
+// The present Iranian calendar was legally adopted on 31 March 1925, under the early Pahlavi dynasty.
+// Afghanistan legally adopted the official Jalali calendar in 1922 but with different month names.
+
+// http://www.iranicaonline.org/articles/afghanistan-x-political-history
+// the solar heǰrī calendar officially replaced the lunar calendar in 1301 Š./1922.
+// 阿富汗官方語言 	達利語（波斯語）、普什圖語
+
+// Persian calendar, Kurdish calendar, Afghan calendar
+// http://www.calendarhome.com/calculate/convert-a-date
+// http://www.viewiran.com/calendar-converter.php
+
 
 // Eastern Arabic numerals / Perso-Arabic variant
 // https://en.wikipedia.org/wiki/Eastern_Arabic_numerals
@@ -2672,9 +2692,9 @@ function Date_to_Solar_Hijri(date, options) {
 
 	date = Math.floor(days);
 	if (date < 31 * 6)
-		date = mod(date, 31);
+		date = date.divided(31);
 	else {
-		date = mod(date - 31 * 6, 30);
+		date = (date - 31 * 6).divided(30);
 		date[0] += 6;
 	}
 	// year/0/0 → year/1/1
@@ -2688,6 +2708,7 @@ function Date_to_Solar_Hijri(date, options) {
 		year--;
 	date.unshift(year);
 
+	// 不動到原 options。
 	options = Object.assign({
 		numeral : to_Perso_numerals
 	}, options);
@@ -2714,9 +2735,6 @@ Solar_Hijri_Date.test = new_tester(Date_to_Solar_Hijri, Solar_Hijri_Date, {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 
 
-
-// TODO: Persian calendar, Kurdish calendar, Afghan calendar
-// http://www.calendarhome.com/calculate/convert-a-date
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//

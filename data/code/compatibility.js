@@ -418,6 +418,7 @@ set_method(Array.prototype, {
 	// Array.prototype.copyWithin(target, start [ , end ])
 	copyWithin : copyWithin,
 	// Array.prototype.includes()
+	// part of the Harmony (ECMAScript 7) proposal.
 	includes : function Array_includes(search_target, position) {
 		if (search_target === search_target)
 			return this.indexOf(search_target, position) !== NOT_FOUND;

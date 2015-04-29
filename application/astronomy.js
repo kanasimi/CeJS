@@ -1726,7 +1726,7 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * Date → [ year, days ]
+			 * Date → [ year, days of year ]
 			 * 
 			 * @param {Date}date
 			 *            指定日期
@@ -1814,7 +1814,7 @@ if (typeof CeL === 'function')
 			// 基本上與程式碼設計合一，僅表示名義，不可更改。
 			START_YEAR = 1, START_MONTH = 1, START_DATE = 1,
 			// set normal month count of a year.
-			// 月數12: 每年有12個月.
+			// 月數12: 每年有12個月。
 			MONTH_COUNT = 12,
 			// = 2. assert: 為整數
 			SOLAR_TERMS_MONTH_RATE = SOLAR_TERMS_NAME.length / MONTH_COUNT | 0,
@@ -2129,6 +2129,7 @@ if (typeof CeL === 'function')
 			function LEA406_loaded(term_name) {
 				if (!term_name)
 					return Object.keys(LEA406_terms);
+				// ab: LEA-406a, LEA-406b
 				var terms = [], types = 'ab'.split('');
 				types.forEach(function(type) {
 					if ((term_name + type) in LEA406_terms)
