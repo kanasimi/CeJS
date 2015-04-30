@@ -2599,26 +2599,6 @@ French_Republican_Date.test = new_tester(Date_to_French_Republican, French_Repub
 // http://www.viewiran.com/calendar-converter.php
 
 
-// Eastern Arabic numerals / Perso-Arabic variant
-// https://en.wikipedia.org/wiki/Eastern_Arabic_numerals
-var Perso_digits = '۰۱۲۳۴۵۶۷۸۹',
-//
-Perso_digits_PATTERN = new RegExp('[' + Perso_digits + ']', 'g');
-Perso_digits = Perso_digits.split('');
-
-
-function to_Perso_numerals(natural) {
-	return natural.toString().replace(/\d/g, function(digit) {
-		return Perso_digits[digit];
-	});
-}
-
-function from_Perso_numerals(Perso) {
-	return +Perso.replace(Perso_digits_PATTERN, function(digit) {
-		return Perso_digits.indexOf(digit);
-	});
-}
-
 // year epoch: began on 622 CE
 var Solar_Hijri_CE_offset = 622 - 1,
 // month name, 春4 夏4 秋4 冬4
@@ -2710,7 +2690,7 @@ function Date_to_Solar_Hijri(date, options) {
 
 	// 不動到原 options。
 	options = Object.assign({
-		numeral : to_Perso_numerals
+		numeral : library_namespace.to_Perso_numeral
 	}, options);
 	days = _format(date, options, Solar_Hijri_Date.month_name);
 	return days;

@@ -817,15 +817,62 @@ if (typeof CeL === 'function')
 			function sun_aberration_low(R) {
 				// 式中分子是光行差常數 constant of aberration
 				// κ=20″.49552 arcseconds at J2000
-				// 乘以a*(1-e^2)，與24.5式的分子相同。
-				// 因此24.10中的分子中其實是一個緩慢變化的數，在0年是20".4893，在+4000年是20".4904。
+				// 乘以a*(1-e²)，與24.5式的分子相同。
+				// 因此24.10中的分子中其實是一個緩慢變化的數，在0年是20″.4893，在+4000年是20″.4904。
 				return -20.4898 / DEGREES_TO_ARCSECONDS / R;
-				// 24.10式本身不是一個嚴格的準確的運算式，因為它是假設地球軌道是不受攝動的標準橢圓。當受到攝動時，月球的攝動可引起0".01的誤差。
+				// 24.10式本身不是一個嚴格的準確的運算式，因為它是假設地球軌道是不受攝動的標準橢圓。當受到攝動時，月球的攝動可引起0″.01的誤差。
 				// 當需要進行高精度計算時(比使用附錄II計算精度要求更高時)，可用以下方法進行光行差修正
 				// sun_aberration_high(R, JD)
 			}
 
 			var sun_aberration = sun_aberration_high;
+
+			// ------------------------------------------------------------------------------------------------------//
+			// precession 歲差
+
+			/**
+			 * calculate general precession / precession of the ecliptic
+			 * 
+			 * Reference 資料來源/資料依據:<br />
+			 * Kai Tang (2015). A long time span relativistic precession model
+			 * of the Earth.
+			 * 
+			 * IAU 2006年將主要的部分重新命名為赤道歲差，而較微弱的成份命名為黃道歲差 (precession of the
+			 * ecliptic)，但是兩者的合稱仍是綜合歲差 (general precession)，取代了分點歲差。
+			 * 
+			 * <q>在J2000.0的时候与P03岁差差大概几个角秒，主要由于周期拟合的时候，很难保证长期与短期同时精度很高。</q>
+			 * 
+			 * @param {Number}JD
+			 *            Julian date (JD of 天文計算用時間 TT)
+			 * @param {Boolean}ecliptic
+			 *            true: get precession of the ecliptic (黃道歲差). else:
+			 *            general precession
+			 * 
+			 * @returns {Array} [ P, Q ] in degrees
+			 */
+			function precession(JD, ecliptic) {
+				// T 是 J2000.0 起算的儒略世紀數：
+				var T = Julian_century(JD),
+				//
+				terms = ecliptic ? 唐凯_ecliptic_precession_terms
+						: 唐凯_precession_terms,
+				//
+				p_A = polynomial_value(terms.init[0], T),
+				//
+				ε_A = polynomial_value(terms.init[1], T);
+
+				terms.forEach(function(term) {
+					var p = term[4] * T;
+					p_A += term[0] * Math.cos(p) + term[1] * Math.sin(p);
+					if (term[2])
+						ε_A += term[2] * Math.cos(p) + term[3] * Math.sin(p);
+				});
+
+				return [ p_A / DEGREES_TO_ARCSECONDS,
+						ε_A / DEGREES_TO_ARCSECONDS ];
+			}
+
+			_.precession = precession;
 
 			// ------------------------------------------------------------------------------------------------------//
 			// nutation 章動
@@ -938,7 +985,7 @@ if (typeof CeL === 'function')
 						Δε += c * Math.cos(argument);
 				});
 
-				// 表中的係數的單位是0".0001。
+				// 表中的係數的單位是0″.0001。
 				T = 1e4 * DEGREES_TO_ARCSECONDS;
 				return Δψ_only ? Δψ / T : [ Δψ / T, Δε / T ];
 			}
@@ -977,6 +1024,13 @@ if (typeof CeL === 'function')
 			 * 得到行星在動力學Date平黃道座標(Bretagnon的VSOP定義的)中的日心黃經L、黃緯B。<br />
 			 * <br />
 			 * does not include nutation or aberration.
+			 * 
+			 * 已 apply precision:<br />
+			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/vsop87.doc<br />
+			 * The coordinates of the version C an D are given in the frame
+			 * defined by the mean equinox and ecliptic of the date. This frame
+			 * is deduced from the previous one by precessional moving between
+			 * J2000 and the epoch of the date.
 			 * 
 			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
@@ -1066,8 +1120,8 @@ if (typeof CeL === 'function')
 					});
 
 					coordinate[term_name] =
-					// L=(L0+L1*τ+L2*τ^2+L3*τ^3+L4*τ^4+L5*τ^5)/10^8
-					// (倍數: 10^-8)
+					// L=(L0+L1*τ+L2*τ²+L3*τ³+L4*τ⁴+L5*τ⁵)/10⁸
+					// (倍數: 10⁻⁸)
 					polynomial_value(coefficients, τ);
 					// 倍數
 					if (object_terms.multiplier > 0)
@@ -1095,12 +1149,12 @@ if (typeof CeL === 'function')
 				 * 
 				 * 太陽黃經☉及黃緯β是P.Bretagnon的VSOP行星理論定義的動力學黃道坐標。這個參考系與標準的FK5坐標系統(詳見20章)僅存在很小的差別。
 				 * 可按以下方法把☉、β轉換到FK5坐標系統中,其中T是J2000起算的儒略世紀數,或T=10τ。
-				 * J2000.0的VSOP黃道與J2000.0的FK5黃道存在一個很小的夾角 E = 0".0554 左右，所以作以上修正。
+				 * J2000.0的VSOP黃道與J2000.0的FK5黃道存在一個很小的夾角 E = 0″.0554 左右，所以作以上修正。
 				 * 
 				 * @see http://www.astrosurf.com/jephem/astro/ephemeris/et520transfo_en.htm
 				 */
 				if (options.FK5 !== false) {
-					// 先計算 L′ = L - 1°.397*T - 0°.00031*T^2
+					// 先計算 L′ = L - 1°.397*T - 0°.00031*T²
 					var _L = polynomial_value([ coordinate.L,
 							-1.397 * DEGREES_TO_RADIANS,
 							-0.00031 * DEGREES_TO_RADIANS ], 10 * τ),
@@ -1332,9 +1386,9 @@ if (typeof CeL === 'function')
 
 				// λ: 太陽黃經☉是Date黃道分點座標(瞬時黃道/當日黃道?)的真幾何黃經。
 				// 要取得視黃經λ，還應加上精確的黃經章動及光行差。
-				// TODO: 黃經周年光行差修正量：-20".161 (公式(24.10)), 黃經章動效果：Δψ =
-				// -12".965
-				// (詳見第22章), 轉到 FK5 系統的修正值(-0".09033) (公式(24.9))
+				// TODO: 黃經周年光行差修正量：-20″.161 (公式(24.10)), 黃經章動效果：Δψ =
+				// -12″.965
+				// (詳見第22章), 轉到 FK5 系統的修正值(-0″.09033) (公式(24.9))
 				// 光行差 aberration
 				// 章動 nutation
 
@@ -1957,7 +2011,7 @@ if (typeof CeL === 'function')
 
 				// 儒略千年數 Julian millennia since J2000.0.
 				var τ = Julian_century(JD) / 10,
-				// τ^2
+				// τ²
 				τ2 = τ * τ, terms = options.terms,
 				//
 				warn_term = !options.ignore_term,
@@ -1974,7 +2028,7 @@ if (typeof CeL === 'function')
 				 */
 				coordinates = library_namespace.null_Object();
 
-				library_namespace.debug(JD + ': τ: ' + τ + ', τ^2: ' + τ2, 3);
+				library_namespace.debug(JD + ': τ: ' + τ + ', τ²: ' + τ2, 3);
 
 				if (!Array.isArray(terms)) {
 					if (!terms || typeof terms !== 'string') {
@@ -3106,42 +3160,7 @@ if (typeof CeL === 'function')
 			 */
 
 			// ------------------------------------------------------------------------------------------------------//
-			// terms for obliquity 轉軸傾角
-			/**
-			 * IAU2006 obliquity coefficients.<br />
-			 * terms for function mean_obliquity_IAU2006(JD)
-			 * 
-			 * Reference 資料來源/資料依據:
-			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/obl06.c
-			 * 
-			 * @inner
-			 */
-			var IAU2006_obliquity_coefficients = [ 84381.406, -46.836769,
-					-0.0001831, 0.00200340, -0.000000576, -0.0000000434 ];
-
-			/**
-			 * terms for function equinox()
-			 * 
-			 * Reference 資料來源/資料依據:<br />
-			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
-			 * 《天文算法》 chapter 章動及黃赤交角.<br />
-			 * 
-			 * @inner
-			 */
-			var Laskar_obliquity_coefficients = [
-			// ε = 23° 26′ 21.448″ - 4680.93″ T - 1.55″ T2
-			// + 1999.25″ T3 - 51.38″ T4 - 249.67″ T5
-			// - 39.05″ T6 + 7.12″ T7 + 27.87″ T8 + 5.79″ T9 + 2.45″ T10
-			23 * 60 * 60 + 26 * 60 + 21.448, -4680.93, -1.55, 1999.25, -51.38,
-					-249.67, -39.05, 7.12, 27.87, 5.79, 2.45 ];
-			Laskar_obliquity_coefficients.forEach(function(v, index) {
-				Laskar_obliquity_coefficients[index] = v
-						/ DEGREES_TO_ARCSECONDS;
-			});
-
-			// ------------------------------------------------------------------------------------------------------//
 			// terms for ΔT
-
 			/**
 			 * terms for function ΔT()
 			 * 
@@ -3160,7 +3179,7 @@ if (typeof CeL === 'function')
 			// http://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html
 			// All values of ΔT based on Morrison and Stephenson [2004]
 			// assume a value for the Moon's secular acceleration of -26
-			// arcsec/cy^2.
+			// arcsec/cy².
 			ΔT_year_base = [ 1820, 1820, 2000, 2000, 1975, 1950, 1920, 1900,
 					1860, 1800, 1700, 1600, 1000, 0 ],
 			// 為統合、方便計算，在演算方法上作了小幅變動。
@@ -3185,128 +3204,130 @@ if (typeof CeL === 'function')
 							0.022174192, 0.0090316521 ] ];
 
 			// ------------------------------------------------------------------------------------------------------//
-			// Sun's aberration. 太陽地心黃經光行差修正量。
+			// terms for obliquity 轉軸傾角
 
 			/**
-			 * constant term of Sun's aberration
+			 * IAU2006 obliquity coefficients.<br />
+			 * terms for function mean_obliquity_IAU2006(JD)
 			 * 
-			 * Reference 資料來源/資料依據:<br />
-			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
-			 * 《天文算法》 p.167,168 chapter 太陽位置計算.
-			 * 
-			 * If needed with respect to the mean equinox of the date instead of
-			 * to a fixed reference frame, the constant term 3548.193 should be
-			 * replaced by 3548.330. 如果Δλ須是在Date黃道中的，則應把常數項3548.193換為3548.330
-			 * 
-			 * The ICRF is a fixed reference frame. The FK5 based on fixed
-			 * reference frame of J2000.0?
-			 * http://blog.csdn.net/songgz/article/details/2680144
-			 * 通過數以千計的恆星位置，反推出春風點在天球上的位置，我們常說的FK5天球坐標系統就與它有關。
+			 * Reference 資料來源/資料依據:
+			 * https://github.com/kanasimi/IAU-SOFA/blob/master/src/obl06.c
 			 * 
 			 * @inner
 			 */
-			var sun_aberration_variation_constant = 3548.193,
-			/**
-			 * coefficients of Sun's aberration
-			 * 
-			 * Σ : Σ ([0] * sin ( [1] + [2] τ) )
-			 * 
-			 * daily variation = sun_aberration_variation_constant +
-			 * Σ(variation[0]) + Σ(variation[1])*τ + Σ(variation[2])*τ^2 +
-			 * Σ(variation[3])*τ^3
-			 * 
-			 * τ的係數為359993.7、719987或1079981的週期項，與地球離心率相關。<br />
-			 * τ的係數為4452671、9224660或4092677的週期項，與月球運動相關。<br />
-			 * τ的係數為450369、225184、315560或675553的週期項，與金星攝動相關。<br />
-			 * τ的係數為329645、659289、或299296的週期項，與火星攝動相關。
-			 * 
-			 * @inner
-			 */
-			sun_aberration_variation = [
-					// τ^0
-					[ [ 118.568, 87.5287, 359993.7286 ],
-							[ 2.476, 85.0561, 719987.4571 ],
-							[ 1.376, 27.8502, 4452671.1152 ],
-							[ 0.119, 73.1375, 450368.8564 ],
-							[ 0.114, 337.2264, 329644.6718 ],
-							[ 0.086, 222.5400, 659289.3436 ],
-							[ 0.078, 162.8136, 9224659.7915 ],
-							[ 0.054, 82.5823, 1079981.1857 ],
-							[ 0.052, 171.5189, 225184.4282 ],
-							[ 0.034, 30.3214, 4092677.3866 ],
-							[ 0.033, 119.8105, 337181.4711 ],
-							[ 0.023, 247.5418, 299295.6151 ],
-							[ 0.023, 325.1526, 315559.5560 ],
-							[ 0.021, 155.1241, 675553.2846 ] ],
-					// τ^1
-					[ [ 7.311, 333.4515, 359993.7286 ],
-							[ 0.305, 330.9814, 719987.4571 ],
-							[ 0.010, 328.5170, 1079981.1857 ] ],
-					// τ^2
-					[ [ 0.309, 241.4518, 359993.7286 ],
-							[ 0.021, 205.0482, 719987.4571 ],
-							[ 0.004, 297.8610, 4452671.1152 ] ],
-					// τ^3
-					[ [ 0.010, 154.7066, 359993.7286 ] ] ];
-
-			sun_aberration_variation.forEach(function(term) {
-				term.forEach(function(sub_term) {
-					sub_term[1] *= DEGREES_TO_RADIANS;
-					sub_term[2] *= DEGREES_TO_RADIANS;
-				});
-			});
-
-			// ------------------------------------------------------------------------------------------------------//
+			var IAU2006_obliquity_coefficients = [ 84381.406, -46.836769,
+					-0.0001831, 0.00200340, -0.000000576, -0.0000000434 ];
 
 			/**
 			 * terms for function equinox()
 			 * 
 			 * Reference 資料來源/資料依據:<br />
-			 * Jean Meeus, Astronomical Algorithms.<br />
-			 * 《天文算法》 chapter 分點和至點.<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 chapter 章動及黃赤交角.
 			 * 
 			 * @inner
 			 */
-			// for years -1000 to 1000
-			var equinox_terms_before_1000 = [
-			// March equinox, 春分點時刻
-			[ 1721139.29189, 365242.13740, 0.06134, 0.00111, -0.00071 ],
-			// June Solstice, 夏至點時刻
-			[ 1721233.25401, 365241.72562, -0.05323, 0.00907, 0.00025 ],
-			// September equinox, 秋分點時刻
-			[ 1721325.70455, 365242.49558, -0.11677, -0.00297, 0.00074 ],
-			// December Solstice, 冬至點時刻
-			[ 1721414.39987, 365242.88257, -0.00769, -0.00933, -0.00006 ] ],
-			// for years 1000 to 3000
-			equinox_terms_after_1000 = [
-			// March equinox, 春分點時刻
-			[ 2451623.80984, 365242.37404, 0.05169, -0.00411, -0.00057 ],
-			// June Solstice, 夏至點時刻
-			[ 2451716.56767, 365241.62603, 0.00325, 0.00888, -0.00030 ],
-			// September equinox, 秋分點時刻
-			[ 2451810.21715, 365242.01767, -0.11575, 0.00337, 0.00078 ],
-			// December Solstice, 冬至點時刻
-			[ 2451900.05952, 365242.74049, -0.06223, -0.00823, 0.00032 ] ],
-			// 週期項
-			equinox_periodic_terms = [
-			//
-			[ 485, 324.96, 1934.136 ], [ 203, 337.23, 32964.467 ],
-					[ 199, 342.08, 20.186 ], [ 182, 27.85, 445267.112 ],
-					[ 156, 73.14, 45036.886 ], [ 136, 171.52, 22518.443 ],
-					[ 77, 222.54, 65928.934 ], [ 74, 296.72, 3034.906 ],
-					[ 70, 243.58, 9037.513 ], [ 58, 119.81, 33718.147 ],
-					[ 52, 297.17, 150.678 ], [ 50, 21.02, 2281.226 ],
-					[ 45, 247.54, 29929.562 ], [ 44, 325.15, 31555.956 ],
-					[ 29, 60.93, 4443.417 ], [ 18, 155.12, 67555.328 ],
-					[ 17, 288.79, 4562.452 ], [ 16, 198.04, 62894.029 ],
-					[ 14, 199.76, 31436.921 ], [ 12, 95.39, 14577.848 ],
-					[ 12, 287.11, 31931.756 ], [ 12, 320.81, 34777.259 ],
-					[ 9, 227.73, 1222.114 ], [ 8, 15.45, 16859.074 ] ];
+			var Laskar_obliquity_coefficients = [
+			// ε = 23° 26′ 21.448″ - 4680.93″ T - 1.55″ T²
+			// + 1999.25″ T³ - 51.38″ T⁴ - 249.67″ T⁵
+			// - 39.05″ T⁶ + 7.12″ T⁷ + 27.87″ T⁸ + 5.79″ T⁹ + 2.45″ T¹⁰
+			23 * 60 * 60 + 26 * 60 + 21.448, -4680.93, -1.55, 1999.25, -51.38,
+					-249.67, -39.05, 7.12, 27.87, 5.79, 2.45 ];
+			Laskar_obliquity_coefficients.forEach(function(v, index) {
+				Laskar_obliquity_coefficients[index] = v
+						/ DEGREES_TO_ARCSECONDS;
+			});
 
-			// 把能先做的做一做，加快運算速度。
-			equinox_periodic_terms.forEach(function(terms) {
-				terms[1] *= DEGREES_TO_RADIANS;
-				terms[2] *= DEGREES_TO_RADIANS;
+			// ------------------------------------------------------------------------------------------------------//
+			// terms for precession
+
+			var
+			/**
+			 * terms for function ecliptic_precession()
+			 * 
+			 * Reference 資料來源/資料依據:<br />
+			 * Kai Tang (2015). A long time span relativistic precession model
+			 * of the Earth.<br />
+			 * Table B.1 The Periodic Terms in PA, QA.
+			 * 
+			 * @inner
+			 */
+			唐凯_ecliptic_precession_terms = [
+					[ -3720, 1260, -1290, -3698, 68975 ],
+					[ 657, -2585, 2508, 736, 235535 ],
+					[ -2068, -302, 288, -2056, 72488 ],
+					[ -855, -570, 548, -838, 192342 ],
+					[ 438, 338, -334, 435, 49178 ],
+					[ 309, 255, -225, 289, 67341 ],
+					[ 217, 322, -191, 5, 424863 ],
+					[ 168, -313, 288, 183, 65723 ],
+					[ -278, 130, -112, -294, 173673 ],
+					[ -278, -79, 89, -285, 75817 ],
+					[ -77, 258, -157, -194, 255871 ],
+					[ -24, 124, -106, -33, 64138 ],
+					[ 29, 3, -91, 187, 496536 ],
+					[ -135, -153, 176, -151, 70820 ],
+					[ -85, 124, -257, 187, 1080090 ],
+					[ 153, -276, 395, -117, 1309223 ],
+					[ 14, -12, 77, -94, 663722 ], [ 55, -11, 46, 20, 214239 ],
+					[ 81, 39, -41, 92, 77777 ], [ -55, -16, 19, -61, 80440 ],
+					[ 6, -88, -50, 206, 367386 ],
+					[ -22, 107, 16, -189, 321366 ],
+					[ 5, -130, 24, 141, 284995 ], [ 11, -28, 8, 27, 164405 ],
+					[ 15, 19, -19, 19, 83199 ] ],
+
+			/**
+			 * terms for function precession()
+			 * 
+			 * Reference 資料來源/資料依據:<br />
+			 * Kai Tang (2015). A long time span relativistic precession model
+			 * of the Earth.<br />
+			 * Table B.2 The Periodic Terms in pA, εA.
+			 * 
+			 * @inner
+			 */
+			唐凯_precession_terms = [ [ -6653, -2199, 739, -2217, 40938 ],
+					[ -3349, 541, -175, -1126, 39803 ],
+					[ 1526, -1218, 376, 469, 53789 ],
+					[ 227, 874, -313, 84, 28832 ],
+					[ -370, 256, -91, -129, 29639 ],
+					[ 518, -353, 110, 174, 41557 ],
+					[ 324, 542, -174, 107, 42171 ],
+					[ -482, 200, -72, -158, 38875 ],
+					[ -46, -201, 63, -17, 42847 ],
+					[ -140, -45, 16, -50, 30127 ],
+					[ -224, 404, -143, -69, 40316 ],
+					[ 181, -98, 38, 55, 38379 ], [ -121, 59, -24, -35, 37783 ],
+					[ -9, -73, 27, -6, 28550 ], [ 35, -42, 15, 13, 27300 ],
+					[ 63, -35, 15, 16, 37225 ], [ 56, -64, 15, 12, 20459 ],
+					[ 18, -77, 18, 3, 20151 ], [ -8, 41, -9, -13, 170984 ],
+					[ 51, 9, -2, 16, 29197 ], [ 3425, -2525, , , 1309223 ],
+					[ -2951, 1938, , , 991814 ], [ 2117, -704, , , 716770 ],
+					[ 877, -993, , , 416787 ], [ -805, 226, , , 554293 ],
+					[ -710, -52, , , 371201 ], [ 448, -33, , , 324763 ],
+					[ -217, 111, , , 122237 ], [ 224, -55, , , 94370 ],
+					[ -228, 37, , , 287695 ] ];
+
+			唐凯_ecliptic_precession_terms
+			// 原數值: [ [ 5540″, -1.98e-4″ ], [ -1608″, -2.06e-4 ] ]
+			// 已轉成適用於 Julian century 使用。
+			.init = [ [ 5540, -0.0198 ], [ -1608, -0.0206 ] ];
+			唐凯_ecliptic_precession_terms.forEach(function(term) {
+				// 100: 轉成適用於 Julian century 使用。
+				// Julian year (the time reckoned from J2000.0 in years)
+				// → Julian century
+				term[4] = 100 * 2 * Math.PI / term[4];
+			});
+
+			唐凯_precession_terms
+			// 原數值: [ [ 6221″, 50″.44766 ], [ 83953″, -8.9e-5″ ] ]
+			// 已轉成適用於 Julian century 使用。
+			.init = [ [ 6221, 5044.766 ], [ 83953, -0.0089 ] ];
+			唐凯_precession_terms.forEach(function(term) {
+				// 100: 轉成適用於 Julian century 使用。
+				// Julian year (the time reckoned from J2000.0 in years)
+				// → Julian century
+				term[4] = 100 * 2 * Math.PI / term[4];
 			});
 
 			// ------------------------------------------------------------------------------------------------------//
@@ -3467,27 +3488,27 @@ if (typeof CeL === 'function')
 			// IAU1980_nutation_parameters 單位是度。
 			var IAU1980_nutation_parameters = [
 			// 平距角(日月對地心的角距離)：
-			// D = 297.85036 + 445267.111480*T - 0.0019142*T^2 +
-			// T^3/189474
+			// D = 297.85036 + 445267.111480*T - 0.0019142*T² +
+			// T³/189474
 			[ 297.85036, 445267.111480, -0.0019142, 1 / 189474 ],
 			// 太陽（地球）平近點角：
-			// M = 357.52772 + 35999.050340*T - 0.0001603*T^2 -
-			// T^3/300000
+			// M = 357.52772 + 35999.050340*T - 0.0001603*T² -
+			// T³/300000
 			[ 357.52772, 35999.050340, -0.0001603, -1 / 300000 ],
 			// 月球平近點角：
-			// M′= 134.96298 + 477198.867398*T + 0.0086972*T^2 +
-			// T^3/56250
+			// M′= 134.96298 + 477198.867398*T + 0.0086972*T² +
+			// T³/56250
 			[ 134.96298, 477198.867398, 0.0086972, 1 / 56250 ],
 			// 月球緯度參數：
-			// F = 93.27191 + 483202.017538*T - 0.0036825*T^2 +
-			// T^3/327270
+			// F = 93.27191 + 483202.017538*T - 0.0036825*T² +
+			// T³/327270
 			[ 93.27191, 483202.017538, -0.0036825, 1 / 327270 ],
 			// 黃道與月球平軌道升交點黃經，從Date黃道平分點開始測量：
-			// Ω= 125.04452 - 1934.136261*T + 0.0020708*T^2 +
-			// T^3/450000
+			// Ω= 125.04452 - 1934.136261*T + 0.0020708*T² +
+			// T³/450000
 			[ 125.04452, -1934.136261, 0.0020708, 1 / 450000 ] ],
 
-			// 這些項來自 IAU 1980 章動理論，忽略了係數小於0".0003的項。
+			// 這些項來自 IAU 1980 章動理論，忽略了係數小於0″.0003的項。
 			// https://github.com/kanasimi/IAU-SOFA/blob/master/src/nut80.c
 			IAU1980_nutation_terms = [
 					[ 0, 0, 0, 0, 1, -171996, -1742, 92025, 89 ],
@@ -3553,6 +3574,131 @@ if (typeof CeL === 'function')
 					[ 2, -1, -1, 2, 2, -3, 0, 0, 0 ],
 					[ 0, 0, 3, 2, 2, -3, 0, 0, 0 ],
 					[ 2, -1, 0, 2, 2, -3, 0, 0, 0 ] ];
+
+			// ------------------------------------------------------------------------------------------------------//
+			// Sun's aberration. 太陽地心黃經光行差修正量。
+
+			/**
+			 * constant term of Sun's aberration
+			 * 
+			 * Reference 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+			 * 《天文算法》 p.167,168 chapter 太陽位置計算.
+			 * 
+			 * If needed with respect to the mean equinox of the date instead of
+			 * to a fixed reference frame, the constant term 3548.193 should be
+			 * replaced by 3548.330. 如果Δλ須是在Date黃道中的，則應把常數項3548.193換為3548.330
+			 * 
+			 * The ICRF is a fixed reference frame. The FK5 based on fixed
+			 * reference frame of J2000.0?
+			 * http://blog.csdn.net/songgz/article/details/2680144
+			 * 通過數以千計的恆星位置，反推出春風點在天球上的位置，我們常說的FK5天球坐標系統就與它有關。
+			 * 
+			 * @inner
+			 */
+			var sun_aberration_variation_constant = 3548.193,
+			/**
+			 * coefficients of Sun's aberration
+			 * 
+			 * Σ : Σ ([0] * sin ( [1] + [2] τ) )
+			 * 
+			 * daily variation = sun_aberration_variation_constant +
+			 * Σ(variation[0]) + Σ(variation[1])*τ + Σ(variation[2])*τ² +
+			 * Σ(variation[3])*τ³
+			 * 
+			 * τ的係數為359993.7、719987或1079981的週期項，與地球離心率相關。<br />
+			 * τ的係數為4452671、9224660或4092677的週期項，與月球運動相關。<br />
+			 * τ的係數為450369、225184、315560或675553的週期項，與金星攝動相關。<br />
+			 * τ的係數為329645、659289、或299296的週期項，與火星攝動相關。
+			 * 
+			 * @inner
+			 */
+			sun_aberration_variation = [
+					// τ⁰
+					[ [ 118.568, 87.5287, 359993.7286 ],
+							[ 2.476, 85.0561, 719987.4571 ],
+							[ 1.376, 27.8502, 4452671.1152 ],
+							[ 0.119, 73.1375, 450368.8564 ],
+							[ 0.114, 337.2264, 329644.6718 ],
+							[ 0.086, 222.5400, 659289.3436 ],
+							[ 0.078, 162.8136, 9224659.7915 ],
+							[ 0.054, 82.5823, 1079981.1857 ],
+							[ 0.052, 171.5189, 225184.4282 ],
+							[ 0.034, 30.3214, 4092677.3866 ],
+							[ 0.033, 119.8105, 337181.4711 ],
+							[ 0.023, 247.5418, 299295.6151 ],
+							[ 0.023, 325.1526, 315559.5560 ],
+							[ 0.021, 155.1241, 675553.2846 ] ],
+					// τ¹
+					[ [ 7.311, 333.4515, 359993.7286 ],
+							[ 0.305, 330.9814, 719987.4571 ],
+							[ 0.010, 328.5170, 1079981.1857 ] ],
+					// τ²
+					[ [ 0.309, 241.4518, 359993.7286 ],
+							[ 0.021, 205.0482, 719987.4571 ],
+							[ 0.004, 297.8610, 4452671.1152 ] ],
+					// τ³
+					[ [ 0.010, 154.7066, 359993.7286 ] ] ];
+
+			sun_aberration_variation.forEach(function(term) {
+				term.forEach(function(sub_term) {
+					sub_term[1] *= DEGREES_TO_RADIANS;
+					sub_term[2] *= DEGREES_TO_RADIANS;
+				});
+			});
+
+			// ------------------------------------------------------------------------------------------------------//
+
+			/**
+			 * terms for function equinox()
+			 * 
+			 * Reference 資料來源/資料依據:<br />
+			 * Jean Meeus, Astronomical Algorithms.<br />
+			 * 《天文算法》 chapter 分點和至點.<br />
+			 * 
+			 * @inner
+			 */
+			// for years -1000 to 1000
+			var equinox_terms_before_1000 = [
+			// March equinox, 春分點時刻
+			[ 1721139.29189, 365242.13740, 0.06134, 0.00111, -0.00071 ],
+			// June Solstice, 夏至點時刻
+			[ 1721233.25401, 365241.72562, -0.05323, 0.00907, 0.00025 ],
+			// September equinox, 秋分點時刻
+			[ 1721325.70455, 365242.49558, -0.11677, -0.00297, 0.00074 ],
+			// December Solstice, 冬至點時刻
+			[ 1721414.39987, 365242.88257, -0.00769, -0.00933, -0.00006 ] ],
+			// for years 1000 to 3000
+			equinox_terms_after_1000 = [
+			// March equinox, 春分點時刻
+			[ 2451623.80984, 365242.37404, 0.05169, -0.00411, -0.00057 ],
+			// June Solstice, 夏至點時刻
+			[ 2451716.56767, 365241.62603, 0.00325, 0.00888, -0.00030 ],
+			// September equinox, 秋分點時刻
+			[ 2451810.21715, 365242.01767, -0.11575, 0.00337, 0.00078 ],
+			// December Solstice, 冬至點時刻
+			[ 2451900.05952, 365242.74049, -0.06223, -0.00823, 0.00032 ] ],
+			// 週期項
+			equinox_periodic_terms = [
+			//
+			[ 485, 324.96, 1934.136 ], [ 203, 337.23, 32964.467 ],
+					[ 199, 342.08, 20.186 ], [ 182, 27.85, 445267.112 ],
+					[ 156, 73.14, 45036.886 ], [ 136, 171.52, 22518.443 ],
+					[ 77, 222.54, 65928.934 ], [ 74, 296.72, 3034.906 ],
+					[ 70, 243.58, 9037.513 ], [ 58, 119.81, 33718.147 ],
+					[ 52, 297.17, 150.678 ], [ 50, 21.02, 2281.226 ],
+					[ 45, 247.54, 29929.562 ], [ 44, 325.15, 31555.956 ],
+					[ 29, 60.93, 4443.417 ], [ 18, 155.12, 67555.328 ],
+					[ 17, 288.79, 4562.452 ], [ 16, 198.04, 62894.029 ],
+					[ 14, 199.76, 31436.921 ], [ 12, 95.39, 14577.848 ],
+					[ 12, 287.11, 31931.756 ], [ 12, 320.81, 34777.259 ],
+					[ 9, 227.73, 1222.114 ], [ 8, 15.45, 16859.074 ] ];
+
+			// 把能先做的做一做，加快運算速度。
+			equinox_periodic_terms.forEach(function(terms) {
+				terms[1] *= DEGREES_TO_RADIANS;
+				terms[2] *= DEGREES_TO_RADIANS;
+			});
 
 			// ------------------------------------------------------------------------------------------------------//
 			// VSOP87 半解析（semi-analytic）理論 periodic terms

@@ -865,25 +865,27 @@ to_TWD = to_TWD;
 // https://hi.wikipedia.org/wiki/%E0%A4%B5%E0%A4%BF%E0%A4%95%E0%A4%BF%E0%A4%AA%E0%A5%80%E0%A4%A1%E0%A4%BF%E0%A4%AF%E0%A4%BE:%E0%A4%85%E0%A4%82%E0%A4%95_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%B0%E0%A5%8D%E0%A4%A4%E0%A4%95
 
 // 天城文（देवनागरी / devanāgarī）
-var Devanagari_numeral = '०१२३४५६७८९',
+var Devanagari_digits = '०१२३४५६७८९',
 //
-Devanagari_numeral_RegExp = new RegExp('[' + Devanagari_numeral + ']', 'g');
+Devanagari_digits_RegExp = new RegExp('[' + Devanagari_digits + ']', 'g');
 
 
-Devanagari_numeral.split('').forEach(function(digit, index) {
+(Devanagari_digits = Devanagari_digits.split(''))
+//
+.forEach(function(digit, index) {
 	numeral_convert_pair[digit] = index;
 });
 
 
 function to_Devanagari_numeral(number) {
-	return String(number).replace(/\d/g, function($0) {
-		return Devanagari_numeral.charAt($0);
+	return String(number).replace(/\d/g, function(digit) {
+		return Devanagari_numeral[digit];
 	});
 }
 
 function from_Devanagari_numeral(number) {
-	number = String(number).replace(Devanagari_numeral_RegExp, function($0) {
-		return numeral_convert_pair[$0];
+	number = String(number).replace(Devanagari_digits_RegExp, function(digit) {
+		return numeral_convert_pair[digit];
 	});
 	if (!isNaN(number))
 		number = Number(number);
@@ -899,6 +901,45 @@ TODO:
 https://en.wikipedia.org/wiki/Eastern_Arabic_numerals
 https://en.wiktionary.org/wiki/8
 */
+
+// ----------------------------------------------------------------------------------------------------------------- //
+// Eastern Arabic numerals / Perso-Arabic variant
+// https://en.wikipedia.org/wiki/Eastern_Arabic_numerals
+var Perso_digits = '۰۱۲۳۴۵۶۷۸۹',
+//
+Perso_digits_RegExp = new RegExp('[' + Perso_digits + ']', 'g');
+
+(Perso_digits = Perso_digits.split(''))
+//
+.forEach(function(digit, index) {
+	numeral_convert_pair[digit] = index;
+});
+
+
+function to_Perso_numeral(number) {
+	return String(number).replace(/\d/g, function(digit) {
+		return Perso_digits[digit];
+	});
+}
+
+/**
+ * 
+ * @param number
+ *            Perso number
+ * @returns
+ */
+function from_Perso_numeral(number) {
+	number = String(number).replace(Perso_digits_RegExp, function(digit) {
+		return numeral_convert_pair[digit];
+	});
+	if (!isNaN(number))
+		number = Number(number);
+	return number;
+}
+
+
+_.to_Perso_numeral = to_Perso_numeral;
+_.from_Perso_numeral = from_Perso_numeral;
 
 
 // ----------------------------------------------------------------------------------------------------------------- //
