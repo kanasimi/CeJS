@@ -2434,6 +2434,25 @@ function affairs() {
 					em : '隨即重新整理'
 				}, '，以更改設定！）' ] ],
 
+		precession : [ {
+			a : {
+				T : 'precession'
+			},
+			R : 'general precession.\nKai Tang (2015).'
+			//
+			+ ' A long time span relativistic precession model of the Earth.',
+			href : 'https://en.wikipedia.org/wiki/Precession#Astronomy'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			var precession = CeL.precession(
+			//
+			CeL.TT(new Date(date.offseted_value())));
+			return CeL.show_degrees(precession[0], 2) + ', '
+			//
+			+ CeL.show_degrees(precession[1], 2);
+		} ],
+
 		solarterms : [ {
 			a : {
 				T : '天文節氣'
@@ -2908,9 +2927,9 @@ function affairs() {
 			//
 			+ ' ou calendrier révolutionnaire français.\n'
 			//
-			+ '法國共和曆行用期間 1792/9/22–1805/12/31 CE，每年第一天都從秋分日開始。'
+			+ '法國共和曆行用期間 1792/9/22–1805/12/31，每年第一天都從秋分日開始。'
 			//
-			+ '後來巴黎公社 (1871 CE) 曾一度短暫恢復使用。',
+			+ '後來巴黎公社 1871/5/6–23 曾一度短暫恢復使用。',
 			href : 'https://fr.wikipedia.org/wiki/Calendrier_r%C3%A9publicain'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Republican({

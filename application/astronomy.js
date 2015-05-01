@@ -436,10 +436,10 @@ if (typeof CeL === 'function')
 						+ value + '′ ';
 					if (degree -= value) {
 						degree *= 60;
-						if (padding >= 0)
-							degree = (degree < 10 ? ' ' : '')
-									+ degree.toFixed(padding);
-						show += degree + '″';
+						degree = padding >= 0 ? (degree < 10 ? ' ' : '')
+								+ degree.toFixed(padding) : String(degree);
+						show += degree.includes('.') ? degree
+								.replace('.', '″.') : degree + '″';
 					}
 				}
 
