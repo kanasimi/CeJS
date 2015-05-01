@@ -19,6 +19,9 @@ if (false) {
 if (typeof CeL === 'function')
 	CeL.run({
 		name : 'data.numeral',
+		//
+		require : 'data.code.compatibility.',
+
 		code : function(library_namespace) {
 			var
 			// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
@@ -611,13 +614,14 @@ if (typeof CeL === 'function')
 				return r;
 			}
 
-			// 2.016,2.297,2.016
-			if (false) {
-				var d = new Date, v = '12345236', i = 0, a;
-				for (; i < 10000; i++)
-					a = to_Chinese_numeral(v);
-				alert(v + '\n→' + a + '\ntime:' + gDate(new Date - d));
-			}
+			if (false)
+				(function() {
+					// 2.016,2.297,2.016
+					var d = new Date, v = '12345236', i = 0, a;
+					for (; i < 10000; i++)
+						a = to_Chinese_numeral(v);
+					alert(v + '\n→' + a + '\ntime:' + gDate(new Date - d));
+				});
 
 			/**
 			 * 將阿拉伯數字轉為萬進中文數字表示法。 num>1京時僅會取概數，此時得轉成string再輸入！ TODO: 統整:尚有bug。
@@ -777,7 +781,7 @@ if (typeof CeL === 'function')
 				 * 
 				 * @returns {Number} native number
 				 */
-				function from_numeral(number) {
+				to_numeral.from = function from_numeral(number) {
 					number = String(number).replace(PATTERN_numeral,
 							function(digit) {
 								return numeral_convert_pair[digit];
@@ -787,7 +791,7 @@ if (typeof CeL === 'function')
 					return number;
 				}
 
-				return [ to_numeral, from_numeral ];
+				return to_numeral;
 			}
 
 			// -----------------------------------------------------------------------------------------------------------------
@@ -796,10 +800,9 @@ if (typeof CeL === 'function')
 			// https://hi.wikipedia.org/wiki/%E0%A4%AE%E0%A5%80%E0%A4%A1%E0%A4%BF%E0%A4%AF%E0%A4%BE%E0%A4%B5%E0%A4%BF%E0%A4%95%E0%A4%BF:Gadget-Numeral_converter.js
 			// https://hi.wikipedia.org/wiki/%E0%A4%B5%E0%A4%BF%E0%A4%95%E0%A4%BF%E0%A4%AA%E0%A5%80%E0%A4%A1%E0%A4%BF%E0%A4%AF%E0%A4%BE:%E0%A4%85%E0%A4%82%E0%A4%95_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%B0%E0%A5%8D%E0%A4%A4%E0%A4%95
 
-			var Devanagari_numeral = convert_positional('०१२३४५६७८९');
-
-			_.to_Devanagari_numeral = Devanagari_numeral[0];
-			_.from_Devanagari_numeral = Devanagari_numeral[1];
+			_.from_Devanagari_numeral =
+			//
+			(_.to_Devanagari_numeral = convert_positional('०१२३४५६७८९')).from;
 
 			/*
 			 * TODO: https://en.wikipedia.org/wiki/Eastern_Arabic_numerals
@@ -809,18 +812,107 @@ if (typeof CeL === 'function')
 			// -----------------------------------------------------------------------------------------------------------------
 			// Eastern Arabic numerals / Perso-Arabic variant
 			// https://en.wikipedia.org/wiki/Eastern_Arabic_numerals
-			var Perso_numeral = convert_positional('۰۱۲۳۴۵۶۷۸۹');
-
-			_.to_Perso_numeral = Perso_numeral[0];
-			_.from_Perso_numeral = Perso_numeral[1];
+			_.from_Perso_numeral =
+			//
+			(_.to_Perso_numeral = convert_positional('۰۱۲۳۴۵۶۷۸۹')).from;
 
 			// -----------------------------------------------------------------------------------------------------------------
 			// Roman numerals
 			// https://en.wikipedia.org/wiki/Roman_numerals
 
-			var PATTERN_Roman = /(M*)(C[DM]|D?C*)(X[LC]|L?X*)(I[VX]|V?I*)/i;
+			var Roman_numeral_pair = {},
+			// 
+			PATTERN_Roman = [],
 
-			;
+			Roman_numeral_value = 'IVXLCDMↁↂↇↈ'.split('');
+
+			Roman_numeral_value.forEach(function(digit, index) {
+				var is_unit = index % 2 === 0, next;
+				Roman_numeral_pair[digit] = (is_unit ? 1 : 5)
+						* Math.pow(10, index / 2 | 0);
+				if (is_unit) {
+					var next = Roman_numeral_value[index + 1];
+					PATTERN_Roman.unshift('('
+							+ (next ? digit + '[' + next
+									+ Roman_numeral_value[index + 2] + ']|'
+									+ next + '?' : '') + digit + '*)');
+				}
+			});
+
+			// 千百十個: /(M*)(C[DM]|D?C*)(X[LC]|L?X*)(I[VX]|V?I*)/i
+			PATTERN_Roman = new RegExp(PATTERN_Roman.join(''), 'i');
+			// console.log(PATTERN_Roman);
+			// /(ↈ*)(ↂ[ↇↈ]|ↇ?ↂ*)(M[ↁↂ]|ↁ?M*)(C[DM]|D?C*)(X[LC]|L?X*)(I[VX]|V?I*)/i
+
+			function to_Roman_numeral(number) {
+				if (!(number > 0) || number != (number | 0))
+					return number;
+
+				var value = [], left = number | 0;
+				for (var index = 0; left > 0; index += 2) {
+					if (index >= Roman_numeral_value.length)
+						throw new Error('The number is too large: ' + number);
+
+					var digits, position = left % 10;
+					left = left / 10 | 0;
+					if ((position + 1) % 5 === 0)
+						digits = Roman_numeral_value[index]
+								+ Roman_numeral_value[index
+										+ (position === 4 ? 1 : 2)];
+					else {
+						if (position > 4) {
+							position -= 5;
+							digits = Roman_numeral_value[index + 1];
+						} else
+							digits = '';
+						digits += Roman_numeral_value[index].repeat(position);
+					}
+					value.push(digits);
+				}
+
+				return value.reverse().join('');
+			}
+
+			function Roman_position(previous, position) {
+				if (!position)
+					return previous;
+
+				if (position.length === 1)
+					return previous + Roman_numeral_pair[position];
+
+				var _1 = Roman_numeral_pair[position[0]],
+				//
+				_2 = Roman_numeral_pair[position[1]];
+				if (_2 > _1)
+					// assert: position.length === 2
+					return previous + _2 - _1;
+
+				return previous + _1 + _2 * (position.length - 1);
+			}
+
+			function from_Roman_numeral(number) {
+				var matched = String(number).match(PATTERN_Roman);
+
+				return matched ? matched.slice(1).reduce(Roman_position, 0)
+						: number;
+			}
+
+			_.to_Roman_numeral = to_Roman_numeral;
+			_.from_Roman_numeral = from_Roman_numeral;
+
+			if (false)
+				(function() {
+					for (var i = 1; i < 50000; i++)
+						if (i !== CeL.from_Roman_numeral(CeL
+								.to_Roman_numeral(i)))
+							throw 'Error: '
+									+ i
+									+ ' → '
+									+ CeL.to_Roman_numeral(i)
+									+ ' → '
+									+ CeL.from_Roman_numeral(CeL
+											.to_Roman_numeral(i));
+				});
 
 			// -----------------------------------------------------------------------------------------------------------------
 

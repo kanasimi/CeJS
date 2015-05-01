@@ -2443,28 +2443,29 @@ if (typeof CeL === 'function')
 						 * @see http://lifesci.net/pod/bbs/board.php?bo_table=B07&wr_id=52
 						 */
 						var light_time = -0.70 / DEGREES_TO_ARCSECONDS;
-						if (false) {
-							/**
-							 * 錯誤的方法:
-							 * 
-							 * @deprecated
-							 */
-							// coordinates.R in km
-							var r = coordinates.R || LUNAR_DISTANCE_KM;
-							// 地球半徑6,357km到6,378km。平均半徑6371km。
-							r -= 6371;
-							// 1000: 1 km = 1000 m (CELERITAS in m/s)
-							light_time = -r * 1000 / CELERITAS
-									* TURN_TO_DEGREES / ONE_DAY_SECONDS;
-							library_namespace.debug(
-							//
-							'月亮經度光行差 of JD'
-									+ JD
-									+ ' ('
-									+ library_namespace.JD_to_Date(JD).format(
-											'CE') + '): '
-									+ show_degrees(light_time), 3);
-						}
+						if (false)
+							(function() {
+								/**
+								 * 錯誤的方法:
+								 * 
+								 * @deprecated
+								 */
+								// coordinates.R in km
+								var r = coordinates.R || LUNAR_DISTANCE_KM;
+								// 地球半徑6,357km到6,378km。平均半徑6371km。
+								r -= 6371;
+								// 1000: 1 km = 1000 m (CELERITAS in m/s)
+								light_time = -r * 1000 / CELERITAS
+										* TURN_TO_DEGREES / ONE_DAY_SECONDS;
+								library_namespace.debug(
+								//
+								'月亮經度光行差 of JD'
+										+ JD
+										+ ' ('
+										+ library_namespace.JD_to_Date(JD)
+												.format('CE') + '): '
+										+ show_degrees(light_time), 3);
+							});
 						coordinates.V += light_time;
 
 						/**

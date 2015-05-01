@@ -18,12 +18,12 @@ Microsoft | 語言入口網站
 if (typeof CeL === 'function')
 CeL.run({
 name : 'application.locale',
-require : 'data.numeral.to_Chinese_numeral',
+require : 'data.numeral.to_Chinese_numeral|data.numeral.to_positional_Chinese_numeral',
 code : function(library_namespace) {
 
 var module_name = this.id,
 // requiring
-to_Chinese_numeral;
+to_Chinese_numeral, to_positional_Chinese_numeral;
 eval(this.use());
 
 /**
