@@ -752,10 +752,20 @@ if (typeof CeL === 'function')
 			// (十進位)位值直接轉換用
 			// https://en.wikipedia.org/wiki/Positional_notation
 
-			function convert_positional(digits) {
-				var PATTERN_numeral = new RegExp('[' + digits + ']', 'g');
-				(digits = digits.split(''))//
-				.forEach(function(digit, index) {
+			function convert_positional(digit_set, name) {
+				var digits;
+				if (typeof digit_set !== 'string' || 10 !==
+				//
+				(digits = digit_set.chars()).length) {
+					library_namespace.err('Invalid digits of [' + name + ']: ('
+							+ digits.length + ') [' + digit_set + ']');
+					return;
+				}
+
+				var PATTERN_numeral = new RegExp(
+						digit_set.length === digits.length ? '[' + digit_set
+								+ ']' : digits.join('|'), 'g');
+				digits.forEach(function(digit, index) {
 					numeral_convert_pair[digit] = index;
 				});
 
@@ -794,33 +804,123 @@ if (typeof CeL === 'function')
 				return to_numeral;
 			}
 
-			// -----------------------------------------------------------------------------------------------------------------
-			// 天城文（देवनागरी / devanāgarī）
+			// http://wikimediafoundation.org/wiki/Template:ConvertDigit
+			// https://github.com/esetera/Objavi/blob/master/digits.txt
+			// https://de.wikipedia.org/wiki/Zahlzeichen_in_Unicode
+			// TODO: https://en.wiktionary.org/wiki/8
+			(function() {
+				var positional_digits = {
+					// Eastern Arabic numerals
+					// https://en.wikipedia.org/wiki/Eastern_Arabic_numerals
+					// 中東阿拉伯文數字, 標準阿拉伯文數字
+					// Western Arabic / Hindu–Arabic numeral system: 0123456789
+					// 在埃及，「二」通常用另一種寫法。
+					Arabic : '٠١٢٣٤٥٦٧٨٩',
+					// Perso-Arabic variant, Persian, Urdu, 東阿拉伯文數字
+					Perso : '۰۱۲۳۴۵۶۷۸۹',
 
-			// https://hi.wikipedia.org/wiki/%E0%A4%AE%E0%A5%80%E0%A4%A1%E0%A4%BF%E0%A4%AF%E0%A4%BE%E0%A4%B5%E0%A4%BF%E0%A4%95%E0%A4%BF:Gadget-Numeral_converter.js
-			// https://hi.wikipedia.org/wiki/%E0%A4%B5%E0%A4%BF%E0%A4%95%E0%A4%BF%E0%A4%AA%E0%A5%80%E0%A4%A1%E0%A4%BF%E0%A4%AF%E0%A4%BE:%E0%A4%85%E0%A4%82%E0%A4%95_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%B0%E0%A5%8D%E0%A4%A4%E0%A4%95
+					Balinese : '᭐᭑᭒᭓᭔᭕᭖᭗᭘᭙',
 
-			_.from_Devanagari_numeral =
-			//
-			(_.to_Devanagari_numeral = convert_positional('०१२३४५६७८९')).from;
+					// Bengali numerals (সংখ্যা shôngkhæ), 孟加拉文數字,
+					// Bengali-Assamese numerals
+					// https://en.wikipedia.org/wiki/Bengali_numerals
+					// ৴৵৶৷৸৹
+					Bengali : '০১২৩৪৫৬৭৮৯',
 
-			/*
-			 * TODO: https://en.wikipedia.org/wiki/Eastern_Arabic_numerals
-			 * https://en.wiktionary.org/wiki/8
-			 */
+					Brahmi : '𑁦𑁧𑁨𑁩𑁪𑁫𑁬𑁭𑁮𑁯',
+					Chakma : '𑄶𑄷𑄸𑄹𑄺𑄻𑄼𑄽𑄾𑄿',
+					Cham : '꩐꩑꩒꩓꩔꩕꩖꩗꩘꩙',
 
-			// -----------------------------------------------------------------------------------------------------------------
-			// Eastern Arabic numerals / Perso-Arabic variant
-			// https://en.wikipedia.org/wiki/Eastern_Arabic_numerals
-			_.from_Perso_numeral =
-			//
-			(_.to_Perso_numeral = convert_positional('۰۱۲۳۴۵۶۷۸۹')).from;
+					// 天城文（देवनागरी / devanāgarī）
+					// https://hi.wikipedia.org/wiki/%E0%A4%AE%E0%A5%80%E0%A4%A1%E0%A4%BF%E0%A4%AF%E0%A4%BE%E0%A4%B5%E0%A4%BF%E0%A4%95%E0%A4%BF:Gadget-Numeral_converter.js
+					// https://hi.wikipedia.org/wiki/%E0%A4%B5%E0%A4%BF%E0%A4%95%E0%A4%BF%E0%A4%AA%E0%A5%80%E0%A4%A1%E0%A4%BF%E0%A4%AF%E0%A4%BE:%E0%A4%85%E0%A4%82%E0%A4%95_%E0%A4%AA%E0%A4%B0%E0%A4%BF%E0%A4%B5%E0%A4%B0%E0%A5%8D%E0%A4%A4%E0%A4%95
+					Devanagari : '०१२३४५६७८९',
+
+					Gujarati : '૦૧૨૩૪૫૬૭૮૯',
+					Gurmukhi : '੦੧੨੩੪੫੬੭੮੯',
+					Javanese : '꧐꧑꧒꧓꧔꧕꧖꧗꧘꧙',
+					Kannada : '೦೧೨೩೪೫೬೭೮೯',
+					// Kayah Li
+					Kayah_Li : '꤀꤁꤂꤃꤄꤅꤆꤇꤈꤉',
+
+					// Khmer, Cambodian, 高棉文數字.
+					// https://km.wikipedia.org/wiki/%E1%9E%91%E1%9F%86%E1%9E%96%E1%9F%90%E1%9E%9A%E1%9E%82%E1%9F%86%E1%9E%9A%E1%9E%BC:Number_table_sorting
+					Khmer : '០១២៣៤៥៦៧៨៩',
+
+					// Tai Tham Hora 十進位數字系統。
+					Lanna : '᪀᪁᪂᪃᪄᪅᪆᪇᪈᪉',
+					// Tai Tham Tham 十進位數字系統。老傣文，又稱老傣仂文、蘭納文. Lanna script
+					Tai_Tham : '᪐᪑᪒᪓᪔᪕᪖᪗᪘᪙',
+
+					// 寮國/寮文數字
+					Lao : '໐໑໒໓໔໕໖໗໘໙',
+					Lepcha : '᱀᱁᱂᱃᱄᱅᱆᱇᱈᱉',
+					Limbu : '᥆᥇᥈᥉᥊᥋᥌᥍᥎᥏',
+					Malayalam : '൦൧൨൩൪൫൬൭൮൯',
+					// Meitei-Mayek
+					Meitei_Mayek : '꯰꯱꯲꯳꯴꯵꯶꯷꯸꯹',
+					Mongolian : '᠐᠑᠒᠓᠔᠕᠖᠗᠘᠙',
+					// or Burmese. 緬甸文數字.
+					// 警告:其中非空!
+					Myanmar : '၀၁၂၃၄၅၆၇၈၉',
+					// 緬甸撣邦文十進位數字系統。
+					// 警告:其中非空!
+					Myanmar_Shan : '႐႑႒႓႔႕႖႗႘႙',
+					// Neu-Tai-Lue.
+					Neu_Tai_Lue : '᧐᧑᧒᧓᧔᧕᧖᧗᧘᧙',
+					// N'Ko, r to l
+					NKo : '߀߁߂߃߄߅߆߇߈߉',
+					Oriya : '୦୧୨୩୪୫୬୭୮୯',
+					// Ol Chiki decimal numeral system. 桑塔爾文十進位數字系統。
+					Ol_Chiki : '᱐᱑᱒᱓᱔᱕᱖᱗᱘᱙',
+					Osmanya : '𐒠𐒡𐒢𐒣𐒤𐒥𐒦𐒧𐒨𐒩',
+					Saurashtra : '꣐꣑꣒꣓꣔꣕꣖꣗꣘꣙',
+					Sharada : '𑇐𑇑𑇒𑇓𑇔𑇕𑇖𑇗𑇘𑇙',
+					// Sorang-Sompeng
+					Sorang_Sompeng : '𑃰𑃱𑃲𑃳𑃴𑃵𑃶𑃷𑃸𑃹',
+					Sundanese : '᮰᮱᮲᮳᮴᮵᮶᮷᮸᮹',
+					Takri : '𑛀𑛁𑛂𑛃𑛄𑛅𑛆𑛇𑛈𑛉',
+					// Tamil (Grantha), 泰米爾文數字
+					// https://www.adobe.com/type/browser/pdfs/1965.pdf
+					Tamil : '௦௧௨௩௪௫௬௭௮௯',
+					Telugu : '౦౧౨౩౪౫౬౭౮౯',
+					// 藏文數字
+					Tibetan : '༠༡༢༣༤༥༦༧༨༩',
+					// 泰文數字
+					Thai : '๐๑๒๓๔๕๖๗๘๙',
+					Vai : '꘠꘡꘢꘣꘤꘥꘦꘧꘨꘩'
+				};
+
+				for ( var name in positional_digits) {
+					var to_numeral = convert_positional(
+							positional_digits[name], name);
+					if (to_numeral) {
+						_['to_' + name + '_numeral'] = to_numeral;
+						_['from_' + name + '_numeral'] = to_numeral.from;
+					}
+				}
+			})();
 
 			// -----------------------------------------------------------------------------------------------------------------
 			// Roman numerals
 			// https://en.wikipedia.org/wiki/Roman_numerals
-
-			var Roman_numeral_pair = {},
+			// https://en.wiktionary.org/wiki/Appendix:Roman_numerals
+			// Alternative forms
+			var Roman_numeral_alternative = {
+				'ↅ' : 'VI',
+				'ↆ' : 'L',
+				Ⅼ : 'L',
+				Ⅽ : 'C',
+				Ⅾ : 'D',
+				Ⅿ : 'M',
+				ⅼ : 'L',
+				ⅽ : 'C',
+				ⅾ : 'D',
+				ⅿ : 'M',
+				ↀ : 'M'
+			}, PATTERN_Roman_numeral_alternative,
+			//
+			Roman_numeral_pair = {},
 			// 
 			PATTERN_Roman = [],
 
@@ -851,6 +951,7 @@ if (typeof CeL === 'function')
 				var value = [], left = number | 0;
 				for (var index = 0; left > 0; index += 2) {
 					if (index >= Roman_numeral_value.length)
+						// OUT OF RANGE
 						throw new Error('The number is too large: ' + number);
 
 					var digits, position = left % 10;
@@ -890,15 +991,35 @@ if (typeof CeL === 'function')
 				return previous + _1 + _2 * (position.length - 1);
 			}
 
+			// TODO: 'Ↄ', 'ↄ'
 			function from_Roman_numeral(number) {
-				var matched = String(number).match(PATTERN_Roman);
+				var matched = normalize_Roman_numeral(number).match(
+						PATTERN_Roman);
 
 				return matched ? matched.slice(1).reduce(Roman_position, 0)
 						: number;
 			}
 
+			function normalize_Roman_numeral(number) {
+				return String(number)
+				// 正規化。
+				.replace(PATTERN_Roman_numeral_alternative, function(digit) {
+					return Roman_numeral_alternative[digit];
+				});
+			}
+
 			_.to_Roman_numeral = to_Roman_numeral;
 			_.from_Roman_numeral = from_Roman_numeral;
+			_.normalize_Roman_numeral = normalize_Roman_numeral;
+
+			'ⅠⅡⅢⅣⅤⅥⅦⅧⅩⅪⅫ'.split('').forEach(function(digit, index) {
+				Roman_numeral_alternative[digit] = to_Roman_numeral(index + 1);
+			});
+			'ⅰⅱⅲⅳⅴⅵⅶⅷⅸⅹⅺⅻ'.split('').forEach(function(digit, index) {
+				Roman_numeral_alternative[digit] = to_Roman_numeral(index + 1);
+			});
+			PATTERN_Roman_numeral_alternative = new RegExp('['
+					+ Object.keys(Roman_numeral_alternative) + ']', 'g');
 
 			if (false)
 				(function() {

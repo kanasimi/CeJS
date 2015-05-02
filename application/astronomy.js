@@ -15,6 +15,7 @@
  * https://pypi.python.org/pypi/astronomia
  * https://github.com/Hedwig1958/libastro/blob/master/astro.c
  * https://github.com/soniakeys/meeus/blob/master/solar/solar.go
+ * https://github.com/hkuno9000/sunmoon/blob/master/acoord.cpp
  * 
  * 大地測量:給定地球表面兩個點的經緯度,計算兩點間之距離<br />
  * 天球上星體距離<br />

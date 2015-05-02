@@ -214,7 +214,7 @@ function Year_numbering(year_shift, year_only, has_year_0, reverse) {
 // const
 var PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
 //
-CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '-?\\d'), pin_column,
+CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '[前-]?\\d'), pin_column,
 // 可選用的文字式年曆欄位。
 selected_column = {
 	JDN : true,
@@ -1606,8 +1606,8 @@ function translate_era(era) {
 		var format = output_format_object.setValue();
 		if (!format)
 			format = output_format_object.setValue(
-			//
-			CE_name + '%Y年' + (date.精 === '年' ? '' : '%m月%d日'));
+			//'%Y年'.replace(/-(\d+年)/, '前$1')
+			CE_name + '%Y年'.replace(/^-/,'前') + (date.精 === '年' ? '' : '%m月%d日'));
 
 		if (format === '共存紀年')
 			if (Array.isArray(output = date.共存紀年))
@@ -1632,6 +1632,7 @@ function translate_era(era) {
 			});
 			if (output_numeral === 'Chinese')
 				output = CeL.to_Chinese_numeral(output);
+			output = output.replace(/-(\d+年)/, '前$1');
 			if (output !== era)
 				output = {
 					a : output,
@@ -1741,7 +1742,7 @@ function click_title_as_era() {
 		matched = matched[0];
 		if (matched in output_format_types)
 			matched = output_format_types[matched];
-		output_format_object.setValue(matched);
+		output_format_object.setValue(matched).replace(/-(\d+年)/,'前$1');
 	}
 
 	era_input_object.setValue(era);
@@ -2079,8 +2080,8 @@ function affairs() {
 	list = [];
 	o = [];
 	i = [ '共存紀年:546/3/1', '共存紀年:1546-3-1', '年月日時干支:一八八〇年四月二十一日七時',
-			'年月日時干支:一八八〇年庚辰月庚辰日7時', '公元日期:一八八〇年庚辰月庚辰日庚辰時', '初始元年11月1日',
-			'明思宗崇禎1年1月26日', '公元日期:天聰二年甲寅月戊子日', '公元日期:天聰2年寅月戊子日',
+			'年月日時干支:一八八〇年庚辰月庚辰日7時', CE_name+'日期:一八八〇年庚辰月庚辰日庚辰時', '初始元年11月1日',
+			'明思宗崇禎1年1月26日', CE_name+'日期:天聰二年甲寅月戊子日', CE_name+'日期:天聰2年寅月戊子日',
 			'清德宗光緒六年三月十三日', '清德宗光緒庚辰年三月十三日', '清德宗光緒庚辰年庚辰月庚辰日',
 			'清德宗光緒六年三月十三日辰正一刻', '魏少帝嘉平4年5月1日', '魏少帝嘉平4年閏5月1日', '魏少帝嘉平4年閏月1日',
 			'景元元年', '景元元年7月', '元文宗天曆2年8月8日', '元文宗天曆3/1/2', '共存紀年:JD2032189',
@@ -2436,21 +2437,24 @@ function affairs() {
 
 		precession : [ {
 			a : {
-				T : 'precession'
+				T : 'general precession'
 			},
-			R : 'general precession.\nKai Tang (2015).'
+			R : '紀元使用當地、當日零時綜合歲差。\nKai Tang (2015).'
 			//
-			+ ' A long time span relativistic precession model of the Earth.',
-			href : 'https://en.wikipedia.org/wiki/Precession#Astronomy'
+			+ ' A long time span relativistic precession model of the Earth.\n'
+			//
+			+ '在J2000.0的时候与P03岁差差大概几个角秒，主要由于周期拟合的时候，很难保证长期与短期同时精度很高。',
+			href : 'https://en.wikipedia.org/wiki/Axial_precession'
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return '';
 			var precession = CeL.precession(
 			//
 			CeL.TT(new Date(date.offseted_value())));
-			return CeL.show_degrees(precession[0], 2) + ', '
-			//
-			+ CeL.show_degrees(precession[1], 2);
+			return [ CeL.show_degrees(precession[0], 2), {
+				b : ', ',
+				S : 'color:#e60;'
+			}, CeL.show_degrees(precession[1], 2) ];
 		} ],
 
 		solarterms : [ {
@@ -2927,7 +2931,7 @@ function affairs() {
 			//
 			+ ' ou calendrier révolutionnaire français.\n'
 			//
-			+ '法國共和曆行用期間 1792/9/22–1805/12/31，每年第一天都從秋分日開始。'
+			+ '每年第一天都從法國秋分日開始。法國共和曆行用期間 1792/9/22–1805/12/31，'
 			//
 			+ '後來巴黎公社 1871/5/6–23 曾一度短暫恢復使用。',
 			href : 'https://fr.wikipedia.org/wiki/Calendrier_r%C3%A9publicain'

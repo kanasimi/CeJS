@@ -860,6 +860,38 @@ function chunk(size) {
 }
 
 
+var split_by_code_point, PATTERN_char;
+/**
+ * 對於可能出現 surrogate pairs 的字串，應當以此來取代 .split('')！<br />
+ * handling of surrogate pairs / code points
+ * 
+ * @see
+ * https://en.wikipedia.org/wiki/UTF-16#Code_points_U.2B10000_to_U.2B10FFFF
+ * http://teppeis.hatenablog.com/entry/2014/01/surrogate-pair-in-javascript
+ */
+try {
+	PATTERN_char = new RegExp('.', 'u');
+	split_by_code_point = function() {
+		return this.match(PATTERN_char);
+	};
+
+} catch (e) {
+	split_by_code_point = function() {
+		return /[\uD800-\uDBFF][\uDC00-\uDFFF]/.test(this)
+		//
+		? this.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|./g) : this.split('');
+	};
+}
+
+// http://docs.oracle.com/javase/8/docs/api/java/lang/CharSequence.html#codePoints--
+function codePoints() {
+	return split_by_code_point.call(this)
+	// need data.code.compatibility!
+	.map(function(char) {
+		return char.codePointAt(0);
+	});
+}
+
 
 /**
  * get string between head and foot.<br />
@@ -1923,6 +1955,16 @@ set_method(String.prototype, {
 	
 	//split_by : split_String_by_length,
 	chunk : chunk,
+
+	// 對於可能出現 surrogate pairs 的字串，應當以此來取代 .split('')！
+	chars : split_by_code_point,
+	codePoints : function codePoints() {
+		return split_by_code_point.call(this)
+		//
+		.map(function(char) {
+			return char.codePointAt(0);
+		});
+	},
 	
 	pad : set_bind(pad, true),
 	toRegExp : set_bind(String_to_RegExp, true),

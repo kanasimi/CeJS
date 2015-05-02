@@ -2558,10 +2558,11 @@ function Date_to_French_Republican(date, options) {
 	if (typeof days === 'string' && (year = days.match(/^(.+? \d+ \D+ )(\d+)$/))) {
 		if (year[2] > 0 && library_namespace.to_Roman_numeral)
 			year[2] = library_namespace.to_Roman_numeral(year[2]);
+
+		var décade = (((date[2] - 1) / French_Republican_weekday_name.length) | 0) + 1;
 		// e.g., output:
-		// Septidi, 7 Floréal an 223
-		// TODO: Septidi, 7 Floréal an CCXXIII
-		days = year[1] + 'an ' + year[2];
+		// Septidi, 7 Floréal an CCXXIII
+		days = 'Décade ' + décade + ' Jour du ' + year[1] + 'an ' + year[2];
 	}
 	if (false)
 		days.décade = (((date[2] - 1) / French_Republican_weekday_name.length) | 0) + 1;
