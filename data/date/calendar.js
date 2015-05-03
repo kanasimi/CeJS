@@ -2555,7 +2555,7 @@ function Date_to_French_Republican(date, options) {
 		//
 		(date[2] - 1) % French_Republican_weekday_name.length];
 	days = _format(date, options, French_Republican_Date.month_name);
-	if (typeof days === 'string' && (year = days.match(/^(.+? \d+ \D+ )(\d+)$/))) {
+	if (typeof days === 'string' && (year = days.match(/^(.+? \d+ \D+ )(-?\d+)$/))) {
 		if (year[2] > 0 && library_namespace.to_Roman_numeral)
 			year[2] = library_namespace.to_Roman_numeral(year[2]);
 

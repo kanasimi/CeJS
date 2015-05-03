@@ -417,8 +417,9 @@ if (false)
 
 return [ JSalert, popErr, show_value ];
 },
+
 // 'log': 為預防覆寫基底之 log 而加。
-no_extend:'this,log'
+no_extend : 'this,log'
 
 
 });

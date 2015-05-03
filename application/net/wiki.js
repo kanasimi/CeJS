@@ -43,7 +43,7 @@ if (false) {
 				})
 				// get the content of page, and then modify it.
 				.page('Wikipedia:沙盒').edit(function(text) {
-					return text + '\n\n* [[沙盒]]';
+					return text + '\n\n* [[WP:Sandbox|沙盒]]';
 				}, {
 					summary : '沙盒 test edit',
 					nocreate : 1,
@@ -265,26 +265,28 @@ if (false) {
 }
 
 /**
- * 取得完整的模板token<br />
+ * 取得完整的模板 token。<br />
  * 此功能未來可能會統合於 parser 之中。
- *
+ * 
  * @param {String}wikitext
  *            模板前後之 content。<br />
  *            assert: wikitext 為良好結構 (well-constructed)。
  * @param {String}[template_name]
  *            模板名
- * @param {Boolean}parse
- *            是否解析
- *
- * @returns [ {String}完整的模板token, {String}模板名,
- *          {Array}parameters ].count = count('{{') -
- *          count('}}')，正常情況下應為 0。
+ * @param {Boolean}no_parse
+ *            是否不解析 parameters
+ * 
+ * @returns token = [ {String}完整的模板token, {String}模板名,
+ *          {Array}parameters ];<br />
+ *          token.count = count('{{') - count('}}')，正常情況下應為 0。<br />
+ *          token.index, token.lastIndex: index.
  */
-function template_token(wikitext, template_name, parse) {
+function template_token(wikitext, template_name, no_parse) {
 	var matched = (template_name = normalize_name_pattern(template_name, true))
 	// 模板起始。
-	? new RegExp(/{{[\s\n]*/.source + template_name + '[|}]', 'gi')
+	? new RegExp(/{{[\s\n]*/.source + template_name + '\\s*[|}]', 'gi')
 			: new RegExp(TEMPLATE_NAME_PATTERN.source, 'g');
+	library_namespace.debug('Use patten: ' + matched, 2);
 	// template_name : start token
 	template_name = matched.exec(wikitext);
 
@@ -308,24 +310,36 @@ function template_token(wikitext, template_name, parse) {
 
 	wikitext = pattern.lastIndex > 0 ? wikitext.slice(template_name.index,
 			pattern.lastIndex) : wikitext.slice(template_name.index);
-	// [ {String}完整的模板token, {String}模板名, {Array}parameters ].count =
-	// count('{{') - count('}}')
-	var result = [ wikitext, template_name[1].trim(),
+	var result = [
+	// [0]: {String}完整的模板token
+	wikitext,
+	// [1]: {String}模板名
+	template_name[1].trim(),
+	// [2] {String}parameters
 	// 接下來要作用在已經裁切擷取過的 wikitext 上，需要設定好 index。
 	// assert: 其他餘下 parameters 的部分以 [|}] 起始。
 	// -2: 模板結尾 '}}'.length
-	wikitext.slice(template_name.lastIndex - template_name.index, -2).trim() ];
-	result.count = count;
+	wikitext.slice(template_name.lastIndex - template_name.index, -2) ];
+	Object.assign(result, {
+		count : count,
+		index : template_name.index,
+		lastIndex : pattern.lastIndex
+	});
 
-	if (parse) {
+	if (!no_parse) {
 		// {Array}parameters
 		// 警告:這邊只是單純的以 '|' 分割，但照理來說應該再 call parser 來處理。
 		// 最起碼應該除掉所有可能包含 '|' 的語法，例如內部連結 [[~|~]], 模板 {{~|~}}。
-		(result[2] = result[2].split('|')).shift();
+		// .shift(): parameters 以 '|' 起始，因此需去掉最前面一個。
+		(result[2] = result[2].split(/[\s\n]*\|[\s\n]*/)).shift();
 	}
 
 	return result;
 }
+
+
+// --------------------------------------------------------------------------------------------- //
+// parse data
 
 
 /*
@@ -387,10 +401,45 @@ function parse_wikitext(wikitext, trigger) {
 }
 
 
+// parse Date
+function parse_Date(wikitext) {
+	return wikitext
+	// 去掉年分前之雜項。
+	.replace(/.+(\d{4}年)/, '$1')
+	// 去掉星期。
+	.replace(/日\s*\([^()]+\)/, '日 ')
+	// Warning: need data.date.
+	.to_Date();
+};
+
+// parse user name
+function parse_user(wikitext) {
+	var matched = wikitext.match(
+	//
+	/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论)|用戶(?:討論))\s*:\s*([^\|\]]+)/i);
+	if (matched)
+		return matched[1].trim();
+};
+
+
+function parse_redirect(wikitext) {
+	var matched = wikitext.match(
+	//
+	/(?:^|[\s\n]*)#(?:REDIRECT|重定向)\s*\[\[([^\]]+)\]\]/i);
+	if (matched)
+		return matched[1].trim();
+};
+
+Object.assign(parse_wikitext, {
+	Date : parse_Date,
+	user : parse_user,
+	redirect : parse_redirect
+});
+
 //---------------------------------------------------------------------//
 
 /**
- * get the contents of page
+ * get the contents of page data. 取得頁面內容。
  *
  * @param {Object}page_data
  *            page data got from wiki API
@@ -401,7 +450,11 @@ function page_content(page_data) {
 	return page_content.is_page_data(page_data) ?
 	//
 	(page_data = page_content.has_content(page_data)) && page_data['*']
-			|| undefined : String(page_data);
+			|| undefined
+	// ('missing' in page_data): 此頁面已刪除。
+	// e.g., { ns: 0, title: 'title', missing: '' }
+	// TODO: 提供此頁面的刪除和移動日誌以便參考。
+	: page_data && ('missing' in page_data) ? '' : String(page_data);
 }
 
 /**
@@ -654,7 +707,7 @@ function add_message(message, title) {
 	write_to : '',
 	// 運作記錄。
 	log_to : 'User:Robot/log/%4Y%2m%2d',
-	// 編輯摘要。「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」
+	// 編輯摘要。總結報告。「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」
 	summary : ''
 });
 
@@ -878,13 +931,13 @@ wiki_API.prototype.work = function(config, pages, titles) {
 						library_namespace.warn('wiki_API.work: Can not write log to [' + log_to
 						//
 						+ ']! Try to write to [' + 'User:' + this.token.lgname + ']');
-						library_namespace.log('log:<br />\n' + messages.join('<br />\n'));
+						library_namespace.log('\nlog:<br />\n' + messages.join('<br />\n'));
 						// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
 						this.page('User:' + this.token.lgname).edit(messages.join('\n'), options);
 					}
 				});
 			else
-				library_namespace.log('log:<br />\n' + messages.join('<br />\n'));
+				library_namespace.log('\nlog:<br />\n' + messages.join('<br />\n'));
 
 			// config.callback()
 			// 只有在成功時，才會繼續執行。
@@ -1082,7 +1135,7 @@ CeL.wiki.page('道', function(p) {
  * @param {String|Array}title
  *            title or [ {String}API_URL, {String}title ]
  * @param {Function}callback
- *            callback(page_data)
+ *            callback(page_data) { var content = CeL.wiki.content_of(page_data); }
  * @param options
  */
 wiki_API.page = function(title, callback, options) {
@@ -1126,7 +1179,9 @@ wiki_API.page = function(title, callback, options) {
 			var page = data[pageid];
 			pages.push(page);
 			if (!page_content.has_content(page))
-				library_namespace.warn('wiki_API.page: No content: [' + page.title + ']');
+				library_namespace.warn('wiki_API.page: '
+				//
+				+ ('missing' in page ? 'Deleted' : 'No content') + ': [' + page.title + ']');
 		}
 
 		if (pages.length < 2
@@ -1632,6 +1687,7 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
  *            回調函數。 callback(title, error, result)
  * @param {String}timestamp
  *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
+ *
  * @returns
  */
 wiki_API.edit = function(title, text, token, options, callback, timestamp) {
@@ -1854,6 +1910,7 @@ wiki_API.search.default_parameter = {
 	srinterwiki : 1
 };
 
+
 // --------------------------------------------------------------------------------------------- //
 
 // export
@@ -1878,12 +1935,15 @@ Object.assign(wiki_API, {
 		if (Array.isArray(page_data))
 			page_data = page_data[1];
 		return page_data.title || page_data;
-	}
+	},
+
+	parse : parse_wikitext
 });
 
 
 return wiki_API;
-}
+},
 
+no_extend : '*'
 
 });
