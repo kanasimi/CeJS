@@ -2477,7 +2477,7 @@ _.Ethiopian_Date = Ethiopian_Date;
 
 // ** Warning: need application.astronomy
 
-// 每月30天。
+// 每月天數。
 var French_Republican_MONTH_DAYS = 30,
 // year epoch: began on 1792 CE
 French_Republican_CE_offset = 1792 - 1,
@@ -2717,8 +2717,146 @@ Solar_Hijri_Date.test = new_tester(Date_to_Solar_Hijri, Solar_Hijri_Date, {
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
-// 
+// 彝曆
 
+// 每月天數。
+var Yi_MONTH_DAYS = 36,
+// 一年10個月。
+Yi_MONTH_COUNT = 10,
+// 首年（東方之年）以虎為首，依序紀日不間斷。
+Yi_DAY_OFFSET = 0,
+// 木火土銅水, 分公母/雌雄. 以「銅」代「金」、以「公母」代「陰陽」
+Yi_month_name = [],
+//
+Yi_year_name = '東,東南,南,西南,西,西北,北,東北'.split(','),
+// 預防 load 時尚未 ready.
+Yi_year_starts = function(year) {
+	if (library_namespace.solar_term_calendar)
+		return (Yi_year_starts = library_namespace.solar_term_calendar('冬至',
+		// 8: UTC+8 → minute offset
+		8 * 60))(year);
+};
+// Yi_year_starts.year_of = library_namespace.null_function;
+
+// 先嘗試看看。
+Yi_year_starts();
+
+Yi_month_name.length = 1;
+'木火土銅水'.split('').forEach(function(五行) {
+	// 陰陽
+	Yi_month_name.push(五行 + '公月', 五行 + '母月');
+});
+// 過年日於曆算法中，古稱「歲餘日」。
+Yi_month_name.push('歲餘日');
+
+Yi_Date.month_name = function(month, is_leap, options) {
+	return Yi_month_name[month];
+};
+
+/**
+ * Yi calendar
+ * 
+ * @param {Integer}year
+ * @param {Integer}month
+ *            過年日: 11
+ * @param {Integer}date
+ * 
+ * @returns {Date} Gregorian calendar
+ */
+function Yi_Date(year, month, date) {
+	// no year 0
+	if (year < 1)
+		year++;
+	if (month !== (month | 0) || !(0 < month && month < 12)) {
+		library_namespace.err('Invalid month: ' + month
+				+ ' Should be 1–10. 11 for leap year.');
+		return new Date(NaN);
+	}
+	return new Date(Yi_year_starts(year)
+	// 2000年: 以 2000/12/21 冬至為基準，1–10月往前數，過年日(11月)往後數。
+	+ (date - 1 - ((Yi_MONTH_COUNT + 1) - month) * Yi_MONTH_DAYS)
+			* ONE_DAY_LENGTH_VALUE);
+}
+
+_.Yi_Date = Yi_Date;
+
+function Date_to_Yi(date, options) {
+	var days = Yi_year_starts.year_of(date),
+	//
+	year = days[0],
+	//
+	month = (Yi_year_starts(year + 1) - date) / ONE_DAY_LENGTH_VALUE,
+	//
+	_date = date;
+	// console.log([month,days])
+	days = days[1];
+	if ( // days < 5 ||
+	Yi_MONTH_COUNT * Yi_MONTH_DAYS < month) {
+		date = [ year, Yi_MONTH_COUNT + 1, days + 1 ];
+	} else {
+		date = [ year + 1,
+		//
+		Yi_MONTH_COUNT + 1 - Math.ceil(month / Yi_MONTH_DAYS),
+		//
+		days = 1 + (-month).mod(Yi_MONTH_DAYS) ];
+		if (days %= 1) {
+			date[2] |= 0;
+			date.push(days);
+		}
+	}
+
+	if (options && options.format === 'name') {
+		// 由下面測試，發現 1991–2055 以 +1 能得到最多年首由虎日起，為東方之年之情況。
+		if (false) {
+			for (var y = 1900, n; y < 2100; y++) {
+				n = CeL.Yi_Date(y, 1, 1).to_Yi({
+					format : 'name'
+				});
+				if (n.includes('虎日'))
+					console.log(y + n);
+			}
+		}
+		date[0]
+		// 但依 hosi.org，2015/5北方之年，應該採 -1。
+		//= Yi_year_name[(date[0] - 1).mod(Yi_year_name.length)] + '方之年';
+		+= '年';
+
+		date[1] = Yi_Date.month_name(month = date[1]);
+
+		days = date[2];
+		if (library_namespace.十二生肖_LIST) {
+			days = library_namespace.十二生肖_LIST[(Yi_DAY_OFFSET +
+			//
+			library_namespace.stem_branch_index(_date))
+			//
+			% library_namespace.十二生肖_LIST.length];
+		}
+		date[2] = (month < Yi_MONTH_COUNT + 1 ? (1 + ((date[2] - 1)
+		//
+		/ library_namespace.十二生肖_LIST.length | 0)) + '輪' : '') + days + '日';
+		date = date.join('');
+	}
+
+	return date;
+}
+
+/*
+
+CeL.Yi_Date.test(-2e4, 4e6, 4).join('\n') || 'OK'; // "OK"
+// "OK"
+
+*/
+Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
+	epoch : Date.parse('1000/1/1'),
+	continued_month : function(month, old_month) {
+		return month === 1 && old_month === 11;
+	},
+	month_days : {
+		'36' : '10個月',
+		'5' : '過年日',
+		'6' : '閏年過年日'
+	}
+});
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -2739,7 +2877,9 @@ library_namespace.set_method(Date.prototype, {
 	to_Coptic : set_bind(Date_to_Coptic),
 	to_Ethiopian : set_bind(Date_to_Ethiopian),
 	to_Republican : set_bind(Date_to_French_Republican),
-	to_Solar_Hijri : set_bind(Date_to_Solar_Hijri)
+	to_Solar_Hijri : set_bind(Date_to_Solar_Hijri),
+	// to_Yi_calendar
+	to_Yi : set_bind(Date_to_Yi)
 });
 
 

@@ -1606,8 +1606,9 @@ function translate_era(era) {
 		var format = output_format_object.setValue();
 		if (!format)
 			format = output_format_object.setValue(
-			//'%Y年'.replace(/-(\d+年)/, '前$1')
-			CE_name + '%Y年'.replace(/^-/,'前') + (date.精 === '年' ? '' : '%m月%d日'));
+			// '%Y年'.replace(/-(\d+年)/, '前$1')
+			CE_name + '%Y年'.replace(/^-/, '前')
+					+ (date.精 === '年' ? '' : '%m月%d日'));
 
 		if (format === '共存紀年')
 			if (Array.isArray(output = date.共存紀年))
@@ -1742,7 +1743,7 @@ function click_title_as_era() {
 		matched = matched[0];
 		if (matched in output_format_types)
 			matched = output_format_types[matched];
-		output_format_object.setValue(matched).replace(/-(\d+年)/,'前$1');
+		output_format_object.setValue(matched).replace(/-(\d+年)/, '前$1');
 	}
 
 	era_input_object.setValue(era);
@@ -2080,12 +2081,13 @@ function affairs() {
 	list = [];
 	o = [];
 	i = [ '共存紀年:546/3/1', '共存紀年:1546-3-1', '年月日時干支:一八八〇年四月二十一日七時',
-			'年月日時干支:一八八〇年庚辰月庚辰日7時', CE_name+'日期:一八八〇年庚辰月庚辰日庚辰時', '初始元年11月1日',
-			'明思宗崇禎1年1月26日', CE_name+'日期:天聰二年甲寅月戊子日', CE_name+'日期:天聰2年寅月戊子日',
-			'清德宗光緒六年三月十三日', '清德宗光緒庚辰年三月十三日', '清德宗光緒庚辰年庚辰月庚辰日',
-			'清德宗光緒六年三月十三日辰正一刻', '魏少帝嘉平4年5月1日', '魏少帝嘉平4年閏5月1日', '魏少帝嘉平4年閏月1日',
-			'景元元年', '景元元年7月', '元文宗天曆2年8月8日', '元文宗天曆3/1/2', '共存紀年:JD2032189',
-			'平成26年6月8日', 'H26.6.8', '漢和帝劉肇（79年–106年2月13日）' ];
+			'年月日時干支:一八八〇年庚辰月庚辰日7時', CE_name + '日期:一八八〇年庚辰月庚辰日庚辰時', '初始元年11月1日',
+			'明思宗崇禎1年1月26日', CE_name + '日期:天聰二年甲寅月戊子日',
+			CE_name + '日期:天聰2年寅月戊子日', '清德宗光緒六年三月十三日', '清德宗光緒庚辰年三月十三日',
+			'清德宗光緒庚辰年庚辰月庚辰日', '清德宗光緒六年三月十三日辰正一刻', '魏少帝嘉平4年5月1日',
+			'魏少帝嘉平4年閏5月1日', '魏少帝嘉平4年閏月1日', '景元元年', '景元元年7月', '元文宗天曆2年8月8日',
+			'元文宗天曆3/1/2', '共存紀年:JD2032189', '平成26年6月8日', 'H26.6.8',
+			'漢和帝劉肇（79年–106年2月13日）' ];
 	i.forEach(function(era) {
 		list.push({
 			div : {
@@ -2809,28 +2811,56 @@ function affairs() {
 			return CeL.Maya_Date.to_Haab(date) + (date.精 === '年' ? '–' : '');
 		} ],
 
-		Dai : [
-				{
-					a : {
-						T : '傣曆',
-					},
-					R : '西雙版納傣曆紀元始於公元638年3月22日，可轉換之範圍於傣曆714年（1352/3/28–）至3190年期間內。\n有0年。非精確時，可能有最多前後2年的誤差。',
-					href : 'http://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86'
-				},
-				function(date) {
-					var dai;
-					return date - CeL.Dai_Date.epoch < 0
-					// 超出可轉換之範圍。
-					|| isNaN((dai = date.to_Dai({
-					// format : 'serial'
-					}))[0]) ? '約' + date.to_Dai({
-						ignore_year_limit : true
-					})[0] + '年'
-					//
-					: date.精 === '年' ? dai[0] + '年' : dai.slice(0, 3).join('/')
-							+ '(周' + (date.getDay() + 1) + ')'
-							+ (dai[3] ? ' ' + dai[3] : '');
-				} ],
+		Dai : [ {
+			a : {
+				T : '傣曆',
+			},
+			R : '西雙版納傣曆紀元始於公元638年3月22日，可轉換之範圍於傣曆714年（1352/3/28–）至3190年期間內。\n'
+			//
+			+ '傣曆有0年。非精確時，可能有最多前後2年的誤差。',
+			href : 'http://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86'
+		}, function(date) {
+			var dai;
+			return date - CeL.Dai_Date.epoch < 0
+			// 超出可轉換之範圍。
+			|| isNaN((dai = date.to_Dai({
+			// format : 'serial'
+			}))[0]) ? '約' + date.to_Dai({
+				ignore_year_limit : true
+			})[0] + '年'
+			//
+			: date.精 === '年' ? dai[0] + '年' : dai.slice(0, 3).join('/')
+			//
+			+ '(周' + (date.getDay() + 1) + ')' + (dai[3] ? ' ' + dai[3] : '');
+		} ],
+
+		Yi : [ {
+			a : {
+				T : '彝曆',
+			},
+			R : '彝族十月太陽曆。採歲末過年日以冬至起頭之法，而非採四年一閏法！\n'
+			//
+			+ '彝曆一日分12時段，自當天拂曉前雞鳴起。\n'
+			//
+			+ '若公元12月27日對彝曆1月1日，則自公元12月27日約凌晨3點起跨入彝曆1月1日。\n' +
+			//
+			'過年日於曆算法中，古稱「歲餘日」。',
+			href : 'http://zh.wikipedia.org/wiki/%E5%BD%9D%E6%9B%86'
+		}, function(date) {
+			var yi;
+			// 超出可轉換之範圍。
+			return isNaN((yi = date.to_Yi({
+			// format : 'serial'
+			}))[0]) ? '約' + date.to_Yi({
+				ignore_year_limit : true
+			})[0] + '年'
+			//
+			: date.精 === '年' ? yi[0] + '年' : yi.slice(0, 3).join('/')
+			//
+			+ '; ' + date.to_Yi({
+				format : 'name'
+			});
+		} ],
 
 		Indian_national : [ {
 			a : {
