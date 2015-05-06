@@ -520,9 +520,9 @@ Hebrew_epoch = String_to_Date('-3761/10/7', {
 // Hebrew year, month, date
 // get_days: get days of year
 function Hebrew_Date(year, month, date, get_days) {
+	// no year 0. year: -1 → 0
 	if (year < 0 && !Hebrew_Date.year_0)
-		// year: -1 → 0
-		++year;
+		year++;
 
 	var is_leap = Hebrew_Date.is_leap(year),
 	//
@@ -2310,9 +2310,9 @@ Coptic_month_name = '|Thout|Paopi|Hathor|Koiak|Tobi|Meshir|Paremhat|Paremoude|Pa
 		.split('|');
 
 function Coptic_Date(year, month, date, get_days, year_0) {
+	// no year 0. year: -1 → 0
 	if (year < 0 && !year_0)
-		// year: -1 → 0
-		++year;
+		year++;
 
 	var days = Math.floor(--year / 4) * Coptic_cycle_days | 0;
 	// 轉正。保證變數值非負數。
@@ -2412,9 +2412,9 @@ _.Coptic_Date = Coptic_Date;
 
 
 function Ethiopian_Date(year, month, date, year_0) {
+	// no year 0. year: -1 → 0
 	if (year < 0 && !year_0)
-		// year: -1 → 0
-		++year;
+		year++;
 
 	year += Ethiopian_year_to_Coptic;
 
@@ -2472,6 +2472,102 @@ Ethiopian_Date.test = new_tester(Date_to_Ethiopian, Ethiopian_Date, {
 
 _.Ethiopian_Date = Ethiopian_Date;
 
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// Հայկական եկեղեցական տոմար, 教會亞美尼亞曆法, Armenian calendar
+// https://hy.wikipedia.org/wiki/%D5%80%D5%A1%D5%B5%D5%AF%D5%A1%D5%AF%D5%A1%D5%B6_%D5%A5%D5%AF%D5%A5%D5%B2%D5%A5%D6%81%D5%A1%D5%AF%D5%A1%D5%B6_%D5%BF%D5%B8%D5%B4%D5%A1%D6%80
+
+// Հայկյան տոմար, 傳統/古亞美尼亞曆法
+// https://hy.wikipedia.org/wiki/%D5%80%D5%A1%D5%B5%D5%AF%D5%B5%D5%A1%D5%B6_%D5%BF%D5%B8%D5%B4%D5%A1%D6%80
+// http://haytomar.com/index.php?l=am
+// http://www.anunner.com/grigor.brutyan/ՀԱՅԿԱԿԱՆ_ՕՐԱՑՈՒՅՑԸ_ԻՐ_ՍԿԶԲՆԱՒՈՐՈՒՄԻՑ_ՄԻՆՉԵՎ_ՄԵՐ_ՕՐԵՐԸ_(համառօտ_ակնարկ)
+
+// 每月天數。
+var Armenian_MONTH_DAYS = 30,
+// 一年12個月。
+Armenian_MONTH_COUNT = 12,
+// Epagomenal days
+Armenian_Epagomenal_days = 5,
+// 365-day year with no leap year
+Armenian_year_days = Armenian_MONTH_COUNT * Armenian_MONTH_DAYS + Armenian_Epagomenal_days,
+// ամիս
+Armenian_month_name = 'Նավասարդ|Հոռի|Սահմի|Տրե|Քաղոց|Արաց|Մեհեկան|Արեգ|Ահեկան|Մարերի|Մարգաց|Հրոտից|Ավելյաց'.split('|'),
+// օր
+Armenian_date_name = 'Արէգ|Հրանդ|Արամ|Մարգար|Ահրանք|Մազդեղ կամ Մազդեկան|Աստղիկ|Միհր|Ձոպաբեր|Մուրց|Երեզկան կամ Երեզհան|Անի|Պարխար|Վանատուր|Արամազդ|Մանի|Ասակ|Մասիս|Անահիտ|Արագած|Գրգուռ|Կորդուիք|Ծմակ|Լուսնակ|Ցրոն կամ Սփյուռ|Նպատ|Վահագն|Սիմ կամ Սեին|Վարագ|Գիշերավար'.split('|'),
+//
+Armenian_epagomenal_date_name = 'Լուծ|Եղջերու|Ծկրավորի|Արտախույր|Փառազնոտի'.split('|'),
+// շաբատվա օր
+Armenian_weekday_name = 'Արեգակի|Լուսնի|Հրատի|Փայլածուի|Լուսնթագի|Արուսյակի|Երևակի'.split('|'),
+// 夜間時段 → 日間時段
+// starts from 0:0 by http://haytomar.com/converter.php?l=am
+Armenian_hour_name = 'Խաւարականն|Աղջամուղջն|Մթացեալն|Շաղաւոտն|Կամաւօտն|Բաւականն|Հաւթափեալն|Գիզկան|Լուսաճեմն|Առաւոտն|Լուսափայլն|Փայլածումն|Այգն|Ծայգն|Զօրացեալն|Ճառագայթեալն|Շառաւիղեալն|Երկրատեսն|Շանթակալն|Հրակաթն|Հուրթափեալն|Թաղանթեալն|Առաւարն|Արփողն'.split('|');
+
+// Armenian year 1 began on 11 July AD 552 (Julian).
+Armenian_Date.epoch = String_to_Date('552/7/11', {
+	parser : 'Julian'
+}).getTime();
+
+function Armenian_Date(year, month, date) {
+	// no year 0. year: -1 → 0
+	if (year < 0)
+		year++;
+
+	return new Date(Armenian_Date.epoch + (
+	// days from Armenian_Date.epoch.
+	(year - 1) * Armenian_year_days
+	//
+	+ (month - 1) * Armenian_MONTH_DAYS
+	//
+	+ date - 1) * ONE_DAY_LENGTH_VALUE);
+}
+
+
+function Date_to_Armenian(date, options) {
+	var days = (date - Armenian_Date.epoch) / ONE_DAY_LENGTH_VALUE,
+	// տարի
+	year = Math.floor(days / Armenian_year_days) + 1;
+	// no year 0
+	if (year < 1)
+		year--;
+
+	days = days.mod(Armenian_year_days);
+	var month = days / Armenian_MONTH_DAYS | 0;
+	days %= Armenian_MONTH_DAYS;
+
+	days = [ year, month + 1, days + 1 ];
+
+	if (options && options.format === 'name') {
+		//days[0] = 'տարի ' + days[0];
+		days[1] = Armenian_month_name[month];
+		days[2] = (month > Armenian_MONTH_COUNT
+		//
+		? Armenian_epagomenal_date_name : Armenian_date_name)[days[2] - 1];
+		days = days.join(' / ')
+		// add weekday, շաբատվա օր.
+		+ ', ' + Armenian_weekday_name[date.getDay()] + ' օր';
+	}
+
+	return days;
+}
+
+
+/*
+
+CeL.Armenian_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
+// "OK"
+
+*/
+Armenian_Date.test = new_tester(Date_to_Armenian, Armenian_Date, {
+	month_days : {
+		'30' : 'common month',
+		'5' : 'Epagomenal days',
+	}
+});
+
+
+_.Armenian_Date = Armenian_Date;
+
+
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // Le calendrier républicain, ou calendrier révolutionnaire français (法國共和曆, French Republican Calendar).
 
@@ -2518,9 +2614,10 @@ French_Republican_Date.month_name = function(month) {
  * @returns {Date} Gregorian calendar
  */
 function French_Republican_Date(year, month, date, shift) {
-	// no year 0
+	// no year 0. year: -1 → 0
 	if (year < 1)
 		year++;
+
 	return new Date(
 			French_Republican_year_starts(year + French_Republican_CE_offset)
 					// 一年分為12個月，每月30天，每月分為3周，每周10天，廢除星期日，每年最後加5天，閏年加6天。
@@ -2654,9 +2751,10 @@ Solar_Hijri_Date.month_name = function(month, is_leap, options) {
  * @returns {Date} Gregorian calendar
  */
 function Solar_Hijri_Date(year, month, date) {
-	// no year 0
+	// no year 0. year: -1 → 0
 	if (year < 1)
 		year++;
+
 	return new Date(Solar_Hijri_year_starts(year + Solar_Hijri_CE_offset)
 	// 伊朗曆月名由12 個波斯名字組成。前6個月是每月31天，下5個月是30天，最後一個月平年29天，閏年30天。
 	// The first six months (Farvardin–Shahrivar) have 31 days, the next
@@ -2764,9 +2862,10 @@ Yi_Date.month_name = function(month, is_leap, options) {
  * @returns {Date} Gregorian calendar
  */
 function Yi_Date(year, month, date) {
-	// no year 0
+	// no year 0. year: -1 → 0
 	if (year < 1)
 		year++;
+
 	if (month !== (month | 0) || !(0 < month && month < 12)) {
 		library_namespace.err('Invalid month: ' + month
 				+ ' Should be 1–10. 11 for leap year.');
@@ -2788,8 +2887,13 @@ function Date_to_Yi(date, options) {
 	month = (Yi_year_starts(year + 1) - date) / ONE_DAY_LENGTH_VALUE,
 	//
 	_date = date;
-	// console.log([month,days])
+	// console.log([ month, days ])
 	days = days[1];
+
+	// no year 0
+	if (year < 1)
+		year--;
+
 	if ( // days < 5 ||
 	Yi_MONTH_COUNT * Yi_MONTH_DAYS < month) {
 		date = [ year, Yi_MONTH_COUNT + 1, days + 1 ];
@@ -2876,6 +2980,7 @@ library_namespace.set_method(Date.prototype, {
 	to_Bahai : set_bind(Date_to_Bahai),
 	to_Coptic : set_bind(Date_to_Coptic),
 	to_Ethiopian : set_bind(Date_to_Ethiopian),
+	to_Armenian : set_bind(Date_to_Armenian),
 	to_Republican : set_bind(Date_to_French_Republican),
 	to_Solar_Hijri : set_bind(Date_to_Solar_Hijri),
 	// to_Yi_calendar

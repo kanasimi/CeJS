@@ -1841,13 +1841,15 @@ function set_era_by_url_data(era) {
 
 	else {
 
+		var column, items,
 		// 直接處理 hash / search。
 		// e.g., "era.htm#era=%E5%A4%A7%E6%B0%B82%E5%B9%B4&column="
 		// #era=景元元年&column=-contemporary&layer=臺灣地震
 		// #hierarchy=中國/東漢/安帝
 		// #hierarchy=中國/清&layer=臺灣地震
-		var column, items, data = CeL.parse_URI.parse_search(location.search
-				.slice(1), CeL.parse_URI.parse_search(location.hash.slice(1)));
+		data = CeL.parse_URI.parse_search(location.search.slice(1),
+		//
+		CeL.parse_URI.parse_search(location.hash.slice(1)));
 
 		if (column = data.column) {
 			(Array.isArray(column) ? column : [ column ])
@@ -2951,6 +2953,30 @@ function affairs() {
 			})[0] + '年' : date.to_Ethiopian({
 				format : 'serial'
 			}).slice(0, 3).join('/') + '; ' + date.to_Ethiopian();
+		} ],
+
+		Armenian : [ {
+			a : {
+				T : '教會亞美尼亞曆'
+			},
+			R : 'year / month / date, weekday\n'
+			//
+			+ 'Armenian calendar, 教會亞美尼亞曆法, Հայկական եկեղեցական տոմար',
+			href : 'https://hy.wikipedia.org/wiki/'
+			//
+			+ '%D5%80%D5%A1%D5%B5%D5%AF%D5%A1%D5%AF%D5%A1%D5%B6'
+			//
+			+ '_%D5%A5%D5%AF%D5%A5%D5%B2%D5%A5%D6%81%D5%A1%D5%AF%D5%A1%D5%B6'
+			//
+			+ '_%D5%BF%D5%B8%D5%B4%D5%A1%D6%80'
+		}, function(date) {
+			return date.精 === '年' ? date.to_Armenian({
+				format : 'serial'
+			})[0] + '年' : date.to_Armenian({
+				format : 'serial'
+			}).slice(0, 3).join('/') + '; ' + date.to_Armenian({
+				format : 'name'
+			});
 		} ],
 
 		Republican : [ {
