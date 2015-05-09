@@ -395,19 +395,20 @@ function show_calendar(era_name) {
 		tmp = date.format(
 				{
 					parser : 'CE',
-					format : tmp ? '%紀年名%年年|%Y年|%年干支||'
+					format : tmp ? '%紀年名 %年年|%Y年|%年干支||'
 					//
-					: '%紀年名%年年%月月%日日|%Y/%m/%d('
+					: '%紀年名 %年年%月月%日日|%Y/%m/%d('
 							+ (_.is_domain_name('ja') ? '%七曜' : '%w')
 							+ ')|%年干支|%月干支%大小月|%日干支',
 					locale : 'cmn-Hant-TW',
 					as_UTC_time : true
-				}).replace(/星期/, '').split('|');
+				}).replace(/([^a-z\d'"]) (\d)/i, '$1$2').replace(/星期/, '')
+				.split('|');
 
 		if (matched = tmp[0]
-		// 後處理。
-		// 月名: 正/臘/閏12/後12
-		.match(/^(.*\D\d+年)(.{1,3}月)(\d+日)$/))
+		// 後處理: 添加進一步之日期捷徑。
+		// 月名: 正/臘/閏12/後12/Nīsannu月
+		.match(/^(.*\D\d+年)(.{1,20}月)(\d+日)$/))
 			tmp[0] = [ matched[1] === 前年名 ? 前年名 : {
 				a : 前年名 = matched[1],
 				title : matched[1],
@@ -1377,9 +1378,9 @@ draw_era.click_Era = function() {
 	draw_era.draw_navigation(hierarchy, true);
 
 	era_input_object.setValue(era.format({
-		format : era.精 === '年' ? '%紀年名%年年' : '%紀年名%年年%月月%日日',
+		format : era.精 === '年' ? '%紀年名 %年年' : '%紀年名 %年年%月月%日日',
 		locale : 'cmn-Hant-TW'
-	}));
+	})).replace(/([^a-z\d'"]) (\d)/i, '$1$2');
 	translate_era();
 	return false;
 };
@@ -1564,6 +1565,16 @@ function translate_era(era) {
 		}
 	}
 
+	function add_君主名(note) {
+		return {
+			a : note,
+			href : 'https://'
+					+ (PATTERN_NOT_ALL_ALPHABET.test(note) ? 'zh' : 'en')
+					+ '.wikipedia.org/wiki/' + note,
+			C : 'note'
+		};
+	}
+
 	if (!era)
 		era = era_input_object.setValue();
 
@@ -1588,13 +1599,15 @@ function translate_era(era) {
 		set_era_by_url_data(era);
 
 		if (!(date.國家 in had_inputted)) {
+			// 自動增加此欄。
 			if (date.國家 === 'Maya')
-				// 自動增加此欄。
 				selected_column['calendar/Long_Count']
 				//
 				= selected_column['calendar/Tzolkin']
 				//
 				= selected_column['calendar/Haab'] = true;
+			else if (date.國家 === 'Mesopotamian')
+				selected_column['calendar/Hebrew'] = true;
 
 			had_inputted[date.國家] = true;
 		}
@@ -1645,16 +1658,12 @@ function translate_era(era) {
 
 			add_注('曆法', '採用曆法');
 			add_注('據', '出典');
-			add_注('君主名', '君主姓名', function(note) {
-				return {
-					a : note,
-					href : 'https://'
-							+ (PATTERN_NOT_ALL_ALPHABET.test(note) ? 'zh'
-									: 'en') + '.wikipedia.org/wiki/' + note,
-					C : 'note'
-				};
-			});
-			// add_注('君主');
+
+			add_注('君主名', '君主姓名', add_君主名);
+			if (date.ruler) {
+				add_注('君主', '君主姓名', add_君主名);
+				add_注('ruler', '君主姓名', add_君主名);
+			}
 			add_注('君主字');
 			add_注('廟號');
 			add_注('諡');
@@ -1695,7 +1704,6 @@ function translate_era(era) {
 				};
 			});
 			// add_注('諱');
-			add_注('據', '資料來源');
 
 			add_注('注');
 
@@ -1805,9 +1813,9 @@ function parse_text(text) {
 			if (era) {
 				era = era.to_Date('era').format({
 					parser : 'CE',
-					format : '%紀年名%年年%月月%日日',
+					format : '%紀年名 %年年%月月%日日',
 					locale : 'cmn-Hant-TW'
-				});
+				}).replace(/([^a-z\d'"]) (\d)/i, '$1$2');
 				era_input_object.setValue(era);
 				translate_era(era);
 			} else
@@ -3423,7 +3431,7 @@ function affairs() {
 
 		Seleucid : [ {
 			a : {
-				T : '塞琉古紀元'
+				T : 'Seleucid era'
 			},
 			R : 'Seleucid era or Anno Graecorum, 塞琉古紀元。非精確時，可能有最多前後一年的誤差。',
 			href : 'https://en.wikipedia.org/wiki/Seleucid_era',

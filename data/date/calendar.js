@@ -270,7 +270,7 @@ new_tester.default_options = {
 // تقويم هجري
 // https://ar.wikipedia.org/wiki/%D8%AA%D9%82%D9%88%D9%8A%D9%85_%D9%87%D8%AC%D8%B1%D9%8A
 
-// Tabular Islamic calendar / lunar Hijri calendar (AH) / التقويم الهجري المجدول /
+// Tabular Islamic calendar / lunar Hijri calendar (AH, A.H. = anno hegirae), lunar Hejrī calendar / التقويم الهجري المجدول /
 // http://en.wikipedia.org/wiki/Tabular_Islamic_calendar
 // 伊斯蘭曆(回回曆)
 // 陳垣編的《中西回史日曆》(中華書局1962年修訂重印)。
@@ -570,6 +570,7 @@ Hebrew_Date.year_0 = false;
 // Academy name of specified month serial.
 // common year: Nisan: 1, Iyyar: 2, .. Adar: 12
 // leap year: Nisan: 1, Iyyar: 2, .. (Adar I): 12, (Adar II/Adar/Ve'Adar): 13
+// Tishri: 下半年的開始。 http://en.wikipedia.org/wiki/Babylonian_calendar
 (Hebrew_Date.month_name_of_serial = "|Nisan|Iyyar|Sivan|Tammuz|Av|Elul|Tishri|Marẖeshvan|Kislev|Tevet|Shvat|Adar"
 		.split('|'))
 //
@@ -2567,6 +2568,9 @@ Armenian_Date.test = new_tester(Date_to_Armenian, Armenian_Date, {
 
 _.Armenian_Date = Armenian_Date;
 
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// 以下為應用天文演算的曆法。
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // Le calendrier républicain, ou calendrier révolutionnaire français (法國共和曆, French Republican Calendar).

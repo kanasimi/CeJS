@@ -422,7 +422,7 @@ if (typeof CeL === 'function')
 			// 年分名稱。
 			年_SOURCE = /([前\-−‐]?\d{1,4}|干支|前?數{1,4}|元)[\/.\-年]\s*/.source,
 			// 月分名稱。
-			月_SOURCE = /\s*([^\s月\/.\-年]{1,4})[\/.\-月]/.source,
+			月_SOURCE = /\s*([^\s\/.\-年月日]{1,20})[\/.\-月]/.source,
 			// 日期名稱。
 			日_SOURCE = /\s*初?(\d{1,2}|數{1,3}|[^\s日朔晦望]{1,5})日?/.source,
 
@@ -463,8 +463,8 @@ if (typeof CeL === 'function')
 			// matched: [ , prefix, year, numeral month, month, suffix ]
 			ERA_DATE_PATTERN_NO_DATE = generate_pattern(前置_SOURCE + 年_SOURCE
 					+ 季_SOURCE
-					// 月分名稱。
-					+ /\s*(?:([01]?\d)|([^\s月\/.\-年]{1,3})月)?/.source
+					// 月分名稱。參考 (月_SOURCE)。
+					+ /\s*(?:([01]?\d)|([^\s\/.\-年月日]{1,20})月)?/.source
 					+ 後置_SOURCE),
 
 			// parse 年 only
@@ -509,8 +509,9 @@ if (typeof CeL === 'function')
 				元号 : 0,
 
 				// 統治者, 起事者, 國家最高領導人, 國家元首, 作亂/起辜/起義領導者, 民變領導人, 領袖, 首領,
-				// monarch, ruler
 				君主 : 1,
+				// monarch, ruler
+				ruler : 1,
 				// 君主姓名
 				君主名 : 1,
 				// 表字,小字
@@ -1213,16 +1214,17 @@ if (typeof CeL === 'function')
 
 			// 至順治二年（公元1645年）頒行時憲曆後，改為日96刻，每時辰八刻（初初刻、初一刻、初二刻、初三刻、正初刻、正一刻、正二刻、正三刻）。自此每刻15分，無「四刻」之名。
 			function 時刻_to_hour(時刻_String) {
-				return String(時刻_String).trim().replace(
-						時刻_PATTERN,
+				return String(時刻_String).trim().replace(時刻_PATTERN,
 						function($0, 時, 初正, 刻) {
-							return (2 * library_namespace.BRANCH_LIST
-									.indexOf(時) - (初正 === '初' ? 1 : 0))
-									+ '時'
-									+ (刻
-											&& (刻 = isNaN(刻) ? '初一二三'
-													.indexOf(刻) : +刻) ? 15 * 刻
-											+ '分' : '');
+							return (2
+							//
+							* library_namespace.BRANCH_LIST.indexOf(時)
+							//
+							- (初正 === '初' ? 1 : 0)) + '時'
+							//
+							+ (刻 && (刻 = isNaN(刻)
+							//
+							? '初一二三'.indexOf(刻) : +刻) ? 15 * 刻 + '分' : '');
 						});
 			}
 
@@ -1432,7 +1434,9 @@ if (typeof CeL === 'function')
 
 				if (type === WITH_PERIOD)
 					append_period(this, name);
-				return name.join('');
+
+				return name.join(' ').replace(/([^a-z\d'"]) ([^a-z\d'"])/i,
+						'$1$2').trim();
 			}
 
 			// ---------------------------------------
@@ -1497,15 +1501,18 @@ if (typeof CeL === 'function')
 
 					if (this.歲首序 && (月名 += this.歲首序) > MONTH_COUNT)
 						月名 -= MONTH_COUNT;
+				}
 
-					// 依 month_index_to_name() 之演算法，
-					// 若為閏月起首，則 [START_KEY] 須設定為下一月名！
-					// e.g., 閏3月起首，則 [START_KEY] = 4。
-					if (月序 >= 歲序[LEAP_MONTH_KEY]) {
-						if (--月名 < START_MONTH)
-							月名 += MONTH_COUNT;
-						if (月序 === 歲序[LEAP_MONTH_KEY])
-							月名 = (this.閏月名 || LEAP_MONTH_PREFIX) + 月名;
+				// 依 month_index_to_name() 之演算法，
+				// 若為閏月起首，則 [START_KEY] 須設定為下一月名！
+				// e.g., 閏3月起首，則 [START_KEY] = 4。
+				if (月序 >= 歲序[LEAP_MONTH_KEY]) {
+					if (!isNaN(月名) && --月名 < START_MONTH)
+						// 確保月數為正。
+						月名 += MONTH_COUNT;
+					if (月序 === 歲序[LEAP_MONTH_KEY]) {
+						// 是為閏月。
+						月名 = (this.閏月名 || LEAP_MONTH_PREFIX) + 月名;
 					}
 				}
 				return 月名;
@@ -1766,6 +1773,20 @@ if (typeof CeL === 'function')
 				return date_name;
 			}
 
+			function clone_year_data(year_data, clone_to) {
+				if (!clone_to)
+					clone_to = year_data.slice();
+				[ START_KEY, LEAP_MONTH_KEY ]
+				//
+				.forEach(
+				// 複製本年之月 START_KEY, LEAP_MONTH_KEY 等。
+				function(key) {
+					if (key in year_data)
+						clone_to[key] = year_data[key];
+				});
+				return clone_to;
+			}
+
 			// 需在設定完個別 this_year_data 之月名後，才作本紀年泛用設定。
 			function add_month_name(月名_Array, this_year_data) {
 				var name_Array = this_year_data[NAME_KEY],
@@ -1778,12 +1799,16 @@ if (typeof CeL === 'function')
 
 				if (!Array.isArray(name_Array))
 					if (isNaN(leap)) {
-						if (Array.isArray(月名_Array))
+						if (Array.isArray(月名_Array)) {
+							// this_year_data = clone_year_data(this_year_data);
 							this_year_data[NAME_KEY] = start ? 月名_Array
 									.slice(start) : 月名_Array;
+						}
 						return;
-					} else
+					} else {
+						// this_year_data = clone_year_data(this_year_data);
 						name_Array = this_year_data[NAME_KEY] = [];
+					}
 
 				月名_Array.forEach(function(名, index) {
 					if (0 <= (index -= start)) {
@@ -1987,15 +2012,11 @@ if (typeof CeL === 'function')
 							// 初始化本年曆數。
 							= tmp.slice(0, correct_month_count));
 							this_year_data[COUNT_KEY] = correct_month_count;
+							if (tmp.月名)
+								this_year_data.月名 = tmp.月名.slice(0,
+										correct_month_count);
 
-							[ START_KEY, LEAP_MONTH_KEY ]
-							//
-							.forEach(
-							// 複製本年之月 START_KEY, LEAP_MONTH_KEY。
-							function(key) {
-								if (key in tmp)
-									this_year_data[key] = tmp[key];
-							});
+							clone_year_data(tmp, this_year_data);
 							// 複製 era 之[NAME_KEY]。
 							if (NAME_KEY in tmp)
 								this_year_data[NAME_KEY] = tmp[NAME_KEY].slice(
@@ -3919,8 +3940,9 @@ if (typeof CeL === 'function')
 					library_namespace.err('add_note: 加注日期於紀年 [' + this
 							+ '] 範圍外！');
 				} else {
-					// 欲使用 date_index，應該採 (date.年, date.月, date.日)。
-					// date.index = date_index;
+					// 欲使用 date_index，應該考慮採 (date.年, date.月, date.日)。
+					// 因為日期可能不是從1月1日開始。
+					// Object.seal(date.index = date_index);
 
 					date.年干支序 = tmp
 					//
@@ -4013,7 +4035,7 @@ if (typeof CeL === 'function')
 
 			Object.assign(add_note, {
 				// 預設會 copy 的紀年曆注。
-				// 據: 根據/出典/原始參考文獻/資料引用來源。
+				// 據: 根據/出典/原始參考文獻/資料引用來源/典拠。
 				copy_attributes : '據,準,曆法'.split(','),
 				// 曆注, note
 				// 減輕負擔:要這些曆注的自己算。
@@ -4141,6 +4163,7 @@ if (typeof CeL === 'function')
 									+ ' 個 [' + parser + ']！');
 							return;
 						}
+						// 取得那唯一個 parser。
 						era_Set.forEach(function(era) {
 							parser = era;
 						});
@@ -4167,6 +4190,9 @@ if (typeof CeL === 'function')
 					String_to_Date.default_parser.date_first, ''))
 							//
 							&& typeof string.to_Date === 'function'
+							// 為了使 'Babylonian-556/4' 不被執行 string.to_Date()
+							// 參考 (年_SOURCE)
+							&& /^[前\-−‐]?\d/.test(string)
 							//
 							&& (parser = string.to_Date({
 								parser : parser === PASS_PARSER ? undefined
@@ -6503,8 +6529,8 @@ if (typeof CeL === 'function')
 					//
 					.replace(/([年月日])\s+/g, '$1');
 					if (era_list = normalize_number(era).match(
-					//
-					/\d年(.{1,3}月)?/))
+					// 月分名稱。參考 (月_SOURCE)。
+					/\d年([^\s\/.\-年月日]{1,20}月)?/))
 						options.月 = 1, options.日 = era_list[1] && 1;
 
 					if (date = date || options.月 || options.日)
@@ -6629,9 +6655,27 @@ if (typeof CeL === 'function')
 					//
 					i = 0, l = year_start.length - 1;
 
-					if (l > get_dates.ERA_YEAR_LIMIT)
-						library_namespace.warn('get_dates: 跳過 [' + era
-								+ ']：跨度過長，共有 ' + l + '個年分！');
+					if (l > get_dates.ERA_YEAR_LIMIT
+					//	
+					&& !get_dates.no_limit_era.includes(era))
+						library_namespace.warn([
+						//
+						'get_dates: 跳過 [' + era + ']：跨度過長，共有 '
+						//
+						+ l + '個年分！您可嘗試縮小範圍、加注年分，或', {
+							a : {
+								T : '取消限制'
+							},
+							href : '#',
+							onclick : function() {
+								if (!get_dates.no_limit_era.includes(era))
+									get_dates.no_limit_era.push(era);
+								library_namespace.info(
+								//
+								'已取消 [' + era + '] 之限制。請注意有些操作將極度費時！');
+								return false;
+							}
+						}, '。' ]);
 					else
 						for (; i < l; i++) {
 							if (true || date_list.length < get_dates.LIMIT)
@@ -6652,6 +6696,7 @@ if (typeof CeL === 'function')
 			// get_dates.LIMIT = Infinity;
 			// 跳過跨度過長之紀年。
 			get_dates.ERA_YEAR_LIMIT = 150;
+			get_dates.no_limit_era = [];
 			// 預設月曆之年數。
 			get_dates.DEFAULT_YEARS = 10;
 

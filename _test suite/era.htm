@@ -18,6 +18,14 @@ em {
 	font-weight: 900;
 }
 
+blockquote {
+	color: #a37;
+	background-color: #eff;
+	border: double #a25 1px;
+	margin: .5em;
+	padding: .5em;
+}
+
 .monospaced {
 	font-family: Courier;
 }
@@ -1081,6 +1089,77 @@ div.box {
 				</td>
 			</tr>
 			<tr>
+				<td><a rel="nofollow"
+					href="https://en.wikipedia.org/wiki/Babylonian_calendar">Babylonian
+						Calendar</a> (巴比倫尼亞曆)</td>
+				<td>Robert Harry van Gent <a rel="nofollow"
+					href="http://www.staff.science.uu.nl/~gent0113/babylon/babycal.htm">Babylonian
+						Calendar Converter (626 BCE to 75 CE)</a>, Wikipedia
+				</td>
+				<td>R.H. van Gent 此 converter 之朔閏主要採用 Parker and Dubberstein
+					(1971) 之資料，與實曆仍有一兩天之差距。
+					<blockquote>An analysis of these tables confirms
+						earlier claims that sequences of more than two months of either 29
+						or 30 days in succession occur fairly commonly: so there are 63
+						sequences of three 29-day months in succession and 386 sequences
+						of three 30-day months in succession. Even longer sequences are
+						also present but only for 30-day months: there are 79 sequences of
+						four 30-day months in succession and there is one sequence of five
+						30-day months in succession (Nabonassar lunation numbers 2961 to
+						2965). There is also one lunation of unusual length: the month
+						Arahsamna in the 10th year of Darius I (Nabonassar lunation number
+						2916) has a length of 31 days.
+					</blockquote> 本工具採用 Wikipedia 之月名，在轉換上仍有不盡如人意處。至於各王朝之年代，本工具亦採用了 Wikipedia
+					之資料。但請注意：Persia (Achaemenid Empire) <a rel="nofollow"
+					href="http://www.iranicaonline.org/articles/calendars">與
+						Babylonian Calendar 置閏法可能有差異，且後期可能使用 Zoroastrian solar calendar</a>。
+					<blockquote>
+						<p>The Old Persian calendar was lunisolar, like that of the
+							Babylonians, with twelve months of thirty days each; the days
+							were numbered but not named</p>
+						<p>As E. J. Bickerman has shown, the Achaemenids used the
+							lunisolar calendar at least until 459 B.C. Between 471 and 401
+							the Babylonian calendar was still used in Aramaic documents
+							issued by the Persian administration (almost all found at the
+							colony of Elephantine in Egypt).</p>
+						<p>referring to the year 333 B.C., seems to indicate the
+							existence of a somewhat later solar calendar, though opinions
+							differ on this point (Bickerman, 1967, p. 205 n. 41). Another
+							problem is posed by the system of intercalation used in the
+							Achaemenid calendar, for which no direct and explicit testimony
+							survives. Hallock (1969, p. 74) maintains that the Old Persian
+							calendar followed the same system of intercalation as the
+							Babylonian calendar. Hartner’s interpretation differs: “The Old
+							Persian and the Babylonian calendars will then have had different
+							systems of intercalation. The latter we have seen operated with
+							irregular, empirical Ulūlu and Addāru intercalations down to 527,
+							then passed over to the octaëteris and finally, when in the 19th
+							year of Darius the beginning of the year coincided with spring
+							equinox, to the 19-year cycle” (1985, p. 747).</p>
+					</blockquote> Alexander III (亞歷山大大帝) 所屬之 Argead dynasty 與 Seleucid Empire 宮廷可能採用
+					<a rel="nofollow"
+					href="https://en.wikipedia.org/wiki/Ancient_Macedonian_calendar">Ancient
+						Macedonian calendar</a>，雖閏朔同 Babylonian calendar，但月名不同；且<a
+					rel="nofollow"
+					href="https://zh.wikipedia.org/wiki/%E5%A1%9E%E7%90%89%E5%8F%A4%E7%B4%80%E5%85%83"
+					title="
+在塞琉古帝國的當地住民多使用巴比倫曆，並以尼散奴（Nisānu）為巴比倫曆的一月（時間約等同今日的四月），故此系統的塞琉古紀元的元年等於公元前311年四月到公元前310年三月。
+
+而塞琉古帝國的宮廷雖然採用巴比倫曆（但換上馬其頓的月份名），一月卻是在秋季，故此系統的塞琉古紀元的元年等於公元前311年秋季到公元前310年夏季。
+By the seventh century AD / tenth AG, the west Syrian Christians settled on 1 October-to-30 September.
+Jews, however, reckon the start of each new Seleucid year with the lunar month Tishri.
+					">年首置於秋季</a>，因此與本工具所列亦有差別。
+				</td>
+			</tr>
+			<tr>
+				<td><a rel="nofollow"
+					href="https://zh.wikipedia.org/wiki/%E5%BD%9D%E6%9B%86">彝曆</a></td>
+				<td>主要採用研究者如<span class="proper_noun">老板萨龙</span>與其他網路上的資訊。詳見
+					Wikipedia。
+				</td>
+				<td>現彝族用曆多與中國傳統曆法（農曆）同化。本工具所附為計算所得之古代彝族十月太陽曆，請注意。惟當前亦有部分人士，推動復興此彝族傳統曆法。此外，本函式庫尚無法解析時段。</td>
+			</tr>
+			<tr>
 				<td>西雙版納<a rel="nofollow"
 					href="https://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86"
 					accessdate="2014/4/12 22:26">傣曆</a></td>
@@ -1251,33 +1330,33 @@ div.box {
 	</div>
 
 	<script type="text/javascript">
-		var document_title = document.title;
-		// document.title = 'Initializing...';
-	</script>
+	var document_title = document.title;
+	// document.title = 'Initializing...';
+</script>
 	<script type="text/javascript" src="../ce.js">
-		//{"run":"era.js"}
-	</script>
+	//{"run":"era.js"}
+</script>
 	<script type="text/javascript">
-		CeL.env.same_origin_policy = true;
-	</script>
+	CeL.env.same_origin_policy = true;
+</script>
 
 	<script>
-		/**
-		 * @memo <code>
+	/**
+	 * @memo <code>
 
-			(function(d, s, id) {
-				var js, fjs = d.getElementsByTagName(s)[0];
-				if (d.getElementById(id))
-					return;
-				js = d.createElement(s);
-				js.id = id;
-				js.src = "//connect.facebook.net/zh_TW/all.js#xfbml=1";
-				fjs.parentNode.insertBefore(js, fjs);
-			}(document, 'script', 'facebook-jssdk'));
+		(function(d, s, id) {
+			var js, fjs = d.getElementsByTagName(s)[0];
+			if (d.getElementById(id))
+				return;
+			js = d.createElement(s);
+			js.id = id;
+			js.src = "//connect.facebook.net/zh_TW/all.js#xfbml=1";
+			fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));
 
-		 </code>
-		 */
-	</script>
+	 </code>
+	 */
+</script>
 
 	<!-- 
 	<script type="text/javascript" src="http://www.google.com/jsapi"></script>

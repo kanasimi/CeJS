@@ -9,6 +9,7 @@ TODO:
 任意線圖階層，不只(紀年名稱索引值)所示。
 
 
+https://en.wikipedia.org/wiki/Lists_of_ancient_kings
 https://en.wikipedia.org/wiki/List_of_Roman_emperors
 
 
@@ -2615,6 +2616,150 @@ this.CeL_era_data = {
 		"/Wak Kimi Janahb' Pakal|799/11/11~810|疑|:CE|君主名=Wak Kimi Hanab Pakal;6 Kimi Pakal;Cimi-Pacal"
 
 ]).minute_offset = -6 * 60;
+
+// ---------------------------------------------------------------------//
+// Mesopotamian
+// https://en.wikipedia.org/wiki/Babylonia
+// https://en.wikipedia.org/wiki/List_of_kings_of_Babylon
+// https://en.wikipedia.org/wiki/List_of_Mesopotamian_dynasties
+
+(this.CeL_era_data.Mesopotamian = [
+		// Babylonian Calendar Converter (626 BCE to 75 CE)
+		// http://www.staff.science.uu.nl/~gent0113/babylon/babycal_converter.htm
+		// Babylonian calendar
+		// https://en.wikipedia.org/wiki/Babylonian_calendar
+		'Babylonian|-626/4/5~76/3/26|-626/=3px 3o6 4m7g58r 4g9 4sba5dx 3sfg49m 431 3kk640m 4y3w5n9 4eq 4so65aq 48a 445 3mmu3pp855y 5r7 41ue4gk 5e2 	29;30;29;30;29;30;閏6=28;30;30;30;29;29;30	3mi 4lh23zp 4l0656y 54bw5sh 4a9 3b5847q 46j 3pa445x 5ca 5u1 3zxi59m 3quk4za 4uz 3kcc45x 4nz059g 5sk 4osm59w 4g9o3me 58r 3wsc4g5 5dx 4h0 5e2 4o2e37x83zq 5kb 4kvw4dm 59l 3rcc48c 3a9846t 3pss55y 5r7 3yos4gi 5e2 4h6 3qna571 4kws55j 46d 3z304gk 5aw 57u 4fd24fcs3mi 4zu 51v05u1 	30;29;29;29;30;29;30;30;30;29;29;31	4sra47p 42j 3lx23zp 4y1o5l6 5rd 4oj059m 44a 3l464vh 3m4c46d 5cy 57bg5sy 	29;30;29;29;30;30;29;31;29;29;29;30	4hqe57a 4lf05jv 55h 53sc5r9 47o 4oly3p1 3mi 4lgs579 3wvw4gi 5ea 3sx84a1 3quk4z1 45y 53lo45p 58q 4rpo5ro 50a 3mx24vq 4bjg4yy 5r9 3z304hw 5es 4okc3oq 4m9o40e 4vb 3vl85yd 59h 3quk43e 40t 374m40m 4m7058y 5si 408c5aq 489 3mng4yz 3pa455h 5qi 5d244es 59w 4g9o3ei 4z1 3pb04yy 4ofg5e1 4a0 4pm43px 3oq 4m7w423 4nng58q 5s9 3yr057e 431 3koc4t7 40d 4lek58y 4sp85ec 4a2 3nos505 4yz 3pa44dh 4r4s5ck 5sk 4o643ml 3la 4l0s563 46b 4oeu4h5 3ep8489 3p1 37x842e 58r 3yd84g9 4sh85d6 47q 3mp84v1 4t2 50fg5n9 47m 4oqu5as 4gnw3fu 4fxo577 56t 5s5 3z304h0 4rrw46l 40q 4y4c3zh 562 548c5rd 489 3a9247p 3l2k42z 42d 4nz05cy 5u9 3z8s59m 4g4s566 55n 3p3045x 590 55ek3tg 510 4cba3fa 4f3g56z 479 4sd85e1 49x 39zw431 3kd840m 5kb 3vzw4ei 59l 3qy448a 439 3knq42u 4nzg5r7 4gy 4sp85ea 596 4f58565 3vmk55m 5qt 3yr047t 3p1 380s3mj 	30;30;29;31;29;30;29;29;30;29;30;29	4f2u56y 554c5sh 4h5 3e7g47p 42j 3lx845p 4qxo58q 5sa 3z9o50q 4vu 49yk4vf 45x 4nrq59g 55qk5us 59m 4g643me 563 3pa44dh 4r6k59l 47p 3mp8419 3zq 4lf0577 47d 4pba5ap 3sx84a2 46l 3m584d2 5qr 3ygs4gi 4rpo5dg 50a 4bzw3e5 4yi 50oc5r9 49w 4osm5as 4okc3or 3m5 4noc58m 5s5 3z4s4k9 3q2443a 40r 3jjw40l 56y 55bg5si 4aa 3ns647q 3mng563 45x 4r4s5ci 5ua 4ojw59o 4fdo3li 55n 3pa446h 59l 3r8c489 3pp 31p23o6 4nsc5qj 4g5 4sdo5e1 49h 3pv04vp 3kkc4t2 5l9 3wws47m 59w 4gng50q 4vp 3mmu4yy 54z05s5 4gy 4spo47h 3oa 4lh83zh 4kws562 5rd 3z8s4a1 3q1 38h842z 40l 3yhi58y 56wc5ua 4i2 3quk47q 4yj 3p3045x 4nrw579 47m 4oss59w 50q 4bzg56z 479 4riu5dw 57do49x 3sd 39i440m 5kb 3vzw4dm 4oj059u 47u 4c6k439 40q 4z3g5nn 4gy 4so65ea 3sy459m 4z1 4eos55i 5ql 4nrw4gk 4ot83p1 3fg 4fdo3md 562 550s5s9 4i0 4t5i47p 3a0c46j 45p 4noc5qi 5zd 3z8s59m 4fgs4vu 4t7 3kkc42t 59e 55qk5us 5as 3rd257a 4lf0563 4d1 53rw5np 4gk 4om43p1 378c40q 565 3pss4eq 5e9 3sx84a1 3px 39zq42e 53l85qj 4ga 554c5re 57e 3pv04vq 4bjg4yy 5n9 3z4s4h4 5es 4iho3oq 505 4m6u58m 5bcc5z9 4km 3quk46t 419 3jks3zq 4lek576 5si 3zfw5aq 489 3mwc4yz 46d 4qxi5qq 5d984gk 59m 4g643lm 55p 3pb04ye 4ofg59l 488 4ot83px 3my 4muk58r 4g5 4sdi5s9 3z584gq 46t 3m5o4t7 3zh 4lek56y 4sp85as 48a 3mwc506 4ve 4rl85s5 5cy 4u9y5t0 4okc3ob 3la 4kx855n 45x 4o0s57t 3eb047t 3n9 37x842d 51m 56p861d 4i1 4i3q47p 3pv04yl 45q 53ks5n7 47m 4ojw59w 4g9o3fe 4vp 3pss479 5dx 3z304h0 5ec 4ok63oa 4lh83zh 55y 548c5rd 49l 3a98439 3koc417 42h 4nz04gy 5e9 3tpo4h6 47p 3peu55j 3p304d1 58y 55cs47o 50s 4c7w3ee 4f3g56z 47e 3zx84i1 49v 3a7g431 42e 4ns65qj 3yd84eq 59l 3qy444a 4t9'
+				// 月名: https://en.wikipedia.org/wiki/Babylonian_calendar
+				// In year 17 of 19-year cycle,
+				// the intercalary month was named Araḫ Ulūlu.
+				// @see https://en.wikipedia.org/wiki/Iranian_calendars
+				+ "|參照用|曆法=Babylonian calendar|據=Parker & Dubberstein (1971)|月名=Nisānu;Āru;Simanu;Dumuzu;Abu;Ulūlu;Tišritum;Samna;Kislimu;Ṭebētum;Šabaṭu;Addaru;Makaruša Addari",
+
+		// Dynasty XI of Babylon (Neo-Babylonian or Chaldean Dynasty)
+		'Babylon/Nabopolassar|Babylonian-626~|:Babylonian|準=年|ruler=Nabû-apla-uṣur',
+		'/Nebuchadnezzar II|Babylonian-605~|:Babylonian|準=年|ruler=Nabû-kudurri-usur',
+		'/Amel-Marduk|Babylonian-562~|:Babylonian|準=年|ruler=Amēl-Marduk',
+		'/Neriglissar|Babylonian-560~|:Babylonian|準=年|ruler=Nergal-šar-uṣur',
+		'/Labashi-Marduk|Babylonian-556~|:Babylonian|準=年',
+		'/Nabonidus|Babylonian-556/4~-539|:Babylonian|準=年|ruler=Nabû-naʾid',
+
+		// Cyrus II: founder of the Achaemenid Empire (𐎱𐎠𐎼𐎿, 阿契美尼德王朝),
+		// King of Kings of Persia, Kings of Anshan
+		// should use Zoroastrian calendar?
+		// @see https://en.wikipedia.org/wiki/Iranian_calendars
+		'Persia/Cyrus II|Babylonian-559~|:Babylonian|準=年|ruler=𐎤𐎢𐎽𐎢𐏁;کوروش بزرگ;Kūruš',
+		'/Cambyses II|Babylonian-530~|:Babylonian|準=年|ruler=کمبوجيه دوم',
+		'/Bardiya|Babylonian-522~|:Babylonian|準=年|ruler=𐎲𐎼𐎮𐎡𐎹',
+		'/Darius I|Babylonian-522/7~|:Babylonian|準=年|ruler=𐎭𐎠𐎼𐎹𐎺𐎢𐏁;𐎭𐎠𐎼𐎹𐎢𐏁',
+		'/Xerxes I|Babylonian-486/8~|:Babylonian|準=年|ruler=Xšaya-ṛšā;𐎧𐏁𐎹𐎠𐎼𐏁𐎠',
+		'/Artaxerxes I|Babylonian-465/6~|:Babylonian|準=年|ruler=اردشیر یکم|注=The last inscription mentioning Artaxerxes I being alive can be dated to December 24, 424 BC.',
+		'/Xerxes II|-423~-423/2|:Babylonian|準=年|ruler=خشايارشا دوم|注=wiki:阿契美尼德王朝: 在位45天被妃嬪之子暗殺',
+		'/Sogdianus|-423~-423/6|:Babylonian|準=年|ruler=سغدیانوس|注=He reigned for six months and fifteen days before being captured by his half-brother, Ochus, who rebelled against him.',
+		'/Darius II|-423~|:Babylonian|準=年|ruler=داريوش دوم‎|注=The first inscription of Ochus as Darius II can be dated to January 10, 423 BC.',
+		'/Artaxerxes II|Babylonian-404~|:Babylonian|準=年|ruler=𐎠𐎼𐎫𐎧𐏁𐏂𐎠;Artaxerxes II Memnon',
+		'/Artaxerxes III|Babylonian-359/12~|:Babylonian|準=年|ruler=اردشير سوم;𐎠𐎼𐎫𐎧𐏁𐏂𐎠;Artaxerxes III Ochus',
+		'/Artaxerxes IV|Babylonian-338/8~|:Babylonian|準=年|ruler=اردشيرچهارم‎;Artaxerxes (Artaxšacā) IV Arses;Artaxerxes IV Arses',
+		'/Darius III|Babylonian-336~|:Babylonian|準=年|ruler=Artashata;Codomannus',
+		'/Bessus|Babylonian:-330~-329/7|:Babylonian|準=年|ruler=Artaxerxes V',
+
+		// Ἀργεάδαι, Argead dynasty
+		'Μακεδονία/Alexander III|Babylonian-336/4~-323/6/10|:Babylonian|準=年|ruler=Ἀλέξανδρος ὁ Μέγας|生=-356/7/20 or 21|卒=-323/6/10 or 11',
+		'/Philip III|-323/6/11~-317/12/25|:Babylonian|準=年|ruler=Philip III Arrhidaeus;Φίλιππος Γ΄ ὁ Ἀρριδαῖος|卒=-317/12/25',
+		'/Alexander IV|Babylonian-323/5~-309|:Babylonian|準=年|ruler=Ἀλέξανδρος Δ΄;Alexander IV Aegus|生=-323/8',
+
+		/**
+		 * 塞琉古紀元，是一套塞琉古帝國以及之後受希臘化文明影響的古代國家所採用的紀年方式。 The Seleucid era or Anno
+		 * Graecorum (literally "year of the Greeks" or "Greek year"), sometimes
+		 * denoted "AG", was a system of numbering years in use by the Seleucid
+		 * Empire and other countries among the ancient Hellenistic
+		 * civilizations.
+		 * 
+		 * The natives of the empire used the Babylonian calendar, in which the
+		 * new year falls on 1 Nisanu (3 April in 311 BC)
+		 * 
+		 * The Macedonian court adopted the Babylonian calendar (substituting
+		 * the Macedonian month names ) but reckoned the new year to be in the
+		 * autumn (the exact date is unknown).
+		 * 
+		 * @see https://en.wikipedia.org/wiki/Seleucid_era
+		 */
+		/**
+		 * 古代馬其頓曆 The Macedonian calendar was in essence the Babylonian calendar
+		 * with the substitution of Macedonian names for the Babylonian ones.
+		 * 
+		 * Under the Seleucid Empire, the Macedonians adopted the Seleucid era.
+		 * The year beginning on the 1st of Dios during what we call October 312
+		 * BCE was declared to be the year one of the Seleucid era.
+		 * 
+		 * @see https://en.wikipedia.org/wiki/Ancient_Macedonian_calendar
+		 */
+		/**
+		 * His return to Babylon was afterwards officially regarded as the
+		 * beginning of the Seleucid Empire and that year as the first of the
+		 * Seleucid era.
+		 * 
+		 * @see https://en.wikipedia.org/wiki/Seleucus_I_Nicator
+		 */
+		/**
+		 * Hallock (1969, p. 74) maintains that the Old Persian calendar
+		 * followed the same system of intercalation as the Babylonian calendar.
+		 * Hartner’s interpretation differs: “The Old Persian and the Babylonian
+		 * calendars will then have had different systems of intercalation. The
+		 * latter we have seen operated with irregular, empirical Ulūlu and
+		 * Addāru intercalations down to 527, then passed over to the octaëteris
+		 * and finally, when in the 19th year of Darius the beginning of the
+		 * year coincided with spring equinox, to the 19-year cycle” (1985, p.
+		 * 747).
+		 * 
+		 * Alex­ander probably used the Macedonian calendar, but the Achaemenid
+		 * system seems not to have been abolished. In the time of Seleucus I
+		 * (321-281 B.C.) the Babylonian calendar was adopted, but the original
+		 * names of the months were replaced by the Macedonian names, in which
+		 * Nīsannu corresponded to Artemisios and so on (cf. Bickerman, 1980, p.
+		 * 20). The Arsacid kings fol­lowed the same practice, but it appears
+		 * from material discovered at Nisa (2nd-1st century B.C.) and Avroman
+		 * (1st cent. a.d.) that the Zoroastrian solar calendar (see below) was
+		 * also used.
+		 * 
+		 * @see http://www.iranicaonline.org/articles/calendars
+		 */
+		'Seleucid era|Babylonian-311~76/3/26|:Babylonian|準=年',
+		// Seleucid Empire
+		'Σελευκιδών/Seleucus I|Babylonian-306~|:Babylonian|準=年|ruler=Seleucus I Nicator;Σέλευκος Α΄ Νικάτωρ',
+		// he was assassinated by Ptolemy Keraunos near Lysimachia September
+		// (281 BC).
+		'/Antiochus I|Babylonian-281/7~|:Babylonian|準=年|ruler=Antiochus I Soter;Ἀντίοχος Α΄ ὁ Σωτήρ',
+		// He succeeded his father Antiochus I Soter in the winter of 262–61 BC.
+		'/Antiochus II|Babylonian-262/10~|:Babylonian|準=年|ruler=Antiochus II Theos;Ἀντίοχος Β΄ ὁ Θεός',
+		'/Seleucus II|Babylonian-246~|:Babylonian|準=年|ruler=Seleucus II Callinicus Pogon;Σέλευκος Β΄ ὁ Καλλίνικος ὁ Πώγων',
+		'/Seleucus III|Babylonian-225~|:Babylonian|準=年|ruler=Seleucus III Soter;Seleucus Ceraunus;Σέλευκος Γ΄ ὁ Σωτήρ, ὁ Κεραυνός',
+		'/Antiochus III|Babylonian-222~|:Babylonian|準=年|ruler=Ἀντίoχoς Μέγας',
+		'/Seleucus IV|Babylonian-187~|:Babylonian|準=年|ruler=Seleucus IV Philopator;Σέλευκος Δ΄ Φιλοπάτωρ',
+		'/Antiochus IV|Babylonian-175~|:Babylonian|準=年|ruler=Antiochus IV Epiphanes;Ἀντίοχος Δ΄ ὁ Ἐπιφανής',
+		"/Antiochus V|Babylonian-164~|:Babylonian|準=年|ruler=Antiochus V Eupator;Αντίοχος Ε' Ευπάτωρ",
+		'/Demetrius I|Babylonian-161~|:Babylonian|準=年|ruler=Demetrius I Soter;Δημήτριος Α`',
+		'/Alexander Balas|Babylonian-150~|:Babylonian|準=年|ruler=Ἀλέξανδρoς Bάλας',
+		'/Demetrius II|Babylonian-146~-137|:Babylonian|準=年|ruler=Demetrius II Nicator;Δημήτριος Β`',
+		'/Antiochus VI|Babylonian-145~|:Babylonian|準=年|ruler=Antiochus VI Dionysus|卒=-142 or -141',
+		'/Diodotus Tryphon|Babylonian-142~|:Babylonian|準=年|ruler=Διόδοτος Τρύφων',
+		'/Antiochus VII|Babylonian-138~|:Babylonian|準=年|ruler=Antiochus VII Euergetes;Antiochus VII Sidetes',
+		'/Demetrius II|Babylonian-129~-126|:Babylonian|準=年',
+		'/Alexander II|Babylonian-128~-123|:Babylonian|準=年|ruler=Alexander II Zabinas;Ἀλέξανδρoς Zαβίνας',
+		'/Cleopatra Thea|-125~-121|:Babylonian|準=年|ruler=Κλεοπάτρα Θεά',
+		'/Antiochus IX|Babylonian-114~|:Babylonian|準=年|ruler=Antiochus IX Cyzicenus;Antiochus IX Eusebes',
+		'/Antiochus X|-95~-83|:Babylonian|準=年|ruler=Antiochus X Eusebes Philopator',
+		'/Antiochus VIII|-125~|:Babylonian|準=年|ruler=Antiochus VIII Grypus;Antiochus VIII Epiphanes/Callinicus/Philometor',
+		'/Seleucus VI|Babylonian-96~|:Babylonian|準=年|ruler=Seleucus VI Epiphanes Nikator;Σέλευκος ΣΤ΄',
+		'/Demetrius III|Babylonian-95~-95|:Babylonian|準=年|ruler=Demetrius III Eucaerus',
+		'/Philip I|Babylonian-95~-83|:Babylonian|準=年|ruler=Philip I Philadelphus',
+		'/Antiochus XI|Babylonian-95~-92|:Babylonian|準=年|ruler=Antiochus XI Epiphanes',
+		'/Antiochus XII|-87~|:Babylonian|準=年|ruler=Antiochus XII Dionysus (Epiphanes/Philopator/Callinicus)',
+		// Tigranes the Great (Tigranes II of Armenia)
+		'/Seleucus VII|Babylonian-83~|:Babylonian|準=年|ruler=Seleucus VII Philometor;Σέλευκος Ζ΄',
+		'/Antiochus XIII|Babylonian-69~|:Babylonian|準=年|ruler=Antiochus XIII Philadelphus;Asiaticus',
+		'/Philip II|Babylonian-65~63|:Babylonian|準=年|ruler=Philip II Philorhomaeus;Φίλιππος Β΄ ὁ Φιλορωμαῖος;Barypous'
+
+]).minute_offset = 3 * 60;
 
 // ---------------------------------------------------------------------//
 // example.
