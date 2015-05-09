@@ -2206,7 +2206,7 @@ _.age_of = age_of;
 
 
 
-// Durations
+// parse Durations
 function parse_period(period) {
 	var matched = period.trim().match(parse_period.PATTERN);
 	if (matched && (!/[日時]/.test(matched[2])
@@ -2224,7 +2224,8 @@ function parse_period(period) {
 	return period;
 }
 
-parse_period.PATTERN = /^(.+)\s*[\-–－—─~～〜﹣]\s*([^\-].+)$/;
+// "[^a-z]": 避免類似 "Neo-Babylonian" 被當作 period。
+parse_period.PATTERN = /^(.+[^a-z])\s*[\-–－—─~～〜﹣]\s*([^\-].+)$/i;
 
 _.parse_period = parse_period;
 

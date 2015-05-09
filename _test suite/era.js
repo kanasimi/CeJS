@@ -2430,8 +2430,8 @@ function affairs() {
 		astronomy : [ '天文計算 astronomical calculations',
 				[ '因為採用了完整的 LEA-406' + CeL.LEA406.default_type
 				//
-				+ ' 來計算月亮位置，關於月亮位置之項目，例如黃曆，每次執行常需耗費數秒至一兩分鐘，敬請見諒。您可', {
-					a : '改採 LEA-406'
+				+ ' 來計算月亮位置，關於月亮位置之項目，例如黃曆，每次執行常需耗費數秒至一兩分鐘，敬請見諒。您尚可可', {
+					a : '採用 LEA-406'
 					//
 					+ (CeL.LEA406.default_type === 'a' ? 'b' : 'a'),
 					href : '#',

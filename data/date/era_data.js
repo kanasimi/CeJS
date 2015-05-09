@@ -2624,6 +2624,32 @@ this.CeL_era_data = {
 // https://en.wikipedia.org/wiki/List_of_Mesopotamian_dynasties
 
 (this.CeL_era_data.Mesopotamian = [
+
+		// https://en.wikipedia.org/wiki/List_of_kings_of_Babylon
+		// From this point on, the Babylonian chronology is securely known via Ptolemy's Canon of Kings and other sources.
+		'Babylonian Dynasty of E/Nabonassar|-747~|:CE|疑|準=年|時期=Babylon|ruler=Nabû-nāṣir',
+		'/Nabû-nādin-zēri|-734~|:CE|疑|準=年|ruler=Nabu-nadin-zeri',
+		'/Nabû-šuma-ukîn II|-732~|:CE|疑|準=年|ruler=Nabu-suma-ukin II|注=king of Babylon for one month and two days during 732 BC before he was swept aside by his successor, Nabû-mukin-zēri.',
+		'/Nabû-mukin-zēri|-732/2~-729|:CE|疑|準=年|ruler=Nabu-mukin-zeri',
+
+		// Neo-Assyrian Empire
+		'Neo-Assyrian/Tiglath-Pileser III|-745~|:CE|疑|準=年|時期=Babylon|ruler=Mukin-zēri',
+		'/Shalmaneser V|-727~|:CE|疑|準=年|ruler=Šulmanu-ašarid',
+		'/Marduk-apla-iddina II|-722~-710|:CE|疑|準=年|ruler=Merodach-Baladan;Marduk-Baladan',
+		'/Sargon II|-722~|:CE|疑|準=年|ruler=Šarru-ukin',
+		'/Sennacherib|-705~-681|:CE|疑|準=年|ruler=Sîn-ahhī-erība',
+		'/Marduk-apla-iddina II|-703~|:CE|疑|準=年',
+		'/Bel-ibni|-702~|:CE|疑|準=年',
+		'/Ashur-nadin-shumi|-700~|:CE|疑|準=年',
+		'/Nergal-ushezib|-694~|:CE|疑|準=年|ruler=Shuzub',
+		'/Mushezib-Marduk|-693~-689|:CE|疑|準=年',
+		'/Esarhaddon|-681~|:CE|疑|準=年|ruler=Aššur-ahu-iddin',
+		'/Shamash-shum-ukin|-668~|:CE|疑|準=年',
+		'/Kandalānu|-648~-626/4/4|:CE|疑|準=年|ruler=Kandalanu|注=Succeeded by Nabopolassar',
+		'/Ashurbanipal|-668~-627|:CE|疑|準=年|ruler=Aššur-bāni-apli',
+		'/Ashur-etil-ilani|-631~|:CE|疑|準=年',
+		'/Sin-shumu-lishir|-626~|:CE|疑|準=年|ruler=Sin-shum-lishir',
+
 		// Babylonian Calendar Converter (626 BCE to 75 CE)
 		// http://www.staff.science.uu.nl/~gent0113/babylon/babycal_converter.htm
 		// Babylonian calendar
@@ -2635,37 +2661,40 @@ this.CeL_era_data = {
 				// @see https://en.wikipedia.org/wiki/Iranian_calendars
 				+ "|參照用|曆法=Babylonian calendar|據=Parker & Dubberstein (1971)|月名=Nisānu;Āru;Simanu;Dumuzu;Abu;Ulūlu;Tišritum;Samna;Kislimu;Ṭebētum;Šabaṭu;Addaru;Makaruša Addari",
 
+		'Neo-Assyrian/Sinsharishkun|Babylonian-626~-620|:Babylonian|疑|準=年|ruler=Sin-shar-ishkun',
+
 		// Dynasty XI of Babylon (Neo-Babylonian or Chaldean Dynasty)
-		'Babylon/Nabopolassar|Babylonian-626~|:Babylonian|準=年|ruler=Nabû-apla-uṣur',
-		'/Nebuchadnezzar II|Babylonian-605~|:Babylonian|準=年|ruler=Nabû-kudurri-usur',
-		'/Amel-Marduk|Babylonian-562~|:Babylonian|準=年|ruler=Amēl-Marduk',
-		'/Neriglissar|Babylonian-560~|:Babylonian|準=年|ruler=Nergal-šar-uṣur',
-		'/Labashi-Marduk|Babylonian-556~|:Babylonian|準=年',
-		'/Nabonidus|Babylonian-556/4~-539|:Babylonian|準=年|ruler=Nabû-naʾid',
+		'Neo-Babylonian/Nabopolassar|Babylonian-626~|:Babylonian|疑|準=年|時期=Babylon|ruler=Nabû-apla-uṣur',
+		'/Nebuchadnezzar II|Babylonian-605~|:Babylonian|疑|準=年|ruler=Nabû-kudurri-usur',
+		'/Amel-Marduk|Babylonian-562~|:Babylonian|疑|準=年|ruler=Amēl-Marduk',
+		'/Neriglissar|Babylonian-560~|:Babylonian|疑|準=年|ruler=Nergal-šar-uṣur',
+		'/Labashi-Marduk|Babylonian-556~|:Babylonian|疑|準=年',
+		'/Nabonidus|Babylonian-556/4~-539|:Babylonian|疑|準=年|ruler=Nabû-naʾid',
+		'/Belshazzar|Babylonian-553~-539|:Babylonian|疑|準=年|ruler=Bēl-šarra-uṣur',
 
 		// Cyrus II: founder of the Achaemenid Empire (𐎱𐎠𐎼𐎿, 阿契美尼德王朝),
 		// King of Kings of Persia, Kings of Anshan
 		// should use Zoroastrian calendar?
 		// @see https://en.wikipedia.org/wiki/Iranian_calendars
-		'Persia/Cyrus II|Babylonian-559~|:Babylonian|準=年|ruler=𐎤𐎢𐎽𐎢𐏁;کوروش بزرگ;Kūruš',
-		'/Cambyses II|Babylonian-530~|:Babylonian|準=年|ruler=کمبوجيه دوم',
-		'/Bardiya|Babylonian-522~|:Babylonian|準=年|ruler=𐎲𐎼𐎮𐎡𐎹',
-		'/Darius I|Babylonian-522/7~|:Babylonian|準=年|ruler=𐎭𐎠𐎼𐎹𐎺𐎢𐏁;𐎭𐎠𐎼𐎹𐎢𐏁',
-		'/Xerxes I|Babylonian-486/8~|:Babylonian|準=年|ruler=Xšaya-ṛšā;𐎧𐏁𐎹𐎠𐎼𐏁𐎠',
-		'/Artaxerxes I|Babylonian-465/6~|:Babylonian|準=年|ruler=اردشیر یکم|注=The last inscription mentioning Artaxerxes I being alive can be dated to December 24, 424 BC.',
-		'/Xerxes II|-423~-423/2|:Babylonian|準=年|ruler=خشايارشا دوم|注=wiki:阿契美尼德王朝: 在位45天被妃嬪之子暗殺',
-		'/Sogdianus|-423~-423/6|:Babylonian|準=年|ruler=سغدیانوس|注=He reigned for six months and fifteen days before being captured by his half-brother, Ochus, who rebelled against him.',
-		'/Darius II|-423~|:Babylonian|準=年|ruler=داريوش دوم‎|注=The first inscription of Ochus as Darius II can be dated to January 10, 423 BC.',
-		'/Artaxerxes II|Babylonian-404~|:Babylonian|準=年|ruler=𐎠𐎼𐎫𐎧𐏁𐏂𐎠;Artaxerxes II Memnon',
-		'/Artaxerxes III|Babylonian-359/12~|:Babylonian|準=年|ruler=اردشير سوم;𐎠𐎼𐎫𐎧𐏁𐏂𐎠;Artaxerxes III Ochus',
-		'/Artaxerxes IV|Babylonian-338/8~|:Babylonian|準=年|ruler=اردشيرچهارم‎;Artaxerxes (Artaxšacā) IV Arses;Artaxerxes IV Arses',
-		'/Darius III|Babylonian-336~|:Babylonian|準=年|ruler=Artashata;Codomannus',
-		'/Bessus|Babylonian:-330~-329/7|:Babylonian|準=年|ruler=Artaxerxes V',
+		'Persia/Cyrus II|Babylonian-559~|:Babylonian|疑|準=年|ruler=𐎤𐎢𐎽𐎢𐏁;کوروش بزرگ;Kūruš',
+		'/Cambyses II|Babylonian-530~|:Babylonian|疑|準=年|ruler=کمبوجيه دوم',
+		'/Bardiya|Babylonian-522~|:Babylonian|疑|準=年|ruler=𐎲𐎼𐎮𐎡𐎹',
+		'/Darius I|Babylonian-522/7~|:Babylonian|疑|準=年|ruler=𐎭𐎠𐎼𐎹𐎺𐎢𐏁;𐎭𐎠𐎼𐎹𐎢𐏁',
+		'/Xerxes I|Babylonian-486/8~|:Babylonian|疑|準=年|ruler=Xšaya-ṛšā;𐎧𐏁𐎹𐎠𐎼𐏁𐎠',
+		'/Artaxerxes I|Babylonian-465/6~|:Babylonian|疑|準=年|ruler=اردشیر یکم|注=The last inscription mentioning Artaxerxes I being alive can be dated to December 24, 424 BC.',
+		'/Xerxes II|-423~-423/2|:Babylonian|疑|準=年|ruler=خشايارشا دوم|注=wiki:阿契美尼德王朝: 在位45天被妃嬪之子暗殺',
+		'/Sogdianus|-423~-423/6|:Babylonian|疑|準=年|ruler=سغدیانوس|注=He reigned for six months and fifteen days before being captured by his half-brother, Ochus, who rebelled against him.',
+		'/Darius II|-423~|:Babylonian|疑|準=年|ruler=داريوش دوم‎|注=The first inscription of Ochus as Darius II can be dated to January 10, 423 BC.',
+		'/Artaxerxes II|Babylonian-404~|:Babylonian|疑|準=年|ruler=𐎠𐎼𐎫𐎧𐏁𐏂𐎠;Artaxerxes II Memnon',
+		'/Artaxerxes III|Babylonian-359/12~|:Babylonian|疑|準=年|ruler=اردشير سوم;𐎠𐎼𐎫𐎧𐏁𐏂𐎠;Artaxerxes III Ochus',
+		'/Artaxerxes IV|Babylonian-338/8~|:Babylonian|疑|準=年|ruler=اردشيرچهارم‎;Artaxerxes (Artaxšacā) IV Arses;Artaxerxes IV Arses',
+		'/Darius III|Babylonian-336~|:Babylonian|疑|準=年|ruler=Artashata;Codomannus',
+		'/Bessus|Babylonian:-330~-329/7|:Babylonian|疑|準=年|ruler=Artaxerxes V',
 
 		// Ἀργεάδαι, Argead dynasty
-		'Μακεδονία/Alexander III|Babylonian-336/4~-323/6/10|:Babylonian|準=年|ruler=Ἀλέξανδρος ὁ Μέγας|生=-356/7/20 or 21|卒=-323/6/10 or 11',
-		'/Philip III|-323/6/11~-317/12/25|:Babylonian|準=年|ruler=Philip III Arrhidaeus;Φίλιππος Γ΄ ὁ Ἀρριδαῖος|卒=-317/12/25',
-		'/Alexander IV|Babylonian-323/5~-309|:Babylonian|準=年|ruler=Ἀλέξανδρος Δ΄;Alexander IV Aegus|生=-323/8',
+		'Μακεδονία/Alexander III|Babylonian-336/4~-323/6/10|:Babylonian|疑|準=年|ruler=Ἀλέξανδρος ὁ Μέγας|生=-356/7/20 or 21|卒=-323/6/10 or 11',
+		'/Philip III|-323/6/11~-317/12/25|:Babylonian|疑|準=年|ruler=Philip III Arrhidaeus;Φίλιππος Γ΄ ὁ Ἀρριδαῖος|卒=-317/12/25',
+		'/Alexander IV|Babylonian-323/5~-309|:Babylonian|疑|準=年|ruler=Ἀλέξανδρος Δ΄;Alexander IV Aegus|生=-323/8',
 
 		/**
 		 * 塞琉古紀元，是一套塞琉古帝國以及之後受希臘化文明影響的古代國家所採用的紀年方式。 The Seleucid era or Anno
@@ -2723,41 +2752,41 @@ this.CeL_era_data = {
 		 * 
 		 * @see http://www.iranicaonline.org/articles/calendars
 		 */
-		'Seleucid era|Babylonian-311~76/3/26|:Babylonian|準=年',
+		'Seleucid era|Babylonian-311~76/3/26|:Babylonian|疑|準=年',
 		// Seleucid Empire
-		'Σελευκιδών/Seleucus I|Babylonian-306~|:Babylonian|準=年|ruler=Seleucus I Nicator;Σέλευκος Α΄ Νικάτωρ',
+		'Σελευκιδών/Seleucus I|Babylonian-306~|:Babylonian|疑|準=年|ruler=Seleucus I Nicator;Σέλευκος Α΄ Νικάτωρ',
 		// he was assassinated by Ptolemy Keraunos near Lysimachia September
 		// (281 BC).
-		'/Antiochus I|Babylonian-281/7~|:Babylonian|準=年|ruler=Antiochus I Soter;Ἀντίοχος Α΄ ὁ Σωτήρ',
+		'/Antiochus I|Babylonian-281/7~|:Babylonian|疑|準=年|ruler=Antiochus I Soter;Ἀντίοχος Α΄ ὁ Σωτήρ',
 		// He succeeded his father Antiochus I Soter in the winter of 262–61 BC.
-		'/Antiochus II|Babylonian-262/10~|:Babylonian|準=年|ruler=Antiochus II Theos;Ἀντίοχος Β΄ ὁ Θεός',
-		'/Seleucus II|Babylonian-246~|:Babylonian|準=年|ruler=Seleucus II Callinicus Pogon;Σέλευκος Β΄ ὁ Καλλίνικος ὁ Πώγων',
-		'/Seleucus III|Babylonian-225~|:Babylonian|準=年|ruler=Seleucus III Soter;Seleucus Ceraunus;Σέλευκος Γ΄ ὁ Σωτήρ, ὁ Κεραυνός',
-		'/Antiochus III|Babylonian-222~|:Babylonian|準=年|ruler=Ἀντίoχoς Μέγας',
-		'/Seleucus IV|Babylonian-187~|:Babylonian|準=年|ruler=Seleucus IV Philopator;Σέλευκος Δ΄ Φιλοπάτωρ',
-		'/Antiochus IV|Babylonian-175~|:Babylonian|準=年|ruler=Antiochus IV Epiphanes;Ἀντίοχος Δ΄ ὁ Ἐπιφανής',
-		"/Antiochus V|Babylonian-164~|:Babylonian|準=年|ruler=Antiochus V Eupator;Αντίοχος Ε' Ευπάτωρ",
-		'/Demetrius I|Babylonian-161~|:Babylonian|準=年|ruler=Demetrius I Soter;Δημήτριος Α`',
-		'/Alexander Balas|Babylonian-150~|:Babylonian|準=年|ruler=Ἀλέξανδρoς Bάλας',
-		'/Demetrius II|Babylonian-146~-137|:Babylonian|準=年|ruler=Demetrius II Nicator;Δημήτριος Β`',
-		'/Antiochus VI|Babylonian-145~|:Babylonian|準=年|ruler=Antiochus VI Dionysus|卒=-142 or -141',
-		'/Diodotus Tryphon|Babylonian-142~|:Babylonian|準=年|ruler=Διόδοτος Τρύφων',
-		'/Antiochus VII|Babylonian-138~|:Babylonian|準=年|ruler=Antiochus VII Euergetes;Antiochus VII Sidetes',
-		'/Demetrius II|Babylonian-129~-126|:Babylonian|準=年',
-		'/Alexander II|Babylonian-128~-123|:Babylonian|準=年|ruler=Alexander II Zabinas;Ἀλέξανδρoς Zαβίνας',
-		'/Cleopatra Thea|-125~-121|:Babylonian|準=年|ruler=Κλεοπάτρα Θεά',
-		'/Antiochus IX|Babylonian-114~|:Babylonian|準=年|ruler=Antiochus IX Cyzicenus;Antiochus IX Eusebes',
-		'/Antiochus X|-95~-83|:Babylonian|準=年|ruler=Antiochus X Eusebes Philopator',
-		'/Antiochus VIII|-125~|:Babylonian|準=年|ruler=Antiochus VIII Grypus;Antiochus VIII Epiphanes/Callinicus/Philometor',
-		'/Seleucus VI|Babylonian-96~|:Babylonian|準=年|ruler=Seleucus VI Epiphanes Nikator;Σέλευκος ΣΤ΄',
-		'/Demetrius III|Babylonian-95~-95|:Babylonian|準=年|ruler=Demetrius III Eucaerus',
-		'/Philip I|Babylonian-95~-83|:Babylonian|準=年|ruler=Philip I Philadelphus',
-		'/Antiochus XI|Babylonian-95~-92|:Babylonian|準=年|ruler=Antiochus XI Epiphanes',
-		'/Antiochus XII|-87~|:Babylonian|準=年|ruler=Antiochus XII Dionysus (Epiphanes/Philopator/Callinicus)',
+		'/Antiochus II|Babylonian-262/10~|:Babylonian|疑|準=年|ruler=Antiochus II Theos;Ἀντίοχος Β΄ ὁ Θεός',
+		'/Seleucus II|Babylonian-246~|:Babylonian|疑|準=年|ruler=Seleucus II Callinicus Pogon;Σέλευκος Β΄ ὁ Καλλίνικος ὁ Πώγων',
+		'/Seleucus III|Babylonian-225~|:Babylonian|疑|準=年|ruler=Seleucus III Soter;Seleucus Ceraunus;Σέλευκος Γ΄ ὁ Σωτήρ, ὁ Κεραυνός',
+		'/Antiochus III|Babylonian-222~|:Babylonian|疑|準=年|ruler=Ἀντίoχoς Μέγας',
+		'/Seleucus IV|Babylonian-187~|:Babylonian|疑|準=年|ruler=Seleucus IV Philopator;Σέλευκος Δ΄ Φιλοπάτωρ',
+		'/Antiochus IV|Babylonian-175~|:Babylonian|疑|準=年|ruler=Antiochus IV Epiphanes;Ἀντίοχος Δ΄ ὁ Ἐπιφανής',
+		"/Antiochus V|Babylonian-164~|:Babylonian|疑|準=年|ruler=Antiochus V Eupator;Αντίοχος Ε' Ευπάτωρ",
+		'/Demetrius I|Babylonian-161~|:Babylonian|疑|準=年|ruler=Demetrius I Soter;Δημήτριος Α`',
+		'/Alexander Balas|Babylonian-150~|:Babylonian|疑|準=年|ruler=Ἀλέξανδρoς Bάλας',
+		'/Demetrius II|Babylonian-146~-137|:Babylonian|疑|準=年|ruler=Demetrius II Nicator;Δημήτριος Β`',
+		'/Antiochus VI|Babylonian-145~|:Babylonian|疑|準=年|ruler=Antiochus VI Dionysus|卒=-142 or -141',
+		'/Diodotus Tryphon|Babylonian-142~|:Babylonian|疑|準=年|ruler=Διόδοτος Τρύφων',
+		'/Antiochus VII|Babylonian-138~|:Babylonian|疑|準=年|ruler=Antiochus VII Euergetes;Antiochus VII Sidetes',
+		'/Demetrius II|Babylonian-129~-126|:Babylonian|疑|準=年',
+		'/Alexander II|Babylonian-128~-123|:Babylonian|疑|準=年|ruler=Alexander II Zabinas;Ἀλέξανδρoς Zαβίνας',
+		'/Cleopatra Thea|-125~-121|:Babylonian|疑|準=年|ruler=Κλεοπάτρα Θεά',
+		'/Antiochus IX|Babylonian-114~|:Babylonian|疑|準=年|ruler=Antiochus IX Cyzicenus;Antiochus IX Eusebes',
+		'/Antiochus X|-95~-83|:Babylonian|疑|準=年|ruler=Antiochus X Eusebes Philopator',
+		'/Antiochus VIII|-125~|:Babylonian|疑|準=年|ruler=Antiochus VIII Grypus;Antiochus VIII Epiphanes/Callinicus/Philometor',
+		'/Seleucus VI|Babylonian-96~|:Babylonian|疑|準=年|ruler=Seleucus VI Epiphanes Nikator;Σέλευκος ΣΤ΄',
+		'/Demetrius III|Babylonian-95~-95|:Babylonian|疑|準=年|ruler=Demetrius III Eucaerus',
+		'/Philip I|Babylonian-95~-83|:Babylonian|疑|準=年|ruler=Philip I Philadelphus',
+		'/Antiochus XI|Babylonian-95~-92|:Babylonian|疑|準=年|ruler=Antiochus XI Epiphanes',
+		'/Antiochus XII|-87~|:Babylonian|疑|準=年|ruler=Antiochus XII Dionysus (Epiphanes/Philopator/Callinicus)',
 		// Tigranes the Great (Tigranes II of Armenia)
-		'/Seleucus VII|Babylonian-83~|:Babylonian|準=年|ruler=Seleucus VII Philometor;Σέλευκος Ζ΄',
-		'/Antiochus XIII|Babylonian-69~|:Babylonian|準=年|ruler=Antiochus XIII Philadelphus;Asiaticus',
-		'/Philip II|Babylonian-65~63|:Babylonian|準=年|ruler=Philip II Philorhomaeus;Φίλιππος Β΄ ὁ Φιλορωμαῖος;Barypous'
+		'/Seleucus VII|Babylonian-83~|:Babylonian|疑|準=年|ruler=Seleucus VII Philometor;Σέλευκος Ζ΄',
+		'/Antiochus XIII|Babylonian-69~|:Babylonian|疑|準=年|ruler=Antiochus XIII Philadelphus;Asiaticus',
+		'/Philip II|Babylonian-65~-63|:Babylonian|疑|準=年|ruler=Philip II Philorhomaeus;Φίλιππος Β΄ ὁ Φιλορωμαῖος;Barypous'
 
 ]).minute_offset = 3 * 60;
 
