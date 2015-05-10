@@ -1,6 +1,7 @@
 ﻿/**
  * @name CeL data for era calendar.
- * @fileoverview 本檔案包含了東亞傳統曆法/中國傳統曆法，農曆、夏曆、陰曆的各紀年期間曆數資料。
+ * @fileoverview 本檔案包含了東亞傳統曆法/中國傳統曆法 (traditional civil
+ *               calendar)，農曆、夏曆、陰曆的各紀年期間曆數資料。
  * 
  * @summary <code>
 
@@ -2362,27 +2363,27 @@ this.CeL_era_data = {
 
 		'蜀/安陽王|-257~||精=年|君主名=蜀泮',
 
-		// Thời kỳ phong kiến phương Bắc đô hộ, 北屬時期, 北属期
+		// Bắc thuộc, Thời kỳ phong kiến phương Bắc đô hộ, 北屬時期, 北属期
 		// Thời phong kiến phương Bắc đô hộ
-		'南越/武帝|-208/11/25~|:中國|準=年|朝代=趙朝|君主名=趙佗|時期=Thời kỳ phong kiến phương Bắc đô hộ|注=《欽定越史通鑑綱目·卷之一》67頁：「甲午趙武王元年秦二世三年」。該年當系趙佗成為南海郡太守的年份。|注=約前203年，趙佗以番禺為都城在嶺南地區建立南越國，自稱「南越武王」。|注=目前越南大部分學者亦不承認趙朝，僅有少數人堅持認為趙朝是越南的一個朝代。',
+		'南越/武帝|-208/11/25~|:中國|準=年|朝代=趙朝|君主名=趙佗|時期=Bắc thuộc|注=《欽定越史通鑑綱目·卷之一》67頁：「甲午趙武王元年秦二世三年」。該年當系趙佗成為南海郡太守的年份。|注=約前203年，趙佗以番禺為都城在嶺南地區建立南越國，自稱「南越武王」。|注=目前越南大部分學者亦不承認趙朝，僅有少數人堅持認為趙朝是越南的一個朝代。',
 		'/文王|-137~|:中國|準=年|君主名=趙眜;趙胡|注=「趙胡」係《史記》所載南越文王之名。據1983年發現的南越王墓中所發掘的文物，文王的真實名字應是「趙眜」。',
 		'/明王|-125~|:中國|準=年|君主名=趙嬰齊',
 		'/哀王|-113~|:中國|準=年|君主名=趙興',
 		'/術陽侯|-112~-111|:中國|準=年|君主名=趙建德|君主=高昌侯',
 
-		'徵/徵女王|40/2/2~43/7/25|:中國|準=年|君主名=徵側;徵貳;𠄩婆徵;二徵夫人;徵氏姐妹|時期=Thời kỳ phong kiến phương Bắc đô hộ',
+		'徵/徵女王|40/2/2~43/7/25|:中國|準=年|君主名=徵側;徵貳;𠄩婆徵;二徵夫人;徵氏姐妹|時期=Bắc thuộc',
 
-		'士/士王|187/1/27~|:中國|準=年|君主名=士燮;士爕|時期=Thời kỳ phong kiến phương Bắc đô hộ|注=欽定越史通鑑綱目:士爕',
+		'士/士王|187/1/27~|:中國|準=年|君主名=士燮;士爕|時期=Bắc thuộc|注=欽定越史通鑑綱目:士爕',
 		'/士徽|226/2/16~227/2/3|:中國|準=年|注=226年，士燮病逝，年90歲。兒子士徽背叛吳國而自立，最終為東吳攻滅。|注=為使"士王40年"存，稍改本條起始日。',
 
-		'前李/南帝|542/1/2~|:中國|準=年|君主=李南帝|君主名=李賁|時期=Thời kỳ phong kiến phương Bắc đô hộ|注=李賁於541年十二月集合交州數州人士起兵。',
+		'前李/南帝|542/1/2~|:中國|準=年|君主=李南帝|君主名=李賁|時期=Bắc thuộc|注=李賁於541年十二月集合交州數州人士起兵。',
 		'/=/天德|544/2/9~|:中國|準=年|君主=南越帝|國號=萬春|年號=大德|注=大越史記全書:甲子天德元年梁大同十年春正月，帝因勝敵，自稱南越帝，即位建元，置百官，建國號曰萬春，望社稷至萬世也。',
 		'=/趙越王|548/4/13~571/2/10|:中國|準=年|君主名=趙光復|注=大越史記全書外紀卷之四: 春三月辛亥，南帝在屈獠洞中，日久，肙瘴病薨。',
 		'/桃郎王|549/2/13~|:中國|準=年|君主名=李天寶|國號=野能',
 		'/李佛子|555/2/7~|:中國|準=年',
 		'/後李南帝|571/2/11~603/2/15|:中國|準=年|君主名=李佛子|朝代=後李',
 
-		'梅/黑帝|722/9/2~12/31|:中國|準=年|君主名=梅叔鸞|時期=Thời kỳ phong kiến phương Bắc đô hộ|注=新唐書:（玄宗開元）十年..七月..丙戌，安南人梅叔鸞反，伏誅。',
+		'梅/黑帝|722/9/2~12/31|:中國|準=年|君主名=梅叔鸞|時期=Bắc thuộc|注=新唐書:（玄宗開元）十年..七月..丙戌，安南人梅叔鸞反，伏誅。',
 
 		// Thời kỳ độc lập, 獨立時期, 独立王朝時代
 
@@ -2597,22 +2598,64 @@ this.CeL_era_data = {
 		// http://www.mesoweb.com/palenque/resources/rulers/rulers_table.html
 		// http://www.criscenzo.com/jaguarsun/dynasty.html
 		// https://en.wikipedia.org/wiki/Palenque
+
+		// b. 8.18.0.13.6 5 Kimi 14 K'ayab'
+		// a. 8.19.15.3.4 1 K'an 2 K'ayab'
 		"Palenque/K'uk' B'ahlam I|431/3/8~|:CE|君主名=Bahlum-K'uk';Quetzal;Kuk|生=397/3/28",
+		// b. 8.19.6.8.8 11 Lamat 6 Xul
+		// a. 8.19.19.11.17 2 Kab'an 10 Xul
 		'/"Casper"|435/8/7~|:CE|君主名=11 Rabbit;Manatee|生=422/8/6',
+		// b. 9.1.4.5.0 12 Ahaw 13 Sak
+		// a. 9.2.12.6.18 3 Etz'nab' 11 Xul
 		"/B'utz'aj Sak Chiik|487/7/26~|:CE|君主名=Butz'ah Sak Chik;Manik;Sak-Chik|生=459/11/12",
+		// b. 9.1.10.0.0 5 Ahaw 3 Sek
+		// a. 9.3.6.7.17 5 Kab'an 0 Sotz'
+		// d. 9.4.10.4.17 5 Kab'an 5 Mak
 		"/Ahkal Mo' Nahb' I|501/6/1~|:CE|君主名=Akul Anab;Chaacal;Cauac-Uinal;Chaac|生=465/7/3|卒=524/11/27",
+		// b. 9.2.15.3.8 12 Lamat 6 Wo
+		// a. 9.4.14.10.4 5 K'an 12 K'ayab'
+		// d. 9.6.11.0.16 7 Kib' 4 K'ayab'
 		"/K'an Joy Chitam I|529/2/21~|:CE|君主名=K'an Hoy Chitam;K'an Hok' Chitam;Kan-Xul;Hok|生=490/5/1|卒=565/2/4",
+		// b. 9.4.9.0.4 7 K'an 17 Mol
+		// a. 9.6.11.5.1 1 Imix 4 Sip
+		// d. 9.6.16.10.7 9 Manik' 5 Yaxk'in
 		"/Ahkal Mo' Nahb' II|565/4/30~|:CE|君主名=Akul Anab;Chaacal;Chaac;Cauac-Uinal|生=523/9/1|卒=570/7/19",
+		// b. 9.4.10.1.5 11 Chikchan 13 Ch'en
+		// a. 9.6.18.5.12 10 Eb' 0 Wo
+		// d. 9.7.9.5.5 11 Chikchan 3 K'ayab'
 		"/Kan B'ahlam I|572/4/4~|:CE|君主名=Chan-Bahlum;Bahlum|生=524/9/16|卒=583/1/30",
+		// a. 9.7.10.3.8 9 Lamat 1 Muwan
+		// d. 9.8.11.6.12 2 Eb' 0 Mak
 		"/Lady Yohl Ik'nal|583/12/19~|:CE|君主名=Ix Yohl Ik'nal;Lady Olnal;Lady Kan-Ik;Lady Ik;Lady K'anal-Ik'al|卒=604/11/2",
+		// a. 9.8.11.9.10 8 Ok 18 Muwan
+		// d. 9.8.19.4.6 2 Kimi 14 Mol
 		"/Aj Ne' Yohl Mat|604/12/30~|:CE|君主名=Ajen Yohl Mat;Ah Neh Yohl Mat;Ah Ne Ohl Mat;Ah Lawal Mat;Aahc-Kan;Ah K'an;Ac-Kan|卒=612/8/6",
+		// a. 9.8.19.7.18 9 Etz'nab' 6 Keh
 		"/Muwaan Mat|612/10/17~|:CE",
+		// b. 9.8.9.13.0 8 Ahaw 13 Pop
+		// a. 9.9.2.4.8 5 Lamat 1 Mol
+		// d. 9.12.11.5.18 6 Etz'nab' 11 Yax
 		"/K'inich Janahb' Pakal|615/7/24~|:CE|君主名=Pacal;Hanab Pakal;Pacal II;Pacal the Great;Lord Shield Pacal;Subject A;Sunshield;Sun-Shield;Lady 8 Flower|生=603/3/21|卒=683/8/26",
+		// b. 9.10.2.6.6 2 Kimi 19 Sotz'
+		// heir designation 9.10.8.9.3 9 Ak'b'al 6 Xul
+		// a. 9.12.11.12.10 8 Ok 3 K'ayab'
+		// d. 9.13.10.1.5 6 Chikchan 3 Pop
 		"/K'inich Kan B'ahlam II|684/1/5~|:CE|君主名=Chan Bahlum|生=635/5/18|卒=702/2/14",
+		// b. 9.10.11.17.0 11 Ahaw 8 Mac
+		// a. 9.13.10.6.8 5 Lamat 6 Xul
+		// captured 9.13.19.13.3 13 Ak'b'al 16 Yax
+		// dedicates Palace House A-D 9.14.8.14.15 9 Men 3 Yax
 		"/K'inich K'an Joy Chitam II|702/5/28~|:CE|君主名=K'an Hoy Chitam;K'an Hok' Chitam;Kan-Xul;Subject B;Hok';Xul;K'an-Hok-Xul|生=644/10/31",
+		// b. 9.12.6.5.8 3 Lamat 6 Sak
+		// a. 9.14.10.4.2 9 Ik' 5 K'ayab'
+		// d. Post 9.15.5.0.0 10 Ahaw 8 Ch'en
 		"/K'inich Ahkal Mo' Nahb' III|721/12/28~|:CE|君主名=Akul Anab;Chaacal;Lord Chaac;Subject C|生=678/9/11",
+		// invests K'an Tok official 9.15.10.10.13 8 B'en 16 Kumk'u
 		"/K'inich Janahb' Pakal II|742/1/23~|:CE|疑|君主名=U Pakal K'inich Janahb' Pakal",
+		// a. 9.16.13.0.7 9 Manik' 15 Wo
+		// first katun anniversary 9.17.13.0.7 7 Manik' 0 Pax
 		"/K'inich K'uk' B'ahlam II|764/3/2~|:CE|君主名=Kuk",
+		// a. 9.18.9.4.4 7 K'an 17 Muwan
 		"/Wak Kimi Janahb' Pakal|799/11/11~810|疑|:CE|君主名=Wak Kimi Hanab Pakal;6 Kimi Pakal;Cimi-Pacal"
 
 ]).minute_offset = -6 * 60;
@@ -2626,35 +2669,35 @@ this.CeL_era_data = {
 (this.CeL_era_data.Mesopotamian = [
 
 		// https://en.wikipedia.org/wiki/List_of_kings_of_Babylon
-		// From this point on, the Babylonian chronology is securely known via Ptolemy's Canon of Kings and other sources.
-		'Babylonian Dynasty of E/Nabonassar|-747~|:CE|疑|準=年|時期=Babylon|ruler=Nabû-nāṣir',
-		'/Nabû-nādin-zēri|-734~|:CE|疑|準=年|ruler=Nabu-nadin-zeri',
-		'/Nabû-šuma-ukîn II|-732~|:CE|疑|準=年|ruler=Nabu-suma-ukin II|注=king of Babylon for one month and two days during 732 BC before he was swept aside by his successor, Nabû-mukin-zēri.',
-		'/Nabû-mukin-zēri|-732/2~-729|:CE|疑|準=年|ruler=Nabu-mukin-zeri',
+		// From this point on, the Babylonian chronology is securely known via
+		// Ptolemy's Canon of Kings and other sources.
+		'Babylonian Dynasty of E/Nabonassar|-747~|:CE|精=年|準=年|時期=Babylon|ruler=Nabû-nāṣir',
+		'/Nabu-nadin-zeri|-734~|:CE|精=年|準=年|ruler=Nabû-nādin-zēri',
+		'/Nabu-suma-ukin II|-732~|:CE|精=年|準=年|ruler=Nabû-šuma-ukîn II|注=king of Babylon for one month and two days during 732 BC before he was swept aside by his successor, Nabû-mukin-zēri.',
+		'/Nabu-mukin-zeri|-732/2~-729|:CE|精=年|準=年|ruler=Nabû-mukin-zēri',
 
 		// Neo-Assyrian Empire
-		'Neo-Assyrian/Tiglath-Pileser III|-745~|:CE|疑|準=年|時期=Babylon|ruler=Mukin-zēri',
-		'/Shalmaneser V|-727~|:CE|疑|準=年|ruler=Šulmanu-ašarid',
-		'/Marduk-apla-iddina II|-722~-710|:CE|疑|準=年|ruler=Merodach-Baladan;Marduk-Baladan',
-		'/Sargon II|-722~|:CE|疑|準=年|ruler=Šarru-ukin',
-		'/Sennacherib|-705~-681|:CE|疑|準=年|ruler=Sîn-ahhī-erība',
-		'/Marduk-apla-iddina II|-703~|:CE|疑|準=年',
-		'/Bel-ibni|-702~|:CE|疑|準=年',
-		'/Ashur-nadin-shumi|-700~|:CE|疑|準=年',
-		'/Nergal-ushezib|-694~|:CE|疑|準=年|ruler=Shuzub',
-		'/Mushezib-Marduk|-693~-689|:CE|疑|準=年',
-		'/Esarhaddon|-681~|:CE|疑|準=年|ruler=Aššur-ahu-iddin',
-		'/Shamash-shum-ukin|-668~|:CE|疑|準=年',
-		'/Kandalānu|-648~-626/4/4|:CE|疑|準=年|ruler=Kandalanu|注=Succeeded by Nabopolassar',
-		'/Ashurbanipal|-668~-627|:CE|疑|準=年|ruler=Aššur-bāni-apli',
-		'/Ashur-etil-ilani|-631~|:CE|疑|準=年',
-		'/Sin-shumu-lishir|-626~|:CE|疑|準=年|ruler=Sin-shum-lishir',
+		'Neo-Assyrian/Tiglath-Pileser III|-745~|:CE|精=年|準=年|時期=Babylon|ruler=Mukin-zēri',
+		'/Shalmaneser V|-727~|:CE|精=年|準=年|ruler=Šulmanu-ašarid',
+		'/Marduk-apla-iddina II|-722~-710|:CE|精=年|準=年|ruler=Merodach-Baladan;Marduk-Baladan',
+		'/Sargon II|-722~|:CE|精=年|準=年|ruler=Šarru-ukin',
+		'/Sennacherib|-705~-681|:CE|精=年|準=年|ruler=Sîn-ahhī-erība',
+		'/Marduk-apla-iddina II|-703~|:CE|精=年|準=年',
+		'/Bel-ibni|-702~|:CE|精=年|準=年',
+		'/Ashur-nadin-shumi|-700~|:CE|精=年|準=年',
+		'/Nergal-ushezib|-694~|:CE|精=年|準=年|ruler=Shuzub',
+		'/Mushezib-Marduk|-693~-689|:CE|精=年|準=年',
+		'/Esarhaddon|-681~|:CE|精=年|準=年|ruler=Aššur-ahu-iddin',
+		'/Shamash-shum-ukin|-668~|:CE|精=年|準=年',
+		'/Kandalānu|-648~-626/4/4|:CE|精=年|準=年|ruler=Kandalanu|注=Succeeded by Nabopolassar',
+		'/Ashurbanipal|-668~-627|:CE|精=年|準=年|ruler=Aššur-bāni-apli',
+		'/Ashur-etil-ilani|-631~|:CE|精=年|準=年',
+		'/Sin-shumu-lishir|-626~|:CE|精=年|準=年|ruler=Sin-shum-lishir',
 
 		// Babylonian Calendar Converter (626 BCE to 75 CE)
 		// http://www.staff.science.uu.nl/~gent0113/babylon/babycal_converter.htm
-		// Babylonian calendar
 		// https://en.wikipedia.org/wiki/Babylonian_calendar
-		'Babylonian|-626/4/5~76/3/26|-626/=3px 3o6 4m7g58r 4g9 4sba5dx 3sfg49m 431 3kk640m 4y3w5n9 4eq 4so65aq 48a 445 3mmu3pp855y 5r7 41ue4gk 5e2 	29;30;29;30;29;30;閏6=28;30;30;30;29;29;30	3mi 4lh23zp 4l0656y 54bw5sh 4a9 3b5847q 46j 3pa445x 5ca 5u1 3zxi59m 3quk4za 4uz 3kcc45x 4nz059g 5sk 4osm59w 4g9o3me 58r 3wsc4g5 5dx 4h0 5e2 4o2e37x83zq 5kb 4kvw4dm 59l 3rcc48c 3a9846t 3pss55y 5r7 3yos4gi 5e2 4h6 3qna571 4kws55j 46d 3z304gk 5aw 57u 4fd24fcs3mi 4zu 51v05u1 	30;29;29;29;30;29;30;30;30;29;29;31	4sra47p 42j 3lx23zp 4y1o5l6 5rd 4oj059m 44a 3l464vh 3m4c46d 5cy 57bg5sy 	29;30;29;29;30;30;29;31;29;29;29;30	4hqe57a 4lf05jv 55h 53sc5r9 47o 4oly3p1 3mi 4lgs579 3wvw4gi 5ea 3sx84a1 3quk4z1 45y 53lo45p 58q 4rpo5ro 50a 3mx24vq 4bjg4yy 5r9 3z304hw 5es 4okc3oq 4m9o40e 4vb 3vl85yd 59h 3quk43e 40t 374m40m 4m7058y 5si 408c5aq 489 3mng4yz 3pa455h 5qi 5d244es 59w 4g9o3ei 4z1 3pb04yy 4ofg5e1 4a0 4pm43px 3oq 4m7w423 4nng58q 5s9 3yr057e 431 3koc4t7 40d 4lek58y 4sp85ec 4a2 3nos505 4yz 3pa44dh 4r4s5ck 5sk 4o643ml 3la 4l0s563 46b 4oeu4h5 3ep8489 3p1 37x842e 58r 3yd84g9 4sh85d6 47q 3mp84v1 4t2 50fg5n9 47m 4oqu5as 4gnw3fu 4fxo577 56t 5s5 3z304h0 4rrw46l 40q 4y4c3zh 562 548c5rd 489 3a9247p 3l2k42z 42d 4nz05cy 5u9 3z8s59m 4g4s566 55n 3p3045x 590 55ek3tg 510 4cba3fa 4f3g56z 479 4sd85e1 49x 39zw431 3kd840m 5kb 3vzw4ei 59l 3qy448a 439 3knq42u 4nzg5r7 4gy 4sp85ea 596 4f58565 3vmk55m 5qt 3yr047t 3p1 380s3mj 	30;30;29;31;29;30;29;29;30;29;30;29	4f2u56y 554c5sh 4h5 3e7g47p 42j 3lx845p 4qxo58q 5sa 3z9o50q 4vu 49yk4vf 45x 4nrq59g 55qk5us 59m 4g643me 563 3pa44dh 4r6k59l 47p 3mp8419 3zq 4lf0577 47d 4pba5ap 3sx84a2 46l 3m584d2 5qr 3ygs4gi 4rpo5dg 50a 4bzw3e5 4yi 50oc5r9 49w 4osm5as 4okc3or 3m5 4noc58m 5s5 3z4s4k9 3q2443a 40r 3jjw40l 56y 55bg5si 4aa 3ns647q 3mng563 45x 4r4s5ci 5ua 4ojw59o 4fdo3li 55n 3pa446h 59l 3r8c489 3pp 31p23o6 4nsc5qj 4g5 4sdo5e1 49h 3pv04vp 3kkc4t2 5l9 3wws47m 59w 4gng50q 4vp 3mmu4yy 54z05s5 4gy 4spo47h 3oa 4lh83zh 4kws562 5rd 3z8s4a1 3q1 38h842z 40l 3yhi58y 56wc5ua 4i2 3quk47q 4yj 3p3045x 4nrw579 47m 4oss59w 50q 4bzg56z 479 4riu5dw 57do49x 3sd 39i440m 5kb 3vzw4dm 4oj059u 47u 4c6k439 40q 4z3g5nn 4gy 4so65ea 3sy459m 4z1 4eos55i 5ql 4nrw4gk 4ot83p1 3fg 4fdo3md 562 550s5s9 4i0 4t5i47p 3a0c46j 45p 4noc5qi 5zd 3z8s59m 4fgs4vu 4t7 3kkc42t 59e 55qk5us 5as 3rd257a 4lf0563 4d1 53rw5np 4gk 4om43p1 378c40q 565 3pss4eq 5e9 3sx84a1 3px 39zq42e 53l85qj 4ga 554c5re 57e 3pv04vq 4bjg4yy 5n9 3z4s4h4 5es 4iho3oq 505 4m6u58m 5bcc5z9 4km 3quk46t 419 3jks3zq 4lek576 5si 3zfw5aq 489 3mwc4yz 46d 4qxi5qq 5d984gk 59m 4g643lm 55p 3pb04ye 4ofg59l 488 4ot83px 3my 4muk58r 4g5 4sdi5s9 3z584gq 46t 3m5o4t7 3zh 4lek56y 4sp85as 48a 3mwc506 4ve 4rl85s5 5cy 4u9y5t0 4okc3ob 3la 4kx855n 45x 4o0s57t 3eb047t 3n9 37x842d 51m 56p861d 4i1 4i3q47p 3pv04yl 45q 53ks5n7 47m 4ojw59w 4g9o3fe 4vp 3pss479 5dx 3z304h0 5ec 4ok63oa 4lh83zh 55y 548c5rd 49l 3a98439 3koc417 42h 4nz04gy 5e9 3tpo4h6 47p 3peu55j 3p304d1 58y 55cs47o 50s 4c7w3ee 4f3g56z 47e 3zx84i1 49v 3a7g431 42e 4ns65qj 3yd84eq 59l 3qy444a 4t9'
+		'Babylonian|-626/4/5~76/3/24|-626/=3px 3o6 4m7g58r 4g9 4sba5dx 3sfg49m 431 3kk640m 4y3w5n9 4eq 4so65aq 48a 445 3mmu3pp855y 5r7 41ue4gk 5e2 	29;30;29;30;29;30;閏6=28;30;30;30;29;29;30	3mi 4lh23zp 4l0656y 54bw5sh 4a9 3b5847q 46j 3pa445x 5ca 5u1 3zxi59m 3quk4za 4uz 3kcc45x 4nz059g 5sk 4osm59w 4g9o3me 58r 3wsc4g5 5dx 4h0 5e2 4o2e37x83zq 5kb 4kvw4dm 59l 3rcc48c 3a9846t 3pss55y 5r7 3yos4gi 5e2 4h6 3qna571 4kws55j 46d 3z304gk 5aw 57u 4fd24fcs3mi 4zu 51v05u1 	30;29;29;29;30;29;30;30;30;29;29;31	4sra47p 42j 3lx23zp 4y1o5l6 5rd 4oj059m 44a 3l464vh 3m4c46d 5cy 57bg5sy 	29;30;29;29;30;30;29;31;29;29;29;30	4hqe57a 4lf05jv 55h 53sc5r9 47o 4oly3p1 3mi 4lgs579 3wvw4gi 5ea 3sx84a1 3quk4z1 45y 53lo45p 58q 4rpo5ro 50a 3mx24vq 4bjg4yy 5r9 3z304hw 5es 4okc3oq 4m9o40e 4vb 3vl85yd 59h 3quk43e 40t 374m40m 4m7058y 5si 408c5aq 489 3mng4yz 3pa455h 5qi 5d244es 59w 4g9o3ei 4z1 3pb04yy 4ofg5e1 4a0 4pm43px 3oq 4m7w423 4nng58q 5s9 3yr057e 431 3koc4t7 40d 4lek58y 4sp85ec 4a2 3nos505 4yz 3pa44dh 4r4s5ck 5sk 4o643ml 3la 4l0s563 46b 4oeu4h5 3ep8489 3p1 37x842e 58r 3yd84g9 4sh85d6 47q 3mp84v1 4t2 50fg5n9 47m 4oqu5as 4gnw3fu 4fxo577 56t 5s5 3z304h0 4rrw46l 40q 4y4c3zh 562 548c5rd 489 3a9247p 3l2k42z 42d 4nz05cy 5u9 3z8s59m 4g4s566 55n 3p3045x 590 55ek3tg 510 4cba3fa 4f3g56z 479 4sd85e1 49x 39zw431 3kd840m 5kb 3vzw4ei 59l 3qy448a 439 3knq42u 4nzg5r7 4gy 4sp85ea 596 4f58565 3vmk55m 5qt 3yr047t 3p1 380s3mj 	30;30;29;31;29;30;29;29;30;29;30;29	4f2u56y 554c5sh 4h5 3e7g47p 42j 3lx845p 4qxo58q 5sa 3z9o50q 4vu 49yk4vf 45x 4nrq59g 55qk5us 59m 4g643me 563 3pa44dh 4r6k59l 47p 3mp8419 3zq 4lf0577 47d 4pba5ap 3sx84a2 46l 3m584d2 5qr 3ygs4gi 4rpo5dg 50a 4bzw3e5 4yi 50oc5r9 49w 4osm5as 4okc3or 3m5 4noc58m 5s5 3z4s4k9 3q2443a 40r 3jjw40l 56y 55bg5si 4aa 3ns647q 3mng563 45x 4r4s5ci 5ua 4ojw59o 4fdo3li 55n 3pa446h 59l 3r8c489 3pp 31p23o6 4nsc5qj 4g5 4sdo5e1 49h 3pv04vp 3kkc4t2 5l9 3wws47m 59w 4gng50q 4vp 3mmu4yy 54z05s5 4gy 4spo47h 3oa 4lh83zh 4kws562 5rd 3z8s4a1 3q1 38h842z 40l 3yhi58y 56wc5ua 4i2 3quk47q 4yj 3p3045x 4nrw579 47m 4oss59w 50q 4bzg56z 479 4riu5dw 57do49x 3sd 39i440m 5kb 3vzw4dm 4oj059u 47u 4c6k439 40q 4z3g5nn 4gy 4so65ea 3sy459m 4z1 4eos55i 5ql 4nrw4gk 4ot83p1 3fg 4fdo3md 562 550s5s9 4i0 4t5i47p 3a0c46j 45p 4noc5qi 5zd 3z8s59m 4fgs4vu 4t7 3kkc42t 59e 55qk5us 5as 3rd257a 4lf0563 4d1 53rw5np 4gk 4om43p1 378c40q 565 3pss4eq 5e9 3sx84a1 3px 39zq42e 53l85qj 4ga 554c5re 57e 3pv04vq 4bjg4yy 5n9 3z4s4h4 5es 4iho3oq 505 4m6u58m 5bcc5z9 4km 3quk46t 419 3jks3zq 4lek576 5si 3zfw5aq 489 3mwc4yz 46d 4qxi5qq 5d984gk 59m 4g643lm 55p 3pb04ye 4ofg59l 488 4ot83px 3my 4muk58r 4g5 4sdi5s9 3z584gq 46t 3m5o4t7 3zh 4lek56y 4sp85as 48a 3mwc506 4ve 4rl85s5 5cy 4u9y5t0 4okc3ob 3la 4kx855n 45x 4o0s57t 3eb047t 3n9 37x842d 51m 56p861d 4i1 4i3q47p 3pv04yl 45q 53ks5n7 47m 4ojw59w 4g9o3fe 4vp 3pss479 5dx 3z304h0 5ec 4ok63oa 4lh83zh 55y 548c5rd 49l 3a98439 3koc417 42h 4nz04gy 5e9 3tpo4h6 47p 3peu55j 3p304d1 58y 55cs47o 50s 4c7w3ee 4f3g56z 47e 3zx84i1 49v 3a7g431 42e 4ns65qj 3yd84eq 59l 3qy444a 4t9'
 				// 月名: https://en.wikipedia.org/wiki/Babylonian_calendar
 				// In year 17 of 19-year cycle,
 				// the intercalary month was named Araḫ Ulūlu.
@@ -2752,7 +2795,7 @@ this.CeL_era_data = {
 		 * 
 		 * @see http://www.iranicaonline.org/articles/calendars
 		 */
-		'Seleucid era|Babylonian-311~76/3/26|:Babylonian|疑|準=年',
+		'Seleucid era|Babylonian-311~76/3/24|:Babylonian|疑|準=年',
 		// Seleucid Empire
 		'Σελευκιδών/Seleucus I|Babylonian-306~|:Babylonian|疑|準=年|ruler=Seleucus I Nicator;Σέλευκος Α΄ Νικάτωρ',
 		// he was assassinated by Ptolemy Keraunos near Lysimachia September

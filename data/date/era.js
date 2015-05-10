@@ -491,6 +491,12 @@ if (typeof CeL === 'function')
 
 			// 可指示尚存疑/爭議資料，例如傳說時代之資料。
 			// https://en.wikipedia.org/wiki/Circa
+			// c., ca or ca. (also circ. or cca.), means "approximately" in
+			// several European languages including English, usually in
+			// reference to a date.
+			//
+			// r. can be used to designate the ruling period of a person in
+			// dynastic power, to distinguish from his or her lifespan.
 			準確程度_ENUM = {
 				疑 : '尚存疑',
 				// 為傳說時代之資料
@@ -1435,8 +1441,9 @@ if (typeof CeL === 'function')
 				if (type === WITH_PERIOD)
 					append_period(this, name);
 
-				return name.join(' ').replace(/([^a-z\d'"]) ([^a-z\d'"])/i,
-						'$1$2').trim();
+				return name.join(' ').trim()
+				// 去除不需要以 space 間隔之紀元名中之 space。
+				.replace(/([^a-z\d'"]) ([^a-z\d'"])/gi, '$1$2');
 			}
 
 			// ---------------------------------------
@@ -5535,7 +5542,11 @@ if (typeof CeL === 'function')
 								date_index = numeralize_date_format(date_index,
 										options.numeral);
 
-							var name = era + date_index[0] + '年';
+							var name = era.toString();
+							// 為需要以 space 間隔之紀元名添加 space。
+							if (/[a-z\d'"]$/.test(name))
+								name += ' ';
+							name += date_index[0] + '年';
 							if (era.精 !== '年') {
 								name += date_index[1] + '月';
 								if (era.精 !== '月')

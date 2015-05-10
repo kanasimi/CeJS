@@ -1334,7 +1334,7 @@ function Dai_Date(year, month, date, get_days) {
 
 	if (isNaN(month) || month < 1 || 12 < month) {
 		// 確定元旦之前的空日數目。
-		days = Dai_Date.null_days(year - 1);
+		days = Dai_Date.vacant_days(year - 1);
 		switch (month) {
 		case '空2日':
 			// 若有空2日，其必為元旦前一日。
@@ -1418,9 +1418,9 @@ Dai_Date.year_days = function(year) {
 
 // 當年空日數目。1 or 2.
 // 注意：這邊之年分，指的是當年除夕後，即明年（隔年）元旦之前的空日數目。與 Dai_Date() 不同！
-// e.g., Dai_Date.null_days(100) 指的是傣曆100年除夕後，即傣曆101年元旦之前的空日數目。
+// e.g., Dai_Date.vacant_days(100) 指的是傣曆100年除夕後，即傣曆101年元旦之前的空日數目。
 // 依 Dai_Date.date_of_days() 的做法，空日本身會被算在前一年內。
-Dai_Date.null_days = function(year) {
+Dai_Date.vacant_days = function(year) {
 	// 傣曆潑水節末日之元旦（新年的第一天）與隔年元旦間，一般為365日（有「宛腦」一天）或366日（有「宛腦」兩天）。
 	return Dai_Date.year_days(year) - 364;
 };

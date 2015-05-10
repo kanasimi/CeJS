@@ -252,16 +252,20 @@ td {
 	background-color: #aaa;
 }
 
-#calendar tr:hover>td {
-	background-color: #cfc;
-}
-
 #calendar tr.selected>td {
 	background-color: #fba;
 }
 
 #calendar .selected a {
 	color: #c21;
+}
+
+#calendar tr.uncertain>td {
+	background-color: #eee;
+}
+
+#calendar tr:hover>td {
+	background-color: #cfc;
 }
 
 .曆譜_em {
@@ -1330,33 +1334,33 @@ Jews, however, reckon the start of each new Seleucid year with the lunar month T
 	</div>
 
 	<script type="text/javascript">
-	var document_title = document.title;
-	// document.title = 'Initializing...';
-</script>
+		var document_title = document.title;
+		// document.title = 'Initializing...';
+	</script>
 	<script type="text/javascript" src="../ce.js">
-	//{"run":"era.js"}
-</script>
+		//{"run":"era.js"}
+	</script>
 	<script type="text/javascript">
-	CeL.env.same_origin_policy = true;
-</script>
+		CeL.env.same_origin_policy = true;
+	</script>
 
 	<script>
-	/**
-	 * @memo <code>
+		/**
+		 * @memo <code>
 
-		(function(d, s, id) {
-			var js, fjs = d.getElementsByTagName(s)[0];
-			if (d.getElementById(id))
-				return;
-			js = d.createElement(s);
-			js.id = id;
-			js.src = "//connect.facebook.net/zh_TW/all.js#xfbml=1";
-			fjs.parentNode.insertBefore(js, fjs);
-		}(document, 'script', 'facebook-jssdk'));
+			(function(d, s, id) {
+				var js, fjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(id))
+					return;
+				js = d.createElement(s);
+				js.id = id;
+				js.src = "//connect.facebook.net/zh_TW/all.js#xfbml=1";
+				fjs.parentNode.insertBefore(js, fjs);
+			}(document, 'script', 'facebook-jssdk'));
 
-	 </code>
-	 */
-</script>
+		 </code>
+		 */
+	</script>
 
 	<!-- 
 	<script type="text/javascript" src="http://www.google.com/jsapi"></script>

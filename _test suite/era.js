@@ -402,8 +402,9 @@ function show_calendar(era_name) {
 							+ ')|%年干支|%月干支%大小月|%日干支',
 					locale : 'cmn-Hant-TW',
 					as_UTC_time : true
-				}).replace(/([^a-z\d'"]) (\d)/i, '$1$2').replace(/星期/, '')
-				.split('|');
+				})
+		// 去除不需要以 space 間隔之紀元名中之 space。
+		.replace(/([^a-z\d'"]) (\d)/gi, '$1$2').replace(/星期/, '').split('|');
 
 		if (matched = tmp[0]
 		// 後處理: 添加進一步之日期捷徑。
@@ -454,16 +455,18 @@ function show_calendar(era_name) {
 			前紀年名 = date.前紀年;
 		}
 
+		tmp = [];
 		if (main_date_value
 		//
 		&& main_date_value === date.getTime())
-			tmp = 'selected', main_date_value = null;
-		else
-			tmp = '';
+			tmp.push('selected'), main_date_value = null;
+		if (date.準 || date.精)
+			// 不確定之數值
+			tmp.push('uncertain');
 
 		output.push({
 			tr : list,
-			C : tmp
+			C : tmp.join(' ')
 		});
 
 		if (date.後紀年 !== 後紀年名) {
@@ -497,6 +500,7 @@ function show_calendar(era_name) {
 		}, {
 			tbody : output
 		} ]
+	// , id : 'text_calendar'
 	};
 	if (hidden_column.length > 0) {
 		hidden_column.unshift({
@@ -1009,7 +1013,7 @@ function draw_era(hierarchy) {
 			// 以 tag 顯示君主生卒標記。
 			if (!periods.added) {
 				periods.added = true;
-				add_tag(periods.生[0] + '-' + periods.卒[0], period_hierarchy,
+				add_tag(periods.生[0] + '－' + periods.卒[0], period_hierarchy,
 						'君主生卒', true, {
 							歲 : true
 						});
@@ -1380,7 +1384,9 @@ draw_era.click_Era = function() {
 	era_input_object.setValue(era.format({
 		format : era.精 === '年' ? '%紀年名 %年年' : '%紀年名 %年年%月月%日日',
 		locale : 'cmn-Hant-TW'
-	})).replace(/([^a-z\d'"]) (\d)/i, '$1$2');
+	}))
+	// 去除不需要以 space 間隔之紀元名中之 space。
+	.replace(/([^a-z\d'"]) (\d)/gi, '$1$2');
 	translate_era();
 	return false;
 };
@@ -1815,7 +1821,9 @@ function parse_text(text) {
 					parser : 'CE',
 					format : '%紀年名 %年年%月月%日日',
 					locale : 'cmn-Hant-TW'
-				}).replace(/([^a-z\d'"]) (\d)/i, '$1$2');
+				})
+				// 去除不需要以 space 間隔之紀元名中之 space。
+				.replace(/([^a-z\d'"]) (\d)/gi, '$1$2');
 				era_input_object.setValue(era);
 				translate_era(era);
 			} else
@@ -2563,34 +2571,35 @@ function affairs() {
 			};
 		} ],
 
-		moon_sun : [
-				{
-					a : {
-						// 月日視黃經差角
-						T : "月日視黃經差"
-					},
-					R : '紀元使用當地、當日零時，月亮的視黃經-太陽的視黃經\n'
-							//
-							+ 'the apparent geocentric celestial longitude: Moon - Sun.\n'
-							//
-							+ 'Using VSOP87D.ear and LEA-406.',
-					href : 'https://zh.wikipedia.org/wiki/%E8%A1%9D_%28%E5%A4%A9%E9%AB%94%E4%BD%8D%E7%BD%AE%29'
-				}, function(date) {
-					if (/* date.準 || */date.精)
-						return '';
-					var JD = CeL.TT(new Date(date.offseted_value())),
-					//
-					degrees = CeL.lunar_phase_angel_of_JD(JD);
+		moon_sun : [ {
+			a : {
+				// 月日視黃經差角
+				T : "月日視黃經差"
+			},
+			R : '紀元使用當地、當日零時，月亮的視黃經-太陽的視黃經\n'
+			//
+			+ 'the apparent geocentric celestial longitude: Moon - Sun.\n'
+			//
+			+ 'Using VSOP87D.ear and LEA-406.',
+			href : 'https://zh.wikipedia.org/wiki/'
+			//
+			+ '%E8%A1%9D_%28%E5%A4%A9%E9%AB%94%E4%BD%8D%E7%BD%AE%29'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return '';
+			var JD = CeL.TT(new Date(date.offseted_value())),
+			//
+			degrees = CeL.lunar_phase_angel_of_JD(JD);
 
-					return {
-						span : isNaN(degrees) ? data_load_message
-						//
-						: CeL.show_degrees(degrees, 0)
-						// &nbsp;
-						.replace(/ /g, CeL.DOM.NBSP),
-						C : 'monospaced'
-					};
-				} ],
+			return {
+				span : isNaN(degrees) ? data_load_message
+				//
+				: CeL.show_degrees(degrees, 0)
+				// &nbsp;
+				.replace(/ /g, CeL.DOM.NBSP),
+				C : 'monospaced'
+			};
+		} ],
 
 		lunar_phase : [ {
 			a : {
@@ -2835,11 +2844,11 @@ function affairs() {
 			// 超出可轉換之範圍。
 			|| isNaN((dai = date.to_Dai({
 			// format : 'serial'
-			}))[0]) ? '約' + date.to_Dai({
-				ignore_year_limit : true
-			})[0] + '年'
-			//
-			: date.精 === '年' ? dai[0] + '年' : dai.slice(0, 3).join('/')
+			}))[0]) ? {
+				T : [ '約%1年', date.to_Dai({
+					ignore_year_limit : true
+				})[0] ]
+			} : date.精 === '年' ? dai[0] + '年' : dai.slice(0, 3).join('/')
 			//
 			+ '(周' + (date.getDay() + 1) + ')' + (dai[3] ? ' ' + dai[3] : '');
 		} ],
@@ -2861,11 +2870,11 @@ function affairs() {
 			// 超出可轉換之範圍。
 			return isNaN((yi = date.to_Yi({
 			// format : 'serial'
-			}))[0]) ? '約' + date.to_Yi({
-				ignore_year_limit : true
-			})[0] + '年'
-			//
-			: date.精 === '年' ? yi[0] + '年' : yi.slice(0, 3).join('/')
+			}))[0]) ? {
+				T : [ '約%1年', date.to_Yi({
+					ignore_year_limit : true
+				})[0] ]
+			} : date.精 === '年' ? yi[0] + '年' : yi.slice(0, 3).join('/')
 			//
 			+ '; ' + date.to_Yi({
 				format : 'name'
@@ -2903,7 +2912,9 @@ function affairs() {
 				year += 543;
 				if (date.getMonth() >= 4)
 					year++;
-				return '約' + year + '年';
+				return {
+					T : [ '約%1年', year ]
+				};
 			}
 
 			var era = CeL.era('中曆', {
@@ -3353,7 +3364,7 @@ function affairs() {
 		Dangi : [
 				{
 					a : {
-						T : '檀紀'
+						T : '단군기원'
 					},
 					R : '단군기원(檀君紀元) 또는 단기(檀紀)',
 					href : 'https://ko.wikipedia.org/wiki/%EB%8B%A8%EA%B5%B0%EA%B8%B0%EC%9B%90'

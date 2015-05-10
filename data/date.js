@@ -430,35 +430,44 @@ function String_to_Date_default_parser(date_string,
 		// 依照中文之習慣，日期 + 時間中間可不加空格。
 		date_string = date_string.replace(/日(\d)/, '日 $1');
 
-	if ((matched = date_string
+	if (false &&
+	// 速度似乎差不多。
+	(date_data = date_string.match(/^(-?\d{1,4})\/(\d{1,2})\/(\d{1,2})$/))) {
+		//library_namespace.debug('輸入格式: 日期', 2);
+		date_data.shift();
+		
+	} else if ((date_data = date_string
 			.match(String_to_Date_default_parser.date_first))
-			&& isNaN(matched[0])) {
-		library_namespace.debug('輸入格式: 日期 (+ 時間)', 2);
-		date_data = [ 1, 2, 3, 4, 5, 6, 7, 8 ];
-	} else if (matched = date_string
+			&& isNaN(date_data[0])) {
+		//library_namespace.debug('輸入格式: 日期 (+ 時間)', 2);
+		date_data.shift();
+
+	} else if (date_data = date_string
 			.match(String_to_Date_default_parser.time_first)) {
-		library_namespace.debug(
-				'輸入格式: 時間 (+ 日期): 未匹配或僅有一數字', 2);
-		date_data = [ 6, 7, 8, 1, 2, 3, 4, 5 ];
+		//library_namespace.debug('輸入格式: 時間 (+ 日期): 未匹配或僅有一數字', 2);
+		//    [ 1, 2, 3, 4, 5, 6, 7, 8 ]
+		// → [ 6, 7, 8, 1, 2, 3, 4, 5 ]
+		date_data.shift();
+		date_data.unshift(date_data[5], date_data[6], date_data[7]);
+		date_data.length = 8;
+
 	} else {
 		library_namespace.debug('無法 parse: [' + date_string
 				+ ']', 2, 'String_to_Date_default_parser');
 		return;
 	}
 
+
 	// ----------------------------------------------------
 
 	// date_data: index: [ year, month, month_day (Day of
 	// the month), hour, minute, second, milliseconds, Ante
 	// meridiem or Post meridiem ]
-	date_data.forEach(function(i, index) {
-		date_data[index] = matched[i];
-	});
 
 	library_namespace.debug(date_data.join('<br />'), 2,
 	'String_to_Date_default_parser');
 
-	var year, tmp = date_data.pop();
+	var year, tmp = date_data.length === 8 && date_data.pop();
 
 	if (tmp === 'P' || tmp === 'p')
 		// is PM (else: AM or 24-hour format)
@@ -471,6 +480,7 @@ function String_to_Date_default_parser(date_string,
 	else if (year > 0 && BCE_PATTERN.test(date_string)) {
 		year = -year;
 		if (!('no_year_0' in options))
+			// default: no year 0
 			no_year_0 = true;
 	}
 
@@ -485,7 +495,7 @@ function String_to_Date_default_parser(date_string,
 			year++;
 	} else if (year < 100
 			&& date_data[0].length < 3
-			// year padding: 0~99 的年份會加上此年份。
+			// year padding: 0–99 的年份會加上此年份。
 			&& (tmp = isNaN(options.year_padding) ? String_to_Date_default_parser.year_padding
 					: options.year_padding))
 		year += tmp;
@@ -511,7 +521,8 @@ function String_to_Date_default_parser(date_string,
 		options.post_process(date_data);
 
 	// 先設定小單位，再設定大單位：設定小單位時會影響到大單位。反之不然。
-	var date_value = new Date(0, 0, 0, +date_data[3] || 0,
+	var date_value;
+	date_value = new Date(0, 0, 0, +date_data[3] || 0,
 			0, +date_data[5] || 0, +date_data[6] || 0);
 	// new Date(10, ..) === new Date(1910, ..)
 	date_value.setFullYear(year || 0,
@@ -545,7 +556,7 @@ function String_to_Date_default_parser(date_string,
 }
 
 
-// 0~99 的年份會加上此年份 (1900)。
+// 0–99 的年份會加上此年份 (1900)。
 String_to_Date_default_parser.year_padding = (new Date(0,
 		0, 1)).getFullYear();
 String_to_Date.default_parser = String_to_Date_default_parser;
@@ -1080,7 +1091,7 @@ function get_month_days(is_leap, month, date) {
 	// month: serial → index
 	if (month |= 0)
 		--month;
-	// assert: month: 0~11, date: 1~28/29/30/31
+	// assert: month: 0–11, date: 1–28/29/30/31
 
 	var year_data = month_days.slice(month);
 
@@ -1693,8 +1704,8 @@ function Date_to_JD(date_value, options) {
 }
 // Julian Day Number (JDN)
 function Date_to_JDN(date_value, options) {
-	// JDN0: JD = -.5 ~ .5⁻
-	// JDN0: JD + .5 = 0 ~ 1⁻
+	// JDN0: JD = -.5 – .5⁻
+	// JDN0: JD + .5 = 0 – 1⁻
 	// 精神:以 UTC 計算時，當天從頭至尾都是相同的 JDN。
 	// 基本上世界每個地方在當地當天 12:0 都有相同的 JDN，但不保證世界每個地方在當地當天 0:0 都有相同的 JDN。
 	return Math.floor(Date_to_JD(date_value, options) + .5);
@@ -2020,7 +2031,7 @@ function index_to_stem_branch(index) {
 	// 當 < 0: 需要修正對負小數之模數計算。
 	// 原因出自上面計算負小數時，其實應採用 Math.floor()。
 	// Math.floor(-1.1) → -2。
-	// 但以 "-1.1 | 0", "-1.1 >> 0", "~~-1.1" 會  → -1。
+	// 但以 "-1.1 | 0", "-1.1 >> 0", "≈-1.1" 會  → -1。
 	// 效能:
 	// http://jsperf.com/math-floor-vs-math-round-vs-parseint
 	if (!isNaN(index = +index % SEXAGENARY_CYCLE_LENGTH)) {
@@ -2369,7 +2380,7 @@ function format_date(date_value, mode, zero_fill, date_separator, time_separator
 			//	.getTimezoneOffset() is in minute. 60*1000(milliseconds)=6e4(milliseconds)
 			a = format_date.UTC_offset = 6e4 * (new Date).getTimezoneOffset();
 
-		// 值過小時當作時間: d<90000000~24*60*60*1000，判別為當天，只顯示時間。不允許 d<0！
+		// 值過小時當作時間: d < 90000000 ≈ 24*60*60*1000，判別為當天，只顯示時間。不允許 d < 0！
 		date_value = new Date(Math.abs(a += date_value) < 9e7 ? a : date_value);
 		mode = 32;
 	} else if (b === 'string' && (a = date_value.toDate()))
