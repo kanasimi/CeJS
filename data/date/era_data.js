@@ -2596,67 +2596,33 @@ this.CeL_era_data = {
 
 (this.CeL_era_data.Maya = [
 		// http://www.mesoweb.com/palenque/resources/rulers/rulers_table.html
+		// http://research.famsi.org/whos_who/pm_index.php
 		// http://www.criscenzo.com/jaguarsun/dynasty.html
 		// https://en.wikipedia.org/wiki/Palenque
 
-		// b. 8.18.0.13.6 5 Kimi 14 K'ayab'
-		// a. 8.19.15.3.4 1 K'an 2 K'ayab'
-		"Palenque/K'uk' B'ahlam I|431/3/8~|:CE|君主名=Bahlum-K'uk';Quetzal;Kuk|生=397/3/28",
-		// b. 8.19.6.8.8 11 Lamat 6 Xul
-		// a. 8.19.19.11.17 2 Kab'an 10 Xul
-		'/"Casper"|435/8/7~|:CE|君主名=11 Rabbit;Manatee|生=422/8/6',
-		// b. 9.1.4.5.0 12 Ahaw 13 Sak
-		// a. 9.2.12.6.18 3 Etz'nab' 11 Xul
-		"/B'utz'aj Sak Chiik|487/7/26~|:CE|君主名=Butz'ah Sak Chik;Manik;Sak-Chik|生=459/11/12",
-		// b. 9.1.10.0.0 5 Ahaw 3 Sek
-		// a. 9.3.6.7.17 5 Kab'an 0 Sotz'
-		// d. 9.4.10.4.17 5 Kab'an 5 Mak
-		"/Ahkal Mo' Nahb' I|501/6/1~|:CE|君主名=Akul Anab;Chaacal;Cauac-Uinal;Chaac|生=465/7/3|卒=524/11/27",
-		// b. 9.2.15.3.8 12 Lamat 6 Wo
-		// a. 9.4.14.10.4 5 K'an 12 K'ayab'
-		// d. 9.6.11.0.16 7 Kib' 4 K'ayab'
-		"/K'an Joy Chitam I|529/2/21~|:CE|君主名=K'an Hoy Chitam;K'an Hok' Chitam;Kan-Xul;Hok|生=490/5/1|卒=565/2/4",
-		// b. 9.4.9.0.4 7 K'an 17 Mol
-		// a. 9.6.11.5.1 1 Imix 4 Sip
-		// d. 9.6.16.10.7 9 Manik' 5 Yaxk'in
-		"/Ahkal Mo' Nahb' II|565/4/30~|:CE|君主名=Akul Anab;Chaacal;Chaac;Cauac-Uinal|生=523/9/1|卒=570/7/19",
-		// b. 9.4.10.1.5 11 Chikchan 13 Ch'en
-		// a. 9.6.18.5.12 10 Eb' 0 Wo
-		// d. 9.7.9.5.5 11 Chikchan 3 K'ayab'
-		"/Kan B'ahlam I|572/4/4~|:CE|君主名=Chan-Bahlum;Bahlum|生=524/9/16|卒=583/1/30",
-		// a. 9.7.10.3.8 9 Lamat 1 Muwan
-		// d. 9.8.11.6.12 2 Eb' 0 Mak
-		"/Lady Yohl Ik'nal|583/12/19~|:CE|君主名=Ix Yohl Ik'nal;Lady Olnal;Lady Kan-Ik;Lady Ik;Lady K'anal-Ik'al|卒=604/11/2",
-		// a. 9.8.11.9.10 8 Ok 18 Muwan
-		// d. 9.8.19.4.6 2 Kimi 14 Mol
-		"/Aj Ne' Yohl Mat|604/12/30~|:CE|君主名=Ajen Yohl Mat;Ah Neh Yohl Mat;Ah Ne Ohl Mat;Ah Lawal Mat;Aahc-Kan;Ah K'an;Ac-Kan|卒=612/8/6",
-		// a. 9.8.19.7.18 9 Etz'nab' 6 Keh
-		"/Muwaan Mat|612/10/17~|:CE",
-		// b. 9.8.9.13.0 8 Ahaw 13 Pop
-		// a. 9.9.2.4.8 5 Lamat 1 Mol
-		// d. 9.12.11.5.18 6 Etz'nab' 11 Yax
-		"/K'inich Janahb' Pakal|615/7/24~|:CE|君主名=Pacal;Hanab Pakal;Pacal II;Pacal the Great;Lord Shield Pacal;Subject A;Sunshield;Sun-Shield;Lady 8 Flower|生=603/3/21|卒=683/8/26",
-		// b. 9.10.2.6.6 2 Kimi 19 Sotz'
+		// Birth - Accession - Period-ending - Death
+		"Palenque/K'uk' B'ahlam I|Maya:8.19.15.3.4 1 K'an 2 K'ayab'~|:CE|君主名=Bahlum-K'uk';Quetzal;Kuk|生=Maya:8.18.0.13.6 5 Kimi 14 K'ayab'",
+		'/"Casper"|Maya:8.19.19.11.17 2 Kab\'an 10 Xul~|:CE|君主名=11 Rabbit;Manatee|生=Maya:8.19.6.8.8 11 Lamat 6 Xul',
+		"/B'utz'aj Sak Chiik|Maya:9.2.12.6.18 3 Etz'nab' 11 Xul~|:CE|君主名=Butz'ah Sak Chik;Manik;Sak-Chik|生=Maya:9.1.4.5.0 12 Ahaw 13 Sak",
+		"/Ahkal Mo' Nahb' I|Maya:9.3.6.7.17 5 Kab'an 0 Sotz'~|:CE|君主名=Akul Anab;Chaacal;Cauac-Uinal;Chaac|生=Maya:9.1.10.0.0 5 Ahaw 3 Sek|卒=Maya:9.4.10.4.17 5 Kab'an 5 Mak",
+		"/K'an Joy Chitam I|Maya:9.4.14.10.4 5 K'an 12 K'ayab'~|:CE|君主名=K'an Hoy Chitam;K'an Hok' Chitam;Kan-Xul;Hok|生=Maya:9.2.15.3.8 12 Lamat 6 Wo|卒=Maya:9.6.11.0.16 7 Kib' 4 K'ayab'",
+		"/Ahkal Mo' Nahb' II|Maya:9.6.11.5.1 1 Imix 4 Sip~|:CE|君主名=Akul Anab;Chaacal;Chaac;Cauac-Uinal|生=Maya:9.4.9.0.4 7 K'an 17 Mol|卒=Maya:9.6.16.10.7 9 Manik' 5 Yaxk'in",
+		"/Kan B'ahlam I|Maya:9.6.18.5.12 10 Eb' 0 Wo~|:CE|君主名=Chan-Bahlum;Bahlum|生=Maya:9.4.10.1.5 11 Chikchan 13 Ch'en|卒=Maya:9.7.9.5.5 11 Chikchan 3 K'ayab'",
+		"/Lady Yohl Ik'nal|Maya:9.7.10.3.8 9 Lamat 1 Muwan~|:CE|君主名=Ix Yohl Ik'nal;Lady Olnal;Lady Kan-Ik;Lady Ik;Lady K'anal-Ik'al|卒=Maya:9.8.11.6.12 2 Eb' 0 Mak",
+		"/Aj Ne' Yohl Mat|Maya:9.8.11.9.10 8 Ok 18 Muwan~|:CE|君主名=Ajen Yohl Mat;Ah Neh Yohl Mat;Ah Ne Ohl Mat;Ah Lawal Mat;Aahc-Kan;Ah K'an;Ac-Kan|卒=Maya:9.8.19.4.6 2 Kimi 14 Mol",
+		"/Muwaan Mat|Maya:9.8.19.7.18 9 Etz'nab' 6 Keh~|:CE",
+		"/K'inich Janahb' Pakal|Maya:9.9.2.4.8 5 Lamat 1 Mol~|:CE|君主名=Pacal;Hanab Pakal;Pacal II;Pacal the Great;Lord Shield Pacal;Subject A;Sunshield;Sun-Shield;Lady 8 Flower|生=Maya:9.8.9.13.0 8 Ahaw 13 Pop|卒=Maya:9.12.11.5.18 6 Etz'nab' 11 Yax",
 		// heir designation 9.10.8.9.3 9 Ak'b'al 6 Xul
-		// a. 9.12.11.12.10 8 Ok 3 K'ayab'
-		// d. 9.13.10.1.5 6 Chikchan 3 Pop
-		"/K'inich Kan B'ahlam II|684/1/5~|:CE|君主名=Chan Bahlum|生=635/5/18|卒=702/2/14",
-		// b. 9.10.11.17.0 11 Ahaw 8 Mac
-		// a. 9.13.10.6.8 5 Lamat 6 Xul
+		"/K'inich Kan B'ahlam II|Maya:9.12.11.12.10 8 Ok 3 K'ayab'~|:CE|君主名=Chan Bahlum|生=Maya:9.10.2.6.6 2 Kimi 19 Sotz'|卒=Maya:9.13.10.1.5 6 Chikchan 3 Pop",
 		// captured 9.13.19.13.3 13 Ak'b'al 16 Yax
 		// dedicates Palace House A-D 9.14.8.14.15 9 Men 3 Yax
-		"/K'inich K'an Joy Chitam II|702/5/28~|:CE|君主名=K'an Hoy Chitam;K'an Hok' Chitam;Kan-Xul;Subject B;Hok';Xul;K'an-Hok-Xul|生=644/10/31",
-		// b. 9.12.6.5.8 3 Lamat 6 Sak
-		// a. 9.14.10.4.2 9 Ik' 5 K'ayab'
-		// d. Post 9.15.5.0.0 10 Ahaw 8 Ch'en
-		"/K'inich Ahkal Mo' Nahb' III|721/12/28~|:CE|君主名=Akul Anab;Chaacal;Lord Chaac;Subject C|生=678/9/11",
+		"/K'inich K'an Joy Chitam II|Maya:9.13.10.6.8 5 Lamat 6 Xul~|:CE|君主名=K'an Hoy Chitam;K'an Hok' Chitam;Kan-Xul;Subject B;Hok';Xul;K'an-Hok-Xul|生=Maya:9.10.11.17.0 11 Ahaw 8 Mac",
+		"/K'inich Ahkal Mo' Nahb' III|Maya:9.14.10.4.2 9 Ik' 5 K'ayab'~|:CE|君主名=Akul Anab;Chaacal;Lord Chaac;Subject C|生=Maya:9.12.6.5.8 3 Lamat 6 Sak|卒=Post 9.15.5.0.0 10 Ahaw 8 Ch'en",
 		// invests K'an Tok official 9.15.10.10.13 8 B'en 16 Kumk'u
 		"/K'inich Janahb' Pakal II|742/1/23~|:CE|疑|君主名=U Pakal K'inich Janahb' Pakal",
-		// a. 9.16.13.0.7 9 Manik' 15 Wo
 		// first katun anniversary 9.17.13.0.7 7 Manik' 0 Pax
-		"/K'inich K'uk' B'ahlam II|764/3/2~|:CE|君主名=Kuk",
-		// a. 9.18.9.4.4 7 K'an 17 Muwan
-		"/Wak Kimi Janahb' Pakal|799/11/11~810|疑|:CE|君主名=Wak Kimi Hanab Pakal;6 Kimi Pakal;Cimi-Pacal"
+		"/K'inich K'uk' B'ahlam II|Maya:9.16.13.0.7 9 Manik' 15 Wo~|:CE|君主名=Kuk",
+		"/Wak Kimi Janahb' Pakal|Maya:9.18.9.4.4 7 K'an 17 Muwan~9.18.10.4.4|疑|:CE|君主名=Wak Kimi Hanab Pakal;6 Kimi Pakal;Cimi-Pacal"
 
 ]).minute_offset = -6 * 60;
 
@@ -2731,7 +2697,10 @@ this.CeL_era_data = {
 		'/Artaxerxes II|Babylonian-404~|:Babylonian|疑|準=年|ruler=𐎠𐎼𐎫𐎧𐏁𐏂𐎠;Artaxerxes II Memnon',
 		'/Artaxerxes III|Babylonian-359/12~|:Babylonian|疑|準=年|ruler=اردشير سوم;𐎠𐎼𐎫𐎧𐏁𐏂𐎠;Artaxerxes III Ochus',
 		'/Artaxerxes IV|Babylonian-338/8~|:Babylonian|疑|準=年|ruler=اردشيرچهارم‎;Artaxerxes (Artaxšacā) IV Arses;Artaxerxes IV Arses',
-		'/Darius III|Babylonian-336~|:Babylonian|疑|準=年|ruler=Artashata;Codomannus',
+		// Babylonian “Astronomical Diary” mentioning a lunar eclipse on 13
+		// Ulūlu in the 5th year of Darius III [20 September 331 BCE], ten days
+		// before the battle of Gaugamela (British Museum)
+		'/Darius III|Babylonian-335~|:Babylonian|疑|準=年|ruler=Artashata;Codomannus',
 		'/Bessus|Babylonian:-330~-329/7|:Babylonian|疑|準=年|ruler=Artaxerxes V',
 
 		// Ἀργεάδαι, Argead dynasty

@@ -561,6 +561,9 @@ String_to_Date_default_parser.year_padding = (new Date(0,
 		0, 1)).getFullYear();
 String_to_Date.default_parser = String_to_Date_default_parser;
 
+// date_string.match(String_to_Date.parser_PATTERN) === [, parser name, date string ]
+String_to_Date.parser_PATTERN = /^\s*(?:([^:\s]+):)?\s*(.+)/i;
+
 String_to_Date.parser = {
 
 	Julian: Julian_String_to_Date,
@@ -590,6 +593,7 @@ String_to_Date.parser = {
 		throw new Error('String_to_Date.parser.strftime: Not Yet Implemented!');
 	}
 };
+
 
 
 //	時區縮寫。
@@ -2219,7 +2223,7 @@ _.age_of = age_of;
 
 // parse Durations
 function parse_period(period) {
-	var matched = period.trim().match(parse_period.PATTERN);
+	var matched = period.match(parse_period.PATTERN);
 	if (matched && (!/[日時]/.test(matched[2])
 	// 預防 "10月22日夜7-8時"
 	|| !/[時分秒\/]/.test(matched[2].match(/^(?:.*?)([年月日時分秒\/])/)[1]))) {
@@ -2235,8 +2239,14 @@ function parse_period(period) {
 	return period;
 }
 
+
+// '1/1/1-2/1/1' → [, '1/1/1', '2/1/1' ]
+// 'Neo-Babylonian/Nabopolassar' → null
 // "[^a-z]": 避免類似 "Neo-Babylonian" 被當作 period。
-parse_period.PATTERN = /^(.+[^a-z])\s*[\-–－—─~～〜﹣]\s*([^\-].+)$/i;
+//
+// "Maya:9.2.15.3.8 12 Lamat 6 Wo－Maya:9.6.11.0.16 7 Kib' 4 K'ayab'"
+// → [, "Maya:9.2.15.3.8 12 Lamat 6 Wo", "Maya:9.6.11.0.16 7 Kib' 4 K'ayab'" ]
+parse_period.PATTERN = /^(.+[^a-z]|[^\d]*\d.+)[\-–－—─~～〜﹣]\s*([^\-].+)$/i;
 
 _.parse_period = parse_period;
 

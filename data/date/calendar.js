@@ -1122,16 +1122,28 @@ Tzolkin_day_period = 13 * 20,
 */
 Haab_day_offset = 348, Haab_day_period = 20 * 18 + 5;
 
-function Maya_Date(date) {
+function Maya_Date(date, minute_offset, options) {
 	if (typeof date === 'string')
 		date = date.split(/[,.]/);
 	else if (!Array.isArray(date))
 		return new Date(NaN);
 
-	var days = 0, length = date.length - 2, i = 0;
+	var days = 0, length = date.length - 1, i = 0,
+	// e.g., 8.19.15.3.4 1 K'an 2 K'ayab'
+	matched = date[length].match(/^(\d{1,2})\s/);
+	if (matched)
+		date[length] = matched[1] | 0;
+	if (matched = date[0].match(/\s(\d{1,2})$/))
+		date[0] = matched[1] | 0;
+	length--;
+
 	while (i < length)
 		days = days * 20 + (date[i++] | 0);
 	days = (days * 18 + (date[i] | 0)) * 20 + (date[++i] | 0);
+
+	if (options && options.period_end)
+		days++;
+
 	return new Date(days * ONE_DAY_LENGTH_VALUE + Maya_epoch);
 }
 
@@ -2970,6 +2982,10 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // export methods.
 
+// e.g., "8.19.15.3.4 1 K'an 2 K'ayab'".to_Date('Maya').format()
+Object.assign(String_to_Date.parser, {
+	Maya : Maya_Date
+});
 
 library_namespace.set_method(Date.prototype, {
 	to_Long_Count : set_bind(Maya_Date.to_Long_Count),

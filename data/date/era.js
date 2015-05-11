@@ -4104,7 +4104,9 @@ if (typeof CeL === 'function')
 				var tmp;
 				if (typeof date === 'string' && (tmp = date.match(
 				// [ matched, parser, 起, 訖1, 訖2 ]
-				/^(?:([^:]+):)?([^–－—~～〜至:]*)(?:[–－—~～〜至](.*)|(\+\d+))\s*$/)))
+				/^\s*(?:([^:\s]+):)?\s*([^–－—~～〜至:]*)(?:[–－—~～〜至]\s*(.*)|(\+\d+))\s*$/
+				// @see String_to_Date.parser_PATTERN
+				)))
 					date = [ tmp[2], tmp[3] || tmp[4], tmp[1] ];
 
 				if (Array.isArray(date) && date.length > 0) {
@@ -4113,8 +4115,8 @@ if (typeof CeL === 'function')
 						tmp = date[0];
 						// 針對從下一筆紀年調來的資料。
 						if (typeof tmp === 'string' && (tmp = tmp
-						//
-						.match(/^(?:([^:]+):)?([^–－—~～〜至:]*)/)))
+						// @see String_to_Date.parser_PATTERN
+						.match(/^\s*(?:([^:\s]+):)?\s*([^–－—~～〜至:]*)/)))
 							date = [ tmp[2], date[1], tmp[1] ];
 					}
 
@@ -4159,7 +4161,20 @@ if (typeof CeL === 'function')
 						}
 					};
 
-					if (parser in search_index) {
+					// 像是 'Maya'，在登記完 Maya 紀年後便存在。
+					// 因此需要先檢查 (parser in String_to_Date.parser)
+					// 再檢查 (parser in search_index)
+					if (parser in String_to_Date.parser) {
+						string = String(date).trim();
+						date = string.to_Date({
+							parser : parser === PASS_PARSER ? undefined
+									: parser || DEFAULT_DATE_PARSER,
+							period_end : period_end,
+							// 於 CE 可避免 80 被 parse 成 1980。
+							year_padding : 0
+						});
+
+					} else if (parser in search_index) {
 						var era_Set = search_index[parser];
 						if (!(era_Set instanceof Set)
 						// 確定 parser 為唯一且原生的 era key。
@@ -7111,6 +7126,7 @@ if (typeof CeL === 'function')
 				pack : pack_era,
 				extract : extract_calendar_data,
 				periods : get_periods,
+				// normalize_date : normalize_date,
 				get_candidate : get_candidate,
 				dates : get_dates,
 				era_list : create_era_search_pattern,

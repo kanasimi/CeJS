@@ -770,9 +770,8 @@ function add_tag(period, data, group, register_only, options) {
 	//
 	arg_passed = CeL.parse_period(period),
 	// from date
-	date = CeL.era(Array.isArray(arg_passed) ? arg_passed[0] : period, {
-		date_only : true
-	});
+	date = draw_era
+			.get_date(Array.isArray(arg_passed) ? arg_passed[0] : period);
 
 	if (!date) {
 		// Cannot parse
@@ -782,10 +781,7 @@ function add_tag(period, data, group, register_only, options) {
 
 	if (Array.isArray(arg_passed)) {
 		// to date
-		arg_passed = CeL.era(arg_passed[1], {
-			date_only : true,
-			period_end : true
-		});
+		arg_passed = draw_era.get_date(arg_passed[1], true);
 		if (!arg_passed) {
 			CeL.warn('add_tag: 無法解析 [' + period + ']!');
 			return;
@@ -1003,12 +999,10 @@ function draw_era(hierarchy) {
 		if (periods.生 && periods.卒) {
 			if (draw_era.options.adapt_lifetime) {
 				// 若君主在世時段於本 period 之外，則擴張範圍。
-				start_time = Math.min(start_time - 0, CeL.era(periods.生[0], {
-					date_only : true
-				}) - 0);
-				ratio = Math.max(ratio - 0, CeL.era(periods.卒[0], {
-					date_only : true
-				}) - 0);
+				start_time = Math.min(start_time - 0, draw_era
+						.get_date(periods.生[0]) - 0);
+				ratio = Math
+						.max(ratio - 0, draw_era.get_date(periods.卒[0]) - 0);
 			}
 			// 以 tag 顯示君主生卒標記。
 			if (!periods.added) {
@@ -1286,6 +1280,18 @@ draw_era.options = {
 
 draw_era.redraw = function() {
 	draw_era(SVG_object.hierarchy);
+};
+
+draw_era.get_date = function(date, period_end) {
+	var matched = date.match(CeL.String_to_Date.parser_PATTERN),
+	//
+	options = {
+		date_only : true,
+		period_end : period_end
+	};
+	if (matched && (matched[1] in CeL.String_to_Date.parser))
+		return CeL.String_to_Date.parser[matched[1]](matched[2], 0, options);
+	return CeL.era(date, options);
 };
 
 // click and change the option of this.title
