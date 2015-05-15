@@ -1027,9 +1027,9 @@ if (typeof CeL === 'function')
 			 * <br />
 			 * does not include nutation or aberration.
 			 * 
-			 * 已 apply precision:<br />
+			 * 依 vsop87.doc 的說法，VSOP87D 已 apply precision:<br />
 			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/vsop87.doc<br />
-			 * The coordinates of the version C an D are given in the frame
+			 * The coordinates of the versions C and D are given in the frame
 			 * defined by the mean equinox and ecliptic of the date. This frame
 			 * is deduced from the previous one by precessional moving between
 			 * J2000 and the epoch of the date.

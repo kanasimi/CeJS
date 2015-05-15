@@ -2167,6 +2167,56 @@ _.Indian_national_Date = Indian_national_Date;
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+/**
+ * 泰國佛曆
+ * @see https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2
+ * @see https://th.wikipedia.org/wiki/%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B9%88%E0%B8%AD%E0%B8%A2:%E0%B9%80%E0%B8%AB%E0%B8%95%E0%B8%B8%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%93%E0%B9%8C%E0%B8%9B%E0%B8%B1%E0%B8%88%E0%B8%88%E0%B8%B8%E0%B8%9A%E0%B8%B1%E0%B8%99
+ */
+function Date_to_Thai(date, month, year, weekday) {
+	if (library_namespace.is_Date(date)) {
+		weekday = date.getDay();
+		year = 543 + date.getFullYear();
+		month = date.getMonth();
+		date = date.getDate();
+	} else if (month > 0)
+		// month start from 0.
+		month--;
+	else
+		month = null;
+
+	date = [
+			(weekday = Date_to_Thai.weekday_name[weekday]) ? 'วัน' + weekday
+					: '', date || '', Date_to_Thai.month_name[month] || '',
+			year || '' ];
+	if (date[0] && (date[1] || date[2] || date[3]))
+		date[0] += 'ที่';
+
+	if (!date[2] && !isNaN(date[3]))
+		// year only?
+		date[3] = 'พ.ศ. ' + date[3];
+
+	year = [];
+	date.forEach(function(n) {
+		if (n)
+			year.push(n);
+	});
+	return year.join(' ');
+}
+
+// start from 0.
+Date_to_Thai.month_name = 'มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม'
+		.split('|');
+
+// 0: Sunday.
+Date_to_Thai.weekday_name = 'อาทิตย์|จันทร์|อังคาร|พุธ|พฤหัสบดี|ศุกร์|เสาร์'
+		.split('|');
+
+
+_.Date_to_Thai = Date_to_Thai;
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 長曆: 巴哈伊曆法 / Bahá'í calendar / Badí‘ calendar
 // https://en.wikipedia.org/wiki/Bah%C3%A1'%C3%AD_calendar
 // http://www.bahai.us/welcome/principles-and-practices/bahai-calendar/
@@ -2254,7 +2304,7 @@ function Date_to_Bahai(date, options) {
 	// 日期序數→日期名。year/month/date index to serial.
 	year -= Bahai_epoch_year - 1;
 	date = options.single_year ? [ year ] : Bahai_Date.Vahid(year,
-			options.numerical_date);
+			options.numerical_date || options.format === 'serial');
 	++days;
 	if (options.format !== 'serial') {
 		days = Bahai_Date.month_name(days);
@@ -2980,6 +3030,29 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// Myanmar calendar, 緬曆
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// TODO:
+// Egyptian calendar, 古埃及曆法.
+// According to Roman writer Censorinus, the Egyptian New Year's Day fell on July 20 in the Julian Calendar in 139 CE, which was a heliacal rising of Sirius in Egypt.
+// https://en.wikipedia.org/wiki/Sothic_cycle
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// TODO:
+// https://en.wikipedia.org/wiki/Bengali_calendar
+// https://en.wikipedia.org/wiki/Nanakshahi_calendar
+
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // export methods.
 
 // e.g., "8.19.15.3.4 1 K'an 2 K'ayab'".to_Date('Maya').format()
@@ -2997,6 +3070,7 @@ library_namespace.set_method(Date.prototype, {
 				/ ONE_DAY_LENGTH_VALUE | 0, options);
 	},
 	to_Indian_national : set_bind(Date_to_Indian_national),
+	to_Thai : set_bind(Date_to_Thai),
 	to_Bahai : set_bind(Date_to_Bahai),
 	to_Coptic : set_bind(Date_to_Coptic),
 	to_Ethiopian : set_bind(Date_to_Ethiopian),

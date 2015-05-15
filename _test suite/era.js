@@ -217,34 +217,26 @@ var PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
 CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '[前-]?\\d'), pin_column,
 // 可選用的文字式年曆欄位。
 selected_column = {
-	JDN : true,
-	// 'astronomy/solarterms' : true,
-	// 'astronomy/solarterm_days' : true,
-	// '曆注/日家九星' : true
+	// JDN : true,
 	contemporary : true
+},
+// 依特定國家自動增加這些欄。
+auto_add_column = {
+	中國 : [ 'Year naming/歲次', '曆注/月干支', '曆注/日干支' ],
+	Maya : [ 'calendar/Long_Count', 'calendar/Tzolkin', 'calendar/Haab' ],
+	Mesopotamian : [ 'calendar/Hebrew' ]
 },
 // 可選用的文字式年曆 title = { id : [th, function (date) {} ] }
 calendar_column,
 //
 default_column = [ {
 	T : '朝代紀年日期'
-}, [ {
-	T : CE_name
-}, '(', {
-	T : '星期'
-}, ')' ]
-// , R : '0: 周日/星期日/禮拜天, 1: 周一, 餘類推'
-, {
-	T : '歲次',
-	R : '年干支'
 }, {
-	T : '月干支',
-	R : '月干支/大小月。此為推算所得，於部分非寅正起始之年分可能有誤！',
-	S : 'font-size:.7em;'
-}, {
-	T : '日干支',
-	S : 'font-size:.7em;'
+	T : CE_name,
+	R : 'Common Era'
 } ];
+
+auto_add_column.日本 = auto_add_column.한국 = auto_add_column['Việt Nam'] = auto_add_column.中國;
 
 function pin_text(gettext) {
 	var text = pin_column ? 'Unpin' : 'Pin';
@@ -322,7 +314,7 @@ function show_calendar(era_name) {
 					T : '分類'
 				}, ': ', {
 					T : group,
-					R : calendar_column[group][0] || ''
+					R : calendar_column[group][0]
 				}, calendar_column[group][1] ? [ {
 					span : calendar_column[group][1],
 					C : 'calendar_column_notice'
@@ -392,19 +384,14 @@ function show_calendar(era_name) {
 
 		if (tmp = date.精 === '年')
 			is_年譜 = true;
-		tmp = date.format(
-				{
-					parser : 'CE',
-					format : tmp ? '%紀年名 %年年|%Y年|%年干支||'
-					//
-					: '%紀年名 %年年%月月%日日|%Y/%m/%d('
-							+ (_.is_domain_name('ja') ? '%七曜' : '%w')
-							+ ')|%年干支|%月干支%大小月|%日干支',
-					locale : 'cmn-Hant-TW',
-					as_UTC_time : true
-				})
-		// 去除不需要以 space 間隔之紀元名中之 space。
-		.replace(/([^a-z\d'"]) (\d)/gi, '$1$2').replace(/星期/, '').split('|');
+		tmp = CeL.era.reduce_name(date.format({
+			parser : 'CE',
+			format : tmp ? '%紀年名 %年年|%Y年'
+			//
+			: '%紀年名 %年年%月月%日日|%Y/%m/%d',
+			locale : 'cmn-Hant-TW',
+			as_UTC_time : true
+		})).split('|');
 
 		if (matched = tmp[0]
 		// 後處理: 添加進一步之日期捷徑。
@@ -427,8 +414,8 @@ function show_calendar(era_name) {
 			}, matched[3] ];
 
 		// 後處理。
-		// 公曆換月。
-		if (tmp[1].includes('\/1('))
+		// 標註公曆換月。
+		if (tmp[1].endsWith('/1'))
 			tmp[1] = {
 				span : tmp[1],
 				S : 'color:#f80'
@@ -489,7 +476,7 @@ function show_calendar(era_name) {
 		target : '_self',
 		C : 'to_select',
 		onclick : click_title_as_era
-	}, {
+	}, CeL.era.NEED_SPLIT_POSTFIX.test(era_caption) ? ' ' : '', {
 		T : is_年譜 ? '年譜' : '曆譜'
 	}, '（共有 ' + dates.length + ' 個' + (dates.type ? '時' : '年') + '段紀錄）' ]
 			: '無可供列出之曆譜！';
@@ -505,6 +492,18 @@ function show_calendar(era_name) {
 	if (hidden_column.length > 0) {
 		hidden_column.unshift({
 			div : {
+				T : '全不選',
+				R : 'Remove all columns. 除去所有欄',
+				onclick : function() {
+					for ( var column in selected_column)
+						delete selected_column[column];
+					translate_era();
+				}
+			},
+			C : 'column_select_option_button',
+			S : 'font-size:.7em;'
+		}, {
+			div : {
 				T : pin_text(),
 				R : 'Click to pin / unpin',
 				onclick : function() {
@@ -512,7 +511,7 @@ function show_calendar(era_name) {
 					this.innerHTML = pin_text(true);
 				}
 			},
-			id : 'column_select_pin_button'
+			C : 'column_select_option_button'
 		}, ': ');
 		title = [ {
 			div : [ {
@@ -1387,12 +1386,10 @@ draw_era.click_Era = function() {
 			.era(hierarchy.join(''));
 	draw_era.draw_navigation(hierarchy, true);
 
-	era_input_object.setValue(era.format({
+	era_input_object.setValue(CeL.era.reduce_name(era.format({
 		format : era.精 === '年' ? '%紀年名 %年年' : '%紀年名 %年年%月月%日日',
 		locale : 'cmn-Hant-TW'
-	}))
-	// 去除不需要以 space 間隔之紀元名中之 space。
-	.replace(/([^a-z\d'"]) (\d)/gi, '$1$2');
+	})));
 	translate_era();
 	return false;
 };
@@ -1611,16 +1608,11 @@ function translate_era(era) {
 		set_era_by_url_data(era);
 
 		if (!(date.國家 in had_inputted)) {
-			// 自動增加此欄。
-			if (date.國家 === 'Maya')
-				selected_column['calendar/Long_Count']
-				//
-				= selected_column['calendar/Tzolkin']
-				//
-				= selected_column['calendar/Haab'] = true;
-			else if (date.國家 === 'Mesopotamian')
-				selected_column['calendar/Hebrew'] = true;
-
+			// 依特定國家自動增加這些欄。
+			if (date.國家 in auto_add_column)
+				auto_add_column[date.國家].forEach(function(note) {
+					selected_column[note] = true;
+				});
 			had_inputted[date.國家] = true;
 		}
 
@@ -1823,13 +1815,11 @@ function parse_text(text) {
 		onclick : function() {
 			var era = CeL.era.node_era(this, 'String');
 			if (era) {
-				era = era.to_Date('era').format({
+				era = CeL.era.reduce_name(era.to_Date('era').format({
 					parser : 'CE',
 					format : '%紀年名 %年年%月月%日日',
 					locale : 'cmn-Hant-TW'
-				})
-				// 去除不需要以 space 間隔之紀元名中之 space。
-				.replace(/([^a-z\d'"]) (\d)/gi, '$1$2');
+				}));
 				era_input_object.setValue(era);
 				translate_era(era);
 			} else
@@ -2327,7 +2317,27 @@ function affairs() {
 
 	// calendar_column
 	list = {
-		// 公曆日期格式
+		week : [ {
+			a : {
+				T : '星期'
+			},
+			// 0: 周日/星期日/禮拜天, 1: 周一, 餘類推
+			R : '星期/週/禮拜',
+			href : 'https://en.wikipedia.org/wiki/Week',
+			S : 'font-size:.7em;'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
+
+			if (_.is_domain_name('ja'))
+				return date.七曜;
+
+			return date.format({
+				format : '%w',
+				locale : _.get_domain_name()
+			});
+		} ],
+
 		JDN : [
 				{
 					a : {
@@ -2358,26 +2368,27 @@ function affairs() {
 			return date_String;
 		} ],
 
-		ISO : [
-				{
-					a : {
-						T : 'ISO 8601'
-					},
-					R : 'YYYY-MM-DD\nThe standard uses the proleptic Gregorian calendar.',
-					href : 'https://en.wikipedia.org/wiki/ISO_8601',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					var year = date.getFullYear() | 0;
-					return date.精 === '年' ? year + '年'
-					//
-					: year.pad(year < 0 ? 5 : 4) + date.format('-%2m-%2d');
-				} ],
+		ISO : [ {
+			a : {
+				T : 'ISO 8601'
+			},
+			R : '日期格式 YYYY-MM-DD'
+			//
+			+ '\nThe standard uses the proleptic Gregorian calendar.',
+			href : 'https://en.wikipedia.org/wiki/ISO_8601',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			var year = date.getFullYear() | 0;
+			return date.精 === '年' ? year + '年'
+			//
+			: year.pad(year < 0 ? 5 : 4) + date.format('-%2m-%2d');
+		} ],
 
 		ordinal_date : [ {
 			a : {
 				T : '年日期'
 			},
-			R : '表示年內的天數',
+			R : '表示年內的天數。日期格式 YYYY-DDD',
 			href : 'https://en.wikipedia.org/wiki/Ordinal_date'
 		}, function(date) {
 			var year = date.getFullYear() | 0;
@@ -2436,7 +2447,7 @@ function affairs() {
 			T : '共存紀年',
 			R : '本日/本年同時期存在之其他紀年。對未有詳實資料者，僅約略準確至所列日期！'
 		}, function(date) {
-			return date.共存紀年 || '';
+			return date.共存紀年;
 		} ],
 
 		// --------------------------------------------------------------------
@@ -2473,7 +2484,8 @@ function affairs() {
 			href : 'https://en.wikipedia.org/wiki/Axial_precession'
 		}, function(date) {
 			if (/* date.準 || */date.精)
-				return '';
+				return;
+
 			var precession = CeL.precession(
 			//
 			CeL.TT(new Date(date.offseted_value())));
@@ -2495,7 +2507,8 @@ function affairs() {
 			href : 'https://zh.wikipedia.org/wiki/%E8%8A%82%E6%B0%94'
 		}, function(date) {
 			if (/* date.準 || */date.精)
-				return '';
+				return;
+
 			var JD = CeL.Date_to_JD(date.offseted_value());
 			date = CeL.solar_term_of_JD(JD, {
 				pentads : true,
@@ -2515,7 +2528,8 @@ function affairs() {
 			S : 'font-size:.8em;'
 		}, function(date) {
 			if (/* date.準 || */date.精)
-				return '';
+				return;
+
 			var JD = CeL.Date_to_JD(date.offseted_value());
 
 			date = CeL.solar_term_of_JD(JD, {
@@ -2538,7 +2552,8 @@ function affairs() {
 			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
 		}, function(date) {
 			if (/* date.準 || */date.精)
-				return '';
+				return;
+
 			var JD = CeL.TT(new Date(date.offseted_value()));
 			return {
 				span : CeL.show_degrees(CeL.solar_coordinate(JD).apparent, 0)
@@ -2562,7 +2577,8 @@ function affairs() {
 			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
 		}, function(date) {
 			if (/* date.準 || */date.精)
-				return '';
+				return;
+
 			var JD = CeL.TT(new Date(date.offseted_value())),
 			//
 			V = CeL.lunar_coordinate(JD).V;
@@ -2592,7 +2608,8 @@ function affairs() {
 			+ '%E8%A1%9D_%28%E5%A4%A9%E9%AB%94%E4%BD%8D%E7%BD%AE%29'
 		}, function(date) {
 			if (/* date.準 || */date.精)
-				return '';
+				return;
+
 			var JD = CeL.TT(new Date(date.offseted_value())),
 			//
 			degrees = CeL.lunar_phase_angel_of_JD(JD);
@@ -2617,7 +2634,7 @@ function affairs() {
 			href : 'https://zh.wikipedia.org/wiki/%E6%9C%88%E7%9B%B8'
 		}, function(date) {
 			if (/* date.準 || */date.精)
-				return '';
+				return;
 
 			var JD = CeL.TT(new Date(date.offseted_value())),
 			//
@@ -2654,7 +2671,8 @@ function affairs() {
 			href : 'http://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html'
 		}, function(date) {
 			if (/* date.準 || */date.精)
-				return '';
+				return;
+
 			var JD = CeL.Date_to_JD(date.offseted_value()),
 			//
 			ΔT = CeL.deltaT.JD(JD);
@@ -2671,7 +2689,8 @@ function affairs() {
 			href : 'https://en.wikipedia.org/wiki/Terrestrial_Time'
 		}, function(date) {
 			if (/* date.準 || */date.精)
-				return '';
+				return;
+
 			return CeL.TT(new Date(date.offseted_value()));
 		} ],
 
@@ -2689,7 +2708,8 @@ function affairs() {
 			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
 		}, function(date) {
 			if (/* date.準 || */date.精)
-				return '';
+				return;
+
 			var JD = CeL.Date_to_JD(date.offseted_value()),
 			//
 			年朔日 = CeL.定朔(date, {
@@ -2761,24 +2781,29 @@ function affairs() {
 			} ];
 		} ],
 
-		Solar_Hijri : [
-				{
-					a : {
-						T : 'گاه‌شماری هجری خورشیدی'
-					},
-					R : 'Solar Hijri calendar / 現代伊朗曆/阿富汗曆(陽曆) / ヒジュラ太陽暦/アフガン暦',
-					href : 'https://fa.wikipedia.org/wiki/%DA%AF%D8%A7%D9%87%E2%80%8C%D8%B4%D9%85%D8%A7%D8%B1%DB%8C_%D9%87%D8%AC%D8%B1%DB%8C_%D8%AE%D9%88%D8%B1%D8%B4%DB%8C%D8%AF%DB%8C'
-				}, function(date) {
-					return date.精 === '年' ? 'SH' + date.to_Solar_Hijri({
-						format : 'serial'
-					})[0] : [ 'SH' + date.to_Solar_Hijri({
-						format : 'serial'
-					}).slice(0, 3).join('/') + '; ', {
-						span : date.to_Solar_Hijri(),
-						dir : 'rtl',
-						S : 'unicode-bidi: -moz-isolate;'
-					} ];
-				} ],
+		Solar_Hijri : [ {
+			a : {
+				T : 'گاه‌شماری هجری خورشیدی'
+			},
+			R : 'Solar Hijri calendar / 現代伊朗曆/阿富汗曆(陽曆) / ヒジュラ太陽暦/アフガン暦/ジャラリ暦',
+			href : 'https://fa.wikipedia.org/wiki/'
+			//
+			+ '%DA%AF%D8%A7%D9%87%E2%80%8C%D8%B4%D9%85%D8%A7%D8%B1%DB%8C'
+			//
+			+ '_%D9%87%D8%AC%D8%B1%DB%8C'
+			//
+			+ '_%D8%AE%D9%88%D8%B1%D8%B4%DB%8C%D8%AF%DB%8C'
+		}, function(date) {
+			return date.精 === '年' ? 'SH' + date.to_Solar_Hijri({
+				format : 'serial'
+			})[0] : [ 'SH' + date.to_Solar_Hijri({
+				format : 'serial'
+			}).slice(0, 3).join('/') + '; ', {
+				span : date.to_Solar_Hijri(),
+				dir : 'rtl',
+				S : 'unicode-bidi: -moz-isolate;'
+			} ];
+		} ],
 
 		Hebrew : [
 				{
@@ -3037,42 +3062,65 @@ function affairs() {
 		// 納音 12直 27宿 7曜 節気/72候/没滅日 大小歳/凶会 下段 雑注 日遊 節月
 		// http://www.wagoyomi.info/guchu.cgi
 
-		Chinese_solar_terms : [
-				{
-					a : {
-						T : '明清節氣'
-					},
-					R : '明朝、清朝、中國傳統曆法 (1516–1941 CE) 之實曆節氣 from 時間規範資料庫.\n'
-					//
-					+ '有些嚴重問題須注意，見使用說明。',
-					href : 'http://140.112.30.230/datemap/reference.php'
-				},
-				function(date) {
-					if (/* date.準 || */date.精)
-						return '';
+		月干支 : [ {
+			a : {
+				T : '月干支'
+			},
+			R : '月干支/大小月。此為推算所得，於部分非寅正起始之年分可能有誤！'
+			//
+			+ '\n警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
+			href : 'https://zh.wikipedia.org/wiki/%E5%B9%B2%E6%94%AF',
+			S : 'font-size:.7em;'
+		}, function(date) {
+			return (date.月干支 || '') + (date.大小月 || '');
+		} ],
 
-					initialize_thdl_solar_term && initialize_thdl_solar_term();
+		日干支 : [ {
+			a : {
+				T : '日干支'
+			},
+			R : '警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
+			href : 'https://zh.wikipedia.org/wiki/%E5%B9%B2%E6%94%AF',
+			S : 'font-size:.7em;'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && date.format({
+				format : '%日干支',
+				locale : CeL.gettext.to_standard('Chinese')
+			});
+		} ],
 
-					var year = date.getFullYear();
-					if (year < thdl_solar_term.start)
-						return '';
-					var time, year_data = thdl_solar_term[year];
-					if (!year_data
-					//
-					|| (time = date.getTime()) < year_data[0])
-						// 試試看前一年。
-						year_data = thdl_solar_term[--year];
+		Chinese_solar_terms : [ {
+			a : {
+				T : '明清節氣'
+			},
+			R : '明朝、清朝、中國傳統曆法 (1516–1941 CE) 之實曆節氣 from 時間規範資料庫.\n'
+			//
+			+ '有些嚴重問題須注意，見使用說明。',
+			href : 'http://140.112.30.230/datemap/reference.php'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
 
-					year_data = year_data
-							&& CeL.SOLAR_TERMS[year_data.indexOf(time)] || '';
-					return year_data ? date.getFullYear() < thdl_solar_term.準 ? {
-						span : year_data,
-						R : '推算所得',
-						S : 'color:#888;'
-					}
-							: year_data
-							: '';
-				} ],
+			initialize_thdl_solar_term && initialize_thdl_solar_term();
+
+			var year = date.getFullYear();
+			if (year < thdl_solar_term.start)
+				return;
+
+			var time, year_data = thdl_solar_term[year];
+			if (!year_data
+			//
+			|| (time = date.getTime()) < year_data[0])
+				// 試試看前一年。
+				year_data = thdl_solar_term[--year];
+
+			year_data = year_data && CeL.SOLAR_TERMS[year_data.indexOf(time)];
+			return year_data && date.getFullYear() < thdl_solar_term.準 && {
+				span : year_data,
+				R : '推算所得',
+				S : 'color:#888;'
+			};
+		} ],
 
 		// 日柱的五行 日の五行 : 以六十甲子納音代
 		納音 : [ {
@@ -3082,7 +3130,7 @@ function affairs() {
 			R : '六十甲子納音、納音五行。中曆曆注、日本の暦注の一つ。',
 			href : 'https://zh.wikipedia.org/wiki/%E7%B4%8D%E9%9F%B3'
 		}, function(date) {
-			return /* !date.準 && */!date.精 && CeL.era.納音(date) || '';
+			return /* !date.準 && */!date.精 && CeL.era.納音(date);
 		} ],
 
 		// http://koyomi8.com/sub/rekicyuu_doc01.htm#jyuunicyoku
@@ -3107,7 +3155,8 @@ function affairs() {
 					S : 'font-size:.8em;'
 				}, function(date) {
 					if (/* date.準 || */date.精)
-						return '';
+						return;
+
 					var JD = CeL.Date_to_JD(date.offseted_value());
 
 					var index = CeL.stem_branch_index(date)
@@ -3119,7 +3168,7 @@ function affairs() {
 					// 30 = TURN_TO_DEGREES / (SOLAR_TERMS_NAME / 2)
 					// = 360 / (24 / 2)
 					- CeL.solar_coordinate(JD + 1).apparent / 30 | 0;
-					return 建除_LIST[index % 建除_LIST.length] || '';
+					return 建除_LIST[index % 建除_LIST.length];
 				} ],
 
 		反支 : [ {
@@ -3135,7 +3184,7 @@ function affairs() {
 			return /* !date.準 && */!date.精 && CeL.era.反支(date, {
 				span : '反支',
 				S : 'color:#888;'
-			}) || '';
+			});
 		} ],
 
 		血忌 : [ {
@@ -3146,7 +3195,7 @@ function affairs() {
 			href : 'http://shc2000.sjtu.edu.cn/030901/lishu.htm',
 			S : 'font-size:.8em;'
 		}, function(date) {
-			return /* !date.準 && */!date.精 && CeL.era.血忌(date) || '';
+			return /* !date.準 && */!date.精 && CeL.era.血忌(date);
 		} ],
 
 		月の別名 : [
@@ -3157,9 +3206,8 @@ function affairs() {
 					R : '各月の別名',
 					href : 'https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E6%9A%A6#.E5.90.84.E6.9C.88.E3.81.AE.E5.88.A5.E5.90.8D',
 					S : 'font-size:.8em;'
-				},
-				function(date) {
-					return /* !date.準 && */!date.精 && CeL.era.月の別名(date) || '';
+				}, function(date) {
+					return /* !date.準 && */!date.精 && CeL.era.月の別名(date);
 				} ],
 
 		六曜 : [
@@ -3171,7 +3219,7 @@ function affairs() {
 					href : 'https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C',
 					S : 'font-size:.8em;'
 				}, function(date) {
-					return /* !date.準 && */!date.精 && CeL.era.六曜(date) || '';
+					return /* !date.準 && */!date.精 && CeL.era.六曜(date);
 				} ],
 
 		七曜 : [ {
@@ -3182,7 +3230,7 @@ function affairs() {
 			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5',
 			S : 'font-size:.8em;'
 		}, function(date) {
-			return /* !date.準 && */!date.精 && CeL.era.七曜(date) || '';
+			return /* !date.準 && */!date.精 && CeL.era.七曜(date);
 		} ],
 
 		// 暦注上段
@@ -3194,12 +3242,12 @@ function affairs() {
 			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5'
 		}, function(date) {
 			var 七曜 = /* !date.準 && */!date.精 && CeL.era.七曜(date);
-			return 七曜 ? {
+			return 七曜 && {
 				span : 七曜 + '曜日',
 				S : 七曜 === '日' ? 'color:#f34'
 				//
 				: 七曜 === '土' ? 'color:#2b3' : ''
-			} : '';
+			};
 		} ],
 
 		/**
@@ -3215,9 +3263,8 @@ function affairs() {
 					R : '中曆曆注、日本の暦注の一つ。又稱二十八舍或二十八星。',
 					href : 'https://zh.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
 					S : 'font-size:.8em;'
-				},
-				function(date) {
-					return /* !date.準 && */!date.精 && CeL.era.二十八宿(date) || '';
+				}, function(date) {
+					return /* !date.準 && */!date.精 && CeL.era.二十八宿(date);
 				} ],
 
 		二十七宿 : [
@@ -3228,9 +3275,8 @@ function affairs() {
 					R : '日本の暦注の一つ\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！',
 					href : 'https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E4%B8%83%E5%AE%BF',
 					S : 'font-size:.8em;'
-				},
-				function(date) {
-					return /* !date.準 && */!date.精 && CeL.era.二十七宿(date) || '';
+				}, function(date) {
+					return /* !date.準 && */!date.精 && CeL.era.二十七宿(date);
 				} ],
 
 		日家九星 : [ {
@@ -3241,7 +3287,7 @@ function affairs() {
 			href : 'http://koyomi8.com/sub/9sei.htm'
 		}, function(date) {
 			if (/* date.準 || */date.精)
-				return '';
+				return;
 
 			var 九星 = CeL.era.日家九星(date),
 			//
@@ -3270,7 +3316,7 @@ function affairs() {
 			href : 'https://archive.org/details/06056509.cn'
 		}, function(date) {
 			// 入中宫
-			return CeL.era.月九星(date) || '';
+			return CeL.era.月九星(date);
 		} ],
 
 		年九星 : [ {
@@ -3281,7 +3327,7 @@ function affairs() {
 			href : 'https://archive.org/details/06056509.cn'
 		}, function(date) {
 			// 入中宫
-			return CeL.era.年九星(date) || '';
+			return CeL.era.年九星(date);
 		} ],
 
 		三元九運 : [
@@ -3294,7 +3340,7 @@ function affairs() {
 					href : 'http://www.twwiki.com/wiki/%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B',
 					S : 'font-size:.8em;'
 				}, function(date) {
-					return CeL.era.三元九運(date) || '';
+					return CeL.era.三元九運(date);
 				} ],
 
 		astrological : [
@@ -3307,7 +3353,8 @@ function affairs() {
 					S : 'font-size:.8em;'
 				}, function(date) {
 					if (/* date.準 || */date.精)
-						return '';
+						return;
+
 					var JD = CeL.Date_to_JD(date.offseted_value());
 
 					// +1: 只要當天達到此角度，即算做此宮。
@@ -3321,6 +3368,18 @@ function affairs() {
 		// 紀年法/紀年方法。 Cyclic year, year recording/representation method
 		'Year naming' : '區別與紀錄年份的方法，例如循環紀年。',
 
+		歲次 : [ {
+			a : {
+				T : '歲次'
+			},
+			R : '年干支/干支紀年'
+			//
+			+ '\n警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
+			href : 'https://zh.wikipedia.org/wiki/%E5%B9%B2%E6%94%AF'
+		}, function(date) {
+			return date.歲次;
+		} ],
+
 		生肖 : [ {
 			a : {
 				T : '生肖'
@@ -3328,7 +3387,7 @@ function affairs() {
 			R : '十二生肖紀年，屬相',
 			href : 'https://zh.wikipedia.org/wiki/%E7%94%9F%E8%82%96'
 		}, function(date) {
-			return CeL.era.生肖(date) || '';
+			return CeL.era.生肖(date);
 		} ],
 
 		五行 : [
@@ -3339,7 +3398,7 @@ function affairs() {
 					R : '陰陽五行紀年',
 					href : 'http://zh.wikipedia.org/wiki/%E4%BA%94%E8%A1%8C#.E4.BA.94.E8.A1.8C.E4.B8.8E.E5.B9.B2.E6.94.AF.E8.A1.A8'
 				}, function(date) {
-					return CeL.era.五行(date) || '';
+					return CeL.era.五行(date);
 				} ],
 
 		繞迥 : [ {
@@ -3351,7 +3410,7 @@ function affairs() {
 			+ '又稱勝生周。第一繞迥自公元1027年開始。\n此處採公曆改年而非藏曆，可能有最多前後一年的誤差。',
 			href : 'https://zh.wikipedia.org/wiki/%E7%BB%95%E8%BF%A5'
 		}, function(date) {
-			return CeL.era.繞迥(date) || '';
+			return CeL.era.繞迥(date);
 		} ],
 
 		// --------------------------------------------------------------------

@@ -562,7 +562,8 @@ String_to_Date_default_parser.year_padding = (new Date(0,
 String_to_Date.default_parser = String_to_Date_default_parser;
 
 // date_string.match(String_to_Date.parser_PATTERN) === [, parser name, date string ]
-String_to_Date.parser_PATTERN = /^\s*(?:([^:\s]+):)?\s*(.+)/i;
+// e.g., "Âm lịch"
+String_to_Date.parser_PATTERN = /^\s*(?:([^:]+):)?\s*(.+)/i;
 
 String_to_Date.parser = {
 
@@ -2251,54 +2252,6 @@ parse_period.PATTERN = /^(.+[^a-z]|[^\d]*\d.+)[\-–－—─~～〜﹣]\s*([^\-
 _.parse_period = parse_period;
 
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------//
-
-/**
- * 泰國佛曆
- * @see https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2
- * @see https://th.wikipedia.org/wiki/%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B9%88%E0%B8%AD%E0%B8%A2:%E0%B9%80%E0%B8%AB%E0%B8%95%E0%B8%B8%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%93%E0%B9%8C%E0%B8%9B%E0%B8%B1%E0%B8%88%E0%B8%88%E0%B8%B8%E0%B8%9A%E0%B8%B1%E0%B8%99
- */
-function Date_to_Thai(date, month, year, weekday) {
-	if (is_Date(date)) {
-		weekday = date.getDay();
-		year = 543 + date.getFullYear();
-		month = date.getMonth();
-		date = date.getDate();
-	} else if (month > 0)
-		// month start from 0.
-		month--;
-	else
-		month = null;
-
-	date = [
-			(weekday = Date_to_Thai.weekday_name[weekday]) ? 'วัน' + weekday
-					: '', date || '', Date_to_Thai.month_name[month] || '',
-			year || '' ];
-	if (date[0] && (date[1] || date[2] || date[3]))
-		date[0] += 'ที่';
-
-	if (!date[2] && !isNaN(date[3]))
-		// year only?
-		date[3] = 'พ.ศ. ' + date[3];
-
-	year = [];
-	date.forEach(function(n) {
-		if (n)
-			year.push(n);
-	});
-	return year.join(' ');
-}
-
-// start from 0.
-Date_to_Thai.month_name = 'มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม'
-		.split('|');
-
-// 0: Sunday.
-Date_to_Thai.weekday_name = 'อาทิตย์|จันทร์|อังคาร|พุธ|พฤหัสบดี|ศุกร์|เสาร์'
-		.split('|');
-
-
-_.Date_to_Thai = Date_to_Thai;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
@@ -2480,7 +2433,6 @@ library_namespace.set_method(String.prototype, {
 
 
 library_namespace.set_method(Date.prototype, {
-	to_Thai : set_bind(Date_to_Thai),
 	age : set_bind(age_of, true),
 	format : set_bind(Date_to_String)
 });

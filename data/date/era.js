@@ -1412,6 +1412,41 @@ if (typeof CeL === 'function')
 					this[property] = properties[property];
 			}
 
+			// ": "Casper"
+			var NEED_SPLIT_CHARS = 'a-zA-Z\\d\'"',
+			//
+			NEED_SPLIT_PREFIX = new RegExp(
+			//
+			'^[' + NEED_SPLIT_CHARS + ']'),
+			//
+			NEED_SPLIT_POSTFIX = new RegExp(
+			//
+			'[' + NEED_SPLIT_CHARS.replace('\\d', '') + ']$'),
+			//
+			REDUCE_PATTERN = new RegExp('([^' + NEED_SPLIT_CHARS + ']) ([^'
+					+ NEED_SPLIT_CHARS.replace('\\d', '') + '])', 'g');
+
+			// 警告:會改變 name_Array!
+			function concat_era_name(name_Array) {
+				name_Array.forEach(function(slice, index) {
+					var _slice = slice.trim();
+					if (index > 0 && NEED_SPLIT_PREFIX.test(_slice)
+							&& NEED_SPLIT_POSTFIX.test(name_Array[index - 1]))
+						// 為需要以 space 間隔之紀元名添加 space。
+						_slice = ' ' + _slice;
+					if (_slice !== slice)
+						name_Array[index] = _slice;
+				});
+				return name_Array.join('');
+			}
+
+			// remove needless space in the era name
+			function reduce_era_name(name) {
+				return name.trim()
+				// 去除不需要以 space 間隔之紀元名中之 space。
+				.replace(REDUCE_PATTERN, '$1$2');
+			}
+
 			// <a
 			// href="http://big5.huaxia.com/zhwh/wszs/2009/12/1670026.html"
 			// accessdate="2013/5/2 19:46">《中國歷史紀年表》解惑</a>
@@ -1441,9 +1476,7 @@ if (typeof CeL === 'function')
 				if (type === WITH_PERIOD)
 					append_period(this, name);
 
-				return name.join(' ').trim()
-				// 去除不需要以 space 間隔之紀元名中之 space。
-				.replace(/([^a-z\d'"]) ([^a-z\d'"])/gi, '$1$2');
+				return reduce_era_name(name.join(' '));
 			}
 
 			// ---------------------------------------
@@ -4104,7 +4137,7 @@ if (typeof CeL === 'function')
 				var tmp;
 				if (typeof date === 'string' && (tmp = date.match(
 				// [ matched, parser, 起, 訖1, 訖2 ]
-				/^\s*(?:([^:\s]+):)?\s*([^–－—~～〜至:]*)(?:[–－—~～〜至]\s*(.*)|(\+\d+))\s*$/
+				/^\s*(?:([^:]+):)?\s*([^–－—~～〜至:]*)(?:[–－—~～〜至]\s*(.*)|(\+\d+))\s*$/
 				// @see String_to_Date.parser_PATTERN
 				)))
 					date = [ tmp[2], tmp[3] || tmp[4], tmp[1] ];
@@ -4116,7 +4149,7 @@ if (typeof CeL === 'function')
 						// 針對從下一筆紀年調來的資料。
 						if (typeof tmp === 'string' && (tmp = tmp
 						// @see String_to_Date.parser_PATTERN
-						.match(/^\s*(?:([^:\s]+):)?\s*([^–－—~～〜至:]*)/)))
+						.match(/^\s*(?:([^:]+):)?\s*([^–－—~～〜至:]*)/)))
 							date = [ tmp[2], date[1], tmp[1] ];
 					}
 
@@ -5559,7 +5592,7 @@ if (typeof CeL === 'function')
 
 							var name = era.toString();
 							// 為需要以 space 間隔之紀元名添加 space。
-							if (/[a-z\d'"]$/.test(name))
+							if (NEED_SPLIT_POSTFIX.test(name))
 								name += ' ';
 							name += date_index[0] + '年';
 							if (era.精 !== '年') {
@@ -7133,6 +7166,12 @@ if (typeof CeL === 'function')
 				for_dynasty : for_dynasty,
 				for_monarch : for_monarch,
 				numeralize : numeralize_date_name,
+
+				NEED_SPLIT_PREFIX : NEED_SPLIT_PREFIX,
+				NEED_SPLIT_POSTFIX : NEED_SPLIT_POSTFIX,
+				concat_name : concat_era_name,
+				reduce_name : reduce_era_name,
+
 				compare_start : compare_start_date,
 				Date_of_CE_year : get_Date_of_key_by_CE,
 				MINUTE_OFFSET_KEY : MINUTE_OFFSET_KEY,
