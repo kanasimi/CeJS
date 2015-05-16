@@ -230,10 +230,11 @@ auto_add_column = {
 calendar_column,
 //
 default_column = [ {
-	T : '朝代紀年日期'
+	T : '朝代紀年日期',
+	R : 'date of calendar era: Y/m/d'
 }, {
 	T : CE_name,
-	R : 'Common Era'
+	R : 'Common Era: Y/m/d'
 } ];
 
 auto_add_column.日本 = auto_add_column.한국 = auto_add_column['Việt Nam'] = auto_add_column.中國;
@@ -282,27 +283,22 @@ function show_calendar(era_name) {
 		dates.length = show_calendar.LIMIT;
 	}
 
-	if (!era_name.includes('月'))
-		title.splice(-1, 1, {
-			th : {
-				T : '朔日',
-				R : '實曆每月初一之朔日，非天文朔日！'
-			}
-		});
-
 	for (i in calendar_column) {
-		if (selected_column[i])
+		j = calendar_column[i][0];
+		if (typeof j === 'function')
+			j = j(era_name, dates);
+
+		if (selected_column[i]) {
 			title.push({
-				th : [ calendar_column[i][0], ' ', {
+				th : [ j, ' ', {
 					span : '×',
 					title : _('除去此欄') + ': ' + i,
 					C : 'remove_mark',
 					onclick : remove_calendar_column
 				} ]
 			});
-		else if (typeof calendar_column[i][1] === 'function') {
+		} else if (typeof calendar_column[i][1] === 'function') {
 			// 增加此欄
-			j = calendar_column[i][0];
 			if (!j.T && j.a)
 				j = j.a;
 			if ((matched = i.match(/^([^\/]+)\//)) && matched[1] !== group) {
@@ -384,54 +380,105 @@ function show_calendar(era_name) {
 
 		if (tmp = date.精 === '年')
 			is_年譜 = true;
-		tmp = CeL.era.reduce_name(date.format({
+
+		var fields = CeL.era.reduce_name(date.format({
 			parser : 'CE',
-			format : tmp ? '%紀年名 %年年|%Y年'
+			format : tmp ? '%紀年名/%年|%Y'
 			//
-			: '%紀年名 %年年%月月%日日|%Y/%m/%d',
+			: '%紀年名/%年/%月/%日|%Y/%m/%d',
 			locale : 'cmn-Hant-TW',
 			as_UTC_time : true
 		})).split('|');
 
-		if (matched = tmp[0]
-		// 後處理: 添加進一步之日期捷徑。
-		// 月名: 正/臘/閏12/後12/Nīsannu月
-		.match(/^(.*\D\d+年)(.{1,20}月)(\d+日)$/))
-			tmp[0] = [ matched[1] === 前年名 ? 前年名 : {
-				a : 前年名 = matched[1],
-				title : matched[1],
-				href : '#',
-				target : '_self',
-				C : 'to_select',
-				onclick : click_title_as_era
-			}, matched[2] === 前月名 ? 前月名 : {
-				a : 前月名 = matched[2],
-				title : matched[1] + matched[2],
-				href : '#',
-				target : '_self',
-				C : 'to_select',
-				onclick : click_title_as_era
-			}, matched[3] ];
+		var conversion = fields[0].split('/'),
+		//
+		紀年名_pattern = '%1 %2年',
+		//
+		轉換用紀年名 = CeL.era.concat_name([ conversion[0], conversion[1] + '年' ]);
+		if (!CeL.era.NEED_SPLIT_POSTFIX.test(conversion[0]))
+			紀年名_pattern = 紀年名_pattern.replace(' ', '');
 
-		// 後處理。
-		// 標註公曆換月。
-		if (tmp[1].endsWith('/1'))
-			tmp[1] = {
-				span : tmp[1],
-				S : 'color:#f80'
+		// 後處理: 進一步添加紀年/月名之日期捷徑。
+		if (前年名 !== 轉換用紀年名) {
+			conversion[0] = {
+				a : conversion[0],
+				title : 前年名 = 轉換用紀年名,
+				href : '#',
+				target : '_self',
+				C : 'to_select',
+				onclick : click_title_as_era
 			};
+			conversion[1] = Object.assign({}, conversion[0], {
+				a : conversion[1]
+			});
+		}
 
-		tmp.forEach(function(data, index) {
+		if (conversion.length > 2) {
+			紀年名_pattern += '%3月%4日';
+			// 月名可能會是: 正/臘/閏12/後12/Nīsannu月
+			轉換用紀年名 += conversion[2] + '月';
+			if (前月名 !== 轉換用紀年名) {
+				conversion[2] = {
+					a : conversion[2],
+					title : 前月名 = 轉換用紀年名,
+					href : '#',
+					target : '_self',
+					C : 'to_select',
+					onclick : click_title_as_era
+				};
+			}
+		}
+
+		conversion.unshift(_(紀年名_pattern));
+		fields[0] = show_calendar.convert_field
+		// 太耗資源。
+		? {
+			T : conversion
+		} : _.apply(null, conversion);
+
+		conversion = fields[1].split('/');
+		if (conversion.length > 1)
+			紀年名_pattern = '%1/%2/%3';
+		else if (conversion[0] < 0) {
+			// 轉正。
+			conversion[0] = -conversion[0];
+			紀年名_pattern = '%1 BCE';
+		} else
+			紀年名_pattern = '%1 CE';
+		conversion.unshift(_(紀年名_pattern));
+		if (show_calendar.convert_field) {
+			// 太耗資源。
+			fields[1] = {
+				T : conversion
+			};
+			// 後處理: 標註公曆換月。
+			if (conversion[3] === '1')
+				fields[1].S = 'color:#f80;';
+
+		} else {
+			fields[1] = _.apply(null, conversion);
+			// 後處理: 標註公曆換月。
+			if (conversion[3] === '1')
+				fields[1] = {
+					span : fields[1],
+					S : 'color:#f80;'
+				};
+		}
+
+		fields.forEach(function(data, index) {
 			list.push({
 				td : data
 			});
 		});
 
-		for (tmp in calendar_column) {
-			if (selected_column[tmp])
+		// 添加各個欄位。
+		for (tmp in selected_column) {
+			if (conversion = calendar_column[tmp])
 				list.push({
-					td : calendar_column[tmp][1](date)
+					td : conversion[1](date) || ''
 				});
+			else
+				delete selected_column[tmp];
 		}
 
 		// 處理改朝換代巡覽。
@@ -540,6 +587,7 @@ function show_calendar(era_name) {
 			+ CeL.LEA406.default_type);
 }
 
+show_calendar.convert_field = false;
 show_calendar.LIMIT = 200;
 
 // ---------------------------------------------------------------------//
@@ -2379,7 +2427,7 @@ function affairs() {
 			S : 'font-size:.8em;'
 		}, function(date) {
 			var year = date.getFullYear() | 0;
-			return date.精 === '年' ? year + '年'
+			return date.精 === '年' ? _('%1年', year)
 			//
 			: year.pad(year < 0 ? 5 : 4) + date.format('-%2m-%2d');
 		} ],
@@ -2392,7 +2440,7 @@ function affairs() {
 			href : 'https://en.wikipedia.org/wiki/Ordinal_date'
 		}, function(date) {
 			var year = date.getFullYear() | 0;
-			return date.精 === '年' ? year + '年'
+			return date.精 === '年' ? _('%1年', year)
 			//
 			: year.pad(4) + '-' + CeL.ordinal_date(date).pad(3);
 		} ],
@@ -2404,7 +2452,7 @@ function affairs() {
 			R : '表示年內的星期數天數，再加上星期內第幾天。',
 			href : 'https://en.wikipedia.org/wiki/ISO_week_date'
 		}, function(date) {
-			return date.精 === '年' ? date.getFullYear() + '年'
+			return date.精 === '年' ? _('%1年', date.getFullYear())
 			//
 			: CeL.week_date(date, true);
 		} ],
@@ -3075,13 +3123,18 @@ function affairs() {
 			return (date.月干支 || '') + (date.大小月 || '');
 		} ],
 
-		日干支 : [ {
-			a : {
-				T : '日干支'
-			},
-			R : '警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
-			href : 'https://zh.wikipedia.org/wiki/%E5%B9%B2%E6%94%AF',
-			S : 'font-size:.7em;'
+		日干支 : [ function(era_name) {
+			return era_name && era_name.includes('月') ? {
+				a : {
+					T : '日干支'
+				},
+				R : '警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
+				href : 'https://zh.wikipedia.org/wiki/%E5%B9%B2%E6%94%AF',
+				S : 'font-size:.7em;'
+			} : {
+				T : '朔日',
+				R : '實曆每月初一之朔日，非天文朔日！'
+			};
 		}, function(date) {
 			return /* !date.準 && */!date.精 && date.format({
 				format : '%日干支',
@@ -3198,29 +3251,33 @@ function affairs() {
 			return /* !date.準 && */!date.精 && CeL.era.血忌(date);
 		} ],
 
-		月の別名 : [
-				{
-					a : {
-						T : '月の別名'
-					},
-					R : '各月の別名',
-					href : 'https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E6%9A%A6#.E5.90.84.E6.9C.88.E3.81.AE.E5.88.A5.E5.90.8D',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					return /* !date.準 && */!date.精 && CeL.era.月の別名(date);
-				} ],
+		月の別名 : [ {
+			a : {
+				T : '月の別名'
+			},
+			R : '各月の別名',
+			href : 'https://ja.wikipedia.org/wiki/'
+			//
+			+ '%E6%97%A5%E6%9C%AC%E3%81%AE%E6%9A%A6'
+			//
+			+ '#.E5.90.84.E6.9C.88.E3.81.AE.E5.88.A5.E5.90.8D',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.月の別名(date);
+		} ],
 
-		六曜 : [
-				{
-					a : {
-						T : '六曜'
-					},
-					R : '日本の暦注の一つ。\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之六曜值可能是錯誤的！\n六輝（ろっき）や宿曜（すくよう）ともいうが、これは七曜との混同を避けるために、明治以後に作られた名称である。',
-					href : 'https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					return /* !date.準 && */!date.精 && CeL.era.六曜(date);
-				} ],
+		六曜 : [ {
+			a : {
+				T : '六曜'
+			},
+			R : '日本の暦注の一つ。\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之六曜值可能是錯誤的！'
+			//
+			+ '\n六輝（ろっき）や宿曜（すくよう）ともいうが、これは七曜との混同を避けるために、明治以後に作られた名称である。',
+			href : 'https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.六曜(date);
+		} ],
 
 		七曜 : [ {
 			a : {
@@ -3255,29 +3312,31 @@ function affairs() {
 		 *      href="https://ja.wikipedia.org/wiki/%E6%9A%A6%E6%B3%A8%E4%B8%8B%E6%AE%B5"
 		 *      accessdate="2015/3/7 13:52">暦注下段</a>
 		 */
-		二十八宿 : [
-				{
-					a : {
-						T : '二十八宿'
-					},
-					R : '中曆曆注、日本の暦注の一つ。又稱二十八舍或二十八星。',
-					href : 'https://zh.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					return /* !date.準 && */!date.精 && CeL.era.二十八宿(date);
-				} ],
+		二十八宿 : [ {
+			a : {
+				T : '二十八宿'
+			},
+			R : '中曆曆注、日本の暦注の一つ。又稱二十八舍或二十八星。',
+			href : 'https://zh.wikipedia.org/wiki/'
+			//
+			+ '%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.二十八宿(date);
+		} ],
 
-		二十七宿 : [
-				{
-					a : {
-						T : '二十七宿'
-					},
-					R : '日本の暦注の一つ\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！',
-					href : 'https://ja.wikipedia.org/wiki/%E4%BA%8C%E5%8D%81%E4%B8%83%E5%AE%BF',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					return /* !date.準 && */!date.精 && CeL.era.二十七宿(date);
-				} ],
+		二十七宿 : [ {
+			a : {
+				T : '二十七宿'
+			},
+			R : '日本の暦注の一つ\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！',
+			href : 'https://ja.wikipedia.org/wiki/'
+			//
+			+ '%E4%BA%8C%E5%8D%81%E4%B8%83%E5%AE%BF',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.二十七宿(date);
+		} ],
 
 		日家九星 : [ {
 			a : {
@@ -3330,18 +3389,19 @@ function affairs() {
 			return CeL.era.年九星(date);
 		} ],
 
-		三元九運 : [
-				{
-					a : {
-						T : '三元九運'
-					},
-					R : '二十年一運，每年以立春交節時刻為界，立春後才改「運」。玄空飛星一派風水三元九運，又名「洛書運」。',
-					// http://www.hokming.com/fengshui-edit-threeyuennineyun.htm
-					href : 'http://www.twwiki.com/wiki/%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					return CeL.era.三元九運(date);
-				} ],
+		三元九運 : [ {
+			a : {
+				T : '三元九運'
+			},
+			R : '二十年一運，每年以立春交節時刻為界，立春後才改「運」。玄空飛星一派風水三元九運，又名「洛書運」。',
+			// http://www.hokming.com/fengshui-edit-threeyuennineyun.htm
+			href : 'http://www.twwiki.com/wiki/'
+			//
+			+ '%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return CeL.era.三元九運(date);
+		} ],
 
 		astrological : [
 				{

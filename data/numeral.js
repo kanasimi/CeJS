@@ -627,9 +627,11 @@ if (typeof CeL === 'function')
 			 * 將阿拉伯數字轉為萬進中文數字表示法。 num>1京時僅會取概數，此時得轉成string再輸入！ TODO: 統整:尚有bug。
 			 * 廿卅 小數
 			 * 
-			 * @param number
-			 * @param formal
+			 * @param {Number}number
+			 *            native number
+			 * @param {Boolean}[formal]
 			 *            kind
+			 * 
 			 * @returns {String} 中文數字
 			 * 
 			 */
@@ -747,6 +749,21 @@ if (typeof CeL === 'function')
 
 			_// JSDT:_module_
 			.to_TWD = to_TWD;
+
+			/**
+			 * Japanese numerals
+			 * 
+			 * @param {Number}number
+			 *            native number
+			 * 
+			 * @returns {String} Japanese numerals
+			 */
+			function to_Japanese_numeral(number) {
+				return to_Chinese_numeral(number).replace(/〇/g, '').replace(
+						/萬/, '万');
+			}
+
+			_.to_Japanese_numeral = to_Japanese_numeral;
 
 			// -----------------------------------------------------------------------------------------------------------------
 			// (十進位)位值直接轉換用

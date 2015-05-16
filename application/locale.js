@@ -294,7 +294,7 @@ language_tag = language_tag;
 
 
 // ----------------------------------------------------------------------------------------------------------------- //
-//	JavaScript i18n (Internationalization) / l10n (Localization) / 全球化 g11n (Globalization).
+//	JavaScript 國際化 i18n (Internationalization) / 在地化 本土化 l10n (Localization) / 全球化 g11n (Globalization).
 
 
 /**
@@ -447,84 +447,104 @@ CeL.assert([ "女人四十1枝花", CeL.gettext('女人%數1|1枝花', 40) ], 'i
  *      http://wiki.ecmascript.org/doku.php?id=strawman:string_format_take_two
  */
 function gettext(text_id) {
-	var arg = arguments, length = arg.length, domain_name = gettext_domain_name, domain = gettext_texts[domain_name],
-
 	// 轉換 / convert function.
-	convert = function(text_id, domain_specified) {
+	function convert(text_id, domain_specified) {
 		// 未設定個別 domain 者，將以此訊息(text_id)顯示。
 		// text_id 一般應採用原文(original)，或最常用語言；亦可以代碼表示，但須設定所有可能使用的語言。
 		if (typeof text_id !== 'function' && (text_id in domain))
 			text_id = domain[text_id];
 
-		return typeof text_id === 'function' ? text_id(domain_name, arg, domain_specified)
-				: text_id;
-	},
+		return typeof text_id === 'function' ? text_id(domain_name, arg,
+				domain_specified) : text_id;
+	}
 
+	var arg = arguments, length = arg.length,
+	//
+	domain_name = gettext_domain_name, domain = gettext_texts[domain_name],
+	//
 	text = ''
-		+ (convert(library_namespace.is_Object(text_id) ? text_id[domain_name]
-		: text_id));
+			+ (convert(library_namespace.is_Object(text_id) ? text_id[domain_name]
+					: text_id));
 
-	if (length > 1)
-		text = text
-		.replace(
-				/%(?:(%)|(?:([^%@\s\/]+)\/)?(?:([^%@\s\d]{1,3})|([^%@]+)@)?(\d{1,2})\|?)/g,
-				function(conversion, is_escaped,
-						domain_specified, format,
-						object_name, NO) {
-					// whole conversion specification:
-					// %% || %index || %\w(conversion format specifier)\d{1,2}(index) || %[conversion specifications@]index
-					// index 可以 "|" 終結。
-					if (is_escaped)
-						return is_escaped;
+	if (length <= 1)
+		return text;
 
-					// argument NO.
-					NO = Number(NO);
-					if (NO < length
-							&& (!(format || (format = object_name)) || (format in gettext.conversion))) {
-						// 避免 %0 形成 infinite loop。
-						if (NO && domain_specified) {
-							var d = domain, dn = domain_name,
-							//
-							_d = gettext_texts[domain_specified];
-							// 臨時改變 domain。
-							if (_d)
-								domain = _d,
-								domain_name = domain_specified;
-							conversion = convert(
-									arg[NO],
-									domain_specified);
-							// 回存。
-							if (_d)
-								domain = d,
-								domain_name = dn;
-						} else
-							conversion = NO ? convert(arg[NO])
-									: text_id;
-						if (format)
-							conversion = Array
-							.isArray(object_name = gettext.conversion[format]) ? gettext_conversion_Array(
-									conversion,
-									object_name,
-									format)
-									: object_name(
-											conversion,
-											domain_specified
-											|| domain_name);
-					} else
-						library_namespace
-						.warn('gettext: '
-								+ (NO < length ? 'Unknown format ['
-										+ format
-										+ ']'
-										: 'given too few arguments: '
-											+ length
-											+ ' <= No. '
-											+ NO));
-					return conversion;
-				});
+	var text_list = [], matched, last_index = 0,
+	// 允許 convert 出的結果為 object。
+	has_object = false,
+	// whole conversion specification:
+	// %% || %index || %domain/index
+	// || %\w(conversion format specifier)\d{1,2}(index)
+	// || %[conversion specifications@]index
+	//
+	// 不採用 global pattern，因為可能有 multithreading 的問題。
+	conversion_pattern = /([\s\S]*?)%(?:(%)|(?:([^%@\s\/]+)\/)?(?:([^%@\s\d]{1,3})|([^%@]+)@)?(\d{1,2})\|?)/g;
+	// index 可以 "|" 終結。
 
-	return text;
+	while (matched = conversion_pattern.exec(text)) {
+		last_index = conversion_pattern.lastIndex;
+
+		// matched:
+		// 0: conversion, 1: prefix, 2: is_escaped, 3: domain_specified,
+		// 4: format, 5: object_name, 6: argument NO.
+		var conversion = matched[0];
+
+		if (matched[2]) {
+			text_list.push(conversion);
+			continue;
+		}
+
+		var NO = +matched[6], format = matched[4];
+		if (NO < length && (!(format || (format = matched[5]))
+		// 有設定 {String}format 的話，就必須在 gettext.conversion 中。
+		|| (format in gettext.conversion))) {
+			if (NO === 0)
+				conversion = text_id;
+			else {
+				var domain_specified = matched[3],
+				//
+				domain_used = domain_specified
+						&& gettext_texts[domain_specified];
+				if (domain_used) {
+					// 避免 %0 形成 infinite loop。
+					var origin_domain = domain, origin_domain_name = domain_name;
+					// 臨時改變 domain。
+					domain_name = domain_specified;
+					domain = domain_used;
+					conversion = convert(arg[NO], domain_specified);
+					// 回存。
+					domain_name = origin_domain_name;
+					domain = origin_domain;
+				} else
+					conversion = convert(arg[NO]);
+			}
+
+			if (format)
+				conversion = Array.isArray(NO = gettext.conversion[format])
+				//
+				? gettext_conversion_Array(conversion, NO, format)
+				// assert: gettext.conversion[format] is function
+				: NO(conversion, domain_specified || domain_name);
+
+		} else {
+			library_namespace.warn('gettext: '
+			//
+			+ (NO < length ? 'Unknown format [' + format + ']'
+			//
+			: 'given too few arguments: ' + length + ' <= No. ' + NO));
+		}
+
+		if (typeof conversion === 'object') {
+			has_object = true;
+			text_list.push(matched[1], conversion);
+		} else
+			text_list.push(matched[1] + conversion);
+	}
+
+	text_list.push(text.slice(last_index));
+	return has_object ? text_list : text_list.join('');
 }
+
 
 
 /**
@@ -697,8 +717,9 @@ gettext.use_domain = function(domain_name, callback, force) {
 							+ ').', 1, 'gettext');
 
 		gettext_domain_name = domain_name;
-		if (!(domain_name in gettext_texts))
+		if (!(domain_name in gettext_texts)) {
 			gettext_texts[domain_name] = library_namespace.null_Object();
+		}
 
 		var need_to_load = [];
 		// TODO: use <a href="http://en.wikipedia.org/wiki/JSONP" accessdate="2012/9/14 23:50">JSONP</a>
@@ -1061,7 +1082,8 @@ gettext.create_menu = create_domain_menu;
 //------------------------------------
 //	conversion specifications (轉換規格). e.g., 各區文化特色 - 數字、貨幣、時間、日期格式。
 
-//數字系統。numeral system.
+// 數字系統。numeral system.
+// 英文的基數
 gettext.numeral = function(attribute, domain_name) {
 	switch (domain_name || gettext_domain_name) {
 	case 'Chinese':
@@ -1123,6 +1145,35 @@ gettext.numeral.thousands_separator = function(domain_name) {
 	}
 };
 
+
+// 英文的序數
+// https://en.wikipedia.org/wiki/Ordinal_number_%28linguistics%29
+var English_ordinal_suffixes = [ 'th', 'st', 'nd', 'rd' ];
+
+if (false) {
+	CeL.gettext('The %o1 year', 21);
+}
+gettext.ordinal = function(attribute, domain_name) {
+	switch (domain_name || gettext_domain_name) {
+	case 'Chinese':
+		return '第' + gettext.numeral(attribute, domain_name);
+
+	//	TODO: others
+
+	default:
+		var ordinal = attribute | 0;
+		if (ordinal !== attribute || ordinal < 1)
+			return attribute;
+		if (3 < attribute && attribute < 21) {
+			ordinal = English_ordinal_suffixes[0];
+		} else {
+			ordinal = English_ordinal_suffixes[ordinal % 10]
+			//
+			|| English_ordinal_suffixes[0];
+		}
+		return attribute + ordinal;
+	}
+};
 
 //	貨幣, 通貨.
 gettext.currency = function(attribute, domain_name) {
@@ -1325,11 +1376,6 @@ gettext.datetime = function(date, domain_name) {
 };
 
 
-// Japanese numerals
-function to_Japanese_numeral(number) {
-	return to_Chinese_numeral(number).replace(/〇/g, '').replace(/萬/, '万');
-}
-
 //------------------------------------
 
 //	{ format : function }
@@ -1340,12 +1386,12 @@ gettext.conversion = {
 		},
 		//	大陆简体中文数字。
 		数 : function (number, locale) {
-			return locale === 'ja-JP' ? to_Japanese_numeral(number)
+			return locale === 'ja-JP' ? library_namespace.to_Japanese_numeral(number)
 			//
 			: to_Chinese_numeral(number).replace(/萬/, '万');
 		},
 		//	日本語の漢数字。
-		漢数 : to_Japanese_numeral,
+		漢数 : library_namespace.to_Japanese_numeral,
 
 		// 加成。e.g., 打六折、二成、二成七。
 		成 : function (number) {
@@ -1407,6 +1453,7 @@ gettext.conversion = {
 		t : gettext.time,
 		T : gettext.datetime,
 		n : gettext.numeral,
+		o : gettext.ordinal,
 		c : gettext.currency
 };
 
