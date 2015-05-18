@@ -92,12 +92,12 @@ function _time(year, month, date, hour) {
 Date_to_Calendar({Date}, {Object}options)
 
 options.format = 'serial':
-	return 數字序號 (numerical serial) [ {Integer}year, {Integer}month, {Integer}date ]
+	return 數字序號 (numerical serial) [ {Integer}year, {Natural}month, {Natural}date ]
 
 options.format = 'item':
 	一般會:
-	return [ {Integer}year, {String}month name, {Integer}date ]
-	return [ {Integer}year, {String}month name, {Integer}date, {小數}餘下不到一日之時間值 remainder (單位:日) ]
+	return [ {Integer}year, {String}month name, {Natural}date ]
+	return [ {Integer}year, {String}month name, {Natural}date, {小數}餘下不到一日之時間值 remainder (單位:日) ]
 
 options.format = 'text':
 	return {String} 當地語言之表現法。常是 "weekday, date month year"。
@@ -108,7 +108,7 @@ others:
  * </code>
  * 
  * @param {Array}date [
- *            {Integer}year, {Integer}month, {Integer}date ],<br />
+ *            {Integer}year, {Natural}month, {Natural}date ],<br />
  *            date[KEY_WEEK] = {Integer}weekday
  * @param {Object}options
  *            options that called
@@ -165,6 +165,7 @@ function _format(date, options, to_name, is_leap) {
  * @param {Function}to_Calendar
  * @param {Function}to_Date
  * @param {Object}options
+ * 
  * @returns {Function}測試器。
  */
 function new_tester(to_Calendar, to_Date, options) {
@@ -212,19 +213,30 @@ function new_tester(to_Calendar, to_Date, options) {
 				// 月差距
 				tmp = get_month_serial(date_name[1])
 						- get_month_serial(old_date_name[1]);
-				// 隔日。
-				if (date_name[2] - old_date_name[2] === 1 ? tmp !== 0
-				// 隔月/隔年。
-				: date_name[2] !== 1 || !(old_date_name[2] in month_days)
-						|| tmp !== 1 && (tmp !== 0
-						// 這邊不再檢查年份是否差一，因為可能是閏月。
-						// || date_name[0] - old_date_name[0] !== 1
-						) && !continued_month(date_name[1], old_date_name[1])
-						// 日期名相同。
-						|| date_name[2] === old_date_name[2])
-					error.push('日期名未接續: ' + old_date_name.join('/') + ' ⇨ '
+
+				if (date_name[2] - old_date_name[2] === 1)
+					tmp = tmp !== 0 && !continued_month(date_name[1], old_date_name[1])
+						&& '隔日(日期名接續)，但月 serial 差距 !== 0';
+				else if (date_name[2] !== 1)
+					tmp = '日期名未接續: 隔月/隔年，但日期非以 1 起始';
+				else if (!(old_date_name[2] in month_days))
+					tmp = '日期名未接續: 前一月末日數 ' + old_date_name[2] + '未設定於 month_days 中';
+				else if (tmp !== 1 && (tmp !== 0
+					// 這邊不再檢查年份是否差一，因為可能是閏月。
+					// || date_name[0] - old_date_name[0] !== 1
+					) && !continued_month(date_name[1], old_date_name[1]))
+					tmp = '月名未接續';
+				else if (date_name[2] === old_date_name[2])
+					tmp = '前後日期名相同';
+				else
+					// 若 OK，必得設定 tmp!
+					tmp = false;
+
+				if (tmp) {
+					error.push(tmp + ': ' + old_date_name.join('/') + ' ⇨ '
 							+ date_name.join('/') + ' ('
 							+ (new Date(begin_Date)).format(CE_format) + ')');
+				}
 			}
 			old_date_name = date_name;
 
@@ -349,11 +361,11 @@ function Tabular_Date(year, month, date, shift) {
 	+ get_Tabular_leap_count(shift,
 	// 確認 year >=0。
 	(year %= Tabular_cycle_years) < 0 ? (year += Tabular_cycle_years) : year)
-	// 添上年之日數。
+	// 添上整年之日數。
 	+ year * Tabular_common_year_days
-	// 添上月之日數。
+	// 添上整月之日數。
 	+ Tabular_month_days[(month || 1) - 1]
-	// 添上日數。
+	// 添上月初至 date 日數。
 	+ (date || 1) - 1) * ONE_DAY_LENGTH_VALUE);
 }
 
@@ -2078,19 +2090,490 @@ Dai_Date.test = new_tester(function(date) {
 _.Dai_Date = Dai_Date;
 
 
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// Myanmar calendar, 緬曆, 緬甸曆法, မြန်မာသက္ကရာဇ်.
+
+// References:
+
+// Wikipedia: Burmese calendar
+// https://en.wikipedia.org/wiki/Burmese_calendar
+
+// Irwin(1909)
+// The Burmese & Arakanese calendars
+// Irwin, Alfred Macdonald Bulteel. (A.M.B. Irwin) 1853-
+//https://archive.org/details/burmesearakanese00irwiiala
+
+// Cool Emerald(2015)
+// Cool Emerald: Algorithm, Program and Calculation of Myanmar Calendar
+//http://cool-emerald.blogspot.sg/2013/06/algorithm-program-and-calculation-of.html
+
+
+// Irwin(1909) paragraph 34.
+// According to the Surya Siddhanta a maha-yug of
+// 4,320,000 years contains
+// 1,577,917,828 days.
+// 1,603,000,080 didi.
+// 25,082,252 kaya.
+// 51,840,000 solar months.
+// 53,433,336 lunar months.
+// 1,593,336 adimath.
+//
+// mean tropical year days  (Thandeikta solar year, ayana hnit)
+// ≈ 365.2587564814814814814814814814814814814814814814814814814814...
+var Myanmar_YEAR_DAYS = 1577917828 / 4320000,
+// ONE_DAY_LENGTH_VALUE * Myanmar_YEAR_DAYS
+// = 31558356560
+Myanmar_YEAR_LENGTH_VALUE = ONE_DAY_LENGTH_VALUE / 4320000 * 1577917828,
+// mean synodic month days (Thandeikta lunar month)
+// ≈ 29.53058794607171822474269620747617180405879954790769567522417...
+Myanmar_MONTH_DAYS = 1577917828 / 53433336,
+
+// accumulated solar days of every month.
+// = Myanmar_YEAR_DAYS / 12 - Myanmar_MONTH_DAYS
+// = 26189096670773/28854001440000
+// ≈ 0.907641760718405232047427249313951652731323908882427781565952...
+// cf. epact: the moon age when tropical year starts. https://en.wikipedia.org/wiki/Epact
+Myanmar_month_accumulated_days = Myanmar_YEAR_DAYS / 12 - Myanmar_MONTH_DAYS,
+
+// Cool Emerald(2015)
+// The Kali Yuga year number can be obtained by adding 3739 to the Myanmar year.
+// The start of Kali Yuga in the Myanmar calendar is found to be 588465.560139 in Julian date. (MO - 3739 SY)
+Myanmar_Kali_Yuga_offset = 3739,
+// The first era: The era of Myanmar kings
+// The second era: The era under British colony
+Myanmar_era_2_year = 1217,
+// The third era: The era after Independence
+Myanmar_era_3_year = 1312,
+// Irwin(1909) paragraph 50.
+// The difference in time between the entry of the apparent sun and that of the mean sun into the sign Meiktha is called in India Sodhya, and in Burma Thingyan. The length of this period is fixed at 2 yet 10 nayi and 3 bizana (2 days 4 hours 1 minute and 12 seconds).
+// The day on which the Thingyan commences is called Thingyan Kya, and the day on which it ends Thingyan Tet.
+// = 187272000
+Myanmar_Thingyan_LENGTH_VALUE = new Date(0, 0, 2, 4, 1, 12) - new Date(0, 0, 0, 0, 0, 0),
+// Cool Emerald(2015)
+// A typical Myanmar calendar mentions the beginning of the year called the atat time and it is the end of the Thingyan. The starting time of the Thingyan is called the akya time.
+// The length of the Thingyan currently recognized by Myanmar Calendar Advisory Board is 2.169918982 days ( 2days, 4 hours, 4 minutes and 41 seconds). When the time of ancient Myanmar kings, 2.1675 days (2 days, 4 hours, 1 min and 12 seconds) was used as the length of the Thingyan.
+// = 187481000
+Myanmar_Thingyan_3rd_LENGTH_VALUE = new Date(0, 0, 2, 4, 4, 41) - new Date(0, 0, 0, 0, 0, 0),
+// local timezone offset value
+TIMEZONE_OFFSET_VALUE = String_to_Date.default_offset * (ONE_DAY_LENGTH_VALUE / 24 / 60),
+
+// Myanmar_cache[reference][year] = year data
+Myanmar_cache = [ [], [] ],
+// Myanmar_month_day_count[ type : 0, 1, 2 ]
+// = [ accumulated days of month 1, accumulated days of month 2, ... ]
+Myanmar_month_day_count = [],
+
+// 1060: beginning of well known (historical) Myanmar year
+// well known exceptions
+Myanmar_adjust_watat = {
+	1201 : true,
+	1202 : false,
+	1263 : true,
+	1264 : false,
+	1344 : true,
+	1345 : false
+},
+// well known exceptions
+Myanmar_adjust_fullmoon = {
+	1120 : 1,
+	1126 : -1,
+	1150 : 1,
+	1172 : -1,
+	1207 : 1,
+	1234 : 1,
+	1261 : -1,
+	1377 : 1
+},
+// for fullmoon: Cool Emerald - Based on various evidence such as inscriptions, books, etc...
+Myanmar_adjust_CE = {
+	205 : 1,
+	246 : 1,
+	572 : -1,
+	651 : 1,
+	653 : 2,
+	656 : 1,
+	672 : 1,
+	729 : 1,
+	767 : -1,
+	813 : -1,
+	849 : -1,
+	851 : -1,
+	854 : -1,
+	1039 : -1
+},
+// for fullmoon: Tin Naing Toe & Dr. Than Tun
+Myanmar_adjust_TNT = {
+	205 : 1,
+	246 : 1,
+	813 : -1,
+	854 : -1,
+	1039 : -1
+};
+
+
+// Irwin(1909) paragraph 38.
+// In Burma the zero of celestial longitude does not move with the precession of the equinoxes as in Europe.
+// Irwin(1909) paragraph 104.
+// The equinox is said to have coincided with Thingyan Kya about 207 years before Poppasaw's epoch, i.e., about 411 A.D.
+// Irwin(1909) paragraph 107.
+// Through the accumulation of precession, Thingyan Kya is now about 24 days after the vernal equinox.
+
+// initialization of accumulated days / month name
+(function() {
+	var m, count = 0, queue = [ count ],
+	// new year's day often falls on middle Tagu, even Kason.
+	month_name = 'First Tabaung|Tagu|Kason|Nayon|Waso|Wagaung|Tawthalin|Thadingyut|Tazaungmon|Nadaw|Pyatho|Tabodwe|Tabaung|Late Tagu|Late Kason'
+			.split('|');
+
+	Myanmar_month_day_count.push(queue);
+	for (m = 0; m < month_name.length; m++)
+		queue.push(count += m % 2 === 0 ? 29 : 30);
+	queue.month = month_name.slice();
+
+	// insert leap month, 2nd Waso
+	queue = queue.slice();
+	// 5: index of 2nd Waso
+	queue.splice(5, 0, queue[5 - 1]);
+	month_name.splice(4, 1, 'First Waso', 'Second Waso');
+
+	// add accumulated days to all months after 2nd Waso
+	Myanmar_month_day_count.push(queue);
+	for (m = 5; m < month_name.length; m++)
+		queue[m] += 30;
+	queue.month = month_name.slice();
+
+	Myanmar_month_day_count.push(queue = queue.slice());
+	// add 1 day to all months after 30 days Nayon
+	// 3: index of Nayon
+	for (m = 3; m < month_name.length; m++)
+		queue[m]++;
+	queue.month = month_name;
+})();
+
+
+if (false) {
+	CeL.Myanmar_Date.new_year_Date(0, true);
+	CeL.Myanmar_Date.new_year_Date(1377, true);
+}
+
+// Cool Emerald(2015)
+// The day before the akya day is called the akyo day (the Thingyan eve).
+// the day after the atat day is called new year's day.
+// The days between the akya day and the atat day are called akyat days.
+/**
+ * get year start date of Myanmar calendar.<br />
+ * Using integer to caculate Myanmar new year's day.
+ * 
+ * @param {Integer}year
+ *            year of Myanmar calendar.
+ * 
+ * @returns {Date} Gregorian calendar
+ */
+Myanmar_Date.new_year_Date = function(year, get_time) {
+	var date = Myanmar_Date.epoch + year * Myanmar_YEAR_LENGTH_VALUE,
+	// remainder: time value after local midnight of the date.
+	// (date + TIMEZONE_OFFSET_VALUE): convert ((date)) to UTC so we can use .mod(ONE_DAY_LENGTH_VALUE) to reckon the time value.
+	// Because (date at UTC+0 midnight).mod(ONE_DAY_LENGTH_VALUE) === 0.
+	remainder = (date + TIMEZONE_OFFSET_VALUE).mod(ONE_DAY_LENGTH_VALUE), info;
+
+	if (get_time)
+		info = {
+			// * Thingyan start: Thingyan Kya, akya time
+			start_time : date - (year < Myanmar_era_3_year ? Myanmar_Thingyan_LENGTH_VALUE
+			//
+			: Myanmar_Thingyan_3rd_LENGTH_VALUE),
+			// * Thingyan end: Thingyan Tet, atat time
+			end_time : date
+		};
+
+	// Convert the date to local midnight of next day, the new year's day.
+	// assert: The remainder should bigger than 0.
+	date += ONE_DAY_LENGTH_VALUE - remainder;
+
+	if (!get_time)
+		// local midnight of new year's day
+		return new Date(date);
+
+	// get time and more infomation.
+	// new year's day (local midnight)
+	info.new_year = date;
+	// Thingyan end day: atat day (local midnight)
+	info.end = date - ONE_DAY_LENGTH_VALUE;
+
+	date = info.start_time;
+	// assert: The remainder should bigger than 0.
+	date -= (date + TIMEZONE_OFFSET_VALUE).mod(ONE_DAY_LENGTH_VALUE);
+	// Thingyan (သႀကၤန္), Myanmar new year festival: akya day (local midnight)
+	info.start = date;
+	// Thingyan eve: akyo day (local midnight)
+	info.eve = date - ONE_DAY_LENGTH_VALUE;
+
+	for (date in info)
+		info[date] = (new Date(info[date])).format('CE');
+
+	// info.eve: Thingyan eve: akyo day
+	// info.start: Thingyan start day, Myanmar new year festival: akya day
+	// info.start_time: Thingyan start: Thingyan Kya, akya time
+	//
+	// days between akya day, atat day: akyat days
+	//
+	// info.end: Thingyan end day: atat day
+	// info.end_time: Thingyan end: Thingyan Tet, atat time
+	// info.new_year: new year's day
+	return info;
+};
+
+
+/*
+
+# Myanmar leap year
+
+Myanmar leap year on 2,5,7,10,13,15,18 / 19
+
+** But Wikipedia denotes prior to 1740, it's 2, 5, 8, 10, 13, 16, 18.
+
+for(var i=0;i<19;i++){for(var y=0,_y,l=[];y<19;y++){_y=(7*y+i).mod(19);if(_y<7)l.push(y);}console.log(i+':'+l);}
+// 9:2,5,7,10,13,15,18
+
+→ Myanmar year is a leap year if:
+(7*year+9).mod(19)<7
+
+*/
+
+Myanmar_Date.watat_data = function(year, reference) {
+	var cache = Myanmar_cache[reference |= 0];
+	if (year in cache)
+		return cache[year];
+
+	var accumulated_months = year < Myanmar_era_2_year ? -1 : year < Myanmar_era_3_year ? 4 : 8,
+	// reckon excess days
+	excess_days = ((year + Myanmar_Kali_Yuga_offset) * Myanmar_YEAR_DAYS) % Myanmar_MONTH_DAYS;
+	// adjust excess days
+	if (excess_days < Myanmar_month_accumulated_days * (12 - accumulated_months))
+		excess_days += Myanmar_MONTH_DAYS;
+
+	// Using historical data directly.
+	var watat = year in Myanmar_adjust_watat ? Myanmar_adjust_watat[year]
+	// find watat by 19 years metonic cycle.
+	// see "# Myanmar leap year" above.
+	: year < Myanmar_era_2_year ? watat = (7 * year + 9).mod(19) < 7
+	// find watat based on excess days. value below denotes threshold for watat.
+	: excess_days >= Myanmar_MONTH_DAYS - Myanmar_month_accumulated_days * accumulated_months;
+
+	// the full moon day of Second Waso only need to reckon in the watat year.
+	if (!watat)
+		return cache[year] = {
+			watat : 0
+		};
+
+	// find full moon day of second Waso
+
+	// Use TIMEZONE_OFFSET_VALUE & Math.floor() to convert between UTC and local time,
+	// to get local midnight of specified date.
+	var fullmoon = Math.floor((Myanmar_Date.epoch + TIMEZONE_OFFSET_VALUE) / ONE_DAY_LENGTH_VALUE
+		// full moon accumulated days from Myanmar_Date.epoch
+		+ (year * Myanmar_YEAR_DAYS - excess_days + 4.5 * Myanmar_MONTH_DAYS
+		// 1.1, 0.85:
+		// The constant which is used to adjust the full moon time of Second Waso is denoted by WO and its value for the third era is therefore -0.5.
+		// By analyzing ME table [Toe, 1999], to fit them to our method,
+		// we've got two offsets as 1.1 and 0.85 for before and after ME 1100
+		// respectively
+		- (year < 1100 ? 1.1 : year < Myanmar_era_2_year ? 0.85
+		// 4 / accumulated_months:
+		// it is 4 and half month from the latest new moon before new year
+		// 2 nd era is 1 day earlier and 3rd ear is 0.5 day earlier (i.e. to make full
+		// moon at midnight instead of noon)
+		: 4 / accumulated_months))
+		);
+
+	// adjust for exceptions
+	// 1060: beginning of well known (historical) Myanmar year
+	var table = year < 1060 ? reference ? Myanmar_adjust_TNT : Myanmar_adjust_CE : Myanmar_adjust_fullmoon;
+	if (year in table)
+		fullmoon += table[year];
+
+	return cache[year] = {
+		watat : true,
+		// to get local midnight of specified date.
+		fullmoon : fullmoon * ONE_DAY_LENGTH_VALUE - TIMEZONE_OFFSET_VALUE
+	};
+};
+
+
+/**
+ * get information of year. e.g., watat year, full moon day.<br />
+ * Here we use the algorithm developed by Yan Naing Aye.
+ * 
+ * @param {Integer}year
+ *            year of Myanmar calendar.
+ * 
+ * @returns {Object} year data {<br />
+ *          watat : 0: common / 1: little watat / 2: big watat,<br />
+ *          Tagu_1st : The first day of Tagu<br />
+ *          fullmoon : full moon day of 2nd Waso<br /> }
+ * 
+ * @see http://cool-emerald.blogspot.sg/2013/06/algorithm-program-and-calculation-of.html
+ * @see http://mmcal.blogspot.com
+ */
+Myanmar_Date.year_data = function(year, options) {
+	var data = Myanmar_Date.watat_data(year);
+	if ('Tagu_1st' in data)
+		return data;
+
+	var last_watat_year = year, last_watat_data;
+	// find the lastest watat year before this year.
+	do {
+		last_watat_data = Myanmar_Date.watat_data(--last_watat_year, options && options.reference);
+	} while (0 === last_watat_data.watat);
+
+	if (data.watat)
+		data.watat
+		// assert: (... % 354) should be 30 or 31.
+		= (data.fullmoon - last_watat_data.fullmoon) / ONE_DAY_LENGTH_VALUE
+		// 354: common year days.
+		% 354 === 31 ? 2 : 1;
+
+	// The first day of Tagu is not only determined by the full moon day of that year.
+	data.Tagu_1st = last_watat_data.fullmoon + (354 * (year - last_watat_year) - 102) * ONE_DAY_LENGTH_VALUE;
+
+	return data;
+};
+
+
+
+/**
+ * get Date of Myanmar calendar.
+ * 
+ * @param {Integer}year
+ *            year of Myanmar calendar.
+ * @param {Natural}month
+ *            month of Myanmar calendar.<br />
+ *            Using 1 for Oo Tagu (Early Tagu) and 13 (14) for Hnaung Tagu (Late Tagu).
+ * @param {Natural}date
+ *            date of Myanmar calendar.
+ * 
+ * @returns {Date} Gregorian calendar
+ */
+function Myanmar_Date(year, month, date) {
+	var data = Myanmar_Date.year_data(year);
+
+	// reckon days count from Tagu 1
+
+	// e.g., 654/3/23 CE
+	// treat as the last month, 'First Tabaung' (30 days) of last year.
+	if (month === 0)
+		// 1: serial to index.
+		date -= 30 + 1;
+	else
+		// -1: serial to index.
+		date += Myanmar_month_day_count[data.watat][month - 1] - 1;
+
+	return new Date(data.Tagu_1st + date * ONE_DAY_LENGTH_VALUE);
+}
+
+
+// Year 0 date
+// https://en.wikipedia.org/wiki/Burmese_calendar
+// (Luce Vol. 2 1970: 336): According to planetary positions, the current Burmese era technically began at 11:11:24 on 22 March 638.
+if (false)
+	Myanmar_Date.epoch = String_to_Date('638/3/22 11:11:24', {
+		parser : 'Julian'
+	}).getTime();
+
+
+// https://plus.google.com/u/1/+YanNaingAye-Mdy/posts/1eMwo3CbrWZ
+// ME 1377 (my=1377) Myanmar calendar says new year time is 2015-Apr-16 20:35:57
+// = 638/3/22 13:12:53.880 local time	(new Date(CeL.Myanmar_Date.epoch).format('CE'))
+Myanmar_Date.epoch = new Date(2015, 4 - 1, 16, 20, 35, 57) - 1377 * Myanmar_YEAR_LENGTH_VALUE;
+
+
+
+_.Myanmar_Date = Myanmar_Date;
+
+
+function Date_to_Myanmar(date, options) {
+	// reckon the year of ((date))
+	var year = Math.floor((date - Myanmar_Date.epoch)
+			/ Myanmar_YEAR_LENGTH_VALUE),
+	//
+	data = Myanmar_Date.year_data(year),
+	// days count from Tagu 1
+	days = (date - data.Tagu_1st) / ONE_DAY_LENGTH_VALUE,
+	// 30 > mean month days. So the true month may be month or month + 1.
+	month = days / 30 | 0,
+	//
+	accumulated_days = Myanmar_month_day_count[data.watat];
+
+	// Test next month, or should be this month.
+	date = days - accumulated_days[month + 1];
+	if (date < 0)
+		days -= accumulated_days[month];
+	else
+		days = date, month++;
+
+	if (days < 0)
+		if (month !== 0)
+			throw 'Unknown error of ' + date.format('CE');
+		else
+			// e.g., 654/3/23 CE
+			// First Tabaung: days
+			month--, days += 30;
+	// assert: now days >=0.
+
+	// +1: index to ordinal.
+	date = [ year, month + 1, ++days | 0 ];
+	if (0 < (days %= 1))
+		date.push(days);
+
+	if (!options || options.format !== 'serial') {
+		date[1] = accumulated_days.month[date[1]];
+		days = date[2];
+		date[2] = days < 15 ? 'waxing ' + days
+		// The 15th of the waxing (လပြည့် [la̰bjḛ]) is the civil full moon day.
+		: days === 15 ? 'full moon'
+		// The civil new moon day (လကွယ် [la̰ɡwɛ̀]) is the last day of the month (14th or 15th waning).
+		: days >= 29 && days === accumulated_days[month + 1] - accumulated_days[month] ? 'new moon' : 'waning ' + (days - 15);
+	}
+
+	return date;
+}
+
+
+/*
+
+'654/3/23'.to_Date('CE').to_Myanmar()
+
+CeL.Myanmar_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
+// "OK"
+
+*/
+Myanmar_Date.test = new_tester(Date_to_Myanmar, Myanmar_Date, {
+	epoch : Date.parse('638/3/22'),
+	continued_month : function(month, old_month) {
+		// month === 0: e.g., 654/3/23 CE
+		// month === 2: e.g., Late Tagu / Kason → Kason
+		return 0 <= month && month <= 2
+		// is the last month of the year.
+		&& 12 <= old_month && old_month <= 14;
+	}
+});
+
+
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 長曆: भारतीय राष्ट्रीय पंचांग / Indian national calendar / Saka calendar / 印度國定曆
 // https://en.wikipedia.org/wiki/Indian_national_calendar
 
 // Years are counted in the Saka Era, which starts its year 0 in the year 78 of the Common Era.
-var Saka_epoch_year = 78 | 0,
+// epochal year of 78 CE
+var Saka_epochal_year = 78 | 0,
 // 前六個月日數。
 Indian_national_6_months_days = 6 * 31 | 0,
 // Indian_national_month_name[month_serial] = month name
 Indian_national_month_name = '|Chaitra|Vaishākha|Jyaishtha|Āshādha|Shrāvana|Bhādrapada|Āshwin|Kārtika|Agrahayana|Pausha|Māgha|Phālguna'.split('|');
 
 function Indian_national_Date(year, month, date) {
-	year += Saka_epoch_year;
+	year += Saka_epochal_year;
 	// 預設當作閏年，3/21 起 Indian_national_6_months_days 日 + 6*30日。
 	if (--month > 0
 	// 則只有平年一月份需特別處理。
@@ -2103,10 +2586,10 @@ function Indian_national_Date(year, month, date) {
 }
 
 // Usage officially started at Chaitra 1, 1879 Saka Era, or March 22, 1957.
-Indian_national_Date.epoch = _Date(Saka_epoch_year, 3 - 1, 22).getTime();
+Indian_national_Date.epoch = _Date(Saka_epochal_year, 3 - 1, 22).getTime();
 
 Indian_national_Date.is_leap = function(year) {
-	return is_leap_year(Saka_epoch_year + year);
+	return is_leap_year(Saka_epochal_year + year);
 };
 
 Indian_national_Date.month_name = function(month_serial) {
@@ -2137,7 +2620,7 @@ function Date_to_Indian_national(date, options) {
 		days--;
 
 	// 日期序數→日期名。year/month/date index to serial.
-	return _format([ year - Saka_epoch_year, month + 1, days + 1 ], options,
+	return _format([ year - Saka_epochal_year, month + 1, days + 1 ], options,
 			Date_to_Indian_national.to_name);
 }
 
@@ -2231,7 +2714,7 @@ Bahai_start_hour_of_day = -6 | 0,
 Bahai_start_hour_of_day_non_negative = (Bahai_start_hour_of_day % ONE_DAY_HOURS + ONE_DAY_HOURS)
 		% ONE_DAY_HOURS | 0,
 // 1844 CE
-Bahai_epoch_year = 1844 | 0,
+Bahai_epochal_year = 1844 | 0,
 //
 Bahai_year_months = 19 | 0,
 //
@@ -2249,7 +2732,7 @@ function Bahai_Date(year, month, date) {
 	else if (month == Bahai_Ha)
 		month = Bahai_year_months;
 
-	date = new Date(_Date(Bahai_epoch_year - 1 + year, 3 - 1, 2
+	date = new Date(_Date(Bahai_epochal_year - 1 + year, 3 - 1, 2
 	// , Bahai_start_hour_of_day
 	).getTime() + (month * Bahai_year_months + date - 1)
 			* ONE_DAY_LENGTH_VALUE);
@@ -2258,7 +2741,7 @@ function Bahai_Date(year, month, date) {
 }
 
 // 1844/3/21
-Bahai_Date.epoch = new Date(Bahai_epoch_year, 3 - 1, 21).getTime();
+Bahai_Date.epoch = new Date(Bahai_epochal_year, 3 - 1, 21).getTime();
 
 Bahai_Date.month_name = function(month_serial) {
 	return Bahai_month_name[month_serial];
@@ -2302,7 +2785,7 @@ function Date_to_Bahai(date, options) {
 		options = library_namespace.null_Object();
 
 	// 日期序數→日期名。year/month/date index to serial.
-	year -= Bahai_epoch_year - 1;
+	year -= Bahai_epochal_year - 1;
 	date = options.single_year ? [ year ] : Bahai_Date.Vahid(year,
 			options.numerical_date || options.format === 'serial');
 	++days;
@@ -2641,8 +3124,8 @@ _.Armenian_Date = Armenian_Date;
 
 // 每月天數。
 var French_Republican_MONTH_DAYS = 30,
-// year epoch: began on 1792 CE
-French_Republican_CE_offset = 1792 - 1,
+// epochal year of 1792 CE
+French_Republican_epochal_year = 1792 - 1,
 // month name
 French_Republican_month_name = '|Vendémiaire|Brumaire|Frimaire|Nivôse|Pluviôse|Ventôse|Germinal|Floréal|Prairial|Messidor|Thermidor|Fructidor|Jours complémentaires'
 		.split('|'),
@@ -2673,9 +3156,12 @@ French_Republican_Date.month_name = function(month) {
  * TODO: time
  * 
  * @param {Integer}year
- * @param {Integer}month
- *            using 13 for the complementary days.
- * @param {Integer}date
+ *            year of calendrier républicain.
+ * @param {Natural}month
+ *            month of calendrier républicain. Using 13 for the complementary
+ *            days.
+ * @param {Natural}date
+ *            date of calendrier républicain.
  * 
  * @returns {Date} Gregorian calendar
  */
@@ -2685,7 +3171,7 @@ function French_Republican_Date(year, month, date, shift) {
 		year++;
 
 	return new Date(
-			French_Republican_year_starts(year + French_Republican_CE_offset)
+			French_Republican_year_starts(year + French_Republican_epochal_year)
 					// 一年分為12個月，每月30天，每月分為3周，每周10天，廢除星期日，每年最後加5天，閏年加6天。
 					+ ((month - 1) * French_Republican_MONTH_DAYS + date - 1 + (shift || 0))
 					* ONE_DAY_LENGTH_VALUE);
@@ -2696,7 +3182,7 @@ _.Republican_Date = French_Republican_Date;
 function Date_to_French_Republican(date, options) {
 	var days = French_Republican_year_starts.year_of(date),
 	//
-	year = days[0] - French_Republican_CE_offset;
+	year = days[0] - French_Republican_epochal_year;
 	days = days[1];
 
 	date = Math.floor(days).divided(French_Republican_MONTH_DAYS);
@@ -2766,8 +3252,8 @@ French_Republican_Date.test = new_tester(Date_to_French_Republican, French_Repub
 // http://www.viewiran.com/calendar-converter.php
 
 
-// year epoch: began on 622 CE
-var Solar_Hijri_CE_offset = 622 - 1,
+// epochal year of 622 CE
+var Solar_Hijri_epochal_year = 622 - 1,
 // month name, 春4 夏4 秋4 冬4
 // https://fa.wikipedia.org/wiki/%DA%AF%D8%A7%D9%87%E2%80%8C%D8%B4%D9%85%D8%A7%D8%B1%DB%8C_%D9%87%D8%AC%D8%B1%DB%8C_%D8%AE%D9%88%D8%B1%D8%B4%DB%8C%D8%AF%DB%8C
 Solar_Hijri_month_name = {
@@ -2811,8 +3297,12 @@ Solar_Hijri_Date.month_name = function(month, is_leap, options) {
  * Solar Hijri calendar
  * 
  * @param {Integer}year
- * @param {Integer}month
- * @param {Integer}date
+ *            year of Solar Hijri calendar.
+ * @param {Natural}month
+ *            month of Solar Hijri calendar
+ *            days.
+ * @param {Natural}date
+ *            date of Solar Hijri calendar.
  * 
  * @returns {Date} Gregorian calendar
  */
@@ -2821,7 +3311,7 @@ function Solar_Hijri_Date(year, month, date) {
 	if (year < 1)
 		year++;
 
-	return new Date(Solar_Hijri_year_starts(year + Solar_Hijri_CE_offset)
+	return new Date(Solar_Hijri_year_starts(year + Solar_Hijri_epochal_year)
 	// 伊朗曆月名由12 個波斯名字組成。前6個月是每月31天，下5個月是30天，最後一個月平年29天，閏年30天。
 	// The first six months (Farvardin–Shahrivar) have 31 days, the next
 	// five (Mehr–Bahman) have 30 days, and the last month (Esfand) has 29
@@ -2835,7 +3325,7 @@ _.Solar_Hijri_Date = Solar_Hijri_Date;
 function Date_to_Solar_Hijri(date, options) {
 	var days = Solar_Hijri_year_starts.year_of(date),
 	//
-	year = days[0] - Solar_Hijri_CE_offset;
+	year = days[0] - Solar_Hijri_epochal_year;
 	days = days[1];
 
 	date = Math.floor(days);
@@ -2921,9 +3411,12 @@ Yi_Date.month_name = function(month, is_leap, options) {
  * Yi calendar
  * 
  * @param {Integer}year
- * @param {Integer}month
+ *            year of Yi calendar.
+ * @param {Natural}month
+ *            month of Yi calendar.
  *            過年日: 11
- * @param {Integer}date
+ * @param {Natural}date
+ *            date of Yi calendar.
  * 
  * @returns {Date} Gregorian calendar
  */
@@ -3012,7 +3505,7 @@ function Date_to_Yi(date, options) {
 
 /*
 
-CeL.Yi_Date.test(-2e4, 4e6, 4).join('\n') || 'OK'; // "OK"
+CeL.Yi_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 // "OK"
 
 */
@@ -3027,11 +3520,6 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 		'6' : '閏年過年日'
 	}
 });
-
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------//
-// Myanmar calendar, 緬曆
-
 
 
 
@@ -3050,7 +3538,44 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 // https://en.wikipedia.org/wiki/Bengali_calendar
 // https://en.wikipedia.org/wiki/Nanakshahi_calendar
 
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// reform of lunisolar calendar
 
+/*
+
+tropical year:
+365.2421896698 − 6.15359×10−6T − 7.29×10−10T2 + 2.64×10−10T3
+It will get shorter
+
+synodic month:
+The long-term average duration is 29.530587981 days (29 d 12 h 44 min 2.8016 s)
+
+ContinuedFraction[365.2421896698/29.530587981]
+{12, 2, 1, 2, 1, 1, 17, 2, 1, 2, 20}
+
+FromContinuedFraction[{12, 2, 1, 2, 1, 1, 17, 2, 1, 2, 20}]
+687688/55601~~12.3683
+// too long
+// After these time, the value itself changes. We need another rule.
+
+FromContinuedFraction[{12, 2, 1, 2, 1, 1}]
+235/19~~12.3684
+// Metonic cycle
+
+(235*29.530587981-19*365.2421896698)*24*60
+124.663404672
+// About 2 hours error after 19 tropical years
+// Surely it's great.
+
+FromContinuedFraction[{12, 2, 1, 2, 1, 1, 17}]
+4131/334~~12.3683
+
+(365.2421896698*334-29.530587981*4131)*24*60
+46.656291168
+// About 1 hour error after 334 tropical years
+// But still too long. And the cycle changes with time.
+
+*/
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // export methods.
@@ -3069,6 +3594,7 @@ library_namespace.set_method(Date.prototype, {
 		return Dai_Date.date_of_days((this - Dai_Date.epoch)
 				/ ONE_DAY_LENGTH_VALUE | 0, options);
 	},
+	to_Myanmar : set_bind(Date_to_Myanmar),
 	to_Indian_national : set_bind(Date_to_Indian_national),
 	to_Thai : set_bind(Date_to_Thai),
 	to_Bahai : set_bind(Date_to_Bahai),

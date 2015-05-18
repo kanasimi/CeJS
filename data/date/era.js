@@ -211,7 +211,9 @@ if (typeof CeL === 'function')
 		// application.locale. : 中文數字
 		// includes() @ data.code.compatibility.
 		require : 'data.code.compatibility.'
-				+ '|data.native.|application.locale.|data.date.String_to_Date',
+				+ '|data.native.|application.locale.|data.date.String_to_Date'
+				// Maya 需要用到 data.date.calendar。
+				+ '|data.date.calendar.',
 
 		code : function(library_namespace) {
 

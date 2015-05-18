@@ -227,7 +227,7 @@ auto_add_column = {
 	Mesopotamian : [ 'calendar/Hebrew' ]
 },
 // 可選用的文字式年曆 title = { id : [th, function (date) {} ] }
-calendar_column,
+calendar_column, calendar_column_alias,
 //
 default_column = [ {
 	T : '朝代紀年日期',
@@ -246,16 +246,33 @@ function pin_text(gettext) {
 	return text;
 }
 
+function full_column_name(name) {
+	if (name.includes('/'))
+		return name;
+	for ( var n in calendar_column.alias)
+		;
+}
+
 function remove_calendar_column() {
 	var n = this.title.match(/: (.+)$/);
-	if (n)
-		delete selected_column[n[1]];
+	if (n && ((n = n[1]) in calendar_column)
+	//		
+	|| (n = calendar_column_alias[n]) && (n in calendar_column))
+		delete selected_column[n];
+	else
+		CeL.warn('Unkonwn column: [' + this.title + ']');
 	translate_era();
 	return false;
 }
 
 function add_calendar_column() {
-	selected_column[this.title] = true;
+	var n = this.title;
+	if ((n in calendar_column)
+	//
+	|| (n = calendar_column_alias[n]) && (n in calendar_column))
+		selected_column[n] = true;
+	else
+		CeL.warn('Unkonwn column: [' + this.title + ']');
 	translate_era();
 	return false;
 }
@@ -283,12 +300,12 @@ function show_calendar(era_name) {
 		dates.length = show_calendar.LIMIT;
 	}
 
-	for (i in calendar_column) {
-		j = calendar_column[i][0];
-		if (typeof j === 'function')
-			j = j(era_name, dates);
-
-		if (selected_column[i]) {
+	// 添加各個欄位標頭。
+	// 這樣會依照添加進 selected_column 的順序顯示欄位。
+	for (i in selected_column) {
+		if (j = calendar_column[i]) {
+			if (typeof (j = j[0]) === 'function')
+				j = j(era_name, dates);
 			title.push({
 				th : [ j, ' ', {
 					span : '×',
@@ -297,8 +314,19 @@ function show_calendar(era_name) {
 					onclick : remove_calendar_column
 				} ]
 			});
-		} else if (typeof calendar_column[i][1] === 'function') {
-			// 增加此欄
+		} else
+			// invalid one.
+			delete selected_column[i];
+	}
+
+	for (i in calendar_column) {
+		if (!(i in selected_column)
+		// "增加此欄"區
+		&& typeof calendar_column[i][1] === 'function') {
+			j = calendar_column[i][0];
+			if (typeof j === 'function')
+				j = j(era_name, dates);
+
 			if (!j.T && j.a)
 				j = j.a;
 			if ((matched = i.match(/^([^\/]+)\//)) && matched[1] !== group) {
@@ -477,8 +505,6 @@ function show_calendar(era_name) {
 				list.push({
 					td : conversion[1](date) || ''
 				});
-			else
-				delete selected_column[tmp];
 		}
 
 		// 處理改朝換代巡覽。
@@ -525,8 +551,11 @@ function show_calendar(era_name) {
 		onclick : click_title_as_era
 	}, CeL.era.NEED_SPLIT_POSTFIX.test(era_caption) ? ' ' : '', {
 		T : is_年譜 ? '年譜' : '曆譜'
-	}, '（共有 ' + dates.length + ' 個' + (dates.type ? '時' : '年') + '段紀錄）' ]
-			: '無可供列出之曆譜！';
+	}, ' (', {
+		T : [ _('共有 %1 個' + (dates.type ? '時' : '年') + '段紀錄'), dates.length ]
+	}, ')' ] : {
+		T : '無可供列出之曆譜！'
+	};
 
 	title = {
 		table : [ {
@@ -2932,6 +2961,21 @@ function affairs() {
 			+ '(周' + (date.getDay() + 1) + ')' + (dai[3] ? ' ' + dai[3] : '');
 		} ],
 
+		Myanmar : [ {
+			a : {
+				T : '緬曆',
+			},
+			R : '緬甸曆法。Myanmar calendar, Burmese calendar.\n'
+			//
+			+ '緬曆有0年。非精確時，可能有最多前後2日的誤差。',
+			href : 'https://en.wikipedia.org/wiki/Burmese_calendar'
+		}, function(date) {
+			var Myanmar_date = date.to_Myanmar();
+			return date.精 === '年' ? 'ME' + Myanmar_date[0]
+			//
+			: Myanmar_date.slice(0, 3).join(' ');
+		} ],
+
 		Yi : [ {
 			a : {
 				T : '彝曆',
@@ -3594,12 +3638,13 @@ function affairs() {
 	};
 
 	calendar_column = CeL.null_Object();
+	calendar_column_alias = CeL.null_Object();
 	o = null;
 	for (i in list)
 		if (Array.isArray(list[i])
 		//		
 		&& typeof list[i][1] === 'function')
-			calendar_column[o ? o + '/' + i : i] = list[i];
+			calendar_column[calendar_column_alias[i] = o ? o + '/' + i : i] = list[i];
 		else
 			calendar_column[o = i] = Array.isArray(list[i]) ? list[i]
 					: [ list[i] ];
@@ -3617,7 +3662,7 @@ function affairs() {
 		}.bind({
 			r : i
 		});
-		calendar_column[v + '/' + i] = [ {
+		calendar_column[calendar_column_alias[i] = v + '/' + i] = [ {
 			T : i,
 			R : i + ', Gregorian reform on '
 			//
