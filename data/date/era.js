@@ -2877,6 +2877,7 @@ if (typeof CeL === 'function')
 
 							if (!library_namespace
 									.is_digits(date_data = date_name[2].trim())
+									//接受 0日，是為了如 Myanmar 需要調整月名的情況。
 									|| (date_data |= 0) <= 0) {
 								library_namespace
 										.err('initialize_era_date: 無法辨識日數資料 ['

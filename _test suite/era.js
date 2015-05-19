@@ -224,7 +224,8 @@ selected_column = {
 auto_add_column = {
 	中國 : [ 'Year naming/歲次', '曆注/月干支', '曆注/日干支' ],
 	Maya : [ 'calendar/Long_Count', 'calendar/Tzolkin', 'calendar/Haab' ],
-	Mesopotamian : [ 'calendar/Hebrew' ]
+	Mesopotamian : [ 'calendar/Hebrew' ],
+	မြန်မာ : [ 'calendar/Myanmar' ]
 },
 // 可選用的文字式年曆 title = { id : [th, function (date) {} ] }
 calendar_column, calendar_column_alias,

@@ -1999,7 +1999,7 @@ set_method(library_namespace.env.global, {
 	//alert : JSalert
 });
 
-//	建議不用，因為在for(in Array)時會..
+//	建議不用，因為在for(in Array)時會...
 set_method(Array.prototype, {
 	remove_once: function(value) {
 		var index = this.indexOf(value);
@@ -2012,6 +2012,13 @@ set_method(Array.prototype, {
 		var index = 0;
 		while((index = this.indexOf(value, index)) !== NOT_FOUND)
 			this.splice(index, 1);
+	},
+	sum: function() {
+		var sum = 0;
+		this.forEach(function(e) {
+			sum += +e;
+		});
+		return sum;
 	},
 	//clone: Array.prototype.slice,
 	append: append_to_Array,

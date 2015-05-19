@@ -110,7 +110,7 @@ others:
  * @param {Array}date [
  *            {Integer}year, {Natural}month, {Natural}date ],<br />
  *            date[KEY_WEEK] = {Integer}weekday
- * @param {Object}options
+ * @param {Object}[options]
  *            options that called
  * @param {Array|Function}to_name [
  *            {Function}year serial to name, {Function}month serial to name,
@@ -164,7 +164,7 @@ function _format(date, options, to_name, is_leap) {
  * 
  * @param {Function}to_Calendar
  * @param {Function}to_Date
- * @param {Object}options
+ * @param {Object}[options]
  * 
  * @returns {Function}測試器。
  */
@@ -258,8 +258,8 @@ function new_tester(to_Calendar, to_Date, options) {
 
 new_tester.default_options = {
 	month_days : {
-		'29' : '大月',
-		'30' : '小月'
+		29 : '大月',
+		30 : '小月'
 	},
 	CE_format : {
 		parser : 'CE',
@@ -2102,11 +2102,14 @@ _.Dai_Date = Dai_Date;
 // Irwin(1909)
 // The Burmese & Arakanese calendars
 // Irwin, Alfred Macdonald Bulteel. (A.M.B. Irwin) 1853-
-//https://archive.org/details/burmesearakanese00irwiiala
+// https://archive.org/details/burmesearakanese00irwiiala
 
 // Cool Emerald(2015)
 // Cool Emerald: Algorithm, Program and Calculation of Myanmar Calendar
-//http://cool-emerald.blogspot.sg/2013/06/algorithm-program-and-calculation-of.html
+// http://cool-emerald.blogspot.sg/2013/06/algorithm-program-and-calculation-of.html
+
+// Cool Emerald(2015/5)
+// https://plus.google.com/u/1/+YanNaingAye-Mdy/posts/1eMwo3CbrWZ
 
 
 // Irwin(1909) paragraph 34.
@@ -2158,11 +2161,18 @@ Myanmar_Thingyan_3rd_LENGTH_VALUE = new Date(0, 0, 2, 4, 4, 41) - new Date(0, 0,
 // local timezone offset value
 TIMEZONE_OFFSET_VALUE = String_to_Date.default_offset * (ONE_DAY_LENGTH_VALUE / 24 / 60),
 
-// Myanmar_cache[reference][year] = year data
+// Myanmar_cache[reference][year] = year data = {
+//	Tagu_1st: time value of Tagu 1st,
+//	watat: watat type (0: common / 1: little watat / 2: big watat),
+//	full_moon: time value of full moon day of watat year
+// }
 Myanmar_cache = [ [], [] ],
-// Myanmar_month_day_count[ type : 0, 1, 2 ]
-// = [ accumulated days of month 1, accumulated days of month 2, ... ]
-Myanmar_month_day_count = [],
+// Myanmar_month_days[ type : 0, 1, 2 ]
+// = [ days of month 1 (Tagu), days of month 2, ... ]
+Myanmar_month_days = [],
+// Myanmar_month_days_count[ type : 0, 1, 2 ]
+// = [ accumulated days of month 1 (Tagu), accumulated days of month 2, ... ]
+Myanmar_month_days_count = [],
 
 // 1060: beginning of well known (historical) Myanmar year
 // well known exceptions
@@ -2186,6 +2196,8 @@ Myanmar_adjust_fullmoon = {
 	1377 : 1
 },
 // for fullmoon: Cool Emerald - Based on various evidence such as inscriptions, books, etc...
+// Cool Emerald(2015/5)
+// got modified dates based on feedback from U Aung Zeya who referred to multiple resources such as Mhan Nan Yar Za Win, Mahar Yar Za Win, J. C. Eade, and inscriptions etc...
 Myanmar_adjust_CE = {
 	205 : 1,
 	246 : 1,
@@ -2203,14 +2215,20 @@ Myanmar_adjust_CE = {
 	1039 : -1
 },
 // for fullmoon: Tin Naing Toe & Dr. Than Tun
+// Cool Emerald(2015/5)
+// from T. N. Toe (1999) which he said referred from Dr. Than Tun and Irwin. I am currently building that of Irwin (xIRWIN)  and J. C. Eade (xEADE) to add in the calendar.﻿
 Myanmar_adjust_TNT = {
 	205 : 1,
 	246 : 1,
 	813 : -1,
 	854 : -1,
 	1039 : -1
-};
+},
+// references before 1060.
+Myanmar_reference =[ Myanmar_adjust_CE, Myanmar_adjust_TNT ];
 
+Myanmar_Date.month_name = 'First Tabaung|Tagu|Kason|Nayon|Waso|Wagaung|Tawthalin|Thadingyut|Tazaungmon|Nadaw|Pyatho|Tabodwe|Tabaung|Late Tagu|Late Kason'
+	.split('|');
 
 // Irwin(1909) paragraph 38.
 // In Burma the zero of celestial longitude does not move with the precession of the equinoxes as in Europe.
@@ -2221,29 +2239,36 @@ Myanmar_adjust_TNT = {
 
 // initialization of accumulated days / month name
 (function() {
-	var m, count = 0, queue = [ count ],
+	var m, count = 0, days, queue = [ count ], month_days = [],
 	// new year's day often falls on middle Tagu, even Kason.
-	month_name = 'First Tabaung|Tagu|Kason|Nayon|Waso|Wagaung|Tawthalin|Thadingyut|Tazaungmon|Nadaw|Pyatho|Tabodwe|Tabaung|Late Tagu|Late Kason'
-			.split('|');
+	month_name = Myanmar_Date.month_name.slice();
 
-	Myanmar_month_day_count.push(queue);
-	for (m = 0; m < month_name.length; m++)
-		queue.push(count += m % 2 === 0 ? 29 : 30);
+	Myanmar_month_days_count.push(queue);
+	for (m = 0; m < month_name.length; m++) {
+		month_days.push(days = m % 2 === 0 ? 29 : 30);
+		queue.push(count += days);
+	}
 	queue.month = month_name.slice();
+
+	Myanmar_month_days.push(month_days.slice());
+	month_days.splice(5 - 1, 0, 30);
+	Myanmar_month_days.push(month_days.slice());
+	month_days[2]++;
+	Myanmar_month_days.push(month_days);
 
 	// insert leap month, 2nd Waso
 	queue = queue.slice();
 	// 5: index of 2nd Waso
 	queue.splice(5, 0, queue[5 - 1]);
-	month_name.splice(4, 1, 'First Waso', 'Second Waso');
+	month_name.splice(5 - 1, 1, 'First Waso', 'Second Waso');
 
 	// add accumulated days to all months after 2nd Waso
-	Myanmar_month_day_count.push(queue);
+	Myanmar_month_days_count.push(queue);
 	for (m = 5; m < month_name.length; m++)
 		queue[m] += 30;
 	queue.month = month_name.slice();
 
-	Myanmar_month_day_count.push(queue = queue.slice());
+	Myanmar_month_days_count.push(queue = queue.slice());
 	// add 1 day to all months after 30 days Nayon
 	// 3: index of Nayon
 	for (m = 3; m < month_name.length; m++)
@@ -2251,11 +2276,6 @@ Myanmar_adjust_TNT = {
 	queue.month = month_name;
 })();
 
-
-if (false) {
-	CeL.Myanmar_Date.new_year_Date(0, true);
-	CeL.Myanmar_Date.new_year_Date(1377, true);
-}
 
 // Cool Emerald(2015)
 // The day before the akya day is called the akyo day (the Thingyan eve).
@@ -2267,17 +2287,21 @@ if (false) {
  * 
  * @param {Integer}year
  *            year of Myanmar calendar.
+ * @param {Object}[options]
+ *            options to use
  * 
  * @returns {Date} Gregorian calendar
  */
-Myanmar_Date.new_year_Date = function(year, get_time) {
+Myanmar_Date.new_year_Date = function(year, options) {
 	var date = Myanmar_Date.epoch + year * Myanmar_YEAR_LENGTH_VALUE,
 	// remainder: time value after local midnight of the date.
 	// (date + TIMEZONE_OFFSET_VALUE): convert ((date)) to UTC so we can use .mod(ONE_DAY_LENGTH_VALUE) to reckon the time value.
 	// Because (date at UTC+0 midnight).mod(ONE_DAY_LENGTH_VALUE) === 0.
-	remainder = (date + TIMEZONE_OFFSET_VALUE).mod(ONE_DAY_LENGTH_VALUE), info;
+	remainder = (date + TIMEZONE_OFFSET_VALUE).mod(ONE_DAY_LENGTH_VALUE), info,
+	// get detail information.
+	detail = options && options.detail;
 
-	if (get_time)
+	if (detail)
 		info = {
 			// * Thingyan start: Thingyan Kya, akya time
 			start_time : date - (year < Myanmar_era_3_year ? Myanmar_Thingyan_LENGTH_VALUE
@@ -2291,11 +2315,11 @@ Myanmar_Date.new_year_Date = function(year, get_time) {
 	// assert: The remainder should bigger than 0.
 	date += ONE_DAY_LENGTH_VALUE - remainder;
 
-	if (!get_time)
+	if (!detail)
 		// local midnight of new year's day
-		return new Date(date);
+		return options && options.get_value ? date : new Date(date);
 
-	// get time and more infomation.
+	// get time and more information.
 	// new year's day (local midnight)
 	info.new_year = date;
 	// Thingyan end day: atat day (local midnight)
@@ -2325,6 +2349,7 @@ Myanmar_Date.new_year_Date = function(year, get_time) {
 };
 
 
+
 /*
 
 # Myanmar leap year
@@ -2333,7 +2358,7 @@ Myanmar leap year on 2,5,7,10,13,15,18 / 19
 
 ** But Wikipedia denotes prior to 1740, it's 2, 5, 8, 10, 13, 16, 18.
 
-for(var i=0;i<19;i++){for(var y=0,_y,l=[];y<19;y++){_y=(7*y+i).mod(19);if(_y<7)l.push(y);}console.log(i+':'+l);}
+for(var i=0;i<19;i++){for(var y=0,_y,l=[];y<19;y++){_y=(7*y+i)%19;if(_y<7)l.push(y);}console.log(i+':'+l);}
 // 9:2,5,7,10,13,15,18
 
 → Myanmar year is a leap year if:
@@ -2341,6 +2366,16 @@ for(var i=0;i<19;i++){for(var y=0,_y,l=[];y<19;y++){_y=(7*y+i).mod(19);if(_y<7)l
 
 */
 
+/**
+ * check if it's a watat year.<br />
+ * 
+ * @param {Integer}year
+ *            year of Myanmar calendar.
+ * @param {Integer}[reference]
+ *            reference to use. see Myanmar_reference.
+ * 
+ * @returns {Date} Gregorian calendar
+ */
 Myanmar_Date.watat_data = function(year, reference) {
 	var cache = Myanmar_cache[reference |= 0];
 	if (year in cache)
@@ -2357,17 +2392,17 @@ Myanmar_Date.watat_data = function(year, reference) {
 	var watat = year in Myanmar_adjust_watat ? Myanmar_adjust_watat[year]
 	// find watat by 19 years metonic cycle.
 	// see "# Myanmar leap year" above.
-	: year < Myanmar_era_2_year ? watat = (7 * year + 9).mod(19) < 7
+	: year < Myanmar_era_2_year ? (7 * year + 9).mod(19) < 7
 	// find watat based on excess days. value below denotes threshold for watat.
 	: excess_days >= Myanmar_MONTH_DAYS - Myanmar_month_accumulated_days * accumulated_months;
 
-	// the full moon day of Second Waso only need to reckon in the watat year.
+	// the full moon day of Second Waso only needs to reckon in the watat year.
 	if (!watat)
 		return cache[year] = {
-			watat : 0
+			type : 0
 		};
 
-	// find full moon day of second Waso
+	// reckon the full moon day of second Waso
 
 	// Use TIMEZONE_OFFSET_VALUE & Math.floor() to convert between UTC and local time,
 	// to get local midnight of specified date.
@@ -2388,13 +2423,15 @@ Myanmar_Date.watat_data = function(year, reference) {
 		);
 
 	// adjust for exceptions
+	var table
 	// 1060: beginning of well known (historical) Myanmar year
-	var table = year < 1060 ? reference ? Myanmar_adjust_TNT : Myanmar_adjust_CE : Myanmar_adjust_fullmoon;
+	= year < 1060 ? reference && Myanmar_reference[reference] || Myanmar_reference[0] : Myanmar_adjust_fullmoon;
 	if (year in table)
 		fullmoon += table[year];
 
 	return cache[year] = {
-		watat : true,
+		// is watat year
+		type : true,
 		// to get local midnight of specified date.
 		fullmoon : fullmoon * ONE_DAY_LENGTH_VALUE - TIMEZONE_OFFSET_VALUE
 	};
@@ -2407,6 +2444,8 @@ Myanmar_Date.watat_data = function(year, reference) {
  * 
  * @param {Integer}year
  *            year of Myanmar calendar.
+ * @param {Object}[options]
+ *            options to use
  * 
  * @returns {Object} year data {<br />
  *          watat : 0: common / 1: little watat / 2: big watat,<br />
@@ -2417,33 +2456,86 @@ Myanmar_Date.watat_data = function(year, reference) {
  * @see http://mmcal.blogspot.com
  */
 Myanmar_Date.year_data = function(year, options) {
-	var data = Myanmar_Date.watat_data(year);
-	if ('Tagu_1st' in data)
-		return data;
+	var year_data = Myanmar_Date.watat_data(year),
+	//
+	reference = (options && options.reference) | 0;
+	if ('Tagu_1st' in year_data)
+		return year_data;
 
 	var last_watat_year = year, last_watat_data;
+	while (0 === (last_watat_data
 	// find the lastest watat year before this year.
-	do {
-		last_watat_data = Myanmar_Date.watat_data(--last_watat_year, options && options.reference);
-	} while (0 === last_watat_data.watat);
+	= Myanmar_Date.watat_data(--last_watat_year, reference)).type);
 
-	if (data.watat)
-		data.watat
+	if (year_data.type)
+		// This year is a watat year, andtest if it is a big watat year.
+		year_data.type
 		// assert: (... % 354) should be 30 or 31.
-		= (data.fullmoon - last_watat_data.fullmoon) / ONE_DAY_LENGTH_VALUE
+		= (year_data.fullmoon - last_watat_data.fullmoon) / ONE_DAY_LENGTH_VALUE
 		// 354: common year days.
 		% 354 === 31 ? 2 : 1;
 
+	// Tagu 1st time value
 	// The first day of Tagu is not only determined by the full moon day of that year.
-	data.Tagu_1st = last_watat_data.fullmoon + (354 * (year - last_watat_year) - 102) * ONE_DAY_LENGTH_VALUE;
+	year_data.Tagu_1st = last_watat_data.fullmoon + (354 * (year - last_watat_year) - 102) * ONE_DAY_LENGTH_VALUE;
 
-	return data;
+	return year_data;
 };
 
 
+/**
+ * get days count of specified year.<br />
+ * The sum of all days should be 365 or 366.
+ * 
+ * @param {Integer}year
+ *            year of Myanmar calendar.
+ * @param {Object}[options]
+ *            options to use
+ * 
+ * @returns {Array} days count
+ */
+Myanmar_Date.month_days = function(year, options) {
+	var year_data = Myanmar_Date.year_data(year),
+	end = Myanmar_Date.new_year_Date(year + 1, {
+		get_value : true
+	}),
+	// the last day of the year counts from Tagu 1.
+	date = Date_to_Myanmar(end - ONE_DAY_LENGTH_VALUE, {
+		format : 'serial'
+	}),
+	//
+	month_days = Myanmar_month_days[year_data.type].slice(0, date[1] - 1);
+	month_days.end = end;
+	month_days.end_date = date;
+	month_days.push(date[2]);
+
+	month_days.start_date
+	// date (new year's day) counts from Tagu 1.
+	= date = Date_to_Myanmar(month_days.start = Myanmar_Date.new_year_Date(year, {
+		get_value : true
+	}), {
+		format : 'serial'
+	});
+
+	if (date[1] < 1)
+		// assert: date[1] === 0
+		// First Tabaung: 30 days
+		month_days.unshift(30 + 1 - date[2]);
+	else
+		month_days.splice(0, date[1], month_days[date[1] - 1] + 1 - date[2]);
+
+	if (options && ('start_month' in options)
+	// assert: options.start_month < date[1]. e.g., ((0))
+	&& (end = date[1] - options.start_month) > 0)
+		Array.prototype.unshift.apply(month_days, (new Array(end)).fill(0));
+
+	return month_days;
+};
+
 
 /**
- * get Date of Myanmar calendar.
+ * get Date of Myanmar calendar.<br />
+ * Myanmar date → Date
  * 
  * @param {Integer}year
  *            year of Myanmar calendar.
@@ -2452,24 +2544,28 @@ Myanmar_Date.year_data = function(year, options) {
  *            Using 1 for Oo Tagu (Early Tagu) and 13 (14) for Hnaung Tagu (Late Tagu).
  * @param {Natural}date
  *            date of Myanmar calendar.
+ * @param {Object}[options]
+ *            options to use
  * 
  * @returns {Date} Gregorian calendar
  */
-function Myanmar_Date(year, month, date) {
-	var data = Myanmar_Date.year_data(year);
+function Myanmar_Date(year, month, date, options) {
+	var year_data = Myanmar_Date.year_data(year, options);
+	if (isNaN(date))
+		date = 1;
 
 	// reckon days count from Tagu 1
 
 	// e.g., 654/3/23 CE
 	// treat as the last month, 'First Tabaung' (30 days) of last year.
 	if (month === 0)
-		// 1: serial to index.
+		// - 1: serial to index.
 		date -= 30 + 1;
 	else
 		// -1: serial to index.
-		date += Myanmar_month_day_count[data.watat][month - 1] - 1;
+		date += Myanmar_month_days_count[year_data.type][month - 1 || 0] - 1;
 
-	return new Date(data.Tagu_1st + date * ONE_DAY_LENGTH_VALUE);
+	return new Date(year_data.Tagu_1st + date * ONE_DAY_LENGTH_VALUE);
 }
 
 
@@ -2482,7 +2578,7 @@ if (false)
 	}).getTime();
 
 
-// https://plus.google.com/u/1/+YanNaingAye-Mdy/posts/1eMwo3CbrWZ
+// Cool Emerald(2015/5)
 // ME 1377 (my=1377) Myanmar calendar says new year time is 2015-Apr-16 20:35:57
 // = 638/3/22 13:12:53.880 local time	(new Date(CeL.Myanmar_Date.epoch).format('CE'))
 Myanmar_Date.epoch = new Date(2015, 4 - 1, 16, 20, 35, 57) - 1377 * Myanmar_YEAR_LENGTH_VALUE;
@@ -2492,18 +2588,29 @@ Myanmar_Date.epoch = new Date(2015, 4 - 1, 16, 20, 35, 57) - 1377 * Myanmar_YEAR
 _.Myanmar_Date = Myanmar_Date;
 
 
+/**
+ * get Myanmar calendar (of Date).<br />
+ * Date → Myanmar date
+ * 
+ * @param {Date}date
+ *            system date.
+ * @param {Object}[options]
+ *            options to use
+ * 
+ * @returns {Array} [ year, month, date ]
+ */
 function Date_to_Myanmar(date, options) {
 	// reckon the year of ((date))
 	var year = Math.floor((date - Myanmar_Date.epoch)
 			/ Myanmar_YEAR_LENGTH_VALUE),
 	//
-	data = Myanmar_Date.year_data(year),
+	year_data = Myanmar_Date.year_data(year, options),
 	// days count from Tagu 1
-	days = (date - data.Tagu_1st) / ONE_DAY_LENGTH_VALUE,
+	days = (date - year_data.Tagu_1st) / ONE_DAY_LENGTH_VALUE,
 	// 30 > mean month days. So the true month may be month or month + 1.
 	month = days / 30 | 0,
 	//
-	accumulated_days = Myanmar_month_day_count[data.watat];
+	accumulated_days = Myanmar_month_days_count[year_data.type];
 
 	// Test next month, or should be this month.
 	date = days - accumulated_days[month + 1];
@@ -2517,7 +2624,7 @@ function Date_to_Myanmar(date, options) {
 			throw 'Unknown error of ' + date.format('CE');
 		else
 			// e.g., 654/3/23 CE
-			// First Tabaung: days
+			// First Tabaung: 30 days
 			month--, days += 30;
 	// assert: now days >=0.
 
@@ -2552,9 +2659,9 @@ Myanmar_Date.test = new_tester(Date_to_Myanmar, Myanmar_Date, {
 	epoch : Date.parse('638/3/22'),
 	continued_month : function(month, old_month) {
 		// month === 0: e.g., 654/3/23 CE
-		// month === 2: e.g., Late Tagu / Kason → Kason
-		return 0 <= month && month <= 2
-		// is the last month of the year.
+		// month === 2: e.g., Late Tagu / Late Kason → Kason
+		return month <= 2 && 0 <= month
+		// The old month is the last month of last year.
 		&& 12 <= old_month && old_month <= 14;
 	}
 });
@@ -2640,8 +2747,8 @@ CeL.Indian_national_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 Indian_national_Date.test = new_tester(Date_to_Indian_national,
 		Indian_national_Date, {
 			month_days : {
-				'31' : 'first 6 months',
-				'30' : 'last 6 months'
+				31 : 'first 6 months',
+				30 : 'last 6 months'
 			}
 		});
 
@@ -2816,9 +2923,9 @@ CeL.Bahai_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 */
 Bahai_Date.test = new_tester(Date_to_Bahai, Bahai_Date, {
 	month_days : {
-		'19' : 'common month',
-		'4' : 'intercalary month',
-		'5' : 'intercalary month + intercalary day'
+		19 : 'common month',
+		4 : 'intercalary month',
+		5 : 'intercalary month + intercalary day'
 	},
 	continued_month : function(month, old_month) {
 		return old_month === Bahai_year_months && month === 1
@@ -2940,9 +3047,9 @@ CeL.Coptic_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 */
 Coptic_Date.test = new_tester(Date_to_Coptic, Coptic_Date, {
 	month_days : {
-		'30' : 'common month',
-		'5' : 'intercalary month',
-		'6' : 'intercalary month + intercalary day'
+		30 : 'common month',
+		5 : 'intercalary month',
+		6 : 'intercalary month + intercalary day'
 	}
 });
 
@@ -3009,9 +3116,9 @@ CeL.Ethiopian_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 */
 Ethiopian_Date.test = new_tester(Date_to_Ethiopian, Ethiopian_Date, {
 	month_days : {
-		'30' : 'common month',
-		'5' : 'intercalary month',
-		'6' : 'intercalary month + intercalary day'
+		30 : 'common month',
+		5 : 'intercalary month',
+		6 : 'intercalary month + intercalary day'
 	}
 });
 
@@ -3105,8 +3212,8 @@ CeL.Armenian_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 */
 Armenian_Date.test = new_tester(Date_to_Armenian, Armenian_Date, {
 	month_days : {
-		'30' : 'common month',
-		'5' : 'Epagomenal days',
+		30 : 'common month',
+		5 : 'Epagomenal days',
 	}
 });
 
@@ -3227,9 +3334,9 @@ CeL.Republican_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 French_Republican_Date.test = new_tester(Date_to_French_Republican, French_Republican_Date, {
 	epoch : Date.parse('1792/9/22'),
 	month_days : {
-		'30' : 'common month',
-		'5' : 'common complementary days',
-		'6' : 'complementary days in leap year'
+		30 : 'common month',
+		5 : 'common complementary days',
+		6 : 'complementary days in leap year'
 	}
 });
 
@@ -3363,9 +3470,9 @@ CeL.Solar_Hijri_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 Solar_Hijri_Date.test = new_tester(Date_to_Solar_Hijri, Solar_Hijri_Date, {
 	epoch : Date.parse('622/3/22'),
 	month_days : {
-		'31' : 'month 1–6',
-		'30' : 'month 7–11, 12 (leap year)',
-		'29' : 'common month 12'
+		31 : 'month 1–6',
+		30 : 'month 7–11, 12 (leap year)',
+		29 : 'common month 12'
 	}
 });
 
@@ -3515,9 +3622,9 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 		return month === 1 && old_month === 11;
 	},
 	month_days : {
-		'36' : '10個月',
-		'5' : '過年日',
-		'6' : '閏年過年日'
+		36 : '10個月',
+		5 : '過年日',
+		6 : '閏年過年日'
 	}
 });
 
@@ -3582,6 +3689,24 @@ FromContinuedFraction[{12, 2, 1, 2, 1, 1, 17}]
 
 // e.g., "8.19.15.3.4 1 K'an 2 K'ayab'".to_Date('Maya').format()
 Object.assign(String_to_Date.parser, {
+	Myanmar : function(date, minute_offset, options) {
+		var period_end = options && options.period_end;
+
+		if (!isNaN(date)) {
+			// use the new year's day
+			return Myanmar_Date.new_year_Date(date);
+
+			// use year/1/1
+			date |= 0;
+			return Myanmar_Date(period_end ? 1 + date : date, 1, 1);
+		}
+
+		if (date = date.match(/(-?\d{1,4})[\/\-](\d{1,2})(?:[\/\-](\d{1,2}))?/)) {
+			if (period_end)
+				date[date[3] ? 3 : 2]++;
+			return Myanmar_Date(date[1], date[2], date[3] || 1);
+		}
+	},
 	Maya : Maya_Date
 });
 

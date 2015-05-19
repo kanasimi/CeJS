@@ -2592,6 +2592,58 @@ this.CeL_era_data = {
 ]).minute_offset = 7 * 60;
 
 // ---------------------------------------------------------------------//
+// 緬甸, Myanmar / Burma
+
+(this.CeL_era_data.မြန်မာ = [
+
+		function() {
+			var start = -26, year = start, calendar = [],
+			//
+			end = this.CeL_era_data.data.last.to_Date().to_Myanmar()[0] + 1;
+
+			while (year < end) {
+				var month_days = CeL.Myanmar_Date.month_days(year++, {
+					//start_month : 0
+				});
+				calendar.push(
+				// TODO: will get '設定非數字的月中起始日 [2]；或是在中途設定日期，而非在曆數資料一開始即設定月中日期！將忽略之。'
+				//'/' + month_days.start_date[1] + '/' + month_days.start_date[2]
+				month_days.start_date[1] + '=' + month_days.join(';'));
+			}
+
+			return [ 'Myanmar',
+					[ CeL.Myanmar_Date.new_year_Date(start), CeL.Myanmar_Date.new_year_Date(end) ],
+					start + '/' + calendar.join('	'),
+					//'月名=' + CeL.Myanmar_Date.month_name.join(';'),
+					'參照用' ];
+		}.call(this),
+
+		// 關係: 為前任者之～,Relationship with predecessor(s)
+
+		// Upper Burma, Middle Early Pagan
+		// http://en.wikipedia.org/wiki/List_of_early_and_legendary_monarchs_of_Burma#Middle_Early_Pagan
+		// Reign per Zatadawbon Yazawin, Maha Yazawin, Yazawin Thit, and Hmannan
+		// Yazawin
+		'Middle Early Pagan/Popa Sawrahan|Myanmar:-25~|:Myanmar|疑|準=年|時期=Pagan|關係=Usurper',
+		'/Shwe Ohnthi|Myanmar:2~|:Myanmar|疑|準=年|關係=Son-in-law',
+		'/Peit Thon|Myanmar:14~|:Myanmar|疑|準=年|關係=Brother',
+		'/Peit Taung|Myanmar:22~|:Myanmar|疑|準=年|關係=Son',
+		'/Min Khwe|Myanmar:72~|:Myanmar|疑|準=年|關係=Brother',
+		'/Myingyway|Myanmar:78~|:Myanmar|疑|準=年|關係=Usurper',
+		'/Theinga|Myanmar:88~|:Myanmar|疑|準=年|關係=Elected by court; of royal blood',
+		'/Thein Khun|Myanmar:96~|:Myanmar|疑|準=年|關係=Son',
+		'/Shwe Laung|Myanmar:106~|:Myanmar|疑|準=年|關係=Son',
+		'/Htun Htwin|Myanmar:115~|:Myanmar|疑|準=年|關係=Son',
+		'/Shwe Hmauk|Myanmar:124~|:Myanmar|疑|準=年|關係=Son',
+		'/Htun Lut|Myanmar:147~|:Myanmar|疑|準=年|關係=Brother',
+		'/Saw Khin Hnit|Myanmar:164~|:Myanmar|疑|準=年|關係=Son',
+		'/Khe Lu|Myanmar:191~208|:Myanmar|疑|準=年|關係=Son',
+
+// http://en.wikipedia.org/wiki/Zatadawbon_Yazawin
+
+]).minute_offset = 6.5 * 60;
+
+// ---------------------------------------------------------------------//
 // 瑪雅文明, pre-Columbian Maya civilization
 
 (this.CeL_era_data.Maya = [
