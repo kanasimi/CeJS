@@ -2597,25 +2597,29 @@ this.CeL_era_data = {
 (this.CeL_era_data.မြန်မာ = [
 
 		function() {
-			var start = -26, year = start, calendar = [],
+			var start = -25 - 1, year = start, calendar = [],
 			//
 			end = this.CeL_era_data.data.last.to_Date().to_Myanmar()[0] + 1;
 
 			while (year < end) {
 				var month_days = CeL.Myanmar_Date.month_days(year++, {
-					//start_month : 0
+				// start_month : 0
 				});
 				calendar.push(
-				// TODO: will get '設定非數字的月中起始日 [2]；或是在中途設定日期，而非在曆數資料一開始即設定月中日期！將忽略之。'
-				//'/' + month_days.start_date[1] + '/' + month_days.start_date[2]
+				// TODO: will get '設定非數字的月中起始日
+				// [2]；或是在中途設定日期，而非在曆數資料一開始即設定月中日期！將忽略之。'
+				// '/' + month_days.start_date[1] + '/' +
+				// month_days.start_date[2]
 				month_days.start_date[1] + '=' + month_days.join(';'));
 			}
 
-			return [ 'Myanmar',
-					[ CeL.Myanmar_Date.new_year_Date(start), CeL.Myanmar_Date.new_year_Date(end) ],
+			return [
+					'ME',
+					[ CeL.Myanmar_Date.new_year_Date(start),
+							CeL.Myanmar_Date.new_year_Date(end) ],
 					start + '/' + calendar.join('	'),
-					//'月名=' + CeL.Myanmar_Date.month_name.join(';'),
-					'參照用' ];
+					// '月名=' + CeL.Myanmar_Date.month_name.join(';'),
+					'參照用', '注=Myanmar calendar, Myanmar era' ];
 		}.call(this),
 
 		// 關係: 為前任者之～,Relationship with predecessor(s)
@@ -2624,22 +2628,308 @@ this.CeL_era_data = {
 		// http://en.wikipedia.org/wiki/List_of_early_and_legendary_monarchs_of_Burma#Middle_Early_Pagan
 		// Reign per Zatadawbon Yazawin, Maha Yazawin, Yazawin Thit, and Hmannan
 		// Yazawin
-		'Middle Early Pagan/Popa Sawrahan|Myanmar:-25~|:Myanmar|疑|準=年|時期=Pagan|關係=Usurper',
-		'/Shwe Ohnthi|Myanmar:2~|:Myanmar|疑|準=年|關係=Son-in-law',
-		'/Peit Thon|Myanmar:14~|:Myanmar|疑|準=年|關係=Brother',
-		'/Peit Taung|Myanmar:22~|:Myanmar|疑|準=年|關係=Son',
-		'/Min Khwe|Myanmar:72~|:Myanmar|疑|準=年|關係=Brother',
-		'/Myingyway|Myanmar:78~|:Myanmar|疑|準=年|關係=Usurper',
-		'/Theinga|Myanmar:88~|:Myanmar|疑|準=年|關係=Elected by court; of royal blood',
-		'/Thein Khun|Myanmar:96~|:Myanmar|疑|準=年|關係=Son',
-		'/Shwe Laung|Myanmar:106~|:Myanmar|疑|準=年|關係=Son',
-		'/Htun Htwin|Myanmar:115~|:Myanmar|疑|準=年|關係=Son',
-		'/Shwe Hmauk|Myanmar:124~|:Myanmar|疑|準=年|關係=Son',
-		'/Htun Lut|Myanmar:147~|:Myanmar|疑|準=年|關係=Brother',
-		'/Saw Khin Hnit|Myanmar:164~|:Myanmar|疑|準=年|關係=Son',
-		'/Khe Lu|Myanmar:191~208|:Myanmar|疑|準=年|關係=Son',
+		'Middle Early Pagan/Popa Sawrahan|Myanmar:-25~|:ME|疑|準=年|時期=Early Pagan|關係=Usurper',
+		'/Shwe Ohnthi|Myanmar:2~|:ME|疑|準=年|關係=Son-in-law',
+		'/Peit Thon|Myanmar:14~|:ME|疑|準=年|關係=Brother',
+		'/Peit Taung|Myanmar:22~|:ME|疑|準=年|關係=Son',
+		'/Min Khwe|Myanmar:72~|:ME|疑|準=年|關係=Brother',
+		'/Myingyway|Myanmar:78~|:ME|疑|準=年|關係=Usurper',
+		'/Theinga|Myanmar:88~|:ME|疑|準=年|關係=Elected by court; of royal blood',
+		'/Thein Khun|Myanmar:96~|:ME|疑|準=年|關係=Son',
+		'/Shwe Laung|Myanmar:106~|:ME|疑|準=年|關係=Son',
+		'/Htun Htwin|Myanmar:115~|:ME|疑|準=年|關係=Son',
+		'/Shwe Hmauk|Myanmar:124~|:ME|疑|準=年|關係=Son',
+		'/Htun Lut|Myanmar:147~|:ME|疑|準=年|關係=Brother',
+		'/Saw Khin Hnit|Myanmar:164~|:ME|疑|準=年|關係=Son',
+		'/Khe Lu|Myanmar:191~|:ME|疑|準=年|關係=Son',
 
-// http://en.wikipedia.org/wiki/Zatadawbon_Yazawin
+		// http://en.wikipedia.org/wiki/Zatadawbon_Yazawin
+		// In terms of regnal years, the chronicle is considered "the most
+		// accurate of all Burmese chronicles, particularly with regard to the
+		// best-known Pagan and Ava kings, many of whose dates have been
+		// corroborated by epigraphy."
+		'Late Early Pagan/Pyinbya|Myanmar:208~|:ME|準=年|時期=Early Pagan|關係=Brother',
+		'/Tannet|Myanmar:238~|:ME|準=年|關係=Son',
+		'/Sale Ngahkwe|Myanmar:266~|:ME|準=年|關係=Usurper',
+		'/Theinhko|Myanmar:296~|:ME|準=年|關係=Son',
+		'/Nyaung-u Sawrahan|Myanmar:318~|:ME|準=年|關係=Usurper',
+		'/Kunhsaw Kyaunghpyu|Myanmar:363~|:ME|準=年|關係=Son of Tannet',
+		'/Kyiso|Myanmar:383~|:ME|準=年|關係=Son of Nyaung-u Sawrahan',
+		'/Sokkate|Myanmar:400~406|:ME|準=年|關係=Brother',
+
+		// http://en.wikipedia.org/wiki/List_of_Burmese_monarchs
+		// the chronicle reported order and reign dates. G.H. Luce does not
+		// recognize Naratheinkha, and proposes an interregnum of nine years
+		// between 1165 and 1174. But Luce's gap has been rigorously questioned.
+		// Moreover, Luce proposes that Naratheinga Uzana was king between 1231
+		// and 1235 but it too is not universally accepted.
+		// http://en.wikipedia.org/wiki/List_of_heirs_to_the_Burmese_thrones
+		'Pagan/Anawrahta|1044/8/11~|:ME|關係=Son of Kunhsaw Kyaunghpyu',
+		'/Sawlu|1077/4/11~|:ME|準=年|在位=11 April 1077–c. 21 April 1084|關係=Son',
+		'/Kyansittha|1084/4/21~|:ME|準=年|在位=21 April 1084–1112/13|關係=Half-brother',
+		'/Sithu I|1112/13~|:ME|準=年|在位=1112/13–1167|關係=Grandson',
+		'/Narathu|1167~|:ME|準=年|在位=1167–c. February 1171|關係=Son',
+		'/Naratheinkha|1171/2/1~|:ME|準=年|在位=c. February 1171–May 1174|關係=Son',
+		'/Sithu II|1174/5/1~|:ME|準=年|在位=May 1174–18 August 1211|關係=Brother',
+		'/Htilominlo|1211/8/18~1235/7/18|:ME|關係=Son',
+		'/Naratheinga Uzana|1231~|:ME|準=年|在位=c. 1231?/35–19 July 1235|關係=Son',
+		'/Kyaswa|1235/7/19~|:ME|準=年|在位=19 July 1235–c. May 1251|關係=Son of Htilominlo',
+		'/Uzana|1251/5/1~|:ME|準=年|在位=c. May 1251–c. 6 May 1256|關係=Son',
+		'/Narathihapate|1256/5/6~1287/7/1|:ME|關係=Son',
+		// Interregnum (1287–1289)
+		'/Kyawswa|1289/5/30~1297/12/17|:ME|關係=Son',
+		'/Sawhnit|1299/5/8~|:ME|準=年|在位=8 May 1299–1325|關係=Son',
+		'/Uzana II|1325~1368|:ME|準=年|關係=Son',
+
+		// Small kingdoms
+		// All main chronicles prior to Hmannan Yazawin say that the co-regency
+		// ended in 674 ME (1312/13) but Hmannan says it ended in 672 ME
+		// (1310/11). Inscriptional evidence shows that the first brother died
+		// on 13 April 1310 but the second brother was still alive.
+		'Myinsaing/Athinkhaya|1297/12/17~1310/4/13|:ME|關係=Founders|注=Co-Regent: Yazathingyan, Thihathu',
+		'/Yazathingyan|1297/12/17~1312|:ME|關係=Co-rulers|注=Co-Regent: Athinkhaya, Thihathu',
+		'/Thihathu|1297/12/17~|:ME|關係=Co-rulers|注=Co-Regent: Athinkhaya, Yazathingyan',
+		// Most of the dates below are by Than Tun and Gordon Luce who had
+		// checked the chronicle reported dates with inscriptions. Myinsaing
+		// Sithu does not appear in any of the chronicles.
+		'Pinya/Thihathu|1313/2/7~|:ME|準=年|在位=7 February 1313–c. February 1325|關係=Brother of Athinkhaya and Yazathingyan',
+		'/Uzana I|1325/2/1~|:ME|準=年|在位=c. February 1325–1 September 1340|關係=Adopted son of Thihathu; Son of Kyawswa of Pagan',
+		'/Myinsaing Sithu|1340/9/1~|:ME|關係=Maternal uncle?',
+		'/Kyawswa I|1344/3/29~|:ME|關係=Nephew and son-in-law|君主名=Ngarsishin Kyawswa;Thihathu II',
+		'/Kyawswa II|1350/12/12~|:ME|關係=Son',
+		'/Narathu|1359/3/19~|:ME|準=年|君主名=Thihathu III|在位=19 March 1359–June 1364|關係=Brother',
+		'/Uzana II|1364/6/1~1364/9/1|:ME|準=年|在位=June 1364–September 1364|關係=Brother',
+
+		// Most of the dates are by Than Tun and Gordon Luce who had checked the
+		// dates provided in the chronicles against the inscriptions. Sawyun's
+		// start of reign date and Minbyauk's end of reign date are per Hmannan.
+		'Sagaing/Sawyun|1315/5/16~|:ME|關係=Son of Thihathu',
+		'/Tarabya I|1327/2/5~|:ME|準=年|在位=5 February 1327–1335|關係=Maternal half-brother',
+		'/Shwetaungtet|1335~|:ME|準=年|關係=Son',
+		'/Kyaswa of Sagaing|1339~|:ME|準=年|關係=Uncle; Son of Sawyun',
+		'/Nawrahta Minye|1348~|:ME|準=年|在位=1348–c. March 1350|關係=Brother',
+		'/Tarabya II|1350/3/1~|:ME|準=年|在位=c. March 1350–23 February 1352|關係=Brother',
+		'/Minbyauk Thihapate|1352/2/23~|:ME|準=年|在位=23 February 1352–April 1364|關係=Brother-in-law',
+		// Different Burmese chronicles give similar but not identical dates for
+		// the regnal dates of the Ava period. The following table largely
+		// follows the dates given in Hmannan Yazawin and the table of regnal
+		// dates given in (Maha Yazawin Vol. 2 2006: 352–355). The regnal dates
+		// by G.E. Harvey (Harvey 1925: 366) for the most part are off by a year
+		// (a year later) than chronicle and inscriptionally-verified dates.
+		'Ava/Thadominbya|1364/4/1~|:ME|準=年|在位=April 1364–c. 5 September 1367|關係=Grandson of Sawyun',
+		'/Swasawke|1367/9/5~|:ME|準=年|在位=5 September 1367–April 1400|關係=Grandson of Kyawswa of Pagan and grandnephew ofThihathu',
+		'/Tarabya|1400/4/1~|:ME|準=年|在位=April 1400–25 November 1400|關係=Son',
+		'/Minkhaung I|1400/11/25~|:ME|準=年|在位=25 November 1400–c. February 1422|關係=Half-brother',
+		'/Thihathu|1422/2/1~|:ME|準=年|在位=c. February 1422–August 1425|關係=Son',
+		'/Minhlange|1425/8/1~|:ME|準=年|在位=August 1425–November 1425|關係=Son',
+		'/Kale Kyetaungnyo|1425/11/1~|:ME|準=年|在位=November 1425–20 May 1426|關係=Uncle',
+		'/Mohnyin Thado|1426/5/20~|:ME|準=年|在位=20 May 1426–May 1439|關係=Descended from Kyawswa I of Pinya',
+		'/Minyekyawswa|1439/5/1~1442/1/1|:ME|準=年|在位=May 1439–January 1442|關係=Son',
+		'/Narapati I|1442/4/25~|:ME|關係=Brother',
+		'/Thihathura I|1468/7/24~|:ME|準=年|在位=24 July 1468–c. August 1480|關係=Son',
+		'/Minkhaung II|1480/8/1~1501/4/7|:ME|準=年|在位=c. August 1480–7 April 1501|關係=Son',
+		'/Thihathura II|1485~1501/3/4|:ME|準=年|在位=1485–4 March 1501|關係=Son',
+		'/Narapati II|1501/4/7~|:ME|關係=Son of Minkhaung II',
+		'/Thohanbwa|1527/3/14~1542/5/1|:ME|準=年|在位=14 March 1527–May 1542|關係=Son of Sawlon I of Mohnyin',
+		'/Hkonmaing|1542/6/1~|:ME|準=年|在位=June 1542–c. September 1545|關係=Saopha of Thibaw',
+		'/Narapati III|1545/9/1~|:ME|準=年|在位=c. September 1545–c. October 1551|關係=Son',
+		'/Narapati IV|1551/10/1~1555/1/22|:ME|準=年|在位=c. October 1551–22 January 1555|關係=Governor of Salin and Viceroy of Sagaing',
+
+		// http://en.wikipedia.org/wiki/List_of_rulers_of_Prome
+		// The following list is per the standard Burmese chronicles Maha
+		// Yazawin and Hmannan Yazawin, unless otherwise noted. The Yazawin Thit
+		// chronicle reports a slightly different list; most notably, it does
+		// not accept that Crown Prince Minye Kyawswa was governor between 1415
+		// and 1416.
+		'Prome/Thihathu I|1275~1288|:ME|準=年|關係=Appointed|注=In revolt (1287–88)',
+		'/Kyaswa|1289~|:ME|準=年|關係=Younger brother|注=Minister Pizzawta, not Kyaswa, was governor according to Yazawin Thit',
+		'/Saw Yan Naung|1323~|:ME|準=年|關係=Appointed|注=Son of Thihathu of Prome and elder brother of Swasawke of Ava',
+		'/Myet-Hna Shay|1377~|:ME|準=年|關係=Nephew',
+		'/Htihlaing|1388~|:ME|準=年|關係=Appointed',
+		'/Letya Pyanchi|1393~|:ME|準=年|關係=Appointed',
+		'/Sokkate|1415~|:ME|準=年|在位=1415 (3 months)|關係=Appointed',
+		'/Minye Kyawswa I|1415/4~|:ME|準=年|關係=Appointed',
+		'/Thihathu II|1416~|:ME|準=年|關係=Appointed|注=Minye Kyawswa Saw Shet Khet, not the crown prince, per Yazawin Thit',
+		'/Minye Kyawswa II|1419~|:ME|準=年|關係=Appointed|注=aka Saw Shwe Khet',
+		'/Min Maha|1425~|:ME|準=年|關係=Appointed|注=Reappointed to be governor of Sagaing',
+		'/Thihathu III|1429~|:ME|準=年|在位=1429–25 April 1442|關係=Appointed|注=Later known as King Narapati I of Ava',
+		'/Minye Kyawswa III|1442/4/25~|:ME|準=年|在位=25 April 1442–January 1446|關係=Appointed|注=Brother-in-law of Narapati I; Reappointed to be governor of Tharrawaddy',
+		'/Mingyi Swa|1446/1/1~|:ME|準=年|在位=January 1446–1482|關係=Appointed',
+		// Independent
+		'/Thado Minsaw|1482~|:ME|準=年|關係=Son of Narapati of Ava|注=Independent',
+		'/Bayin Htwe|1526~|:ME|準=年|在位=1526–c. December 1532|關係=Son|注=Independent',
+		'/Narapati|1532/12/1~|:ME|準=年|在位=c. December 1532–c. February 1539|關係=Son|注=Vassal of Confederation of Shan States',
+		'/Minkhaung|1539/2/1~|:ME|準=年|在位=c. February 1539–19 May 1542|關係=Brother|注=Vassal of Confederation of Shan States',
+		// ↑ Independent
+		'/Thado Dhamma Yaza I|1542/5/19~|:ME|關係=Appointed|注=Nanny of Tabinshwehti; In revolt (1550–1551)',
+		'/Thado Dhamma Yaza II|1551/8/30~1588/12|:ME|在位=30 August 1551–Nov/Dec 1588|關係=Appointed|注=Younger brother of Bayinnaung',
+		'/Thado Dhamma Yaza III|1589/2/28~|:ME|關係=Appointed|注=Son of Nanda; in revolt (1595–97)',
+		'/Yan Naing|1597/9/17~1608/7/13|:ME|關係=Usurper|注=Independent; Taken to Ava as POW',
+		'/Thado Dhamma Yaza IV|1620/11/2~1628/7/9|:ME|關係=Appointed|注=Later known as King Thalun',
+		'/Udein Kyawhtin|1630/6/1~1648|:ME|準=年|在位=June 1630–1648?|關係=Appointed',
+		'/Pye Min|1650/9/13~1661/6/3|:ME|關係=Appointed',
+
+		'Hanthawaddy/Wareru|1287/4/4~|:ME|準=年|在位=4 April 1287–January 1307|關係=Founder',
+		'/Hkun Law|1307~1311/3/1|:ME|準=年|在位=January 1307–March 1311|關係=Brother',
+		'/Saw O|1311/4/10~|:ME|準=年|在位=10 April 1311–September 1323|關係=Nephew',
+		'/Saw Zein|1323/9/1~|:ME|準=年|在位=September 1323–April 1330|關係=Brother',
+		'/Zein Pun|1330/4/1~|:ME|準=年|在位=April 1330–April 1330|關係=Usurper',
+		'/Saw E|1330/4/1~|:ME|準=年|在位=April 1330–May 1330|關係=Nephew of Saw Zein',
+		'/Binnya E Law|1330/5/1~|:ME|準=年|在位=May 1330–1348|關係=Uncle; Son of Hkun Law',
+		'/Binnya U|1348~|:ME|準=年|在位=1348–2 January 1384|關係=Nephew; Son of Saw Zein',
+		'/Razadarit|1384/1/2~|:ME|準=年|在位=2 January 1384–c. February 1421|關係=Son',
+		'/Binnya Dhammaraza|1421/2/1~|:ME|準=年|在位=c. February 1421–1424|關係=Son',
+		'/Binnya Ran I|1424~|:ME|準=年|關係=Brother',
+		'/Binnya Waru|1446~|:ME|準=年|在位=1446–30 May 1451|關係=Nephew',
+		'/Binnya Kyan|1451/5/30~|:ME|準=年|在位=30 May 1451–c. June 1453|關係=Cousin; Son of Binnya Dhamaraza',
+		'/Leik Munhtaw|1453/6/1~|:ME|準=年|在位=c. June 1453–c. January 1454|關係=Cousin; Son of Binnya Ran',
+		'/Shin Sawbu|1454~|:ME|準=年|在位=c. January 1454–1471|關係=Aunt; Daughter of Razadarit',
+		'/Dhammazedi|1471~|:ME|準=年|關係=Son in law',
+		'/Binnya Ran II|1492~|:ME|準=年|關係=Son',
+		'/Takayutpi|1526~1539/1/1|:ME|準=年|在位=1526–c. January 1539|關係=Son',
+		// Toungoo rule (1539–1550)
+		'/Smim Sawhtut|1550/6/1~|:ME|準=年|在位=June 1550–August 1550|關係=Claimant to throne',
+		'/Smim Htaw|1550/8/1~1552/3/12|:ME|準=年|在位=August 1550–12 March 1552|關係=Brother of Takayutpi',
+
+		// http://en.wikipedia.org/wiki/List_of_Burmese_monarchs
+		// http://en.wikipedia.org/wiki/List_of_Arakanese_monarchs
+		// The reign dates are per the Arakanese chronicle Rakhine Razawin Thit
+		// (Sandamala Linkara Vol. 2 1931), converted into Western dates using
+		// (Eade 1989). (Some Arakanese chronicles state the foundation of the
+		// kingdom a year later, 1430. Moreover, the end of the kingdom is given
+		// per Burmese records, 2 January 1785. Arakanese records give a day
+		// earlier, 1 January 1785.)
+		'Mrauk U/Saw Mon|1429/4/18~|:ME|關係=Founder',
+		'/Khayi|1433/5/9~|:ME|準=年|在位=9 May 1433–c. January 1459|關係=Brother',
+		'/Ba Saw Phyu|1459/1/1~|:ME|準=年|在位=c. January 1459–5 August 1482|關係=Son',
+		'/Dawlya|1482/8/5~|:ME|準=年|在位=5 August 1482–c. February 1492|關係=Son',
+		'/Ba Saw Nyo|1492/2/1~|:ME|準=年|在位=c. February 1492–c. January 1494|關係=Uncle',
+		'/Ran Aung|1494/1/1~|:ME|準=年|在位=c. January 1494–c. July 1494|關係=Nephew',
+		'/Salingathu|1494/7/1~|:ME|準=年|在位=c. July 1494–February 1502|關係=Maternal uncle',
+		'/Raza|1502/2/1~|:ME|準=年|在位=February 1502–c. November 1513|關係=Son',
+		'/Gazapati|1513/11/1~|:ME|準=年|在位=c. November 1513–January 1515|關係=Son',
+		'/Saw O|1515/1/1~|:ME|準=年|在位=January 1515–July 1515|關係=Granduncle; brother of Salingathu',
+		'/Thazata|1515/7/1~|:ME|準=年|在位=July 1515–c. April 1521|關係=Son of Dawlya',
+		'/Minkhaung|1521/4/1~|:ME|準=年|在位=c. April 1521–27 May 1531|關係=Brother',
+		'/Min Bin|1531/5/27~|:ME|關係=Son of Min Raza',
+		'/Dikkha|1554/1/11~|:ME|關係=Son',
+		'/Saw Hla|1556/3/6~|:ME|關係=Son',
+		'/Sekkya|1564/7/24~|:ME|關係=Brother',
+		'/Min Phalaung|1572/2/7~|:ME|關係=Son of Min Bin|君主名=Min Hpalaung',
+		'/Razagri|1593/7/4~|:ME|關係=Son',
+		'/Khamaung|1612/7/4~|:ME|關係=Son',
+		'/Thiri Thudhamma|1622/5/14~|:ME|關係=Son',
+		'/Sanay|1638/5/29~|:ME|關係=Son',
+		'/Narapati|1638/6/17~|:ME|關係=Great grandson of Min Bin',
+		'/Thado|1645/12/13~|:ME|準=年|在位=13 December 1645–c. May 1652|關係=Son',
+		'/Sanda Thudhamma|1652/5/1~|:ME|準=年|在位=c. May 1652–11 June 1674|關係=Son',
+		'/Thiri Thudhamma|1674/6/11~|:ME|關係=Son',
+		'/Wara Dhammaraza|1685/4/16~|:ME|關係=Brother|君主名=Wara Dhamma',
+		'/Muni Thudhammaraza|1692/6/20~|:ME|關係=Elder brother|君主名=Mani Dhamma',
+		'/Sanda Thuriya I|1694/12/20~|:ME|關係=Brother',
+		'/Nawrahta|1696/8/4~|:ME|關係=Son',
+		'/Mayuppiya|1696/8/18~1697/5/13|:ME|關係=Usurper|君主名=Mayonpiya',
+		'/Kalamandat|1697/5/16~|:ME|關係=Usurper|君主名=Kalagandat',
+		'/Naradipati I|1698/6/5~|:ME|關係=Son of Sanda Thuriya|君主名=Naradipadi I',
+		'/Sanda Wimala I|1700/6/18~1707/3/30|:ME|關係=Grandson of Thado',
+		'/Sanda Thuriya II|1707/4/3~1710/9/1|:ME|準=年|在位=3 April 1707–September 1710|關係=Grandson of Sanda Thudhamma',
+		// Interregnum ~2 months
+		'/Sanda Wizaya I|1710/11/1~|:ME|準=年|在位=November 1710–April 1731|關係=Usurper',
+		'/Sanda Thuriya III|1731/4/1~|:ME|準=年|在位=April 1731–1734|關係=Son-in-law',
+		'/Naradipati II|1734~|:ME|準=年|關係=Son|君主名=Naradipadi II',
+		'/Narapawara|1735~|:ME|準=年|在位=1735–September 1737|關係=Usurper',
+		'/Sanda Wizaya II|1737/9/1~1738/3/25|:ME|準=年|在位=September 1737–25 March 1738|關係=Cousin',
+		'/Madarit|1738/3/28~|:ME|關係=Brother',
+		'/Nara Apaya|1743/2/6~|:ME|關係=Uncle',
+		'/Thirithu|1761/10/28~|:ME|關係=Son',
+		'/Sanda Parama|1762/2/3~|:ME|關係=Brother',
+		'/Apaya|1764/5/1~|:ME|關係=Brother-in-law',
+		'/Sanda Thumana|1774/1/17~|:ME|關係=Brother-in-law',
+		'/Sanda Wimala II|1777/5/6~|:ME|關係=Usurper',
+		'/Sanda Thaditha|1777/6/5~|:ME|關係=Usurper',
+		'/Maha Thammada|1782/12/2~1785/1/2|:ME|關係=Usurper',
+
+		// http://en.wikipedia.org/wiki/List_of_Burmese_monarchs
+		// http://en.wikipedia.org/wiki/List_of_rulers_of_Toungoo
+		'Toungoo/Thawun Gyi|1279/4/21~|:ME|準=年|在位=21 April 1279–1317|關係=Son of Thawun Letya|注=Vassal of Pagan (1279–1287); independent (1287–1317); assassinated',
+		'/Thawun Nge|1317~|:ME|準=年|關係=Brother|注=Independent (1317–1322); Vassal of Pinya (1322–1324)',
+		'/Saw Hnit|1324~|:ME|準=年|關係=Son|注=Vassal of Pinya; assassinated',
+		'/Kayin Ba|1325~|:ME|準=年|關係=No relations; usurper|注=Vassal of Pinya',
+		'/Letya Sekkya|1342~|:ME|準=年|關係=Son-in-law|注=Vassal of Pinya; assassinated',
+		'/Htauk Hlayga|1344~|:ME|準=年|關係=Brother; usurper|注=Vassal of Pinya; assassinated',
+		'/Theinkhaba|1346~|:ME|準=年|在位=1346–29 March 1367|關係=No relations; usurper|注=Independent/in rebellion (1358–1366)',
+		'/Pyanchi I|1367/3/29~|:ME|準=年|在位=29 March 1367–1375|關係=Son|注=Vassal of Ava; assassinated',
+		'/Ma Sein|1375~|:ME|準=年|關係=Usurper|在位=1375 (7 months)|注=In rebellion/vassal of Hanthawaddy Pegu; assassinated',
+		'/Pyanchi II|1375/8~|:ME|準=年|關係=Son of Pyanchi I|注=Vassal of Ava; assassinated',
+		'/Sokkate|1379~|:ME|準=年|關係=Brother-in-law|注=Vassal of Ava; assassinated',
+		'/Phaungga|1383~|:ME|準=年|關係=Usurper|注=Vassal of Ava',
+		'/Saw Oo I|1397~|:ME|準=年|關係=Son|注=Removed from office',
+		'/Min Nemi|1399~|:ME|準=年|在位=1399–1408|關係=No relations|注= appointed',
+		'/Letya Zeya Thingyan|1408~|:ME|準=年|關係=Appointed|注=Moved to become governor ofPyinsi',
+		'/Thinkhaya I|1412~|:ME|準=年|關係=Appointed',
+		'/Thinkhaya II|1415~1418|:ME|準=年|關係=Appointed|注=Assassinated',
+		// No office holder (1418–1419)
+		'/Pantaung|1419~|:ME|準=年|關係=Appointed|注=Removed from office',
+		'/Thinkhaya III|1420~|:ME|準=年|關係=Appointed|注=Independent/in rebellion (1426–1435)',
+		'/Uzana|1435~|:ME|準=年|關係=Son-in-law; Appointed|注=Independent/in rebellion; Vassal of Hanthawaddy; Removed from office by Binnya Ran I',
+		'/Saw Oo II|1436~|:ME|準=年|關係=Son of Thinkhaya III|注=Independent/in rebellion; killed in action',
+		'/Tarabya|1440~|:ME|準=年|在位=1440–2 January 1446|關係=Appointed|注=Vassal of Ava',
+		'/Minkhaung I|1446/1/2~|:ME|準=年|在位=2 January 1446–1451|關係=Son|注=Vassal of Ava; assassinated',
+		'/Minye Kyawhtin of Toungoo|1451~|:ME|準=年|關係=Usurper; son of Crown Prince Minyekyawswa|注=Independent/in rebellion (1451–1459); assassinated',
+		'/Thiri Zeya Thura|1459~|:ME|準=年|關係=Appointed|注=Removed from office',
+		'/Letya Zala Thingyan|1466~|:ME|準=年|關係=Appointed|注=Independent/in revolt (1470); deposed',
+		'/Sithu Kyawhtin|1470~|:ME|準=年|關係=Appointed|注=Vassal of Ava; died in action',
+		'/Min Sithu|1481~|:ME|準=年|在位=1481–c. April 1485|關係=Son|注=Vassal of Ava; assassinated',
+		// Independent
+		'/Mingyinyo|1485/4/1~|:ME|準=年|在位=c. April 1485–24 November 1530|關係=Nephew|注=Declared independence from Ava in 1510/10/16',
+		'/Tabinshwehti|1530/11/24~|:ME|準=年|在位=24 November 1530–1540|關係=Son|注=Moved seat of government to Pegu(Bago) in 1539',
+		'/Minye Thihathu I|1540~|:ME|準=年|在位=1540–March 1549|關係=Appointed; father of Bayinnaung',
+		'/Minkhaung II|1549/3/1~1551/1/11|:ME|準=年|在位=March 1549–11 January 1551|關係=Appointed|注=Independent/in rebellion (1550–1551); Minkhaung resisted for four months but finally surrendered on 11 January 1551.',
+		'/=|1552/6/6~|:ME|關係=Younger brother; re-appointed|注=viceroy of Toungoo',
+		'/Minye Thihathu II|1584/6/1~|:ME|準=年|在位=June 1584–11 August 1609|關係=Son|注=Independent/in rebellion (1597–1609)|注=Viceroy of Toungoo: June 1584 – c. February 1597; King of Toungoo: – 11 August 1609',
+		'/Natshinnaung|1609/8/11~1610/9/4|:ME|關係=Son; appointed 1610–1612|注=Independent/in rebellion (1609–1610); King of Toungoo; Coronation: 6th waning of Wagaung 971 ME, 1609/8/21',
+		// King of Burma and dominions
+		// On 30 April 1550, Tabinshwehti was assassinated by his own bodyguards
+		// on the order of Smim Sawhtut, one of the king's close advisers.[
+		'/Bayinnaung|1550/4/30~|:ME|關係=Brother-in-law',
+		'/Nanda|1581/10/10~|:ME|關係=Son; nephew of Tabinshwehti',
+		'/Nyaungyan Min|1599/12/19~|:ME|關係=Half-brother',
+		'/Anaukpetlun|1605/11/5~|:ME|關係=Son',
+		'/Minye Deibba|1628/7/9~|:ME|關係=Son',
+		'/Thalun|1629/8/19~|:ME|關係=Uncle',
+		'/Pindale|1648/8/27~|:ME|關係=Son',
+		'/Pye|1661/6/3~|:ME|關係=Brother',
+		'/Narawara|1672/4/14~|:ME|關係=Son',
+		'/Minye Kyawhtin|1673/2/27~|:ME|關係=Nephew',
+		'/Sanay|1698/5/4~|:ME|關係=Son',
+		'/Taninganway|1714/9/12~|:ME|關係=Son',
+		'/Mahadhammaraza Dipadi|1733/12/12~1752/3/23|:ME|關係=Son',
+
+		// Restored Hanthawaddy Kingdom
+		'Restored Hanthawaddy/Smim Htaw Buddhaketi|1740/11/1~|:ME|準=年|在位=November 1740–December 1747|關係=Cousin of Mahadhammaraza Dipadi',
+		'/Binnya Dala|1747/12/1~1757/5/6|:ME|準=年|在位=December 1747–6 May 1757|關係=Elected',
+
+		'Konbaung/Alaungpaya|1752/2/29~|:ME|關係=Founder',
+		'/Naungdawgyi|1760/5/11~|:ME|關係=Son',
+		'/Hsinbyushin|1763/11/28~|:ME|關係=Brother',
+		'/Singu|1776/6/10~|:ME|關係=Son',
+		'/Phaungka|1782/2/6~|:ME|關係=Cousin; Son of Naungdawgyi',
+		"/Bodawpaya|1782/2/11~|:ME|關係=Uncle; Alaungpaya's fourth son",
+		'/Bagyidaw|1819/6/5~|:ME|關係=Grandson',
+		'/Tharrawaddy|1837/4/15~|:ME|關係=Brother',
+		'/Pagan|1846/11/17~|:ME|關係=Son',
+		'/Mindon|1853/2/18~|:ME|關係=Brother',
+		'/Thibaw Min|1878/10/1~|:ME|關係=Son',
+		'Konbaung exiled/=|1885/11/29~|:CE',
+		'/Myat Paya Lat|1916/12/19~|:CE|疑|關係=Daughter',
+		'/Myat Phaya|1956/4/4~|:CE|疑|關係=Younger sister',
+		'/Taw Phaya|1962/7/20~' + this.CeL_era_data.data.last
+				+ '|:CE|疑|關係=Second son',
+
+		'British Burma|1824/3/5~|:CE|注=First Anglo-Burmese War: 5 March 1824',
+
+		'မြန်မာပြည်|1948/1/4~' + this.CeL_era_data.data.last
+				+ '|:CE|國名=Republic of the Union of Myanmar'
 
 ]).minute_offset = 6.5 * 60;
 

@@ -743,6 +743,8 @@ _.Julian_shift_days = Julian_shift_days;
  *            Julian calendar　date string.
  * 
  * @returns {Date} new Date
+ * 
+ * @see http://en.wikipedia.org/wiki/Old_Style_and_New_Style_dates
  */
 function Julian_String_to_Date(date_string, minute_offset, options) {
 	if (!library_namespace.is_Object(options))
@@ -752,6 +754,37 @@ function Julian_String_to_Date(date_string, minute_offset, options) {
 
 	return String_to_Date_default_parser(date_string, minute_offset, options);
 }
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+
+function parse_English_Date(date) {
+	date = date.trim().replace(/.+\[(?:\d{1,2}|note \d+)\]$/, '');
+	var accuracy;
+	if (accuracy = date.match(/^(?:before|after)[\s ](.+)$/i))
+		date = accuracy[1].trim(), accuracy = accuracy[0];
+	if (accuracy = date.match(/^c.(.+)$/))
+		date = accuracy[1].trim(), accuracy = accuracy[0];
+	if (/^[a-z]+\s+-?\d+$/i.test(date))
+		date = '1 ' + date, accuracy = date;
+
+	if (date.includes('?'))
+		accuracy = date, date = date.replace(/\?/g, '');
+	var matched;
+	if (!isNaN(date) || /^\d+\/\d+$/.test(date))
+		accuracy = date;
+	else if (!isNaN(matched = Date.parse(date))) {
+		date = new Date(matched + String_to_Date.default_offset
+				* ONE_MINTE_LENGTH_VALUE).toISOString().match(/^\d+-\d+-\d+/)[0]
+				.replace(/^0+/, '').replace(/(\d)-0*/g, '$1\/');
+	} else {
+		library_namespace.warn(date);
+		return;
+	}
+	return [ date, accuracy ];
+}
+
+_.parse_English = parse_English_Date;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
@@ -887,9 +920,6 @@ Date_to_String = Date_to_String;
 
 
 //---------------------------------------------------------
-
-// 一分鐘的 time 值。should be 60 * 1000 = 60000.
-var ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1);
 
 /**
  * 依照指定 strftime 格式輸出日期與時間。
@@ -1735,6 +1765,8 @@ _.JD_to_Date = JD_to_Date;
 
 // 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
 var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+//一分鐘的 time 值。should be 60 * 1000 = 60000.
+ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
 // 一整時辰的 time 值。should be 2 * 60 * 60 * 1000 = 7200000.
 ONE_時辰_LENGTH_VALUE = new Date(0, 0, 0, 2) - new Date(0, 0, 0, 0),
 

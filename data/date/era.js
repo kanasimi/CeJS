@@ -542,6 +542,7 @@ if (typeof CeL === 'function')
 				朝代 : 2,
 				政權 : 2,
 				國號 : 2,
+				國名 : 2,
 
 				// 王朝, 帝國, Empire
 
@@ -566,7 +567,7 @@ if (typeof CeL === 'function')
 				生 : 1,
 				// 君主逝世日期
 				卒 : 1,
-				// 君主在位期間: 上任/退位
+				// 君主在位期間: 上任/退位, 執政,君主統治,統治,支配
 				在位 : 1
 			}, 紀年名稱索引值),
 
@@ -2877,7 +2878,7 @@ if (typeof CeL === 'function')
 
 							if (!library_namespace
 									.is_digits(date_data = date_name[2].trim())
-									//接受 0日，是為了如 Myanmar 需要調整月名的情況。
+									// 接受 0日，是為了如 Myanmar 需要調整月名的情況。
 									|| (date_data |= 0) <= 0) {
 								library_namespace
 										.err('initialize_era_date: 無法辨識日數資料 ['
@@ -5062,6 +5063,9 @@ if (typeof CeL === 'function')
 						}
 
 					起訖[0] = normalize_date(起訖[0], 起訖[2], false, true);
+					if (!起訖[0])
+						throw new Error('parse_era: 未能 parse 起始日期: [' + 紀年
+								+ ']！');
 
 					if (起訖[1])
 						// tmp 於此將設成是否取終點。

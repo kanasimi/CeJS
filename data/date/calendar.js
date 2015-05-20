@@ -2468,7 +2468,7 @@ Myanmar_Date.year_data = function(year, options) {
 	= Myanmar_Date.watat_data(--last_watat_year, reference)).type);
 
 	if (year_data.type)
-		// This year is a watat year, andtest if it is a big watat year.
+		// This year is a watat year, and test if it is a big watat year.
 		year_data.type
 		// assert: (... % 354) should be 30 or 31.
 		= (year_data.fullmoon - last_watat_data.fullmoon) / ONE_DAY_LENGTH_VALUE
