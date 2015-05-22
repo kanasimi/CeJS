@@ -2622,7 +2622,7 @@ this.CeL_era_data = {
 					'參照用', '注=Myanmar calendar, Myanmar era' ];
 		}.call(this),
 
-		// 關係: 為前任者之～,Relationship with predecessor(s)
+		// 關係: 為前任者之～, Relationship with predecessor(s).
 
 		// Upper Burma, Middle Early Pagan
 		// http://en.wikipedia.org/wiki/List_of_early_and_legendary_monarchs_of_Burma#Middle_Early_Pagan

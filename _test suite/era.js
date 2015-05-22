@@ -234,8 +234,11 @@ default_column = [ {
 	T : '朝代紀年日期',
 	R : 'date of calendar era: Y/m/d'
 }, {
-	T : CE_name,
-	R : 'Common Era: Y/m/d'
+	a : {
+		T : CE_name
+	},
+	R : 'Common Era: Y/m/d',
+	href : 'https://en.wikipedia.org/wiki/Common_Era'
 } ];
 
 auto_add_column.日本 = auto_add_column.한국 = auto_add_column['Việt Nam'] = auto_add_column.中國;
@@ -2550,28 +2553,29 @@ function affairs() {
 					em : '隨即重新整理'
 				}, '，以更改設定！）' ] ],
 
-		precession : [ {
-			a : {
-				T : 'general precession'
-			},
-			R : '紀元使用當地、當日零時綜合歲差。\nKai Tang (2015).'
-			//
-			+ ' A long time span relativistic precession model of the Earth.\n'
-			//
-			+ '在J2000.0的时候与P03岁差差大概几个角秒，主要由于周期拟合的时候，很难保证长期与短期同时精度很高。',
-			href : 'https://en.wikipedia.org/wiki/Axial_precession'
-		}, function(date) {
-			if (/* date.準 || */date.精)
-				return;
+		precession : [
+				{
+					a : {
+						T : 'general precession'
+					},
+					R : '紀元使用當地、當日零時綜合歲差，指赤道歲差加上黃道歲差 (Table B.1) 的綜合效果。\nKai Tang (2015).'
+							//
+							+ ' A long time span relativistic precession model of the Earth.\n'
+							//
+							+ '在J2000.0的时候与P03岁差差大概几个角秒，主要由于周期拟合的时候，很难保证长期与短期同时精度很高。',
+					href : 'https://en.wikipedia.org/wiki/Axial_precession'
+				}, function(date) {
+					if (/* date.準 || */date.精)
+						return;
 
-			var precession = CeL.precession(
-			//
-			CeL.TT(new Date(date.offseted_value())));
-			return [ CeL.show_degrees(precession[0], 2), {
-				b : ', ',
-				S : 'color:#e60;'
-			}, CeL.show_degrees(precession[1], 2) ];
-		} ],
+					var precession = CeL.precession(
+					//
+					CeL.TT(new Date(date.offseted_value())));
+					return [ CeL.show_degrees(precession[0], 2), {
+						b : ', ',
+						S : 'color:#e60;'
+					}, CeL.show_degrees(precession[1], 2) ];
+				} ],
 
 		solarterms : [ {
 			a : {
@@ -2971,10 +2975,31 @@ function affairs() {
 			+ '緬曆有0年。非精確時，可能有最多前後2日的誤差。',
 			href : 'https://en.wikipedia.org/wiki/Burmese_calendar'
 		}, function(date) {
-			var Myanmar_date = date.to_Myanmar();
-			return date.精 === '年' ? 'ME' + Myanmar_date[0]
-			//
-			: Myanmar_date.slice(0, 3).join(' ');
+			if (date.精 === '年')
+				return 'ME' + date.to_Myanmar({
+					format : 'serial'
+				})[0];
+
+			var result = [ (date = date.to_Myanmar({
+				notes : true
+			})).slice(0, 3).join(' ') ], notes;
+
+			// calendar notes. Myanmar Astrological Calendar Days.
+			if (date.notes) {
+				result.push({
+					span : notes = [],
+					C : 'notes'
+				});
+				date.notes.forEach(function(note) {
+					notes.push(note, {
+						b : ', ',
+						S : 'color:#39e;'
+					});
+				});
+				notes.pop();
+			}
+
+			return result;
 		} ],
 
 		Yi : [ {

@@ -1288,13 +1288,19 @@ Chinese_week_name = [];
 month_name.Chinese_month_name = Chinese_month_name;
 date_name.Chinese_date_name = Chinese_date_name;
 
+var English_week_name = 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(',');
+
 
 function week_name(ordinal, domain_name) {
+	// assert: ordinal: 0~6
 	switch (domain_name) {
 	case 'cmn-Hant-TW':
+	case 'cmn-Hans-CN':
 		// number to Chinese week name.
-		// assert: ordinal: 0~6
 		return Chinese_week_name[ordinal];
+
+	case 'en-US':
+		return English_week_name[ordinal];
 
 	default:
 		return ordinal;

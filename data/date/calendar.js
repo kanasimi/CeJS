@@ -328,7 +328,7 @@ function Tabular_list_leap() {
 // 1: 2,5,7,10,13,15,18,21,24,26,29
 // -5: 2,5,8,11,13,16,19,21,24,27,30
 
-// shift: 小餘, -30－30.
+// shift: 小餘, -30–30.
 function get_Tabular_leap_count(shift, year_serial) {
 	if (0 < (shift |= 0))
 		shift %= Tabular_cycle_years;
@@ -406,7 +406,7 @@ function Date_to_Tabular(date, options) {
 	if (date < 0)
 		date += Tabular_cycle_days;
 
-	// month: 本30年周期內之積年數: 0－30。
+	// month: 本30年周期內之積年數: 0–30。
 	// 30: 第29年年底。
 	month = (date / Tabular_common_year_days) | 0;
 	year += month;
@@ -481,7 +481,7 @@ _.Tabular_Date = Tabular_Date;
 // http://www.jewishgen.org/infofiles/m_calint.htm
 
 
-// Hebrew_month_serial[month_name] = month serial (1 － 12 or 13)
+// Hebrew_month_serial[month_name] = month serial (1–12 or 13)
 var Hebrew_month_serial = library_namespace.null_Object(),
 // Hour is divided into 1080 parts called haliq (singular of halaqim)
 Hebrew_1_HOUR = 1080 | 0,
@@ -552,7 +552,7 @@ function Hebrew_Date(year, month, date, get_days) {
 	else if (isNaN(month = Hebrew_Date.month_index(month, is_leap)))
 		return;
 
-	// month: month index (0 － 11 or 12)
+	// month: month index (0–11 or 12)
 
 	if (month > 2 || month === 2 && add_days > 0) {
 		// 所有後面的月份皆須加上此 add_days。
@@ -662,8 +662,8 @@ Hebrew_Date.month_serial = function(month_name, is_leap_year) {
 //
 // return 0: Tishri, 1: Heshvan, ..
 //
-// common year: 0－11
-// leap year: 0－12
+// common year: 0–11
+// leap year: 0–12
 //
 // for numeral month name (i.e. month serial):
 // Hebrew year begins on 7/1, then month 8, 9, .. 12, 1, 2, .. 6.
@@ -738,7 +738,7 @@ Hebrew_Date.molad = function(year, month_index, get_Date) {
 };
 
 // return [ week_day (0:Sunday, 1:Monday, .. 6),
-// hour (0－23 from sunset 18:0 of previous day), halaqim (0－) ]
+// hour (0–23 from sunset 18:0 of previous day), halaqim (0–) ]
 // @see
 // http://www.stevemorse.org/jcal/molad.htm?year=1
 Hebrew_Date.molad_date = function(year, month_index) {
@@ -986,7 +986,7 @@ Hebrew_Date.year_of_days = function(days) {
 			/ Hebrew_1_MONTH * 19 / 235) + 1 | 0;
 
 	// assert: 最多減兩次。
-	// 經測試 0－4e6，96% 皆為減一次。
+	// 經測試 0–4e6，96% 皆為減一次。
 	// [ 139779, 3859350, 871 ]
 	while (days < Hebrew_Date.new_year_days(year))
 		year--;
@@ -1269,7 +1269,7 @@ _.Maya_Date = Maya_Date;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 長曆: 西雙版納傣曆計算。傣历 / Dai Calendar
-// 適用範圍: 傣曆 714年（1352/3/28－）至 3190年期間內。
+// 適用範圍: 傣曆 714年（1352/3/28–）至 3190年期間內。
 
 /*
 
@@ -1305,7 +1305,7 @@ Dai_Date(紀元年數, 特殊日期)
 	特殊日期: 元旦/除夕/空1/空2
 Dai_Date(紀元年數, 0, 當年日序數)
 Dai_Date(紀元年數, 月, 日)
-	月: 1－12/閏/後6/後7
+	月: 1–12/閏/後6/後7
 
 元旦：
 	Dai_Date(year, 0)
@@ -1411,7 +1411,7 @@ function Dai_Date(year, month, date, get_days) {
 			* ONE_DAY_LENGTH_VALUE);
 }
 
-// 適用範圍: 傣曆 0－103295 年
+// 適用範圍: 傣曆 0–103295 年
 Dai_Date.to_valid_year = function(year, ignore_range) {
 	if (false && year < 0)
 		library_namespace.warn('Dai_Date.to_valid_year: 公式不適用於過小之年分：' + year);
@@ -1426,7 +1426,7 @@ Dai_Date.to_valid_year = function(year, ignore_range) {
 
 // 傣曆採十九年七閏法，平年有12個月，閏年有13個月。閏月固定在9月，所以閏年又稱為「雙九月」年
 // 閏9月, 閏九月。
-// 適用範圍: 傣曆 0－ 年
+// 適用範圍: 傣曆 0– 年
 Dai_Date.is_leap = function(year) {
 	// 傣曆零年當年九月置閏月。
 	return year == 0 ||
@@ -1521,7 +1521,7 @@ Dai_Date.new_year_days_original = function(year) {
 
 
 // 元旦紀元積日數, accumulated days
-// 簡化法：適用於 -69889－103295 年
+// 簡化法：適用於 -69889–103295 年
 Dai_Date.new_year_days = function(year, get_remainder) {
 	// 防止 overflow。但效果相同。
 	// var v = 365 * year + 1 + (279457 * year + 529723) / 1080000,
@@ -1532,7 +1532,7 @@ Dai_Date.new_year_days = function(year, get_remainder) {
 	return get_remainder ? v - f : f;
 };
 
-// 簡化法：適用於 -3738－1000000 年
+// 簡化法：適用於 -3738–1000000 年
 Dai_Date.year_of_days = function(days) {
 	return Math.floor((1080000 * (days + 1) - 1609723) / 394479457) | 0;
 };
@@ -1569,7 +1569,7 @@ Mod[day + Floor[1/692 (633 + 11 day - Floor[(7368 + day)/8878])], 30]
 var new_year_date_serial = [ 30 ];
 
 // 元旦之當月日序基數
-// d = 30－35: 7/(d-29)
+// d = 30–35: 7/(d-29)
 // others: 6/d
 Dai_Date.new_year_date_serial = function(year, days, ignore_year_limit) {
 	if (year in new_year_date_serial)
@@ -1597,7 +1597,7 @@ Dai_Date.new_year_date_serial = function(year, days, ignore_year_limit) {
 	= year * 354
 	// 閏月年初累積日數 = 30 * (年初累積閏月數 (7r-6)/19+1=(7r+13)/19)
 	+ 30 * (((7 * (year - 1) - 6) / 19) + 2 | 0)
-	// 八月滿月年初累積日數。.194: 經手動測試，誤差=0 or 1日@部分0－1400年
+	// 八月滿月年初累積日數。.194: 經手動測試，誤差=0 or 1日@部分0–1400年
 	+ (.194 * year | 0)
 	// 為傣曆紀元始於 7/1，而非 6/1；以及 date 由 6/1 而非 6/0 起始而調整。
 	- 30
@@ -1637,7 +1637,7 @@ Dai_Date.new_year_date_serial = function(year, days, ignore_year_limit) {
 
 
 // 6/1 紀元積日數, accumulated days
-// 簡化法：適用於 -69889－103295 年
+// 簡化法：適用於 -69889–103295 年
 Dai_Date.days_6_1 = function(year, days) {
 	// days: 元旦紀元積日數。
 	if (isNaN(days))
@@ -1661,7 +1661,7 @@ function get_boundary(caculator, result, down, up, limit) {
 		return up;
 
 	var boundary, value, increase;
-	// assert: caculator(down) － caculator(up) 為嚴格遞增/嚴格遞減函數。
+	// assert: caculator(down) – caculator(up) 為嚴格遞增/嚴格遞減函數。
 	if (caculator(up) - caculator(down) < 0)
 		// swap.
 		boundary = up, up = down, down = boundary;
@@ -1673,7 +1673,7 @@ function get_boundary(caculator, result, down, up, limit) {
 
 	do {
 		boundary = (up + down) / 2;
-		// console.log(down + ' － ' + boundary + ' － ' + up);
+		// console.log(down + ' – ' + boundary + ' – ' + up);
 		if (boundary === down || boundary === up)
 			return boundary;
 		value = result - caculator(boundary);
@@ -1726,7 +1726,7 @@ function get_boundary(caculator, result, down, up, limit) {
 0<=k<4.85142740011485494303
 
 八月滿月 years:
-1166－:
+1166–:
 1167, 1172, 1176, 
 
 
@@ -2174,8 +2174,8 @@ Myanmar_month_days = [],
 // = [ accumulated days of month 1 (Tagu), accumulated days of month 2, ... ]
 Myanmar_month_days_count = [],
 
-// 1060: beginning of well known (historical) Myanmar year
-// well known exceptions
+// 1060: beginning of well-known (historical) Myanmar year
+// well-known exceptions
 Myanmar_adjust_watat = {
 	1201 : true,
 	1202 : false,
@@ -2184,7 +2184,7 @@ Myanmar_adjust_watat = {
 	1344 : true,
 	1345 : false
 },
-// well known exceptions
+// well-known exceptions
 Myanmar_adjust_fullmoon = {
 	1120 : 1,
 	1126 : -1,
@@ -2227,6 +2227,23 @@ Myanmar_adjust_TNT = {
 // references before 1060.
 Myanmar_reference =[ Myanmar_adjust_CE, Myanmar_adjust_TNT ];
 
+
+
+// Year 0 date
+// https://en.wikipedia.org/wiki/Burmese_calendar
+// (Luce Vol. 2 1970: 336): According to planetary positions, the current Burmese era technically began at 11:11:24 on 22 March 638.
+if (false)
+	Myanmar_Date.epoch = String_to_Date('638/3/22 11:11:24', {
+		parser : 'Julian'
+	}).getTime();
+
+// Cool Emerald(2015/5)
+// ME 1377 (my=1377) Myanmar calendar says new year time is 2015-Apr-16 20:35:57
+// = 638/3/22 13:12:53.880 local time	(new Date(CeL.Myanmar_Date.epoch).format('CE'))
+Myanmar_Date.epoch = new Date(2015, 4 - 1, 16, 20, 35, 57) - 1377 * Myanmar_YEAR_LENGTH_VALUE;
+
+
+
 Myanmar_Date.month_name = 'First Tabaung|Tagu|Kason|Nayon|Waso|Wagaung|Tawthalin|Thadingyut|Tazaungmon|Nadaw|Pyatho|Tabodwe|Tabaung|Late Tagu|Late Kason'
 	.split('|');
 
@@ -2239,7 +2256,9 @@ Myanmar_Date.month_name = 'First Tabaung|Tagu|Kason|Nayon|Waso|Wagaung|Tawthalin
 
 // initialization of accumulated days / month name
 (function() {
-	var m, count = 0, days, queue = [ count ], month_days = [],
+	var m, count = 0, days, queue = [ count ],
+	// days in the month
+	month_days = [],
 	// new year's day often falls on middle Tagu, even Kason.
 	month_name = Myanmar_Date.month_name.slice();
 
@@ -2290,7 +2309,7 @@ Myanmar_Date.month_name = 'First Tabaung|Tagu|Kason|Nayon|Waso|Wagaung|Tawthalin
  * @param {Object}[options]
  *            options to use
  * 
- * @returns {Date} Gregorian calendar
+ * @returns {Date} proleptic Gregorian calendar
  */
 Myanmar_Date.new_year_Date = function(year, options) {
 	var date = Myanmar_Date.epoch + year * Myanmar_YEAR_LENGTH_VALUE,
@@ -2374,7 +2393,7 @@ for(var i=0;i<19;i++){for(var y=0,_y,l=[];y<19;y++){_y=(7*y+i)%19;if(_y<7)l.push
  * @param {Integer}[reference]
  *            reference to use. see Myanmar_reference.
  * 
- * @returns {Date} Gregorian calendar
+ * @returns {Date} proleptic Gregorian calendar
  */
 Myanmar_Date.watat_data = function(year, reference) {
 	var cache = Myanmar_cache[reference |= 0];
@@ -2424,7 +2443,7 @@ Myanmar_Date.watat_data = function(year, reference) {
 
 	// adjust for exceptions
 	var table
-	// 1060: beginning of well known (historical) Myanmar year
+	// 1060: beginning of well-known (historical) Myanmar year
 	= year < 1060 ? reference && Myanmar_reference[reference] || Myanmar_reference[0] : Myanmar_adjust_fullmoon;
 	if (year in table)
 		fullmoon += table[year];
@@ -2459,6 +2478,7 @@ Myanmar_Date.year_data = function(year, options) {
 	var year_data = Myanmar_Date.watat_data(year),
 	//
 	reference = (options && options.reference) | 0;
+	// "TypeError: invalid 'in' operand year_data" for minus years
 	if ('Tagu_1st' in year_data)
 		return year_data;
 
@@ -2547,7 +2567,7 @@ Myanmar_Date.month_days = function(year, options) {
  * @param {Object}[options]
  *            options to use
  * 
- * @returns {Date} Gregorian calendar
+ * @returns {Date} proleptic Gregorian calendar
  */
 function Myanmar_Date(year, month, date, options) {
 	var year_data = Myanmar_Date.year_data(year, options);
@@ -2567,23 +2587,6 @@ function Myanmar_Date(year, month, date, options) {
 
 	return new Date(year_data.Tagu_1st + date * ONE_DAY_LENGTH_VALUE);
 }
-
-
-// Year 0 date
-// https://en.wikipedia.org/wiki/Burmese_calendar
-// (Luce Vol. 2 1970: 336): According to planetary positions, the current Burmese era technically began at 11:11:24 on 22 March 638.
-if (false)
-	Myanmar_Date.epoch = String_to_Date('638/3/22 11:11:24', {
-		parser : 'Julian'
-	}).getTime();
-
-
-// Cool Emerald(2015/5)
-// ME 1377 (my=1377) Myanmar calendar says new year time is 2015-Apr-16 20:35:57
-// = 638/3/22 13:12:53.880 local time	(new Date(CeL.Myanmar_Date.epoch).format('CE'))
-Myanmar_Date.epoch = new Date(2015, 4 - 1, 16, 20, 35, 57) - 1377 * Myanmar_YEAR_LENGTH_VALUE;
-
-
 
 _.Myanmar_Date = Myanmar_Date;
 
@@ -2609,6 +2612,8 @@ function Date_to_Myanmar(date, options) {
 	days = (date - year_data.Tagu_1st) / ONE_DAY_LENGTH_VALUE,
 	// 30 > mean month days. So the true month may be month or month + 1.
 	month = days / 30 | 0,
+	// for notes
+	weekday = options && options.notes && date.getDay(),
 	//
 	accumulated_days = Myanmar_month_days_count[year_data.type];
 
@@ -2633,6 +2638,97 @@ function Date_to_Myanmar(date, options) {
 	if (0 < (days %= 1))
 		date.push(days);
 
+	var month_days = accumulated_days[month + 1] - accumulated_days[month];
+
+	/**
+	 * calendar notes / 曆注<br />
+	 * Myanmar Astrological Calendar Days
+	 * 
+	 * notes: {Array} all notes in lower-case
+	 * 
+	 * @see http://cool-emerald.blogspot.tw/2013/12/myanmar-astrological-calendar-days.html
+	 */
+	if (typeof weekday === 'number') {
+		var notes = [],
+		// 0–11, do not count First Waso.
+		month_index = month, tmp;
+		if (month_index < 0)
+			// assert: month_index === -1
+			month_index = 11;
+		else if (year_data.type && month > 3)
+			// month after First Waso.
+			month_index--;
+
+		// full moon days, new moon days and waxing and waning 8 are sabbath days. The day before sabbath day is sabbath eve.
+		if (date === 8 || date === 15 || date === 23 || date === month_days)
+			notes.push('sabbath');
+		else if (date === 7 || date === 14 || date === 22 || date === month_days - 1)
+			notes.push('sabbath eve');
+
+		// Yatyaza: ရက်ရာဇာ
+		tmp = [ {
+			3 : 1,
+			4 : 2,
+			5 : 1,
+			6 : 2
+		}, {
+			3 : 2,
+			4 : 1,
+			5 : 2,
+			6 : 1
+		}, {
+			0 : 2,
+			1 : 2,
+			2 : 1,
+			4 : 1
+		}, {
+			0 : 1,
+			2 : 2,
+			3 : 3
+		} ][month_index % 4][weekday];
+		if (tmp)
+			if (tmp === 3)
+				notes.push('yatyaza', 'pyathada(afternoon)');
+			else
+				notes.push([ , 'yatyaza', 'pyathada' ][tmp]);
+
+		//for(month=0;month<12;month++){i=month===8?7:(((month+3)%12)*2)%7+1;console.log(month+':'+i);}
+		if ((weekday - (month_index === 8 ? 7 : ((month_index + 3) % 12) * 2 + 1)) % 7 >= -1) {
+			tmp = 'thamanyo';
+			if (month_index === 10 && weekday === 3)
+				tmp += '(afternoon)';
+			notes.push(tmp);
+		}
+
+		// tmp: waxing or waning day, 1–14
+		if ((tmp = date[2]) > 15)
+			tmp -= 15;
+		if (tmp === [ 8, 3, 7, 2, 4, 1, 5 ][weekday])
+			notes.push('amyeittasote');
+		if (tmp === [ 1, 4, 8, 9, 6, 3, 7 ][weekday])
+			notes.push('warameittugyi');
+		if (tmp + weekday === 12)
+			notes.push('warameittunge');
+		if (tmp === [ 1, 4, 6, 9, 8, 7, 8 ][weekday])
+			notes.push('yatpote');
+		if ([ [ 1, 2 ], [ 6, 11 ], [ 6 ], [ 5 ], [ 3, 4, 6 ], [ 3, 7 ], [ 1 ] ][weekday].includes(tmp))
+			notes.push('thamaphyu');
+		if ([ [ 2, 19, 21 ], [ 1, 2, 4, 12, 18 ], [ 10 ], [ 9, 18 ], [ 2 ], [ 21 ], [ 17, 26 ] ][weekday].includes(date[2]))
+			notes.push('nagapor');
+		if (tmp % 2 === 0
+		//
+		&& tmp === (month_index % 2 ? month_index + 3 : month_index + 6) % 12)
+			notes.push('yatyotema');
+		if (tmp - 1 === (((month_index + 9) % 12) / 2 | 0))
+			notes.push('mahayatkyan');
+		if (tmp === [ 8, 8, 2, 2, 9, 3, 3, 5, 1, 4, 7, 4 ][month_index])
+			notes.push('shanyat');
+		notes.push('nagahle:' + nagahle_direction[((month_index + 1) % 12) / 3 | 0]);
+		
+		if (notes.length > 0)
+			date.notes = notes;
+	}
+
 	if (!options || options.format !== 'serial') {
 		date[1] = accumulated_days.month[date[1]];
 		days = date[2];
@@ -2640,14 +2736,23 @@ function Date_to_Myanmar(date, options) {
 		// The 15th of the waxing (လပြည့် [la̰bjḛ]) is the civil full moon day.
 		: days === 15 ? 'full moon'
 		// The civil new moon day (လကွယ် [la̰ɡwɛ̀]) is the last day of the month (14th or 15th waning).
-		: days >= 29 && days === accumulated_days[month + 1] - accumulated_days[month] ? 'new moon' : 'waning ' + (days - 15);
+		: days >= 29 && days === month_days ? 'new moon' : 'waning ' + (days - 15);
 	}
 
 	return date;
 }
 
+var nagahle_direction = 'west,north,east,south'.split(',');
+
 
 /*
+
+
+CeL.run('https://googledrive.com/host/0B7WW8_JrpDFXTHRHbUJkV0FBdFU/mc.js');
+
+for(var y=-100;y<2000;y++){var d=chk_my(y);CeL.assert([d.myt,CeL.Myanmar_Date.year_data(y).type],'t'+y);d=j2w(d.tg1,1);CeL.assert([d.y+'/'+d.m+'/'+d.d,CeL.Myanmar_Date(y).format('%Y/%m/%d')],y);}
+// true
+
 
 '654/3/23'.to_Date('CE').to_Myanmar()
 
@@ -3248,7 +3353,12 @@ French_Republican_year_starts = function(year) {
 		// French: UTC+1
 		1 * 60))(year);
 };
-//French_Republican_year_starts.year_of = library_namespace.null_function;
+
+French_Republican_year_starts.year_of = function(date) {
+	French_Republican_year_starts();
+	if (this !== French_Republican_year_starts.year_of)
+		return French_Republican_year_starts.year_of(date);
+};
 
 // 先嘗試看看。
 French_Republican_year_starts();
@@ -3270,7 +3380,7 @@ French_Republican_Date.month_name = function(month) {
  * @param {Natural}date
  *            date of calendrier républicain.
  * 
- * @returns {Date} Gregorian calendar
+ * @returns {Date} proleptic Gregorian calendar
  */
 function French_Republican_Date(year, month, date, shift) {
 	// no year 0. year: -1 → 0
@@ -3391,7 +3501,12 @@ Solar_Hijri_year_starts = function(year) {
 						// 12: 移半天可以取代正午之效果。
 						(3.5 + 12) * 60))(year);
 };
-//Solar_Hijri_year_starts.year_of = library_namespace.null_function;
+
+Solar_Hijri_year_starts.year_of = function(date) {
+	Solar_Hijri_year_starts();
+	if (this !== Solar_Hijri_year_starts.year_of)
+		return Solar_Hijri_year_starts.year_of(date);
+};
 
 // 先嘗試看看。
 Solar_Hijri_year_starts();
@@ -3411,7 +3526,7 @@ Solar_Hijri_Date.month_name = function(month, is_leap, options) {
  * @param {Natural}date
  *            date of Solar Hijri calendar.
  * 
- * @returns {Date} Gregorian calendar
+ * @returns {Date} proleptic Gregorian calendar
  */
 function Solar_Hijri_Date(year, month, date) {
 	// no year 0. year: -1 → 0
@@ -3497,7 +3612,13 @@ Yi_year_starts = function(year) {
 		// 8: UTC+8 → minute offset
 		8 * 60))(year);
 };
-// Yi_year_starts.year_of = library_namespace.null_function;
+
+Yi_year_starts.year_of = function(date) {
+	Yi_year_starts();
+	if (this !== Yi_year_starts.year_of)
+		return Yi_year_starts.year_of(date);
+};
+
 
 // 先嘗試看看。
 Yi_year_starts();
@@ -3525,7 +3646,7 @@ Yi_Date.month_name = function(month, is_leap, options) {
  * @param {Natural}date
  *            date of Yi calendar.
  * 
- * @returns {Date} Gregorian calendar
+ * @returns {Date} proleptic Gregorian calendar
  */
 function Yi_Date(year, month, date) {
 	// no year 0. year: -1 → 0
@@ -3633,10 +3754,28 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // TODO:
 // Egyptian calendar, 古埃及曆法.
-// According to Roman writer Censorinus, the Egyptian New Year's Day fell on July 20 in the Julian Calendar in 139 CE, which was a heliacal rising of Sirius in Egypt.
+
+// https://en.wikipedia.org/wiki/Egyptian_calendar
+// According to Roman writer Censorinus (3rd century AD), the Egyptian New Year's Day fell on July 20 in the Julian Calendar in 139 CE, which was a heliacal rising of Sirius in Egypt.
+
 // https://en.wikipedia.org/wiki/Sothic_cycle
 
 
+/**
+ * Egyptian calendar
+ * 
+ * @param {Integer}year
+ *            year of Egyptian calendar.
+ * @param {Natural}month
+ *            month of Egyptian calendar.
+ * @param {Natural}date
+ *            date of Egyptian calendar.
+ * 
+ * @returns {Date} proleptic Gregorian calendar
+ */
+function Egyptian_Date(year, month, date, shift) {
+	;
+}
 
 
 
