@@ -2625,9 +2625,17 @@ this.CeL_era_data = {
 		// 關係: 為前任者之～, Relationship with predecessor(s).
 
 		// Upper Burma, Middle Early Pagan
+		//
 		// http://en.wikipedia.org/wiki/List_of_early_and_legendary_monarchs_of_Burma#Middle_Early_Pagan
 		// Reign per Zatadawbon Yazawin, Maha Yazawin, Yazawin Thit, and Hmannan
 		// Yazawin
+		//
+		// http://en.wikipedia.org/wiki/Burmese_calendar
+		// 640 CE, King Popa Sawrahan (r. 613–640) recalibrated the calendar,
+		// named the new era Kawza Thekkarit (ကောဇာ သက္ကရာဇ် [kɔ́zà θɛʔkəɹɪʔ])
+		// with a Year Zero starting date of 22 March 638 CE. It was used as the
+		// civil calendar while the Buddhist Era remained in use as the
+		// religious calendar.
 		'Middle Early Pagan/Popa Sawrahan|Myanmar:-25~|:ME|疑|準=年|時期=Early Pagan|關係=Usurper',
 		'/Shwe Ohnthi|Myanmar:2~|:ME|疑|準=年|關係=Son-in-law',
 		'/Peit Thon|Myanmar:14~|:ME|疑|準=年|關係=Brother',

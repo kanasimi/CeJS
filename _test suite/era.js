@@ -2980,17 +2980,24 @@ function affairs() {
 					format : 'serial'
 				})[0];
 
-			var result = [ (date = date.to_Myanmar({
-				notes : true
-			})).slice(0, 3).join(' ') ], notes;
+			var Myanmar_date = date.to_Myanmar({
+				notes : true,
+				format : 'serial'
+			});
+
+			var result = [ Myanmar_date.slice(0, 3).join('/'), '; ',
+			//
+			date.to_Myanmar().slice(0, 3).join(' ') ], notes;
 
 			// calendar notes. Myanmar Astrological Calendar Days.
-			if (date.notes) {
+			if (Myanmar_date.notes) {
 				result.push({
+					br : null
+				}, {
 					span : notes = [],
 					C : 'notes'
 				});
-				date.notes.forEach(function(note) {
+				Myanmar_date.notes.forEach(function(note) {
 					notes.push(note, {
 						b : ', ',
 						S : 'color:#39e;'
@@ -2998,6 +3005,15 @@ function affairs() {
 				});
 				notes.pop();
 			}
+
+			result.push({
+				br : null
+			}, {
+				span : date.to_Myanmar({
+					locale : 'my'
+				}).join(' '),
+				C : 'Myanmar'
+			});
 
 			return result;
 		} ],

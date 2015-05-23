@@ -3,7 +3,7 @@
  * @name	CeL function for calendrical calculations.
  * @fileoverview
  * 本檔案包含了曆法轉換的功能。
- * 
+ *
  * @since 2014/4/12 15:37:56
  */
 
@@ -85,7 +85,7 @@ function _time(year, month, date, hour) {
 
 /**
  * format 回傳處理。
- * 
+ *
  * <code>
  * API:
 
@@ -106,7 +106,7 @@ others:
 	default: text
 
  * </code>
- * 
+ *
  * @param {Array}date [
  *            {Integer}year, {Natural}month, {Natural}date ],<br />
  *            date[KEY_WEEK] = {Integer}weekday
@@ -142,7 +142,7 @@ function _format(date, options, to_name, is_leap) {
 		date[0] = options.numeral(date[0]);
 		date[2] = options.numeral(date[2]);
 	}
-	
+
 	format = date.slice(0, 3).reverse().join(' ');
 	if (options) {
 		if (options.postfix)
@@ -161,11 +161,11 @@ function _format(date, options, to_name, is_leap) {
 /**
  * 創建測試器。<br />
  * test: 經過正反轉換運算，應該回到相同的日子。
- * 
+ *
  * @param {Function}to_Calendar
  * @param {Function}to_Date
  * @param {Object}[options]
- * 
+ *
  * @returns {Function}測試器。
  */
 function new_tester(to_Calendar, to_Date, options) {
@@ -1464,7 +1464,7 @@ d := S + 1
 Simplify[d]
 
 1 + Floor[(
-  49049 + 36525876 year - 
+  49049 + 36525876 year -
    Floor[1/2 (1 + year - Floor[1/3 (year - Floor[(4 + year)/9])])])/
   100000]
 
@@ -1556,7 +1556,7 @@ Simplify[e]
 Simplify[f]
 
 e:
-Floor[1/30 (day + 
+Floor[1/30 (day +
     Floor[1/692 (633 + 11 day - Floor[(7368 + day)/8878])])]
 
 f:
@@ -1727,7 +1727,7 @@ function get_boundary(caculator, result, down, up, limit) {
 
 八月滿月 years:
 1166–:
-1167, 1172, 1176, 
+1167, 1172, 1176,
 
 
 d := 20520000/4229683
@@ -2243,9 +2243,16 @@ if (false)
 Myanmar_Date.epoch = new Date(2015, 4 - 1, 16, 20, 35, 57) - 1377 * Myanmar_YEAR_LENGTH_VALUE;
 
 
-
-Myanmar_Date.month_name = 'First Tabaung|Tagu|Kason|Nayon|Waso|Wagaung|Tawthalin|Thadingyut|Tazaungmon|Nadaw|Pyatho|Tabodwe|Tabaung|Late Tagu|Late Kason'
+// 'နှောင်း': Hnaung (e.g., Hnaung Tagu, Late Tagu)
+Myanmar_Date.month_name = 'ဦးတပေါင်း|တန်ခူး|ကဆုန်|နယုန်|ဝါဆို|ဝါခေါင်|တော်သလင်း|သီတင်းကျွတ်|တန်ဆောင်မုန်း|နတ်တော်|ပြာသို|တပို့တွဲ|တပေါင်း|နှောင်းတန်ခူး|နှောင်းကဆုန်'
 	.split('|');
+// intercalary month
+// 'ဒု': Second (e.g., Second Waso)
+Myanmar_Date.month_name.waso = [ 'ပဝါဆို', 'ဒုဝါဆို' ];
+
+Myanmar_Date.month_name.en = 'Early Tabaung|Tagu|Kason|Nayon|Waso|Wagaung|Tawthalin|Thadingyut|Tazaungmon|Nadaw|Pyatho|Tabodwe|Tabaung|Late Tagu|Late Kason'
+	.split('|');
+Myanmar_Date.month_name.en.waso = [ 'First Waso', 'Second Waso' ];
 
 // Irwin(1909) paragraph 38.
 // In Burma the zero of celestial longitude does not move with the precession of the equinoxes as in Europe.
@@ -2256,18 +2263,33 @@ Myanmar_Date.month_name = 'First Tabaung|Tagu|Kason|Nayon|Waso|Wagaung|Tawthalin
 
 // initialization of accumulated days / month name
 (function() {
+	function push_queue() {
+		(m = month_name.slice())
+		// reverse index
+		.forEach(function(value, index) {
+			m[value] = index;
+		});
+		(m.en = month_name.en.slice())
+		// reverse index
+		.forEach(function(value, index) {
+			m[value] = index;
+		});
+		queue.month = m;
+		Myanmar_month_days_count.push(queue);
+	}
+
 	var m, count = 0, days, queue = [ count ],
 	// days in the month
 	month_days = [],
 	// new year's day often falls on middle Tagu, even Kason.
 	month_name = Myanmar_Date.month_name.slice();
+	month_name.en = Myanmar_Date.month_name.en.slice();
 
-	Myanmar_month_days_count.push(queue);
 	for (m = 0; m < month_name.length; m++) {
 		month_days.push(days = m % 2 === 0 ? 29 : 30);
 		queue.push(count += days);
 	}
-	queue.month = month_name.slice();
+	push_queue();
 
 	Myanmar_month_days.push(month_days.slice());
 	month_days.splice(5 - 1, 0, 30);
@@ -2279,20 +2301,24 @@ Myanmar_Date.month_name = 'First Tabaung|Tagu|Kason|Nayon|Waso|Wagaung|Tawthalin
 	queue = queue.slice();
 	// 5: index of 2nd Waso
 	queue.splice(5, 0, queue[5 - 1]);
-	month_name.splice(5 - 1, 1, 'First Waso', 'Second Waso');
+
+	// adapt intercalary month name.
+	m = Myanmar_Date.month_name.waso;
+	month_name.splice(5 - 1, 1, m[0], m[1]);
+	m = Myanmar_Date.month_name.en;
+	month_name.en.splice(5 - 1, 1, m[0], m[1]);
 
 	// add accumulated days to all months after 2nd Waso
-	Myanmar_month_days_count.push(queue);
 	for (m = 5; m < month_name.length; m++)
 		queue[m] += 30;
-	queue.month = month_name.slice();
+	push_queue();
 
-	Myanmar_month_days_count.push(queue = queue.slice());
+	queue = queue.slice();
 	// add 1 day to all months after 30 days Nayon
 	// 3: index of Nayon
 	for (m = 3; m < month_name.length; m++)
 		queue[m]++;
-	queue.month = month_name;
+	push_queue();
 })();
 
 
@@ -2303,12 +2329,12 @@ Myanmar_Date.month_name = 'First Tabaung|Tagu|Kason|Nayon|Waso|Wagaung|Tawthalin
 /**
  * get year start date of Myanmar calendar.<br />
  * Using integer to caculate Myanmar new year's day.
- * 
+ *
  * @param {Integer}year
  *            year of Myanmar calendar.
  * @param {Object}[options]
  *            options to use
- * 
+ *
  * @returns {Date} proleptic Gregorian calendar
  */
 Myanmar_Date.new_year_Date = function(year, options) {
@@ -2352,11 +2378,12 @@ Myanmar_Date.new_year_Date = function(year, options) {
 	// Thingyan eve: akyo day (local midnight)
 	info.eve = date - ONE_DAY_LENGTH_VALUE;
 
-	for (date in info)
-		info[date] = (new Date(info[date])).format('CE');
+	if (false)
+		for (date in info)
+			info[date] = (new Date(info[date])).format('CE');
 
 	// info.eve: Thingyan eve: akyo day
-	// info.start: Thingyan start day, Myanmar new year festival: akya day
+	// info.start: Thingyan start day, Myanmar new year festival, 潑水節: akya day
 	// info.start_time: Thingyan start: Thingyan Kya, akya time
 	//
 	// days between akya day, atat day: akyat days
@@ -2387,12 +2414,12 @@ for(var i=0;i<19;i++){for(var y=0,_y,l=[];y<19;y++){_y=(7*y+i)%19;if(_y<7)l.push
 
 /**
  * check if it's a watat year.<br />
- * 
+ *
  * @param {Integer}year
  *            year of Myanmar calendar.
  * @param {Integer}[reference]
  *            reference to use. see Myanmar_reference.
- * 
+ *
  * @returns {Date} proleptic Gregorian calendar
  */
 Myanmar_Date.watat_data = function(year, reference) {
@@ -2460,17 +2487,17 @@ Myanmar_Date.watat_data = function(year, reference) {
 /**
  * get information of year. e.g., watat year, full moon day.<br />
  * Here we use the algorithm developed by Yan Naing Aye.
- * 
+ *
  * @param {Integer}year
  *            year of Myanmar calendar.
  * @param {Object}[options]
  *            options to use
- * 
+ *
  * @returns {Object} year data {<br />
  *          watat : 0: common / 1: little watat / 2: big watat,<br />
  *          Tagu_1st : The first day of Tagu<br />
  *          fullmoon : full moon day of 2nd Waso<br /> }
- * 
+ *
  * @see http://cool-emerald.blogspot.sg/2013/06/algorithm-program-and-calculation-of.html
  * @see http://mmcal.blogspot.com
  */
@@ -2506,12 +2533,12 @@ Myanmar_Date.year_data = function(year, options) {
 /**
  * get days count of specified year.<br />
  * The sum of all days should be 365 or 366.
- * 
+ *
  * @param {Integer}year
  *            year of Myanmar calendar.
  * @param {Object}[options]
  *            options to use
- * 
+ *
  * @returns {Array} days count
  */
 Myanmar_Date.month_days = function(year, options) {
@@ -2539,7 +2566,7 @@ Myanmar_Date.month_days = function(year, options) {
 
 	if (date[1] < 1)
 		// assert: date[1] === 0
-		// First Tabaung: 30 days
+		// Early Tabaung: 30 days
 		month_days.unshift(30 + 1 - date[2]);
 	else
 		month_days.splice(0, date[1], month_days[date[1] - 1] + 1 - date[2]);
@@ -2556,7 +2583,7 @@ Myanmar_Date.month_days = function(year, options) {
 /**
  * get Date of Myanmar calendar.<br />
  * Myanmar date → Date
- * 
+ *
  * @param {Integer}year
  *            year of Myanmar calendar.
  * @param {Natural}month
@@ -2566,7 +2593,7 @@ Myanmar_Date.month_days = function(year, options) {
  *            date of Myanmar calendar.
  * @param {Object}[options]
  *            options to use
- * 
+ *
  * @returns {Date} proleptic Gregorian calendar
  */
 function Myanmar_Date(year, month, date, options) {
@@ -2575,15 +2602,21 @@ function Myanmar_Date(year, month, date, options) {
 		date = 1;
 
 	// reckon days count from Tagu 1
+	var month_days = Myanmar_month_days_count[year_data.type];
+	if (isNaN(month))
+		// e.g., CeL.Myanmar_Date(1370,'Tawthalin',18).format()
+		// @see 'reverse index' of push_queue()
+		// may get invalid month name.
+		month = month_days.month[month];
 
 	// e.g., 654/3/23 CE
-	// treat as the last month, 'First Tabaung' (30 days) of last year.
+	// treat as the last month, 'Early Tabaung' (30 days) of last year.
 	if (month === 0)
 		// - 1: serial to index.
 		date -= 30 + 1;
 	else
 		// -1: serial to index.
-		date += Myanmar_month_days_count[year_data.type][month - 1 || 0] - 1;
+		date += month_days[month - 1 || 0] - 1;
 
 	return new Date(year_data.Tagu_1st + date * ONE_DAY_LENGTH_VALUE);
 }
@@ -2594,15 +2627,19 @@ _.Myanmar_Date = Myanmar_Date;
 /**
  * get Myanmar calendar (of Date).<br />
  * Date → Myanmar date
- * 
+ *
  * @param {Date}date
  *            system date.
  * @param {Object}[options]
  *            options to use
- * 
+ *
  * @returns {Array} [ year, month, date ]
  */
 function Date_to_Myanmar(date, options) {
+	// 前置處理。
+	if (!library_namespace.is_Object(options))
+		options = library_namespace.null_Object();
+
 	// reckon the year of ((date))
 	var year = Math.floor((date - Myanmar_Date.epoch)
 			/ Myanmar_YEAR_LENGTH_VALUE),
@@ -2613,56 +2650,114 @@ function Date_to_Myanmar(date, options) {
 	// 30 > mean month days. So the true month may be month or month + 1.
 	month = days / 30 | 0,
 	// for notes
-	weekday = options && options.notes && date.getDay(),
+	weekday = options.notes && date.getDay(),
 	//
 	accumulated_days = Myanmar_month_days_count[year_data.type];
 
 	// Test next month, or should be this month.
-	date = days - accumulated_days[month + 1];
-	if (date < 0)
+	var Myanmar_date = days - accumulated_days[month + 1];
+	if (Myanmar_date < 0)
 		days -= accumulated_days[month];
 	else
-		days = date, month++;
+		days = Myanmar_date, month++;
 
 	if (days < 0)
 		if (month !== 0)
 			throw 'Unknown error of ' + date.format('CE');
 		else
+			// month: 0 → -1
 			// e.g., 654/3/23 CE
-			// First Tabaung: 30 days
+			// Early Tabaung: 30 days
 			month--, days += 30;
+	// month: month index, Tagu: 0
 	// assert: now days >=0.
 
 	// +1: index to ordinal.
-	date = [ year, month + 1, ++days | 0 ];
+	Myanmar_date = [ year, month + 1, ++days | 0 ];
 	if (0 < (days %= 1))
-		date.push(days);
+		Myanmar_date.push(days);
 
-	var month_days = accumulated_days[month + 1] - accumulated_days[month];
+	// Early Tabaung: 30 days
+	var month_days = month < 0 ? 30
+	//
+	: accumulated_days[month + 1] - accumulated_days[month];
 
 	/**
 	 * calendar notes / 曆注<br />
 	 * Myanmar Astrological Calendar Days
-	 * 
+	 *
 	 * notes: {Array} all notes in lower-case
-	 * 
+	 *
 	 * @see http://cool-emerald.blogspot.tw/2013/12/myanmar-astrological-calendar-days.html
 	 */
 	if (typeof weekday === 'number') {
 		var notes = [],
 		// 0–11, do not count First Waso.
-		month_index = month, tmp;
+		month_index = month,
+		//
+		tmp = ((date - Myanmar_Date.epoch)
+				% Myanmar_YEAR_LENGTH_VALUE) / ONE_DAY_LENGTH_VALUE | 0;
+
+		// at start or end of year.
+		if (tmp < 2 || 359 < tmp) {
+			var new_year_info = Myanmar_Date.new_year_Date(tmp < 2 ? year : year + 1, {
+				detail : true
+			});
+			if (tmp < 2) {
+				if (date - new_year_info.new_year === 0)
+					notes.push("new year's day");
+			} else {
+				days = date - new_year_info.eve;
+				if (days >= 0 && new_year_info.new_year - date >= 0) {
+					days = days / ONE_DAY_LENGTH_VALUE | 0;
+					tmp = (new_year_info.new_year - new_year_info.eve) / ONE_DAY_LENGTH_VALUE | 0;
+					switch (days) {
+					case 0:
+						// akyo day
+						tmp = 'thingyan eve (akyo day)';
+						break;
+
+					case 1:
+						// thingyan start day. akya day. akya time:
+						tmp = 'thingyan start (' + (new Date(new_year_info.start_time))
+							.format({
+								parser : 'CE',
+								format : '%H:%M:%S'
+							}) + ')';
+						break;
+
+					case tmp - 1:
+						// thingyan end day. atat day. atat time:
+						tmp = 'thingyan end (' + (new Date(new_year_info.end_time))
+							.format({
+								parser : 'CE',
+								format : '%H:%M:%S'
+							}) + ')';
+						break;
+
+					default:
+						// days between akya day, atat day: akyat days
+						tmp = 'thingyan akyat';
+						break;
+					}
+
+					notes.push(tmp);
+				}
+			}
+		}
+
 		if (month_index < 0)
-			// assert: month_index === -1
+			// assert: month_index === -1 (Early Tabaung)
 			month_index = 11;
 		else if (year_data.type && month > 3)
 			// month after First Waso.
 			month_index--;
 
+		days = Myanmar_date[2];
 		// full moon days, new moon days and waxing and waning 8 are sabbath days. The day before sabbath day is sabbath eve.
-		if (date === 8 || date === 15 || date === 23 || date === month_days)
+		if (days === 8 || days === 15 || days === 23 || days === month_days)
 			notes.push('sabbath');
-		else if (date === 7 || date === 14 || date === 22 || date === month_days - 1)
+		else if (days === 7 || days === 14 || days === 22 || days === month_days - 1)
 			notes.push('sabbath eve');
 
 		// Yatyaza: ရက်ရာဇာ
@@ -2688,7 +2783,7 @@ function Date_to_Myanmar(date, options) {
 		} ][month_index % 4][weekday];
 		if (tmp)
 			if (tmp === 3)
-				notes.push('yatyaza', 'pyathada(afternoon)');
+				notes.push('yatyaza', 'pyathada (afternoon)');
 			else
 				notes.push([ , 'yatyaza', 'pyathada' ][tmp]);
 
@@ -2696,50 +2791,99 @@ function Date_to_Myanmar(date, options) {
 		if ((weekday - (month_index === 8 ? 7 : ((month_index + 3) % 12) * 2 + 1)) % 7 >= -1) {
 			tmp = 'thamanyo';
 			if (month_index === 10 && weekday === 3)
-				tmp += '(afternoon)';
+				tmp += ' (afternoon)';
 			notes.push(tmp);
 		}
 
-		// tmp: waxing or waning day, 1–14
-		if ((tmp = date[2]) > 15)
-			tmp -= 15;
-		if (tmp === [ 8, 3, 7, 2, 4, 1, 5 ][weekday])
+		// days: waxing or waning day, 1–14
+		if ((days = Myanmar_date[2]) > 15)
+			days -= 15;
+		if (days === [ 8, 3, 7, 2, 4, 1, 5 ][weekday])
 			notes.push('amyeittasote');
-		if (tmp === [ 1, 4, 8, 9, 6, 3, 7 ][weekday])
+		if (days === [ 1, 4, 8, 9, 6, 3, 7 ][weekday])
 			notes.push('warameittugyi');
-		if (tmp + weekday === 12)
+		if (days + weekday === 12)
 			notes.push('warameittunge');
-		if (tmp === [ 1, 4, 6, 9, 8, 7, 8 ][weekday])
+		if (days === [ 1, 4, 6, 9, 8, 7, 8 ][weekday])
 			notes.push('yatpote');
-		if ([ [ 1, 2 ], [ 6, 11 ], [ 6 ], [ 5 ], [ 3, 4, 6 ], [ 3, 7 ], [ 1 ] ][weekday].includes(tmp))
+		if ([ [ 1, 2 ], [ 6, 11 ], [ 6 ], [ 5 ], [ 3, 4, 6 ], [ 3, 7 ], [ 1 ] ][weekday].includes(days))
 			notes.push('thamaphyu');
-		if ([ [ 2, 19, 21 ], [ 1, 2, 4, 12, 18 ], [ 10 ], [ 9, 18 ], [ 2 ], [ 21 ], [ 17, 26 ] ][weekday].includes(date[2]))
+		if ([ [ 2, 19, 21 ], [ 1, 2, 4, 12, 18 ], [ 10 ], [ 9, 18 ], [ 2 ], [ 21 ], [ 17, 26 ] ][weekday].includes(Myanmar_date[2]))
 			notes.push('nagapor');
-		if (tmp % 2 === 0
+		if (days % 2 === 0
 		//
-		&& tmp === (month_index % 2 ? month_index + 3 : month_index + 6) % 12)
+		&& days === (month_index % 2 ? month_index + 3 : month_index + 6) % 12)
 			notes.push('yatyotema');
-		if (tmp - 1 === (((month_index + 9) % 12) / 2 | 0))
+		if (days - 1 === (((month_index + 9) % 12) / 2 | 0))
 			notes.push('mahayatkyan');
-		if (tmp === [ 8, 8, 2, 2, 9, 3, 3, 5, 1, 4, 7, 4 ][month_index])
+		if (days === [ 8, 8, 2, 2, 9, 3, 3, 5, 1, 4, 7, 4 ][month_index])
 			notes.push('shanyat');
 		notes.push('nagahle:' + nagahle_direction[((month_index + 1) % 12) / 3 | 0]);
-		
+
 		if (notes.length > 0)
-			date.notes = notes;
+			Myanmar_date.notes = notes;
 	}
 
-	if (!options || options.format !== 'serial') {
-		date[1] = accumulated_days.month[date[1]];
-		days = date[2];
-		date[2] = days < 15 ? 'waxing ' + days
+	if (options.format === 'serial') {
+
+	} else if (options.locale === 'my') {
+		// ↑ my: Myanmar language
+
+		// Produce a Myanmar date string
+		// @see https://6885131898aff4b870269af7dd32976d97cca04b.googledrive.com/host/0B7WW8_JrpDFXTHRHbUJkV0FBdFU/mc_main_e.js
+		// function m2str(my, myt, mm, mmt, ms, d, wd)
+
+		// CeL.numeral.to_Myanmar_numeral()
+		var numeral = library_namespace.to_Myanmar_numeral || function(number) {
+			return number;
+		};
+		// year
+		Myanmar_date[0] = 'မြန်မာနှစ် ' + numeral(year) + ' ခု၊ ';
+		// month
+		Myanmar_date[1] = accumulated_days.month[Myanmar_date[1]];
+		// date
+		days = Myanmar_date[2];
+		Myanmar_date[2] = days < 15 ? 'လဆန်း ' + numeral(days) + ' ရက်'
+		// The 15th of the waxing (လပြည့် [la̰bjḛ]) is the civil full moon day.
+		: days === 15 ? 'လပြည့်'
+		// The civil new moon day (လကွယ် [la̰ɡwɛ̀]) is the last day of the month (14th or 15th waning).
+		: days >= 29 && days === month_days ? 'လကွယ်' : 'လဆုတ် ' + numeral(days - 15) + ' ရက်';
+		// time
+		if (options.time) {
+			days = date.getHours();
+			// hour
+			Myanmar_date[4] = (days === 0 ? 'မွန်းတက် ၁၂ '
+			: days === 12 ? 'မွန်းလွဲ ၁၂ '
+			: days < 12 ? 'မနက် ' + numeral(h)
+				: ((days -= 12) > 6 ? 'ည '
+				: days > 3 ? 'ညနေ '
+				// assert: 0 < days <= 3
+				: 'နေ့လယ် '
+				)+ numeral(h)
+			) + 'နာရီ၊';
+			// assert: Myanmar_date.length === 5
+			// minute, second
+			Myanmar_date.push(numeral(date.getMinutes()) + ' မိနစ်၊', numeral(date.getSeconds()) + ' စက္ကန့်');
+		}
+		// weekday
+		Myanmar_date[3] = '၊ '
+			+ [ 'တနင်္ဂနွေ', 'တနင်္လာ', 'အင်္ဂါ', 'ဗုဒ္ဓဟူး',
+				'ကြာသပတေး', 'သောကြာ', 'စနေ' ][date.getDay()] + 'နေ့၊';
+
+		// Myanmar_date = [ year, month, date, weekday, hour, minute, second ]
+		// Using Myanmar_date.join(' ') to get full date name.
+
+	} else {
+		Myanmar_date[1] = accumulated_days.month.en[Myanmar_date[1]];
+		days = Myanmar_date[2];
+		Myanmar_date[2] = days < 15 ? 'waxing ' + days
 		// The 15th of the waxing (လပြည့် [la̰bjḛ]) is the civil full moon day.
 		: days === 15 ? 'full moon'
 		// The civil new moon day (လကွယ် [la̰ɡwɛ̀]) is the last day of the month (14th or 15th waning).
 		: days >= 29 && days === month_days ? 'new moon' : 'waning ' + (days - 15);
 	}
 
-	return date;
+	return Myanmar_date;
 }
 
 var nagahle_direction = 'west,north,east,south'.split(',');
@@ -3369,9 +3513,9 @@ French_Republican_Date.month_name = function(month) {
 
 /**
  * calendrier républicain → Gregorian Date @ local
- * 
+ *
  * TODO: time
- * 
+ *
  * @param {Integer}year
  *            year of calendrier républicain.
  * @param {Natural}month
@@ -3379,7 +3523,7 @@ French_Republican_Date.month_name = function(month) {
  *            days.
  * @param {Natural}date
  *            date of calendrier républicain.
- * 
+ *
  * @returns {Date} proleptic Gregorian calendar
  */
 function French_Republican_Date(year, month, date, shift) {
@@ -3517,7 +3661,7 @@ Solar_Hijri_Date.month_name = function(month, is_leap, options) {
 
 /**
  * Solar Hijri calendar
- * 
+ *
  * @param {Integer}year
  *            year of Solar Hijri calendar.
  * @param {Natural}month
@@ -3525,7 +3669,7 @@ Solar_Hijri_Date.month_name = function(month, is_leap, options) {
  *            days.
  * @param {Natural}date
  *            date of Solar Hijri calendar.
- * 
+ *
  * @returns {Date} proleptic Gregorian calendar
  */
 function Solar_Hijri_Date(year, month, date) {
@@ -3637,7 +3781,7 @@ Yi_Date.month_name = function(month, is_leap, options) {
 
 /**
  * Yi calendar
- * 
+ *
  * @param {Integer}year
  *            year of Yi calendar.
  * @param {Natural}month
@@ -3645,7 +3789,7 @@ Yi_Date.month_name = function(month, is_leap, options) {
  *            過年日: 11
  * @param {Natural}date
  *            date of Yi calendar.
- * 
+ *
  * @returns {Date} proleptic Gregorian calendar
  */
 function Yi_Date(year, month, date) {
@@ -3763,14 +3907,14 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 
 /**
  * Egyptian calendar
- * 
+ *
  * @param {Integer}year
  *            year of Egyptian calendar.
  * @param {Natural}month
  *            month of Egyptian calendar.
  * @param {Natural}date
  *            date of Egyptian calendar.
- * 
+ *
  * @returns {Date} proleptic Gregorian calendar
  */
 function Egyptian_Date(year, month, date, shift) {

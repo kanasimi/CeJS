@@ -3433,7 +3433,7 @@ if (typeof CeL === 'function')
 		check_and_run.options = {
 			// default timeout (millisecond) after options.interval.
 			// 若短到 3s， 在大檔案作 auto_TOC() 會逾時。
-			timeout : library_namespace.is_local() ? 8000 : 30000
+			timeout : library_namespace.is_local() ? 20000 : 60000
 		};
 
 		/**
