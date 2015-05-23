@@ -2987,6 +2987,9 @@ this.CeL_era_data = {
 		// https://en.wikipedia.org/wiki/List_of_kings_of_Babylon
 		// From this point on, the Babylonian chronology is securely known via
 		// Ptolemy's Canon of Kings and other sources.
+		//
+		// https://en.wikipedia.org/wiki/8th_century_BC
+		// February 26, 747 BC: Nabonassar becomes king of Babylon.
 		'Babylonian Dynasty of E/Nabonassar|-747~|:CE|精=年|準=年|時期=Babylon|ruler=Nabû-nāṣir',
 		'/Nabu-nadin-zeri|-734~|:CE|精=年|準=年|ruler=Nabû-nādin-zēri',
 		'/Nabu-suma-ukin II|-732~|:CE|精=年|準=年|ruler=Nabû-šuma-ukîn II|注=king of Babylon for one month and two days during 732 BC before he was swept aside by his successor, Nabû-mukin-zēri.',
@@ -3151,6 +3154,17 @@ this.CeL_era_data = {
 		'/Philip II|Babylonian-65~-63|:Babylonian|疑|準=年|ruler=Philip II Philorhomaeus;Φίλιππος Β΄ ὁ Φιλορωμαῖος;Barypous'
 
 ]).minute_offset = 3 * 60;
+
+// ---------------------------------------------------------------------//
+// Egypt
+// https://en.wikipedia.org/wiki/Ancient_Egypt
+
+(this.CeL_era_data.Egypt = [
+
+//https://en.wikipedia.org/wiki/Twenty-fifth_Dynasty_of_Egypt
+'Egypt/Piye|-746~453|:CE'
+
+]).minute_offset = 2 * 60;
 
 // ---------------------------------------------------------------------//
 // example.

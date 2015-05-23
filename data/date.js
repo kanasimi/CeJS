@@ -2440,22 +2440,6 @@ function format_date(date_value, mode, zero_fill, date_separator, time_separator
 };
 
 
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------//
-
-// http://en.wikipedia.org/wiki/Easter
-// http://en.wikipedia.org/wiki/Computus
-// http://www.merlyn.demon.co.uk/estralgs.txt
-function jrsEaster(YR) { // Fast JRSEaster, unsigned 32-bit year
-  var gn, xx, cy, DM
-  gn = YR % 19					// gn ~ GoldenNumber
-  xx = (YR/100)|0
-  cy = ((3*(xx+1)/4)|0) - (((13+xx*8)/25)|0)	// cy ~ BCPcypher
-  xx = ( 6 + YR + ((YR/4)|0) - xx + ((YR/400)|0) ) % 7
-  DM = 21 + (gn*19 + cy + 15)%30 ; DM -= ((gn>10) + DM > 49) // PFM
-  return DM + 1 + (66-xx-DM)%7 /* Day-of-March */ }
-
-
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 

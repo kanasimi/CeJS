@@ -225,7 +225,7 @@ auto_add_column = {
 	中國 : [ 'Year naming/歲次', '曆注/月干支', '曆注/日干支' ],
 	Maya : [ 'calendar/Long_Count', 'calendar/Tzolkin', 'calendar/Haab' ],
 	Mesopotamian : [ 'calendar/Hebrew' ],
-	မြန်မာ : [ 'calendar/Myanmar' ]
+	မြန်မာ : [ 'Gregorian reform/Great Britain', 'calendar/Myanmar' ]
 },
 // 可選用的文字式年曆 title = { id : [th, function (date) {} ] }
 calendar_column, calendar_column_alias,
@@ -237,7 +237,7 @@ default_column = [ {
 	a : {
 		T : CE_name
 	},
-	R : 'Common Era: Y/m/d',
+	R : 'Common Era: Y/m/d.\nYear of ruler / month of the year / date of the month.',
 	href : 'https://en.wikipedia.org/wiki/Common_Era'
 } ];
 
@@ -2987,7 +2987,14 @@ function affairs() {
 
 			var result = [ Myanmar_date.slice(0, 3).join('/'), '; ',
 			//
-			date.to_Myanmar().slice(0, 3).join(' ') ], notes;
+			date.to_Myanmar().slice(0, 3).join(' '), {
+				br : null
+			}, {
+				span : date.to_Myanmar({
+					locale : 'my'
+				}).join(' '),
+				C : 'Myanmar'
+			} ], notes;
 
 			// calendar notes. Myanmar Astrological Calendar Days.
 			if (Myanmar_date.notes) {
@@ -2995,25 +3002,21 @@ function affairs() {
 					br : null
 				}, {
 					span : notes = [],
-					C : 'notes'
+					C : 'notes Myanmar'
 				});
 				Myanmar_date.notes.forEach(function(note) {
+					if (note.includes('Thingyan') || note.includes('New year'))
+						note = {
+							b : note,
+							S : 'color:#853;'
+						};
 					notes.push(note, {
 						b : ', ',
-						S : 'color:#39e;'
+						S : 'color:#15e;'
 					});
 				});
 				notes.pop();
 			}
-
-			result.push({
-				br : null
-			}, {
-				span : date.to_Myanmar({
-					locale : 'my'
-				}).join(' '),
-				C : 'Myanmar'
-			});
 
 			return result;
 		} ],
@@ -3161,6 +3164,22 @@ function affairs() {
 			}).slice(0, 3).join('/') + '; ' + date.to_Armenian({
 				format : 'name'
 			});
+		} ],
+
+		Egyptian : [ {
+			a : {
+				T : '古埃及曆'
+			},
+			R : 'Ancient civil Egyptian calendar used BEFORE REFORM at 22 BCE.\n自 22 BCE 之後不準確。',
+			href : 'https://en.wikipedia.org/wiki/Egyptian_calendar'
+		}, function(date) {
+			return date.精 === '年' ? {
+				T : [ '約%1年', date.to_Egyptian({
+						format : 'serial'
+					})[0] ]
+			} : date.to_Egyptian({
+				format : 'serial'
+			}).slice(0, 3).join('/') + '; ' + date.to_Egyptian();
 		} ],
 
 		Republican : [ {

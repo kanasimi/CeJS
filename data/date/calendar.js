@@ -2686,7 +2686,7 @@ function Date_to_Myanmar(date, options) {
 	 * calendar notes / 曆注<br />
 	 * Myanmar Astrological Calendar Days
 	 *
-	 * notes: {Array} all notes in lower-case
+	 * notes: {Array} all notes with Myanmar language
 	 *
 	 * @see http://cool-emerald.blogspot.tw/2013/12/myanmar-astrological-calendar-days.html
 	 */
@@ -2705,7 +2705,8 @@ function Date_to_Myanmar(date, options) {
 			});
 			if (tmp < 2) {
 				if (date - new_year_info.new_year === 0)
-					notes.push("new year's day");
+					// New year's day
+					notes.push("နှစ်ဆန်းတစ်ရက် (New year's day)");
 			} else {
 				days = date - new_year_info.eve;
 				if (days >= 0 && new_year_info.new_year - date >= 0) {
@@ -2713,13 +2714,13 @@ function Date_to_Myanmar(date, options) {
 					tmp = (new_year_info.new_year - new_year_info.eve) / ONE_DAY_LENGTH_VALUE | 0;
 					switch (days) {
 					case 0:
-						// akyo day
-						tmp = 'thingyan eve (akyo day)';
+						// Thingyan eve (akyo day)
+						tmp = 'သင်္ကြန်အကြို (Thingyan eve)';
 						break;
 
 					case 1:
-						// thingyan start day. akya day. akya time:
-						tmp = 'thingyan start (' + (new Date(new_year_info.start_time))
+						// Thingyan start day. akya day. akya time:
+						tmp = 'သင်္ကြန်အကျ (Thingyan start, ' + (new Date(new_year_info.start_time))
 							.format({
 								parser : 'CE',
 								format : '%H:%M:%S'
@@ -2727,8 +2728,8 @@ function Date_to_Myanmar(date, options) {
 						break;
 
 					case tmp - 1:
-						// thingyan end day. atat day. atat time:
-						tmp = 'thingyan end (' + (new Date(new_year_info.end_time))
+						// Thingyan end day. atat day. atat time:
+						tmp = 'သင်္ကြန်အတက် (Thingyan end, ' + (new Date(new_year_info.end_time))
 							.format({
 								parser : 'CE',
 								format : '%H:%M:%S'
@@ -2736,8 +2737,8 @@ function Date_to_Myanmar(date, options) {
 						break;
 
 					default:
-						// days between akya day, atat day: akyat days
-						tmp = 'thingyan akyat';
+						// Thingyan akyat, days between akya day, atat day: akyat days
+						tmp = 'သင်္ကြန်အကြတ် (Thingyan akyat)';
 						break;
 					}
 
@@ -2756,9 +2757,11 @@ function Date_to_Myanmar(date, options) {
 		days = Myanmar_date[2];
 		// full moon days, new moon days and waxing and waning 8 are sabbath days. The day before sabbath day is sabbath eve.
 		if (days === 8 || days === 15 || days === 23 || days === month_days)
-			notes.push('sabbath');
+			// Sabbath
+			notes.push('ဥပုသ်');
 		else if (days === 7 || days === 14 || days === 22 || days === month_days - 1)
-			notes.push('sabbath eve');
+			// Sabbath Eve
+			notes.push('အဖိတ်');
 
 		// Yatyaza: ရက်ရာဇာ
 		tmp = [ {
@@ -2783,15 +2786,19 @@ function Date_to_Myanmar(date, options) {
 		} ][month_index % 4][weekday];
 		if (tmp)
 			if (tmp === 3)
-				notes.push('yatyaza', 'pyathada (afternoon)');
+				// Yatyaza, Pyathada (afternoon) / Afternoon Pyathada
+				notes.push('ရက်ရာဇာ', 'မွန်းလွဲပြဿဒါး');
 			else
-				notes.push([ , 'yatyaza', 'pyathada' ][tmp]);
+				// [ , 'Yatyaza', 'Pyathada' ]
+				notes.push([ , 'ရက်ရာဇာ', 'ပြဿဒါး' ][tmp]);
 
 		//for(month=0;month<12;month++){i=month===8?7:(((month+3)%12)*2)%7+1;console.log(month+':'+i);}
 		if ((weekday - (month_index === 8 ? 7 : ((month_index + 3) % 12) * 2 + 1)) % 7 >= -1) {
-			tmp = 'thamanyo';
+			// Thamanyo
+			tmp = 'သမားညို';
 			if (month_index === 10 && weekday === 3)
-				tmp += ' (afternoon)';
+				// (afternoon)
+				tmp = 'မွန်းလွဲ' + tmp;
 			notes.push(tmp);
 		}
 
@@ -2799,26 +2806,37 @@ function Date_to_Myanmar(date, options) {
 		if ((days = Myanmar_date[2]) > 15)
 			days -= 15;
 		if (days === [ 8, 3, 7, 2, 4, 1, 5 ][weekday])
-			notes.push('amyeittasote');
+			// Amyeittasote
+			notes.push('အမြိတ္တစုတ်');
 		if (days === [ 1, 4, 8, 9, 6, 3, 7 ][weekday])
-			notes.push('warameittugyi');
+			// Warameittugyi
+			notes.push('ဝါရမိတ္တုကြီး');
 		if (days + weekday === 12)
-			notes.push('warameittunge');
+			// Warameittunge
+			notes.push('ဝါရမိတ္တုငယ်');
 		if (days === [ 1, 4, 6, 9, 8, 7, 8 ][weekday])
-			notes.push('yatpote');
+			// Yatpote
+			notes.push('ရက်ပုပ်');
 		if ([ [ 1, 2 ], [ 6, 11 ], [ 6 ], [ 5 ], [ 3, 4, 6 ], [ 3, 7 ], [ 1 ] ][weekday].includes(days))
-			notes.push('thamaphyu');
+			// Thamaphyu
+			notes.push('သမားဖြူ');
 		if ([ [ 2, 19, 21 ], [ 1, 2, 4, 12, 18 ], [ 10 ], [ 9, 18 ], [ 2 ], [ 21 ], [ 17, 26 ] ][weekday].includes(Myanmar_date[2]))
-			notes.push('nagapor');
+			// Nagapor
+			notes.push('နဂါးပေါ်');
 		if (days % 2 === 0
 		//
 		&& days === (month_index % 2 ? month_index + 3 : month_index + 6) % 12)
-			notes.push('yatyotema');
+			// Yatyotema
+			notes.push('ရက်ယုတ်မာ');
 		if (days - 1 === (((month_index + 9) % 12) / 2 | 0))
-			notes.push('mahayatkyan');
+			// Mahayatkyan
+			notes.push('မဟာရက်ကြမ်း');
 		if (days === [ 8, 8, 2, 2, 9, 3, 3, 5, 1, 4, 7, 4 ][month_index])
-			notes.push('shanyat');
-		notes.push('nagahle:' + nagahle_direction[((month_index + 1) % 12) / 3 | 0]);
+			// Shanyat
+			notes.push('ရှမ်းရက်');
+		// Nagahle
+		// http://www.cool-emerald.com/2013/12/blog-post.html#nagahlem
+		notes.push('နဂါးခေါင်းလှည့်: ' + nagahle_direction[((month_index + 1) % 12) / 3 | 0]);
 
 		if (notes.length > 0)
 			Myanmar_date.notes = notes;
@@ -2837,7 +2855,7 @@ function Date_to_Myanmar(date, options) {
 		var numeral = library_namespace.to_Myanmar_numeral || function(number) {
 			return number;
 		};
-		// year
+		// Myanmar year
 		Myanmar_date[0] = 'မြန်မာနှစ် ' + numeral(year) + ' ခု၊ ';
 		// month
 		Myanmar_date[1] = accumulated_days.month[Myanmar_date[1]];
@@ -2886,7 +2904,8 @@ function Date_to_Myanmar(date, options) {
 	return Myanmar_date;
 }
 
-var nagahle_direction = 'west,north,east,south'.split(',');
+// west,north,east,south
+var nagahle_direction = 'အနောက်,မြောက်,အရှေ့,တောင်'.split(',');
 
 
 /*
@@ -3461,13 +3480,141 @@ CeL.Armenian_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 */
 Armenian_Date.test = new_tester(Date_to_Armenian, Armenian_Date, {
 	month_days : {
-		30 : 'common month',
+		30 : 'common month 1–12',
 		5 : 'Epagomenal days',
 	}
 });
 
 
 _.Armenian_Date = Armenian_Date;
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// Egyptian calendar, 古埃及曆法.
+// ** 自 22 BCE 之後不準確。
+
+
+// References:
+
+// A Chronological Survey of Precisely Dated Demotic and Abnormal Hieratic Sources
+// Version 1.0 (February 2007)
+// http://www.trismegistos.org/top.php
+
+// Date Converter for Ancient Egypt
+// http://aegyptologie.online-resourcen.de/Date_converter_for_Ancient_Egypt
+
+// https://en.wikipedia.org/wiki/Transliteration_of_Ancient_Egyptian
+// https://en.wikipedia.org/wiki/Egyptian_hieroglyphs
+
+// https://en.wikipedia.org/wiki/Egyptian_calendar
+// According to Roman writer Censorinus (3rd century AD), the Egyptian New Year's Day fell on July 20 in the Julian Calendar in 139 CE, which was a heliacal rising of Sirius in Egypt.
+// In 238 BCE, the Ptolemaic rulers decreed that every 4th year should be 366 days long rather than 365. The Egyptians, most of whom were farmers, did not accept the reform, as it was the agricultural seasons that made up their year. The reform eventually went into effect with the introduction of the "Alexandrian calendar" by Augustus in 26/25 BCE, which included a 6th epagomenal day for the first time in 22 BCE. This almost stopped the movement of the first day of the year, 1 Thoth, relative to the seasons, leaving it on 29 August in the Julian calendar except in the year before a Julian leap year, when a 6th epagomenal day occurred on 29 August, shifting 1 Thoth to 30 August.
+Egyptian_Date.epoch = String_to_Date('139/7/20', {
+	parser : 'Julian'
+});
+
+var Egyptian_epochal_year = Egyptian_Date.epoch.getFullYear() | 0,
+//
+Egyptian_month_days = 30,
+//
+Egyptian_year_days = 12 * Egyptian_month_days + 5;
+
+Egyptian_Date.epoch = Egyptian_Date.epoch.getTime();
+
+// 521 BCE 與之前應採 -1，520 BCE 之後採 0 則可幾近與 CE 同步。但 520+1460=1980 BCE 與之前應採 -2。
+// https://en.wikipedia.org/wiki/Sothic_cycle
+Egyptian_Date.default_shift = 0;
+
+
+
+/**
+ * Egyptian calendar
+ *
+ * @param {Integer}year
+ *            year of Egyptian calendar.
+ * @param {Natural}month
+ *            month of Egyptian calendar. for epagomenal day: 13.
+ * @param {Natural}date
+ *            date of Egyptian calendar.
+ *
+ * @returns {Date} proleptic Gregorian calendar
+ */
+function Egyptian_Date(year, month, date, shift) {
+	// no year 0. year: -1 → 0
+	if (year < 0)
+		year++;
+
+	if (shift === undefined)
+		shift = Egyptian_Date.default_shift;
+	if (shift && !isNaN(shift))
+		year += shift;
+
+	date = new Date(Egyptian_Date.epoch + ONE_DAY_LENGTH_VALUE *
+	//		
+	((year - Egyptian_epochal_year) * Egyptian_year_days
+	//
+	+ (month - 1) * Egyptian_month_days + date - 1));
+
+	// is the latter year
+	if (shift === true && (year = date.format({
+		parser : 'CE',
+		format : '%Y/%m/%d'
+	}).match(/^(-?\d+)\/1\/1$/))
+	//
+	&& library_namespace.is_leap_year(year[1], 'CE'))
+		date = new Date(date.getTime() + Egyptian_year_days
+				* ONE_DAY_LENGTH_VALUE);
+
+	return date;
+}
+
+
+_.Egyptian_Date = Egyptian_Date;
+
+
+function Date_to_Egyptian(date, options) {
+	var shift = options && ('shift' in options) && options.shift || Egyptian_Date.default_shift,
+	days = (date - Egyptian_Date.epoch) / ONE_DAY_LENGTH_VALUE,
+	year = Math.floor(days / Egyptian_year_days) + Egyptian_epochal_year,
+	month = (days = days.mod(Egyptian_year_days)) / Egyptian_month_days | 0;
+	days = days.mod(Egyptian_month_days) + 1;
+
+	if (!isNaN(shift))
+		year -= shift;
+	if (year <= 0)
+		// year: 0 → -1
+		year--;
+
+	date = [ year, month + 1, days | 0 ];
+	if (days %= 1)
+		date.push(days);
+
+	return date;
+}
+
+
+/*
+
+
+CeL.Egyptian_Date(-726,1,1,-1).format('CE')
+"-527/1/1".to_Date('CE').to_Egyptian({shift:-1})
+
+
+CeL.Egyptian_Date.test(new Date(-5000, 1, 1), 4e6, 4).join('\n') || 'OK';
+// "OK"
+
+*/
+Egyptian_Date.test = new_tester(Date_to_Egyptian, Egyptian_Date, {
+	month_days : {
+		30 : 'common month 1–12',
+		5 : 'Epagomenal days',
+	}
+});
+
+
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -3894,39 +4041,11 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 });
 
 
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------------//
-// TODO:
-// Egyptian calendar, 古埃及曆法.
-
-// https://en.wikipedia.org/wiki/Egyptian_calendar
-// According to Roman writer Censorinus (3rd century AD), the Egyptian New Year's Day fell on July 20 in the Julian Calendar in 139 CE, which was a heliacal rising of Sirius in Egypt.
-
-// https://en.wikipedia.org/wiki/Sothic_cycle
-
-
-/**
- * Egyptian calendar
- *
- * @param {Integer}year
- *            year of Egyptian calendar.
- * @param {Natural}month
- *            month of Egyptian calendar.
- * @param {Natural}date
- *            date of Egyptian calendar.
- *
- * @returns {Date} proleptic Gregorian calendar
- */
-function Egyptian_Date(year, month, date, shift) {
-	;
-}
-
-
-
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // TODO:
 // https://en.wikipedia.org/wiki/Bengali_calendar
 // https://en.wikipedia.org/wiki/Nanakshahi_calendar
+
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // reform of lunisolar calendar
@@ -3966,6 +4085,24 @@ FromContinuedFraction[{12, 2, 1, 2, 1, 1, 17}]
 // But still too long. And the cycle changes with time.
 
 */
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+// http://en.wikipedia.org/wiki/Easter
+// http://en.wikipedia.org/wiki/Computus
+// http://www.merlyn.demon.co.uk/estralgs.txt
+function jrsEaster(YR) { // Fast JRSEaster, unsigned 32-bit year
+  var gn, xx, cy, DM
+  gn = YR % 19					// gn ~ GoldenNumber
+  xx = (YR/100)|0
+  cy = ((3*(xx+1)/4)|0) - (((13+xx*8)/25)|0)	// cy ~ BCPcypher
+  xx = ( 6 + YR + ((YR/4)|0) - xx + ((YR/400)|0) ) % 7
+  DM = 21 + (gn*19 + cy + 15)%30 ; DM -= ((gn>10) + DM > 49) // PFM
+  return DM + 1 + (66-xx-DM)%7 /* Day-of-March */ }
+
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // export methods.
@@ -4009,6 +4146,8 @@ library_namespace.set_method(Date.prototype, {
 	to_Coptic : set_bind(Date_to_Coptic),
 	to_Ethiopian : set_bind(Date_to_Ethiopian),
 	to_Armenian : set_bind(Date_to_Armenian),
+	to_Egyptian : set_bind(Date_to_Egyptian),
+
 	to_Republican : set_bind(Date_to_French_Republican),
 	to_Solar_Hijri : set_bind(Date_to_Solar_Hijri),
 	// to_Yi_calendar
