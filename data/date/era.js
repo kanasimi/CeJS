@@ -337,7 +337,7 @@ if (typeof CeL === 'function')
 
 			// set normal month count of a year.
 			// 月數12: 每年有12個月.
-			MONTH_COUNT = 12,
+			LUNISOLAR_MONTH_COUNT = 12,
 
 			// 可能出現的最大日期值。
 			MAX_DATE_NUMBER = 1e5,
@@ -358,18 +358,18 @@ if (typeof CeL === 'function')
 			PACK_RADIX = 10 + 26,
 
 			LEAP_MONTH_PADDING = new Array(
-			// 閏月會有 MONTH_COUNT 個月 + 1個閏月 筆資料。
-			(MONTH_COUNT + 1).toString(RADIX_2).length + 1).join(0),
+			// 閏月會有 LUNISOLAR_MONTH_COUNT 個月 + 1個閏月 筆資料。
+			(LUNISOLAR_MONTH_COUNT + 1).toString(RADIX_2).length + 1).join(0),
 
 			// 每年月數資料的固定長度。
 			// 依當前實作法，最長可能為長度 4。
 			YEAR_CHUNK_SIZE = parseInt(
 			// 為了保持應有的長度，最前面加上 1。
-			'1' + new Array(MONTH_COUNT).join(
+			'1' + new Array(LUNISOLAR_MONTH_COUNT).join(
 			// 農曆通常是大小月相間。
-			'110').slice(0, MONTH_COUNT + 1)
+			'110').slice(0, LUNISOLAR_MONTH_COUNT + 1)
 			// 13 個月可以二進位 1101 表現。
-			+ (MONTH_COUNT + 1).toString(RADIX_2), RADIX_2)
+			+ (LUNISOLAR_MONTH_COUNT + 1).toString(RADIX_2), RADIX_2)
 			//
 			.toString(PACK_RADIX).length,
 
@@ -1285,8 +1285,8 @@ if (typeof CeL === 'function')
 					//
 					leap_month_index, leap_month_index_list;
 
-					// MONTH_COUNT 個月 + 1個閏月。
-					while (year_data.length > MONTH_COUNT + 1) {
+					// LUNISOLAR_MONTH_COUNT 個月 + 1個閏月。
+					while (year_data.length > LUNISOLAR_MONTH_COUNT + 1) {
 						// 閏月的部分以 4
 						// (LEAP_MONTH_PADDING.length)
 						// 個二進位數字指示。
@@ -1432,7 +1432,7 @@ if (typeof CeL === 'function')
 			// 警告:會改變 name_Array!
 			function concat_era_name(name_Array) {
 				name_Array.forEach(function(slice, index) {
-					var _slice = slice.trim();
+					var _slice = String(slice).trim();
 					if (index > 0 && NEED_SPLIT_PREFIX.test(_slice)
 							&& NEED_SPLIT_POSTFIX.test(name_Array[index - 1]))
 						// 為需要以 space 間隔之紀元名添加 space。
@@ -1542,8 +1542,8 @@ if (typeof CeL === 'function')
 				if (!月名 || !(月名 = 月名[月序])) {
 					月名 = 月序 + (START_KEY in 歲序 ? 歲序[START_KEY] : START_MONTH);
 
-					if (this.歲首序 && (月名 += this.歲首序) > MONTH_COUNT)
-						月名 -= MONTH_COUNT;
+					if (this.歲首序 && (月名 += this.歲首序) > LUNISOLAR_MONTH_COUNT)
+						月名 -= LUNISOLAR_MONTH_COUNT;
 				}
 
 				// 依 month_index_to_name() 之演算法，
@@ -1552,7 +1552,7 @@ if (typeof CeL === 'function')
 				if (月序 >= 歲序[LEAP_MONTH_KEY]) {
 					if (!isNaN(月名) && --月名 < START_MONTH)
 						// 確保月數為正。
-						月名 += MONTH_COUNT;
+						月名 += LUNISOLAR_MONTH_COUNT;
 					if (月序 === 歲序[LEAP_MONTH_KEY]) {
 						// 是為閏月。
 						月名 = (this.閏月名 || LEAP_MONTH_PREFIX) + 月名;
@@ -1586,7 +1586,7 @@ if (typeof CeL === 'function')
 					if (!isNaN(is_閏月 = this.歲首序))
 						月名 = 月名.replace(/\d+/, function(month) {
 							if ((month -= is_閏月) < 1)
-								month += MONTH_COUNT;
+								month += LUNISOLAR_MONTH_COUNT;
 							return month;
 						});
 
@@ -1819,13 +1819,18 @@ if (typeof CeL === 'function')
 			function clone_year_data(year_data, clone_to) {
 				if (!clone_to)
 					clone_to = year_data.slice();
-				[ START_KEY, LEAP_MONTH_KEY ]
+				[ START_KEY, LEAP_MONTH_KEY
+				// , NAME_KEY
+				]
 				//
 				.forEach(
 				// 複製本年之月 START_KEY, LEAP_MONTH_KEY 等。
 				function(key) {
-					if (key in year_data)
-						clone_to[key] = year_data[key];
+					if (key in year_data) {
+						var value = year_data[key];
+						clone_to[key] = Array.isArray(value) ? value.slice()
+								: value;
+					}
 				});
 				return clone_to;
 			}
@@ -1936,10 +1941,21 @@ if (typeof CeL === 'function')
 						// ---------------------------------------
 
 						/**
-						 * 
 						 * e.g., test: <code>
-						 * CeL.era.set('古曆|-60~1230|-61/=:中國');
-						 * CeL.era('古曆9年');
+
+						CeL.era.set('古曆|-60~1230|-61/=:中國');
+						CeL.era('古曆9年');
+
+						 * </code>
+						 * 
+						 * <code>
+
+						CeL.set_debug(6);
+						CeL.era.set('古曆|Egyptian:-571/11~-570|:Egyptian|準=年');
+
+						CeL.Log.clear();
+						CeL.era('古曆2年1月').format({parser:'CE',format:'%Y/%m/%d'});
+
 						 * </code>
 						 */
 
@@ -2069,6 +2085,27 @@ if (typeof CeL === 'function')
 							correct_month_count = null;
 
 							correct_month(月中交接);
+						},
+						// 處理月中換日的情況，複製本年本月之月分名稱與本月日數。
+						copy_date = function(本月日數) {
+							var 月名 = era_year_data[NAME_KEY];
+							if (月名 && (月名 = 月名[月序])) {
+								if (!(NAME_KEY in this_year_data))
+									// 初始化本年之月分名稱。
+									this_year_data[NAME_KEY] = [];
+								library_namespace.debug(
+								//
+								'複製本年本月之月分名稱。月序' + 月序 + '，本月現有 '
+								//
+								+ this_year_data.length + '個月。', 3);
+								this_year_data[NAME_KEY][
+								//
+								this_year_data.length] = 月名;
+							}
+
+							this_year_data.push(本月日數);
+							// 本月已處理完，將月序指向下一個月。
+							月序++;
 						};
 
 						// 初始化:取得所有候選紀年列表。
@@ -2192,11 +2229,15 @@ if (typeof CeL === 'function')
 										// 測試是否為跨年。
 										|| (tmp[1] === START_MONTH
 										//
-										&& (date_name[1] === MONTH_COUNT
+										&& (date_name[1]
+										//
+										=== LUNISOLAR_MONTH_COUNT
 										//
 										|| date_name[1]
 										//
-										=== LEAP_MONTH_PREFIX + MONTH_COUNT)))
+										=== LEAP_MONTH_PREFIX
+										//
+										+ LUNISOLAR_MONTH_COUNT)))
 										// 測試日名稱可否銜接。是否為年內換月。
 										// era 的 date index 為首日。
 										&& tmp[0] === START_DATE
@@ -2281,6 +2322,9 @@ if (typeof CeL === 'function')
 							// [ 歲序, 月序, 日序 | 0 ]
 							date_index = era[2]
 									|| era[0].Date_to_date_index(start_time);
+							library_namespace.debug(
+							//
+							'交接日序、日名: ' + date_index, 5);
 							if (!date_index)
 								throw new Error('initialize_era_date: 無法取得 ['
 										+ era[0]
@@ -2358,9 +2402,8 @@ if (typeof CeL === 'function')
 										calendar_data.push(
 										// 設定好 this_year_data 環境。
 										this_year_data = []);
-									this_year_data.push(
-									//
-									era_year_data[月序++] - date_index);
+
+									copy_date(era_year_data[月序] - date_index);
 									date_index = 0;
 								}
 
@@ -2422,6 +2465,9 @@ if (typeof CeL === 'function')
 							// assert: && era.calendar[START_DATE_KEY] !==
 							// START_DATE
 							) {
+								library_namespace.debug(
+								//
+								'處理年中分割，更替時間點不在本年年首的情況。', 5);
 								// 續用 this_year_data。
 								// 必須設定好 this_year_data 環境。
 								clone_last_year(true);
@@ -2469,19 +2515,26 @@ if (typeof CeL === 'function')
 									// 若本已有 START_DATE_KEY 則減去之。
 									-= calendar_data[START_DATE_KEY]
 											- START_DATE;
-								this_year_data.push(date_index);
-								月序++;
+								copy_date(date_index);
 							}
 
 							/**
-							 * 分割點於本年中間之月首，而不在本年首尾。
+							 * 處理分割點於本年中間之月首，而不在本年首尾的情況。
 							 */
 							if (月序 > 0 || (START_KEY in era_year_data)
 							// 有時 era_year_data[START_KEY] === START_MONTH。
 							&& era_year_data[START_KEY] !== START_MONTH) {
+								library_namespace.debug(
+								//
+								'處理分割點於本年中間之月首 (月序='
+								//
+								+ 月序 + ')，而不在本年首尾的情況。', 5);
 								clone_last_year();
 
-								// 複製本年接下來每月之曆數。
+								library_namespace.debug(
+								//
+								'複製本年接下來每月之曆數: ' + 月序 + '–'
+										+ era_year_data.length + '。', 5);
 								if (月序 < era_year_data.length)
 									Array_push(this_year_data, era_year_data
 											.slice(月序));
@@ -2501,6 +2554,9 @@ if (typeof CeL === 'function')
 								&& (!(LEAP_MONTH_KEY in this_year_data)
 								//
 								|| tmp !== this_year_data[LEAP_MONTH_KEY])) {
+									library_namespace.debug(
+									//
+									'複製本年之 LEAP_MONTH_KEY。 index ' + tmp, 5);
 									if (LEAP_MONTH_KEY in this_year_data)
 										library_namespace.warn([
 												'initialize_era_date: ' + this,
@@ -2514,22 +2570,27 @@ if (typeof CeL === 'function')
 									this_year_data[LEAP_MONTH_KEY] = tmp;
 								}
 
-								// 複製本年接下來每月之 NAME_KEY。
 								tmp = era_year_data[NAME_KEY];
 								if (tmp && 月序 < tmp.length) {
-									if (NAME_KEY in this_year_data)
-										this_year_data[NAME_KEY].length
-										//
-										= this_year_data.length;
-									else
-										this_year_data[NAME_KEY]
-										//
-										= new Array(this_year_data.length);
+									library_namespace.debug(
+									//
+									'複製本年接下來每月之月分名稱 (' + 月序 + '–' + tmp.length
+											+ ') [' + tmp + ']。', 5);
+									// console.log(era_year_data);
+									// console.log(this_year_data);
+									if (!(NAME_KEY in this_year_data))
+										// 初始化本年之月分名稱。
+										this_year_data[NAME_KEY] = [];
+									this_year_data[NAME_KEY].length
+									// 先截至當前交接之月分。
+									= this_year_data.length
+									// 減掉前面 copy 過之每月曆數長度。
+									- era_year_data.length + 月序;
 									Array_push(this_year_data[NAME_KEY], tmp
 											.slice(月序));
 								}
 
-								if (library_namespace.is_debug(0)) {
+								if (library_namespace.is_debug(1)) {
 									// check 曆數
 									tmp = this_year_data.length;
 									library_namespace.debug([ this + ' 年序 ',
@@ -2540,21 +2601,24 @@ if (typeof CeL === 'function')
 									if (START_KEY in this_year_data)
 										tmp += this_year_data[START_KEY]
 												- START_MONTH;
-									if (tmp !== MONTH_COUNT
+									if (tmp !== LUNISOLAR_MONTH_COUNT
 									//
 									+ (LEAP_MONTH_KEY
 									//
 									in this_year_data ? 1 : 0))
 										library_namespace.warn([
-												'initialize_era_date: ' + this,
-												' 年序 ',
-												calendar_data.length - 1,
-												'：本年參照紀年 [' + era, '] 年序 ', 年序,
-												'，共至 ', tmp, ' 月，正常情況應為 ',
-												MONTH_COUNT + (LEAP_MONTH_KEY
-												//
-												in this_year_data ? 1 : 0),
-												' 個月！' ]);
+										//
+										'initialize_era_date: ' + this,
+										//
+										' 年序 ', calendar_data.length - 1,
+										//
+										'：本年參照紀年 [' + era, '] 年序 ', 年序,
+										//
+										'，共至 ', tmp, ' 月，陰陽曆正常情況應為 ',
+										//
+										LUNISOLAR_MONTH_COUNT + (LEAP_MONTH_KEY
+										//
+										in this_year_data ? 1 : 0), ' 個月！' ]);
 								}
 
 								// 月序 = 0;
@@ -2966,6 +3030,7 @@ if (typeof CeL === 'function')
 											= 月序 = 月名;
 										else {
 											if (!(NAME_KEY in this_year_data))
+												// 初始化本年之月分名稱。
 												this_year_data[NAME_KEY] = [];
 											this_year_data[NAME_KEY]
 											// e.g.,
@@ -3010,11 +3075,12 @@ if (typeof CeL === 'function')
 												// 因為所有閏月之後，包括閏月本身，都會減一。
 												? 1 + tmp[2]
 												//
-												: 2 + MONTH_COUNT
+												: 2 + LUNISOLAR_MONTH_COUNT
 														- month_data.length;
 										}
 									else {
 										if (!(NAME_KEY in this_year_data)) {
+											// 初始化本年之月分名稱。
 											this_year_data[NAME_KEY] = [];
 											// TODO: 填補原先應有的名稱。
 
@@ -3291,7 +3357,7 @@ if (typeof CeL === 'function')
 													+ 月序[0] - (閏月後 ? 1 : 0))),
 											1, 'get_month_branch_index');
 
-									// 歲首月建序=(歲首中氣序+1)%MONTH_COUNT
+									// 歲首月建序=(歲首中氣序+1)%LUNISOLAR_MONTH_COUNT
 									library_namespace.debug('歲首月建序 = '
 											+ (1 + ST月序
 											//
@@ -3305,7 +3371,7 @@ if (typeof CeL === 'function')
 
 								this.歲首月建序 = ST月序 - 月序[0]
 								// 歲首月建序=(ST月序+(is
-								// leap?2:1)-月序[0]-(曆數[月序[1]][START_KEY]-START_MONTH))%MONTH_COUNT
+								// leap?2:1)-月序[0]-(曆數[月序[1]][START_KEY]-START_MONTH))%LUNISOLAR_MONTH_COUNT
 								- (START_KEY in 曆數[月序[1]]
 								//
 								? 曆數[月序[1]][START_KEY] - START_MONTH : 0)
@@ -3343,7 +3409,7 @@ if (typeof CeL === 'function')
 					// 月干支每5年一循環。
 					// (ST月序):紀年首月之月建序差距。
 					= ((this.get_year_stem_branch_index() + 月序[1])
-							* MONTH_COUNT + ST月序)
+							* LUNISOLAR_MONTH_COUNT + ST月序)
 							.mod(library_namespace.SEXAGENARY_CYCLE_LENGTH);
 				}
 
@@ -3355,13 +3421,14 @@ if (typeof CeL === 'function')
 
 				// 找出最接近的月干支所在。
 				// 回傳所求干支序之 [ 月序, 歲序 ]。
-				// 就算有閏月，每年也不過移動 MONTH_COUNT。
+				// 就算有閏月，每年也不過移動 LUNISOLAR_MONTH_COUNT。
 				if (歲序 |= 0) {
 					// 算出本歲序首月之月干支。
 					// 有閏月的話，月干支會少位移一個月。
 					起始月干支 = (起始月干支 + 曆數[0].length
-							- (曆數[0][LEAP_MONTH_KEY] ? 1 : 0) + MONTH_COUNT
-							* (歲序 - 1))
+							- (曆數[0][LEAP_MONTH_KEY] ? 1 : 0)
+					//
+					+ LUNISOLAR_MONTH_COUNT * (歲序 - 1))
 							% library_namespace.SEXAGENARY_CYCLE_LENGTH;
 				}
 				// now: 起始月干支 = 歲序(歲序)月序(0)之月干支
@@ -3370,7 +3437,7 @@ if (typeof CeL === 'function')
 				if ((月序 = 月干支 - 起始月干支) < 0)
 					// 確保所求差距月數於起始月干支後。
 					月序 += library_namespace.SEXAGENARY_CYCLE_LENGTH;
-				if (月序 >= MONTH_COUNT) {
+				if (月序 >= LUNISOLAR_MONTH_COUNT) {
 
 					library_namespace.err('get_month_branch_index: '
 					//
@@ -3383,16 +3450,16 @@ if (typeof CeL === 'function')
 						// 採用向前的月分。
 						月序 = library_namespace.SEXAGENARY_CYCLE_LENGTH - 月序;
 						// 警告，須檢查(歲序<0)的情況。
-						歲序 -= 月序 / MONTH_COUNT | 0;
-						月序 %= MONTH_COUNT;
+						歲序 -= 月序 / LUNISOLAR_MONTH_COUNT | 0;
+						月序 %= LUNISOLAR_MONTH_COUNT;
 						月序 = 曆數[歲序].length - 月序;
 						if (月序 >= 曆數[歲序][LEAP_MONTH_KEY])
 							月序--;
 					} else {
 						// 普通情況採用向後的月分。
 						// 警告，須檢查(歲序>=曆數.length)的情況。
-						歲序 += 月序 / MONTH_COUNT | 0;
-						月序 %= MONTH_COUNT;
+						歲序 += 月序 / LUNISOLAR_MONTH_COUNT | 0;
+						月序 %= LUNISOLAR_MONTH_COUNT;
 					}
 
 				}
@@ -3723,7 +3790,8 @@ if (typeof CeL === 'function')
 				var index = 立春年(date, true);
 				// 1863年11月:上元甲子月
 				// offset 47 = (1863 * 12 + 11) % 180
-				index = (47 - index[0] * MONTH_COUNT - index[1]).mod(180);
+				index = (47 - index[0] * LUNISOLAR_MONTH_COUNT - index[1])
+						.mod(180);
 				// assert: 0 <= index < 180
 
 				return 九星_LIST[index % 九星_LIST.length]
@@ -4048,8 +4116,8 @@ if (typeof CeL === 'function')
 						date.月干支 = library_namespace.to_stem_branch(
 						// 基準點。
 						this.get_month_branch_index()
-						// 就算有閏月，每年也不過移動 MONTH_COUNT。
-						+ MONTH_COUNT * tmp2 + date_index[1]
+						// 就算有閏月，每年也不過移動 LUNISOLAR_MONTH_COUNT。
+						+ LUNISOLAR_MONTH_COUNT * tmp2 + date_index[1]
 						// 為非一月開始的紀年作修正。
 						- (0 < tmp2 && (tmp2 = this.calendar[0][START_KEY])
 						//
@@ -4673,7 +4741,8 @@ if (typeof CeL === 'function')
 					}
 
 					if (month_data) {
-						j = MONTH_COUNT + (leap_month_index_base_2 ? 1 : 0);
+						j = LUNISOLAR_MONTH_COUNT
+								+ (leap_month_index_base_2 ? 1 : 0);
 						if (month_data.length < j) {
 							// padding
 							Array_push(
@@ -5301,7 +5370,7 @@ if (typeof CeL === 'function')
 						//
 						&& (i = last_era_data.歲首 | 0) !== START_MONTH
 						//
-						&& 0 < i && i <= MONTH_COUNT)
+						&& 0 < i && i <= LUNISOLAR_MONTH_COUNT)
 							last_era_data.歲首序 = i - START_MONTH;
 
 						if (!(0 < (last_era_data.大月 |= 0))
@@ -5698,7 +5767,7 @@ if (typeof CeL === 'function')
 			 */
 			function get_Date_of_key_by_CE(year, 月, 日, era_key) {
 				var 日期,
-				// 7: 年中， (1 + MONTH_COUNT >> 1)
+				// 7: 年中， (1 + LUNISOLAR_MONTH_COUNT >> 1)
 				date = new Date((year < 0 ? year : '000' + year) + '/7/1'),
 				//
 				共存紀年 = add_contemporary(date, null, {
@@ -6726,9 +6795,11 @@ if (typeof CeL === 'function')
 					&& !get_dates.no_limit_era.includes(era))
 						library_namespace.warn([
 						//
-						'get_dates: 跳過 [' + era + ']：跨度過長，共有 '
+						'get_dates: 跳過 [' + era + ']： 跨度過長，共有 '
 						//
-						+ l + '個年分！您可嘗試縮小範圍、加注年分，或', {
+						+ l + '個年分！您可嘗試縮小範圍、加注年分 (如輸入 "'
+						//
+						+ concat_era_name([ era, '1年' ]) + '")，或', {
 							a : {
 								T : '取消限制'
 							},

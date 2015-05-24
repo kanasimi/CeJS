@@ -3038,10 +3038,10 @@ this.CeL_era_data = {
 		// King of Kings of Persia, Kings of Anshan
 		// should use Zoroastrian calendar?
 		// @see https://en.wikipedia.org/wiki/Iranian_calendars
-		'Persia/Cyrus II|Babylonian-559~|:Babylonian|疑|準=年|ruler=𐎤𐎢𐎽𐎢𐏁;کوروش بزرگ;Kūruš',
+		'Persia/Cyrus II|Babylonian-559~|:Babylonian|疑|準=年|ruler=𐎤𐎢𐎽𐎢𐏁;کوروش بزرگ;Kūruš;Cyrus the Great',
 		'/Cambyses II|Babylonian-530~|:Babylonian|疑|準=年|ruler=کمبوجيه دوم',
-		'/Bardiya|Babylonian-522~|:Babylonian|疑|準=年|ruler=𐎲𐎼𐎮𐎡𐎹',
-		'/Darius I|Babylonian-522/7~|:Babylonian|疑|準=年|ruler=𐎭𐎠𐎼𐎹𐎺𐎢𐏁;𐎭𐎠𐎼𐎹𐎢𐏁',
+		'/Bardiya|Babylonian-522~|:Babylonian|疑|準=年|ruler=𐎲𐎼𐎮𐎡𐎹;Bardia;Σμέρδις;Smerdis',
+		'/Darius I|Babylonian-522/7~|:Babylonian|疑|準=年|ruler=𐎭𐎠𐎼𐎹𐎺𐎢𐏁;𐎭𐎠𐎼𐎹𐎢𐏁;Darius the Great',
 		'/Xerxes I|Babylonian-486/8~|:Babylonian|疑|準=年|ruler=Xšaya-ṛšā;𐎧𐏁𐎹𐎠𐎼𐏁𐎠',
 		'/Artaxerxes I|Babylonian-465/6~|:Babylonian|疑|準=年|ruler=اردشیر یکم|注=The last inscription mentioning Artaxerxes I being alive can be dated to December 24, 424 BC.',
 		'/Xerxes II|-423~-423/2|:Babylonian|疑|準=年|ruler=خشايارشا دوم|注=wiki:阿契美尼德王朝: 在位45天被妃嬪之子暗殺',
@@ -3056,8 +3056,9 @@ this.CeL_era_data = {
 		'/Darius III|Babylonian-335~|:Babylonian|疑|準=年|ruler=Artashata;Codomannus',
 		'/Bessus|Babylonian:-330~-329/7|:Babylonian|疑|準=年|ruler=Artaxerxes V',
 
+		// https://en.wikipedia.org/wiki/List_of_people_known_as_The_Great
 		// Ἀργεάδαι, Argead dynasty
-		'Μακεδονία/Alexander III|Babylonian-336/4~-323/6/10|:Babylonian|疑|準=年|ruler=Ἀλέξανδρος ὁ Μέγας|生=-356/7/20 or 21|卒=-323/6/10 or 11',
+		'Μακεδονία/Alexander III|Babylonian-336/4~-323/6/10|:Babylonian|疑|準=年|ruler=Ἀλέξανδρος ὁ Μέγας;Alexander the Great|生=-356/7/20 or 21|卒=-323/6/10 or 11',
 		'/Philip III|-323/6/11~-317/12/25|:Babylonian|疑|準=年|ruler=Philip III Arrhidaeus;Φίλιππος Γ΄ ὁ Ἀρριδαῖος|卒=-317/12/25',
 		'/Alexander IV|Babylonian-323/5~-309|:Babylonian|疑|準=年|ruler=Ἀλέξανδρος Δ΄;Alexander IV Aegus|生=-323/8',
 
@@ -3148,8 +3149,7 @@ this.CeL_era_data = {
 		'/Philip I|Babylonian-95~-83|:Babylonian|疑|準=年|ruler=Philip I Philadelphus',
 		'/Antiochus XI|Babylonian-95~-92|:Babylonian|疑|準=年|ruler=Antiochus XI Epiphanes',
 		'/Antiochus XII|-87~|:Babylonian|疑|準=年|ruler=Antiochus XII Dionysus (Epiphanes/Philopator/Callinicus)',
-		// Tigranes the Great (Tigranes II of Armenia)
-		'/Seleucus VII|Babylonian-83~|:Babylonian|疑|準=年|ruler=Seleucus VII Philometor;Σέλευκος Ζ΄',
+		'/Seleucus VII|Babylonian-83~|:Babylonian|疑|準=年|ruler=Seleucus VII Philometor;Σέλευκος Ζ΄;Tigranes the Great;Tigranes II of Armenia',
 		'/Antiochus XIII|Babylonian-69~|:Babylonian|疑|準=年|ruler=Antiochus XIII Philadelphus;Asiaticus',
 		'/Philip II|Babylonian-65~-63|:Babylonian|疑|準=年|ruler=Philip II Philorhomaeus;Φίλιππος Β΄ ὁ Φιλορωμαῖος;Barypous'
 
@@ -3159,10 +3159,113 @@ this.CeL_era_data = {
 // Egypt
 // https://en.wikipedia.org/wiki/Ancient_Egypt
 
+// A Chronological Survey of Precisely Dated Demotic and Abnormal Hieratic
+// Sources
+// Version 1.0 (February 2007)
+// http://www.trismegistos.org/top.php
+
 (this.CeL_era_data.Egypt = [
 
-//https://en.wikipedia.org/wiki/Twenty-fifth_Dynasty_of_Egypt
-'Egypt/Piye|-746~453|:CE'
+		(function() {
+			// -1: shift
+			var start_year = -746 - 1,
+			// 453
+			end_year = -23;
+
+			return [
+					'Egyptian',
+					[ String(start_year).to_Date('Egyptian'),
+					// +1: period_end
+					String(end_year + 1).to_Date('Egyptian') ],
+					start_year + '/='
+					//
+					+ new Array(end_year - start_year + 2).fill(
+					//
+					CeL.Egyptian_Date.month_days.join(';')).join('	'),
+					//
+					'參照用',
+					'曆法=Egyptian calendar',
+					'月名='
+							+ CeL.Egyptian_Date.month_name.Greek.join(';')
+									.replace(/^;+/, '') ];
+		})(),
+
+		// https://en.wikipedia.org/wiki/Twenty-fifth_Dynasty_of_Egypt
+		// Year 21 of Piye (Piankhi)
+		// BC 726 Feb 21 – 725 Feb 20
+		//
+		// http://www.trismegistos.org/daht/detail.php?tm=46106
+		// BC 726 Mar 30 (Piye (Pianchi), year 21, Phaophi 08)
+		'Egypt Dynasty XXV/Piye|Egyptian-747~|:Egyptian|疑|準=年|時期=Third Intermediate|ruler=Pianchi',
+		// http://www.trismegistos.org/text/46121
+		// BC 703 May 10 ((Shabaka), year 13, Hathyr 25)
+		'/Shabaka|Egyptian-716~|:Egyptian|疑|準=年',
+		'/Shebitku|Egyptian-702~|:Egyptian|疑|準=年',
+		// BC 665 Sep 16 ((Taharqa), year 26, Pharmouthi 14)
+		'/Taharqa|Egyptian-691~|:Egyptian|疑|準=年',
+		'/Tantamani|Egyptian:-665~-656|:Egyptian|疑|準=年',
+
+		// BC 660 Jan 12 ([Psammetichus 1], year 04, Mesore 13)
+		'Egypt Dynasty XXVI/Psammetichus I|Egyptian-665~|:Egyptian|疑|準=年|時期=Late Period|ruler=Psamtik I',
+		'/Necho II|Egyptian-611~|:Egyptian|疑|準=年',
+		'/Psammetichus II|Egyptian-596~|:Egyptian|疑|準=年',
+		'/Apries|Egyptian:-590~|:Egyptian|疑|準=年',
+		// 若以下兩筆紀錄皆為真，可推測 Apries 死於 20年中，或許是 Payni 10 之後。
+		// 而 Amasis II 於年中登基，並稱元年。
+		// BC 570 Oct 19 (Apries, year 20, Pauni 10) Type: contract loan (money)
+		// BC 569 Feb 12 - Mar 12 (Amasis, year 02, Phaophi)
+		'/Amasis II|Egyptian-571/11~|:Egyptian|疑|準=年',
+		'/Psamtik III|Egyptian:-527~-526/5|:Egyptian|疑|準=年|注=Psamtik III was defeated by Cambyses II of Persia in the battle of Pelusium in the eastern Nile delta in May 525 BCE.',
+
+		// modified form Achaemenid Empire listed above.
+		'First Achaemenid Period/Cambyses II|Egyptian:-530~-523/9|:Egyptian|疑|準=年|朝代=Egypt Dynasty XXVII;First Egyptian Satrapy|時期=Late Period',
+		'/Seheruibre Padibastet|Egyptian:-523~-520|:Egyptian|疑|準=年|ruler=Petubastis III|注=There also exists a document that has been dated to 522 BCE, which was the first year of his reign.|注=Certainly Egypt was pacified by 518 BCE when Darius arrived and authorised the codification of local Egyptian laws.',
+		// TM 48872: BC 519 Jan 30 - Feb 28? (Darius 1, year 03, Phaophi?)
+		'/Darius I|Egyptian-522~|:Egyptian|疑|準=年',
+		// TM 46738: BC 486 Jun 7 ((Darius 1), year 36, Mecheir 17)
+		// TM 46432: BC 485 Feb 21 - Mar 21 (Psammetichus 4, year 02, Hathyr)
+		// TM 46431: BC 485 Mar 22 - Apr 20 (Psammetichus 4, year 02, Choiak)
+		// TM 46428: BC 485 Apr 21 - May 20 (Psammetichus 4, year 02, Tybi)
+		'/Psammetichus IV|Egyptian-487/7~|:Egyptian|疑|準=年|注=proposed ancient Egyptian ruler',
+		'/Xerxes I|Egyptian-486/6~|:Egyptian|疑|準=年',
+		// TM 81436: BC 443 Nov 7 - Dec 6 (Artaxerxes 1, year 22, Mesore)
+		'/Artaxerxes I|Egyptian-465~|:Egyptian|疑|準=年',
+		// TM 81485: BC 422 Jun 5 - Jul 4 (Darius 2, year 02, Phamenoth)
+		'/Darius II|Egyptian-424/2~|:Egyptian|疑|準=年',
+		'/Artaxerxes II|Egyptian:-405/6~-402|:Egyptian|疑|準=年',
+
+		'Egypt Dynasty XXVIII/Amyrtaeus|Egyptian-405/2~|:Egyptian|疑|準=年|時期=Late Period|ruler=Amenirdisu',
+
+		'Egypt Dynasty XXIV/Nepherites I|Egyptian-400/12~|:Egyptian|疑|準=年|時期=Late Period',
+		// TM 81525: BC 393 Mar 29 - Apr 27? (Nepherites 1, year 07, Tybi?)
+		// TM 54648: BC 394 Nov 30 - 393 Nov 28 (Hakoris, year 01)
+		'/Hakor/first reign|Egyptian-394/6~|:Egyptian|疑|準=年|ruler=Hagar;Achoris;Hakoris;Akoris',
+		// TM 51551: BC 388 Jun 26 - Jul 25 (Psammuthis, year 01, Pharmouthi)
+		'/Psammuthes/|Egyptian-389~|:Egyptian|疑|準=年|ruler=Psammuthis',
+		'/Hakor/second reign|Egyptian-388~|:Egyptian|疑|準=年',
+		'/Nepherities II/|Egyptian-382/9~|:Egyptian|疑|準=年|ruler=Nefaarud II|注=He was deposed and likely killed by Nectanebo I after ruling Egypt for only 4 months.',
+
+		// TM 46406: BC 380 Jun 23? (Nectanebo 1, year 01, Phamenoth 30)
+		'Egypt Dynasty XXX/Nectanebo I|Egyptian-381~|:Egyptian|疑|準=年|ruler=Kheperkare Nakhtnebef|時期=Late Period',
+		'/Teos|Egyptian-365~|:Egyptian|疑|準=年|ruler=Τέως;Tachos;Τάχως;Djedhor;Irmaatenre',
+		'/Nectanebo II|Egyptian-361~-344|:Egyptian|疑|準=年|ruler=Senedjemibra Setepeninhur;Nakhthorheb;Nektanebo II',
+
+		'Second Achaemenid Period/Artaxerxes III|Egyptian-359/12~|:Egyptian|疑|準=年|朝代=Egypt Dynasty XXXI|時期=Late Period',
+		'/Khabash|Egyptian-338~-335|:Egyptian|疑|準=年|ruler=Khababash;Khabbash;Chababash',
+		'/Darius III|Egyptian-337~|:Egyptian|疑|準=年',
+
+		// 時期=Ptolemaic (Hellenistic)
+		'Argead Dynasty/Alexander III|Egyptian-332~-324|:Egyptian|疑|準=年|時期=Ptolemaic',
+
+		// TODO
+
+		'Roman Empire/Augustus|Egyptian:-30~-23|:Egyptian'
+
+// TODO
+
+// https://en.wikipedia.org/wiki/Era_of_Martyrs
+// The Era of the Martyrs (Latin: anno martyrum or AM), also known as the
+// Diocletian era (Latin: anno Diocletiani)
 
 ]).minute_offset = 2 * 60;
 

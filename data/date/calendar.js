@@ -117,7 +117,7 @@ others:
  *            {Function}date serial to name, {Function}weekday serial to name ]
  * @returns
  */
-function _format(date, options, to_name, is_leap) {
+function _format(date, options, to_name, is_leap, combine) {
 	var format = options && options.format;
 
 	if (format === 'serial')
@@ -130,7 +130,7 @@ function _format(date, options, to_name, is_leap) {
 		to_name.forEach(function(func, index) {
 			if (index === 3)
 				index = KEY_WEEK;
-			date[index] = func(date[index], is_leap);
+			date[index] = func(date[index], is_leap, index);
 		});
 	else
 		library_namespace.warn('_format: 無法辨識之 to_name: ' + to_name);
@@ -143,7 +143,16 @@ function _format(date, options, to_name, is_leap) {
 		date[2] = options.numeral(date[2]);
 	}
 
-	format = date.slice(0, 3).reverse().join(' ');
+	if (typeof combine === 'function') {
+		format = combine(date);
+	} else {
+		format = date.slice(0, 3);
+		// direction
+		if (combine !== true)
+			format = format.reverse();
+		format = format.join(' ');
+	}
+
 	if (options) {
 		if (options.postfix)
 			format += options.postfix;
@@ -274,6 +283,41 @@ new_tester.default_options = {
 	error_limit : 20
 };
 
+
+/**
+ * 提供 to calendar date 之 front-end (wrapper)
+ * 
+ * @param {Function}calendar_Date
+ *            to calendar date
+ * @param {Function}[new_year_Date]
+ *            to calendar new year's day
+ * 
+ * @returns {Function} parser
+ */
+function _parser(calendar_Date, new_year_Date) {
+
+	return function(date, minute_offset, options) {
+		var period_end = options && options.period_end;
+
+		if (!isNaN(date)) {
+			if (new_year_Date)
+				// use the new year's day
+				return new_year_Date(date);
+
+			// use year/1/1
+			// String → Number
+			date |= 0;
+			return calendar_Date(period_end ? 1 + date : date, 1, 1);
+		}
+
+		if (date = date.match(/(-?\d{1,4})[\/\-](\d{1,2})(?:[\/\-](\d{1,2}))?/)) {
+			if (period_end)
+				date[date[3] ? 3 : 2]++;
+			return calendar_Date(date[1], date[2], date[3] || 1);
+		}
+	};
+
+}
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 長曆: 伊斯蘭曆
@@ -3506,12 +3550,10 @@ _.Armenian_Date = Armenian_Date;
 // Date Converter for Ancient Egypt
 // http://aegyptologie.online-resourcen.de/Date_converter_for_Ancient_Egypt
 
-// https://en.wikipedia.org/wiki/Transliteration_of_Ancient_Egyptian
-// https://en.wikipedia.org/wiki/Egyptian_hieroglyphs
 
-// https://en.wikipedia.org/wiki/Egyptian_calendar
+// https://en.wikipedia.org/wiki/Egyptian_calendar#Ptolemaic_and_Roman_calendar
 // According to Roman writer Censorinus (3rd century AD), the Egyptian New Year's Day fell on July 20 in the Julian Calendar in 139 CE, which was a heliacal rising of Sirius in Egypt.
-// In 238 BCE, the Ptolemaic rulers decreed that every 4th year should be 366 days long rather than 365. The Egyptians, most of whom were farmers, did not accept the reform, as it was the agricultural seasons that made up their year. The reform eventually went into effect with the introduction of the "Alexandrian calendar" by Augustus in 26/25 BCE, which included a 6th epagomenal day for the first time in 22 BCE. This almost stopped the movement of the first day of the year, 1 Thoth, relative to the seasons, leaving it on 29 August in the Julian calendar except in the year before a Julian leap year, when a 6th epagomenal day occurred on 29 August, shifting 1 Thoth to 30 August.
+// In 238 BCE, the Ptolemaic rulers decreed that every 4th year should be 366 days long rather than 365 (the so-called Canopic reform). The Egyptians, most of whom were farmers, did not accept the reform, as it was the agricultural seasons that made up their year. The reform eventually went into effect with the introduction of the "Alexandrian calendar" (or Julian calendar) by Augustus in 26/25 BCE, which included a 6th epagomenal day for the first time in 22 BCE. This almost stopped the movement of the first day of the year, 1 Thoth, relative to the seasons, leaving it on 29 August in the Julian calendar except in the year before a Julian leap year, when a 6th epagomenal day occurred on 29 August, shifting 1 Thoth to 30 August.
 Egyptian_Date.epoch = String_to_Date('139/7/20', {
 	parser : 'Julian'
 });
@@ -3528,6 +3570,35 @@ Egyptian_Date.epoch = Egyptian_Date.epoch.getTime();
 // https://en.wikipedia.org/wiki/Sothic_cycle
 Egyptian_Date.default_shift = 0;
 
+// [30,30,30,30,30,30,30,30,30,30,30,30,5]
+Egyptian_Date.month_days = new Array(13).fill(0).map(function(v, index) {
+	return index === 12 ? 5 : Egyptian_month_days;
+});
+
+// https://en.wikipedia.org/wiki/Transliteration_of_Ancient_Egyptian
+// https://en.wikipedia.org/wiki/Egyptian_hieroglyphs
+Egyptian_Date.season_month = function(month) {
+	var serial = month - 1, season = serial / 4 | 0;
+	// Skip 5 epagomenal days.
+	if (season = Egyptian_Date.season_name[season])
+		return ((serial % 4) + 1) + ' ' + season;
+	//return 'nꜣ hrw 5 n ḥb';
+};
+
+// https://en.wikipedia.org/wiki/Season_of_the_Inundation
+Egyptian_Date.season_name = 'Akhet|Peret|Shemu'.split('|');
+
+Egyptian_Date.month_name = function(month) {
+	return Egyptian_Date.month_name.Greek[month];
+};
+
+// Latin script of Greek
+Egyptian_Date.month_name.Greek = '|Thoth|Phaophi|Athyr|Choiak|Tybi|Mechir|Phamenoth|Pharmouthi|Pachon|Payni|Epiphi|Mesore|Epagomenai'
+		.split('|');
+
+// Latin script of Egyptian Arabic
+Egyptian_Date.month_name.Egyptian_Arabic = '|توت|بابه|هاتور|(كياك (كيهك|طوبه|أمشير|برمهات|برموده|بشنس|بئونه|أبيب|مسرا|Epagomenai'
+		.split('|');
 
 
 /**
@@ -3592,7 +3663,7 @@ function Date_to_Egyptian(date, options) {
 	if (days %= 1)
 		date.push(days);
 
-	return date;
+	return _format(date, options, Egyptian_Date.month_name, null, true);
 }
 
 
@@ -3601,6 +3672,21 @@ function Date_to_Egyptian(date, options) {
 
 CeL.Egyptian_Date(-726,1,1,-1).format('CE')
 "-527/1/1".to_Date('CE').to_Egyptian({shift:-1})
+
+
+CeL.Egyptian_Date(-727,1,1).format('CE')
+'-726/2/21'.to_Date('CE').to_Egyptian({format:'serial'})
+
+'-727'.to_Date('Egyptian').format('CE')
+// "-726/2/21 0:0:0.000"
+
+// OK
+CeL.Egyptian_Date(-23,1,1).format('CE')
+'-23/8/29'.to_Date('CE').to_Egyptian({format:'serial'})
+
+// WRONG from the last day (Epagomenai) of Egyptian_Date(-23)
+CeL.Egyptian_Date(-22,1,1).format('CE')
+'-22/8/29'.to_Date('CE').to_Egyptian({format:'serial'})
 
 
 CeL.Egyptian_Date.test(new Date(-5000, 1, 1), 4e6, 4).join('\n') || 'OK';
@@ -4107,27 +4193,12 @@ function jrsEaster(YR) { // Fast JRSEaster, unsigned 32-bit year
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // export methods.
 
-// e.g., "8.19.15.3.4 1 K'an 2 K'ayab'".to_Date('Maya').format()
+// register
 Object.assign(String_to_Date.parser, {
-	Myanmar : function(date, minute_offset, options) {
-		var period_end = options && options.period_end;
-
-		if (!isNaN(date)) {
-			// use the new year's day
-			return Myanmar_Date.new_year_Date(date);
-
-			// use year/1/1
-			date |= 0;
-			return Myanmar_Date(period_end ? 1 + date : date, 1, 1);
-		}
-
-		if (date = date.match(/(-?\d{1,4})[\/\-](\d{1,2})(?:[\/\-](\d{1,2}))?/)) {
-			if (period_end)
-				date[date[3] ? 3 : 2]++;
-			return Myanmar_Date(date[1], date[2], date[3] || 1);
-		}
-	},
-	Maya : Maya_Date
+	// e.g., "8.19.15.3.4 1 K'an 2 K'ayab'".to_Date('Maya').format()
+	Maya : Maya_Date,
+	Myanmar : _parser(Myanmar_Date, Myanmar_Date.new_year_Date),
+	Egyptian : _parser(Egyptian_Date)
 });
 
 library_namespace.set_method(Date.prototype, {

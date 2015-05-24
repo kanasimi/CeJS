@@ -277,7 +277,8 @@ function String_to_Date(date_string, options) {
 	library_namespace
 	.debug(
 			'最終設定 offset '
-			+ (minute_offset === DEFAULT_TIME_ZONE ? '(default)'
+			+ (minute_offset === DEFAULT_TIME_ZONE
+					? '(default　= ' + String_to_Date.default_offset + ')'
 					: minute_offset)
 					+ ' minutes.', 2);
 

@@ -224,22 +224,24 @@ selected_column = {
 auto_add_column = {
 	中國 : [ 'Year naming/歲次', '曆注/月干支', '曆注/日干支' ],
 	Maya : [ 'calendar/Long_Count', 'calendar/Tzolkin', 'calendar/Haab' ],
+	မြန်မာ : [ 'Gregorian reform/Great Britain', 'calendar/Myanmar' ],
 	Mesopotamian : [ 'calendar/Hebrew' ],
-	မြန်မာ : [ 'Gregorian reform/Great Britain', 'calendar/Myanmar' ]
+	Egypt : [ 'calendar/Egyptian' ]
 },
 // 可選用的文字式年曆 title = { id : [th, function (date) {} ] }
 calendar_column, calendar_column_alias,
 //
-default_column = [ {
-	T : '朝代紀年日期',
-	R : 'date of calendar era: Y/m/d'
-}, {
-	a : {
-		T : CE_name
-	},
-	R : 'Common Era: Y/m/d.\nYear of ruler / month of the year / date of the month.',
-	href : 'https://en.wikipedia.org/wiki/Common_Era'
-} ];
+default_column = [
+		{
+			T : '朝代紀年日期',
+			R : 'date of calendar era: Y/m/d\nYear of ruler / month of the year / day of the month.'
+		}, {
+			a : {
+				T : CE_name
+			},
+			R : 'Common Era: Y/m/d',
+			href : 'https://en.wikipedia.org/wiki/Common_Era'
+		} ];
 
 auto_add_column.日本 = auto_add_column.한국 = auto_add_column['Việt Nam'] = auto_add_column.中國;
 
@@ -557,9 +559,19 @@ function show_calendar(era_name) {
 		T : is_年譜 ? '年譜' : '曆譜'
 	}, ' (', {
 		T : [ _('共有 %1 個' + (dates.type ? '時' : '年') + '段紀錄'), dates.length ]
-	}, ')' ] : {
-		T : '無可供列出之曆譜！'
-	};
+	}, ')' ] : [ {
+		T : '無可供列出之曆譜！',
+		S : 'color:#f00;background-color:#ff3;'
+	}, /[\/年]/.test(era_name) ? '' : [ {
+		br : null
+	}, '→', {
+		a : {
+			T : '嘗試加注年分'
+		},
+		href : '#',
+		title : CeL.era.concat_name([ era_name, '1年' ]),
+		onclick : click_title_as_era
+	} ] ];
 
 	title = {
 		table : [ {
@@ -3170,16 +3182,43 @@ function affairs() {
 			a : {
 				T : '古埃及曆'
 			},
-			R : 'Ancient civil Egyptian calendar used BEFORE REFORM at 22 BCE.\n自 22 BCE 之後不準確。',
+			R : 'Ancient civil Egyptian calendar used BEFORE REFORM'
+			//
+			+ ' at 22/8/29 BCE.\nThe year is meaningless,'
+			//
+			+ ' it is just slightly synchronize with the common era.'
+			//
+			+ '\n自 22/8/29 BCE 之後不準確。',
 			href : 'https://en.wikipedia.org/wiki/Egyptian_calendar'
 		}, function(date) {
-			return date.精 === '年' ? {
-				T : [ '約%1年', date.to_Egyptian({
+			if (date.精 === '年')
+				return {
+					T : [ '約%1年', date.to_Egyptian({
 						format : 'serial'
 					})[0] ]
-			} : date.to_Egyptian({
+				};
+
+			var tmp = date.to_Egyptian({
 				format : 'serial'
-			}).slice(0, 3).join('/') + '; ' + date.to_Egyptian();
+			}).slice(0, 3),
+			//
+			season_month = CeL.Egyptian_Date
+			//
+			.season_month(tmp[1]);
+
+			date = tmp.join('/') + '; ' + tmp[0] + ' '
+			//
+			+ CeL.Egyptian_Date.month_name(tmp[1]);
+			tmp = ' ' + tmp[2];
+			if (season_month)
+				date = [ date, {
+					sub : ' (' + season_month + ')',
+					S : 'color:#291;'
+				}, tmp ];
+			else
+				date += tmp;
+
+			return date;
 		} ],
 
 		Republican : [ {
