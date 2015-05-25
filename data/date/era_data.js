@@ -2606,20 +2606,20 @@ this.CeL_era_data = {
 				// start_month : 0
 				});
 				calendar.push(
-				// TODO: will get '設定非數字的月中起始日
-				// [2]；或是在中途設定日期，而非在曆數資料一開始即設定月中日期！將忽略之。'
-				// '/' + month_days.start_date[1] + '/' +
-				// month_days.start_date[2]
-				month_days.start_date[1] + '=' + month_days.join(';'));
+				// 緬曆每年並非從首月一日起始
+				'/' + month_days.start_date[1] + '/' + month_days.start_date[2]
+						+ '=' + month_days.join(';'));
 			}
 
 			return [
 					'ME',
 					[ CeL.Myanmar_Date.new_year_Date(start),
 							CeL.Myanmar_Date.new_year_Date(end) ],
-					start + '/' + calendar.join('	'),
-					// '月名=' + CeL.Myanmar_Date.month_name.join(';'),
-					'參照用', '注=Myanmar calendar, Myanmar era' ];
+					start + calendar.join('	'), '參照用',
+					// 因為無法處理 watat year 時之月名；比起將就，不如不設定；須參照相對應之緬曆。
+					// '月名=' +
+					// CeL.Myanmar_Date.month_name.en.slice(1).join(';'),
+					, '注=Myanmar calendar, Myanmar era' ];
 		}.call(this),
 
 		// 關係: 為前任者之～, Relationship with predecessor(s).
@@ -3059,7 +3059,7 @@ this.CeL_era_data = {
 		// https://en.wikipedia.org/wiki/List_of_people_known_as_The_Great
 		// Ἀργεάδαι, Argead dynasty
 		'Μακεδονία/Alexander III|Babylonian-336/4~-323/6/10|:Babylonian|疑|準=年|ruler=Ἀλέξανδρος ὁ Μέγας;Alexander the Great|生=-356/7/20 or 21|卒=-323/6/10 or 11',
-		'/Philip III|-323/6/11~-317/12/25|:Babylonian|疑|準=年|ruler=Philip III Arrhidaeus;Φίλιππος Γ΄ ὁ Ἀρριδαῖος|卒=-317/12/25',
+		'/Philip III|-323/6/11~-317/12/25|:Babylonian|疑|準=年|ruler=Philip III Arrhidaeus;Φίλιππος Γ΄ ὁ Ἀρριδαῖος|卒=-317/12/25|注=reigned as king of Macedonia from after June 11, 323 BC until his death, December 25, 317 BC.',
 		'/Alexander IV|Babylonian-323/5~-309|:Babylonian|疑|準=年|ruler=Ἀλέξανδρος Δ΄;Alexander IV Aegus|生=-323/8',
 
 		/**
@@ -3160,8 +3160,7 @@ this.CeL_era_data = {
 // https://en.wikipedia.org/wiki/Ancient_Egypt
 
 // A Chronological Survey of Precisely Dated Demotic and Abnormal Hieratic
-// Sources
-// Version 1.0 (February 2007)
+// Sources, Version 1.0 (February 2007)
 // http://www.trismegistos.org/top.php
 
 (this.CeL_era_data.Egypt = [
@@ -3172,22 +3171,17 @@ this.CeL_era_data = {
 			// 453
 			end_year = -23;
 
-			return [
-					'Egyptian',
-					[ String(start_year).to_Date('Egyptian'),
-					// +1: period_end
-					String(end_year + 1).to_Date('Egyptian') ],
-					start_year + '/='
-					//
-					+ new Array(end_year - start_year + 2).fill(
-					//
-					CeL.Egyptian_Date.month_days.join(';')).join('	'),
-					//
-					'參照用',
-					'曆法=Egyptian calendar',
-					'月名='
-							+ CeL.Egyptian_Date.month_name.Greek.join(';')
-									.replace(/^;+/, '') ];
+			return [ 'Egyptian', [ String(start_year).to_Date('Egyptian'),
+			// +1: period_end
+			String(end_year + 1).to_Date('Egyptian') ], start_year + '/='
+			//
+			+ new Array(end_year - start_year + 2).fill(
+			//
+			CeL.Egyptian_Date.month_days.join(';')).join('	'),
+			//
+			'參照用', '曆法=Egyptian calendar',
+			//
+			'月名=' + CeL.Egyptian_Date.month_name.Greek.slice(1).join(';') ];
 		})(),
 
 		// https://en.wikipedia.org/wiki/Twenty-fifth_Dynasty_of_Egypt
@@ -3255,7 +3249,29 @@ this.CeL_era_data = {
 		'/Darius III|Egyptian-337~|:Egyptian|疑|準=年',
 
 		// 時期=Ptolemaic (Hellenistic)
-		'Argead Dynasty/Alexander III|Egyptian-332~-324|:Egyptian|疑|準=年|時期=Ptolemaic',
+		'Argead Dynasty/Alexander III|Egyptian-332~|:Egyptian|疑|準=年|時期=Ptolemaic|朝代=Egypt Dynasty XXXII',
+		'/Philip III|-323/6/11~|:Egyptian|疑|準=年|ruler=Philippus Arrhidaeus',
+		'/Alexander IV|-317/12/25~|:Egyptian|疑|準=年',
+
+		'Ptolemaic Dynasty/Ptolemy I|Egyptian-305~|:Egyptian|疑|準=年|ruler=Ptolemy I Soter|時期=Ptolemaic',
+		// TM 43764: BC 284 Aug 29 - Sep 27 (P01, year 21, Epeiph)
+		'/Ptolemy II|Egyptian-285/12~|:Egyptian|疑|準=年|ruler=Ptolemy II Philadelphos',
+		// TM 49771: BC 247 Dec 28 ((P02), year 39, Hathyr 06 ; cf. DBL)
+		// TM 53665: BC 246 Feb 21? ((P02?), year 39, Tybi 01)
+		// TM 8527: BC 246 Mar 14 (P03, year 01, Tybi 22)
+		'/Ptolemy III|Egyptian-247/5/15~|:Egyptian|疑|準=年|ruler=Ptolemy III Euergetes I',
+		'/Ptolemy IV|Egyptian-222/5~|:Egyptian|疑|準=年|ruler=Ptolemy IV Philopator',
+		'/Hugronaphor|Egyptian:-205/1/15~-192|:Egyptian|疑|準=年|ruler=Haronnophris;Chaonnophris',
+		'/Ptolemy V|Egyptian-205/1/15~|:Egyptian|疑|準=年|ruler=Ptolemy V Epiphanes',
+		'/Ptolemy VI|Egyptian:-181~-146/11/14|:Egyptian|疑|準=年|ruler=Ptolemy VI Philometor',
+		'/Ptolemy VIII|Egyptian:-170~-164|:Egyptian|疑|準=年|ruler=Ptolemy VIII Euergetes II',
+		'/Ptolemy VIII|Egyptian:-146/11/15~-117/11|25/=:Egyptian|疑|準=年',
+		// Kleopatra II (or Harsiesis?)
+		'/Kleopatra II|Egyptian:-132/12~-131|:Egyptian|疑|準=年',
+		'/Kleopatra III|Egyptian:-117/12~-101|:Egyptian|疑|準=年',
+		'/Ptolemy IX|Egyptian:-117/12~-107|:Egyptian|疑|準=年|ruler=Ptolemy IX Soter II',
+		'/Ptolemy IX|Egyptian:-89~-82|29/=:Egyptian|疑|準=年|ruler=Ptolemy IX Soter II',
+		'/Ptolemy X|Egyptian:-114~-88|:Egyptian|疑|準=年|ruler=Ptolemy X Alexander I',
 
 		// TODO
 
@@ -3268,6 +3284,10 @@ this.CeL_era_data = {
 // Diocletian era (Latin: anno Diocletiani)
 
 ]).minute_offset = 2 * 60;
+
+// ---------------------------------------------------------------------//
+
+// TODO: 阿拉伯
 
 // ---------------------------------------------------------------------//
 // example.

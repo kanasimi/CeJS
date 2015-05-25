@@ -313,7 +313,7 @@ function _parser(calendar_Date, new_year_Date) {
 		if (date = date.match(/(-?\d{1,4})[\/\-](\d{1,2})(?:[\/\-](\d{1,2}))?/)) {
 			if (period_end)
 				date[date[3] ? 3 : 2]++;
-			return calendar_Date(date[1], date[2], date[3] || 1);
+			return calendar_Date(date[1] | 0, date[2] | 0, date[3] && (date[3] | 0) || 1);
 		}
 	};
 

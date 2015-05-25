@@ -320,7 +320,7 @@ if (typeof CeL === 'function')
 			NAME_KEY = 'name', LEAP_MONTH_KEY = 'leap',
 			// 月次，歲次
 			START_KEY = 'start',
-			//
+			// 起始日名/起始日碼/起始日期名
 			START_DATE_KEY = 'start date',
 			//
 			MONTH_NAME_KEY = 'month name',
@@ -1658,22 +1658,31 @@ if (typeof CeL === 'function')
 					} else
 						return;
 
-				日序 += (月序 === 0 && 歲序 === 0
-						&& (START_DATE_KEY in this.calendar)
+				日序 += 月序 === 0 && (START_DATE_KEY in this.calendar[歲序])
+				// 若當年首月有設定起始日名/起始日碼，則使用之。
+				? this.calendar[歲序][START_DATE_KEY]
+				// 不採 this.calendar[START_DATE_KEY]
+				// : 月序 === 0 && 歲序 === 0 && (START_DATE_KEY in this.calendar)
 				//
-				? this.calendar[START_DATE_KEY] : START_DATE);
+				// ? this.calendar[START_DATE_KEY]
+				//
+				: START_DATE;
 
 				return 日序_only ? 日序 : [ 日序, this.月名(月序, 歲序), this.歲名(歲序) ];
 			}
 
 			// 日名轉成日序。
-			function date_name_to_index(日名, is_首月) {
+			function date_name_to_index(日名, 首月採用年序) {
 				if (!isNaN(日名
 				//
-				= numeralize_date_name(日名)))
-					日名 -= (is_首月 && START_DATE_KEY in this.calendar
+				= numeralize_date_name(日名))) {
+					// 不採 this.calendar[START_DATE_KEY]
+					日名 -= ((首月採用年序 in this.calendar)
 					//
-					? this.calendar[START_DATE_KEY] : START_DATE);
+					&& (START_DATE_KEY in (首月採用年序 = this.calendar[首月採用年序]))
+					//
+					? 首月採用年序[START_DATE_KEY] : START_DATE);
+				}
 				return 日名;
 			}
 
@@ -2412,7 +2421,7 @@ if (typeof CeL === 'function')
 									// year_start_time.length
 									year_start_time = [];
 
-								if (library_namespace.is_debug(0)) {
+								if (library_namespace.is_debug(1)) {
 									// check 日次。
 									// tmp: 紀年曆數所設定之起始日次。
 									tmp = date_name[0] | 0;
@@ -2488,6 +2497,7 @@ if (typeof CeL === 'function')
 									+= calendar_data[START_DATE_KEY]
 											- START_DATE;
 								// 由後一使用紀元得出本月實際應有天數。
+								// TODO: 若前後紀元各自設有 START_DATE_KEY，恐怕仍有 bug。
 								date_index = era_year_data[月序];
 								if (年序 === 0 && 月序 === 0
 								//
@@ -2505,14 +2515,15 @@ if (typeof CeL === 'function')
 											'後一紀元 [' + era, '] 本月 ',
 											date_index, '天，不等於原先參照的紀元(為 ', tmp,
 											'天)！' ]);
-								// 設定
+								// 設定起始日碼。
+								// TODO: 若前後紀元各自設有 START_DATE_KEY，恐怕仍有 bug。
 								if (calendar_data.length === 1
 								// this.年序 === 0 && this.月序 === 0
 								&& this_year_data.length === 0
 								//
 								&& (START_DATE_KEY in calendar_data))
 									date_index
-									// 若本已有 START_DATE_KEY 則減去之。
+									// 當接續紀元時，若本已有 START_DATE_KEY 則減去之。
 									-= calendar_data[START_DATE_KEY]
 											- START_DATE;
 								copy_date(date_index);
@@ -2778,8 +2789,12 @@ if (typeof CeL === 'function')
 									+ ']！');
 							return;
 						}
-						if (ordinal[2] !== START_DATE)
+						// 於曆數起頭設定起始日碼。
+						if (ordinal[2] !== START_DATE) {
+							// 這時還沒設定 calendar_data[0] = this_year_data。
+							// calendar_data[0][START_DATE_KEY] =
 							calendar_data[START_DATE_KEY] = ordinal[2];
+						}
 
 						if (曆法 === 'CE') {
 							// 加速 CE 的演算。另可試試不採用 .calendar = [] 的方法，而直接改變
@@ -2958,7 +2973,7 @@ if (typeof CeL === 'function')
 								var tmp, 年名 = date_name[0],
 								//
 								月名 = date_name[1],
-								//
+								// 僅允許整數。
 								起始日碼 = date_name[2] | 0;
 
 								// 設定年分名稱
@@ -2998,21 +3013,44 @@ if (typeof CeL === 'function')
 
 								}
 
-								// 設定起始之月中日數
-								if (起始日碼 && 起始日碼 !== START_DATE)
-									if (!(START_DATE_KEY in calendar_data)
-											&& library_namespace
-													.is_digits(起始日碼)) {
-										calendar_data[START_DATE_KEY] = 起始日碼;
+								// 設定起始日碼。
+								if (!起始日碼 || 起始日碼 === START_DATE) {
+									// 無須設定。
+
+								} else if (!library_namespace.is_digits(起始日碼)) {
+									// 測試是否為合理之數值:不合資格。
+									library_namespace.warn(
+									//
+									'initialize_era_date: 設定非數字的年度月中起始日碼 ['
+											+ 起始日碼 + ']！將忽略之。');
+								} else {
+									if (START_DATE_KEY in this_year_data)
+										library_namespace.warn(
+										//
+										'initialize_era_date: 本年已設定過月中起始日碼 ['
+												+ 起始日碼 + ']！');
+									else {
+										this_year_data[START_DATE_KEY] = 起始日碼;
 										// 測試曆數是否已壓縮。
 										if (已壓縮曆數_PATTERN.test(era.calendar))
 											date_data -= 起始日碼 - START_DATE;
-									} else
-										library_namespace.warn(
-										//
-										'initialize_era_date: 設定非數字的月中起始日 ['
-												+ 起始日碼 + ']；或是在中途設定日期，'
-												+ '而非在曆數資料一開始即設定月中日期！將忽略之。');
+									}
+
+									// 於最起頭才能設定 calendar_data[START_DATE_KEY]。
+									// 確定在曆數資料一開始即設定月中日期，而非在中途設定日期。
+									if (calendar_data.length === 1)
+										// 確定之前尚未設定。
+										if (START_DATE_KEY in calendar_data) {
+											library_namespace.warn(
+											//
+											'initialize_era_date: 本紀年已設定過起始日碼 ['
+													+ 起始日碼 + ']！將忽略之。');
+										} else {
+											calendar_data[START_DATE_KEY]
+											// 設定紀年起始之月中日數。
+											= 起始日碼;
+										}
+								}
 
 								// 設定月分名稱。
 								// TODO:
@@ -3103,7 +3141,7 @@ if (typeof CeL === 'function')
 							}
 							// 日期名稱處理完畢。
 
-							// 當月之日數
+							// 當月之日數。
 							this_year_data.push(date_data);
 							days += date_data;
 
@@ -3122,6 +3160,13 @@ if (typeof CeL === 'function')
 				}
 
 				// ---------------------------------------
+
+				if ((START_DATE_KEY in calendar_data)
+				//
+				&& !(START_DATE_KEY in calendar_data[0]))
+					calendar_data[0][START_DATE_KEY]
+					// assert: 於前面，"於曆數起頭設定起始日碼"處未設定之值。
+					= calendar_data[START_DATE_KEY];
 
 				if (Array.isArray(月序 = this[MONTH_NAME_KEY]))
 					calendar_data.forEach(function(this_year_data) {
@@ -3559,7 +3604,8 @@ if (typeof CeL === 'function')
 					break;
 				}
 
-				干支 = 日 && this.日序(日, year_index === 0 && month_index === 0);
+				// this.日序(): see date_name_to_index()
+				干支 = 日 && this.日序(日, month_index === 0 && year_index);
 				if (!isNaN(干支) && end_type === 1)
 					干支++;
 				// 取得基準 Date。
@@ -4098,13 +4144,17 @@ if (typeof CeL === 'function')
 										% 十二直_LIST.length];
 						}
 
-						tmp = this.calendar[date_index[0]][date_index[1]];
-						if (date_index[0] === 0 && date_index[1] === 0
+						// 計算當月日名/日碼。
+						tmp2 = this.calendar[date_index[0]];
+						tmp = tmp2[date_index[1]];
+						if (date_index[1] === 0
 						//
-						&& (START_DATE_KEY in this.calendar))
-							tmp += this.calendar[START_DATE_KEY] - START_DATE;
+						&& (START_DATE_KEY in tmp2))
+							tmp += tmp2[START_DATE_KEY] - START_DATE;
+
 						// 大月
-						date.大小月 = (tmp2 = this.大月) ? tmp < tmp2 ? '小' : '大'
+						tmp2 = this.大月;
+						date.大小月 = tmp2 ? tmp < tmp2 ? '小' : '大'
 						//
 						: tmp === 大月 ? '大' : tmp === 小月 ? '小' : '(' + tmp
 								+ '日)';

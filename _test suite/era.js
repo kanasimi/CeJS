@@ -239,7 +239,7 @@ default_column = [
 			a : {
 				T : CE_name
 			},
-			R : 'Common Era: Y/m/d',
+			R : 'Common Era: Y/m/d\nReform after 1582/10/4.',
 			href : 'https://en.wikipedia.org/wiki/Common_Era'
 		} ];
 
