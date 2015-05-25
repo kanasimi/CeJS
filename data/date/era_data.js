@@ -3266,14 +3266,15 @@ this.CeL_era_data = {
 		'/Ptolemy VI|Egyptian:-181~-146/11/14|:Egyptian|疑|準=年|ruler=Ptolemy VI Philometor',
 		'/Ptolemy VIII|Egyptian:-170~-164|:Egyptian|疑|準=年|ruler=Ptolemy VIII Euergetes II',
 		'/Ptolemy VIII|Egyptian:-146/11/15~-117/11|25/=:Egyptian|疑|準=年',
-		// Kleopatra II (or Harsiesis?)
-		'/Kleopatra II|Egyptian:-132/12~-131|:Egyptian|疑|準=年',
+		'/Kleopatra II|Egyptian:-132/12~-131|:Egyptian|疑|準=年|注=or Harsiesis?',
 		'/Kleopatra III|Egyptian:-117/12~-101|:Egyptian|疑|準=年',
 		'/Ptolemy IX|Egyptian:-117/12~-107|:Egyptian|疑|準=年|ruler=Ptolemy IX Soter II',
 		'/Ptolemy IX|Egyptian:-89~-82|29/=:Egyptian|疑|準=年|ruler=Ptolemy IX Soter II',
 		'/Ptolemy X|Egyptian:-114~-88|:Egyptian|疑|準=年|ruler=Ptolemy X Alexander I',
-
-		// TODO
+		'/Kleopatra Berenike III|Egyptian:-82~-81|:Egyptian|疑|準=年',
+		'/Ptolemy XII|Egyptian:-81~-52|:Egyptian|疑|準=年|ruler=Ptolemy XII Neos Dionysos',
+		'/Berenike IV|Egyptian:-59~-56|:Egyptian|疑|準=年',
+		'/Kleopatra VII|Egyptian:-52~|:Egyptian|疑|準=年|ruler=Kleopatra VII Philopator',
 
 		'Roman Empire/Augustus|Egyptian:-30~-23|:Egyptian'
 
