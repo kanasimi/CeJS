@@ -3559,21 +3559,54 @@ Egyptian_Date.epoch = String_to_Date('139/7/20', {
 });
 
 var Egyptian_epochal_year = Egyptian_Date.epoch.getFullYear() | 0,
+// 開始 reform 之閏年 (no year 0)。22 BCE, Egyptian year -23 (shift 0)
+// +1: no year 0.
+// = -22
+Egyptian_reform_year = -23 + 1,
+// the reform epochal year of Egyptian calendar (no year 0).
+// 自此年 (Egyptian year, shift 0) 起計算，第四年年末為第一個閏年。
+// = -25 (-25/8/29)
+Egyptian_reform_epochal_year = Egyptian_reform_year - 4 + 1,
+//
+Egyptian_reform_epoch,
 //
 Egyptian_month_days = 30,
 //
-Egyptian_year_days = 12 * Egyptian_month_days + 5;
+Egyptian_year_days = 12 * Egyptian_month_days + 5,
+//
+Egyptian_year_circle = 4,
+// additional 1 day every Egyptian_year_circle years
+Egyptian_reform_year_days = Egyptian_year_days + 1 / Egyptian_year_circle
+
 
 Egyptian_Date.epoch = Egyptian_Date.epoch.getTime();
 
-// 521 BCE 與之前應採 -1，520 BCE 之後採 0 則可幾近與 CE 同步。但 520+1460=1980 BCE 與之前應採 -2。
-// https://en.wikipedia.org/wiki/Sothic_cycle
-Egyptian_Date.default_shift = 0;
+// -1: adapt year 0.
+// = -62903980800000
+Egyptian_reform_epoch = Egyptian_Date(Egyptian_reform_epochal_year - 1, 1, 1, {
+	shift : 0,
+	no_reform : true,
+	get_value : true
+});
+
+
+// -1: adapt year 0.
+// = -26
+Egyptian_Date.reform_epochal_year = Egyptian_reform_epochal_year - 1;
 
 // [30,30,30,30,30,30,30,30,30,30,30,30,5]
 Egyptian_Date.month_days = new Array(13).fill(0).map(function(v, index) {
 	return index === 12 ? 5 : Egyptian_month_days;
 });
+
+Egyptian_Date.leap_month_days = Egyptian_Date.month_days.slice();
+Egyptian_Date.leap_month_days[Egyptian_Date.leap_month_days.length - 1]++;
+
+
+
+// 521 BCE 與之前應採 -1，520 BCE 之後採 0 則可幾近與 CE 同步。但 520+1460=1980 BCE 與之前應採 -2。
+// https://en.wikipedia.org/wiki/Sothic_cycle
+Egyptian_Date.default_shift = 0;
 
 // https://en.wikipedia.org/wiki/Transliteration_of_Ancient_Egyptian
 // https://en.wikipedia.org/wiki/Egyptian_hieroglyphs
@@ -3613,44 +3646,73 @@ Egyptian_Date.month_name.Egyptian_Arabic = '|توت|بابه|هاتور|(كيا�
  *
  * @returns {Date} proleptic Gregorian calendar
  */
-function Egyptian_Date(year, month, date, shift) {
+function Egyptian_Date(year, month, date, options) {
 	// no year 0. year: -1 → 0
 	if (year < 0)
 		year++;
 
+	// adapt shift.
+	var shift = options ? options.shift : undefined;
 	if (shift === undefined)
 		shift = Egyptian_Date.default_shift;
 	if (shift && !isNaN(shift))
 		year += shift;
 
-	date = new Date(Egyptian_Date.epoch + ONE_DAY_LENGTH_VALUE *
-	//		
-	((year - Egyptian_epochal_year) * Egyptian_year_days
+	// caculate days.
+	date = (year - Egyptian_epochal_year) * Egyptian_year_days
 	//
-	+ (month - 1) * Egyptian_month_days + date - 1));
+	+ (month ? (month - 1) * Egyptian_month_days : 0)
+	//
+	+ (date ? date - 1 : 0);
+
+	if (year >= Egyptian_reform_year
+	//
+	&& (!options || !options.no_reform))
+		date += Math.floor((year - Egyptian_reform_epochal_year) / Egyptian_year_circle);
+
+	date = date * ONE_DAY_LENGTH_VALUE + Egyptian_Date.epoch;
 
 	// is the latter year
-	if (shift === true && (year = date.format({
+	if (shift === true && (year = new Date(date).format({
 		parser : 'CE',
 		format : '%Y/%m/%d'
 	}).match(/^(-?\d+)\/1\/1$/))
 	//
 	&& library_namespace.is_leap_year(year[1], 'CE'))
-		date = new Date(date.getTime() + Egyptian_year_days
-				* ONE_DAY_LENGTH_VALUE);
+		date += Egyptian_year_days * ONE_DAY_LENGTH_VALUE;
 
-	return date;
+	return options && options.get_value ? date : new Date(date);
 }
 
 
 _.Egyptian_Date = Egyptian_Date;
 
 
+
+
 function Date_to_Egyptian(date, options) {
 	var shift = options && ('shift' in options) && options.shift || Egyptian_Date.default_shift,
+	//
 	days = (date - Egyptian_Date.epoch) / ONE_DAY_LENGTH_VALUE,
-	year = Math.floor(days / Egyptian_year_days) + Egyptian_epochal_year,
-	month = (days = days.mod(Egyptian_year_days)) / Egyptian_month_days | 0;
+	year = Math.floor(days / Egyptian_year_days) + Egyptian_epochal_year;
+
+	if (year >= Egyptian_reform_year && (!options || !options.no_reform)) {
+		// reformed. adapt reform days.
+		days = (date - Egyptian_reform_epoch) / ONE_DAY_LENGTH_VALUE;
+		// 計算有幾個 Egyptian_year_days
+		year = Math.floor((days
+		// 採用此方法可以直接用 (...) / Egyptian_reform_year_days 即得到年分。
+		+ 1 - 1 / Egyptian_year_circle) / Egyptian_reform_year_days);
+		// 取得年內日數。
+		days -= Math.floor(year * Egyptian_reform_year_days);
+		year += Egyptian_reform_epochal_year;
+	} else
+		// 取得年內日數。
+		days = days.mod(Egyptian_year_days);
+
+	// assert: days >= 0
+
+	var month = days / Egyptian_month_days | 0;
 	days = days.mod(Egyptian_month_days) + 1;
 
 	if (!isNaN(shift))
@@ -3684,9 +3746,8 @@ CeL.Egyptian_Date(-727,1,1).format('CE')
 CeL.Egyptian_Date(-23,1,1).format('CE')
 '-23/8/29'.to_Date('CE').to_Egyptian({format:'serial'})
 
-// WRONG from the last day (Epagomenai) of Egyptian_Date(-23)
 CeL.Egyptian_Date(-22,1,1).format('CE')
-'-22/8/29'.to_Date('CE').to_Egyptian({format:'serial'})
+'-22/8/30'.to_Date('CE').to_Egyptian({format:'serial'})
 
 
 CeL.Egyptian_Date.test(new Date(-5000, 1, 1), 4e6, 4).join('\n') || 'OK';
@@ -3697,6 +3758,7 @@ Egyptian_Date.test = new_tester(Date_to_Egyptian, Egyptian_Date, {
 	month_days : {
 		30 : 'common month 1–12',
 		5 : 'Epagomenal days',
+		6 : 'Epagomenal days (leap)'
 	}
 });
 

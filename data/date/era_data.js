@@ -3166,18 +3166,29 @@ this.CeL_era_data = {
 (this.CeL_era_data.Egypt = [
 
 		(function() {
-			// -1: shift
-			var start_year = -746 - 1,
-			// 453
-			end_year = -23;
+			// Egyptian year (has year 0) = -26
+			var epochal_year = CeL.Egyptian_Date.reform_epochal_year - 1,
+			// assert: start_year < epochal_year < 0
+			// -746/2/26
+			start_year = -747,
+			// assert: end_year > epochal_year
+			end_year = 452,
+			//
+			month_days = CeL.Egyptian_Date.month_days.join(';'),
+			//
+			circle_month_days = new Array(3).fill(month_days);
+			circle_month_days.push(CeL.Egyptian_Date.leap_month_days.join(';'));
+			month_days = new Array(epochal_year - start_year + 1)
+					.fill(month_days);
+			Array.prototype.push.apply(month_days, new Array(Math
+					.ceil((end_year - epochal_year) / 4))
+					.fill(circle_month_days.join('	')));
 
 			return [ 'Egyptian', [ String(start_year).to_Date('Egyptian'),
 			// +1: period_end
-			String(end_year + 1).to_Date('Egyptian') ], start_year + '/='
+			String(end_year + 1).to_Date('Egyptian') ],
 			//
-			+ new Array(end_year - start_year + 2).fill(
-			//
-			CeL.Egyptian_Date.month_days.join(';')).join('	'),
+			start_year + '/=' + month_days.join('	'),
 			//
 			'參照用', '曆法=Egyptian calendar',
 			//
@@ -3274,15 +3285,36 @@ this.CeL_era_data = {
 		'/Kleopatra Berenike III|Egyptian:-82~-81|:Egyptian|疑|準=年',
 		'/Ptolemy XII|Egyptian:-81~-52|:Egyptian|疑|準=年|ruler=Ptolemy XII Neos Dionysos',
 		'/Berenike IV|Egyptian:-59~-56|:Egyptian|疑|準=年',
-		'/Kleopatra VII|Egyptian:-52~|:Egyptian|疑|準=年|ruler=Kleopatra VII Philopator',
+		'/Kleopatra VII|Egyptian-52~|:Egyptian|疑|準=年|ruler=Kleopatra VII Philopator',
 
-		'Roman Empire/Augustus|Egyptian:-30~-23|:Egyptian'
+		'Roman Empire/Augustus|Egyptian-30~|:Egyptian|疑|準=年',
+		'/Tiberius|Egyptian:14~37|:Egyptian|疑|準=年',
+		'/Caligula|Egyptian36/8~|:Egyptian|疑|準=年',
+		'/Claudius|Egyptian40/6~|:Egyptian|疑|準=年',
+		'/Nero|Egyptian54/3~|:Egyptian|疑|準=年',
+		'/Galba|Egyptian67/11~|:Egyptian|疑|準=年',
+		'/Vespasianus|Egyptian68/6~|:Egyptian|疑|準=年',
+		'/Titus|Egyptian79/11~|:Egyptian|疑|準=年',
+		'/Domitian|Egyptian81/11~|:Egyptian|疑|準=年',
+		'/Traianus|Egyptian97~|:Egyptian|疑|準=年',
+		'/Hadrianus|Egyptian116/12~|:Egyptian|疑|準=年',
+		'/Antoninus Pius|Egyptian137/11~|:Egyptian|疑|準=年',
+		// Year 21 of Marcus Aurelius (= Commodus) AD 180 Aug 29 – 181 Aug 28
+		'/Marcus Aurelius|Egyptian160~|:Egyptian|疑|準=年',
+		// Year 19 of Septimius Severus (= Caracalla) AD 210 Aug 29 – 211 Aug 28
+		'/Septimius Severus|Egyptian192/9~|:Egyptian|疑|準=年',
+		'/Macrinus|Egyptian216/9~|:Egyptian|疑|準=年',
+		'/Elegabalus|Egyptian217/11~|:Egyptian|疑|準=年',
+		'/Severus Alexander|Egyptian221/8~234|:Egyptian|疑|準=年',
 
-// TODO
+		// TODO
 
-// https://en.wikipedia.org/wiki/Era_of_Martyrs
-// The Era of the Martyrs (Latin: anno martyrum or AM), also known as the
-// Diocletian era (Latin: anno Diocletiani)
+		// https://en.wikipedia.org/wiki/Era_of_Martyrs
+		// The Era of the Martyrs (Latin: anno martyrum or AM), also known as
+		// the Diocletian era (Latin: anno Diocletiani)
+
+		'/Diocletianus|Egyptian284~|:Egyptian|疑|準=年',
+		'/Diocletian era|Egyptian:290~452|7/=:Egyptian|疑|準=年'
 
 ]).minute_offset = 2 * 60;
 

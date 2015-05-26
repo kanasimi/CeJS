@@ -3182,13 +3182,13 @@ function affairs() {
 			a : {
 				T : '古埃及曆'
 			},
-			R : 'Ancient civil Egyptian calendar used BEFORE REFORM'
+			R : 'Ancient civil Egyptian calendar.'
 			//
-			+ ' at 22/8/29 BCE.\nThe year is meaningless,'
+			+ '\nThe first 6th epagomenal day is 22/8/29 BCE.'
 			//
-			+ ' it is just slightly synchronize with the common era.'
+			+ '\nThe year is meaningless,'
 			//
-			+ '\n自 22/8/29 BCE 之後不準確。',
+			+ ' it is just slightly synchronize with the common era.',
 			href : 'https://en.wikipedia.org/wiki/Egyptian_calendar'
 		}, function(date) {
 			if (date.精 === '年')
