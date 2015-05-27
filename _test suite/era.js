@@ -224,9 +224,9 @@ selected_column = {
 auto_add_column = {
 	中國 : [ 'Year naming/歲次', '曆注/月干支', '曆注/日干支' ],
 	Maya : [ 'calendar/Long_Count', 'calendar/Tzolkin', 'calendar/Haab' ],
-	မြန်မာ : [ 'Gregorian reform/Great Britain', 'calendar/Myanmar' ],
+	'မြန်မာ' : [ 'Gregorian reform/Great Britain', 'calendar/Myanmar' ],
 	Mesopotamian : [ 'calendar/Hebrew' ],
-	Egypt : [ 'calendar/Egyptian' ]
+	Egypt : [ 'calendar/Egyptian', 'calendar/Coptic' ]
 },
 // 可選用的文字式年曆 title = { id : [th, function (date) {} ] }
 calendar_column, calendar_column_alias,
@@ -3130,7 +3130,9 @@ function affairs() {
 			a : {
 				T : '科普特曆'
 			},
-			R : 'Coptic calendar',
+			R : 'Coptic calendar,'
+			//
+			+ ' 紀年紀月紀日與 Diocletian era (Era of the Martyrs) 相同。',
 			href : 'https://en.wikipedia.org/wiki/Coptic_calendar'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Coptic({

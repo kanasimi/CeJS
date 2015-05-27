@@ -2594,7 +2594,7 @@ this.CeL_era_data = {
 // ---------------------------------------------------------------------//
 // 緬甸, Myanmar / Burma
 
-(this.CeL_era_data.မြန်မာ = [
+(this.CeL_era_data['မြန်မာ'] = [
 
 		function() {
 			var start = -25 - 1, year = start, calendar = [],
@@ -3159,9 +3159,12 @@ this.CeL_era_data = {
 // Egypt
 // https://en.wikipedia.org/wiki/Ancient_Egypt
 
-// A Chronological Survey of Precisely Dated Demotic and Abnormal Hieratic
-// Sources, Version 1.0 (February 2007)
-// http://www.trismegistos.org/top.php
+/**
+ * A Chronological Survey of Precisely Dated Demotic and Abnormal Hieratic
+ * Sources, Version 1.0 (February 2007)
+ * 
+ * @see http://www.trismegistos.org/top.php
+ */
 
 (this.CeL_era_data.Egypt = [
 
@@ -3172,7 +3175,7 @@ this.CeL_era_data = {
 			// -746/2/26
 			start_year = -747,
 			// assert: end_year > epochal_year
-			end_year = 452,
+			end_year = 304,
 			//
 			month_days = CeL.Egyptian_Date.month_days.join(';'),
 			//
@@ -3265,6 +3268,18 @@ this.CeL_era_data = {
 		'/Alexander IV|-317/12/25~|:Egyptian|疑|準=年',
 
 		'Ptolemaic Dynasty/Ptolemy I|Egyptian-305~|:Egyptian|疑|準=年|ruler=Ptolemy I Soter|時期=Ptolemaic',
+		/**
+		 * Ever since Pestman, Chronologie, p. 18, it has been assumed that
+		 * originally Ptolemy II Philadelphos counted his Egyptian regnal years
+		 * from the death of his father (283 / 282 BC), but switched to another
+		 * system, taking into account his coregency (starting in 285 / 284 BC),
+		 * in the middle of his reign. Supposedly he skipped years 17 and 18,
+		 * which were at that time unattested in Demotic or Greek sources.
+		 * Recently Muhs has argued that this change of counting basis is in
+		 * fact imaginary and that the two regnal years are indeed attested.
+		 * Although the last word has not yet been said about this chronological
+		 * problem, I have followed Muhs's reconstruction.
+		 */
 		// TM 43764: BC 284 Aug 29 - Sep 27 (P01, year 21, Epeiph)
 		'/Ptolemy II|Egyptian-285/12~|:Egyptian|疑|準=年|ruler=Ptolemy II Philadelphos',
 		// TM 49771: BC 247 Dec 28 ((P02), year 39, Hathyr 06 ; cf. DBL)
@@ -3287,6 +3302,7 @@ this.CeL_era_data = {
 		'/Berenike IV|Egyptian:-59~-56|:Egyptian|疑|準=年',
 		'/Kleopatra VII|Egyptian-52~|:Egyptian|疑|準=年|ruler=Kleopatra VII Philopator',
 
+		// https://en.wikipedia.org/wiki/List_of_Roman_emperors
 		'Roman Empire/Augustus|Egyptian-30~|:Egyptian|疑|準=年',
 		'/Tiberius|Egyptian:14~37|:Egyptian|疑|準=年',
 		'/Caligula|Egyptian36/8~|:Egyptian|疑|準=年',
@@ -3305,16 +3321,27 @@ this.CeL_era_data = {
 		'/Septimius Severus|Egyptian192/9~|:Egyptian|疑|準=年',
 		'/Macrinus|Egyptian216/9~|:Egyptian|疑|準=年',
 		'/Elegabalus|Egyptian217/11~|:Egyptian|疑|準=年',
-		'/Severus Alexander|Egyptian221/8~234|:Egyptian|疑|準=年',
+		'/Severus Alexander|Egyptian221/8~|:Egyptian|疑|準=年',
+		'/Gordianus|Egyptian:237~240|:Egyptian|疑|準=年',
+		'/Maximinus Thrax|Egyptian240~|:Egyptian|疑|準=年',
+		'/Philippus Arabs|Egyptian243~|:Egyptian|疑|準=年',
+		'/Gallus|Egyptian250~|:Egyptian|疑|準=年',
+		'/Valerianus|Egyptian:253~259|:Egyptian|疑|準=年',
+		'/Gallienus|Egyptian:253~268|:Egyptian|疑|準=年',
+		// Macrinus and Quietus, as emperors
+		'/Macrianus Minor|Egyptian:260~261|:Egyptian|疑|準=年',
+		'/Quietus|Egyptian:260~261|:Egyptian|疑|準=年',
+		'/Aurelianus|Egyptian269~|:Egyptian|疑|準=年',
 
-		// TODO
+		/**
+		 * The Era of the Martyrs (Latin: anno martyrum or AM), also known as
+		 * the Diocletian era (Latin: anno Diocletiani)
+		 * 
+		 * @see https://en.wikipedia.org/wiki/Era_of_Martyrs
+		 */
 
-		// https://en.wikipedia.org/wiki/Era_of_Martyrs
-		// The Era of the Martyrs (Latin: anno martyrum or AM), also known as
-		// the Diocletian era (Latin: anno Diocletiani)
-
-		'/Diocletianus|Egyptian284~|:Egyptian|疑|準=年',
-		'/Diocletian era|Egyptian:290~452|7/=:Egyptian|疑|準=年'
+		'/Diocletianus|Egyptian:284~304|:Egyptian|疑|準=年'
+// , '/Diocletian era|Egyptian:305~452|23/=:Egyptian|疑|準=年'
 
 ]).minute_offset = 2 * 60;
 

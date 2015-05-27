@@ -3258,12 +3258,17 @@ _.Bahai_Date = Bahai_Date;
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 長曆: 科普特曆 / Coptic calendar / Alexandrian calendar
 // 埃及東正教仍然在使用。
+// Egyptian calendar → Era of Martyrs (Diocletian era) = Coptic calendar
+
 // http://orthodoxwiki.org/Coptic_calendar
 // Egypt used the Coptic Calendar till the Khedive Ismael adopted the Western Gregorian Calendar in the nineteenth century and applied it in Egypt's government departments.
 // The Coptic calendar has 13 months, 12 of 30 days each and an intercalary month at the end of the year of 5 or 6 days, depending whether the year is a leap year or not. The year starts on 29 August in the Julian Calendar or on the 30th in the year before (Julian) Leap Years. The Coptic Leap Year follows the same rules as the Julian Calendar so that the extra month always has six days in the year before a Julian Leap Year.
 // The Feast of Neyrouz marks the first day of the Coptic year. Its celebration falls on the 1st day of the month of Thout, the first month of the Coptic year, which for AD 1901 to 2098 usually coincides with 11 September, except before a Gregorian leap year when it's September 12. Coptic years are counted from AD 284, the year Diocletian became Roman Emperor, whose reign was marked by tortures and mass executions of Christians, especially in Egypt. Hence, the Coptic year is identified by the abbreviation A.M. (for Anno Martyrum or "Year of the Martyrs"). The A.M. abbreviation is also used for the unrelated Jewish year (Anno Mundi).
 // To obtain the Coptic year number, subtract from the Julian year number either 283 (before the Julian new year) or 284 (after it).
 // http://orthodoxwiki.org/Calendar
+
+// https://en.wikipedia.org/wiki/Era_of_Martyrs
+// The Era of the Martyrs (Latin: anno martyrum or AM), also known as the Diocletian era (Latin: anno Diocletiani), is a method of numbering years used by the Church of Alexandria beginning in the 4th century anno Domini and by the Coptic Orthodox Church of Alexandria from the 5th century to the present.
 
 var Coptic_common_month = 30,
 //
@@ -3543,9 +3548,16 @@ _.Armenian_Date = Armenian_Date;
 
 // References:
 
-// A Chronological Survey of Precisely Dated Demotic and Abnormal Hieratic Sources
-// Version 1.0 (February 2007)
-// http://www.trismegistos.org/top.php
+/**
+ * A Chronological Survey of Precisely Dated Demotic and Abnormal Hieratic
+ * Sources, Version 1.0 (February 2007)
+ * 
+ * From year 21 of Ptolemy II Philadelphos until the very beginning of the reign
+ * of Ptolemy V Epiphanes, a so-called financial calendar was in use
+ * 
+ * @see http://www.trismegistos.org/top.php
+ */
+
 
 // Date Converter for Ancient Egypt
 // http://aegyptologie.online-resourcen.de/Date_converter_for_Ancient_Egypt
