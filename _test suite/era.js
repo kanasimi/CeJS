@@ -226,7 +226,9 @@ auto_add_column = {
 	Maya : [ 'calendar/Long_Count', 'calendar/Tzolkin', 'calendar/Haab' ],
 	'မြန်မာ' : [ 'Gregorian reform/Great Britain', 'calendar/Myanmar' ],
 	Mesopotamian : [ 'calendar/Hebrew' ],
-	Egypt : [ 'calendar/Egyptian', 'calendar/Coptic' ]
+	Egypt : [ 'calendar/Egyptian'
+	// , 'calendar/Coptic'
+	]
 },
 // 可選用的文字式年曆 title = { id : [th, function (date) {} ] }
 calendar_column, calendar_column_alias,

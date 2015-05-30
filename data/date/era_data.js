@@ -2978,12 +2978,29 @@ this.CeL_era_data = {
 
 // ---------------------------------------------------------------------//
 // Mesopotamian
-// https://en.wikipedia.org/wiki/Babylonia
-// https://en.wikipedia.org/wiki/List_of_kings_of_Babylon
 // https://en.wikipedia.org/wiki/List_of_Mesopotamian_dynasties
 
 (this.CeL_era_data.Mesopotamian = [
 
+		// Urartu (Akkadian Uraštu; Hebrew Ararat; Kingdom of Van; Biainele)
+		// https://en.wikipedia.org/wiki/List_of_kings_of_Urartu
+		'Urartu/Arame|-858~|:CE|精=年|準=年|ruler=Aramu;Արամե',
+		'/Lutipri|-844~|:CE|精=年|準=年',
+		'/Sarduri I|-834~|:CE|精=年|準=年|ruler=Սարդուրի Ա;Sarduris I',
+		'/Ishpuini|-834~|:CE|精=年|準=年|ruler=Ishpuinis;Išpuine',
+		'/Menua|-810~|:CE|精=年|準=年|ruler=Մենուա;Minua',
+		'/Argishti I|-785~|:CE|精=年|準=年|ruler=Արգիշտի;Argište I',
+		'/Sarduri II|-764~|:CE|精=年|準=年|ruler=Sardure II',
+		'/Rusa I|-735~|:CE|精=年|準=年',
+		'/Argishti II|-714~|:CE|精=年|準=年|ruler=Արգիշտի;Argište II',
+		'/Rusa II|-680~|:CE|精=年|準=年',
+		'/Sarduri III|-639~|:CE|精=年|準=年|ruler=Sardure III',
+		'/Erimena|-635~|:CE|精=年|準=年',
+		'/Rusa III|-629~|:CE|精=年|準=年',
+		'/Sarduri IV|-615~|:CE|精=年|準=年|ruler=Sardure IV',
+		'/Rusa IV|-590~-585|:CE|精=年|準=年',
+
+		// https://en.wikipedia.org/wiki/Babylonia
 		// https://en.wikipedia.org/wiki/List_of_kings_of_Babylon
 		// From this point on, the Babylonian chronology is securely known via
 		// Ptolemy's Canon of Kings and other sources.
@@ -2996,7 +3013,19 @@ this.CeL_era_data = {
 		'/Nabu-mukin-zeri|-732/2~-729|:CE|精=年|準=年|ruler=Nabû-mukin-zēri',
 
 		// Neo-Assyrian Empire
-		'Neo-Assyrian/Tiglath-Pileser III|-745~|:CE|精=年|準=年|時期=Babylon|ruler=Mukin-zēri',
+		// https://en.wikipedia.org/wiki/Neo-Assyrian_Empire
+		// https://en.wikipedia.org/wiki/List_of_Assyrian_kings#Neo-Assyrian_Period
+		'Neo-Assyrian/Adad-nirari II|-911~|:CE|精=年|準=年|時期=Babylon',
+		'/Tukulti-Ninurta II|-891~|:CE|精=年|準=年',
+		'/Ashur-nasir-pal II|-883~|:CE|精=年|準=年|ruler=Ashurnasirpal II',
+		'/Shalmaneser III|-859~|:CE|精=年|準=年',
+		'/Shamshi-Adad V|-824~|:CE|精=年|準=年',
+		'/Sammu-ramat|-811~-808|:CE|精=年|準=年|ruler=Shammuramat',
+		'/Adad-nirari III|-811~|:CE|精=年|準=年|ruler=Adad-narari',
+		'/Shalmaneser IV|-783~|:CE|精=年|準=年',
+		'/Ashur-dan III|-772~|:CE|精=年|準=年',
+		'/Ashur-nirari V|-755~|:CE|精=年|準=年',
+		'/Tiglath-Pileser III|-745~|:CE|精=年|準=年|ruler=Mukin-zēri',
 		'/Shalmaneser V|-727~|:CE|精=年|準=年|ruler=Šulmanu-ašarid',
 		'/Marduk-apla-iddina II|-722~-710|:CE|精=年|準=年|ruler=Merodach-Baladan;Marduk-Baladan',
 		'/Sargon II|-722~|:CE|精=年|準=年|ruler=Šarru-ukin',
@@ -3023,7 +3052,8 @@ this.CeL_era_data = {
 				// @see https://en.wikipedia.org/wiki/Iranian_calendars
 				+ "|參照用|曆法=Babylonian calendar|據=Parker & Dubberstein (1971)|月名=Nisānu;Āru;Simanu;Dumuzu;Abu;Ulūlu;Tišritum;Samna;Kislimu;Ṭebētum;Šabaṭu;Addaru;Makaruša Addari",
 
-		'Neo-Assyrian/Sinsharishkun|Babylonian-626~-620|:Babylonian|疑|準=年|ruler=Sin-shar-ishkun',
+		'Neo-Assyrian/Sin-shar-ishkun|Babylonian-626~|:Babylonian|疑|準=年|ruler=Sinsharishkun',
+		'/Ashur-uballit II|Babylonian-612~Babylonian-608|:Babylonian|疑|準=年',
 
 		// Dynasty XI of Babylon (Neo-Babylonian or Chaldean Dynasty)
 		'Neo-Babylonian/Nabopolassar|Babylonian-626~|:Babylonian|疑|準=年|時期=Babylon|ruler=Nabû-apla-uṣur',

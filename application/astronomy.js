@@ -345,6 +345,18 @@ if (typeof CeL === 'function')
 			 * DEGREES_BETWEEN_SOLAR_TERMS = 15
 			 */
 			DEGREES_BETWEEN_SOLAR_TERMS = TURN_TO_DEGREES / SOLAR_TERMS_COUNT,
+			// 🌑NEW MOON SYMBOL
+			// 🌒WAXING CRESCENT MOON SYMBOL
+			// ☽FIRST QUARTER MOON
+			// 🌓FIRST QUARTER MOON SYMBOL
+			// 🌔WAXING GIBBOUS MOON SYMBOL
+			// 🌕FULL MOON SYMBOL
+			// 🌖WANING GIBBOUS MOON SYMBOL
+			// 🌙CRESCENT MOON
+			// ☾LAST QUARTER MOON
+			// 🌗LAST QUARTER MOON SYMBOL
+			// 🌘WANING CRESCENT MOON SYMBOL
+			//
 			// 各種月相: 新月、上弦月、滿月、下弦月。
 			LUNAR_PHASE_NAME = '朔,上弦,望,下弦'.split(','),
 			// 本地之 time zone / time offset (UTC offset by minutes)。
