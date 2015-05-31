@@ -2450,6 +2450,8 @@ Myanmar leap year on 2,5,7,10,13,15,18 / 19
 
 for(var i=0;i<19;i++){for(var y=0,_y,l=[];y<19;y++){_y=(7*y+i)%19;if(_y<7)l.push(y);}console.log(i+':'+l);}
 // 9:2,5,7,10,13,15,18
+@see Tabular_list_leap()
+
 
 → Myanmar year is a leap year if:
 (7*year+9).mod(19)<7
@@ -2954,7 +2956,7 @@ var nagahle_direction = 'အနောက်,မြောက်,အရှေ့,�
 
 /*
 
-
+// confirm
 CeL.run('https://googledrive.com/host/0B7WW8_JrpDFXTHRHbUJkV0FBdFU/mc.js');
 
 for(var y=-100;y<2000;y++){var d=chk_my(y);CeL.assert([d.myt,CeL.Myanmar_Date.year_data(y).type],'t'+y);d=j2w(d.tg1,1);CeL.assert([d.y+'/'+d.m+'/'+d.d,CeL.Myanmar_Date(y).format('%Y/%m/%d')],y);}

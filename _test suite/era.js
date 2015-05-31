@@ -89,6 +89,7 @@ function initializer() {
 						CeL.warn('Invalid type: [' + type + ']');
 				// for 月亮視黃經
 				CeL.LEA406.load_terms('V');
+				CeL.LEA406.load_terms('U');
 			} ], function() {
 				// alias for CeL.gettext, then we can use _('message').
 				_ = CeL.gettext;
@@ -245,6 +246,7 @@ default_column = [
 			href : 'https://en.wikipedia.org/wiki/Common_Era'
 		} ];
 
+// 承襲中曆。
 auto_add_column.日本 = auto_add_column.한국 = auto_add_column['Việt Nam'] = auto_add_column.中國;
 
 function pin_text(gettext) {
@@ -1943,10 +1945,11 @@ function set_era_by_url_data(era) {
 		return;
 	set_era_by_url_data_running = true;
 
-	if (typeof era === 'string')
+	if (typeof era === 'string') {
 		location.hash = '#era=' + era;
+		document.title = _('紀年 %1', era);
 
-	else {
+	} else {
 
 		var column, items,
 		// 直接處理 hash / search。
@@ -1983,11 +1986,12 @@ function set_era_by_url_data(era) {
 			});
 		}
 
-		if (era)
+		if (era) {
+			document.title = _('紀年 %1', era);
 			click_title_as_era.call({
 				title : decodeURIComponent(era)
 			});
-		else if (column && era_input_object.setValue())
+		} else if (column && era_input_object.setValue())
 			translate_era();
 		else if (items = data.hierarchy)
 			draw_era(Array.isArray(items) ? items : items.split(/[,\/]/));
@@ -2433,20 +2437,20 @@ function affairs() {
 			});
 		} ],
 
-		JDN : [
-				{
-					a : {
-						T : 'JDN'
-					},
-					R : _('Julian Day Number')
-							+ '\n以 UTC 相同日期當天正午12時為準。\n因此 2000/1/1 轉為 2451545。',
-					href : 'https://en.wikipedia.org/wiki/Julian_Day_Number'
-				},
-				function(date) {
-					var date_String = CeL.Date_to_JDN(date.offseted_value(0))
-							+ (date.精 === '年' ? '–' : '');
-					return date_String;
-				} ],
+		JDN : [ {
+			a : {
+				T : 'JDN'
+			},
+			R : _('Julian Day Number')
+
+			+ '\n以 UTC 相同日期當天正午12時為準。\n因此 2000/1/1 轉為 2451545。',
+			href : 'https://en.wikipedia.org/wiki/Julian_Day_Number'
+		}, function(date) {
+			var date_String = CeL.Date_to_JDN(date.offseted_value(0))
+			//
+			+ (date.精 === '年' ? '–' : '');
+			return date_String;
+		} ],
 
 		JD : [ {
 			a : {
@@ -2548,9 +2552,17 @@ function affairs() {
 		// --------------------------------------------------------------------
 		// 天文計算 astronomical calculations
 		astronomy : [ '天文計算 astronomical calculations',
-				[ '因為採用了完整的 LEA-406' + CeL.LEA406.default_type
+				[ 'Because using complete ' + CeL.LEA406.default_type
 				//
-				+ ' 來計算月亮位置，關於月亮位置之項目，例如黃曆，每次執行常需耗費數秒至一兩分鐘，敬請見諒。您尚可可', {
+				, ' to calculate the position of moon,'
+				//			
+				+ ' it often takes seconds to minutes to display.', {
+					br : null
+				}, '因為採用了完整的 LEA-406'
+				//
+				+ CeL.LEA406.default_type + ' 來計算月亮位置，關於月亮位置之項目，例如黃曆，'
+				//
+				+ '每次執行常需耗費數秒至一兩分鐘，敬請見諒。您尚可', {
 					a : '採用 LEA-406'
 					//
 					+ (CeL.LEA406.default_type === 'a' ? 'b' : 'a'),
@@ -2567,29 +2579,30 @@ function affairs() {
 					em : '隨即重新整理'
 				}, '，以更改設定！）' ] ],
 
-		precession : [
-				{
-					a : {
-						T : 'general precession'
-					},
-					R : '紀元使用當地、當日零時綜合歲差，指赤道歲差加上黃道歲差 (Table B.1) 的綜合效果。\nKai Tang (2015).'
-							//
-							+ ' A long time span relativistic precession model of the Earth.\n'
-							//
-							+ '在J2000.0的时候与P03岁差差大概几个角秒，主要由于周期拟合的时候，很难保证长期与短期同时精度很高。',
-					href : 'https://en.wikipedia.org/wiki/Axial_precession'
-				}, function(date) {
-					if (/* date.準 || */date.精)
-						return;
+		precession : [ {
+			a : {
+				T : 'general precession'
+			},
+			R : '紀元使用當地、當日零時綜合歲差，指赤道歲差加上黃道歲差 (Table B.1) 的綜合效果。'
+			//
+			+ '\nKai Tang (2015).'
+			//
+			+ ' A long time span relativistic precession model of the Earth.'
+			//
+			+ '\n在J2000.0的时候与P03岁差差大概几个角秒，主要由于周期拟合的时候，很难保证长期与短期同时精度很高。',
+			href : 'https://en.wikipedia.org/wiki/Axial_precession'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
 
-					var precession = CeL.precession(
-					//
-					CeL.TT(new Date(date.offseted_value())));
-					return [ CeL.show_degrees(precession[0], 2), {
-						b : ', ',
-						S : 'color:#e60;'
-					}, CeL.show_degrees(precession[1], 2) ];
-				} ],
+			var precession = CeL.precession(
+			//
+			CeL.TT(new Date(date.offseted_value())));
+			return [ CeL.show_degrees(precession[0], 2), {
+				b : ', ',
+				S : 'color:#e60;'
+			}, CeL.show_degrees(precession[1], 2) ];
+		} ],
 
 		solarterms : [ {
 			a : {
@@ -2640,11 +2653,11 @@ function affairs() {
 				// apparent longitude of the Sun
 				T : "Sun's apparent longitude"
 			},
-			R : '紀元使用當地、當日零時，太陽的視黃經\n'
+			R : '紀元使用當地、當日零時，太陽的視黃經。\n'
 			//
-			+ 'the apparent geocentric celestial longitude of the Sun.\n'
+			+ 'the apparent geocentric celestial longitude of the Sun.'
 			//
-			+ 'Using VSOP87D.ear.',
+			+ '\nUsing VSOP87D.ear.',
 			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -2659,17 +2672,15 @@ function affairs() {
 			};
 		} ],
 
-		moon_apparent : [ {
+		moon_longitude : [ {
 			a : {
-				// Moon's apparent position
-				// apparent longitude of the Moon
-				T : "Moon's apparent longitude"
+				T : 'Moon longitude'
 			},
-			R : '紀元使用當地、當日零時，月亮的視黃經\n'
+			R : '紀元使用當地、當日零時，月亮的黃經。\n'
 			//
-			+ 'the apparent geocentric celestial longitude of the Moon.\n'
+			+ 'the ecliptic longitude of the Moon.'
 			//
-			+ 'Using LEA-406.',
+			+ '\nUsing LEA-406.',
 			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -2689,10 +2700,38 @@ function affairs() {
 			};
 		} ],
 
+		moon_latitude : [ {
+			a : {
+				T : 'Moon latitude'
+			},
+			R : '紀元使用當地、當日零時，月亮的黃緯。\n'
+			//
+			+ 'the ecliptic latitude of the Moon.\n'
+			//
+			+ 'Using LEA-406.',
+			href : 'https://en.wikipedia.org/wiki/Ecliptic_coordinate_system'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
+
+			var JD = CeL.TT(new Date(date.offseted_value())),
+			//
+			U = CeL.lunar_coordinate(JD).U;
+
+			return {
+				span : isNaN(U) ? data_load_message
+				//
+				: CeL.show_degrees(U, 0)
+				// &nbsp;
+				.replace(/ /g, CeL.DOM.NBSP),
+				C : 'monospaced'
+			};
+		} ],
+
 		moon_sun : [ {
 			a : {
 				// 月日視黃經差角
-				T : "月日視黃經差"
+				T : '月日視黃經差'
 			},
 			R : '紀元使用當地、當日零時，月亮的視黃經-太陽的視黃經\n'
 			//
@@ -2735,10 +2774,10 @@ function affairs() {
 			var JD = CeL.TT(new Date(date.offseted_value())),
 			//
 			phase = CeL.lunar_phase_of_JD(JD, {
-				time : true,
+				eclipse : true,
 				晦 : '晦日'
 			});
-			if (Array.isArray(phase))
+			if (Array.isArray(phase)) {
 				phase = [ {
 					b : {
 						T : phase[0]
@@ -2747,8 +2786,13 @@ function affairs() {
 					parser : 'CE',
 					// format : '%Y/%m/%d %H:%M:%S'
 					format : '%H:%M:%S'
-				}) ];
-			else if (phase)
+				}), phase[2] ? [ ' ', {
+					T : (phase[0] === '朔' ? '日' : '月') + '食',
+					R : _('Moon latitude') + ': '
+					//
+					+ CeL.show_degrees(phase[2], 2)
+				}, '?' ] : '' ];
+			} else if (phase)
 				phase = {
 					b : {
 						T : phase
@@ -2832,32 +2876,36 @@ function affairs() {
 			return 年朔日.月名[index] + '月' + (1 + JD - 年朔日[index] | 0) + '日';
 		} ],
 
-		Julian : [
-				{
-					a : {
-						T : 'Julian calendar'
-					},
-					R : 'In fact, proleptic Julian calendar WITHOUT year 0, 不包含0年的外推儒略曆',
-					href : 'https://en.wikipedia.org/wiki/Proleptic_Julian_calendar',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					return date.format({
-						parser : 'Julian',
-						format : date.精 === '年' ? '%Y年' : '%Y/%m/%d'
-					});
-				} ],
+		Julian : [ {
+			a : {
+				T : 'Julian calendar'
+			},
+			R : 'In fact, proleptic Julian calendar WITHOUT year 0,'
+			//
+			+ ' 不包含0年的外推儒略曆',
+			href : 'https://en.wikipedia.org/wiki/Proleptic_Julian_calendar',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return date.format({
+				parser : 'Julian',
+				format : date.精 === '年' ? '%Y年' : '%Y/%m/%d'
+			});
+		} ],
 
-		Gregorian : [
-				{
-					a : {
-						T : 'Gregorian calendar'
-					},
-					R : 'In fact, proleptic Gregorian calendar INCLUDES year 0, 包含0年的外推格里曆',
-					href : 'https://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					return date.format('%Y/%m/%d');
-				} ],
+		Gregorian : [ {
+			a : {
+				T : 'Gregorian calendar'
+			},
+			R : 'In fact, proleptic Gregorian calendar INCLUDES year 0,'
+			//
+			+ ' 包含0年的外推格里曆',
+			href : 'https://en.wikipedia.org/wiki/'
+
+			+ 'Proleptic_Gregorian_calendar',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return date.format('%Y/%m/%d');
+		} ],
 
 		Tabular : [ {
 			a : {
@@ -3281,7 +3329,7 @@ function affairs() {
 				S : 'font-size:.7em;'
 			} : {
 				T : '朔日',
-				R : '實曆每月初一之朔日，非天文朔日！'
+				R : '實曆每月初一之朔日。若欲求天文朔日，請採「黃曆」欄。'
 			};
 		}, function(date) {
 			return /* !date.準 && */!date.精 && date.format({
@@ -3346,31 +3394,36 @@ function affairs() {
 		// http://blog.sina.com.cn/s/blog_3f5d24310100gj7a.html
 		// http://blog.xuite.net/if0037212000/02/snapshot-view/301956963
 		// https://sites.google.com/site/chailiong/home/zgxx/huangli/huandao
-		建除 : [
-				{
-					a : {
-						T : '建除'
-					},
-					R : '中曆曆注、日本の暦注の一つ。(中段十二直)\n建除十二神(十二值位/十二值星/通勝十二建)、血忌等，都被歸入神煞體系。\n交節採天文節氣，非實曆。',
-					href : 'https://zh.wikipedia.org/wiki/%E5%BB%BA%E9%99%A4%E5%8D%81%E4%BA%8C%E7%A5%9E',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					if (/* date.準 || */date.精)
-						return;
+		建除 : [ {
+			a : {
+				T : '建除'
+			},
+			R : '中曆曆注、日本の暦注の一つ。(中段十二直)'
+			//
+			+ '\n建除十二神(十二值位/十二值星/通勝十二建)、血忌等，都被歸入神煞體系。'
+			//
+			+ '\n交節採天文節氣，非實曆。',
+			href : 'https://zh.wikipedia.org/wiki/'
+			//
+			+ '%E5%BB%BA%E9%99%A4%E5%8D%81%E4%BA%8C%E7%A5%9E',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
 
-					var JD = CeL.Date_to_JD(date.offseted_value());
+			var JD = CeL.Date_to_JD(date.offseted_value());
 
-					var index = CeL.stem_branch_index(date)
-					// .5: 清明、立夏之類方為"節"，因此配合節氣序，需添加之 offset。
-					// 添上初始 offset (9) 並保證 index >= 0。
-					// -1e-8: 交節當日即開始疊。因此此處之 offset 實際上算到了當日晚 24時，屬明日，需再回調至當日晚。
-					+ 建除_LIST.length + 9 + .5 - 1e-8
-					// 交節則疊兩值日。採天文節氣，非實曆。
-					// 30 = TURN_TO_DEGREES / (SOLAR_TERMS_NAME / 2)
-					// = 360 / (24 / 2)
-					- CeL.solar_coordinate(JD + 1).apparent / 30 | 0;
-					return 建除_LIST[index % 建除_LIST.length];
-				} ],
+			var index = CeL.stem_branch_index(date)
+			// .5: 清明、立夏之類方為"節"，因此配合節氣序，需添加之 offset。
+			// 添上初始 offset (9) 並保證 index >= 0。
+			// -1e-8: 交節當日即開始疊。因此此處之 offset 實際上算到了當日晚 24時，屬明日，需再回調至當日晚。
+			+ 建除_LIST.length + 9 + .5 - 1e-8
+			// 交節則疊兩值日。採天文節氣，非實曆。
+			// 30 = TURN_TO_DEGREES / (SOLAR_TERMS_NAME / 2)
+			// = 360 / (24 / 2)
+			- CeL.solar_coordinate(JD + 1).apparent / 30 | 0;
+			return 建除_LIST[index % 建除_LIST.length];
+		} ],
 
 		反支 : [ {
 			a : {
@@ -3464,7 +3517,9 @@ function affairs() {
 			a : {
 				T : '二十八宿'
 			},
-			R : '中曆曆注、日本の暦注の一つ。又稱二十八舍或二十八星。',
+			R : '中曆曆注、日本の暦注の一つ。又稱二十八舍或二十八星。'
+			//
+			+ '28 Mansions, 28 asterisms.',
 			href : 'https://zh.wikipedia.org/wiki/'
 			//
 			+ '%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
@@ -3477,7 +3532,9 @@ function affairs() {
 			a : {
 				T : '二十七宿'
 			},
-			R : '日本の暦注の一つ\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！',
+			R : '日本の暦注の一つ\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！'
+			//
+			+ '27 Mansions, 27 asterisms.',
 			href : 'https://ja.wikipedia.org/wiki/'
 			//
 			+ '%E4%BA%8C%E5%8D%81%E4%B8%83%E5%AE%BF',

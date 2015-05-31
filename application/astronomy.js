@@ -308,12 +308,31 @@ if (typeof CeL === 'function')
 			 */
 			AU_LIGHT_TIME = AU_TO_METERS / CELERITAS / ONE_DAY_SECONDS,
 			/**
-			 * 地月距離 in km (半長軸 384,399公里, NOT 平均距離)。
+			 * 地月距離 in km (公里)。
+			 * 
+			 * 平均距離 mean distance: 384400 km<br />
+			 * 半長軸 Semi-major axis: 384748 km<br />
 			 * 
 			 * @see https://en.wikipedia.org/wiki/Lunar_distance_%28astronomy%29
+			 * @see http://en.wikipedia.org/wiki/Orbit_of_the_Moon
 			 * @see http://solarsystem.nasa.gov/planets/profile.cfm?Display=Facts&Object=Moon
 			 */
 			LUNAR_DISTANCE_KM = 384400,
+			/**
+			 * 地球半徑 in km (公里)。地球半徑6,357km到6,378km。平均半徑6371km。
+			 * 
+			 * 平均半徑 Earth mean radius: 6371.0 km<br />
+			 * Equatorial radius: 6378.1 km<br />
+			 * 
+			 * @see http://en.wikipedia.org/wiki/Earth
+			 */
+			TERRA_RADIUS_KM = 6371,
+			/**
+			 * 月球半徑 in km (公里)。
+			 * 
+			 * @see http://en.wikipedia.org/wiki/Earth
+			 */
+			LUNAR_RADIUS_KM = 6371,
 			/**
 			 * 每年 2 分點 + 2 至點。
 			 * 
@@ -2466,8 +2485,8 @@ if (typeof CeL === 'function')
 								 */
 								// coordinates.R in km
 								var r = coordinates.R || LUNAR_DISTANCE_KM;
-								// 地球半徑6,357km到6,378km。平均半徑6371km。
-								r -= 6371;
+								// 地球半徑。
+								r -= TERRA_RADIUS_KM;
 								// 1000: 1 km = 1000 m (CELERITAS in m/s)
 								light_time = -r * 1000 / CELERITAS
 										* TURN_TO_DEGREES / ONE_DAY_SECONDS;
@@ -2505,7 +2524,7 @@ if (typeof CeL === 'function')
 						// V, U in arcseconds
 						// 修正章動 nutation。
 						coordinates.U += n[1] / DEGREES_TO_RADIANS;
-						coordinates.U = normalize_degrees(coordinates.U);
+						coordinates.U = normalize_degrees(coordinates.U, true);
 					}
 				}
 
@@ -2626,7 +2645,11 @@ if (typeof CeL === 'function')
 				// 利用平月相的時間，以取得內插法初始近似值。
 				JD = mean_lunar_phase(year_month, phase, options),
 				// 計算月日視黃經差。
-				angel = degrees < 90 ? function(_JD) {
+				angel = // options
+				//
+				// && typeof options.angel === 'function' ? options.angel :
+				//
+				degrees < 90 ? function(_JD) {
 					var d = lunar_phase_angel_of_JD(_JD || JD, true);
 					if (d > TURN_TO_DEGREES - 90)
 						d -= TURN_TO_DEGREES;
@@ -2698,7 +2721,7 @@ if (typeof CeL === 'function')
 						+ show_degrees(angel()), 2);
 
 				// apply ΔT: TT → UT.
-				return /* options.TT ? JD : */UT_of(JD);
+				return options && options.TT ? JD : UT_of(JD);
 			}
 
 			// phase: 0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
@@ -2765,6 +2788,7 @@ if (typeof CeL === 'function')
 						lunar_phase_cache[year] = phase_data = [];
 
 					if (phase_data = phase_data[phase])
+						// has cache. using clone.
 						phase_data = phase_data.slice();
 					else {
 						phase_data = [];
@@ -2793,7 +2817,7 @@ if (typeof CeL === 'function')
 						}
 						if (options.mean === false)
 							lunar_phase_cache[year][phase]
-							//
+							// using clone.
 							= phase_data.slice();
 					}
 
@@ -2816,7 +2840,8 @@ if (typeof CeL === 'function')
 			 * get lunar phase of JD. 取得 JD 之月相。
 			 * 
 			 * @param {Number}JD
-			 *            Julian date (JD of 天文計算用時間 TT)
+			 *            Julian date of local midnight (00:00) (JD of 天文計算用時間
+			 *            TT)
 			 * @param {Object}[options]
 			 *            options 設定特殊功能:<br />
 			 *            {Boolean}options.time: 取得月相時，亦取得時刻。<br />
@@ -2835,18 +2860,83 @@ if (typeof CeL === 'function')
 
 				var _phase = Math.floor(lunar_phase_angel_of_JD(JD) / 90);
 				if (_phase !== phase) {
+					// JD, JD+1 有不同月相，表示這天中改變了月相。
 					// phase: -2–1
 					if (phase < 0)
 						phase += 4;
+					// phase: 0–3
 					var phase_shown = options.index ? phase
 							: LUNAR_PHASE_NAME[phase];
-					if (options && options.time)
-						return [ phase_shown, accurate_lunar_phase(
-						//
-						Julian_century(JD) * 100 + 2000, phase, {
-							JD : JD,
-							nearest : true
-						}) ];
+					if (options && (options.time || options.eclipse)) {
+						var TT = accurate_lunar_phase(
+								Julian_century(JD) * 100 + 2000, phase, {
+									JD : JD,
+									TT : true,
+									nearest : true
+								});
+						phase_shown = [ phase_shown, UT_of(TT) ];
+						/**
+						 * @see
+						 * 
+						 * Jean Meeus, Astronomical Algorithms, 2nd Edition.<br />
+						 * 《天文算法》 chapter 54 p.380.
+						 * 
+						 * If F differs from the nearest multiple of 180° by
+						 * less than 13.9 degrees, then there is certainly an
+						 * eclipse; ifthe difference is larger than 21°, there
+						 * is no eclipse;
+						 * 
+						 * Use can be made of the following rule: there is no
+						 * eclipse if |sin F| > 0.36.
+						 */
+						if (options && options.eclipse
+						// 0:朔才可能日食, 2:望才可能月食
+						&& (phase === 0 || phase === 2)) {
+							// TODO: 以下方法有誤。
+							// 地面某點緯度 latitude
+							var latitude = 45,
+							// 距離最大食分應在五分左右，十分內。
+							/**
+							 * 計算月亮(月心)的緯度→與黃道距離(度)。
+							 */
+							d = lunar_coordinate(TT).U,
+							/**
+							 * 計算月面視半徑 (度)。
+							 */
+							// 地心視半徑
+							r = Math.asin(LUNAR_RADIUS_KM / LUNAR_DISTANCE_KM)
+							// → 以地面某點為中心的座標中看到的月亮視半徑
+							* (1 + Math.sin(latitude * DEGREES_TO_RADIANS)
+							//
+							* TERRA_RADIUS_KM / LUNAR_DISTANCE_KM)
+							// → 度
+							/ DEGREES_TO_RADIANS,
+							/**
+							 * calculate range (度)<br />
+							 */
+							// 日食: 計算日面視半徑 (度)。
+							range = 959.63 / DEGREES_TO_ARCSECONDS;
+							// 月食: 計算地球本影之半徑, Earth's umbra radius.
+							if (phase === 2) {
+								// 太陽赤道地平視差
+								var Solar_parallax
+								// https://en.wikipedia.org/wiki/Parallax#Solar_parallax
+								// 1: distance in AU
+								= 8.794143 / DEGREES_TO_ARCSECONDS / 1,
+								// 月球赤道地平視差
+								// http://farside.ph.utexas.edu/Books/Syntaxis/Almagest/node42.html
+								Lunar_parallax = 41 / DEGREES_TO_ARCSECONDS;
+								// http://eclipse.gsfc.nasa.gov/LEcat5/shadow.html
+								range = 1.01 * Lunar_parallax + Solar_parallax
+										- range;
+							}
+							if (Math.abs(d) < range + r)
+								// 遮到了。
+								// eclipse conjunction
+								// push 黃經衝 or 合(有相同的黃經)時之月黃緯
+								phase_shown.push(d);
+						}
+					}
 					return phase_shown;
 				}
 

@@ -746,6 +746,7 @@ _.Julian_shift_days = Julian_shift_days;
  * @returns {Date} new Date
  * 
  * @see http://en.wikipedia.org/wiki/Old_Style_and_New_Style_dates
+ * @see http://eclipse.gsfc.nasa.gov/SEhelp/julian.html
  */
 function Julian_String_to_Date(date_string, minute_offset, options) {
 	if (!library_namespace.is_Object(options))

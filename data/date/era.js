@@ -4925,6 +4925,10 @@ if (typeof CeL === 'function')
 					era_key_list = [];
 					for ( var key in search_index)
 						era_key_list.push(key);
+					library_namespace.debug(
+					//
+					'初始化 search pattern: ' + era_key_list.length + ' era keys',
+							3);
 
 					// 排序:長的 key 排前面。
 					era_key_list.sort(function(key_1, key_2) {
@@ -5428,9 +5432,14 @@ if (typeof CeL === 'function')
 							delete last_era_data.大月;
 					}
 
-					// 為使後來的能利用此新加入紀年，重新設定 era_search_pattern。
-					if (last_era_data.參照用)
+					if (last_era_data.參照用) {
+						library_namespace.debug(
+						//
+						'為使後來的操作能利用此新加入紀年 [' + last_era_data
+						//
+						+ ']，重新設定 era_search_pattern。', 3);
 						era_search_pattern = null;
+					}
 
 					if (options.extract_only)
 						return;
