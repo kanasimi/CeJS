@@ -1119,7 +1119,7 @@ get_random_prime.get_different_number_set = function(count, till, GCD_till) {
 // Interpolation
 // equation: mapping function
 // TODO: 牛頓法, options.derivative
-// x0, x1: 內插法(線性插值)上下限，初始近似值。
+// x0, x1: 內插法(線性插值)上下限，設定初始近似值。
 // y: 目標值。 get (equation^-1)(y)
 function secant_method(equation, x0, x1, y, options) {
 	// default error
@@ -1154,8 +1154,8 @@ function secant_method(equation, x0, x1, y, options) {
 	return x2;
 }
 
-//secant_method(function(x) { return x * x; }, 3, 5, 15)
-//secant_method(function(x) { return x * x * x - 8; }, 5, 4)
+//CeL.secant_method(function(x) { return x * x; }, 3, 5, 15)
+//CeL.secant_method(function(x) { return x * x * x - 8; }, 5, 4)
 
 _.secant_method = secant_method;
 
@@ -1212,8 +1212,8 @@ function find_root(equation, x0, x1, y, options) {
 }
 
 
-//find_root(function(x) { return x * x; }, 3, 5, 15)
-//find_root(function(x) { return x * x * x - 8; }, 5, 4)
+//CeL.find_root(function(x) { return x * x; }, 3, 5, 15)
+//CeL.find_root(function(x) { return x * x * x - 8; }, 5, 4)
 
 _.find_root = find_root;
 

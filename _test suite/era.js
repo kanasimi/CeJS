@@ -3113,6 +3113,32 @@ function affairs() {
 			});
 		} ],
 
+		Hindu : [ {
+			a : {
+				T : 'Hindu calendar',
+			},
+			R : 'Hindu calendar',
+			href : 'https://en.wikipedia.org/wiki/Hindu_calendar'
+		}, function(date) {
+			if(date.精 === '年')
+			return  date.to_Hindu({
+				era:'Saka',
+				format : 'serial'
+			})[0] + '年';
+
+			var Hindu_date= date.to_Hindu({
+				era:'Saka',
+				format : 'serial',
+				leap:['閏','','缺']
+			});
+			return Hindu_date.slice(0, 3).join('/')
+			//
+			//+ '; ' + date.to_Hindu({era:'Saka'})
+			+' Nakshatra '+Hindu_date.Nakshatra;
+		} ],
+
+
+
 		Indian_national : [ {
 			a : {
 				T : '印度國定曆'

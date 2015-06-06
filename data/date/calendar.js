@@ -2996,6 +2996,7 @@ Myanmar_Date.test = new_tester(Date_to_Myanmar, Myanmar_Date, {
 /*
 基本計算參照來源:
 http://www.cc.kyoto-su.ac.jp/~yanom/pancanga/
+Based on Pancanga (version 3.14) with small changes.
 
 S. P. Bhattacharyya, Ahargana in Hindu Astronomy
 http://insa.nic.in/writereaddata/UpLoadedFiles/IJHS/Vol04_1And2_14_SPBhattacharyya.pdf
@@ -3034,7 +3035,6 @@ http://www.ima.umn.edu/~miller/Nelsonlecture1.pdf
 
 
 
-
 // copy from application.astronomy
 var
 /**
@@ -3052,6 +3052,7 @@ TURN_TO_DEGREES = 360,
  * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
  */
 DEGREES_TO_RADIANS = 2 * Math.PI / TURN_TO_DEGREES,
+
 // $PlanetCircumm{}
 Hindu_circum = {
 	sun : 13 + 50 / 60,
@@ -3065,7 +3066,7 @@ Hindu_apogee = {
 Hindu_constants = library_namespace.null_Object();
 
 // https://en.wikipedia.org/wiki/Surya_Siddhanta
-// based on SuryaSiddhanta (AD 1000ca).
+// based on SuryaSiddhanta (c. 1200).
 // Saura, HIL, p.15
 Hindu_constants.Surya_Siddhanta = {
 	// revolutions in a mahayuga
@@ -3090,7 +3091,7 @@ Hindu_constants.Surya_Siddhanta = {
 };
 
 // https://en.wikipedia.org/wiki/Var%C4%81hamihira#Pancha-Siddhantika
-// based on older constants in Pancasiddhantika (AD 505).
+// based on older constants in Pancasiddhantika (c. 575).
 // Latadeva/Ardharatrika, HIL, p.15
 Hindu_constants.Pancha_Siddhantika = {
 	star : 1582237800,
@@ -3107,17 +3108,39 @@ Hindu_constants.Pancha_Siddhantika = {
 	north_lunar_node : -232226
 };
 
-var Hindu_default_system = Hindu_constants.Surya_Siddhanta;
+// It is partly based on Vedanga Jyotisha, which itself might reflect traditions going back to the Indian Iron Age (around 700 BCE).
+var Hindu_default_system = Hindu_constants.Surya_Siddhanta,
+// https://en.wikipedia.org/wiki/Ujjain
+Hindu_day_offset = 75.777222/TURN_TO_DEGREES,
+// Month names based on the rāshi (Zodiac sign) into which the sun transits within a lunar month
+// https://en.wikipedia.org/wiki/Hindu_zodiac
+Hindu_Zodiac_signs=12,
+Hindu_Zodiac_angle=TURN_TO_DEGREES/Hindu_Zodiac_signs,
 
+Hindu_month_count=Hindu_Zodiac_signs,
+Hindu_month_angle=TURN_TO_DEGREES/Hindu_month_count,
+
+Hindu_year_offset={
+	Saka:3179,
+	Vikrama:3179-135
+};
+
+
+//Hindu_Date.constants = Hindu_constants;
 
 (function() {
 	for ( var system in Hindu_constants) {
 		system = Hindu_constants[system];
 		var civil_days = system.star - system.sun;
+		// assert: 0 < system[object]: 星體每天移動的角度。
 		// so we can use ((days * system[object]))
-		// to get the mean longitude of the object in the Indian astronomy
+		// to get the mean longitude of the object in the Indian astronomy.
 		for ( var object in system)
 			system[object] *= TURN_TO_DEGREES / civil_days;
+		// cache for Hindu_Date.conjunction()
+		system.conjunction = library_namespace.null_Object();
+		system.moon_sun=1/(system.moon-system.sun);
+		system.moon_days=1/system.moon_sun/TURN_TO_DEGREES;
 	}
 
 	for ( var object in Hindu_circum)
@@ -3140,34 +3163,80 @@ Like Ptolemy, Hindu astronomers used epicycles (small circular motions within th
 */
 Hindu_Date.longitude_correction = function(circum, argument) {
 	// circum: Hindu_circum[object]
-	Math.asin(circum * Math.sin(argument * DEGREES_TO_RADIANS))
+	return Math.asin(circum * Math.sin(argument * DEGREES_TO_RADIANS))
 			/ DEGREES_TO_RADIANS;
 };
 
-// the true longitudes of the Sun and Moon
-// true longitude of Indian astronomy
-Hindu_Date.true_longitude = function(object, days,system) {
-	var mean_longitude = days*system[object];
-	if (object==='sun'){
-		// mean solar longitude → true solar longitude
-		return mean_longitude - Hindu_Date.longitude_correction(Hindu_circum.sun, mean_longitude - Hindu_apogee.sun);
+// the true longitudes of Sun in the Indian astronomy
+//sub get_tslong
+Hindu_Date.true_solar_longitude = function(days, system) {
+	var mean_longitude = days * system.sun;
+	// mean solar longitude → true solar longitude
+	return mean_longitude
+			- Hindu_Date.longitude_correction(Hindu_circum.sun,
+					mean_longitude - Hindu_apogee.sun);
+};
+
+// the true longitudes of Moon in the Indian astronomy
+//sub get_tllong
+Hindu_Date.true_lunar_longitude = function(days, system) {
+	var mean_longitude = days * system.moon;
+	// mean lunar longitude → true lunar longitude
+	return mean_longitude
+			- Hindu_Date.longitude_correction(Hindu_circum.moon,
+					mean_longitude - days * system.moon_apogee - TURN_TO_DEGREES/4);
+};
+
+
+Hindu_Date.zodiac_sign = function(longitude){
+	return longitude.mod(TURN_TO_DEGREES)/Hindu_Zodiac_angle|0;
+};
+
+
+//sub get_conj
+Hindu_Date.conjunction = function(days, system, angle, next) {
+	// 設定初始近似值。
+	if(next)
+		days+=(TURN_TO_DEGREES-angle)*system.moon_sun;
+	else
+		days-=angle*system.moon_sun;
+
+	//使用 cache 約可省一半時間。
+	var index=Math.round(days*system.moon_days);
+	if(index in system.conjunction){
+		return system.conjunction[index];
 	}
 
-	if (object==='moon'){
-		// mean lunar longitude → true lunar longitude
-		return mean_longitude - Hindu_Date.longitude_correction(Hindu_circum.moon, mean_longitude - days*system.candrocca - 90);
-	}
+	//console.log('count ['+index+']:'+days);
+	var longitude;
+	days= library_namespace.find_root(function(days){
+		longitude=Hindu_Date.true_solar_longitude(days, system);
+		angle=(Hindu_Date.true_lunar_longitude(days, system) - longitude)%TURN_TO_DEGREES;
+		return angle<-TURN_TO_DEGREES/2?angle+TURN_TO_DEGREES:angle;
+	}, days,days+1);
 
-	//TODO: other objects
+	return system.conjunction[index]=[days,longitude,Hindu_Date.zodiac_sign(longitude)];
+	//return [days,longitude];
 };
 
 
 function Hindu_Date(year, month, date, options) {
+	;
 }
 
 
-// TODO
+_.Hindu_Date = Hindu_Date;
+
+
 function Date_to_Hindu(date, options) {
+	// 前置處理。
+	if (!library_namespace.is_Object(options))
+		options = library_namespace.null_Object();
+
+	// $year/$month/$day → $JulianDay
+	// → $ahar, $mllong, $mslong, $tllong, $tslong, $tithi, $clong, $nclong
+	// → $YearSaka|$YearVikrama/$adhimasa $masa_num/$sukla_krsna $tithi_day
+
 	// Kali-ahargana, civil days
 	// Ahargana: Heap of days, sum of days, day count, 紀元積日數
 	// http://www.indiadivine.org/content/topic/1445853-calendar/
@@ -3176,42 +3245,62 @@ function Date_to_Hindu(date, options) {
 	// In Sanskrit 'ahoratra' means one full day and 'gana' means count. Hence, the Ahargana on any given day stands for the number of lunar days that have elapsed starting from an epoch.
 	// http://www.ibiblio.org/sripedia/oppiliappan/archives/jun05/msg00030.html
 	// 6, 6, 2005, Monday has been the 1865063rd day(5106.4 year) in Kali Yuga (Kali-ahargana: 1865063)
-	var days = (date - Kali_epoch) / ONE_DAY_LENGTH_VALUE;
+	var days = (date - Kali_epoch) / ONE_DAY_LENGTH_VALUE
+	// .25: Day begins at sunrise.
+	+ .25;
 
-	// $year/$month/$day → $JulianDay
-	// → $ahar, $mllong, $mslong, $tllong, $tslong, $tithi, $clong, $nclong
-	// → $YearSaka|$YearVikrama/$adhimasa $masa_num/$sukla_krsna $tithi_day
+	//後面的演算基於在 Ujjain 的天文觀測，因此需要轉換 local days 至 Ujjain 對應的日數。
+	if(!isNaN(options.minute_offset))
+		//desantara
+		days+=Hindu_day_offset-options.minute_offset/60/24;
 
-	var system = options && options.system;
-	system = system && Hindu_constants[system]
-	|| Hindu_default_system;
+	var system = options.system && Hindu_constants[options.system]|| Hindu_default_system,
+	//
+	true_lunar_longitude=Hindu_Date.true_lunar_longitude(days, system).mod(TURN_TO_DEGREES),
+	//
+	true_solar_longitude = Hindu_Date.true_solar_longitude(days, system).mod(TURN_TO_DEGREES),
+	// 日月夾角 angle in degrees: 0~TURN_TO_DEGREES
+	angle = (true_lunar_longitude - true_solar_longitude).mod(TURN_TO_DEGREES),
+	// 上一次日月合朔時的 longitude
+	conjunction = Hindu_Date.conjunction(days, system, angle)[2],
+	// 下一次日月合朔時的 longitude
+	next_conjunction = Hindu_Date.conjunction(days, system, angle, true)[2];
 
-	var true_solar_longitude = Hindu_Date.true_longitude(
-			'sun', days, system),
 	// https://en.wikipedia.org/wiki/Tithi
 	// reckon tithi: the longitudinal angle between the Moon and the Sun to increase by 12°.
-	// 相當於中曆日期，或月齡。
-	tithi = (true_solar_longitude - Hindu_Date.true_longitude('moon', days, system))
-			.mod(TURN_TO_DEGREES) / 12;
-	// 上一次日月合朔的 true solar longitude
-	$clong = get_clong(days, $tithi);
-	// 下一次日月合朔的 true solar longitude
-	$nclong = get_nclong(days, $tithi);
+	// tithi 相當於中曆日期，或月齡。
+	// When a new moon occurs before sunrise on a day, that day is said to be the first day of the lunar month.
+	date= angle / Hindu_month_count|0;
 
-	date = Math.ceil($tithi);
-
-	// $masa_num: month
-	$masa_num = ($tslong / 30|0) % 12;
-	if ((($clong / 30|0) % 12) === $masa_num)
-		$masa_num++;
-	$masa_num = $masa_num.mod(12);
-
-	$YearKali = (days + (4 - $masa_num) * 30) * $YugaRotation['sun'] / $YugaCivilDays;
 	// adhika means "extra".
 	// Kṣaya means "loss". (Ksaya)
-	$adhimasa = ($clong / 30 | 0) === ($nclong / 30 | 0) ? 'leap'
-			: '';
+	var leap = (next_conjunction - conjunction).mod(Hindu_Zodiac_signs);
 
+	// $masa_num: month
+	//月分名以當月月初之後首個太陽進入的 Rāśi (zodiac sign) 為準。
+	var month = (conjunction+1).mod(Hindu_Zodiac_signs);
+
+	//$YearKali
+	//以太陽實際進入 Meṣa 所在月份分年，當月為新年第一月。
+	// 當在年初年尾時，若判別已經過或將進入 Meṣa，特別加點數字以當作下一年。
+	var year = Math.floor((month < 2 ? days + 60 : days) * system.sun / TURN_TO_DEGREES);
+	if(options.era in Hindu_year_offset)
+		year -=Hindu_year_offset[options.era];
+
+	date=[year,month+1,date+1];
+	//month type. e.g., ['leap','','loss']
+	// Adhika Māsa (Adhika or "extra"), nija ("original") or Śuddha ("unmixed"), Kṣaya-Māsa (Ksaya or "loss")
+	date.leap=leap;
+	if(options.leap){
+		if(leap>1)
+			date[1]+='-'+(date[1]+1);
+		date[1]=options.leap[leap]+date[1];
+	}
+
+	// Nakshatra (Sanskrit: नक्षत्र, IAST: Nakṣatra) $naksatra
+	date.Nakshatra=true_lunar_longitude * 27 / TURN_TO_DEGREES|0;
+
+	return date;
 }
 
 
@@ -4522,6 +4611,7 @@ library_namespace.set_method(Date.prototype, {
 				/ ONE_DAY_LENGTH_VALUE | 0, options);
 	},
 	to_Myanmar : set_bind(Date_to_Myanmar),
+	to_Hindu : set_bind(Date_to_Hindu),
 	to_Indian_national : set_bind(Date_to_Indian_national),
 	to_Thai : set_bind(Date_to_Thai),
 	to_Bahai : set_bind(Date_to_Bahai),
