@@ -191,8 +191,8 @@ if (false) {
 if (typeof CeL === 'function')
 	CeL.run({
 		name : 'application.astronomy',
-		//
-		require : 'data.code.compatibility.',
+		// data.math.find_root
+		require : 'data.code.compatibility.|data.math.',
 
 		code : function(library_namespace) {
 
@@ -1519,7 +1519,7 @@ if (typeof CeL === 'function')
 				if (degrees % EQUINOX_SOLSTICE_DEGREES > 0)
 					JD += ((index === 3 ? equinox(year + 1, 0) : equinox(year,
 							index + 1)) - JD)
-							// 以內插法取得近似值。
+							// 以內插法(線性插值)取得近似值。
 							* (degrees - index * EQUINOX_SOLSTICE_DEGREES)
 							/ EQUINOX_SOLSTICE_DEGREES;
 
@@ -2622,6 +2622,8 @@ if (typeof CeL === 'function')
 			 * get JD of lunar phase. Using full LEA-406a or LEA-406b model.
 			 * 計算特定月相之時間精準值。可用來計算月相、日月合朔(黑月/新月)、弦、望(滿月，衝)、月食、月齡。
 			 * 
+			 * @deprecated using accurate_lunar_phase()
+			 * 
 			 * @param {Number}year_month
 			 *            帶小數點的年數
 			 * @param {Integer}phase
@@ -2636,7 +2638,9 @@ if (typeof CeL === 'function')
 			 * @see http://homepage3.nifty.com/ayumi_ho/moon1.htm
 			 * @see http://www2s.biglobe.ne.jp/~yoss/moon/moon.html
 			 */
-			function accurate_lunar_phase(year_month, phase, options) {
+			function deprecated_accurate_lunar_phase
+			//
+			(year_month, phase, options) {
 				var up_degrees, low_degrees,
 				// 內插法(線性插值)上下限。
 				up_JD, low_JD,
@@ -2650,6 +2654,7 @@ if (typeof CeL === 'function')
 				// && typeof options.angel === 'function' ? options.angel :
 				//
 				degrees < 90 ? function(_JD) {
+					// window.lunar_count = (window.lunar_count || 0) + 1;
 					var d = lunar_phase_angel_of_JD(_JD || JD, true);
 					if (d > TURN_TO_DEGREES - 90)
 						d -= TURN_TO_DEGREES;
@@ -2719,6 +2724,68 @@ if (typeof CeL === 'function')
 				library_namespace.debug('JD' + JD + ' ('
 						+ library_namespace.JD_to_Date(JD).format('CE') + '): '
 						+ show_degrees(angel()), 2);
+
+				// apply ΔT: TT → UT.
+				return options && options.TT ? JD : UT_of(JD);
+			}
+
+			/**
+			 * get JD of lunar phase. Using full LEA-406a or LEA-406b model.
+			 * 計算特定月相之時間精準值。可用來計算月相、日月合朔(黑月/新月)、弦、望(滿月，衝)、月食、月齡。
+			 * 
+			 * @param {Number}year_month
+			 *            帶小數點的年數
+			 * @param {Integer}phase
+			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
+			 * @param {Object}[options]
+			 *            options 設定特殊功能
+			 * 
+			 * @returns {Number} Julian date (JD of 日常生活時間 UT)
+			 * 
+			 * @see http://koyomi8.com/sub/sunmoon_long.htm
+			 * @see http://eco.mtk.nao.ac.jp/cgi-bin/koyomi/cande/phenom_phase.cgi
+			 * @see http://homepage3.nifty.com/ayumi_ho/moon1.htm
+			 * @see http://www2s.biglobe.ne.jp/~yoss/moon/moon.html
+			 */
+			function accurate_lunar_phase
+			//
+			(year_month, phase, options) {
+				var
+				// 目標角度。
+				degrees = phase * 90,
+				// 利用平月相的時間，以取得內插法初始近似值。
+				JD = mean_lunar_phase(year_month, phase, options),
+				// 計算月日視黃經差。
+				angel = // options
+				//
+				// && typeof options.angel === 'function' ? options.angel :
+				//
+				degrees < 90 ? function(JD) {
+					// window.lunar_count = (window.lunar_count || 0) + 1;
+					var d = lunar_phase_angel_of_JD(JD, true);
+					if (d > TURN_TO_DEGREES - 90)
+						d -= TURN_TO_DEGREES;
+					return d;
+				} : function(JD) {
+					return lunar_phase_angel_of_JD(JD, true);
+				},
+				// 誤差常於2°之內。
+				result_degrees = angel(JD);
+
+				JD = library_namespace.find_root('count' in options ? function(
+						JD) {
+					options.count++;
+					return angel(JD);
+				} : angel,
+				// / 12: 月日視黃經差每日必於 12°–13°之內。
+				// 因此每度耗時必小於 1/12 日。此處取最大值。
+				JD - (result_degrees - degrees) / 12, JD, degrees, {
+					y1 : result_degrees
+				});
+
+				library_namespace.debug('JD' + JD + ' ('
+						+ library_namespace.JD_to_Date(JD).format('CE') + '): '
+						+ show_degrees(angel(JD)), 2);
 
 				// apply ΔT: TT → UT.
 				return options && options.TT ? JD : UT_of(JD);

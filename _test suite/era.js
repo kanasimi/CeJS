@@ -586,31 +586,31 @@ function show_calendar(era_name) {
 	// , id : 'text_calendar'
 	};
 	if (hidden_column.length > 0) {
-		hidden_column.unshift({
-			div : {
-				T : '全不選',
-				R : 'Remove all columns. 除去所有欄',
-				onclick : function() {
-					for ( var column in selected_column)
-						delete selected_column[column];
-					translate_era();
-				}
-			},
-			C : 'column_select_option_button',
-			S : 'font-size:.7em;'
-		}, {
-			div : {
-				T : pin_text(),
-				R : 'Click to pin / unpin',
-				onclick : function() {
-					pin_column = !pin_column;
-					this.innerHTML = pin_text(true);
-				}
-			},
-			C : 'column_select_option_button'
-		}, ': ');
+		hidden_column.unshift(': ');
 		title = [ {
 			div : [ {
+				div : {
+					T : '全不選',
+					R : 'Remove all columns. 除去所有欄',
+					onclick : function() {
+						for ( var column in selected_column)
+							delete selected_column[column];
+						translate_era();
+					}
+				},
+				C : 'column_select_option_button',
+				S : 'font-size:.7em;'
+			}, {
+				div : {
+					T : pin_text(),
+					R : 'Click to pin / unpin',
+					onclick : function() {
+						pin_column = !pin_column;
+						this.innerHTML = pin_text(true);
+					}
+				},
+				C : 'column_select_option_button'
+			}, {
 				T : '增加此欄',
 				C : 'column_select_button',
 				onclick : function() {
@@ -2552,7 +2552,7 @@ function affairs() {
 		// --------------------------------------------------------------------
 		// 天文計算 astronomical calculations
 		astronomy : [ '天文計算 astronomical calculations',
-				[ 'Because using complete ' + CeL.LEA406.default_type
+				[ 'Because using complete LEA-406' + CeL.LEA406.default_type
 				//
 				, ' to calculate the position of moon,'
 				//			
@@ -2560,9 +2560,9 @@ function affairs() {
 					br : null
 				}, '因為採用了完整的 LEA-406'
 				//
-				+ CeL.LEA406.default_type + ' 來計算月亮位置，關於月亮位置之項目，例如黃曆，'
+				+ CeL.LEA406.default_type + ' 來計算月亮位置，關於月亮位置之項目，例如'
 				//
-				+ '每次執行常需耗費數秒至一兩分鐘，敬請見諒。您尚可', {
+				+ _('夏曆') + '，每次執行常需耗費數秒至一兩分鐘，敬請見諒。您尚可', {
 					a : '採用 LEA-406'
 					//
 					+ (CeL.LEA406.default_type === 'a' ? 'b' : 'a'),
@@ -2838,13 +2838,15 @@ function affairs() {
 		// 曆法 Historical calendar
 		calendar : '計算日期的方法。計算得出，不一定是實暦。',
 
-		lunisolar : [ {
+		夏曆 : [ {
 			a : {
-				T : 'lunisolar'
+				T : '夏曆'
 			},
-			R : 'lunisolar calendar. 計算速度較慢！\n'
+			R : 'traditional Chinese lunisolar calendar.'
 			//
-			+ '計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
+			+ '\n當前使用之農曆/陰曆/夏曆/黃曆曆法. 計算速度較慢！'
+			//
+			+ '\n計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
 			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -3329,7 +3331,7 @@ function affairs() {
 				S : 'font-size:.7em;'
 			} : {
 				T : '朔日',
-				R : '實曆每月初一之朔日。若欲求天文朔日，請採「黃曆」欄。'
+				R : '實曆每月初一之朔日。若欲求天文朔日，請採「' + _('夏曆') + '」欄。'
 			};
 		}, function(date) {
 			return /* !date.準 && */!date.精 && date.format({

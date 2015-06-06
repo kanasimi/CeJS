@@ -19,7 +19,8 @@ CeL.run(
 {
 name : 'data.date.calendar',
 // |application.astronomy.
-require : 'data.code.compatibility.|data.native.set_bind|data.date.String_to_Date|data.date.is_leap_year',
+// data.math.find_root
+require : 'data.code.compatibility.|data.native.set_bind|data.date.String_to_Date|data.date.is_leap_year|data.math.',
 
 code : function(library_namespace) {
 
@@ -2166,6 +2167,9 @@ _.Dai_Date = Dai_Date;
 // 53,433,336 lunar months.
 // 1,593,336 adimath.
 //
+// https://en.wikipedia.org/wiki/Yuga
+// MAHAYUG: 1200*(4*360)+1200*(3*360)+1200*(2*360)+1200*(1*360) = 4320000
+//
 // mean tropical year days  (Thandeikta solar year, ayana hnit)
 // ≈ 365.2587564814814814814814814814814814814814814814814814814814...
 var Myanmar_YEAR_DAYS = 1577917828 / 4320000,
@@ -2183,6 +2187,9 @@ Myanmar_MONTH_DAYS = 1577917828 / 53433336,
 // cf. epact: the moon age when tropical year starts. https://en.wikipedia.org/wiki/Epact
 Myanmar_month_accumulated_days = Myanmar_YEAR_DAYS / 12 - Myanmar_MONTH_DAYS,
 
+// https://en.wikipedia.org/wiki/Kali_Yuga
+// According to the Surya Siddhanta, Kali Yuga began at midnight (00:00) on 18 February 3102 BCE in the proleptic Julian calendar
+//
 // Cool Emerald(2015)
 // The Kali Yuga year number can be obtained by adding 3739 to the Myanmar year.
 // The start of Kali Yuga in the Myanmar calendar is found to be 588465.560139 in Julian date. (MO - 3739 SY)
@@ -2979,6 +2986,234 @@ Myanmar_Date.test = new_tester(Date_to_Myanmar, Myanmar_Date, {
 		&& 12 <= old_month && old_month <= 14;
 	}
 });
+
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// 長曆: Hindu calendar / 印度曆
+// https://en.wikipedia.org/wiki/Hindu_calendar
+
+/*
+基本計算參照來源:
+http://www.cc.kyoto-su.ac.jp/~yanom/pancanga/
+
+S. P. Bhattacharyya, Ahargana in Hindu Astronomy
+http://insa.nic.in/writereaddata/UpLoadedFiles/IJHS/Vol04_1And2_14_SPBhattacharyya.pdf
+
+*/
+
+
+/*
+https://en.wikipedia.org/wiki/Kali_Yuga
+According to the Surya Siddhanta, Kali Yuga began at midnight (00:00) on 18 February 3102 BCE in the proleptic Julian calendar, or 14 January 3102 BC in the proleptic Gregorian calendar.
+
+http://www.new1.dli.ernet.in/data1/upload/insa/INSA_1/2000c4e3-359.pdf
+K. Chandra Hari, HISTORICAL NOTES. Indian Journal of History of Science, 39.3 (2004) 359-364.
+Kali epoch: 18 February 3102 BC 06:00 Ujjain Mean time
+Varahamihira Epoch: Tuesday, Caitra 1,427 Saka (22 March 505 AD)
+Brahmagupta epoch: Sunday Caitra 1, 587 Saka (23 March 665 AD). JDN (Bag)= 1964031 : This refers to the day beginning at 12:00 GMT of Sunday and not the 00:00 GMT of Sunday or mean sunrise at Ujjain.
+Epoch of KaraYJ,akutuhala: Bag placed the KaraYJ, akutuhala epoch at Thursday, Caitra-s ukla mean sunrise Saka1105 (24 February 1183 AD), Kalilnda6 = 1564737.
+Epoch ofGrahaliighava: Caitra S(l), 19 March 1520 AD, Kalidina = 1687850
+*/
+var Kali_epoch = String_to_Date('-3102/2/18', {
+	parser : 'Julian'
+}).getTime();
+
+
+/*
+
+http://ephemeris.com/history/india.html
+Like Ptolemy, Hindu astronomers used epicycles (small circular motions within the larger circular orbit around the Earth) to describe the motion of the planets in a geocentric Solar System. One method of epicycles ("manda" in Sanskrit) was given in the Surya Siddhanta.
+
+http://www.ima.umn.edu/~miller/Nelsonlecture1.pdf
+古印度占星術(天文學)中，星體運行主要依循繞著地球公轉的軌道，但星體本身繞著此軌道小公轉。而所有軌道皆正圓(?)，皆以恆定速率公轉、小公轉。
+因此星體經度可以從紀元積日數 (Ahargana)乘以平均速率，加上 apogee (遠地點)參數估算推得。
+
+
+*/
+
+
+
+
+// copy from application.astronomy
+var
+/**
+ * 周角 = 360°, 1 turn, 1 revolution, 1 perigon, full circle, complete
+ * rotation, a full rotation in degrees.
+ */
+TURN_TO_DEGREES = 360,
+/**
+ * degrees * DEGREES_TO_RADIANS = radians.
+ * 
+ * DEGREES_TO_RADIANS = 2π/360 =
+ * 0.017453292519943295769236907684886127134428718885417254560971... ≈
+ * 1.745329251994329576923691e-2
+ * 
+ * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
+ */
+DEGREES_TO_RADIANS = 2 * Math.PI / TURN_TO_DEGREES,
+// $PlanetCircumm{}
+Hindu_circum = {
+	sun : 13 + 50 / 60,
+	moon : 31 + 50 / 60
+},
+
+Hindu_apogee = {
+	sun : 77 + 17 / 60
+},
+
+Hindu_constants = library_namespace.null_Object();
+
+// https://en.wikipedia.org/wiki/Surya_Siddhanta
+// based on SuryaSiddhanta (AD 1000ca).
+// Saura, HIL, p.15
+Hindu_constants.Surya_Siddhanta = {
+	// revolutions in a mahayuga
+	// asterisrn
+	star : 1582237828,
+
+	// planets
+	// revolutions in a mahayuga
+	sun : 4320000,
+	moon : 57753336,
+	mercury : 17937060,
+	venus : 7022376,
+	mars : 2296832,
+	jupiter : 364220,
+	saturn : 146568,
+
+	// http://www.hamsi.org.nz/p/blog-page_19.html
+	// Candrocca, the apogee of Moon. 月球遠地點
+	moon_apogee : 488203,
+	// Rahu, the south lunar nodes, 月球升交點
+	north_lunar_node : -232238
+};
+
+// https://en.wikipedia.org/wiki/Var%C4%81hamihira#Pancha-Siddhantika
+// based on older constants in Pancasiddhantika (AD 505).
+// Latadeva/Ardharatrika, HIL, p.15
+Hindu_constants.Pancha_Siddhantika = {
+	star : 1582237800,
+
+	sun : 4320000,
+	moon : 57753336,
+	mercury : 17937000,
+	venus : 7022388,
+	mars : 2296824,
+	jupiter : 364220,
+	saturn : 146564,
+
+	moon_apogee : 488219,
+	north_lunar_node : -232226
+};
+
+var Hindu_default_system = Hindu_constants.Surya_Siddhanta;
+
+
+(function() {
+	for ( var system in Hindu_constants) {
+		system = Hindu_constants[system];
+		var civil_days = system.star - system.sun;
+		// so we can use ((days * system[object]))
+		// to get the mean longitude of the object in the Indian astronomy
+		for ( var object in system)
+			system[object] *= TURN_TO_DEGREES / civil_days;
+	}
+
+	for ( var object in Hindu_circum)
+		Hindu_circum[object] /= TURN_TO_DEGREES;
+})();
+
+/*
+manda correction 修正
+
+manda (Sanskrit: मन्द)
+http://www.sanskritdictionary.com/scans/?col=3&img=mw0787.jpg
+the (upper) apsis of a planet's course or (according to some) its anomalistic motion - See more at: http://www.sanskritdictionary.com/manda/171277/1#sthash.ASB1VNSi.dpuf
+http://www.sanskritdictionary.com/?q=luna&iencoding=iast&lang=sans
+
+http://www.physics.iitm.ac.in/~labs/amp/kerala-astronomy.pdf
+two correctionsnamely manda samskara and sighra samskara are applied to the mean planet to obtain the true longitude.
+Themandasamskara is equivalentto taking into account tbe eccentricity of the planet's orbit. DitTerent computational schemes for the manda samsknra arc discussed in Indian astronomical literature.
+http://ephemeris.com/history/india.html
+Like Ptolemy, Hindu astronomers used epicycles (small circular motions within the larger circular orbit around the Earth) to describe the motion of the planets in a geocentric Solar System. One method of epicycles ("manda" in Sanskrit) was given in the Surya Siddhanta.
+*/
+Hindu_Date.longitude_correction = function(circum, argument) {
+	// circum: Hindu_circum[object]
+	Math.asin(circum * Math.sin(argument * DEGREES_TO_RADIANS))
+			/ DEGREES_TO_RADIANS;
+};
+
+// the true longitudes of the Sun and Moon
+// true longitude of Indian astronomy
+Hindu_Date.true_longitude = function(object, days,system) {
+	var mean_longitude = days*system[object];
+	if (object==='sun'){
+		// mean solar longitude → true solar longitude
+		return mean_longitude - Hindu_Date.longitude_correction(Hindu_circum.sun, mean_longitude - Hindu_apogee.sun);
+	}
+
+	if (object==='moon'){
+		// mean lunar longitude → true lunar longitude
+		return mean_longitude - Hindu_Date.longitude_correction(Hindu_circum.moon, mean_longitude - days*system.candrocca - 90);
+	}
+
+	//TODO: other objects
+};
+
+
+function Hindu_Date(year, month, date, options) {
+}
+
+
+// TODO
+function Date_to_Hindu(date, options) {
+	// Kali-ahargana, civil days
+	// Ahargana: Heap of days, sum of days, day count, 紀元積日數
+	// http://www.indiadivine.org/content/topic/1445853-calendar/
+	// Every kerala Panchanga (ephemeris) gives the Ahargana (kalidina) alias 'day count' for for every day.
+	// http://cs.annauniv.edu/insight/Reading%20Materials/astro/sharptime/ahargana.htm
+	// In Sanskrit 'ahoratra' means one full day and 'gana' means count. Hence, the Ahargana on any given day stands for the number of lunar days that have elapsed starting from an epoch.
+	// http://www.ibiblio.org/sripedia/oppiliappan/archives/jun05/msg00030.html
+	// 6, 6, 2005, Monday has been the 1865063rd day(5106.4 year) in Kali Yuga (Kali-ahargana: 1865063)
+	var days = (date - Kali_epoch) / ONE_DAY_LENGTH_VALUE;
+
+	// $year/$month/$day → $JulianDay
+	// → $ahar, $mllong, $mslong, $tllong, $tslong, $tithi, $clong, $nclong
+	// → $YearSaka|$YearVikrama/$adhimasa $masa_num/$sukla_krsna $tithi_day
+
+	var system = options && options.system;
+	system = system && Hindu_constants[system]
+	|| Hindu_default_system;
+
+	var true_solar_longitude = Hindu_Date.true_longitude(
+			'sun', days, system),
+	// https://en.wikipedia.org/wiki/Tithi
+	// reckon tithi: the longitudinal angle between the Moon and the Sun to increase by 12°.
+	// 相當於中曆日期，或月齡。
+	tithi = (true_solar_longitude - Hindu_Date.true_longitude('moon', days, system))
+			.mod(TURN_TO_DEGREES) / 12;
+	// 上一次日月合朔的 true solar longitude
+	$clong = get_clong(days, $tithi);
+	// 下一次日月合朔的 true solar longitude
+	$nclong = get_nclong(days, $tithi);
+
+	date = Math.ceil($tithi);
+
+	// $masa_num: month
+	$masa_num = ($tslong / 30|0) % 12;
+	if ((($clong / 30|0) % 12) === $masa_num)
+		$masa_num++;
+	$masa_num = $masa_num.mod(12);
+
+	$YearKali = (days + (4 - $masa_num) * 30) * $YugaRotation['sun'] / $YugaCivilDays;
+	// adhika means "extra".
+	// Kṣaya means "loss". (Ksaya)
+	$adhimasa = ($clong / 30 | 0) === ($nclong / 30 | 0) ? 'leap'
+			: '';
+
+}
+
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//

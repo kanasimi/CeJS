@@ -2093,6 +2093,9 @@ XML_node = function(tag, propertyO, insertBeforeO, innerObj, styleO) {
  * 
  */
 function select_node(selector, base_space, options) {
+	if (_.is_ELEMENT_NODE(selector))
+		return selector;
+
 	library_namespace.debug('Get [' + selector + ']', 2, 'select_node');
 	if (library_namespace.is_Object(base_space)) {
 		base_space = base_space.base;
