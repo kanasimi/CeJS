@@ -171,11 +171,11 @@ function _format(date, options, to_name, is_leap, combine) {
 /**
  * 創建測試器。<br />
  * test: 經過正反轉換運算，應該回到相同的日子。
- *
+ * 
  * @param {Function}to_Calendar
  * @param {Function}to_Date
  * @param {Object}[options]
- *
+ * 
  * @returns {Function}測試器。
  */
 function new_tester(to_Calendar, to_Date, options) {
@@ -183,7 +183,11 @@ function new_tester(to_Calendar, to_Date, options) {
 			new_tester.default_options, options || {});
 	var epoch = options.epoch || to_Date.epoch || 0,
 	//
-	month_days = options.month_days, CE_format = options.CE_format, continued_month = options.continued_month;
+	month_days = options.month_days, CE_format = options.CE_format,
+	//
+	continued_month = options.continued_month,
+	//
+	get_month_serial = options.month_serial;
 
 	return function(begin_Date, end_Date, error_limit) {
 		begin_Date = typeof begin_Date === 'number' ? epoch + (begin_Date | 0)
@@ -195,16 +199,6 @@ function new_tester(to_Calendar, to_Date, options) {
 				+ end_Date * ONE_DAY_LENGTH_VALUE : end_Date - 0;
 		if (isNaN(begin_Date) || isNaN(end_Date))
 			return;
-
-		function get_month_serial(month) {
-			if (isNaN(month)) {
-				var matched = month.match(/^\D?(\d{1,2})$/);
-				if (!matched)
-					throw 'Illegal month name: ' + month;
-				month = matched[1] | 0;
-			}
-			return month;
-		}
 
 		var begin = new Date, date_name, old_date_name, error = [];
 		if (!(0 < error_limit && error_limit < 1e9))
@@ -221,31 +215,38 @@ function new_tester(to_Calendar, to_Date, options) {
 							/ ONE_DAY_LENGTH_VALUE + ': ' + date_name.join());
 				// 確定 old_date_name 的下一個天為 date_name。
 				// 月差距
-				tmp = get_month_serial(date_name[1])
-						- get_month_serial(old_date_name[1]);
+				tmp = get_month_serial(date_name)
+						- get_month_serial(old_date_name);
 
 				if (date_name[2] - old_date_name[2] === 1)
-					tmp = tmp !== 0 && !continued_month(date_name[1], old_date_name[1])
-						&& '隔日(日期名接續)，但月 serial 差距 !== 0';
+					tmp = tmp !== 0
+							&& !continued_month(date_name[1], old_date_name[1])
+							&& '隔日(日期名接續)，但月 serial 差距 !== 0';
 				else if (date_name[2] !== 1)
 					tmp = '日期名未接續: 隔月/隔年，但日期非以 1 起始';
 				else if (!(old_date_name[2] in month_days))
-					tmp = '日期名未接續: 前一月末日數 ' + old_date_name[2] + '未設定於 month_days 中';
+					tmp = '日期名未接續: 前一月末日數 ' + old_date_name[2]
+							+ '未設定於 month_days 中';
 				else if (tmp !== 1 && (tmp !== 0
-					// 這邊不再檢查年份是否差一，因為可能是閏月。
-					// || date_name[0] - old_date_name[0] !== 1
-					) && !continued_month(date_name[1], old_date_name[1]))
-					tmp = '月名未接續';
+				// 這邊不再檢查年份是否差一，因為可能是閏月。
+				// || date_name[0] - old_date_name[0] !== 1
+				) && !continued_month(date_name[1], old_date_name[1]))
+					tmp = '月名未接續 (' + old_date_name[1] + '→' + date_name[1]
+							+ ': 相差' + tmp + ')';
 				else if (date_name[2] === old_date_name[2])
 					tmp = '前後日期名相同';
+				else if (date_name[0] !== old_date_name[0]
+						&& date_name[0] - old_date_name[0] !== 1)
+					tmp = '前後年份不同: ' + old_date_name[0] + '→' + date_name[0];
 				else
 					// 若 OK，必得設定 tmp!
 					tmp = false;
 
 				if (tmp) {
-					error.push(tmp + ': ' + old_date_name.join('/') + ' ⇨ '
-							+ date_name.join('/') + ' ('
-							+ (new Date(begin_Date)).format(CE_format) + ')');
+					error.push(tmp + ': 前一天 ' + old_date_name.join('/')
+							+ ' ⇨ 隔天 ' + date_name.join('/') + ' ('
+							+ (new Date(begin_Date)).format(CE_format) + ', '
+							+ begin_Date + ')');
 				}
 			}
 			old_date_name = date_name;
@@ -253,14 +254,14 @@ function new_tester(to_Calendar, to_Date, options) {
 			// 反解: calendar date → Date
 			tmp = to_Date(date_name[0], date_name[1], date_name[2]);
 			if (begin_Date - tmp !== 0)
-				error.push(begin_Date + ' ('
+				error.push('正反解到了不同日期: '
 						+ (new Date(begin_Date)).format(CE_format) + ', '
 						+ (begin_Date - epoch) / ONE_DAY_LENGTH_VALUE
-						+ ' days): ' + date_name.join(',') + ' → '
+						+ ' days → ' + date_name.join(',') + ' → '
 						+ tmp.format(CE_format));
 		}
 
-		library_namespace.debug((new Date - begin) + ' ms, error '
+		library_namespace.info((new Date - begin) + ' ms, error '
 				+ error.length + '/' + error_limit);
 		return error;
 	};
@@ -268,8 +269,8 @@ function new_tester(to_Calendar, to_Date, options) {
 
 new_tester.default_options = {
 	month_days : {
-		29 : '大月',
-		30 : '小月'
+		29 : '陰陽曆大月',
+		30 : '陰陽曆小月'
 	},
 	CE_format : {
 		parser : 'CE',
@@ -278,6 +279,18 @@ new_tester.default_options = {
 	// 延續的月序，月序未中斷。continued/non-interrupted month serial.
 	continued_month : function(month, old_month) {
 		return month === 1 && (old_month === 12 || old_month === 13);
+	},
+	// get month serial
+	// 其他方法: 見 Hindu_Date.test
+	month_serial : function(date_name) {
+		var month = date_name[1];
+		if (isNaN(month)) {
+			var matched = month.match(/^\D?(\d{1,2})$/);
+			if (!matched)
+				throw 'tester: Illegal month name: ' + month;
+			month = matched[1] | 0;
+		}
+		return month;
 	},
 	// get 數字序號 (numerical serial).
 	format : 'serial',
@@ -3001,27 +3014,7 @@ Based on Pancanga (version 3.14) with small changes.
 S. P. Bhattacharyya, Ahargana in Hindu Astronomy
 http://insa.nic.in/writereaddata/UpLoadedFiles/IJHS/Vol04_1And2_14_SPBhattacharyya.pdf
 
-*/
 
-
-/*
-https://en.wikipedia.org/wiki/Kali_Yuga
-According to the Surya Siddhanta, Kali Yuga began at midnight (00:00) on 18 February 3102 BCE in the proleptic Julian calendar, or 14 January 3102 BC in the proleptic Gregorian calendar.
-
-http://www.new1.dli.ernet.in/data1/upload/insa/INSA_1/2000c4e3-359.pdf
-K. Chandra Hari, HISTORICAL NOTES. Indian Journal of History of Science, 39.3 (2004) 359-364.
-Kali epoch: 18 February 3102 BC 06:00 Ujjain Mean time
-Varahamihira Epoch: Tuesday, Caitra 1,427 Saka (22 March 505 AD)
-Brahmagupta epoch: Sunday Caitra 1, 587 Saka (23 March 665 AD). JDN (Bag)= 1964031 : This refers to the day beginning at 12:00 GMT of Sunday and not the 00:00 GMT of Sunday or mean sunrise at Ujjain.
-Epoch of KaraYJ,akutuhala: Bag placed the KaraYJ, akutuhala epoch at Thursday, Caitra-s ukla mean sunrise Saka1105 (24 February 1183 AD), Kalilnda6 = 1564737.
-Epoch ofGrahaliighava: Caitra S(l), 19 March 1520 AD, Kalidina = 1687850
-*/
-var Kali_epoch = String_to_Date('-3102/2/18', {
-	parser : 'Julian'
-}).getTime();
-
-
-/*
 
 http://ephemeris.com/history/india.html
 Like Ptolemy, Hindu astronomers used epicycles (small circular motions within the larger circular orbit around the Earth) to describe the motion of the planets in a geocentric Solar System. One method of epicycles ("manda" in Sanskrit) was given in the Surya Siddhanta.
@@ -3031,8 +3024,25 @@ http://www.ima.umn.edu/~miller/Nelsonlecture1.pdf
 因此星體經度可以從紀元積日數 (Ahargana)乘以平均速率，加上 apogee (遠地點)參數估算推得。
 
 
-*/
+@see
+https://archive.org/details/indiancalendarwi00seweuoft
+https://en.wikipedia.org/wiki/Hindu_calendar
+http://vedicastro.com/vedic-system-of-calculating-ascendant/
+https://en.wikipedia.org/wiki/Hindu_astrology
+http://www2u.biglobe.ne.jp/~suchowan/when_exe/When/Ephemeris/Hindu.html
+http://zh.scribd.com/doc/133208102/Horoscope-Construction-and-Organisation
+http://www.hamsi.org.nz/p/blog-page_19.html
+http://www.encyclopedia.com/doc/1G2-2830904948.html
 
+https://astrodevam.com/blog/tag/sayana-lagna/
+http://jyotisha.00it.com/Difference.htm
+http://vedicastro.com/basic-concepts-of-astronomy-relevant-to-astrology/
+http://www.rubydoc.info/gems/when_exe/0.4.1/When/Ephemeris/Hindu
+
+http://www.astrogyan.com/panchang/day-24/month-06/year-2015/indian_calender_june_24_2015.html
+https://github.com/suchowan/when_exe/blob/master/lib/when_exe/region/indian.rb
+
+*/
 
 
 // copy from application.astronomy
@@ -3041,7 +3051,7 @@ var
  * 周角 = 360°, 1 turn, 1 revolution, 1 perigon, full circle, complete
  * rotation, a full rotation in degrees.
  */
-TURN_TO_DEGREES = 360,
+TURN_TO_DEGREES = 360 | 0,
 /**
  * degrees * DEGREES_TO_RADIANS = radians.
  * 
@@ -3063,11 +3073,67 @@ Hindu_apogee = {
 	sun : 77 + 17 / 60
 },
 
+//https://en.wikipedia.org/wiki/Ujjain
+Hindu_day_offset = 75.777222 / TURN_TO_DEGREES,
+//Month names based on the rāshi (Zodiac sign) into which the sun transits
+//within a lunar month
+//https://en.wikipedia.org/wiki/Hindu_zodiac
+Hindu_zodiac_signs = 12 | 0,
+Hindu_zodiac_angle = TURN_TO_DEGREES / Hindu_zodiac_signs | 0,
+
+Hindu_month_count = Hindu_zodiac_signs,
+Hindu_month_angle = TURN_TO_DEGREES / Hindu_month_count | 0,
+
+// 日出 (6:0) 為當日起始。Day begins at sunrise.
+Hindu_days_begin = .25,
+
+// names
+Hindu_leap_prefix = 'Adhika ',
+// month names
+Hindu_month_name =
+	//'|Chaitra|Vaiśākha|Jyeṣṭha|Āṣāḍha|Śrāvaṇa|Bhādrapada, Bhādra or Proṣṭhapada|Āśvina|Kārtika|Agrahāyaṇa, Mārgaśīrṣa|Pauṣa|Māgha|Phālguna'
+	'|Chaitra|Vaiśākha|Jyeṣṭha|Āṣāḍha|Śrāvaṇa|Bhādra|Āśvina|Kārtika|Agrahāyaṇa|Pauṣa|Māgha|Phālguna'
+	.split('|'),
+Hindu_year_name =
+	'Prabhava|Vibhava|Shukla|Pramoda|Prajāpati|Āngirasa|Shrīmukha|Bhāva|Yuva|Dhātri|Īshvara|Bahudhānya|Pramādhi|Vikrama|Vrisha|Chitrabhānu|Svabhānu|Tārana|Pārthiva|Vyaya|Sarvajeeth|Sarvadhāri|Virodhi|Vikrita|Khara|Nandana|Vijaya|Jaya|Manmatha|Durmukhi|Hevilambi|Vilambi|Vikāri|Shārvari|Plava|Shubhakruti|Sobhakruthi|Krodhi|Vishvāvasu|Parābhava|Plavanga|Kīlaka|Saumya|Sādhārana|Virodhikruthi|Paridhāvi|Pramādicha|Ānanda|Rākshasa|Anala|Pingala|Kālayukthi|Siddhārthi|Raudra|Durmathi|Dundubhi|Rudhirodgāri|Raktākshi|Krodhana|Akshaya'
+	.split('|'),
+// Nakshatra (Sanskrit: नक्षत्र, IAST: Nakṣatra) 二十七宿
+// https://en.wikipedia.org/wiki/Nakshatra
+Nakṣatra =
+	// 'Ashwini (अश्विनि)|Bharani (भरणी)|Kritika (कृत्तिका)|Rohini(रोहिणी)|Mrigashīrsha(म्रृगशीर्षा)|Ārdrā (आर्द्रा)|Punarvasu (पुनर्वसु)|Pushya (पुष्य)|Āshleshā (आश्लेषा)|Maghā (मघा)|Pūrva or Pūrva Phalgunī (पूर्व फाल्गुनी)|Uttara or Uttara Phalgunī (उत्तर फाल्गुनी)|Hasta (हस्त)|Chitra (चित्रा)|Svātī (स्वाति)|Viśākhā (विशाखा)|Anurādhā (अनुराधा)|Jyeshtha (ज्येष्ठा)|Mula (मूल)|Pūrva Ashādhā (पूर्वाषाढ़ा)|Uttara Aṣāḍhā (उत्तराषाढ़ा)|Śrāvaṇa (श्र‌ावण)|Śrāviṣṭha (श्रविष्ठा) or Dhanishta|Shatabhisha (शतभिषा)or Śatataraka|Pūrva Bhādrapadā (पूर्वभाद्रपदा)|Uttara Bhādrapadā (उत्तरभाद्रपदा)|Revati (रेवती)'
+	'Aśvinī अश्विनी|Bharaṇī भरणी|Kṛttikā कृत्तिका|Rohiṇī रोहिणी|Mṛgaśirṣa मृगशिर्ष|Ārdrā आद्रा|Punarvasu पुनर्वसु|Puṣya पुष्य|Aśleṣā आश्ळेषा / आश्लेषा|Maghā मघा|Pūrva or Pūrva Phalguṇī पूर्व फाल्गुनी|Uttara or Uttara Phalguṇī उत्तर फाल्गुनी|Hasta हस्त|Citrā चित्रा14|Svāti स्वाति|Viśākha विशाखा|Anurādhā अनुराधा|Jyeṣṭha ज्येष्ठा|Mūla मूल/मूळ|Pūrvāṣāḍha पूर्वाषाढा|Uttarāṣāḍha उत्तराषाढा|Śravaṇa श्रवण|Śraviṣṭhā or Dhaniṣṭha श्रविष्ठा or धनिष्ठा|Śatabhiṣak or Śatatārakā शतभिषक् / शततारका|Pūrva Bhādrapadā पूर्वभाद्रपदा / पूर्वप्रोष्ठपदा|Uttara Bhādrapadā उत्तरभाद्रपदा / उत्तरप्रोष्ठपदा|Revatī रेवती'
+	.split('|'),
+Vāsara = 'Ravi vāsara रविवासर|Soma vāsara सोमवासर|Maṅgala vāsara मंगलवासर|Budha vāsara बुधवासर|Guru vāsara गुरुवासर|Śukra vāsara शुक्रवासर|Śani vāsara शनिवासर'.split('|'),
+
+/*
+https://en.wikipedia.org/wiki/Kali_Yuga
+According to the Surya Siddhanta, Kali Yuga began at midnight (00:00) on 18 February 3102 BCE in the proleptic Julian calendar, or 14 January 3102 BC in the proleptic Gregorian calendar.
+
+http://www.new1.dli.ernet.in/data1/upload/insa/INSA_1/2000c4e3-359.pdf
+K. Chandra Hari, HISTORICAL NOTES. Indian Journal of History of Science, 39.3 (2004) 359-364.
+Kali epoch: 18 February 3102 BC 06:00 Ujjain Mean time
+Varahamihira Epoch: Tuesday, Caitra 1,427 Saka (22 March 505 AD)
+Brahmagupta epoch: Sunday Caitra 1, 587 Saka (23 March 665 AD). JDN (Bag)= 1964031 : This refers to the day beginning at 12:00 GMT of Sunday and not the 00:00 GMT of Sunday or mean sunrise at Ujjain.
+Epoch of KaraYJ,akutuhala: Bag placed the KaraYJ, akutuhala epoch at Thursday, Caitra-s ukla mean sunrise Saka1105 (24 February 1183 AD), Kalilnda6 = 1564737.
+Epoch ofGrahaliighava: Caitra S(l), 19 March 1520 AD, Kalidina = 1687850
+*/
+Kali_epoch = String_to_Date('-3102/2/18', {
+	parser : 'Julian'
+}).getTime(),
+
+Hindu_year_offset = {
+	// Saka 0 = Kali Yuga 3179, サカ紀元
+	Saka : 3179,
+	Vikrama : 3044
+},
+
+
 Hindu_constants = library_namespace.null_Object();
 
 // https://en.wikipedia.org/wiki/Surya_Siddhanta
 // based on SuryaSiddhanta (c. 1200).
 // Saura, HIL, p.15
+// It is partly based on Vedanga Jyotisha, which itself might reflect traditions going back to the Indian Iron Age (around 700 BCE).
 Hindu_constants.Surya_Siddhanta = {
 	// revolutions in a mahayuga
 	// asterisrn
@@ -3108,22 +3174,7 @@ Hindu_constants.Pancha_Siddhantika = {
 	north_lunar_node : -232226
 };
 
-// It is partly based on Vedanga Jyotisha, which itself might reflect traditions going back to the Indian Iron Age (around 700 BCE).
-var Hindu_default_system = Hindu_constants.Surya_Siddhanta,
-// https://en.wikipedia.org/wiki/Ujjain
-Hindu_day_offset = 75.777222/TURN_TO_DEGREES,
-// Month names based on the rāshi (Zodiac sign) into which the sun transits within a lunar month
-// https://en.wikipedia.org/wiki/Hindu_zodiac
-Hindu_Zodiac_signs=12,
-Hindu_Zodiac_angle=TURN_TO_DEGREES/Hindu_Zodiac_signs,
-
-Hindu_month_count=Hindu_Zodiac_signs,
-Hindu_month_angle=TURN_TO_DEGREES/Hindu_month_count,
-
-Hindu_year_offset={
-	Saka:3179,
-	Vikrama:3179-135
-};
+var Hindu_default_system = Hindu_constants.Surya_Siddhanta;
 
 
 //Hindu_Date.constants = Hindu_constants;
@@ -3132,15 +3183,16 @@ Hindu_year_offset={
 	for ( var system in Hindu_constants) {
 		system = Hindu_constants[system];
 		var civil_days = system.star - system.sun;
-		// assert: 0 < system[object]: 星體每天移動的角度。
+		// assert: 0 < system[object]: 星體每天移動的角度 (degrees)。
 		// so we can use ((days * system[object]))
 		// to get the mean longitude of the object in the Indian astronomy.
 		for ( var object in system)
 			system[object] *= TURN_TO_DEGREES / civil_days;
+		system.year_days = TURN_TO_DEGREES / system.sun;
 		// cache for Hindu_Date.conjunction()
 		system.conjunction = library_namespace.null_Object();
-		system.moon_sun=1/(system.moon-system.sun);
-		system.moon_days=1/system.moon_sun/TURN_TO_DEGREES;
+		system.moon_sun = 1 / (system.moon - system.sun);
+		system.moon_days = system.moon_sun * TURN_TO_DEGREES;
 	}
 
 	for ( var object in Hindu_circum)
@@ -3171,57 +3223,199 @@ Hindu_Date.longitude_correction = function(circum, argument) {
 //sub get_tslong
 Hindu_Date.true_solar_longitude = function(days, system) {
 	var mean_longitude = days * system.sun;
+	return mean_longitude - Hindu_Date.longitude_correction
 	// mean solar longitude → true solar longitude
-	return mean_longitude
-			- Hindu_Date.longitude_correction(Hindu_circum.sun,
-					mean_longitude - Hindu_apogee.sun);
+	(Hindu_circum.sun, mean_longitude - Hindu_apogee.sun);
 };
 
 // the true longitudes of Moon in the Indian astronomy
 //sub get_tllong
 Hindu_Date.true_lunar_longitude = function(days, system) {
 	var mean_longitude = days * system.moon;
+	return mean_longitude - Hindu_Date.longitude_correction
 	// mean lunar longitude → true lunar longitude
-	return mean_longitude
-			- Hindu_Date.longitude_correction(Hindu_circum.moon,
-					mean_longitude - days * system.moon_apogee - TURN_TO_DEGREES/4);
+	(Hindu_circum.moon, mean_longitude
+	//
+	- days * system.moon_apogee - TURN_TO_DEGREES / 4);
 };
 
-
-Hindu_Date.zodiac_sign = function(longitude){
-	return longitude.mod(TURN_TO_DEGREES)/Hindu_Zodiac_angle|0;
-};
 
 
 //sub get_conj
-Hindu_Date.conjunction = function(days, system, angle, next) {
-	// 設定初始近似值。
-	if(next)
-		days+=(TURN_TO_DEGREES-angle)*system.moon_sun;
-	else
-		days-=angle*system.moon_sun;
+Hindu_Date.conjunction = function(days, system, angle, next, no_recursion) {
+	if (!(angle >= 0))
+		// 日月夾角 angle in degrees: 0–TURN_TO_DEGREES
+		angle = (Hindu_Date.true_lunar_longitude(days, system) - Hindu_Date
+				.true_solar_longitude(days, system)).mod(TURN_TO_DEGREES);
 
-	//使用 cache 約可省一半時間。
-	var index=Math.round(days*system.moon_days);
-	if(index in system.conjunction){
+	// 設定初始近似值。
+	if (next)
+		days += (TURN_TO_DEGREES - angle) * system.moon_sun;
+	else
+		days -= angle * system.moon_sun;
+
+	// 使用 cache 約可省一半時間。
+
+	// index: month count from Kali_epoch
+	var index = Math.round(days / system.moon_days);
+	if (index in system.conjunction) {
 		return system.conjunction[index];
 	}
 
-	//console.log('count ['+index+']:'+days);
+	// console.log('count [' + index + ']:' + days);
 	var longitude;
-	days= library_namespace.find_root(function(days){
-		longitude=Hindu_Date.true_solar_longitude(days, system);
-		angle=(Hindu_Date.true_lunar_longitude(days, system) - longitude)%TURN_TO_DEGREES;
-		return angle<-TURN_TO_DEGREES/2?angle+TURN_TO_DEGREES:angle;
-	}, days,days+1);
+	// 範圍設在 [ days - 1, days + 1 ] 會在 Hindu_Date.test(1969867, 1969868) 出問題。
+	days = library_namespace.find_root(function(days) {
+		longitude = Hindu_Date.true_solar_longitude(days, system);
+		angle = (Hindu_Date.true_lunar_longitude(days, system) - longitude)
+				.mod(TURN_TO_DEGREES);
+		// console.log(days + ': ' + longitude + ',' + angle);
+		// angle: -180–180
+		return angle > TURN_TO_DEGREES / 2 ? angle - TURN_TO_DEGREES : angle;
+	}, days - 1, days + 1);
 
-	return system.conjunction[index]=[days,longitude,Hindu_Date.zodiac_sign(longitude)];
-	//return [days,longitude];
+	if (!Number.isFinite(days))
+		throw 'Hindu_Date.conjunction: Can not find days!';
+
+	// ** 在此計算 month, year 不能節省時間，純粹為了降低複雜度用。
+	longitude = longitude.mod(TURN_TO_DEGREES);
+
+	// $masa_num
+	// month index
+	// 月分名以當月月初之後首個太陽進入的 Rāśi (zodiac sign) 為準。
+	var month = longitude / Hindu_zodiac_angle + 1,
+	// 只有恰好在前後的時候，才需要檢測。否則月中跨越 zodiac 的次數應該都是 1。
+	transit = Math.abs(month - Math.round(month)) > .1 && 1;
+	month = (month | 0).mod(Hindu_zodiac_signs);
+	if (!transit) {
+		if (no_recursion)
+			// 不遞迴
+			return {
+				month : month
+			};
+		// 檢測下一次日月合朔時的 longitude 與資訊。
+		transit = (Hindu_Date.conjunction(days, system, 0, true, true).month - month)
+				.mod(Hindu_zodiac_signs);
+	}
+
+	// 日月合朔時的 conjunction information
+	return system.conjunction[index] = {
+		// start days (Kali-ahargana, NOT date!)
+		days : days,
+		// month index: 0–(Hindu_zodiac_signs-1)
+		month : month,
+		// How many times the sun transits into next rāshis.
+		// 太陽在月中跨越 zodiac 的次數。
+		// 0: Adhika means "extra", leap month.
+		// 1: normal month.
+		// 2: Kṣaya means "loss". (Ksaya)
+		transit : transit,
+		// Kali year: 以太陽實際進入 Meṣa 所在月份來分年，當月為新年第一月。
+		year : Math.floor((month < 2
+		// https://en.wikipedia.org/wiki/Hindu_calendar#Year_of_the_lunisolar_calendar
+		// * If an adhika Chaitra is followed by a nija Chaitra, the new year
+		// starts with the nija Chaitra.
+		// * If an adhika Chaitra is followed by a Chaitra-Vaishākha kshaya, the
+		// new year starts with the adhika Chaitra.
+		// * If a Chaitra-Vaiśākha Kṣaya occurs with no adhika Chaitra before
+		// it, then it starts the new year.
+		&& (0 < month || 0 < transit)
+		// If a Chaitra-Phālguna Kṣaya' occurs, it starts the new year.
+		|| month === Hindu_zodiac_signs - 1 && transit === 2
+		// 當在年初年尾時，若判別已經過、或將進入 Meṣa，特別加點數字以當作下一年。
+		// 採用 2 個月是為了預防有 leap。
+		? days + 60 : days) / system.year_days),
+		longitude : longitude
+	};
 };
 
 
 function Hindu_Date(year, month, date, options) {
-	;
+	// 前置處理。
+	if (!library_namespace.is_Object(options))
+		options = library_namespace.null_Object();
+
+	if (options.era in Hindu_year_offset)
+		year += Hindu_year_offset[options.era];
+
+	var system = options.system && Hindu_constants[options.system]
+			|| Hindu_default_system,
+	// 太陽在月中跨越 zodiac 的次數。
+	transit = 1, matched;
+
+	if (typeof month === 'string')
+		if (month.startsWith(Hindu_leap_prefix))
+			transit = 0, month = month.slice(Hindu_leap_prefix.length);
+		else if (matched = month.match(/(\d{1,2})[\-–]\d{1,2}/))
+			transit = 2, month = matched[1];
+
+	var diff, last_diff = Infinity, days,
+	// 設定初始近似值。
+	conjunction = Hindu_Date.conjunction(year * system.year_days + --month
+			* system.moon_days, system);
+
+	// 找尋準確值。
+	while (diff = (year - conjunction.year)
+			* system.year_days
+			+ (month - conjunction.month
+			// If we want to get a normal month after leap month, add 1.
+			// 這時 conjunction 為上個月的。
+			+ (conjunction.transit === 0 && transit > 0
+					&& month === conjunction.month ? 1 : 0)) * system.moon_days) {
+		// 進來至此的機會應該不多。
+		// console.log('Hindu_Date: diff: ' + diff);
+
+		// 應該越來越接近。
+		if (!(Math.abs(diff) < last_diff))
+			throw new Error('Hindu_Date(' + [ year,
+			//
+			transit ? month + 1 : '"' + Hindu_leap_prefix + (month + 1) + '"',
+			//
+			date ] + '): 無法找到準確值!');
+		last_diff = Math.abs(diff);
+		conjunction = Hindu_Date
+				.conjunction(conjunction.days + diff, system, 0);
+	}
+
+	// assert: 年月份皆已正確。
+
+	if (transit !== conjunction.transit)
+		// 做補救措施。
+		if (transit === 0 && month === 0) {
+			// 處理如 4115/Adhika 1 (1015/2/22 CE)，為 4116/1 前一個月的情況。
+			// assert: conjunction.transit === 1,
+			// 取到了本年1月，但本應該取年末之 Adhika 1。
+			conjunction = Hindu_Date.conjunction((year + 1) * system.year_days
+					- system.moon_days, system);
+		} else if (transit === 0 && conjunction.transit === 1
+				&& month === conjunction.month) {
+			// If we want to get the leap month before normal month, sub 1.
+			// 這時 conjunction 為下個月的。
+			conjunction = Hindu_Date.conjunction(conjunction.days
+					- system.moon_days, system, 0);
+		} else if (transit === 2 && conjunction.transit === 1
+				&& month === conjunction.month) {
+			// e.g., Hindu_Date(5393,'2-3',29)
+			conjunction = Hindu_Date.conjunction(conjunction.days
+					- system.moon_days, system, 0);
+		}
+
+	// last check.
+	if (transit !== conjunction.transit || year !== conjunction.year
+			|| month !== conjunction.month)
+		throw new Error('Hindu_Date(' + [ year,
+		//
+		transit ? month + 1 : '"' + Hindu_leap_prefix + (month + 1) + '"',
+		//
+		date ] + '): 無法找到準確值: 日期或 transit 錯誤。 transit: ' + transit + ', get '
+				+ conjunction.transit);
+
+	// 合朔後首個日出開始為當月起始。
+	// conjunction.days 為日月合朔時刻。
+	var days = Math.floor(conjunction.days - Hindu_days_begin) + date;
+
+	// 還是取到 midnight (0:0)。
+	return new Date(Kali_epoch + days * ONE_DAY_LENGTH_VALUE);
 }
 
 
@@ -3245,63 +3439,161 @@ function Date_to_Hindu(date, options) {
 	// In Sanskrit 'ahoratra' means one full day and 'gana' means count. Hence, the Ahargana on any given day stands for the number of lunar days that have elapsed starting from an epoch.
 	// http://www.ibiblio.org/sripedia/oppiliappan/archives/jun05/msg00030.html
 	// 6, 6, 2005, Monday has been the 1865063rd day(5106.4 year) in Kali Yuga (Kali-ahargana: 1865063)
-	var days = (date - Kali_epoch) / ONE_DAY_LENGTH_VALUE
-	// .25: Day begins at sunrise.
-	+ .25;
+	var days = (date - Kali_epoch) / ONE_DAY_LENGTH_VALUE + Hindu_days_begin;
 
-	//後面的演算基於在 Ujjain 的天文觀測，因此需要轉換 local days 至 Ujjain 對應的日數。
-	if(!isNaN(options.minute_offset))
-		//desantara
-		days+=Hindu_day_offset-options.minute_offset/60/24;
+	// 後面的演算基於在 Ujjain 的天文觀測，因此需要轉換 local days 至 Ujjain 對應的日數。
+	if (!isNaN(options.minute_offset))
+		// desantara
+		days += Hindu_day_offset - options.minute_offset / 60 / 24;
 
-	var system = options.system && Hindu_constants[options.system]|| Hindu_default_system,
+	var system = options.system && Hindu_constants[options.system]
+			|| Hindu_default_system,
 	//
-	true_lunar_longitude=Hindu_Date.true_lunar_longitude(days, system).mod(TURN_TO_DEGREES),
-	//
-	true_solar_longitude = Hindu_Date.true_solar_longitude(days, system).mod(TURN_TO_DEGREES),
-	// 日月夾角 angle in degrees: 0~TURN_TO_DEGREES
-	angle = (true_lunar_longitude - true_solar_longitude).mod(TURN_TO_DEGREES),
+	true_lunar_longitude = Hindu_Date.true_lunar_longitude(days, system).mod(TURN_TO_DEGREES),
+	// 日月夾角 angle in degrees: 0–TURN_TO_DEGREES
+	angle = (true_lunar_longitude - Hindu_Date.true_solar_longitude(days, system)).mod(TURN_TO_DEGREES),
 	// 上一次日月合朔時的 longitude
-	conjunction = Hindu_Date.conjunction(days, system, angle)[2],
-	// 下一次日月合朔時的 longitude
-	next_conjunction = Hindu_Date.conjunction(days, system, angle, true)[2];
+	conjunction = Hindu_Date.conjunction(days, system, angle),
+	// 太陽在月中跨越 zodiac 的次數。
+	transit = conjunction.transit;
 
 	// https://en.wikipedia.org/wiki/Tithi
 	// reckon tithi: the longitudinal angle between the Moon and the Sun to increase by 12°.
 	// tithi 相當於中曆日期，或月齡。
 	// When a new moon occurs before sunrise on a day, that day is said to be the first day of the lunar month.
-	date= angle / Hindu_month_count|0;
+	if(false)
+		Hindu_date = angle / Hindu_month_count | 0;
+	// 為了使日期在例如 1315/10/8 能延續，因此採用減去月初日期的方法，而非上者。
+	var Hindu_date = days - conjunction.days | 0;
 
-	// adhika means "extra".
-	// Kṣaya means "loss". (Ksaya)
-	var leap = (next_conjunction - conjunction).mod(Hindu_Zodiac_signs);
+	Hindu_date = [ conjunction.year, conjunction.month + 1, Hindu_date + 1 ];
+	// $YearKali → other era
+	if (options.era in Hindu_year_offset)
+		Hindu_date[0] -= Hindu_year_offset[options.era];
 
-	// $masa_num: month
-	//月分名以當月月初之後首個太陽進入的 Rāśi (zodiac sign) 為準。
-	var month = (conjunction+1).mod(Hindu_Zodiac_signs);
-
-	//$YearKali
-	//以太陽實際進入 Meṣa 所在月份分年，當月為新年第一月。
-	// 當在年初年尾時，若判別已經過或將進入 Meṣa，特別加點數字以當作下一年。
-	var year = Math.floor((month < 2 ? days + 60 : days) * system.sun / TURN_TO_DEGREES);
-	if(options.era in Hindu_year_offset)
-		year -=Hindu_year_offset[options.era];
-
-	date=[year,month+1,date+1];
-	//month type. e.g., ['leap','','loss']
+	Hindu_date.transit = transit;
+	if (transit > 1)
+		Hindu_date[1] += '–' + (Hindu_date[1] < Hindu_zodiac_signs ? Hindu_date[1] + 1 : 1);
+	// month type. e.g., [ 'leap', '', 'loss' ]
 	// Adhika Māsa (Adhika or "extra"), nija ("original") or Śuddha ("unmixed"), Kṣaya-Māsa (Ksaya or "loss")
-	date.leap=leap;
-	if(options.leap){
-		if(leap>1)
-			date[1]+='-'+(date[1]+1);
-		date[1]=options.leap[leap]+date[1];
+	if (options.epithet) {
+		Hindu_date[1] = options.epithet[Hindu_date.transit] + Hindu_date[1];
+	} else if (transit === 0)
+		Hindu_date[1] = Hindu_leap_prefix + Hindu_date[1];
+
+	if (options.format === 'serial') {
+		if (options.note) {
+			// $naksatra
+			// 時不時有重號或跳號現象。似乎是正常？
+			Hindu_date.Nakṣatra = Nakṣatra[true_lunar_longitude * 27 / TURN_TO_DEGREES | 0];
+			Hindu_date.Vāsara = Vāsara[date.getDay()];
+		}
+
+	} else {
+		// 12: Manmatha (2015-16)
+		Hindu_date[0] = Hindu_year_name[(Hindu_date[0] + 11).mod(Hindu_year_name.length)];
+
+		if (transit === 0)
+			// reset
+			Hindu_date[1] = conjunction.month + 1;
+		// TODO: epithet nija ("original") or Śuddha ("unmixed").
+		Hindu_date[1] = (isNaN(Hindu_date[1]) ? Hindu_date[1].replace(/\d+/g, function($0) {
+			return Hindu_month_name[$0];
+		}) : Hindu_month_name[Hindu_date[1]])
+		// epithet / prefix
+		+ (transit === 0 ? ' adhika-' : transit > 1 ? ' kṣaya-' : ' ')
+		// māsa = lunar month
+		+ 'māsa';
+
+		// https://en.wikipedia.org/wiki/Tithi
+
+		Hindu_date[2] = Hindu_date[2] < 15
+		// https://en.wikipedia.org/wiki/Amavasya
+		// Amavasya (Sanskrit: अमावस्या) means new moon night in Sanskrit.
+		// Shukla Paksha is a period of 15 days, which begins on the Shukla Amavasya (New Moon) day and culminating Poornima (Full Moon) day and is considered auspicious.
+		? Hindu_date[2] === 1 ? 'Amavasya (अमावस्या)'
+		// http://marathidictionary.org/meaning.php?id=55359&lang=Marathi
+		// शुक्लपक्ष - suklapaksa - [śuklapakṣa]
+		// the period of the waxing moon.
+		// Śukla Pakṣa, 'bright part' of the month
+		: 'Śukla Pakṣa (शुक्लपक्ष) ' + Hindu_date[2]
+		// https://en.wikipedia.org/wiki/Purnima
+		// Purnima (also called Poornima, Sanskrit: पूर्णिमा) Pūrṇimā (the full moon)
+		: Hindu_date[2] === 15 ? 'Purnima (पूर्णिमा)'
+		// http://www.marathidictionary.org/meaning.php?id=12728&lang=Marathi
+		// कृष्णपक्ष - krsnapaksa - [kṛṣṇapakṣa]
+		// the fortnight of the waning moon
+		// Kṛṣṇa Pakṣa, the'dark part' of the month.
+		: 'Kṛṣṇa Pakṣa (कृष्णपक्ष) ' + (Hindu_date[2] - 15);
+
+		Hindu_date = Hindu_date.join(' ');
 	}
 
-	// Nakshatra (Sanskrit: नक्षत्र, IAST: Nakṣatra) $naksatra
-	date.Nakshatra=true_lunar_longitude * 27 / TURN_TO_DEGREES|0;
-
-	return date;
+	return Hindu_date;
 }
+
+
+/*
+
+var Kali_epoch = CeL.String_to_Date('-3102/2/18', {
+	parser : 'Julian'
+}).getTime();
+('0001/1/1'.to_Date('CE')-Kali_epoch)/86400000
+
+'0001/1/1'.to_Date('CE').to_Hindu({era:'Saka'})
+'0300/1/1'.to_Date('CE').to_Hindu({era:'Saka'})
+for(d=new Date(-1,0,1).getTime();d<new Date();d+=86400000)new Date(d).to_Hindu({era:'Saka'})
+
+s=new Date;for(d=new Date(1600,0,1).getTime();d<new Date();d+=86400000)new Date(d).to_Hindu({era:'Saka'});new Date-s;
+
+?? 1315. October 8 to November 5 were Kārtika Adhika-Māsa. November 6 to December 5 were Kārtika-Mārgaśīrṣa Kṣaya-Māsa. December 6 onwards was Pauṣa.
+'1315/10/8'.to_Date('CE').to_Hindu({era:'Saka'})
+
+*/
+
+/*
+
+CeL.Hindu_Date.test(15e5, 2e6, 4).join('\n') || 'OK';
+CeL.Hindu_Date(4115,'Adhika 1',1)
+CeL.Hindu_Date(4124,'Adhika 2',1)
+CeL.Hindu_Date(4134,'8-9',1)
+// 1455/1/19
+new Date(-16249536000000).to_Hindu()
+
+
+CeL.Hindu_Date.test(1969867, 1969868, 4).join('\n') || 'OK';
+// Hindu_Date(5393,2,1): 無法找到準確值: 日期或 transit 錯誤。 transit: 2, get 1
+CeL.Hindu_Date(5393,2,1)
+
+
+new Date(-25541942400000).to_Hindu()
+
+
+CeL.Hindu_Date.test(2574530, 4e6, 4).join('\n') || 'OK';
+new Date(3947,11,26).to_Hindu()
+new Date(62416454400000).to_Hindu()
+
+CeL.Hindu_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
+// "OK"
+// 564259 ms, error 0/4
+
+*/
+Hindu_Date.test = new_tester(Date_to_Hindu, Hindu_Date, {
+	epoch : Kali_epoch,
+	month_serial : function(date_name) {
+		return (Hindu_Date(date_name[0], date_name[1], 1)
+		// 計算月份差距。
+		- Hindu_Date(date_name[0], 1, 1))
+		// 29 <= 最小月份日數，但又不致跳月。
+		/ 29 / ONE_DAY_LENGTH_VALUE | 0;
+	},
+	continued_month : function(month, old_month) {
+		if (typeof old_month === 'string')
+			if (old_month.startsWith(Hindu_leap_prefix))
+				return month === +old_month.slice(Hindu_leap_prefix.length);
+		return month === 1 && (old_month === 12 || old_month === 13);
+	}
+});
 
 
 
@@ -4549,12 +4841,12 @@ ContinuedFraction[365.2421896698/29.530587981]
 {12, 2, 1, 2, 1, 1, 17, 2, 1, 2, 20}
 
 FromContinuedFraction[{12, 2, 1, 2, 1, 1, 17, 2, 1, 2, 20}]
-687688/55601~~12.3683
+687688/55601≈12.3683
 // too long
 // After these time, the value itself changes. We need another rule.
 
 FromContinuedFraction[{12, 2, 1, 2, 1, 1}]
-235/19~~12.3684
+235/19≈12.3684
 // Metonic cycle
 
 (235*29.530587981-19*365.2421896698)*24*60
@@ -4563,7 +4855,7 @@ FromContinuedFraction[{12, 2, 1, 2, 1, 1}]
 // Surely it's great.
 
 FromContinuedFraction[{12, 2, 1, 2, 1, 1, 17}]
-4131/334~~12.3683
+4131/334≈12.3683
 
 (365.2421896698*334-29.530587981*4131)*24*60
 46.656291168

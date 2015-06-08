@@ -3115,29 +3115,33 @@ function affairs() {
 
 		Hindu : [ {
 			a : {
-				T : 'Hindu calendar',
+				T : '印度曆',
 			},
-			R : 'Hindu calendar',
+			R : 'Hindu calendar, 印度曆',
 			href : 'https://en.wikipedia.org/wiki/Hindu_calendar'
 		}, function(date) {
-			if(date.精 === '年')
-			return  date.to_Hindu({
-				era:'Saka',
+			if (date.精 === '年')
+				return 'Saka ' + date.to_Hindu({
+					era : 'Saka',
+					format : 'serial'
+				})[0] + '年';
+
+			var Hindu_date = date.to_Hindu({
+				era : 'Saka',
+				// epithet : [ '閏', '', '缺' ],
+				note : true,
 				format : 'serial'
-			})[0] + '年';
-
-			var Hindu_date= date.to_Hindu({
-				era:'Saka',
-				format : 'serial',
-				leap:['閏','','缺']
 			});
-			return Hindu_date.slice(0, 3).join('/')
-			//
-			//+ '; ' + date.to_Hindu({era:'Saka'})
-			+' Nakshatra '+Hindu_date.Nakshatra;
+			return [ 'Saka ' + Hindu_date.slice(0, 3).join('/'), {
+				br : null
+			}, date.to_Hindu({
+				era : 'Saka'
+			}), {
+				br : null
+			}, ' Nakṣatra: ' + Hindu_date.Nakṣatra, {
+				br : null
+			}, 'Vāsara: ' + Hindu_date.Vāsara ];
 		} ],
-
-
 
 		Indian_national : [ {
 			a : {

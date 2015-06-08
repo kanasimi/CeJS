@@ -1140,12 +1140,16 @@ function secant_method(equation, x0, x1, y, options) {
 	x2 = x1, y2 = y1;
 
 	while (error < Math.abs(y2 - y) && count-- > 0
+	// 分母不應為 0。
+	&& (y0 -= y1) !== 0
 	// 測試已達極限，已經得到相當好的效果。無法取得更精確值。
 	// assert: else: x0===x, 可能是因為誤差已過小。
-	&& (x2 = x1 - (x1 - x0) * (y1 - y) / (y1 - y0)) !== x1) {
-		// result
+	&& ((x2 = x1 - (x1 - x0) * (y - y1) / y0) !== x1 || x1 !== x0)) {
+		// evaluate result
 		y2 = equation(x2);
-		//library_namespace.debug(count + ': ' + x2 + ',' + y2 + ' → ' + (y2 - y));
+		if (false)
+			library_namespace.debug(count + ': ' + x2 + ',' + y2 + ' → '
+					+ (y2 - y));
 		// shift items
 		x0 = x1, y0 = y1;
 		x1 = x2, y1 = y2;
@@ -1154,7 +1158,7 @@ function secant_method(equation, x0, x1, y, options) {
 	return x2;
 }
 
-//CeL.secant_method(function(x) { return x * x; }, 3, 5, 15)
+//Math.pow(CeL.secant_method(function(x) { return x * x; }, 3, 5, 15), 2)
 //CeL.secant_method(function(x) { return x * x * x - 8; }, 5, 4)
 
 _.secant_method = secant_method;
@@ -1185,15 +1189,23 @@ function find_root(equation, x0, x1, y, options) {
 	// divided differences, 1階差商
 	y10 = (y1 - y0) / (x1 - x0), y21 = (y2 - y1) / (x2 - x1),
 	// 2階差商
-	y210 = (y21 - y10) / (x2 - x0);
+	y210 = (y21 - y10) / (x2 - x0),
+	// 暫時使用。
+	denominator;
 
 	// main loop of Sidi's generalized secant method (take k = 2)
 	while (error < Math.abs(y3 - y) && count-- > 0
-	// Avram Sidi (2008), "Generalization Of The Secant Method For Nonlinear Equations"
-	&& (x3 = x2 - (y2 - y) / (y21 + y210 * (x2 - x1))) !== x2) {
-		// result
+	// 檢查是否兩個差距極小的不同輸入，獲得相同輸出。
+	&& y21 !== 0
+	// 分母不應為 0。
+	&& (denominator = y21 + y210 * (x2 - x1)) !== 0
+	// Avram Sidi (2008), "Generalization Of The Secant Method For Nonlinear
+	// Equations"
+	// 可能需要考量會不會有循環的問題。
+	&& ((x3 = x2 - (y2 - y) / denominator) !== x2 || x2 !== x1 || x1 !== x0)) {
+		// evaluate result
 		y3 = equation(x3);
-		//library_namespace.debug(count + ': ' + x3 + ',' + y3 + ' → error ' + (y3 - y));
+		// console.log(count + ': ' + x3 + ',' + y3 + ' → error ' + (y3 - y));
 		// shift items
 		x0 = x1, y0 = y1;
 		x1 = x2, y1 = y2;
@@ -1205,14 +1217,14 @@ function find_root(equation, x0, x1, y, options) {
 		// incase y21 === y10
 		if (y210 = y21 - y10)
 			y210 /= x2 - x0;
-		//library_namespace.debug('divided differences: ' + [ y10, y21, y210 ]);
+		// console.log('divided differences: ' + [ y10, y21, y210 ]);
 	}
 
 	return x3;
 }
 
 
-//CeL.find_root(function(x) { return x * x; }, 3, 5, 15)
+//Math.pow(CeL.find_root(function(x) { return x * x; }, 3, 5, 15), 2)
 //CeL.find_root(function(x) { return x * x * x - 8; }, 5, 4)
 
 _.find_root = find_root;

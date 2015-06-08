@@ -234,7 +234,7 @@ if (typeof CeL === 'function')
 			 * 周角 = 360°, 1 turn, 1 revolution, 1 perigon, full circle, complete
 			 * rotation, a full rotation in degrees.
 			 */
-			TURN_TO_DEGREES = 360,
+			TURN_TO_DEGREES = 360 | 0,
 			/**
 			 * degrees * DEGREES_TO_RADIANS = radians.
 			 * 
@@ -250,7 +250,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * DEGREES_TO_ARCSECONDS = 3600
 			 */
-			DEGREES_TO_ARCSECONDS = 60 * 60,
+			DEGREES_TO_ARCSECONDS = 60 * 60 | 0,
 			/**
 			 * Arcseconds in a full circle. 角秒
 			 * 
@@ -274,7 +274,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @see https://github.com/kanasimi/IAU-SOFA/blob/master/src/sofam.h
 			 */
-			ONE_DAY_SECONDS = 24 * 60 * 60,
+			ONE_DAY_SECONDS = 24 * 60 * 60 | 0,
 			/**
 			 * Reference epoch (J2000.0), Julian Date. J2000.0 曆元。
 			 * 
