@@ -51,28 +51,19 @@ http://astro.kasi.re.kr/Life/ConvertSolarLunarForm.aspx?MenuID=115
 http://astro.kasi.re.kr/Life/Knowledge/solar2lunar/convert_daily_l2s.php
 
 
-晚唐、五代、宋、金時期存在的君主制國家與藩鎮等
+宋、金時期存在的君主制國家與藩鎮等
 +渤海國
 
 
 +藏曆
 
-+緬曆
 +蒙古曆
-+彝曆
-彝文历算书《尼亥尼司》研究
-
-+印度曆
-Indian Calendar
-http://www.math.nus.edu.sg/aslaksen/calendar/indian.html
 
 +印度年表
-+緬甸年表
 +寮國年表
 
 
 +Ab urbe condita (AUC)
-
 
 
 +敦煌曆
@@ -1129,7 +1120,7 @@ this.CeL_era_data = {
 		'/天祐|904/5/18~|閏4=2vwk',
 		'/哀帝/=|904/9/12~907/5/14|8=361 3os 4mho3k0|君主名=李柷;李祚|生=892年10月27日|卒=908年3月26日|在位=904年9月27日~907年5月12日|注=原名祚|君主=昭宣帝|諡=昭宣光烈孝皇帝',
 
-		// 唐朝統治地區其他勢力的年號
+		// 晚唐/唐朝統治地區其他勢力的年號
 		// 安史之亂
 		'燕/光烈帝/聖武|756/2/5~|:唐|君主名=安祿山|諡=光烈皇帝|時期=隋唐|朝代=唐',
 		'/哀帝/載初|757/1/30~|:唐|君主名=安慶緒|諡=晉剌王|注=安祿山事跡: 十五載正月乙卯朔，祿山遣東都耆老緇黃勸進，遂偽即帝位，國曰大燕，自稱雄武皇帝...二年正月五日，遂相與謀殺祿山...祿山以天寶十四年乙未十一月反，...乾元二年己亥為史思明所殺',
@@ -2591,6 +2582,59 @@ this.CeL_era_data = {
 				+ '|1976/=:CE|國號=Cộng hòa Xã hội chủ nghĩa Việt Nam;越南社會主義共和國'
 
 ]).minute_offset = 7 * 60;
+
+// ---------------------------------------------------------------------//
+// 印度年表, ancient India
+
+(this.CeL_era_data.India = [
+
+		// मगध (Magadha empire)
+		// https://en.wikipedia.org/wiki/Magadha
+
+		// Haryanka dynasty (c. 600 – 413 BC) 訶黎王朝
+		// Bhattiya
+		'Haryanka/बिम्बिसारः|-544~|:CE|疑|準=年|生=558|卒=491|時期=मगध|君主名=Bimbisara;頻毗娑羅',
+		'/Ajātasattu|-492~-460|:CE|疑|準=年|君主名=Ajātaśatru;Ajatasatru',
+		// Udayabhadra
+		// Anuruddha
+		// Munda
+		// Nagadasaka
+
+		// Shishunaga dynasty (413–345 BC) 幼龍王朝
+		'Shishunaga/Shishunaga|-413~|:CE|疑|準=年|時期=मगध|君主名=Shusunaga',
+		'/Kakavarna Kalashoka|-395~|:CE|疑|準=年',
+		'/Mahanandin|-367~-345|:CE|疑|準=年',
+
+		// Nanda Dynasty (345–321 BCE) 難陀王朝
+		'Nanda/महापद्मानन्द|-400~|:CE|疑|準=年|時期=मगध|君主名=Mahapadma Nanda',
+		// Pandhuka
+		// Panghupati
+		// Bhutapala
+		// Rashtrapala
+		// Govishanaka
+		// Dashasidkhaka
+		// Kaivarta
+		'/धनानन्द|-329~|:CE|疑|準=年|君主名=Dhana Nanda',
+
+		// 波斯人與希臘人的入侵
+
+		// Maurya Empire 孔雀王朝
+		// https://en.wikipedia.org/wiki/Maurya_Empire
+		'मौर्यसाम्राज्यम्/चन्द्रगुप्त मौर्य|-322~|:CE|疑|準=年|君主名=Chandragupta Maurya;旃陀羅笈多（月護王）',
+		'/Bindusara|-298~-272|:CE|疑|準=年|君主名=Bindusara Maurya;賓頭娑羅',
+		'/अशोक मौर्य|-269~|:CE|疑|準=年|君主名=Ashoka Maurya;阿育王（無憂王）',
+		'/Dasaratha|-232~|:CE|疑|準=年|君主名=Dasaratha Maurya',
+		'/Samprati|-224~|:CE|疑|準=年|君主名=Samprati Maurya',
+		'/Salisuka|-215~|:CE|疑|準=年|君主名=Salisuka Maurya;Śāliśuka',
+		'/Devavarman|-202~|:CE|疑|準=年|君主名=Devavarman Maurya',
+		'/Satadhanvan|-195~|:CE|疑|準=年|君主名=Satadhanvan Maurya',
+		'/बृहद्रथ मौर्य|-187~-180|:CE|疑|準=年|君主名=Brihadratha Maurya;Ashoka Bindusara Maurya',
+
+// The Śuṅga Empire (Sanskrit: शुंग राजवंश) or Shunga Empire 巽伽王朝
+// https://en.wikipedia.org/wiki/%C5%9Au%E1%B9%85ga_Empire
+
+// IST (UTC+05:30)
+]).minute_offset = 5.5 * 60;
 
 // ---------------------------------------------------------------------//
 // 緬甸, Myanmar / Burma

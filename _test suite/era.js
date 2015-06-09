@@ -225,6 +225,7 @@ selected_column = {
 auto_add_column = {
 	中國 : [ 'Year naming/歲次', '曆注/月干支', '曆注/日干支' ],
 	Maya : [ 'calendar/Long_Count', 'calendar/Tzolkin', 'calendar/Haab' ],
+	India : [ 'calendar/Hindu' ],
 	'မြန်မာ' : [ 'Gregorian reform/Great Britain', 'calendar/Myanmar' ],
 	Mesopotamian : [ 'calendar/Hebrew' ],
 	Egypt : [ 'calendar/Egyptian'
@@ -3131,12 +3132,23 @@ function affairs() {
 				// epithet : [ '閏', '', '缺' ],
 				note : true,
 				format : 'serial'
+			}), named_date = date.to_Hindu({
+				era : 'Saka'
 			});
 			return [ 'Saka ' + Hindu_date.slice(0, 3).join('/'), {
 				br : null
-			}, date.to_Hindu({
-				era : 'Saka'
-			}), {
+			}, {
+				span : named_date[0],
+				R : 'year'
+			}, ' ', {
+				span : named_date[1],
+				R : 'month',
+				S : 'color:#4a2;'
+			}, ' ', {
+				span : named_date[2],
+				R : 'date',
+				S : 'color:#633;'
+			}, {
 				br : null
 			}, ' Nakṣatra: ' + Hindu_date.Nakṣatra, {
 				br : null

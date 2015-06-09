@@ -3042,6 +3042,9 @@ http://www.rubydoc.info/gems/when_exe/0.4.1/When/Ephemeris/Hindu
 http://www.astrogyan.com/panchang/day-24/month-06/year-2015/indian_calender_june_24_2015.html
 https://github.com/suchowan/when_exe/blob/master/lib/when_exe/region/indian.rb
 
+Indian Calendar
+http://www.math.nus.edu.sg/aslaksen/calendar/indian.html
+
 */
 
 
@@ -3526,7 +3529,8 @@ function Date_to_Hindu(date, options) {
 		// Kṛṣṇa Pakṣa, the'dark part' of the month.
 		: 'Kṛṣṇa Pakṣa (कृष्णपक्ष) ' + (Hindu_date[2] - 15);
 
-		Hindu_date = Hindu_date.join(' ');
+		if (options.format === 'name')
+			Hindu_date = Hindu_date.join(' ');
 	}
 
 	return Hindu_date;
@@ -4663,6 +4667,7 @@ Solar_Hijri_Date.test = new_tester(Date_to_Solar_Hijri, Solar_Hijri_Date, {
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 彝曆
+// TODO: 彝文历算书《尼亥尼司》研究
 
 // 每月天數。
 var Yi_MONTH_DAYS = 36,
