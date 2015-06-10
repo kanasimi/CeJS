@@ -2630,8 +2630,33 @@ this.CeL_era_data = {
 		'/Satadhanvan|-195~|:CE|疑|準=年|君主名=Satadhanvan Maurya',
 		'/बृहद्रथ मौर्य|-187~-180|:CE|疑|準=年|君主名=Brihadratha Maurya;Ashoka Bindusara Maurya',
 
-// The Śuṅga Empire (Sanskrit: शुंग राजवंश) or Shunga Empire 巽伽王朝
-// https://en.wikipedia.org/wiki/%C5%9Au%E1%B9%85ga_Empire
+		// The Śuṅga Empire (Sanskrit: शुंग राजवंश) or Shunga Empire 巽伽王朝
+		// https://en.wikipedia.org/wiki/%C5%9Au%E1%B9%85ga_Empire
+		'शुंग राजवंश/Puṣyamitra Śuṅga|-185~|:CE|疑|準=年|君主名=Pushyamitra Sunga',
+		'/अग्निमित्र|-149~|:CE|疑|準=年|君主名=Agnimitra',
+		'/Vasujyetha|-141~|:CE|疑|準=年',
+		'/Vasumitra|-131~|:CE|疑|準=年|君主名=Sumitra', '/Andhraka|-124~|:CE|疑|準=年',
+		'/Pulindaka|-122~-119|:CE|疑|準=年',
+		// Ghosha
+		// Vajramitra
+		'/Bhagabhadra|-110~|:CE|疑|準=年|circa 110 BCE',
+		'/Devabhuti|-83~-73|:CE|疑|準=年',
+
+		// The Kanva or Kanvayana Dynasty is a Brahmin Dynasty replaced the
+		// Sunga dynasty in Magadha
+		// 甘婆王朝/甘華王朝
+		// https://en.wikipedia.org/wiki/Kanva_dynasty
+		'Kanva/Vasudeva|-75~|:CE|疑|準=年', '/Bhumimitra|-66~|:CE|疑|準=年',
+		'/Narayana|-52~|:CE|疑|準=年', '/Susharman|-40~-30|:CE|疑|準=年',
+
+// The Mahameghavahana dynasty (Oriya: ମହାମେଘବାହନ; Mahā-Mēgha-Bāhana, c. 250s BC
+// to 400s AD) was an ancient ruling dynasty of Kalinga after the decline of the
+// Mauryan Empire.
+// https://en.wikipedia.org/wiki/Mahameghavahana_dynasty
+
+// The Gupta Empire (Sanskrit: गुप्तसाम्राज्य, Gupta Sāmrājya) was an ancient
+// Indian empire
+// https://en.wikipedia.org/wiki/Gupta_Empire
 
 // IST (UTC+05:30)
 ]).minute_offset = 5.5 * 60;

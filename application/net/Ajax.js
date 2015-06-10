@@ -573,6 +573,7 @@ function merge_cookie(agent, cookie) {
 		if (!agent.last_cookie.includes(piece))
 			agent.last_cookie.push(piece);
 	});
+	//console.log(agent.last_cookie);
 	return agent.last_cookie;
 }
 
@@ -602,11 +603,12 @@ function get_URL_node(URL, onload, encoding, post_data) {
 		post_data = encoding;
 		encoding = null;
 	}
-	var options;
+	var options, headers;
 	if (library_namespace.is_Object(URL) && URL.URL) {
 		onload = URL.onload || onload;
 		post_data = URL.post || post_data;
 		encoding = URL.encoding || encoding;
+		headers = URL.headers;
 		URL = (options = URL).URL;
 	} else
 		options = library_namespace.null_Object();
@@ -659,27 +661,27 @@ function get_URL_node(URL, onload, encoding, post_data) {
 			result.setEncoding(encoding || 'utf8');
 		// listener must be a function
 		if (typeof onload === 'function') {
-			var chunk = [];
-			result.on('data', function(data) {
-				library_namespace.debug('receive BODY.length: ' + data.length, 3, 'get_URL_node');
-				chunk.push(data);
+			var data = [];
+			result.on('data', function(chunk) {
+				library_namespace.debug('receive BODY.length: ' + chunk.length, 3, 'get_URL_node');
+				data.push(chunk);
 			});
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			result.on('end', function() {
 				//console.log('No more data in response.');
 				if (encoding !== 'binary')
-					chunk = chunk.join('');
+					data = data.join('');
 				else {
 					//TODO:  (binary)
 				}
 				if (library_namespace.is_debug(4))
-					library_namespace.debug('BODY: ' + chunk, 1, 'get_URL_node');
+					library_namespace.debug('BODY: ' + data, 1, 'get_URL_node');
 				// 模擬 XMLHttp。
 				onload({
-					responseText : chunk
+					responseText : data
 				});
 				// free
-				chunk = null;
+				data = null;
 			});
 		} else {
 			library_namespace.warn('get_URL_node: get [' + URL + '], but no listener!');
@@ -696,18 +698,28 @@ function get_URL_node(URL, onload, encoding, post_data) {
 		};
 	}
 
+	if (headers) {
+		if (!_URL.headers)
+			_URL.headers = {};
+		Object.assign(_URL.headers, headers);
+	}
+
 	_URL.agent = agent;
 	if (agent.last_cookie) {
 		if (!_URL.headers)
 			_URL.headers = {};
 		library_namespace.debug('Set cookie: ' + JSON.stringify(agent.last_cookie), 3, 'get_URL_node');
+		_URL.headers.Cookie = (_URL.headers.Cookie ? _URL.headers.Cookie + ';' : '')
 		// cookie is Array @ Wikipedia
-		_URL.headers.Cookie = Array.isArray(agent.last_cookie) ? agent.last_cookie.join(';') : agent.last_cookie;
+		+ (Array.isArray(agent.last_cookie) ? agent.last_cookie.join(';') : agent.last_cookie);
+		//console.log(_URL.headers.Cookie);
 	}
 	library_namespace.debug('set protocol ' + _URL.protocol, 3, 'get_URL_node');
+	//console.log(_URL.headers);
 	request = _URL.protocol === 'https:' ? node_https.request(_URL, _onload) : node_http.request(_URL, _onload);
 
 	if (post_data) {
+		//console.log(post_data);
 		library_namespace.debug('set post data: length ' + post_data.length, 3, 'get_URL_node');
 		request.write(post_data);
 	}
