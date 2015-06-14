@@ -223,11 +223,13 @@ function tag_to_attribute(nodes, root) {
 _.tag_to_attribute = tag_to_attribute;
 
 
+// text declaration of XML.
 var PATTERN_XML_declaration = /^\s*<\?xml(?:\s[^<>?]*)?\?>\s*/,
-// 無 close tag 之 node pattern
+// 無 end-tag 之 node (empty-element tag) pattern
+// http://www.w3.org/TR/REC-xml/#sec-starttags
 // [ , tag, attributes ]
-PATTERN_SINGLE = /<([^\0-\-:->\s]+)(\s[^<>]*?)?\/>/,
-// close tag 之 pattern
+PATTERN_EMPTY = /<([^\0-\-:->\s]+)(\s[^<>]*?)?\/>/,
+// end-tag 之 pattern
 // [ , last children, tag name ]
 PATTERN_END = /^([\S\s]*?)<\/([^\0-\-:->\s]+)\s*>/;
 
@@ -273,7 +275,7 @@ function XML_to_JSON(XML, options) {
 			continue;
 
 		// 'f<n/>e' → 'f', {n:null}, 'e'
-		if (matched = nodes[index].match(PATTERN_SINGLE)) {
+		if (matched = nodes[index].match(PATTERN_EMPTY)) {
 			// 本次要建構的 node。
 			var node = {},
 			//
@@ -412,6 +414,7 @@ _.XML_to_JSON = XML_to_JSON;
  *            node list
  * @param {Object}[options]
  *            options<br />
+ *            {Boolean}options.no_empty: no empty-element tags.
  * 
  * @returns {String}XML
  */
@@ -432,12 +435,12 @@ function to_XML(nodes, options) {
 			}
 		}
 		n = nodes[tag];
-		node.push(n || n === 0 ? '>' + to_XML(n, options) + '</' + tag + '>'
-				: ' />');
+		n = n || n === 0 ? to_XML(n, options) : options && options.no_empty ? '' : null;
+		node.push(n === null ? ' />' : '>' + n + '</' + tag + '>');
 		return node.join('');
 	}
 
-	return String(nodes);
+	return n || n === 0 ? String(nodes) : nodes;
 }
 
 /**

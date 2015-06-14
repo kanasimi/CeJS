@@ -542,6 +542,7 @@ if (typeof CeL === 'function')
 				朝代 : 2,
 				政權 : 2,
 				國號 : 2,
+				// 王國名
 				國名 : 2,
 
 				// 王朝, 帝國, Empire
@@ -557,6 +558,7 @@ if (typeof CeL === 'function')
 				// country
 				// e.g., 中國, 日本
 				國家 : 3
+			// territory 疆域
 			// nation
 			// 民族 : 3
 			// 地區, 區域. e,g, 中亞, 北亞, 東北亞

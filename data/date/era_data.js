@@ -2618,8 +2618,9 @@ this.CeL_era_data = {
 
 		// 波斯人與希臘人的入侵
 
-		// Maurya Empire 孔雀王朝
+		// Maurya Empire, Mauryan Empire, 孔雀王朝
 		// https://en.wikipedia.org/wiki/Maurya_Empire
+		// https://en.wikipedia.org/wiki/List_of_Mauryan_rulers
 		'मौर्यसाम्राज्यम्/चन्द्रगुप्त मौर्य|-322~|:CE|疑|準=年|君主名=Chandragupta Maurya;旃陀羅笈多（月護王）',
 		'/Bindusara|-298~-272|:CE|疑|準=年|君主名=Bindusara Maurya;賓頭娑羅',
 		'/अशोक मौर्य|-269~|:CE|疑|準=年|君主名=Ashoka Maurya;阿育王（無憂王）',
@@ -2630,12 +2631,20 @@ this.CeL_era_data = {
 		'/Satadhanvan|-195~|:CE|疑|準=年|君主名=Satadhanvan Maurya',
 		'/बृहद्रथ मौर्य|-187~-180|:CE|疑|準=年|君主名=Brihadratha Maurya;Ashoka Bindusara Maurya',
 
+		// https://en.wikipedia.org/wiki/Indo-Greek_Kingdom#List_of_the_Indo-Greek_kings_and_their_territories
+		// The Indo-Greek Kingdom or Graeco-Indian Kingdom
+		// https://en.wikipedia.org/wiki/Timeline_of_Indo-Greek_kingdoms
+		'ګندارا‎/Ἀπολλόδοτος Α΄ ὁ Σωτήρ|-180~-160|:CE|疑|準=年|君主名=Apollodotus I;Apollodotus I Soter;महरजस अपलदतस त्रतरस|朝代=Gandhāra;Gandhara|時期=Indo-Greek',
+		// TODO
+		'Punjab/Στράτων B΄ ὁ Σωτήρ|-25~-10|:CE|疑|準=年|君主名=Strátōn B΄ ho Sotḗr;Strato II;Strato II "Soter"|時期=Indo-Greek',
+
 		// The Śuṅga Empire (Sanskrit: शुंग राजवंश) or Shunga Empire 巽伽王朝
 		// https://en.wikipedia.org/wiki/%C5%9Au%E1%B9%85ga_Empire
 		'शुंग राजवंश/Puṣyamitra Śuṅga|-185~|:CE|疑|準=年|君主名=Pushyamitra Sunga',
 		'/अग्निमित्र|-149~|:CE|疑|準=年|君主名=Agnimitra',
 		'/Vasujyetha|-141~|:CE|疑|準=年',
-		'/Vasumitra|-131~|:CE|疑|準=年|君主名=Sumitra', '/Andhraka|-124~|:CE|疑|準=年',
+		'/Vasumitra|-131~|:CE|疑|準=年|君主名=Sumitra',
+		'/Andhraka|-124~|:CE|疑|準=年',
 		'/Pulindaka|-122~-119|:CE|疑|準=年',
 		// Ghosha
 		// Vajramitra
@@ -2646,17 +2655,42 @@ this.CeL_era_data = {
 		// Sunga dynasty in Magadha
 		// 甘婆王朝/甘華王朝
 		// https://en.wikipedia.org/wiki/Kanva_dynasty
-		'Kanva/Vasudeva|-75~|:CE|疑|準=年', '/Bhumimitra|-66~|:CE|疑|準=年',
-		'/Narayana|-52~|:CE|疑|準=年', '/Susharman|-40~-30|:CE|疑|準=年',
+		'Kanva/Vasudeva|-75~|:CE|疑|準=年',
+		'/Bhumimitra|-66~|:CE|疑|準=年',
+		'/Narayana|-52~|:CE|疑|準=年',
+		'/Susharman|-40~-30|:CE|疑|準=年',
 
-// The Mahameghavahana dynasty (Oriya: ମହାମେଘବାହନ; Mahā-Mēgha-Bāhana, c. 250s BC
-// to 400s AD) was an ancient ruling dynasty of Kalinga after the decline of the
-// Mauryan Empire.
-// https://en.wikipedia.org/wiki/Mahameghavahana_dynasty
+		/**
+		 * The Mahameghavahana dynasty (Oriya: ମହାମେଘବାହନ; Mahā-Mēgha-Bāhana, c.
+		 * 250s BC to 400s AD) was an ancient ruling dynasty of Kalinga after
+		 * the decline of the Maurya Empire.
+		 * 
+		 * @see https://en.wikipedia.org/wiki/Mahameghavahana_dynasty
+		 */
+		'ମହାମେଘବାହନ/ଖାରବେଳ|-193~-170|:CE|疑|準=年|朝代=Mahāmēghabāhana;Maha-Meghavahana;Mahameghavahana|君主名=ଖାରେବଳ;खारवेल;Khārabēḷa;Khāravēla;Kharavela|注=the third and greatest emperor of the Mahameghavahana dynasty of Kalinga (present-day Odisha).',
 
-// The Gupta Empire (Sanskrit: गुप्तसाम्राज्य, Gupta Sāmrājya) was an ancient
-// Indian empire
-// https://en.wikipedia.org/wiki/Gupta_Empire
+		// The Gupta Empire (Sanskrit: गुप्तसाम्राज्य, Gupta Sāmrājya) was an
+		// ancient Indian empire
+		// https://en.wikipedia.org/wiki/Gupta_Empire
+		'गुप्तसाम्राज्य/Śri Gupta|240~|:CE|疑|準=年|朝代=गुप्ता राजवंश;Gupta;笈多王朝',
+		'/Ghatotkacha|280~|:CE|疑|準=年',
+		'/Chandragupta|320~|:CE|疑|準=年|君主名=Chandragupta I',
+		'/Samudragupta|335~|:CE|疑|準=年',
+		'/चन्द्रगुप्त विक्रमादित्य|375~|:CE|疑|準=年|君主名=Chandragupta II',
+		'/Kumaragupta I|415~|:CE|疑|準=年|君主名=Shakraditya;Mahendraditya',
+		'/स्कन्दगुप्त|455~|:CE|疑|準=年|君主名=Skandagupta',
+		'/पुरुगुप्त|467~|:CE|疑|準=年|君主名=Purugupta',
+		'/कुमारगुप्त द्वितीय|473~|:CE|疑|準=年|君主名=Kumaragupta II',
+		'/बुधगुप्त|476~|:CE|疑|準=年|君主名=Budhagupta',
+		'/Narasimhagupta|495~|:CE|疑|準=年|君主名=Narasimhagupta Baladitya|注=495 – ? CE',
+		// 510: 隨便選
+		'/Kumaragupta III|510~|:CE|疑|準=年|注=? – 540 CE',
+		'/विष्णुगुप्त|540~|:CE|疑|準=年|君主名=Vishnugupta',
+		'/वैन्यगुप्त|550~|:CE|疑|準=年|君主名=Vainyagupta',
+		// 552: 隨便選
+		'/Bhanugupta|552~|:CE|疑|準=年',
+		// 553: 隨便選
+		'/Shashankgupta|553~554|:CE|疑|準=年|注=554 : The Gupta dynasty ends when the last emperor Shashakgupta dies.',
 
 // IST (UTC+05:30)
 ]).minute_offset = 5.5 * 60;
