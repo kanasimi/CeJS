@@ -1257,8 +1257,7 @@ var is_Date = library_namespace.is_Date,
 //中文月名: Chinese_month_name[1]=正
 Chinese_month_name = ['', '正'],
 // 中文日名: Chinese_date_name[1]=初一
-Chinese_date_name = [''],
-Chinese_week_name = [];
+Chinese_date_name = [''];
 
 // 初一, 初二, ..初十,十一..十九,二十,廿一,廿九,三十
 (function () {
@@ -1277,18 +1276,16 @@ Chinese_week_name = [];
 			date_name = date_name.replace(/二十/, '廿');
 		Chinese_date_name.push(date_name);
 	}
-
-	'日一二三四五六'.split('')
-	//
-	.forEach(function (name) {
-		Chinese_week_name.push('星期' + name);
-	});
 })();
 
 month_name.Chinese_month_name = Chinese_month_name;
 date_name.Chinese_date_name = Chinese_date_name;
 
-var English_week_name = 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(',');
+var Chinese_week_name = '日一二三四五六'.split(''),
+//
+Japanese_week_name = '日月火水木金土'.split(''),
+//
+English_week_name = 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(',');
 
 
 function week_name(ordinal, domain_name) {
@@ -1297,7 +1294,10 @@ function week_name(ordinal, domain_name) {
 	case 'cmn-Hant-TW':
 	case 'cmn-Hans-CN':
 		// number to Chinese week name.
-		return Chinese_week_name[ordinal];
+		return '星期' + Chinese_week_name[ordinal];
+
+	case 'ja-JP':
+		return Japanese_week_name[ordinal] + '曜日';
 
 	case 'en-US':
 		return English_week_name[ordinal];

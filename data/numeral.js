@@ -842,7 +842,7 @@ if (typeof CeL === 'function')
 					// Bengali-Assamese numerals
 					// https://en.wikipedia.org/wiki/Bengali_numerals
 					// ৴৵৶৷৸৹
-					Bengali : '০১২৩৪৫৬৭৮৯',
+					Bangla : '০১২৩৪৫৬৭৮৯',
 
 					Brahmi : '𑁦𑁧𑁨𑁩𑁪𑁫𑁬𑁭𑁮𑁯',
 					Chakma : '𑄶𑄷𑄸𑄹𑄺𑄻𑄼𑄽𑄾𑄿',

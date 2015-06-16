@@ -522,15 +522,23 @@ function String_to_Date_default_parser(date_string,
 		options.post_process(date_data);
 
 	// 先設定小單位，再設定大單位：設定小單位時會影響到大單位。反之不然。
+	year = +year || 0;
+	// time zone。
+	tmp = (+date_data[4] || 0)
+			+ String_to_Date.default_offset
+			- (+minute_offset || 0);
 	var date_value;
-	date_value = new Date(0, 0, 0, +date_data[3] || 0,
-			0, +date_data[5] || 0, +date_data[6] || 0);
-	// new Date(10, ..) === new Date(1910, ..)
-	date_value.setFullYear(year || 0,
-			date_data[1] ? date_data[1] - 1 : 0,
-					date_data[2]);
-	// 設定時間後才設定 time zone。
-	date_value.setMinutes((+date_data[4] || 0)
+	if (year < 99 && year >= 0) {
+		(date_value = new Date(0)).setFullYear(
+		// new Date(10, ..) === new Date(1910, ..)
+		year, date_data[1] ? date_data[1] - 1 : 0, date_data[2], +date_data[3] || 0,
+			tmp, +date_data[5] || 0, +date_data[6] || 0);
+	} else
+		date_value = new Date(year, date_data[1] ? date_data[1] - 1 : 0, date_data[2], +date_data[3] || 0,
+			tmp, +date_data[5] || 0, +date_data[6] || 0);
+	if (false)
+		// 設定時間後才設定 time zone。
+		date_value.setMinutes((+date_data[4] || 0)
 			+ String_to_Date.default_offset
 			- (+minute_offset || 0));
 

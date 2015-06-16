@@ -16,11 +16,13 @@
 if (false)
 	(function() {
 		// Copy this section in front of the script. Path list from /path.txt/.
+		// @see node.demo.js
 
 		"use strict";
 
 		// ----------------------------------------------------------------------------
 		// For node.js loading. Copy from /_for include/node.loader.js.
+		// 載入泛用（非特殊目的使用）之功能。
 		'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS'
 		//
 		.split('|')

@@ -590,25 +590,21 @@ function show_calendar(era_name) {
 		hidden_column.unshift(': ');
 		title = [ {
 			div : [ {
-				div : {
-					T : '全不選',
-					R : 'Remove all columns. 除去所有欄',
-					onclick : function() {
-						for ( var column in selected_column)
-							delete selected_column[column];
-						translate_era();
-					}
+				T : '全不選',
+				R : 'Remove all columns. 除去所有欄',
+				onclick : function() {
+					for ( var column in selected_column)
+						delete selected_column[column];
+					translate_era();
 				},
 				C : 'column_select_option_button',
 				S : 'font-size:.7em;'
 			}, {
-				div : {
-					T : pin_text(),
-					R : 'Click to pin / unpin',
-					onclick : function() {
-						pin_column = !pin_column;
-						this.innerHTML = pin_text(true);
-					}
+				T : pin_text(),
+				R : 'Click to pin / unpin',
+				onclick : function() {
+					pin_column = !pin_column;
+					this.innerHTML = pin_text(true);
 				},
 				C : 'column_select_option_button'
 			}, {
@@ -2426,16 +2422,16 @@ function affairs() {
 			href : 'https://en.wikipedia.org/wiki/Week',
 			S : 'font-size:.7em;'
 		}, function(date) {
-			if (/* date.準 || */date.精)
-				return;
-
-			if (_.is_domain_name('ja'))
-				return date.七曜;
-
-			return date.format({
-				format : '%w',
-				locale : _.get_domain_name()
-			});
+			if (/* !date.準 && */!date.精)
+				return {
+					span : date.format({
+						format : '%w',
+						locale : _.get_domain_name()
+					}),
+					S : date.getDay() === 0 ? 'color:#f34'
+					//
+					: date.getDay() === 6 ? 'color:#2b3' : ''
+				};
 		} ],
 
 		JDN : [ {
@@ -2917,11 +2913,11 @@ function affairs() {
 			R : 'Tabular Islamic calendar\n日落後為隔日。',
 			href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar'
 		}, function(date) {
-			return date.精 === '年' ? 'AH' + date.to_Tabular({
+			return date.精 === '年' ? date.to_Tabular({
 				format : 'serial'
-			})[0] : [ 'AH' + date.to_Tabular({
+			})[0] + ' AH' : [ date.to_Tabular({
 				format : 'serial'
-			}).slice(0, 3).join('/') + '; ', {
+			}).slice(0, 3).join('/') + ' AH; ', {
 				span : date.to_Tabular(),
 				dir : 'rtl',
 				S : 'unicode-bidi: -moz-isolate;'
@@ -2941,15 +2937,31 @@ function affairs() {
 			//
 			+ '_%D8%AE%D9%88%D8%B1%D8%B4%DB%8C%D8%AF%DB%8C'
 		}, function(date) {
-			return date.精 === '年' ? 'SH' + date.to_Solar_Hijri({
+			return date.精 === '年' ? date.to_Solar_Hijri({
 				format : 'serial'
-			})[0] : [ 'SH' + date.to_Solar_Hijri({
+			})[0] + ' SH' : [ date.to_Solar_Hijri({
 				format : 'serial'
-			}).slice(0, 3).join('/') + '; ', {
+			}).slice(0, 3).join('/') + ' SH; ', {
 				span : date.to_Solar_Hijri(),
 				dir : 'rtl',
 				S : 'unicode-bidi: -moz-isolate;'
 			} ];
+		} ],
+
+		Bangla : [ {
+			a : {
+				T : 'Bangla calendar'
+			},
+			R : 'revised Bengali Calendar or Bangla Calendar. 現行孟加拉曆.'
+			//
+			+ '\n自日出起算。日出 (6:0) 為孟加拉曆當日起始。Day begins at sunrise.',
+			href : 'https://en.wikipedia.org/wiki/Bengali_calendar'
+		}, function(date) {
+			return date.精 === '年' ? date.to_Bangla({
+				format : 'serial'
+			})[0] + ' BS' : date.to_Bangla({
+				format : 'serial'
+			}).slice(0, 3).join('/') + ' BS; ' + date.to_Bangla();
 		} ],
 
 		Hebrew : [
@@ -3118,7 +3130,9 @@ function affairs() {
 			a : {
 				T : '印度曆',
 			},
-			R : 'Hindu calendar, 印度曆',
+			R : 'Hindu calendar, 印度曆, 自日出起算。'
+			//
+			+ '\n日出 (6:0) 為印度曆當日起始。Day begins at sunrise.',
 			href : 'https://en.wikipedia.org/wiki/Hindu_calendar'
 		}, function(date) {
 			if (date.精 === '年')

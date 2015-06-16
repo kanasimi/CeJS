@@ -119,6 +119,10 @@ td {
 	padding-left: 1em;
 }
 
+.column_select_option_button:hover {
+	background-color: #ffe;
+}
+
 #column_to_select {
 	display: none;
 }
@@ -570,11 +574,19 @@ div.box {
 			<li>您可參照測試範例，先輸入來源紀年與日期，後選取輸出格式，按下轉換執行鍵「→」即可獲得轉換結果。</li>
 			<li>感謝孫郁興教授、譚冰、唐凯、Yan Naing Aye 等研究者，親自提供本函式庫之資料來源與指導。</li>
 			<li>請各位先進幫助測試本工具之正確性，看看是否有謬誤之處。更希望能幫忙到有需要的文史前輩們。</li>
-			<li>本函式庫希望能納入日、韓、越之紀年，以及共和元年(841
-				BCE)之後的中國曆數。請幫助我們取得這些王朝之數字化曆數資料。</li>
-			<li>本函式庫以歷史上實際施行、使用過的曆數為準。<!-- actually observed -->實曆包含經傳曆日、簡牘曆譜等。用意不在推導曆法，而在<b>據實轉換過去時間</b>。因此實曆部分僅用查表法，盡可能採用學術界或官方認可的曆數，未打算作繁複曆法計算。更深入的資料結構，可參見
+			<li>Please help us <a rel="nofollow"
+				href="https://docs.google.com/spreadsheets/d/1E0NJV7eRfRD89QkGAUHxMpJY5TkSSRVvzCzBhx5hm7w/edit?usp=sharing"
+				accessdate="2015/6/16 15:42"
+				title="locale of Era Calendar Converter - Google 試算表">translating
+					the interface</a>.
+			</li>
+			<li>本函式庫希望能納入各文明（包括日、韓、越王朝）之紀年，以及共和元年 (841 BCE)
+				之後的中國曆數。請幫助我們取得這些文明之數字化曆數資料。</li>
+			<li>本函式庫以歷史上實際施行、使用過的曆數為準。<!-- actually observed -->實曆包含經傳曆日、簡牘曆譜等。用意不在推導曆法，而在<b>據實轉換過去時間</b>。因此實曆多僅用查表法，盡可能採用學術界或官方認可的曆數，未打算全部實作出繁複的曆法計算。更深入的資料結構，可參見
 				<a rel="nofollow"
-				href="https://github.com/kanasimi/CeJS/blob/master/data/date/era_data.js">era_data.js</a>。
+				href="https://github.com/kanasimi/CeJS/blob/master/data/date/era_data.js">era_data.js</a>。已實作之曆法計算可參見
+				<a rel="nofollow"
+				href="https://github.com/kanasimi/CeJS/blob/master/data/date/calendar.js">calendar.js</a>。
 			</li>
 			<li>天文演算採用完整的 <a rel="nofollow"
 				href="https://en.wikipedia.org/wiki/VSOP_%28planets%29"

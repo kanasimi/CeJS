@@ -273,9 +273,9 @@ function start_count(restart) {
 		// 提醒
 		window.focus();
 	// 顯示
-	CeL.get_element('clock').innerHTML = timer > timeout1 ? CeL
-			.format_date(timer) : '<span style="color:#f88">'
-			+ CeL.format_date(timer) + '</span>';
+	CeL.get_element('clock').innerHTML = timer > timeout1 ?
+			new Date(timer).format('%M:%S') : '<span style="color:#f88">'
+			+ new Date(timer).format('%M:%S') + '</span>';
 	CeL.get_element('clock').style.marginTop = '50pt';
 
 	if (timer > 0)
@@ -709,6 +709,8 @@ function start_count(restart) {
 			};
 
 		});
+
+		CeL.run('data.date');
 
 		CeL.run('application.math');
 

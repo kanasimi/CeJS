@@ -129,9 +129,9 @@ function _format(date, options, to_name, is_leap, combine) {
 		date[1] = to_name(date[1], is_leap, options);
 	else if (Array.isArray(to_name))
 		to_name.forEach(function(func, index) {
-			if (index === 3)
-				index = KEY_WEEK;
-			date[index] = func(date[index], is_leap, index);
+			date[ index === 3 ? KEY_WEEK : index ]
+			//
+			= func(date[index], is_leap, index);
 		});
 	else
 		library_namespace.warn('_format: 無法辨識之 to_name: ' + to_name);
@@ -161,6 +161,7 @@ function _format(date, options, to_name, is_leap, combine) {
 			format = options.prefix + format;
 	}
 
+	// add weekday name
 	if (date[KEY_WEEK])
 		format = date[KEY_WEEK] + ', ' + format;
 	return format;
@@ -181,7 +182,7 @@ function _format(date, options, to_name, is_leap, combine) {
 function new_tester(to_Calendar, to_Date, options) {
 	options = Object.assign(library_namespace.null_Object(),
 			new_tester.default_options, options || {});
-	var epoch = options.epoch || to_Date.epoch || 0,
+	var epoch = (options.epoch || to_Date.epoch) - 0 || 0,
 	//
 	month_days = options.month_days, CE_format = options.CE_format,
 	//
@@ -263,11 +264,13 @@ function new_tester(to_Calendar, to_Date, options) {
 
 		library_namespace.info((new Date - begin) + ' ms, error '
 				+ error.length + '/' + error_limit);
-		return error;
+		if (error.length)
+			return error;
 	};
 }
 
 new_tester.default_options = {
+	// length of the months
 	month_days : {
 		29 : '陰陽曆大月',
 		30 : '陰陽曆小月'
@@ -3087,15 +3090,16 @@ Hindu_zodiac_angle = TURN_TO_DEGREES / Hindu_zodiac_signs | 0,
 Hindu_month_count = Hindu_zodiac_signs,
 Hindu_month_angle = TURN_TO_DEGREES / Hindu_month_count | 0,
 
-// 日出 (6:0) 為當日起始。Day begins at sunrise.
+// 自日出起算。日出 (6:0) 為印度曆當日起始。Day begins at sunrise.
 Hindu_days_begin = .25,
 
 // names
 Hindu_leap_prefix = 'Adhika ',
-// month names
+// month names (मासाः, भारतीयमासाः)
+// https://sa.wikipedia.org/wiki/%E0%A4%AD%E0%A4%BE%E0%A4%B0%E0%A4%A4%E0%A5%80%E0%A4%AF%E0%A4%AE%E0%A4%BE%E0%A4%B8%E0%A4%BE%E0%A4%83
 Hindu_month_name =
 	//'|Chaitra|Vaiśākha|Jyeṣṭha|Āṣāḍha|Śrāvaṇa|Bhādrapada, Bhādra or Proṣṭhapada|Āśvina|Kārtika|Agrahāyaṇa, Mārgaśīrṣa|Pauṣa|Māgha|Phālguna'
-	'|Chaitra|Vaiśākha|Jyeṣṭha|Āṣāḍha|Śrāvaṇa|Bhādra|Āśvina|Kārtika|Agrahāyaṇa|Pauṣa|Māgha|Phālguna'
+	'|Chaitra (चैत्र)|Vaiśākha (वैशाख)|Jyeṣṭha (ज्येष्ठ)|Āṣāḍha (आषाढ)|Śrāvaṇa (श्रावण)|Bhādra (भाद्रपद)|Āśvina (अश्विन्)|Kārtika (कार्तिक)|Agrahāyaṇa (मार्गशीर्ष)|Pauṣa (पौष)|Māgha (माघ)|Phālguna (फाल्गुन)'
 	.split('|'),
 Hindu_year_name =
 	'Prabhava|Vibhava|Shukla|Pramoda|Prajāpati|Āngirasa|Shrīmukha|Bhāva|Yuva|Dhātri|Īshvara|Bahudhānya|Pramādhi|Vikrama|Vrisha|Chitrabhānu|Svabhānu|Tārana|Pārthiva|Vyaya|Sarvajeeth|Sarvadhāri|Virodhi|Vikrita|Khara|Nandana|Vijaya|Jaya|Manmatha|Durmukhi|Hevilambi|Vilambi|Vikāri|Shārvari|Plava|Shubhakruti|Sobhakruthi|Krodhi|Vishvāvasu|Parābhava|Plavanga|Kīlaka|Saumya|Sādhārana|Virodhikruthi|Paridhāvi|Pramādicha|Ānanda|Rākshasa|Anala|Pingala|Kālayukthi|Siddhārthi|Raudra|Durmathi|Dundubhi|Rudhirodgāri|Raktākshi|Krodhana|Akshaya'
@@ -3106,6 +3110,8 @@ Nakṣatra =
 	// 'Ashwini (अश्विनि)|Bharani (भरणी)|Kritika (कृत्तिका)|Rohini(रोहिणी)|Mrigashīrsha(म्रृगशीर्षा)|Ārdrā (आर्द्रा)|Punarvasu (पुनर्वसु)|Pushya (पुष्य)|Āshleshā (आश्लेषा)|Maghā (मघा)|Pūrva or Pūrva Phalgunī (पूर्व फाल्गुनी)|Uttara or Uttara Phalgunī (उत्तर फाल्गुनी)|Hasta (हस्त)|Chitra (चित्रा)|Svātī (स्वाति)|Viśākhā (विशाखा)|Anurādhā (अनुराधा)|Jyeshtha (ज्येष्ठा)|Mula (मूल)|Pūrva Ashādhā (पूर्वाषाढ़ा)|Uttara Aṣāḍhā (उत्तराषाढ़ा)|Śrāvaṇa (श्र‌ावण)|Śrāviṣṭha (श्रविष्ठा) or Dhanishta|Shatabhisha (शतभिषा)or Śatataraka|Pūrva Bhādrapadā (पूर्वभाद्रपदा)|Uttara Bhādrapadā (उत्तरभाद्रपदा)|Revati (रेवती)'
 	'Aśvinī अश्विनी|Bharaṇī भरणी|Kṛttikā कृत्तिका|Rohiṇī रोहिणी|Mṛgaśirṣa मृगशिर्ष|Ārdrā आद्रा|Punarvasu पुनर्वसु|Puṣya पुष्य|Aśleṣā आश्ळेषा / आश्लेषा|Maghā मघा|Pūrva or Pūrva Phalguṇī पूर्व फाल्गुनी|Uttara or Uttara Phalguṇī उत्तर फाल्गुनी|Hasta हस्त|Citrā चित्रा14|Svāti स्वाति|Viśākha विशाखा|Anurādhā अनुराधा|Jyeṣṭha ज्येष्ठा|Mūla मूल/मूळ|Pūrvāṣāḍha पूर्वाषाढा|Uttarāṣāḍha उत्तराषाढा|Śravaṇa श्रवण|Śraviṣṭhā or Dhaniṣṭha श्रविष्ठा or धनिष्ठा|Śatabhiṣak or Śatatārakā शतभिषक् / शततारका|Pūrva Bhādrapadā पूर्वभाद्रपदा / पूर्वप्रोष्ठपदा|Uttara Bhādrapadā उत्तरभाद्रपदा / उत्तरप्रोष्ठपदा|Revatī रेवती'
 	.split('|'),
+//Hindu_weekday_name
+// the Vāsara (ancient nomeclature), vāra (modern nomeclature), like in ravi-vāra, somā-vāra, etc. or weekday
 Vāsara = 'Ravi vāsara रविवासर|Soma vāsara सोमवासर|Maṅgala vāsara मंगलवासर|Budha vāsara बुधवासर|Guru vāsara गुरुवासर|Śukra vāsara शुक्रवासर|Śani vāsara शनिवासर'.split('|'),
 
 /*
@@ -3614,6 +3620,8 @@ Indian_national_6_months_days = 6 * 31 | 0,
 Indian_national_month_name = '|Chaitra|Vaishākha|Jyaishtha|Āshādha|Shrāvana|Bhādrapada|Āshwin|Kārtika|Agrahayana|Pausha|Māgha|Phālguna'.split('|');
 
 function Indian_national_Date(year, month, date) {
+	// has year 0
+
 	year += Saka_epochal_year;
 	// 預設當作閏年，3/21 起 Indian_national_6_months_days 日 + 6*30日。
 	if (--month > 0
@@ -3691,9 +3699,131 @@ _.Indian_national_Date = Indian_national_Date;
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// 長曆: 現行孟加拉曆
+// The Bengali Calendar or Bangla Calendar (বঙ্গাব্দ Bônggabdô or Banggabda) (New revised tropical version - Bangladesh)
+// https://en.wikipedia.org/wiki/Bengali_calendar
+// http://www.pallab.com/services/bangladateconverter.aspx
+
+// TODO:
+// http://www.ponjika.com/pBosor.aspx
+// http://usingha.com/1.html
+
+// epochal year
+// the starting date: 14 April 594 CE
+var Bangla_epochal_year = 594 - 1 | 0,
+// normalized string. e.g., 'আষাঢ়'.normalize() === 'আষাঢ়'
+Bangla_month_name = '|Bôishakh (বৈশাখ)|Jyôishţhô (জ্যৈষ্ঠ)|Ashaŗh (আষাঢ়)|Shrabôn (শ্রাবণ)|Bhadrô (ভাদ্র)|Ashbin (আশ্বিন)|Kartik (কার্তিক)|Ôgrôhayôn (অগ্রহায়ণ)|Poush (পৌষ)|Magh (মাঘ)|Falgun (ফাল্গুন)|Chôitrô (চৈত্র)'
+		.split('|'),
+// 0: Sunday.
+Bangla_weekday_name = 'Rôbibar (রবিবার)|Sombar (সোমবার)|Mônggôlbar (মঙ্গলবার)|Budhbar (বুধবার)|Brihôspôtibar (বৃহস্পতিবার)|Shukrôbar (শুক্রবার)|Shônibar (শনিবার)'
+		.split('|');
+
+function Bangla_Date(year, month, date, options) {
+	// has year 0
+
+	// according to the revised version of the calendar, now followed in
+	// Bangladesh, Pôhela Bôishakh always falls on 14 April.
+	year += Bangla_epochal_year;
+	date = 14 + Math.min(5, --month) + month * 30 + date - 1;
+	if (month === 11 && library_namespace.is_leap_year(year + 1))
+		// 為閏年。
+		date++;
+
+	if (year < 100 && year >= 0)
+		(date = new Date(0)).setFullYear(year, 4 - 1, date);
+	else
+		date = new Date(year, 4 - 1, date);
+
+	return date;
+}
+
+_.Bangla_Date = Bangla_Date;
+
+Bangla_Date.month_name = function(month_serial) {
+	return Bangla_month_name[month_serial];
+};
+
+Bangla_Date.weekday_name = function(weekday_serial) {
+	return Bangla_weekday_name[weekday_serial];
+};
+
+
+// Date.parse 不會比 new Date 快 @ Chrome/45.0.2427.7
+function to_date_value(year, month, date) {
+	if (year < 100 && year > 0)
+		// assert: new Date(Date.parse('0001-01-01')).format() === 1/1/1
+		return Date.parse((year < 10 ? '000' : '00') + year + '-'
+				+ (month < 10 ? '0' + month : month) + '-'
+				+ (date < 10 ? '0' + date : date));
+	return Date.parse(year + '/' + month + '/' + date);
+}
+
+
+function Date_to_Bangla(date, options) {
+	var _year = date.getFullYear(), year = _year, month = date.getMonth();
+	if (month <= 4 - 1 &&
+	//
+	(month < 4 - 1 || date.getDate() < 14))
+		// 取上一年的 4/14，使 days >= 0
+		year--;
+	// Date.parse 不會比 new Date 快 @ Chrome/45.0.2427.7
+	var days = (date - new Date(year, 4 - 1, 14)) / ONE_DAY_LENGTH_VALUE;
+	// assert: days >= 0
+	if (days < 5 * 31) {
+		month = days / 31 | 0;
+		days %= 31;
+	} else {
+		days -= 5 * 31;
+		month = 5 + days / 30 | 0;
+		days %= 30;
+		if (month >= 11 && library_namespace.is_leap_year(_year)
+		// 是否為 11/31 或 12/30?
+		&& --days < 0) {
+			// is 11/31?
+			days = --month === 10 ? 30 : 29;
+		}
+	}
+
+	date = [ year - Bangla_epochal_year, month + 1, (days | 0) + 1,
+			date.getDay() ];
+	if (days %= 1)
+		date.push(days);
+
+	// 日期序數→日期名。year/month/date index to serial.
+	return _format(date, options, Date_to_Bangla.to_name);
+}
+
+Date_to_Bangla.to_name = [ library_namespace.to_Bangla_numeral,
+		Bangla_Date.month_name, library_namespace.to_Bangla_numeral,
+		Bangla_Date.weekday_name ];
+
+/*
+
+new Date('540/1/12').to_Bangla({format : 'serial'})
+CeL.Bangla_Date(-54, 9, 28).format()
+new Date('540/1/14').to_Bangla({format : 'serial'})
+
+new Date('540/3/11').to_Bangla({format : 'serial'})
+new Date('540/3/13').to_Bangla({format : 'serial'})
+new Date('540/4/13').to_Bangla({format : 'serial'})
+
+CeL.Bangla_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
+// "OK"
+
+*/
+Bangla_Date.test = new_tester(Date_to_Bangla, Bangla_Date, {
+	epoch : new Date(Bangla_epochal_year + 1, 4 - 1, 14),
+	month_days : {
+		31 : 'first 5 months or leap month',
+		30 : 'last 7 months'
+	}
+});
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 /**
- * 泰國佛曆
+ * 長曆: 泰國佛曆
  * @see https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2
  * @see https://th.wikipedia.org/wiki/%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B9%88%E0%B8%AD%E0%B8%A2:%E0%B9%80%E0%B8%AB%E0%B8%95%E0%B8%B8%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%93%E0%B9%8C%E0%B8%9B%E0%B8%B1%E0%B8%88%E0%B8%88%E0%B8%B8%E0%B8%9A%E0%B8%B1%E0%B8%99
  */
@@ -4826,9 +4956,10 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // TODO:
-// https://en.wikipedia.org/wiki/Bengali_calendar
 // https://en.wikipedia.org/wiki/Nanakshahi_calendar
 
+// https://en.wikipedia.org/wiki/Byzantine_calendar
+// https://en.wikipedia.org/wiki/Anno_Mundi
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // reform of lunisolar calendar
@@ -4910,6 +5041,7 @@ library_namespace.set_method(Date.prototype, {
 	to_Myanmar : set_bind(Date_to_Myanmar),
 	to_Hindu : set_bind(Date_to_Hindu),
 	to_Indian_national : set_bind(Date_to_Indian_national),
+	to_Bangla : set_bind(Date_to_Bangla),
 	to_Thai : set_bind(Date_to_Thai),
 	to_Bahai : set_bind(Date_to_Bahai),
 	to_Coptic : set_bind(Date_to_Coptic),
