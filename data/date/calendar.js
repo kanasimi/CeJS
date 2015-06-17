@@ -211,9 +211,13 @@ function new_tester(to_Calendar, to_Date, options) {
 			if (old_date_name
 					//
 					&& (date_name[2] - old_date_name[2] !== 1 || old_date_name[1] !== date_name[1])) {
-				if (false)
-					library_namespace.log((begin_Date - epoch)
-							/ ONE_DAY_LENGTH_VALUE + ': ' + date_name.join());
+				if (date_name[0] !== old_date_name[0]
+				// 每世紀記錄一次使用時間。
+				&& date_name[0] % 100 === 0)
+					console.log((begin_Date - epoch) / ONE_DAY_LENGTH_VALUE
+							+ ' days: ' + date_name.join() + ' ('
+							+ (new Date(begin_Date)).format(CE_format) + ')'
+							+ ', 使用時間 ' + (new Date - begin) + ' ms.');
 				// 確定 old_date_name 的下一個天為 date_name。
 				// 月差距
 				tmp = get_month_serial(date_name)
@@ -254,12 +258,16 @@ function new_tester(to_Calendar, to_Date, options) {
 
 			// 反解: calendar date → Date
 			tmp = to_Date(date_name[0], date_name[1], date_name[2]);
-			if (begin_Date - tmp !== 0)
-				error.push('正反解到了不同日期: '
+			if (begin_Date - tmp !== 0) {
+				tmp = '正反解到了不同日期: '
 						+ (new Date(begin_Date)).format(CE_format) + ', '
 						+ (begin_Date - epoch) / ONE_DAY_LENGTH_VALUE
 						+ ' days → ' + date_name.join(',') + ' → '
-						+ tmp.format(CE_format));
+						+ (tmp ? tmp.format(CE_format) : tmp);
+				error.push(tmp);
+				if (error.length < 9)
+					console.error(tmp);
+			}
 		}
 
 		library_namespace.info((new Date - begin) + ' ms, error '
@@ -269,6 +277,7 @@ function new_tester(to_Calendar, to_Date, options) {
 	};
 }
 
+
 new_tester.default_options = {
 	// length of the months
 	month_days : {
@@ -277,7 +286,7 @@ new_tester.default_options = {
 	},
 	CE_format : {
 		parser : 'CE',
-		format : '%Y/%m/%d CE'
+		format : '%Y/%m/%d %HH CE'
 	},
 	// 延續的月序，月序未中斷。continued/non-interrupted month serial.
 	continued_month : function(month, old_month) {
@@ -3705,6 +3714,7 @@ _.Indian_national_Date = Indian_national_Date;
 // http://www.pallab.com/services/bangladateconverter.aspx
 
 // TODO:
+// traditional unrevised Bangla calendar 現行於 West Bengal，聽說 "Bangla Panjikas according to Surya Siddhanta"，但未詳述計算方法。
 // http://www.ponjika.com/pBosor.aspx
 // http://usingha.com/1.html
 
@@ -3730,7 +3740,7 @@ function Bangla_Date(year, month, date, options) {
 		date++;
 
 	if (year < 100 && year >= 0)
-		(date = new Date(0)).setFullYear(year, 4 - 1, date);
+		(date = new Date(0, 0)).setFullYear(year, 4 - 1, date);
 	else
 		date = new Date(year, 4 - 1, date);
 
@@ -4385,8 +4395,8 @@ Egyptian_Date.season_month = function(month) {
 // https://en.wikipedia.org/wiki/Season_of_the_Inundation
 Egyptian_Date.season_name = 'Akhet|Peret|Shemu'.split('|');
 
-Egyptian_Date.month_name = function(month) {
-	return Egyptian_Date.month_name.Greek[month];
+Egyptian_Date.month_name = function(month_serial) {
+	return Egyptian_Date.month_name.Greek[month_serial];
 };
 
 // Latin script of Greek
@@ -4526,6 +4536,92 @@ Egyptian_Date.test = new_tester(Date_to_Egyptian, Egyptian_Date, {
 	}
 });
 
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// The Byzantine Creation Era, also "Creation Era of Constantinople," or "Era of the World" (Greek: Έτη Γενέσεως Κόσμου κατά 'Ρωμαίους [1] also Έτος Κτίσεως Κόσμου or Έτος Κόσμου )
+// http://orthodoxwiki.org/Byzantine_Creation_Era
+// https://en.wikipedia.org/wiki/Byzantine_calendar
+// https://en.wikipedia.org/wiki/Anno_Mundi
+
+/*
+
+the names of the months were transcribed from Latin into Greek,
+the first day of the year was September 1, so that both the Ecclesiastical and Civil calendar years ran from 1 September to 31 August, (see Indiction), which to the present day is the Church year, and,
+the date of creation, its year one, was September 1, 5509 BC to August 31, 5508 BC.
+
+*/
+
+var Byzantine_epochal_year = -5509,
+// "Religions du Pont-Euxin : actes du VIIIe Symposium de Vani, Colchide, 1997" p87
+//
+// BASILICA The Official Newsletter of Byzantium Novum Issue #9 (May 2015)
+// https://xa.yimg.com/kq/groups/9483617/384276876/name/Basilica+issue+9.pdf
+Byzantine_month_name = '|Petagnicios|Dionisius|Eiclios|Artemesios|Licios|Bosporius|Iateos|Agrantos|Malatorus|Ereo|Carneios|Machanios'
+	.split('|');
+
+function Byzantine_Date(year, month, date) {
+	// no year 0. year: -1 → 0
+	if (year < 0)
+		year++;
+
+	// 9/1 起才是此年。
+	if (month < 9)
+		year++;
+
+	// Byzantine calendar to Julian calendar
+	year += Byzantine_epochal_year;
+
+	return String_to_Date.parser.Julian(
+	//
+	year + '/' + month + '/' + date, undefined, {
+		no_year_0 : false,
+		year_padding : 0
+	});
+}
+
+_.Byzantine_Date = Byzantine_Date;
+
+Byzantine_Date.month_name = function(month_serial) {
+	return Byzantine_month_name[month_serial];
+};
+
+
+function Date_to_Byzantine(date, options) {
+	date = library_namespace.Date_to_String.parser.Julian(date, '%Y/%m/%d', undefined, {
+		no_year_0 : false
+	}).split('/');
+	date[0] -= Byzantine_epochal_year;
+	if ((date[1] |= 0) < 9)
+		date[0]--;
+	// no year 0
+	if (date[0] < 1)
+		date[0]--;
+
+	date[2] = +date[2];
+
+	return _format(date, options, Byzantine_Date.month_name);
+}
+
+/*
+
+
+'0001-01-01'.to_Date('Julian').to_Byzantine()
+'-1-01-01'.to_Date('Julian').to_Byzantine()
+CeL.String_to_Date.parser.Julian('100/1/1', undefined, {no_year_0 : false,year_padding : 0}).format('CE')
+
+CeL.Byzantine_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
+// "OK"
+
+*/
+Byzantine_Date.test = new_tester(Date_to_Byzantine, Byzantine_Date, {
+	epoch : new Date(-1, 12, 1),
+	month_days : {
+		28 : '2',
+		29 : 'leap 2',
+		30 : 'small',
+		31 : 'big'
+	}
+});
 
 
 
@@ -4958,8 +5054,9 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 // TODO:
 // https://en.wikipedia.org/wiki/Nanakshahi_calendar
 
-// https://en.wikipedia.org/wiki/Byzantine_calendar
-// https://en.wikipedia.org/wiki/Anno_Mundi
+// http://orthodoxwiki.org/Revised_Julian_Calendar
+// https://en.wikipedia.org/wiki/Revised_Julian_calendar
+
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // reform of lunisolar calendar
@@ -5048,6 +5145,7 @@ library_namespace.set_method(Date.prototype, {
 	to_Ethiopian : set_bind(Date_to_Ethiopian),
 	to_Armenian : set_bind(Date_to_Armenian),
 	to_Egyptian : set_bind(Date_to_Egyptian),
+	to_Byzantine : set_bind(Date_to_Byzantine),
 
 	to_Republican : set_bind(Date_to_French_Republican),
 	to_Solar_Hijri : set_bind(Date_to_Solar_Hijri),

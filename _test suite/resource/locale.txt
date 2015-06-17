@@ -116,6 +116,7 @@ http://www.e-yakushiyo.net/Calendario_Maya_Dias.htm",儒略日數,,Julian Day Nu
 ,可選用的文字式年曆欄位: 分類: 曆法,科普特曆,,科普特曆,,Coptic calendar,コプト暦
 ,可選用的文字式年曆欄位: 分類: 曆法,衣索比亞曆,,衣索比亞曆,,Ethiopian calendar,エチオピア暦
 ,可選用的文字式年曆欄位: 分類: 曆法,教會亞美尼亞曆,,教會亞美尼亞曆,,Armenian calendar,古アルメニア暦
+,可選用的文字式年曆欄位: 分類: 曆法,Byzantine calendar,世界創造紀元,拜占庭曆,,Byzantine calendar,ビザンティン暦
 ,可選用的文字式年曆欄位: 分類: 曆法,古埃及曆,古代エジプトの暦,古埃及曆,,Egyptian calendar,古エジプト暦
 ,可選用的文字式年曆欄位: 分類: 曆法,Calendrier républicain,,法國共和曆,,French Republican Calendar,フランス革命暦
 ,可選用的文字式年曆欄位: 分類: 曆注,月干支,,月干支,,month of the sexagenary cycle,月の干支

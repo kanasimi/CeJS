@@ -3197,8 +3197,9 @@ this.CeL_era_data = {
 		'/Alexander IV|Babylonian-323/5~-309|:Babylonian|疑|準=年|ruler=Ἀλέξανδρος Δ΄;Alexander IV Aegus|生=-323/8',
 
 		/**
-		 * 塞琉古紀元，是一套塞琉古帝國以及之後受希臘化文明影響的古代國家所採用的紀年方式。 The Seleucid era or Anno
-		 * Graecorum (literally "year of the Greeks" or "Greek year"), sometimes
+		 * 塞琉古紀元，是一套塞琉古帝國以及之後受希臘化文明影響的古代國家所採用的紀年方式。
+		 * 
+		 * The Seleucid era or Anno Graecorum (literally "year of the Greeks" or "Greek year"), sometimes
 		 * denoted "AG", was a system of numbering years in use by the Seleucid
 		 * Empire and other countries among the ancient Hellenistic
 		 * civilizations.
@@ -3309,7 +3310,7 @@ this.CeL_era_data = {
 			// -746/2/26
 			start_year = -747,
 			// assert: end_year > epochal_year
-			end_year = 304,
+			end_year = 306,
 			//
 			month_days = CeL.Egyptian_Date.month_days.join(';'),
 			//
@@ -3474,8 +3475,10 @@ this.CeL_era_data = {
 		 * @see https://en.wikipedia.org/wiki/Era_of_Martyrs
 		 */
 
-		'/Diocletianus|Egyptian:284~304|:Egyptian|疑|準=年'
-// , '/Diocletian era|Egyptian:305~452|23/=:Egyptian|疑|準=年'
+		'/Diocletianus|Egyptian:284~|:Egyptian|疑|準=年',
+
+		// 305~452 ディオクレティアヌス紀元または殉教紀元（じゅんきょうきげん）
+		'Diocletian era|Egyptian:305~306|23/=:Egyptian|疑|準=年|注=殉道時期 (The Era of the Martyrs, 殉教紀元) 沿用古埃及曆，並於亞歷山大科普特正教會行用至今；請參照之。'
 
 ]).minute_offset = 2 * 60;
 

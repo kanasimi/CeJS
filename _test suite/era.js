@@ -3288,6 +3288,21 @@ function affairs() {
 			});
 		} ],
 
+		Byzantine : [ {
+			a : {
+				T : 'Byzantine calendar'
+			},
+			R : 'Byzantine Creation Era',
+			href : 'https://en.wikipedia.org/wiki/Byzantine_calendar',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return date.精 === '年' ? date.to_Byzantine({
+				format : 'serial'
+			})[0] + '年' : date.to_Byzantine({
+				format : 'serial'
+			}).slice(0, 3).join('/') + '; ' + date.to_Byzantine();
+		} ],
+
 		Egyptian : [ {
 			a : {
 				T : '古埃及曆'

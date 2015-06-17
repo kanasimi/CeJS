@@ -413,7 +413,8 @@ function String_to_Date_default_parser(date_string,
 
 	if (matched = date_string
 	// U+2212 '−': minus sign
-	.match(/^[^\d\/\-:日月年前]*([0-4]?\d{3}|([前\-−‐]?\d{1,4})年|[前\-−‐]\d{1,4})[^\d\/\-:日月年前]*$/)) {
+	// 為了 calendar 測試，年分需要能 parse 0–9999。
+	.match(/^[^\d\/\-:日月年前]*(\d{3,4}|([前\-−‐]?\d{1,4})年|[前\-−‐]\d{1,4})[^\d\/\-:日月年前]*$/)) {
 		// 僅有 xxx/1xxx/2xxx 年(year) 時。
 		date_string = (matched[2] || matched[1]).replace(/^[前−]/, '-000');
 		if (period_end) {
@@ -523,13 +524,16 @@ function String_to_Date_default_parser(date_string,
 
 	// 先設定小單位，再設定大單位：設定小單位時會影響到大單位。反之不然。
 	year = +year || 0;
-	// time zone。
+	// time zone.
 	tmp = (+date_data[4] || 0)
-			+ String_to_Date.default_offset
-			- (+minute_offset || 0);
+	// 若是未設定，則當作 local zone。
+	+ String_to_Date.default_offset
+	- (+minute_offset || 0);
 	var date_value;
-	if (year < 99 && year >= 0) {
-		(date_value = new Date(0)).setFullYear(
+	if (year < 100 && year >= 0) {
+		// 僅使用 new Date(0) 的話，會含入 timezone offset (.getTimezoneOffset)。
+		// 因此得使用 new Date(0, 0)。
+		(date_value = new Date(0, 0)).setFullYear(
 		// new Date(10, ..) === new Date(1910, ..)
 		year, date_data[1] ? date_data[1] - 1 : 0, date_data[2], +date_data[3] || 0,
 			tmp, +date_data[5] || 0, +date_data[6] || 0);
@@ -1480,6 +1484,8 @@ var leap_date = new Function('return 29');
 
 /**
  * proleptic Julian calendar.<br />
+ * 
+ * TODO: 太沒效率。
  * 
  * 以系統內建的計時機制，<br />
  * 將擴展/外推/延伸的格里曆, proleptic Gregorian calendar<br />
