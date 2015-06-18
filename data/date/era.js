@@ -213,12 +213,12 @@ if (typeof CeL === 'function')
 		require : 'data.code.compatibility.'
 				+ '|data.native.|application.locale.|data.date.String_to_Date'
 				// Maya 需要用到 data.date.calendar。
-				+ '|data.date.calendar.',
+				+ '|data.date.Julian_day|data.date.calendar.',
 
 		code : function(library_namespace) {
 
 			// requiring
-			var String_to_Date;
+			var String_to_Date, Julian_day;
 			eval(this.use());
 
 			// ---------------------------------------------------------------------//
@@ -4303,6 +4303,13 @@ if (typeof CeL === 'function')
 				if (!date)
 					return '';
 
+				var parsed;
+				if (!is_Date(date) && !period_end
+						&& (!parser || parser === 'CE') && /^-?\d/.test(date)
+						&& (parsed = Julian_day(date, parser, true)))
+					// 採用 Julian_day 較快。
+					date = Julian_day.to_Date(parsed);
+
 				if (!is_Date(date)) {
 					var string, to_period_end = period_end && function() {
 						var tmp, matched = string.match(
@@ -4396,11 +4403,12 @@ if (typeof CeL === 'function')
 				}
 				// else: 已經處理過了?
 
-				if (is_Date(date))
+				if (is_Date(date)) {
 					if (get_date)
 						return date;
 					else if (typeof date.format === 'function')
 						return date.format(DATE_NAME_FORMAT);
+				}
 
 				library_namespace.err('normalize_date: 無法解析 [' + date + ']！');
 			}

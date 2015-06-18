@@ -20,12 +20,12 @@ CeL.run(
 name : 'data.date.calendar',
 // |application.astronomy.
 // data.math.find_root
-require : 'data.code.compatibility.|data.native.set_bind|data.date.String_to_Date|data.date.is_leap_year|data.math.',
+require : 'data.code.compatibility.|data.native.set_bind|data.date.String_to_Date|data.date.is_leap_year|data.date.Julian_day|data.math.',
 
 code : function(library_namespace) {
 
 //	requiring
-var set_bind, String_to_Date, is_leap_year;
+var set_bind, String_to_Date, is_leap_year, Julian_day;
 eval(this.use());
 
 
@@ -272,7 +272,7 @@ function new_tester(to_Calendar, to_Date, options) {
 
 		library_namespace.info((new Date - begin) + ' ms, error '
 				+ error.length + '/' + error_limit);
-		if (error.length)
+		if (true || error.length)
 			return error;
 	};
 }
@@ -4571,8 +4571,10 @@ function Byzantine_Date(year, month, date) {
 	// Byzantine calendar to Julian calendar
 	year += Byzantine_epochal_year;
 
+	return Julian_day.to_Date(Julian_day.from_YMD(year, month, date));
+
 	return String_to_Date.parser.Julian(
-	//
+	// slow~~
 	year + '/' + month + '/' + date, undefined, {
 		no_year_0 : false,
 		year_padding : 0
@@ -4587,9 +4589,13 @@ Byzantine_Date.month_name = function(month_serial) {
 
 
 function Date_to_Byzantine(date, options) {
-	date = library_namespace.Date_to_String.parser.Julian(date, '%Y/%m/%d', undefined, {
-		no_year_0 : false
-	}).split('/');
+	date = Julian_day.to_YMD(Julian_day(date));
+	if (false)
+		// slow~~
+		date = library_namespace.Date_to_String.parser.Julian(date, '%Y/%m/%d', undefined, {
+			no_year_0 : false
+		}).split('/');
+
 	date[0] -= Byzantine_epochal_year;
 	if ((date[1] |= 0) < 9)
 		date[0]--;
@@ -4611,6 +4617,7 @@ CeL.String_to_Date.parser.Julian('100/1/1', undefined, {no_year_0 : false,year_p
 
 CeL.Byzantine_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 // "OK"
+// 53167 ms, error 0/4
 
 */
 Byzantine_Date.test = new_tester(Date_to_Byzantine, Byzantine_Date, {
@@ -5054,6 +5061,7 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 // TODO:
 // https://en.wikipedia.org/wiki/Nanakshahi_calendar
 
+// 儒略改革曆
 // http://orthodoxwiki.org/Revised_Julian_Calendar
 // https://en.wikipedia.org/wiki/Revised_Julian_calendar
 

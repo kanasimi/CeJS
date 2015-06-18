@@ -127,6 +127,275 @@ function get_minute_offset(date_string) {
 }
 
 
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+//	常數計算。
+
+// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
+var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+// 一分鐘的 time 值。should be 60 * 1000 = 60000.
+ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
+// 一整時辰的 time 值。should be 2 * 60 * 60 * 1000 = 7200000.
+ONE_時辰_LENGTH_VALUE = new Date(0, 0, 0, 2) - new Date(0, 0, 0, 0);
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// for Julian date. 期能不使用內建 Date 以計算日期。
+// @see https://en.wikipedia.org/wiki/Julian_day#Calculation
+
+/*
+
+for(var JD=0,d;JD<4e6;JD++){d=CeL.Julian_day.to_YMD(JD);if(JD!==CeL.Julian_day.from_YMD(d[0],d[1],d[2]))throw JD;}
+// Array [ 6239, 5, 27 ]
+
+for(var JD=0,d;JD>-4e6;JD--){d=CeL.Julian_day.to_YMD(JD);if(JD!==CeL.Julian_day.from_YMD(d[0],d[1],d[2]))throw JD;}
+// -1402
+CeL.Julian_day.to_YMD(-1401)
+// Array [ -4716, 3, 1 ]
+
+
+
+for(var JD=0,d;JD<4e6;JD++){d=CeL.Julian_day.to_YMD(JD,true);if(JD!==CeL.Julian_day.from_YMD(d[0],d[1],d[2],true))throw JD;}
+// Array [ 6239, 7, 11 ]
+
+for(var JD=0,d;JD>-4e6;JD--){d=CeL.Julian_day.to_YMD(JD,true);if(JD!==CeL.Julian_day.from_YMD(d[0],d[1],d[2],true))throw JD;}
+// -1364
+CeL.Julian_day.to_YMD(-1363,true)
+// Array [ -4716, 3, 1 ]
+
+*/
+
+/**
+ * Get Julian day number (JDN) of date.<br />
+ * If type of date is Date, we'll treat date as local date.
+ * 
+ * @param {String|Date|Number}date
+ *            date or date value
+ * @param {Boolean}type
+ *            calendar type. true: Gregorian, false: Julian, 'CE': Common Era
+ * @param {Boolean}no_year_0
+ *            no year 0
+ * @param {Boolean}get_remainder
+ *            Will return [ {Number} Julian day number (JDN), {Number} remainder ].<br />
+ *            remainder / ONE_DAY_LENGTH_VALUE = day.
+ * 
+ * @returns {Number} Julian day number (JDN)
+ */
+function Julian_day(date, type, no_year_0, get_remainder) {
+	if (typeof date === 'string') {
+		// parse '1/1/1'
+		var matched = date.match(/(-?\d{1,4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+		if (matched)
+			return Julian_day.from_YMD(matched[1] | 0, matched[2] | 0,
+					matched[3] | 0, type, no_year_0);
+
+		if (-4716 < date && date < 9999)
+			// treat as year
+			return Julian_day.from_YMD(date | 0, 1, 1, type, no_year_0);
+
+		if (matched = date.match(/(-?\d{1,4})[\/\-](\d{1,2})/))
+			return Julian_day.from_YMD(matched[1] | 0, matched[2] | 0, 1, type,
+					no_year_0);
+
+		// throw new Error('Julian_day: Can not parse [' + date + ']');
+		if (library_namespace.is_debug(2))
+			library_namespace.err('Julian_day: 無法解析 [' + date + ']！');
+		return;
+	}
+
+	// offset: convert local to UTC+0.
+	var offset;
+
+	if (is_Date(date)) {
+		offset = date.getTimezoneOffset() * ONE_MINTE_LENGTH_VALUE;
+		date = date.getTime();
+	} else
+		offset = Julian_day.default_offset;
+
+	if (!isNaN(date)) {
+		// treat ((date)) as date value. So it's Gregorian.
+		type = true;
+		date -= offset
+		// epoch 為 12:0，需要將之減回來以轉成 midnight (0:0)。
+		+ Julian_day.epoch - ONE_DAY_LENGTH_VALUE / 2;
+		var remainder;
+		if (get_remainder) {
+			remainder = date % ONE_DAY_LENGTH_VALUE;
+			if (remainder < 0)
+				remainder += ONE_DAY_LENGTH_VALUE;
+		}
+		date = Math.floor(date / ONE_DAY_LENGTH_VALUE);
+		return get_remainder ? [ date, remainder ] : date;
+	}
+
+}
+
+/**
+ * Get JDN of (year, month, date).<br />
+ * input MUST latter than -4716/3/1!!
+ * 
+ * @param {Integer}year
+ *            year >= -4716
+ * @param {Natural}month
+ *            1–12
+ * @param {Natural}date
+ *            1–31
+ * @param {Boolean}type
+ *            calendar type. true: Gregorian, false: Julian, 'CE': Common Era
+ * @param {Boolean}no_year_0
+ *            no year 0
+ * 
+ * @returns {Number} JDN
+ */
+Julian_day.from_YMD = function(year, month, date, type, no_year_0) {
+	if (Array.isArray(year)) {
+		type = month;
+		date = year[2];
+		month = year[1];
+		year = year[1];
+	}
+	if (no_year_0 && year < 0)
+		// no year 0. year: -1 → 0
+		year++;
+	if (type === 'CE')
+		type = year > 1582
+		// Julian calendar（儒略曆）1582年10月4日的下一日為 Gregorian
+		// calendar（格里高利曆）1582年10月15日。
+		|| year == 1582 && (month > 10 || month == 10 && date >= 15);
+
+	var a = (14 - month) / 12 | 0;
+	year = year + 4800 - a | 0;
+	month = month + 12 * a - 3 | 0;
+	// assert: year, month are integers. month >= 0
+
+	return date + ((153 * month + 2) / 5 | 0)
+	//
+	+ 365 * year + Math.floor(year / 4) -
+	// for Gregorian calendar
+	(type ? 32045 + Math.floor(year / 100) - Math.floor(year / 400)
+	// for Julian calendar
+	: 32083);
+};
+
+/**
+ * Get the local midnight date of JDN.<br />
+ * 傳回 local midnight (0:0)。
+ * 
+ * @param {Integer}JDN
+ *            input {Integer}JDN or {Number}JD.
+ * @param {Boolean}is_JD
+ *            The JDN is JD.
+ * @param {Boolean}get_value
+ *            get {Number} date value instead of {Date}.
+ * 
+ * @returns {Date} local midnight date
+ */
+Julian_day.to_Date = function(JDN, is_JD, get_value) {
+	if (!is_JD)
+		// epoch 為 12:0，需要將之減回來以轉成 midnight (0:0)。
+		JDN -= .5;
+	JDN = JDN * ONE_DAY_LENGTH_VALUE + Julian_day.epoch
+			+ Julian_day.default_offset;
+	return get_value ? JDN : new Date(JDN);
+};
+
+/**
+ * Get Julian date (JD) of date.
+ * 
+ * @param {String|Date|Number}date
+ *            date or date value
+ * @param {Boolean}type
+ *            calendar type. true: Gregorian, false: Julian, 'CE': Common Era
+ * @param {Boolean}no_year_0
+ *            no year 0
+ * 
+ * @returns {Number} Julian date
+ */
+Julian_day.JD = function(date, type, no_year_0) {
+	date = Julian_day(date, type, no_year_0, true);
+	return date[0] + date[1] / ONE_DAY_LENGTH_VALUE;
+};
+
+/**
+ * default offset (time value)
+ * 
+ * @type {Integer}
+ */
+Julian_day.default_offset = (new Date).getTimezoneOffset()
+		* ONE_MINTE_LENGTH_VALUE;
+
+/**
+ * Get (year, month, date) of JD.
+ * 
+ * @param {Number}JD
+ *            Julian date
+ * @param {Boolean}type
+ *            calendar type. true: Gregorian, false: Julian, 'CE': Common Era
+ * @param {Boolean}no_year_0
+ *            no year 0
+ * 
+ * @returns {Array} [ year, month, date ]
+ */
+Julian_day.to_YMD = function(JD, type, no_year_0) {
+	var f = JD + 1401 | 0;
+	if (type && (type !== 'CE' || JD >= Gregorian_reform_JD))
+		// to proleptic Gregorian calendar
+		f += ((((4 * JD + 274277) / 146097 | 0) * 3) / 4 | 0) - 38;
+	// else: to proleptic Julian calendar with year 0
+
+	var e = 4 * f + 3 | 0,
+	//
+	g = (e % 1461) / 4 | 0,
+	//
+	h = 5 * g + 2,
+	//
+	date = ((h % 153) / 5 | 0) + 1,
+	//
+	month = (((h / 153 | 0) + 2) % 12) + 1,
+	//
+	year = (e / 1461 | 0) - 4716 + ((12 + 2 - month) / 12 | 0);
+
+	if (no_year_0 && year < 1)
+		// no year 0. year: 0 → -1
+		year--;
+
+	return [ year, month, date ];
+};
+
+// Get the epoch of Julian date, i.e., -4713/11/24 12:0
+(function() {
+	var date = new Date(0),
+	// [ -4713, 11, 24 ]
+	JD0 = Julian_day.to_YMD(0, true);
+	// set the date value of Julian date 0
+	date.setUTCFullYear(JD0[0] | 0, (JD0[1] | 0) - 1, JD0[2] | 0);
+	date.setUTCHours(12);
+	Julian_day.epoch = date.getTime();
+})();
+
+/**
+ * Gregorian reform JD.
+ * 
+ * @type {Integer}
+ */
+var Gregorian_reform_JD = Julian_day.from_YMD(1582, 10, 15);
+
+/**
+ * Get weekday index of JD.
+ * 
+ * @param {Number}JD
+ *            Julian date
+ * @param {Boolean}to_ISO
+ *            to ISO type.
+ * 
+ * @returns {Integer} weekday index
+ */
+Julian_day.weekday = function(JD, to_ISO) {
+	return to_ISO ? (Math.floor(JD) % 7) + 1 : (Math.floor(JD) + 1) % 7;
+};
+
+_.Julian_day = Julian_day;
+
+
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 // Unix time (a.k.a. POSIX time or Epoch time)
@@ -1779,19 +2048,12 @@ _.JD_to_Date = JD_to_Date;
 //	常數計算。
 
 
-// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
-var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
-//一分鐘的 time 值。should be 60 * 1000 = 60000.
-ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
-// 一整時辰的 time 值。should be 2 * 60 * 60 * 1000 = 7200000.
-ONE_時辰_LENGTH_VALUE = new Date(0, 0, 0, 2) - new Date(0, 0, 0, 0),
-
 //for Julian Date (JD), Julian Day Number (JDN).
 //Julian Date: 由公元前4713年1月1日，協調世界時中午12時開始所經過的天數。
 //	原點實際設在  -004713-11-24T12:00:00.000Z。
 //	http://www.tondering.dk/claus/cal/julperiod.php
 //	http://aa.usno.navy.mil/data/docs/JulianDate.php
-Julian_Date_offset = String_to_Date('-4713/1/1 12:0', {
+var Julian_Date_offset = String_to_Date('-4713/1/1 12:0', {
 	parser : 'Julian',
 	zone : 0
 }).getTime();
