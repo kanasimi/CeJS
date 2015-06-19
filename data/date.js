@@ -44,8 +44,8 @@ _// JSDT:_module_
 if (false)
 (function() {
 	/*
-	 * opposite of toUTCString() 尚不成熟！假如是type=='date'，不如用new
-	 * Date()! string大部分可用new Date(Date.parse(str))代替!
+	 * opposite of toUTCString() 尚不成熟！假如是type=='date'，不如用new Date()!
+	 * string大部分可用new Date(Date.parse(str))代替!
 	 * http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K742.aspx
 	 */
 	var UTCDay, UTCMonth;
@@ -98,11 +98,11 @@ if (false)
 				+ s[f[2]] + '(' + UTCMonth[s[f[2]]] + '),'
 				+ s[f[3]] + ',' + s[f[4]][0] + ','
 				+ s[f[4]][1] + ',' + s[f[4]][2]);
-		//	check,可以包括星期
+		// check, 可以包括星期
 		if (!(s[f[2]] = UTCMonth[s[f[2]]])
 				|| !(s = new Date(s[f[1]], s[f[2]],
 						s[f[3]], s[f[4]][0], s[f[4]][1],
-						s[f[4]][2]))) //	Date.UTC()
+						s[f[4]][2]))) // Date.UTC()
 			s = 'Input data error!';
 		return s;
 	}
@@ -141,6 +141,7 @@ ONE_時辰_LENGTH_VALUE = new Date(0, 0, 0, 2) - new Date(0, 0, 0, 0);
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // for Julian date. 期能不使用內建 Date 以計算日期。
 // @see https://en.wikipedia.org/wiki/Julian_day#Calculation
+// 適用範圍: 4717/3/1 BCE 0:0 之後。
 
 /*
 
@@ -231,7 +232,7 @@ function Julian_day(date, type, no_year_0, get_remainder) {
 
 /**
  * Get JDN of (year, month, date).<br />
- * input MUST latter than -4716/3/1!!
+ * input MUST latter than -4716/3/1 (4717/3/1 BCE)!!
  * 
  * @param {Integer}year
  *            year >= -4716

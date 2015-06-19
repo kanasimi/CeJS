@@ -854,6 +854,8 @@ if (typeof CeL === 'function')
 					Devanagari : '०१२३४५६७८९',
 
 					Gujarati : '૦૧૨૩૪૫૬૭૮૯',
+					// Gurmukhī numerals
+					// https://en.wikipedia.org/wiki/Gurmukh%C4%AB_alphabet#Numerals
 					Gurmukhi : '੦੧੨੩੪੫੬੭੮੯',
 					Javanese : '꧐꧑꧒꧓꧔꧕꧖꧗꧘꧙',
 					Kannada : '೦೧೨೩೪೫೬೭೮೯',

@@ -2732,9 +2732,9 @@ function affairs() {
 			},
 			R : '紀元使用當地、當日零時，月亮的視黃經-太陽的視黃經\n'
 			//
-			+ 'the apparent geocentric celestial longitude: Moon - Sun.\n'
+			+ 'the apparent geocentric celestial longitude: Moon - Sun.'
 			//
-			+ 'Using VSOP87D.ear and LEA-406.',
+			+ '\nUsing VSOP87D.ear and LEA-406.',
 			href : 'https://zh.wikipedia.org/wiki/'
 			//
 			+ '%E8%A1%9D_%28%E5%A4%A9%E9%AB%94%E4%BD%8D%E7%BD%AE%29'
@@ -2760,9 +2760,9 @@ function affairs() {
 			a : {
 				T : '月相'
 			},
-			R : 'lunar phase, 天文月相。計算得出之紀元使用當地、當日零時月相，非實曆。\n'
+			R : 'lunar phase, 天文月相附加可能的日月食資訊。計算得出之紀元使用當地、當日零時月相，非實曆。'
 			//
-			+ 'Using VSOP87D.ear and LEA-406.',
+			+ '\nUsing VSOP87D.ear and LEA-406.',
 			href : 'https://zh.wikipedia.org/wiki/%E6%9C%88%E7%9B%B8'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -3218,6 +3218,22 @@ function affairs() {
 			return (year + 543) + (date.精 === '年' ? '年' : '/'
 			//
 			+ (date.getMonth() + 1) + '/' + date.getDate());
+		} ],
+
+		Nanakshahi : [ {
+			a : {
+				T : 'ਨਾਨਕਸ਼ਾਹੀ'
+			},
+			R : 'Nanakshahi calendar, 印度錫克教日曆, ナーナク暦. ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ'
+			//
+			+ '\nAdopted in 2003/3/14 CE (535/1/1 NS). 自 2003 行用。',
+			href : "https://en.wikipedia.org/wiki/Nanakshahi_calendar"
+		}, function(date) {
+			return date.精 === '年' ? date.to_Nanakshahi({
+				format : 'serial'
+			})[0] + ' NS' : date.to_Nanakshahi({
+				format : 'serial'
+			}).slice(0, 3).join('/') + ' NS; ' + date.to_Nanakshahi();
 		} ],
 
 		Bahai : [ {

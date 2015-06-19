@@ -201,7 +201,7 @@ function new_tester(to_Calendar, to_Date, options) {
 		if (isNaN(begin_Date) || isNaN(end_Date))
 			return;
 
-		var begin = new Date, date_name, old_date_name, error = [];
+		var begin = Date.now(), last_show = begin, date_name, old_date_name, error = [];
 		if (!(0 < error_limit && error_limit < 1e9))
 			error_limit = new_tester.default_options.error_limit;
 
@@ -213,11 +213,13 @@ function new_tester(to_Calendar, to_Date, options) {
 					&& (date_name[2] - old_date_name[2] !== 1 || old_date_name[1] !== date_name[1])) {
 				if (date_name[0] !== old_date_name[0]
 				// 每世紀記錄一次使用時間。
-				&& date_name[0] % 100 === 0)
+				&& date_name[0] % 100 === 0 && Date.now() - last_show > 20000) {
 					console.log((begin_Date - epoch) / ONE_DAY_LENGTH_VALUE
 							+ ' days: ' + date_name.join() + ' ('
 							+ (new Date(begin_Date)).format(CE_format) + ')'
-							+ ', 使用時間 ' + (new Date - begin) + ' ms.');
+							+ ', 使用時間 ' + ((last_show = Date.now()) - begin)
+							+ ' ms.');
+				}
 				// 確定 old_date_name 的下一個天為 date_name。
 				// 月差距
 				tmp = get_month_serial(date_name)
@@ -241,7 +243,9 @@ function new_tester(to_Calendar, to_Date, options) {
 				else if (date_name[2] === old_date_name[2])
 					tmp = '前後日期名相同';
 				else if (date_name[0] !== old_date_name[0]
-						&& date_name[0] - old_date_name[0] !== 1)
+						&& date_name[0] - old_date_name[0] !== 1
+						// Skip last day of -1 → first day of 1
+						&& date_name[0] !== 1 && old_date_name[0] !== -1)
 					tmp = '前後年份不同: ' + old_date_name[0] + '→' + date_name[0];
 				else
 					// 若 OK，必得設定 tmp!
@@ -259,9 +263,8 @@ function new_tester(to_Calendar, to_Date, options) {
 			// 反解: calendar date → Date
 			tmp = to_Date(date_name[0], date_name[1], date_name[2]);
 			if (begin_Date - tmp !== 0) {
-				tmp = '正反解到了不同日期: '
-						+ (new Date(begin_Date)).format(CE_format) + ', '
-						+ (begin_Date - epoch) / ONE_DAY_LENGTH_VALUE
+				tmp = '正反解到了不同日期: ' + (new Date(begin_Date)).format(CE_format)
+						+ ', ' + (begin_Date - epoch) / ONE_DAY_LENGTH_VALUE
 						+ ' days → ' + date_name.join(',') + ' → '
 						+ (tmp ? tmp.format(CE_format) : tmp);
 				error.push(tmp);
@@ -4631,6 +4634,89 @@ Byzantine_Date.test = new_tester(Date_to_Byzantine, Byzantine_Date, {
 });
 
 
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// Nanakshahi calendar, 印度錫克教日曆 基本上與 Gregorian calendar 同步。
+// https://en.wikipedia.org/wiki/Nanakshahi_calendar
+// The Nanakshahi (Punjabi: ਨਾਨਕਸ਼ਾਹੀ, nānakashāhī) calendar is a tropical solar calendar
+// New Year's Day falls annually on what is March 14 in the Gregorian Western calendar.
+// year one is the year of Guru Nanak's birth (1469 CE). As an example, April 2014 CE is Nanakshahi 546.
+// http://www.purewal.biz/fixed_sangrand_dates.pdf
+// http://www.purewal.biz/Gurbani_and_Nanakshahi_Calendar.pdf
+// Nanakshahi Sangrand Dates in Gregorian Calendar - Forever from 14 March 2003 CE / 535 NS
+
+// Nanakshahi epoch: Gregorian 1469/3/14
+var Nanakshahi_year_offset = 1469 - 1,
+// https://en.wikipedia.org/wiki/Nanakshahi_calendar#Months_of_the_Nanakshahi_calendar
+Nanakshahi_month_name = '|Chet (ਚੇਤ)|Vaisakh (ਵੈਸਾਖ)|Jeth (ਜੇਠ)|Harh (ਹਾੜ)|Sawan (ਸਾਵਣ)|Bhadon (ਭਾਦੋਂ)|Assu (ਅੱਸੂ)|Katak (ਕੱਤਕ)|Maghar (ਮੱਘਰ)|Poh (ਪੋਹ)|Magh (ਮਾਘ)|Phagun (ਫੱਗਣ)'.split('|');
+
+Nanakshahi_Date.month_name = function(month_serial) {
+	return Nanakshahi_month_name[month_serial];
+};
+
+function Nanakshahi_Date(year, month, date) {
+	// no year 0. year: -1 → 0
+	if (year < 0)
+		year++;
+
+	var JDN = Julian_day.from_YMD(year + 1468, 3, 14, true) + date - 1
+	// Nanakshahi 前5個月 31日。
+	+ (month > 5 ? 5 * 31 + (month - 6) * 30 : (month - 1) * 31);
+
+	return Julian_day.to_Date(JDN);
+}
+
+_.Nanakshahi_Date = Nanakshahi_Date;
+
+
+function Date_to_Nanakshahi(date, options) {
+	var year = date.getFullYear(), month = date.getMonth();
+	// Nanakshahi epoch: Gregorian 1469/3/14
+	if (month < 3 - 1 || month === 3 - 1 && date.getDate() < 14)
+		year--;
+	var days = Julian_day(date)
+	// get the first day of this Nanakshahi year.
+	- Julian_day.from_YMD(year, 3, 14, true) | 0;
+	// assert: 0 <= days <= 366
+
+	if (days < 5 * 31)
+		month = days / 31 | 0, date = days % 31;
+	else {
+		days -= 5 * 31;
+		month = 5 + (days / 30 | 0);
+		if (month === 12)
+			// The leap day, i.e., the last day of the leap year.
+			month = 11, date = 30;
+		else
+			date = days % 30;
+	}
+
+	year -= Nanakshahi_year_offset;
+	if (year <= 0)
+		// year: 0 → -1
+		year--;
+	date = [ year, month + 1, date + 1 ];
+
+	return _format(date, options, Date_to_Nanakshahi.to_name);
+}
+
+Date_to_Nanakshahi.to_name = [ library_namespace.to_Gurmukhi_numeral,
+	Nanakshahi_Date.month_name, library_namespace.to_Gurmukhi_numeral ];
+
+
+/*
+
+CeL.Nanakshahi_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
+// 40717 ms, error 0/4
+
+*/
+Nanakshahi_Date.test = new_tester(Date_to_Nanakshahi, Nanakshahi_Date, {
+	epoch : new Date(1469, 3 - 1, 14),
+	month_days : {
+		30 : 'small',
+		31 : 'big'
+	}
+});
+
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 以下為應用天文演算的曆法。
@@ -4817,8 +4903,8 @@ Solar_Hijri_year_starts.year_of = function(date) {
 // 先嘗試看看。
 Solar_Hijri_year_starts();
 
-Solar_Hijri_Date.month_name = function(month, is_leap, options) {
-	return Solar_Hijri_month_name[options && options.locale || 'ایران'][month];
+Solar_Hijri_Date.month_name = function(month_serial, is_leap, options) {
+	return Solar_Hijri_month_name[options && options.locale || 'ایران'][month_serial];
 };
 
 /**
@@ -5059,7 +5145,7 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // TODO:
-// https://en.wikipedia.org/wiki/Nanakshahi_calendar
+
 
 // 儒略改革曆
 // http://orthodoxwiki.org/Revised_Julian_Calendar
@@ -5154,7 +5240,9 @@ library_namespace.set_method(Date.prototype, {
 	to_Armenian : set_bind(Date_to_Armenian),
 	to_Egyptian : set_bind(Date_to_Egyptian),
 	to_Byzantine : set_bind(Date_to_Byzantine),
+	to_Nanakshahi : set_bind(Date_to_Nanakshahi),
 
+	// 以下為應用天文演算的曆法。
 	to_Republican : set_bind(Date_to_French_Republican),
 	to_Solar_Hijri : set_bind(Date_to_Solar_Hijri),
 	// to_Yi_calendar

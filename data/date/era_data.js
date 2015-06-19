@@ -3199,10 +3199,10 @@ this.CeL_era_data = {
 		/**
 		 * 塞琉古紀元，是一套塞琉古帝國以及之後受希臘化文明影響的古代國家所採用的紀年方式。
 		 * 
-		 * The Seleucid era or Anno Graecorum (literally "year of the Greeks" or "Greek year"), sometimes
-		 * denoted "AG", was a system of numbering years in use by the Seleucid
-		 * Empire and other countries among the ancient Hellenistic
-		 * civilizations.
+		 * The Seleucid era or Anno Graecorum (literally "year of the Greeks" or
+		 * "Greek year"), sometimes denoted "AG", was a system of numbering
+		 * years in use by the Seleucid Empire and other countries among the
+		 * ancient Hellenistic civilizations.
 		 * 
 		 * The natives of the empire used the Babylonian calendar, in which the
 		 * new year falls on 1 Nisanu (3 April in 311 BC)
