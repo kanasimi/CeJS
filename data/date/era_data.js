@@ -3047,6 +3047,7 @@ this.CeL_era_data = {
 
 // ---------------------------------------------------------------------//
 // 瑪雅文明, pre-Columbian Maya civilization
+// https://en.wikipedia.org/wiki/Category:Maya_rulers
 
 (this.CeL_era_data.Maya = [
 		// http://www.mesoweb.com/palenque/resources/rulers/rulers_table.html

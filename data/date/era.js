@@ -384,6 +384,7 @@ if (typeof CeL === 'function')
 
 			// date_data 0/1 設定。
 			// 農曆一個月是29日或30日。
+			// long month / short month
 			大月 = 30, 小月 = 29,
 			// length of the months
 			// 0:30, 1:29

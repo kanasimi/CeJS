@@ -263,11 +263,23 @@ Julian_day.from_YMD = function(year, month, date, type, no_year_0) {
 		// calendar（格里高利曆）1582年10月15日。
 		|| year == 1582 && (month > 10 || month == 10 && date >= 15);
 
-	var a = (14 - month) / 12 | 0;
+	// method: 自 3月起算。
+	if (false)
+		if (month < 3) {
+			year = year + 4800 - 1 | 0;
+			month = month + 12 - 3 | 0;
+		} else {
+			year = year + 4800 | 0;
+			month = month - 3 | 0;
+		}
+	// a=1: 1–2月, a=0: 3–12月
+	//var a = (14 - month) / 12 | 0;
+	var a = month < 3 ? 1 : 0;
 	year = year + 4800 - a | 0;
 	month = month + 12 * a - 3 | 0;
 	// assert: year, month are integers. month >= 0
 
+	// 3–7月:153日
 	return date + ((153 * month + 2) / 5 | 0)
 	//
 	+ 365 * year + Math.floor(year / 4) -
@@ -276,6 +288,45 @@ Julian_day.from_YMD = function(year, month, date, type, no_year_0) {
 	// for Julian calendar
 	: 32083);
 };
+
+/**
+ * Get (year, month, date) of JD.
+ * 
+ * @param {Number}JD
+ *            Julian date
+ * @param {Boolean}type
+ *            calendar type. true: Gregorian, false: Julian, 'CE': Common Era
+ * @param {Boolean}no_year_0
+ *            no year 0
+ * 
+ * @returns {Array} [ year, month, date ]
+ */
+Julian_day.to_YMD = function(JD, type, no_year_0) {
+	var f = JD + 1401 | 0;
+	if (type && (type !== 'CE' || JD >= Gregorian_reform_JD))
+		// to proleptic Gregorian calendar
+		f += ((((4 * JD + 274277) / 146097 | 0) * 3) / 4 | 0) - 38;
+	// else: to proleptic Julian calendar with year 0
+
+	var e = 4 * f + 3 | 0,
+	//
+	g = (e % 1461) / 4 | 0,
+	//
+	h = 5 * g + 2,
+	//
+	date = ((h % 153) / 5 | 0) + 1,
+	//
+	month = (((h / 153 | 0) + 2) % 12) + 1,
+	//
+	year = (e / 1461 | 0) - 4716 + ((12 + 2 - month) / 12 | 0);
+
+	if (no_year_0 && year < 1)
+		// no year 0. year: 0 → -1
+		year--;
+
+	return [ year, month, date ];
+};
+
 
 /**
  * Get the local midnight date of JDN.<br />
@@ -324,43 +375,6 @@ Julian_day.JD = function(date, type, no_year_0) {
 Julian_day.default_offset = (new Date).getTimezoneOffset()
 		* ONE_MINTE_LENGTH_VALUE;
 
-/**
- * Get (year, month, date) of JD.
- * 
- * @param {Number}JD
- *            Julian date
- * @param {Boolean}type
- *            calendar type. true: Gregorian, false: Julian, 'CE': Common Era
- * @param {Boolean}no_year_0
- *            no year 0
- * 
- * @returns {Array} [ year, month, date ]
- */
-Julian_day.to_YMD = function(JD, type, no_year_0) {
-	var f = JD + 1401 | 0;
-	if (type && (type !== 'CE' || JD >= Gregorian_reform_JD))
-		// to proleptic Gregorian calendar
-		f += ((((4 * JD + 274277) / 146097 | 0) * 3) / 4 | 0) - 38;
-	// else: to proleptic Julian calendar with year 0
-
-	var e = 4 * f + 3 | 0,
-	//
-	g = (e % 1461) / 4 | 0,
-	//
-	h = 5 * g + 2,
-	//
-	date = ((h % 153) / 5 | 0) + 1,
-	//
-	month = (((h / 153 | 0) + 2) % 12) + 1,
-	//
-	year = (e / 1461 | 0) - 4716 + ((12 + 2 - month) / 12 | 0);
-
-	if (no_year_0 && year < 1)
-		// no year 0. year: 0 → -1
-		year--;
-
-	return [ year, month, date ];
-};
 
 // Get the epoch of Julian date, i.e., -4713/11/24 12:0
 (function() {
@@ -389,6 +403,8 @@ var Gregorian_reform_JD = Julian_day.from_YMD(1582, 10, 15);
  *            to ISO type.
  * 
  * @returns {Integer} weekday index
+ * 
+ * @see https://en.wikipedia.org/wiki/Zeller's_congruence
  */
 Julian_day.weekday = function(JD, to_ISO) {
 	return to_ISO ? (Math.floor(JD) % 7) + 1 : (Math.floor(JD) + 1) % 7;
@@ -992,12 +1008,15 @@ function is_different_leap_year(year) {
 _.is_different_leap_year = is_different_leap_year;
 
 /**
- * 計算 Gregorian 與 Julian 的日數差距。<br />
+ * 計算 Gregorian 與 Julian 的日數差距。 the secular difference between the two calendars.<br />
  * 會將 date_data: Julian → Gregorian.
  * 
  * @param {Array}date_data
  *            Julian date [year, month, date]
+ * 
  * @returns {Number} Julian → Gregorian 時，需要減去的日數。（除少數特例外，即 Gregorian → Julian 時，需要加上的日數。）
+ * 
+ * @see https://en.wikipedia.org/wiki/Gregorian_calendar#Difference_between_Gregorian_and_Julian_calendar_dates
  */
 function Julian_shift_days(date_data) {
 	var year = +date_data[0];
@@ -2096,6 +2115,7 @@ var reform_by_region = {
 	'Norway' : '1700/3/1',
 	'Denmark' : '1700/3/1',
 	// Kingdom of Great Britain, 大不列顛王國, グレートブリテン王国, 英國
+	// https://en.wikipedia.org/wiki/Calendar_%28New_Style%29_Act_1750
 	'Great Britain' : '1752/9/14',
 	'Sweden' : '1753/3/1',
 	'Finland' : '1753/3/1',

@@ -4613,7 +4613,6 @@ function Date_to_Byzantine(date, options) {
 
 /*
 
-
 '0001-01-01'.to_Date('Julian').to_Byzantine()
 '-1-01-01'.to_Date('Julian').to_Byzantine()
 CeL.String_to_Date.parser.Julian('100/1/1', undefined, {no_year_0 : false,year_padding : 0}).format('CE')
@@ -4626,10 +4625,10 @@ CeL.Byzantine_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 Byzantine_Date.test = new_tester(Date_to_Byzantine, Byzantine_Date, {
 	epoch : new Date(-1, 12, 1),
 	month_days : {
-		28 : '2',
-		29 : 'leap 2',
-		30 : 'small',
-		31 : 'big'
+		28 : 'common February',
+		29 : 'leap February',
+		30 : 'short month',
+		31 : 'long month'
 	}
 });
 
@@ -4646,6 +4645,7 @@ Byzantine_Date.test = new_tester(Date_to_Byzantine, Byzantine_Date, {
 
 // Nanakshahi epoch: Gregorian 1469/3/14
 var Nanakshahi_year_offset = 1469 - 1,
+// 此 month name 會令 Eclipse 加大行距。
 // https://en.wikipedia.org/wiki/Nanakshahi_calendar#Months_of_the_Nanakshahi_calendar
 Nanakshahi_month_name = '|Chet (ਚੇਤ)|Vaisakh (ਵੈਸਾਖ)|Jeth (ਜੇਠ)|Harh (ਹਾੜ)|Sawan (ਸਾਵਣ)|Bhadon (ਭਾਦੋਂ)|Assu (ਅੱਸੂ)|Katak (ਕੱਤਕ)|Maghar (ਮੱਘਰ)|Poh (ਪੋਹ)|Magh (ਮਾਘ)|Phagun (ਫੱਗਣ)'.split('|');
 
@@ -4678,6 +4678,7 @@ function Date_to_Nanakshahi(date, options) {
 	- Julian_day.from_YMD(year, 3, 14, true) | 0;
 	// assert: 0 <= days <= 366
 
+	// Nanakshahi 前5個月 31日。
 	if (days < 5 * 31)
 		month = days / 31 | 0, date = days % 31;
 	else {
@@ -4712,11 +4713,98 @@ CeL.Nanakshahi_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 Nanakshahi_Date.test = new_tester(Date_to_Nanakshahi, Nanakshahi_Date, {
 	epoch : new Date(1469, 3 - 1, 14),
 	month_days : {
-		30 : 'small',
-		31 : 'big'
+		30 : 'short month',
+		31 : 'long month'
 	}
 });
 
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// 儒略改革曆
+// http://orthodoxwiki.org/Revised_Julian_Calendar
+// https://en.wikipedia.org/wiki/Revised_Julian_calendar
+
+// Revised Julian Calendar epoch: 0/1/1
+var Revised_Julian_epoch = new Date(0, 0),
+//
+Revised_Julian_days = [ , 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ],
+// 本年累積月份日數。
+Revised_Julian_accumulated_days = [ , 0 ];
+
+Revised_Julian_days.forEach(function(days, index) {
+	if (index > 0)
+		Revised_Julian_accumulated_days.push(days
+				+ Revised_Julian_accumulated_days[index]);
+});
+
+Revised_Julian_epoch.setFullYear(0, 0, 1);
+Revised_Julian_epoch = Revised_Julian_epoch.getTime();
+
+Revised_Julian_Date.days = function(year, month) {
+	// 要用來計算 leap 日數的年分。過3月則應當做下一年計算。
+	var y = month >= 3 ? year + 1 : year, m900 = y % 900;
+
+	// days from epoch
+	return 365 * year
+	// 計算 leap 日數。
+	+ Math.floor(y / 4) - Math.floor(y / 100)
+	// Years evenly divisible by 4 are leap years, except that years evenly
+	// divisible by 100 are not leap years, unless they leave a remainder of 200
+	// or 600 when divided by 900, in which case they are leap years.
+	+ 2 * Math.floor(y / 900) + (m900 >= 600 ? 2 : m900 >= 200 ? 1 : 0)
+	// 本年累積月份日數。
+	+ Revised_Julian_accumulated_days[month];
+}
+
+function Revised_Julian_Date(year, month, date) {
+	date += Revised_Julian_Date.days(year, month) - 1;
+
+	return new Date(Revised_Julian_epoch + date * ONE_DAY_LENGTH_VALUE);
+}
+
+_.Revised_Julian_Date = Revised_Julian_Date;
+
+function Date_to_Revised_Julian(date, options) {
+	var days = (date - Revised_Julian_epoch) / ONE_DAY_LENGTH_VALUE,
+	// 估測
+	diff, year = date.getFullYear() | 0, month = date.getMonth() + 1 | 0;
+
+	// TODO: ugly method. too slow. improve it.
+	for (;;) {
+		var base = Revised_Julian_Date.days(year, month);
+		date = days - base;
+		if (date < 0) {
+			if (--month < 1)
+				month = 12, year--;
+		} else if (date >= Revised_Julian_days[month]) {
+			if (month === 2 && date === 29) {
+				if (days >= Revised_Julian_Date.days(year, 3))
+					month = 3, date = 0;
+				break;
+			}
+			if (++month > 12)
+				month = 1, year++;
+		} else
+			break;
+	}
+
+	return [ year, month, date + 1 ];
+}
+
+/*
+
+CeL.Revised_Julian_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
+
+*/
+Revised_Julian_Date.test = new_tester(Date_to_Revised_Julian, Revised_Julian_Date, {
+	epoch : Revised_Julian_epoch,
+	month_days : {
+		28 : 'common February',
+		29 : 'leap February',
+		30 : 'short month',
+		31 : 'long month'
+	}
+});
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 以下為應用天文演算的曆法。
@@ -5143,14 +5231,6 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 });
 
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------//
-// TODO:
-
-
-// 儒略改革曆
-// http://orthodoxwiki.org/Revised_Julian_Calendar
-// https://en.wikipedia.org/wiki/Revised_Julian_calendar
-
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // reform of lunisolar calendar
@@ -5241,6 +5321,7 @@ library_namespace.set_method(Date.prototype, {
 	to_Egyptian : set_bind(Date_to_Egyptian),
 	to_Byzantine : set_bind(Date_to_Byzantine),
 	to_Nanakshahi : set_bind(Date_to_Nanakshahi),
+	to_Revised_Julian : set_bind(Date_to_Revised_Julian),
 
 	// 以下為應用天文演算的曆法。
 	to_Republican : set_bind(Date_to_French_Republican),
