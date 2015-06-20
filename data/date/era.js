@@ -108,7 +108,7 @@ CeL.assert(['304/12/23', '西晉惠帝永安1年11月10日'.to_Date('era').forma
 CeL.assert(['304/12/23', '前涼太祖永安1年11月10日'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})]);
 CeL.assert(['1911年11月30日','清遜帝宣統三年10月10日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'閏月或之後');
 CeL.assert(['1329年9月1日','元文宗天曆2年8月8日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'天曆在元明宗(1329年)時被重複使用，共計3年。');
-CeL.assert(['761年10月4日','唐肅宗元年建戌月初二'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'唐肅宗上元二年九月二十一日去年號，稱元年，以建子之月為歲首。');
+CeL.assert(['762年1月1日','唐肅宗元年建丑月初二'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'唐肅宗上元二年九月二十一日去年號，稱元年，以建子之月為歲首。');
 CeL.assert(['694年11月25日 戊子小','證聖元年正月初三'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %月干支%大小月',locale:'cmn-Hant-TW'})],'證聖元年正月初一辛巳（694年11月23日），改元證聖。');
 CeL.assert(['1855年2月5日 '+(CeL.gettext?'星期二':2),'太平天囯乙榮五年正月初一甲寅'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %w',locale:'cmn-Hant-TW'})],'天历与夏历阳历对照及简表');
 CeL.assert(['西漢武帝元朔6年12月1日','武帝元朔六年十二月甲寅'.to_Date('era').format({parser:'CE',format:'%紀年名%年年%月月%日日',locale:'cmn-Hant-TW'})],'秦至汉初( 前246 至前104) 历法研究');
@@ -118,7 +118,7 @@ CeL.assert(["甲寅年正月初一",'2034年2月19日'.to_Date().format('Chinese
 CeL.assert(["癸丑年閏11月1日",'2033年12月22日'.to_Date().format({parser:'Chinese',numeral:null,format:'%歲次年%月月%日日'})],'2033年閏十一月初一');
 CeL.assert(["癸丑年閏11月1日",'2033年12月22日'.to_Date().format({parser:'era',era:'中曆',format:'%歲次年%月月%日日',locale:'cmn-Hant-TW'})],'2033年閏十一月初一');
 CeL.assert([undefined,CeL.era('2200/1/1').共存紀年]);
-CeL.assert([undefined,CeL.era('-900/1/1').共存紀年]);
+CeL.assert([undefined,CeL.era('-4000/1/1').共存紀年]);
 // .共存紀年 test: 可能需要因添加紀年而改變。
 CeL.assert(/吳大帝嘉禾7年5月3日(.*?)\|魏明帝景初2年6月3日(.*?)\|蜀後主延熙1年5月2日/.test(CeL.era('238/6/2').共存紀年.join('|')),'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#1');
 CeL.assert(['弥生時代神功皇后38年|高句麗東川王12年6月3日|新羅助賁尼師今9年6月3日|吳大帝嘉禾7年5月3日|百濟古尒王5年6月3日|魏明帝景初2年6月3日|魏燕王紹漢2年6月3日',CeL.era('延熙1年5月2日').共存紀年.join('|')],'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#1');
@@ -4305,9 +4305,12 @@ if (typeof CeL === 'function')
 					return '';
 
 				var parsed;
-				if (!is_Date(date) && !period_end
-						&& (!parser || parser === 'CE') && /^-?\d/.test(date)
-						&& (parsed = Julian_day(date, parser, true)))
+				if (!is_Date(date)
+						&& !period_end
+						&& (!parser || parser === 'CE')
+						&& /^-?\d/.test(date)
+						&& (parsed = Julian_day(date, parser
+								|| standard_time_parser, true)))
 					// 採用 Julian_day 較快。
 					date = Julian_day.to_Date(parsed);
 

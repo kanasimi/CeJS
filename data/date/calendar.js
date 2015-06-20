@@ -13,6 +13,17 @@
 // http://keith-wood.name/calendars.html
 // http://www.cc.kyoto-su.ac.jp/~yanom/pancanga/index.html
 
+/*
+
+TODO:
+https://en.wikipedia.org/wiki/Vikram_Samvat
+the official calendar of Nepal
+
+https://en.wikipedia.org/wiki/Thai_solar_calendar
+
+*/
+
+
 'use strict';
 if (typeof CeL === 'function')
 CeL.run(
@@ -4722,6 +4733,7 @@ Nanakshahi_Date.test = new_tester(Date_to_Nanakshahi, Nanakshahi_Date, {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 儒略改革曆, Revised Julian calendar
 // http://orthodoxwiki.org/Revised_Julian_Calendar
+// The Revised Julian Calendar is a calendar that was considered for adoption by several Orthodox churches at a synod in Constantinople in May 1923. The synod synchronized the new calendar with the Gregorian Calendar by specifying that October 1, 1923, in the Julian Calendar will be October 14 in the Revised Julian Calendar, thus dropping thirteen days.
 // https://en.wikipedia.org/wiki/Revised_Julian_calendar
 
 // Revised Julian Calendar epoch: 0/1/1

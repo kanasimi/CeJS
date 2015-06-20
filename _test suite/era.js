@@ -2069,6 +2069,13 @@ initialize_thdl_solar_term = function() {
 
 // ---------------------------------------------------------------------//
 
+function adapt_by(date, show, start, is_end) {
+	return is_end ^ (date - start < 0) ? {
+		span : show || date,
+		S : 'color:#aaa;'
+	} : show || date;
+}
+
 /**
  * 利用 cookie 記錄前次所選欄位。
  */
@@ -2409,7 +2416,10 @@ function affairs() {
 	// for 皇紀.
 	kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset),
 	// for 泰國佛曆
-	THAI_Year_numbering = Year_numbering(543);
+	THAI_Year_numbering = Year_numbering(543),
+	//
+	Gregorian_reform = new Date(1582, 10 - 1, 15), Revised_Julian_reform = new Date(
+			1923, 10 - 1, 14);
 
 	// calendar_column
 	list = {
@@ -2875,51 +2885,59 @@ function affairs() {
 			return 年朔日.月名[index] + '月' + (1 + JD - 年朔日[index] | 0) + '日';
 		} ],
 
-		Gregorian : [ {
-			a : {
-				T : 'Gregorian calendar'
-			},
-			R : 'proleptic Gregorian calendar WITH year 0,'
-			//
-			+ ' 包含0年的外推格里曆',
-			href : 'https://en.wikipedia.org/wiki/'
+		Gregorian : [
+				{
+					a : {
+						T : 'Gregorian calendar'
+					},
+					R : 'proleptic Gregorian calendar WITH year 0. Adopted in 1582/10/15 CE.'
+							//
+							+ '\n包含0年的外推格里曆',
+					href : 'https://en.wikipedia.org/wiki/'
 
-			+ 'Proleptic_Gregorian_calendar',
-			S : 'font-size:.8em;'
-		}, function(date) {
-			return date.format('%Y/%m/%d');
-		} ],
+					+ 'Proleptic_Gregorian_calendar',
+					S : 'font-size:.8em;'
+				},
+				function(date) {
+					return adapt_by(date, date.format('%Y/%m/%d'),
+							Gregorian_reform);
+				} ],
 
-		Julian : [ {
-			a : {
-				T : 'Julian calendar'
-			},
-			R : 'proleptic Julian calendar WITHOUT year 0,'
-			//
-			+ ' 不包含0年的外推儒略曆',
-			href : 'https://en.wikipedia.org/wiki/Proleptic_Julian_calendar',
-			S : 'font-size:.8em;'
-		}, function(date) {
-			return date.format({
-				parser : 'Julian',
-				format : date.精 === '年' ? '%Y年' : '%Y/%m/%d'
-			});
-		} ],
+		Julian : [
+				{
+					a : {
+						T : 'Julian calendar'
+					},
+					R : 'proleptic Julian calendar WITHOUT year 0, used before 1582/10/15 CE.'
+							//
+							+ '\n不包含0年的外推儒略曆',
+					href : 'https://en.wikipedia.org/wiki/Proleptic_Julian_calendar',
+					S : 'font-size:.8em;'
+				}, function(date) {
+					return adapt_by(date, date.format({
+						parser : 'Julian',
+						format : date.精 === '年' ? '%Y年' : '%Y/%m/%d'
+					}), Gregorian_reform, true);
+				} ],
 
-		Revised_Julian : [ {
-			a : {
-				T : 'Revised Julian calendar'
-			},
-			R : 'proleptic Revised Julian calendar WITHOUT year 0,'
-			//
-			+ ' 不包含0年的外推儒略改革曆',
-			href : 'https://en.wikipedia.org/wiki/Revised_Julian_calendar',
-			S : 'font-size:.8em;'
-		}, function(date) {
-			return date.精 === '年' ? date.to_Revised_Julian({
-				format : 'serial'
-			})[0] : date.to_Revised_Julian().join('/');
-		} ],
+		Revised_Julian : [
+				{
+					a : {
+						T : 'Revised Julian calendar'
+					},
+					R : 'proleptic Revised Julian calendar WITHOUT year 0. Adopted in 1923/10/14 CE.'
+							//
+							+ '\n不包含0年的外推儒略改革曆',
+					href : 'https://en.wikipedia.org/wiki/Revised_Julian_calendar',
+					S : 'font-size:.8em;'
+				},
+				function(date) {
+					return adapt_by(date, date.精 === '年' ? date
+							.to_Revised_Julian({
+								format : 'serial'
+							})[0] : date.to_Revised_Julian().join('/'),
+							Revised_Julian_reform);
+				} ],
 
 		Tabular : [ {
 			a : {
