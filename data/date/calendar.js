@@ -2414,7 +2414,7 @@ Myanmar_Date.month_name.en.waso = [ 'First Waso', 'Second Waso' ];
  * @param {Object}[options]
  *            options to use
  *
- * @returns {Date} proleptic Gregorian calendar
+ * @returns {Date} system Date (proleptic Gregorian calendar with year 0)
  */
 Myanmar_Date.new_year_Date = function(year, options) {
 	var date = Myanmar_Date.epoch + year * Myanmar_YEAR_LENGTH_VALUE,
@@ -2501,7 +2501,7 @@ for(var i=0;i<19;i++){for(var y=0,_y,l=[];y<19;y++){_y=(7*y+i)%19;if(_y<7)l.push
  * @param {Integer}[reference]
  *            reference to use. see Myanmar_reference.
  *
- * @returns {Date} proleptic Gregorian calendar
+ * @returns {Date} system Date (proleptic Gregorian calendar with year 0)
  */
 Myanmar_Date.watat_data = function(year, reference) {
 	var cache = Myanmar_cache[reference |= 0];
@@ -2675,7 +2675,7 @@ Myanmar_Date.month_days = function(year, options) {
  * @param {Object}[options]
  *            options to use
  *
- * @returns {Date} proleptic Gregorian calendar
+ * @returns {Date} system Date (proleptic Gregorian calendar with year 0)
  */
 function Myanmar_Date(year, month, date, options) {
 	var year_data = Myanmar_Date.year_data(year, options);
@@ -4421,7 +4421,7 @@ Egyptian_Date.month_name.Egyptian_Arabic = '|توت|بابه|هاتور|(كيا�
  * @param {Natural}date
  *            date of Egyptian calendar.
  *
- * @returns {Date} proleptic Gregorian calendar
+ * @returns {Date} system Date (proleptic Gregorian calendar with year 0)
  */
 function Egyptian_Date(year, month, date, options) {
 	// no year 0. year: -1 → 0
@@ -4720,7 +4720,7 @@ Nanakshahi_Date.test = new_tester(Date_to_Nanakshahi, Nanakshahi_Date, {
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
-// 儒略改革曆
+// 儒略改革曆, Revised Julian calendar
 // http://orthodoxwiki.org/Revised_Julian_Calendar
 // https://en.wikipedia.org/wiki/Revised_Julian_calendar
 
@@ -4731,18 +4731,28 @@ Revised_Julian_days = [ , 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ],
 // 本年累積月份日數。
 Revised_Julian_accumulated_days = [ , 0 ];
 
+Revised_Julian_epoch.setFullYear(0, 0, 2);
+Revised_Julian_epoch = Revised_Julian_epoch.getTime();
+
 Revised_Julian_days.forEach(function(days, index) {
 	if (index > 0)
 		Revised_Julian_accumulated_days.push(days
 				+ Revised_Julian_accumulated_days[index]);
 });
 
-Revised_Julian_epoch.setFullYear(0, 0, 1);
-Revised_Julian_epoch = Revised_Julian_epoch.getTime();
-
+/**
+ * Get the days count from epoch.
+ * 
+ * @param {Integer}year
+ *            year of Revised Julian calendar. (Astronomical year numbering)
+ * @param {Natural}month
+ *            month of Revised Julian calendar.
+ * 
+ * @returns {Integer} days count from epoch.
+ */
 Revised_Julian_Date.days = function(year, month) {
-	// 要用來計算 leap 日數的年分。過3月則應當做下一年計算。
-	var y = month >= 3 ? year + 1 : year, m900 = y % 900;
+	// 要用來計算 leap 日數的年分。未過3月則應當做前一年計算。
+	var y = month >= 3 ? year : year - 1, m900 = y.mod(900);
 
 	// days from epoch
 	return 365 * year
@@ -4756,7 +4766,23 @@ Revised_Julian_Date.days = function(year, month) {
 	+ Revised_Julian_accumulated_days[month];
 }
 
+/**
+ * Revised Julian calendar → system Date
+ * 
+ * @param {Integer}year
+ *            year of Revised Julian calendar.
+ * @param {Natural}month
+ *            month of Revised Julian calendar.
+ * @param {Natural}date
+ *            date of Revised Julian calendar.
+ * 
+ * @returns {Date} system Date (proleptic Gregorian calendar with year 0)
+ */
 function Revised_Julian_Date(year, month, date) {
+	// no year 0. year: -1 → 0
+	if (year < 0)
+		year++;
+
 	date += Revised_Julian_Date.days(year, month) - 1;
 
 	return new Date(Revised_Julian_epoch + date * ONE_DAY_LENGTH_VALUE);
@@ -4764,22 +4790,38 @@ function Revised_Julian_Date(year, month, date) {
 
 _.Revised_Julian_Date = Revised_Julian_Date;
 
+
+/**
+ * system Date → Revised Julian calendar
+ * 
+ * @param {Date}date
+ *            system date.
+ * @param {Object}[options]
+ *            options to use
+ * 
+ * @returns {Array} [ year, month, date ]
+ */
 function Date_to_Revised_Julian(date, options) {
 	var days = (date - Revised_Julian_epoch) / ONE_DAY_LENGTH_VALUE,
 	// 估測
-	diff, year = date.getFullYear() | 0, month = date.getMonth() + 1 | 0;
+	year = date.getFullYear() | 0, month = date.getMonth() + 1 | 0;
 
-	// TODO: ugly method. too slow. improve it.
+	// TODO: ugly method. Try to improve it.
 	for (;;) {
-		var base = Revised_Julian_Date.days(year, month);
-		date = days - base;
+		date = days - Revised_Julian_Date.days(year, month);
+		// 在前後萬年範圍內，應該僅修正一次。
 		if (date < 0) {
+			if (month === 3) {
+				date = days - Revised_Julian_Date.days(year, month = 2);
+				break;
+			}
 			if (--month < 1)
 				month = 12, year--;
 		} else if (date >= Revised_Julian_days[month]) {
-			if (month === 2 && date === 29) {
-				if (days >= Revised_Julian_Date.days(year, 3))
-					month = 3, date = 0;
+			if (month === 2) {
+				days -= Revised_Julian_Date.days(year, 3);
+				if (days >= 0)
+					month = 3, date = days;
 				break;
 			}
 			if (++month > 12)
@@ -4788,12 +4830,20 @@ function Date_to_Revised_Julian(date, options) {
 			break;
 	}
 
+	if (year <= 0)
+		// year: 0 → -1
+		year--;
+
 	return [ year, month, date + 1 ];
 }
 
 /*
 
+CeL.Revised_Julian_Date(6400,3,1).format()
+new Date('6400/3/1').to_Revised_Julian()
+
 CeL.Revised_Julian_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
+// 59804 ms, error 0/4
 
 */
 Revised_Julian_Date.test = new_tester(Date_to_Revised_Julian, Revised_Julian_Date, {
@@ -4860,7 +4910,7 @@ French_Republican_Date.month_name = function(month) {
  * @param {Natural}date
  *            date of calendrier républicain.
  *
- * @returns {Date} proleptic Gregorian calendar
+ * @returns {Date} system Date (proleptic Gregorian calendar with year 0)
  */
 function French_Republican_Date(year, month, date, shift) {
 	// no year 0. year: -1 → 0
@@ -5006,7 +5056,7 @@ Solar_Hijri_Date.month_name = function(month_serial, is_leap, options) {
  * @param {Natural}date
  *            date of Solar Hijri calendar.
  *
- * @returns {Date} proleptic Gregorian calendar
+ * @returns {Date} system Date (proleptic Gregorian calendar with year 0)
  */
 function Solar_Hijri_Date(year, month, date) {
 	// no year 0. year: -1 → 0
@@ -5127,7 +5177,7 @@ Yi_Date.month_name = function(month, is_leap, options) {
  * @param {Natural}date
  *            date of Yi calendar.
  *
- * @returns {Date} proleptic Gregorian calendar
+ * @returns {Date} system Date (proleptic Gregorian calendar with year 0)
  */
 function Yi_Date(year, month, date) {
 	// no year 0. year: -1 → 0

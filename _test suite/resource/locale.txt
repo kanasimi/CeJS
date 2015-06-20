@@ -97,15 +97,16 @@ http://www.e-yakushiyo.net/Calendario_Maya_Dias.htm",儒略日數,,Julian Day Nu
 ,可選用的文字式年曆欄位: 分類: 天文計算,下弦,,下弦,,last quarter,下弦
 ,可選用的文字式年曆欄位: 分類: 天文計算,晦日,,晦日,,new moon eve,晦日
 ,可選用的文字式年曆欄位: 分類: 天文計算,夏曆,traditional Chinese lunisolar calendar,夏曆,,Chinese lunisolar,旧暦
-,可選用的文字式年曆欄位: 分類: 曆法,伊斯蘭曆,,伊斯蘭曆,,Islamic Calendar,ヒジュラ暦
+,可選用的文字式年曆欄位: 分類: 曆法,Revised Julian calendar,,儒略改革曆,,Revised Julian calendar,修正ユリウス暦
+,可選用的文字式年曆欄位: 分類: 曆法,伊斯蘭曆,,伊斯蘭曆,,Islamic calendar,ヒジュラ暦
 ,可選用的文字式年曆欄位: 分類: 曆法,گاه‌شماری هجری خورشیدی,,現代伊朗曆,,Modern Iranian calendar,イラン太陽暦
 ,可選用的文字式年曆欄位: 分類: 曆法,希伯來曆,,希伯來曆,,Hebrew calendar,ユダヤ暦
 ,可選用的文字式年曆欄位: 分類: 曆法,長紀曆,The Mesoamerican Long Count calendar,長紀曆,,Long Count,マヤ長期暦
 ,可選用的文字式年曆欄位: 分類: 曆法,Maya Tzolk'in,,,,Maya Tzolk'in,マヤ神聖暦
 ,可選用的文字式年曆欄位: 分類: 曆法,Maya Haab',,,,Maya Haab',マヤ文化暦
-,可選用的文字式年曆欄位: 分類: 曆法,傣曆,,傣曆,,Dai Calendar,タイ暦
+,可選用的文字式年曆欄位: 分類: 曆法,傣曆,,傣曆,,Dai calendar,タイ暦
 ,可選用的文字式年曆欄位: 分類: 曆法,緬曆,"緬甸曆法, Burmese calendar, ミャンマー暦",緬曆,,Myanmar calendar,ビルマ暦
-,可選用的文字式年曆欄位: 分類: 曆法,彝曆,,彝曆,,Yi Calendar,彝暦
+,可選用的文字式年曆欄位: 分類: 曆法,彝曆,,彝曆,,Yi calendar,彝暦
 ,可選用的文字式年曆欄位: 分類: 曆法,印度曆,,印度曆,,Hindu calendar,ヒンドゥー暦
 ,可選用的文字式年曆欄位: 分類: 曆法,印度國定曆,,印度國定曆,,Indian national calendar,インド国定暦
 ,可選用的文字式年曆欄位: 分類: 曆法,Bangla calendar,"

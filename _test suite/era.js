@@ -2875,11 +2875,26 @@ function affairs() {
 			return 年朔日.月名[index] + '月' + (1 + JD - 年朔日[index] | 0) + '日';
 		} ],
 
+		Gregorian : [ {
+			a : {
+				T : 'Gregorian calendar'
+			},
+			R : 'proleptic Gregorian calendar WITH year 0,'
+			//
+			+ ' 包含0年的外推格里曆',
+			href : 'https://en.wikipedia.org/wiki/'
+
+			+ 'Proleptic_Gregorian_calendar',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return date.format('%Y/%m/%d');
+		} ],
+
 		Julian : [ {
 			a : {
 				T : 'Julian calendar'
 			},
-			R : 'In fact, proleptic Julian calendar WITHOUT year 0,'
+			R : 'proleptic Julian calendar WITHOUT year 0,'
 			//
 			+ ' 不包含0年的外推儒略曆',
 			href : 'https://en.wikipedia.org/wiki/Proleptic_Julian_calendar',
@@ -2891,19 +2906,19 @@ function affairs() {
 			});
 		} ],
 
-		Gregorian : [ {
+		Revised_Julian : [ {
 			a : {
-				T : 'Gregorian calendar'
+				T : 'Revised Julian calendar'
 			},
-			R : 'In fact, proleptic Gregorian calendar INCLUDES year 0,'
+			R : 'proleptic Revised Julian calendar WITHOUT year 0,'
 			//
-			+ ' 包含0年的外推格里曆',
-			href : 'https://en.wikipedia.org/wiki/'
-
-			+ 'Proleptic_Gregorian_calendar',
+			+ ' 不包含0年的外推儒略改革曆',
+			href : 'https://en.wikipedia.org/wiki/Revised_Julian_calendar',
 			S : 'font-size:.8em;'
 		}, function(date) {
-			return date.format('%Y/%m/%d');
+			return date.精 === '年' ? date.to_Revised_Julian({
+				format : 'serial'
+			})[0] : date.to_Revised_Julian().join('/');
 		} ],
 
 		Tabular : [ {
