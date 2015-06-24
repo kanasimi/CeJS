@@ -2004,7 +2004,7 @@ var thdl_solar_term,
 initialize_thdl_solar_term = function() {
 	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
 	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
-	//
+	// STARTS_FROM: 節氣間間隔以 STARTS_FROM 日起跳。
 	STARTS_FROM = 14, DIGITS = 4, MAX_DIGITS = 10 + 26,
 	//
 	last_date = null, start_year, result = [],
@@ -2014,6 +2014,7 @@ initialize_thdl_solar_term = function() {
 
 	data.forEach(function(year_data, index) {
 		if (year_data.includes(',')) {
+			// 無簡化方法。
 			year_data = year_data.split(',');
 			year_data.forEach(function(solar_term, index) {
 				if (!year_data[index])
@@ -2032,6 +2033,7 @@ initialize_thdl_solar_term = function() {
 			});
 
 		} else if (year_data.length === 24) {
+			// 次簡化方法。
 			year_data = year_data.split('');
 
 			year_data.forEach(function(solar_term, index) {
@@ -2041,6 +2043,7 @@ initialize_thdl_solar_term = function() {
 			});
 
 		} else {
+			// 最簡化方法。
 			year_data = parseInt(year_data, MAX_DIGITS)
 			//
 			.toString(DIGITS).split('');
@@ -2766,47 +2769,65 @@ function affairs() {
 			};
 		} ],
 
-		lunar_phase : [ {
-			a : {
-				T : '月相'
-			},
-			R : 'lunar phase, 天文月相附加可能的日月食資訊。計算得出之紀元使用當地、當日零時月相，非實曆。'
-			//
-			+ '\nUsing VSOP87D.ear and LEA-406.',
-			href : 'https://zh.wikipedia.org/wiki/%E6%9C%88%E7%9B%B8'
-		}, function(date) {
-			if (/* date.準 || */date.精)
-				return;
-
-			var JD = CeL.TT(new Date(date.offseted_value())),
-			//
-			phase = CeL.lunar_phase_of_JD(JD, {
-				eclipse : true,
-				晦 : '晦日'
-			});
-			if (Array.isArray(phase)) {
-				phase = [ {
-					b : {
-						T : phase[0]
-					}
-				}, ' ', CeL.JD_to_Date(phase[1]).format({
-					parser : 'CE',
-					// format : '%Y/%m/%d %H:%M:%S'
-					format : '%H:%M:%S'
-				}), phase[2] ? [ ' ', {
-					T : (phase[0] === '朔' ? '日' : '月') + '食',
-					R : _('Moon latitude') + ': '
+		lunar_phase : [
+				{
+					a : {
+						T : '月相'
+					},
+					R : 'lunar phase, 天文月相附加可能的日月食資訊。計算得出之紀元使用當地、當日零時月相，非實曆。'
 					//
-					+ CeL.show_degrees(phase[2], 2)
-				}, '?' ] : '' ];
-			} else if (phase)
-				phase = {
-					b : {
-						T : phase
-					}
-				};
-			return phase;
-		} ],
+					+ '\nUsing VSOP87D.ear and LEA-406.',
+					href : 'https://zh.wikipedia.org/wiki/%E6%9C%88%E7%9B%B8'
+				},
+				function(date) {
+					if (/* date.準 || */date.精)
+						return;
+
+					var JD = CeL.TT(new Date(date.offseted_value())),
+					//
+					phase = CeL.lunar_phase_of_JD(JD, {
+						eclipse : true,
+						晦 : '晦日'
+					});
+					if (Array.isArray(phase)) {
+						var eclipse = (phase[0] === '朔' ? '日' : '月') + '食';
+						phase = [
+								{
+									b : {
+										T : phase[0]
+									}
+								},
+								' ',
+								CeL.JD_to_Date(phase[1]).format({
+									parser : 'CE',
+									// format : '%Y/%m/%d %H:%M:%S'
+									format : '%H:%M:%S'
+								}),
+								phase[2] ? [
+										' ',
+										{
+											a : {
+												T : eclipse
+											},
+											R : _('Moon latitude') + ': '
+											//
+											+ CeL.show_degrees(phase[2], 2),
+											href : 'https://zh.wikipedia.org/wiki/'
+													//
+													+ encodeURIComponent(date
+															.format('%Y年%m月%d日')
+															.replace(/^-/, '前')
+															+ eclipse)
+										}, '?' ]
+										: '' ];
+					} else if (phase)
+						phase = {
+							b : {
+								T : phase
+							}
+						};
+					return phase;
+				} ],
 
 		ΔT : [ {
 			a : {
@@ -2842,48 +2863,8 @@ function affairs() {
 		} ],
 
 		// --------------------------------------------------------------------
-		// 曆法 Historical calendar
+		// 各國曆法 Historical calendar
 		calendar : '計算日期的方法。計算得出，不一定是實暦。',
-
-		夏曆 : [ {
-			a : {
-				T : '夏曆'
-			},
-			R : 'traditional Chinese lunisolar calendar.'
-			//
-			+ '\n當前使用之農曆/陰曆/夏曆/黃曆曆法. 計算速度較慢！'
-			//
-			+ '\n計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
-			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
-		}, function(date) {
-			if (/* date.準 || */date.精)
-				return;
-
-			var JD = CeL.Date_to_JD(date.offseted_value()),
-			//
-			年朔日 = CeL.定朔(date, {
-				月名 : true
-			});
-
-			if (!年朔日)
-				return data_load_message;
-
-			if (JD < 年朔日[0])
-				// date 實際上在上一年。
-				年朔日 = CeL.定朔(date, {
-					月名 : true,
-					year_offset : -1
-				});
-			else if (JD >= 年朔日.end)
-				// date 實際上在下一年。
-				年朔日 = CeL.定朔(date, {
-					月名 : true,
-					year_offset : 1
-				});
-
-			var index = 年朔日.search_sorted(JD, true);
-			return 年朔日.月名[index] + '月' + (1 + JD - 年朔日[index] | 0) + '日';
-		} ],
 
 		Gregorian : [
 				{
@@ -3416,7 +3397,67 @@ function affairs() {
 		} ],
 
 		// --------------------------------------------------------------------
-		// 列具曆注
+		// 中國曆法 Chinese calendar
+		中國曆法 : '中國歷代計算日期的方法。計算得出，不一定是實暦。',
+
+		夏曆 : [ {
+			a : {
+				T : '夏曆'
+			},
+			R : 'traditional Chinese lunisolar calendar.'
+			//
+			+ '\n當前使用之農曆/陰曆/夏曆/黃曆曆法. 計算速度較慢！'
+			//
+			+ '\n計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
+			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
+
+			var JD = CeL.Date_to_JD(date.offseted_value()),
+			//
+			年朔日 = CeL.定朔(date, {
+				月名 : true
+			});
+
+			if (!年朔日)
+				return data_load_message;
+
+			if (JD < 年朔日[0])
+				// date 實際上在上一年。
+				年朔日 = CeL.定朔(date, {
+					月名 : true,
+					year_offset : -1
+				});
+			else if (JD >= 年朔日.end)
+				// date 實際上在下一年。
+				年朔日 = CeL.定朔(date, {
+					月名 : true,
+					year_offset : 1
+				});
+
+			var index = 年朔日.search_sorted(JD, true);
+			return 年朔日.月名[index] + '月' + (1 + JD - 年朔日[index] | 0) + '日';
+		} ],
+
+		太初曆 : [ {
+			a : {
+				T : '太初曆'
+			},
+			R : '從漢武帝太初元年夏五月（前104年）至後漢章帝元和二年二月甲寅（85年），太初曆共實行了188年。',
+			href : 'https://zh.wikipedia.org/wiki/%E5%A4%AA%E5%88%9D%E6%9B%86'
+		}, function(date) {
+			if (date.精 !== '年') {
+				date = date.to_太初曆();
+				return /^1 /.test(date[2]) ? {
+					span : date.join('/'),
+					S : 'color:#f94;'
+				} : date.join('/');
+			}
+		} ],
+
+		// --------------------------------------------------------------------
+		// 列具曆注, calendar notes
 		曆注 : '具注曆譜/曆書之補充注釋，常與風水運勢、吉凶宜忌相關。',
 		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
 		// TODO: 八節、二至啟閉四節、伏臘、八魁、天李、入官忌、日忌和歸忌
@@ -3535,7 +3576,7 @@ function affairs() {
 
 			var JD = CeL.Date_to_JD(date.offseted_value());
 
-			var index = CeL.stem_branch_index(date)
+			var 建除 = CeL.stem_branch_index(date)
 			// .5: 清明、立夏之類方為"節"，因此配合節氣序，需添加之 offset。
 			// 添上初始 offset (9) 並保證 index >= 0。
 			// -1e-8: 交節當日即開始疊。因此此處之 offset 實際上算到了當日晚 24時，屬明日，需再回調至當日晚。
@@ -3544,7 +3585,11 @@ function affairs() {
 			// 30 = TURN_TO_DEGREES / (SOLAR_TERMS_NAME / 2)
 			// = 360 / (24 / 2)
 			- CeL.solar_coordinate(JD + 1).apparent / 30 | 0;
-			return 建除_LIST[index % 建除_LIST.length];
+			建除 = 建除_LIST[建除 % 建除_LIST.length]
+			return 建除 === '建' ? {
+				span : 建除,
+				S : 'color:#f24;font-weight:bold;'
+			} : 建除;
 		} ],
 
 		反支 : [ {

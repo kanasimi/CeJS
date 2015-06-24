@@ -6,6 +6,7 @@
  * @since 2013/2/13 12:45:44
  * 
  * TODO:<br />
+ * bug: 西漢武帝後元2年<br />
  * 太複雜了，效率不高，重構。<br />
  * 舊唐書/卷11 <span data-era="~">寶應元年</span>..<span data-era="~">二年</span>..<span
  * data-era="~">二月甲午</span>，回紇登裏可汗辭歸蕃。<span data-era="~">三月甲辰</span>朔，襄州右兵馬使梁崇義殺大將李昭，據城自固，仍授崇義襄州刺史、山南東道節度使。<span

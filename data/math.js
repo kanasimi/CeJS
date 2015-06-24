@@ -1230,6 +1230,50 @@ function find_root(equation, x0, x1, y, options) {
 _.find_root = find_root;
 
 
+/*
+// 求取反函數 caculator[-1](result)
+function get_boundary(caculator, result, down, up, limit) {
+	if (up - down === 0)
+		return up;
+
+	var boundary, value, increase;
+	// assert: caculator(down) – caculator(up) 為嚴格遞增/嚴格遞減函數。
+	if (caculator(up) - caculator(down) < 0)
+		// swap.
+		boundary = up, up = down, down = boundary;
+
+	// assert: caculator(down)<caculator(up)
+	increase = down < up;
+	if (!(limit > 0))
+		limit = 800;
+
+	do {
+		boundary = (up + down) / 2;
+		// console.log(down + ' – ' + boundary + ' – ' + up);
+		if (boundary === down || boundary === up)
+			return boundary;
+		value = result - caculator(boundary);
+		if (value === 0) {
+			if (result - caculator(down) === 0)
+				down = boundary, value = true;
+			if (result - caculator(up) === 0)
+				up = boundary, value = true;
+			if (value && (increase ? up - down > 0 : up - down < 0))
+				continue;
+			return boundary;
+		}
+		if (value > 0)
+			down = boundary;
+		else
+			up = boundary;
+	} while (--limit > 0 && (increase ? up - down > 0 : up - down < 0));
+
+	throw 'get_boundary: caculator is not either strictly increasing or decreasing?';
+}
+
+*/
+
+
 //------------------------------------------------------------------------------------------------------//
 
 

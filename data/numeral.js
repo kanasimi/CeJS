@@ -141,7 +141,9 @@ if (typeof CeL === 'function')
 				廿 : '二十',
 				卄 : '二十',
 				卅 : '三十',
-				// 丗 : '三十',
+				// http://www.bsm.org.cn/show_article.php?id=1888
+				// "丗五年" = "卅五年"
+				丗 : '三十',
 				// e.g., 卌又三年
 				卌 : '四十',
 				皕 : '二百',

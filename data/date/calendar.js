@@ -1,6 +1,10 @@
 
 /**
  * @name	CeL function for calendrical calculations.
+ *
+ * If you need a online demo of these calendars, please visit:
+ * http://lyrics.meicho.com.tw/lib/JS/_test%20suite/era.htm
+ *
  * @fileoverview
  * 本檔案包含了曆法轉換的功能。
  *
@@ -1375,6 +1379,10 @@ http://blog.sina.com.cn/s/blog_4131e58f0101fikx.html
 傣曆中的紀元紀時法,與公曆的紀時法相近似,即以某一個時間為傣曆紀元開始累計的時間,以後就順此按年月日往下記,至今年(1979年)10月1日(農曆己未年八月十一)為傣曆1341年12月月出11日,這是一種情況。
 還有一種情況是:公元1979年10月1日又是傣曆紀元的第1341年、傣曆紀元的第16592月,並是傣曆紀元的第489982日。對這種年月日的累計數,現譯稱為傣曆紀元年數、紀元積月數和紀元積日數。
 
+
+TODO:
+有極少例外，如1190年未閏（八月滿月），而1191年閏。
+
 */
 
 
@@ -1734,53 +1742,6 @@ Dai_Date.days_6_1 = function(year, days) {
 
 
 /*
-
-
-
-
-
-// 求取反函數 caculator[-1](result)
-function get_boundary(caculator, result, down, up, limit) {
-	if (up - down === 0)
-		return up;
-
-	var boundary, value, increase;
-	// assert: caculator(down) – caculator(up) 為嚴格遞增/嚴格遞減函數。
-	if (caculator(up) - caculator(down) < 0)
-		// swap.
-		boundary = up, up = down, down = boundary;
-
-	// assert: caculator(down)<caculator(up)
-	increase = down < up;
-	if (!(limit > 0))
-		limit = 800;
-
-	do {
-		boundary = (up + down) / 2;
-		// console.log(down + ' – ' + boundary + ' – ' + up);
-		if (boundary === down || boundary === up)
-			return boundary;
-		value = result - caculator(boundary);
-		if (value === 0) {
-			if (result - caculator(down) === 0)
-				down = boundary, value = true;
-			if (result - caculator(up) === 0)
-				up = boundary, value = true;
-			if (value && (increase ? up - down > 0 : up - down < 0))
-				continue;
-			return boundary;
-		}
-		if (value > 0)
-			down = boundary;
-		else
-			up = boundary;
-	} while (--limit > 0 && (increase ? up - down > 0 : up - down < 0));
-
-	throw 'get_boundary: caculator is not either strictly increasing or decreasing?';
-}
-
-
-
 
 
 
@@ -4319,7 +4280,7 @@ _.Armenian_Date = Armenian_Date;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // Egyptian calendar, 古埃及曆法.
-// ** 自 22 BCE 之後不準確。
+// ** 自 22 BCE 之後不改制。
 
 
 // References:
@@ -4724,8 +4685,8 @@ CeL.Nanakshahi_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 Nanakshahi_Date.test = new_tester(Date_to_Nanakshahi, Nanakshahi_Date, {
 	epoch : new Date(1469, 3 - 1, 14),
 	month_days : {
-		30 : 'short month',
-		31 : 'long month'
+		30 : 'short month 6–12',
+		31 : 'long month 1–5'
 	}
 });
 
@@ -4821,7 +4782,7 @@ function Date_to_Revised_Julian(date, options) {
 	// TODO: ugly method. Try to improve it.
 	for (;;) {
 		date = days - Revised_Julian_Date.days(year, month);
-		// 在前後萬年範圍內，應該僅修正一次。
+		// 經測試，在前後萬年範圍內，最多僅修正一次。
 		if (date < 0) {
 			if (month === 3) {
 				date = days - Revised_Julian_Date.days(year, month = 2);
@@ -4856,6 +4817,7 @@ new Date('6400/3/1').to_Revised_Julian()
 
 CeL.Revised_Julian_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 // 59804 ms, error 0/4
+// 修正 138217 次。平均 29+ 日（每個月）會修正一次。
 
 */
 Revised_Julian_Date.test = new_tester(Date_to_Revised_Julian, Revised_Julian_Date, {
@@ -4867,6 +4829,214 @@ Revised_Julian_Date.test = new_tester(Date_to_Revised_Julian, Revised_Julian_Dat
 		31 : 'long month'
 	}
 });
+
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// 《太初曆》即《三統曆》行用於太初元年夏五月至後漢章帝元和二年二月甲寅(104 BCE–85 CE)
+// 漢簡曆日考徵 許名瑲
+// http://www.bsm.org.cn/show_article.php?id=2033
+// http://www.bsm.org.cn/show_article.php?id=2042
+// http://www.bsm.org.cn/show_article.php?id=2262
+// 漢書 律曆志
+// http://ctext.org/han-shu/lv-li-zhi-shang/zh
+
+// 曆法:回歸年,朔望月,平太陽日
+
+function 太初曆() {
+	// 元始黃鐘初九自乘，一龠之數，得日法。
+	var 日法 = 9 * 9,
+	// 章歲。十九年七閏，是為一章(十九歲七閏)
+	// 朔不得中，是謂閏月。無中置閏
+	閏法 = 19,
+	// 經歷一統千五百三十九年，冬至與月朔相合夜半時刻。
+	統法 = 日法 * 閏法,
+	// 參統法，得元法。
+	// 經歷一元四千六百一十七年，冬至與月朔相合甲子夜半。
+	元法 = 3 * 統法,
+	// 47: 參天九，兩地十，得會數。
+	// 三統曆以一百三十五月為「朔望之會」，有廿三交食，四十七「朔望之會」，得六千三百四十五月(47×135＝6345)為「會月」，則交食起于冬至朔旦。
+	會數 = 3 * 9 + 2 * 10,
+	// 五位乘會數，得章月。案：章月即一章(十九年)之朔望月數二百三十五(十九年七閏；12×19+7＝235)。
+	章月 = 5 * 會數,
+	// 朔望月長: 29+43/81 = 2392/81
+	// 以朔策廿九日又八十一分之四十三日化為分數，得八十一分之二千三百九十二日；即一日為八十一分，則一月有二千三百九十二分。二千三百九十二，名之曰「月法」
+	月法 = 29 * 日法 + 43,
+	//
+	月日數 = 月法 / 日法,
+	// 四分月法，得通法。
+	通法 = 月法 / 4,
+	// 以章月乘通法，得中法。
+	中法 = 章月 * 通法,
+	// 30+2020/4617 = 70265/4617 ≈ 487/16 = 30.4375
+	中氣日數 = 中法 / 元法,
+	// 一統之日數。
+	周天 = 章月 * 月法,
+	// 歲中十二。以三統乘四時，得歲中。案：即一歲有十二中氣。
+	歲中 = 3 * 4,
+	// 以章月加閏法，得月周。
+	// 一章中月亮經天周數；一章中恒星月數。
+	// 朔望月大于恒星月，三統曆以一章二百三十五朔望月等于二百五十四恒星月，恰為「章月加閏法」之數，劉歆故云。
+	月周 = 章月 + 閏法,
+	// 參天數二十五，兩地數三十
+	// 此為交食周期，三統曆據實測，以一百三十五朔望月有二十三交食
+	朔望之會 = 3 * 25 + 2 * 30,
+	// 合廿七章，五百一十三歲
+	會月 = 會數 * 朔望之會,
+	// 合八十一章，一千五百三十九年。
+	統月 = 3 * 會月,
+	// 合三統，四千六百一十七年，則交食起于甲子朔旦冬至，所謂「九會而元復」。
+	元月 = 3 * 統月,
+	// 一章有二百二十八中氣(19×12＝228)，名曰「章中」。一章二百三十五朔望月，七個月無中氣，三統閏法「朔不得中，是謂閏月。」
+	章中 = 閏法 * 歲中,
+	//
+	統中 = 日法 * 章中,
+	//
+	元中 = 3 * 統中,
+	// 什乘元中，以減周天，得策餘。
+	// 三統曆歲實(冬至點間的時間間隔)三百六十五日又一千五百三十九分之三百八十五日，去其六周甲子，餘五日又一千五百三十九分之三百八十五日，化為分數，取其分子，得八千八十，名曰「策餘」。
+	策餘 = 周天 - 10 * 元中,
+	//
+	周至 = 3 * 閏法,
+	// 太初元年上元積年
+	上元積年 = 143127,
+	// 閏餘0
+	積月 = 1770255,
+	// 小餘0
+	朔積日 = 52277160,
+	// 小餘0
+	氣積日 = 52277160;
+
+	// 步算
+
+}
+
+// 24: 每年24節氣. Should be library_namespace.SOLAR_TERMS.length
+var 年節氣數 = 24,
+// 西漢武帝元封7年11月1日, 105/12/25 BC, -105/12/25
+// 至於元封七年，復得閼逢攝提格之歲，中冬十一月甲子朔旦冬至，日月在建星，太歲在子，已得太初本星度新正。
+太初曆_曆元JDN = 1683431,
+// 朔望月長: 月法 / 日法 = 2392 / 81 ≈ 29.530864197530864
+太初曆_月長 = 2392, 太初曆_月之日長 = 81, 太初曆_月日數 = 太初曆_月長 / 太初曆_月之日長,
+// 中法 / 元法 / 2 = 140530 / 4617 / 2 ≈ 30.43751353692874/2 ≈ 15.21875676846437
+// 太初曆歲實 = 12 * 中法 / 元法 ≈ 365.2501624431449
+太初曆_節氣長 = 70265, 太初曆_節氣之日長 = 4617, 太初曆_節氣日數 = 太初曆_節氣長 / 太初曆_節氣之日長;
+
+/*
+
+index: Math.ceil(太初曆_月日數/(2*太初曆_節氣日數-太初曆_月日數))-1 = 32月為太初曆首個無中氣月(閏月)
+積年3, index: 8月 = 3年閏6月為太初曆首個無中氣月(閏月)
+
+*/
+
+
+// 每年以朔分月（朔日為每月初一）。
+function 太初曆_積月(積日, get_積日) {
+	var 積月 = Math.ceil(積日 / 太初曆_月日數),
+	// 先測試下個月的月始積日。
+	月始積日 = Math.floor(積月 * 太初曆_月日數);
+	if (積日 < 月始積日)
+		// 應採用上個月。
+		月始積日 = Math.floor(--積月 * 太初曆_月日數);
+	return get_積日 ? [ 積月, 月始積日 ] : 積月;
+}
+
+// index (0–11) to month serial (1–12)
+function 太初曆_index_to_月(月) {
+	// original: (月-2).mod(12)+1
+	// 12: 12個月
+	// 10: index 0 → 10+1月
+	return ((月 + 10) % 12) + 1;
+}
+
+// 曆算推步
+// '-106/12/25'.to_Date('CE').to_太初曆()
+function Date_to_太初曆(date, options) {
+	// 自曆元累積日數，本日距離曆元 (西漢武帝元封7年11月1日甲子朔旦冬至) 之日數。
+	// 西漢武帝元封7年11月1日積日為0日
+	var 積日 = Julian_day(date) - 太初曆_曆元JDN,
+	// 自曆元累積月數
+	積月 = 太初曆_積月(積日, true),
+	// 自曆元累積節氣數
+	積節氣 = Math.floor(積日 / 太初曆_節氣日數),
+	// 自曆元累積年數
+	積年 = Math.floor(積節氣 / 年節氣數),
+	//
+	年, 月, 日 = 積日 - 積月[1] + 1,
+	// 年初冬至日之積月
+	// 冬至所在月為十一月，之後為十二月、正月、二月……復至十一月。
+	年初積月, 閏月, 下一冬至積日;
+
+	積月 = 積月[0];
+
+	// -2: 僅有在此範圍內，才有必要檢測本日是否與冬至在同一個月，又在冬至之前。
+	if (積節氣.mod(年節氣數) >= 年節氣數 - 2
+	// 檢測下一個冬至的積日數
+	&& (下一冬至積日 = Math.ceil(積節氣 / 年節氣數) * 年節氣數 * 太初曆_節氣日數)
+	// 下一個月月初積日
+	< Math.floor((積月 + 1) * 太初曆_月日數)
+	// 檢測是否與下一個冬至在同一個月
+	&& 積月 === 太初曆_積月(下一冬至積日)) {
+		年 = 積年 + 1;
+		年初積月 = 積月;
+	} else {
+		年 = 積年;
+		// 歲實 = 冬至點間的時間間隔 = 年節氣數 * 太初曆_節氣日數
+		年初積月 = 太初曆_積月(Math.floor(年 * 年節氣數 * 太初曆_節氣日數));
+	}
+
+	月 = 積月 - 年初積月;
+	// 年月數 > 12 (應為13)，則置閏月
+	if (太初曆_積月(Math.floor((年 + 1) * 年節氣數 * 太初曆_節氣日數)) - 年初積月 > 12) {
+		// 本年(冬至起)第(閏月+1)個月為閏月。(index:閏月)
+		// e.g., 閏月=1: 閏11月. 閏月=3: 閏1月.
+		//
+		// 先取得最大可能值:實際值一定小於此。
+		閏月 = Math.ceil(
+		// 需要追趕之日數: 自冬至起，至第2(index:1)個月第一天子夜。
+		((年初積月 + 1) * 太初曆_月日數 - 年 * 年節氣數 * 太初曆_節氣日數) /
+		// 每個月可追趕之日數
+		(2 * 太初曆_節氣日數 - 太初曆_月日數));
+		// 檢查是否(月初積日>前一節氣時間)，若非，則表示應該往前找。
+		// (index:1)月與冬至(節氣index:0)相較，
+		// (index:2)月與(節氣index:1)相較。
+		while (Math.floor((年初積月 + 閏月) * 太初曆_月日數) <= (年 * 年節氣數 + (閏月 - 1) * 2)
+				* 太初曆_節氣日數)
+			// 最多應該只會 loop Math.ceil(1/(2 * 太初曆_節氣日數 - 太初曆_月日數)) = 2次?
+			閏月--;
+		閏月 = 月 >= 閏月 && 月-- === 閏月;
+	}
+	月 = 太初曆_index_to_月(月);
+
+	// 11→12→(跨年)1→2→...→10
+	if (月 < 11)
+		年++;
+
+	if (日 === 1)
+		日 += ' (月小餘' + (積月 * 太初曆_月長).mod(太初曆_月之日長) + ')';
+
+	date = [ 年, 閏月 ? '閏' + 月 : 月, 日 ];
+
+	// 測試今天之內有無變換至下一節氣
+	if (++積節氣 === Math.floor((積日 + 1) / 太初曆_節氣日數)) {
+		// 今天之內變換至下一節氣
+		if (library_namespace.SOLAR_TERMS) {
+			// 冬至序 = SOLAR_TERMS_NAME.indexOf('冬至') = 18;
+			積節氣 = library_namespace.SOLAR_TERMS[(積節氣 + 18)
+					.mod(library_namespace.SOLAR_TERMS.length)]
+					+ ' (節氣小餘' + (積節氣 * 太初曆_節氣長).mod(太初曆_節氣之日長) + ')';
+		}
+		date.push(積節氣);
+	}
+
+	return date;
+}
+
+// 平朔平氣曆日
+function 平朔平氣(月日數, 節氣日數, 曆元JDN) {
+	;
+}
+
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 以下為應用天文演算的曆法。
@@ -5384,6 +5554,8 @@ library_namespace.set_method(Date.prototype, {
 	to_Byzantine : set_bind(Date_to_Byzantine),
 	to_Nanakshahi : set_bind(Date_to_Nanakshahi),
 	to_Revised_Julian : set_bind(Date_to_Revised_Julian),
+
+	to_太初曆 : set_bind(Date_to_太初曆),
 
 	// 以下為應用天文演算的曆法。
 	to_Republican : set_bind(Date_to_French_Republican),

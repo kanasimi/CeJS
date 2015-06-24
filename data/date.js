@@ -422,7 +422,7 @@ function Unix_time(date) {
 
 _.Unix_time = Unix_time;
 
-// Unix epoch '1970-01-01T00:00:00Z", 0 @ most systems
+// Unix epoch '1970-01-01T00:00:00Z', 0 @ most systems
 Unix_time.epoch = Date.parse('1970/1/1 UTC');
 
 Unix_time.to_Date = function (time_value) {
