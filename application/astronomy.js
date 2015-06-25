@@ -1970,8 +1970,8 @@ if (typeof CeL === 'function')
 					return month < 1 ? year - 1 : year;
 				// +1: 當天24時之前交節，依舊得算在當日。
 				return library_namespace.Date_to_JD(date) + 1
-				//
-				< solar_term_JD(year - 1, 立春NO) ? year - 1 : year;
+				// 就算正好等於，本日JD也應該算前一年的。
+				<= solar_term_JD(year - 1, 立春NO) ? year - 1 : year;
 			}
 
 			// CeL.立春年(2001).format('CE');
@@ -2919,14 +2919,19 @@ if (typeof CeL === 'function')
 			 */
 			function lunar_phase_of_JD(JD, options) {
 				// 90: TURN_TO_DEGREES / 4相 = 360 / 4
-				var phase = Math.floor(lunar_phase_angel_of_JD(JD + 1) / 90);
-				if (isNaN(phase)) {
+				var _phase = lunar_phase_angel_of_JD(JD + 1) / 90;
+				if (isNaN(_phase)) {
 					library_namespace.debug('資料還沒載入。', 2);
 					return;
 				}
+				var phase = Math.floor(_phase);
 
-				var _phase = Math.floor(lunar_phase_angel_of_JD(JD) / 90);
-				if (_phase !== phase) {
+				// 假如變換剛好落在隔日子夜0時剛開始(這機率應該極低)，則今日還是應該算前一個。
+				// 因為月相長度大於日長度，此即表示今天還沒變換月相。
+				if (phase !== _phase
+						// 檢查今天子夜0時與明日子夜0時是否有改變月相。
+						&& phase !== (_phase = Math
+								.floor(lunar_phase_angel_of_JD(JD) / 90))) {
 					// JD, JD+1 有不同月相，表示這天中改變了月相。
 					// phase: -2–1
 					if (phase < 0)

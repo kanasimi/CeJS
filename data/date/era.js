@@ -648,7 +648,7 @@ if (typeof CeL === 'function')
 			// 《三命通會》《論納音取象》
 			// http://ctext.org/wiki.pl?if=gb&chapter=212352
 			納音_LIST = ('海中,爐中,大林,路旁,劍鋒,山頭,澗下,城頭,白蠟,楊柳,井泉,屋上,霹靂,松柏,長流,'
-			// 0 ~ 59 干支序轉納音: 納音_LIST[index / 2 | 0]; '/2': 0,1→0; 2,3→1; ...
+			// 0 – 59 干支序轉納音: 納音_LIST[index / 2 | 0]; '/2': 0,1→0; 2,3→1; ...
 			+ '砂中,山下,平地,壁上,金泊,覆燈,天河,大驛,釵釧,桑柘,大溪,沙中,天上,石榴,大海').split(','),
 			// It will be splitted later.
 			九星_LIST = '一白水星,二黑土星,三碧木星,四綠木星,五黃土星,六白金星,七赤金星,八白土星,九紫火星',
@@ -720,7 +720,7 @@ if (typeof CeL === 'function')
 				a = '火木水土金';
 				a += a;
 				for (d = 納音_LIST.length; d-- > 0;)
-					// "% 15": 30個 → 15個 loop : 0 ~ 14
+					// "% 15": 30個 → 15個 loop : 0 – 14
 					納音_LIST[d] += a.charAt(4 - ((d % 15) / 3 | 0) + (d % 3));
 			})();
 
@@ -3719,7 +3719,7 @@ if (typeof CeL === 'function')
 
 			function note_納音(date) {
 				var index = library_namespace.stem_branch_index(date);
-				// 0 ~ 59 干支序轉納音: 納音_LIST[index / 2 | 0];
+				// 0 – 59 干支序轉納音: 納音_LIST[index / 2 | 0];
 				// '/2': 0,1→0; 2,3→1; ...
 				// or [index >>> 1]
 				return 納音_LIST[index / 2 | 0];
@@ -3968,7 +3968,8 @@ if (typeof CeL === 'function')
 					年 -= .5;
 				// 確定 date 之前一至日。
 				// +1 : JD 為當地當天0時。但交節時刻會在至日0時之後。因此需算到整日過完，即 JD+1。
-				while (遁開始日(年 + .5)[0] <= JD + 1)
+				// 若交節時刻剛好落在隔日剛開始(子夜0時)，則今日還是應該算前一個。
+				while (遁開始日(年 + .5)[0] < JD + 1)
 					年 += .5;
 				library_namespace.debug(
 				//
@@ -3977,7 +3978,7 @@ if (typeof CeL === 'function')
 				+ ' (' + (遁開始日(年 + .5)[0] - 遁開始日(年)[0]) + ')', 2);
 				index = 遁開始日(年);
 
-				// days: 遁開始日後經過天數。0~179
+				// days: 遁開始日後經過天數。0–179
 				var days = JD + 1 - index[0] | 0,
 				//
 				result = library_namespace.null_Object();
@@ -4891,7 +4892,7 @@ if (typeof CeL === 'function')
 					起訖時間[1] = 起訖時間[1].slice(i.length);
 				packed_era_data = [ 紀年名稱, (起訖時間[2] ? 起訖時間[2] + ':' : '')
 				//
-				+ 起訖時間[0] + '~' + 起訖時間[1], 年度月分資料.join('') ];
+				+ 起訖時間[0] + '–' + 起訖時間[1], 年度月分資料.join('') ];
 
 				// 添加其他附加屬性名稱。
 				for (i in plain_era_data)

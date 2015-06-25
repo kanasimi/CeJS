@@ -942,7 +942,7 @@ function add_tag(period, data, group, register_only, options) {
 	}
 }
 
-// add_tag.group_count[group] = {Interger}count
+// add_tag.group_count[group] = {Integer}count
 add_tag.group_count = CeL.null_Object();
 
 add_tag.show = function(array_data) {
@@ -2072,8 +2072,25 @@ initialize_thdl_solar_term = function() {
 
 // ---------------------------------------------------------------------//
 
-function adapt_by(date, show, start, is_end) {
-	return is_end ^ (date - start < 0) ? {
+/**
+ * 若非在試用期間，則淡化顯示之。
+ * 
+ * @param {Date}date
+ *            date to detect
+ * @param {String}show
+ *            text to show
+ * @param {Date}start
+ *            start date of adaptation
+ * @param {Date}end
+ *            end date of adaptation
+ * 
+ * @returns formated style
+ */
+function adapt_by(date, show, start, end) {
+	if (Array.isArray(start) && !end) {
+		end = start[1], start = start[0];
+	}
+	return start && date - start < 0 || end && end - date <= 0 ? {
 		span : show || date,
 		S : 'color:#aaa;'
 	} : show || date;
@@ -2422,7 +2439,10 @@ function affairs() {
 	THAI_Year_numbering = Year_numbering(543),
 	//
 	Gregorian_reform = new Date(1582, 10 - 1, 15), Revised_Julian_reform = new Date(
-			1923, 10 - 1, 14);
+			1923, 10 - 1, 14),
+	// 《太初曆》於漢成帝末年，由劉歆重新編訂，改稱三統曆。行用於太初元年夏五月至後漢章帝元和二年二月甲寅(104 BCE–85 CE)
+	太初曆_adopted = [ '-104/6/20'.to_Date('CE').getTime(),
+			'085/3/18'.to_Date('CE').getTime() ];
 
 	// calendar_column
 	list = {
@@ -2898,7 +2918,7 @@ function affairs() {
 					return adapt_by(date, date.format({
 						parser : 'Julian',
 						format : date.精 === '年' ? '%Y年' : '%Y/%m/%d'
-					}), Gregorian_reform, true);
+					}), null, Gregorian_reform);
 				} ],
 
 		Revised_Julian : [
@@ -3436,8 +3456,14 @@ function affairs() {
 					year_offset : 1
 				});
 
-			var index = 年朔日.search_sorted(JD, true);
-			return 年朔日.月名[index] + '月' + (1 + JD - 年朔日[index] | 0) + '日';
+			var index = 年朔日.search_sorted(JD, true),
+			//
+			日 = 1 + JD - 年朔日[index] | 0;
+			date = 年朔日.月名[index] + '月' + 日 + '日';
+			return 日 === 1 ? {
+				span : date,
+				S : 'color:#f94;'
+			} : date;
 		} ],
 
 		太初曆 : [ {
@@ -3448,11 +3474,11 @@ function affairs() {
 			href : 'https://zh.wikipedia.org/wiki/%E5%A4%AA%E5%88%9D%E6%9B%86'
 		}, function(date) {
 			if (date.精 !== '年') {
-				date = date.to_太初曆();
-				return /^1 /.test(date[2]) ? {
-					span : date.join('/'),
+				var 太初曆 = date.to_太初曆(), show = 太初曆.join('/');
+				return adapt_by(date, /^1 /.test(太初曆[2]) ? {
+					span : show,
 					S : 'color:#f94;'
-				} : date.join('/');
+				} : show, 太初曆_adopted);
 			}
 		} ],
 
