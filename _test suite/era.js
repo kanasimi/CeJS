@@ -3474,7 +3474,10 @@ function affairs() {
 			href : 'https://zh.wikipedia.org/wiki/%E5%A4%AA%E5%88%9D%E6%9B%86'
 		}, function(date) {
 			if (date.精 !== '年') {
-				var 太初曆 = date.to_太初曆(), show = 太初曆.join('/');
+				var 太初曆 = date.to_太初曆({
+					小餘 : true,
+					節氣 : true
+				}), show = 太初曆.join('/');
 				return adapt_by(date, /^1 /.test(太初曆[2]) ? {
 					span : show,
 					S : 'color:#f94;'
