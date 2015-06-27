@@ -330,6 +330,7 @@ if (typeof CeL === 'function')
 
 			COUNT_KEY = 'count',
 
+			// 亦用於春秋戰國時期"周諸侯國"分類
 			PERIOD_KEY = '時期',
 			//
 			PERIOD_PREFIX = 'period:',
@@ -553,10 +554,12 @@ if (typeof CeL === 'function')
 				// state 州
 				// Ancient Chinese states
 				// https://en.wikipedia.org/wiki/Ancient_Chinese_states
+				//
+				// 諸侯國名
 				諸侯國 : 2,
 				// 歷史時期 period. e.g., 魏晉南北朝, 五代十國
-				時期 : 2,
 				// period : 2,
+				時期 : 2,
 
 				// country
 				// e.g., 中國, 日本
@@ -1470,16 +1473,25 @@ if (typeof CeL === 'function')
 							+ name[紀年名稱索引值.國家] + ')';
 
 				// 基本上不加國家名稱。
+				// name: [ 朝代, 君主, 紀年 ]
 				name = name.slice(0, 3).reverse();
+
 				// 對重複的名稱作適當簡略調整。
 				if (name[0] && name[0].includes(name[2])
 				//
 				|| name[1] && name[1].includes(name[2]))
 					name[2] = '';
-				if (name[1] &&
-				// name[1].startsWith(name[0])
-				name[1].lastIndexOf(name[0], 0) === 0)
-					name[0] = '';
+				if (name[1])
+					// name[1].startsWith(name[0])
+					if (name[1].lastIndexOf(name[0], 0) === 0)
+						name[0] = '';
+					else {
+						var matched = name[0].match(/^(.+)國$/);
+						// 周諸侯國之類?
+						if (matched && name[1].startsWith(matched[1]))
+							// 例如 魯國/魯昭公 → 魯魯昭公
+							name[0] = '';
+					}
 
 				if (type === WITH_PERIOD)
 					append_period(this, name);
@@ -4980,10 +4992,12 @@ if (typeof CeL === 'function')
 			// TODO: {Array}value
 			function add_attribute(object, key, value) {
 				var v = object[key];
-				if (Array.isArray(v))
-					v.push(value);
-				else
-					object[key] = key in object ? [ v, value ] : value;
+				if (Array.isArray(v)) {
+					// 不重複設定。
+					if (!v.includes(value))
+						v.push(value);
+				} else
+					object[key] = v && v !== value ? [ v, value ] : value;
 			}
 
 			function parse_month_name(月名, 月名_Array) {
@@ -5119,12 +5133,12 @@ if (typeof CeL === 'function')
 						return;
 
 					var tmp, i, j, k,
-					//
+					// 紀年:紀年名稱
 					紀年 = era_data[0], 起訖 = era_data[1], 曆數 = era_data[2],
 					//
 					附加屬性 = era_data[3];
 
-					// 至此已設定完成 (紀年), (起訖), (曆數), (其他附加屬性)。
+					// 至此已定出 (紀年), (起訖), (曆數), (其他附加屬性)，接下來作進一步解析。
 
 					if (紀年 && !Array.isArray(紀年))
 						紀年 = String(紀年).split(pack_era.era_name_classifier);
@@ -5174,6 +5188,16 @@ if (typeof CeL === 'function')
 					紀年.reverse();
 					if (國家 && !紀年[3])
 						紀年[3] = 國家;
+					if ((tmp = 紀年[2].match(/^(.+)國$/))
+					// 周諸侯國之類?
+					&& !紀年[1].includes('國')) {
+						// 例如 for 魯國/昭公: add "魯昭公"
+						// add_attribute(附加屬性, '君主', tmp[1] + 紀年[1]);
+
+						// 直接改才能得到效果。
+						// 例如 魯國/昭公 → 魯國/魯昭公
+						紀年[1] = tmp[1] + 紀年[1];
+					}
 
 					// assert: 至此
 					// 前一紀年名稱 = [ 朝代, 君主(帝王), 紀年 ]
@@ -6251,7 +6275,7 @@ if (typeof CeL === 'function')
 							tmp = [];
 							紀年_list.forEach(function(era) {
 								if (!tmp.includes(
-								// 謹記祿未重複的紀年，忽略重複的紀年名稱。
+								// 僅記錄未重複的紀年，忽略重複的紀年名稱。
 								era = era.toString()))
 									tmp.push(era);
 							});

@@ -5000,7 +5000,9 @@ function 太初曆_積節氣(積日) {
  * @returns {Date} system Date (proleptic Gregorian calendar with year 0)
  */
 function 太初曆_Date(year, month, date, options) {
+	// 輸入閏月。
 	var leap;
+	// 1–10月從前一年起算。
 	if (isNaN(month))
 		--year, leap = month.match(/^閏(\d{1,2})$/);
 	else if (month < 11)
@@ -5043,7 +5045,7 @@ _.太初曆_Date = 太初曆_Date;
 
 
 /**
- * 太初曆曆算推步。system Date → 太初曆(無中置閏平朔平氣曆日)
+ * 太初曆曆算推步。system Date → 太初曆(平朔平氣無中置閏曆日)
  * 
  * @param {Date}date
  *            system date to convert.
@@ -5126,7 +5128,7 @@ function Date_to_太初曆(date, options) {
 		// 若在閏月 index 之後，則 -1 以接下來進一步轉換成月名。
 		閏月 = 月 >= 閏月 && 月-- === 閏月;
 	}
-	// index (0–11) to month serial (1–12)
+	// month index (0–11) to month serial (1–12)
 	// original: (月-2).mod(12)+1
 	// 12: 12個月
 	// 10: index 0 → 10+1月
@@ -5188,6 +5190,8 @@ CeL.太初曆_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
 	}
 });
 
+
+// 後漢四分曆以文帝後元三年（公元前161年）十一月甲子朔旦冬至為曆元。上距魯哀公十四年春孔子獲麟320年。
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // 以下為應用天文演算的曆法。
