@@ -5170,8 +5170,8 @@ function Date_to_太初曆(date, options) {
 '-86/12/25'.to_Date('CE').to_太初曆()
 CeL.太初曆_Date(38,10,1).format('CE');
 
-CeL.太初曆_Date.test(-2e4, 4e6, 4).join('\n') || 'OK';
-// 27666 ms, error 0/4
+CeL.太初曆_Date.test(-2e4, 1e7, 4).join('\n') || 'OK';
+// "OK"
 
 */
 太初曆_Date.test = new_tester(Date_to_太初曆, 太初曆_Date, {
@@ -5623,6 +5623,8 @@ Yi_Date.test = new_tester(Date_to_Yi, Yi_Date, {
 // reform of lunisolar calendar
 
 /*
+
+https://en.wikipedia.org/wiki/Lunisolar_calendar#Determining_leap_months
 
 tropical year:
 365.2421896698 − 6.15359×10−6T − 7.29×10−10T2 + 2.64×10−10T3

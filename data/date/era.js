@@ -1472,6 +1472,9 @@ if (typeof CeL === 'function')
 							+ (name[紀年名稱索引值.君主] || '') + ', '
 							+ name[紀年名稱索引值.國家] + ')';
 
+				if (name.cache)
+					return name.cache;
+
 				// 基本上不加國家名稱。
 				// name: [ 朝代, 君主, 紀年 ]
 				name = name.slice(0, 3).reverse();
@@ -1496,7 +1499,7 @@ if (typeof CeL === 'function')
 				if (type === WITH_PERIOD)
 					append_period(this, name);
 
-				return reduce_era_name(name.join(' '));
+				return name.cache = reduce_era_name(name.join(' '));
 			}
 
 			// ---------------------------------------

@@ -1816,7 +1816,7 @@ if (typeof CeL === 'function')
 			 * Date → [ year, days of year ]
 			 * 
 			 * @param {Date}date
-			 *            指定日期
+			 *            指定日期。
 			 * 
 			 * @returns {Array} [ (CE year), (days counts from the first day) ]
 			 */
@@ -3329,6 +3329,49 @@ if (typeof CeL === 'function')
 			};
 
 			_.定朔 = 定朔;
+
+			/**
+			 * 取得指定日期之夏曆。
+			 * 
+			 * @param {Date}date
+			 *            指定日期。
+			 * @param {Object}options
+			 *            options
+			 * 
+			 * @returns {Array} [ 年, 月, 日 ]
+			 */
+			function 夏曆(date, options) {
+				if (!LEA406_loaded('V'))
+					// 採用低精度之誤差過大，不能用。
+					return;
+
+				var JDN = library_namespace.Julian_day(date),
+				//
+				年朔日 = {
+					月名 : true
+				};
+				options = options ? Object.assign(年朔日, options) : 年朔日;
+				options.year_offset |= 0;
+				年朔日 = 定朔(date, options);
+
+				if (JDN < 年朔日[0]) {
+					// date 實際上在上一年。
+					options.year_offset--;
+					年朔日 = 定朔(date, options);
+				} else if (JDN >= 年朔日.end) {
+					// date 實際上在下一年。
+					options.year_offset++;
+					年朔日 = 定朔(date, options);
+				}
+
+				var index = 年朔日.search_sorted(JDN, true);
+
+				// [ 年, 月, 日 ]
+				return [ date.getFullYear() + options.year_offset,
+						年朔日.月名[index], 1 + JDN - 年朔日[index] | 0 ];
+			}
+
+			_.夏曆 = 夏曆;
 
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 

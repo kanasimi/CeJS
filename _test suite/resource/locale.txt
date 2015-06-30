@@ -74,6 +74,7 @@ http://www.e-yakushiyo.net/Calendario_Maya_Dias.htm",儒略日數,,Julian Day Nu
 ,可選用的文字式年曆欄位,週日期,,週日期,,Week date,週日付
 ,可選用的文字式年曆欄位: 分類,astronomy,天文計算 astronomical calculations,天文,,astronomy,天文
 ,可選用的文字式年曆欄位: 分類,calendar,,曆法,,calendar,暦法
+,可選用的文字式年曆欄位: 分類,東亞陰陽曆,"中國傳統曆法, East Asian lunisolar calendar",東亞陰陽曆,,East Asian calendar,中華圏の太陰太陽暦
 ,可選用的文字式年曆欄位: 分類,Year naming,,紀年法,,Year naming,紀年法
 ,可選用的文字式年曆欄位: 分類,Year numbering,,編年法,,Year numbering,編年方法
 ,可選用的文字式年曆欄位: 分類,Gregorian reform,,公曆改曆,,Adoption of the Gregorian calendar,グレゴリオ改暦

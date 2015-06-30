@@ -2789,65 +2789,56 @@ function affairs() {
 			};
 		} ],
 
-		lunar_phase : [
-				{
-					a : {
-						T : '月相'
-					},
-					R : 'lunar phase, 天文月相附加可能的日月食資訊。計算得出之紀元使用當地、當日零時月相，非實曆。'
-					//
-					+ '\nUsing VSOP87D.ear and LEA-406.',
-					href : 'https://zh.wikipedia.org/wiki/%E6%9C%88%E7%9B%B8'
-				},
-				function(date) {
-					if (/* date.準 || */date.精)
-						return;
+		lunar_phase : [ {
+			a : {
+				T : '月相'
+			},
+			R : 'lunar phase, 天文月相附加可能的日月食資訊。計算得出之紀元使用當地、當日零時月相，非實曆。'
+			//
+			+ '\nUsing VSOP87D.ear and LEA-406.',
+			href : 'https://zh.wikipedia.org/wiki/%E6%9C%88%E7%9B%B8'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
 
-					var JD = CeL.TT(new Date(date.offseted_value())),
+			var JD = CeL.TT(new Date(date.offseted_value())),
+			//
+			phase = CeL.lunar_phase_of_JD(JD, {
+				eclipse : true,
+				晦 : '晦日'
+			});
+			if (Array.isArray(phase)) {
+				var eclipse = (phase[0] === '朔' ? '日' : '月') + '食';
+				phase = [ {
+					b : {
+						T : phase[0]
+					}
+				}, ' ', CeL.JD_to_Date(phase[1]).format({
+					parser : 'CE',
+					// format : '%Y/%m/%d %H:%M:%S'
+					format : '%H:%M:%S'
+				}), phase[2] ? [ ' ', {
+					a : {
+						T : eclipse
+					},
+					R : _('Moon latitude') + ': '
 					//
-					phase = CeL.lunar_phase_of_JD(JD, {
-						eclipse : true,
-						晦 : '晦日'
-					});
-					if (Array.isArray(phase)) {
-						var eclipse = (phase[0] === '朔' ? '日' : '月') + '食';
-						phase = [
-								{
-									b : {
-										T : phase[0]
-									}
-								},
-								' ',
-								CeL.JD_to_Date(phase[1]).format({
-									parser : 'CE',
-									// format : '%Y/%m/%d %H:%M:%S'
-									format : '%H:%M:%S'
-								}),
-								phase[2] ? [
-										' ',
-										{
-											a : {
-												T : eclipse
-											},
-											R : _('Moon latitude') + ': '
-											//
-											+ CeL.show_degrees(phase[2], 2),
-											href : 'https://zh.wikipedia.org/wiki/'
-													//
-													+ encodeURIComponent(date
-															.format('%Y年%m月%d日')
-															.replace(/^-/, '前')
-															+ eclipse)
-										}, '?' ]
-										: '' ];
-					} else if (phase)
-						phase = {
-							b : {
-								T : phase
-							}
-						};
-					return phase;
-				} ],
+					+ CeL.show_degrees(phase[2], 2),
+					href : 'https://zh.wikipedia.org/wiki/'
+					//
+					+ encodeURIComponent(date.format({
+						parser : 'CE',
+						format : '%Y年%m月%d日'
+					}).replace(/^-/, '前') + eclipse)
+				}, '?' ] : '' ];
+			} else if (phase)
+				phase = {
+					b : {
+						T : phase
+					}
+				};
+			return phase;
+		} ],
 
 		ΔT : [ {
 			a : {
@@ -3417,8 +3408,9 @@ function affairs() {
 		} ],
 
 		// --------------------------------------------------------------------
-		// 中國曆法 Chinese calendar
-		中國曆法 : '中國歷代計算日期的方法。計算得出，不一定是實暦。',
+		// 中國傳統曆法 Chinese calendar, 太陰太陽暦
+		// https://zh.wikipedia.org/wiki/%E9%98%B4%E9%98%B3%E5%8E%86
+		東亞陰陽曆 : 'East Asian lunisolar calendar. 中國、日本、朝鮮歷代計算日期的方法。計算得出，不一定是實暦。',
 
 		夏曆 : [ {
 			a : {
@@ -3428,39 +3420,55 @@ function affairs() {
 			//
 			+ '\n當前使用之農曆/陰曆/夏曆/黃曆曆法. 計算速度較慢！'
 			//
-			+ '\n計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
+			+ '\n以定氣定朔無中置閏規則計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
 			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return;
+			// [ 年, 月, 日 ]
+			var 曆 = CeL.夏曆(date);
+			date = 曆[1] + '月' + 曆[2] + '日';
+			return 曆[2] === 1 ? {
+				span : date,
+				S : 'color:#f94;'
+			} : date;
+		} ],
 
-			var JD = CeL.Date_to_JD(date.offseted_value()),
-			//
-			年朔日 = CeL.定朔(date, {
-				月名 : true
+		殷曆 : [ {
+			a : {
+				T : '殷曆'
+			},
+			R : '以定氣定朔無中置閏規則計算得出，非實曆。殷曆預設歲首為建丑。計算速度較慢！',
+			href : 'https://zh.wikipedia.org/wiki/%E5%8F%A4%E5%85%AD%E6%AD%B7'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
+			// [ 年, 月, 日 ]
+			var 曆 = CeL.夏曆(date, {
+				歲首 : '丑'
 			});
+			date = 曆[1] + '月' + 曆[2] + '日';
+			return 曆[2] === 1 ? {
+				span : date,
+				S : 'color:#f94;'
+			} : date;
+		} ],
 
-			if (!年朔日)
-				return data_load_message;
-
-			if (JD < 年朔日[0])
-				// date 實際上在上一年。
-				年朔日 = CeL.定朔(date, {
-					月名 : true,
-					year_offset : -1
-				});
-			else if (JD >= 年朔日.end)
-				// date 實際上在下一年。
-				年朔日 = CeL.定朔(date, {
-					月名 : true,
-					year_offset : 1
-				});
-
-			var index = 年朔日.search_sorted(JD, true),
-			//
-			日 = 1 + JD - 年朔日[index] | 0;
-			date = 年朔日.月名[index] + '月' + 日 + '日';
-			return 日 === 1 ? {
+		周曆 : [ {
+			a : {
+				T : '周曆'
+			},
+			R : '以定氣定朔無中置閏規則計算得出，非實曆。周曆預設歲首為建子。計算速度較慢！',
+			href : 'https://zh.wikipedia.org/wiki/%E5%8F%A4%E5%85%AD%E6%AD%B7'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
+			// [ 年, 月, 日 ]
+			var 曆 = CeL.夏曆(date, {
+				歲首 : '子'
+			});
+			date = 曆[1] + '月' + 曆[2] + '日';
+			return 曆[2] === 1 ? {
 				span : date,
 				S : 'color:#f94;'
 			} : date;
