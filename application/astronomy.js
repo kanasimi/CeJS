@@ -1094,7 +1094,7 @@ if (typeof CeL === 'function')
 			function VSOP87(JD, object, options) {
 				// 儒略千年數 Julian millennia since J2000.0.
 				var τ = Julian_century(JD) / 10,
-				//				
+				//
 				coordinate = library_namespace.null_Object(),
 				//
 				object_terms = VSOP87_terms[VSOP87.object_name(object)];
@@ -2924,6 +2924,11 @@ if (typeof CeL === 'function')
 					library_namespace.debug('資料還沒載入。', 2);
 					return;
 				}
+
+				// 前置處理。
+				if (!library_namespace.is_Object(options))
+					options = library_namespace.null_Object();
+
 				var phase = Math.floor(_phase);
 
 				// 假如變換剛好落在隔日子夜0時剛開始(這機率應該極低)，則今日還是應該算前一個。
@@ -2939,7 +2944,7 @@ if (typeof CeL === 'function')
 					// phase: 0–3
 					var phase_shown = options.index ? phase
 							: LUNAR_PHASE_NAME[phase];
-					if (options && (options.time || options.eclipse)) {
+					if (options.time || options.eclipse) {
 						var TT = accurate_lunar_phase(
 								Julian_century(JD) * 100 + 2000, phase, {
 									JD : JD,
@@ -2961,7 +2966,7 @@ if (typeof CeL === 'function')
 						 * Use can be made of the following rule: there is no
 						 * eclipse if |sin F| > 0.36.
 						 */
-						if (options && options.eclipse
+						if (options.eclipse
 						// 0:朔才可能日食, 2:望才可能月食
 						&& (phase === 0 || phase === 2)) {
 							// TODO: 以下方法有誤。

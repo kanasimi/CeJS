@@ -436,6 +436,8 @@ if (typeof CeL === 'function')
 			// 季名稱。e.g., 春正月
 			季_SOURCE = '[' + 季_LIST + ']?王?',
 
+			孟仲季_LIST = '孟仲季'.split(''),
+
 			// see: 時刻_to_hour()
 			時刻_PATTERN = generate_pattern(
 			// '(?:[早晚夜])'+
@@ -623,6 +625,11 @@ if (typeof CeL === 'function')
 			// the Five Steps/Stages
 			陰陽五行_LIST = '木火土金水'.split(''),
 
+			// @see https://zh.wikipedia.org/wiki/%E5%8D%81%E4%BA%8C%E5%BE%8B
+			// 十二月律
+			// 黃鐘之月:子月
+			月律_LIST = '太簇,夾鐘,姑洗,仲呂,蕤賓,林鐘,夷則,南呂,無射,應鐘,黃鐘,大呂',
+
 			// 各月の別名, 日本月名
 			// https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E6%9A%A6#.E5.90.84.E6.9C.88.E3.81.AE.E5.88.A5.E5.90.8D
 			月の別名_LIST = '睦月,如月,弥生,卯月,皐月,水無月,文月,葉月,長月,神無月,霜月,師走'.split(','),
@@ -662,6 +669,7 @@ if (typeof CeL === 'function')
 			// ---------------------------------------------------------------------//
 			// 初始調整並規範基本常數。
 
+			季_LIST = 季_LIST.split('');
 			九星_LIST = 九星_LIST.split(',');
 
 			(function() {
@@ -3693,6 +3701,7 @@ if (typeof CeL === 'function')
 				&& date.月干支.charAt(1) || '';
 			}
 
+			// 僅適用於夏曆!
 			function note_季(date) {
 				var 月 = date.月;
 				if (isNaN(月) && (月 = 月.match(MONTH_NAME_PATTERN)))
@@ -3700,7 +3709,29 @@ if (typeof CeL === 'function')
 
 				return 0 <= (月 -= START_MONTH)
 				// 此非季節，而為「冬十月」之類用。
-				&& 季_LIST.charAt(月 / 4 | 0) || '';
+				&& 季_LIST[月 / 3 | 0] || '';
+			}
+
+			// 僅適用於夏曆!
+			function note_孟仲季(date) {
+				var 月 = date.月;
+				if (isNaN(月) && (月 = 月.match(MONTH_NAME_PATTERN)))
+					月 = 月[2];
+
+				return 0 <= (月 -= START_MONTH)
+				// 此非季節，而為「冬十月」之類用。
+				&& (孟仲季_LIST[月 % 3] + 季_LIST[月 / 3 | 0]) || '';
+			}
+
+			// 僅適用於夏曆!
+			function note_月律(date) {
+				return 月律_LIST[date.月 - START_MONTH];
+			}
+
+			function note_月の別名(date, 新暦) {
+				// 新暦に適用する
+				var index = 新暦 ? date.getMonth() : date.月 - START_MONTH;
+				return index >= 0 ? 月の別名_LIST[index] : '';
 			}
 
 			function note_旬(date) {
@@ -3771,12 +3802,6 @@ if (typeof CeL === 'function')
 				// https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C
 				// 旧暦の月の数字と旧暦の日の数字の和が6の倍数であれば大安となる。
 				? 六曜_LIST[index % 六曜_LIST.length] : '';
-			}
-
-			function note_月の別名(date, 新暦) {
-				// 新暦に適用する
-				var index = 新暦 ? date.getMonth() : date.月 - 1;
-				return index >= 0 ? 月の別名_LIST[index] : '';
 			}
 
 			function note_反支(date, 六日反支標記) {
@@ -4234,6 +4259,8 @@ if (typeof CeL === 'function')
 					日家九星 : note_日家九星,
 					三元九運 : note_三元九運,
 
+					孟仲季 : note_孟仲季,
+					月律 : note_月律,
 					月の別名 : note_月の別名,
 
 					反支 : note_反支,

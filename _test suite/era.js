@@ -2442,7 +2442,10 @@ function affairs() {
 			1923, 10 - 1, 14),
 	// 《太初曆》於漢成帝末年，由劉歆重新編訂，改稱三統曆。行用於太初元年夏五月至後漢章帝元和二年二月甲寅(104 BCE–85 CE)
 	太初曆_adopted = [ '-104/6/20'.to_Date('CE').getTime(),
-			'085/3/18'.to_Date('CE').getTime() ];
+			'085/3/18'.to_Date('CE').getTime() ],
+	// 東漢章帝元和二年二月四日甲寅至曹魏青龍五年二月末（東吳用至黃武二年）施用《四分曆》
+	後漢四分曆_adopted = [ '085/3/18'.to_Date('CE').getTime(),
+			'237/4/13'.to_Date('CE').getTime() ];
 
 	// calendar_column
 	list = {
@@ -3493,6 +3496,25 @@ function affairs() {
 			}
 		} ],
 
+		後漢四分曆 : [ {
+			a : {
+				T : '後漢四分曆'
+			},
+			R : '東漢章帝元和二年二月四日甲寅至曹魏青龍五年二月末（東吳用至黃武二年）施用《四分曆》',
+			href : 'https://zh.wikipedia.org/wiki/%E5%9B%9B%E5%88%86%E6%9B%86'
+		}, function(date) {
+			if (date.精 !== '年') {
+				var 後漢四分曆 = date.to_後漢四分曆({
+					小餘 : true,
+					節氣 : true
+				}), show = 後漢四分曆.join('/');
+				return adapt_by(date, /^1 /.test(後漢四分曆[2]) ? {
+					span : show,
+					S : 'color:#f94;'
+				} : show, 後漢四分曆_adopted);
+			}
+		} ],
+
 		// --------------------------------------------------------------------
 		// 列具曆注, calendar notes
 		曆注 : '具注曆譜/曆書之補充注釋，常與風水運勢、吉凶宜忌相關。',
@@ -3654,6 +3676,28 @@ function affairs() {
 			S : 'font-size:.8em;'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.血忌(date);
+		} ],
+
+		孟仲季 : [ {
+			a : {
+				T : '孟仲季月'
+			},
+			R : '孟仲季之月名別稱, 孟仲季+春夏秋冬',
+			href : 'https://zh.wikipedia.org/wiki/%E5%8D%81%E4%BA%8C%E5%BE%8B',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.孟仲季(date);
+		} ],
+
+		月律 : [ {
+			a : {
+				T : '十二月律'
+			},
+			R : '十二月律',
+			href : 'https://zh.wikipedia.org/wiki/%E5%8D%81%E4%BA%8C%E5%BE%8B',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return /* !date.準 && */!date.精 && CeL.era.月律(date);
 		} ],
 
 		月の別名 : [ {
