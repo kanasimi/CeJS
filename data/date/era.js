@@ -627,8 +627,9 @@ if (typeof CeL === 'function')
 
 			// @see https://zh.wikipedia.org/wiki/%E5%8D%81%E4%BA%8C%E5%BE%8B
 			// 十二月律
-			// 黃鐘之月:子月
-			月律_LIST = '太簇,夾鐘,姑洗,仲呂,蕤賓,林鐘,夷則,南呂,無射,應鐘,黃鐘,大呂',
+			// 黃鐘之月:十一月子月
+			// 蕤賓 or 蕤賔 http://sidneyluo.net/a/a05/016.htm 晉書 卷十六 ‧ 志第六 律歷上
+			月律_LIST = '太簇,夾鐘,姑洗,仲呂,蕤賓,林鐘,夷則,南呂,無射,應鐘,黃鐘,大呂'.split(','),
 
 			// 各月の別名, 日本月名
 			// https://ja.wikipedia.org/wiki/%E6%97%A5%E6%9C%AC%E3%81%AE%E6%9A%A6#.E5.90.84.E6.9C.88.E3.81.AE.E5.88.A5.E5.90.8D

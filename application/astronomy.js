@@ -2969,7 +2969,7 @@ if (typeof CeL === 'function')
 						if (options.eclipse
 						// 0:朔才可能日食, 2:望才可能月食
 						&& (phase === 0 || phase === 2)) {
-							// TODO: 以下方法有誤。
+							// TODO: 以下方法無依據。這樣的條件也有可能過疏過密？
 							// 地面某點緯度 latitude
 							var latitude = 45,
 							// 距離最大食分應在五分左右，十分內。
@@ -3007,11 +3007,12 @@ if (typeof CeL === 'function')
 								range = 1.01 * Lunar_parallax + Solar_parallax
 										- range;
 							}
-							if (Math.abs(d) < range + r)
+							if (Math.abs(d) < range + r) {
 								// 遮到了。
 								// eclipse conjunction
 								// push 黃經衝 or 合(有相同的黃經)時之月黃緯
 								phase_shown.push(d);
+							}
 						}
 					}
 					return phase_shown;

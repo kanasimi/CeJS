@@ -2223,7 +2223,7 @@ function affairs() {
 			CE_name + '日期:天聰2年寅月戊子日', '清德宗光緒六年三月十三日', '清德宗光緒庚辰年三月十三日',
 			'清德宗光緒庚辰年庚辰月庚辰日', '清德宗光緒六年三月十三日辰正一刻', '魏少帝嘉平4年5月1日',
 			'魏少帝嘉平4年閏5月1日', '魏少帝嘉平4年閏月1日', '景元元年', '景元元年7月', '元文宗天曆2年8月8日',
-			'元文宗天曆3/1/2', '共存紀年:JD2032189', '平成26年6月8日', 'H26.6.8',
+			'元文宗天曆3/1/2', '旧暦2016年', '共存紀年:JD2032189', '平成26年6月8日', 'H26.6.8',
 			'漢和帝劉肇（79年–106年2月13日）' ];
 	i.forEach(function(era) {
 		list.push({
@@ -2445,7 +2445,13 @@ function affairs() {
 			'085/3/18'.to_Date('CE').getTime() ],
 	// 東漢章帝元和二年二月四日甲寅至曹魏青龍五年二月末（東吳用至黃武二年）施用《四分曆》
 	後漢四分曆_adopted = [ '085/3/18'.to_Date('CE').getTime(),
-			'237/4/13'.to_Date('CE').getTime() ];
+			'237/4/13'.to_Date('CE').getTime() ],
+	//
+	景初曆_adopted = [ '237/4/13'.to_Date('CE').getTime(),
+			'412/12/19'.to_Date('CE').getTime() ],
+	//
+	乾象曆_adopted = [ '223/2/18	'.to_Date('CE').getTime(),
+			'280/5/16'.to_Date('CE').getTime() ];
 
 	// calendar_column
 	list = {
@@ -3413,7 +3419,9 @@ function affairs() {
 		// --------------------------------------------------------------------
 		// 中國傳統曆法 Chinese calendar, 太陰太陽暦
 		// https://zh.wikipedia.org/wiki/%E9%98%B4%E9%98%B3%E5%8E%86
-		東亞陰陽曆 : 'East Asian lunisolar calendar. 中國、日本、朝鮮歷代計算日期的方法。計算得出，不一定是實暦。',
+		東亞陰陽曆 : [
+				'East Asian lunisolar calendar. 中國、日本、朝鮮歷代計算日期的方法。計算得出，不一定是實暦。',
+				'夏、商、西周觀象授時，本工具採用天文演算，較耗時間。' ],
 
 		夏曆 : [ {
 			a : {
@@ -3481,7 +3489,9 @@ function affairs() {
 			a : {
 				T : '太初曆'
 			},
-			R : '從漢武帝太初元年夏五月（前104年）至後漢章帝元和二年二月甲寅（85年），太初曆共實行了188年。',
+			R : '從漢武帝太初元年夏五月（前104年）至後漢章帝元和二年二月甲寅（85年），太初曆共實行了188年。'
+			//
+			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
 			href : 'https://zh.wikipedia.org/wiki/%E5%A4%AA%E5%88%9D%E6%9B%86'
 		}, function(date) {
 			if (date.精 !== '年') {
@@ -3500,7 +3510,9 @@ function affairs() {
 			a : {
 				T : '後漢四分曆'
 			},
-			R : '東漢章帝元和二年二月四日甲寅至曹魏青龍五年二月末（東吳用至黃武二年）施用《四分曆》',
+			R : '東漢章帝元和二年二月四日甲寅至曹魏青龍五年二月末（東吳用至黃武二年）施用《四分曆》。'
+			//
+			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
 			href : 'https://zh.wikipedia.org/wiki/%E5%9B%9B%E5%88%86%E6%9B%86'
 		}, function(date) {
 			if (date.精 !== '年') {
@@ -3512,6 +3524,48 @@ function affairs() {
 					span : show,
 					S : 'color:#f94;'
 				} : show, 後漢四分曆_adopted);
+			}
+		} ],
+
+		景初曆 : [ {
+			a : {
+				T : '景初曆'
+			},
+			R : '魏明帝景初元年（237年）施行。南北朝劉宋用到444年，被《元嘉曆》取代。北魏用到451年，被《玄始曆》取代。'
+			//
+			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
+			href : 'https://zh.wikipedia.org/wiki/%E6%99%AF%E5%88%9D%E6%9B%86'
+		}, function(date) {
+			if (date.精 !== '年') {
+				var 景初曆 = date.to_景初曆({
+					小餘 : true,
+					節氣 : true
+				}), show = 景初曆.join('/');
+				return adapt_by(date, /^1 /.test(景初曆[2]) ? {
+					span : show,
+					S : 'color:#f94;'
+				} : show, 景初曆_adopted);
+			}
+		} ],
+
+		乾象曆 : [ {
+			a : {
+				T : '乾象曆'
+			},
+			R : '三國東吳孫權黃武二年正月（223年）施行，直到天紀三年（280年）東吳滅亡。'
+			//
+			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
+			href : 'https://zh.wikipedia.org/wiki/%E4%B9%BE%E8%B1%A1%E6%9B%86'
+		}, function(date) {
+			if (date.精 !== '年') {
+				var 乾象曆 = date.to_乾象曆({
+					小餘 : true,
+					節氣 : true
+				}), show = 乾象曆.join('/');
+				return adapt_by(date, /^1 /.test(乾象曆[2]) ? {
+					span : show,
+					S : 'color:#f94;'
+				} : show, 乾象曆_adopted);
 			}
 		} ],
 
