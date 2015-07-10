@@ -2447,11 +2447,14 @@ function affairs() {
 	後漢四分曆_adopted = [ '085/3/18'.to_Date('CE').getTime(),
 			'237/4/13'.to_Date('CE').getTime() ],
 	//
+	乾象曆_adopted = [ '223/2/18'.to_Date('CE').getTime(),
+			'280/5/16'.to_Date('CE').getTime() ],
+	//
 	景初曆_adopted = [ '237/4/13'.to_Date('CE').getTime(),
 			'412/12/19'.to_Date('CE').getTime() ],
 	//
-	乾象曆_adopted = [ '223/2/18	'.to_Date('CE').getTime(),
-			'280/5/16'.to_Date('CE').getTime() ];
+	元嘉曆_adopted = [ '445/1/24'.to_Date('CE').getTime(),
+			'510/1/26'.to_Date('CE').getTime() ];
 
 	// calendar_column
 	list = {
@@ -2601,7 +2604,7 @@ function affairs() {
 				//
 				+ CeL.LEA406.default_type + ' 來計算月亮位置，關於月亮位置之項目，例如'
 				//
-				+ _('夏曆') + '，每次執行常需耗費數秒至一兩分鐘，敬請見諒。您尚可', {
+				+ _('月相') + '，每次執行常需耗費數秒至一兩分鐘，敬請見諒。您尚可', {
 					a : '採用 LEA-406'
 					//
 					+ (CeL.LEA406.default_type === 'a' ? 'b' : 'a'),
@@ -2817,7 +2820,11 @@ function affairs() {
 				晦 : '晦日'
 			});
 			if (Array.isArray(phase)) {
-				var eclipse = (phase[0] === '朔' ? '日' : '月') + '食';
+				var is_solar = phase[0] === '朔',
+				//
+				eclipse = phase[2]
+				//
+				&& ((is_solar ? '日' : '月') + '食');
 				phase = [ {
 					b : {
 						T : phase[0]
@@ -2826,7 +2833,7 @@ function affairs() {
 					parser : 'CE',
 					// format : '%Y/%m/%d %H:%M:%S'
 					format : '%H:%M:%S'
-				}), phase[2] ? [ ' ', {
+				}), eclipse ? [ ' ', {
 					a : {
 						T : eclipse
 					},
@@ -2839,7 +2846,15 @@ function affairs() {
 						parser : 'CE',
 						format : '%Y年%m月%d日'
 					}).replace(/^-/, '前') + eclipse)
-				}, '?' ] : '' ];
+				}, phase[3] ? [ ', ', {
+					// 沙羅週期標示。
+					a : {
+						T : [ 'saros %1', phase[3][1] + '#' + phase[3][2] ]
+					},
+					href : 'https://en.wikipedia.org/wiki/'
+					//
+					+ (is_solar ? 'Solar' : 'Lunar') + '_Saros_' + phase[3][1]
+				} ] : '', '?' ] : '' ];
 			} else if (phase)
 				phase = {
 					b : {
@@ -3421,7 +3436,7 @@ function affairs() {
 		// https://zh.wikipedia.org/wiki/%E9%98%B4%E9%98%B3%E5%8E%86
 		東亞陰陽曆 : [
 				'East Asian lunisolar calendar. 中國、日本、朝鮮歷代計算日期的方法。計算得出，不一定是實暦。',
-				'夏、商、西周觀象授時，本工具採用天文演算，較耗時間。' ],
+				'夏、商、西周觀象授時，本工具於這些曆法採用天文演算，較耗時間。實際天象可參照「天文節氣」、「月相」欄。月相並附注可能之日月食。' ],
 
 		夏曆 : [ {
 			a : {
@@ -3527,6 +3542,27 @@ function affairs() {
 			}
 		} ],
 
+		乾象曆 : [ {
+			a : {
+				T : '乾象曆'
+			},
+			R : '三國東吳孫權黃武二年正月（223年）施行，直到天紀三年（280年）東吳滅亡。'
+			//
+			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
+			href : 'https://zh.wikipedia.org/wiki/%E4%B9%BE%E8%B1%A1%E6%9B%86'
+		}, function(date) {
+			if (date.精 !== '年') {
+				var 乾象曆 = date.to_乾象曆({
+					小餘 : true,
+					節氣 : true
+				}), show = 乾象曆.join('/');
+				return adapt_by(date, /^1 /.test(乾象曆[2]) ? {
+					span : show,
+					S : 'color:#f94;'
+				} : show, 乾象曆_adopted);
+			}
+		} ],
+
 		景初曆 : [ {
 			a : {
 				T : '景初曆'
@@ -3548,24 +3584,24 @@ function affairs() {
 			}
 		} ],
 
-		乾象曆 : [ {
+		元嘉曆 : [ {
 			a : {
-				T : '乾象曆'
+				T : '元嘉曆'
 			},
-			R : '三國東吳孫權黃武二年正月（223年）施行，直到天紀三年（280年）東吳滅亡。'
+			R : '劉宋二十二年，普用元嘉曆。梁武帝天監九年（510年），被《大明曆》取代。'
 			//
 			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
-			href : 'https://zh.wikipedia.org/wiki/%E4%B9%BE%E8%B1%A1%E6%9B%86'
+			href : 'https://zh.wikipedia.org/wiki/%E5%85%83%E5%98%89%E6%9B%86'
 		}, function(date) {
 			if (date.精 !== '年') {
-				var 乾象曆 = date.to_乾象曆({
+				var 元嘉曆 = date.to_元嘉曆({
 					小餘 : true,
 					節氣 : true
-				}), show = 乾象曆.join('/');
-				return adapt_by(date, /^1 /.test(乾象曆[2]) ? {
+				}), show = 元嘉曆.join('/');
+				return adapt_by(date, /^1 /.test(元嘉曆[2]) ? {
 					span : show,
 					S : 'color:#f94;'
-				} : show, 乾象曆_adopted);
+				} : show, 元嘉曆_adopted);
 			}
 		} ],
 
@@ -3605,7 +3641,7 @@ function affairs() {
 				S : 'font-size:.7em;'
 			} : {
 				T : '朔日',
-				R : '實曆每月初一之朔日。若欲求天文朔日，請採「' + _('夏曆') + '」欄。'
+				R : '實曆每月初一之朔日。若欲求天文朔日，請採「' + _('月相') + '」欄。'
 			};
 		}, function(date) {
 			return /* !date.準 && */!date.精 && date.format({

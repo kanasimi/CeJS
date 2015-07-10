@@ -82,20 +82,20 @@ if (false) {
 		CeL.nutation(2446895.5);
 		// get ≈ [ -3.788/3600, 9.443/3600 ]
 
-		// 取得 Gregorian calendar 1977 年，中曆 1978 年之冬至日時間。
+		// 取得 Gregorian calendar 1977年，中曆 1978年年內之冬至日 midnight (0:0) 時間。
 		CeL.solar_term_JD(1977, '冬至');
 
 		// ----------------------------------------------------------------------------
 
 		// 取得 Le calendrier républicain (法國共和曆)行用期間之年首。
-		// method 1: 取得法國當地之 0:0
+		// method 1: 取得法國當地之 midnight (0:0)
 		for (var year = 1792, offset = 1 * 60; year <= 1805; year++)
 			console.log(CeL.JD_to_Date(
 			// 1: UTC+1 → minute offset
 			CeL.midnight_of(CeL.solar_term_JD(year, '秋分'), offset)).format({
 				offset : offset
 			}));
-		// method 2: 將 date 當作 local 之 0:0
+		// method 2: 將 date 當作 local 之 midnight (0:0)
 		for (var year = 1792, offset = 1 * 60; year <= 1805; year++) {
 			// 1: UTC+1 → minute offset
 			var date = CeL.JD_to_Date(CeL.midnight_of(CeL.solar_term_JD(year,
@@ -1978,6 +1978,83 @@ if (typeof CeL === 'function')
 			_.立春年 = 立春年;
 
 			// ------------------------------------------------------------------------------------------------------//
+
+			var TYPE_SOLAR = 1, TYPE_LUNAR = 2,
+			// 89: Lunar Eclipses Saros Series 7
+			MAX_SAROS_SERIES = 89;
+
+			/**
+			 * Get the saros series index of JD.
+			 * 
+			 * @param {Number}JD
+			 *            Julian date (JD of 天文計算用時間 TT)
+			 * @param {Number}[type]
+			 *            type = 1(TYPE_SOLAR): solar, 2(TYPE_LUNAR): lunar
+			 * 
+			 * @returns {Array} [ type, saros series index, #NO of series ]
+			 */
+			function saros(JD, type) {
+				if (!type)
+					return saros(JD, TYPE_SOLAR) || saros(JD, TYPE_LUNAR);
+
+				var data = type === TYPE_SOLAR ? solar_saros_remainder
+						: lunar_saros_remainder, series, remainder = JD
+						.mod(saros_days),
+				// get TT
+				index = data[0].search_sorted(remainder, data[1]), NOm1;
+				if (!index && remainder < data[0][0])
+					// 若是比最小的還小，則當作最後一個。
+					index = data[1][data[1].length - 1];
+				if (index && MAX_SAROS_SERIES >
+				// NOm1: #NO - 1
+				(NOm1 = Math.round((JD - index[1]) / saros_days))) {
+					var series = [ type, index[0], NOm1 + 1 ];
+					// 2: 別差太多，最起碼應在2天內。
+					if (Math.abs(JD - (index[1] + NOm1 * saros_days)) < 2)
+						return series;
+				}
+			}
+
+			/**
+			 * Get the JD of specified saros series and NO.
+			 * 
+			 * @param {Natural}type
+			 *            type = 1: solar, 2: lunar
+			 * @param {Natural}series
+			 *            saros series
+			 * @param {Natural}[NO]
+			 *            NO of saros series
+			 * 
+			 * @returns {Number} JD of specified saros series and NO
+			 */
+			function saros_JD(type, series, NO) {
+				series = (type === TYPE_SOLAR
+				//
+				? solar_saros : lunar_saros)[series];
+				if (isNaN(series))
+					return;
+
+				var JD = series
+						+ (0 < NO && NO <= MAX_SAROS_SERIES ? (NO - 1)
+								* saros_days : 0);
+				JD = library_namespace.Julian_day.to_YMD(JD);
+
+				JD = lunar_phase([ JD[0], JD[1] ],
+				//
+				type === TYPE_SOLAR ? 0 : 2);
+
+				// TODO: 此處得到的是朔望時間，而非食甚時間。應進一步處理之。
+
+				return JD;
+			}
+
+			saros.JD = saros_JD;
+			_.saros = saros;
+
+			// TODO: metonic series
+			// https://en.wikipedia.org/wiki/Solar_eclipse_of_March_20,_2015#Metonic_series
+
+			// ------------------------------------------------------------------------------------------------------//
 			// LEA-406a, LEA-406b lunar model & periodic terms
 
 			/**
@@ -2589,7 +2666,7 @@ if (typeof CeL === 'function')
 			 * 《天文算法》 p. 349 formula 49.1.<br />
 			 * 
 			 * @param {Number}year_month
-			 *            帶小數點的年數
+			 *            帶小數點的年數，例如1987.25表示1987年3月末。
 			 * @param {Integer}phase
 			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 * @param {Object}[options]
@@ -2600,6 +2677,8 @@ if (typeof CeL === 'function')
 			 */
 			function mean_lunar_phase(year_month, phase, options) {
 				phase /= 4;
+				if (Array.isArray(year_month))
+					year_month = year_month[0] + (year_month[1] - 1) / 12;
 				var k = (year_month - 2000) * 12.3685,
 				// 取 year_month 之後，第一個 phase。
 				T = Math.floor(k) + phase;
@@ -2625,7 +2704,7 @@ if (typeof CeL === 'function')
 			 * @deprecated using accurate_lunar_phase()
 			 * 
 			 * @param {Number}year_month
-			 *            帶小數點的年數
+			 *            帶小數點的年數，例如1987.25表示1987年3月末。
 			 * @param {Integer}phase
 			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 * @param {Object}[options]
@@ -2734,7 +2813,7 @@ if (typeof CeL === 'function')
 			 * 計算特定月相之時間精準值。可用來計算月相、日月合朔(黑月/新月)、弦、望(滿月，衝)、月食、月齡。
 			 * 
 			 * @param {Number}year_month
-			 *            帶小數點的年數
+			 *            帶小數點的年數，例如1987.25表示1987年3月末。
 			 * @param {Integer}phase
 			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 * @param {Object}[options]
@@ -2860,7 +2939,7 @@ if (typeof CeL === 'function')
 					else {
 						phase_data = [];
 						for (var year_month = year, JD, date, hours;;
-						// 1 / 12 = .08333333333333
+						// 0.08: 1 / 12 = .08333333333333
 						// assert: 朔望月長度 < 0.08 year.
 						year_month = Julian_century(JD) * 100 + 2000 + 0.08) {
 							JD = (operator || mean_lunar_phase)(year_month,
@@ -3011,7 +3090,9 @@ if (typeof CeL === 'function')
 								// 遮到了。
 								// eclipse conjunction
 								// push 黃經衝 or 合(有相同的黃經)時之月黃緯
-								phase_shown.push(d);
+								phase_shown.push(d, saros(TT,
+								// push saros series
+								phase === 0 ? TYPE_SOLAR : TYPE_LUNAR));
 							}
 						}
 					}
@@ -4106,6 +4187,153 @@ if (typeof CeL === 'function')
 						[ [ 145.0, 4.273, 6283.076 ], [ 7, 3.92, 12566.15 ] ],
 						[ [ 4, 2.56, 6283.08 ] ] ]
 			};
+
+			// ------------------------------------------------------------------------------------------------------//
+
+			/**
+			 * 初始化 Saros Series data.
+			 * 
+			 * @param {Array}saros_starts
+			 *            Solar/Lunar Eclipses Saros Series start TT, MUST > 1.5
+			 * @param {Integer}offset
+			 *            offset of saros index
+			 * @param {Array}saros_starts_TT
+			 *            Array to put Solar/Lunar Eclipses Saros Series start
+			 *            TT. saros_starts_TT[1] = start TT of series 1
+			 * 
+			 * @returns {Array} [ remainder, saros_index ];
+			 * 
+			 * @inner
+			 */
+			function create_saros_index(saros_starts, offset, saros_starts_TT) {
+				var saros_data = [];
+				saros_starts
+						.forEach(function(TT, index) {
+							saros_starts_TT[index += offset] = TT;
+							// -1.5: 確保查詢時一定大於底限。因此需要壓低底限。
+							saros_data.push([ (TT - 1.5) % saros_days,
+									[ index, TT ] ]);
+						});
+				saros_data.sort(function(a, b) {
+					return a[0] - b[0];
+				});
+				// console.log(saros_data);
+
+				var remainder = [], saros_index = [];
+				saros_data.forEach(function(data) {
+					remainder.push(data[0]);
+					saros_index.push(data[1]);
+				});
+
+				if (false) {
+					var min_gap = Infinity;
+					remainder.forEach(function(r, index) {
+						if (index > 0 && min_gap > r - remainder[index - 1])
+							min_gap = r - remainder[index - 1];
+					});
+					console.log('min gap: ' + min_gap);
+					// min gap ≈ 27.7707
+				}
+
+				return [ remainder, saros_index ];
+			}
+
+			/**
+			 * 沙羅週期 The saros is a period of approximately 223 synodic months
+			 * 
+			 * Reference 資料來源/資料依據:<br />
+			 * wikipedia: 6585.3211 , SEsaros.html: 6585.3223
+			 * 
+			 * 奇數的數字表示發生在接近昇交點的日食，偶數的數字表示發生在接近降交點的日食；但在月食這種數字的搭配是相反的。沙羅序列的編號是以最大食出現，也就是最接近交點的時間來排列的。
+			 * 
+			 * 任何時間都有大約40個不同的沙羅序列在進行中。 以2008年為例，共有39個日食的沙羅序列在進行中，而月食則有41個序列在進行中。
+			 * 
+			 * @see https://en.wikipedia.org/wiki/Saros_%28astronomy%29
+			 * @see http://eclipse.gsfc.nasa.gov/SEsaros/SEsaros.html
+			 */
+			var saros_days = 6585.3211,
+			// Solar/Lunar Eclipses Saros Series start TT
+			// solar_saros[1]: The start TT of Solar Eclipses Saros Series 1
+			solar_saros = [], lunar_saros = [],
+			// remainder[0] 為依 saros_days, sort 過的 remainder.
+			// remainder[1] 為 [ 所指向的 saros series index, start JDN ]
+			//
+			// http://eclipse.gsfc.nasa.gov/SEsaros/SEperiodtab4.html
+			// http://eclipse.gsfc.nasa.gov/SEsaros/SEsaros0-180.html
+			// http://eclipse.gsfc.nasa.gov/SEsaros/SEsaros000.html
+			solar_saros_remainder = create_saros_index([ 524207, 541365,
+					571692, 562508, 579666, 609994, 534956, 538943, 575856,
+					573257, 590415, 620743, 624729, 641887, 672215, 676201,
+					693358, 723686, 727672, 744830, 775158, 779144, 783132,
+					820045, 810860, 748994, 792493, 789893, 787295, 824208,
+					834780, 838767, 869095, 886252, 890239, 927152, 937723,
+					941710, 978624, 989195, 993182, 1023511, 1034082, 972215,
+					1061812, 1006530, 997346, 1021089, 1038246, 1042232,
+					1065975, 1089717, 1093704, 1117447, 1141189, 1145176,
+					1168919, 1192661, 1196648, 1220391, 1244133, 1234949,
+					1265278, 1282434, 1207396, 1217969, 1254882, 1252283,
+					1262856, 1293183, 1297170, 1314327, 1344655, 1348641,
+					1365799, 1396127, 1400113, 1417271, 1447599, 1445000,
+					1462158, 1492486, 1456960, 1421435, 1471519, 1455749,
+					1466321, 1496649, 1500635, 1511208, 1548121, 1552107,
+					1562680, 1599593, 1603579, 1614151, 1644480, 1655051,
+					1659038, 1695951, 1693352, 1631485, 1727667, 1672385,
+					1663201, 1693530, 1710686, 1714673, 1738416, 1755573,
+					1766145, 1789888, 1807045, 1817617, 1841360, 1858517,
+					1862503, 1892832, 1903403, 1887634, 1924548, 1921949,
+					1873252, 1890410, 1914152, 1918139, 1935297, 1959039,
+					1963025, 1986768, 2010511, 2014497, 2031655, 2061983,
+					2065969, 2083127, 2113455, 2104270, 2108257, 2151756,
+					2083303, 2080705, 2124204, 2121604, 2132177, 2162505,
+					2166491, 2177063, 2207391, 2217963, 2228535, 2258863,
+					2269435, 2273422, 2310335, 2314321, 2311723, 2355222,
+					2319696, 2284170, 2314499, 2325070, 2329057, 2352800,
+					2369957, 2380529, 2404272, 2421429, 2425415, 2455744,
+					2472901, 2476887, 2500630, 2517787, 2515188, 2545517,
+					2556088, 2487636, 2504794, 2535122, 2525937, 2543095,
+					2573423, 2577409, 2594567, 2624895, 2628881, 2646039,
+					2669781, 2673767, 2690925, 2721253, 2718654, 2729227,
+					2759554, 2704272, 2695089, 2738588, 2729403, 2739975,
+					2770303, 2774289, 2784862, 2815190 ], -13, solar_saros),
+
+			// http://eclipse.gsfc.nasa.gov/LEsaros/LEperiodtab3.html
+			// http://eclipse.gsfc.nasa.gov/LEsaros/LEsaroscat.html
+			// https://en.wikipedia.org/wiki/List_of_Saros_series_for_lunar_eclipses
+			// http://eclipse.gsfc.nasa.gov/LEcat5/LE-1999--1900.html
+			lunar_saros_remainder = create_saros_index([ 534086, 544657,
+					542059, 585557, 582958, 507921, 538249, 555406, 552807,
+					576550, 600292, 604279, 628022, 645179, 655751, 679494,
+					703236, 707223, 730966, 754708, 752109, 782438, 799594,
+					783825, 754885, 824725, 762858, 773431, 810344, 807744,
+					824902, 855230, 859216, 876374, 906702, 910688, 927846,
+					958174, 962160, 979318, 1009646, 1007047, 1017619, 1054532,
+					979494, 976896, 1020395, 1017795, 1028368, 1058696,
+					1062682, 1073254, 1110168, 1114154, 1131312, 1161640,
+					1165626, 1176198, 1213112, 1217098, 1221085, 1257998,
+					1255399, 1186947, 1283129, 1227846, 1225248, 1255576,
+					1272733, 1276720, 1307048, 1317620, 1328192, 1358520,
+					1375677, 1379664, 1409992, 1420563, 1424550, 1461464,
+					1465450, 1436510, 1493180, 1457654, 1435299, 1452457,
+					1476199, 1480185, 1503929, 1527671, 1531657, 1548815,
+					1579143, 1583129, 1600287, 1624029, 1628016, 1651759,
+					1675501, 1672902, 1683475, 1713802, 1645350, 1649337,
+					1686250, 1683651, 1694223, 1731137, 1735123, 1745695,
+					1776023, 1786595, 1797167, 1827495, 1838067, 1848639,
+					1878967, 1882953, 1880355, 1923854, 1881742, 1852802,
+					1889716, 1893702, 1897689, 1928017, 1938589, 1942576,
+					1972904, 1990060, 1994047, 2024376, 2034947, 2045519,
+					2075848, 2086419, 2083821, 2120734, 2124720, 2062853,
+					2086597, 2103753, 2094569, 2118312, 2142055, 2146041,
+					2169784, 2186941, 2197513, 2214671, 2238413, 2242399,
+					2266143, 2289885, 2287286, 2311029, 2334771, 2292660,
+					2276891, 2326975, 2304620, 2308607, 2345521, 2349507,
+					2360079, 2390407, 2394393, 2411551, 2441879, 2445865,
+					2456438, 2486766, 2490752, 2501324, 2538237, 2529053,
+					2473772, 2563368, 2508086, 2505487, 2542401, 2546387,
+					2556959, 2587288, 2597859, 2601846, 2632174, 2649331,
+					2653318, 2683646, 2694218, 2698204, 2728533, 2739104,
+					2683823, 2740493, 2724723, 2708953, 2732696, 2749853,
+					2753840, 2777583, 2801325, 2805311 ], -20, lunar_saros);
 
 			// ---------------------------------------------------------------------------------------------------------------------------------------//
 			// export.

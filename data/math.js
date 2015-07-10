@@ -259,7 +259,7 @@ to_rational_number = function(number, rate, max_no) {
 		else
 			break;
 
-	if(0)
+	if (false)
 		library_namespace.debug(
 			number + ' ' +
 			//	連分數表示

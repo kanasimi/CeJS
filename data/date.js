@@ -302,6 +302,7 @@ Julian_day.from_YMD = function(year, month, date, type, no_year_0) {
  * @returns {Array} [ year, month, date ]
  */
 Julian_day.to_YMD = function(JD, type, no_year_0) {
+	// TODO: time
 	var f = JD + 1401 | 0;
 	if (type && (type !== 'CE' || JD >= Gregorian_reform_JD))
 		// to proleptic Gregorian calendar
