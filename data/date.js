@@ -1259,7 +1259,8 @@ function strftime(date_value, format, locale, options) {
 	search = strftime.search[locale] || strftime.search[strftime.null_domain];
 
 	// to this minute offset. UTC+8: 8 * 60 = +480
-	if (options.offset && !isNaN(options.offset)) {
+	// or using options.minute_offset?
+	if (!isNaN(options.offset)) {
 		date_value = new Date(date_value.getTime() + ONE_MINTE_LENGTH_VALUE *
 		//
 		(options.offset - String_to_Date.default_offset));
