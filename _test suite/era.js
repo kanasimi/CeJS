@@ -276,15 +276,17 @@ function remove_calendar_column() {
 	return false;
 }
 
-function add_calendar_column() {
-	var n = this.title;
-	if ((n in calendar_column)
-	//
-	|| (n = calendar_column_alias[n]) && (n in calendar_column))
-		selected_column[n] = true;
+function add_calendar_column(name, no_jump) {
+	if (typeof name !== 'string' || !name)
+		name = this.title;
+	var column = name;
+	if ((column in calendar_column) || (column = calendar_column_alias[column])
+			&& (column in calendar_column))
+		selected_column[column] = true;
 	else
-		CeL.warn('Unkonwn column: [' + this.title + ']');
-	translate_era();
+		CeL.warn('Unkonwn column: [' + name + ']');
+	if (!no_jump)
+		translate_era();
 	return false;
 }
 
@@ -1651,11 +1653,10 @@ function translate_era(era) {
 				br : null
 			}, {
 				T : name || key
-			}, 0 < index ? ' ' + (index + 1) : '', '：', add_node
-					&& add_node(note) || {
-						span : note,
-						C : 'note'
-					});
+			}, 0 < index ? ' ' + (index + 1) : '', '：', {
+				span : add_node && add_node(note) || note,
+				C : 'note'
+			});
 		}
 
 		if (date[key]) {
@@ -1701,13 +1702,20 @@ function translate_era(era) {
 	if (date) {
 		set_era_by_url_data(era);
 
-		if (!(date.國家 in had_inputted)) {
+		output = date.曆法;
+		if (output && !(output in had_inputted)) {
+			add_calendar_column(output, true);
+			had_inputted[output] = true;
+		}
+
+		output = date.國家;
+		if (!(output in had_inputted)) {
 			// 依特定國家自動增加這些欄。
-			if (date.國家 in auto_add_column)
-				auto_add_column[date.國家].forEach(function(note) {
+			if (output in auto_add_column)
+				auto_add_column[output].forEach(function(note) {
 					selected_column[note] = true;
 				});
-			had_inputted[date.國家] = true;
+			had_inputted[output] = true;
 		}
 
 		if (date.紀年名)
@@ -1754,7 +1762,14 @@ function translate_era(era) {
 					onclick : click_title_as_era
 				};
 
-			add_注('曆法', '採用曆法');
+			add_注('曆法', '採用曆法', function(曆法) {
+				return {
+					a : 曆法,
+					href : '#',
+					title : 曆法,
+					onclick : add_calendar_column
+				};
+			});
 			add_注('據', '出典');
 
 			add_注('君主名', '君主姓名', add_君主名);
@@ -2082,7 +2097,7 @@ initialize_thdl_solar_term = function() {
  * @param {Date}start
  *            start date of adaptation
  * @param {Date}end
- *            end date of adaptation
+ *            end date of adaptation. 指結束行用之<b>隔日</b>!
  * 
  * @returns formated style
  */
@@ -2439,25 +2454,33 @@ function affairs() {
 	THAI_Year_numbering = Year_numbering(543),
 	//
 	Gregorian_reform = new Date(1582, 10 - 1, 15), Revised_Julian_reform = new Date(
-			1923, 10 - 1, 14),
-	// 《太初曆》於漢成帝末年，由劉歆重新編訂，改稱三統曆。行用於太初元年夏五月至後漢章帝元和二年二月甲寅(104 BCE–85 CE)
-	太初曆_adopted = [ '-104/6/20'.to_Date('CE').getTime(),
-			'085/3/18'.to_Date('CE').getTime() ],
-	// 東漢章帝元和二年二月四日甲寅至曹魏青龍五年二月末（東吳用至黃武二年）施用《四分曆》
-	後漢四分曆_adopted = [ '085/3/18'.to_Date('CE').getTime(),
-			'237/4/13'.to_Date('CE').getTime() ],
-	//
-	乾象曆_adopted = [ '223/2/18'.to_Date('CE').getTime(),
-			'280/5/16'.to_Date('CE').getTime() ],
-	//
-	景初曆_adopted = [ '237/4/13'.to_Date('CE').getTime(),
-			'412/12/19'.to_Date('CE').getTime() ],
-	//
-	元嘉曆_adopted = [ '445/1/24'.to_Date('CE').getTime(),
-			'510/1/26'.to_Date('CE').getTime() ],
-	//
-	大明曆_adopted = [ '510/1/26'.to_Date('CE').getTime(),
-			'557/11/7'.to_Date('CE').getTime() ];
+			1923, 10 - 1, 14);
+
+	// add 東亞陰陽曆法
+	function add_曆法(曆名, 說明, link) {
+		if (Array.isArray(說明))
+			說明 = 說明.join('\n');
+		return [ {
+			a : {
+				T : 曆名
+			},
+			R : 說明 + '\n以平氣平朔無中置閏規則計算得出，非實曆。',
+			href : 'https://zh.wikipedia.org/wiki/'
+			//
+			+ encodeURIComponent(link || 曆名)
+		}, function(date) {
+			if (date.精 !== '年') {
+				var 曆日 = date['to_' + 曆名]({
+					小餘 : true,
+					節氣 : true
+				}), show = 曆日.join('/');
+				return adapt_by(date, /^1 /.test(曆日[2]) ? {
+					span : show,
+					S : 'color:#f94;'
+				} : show, CeL[曆名 + '_Date'].行用);
+			}
+		} ];
+	}
 
 	// calendar_column
 	list = {
@@ -2850,7 +2873,7 @@ function affairs() {
 						format : '%Y年%m月%d日',
 						offset : 0
 					}).replace(/^-/, '前') + eclipse)
-				}, phase[3] ? [ {
+				}, '?', phase[3] ? [ {
 					br : null
 				}, {
 					// 沙羅週期標示。
@@ -3518,135 +3541,17 @@ function affairs() {
 			} : date;
 		} ],
 
-		太初曆 : [ {
-			a : {
-				T : '太初曆'
-			},
-			R : '從漢武帝太初元年夏五月（前104年）至後漢章帝元和二年二月甲寅（85年），太初曆共實行了188年。'
-			//
-			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
-			href : 'https://zh.wikipedia.org/wiki/%E5%A4%AA%E5%88%9D%E6%9B%86'
-		}, function(date) {
-			if (date.精 !== '年') {
-				var 太初曆 = date.to_太初曆({
-					小餘 : true,
-					節氣 : true
-				}), show = 太初曆.join('/');
-				return adapt_by(date, /^1 /.test(太初曆[2]) ? {
-					span : show,
-					S : 'color:#f94;'
-				} : show, 太初曆_adopted);
-			}
-		} ],
-
-		後漢四分曆 : [ {
-			a : {
-				T : '後漢四分曆'
-			},
-			R : '東漢章帝元和二年二月四日甲寅至曹魏青龍五年二月末（東吳用至黃武二年）施用《四分曆》。'
-			//
-			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
-			href : 'https://zh.wikipedia.org/wiki/%E5%9B%9B%E5%88%86%E6%9B%86'
-		}, function(date) {
-			if (date.精 !== '年') {
-				var 後漢四分曆 = date.to_後漢四分曆({
-					小餘 : true,
-					節氣 : true
-				}), show = 後漢四分曆.join('/');
-				return adapt_by(date, /^1 /.test(後漢四分曆[2]) ? {
-					span : show,
-					S : 'color:#f94;'
-				} : show, 後漢四分曆_adopted);
-			}
-		} ],
-
-		乾象曆 : [ {
-			a : {
-				T : '乾象曆'
-			},
-			R : '三國東吳孫權黃武二年正月（223年）施行，直到天紀三年（280年）東吳滅亡。'
-			//
-			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
-			href : 'https://zh.wikipedia.org/wiki/%E4%B9%BE%E8%B1%A1%E6%9B%86'
-		}, function(date) {
-			if (date.精 !== '年') {
-				var 乾象曆 = date.to_乾象曆({
-					小餘 : true,
-					節氣 : true
-				}), show = 乾象曆.join('/');
-				return adapt_by(date, /^1 /.test(乾象曆[2]) ? {
-					span : show,
-					S : 'color:#f94;'
-				} : show, 乾象曆_adopted);
-			}
-		} ],
-
-		景初曆 : [ {
-			a : {
-				T : '景初曆'
-			},
-			R : '魏明帝景初元年（237年）施行。南北朝劉宋用到444年，被《元嘉曆》取代。北魏用到451年，被《玄始曆》取代。'
-			//
-			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
-			href : 'https://zh.wikipedia.org/wiki/%E6%99%AF%E5%88%9D%E6%9B%86'
-		}, function(date) {
-			if (date.精 !== '年') {
-				var 景初曆 = date.to_景初曆({
-					小餘 : true,
-					節氣 : true
-				}), show = 景初曆.join('/');
-				return adapt_by(date, /^1 /.test(景初曆[2]) ? {
-					span : show,
-					S : 'color:#f94;'
-				} : show, 景初曆_adopted);
-			}
-		} ],
-
-		元嘉曆 : [ {
-			a : {
-				T : '元嘉曆'
-			},
-			R : '劉宋二十二年，普用元嘉曆。梁武帝天監九年（510年），被《大明曆》取代。'
-			//
-			+ '\n文武天皇元年（697年）からは元嘉暦を廃して儀鳳暦を正式に採用することとなった。'
-			//
-			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
-			href : 'https://zh.wikipedia.org/wiki/%E5%85%83%E5%98%89%E6%9B%86'
-		}, function(date) {
-			if (date.精 !== '年') {
-				var 元嘉曆 = date.to_元嘉曆({
-					小餘 : true,
-					節氣 : true
-				}), show = 元嘉曆.join('/');
-				return adapt_by(date, /^1 /.test(元嘉曆[2]) ? {
-					span : show,
-					S : 'color:#f94;'
-				} : show, 元嘉曆_adopted);
-			}
-		} ],
-
-		大明曆 : [ {
-			a : {
-				T : '大明曆'
-			},
-			R : '大明曆，亦稱「甲子元曆」。梁天監九年（510年）施行。'
-			//
-			+ '\n以平氣平朔無中置閏規則計算得出，非實曆。',
-			href : 'https://zh.wikipedia.org/wiki/'
-			//
-			+ '%E5%A4%A7%E6%98%8E%E6%9B%86_%28%E7%A5%96%E6%B2%96%E4%B9%8B%29'
-		}, function(date) {
-			if (date.精 !== '年') {
-				var 大明曆 = date.to_大明曆({
-					小餘 : true,
-					節氣 : true
-				}), show = 大明曆.join('/');
-				return adapt_by(date, /^1 /.test(大明曆[2]) ? {
-					span : show,
-					S : 'color:#f94;'
-				} : show, 大明曆_adopted);
-			}
-		} ],
+		太初曆 : add_曆法('太初曆', '從漢武帝太初元年夏五月（前104年）至後漢章帝元和二年二月甲寅（85年），太初曆共實行了188年。'),
+		後漢四分曆 : add_曆法('後漢四分曆', '東漢章帝元和二年二月四日甲寅至曹魏青龍五年二月末（東吳用至黃武二年）施用《四分曆》。'),
+		乾象曆 : add_曆法('乾象曆', '三國東吳孫權黃武二年正月（223年）施行，直到天紀三年（280年）東吳滅亡。'),
+		景初曆 : add_曆法('景初曆',
+				'魏明帝景初元年（237年）施行。南北朝劉宋用到444年，被《元嘉曆》取代。北魏用到451年，被《玄始曆》取代。'),
+		三紀曆 : add_曆法('三紀曆', '姜岌在十六國後秦白雀元年（384年）編制。同年起施行三十多年。'),
+		玄始曆 : add_曆法('玄始曆', '北涼、北魏於452年用至正光三年（522年）施行《正光曆》。'),
+		元嘉曆 : add_曆法('元嘉曆', [ '劉宋二十二年，普用元嘉曆。梁武帝天監九年（510年），被《大明曆》取代。',
+				'文武天皇元年（697年）からは元嘉暦を廃して儀鳳暦を正式に採用することとなった。' ]),
+		大明曆 : add_曆法('大明曆', [ '大明曆，亦稱「甲子元曆」。梁天監九年（510年）施行至陳後主禎明三年（589年）。',
+				'惟永定3年閏4月，太建7年閏9月。' ], '大明曆 (祖沖之)'),
 
 		// --------------------------------------------------------------------
 		// 列具曆注, calendar notes

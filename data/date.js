@@ -342,13 +342,19 @@ Julian_day.to_YMD = function(JD, type, no_year_0) {
  * 
  * @returns {Date} local midnight date
  */
-Julian_day.to_Date = function(JDN, is_JD, get_value) {
+Julian_day.to_Date = function(JDN, is_JD, get_value, offset) {
 	if (!is_JD)
 		// epoch 為 12:0，需要將之減回來以轉成 midnight (0:0)。
 		JDN -= .5;
 	JDN = JDN * ONE_DAY_LENGTH_VALUE + Julian_day.epoch
-			+ Julian_day.default_offset;
+	//
+	+ (isNaN(offset) ? Julian_day.default_offset : offset);
 	return get_value ? JDN : new Date(JDN);
+};
+
+Julian_day.YMD_to_Date = function(year, month, date, type, get_value, no_year_0) {
+	var JDN = Julian_day.from_YMD(year, month, date, type, no_year_0);
+	return Julian_day.to_Date(JDN, false, get_value);
 };
 
 /**
