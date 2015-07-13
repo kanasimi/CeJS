@@ -6670,6 +6670,8 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Array|String}hierarchy
 			 *            指定層次/關鍵字。
+			 * @param {Object}[options]
+			 *            options 設定特殊功能.
 			 * 
 			 * @returns {Array}紀年列表。<br /> [ 同階層紀年列表 ]
 			 */
@@ -6767,8 +6769,16 @@ if (typeof CeL === 'function')
 			// 生卒年月日 Date of Birth and Death, lifetime.
 			get_periods.copy_attributes = '生,卒'.split(',');
 
-			// 文字式曆譜:年曆,朔閏表,曆日譜。
-			// 會更改 options!
+			/**
+			 * 取得指定紀年之文字式曆譜:年曆,朔閏表,曆日譜。
+			 * 
+			 * @param {String}era
+			 *            完整紀年日期。<br />
+			 * @param {Object}[options]
+			 *            options 設定特殊功能. 此 options 可能會被變更!<br />
+			 * 
+			 * @returns {Array}曆譜
+			 */
 			function get_dates(era, options) {
 				if (!era)
 					return;
@@ -6816,6 +6826,9 @@ if (typeof CeL === 'function')
 					return;
 				}
 
+				// 紀錄備查: 由於取得的是最小資訊，不包含共存紀年，因此有需要應自行擷取。
+				// date_list.date = era_list;
+
 				if (era_list.精 === '年' || era_list.精 === '月') {
 					// 精密度不足。
 					if (era_list.精 === '年')
@@ -6849,6 +6862,7 @@ if (typeof CeL === 'function')
 						year_left = get_dates.DEFAULT_YEARS;
 
 					if (0 < year_index)
+						// 紀錄前一紀年。
 						date_list.previous = era.toString()
 								+ era.歲名(year_index < year_left ? 0
 										: year_index - year_left) + '年';
@@ -6866,6 +6880,7 @@ if (typeof CeL === 'function')
 
 					date_list.type = 1;
 					if (year_index < calendar.length)
+						// 紀錄後一紀年。
 						date_list.next = era.toString() + era.歲名(year_index)
 								+ '年';
 					return date_list;
@@ -6896,10 +6911,12 @@ if (typeof CeL === 'function')
 					date = date_list.selected;
 					// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
 					if (i = era.日名(0, date[1] - 1, date[0]))
+						// 紀錄前一紀年。
 						date_list.previous = era.toString() + i[2] + '年' + i[1]
 								+ '月';
 					if (start_time < era.end
 							&& (i = era.日名(0, date[1] + 1, date[0])))
+						// 紀錄後一紀年。
 						date_list.next = era.toString() + i[2] + '年' + i[1]
 								+ '月';
 					return date_list;
@@ -6950,9 +6967,10 @@ if (typeof CeL === 'function')
 							if (true || date_list.length < get_dates.LIMIT)
 								add_date(year_start[i], era);
 							else {
-								library_namespace
-										.warn('get_dates: 輸出年段紀錄過長，已超過輸出總筆數限制 '
-												+ get_dates.LIMIT + ' 筆！');
+								library_namespace.warn(
+								//
+								'get_dates: 輸出年段紀錄過長，已超過輸出總筆數限制 '
+										+ get_dates.LIMIT + ' 筆！');
 								break;
 							}
 						}

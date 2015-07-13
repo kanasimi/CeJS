@@ -298,8 +298,8 @@ function show_calendar(era_name) {
 		tr : title
 	} ], 前年名, 前月名, 前紀年名, 後紀年名,
 	//
-	main_date_value = CeL.era(era_name),
-	//
+	main_date = CeL.era(era_name), main_date_value,
+	// 取得指定紀年之文字式曆譜:年曆,朔閏表,曆日譜。
 	dates = CeL.era.dates(era_name, {
 		含參照用 : /明治|大正|昭和|明仁/.test(era_name)
 	}), is_年譜, i, j, matched, hidden_column = [], group;
@@ -371,10 +371,12 @@ function show_calendar(era_name) {
 	}
 	hidden_column.pop();
 
-	if (main_date_value)
-		if (main_date_value.日 == 1 && !era_name.includes('日'))
+	if (main_date)
+		if (main_date.日 == 1 && !era_name.includes('日'))
 			main_date_value = null;
 		else {
+			main_date_value = new Date(main_date.getTime());
+			// 轉換成本地子夜時間值。
 			main_date_value.setHours(0, 0, 0, 0);
 			main_date_value = main_date_value.getTime();
 		}
@@ -385,7 +387,7 @@ function show_calendar(era_name) {
 				tr : {
 					td : [
 					// icon
-					is_next ? '↓' : '↑', {
+					is_next ? is_next === true ? '↓' : is_next : '↑', {
 						a : name,
 						title : name,
 						href : '#',
@@ -397,8 +399,17 @@ function show_calendar(era_name) {
 			});
 	}
 
+	// 添加前一紀年之日期捷徑。
 	if (dates.previous)
 		add_traveler(dates.previous);
+	// 添加同一朝代共存紀年之日期捷徑。
+	if (main_date.共存紀年) {
+		i = main_date.朝代;
+		main_date.共存紀年.forEach(function(era_name) {
+			if (era_name.startsWith(i))
+				add_traveler(era_name, '↔');
+		});
+	}
 
 	dates.forEach(function(date) {
 		if (!era_caption)
@@ -552,6 +563,7 @@ function show_calendar(era_name) {
 	if (後紀年名)
 		add_traveler(後紀年名, true);
 
+	// 添加後一紀年之日期捷徑。
 	if (dates.next)
 		add_traveler(dates.next, true);
 
@@ -2460,11 +2472,20 @@ function affairs() {
 	function add_曆法(曆名, 說明, link) {
 		if (Array.isArray(說明))
 			說明 = 說明.join('\n');
+		var 行用 = CeL[曆名 + '_Date'].行用;
+		if (行用) {
+			行用 = [ new Date(行用[0]), new Date(行用[1]) ];
+			說明 += '\n行用期間: ' + 行用[0].format(draw_era.date_options) + '–'
+					+ 行用[1].format(draw_era.date_options) + ' ('
+					+ 行用[0].age(行用[1]) + ')';
+		}
+		if (CeL[曆名 + '_Date'].閏法)
+			說明 += '\n閏法: ' + CeL[曆名 + '_Date'].閏法;
 		return [ {
 			a : {
 				T : 曆名
 			},
-			R : 說明 + '\n以平氣平朔無中置閏規則計算得出，非實曆。',
+			R : 說明 + '\n* 以平氣平朔無中置閏規則計算得出，非實曆。',
 			href : 'https://zh.wikipedia.org/wiki/'
 			//
 			+ encodeURIComponent(link || 曆名)
@@ -3548,10 +3569,11 @@ function affairs() {
 				'魏明帝景初元年（237年）施行。南北朝劉宋用到444年，被《元嘉曆》取代。北魏用到451年，被《玄始曆》取代。'),
 		三紀曆 : add_曆法('三紀曆', '姜岌在十六國後秦白雀元年（384年）編制。同年起施行三十多年。'),
 		玄始曆 : add_曆法('玄始曆', '北涼、北魏於452年用至正光三年（522年）施行《正光曆》。'),
-		元嘉曆 : add_曆法('元嘉曆', [ '劉宋二十二年，普用元嘉曆。梁武帝天監九年（510年），被《大明曆》取代。',
+		元嘉曆 : add_曆法('元嘉曆', [ '劉宋二十二年，普用元嘉曆。梁武帝天監九年（510年）被《大明曆》取代。',
 				'文武天皇元年（697年）からは元嘉暦を廃して儀鳳暦を正式に採用することとなった。' ]),
 		大明曆 : add_曆法('大明曆', [ '大明曆，亦稱「甲子元曆」。梁天監九年（510年）施行至陳後主禎明三年（589年）。',
-				'惟永定3年閏4月，太建7年閏9月。' ], '大明曆 (祖沖之)'),
+				'惟實曆陳永定3年閏4月，太建7年閏9月；與之不甚合。' ], '大明曆_(祖沖之)'),
+		正光曆 : add_曆法('正光曆', '魏孝明帝改元正光，於正光三年（522年）施行。興和二年被《興和曆》取代。'),
 
 		// --------------------------------------------------------------------
 		// 列具曆注, calendar notes
