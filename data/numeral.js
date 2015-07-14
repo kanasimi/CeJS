@@ -88,7 +88,7 @@ if (typeof CeL === 'function')
 			numerals_Normal_pattern = new RegExp('('
 			//
 			+ Chinese_numerals_Normal_digits_pattern.source + '|\\d+)', 'g'),
-			//
+			// 籌算: 步十百千萬
 			amount_pattern = new RegExp(numerals_Normal_pattern.source
 					+ '?([十百千])', 'g'),
 
@@ -106,6 +106,10 @@ if (typeof CeL === 'function')
 			// http://thdl.ntu.edu.tw/suzhou/
 			// 蘇州碼子又稱花碼、番仔碼、草碼、菁仔碼
 			Suzhou_numerals_digits = '〇〡〢〣〤〥〦〧〨〩',
+			// Counting Rod Numerals As of Unicode version 8.0
+			Counting_rod_numerals_digits
+			// https://en.wikipedia.org/wiki/Counting_Rod_Numerals
+			= '𝍠𝍡𝍢𝍣𝍤𝍥𝍦𝍧𝍨𝍩𝍪𝍫𝍬𝍭𝍮𝍯𝍰𝍱',
 			// 全形阿拉伯數字 U+FF10~U+FF19 FULLWIDTH DIGIT
 			FULLWIDTH_DIGITS = '０１２３４５６７８９',
 			//
@@ -212,7 +216,7 @@ if (typeof CeL === 'function')
 
 			// 下數系統單位
 			Chinese_numerals_Normal_base_denomination
-			//
+			// 籌算: 步十百千萬
 			= (',十,百,千' + Chinese_numerals_Denominations).split(','),
 			//
 			Chinese_numerals_Formal_base_denomination
@@ -250,7 +254,7 @@ if (typeof CeL === 'function')
 
 				base = scale;
 				'十,百,千'.split(',')
-				//
+				// 籌算: 步十百千萬
 				.forEach(function(denomination) {
 					numeral_value[denomination] = scale;
 					scale *= base;
@@ -371,7 +375,7 @@ if (typeof CeL === 'function')
 				var i = 0, l, m,
 				//
 				n = Chinese_numerals_Normal_digits_Array,
-				//
+				// 籌算: 萬千百十步
 				d = '萬千百十'.split(''), r = 0,
 				/**
 				 * @see <a
@@ -504,7 +508,19 @@ if (typeof CeL === 'function')
 					Chinese_numerals_Normal_pattern.lastIndex = 0;
 					return number_String.replace(
 					//
-					Chinese_numerals_Normal_pattern, from_Chinese_numeral);
+					Chinese_numerals_Normal_pattern, function($0) {
+						var digit = $0.charAt(0);
+						return '負十'.includes(digit)
+								|| positional_Chinese_numerals_digits
+										.includes(digit)
+								|| (digit = $0.charAt(1))
+								&& ('十'.includes(digit)
+								//
+								|| positional_Chinese_numerals_digits
+										.includes(digit))
+						// 不處理過大的位值，例如 "正"。
+						? from_Chinese_numeral($0) : $0;
+					});
 				}
 
 				var sum = 0, lastIndex = 0,
@@ -1033,7 +1049,7 @@ if (typeof CeL === 'function')
 			_.from_Roman_numeral = from_Roman_numeral;
 			_.normalize_Roman_numeral = normalize_Roman_numeral;
 
-			'ⅠⅡⅢⅣⅤⅥⅦⅧⅩⅪⅫ'.split('').forEach(function(digit, index) {
+			'ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫ'.split('').forEach(function(digit, index) {
 				Roman_numeral_alternative[digit] = to_Roman_numeral(index + 1);
 			});
 			'ⅰⅱⅲⅳⅴⅵⅶⅷⅸⅹⅺⅻ'.split('').forEach(function(digit, index) {
