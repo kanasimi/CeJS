@@ -4853,8 +4853,9 @@ Revised_Julian_Date.test = new_tester(Date_to_Revised_Julian, Revised_Julian_Dat
 // 漢書 律曆志
 // http://ctext.org/han-shu/lv-li-zhi-shang/zh
 
-// 曆法:回歸年,朔望月,平太陽日
-// 曆法上之"歲首"指每歲(嵗)起算點(之月序數)。當前農曆之"歲"指冬至月首至冬至月首之間，"年"指正月首(1月1日)至正月首之間，故歲首為11月1日夜半(子夜時刻)。
+// 曆法:歲:回歸年,月:朔望月,日:平太陽日
+// 曆法上之"歲首"指每歲(嵗)起算點(之月序數)，常為中氣(一般為冬至)時間。月首朔旦，朔旦到朔旦爲一月(朔望月)。日首夜半，夜半到夜半爲一日(平太陽日)。
+// 當前農曆之"歲"指冬至月首至冬至月首之間(回歸年)，"年"指正月首(1月1日)至正月首之間，故歲首為11月1日夜半(子夜時刻)。
 // 元嘉曆之"歲"指正月首(1月1日)至正月首之間，與"年"相同。
 
 /*
@@ -5272,22 +5273,23 @@ function add_平氣平朔曆法(config) {
 		var 曆數 = config[曆名];
 		if (typeof 曆數 === 'string')
 			曆數 = 曆數.split(',');
+		// 曆數:
+		// [ 曆數_月日數, 曆數_節氣日數, 曆元JDN, 行用起訖JDN, options ]
+		// 行用起訖JDN: {Integer}起JDN or [ 起JDN, 訖JDN ]; 訖JDN 指結束行用之<b>隔日</b>!
 		if (typeof 曆數[0] === 'string')
 			曆數[0] = 曆數[0].split('/');
 		if (typeof 曆數[1] === 'string')
 			曆數[1] = 曆數[1].split('/');
 
-		if (typeof 曆數[3] === 'string') {
+		if (typeof 曆數[3] === 'string')
 			曆數[3] = library_namespace.parse_period(曆數[3]);
-			曆數[3][0] = Julian_day.to_Date(Julian_day(曆數[3][0], 'CE'), null,
-					true);
-			曆數[3][1] = Julian_day.to_Date(Julian_day(曆數[3][1], 'CE'), null,
-					true);
+		if (Array.isArray(曆數[3])) {
+			曆數[3][0] = 曆數[3][0] && Julian_day.to_Date(Julian_day(曆數[3][0], 'CE'), null,
+					true) || undefined;
+			曆數[3][1] = 曆數[3][1] && Julian_day.to_Date(Julian_day(曆數[3][1], 'CE'), null,
+					true) || undefined;
 		}
 
-		// 曆數:
-		// [ 曆數_月日數, 曆數_節氣日數, 曆元JDN, 行用起訖JDN, options ]
-		// 行用起訖JDN: {Integer}起JDN or [ 起JDN, 訖JDN ]; 訖JDN 指結束行用之<b>隔日</b>!
 		var 曆術 = 平氣平朔無中置閏(曆數[0], 曆數[1], 曆數[2] | 0, 曆數[4]);
 
 		var 章歲 = 曆數[0][0] * 曆數[1][1], 章閏 = 年節氣數 * 曆數[0][1] * 曆數[1][0] % 章歲,

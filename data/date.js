@@ -1068,19 +1068,19 @@ function Julian_String_to_Date(date_string, minute_offset, options) {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 
-function parse_English_Date(date) {
-	date = date.trim().replace(/.+\[(?:\d{1,2}|note \d+)\]$/, '');
-	var accuracy;
-	if (accuracy = date.match(/^(?:before|after)[\s ](.+)$/i))
+function parse_English_date(date) {
+	date = date.trim().replace(/.+\[(?:\d{1,2}|note \d+)\]$/i, '');
+	var accuracy = date.match(/^(?:before|after)[\s ](.+)$/i), matched;
+	if (accuracy)
 		date = accuracy[1].trim(), accuracy = accuracy[0];
-	if (accuracy = date.match(/^c.(.+)$/))
+	if (accuracy = date.match(/^ca?.(.+)$/))
 		date = accuracy[1].trim(), accuracy = accuracy[0];
 	if (/^[a-z]+\s+-?\d+$/i.test(date))
 		date = '1 ' + date, accuracy = date;
 
 	if (date.includes('?'))
 		accuracy = date, date = date.replace(/\?/g, '');
-	var matched;
+
 	if (!isNaN(date) || /^\d+\/\d+$/.test(date))
 		accuracy = date;
 	else if (!isNaN(matched = Date.parse(date))) {
@@ -1094,7 +1094,7 @@ function parse_English_Date(date) {
 	return [ date, accuracy ];
 }
 
-_.parse_English = parse_English_Date;
+_.parse_English_date = parse_English_date;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 

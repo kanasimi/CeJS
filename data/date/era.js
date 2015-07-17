@@ -825,10 +825,13 @@ if (typeof CeL === 'function')
 
 			// 取得以 key 登錄之所有 era。
 			// get era Set of {String}key
-			function get_era_Set_of_key(key, list) {
+			function get_era_Set_of_key(key, no_expand) {
 				var eras = search_index[key];
 
-				if (Array.isArray(eras))
+				if (Array.isArray(eras)) {
+					if (no_expand)
+						// eras[0]: 所有僅包含 key 的 era Set。
+						return eras[0];
 					if (eras.cache)
 						eras = eras.cache;
 					else {
@@ -843,6 +846,7 @@ if (typeof CeL === 'function')
 						eras.cache = set;
 						eras = set;
 					}
+				}
 
 				return eras;
 			}
@@ -1485,7 +1489,7 @@ if (typeof CeL === 'function')
 					return name.cache;
 
 				// 基本上不加國家名稱。
-				// name: [ 朝代, 君主, 紀年 ]
+				// name → [ 朝代, 君主, 紀年 ]
 				name = name.slice(0, 3).reverse();
 
 				// 對重複的名稱作適當簡略調整。
@@ -1493,17 +1497,13 @@ if (typeof CeL === 'function')
 				//
 				|| name[1] && name[1].includes(name[2]))
 					name[2] = '';
-				if (name[1])
-					// name[1].startsWith(name[0])
-					if (name[1].lastIndexOf(name[0], 0) === 0)
+				if (name[1]) {
+					// 處理如周諸侯國之類。
+					// 例如 魯國/魯昭公 → 魯昭公
+					var matched = name[0].match(/^(.+)國$/);
+					if (name[1].startsWith(matched ? matched[1] : name[0]))
 						name[0] = '';
-					else {
-						var matched = name[0].match(/^(.+)國$/);
-						// 周諸侯國之類?
-						if (matched && name[1].startsWith(matched[1]))
-							// 例如 魯國/魯昭公 → 魯魯昭公
-							name[0] = '';
-					}
+				}
 
 				if (type === WITH_PERIOD)
 					append_period(this, name);
@@ -5018,17 +5018,25 @@ if (typeof CeL === 'function')
 				return era_1.start - era_2.start;
 			}
 
-			// 避免覆蓋原有值。
+			// 避免重複設定或覆蓋原有值。
 			// object[key] = value
 			// TODO: {Array}value
-			function add_attribute(object, key, value) {
-				var v = object[key];
-				if (Array.isArray(v)) {
-					// 不重複設定。
-					if (!v.includes(value))
-						v.push(value);
+			function add_attribute(object, key, value, shift) {
+				if (key in object) {
+					// 有衝突。
+					var v = object[key];
+					if (Array.isArray(v)) {
+						// 不重複設定。
+						if (!v.includes(value))
+							if (shift)
+								v.shift(value);
+							else
+								v.push(value);
+					} else if (v !== value)
+						object[key] = shift ? [ value, v ] : [ v, value ];
 				} else
-					object[key] = v && v !== value ? [ v, value ] : value;
+					// 一般情況。
+					object[key] = value;
 			}
 
 			function parse_month_name(月名, 月名_Array) {
@@ -5216,19 +5224,22 @@ if (typeof CeL === 'function')
 							紀年[2] = 紀年[1];
 					}
 
-					紀年.reverse();
-					if (國家 && !紀年[3])
-						紀年[3] = 國家;
-					if ((tmp = 紀年[2].match(/^(.+)國$/))
-					// 周諸侯國之類?
-					&& !紀年[1].includes('國')) {
-						// 例如 for 魯國/昭公: add "魯昭公"
+					// 處理如周諸侯國之類。
+					tmp = 紀年[0].match(/^(.+)國$/);
+					// 例如:
+					// 魯國/昭公 → 魯國/魯昭公
+					// 秦國/秦王政 → 秦國/秦王政 (no change)
+					if (tmp && !紀年[1].includes('國')
+							&& !紀年[1].includes(tmp = tmp[1])) {
 						// add_attribute(附加屬性, '君主', tmp[1] + 紀年[1]);
 
 						// 直接改才能得到效果。
-						// 例如 魯國/昭公 → 魯國/魯昭公
-						紀年[1] = tmp[1] + 紀年[1];
+						紀年[1] = tmp + 紀年[1];
 					}
+
+					紀年.reverse();
+					if (國家 && !紀年[3])
+						紀年[3] = 國家;
 
 					// assert: 至此
 					// 前一紀年名稱 = [ 朝代, 君主(帝王), 紀年 ]
@@ -5349,24 +5360,14 @@ if (typeof CeL === 'function')
 							if (j || (j = k)) {
 								if (!tmp.era)
 									tmp.era = library_namespace.null_Object();
-								if (j in tmp.era) {
-									// 有衝突。
-									if (Array.isArray(tmp.era[j]))
-										tmp.era[j].push(last_era_data);
-									else
-										tmp.era[j]
-										//
-										= [ tmp.era[j], last_era_data ];
-
-									if (library_namespace.is_debug())
-										library_namespace.warn(
-										//
-										'parse_era: 存在相同朝代、名稱重複之紀年 '
-												+ tmp.era[j].length + ' 個: '
-												+ last_era_data);
-								} else
-									// 一般情況。
-									tmp.era[j] = last_era_data;
+								add_attribute(tmp.era, j, last_era_data);
+								if (library_namespace.is_debug()
+										&& Array.isArray(tmp.era[j]))
+									library_namespace.warn(
+									//
+									'add_attribute: 存在相同朝代、名稱重複之紀年 '
+											+ tmp.era[j].length + ' 個: '
+											+ last_era_data);
 							}
 							break;
 						}
@@ -5973,7 +5974,7 @@ if (typeof CeL === 'function')
 				}
 
 				// 取 key 與 (紀年_list) 之交集。
-				function get_intersection(key) {
+				function get_intersection(key, no_expand) {
 					if (key.start && key.end) {
 						origin = false;
 						(紀年_list = library_namespace.Set_from_Array(
@@ -5985,7 +5986,7 @@ if (typeof CeL === 'function')
 
 					library_namespace.debug('Get 紀年 list of [' + key + ']', 2,
 							'to_era_Date');
-					var list = get_era_Set_of_key(key);
+					var list = get_era_Set_of_key(key, no_expand);
 					if (!list ||
 					// assert: (Set)list
 					list.size === 0)
@@ -6026,6 +6027,7 @@ if (typeof CeL === 'function')
 											+ ']', 2, 'to_era_Date');
 									紀年 = era;
 									// TODO: 以更好的方法處理，不用 throw。
+									// 只要有一些通過，就成。但((紀年_list))非Array，不能用.some()。
 									throw 0;
 								}
 							});
@@ -6040,6 +6042,7 @@ if (typeof CeL === 'function')
 									'to_era_Date');
 							紀年 = era;
 							// TODO: 以更好的方法處理，不用 throw。
+							// 只要有一些通過，就成。但((紀年_list))非Array，不能用.some()。
 							throw 0;
 						});
 					} catch (e) {
@@ -6188,9 +6191,19 @@ if (typeof CeL === 'function')
 							if (search_era()
 									&& (tmp = get_intersection(matched[0]))
 									&& tmp.size > 1) {
+								// backup: 為了預防使用別名，因此部一開始就設定 no_expand。
+								date = 偵測集.slice();
 								// 進一步篩選，緊縮符合範圍。
 								while (紀年_list.size > 1 && search_era())
 									get_intersection(matched[0]);
+								if (紀年_list.size > 1) {
+									// 依舊有超過一個候選，則設定別擴大解釋。
+									// revert
+									偵測集 = date;
+									while (紀年_list.size > 1 && search_era())
+										// 已經有太多了，因此設定 no_expand。
+										get_intersection(matched[0], true);
+								}
 								if (tmp2[1] === null && 偵測集[1] !== null)
 									年 = '';
 							}
@@ -6311,6 +6324,7 @@ if (typeof CeL === 'function')
 								era = era.toString()))
 									tmp.push(era);
 							});
+							// tmp = Array.from(紀年_list).uniq()
 							if (tmp.length > 1)
 								// 有超過1個紀年。
 								if (options.pick)
@@ -7225,10 +7239,13 @@ if (typeof CeL === 'function')
 					}
 
 					// TODO: 檢驗若無法設定 this.era_popup
+
 					library_namespace.locate_node(
 							this.era_popup = library_namespace.new_node({
 								div : era.join('<br />'),
-								C : 'era_popup'
+								C : 'era_popup',
+								// 盡可能預防殘留 dialog。
+								onmouseout : popup_era_dialog.clear.bind(this)
 							}, document.body), this);
 				}
 
@@ -7240,8 +7257,11 @@ if (typeof CeL === 'function')
 
 			popup_era_dialog.format = '%Y年%m月%d日';
 
-			popup_era_dialog.clear = function() {
-				library_namespace.toggle_display(this.era_popup, false);
+			popup_era_dialog.clear = function(clear) {
+				if (this.era_popup)
+					library_namespace.toggle_display(this.era_popup, false);
+				if (clear)
+					this.era_popup = null;
 				library_namespace.set_class(this, 'era_popupd', {
 					remove : true
 				});
@@ -7265,7 +7285,11 @@ if (typeof CeL === 'function')
 						if (options.add_date)
 							node.add_date = options.add_date;
 						if (options.onclick) {
-							node.onclick = options.onclick;
+							node.onclick = function(e) {
+								// 清掉殘存的 dialog。
+								popup_era_dialog.clear.call(this, true);
+								return options.onclick.call(this, e);
+							};
 							node.style.cursor = 'pointer';
 						}
 					}
@@ -7318,21 +7342,22 @@ if (typeof CeL === 'function')
 				if (!史籍紀年_PATTERN)
 					era_text_to_HTML.build_pattern();
 
-				text = text
-				// 因為 史籍紀年_PATTERN 於會利用到 pattern 前後，這部分會被吃掉，
-				// 像 "十年，七月庚辰" 就會在 match 了 "十年，" 後，無法 match 到 "七月"。
-				// 因此先將可能出現問題的做處理，多墊個字元以備不時之需。
-				.replace(/([，。；！）])/g, '$1\0')
-				// search
-				.replace(史籍紀年_PATTERN, REPLACED_data_era)
-				// search for 僅紀年亦轉換的情況。 e.g., '天皇'.
-				.replace(ERA_ONLY_PATTERN, REPLACED_data_era)
-				//
-				.replace(朔干支_PATTERN, REPLACED_data_era)
-				// 回復
-				.replace(/([，。；！）])\0/g, '$1')
-				// format
-				.replace(/\n/g, '<br />');
+				if (typeof text === 'string')
+					text = text
+					// 因為 史籍紀年_PATTERN 於會利用到 pattern 前後，這部分會被吃掉，
+					// 像 "十年，七月庚辰" 就會在 match 了 "十年，" 後，無法 match 到 "七月"。
+					// 因此先將可能出現問題的做處理，多墊個字元以備不時之需。
+					.replace(/([，。；！）])/g, '$1\0')
+					// search
+					.replace(史籍紀年_PATTERN, REPLACED_data_era)
+					// search for 僅紀年亦轉換的情況。 e.g., '天皇'.
+					.replace(ERA_ONLY_PATTERN, REPLACED_data_era)
+					//
+					.replace(朔干支_PATTERN, REPLACED_data_era)
+					// 回復
+					.replace(/([，。；！）])\0/g, '$1')
+					// format
+					.replace(/\n/g, '<br />');
 
 				if (node) {
 					if (typeof node === 'string')

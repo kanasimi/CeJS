@@ -386,8 +386,14 @@ function show_calendar(era_name) {
 			output.push({
 				tr : {
 					td : [
-					// icon
-					is_next ? is_next === true ? '↓' : is_next : '↑', {
+					// setup icon
+					is_next ? is_next === true ? {
+						span : '↓',
+						R : 'next'
+					} : is_next : {
+						span : '↑',
+						R : 'previous'
+					}, ' ', {
 						a : name,
 						title : name,
 						href : '#',
@@ -403,11 +409,15 @@ function show_calendar(era_name) {
 	if (dates.previous)
 		add_traveler(dates.previous);
 	// 添加同一朝代共存紀年之日期捷徑。
-	if (main_date.共存紀年) {
-		i = main_date.朝代;
+	if (main_date.共存紀年 && (i = main_date.朝代)) {
+		if (Array.isArray(i))
+			i = i[0];
 		main_date.共存紀年.forEach(function(era_name) {
 			if (era_name.startsWith(i))
-				add_traveler(era_name, '↔');
+				add_traveler(era_name, {
+					span : '↔',
+					R : 'contemporary'
+				});
 		});
 	}
 
@@ -1663,10 +1673,10 @@ function translate_era(era) {
 		function add_item(note, index) {
 			output.push({
 				br : null
-			}, {
+			}, typeof name === 'object' ? name : {
 				T : name || key
 			}, 0 < index ? ' ' + (index + 1) : '', '：', {
-				span : add_node && add_node(note) || note,
+				span : CeL.era.to_HTML(add_node && add_node(note) || note),
 				C : 'note'
 			});
 		}
@@ -1681,7 +1691,7 @@ function translate_era(era) {
 		}
 	}
 
-	function add_君主名(note) {
+	function add_注_link(note) {
 		return {
 			a : note,
 			href : 'https://'
@@ -1784,14 +1794,20 @@ function translate_era(era) {
 			});
 			add_注('據', '出典');
 
-			add_注('君主名', '君主姓名', add_君主名);
+			add_注('君主名', '君主姓名', add_注_link);
 			if (date.ruler) {
-				add_注('君主', '君主姓名', add_君主名);
-				add_注('ruler', '君主姓名', add_君主名);
+				add_注('君主', '君主姓名', add_注_link);
+				add_注('ruler', '君主姓名', add_注_link);
 			}
 			add_注('君主字');
-			add_注('廟號');
-			add_注('諡');
+			add_注('廟號', {
+				a : '廟號',
+				href : 'https://zh.wikipedia.org/wiki/%E5%BB%9F%E8%99%9F'
+			});
+			add_注('諡', {
+				a : '諡',
+				href : 'https://zh.wikipedia.org/wiki/%E8%AB%A1'
+			});
 			add_注('生', '君主出生日期', function(note) {
 				return {
 					a : note,
@@ -1810,7 +1826,14 @@ function translate_era(era) {
 					C : 'note'
 				};
 			});
-			add_注('在位');
+			add_注('在位', '君主在位期間', function(note) {
+				return {
+					a : note,
+					href : '#',
+					title : note,
+					onclick : click_title_as_era
+				};
+			});
 
 			if (date.name[1] && date.name[1].includes('天皇'))
 				// append name.
@@ -1848,6 +1871,10 @@ function translate_era(era) {
 
 		CeL.remove_all_child('era_output');
 		CeL.new_node(output, 'era_output');
+		CeL.era.setup_nodes(null, {
+			add_date : true,
+			onclick : parse_text.onclick
+		});
 
 		if (era && era !== last_input)
 			CeL.new_node({
@@ -1921,7 +1948,7 @@ function 批次轉換() {
 
 // ---------------------------------------------------------------------//
 
-function parse_text(text) {
+function parse_text(text, node) {
 	if (!CeL.era)
 		return false;
 
@@ -1931,27 +1958,31 @@ function parse_text(text) {
 		text = CeL.set_text('original_text');
 
 	// 標注文本 點擊(點選解析)功能。
-	CeL.era.to_HTML(text, 'parsed_text', {
+	CeL.era.to_HTML(text, node || 'parsed_text', {
 		add_date : parse_text.add_date,
-		onclick : function() {
-			var era = CeL.era.node_era(this, 'String');
-			if (era) {
-				era = CeL.era.reduce_name(era.to_Date('era').format({
-					parser : 'CE',
-					format : '%紀年名 %年年%月月%日日',
-					locale : 'cmn-Hant-TW'
-				}));
-				era_input_object.setValue(era);
-				translate_era(era);
-			} else
-				CeL.warn('解析結果為 [' + era + ']');
-		}
+		onclick : parse_text.onclick
 	});
 
 	return false;
 }
 
 // parse_text.add_date = true;
+
+parse_text.onclick = function() {
+	var era = CeL.era.node_era(this, 'String');
+	if (era) {
+		era = CeL.era.reduce_name(era.to_Date('era').format({
+			parser : 'CE',
+			format : '%紀年名 %年年%月月%日日',
+			locale : 'cmn-Hant-TW'
+		}));
+		era_input_object.setValue(era);
+		translate_era(era);
+	} else
+		CeL.warn('解析結果為 [' + era + ']');
+
+	return false;
+};
 
 function parsed_text_set_date(add_date) {
 	CeL.get_element('parsed_text_add_date').innerHTML
@@ -2100,7 +2131,7 @@ initialize_thdl_solar_term = function() {
 // ---------------------------------------------------------------------//
 
 /**
- * 若非在試用期間，則淡化顯示之。
+ * 若非在行用/適用期間，則淡化顯示之。
  * 
  * @param {Date}date
  *            date to detect
