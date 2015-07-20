@@ -34,7 +34,7 @@ hide,scope,message,note,繁體中文,简体中文,English,日本語
 ,note_botton_layer,測試範例,,測試範例,,EXAMPLE,入力例
 ,note_botton_layer,輸入紀錄,,輸入紀錄,输入履历,RECORD,入力記録
 ,note_botton_layer,使用說明,,使用說明,,CONCEPT,ご利用方法
-,note_botton_layer,紀年線圖,ERA GRAPH 時間軸,紀年線圖,,TIMELINE,時系列軸
+,note_botton_layer,紀年線圖,"ERA GRAPH, 時間線, 時系列軸",紀年線圖,,TIMELINE,時間軸
 ,note_botton_layer,資料圖層,ja:階層,資料圖層,,DATA LAYER,情報レイヤ
 ,note_botton_layer + 文字式年曆,曆譜,,曆譜,,CALENDAR,暦日表
 ,note_botton_layer,批次轉換,batch convert,批次轉換,,BATCH,一括変換
@@ -53,13 +53,33 @@ hide,scope,message,note,繁體中文,简体中文,English,日本語
 ,文字式年曆,%1/%2/%3,Common Era: Y/m/d,%1/%2/%3,,,
 ,文字式年曆,%1 BCE,,前%1年,,%1 BCE,前%1年
 ,文字式年曆,%1 CE,,%1年,,%1 CE,%1年
+,文字式年曆注解,年號,,年號,,Era date,元号
+,文字式年曆注解,採用曆法,,採用曆法,,Calendar,使用されていた暦
+,文字式年曆注解,出典,,出典,,Reference,出典
+,文字式年曆注解,注,"注解,注釋, 補足・説明・解説",注,,Note,注釈
+,文字式年曆注解,展示線圖,,展示線圖,,Showing timeline,時間軸を見る
+,文字式年曆注解/君主資料,君主名,"本名，正名、大名，原名，Personal name, Full name, 全名 (e.g., 溥儀 vs. 愛新覺羅溥儀)",君主姓名,,Personal name,帝王の御名
+,文字式年曆注解/君主資料,表字,,表字,,Courtesy name,字（あざな）
+,文字式年曆注解/君主資料,君主號,"別字, Pseudonym, pen name",別號,,Art name,号（ごう）
+,文字式年曆注解/君主資料,諱,,名諱,,True name,諱（いみな）
+,文字式年曆注解/君主資料,諡,"為天皇作特殊處理。天皇: 漢風諡号・追号・異名/異称/別号, 天皇名和式諡號, Japanese Emperor, Emperor of Japan",諡,,Posthumous name,諡号
+,文字式年曆注解/君主資料,廟號,,廟號,,Temple name,廟号
+,文字式年曆注解/君主資料,出生,"君主出生日期, Birth of ruler, 帝王の誕生",出生,,Born,誕生
+,文字式年曆注解/君主資料,逝世,"君主逝世日期, Death of ruler, 帝王の没",逝世,,Died,崩御
+,文字式年曆注解/君主資料,在位,君主在位期間,在位,,Reign,在位期間
+,文字式年曆注解/君主資料,加冕,登基即位,加冕,,Coronation,戴冠
+,文字式年曆注解/君主資料,父親,,父親,,Father,父親
+,文字式年曆注解/君主資料,母親,,母親,,Mother,母親
+,文字式年曆注解/君主資料,前任,,前任,,Predecessor,先代
+,文字式年曆注解/君主資料,繼任,,繼任,,Successor,次代
+,文字式年曆注解/君主資料,配偶,,配偶,,Spouse,配偶者
 ,文字式年曆欄位,前綴,,前綴,,prefix,接頭辞
 ,文字式年曆欄位,增加此欄,,增加此欄,,Add the column,この列を追加する
 ,文字式年曆欄位,除去此欄,,除去此欄,,Remove the column,この列を削除する
 ,文字式年曆欄位,全不選,,全不選,,Remove ALL,全ての列を削除する
 ,文字式年曆欄位,Pin,固定する,釘選,,Pin,ピン
 ,文字式年曆欄位,Unpin,解除釘選/取消釘選/拔去/拔起/拔錨/拔除/ピンを抜く; 留めくぎを取る/はずす 外す,拔起,,Unpin,外す
-,文字式年曆欄位,分類,,分類,,Group,
+,文字式年曆欄位,分類,,分類,,Group,分類
 ,文字式年曆欄位,曆注,"Calendar notes, Calendar comments",曆注,,Calendar note,暦注
 ,可選用的文字式年曆欄位,星期,,星期,,Week-day,曜日
 ,可選用的文字式年曆欄位,Gregorian calendar,,格里曆,,Gregorian calendar,グレゴリオ暦
@@ -191,7 +211,7 @@ https://zh.wikipedia.org/wiki/%E6%A8%A1%E5%9D%97:CGroup/%E5%9C%B0%E5%90%8D",義�
 ,紀年線圖,導覽列：,,導覽列：,,Navigation: ,ナビゲーション バー：
 ,紀年線圖,所有國家,,所有國家,,All Countries,全ての国家
 ,紀年線圖,難辨識時段：,判別困難,難辨識時段：,,Unobvious periods: ,見づらい紀年：
-,紀年線圖選項,紀年線圖選項：,,紀年線圖選項：,,Options of era graph:,時系列軸の設定：
+,紀年線圖選項,紀年線圖選項：,,紀年線圖選項：,,Options of timeline:,時間軸の設定：
 ,紀年線圖選項,合併歷史時期,,合併歷史時期,,Combine historical periods,時代区分を結合する
 ,紀年線圖選項,擴張範圍至君主在世時段,,擴張範圍至君主在世時段,,Adapt lifetime of rulers,君主の生存期間まで拡大する
 ,資料圖層,請選擇所欲載入之資料圖層。,,請選擇所欲載入之資料圖層。,,Please select the layer you want to load.,お求めになる情報レイヤを選んでください。

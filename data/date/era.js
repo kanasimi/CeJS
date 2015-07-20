@@ -432,6 +432,7 @@ if (typeof CeL === 'function')
 			// 日期名稱。
 			日_SOURCE = /\s*初?(\d{1,2}|數{1,3}|[^\s日朔晦望]{1,5})日?/.source,
 
+			// 四季, 四時
 			季_LIST = '春夏秋冬',
 			// 季名稱。e.g., 春正月
 			季_SOURCE = '[' + 季_LIST + ']?王?',
@@ -452,6 +453,8 @@ if (typeof CeL === 'function')
 			/^(-?\d+|元)?[\/.\-年](閏?(?:[正元]|[01]?\d))[\/.\-月]?(?:(初?\d{1,2}?|[正元])日?)?$/
 			//
 			,
+
+			國_PATTERN = /^(.*[^民])國$/,
 
 			// 取得/保存前置資訊。
 			前置_SOURCE = '^(.*?)',
@@ -528,8 +531,8 @@ if (typeof CeL === 'function')
 				ruler : 1,
 				// 君主姓名
 				君主名 : 1,
-				// 表字,小字
-				君主字 : 1,
+				// 君主字,小字(乳名)
+				表字 : 1,
 				帝王 : 1,
 				總統 : 1,
 				// 天皇名
@@ -551,7 +554,7 @@ if (typeof CeL === 'function')
 				// 王國名
 				國名 : 2,
 
-				// 王朝, 帝國, Empire
+				// 王朝, 王家, 帝國, Empire
 
 				// state 州
 				// Ancient Chinese states
@@ -1500,7 +1503,7 @@ if (typeof CeL === 'function')
 				if (name[1]) {
 					// 處理如周諸侯國之類。
 					// 例如 魯國/魯昭公 → 魯昭公
-					var matched = name[0].match(/^(.+)國$/);
+					var matched = name[0].match(國_PATTERN);
 					if (name[1].startsWith(matched ? matched[1] : name[0]))
 						name[0] = '';
 				}
@@ -5225,7 +5228,7 @@ if (typeof CeL === 'function')
 					}
 
 					// 處理如周諸侯國之類。
-					tmp = 紀年[0].match(/^(.+)國$/);
+					tmp = 紀年[0].match(國_PATTERN);
 					// 例如:
 					// 魯國/昭公 → 魯國/魯昭公
 					// 秦國/秦王政 → 秦國/秦王政 (no change)
@@ -5414,9 +5417,9 @@ if (typeof CeL === 'function')
 
 							// 將屬性值搬移至 period_root 之 tree 中。
 							// i === 0，即紀元本身時，毋須搬移。
-							if (0 < i) {
+							// 使用者測試資料時，可能導致 j 為 undefined。
+							if (0 < i && (j = period_attribute_hierarchy[i])) {
 								// j: attributes of hierarchy[i]
-								j = period_attribute_hierarchy[i];
 								// assert: Object.isObject(j)
 								if (tmp in j)
 									// 解決重複設定、多重設定問題。
@@ -7389,7 +7392,7 @@ if (typeof CeL === 'function')
 				var 日 = library_namespace.Chinese_numerals_Normal_digits
 						.slice(1),
 				//
-				年 = '(?:[元' + 日 + ']|[十廿卅]有?){1,4}年',
+				年 = '(?:[元' + 日 + ']|[十廿卅][有又]?){1,4}年',
 				// 春王正月 冬十有二月
 				月 = 季_SOURCE + '閏?(?:[正臘' + 日 + ']|十有?){1,3}月';
 				日 = '(?:(?:(?:干支)?(?:初[' + 日 + ']日?|(?:' + 日
@@ -7398,7 +7401,7 @@ if (typeof CeL === 'function')
 
 				// TODO: 地皇三年，天鳳六年改為地皇。
 				// e.g., 以建平二年為太初元年, 一年中地再動, 大酺五日, 乃元康四年嘉谷, （玄宗開元）十年
-				// TODO: 未及一年, [去明]年, 是[年月日]
+				// TODO: 未及一年, [去明]年, 是[年月日], 《清華大學藏戰國竹簡（貳）·繫年》周惠王立十又七年
 				return 史籍紀年_PATTERN = generate_pattern('(^|[^為酺乃])((?:' + 紀年
 						+ ')*(?:）\0|\\))?' + 年 + '(?:' + 月 + 日 + '?)?|(?:' + 月
 						+ ')?' + 日 + '|' + 月 + ')([^中]|$)', false, 'g');

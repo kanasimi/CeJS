@@ -1376,7 +1376,7 @@ function draw_era(hierarchy) {
 			periods.unshift({
 				T : '資料圖層',
 				onclick : function() {
-					select_panel('data_layer');
+					select_panel('data_layer', true);
 					return false;
 				},
 				S : 'cursor: pointer;'
@@ -1514,6 +1514,7 @@ draw_era.click_Era = function() {
 
 draw_era.click_Period = function() {
 	draw_era(this.dataset.hierarchy.split(era_name_classifier));
+	select_panel('era_graph', true);
 	return false;
 };
 
@@ -1667,21 +1668,34 @@ function add_contemporary(era, output_numeral) {
 	return o;
 }
 
+var 國家_code = {
+	中國 : 'zh',
+	English : 'en',
+	日本 : 'ja'
+// 不列其他國家，如越南尚應以中文 Wikipedia 為主，因其過去紀年原名採用漢字。
+// 直到當地 Wikipedia 全面加入紀年使用當時之原名，且資料較中文 Wikipedia 更多時，再行轉換。
+};
+
 function translate_era(era) {
 
+	// add 文字式年曆注解
 	function add_注(key, name, add_node) {
 		function add_item(note, index) {
 			output.push({
 				br : null
-			}, typeof name === 'object' ? name : {
+			}, typeof name === 'object' && name || {
 				T : name || key
-			}, 0 < index ? ' ' + (index + 1) : '', '：', {
-				span : CeL.era.to_HTML(add_node && add_node(note) || note),
-				C : 'note'
 			});
+			if (0 < index)
+				output.push(' ' + (index + 1));
+			if (note)
+				output.push(': ', {
+					span : CeL.era.to_HTML(add_node && add_node(note) || note),
+					C : 'note'
+				});
 		}
 
-		if (date[key]) {
+		if (date[key] || add_node === true) {
 			if (!Array.isArray(output))
 				output = [ output ];
 			if (Array.isArray(date[key]))
@@ -1695,8 +1709,10 @@ function translate_era(era) {
 		return {
 			a : note,
 			href : 'https://'
-					+ (PATTERN_NOT_ALL_ALPHABET.test(note) ? 'zh' : 'en')
-					+ '.wikipedia.org/wiki/' + note,
+					+ (國家_code[date.國家] || (PATTERN_NOT_ALL_ALPHABET.test(note)
+					// 預設： 中文 Wikipedia
+					? 'zh' : 'en')) + '.wikipedia.org/wiki/'
+					+ encodeURIComponent(note),
 			C : 'note'
 		};
 	}
@@ -1794,21 +1810,41 @@ function translate_era(era) {
 			});
 			add_注('據', '出典');
 
-			add_注('君主名', '君主姓名', add_注_link);
+			// 君主資料
+			add_注('君主名', null, add_注_link);
 			if (date.ruler) {
-				add_注('君主', '君主姓名', add_注_link);
-				add_注('ruler', '君主姓名', add_注_link);
+				add_注('君主', '君主名', add_注_link);
+				add_注('ruler', '君主名', add_注_link);
 			}
-			add_注('君主字');
+			add_注('表字');
+			add_注('君主號', null, add_注_link);
+			add_注('諱', {
+				a : {
+					T : '諱'
+				},
+				href : 'https://zh.wikipedia.org/wiki/%E5%90%8D%E8%AB%B1'
+			}, add_注_link);
+			if (date.name[1] && date.name[1].includes('天皇'))
+				// append name.
+				if (Array.isArray(date.諡))
+					// 不動到原 data。
+					(date.諡 = date.諡.slice()).unshift(date.name[1]);
+				else
+					date.諡 = date.諡 ? [ date.name[1], date.諡 ]
+							: [ date.name[1] ];
+			add_注('諡', {
+				a : {
+					T : '諡'
+				},
+				href : 'https://zh.wikipedia.org/wiki/%E8%AB%A1'
+			}, add_注_link);
 			add_注('廟號', {
-				a : '廟號',
+				a : {
+					T : '廟號'
+				},
 				href : 'https://zh.wikipedia.org/wiki/%E5%BB%9F%E8%99%9F'
 			});
-			add_注('諡', {
-				a : '諡',
-				href : 'https://zh.wikipedia.org/wiki/%E8%AB%A1'
-			});
-			add_注('生', '君主出生日期', function(note) {
+			add_注('生', '出生', function(note) {
 				return {
 					a : note,
 					title : '共存紀年:' + note,
@@ -1817,7 +1853,7 @@ function translate_era(era) {
 					C : 'note'
 				};
 			});
-			add_注('卒', '君主逝世日期', function(note) {
+			add_注('卒', '逝世', function(note) {
 				return {
 					a : note,
 					title : '共存紀年:' + note,
@@ -1826,7 +1862,7 @@ function translate_era(era) {
 					C : 'note'
 				};
 			});
-			add_注('在位', '君主在位期間', function(note) {
+			add_注('在位', null, function(note) {
 				return {
 					a : note,
 					href : '#',
@@ -1835,25 +1871,20 @@ function translate_era(era) {
 				};
 			});
 
-			if (date.name[1] && date.name[1].includes('天皇'))
-				// append name.
-				if (Array.isArray(date.天皇))
-					// 不動到原 data。
-					(date.天皇 = date.天皇.slice()).unshift(date.name[1]);
-				else
-					date.天皇 = date.天皇 ? [ date.name[1], date.天皇 ]
-							: [ date.name[1] ];
-			// 漢風諡号・追号
-			add_注('天皇', '天皇名', function(note) {
-				return {
-					a : note,
-					href : 'https://ja.wikipedia.org/wiki/' + note,
-					C : 'note'
-				};
-			});
-			// add_注('諱');
-
 			add_注('注');
+
+			add_注('紀年線圖', {
+				a : {
+					T : '展示線圖'
+				},
+				D : {
+					hierarchy : date.name.slice().reverse().slice(0, -1).join(
+							'/')
+				},
+				href : '#',
+				onclick : draw_era.click_Period,
+				S : 'cursor:pointer;background-color:#ffa;color:#a26;'
+			}, true);
 
 			if (date.準 || date.精) {
 				if (!Array.isArray(output))
@@ -2472,7 +2503,7 @@ function affairs() {
 	CeL.clear_class('note_botton_layer');
 	CeL.new_node(list, 'note_botton_layer');
 
-	select_panel('era_graph' in select_panels ? 'era_graph' : 'FAQ');
+	select_panel('era_graph' in select_panels ? 'era_graph' : 'FAQ', true);
 
 	// -----------------------------
 
