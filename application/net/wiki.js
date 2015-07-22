@@ -30,9 +30,10 @@ if (false) {
 			function() {
 				var wiki = CeL.wiki.login('', '')
 				// get the content of page
-				.page('Wikipedia:沙盒', function(title, content) {
-					CeL.info(title);
-					CeL.log(content);
+				.page('Wikipedia:沙盒', function(page_data) {
+					CeL.info(page_data.title);
+					var content = CeL.wiki.content_of(page_data);
+					CeL.log(content === undefined ? 'page deleted!' : content);
 				})
 				// get the content of page, and then replace it.
 				.page('Wikipedia:沙盒').edit('* [[沙盒]]', {
@@ -50,9 +51,9 @@ if (false) {
 					bot : 1
 				})
 				// 執行過 .page() 後，與上一種方法相同。
-				.page(function(title, content) {
-					CeL.info(title);
-					CeL.log(content);
+				.page(function(page_data) {
+					CeL.info(page_data.title);
+					CeL.log(CeL.wiki.content_of(page_data));
 				})
 				// get the content of page, replace it, and set summary.
 				.edit('text to replace', {
@@ -65,9 +66,9 @@ if (false) {
 					summary : 'summary'
 				});
 
-				CeL.wiki.page('Wikipedia:沙盒', function(title, content) {
-					CeL.info(title);
-					CeL.log(content);
+				CeL.wiki.page('Wikipedia:沙盒', function(page_data) {
+					CeL.info(page_data.title);
+					CeL.log(CeL.wiki.content_of(page_data));
 				});
 
 				wiki.logout();
@@ -276,7 +277,7 @@ if (false) {
  * @param {Boolean}no_parse
  *            是否不解析 parameters
  * 
- * @returns token = [ {String}完整的模板token, {String}模板名,
+ * @returns {Array}token = [ {String}完整的模板token, {String}模板名,
  *          {Array}parameters ];<br />
  *          token.count = count('{{') - count('}}')，正常情況下應為 0。<br />
  *          token.index, token.lastIndex: index.
@@ -403,7 +404,7 @@ function parse_wikitext(wikitext, trigger) {
 
 // parse Date
 function parse_Date(wikitext) {
-	return wikitext
+	return wikitext && wikitext
 	// 去掉年分前之雜項。
 	.replace(/.+(\d{4}年)/, '$1')
 	// 去掉星期。
@@ -414,8 +415,8 @@ function parse_Date(wikitext) {
 
 // parse user name
 function parse_user(wikitext) {
-	var matched = wikitext.match(
-	//
+	var matched = wikitext && wikitext.match(
+	// 使用者/用戶對話頁面
 	/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论)|用戶(?:討論))\s*:\s*([^\|\]]+)/i);
 	if (matched)
 		return matched[1].trim();
@@ -423,7 +424,7 @@ function parse_user(wikitext) {
 
 
 function parse_redirect(wikitext) {
-	var matched = wikitext.match(
+	var matched = wikitext && wikitext.match(
 	//
 	/(?:^|[\s\n]*)#(?:REDIRECT|重定向)\s*\[\[([^\]]+)\]\]/i);
 	if (matched)
@@ -450,11 +451,11 @@ function page_content(page_data) {
 	return page_content.is_page_data(page_data) ?
 	//
 	(page_data = page_content.has_content(page_data)) && page_data['*']
-			|| undefined
+			|| null
 	// ('missing' in page_data): 此頁面已刪除。
 	// e.g., { ns: 0, title: 'title', missing: '' }
 	// TODO: 提供此頁面的刪除和移動日誌以便參考。
-	: page_data && ('missing' in page_data) ? '' : String(page_data);
+	: page_data && ('missing' in page_data) ? undefined : String(page_data);
 }
 
 /**
@@ -603,6 +604,7 @@ wiki_API.prototype.next = function() {
 		break;
 
 	case 'edit':
+		// TODO: {String|RegExp|Array}filter
 		if (!this.last_page) {
 			library_namespace.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first!');
 			// next[3] : callback
@@ -705,7 +707,7 @@ function add_message(message, title) {
 	no_edit : true,
 	// 設定寫入目標。一般為 debug、test 測試期間用。
 	write_to : '',
-	// 運作記錄。
+	// 運作記錄存放頁面。
 	log_to : 'User:Robot/log/%4Y%2m%2d',
 	// 編輯摘要。總結報告。「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」
 	summary : ''
@@ -883,6 +885,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				this.page(page)
 				// 編輯頁面內容。
 				.edit(function(content, title) {
+					// edit/process
 					library_namespace.info('wiki_API.work: edit '
 					//
 					+ (index + 1) + '/' + pages.length + ' [[' + page.title + ']]');
@@ -910,6 +913,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			: 'User:' + this.token.lgname + '/log/' + (new Date).format('%4Y%2m%2d'),
 			// options for summary.
 			options = {
+				// append after all, at bottom.
 				section : 'new',
 				sectiontitle : '[' + (new Date).toISOString() + '] ' + done
 				//
@@ -951,7 +955,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 
 //--------------------------------------------------------------------------------------------- //
-//泛用，無須 instance。
+// 泛用，無須 instance。
 
 // {String}action or [ {String}api URL, {String}action, {Object}other parameters ]
 wiki_API.query = function (action, callback, post_data) {
@@ -1135,7 +1139,7 @@ CeL.wiki.page('道', function(p) {
  * @param {String|Array}title
  *            title or [ {String}API_URL, {String}title ]
  * @param {Function}callback
- *            callback(page_data) { var content = CeL.wiki.content_of(page_data); }
+ *            callback(page_data) { page_data.title; var content = CeL.wiki.content_of(page_data); }
  * @param options
  */
 wiki_API.page = function(title, callback, options) {
@@ -1180,8 +1184,8 @@ wiki_API.page = function(title, callback, options) {
 			pages.push(page);
 			if (!page_content.has_content(page))
 				library_namespace.warn('wiki_API.page: '
-				//
-				+ ('missing' in page ? 'Deleted' : 'No content') + ': [' + page.title + ']');
+				// 頁面不存在。Page does not exist. Deleted?
+				+ ('missing' in page ? 'Not exists' : 'No content') + ': [' + page.title + ']');
 		}
 
 		if (pages.length < 2
@@ -1713,7 +1717,8 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	if (Array.isArray(text) && text[0] === wiki_API.edit.cancel) {
 		action = text.slice(1);
 		library_namespace.debug('採用個別特殊訊息: ' + action, 2, 'wiki_API.edit');
-		// 可以利用 (return [ CeL.wiki.edit.cancel, 'reason' ];) 來回傳 reason。
+		// 可以利用 ((return [ CeL.wiki.edit.cancel, 'reason' ];)) 來回傳 reason。
+		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來 skip。
 		if (action.length === 1)
 			action[1] = action[0];
 	} else if (text === wiki_API.edit.cancel)
@@ -1724,8 +1729,12 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 
 	if (action) {
 		title = wiki_API.title_of(title);
-		library_namespace.warn('wiki_API.edit: ' + action[1] + ' [' + title
+		if (action[1] !== 'skip')
+			// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
+			library_namespace.warn('wiki_API.edit: ' + action[1] + ' [' + title
 				+ ']');
+		else
+			library_namespace.debug('Skip [' + title + ']', 2);
 		return callback(title, action[0]);
 	}
 
@@ -1805,8 +1814,9 @@ wiki_API.edit.set_stamp = function(options, timestamp) {
 
 // https://zh.wikipedia.org/wiki/Template:Bots
 wiki_API.edit.get_bot = function(content) {
+	// TODO: use template_token(content, 'bots')
 	var bots = [], matched, PATTERN = /{{[\s\n]*bots[\s\n]*([\S][\s\S]*?)}}/ig;
-	while (matched = PATTERN.exec(content)){
+	while (matched = PATTERN.exec(content)) {
 		library_namespace.debug(matched.join('<br />'), 1, 'wiki_API.edit.get_bot');
 		if (matched = matched[1].trim().replace(/(^\|\s*|\s*\|$)/g, '')
 				// .split('|')
@@ -1820,6 +1830,7 @@ wiki_API.edit.get_bot = function(content) {
 };
 
 // 遵守[[Template:Bots]]
+// 另須考慮{{Personal announcement}}的情況。
 wiki_API.edit.denied = function(content, bot_id, action) {
 	if (!content || page_content.is_page_data(content) && !(content = page_content(content)))
 		return;
@@ -1842,21 +1853,31 @@ wiki_API.edit.denied = function(content, bot_id, action) {
 				'wiki_API.edit.denied');
 			data = data.toLowerCase();
 
-			var matched,
-			// 封鎖機器人訪問
-			PATTERN = /(?:^|\|)[\s\n]*deny[\s\n]*=[\s\n]*([^|]+)/ig;
-			while (!denied && (matched = PATTERN.exec(data)))
-				denied = bot_id.test(matched[1]);
+			// 封鎖機器人訪問之 pattern
+			var matched, PATTERN;
+			if (!denied) {
+				PATTERN = /(?:^|\|)[\s\n]*deny[\s\n]*=[\s\n]*([^|]+)/ig;
+				while ((matched = PATTERN.exec(data))
+						// 一被拒絕則跳出。
+						&& !(denied = bot_id.test(matched[1])))
+					;
+			}
 
-			PATTERN = /(?:^|\|)[\s\n]*allow[\s\n]*=[\s\n]*([^|]+)/ig;
-			while (!denied && (matched = PATTERN.exec(data)))
-				denied = !bot_id.test(matched[1]);
+			if (!denied) {
+				PATTERN = /(?:^|\|)[\s\n]*allow[\s\n]*=[\s\n]*([^|]+)/ig;
+				while ((matched = PATTERN.exec(data))
+						// 一被拒絕則跳出。
+						&& !(denied = !bot_id.test(matched[1])))
+					;
+			}
 
-			// 過濾所有機器人所發出的所有通知
-			if (action) {
+			// 過濾機器人所發出的通知
+			if (!denied && action) {
 				PATTERN = /(?:^|\|)[\s\n]*optout[\s\n]*=[\s\n]*([^|]+)/ig;
-				while (!denied && (matched = PATTERN.exec(data)))
-					denied = action.test(matched[1]);
+				while ((matched = PATTERN.exec(data))
+						// 一被拒絕則跳出。
+						&& !(denied = action.test(matched[1])))
+					;
 			}
 
 			if (denied)

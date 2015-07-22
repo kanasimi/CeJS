@@ -1500,8 +1500,14 @@ draw_era.click_navigation_date = function() {
 };
 
 draw_era.click_Era = function() {
-	var hierarchy = this.dataset.hierarchy.split(era_name_classifier), era = CeL
-			.era(hierarchy.join(''));
+	var hierarchy = this.dataset.hierarchy.split(era_name_classifier);
+	// 去除"時期"如 "period:~"
+	// e.g., 處理太平天囯時，因為其屬大清時期，惟另有大清政權，因此若未去除時期，將無法解析"大清太平天囯"。
+	hierarchy.forEach(function(name, index) {
+		if (CeL.era.PERIOD_PATTERN.test(name))
+			hierarchy[index] = '';
+	});
+	var era = CeL.era(hierarchy.join('' /* or use ' ' */));
 	draw_era.draw_navigation(hierarchy, true);
 
 	era_input_object.setValue(CeL.era.reduce_name(era.format({
