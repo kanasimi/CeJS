@@ -85,7 +85,7 @@ CeL.run({
 name : 'application.net.wiki',
 // .includes() @ data.code.compatibility
 // .between() @ data.native
-// (new Date).format('%4Y%2m%2d'), (new Date).toISOString() @ data.date
+// (new Date).format('%4Y%2m%2d'), (new Date).format() @ data.date
 // optional: .show_value() @ interact.DOM, application.debug
 require : 'data.code.compatibility.|data.native.|application.net.Ajax.get_URL|data.date.',
 code : function(library_namespace) {
@@ -115,6 +115,7 @@ function wiki_API(name, password, API_URL) {
 	// action queue
 	this.actions = [];
 
+	// 對舊版本須用到 for (in .next_mark)
 	this.next_mark = library_namespace.null_Object();
 
 	// setup session.
@@ -486,6 +487,7 @@ wiki_API.prototype.toString = function(type) {
 	return page_content(this.last_page) || '';
 };
 
+// @see function get_continue(), get_list()
 wiki_API.prototype.show_next = typeof JSON === 'object' && JSON.stringify ? function() {
 	return this.next_mark && JSON.stringify(this.next_mark);
 } : function() {
@@ -557,9 +559,14 @@ wiki_API.prototype.next = function() {
 			// [ page_data ]
 			_this.last_pages = pages;
 			if (pages && library_namespace.is_Object(pages.next_index)) {
-				// pages.next_index: 後續檢索用索引值。例如 {backlinks:{blcontinue:'[0|12]'}}。
-				for ( var type in pages.next_index)
-					Object.assign(_this.next_mark, pages.next_index[type]);
+				// pages.next_index: 後續檢索用索引值。
+				if (pages.old_next)
+					// 例如 {backlinks:{blcontinue:'[0|12]'}}。
+					for ( var type in pages.next_index)
+						Object.assign(_this.next_mark, pages.next_index[type]);
+				else
+					// e.g., continue: { blcontinue: '0|123', continue: '-||' }
+					Object.assign(_this.next_mark, pages.next_index);
 				library_namespace.debug('next index of ' + next[0] + ': ' + _this.show_next());
 			}
 
@@ -684,6 +691,9 @@ wiki_API.prototype.next.methods = 'page,edit,search,logout,run,set_URL'
 	.split(',');
 
 //---------------------------------------------------------------------//
+
+// @see ISO 8601
+wiki_API.prototype.date_format = '%4Y%2m%2dT%2H%2M';
 
 wiki_API.prototype.continue_key = '後續檢索用索引值';
 
@@ -819,7 +829,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 			// 使用時間, 費時
 			messages.add('間隔 ' + messages.last.age(new Date)
-					+ '，' + (messages.last = new Date).toISOString() + ' ' + error, title);
+					+ '，' + (messages.last = new Date).format(config.date_format || this.date_format) + ' ' + error, title);
 		};
 	// each 現在作為對每一頁面執行之工作。
 	each = each[0];
@@ -844,14 +854,19 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	library_namespace.debug('wiki_API.work: 設定一次先取得所有 revisions (page content)。', 2);
 	this.page(pages || titles, function(data) {
-		if (!data && pages.length === 0) {
-			library_namespace.info('wiki_API.work: 未取得任何頁面。已完成？');
-			data = [];
-		}
-		if (data.length !== pages.length)
+		if (!Array.isArray(data))
+			if (!data && pages.length === 0) {
+				library_namespace.info('wiki_API.work: 未取得任何頁面。已完成？');
+				data = [];
+			} else
+				// 可能是 page data 或 title。
+				data = [ data ];
+
+		if (Array.isArray(pages) && data.length !== pages.length)
 			library_namespace.warn('wiki_API.work: query 所得之 length (' + data.length + ') !== pages.length (' + pages.length + ') !');
-		// pages: 暫存值。
-		if (pages = this.show_next())
+		if ((pages = 'continue_wiki' in config ? config.continue_wiki : this)
+			// pages: 後續檢索用索引值暫存值。
+			&& (pages = pages.show_next()))
 			messages.add(this.continue_key + ': ' + pages);
 		// 使用時間, 費時
 		pages = '首先使用 ' + messages.last.age(new Date) + ' 以取得 ' + data.length + ' 個頁面內容。';
@@ -915,10 +930,10 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			options = {
 				// append after all, at bottom.
 				section : 'new',
-				sectiontitle : '[' + (new Date).toISOString() + '] ' + done
+				sectiontitle : '[' + (new Date).format(config.date_format || this.date_format) + '] ' + done
 				//
 				+ (done === pages.length ? '' : '/' + pages.length) + ' 條目',
-				summary : 'Robot: 完成 ' + done + (done === pages.length ? '' : '/' + pages.length) + ' 條目',
+				summary : 'Robot: ' + config.summary + ': 完成 ' + done + (done === pages.length ? '' : '/' + pages.length) + ' 條目',
 				// Throw an error if the page doesn't exist.
 				// 若頁面不存在，則產生錯誤。
 				nocreate : 1,
@@ -1188,15 +1203,15 @@ wiki_API.page = function(title, callback, options) {
 				+ ('missing' in page ? 'Not exists' : 'No content') + ': [' + page.title + ']');
 		}
 
-		if (pages.length < 2
 		// options.multi: 即使只取得單頁面，依舊回傳 Array。
-		&& (!options || !options.multi)) {
-			library_namespace.debug('只取得單頁面，僅回傳此頁面內容，而非 Array。', 2);
-			pages = pages[0];
-		} else
-			library_namespace.debug('Get ' + pages.length
-			//
-			+ ' page(s)! The pages will all passed to callback as Array!', 2);
+		if (!options || !options.multi)
+			if (pages.length <= 1) {
+				library_namespace.debug('只取得單頁面，僅回傳此頁面內容，而非 Array。', 2);
+				pages = pages[0];
+			} else
+				library_namespace.debug('Get ' + pages.length
+				//
+				+ ' page(s)! The pages will all passed to callback as Array!', 2);
 
 		// page 之 structure 將按照 wiki 本身之 return！
 		// page = {pageid,ns,title,revisions:[{timestamp,'*'}]}
@@ -1212,12 +1227,14 @@ wiki_API.page = function(title, callback, options) {
 CeL.wiki.langlinks('語言',function(p){CeL.show_value(p);},'en');
 
 // '語言'
-CeL.wiki.langlinks(['en','Language'],function(p){CeL.show_value(p);},'zh');
+CeL.wiki.langlinks(['en','Language'],function(p){if(p)CeL.show_value(p);},'zh');
 
-CeL.wiki.langlinks('語言',function(p){CeL.show_value(p);})
+CeL.wiki.langlinks('語言',function(p){if(p)CeL.show_value(p);})
 ==
-CeL.wiki.langlinks('語言',function(p){CeL.show_value(p);},10)
+CeL.wiki.langlinks('語言',function(p){if(p)CeL.show_value(p);},10)
 == {langs:['',''], lang:'title'}
+
+未指定 page，表示已完成。
 
 */
 
@@ -1238,7 +1255,13 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 	//
 	&& function(data) {
 		if (!data || !data.query || !data.query.pages) {
-			library_namespace.warn('wiki_API.langlinks: Unknown response: [' + data + ']');
+			// https://www.mediawiki.org/wiki/API:Query#batchcomplete
+			// From version 1.25 onwards, the API returns a batchcomplete element to indicate that all data for the current "batch" of pages has been returned.
+			if (data && data.batchcomplete) {
+				//library_namespace.info('wiki_API.langlinks: [' + title + ']: Done.');
+			} else
+				library_namespace.warn('wiki_API.langlinks: Unknown response: [' + data + ']');
+			//console.warn(data);
 			if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
@@ -1313,7 +1336,7 @@ wiki_API.langlinks.parse = function(langlinks, to_lang) {
 //---------------------------------------------------------------------//
 
 /**
- * 自 title 頁面取得後續檢索用索引值。 e.g., query-continue
+ * 自 title 頁面取得後續檢索用索引值 (continuation data)。 e.g., 'continue'
  *
  * @param {String|Array}title
  *            the page title to search continue information
@@ -1412,14 +1435,14 @@ function get_list(type, title, callback, namespace) {
 		title = [ , title ];
 
 	if (options.get_continue) {
-		get_continue([ title[0], options.get_continue ], {
+		get_continue(Array.isArray(options.get_continue) ? options.get_continue : [ title[0], options.get_continue ], {
 			type : type,
-			callback : function(continue_data) {
+			callback : function(continuation_data) {
 				// 注意:這裡會改變 options!
 				delete options.get_continue;
-				if (continue_data = continue_data[prefix + 'continue']) {
-					library_namespace.info('get_list: continue from [' + continue_data + ']');
-					options[prefix + 'continue'] = continue_data;
+				if (continuation_data = continuation_data[prefix + 'continue']) {
+					library_namespace.info('get_list: continue from [' + continuation_data + ']');
+					options[prefix + 'continue'] = continuation_data;
 				} else {
 					//delete options[prefix + 'continue'];
 					library_namespace.debug('Nothing to continue!', 1, 'get_list');
@@ -1479,20 +1502,23 @@ function get_list(type, title, callback, namespace) {
 		&& library_namespace.show_value)
 			library_namespace.show_value(data, 'get_list:' + type);
 
-		var titles = [], pages = [];
-		// 紀錄清單類型。
-		// assert: overwrite 之屬性不應該是原先已經存在之屬性。
-		pages.list_type = type;
+		var titles = [], pages = [],
 		// 紀錄後續檢索用索引值。
-		// https://www.mediawiki.org/wiki/API:Query/zh#.E5.90.8E.E7.BB.AD.E6.A3.80.E7.B4.A2
-		if (data['query-continue']) {
-			pages.next_index = data['query-continue'];
+		// https://www.mediawiki.org/wiki/API:Query#Backwards_compatibility_of_continue
+		next_index = data['continue'] || data['query-continue'];
+		if (next_index) {
+			pages.next_index = next_index;
+			if ('query-continue' in data)
+				pages.old_next = true;
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value)
 				library_namespace.show_value(pages.next_index,
-						'get_list:get query-continue');
+						'get_list:get the continue value');
 		}
+		// 紀錄清單類型。
+		// assert: overwrite 之屬性不應該是原先已經存在之屬性。
+		pages.list_type = type;
 		if (page_content.is_page_data(title))
 			title = title.title;
 
@@ -1731,10 +1757,9 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 		title = wiki_API.title_of(title);
 		if (action[1] !== 'skip')
 			// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
-			library_namespace.warn('wiki_API.edit: ' + action[1] + ' [' + title
-				+ ']');
+			library_namespace.warn('wiki_API.edit: [[' + title + ']]: ' + action[1]);
 		else
-			library_namespace.debug('Skip [' + title + ']', 2);
+			library_namespace.debug('Skip [[' + title + ']]', 2);
 		return callback(title, action[0]);
 	}
 
@@ -1909,7 +1934,7 @@ wiki_API.search = function(key, callback, options) {
 			&& library_namespace.show_value)
 			library_namespace.show_value(data, 'wiki_API.search');
 
-		options = data && data['query-continue'];
+		options = data && (data['continue'] || data['query-continue']);
 		if (data && (data = data.query)) {
 			if (options)
 				// data.search.sroffset = options.search.sroffset;
