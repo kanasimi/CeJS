@@ -99,7 +99,7 @@ eval(this.use());
 
 
 /**
- * web Wikipedia / 維基百科 用的 functions。
+ * web Wikipedia / 維基百科 用的 functions。<br />
  * 可執行環境: node.js, JScript。
  */
 function wiki_API(name, password, API_URL) {
@@ -147,6 +147,8 @@ function get_namespace(namespace) {
 	return namespace | 0;
 };
 
+// The namespace number of the page.
+// {{NAMESPACENUMBER:{{FULLPAGENAME}}}}
 get_namespace.hash = {
 	// Virtual namespaces
 	media : -2,
@@ -580,7 +582,7 @@ wiki_API.prototype.next = function() {
 				else
 					// 只有在本次有處理頁面時，才繼續下去。
 					library_namespace.info('無頁面可處理（已完成？），中斷跳出。');
-					
+
 			_this.next();
 		},
 		// next[3] : options
@@ -642,10 +644,30 @@ wiki_API.prototype.next = function() {
 				next[1], this.token,
 				// next[2]: options to edit()
 				next[2], function(title, error, result) {
-					// next[3] : callback
-					if (typeof next[3] === 'function')
-						next[3].call(_this, title, error, result);
-					_this.next();
+					// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
+					if (result && result.error && result.error.code === 'badtoken') {
+						// Invalid token
+						library_namespace.warn('wiki_API.prototype.next: It seems we lost the token.');
+						if (!_this.token.lgpassword) {
+							library_namespace.err('wiki_API.prototype.next: No password to get token again. About.');
+							return;
+						}
+						library_namespace.info('wiki_API.prototype.next: Try to get token again. 似乎丟失了 token，嘗試重新取得 token。');
+						// rollback
+						_this.actions.unshift(next);
+						// see wiki_API.login
+						delete _this.token.csrftoken;
+						wiki_API.login(_this.token.lgname, _this.token.lgpassword, {
+							session : _this,
+							// 將 'login' 置於最前頭。
+							login_mark : true
+						});
+					} else {
+						// next[3] : callback
+						if (typeof next[3] === 'function')
+							next[3].call(_this, title, error, result);
+						_this.next();
+					}
 				});
 		}
 		break;
@@ -653,6 +675,7 @@ wiki_API.prototype.next = function() {
 	case 'login':
 		library_namespace.debug('正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。', 2, 'wiki_API.prototype.next');
 	case 'wait':
+		// rollback
 		this.actions.unshift(next);
 		break;
 
@@ -1348,6 +1371,7 @@ function get_continue(title, callback) {
 	if (library_namespace.is_Object(callback))
 		callback = (options = callback).callback;
 	else
+		// 前置處理。
 		options = library_namespace.null_Object();
 
 	wiki_API.page(title, function(page_data) {
@@ -1423,6 +1447,7 @@ function get_list(type, title, callback, namespace) {
 	if (library_namespace.is_Object(namespace))
 		namespace = (options = namespace).namespace;
 	else
+		// 前置處理。
 		options = library_namespace.null_Object();
 
 	if (isNaN(namespace = get_namespace(namespace)))
@@ -1622,17 +1647,21 @@ get_list.type = {
 //---------------------------------------------------------------------//
 
 // 登入用。
-wiki_API.login = function(name, password, callback) {
+wiki_API.login = function(name, password, options) {
 	function _next() {
 		if (typeof callback === 'function')
 			callback(session.token.lgname);
 		library_namespace.debug('已登入 [' + session.token.lgname + ']。自動執行 .next()，處理餘下的工作。', 1, 'wiki_API.login');
+		// popup 'login'.
 		session.actions.shift();
 		session.next();
 	}
 
 	function _done(data) {
-		delete session.token.lgpassword;
+		// 在 mass edit 時會 lose token (badtoken)，需要保存 password。
+		if (!session.preserve_password)
+			// 捨棄 password。
+			delete session.token.lgpassword;
 		if (data && (data = data.login))
 			if (data.result === 'NeedToken')
 				library_namespace.err('wiki_API.login: login [' + session.token.lgname + '] failed!');
@@ -1667,12 +1696,30 @@ wiki_API.login = function(name, password, callback) {
 		}
 	}
 
-	var action = 'assert=user',
-	// 這裡 callback 當作 API_URL。
-	session = new wiki_API(name, password, callback);
-	// hack: 這表示正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。
-	session.actions.push([ 'login' ]);
+	var action = 'assert=user', callback, session;
+	if (library_namespace.is_Object(options)) {
+		session = options.session;
+		callback = options.callback;
+	} else {
+		if (typeof options === 'function')
+			callback = options;
+		// 前置處理。
+		options = library_namespace.null_Object();
+	}
 
+	if (!session)
+		// 初始化 session。這裡 callback 當作 API_URL。
+		session = new wiki_API(name, password, callback);
+	if (!('login_mark' in options) || options.login_mark) {
+		// hack: 這表示正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。
+		// @see wiki_API.prototype.next
+		if (options.login_mark)
+			// 將 'login' 置於最前頭。
+			session.actions.unshift([ 'login' ]);
+		else
+			// default: 依順序將 'login' 置於最末端。
+			session.actions.push([ 'login' ]);
+	}
 	if (session.API_URL)
 		action = [ session.API_URL, action ];
 
