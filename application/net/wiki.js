@@ -753,7 +753,8 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	if (!pages)
 		pages = this.last_pages, titles = this.last_titles;
-	if (!pages && !titles) {
+	// config.run_empty: 即使無頁面，依舊強制執行下去。
+	if (!pages && !titles && !config.run_empty) {
 		// 採用推入前一個 this.actions queue 的方法，
 		// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 		library_namespace
@@ -836,8 +837,8 @@ wiki_API.prototype.work = function(config, pages, titles) {
 					result = 'nochange';
 				} else {
 					// 有錯誤發生。
+					result = [ 'error', error ];
 					error = ' 結束: ' + error;
-					result = 'error';
 				}
 			else {
 				// 成功完成。
@@ -864,7 +865,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			error = '間隔 ' + messages.last.age(new Date) + '，'
 			// 紀錄使用時間, 費時
 			+ (messages.last = new Date).format(config.date_format || this.date_format) + ' ' + error;
-			if (log_item[result])
+			if (log_item[ Array.isArray(result) ?
+			// {Array}result = [ main, sub ]
+			result.join('_') in log_item ? result.join('_') : result[0] : result ])
 				messages.add(error, title);
 		};
 	// each 現在轉作為對每一頁面執行之工作。
@@ -1941,7 +1944,8 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 		if (error)
 			library_namespace.warn('wiki_API.edit: Error to edit ['
 					+ wiki_API.title_of(title) + ']: ' + error);
-		else if ('nochange' in data.edit)
+		else if (data.edit && ('nochange' in data.edit))
+			// 在極少的情況下，data.edit === undefined。
 			library_namespace.info('wiki_API.edit: ['
 					+ wiki_API.title_of(title) + ']: no change');
 		if (typeof callback === 'function')
