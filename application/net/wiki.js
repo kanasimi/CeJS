@@ -753,7 +753,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	if (!pages)
 		pages = this.last_pages, titles = this.last_titles;
-	// config.run_empty: 即使無頁面，依舊強制執行下去。
+	// config.run_empty: 即使無頁面/未取得頁面，依舊強制執行下去。
 	if (!pages && !titles && !config.run_empty) {
 		// 採用推入前一個 this.actions queue 的方法，
 		// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
@@ -1211,6 +1211,8 @@ CeL.wiki.page('道', function(p) {
  * @param {Function}callback
  *            callback(page_data) { page_data.title; var content = CeL.wiki.content_of(page_data); }
  * @param options
+ *
+ * @see https://en.wikipedia.org/w/api.php?action=help&modules=query%2Brevisions
  */
 wiki_API.page = function(title, callback, options) {
 	// 處理 [ {String}API_URL, {String}title ]
@@ -1219,16 +1221,27 @@ wiki_API.page = function(title, callback, options) {
 	|| title.length !== 2 || typeof title[0] === 'object')
 		title = [ , title ];
 	title[1] = wiki_API.query.title_param(title[1], true);
-	if (!title[1].includes('|')
+
+	// 處理 limit。單一頁面才能取得多 revisions。多頁面(<=50)只能取得單一 revision。
+	// https://en.wikipedia.org/w/api.php?action=help&modules=query
+	// titles/pageids: Maximum number of values is 50 (500 for bots).
+	if (options && ('rvlimit' in options)) {
+		if (options.rvlimit > 0 || options.rvlimit === 'max')
+			title[1] += '&rvlimit=' + options.rvlimit;
+	} else if (!title[1].includes('|')
 	//
 	&& !title[1].includes(encodeURIComponent('|')))
-		title[1] = 'rvlimit=1&' + title[1];
+		// default: 僅取得單一 revision。
+		title[1] += '&rvlimit=1';
+
 	title[1] = 'query&prop=revisions&rvprop=content|timestamp&'
 	// &rvexpandtemplates=1
 	// prop=info|revisions
 	+ title[1];
 	if (!title[0])
 		title = title[1];
+
+	// library_namespace.debug('get url token: ' + title, 0, 'wiki_API.page');
 
 	wiki_API.query(title, typeof callback === 'function'
 	//
@@ -1238,7 +1251,16 @@ wiki_API.page = function(title, callback, options) {
 			&& library_namespace.show_value)
 			library_namespace.show_value(data, 'wiki_API.page: data');
 
-		if (!data || !data.query || !data.query.pages) {
+		var error = data && data.error;
+		// 檢查伺服器回應是否有錯誤資訊。
+		if (error) {
+			library_namespace.err('wiki_API.page: [' + error.code + '] ' + error.info);
+			// e.g., Too many values supplied for parameter 'pageids': the limit is 50
+			if (data.warnings && data.warnings.query && data.warnings.query['*'])
+				library_namespace.warn(data.warnings.query['*']);
+			return callback();
+
+		} else if (!data || !data.query || !data.query.pages) {
 			library_namespace.warn('wiki_API.page: Unknown response: [' + data + ']');
 			if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
@@ -1301,7 +1323,10 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 		from_lang = title[0], title = title[1];
 	title = 'query&prop=langlinks&' + wiki_API.query.title_param(title, true);
 	if (to_lang)
-		title += (0 < to_lang ? '&lllimit=' : '&lllang=') + to_lang;
+		title += (to_lang > 0 || to_lang === 'max' ? '&lllimit=' : '&lllang=') + to_lang;
+	if (options.limit > 0 || options.limit === 'max')
+		title += '&lllimit=' + options.limit;
+	//console.log('ll title:' + title);
 	if (from_lang)
 		// llinlanguagecode 無效。
 		title = [ from_lang, title ];
@@ -1506,7 +1531,8 @@ function get_list(type, title, callback, namespace) {
 			if (continue_from in continue_wiki.next_mark) {
 				// {String}continue_wiki.next_mark[continue_from]: 後續檢索用索引值。
 				options[continue_from] = continue_wiki.next_mark[continue_from];
-				library_namespace.info('get_list: continue from [' + options[continue_from] + '] by {wiki_API}');
+				// 經由,經過,通過來源
+				library_namespace.info('get_list: continue from [' + options[continue_from] + '] via {wiki_API}');
 				// 刪掉標記，避免無窮迴圈。
 				delete options.get_continue;
 			} else {
@@ -1528,7 +1554,7 @@ function get_list(type, title, callback, namespace) {
 			type : type,
 			callback : function(continuation_data) {
 				if (continuation_data = continuation_data[continue_from]) {
-					library_namespace.info('get_list: continue from [' + continuation_data + '] by page');
+					library_namespace.info('get_list: continue from [' + continuation_data + '] via page');
 					// 注意:這裡會改變 options!
 					// 刪掉標記，避免無窮迴圈。
 					delete options.get_continue;
@@ -1560,7 +1586,9 @@ function get_list(type, title, callback, namespace) {
 	//
 	+ wiki_API.query.title_param(title[1])
 	// 數目限制。No more than 500 (5,000 for bots) allowed.
-	+ (0 < options.limit ? '&' + prefix + 'limit=' + options.limit : '')
+	// Type: integer or max
+	// https://en.wikipedia.org/w/api.php?action=help&modules=query%2Brevisions
+	+ (options.limit > 0 || options.limit === 'max' ? '&' + prefix + 'limit=' + options.limit : '')
 	// next start from here.
 	+ (continue_from ?
 	//
@@ -1571,6 +1599,7 @@ function get_list(type, title, callback, namespace) {
 	? '&' + prefix + 'namespace=' + options.namespace : '');
 	if (!title[0])
 		title = title[1];
+	// console.log('get_list: title: ' + title);
 
 	if (typeof callback !== 'function') {
 		library_namespace.err('callback is NOT function! callback: ['
@@ -2059,7 +2088,7 @@ wiki_API.edit.denied.all = /(?:^|[\s,])all(?:$|[\s,])/;
 // full text search
 // callback(key, pages, hits)
 wiki_API.search = function(key, callback, options) {
-	if (0 < options)
+	if (options > 0 || options === 'max')
 		options = {
 			srlimit : options
 		};
