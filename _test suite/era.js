@@ -2765,10 +2765,10 @@ function affairs() {
 			var precession = CeL.precession(
 			//
 			CeL.TT(new Date(date.offseted_value())));
-			return [ CeL.show_degrees(precession[0], 2), {
+			return [ CeL.format_angle(precession[0], 2), {
 				b : ', ',
 				S : 'color:#e60;'
-			}, CeL.show_degrees(precession[1], 2) ];
+			}, CeL.format_angle(precession[1], 2) ];
 		} ],
 
 		solarterms : [ {
@@ -2832,7 +2832,7 @@ function affairs() {
 
 			var JD = CeL.TT(new Date(date.offseted_value()));
 			return {
-				span : CeL.show_degrees(CeL.solar_coordinate(JD).apparent, 0)
+				span : CeL.format_angle(CeL.solar_coordinate(JD).apparent, 0)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
@@ -2860,7 +2860,7 @@ function affairs() {
 			return {
 				span : isNaN(V) ? data_load_message
 				//
-				: CeL.show_degrees(V, 0)
+				: CeL.format_angle(V, 0)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
@@ -2888,7 +2888,7 @@ function affairs() {
 			return {
 				span : isNaN(U) ? data_load_message
 				//
-				: CeL.show_degrees(U, 0)
+				: CeL.format_angle(U, 0)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
@@ -2919,7 +2919,7 @@ function affairs() {
 			return {
 				span : isNaN(degrees) ? data_load_message
 				//
-				: CeL.show_degrees(degrees, 0)
+				: CeL.format_angle(degrees, 0)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
@@ -2964,7 +2964,7 @@ function affairs() {
 					},
 					R : _('Moon latitude') + ': '
 					//
-					+ CeL.show_degrees(phase[2], 2),
+					+ CeL.format_angle(phase[2], 2),
 					href : 'https://zh.wikipedia.org/wiki/'
 					//
 					+ encodeURIComponent(JD.format({

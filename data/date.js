@@ -167,7 +167,8 @@ CeL.Julian_day.to_YMD(-1363,true)
 
 /**
  * Get Julian day number (JDN) of date.<br />
- * If type of date is Date, we'll treat date as local date.
+ * If type of date is Date, we'll treat date as local date.<br />
+ * 因為得出的是 UTC+0 12:0 之 JDN，UTC+0 0:0 之 JD = JDN - .5。 
  * 
  * @param {String|Date|Number}date
  *            date or date value

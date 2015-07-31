@@ -338,6 +338,7 @@ reload:function(){
 			iframe : 1
 		})) {
 			library_namespace.debug('移至 &lt;' + node.tagName + '&gt;.contentWindow.document', 2, 'IEA.get_node');
+			// IE11: typeof node.contentWindow === 'object', but node.contentWindow.document: 沒有使用權限
 			node = node.contentWindow.document;
 		} else if (library_namespace.is_NodeList(node) && library_namespace.is_debug(2)) {
 			library_namespace.warn('IEA.get_node: get NodeList[' + node.length + '].');

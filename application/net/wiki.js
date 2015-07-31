@@ -712,7 +712,8 @@ wiki_API.prototype.next.methods = 'page,edit,search,logout,run,set_URL'
 // @see ISO 8601
 wiki_API.prototype.date_format = '%4Y%2m%2dT%2H%2M';
 
-wiki_API.prototype.continue_key = '後續檢索用索引值';
+// 後續檢索用索引值
+wiki_API.prototype.continue_key = '後續索引';
 
 // 規範 log 之格式。
 function add_message(message, title) {
@@ -1552,6 +1553,8 @@ function get_list(type, title, callback, namespace) {
 		// 在多人共同編輯的情況下，才需要每次重新 load page。
 		get_continue(Array.isArray(options.get_continue) ? options.get_continue : [ title[0], options.get_continue ], {
 			type : type,
+			// options.wiki: 作業中之 {wiki_API}
+			continue_key : (continue_wiki || options.wiki).continue_key,
 			callback : function(continuation_data) {
 				if (continuation_data = continuation_data[continue_from]) {
 					library_namespace.info('get_list: continue from [' + continuation_data + '] via page');
