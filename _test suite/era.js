@@ -2832,7 +2832,7 @@ function affairs() {
 
 			var JD = CeL.TT(new Date(date.offseted_value()));
 			return {
-				span : CeL.format_angle(CeL.solar_coordinate(JD).apparent, 0)
+				span : CeL.format_angle(CeL.solar_coordinates(JD).apparent, 0)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
@@ -2855,7 +2855,7 @@ function affairs() {
 
 			var JD = CeL.TT(new Date(date.offseted_value())),
 			//
-			V = CeL.lunar_coordinate(JD).V;
+			V = CeL.lunar_coordinates(JD).V;
 
 			return {
 				span : isNaN(V) ? data_load_message
@@ -2883,7 +2883,7 @@ function affairs() {
 
 			var JD = CeL.TT(new Date(date.offseted_value())),
 			//
-			U = CeL.lunar_coordinate(JD).U;
+			U = CeL.lunar_coordinates(JD).U;
 
 			return {
 				span : isNaN(U) ? data_load_message
@@ -3801,7 +3801,7 @@ function affairs() {
 			// 交節則疊兩值日。採天文節氣，非實曆。
 			// 30 = TURN_TO_DEGREES / (SOLAR_TERMS_NAME / 2)
 			// = 360 / (24 / 2)
-			- CeL.solar_coordinate(JD + 1).apparent / 30 | 0;
+			- CeL.solar_coordinates(JD + 1).apparent / 30 | 0;
 			建除 = 建除_LIST[建除 % 建除_LIST.length]
 			return 建除 === '建' ? {
 				span : 建除,
@@ -4022,14 +4022,15 @@ function affairs() {
 					R : 'Astrological signs, Western zodiac signs',
 					href : 'https://en.wikipedia.org/wiki/Astrological_sign#Western_zodiac_signs',
 					S : 'font-size:.8em;'
-				}, function(date) {
+				},
+				function(date) {
 					if (/* date.準 || */date.精)
 						return;
 
 					var JD = CeL.Date_to_JD(date.offseted_value());
 
 					// +1: 只要當天達到此角度，即算做此宮。
-					var index = CeL.solar_coordinate(JD + 1).apparent / 30 | 0;
+					var index = CeL.solar_coordinates(JD + 1).apparent / 30 | 0;
 					return [ ZODIAC_SYMBOLS[index], CeL.DOM.NBSP, {
 						T : ZODIAC_SIGNS[index]
 					} ];
