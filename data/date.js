@@ -291,6 +291,35 @@ Julian_day.from_YMD = function(year, month, date, type, no_year_0) {
 };
 
 /**
+ * Get day value from hour, minute, second.<br />
+ * TODO: microsecond µs, nanosecond ns
+ * 
+ * @param {Number}[hour]
+ *            hour
+ * @param {Number}[minute]
+ *            minute
+ * @param {Number}[second]
+ *            second
+ * @param {Number}[millisecond]
+ *            millisecond
+ * 
+ * @returns {Number}day value
+ */
+Julian_day.from_HMS = function(hour, minute, second, millisecond) {
+	// initialization, milliseconds to seconds
+	var time = millisecond ? millisecond / 1000 : 0;
+	if (second)
+		time += second;
+	// to minutes
+	time /= 60;
+	if (minute)
+		time += minute;
+	// to hours → to days
+	return (time / 60 + (hour || 0)) / 24;
+};
+
+
+/**
  * Get (year, month, date) of JD.
  * 
  * @param {Number}JD
@@ -2649,7 +2678,7 @@ d.setTime(d.getTime()-60000*((new Date).getTimezoneOffset()+diff*60))
 function format_date(date_value, mode, zero_fill, date_separator, time_separator) {
 	//library_namespace.debug('[' + (typeof date_value) + '] ' + date_value + ', mode: ' + mode);
 
-	// initiate
+	// initialization
 	if (!mode)
 		mode = 0;
 
