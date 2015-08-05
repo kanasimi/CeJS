@@ -204,16 +204,15 @@ function Julian_day(date, type, no_year_0, get_remainder) {
 		return;
 	}
 
-	// offset: convert local to UTC+0.
-	var offset;
-
-	if (is_Date(date)) {
-		offset = date.getTimezoneOffset() * ONE_MINTE_LENGTH_VALUE;
-		date = date.getTime();
-	} else
-		offset = Julian_day.default_offset;
-
 	if (!isNaN(date)) {
+		// offset: convert local to UTC+0.
+		var offset;
+		if (is_Date(date)) {
+			offset = date.getTimezoneOffset() * ONE_MINTE_LENGTH_VALUE;
+			date = date.getTime();
+		} else
+			offset = Julian_day.default_offset;
+
 		// treat ((date)) as date value. So it's Gregorian.
 		type = true;
 		date -= offset
@@ -229,6 +228,10 @@ function Julian_day(date, type, no_year_0, get_remainder) {
 		return get_remainder ? [ date, remainder ] : date;
 	}
 
+	if (Array.isArray(date)) {
+		var JD = Julian_day.from_YMD(date[0], date[1], date[2], type, no_year_0);
+		return get_remainder ? [ JD, date.length > 3 ? Julian_day.from_HMS(date[3], date[4], date[5]) - .5 : 0 ] : JD;
+	}
 }
 
 /**
@@ -320,23 +323,22 @@ Julian_day.from_HMS = function(hour, minute, second, millisecond) {
 
 
 /**
- * Get (year, month, date) of JD.
+ * Get (year, month, date) of JDN.
  * 
- * @param {Number}JD
- *            Julian date
+ * @param {Number}JDN
+ *            Julian date number
  * @param {Boolean}type
- *            calendar type. true: Gregorian, false: Julian, 'CE': Common Era
+ *            calendar type. true: Gregorian, false: Julian, 'CE': Common Era.
  * @param {Boolean}no_year_0
  *            no year 0
  * 
  * @returns {Array} [ year, month, date ]
  */
-Julian_day.to_YMD = function(JD, type, no_year_0) {
-	// TODO: time
-	var f = JD + 1401 | 0;
-	if (type && (type !== 'CE' || JD >= Gregorian_reform_JD))
+Julian_day.to_YMD = function(JDN, type, no_year_0) {
+	var f = JDN + 1401 | 0;
+	if (type && (type !== 'CE' || JDN >= Gregorian_reform_JDN))
 		// to proleptic Gregorian calendar
-		f += ((((4 * JD + 274277) / 146097 | 0) * 3) / 4 | 0) - 38;
+		f += ((((4 * JDN + 274277) / 146097 | 0) * 3) / 4 | 0) - 38;
 	// else: to proleptic Julian calendar with year 0
 
 	var e = 4 * f + 3 | 0,
@@ -355,9 +357,47 @@ Julian_day.to_YMD = function(JD, type, no_year_0) {
 		// no year 0. year: 0 → -1
 		year--;
 
-	return [ year, month, date ];
+	// TODO: time
+	return  [ year, month, date ];
 };
 
+/**
+ * JD to YMDHMS. Get (year, month, date, hour, minute, second) of JD.
+ * 
+ * @param {Number}JD
+ *            Julian date
+ * @param {Number}zone
+ *            local time zone. 0 if is UTC+0 (default), 8 if is UTC+8.
+ * @param {Boolean}type
+ *            calendar type. true: Gregorian, false: Julian, 'CE': Common Era.
+ * @param {Boolean}no_year_0
+ *            no year 0
+ * 
+ * @returns {Array} [ year, month, date, hour, minute, second ]
+ */
+Julian_day.to_YMDHMS = function(JD, zone, type, no_year_0) {
+	// +.5: input JD instead of JDN
+	// 1e-16 (days): for error. e.g., CeL.Julian_day.to_YMDHMS(.6, 8)
+	// 2451544.5 is 2000/1/1 0:0 UTC+12, 1999/12/31 12:0 UTC+0
+	// → 2451545 is 2000/1/1 12:0 UTC+0
+	// 0 is -4712/1/1 12:0 UTC+0, -4712/1/2 0:0 UTC+12
+	var JDN = Julian_day.to_YMD(JD += .5 + 1e-16 + (zone | 0) / 24, type, no_year_0);
+	// to local time
+	JDN.push((JD = JD.mod(1) * 24) | 0, (JD = (JD % 1) * 60) | 0, (JD = (JD % 1) * 60) | 0);
+	// milliseconds 去除 error。
+	// 4e-11:
+	// 1e-16*86400 ≈ 1e-11
+	// (-Math.log10((1/2-1/3-1/6)*86400)|0) → 1e-11
+	// So we use 1e-11 + 1e-11 = 2e-11.
+	// But for CeL.Julian_day.to_YMDHMS(.6, 8), it seems still not enough.
+	// We should use 4e-11 at least.
+	if ((JD %= 1) > 4e-11)
+		// 8.64e-9 = 1e-16 * 86400000: 將之前加的 error 修正補回來。
+		// 約精確到 1e-7 ms
+		JDN.push(JD * 1000 - 8.64e-9);
+	// else: 當作 error。
+	return JDN;
+};
 
 /**
  * Get the local midnight date of JDN.<br />
@@ -425,11 +465,11 @@ Julian_day.default_offset = (new Date).getTimezoneOffset()
 })();
 
 /**
- * Gregorian reform JD.
+ * Gregorian reform JDN.
  * 
  * @type {Integer}
  */
-var Gregorian_reform_JD = Julian_day.from_YMD(1582, 10, 15);
+var Gregorian_reform_JDN = Julian_day.from_YMD(1582, 10, 15);
 
 /**
  * Get weekday index of JD.

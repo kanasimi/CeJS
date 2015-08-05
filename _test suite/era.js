@@ -2765,10 +2765,10 @@ function affairs() {
 			var precession = CeL.precession(
 			//
 			CeL.TT(new Date(date.offseted_value())));
-			return [ CeL.format_angle(precession[0], 2), {
+			return [ CeL.format_degrees(precession[0], 2), {
 				b : ', ',
 				S : 'color:#e60;'
-			}, CeL.format_angle(precession[1], 2) ];
+			}, CeL.format_degrees(precession[1], 2) ];
 		} ],
 
 		solarterms : [ {
@@ -2814,30 +2814,33 @@ function affairs() {
 			return CeL.SOLAR_TERMS[date[1]] + ' ' + date[2];
 		} ],
 
-		sun_apparent : [ {
-			a : {
-				// Sun's apparent position
-				// apparent longitude of the Sun
-				T : "Sun's apparent longitude"
-			},
-			R : '紀元使用當地、當日零時，太陽的視黃經。\n'
-			//
-			+ 'the apparent geocentric celestial longitude of the Sun.'
-			//
-			+ '\nUsing VSOP87D.ear.',
-			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
-		}, function(date) {
-			if (/* date.準 || */date.精)
-				return;
+		sun_apparent : [
+				{
+					a : {
+						// Sun's apparent position
+						// apparent longitude of the Sun
+						T : "Sun's apparent longitude"
+					},
+					R : '紀元使用當地、當日零時，太陽的視黃經。\n'
+					//
+					+ 'the apparent geocentric celestial longitude of the Sun.'
+					//
+					+ '\nUsing VSOP87D.ear.',
+					href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
+				},
+				function(date) {
+					if (/* date.準 || */date.精)
+						return;
 
-			var JD = CeL.TT(new Date(date.offseted_value()));
-			return {
-				span : CeL.format_angle(CeL.solar_coordinates(JD).apparent, 0)
-				// &nbsp;
-				.replace(/ /g, CeL.DOM.NBSP),
-				C : 'monospaced'
-			};
-		} ],
+					var JD = CeL.TT(new Date(date.offseted_value()));
+					return {
+						span : CeL.format_degrees(
+								CeL.solar_coordinates(JD).apparent, 0)
+						// &nbsp;
+						.replace(/ /g, CeL.DOM.NBSP),
+						C : 'monospaced'
+					};
+				} ],
 
 		moon_longitude : [ {
 			a : {
@@ -2855,12 +2858,14 @@ function affairs() {
 
 			var JD = CeL.TT(new Date(date.offseted_value())),
 			//
-			V = CeL.lunar_coordinates(JD).V;
+			V = CeL.lunar_coordinates(JD, {
+				degrees : true
+			}).V;
 
 			return {
 				span : isNaN(V) ? data_load_message
 				//
-				: CeL.format_angle(V, 0)
+				: CeL.format_degrees(V, 0)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
@@ -2883,12 +2888,14 @@ function affairs() {
 
 			var JD = CeL.TT(new Date(date.offseted_value())),
 			//
-			U = CeL.lunar_coordinates(JD).U;
+			U = CeL.lunar_coordinates(JD, {
+				degrees : true
+			}).U;
 
 			return {
 				span : isNaN(U) ? data_load_message
 				//
-				: CeL.format_angle(U, 0)
+				: CeL.format_degrees(U, 0)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
@@ -2919,7 +2926,7 @@ function affairs() {
 			return {
 				span : isNaN(degrees) ? data_load_message
 				//
-				: CeL.format_angle(degrees, 0)
+				: CeL.format_degrees(degrees, 0)
 				// &nbsp;
 				.replace(/ /g, CeL.DOM.NBSP),
 				C : 'monospaced'
@@ -2938,7 +2945,7 @@ function affairs() {
 			if (/* date.準 || */date.精)
 				return;
 
-			var JD = CeL.TT(new Date(date.offseted_value())),
+			var JD = CeL.Date_to_JD(new Date(date.offseted_value())),
 			//
 			phase = CeL.lunar_phase_of_JD(JD, {
 				eclipse : true,
@@ -2964,7 +2971,7 @@ function affairs() {
 					},
 					R : _('Moon latitude') + ': '
 					//
-					+ CeL.format_angle(phase[2], 2),
+					+ CeL.format_degrees(phase[2], 2),
 					href : 'https://zh.wikipedia.org/wiki/'
 					//
 					+ encodeURIComponent(JD.format({

@@ -1338,10 +1338,12 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 		if (!data || !data.query || !data.query.pages) {
 			// https://www.mediawiki.org/wiki/API:Query#batchcomplete
 			// From version 1.25 onwards, the API returns a batchcomplete element to indicate that all data for the current "batch" of pages has been returned.
-			if (data && data.batchcomplete) {
+			if (data && ('batchcomplete' in data)) {
+				// data.batchcomplete === ''
 				//library_namespace.info('wiki_API.langlinks: [' + title + ']: Done.');
 			} else {
 				library_namespace.warn('wiki_API.langlinks: Unknown response: [' + data + ']');
+				//console.log(data);
 			}
 			//console.warn(data);
 			if (library_namespace.is_debug()
@@ -1665,8 +1667,7 @@ function get_list(type, title, callback, namespace) {
 			title = title.title;
 
 		if (!data || !data.query) {
-			library_namespace.err('Unknown response: [' + data + ']', 1,
-					'get_list');
+			library_namespace.err('get_list: Unknown response: [' + data + ']');
 
 		} else if (data.query[type]) {
 			// 一般情況。
@@ -2035,7 +2036,7 @@ wiki_API.edit.denied = function(content, bot_id, action) {
 				'wiki_API.edit.denied');
 		// botlist 以半形逗號作間隔
 		bot_id = (bot_id = bot_id && bot_id.toLowerCase()) ?
-				new RegExp('(?:^|[\\s,])(?:all|' + bot_id + ')(?:$|[\\s,])')
+				new RegExp('(?:^|[\\s,])(?:all|' + bot_id + ')(?:$|[\\s,])', 'i')
 				: wiki_API.edit.denied.all;
 		if (action)
 			// optout 以半形逗號作間隔
@@ -2052,25 +2053,29 @@ wiki_API.edit.denied = function(content, bot_id, action) {
 			if (!denied) {
 				PATTERN = /(?:^|\|)[\s\n]*deny[\s\n]*=[\s\n]*([^|]+)/ig;
 				while ((matched = PATTERN.exec(data))
-						// 一被拒絕則跳出。
-						&& !(denied = bot_id.test(matched[1])))
+						// 一被拒絕即跳出。
+						&& !(denied = bot_id.test(matched[1]) && ('Banned: ' + matched[1])))
 					;
 			}
 
+			// 允許之機器人帳戶列表（以半形逗號作間隔）
 			if (!denied) {
 				PATTERN = /(?:^|\|)[\s\n]*allow[\s\n]*=[\s\n]*([^|]+)/ig;
 				while ((matched = PATTERN.exec(data))
-						// 一被拒絕則跳出。
-						&& !(denied = !bot_id.test(matched[1])))
+						// 一被拒絕即跳出。
+						&& !(denied = !bot_id.test(matched[1])
+						// denied messages
+						&& ('Not in allowed bots list: [' + matched[1] + ']')))
 					;
 			}
 
-			// 過濾機器人所發出的通知
+			// 過濾機器人所發出的通知/提醒
+			// 用戶以bots模板封鎖通知
 			if (!denied && action) {
 				PATTERN = /(?:^|\|)[\s\n]*optout[\s\n]*=[\s\n]*([^|]+)/ig;
 				while ((matched = PATTERN.exec(data))
-						// 一被拒絕則跳出。
-						&& !(denied = action.test(matched[1])))
+						// 一被拒絕即跳出。
+						&& !(denied = action.test(matched[1]) && ('Opt out of ' + matched[1])))
 					;
 			}
 
@@ -2079,7 +2084,7 @@ wiki_API.edit.denied = function(content, bot_id, action) {
 		});
 	}
 
-	return denied || /{{[\s\n]*nobots[\s\n]*}}/i.test(content);
+	return denied || /{{[\s\n]*nobots[\s\n]*}}/i.test(content) && 'Ban all compliant bots.';
 };
 
 // deny=all, !(allow=all)

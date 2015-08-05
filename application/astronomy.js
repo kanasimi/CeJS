@@ -38,7 +38,6 @@
  * LUNAR SOLUTION ELP version ELP/MPP02
  * 
  * 未來發展：<br />
- * 計算順序: https://github.com/kanasimi/IAU-SOFA/blob/master/doc/sofa_ast_c.pdf
  * 
  * @see <a href="http://www.nongli.com/item2/index.html" accessdate="2013/5/2
  *      20:23">农历知识:传统节日,24节气，农历历法，三九，三伏，天文历法,天干地支阴阳五行</a>
@@ -133,6 +132,7 @@ if (false) {
 					+ CeL.Julian_day.from_HMS(19, 21);
 			console.log(CeL.object_coordinates(JD, 'Venus', {
 				// United States Naval Observatory (USNO)
+				// Coordinates: 38.921473°N 77.066946°W
 				// @see
 				// https://en.wikipedia.org/wiki/United_States_Naval_Observatory
 				local : [ 38.921473, -77.066946 ],
@@ -148,6 +148,8 @@ if (false) {
 					+ CeL.Julian_day.from_HMS(3, 17);
 			console.log(CeL.object_coordinates(JD, 'Mars', {
 				// Palomar Observatory
+				// Coordinates: 33°21′21″N 116°51′50″W
+				// Altitude: 1,712 meters (5,617 ft)
 				// @see https://en.wikipedia.org/wiki/Palomar_Observatory
 				local : [ 33.355833, -116.863889, 1712 ],
 				degrees : true
@@ -212,13 +214,19 @@ if (false) {
 		CeL.assert([ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4');
 		CeL.assert([ 2014, CeL.立春年(new Date('2015/2/3')) ], '立春年 2015/2/3');
 
+		// 取得 2000/1/1 月亮地心瞬時黃道視黃經 in degrees。
 		CeL.LEA406.load_terms('V', function() {
-			CeL.format_angle(CeL.LEA406(2457132, 'V'));
+			CeL.format_degrees(CeL.LEA406(CeL.Julian_day.from_YMD(2000, 1, 1,
+					'CE'), 'V', {
+				degrees : true
+			}));
 		});
 
-		// 取得 2200年01月02日0:0 TT 月亮視黃經。
-		CeL.format_angle(CeL.lunar_coordinates(CeL.Date_to_JD(new Date(
-				'2200-01-02T00:00:00Z'))).V, 3);
+		// 取得 2200年01月02日0:0 TT 月亮地心視黃經 in degrees。
+		CeL.format_degrees(CeL.lunar_coordinates(CeL.Date_to_JD(new Date(
+				'2200-01-02T00:00:00Z')), {
+			degrees : true
+		}).V, 3);
 
 		// 取得 Gregorian calendar 1977 年之整年度日月合朔時間。
 		CeL.lunar_phase(1977, 0, {
@@ -252,6 +260,40 @@ if (false) {
 		var index = 年朔日.search_sorted(1727054, true);
 		年朔日.月名[index] + '月' + (1727054 - 年朔日[index] | 0) + '日'
 
+		// ----------------------------------------------------------------------------
+
+		var solar_coordinates = new CeL.celestial_coordinates('solar',
+				'2015/8/1');
+		solar_coordinates.object === 'sun';
+		solar_coordinates.UT === 2457249;
+		// solar_coordinates.TT === {Number}TT in JD
+
+		// CeL.LEA406.load_terms('R');
+		var moon_coordinates = new CeL.celestial_coordinates('lunar',
+				'2015/8/1');
+		moon_coordinates.object === 'moon';
+		moon_coordinates.UT === 2457249;
+
+		// Jean Meeus, Astronomical Algorithms, 2nd Edition.
+		// p. 95, Example 13.b with full VSOP87
+		var Venus_coordinates = new CeL.celestial_coordinates('Venus',
+				CeL.Julian_day.from_YMD(1987, 4, 10, 'CE') - .5
+						+ CeL.Julian_day.from_HMS(19, 21), [ 38.921473,
+						-77.066946 ], {
+					TT : true
+				});
+		// Venus_coordinates.H
+
+		// Jean Meeus, Astronomical Algorithms, 2nd Edition.
+		// p. 82. Example 11.a
+		// p. 280. Example 40.a
+		var Mars_coordinates = new CeL.celestial_coordinates('Mars',
+				CeL.Julian_day.from_YMD(2003, 8, 28, 'CE') - .5
+						+ CeL.Julian_day.from_HMS(3, 17), [ 33.355833,
+						-116.863889, 1712 ], {
+					TT : true
+				});
+		// Mars_coordinates.E
 	});
 }
 
@@ -602,7 +644,7 @@ if (typeof CeL === 'function')
 			// normalize degrees
 			// to proper degrees 0–less than 360
 			// near_0: −180–less than 180
-			function normalize_angle(degree, near_0) {
+			function normalize_degrees(degree, near_0) {
 				if ((degree %= TURN_TO_DEGREES) < 0)
 					degree += TURN_TO_DEGREES;
 				if (near_0 && degree >= TURN_TO_DEGREES / 2)
@@ -610,14 +652,49 @@ if (typeof CeL === 'function')
 				return degree;
 			}
 
-			_.normalize_angle = normalize_angle;
+			_.normalize_degrees = normalize_degrees;
 
-			// show degrees. 顯示易懂角度。
-			function format_angle(degree, padding) {
+			function normalize_radians(radians, near_0) {
+				radians = radians.mod(TURN_TO_RADIANS);
+				if (near_0 && radians >= TURN_TO_RADIANS / 2)
+					radians -= TURN_TO_RADIANS;
+				return radians;
+			}
+
+			_.normalize_radians = normalize_radians;
+
+			// 計算角度差距(減法)
+			// return (base - target), target 會先趨近於 base。或是說結果會向 0 趨近。
+			// subtract_degrees(base,target)>0:
+			// base>target, base-target>0
+			function subtract_degrees(base, target) {
+				if (Math.abs(base = (base - target) % TURN_TO_DEGREES)
+				//
+				>= TURN_TO_DEGREES / 2)
+					if (base > 0)
+						base -= TURN_TO_DEGREES;
+					else
+						base += TURN_TO_DEGREES;
+				return base;
+			}
+
+			/**
+			 * show degrees / sexagesimal system. 顯示易懂角度。
+			 * 
+			 * @param degree
+			 * @param padding
+			 * 
+			 * @returns {String}易懂角度。
+			 * 
+			 * @see https://en.wikipedia.org/wiki/Minute_and_second_of_arc
+			 */
+			function format_degrees(degree, padding) {
 				if (!degree)
 					return '0°';
 
+				// is negative.
 				var minus = degree < 0;
+				// 處理負數。
 				if (minus)
 					degree = -degree;
 
@@ -647,27 +724,110 @@ if (typeof CeL === 'function')
 					}
 				}
 
+				// 處理負數。
 				if (minus)
 					show = '-' + show;
+
 				return show.replace(/ $/, '');
 			}
 
-			_.format_angle = format_angle;
+			_.format_degrees = format_degrees;
 
-			// 計算角度差距(減法)
-			// return (base - target), target 會先趨近於 base。或是說結果會向 0 趨近。
-			// subtract_degrees(base,target)>0:
-			// base>target, base-target>0
-			function subtract_degrees(base, target) {
-				if (Math.abs(base = (base - target) % TURN_TO_DEGREES)
-				//
-				>= TURN_TO_DEGREES / 2)
-					if (base > 0)
-						base -= TURN_TO_DEGREES;
+			/**
+			 * show time angel. 顯示易懂時角。
+			 * 
+			 * @param {Number}days
+			 *            days / turns
+			 * 
+			 * @returns {String}易懂時角。
+			 * 
+			 * @see https://en.wikipedia.org/wiki/Unicode_subscripts_and_superscripts
+			 */
+			function days_to_time(days) {
+				var show = '', minus = days < 0;
+				// 處理負數。
+				if (minus)
+					days = -days;
+
+				// time: hours
+				var time = (days % 1) * 24;
+				if (days |= 0)
+					show += days + 'ᵈ';
+
+				days = time | 0;
+				if (days || show)
+					show += days + 'ʰ';
+
+				// time: minutes
+				time = (time % 1) * 60;
+				days = time | 0;
+				if (days || show)
+					show += days + 'ᵐ';
+
+				// time: seconds
+				time = (time % 1) * 60;
+				if (days || show)
+					show += days + 'ˢ';
+				// time <= 1e-10: 當作 error。
+				// 1e-11: -Math.log10((1/2-1/3-1/6)*86400)|0
+				if ((time %= 1) > 1e-11) {
+					// 去首尾之 0。
+					time = time.toPrecision(11).replace(/0+$/, '').replace(
+							/^0+/, '');
+					if (show)
+						show += time;
 					else
-						base += TURN_TO_DEGREES;
-				return base;
+						show = '0ˢ' + time;
+				} else if (!show) {
+					show = '0';
+				}
+
+				// 收尾。
+
+				// 處理負數。
+				if (minus)
+					show = '-' + show;
+
+				return show;
 			}
+
+			_.days_to_time = days_to_time;
+
+			/**
+			 * format radians
+			 * 
+			 * @param {Number}radians
+			 *            radians to format
+			 * @param {String}[to_type]
+			 *            to what type: decimal degrees, degrees, time, radians,
+			 *            turns
+			 * @param {Object}[options]
+			 *            options 設定特殊功能:<br />
+			 * 
+			 * @returns {String}formatted radians
+			 */
+			function format_radians(radians, to_type, options) {
+				if (!to_type)
+					// default: degrees of sexagesimal measure
+					to_type = 'degrees';
+
+				switch (to_type) {
+				case 'decimal':
+				case 'decimal degrees':
+					return radians / DEGREES_TO_RADIANS;
+				case 'degrees':
+					return format_degrees(radians / DEGREES_TO_RADIANS, options
+							&& options.padding);
+				case 'turns':
+					return radians / TURN_TO_RADIANS;
+				case 'time':
+					return days_to_time(radians / TURN_TO_RADIANS);
+				}
+				// default
+				return radians;
+			}
+
+			_.format_radians = format_radians;
 
 			// ------------------------------------------------------------------------------------------------------//
 			// coordinate transformations 座標變換
@@ -691,8 +851,12 @@ if (typeof CeL === 'function')
 			 * spherical coordinates → rectangular coordinates.
 			 * 球座標系(日心座標)轉為直角座標系。
 			 * 
-			 * @param {Object}spherical
-			 *            球座標 { L, B, R }
+			 * @param {Number}longitude
+			 *            longitude (L) of spherical 球座標
+			 * @param {Number}latitude
+			 *            latitude (B) of spherical 球座標
+			 * @param {Number}radius
+			 *            radius (R) of spherical 球座標
 			 * @param {Object}[options]
 			 *            options 設定特殊功能:<br />
 			 *            {Boolean}options.unit_radius: 若為 true，則將 .R 當作 1。<br />
@@ -704,26 +868,32 @@ if (typeof CeL === 'function')
 			 * @see https://en.wikipedia.org/wiki/Ecliptic_coordinate_system#Rectangular_coordinates
 			 *      https://en.wikipedia.org/wiki/Equatorial_coordinate_system#Geocentric_equatorial_coordinates
 			 */
-			function spherical_to_rectangular(spherical, options) {
+			function spherical_to_rectangular(longitude, latitude, radius,
+					options) {
+				if (library_namespace.is_Object(longitude)) {
+					options = latitude;
+					radius = longitude.R;
+					latitude = longitude.B;
+					longitude = longitude.L;
+				}
+
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
 					options = library_namespace.null_Object();
 
-				var tmp = spherical.B, cos_B = Math.cos(tmp), L = spherical.L,
+				var tmp, cos_B = Math.cos(latitude),
 				//
-				x = cos_B * Math.cos(L), y = cos_B * Math.sin(L), z = Math
-						.sin(tmp);
+				x = cos_B * Math.cos(longitude), y = cos_B
+						* Math.sin(longitude), z = Math.sin(latitude);
 
-				if (!options.unit_radius && (tmp = spherical.R)) {
-					x *= tmp;
-					y *= tmp;
-					z *= tmp;
+				if (!options.unit_radius && radius) {
+					x *= radius;
+					y *= radius;
+					z *= radius;
 				}
 
-				if (options.base) {
-					tmp = spherical_to_rectangular(options.base,
-					//
-					options.unit_radius ? {
+				if (tmp = options.base) {
+					tmp = spherical_to_rectangular(tmp, options.unit_radius ? {
 						unit_radius : true
 					} : null);
 					x -= tmp[0];
@@ -733,7 +903,7 @@ if (typeof CeL === 'function')
 
 				tmp = [ x, y, z ];
 				if (options.distance)
-					tmp.d = Math.sqrt(x * x + y * y + z * z);
+					tmp.distance = Math.sqrt(x * x + y * y + z * z);
 
 				// return rectangular
 				return tmp;
@@ -749,38 +919,45 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Array}rectangular
 			 *            直角座標 [ x, y, z ]
+			 * @param {Boolean}get_radius
+			 *            亦生成 radius
 			 * 
 			 * @returns {Object}spherical coordinates { λ , β }
 			 */
-			function rectangular_to_spherical(rectangular) {
-				var x = rectangular[0], y = rectangular[1];
-				return {
-					// ecliptical (or celestial) longitude 黃經。
-					λ : Math.atan2(y, x),
-					// ecliptical (or celestial) latitude 黃緯。
-					β : Math.atan2(rectangular[2], Math.sqrt(x * x, y * y))
-				};
+			function rectangular_to_spherical(rectangular, get_radius) {
+				var x = rectangular[0], y = rectangular[1], z = rectangular[2],
+				// ecliptical (or celestial) [ longitude 黃經, latitude 黃緯 ]。
+				spherical = [ Math.atan2(y, x),
+						Math.atan2(z, Math.sqrt(x * x, y * y)) ];
+				if (get_radius)
+					spherical.push(Math.sqrt(x * x + y * y + z * z));
+				return spherical;
 			}
 
 			/**
 			 * Transformation from ecliptical into equatorial coordinates.
-			 * 地心視黃道座標轉到視赤道座標(視赤經及視赤緯)
+			 * G地心視黃道座標轉到 E地心赤道座標(視赤經及視赤緯)
 			 * 
 			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版<br />
 			 * p. 93. formula 13.3, 13.4
 			 * 
 			 * @param {Object}coordinates
-			 *            ecliptical coordinates { λ , β }
+			 *            apparent geocentric ecliptical coordinates<br /> {
+			 *            longitude λ , latitude β }
 			 * @param {Number}TT_JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}[options]
 			 *            options 設定特殊功能
 			 * 
-			 * @returns {Object}equatorial coordinates { α , δ }
+			 * @returns {Object}equatorial coordinates { right ascension α ,
+			 *          declination δ }
 			 */
 			function ecliptical_to_equatorial(coordinates, TT_JD, options) {
-				var ε = obliquity(TT_JD), λ = coordinates.λ, β = coordinates.β,
+				var ε = obliquity(TT_JD),
+				// G地心視黃道 apparent geocentric ecliptic coordinates:
+				// longitude λ and latitude β in radians
+				λ = coordinates.λ, β = coordinates.β,
 				// cache
 				sin_λ = Math.sin(λ), cos_ε = Math.cos(ε), sin_ε = Math.sin(ε);
 
@@ -797,7 +974,7 @@ if (typeof CeL === 'function')
 
 			/**
 			 * equatorial coordinates → local horizontal coordinates.
-			 * 地心視赤道座標轉到本地站心地平座標
+			 * 依據觀測者的位置和時間，轉換地心視赤道座標到本地站心地平座標系。
 			 * 
 			 * Reference 資料來源/資料依據:<br />
 			 * Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版<br />
@@ -805,7 +982,8 @@ if (typeof CeL === 'function')
 			 * Chapter 40: Correction for Parallax
 			 * 
 			 * @param {Object}coordinates
-			 *            equatorial coordinates { α , δ }
+			 *            equatorial coordinates { right ascension α ,
+			 *            declination δ }
 			 * @param {Number}TT_JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Array}local
@@ -814,7 +992,8 @@ if (typeof CeL === 'function')
 			 *            觀測者 [ 緯度（北半球為正,南半球為負）, 經度（從Greenwich向東為正，西為負）,
 			 *            海拔標高(觀測者距海平面的高度) ]
 			 * 
-			 * @returns {Object}horizontal { Alt , Az }
+			 * @returns {Object}horizontal { Alt:altitude (radians) , Az:azimuth
+			 *          (radians) }
 			 * 
 			 * @see https://en.wikipedia.org/wiki/Horizontal_coordinate_system
 			 */
@@ -823,7 +1002,7 @@ if (typeof CeL === 'function')
 				var δ = coordinates.δ;
 				if (isNaN(δ))
 					// 先算出地心視赤道座標。
-					// 一般已在 function object_coordinates() 中處理。
+					// 一般已在 function get_horizontal() 中處理。
 					δ = ecliptical_to_equatorial(coordinates, TT_JD).δ;
 
 				// 地心赤經α。
@@ -835,32 +1014,35 @@ if (typeof CeL === 'function')
 				// 本地恆星時θ = Greenwich恆星時θ0 − L觀測者經度
 				θ = GAST(TT_of(TT_JD, true), TT_JD) + local[1]
 						* DEGREES_TO_RADIANS,
-				// local hour angle (radians) 本地地心時角，從南向西測量。
-				// H = 本地恆星時θ − 地心赤經α
+				// LHA: local hour angle (in radians) 本地地心時角，從南向西測量。
+				// LHA = 本地恆星時θ − 地心赤經α
 				// = Greenwich恆星時θ0 − L觀測者經度 − 地心赤經α
-				H = θ - α,
+				LHA = θ - α,
 				// cache
-				sin_φ = Math.sin(φ), cos_φ = Math.cos(φ), cos_H = Math.cos(H),
+				sin_φ = Math.sin(φ), cos_φ = Math.cos(φ),
+				// cache
+				cos_H = Math.cos(LHA),
 				// p. 82.
 				// tmp
 				u = Math.atan(TERRA_POLAR_RADIUS_M / TERRA_EQUATORIAL_RADIUS_M
 						* Math.tan(φ));
 
 				// tmp
-				H /= TERRA_EQUATORIAL_RADIUS_M;
+				LHA /= TERRA_EQUATORIAL_RADIUS_M;
 				// 計算周日視差、日月食、星蝕所需要的量ρsin(φ′)和ρcos(φ′)可以用下式計算：
 				var ρsin_φp = TERRA_POLAR_RADIUS_M / TERRA_EQUATORIAL_RADIUS_M
-						* Math.sin(u) + H * sin_φ,
+						* Math.sin(u) + LHA * sin_φ,
 				//
-				ρcos_φp = Math.cos(u) + H * cos_φ;
+				ρcos_φp = Math.cos(u) + LHA * cos_φ;
 
 				// p. 279.
+				// 地心視赤道座標轉到本地站心赤道座標:
 				// 修正 planet's parallax (行星視差)
 				var
-				// the equatorial horizontal parallax of the body.
+				// π: the equatorial horizontal parallax of the body.
 				// π是星體的赤道地平視差
 				π = Math.asin(Math.sin(8.794 * ARCSECONDS_TO_RADIANS)
-				// apparent distance at JD in AU
+				// coordinates.Δ: apparent distance at TT_JD in AU
 				// 對於太陽、行星和慧星，經常適合使用它們到地球的距離Δ替代視差
 				/ coordinates.Δ),
 				// cache
@@ -868,17 +1050,23 @@ if (typeof CeL === 'function')
 				// tmp
 				u = ρcos_φp * sin_π;
 				π = cos_δ - u * cos_H;
-				var Δα = Math.atan2(-u * Math.sin(H), π);
-
-				// apply new value to (δ, α, H).
+				var Δα = Math.atan2(-u * Math.sin(LHA), π);
+				// 對於赤緯，不必計算Δδ，用下式可直接算出δ′：
+				// apply new value to (δ, α, LHA).
 				δ = Math.atan2((Math.sin(δ) - ρsin_φp * sin_π) * Math.cos(Δα),
 						π);
 				α += Δα;
-				H = θ - α;
+				// T站心赤道 topocentric equatorial coordinate system
+				// @see function Coordinates()
+				coordinates.T = [ α, δ ];
+
+				// LHA: local hour angle (in radians) 本地地心時角，從南向西測量。
+				coordinates.LHA = LHA = θ - α;
 				// re-cache
-				cos_H = Math.cos(H);
+				cos_H = Math.cos(LHA);
 
 				// p. 93.
+				// 站心赤道座標轉到站心地平座標 (radians)
 				// Altitude (Alt) 高度角或仰角又稱地平緯度。
 				// 修正大氣折射的影響
 				// TODO: 考慮 dip of the horizon (地平俯角, 海岸視高差)
@@ -887,11 +1075,58 @@ if (typeof CeL === 'function')
 						/ DEGREES_TO_RADIANS)
 						* DEGREES_TO_RADIANS;
 				// Azimuth (Az) 方位角又稱地平經度。
-				coordinates.Az = Math.atan2(Math.sin(H), cos_H * sin_φ
+				coordinates.Az = Math.atan2(Math.sin(LHA), cos_H * sin_φ
 						- Math.tan(δ) * cos_φ);
 
 				// 因為可能會再利用，這裡不處理 options.degrees。
 				return coordinates;
+			}
+
+			/**
+			 * ecliptical → equatorial coordinates → local horizontal
+			 * coordinates.
+			 * 
+			 * @param {Object}coordinates
+			 *            apparent geocentric ecliptical coordinates<br /> {
+			 *            longitude λ , latitude β }
+			 * @param {Number}TT_JD
+			 *            Julian date (JD of 天文計算用時間 TT)
+			 * @param {Object}[options]
+			 *            options 設定特殊功能
+			 */
+			function get_horizontal(coordinates, TT_JD, options) {
+				var local = Array.isArray(options.local) && options.local;
+				if (local || options.equatorial) {
+					// 地心視黃道座標轉到視赤道座標(視赤經及視赤緯)。
+					ecliptical_to_equatorial(coordinates, TT_JD, options);
+					if (local)
+						equatorial_to_horizontal(coordinates, TT_JD, local);
+					// 單位轉換。
+					if (options.degrees) {
+						if (local) {
+							coordinates.Alt /= DEGREES_TO_RADIANS;
+							coordinates.Az /= DEGREES_TO_RADIANS;
+						}
+						coordinates.α /= DEGREES_TO_RADIANS;
+						coordinates.δ /= DEGREES_TO_RADIANS;
+					}
+				}
+
+				// elongation Ψ of the planet, its angular distance to the Sun
+				// https://en.wikipedia.org/wiki/Elongation_%28astronomy%29
+				// 行星的距角，即地心看行星與太陽的角距離。
+				if (options.elongation) {
+					// the Sun's apparent longitude in degrees → radians.
+					var λ0 = solar_coordinates(TT_JD).apparent
+							* DEGREES_TO_RADIANS;
+					// The Sun's latitude, which is always smaller than 1.2
+					// arcsecond, may be neglected here.
+					coordinates.Ψ = Math.acos(Math.cos(coordinates.β)
+							* Math.cos(coordinates.λ - λ0));
+					// 單位轉換。
+					if (options.degrees)
+						coordinates.Ψ /= DEGREES_TO_RADIANS;
+				}
 			}
 
 			// ------------------------------------------------------------------------------------------------------//
@@ -1261,8 +1496,8 @@ if (typeof CeL === 'function')
 				var T = Julian_century(TT_JD);
 
 				// Greenwich mean sidereal time, IAU 2006.
-				return (IAU2000_ERA(UT_JD) + polynomial_value(
-						IAU2006_GMST_parameters, T)).mod(TURN_TO_RADIANS);
+				return normalize_radians(IAU2000_ERA(UT_JD)
+						+ polynomial_value(IAU2006_GMST_parameters, T));
 			}
 
 			/**
@@ -1360,10 +1595,9 @@ if (typeof CeL === 'function')
 				if (isNaN(TT_JD))
 					TT_JD = TT_of(UT_JD);
 
-				return (GMST(UT_JD, TT_JD)
+				return normalize_radians(GMST(UT_JD, TT_JD)
 				// 赤經章動修正值 Δψ*cos(ε) 也稱作分點方程。
-				+ nutation(TT_JD, true) * Math.cos(obliquity(TT_JD)))
-						.mod(TURN_TO_RADIANS);
+				+ nutation(TT_JD, true) * Math.cos(obliquity(TT_JD)));
 			}
 
 			/**
@@ -1448,9 +1682,9 @@ if (typeof CeL === 'function')
 				if (library_namespace.is_debug(3))
 					library_namespace.debug('aberration of radius vector ' + R
 							+ ', JD: ' + TT_JD + ': '
-							+ format_angle(aberration)
+							+ format_degrees(aberration)
 							+ '. low-precision method: '
-							+ format_angle(sun_aberration_low(R)), 0);
+							+ format_degrees(sun_aberration_low(R)), 0);
 
 				return aberration;
 			}
@@ -1519,7 +1753,7 @@ if (typeof CeL === 'function')
 			 * @param {Boolean}Δψ_only
 			 *            only get 黃經章動Δψ
 			 * 
-			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (radians)
+			 * @returns {Array} [ 黃經章動Δψ, 黃赤交角章動Δε ] (in radians)
 			 * 
 			 * @see http://www.neoprogrammics.com/nutations/nutations_1980_2000b/index.php
 			 */
@@ -1659,14 +1893,14 @@ if (typeof CeL === 'function')
 				if (library_namespace.is_debug(3))
 					library_namespace.debug('FK5 correction of object.L @ ' + τ
 							+ ' ≈ ' + coordinates.L + ' + '
-							+ format_angle(ΔL / DEGREES_TO_RADIANS));
+							+ format_degrees(ΔL / DEGREES_TO_RADIANS));
 				coordinates.L += ΔL;
 
 				var ΔB = 0.03916 * ARCSECONDS_TO_RADIANS * (cos_L - sin_L);
 				if (library_namespace.is_debug(3))
 					library_namespace.debug('FK5 correction of object.B @ ' + τ
 							+ ' ≈ ' + coordinates.B + ' + '
-							+ format_angle(ΔB / DEGREES_TO_RADIANS));
+							+ format_degrees(ΔB / DEGREES_TO_RADIANS));
 				coordinates.B += ΔB;
 
 				return coordinates;
@@ -1802,25 +2036,24 @@ if (typeof CeL === 'function')
 					// 倍數
 					if (object_terms.multiplier > 0)
 						coordinates[term_name] *= object_terms.multiplier;
-					library_namespace.debug(object
-							+ '.'
-							+ term_name
-							+ ' @ '
-							+ TT_JD
-							+ ' ≈ '
-							+ (term_name === 'R' ? coordinates[term_name]
-									+ '  AU'
-									: format_angle(normalize_angle(
-											coordinates[term_name]
-													/ DEGREES_TO_RADIANS,
-											term_name === 'B')))
-							+ ' (coefficients: ' + coefficients.join(', ')
-							+ ')', 3);
+					library_namespace.debug(
+					//
+					object + '.' + term_name + ' @ ' + TT_JD + ' ≈ '
+					//
+					+ (term_name === 'R' ? coordinates[term_name] + '  AU'
+					//
+					: format_degrees(normalize_degrees(
+					//
+					coordinates[term_name] / DEGREES_TO_RADIANS,
+					//
+					term_name === 'B'))) + ' (coefficients: '
+							+ coefficients.join(', ') + ')', 3);
 				});
 
 				if (options.FK5 !== false)
 					dynamical_to_FK5(coordinates, τ);
 
+				// 單位轉換。
 				if (options.degrees) {
 					if (coordinates.L)
 						coordinates.L /= DEGREES_TO_RADIANS;
@@ -2030,7 +2263,7 @@ if (typeof CeL === 'function')
 				if (!library_namespace.is_Object(options))
 					options = library_namespace.null_Object();
 
-				var τ0, τ = 0, rectangular,
+				var τ0, τ = 0, rectangular, object_heliocentric,
 				//
 				coordinates = library_namespace.null_Object(),
 				// light-time error in days
@@ -2041,23 +2274,29 @@ if (typeof CeL === 'function')
 				// 一次性修正光行時及光行差。
 				do {
 					// assert: terms of object and Earth are loaded.
-					// JD時的天體/行星日心黃道座標。
-					var object_heliocentric = VSOP87(TT_JD - τ, object, {
+					// JD時的天體/行星日心瞬時黃道座標。
+					object_heliocentric = VSOP87(TT_JD - τ, object, {
 						FK5 : false
-					}),
+					});
 					// JD時的地球日心黃道座標。
-					earth_heliocentric = VSOP87(TT_JD - τ, 'earth', {
-						FK5 : false
-					}),
+					var earth_heliocentric = VSOP87(TT_JD - τ,
+							solar_terms_object, {
+								FK5 : false
+							}),
 					// planet's distance to the Earth, 行星到地球的距離.
 					Δ = (rectangular = spherical_to_rectangular(
 							object_heliocentric, {
 								base : earth_heliocentric,
 								distance : true
-							})).d;
-					if (τ === 0)
-						// real distance at JD in AU
+							})).distance;
+					if (τ === 0) {
+						// real distance at TT_JD in AU
 						coordinates.Δ0 = Δ;
+						// D日心瞬時黃道
+						// heliocentric dynamical ecliptic coordinate system
+						// @see function Coordinates()
+						coordinates.D = object_heliocentric;
+					}
 					τ0 = τ;
 					// effect of light-time, 光線從行星到達地球所需的時間.
 					τ = AU_LIGHT_TIME * Δ;
@@ -2065,8 +2304,12 @@ if (typeof CeL === 'function')
 					library_namespace.debug('τ-τ0 = ' + Math.abs(τ - τ0));
 				} while (Math.abs(τ - τ0) > error);
 
-				// apparent distance at JD in AU
+				// apparent distance at TT_JD in AU
 				coordinates.Δ = Δ;
+
+				// S日心視黃道 heliocentric ecliptic coordinate system
+				// @see function Coordinates()
+				coordinates.S = object_heliocentric;
 
 				// rectangular: 該天體的地心直角黃道座標
 				// → geocentric: 該天體的地心黃道座標(球座標)
@@ -2077,47 +2320,20 @@ if (typeof CeL === 'function')
 				τ = Julian_century(TT_JD) / 10;
 				// replacing L by λ, and B by β.
 				geocentric = dynamical_to_FK5({
-					L : geocentric.λ,
-					B : geocentric.β
+					L : geocentric[0],
+					B : geocentric[1]
 				}, τ);
 
 				// 修正章動 nutation。
 				τ = nutation(TT_JD);
-				// apparent geocentric longitude λ and latitude β in radians
+				// G地心視黃道 apparent geocentric ecliptic coordinates:
+				// longitude λ and latitude β in radians
 				coordinates.λ = geocentric.L + τ[0];
 				coordinates.β = geocentric.B + τ[1];
 
-				var local = Array.isArray(options.local) && options.local;
-				if (local || options.equatorial) {
-					// 地心視黃道座標轉到視赤道座標(視赤經及視赤緯)。
-					ecliptical_to_equatorial(coordinates, TT_JD, options);
-					if (local)
-						equatorial_to_horizontal(coordinates, TT_JD, local);
-					if (options.degrees) {
-						if (local) {
-							coordinates.Alt /= DEGREES_TO_RADIANS;
-							coordinates.Az /= DEGREES_TO_RADIANS;
-						}
-						coordinates.α /= DEGREES_TO_RADIANS;
-						coordinates.δ /= DEGREES_TO_RADIANS;
-					}
-				}
+				get_horizontal(coordinates, TT_JD, options);
 
-				// elongation Ψ of the planet, its angular distance to the Sun
-				// https://en.wikipedia.org/wiki/Elongation_%28astronomy%29
-				// 行星的距角，即地心看行星與太陽的角距離。
-				if (options.elongation) {
-					// the Sun's apparent longitude.
-					var λ0 = solar_coordinates(TT_JD).λ * DEGREES_TO_RADIANS;
-					// The Sun's latitude, which is always smaller than 1.2
-					// arcsecond, may be neglected here.
-					coordinates.Ψ = Math.acos(Math.cos(coordinates.β)
-							* Math.cos(coordinates.λ - λ0))
-							/ DEGREES_TO_RADIANS;
-					if (options.degrees)
-						coordinates.Ψ /= DEGREES_TO_RADIANS;
-				}
-
+				// 單位轉換。
 				if (options.degrees) {
 					coordinates.λ /= DEGREES_TO_RADIANS;
 					coordinates.β /= DEGREES_TO_RADIANS;
@@ -2210,25 +2426,28 @@ if (typeof CeL === 'function')
 			 * @param {Number}TT_JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            options 設定特殊功能:<br />
+			 *            {Boolean}options.degrees: translate radians to
+			 *            degrees.<br />
+			 *            {Boolean}options.km: translate AU to km.<br />
 			 * 
-			 * @returns {Object}coordinates { apparent:太陽視黃經, λ:地心黃經(度),
-			 *          β:地心黃緯β(度), Δ:日地距離(m), L:黃經 longitude, B:黃緯 latitude,
-			 *          R:距離 radius vector }
+			 * @returns {Object}coordinates { apparent:太陽視黃經(度),
+			 *          λ:地心黃經(radians), β:地心黃緯β(radians), Δ:日地距離(AU), L:黃經
+			 *          longitude(radians), B:黃緯 latitude(radians), R:距離 radius
+			 *          vector(AU) }
 			 */
 			function solar_coordinates(TT_JD, options) {
 				// 前置處理。
 				if (!library_namespace.is_Object(options))
 					options = library_namespace.null_Object();
 
-				// heliocentric coordinates. 計算日心坐標中地球的位置。
-				var coordinates = VSOP87(TT_JD, solar_terms_object, {
-					degrees : true
-				});
+				// heliocentric coordinates. 計算日心黃道坐標中地球的位置。
+				var coordinates = VSOP87(TT_JD, solar_terms_object);
 
+				// 日心黃道坐標中地球的位置 → 地心黃道坐標中太陽的位置
 				// 弧度單位日心黃經L → 地心黃經(geocentric longitude)λ(度)
 				// Jean Meeus 文中以 "☉" 表示此處之 λ。
-				var λ = coordinates.L + TURN_TO_DEGREES / 2,
+				var λ = coordinates.L + TURN_TO_RADIANS / 2,
 				// 弧度單位日心黃緯B → 地心黃緯β(度)
 				β = -coordinates.B;
 
@@ -2240,7 +2459,7 @@ if (typeof CeL === 'function')
 				// equinox and solstice.
 				// 節氣以太陽視黃經為準。
 				// ** 問題:但中國古代至點以日長為準。兩者或可能產生出入？
-				var apparent = λ
+				var apparent = λ / DEGREES_TO_RADIANS
 				// 修正太陽光行差 aberration。
 				+ sun_aberration(coordinates.R, TT_JD)
 				// 修正章動 nutation。
@@ -2249,29 +2468,28 @@ if (typeof CeL === 'function')
 				// https://en.wikipedia.org/wiki/Ecliptic_coordinate_system#Spherical_coordinates
 				Object.assign(coordinates, {
 					// geocentric
-					λ : normalize_angle(λ),
-					β : normalize_angle(β),
-					Δ : coordinates.R * AU_TO_METERS,
+					λ : normalize_radians(λ),
+					β : normalize_radians(β, true),
+					Δ : coordinates.R,
 
 					// apparent longitude
-					apparent : normalize_angle(apparent)
+					apparent : normalize_degrees(apparent)
 				// TODO: apparent latitude
 				});
 
-				var local = Array.isArray(options.local) && options.local;
-				if (local || options.equatorial) {
-					// 地心視黃道座標轉到視赤道座標(視赤經及視赤緯)。
-					ecliptical_to_equatorial(coordinates, TT_JD, options);
-					if (local)
-						equatorial_to_horizontal(coordinates, TT_JD, local);
-					if (true || options.degrees) {
-						if (local) {
-							coordinates.Alt /= DEGREES_TO_RADIANS;
-							coordinates.Az /= DEGREES_TO_RADIANS;
-						}
-						coordinates.α /= DEGREES_TO_RADIANS;
-						coordinates.δ /= DEGREES_TO_RADIANS;
-					}
+				get_horizontal(coordinates, TT_JD, options);
+
+				// 單位轉換。
+				if (options.degrees) {
+					coordinates.λ /= DEGREES_TO_RADIANS;
+					coordinates.β /= DEGREES_TO_RADIANS;
+					coordinates.L /= DEGREES_TO_RADIANS;
+					coordinates.B /= DEGREES_TO_RADIANS;
+				}
+				if (options.km) {
+					// 1000: 1 km = 1000 m
+					coordinates.Δ *= AU_TO_METERS / 1000;
+					coordinates.R *= AU_TO_METERS / 1000;
 				}
 
 				return coordinates;
@@ -2314,6 +2532,7 @@ if (typeof CeL === 'function')
 
 				// 最多趨近 JD_of_solar_angle.max_calculations 次。
 				for (index = JD_of_solar_angle.max_calculations; index-- > 0;) {
+					// apparent in degrees.
 					apparent = solar_coordinates(TT_JD).apparent;
 					// 由公式(26.1)得到對“大約時間”的修正量。
 					// +58 sin (k·90° - λ) (26.1)
@@ -2324,7 +2543,7 @@ if (typeof CeL === 'function')
 
 					if (false)
 						library_namespace.debug('index ' + index
-								+ ': apparent: ' + format_angle(apparent)
+								+ ': apparent: ' + format_degrees(apparent)
 								+ ', offset in days: ' + offset);
 
 					if (Math.abs(offset) < JD_of_solar_angle.error)
@@ -2497,8 +2716,8 @@ if (typeof CeL === 'function')
 					options = library_namespace.null_Object();
 
 				var index, days, date, year,
-				//
-				apparent = solar_coordinates(TT_of(UT_JD), options).apparent;
+				// apparent in degrees
+				apparent = solar_coordinates(TT_of(UT_JD)).apparent;
 
 				// get days, 回傳已經過幾日。
 				if (options.days) {
@@ -2880,8 +3099,9 @@ if (typeof CeL === 'function')
 					17325643723.0470, -527.90, 6.665, -0.5522 ];
 
 			/**
-			 * 計算月亮位置(坐標)，採用完整的 LEA-406a, LEA-406b。 Using full LEA-406a or
-			 * LEA-406b model.
+			 * Gets coordinates of lunar (geocentric dynamical ecliptic
+			 * coordinates). Using full LEA-406a or LEA-406b model.<br />
+			 * 計算月亮位置(地心瞬時黃道坐標)，採用完整的 LEA-406a, LEA-406b。
 			 * 
 			 * Reference 資料來源/資料依據:<br />
 			 * S. M. Kudryavtsev, Long-term harmonic development of lunar
@@ -2893,15 +3113,18 @@ if (typeof CeL === 'function')
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}[options]
 			 *            options 設定特殊功能:<br />
+			 *            {Boolean}options.degrees: translate radians to
+			 *            degrees.<br />
+			 *            {Boolean}options.km: translate AU to km.<br />
 			 *            {String|Array}options.terms: request terms.<br />
-			 *            V: 黃經 in degrees. ecliptic longitude reckoned along
+			 *            V: 地心黃經 in radians. ecliptic longitude reckoned along
 			 *            the moving ecliptic from the mean equinox of date<br />
-			 *            U: 黃緯 in degrees. ecliptic latitude reckoned from the
-			 *            moving ecliptic<br />
-			 *            R: 地心距離 in km. geocentric distance
+			 *            U: 地心黃緯 in radians. ecliptic latitude reckoned from
+			 *            the moving ecliptic<br />
+			 *            R: 地心距離 in AU. geocentric distance<br />
 			 * 
-			 * @returns {Object} { V:longitude in degrees, U:latitude in
-			 *          degrees, R:distance in km }
+			 * @returns {Object} { V:longitude in radians, U:latitude in
+			 *          radians, R:distance in AU }
 			 * 
 			 * @see http://www.gautschy.ch/~rita/archast/ephemeriden.html
 			 * @see https://github.com/infinet/lunar-calendar/
@@ -2922,13 +3145,14 @@ if (typeof CeL === 'function')
 				/**
 				 * spherical coordinates of its centre:
 				 * 
-				 * r: 地心距離 in km. (geocentric distance)
+				 * r: 地心距離 in AU. (geocentric distance)
 				 * 
-				 * V: 從曆元平春分點沿移動黃道的黃經 in degrees. (ecliptic longitude reckoned
-				 * along the moving ecliptic from the mean equinox of date)
+				 * V: 從曆元平春分點沿移動黃道(瞬時黃道?)的地心黃經 in radians. (ecliptic longitude
+				 * reckoned along the moving ecliptic from the mean equinox of
+				 * date)
 				 * 
-				 * U: 移動黃道計算的黃緯 in degrees. (ecliptic latitude reckoned from the
-				 * moving ecliptic)
+				 * U: 移動黃道(瞬時黃道?)計算的地心黃緯 in radians. (ecliptic latitude reckoned
+				 * from the moving ecliptic)
 				 */
 				coordinates = library_namespace.null_Object();
 
@@ -2994,15 +3218,39 @@ if (typeof CeL === 'function')
 					// Amp_to_integer: see convert_LEA406()
 					sum /= Amp_to_integer;
 
-					// R in km
-					if (term !== 'R') {
-						if (term === 'V')
-							sum += polynomial_value(LEA406_V_coefficients, τ);
-						// V, U in arcseconds → degrees
-						sum /= DEGREES_TO_ARCSECONDS;
-					}
+					if (term === 'V')
+						sum += polynomial_value(LEA406_V_coefficients, τ);
+					// R is now km. e.g., 384399.
+					// V, U is now arcseconds.
+					if (term !== 'R')
+						// default: V, U in arcseconds → radians
+						sum *= ARCSECONDS_TO_RADIANS;
 					coordinates[term] = sum;
 				});
+
+				if (options.FK5 !== false) {
+					// τ: tmp
+					τ = dynamical_to_FK5({
+						L : coordinates.V,
+						B : coordinates.U
+					}, τ);
+					coordinates.V = τ.L;
+					coordinates.U = τ.B;
+				}
+
+				// 單位轉換。
+				if (options.degrees) {
+					// V, U in radians → degrees
+					if (coordinates.V)
+						coordinates.V /= DEGREES_TO_RADIANS;
+					if (coordinates.U)
+						coordinates.U /= DEGREES_TO_RADIANS;
+				}
+				// R is now km. e.g., 384399.
+				if (!options.km && coordinates.R)
+					// default: R in km → AU.
+					// 1000: 1 km = 1000 m
+					coordinates.R /= AU_TO_METERS / 1000;
 
 				return terms.length === 1
 				//
@@ -3316,22 +3564,31 @@ if (typeof CeL === 'function')
 			// lunar coordinates 月亮位置(坐標)
 
 			/**
-			 * lunar coordinates, moon's coordinates 月亮位置(坐標)計算。<br />
+			 * lunar coordinates, moon's coordinates 月亮位置(地心黃道坐標)計算。<br />
 			 * get lunar angle, moon's angle. 僅將 LEA-406 修正章動 nutation。
 			 * 
 			 * @param {Number}TT_JD
 			 *            Julian date (JD of 天文計算用時間 TT)
+			 * @param {Object}[options]
+			 *            options 設定特殊功能:<br />
+			 *            {Boolean}options.degrees: translate radians to
+			 *            degrees.<br />
+			 *            {Boolean}options.km: translate AU to km.<br />
 			 * 
-			 * @returns {Object} { V:longitude in degrees, U:latitude in
-			 *          degrees, R:distance in km }
+			 * @returns {Object} { V:longitude in radians, U:latitude in
+			 *          radians, R:distance in AU }
 			 */
-			function lunar_coordinates(TT_JD) {
+			function lunar_coordinates(TT_JD, options) {
+				// 前置處理。
+				if (!library_namespace.is_Object(options))
+					options = library_namespace.null_Object();
+
 				var coordinates = LEA406(TT_JD);
 
 				if (coordinates.V || coordinates.U) {
 					var n = nutation(TT_JD);
 					if (coordinates.V) {
-						// V, U in arcseconds
+						// V, U in radians
 
 						/**
 						 * 修正經度 of 月亮光行時間 light-time correction (Moon's
@@ -3351,7 +3608,7 @@ if (typeof CeL === 'function')
 						 * @see http://en.wikipedia.org/wiki/Light-time_correction
 						 * @see http://lifesci.net/pod/bbs/board.php?bo_table=B07&wr_id=52
 						 */
-						var light_time = -0.70 / DEGREES_TO_ARCSECONDS;
+						var light_time = -0.70 * ARCSECONDS_TO_RADIANS;
 						if (false)
 							(function() {
 								/**
@@ -3359,8 +3616,9 @@ if (typeof CeL === 'function')
 								 * 
 								 * @deprecated
 								 */
-								// coordinates.R in m
-								var r = coordinates.R || LUNAR_DISTANCE_M;
+								// coordinates.R in AU.
+								var r = coordinates.R * AU_TO_METERS
+										|| LUNAR_DISTANCE_M;
 								// 地球半徑。
 								r -= TERRA_RADIUS_M;
 								// 1000: 1 km = 1000 m (CELERITAS in m/s)
@@ -3368,12 +3626,12 @@ if (typeof CeL === 'function')
 										/ ONE_DAY_SECONDS;
 								library_namespace.debug(
 								//
-								'月亮經度光行差 of JD'
-										+ TT_JD
-										+ ' ('
-										+ library_namespace.JD_to_Date(
-												UT_of(TT_JD)).format('CE')
-										+ '): ' + format_angle(light_time), 3);
+								'月亮經度光行差 of JD' + TT_JD + ' ('
+								//
+								+ library_namespace.JD_to_Date(
+								//
+								UT_of(TT_JD)).format('CE') + '): '
+										+ format_degrees(light_time), 3);
 							});
 						coordinates.V += light_time;
 
@@ -3393,22 +3651,42 @@ if (typeof CeL === 'function')
 						 * Celestial Reference Frame. Spans JED 0625360.5 (-3000
 						 * FEB 23) to 2816912.50 (+3000 MAY 06)
 						 */
-						coordinates.V += n[0] / DEGREES_TO_RADIANS;
-						coordinates.V = normalize_angle(coordinates.V);
+						coordinates.V += n[0];
+						coordinates.V = normalize_radians(coordinates.V);
 					}
 					if (coordinates.U) {
-						// V, U in arcseconds
+						// V, U in radians.
 						// 修正章動 nutation。
-						coordinates.U += n[1] / DEGREES_TO_RADIANS;
-						coordinates.U = normalize_angle(coordinates.U, true);
+						coordinates.U += n[1];
+						coordinates.U = normalize_radians(coordinates.U, true);
 					}
 				}
+
+				if ((coordinates.λ = coordinates.V)
+				//
+				&& (coordinates.β = coordinates.U)) {
+					get_horizontal(coordinates, TT_JD, options);
+				}
+
+				// 單位轉換。
+				if (options.degrees) {
+					// V, U in radians → degrees
+					if (coordinates.V)
+						coordinates.V /= DEGREES_TO_RADIANS;
+					if (coordinates.U)
+						coordinates.U /= DEGREES_TO_RADIANS;
+				}
+				if (options.km && coordinates.R)
+					// R in AU → km.
+					// 1000: 1 km = 1000 m
+					coordinates.R *= AU_TO_METERS / 1000;
 
 				return coordinates;
 			}
 
 			_.lunar_coordinates = lunar_coordinates;
 
+			// lunar_phase_of_JD_cache[TT_JD] = degrees;
 			var lunar_phase_of_JD_cache = [];
 
 			/**
@@ -3421,22 +3699,21 @@ if (typeof CeL === 'function')
 			 * @param {Boolean}normalize_360
 			 *            正規化成 0°–360°，而非 -180°–180°。
 			 * 
-			 * @returns {Number} degrees
+			 * @returns {Number}angle in degrees
 			 */
 			function lunar_phase_angel_of_JD(TT_JD, normalize_360) {
 				var degrees;
 
 				if (String(TT_JD) in lunar_phase_of_JD_cache)
 					degrees = lunar_phase_of_JD_cache[TT_JD];
-				else if (!isNaN(degrees
+				else if (!isNaN(degrees =
 				// 可以忽略章動的影響。
-				= lunar_coordinates(TT_JD).V
-				//
-				- solar_coordinates(TT_JD).apparent))
+				lunar_coordinates(TT_JD).V / DEGREES_TO_RADIANS
+						- solar_coordinates(TT_JD).apparent))
 					lunar_phase_of_JD_cache[TT_JD] = degrees;
 
 				if (!isNaN(degrees))
-					degrees = normalize_angle(degrees, !normalize_360);
+					degrees = normalize_degrees(degrees, !normalize_360);
 				return degrees;
 			}
 
@@ -3563,12 +3840,12 @@ if (typeof CeL === 'function')
 
 				library_namespace.debug(
 				//
-				'初始值: year ' + year_month + ', phase ' + phase + ' ('
+				'初始值: year ' + year_month + ', phase ' + phase
 				//
-				+ degrees + '°): JD' + TT_JD + ' ('
+				+ ' (' + degrees + '°): JD' + TT_JD + ' ('
 				//
 				+ library_namespace.JD_to_Date(UT_of(TT_JD)).format('CE')
-						+ '), ' + format_angle(result_degrees) + '; JD: '
+						+ '), ' + format_degrees(result_degrees) + '; JD: '
 						+ low_JD + '–' + up_JD, 2);
 
 				// 內插法 main loop
@@ -3608,7 +3885,8 @@ if (typeof CeL === 'function')
 				library_namespace.debug('JD' + TT_JD + ' ('
 				//
 				+ library_namespace.JD_to_Date(UT_of(TT_JD)).format('CE')
-						+ '): ' + format_angle(angel(TT_JD)), 2);
+				//
+				+ '): ' + format_degrees(angel(TT_JD)), 2);
 
 				// apply ΔT: TT → UT.
 				return options && options.UT ? UT_of(TT_JD) : TT_JD;
@@ -3674,7 +3952,8 @@ if (typeof CeL === 'function')
 				'JD' + TT_JD + ' ('
 				//
 				+ library_namespace.JD_to_Date(UT_of(TT_JD)).format('CE')
-						+ '): ' + format_angle(angel(TT_JD)), 2);
+				//
+				+ '): ' + format_degrees(angel(TT_JD)), 2);
 
 				// apply ΔT: TT → UT.
 				return options && options.UT ? UT_of(TT_JD) : TT_JD;
@@ -3805,7 +4084,8 @@ if (typeof CeL === 'function')
 			 *            options 設定特殊功能:<br />
 			 *            {Boolean}options.time: 取得月相時，亦取得時刻。<br />
 			 *            {Boolean|String}options.晦: 顯示晦。<br />
-			 *            {Boolean}options.index: 顯示 index 而非名稱。
+			 *            {Boolean}options.index: 顯示 index 而非名稱。<br />
+			 *            {Boolean}options.TT: date is TT instead of UT.
 			 * 
 			 * @returns {Number} phase: 0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 */
@@ -3821,7 +4101,11 @@ if (typeof CeL === 'function')
 				if (!library_namespace.is_Object(options))
 					options = library_namespace.null_Object();
 
-				var phase = Math.floor(_phase), TT_JD = TT_of(UT_JD);
+				var phase = Math.floor(_phase), TT_JD;
+				if (options.TT)
+					UT_JD = UT_of(TT_JD = UT_JD);
+				else
+					TT_JD = TT_of(UT_JD);
 
 				// 假如變換剛好落在隔日子夜0時剛開始(這機率應該極低)，則今日還是應該算前一個。
 				// 因為月相長度大於日長度，此即表示今天還沒變換月相。
@@ -3874,7 +4158,7 @@ if (typeof CeL === 'function')
 							 * 
 							 * @type {Number}
 							 */
-							d = lunar_coordinates(TT).U,
+							d = lunar_coordinates(TT).U / DEGREES_TO_RADIANS,
 							// 計算月面視半徑 (度)。
 							/**
 							 * 月面的地心視半徑 (度)。
@@ -4263,8 +4547,8 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Date}date
 			 *            指定日期。
-			 * @param {Object}options
-			 *            options
+			 * @param {Object}[options]
+			 *            options 設定特殊功能:<br />
 			 * 
 			 * @returns {Array} [ 年, 月, 日 ]
 			 */
@@ -4300,6 +4584,258 @@ if (typeof CeL === 'function')
 			}
 
 			_.夏曆 = 夏曆;
+
+			// -------------------------------------------------------------------------------------------------
+			// coordinates 統合 API
+
+			/**
+			 * 天體位置統合 API
+			 * 
+			 * @param {String}object
+			 *            天體 (planets 行星).
+			 * @param {Nunber|String|Date}date
+			 *            UT (or TT)
+			 * @param {Array}local
+			 *            the observer's geographic location [ latitude (°),
+			 *            longitude (°), elevation or geometric height (m) ]<br />
+			 *            觀測者 [ 緯度（北半球為正,南半球為負）, 經度（從Greenwich向東為正，西為負）,
+			 *            海拔標高(觀測者距海平面的高度) ]
+			 * @param {Object}[options]
+			 *            options 設定特殊功能:<br />
+			 *            {Boolean}options.TT: date is TT instead of UT.
+			 * 
+			 * @constructor
+			 */
+			function Coordinates(object, date, local, options) {
+				// object name
+				this.object = object = Coordinates.normalize_object(object);
+				// 先行載入必須的 terms。
+				// 對 sun, moon 特別處理。
+				if (object === 'moon') {
+					if (!LEA406_loaded('V'))
+						LEA406_load_terms('V');
+				} else if (object !== 'sun') {
+					object = VSOP87.object_name(object);
+					if (!(object in VSOP87_terms))
+						VSOP87_load_terms(object);
+				}
+				object = VSOP87.object_name(solar_terms_object);
+				if (!(object in VSOP87_terms))
+					VSOP87_load_terms(object);
+
+				if (local)
+					this.local = local;
+
+				// 紀錄時間。
+				this.JD = Number.isFinite(date) ? date : library_namespace
+						.Julian_day(date);
+				if (options && options.TT)
+					this.UT = UT_of(this.TT = this.JD);
+				else
+					this.TT = TT_of(this.UT = this.JD);
+			}
+
+			_.celestial_coordinates = Coordinates;
+
+			Coordinates.object_alias = {
+				solar : 'sun',
+				lunar : 'moon'
+			};
+			// normalize object name
+			Coordinates.normalize_object = function(name) {
+				name = name.toLowerCase();
+				if (name in Coordinates.object_alias)
+					name = Coordinates.object_alias[name];
+				return name;
+			};
+
+			function set_coordinates(type, coordinates) {
+				// reset property to cache.
+				Object.defineProperty(this, type, {
+					value : coordinates
+				});
+				return coordinates;
+			}
+
+			// 一次把 ETH 全部設定完。
+			function set_horizontal_coordinates(coordinates) {
+				this.s('E', [ normalize_radians(coordinates.α),
+				//
+				normalize_radians(coordinates.δ, true), coordinates.Δ ]);
+				this.s('H', [ normalize_radians(coordinates.Az),
+						normalize_radians(coordinates.Alt, true) ]);
+				if (coordinates.LHA)
+					this.LHA = coordinates.LHA;
+				if (coordinates.Ψ)
+					this.elongation = coordinates.Ψ;
+				coordinates = coordinates.T;
+				this.s('T', [ normalize_radians(coordinates[0]),
+						normalize_radians(coordinates[1], true) ]);
+			}
+
+			function get_coordinates(type) {
+				var coordinates;
+				TODO;
+
+				return coordinates;
+			}
+
+			Object.defineProperties(Coordinates.prototype, {
+				s : {
+					value : set_coordinates
+				},
+				sh : {
+					value : set_horizontal_coordinates
+				},
+				c : {
+					value : get_coordinates
+				}
+			});
+
+			// ----------------------------------------------------------------------------
+
+			// D日心瞬時黃道 heliocentric dynamical ecliptic coordinate system
+			// [ longitude 黃經(radians), latitude 黃緯(radians), distance 距離(AU) ]
+			Coordinates.D = function() {
+				var coordinates;
+				if (this.object === 'moon') {
+					// LEA406 計算月亮位置(地心瞬時黃道坐標)
+					coordinates = LEA406(this.TT, {
+						FK5 : false
+					});
+					coordinates = [
+							normalize_radians(coordinates.V + TURN_TO_RADIANS
+									/ 2),
+							normalize_radians(-coordinates.U, true),
+							coordinates.R ];
+				} else if (this.object === 'sun')
+					// 日心瞬時黃道以太陽為中心。
+					coordinates = [ 0, 0, 0 ];
+				else {
+					var tmp_c = object_coordinates(this.TT, this.object, {
+						equatorial : true,
+						local : this.local,
+						elongation : true
+					});
+					// S日心視黃道 heliocentric ecliptic coordinate system
+					coordinates = tmp_c.S;
+					this.s('S', [ normalize_radians(coordinates.L),
+							normalize_radians(coordinates.B, true),
+							coordinates.R ]);
+					coordinates = tmp_c;
+					this.s('G', [ normalize_radians(coordinates.λ),
+							normalize_radians(coordinates.β, true),
+							coordinates.Δ ]);
+
+					this.sh(coordinates);
+
+					// D日心瞬時黃道 heliocentric dynamical ecliptic coordinate system
+					coordinates = tmp_c.D;
+					coordinates
+					// 
+					= [ normalize_radians(coordinates.L),
+							normalize_radians(coordinates.B, true),
+							coordinates.R ];
+				}
+
+				return this.s('D', coordinates);
+			};
+
+			// S日心視黃道 heliocentric ecliptic coordinate system
+			// [ longitude 黃經(radians), latitude 黃緯(radians), distance 距離(AU) ]
+			Coordinates.S = function() {
+				var coordinates;
+				if (this.object === 'moon') {
+					coordinates = this.G;
+					coordinates = dynamical_to_FK5({
+						L : coordinates[0],
+						B : coordinates[1]
+					}, Julian_century(this.TT) / 10);
+					coordinates = [ coordinates.L, coordinates.B, this.G[2] ];
+				} else if (this.object === 'sun')
+					// 日心黃道以太陽為中心。
+					coordinates = [ 0, 0, 0 ];
+				else {
+					coordinates = this.D;
+					return this.S;
+				}
+
+				return this.s('S', coordinates);
+			};
+
+			// G地心視黃道 geocentric solar ecliptic coordinate system
+			// [ longitude λ黃經(radians), latitude β黃緯(radians), distance 距離(AU)
+			// ]
+			Coordinates.G = function() {
+				var coordinates;
+				if (this.object === 'moon') {
+					coordinates = lunar_coordinates(this.TT, {
+						equatorial : true,
+						local : this.local,
+						elongation : true
+					});
+
+					this.sh(coordinates);
+
+					coordinates
+					//
+					= [ coordinates.V, coordinates.U, coordinates.R ];
+				} else if (this.object === 'sun') {
+					coordinates = solar_coordinates(this.TT, {
+						equatorial : true,
+						local : this.local,
+						elongation : true
+					});
+
+					this.sh(coordinates);
+
+					// coordinates.apparent or use coordinates.L
+					coordinates = [ coordinates.apparent * DEGREES_TO_RADIANS,
+							coordinates.β, coordinates.Δ ];
+				} else {
+					coordinates = this.D;
+					return this.G;
+				}
+
+				return this.s('G', coordinates);
+			};
+
+			// E地心赤道 geocentric equatorial coordinate system
+			// [ longitude 黃經(radians), latitude 黃緯(radians), distance 距離(AU) ]
+			Coordinates.E = function() {
+				// eval
+				var coordinates = this.G;
+				return this.E;
+			};
+
+			// T站心赤道 topocentric equatorial coordinate system
+			// [ longitude 黃經(radians), latitude 黃緯(radians), distance 距離(AU) ]
+			Coordinates.T = function() {
+				// eval
+				var coordinates = this.G;
+				return this.T;
+			};
+
+			// H站心地平 topocentric horizontal coordinate system
+			// [ Azimuth (Az) 方位角又稱地平經度, Altitude (Alt) 高度角或仰角又稱地平緯度 ]
+			Coordinates.H = function() {
+				// eval
+				var coordinates = this.G;
+				return this.H;
+			};
+
+			// D日心瞬時黃道 heliocentric dynamical ecliptic coordinate system
+			// S日心視黃道 heliocentric ecliptic coordinate system
+			// G地心視黃道 geocentric solar ecliptic coordinate system
+			// E地心赤道 geocentric equatorial coordinate system
+			// T站心赤道 topocentric equatorial coordinate system
+			// H站心地平 topocentric horizontal coordinate system
+			'DSGETH'.split('').forEach(function(type) {
+				Object.defineProperty(Coordinates.prototype, type, {
+					enumerable : true,
+					get : Coordinates[type]
+				});
+			});
 
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 
@@ -4755,8 +5291,17 @@ if (typeof CeL === 'function')
 			 * 
 			 * The ICRF is a fixed reference frame. The FK5 based on fixed
 			 * reference frame of J2000.0?
-			 * http://blog.csdn.net/songgz/article/details/2680144
-			 * 通過數以千計的恆星位置，反推出春風點在天球上的位置，我們常說的FK5天球坐標系統就與它有關。
+			 * 
+			 * @see http://blog.csdn.net/songgz/article/details/2680144<br />
+			 *      通過數以千計的恆星位置，反推出春風點在天球上的位置，我們常說的FK5天球坐標系統就與它有關。
+			 * @see https://en.wikipedia.org/wiki/Barycentric_celestial_reference_system<br />
+			 *      The orientation of the BCRS/ICRS axes also align within 0.02
+			 *      arcsecond of the Earth's mean equator and equinox for the
+			 *      Fifth Fundamental Catalog (FK5) J2000.0 epoch.
+			 * @see http://aa.usno.navy.mil/faq/docs/ICRS_doc.php<br />
+			 *      The orientation of the ICRS axes is consistent with the
+			 *      equator and equinox of J2000.0 represented by the FK5,
+			 *      within the errors of the latter.
 			 * 
 			 * @inner
 			 */

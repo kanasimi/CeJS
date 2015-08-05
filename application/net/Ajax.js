@@ -684,7 +684,7 @@ function get_URL_node(URL, onload, encoding, post_data) {
 				data = null;
 			});
 		} else {
-			library_namespace.warn('get_URL_node: get [' + URL + '], but no listener!');
+			library_namespace.warn('get_URL_node: got [' + URL + '], but no listener!');
 			//console.log(result);
 		}
 	};
