@@ -644,17 +644,21 @@ if (typeof CeL === 'function')
 			// normalize degrees
 			// to proper degrees 0–less than 360
 			// near_0: −180–less than 180
-			function normalize_degrees(degree, near_0) {
-				if ((degree %= TURN_TO_DEGREES) < 0)
-					degree += TURN_TO_DEGREES;
-				if (near_0 && degree >= TURN_TO_DEGREES / 2)
-					degree -= TURN_TO_DEGREES;
-				return degree;
+			function normalize_degrees(degrees, near_0) {
+				if (!degrees)
+					return degrees;
+				if ((degrees %= TURN_TO_DEGREES) < 0)
+					degrees += TURN_TO_DEGREES;
+				if (near_0 && degrees >= TURN_TO_DEGREES / 2)
+					degrees -= TURN_TO_DEGREES;
+				return degrees;
 			}
 
 			_.normalize_degrees = normalize_degrees;
 
 			function normalize_radians(radians, near_0) {
+				if (!radians)
+					return radians;
 				radians = radians.mod(TURN_TO_RADIANS);
 				if (near_0 && radians >= TURN_TO_RADIANS / 2)
 					radians -= TURN_TO_RADIANS;
@@ -4649,6 +4653,7 @@ if (typeof CeL === 'function')
 				return name;
 			};
 
+			// 設定 coordinates.
 			function set_coordinates(type, coordinates) {
 				// reset property to cache.
 				Object.defineProperty(this, type, {
@@ -4657,34 +4662,88 @@ if (typeof CeL === 'function')
 				return coordinates;
 			}
 
-			// 一次把 ETH 全部設定完。
+			// 一次把 E地心赤道, T站心赤道, H站心地平 全部設定完。
 			function set_horizontal_coordinates(coordinates) {
 				this.s('E', [ normalize_radians(coordinates.α),
 				//
 				normalize_radians(coordinates.δ, true), coordinates.Δ ]);
-				this.s('H', [ normalize_radians(coordinates.Az),
-						normalize_radians(coordinates.Alt, true) ]);
+				this.s('H', coordinates.Az ? [
+						normalize_radians(coordinates.Az),
+						normalize_radians(coordinates.Alt, true) ]
+				// 站心地平座標 .Az, .Alt 比較可能未設定。
+				: undefined);
+				// LHA: local hour angle (in radians) 本地地心時角，從南向西測量。
 				if (coordinates.LHA)
 					this.LHA = coordinates.LHA;
+				// elongation Ψ of the planet, its angular distance to the Sun
+				// https://en.wikipedia.org/wiki/Elongation_%28astronomy%29
+				// 行星的距角，即地心看行星與太陽的角距離。
 				if (coordinates.Ψ)
 					this.elongation = coordinates.Ψ;
-				coordinates = coordinates.T;
-				this.s('T', [ normalize_radians(coordinates[0]),
-						normalize_radians(coordinates[1], true) ]);
+				this.s('T', (coordinates = coordinates.T) ? [
+						normalize_radians(coordinates[0]),
+						normalize_radians(coordinates[1], true) ]
+				// coordinates.T 可能未設定。
+				: undefined);
 			}
 
+			// symbols:
+			// @see
+			// https://en.wikipedia.org/wiki/Celestial_coordinate_system#Coordinate_systems
 			function get_coordinates(type) {
-				var coordinates;
-				TODO;
+				if (typeof type === 'string' && type.includes(','))
+					type = type.split(/,+/);
+				if (Array.isArray(type))
+					return type.map(get_coordinates.bind(this));
 
-				return coordinates;
+				type = String(type).toLowerCase().split(/[\s\-]+/);
+				if (type.includes('λ'))
+					return this.G[0];
+				if (type.includes('β'))
+					return this.G[1];
+				if (type.includes('distance'))
+					return this.G[2];
+				if (type.includes('α'))
+					return this.E[0];
+				if (type.includes('δ'))
+					return this.E[1];
+				if (type.includes('az'))
+					return this.H && this.H[0];
+				if (type.includes('alt'))
+					return this.H && this.H[1];
+
+				if (type.includes('dynamical'))
+					return this.D;
+				// after detect dynamical
+				if (type.includes('heliocentric'))
+					return this.S;
+
+				if (type.includes('horizontal'))
+					return this.H;
+				// after detect horizontal
+				if (type.includes('topocentric'))
+					return this.T;
+
+				// after detect heliocentric, topocentric
+				if (type.includes('equatorial'))
+					return this.E;
+				// after detect equatorial
+				if (type.includes('geocentric') || type.includes('ecliptic'))
+					return this.G;
+
+				if ((type[0] in this)
+				//
+				&& typeof (type = this[type[0]]) !== 'function')
+					return type;
 			}
 
 			Object.defineProperties(Coordinates.prototype, {
 				s : {
+					enumerable : false,
 					value : set_coordinates
 				},
 				sh : {
+					enumerable : false,
 					value : set_horizontal_coordinates
 				},
 				c : {
@@ -4756,8 +4815,7 @@ if (typeof CeL === 'function')
 					// 日心黃道以太陽為中心。
 					coordinates = [ 0, 0, 0 ];
 				else {
-					coordinates = this.D;
-					return this.S;
+					return this.D && this.S;
 				}
 
 				return this.s('S', coordinates);
@@ -4793,35 +4851,32 @@ if (typeof CeL === 'function')
 					coordinates = [ coordinates.apparent * DEGREES_TO_RADIANS,
 							coordinates.β, coordinates.Δ ];
 				} else {
-					coordinates = this.D;
-					return this.G;
+					return this.D && this.G;
 				}
 
 				return this.s('G', coordinates);
 			};
 
 			// E地心赤道 geocentric equatorial coordinate system
-			// [ longitude 黃經(radians), latitude 黃緯(radians), distance 距離(AU) ]
+			// [ longitude α赤經(radians), latitude δ赤緯(radians), distance 距離(AU)
+			// ]
 			Coordinates.E = function() {
 				// eval
-				var coordinates = this.G;
-				return this.E;
+				return this.G && this.E;
 			};
 
 			// T站心赤道 topocentric equatorial coordinate system
-			// [ longitude 黃經(radians), latitude 黃緯(radians), distance 距離(AU) ]
+			// [ longitude 赤經(radians), latitude 赤緯(radians) ]
 			Coordinates.T = function() {
 				// eval
-				var coordinates = this.G;
-				return this.T;
+				return this.G && this.T;
 			};
 
 			// H站心地平 topocentric horizontal coordinate system
 			// [ Azimuth (Az) 方位角又稱地平經度, Altitude (Alt) 高度角或仰角又稱地平緯度 ]
 			Coordinates.H = function() {
 				// eval
-				var coordinates = this.G;
-				return this.H;
+				return this.G && this.H;
 			};
 
 			// D日心瞬時黃道 heliocentric dynamical ecliptic coordinate system
