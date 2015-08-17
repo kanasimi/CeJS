@@ -43,6 +43,30 @@ _// JSDT:_module_
 };
 
 
+//----------------------------------------------------- //
+
+(function() {
+	runCode.setR = 0;
+	for (var i = 0, j, t, s, n_e; i < 10;) {
+		t = 2000 + 8000 * Math.random();
+		s = get_random_prime.get_different_number_set(3, t, t / 8);
+		if (s.LCM > 9999)
+			continue;
+		n_e = [];
+		n_e[s.GCD] = 1;
+		for (j = 0; j < s.length; j++)
+			if (n_e[s[j]])
+				continue;
+			else
+				n_e[s[j]] = 1;
+		sl([ s.GCD, s.LCM ] + '<b style="color:#c4a">;</b> ' + s);
+		i++;
+	}
+});
+
+
+//----------------------------------------------------- //
+
 // 中式短除法(Chinese short division)並非 short division.
 // https://en.wikipedia.org/wiki/Short_division
 function draw_short_division(naturals, layer, GCD_only) {

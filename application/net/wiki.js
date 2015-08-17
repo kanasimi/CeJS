@@ -773,6 +773,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	options = config.options || {
 		// Throw an error if the page doesn't exist.
 		// 若頁面不存在，則產生錯誤。
+		// 要取消這項，須注意在重定向頁之對話頁操作之可能。
 		nocreate : 1,
 		// 該編輯是一個小修訂 (minor edit)。
 		minor : 1,

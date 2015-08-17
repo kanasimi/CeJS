@@ -90,6 +90,9 @@ function initializer() {
 				// for 月亮視黃經
 				CeL.LEA406.load_terms('V');
 				CeL.LEA406.load_terms('U');
+				// for 月出月落
+				CeL.LEA406.load_terms('R');
+
 			} ], function() {
 				// alias for CeL.gettext, then we can use _('message').
 				_ = CeL.gettext;
@@ -1375,8 +1378,9 @@ function draw_era(hierarchy) {
 		if (period_hierarchy = periods.length > 0) {
 			periods.unshift({
 				T : '資料圖層',
+				title : '點擊以設定資料圖層',
 				onclick : function() {
-					select_panel('data_layer', true);
+					select_panel('configuration', true);
 					return false;
 				},
 				S : 'cursor: pointer;'
@@ -1565,9 +1569,9 @@ var last_selected, select_panels = {
 	FAQ : '使用說明',
 
 	era_graph : '紀年線圖',
-	data_layer : '資料圖層',
 	// 年表
 	calendar : '曆譜',
+	configuration : '設定',
 	// 整批轉換
 	batch_processing : '批次轉換',
 	tag_text : '標注文本',
@@ -2168,6 +2172,18 @@ initialize_thdl_solar_term = function() {
 // ---------------------------------------------------------------------//
 
 /**
+ * 地理座標（經緯度）<br />
+ * the observer's geographic location [ latitude (°), longitude (°), time zone
+ * (e.g., UTC+8: 8), elevation or geometric height (m) ]<br />
+ * 觀測者 [ 緯度（北半球為正,南半球為負）, 經度（從Greenwich向東為正，西為負）, 時區, 海拔標高(觀測者距海平面的高度) ]
+ * 
+ * @type {Array}
+ */
+var local_coordinates;
+
+// ---------------------------------------------------------------------//
+
+/**
  * 若非在行用/適用期間，則淡化顯示之。
  * 
  * @param {Date}date
@@ -2396,7 +2412,8 @@ function affairs() {
 		CeL.get_element('era_graph').style.display = 'none';
 		SVG_object = null;
 		delete select_panels['era_graph'];
-		delete select_panels['data_layer'];
+		// delete select_panels['data_layer'];
+		CeL.toggle_display('data_layer', false);
 		if (is_IE11)
 			// 多按幾次就會 hang 住。
 			CeL.err('IE 11 尚無法使用線圖。請考慮使用 Chrome 或 Firefox 等網頁瀏覽器。');
@@ -2424,9 +2441,11 @@ function affairs() {
 
 		// 資料圖層
 		list = [ {
-			div : {
-				T : '請選擇所欲載入之資料圖層。'
+			h3 : {
+				T : '資料圖層'
 			}
+		}, {
+			T : '請選擇所欲載入之資料圖層。'
 		} ];
 
 		v = add_tag.data_file;
@@ -2536,6 +2555,35 @@ function affairs() {
 	Gregorian_reform = new Date(1582, 10 - 1, 15), Revised_Julian_reform = new Date(
 			1923, 10 - 1, 14);
 
+	var method_nodes = [ {
+		a : '採用 LEA-406'
+		//
+		+ (CeL.LEA406.default_type === 'a' ? 'b' : 'a'),
+		href : '#',
+		S : 'cursor:pointer',
+		onclick : function() {
+			CeL.set_cookie('LEA406_type',
+			//
+			CeL.LEA406.default_type === 'a' ? 'b' : 'a');
+			history.go(0);
+			return false;
+		}
+	}, '（a 較精準，b 較快。點選後將', {
+		em : '隨即重新整理'
+	}, '，以更改設定！）' ];
+	CeL.new_node(method_nodes, 'method_layer');
+	method_nodes = [ 'Because using complete LEA-406' + CeL.LEA406.default_type
+	//
+	, ' to calculate the position of moon,'
+	//			
+	+ ' it often takes seconds to minutes to display.', {
+		br : null
+	}, '因為採用了完整的 LEA-406'
+	//
+	+ CeL.LEA406.default_type + ' 來計算月亮位置，關於月亮位置之項目，例如「', {
+		T : '月相'
+	}, '」欄每次執行常需耗費數秒至一兩分鐘，敬請見諒。您尚可' ].concat(method_nodes);
+
 	// add 東亞陰陽曆法
 	function add_曆法(曆名, 說明, link) {
 		if (Array.isArray(說明))
@@ -2579,6 +2627,31 @@ function affairs() {
 				} : show, CeL[曆名 + '_Date'].行用);
 			}
 		} ];
+	}
+
+	function add_陰陽暦(歲首) {
+		if (歲首)
+			歲首 = {
+				歲首 : 歲首
+			};
+		return function(date) {
+			if (/* date.準 || */date.精)
+				return;
+			// [ 年, 月, 日 ]
+			var 曆 = CeL.夏曆(date, 歲首);
+			date = '月' + 曆[2] + '日';
+			if (typeof 曆[1] === 'string' && 曆[1].charAt(0) === '閏')
+				date = [ {
+					T : '閏',
+					S : 'color:#52f;'
+				}, 曆[1].slice(1) + date ];
+			else
+				date = 曆[1] + date;
+			return 曆[2] === 1 ? {
+				span : date,
+				S : 'color:#f94;'
+			} : date;
+		}
 	}
 
 	// calendar_column
@@ -2718,33 +2791,7 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		// 天文計算 astronomical calculations
-		astronomy : [ '天文計算 astronomical calculations',
-				[ 'Because using complete LEA-406' + CeL.LEA406.default_type
-				//
-				, ' to calculate the position of moon,'
-				//			
-				+ ' it often takes seconds to minutes to display.', {
-					br : null
-				}, '因為採用了完整的 LEA-406'
-				//
-				+ CeL.LEA406.default_type + ' 來計算月亮位置，關於月亮位置之項目，例如「', {
-					T : '月相'
-				}, '」欄每次執行常需耗費數秒至一兩分鐘，敬請見諒。您尚可', {
-					a : '採用 LEA-406'
-					//
-					+ (CeL.LEA406.default_type === 'a' ? 'b' : 'a'),
-					href : '#',
-					S : 'cursor:pointer',
-					onclick : function() {
-						CeL.set_cookie('LEA406_type',
-						//
-						CeL.LEA406.default_type === 'a' ? 'b' : 'a');
-						history.go(0);
-						return false;
-					}
-				}, '（a 較精準，b 較快。點選後將', {
-					em : '隨即重新整理'
-				}, '，以更改設定！）' ] ],
+		astronomy : [ '天文計算 astronomical calculations', method_nodes ],
 
 		precession : [ {
 			a : {
@@ -2921,7 +2968,7 @@ function affairs() {
 
 			var JD = CeL.TT(new Date(date.offseted_value())),
 			//
-			degrees = CeL.lunar_phase_angel_of_JD(JD);
+			degrees = CeL.lunar_phase_angle_of_JD(JD);
 
 			return {
 				span : isNaN(degrees) ? data_load_message
@@ -2954,9 +3001,7 @@ function affairs() {
 			if (Array.isArray(phase)) {
 				var is_solar = phase[0] === '朔',
 				//
-				eclipse = phase[2]
-				//
-				&& ((is_solar ? '日' : '月') + '食');
+				eclipse_info = phase[2];
 				phase = [ {
 					b : {
 						T : phase[0]
@@ -2965,43 +3010,67 @@ function affairs() {
 					parser : 'CE',
 					// format : '%Y/%m/%d %H:%M:%S'
 					format : '%H:%M:%S'
-				}), eclipse ? [ ' ', {
+				}), eclipse_info ? [ ' ', {
 					a : {
-						T : eclipse
+						T : eclipse_info.name
 					},
 					R : _('Moon latitude') + ': '
 					//
-					+ CeL.format_degrees(phase[2], 2),
+					+ CeL.format_degrees(eclipse_info.Δlongitude, 2),
 					href : 'https://zh.wikipedia.org/wiki/'
 					//
-					+ encodeURIComponent(JD.format({
+					+ encodeURIComponent(
+					//
+					CeL.JD_to_Date(eclipse_info.TT).format({
 						parser : 'CE',
 						format : '%Y年%m月%d日',
 						offset : 0
-					}).replace(/^-/, '前') + eclipse)
-				}, '?', phase[3] ? [ {
+					}).replace(/^-/, '前') + (is_solar ? '日' : '月') + '食')
+				}, '?', eclipse_info.saros ? [ {
 					br : null
 				}, {
 					// 沙羅週期標示。
 					a : {
-						T : [ 'saros %1', phase[3][1] + '#' + phase[3][2] ]
+						T : [ 'saros %1',
+						//
+						eclipse_info.saros[1] + '#' + eclipse_info.saros[2] ]
 					},
 					href : 'https://en.wikipedia.org/wiki/'
 					//
-					+ (is_solar ? 'Solar' : 'Lunar') + '_Saros_' + phase[3][1]
-				}, is_solar ? [ ' (', {
+					+ (is_solar ? 'Solar' : 'Lunar')
+					//
+					+ '_Saros_' + eclipse_info.saros[1]
+				}, {
+					a : '@NASA',
+					R : 'NASA CATALOG OF ECLIPSE SAROS SERIES',
+					href : 'http://eclipse.gsfc.nasa.gov/'
+					//
+					+ (is_solar ? 'SEsaros/SEsaros' : 'LEsaros/LEsaros')
+					//
+					+ eclipse_info.saros[1].pad(3) + '.html'
+				}, is_solar && eclipse_info.type !== 'partial' ? [ ' (', {
 					a : {
 						T : 'path'
 					},
 					R : 'Eclipse Path by NASA',
 					href : 'http://eclipse.gsfc.nasa.gov/SEsearch/'
 					//
-					+ 'SEsearchmap.php?Ecl=' + JD.format({
+					+ 'SEsearchmap.php?Ecl='
+					//
+					+ CeL.JD_to_Date(eclipse_info.TT).format({
 						parser : 'CE',
 						format : '%5Y%2m%2d',
 						offset : 0
 					}) + '#map'
-				}, ')' ] : '' ] : '', '?' ] : '' ];
+				}, ')' ] : '' ] : '', ' ', {
+					span : CeL.JD_to_Date(CeL.UT(eclipse_info.TT)).format({
+						parser : 'CE',
+						format : '%H:%M:%S'
+					}),
+					R : 'maximum eclipse, 食甚時間.' + (eclipse_info.magnitude
+					//
+					? ' 食甚食分: ' + eclipse_info.magnitude.to_fixed(3) : '')
+				}, '?' ] : '' ];
 			} else if (phase)
 				phase = {
 					b : {
@@ -3009,6 +3078,110 @@ function affairs() {
 					}
 				};
 			return phase;
+		} ],
+
+		sunrise_sunset : [ {
+			a : {
+				// 日出日沒
+				T : '日出日落'
+			},
+			R : '所設定之地理座標當地當日之日出日落時刻。約有兩三分的精確度。',
+			href : 'https://en.wikipedia.org/wiki/Sunrise'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
+
+			var JDN = CeL.Date_to_JDN(date.offseted_value(0)),
+			//
+			data = [];
+
+			CeL.rise_set(local_coordinates, JDN)
+			//
+			.forEach(function(JD, index) {
+				if (JD)
+					data.push(CeL.JD_to_Date(JD).format({
+						parser : 'CE',
+						format : '%Y/%m/%d %H:%M:%S',
+						offset : local_coordinates[2] * 60
+					}), ' ', {
+						T : (index % 2 === 0 ? '' : 'sun')
+						//
+						+ CeL.rise_set.type_name[index]
+					}, {
+						br : null
+					});
+			});
+
+			return data;
+		} ],
+
+		twilight : [ {
+			a : {
+				T : '曙暮光'
+			},
+			R : '所設定之地理座標當地當日之曙光暮光時刻。約有兩三分的精確度。',
+			href : 'https://en.wikipedia.org/wiki/Twilight'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
+
+			var JDN = CeL.Date_to_JDN(date.offseted_value(0)),
+			//
+			data = [];
+
+			CeL.rise_set(local_coordinates, JDN, '456789'.split(''))
+			//
+			.forEach(function(JD, index) {
+				if (JD)
+					data.push(CeL.JD_to_Date(JD).format({
+						parser : 'CE',
+						format : '%Y/%m/%d %H:%M:%S',
+						offset : local_coordinates[2] * 60
+					}), ' ', {
+						T : CeL.rise_set.type_name[index + 4]
+					}, index === 2 ? {
+						hr : null,
+						S : 'margin:.1em;'
+					} : {
+						br : null
+					});
+			});
+
+			return data;
+		} ],
+
+		moon_rise_set : [ {
+			a : {
+				T : '月出月落'
+			},
+			R : '所設定之地理座標當地當日之月出月落時刻。約有兩三分的精確度。',
+			href : 'http://www.cwb.gov.tw/V7/astronomy/moonrise.htm'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
+
+			var JDN = CeL.Date_to_JDN(date.offseted_value(0)),
+			//
+			data = [];
+
+			CeL.rise_set(local_coordinates, JDN, null, 'moon')
+			//
+			.forEach(function(JD, index) {
+				if (JD)
+					data.push(CeL.JD_to_Date(JD).format({
+						parser : 'CE',
+						format : '%Y/%m/%d %H:%M:%S',
+						offset : local_coordinates[2] * 60
+					}), ' ', {
+						T : (index % 2 === 0 ? '' : 'moon')
+						//
+						+ CeL.rise_set.type_name[index]
+					}, {
+						br : null
+					});
+			});
+
+			return data;
 		} ],
 
 		ΔT : [ {
@@ -3026,9 +3199,9 @@ function affairs() {
 			var JD = CeL.Date_to_JD(date.offseted_value()),
 			//
 			ΔT = CeL.deltaT.JD(JD);
-			return CeL.age_of(new Date(0, 0, 0), new Date(0, 0, 0, 0, 0, ΔT))
+			return CeL.age_of(0, ΔT * 1000)
 			//
-			+ ' (' + ΔT.to_fixed(2) + ' s)';
+			+ ' (' + ΔT.to_fixed(Math.abs(ΔT) < 60 ? 4 : 2) + ' s)';
 		} ],
 
 		JD_of_TT : [ {
@@ -3601,17 +3774,7 @@ function affairs() {
 			//
 			+ '\n以定氣定朔無中置閏規則計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
 			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
-		}, function(date) {
-			if (/* date.準 || */date.精)
-				return;
-			// [ 年, 月, 日 ]
-			var 曆 = CeL.夏曆(date);
-			date = 曆[1] + '月' + 曆[2] + '日';
-			return 曆[2] === 1 ? {
-				span : date,
-				S : 'color:#f94;'
-			} : date;
-		} ],
+		}, add_陰陽暦() ],
 
 		殷曆 : [ {
 			a : {
@@ -3619,19 +3782,7 @@ function affairs() {
 			},
 			R : '以定氣定朔無中置閏規則計算得出，非實曆。殷曆預設歲首為建丑。計算速度較慢！',
 			href : 'https://zh.wikipedia.org/wiki/%E5%8F%A4%E5%85%AD%E6%AD%B7'
-		}, function(date) {
-			if (/* date.準 || */date.精)
-				return;
-			// [ 年, 月, 日 ]
-			var 曆 = CeL.夏曆(date, {
-				歲首 : '丑'
-			});
-			date = 曆[1] + '月' + 曆[2] + '日';
-			return 曆[2] === 1 ? {
-				span : date,
-				S : 'color:#f94;'
-			} : date;
-		} ],
+		}, add_陰陽暦('丑') ],
 
 		周曆 : [ {
 			a : {
@@ -3639,19 +3790,7 @@ function affairs() {
 			},
 			R : '以定氣定朔無中置閏規則計算得出，非實曆。周曆預設歲首為建子。計算速度較慢！',
 			href : 'https://zh.wikipedia.org/wiki/%E5%8F%A4%E5%85%AD%E6%AD%B7'
-		}, function(date) {
-			if (/* date.準 || */date.精)
-				return;
-			// [ 年, 月, 日 ]
-			var 曆 = CeL.夏曆(date, {
-				歲首 : '子'
-			});
-			date = 曆[1] + '月' + 曆[2] + '日';
-			return 曆[2] === 1 ? {
-				span : date,
-				S : 'color:#f94;'
-			} : date;
-		} ],
+		}, add_陰陽暦('子') ],
 
 		太初曆 : add_曆法('太初曆', '從漢武帝太初元年夏五月（前104年）至後漢章帝元和二年二月甲寅（85年），太初曆共實行了188年。'),
 		後漢四分曆 : add_曆法('後漢四分曆', '東漢章帝元和二年二月四日甲寅至曹魏青龍五年二月末（東吳用至黃武二年）施用《四分曆》。'),
@@ -4256,6 +4395,84 @@ function affairs() {
 	});
 
 	column_by_cookie();
+
+	// -----------------------------
+	// configuration
+
+	function change_coordinates(coordinates) {
+		var name;
+		if (typeof coordinates === 'string') {
+			if (coordinates.includes(':')) {
+				coordinates = coordinates.split(/:/);
+				name = coordinates[0];
+				coordinates = coordinates[1];
+				document.getElementById('coordinates').value = coordinates;
+			}
+		} else
+			coordinates = this.value;
+		// [ latitude, longitude ]
+		coordinates = CeL.parse_coordinates(coordinates);
+		if (coordinates && typeof coordinates[0] === 'number'
+				&& typeof coordinates[1] === 'number') {
+			coordinates[2] = Math.round(coordinates[1] / 360 * 24);
+			if (name) {
+				coordinates.place = name;
+				document.getElementById('place_name').value = name;
+			}
+			document.getElementById('latitude').value = coordinates[0];
+			document.getElementById('longitude').value = coordinates[1];
+			document.getElementById('time_zone').value = coordinates[2];
+			CeL.log('設定地理座標（經緯度）：' + (name ? name + '，' : '')
+					+ coordinates.slice(0, 2).map(function(c) {
+						return c.to_fixed(4);
+					}).join(', ') + '，時區：UTC' + (coordinates[2] < 0 ? '' : '+')
+					+ coordinates[2]);
+			local_coordinates = coordinates;
+		}
+		return false;
+	}
+	document.getElementById('coordinates').onchange = change_coordinates;
+	document.getElementById('time_zone').onchange = function() {
+		local_coordinates[2] = this.value;
+	};
+
+	var place_nodes = [], place_list = {
+		臺北市 : '25°2′N 121°38′E',
+		北京市 : '39°54′57″N 116°23′26″E',
+		// 旧東京天文台1 (東京都港区麻布台。世界測地系で東経 139°44′28.8869″、北緯 35°39′29.1572″)
+		// http://eco.mtk.nao.ac.jp/koyomi/yoko/
+		東京都 : '35° 41′ 22.4″ N, 139° 41′ 30.2″ E',
+		京都市 : '35° 0′ 41.8″ N, 135° 46′ 5.2″ E',
+		// 首爾
+		서울 : '37° 34′ 0″ N, 126° 58′ 41″ E',
+		// 長安
+		西安市 : '34°16′N 108°54′E',
+		// 首都、國都或京（京師／城／都）
+		// https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E9%A6%96%E9%83%BD
+		殷墟 : '36°07′17″N 114°19′01″E',
+		洛陽 : '34°37′53.45″N 112°27′16.85″E'
+	};
+	for ( var place in place_list) {
+		var data = place + ':' + place_list[place];
+		if (place_nodes.length === 0) {
+			change_coordinates(data);
+			place_nodes.push({
+				// 常用地點
+				T : '著名地點：'
+			});
+		}
+		place_nodes.push({
+			a : {
+				T : place
+			},
+			href : '#',
+			title : data,
+			onclick : function() {
+				return change_coordinates(this.title);
+			}
+		}, ' ');
+	}
+	CeL.new_node(place_nodes, 'place_list');
 
 	// -----------------------------
 

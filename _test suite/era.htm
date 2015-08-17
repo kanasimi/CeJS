@@ -419,22 +419,22 @@ td {
 	font-weight: normal;
 }
 
-#data_layer {
+.config_layer {
 	margin: .5em;
 	padding: .5em;
 	background-color: #eef;
 	border-radius: .5em;
 }
 
-#data_layer div {
+.config_layer div {
 	margin-top: 1em;
 }
 
-#data_layer div.data_line {
+.config_layer div.data_line {
 	margin-left: 1em;
 }
 
-#data_layer .loaded_mark {
+.config_layer .loaded_mark {
 	color: #0b0;
 	font-weight: bold;
 	margin-right: .3em;
@@ -448,7 +448,7 @@ td {
 	color: #aaa;
 }
 
-#data_layer .status {
+.config_layer .status {
 	color: #9a2;
 }
 
@@ -1373,9 +1373,28 @@ Jews, however, reckon the start of each new Seleucid year with the lunar month T
 		<div id="era_graph_options"></div>
 	</div>
 
-	<div id="data_layer"></div>
-
 	<div id="calendar"></div>
+
+	<div id="configuration">
+		<div id="place_layer" class="config_layer">
+			日出日落、曙光暮光、月出月落欄之基準地點：<br /> <input id="place_name" />
+			<div id="place_list"></div>
+			<hr />
+			手動設定<span data-gettext="地理座標："></span><input id="coordinates"
+				style="width: 20em" /> <span data-gettext="時區："></span>UTC (+/-) <input
+				id="time_zone" style="width: 3em" type="number" /><br /> <span
+				data-gettext="經度："></span><input id="latitude" /><br /> <span
+				data-gettext="緯度："></span><input id="longitude" /><br />
+			您可使用各種網路工具以取得經緯度。例如 <a rel="nofollow"
+				href="http://geonames.nga.mil/namesviewer/">NGA: Geonames Search
+				- OGC Viewer</a>、<a rel="nofollow" href="http://www.latlong.net/">Latitude
+				Longitude Finder</a>。
+		</div>
+
+		<div id="method_layer" class="config_layer"></div>
+
+		<div id="data_layer" class="config_layer"></div>
+	</div>
 
 	<div id="batch_processing">
 		<span data-gettext="批次轉換"></span>：每項一行，<em>採用上方所列之輸出格式</em>。<br /> <span

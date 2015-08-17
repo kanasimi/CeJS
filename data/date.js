@@ -440,6 +440,8 @@ Julian_day.YMD_to_Date = function(year, month, date, type, get_value, no_year_0)
  * @returns {Number} Julian date
  */
 Julian_day.JD = function(date, type, no_year_0) {
+	if (is_Date(date))
+		return Date_to_JD(date);
 	date = Julian_day(date, type, no_year_0, true);
 	return date[0] + date[1] / ONE_DAY_LENGTH_VALUE;
 };
@@ -1640,7 +1642,7 @@ strftime.default_conversion = {
 	 */
 	f : function(date_value, options) {
 		var ms = date_value.getMilliseconds();
-		return ms > 99 ? ms : ms > 9 ? '0' + ms : '00' + ms;
+		return ms > 99 ? ms : ms > 9 ? '0' + ms : ms >= 0 ? '00' + ms : ms;
 	},
 
 	// 年日數

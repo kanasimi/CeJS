@@ -1,15 +1,13 @@
 
 /**
- * @name	CeL function for math
- * @fileoverview
- * 本檔案包含了數學演算相關的 functions。
- * @since	
+ * @name CeL function for math
+ * @fileoverview 本檔案包含了數學演算相關的 functions。
+ * @since
  */
 
 /*
-TODO:
-方程式圖形顯示 by SVG
-*/
+ * TODO: 方程式圖形顯示 by SVG
+ */
 
 'use strict';
 if (typeof CeL === 'function')
@@ -24,11 +22,12 @@ code : function(library_namespace) {
 
 /**
  * null module constructor
- * @class	數學相關的 functions
+ * 
+ * @class 數學相關的 functions
  */
 var _// JSDT:_module_
 = function() {
-	//	null module constructor
+	// null module constructor
 };
 
 /**
@@ -43,23 +42,43 @@ _// JSDT:_module_
 
 
 /*
-	Math	---------------------------------------------------------------
-*/
+ * Math ---------------------------------------------------------------
+ */
 
-/*
-//{var v=Math.LN2,d=mutual_division(v),q=to_rational_number(v);alert('值	'+v+'\n序列	'+d+'\n近似值	'+q[0]+' / '+q[1]+'\n約	'+(q=q[0]/q[1])+'\n值-近似	'+(q-=v)+'\n差'+(Math.abs(q=10000*q/v)>1?'萬分之'+q.to_fixed(2)+' ( '+q+' / 10000 )':'億分之'+(q*=10000).to_fixed(2)+' ( '+q+' / 100000000 )'),0,'近似值	'+v);}
-
-//{var d=new Date,a=.142857,b=1000000,i=0,c;for(i=0;i<10000;i++)c=mutual_division(a);alert(c+'\n'+gDate(new Date-d));}
-*/
+if (false) {
+	var v = Math.LN2, d = mutual_division(v), q = to_rational_number(v);
+	alert(
+	//
+	'值	' + v + '\n序列	' + d + '\n近似值	' + q[0] + ' / ' + q[1]
+	//
+	+ '\n約	' + (q = q[0] / q[1]) + '\n值-近似	' + (q -= v)
+	//
+	+ '\n差' + (Math.abs(q = 10000 * q / v) > 1
+	//
+	? '萬分之' + q.to_fixed(2) + ' ( ' + q + ' / 10000 )'
+	//
+	: '億分之' + (q *= 10000).to_fixed(2) + ' ( ' + q + ' / 100000000 )'), 0,
+			'近似值	' + v);
+}
+if (false) {
+	var d = new Date, a = .142857, b = 1000000, i = 0, c;
+	for (i = 0; i < 10000; i++)
+		c = mutual_division(a);
+	alert(c + '\n' + gDate(new Date - d));
+}
 
 _// JSDT:_module_
 .
 /**
  * 輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數
- * @param {Number} n1	number 1
- * @param {Number} [n2]	number 2
- * @param {Number} times	max 次數, 1,2,..
- * @return	{Array}	連分數序列 ** 負數視 _.mutual_division.done 而定!
+ * 
+ * @param {Number}
+ *            n1 number 1
+ * @param {Number}
+ *            [n2] number 2
+ * @param {Number}
+ *            times max 次數, 1,2,..
+ * @return {Array} 連分數序列 ** 負數視 _.mutual_division.done 而定!
  */
 mutual_division = function mutual_division(n1, n2, times) {
 	var q = [], c;
@@ -72,14 +91,14 @@ mutual_division = function mutual_division(n1, n2, times) {
 		c = n1;
 		var i = 9, f = n2;
 		while (i--)
-			//	以整數運算比較快！這樣會造成整數多4%，浮點數多1/3倍的時間，但仍值得。
+			// 以整數運算比較快！這樣會造成整數多4%，浮點數多1/3倍的時間，但仍值得。
 			if (f *= 10, c *= 10, c === Math.floor(c)) {
 				n1 = c, n2 = f;
 				break;
 			}
 	}
 
-	//	連分數負數之處理。更沒問題的: (n1 < 0?1:0) ^ (n2 < 0?1:0)
+	// 連分數負數之處理。更沒問題的: (n1 < 0?1:0) ^ (n2 < 0?1:0)
 	if (_.mutual_division.mode && ((n1 < 0) ^ (n2 < 0))) {
 		// 使兩數皆為正
 		if (n2 < 0)
@@ -91,35 +110,45 @@ mutual_division = function mutual_division(n1, n2, times) {
 		n1 = n2, n2 -= c;
 	}
 
-	/* old:
-	 while(b&&n--)
-	  d.push((a-(c=a%b))/b),a=b,b=c;	//	2.08s@10000	可能因為少設定（=）一次c所以較快。但（若輸入不為整數）不確保d為整數？用Math.floor((a-(c=a%b))/b)可確保，速度與下式一樣快。
-	  //d.push(c=Math.floor(a/b)),c=a-b*c,a=b,b=c;	//	2.14s@10000:mutual_division(.142857)
-	  //d.push(Math.floor(a/b)),b=a%(c=b),a=c;	//	2.2s@10000
-	 //if(n)d.push(0);
-	*/
+	// old:
+	if(false){
+		while (b && n--) {
+			// 2.08s@10000
+			// 可能因為少設定（=）一次c所以較快。但（若輸入不為整數）不確保d為整數？用Math.floor((a-(c=a%b))/b)可確保，速度與下式一樣快。
+			d.push((a - (c = a % b)) / b), a = b, b = c;
+			// 2.14s@10000:mutual_division(.142857)
+			// d.push(c=Math.floor(a/b)),c=a-b*c,a=b,b=c;
+			// 2.2s@10000
+			// d.push(Math.floor(a/b)),b=a%(c=b),a=c;
+		}
+		if (n)
+			d.push(0);
+	}
 
-	//	2.4s@10000	可能因為少設定（=）一次c所以較快。但（若輸入不為整數）不確保d為整數？用Math.floor((a-(c=a%b))/b)可確保，速度與下式一樣快。
+	// 2.4s@10000
+	// 可能因為少設定（=）一次c所以較快。但（若輸入不為整數）不確保d為整數？用Math.floor((a-(c=a%b))/b)可確保，速度與下式一樣快。
 	while (times--)
 		if (n2)
 			q.push((n1 - (c = n1 % n2)) / n2), n1 = n2, n2 = c;
 		else {
-			//	[ .. , done mark, (最後非零的餘數。若原 n1, n2 皆為整數，則此值為 GCD。但請注意:這邊是已經經過前面為了以整數運算，增加倍率過的數值!!) ]
+			// [ .. , done mark, (最後非零的餘數。若原 n1, n2 皆為整數，則此值為
+			// GCD。但請注意:這邊是已經經過前面為了以整數運算，增加倍率過的數值!!) ]
 			q.push(_.mutual_division.done, n1);
-			//library_namespace.debug('done: ' + q);
+			// library_namespace.debug('done: ' + q);
 			break;
 		}
 
-	//	2.26s@10000
-	//while(b&&n--)if(d.push((a-(c=a%b))/b),a=b,!(b=c)){d.push(0);break;}
+	// 2.26s@10000
+	// while(b&&n--)if(d.push((a-(c=a%b))/b),a=b,!(b=c)){d.push(0);break;}
 
-	//var m=1;c=1;while(m&&n--)d.push(m=++c%2?b?(a-(a%=b))/b:0:a?(b-(b%=a))/a:0);//bug
+	// var
+	// m=1;c=1;while(m&&n--)d.push(m=++c%2?b?(a-(a%=b))/b:0:a?(b-(b%=a))/a:0);//buggy
 
 	return q;
 };
 _// JSDT:_module_
 .
-mutual_division.done = -7;//''
+mutual_division.done = -7;// ''
 
 _// JSDT:_module_
 .
@@ -132,13 +161,22 @@ _// JSDT:_module_
 .
 /**
  * 取得連分數序列的數值
- * @param {Array} sequence	序列
- * @param {Number} [max_no]	取至第 max_no 個
- * @requires	mutual_division.done
+ * 
+ * @param {Array}
+ *            sequence 序列
+ * @param {Number}
+ *            [max_no] 取至第 max_no 個
+ * 
  * @return
+ * 
+ * @requires mutual_division.done
+ * 
  * @see
+ * 
+ * <code>
  * var a=continued_fraction([1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]);
  * alert(a+'\n'+a[0]/a[1]+'\n'+Math.SQRT2+'\n'+(Math.SQRT2-a[0]/a[1])+'\n'+mutual_division(a[0],a[1]));
+ * </code>
  */
 continued_fraction = function(sequence, max_no) {
 	if (!Array.isArray(sequence) || !sequence.length)
@@ -158,21 +196,23 @@ continued_fraction = function(sequence, max_no) {
 		b = 1, a = 0;
 	else
 		a = 1, b = 0;
-	//sequence[max_no++]=1;if(--max_no%2)b=sequence[max_no],a=s[--max_no];else a=sequence[max_no],b=sequence[--max_no];
+	if(false){ sequence[max_no++]=1;if(--max_no%2)b=sequence[max_no],a=s[--max_no];else
+	 a=sequence[max_no],b=sequence[--max_no];}
 
-	//library_namespace.debug('a=' + a + ', b=' + b + ', max_no=' + max_no);
+	// library_namespace.debug('a=' + a + ', b=' + b + ', max_no=' + max_no);
 	while (max_no--)
 		if (max_no % 2)
 			b += a * sequence[max_no];
 		else
 			a += b * sequence[max_no];
-	//library_namespace.debug('a=' + a + ', b=' + b);
+	// library_namespace.debug('a=' + a + ', b=' + b);
 	return [ a, b ];
 };
 
 // quadratic (m√r + i) / D → continued fraction [.. , [period ..]]
 // https://en.wikipedia.org/wiki/Periodic_continued_fraction
-// Rosen, Kenneth H. (2005). Elementary Number Theory and its Applications (5th edition). Boston: Pearson Addison-Wesley. pp. 510-512.
+// Rosen, Kenneth H. (2005). Elementary Number Theory and its Applications (5th
+// edition). Boston: Pearson Addison-Wesley. pp. 510-512.
 function quadratic_to_continued_fraction(r, m, i, D) {
 	if (!i)
 		i = 0;
@@ -220,7 +260,8 @@ _.quadratic_to_continued_fraction = quadratic_to_continued_fraction;
 
 // get the first solution of Pell's equation: x^2 + d y^2 = 1 or -1.
 // https://en.wikipedia.org/wiki/Pell%27s_equation
-// Rosen, Kenneth H. (2005). Elementary Number Theory and its Applications (5th edition). Boston: Pearson Addison-Wesley. pp. 542-545.
+// Rosen, Kenneth H. (2005). Elementary Number Theory and its Applications (5th
+// edition). Boston: Pearson Addison-Wesley. pp. 542-545.
 function solve_Pell(d, is_m1) {
 	;
 }
@@ -230,23 +271,23 @@ _.solve_Pell = solve_Pell;
 _// JSDT:_module_
 .
 /**
- * The best rational approximation. 取得值最接近之有理數 (use 連分數 continued fraction), 取近似值.
- * c.f., 調日法
- * 在分子或分母小於下一個漸進分數的分數中，其值是最接近精確值的近似值。
- * @example
- * to_rational_number(4088/783)
- * @param {Number} number	number
- * @param {Number} [rate]	比例在 rate 以上
- * @param {Number} [max_no]	最多取至序列第 max_no 個
- * 					TODO : 並小於 l: limit
- * @return	[分子, 分母, 誤差]
- * @requires	mutual_division,continued_fraction
- * @see
- * http://en.wikipedia.org/wiki/Continued_fraction#Best_to_rational_numbers
+ * The best rational approximation. 取得值最接近之有理數 (use 連分數 continued fraction),
+ * 取近似值. c.f., 調日法 在分子或分母小於下一個漸進分數的分數中，其值是最接近精確值的近似值。
+ * 
+ * @example to_rational_number(4088/783)
+ * @param {Number}
+ *            number number
+ * @param {Number}
+ *            [rate] 比例在 rate 以上
+ * @param {Number}
+ *            [max_no] 最多取至序列第 max_no 個 TODO : 並小於 l: limit
+ * @return [分子, 分母, 誤差]
+ * @requires mutual_division,continued_fraction
+ * @see http://en.wikipedia.org/wiki/Continued_fraction#Best_to_rational_numbers
  */
 to_rational_number = function(number, rate, max_no) {
 	if (!rate)
-		//	This is a magic number: 我們無法準確得知其界限為何。
+		// This is a magic number: 我們無法準確得知其界限為何。
 		rate = 65536;
 	var d = _.mutual_division(number, 1, max_no && max_no > 0 ? max_no : 20),
 	i = 0, a, b = d[0], done = _.mutual_division.done;
@@ -262,20 +303,20 @@ to_rational_number = function(number, rate, max_no) {
 	if (false)
 		library_namespace.debug(
 			number + ' ' +
-			//	連分數表示
+			// 連分數表示
 			(d.length > 1 && d[d.length - 2] === _.mutual_division.done ?
 				'=' + ' [<em>' + d[0] + ';' + d.slice(1, i).join(', ') + '</em>'
 					+ (i < d.length - 2 ? ', ' + d.slice(i, -2).join(', ') : '')
 					+ '] .. ' + d.slice(-1) :
-				//	約等於的符號是≈或≒，不等於的符號是≠。
-				//	http://zh.wikipedia.org/wiki/%E7%AD%89%E4%BA%8E
+				// 約等於的符號是≈或≒，不等於的符號是≠。
+				// http://zh.wikipedia.org/wiki/%E7%AD%89%E4%BA%8E
 				'≈' + ' [<em>' + d[0] + ';' + d.slice(1, i).join(', ') + '</em>'
 					+ (i < d.length ? ', ' + d.slice(i).join(', ') : '') + ']: '
 					+ d.length + ',' + i + ',' + d[i]
 			)
 		);
 	d = _.continued_fraction(d, i);
-	//library_namespace.debug('→ ' + d[0] + '/' + d[1]);
+	// library_namespace.debug('→ ' + d[0] + '/' + d[1]);
 	if (d[1] < 0)
 		d[0] = -d[0], d[1] = -d[1];
 
@@ -295,8 +336,8 @@ to_rational_number = function(number, rate, max_no) {
  * // type 2: input Array
  * CeL.GCD([5,3,8,2,6,9]);
  * </code>
- * @param {Integers} number_array
- *            number array
+ * @param {Integers}
+ *            number_array number array
  * @returns {Integer} GCD of the numbers specified
  */
 function GCD(number_array) {
@@ -344,8 +385,8 @@ _// JSDT:_module_
  * // type 2: input Array
  * CeL.LCM([5,3,8,2,6,9]);
  * </code>
- * @param {Integers} number_array
- *            number array
+ * @param {Integers}
+ *            number_array number array
  * @returns {Integer} LCM of the numbers specified
  */
 LCM = function(number_array) {
@@ -372,14 +413,14 @@ LCM = function(number_array) {
 				if (r = -lcm % n0) {
 					n = lcm + r + n0;
 				} else {
-					//	n0 整除 lcm: 取 lcm 即可.
+					// n0 整除 lcm: 取 lcm 即可.
 					break;
 				}
 			} else {
 				if (r = -n % lcm0) {
 					lcm = n + r + lcm0;
 				} else {
-					//	lcm0 整除 n: 取 n 即可.
+					// lcm0 整除 n: 取 n 即可.
 					lcm = n;
 					break;
 				}
@@ -401,8 +442,8 @@ _// JSDT:_module_
  * // type 2: input Array
  * CeL.LCM2([5,3,8,2,6,9]);
  * </code>
- * @param {Integers} number_array
- *            number array
+ * @param {Integers}
+ *            number_array number array
  * @returns {Integer} LCM of the numbers specified
  */
 LCM2 = function(number_array) {
@@ -514,34 +555,40 @@ _.factorial = factorial;
 // ---------------------------------------------------------------------//
 
 /*
-http://www.math.umbc.edu/~campbell/NumbThy/Class/Programming/JavaScript.html
-http://aoki2.si.gunma-u.ac.jp/JavaScript/
-*/
+ * http://www.math.umbc.edu/~campbell/NumbThy/Class/Programming/JavaScript.html
+ * http://aoki2.si.gunma-u.ac.jp/JavaScript/
+ */
 
 /**
- * 得到開方數，相當於 Math.floor(Math.sqrt(number)) === Math.sqrt(number) | 0.
- * get integer square root. TODO: use 牛頓法
- * @param {Number} positive number
- * @return	r, r^2 <= number < (r+1)^2
- * @example
- * var p = 20374345, q = CeL.math.floor_sqrt(p = p * p - 1); CeL.log(q + '<br />' + (q * q) + '<br />' + p + '<br />' + (++q * q));
- * @see
- * <a href="http://www.azillionmonkeys.com/qed/sqroot.html" accessdate="2010/3/11 18:37">Paul Hsieh's Square Root page</a>
- * <a href="http://www.embeddedrelated.com/usenet/embedded/show/114789-1.php" accessdate="2010/3/11 18:34">Suitable Integer Square Root Algorithm for 32-64-Bit Integers on Inexpensive Microcontroller? | Comp.Arch.Embedded | EmbeddedRelated.com</a>
+ * 得到開方數，相當於 Math.floor(Math.sqrt(number)) === Math.sqrt(number) | 0. get
+ * integer square root. TODO: use 牛頓法
+ * 
+ * @param {Number}
+ *            positive number
+ * @return r, r^2 <= number < (r+1)^2
+ * @example var p = 20374345, q = CeL.math.floor_sqrt(p = p * p - 1); CeL.log(q + '<br />' +
+ *          (q * q) + '<br />' + p + '<br />' + (++q * q));
+ * @see <a href="http://www.azillionmonkeys.com/qed/sqroot.html"
+ *      accessdate="2010/3/11 18:37">Paul Hsieh's Square Root page</a><br />
+ *      <a
+ *      href="http://www.embeddedrelated.com/usenet/embedded/show/114789-1.php"
+ *      accessdate="2010/3/11 18:34">Suitable Integer Square Root Algorithm for
+ *      32-64-Bit Integers on Inexpensive Microcontroller? | Comp.Arch.Embedded |
+ *      EmbeddedRelated.com</a>
  */
 function floor_sqrt(number) {
 	if (isNaN(number = Math.floor(number)))
 		return;
 	var g = 0, v, h, t;
 	while ((t = g << 1) < (v = number - g * g)) {
-		//library_namespace.debug(t + ', ' + v);
+		// library_namespace.debug(t + ', ' + v);
 		h = 1;
 		while (h * (h + t) <= v)
 			// 因為型別轉關係，還是保留 << 而不用 *2
-			h <<= 1;//h *= 2;
-		g += h >> 1;//h / 2;//
+			h <<= 1;// h *= 2;
+		g += h >> 1;// h / 2;//
 	}
-	//library_namespace.debug('end: ' + t + ', ' + v);
+	// library_namespace.debug('end: ' + t + ', ' + v);
 	return g;
 }
 _.floor_sqrt = floor_sqrt;
@@ -568,7 +615,7 @@ var primes = [2, 3],
 primes_last_test = primes[primes.length - 1];
 
 function test_prime(integer, index, sqrt) {
-	//assert: integer === Math.floor(integer)
+	// assert: integer === Math.floor(integer)
 	index |= 0;
 	if (!sqrt)
 		sqrt = floor_sqrt(integer);
@@ -607,8 +654,9 @@ function prime(index, limit) {
 _.prime = prime;
 
 
-//prime #5484598 = 94906249, the biggest prime < Math.sqrt(Number.MAX_SAFE_INTEGER) - 1
-//the 2nd biggest prime is 94906247.
+// prime #5484598 = 94906249, the biggest prime <
+// Math.sqrt(Number.MAX_SAFE_INTEGER) - 1
+// the 2nd biggest prime is 94906247.
 
 // prime(prime_pi(Number.MAX_SAFE_INTEGER = 2^53 - 1)) = 9007199254740881
 function prime_pi(value) {
@@ -619,7 +667,8 @@ function prime_pi(value) {
 _.prime_pi = prime_pi;
 
 // return multiplicand × multiplier % modulus
-// assert: 三者皆為 natural number & Number.isSafeInteger() is OK. max(multiplicand, multiplier) < modulus. 否則會出現錯誤!
+// assert: 三者皆為 natural number, and Number.isSafeInteger() is OK.
+// max(multiplicand, multiplier) < modulus. 否則會出現錯誤!
 function multiply_modulo(multiplicand, multiplier, modulus) {
 	var quotient = multiplicand * multiplier;
 	if (Number.isSafeInteger(quotient))
@@ -636,7 +685,7 @@ function multiply_modulo(multiplicand, multiplier, modulus) {
 }
 _.multiply_modulo = multiply_modulo;
 // return integer ^ exponent % modulus
-// assert: 三者皆為 natural number & Number.isSafeInteger() is OK. 否則會出現錯誤!
+// assert: 三者皆為 natural number, and Number.isSafeInteger() is OK. 否則會出現錯誤!
 function power_modulo(integer, exponent, modulus) {
 	for (var remainder = 1, power = integer % modulus; ;) {
 		if (exponent % 2 === 1)
@@ -659,8 +708,8 @@ function power_modulo(natural, exponent, modulus) {
 }
 _.power_modulo = power_modulo;
 
-//	Miller–Rabin primality test
-//	return true: is composite, undefined: probable prime (PRP) / invalid number
+// Miller–Rabin primality test
+// return true: is composite, undefined: probable prime (PRP) / invalid number
 // https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test
 function Miller_Rabin(natural, times) {
 	if (natural % 2 === 0)
@@ -708,9 +757,9 @@ _.Miller_Rabin = Miller_Rabin;
 var sqrt_max_integer = Math.sqrt(Number.MAX_SAFE_INTEGER) | 0;
 
 // return false: is prime,
-//	number: min factor,
-//	undefined: probable prime (PRP) / invalid number,
-//	true: is composite.
+// number: min factor,
+// undefined: probable prime (PRP) / invalid number,
+// true: is composite.
 function not_prime(natural) {
 	if (!Number.isSafeInteger(natural) || natural < 2)
 		return;
@@ -719,17 +768,17 @@ function not_prime(natural) {
 	// 可先檢測此數是否在質數列表中。
 
 	// 採用試除法, use trial division。
-	/*
-	var sqrt = floor_sqrt(natural = p);
-	p = 0;
-	while ((p = test_prime(natural, p, sqrt)) === undefined) {
-		//多取一些質數。
-		prime((p = primes.length) + 1);
+	if (false) {
+		var sqrt = floor_sqrt(natural = p);
+		p = 0;
+		while ((p = test_prime(natural, p, sqrt)) === undefined) {
+			// 多取一些質數。
+			prime((p = primes.length) + 1);
+		}
 	}
-	*/
 
 
-	//為 Miller_Rabin() 暖身。
+	// 為 Miller_Rabin() 暖身。
 	prime(70);
 	if ((p = test_prime(natural)) === undefined)
 		p = Miller_Rabin(natural);
@@ -769,7 +818,7 @@ function Pollards_rho_1980(natural) {
 			k += m;
 		} while (k < r && G === 1);
 		r *= 2;
-		//TODO: 當 r 過大，例如為十位數以上之質數時，過於消耗時間。
+		// TODO: 當 r 過大，例如為十位數以上之質數時，過於消耗時間。
 	} while (G === 1);
 
 	if (natural === G)
@@ -808,7 +857,8 @@ function factors_toString(exponentiation_sign, multiplication_sign) {
 			// exponentiation_sign: ^, **, ↑, ^^, ⋆
 			: exponentiation_sign ? exponentiation_sign + this[factor]
 			// https://en.wikipedia.org/wiki/Prime_factor
-			// To shorten prime factorizations, factors are often expressed in powers (multiplicities).
+			// To shorten prime factorizations, factors are often expressed in
+			// powers (multiplicities).
 			: this[factor].to_super();
 		list.push(factor);
 	}
@@ -818,24 +868,32 @@ function factors_toString(exponentiation_sign, multiplication_sign) {
 
 /**
  * 取得某數的質因數分解，整數分解/因式分解/素因子分解, prime factorization, get floor factor.<br />
- * 唯一分解定理(The Unique Factorization Theorem)告訴我們素因子分解是唯一的，這即是稱為算術基本定理 (The Fundamental Theorem of Arithmeric) 的數學金科玉律。<br />
- * @param {Number}natural integer number
- * @param {Number}radix output radix
- * @param {Number}index start prime index
- * @return	{Object}prime factors { prime1:power1, prime2:power2, .. }
- * @see
- * <a href="http://homepage2.nifty.com/m_kamada/math/10001.htm" accessdate="2010/3/11 18:7">Factorizations of 100...001</a>
- * @requires	floor_sqrt
+ * 唯一分解定理(The Unique Factorization Theorem)告訴我們素因子分解是唯一的，這即是稱為算術基本定理 (The
+ * Fundamental Theorem of Arithmeric) 的數學金科玉律。<br />
+ * 
+ * @param {Number}natural
+ *            integer number
+ * @param {Number}radix
+ *            output radix
+ * @param {Number}index
+ *            start prime index
+ * 
+ * @return {Object}prime factors { prime1:power1, prime2:power2, .. }
+ * 
+ * @requires floor_sqrt
+ * 
+ * @see <a href="http://homepage2.nifty.com/m_kamada/math/10001.htm"
+ *      accessdate="2010/3/11 18:7">Factorizations of 100...001</a>
  */
 function factorize(natural, radix, index, factors) {
 	if (!Number.isSafeInteger(natural) || natural < 2
 		/*
-		 * javascript 可以表示的最大整數值
-		 * 10^21-2^16-1 = 999999999999999934463
-		 * @see
-		 * http://www.highdots.com/forums/javascript/how-js-numbers-represented-internally-166538-4.html
+		 * javascript 可以表示的最大整數值 = 10^21-2^16-1 = 999999999999999934463
+		 * 
+		 * @see http://www.highdots.com/forums/javascript/how-js-numbers-represented-internally-166538-4.html
 		 */
-		//&& !(1 < (natural = Math.floor(Math.abs(natural))) && natural < 999999999999999934469)
+		// && !(1 < (natural = Math.floor(Math.abs(natural))) && natural <
+		// 999999999999999934469)
 		)
 		return;
 
@@ -860,7 +918,7 @@ function factorize(natural, radix, index, factors) {
 	for (var power, length = primes.length ; p <= sqrt ;)
 		// 採用試除法, trial division。
 		if (natural % (p = index < length ? primes[index++]
-			//find enough primes
+			// find enough primes
 			: prime(++index)) === 0) {
 			for (power = 1; (natural /= p) % p === 0;)
 				power++;
@@ -875,14 +933,12 @@ function factorize(natural, radix, index, factors) {
 	// 事實上，若加上 (natural < sqrt_max_integer) 的限制，
 	// 一般說來在此範圍內使用 Pollard's rho 亦不切實際。
 
-	/*
 	if (sqrt < p) {
-		//assert: natural is now prime.
+		// assert: natural is now prime.
 		if (1 < natural)
 			factors[natural.toString(radix)] = 1;
 		return factors;
 	}
-
 	var fA = [], fac = function (i) {
 		if (sqrt_max_integer <= natural || not_prime(i)) {
 			var p, count = 3;
@@ -898,7 +954,6 @@ function factorize(natural, radix, index, factors) {
 		fA.push(i);
 	};
 	fac(natural);
-
 	fA.sort(function (a, b) { return a - b; });
 	fA.forEach(function (p) {
 		p = p.toString(radix);
@@ -907,31 +962,35 @@ function factorize(natural, radix, index, factors) {
 		else
 			factors[p] = 1;
 	});
-
 	return factors;
-	*/
 }
 factorize._toString = factors_toString;
 _.factorize = factorize;
 
 
-/*	test
-function count(n){
-var a=factorize(n),s='',v=1;
-if(a){
-	for(var i in a){s+='*'+i+(a[i]>1?'^'+a[i]:'');v*=Math.pow(i,a[i]);}
-	s=s.substr(1)+'='+v+'='+n;
-}else s='error! '+n;
-document.getElementById('result').value+=s+'\n-------------------------------------------\n';
-}
-*/
+// test
+(function() {
+	function count(n) {
+		var a = factorize(n), s = '', v = 1;
+		if (a) {
+			for ( var i in a) {
+				s += '*' + i + (a[i] > 1 ? '^' + a[i] : '');
+				v *= Math.pow(i, a[i]);
+			}
+			s = s.substr(1) + '=' + v + '=' + n;
+		} else
+			s = 'error! ' + n;
+		document.getElementById('result').value += s
+				+ '\n-------------------------------------------\n';
+	}
+});
 
 
 function first_factor(natural) {
 	for (var p = 1, sqrt = floor_sqrt(natural), index = 0, length = primes.length ; p <= sqrt ;)
 		// 採用試除法, trial division。
 		if (natural % (p = index < length ? primes[index++]
-			//find enough primes
+			// find enough primes
 			: prime(++index)) === 0)
 			return p;
 	return natural;
@@ -952,16 +1011,22 @@ _// JSDT:_module_
  * alert(t[0] + '/' + t[1] + '^' + t[2] + '/' + t[3]);
  * </code>
  * 
- * @param {Number} number 數字
- * @param {Boolean} type
- *            false: base 為整數, true: base 為有理數
- * @returns [{Integer} base 分子, {Integer} base 分母, {Integer} exponent 分子, {Integer} exponent 分母]
+ * @param {Number}
+ *            number 數字
+ * @param {Boolean}
+ *            type false: base 為整數, true: base 為有理數
+ * 
+ * @returns [{Integer} base 分子, {Integer} base 分母, {Integer} exponent 分子,
+ *          {Integer} exponent 分母]
+ * 
  * @since 2005/2/18 19:20 未完成
  */
 guess_exponent = function(number, type) {
 	var bn, bd, en = 1, ed, sq = [ 1, number ], t, q,
-	// error: 容許誤差
-	error = 1e-9, g = function(n) {
+	// default error, accuracy, stopping tolerance, 容許誤差 
+	error = Number.EPSILON,
+	//
+	g = function(n) {
 		q = _.to_rational_number(n, 99999);
 		if ((!type || q[1] === 1) && !(q[0] > 99999 && q[1] > 99999)
 				&& q[2] / n < error)
@@ -987,33 +1052,17 @@ guess_exponent = function(number, type) {
 
 
 
-/*
-for 出題目
-
-runCode.setR=0;
-for(var i=0,j,t,s,n_e;i<10;){
- t=2000+8000*Math.random();
- s=get_random_prime.get_different_number_set(3,t,t/8);
- if(s.LCM>9999)continue;
- n_e=[];
- n_e[s.GCD]=1;
- for(j=0;j<s.length;j++)
-  if(n_e[s[j]])continue;
-  else n_e[s[j]]=1;
- sl([s.GCD,s.LCM]+'<b style="color:#c4a">;</b> '+s);i++;
-}
-
-*/
-
 /**
  * get random prime(s)
  * 
- * @param {Integer} count
- *            個數
- * @param {Boolean} exclude
- *            排除
+ * @param {Integer}
+ *            count 個數
+ * @param {Boolean}
+ *            exclude 排除
  * @param all_different
+ * 
  * @returns random prime / random prime array
+ * 
  * @since 2009/10/21 11:57:47
  */
 function get_random_prime(count, exclude, all_different) {
@@ -1066,7 +1115,7 @@ get_random_prime.primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
 	    823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911,
 	    919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997 ];
 
-//	return [GCD, n1, n2, ..]
+// return [GCD, n1, n2, ..]
 get_random_prime.get_different_number_set = function(count, till, GCD_till) {
 	delete this.excluded;
 	if (!GCD_till)
@@ -1076,7 +1125,9 @@ get_random_prime.get_different_number_set = function(count, till, GCD_till) {
 
 	/**
 	 * 求乘積, 乘到比till小就回傳.
-	 * @param nums	num array
+	 * 
+	 * @param nums
+	 *            num array
 	 * @param till
 	 * @returns {Number}
 	 */
@@ -1111,127 +1162,13 @@ get_random_prime.get_different_number_set = function(count, till, GCD_till) {
 };
 
 
-//------------------------------------------------------------------------------------------------------//
+// ------------------------------------------------------------------------------------------------------//
 
-
-// https://en.wikipedia.org/wiki/Root-finding_algorithm
-// https://en.wikipedia.org/wiki/Secant_method
-// Interpolation
-// equation: mapping function
-// TODO: 牛頓法, options.derivative
-// x0, x1: 內插法(線性插值)上下限，設定初始近似值。
-// y: 目標值。 get (equation^-1)(y)
-function secant_method(equation, x0, x1, y, options) {
-	// default error
-	var error = 0;
-	if (!options)
-		options = {};
-	else if (options > 0)
-		error = options;
-	else if (options.error > 0)
-		error = options.error;
-
-	var count = (options.count || 40) | 0,
-	//
-	y0 = 'y0' in options ? options.y0 : equation(x0),
-	//
-	y1 = 'y1' in options ? options.y1 : equation(x1),
-	//
-	x2 = x1, y2 = y1;
-
-	while (error < Math.abs(y2 - y) && count-- > 0
-	// 分母不應為 0 或 NaN。
-	&& (y0 -= y1)
-	// 測試已達極限，已經得到相當好的效果。無法取得更精確值。
-	// assert: else: x0===x, 可能是因為誤差已過小。
-	&& ((x2 = x1 - (x1 - x0) * (y - y1) / y0) !== x1 || x1 !== x0)) {
-		// evaluate result
-		y2 = equation(x2);
-		if (false)
-			library_namespace.debug(count + ': ' + x2 + ',' + y2 + ' → '
-					+ (y2 - y));
-		// shift items
-		x0 = x1, y0 = y1;
-		x1 = x2, y1 = y2;
-	}
-
-	return x2;
-}
-
-//Math.pow(CeL.secant_method(function(x) { return x * x; }, 3, 5, 15), 2)
-//CeL.secant_method(function(x) { return x * x * x - 8; }, 5, 4)
-
-_.secant_method = secant_method;
-
-
-// https://en.wikipedia.org/wiki/Sidi's_generalized_secant_method
-function find_root(equation, x0, x1, y, options) {
-	// default error
-	var error = 0;
-	if (!options)
-		options = {};
-	else if (options > 0)
-		error = options;
-	else if (options.error > 0)
-		error = options.error;
-
-	y = +y || 0;
-
-	var count = (options.count || 40) | 0,
-	//
-	y0 = 'y0' in options ? options.y0 : equation(x0),
-	//
-	y1 = 'y1' in options ? options.y1 : equation(x1),
-	// initialize
-	x2 = x1 - (x1 - x0) * (y1 - y) / (y1 - y0),
-	//
-	y2 = equation(x2), x3 = x2, y3 = y2,
-	// divided differences, 1階差商
-	y10 = (y1 - y0) / (x1 - x0), y21 = (y2 - y1) / (x2 - x1),
-	// 2階差商
-	y210 = (y21 - y10) / (x2 - x0),
-	// 暫時使用。
-	denominator;
-
-	// main loop of Sidi's generalized secant method (take k = 2)
-	while (error < Math.abs(y3 - y) && count-- > 0
-	// 檢查是否兩個差距極小的不同輸入，獲得相同輸出。
-	&& y21 !== 0
-	// 分母不應為 0 或 NaN。
-	&& (denominator = y21 + y210 * (x2 - x1))
-	// Avram Sidi (2008), "Generalization Of The Secant Method For Nonlinear
-	// Equations"
-	// 可能需要考量會不會有循環的問題。
-	&& ((x3 = x2 - (y2 - y) / denominator) !== x2 || x2 !== x1 || x1 !== x0)) {
-		// evaluate result
-		y3 = equation(x3);
-		// console.log(count + ': ' + x3 + ',' + y3 + ' → error ' + (y3 - y));
-		// shift items
-		x0 = x1, y0 = y1;
-		x1 = x2, y1 = y2;
-		x2 = x3, y2 = y3;
-		// reckon divided differences
-		y10 = y21;
-		y21 = (y2 - y1) / (x2 - x1);
-		// y210 = (y21 - y10) / (x2 - x0);
-		// incase y21 === y10
-		if (y210 = y21 - y10)
-			y210 /= x2 - x0;
-		// console.log('divided differences: ' + [ y10, y21, y210 ]);
-	}
-
-	return x3;
-}
-
-
-//Math.pow(CeL.find_root(function(x) { return x * x; }, 3, 5, 15), 2)
-//CeL.find_root(function(x) { return x * x * x - 8; }, 5, 4)
-
-_.find_root = find_root;
-
-
-/*
-// 求取反函數 caculator[-1](result)
+/**
+ * 求取反函數 caculator[-1](result)
+ * 
+ * @deprecated
+ */
 function get_boundary(caculator, result, down, up, limit) {
 	if (up - down === 0)
 		return up;
@@ -1271,20 +1208,495 @@ function get_boundary(caculator, result, down, up, limit) {
 	throw 'get_boundary: caculator is not either strictly increasing or decreasing?';
 }
 
-*/
+
+/**
+ * 求根/求取反函數 equation^-1(y)。 using Secant method.
+ * 
+ * @param {Function}equation
+ *            演算式, mapping function
+ * @param {Number}x0
+ *            內插法(線性插值 Interpolation)求值之自變數 variable 下限，設定初始近似值。
+ * @param {Number}x1
+ *            內插法(線性插值 Interpolation)求值之自變數 variable 上限，設定初始近似值。
+ * @param {Number}[y]
+ *            目標值。default: 0. get (equation^-1)(y)
+ * @param {Object}[options]
+ *            options 設定特殊功能:<br />
+ * 
+ * @returns {Number}root: equation(root)≈y
+ * 
+ * @see Interpolation 以內插值替換
+ *      https://en.wikipedia.org/wiki/Root-finding_algorithm
+ *      https://en.wikipedia.org/wiki/Secant_method
+ */
+function secant_method(equation, x0, x1, y, options) {
+	// default error, accuracy, stopping tolerance, 容許誤差 
+	var error = Number.EPSILON;
+	if (!options)
+		options = library_namespace.null_Object();
+	else if (options > 0)
+		error = options;
+	else if (options.error > 0)
+		error = Math.abs(options.error);
+
+	y = +y || 0;
+
+	var count = (options.count || 40) | 0,
+	// assert: y0 = equation(x0)
+	y0 = 'y0' in options ? options.y0 : equation(x0),
+	// assert: y1 = equation(x1)
+	y1 = 'y1' in options ? options.y1 : equation(x1),
+	//
+	x2 = x1, y2 = y1;
+
+	if (typeof options.start_OK === 'function'
+		// 初始測試: Invalid initial value, 不合理的初始值，因此毋須繼續。
+		&& !options.start_OK(y0, y1))
+			return;
+
+	// main loop
+	while (error < Math.abs(y2 - y) && count-- > 0
+	// 分母不應為 0 或 NaN。
+	&& (y0 -= y1)
+	// 測試已達極限，已經得到相當好的效果。無法取得更精確值。
+	// assert: else: x0===x, 可能是因為誤差已過小。
+	&& ((x2 = x1 - (x1 - x0) * (y - y1) / y0) !== x1 || x1 !== x0)) {
+		// evaluate result
+		y2 = equation(x2);
+		if (false)
+			library_namespace.debug(count + ': ' + x2 + ',' + y2 + ' → '
+					+ (y2 - y));
+		// shift items
+		x0 = x1, y0 = y1;
+		x1 = x2, y1 = y2;
+	}
+
+	return x2;
+}
+
+// Math.pow(CeL.secant_method(function(x) { return x * x; }, 3, 5, 15), 2)
+// CeL.secant_method(function(x) { return x * x * x - 8; }, 5, 4)
+
+_.secant_method = secant_method;
 
 
-//------------------------------------------------------------------------------------------------------//
+/**
+ * 求根/求取反函數 equation^-1(y)。 using Sidi's generalized secant method.
+ * 
+ * @param {Function}equation
+ *            演算式, mapping function
+ * @param {Number}x0
+ *            求值之自變數 variable 下限，設定初始近似值。
+ * @param {Number}x1
+ *            求值之自變數 variable 上限，設定初始近似值。
+ * @param {Number}[y]
+ *            目標值。default: 0. get (equation^-1)(y)
+ * @param {Object}[options]
+ *            options 設定特殊功能:<br />
+ * 
+ * @returns {Number}root: equation(root)≈y
+ * 
+ * @see https://en.wikipedia.org/wiki/Root-finding_algorithm
+ * @see https://en.wikipedia.org/wiki/Sidi's_generalized_secant_method
+ */
+function Sidi_method(equation, x0, x1, y, options) {
+	// default error, accuracy, stopping tolerance, 容許誤差 
+	var error = Number.EPSILON;
+	if (!options)
+		options = library_namespace.null_Object();
+	else if (options > 0)
+		error = options;
+	else if (options.error > 0)
+		error = Math.abs(options.error);
+
+	y = +y || 0;
+
+	var count = (options.count || 40) | 0,
+	// assert: y0 = equation(x0)
+	y0 = 'y0' in options ? options.y0 : equation(x0),
+	// assert: y1 = equation(x1)
+	y1 = 'y1' in options ? options.y1 : equation(x1);
+
+	if (typeof options.start_OK === 'function'
+		// 初始測試: Invalid initial value, 不合理的初始值，因此毋須繼續。
+		&& !options.start_OK(y0, y1))
+			return;
+
+	// initialization
+	var x2 = x1 - (x1 - x0) * (y1 - y) / (y1 - y0),
+	//
+	y2 = equation(x2), x3 = x2, y3 = y2,
+	// divided differences, 1階差商
+	y10 = (y1 - y0) / (x1 - x0), y21 = (y2 - y1) / (x2 - x1),
+	// 2階差商
+	y210 = (y21 - y10) / (x2 - x0),
+	// 暫時使用。
+	denominator;
+
+	// main loop of Sidi's generalized secant method (take k = 2)
+	while (error < Math.abs(y3 - y) && count-- > 0
+	// 檢查是否兩個差距極小的不同輸入，獲得相同輸出。
+	&& y21 !== 0
+	// 分母不應為 0 或 NaN。
+	&& (denominator = y21 + y210 * (x2 - x1))
+	// Avram Sidi (2008), "Generalization Of The Secant Method For Nonlinear
+	// Equations"
+	// 可能需要考量會不會有循環的問題。
+	&& ((x3 = x2 - (y2 - y) / denominator) !== x2 || x2 !== x1 || x1 !== x0)) {
+		// evaluate result
+		y3 = equation(x3);
+		// console.log(count + ': ' + x3 + ',' + y3 + ' → error ' + (y3 - y));
+		// shift items
+		x0 = x1, y0 = y1;
+		x1 = x2, y1 = y2;
+		x2 = x3, y2 = y3;
+		// reckon divided differences
+		y10 = y21;
+		y21 = (y2 - y1) / (x2 - x1);
+		// y210 = (y21 - y10) / (x2 - x0);
+		// incase y21 === y10
+		if (y210 = y21 - y10)
+			y210 /= x2 - x0;
+		// console.log('divided differences: ' + [ y10, y21, y210 ]);
+	}
+
+	return x3;
+}
+
+_.Sidi_method = Sidi_method;
+
+/**
+ * 以 Brent's method 求根/求取反函數 equation^-1(y)。
+ * 
+ * TODO: 牛頓法, options.derivative
+ * 
+ * @param {Function}equation
+ *            演算式, mapping function
+ * @param {Number}x0
+ *            求值之自變數 variable 下限，設定初始近似值。
+ * @param {Number}x1
+ *            求值之自變數 variable 上限，設定初始近似值。
+ * @param {Number}[y]
+ *            目標值。default: 0. get (equation^-1)(y)
+ * @param {Object}[options]
+ *            options 設定特殊功能:<br />
+ * 
+ * @returns {Number}root: equation(root)≈y
+ * 
+ * @see https://en.wikipedia.org/wiki/Root-finding_algorithm
+ * @see https://en.wikipedia.org/wiki/Brent%27s_method
+ * @see http://www.boost.org/doc/libs/1_58_0/boost/math/tools/minima.hpp
+ * @see http://people.sc.fsu.edu/~jburkardt/cpp_src/brent/brent.cpp
+ * @see http://www.cscjournals.org/manuscript/Journals/IJEA/volume4/Issue1/IJEA-33.pdf
+ * @see http://www.cscjournals.org/manuscript/Journals/IJEA/volume2/Issue1/IJEA-7.pdf
+ */
+function Brent_method(equation, x0, x1, y, options) {
+	// default error, accuracy, stopping tolerance, 容許誤差
+	// @see Number.EPSILON
+	var error = 0;
+	if (!options)
+		options = library_namespace.null_Object();
+	else if (options > 0)
+		error = options;
+	else if (options.error > 0)
+		error = Math.abs(options.error);
+
+	y = +y || 0;
+
+	var count = (options.count || 40) | 0,
+	// assert: y0 = equation(x0)
+	y0 = 'y0' in options ? options.y0 : equation(x0),
+	// assert: y1 = equation(x1)
+	y1 = 'y1' in options ? options.y1 : equation(x1);
+
+	if (typeof options.start_OK === 'function'
+	// 初始測試: Invalid initial value, 不合理的初始值，因此毋須繼續。
+	&& !options.start_OK(y0, y1))
+		return;
+
+	if (y0 === y)
+		return x0;
+	if (y1 === y)
+		return x1;
+	if (!((y0 - y) * (y1 - y) < 0))
+		// the root is not bracketed.
+		// 但亦有可能只是所取範圍過大，若中間多挑幾點，或許能找到合適的值。
+		// 回退至使用  Sidi's generalized secant method。
+		return Sidi_method(equation, x0, x1, y, options);
+
+	// copy from double zero () @
+	// http://people.sc.fsu.edu/~jburkardt/cpp_src/brent/brent.cpp
+	// rewrite when I have time...
+
+	var a = x0, b = x1, c, d, e, sa, sb, sc, fa, fb, fc, m, tol, p, q, r, s;
+
+	//
+	// Make local copies of A and B.
+	//
+	c = sa = a;
+	fc = fa = y0 - y;
+	sb = b;
+	fb = y1 - y;
+
+	d = e = b - a;
+
+	for (;;) {
+		if (Math.abs(fc) < Math.abs(fb)) {
+			sa = sb, sb = c, c = sa;
+			fa = fb, fb = fc, fc = fa;
+		}
+
+		//tol = 2 * Number.EPSILON * Math.abs(sb) + error;
+		tol = 0;
+		if (sa === sb || Math.abs(m = (c - sb) / 2) <= tol || fb === 0) {
+			break;
+		}
+
+		if (Math.abs(e) < tol || Math.abs(fa) <= Math.abs(fb)) {
+			d = e = m;
+		} else {
+			s = fb / fa;
+
+			if (sa === c) {
+				p = 2 * m * s;
+				q = 1 - s;
+			} else {
+				q = fa / fc;
+				r = fb / fc;
+				p = s * (2 * m * q * (q - r) - (sb - sa) * (r - 1));
+				q = (q - 1) * (r - 1) * (s - 1);
+			}
+
+			if (0 < p) {
+				q = -q;
+			} else {
+				p = -p;
+			}
+
+			s = e;
+			e = d;
+
+			if (2 * p < 3 * m * q - Math.abs(tol * q)
+					&& p < Math.abs(0.5 * s * q)) {
+				d = p / q;
+			} else {
+				d = e = m;
+			}
+		}
+		sa = sb;
+		fa = fb;
+
+		if (tol < Math.abs(d)) {
+			sb = sb + d;
+		} else if (0 < m) {
+			sb = sb + tol;
+		} else {
+			sb = sb - tol;
+		}
+
+		fb = equation(sb) - y;
+
+		if ((0 < fb && 0 < fc) || (fb <= 0 && fc <= 0)) {
+			c = sa;
+			fc = fa;
+			d = e = sb - sa;
+		}
+	}
+
+	return sb;
+}
+
+_.Brent_method = Brent_method;
+
+_.find_root = Brent_method;
+
+// Math.pow(CeL.find_root(function(x) { return x * x; }, 3, 5, 15), 2)
+// CeL.find_root(function(x) { return x * x * x - 8; }, 5, 4)
+
+
+
+/**
+ * 不用微分求取局部極小值 get local minimum using Brent's golden section search
+ * 
+ * 注意: 不同的輸入，即使對同一極值，亦可能會得出不同的輸出值。
+ * 
+ * @param {Function}equation
+ *            演算式, mapping function
+ * @param {Number}min
+ *            求值之自變數 variable 下限，設定初始近似值。
+ * @param {Number}max
+ *            求值之自變數 variable 上限，設定初始近似值。
+ * @param {Object}[options]
+ *            options 設定特殊功能:<br />
+ * 
+ * @returns {Number}[x,fx]: equation(x)≈fx≈minimum
+ * 
+ * @see https://en.wikipedia.org/wiki/Maxima_and_minima
+ *      https://en.wikipedia.org/wiki/Golden_section_search
+ *      https://zh.wikipedia.org/wiki/%E6%9E%81%E5%80%BC#.E6.B1.82.E6.9E.81.E5.80.BC.E7.9A.84.E6.96.B9.E6.B3.95
+ *      https://zh.wikipedia.org/wiki/%E5%8F%98%E5%88%86%E6%B3%95
+ *      http://maths-people.anu.edu.au/~brent/pub/pub011.html
+ *      http://math.stackexchange.com/questions/58787/looking-for-numerical-methods-for-finding-local-maxima-and-minima-of-a-function
+ */
+function Brent_minima(equation, min, max, options) {
+	// default error, accuracy, stopping tolerance, 容許誤差
+	// @see Number.EPSILON
+	var error = 0;
+	if (!options)
+		options = library_namespace.null_Object();
+	else if (options > 0)
+		error = options;
+	else if (options.error > 0)
+		error = Math.abs(options.error);
+
+	var count = (options.count || 40) | 0, data, data_u;
+
+	// copy from std::pair<T, T> brent_find_minima @
+	// http://www.boost.org/doc/libs/1_58_0/boost/math/tools/minima.hpp
+	// rewrite when I have time...
+
+	var tolerance = error,
+	// minima so far
+	x,
+	// second best point
+	w,
+	// previous value of w
+	v,
+	// most recent evaluation point
+	u,
+	// The distance moved in the last step
+	delta,
+	// The distance moved in the step before last
+	delta2,
+	// function evaluations at u, v, w, x
+	fu, fv, fw, fx,
+	// midpoint of min and max
+	mid,
+	// minimal relative movement in x
+	fract1, fract2,
+	// golden ratio, don't need too much precision here!
+	golden = 0.3819660;
+
+	x = w = v = max;
+	fx = equation(x);
+	if (Array.isArray(fx))
+		 data = fx[1], fx = fx[0];
+	fw = fv = fx;
+	delta2 = delta = 0;
+
+	do {
+		// get midpoint
+		mid = (min + max) / 2;
+		// work out if we're done already:
+		fract1 = tolerance * Math.abs(x) + tolerance / 4;
+		fract2 = 2 * fract1;
+		if (Math.abs(x - mid) <= (fract2 - (max - min) / 2))
+			break;
+
+		if (Math.abs(delta2) > fract1) {
+			// try and construct a parabolic fit:
+			var r = (x - w) * (fx - fv), q = (x - v) * (fx - fw), p = (x - v)
+					* q - (x - w) * r;
+			q = 2 * (q - r);
+			if (q > 0)
+				p = -p;
+			q = Math.abs(q);
+			var td = delta2;
+			delta2 = delta;
+			// determine whether a parabolic step is acceptible or not:
+			if ((Math.abs(p) >= Math.abs(q * td / 2)) || (p <= q * (min - x))
+					|| (p >= q * (max - x))) {
+				// nope, try golden section instead
+				delta2 = (x >= mid) ? min - x : max - x;
+				delta = golden * delta2;
+			} else {
+				// whew, parabolic fit:
+				delta = p / q;
+				u = x + delta;
+				if (((u - min) < fract2) || ((max - u) < fract2))
+					delta = (mid - x) < 0 ? -Math.abs(fract1) : Math
+							.abs(fract1);
+			}
+		} else {
+			// golden section:
+			delta2 = (x >= mid) ? min - x : max - x;
+			delta = golden * delta2;
+		}
+		// update current position:
+		u = (Math.abs(delta) >= fract1) ? (x + delta) : (delta > 0 ? (x + Math
+				.abs(fract1)) : (x - Math.abs(fract1)));
+		fu = equation(u);
+		if (Array.isArray(fu))
+			 data_u = fu[1], fu = fu[0];
+		if (fu <= fx) {
+			// good new point is an improvement!
+			// update brackets:
+			if (u >= x)
+				min = x;
+			else
+				max = x;
+			if (x === u)
+				// 無改變。
+				break;
+			// update control points:
+			v = w, w = x, x = u;
+			fv = fw, fw = fx, fx = fu;
+			data = data_u;
+		} else {
+			// Oh dear, point u is worse than what we have already,
+			// even so it *must* be better than one of our endpoints:
+			if (u < x)
+				min = u;
+			else
+				max = u;
+			if ((fu <= fw) || (w == x)) {
+				// however it is at least second best:
+				v = w, w = u;
+				fv = fw, fw = fu;
+			} else if ((fu <= fv) || (v == x) || (v == w)) {
+				// third best:
+				v = u;
+				fv = fu;
+			}
+		}
+
+	} while (--count);
+
+	(x = new Number(x)).y = fx;
+	if (data !== undefined)
+		if (library_namespace.is_Object(data))
+			Object.assign(x, data);
+		else
+			x.data = data;
+	return x;
+}
+
+_.Brent_minima = Brent_minima;
+
+
+// 不用微分求取求取局部極小值 get local minimum
+_.find_minima = Brent_minima;
+_.find_maxima = function(equation, min, max, options) {
+	return Brent_minima(function(x) {
+		return -equation(x);
+	}, min, max, options);
+};
+//不用微分求取局部極值 get local maximum and minimum
+//_.find_extremum = Brent_minima;
+
+
+// ------------------------------------------------------------------------------------------------------//
 
 
 _// JSDT:_module_
 .
 /**
  * VBScript has a Hex() function but JScript does not.
- * @param {Number} number
- * @return	{String} number in hex
- * @example
- * alert('0x'+CeL.hex(16725))
+ * 
+ * @param {Number}
+ *            number
+ * @return {String} number in hex
+ * @example alert('0x'+CeL.hex(16725))
  */
 hex = function(number) {
 	return ((number = Number(number)) < 0 ? number + 0x100000000 : number).toString(16);
@@ -1293,17 +1705,17 @@ hex = function(number) {
 _// JSDT:_module_
 .
 /**
- * 補數計算。
- * 正數的補數即為自身。若要求得互補之後的數字，請設成負數。
- * @param {Number} number
- * @return	{Number} base	1: 1's Complement, 2: 2's Complement, (TODO: 3, 4, ..)
- * @example
- * alert(complement())
- * @see
- * http://www.tomzap.com/notes/DigitalSystemsEngEE316/1sAnd2sComplement.pdf
- * http://en.wikipedia.org/wiki/Method_of_complements
- * http://en.wikipedia.org/wiki/Signed_number_representations
- * @since	2010/3/12 23:47:52
+ * 補數計算。 正數的補數即為自身。若要求得互補之後的數字，請設成負數。
+ * 
+ * @param {Number}
+ *            number
+ *
+ * @return {Number} base 1: 1's Complement, 2: 2's Complement, (TODO: 3, 4, ..)
+ * @example alert(complement())
+ * @see http://www.tomzap.com/notes/DigitalSystemsEngEE316/1sAnd2sComplement.pdf
+ *      http://en.wikipedia.org/wiki/Method_of_complements
+ *      http://en.wikipedia.org/wiki/Signed_number_representations
+ * @since 2010/3/12 23:47:52
  */
 complement = function() {
 	return this.from.apply(this, arguments);
@@ -1315,21 +1727,19 @@ complement.prototype = {
 
 base : 2,
 
-//	1,2,..
+// 1,2,..
 bits : 8,
 
-//	radix complement or diminished radix complement.
-//	http://en.wikipedia.org/wiki/Method_of_complements
+// radix complement or diminished radix complement.
+// http://en.wikipedia.org/wiki/Method_of_complements
 diminished : 0,
 
 /**
- * 正負符號.
- * 正: 0/false,
- * 負 negative value:!=0 / true
+ * 正負符號. 正: 0/false, 負 negative value:!=0 / true
  */
 sign : 0,
 
-//	get the value
+// get the value
 valueOf : function() {
 	return this.sign ? -this.value : this.value;
 },
@@ -1356,21 +1766,21 @@ set : function(value) {
  * input
  */
 from : function(number, base, diminished) {
-	//	正規化
+	// 正規化
 	number = ('' + (number||0)).replace(/\s+$|^[\s0]+/g, '') || '0';
-	//library_namespace.debug(number + ':' + number.length + ',' + this.bits);
+	// library_namespace.debug(number + ':' + number.length + ',' + this.bits);
 
-	//	整數部分位數
+	// 整數部分位數
 	var value = number.indexOf('.'), tmp;
 	if (value == -1)
 		value = number.length;
-	//	TODO: not good
+	// TODO: not good
 	if (value > this.bits)
-		//throw 'overflow';
+		// throw 'overflow';
 		library_namespace.err('complement.from: overflow: ' + value);
 
 	if (typeof diminished === 'undefined')
-		//	illegal setup
+		// illegal setup
 		diminished = this.diminished;
 	else
 		this.diminished = diminished;
@@ -1380,27 +1790,29 @@ from : function(number, base, diminished) {
 			base = 2, this.diminished = 1;
 		this.base = base;
 	}else
-		//	illegal base
+		// illegal base
 		base = this.base;
-	//library_namespace.debug(base + "'s Complement");
+	// library_namespace.debug(base + "'s Complement");
 
-	//	TODO: 僅對 integer 有效
+	// TODO: 僅對 integer 有效
 	value = parseInt(number, base);
 	tmp = Math.pow(base, this.bits - 1);
 	if (value >= tmp * base)
-		//throw 'overflow';
+		// throw 'overflow';
 		library_namespace.err('complement.from: overflow: ' + value);
 
-	//library_namespace.debug('compare ' + value + ',' + tmp);
+	// library_namespace.debug('compare ' + value + ',' + tmp);
 	if (value < tmp)
 		this.sign = 0;
-	else
-		//library_namespace.debug('負數 ' + (tmp * base - (diminished ? 1 : 0)) + '-'+ value+'='+(tmp * base - (diminished ? 1 : 0) - value)),
-		this.sign = 1,
+	else {
+		library_namespace.debug('負數 ' + (tmp * base - (diminished ? 1 : 0)) + '-'
+				+ value + '=' + (tmp * base - (diminished ? 1 : 0) - value), 3);
+		this.sign = 1;
 		value = tmp * base - (diminished ? 1 : 0) - value;
+	}
 
 	this.value = value;
-	//library_namespace.debug(number + ' → '+this.valueOf());
+	// library_namespace.debug(number + ' → '+this.valueOf());
 
 	return this;
 },
@@ -1418,20 +1830,20 @@ to : function(base, diminished) {
 
 	var value = this.value, tmp = Math.pow(base, this.bits - 1);
 	if (value > tmp || value === tmp && (diminished || !this.sign))
-		//throw 'overflow';
+		// throw 'overflow';
 		library_namespace.err('complement.to: overflow: ' + (this.sign ? '-' : '+') + value);
 
 	if (this.sign){
 		tmp *= base;
 		if (diminished)
-			//	TODO: 僅對 integer 有效
+			// TODO: 僅對 integer 有效
 			tmp--;
-		//library_namespace.debug('負數 ' + value + '，sum=' + tmp);
+		// library_namespace.debug('負數 ' + value + '，sum=' + tmp);
 		// 負數，添上兩補數之和
 		value = tmp - value;
 	}
 
-	//library_namespace.debug('value: ' + (this.sign ? '-' : '+') + value);
+	// library_namespace.debug('value: ' + (this.sign ? '-' : '+') + value);
 
 	value = value.toString(Math.max(2, this.base));
 
@@ -1445,10 +1857,27 @@ _// JSDT:_module_
 complement.prototype.toString = _.complement.prototype.to;
 
 
-/*
-	↑Math	---------------------------------------------------------------
-*/
 
+/**
+ * haversines
+ * 
+ * @param {Number}θ
+ *            angle (in radians)
+ * 
+ * @returns {Number}haversines(θ)
+ * 
+ * @see https://en.wikipedia.org/wiki/Haversine_formula
+ */
+function hav(θ) {
+	return (1 - Math.cos(θ)) / 2;
+	// hav(θ) = sin^2(θ/2)
+}
+
+Math.hav = hav;
+
+/*
+ * ↑Math ---------------------------------------------------------------
+ */
 
 
 

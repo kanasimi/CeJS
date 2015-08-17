@@ -870,14 +870,16 @@ var split_by_code_point, PATTERN_char;
  * http://teppeis.hatenablog.com/entry/2014/01/surrogate-pair-in-javascript
  */
 try {
-	PATTERN_char = new RegExp('.', 'u');
+	// tested @ Edge/12.10240
+	PATTERN_char = new RegExp('.', 'ug');
 	split_by_code_point = function() {
 		return this.match(PATTERN_char);
 	};
 
 } catch (e) {
+	PATTERN_char = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
 	split_by_code_point = function() {
-		return /[\uD800-\uDBFF][\uDC00-\uDFFF]/.test(this)
+		return PATTERN_char.test(this)
 		//
 		? this.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|./g) : this.split('');
 	};
@@ -1243,11 +1245,14 @@ function slow_to_fixed(decimals, max) {
 	if (isNaN(value))
 		return value;
 
-	if (isNaN(decimals) || (decimals = Math.floor(decimals)) < 0)
-		// 內定：8位
-		decimals = 8;
-	else if (decimals > 20)
-		decimals = 20;
+	if (isNaN(decimals) || (decimals = Math.floor(decimals)) < 0) {
+		// TODO: using Number.EPSILON
+
+		// 內定：10位
+		decimals = 10;
+	} else if (decimals > 20)
+		// 16: Math.ceil(Math.abs(Math.log10(Number.EPSILON)))
+		decimals = 16;
 
 	if (!max && Number.prototype.toFixed)
 		return parseFloat(value.toFixed(decimals).replace(/\.?0+$/, ''));
@@ -1285,6 +1290,9 @@ function slow_to_fixed(decimals, max) {
 
 	return value ? parseFloat((negative ? '-' : '') + value) : 0;
 }
+
+//(15*1.33).to_fixed()===19.95
+
 /*	old:very slow
 function to_fixed(d,m){
  var v=this.valueOf(),i;if(isNaN(v))return v;
