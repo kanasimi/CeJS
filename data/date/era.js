@@ -615,7 +615,9 @@ if (typeof CeL === 'function')
 			// @see get_era_name(type)
 
 			// 基本上僅表示名義。若欲更改，需考慮對外部程式之相容性。
-			SEARCH_STRING = 'dynasty', WITH_PERIOD = 'period',
+			SEARCH_STRING = 'dynasty',
+			//
+			WITH_PERIOD = 'period', WITH_COUNTRY = 'country',
 
 			// 十二生肖，或屬相。
 			// Chinese Zodiac
@@ -1488,30 +1490,32 @@ if (typeof CeL === 'function')
 							+ (name[紀年名稱索引值.君主] || '') + ', '
 							+ name[紀年名稱索引值.國家] + ')';
 
-				if (name.cache)
-					return name.cache;
+				if (!name.cache) {
+					// 基本上不加國家名稱。
+					// name → [ 朝代, 君主, 紀年 ]
+					name = name.slice(0, 3).reverse();
 
-				// 基本上不加國家名稱。
-				// name → [ 朝代, 君主, 紀年 ]
-				name = name.slice(0, 3).reverse();
+					// 對重複的名稱作適當簡略調整。
+					if (name[0] && name[0].includes(name[2])
+					//
+					|| name[1] && name[1].includes(name[2]))
+						name[2] = '';
+					if (name[1]) {
+						// 處理如周諸侯國之類。
+						// 例如 魯國/魯昭公 → 魯昭公
+						var matched = name[0].match(國_PATTERN);
+						if (name[1].startsWith(matched ? matched[1] : name[0]))
+							name[0] = '';
+					}
 
-				// 對重複的名稱作適當簡略調整。
-				if (name[0] && name[0].includes(name[2])
-				//
-				|| name[1] && name[1].includes(name[2]))
-					name[2] = '';
-				if (name[1]) {
-					// 處理如周諸侯國之類。
-					// 例如 魯國/魯昭公 → 魯昭公
-					var matched = name[0].match(國_PATTERN);
-					if (name[1].startsWith(matched ? matched[1] : name[0]))
-						name[0] = '';
+					if (type === WITH_PERIOD)
+						append_period(this, name);
+
+					name.cache = reduce_era_name(name.join(' '));
 				}
 
-				if (type === WITH_PERIOD)
-					append_period(this, name);
-
-				return name.cache = reduce_era_name(name.join(' '));
+				return type === WITH_COUNTRY ? [ this.name[紀年名稱索引值.國家],
+						name.cache ] : name.cache;
 			}
 
 			// ---------------------------------------
@@ -5802,15 +5806,16 @@ if (typeof CeL === 'function')
 								date_index = numeralize_date_format(date_index,
 										options.numeral);
 
-							var name = era.toString();
+							var name = era.toString(options.add_country
+									&& WITH_COUNTRY);
 							// 為需要以 space 間隔之紀元名添加 space。
-							if (NEED_SPLIT_POSTFIX.test(name))
-								name += ' ';
-							name += date_index[0] + '年';
+							if (NEED_SPLIT_POSTFIX.test(name[1]))
+								name[1] += ' ';
+							name[1] += date_index[0] + '年';
 							if (era.精 !== '年') {
-								name += date_index[1] + '月';
+								name[1] += date_index[1] + '月';
 								if (era.精 !== '月')
-									name += date_index[2]
+									name[1] += date_index[2]
 											+ (options.numeral === 'Chinese'
 											//
 											? '' : '日');
@@ -5818,7 +5823,7 @@ if (typeof CeL === 'function')
 							tmp.push(name);
 						}
 					});
-					if (tmp.length)
+					if (tmp.length > 0)
 						date.共存紀年 = tmp;
 				}
 
@@ -7286,6 +7291,7 @@ if (typeof CeL === 'function')
 					node.onmouseout = popup_era_dialog.clear;
 					if (options) {
 						if (options.add_date)
+							// append date
 							node.add_date = options.add_date;
 						if (options.onclick) {
 							node.onclick = function(e) {
@@ -7328,6 +7334,8 @@ if (typeof CeL === 'function')
 			var 史籍紀年_PATTERN, ERA_ONLY_PATTERN,
 			//
 			朔干支_PATTERN = generate_pattern('(朔<\\/span>)(干支)()', false, 'g'),
+			//
+			時干支_PATTERN = generate_pattern('(支)時', false, 'g'),
 			// see era_text_to_HTML.build_pattern()
 			REPLACED_data_era = '$1<span data-era="~">$2</span>$3';
 
@@ -7357,6 +7365,20 @@ if (typeof CeL === 'function')
 					.replace(ERA_ONLY_PATTERN, REPLACED_data_era)
 					//
 					.replace(朔干支_PATTERN, REPLACED_data_era)
+					//
+					.replace(時干支_PATTERN, function($0, 時辰) {
+						var end = library_namespace.BRANCH_LIST
+						// 2: 每個時辰兩小時
+						.indexOf(時辰) * 2 + 1, start = end - 2;
+						if (start < 0)
+							// 24: 每天24小時
+							start += 24;
+						// 時: 小時
+						start += '–' + end + '時';
+						return options.add_date ? $0 + '(' + start + ')'
+						//
+						: '<span title="' + start + '">' + $0 + '</span>';
+					})
 					// 回復
 					.replace(/([，。；！）])\0/g, '$1')
 					// format

@@ -253,10 +253,11 @@ function Julian_day(date, type, no_year_0, get_remainder) {
  */
 Julian_day.from_YMD = function(year, month, date, type, no_year_0) {
 	if (Array.isArray(year)) {
-		type = month;
-		date = year[2];
-		month = year[1];
-		year = year[1];
+		return Array.isArray(month)
+		// month = [H,M,S]
+		? Julian_day.from_YMD(year[0], year[1], year[2], date, type) - .5 + Julian_day.from_HMS(month[0], month[1], month[2])
+		//
+		: Julian_day.from_YMD(year[0], year[1], year[2], month, date);
 	}
 	if (no_year_0 && year < 0)
 		// no year 0. year: -1 → 0

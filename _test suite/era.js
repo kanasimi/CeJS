@@ -222,7 +222,7 @@ CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '[前-]?\\d'), pin_c
 // 可選用的文字式年曆欄位。
 selected_column = {
 	// JDN : true,
-	contemporary : true
+	adjacent_contemporary : true
 },
 // 依特定國家自動增加這些欄。
 auto_add_column = {
@@ -304,7 +304,8 @@ function show_calendar(era_name) {
 	main_date = CeL.era(era_name), main_date_value,
 	// 取得指定紀年之文字式曆譜:年曆,朔閏表,曆日譜。
 	dates = CeL.era.dates(era_name, {
-		含參照用 : /明治|大正|昭和|明仁/.test(era_name)
+		含參照用 : /明治|大正|昭和|明仁/.test(era_name),
+		add_country : true
 	}), is_年譜, i, j, matched, hidden_column = [], group;
 
 	if (!dates)
@@ -430,17 +431,21 @@ function show_calendar(era_name) {
 			//
 			: /[\/年]/.test(era_name) ? date.紀年 : era_name;
 
-		var tmp, matched, list = [];
+		var tmp, matched, list = [], list2 = [];
 		if (date.共存紀年) {
+			tmp = date.國家;
 			date.共存紀年.forEach(function(era, index) {
-				if (output_numeral === 'Chinese')
-					era = CeL.to_Chinese_numeral(era);
 				list.push('[' + (index + 1) + ']', add_contemporary(era,
 						output_numeral));
+				if (tmp === era[0])
+					list2.push('[' + ((list2.length / 2 | 0) + 1) + ']',
+							add_contemporary(era, output_numeral));
 			});
 			date.共存紀年 = list;
+			date.同國共存紀年 = list2;
 			// reset
 			list = [];
+			list2 = [];
 		}
 
 		if (tmp = date.精 === '年')
@@ -638,8 +643,14 @@ function show_calendar(era_name) {
 				T : '增加此欄',
 				C : 'column_select_button',
 				onclick : function() {
-					if (CeL.toggle_display('column_to_select') === 'none')
+					if (CeL.toggle_display('column_to_select') === 'none') {
+						CeL.set_class(this, 'shrink', {
+							remove : true
+						});
 						pin_column = false;
+					} else {
+						CeL.set_class(this, 'shrink');
+					}
 					return false;
 				}
 			}, {
@@ -1640,21 +1651,26 @@ var 準確程度_MESSAGE = {
 	T : '大正',
 	M : '明治'
 }, country_color = {
-	天皇 : '#9cf',
+	中國 : '#dd0',
 
-	朝鮮 : '#ccf',
-	新羅 : '#ccf',
-	百濟 : '#ccf',
-	高句麗 : '#ccf',
-	高麗 : '#ccf',
-	대한민국 : '#ccf',
-	'일제 강점기' : '#ccf',
-	조선주체연호 : '#ccf',
+	日本 : '#9cf',
+	// 天皇 : '#9cf',
 
-	越南 : '#9f9',
-	黎 : '#9f9',
-	阮 : '#9f9',
-	莫 : '#9f9'
+	한국 : '#ccf',
+	// 朝鮮 : '#ccf',
+	// 新羅 : '#ccf',
+	// 百濟 : '#ccf',
+	// 高句麗 : '#ccf',
+	// 高麗 : '#ccf',
+	// 대한민국 : '#ccf',
+	// '일제 강점기' : '#ccf',
+	// 조선주체연호 : '#ccf',
+
+	'Việt Nam' : '#9f9',
+// 越南 : '#9f9',
+// 黎 : '#9f9',
+// 阮 : '#9f9',
+// 莫 : '#9f9'
 }, had_inputted = CeL.null_Object(), country_PATTERN;
 
 (function() {
@@ -1665,16 +1681,23 @@ var 準確程度_MESSAGE = {
 })();
 
 function add_contemporary(era, output_numeral) {
+	if (!Array.isArray(era))
+		era = [ , era ];
 	var o = {
-		a : output_numeral === 'Chinese' ? CeL.to_Chinese_numeral(era) : era,
-		title : era,
+		a : output_numeral === 'Chinese' ? CeL.to_Chinese_numeral(era[1])
+				: era[1],
+		title : era[1],
 		href : '#',
 		target : '_self',
 		onclick : click_title_as_era,
 		C : '共存紀年'
-	}, matched = era.match(country_PATTERN);
+	}, matched;
+	if (era[0] in country_color)
+		matched = era[0];
+	else if (false && (matched = era[1].match(country_PATTERN)))
+		matched = matched[1];
 	if (matched)
-		o.S = 'background-color: ' + country_color[matched[1]] + ';';
+		o.S = 'background-color: ' + country_color[matched] + ';';
 	return o;
 }
 
@@ -1745,7 +1768,8 @@ function translate_era(era) {
 
 	date = CeL.era(era, {
 		// 尋精準 : 4,
-		numeral : output_numeral
+		numeral : output_numeral,
+		add_country : true
 	});
 	if (date) {
 		set_era_by_url_data(era);
@@ -2789,6 +2813,13 @@ function affairs() {
 			return date.共存紀年;
 		} ],
 
+		adjacent_contemporary : [ {
+			T : '同國共存紀年',
+			R : '本日/本年同時期相同國家存在之其他紀年。對未有詳實資料者，僅約略準確至所列日期！'
+		}, function(date) {
+			return date.同國共存紀年;
+		} ],
+
 		// --------------------------------------------------------------------
 		// 天文計算 astronomical calculations
 		astronomy : [ '天文計算 astronomical calculations', method_nodes ],
@@ -3009,7 +3040,8 @@ function affairs() {
 				}, ' ', (JD = CeL.JD_to_Date(phase[1])).format({
 					parser : 'CE',
 					// format : '%Y/%m/%d %H:%M:%S'
-					format : '%H:%M:%S'
+					format : '%H:%M:%S',
+					offset : date['minute offset']
 				}), eclipse_info ? [ ' ', {
 					a : {
 						T : eclipse_info.name
@@ -3062,12 +3094,13 @@ function affairs() {
 						format : '%5Y%2m%2d',
 						offset : 0
 					}) + '#map'
-				}, ')' ] : '' ] : '', ' ', {
+				}, ')' ] : '' ] : '', ' ', isNaN(eclipse_info.TT) ? '' : {
 					span : CeL.JD_to_Date(CeL.UT(eclipse_info.TT)).format({
 						parser : 'CE',
-						format : '%H:%M:%S'
+						format : '%H:%M:%S',
+						offset : date['minute offset']
 					}),
-					R : 'maximum eclipse, 食甚時間.' + (eclipse_info.magnitude
+					R : 'maximum eclipse, 本地食甚時間.' + (eclipse_info.magnitude
 					//
 					? ' 食甚食分: ' + eclipse_info.magnitude.to_fixed(3) : '')
 				}, '?' ] : '' ];
@@ -4414,6 +4447,7 @@ function affairs() {
 		coordinates = CeL.parse_coordinates(coordinates);
 		if (coordinates && typeof coordinates[0] === 'number'
 				&& typeof coordinates[1] === 'number') {
+			// 自動判別時區。
 			coordinates[2] = Math.round(coordinates[1] / 360 * 24);
 			if (name) {
 				coordinates.place = name;
@@ -4436,42 +4470,61 @@ function affairs() {
 		local_coordinates[2] = this.value;
 	};
 
-	var place_nodes = [], place_list = {
-		臺北市 : '25°2′N 121°38′E',
-		北京市 : '39°54′57″N 116°23′26″E',
-		// 旧東京天文台1 (東京都港区麻布台。世界測地系で東経 139°44′28.8869″、北緯 35°39′29.1572″)
-		// http://eco.mtk.nao.ac.jp/koyomi/yoko/
-		東京都 : '35° 41′ 22.4″ N, 139° 41′ 30.2″ E',
-		京都市 : '35° 0′ 41.8″ N, 135° 46′ 5.2″ E',
-		// 首爾
-		서울 : '37° 34′ 0″ N, 126° 58′ 41″ E',
-		// 長安
-		西安市 : '34°16′N 108°54′E',
-		// 首都、國都或京（京師／城／都）
-		// https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E9%A6%96%E9%83%BD
-		殷墟 : '36°07′17″N 114°19′01″E',
-		洛陽 : '34°37′53.45″N 112°27′16.85″E'
-	};
-	for ( var place in place_list) {
-		var data = place + ':' + place_list[place];
-		if (place_nodes.length === 0) {
-			change_coordinates(data);
-			place_nodes.push({
-				// 常用地點
-				T : '著名地點：'
-			});
+	// 首都、國都或京（京師／城／都）
+	// https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E9%A6%96%E9%83%BD
+	var place_nodes = [ {
+		// 常用地點
+		T : '著名地點：'
+	} ], place_list = {
+		中國 : {
+			北京市 : '39°54′57″N 116°23′26″E',
+			// 長安
+			西安市 : '34°16′N 108°54′E',
+			洛陽 : '34°37′53.45″N 112°27′16.85″E',
+			南京市 : '32°02′38″N 118°46′43″E',
+			殷墟 : '36°07′17″N 114°19′01″E'
+		},
+		日本 : {
+			// 旧東京天文台1 (東京都港区麻布台。世界測地系で東経 139°44′28.8869″、北緯 35°39′29.1572″)
+			// http://eco.mtk.nao.ac.jp/koyomi/yoko/
+			東京都 : '35° 41′ 22.4″ N, 139° 41′ 30.2″ E',
+			京都市 : '35° 0′ 41.8″ N, 135° 46′ 5.2″ E'
+		},
+		한국 : {
+			// 首爾
+			서울 : '37° 34′ 0″ N, 126° 58′ 41″ E'
+		},
+		'Việt Nam' : {
+			// 河內市
+			'Hà Nội' : '21°01′42.5″N 105°51′15.0″E'
+		},
+		others : {
+			臺北市 : '25°2′N 121°38′E'
 		}
+	};
+	for ( var country in place_list) {
+		var country_places = place_list[country];
 		place_nodes.push({
-			a : {
-				T : place
-			},
-			href : '#',
-			title : data,
-			onclick : function() {
-				return change_coordinates(this.title);
-			}
-		}, ' ');
+			br : null
+		}, {
+			T : country,
+			C : 'country'
+		}, ': ');
+		for ( var place in country_places) {
+			i = place + ':' + country_places[place];
+			place_nodes.push({
+				a : {
+					T : place
+				},
+				href : '#',
+				title : i,
+				onclick : function() {
+					return change_coordinates(this.title);
+				}
+			}, ' ');
+		}
 	}
+	change_coordinates(i);
 	CeL.new_node(place_nodes, 'place_list');
 
 	// -----------------------------

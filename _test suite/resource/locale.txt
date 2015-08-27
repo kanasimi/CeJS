@@ -111,8 +111,8 @@ http://www.e-yakushiyo.net/Calendario_Maya_Dias.htm",儒略日數,,Julian Day Nu
 ,可選用的文字式年曆欄位: 分類: 天文計算,月日視黃經差,月と太陽との視黄経の差,月日視黃經差,,apparent longitude: Moon - Sun,月日視黄経差
 ,可選用的文字式年曆欄位: 分類: 天文計算,月相,月齢,月相,,lunar phase,月相
 ,可選用的文字式年曆欄位: 分類: 天文計算,saros %1,沙羅週期標示,沙羅序列%1,,saros %1,サロス系列%1
-,可選用的文字式年曆欄位: 分類: 天文計算,日食,,日食,,solar eclipse,日食
-,可選用的文字式年曆欄位: 分類: 天文計算,月食,,月食,,lunar eclipse,月食
+,可選用的文字式年曆欄位: 分類: 天文計算,solar eclipse,,日食,,solar eclipse,日食
+,可選用的文字式年曆欄位: 分類: 天文計算,lunar eclipse,,月食,,lunar eclipse,月食
 ,可選用的文字式年曆欄位: 分類: 天文計算,total solar eclipse,,日全食,,total solar eclipse,皆既日食
 ,可選用的文字式年曆欄位: 分類: 天文計算,annular solar eclipse,,日環食,,annular solar eclipse,金環日食
 ,可選用的文字式年曆欄位: 分類: 天文計算,hybrid solar eclipse,,全環食,,hybrid solar eclipse,金環皆既日食
@@ -227,6 +227,7 @@ https://zh.wikipedia.org/wiki/%E6%A8%A1%E5%9D%97:CGroup/%E5%9C%B0%E5%90%8D",義�
 ,輸出格式,公元日期,,公元日期,,Date of Common Era,西暦日付
 ,輸出格式,朝代紀年日期,,朝代紀年日期,,Date of calendar era,紀年/元号暦日
 ,輸出格式+可選用的文字式年曆欄位,共存紀年,contemporary dates,共存紀年,,Contemporary Period,共存の紀年
+,可選用的文字式年曆欄位,同國共存紀年,the same country,同國共存紀年,,Contemporary Period (same country),共存の同国紀年
 ,輸出格式,年月日干支,Months in Sexagenary Cycle,年月日干支,,Stem-branches,年・月・日の干支
 ,輸出格式,四柱八字,https://en.wikipedia.org/wiki/Four_Pillars_of_Destiny,四柱八字,,Four Pillars,四柱
 ,文字式年曆,公元,,公元,,Common Era,西暦

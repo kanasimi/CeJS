@@ -103,6 +103,16 @@ td {
 	color: #a4d;
 	font-weight: bold;
 	cursor: pointer;
+	display: block;
+	border-radius: .5em;
+}
+
+.column_select_button.shrink {
+	display: inline;
+}
+
+.column_select_button:hover {
+	background-color: #dfb;
 }
 
 .column_select_option_button {
@@ -450,6 +460,10 @@ td {
 
 .config_layer .status {
 	color: #9a2;
+}
+
+#place_list .country {
+	background-color: #eff;
 }
 
 #batch_prefix {
@@ -1381,8 +1395,10 @@ Jews, however, reckon the start of each new Seleucid year with the lunar month T
 			<div id="place_list"></div>
 			<hr />
 			手動設定<span data-gettext="地理座標："></span><input id="coordinates"
-				style="width: 20em" /> <span data-gettext="時區："></span>UTC (+/-) <input
-				id="time_zone" style="width: 3em" type="number" /><br /> <span
+				style="width: 20em" /> <a rel="nofollow"
+				href="https://en.wikipedia.org/wiki/Time_zone" title="time zone"><span
+				data-gettext="時區："></span></a>UTC (+/-) <input id="time_zone"
+				style="width: 3em" /> (<q>9.5</q> for UTC+9:30)<br /> <span
 				data-gettext="經度："></span><input id="latitude" /><br /> <span
 				data-gettext="緯度："></span><input id="longitude" /><br />
 			您可使用各種網路工具以取得經緯度。例如 <a rel="nofollow"
