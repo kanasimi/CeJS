@@ -794,11 +794,25 @@ function openOut(file_path,IO_mode,format){
  try{OUTs=OUT.OpenAsTextStream(IO_mode,format);}catch(e){pErr(e);}
 
  return OUTs;
-};
+}
 
 
+// create link
+// 2015/9/3
+// link source (target), link file path
+// https://msdn.microsoft.com/en-us/library/xsy6k3ys.aspx
+function create_shortcut(from, to, options) {
+	if (!/\\.(lnk|url)$/i.test(to))
+		to += '.lnk';
+	var WshShortcut = WshShell.CreateShortcut(to);
+	if (library_namespace.is_Object(options))
+		Object.assign(WshShortcut, options);
+	WshShortcut.TargetPath = from;
+	WshShortcut.Save();
+	return WshShortcut;
+}
 
-
+_.create_shortcut = create_shortcut;
 
 
 /*

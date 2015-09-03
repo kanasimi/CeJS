@@ -12,7 +12,7 @@
 
 if (false) {
 	CeL.run('data.numeral', function() {
-		// ...
+		CeL.to_Chinese_numeral(1000);
 	});
 }
 

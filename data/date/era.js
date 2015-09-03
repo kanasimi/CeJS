@@ -1511,7 +1511,8 @@ if (typeof CeL === 'function')
 					if (type === WITH_PERIOD)
 						append_period(this, name);
 
-					name.cache = reduce_era_name(name.join(' '));
+					this.name.cache = reduce_era_name(name.join(' '));
+					name = this.name;
 				}
 
 				return type === WITH_COUNTRY ? [ this.name[紀年名稱索引值.國家],
@@ -5806,20 +5807,21 @@ if (typeof CeL === 'function')
 								date_index = numeralize_date_format(date_index,
 										options.numeral);
 
-							var name = era.toString(options.add_country
-									&& WITH_COUNTRY);
+							var name = era.toString();
 							// 為需要以 space 間隔之紀元名添加 space。
-							if (NEED_SPLIT_POSTFIX.test(name[1]))
-								name[1] += ' ';
-							name[1] += date_index[0] + '年';
+							if (NEED_SPLIT_POSTFIX.test(name))
+								name += ' ';
+							name += date_index[0] + '年';
 							if (era.精 !== '年') {
-								name[1] += date_index[1] + '月';
+								name += date_index[1] + '月';
 								if (era.精 !== '月')
-									name[1] += date_index[2]
+									name += date_index[2]
 											+ (options.numeral === 'Chinese'
 											//
 											? '' : '日');
 							}
+							if (options.add_country)
+								name = [ era.name[紀年名稱索引值.國家], name ];
 							tmp.push(name);
 						}
 					});
