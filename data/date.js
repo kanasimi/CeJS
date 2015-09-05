@@ -2821,6 +2821,188 @@ function format_date(date_value, mode, zero_fill, date_separator, time_separator
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// 組織 period list，以做後續檢索。
+
+/**
+ * 取得包含 date 之 periods<br />
+ * need module CeL.data.native
+ * 
+ * @param {Date}date
+ *            欲搜尋之 date
+ * 
+ * @returns {Array}period data
+ */
+function get_contemporary_periods(date) {
+	date = +date;
+	if (date < this.start[0])
+		return;
+
+	var start_index = this.start.search_sorted(date, {
+		found : true
+	}),
+	// 邊際 period
+	edge_period = this[start_index], contemporary = this.contemporary[start_index];
+
+	if (contemporary) {
+		var end_list = contemporary.end;
+		// 把結束時間在 date 之前的去掉。
+		var last_index = 0;
+		// 因為量應該不大，採循序搜尋。
+		while (end_list[last_index] <= date)
+			last_index++;
+		contemporary = contemporary.slice(last_index);
+	} else
+		contemporary = [];
+
+	if (date < this.get_end(edge_period))
+		contemporary.push(edge_period);
+	else if (contemporary.length === 0)
+		return;
+
+	return contemporary;
+}
+
+// TODO
+function add_period(period_data) {
+	var start_time = this.get_start(period_data),
+	// index to insert
+	index = this.start.search_sorted(start_time, {
+		found : true
+	});
+	TODO;
+	if (start_time < this.start[0])
+		;
+}
+
+
+if (false) {
+	test_periods = sortest_periods([
+		[ new Date(2015, 3, 2), new Date(2015, 7, 3), 'bbb' ],
+		[ new Date(2015, 1, 2), new Date(2015, 4, 3), 'aaa' ],
+	], 0, 1);
+
+	test_periods.get_contemporary(new Date(2015, 1, 1));
+	test_periods.get_contemporary(new Date(2015, 3, 2));
+	test_periods.get_contemporary(new Date(2015, 3, 8));
+	test_periods.get_contemporary(new Date(2015, 4, 3));
+	test_periods.get_contemporary(new Date(2015, 7, 2));
+	test_periods.get_contemporary(new Date(2015, 7, 3));
+	test_periods.get_contemporary(new Date(2015, 7, 4));
+}
+
+
+/**
+ * 組織 period_list，以做後續檢索。
+ * 
+ * @param {Object|Array}period_list
+ *            period list
+ * @param {Number|Function}start_index
+ *            start index. 若為 function，回傳須轉為 number，不應回傳 boolean, false。
+ * @param {Number|Function}end_index
+ *            end index. 若為 function，回傳須轉為 number，不應回傳 boolean, false。
+ * @param {Number}[unit_length]
+ * 
+ * @returns {Array}period list
+ */
+function sort_periods(period_list, start_index, end_index, unit_length) {
+	var periods = [], start_list = [],
+	// assert: Number.isFinite(get_start(period_data))
+	get_start = typeof start_index === 'function' ? start_index
+			: function(data) {
+				return +data[start_index];
+			},
+	// assert: Number.isFinite(get_end(period_data))
+	get_end = typeof end_index === 'function' ? end_index : function(data) {
+		var time = +data[end_index];
+		return isNaN(time) ? +get_start(data) + unit_length : time;
+	};
+	if (!(unit_length > 0))
+		unit_length = ONE_DAY_LENGTH_VALUE;
+	// periods.get_start = get_start;
+	periods.get_end = get_end;
+	// periods.unit = unit_length;
+
+	function add_index(period_data, index) {
+		start_list.push([ get_start(period_data), period_data ]);
+	}
+	if (typeof period_list.forEach === 'function')
+		period_list.forEach(add_index);
+	else
+		for ( var key in period_list)
+			add_index(period_list[key], key);
+
+	// sort by start time
+	start_list.sort(function comparator(period1, period2) {
+		return period1[0] - period2[0];
+	});
+
+	// [ start time value, ... ]
+	var start_time_list = [],
+	// [ [ period_data, period_data, ... ], ... ]
+	// contemporary 若存在，應該按照 end 時間由前至後 sort。
+	contemporary = [],
+	//
+	last_contemporary, last_end_list, last_end,
+	// 前一period
+	last_period;
+	periods.start = start_time_list;
+	periods.contemporary = contemporary;
+	if (false) {
+		periods.add = add_period;
+		start_list.forEach(function(period_data) {
+			periods.add(period_data);
+		});
+	}
+
+	start_list.forEach(function(period, index) {
+		var start_time = period[0];
+		periods.push(period[1]);
+		start_time_list.push(start_time);
+		if (last_contemporary) {
+			last_contemporary = last_contemporary.slice();
+			last_end_list = last_end_list.slice();
+		} else {
+			last_contemporary = [];
+			last_end_list = [];
+		}
+
+		// 除去結束時間於本 period 之前的 period。
+		var past_index = 0;
+		// 因為量應該不大，採循序搜尋。
+		while (last_end_list[past_index]
+				&& start_time < last_end_list[past_index])
+			past_index++;
+		if (past_index > 0) {
+			last_end_list.slice(past_index);
+			last_contemporary.slice(past_index);
+		}
+
+		if (start_time < last_end) {
+			// last_period 與本 period 重疊。將之添入。
+			past_index = 0;
+			// 因為量應該不大，採循序搜尋。
+			while (last_end_list[past_index] <= last_end)
+				past_index++;
+			last_end_list.splice(past_index, 0, last_end);
+			last_contemporary.splice(past_index, 0, last_period);
+		}
+
+		// last_contemporary: 不包含本 period 之本 period 共存 periods。
+
+		if (last_contemporary.length > 0)
+			(contemporary[index] = last_contemporary).end = last_end_list;
+		else
+			last_contemporary = null;
+		last_end = get_end(last_period = period[1]);
+	});
+
+	periods.get_contemporary = get_contemporary_periods;
+	return periods;
+}
+
+_.sort_periods = sort_periods;
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 
 library_namespace.set_method(String.prototype, {

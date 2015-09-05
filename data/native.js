@@ -1787,6 +1787,15 @@ CeL.assert([ 1, search_sorted_Array([ 0, 2, 4 ], 3, {
 	found : true
 }) ]);
 
+CeL.assert([ 'r', [ 4, 7, 12 ].search_sorted(8, {
+	found : [ 'f', 'r', 'e' ]
+}) ]);
+
+CeL.assert([ undefined, [ 4, 7, 12 ].search_sorted(8, {
+	found : [ 'f', 'r', 'e' ],
+	// 以便未找到時回傳 undefined.
+	near : []
+}) ]);
 
  </code>
  */
@@ -1804,10 +1813,10 @@ CeL.assert([ 1, search_sorted_Array([ 0, 2, 4 ], 3, {
  *            由小至大已排序的 array。
  * @param value
  *            value to search.
- * @param {Object}options
+ * @param {Object}[options]
  *            options = {<br />
- *            found : found_callback(index, closed/未準確相符合，僅為趨近、近似),<br />
- *            near : not_found_callback(較小的 index),<br />
+ *            found : found_callback(index, not_found: closed/未準確相符合，僅為趨近、近似),<br />
+ *            near : not_found_callback(較小的 index, not_found),<br />
  *            start : start index,<br />
  *            last : last/end index,<br />
  *            length : search length.<br />
@@ -1895,6 +1904,7 @@ function search_sorted_Array(array, value, options) {
 
 search_sorted_Array.default_comparator = function(a, b) {
 	// return a - b;
+	// return Math.sign(a - b);
 	return a < b ? -1 : a > b ? 1 : 0;
 };
 

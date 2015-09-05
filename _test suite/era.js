@@ -220,7 +220,7 @@ var PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
 //
 CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '[前-]?\\d'), pin_column,
 // 可選用的文字式年曆欄位。
-selected_column = {
+selected_columns = {
 	// JDN : true,
 	adjacent_contemporary : true
 },
@@ -236,7 +236,7 @@ auto_add_column = {
 	]
 },
 // 可選用的文字式年曆 title = { id : [th, function (date) {} ] }
-calendar_column, calendar_column_alias,
+calendar_columns, calendar_column_alias,
 //
 default_column = [
 		{
@@ -263,29 +263,30 @@ function pin_text(gettext) {
 function full_column_name(name) {
 	if (name.includes('/'))
 		return name;
-	for ( var n in calendar_column.alias)
+	for ( var n in calendar_columns.alias)
 		;
 }
 
-function remove_calendar_column() {
+function remove_calendar_columns() {
 	var n = this.title.match(/: (.+)$/);
-	if (n && ((n = n[1]) in calendar_column)
+	if (n && ((n = n[1]) in calendar_columns)
 	//		
-	|| (n = calendar_column_alias[n]) && (n in calendar_column))
-		delete selected_column[n];
+	|| (n = calendar_column_alias[n]) && (n in calendar_columns))
+		delete selected_columns[n];
 	else
 		CeL.warn('Unkonwn column: [' + this.title + ']');
 	translate_era();
 	return false;
 }
 
-function add_calendar_column(name, no_jump) {
+function add_calendar_columns(name, no_jump) {
 	if (typeof name !== 'string' || !name)
 		name = this.title;
 	var column = name;
-	if ((column in calendar_column) || (column = calendar_column_alias[column])
-			&& (column in calendar_column))
-		selected_column[column] = true;
+	if ((column in calendar_columns)
+			|| (column = calendar_column_alias[column])
+			&& (column in calendar_columns))
+		selected_columns[column] = true;
 	else
 		CeL.warn('Unkonwn column: [' + name + ']');
 	if (!no_jump)
@@ -318,9 +319,9 @@ function show_calendar(era_name) {
 	}
 
 	// 添加各個欄位標頭。
-	// 這樣會依照添加進 selected_column 的順序顯示欄位。
-	for (i in selected_column) {
-		if (j = calendar_column[i]) {
+	// 這樣會依照添加進 selected_columns 的順序顯示欄位。
+	for (i in selected_columns) {
+		if (j = calendar_columns[i]) {
 			if (typeof (j = j[0]) === 'function')
 				j = j(era_name, dates);
 			title.push({
@@ -328,19 +329,21 @@ function show_calendar(era_name) {
 					span : '×',
 					title : _('除去此欄') + ': ' + i,
 					C : 'remove_mark',
-					onclick : remove_calendar_column
+					onclick : remove_calendar_columns
 				} ]
 			});
 		} else
 			// invalid one.
-			delete selected_column[i];
+			delete selected_columns[i];
 	}
 
-	for (i in calendar_column) {
-		if (!(i in selected_column)
+	for (i in calendar_columns) {
+		if (!(i in selected_columns)
+		// 可能有些先行佔位的，因此須做檢測。
+		&& Array.isArray(calendar_columns[i])
 		// "增加此欄"區
-		&& typeof calendar_column[i][1] === 'function') {
-			j = calendar_column[i][0];
+		&& typeof calendar_columns[i][1] === 'function') {
+			j = calendar_columns[i][0];
 			if (typeof j === 'function')
 				j = j(era_name, dates);
 
@@ -355,9 +358,9 @@ function show_calendar(era_name) {
 					T : '分類'
 				}, ': ', {
 					T : group,
-					R : calendar_column[group][0]
-				}, calendar_column[group][1] ? [ {
-					span : calendar_column[group][1],
+					R : calendar_columns[group][0]
+				}, calendar_columns[group][1] ? [ {
+					span : calendar_columns[group][1],
 					C : 'calendar_column_notice'
 				}, {
 					br : null
@@ -369,7 +372,7 @@ function show_calendar(era_name) {
 				} : i,
 				title : i,
 				C : 'add_mark',
-				onclick : add_calendar_column
+				onclick : add_calendar_columns
 			}, ' | ');
 		}
 	}
@@ -542,8 +545,8 @@ function show_calendar(era_name) {
 		});
 
 		// 添加各個欄位。
-		for (tmp in selected_column) {
-			if (conversion = calendar_column[tmp])
+		for (tmp in selected_columns) {
+			if (conversion = calendar_columns[tmp])
 				list.push({
 					td : conversion[1](date) || ''
 				});
@@ -625,8 +628,8 @@ function show_calendar(era_name) {
 				T : '全不選',
 				R : 'Remove all columns. 除去所有欄',
 				onclick : function() {
-					for ( var column in selected_column)
-						delete selected_column[column];
+					for ( var column in selected_columns)
+						delete selected_columns[column];
 					translate_era();
 				},
 				C : 'column_select_option_button',
@@ -1048,6 +1051,7 @@ add_tag.load = function(id, callback) {
 	}
 };
 
+// 將由資源檔呼叫。
 add_tag.parse = function(group, data, line_separator, date_index, title_index,
 		description_index, field_separator) {
 	if (!field_separator)
@@ -1056,6 +1060,7 @@ add_tag.parse = function(group, data, line_separator, date_index, title_index,
 		date_index = 0;
 	if (isNaN(title_index))
 		title_index = 1;
+
 	data.split(line_separator || '|').forEach(function(line) {
 		if (!line)
 			return;
@@ -1065,8 +1070,43 @@ add_tag.parse = function(group, data, line_separator, date_index, title_index,
 			line.description = line[description_index];
 		add_tag(line[date_index], line, group);
 	});
+
+	if (calendar_columns[title_index = '資料圖層/' + group])
+		// 已初始化過。
+		return;
+
+	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
+	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+	// period to search
+	periods = CeL.sort_periods(draw_era.tags[group], function(period) {
+		return Array.isArray(period = period[0]) ? +period[0] : +period;
+	}, function(period) {
+		return Array.isArray(period = period[0]) ? +period[1] : +period
+				+ ONE_DAY_LENGTH_VALUE;
+	});
+	selected_columns[title_index] = true;
+	data = add_tag.data_file[group];
+	calendar_columns[title_index] = [ {
+		T : group,
+		R : '資料來源: ' + data[1] + (data = data[3] ? '\n' + data[3] : '')
+	}, function(date) {
+		if (/* date.準 || */date.精)
+			return;
+
+		var contemporary = periods.get_contemporary(date);
+		if (!contemporary)
+			return;
+		var list = [];
+		contemporary.forEach(function(period) {
+			list.push(period, {
+				br : null
+			})
+		})
+		return list;
+	} ];
 };
 
+// 登錄預設可 include 之資料圖層
 add_tag.data_file = {
 	'中國皇帝生卒' : [
 			'resource/emperor.js',
@@ -1776,7 +1816,7 @@ function translate_era(era) {
 
 		output = date.曆法;
 		if (output && !(output in had_inputted)) {
-			add_calendar_column(output, true);
+			add_calendar_columns(output, true);
 			had_inputted[output] = true;
 		}
 
@@ -1785,7 +1825,7 @@ function translate_era(era) {
 			// 依特定國家自動增加這些欄。
 			if (output in auto_add_column)
 				auto_add_column[output].forEach(function(note) {
-					selected_column[note] = true;
+					selected_columns[note] = true;
 				});
 			had_inputted[output] = true;
 		}
@@ -1839,7 +1879,7 @@ function translate_era(era) {
 					a : 曆法,
 					href : '#',
 					title : 曆法,
-					onclick : add_calendar_column
+					onclick : add_calendar_columns
 				};
 			});
 			add_注('據', '出典');
@@ -2088,7 +2128,7 @@ function set_era_by_url_data(era) {
 				var to_remove;
 				if (to_remove = item.charAt(0) === '-')
 					item = item.slice(1);
-				selected_column[item] = !to_remove;
+				selected_columns[item] = !to_remove;
 			});
 		}
 
@@ -2238,13 +2278,15 @@ function column_by_cookie(to_set) {
 	if (to_set) {
 		// 將所選欄位存於 cookie。
 		if (JSON.stringify)
-			CeL.set_cookie('selected_column', JSON.stringify(selected_column));
+			CeL
+					.set_cookie('selected_columns', JSON
+							.stringify(selected_columns));
 	} else
 		// 取得並設定存於 cookie 之欄位。
 		try {
-			var data = CeL.get_cookie('selected_column');
+			var data = CeL.get_cookie('selected_columns');
 			if (data && CeL.is_Object(data = JSON.parse(data)))
-				selected_column = data;
+				selected_columns = data;
 		} catch (e) {
 			// TODO: handle exception
 		}
@@ -2678,7 +2720,7 @@ function affairs() {
 		}
 	}
 
-	// calendar_column
+	// calendar_columns
 	list = {
 		week : [ {
 			a : {
@@ -2819,6 +2861,10 @@ function affairs() {
 		}, function(date) {
 			return date.同國共存紀年;
 		} ],
+
+		// --------------------------------------------------------------------
+		// data layer
+		資料圖層 : null,
 
 		// --------------------------------------------------------------------
 		// 天文計算 astronomical calculations
@@ -4384,20 +4430,26 @@ function affairs() {
 
 	};
 
-	calendar_column = CeL.null_Object();
+	calendar_columns = CeL.null_Object();
 	calendar_column_alias = CeL.null_Object();
 	o = null;
-	for (i in list)
+	for (i in list) {
 		if (Array.isArray(list[i])
 		//		
 		&& typeof list[i][1] === 'function')
-			calendar_column[calendar_column_alias[i] = o ? o + '/' + i : i] = list[i];
+			calendar_columns[calendar_column_alias[i] = o ? o + '/' + i : i] = list[i];
 		else
-			calendar_column[o = i] = Array.isArray(list[i]) ? list[i]
+			calendar_columns[o = i] = Array.isArray(list[i]) ? list[i]
 					: [ list[i] ];
+		if (i === '資料圖層') {
+			// 先行佔位
+			for (i in add_tag.data_file)
+				calendar_columns[calendar_column_alias[i] = '資料圖層/' + i] = null;
+		}
+	}
 
 	v = 'Gregorian reform';
-	calendar_column[v] = [ '各地啓用格里曆之日期對照' ];
+	calendar_columns[v] = [ '各地啓用格里曆之日期對照' ];
 	for (i in CeL.Gregorian_reform_of.regions) {
 		o = function(date) {
 			return date.format({
@@ -4409,7 +4461,7 @@ function affairs() {
 		}.bind({
 			r : i
 		});
-		calendar_column[calendar_column_alias[i] = v + '/' + i] = [ {
+		calendar_columns[calendar_column_alias[i] = v + '/' + i] = [ {
 			T : i,
 			R : i + ', Gregorian reform on '
 			//
