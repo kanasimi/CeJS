@@ -6522,8 +6522,11 @@ if (typeof CeL === 'function')
 					set_minute_offset(date, tmp);
 
 				if (options.date_only) {
-					if (指定紀年)
+					if (指定紀年) {
 						add_offset_function(date, 指定紀年);
+						if (false && 指定紀年.精)
+							date.精 = 指定紀年.精;
+					}
 					return date;
 				}
 
@@ -7336,8 +7339,8 @@ if (typeof CeL === 'function')
 			var 史籍紀年_PATTERN, ERA_ONLY_PATTERN,
 			//
 			朔干支_PATTERN = generate_pattern('(朔<\\/span>)(干支)()', false, 'g'),
-			//
-			時干支_PATTERN = generate_pattern('(支)時', false, 'g'),
+			// 十二地支時辰. e.g., 光緒十九年八月初二日丑刻
+			時干支_PATTERN = generate_pattern('(支)[時刻]', false, 'g'),
 			// see era_text_to_HTML.build_pattern()
 			REPLACED_data_era = '$1<span data-era="~">$2</span>$3';
 
@@ -7377,7 +7380,9 @@ if (typeof CeL === 'function')
 							start += 24;
 						// 時: 小時
 						start += '–' + end + '時';
-						return options.add_date ? $0 + '(' + start + ')'
+						return options && options.add_date
+						//
+						? $0 + '(' + start + ')'
 						//
 						: '<span title="' + start + '">' + $0 + '</span>';
 					})
@@ -7421,7 +7426,7 @@ if (typeof CeL === 'function')
 				月 = 季_SOURCE + '閏?(?:[正臘' + 日 + ']|十有?){1,3}月';
 				日 = '(?:(?:(?:干支)?(?:初[' + 日 + ']日?|(?:' + 日
 						+ '|(?:[一二三]?十|[廿卅])有?[元' + 日 + ']?|[元' + 日
-						+ '])日)|干支日?)[朔晦望]?旦?|[朔晦望]日)';
+						+ '])日)|干支日?)[朔晦望]?旦?|[朔晦望]日?)';
 
 				// TODO: 地皇三年，天鳳六年改為地皇。
 				// e.g., 以建平二年為太初元年, 一年中地再動, 大酺五日, 乃元康四年嘉谷, （玄宗開元）十年
@@ -7576,16 +7581,18 @@ if (typeof CeL === 'function')
 			// ---------------------------------------
 
 			this.finish = function(name_space, waiting) {
-				library_namespace.run([
-						// 載入 CSS resource。
-						// include resource of module.
-						library_namespace.get_module_path(this.id).replace(
-								/[^.]+$/, 'css'),
-						// TODO: set timeout
-						// 載入各紀年期間曆數資料 (era_data.js)。
-						library_namespace.get_module_path(this.id + '_data')
-				//
-				], waiting);
+				// 載入各紀年期間曆數資料 (era_data.js)。
+				var queue = [ library_namespace.get_module_path(this.id
+						+ '_data')
+				// .replace(/\\{2,}/g, '\\')
+				];
+				if (library_namespace.is_WWW(true))
+					// 載入 CSS resource。
+					// include resource of module.
+					queue.unshift(library_namespace.get_module_path(this.id)
+							.replace(/[^.]+$/, 'css'));
+				// library_namespace.log(queue);
+				library_namespace.run(queue, waiting);
 				return waiting;
 			};
 

@@ -1903,9 +1903,10 @@ function search_sorted_Array(array, value, options) {
 }
 
 search_sorted_Array.default_comparator = function(a, b) {
+	return a < b ? -1 : a > b ? 1 : 0;
+	// '12/34', '56/78' 可以比大小，但不能相減。
 	// return a - b;
 	// return Math.sign(a - b);
-	return a < b ? -1 : a > b ? 1 : 0;
 };
 
 _.search_sorted_Array = search_sorted_Array;

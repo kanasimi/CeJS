@@ -967,18 +967,30 @@ function add_tag(period, data, group, register_only, options) {
 		});
 	}
 	target = draw_era.tags[target];
-	if (target[period]) {
-		CeL.warn('add_tag: 已經有此時段存在！將跳過之，不會以新的覆蓋舊的。 '
-				+ (group ? '[' + group + ']' : '') + '[' + period + ']');
-		return;
-	}
+	if (target[period])
+		if (options.rename_duplicate) {
+			for (var i = 0, n;;)
+				if (!target[n = period + '#' + ++i]) {
+					period = n;
+					break;
+				}
+		} else if (typeof options.for_duplicate === 'function')
+			arg_passed = options.for_duplicate(target[period], arg_passed);
+		else {
+			CeL.warn('add_tag: 已經有此時段存在！將跳過之，不會以新的覆蓋舊的。 '
+					+ (group ? '[' + group + ']' : '') + '[' + period + ']');
+			return;
+		}
 
 	CeL.debug('登錄 ' + (group ? '[' + group + ']' : '') + '[' + period + ']', 2,
 			'add_tag');
 	target[period] = arg_passed;
 
-	if (!register_only) {
-		add_tag.show(arg_passed);
+	if (register_only) {
+		// 因為不跑 add_tag.show()，因此得登錄數量。
+		add_tag.group_count[group] = (add_tag.group_count[group] | 0) + 1;
+	} else {
+		add_tag.show(arg_passed, options);
 		select_panel('era_graph', true);
 	}
 }
@@ -986,7 +998,7 @@ function add_tag(period, data, group, register_only, options) {
 // add_tag.group_count[group] = {Integer}count
 add_tag.group_count = CeL.null_Object();
 
-add_tag.show = function(array_data) {
+add_tag.show = function(array_data, options) {
 	if (!Array.isArray(array_data))
 		// illegal data.
 		return;
@@ -1007,10 +1019,11 @@ add_tag.show = function(array_data) {
 
 	// 點擊後消除。
 	lastAdd.style.cursor = 'pointer';
-	lastAdd.onclick = add_tag.remove_self;
+	lastAdd.onclick = options && options.onclick || add_tag.remove_self;
 
 	// settle search id
 	lastAdd.period = array_data.period;
+	// lastAdd.data = array_data;
 	if (array_data.group)
 		lastAdd.group = array_data.group;
 
@@ -1024,6 +1037,17 @@ add_tag.remove_self = function() {
 	if (target)
 		delete target[this.period];
 	return SVG_object.removeSelf.call(this);
+};
+
+add_tag.show_calendar = function() {
+	/**
+	 * <code>
+	 * lastAdd.period = array_data.period;
+	 * </code>
+	 * 
+	 * @see add_tag.show
+	 */
+	translate_era(this.period);
 };
 
 // add_tag.load('臺灣地震');
@@ -1053,27 +1077,45 @@ add_tag.load = function(id, callback) {
 
 // 將由資源檔呼叫。
 add_tag.parse = function(group, data, line_separator, date_index, title_index,
-		description_index, field_separator) {
+		description_index, field_separator, options) {
+	// 前置處理。
 	if (!field_separator)
 		field_separator = '\t';
 	if (isNaN(date_index))
 		date_index = 0;
 	if (isNaN(title_index))
 		title_index = 1;
+	if (!CeL.is_Object(options))
+		options = CeL.null_Object();
+	if (!('onclick' in options))
+		options.onclick = add_tag.show_calendar;
 
-	data.split(line_separator || '|').forEach(function(line) {
+	data = data.split(line_separator || '|');
+	var register_only = data.length > add_tag.parse.draw_limit;
+	data.forEach(function(line) {
 		if (!line)
 			return;
 		line = line.split(field_separator);
 		line.title = line[title_index];
-		if (description_index && line[description_index])
-			line.description = line[description_index];
-		add_tag(line[date_index], line, group);
+		if (description_index) {
+			var description
+			//
+			= typeof description_index === 'function' ? description_index(line)
+					: line[description_index];
+			if (description)
+				line.description = description;
+		}
+		add_tag(line[date_index], line, group, register_only, options);
 	});
+	if (register_only) {
+		CeL.info('資料過多，總共' + data.length + '筆，因此將不自動顯示於線圖上。若手動開啟顯示，速度可能極慢！');
+		draw_era.tags[group].hide = true;
+	}
 
-	if (calendar_columns[title_index = '資料圖層/' + group])
-		// 已初始化過。
+	if (calendar_columns[title_index = '資料圖層/' + group]) {
+		CeL.warn('已初始化過 calendar_columns。以現行配置，不應有此情形。');
 		return;
+	}
 
 	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
 	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
@@ -1086,7 +1128,13 @@ add_tag.parse = function(group, data, line_separator, date_index, title_index,
 	});
 	selected_columns[title_index] = true;
 	data = add_tag.data_file[group];
-	calendar_columns[title_index] = [ {
+	calendar_columns[title_index] = [ data[2] ? {
+		a : {
+			T : group
+		},
+		href : data[2],
+		R : '資料來源: ' + data[1] + (data = data[3] ? '\n' + data[3] : '')
+	} : {
 		T : group,
 		R : '資料來源: ' + data[1] + (data = data[3] ? '\n' + data[3] : '')
 	}, function(date) {
@@ -1098,13 +1146,31 @@ add_tag.parse = function(group, data, line_separator, date_index, title_index,
 			return;
 		var list = [];
 		contemporary.forEach(function(period) {
-			list.push(period, {
-				br : null
-			})
+			period = period[2].split('\n');
+			// 標題已附，因此刪除之。
+			var data = period[0].replace(/^\[[^\[\]]+\]\s*/, ''),
+			//
+			style = period[0].length > 9 ? 'font-size:.9em;' : '';
+			if (period[2]) {
+				data = [ data, {
+					br : null
+				}, {
+					span : period[2],
+					C : 'description'
+				} ];
+			}
+			list.push({
+				div : data,
+				C : 'data_layer_column',
+				S : style
+			});
 		})
 		return list;
 	} ];
 };
+
+// 資料過多，將不自動顯示於線圖上。
+add_tag.parse.draw_limit = 400;
 
 // 登錄預設可 include 之資料圖層
 add_tag.data_file = {
@@ -1117,7 +1183,11 @@ add_tag.data_file = {
 
 	// 臺灣歷史地震時間軸視覺化（英文：Visulation）
 	'臺灣地震' : [ 'resource/quake.js', '臺灣地震年表',
-			'http://921kb.sinica.edu.tw/history/quake_history.html' ]
+			'http://921kb.sinica.edu.tw/history/quake_history.html' ],
+
+	'古籍異象' : [ 'resource/abnormal.js', '中國古籍異象',
+			'http://sciencehistory.twbbs.org/?p=982',
+			'因資料數量龐大，載入與處理速度緩慢，請稍作等待。' ]
 };
 
 // ---------------------------------------------------------------------//
@@ -1746,7 +1816,7 @@ var 國家_code = {
 	English : 'en',
 	日本 : 'ja'
 // 不列其他國家，如越南尚應以中文 Wikipedia 為主，因其過去紀年原名採用漢字。
-// 直到當地 Wikipedia 全面加入紀年使用當時之原名，且資料較中文 Wikipedia 更多時，再行轉換。
+// 直到當地 Wikipedia 全面加入紀年使用當時之原名，且資料較中文 Wikipedia 周全時，再行轉換。
 };
 
 function translate_era(era) {
@@ -2559,7 +2629,10 @@ function affairs() {
 			if (i[3]) {
 				if (!Array.isArray(o))
 					o = [ o ];
-				o.push(' ', i[3]);
+				o.push({
+					span : i[3],
+					C : 'description'
+				});
 			}
 
 			list.push({
