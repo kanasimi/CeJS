@@ -936,13 +936,14 @@ function add_tag(period, data, group, register_only, options) {
 		// , { color : '' }
 		];
 	}
+	title = date.format(draw_era.date_options) + title;
 
 	// 處理 title: [group] data.title \n period (date) \n data.description
 	title = [ (group ? '[' + group + '] ' : '')
 	//
 	+ (data && (typeof data === 'string' ? data : data.title) || ''),
 	//
-	period + ' (' + date.format(draw_era.date_options) + title + ')' ];
+	period === title ? period : period + ' (' + title + ')' ];
 	if (data && data.description)
 		title.push(data.description);
 	arg_passed[2] = title.join('\n').trim();
@@ -1075,15 +1076,23 @@ add_tag.load = function(id, callback) {
 	}
 };
 
-// 將由資源檔呼叫。
+// 將由 資源檔.js 呼叫。
+// 會改變 options!
 add_tag.parse = function(group, data, line_separator, date_index, title_index,
 		description_index, field_separator, options) {
 	// 前置處理。
+	if (!options)
+		if (CeL.is_Object(field_separator)) {
+			field_separator = (options = field_separator).field_separator;
+		} else if (!field_separator && CeL.is_Object(description_index)) {
+			field_separator = (options = description_index).field_separator;
+			description_index = options.description_index;
+		}
 	if (!field_separator)
 		field_separator = '\t';
-	if (isNaN(date_index))
+	if (date_index === undefined)
 		date_index = 0;
-	if (isNaN(title_index))
+	if (title_index === undefined)
 		title_index = 1;
 	if (!CeL.is_Object(options))
 		options = CeL.null_Object();
@@ -1096,8 +1105,12 @@ add_tag.parse = function(group, data, line_separator, date_index, title_index,
 		if (!line)
 			return;
 		line = line.split(field_separator);
-		line.title = line[title_index];
-		if (description_index) {
+		var title = typeof title_index === 'function' ? title_index(line)
+				: line[title_index];
+		if (title)
+			line.title = title;
+
+		if (description_index !== undefined) {
 			var description
 			//
 			= typeof description_index === 'function' ? description_index(line)
@@ -1147,7 +1160,7 @@ add_tag.parse = function(group, data, line_separator, date_index, title_index,
 		var list = [];
 		contemporary.forEach(function(period) {
 			period = period[2].split('\n');
-			// 標題已附，因此刪除之。
+			// group (欄位標題, e.g., "[古籍異象] ") 已附於頂端標頭，因此刪除之。
 			var data = period[0].replace(/^\[[^\[\]]+\]\s*/, ''),
 			//
 			style = period[0].length > 9 ? 'font-size:.9em;' : '';

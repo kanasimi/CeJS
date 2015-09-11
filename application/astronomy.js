@@ -7205,6 +7205,9 @@ if (typeof CeL === 'function')
 			// T站心赤道 topocentric equatorial coordinate system
 			// H站心地平 topocentric horizontal coordinate system
 			'DSGETH'.split('').forEach(function(type) {
+				if (Object.defineProperty.not_native)
+					// e.g., IE8
+					return;
 				// type: to [ radians, radians, AU ]
 				Object.defineProperty(Coordinates.prototype, type, {
 					enumerable : true,
