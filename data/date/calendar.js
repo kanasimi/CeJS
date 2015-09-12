@@ -3010,7 +3010,7 @@ Myanmar_Date.test = new_tester(Date_to_Myanmar, Myanmar_Date, {
 http://www.cc.kyoto-su.ac.jp/~yanom/pancanga/
 Based on Pancanga (version 3.14) with small changes.
 
-S. P. Bhattacharyya, Ahargana in Hindu Astronomy
+S. P. Bhattacharya and S. N. Sen, Ahargana in Hindu Astronomy, IJHS 4.1-2 (1969) 144-55.
 http://insa.nic.in/writereaddata/UpLoadedFiles/IJHS/Vol04_1And2_14_SPBhattacharyya.pdf
 
 
@@ -3135,6 +3135,7 @@ Hindu_year_offset = {
 
 Hindu_constants = library_namespace.null_Object();
 
+// सूर्य सिद्धांत
 // https://en.wikipedia.org/wiki/Surya_Siddhanta
 // based on SuryaSiddhanta (c. 1200).
 // Saura, HIL, p.15
@@ -3868,9 +3869,10 @@ _.Date_to_Thai = Date_to_Thai;
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
-// 長曆: 巴哈伊曆法 / Bahá'í calendar / Badí‘ calendar
+// 長曆: "تقویم بهائی" / "گاه‌شماری بهائی" / 巴哈伊曆法 / Bahá'í calendar / Badí‘ calendar
 // https://en.wikipedia.org/wiki/Bah%C3%A1'%C3%AD_calendar
 // http://www.bahai.us/welcome/principles-and-practices/bahai-calendar/
+// http://bahaical.org/default.aspx?ln=fa
 
 
 // month (Bahai_Ha): month serial of Ayyám-i-Há (intercalary days)

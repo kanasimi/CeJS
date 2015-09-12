@@ -3579,9 +3579,9 @@ function affairs() {
 
 		Myanmar : [ {
 			a : {
-				T : '緬曆',
+				T : 'မြန်မာ ပြက္ခဒိန်',
 			},
-			R : '緬甸曆法。Myanmar calendar, Burmese calendar.\n'
+			R : '緬甸曆法. Myanmar calendar, Burmese calendar.\n'
 			//
 			+ '緬曆有0年。非精確時，可能有最多前後2日的誤差。',
 			href : 'https://en.wikipedia.org/wiki/Burmese_calendar'
@@ -3662,7 +3662,7 @@ function affairs() {
 
 		Hindu : [ {
 			a : {
-				T : '印度曆',
+				T : 'हिन्दू पंचांग',
 			},
 			R : 'Hindu calendar, 印度曆, 自日出起算。'
 			//
@@ -3705,9 +3705,9 @@ function affairs() {
 
 		Indian_national : [ {
 			a : {
-				T : '印度國定曆'
+				T : 'भारतीय राष्ट्रीय पंचांग'
 			},
-			R : 'भारतीय राष्ट्रीय पंचांग / Indian national calendar',
+			R : '印度國定曆, Indian national calendar',
 			href : 'https://en.wikipedia.org/wiki/Indian_national_calendar'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Indian_national({
@@ -3772,9 +3772,10 @@ function affairs() {
 
 		Bahai : [ {
 			a : {
-				T : '巴哈伊曆'
+				T : 'گاه‌شماری بهائی'
 			},
-			R : "Bahá'í / Badí‘ calendar",
+			R : "Bahá'í / Badí‘ calendar, 巴哈伊曆",
+			// https://fa.wikipedia.org/wiki/%DA%AF%D8%A7%D9%87%E2%80%8C%D8%B4%D9%85%D8%A7%D8%B1%DB%8C_%D8%A8%D9%87%D8%A7%D8%A6%DB%8C
 			href : "https://en.wikipedia.org/wiki/Bah%C3%A1'%C3%AD_calendar"
 		}, function(date) {
 			return date.精 === '年' ? date.to_Bahai({

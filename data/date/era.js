@@ -5287,7 +5287,7 @@ if (typeof CeL === 'function')
 					else if ((tmp = pre_parse_紀年資料(index + 1))
 					// 下一個紀年的起始日期接續本紀年，因此先分解下一個紀年。
 					// assert: tmp[1](起訖) is String
-					&& (tmp = parse_duration(tmp[1], tmp[0]))) {
+					&& (tmp = parse_duration(tmp[1], tmp[0])) && tmp[0]) {
 						起訖[1] = tmp[0];
 						起訖[2] = tmp[2];
 						// 既然直接採下一個紀年的起始日期，就不需要取終點了。
@@ -5295,7 +5295,8 @@ if (typeof CeL === 'function')
 					} else if (options.extract_only)
 						起訖[1] = new Date(0);
 					else {
-						library_namespace.err('parse_era: 無法求得紀年結束時間！');
+						library_namespace.err('parse_era: 無法求得紀年[' + 紀年
+								+ ']之結束時間！');
 						return;
 					}
 

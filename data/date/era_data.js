@@ -3070,7 +3070,7 @@ CeL.era.tmp = {
 		'Restored Hanthawaddy/Smim Htaw Buddhaketi|1740/11/1~|:ME|準=年|在位=November 1740–December 1747|關係=Cousin of Mahadhammaraza Dipadi',
 		'/Binnya Dala|1747/12/1~1757/5/6|:ME|準=年|在位=December 1747–6 May 1757|關係=Elected',
 
-		'Konbaung/Alaungpaya|1752/2/29~|:ME|關係=Founder',
+		'ကုန်းဘောင်ခေတ်/Alaungpaya|1752/2/29~|:ME|關係=Founder',
 		'/Naungdawgyi|1760/5/11~|:ME|關係=Son',
 		'/Hsinbyushin|1763/11/28~|:ME|關係=Brother',
 		'/Singu|1776/6/10~|:ME|關係=Son',
@@ -3081,15 +3081,36 @@ CeL.era.tmp = {
 		'/Pagan|1846/11/17~|:ME|關係=Son',
 		'/Mindon|1853/2/18~|:ME|關係=Brother',
 		'/Thibaw Min|1878/10/1~|:ME|關係=Son',
+		//
 		'Konbaung exiled/=|1885/11/29~|:CE',
 		'/Myat Paya Lat|1916/12/19~|:CE|疑|關係=Daughter',
 		'/Myat Phaya|1956/4/4~|:CE|疑|關係=Younger sister',
 		'/Taw Phaya|1962/7/20~' + CeL.era.tmp.last_day + '|:CE|疑|關係=Second son',
 
-		'British Burma|1824/3/5~|:CE|注=First Anglo-Burmese War: 5 March 1824',
+		// https://en.wikipedia.org/wiki/President_of_Myanmar
+		'British Burma|1824/3/5~1948/1/3|:CE|注=First Anglo-Burmese War: 1824/3/5. From 31 January 1862 to 1 May 1897, British Burma was headed by a Chief Commissioner.',
 
-		'မြန်မာပြည်|1948/1/4~' + CeL.era.tmp.last_day
-				+ '|:CE|國名=Republic of the Union of Myanmar'
+		// https://ja.wikipedia.org/wiki/%E3%83%93%E3%83%AB%E3%83%9E%E3%81%AE%E6%88%A6%E3%81%84
+		'Japanese occupation of Burma|1942/3/8~1945/5/2|:CE|注=3月8日首都ラングーンを占領した。...開戦時には日本軍はビルマの全面占領までは意図しておらず、第15軍は軍政部を持っていなかった。那須義雄大佐を長とする軍政部が設置されたのはラングーン占領後である。|注=イギリス軍は5月2日にラングーンを奪回した。',
+
+		// https://en.wikipedia.org/wiki/List_of_Presidents_of_Myanmar
+		// https://zh.wikipedia.org/wiki/%E7%BC%85%E7%94%B8%E6%80%BB%E7%BB%9F
+		// https://my.wikipedia.org/wiki/%E1%80%95%E1%80%BC%E1%80%8A%E1%80%BA%E1%80%91%E1%80%B1%E1%80%AC%E1%80%84%E1%80%BA%E1%80%85%E1%80%AF%E1%80%99%E1%80%BC%E1%80%94%E1%80%BA%E1%80%99%E1%80%AC%E1%80%94%E1%80%AD%E1%80%AF%E1%80%84%E1%80%BA%E1%80%84%E1%80%B6%E1%80%90%E1%80%B1%E1%80%AC%E1%80%BA%E1%81%8F_%E1%80%9E%E1%80%99%E1%80%B9%E1%80%99%E1%80%90%E1%80%99%E1%80%BB%E1%80%AC%E1%80%B8
+		'Union of Burma/စဝ်ရွှေသိုက်|1948/1/4~|:CE|時期=Post-independence Burma|君主名=Sao Shwe Thaik',
+		'/ဘဦး|1952/3/16~|:CE|君主名=Ba U;Ba Oo',
+		'/မန်းဝင်းမောင်|1957/3/13~|:CE|君主名=Mahn Win Maung',
+		'/နေဝင်း|1962/3/2~|:CE|君主名=Ne Win',
+		'Socialist Republic of the Union of Burma/=|1974/3/2~|:CE|時期=Military rule',
+		'/စန်းယု|1981/11/9~|:CE|君主名=San Yu',
+		'/စိန်လွင်|1988/7/27~|:CE|君主名=Sein Lwin|注=1988年7月26日任緬甸社會主義綱領黨主席，次日繼任緬甸總統',
+		'/အေးကို|1988/8/12~|:CE|君主名=Aye Ko',
+		'/မောင်မောင်|1988/8/19~|:CE|君主名=Maung Maung',
+		'/စောမောင်|1988/9/18~|:CE|君主名=Saw Maung',
+		'Late Union of Burma/=|1988/9/23~|:CE|時期=Military rule',
+		'Union of Myanmar/=|1989/6/18~|:CE|時期=Military rule|注=1989年6月18日緬甸軍人政府將緬甸的英文寫法「Burma」改為「Myanmar」。',
+		'/သန်းရွှေ|1992/4/23~|:CE|君主名=Than Shwe|注=1997年11月15日起改任國家和平與發展委員會主席(State Law and Order Restoration Council→State Peace and Development Council)',
+		'မြန်မာပြည်/=|2010/10/21~|:CE|國名=Republic of the Union of Myanmar|時期=Democratic reforms',
+		'/သိန်းစိန်|2011/3/30~' + CeL.era.tmp.last_day + '|:CE|君主名=Thein Sein'
 
 ]).minute_offset = 6.5 * 60;
 

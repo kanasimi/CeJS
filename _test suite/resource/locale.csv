@@ -16,6 +16,7 @@ hide,scope,message,note,繁體中文,简体中文,English,日本語
 ,國家 country,မြန်မာပြည်,,緬甸聯邦共和國,,Republic of the Union of Myanmar,ミャンマー連邦共和国
 ,國家 country,Pagan,パガン王朝,蒲甘,,Pagan,バガン
 ,國家 country,Toungoo,,東吁,,Toungoo,タウングー
+,國家 country,ကုန်းဘောင်ခေတ်,貢榜王朝,貢榜,,Konbaung,コンバウン
 ,國家 country,Maya,,瑪雅,,Maya,マヤ
 ,國家 country,Palenque,,帕倫克,,Palenque,パレンケ
 ,國家 country,Mesopotamian,"美索不達米亞人, 古代メソポタミア文明",美索不達米亞文明,,Mesopotamian,メソポタミア文明
@@ -149,15 +150,14 @@ http://www.e-yakushiyo.net/Calendario_Maya_Dias.htm",儒略日數,,Julian Day Nu
 ,可選用的文字式年曆欄位: 分類: 曆法,Maya Tzolk'in,,,,Maya Tzolk'in,マヤ神聖暦
 ,可選用的文字式年曆欄位: 分類: 曆法,Maya Haab',,,,Maya Haab',マヤ文化暦
 ,可選用的文字式年曆欄位: 分類: 曆法,傣曆,,傣曆,,Dai calendar,タイ暦
-,可選用的文字式年曆欄位: 分類: 曆法,緬曆,"緬甸曆法, Burmese calendar, ミャンマー暦",緬曆,,Myanmar calendar,ビルマ暦
+,可選用的文字式年曆欄位: 分類: 曆法,မြန်မာ ပြက္ခဒိန်,"(緬甸 日曆). 緬甸曆法, Burmese calendar, ミャンマー暦",緬曆,,Myanmar calendar,ビルマ暦
 ,可選用的文字式年曆欄位: 分類: 曆法,彝曆,,彝曆,,Yi calendar,彝暦
-,可選用的文字式年曆欄位: 分類: 曆法,印度曆,,印度曆,,Hindu calendar,ヒンドゥー暦
-,可選用的文字式年曆欄位: 分類: 曆法,印度國定曆,,印度國定曆,,Indian national calendar,インド国定暦
+,可選用的文字式年曆欄位: 分類: 曆法,हिन्दू पंचांग,,印度曆,,Hindu calendar,ヒンドゥー暦
+,可選用的文字式年曆欄位: 分類: 曆法,भारतीय राष्ट्रीय पंचांग,,印度國定曆,,Indian national calendar,インド国定暦
 ,可選用的文字式年曆欄位: 分類: 曆法,Bangla calendar,"
 ",現行孟加拉曆,,revised Bengali calendar,改訂ベンガル暦
-,可選用的文字式年曆欄位: 分類: 曆法,Myanmar calendar,Myanmar calendar. ビルマ暦?,緬曆,,Burmese calendar,ミャンマー暦
 ,可選用的文字式年曆欄位: 分類: 曆法,佛曆,"Buddhist calendar, 仏滅紀元",佛曆,,Chinese Buddhist,仏暦
-,可選用的文字式年曆欄位: 分類: 曆法,巴哈伊曆,,巴哈伊曆,,Bahá'í calendar,バハイ暦
+,可選用的文字式年曆欄位: 分類: 曆法,گاه‌شماری بهائی,تقویم بهائی,巴哈伊曆,,Bahá'í calendar,バハイ暦
 ,可選用的文字式年曆欄位: 分類: 曆法,ਨਾਨਕਸ਼ਾਹੀ,"ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ, ナーナク暦",錫克教曆,,Nanakshahi calendar,新シク暦
 ,可選用的文字式年曆欄位: 分類: 曆法,科普特曆,,科普特曆,,Coptic calendar,コプト暦
 ,可選用的文字式年曆欄位: 分類: 曆法,衣索比亞曆,,衣索比亞曆,,Ethiopian calendar,エチオピア暦
