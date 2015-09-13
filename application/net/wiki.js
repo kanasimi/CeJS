@@ -73,6 +73,12 @@ if (false) {
 
 				wiki.logout();
 			});
+	
+	// 取得完整 list 後才作業。
+	CeL.wiki.list('Template:a‎‎', function(pages) {
+		// console.log(pages);
+		console.log(pages.length + ' pages got.');
+	});
 
 	// TODO: http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 }
@@ -1236,6 +1242,9 @@ wiki_API.page = function(title, callback, options) {
 		// default: 僅取得單一 revision。
 		title[1] += '&rvlimit=1';
 
+	if (options.redirects)
+		title[1] += '&redirects=1';
+
 	title[1] = 'query&prop=revisions&rvprop=content|timestamp&'
 	// &rvexpandtemplates=1
 	// prop=info|revisions
@@ -1493,7 +1502,7 @@ function get_continue(title, callback) {
  * @param {String}title
  *            頁面標題。
  * @param {Function}callback
- *            回調函數。
+ *            回調函數。callback(title, titles, pages)
  * @param {Number|String}namespace
  *            one of get_namespace.hash
  */
@@ -1766,6 +1775,41 @@ get_list.type = {
 	});
 })();
 
+
+//---------------------------------------------------------------------//
+
+// 取得完整 list 後才作業。
+// 注意:可能會改變 options!
+wiki_API.list = function(target, after_all, options) {
+	// 前置處理。
+	if (!library_namespace.is_Object(options))
+		options = library_namespace.null_Object();
+	if (!options.initialized) {
+		if (!options.wiki)
+			options.wiki = new wiki_API;
+		if (!options.type)
+			options.type = 'embeddedin';
+		if (!options.pages)
+			options.pages = [];
+		options.initialized = true;
+	}
+
+	options.wiki[options.type](target, function(title, titles, pages) {
+		library_namespace.debug('Get ' + pages.length + ' pages', 2, 'wiki_API.list');
+		if (options.callback)
+			options.callback(title, titles, pages);
+		Array.prototype.push.apply(options.pages, pages);
+		if (pages.next_index)
+			setTimeout(function() {
+				wiki_API.list(target, after_all, options);
+			}, 0);
+		else
+			after_all(options.pages, target, options);
+	}, {
+		continue_wiki : options.wiki,
+		limit : options.limit || 'max'
+	});
+};
 
 //---------------------------------------------------------------------//
 
@@ -2095,7 +2139,10 @@ wiki_API.edit.denied.all = /(?:^|[\s,])all(?:$|[\s,])/;
 //---------------------------------------------------------------------//
 
 // full text search
+// @see https://www.mediawiki.org/wiki/API:Search_and_discovery
 // callback(key, pages, hits)
+// search wikitext: using prefix "insource:". e.g., https://en.wikipedia.org/w/api.php?action=query&list=search&srwhat=text&srsearch=insource:abc+def
+// @see https://www.mediawiki.org/wiki/Help:CirrusSearch
 wiki_API.search = function(key, callback, options) {
 	if (options > 0 || options === 'max')
 		options = {

@@ -2585,6 +2585,27 @@ if (typeof CeL === 'function')
 			}
 
 			/**
+			 * terms for VSOP87 planets model used in function VSOP87()
+			 * 
+			 * full data:<br />
+			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/README
+			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/VSOP87D.ear
+			 * 
+			 * 金文敬. 2015. 太阳系行星和月球历表的发展.<br />
+			 * 球坐標相對於瞬時平黃道和春分點為 VSOP87D 解。
+			 * 
+			 * TODO: VSOP2013, DE-431
+			 * 
+			 * see also:<br />
+			 * JPL DE422:<br />
+			 * http://ssd.jpl.nasa.gov/?ephemerides
+			 * ftp://ssd.jpl.nasa.gov/pub/eph/planets/ascii/de422/
+			 * 
+			 * @inner
+			 */
+			var VSOP87_terms = library_namespace.null_Object();
+
+			/**
 			 * VSOP87 天體/行星的日心座標位置 (Heliocentric ecliptic spherical coordinates)
 			 * 計算。<br />
 			 * 得到行星在FK5坐標系統中的日心黃經L、黃緯B。<br />
@@ -7974,27 +7995,6 @@ if (typeof CeL === 'function')
 
 			// ------------------------------------------------------------------------------------------------------//
 			// VSOP87 半解析（semi-analytic）理論 periodic terms
-
-			/**
-			 * terms for VSOP87 planets model used in function VSOP87()
-			 * 
-			 * full data:<br />
-			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/README
-			 * ftp://ftp.imcce.fr/pub/ephem/planets/vsop87/VSOP87D.ear
-			 * 
-			 * 金文敬. 2015. 太阳系行星和月球历表的发展.<br />
-			 * 球坐標相對於瞬時平黃道和春分點為 VSOP87D 解。
-			 * 
-			 * TODO: VSOP2013, DE-431
-			 * 
-			 * see also:<br />
-			 * JPL DE422:<br />
-			 * http://ssd.jpl.nasa.gov/?ephemerides
-			 * ftp://ssd.jpl.nasa.gov/pub/eph/planets/ascii/de422/
-			 * 
-			 * @inner
-			 */
-			var VSOP87_terms = library_namespace.null_Object();
 
 			/**
 			 * 這邊僅擷取行星 Earth 地球數值，以計算二十四節氣 (solar terms)。
