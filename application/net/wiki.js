@@ -74,7 +74,7 @@ if (false) {
 				wiki.logout();
 			});
 	
-	// 取得完整 list 後才作業。
+	// 取得完整 embeddedin list 後才作業。
 	CeL.wiki.list('Template:a‎‎', function(pages) {
 		// console.log(pages);
 		console.log(pages.length + ' pages got.');
@@ -197,6 +197,25 @@ get_namespace.hash = {
 //---------------------------------------------------------------------//
 // 創建 match patten 相關函數。
 
+// 這種規範化只能通用於本 library 內。Wikipedia 並未硬性設限。
+function normalize_page_name(page_name) {
+	page_name = page_name.trim().split(':');
+	var name_list = [];
+	page_name.forEach(function(section, index) {
+		section = section.trim();
+		if (index > 1 || index > 0 && page_name[0] || index === page_name.length - 1)
+			// ' ' → '_': 在 URL 上可更簡潔。
+			name_list.push(section.charAt(0).toUpperCase() + section.slice(1).replace(/ /g, '_'));
+		else if (section in get_namespace.hash)
+			// Wikipedia namespace
+			name_list.push(section.charAt(0).toUpperCase() + section.slice(1));
+		else
+			// lang code
+			name_list.push(section.toLowerCase());
+	});
+	return name_list.join(':');
+}
+
 function normalize_name_pattern(file_name, add_group) {
 	if (!file_name)
 		return file_name;
@@ -283,9 +302,9 @@ if (false) {
  *            模板前後之 content。<br />
  *            assert: wikitext 為良好結構 (well-constructed)。
  * @param {String}[template_name]
- *            模板名
- * @param {Boolean}no_parse
- *            是否不解析 parameters
+ *            擷取模板名。
+ * @param {Boolean}[no_parse]
+ *            是否不解析 parameters。
  * 
  * @returns {Array}token = [ {String}完整的模板token, {String}模板名,
  *          {Array}parameters ];<br />
@@ -293,7 +312,16 @@ if (false) {
  *          token.index, token.lastIndex: index.
  */
 function template_token(wikitext, template_name, no_parse) {
-	var matched = (template_name = normalize_name_pattern(template_name, true))
+	var matched;
+	// TODO: 這方法太沒效率!!
+	if (Array.isArray(template_name)) {
+		template_name.some(function(_name) {
+			return matched = template_token(wikitext, _name, no_parse);
+		});
+		return matched;
+	}
+
+	matched = (template_name = normalize_name_pattern(template_name, true))
 	// 模板起始。
 	? new RegExp(/{{[\s\n]*/.source + template_name + '\\s*[|}]', 'gi')
 			: new RegExp(TEMPLATE_NAME_PATTERN.source, 'g');
@@ -433,6 +461,7 @@ function parse_user(wikitext) {
 };
 
 
+// 若重定向到其他頁面，則回傳其頁面名。
 function parse_redirect(wikitext) {
 	var matched = wikitext && wikitext.match(
 	//
@@ -450,6 +479,29 @@ Object.assign(parse_wikitext, {
 //---------------------------------------------------------------------//
 
 /**
+ * get title of page.
+ * 
+ * @param {Object}page_data
+ *            page data got from wiki API
+ * 
+ * @returns {String} title of page
+ * 
+ * @seealso wiki_API.query.title_param()
+ */
+function get_page_title(page_data) {
+	// 處理 [ {String}API_URL, {String}title ]
+	if (Array.isArray(page_data)) {
+		if (get_page_content.is_page_data(page_data[0]))
+			// assert: page_data = [ page data, page data, ... ]
+			return page_data.map(get_page_title);
+		// assert: page_data = [ {String}API_URL, {String}title ]
+		return page_data[1];
+	}
+	return page_data.title || page_data;
+}
+
+
+/**
  * get the contents of page data. 取得頁面內容。
  *
  * @param {Object}page_data
@@ -457,11 +509,15 @@ Object.assign(parse_wikitext, {
  *
  * @returns {String} content of page
  */
-function page_content(page_data) {
-	return page_content.is_page_data(page_data) ?
+function get_page_content(page_data) {
+	return get_page_content.is_page_data(page_data) ?
 	//
-	(page_data = page_content.has_content(page_data)) && page_data['*']
+	(page_data = get_page_content.has_content(page_data)) && page_data['*']
 			|| null
+
+	// 一般都會輸入 page_data: {"pageid":0,"ns":0,"title":""}
+	//: typeof page_data === 'string' ? page_data
+
 	// ('missing' in page_data): 此頁面已刪除。
 	// e.g., { ns: 0, title: 'title', missing: '' }
 	// TODO: 提供此頁面的刪除和移動日誌以便參考。
@@ -476,13 +532,13 @@ function page_content(page_data) {
  *
  * @returns {String|Number} pageid
  */
-page_content.is_page_data = function(page_data) {
+get_page_content.is_page_data = function(page_data) {
 	return library_namespace.is_Object(page_data) && page_data.title
 			&& page_data.pageid;
 };
 // return .revisions[0]
 // 不回傳 {String}，減輕負擔。
-page_content.has_content = function(page_data) {
+get_page_content.has_content = function(page_data) {
 	return library_namespace.is_Object(page_data)
 	// treat as page data. Try to get page contents: page.revisions[0]['*']
 	&& page_data.revisions && page_data.revisions[0];
@@ -493,7 +549,7 @@ page_content.has_content = function(page_data) {
 // instance 相關函數。
 
 wiki_API.prototype.toString = function(type) {
-	return page_content(this.last_page) || '';
+	return get_page_content(this.last_page) || '';
 };
 
 // @see function get_continue(), get_list()
@@ -530,7 +586,7 @@ wiki_API.prototype.next = function() {
 	switch (next[0]) {
 	case 'page':
 		// this.page(page data, callback) → 採用所輸入之 page data 作為 this.last_page。
-		if (page_content.is_page_data(next[1]) && page_content.has_content(next[1])) {
+		if (get_page_content.is_page_data(next[1]) && get_page_content.has_content(next[1])) {
 			library_namespace.debug('採用所輸入之 [' + next[1].title + '] 作為 this.last_page。', 2, 'wiki_API.prototype.next');
 			this.last_page = next[1];
 			if (typeof next[2] === 'function')
@@ -629,10 +685,10 @@ wiki_API.prototype.next = function() {
 			this.next();
 		} else {
 			if (typeof next[1] === 'function')
-				next[1] = next[1](page_content(this.last_page), this.last_page.title);
+				next[1] = next[1](get_page_content(this.last_page), this.last_page.title);
 			if (next[2] && next[2].skip_nochange
 			// 採用 skip_nochange 可以跳過實際 edit 的動作。
-			&& next[1] === page_content(this.last_page)) {
+			&& next[1] === get_page_content(this.last_page)) {
 				library_namespace.debug('Skip [' + this.last_page.title + ']: The same contents.');
 				// next[3] : callback
 				if (typeof next[3] === 'function')
@@ -942,7 +998,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				// 不作編輯作業。
 				// 取得頁面內容。
 				this.page(page, function(page_data) {
-					each(page_content(page_data), wiki_API.title_of(page_data), messages, page_data);
+					each(get_page_content(page_data), get_page_title(page_data), messages, page_data);
 				});
 			else
 				// 取得頁面內容。
@@ -1201,6 +1257,23 @@ wiki_API.query.id_of_page = function(page_data, title_only) {
 	return page_data;
 };
 
+
+// TODO
+function normalize_title(title, options) {
+	// 處理 [ {String}API_URL, {String}title ]
+	if (!Array.isArray(title)
+	// 為了預防輸入的是問題頁面。
+	|| title.length !== 2 || typeof title[0] === 'object')
+		title = [ , title ];
+	title[1] = wiki_API.query.title_param(title[1], true);
+
+	if (options && options.redirects)
+		title[1] += '&redirects=1';
+
+	return title;
+}
+
+
 //---------------------------------------------------------------------//
 
 
@@ -1242,7 +1315,7 @@ wiki_API.page = function(title, callback, options) {
 		// default: 僅取得單一 revision。
 		title[1] += '&rvlimit=1';
 
-	if (options.redirects)
+	if (options && options.redirects)
 		title[1] += '&redirects=1';
 
 	title[1] = 'query&prop=revisions&rvprop=content|timestamp&'
@@ -1285,7 +1358,7 @@ wiki_API.page = function(title, callback, options) {
 		for ( var pageid in data) {
 			var page = data[pageid];
 			pages.push(page);
-			if (!page_content.has_content(page))
+			if (!get_page_content.has_content(page))
 				library_namespace.warn('wiki_API.page: '
 				// 頁面不存在。Page does not exist. Deleted?
 				+ ('missing' in page ? 'Not exists' : 'No content') + ': [' + page.title + ']');
@@ -1446,7 +1519,7 @@ function get_continue(title, callback) {
 		options = library_namespace.null_Object();
 
 	wiki_API.page(title, function(page_data) {
-		var matched, done, content = page_content(page_data),
+		var matched, done, content = get_page_content(page_data),
 		// {RegExp}[options.pattern]:
 		// content.match(pattern) === [ , '{type:"continue"}' ]
 		pattern = options.pattern,
@@ -1673,7 +1746,7 @@ function get_list(type, title, callback, namespace) {
 		// 紀錄清單類型。
 		// assert: overwrite 之屬性不應該是原先已經存在之屬性。
 		pages.list_type = type;
-		if (page_content.is_page_data(title))
+		if (get_page_content.is_page_data(title))
 			title = title.title;
 
 		if (!data || !data.query) {
@@ -1925,8 +1998,8 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
  *            頁面內容。 {String}text or {Function}text(content, title)
  * @param {Object}token
  *            “csrf”令牌。
- * @param {Object}options
- *            附加參數/設定選項。
+ * @param {Object}[options]
+ *            附加參數/設定特殊功能與選項
  * @param {Function}callback
  *            回調函數。 callback(title, error, result)
  * @param {String}timestamp
@@ -1936,7 +2009,7 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
  */
 wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	if (typeof text === 'function') {
-		library_namespace.debug('先取得內容再 edit [' + wiki_API.title_of(title)
+		library_namespace.debug('先取得內容再 edit [' + get_page_title(title)
 				+ ']。', 1, 'wiki_API.edit');
 		return wiki_API.page(title,
 				function(page_data) {
@@ -1947,7 +2020,7 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 										+ page_data.title + ']');
 						callback(page_data.title, 'denied');
 					} else
-						wiki_API.edit(page_data, text(page_content(page_data),
+						wiki_API.edit(page_data, text(get_page_content(page_data),
 								page_data.title), token, options, callback);
 				});
 	}
@@ -1968,7 +2041,7 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 		action = [ 'empty', '未設定編輯內容' ];
 
 	if (action) {
-		title = wiki_API.title_of(title);
+		title = get_page_title(title);
 		if (action[1] !== 'skip')
 			// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
 			library_namespace.warn('wiki_API.edit: [[' + title + ']]: ' + action[1]);
@@ -2021,13 +2094,13 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 				+ (data.edit.info || data.edit.captcha && '必需輸入驗證碼'));
 		if (error)
 			library_namespace.warn('wiki_API.edit: Error to edit ['
-					+ wiki_API.title_of(title) + ']: ' + error);
+					+ get_page_title(title) + ']: ' + error);
 		else if (data.edit && ('nochange' in data.edit))
 			// 在極少的情況下，data.edit === undefined。
 			library_namespace.info('wiki_API.edit: ['
-					+ wiki_API.title_of(title) + ']: no change');
+					+ get_page_title(title) + ']: no change');
 		if (typeof callback === 'function')
-			callback(wiki_API.title_of(title), error, data);
+			callback(get_page_title(title), error, data);
 	}, options);
 };
 
@@ -2041,8 +2114,8 @@ wiki_API.edit.cancel = library_namespace.null_Object();
 // https://www.mediawiki.org/wiki/API:Edit
 // to detect edit conflicts.
 wiki_API.edit.set_stamp = function(options, timestamp) {
-	if (page_content.is_page_data(timestamp)
-	&& (timestamp = page_content.has_content(timestamp)))
+	if (get_page_content.is_page_data(timestamp)
+	&& (timestamp = get_page_content.has_content(timestamp)))
 		timestamp = timestamp.timestamp;
 	//timestamp = '2000-01-01T00:00:00Z';
 	if (timestamp) {
@@ -2072,7 +2145,7 @@ wiki_API.edit.get_bot = function(content) {
 // 遵守[[Template:Bots]]
 // 另須考慮{{Personal announcement}}的情況。
 wiki_API.edit.denied = function(content, bot_id, action) {
-	if (!content || page_content.is_page_data(content) && !(content = page_content(content)))
+	if (!content || get_page_content.is_page_data(content) && !(content = get_page_content(content)))
 		return;
 
 	var bots = wiki_API.edit.get_bot(content), denied;
@@ -2179,6 +2252,102 @@ wiki_API.search.default_parameter = {
 };
 
 
+//---------------------------------------------------------------------//
+
+/**
+ * 取得所有 redirect 到 [[title]] 之 pages。<br />
+ * 可以 [[Special:链入页面]] 確認
+ * 
+ * @param {String}title
+ *            頁面名。
+ * @param {Function}callback
+ *            callback(root_page_data, redirect_list) { redirect_list = [ page_data, page_data, ... ]; }
+ * @param {Object}[options]
+ *            附加參數/設定特殊功能與選項. 此 options 可能會被變更!<br />
+ *            {Boolean}options.no_trace: 若頁面還重定向到其他頁面則不溯源。溯源時 title 將以 root 替代。<br />
+ *            {Boolean}options.include_root 回傳 list 包含 title，而不只是所有 redirect 到
+ *            [[title]] 之 pages。
+ */
+wiki_API.redirects = function(title, callback, options) {
+	// 前置處理。
+	if (!library_namespace.is_Object(options))
+		options = library_namespace.null_Object();
+
+	if (!options.no_trace) {
+		// 溯源
+		wiki_API.page(title, function(page_data) {
+			var content = get_page_content(page_data),
+			//
+			redirect_to = parse_redirect(content);
+			options.no_trace = true;
+			if (redirect_to)
+				wiki_API.redirects(redirect_to, callback, options);
+			else
+				wiki_API.redirects(title, callback, options);
+		});
+		return;
+	}
+
+	// 處理 [ {String}API_URL, {String}title ]
+	if (!Array.isArray(title))
+		title = [ , title ];
+	title[1] = wiki_API.query.title_param(title[1], true);
+
+	title[1] = 'query&prop=redirects&rdlimit=max&'
+	//
+	+ title[1];
+	if (!title[0])
+		title = title[1];
+
+	wiki_API.query(title, typeof callback === 'function'
+	//
+	&& function(data) {
+		// copy from wiki_API.page()
+
+		var error = data && data.error;
+		// 檢查伺服器回應是否有錯誤資訊。
+		if (error) {
+			library_namespace.err('wiki_API.redirects: [' + error.code + '] ' + error.info);
+			// e.g., Too many values supplied for parameter 'pageids': the limit is 50
+			if (data.warnings && data.warnings.query && data.warnings.query['*'])
+				library_namespace.warn(data.warnings.query['*']);
+			return callback();
+
+		} else if (!data || !data.query || !data.query.pages) {
+			library_namespace.warn('wiki_API.redirects: Unknown response: [' + data + ']');
+			if (library_namespace.is_debug()
+				// .show_value() @ interact.DOM, application.debug
+				&& library_namespace.show_value)
+				library_namespace.show_value(data);
+			return callback();
+		}
+
+		data = data.query.pages;
+		var pages = [];
+		for ( var pageid in data) {
+			var page = data[pageid];
+			pages.push(page);
+			if (!get_page_content.has_content(page))
+				library_namespace.warn('wiki_API.redirects: '
+				// 頁面不存在。Page does not exist. Deleted?
+				+ ('missing' in page ? 'Not exists' : 'No content') + ': [' + page.title + ']');
+		}
+
+		pages = pages[0];
+
+		// page 之 structure 將按照 wiki 本身之 return！
+		// page = {pageid,ns,title,redirects:[{},{}]}
+		var redirects = pages.redirects || [];
+		library_namespace.debug(get_page_title(pages)
+				+ ': 有 ' + redirects.length + ' 個同名頁面(重定向至此頁面).', 2, 'wiki_API.redirects');
+		if (options.include_root) {
+			redirects = redirects.slice();
+			redirects.unshift(pages);
+		}
+		callback(pages, redirects);
+	});
+};
+
 // --------------------------------------------------------------------------------------------- //
 
 // export
@@ -2195,15 +2364,9 @@ Object.assign(wiki_API, {
 	file_pattern : file_pattern,
 	template_token : template_token,
 
-	content_of : page_content,
-	// wiki_API.title_of(): get title of page.
-	// {@seealso} wiki_API.query.title_param()
-	title_of : function(page_data) {
-		// 處理 [ {String}API_URL, {String}title ]
-		if (Array.isArray(page_data))
-			page_data = page_data[1];
-		return page_data.title || page_data;
-	},
+	content_of : get_page_content,
+	title_of : get_page_title,
+	normalize_title : normalize_page_name,
 
 	parse : parse_wikitext
 });

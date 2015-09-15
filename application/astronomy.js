@@ -1095,7 +1095,7 @@ if (typeof CeL === 'function')
 			 *            to what type: decimal degrees, degrees, time, radians,
 			 *            turns
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 * 
 			 * @returns {String}formatted radians
 			 */
@@ -1399,7 +1399,7 @@ if (typeof CeL === 'function')
 			 * @param {Number}radius
 			 *            radius (R) of spherical 球座標
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 *            {Boolean}options.unit_radius: 若為 true，則將 .R 當作 1。<br />
 			 *            {Object}options.base: base spherical coordinates.
 			 *            {L,B,R} 基準球座標.
@@ -1489,7 +1489,7 @@ if (typeof CeL === 'function')
 			 * @param {Number}TT_JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            附加參數/設定特殊功能與選項
 			 * 
 			 * @returns {Object}equatorial coordinates { right ascension α ,
 			 *          declination δ }
@@ -1692,7 +1692,7 @@ if (typeof CeL === 'function')
 			 * @param {Number}TT_JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            附加參數/設定特殊功能與選項
 			 */
 			function get_horizontal(coordinates, TT_JD, options) {
 				var local = Array.isArray(options.local) && options.local;
@@ -2628,7 +2628,7 @@ if (typeof CeL === 'function')
 			 * @param {String}object
 			 *            天體 (planets 行星).
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 *            {String|Array}options.terms: request terms.<br />
 			 *            L: 日心黃經 the ecliptical longitude in radians (弧度)
 			 *            真黃經，不是軌道經度, NOT the orbital longitude<br />
@@ -2834,7 +2834,7 @@ if (typeof CeL === 'function')
 			 * @param {String}file_name
 			 *            source file name
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            附加參數/設定特殊功能與選項
 			 * 
 			 * @since 2015/4/15 ‏‎17:46:12, 2015/4/18 21:36:12
 			 */
@@ -2936,7 +2936,7 @@ if (typeof CeL === 'function')
 			 * @param {String}object
 			 *            天體 (planets 行星).
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            附加參數/設定特殊功能與選項
 			 * 
 			 * @returns {Object}coordinates
 			 */
@@ -3114,7 +3114,7 @@ if (typeof CeL === 'function')
 			 * @param {Number}TT_JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 *            {Boolean}options.degrees: translate radians to
 			 *            degrees.<br />
 			 *            {Boolean}options.km: translate AU to km.<br />
@@ -3354,7 +3354,7 @@ if (typeof CeL === 'function')
 			 * @param {Number}UT_JD
 			 *            Julian date (JD of 日常生活時間 UT)
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 *            options.days: 回傳 [ 節氣年 year (以"春分"分年, 非立春後才過年!), 節氣序
 			 *            index, 已經過日數/剩下幾日 ]。<br />
 			 *            options.pentads: 亦標示七十二候 (物候, 72 pentads)<br />
@@ -3544,7 +3544,7 @@ if (typeof CeL === 'function')
 			 * @param {Integer}[minute_offset]
 			 *            indicate the time zone
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            附加參數/設定特殊功能與選項
 			 * 
 			 * @returns {Function} handler
 			 * 
@@ -3618,7 +3618,7 @@ if (typeof CeL === 'function')
 			 * @param {Date|Integer}date
 			 *            指定年份或日期
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            附加參數/設定特殊功能與選項
 			 * 
 			 * @returns {Date} 指定年份或日期所在立春年之歲首(立春時刻)
 			 */
@@ -3805,7 +3805,7 @@ if (typeof CeL === 'function')
 			 * @param {Number}TT_JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 *            {Boolean}options.degrees: translate radians to
 			 *            degrees.<br />
 			 *            {Boolean}options.km: translate AU to km.<br />
@@ -4091,7 +4091,7 @@ if (typeof CeL === 'function')
 			 * @param {String}file_name
 			 *            source file name
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            附加參數/設定特殊功能與選項
 			 * 
 			 * @since 2015/4/20
 			 */
@@ -4255,7 +4255,7 @@ if (typeof CeL === 'function')
 			 * @param {Number}TT_JD
 			 *            Julian date (JD of 天文計算用時間 TT)
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 *            {Boolean}options.degrees: translate radians to
 			 *            degrees.<br />
 			 *            {Boolean}options.km: translate AU to km.<br />
@@ -4479,7 +4479,7 @@ if (typeof CeL === 'function')
 			 * @param {Integer}phase
 			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 *            {Boolean}options.nearest: 取得最接近之月相時間。
 			 * 
 			 * @returns {Number} Julian date (JD of 天文計算用時間 TT)
@@ -4784,7 +4784,7 @@ if (typeof CeL === 'function')
 			 *            latitude (°), longitude (°), time zone (e.g., UTC+8:
 			 *            8), elevation or geometric height (m) ]
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 * 
 			 * @returns {Object}Besselian Elements
 			 */
@@ -5521,7 +5521,7 @@ if (typeof CeL === 'function')
 			 * @param {Integer}phase
 			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 * 
 			 * @returns {Object}日月食資訊。
 			 */
@@ -5856,7 +5856,7 @@ if (typeof CeL === 'function')
 			 * @param {Integer}phase
 			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            附加參數/設定特殊功能與選項
 			 * 
 			 * @returns {Number} Julian date (JD of 天文計算用時間 TT)
 			 * 
@@ -5971,7 +5971,7 @@ if (typeof CeL === 'function')
 			 * @param {Integer}phase
 			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            附加參數/設定特殊功能與選項
 			 * 
 			 * @returns {Number} Julian date (JD of 天文計算用時間 TT)
 			 * 
@@ -6051,7 +6051,7 @@ if (typeof CeL === 'function')
 			 * @param {Integer}phase
 			 *            0:朔0°, 1:上弦90°, 2:望180°, 3:下弦270°
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 *            {Boolean}options.mean: 是否採用平月相。 false: 採用精準值。<br />
 			 *            {Integer}options.duration: 取得年數<br />
 			 *            {Boolean}options.to_Date: return Date<br />
@@ -6158,7 +6158,7 @@ if (typeof CeL === 'function')
 			 *            Julian date of local midnight (00:00) (JD of 日常生活時間
 			 *            UT)
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 *            {Boolean}options.time: 取得月相時，亦取得時刻。<br />
 			 *            {Boolean|String}options.晦: 顯示晦。<br />
 			 *            {Boolean}options.index: 顯示 index 而非名稱。<br />
@@ -6454,7 +6454,7 @@ if (typeof CeL === 'function')
 			 * @param {Integer}年
 			 *            基本上與公元年數同步。 e.g., 2000: 1999/12/8–2000/11/25
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 *            {Number}options.minute_offset: time-zone offset from
 			 *            UTC in minutes.<br />
 			 *            e.g., UTC+8: 8 * 60 = 480<br />
@@ -6572,7 +6572,7 @@ if (typeof CeL === 'function')
 			 * @param {Date}date
 			 *            指定日期。
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 * 
 			 * @returns {Array} [ 年, 月, 日 ]
 			 */
@@ -6869,7 +6869,7 @@ if (typeof CeL === 'function')
 			 *            觀測者 [ 緯度（北半球為正,南半球為負）, 經度（從Greenwich向東為正，西為負）, 時區,
 			 *            海拔標高(觀測者距海平面的高度) ]
 			 * @param {Object}[options]
-			 *            options 設定特殊功能:<br />
+			 *            附加參數/設定特殊功能與選項:<br />
 			 *            {Boolean}options.TT: date is TT instead of UT.
 			 * 
 			 * @constructor

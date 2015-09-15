@@ -4084,7 +4084,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Date}date
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            附加參數/設定特殊功能與選項
 			 */
 			function add_note(date, options) {
 				add_offset_function(date, this);
@@ -5661,7 +5661,7 @@ if (typeof CeL === 'function')
 			 * @param {Era}[指定紀年]
 			 *            主要紀年
 			 * @param {Object}[options]
-			 *            options 設定特殊功能
+			 *            附加參數/設定特殊功能與選項
 			 * 
 			 * @returns {Array} 共存紀年
 			 */
@@ -5949,7 +5949,7 @@ if (typeof CeL === 'function')
 			 *            ... }<br />
 			 *            duration: [start_date, end_date]
 			 * @param {Object}[options]
-			 *            options 設定特殊功能. 此 options 可能會被變更!<br />
+			 *            附加參數/設定特殊功能與選項. 此 options 可能會被變更!<br />
 			 *            {String|Date}.base: base date<br />
 			 *            {Boolean}.get_era: 僅回傳所解析出之紀年 {Object}。<br />
 			 *            {Boolean}.get_era_list: 僅回傳所解析出之紀年 list: []。<br />
@@ -6699,7 +6699,7 @@ if (typeof CeL === 'function')
 			 * @param {Array|String}hierarchy
 			 *            指定層次/關鍵字。
 			 * @param {Object}[options]
-			 *            options 設定特殊功能.
+			 *            附加參數/設定特殊功能與選項.
 			 * 
 			 * @returns {Array}紀年列表。<br /> [ 同階層紀年列表 ]
 			 */
@@ -6803,7 +6803,7 @@ if (typeof CeL === 'function')
 			 * @param {String}era
 			 *            完整紀年日期。<br />
 			 * @param {Object}[options]
-			 *            options 設定特殊功能. 此 options 可能會被變更!<br />
+			 *            附加參數/設定特殊功能與選項. 此 options 可能會被變更!<br />
 			 * 
 			 * @returns {Array}曆譜
 			 */
