@@ -43,8 +43,8 @@ if (false) {
 					nocreate : 1
 				})
 				// get the content of page, and then modify it.
-				.page('Wikipedia:沙盒').edit(function(text) {
-					return text + '\n\n* [[WP:Sandbox|沙盒]]';
+				.page('Wikipedia:沙盒').edit(function(page_data) {
+					return CeL.wiki.content_of(page_data) + '\n\n* [[WP:Sandbox|沙盒]]';
 				}, {
 					summary : '沙盒 test edit',
 					nocreate : 1,
@@ -60,7 +60,8 @@ if (false) {
 					summary : 'summary'
 				})
 				// get the content of page, modify it, and set summary.
-				.edit(function(content) {
+				.edit(function(page_data) {
+					var title = page_data.title, content = CeL.wiki.content_of(page_data);
 					return 'text to replace';
 				}, {
 					summary : 'summary'
@@ -301,7 +302,7 @@ if (false) {
  * @param {String}wikitext
  *            模板前後之 content。<br />
  *            assert: wikitext 為良好結構 (well-constructed)。
- * @param {String}[template_name]
+ * @param {String|Array}[template_name]
  *            擷取模板名。
  * @param {Boolean}[no_parse]
  *            是否不解析 parameters。
@@ -312,16 +313,7 @@ if (false) {
  *          token.index, token.lastIndex: index.
  */
 function template_token(wikitext, template_name, no_parse) {
-	var matched;
-	// TODO: 這方法太沒效率!!
-	if (Array.isArray(template_name)) {
-		template_name.some(function(_name) {
-			return matched = template_token(wikitext, _name, no_parse);
-		});
-		return matched;
-	}
-
-	matched = (template_name = normalize_name_pattern(template_name, true))
+	var matched = (template_name = normalize_name_pattern(template_name, true))
 	// 模板起始。
 	? new RegExp(/{{[\s\n]*/.source + template_name + '\\s*[|}]', 'gi')
 			: new RegExp(TEMPLATE_NAME_PATTERN.source, 'g');
@@ -494,8 +486,8 @@ function get_page_title(page_data) {
 		if (get_page_content.is_page_data(page_data[0]))
 			// assert: page_data = [ page data, page data, ... ]
 			return page_data.map(get_page_title);
-		// assert: page_data = [ {String}API_URL, {String}title ]
-		return page_data[1];
+		// assert: page_data = [ {String}API_URL, {String}title || {Object}page_data ]
+		page_data = page_data[1];
 	}
 	return page_data.title || page_data;
 }
@@ -684,8 +676,11 @@ wiki_API.prototype.next = function() {
 				next[3].call(this, this.last_page.title, 'denied');
 			this.next();
 		} else {
-			if (typeof next[1] === 'function')
-				next[1] = next[1](get_page_content(this.last_page), this.last_page.title);
+			if (typeof next[1] === 'function') {
+				// next[1] = next[1](get_page_content(this.last_page), this.last_page.title, this.last_page);
+				// 需要同時改變 wiki_API.edit!
+				next[1] = next[1](this.last_page);
+			}
 			if (next[2] && next[2].skip_nochange
 			// 採用 skip_nochange 可以跳過實際 edit 的動作。
 			&& next[1] === get_page_content(this.last_page)) {
@@ -774,7 +769,7 @@ wiki_API.prototype.next.methods = 'page,edit,search,logout,run,set_URL'
 // @see ISO 8601
 wiki_API.prototype.date_format = '%4Y%2m%2dT%2H%2M';
 
-// 後續檢索用索引值
+// {String}後續檢索用索引值
 wiki_API.prototype.continue_key = '後續索引';
 
 // 規範 log 之格式。
@@ -788,7 +783,7 @@ function add_message(message, title) {
 	first : function(messages, titles, pages) {
 	},
 	// {Function|Array} 每個 page 執行一次。
-	each : function(content, title, messages, page_data) {
+	each : function(page_data, messages) {
 		return 'text to replace';
 	},
 	last : function(messages, titles, pages) {
@@ -797,9 +792,9 @@ function add_message(message, title) {
 	no_edit : true,
 	// 設定寫入目標。一般為 debug、test 測試期間用。
 	write_to : '',
-	// 運作記錄存放頁面。
+	/** {String}運作記錄存放頁面。 */
 	log_to : 'User:Robot/log/%4Y%2m%2d',
-	// 編輯摘要。總結報告。「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」
+	/** {String}編輯摘要。總結報告。「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」 */
 	summary : ''
 });
 
@@ -902,7 +897,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				} else {
 					// 有錯誤發生。
 					result = [ 'error', error ];
-					error = ' 結束: ' + error;
+					error = '結束: ' + error;
 				}
 			else {
 				// 成功完成。
@@ -952,6 +947,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		});
 	}
 
+	// do a little check.
 	if (Array.isArray(pages) && Array.isArray(titles) && pages.length !== titles.length)
 		library_namespace.warn('wiki_API.work: The length of pages and titles are different!');
 
@@ -998,18 +994,18 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				// 不作編輯作業。
 				// 取得頁面內容。
 				this.page(page, function(page_data) {
-					each(get_page_content(page_data), get_page_title(page_data), messages, page_data);
+					each(page_data, messages);
 				});
 			else
 				// 取得頁面內容。
 				this.page(page)
 				// 編輯頁面內容。
-				.edit(function(content, title) {
+				.edit(function(page_data) {
 					// edit/process
 					library_namespace.info('wiki_API.work: edit '
 					//
-					+ (index + 1) + '/' + pages.length + ' [[' + page.title + ']]');
-					return each(content, title, messages, page);
+					+ (index + 1) + '/' + pages.length + ' [[' + page_data.title + ']]');
+					return each(page_data, messages);
 				}, options, callback);
 		}, this);
 
@@ -1995,7 +1991,7 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
  * @param {String|Array}title
  *            頁面標題。 {String}title or [ {String}API_URL, {String}title ]
  * @param {String|Function}text
- *            頁面內容。 {String}text or {Function}text(content, title)
+ *            頁面內容。 {String}text or {Function}text(page_data)
  * @param {Object}token
  *            “csrf”令牌。
  * @param {Object}[options]
@@ -2019,9 +2015,11 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 								.warn('wiki_API.edit: Denied to edit ['
 										+ page_data.title + ']');
 						callback(page_data.title, 'denied');
-					} else
-						wiki_API.edit(page_data, text(get_page_content(page_data),
-								page_data.title), token, options, callback);
+					} else {
+						// text(get_page_content(page_data), page_data.title, page_data)
+						// 需要同時改變 wiki_API.prototype.next!
+						wiki_API.edit(page_data, text(page_data), token, options, callback);
+					}
 				});
 	}
 
@@ -2042,11 +2040,12 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 
 	if (action) {
 		title = get_page_title(title);
-		if (action[1] !== 'skip')
+		if (action[1] !== 'skip') {
 			// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
 			library_namespace.warn('wiki_API.edit: [[' + title + ']]: ' + action[1]);
-		else
+		} else {
 			library_namespace.debug('Skip [[' + title + ']]', 2);
+		}
 		return callback(title, action[0]);
 	}
 
@@ -2107,7 +2106,9 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 /**
  * 放棄編輯頁面用。
  */
-wiki_API.edit.cancel = library_namespace.null_Object();
+wiki_API.edit.cancel = {
+		cancel : '放棄編輯頁面用'
+};
 
 // 處理編輯衝突用。
 // warning: will modify options!
@@ -2367,6 +2368,7 @@ Object.assign(wiki_API, {
 	content_of : get_page_content,
 	title_of : get_page_title,
 	normalize_title : normalize_page_name,
+	normalize_title_pattern : normalize_name_pattern,
 
 	parse : parse_wikitext
 });
