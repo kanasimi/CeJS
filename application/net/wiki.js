@@ -20,6 +20,8 @@
 //'use asm';
 
 if (false) {
+	// examples
+
 	// for debug: 'interact.DOM', 'application.debug',
 	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
 	CeL.assert([ '!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
@@ -157,11 +159,12 @@ function get_namespace(namespace) {
 
 // The namespace number of the page.
 // {{NAMESPACENUMBER:{{FULLPAGENAME}}}}
+// 條目 entry 文章 article, 頁面 page.
 get_namespace.hash = {
 	// Virtual namespaces
 	media : -2,
 	special : -1,
-	// 0: (Main/Article)
+	// 0: (Main/Article) main namespace 主要(條目)命名空間/識別領域
 	'' : 0,
 	talk : 1,
 	user : 2,
@@ -1030,7 +1033,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			: 'User:' + this.token.lgname + '/log/' + (new Date).format('%4Y%2m%2d'),
 			// options for summary.
 			options = {
-				// append after all, at bottom.
+				// append 章節/段落 after all, at bottom.
 				section : 'new',
 				sectiontitle : '[' + (new Date).format(config.date_format || this.date_format) + '] ' + done
 				//
@@ -2275,7 +2278,7 @@ wiki_API.redirects = function(title, callback, options) {
 		options = library_namespace.null_Object();
 
 	if (!options.no_trace) {
-		// 溯源
+		// 溯源(重定向終點)
 		wiki_API.page(title, function(page_data) {
 			var content = get_page_content(page_data),
 			//
@@ -2348,6 +2351,56 @@ wiki_API.redirects = function(title, callback, options) {
 		callback(pages, redirects);
 	});
 };
+
+
+//---------------------------------------------------------------------//
+// 這不一定是最佳解決法!
+
+// node.js
+//var fs = require('fs');
+
+// TODO
+// get_cache(callback(data), item)
+function cache_operator(get_cache, callback, filename, options) {
+	// 前置處理。
+	if (!library_namespace.is_Object(options))
+		options = library_namespace.null_Object();
+
+	if (options.path_prefix)
+		filename = options.path_prefix + filename;
+
+	fs.readFile(filename, options.encoding, function(error, data) {
+		if (!error) {
+			// CeL.log(data);
+			callback(JSON.parse(data));
+			return;
+		}
+
+		function write_cache(data) {
+			// cache data
+			fs.writeFile(filename, JSON.stringify(data), options.encoding);
+			callback(data);
+		}
+
+		if (!Array.isArray(options.list)) {
+			get_cache(write_cache);
+			return;
+		}
+
+		var index = 0;
+		function get_next_item(data) {
+			if (index < options.list.length) {
+				get_cache(get_next_item, options.list[index++]);
+			} else {
+				// All got.
+				write_cache(data);
+			}
+		}
+
+		get_next_item();
+	});
+}
+
 
 // --------------------------------------------------------------------------------------------- //
 
