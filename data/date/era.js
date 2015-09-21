@@ -7438,7 +7438,7 @@ if (typeof CeL === 'function')
 			};
 
 			// ---------------------------------------------------------------------//
-			// export.
+			// export 導出.
 
 			Object.assign(to_era_Date, {
 				set : parse_era,

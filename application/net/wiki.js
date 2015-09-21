@@ -110,6 +110,15 @@ eval(this.use());
 /**
  * web Wikipedia / 維基百科 用的 functions。<br />
  * 可執行環境: node.js, JScript。
+ * 
+ * @param {String}name
+ *            user name
+ * @param {String}password
+ *            user password
+ * @param {String}[API_URL]
+ *            language code or API URL
+ * 
+ * @constructor
  */
 function wiki_API(name, password, API_URL) {
 	if (!this || this.constructor !== wiki_API)
@@ -157,14 +166,19 @@ function get_namespace(namespace) {
 	return namespace | 0;
 };
 
-// The namespace number of the page.
-// {{NAMESPACENUMBER:{{FULLPAGENAME}}}}
-// 條目 entry 文章 article, 頁面 page.
+/**
+ * The namespace number of the page.
+ * 
+ * {{NAMESPACENUMBER:{{FULLPAGENAME}}}}
+ * 
+ * @type {Object}
+ */
 get_namespace.hash = {
 	// Virtual namespaces
 	media : -2,
 	special : -1,
 	// 0: (Main/Article) main namespace 主要(條目)命名空間/識別領域
+	// 條目 entry 文章 article, 頁面 page.
 	'' : 0,
 	talk : 1,
 	user : 2,
@@ -801,7 +815,17 @@ function add_message(message, title) {
 	summary : ''
 });
 
-// 不會推入 this.actions queue，即時執行。因此需要先 get list!
+/**
+ * robot 操作/作業套裝函數。<br />
+ * 不會推入 this.actions queue，即時執行。因此需要先 get list!
+ * 
+ * @param {Object}config
+ *            configuration
+ * @param {Array}pages
+ *            page data list
+ * @param {Array}[titles]
+ *            title list
+ */
 wiki_API.prototype.work = function(config, pages, titles) {
 	if (typeof config === 'function')
 		config = {
@@ -925,7 +949,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			// error: message, result: result type.
 
 			error = '間隔 ' + messages.last.age(new Date) + '，'
-			// 紀錄使用時間, 費時
+			// 紀錄使用時間, 歷時, 費時
 			+ (messages.last = new Date).format(config.date_format || this.date_format) + ' ' + error;
 			if (log_item[ Array.isArray(result) ?
 			// {Array}result = [ main, sub ]
@@ -1073,7 +1097,11 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	});
 };
 
-// 選擇要紀錄的項目。在大量編輯時，可利用此縮減 log。
+/**
+ * 選擇要紀錄的項目。在大量編輯時，可利用此縮減 log。
+ * 
+ * @type {Object}
+ */
 wiki_API.prototype.work.log_item = {
 		title : true,
 		report : true,
@@ -1088,8 +1116,18 @@ wiki_API.prototype.work.log_item = {
 //--------------------------------------------------------------------------------------------- //
 // 泛用，無須 instance。
 
-// {String}action or [ {String}api URL, {String}action, {Object}other parameters ]
-wiki_API.query = function (action, callback, post_data) {
+/**
+ * 實際執行 query 操作，直接 call API 之核心函數。
+ * 
+ * @param {String|Array}action
+ *            {String}action or [ {String}api URL, {String}action, {Object}other
+ *            parameters ]
+ * @param {Function}callback
+ *            回調函數。 callback(response)
+ * @param {Object}[post_data]
+ *            data when need using POST method
+ */
+wiki_API.query = function(action, callback, post_data) {
 	// 處理 action
 	library_namespace.debug('action: ' + action, 2, 'wiki_API.query');
 	if (typeof action === 'string')
@@ -1171,20 +1209,37 @@ wiki_API.query = function (action, callback, post_data) {
 		}, '', post_data);
 };
 
-// 使用5秒的最大延遲參數。
-// https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
+/**
+ * 最大延遲參數。
+ * default: 使用5秒的最大延遲參數。
+ * 
+ * @type {Number}
+ * 
+ * @see https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
+ */
 wiki_API.query.lag = 5000;
 
-// 對於可以不用 XMLHttp 的，直接採 JSONP callback 法。
+/**
+ * 對於可以不用 XMLHttp 的，直接採 JSONP callback 法。
+ * 
+ * @type {Boolean}
+ */
 wiki_API.query.allow_JSONP = library_namespace.is_WWW(true);
 
 // wiki_API.query.last[URL] = {Date}last query
 wiki_API.query.last = library_namespace.null_Object();
 
-// 取得 page_data 之 title parameter。
-// e.g., {pageid:8,title:'abc'} → 'pageid=8'
-// e.g., {title:'abc'} → 'title=abc'
-// e.g., 'abc' → 'title=abc'
+/**
+ * 取得 page_data 之 title parameter。<br />
+ * e.g., {pageid:8,title:'abc'} → 'pageid=8'<br />
+ * e.g., {title:'abc'} → 'title=abc'<br />
+ * e.g., 'abc' → 'title=abc'<br />
+ * 
+ * @param {Object}page_data
+ *            page data got from wiki API
+ * @param {Boolean}[multi]
+ *            is multi-pages
+ */
 wiki_API.query.title_param = function(page_data, multi) {
 	var pageid;
 	if (Array.isArray(page_data)) {
@@ -1242,6 +1297,14 @@ wiki_API.query.title_param = function(page_data, multi) {
 	: 'pageid' + multi + pageid;
 };
 
+/**
+ * get id of page
+ * 
+ * @param {Object}page_data
+ *            page data got from wiki API
+ * @param {Boolean}[title_only]
+ *            get title only
+ */
 wiki_API.query.id_of_page = function(page_data, title_only) {
 	if (Array.isArray(page_data))
 		return page_data.map(function(page) {
@@ -1258,7 +1321,7 @@ wiki_API.query.id_of_page = function(page_data, title_only) {
 
 
 // TODO
-function normalize_title(title, options) {
+function normalize_title_parameter(title, options) {
 	// 處理 [ {String}API_URL, {String}title ]
 	if (!Array.isArray(title)
 	// 為了預防輸入的是問題頁面。
@@ -1289,8 +1352,9 @@ CeL.wiki.page('道', function(p) {
  * @param {String|Array}title
  *            title or [ {String}API_URL, {String}title ]
  * @param {Function}callback
- *            callback(page_data) { page_data.title; var content = CeL.wiki.content_of(page_data); }
- * @param options
+ *            回調函數。 callback(page_data) { page_data.title; var content = CeL.wiki.content_of(page_data); }
+ * @param {Object}[options]
+ *            附加參數/設定特殊功能與選項
  *
  * @see https://en.wikipedia.org/w/api.php?action=help&modules=query%2Brevisions
  */
@@ -1374,7 +1438,7 @@ wiki_API.page = function(title, callback, options) {
 				+ ' page(s)! The pages will all passed to callback as Array!', 2, 'wiki_API.page');
 
 		// page 之 structure 將按照 wiki 本身之 return！
-		// page = {pageid,ns,title,revisions:[{timestamp,'*'}]}
+		// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
 		callback(pages);
 	});
 };
@@ -1574,7 +1638,7 @@ function get_continue(title, callback) {
  * @param {String}title
  *            頁面標題。
  * @param {Function}callback
- *            回調函數。callback(title, titles, pages)
+ *            回調函數。 callback(title, titles, pages)
  * @param {Number|String}namespace
  *            one of get_namespace.hash
  */
@@ -1850,12 +1914,22 @@ get_list.type = {
 
 //---------------------------------------------------------------------//
 
-// 取得完整 list 後才作業。
-// 注意:可能會改變 options!
-wiki_API.list = function(target, after_all, options) {
+/**
+ * 取得完整 list 後才作業。<br />
+ * 注意:可能會改變 options!
+ * 
+ * @param {String}target
+ *            頁面標題。
+ * @param {Function}callback
+ *            回調函數。 callback(title, titles, pages)
+ * @param {Object}[options]
+ *            附加參數/設定特殊功能與選項
+ */
+wiki_API.list = function(target, callback, options) {
 	// 前置處理。
 	if (!library_namespace.is_Object(options))
 		options = library_namespace.null_Object();
+
 	if (!options.initialized) {
 		if (!options.wiki)
 			options.wiki = new wiki_API;
@@ -1873,10 +1947,11 @@ wiki_API.list = function(target, after_all, options) {
 		Array.prototype.push.apply(options.pages, pages);
 		if (pages.next_index)
 			setTimeout(function() {
-				wiki_API.list(target, after_all, options);
+				wiki_API.list(target, callback, options);
 			}, 0);
 		else
-			after_all(options.pages, target, options);
+			// run callback after all list got.
+			callback(options.pages, target, options);
 	}, {
 		continue_wiki : options.wiki,
 		limit : options.limit || 'max'
@@ -1992,7 +2067,7 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
  * 編輯頁面。一次處理一個標題。
  *
  * @param {String|Array}title
- *            頁面標題。 {String}title or [ {String}API_URL, {String}title ]
+ *            頁面標題。 {String}title or [ {String}API_URL, {String}title or {Object}page_data ]
  * @param {String|Function}text
  *            頁面內容。 {String}text or {Function}text(page_data)
  * @param {Object}token
@@ -2053,7 +2128,7 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	}
 
 	action = 'edit';
-	// 處理 [ {String}API_URL, {String}title ]
+	// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 	if (Array.isArray(title))
 		action = [ title[0], action ], title = title[1];
 	if (options && options.write_to) {
@@ -2077,9 +2152,11 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 			options.pageid = title.pageid;
 		else
 			options.title = title.title;
-	} else
+	} else {
 		options.title = title;
-	wiki_API.edit.set_stamp(options, timestamp);
+	}
+	if (timestamp)
+		wiki_API.edit.set_stamp(options, timestamp);
 	// the token should be sent as the last parameter.
 	options.token = library_namespace.is_Object(token) ? token.csrftoken
 			: token;
@@ -2108,26 +2185,47 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 
 /**
  * 放棄編輯頁面用。
+ * 
+ * @type any
  */
 wiki_API.edit.cancel = {
 		cancel : '放棄編輯頁面用'
 };
 
-// 處理編輯衝突用。
-// warning: will modify options!
-// https://www.mediawiki.org/wiki/API:Edit
-// to detect edit conflicts.
+/**
+ * 處理編輯衝突用。 to detect edit conflicts.
+ * 
+ * 注意:會改變 options! Warning: will modify options!
+ * 
+ * 此 library 之工作機制：在 .page() 會取得每個頁面之 page_data.revisions[0].timestamp（各頁面不同）。於
+ * .edit() 時將會以從 page_data 取得之 timestamp 作為時間標記傳入呼叫，當 MediaWiki 系統 (API)
+ * 發現有新的時間標記，會回傳編輯衝突，並放棄編輯此頁面。<br />
+ * 詳見 [https://github.com/kanasimi/CeJS/blob/master/application/net/wiki.js
+ * wiki_API.edit.set_stamp]。
+ * 
+ * @param {Object}options
+ *            附加參數/設定特殊功能與選項
+ * @param {String}timestamp
+ *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
+ * 
+ * @returns {Object}options
+ * 
+ * @see https://www.mediawiki.org/wiki/API:Edit
+ */
 wiki_API.edit.set_stamp = function(options, timestamp) {
 	if (get_page_content.is_page_data(timestamp)
+	// 在 .page() 會取得 page_data.revisions[0].timestamp
 	&& (timestamp = get_page_content.has_content(timestamp)))
+		// 自 page_data 取得 timestamp.
 		timestamp = timestamp.timestamp;
-	//timestamp = '2000-01-01T00:00:00Z';
+	// timestamp = '2000-01-01T00:00:00Z';
 	if (timestamp) {
 		library_namespace.debug(timestamp, 3, 'wiki_API.edit.set_stamp');
 		options.basetimestamp = options.starttimestamp = timestamp;
 	}
 	return options;
-};
+}
+
 
 // https://zh.wikipedia.org/wiki/Template:Bots
 wiki_API.edit.get_bot = function(content) {
@@ -2215,11 +2313,21 @@ wiki_API.edit.denied.all = /(?:^|[\s,])all(?:$|[\s,])/;
 
 //---------------------------------------------------------------------//
 
-// full text search
-// @see https://www.mediawiki.org/wiki/API:Search_and_discovery
-// callback(key, pages, hits)
-// search wikitext: using prefix "insource:". e.g., https://en.wikipedia.org/w/api.php?action=query&list=search&srwhat=text&srsearch=insource:abc+def
-// @see https://www.mediawiki.org/wiki/Help:CirrusSearch
+/**
+ * full text search<br />
+ * search wikitext: using prefix "insource:". e.g.,
+ * https://en.wikipedia.org/w/api.php?action=query&list=search&srwhat=text&srsearch=insource:abc+def
+ * 
+ * @param {String}key
+ *            search key
+ * @param {Function}callback
+ *            回調函數。 callback(key, pages, hits)
+ * @param {Object}options
+ *            附加參數/設定特殊功能與選項
+ * 
+ * @see https://www.mediawiki.org/wiki/API:Search_and_discovery
+ * @see https://www.mediawiki.org/wiki/Help:CirrusSearch
+ */
 wiki_API.search = function(key, callback, options) {
 	if (options > 0 || options === 'max')
 		options = {
@@ -2260,7 +2368,7 @@ wiki_API.search.default_parameter = {
 
 /**
  * 取得所有 redirect 到 [[title]] 之 pages。<br />
- * 可以 [[Special:链入页面]] 確認
+ * 可以 [[Special:链入页面]] 確認。
  * 
  * @param {String}title
  *            頁面名。
@@ -2357,11 +2465,11 @@ wiki_API.redirects = function(title, callback, options) {
 // 這不一定是最佳解決法!
 
 // node.js
-//var fs = require('fs');
+//var node_fs = require('fs');
 
 // TODO
-// get_cache(callback(data), item)
-function cache_operator(get_cache, callback, filename, options) {
+// to_get_data(callback(data), item)
+wiki_API.cache = function(to_get_data, callback, filename, options) {
 	// 前置處理。
 	if (!library_namespace.is_Object(options))
 		options = library_namespace.null_Object();
@@ -2383,14 +2491,14 @@ function cache_operator(get_cache, callback, filename, options) {
 		}
 
 		if (!Array.isArray(options.list)) {
-			get_cache(write_cache);
+			to_get_data(write_cache);
 			return;
 		}
 
 		var index = 0;
 		function get_next_item(data) {
 			if (index < options.list.length) {
-				get_cache(get_next_item, options.list[index++]);
+				to_get_data(get_next_item, options.list[index++]);
 			} else {
 				// All got.
 				write_cache(data);
@@ -2399,12 +2507,12 @@ function cache_operator(get_cache, callback, filename, options) {
 
 		get_next_item();
 	});
-}
+};
 
 
 // --------------------------------------------------------------------------------------------- //
 
-// export
+// export 導出.
 Object.assign(wiki_API, {
 	api_URL : api_URL,
 	// default api URL
