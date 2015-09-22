@@ -81,6 +81,8 @@ if (false) {
 	CeL.wiki.list('Template:a‎‎', function(pages) {
 		// console.log(pages);
 		console.log(pages.length + ' pages got.');
+	}, {
+		type : 'embeddedin'
 	});
 
 	// TODO: http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
@@ -1123,7 +1125,7 @@ wiki_API.prototype.work.log_item = {
  *            {String}action or [ {String}api URL, {String}action, {Object}other
  *            parameters ]
  * @param {Function}callback
- *            回調函數。 callback(response)
+ *            回調函數。 callback(response data)
  * @param {Object}[post_data]
  *            data when need using POST method
  */
@@ -1421,10 +1423,11 @@ wiki_API.page = function(title, callback, options) {
 		for ( var pageid in data) {
 			var page = data[pageid];
 			pages.push(page);
-			if (!get_page_content.has_content(page))
+			if (!get_page_content.has_content(page)) {
 				library_namespace.warn('wiki_API.page: '
 				// 頁面不存在。Page does not exist. Deleted?
 				+ ('missing' in page ? 'Not exists' : 'No content') + ': [' + page.title + ']');
+			}
 		}
 
 		// options.multi: 即使只取得單頁面，依舊回傳 Array。
@@ -2006,7 +2009,7 @@ wiki_API.login = function(name, password, options) {
 				_next();
 			},
 			// Tokens may not be obtained when using a callback
-			{});
+			library_namespace.null_Object());
 		}
 	}
 
@@ -2224,7 +2227,7 @@ wiki_API.edit.set_stamp = function(options, timestamp) {
 		options.basetimestamp = options.starttimestamp = timestamp;
 	}
 	return options;
-}
+};
 
 
 // https://zh.wikipedia.org/wiki/Template:Bots
@@ -2439,10 +2442,11 @@ wiki_API.redirects = function(title, callback, options) {
 		for ( var pageid in data) {
 			var page = data[pageid];
 			pages.push(page);
-			if (!get_page_content.has_content(page))
-				library_namespace.warn('wiki_API.redirects: '
+			// 僅處理第一頁。
+			if ('missing' in page)
 				// 頁面不存在。Page does not exist. Deleted?
-				+ ('missing' in page ? 'Not exists' : 'No content') + ': [' + page.title + ']');
+				library_namespace.warn('wiki_API.redirects: Not exists: [' + page.title + ']');
+			break;
 		}
 
 		pages = pages[0];
@@ -2462,43 +2466,183 @@ wiki_API.redirects = function(title, callback, options) {
 
 
 //---------------------------------------------------------------------//
-// 這不一定是最佳解決法!
 
-// node.js
-//var node_fs = require('fs');
+/** fs in node.js */
+var node_fs;
+try {
+	node_fs = require('fs');
+	if (typeof node_fs.readFile !== 'function')
+		throw 1;
+} catch (e) {
+	// enumerate for wiki_API.cache
+	node_fs = {
+		readFile : function(filename, encoding, callback) {
+			callback(true);
+		},
+		writeFile : library_namespace.null_function
+	};
+}
 
-// TODO
-// to_get_data(callback(data), item)
-wiki_API.cache = function(to_get_data, callback, filename, options) {
-	// 前置處理。
-	if (!library_namespace.is_Object(options))
-		options = library_namespace.null_Object();
 
-	if (options.path_prefix)
-		filename = options.path_prefix + filename;
+/**
+ * cache 作業操作套裝/輔助函數。
+ * 
+ * 注意:會改變 options! Warning: will modify options!
+ * 
+ * @param {Object|Array}operation
+ *            作業設定。
+ * @param {Function}callback
+ *            回調函數。 callback(response data)
+ * @param {Object}[_this]
+ *            傳遞於各 operator 間的 ((this))。
+ */
+wiki_API.cache = function(operation, callback, _this) {
+	if (Array.isArray(operation)) {
+		// [ {Object}default options,
+		// {Object}operation, {Object}operation, ... ]
+		// default options === _this: 傳遞於各 operator 間的 ((this))。
+		// operation = { type:'embeddedin', operator:function(data) }
+		var index = 0;
+		// operation.type: method to get data
+		if (!operation.type) {
+			_this = typeof _this === 'object' ? Object.assign(operation[0],
+					_this) : operation[0];
+			index = 1;
+		}
 
-	fs.readFile(filename, options.encoding, function(error, data) {
+		function next_operator(data) {
+			if (index < operation.length) {
+				if (!operation[index].list)
+					// use previous data as list.
+					operation[index].list = data;
+				wiki_API.cache(operation[index++], next_operator, _this);
+			} else if (typeof callback === 'function')
+				callback.call(_this);
+		}
+
+		next_operator();
+		return;
+	}
+
+	if (typeof _this !== 'object')
+		// _this: 傳遞於各 operator 間的 ((this))。
+		_this = library_namespace.null_Object();
+
+	var type = operation.type,
+	// _this.prefix: cache path prefix
+	filename = _this[type + '_prefix'] || type,
+	//
+	operator = typeof operation.operator === 'function' && operation.operator;
+
+	/**
+	 * 結束作業。
+	 */
+	function finish_work(data) {
+		if (operator)
+			operator.call(_this, data);
+		if (typeof callback === 'function')
+			callback(_this);
+	}
+
+	filename = (_this.prefix || '')
+			+ (filename ? filename + '/' : '')
+			+ (operation.filename || typeof operation.list === 'string'
+					&& operation.list || '');
+	library_namespace.log('Read cache file: ' + filename);
+	node_fs.readFile(filename, _this.encoding, function(error, data) {
 		if (!error) {
-			// CeL.log(data);
-			callback(JSON.parse(data));
+			// library_namespace.log(data);
+			finish_work(JSON.parse(data));
 			return;
 		}
 
+		/**
+		 * 寫入cache。
+		 */
 		function write_cache(data) {
-			// cache data
-			fs.writeFile(filename, JSON.stringify(data), options.encoding);
-			callback(data);
+			// write cache data
+			node_fs.writeFile(filename, JSON.stringify(data), _this.encoding);
+			finish_work(JSON.parse(data));
 		}
 
-		if (!Array.isArray(options.list)) {
-			to_get_data(write_cache);
+		var to_get_data, list = operation.list, title,
+		//
+		page_prefix = _this.page_prefix;
+		switch (type) {
+		case 'page':
+			to_get_data = function(title, callback) {
+				library_namespace.log('Get content of [[' + title + ']]');
+				wiki_API.page(title, function(page_data) {
+					if (operator)
+						operator.call(_this, page_data);
+					callback(page_data);
+				}, Object.assign({
+					include_root : true
+				}, _this, operation));
+			};
+			break;
+		case 'redirects':
+			to_get_data = function(title, callback) {
+				wiki_API.redirects(title, function(root_page_data,
+						redirect_list) {
+					library_namespace.log('redirects (alias) of [[' + title
+							+ ']]: ' + redirect_list);
+					if (operator)
+						operator.call(_this, redirect_list);
+					callback(redirect_list);
+				}, Object.assign(library_namespace.null_Object(), _this,
+						operation));
+			};
+			break;
+		case 'backlinks':
+		case 'embeddedin':
+		case 'imageusage':
+		case 'linkshere':
+		case 'fileusage':
+			to_get_data = function(title, callback) {
+				wiki_API.list(title, function(title, titles, pages) {
+					library_namespace.log('[[' + title + ']]: '
+					//
+					+ pages.length + ' pages ' + type + '.');
+					if (operator)
+						operator.call(_this, pages);
+					callback(pages);
+				}, Object.assign({
+					type : type
+				}, _this, operation));
+			};
+			break;
+		default:
+			if (typeof type === 'function')
+				to_get_data = type;
+			else if (type)
+				throw new Error('wiki_API.cache: Bad type: ' + type);
+			else {
+				finish_work(data);
+				return;
+			}
+		}
+
+		if (typeof list === 'function')
+			list = list.call(_this, operation);
+
+		if (!Array.isArray(list)) {
+			title = list;
+			if (page_prefix)
+				title = page_prefix + title;
+			to_get_data(title, write_cache);
 			return;
 		}
 
 		var index = 0;
 		function get_next_item(data) {
-			if (index < options.list.length) {
-				to_get_data(get_next_item, options.list[index++]);
+			library_namespace.debug('處理 ' + index + '/' + list.length, 2,
+					'get_next_item');
+			if (index < list.length) {
+				title = list[index++];
+				if (page_prefix)
+					title = page_prefix + title;
+				to_get_data(title, get_next_item);
 			} else {
 				// All got.
 				write_cache(data);
