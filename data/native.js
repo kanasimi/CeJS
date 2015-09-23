@@ -2052,6 +2052,16 @@ set_method(Array.prototype, {
 		});
 		return sum;
 	},
+	to_hash: function(get_key, hash) {
+		if (!hash)
+			hash = {};
+		this.forEach(get_key ? function(item) {
+			hash[get_key(item)] = item;
+		} : function(item) {
+			hash[item] = item;
+		});
+		return hash;
+	},
 	//clone: Array.prototype.slice,
 	append: append_to_Array,
 	uniq: unique_Array,

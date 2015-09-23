@@ -180,7 +180,7 @@ get_namespace.hash = {
 	media : -2,
 	special : -1,
 	// 0: (Main/Article) main namespace 主要(條目)命名空間/識別領域
-	// 條目 entry 文章 article, 頁面 page.
+	// 條目 entry 文章 article: ns = 0, 頁面 page: ns = any. 章節/段落 section
 	'' : 0,
 	talk : 1,
 	user : 2,
@@ -217,8 +217,19 @@ get_namespace.hash = {
 //---------------------------------------------------------------------//
 // 創建 match patten 相關函數。
 
-// 這種規範化只能通用於本 library 內。Wikipedia 並未硬性設限。
+/**
+ * 規範頁面名稱 page name。
+ * 
+ * 這種規範化只能通用於本 library 內。Wikipedia 並未硬性設限。
+ * 
+ * @param {String}page_name
+ *            頁面名 page name。
+ * 
+ * @returns {String}規範後之頁面名稱。
+ */
 function normalize_page_name(page_name) {
+	if (!page_name || typeof page_name !== 'string')
+		return page_name;
 	page_name = page_name.trim().split(':');
 	var name_list = [];
 	page_name.forEach(function(section, index) {
@@ -2476,6 +2487,7 @@ wiki_API.redirects = function(title, callback, options) {
 /** fs in node.js */
 var node_fs;
 try {
+	// @see https://nodejs.org/api/fs.html
 	node_fs = require('fs');
 	if (typeof node_fs.readFile !== 'function')
 		throw 1;
@@ -2495,7 +2507,20 @@ try {
 /**
  * cache 作業操作套裝/輔助函數。
  * 
- * 注意:會改變 options! Warning: will modify options!
+ * 注意:會改變 operation, _this! Warning: will modify operation, _this!
+ * 
+ * 連續作業: 依照 _this 設定 {Object}default options，即傳遞於各 operator 間的 ((this))。<br />
+ * 依照 operation 順序個別執行單一項作業。
+ * 
+ * 單一項作業:<br />
+ * 設定檔名。<br />
+ * 若不存在此檔，則:<br />
+ * >>> 依照 operation.type 與 operation.list 取得資料。<br />
+ * >>> 若 Array.isArray(operation.list) 則處理多項列表作業:<br />
+ * >>>>>> 個別處理單一項作業，每次執行 operation.each()。<br />
+ * >>> 執行 data = operation.retrieve()，以其回傳作為將要 cache 之 data。<br />
+ * >>> 寫入cache。<br />
+ * 執行 operation.operator(data)
  * 
  * @param {Object|Array}operation
  *            作業設定。
@@ -2506,18 +2531,7 @@ try {
  */
 wiki_API.cache = function(operation, callback, _this) {
 	if (Array.isArray(operation)) {
-		// [ {Object}default options,
-		// {Object}operation, {Object}operation, ... ]
-		// default options === _this: 傳遞於各 operator 間的 ((this))。
-		// operation = { type:'embeddedin', operator:function(data) }
 		var index = 0;
-		// operation.type: method to get data
-		if (!operation.type) {
-			_this = typeof _this === 'object' ? Object.assign(operation[0],
-					_this) : operation[0];
-			// 跳過 [0]
-			index++;
-		}
 
 		/**
 		 * 連續作業時，轉到下一作業。
@@ -2525,6 +2539,8 @@ wiki_API.cache = function(operation, callback, _this) {
 		function next_operator(data) {
 			library_namespace.debug('連續作業時，轉到下一作業: ' + index + '/'
 					+ operation.length, 3, 'get_next_item');
+			// [ {Object}operation, {Object}operation, ... ]
+			// operation = { type:'embeddedin', operator:function(data) }
 			if (index < operation.length) {
 				if (!('list' in operation[index])) {
 					// use previous data as list.
@@ -2535,6 +2551,7 @@ wiki_API.cache = function(operation, callback, _this) {
 							'wiki_API.cache');
 					operation[index].list = data;
 				}
+				// default options === _this: 傳遞於各 operator 間的 ((this))。
 				wiki_API.cache(operation[index++], next_operator, _this);
 			} else if (typeof callback === 'function')
 				callback.call(_this);
@@ -2544,6 +2561,7 @@ wiki_API.cache = function(operation, callback, _this) {
 		return;
 	}
 
+	// ----------------------------------------------------
 	/**
 	 * 以下為處理單一次作業。
 	 */
@@ -2553,6 +2571,7 @@ wiki_API.cache = function(operation, callback, _this) {
 		// _this: 傳遞於各 operator 間的 ((this))。
 		_this = library_namespace.null_Object();
 
+	// operation.type: method to get data
 	var type = operation.type, filename,
 	//
 	operator = typeof operation.operator === 'function' && operation.operator,
@@ -2564,8 +2583,8 @@ wiki_API.cache = function(operation, callback, _this) {
 	/**
 	 * 結束作業。
 	 */
-	function finish_work(data, no_operate) {
-		if (!no_operate && operator)
+	function finish_work(data) {
+		if (operator)
 			operator.call(_this, data);
 		if (typeof callback === 'function')
 			callback.call(_this, data);
@@ -2573,15 +2592,17 @@ wiki_API.cache = function(operation, callback, _this) {
 
 	// _this.prefix: cache path prefix
 	filename = (('prefix' in _this ? _this.prefix : wiki_API.cache.prefix)
-			// operation.filename 在 type 之前。
-			+ (operation.filename || ((filename = _this[type + '_prefix']
-					|| type) ? filename + '/' : '')
-					//
-					+ (get_page_content.is_page_data(list) ? list.title
-							: typeof list === 'string' && list || ''))
+	// operation.filename 在 type 之前。
+	+ (operation.filename
+	// 需要自行創建目錄!
+	|| ((filename = _this[type + '_prefix'] || type) ? filename + '/' : '')
+	//
+	+ (get_page_content.is_page_data(list) ? list.title
+	//
+	: typeof list === 'string' && normalize_page_name(list) || ''))
 	//
 	+ ('postfix' in _this ? _this.postfix : wiki_API.cache.postfix))
-	// 正規化可用之檔名。
+	// 正規化檔名。
 	.replace(/[:*?<>]/g, '_');
 	library_namespace.debug('Read cache file: [' + filename + ']', 3,
 			'wiki_API.cache');
@@ -2597,18 +2618,17 @@ wiki_API.cache = function(operation, callback, _this) {
 		/**
 		 * 寫入cache。
 		 */
-		function write_cache(data, no_operate) {
+		function write_cache(data) {
 			if (/[^\\\/]$/.test(filename)) {
 				library_namespace.info('wiki_API.cache: Write cache data to ['
 						+ filename + '].');
 				library_namespace.debug('Cache data: '
 						+ JSON.stringify(data).slice(0, 200) + '...', 3,
 						'wiki_API.cache');
-				if (0)
-					node_fs.writeFile(filename, JSON.stringify(data),
-							_this.encoding || wiki_API.encoding);
+				node_fs.writeFile(filename, JSON.stringify(data),
+						_this.encoding || wiki_API.encoding);
 			}
-			finish_work(data, no_operate);
+			finish_work(data);
 		}
 
 		if (Array.isArray(list)) {
@@ -2616,8 +2636,31 @@ wiki_API.cache = function(operation, callback, _this) {
 			 * 處理多項列表作業。
 			 */
 			var index = 0, _operation = Object.clone(operation);
-			// 個別頁面不設定 .filename。
+			// 個別頁面不設定 .filename, .end。
 			delete _operation.filename;
+			delete _operation.end;
+			if (typeof _operation.each === 'function') {
+				_operation.operator = _operation.each;
+				delete _operation.each;
+			} else {
+				/**
+				 * 預設處理列表的函數。
+				 */
+				_operation.operator = function(data) {
+					if (_operation.data_list) {
+						if (Array.isArray(data))
+							Array.prototype.push.apply(_operation.data_list,
+									data);
+						else
+							_operation.data_list.push(data);
+					} else {
+						if (Array.isArray(data))
+							_operation.data_list = data;
+						else
+							_operation.data_list = [ data ];
+					}
+				};
+			}
 
 			function get_next_item(data) {
 				library_namespace.debug('處理多項列表作業: ' + index + '/'
@@ -2627,10 +2670,12 @@ wiki_API.cache = function(operation, callback, _this) {
 					_operation.list = list[index++];
 					wiki_API.cache(_operation, get_next_item, _this);
 				} else {
-					// All got. 為避免重複作業，不再執行 operator。
-					if (typeof operation.fix_data === 'function')
-						data = operation.fix_data.call(_this, data);
-					write_cache(data, true);
+					// All got. retrieve data.
+					if (_operation.data_list)
+						data = _operation.data_list;
+					if (typeof operation.retrieve === 'function')
+						data = operation.retrieve.call(_this, data);
+					write_cache(data);
 				}
 			}
 
@@ -2638,6 +2683,7 @@ wiki_API.cache = function(operation, callback, _this) {
 			return;
 		}
 
+		// ------------------------------------------------
 		/**
 		 * 以下為處理單一項作業。
 		 */
@@ -2661,6 +2707,10 @@ wiki_API.cache = function(operation, callback, _this) {
 						redirect_list) {
 					library_namespace.log('redirects (alias) of [[' + title
 							+ ']]: ' + redirect_list);
+					if (!operation.keep_redirects && redirect_list
+							&& redirect_list[0])
+						// cache 中不需要此累贅之資料。
+						delete redirect_list[0].redirects;
 					callback(redirect_list);
 				}, Object.assign(library_namespace.null_Object(), _this,
 						operation));
@@ -2676,7 +2726,8 @@ wiki_API.cache = function(operation, callback, _this) {
 					library_namespace.log('[[' + get_page_title(title) + ']]: '
 					//
 					+ pages.length + ' pages ' + type + '.');
-					callback(pages);
+					// page list, title page_data
+					callback(pages, title);
 				}, Object.assign({
 					type : type
 				}, _this, operation));
@@ -2684,7 +2735,7 @@ wiki_API.cache = function(operation, callback, _this) {
 			break;
 		default:
 			if (typeof type === 'function')
-				to_get_data = type;
+				to_get_data = type.bind(_this);
 			else if (type)
 				throw new Error('wiki_API.cache: Bad type: ' + type);
 			else {
@@ -2703,7 +2754,7 @@ wiki_API.cache = function(operation, callback, _this) {
 };
 
 
-/** {String}預設 encoding。 */
+/** {String}預設 encoding for fs of node.js。 */
 wiki_API.encoding = 'utf8';
 /** {String}檔名預設前綴。 */
 wiki_API.cache.prefix = '';
