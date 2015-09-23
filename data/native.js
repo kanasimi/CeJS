@@ -1380,6 +1380,7 @@ function non_negative_modulo(dividend, divisor) {
  * @returns {Array} [ {Number}quotient 商, {Number}remainder 餘數 ]
  * 
  * @see http://stackoverflow.com/questions/14997165/fastest-way-to-get-a-positive-modulo-in-c-c
+ * @see Extended_Euclidean() @ data.math
  */
 function Euclidean_division(dividend, divisor) {
 	return [ Math.floor(dividend / divisor),
@@ -1531,6 +1532,18 @@ parse_number = function(number) {
 	}
 */
 };
+
+
+set_method(Object, {
+	// for Object.clone()
+	clone: function(object, deep) {
+		if (deep)
+			// @see http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object
+			return JSON.parse(JSON.stringify(object));
+		// shallow clone Object.
+		return Object.assign(Object.create(object), object);
+	}
+});
 
 
 //	非 deep, 淺層/表面 clone/copy: using Array.from().

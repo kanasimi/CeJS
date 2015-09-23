@@ -476,6 +476,7 @@ LCM2 = function(number_array) {
  *            number 2
  * @returns [ GCD, m1, m2 ]: GCD = m1 * n1 + m2 * n2
  * 
+ * @see Euclidean_division() @ data.native
  * @since 2013/8/3 20:24:30
  */
 function Extended_Euclidean(n1, n2) {

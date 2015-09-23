@@ -1924,7 +1924,7 @@ get_list.type = {
  * @param {String}target
  *            頁面標題。
  * @param {Function}callback
- *            回調函數。 callback(title, titles, pages)
+ *            回調函數。 callback(pages, target, options)
  * @param {Object}[options]
  *            附加參數/設定特殊功能與選項
  */
@@ -1937,17 +1937,18 @@ wiki_API.list = function(target, callback, options) {
 		if (!options.wiki)
 			options.wiki = new wiki_API;
 		if (!options.type)
-			options.type = 'embeddedin';
-		if (!options.pages)
-			options.pages = [];
+			options.type = wiki_API.list.default_type;
 		options.initialized = true;
 	}
 
 	options.wiki[options.type](target, function(title, titles, pages) {
 		library_namespace.debug('Get ' + pages.length + ' pages', 2, 'wiki_API.list');
-		if (options.callback)
+		if (typeof options.callback === 'function')
 			options.callback(title, titles, pages);
-		Array.prototype.push.apply(options.pages, pages);
+		if (options.pages)
+			Array.prototype.push.apply(options.pages, pages);
+		else
+			options.pages = pages;
 		if (pages.next_index)
 			setTimeout(function() {
 				wiki_API.list(target, callback, options);
@@ -1960,6 +1961,9 @@ wiki_API.list = function(target, callback, options) {
 		limit : options.limit || 'max'
 	});
 };
+
+
+wiki_API.list.default_type = 'embeddedin';
 
 //---------------------------------------------------------------------//
 
@@ -2389,11 +2393,13 @@ wiki_API.redirects = function(title, callback, options) {
 		options = library_namespace.null_Object();
 
 	if (!options.no_trace) {
-		// 溯源(重定向終點)
+		// 溯源(追尋重定向終點)
 		wiki_API.page(title, function(page_data) {
 			var content = get_page_content(page_data),
 			//
 			redirect_to = parse_redirect(content);
+			// clone Object, 避免更改 options.
+			options = Object.clone(options);
 			options.no_trace = true;
 			if (redirect_to)
 				wiki_API.redirects(redirect_to, callback, options);
@@ -2475,6 +2481,8 @@ try {
 		throw 1;
 } catch (e) {
 	// enumerate for wiki_API.cache
+	// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
+	library_namespace.warn('無 node.js 之 fs，因此不具備cache 功能。');
 	node_fs = {
 		readFile : function(filename, encoding, callback) {
 			callback(true);
@@ -2491,7 +2499,7 @@ try {
  * 
  * @param {Object|Array}operation
  *            作業設定。
- * @param {Function}callback
+ * @param {Function}[callback]
  *            回調函數。 callback(response data)
  * @param {Object}[_this]
  *            傳遞於各 operator 間的 ((this))。
@@ -2507,14 +2515,26 @@ wiki_API.cache = function(operation, callback, _this) {
 		if (!operation.type) {
 			_this = typeof _this === 'object' ? Object.assign(operation[0],
 					_this) : operation[0];
-			index = 1;
+			// 跳過 [0]
+			index++;
 		}
 
+		/**
+		 * 連續作業時，轉到下一作業。
+		 */
 		function next_operator(data) {
+			library_namespace.debug('連續作業時，轉到下一作業: ' + index + '/'
+					+ operation.length, 3, 'get_next_item');
 			if (index < operation.length) {
-				if (!operation[index].list)
+				if (!('list' in operation[index])) {
 					// use previous data as list.
+					library_namespace.debug('未特別指定 list，以前一次之回傳 data 作為 list。',
+							0, 'wiki_API.cache');
+					library_namespace.debug('前一次之回傳 data: '
+							+ JSON.stringify(data).slice(0, 190) + '...', 3,
+							'wiki_API.cache');
 					operation[index].list = data;
+				}
 				wiki_API.cache(operation[index++], next_operator, _this);
 			} else if (typeof callback === 'function')
 				callback.call(_this);
@@ -2524,33 +2544,51 @@ wiki_API.cache = function(operation, callback, _this) {
 		return;
 	}
 
+	/**
+	 * 以下為處理單一次作業。
+	 */
+	library_namespace.debug('處理單一次作業。', 3, 'get_next_item');
+
 	if (typeof _this !== 'object')
 		// _this: 傳遞於各 operator 間的 ((this))。
 		_this = library_namespace.null_Object();
 
-	var type = operation.type,
-	// _this.prefix: cache path prefix
-	filename = _this[type + '_prefix'] || type,
+	var type = operation.type, filename,
 	//
-	operator = typeof operation.operator === 'function' && operation.operator;
+	operator = typeof operation.operator === 'function' && operation.operator,
+	//
+	list = operation.list;
+	if (typeof list === 'function')
+		list = list.call(_this, operation);
 
 	/**
 	 * 結束作業。
 	 */
-	function finish_work(data) {
-		if (operator)
+	function finish_work(data, no_operate) {
+		if (!no_operate && operator)
 			operator.call(_this, data);
 		if (typeof callback === 'function')
-			callback(_this);
+			callback.call(_this, data);
 	}
 
-	filename = (_this.prefix || '')
-			+ (filename ? filename + '/' : '')
-			+ (operation.filename || typeof operation.list === 'string'
-					&& operation.list || '');
-	library_namespace.log('Read cache file: ' + filename);
-	node_fs.readFile(filename, _this.encoding, function(error, data) {
+	// _this.prefix: cache path prefix
+	filename = (('prefix' in _this ? _this.prefix : wiki_API.cache.prefix)
+			// operation.filename 在 type 之前。
+			+ (operation.filename || ((filename = _this[type + '_prefix']
+					|| type) ? filename + '/' : '')
+					//
+					+ (get_page_content.is_page_data(list) ? list.title
+							: typeof list === 'string' && list || ''))
+	//
+	+ ('postfix' in _this ? _this.postfix : wiki_API.cache.postfix))
+	// 正規化可用之檔名。
+	.replace(/[:*?<>]/g, '_');
+	library_namespace.debug('Read cache file: [' + filename + ']', 3,
+			'wiki_API.cache');
+	node_fs.readFile(filename, _this.encoding || wiki_API.encoding, function(
+			error, data) {
 		if (!error) {
+			library_namespace.debug('Using cache data', 3, 'wiki_API.cache');
 			// library_namespace.log(data);
 			finish_work(JSON.parse(data));
 			return;
@@ -2559,22 +2597,58 @@ wiki_API.cache = function(operation, callback, _this) {
 		/**
 		 * 寫入cache。
 		 */
-		function write_cache(data) {
-			// write cache data
-			node_fs.writeFile(filename, JSON.stringify(data), _this.encoding);
-			finish_work(JSON.parse(data));
+		function write_cache(data, no_operate) {
+			if (/[^\\\/]$/.test(filename)) {
+				library_namespace.info('wiki_API.cache: Write cache data to ['
+						+ filename + '].');
+				library_namespace.debug('Cache data: '
+						+ JSON.stringify(data).slice(0, 200) + '...', 3,
+						'wiki_API.cache');
+				if (0)
+					node_fs.writeFile(filename, JSON.stringify(data),
+							_this.encoding || wiki_API.encoding);
+			}
+			finish_work(data, no_operate);
 		}
 
-		var to_get_data, list = operation.list, title,
-		//
-		page_prefix = _this.page_prefix;
+		if (Array.isArray(list)) {
+			/**
+			 * 處理多項列表作業。
+			 */
+			var index = 0, _operation = Object.clone(operation);
+			// 個別頁面不設定 .filename。
+			delete _operation.filename;
+
+			function get_next_item(data) {
+				library_namespace.debug('處理多項列表作業: ' + index + '/'
+						+ list.length, 3, 'get_next_item');
+				if (index < list.length) {
+					// 利用基本相同的參數以取得 cache。
+					_operation.list = list[index++];
+					wiki_API.cache(_operation, get_next_item, _this);
+				} else {
+					// All got. 為避免重複作業，不再執行 operator。
+					if (typeof operation.fix_data === 'function')
+						data = operation.fix_data.call(_this, data);
+					write_cache(data, true);
+				}
+			}
+
+			get_next_item();
+			return;
+		}
+
+		/**
+		 * 以下為處理單一項作業。
+		 */
+
+		var to_get_data;
+
 		switch (type) {
 		case 'page':
 			to_get_data = function(title, callback) {
 				library_namespace.log('Get content of [[' + title + ']]');
 				wiki_API.page(title, function(page_data) {
-					if (operator)
-						operator.call(_this, page_data);
 					callback(page_data);
 				}, Object.assign({
 					include_root : true
@@ -2587,8 +2661,6 @@ wiki_API.cache = function(operation, callback, _this) {
 						redirect_list) {
 					library_namespace.log('redirects (alias) of [[' + title
 							+ ']]: ' + redirect_list);
-					if (operator)
-						operator.call(_this, redirect_list);
 					callback(redirect_list);
 				}, Object.assign(library_namespace.null_Object(), _this,
 						operation));
@@ -2600,12 +2672,10 @@ wiki_API.cache = function(operation, callback, _this) {
 		case 'linkshere':
 		case 'fileusage':
 			to_get_data = function(title, callback) {
-				wiki_API.list(title, function(title, titles, pages) {
-					library_namespace.log('[[' + title + ']]: '
+				wiki_API.list(title, function(pages) {
+					library_namespace.log('[[' + get_page_title(title) + ']]: '
 					//
 					+ pages.length + ' pages ' + type + '.');
-					if (operator)
-						operator.call(_this, pages);
 					callback(pages);
 				}, Object.assign({
 					type : type
@@ -2623,35 +2693,22 @@ wiki_API.cache = function(operation, callback, _this) {
 			}
 		}
 
-		if (typeof list === 'function')
-			list = list.call(_this, operation);
-
-		if (!Array.isArray(list)) {
-			title = list;
-			if (page_prefix)
-				title = page_prefix + title;
-			to_get_data(title, write_cache);
-			return;
-		}
-
-		var index = 0;
-		function get_next_item(data) {
-			library_namespace.debug('處理 ' + index + '/' + list.length, 2,
-					'get_next_item');
-			if (index < list.length) {
-				title = list[index++];
-				if (page_prefix)
-					title = page_prefix + title;
-				to_get_data(title, get_next_item);
-			} else {
-				// All got.
-				write_cache(data);
-			}
-		}
-
-		get_next_item();
+		var title = list;
+		if (typeof title === 'string' && _this.page_prefix)
+			title = _this.page_prefix + title;
+		library_namespace.debug('處理單一項作業: [[' + title + ']]。', 3,
+				'get_next_item');
+		to_get_data(title, write_cache);
 	});
 };
+
+
+/** {String}預設 encoding。 */
+wiki_API.encoding = 'utf8';
+/** {String}檔名預設前綴。 */
+wiki_API.cache.prefix = '';
+/** {String}檔名預設後綴。 */
+wiki_API.cache.postfix = '.txt';
 
 
 // --------------------------------------------------------------------------------------------- //
