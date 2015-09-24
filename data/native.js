@@ -1541,7 +1541,7 @@ set_method(Object, {
 			// @see http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object
 			return JSON.parse(JSON.stringify(object));
 		// shallow clone Object.
-		return Object.assign(Object.create(object), object);
+		return Object.assign(Object.create(null), object);
 	}
 });
 
