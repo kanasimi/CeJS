@@ -298,6 +298,30 @@ file_pattern.source =
 .source.replace('Tag', library_namespace.ignore_case_pattern('File|Image|[檔档]案|[圖图]像'));
 
 
+/**
+ * 將 page data list 轉為 hash。
+ * 
+ * @param {Array}page_data_list
+ *            list of page_data.
+ * @param {Boolean}use_id
+ *            use page id instead of title.
+ * 
+ * @returns {Object}title/id hash
+ */
+function list_to_hash(page_data_list, use_id) {
+	var hash = library_namespace.null_Object();
+	page_data_list.forEach(use_id ? function(page_data) {
+		// = true
+		hash[page_data.id] = page_data;
+	} : function(page_data) {
+		// = true
+		hash[page_data.title] = page_data;
+	});
+	return hash;
+}
+
+
+
 //---------------------------------------------------------------------//
 
 // 模板名#後的內容會忽略。
@@ -2477,6 +2501,7 @@ wiki_API.redirects = function(title, callback, options) {
 			redirects = redirects.slice();
 			redirects.unshift(pages);
 		}
+		// callback(root_page_data 本名, redirect_list 別名 alias list)
 		callback(pages, redirects);
 	});
 };
@@ -2508,6 +2533,7 @@ try {
  * cache 作業操作套裝/輔助函數。
  * 
  * 注意: 需要自行先創建各 type 之次目錄，如 page, redirects, embeddedin, ...<br />
+ * 注意: 若中途 about，可能需要手動刪除大小為 0 的 cache file!<br />
  * 注意: 會改變 operation, _this! Warning: will modify operation, _this!
  * 
  * 連續作業: 依照 _this 設定 {Object}default options，即傳遞於各 operator 間的 ((this))。<br />
@@ -2518,7 +2544,7 @@ try {
  * 若不存在此檔，則:<br />
  * >>> 依照 operation.type 與 operation.list 取得資料。<br />
  * >>> 若 Array.isArray(operation.list) 則處理多項列表作業:<br />
- * >>>>>> 個別處理單一項作業，每次執行 operation.each()。<br />
+ * >>>>>> 個別處理單一項作業，每次執行 operation.each() || operation.each_retrieve()。<br />
  * >>> 執行 data = operation.retrieve()，以其回傳作為將要 cache 之 data。<br />
  * >>> 寫入cache。<br />
  * 執行 operation.operator(data)
@@ -2554,8 +2580,10 @@ wiki_API.cache = function(operation, callback, _this) {
 				}
 				// default options === _this: 傳遞於各 operator 間的 ((this))。
 				wiki_API.cache(operation[index++], next_operator, _this);
-			} else if (typeof callback === 'function')
+			} else if (typeof callback === 'function') {
+				// last 收尾
 				callback.call(_this);
+			}
 		}
 
 		next_operator();
@@ -2594,7 +2622,9 @@ wiki_API.cache = function(operation, callback, _this) {
 	}
 
 	// _this.prefix: cache path prefix
-	filename = [ 'prefix' in _this ? _this.prefix : wiki_API.cache.prefix,
+	filename = [ 'prefix' in operation ? operation.prefix
+	//
+	: 'prefix' in _this ? _this.prefix : wiki_API.cache.prefix,
 	// operation.filename 在 type 之前。
 	operation.filename
 	// 需要自行創建目錄!
@@ -2604,24 +2634,31 @@ wiki_API.cache = function(operation, callback, _this) {
 	//
 	: typeof list === 'string' && normalize_page_name(list) || ''),
 	//
-	'postfix' in _this ? _this.postfix : wiki_API.cache.postfix ];
+	'postfix' in operation ? operation.postfix
+	//
+	: 'postfix' in _this ? _this.postfix : wiki_API.cache.postfix ];
 	library_namespace.debug(
 			'Pre-normalized cache filename: [' + filename + ']', 5,
 			'wiki_API.cache');
-	library_namespace.debug('filename param:'
-			+ [ operation.filename, _this[type + '_prefix'], type, list ]
-					.join(';'), 6, 'wiki_API.cache');
+	if (false)
+		library_namespace.debug('filename param:'
+				+ [ operation.filename, _this[type + '_prefix'], type, JSON.stringify(list) ]
+						.join(';'), 6, 'wiki_API.cache');
 	// 正規化檔名。
 	filename = filename.join('').replace(/[:*?<>]/g, '_');
 	library_namespace.debug('Try to read cache file: [' + filename + ']', 3,
 			'wiki_API.cache');
+	var use_JSON = 'json' in operation ? operation.json : /\.json$/i
+			.test(filename);
 	node_fs.readFile(filename, _this.encoding || wiki_API.encoding, function(
 			error, data) {
 		if (!error) {
 			library_namespace.debug('Using cached data.', 3, 'wiki_API.cache');
 			library_namespace.debug('Cached data: [' + data.slice(0, 200)
 					+ ']...', 5, 'wiki_API.cache');
-			finish_work(data ? JSON.parse(data) : undefined);
+			finish_work(use_JSON ? data ? JSON.parse(data)
+			// error?
+			: undefined : data);
 			return;
 		}
 
@@ -2638,8 +2675,8 @@ wiki_API.cache = function(operation, callback, _this) {
 				library_namespace.debug('Cache data: '
 						+ (data && JSON.stringify(data).slice(0, 190)) + '...',
 						3, 'wiki_API.cache.write_cache');
-				node_fs.writeFile(filename, JSON.stringify(data),
-						_this.encoding || wiki_API.encoding);
+				node_fs.writeFile(filename, use_JSON ? JSON.stringify(data)
+						: data, _this.encoding || wiki_API.encoding);
 			}
 			finish_work(data);
 		}
@@ -2663,20 +2700,27 @@ wiki_API.cache = function(operation, callback, _this) {
 				_operation.operator = _operation.each;
 				delete _operation.each;
 			} else {
+				if (typeof _operation.each_retrieve === 'function')
+					_operation.each_retrieve = _operation.each_retrieve
+							.bind(_this);
+				else
+					delete _operation.each_retrieve;
 				/**
 				 * 預設處理列表的函數。
 				 */
 				_operation.operator = function(data) {
+					if ('each_retrieve' in operation)
+						data = operation.each_retrieve.call(_this, data);
 					if (_operation.data_list) {
 						if (Array.isArray(data))
 							Array.prototype.push.apply(_operation.data_list,
 									data);
-						else
+						else if (data)
 							_operation.data_list.push(data);
 					} else {
 						if (Array.isArray(data))
 							_operation.data_list = data;
-						else
+						else if (data)
 							_operation.data_list = [ data ];
 					}
 				};
@@ -2692,6 +2736,7 @@ wiki_API.cache = function(operation, callback, _this) {
 					_operation.list = list[index++];
 					wiki_API.cache(_operation, get_next_item, _this);
 				} else {
+					// last 收尾
 					// All got. retrieve data.
 					if (_operation.data_list)
 						data = _operation.data_list;
@@ -2714,6 +2759,7 @@ wiki_API.cache = function(operation, callback, _this) {
 
 		switch (type) {
 		case 'page':
+			// page content 內容
 			to_get_data = function(title, callback) {
 				library_namespace.log('Get content of [[' + title + ']]');
 				wiki_API.page(title, function(page_data) {
@@ -2728,10 +2774,12 @@ wiki_API.cache = function(operation, callback, _this) {
 				wiki_API.redirects(title, function(root_page_data,
 						redirect_list) {
 					library_namespace.log('redirects (alias) of [[' + title
-							+ ']]: ' + redirect_list);
+							+ ']]: (' + redirect_list.length + ') '
+							+ redirect_list);
 					if (!operation.keep_redirects && redirect_list
 							&& redirect_list[0])
 						// cache 中不需要此累贅之資料。
+						// redirect_list[0].redirects == redirect_list.slice(1)
 						delete redirect_list[0].redirects;
 					callback(redirect_list);
 				}, Object.assign(library_namespace.null_Object(), _this,
@@ -2783,7 +2831,7 @@ wiki_API.encoding = 'utf8';
 /** {String}檔名預設前綴。 */
 wiki_API.cache.prefix = '';
 /** {String}檔名預設後綴。 */
-wiki_API.cache.postfix = '.txt';
+wiki_API.cache.postfix = '.json';
 
 
 // --------------------------------------------------------------------------------------------- //
@@ -2806,6 +2854,7 @@ Object.assign(wiki_API, {
 	title_of : get_page_title,
 	normalize_title : normalize_page_name,
 	normalize_title_pattern : normalize_name_pattern,
+	get_hash : list_to_hash,
 
 	parse : parse_wikitext
 });
