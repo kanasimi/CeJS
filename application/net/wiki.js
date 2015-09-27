@@ -226,8 +226,14 @@ get_namespace.hash = {
 })();
 
 function remove_namespace(title) {
-	if (get_page_content.is_page_data(title))
-		title = title.title;
+	if (typeof title !== 'string') {
+		library_namespace.debug(title, 5, 'remove_namespace');
+		if (get_page_content.is_page_data(title)) {
+			title = title.title;
+			// assert: now title is string.
+		} else
+			return title;
+	}
 	var matched = title.match(get_namespace.pattern);
 	library_namespace.debug(
 	//
@@ -966,7 +972,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		return;
 	}
 
-	library_namespace.debug('wiki_API.work: 開始執行:先做環境建構與初始設定。');
+	library_namespace.debug('wiki_API.work: 開始執行:先作環境建構與初始設定。');
 	if (config.summary)
 		library_namespace.info('wiki_API.work: start [' + config.summary + ']');
 
@@ -1025,7 +1031,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	// 未設置時，一樣添附 Robot。
 	: 'Robot';
 
-	// assert: 因為要做排程，為預防衝突與不穩定的操作結果，自此以後不再 modify options。
+	// assert: 因為要作排程，為預防衝突與不穩定的操作結果，自此以後不再 modify options。
 
 	var log_item = Object.assign(library_namespace.null_Object(),
 			wiki_API.prototype.work.log_item, config.log_item);
@@ -2361,8 +2367,8 @@ wiki_API.edit.cancel = {
  * 注意:會改變 options! Warning: will modify options!
  * 
  * 此 library 之工作機制/原理：在 .page() 會取得每個頁面之 page_data.revisions[0].timestamp（各頁面不同）。於
- * .edit() 時將會以從 page_data 取得之 timestamp 作為時間標記傳入呼叫，當 MediaWiki 系統 (API)
- * 發現有新的時間標記，會回傳編輯衝突，並放棄編輯此頁面。<br />
+ * .edit() 時將會以從 page_data 取得之 timestamp 作為時間戳記傳入呼叫，當 MediaWiki 系統 (API)
+ * 發現有新的時間戳記，會回傳編輯衝突，並放棄編輯此頁面。<br />
  * 詳見 [https://github.com/kanasimi/CeJS/blob/master/application/net/wiki.js
  * wiki_API.edit.set_stamp]。
  * 
@@ -2633,6 +2639,32 @@ wiki_API.redirects = function(title, callback, options) {
 };
 
 
+/**
+ * 計算實質嵌入包含頁面數。
+ * 
+ * 若條目(頁面)嵌入包含有模板(頁面)別名，則將同時登記 embeddedin 於別名 alias 與 root。<br />
+ * e.g., 當同時包含 {{Refimprove}}, {{RefImprove}} 時會算作兩個，但實質僅一個。<br />
+ * 惟計數時，此時應僅計算一次。本函數可以去除重複名稱，避免模板尚有名稱重複者。
+ * 
+ * @param {Object}root_name_hash
+ *            模板本名 hash. 模板本名[{String}模板別名/本名] = {String}root 模板本名
+ * @param {Array}embeddedin_list
+ *            頁面嵌入包含之模板 list。
+ * 
+ * @returns {Integer}normalized count
+ */
+wiki_API.redirects.count = function(root_name_hash, embeddedin_list) {
+	var name_hash = library_namespace.null_Object();
+	embeddedin_list.forEach(function(title) {
+		title = get_page_title(title);
+		library_namespace.debug('含有模板{{' + root_name_hash[title] + '}}←{{'
+				+ title + '}}', 3, 'wiki_API.redirects.count');
+		name_hash[root_name_hash[title] || title] = null;
+	});
+	return Object.keys(name_hash).length;
+};
+
+
 //---------------------------------------------------------------------//
 
 /** fs in node.js */
@@ -2727,39 +2759,38 @@ wiki_API.cache = function(operation, callback, _this) {
 		// _this: 傳遞於各 operator 間的 ((this))。
 		_this = library_namespace.null_Object();
 
+	var filename = operation.filename;
+
+	if (typeof filename === 'function')
+		filename = filename.call(_this, operation);
+
 	// operation.type: method to get data
-	var type = operation.type, filename,
+	var type = operation.type,
 	//
 	operator = typeof operation.operator === 'function' && operation.operator,
 	//
 	list = operation.list;
-	if (typeof list === 'function')
-		list = list.call(_this, operation);
 
-	/**
-	 * 結束作業。
-	 */
-	function finish_work(data) {
-		if (operator)
-			operator.call(_this, data, operation);
-		if (typeof callback === 'function')
-			callback.call(_this, data);
+	if (!filename) {
+		// 若自行設定了檔名，則慢點執行 list()，先讀讀 cache。因為 list() 可能會頗耗時間。
+		// 基本上，設定 this.* 應該在 operation.operator() 中，而不是在 operation.list() 中。
+		if (typeof list === 'function')
+			list = list.call(_this, operation);
+
+		// 自行設定之檔名 operation.filename 優先度較 type/title 高。
+		filename = ((filename = _this[type + '_prefix'] || type) ?
+		// 需要自行創建目錄!
+		filename + '/' : '')
+		//
+		+ (get_page_content.is_page_data(list) ? list.title
+		//
+		: typeof list === 'string' && normalize_page_name(list) || '');
 	}
 
 	// _this.prefix: cache path prefix
 	filename = [ 'prefix' in operation ? operation.prefix
 	//
-	: 'prefix' in _this ? _this.prefix : wiki_API.cache.prefix,
-	// operation.filename 在 type 之前。
-	(typeof operation.filename === 'function'
-	//
-	? operation.filename.call(_this, list, type) : operation.filename)
-	// 需要自行創建目錄!
-	|| ((filename = _this[type + '_prefix'] || type) ? filename + '/' : '')
-	//
-	+ (get_page_content.is_page_data(list) ? list.title
-	//
-	: typeof list === 'string' && normalize_page_name(list) || ''),
+	: 'prefix' in _this ? _this.prefix : wiki_API.cache.prefix, filename,
 	//
 	'postfix' in operation ? operation.postfix
 	//
@@ -2775,6 +2806,7 @@ wiki_API.cache = function(operation, callback, _this) {
 	filename = filename.join('').replace(/[:*?<>]/g, '_');
 	library_namespace.debug('Try to read cache file: [' + filename + ']', 3,
 			'wiki_API.cache');
+
 	/**
 	 * 採用 JSON<br />
 	 * TODO: parse & stringify 機制
@@ -2783,8 +2815,19 @@ wiki_API.cache = function(operation, callback, _this) {
 	 */
 	var use_JSON = 'json' in operation ? operation.json : /\.json$/i
 			.test(filename);
+
 	node_fs.readFile(filename, _this.encoding || wiki_API.encoding, function(
 			error, data) {
+		/**
+		 * 結束作業。
+		 */
+		function finish_work(data) {
+			if (operator)
+				operator.call(_this, data, operation);
+			if (typeof callback === 'function')
+				callback.call(_this, data);
+		}
+
 		if (!error && (data ||
 		// 當資料 Invalid，例如採用 JSON 卻獲得空資料時；則視為 error，不接受此資料。
 		('accept_empty_data' in _this ? _this.accept_empty_data : !use_JSON))) {
@@ -2816,6 +2859,8 @@ wiki_API.cache = function(operation, callback, _this) {
 			finish_work(data);
 		}
 
+		if (typeof list === 'function')
+			list = list.call(_this, operation);
 		if (Array.isArray(list)) {
 			if (!type) {
 				library_namespace.debug('採用 list (length ' + list.length
@@ -2922,7 +2967,7 @@ wiki_API.cache = function(operation, callback, _this) {
 					//
 					.map(function(page_data) {
 						return page_data.title;
-					})) + ']...';
+					}) + ']...');
 					if (!operation.keep_redirects && redirect_list
 							&& redirect_list[0])
 						// cache 中不需要此累贅之資料。
@@ -2989,8 +3034,11 @@ wiki_API.cache.postfix = '.json';
  * 
  * @type {Function}
  */
-wiki_API.cache.title_only = function(page_data, type) {
-	return type + '/' + remove_namespace(page_data);
+wiki_API.cache.title_only = function(operation) {
+	var list = operation.list;
+	if (typeof list === 'function')
+		operation.list = list = list.call(_this, operation);
+	return operation.type + '/' + remove_namespace(list);
 };
 
 
