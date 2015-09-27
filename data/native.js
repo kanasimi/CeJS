@@ -1141,14 +1141,18 @@ var type_index = {
 	boolean : 2,
 	'undefined' : 3
 };
-// 確保順序不變。
+/**
+ * 去掉 Array 中重複的 items。<br />
+ * 應能確保順序不變。
+ */
 function unique_Array() {
 	var array = [],
-	// 以 hash 加速純量。
+	// 以 hash 純量 index 加速判別是否重複。
 	hash = library_namespace.null_Object();
 
 	this.forEach(function(element) {
 		var type = typeof element;
+		// 能確保順序不變。
 		if (type in type_index) {
 			// TODO: -0
 			if(!(element in hash) || !(type_index[type] in hash[element])) {

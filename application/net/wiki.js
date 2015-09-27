@@ -9,7 +9,7 @@
  </code>
  */
 
-// [[維基百科:機器人]]
+// [[維基百科:機器人]], [[WP:{{{name|{{int:Group-bot}}}}}|{{{name|{{int:Group-bot}}}}}]]
 // https://en.wikipedia.org/w/api.php
 
 // Wikipedia:沙盒
@@ -158,11 +158,13 @@ function api_URL(project) {
 // 列舉型別 (enumeration)
 // options.namespace: https://en.wikipedia.org/wiki/Wikipedia:Namespace
 function get_namespace(namespace) {
-	if (namespace in get_namespace.hash)
+	if (typeof namespace === 'string'
+			&& ((namespace = namespace.toLowerCase()) in get_namespace.hash))
 		return get_namespace.hash[namespace];
 	if (isNaN(namespace)) {
 		if (namespace)
-			library_namespace.warn('get_namespace: Invalid namespace: [' + namespace + ']');
+			library_namespace.warn('get_namespace: Invalid namespace: ['
+					+ namespace + ']');
 		return namespace;
 	}
 	return namespace | 0;
@@ -213,6 +215,28 @@ get_namespace.hash = {
 	module_talk : 829,
 	topic : 2600
 };
+
+(function() {
+	var source = [];
+	for ( var namespace in get_namespace.hash)
+		source.push(namespace);
+	// [ , namespace, title ]
+	get_namespace.pattern = new RegExp('^(['
+			+ source.join('|').replace(/_/g, '[ _]') + ']):(.+)$', 'i');
+})();
+
+function remove_namespace(title) {
+	if (get_page_content.is_page_data(title))
+		title = title.title;
+	var matched = title.match(get_namespace.pattern);
+	library_namespace.debug(
+	//
+	'Test [[' + title + ']], get [' + matched + '] using pattern '
+			+ get_namespace.pattern, 4, 'remove_namespace');
+	if (matched)
+		return (matched ? matched[2] : title).trim();
+}
+
 
 //---------------------------------------------------------------------//
 // 創建 match patten 相關函數。
@@ -298,8 +322,11 @@ file_pattern.source =
 .source.replace('Tag', library_namespace.ignore_case_pattern('File|Image|[檔档]案|[圖图]像'));
 
 
+//---------------------------------------------------------------------//
+
 /**
- * 將 page data list 轉為 hash。
+ * 將 page data list 轉為 hash。<br />
+ * cf. Array.prototype.to_hash @ data.native
  * 
  * @param {Array}page_data_list
  *            list of page_data.
@@ -320,7 +347,31 @@ function list_to_hash(page_data_list, use_id) {
 	return hash;
 }
 
+/**
+ * 去掉 page data list 中重複的 items。<br />
+ * cf. Array.prototype.uniq @ data.native
+ * 
+ * @param {Array}page_data_list
+ *            list of page_data.
+ * 
+ * @returns {Array}unique list
+ */
+function unique_list(page_data_list) {
+	var array = [],
+	// 以 hash 純量 index 加速判別是否重複。
+	hash = library_namespace.null_Object();
 
+	page_data_list.forEach(function(page_data) {
+		var key = typeof page_data == 'string' ? page_data : page_data.title;
+		if (!(key in hash)) {
+			hash[key] = null;
+			// 能確保順序不變。
+			array.push(page_data);
+		}
+	});
+
+	return array;
+}
 
 //---------------------------------------------------------------------//
 
@@ -571,17 +622,31 @@ function get_page_content(page_data) {
 }
 
 /**
- * get the id of page
- *
+ * check if page_data is page data.
+ * 
  * @param {Object}page_data
  *            page data got from wiki API
- *
+ * 
  * @returns {String|Number} pageid
  */
 get_page_content.is_page_data = function(page_data) {
-	return library_namespace.is_Object(page_data) && page_data.title
-			&& page_data.pageid;
+	return library_namespace.is_Object(page_data)
+	// 可能是 missing:""，此時仍算 page data。
+	&& (page_data.title || ('pageid' in page_data));
 };
+
+/**
+ * get the id of page
+ * 
+ * @param {Object}page_data
+ *            page data got from wiki API
+ * 
+ * @returns {String|Number} pageid
+ */
+get_page_content.pageid = function(page_data) {
+	return get_page_content.is_page_data(page_data) && page_data.pageid;
+};
+
 // return .revisions[0]
 // 不回傳 {String}，減輕負擔。
 get_page_content.has_content = function(page_data) {
@@ -812,21 +877,38 @@ wiki_API.prototype.next = function() {
 	}
 };
 
-// wiki_API.prototype.next() 已登記之 methods。
-// 之後會再加入 get_list.type 之 methods。
-// NG: ,login
+/**
+ * wiki_API.prototype.next() 已登記之 methods。<br />
+ * 之後會再加入 get_list.type 之 methods。<br />
+ * NG: ,login
+ * 
+ * @type {Array}
+ */
 wiki_API.prototype.next.methods = 'page,edit,search,logout,run,set_URL'
-	.split(',');
+		.split(',');
+
 
 //---------------------------------------------------------------------//
 
-// @see ISO 8601
+/**
+ * default date format
+ * 
+ * @type {String}
+ * @see ISO 8601
+ */
 wiki_API.prototype.date_format = '%4Y%2m%2dT%2H%2M';
 
-// {String}後續檢索用索引值
+/** {String}後續檢索用索引值 */
 wiki_API.prototype.continue_key = '後續索引';
 
-// 規範 log 之格式。
+/**
+ * 規範 log 之格式。(for wiki_API.prototype.work)
+ * 
+ * @param {String}message
+ *            message
+ * @param {String}title
+ *            message title
+ */
 function add_message(message, title) {
 	this.push('* ' + (title ? '[[' + title + ']]: ' : '') + message);
 }
@@ -853,7 +935,7 @@ function add_message(message, title) {
 });
 
 /**
- * robot 操作/作業套裝函數。<br />
+ * robot 作業操作之輔助套裝函數。<br />
  * 不會推入 this.actions queue，即時執行。因此需要先 get list!
  * 
  * @param {Object}config
@@ -1247,7 +1329,7 @@ wiki_API.query = function(action, callback, post_data) {
 };
 
 /**
- * 最大延遲參數。
+ * 最大延遲參數。<br />
  * default: 使用5秒的最大延遲參數。
  * 
  * @type {Number}
@@ -1263,7 +1345,12 @@ wiki_API.query.lag = 5000;
  */
 wiki_API.query.allow_JSONP = library_namespace.is_WWW(true);
 
-// wiki_API.query.last[URL] = {Date}last query
+/**
+ * URL last queried.<br />
+ * wiki_API.query.last[URL] = {Date}last queried date
+ * 
+ * @type {Object}
+ */
 wiki_API.query.last = library_namespace.null_Object();
 
 /**
@@ -1450,7 +1537,8 @@ wiki_API.page = function(title, callback, options) {
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
 				library_namespace.show_value(data);
-			return callback();
+			callback();
+			return;
 		}
 
 		data = data.query.pages;
@@ -1491,6 +1579,8 @@ CeL.wiki.langlinks('語言',function(p){CeL.show_value(p);},'en');
 // '語言'
 CeL.wiki.langlinks(['en','Language'],function(p){if(p)CeL.show_value(p);},'zh');
 
+// TODO?
+// return 'title' or {langs:['',''], lang:'title'}
 CeL.wiki.langlinks('語言',function(p){if(p)CeL.show_value(p);})
 ==
 CeL.wiki.langlinks('語言',function(p){if(p)CeL.show_value(p);},10)
@@ -1500,18 +1590,30 @@ CeL.wiki.langlinks('語言',function(p){if(p)CeL.show_value(p);},10)
 
 */
 
-// 取得 title 在其他語系 (to_lang) 之標題。可一次處理多個標題。
-// return 'title' or {langs:['',''], lang:'title'}
+/**
+ * 取得 title 在其他語系 (to_lang) 之標題。可一次處理多個標題。
+ * 
+ * @param {String|Array}title
+ *            the page title to search continue information
+ * @param {Function|Object}callback
+ *            回調函數 or options。
+ * @param {String}to_lang
+ * 所欲求語言
+ * @param {Object}[options]
+ *            附加參數/設定特殊功能與選項
+ */
 wiki_API.langlinks = function(title, callback, to_lang, options) {
 	var from_lang;
-	if (Array.isArray(title) && title.length === 2 && (!title[0] || typeof title[0] === 'string'))
+	if (Array.isArray(title) && title.length === 2
+			&& (!title[0] || typeof title[0] === 'string'))
 		from_lang = title[0], title = title[1];
 	title = 'query&prop=langlinks&' + wiki_API.query.title_param(title, true);
 	if (to_lang)
-		title += (to_lang > 0 || to_lang === 'max' ? '&lllimit=' : '&lllang=') + to_lang;
+		title += (to_lang > 0 || to_lang === 'max' ? '&lllimit=' : '&lllang=')
+				+ to_lang;
 	if (options.limit > 0 || options.limit === 'max')
 		title += '&lllimit=' + options.limit;
-	//console.log('ll title:' + title);
+	// console.log('ll title:' + title);
 	if (from_lang)
 		// llinlanguagecode 無效。
 		title = [ from_lang, title ];
@@ -1520,21 +1622,32 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 	//
 	&& function(data) {
 		if (!data || !data.query || !data.query.pages) {
-			// https://www.mediawiki.org/wiki/API:Query#batchcomplete
-			// From version 1.25 onwards, the API returns a batchcomplete element to indicate that all data for the current "batch" of pages has been returned.
+			/**
+			 * From version 1.25 onwards, the API returns a batchcomplete
+			 * element to indicate that all data for the current "batch" of
+			 * pages has been returned.
+			 * 
+			 * @see https://www.mediawiki.org/wiki/API:Query#batchcomplete
+			 */
 			if (data && ('batchcomplete' in data)) {
-				// data.batchcomplete === ''
-				//library_namespace.info('wiki_API.langlinks: [' + title + ']: Done.');
+				// assert: data.batchcomplete === ''
+				if (false)
+					library_namespace.info(
+					//
+					'wiki_API.langlinks: [' + title + ']: Done.');
 			} else {
-				library_namespace.warn('wiki_API.langlinks: Unknown response: [' + data + ']');
-				//console.log(data);
+				library_namespace.warn(
+				//
+				'wiki_API.langlinks: Unknown response: [' + data + ']');
+				// console.log(data);
 			}
-			//console.warn(data);
+			// console.warn(data);
 			if (library_namespace.is_debug()
-				// .show_value() @ interact.DOM, application.debug
-				&& library_namespace.show_value)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
 				library_namespace.show_value(data);
-			return callback();
+			callback();
+			return;
 		}
 
 		data = data.query.pages;
@@ -1543,7 +1656,9 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 			pages.push(data[pageid]);
 		if (pages.length !== 1 || (options && options.multi)) {
 			if (library_namespace.is_debug())
-				library_namespace.info('wiki_API.langlinks: Get ' + pages.length
+				library_namespace.info(
+				//
+				'wiki_API.langlinks: Get ' + pages.length
 				//
 				+ ' page(s)! We will pass all pages to callback!');
 			// page 之 structure 按照 wiki 本身之 return！
@@ -1553,7 +1668,10 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 			if (library_namespace.is_debug() && !pages[0].langlinks) {
 				library_namespace.warn('wiki_API.langlinks: '
 				//
-				+ ('pageid' in pages[0] ? '無' + (to_lang && isNaN(to_lang) ? '所欲求語言[' + to_lang + ']之' : '其他語言') + '連結' : '不存在此頁面')
+				+ ('pageid' in pages[0] ? '無' + (to_lang && isNaN(to_lang)
+				//
+				? '所欲求語言[' + to_lang + ']之' : '其他語言') + '連結' : '不存在此頁面')
+				//
 				+ ': [' + pages[0].title + ']');
 				// library_namespace.show_value(pages);
 			}
@@ -1571,12 +1689,15 @@ wiki_API.langlinks.parse = function(langlinks, to_lang) {
 
 	if (!Array.isArray(langlinks)) {
 		if (library_namespace.is_debug()) {
-			library_namespace.warn('wiki_API.langlinks.parse: No langlinks exists?'
-				+ (langlinks && langlinks.title ? ' [[' + langlinks.title + ']]' : ''));
+			library_namespace.warn(
+			//
+			'wiki_API.langlinks.parse: No langlinks exists?'
+					+ (langlinks && langlinks.title ? ' [[' + langlinks.title
+							+ ']]' : ''));
 			if (library_namespace.is_debug(2)
-				// .show_value() @ interact.DOM, application.debug
-				&& library_namespace.show_value)
-			library_namespace.show_value(langlinks, 'langlinks.parse');
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+				library_namespace.show_value(langlinks, 'langlinks.parse');
 		}
 		return;
 	}
@@ -1591,7 +1712,8 @@ wiki_API.langlinks.parse = function(langlinks, to_lang) {
 		});
 
 	} else {
-		(langs = library_namespace.null_Object()).langs = [];
+		langs = library_namespace.null_Object();
+		langs.langs = [];
 		langlinks.forEach(function(lang) {
 			langs[lang.lang] = lang['*'];
 			langs.langs.push(lang.lang);
@@ -1925,6 +2047,7 @@ get_list.type = {
 
 
 (function() {
+	// 登記 methods。
 	var methods = wiki_API.prototype.next.methods;
 
 	for (var name in get_list.type) {
@@ -2120,8 +2243,6 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
  *            回調函數。 callback(title, error, result)
  * @param {String}timestamp
  *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
- *
- * @returns
  */
 wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	if (typeof text === 'function') {
@@ -2239,7 +2360,7 @@ wiki_API.edit.cancel = {
  * 
  * 注意:會改變 options! Warning: will modify options!
  * 
- * 此 library 之工作機制：在 .page() 會取得每個頁面之 page_data.revisions[0].timestamp（各頁面不同）。於
+ * 此 library 之工作機制/原理：在 .page() 會取得每個頁面之 page_data.revisions[0].timestamp（各頁面不同）。於
  * .edit() 時將會以從 page_data 取得之 timestamp 作為時間標記傳入呼叫，當 MediaWiki 系統 (API)
  * 發現有新的時間標記，會回傳編輯衝突，並放棄編輯此頁面。<br />
  * 詳見 [https://github.com/kanasimi/CeJS/blob/master/application/net/wiki.js
@@ -2269,7 +2390,7 @@ wiki_API.edit.set_stamp = function(options, timestamp) {
 };
 
 
-// https://zh.wikipedia.org/wiki/Template:Bots
+// @see https://zh.wikipedia.org/wiki/Template:Bots
 wiki_API.edit.get_bot = function(content) {
 	// TODO: use template_token(content, 'bots')
 	var bots = [], matched, PATTERN = /{{[\s\n]*bots[\s\n]*([\S][\s\S]*?)}}/ig;
@@ -2349,7 +2470,12 @@ wiki_API.edit.denied = function(content, bot_id, action) {
 	return denied || /{{[\s\n]*nobots[\s\n]*}}/i.test(content) && 'Ban all compliant bots.';
 };
 
-// deny=all, !(allow=all)
+/**
+ * pattern that will be denied.<br />
+ * i.e. "deny=all", !("allow=all")
+ * 
+ * @type {RegExp}
+ */
 wiki_API.edit.denied.all = /(?:^|[\s,])all(?:$|[\s,])/;
 
 
@@ -2530,10 +2656,9 @@ try {
 
 
 /**
- * cache 作業操作套裝/輔助函數。
+ * cache 作業操作之輔助套裝函數。
  * 
  * 注意: 需要自行先創建各 type 之次目錄，如 page, redirects, embeddedin, ...<br />
- * 注意: 若中途 about，可能需要手動刪除大小為 0 的 cache file!<br />
  * 注意: 會改變 operation, _this! Warning: will modify operation, _this!
  * 
  * 連續作業: 依照 _this 設定 {Object}default options，即傳遞於各 operator 間的 ((this))。<br />
@@ -2626,7 +2751,9 @@ wiki_API.cache = function(operation, callback, _this) {
 	//
 	: 'prefix' in _this ? _this.prefix : wiki_API.cache.prefix,
 	// operation.filename 在 type 之前。
-	operation.filename
+	(typeof operation.filename === 'function'
+	//
+	? operation.filename.call(_this, list, type) : operation.filename)
 	// 需要自行創建目錄!
 	|| ((filename = _this[type + '_prefix'] || type) ? filename + '/' : '')
 	//
@@ -2642,27 +2769,35 @@ wiki_API.cache = function(operation, callback, _this) {
 			'wiki_API.cache');
 	if (false)
 		library_namespace.debug('filename param:'
-				+ [ operation.filename, _this[type + '_prefix'], type, JSON.stringify(list) ]
-						.join(';'), 6, 'wiki_API.cache');
+				+ [ operation.filename, _this[type + '_prefix'], type,
+						JSON.stringify(list) ].join(';'), 6, 'wiki_API.cache');
 	// 正規化檔名。
 	filename = filename.join('').replace(/[:*?<>]/g, '_');
 	library_namespace.debug('Try to read cache file: [' + filename + ']', 3,
 			'wiki_API.cache');
+	/**
+	 * 採用 JSON<br />
+	 * TODO: parse & stringify 機制
+	 * 
+	 * @type {Boolean}
+	 */
 	var use_JSON = 'json' in operation ? operation.json : /\.json$/i
 			.test(filename);
 	node_fs.readFile(filename, _this.encoding || wiki_API.encoding, function(
 			error, data) {
-		if (!error) {
+		if (!error && (data ||
+		// 當資料 Invalid，例如採用 JSON 卻獲得空資料時；則視為 error，不接受此資料。
+		('accept_empty_data' in _this ? _this.accept_empty_data : !use_JSON))) {
 			library_namespace.debug('Using cached data.', 3, 'wiki_API.cache');
 			library_namespace.debug('Cached data: [' + data.slice(0, 200)
 					+ ']...', 5, 'wiki_API.cache');
 			finish_work(use_JSON ? data ? JSON.parse(data)
-			// error?
+			// error? 注意: 若中途 about，此時可能需要手動刪除大小為 0 的 cache file!
 			: undefined : data);
 			return;
 		}
 
-		library_namespace.debug('No cached data. Try to get data...', 3,
+		library_namespace.debug('No valid cached data. Try to get data...', 3,
 				'wiki_API.cache');
 
 		/**
@@ -2694,9 +2829,15 @@ wiki_API.cache = function(operation, callback, _this) {
 			 */
 			var index = 0, _operation = Object.clone(operation);
 			// 個別頁面不設定 .filename, .end。
-			delete _operation.filename;
 			delete _operation.end;
+			if (_operation.each_filename) {
+				_operation.filename = _operation.each_filename;
+				delete _operation.each_filename;
+			} else {
+				delete _operation.filename;
+			}
 			if (typeof _operation.each === 'function') {
+				// 每一項執行一次 .each()
 				_operation.operator = _operation.each;
 				delete _operation.each;
 			} else {
@@ -2710,6 +2851,7 @@ wiki_API.cache = function(operation, callback, _this) {
 				 */
 				_operation.operator = function(data) {
 					if ('each_retrieve' in operation)
+						// 將以 .each_retrieve() 的回傳作為要處理的資料。
 						data = operation.each_retrieve.call(_this, data);
 					if (_operation.data_list) {
 						if (Array.isArray(data))
@@ -2764,26 +2906,32 @@ wiki_API.cache = function(operation, callback, _this) {
 				library_namespace.log('Get content of [[' + title + ']]');
 				wiki_API.page(title, function(page_data) {
 					callback(page_data);
-				}, Object.assign({
-					include_root : true
-				}, _this, operation));
+				}, Object.assign(library_namespace.null_Object(), _this,
+						operation));
 			};
 			break;
 		case 'redirects':
 			to_get_data = function(title, callback) {
 				wiki_API.redirects(title, function(root_page_data,
 						redirect_list) {
-					library_namespace.log('redirects (alias) of [[' + title
-							+ ']]: (' + redirect_list.length + ') '
-							+ redirect_list);
+					library_namespace.log(
+					//
+					'redirects (alias) of [[' + title + ']]: ('
+					//
+					+ redirect_list.length + ') [' + redirect_list.slice(0, 3)
+					//
+					.map(function(page_data) {
+						return page_data.title;
+					})) + ']...';
 					if (!operation.keep_redirects && redirect_list
 							&& redirect_list[0])
 						// cache 中不需要此累贅之資料。
 						// redirect_list[0].redirects == redirect_list.slice(1)
 						delete redirect_list[0].redirects;
 					callback(redirect_list);
-				}, Object.assign(library_namespace.null_Object(), _this,
-						operation));
+				}, Object.assign({
+					include_root : true
+				}, _this, operation));
 			};
 			break;
 		case 'backlinks':
@@ -2805,7 +2953,8 @@ wiki_API.cache = function(operation, callback, _this) {
 			break;
 		default:
 			if (typeof type === 'function')
-				to_get_data = type.bind(_this);
+				to_get_data = type.bind(Object.assign(library_namespace
+						.null_Object(), _this, operation));
 			else if (type)
 				throw new Error('wiki_API.cache: Bad type: ' + type);
 			else {
@@ -2832,6 +2981,17 @@ wiki_API.encoding = 'utf8';
 wiki_API.cache.prefix = '';
 /** {String}檔名預設後綴。 */
 wiki_API.cache.postfix = '.json';
+/**
+ * 只取檔名，僅用在 operation.each_filename。<br />
+ * <code>{
+ * each_filename : CeL.wiki.cache.title_only,
+ * }</code>
+ * 
+ * @type {Function}
+ */
+wiki_API.cache.title_only = function(page_data, type) {
+	return type + '/' + remove_namespace(page_data);
+};
 
 
 // --------------------------------------------------------------------------------------------- //
@@ -2846,6 +3006,7 @@ Object.assign(wiki_API, {
 			.toLowerCase().replace(/-.+$/, '')),
 
 	namespace : get_namespace,
+	remove_namespace : remove_namespace,
 
 	file_pattern : file_pattern,
 	template_token : template_token,
@@ -2855,6 +3016,7 @@ Object.assign(wiki_API, {
 	normalize_title : normalize_page_name,
 	normalize_title_pattern : normalize_name_pattern,
 	get_hash : list_to_hash,
+	uniq_list : unique_list,
 
 	parse : parse_wikitext
 });

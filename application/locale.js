@@ -1495,6 +1495,8 @@ gettext_resource = library_namespace.null_Object();
 //	http://www.ethnologue.com/language/cmn
 
 //	http://schneegans.de/lv/
+
+//	https://github.com/unicode-cldr/cldr-localenames-modern
 gettext.set_alias({
 	//	最推薦之標準 language tag : '主要別名 (e.g., 當地使用之語言名稱)|最常用之 language tag (e.g., IETF language tag)|其他別名 / other aliases (e.g., 英文名稱, 最細分之標準 language tag)'
 
