@@ -793,9 +793,22 @@ wiki_API.prototype.next = function() {
 			if (typeof next[3] === 'function')
 				next[3].call(_this, title, 'no page');
 			this.next();
+
+		} else if (!('stopped' in this)) {
+			// rollback
+			this.actions.unshift(next);
+			library_namespace.debug('以 .check_stop() 檢查與設定是否須停止編輯作業。');
+			this.check_stop(this.next.bind(this));
+		} else if (this.stopped && !next[2].skip_stopped) {
+			library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯[[' + this.last_page.title + ']]!');
+			// next[3] : callback
+			if (typeof next[3] === 'function')
+				next[3].call(_this, title, '已停止作業');
+			this.next();
+
 		} else if (wiki_API.edit.denied(this.last_page, this.token.lgname, next[2] && next[2].action)) {
 			// 採用 this.last_page 的方法，在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
-			library_namespace.warn('wiki_API.prototype.next: Denied to edit [' + this.last_page.title + ']');
+			library_namespace.warn('wiki_API.prototype.next: Denied to edit [[' + this.last_page.title + ']]');
 			// next[3] : callback
 			if (typeof next[3] === 'function')
 				next[3].call(this, this.last_page.title, 'denied');
@@ -1107,7 +1120,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	this.page(pages || titles, function(data) {
 		if (!Array.isArray(data))
 			if (!data && pages.length === 0) {
-				library_namespace.info('wiki_API.work: 未取得任何頁面。已完成？');
+				library_namespace.info('wiki_API.work: 未取得或設定任何頁面。已完成？');
 				data = [];
 			} else
 				// 可能是 page data 或 title。
@@ -1192,7 +1205,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				// 若頁面不存在，則產生錯誤。
 				nocreate : 1,
 				// 標記此編輯為機器人編輯。
-				bot : 1
+				bot : 1,
+				// 就算設定停止編輯作業，仍強制編輯。
+				skip_stopped : true
 			};
 
 			if (log_to)
@@ -1238,8 +1253,105 @@ wiki_API.prototype.work.log_item = {
 };
 
 
+//---------------------------------------------------------------------//
+
+
+/**
+ * check if need to stop / 需要緊急停止作業 (Emergency shutoff-compliant).
+ * 
+ * 此功能之工作機制/原理：<br />
+ * 在 .edit() 編輯之前，先檢查是否有人在緊急停止頁面留言要求 stop。<br />
+ * 只要在緊急停止頁面有指定的章節、或任何章節，就當作有人留言要 stop。
+ * 
+ * @param {Function}callback
+ *            回調函數。 callback(need stop)
+ * @param {Object}[options]
+ *            附加參數/設定特殊功能與選項
+ * 
+ * @see https://www.mediawiki.org/wiki/Manual:Parameters_to_index.php#Edit_and_submit
+ *      https://www.mediawiki.org/wiki/Help:Magic_words#URL_encoded_page_names
+ *      https://www.mediawiki.org/wiki/Help:Links
+ */
+wiki_API.prototype.check_stop = function(callback, options) {
+	if (('stopped' in this) && (!options || !options.force)) {
+		// 已經有 cache。
+		callback(this.stopped);
+		return;
+	}
+
+	/**
+	 * 緊急停止頁面標題:<br />
+	 * 只檢查此緊急停止頁面。
+	 * 
+	 * @type {String}
+	 */
+	var title = options && options.title, _this = this;
+	if (typeof title === 'function')
+		title = title(this.token);
+	if (!title) {
+		// default page title:
+		// [[{{TALKSPACE}}:{{ROOTPAGENAMEE}}/Stop]]
+		title = 'User_talk:' + this.token.lgname + '/Stop';
+	}
+
+	library_namespace.debug('檢查緊急停止頁面 [[' + title + ']]', 1,
+			'wiki_API.prototype.check_stop');
+
+	wiki_API.page(title, function(page_data) {
+		var content = get_page_content(page_data),
+		// default: NOT stopped
+		stopped = false, PATTERN;
+
+		if (options) {
+			if (typeof options.checker === 'function') {
+				// 以 options.checker 的回傳來設定是否stopped。
+				stopped = options.checker(content);
+				if (stopped)
+					library_namespace.warn(
+					//
+					'wiki_API.prototype.check_stop: 已設定停止編輯作業!');
+				content = null;
+			} else {
+				// 指定 pattern
+				PATTERN = options.pattern
+				// options.section: section title
+				|| options.section
+				/**
+				 * <code>
+				 * (new RegExp('\n==(.*?)' + '20150503' + '\\s*==\n')).test('\n== 停止作業:20150503 ==\n') === true
+				 * </code>
+				 */
+				&& new RegExp('\n==(.*?)' + options.section + '\\s*==\n');
+			}
+		}
+
+		if (content) {
+			if (!library_namespace.is_RegExp(PATTERN))
+				PATTERN = _this.check_stop.pattern;
+			stopped = PATTERN.test(content, page_data);
+			if (stopped)
+				library_namespace.warn('緊急停止頁面[[' + title
+						+ ']]有留言要停止編輯作業!');
+		}
+
+		// cache
+		_this.stopped = stopped;
+
+		callback(stopped);
+	});
+};
+
+/**
+ * default check pattern: 任何章節/段落 section<br />
+ * 只要在緊急停止頁面有任何章節，就當作有人留言要求 stop。
+ * 
+ * @type {RegExp}
+ */
+wiki_API.prototype.check_stop.pattern = /\n=([^\n]+)=\n/;
+
+
 //--------------------------------------------------------------------------------------------- //
-// 泛用，無須 instance。
+// 以下皆泛用，無須 instance。
 
 /**
  * 實際執行 query 操作，直接 call API 之核心函數。
@@ -1574,6 +1686,7 @@ wiki_API.page = function(title, callback, options) {
 		callback(pages);
 	});
 };
+
 
 //---------------------------------------------------------------------//
 
@@ -2366,7 +2479,8 @@ wiki_API.edit.cancel = {
  * 
  * 注意:會改變 options! Warning: will modify options!
  * 
- * 此 library 之工作機制/原理：在 .page() 會取得每個頁面之 page_data.revisions[0].timestamp（各頁面不同）。於
+ * 此功能之工作機制/原理：<br />
+ * 在 .page() 會取得每個頁面之 page_data.revisions[0].timestamp（各頁面不同）。於
  * .edit() 時將會以從 page_data 取得之 timestamp 作為時間戳記傳入呼叫，當 MediaWiki 系統 (API)
  * 發現有新的時間戳記，會回傳編輯衝突，並放棄編輯此頁面。<br />
  * 詳見 [https://github.com/kanasimi/CeJS/blob/master/application/net/wiki.js
@@ -2640,7 +2754,7 @@ wiki_API.redirects = function(title, callback, options) {
 
 
 /**
- * 計算實質嵌入包含頁面數。
+ * 計算實質嵌入包含(transclusion)之頁面數。
  * 
  * 若條目(頁面)嵌入包含有模板(頁面)別名，則將同時登記 embeddedin 於別名 alias 與 root。<br />
  * e.g., 當同時包含 {{Refimprove}}, {{RefImprove}} 時會算作兩個，但實質僅一個。<br />
