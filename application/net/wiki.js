@@ -63,7 +63,9 @@ if (false) {
 				})
 				// get the content of page, modify it, and set summary.
 				.edit(function(page_data) {
-					var title = page_data.title, content = CeL.wiki.content_of(page_data);
+					var title = page_data.title,
+					//
+					content = CeL.wiki.content_of(page_data);
 					return 'text to replace';
 				}, {
 					summary : 'summary'
@@ -74,6 +76,14 @@ if (false) {
 					CeL.log(CeL.wiki.content_of(page_data));
 				});
 
+				CeL.wiki.page([ 'zh.wikisource', '史記' ], function(page_data) {
+					var title = page_data.title,
+					//
+					content = CeL.wiki.content_of(page_data);
+					CeL.info(title);
+					CeL.log(content);
+				});
+				
 				wiki.logout();
 			});
 	
@@ -145,15 +155,50 @@ function wiki_API(name, password, API_URL) {
 		this.API_URL = wiki_API.api_URL(API_URL);
 }
 
+
 //--------------------------------------------------------------------------------------------- //
 // 工具函數。
 
-// https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
-// project, domain or language
+/**
+ * Get the API URL of specified project.
+ * 
+ * @param {String}project
+ *            wiki project, domain or language. 指定維基百科語言/姊妹計劃<br />
+ *            e.g., 'zh', 'en', 'zh.wikisource'.
+ * 
+ * @returns {String}API URL
+ * 
+ * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
+ * TODO: https://zh.wikipedia.org/wiki/Wikipedia:%E5%A7%8A%E5%A6%B9%E8%AE%A1%E5%88%92#.E9.93.BE.E6.8E.A5.E5.9E.8B
+ */
 function api_URL(project) {
-	return project ? project.includes('://') ? project : 'https://'
-			+ project + '.wikipedia.org/w/api.php' : wiki_API.API_URL;
+	if (/^[a-z]+$/i.test(project))
+		// e.g., 'zh' → 'zh.wikipedia.org'
+		project += '.wikipedia.org';
+	else if (/^[a-z]+\.[a-z]+$/i.test(project))
+		// e.g., 'zh.wikisource', 'zh.wiktionary'
+		project += '.org';
+
+	var matched = /^(https?:\/\/)?[a-z]+(\.[a-z]+)+(\/?)$/i.test(project);
+	if (matched)
+		// e.g., 'http://zh.wikipedia.org/'
+		return (matched[1] || 'https://') + project + (matched[2] || '/')
+				+ 'w/api.php';
+
+	if (/^https?:\/\//i.test(project))
+		// e.g., 'http://zh.wikipedia.org/w/api.php'
+		return project;
+
+	if (project)
+		library_namespace.err('Unknown project: [' + project
+				+ ']! Using default API URL.');
+
+	return wiki_API.API_URL;
 }
+
+
+//---------------------------------------------------------------------//
+
 
 // 列舉型別 (enumeration)
 // options.namespace: https://en.wikipedia.org/wiki/Wikipedia:Namespace
@@ -898,7 +943,7 @@ wiki_API.prototype.next = function() {
 
 /**
  * wiki_API.prototype.next() 已登記之 methods。<br />
- * 之後會再加入 get_list.type 之 methods。<br />
+ * 之後會再自動加入 get_list.type 之 methods。<br />
  * NG: ,login
  * 
  * @type {Array}
@@ -910,7 +955,7 @@ wiki_API.prototype.next.methods = 'page,edit,search,logout,run,set_URL'
 //---------------------------------------------------------------------//
 
 /**
- * default date format
+ * default date format. 預設的日期格式
  * 
  * @type {String}
  * @see ISO 8601
@@ -1162,7 +1207,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 					each(page_data, messages);
 				});
 			else
-				// 取得頁面內容。
+				// 取得頁面內容。一頁頁處理。
 				this.page(page)
 				// 編輯頁面內容。
 				.edit(function(page_data) {
@@ -1178,12 +1223,14 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			library_namespace.debug('wiki_API.work: 收尾。');
 			if (log_item.report)
 				messages.unshift(': 完成 ' + done + (done === pages.length ? '' : '/' + pages.length) + ' 條目，'
-				//
+				// 未改變任何條目。
 				+ (nochange_count ? (done === nochange_count ? '所有' : nochange_count + ' ') + '條目未作變更，' : '')
 				// 使用時間, 費時
 				+ '前後總共 ' + messages.start.age(new Date) + '。');
 			if (done === nochange_count)
 				messages.add('全無變更。');
+			if (this.stopped)
+				messages.add("'''已停止作業'''，放棄編輯。");
 			if (log_item.title && config.summary)
 				messages.unshift(config.summary);
 
@@ -1212,7 +1259,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 			if (log_to)
 				this.page(log_to)
-				// log summary. Robot 運作記錄。
+				// 將 robot 運作記錄、log summary 報告結果寫入 log 頁面。
 				// TODO: 以表格呈現。
 				.edit(messages.join('\n'), options, function(title, error, result) {
 					if (error) {
@@ -1257,11 +1304,11 @@ wiki_API.prototype.work.log_item = {
 
 
 /**
- * check if need to stop / 需要緊急停止作業 (Emergency shutoff-compliant).
+ * check if need to stop / 檢查是否需要緊急停止作業 (Emergency shutoff-compliant).
  * 
  * 此功能之工作機制/原理：<br />
  * 在 .edit() 編輯之前，先檢查是否有人在緊急停止頁面留言要求 stop。<br />
- * 只要在緊急停止頁面有指定的章節、或任何章節，就當作有人留言要 stop。
+ * 只要在緊急停止頁面有指定的章節、或任何章節，就當作有人留言要 stop，並放棄編輯。
  * 
  * @param {Function}callback
  *            回調函數。 callback(need stop)
@@ -1271,6 +1318,7 @@ wiki_API.prototype.work.log_item = {
  * @see https://www.mediawiki.org/wiki/Manual:Parameters_to_index.php#Edit_and_submit
  *      https://www.mediawiki.org/wiki/Help:Magic_words#URL_encoded_page_names
  *      https://www.mediawiki.org/wiki/Help:Links
+ *      https://zh.wikipedia.org/wiki/User:Cewbot/Stop
  */
 wiki_API.prototype.check_stop = function(callback, options) {
 	if (('stopped' in this) && (!options || !options.force)) {
@@ -1372,6 +1420,7 @@ wiki_API.query = function(action, callback, post_data) {
 	else if (!Array.isArray(action))
 		library_namespace.err('wiki_API.query: Invalid action: [' + action + ']');
 	action[0] = wiki_API.api_URL(action[0]);
+	library_namespace.debug('api URL: ' + action[0], 3, 'wiki_API.query');
 
 	// 檢測是否間隔過短。
 	var to_wait = Date.now() - wiki_API.query.last[action[0]];
@@ -2828,34 +2877,35 @@ try {
  *            傳遞於各 operator 間的 ((this))。
  */
 wiki_API.cache = function(operation, callback, _this) {
+	// node.js v0.11.16: In strict mode code, functions can only be declared at top level or immediately within another function.
+	/**
+	 * 連續作業時，轉到下一作業。
+	 */
+	function next_operator(data) {
+		library_namespace.debug('處理連續作業，轉到下一作業: ' + index + '/'
+				+ operation.length, 2, 'wiki_API.cache.next_operator');
+		// [ {Object}operation, {Object}operation, ... ]
+		// operation = { type:'embeddedin', operator:function(data) }
+		if (index < operation.length) {
+			if (!('list' in operation[index])) {
+				// use previous data as list.
+				library_namespace.debug('未特別指定 list，以前一次之回傳 data 作為 list。',
+						3, 'wiki_API.cache.next_operator');
+				library_namespace.debug('前一次之回傳 data: '
+						+ (data && JSON.stringify(data).slice(0, 180))
+						+ '...', 3, 'wiki_API.cache.next_operator');
+				operation[index].list = data;
+			}
+			// default options === _this: 傳遞於各 operator 間的 ((this))。
+			wiki_API.cache(operation[index++], next_operator, _this);
+		} else if (typeof callback === 'function') {
+			// last 收尾
+			callback.call(_this);
+		}
+	}
+
 	if (Array.isArray(operation)) {
 		var index = 0;
-
-		/**
-		 * 連續作業時，轉到下一作業。
-		 */
-		function next_operator(data) {
-			library_namespace.debug('處理連續作業，轉到下一作業: ' + index + '/'
-					+ operation.length, 2, 'wiki_API.cache.next_operator');
-			// [ {Object}operation, {Object}operation, ... ]
-			// operation = { type:'embeddedin', operator:function(data) }
-			if (index < operation.length) {
-				if (!('list' in operation[index])) {
-					// use previous data as list.
-					library_namespace.debug('未特別指定 list，以前一次之回傳 data 作為 list。',
-							3, 'wiki_API.cache.next_operator');
-					library_namespace.debug('前一次之回傳 data: '
-							+ (data && JSON.stringify(data).slice(0, 180))
-							+ '...', 3, 'wiki_API.cache.next_operator');
-					operation[index].list = data;
-				}
-				// default options === _this: 傳遞於各 operator 間的 ((this))。
-				wiki_API.cache(operation[index++], next_operator, _this);
-			} else if (typeof callback === 'function') {
-				// last 收尾
-				callback.call(_this);
-			}
-		}
 
 		next_operator();
 		return;
@@ -2973,6 +3023,28 @@ wiki_API.cache = function(operation, callback, _this) {
 			finish_work(data);
 		}
 
+		// node.js v0.11.16: In strict mode code, functions can only be declared at top level or immediately within another function.
+		/**
+		 * 取得下一項 data。
+		 */
+		function get_next_item(data) {
+			library_namespace.debug('處理多項列表作業: ' + index + '/'
+					+ list.length, 2, 'wiki_API.cache.get_next_item');
+			if (index < list.length) {
+				// 利用基本相同的參數以取得 cache。
+				_operation.list = list[index++];
+				wiki_API.cache(_operation, get_next_item, _this);
+			} else {
+				// last 收尾
+				// All got. retrieve data.
+				if (_operation.data_list)
+					data = _operation.data_list;
+				if (typeof operation.retrieve === 'function')
+					data = operation.retrieve.call(_this, data);
+				write_cache(data);
+			}
+		}
+
 		if (typeof list === 'function')
 			list = list.call(_this, operation);
 		if (Array.isArray(list)) {
@@ -3028,24 +3100,6 @@ wiki_API.cache = function(operation, callback, _this) {
 			}
 			library_namespace.debug('處理多項列表作業, using operation: '
 					+ JSON.stringify(_operation), 5, 'wiki_API.cache');
-
-			function get_next_item(data) {
-				library_namespace.debug('處理多項列表作業: ' + index + '/'
-						+ list.length, 2, 'wiki_API.cache.get_next_item');
-				if (index < list.length) {
-					// 利用基本相同的參數以取得 cache。
-					_operation.list = list[index++];
-					wiki_API.cache(_operation, get_next_item, _this);
-				} else {
-					// last 收尾
-					// All got. retrieve data.
-					if (_operation.data_list)
-						data = _operation.data_list;
-					if (typeof operation.retrieve === 'function')
-						data = operation.retrieve.call(_this, data);
-					write_cache(data);
-				}
-			}
 
 			get_next_item();
 			return;
