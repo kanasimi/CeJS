@@ -1042,8 +1042,8 @@ new_Array=[,,]:	可以使用 Array 常值中的空白元素來建立零星稀疏
  * @example <code>
 
 // example 1
-var conversion = new CeL.pair(CeL.get_file(path));
-text = conversion.convert(text);
+var conversion_pair = new CeL.pair(CeL.get_file(path));
+text = conversion_pair.convert(text);
 
 
 // example 2

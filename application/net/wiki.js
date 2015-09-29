@@ -134,7 +134,7 @@ eval(this.use());
  */
 function wiki_API(name, password, API_URL) {
 	if (!this || this.constructor !== wiki_API)
-		return wiki_API.query(name, password, API_URL);
+		return wiki_API.query.apply(null, arguments);
 
 	this.token = {
 		// lgusername
@@ -152,7 +152,7 @@ function wiki_API(name, password, API_URL) {
 	// setup session.
 	//this.set_URL(API_URL);
 	if (API_URL)
-		this.API_URL = wiki_API.api_URL(API_URL);
+		this.API_URL = api_URL(API_URL);
 }
 
 
@@ -200,8 +200,14 @@ function api_URL(project) {
 //---------------------------------------------------------------------//
 
 
-// 列舉型別 (enumeration)
-// options.namespace: https://en.wikipedia.org/wiki/Wikipedia:Namespace
+/**
+ * get NO of namespace
+ * 
+ * @param {String}namespace
+ *            namespace
+ * 
+ * @returns {Integer}namespace NO.
+ */
 function get_namespace(namespace) {
 	if (typeof namespace === 'string'
 			&& ((namespace = namespace.toLowerCase()) in get_namespace.hash))
@@ -213,14 +219,16 @@ function get_namespace(namespace) {
 		return namespace;
 	}
 	return namespace | 0;
-};
+}
 
 /**
- * The namespace number of the page.
+ * The namespace number of the page. 列舉型別 (enumeration)
  * 
  * {{NAMESPACENUMBER:{{FULLPAGENAME}}}}
  * 
  * @type {Object}
+ * 
+ * @see https://en.wikipedia.org/wiki/Wikipedia:Namespace
  */
 get_namespace.hash = {
 	// Virtual namespaces
@@ -924,7 +932,7 @@ wiki_API.prototype.next = function() {
 
 	case 'set_URL':
 		if (next[1] && typeof next[1] === 'string')
-			this.API_URL = wiki_API.api_URL(next[1]);
+			this.API_URL = api_URL(next[1]);
 		this.next();
 		break;
 
@@ -1345,7 +1353,7 @@ wiki_API.prototype.check_stop = function(callback, options) {
 	library_namespace.debug('檢查緊急停止頁面 [[' + title + ']]', 1,
 			'wiki_API.prototype.check_stop');
 
-	wiki_API.page(title, function(page_data) {
+	wiki_API.page([ this.API_URL, title], function(page_data) {
 		var content = get_page_content(page_data),
 		// default: NOT stopped
 		stopped = false, PATTERN;
@@ -1419,8 +1427,8 @@ wiki_API.query = function(action, callback, post_data) {
 		action = [ , action ];
 	else if (!Array.isArray(action))
 		library_namespace.err('wiki_API.query: Invalid action: [' + action + ']');
-	action[0] = wiki_API.api_URL(action[0]);
-	library_namespace.debug('api URL: ' + action[0], 3, 'wiki_API.query');
+	library_namespace.debug('api URL: [' + action[0] + '] → [' + api_URL(action[0]) + ']', 3, 'wiki_API.query');
+	action[0] = api_URL(action[0]);
 
 	// 檢測是否間隔過短。
 	var to_wait = Date.now() - wiki_API.query.last[action[0]];
@@ -2321,7 +2329,7 @@ wiki_API.login = function(name, password, options) {
 			_next();
 		else {
 			library_namespace.debug('Try to get the csrftoken ...', 1, 'wiki_API.login');
-			wiki_API.query('query&meta=tokens', function(data) {
+			wiki_API.query([ session.API_URL, 'query&meta=tokens' ], function(data) {
 				if (data && data.query && data.query.tokens) {
 					session.token.csrftoken = data.query.tokens.csrftoken;
 					library_namespace.debug('csrftoken: ' + session.token.csrftoken
@@ -2367,8 +2375,11 @@ wiki_API.login = function(name, password, options) {
 			// default: 依順序將 'login' 置於最末端。
 			session.actions.push([ 'login' ]);
 	}
-	if (session.API_URL)
+	if (session.API_URL) {
+		library_namespace.debug('API URL: [' + session.API_URL + ']。', 3, 'wiki_API.login');
 		action = [ session.API_URL, action ];
+	}
+	library_namespace.debug('action: [' + action + ']。', 3, 'wiki_API.login');
 
 	library_namespace.debug('準備登入 [' + name + ']。', 1, 'wiki_API.login');
 	wiki_API.query(action, function(data) {
@@ -2380,10 +2391,10 @@ wiki_API.login = function(name, password, options) {
 			return;
 		}
 
-		wiki_API.query('login', function(data) {
+		wiki_API.query([ session.API_URL, 'login' ], function(data) {
 			if (data && data.login && data.login.result === 'NeedToken') {
 				session.token.lgtoken = data.login.token;
-				wiki_API.query('login', _done, session.token);
+				wiki_API.query([ session.API_URL, 'login' ], _done, session.token);
 			} else
 				library_namespace.err(data);
 		}, session.token);
@@ -2670,9 +2681,12 @@ wiki_API.search = function(key, callback, options) {
 		options = {
 			srlimit : options
 		};
-	wiki_API.query('query&list=search&' + get_URL.param_to_String(Object.assign({
+	var API_URL;
+	if (Array.isArray(key))
+		API_URL = key[0], key = key[1];
+	wiki_API.query([ API_URL, 'query&list=search&' + get_URL.param_to_String(Object.assign({
 		srsearch : key
-	}, wiki_API.search.default_parameter, options)), function(data) {
+	}, wiki_API.search.default_parameter, options)) ], function(data) {
 		if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value)
