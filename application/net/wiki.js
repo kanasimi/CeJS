@@ -16,6 +16,11 @@
 // https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92
 // https://zh.wikipedia.org/wiki/Special:API%E6%B2%99%E7%9B%92
 
+// TODO:
+// https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
+// https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
+// [[Wikipedia:维基化]]
+
 'use strict';
 //'use asm';
 
@@ -76,14 +81,6 @@ if (false) {
 					CeL.log(CeL.wiki.content_of(page_data));
 				});
 
-				CeL.wiki.page([ 'zh.wikisource', '史記' ], function(page_data) {
-					var title = page_data.title,
-					//
-					content = CeL.wiki.content_of(page_data);
-					CeL.info(title);
-					CeL.log(content);
-				});
-				
 				wiki.logout();
 			});
 	
@@ -94,6 +91,23 @@ if (false) {
 	}, {
 		type : 'embeddedin'
 	});
+
+	var wiki = CeL.wiki.login('', '', 'zh.wikisource');
+	wiki.page('史記').edit(function(page_data) {
+		var title = page_data.title,
+		//
+		content = CeL.wiki.content_of(page_data);
+		CeL.info(title);
+		CeL.log(content);
+	});
+	//
+	wiki.work({
+		each : function(page_data) {
+			var content = CeL.wiki.content_of(page_data);
+		},
+		summary : '',
+		log_to : ''
+	}, [ '史記' ]);
 
 	// TODO: http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 }
@@ -172,12 +186,14 @@ function wiki_API(name, password, API_URL) {
  * TODO: https://zh.wikipedia.org/wiki/Wikipedia:%E5%A7%8A%E5%A6%B9%E8%AE%A1%E5%88%92#.E9.93.BE.E6.8E.A5.E5.9E.8B
  */
 function api_URL(project) {
-	if (/^[a-z]+$/i.test(project))
-		// e.g., 'zh' → 'zh.wikipedia.org'
-		project += '.wikipedia.org';
-	else if (/^[a-z]+\.[a-z]+$/i.test(project))
-		// e.g., 'zh.wikisource', 'zh.wiktionary'
-		project += '.org';
+	if (project)
+		// /^[a-z]+$/i.test(undefined) === true
+		if (/^[a-z]+$/i.test(project))
+			// e.g., 'zh' → 'zh.wikipedia.org' ({{SERVERNAME}})
+			project += '.wikipedia.org';
+		else if (/^[a-z]+\.[a-z]+$/i.test(project))
+			// e.g., 'zh.wikisource', 'zh.wiktionary'
+			project += '.org';
 
 	var matched = /^(https?:\/\/)?[a-z]+(\.[a-z]+)+(\/?)$/i.test(project);
 	if (matched)
@@ -838,6 +854,34 @@ wiki_API.prototype.next = function() {
 		next[3]);
 		break;
 
+	case 'check':
+		next[1] = Object.assign(library_namespace.null_Object(), this.check_options,
+		// next[1]: options
+		typeof next[1] === 'boolean' ? {
+			force : next[1]
+		} : typeof options === 'string' ? {
+			title : next[1]
+		} : library_namespace.is_Object(next[1]) ? next[1] : {});
+
+		// ('stopped' in this): 已經有 cache。
+		if (('stopped' in this) 
+		// force to check
+		&& next[1].force) {
+			library_namespace.debug('Skip check_stop().', 1, 'wiki_API.prototype.next');
+			this.next();
+		} else {
+			library_namespace.debug('以 .check_stop() 檢查與設定是否須停止編輯作業。', 1, 'wiki_API.prototype.next');
+			library_namespace.debug('Using options to check_stop(): ' + JSON.stringify(next[1]), 2, 'wiki_API.prototype.next');
+			next[1].token = this.token;
+			wiki_API.check_stop(function(stopped) {
+				// cache
+				_this.stopped = stopped;
+
+				_this.next();
+			}, next[1]);
+		}
+		break;
+
 	case 'edit':
 		// TODO: {String|RegExp|Array}filter
 		if (!this.last_page) {
@@ -849,9 +893,8 @@ wiki_API.prototype.next = function() {
 
 		} else if (!('stopped' in this)) {
 			// rollback
-			this.actions.unshift(next);
-			library_namespace.debug('以 .check_stop() 檢查與設定是否須停止編輯作業。');
-			this.check_stop(this.next.bind(this));
+			this.actions.unshift([ 'check' ], next);
+			this.next();
 		} else if (this.stopped && !next[2].skip_stopped) {
 			library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯[[' + this.last_page.title + ']]!');
 			// next[3] : callback
@@ -956,7 +999,7 @@ wiki_API.prototype.next = function() {
  * 
  * @type {Array}
  */
-wiki_API.prototype.next.methods = 'page,edit,search,logout,run,set_URL'
+wiki_API.prototype.next.methods = 'page,check,edit,search,logout,run,set_URL'
 		.split(',');
 
 
@@ -1240,7 +1283,8 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			if (this.stopped)
 				messages.add("'''已停止作業'''，放棄編輯。");
 			if (log_item.title && config.summary)
-				messages.unshift(config.summary);
+				// unescape
+				messages.unshift(config.summary.replace(/</g, '&lt;'));
 
 			if (typeof config.last === 'function')
 				config.last.call(this, messages, titles, pages);
@@ -1308,104 +1352,6 @@ wiki_API.prototype.work.log_item = {
 };
 
 
-//---------------------------------------------------------------------//
-
-
-/**
- * check if need to stop / 檢查是否需要緊急停止作業 (Emergency shutoff-compliant).
- * 
- * 此功能之工作機制/原理：<br />
- * 在 .edit() 編輯之前，先檢查是否有人在緊急停止頁面留言要求 stop。<br />
- * 只要在緊急停止頁面有指定的章節、或任何章節，就當作有人留言要 stop，並放棄編輯。
- * 
- * @param {Function}callback
- *            回調函數。 callback(need stop)
- * @param {Object}[options]
- *            附加參數/設定特殊功能與選項
- * 
- * @see https://www.mediawiki.org/wiki/Manual:Parameters_to_index.php#Edit_and_submit
- *      https://www.mediawiki.org/wiki/Help:Magic_words#URL_encoded_page_names
- *      https://www.mediawiki.org/wiki/Help:Links
- *      https://zh.wikipedia.org/wiki/User:Cewbot/Stop
- */
-wiki_API.prototype.check_stop = function(callback, options) {
-	if (('stopped' in this) && (!options || !options.force)) {
-		// 已經有 cache。
-		callback(this.stopped);
-		return;
-	}
-
-	/**
-	 * 緊急停止頁面標題:<br />
-	 * 只檢查此緊急停止頁面。
-	 * 
-	 * @type {String}
-	 */
-	var title = options && options.title, _this = this;
-	if (typeof title === 'function')
-		title = title(this.token);
-	if (!title) {
-		// default page title:
-		// [[{{TALKSPACE}}:{{ROOTPAGENAMEE}}/Stop]]
-		title = 'User_talk:' + this.token.lgname + '/Stop';
-	}
-
-	library_namespace.debug('檢查緊急停止頁面 [[' + title + ']]', 1,
-			'wiki_API.prototype.check_stop');
-
-	wiki_API.page([ this.API_URL, title], function(page_data) {
-		var content = get_page_content(page_data),
-		// default: NOT stopped
-		stopped = false, PATTERN;
-
-		if (options) {
-			if (typeof options.checker === 'function') {
-				// 以 options.checker 的回傳來設定是否stopped。
-				stopped = options.checker(content);
-				if (stopped)
-					library_namespace.warn(
-					//
-					'wiki_API.prototype.check_stop: 已設定停止編輯作業!');
-				content = null;
-			} else {
-				// 指定 pattern
-				PATTERN = options.pattern
-				// options.section: section title
-				|| options.section
-				/**
-				 * <code>
-				 * (new RegExp('\n==(.*?)' + '20150503' + '\\s*==\n')).test('\n== 停止作業:20150503 ==\n') === true
-				 * </code>
-				 */
-				&& new RegExp('\n==(.*?)' + options.section + '\\s*==\n');
-			}
-		}
-
-		if (content) {
-			if (!library_namespace.is_RegExp(PATTERN))
-				PATTERN = _this.check_stop.pattern;
-			stopped = PATTERN.test(content, page_data);
-			if (stopped)
-				library_namespace.warn('緊急停止頁面[[' + title
-						+ ']]有留言要停止編輯作業!');
-		}
-
-		// cache
-		_this.stopped = stopped;
-
-		callback(stopped);
-	});
-};
-
-/**
- * default check pattern: 任何章節/段落 section<br />
- * 只要在緊急停止頁面有任何章節，就當作有人留言要求 stop。
- * 
- * @type {RegExp}
- */
-wiki_API.prototype.check_stop.pattern = /\n=([^\n]+)=\n/;
-
-
 //--------------------------------------------------------------------------------------------- //
 // 以下皆泛用，無須 instance。
 
@@ -1427,7 +1373,7 @@ wiki_API.query = function(action, callback, post_data) {
 		action = [ , action ];
 	else if (!Array.isArray(action))
 		library_namespace.err('wiki_API.query: Invalid action: [' + action + ']');
-	library_namespace.debug('api URL: [' + action[0] + '] → [' + api_URL(action[0]) + ']', 3, 'wiki_API.query');
+	library_namespace.debug('api URL: (' + (typeof action[0]) + ') [' + action[0] + '] → [' + api_URL(action[0]) + ']', 3, 'wiki_API.query');
 	action[0] = api_URL(action[0]);
 
 	// 檢測是否間隔過短。
@@ -2356,7 +2302,9 @@ wiki_API.login = function(name, password, options) {
 		session = options.session;
 		callback = options.callback;
 	} else {
-		if (typeof options === 'function')
+		if (typeof options === 'function'
+		// treat as API_URL
+		|| typeof options === 'string')
 			callback = options;
 		// 前置處理。
 		options = library_namespace.null_Object();
@@ -2404,6 +2352,111 @@ wiki_API.login = function(name, password, options) {
 };
 
 wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
+
+
+//---------------------------------------------------------------------//
+
+/**
+ * check if need to stop / 檢查是否需要緊急停止作業 (Emergency shutoff-compliant).
+ * 
+ * 此功能之工作機制/原理：<br />
+ * 在 .edit() 編輯之前，先檢查是否有人在緊急停止頁面留言要求 stop。<br />
+ * 只要在緊急停止頁面有指定的章節標題、或任何章節，就當作有人留言要 stop，並放棄編輯。
+ * 
+ * @param {Function}callback
+ *            回調函數。 callback({Boolean}need stop)
+ * @param {Object}[options]
+ *            附加參數/設定特殊功能與選項
+ * 
+ * @see https://www.mediawiki.org/wiki/Manual:Parameters_to_index.php#Edit_and_submit
+ *      https://www.mediawiki.org/wiki/Help:Magic_words#URL_encoded_page_names
+ *      https://www.mediawiki.org/wiki/Help:Links
+ *      https://zh.wikipedia.org/wiki/User:Cewbot/Stop
+ */
+wiki_API.check_stop = function(callback, options) {
+	// 前置處理。
+	if (!library_namespace.is_Object(options))
+		if (typeof options === 'string')
+			options = {
+				title : options
+			};
+		else
+			options = library_namespace.null_Object();
+
+	/**
+	 * 緊急停止頁面標題 check title:<br />
+	 * 只檢查此緊急停止頁面。
+	 * 
+	 * @type {String}
+	 */
+	var title = options.title;
+	if (typeof title === 'function')
+		title = title(options.token);
+	if (!title)
+		title = wiki_API.check_stop.title(options.token);
+
+	library_namespace.debug('檢查緊急停止頁面 [[' + title + ']]', 1,
+			'wiki_API.check_stop');
+
+	wiki_API.page([ this.API_URL, title ], function(page_data) {
+		var content = get_page_content(page_data),
+		// default: NOT stopped
+		stopped = false, PATTERN;
+
+		if (typeof options.checker === 'function') {
+			// 以 options.checker 的回傳來設定是否stopped。
+			stopped = options.checker(content);
+			if (stopped)
+				library_namespace.warn(
+				//
+				'wiki_API.check_stop: 已設定停止編輯作業!');
+			content = null;
+		} else {
+			// 指定 pattern
+			PATTERN = options.pattern
+			// options.section: 指定的緊急停止章節標題, section title to check
+			|| options.section
+			/**
+			 * <code>
+			 * (new RegExp('\n==(.*?)' + '20150503' + '\\s*==\n')).test('\n== 停止作業:20150503 ==\n') === true
+			 * </code>
+			 */
+			&& new RegExp('\n==(.*?)' + options.section + '\\s*==\n');
+		}
+
+		if (content) {
+			if (!library_namespace.is_RegExp(PATTERN))
+				PATTERN = wiki_API.check_stop.pattern;
+			stopped = PATTERN.test(content, page_data);
+			if (stopped)
+				library_namespace.warn('緊急停止頁面[[' + title + ']]有留言要停止編輯作業!');
+		}
+
+		callback(stopped);
+	});
+};
+
+/**
+ * default page title to check:<br />
+ * [[{{TALKSPACE}}:{{ROOTPAGENAME}}/Stop]]
+ * 
+ * @param {Object}token
+ *            “csrf”令牌。
+ * 
+ * @returns {String}
+ */
+wiki_API.check_stop.title = function(token) {
+	return 'User_talk:' + token.lgname + '/Stop';
+};
+
+/**
+ * default check pattern: 任何章節/段落 section<br />
+ * default: 只要在緊急停止頁面有任何章節，就當作有人留言要求 stop。
+ * 
+ * @type {RegExp}
+ */
+wiki_API.check_stop.pattern = /\n=([^\n]+)=\n/;
+
 
 //---------------------------------------------------------------------//
 
@@ -3229,7 +3282,7 @@ wiki_API.cache.title_only = function(operation) {
 // export 導出.
 Object.assign(wiki_API, {
 	api_URL : api_URL,
-	// default api URL
+	// default api URL. Use <code>CeL.wiki.API_URL = api_URL('en')</code> to change it.
 	// see also: application.locale
 	API_URL : api_URL((library_namespace.is_WWW()
 			&& (navigator.userLanguage || navigator.language) || 'zh')

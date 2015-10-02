@@ -694,8 +694,15 @@ function get_URL_node(URL, onload, encoding, post_data) {
 		_URL.headers = {
 			'Content-Type': 'application/x-www-form-urlencoded',
 			// prevent HTTP 411 錯誤 – 需要內容長度頭 (411 Length Required)
-			'Content-Length': post_data.length
+			'Content-Length': post_data.length,
+			// User Agent
+			'User-Agent' : get_URL_node.default_user_agent
 		};
+	} else {
+		_URL.headers = {
+				// User Agent
+				'User-Agent' : get_URL_node.default_user_agent
+			};
 	}
 
 	if (headers) {
@@ -726,12 +733,21 @@ function get_URL_node(URL, onload, encoding, post_data) {
 
 	request.end();
 
-	library_namespace.debug('set onerror: ' + (options.onfail ? 'user defined' : 'default'), 3, 'get_URL_node');
+	library_namespace.debug('set onerror: ' + (options.onfail ? 'user defined' : 'default handler'), 3, 'get_URL_node');
 	request.on('error', typeof options.onfail === 'function' ? options.onfail : function (err) {
+		console.error('get_URL_node: Get error:');
 		console.error(err);
 	});
 	// 遇到 "Unhandled 'error' event"，或許是 print 到 stdout 時出錯了，不一定是本函數的問題。
 }
+
+/**
+ * default user agent.
+ * for some server, (e.g., tools.wmflabs.org) <q>Requests must have a user agent</q>.
+ * 
+ * @type {String}
+ */
+get_URL_node.default_user_agent = 'CeJS get_URL_node()';
 
 
 if (library_namespace.is_node) {
