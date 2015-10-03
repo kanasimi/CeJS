@@ -56,16 +56,17 @@ function getU(p){var o;try{o=new ActiveXObject('Microsoft.XMLHTTP');}catch(e){o=
 /**
  * JScript or .wsh only, 能 encode.
  * 
- * @param page_url
+ * @param {String}page_url
  *            page url
- * @param encoding
- *            encoding
+ * @param {String}[charset]
+ *            character encoding. e.g., 'UTF-8', big5, euc-jp, ...
  * @param POST_text
  *            POST text
+ * 
  * @returns {String}
  * @see http://neural.cs.nthu.edu.tw/jang/books/asp/getWebPage.asp?title=10-1%20%E6%8A%93%E5%8F%96%E7%B6%B2%E9%A0%81%E8%B3%87%E6%96%99
  */
-function get_page(page_url, encoding, POST_text) {
+function get_page(page_url, charset, POST_text) {
 	try {
 		// may cause error
 		var X = new ActiveXObject('Microsoft.XMLHTTP'), AS;
@@ -87,8 +88,8 @@ function get_page(page_url, encoding, POST_text) {
 		// 以文字模式操作
 		AS.Type = 2;
 		// 設定編碼方式
-		if (encoding)
-			AS.Charset = encoding;
+		if (charset)
+			AS.Charset = charset;
 		// 將物件內的文字讀出
 		X = AS.ReadText();
 		// free
@@ -105,7 +106,7 @@ if (false)
 	// default arguments
 	var get_URL_arguments = {
 		URL : '',
-		encoding : '',
+		charset : '',
 		// HTTP方法，如"GET", "POST", HEAD, "PUT", "DELETE"等。
 		method : 'GET',
 		post : {},
@@ -157,8 +158,8 @@ document_head = library_namespace.is_WWW(true) && (document.head || document.get
  *            請求目的URL or options
  * @param {Function}[onload]
  *            callback when successful loaded
- * @param {String}[encoding]
- *            encoding. e.g., 'UTF-8', big5, euc-jp,..
+ * @param {String}[charset]
+ *            character encoding. e.g., 'UTF-8', big5, euc-jp, ...
  * @param {String|Object}[post_data]
  *            text data to send when method is POST
  * 
@@ -166,17 +167,17 @@ document_head = library_namespace.is_WWW(true) && (document.head || document.get
  * https://developer.mozilla.org/zh-TW/docs/DOM/XMLHttpRequest
  * http://msdn.microsoft.com/en-us/library/ie/ms535874.aspx
  */
-function get_URL(URL, onload, encoding, post_data) {
+function get_URL(URL, onload, charset, post_data) {
 	// 前導作業。
-	if (library_namespace.is_Object(encoding)) {
-		post_data = encoding;
-		encoding = null;
+	if (library_namespace.is_Object(charset)) {
+		post_data = charset;
+		charset = null;
 	}
 	var options;
 	if (library_namespace.is_Object(URL) && URL.URL) {
 		onload = URL.onload || onload;
 		post_data = URL.post || post_data;
-		encoding = URL.encoding || encoding;
+		charset = URL.charset || charset;
 		URL = (options = URL).URL;
 	} else
 		options = library_namespace.null_Object();
@@ -200,8 +201,8 @@ function get_URL(URL, onload, encoding, post_data) {
 			if (callback_param && typeof onload[callback_param] === 'function') {
 				var callback_name,
 				node = document.createElement('script');
-				for (encoding = 0; (callback_name = 'cb' + encoding) in library_namespace;)
-					encoding++;
+				for (charset = 0; (callback_name = 'cb' + charset) in library_namespace;)
+					charset++;
 				library_namespace[callback_name] = function(data) {
 					library_namespace.debug('[' + URL + ']: callback 完自動移除 .js。', 2, 'get_URL');
 					document_head.removeChild(node);
@@ -260,20 +261,20 @@ function get_URL(URL, onload, encoding, post_data) {
 			});
 
 		if (options.mime)
-			// ignore encoding!
-			encoding = options.mime;
-		else if (encoding)
-			// old: 'text/xml;charset=' + encoding
+			// ignore charset!
+			charset = options.mime;
+		else if (charset)
+			// old: 'text/xml;charset=' + charset
 			// 但這樣會被當作 XML 解析，產生語法錯誤。
-			// TODO: try: 'text/'+(/\.x(ht)?ml$/i.test(URL)?'xml':'plain')+';charset=' + encoding;
-			encoding = 'application/json;charset=' + encoding;
+			// TODO: try: 'text/'+(/\.x(ht)?ml$/i.test(URL)?'xml':'plain')+';charset=' + charset;
+			charset = 'application/json;charset=' + charset;
 
 		// 有些版本的 Mozilla 瀏覽器在伺服器送回的資料未含 XML mime-type
 		// 檔頭（header）時會出錯。為了避免這個問題，可以用下列方法覆寫伺服器傳回的檔頭，以免傳回的不是 text/xml。
 		// http://squio.nl/blog/2006/06/27/xmlhttprequest-and-character-encoding/
 		// http://www.w3.org/TR/XMLHttpRequest/ search encoding
-		if (encoding && XMLHttp.overrideMimeType)
-			XMLHttp.overrideMimeType(encoding);
+		if (charset && XMLHttp.overrideMimeType)
+			XMLHttp.overrideMimeType(charset);
 
 		if (onload)
 			XMLHttp.onreadystatechange = function() {
@@ -379,7 +380,7 @@ function get_URLs() {
 
 arguments f:{
 	URL:'',	//	The same origin policy prevents document or script loaded from one origin, from getting or setting properties from a of a document from a different origin.(http://www.mozilla.org/projects/security/components/jssec.html#sameorigin)
-	enc:'UTF-8',	//	encoding: big5, euc-jp,..
+	enc:'UTF-8',	//	charset: big5, euc-jp,..
 	fn:(handle_function),	//	onLoad:function(){},
 	method:'GET',	//	POST,..
 	sendDoc:'text send in POST,..'
@@ -563,7 +564,16 @@ var node_url, node_http, node_https,
 node_http_agent, node_https_agent;
 
 
-// 快速 merge cookie: 只檢查若沒有重複的，則直接加入。不檢查也不處理。
+/**
+ * 快速 merge cookie: 只檢查若沒有重複的，則直接加入。不檢查也不處理。
+ * 
+ * @param agent
+ * @param cookie
+ * 
+ * @returns
+ * 
+ * @inner
+ */
 function merge_cookie(agent, cookie) {
 	if (!Array.isArray(agent.last_cookie))
 		agent.last_cookie = agent.last_cookie ? [ agent.last_cookie ] : [];
@@ -573,7 +583,7 @@ function merge_cookie(agent, cookie) {
 		if (!agent.last_cookie.includes(piece))
 			agent.last_cookie.push(piece);
 	});
-	//console.log(agent.last_cookie);
+	// console.log(agent.last_cookie);
 	return agent.last_cookie;
 }
 
@@ -586,8 +596,8 @@ function merge_cookie(agent, cookie) {
  *            請求目的URL or options
  * @param {Function}[onload]
  *            callback when successful loaded
- * @param {String}[encoding]
- *            encoding. e.g., 'utf8', big5, euc-jp,..
+ * @param {String}[charset]
+ *            character encoding. e.g., 'UTF-8', big5, euc-jp,..
  * @param {String|Object}[post_data]
  *            text data to send when method is POST
  * 
@@ -597,17 +607,17 @@ function merge_cookie(agent, cookie) {
  * 
  * @since	2015/1/13 23:23:38
  */
-function get_URL_node(URL, onload, encoding, post_data) {
+function get_URL_node(URL, onload, charset, post_data) {
 	// 前導作業。
-	if (library_namespace.is_Object(encoding)) {
-		post_data = encoding;
-		encoding = null;
+	if (library_namespace.is_Object(charset)) {
+		post_data = charset;
+		charset = null;
 	}
 	var options, headers;
 	if (library_namespace.is_Object(URL) && URL.URL) {
 		onload = URL.onload || onload;
 		post_data = URL.post || post_data;
-		encoding = URL.encoding || encoding;
+		charset = URL.charset || charset;
 		headers = URL.headers;
 		URL = (options = URL).URL;
 	} else
@@ -655,10 +665,10 @@ function get_URL_node(URL, onload, encoding, post_data) {
 		library_namespace.debug('STATUS: ' + result.statusCode, 2, 'get_URL_node');
 		library_namespace.debug('HEADERS: ' + JSON.stringify(result.headers), 4, 'get_URL_node');
 		merge_cookie(agent, result.headers['set-cookie']);
-		// 未設定 encoding 的話，將回傳 Buffer。
-		if (encoding !== 'binary')
-			// default encoding: UTF-8.
-			result.setEncoding(encoding || 'utf8');
+		// 未設定 charset 的話，將回傳 Buffer。
+		if (charset !== 'binary')
+			// default charset: UTF-8.
+			result.setEncoding(charset || 'utf8');
 		// listener must be a function
 		if (typeof onload === 'function') {
 			var data = [];
@@ -669,7 +679,7 @@ function get_URL_node(URL, onload, encoding, post_data) {
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			result.on('end', function() {
 				//console.log('No more data in response.');
-				if (encoding !== 'binary')
+				if (charset !== 'binary')
 					data = data.join('');
 				else {
 					//TODO:  (binary)
@@ -764,6 +774,91 @@ if (library_namespace.is_node) {
 	_.get_URL = library_namespace.copy_properties(get_URL, get_URL_node);
 }
 
+
+//---------------------------------------------------------------------//
+// TODO: for non-nodejs
+
+/** {Object|Function}fs in node.js */
+var node_fs;
+try {
+	if (library_namespace.is_node)
+		// @see https://nodejs.org/api/fs.html
+		node_fs = require('fs');
+	if (typeof node_fs.readFile !== 'function')
+		throw true;
+} catch (e) {
+	// enumerate for get_URL_cache_node
+	// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
+	library_namespace.warn('無 node.js 之 fs，因此不具備cache 功能。');
+	if (false)
+		node_fs = {
+			readFile : function(filename, charset, callback) {
+				callback(true);
+			},
+			writeFile : library_namespace.null_function
+		};
+}
+
+/**
+ * cache 作業操作之輔助套裝函數。
+ * 
+ * @param {String|Object}URL
+ *            請求目的URL or options
+ * @param {Function}[onload]
+ *            callback when successful loaded
+ * @param {Object}[options]
+ *            附加參數/設定特殊功能與選項
+ */
+function get_URL_cache_node(URL, onload, options) {
+	// 前置處理。
+	if (!library_namespace.is_Object(options))
+		options = library_namespace.null_Object();
+
+	var filename = options.filename,
+	/** {String}file encoding for fs of node.js. */
+	encoding = options.encoding || get_URL_cache_node.encoding;
+
+	node_fs.readFile(filename, encoding, function(
+			error, data) {
+		if (!error) {
+			library_namespace.debug('Using cached data.', 3, 'get_URL_cache_node');
+			library_namespace.debug('Cached data: [' + data.slice(0, 200)
+					+ ']...', 5, 'get_URL_cache_node');
+			onload(data);
+			return;
+		}
+
+		library_namespace.debug('No valid cached data. Try to get data...', 3,
+				'get_URL_cache_node');
+
+		_.get_URL(URL, function(XMLHttp) {
+			data = XMLHttp.responseText;
+			// 資料事後處理程序 (post-processor):
+			// 將以 .postprocessor() 的回傳作為要處理的資料。
+			if (typeof options.postprocessor === 'function')
+				data = options.postprocessor(data);
+			/**
+			 * 寫入cache。
+			 */
+			if (/[^\\\/]$/.test(filename)) {
+				library_namespace.info('get_URL_cache_node.cache: Write cache data to ['
+						+ filename + '].');
+				library_namespace.debug('Cache data: '
+						+ (data && JSON.stringify(data).slice(0, 190)) + '...',
+						3, 'get_URL_cache_node');
+				node_fs.writeFile(filename, data, encoding);
+			}
+			onload(data);
+		}, options.charset, options.post_data);
+	});
+}
+
+/** {String}預設 file encoding for fs of node.js。 */
+get_URL_cache_node.encoding = 'utf8';
+
+if (library_namespace.is_node) {
+	_.get_URL_cache = get_URL_cache_node;
+}
 
 //---------------------------------------------------------------------//
 

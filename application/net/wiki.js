@@ -1013,7 +1013,7 @@ wiki_API.prototype.next.methods = 'page,check,edit,search,logout,run,set_URL'
  */
 wiki_API.prototype.date_format = '%4Y%2m%2dT%2H%2M';
 
-/** {String}後續檢索用索引值 */
+/** {String}後續檢索用索引值標記名稱 */
 wiki_API.prototype.continue_key = '後續索引';
 
 /**
@@ -1197,6 +1197,12 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	// 設定 time stamp。
 	messages.start = messages.last = new Date;
 	messages.add = add_message;
+	if (Array.isArray(pages) && pages.slice(0, 10).every(function(item) {
+		return typeof item === 'string';
+	})) {
+		// 傳入標題列表。
+		messages.input_title_list = true;
+	}
 
 	if (false && Array.isArray(pages)
 	//
@@ -1224,9 +1230,11 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 		if (Array.isArray(pages) && data.length !== pages.length)
 			library_namespace.warn('wiki_API.work: query 所得之 length (' + data.length + ') !== pages.length (' + pages.length + ') !');
-		// config.continue_wiki: 後續檢索用索引值存儲所在的 {wiki_API}，將會以此 instance 之值寫入 log。
-		if ((pages = 'continue_wiki' in config ? config.continue_wiki : this)
-			// pages: 後續檢索用索引值暫存值。
+		// 傳入標題列表，則由程式自行控制，毋須設定後續檢索用索引值。
+		if (!messages.input_title_list
+			// config.continue_wiki: 後續檢索用索引值存儲所在的 {wiki_API}，將會以此 instance 之值寫入 log。
+			&& (pages = 'continue_wiki' in config ? config.continue_wiki : this)
+			// pages: 後續檢索用索引值之暫存值。
 			&& (pages = pages.show_next()))
 			messages.add(this.continue_key + ': ' + pages);
 		// 使用時間, 費時
@@ -1296,6 +1304,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			options = {
 				// append 章節/段落 after all, at bottom.
 				section : 'new',
+				// 章節標題
 				sectiontitle : '[' + (new Date).format(config.date_format || this.date_format) + '] ' + done
 				//
 				+ (done === pages.length ? '' : '/' + pages.length) + ' 條目',
@@ -1927,7 +1936,9 @@ function get_continue(title, callback) {
 function get_list(type, title, callback, namespace) {
 	library_namespace.debug(type + '[[' + title + ']], callback: ' + callback,
 			3);
-	var options, prefix = get_list.type[type], parameter;
+	var options,
+	// 前置字首
+	prefix = get_list.type[type], parameter;
 	if (Array.isArray(prefix)) {
 		parameter = prefix[1];
 		prefix = prefix[0];
@@ -2897,11 +2908,12 @@ wiki_API.redirects.count = function(root_name_hash, embeddedin_list) {
 
 //---------------------------------------------------------------------//
 
-/** fs in node.js */
+/** {Object|Function}fs in node.js */
 var node_fs;
 try {
-	// @see https://nodejs.org/api/fs.html
-	node_fs = require('fs');
+	if (library_namespace.is_node)
+		// @see https://nodejs.org/api/fs.html
+		node_fs = require('fs');
 	if (typeof node_fs.readFile !== 'function')
 		throw true;
 } catch (e) {
@@ -3045,9 +3057,11 @@ wiki_API.cache = function(operation, callback, _this) {
 	 * @type {Boolean}
 	 */
 	var use_JSON = 'json' in operation ? operation.json : /\.json$/i
-			.test(filename);
+			.test(filename),
+	/** {String}file encoding for fs of node.js. */
+	encoding = _this.encoding || wiki_API.encoding;
 
-	node_fs.readFile(filename, _this.encoding || wiki_API.encoding, function(
+	node_fs.readFile(filename, encoding, function(
 			error, data) {
 		/**
 		 * 結束作業。
@@ -3085,7 +3099,7 @@ wiki_API.cache = function(operation, callback, _this) {
 						+ (data && JSON.stringify(data).slice(0, 190)) + '...',
 						3, 'wiki_API.cache.write_cache');
 				node_fs.writeFile(filename, use_JSON ? JSON.stringify(data)
-						: data, _this.encoding || wiki_API.encoding);
+						: data, encoding);
 			}
 			finish_work(data);
 		}
@@ -3149,6 +3163,7 @@ wiki_API.cache = function(operation, callback, _this) {
 				 */
 				_operation.operator = function(data) {
 					if ('each_retrieve' in operation)
+						// 資料事後處理程序 (post-processor):
 						// 將以 .each_retrieve() 的回傳作為要處理的資料。
 						data = operation.each_retrieve.call(_this, data);
 					if (_operation.data_list) {
@@ -3255,7 +3270,7 @@ wiki_API.cache = function(operation, callback, _this) {
 };
 
 
-/** {String}預設 encoding for fs of node.js。 */
+/** {String}預設 file encoding for fs of node.js。 */
 wiki_API.encoding = 'utf8';
 /** {String}檔名預設前綴。 */
 wiki_API.cache.prefix = '';
