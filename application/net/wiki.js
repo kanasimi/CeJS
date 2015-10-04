@@ -550,7 +550,7 @@ function template_token(wikitext, template_name, no_parse) {
 
 
 // --------------------------------------------------------------------------------------------- //
-// parse data
+// TODO: parse wikitext
 
 
 /*
@@ -566,11 +566,111 @@ function template_token(wikitext, template_name, no_parse) {
 ''~''
 \n{| ~ \n|}
 
+
+
+var wiki_page = CeL.parse_wikitext(page_data);
+wiki_page.each_transclusion(function(name, parameters) {
+	// this = list;
+	;
+});
+return wiki_page.toString();
+
 */
 
-//https://doc.wikimedia.org/mediawiki-core/master/php/html/Parser_8php.html
-//Parser.php: PHP parser that converts wiki markup to HTML.
+
+// 可順便做正規化，例如修復章節標題 title 前後 level 不一，
+// table "|-" 未起新行等。
+var wiki_toString = {
+	namespace : function() {
+		return this.join(':');
+	},
+	link : function() {
+		return '[[' + this.join('|') + ']]';
+	},
+	// External link
+	external_link : function() {
+		return '[' + this.join(' ') + ']';
+	},
+	// e.g., template, 
+	transclusion : function() {
+		return '{{' + this.join('|') + '}}';
+	},
+	// https://meta.wikimedia.org/wiki/Help:Table
+	table : function() {
+		return '{|' + this.join('\n|-') + '|}';
+	},
+	table_header : function() {
+		return this.join('!');
+	},
+	table_cell : function() {
+		return this.join('|');
+	},
+	// https://zh.wikipedia.org/wiki/Help:%E9%AB%98%E7%BA%A7%E5%AD%97%E8%AF%8D%E8%BD%AC%E6%8D%A2%E8%AF%AD%E6%B3%95
+	converter : function() {
+		return '-{' + this.join('|') + '}-';
+	},
+	title : function() {
+		return this.join(' ') + '\n';
+	},
+	html : function() {
+		return this.join('');
+	},
+	// "<\": for Eclipse JSDoc.
+	comments : function() {
+		return '<\!--' + this.join('') + '-->';
+	},
+	line : function() {
+		// https://www.mediawiki.org/wiki/Markup_spec/BNF/Article
+		// NewLine = ? carriage return and line feed ? ;
+		return this.join('\n');
+	},
+	// plain text 或尚未 parse 的 wikitext.
+	text : function() {
+		return this.join('');
+	}
+};
+
+
+// comments, transclusion
+
+
+/*
+
+should use:
+class WikiPage extends Array {  }
+http://www.2ality.com/2015/02/es6-classes-final.html
+
+*/
+var page_prototype = {
+		type : 'wiki',
+		each : for_each_token,
+		parse : parse_wikitext,
+		toString : wiki_toString.text
+};
+
+function parse_page(wikitext, options) {
+	if (typeof wikitext === 'string')
+		wikitext = [ wikitext ];
+	else if (get_page_content.is_page_data(wikitext)) {
+		var tmp = [ get_page_content(wikitext) ];
+		tmp.page = wikitext;
+		wikitext = Object.create(tmp, page_parameters);
+	} else
+		throw new Error('parse_page: Unknown wikitext.');
+
+	if (library_namespace.is_Object(options))
+		wikitext.options = options;
+	// copy prototype methods
+	Object.assign(wikitext, page_prototype);
+	return wikitext;
+}
+
+function for_each_token(type, processor) {
+	;
+}
+
 /**
+ * parse The MediaWiki markup language (wikitext) [[:en:Wiki markup]], [[Wiki標記式語言]]
  * TODO
  *
  * @param {String}wikitext
@@ -579,10 +679,17 @@ function template_token(wikitext, template_name, no_parse) {
  *            觸發器 { node name : function(Array inside node) }
  *
  * @returns {Array}
+ * 
+ * @see https://www.mediawiki.org/wiki/Wikitext
+ * https://www.mediawiki.org/wiki/Markup_spec
+ * https://doc.wikimedia.org/mediawiki-core/master/php/html/Parser_8php.html
+ * Parser.php: PHP parser that converts wiki markup to HTML.
+ * 
  */
-function parse_wikitext(wikitext, trigger) {
+function parse_wikitext() {
 	if (!wikitext)
 		return [];
+
 	// 找出一個文件中不可包含的字串，作為解析用之特殊標記。
 	var prefix = '\0', postfix = ';', result = [];
 	wikitext = wikitext.replace(/\0/g, '');
@@ -592,7 +699,7 @@ function parse_wikitext(wikitext, trigger) {
 
 	// https://zh.wikipedia.org/wiki/Help:%E6%A8%A1%E6%9D%BF
 	// TODO: 在模板頁面中，用三個大括弧可以讀取參數
-	// MediaWiki會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
+	// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
 
 	// 模板（英語：Template，又譯作「樣板」、「範本」）
 	// 模板名#後的內容會忽略。
@@ -1021,11 +1128,11 @@ wiki_API.prototype.continue_key = '後續索引';
  * 
  * @param {String}message
  *            message
- * @param {String}title
+ * @param {String}[title]
  *            message title
  */
 function add_message(message, title) {
-	this.push('* ' + (title ? '[[' + title + ']]: ' : '') + message);
+	this.push('* ' + ((title = get_page_title(title)) ? '[[' + title + ']]: ' : '') + message);
 }
 
 
@@ -1286,10 +1393,10 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				+ (nochange_count ? (done === nochange_count ? '所有' : nochange_count + ' ') + '條目未作變更，' : '')
 				// 使用時間, 費時
 				+ '前後總共 ' + messages.start.age(new Date) + '。');
-			if (done === nochange_count)
-				messages.add('全無變更。');
 			if (this.stopped)
 				messages.add("'''已停止作業'''，放棄編輯。");
+			if (done === nochange_count)
+				messages.add('全無變更。');
 			if (log_item.title && config.summary)
 				// unescape
 				messages.unshift(config.summary.replace(/</g, '&lt;'));
@@ -1318,7 +1425,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				skip_stopped : true
 			};
 
-			if (log_to)
+			if (log_to && (done !== nochange_count
+				// 若全無變更，則預設僅從 console 提示，不寫入 log 頁面。
+				|| config.log_nochange)) {
 				this.page(log_to)
 				// 將 robot 運作記錄、log summary 報告結果寫入 log 頁面。
 				// TODO: 以表格呈現。
@@ -1332,8 +1441,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 						this.page('User:' + this.token.lgname).edit(messages.join('\n'), options);
 					}
 				});
-			else
+			} else {
 				library_namespace.log('\nlog:<br />\n' + messages.join('<br />\n'));
+			}
 
 			// config.callback()
 			// 只有在成功時，才會繼續執行。
@@ -1426,7 +1536,8 @@ wiki_API.query = function(action, callback, post_data) {
 			library_namespace.debug('response: '
 				+ (library_namespace.is_node ? '\n' + response : response.replace(/</g, '&lt;')), 3, 'wiki_API.query');
 
-			if (/<html[\s>]/.test(response.slice(0, 40))) {
+			// "<\": for Eclipse JSDoc.
+			if (/<\html[\s>]/.test(response.slice(0, 40))) {
 				response = response.between('source-javascript', '</pre>').between('>')
 				// 去掉所有 HTML tag。
 				.replace(/<[^>]+>/g, '');
@@ -3309,14 +3420,15 @@ Object.assign(wiki_API, {
 	file_pattern : file_pattern,
 	template_token : template_token,
 
+	// TODO
+	//parse : parse_page,
+
 	content_of : get_page_content,
 	title_of : get_page_title,
 	normalize_title : normalize_page_name,
 	normalize_title_pattern : normalize_name_pattern,
 	get_hash : list_to_hash,
-	uniq_list : unique_list,
-
-	parse : parse_wikitext
+	uniq_list : unique_list
 });
 
 

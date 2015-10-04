@@ -1541,11 +1541,16 @@ parse_number = function(number) {
 set_method(Object, {
 	// for Object.clone()
 	clone: function(object, deep) {
+		// for read-only??
+		// return Object.create(object);
+
 		if (deep)
 			// @see http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object
 			return JSON.parse(JSON.stringify(object));
 		// shallow clone Object.
-		return Object.assign(Object.create(null), object);
+		return Object.assign(Object.create(
+			// copy prototype
+			Object.getPrototypeOf(object)), object);
 	}
 });
 
