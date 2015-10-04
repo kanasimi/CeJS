@@ -392,7 +392,7 @@ function file_pattern(file_name, flag) {
 
 file_pattern.source =
 //[ ':', file name, 接續 ]
-/\[\[[\s\n]*(?:(:)[\s\n]*)?(?:Tag)[\s\n]*:[\s\n]*name\s*(\||\]\])/
+ /\[\[[\s\n]*(?:(:)[\s\n]*)?(?:Tag)[\s\n]*:[\s\n]*name\s*(\||\]\])/
 //[[ :File:name]] === [[File:name]]
 .source.replace('Tag', library_namespace.ignore_case_pattern('File|Image|[檔档]案|[圖图]像'));
 
@@ -578,7 +578,7 @@ return wiki_page.toString();
 */
 
 
-// 可順便做正規化，例如修復章節標題 title 前後 level 不一，
+// 可順便做正規化，例如修復章節標題 section title 前後 level 不一，
 // table "|-" 未起新行等。
 var wiki_toString = {
 	namespace : function() {
@@ -686,7 +686,7 @@ function for_each_token(type, processor) {
  * Parser.php: PHP parser that converts wiki markup to HTML.
  * 
  */
-function parse_wikitext() {
+function parse_wikitext(wikitext, trigger) {
 	if (!wikitext)
 		return [];
 
@@ -773,10 +773,14 @@ function get_page_title(page_data) {
 		if (get_page_content.is_page_data(page_data[0]))
 			// assert: page_data = [ page data, page data, ... ]
 			return page_data.map(get_page_title);
-		// assert: page_data = [ {String}API_URL, {String}title || {Object}page_data ]
+		// assert: page_data =
+		// [ {String}API_URL, {String}title || {Object}page_data ]
 		page_data = page_data[1];
 	}
-	return page_data.title || page_data;
+	// should use get_page_content.is_page_data(page_data)
+	return library_namespace.is_Object(page_data) ? 'title' in page_data ? page_data.title
+			: null
+			: page_data;
 }
 
 
@@ -1003,7 +1007,7 @@ wiki_API.prototype.next = function() {
 			this.actions.unshift([ 'check' ], next);
 			this.next();
 		} else if (this.stopped && !next[2].skip_stopped) {
-			library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯[[' + this.last_page.title + ']]!');
+			library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯[[' + this.last_page.title + ']]！');
 			// next[3] : callback
 			if (typeof next[3] === 'function')
 				next[3].call(_this, title, '已停止作業');
@@ -1336,7 +1340,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				data = [ data ];
 
 		if (Array.isArray(pages) && data.length !== pages.length)
-			library_namespace.warn('wiki_API.work: query 所得之 length (' + data.length + ') !== pages.length (' + pages.length + ') !');
+			library_namespace.warn('wiki_API.work: query 所得之 length (' + data.length + ') !== pages.length (' + pages.length + ') ！');
 		// 傳入標題列表，則由程式自行控制，毋須設定後續檢索用索引值。
 		if (!messages.input_title_list
 			// config.continue_wiki: 後續檢索用索引值存儲所在的 {wiki_API}，將會以此 instance 之值寫入 log。
@@ -1372,7 +1376,10 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				this.page(page, function(page_data) {
 					each(page_data, messages);
 				});
-			else
+			else {
+				// clone() 是為了能個別改變 summary。
+				// 例如: each() { options.summary += " -- ..."; }  
+				var work_options = Object.clone(options);
 				// 取得頁面內容。一頁頁處理。
 				this.page(page)
 				// 編輯頁面內容。
@@ -1381,8 +1388,10 @@ wiki_API.prototype.work = function(config, pages, titles) {
 					library_namespace.info('wiki_API.work: edit '
 					//
 					+ (index + 1) + '/' + pages.length + ' [[' + page_data.title + ']]');
-					return each(page_data, messages);
-				}, options, callback);
+					// 以 each() 的回傳作為要改變成什麼內容。
+					return each(page_data, messages, work_options);
+				}, work_options, callback);
+			}
 		}, this);
 
 		this.run(function() {
@@ -1461,13 +1470,13 @@ wiki_API.prototype.work = function(config, pages, titles) {
  * @type {Object}
  */
 wiki_API.prototype.work.log_item = {
-		title : true,
-		report : true,
-		get_pages : true,
-		// 跳過無改變的。
-		//nochange : false,
-		error : true,
-		succeed : true
+	title : true,
+	report : true,
+	get_pages : true,
+	// 跳過無改變的。
+	// nochange : false,
+	error : true,
+	succeed : true
 };
 
 
@@ -1497,6 +1506,7 @@ wiki_API.query = function(action, callback, post_data) {
 
 	// 檢測是否間隔過短。
 	var to_wait = Date.now() - wiki_API.query.last[action[0]];
+	// TODO: 伺服器負載過重的時候，使用 exponential backoff 進行延遲。
 	if (to_wait < wiki_API.query.lag) {
 		to_wait = wiki_API.query.lag - to_wait;
 		library_namespace.debug('Waiting ' + to_wait + ' ms..', 2, 'wiki_API.query');
@@ -2485,6 +2495,9 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
  * 在 .edit() 編輯之前，先檢查是否有人在緊急停止頁面留言要求 stop。<br />
  * 只要在緊急停止頁面有指定的章節標題、或任何章節，就當作有人留言要 stop，並放棄編輯。
  * 
+ * TODO:<br />
+ * https://zh.wikipedia.org/w/api.php?action=query&meta=userinfo&uiprop=hasmsg
+ * 
  * @param {Function}callback
  *            回調函數。 callback({Boolean}need stop)
  * @param {Object}[options]
@@ -2531,7 +2544,7 @@ wiki_API.check_stop = function(callback, options) {
 			if (stopped)
 				library_namespace.warn(
 				//
-				'wiki_API.check_stop: 已設定停止編輯作業!');
+				'wiki_API.check_stop: 已設定停止編輯作業！');
 			content = null;
 		} else {
 			// 指定 pattern
@@ -2551,7 +2564,7 @@ wiki_API.check_stop = function(callback, options) {
 				PATTERN = wiki_API.check_stop.pattern;
 			stopped = PATTERN.test(content, page_data);
 			if (stopped)
-				library_namespace.warn('緊急停止頁面[[' + title + ']]有留言要停止編輯作業!');
+				library_namespace.warn('緊急停止頁面[[' + title + ']]有留言要停止編輯作業！');
 		}
 
 		callback(stopped);
