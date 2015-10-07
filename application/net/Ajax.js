@@ -787,12 +787,12 @@ try {
 	if (typeof node_fs.readFile !== 'function')
 		throw true;
 } catch (e) {
-	// enumerate for get_URL_cache_node
-	// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
-	library_namespace.warn('無 node.js 之 fs，因此不具備cache 功能。');
+	library_namespace.debug('無 node.js 之 fs，因此不具備 node 之檔案操作功能。');
 	if (false)
+		// enumerate for get_URL_cache_node
+		// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
 		node_fs = {
-			readFile : function(filename, charset, callback) {
+			readFile : function(file_name, charset, callback) {
 				callback(true);
 			},
 			writeFile : library_namespace.null_function
@@ -831,11 +831,11 @@ function get_URL_cache_node(URL, onload, options) {
 	if (!library_namespace.is_Object(options))
 		options = library_namespace.null_Object();
 
-	var filename = options.filename,
+	var file_name = options.file_name,
 	/** {String}file encoding for fs of node.js. */
 	encoding = options.encoding || get_URL_cache_node.encoding;
 
-	node_fs.readFile(filename, encoding, function(
+	node_fs.readFile(file_name, encoding, function(
 			error, data) {
 		if (!error) {
 			library_namespace.debug('Using cached data.', 3, 'get_URL_cache_node');
@@ -857,13 +857,13 @@ function get_URL_cache_node(URL, onload, options) {
 			/**
 			 * 寫入cache。
 			 */
-			if (/[^\\\/]$/.test(filename)) {
+			if (/[^\\\/]$/.test(file_name)) {
 				library_namespace.info('get_URL_cache_node.cache: Write cache data to ['
-						+ filename + '].');
+						+ file_name + '].');
 				library_namespace.debug('Cache data: '
 						+ (data && JSON.stringify(data).slice(0, 190)) + '...',
 						3, 'get_URL_cache_node');
-				node_fs.writeFile(filename, data, encoding);
+				node_fs.writeFile(file_name, data, encoding);
 			}
 			onload(data);
 		}, options.charset, options.post_data);
@@ -872,6 +872,7 @@ function get_URL_cache_node(URL, onload, options) {
 
 /** {String}預設 file encoding for fs of node.js。 */
 get_URL_cache_node.encoding = 'utf8';
+
 
 if (library_namespace.is_node) {
 	_.get_URL_cache = get_URL_cache_node;

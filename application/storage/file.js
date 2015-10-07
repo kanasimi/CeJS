@@ -525,6 +525,8 @@ function URL_encoded(URL) {
 	return /^(?:https?|ftp):\/\/(?:[a-zA-Z0-9\-._~\/?#\[\]@!$&'()*+,;=]|%[a-fA-Z0-9]{2})+$/.test(URL);
 }
 
+
+
 /*
 
 cache 相關函數:
@@ -538,8 +540,9 @@ application.net.wiki wiki_API.cache() CeL.wiki.cache()
 
 
 var get_file = library_namespace.get_file,
-//
-write_file;
+// @see https://nodejs.org/api/fs.html
+write_file = library_namespace.is_node && require('fs').writeFileSync;
+
 
 /**
  * 檔案 cache 作業操作之輔助套裝函數。
@@ -568,7 +571,7 @@ function cache_file(URL, options) {
 	if (!URL_encoded(URL))
 		URL = encodeURI(URL);
 
-	var file_encoding = options.file_encoding || options.encoding || 'UTF-8', data;
+	var file_encoding = options.file_encoding || options.encoding || cache_file.encoding, data;
 
 	if (!options.force)
 		try {
@@ -605,7 +608,8 @@ function cache_file(URL, options) {
 
 _.cache_file = cache_file;
 
-
+/** {String}預設 file encoding for fs of write_file。 */
+cache_file.encoding = library_namespace.is_node ? 'utf8' : 'UTF-8';
 
 
 return (

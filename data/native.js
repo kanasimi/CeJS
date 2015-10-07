@@ -2000,7 +2000,7 @@ toTitleCase
  * @param {String|Function}replace_to
  *            用於替換的字串。
  * 
- * @returns {String}變更/取代後的結果。
+ * @returns {String}replaced text. 變更/取代後的結果。
  */
 function replace_till_stable(text, pattern, replace_to) {
 	for (var original; original !== text;) {
@@ -2008,6 +2008,52 @@ function replace_till_stable(text, pattern, replace_to) {
 		text = original.replace(pattern, replace_to);
 	}
 	return text;
+}
+
+
+/**
+ * 當欲變更/取代文字前後的文字符合要求時，才執行取代。
+ * 
+ * @param {String}text
+ *            指定的輸入字串。
+ * @param {RegExp}pattern
+ *            要搜索的正規表示式/規則運算式模式。
+ * @param {String|Function}replace_to
+ *            用於替換的字串。
+ * @param {Function}[match_previous]
+ *            match_previous(previous token) return true if it's OK to replace,
+ *            false if it's NOT OK to replace.
+ * @param {Function}[match_next]
+ *            match_next(next token) return true if it's OK to replace, false if
+ *            it's NOT OK to replace.
+ * 
+ * @returns {String}replaced text. 變更/取代後的結果。
+ */
+function replace_check_near(text, pattern, replace_to, match_previous,
+		match_next) {
+	var matched, results = [], last_index = 0;
+	if (!pattern.global) {
+		library_namespace.warn("replace_check_near: The pattern doesn't has 'global' flag!");
+	}
+	while (matched = pattern.exec(text)) {
+		// library_namespace.log(pattern + ': ' + matched);
+		var previous_text = text.slice(last_index, matched.index),
+		//
+		_last_index = matched.index + matched[0].length;
+		if ((!match_previous || match_previous(previous_text))
+		//
+		&& (!match_next || match_next(text.slice(_last_index)))) {
+			last_index = pattern.lastIndex;
+			results.push(
+			//
+			previous_text, matched[0].replace(pattern, replace_to));
+			// restore lastIndex.
+			pattern.lastIndex = last_index;
+			last_index = _last_index;
+		}
+	}
+	results.push(text.slice(last_index));
+	return results.join('');
 }
 
 
@@ -2032,6 +2078,9 @@ set_method(String.prototype, {
 	// repeatedly replace till stable
 	replace_till_stable : function(pattern, replace_to) {
 		return replace_till_stable(this, pattern, replace_to);
+	},
+	replace_check_near : function(pattern, replace_to, match_previous, match_next) {
+		return replace_check_near(this, pattern, replace_to, match_previous, match_next);
 	},
 
 	pad : set_bind(pad, true),

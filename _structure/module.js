@@ -358,7 +358,7 @@ if (false) {
 	if (_.new_XMLHttp) {
 
 	} else if (typeof require === 'function'
-	//	for node.js
+	//	for node.js, node_fs
 	&& (_.new_XMLHttp = require('fs'))
 	//
 	&& typeof process === 'object' && typeof process.versions === 'object' && process.versions.node
@@ -367,7 +367,7 @@ if (false) {
 		_.platform = 'node ' + (_.is_node = process.versions.node);
 
 		// TODO: https://github.com/driverdan/node-XMLHttpRequest/blob/master/lib/XMLHttpRequest.js
-		var node_fs = _.new_XMLHttp = _.new_XMLHttp.readFileSync;
+		var node_read_file = _.new_XMLHttp = _.new_XMLHttp.readFileSync;
 
 		// The encoding can be 'utf8', 'ascii', or 'base64'.
 		// http://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
@@ -375,9 +375,9 @@ if (false) {
 			//	for node.js
 			var data, i, l, tmp;
 			try {
-				data = node_fs(path, encoding);
+				data = node_read_file(path, encoding);
 			} catch (e) {
-				data = node_fs(path);
+				data = node_read_file(path);
 			}
 
 			if (typeof data !== 'string') {
@@ -402,13 +402,13 @@ if (false) {
 					_.debug('get_file: Treat file as UTF-8: [' + path + ']', 2);
 					tmp = null;
 					// http://nodejs.org/api/fs.html#fs_fs_readfilesync_filename_options
-					data = node_fs(path, 'utf8');
+					data = node_read_file(path, 'utf8');
 					// or:
 					// http://hi.baidu.com/hellow3c/item/b699cd1d0170c56b3b176e7b
 					//buffer.toString('utf8', 0, length);
 				} else
 					try {
-						i = node_fs(path, 'utf8');
+						i = node_read_file(path, 'utf8');
 						_.debug('get_file: Treat file as UTF-8: [' + path + ']', 2);
 						tmp = null;
 						data = i;
