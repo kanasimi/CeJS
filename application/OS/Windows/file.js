@@ -390,9 +390,9 @@ _// JSDT:_module_
  * @requires	FSO,get_folder,get_file_name,initialization_WScript_Objects
  * @_memberOf	_module_
  */
-move_1_file = function(from, to, dir, only_filename, reverse) {
+move_1_file = function(from, to, dir, only_file_name, reverse) {
 	if (!from || !to || from === to)
-		return new Error(1, 'filename error.');
+		return new Error(1, 'file name error.');
 
 	var e;
 	dir = get_folder(dir);
@@ -401,7 +401,7 @@ move_1_file = function(from, to, dir, only_filename, reverse) {
 		e = from, from = to, to = e;
 	e = function(_i) {
 		return FSO.FileExists(_i) ? _i : dir ? dir
-				+ (only_filename ? library_namespace.get_file_name(_i) : _i) : null;
+				+ (only_file_name ? library_namespace.get_file_name(_i) : _i) : null;
 	};
 
 	try {
@@ -970,7 +970,7 @@ is_folder = is_folder;
 /**
  * get directory name of a path
  * @param folder_path
- * @param mode	0:path, 1:filename
+ * @param mode	0:path, 1:file name
  * @returns
  */
 function get_folder(folder_path, mode) {
@@ -2522,6 +2522,19 @@ _.show_path=show_path;
 
 // ------------------------------------------------------------------------- //
 
+
+/*
+
+cache 相關函數:
+@see
+application.storage.file.get_cache_file
+application.OS.Windows.file.cacher
+application.net.Ajax.get_URL_cache
+application.net.wiki wiki_API.cache() CeL.wiki.cache()
+
+*/
+
+
 /*
 自動 cacher。
 
@@ -2640,6 +2653,7 @@ library_namespace.set_method(cacher.prototype, {
 
 _.cacher = cacher;
 
+// ------------------------------------------------------------------------- //
 
 
 return (

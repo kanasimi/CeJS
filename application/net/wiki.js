@@ -3045,12 +3045,24 @@ try {
 	// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
 	library_namespace.warn('無 node.js 之 fs，因此不具備cache 功能。');
 	node_fs = {
-		readFile : function(filename, encoding, callback) {
+		readFile : function(file_name, encoding, callback) {
 			callback(true);
 		},
 		writeFile : library_namespace.null_function
 	};
 }
+
+
+/*
+
+cache 相關函數:
+@see
+application.storage.file.get_cache_file
+application.OS.Windows.file.cacher
+application.net.Ajax.get_URL_cache
+application.net.wiki wiki_API.cache() CeL.wiki.cache()
+
+*/
 
 
 /**
@@ -3126,10 +3138,10 @@ wiki_API.cache = function(operation, callback, _this) {
 		// _this: 傳遞於各 operator 間的 ((this))。
 		_this = library_namespace.null_Object();
 
-	var filename = operation.filename;
+	var file_name = operation.file_name;
 
-	if (typeof filename === 'function')
-		filename = filename.call(_this, operation);
+	if (typeof file_name === 'function')
+		file_name = file_name.call(_this, operation);
 
 	// operation.type: method to get data
 	var type = operation.type,
@@ -3138,16 +3150,16 @@ wiki_API.cache = function(operation, callback, _this) {
 	//
 	list = operation.list;
 
-	if (!filename) {
+	if (!file_name) {
 		// 若自行設定了檔名，則慢點執行 list()，先讀讀 cache。因為 list() 可能會頗耗時間。
 		// 基本上，設定 this.* 應該在 operation.operator() 中，而不是在 operation.list() 中。
 		if (typeof list === 'function')
 			list = list.call(_this, operation);
 
-		// 自行設定之檔名 operation.filename 優先度較 type/title 高。
-		filename = ((filename = _this[type + '_prefix'] || type) ?
+		// 自行設定之檔名 operation.file_name 優先度較 type/title 高。
+		file_name = ((file_name = _this[type + '_prefix'] || type) ?
 		// 需要自行創建目錄!
-		filename + '/' : '')
+				file_name + '/' : '')
 		//
 		+ (get_page_content.is_page_data(list) ? list.title
 		//
@@ -3155,23 +3167,23 @@ wiki_API.cache = function(operation, callback, _this) {
 	}
 
 	// _this.prefix: cache path prefix
-	filename = [ 'prefix' in operation ? operation.prefix
+	file_name = [ 'prefix' in operation ? operation.prefix
 	//
-	: 'prefix' in _this ? _this.prefix : wiki_API.cache.prefix, filename,
+	: 'prefix' in _this ? _this.prefix : wiki_API.cache.prefix, file_name,
 	//
 	'postfix' in operation ? operation.postfix
 	//
 	: 'postfix' in _this ? _this.postfix : wiki_API.cache.postfix ];
 	library_namespace.debug(
-			'Pre-normalized cache filename: [' + filename + ']', 5,
+			'Pre-normalized cache file name: [' + file_name + ']', 5,
 			'wiki_API.cache');
 	if (false)
-		library_namespace.debug('filename param:'
-				+ [ operation.filename, _this[type + '_prefix'], type,
+		library_namespace.debug('file name param:'
+				+ [ operation.file_name, _this[type + '_prefix'], type,
 						JSON.stringify(list) ].join(';'), 6, 'wiki_API.cache');
 	// 正規化檔名。
-	filename = filename.join('').replace(/[:*?<>]/g, '_');
-	library_namespace.debug('Try to read cache file: [' + filename + ']', 3,
+	file_name = file_name.join('').replace(/[:*?<>]/g, '_');
+	library_namespace.debug('Try to read cache file: [' + file_name + ']', 3,
 			'wiki_API.cache');
 
 	/**
@@ -3181,11 +3193,11 @@ wiki_API.cache = function(operation, callback, _this) {
 	 * @type {Boolean}
 	 */
 	var use_JSON = 'json' in operation ? operation.json : /\.json$/i
-			.test(filename),
+			.test(file_name),
 	/** {String}file encoding for fs of node.js. */
 	encoding = _this.encoding || wiki_API.encoding;
 
-	node_fs.readFile(filename, encoding, function(
+	node_fs.readFile(file_name, encoding, function(
 			error, data) {
 		/**
 		 * 結束作業。
@@ -3216,13 +3228,13 @@ wiki_API.cache = function(operation, callback, _this) {
 		 * 寫入cache。
 		 */
 		function write_cache(data) {
-			if (/[^\\\/]$/.test(filename)) {
+			if (/[^\\\/]$/.test(file_name)) {
 				library_namespace.info('wiki_API.cache: Write cache data to ['
-						+ filename + '].');
+						+ file_name + '].');
 				library_namespace.debug('Cache data: '
 						+ (data && JSON.stringify(data).slice(0, 190)) + '...',
 						3, 'wiki_API.cache.write_cache');
-				node_fs.writeFile(filename, use_JSON ? JSON.stringify(data)
+				node_fs.writeFile(file_name, use_JSON ? JSON.stringify(data)
 						: data, encoding);
 			}
 			finish_work(data);
@@ -3264,13 +3276,13 @@ wiki_API.cache = function(operation, callback, _this) {
 			 * 處理多項列表作業。
 			 */
 			var index = 0, _operation = Object.clone(operation);
-			// 個別頁面不設定 .filename, .end。
+			// 個別頁面不設定 .file_name, .end。
 			delete _operation.end;
-			if (_operation.each_filename) {
-				_operation.filename = _operation.each_filename;
-				delete _operation.each_filename;
+			if (_operation.each_file_name) {
+				_operation.file_name = _operation.each_file_name;
+				delete _operation.each_file_name;
 			} else {
-				delete _operation.filename;
+				delete _operation.file_name;
 			}
 			if (typeof _operation.each === 'function') {
 				// 每一項執行一次 .each()
@@ -3401,9 +3413,9 @@ wiki_API.cache.prefix = '';
 /** {String}檔名預設後綴。 */
 wiki_API.cache.postfix = '.json';
 /**
- * 只取檔名，僅用在 operation.each_filename。<br />
+ * 只取檔名，僅用在 operation.each_file_name。<br />
  * <code>{
- * each_filename : CeL.wiki.cache.title_only,
+ * each_file_name : CeL.wiki.cache.title_only,
  * }</code>
  * 
  * @type {Function}

@@ -799,13 +799,30 @@ try {
 		};
 }
 
+
+
+/*
+
+cache 相關函數:
+@see
+application.storage.file.get_cache_file
+application.OS.Windows.file.cacher
+application.net.Ajax.get_URL_cache
+application.net.wiki wiki_API.cache() CeL.wiki.cache()
+
+*/
+
+
+
 /**
  * cache 作業操作之輔助套裝函數。
+ * 
+ * TODO: 以 HEAD 檢測，若有新版本則不採用 cache。
  * 
  * @param {String|Object}URL
  *            請求目的URL or options
  * @param {Function}[onload]
- *            callback when successful loaded
+ *            callback when successful loaded. onload(data)
  * @param {Object}[options]
  *            附加參數/設定特殊功能與選項
  */

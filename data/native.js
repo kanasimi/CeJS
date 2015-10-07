@@ -1989,6 +1989,28 @@ toTitleCase
 	.add_exception('id,tv,i,ii,iii,iv,v,vi,vii,viii,ix,x,xi,xii,xiii', true);
 
 
+
+/**
+ * 持續執行 .replace()，直到處理至穩定平衡無變動為止。
+ * 
+ * @param {String}text
+ *            指定的輸入字串。
+ * @param {RegExp}pattern
+ *            要搜索的正規表示式/規則運算式模式。
+ * @param {String|Function}replace_to
+ *            用於替換的字串。
+ * 
+ * @returns {String}變更/取代後的結果。
+ */
+function replace_till_stable(text, pattern, replace_to) {
+	for (var original; original !== text;) {
+		original = text;
+		text = original.replace(pattern, replace_to);
+	}
+	return text;
+}
+
+
 set_method(String.prototype, {
 	count_of : set_bind(count_occurrence, true),
 	//gText : getText,
@@ -2006,7 +2028,12 @@ set_method(String.prototype, {
 			return char.codePointAt(0);
 		});
 	},
-	
+
+	// repeatedly replace till stable
+	replace_till_stable : function(pattern, replace_to) {
+		return replace_till_stable(this, pattern, replace_to);
+	},
+
 	pad : set_bind(pad, true),
 	toRegExp : set_bind(String_to_RegExp, true),
 	toTitleCase : toTitleCase,
@@ -2032,16 +2059,24 @@ set_method(Number.prototype, {
 });
 
 set_method(RegExp.prototype, {
+	clone : function() {
+		// TODO: this.hasOwnProperty()
+		return new RegExp(this.source, this.flags);
+	},
 	reflag : set_bind(renew_RegExp_flag)
 });
 
 set_method(library_namespace.env.global, {
-	//	在HTML中typeof alert=='object'
+	//	在 old IE 中 typeof alert==='object'
 	//alert : JSalert
 });
 
 //	建議不用，因為在for(in Array)時會...
 set_method(Array.prototype, {
+	clone : function() {
+		// TODO: this.hasOwnProperty()
+		return this.slice();
+	},
 	remove_once: function(value) {
 		var index = this.indexOf(value);
 		if (index !== NOT_FOUND)
@@ -2122,6 +2157,16 @@ if (isNaN(Date.parse('0000-01-01T00:00:00.000Z'))) {
 	IE_ISO_date.parse = Date.parse;
 
 _.ISO_date = IE_ISO_date;
+
+
+
+set_method(Date.prototype, {
+	clone : function() {
+		// TODO: this.hasOwnProperty()
+		return new Date(this.getTime());
+	}
+});
+
 
 //---------------------------------------------------------------------//
 
