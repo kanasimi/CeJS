@@ -2003,9 +2003,12 @@ toTitleCase
  * @returns {String}replaced text. 變更/取代後的結果。
  */
 function replace_till_stable(text, pattern, replace_to) {
+	library_namespace.debug('pattern: ' + pattern, 6, 'replace_till_stable');
 	for (var original; original !== text;) {
 		original = text;
 		text = original.replace(pattern, replace_to);
+		library_namespace.debug('[' + original + '] '
+				+ (original === text ? 'done.' : '→ [' + text + ']'), 6, 'replace_till_stable');
 	}
 	return text;
 }

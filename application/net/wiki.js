@@ -45,7 +45,7 @@ if (false) {
 				// get the content of page, and then replace it.
 				.page('Wikipedia:沙盒').edit('* [[沙盒]]', {
 					section : 'new',
-					sectiontitle : '沙盒 test section',
+					sectiontitle : '沙盒測試 section',
 					summary : '沙盒 test edit (section)',
 					nocreate : 1
 				})
@@ -569,9 +569,8 @@ function template_token(wikitext, template_name, no_parse) {
 
 
 var wiki_page = CeL.parse_wiki_page(page_data);
-wiki_page.each_transclusion(function(name, parameters) {
+wiki_page.each('transclusion', function(list) {
 	// this = list;
-	;
 });
 return wiki_page.toString();
 
@@ -581,10 +580,15 @@ return wiki_page.toString();
 // 可順便做正規化，例如修復章節標題 section title 前後 level 不一，
 // table "|-" 未起新行等。
 var wiki_toString = {
-	// Internal/interwiki link : language links : category links, file, subst, ... : title
+	// Internal/interwiki link : language links : category links, file, subst,
+	// ... : title
 	// e.g., [[m:en:Help:Parser function]]
 	// https://www.mediawiki.org/wiki/Markup_spec#Namespaces
 	namespace : function() {
+		return this.join(':');
+	},
+	// page title, Template name
+	page_title : function() {
 		return this.join(':');
 	},
 	link : function() {
@@ -594,7 +598,11 @@ var wiki_toString = {
 	external_link : function() {
 		return '[' + this.join(' ') + ']';
 	},
-	// e.g., template, 
+	// template parameter
+	parameter : function() {
+		return '{{{' + this.join('|') + '}}}';
+	},
+	// e.g., template
 	transclusion : function() {
 		return '{{' + this.join('|') + '}}';
 	},
@@ -619,7 +627,7 @@ var wiki_toString = {
 		return this.join('');
 	},
 	// "<\": for Eclipse JSDoc.
-	comments : function() {
+	comment : function() {
 		return '<\!--' + this.join('') + '-->';
 	},
 	line : function() {
@@ -636,6 +644,20 @@ var wiki_toString = {
 
 // comments, transclusion
 
+// {Array}token
+function set_wiki_methods(token, type) {
+	if (typeof token === 'string')
+		token = [ token ];
+	token.type = type;
+	token.is_atom = type in {
+		namespace : true,
+		page_title : true,
+		comment : true
+	};
+	token.toString = wiki_toString[type];
+	return token;
+}
+
 
 /*
 
@@ -645,15 +667,21 @@ http://www.2ality.com/2015/02/es6-classes-final.html
 
 */
 var page_prototype = {
-		type : 'wiki',
-		each : for_each_token,
-		parse : function() {
-			this.each(parse_wikitext.bind(this), 'text');
-		},
-		toString : wiki_toString.text
+	each : for_each_token,
+	each_text : for_each_text,
+	parse : parse_page
 };
 
-function parse_page(wikitext, options) {
+
+if (false) {
+	CeL.wiki.wiki_page.parse_wikitext('{{temp|{{temp2|p{a}r{}}}}}');
+	JSON.stringify(CeL.wiki.wiki_page.parse_wikitext('a{{temp|e{{temp2|p{a}r}}}}b'));
+	CeL.wiki.wiki_page('a{{temp|e{{temp2|p{a}r}}}}b').parse().each_text(function(token) { CeL.log(token); });
+	CeL.wiki.wiki_page('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('template', function(template) { CeL.log(template.toString()); }) && '';
+}
+
+
+function wiki_page(wikitext, options) {
 	if (typeof wikitext === 'string')
 		wikitext = [ wikitext ];
 	else if (get_page_content.is_page_data(wikitext)) {
@@ -661,72 +689,297 @@ function parse_page(wikitext, options) {
 		tmp.page = wikitext;
 		wikitext = Object.create(tmp, page_parameters);
 	} else
-		throw new Error('parse_page: Unknown wikitext.');
+		throw new Error('wiki_page: Unknown wikitext.');
 
 	if (library_namespace.is_Object(options))
 		wikitext.options = options;
 	// copy prototype methods
 	Object.assign(wikitext, page_prototype);
+	set_wiki_methods(wikitext, 'text');
 	return wikitext;
 }
 
-function for_each_token(type, processor) {
-	;
+function for_each_text(processor, modify_this) {
+	this.forEach(function(token, index) {
+		if (typeof token === 'string') {
+			// get result
+			token = processor(token);
+			if (modify_this) {
+				if (this.type === 'text' && token.type === 'text'
+						&& token.length > 1) {
+					// 經過改變，需再進一步處理。
+					for_each_text.call(token, processor, modify_this);
+					token.unshift(index, 1);
+					this[index].splice(token);
+
+				} else if (this[index] !== token) {
+					this[index] = token;
+					// 經過改變，需再進一步處理。
+					if (Array.isArray(token))
+						for_each_text.call(token, processor, modify_this);
+				}
+			}
+
+		} else if (Array.isArray(token) && !token.is_atom)
+			for_each_text.call(token, processor, modify_this);
+	}, this);
+
+	return this;
 }
 
+wiki_page.type_alias = {
+	template : 'transclusion'
+};
+
+// 觸發器 : function(Array inside node)
+function for_each_token(type, trigger) {
+	if (type in wiki_page.type_alias)
+		type = wiki_page.type_alias[type];
+
+	this.forEach(function(token, index) {
+		if (Array.isArray(token)) {
+			if (token.type === type)
+				trigger(token);
+			// is_atom: 不包含可 parse 之要素，不包含 text。
+			if (!token.is_atom)
+				for_each_token.call(token, type, trigger);
+		}
+	}, this);
+
+	return this;
+}
+
+
+function parse_page() {
+	// 範圍由大到小。
+	// e.g., transclusion 不能包括 table，因此在 table 後。
+	// this.each_text(parse_comment, true);
+	// this.each_text(parse_table, true);
+	// this.each_text(parse_transclusion, true);
+	// this.each_text(parse_link, true);
+	if (!this.parsed) {
+		// assert: this = [ {String} ]
+		var parsed = parse_wikitext(this[0]);
+		// library_namespace.log(parsed);
+		if (Array.isArray(parsed) && parsed.type === 'text') {
+			this.pop();
+			Array.prototype.push.apply(this, parsed);
+		} else
+			this[0] = parsed;
+		this.parsed = true;
+	}
+	return this;
+}
+
+function resolve_escaped(queue, include_mark, end_mark) {
+	library_namespace.debug('queue: ' + queue.join('\n--- '), 4,
+			'resolve_escaped');
+	queue.forEach(function(item, index) {
+		library_namespace.debug([ 'item', index, item ], 4, 'resolve_escaped');
+		if (typeof item !== 'string')
+			// assert: Array.isArray(item)
+			return;
+
+		// result queue
+		var result = [];
+
+		item.split(include_mark).forEach(function(token, index) {
+			if (index === 0) {
+				if (token)
+					result.push(token);
+				return;
+			}
+			index = token.indexOf(end_mark);
+			if (index === 0) {
+				result.push(include_mark);
+				return;
+			}
+			result.push(queue[+token.slice(0, index)]);
+			if (token = token.slice(index + end_mark.length))
+				result.push(token);
+		});
+
+		if (result.length > 1)
+			set_wiki_methods(result, 'text');
+		else
+			result = result[0];
+		queue[index] = result;
+	});
+}
+
+
+// 經測試發現 {{...}} 名稱中不可有 [{}<>\[\]]
+// while(/{{{[^{}\[\]]+}}}/g.exec(wikitext));
+// 模板名#後的內容會忽略。
+var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
+//
+PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g;
+
 /**
- * parse The MediaWiki markup language (wikitext) [[:en:Wiki markup]], [[Wiki標記式語言]]
- * TODO
- *
+ * parse The MediaWiki markup language (wikitext) [[:en:Wiki markup]],
+ * [[Wiki標記式語言]] TODO
+ * 
  * @param {String}wikitext
  *            wikitext to parse
- * @param {Object}trigger
- *            觸發器 { node name : function(Array inside node) }
- *
- * @returns {Array}
+ * @param {Array}queue
+ *            temporary queue
+ * 
+ * @returns {Array}parsed data
  * 
  * @see https://www.mediawiki.org/wiki/Markup_spec/BNF/Article
- * https://www.mediawiki.org/wiki/Markup_spec/BNF/Inline_text
- * https://www.mediawiki.org/wiki/Markup_spec
- * https://www.mediawiki.org/wiki/Wikitext
- * https://doc.wikimedia.org/mediawiki-core/master/php/html/Parser_8php.html
- * Parser.php: PHP parser that converts wiki markup to HTML.
+ *      https://www.mediawiki.org/wiki/Markup_spec/BNF/Inline_text
+ *      https://www.mediawiki.org/wiki/Markup_spec
+ *      https://www.mediawiki.org/wiki/Wikitext
+ *      https://doc.wikimedia.org/mediawiki-core/master/php/html/Parser_8php.html
+ *      Parser.php: PHP parser that converts wiki markup to HTML.
  * 
  */
-function parse_wikitext(wikitext, trigger) {
-	// test 發現 {{...}} 名稱中不可有 [{}<>\[\]]
-	//while(/{{{[^{}\[\]]+}}}/.exec(wikitext));
-	
+function parse_wikitext(wikitext, queue) {
 	if (!wikitext)
-		return [];
+		return wikitext;
 
 	// 找出一個文件中不可包含的字串，作為解析用之特殊標記。
-	var prefix = '\0', postfix = ';', result = [];
-	wikitext = wikitext.replace(/\0/g, '');
+	// '\u0000'
+	var include_mark = '\0',
+	// end of include_mark
+	end_mark = ';';
+
+	if (!queue) {
+		// 初始化
+		wikitext = wikitext.replace(
+		// 先 escape 掉會造成問題之 chars。
+		new RegExp(include_mark.replace(/([\s\S])/g, '\\$1'), 'g'),
+				include_mark + end_mark);
+		// temporary queue
+		queue = [];
+	}
+
+	// queue.type='text';
 
 	// 找出完整的最小單元。
-	// TODO
 
+	// {{{...}}} 需在 {{...}} 之前解析。
 	// https://zh.wikipedia.org/wiki/Help:%E6%A8%A1%E6%9D%BF
-	// TODO: 在模板頁面中，用三個大括弧可以讀取參數
+	// 在模板頁面中，用三個大括弧可以讀取參數
 	// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
+	wikitext = wikitext.replace_till_stable(/{{{([^{}].*?)}}}/g, function(all,
+			parameters) {
+		var index = parameters.lastIndexOf('{{{'), prevoius;
+		if (index > 0) {
+			prevoius = '{{{' + parameters.slice(0, index);
+			parameters = parameters.slice(index + '}}}'.length);
+		} else {
+			prevoius = '';
+		}
+		library_namespace.debug(prevoius + ' + ' + parameters, 4,
+				'parse_wikitext.parameter');
+
+		// 經過改變，需再進一步處理。
+		parameters = parameters.split('|').map(
+				function(token, index) {
+					return index === 0 ? set_wiki_methods(token, 'page_title')
+							: parse_wikitext(token, queue);
+				});
+		set_wiki_methods(parameters, 'parameter');
+		queue.push(parameters);
+		return prevoius + include_mark + (queue.length - 1) + end_mark;
+	});
 
 	// 模板（英語：Template，又譯作「樣板」、「範本」）
-	// 模板名#後的內容會忽略。
-	// [ , Template name, parameters ]
-	/{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?(\|[^{}<>\[\]]*)?}}/;
-	/\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/;
+	// PATTERN_transclusion
+	wikitext = wikitext.replace_till_stable(/{{([^{}].*?)}}/g,
+	//
+	function(all, parameters) {
+		var index = parameters.lastIndexOf('{{'), prevoius;
+		if (index > 0) {
+			prevoius = '{{' + parameters.slice(0, index);
+			parameters = parameters.slice(index + '}}'.length);
+		} else {
+			prevoius = '';
+		}
+		library_namespace.debug(prevoius + ' + ' + parameters, 4,
+				'parse_wikitext.transclusion');
+
+		// 經過改變，需再進一步處理。
+		parameters = parameters.split('|').map(
+				function(token, index) {
+					return index === 0 ? set_wiki_methods(token, 'page_title')
+							: parse_wikitext(token, queue);
+				});
+		set_wiki_methods(parameters, 'transclusion');
+		queue.push(parameters);
+		return prevoius + include_mark + (queue.length - 1) + end_mark;
+	});
+
+	// PATTERN_link
+	wikitext = wikitext.replace_till_stable(/\[\[([^\[\]]+)\]\]/g, function(
+			all, parameters) {
+		var index = parameters.lastIndexOf('[['), prevoius;
+		if (index > 0) {
+			prevoius = '[[' + parameters.slice(0, index);
+			parameters = parameters.slice(index + ']]'.length);
+		} else {
+			prevoius = '';
+		}
+		library_namespace.debug(prevoius + ' + ' + parameters, 4,
+				'parse_wikitext.link');
+
+		// 經過改變，需再進一步處理。
+		parameters = parameters.split('|').map(
+				function(token, index) {
+					return index === 0 ? set_wiki_methods(token, 'page_title')
+							: parse_wikitext(token, queue);
+				});
+		set_wiki_methods(parameters, 'link');
+		queue.push(parameters);
+		return prevoius + include_mark + (queue.length - 1) + end_mark;
+	});
+
+	wikitext = wikitext.replace_till_stable(/\[([^\[\]]+)\]/g,
+	//
+	function(all, parameters) {
+		var index = parameters.lastIndexOf('['), prevoius;
+		if (index > 0) {
+			prevoius = '[' + parameters.slice(0, index);
+			parameters = parameters.slice(index + ']'.length);
+		} else {
+			prevoius = '';
+		}
+		library_namespace.debug(prevoius + ' + ' + parameters, 4,
+				'parse_wikitext.external_link');
+
+		// 經過改變，需再進一步處理。
+		parameters = parameters.split(' ').map(
+				function(token, index) {
+					return index === 0 ? set_wiki_methods(token, 'page_title')
+							: parse_wikitext(token, queue);
+				});
+		set_wiki_methods(parameters, 'external_link');
+		queue.push(parameters);
+		return prevoius + include_mark + (queue.length - 1) + end_mark;
+	});
+
+	if (false) {
+		// another method to parse.
+		wikitext = '{{temp|{{temp2|p{a}r{}}}}}';
+		pattern = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)/g;
+		matched = pattern.exec(wikitext);
+		end_index = wikitext.indexOf('}}', pattern.lastIndex);
+	}
+
+	// TODO
 
 	/\[\[([^\|\[\]{}]+)/g;
 	/-{[^{]/g;
 	/}}}?/g;
 
-	// parse_wikitext('a{{temp|{{temp2|p{a}r}}}}b');
-	wikitext = '{{temp|{{temp2|p{a}r{}}}}}';
-	pattern = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)/g;
-	matched = pattern.exec(wikitext);
-	end_index = wikitext.indexOf('}}', pattern.lastIndex);
+	queue.push(wikitext);
+	resolve_escaped(queue, include_mark, end_mark);
+
+	return queue[queue.length - 1];
 }
+
+wiki_page.parse_wikitext = parse_wikitext;
 
 
 // parse Date
@@ -738,7 +991,7 @@ function parse_Date(wikitext) {
 	.replace(/日\s*\([^()]+\)/, '日 ')
 	// Warning: need data.date.
 	.to_Date();
-};
+}
 
 // parse user name
 function parse_user(wikitext) {
@@ -747,7 +1000,7 @@ function parse_user(wikitext) {
 	/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论)|用戶(?:討論))\s*:\s*([^\|\]]+)/i);
 	if (matched)
 		return matched[1].trim();
-};
+}
 
 
 // 若重定向到其他頁面，則回傳其頁面名。
@@ -757,13 +1010,14 @@ function parse_redirect(wikitext) {
 	/(?:^|[\s\n]*)#(?:REDIRECT|重定向)\s*\[\[([^\]]+)\]\]/i);
 	if (matched)
 		return matched[1].trim();
-};
+}
 
-Object.assign(parse_page, {
+Object.assign(wiki_page, {
 	Date : parse_Date,
 	user : parse_user,
 	redirect : parse_redirect
 });
+
 
 //---------------------------------------------------------------------//
 
@@ -3455,7 +3709,7 @@ Object.assign(wiki_API, {
 	file_pattern : file_pattern,
 	template_token : template_token,
 
-	parse : parse_page,
+	wiki_page : wiki_page,
 
 	content_of : get_page_content,
 	title_of : get_page_title,
