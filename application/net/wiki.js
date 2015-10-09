@@ -568,7 +568,7 @@ function template_token(wikitext, template_name, no_parse) {
 
 
 
-var wiki_page = CeL.parse_wikitext(page_data);
+var wiki_page = CeL.parse_wiki_page(page_data);
 wiki_page.each_transclusion(function(name, parameters) {
 	// this = list;
 	;
@@ -581,6 +581,9 @@ return wiki_page.toString();
 // 可順便做正規化，例如修復章節標題 section title 前後 level 不一，
 // table "|-" 未起新行等。
 var wiki_toString = {
+	// Internal/interwiki link : language links : category links, file, subst, ... : title
+	// e.g., [[m:en:Help:Parser function]]
+	// https://www.mediawiki.org/wiki/Markup_spec#Namespaces
 	namespace : function() {
 		return this.join(':');
 	},
@@ -637,14 +640,16 @@ var wiki_toString = {
 /*
 
 should use:
-class WikiPage extends Array {  }
+class Wiki_page extends Array { }
 http://www.2ality.com/2015/02/es6-classes-final.html
 
 */
 var page_prototype = {
 		type : 'wiki',
 		each : for_each_token,
-		parse : parse_wikitext,
+		parse : function() {
+			this.each(parse_wikitext.bind(this), 'text');
+		},
 		toString : wiki_toString.text
 };
 
@@ -680,13 +685,18 @@ function for_each_token(type, processor) {
  *
  * @returns {Array}
  * 
- * @see https://www.mediawiki.org/wiki/Wikitext
+ * @see https://www.mediawiki.org/wiki/Markup_spec/BNF/Article
+ * https://www.mediawiki.org/wiki/Markup_spec/BNF/Inline_text
  * https://www.mediawiki.org/wiki/Markup_spec
+ * https://www.mediawiki.org/wiki/Wikitext
  * https://doc.wikimedia.org/mediawiki-core/master/php/html/Parser_8php.html
  * Parser.php: PHP parser that converts wiki markup to HTML.
  * 
  */
 function parse_wikitext(wikitext, trigger) {
+	// test 發現 {{...}} 名稱中不可有 [{}<>\[\]]
+	//while(/{{{[^{}\[\]]+}}}/.exec(wikitext));
+	
 	if (!wikitext)
 		return [];
 
@@ -749,7 +759,7 @@ function parse_redirect(wikitext) {
 		return matched[1].trim();
 };
 
-Object.assign(parse_wikitext, {
+Object.assign(parse_page, {
 	Date : parse_Date,
 	user : parse_user,
 	redirect : parse_redirect
@@ -1729,7 +1739,7 @@ CeL.wiki.page('道', function(p) {
  * @param {Function}callback
  *            回調函數。 callback(page_data) { page_data.title; var content = CeL.wiki.content_of(page_data); }
  * @param {Object}[options]
- *            附加參數/設定特殊功能與選項
+ *            附加參數/設定選擇性/特殊功能與選項
  *
  * @see https://en.wikipedia.org/w/api.php?action=help&modules=query%2Brevisions
  */
@@ -1852,7 +1862,7 @@ CeL.wiki.langlinks('語言',function(p){if(p)CeL.show_value(p);},10)
  * @param {String}to_lang
  * 所欲求語言
  * @param {Object}[options]
- *            附加參數/設定特殊功能與選項
+ *            附加參數/設定選擇性/特殊功能與選項
  */
 wiki_API.langlinks = function(title, callback, to_lang, options) {
 	var from_lang;
@@ -2338,7 +2348,7 @@ get_list.type = {
  * @param {Function}callback
  *            回調函數。 callback(pages, target, options)
  * @param {Object}[options]
- *            附加參數/設定特殊功能與選項
+ *            附加參數/設定選擇性/特殊功能與選項
  */
 wiki_API.list = function(target, callback, options) {
 	// 前置處理。
@@ -2501,7 +2511,7 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
  * @param {Function}callback
  *            回調函數。 callback({Boolean}need stop)
  * @param {Object}[options]
- *            附加參數/設定特殊功能與選項
+ *            附加參數/設定選擇性/特殊功能與選項
  * 
  * @see https://www.mediawiki.org/wiki/Manual:Parameters_to_index.php#Edit_and_submit
  *      https://www.mediawiki.org/wiki/Help:Magic_words#URL_encoded_page_names
@@ -2605,7 +2615,7 @@ wiki_API.check_stop.pattern = /\n=([^\n]+)=\n/;
  * @param {Object}token
  *            “csrf”令牌。
  * @param {Object}[options]
- *            附加參數/設定特殊功能與選項
+ *            附加參數/設定選擇性/特殊功能與選項
  * @param {Function}callback
  *            回調函數。 callback(title, error, result)
  * @param {String}timestamp
@@ -2735,7 +2745,7 @@ wiki_API.edit.cancel = {
  * wiki_API.edit.set_stamp]。
  * 
  * @param {Object}options
- *            附加參數/設定特殊功能與選項
+ *            附加參數/設定選擇性/特殊功能與選項
  * @param {String}timestamp
  *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
  * 
@@ -2859,7 +2869,7 @@ wiki_API.edit.denied.all = /(?:^|[\s,])all(?:$|[\s,])/;
  * @param {Function}callback
  *            回調函數。 callback(key, pages, hits)
  * @param {Object}options
- *            附加參數/設定特殊功能與選項
+ *            附加參數/設定選擇性/特殊功能與選項
  * 
  * @see https://www.mediawiki.org/wiki/API:Search_and_discovery
  * @see https://www.mediawiki.org/wiki/Help:CirrusSearch
@@ -2914,7 +2924,7 @@ wiki_API.search.default_parameter = {
  * @param {Function}callback
  *            callback(root_page_data, redirect_list) { redirect_list = [ page_data, page_data, ... ]; }
  * @param {Object}[options]
- *            附加參數/設定特殊功能與選項. 此 options 可能會被變更!<br />
+ *            附加參數/設定選擇性/特殊功能與選項. 此 options 可能會被變更!<br />
  *            {Boolean}options.no_trace: 若頁面還重定向到其他頁面則不溯源。溯源時 title 將以 root 替代。<br />
  *            {Boolean}options.include_root 回傳 list 包含 title，而不只是所有 redirect 到
  *            [[title]] 之 pages。
@@ -3445,8 +3455,7 @@ Object.assign(wiki_API, {
 	file_pattern : file_pattern,
 	template_token : template_token,
 
-	// TODO
-	//parse : parse_page,
+	parse : parse_page,
 
 	content_of : get_page_content,
 	title_of : get_page_title,
