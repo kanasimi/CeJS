@@ -577,7 +577,7 @@ return wiki_page.toString();
 */
 
 
-// 可順便做正規化，例如修復章節標題 section title 前後 level 不一，
+// 可順便作正規化，例如修復章節標題 section title 前後 level 不一，
 // table "|-" 未起新行等。
 var wiki_toString = {
 	// Internal/interwiki link : language links : category links, file, subst,
@@ -598,6 +598,9 @@ var wiki_toString = {
 	external_link : function() {
 		return '[' + this.join(' ') + ']';
 	},
+	URL : function() {
+		return this.join('');
+	},
 	// template parameter
 	parameter : function() {
 		return '{{{' + this.join('|') + '}}}';
@@ -608,20 +611,28 @@ var wiki_toString = {
 	},
 	// https://meta.wikimedia.org/wiki/Help:Table
 	table : function() {
-		return '{|' + this.join('\n|-') + '|}';
+		// this: [ table style, row, row, ... ]
+		return '{|' + this.join('\n|-') + '\n|}';
 	},
-	table_header : function() {
-		return this.join('!');
+	table_row : function() {
+		// this: [ row style, cell, cell, ... ]
+		return this.join('');
 	},
 	table_cell : function() {
-		return this.join('|');
+		// this: [ type /\n[!|]|!!|\|\|/, contents ]
+		return this.join('');
 	},
-	// https://zh.wikipedia.org/wiki/Help:%E9%AB%98%E7%BA%A7%E5%AD%97%E8%AF%8D%E8%BD%AC%E6%8D%A2%E8%AF%AD%E6%B3%95
-	converter : function() {
+	style : function() {
+		return this.join('');
+	},
+	// [[H:Convert]]
+	convert : function() {
 		return '-{' + this.join('|') + '}-';
 	},
+	// section title
 	title : function() {
-		return this.join(' ') + '\n';
+		var level = '='.repeat(this.level);
+		return level + this[0] + level + (this.postfix || '');
 	},
 	html : function() {
 		return this.join('');
@@ -644,16 +655,22 @@ var wiki_toString = {
 
 // comments, transclusion
 
+var atom_type = {
+	namespace : true,
+	page_title : true,
+	title : true,
+	external_link : true,
+	URL : true,
+	style : true,
+	comment : true
+};
+
 // {Array}token
 function set_wiki_methods(token, type) {
 	if (typeof token === 'string')
 		token = [ token ];
 	token.type = type;
-	token.is_atom = type in {
-		namespace : true,
-		page_title : true,
-		comment : true
-	};
+	token.is_atom = type in atom_type;
 	token.toString = wiki_toString[type];
 	return token;
 }
@@ -674,10 +691,12 @@ var page_prototype = {
 
 
 if (false) {
-	CeL.wiki.wiki_page.parse_wikitext('{{temp|{{temp2|p{a}r{}}}}}');
-	JSON.stringify(CeL.wiki.wiki_page.parse_wikitext('a{{temp|e{{temp2|p{a}r}}}}b'));
+	CeL.wiki.wiki_page.parse('{{temp|{{temp2|p{a}r{}}}}}');
+	JSON.stringify(CeL.wiki.wiki_page.parse('a{{temp|e{{temp2|p{a}r}}}}b'));
 	CeL.wiki.wiki_page('a{{temp|e{{temp2|p{a}r}}}}b').parse().each_text(function(token) { CeL.log(token); });
 	CeL.wiki.wiki_page('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('template', function(template) { CeL.log(template.toString()); }) && '';
+	CeL.wiki.wiki_page('a{{temp|e{{temp2|p{a}r}}}}b<!--ff[[r]]-->[[t|e]]\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}[http://r.r ee]').parse();
+	CeL.wiki.wiki_page('\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function(table) { CeL.log(table); }) && '';
 }
 
 
@@ -704,7 +723,7 @@ function for_each_text(processor, modify_this) {
 		if (typeof token === 'string') {
 			// get result
 			token = processor(token);
-			if (modify_this) {
+			if (false && modify_this) {
 				if (this.type === 'text' && token.type === 'text'
 						&& token.length > 1) {
 					// 經過改變，需再進一步處理。
@@ -728,6 +747,7 @@ function for_each_text(processor, modify_this) {
 }
 
 wiki_page.type_alias = {
+	row : 'table_row',
 	template : 'transclusion'
 };
 
@@ -750,7 +770,7 @@ function for_each_token(type, trigger) {
 }
 
 
-function parse_page() {
+function parse_page(options) {
 	// 範圍由大到小。
 	// e.g., transclusion 不能包括 table，因此在 table 後。
 	// this.each_text(parse_comment, true);
@@ -759,7 +779,7 @@ function parse_page() {
 	// this.each_text(parse_link, true);
 	if (!this.parsed) {
 		// assert: this = [ {String} ]
-		var parsed = parse_wikitext(this[0]);
+		var parsed = parse_wikitext(this[0], options);
 		// library_namespace.log(parsed);
 		if (Array.isArray(parsed) && parsed.type === 'text') {
 			this.pop();
@@ -816,54 +836,85 @@ var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|
 PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g;
 
 /**
- * parse The MediaWiki markup language (wikitext) [[:en:Wiki markup]],
- * [[Wiki標記式語言]] TODO
+ * parse The MediaWiki markup language (wikitext)
+ * 
+ * 此功能之工作機制/原理：<br />
+ * 找出完整的最小單元，並將之 push 入 queue，並把原 string 中之單元 token 替換成:<br />
+ * {String}include_mark + ({Integer}index of queue) + end_mark<br />
+ * e.g.,<br />
+ * "a[[p]]b{{t}}" →<br />
+ * "a[[p]]b\00;", queue = [ ["t"].type='transclusion' ] →<br />
+ * "a\01;b\00;", queue = [ ["t"].type='transclusion', ["p"].type='link' ]<br />
+ * 最後再依 queue 與剩下的 wikitext 作 resolve。
  * 
  * @param {String}wikitext
  *            wikitext to parse
- * @param {Array}queue
- *            temporary queue
+ * @param {Object}[options]
+ *            附加參數/設定選擇性/特殊功能與選項
+ * @param {Array}[queue]
+ *            temporary queue. 基本上僅供內部使用。
  * 
  * @returns {Array}parsed data
  * 
- * @see https://www.mediawiki.org/wiki/Markup_spec/BNF/Article
+ * @see [[:en:Wiki markup]], [[Wiki標記式語言]]
+ *      https://www.mediawiki.org/wiki/Markup_spec/BNF/Article
  *      https://www.mediawiki.org/wiki/Markup_spec/BNF/Inline_text
  *      https://www.mediawiki.org/wiki/Markup_spec
  *      https://www.mediawiki.org/wiki/Wikitext
  *      https://doc.wikimedia.org/mediawiki-core/master/php/html/Parser_8php.html
  *      Parser.php: PHP parser that converts wiki markup to HTML.
- * 
  */
-function parse_wikitext(wikitext, queue) {
+function parse_wikitext(wikitext, options, queue) {
 	if (!wikitext)
 		return wikitext;
 
-	// 找出一個文件中不可包含的字串，作為解析用之特殊標記。
-	// '\u0000'
-	var include_mark = '\0',
-	// end of include_mark
-	end_mark = ';';
+	/**
+	 * 找出一個文件中不可包含的字串，作為解析用之特殊標記。<br />
+	 * e.g., '\u0000'.<br />
+	 * include_mark + ({Integer}index of queue) + end_mark
+	 * 
+	 * @type {String}
+	 */
+	var include_mark = options && options.include_mark || '\0',
+	/** {String}end of include_mark. 不可為數字 (\d) 或 include_mark。 */
+	end_mark = options && options.end_mark || ';',
+	/** {Boolean}是否順便作正規化。預設不會作正規化。 */
+	normalize = options && options.normalize,
+	/** {Boolean}是否需要初始化。 */
+	need_initialize = !queue;
 
-	if (!queue) {
+	if (/\d/.test(end_mark) || include_mark.includes(end_mark))
+		throw new Error('Error end of include_mark!');
+
+	if (need_initialize) {
 		// 初始化
-		wikitext = wikitext.replace(
+		wikitext = wikitext.replace(/\r\n/g, '\n').replace(
 		// 先 escape 掉會造成問題之 chars。
 		new RegExp(include_mark.replace(/([\s\S])/g, '\\$1'), 'g'),
 				include_mark + end_mark);
 		// temporary queue
 		queue = [];
+
+		if (options && typeof options.prefix === 'function')
+			wikitext = options.prefix(wikitext, queue, include_mark, end_mark);
 	}
 
-	// queue.type='text';
+	// start parse
 
-	// 找出完整的最小單元。
+	// "<\": for Eclipse JSDoc.
+	wikitext = wikitext.replace_till_stable(/<\!--([\s\S]*?)-->/g, function(
+			all, parameters) {
+		queue.push(set_wiki_methods(parameters, 'comment'));
+		return include_mark + (queue.length - 1) + end_mark;
+	});
 
 	// {{{...}}} 需在 {{...}} 之前解析。
 	// https://zh.wikipedia.org/wiki/Help:%E6%A8%A1%E6%9D%BF
 	// 在模板頁面中，用三個大括弧可以讀取參數
 	// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
-	wikitext = wikitext.replace_till_stable(/{{{([^{}].*?)}}}/g, function(all,
-			parameters) {
+	wikitext = wikitext.replace_till_stable(/{{{([^{}][\s\S]*?)}}}/g, function(
+			all, parameters) {
+		// 自 end_mark 向前回溯。
 		var index = parameters.lastIndexOf('{{{'), prevoius;
 		if (index > 0) {
 			prevoius = '{{{' + parameters.slice(0, index);
@@ -874,11 +925,12 @@ function parse_wikitext(wikitext, queue) {
 		library_namespace.debug(prevoius + ' + ' + parameters, 4,
 				'parse_wikitext.parameter');
 
-		// 經過改變，需再進一步處理。
 		parameters = parameters.split('|').map(
 				function(token, index) {
-					return index === 0 ? set_wiki_methods(token, 'page_title')
-							: parse_wikitext(token, queue);
+					return index === 0 ? set_wiki_methods(token.split(':'),
+							'page_title')
+					// 經過改變，需再進一步處理。
+					: parse_wikitext(token, options, queue);
 				});
 		set_wiki_methods(parameters, 'parameter');
 		queue.push(parameters);
@@ -887,9 +939,10 @@ function parse_wikitext(wikitext, queue) {
 
 	// 模板（英語：Template，又譯作「樣板」、「範本」）
 	// PATTERN_transclusion
-	wikitext = wikitext.replace_till_stable(/{{([^{}].*?)}}/g,
+	wikitext = wikitext.replace_till_stable(/{{([^{}][\s\S]*?)}}/g,
 	//
 	function(all, parameters) {
+		// 自 end_mark 向前回溯。
 		var index = parameters.lastIndexOf('{{'), prevoius;
 		if (index > 0) {
 			prevoius = '{{' + parameters.slice(0, index);
@@ -900,20 +953,45 @@ function parse_wikitext(wikitext, queue) {
 		library_namespace.debug(prevoius + ' + ' + parameters, 4,
 				'parse_wikitext.transclusion');
 
-		// 經過改變，需再進一步處理。
 		parameters = parameters.split('|').map(
 				function(token, index) {
-					return index === 0 ? set_wiki_methods(token, 'page_title')
-							: parse_wikitext(token, queue);
+					return index === 0 ? set_wiki_methods(token.split(':'),
+							'page_title')
+					// 經過改變，需再進一步處理。
+					: parse_wikitext(token, options, queue);
 				});
 		set_wiki_methods(parameters, 'transclusion');
 		queue.push(parameters);
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
 
+	wikitext = wikitext.replace_till_stable(/-{(.+?)}-/g, function(all,
+			parameters) {
+		// 自 end_mark 向前回溯。
+		var index = parameters.lastIndexOf('-{'), prevoius;
+		if (index > 0) {
+			prevoius = '-{' + parameters.slice(0, index);
+			parameters = parameters.slice(index + '}-'.length);
+		} else {
+			prevoius = '';
+		}
+		library_namespace.debug(prevoius + ' + ' + parameters, 4,
+				'parse_wikitext.convert');
+
+		parameters = parameters.split('|').map(function(token, index) {
+			// 經過改變，需再進一步處理。
+			return parse_wikitext(token, options, queue);
+		});
+		set_wiki_methods(parameters, 'convert');
+		queue.push(parameters);
+		return prevoius + include_mark + (queue.length - 1) + end_mark;
+	});
+
 	// PATTERN_link
+	// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可!
 	wikitext = wikitext.replace_till_stable(/\[\[([^\[\]]+)\]\]/g, function(
 			all, parameters) {
+		// 自 end_mark 向前回溯。
 		var index = parameters.lastIndexOf('[['), prevoius;
 		if (index > 0) {
 			prevoius = '[[' + parameters.slice(0, index);
@@ -924,39 +1002,83 @@ function parse_wikitext(wikitext, queue) {
 		library_namespace.debug(prevoius + ' + ' + parameters, 4,
 				'parse_wikitext.link');
 
-		// 經過改變，需再進一步處理。
-		parameters = parameters.split('|').map(
-				function(token, index) {
-					return index === 0 ? set_wiki_methods(token, 'page_title')
-							: parse_wikitext(token, queue);
-				});
+		parameters = parameters.split('|').map(function(token, index) {
+			return index === 0 ? set_wiki_methods(
+			// [[: en : abc]] is OK,
+			// [[ : en : abc]] is NOT OK.
+			token.split(normalize ? /\s*:\s*/ : ':'), 'namespace')
+			// 經過改變，需再進一步處理。
+			: parse_wikitext(token, options, queue);
+		});
 		set_wiki_methods(parameters, 'link');
 		queue.push(parameters);
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
 
-	wikitext = wikitext.replace_till_stable(/\[([^\[\]]+)\]/g,
+	wikitext = wikitext.replace_till_stable(
+	// 若為結尾 /$/ 亦會 parse 成 external link。
+	/\[((?:https?:|ftp:)?\/\/[^\/\s][^\s]+)((?:\s[^\]]*)?)(?:\]|$)/gi,
 	//
-	function(all, parameters) {
-		var index = parameters.lastIndexOf('['), prevoius;
-		if (index > 0) {
-			prevoius = '[' + parameters.slice(0, index);
-			parameters = parameters.slice(index + ']'.length);
-		} else {
-			prevoius = '';
-		}
-		library_namespace.debug(prevoius + ' + ' + parameters, 4,
-				'parse_wikitext.external_link');
+	function(all, URL, parameters) {
+		URL = [ set_wiki_methods(URL, 'URL') ];
+		if (normalize)
+			parameters = parameters.trim();
+		if (parameters)
+			URL.push(parameters);
+		set_wiki_methods(URL, 'external_link');
+		queue.push(URL);
+		return include_mark + (queue.length - 1) + end_mark;
+	});
 
-		// 經過改變，需再進一步處理。
-		parameters = parameters.split(' ').map(
-				function(token, index) {
-					return index === 0 ? set_wiki_methods(token, 'page_title')
-							: parse_wikitext(token, queue);
-				});
-		set_wiki_methods(parameters, 'external_link');
+	// 經測試，table 不會向前回溯。
+	wikitext = wikitext.replace_till_stable(/\n{\|([\s\S]*?)\n\|}/g, function(
+			all, parameters) {
+		parameters = parameters.split('\n|-').map(function(token, index) {
+			if (index === 0
+			// 含有 delimiter 的話，即使位在 "{|" 之後，依舊會被當作 row。
+			&& !/\n[!|]|!!|\|\|/.test(token)) {
+				// table style
+				return set_wiki_methods(token, 'style');
+			}
+			var row, matched, separater,
+			// 必須有實體才能如預期作 .exec()。
+			pattern = /([\s\S]*?)(\n[!|]|!!|\|\||$)/g;
+			while (matched = pattern.exec(token)) {
+				if (row)
+					row.push(set_wiki_methods([ separater,
+					// 經過改變，需再進一步處理。
+					parse_wikitext(matched[1], options, queue) ],
+					//
+					'table_cell'));
+				else
+					row = [ set_wiki_methods(token.slice(0, matched.index),
+					// row style
+					'style') ];
+				separater = matched[2];
+				if (!separater)
+					// ended.
+					break;
+			}
+			return set_wiki_methods(row, 'table_row');
+		});
+
+		set_wiki_methods(parameters, 'table');
 		queue.push(parameters);
-		return prevoius + include_mark + (queue.length - 1) + end_mark;
+		return include_mark + (queue.length - 1) + end_mark;
+	});
+
+	// TODO: HTML tags, Magic words
+
+	wikitext = wikitext.replace_till_stable(/\n(=+)(.+)\1(\s*)\n/g, function(
+			all, prefix, parameters, postfix) {
+		if (normalize)
+			parameters = parameters.trim();
+		else if (postfix)
+			(parameters = [ parameters ]).postfix = postfix;
+		set_wiki_methods(parameters, 'title');
+		parameters.level = prefix.length;
+		queue.push(parameters);
+		return '\n' + include_mark + (queue.length - 1) + end_mark + '\n';
 	});
 
 	if (false) {
@@ -965,13 +1087,12 @@ function parse_wikitext(wikitext, queue) {
 		pattern = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)/g;
 		matched = pattern.exec(wikitext);
 		end_index = wikitext.indexOf('}}', pattern.lastIndex);
+
+		/\[\[([^\|\[\]{}]+)/g;
 	}
 
-	// TODO
-
-	/\[\[([^\|\[\]{}]+)/g;
-	/-{[^{]/g;
-	/}}}?/g;
+	if (need_initialize && options && typeof options.postfix === 'function')
+		wikitext = options.postfix(wikitext, queue, include_mark, end_mark);
 
 	queue.push(wikitext);
 	resolve_escaped(queue, include_mark, end_mark);
@@ -979,7 +1100,7 @@ function parse_wikitext(wikitext, queue) {
 	return queue[queue.length - 1];
 }
 
-wiki_page.parse_wikitext = parse_wikitext;
+wiki_page.parse = parse_wikitext;
 
 
 // parse Date

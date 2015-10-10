@@ -2055,7 +2055,9 @@ function replace_check_near(text, pattern, replace_to, match_previous,
 			last_index = _last_index;
 		}
 	}
-	results.push(text.slice(last_index));
+	// 收尾。理想的 pattern 應該用 /([\s\S]*?)(delimiter|$)/g 之類，如此則無須收尾。
+	if (last_index < text.length)
+		results.push(text.slice(last_index));
 	return results.join('');
 }
 
