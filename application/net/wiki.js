@@ -495,8 +495,8 @@ var wiki_toString = {
 	},
 	table_cell : function() {
 		// this: [ contents ]
-		// this.delimiter: /\n[!|]|!!|\|\|/
-		return this.delimiter + this.join('');
+		// this.delimiter: /\n[!|]|!!|\|\|/ or undefined (在 style/第一區間就已當作 cell)
+		return (this.delimiter || '') + this.join('');
 	},
 	// attributes, styles
 	style : function() {
@@ -509,7 +509,9 @@ var wiki_toString = {
 	// section title
 	title : function() {
 		var level = '='.repeat(this.level);
-		return level + this[0] + level + (this.postfix || '');
+		return level
+		// this.join(''): 必須與 text 相同。見 parse_wikitext.title。
+		+ this.join('') + level + (this.postfix || '');
 	},
 	tag : function() {
 		return '<' + this.tag + (this.attribute || '') + '>' + this.join('') + '</' + this.tag + '>';
@@ -517,7 +519,7 @@ var wiki_toString = {
 	tag_single : function() {
 		return '<' + this.tag + (this.attribute || '') + this.join('') + '>';
 	},
-	// comments
+	// comments: <!-- ... -->
 	comment : function() {
 		// "<\": for Eclipse JSDoc.
 		return '<\!--' + this.join('') + '-->';
@@ -547,8 +549,11 @@ var atom_type = {
 
 // {Array}token
 function set_wiki_type(token, type) {
-	if (typeof token === 'string')
+	if (typeof token === 'string') {
 		token = [ token ];
+	} else if (!Array.isArray(token)) {
+		library_namespace.warn('set_wiki_type: The token is not Array!');
+	}
 	// assert: Array.isArray(token)
 	token.type = type;
 	token.is_atom = type in atom_type;
@@ -585,7 +590,23 @@ if (false) {
 	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each_text(function(token) { CeL.log(token); });
 	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('template', function(template) { CeL.log(template.toString()); }) && '';
 	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b<!--ff[[r]]-->[[t|e]]\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}[http://r.r ee]').parse();
-	CeL.wiki.parser('\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function(table) { CeL.log(table); }) && '';
+	CeL.wiki.parser('{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function(table) { CeL.log(table); }) && '';
+	var p=CeL.wiki.parser('==[[L]]==\n==[[L|l]]==\n== [[L]] ==').parse();CeL.log(JSON.stringify(p)+'\n'+p.toString());p;
+
+
+require('./wiki loder.js');
+CeL.wiki.cache([ { type : 'page', list : 'EXO音樂作品列表|FR-F2狙擊步槍|HD_164922|HUNTER×HUNTER|Kubuntu|OpenSUSE|SHIN-EI動畫|Swatch網際網路時間|T93狙擊步槍|一元二次方程'.split('|'), operator : function(page_data_list) { page_data_list.forEach(function(page_data) {
+var title = page_data.title, content = CeL.wiki.content_of(page_data), wiki_page = CeL.wiki.parser(content).parse(), toString = wiki_page.toString();
+//wiki_page.each_text(function(token) { if (token = token.trim()) CeL.log(token); });
+//CeL.log('-'.repeat(70) + '' + toString);
+if (toString === content) CeL.log('[[' + title + ']]: OK'); else {
+var node_fs = require('fs');
+CeL.warn('[[' + title + ']]: different contents!');
+node_fs.writeFile('page/' + title + '_original.txt', content);
+node_fs.writeFile('page/' + title + '_parsed.txt', toString);
+}
+}); }}]);
+
 }
 
 // wiki page parser. wikitext 語法分析程式, wikitext 語法分析器
@@ -655,7 +676,11 @@ function for_each_token(type, trigger) {
 			if (token.type === type)
 				trigger(token, this, index);
 			// is_atom: 不包含可 parse 之要素，不包含 text。
-			if (!token.is_atom)
+			if (!token.is_atom
+			// comment 可以放在任何地方，因此能滲透至任一層。
+			// 但這可能性已經在 parse_wikitext() 中偵測並去除。
+			// && type !== 'comment'
+			)
 				for_each_token.call(token, type, trigger);
 		}
 	}, this);
@@ -764,6 +789,17 @@ function parse_wikitext(wikitext, options, queue) {
 	if (!wikitext)
 		return wikitext;
 
+	function _set_wiki_type(token, type) {
+		// 這可能性已經在下面個別處理程序中偵測並去除。
+		if (false && typeof token === 'string' && token.includes(include_mark)) {
+			queue.push(token);
+			resolve_escaped(queue, include_mark, end_mark);
+			token = [ queue.pop() ];
+		}
+		return set_wiki_type(token, type);
+	}
+
+	var
 	/**
 	 * 找出一個文件中不可包含，亦不會被解析的字串，作為解析用之特殊標記。<br />
 	 * e.g., '\u0000'.<br />
@@ -771,25 +807,31 @@ function parse_wikitext(wikitext, options, queue) {
 	 * 
 	 * @type {String}
 	 */
-	var include_mark = options && options.include_mark || '\0',
+	include_mark = options && options.include_mark || '\0',
 	/** {String}end of include_mark. 不可為數字 (\d) 或 include_mark。 */
 	end_mark = options && options.end_mark || ';',
 	/** {Boolean}是否順便作正規化。預設不會作正規化。 */
 	normalize = options && options.normalize,
 	/** {Boolean}是否需要初始化。 */
-	need_initialize = !queue;
+	initialized_fix = !queue && [ 0 ];
 
 	if (/\d/.test(end_mark) || include_mark.includes(end_mark))
 		throw new Error('Error end of include_mark!');
 
-	if (need_initialize) {
+	if (initialized_fix) {
 		// 初始化
 		wikitext = wikitext.replace(/\r\n/g, '\n').replace(
 		// 先 escape 掉會造成問題之 chars。
 		new RegExp(include_mark.replace(/([\s\S])/g, '\\$1'), 'g'),
 				include_mark + end_mark);
+		if (!wikitext.startsWith('\n') &&
+		// /\n([*#:;]+|[= ]|{\|)/:
+		// https://www.mediawiki.org/wiki/Markup_spec/BNF/Article#Wiki-page
+		// https://www.mediawiki.org/wiki/Markup_spec#Start_of_line_only
+		/^(?:[*#:;= ]|{\|)/.test(wikitext))
+			wikitext = '\n' + wikitext, initialized_fix[0] = 1;
 		if (!wikitext.endsWith('\n'))
-			wikitext += '\n';
+			wikitext += '\n', initialized_fix[1] = -1;
 		// temporary queue
 		queue = [];
 
@@ -797,15 +839,18 @@ function parse_wikitext(wikitext, options, queue) {
 			wikitext = options.prefix(wikitext, queue, include_mark, end_mark);
 	}
 
-	// start parse
+	// ------------------------------------------
+	// parse sequence start / start parse
 
 	// 可順便作正規化，例如修復章節標題 section title 前後 level 不一，
 	// table "|-" 未起新行等。
 
+	// comments: <!-- ... -->
 	// "<\": for Eclipse JSDoc.
 	wikitext = wikitext.replace_till_stable(/<\!--([\s\S]*?)-->/g, function(
 			all, parameters) {
-		queue.push(set_wiki_type(parameters, 'comment'));
+		// 不再作 parse。
+		queue.push(_set_wiki_type(parameters, 'comment'));
 		return include_mark + (queue.length - 1) + end_mark;
 	});
 
@@ -827,11 +872,15 @@ function parse_wikitext(wikitext, options, queue) {
 				'parse_wikitext.parameter');
 
 		parameters = parameters.split('|').map(function(token, index) {
-			return index === 0 ? set_wiki_type(token.split(':'), 'page_title')
+			return index === 0
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			&& !token.includes(include_mark)
+			//
+			? _set_wiki_type(token.split(':'), 'page_title')
 			// 經過改變，需再進一步處理。
 			: parse_wikitext(token, options, queue);
 		});
-		set_wiki_type(parameters, 'parameter');
+		_set_wiki_type(parameters, 'parameter');
 		queue.push(parameters);
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
@@ -855,11 +904,15 @@ function parse_wikitext(wikitext, options, queue) {
 				'parse_wikitext.transclusion');
 
 		parameters = parameters.split('|').map(function(token, index) {
-			return index === 0 ? set_wiki_type(token.split(':'), 'page_title')
+			return index === 0
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			&& !token.includes(include_mark)
+			//
+			? _set_wiki_type(token.split(':'), 'page_title')
 			// 經過改變，需再進一步處理。
 			: parse_wikitext(token, options, queue);
 		});
-		set_wiki_type(parameters, 'transclusion');
+		_set_wiki_type(parameters, 'transclusion');
 		queue.push(parameters);
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
@@ -882,7 +935,7 @@ function parse_wikitext(wikitext, options, queue) {
 			// 經過改變，需再進一步處理。
 			return parse_wikitext(token, options, queue);
 		});
-		set_wiki_type(parameters, 'convert');
+		_set_wiki_type(parameters, 'convert');
 		queue.push(parameters);
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
@@ -904,14 +957,17 @@ function parse_wikitext(wikitext, options, queue) {
 				'parse_wikitext.link');
 
 		parameters = parameters.split('|').map(function(token, index) {
-			return index === 0 ? set_wiki_type(
+			return index === 0
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
+			&& !token.includes(include_mark) ? _set_wiki_type(
 			// [[: en : abc]] is OK,
 			// [[ : en : abc]] is NOT OK.
 			token.split(normalize ? /\s*:\s*/ : ':'), 'namespace')
 			// 經過改變，需再進一步處理。
 			: parse_wikitext(token, options, queue);
 		});
-		set_wiki_type(parameters, 'link');
+		_set_wiki_type(parameters, 'link');
 		queue.push(parameters);
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
@@ -920,38 +976,49 @@ function parse_wikitext(wikitext, options, queue) {
 	// TODO: [{{}} ...]
 	wikitext = wikitext.replace_till_stable(
 	// 若為結尾 /$/ 亦會 parse 成 external link。
-	/\[((?:https?:|ftp:)?\/\/[^\/\s][^\s]+)((?:\s[^\]]*)?)(?:\]|$)/gi,
+	/\[((?:https?:|ftp:)?\/\/[^\/\s][^\]\s]+)(\s[^\]]*)?(?:\]|$)/gi,
 	//
 	function(all, URL, parameters) {
-		URL = [ set_wiki_type(URL, 'URL') ];
-		if (normalize)
-			parameters = parameters.trim();
-		if (parameters)
+		URL = [ _set_wiki_type(URL, 'URL') ];
+		if (parameters) {
+			if (normalize)
+				parameters = parameters.trim();
+			else
+				// 去除最前面的 space。
+				// assert: parameters.charAt(0) === ' '
+				parameters = parameters.slice(1);
 			URL.push(parameters);
-		set_wiki_type(URL, 'external_link');
+		}
+		_set_wiki_type(URL, 'external_link');
 		queue.push(URL);
 		return include_mark + (queue.length - 1) + end_mark;
 	});
 
-	// \n{| ... \n|}
+	// table: \n{| ... \n|}
 	wikitext = wikitext.replace_till_stable(/\n{\|([\s\S]*?)\n\|}/g, function(
 			all, parameters) {
 		// 經測試，table 不會向前回溯。
 		parameters = parameters.split('\n|-').map(function(token, index) {
 			if (index === 0
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			&& !token.includes(include_mark)
 			// 含有 delimiter 的話，即使位在 "{|" 之後，依舊會被當作 row。
 			&& !/\n[!|]|!!|\|\|/.test(token)) {
 				// table style / format modifier (not displayed)
-				return set_wiki_type(token, 'style');
+				return _set_wiki_type(token, 'style');
 			}
 			var row, matched, delimiter,
 			// 必須有實體才能如預期作 .exec()。
 			pattern = /([\s\S]*?)(\n[!|]|!!|\|\||$)/g;
 			while (matched = pattern.exec(token)) {
-				if (row) {
-					var cell = matched[1].match(/^([^|]+)\|([\s\S]*)$/);
+				if (row || /[<>]/.test(token)) {
+					var cell = matched[1].match(/^([^|]+)(\|[\s\S]*)$/);
 					if (cell)
-						cell = [ set_wiki_type(cell[1],
+						cell = [ cell[1].includes(include_mark)
+						// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+						? parse_wikitext(cell[1], options, queue)
+						//
+						: _set_wiki_type(cell[1],
 						// cell style / format modifier (not displayed)
 						'style'), parse_wikitext(cell[2], options, queue) ];
 					else {
@@ -961,23 +1028,36 @@ function parse_wikitext(wikitext, options, queue) {
 							// {String} or other elements
 							cell = [ cell ];
 					}
-					set_wiki_type(cell, 'table_cell');
-					cell.delimiter = delimiter;
-					cell.table_type = delimiter.includes('!') ? 'th' : 'td';
+					_set_wiki_type(cell, 'table_cell');
+					if (delimiter) {
+						cell.delimiter = delimiter;
+						cell.table_type
+						//
+						= delimiter.includes('!') ? 'th' : 'td';
+					}
+					if (!row)
+						row = [];
 					row.push(cell);
 				} else
-					row = [ set_wiki_type(token.slice(0, matched.index),
+					// assert: matched.index === 0
+					row = [ matched[1].includes(include_mark)
+					// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+					? parse_wikitext(matched[1], options, queue)
+					//
+					: _set_wiki_type(matched[1],
 					// row style / format modifier (not displayed)
 					'style') ];
+
 				delimiter = matched[2];
 				if (!delimiter)
 					// assert: /$/, no separater, ended.
 					break;
 			}
-			return set_wiki_type(row, 'table_row');
+			// assert: Array.isArray(row)
+			return _set_wiki_type(row, 'table_row');
 		});
 
-		set_wiki_type(parameters, 'table');
+		_set_wiki_type(parameters, 'table');
 		queue.push(parameters);
 		// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
 		return '\n' + include_mark + (queue.length - 1) + end_mark;
@@ -988,10 +1068,10 @@ function parse_wikitext(wikitext, options, queue) {
 
 	// 不採用 global pattern，預防 multitasking 並行處理。
 	var pattern = new RegExp('<(' + markup_tags
-			+ ')(\\s[^<>]*)?>([^<>]*?)<\\/\\1>', 'gi');
+			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/\\1>', 'gi');
 
 	// HTML tags that must be closed
-	// <pre>...</pre>, <code>int m2()</code>
+	// <pre>...</pre>, <code>int f()</code>
 	wikitext = wikitext.replace_till_stable(pattern, function(all, tag,
 			attribute, inner) {
 		// 經過改變，需再進一步處理。
@@ -1000,16 +1080,18 @@ function parse_wikitext(wikitext, options, queue) {
 			all = [ all ];
 		all.tag = tag;
 		all.attribute = attribute;
-		set_wiki_type(all, 'tag');
+		_set_wiki_type(all, 'tag');
 		queue.push(all);
 		return include_mark + (queue.length - 1) + end_mark;
 	});
 
-	// <nowiki />, <hr />
+	// <hr />
+	// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
 	wikitext = wikitext.replace_till_stable(
 	// HTML tags that may not be closed
-	/<(nowiki|ref|[bh]r|li|d[td]|center)(\s[^<>]*|\/)?>/gi, function(all, tag,
-			attribute) {
+	/<(nowiki|references|ref|[bh]r|li|d[td]|center)(\s[^<>]*|\/)?>/gi,
+	//
+	function(all, tag, attribute) {
 		if (attribute && attribute.endsWith('/')) {
 			attribute = attribute.slice(0, -1);
 			all = [ '/' ];
@@ -1017,7 +1099,7 @@ function parse_wikitext(wikitext, options, queue) {
 			all = [];
 		all.tag = tag;
 		all.attribute = attribute;
-		set_wiki_type(all, 'tag_single');
+		_set_wiki_type(all, 'tag_single');
 		queue.push(all);
 		return include_mark + (queue.length - 1) + end_mark;
 	});
@@ -1028,6 +1110,7 @@ function parse_wikitext(wikitext, options, queue) {
 	// ~~~~~
 	// ----
 
+	// parse_wikitext.title
 	wikitext = wikitext.replace_till_stable(/\n(=+)(.+)\1(\s*)\n/g, function(
 			all, prefix, parameters, postfix) {
 		if (normalize)
@@ -1036,7 +1119,7 @@ function parse_wikitext(wikitext, options, queue) {
 		parameters = parse_wikitext(parameters, options, queue);
 		if (parameters.type !== 'text')
 			parameters = [ parameters ];
-		parameters = set_wiki_type(parameters, 'title');
+		parameters = _set_wiki_type(parameters, 'title');
 		if (postfix && !normalize)
 			parameters.postfix = postfix;
 		parameters.level = prefix.length;
@@ -1055,13 +1138,25 @@ function parse_wikitext(wikitext, options, queue) {
 		/\[\[([^\|\[\]{}]+)/g;
 	}
 
-	if (need_initialize && options && typeof options.postfix === 'function')
-		wikitext = options.postfix(wikitext, queue, include_mark, end_mark);
+	// ↑ parse sequence end
+	// ------------------------------------------
+
+	if (initialized_fix) {
+		if (options && typeof options.postfix === 'function')
+			wikitext = options.postfix(wikitext, queue, include_mark, end_mark);
+
+		// 去掉初始化時添加的 fix。
+		if (initialized_fix[0] || initialized_fix[1])
+			wikitext = wikitext.slice(initialized_fix[0],
+			// assert: '1'.slice(0, [ 1 ][1]) === '1'
+			initialized_fix[1]);
+	}
 
 	queue.push(wikitext);
 	resolve_escaped(queue, include_mark, end_mark);
 
-	return queue[queue.length - 1];
+	wikitext = queue[queue.length - 1];
+	return wikitext;
 }
 
 page_parser.parse = parse_wikitext;
@@ -3785,8 +3880,9 @@ wiki_API.cache = function(operation, callback, _this) {
 		switch (type) {
 		case 'page':
 			// page content 內容
+			// TODO: .page {Array}list
 			to_get_data = function(title, callback) {
-				library_namespace.log('Get content of [[' + title + ']]');
+				library_namespace.log('Get content of [[' + title + ']].');
 				wiki_API.page(title, function(page_data) {
 					callback(page_data);
 				}, Object.assign(library_namespace.null_Object(), _this,
