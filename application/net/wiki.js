@@ -10,7 +10,7 @@
  */
 
 // [[維基百科:機器人]], [[WP:{{{name|{{int:Group-bot}}}}}|{{{name|{{int:Group-bot}}}}}]]
-// https://en.wikipedia.org/w/api.php
+// https://www.mediawiki.org/w/api.php
 
 // Wikipedia:沙盒
 // https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92
@@ -19,7 +19,8 @@
 // TODO:
 // https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 // https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
-// [[Wikipedia:维基化]]
+// [[WP:維基化]]
+// 整合各 action=query 至單一公用 function。
 
 'use strict';
 //'use asm';
@@ -202,7 +203,7 @@ function api_URL(project) {
 				+ 'w/api.php';
 
 	if (/^https?:\/\//i.test(project))
-		// e.g., 'http://zh.wikipedia.org/w/api.php'
+		// e.g., 'https://www.mediawiki.org/w/api.php'
 		return project;
 
 	if (project)
@@ -294,6 +295,7 @@ get_namespace.hash = {
 			+ source.join('|').replace(/_/g, '[ _]') + ']):(.+)$', 'i');
 })();
 
+
 function remove_namespace(title) {
 	if (typeof title !== 'string') {
 		library_namespace.debug(title, 5, 'remove_namespace');
@@ -317,9 +319,11 @@ function remove_namespace(title) {
 // 創建 match patten 相關函數。
 
 /**
- * 規範頁面名稱 page name。
+ * 規範/正規化頁面名稱 page name。
  * 
- * 這種規範化只能通用於本 library 內。Wikipedia 並未硬性設限。
+ * 這種規範化只能通用於本 library 內。Wikipedia 並未硬性設限。<br />
+ * 依照 [https://www.mediawiki.org/w/api.php?action=query&titles=Wikipedia_talk:Flow&prop=info]，
+ * "Wikipedia_talk:Flow" → "Wikipedia talk:Flow"
  * 
  * @param {String}page_name
  *            頁面名 page name。
@@ -453,90 +457,7 @@ function unique_list(page_data_list) {
 // parse wikitext
 
 
-/** {Object}.toString() of wiki elements */
-var wiki_toString = {
-	// Internal/interwiki link : language links : category links, file, subst,
-	// ... : title
-	// e.g., [[m:en:Help:Parser function]]
-	// https://www.mediawiki.org/wiki/Markup_spec#Namespaces
-	namespace : function() {
-		return this.join(':');
-	},
-	// page title, template name
-	page_title : function() {
-		return this.join(':');
-	},
-	link : function() {
-		return '[[' + this.join('|') + ']]';
-	},
-	// External link
-	external_link : function() {
-		return '[' + this.join(' ') + ']';
-	},
-	URL : function() {
-		return this.join('');
-	},
-	// template parameter
-	parameter : function() {
-		return '{{{' + this.join('|') + '}}}';
-	},
-	// e.g., template
-	transclusion : function() {
-		return '{{' + this.join('|') + '}}';
-	},
-	// [[Help:Table]]
-	table : function() {
-		// this: [ table style, row, row, ... ]
-		return '{|' + this.join('\n|-') + '\n|}';
-	},
-	table_row : function() {
-		// this: [ row style, cell, cell, ... ]
-		return this.join('');
-	},
-	table_cell : function() {
-		// this: [ contents ]
-		// this.delimiter: /\n[!|]|!!|\|\|/ or undefined (在 style/第一區間就已當作 cell)
-		return (this.delimiter || '') + this.join('');
-	},
-	// attributes, styles
-	style : function() {
-		return this.join('');
-	},
-	// [[H:Convert]]
-	convert : function() {
-		return '-{' + this.join('|') + '}-';
-	},
-	// section title
-	title : function() {
-		var level = '='.repeat(this.level);
-		return level
-		// this.join(''): 必須與 text 相同。見 parse_wikitext.title。
-		+ this.join('') + level + (this.postfix || '');
-	},
-	tag : function() {
-		return '<' + this.tag + (this.attribute || '') + '>' + this.join('') + '</' + this.tag + '>';
-	},
-	tag_single : function() {
-		return '<' + this.tag + (this.attribute || '') + this.join('') + '>';
-	},
-	// comments: <!-- ... -->
-	comment : function() {
-		// "<\": for Eclipse JSDoc.
-		return '<\!--' + this.join('') + '-->';
-	},
-	line : function() {
-		// https://www.mediawiki.org/wiki/Markup_spec/BNF/Article
-		// NewLine = ? carriage return and line feed ? ;
-		return this.join('\n');
-	},
-	// plain text 或尚未 parse 的 wikitext.
-	text : function() {
-		return this.join('');
-	}
-};
-
-
-// 不包含 section title，可能有 "==[[]]==" 的情況。
+// 不包含 section title，因可能有 "==[[]]==" 的情況。
 var atom_type = {
 	namespace : true,
 	page_title : true,
@@ -573,6 +494,7 @@ http://www.2ality.com/2015/02/es6-classes-final.html
 
 */
 var page_prototype = {
+	// 在執行 .each()、.each_text() 之前，應該先執行 .parse()。
 	each : for_each_token,
 	each_text : for_each_text,
 	parse : parse_page
@@ -592,21 +514,7 @@ if (false) {
 	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b<!--ff[[r]]-->[[t|e]]\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}[http://r.r ee]').parse();
 	CeL.wiki.parser('{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function(table) { CeL.log(table); }) && '';
 	var p=CeL.wiki.parser('==[[L]]==\n==[[L|l]]==\n== [[L]] ==').parse();CeL.log(JSON.stringify(p)+'\n'+p.toString());p;
-
-
-require('./wiki loder.js');
-CeL.wiki.cache([ { type : 'page', list : 'EXO音樂作品列表|FR-F2狙擊步槍|HD_164922|HUNTER×HUNTER|Kubuntu|OpenSUSE|SHIN-EI動畫|Swatch網際網路時間|T93狙擊步槍|一元二次方程'.split('|'), operator : function(page_data_list) { page_data_list.forEach(function(page_data) {
-var title = page_data.title, content = CeL.wiki.content_of(page_data), wiki_page = CeL.wiki.parser(content).parse(), toString = wiki_page.toString();
-//wiki_page.each_text(function(token) { if (token = token.trim()) CeL.log(token); });
-//CeL.log('-'.repeat(70) + '' + toString);
-if (toString === content) CeL.log('[[' + title + ']]: OK'); else {
-var node_fs = require('fs');
-CeL.warn('[[' + title + ']]: different contents!');
-node_fs.writeFile('page/' + title + '_original.txt', content);
-node_fs.writeFile('page/' + title + '_parsed.txt', toString);
-}
-}); }}]);
-
+	CeL.wiki.parser('a{{ #expr: {{CURRENTHOUR}}+8}}}}b').parse()[1];
 }
 
 // wiki page parser. wikitext 語法分析程式, wikitext 語法分析器
@@ -690,12 +598,6 @@ function for_each_token(type, trigger) {
 
 
 function parse_page(options) {
-	// 範圍由大到小。
-	// e.g., transclusion 不能包括 table，因此在 table 後。
-	// this.each_text(parse_comment, true);
-	// this.each_text(parse_table, true);
-	// this.each_text(parse_transclusion, true);
-	// this.each_text(parse_link, true);
 	if (!this.parsed) {
 		// assert: this = [ {String} ]
 		var parsed = parse_wikitext(this[0], options);
@@ -742,6 +644,8 @@ function resolve_escaped(queue, include_mark, end_mark) {
 			set_wiki_type(result, 'text');
 		else
 			result = result[0];
+		if (result.includes(include_mark))
+			throw new Error('resolve_escaped: 仍有 include mark 殘留!');
 		queue[index] = result;
 	});
 }
@@ -756,8 +660,100 @@ PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*
 // [[Help:Wiki markup]], HTML tags
 markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark';
 
+
+/** {Object}.toString() of wiki elements */
+var wiki_toString = {
+	// Internal/interwiki link : language links : category links, file, subst,
+	// ... : title
+	// e.g., [[m:en:Help:Parser function]]
+	// https://www.mediawiki.org/wiki/Markup_spec#Namespaces
+	namespace : function() {
+		return this.join(':');
+	},
+	// page title, template name
+	page_title : function() {
+		return this.join(':');
+	},
+	link : function() {
+		return '[[' + this.join('|') + ']]';
+	},
+	// External link
+	external_link : function() {
+		return '[' + this.join(this.delimiter || ' ') + ']';
+	},
+	URL : function() {
+		return this.join('');
+	},
+	// template parameter
+	parameter : function() {
+		return '{{{' + this.join('|') + '}}}';
+	},
+	// e.g., template
+	transclusion : function() {
+		return '{{' + this.join('|') + '}}';
+	},
+	// [[Help:Table]]
+	table : function() {
+		// this: [ table style, row, row, ... ]
+		return '{|' + this.join('\n|-') + '\n|}';
+	},
+	table_row : function() {
+		// this: [ row style, cell, cell, ... ]
+		return this.join('');
+	},
+	table_cell : function() {
+		// this: [ contents ]
+		// this.delimiter: /\n[!|]|!!|\|\|/ or undefined (在 style/第一區間就已當作 cell)
+		return (this.delimiter || '') + this.join('');
+	},
+	// attributes, styles
+	style : function() {
+		return this.join('');
+	},
+	// [[H:Convert]]
+	convert : function() {
+		return '-{' + this.join('|') + '}-';
+	},
+	// section title
+	section_title : function() {
+		var level = '='.repeat(this.level);
+		return level
+		// this.join(''): 必須與 text 相同。見 parse_wikitext.title。
+		+ this.join('') + level + (this.postfix || '');
+	},
+	// [[Help:Wiki markup]], HTML tags
+	tag : function() {
+		// this: [ attributes, inner nodes ].tag
+		return '<' + this.tag + (this[0] || '') + '>' + this.slice(1).join('')
+				+ '</' + (this.end_tag || this.tag) + '>';
+	},
+	tag_single : function() {
+		// this: [ attributes ].tag
+		return '<' + this.tag + this.join('') + '>';
+	},
+	// comments: <!-- ... -->
+	comment : function() {
+		// "<\": for Eclipse JSDoc.
+		return '<\!--' + this.join('') + (this.no_end ? '' : '-->');
+	},
+	line : function() {
+		// https://www.mediawiki.org/wiki/Markup_spec/BNF/Article
+		// NewLine = ? carriage return and line feed ? ;
+		return this.join('\n');
+	},
+	// plain text 或尚未 parse 的 wikitext.
+	text : function() {
+		return this.join('');
+	}
+};
+
+
+// TODO: {{L<!-- -->L}} .valueOf() === '{{LL}}'
+// TODO: <p<!-- -->re>...</pre>
 /**
  * parse The MediaWiki markup language (wikitext)
+ * 
+ * TODO: 提高效率。
  * 
  * 此功能之工作機制/原理：<br />
  * 找出完整的最小單元，並將之 push 入 queue，並把原 string 中之單元 token 替換成:<br />
@@ -810,9 +806,9 @@ function parse_wikitext(wikitext, options, queue) {
 	include_mark = options && options.include_mark || '\0',
 	/** {String}end of include_mark. 不可為數字 (\d) 或 include_mark。 */
 	end_mark = options && options.end_mark || ';',
-	/** {Boolean}是否順便作正規化。預設不會作正規化。 */
+	/** {Boolean}是否順便作正規化。預設不會規範頁面內容。 */
 	normalize = options && options.normalize,
-	/** {Boolean}是否需要初始化。 */
+	/** {Array}是否需要初始化。 [ length prefix added, length postfix added ] */
 	initialized_fix = !queue && [ 0 ];
 
 	if (/\d/.test(end_mark) || include_mark.includes(end_mark))
@@ -834,25 +830,41 @@ function parse_wikitext(wikitext, options, queue) {
 			wikitext += '\n', initialized_fix[1] = -1;
 		// temporary queue
 		queue = [];
-
-		if (options && typeof options.prefix === 'function')
-			wikitext = options.prefix(wikitext, queue, include_mark, end_mark);
 	}
+
+	if (options && typeof options.prefix === 'function')
+		wikitext = options.prefix(wikitext, queue, include_mark, end_mark)
+				|| wikitext;
 
 	// ------------------------------------------
 	// parse sequence start / start parse
 
-	// 可順便作正規化，例如修復章節標題 section title 前後 level 不一，
+	// parse 範圍基本上由小到大。
+	// e.g., transclusion 不能包括 table，因此在 table 前。
+
+	// 可順便作正規化/維護清理/修正明顯破壞/修正維基語法/維基化，
+	// 例如修復章節標題 section title 前後 level 不一，
 	// table "|-" 未起新行等。
 
 	// comments: <!-- ... -->
 	// "<\": for Eclipse JSDoc.
-	wikitext = wikitext.replace_till_stable(/<\!--([\s\S]*?)-->/g, function(
-			all, parameters) {
-		// 不再作 parse。
-		queue.push(_set_wiki_type(parameters, 'comment'));
-		return include_mark + (queue.length - 1) + end_mark;
-	});
+	if (initialized_fix) {
+		// 因為前後標記間所有內容無作用、能置於任何地方（除了 <nowiki> 中，"<no<!---->wiki>"
+		// 之類），又無需向前回溯；只需在第一次檢測，不會有遺珠之憾。
+		wikitext = wikitext.replace(/<\!--([\s\S]*?)-->/g,
+				function(all, parameters) {
+					// 不再作 parse。
+					queue.push(_set_wiki_type(parameters, 'comment'));
+					return include_mark + (queue.length - 1) + end_mark;
+				}).replace(/<\!--([\s\S]*)$/g, function(all, parameters) {
+			// 不再作 parse。
+			parameters = _set_wiki_type(parameters, 'comment');
+			if (!normalize)
+				parameters.no_end = true;
+			queue.push(parameters);
+			return include_mark + (queue.length - 1) + end_mark;
+		});
+	}
 
 	// {{{...}}} 需在 {{...}} 之前解析。
 	// https://zh.wikipedia.org/wiki/Help:%E6%A8%A1%E6%9D%BF
@@ -874,9 +886,9 @@ function parse_wikitext(wikitext, options, queue) {
 		parameters = parameters.split('|').map(function(token, index) {
 			return index === 0
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			&& !token.includes(include_mark)
+			&& !token.includes(include_mark) ? _set_wiki_type(
 			//
-			? _set_wiki_type(token.split(':'), 'page_title')
+			token.split(normalize ? /\s*:\s*/ : ':'), 'page_title')
 			// 經過改變，需再進一步處理。
 			: parse_wikitext(token, options, queue);
 		});
@@ -888,7 +900,7 @@ function parse_wikitext(wikitext, options, queue) {
 	// 模板（英語：Template，又譯作「樣板」、「範本」）
 	// {{Template name|}}
 	wikitext = wikitext.replace_till_stable(
-	// PATTERN_transclusion
+	// or use ((PATTERN_transclusion))
 	/{{([^{}][\s\S]*?)}}/g,
 	//
 	function(all, parameters) {
@@ -906,9 +918,10 @@ function parse_wikitext(wikitext, options, queue) {
 		parameters = parameters.split('|').map(function(token, index) {
 			return index === 0
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			&& !token.includes(include_mark)
+			// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
+			&& !token.includes(include_mark) ? _set_wiki_type(
 			//
-			? _set_wiki_type(token.split(':'), 'page_title')
+			token.split(normalize ? /\s*:\s*/ : ':'), 'page_title')
 			// 經過改變，需再進一步處理。
 			: parse_wikitext(token, options, queue);
 		});
@@ -940,11 +953,82 @@ function parse_wikitext(wikitext, options, queue) {
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
 
+	// [[Help:HTML in wikitext]]
+	// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
+
+	// 不採用 global pattern，預防 multitasking 並行處理。
+	var pattern = new RegExp('<(' + markup_tags
+			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'gi');
+
+	// HTML tags that must be closed
+	// <pre>...</pre>, <code>int f()</code>
+	wikitext = wikitext.replace_till_stable(pattern, function(all, tag,
+			attribute, inner, end_tag) {
+		// 自 end_mark 向前回溯。
+		var matched = inner.match(new RegExp(
+		//
+		'<(' + tag + ')(\\s[^<>]*)?>([\s\S]*?)$', 'i')), prevoius;
+		if (matched) {
+			prevoius = all.slice(0, -matched[0].length
+			// length of </end_tag>
+			- end_tag.length - 3);
+			tag = matched[1];
+			attribute = matched[2];
+			inner = matched[3];
+		} else {
+			prevoius = '';
+		}
+		library_namespace.debug(prevoius + ' + <' + tag + '>', 4,
+				'parse_wikitext.tag');
+
+		// 經過改變，需再進一步處理。
+		all = parse_wikitext(inner, options, queue);
+		if (all.type !== 'text')
+			all = [ all ];
+		if (normalize)
+			tag = tag.toLowerCase();
+		else if (tag !== end_tag)
+			all.end_tag = end_tag;
+		all.tag = tag;
+		all.unshift(parse_wikitext(attribute, options, queue));
+		_set_wiki_type(all, 'tag');
+		queue.push(all);
+		return prevoius + include_mark + (queue.length - 1) + end_mark;
+	});
+
+	// <hr />
+	// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
+	wikitext = wikitext.replace_till_stable(
+	// HTML tags that may not be closed
+	/<(nowiki|references|ref|[bh]r|li|d[td]|center)(\s[^<>]*|\/)?>/gi,
+	//
+	function(all, tag, attribute) {
+		if (attribute) {
+			if (normalize)
+				attribute = attribute.replace(/[\s\/]*$/, ' /');
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			all = parse_wikitext(attribute, options, queue);
+			if (all.type !== 'text')
+				all = [ all ];
+		} else
+			// use '' as attribute in case the .join() in .toString() doesn't
+			// work.
+			all = [ '' ];
+		if (normalize)
+			tag = tag.toLowerCase();
+		all.tag = tag;
+		_set_wiki_type(all, 'tag_single');
+		queue.push(all);
+		return include_mark + (queue.length - 1) + end_mark;
+	});
+
 	// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可!
 	// [[~:~|~]], [[~:~:~|~]]
 	wikitext = wikitext.replace_till_stable(
-	// PATTERN_link
+	// or use ((PATTERN_link))
 	/\[\[([^\[\]]+)\]\]/g, function(all, parameters) {
+		if (normalize)
+			parameters = parameters.trim();
 		// 自 end_mark 向前回溯。
 		var index = parameters.lastIndexOf('[['), prevoius;
 		if (index > 0) {
@@ -959,7 +1043,6 @@ function parse_wikitext(wikitext, options, queue) {
 		parameters = parameters.split('|').map(function(token, index) {
 			return index === 0
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
 			&& !token.includes(include_mark) ? _set_wiki_type(
 			// [[: en : abc]] is OK,
 			// [[ : en : abc]] is NOT OK.
@@ -975,19 +1058,24 @@ function parse_wikitext(wikitext, options, queue) {
 	// [http://... ...]
 	// TODO: [{{}} ...]
 	wikitext = wikitext.replace_till_stable(
-	// 若為結尾 /$/ 亦會 parse 成 external link。
-	/\[((?:https?:|ftp:)?\/\/[^\/\s][^\]\s]+)(\s[^\]]*)?(?:\]|$)/gi,
+	// 經測試，若為結尾 /$/ 亦會 parse 成 external link。
+	/\[((?:https?:|ftp:)?\/\/[^\/\s][^\]\s]+)(?:(\s)([^\]]*))?(?:\]|$)/gi,
 	//
-	function(all, URL, parameters) {
-		URL = [ _set_wiki_type(URL, 'URL') ];
-		if (parameters) {
+	function(all, URL, delimiter, parameters) {
+		URL = [ URL.includes(include_mark)
+		// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+		? parse_wikitext(URL, options, queue) : _set_wiki_type(URL, 'URL') ];
+		if (delimiter) {
 			if (normalize)
 				parameters = parameters.trim();
-			else
-				// 去除最前面的 space。
-				// assert: parameters.charAt(0) === ' '
-				parameters = parameters.slice(1);
-			URL.push(parameters);
+			else {
+				// 紀錄 delimiter，否則 .toString() 時 .join() 後會與原先不同。
+				if (delimiter !== ' ')
+					URL.delimiter = delimiter;
+				// parameters 已去除最前面的 delimiter (space)。
+			}
+			// 經過改變，需再進一步處理。
+			URL.push(parse_wikitext(parameters, options, queue));
 		}
 		_set_wiki_type(URL, 'external_link');
 		queue.push(URL);
@@ -1063,54 +1151,13 @@ function parse_wikitext(wikitext, options, queue) {
 		return '\n' + include_mark + (queue.length - 1) + end_mark;
 	});
 
-	// [[Help:HTML in wikitext]]
-	// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
-
-	// 不採用 global pattern，預防 multitasking 並行處理。
-	var pattern = new RegExp('<(' + markup_tags
-			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/\\1>', 'gi');
-
-	// HTML tags that must be closed
-	// <pre>...</pre>, <code>int f()</code>
-	wikitext = wikitext.replace_till_stable(pattern, function(all, tag,
-			attribute, inner) {
-		// 經過改變，需再進一步處理。
-		all = parse_wikitext(inner, options, queue);
-		if (all.type !== 'text')
-			all = [ all ];
-		all.tag = tag;
-		all.attribute = attribute;
-		_set_wiki_type(all, 'tag');
-		queue.push(all);
-		return include_mark + (queue.length - 1) + end_mark;
-	});
-
-	// <hr />
-	// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
-	wikitext = wikitext.replace_till_stable(
-	// HTML tags that may not be closed
-	/<(nowiki|references|ref|[bh]r|li|d[td]|center)(\s[^<>]*|\/)?>/gi,
-	//
-	function(all, tag, attribute) {
-		if (attribute && attribute.endsWith('/')) {
-			attribute = attribute.slice(0, -1);
-			all = [ '/' ];
-		} else
-			all = [];
-		all.tag = tag;
-		all.attribute = attribute;
-		_set_wiki_type(all, 'tag_single');
-		queue.push(all);
-		return include_mark + (queue.length - 1) + end_mark;
-	});
-
 	// TODO: Magic words
 	// '''~'''
 	// ''~''
 	// ~~~~~
 	// ----
 
-	// parse_wikitext.title
+	// parse_wikitext.section_title
 	wikitext = wikitext.replace_till_stable(/\n(=+)(.+)\1(\s*)\n/g, function(
 			all, prefix, parameters, postfix) {
 		if (normalize)
@@ -1119,7 +1166,7 @@ function parse_wikitext(wikitext, options, queue) {
 		parameters = parse_wikitext(parameters, options, queue);
 		if (parameters.type !== 'text')
 			parameters = [ parameters ];
-		parameters = _set_wiki_type(parameters, 'title');
+		parameters = _set_wiki_type(parameters, 'section_title');
 		if (postfix && !normalize)
 			parameters.postfix = postfix;
 		parameters.level = prefix.length;
@@ -1141,10 +1188,11 @@ function parse_wikitext(wikitext, options, queue) {
 	// ↑ parse sequence end
 	// ------------------------------------------
 
-	if (initialized_fix) {
-		if (options && typeof options.postfix === 'function')
-			wikitext = options.postfix(wikitext, queue, include_mark, end_mark);
+	if (options && typeof options.postfix === 'function')
+		wikitext = options.postfix(wikitext, queue, include_mark, end_mark)
+				|| wikitext;
 
+	if (initialized_fix) {
 		// 去掉初始化時添加的 fix。
 		if (initialized_fix[0] || initialized_fix[1])
 			wikitext = wikitext.slice(initialized_fix[0],
@@ -2064,7 +2112,7 @@ wiki_API.query = function(action, callback, post_data) {
 	}
 	wiki_API.query.last[action[0]] = Date.now();
 
-	// https://en.wikipedia.org/w/api.php?action=help&modules=query
+	// https://www.mediawiki.org/w/api.php?action=help&modules=query
 	if (!/^[a-z]+=/.test(action[1]))
 		action[1] = 'action=' + action[1];
 	// https://www.mediawiki.org/wiki/API:Data_formats
@@ -2204,7 +2252,7 @@ wiki_API.query.title_param = function(page_data, multi) {
 	else if (typeof page_data === 'number'
 	// {Number}pageid should > 0.
 	// pageid 0 回傳格式不同於 > 0。
-	// https://en.wikipedia.org/w/api.php?action=query&prop=revisions&pageids=0
+	// https://www.mediawiki.org/w/api.php?action=query&prop=revisions&pageids=0
 	&& page_data > 0 && page_data === page_data | 0)
 		pageid = page_data;
 	else if (!page_data) {
@@ -2278,7 +2326,7 @@ CeL.wiki.page('道', function(p) {
  * @param {Object}[options]
  *            附加參數/設定選擇性/特殊功能與選項
  *
- * @see https://en.wikipedia.org/w/api.php?action=help&modules=query%2Brevisions
+ * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
  */
 wiki_API.page = function(title, callback, options) {
 	// 處理 [ {String}API_URL, {String}title ]
@@ -2289,7 +2337,7 @@ wiki_API.page = function(title, callback, options) {
 	title[1] = wiki_API.query.title_param(title[1], true);
 
 	// 處理 limit。單一頁面才能取得多 revisions。多頁面(<=50)只能取得單一 revision。
-	// https://en.wikipedia.org/w/api.php?action=help&modules=query
+	// https://www.mediawiki.org/w/api.php?action=help&modules=query
 	// titles/pageids: Maximum number of values is 50 (500 for bots).
 	if (options && ('rvlimit' in options)) {
 		if (options.rvlimit > 0 || options.rvlimit === 'max')
@@ -2340,14 +2388,24 @@ wiki_API.page = function(title, callback, options) {
 		}
 
 		data = data.query.pages;
-		var pages = [];
+		var pages = [],
+		//
+		page_cache_prefix = library_namespace.is_node && node_fs
+		//
+		&& options && options.page_cache_prefix;
 		for ( var pageid in data) {
 			var page = data[pageid];
 			pages.push(page);
 			if (!get_page_content.has_content(page)) {
 				library_namespace.warn('wiki_API.page: '
 				// 頁面不存在。Page does not exist. Deleted?
-				+ ('missing' in page ? 'Not exists' : 'No content') + ': [' + page.title + ']');
+				+ ('missing' in page ? 'Not exists' : 'No content') + ': [[' + page.title + ']]');
+			} else if (page_cache_prefix) {
+				node_fs.writeFile(page_cache_prefix + page.title + '.json',
+				/**
+				 * 寫入cache。
+				 */
+				JSON.stringify(data), wiki_API.encoding);
 			}
 		}
 
@@ -2699,7 +2757,7 @@ function get_list(type, title, callback, namespace) {
 	+ wiki_API.query.title_param(title[1])
 	// 數目限制。No more than 500 (5,000 for bots) allowed.
 	// Type: integer or max
-	// https://en.wikipedia.org/w/api.php?action=help&modules=query%2Brevisions
+	// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 	+ (options.limit > 0 || options.limit === 'max' ? '&' + prefix + 'limit=' + options.limit : '')
 	// next start from here.
 	+ (continue_from ?
@@ -3043,7 +3101,7 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
  * 只要在緊急停止頁面有指定的章節標題、或任何章節，就當作有人留言要 stop，並放棄編輯。
  * 
  * TODO:<br />
- * https://zh.wikipedia.org/w/api.php?action=query&meta=userinfo&uiprop=hasmsg
+ * https://www.mediawiki.org/w/api.php?action=query&meta=userinfo&uiprop=hasmsg
  * 
  * @param {Function}callback
  *            回調函數。 callback({Boolean}need stop)
@@ -3123,7 +3181,7 @@ wiki_API.check_stop = function(callback, options) {
  * [[{{TALKSPACE}}:{{ROOTPAGENAME}}/Stop]]
  * 
  * @param {Object}token
- *            “csrf”令牌。
+ *            login 資訊，包含“csrf”令牌/密鑰。
  * 
  * @returns {String}
  */
@@ -3148,9 +3206,9 @@ wiki_API.check_stop.pattern = /\n=([^\n]+)=\n/;
  * @param {String|Array}title
  *            頁面標題。 {String}title or [ {String}API_URL, {String}title or {Object}page_data ]
  * @param {String|Function}text
- *            頁面內容。 {String}text or {Function}text(page_data)
+ *            頁面內容 contents。 {String}text or {Function}text(page_data)
  * @param {Object}token
- *            “csrf”令牌。
+ *            login 資訊，包含“csrf”令牌/密鑰。
  * @param {Object}[options]
  *            附加參數/設定選擇性/特殊功能與選項
  * @param {Function}callback
@@ -3399,11 +3457,11 @@ wiki_API.edit.denied.all = /(?:^|[\s,])all(?:$|[\s,])/;
 /**
  * full text search<br />
  * search wikitext: using prefix "insource:". e.g.,
- * https://en.wikipedia.org/w/api.php?action=query&list=search&srwhat=text&srsearch=insource:abc+def
+ * https://www.mediawiki.org/w/api.php?action=query&list=search&srwhat=text&srsearch=insource:abc+def
  * 
  * @param {String}key
  *            search key
- * @param {Function}callback
+ * @param {Function}[callback]
  *            回調函數。 callback(key, pages, hits)
  * @param {Object}options
  *            附加參數/設定選擇性/特殊功能與選項
@@ -3639,7 +3697,8 @@ application.net.wiki wiki_API.cache() CeL.wiki.cache()
  *            傳遞於各 operator 間的 ((this))。
  */
 wiki_API.cache = function(operation, callback, _this) {
-	// node.js v0.11.16: In strict mode code, functions can only be declared at top level or immediately within another function.
+	// node.js v0.11.16: In strict mode code, functions can only be declared at
+	// top level or immediately within another function.
 	/**
 	 * 連續作業時，轉到下一作業。
 	 */
@@ -3651,11 +3710,11 @@ wiki_API.cache = function(operation, callback, _this) {
 		if (index < operation.length) {
 			if (!('list' in operation[index])) {
 				// use previous data as list.
-				library_namespace.debug('未特別指定 list，以前一次之回傳 data 作為 list。',
-						3, 'wiki_API.cache.next_operator');
+				library_namespace.debug('未特別指定 list，以前一次之回傳 data 作為 list。', 3,
+						'wiki_API.cache.next_operator');
 				library_namespace.debug('前一次之回傳 data: '
-						+ (data && JSON.stringify(data).slice(0, 180))
-						+ '...', 3, 'wiki_API.cache.next_operator');
+						+ (data && JSON.stringify(data).slice(0, 180)) + '...',
+						3, 'wiki_API.cache.next_operator');
 				operation[index].list = data;
 			}
 			// default options === _this: 傳遞於各 operator 間的 ((this))。
@@ -3704,32 +3763,41 @@ wiki_API.cache = function(operation, callback, _this) {
 			list = list.call(_this, operation);
 
 		// 自行設定之檔名 operation.file_name 優先度較 type/title 高。
-		file_name = ((file_name = _this[type + '_prefix'] || type) ?
 		// 需要自行創建目錄!
-				file_name + '/' : '')
+		file_name = _this[type + '_prefix'] || type;
+		file_name = [ file_name ? file_name + '/' : '',
 		//
-		+ (get_page_content.is_page_data(list) ? list.title
-		//
-		: typeof list === 'string' && normalize_page_name(list) || '');
+		get_page_content.is_page_data(list) ? list.title
+		// 若 Array.isArray(list)，則 ((file_name = ''))。
+		: typeof list === 'string' && normalize_page_name(list) ];
+		if (file_name[1]) {
+			file_name = file_name[0]
+			// 正規化檔名。
+			+ file_name[1].replace(/\//g, '_');
+		} else {
+			// assert: node_fs.readFile('') 將執行 callback(error)
+			file_name = '';
+		}
 	}
 
-	// _this.prefix: cache path prefix
-	file_name = [ 'prefix' in operation ? operation.prefix
-	//
-	: 'prefix' in _this ? _this.prefix : wiki_API.cache.prefix, file_name,
-	//
-	'postfix' in operation ? operation.postfix
-	//
-	: 'postfix' in _this ? _this.postfix : wiki_API.cache.postfix ];
-	library_namespace.debug(
-			'Pre-normalized cache file name: [' + file_name + ']', 5,
-			'wiki_API.cache');
-	if (false)
-		library_namespace.debug('file name param:'
-				+ [ operation.file_name, _this[type + '_prefix'], type,
-						JSON.stringify(list) ].join(';'), 6, 'wiki_API.cache');
-	// 正規化檔名。
-	file_name = file_name.join('').replace(/[:*?<>]/g, '_');
+	if (file_name) {
+		file_name = [ 'prefix' in operation ? operation.prefix
+		// _this.prefix: cache path prefix
+		: 'prefix' in _this ? _this.prefix : wiki_API.cache.prefix, file_name,
+		//
+		'postfix' in operation ? operation.postfix
+		//
+		: 'postfix' in _this ? _this.postfix : wiki_API.cache.postfix ];
+		library_namespace.debug('Pre-normalized cache file name: [' + file_name
+				+ ']', 5, 'wiki_API.cache');
+		if (false)
+			library_namespace.debug('file name param:'
+					+ [ operation.file_name, _this[type + '_prefix'], type,
+							JSON.stringify(list) ].join(';'), 6,
+					'wiki_API.cache');
+		// 正規化檔名。
+		file_name = file_name.join('').replace(/[:*?<>]/g, '_');
+	}
 	library_namespace.debug('Try to read cache file: [' + file_name + ']', 3,
 			'wiki_API.cache');
 
@@ -3744,8 +3812,7 @@ wiki_API.cache = function(operation, callback, _this) {
 	/** {String}file encoding for fs of node.js. */
 	encoding = _this.encoding || wiki_API.encoding;
 
-	node_fs.readFile(file_name, encoding, function(
-			error, data) {
+	node_fs.readFile(file_name, encoding, function(error, data) {
 		/**
 		 * 結束作業。
 		 */
@@ -3787,13 +3854,14 @@ wiki_API.cache = function(operation, callback, _this) {
 			finish_work(data);
 		}
 
-		// node.js v0.11.16: In strict mode code, functions can only be declared at top level or immediately within another function.
+		// node.js v0.11.16: In strict mode code, functions can only be declared
+		// at top level or immediately within another function.
 		/**
 		 * 取得下一項 data。
 		 */
 		function get_next_item(data) {
-			library_namespace.debug('處理多項列表作業: ' + index + '/'
-					+ list.length, 2, 'wiki_API.cache.get_next_item');
+			library_namespace.debug('處理多項列表作業: ' + index + '/' + list.length,
+					2, 'wiki_API.cache.get_next_item');
 			if (index < list.length) {
 				// 利用基本相同的參數以取得 cache。
 				_operation.list = list[index++];
@@ -3880,7 +3948,6 @@ wiki_API.cache = function(operation, callback, _this) {
 		switch (type) {
 		case 'page':
 			// page content 內容
-			// TODO: .page {Array}list
 			to_get_data = function(title, callback) {
 				library_namespace.log('Get content of [[' + title + ']].');
 				wiki_API.page(title, function(page_data) {
@@ -3974,6 +4041,46 @@ wiki_API.cache.title_only = function(operation) {
 		operation.list = list = list.call(_this, operation);
 	return operation.type + '/' + remove_namespace(list);
 };
+
+
+// --------------------------------------------------------------------------------------------- //
+// [[mediawikiwiki:Extension:Flow/API]]
+// https://www.mediawiki.org/w/api.php?action=help&modules=flow
+// TODO
+
+function Flow_enabled(title) {
+	;
+}
+
+/**
+ * Create a new topic 發新話題。
+ * Reply to an existing topic.
+ * 
+ * @param {String|Array}title
+ *            頁面標題。 {String}title or [ {String}API_URL, {String}title or
+ *            {Object}page_data ]
+ * @param {String}topic
+ *            新話題標題。 {String}topic
+ * @param {String|Function}text
+ *            頁面內容 contents。 {String}text or {Function}text(page_data)
+ * @param {Object}token
+ *            login 資訊，包含“csrf”令牌/密鑰。
+ * @param {Object}[options]
+ *            附加參數/設定選擇性/特殊功能與選項
+ * @param {Function}[callback]
+ *            回調函數。 callback(title, error, result)
+ * 
+ * @see https://www.mediawiki.org/w/api.php?action=help&modules=flow%2Bnew-topic
+ * https://www.mediawiki.org/w/api.php?action=help&modules=flow%2Breply
+ */
+function edit_topic(title, topic, text, token, options, callback) {
+	;
+}
+
+// title 可為話題id/頁面標題+話題標題
+function get_topic(title, options, callback) {
+	;
+}
 
 
 // --------------------------------------------------------------------------------------------- //
