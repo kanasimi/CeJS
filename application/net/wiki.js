@@ -515,6 +515,7 @@ if (false) {
 	CeL.wiki.parser('{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function(table) { CeL.log(table); }) && '';
 	var p=CeL.wiki.parser('==[[L]]==\n==[[L|l]]==\n== [[L]] ==').parse();CeL.log(JSON.stringify(p)+'\n'+p.toString());p;
 	CeL.wiki.parser('a{{ #expr: {{CURRENTHOUR}}+8}}}}b').parse()[1];
+	CeL.wiki.parser('{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}').parse().toString();
 }
 
 // wiki page parser. wikitext 語法分析程式, wikitext 語法分析器
@@ -525,6 +526,9 @@ function page_parser(wikitext, options) {
 		var tmp = wikitext;
 		wikitext = [ get_page_content(wikitext) ];
 		wikitext.page = tmp;
+	} else if(!wikitext) {
+		library_namespace.warn('page_parser: No wikitext specified.');
+		wikitext = [];
 	} else
 		throw new Error('page_parser: Unknown wikitext.');
 
@@ -866,69 +870,8 @@ function parse_wikitext(wikitext, options, queue) {
 		});
 	}
 
-	// {{{...}}} 需在 {{...}} 之前解析。
-	// https://zh.wikipedia.org/wiki/Help:%E6%A8%A1%E6%9D%BF
-	// 在模板頁面中，用三個大括弧可以讀取參數
-	// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
-	wikitext = wikitext.replace_till_stable(/{{{([^{}][\s\S]*?)}}}/g, function(
-			all, parameters) {
-		// 自 end_mark 向前回溯。
-		var index = parameters.lastIndexOf('{{{'), prevoius;
-		if (index > 0) {
-			prevoius = '{{{' + parameters.slice(0, index);
-			parameters = parameters.slice(index + '}}}'.length);
-		} else {
-			prevoius = '';
-		}
-		library_namespace.debug(prevoius + ' + ' + parameters, 4,
-				'parse_wikitext.parameter');
-
-		parameters = parameters.split('|').map(function(token, index) {
-			return index === 0
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			&& !token.includes(include_mark) ? _set_wiki_type(
-			//
-			token.split(normalize ? /\s*:\s*/ : ':'), 'page_title')
-			// 經過改變，需再進一步處理。
-			: parse_wikitext(token, options, queue);
-		});
-		_set_wiki_type(parameters, 'parameter');
-		queue.push(parameters);
-		return prevoius + include_mark + (queue.length - 1) + end_mark;
-	});
-
-	// 模板（英語：Template，又譯作「樣板」、「範本」）
-	// {{Template name|}}
-	wikitext = wikitext.replace_till_stable(
-	// or use ((PATTERN_transclusion))
-	/{{([^{}][\s\S]*?)}}/g,
-	//
-	function(all, parameters) {
-		// 自 end_mark 向前回溯。
-		var index = parameters.lastIndexOf('{{'), prevoius;
-		if (index > 0) {
-			prevoius = '{{' + parameters.slice(0, index);
-			parameters = parameters.slice(index + '}}'.length);
-		} else {
-			prevoius = '';
-		}
-		library_namespace.debug(prevoius + ' + ' + parameters, 4,
-				'parse_wikitext.transclusion');
-
-		parameters = parameters.split('|').map(function(token, index) {
-			return index === 0
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
-			&& !token.includes(include_mark) ? _set_wiki_type(
-			//
-			token.split(normalize ? /\s*:\s*/ : ':'), 'page_title')
-			// 經過改變，需再進一步處理。
-			: parse_wikitext(token, options, queue);
-		});
-		_set_wiki_type(parameters, 'transclusion');
-		queue.push(parameters);
-		return prevoius + include_mark + (queue.length - 1) + end_mark;
-	});
+	// 為了 "{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}"，
+	// 將 -{}-, [], [[]] 等，所有中間可穿插 "|" 的置於 {{{}}}, {{}} 前。
 
 	// -{...}-
 	wikitext = wikitext.replace_till_stable(/-{(.+?)}-/g, function(all,
@@ -951,6 +894,66 @@ function parse_wikitext(wikitext, options, queue) {
 		_set_wiki_type(parameters, 'convert');
 		queue.push(parameters);
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
+	});
+
+	// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可!
+	// [[~:~|~]], [[~:~:~|~]]
+	wikitext = wikitext.replace_till_stable(
+	// or use ((PATTERN_link))
+	/\[\[([^\[\]]+)\]\]/g, function(all, parameters) {
+		if (normalize)
+			parameters = parameters.trim();
+		// 自 end_mark 向前回溯。
+		var index = parameters.lastIndexOf('[['), prevoius;
+		if (index > 0) {
+			prevoius = '[[' + parameters.slice(0, index);
+			parameters = parameters.slice(index + ']]'.length);
+		} else {
+			prevoius = '';
+		}
+		library_namespace.debug(prevoius + ' + ' + parameters, 4,
+				'parse_wikitext.link');
+
+		parameters = parameters.split('|').map(function(token, index) {
+			return index === 0
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			&& !token.includes(include_mark) ? _set_wiki_type(
+			// [[: en : abc]] is OK,
+			// [[ : en : abc]] is NOT OK.
+			token.split(normalize ? /\s*:\s*/ : ':'), 'namespace')
+			// 經過改變，需再進一步處理。
+			: parse_wikitext(token, options, queue);
+		});
+		_set_wiki_type(parameters, 'link');
+		queue.push(parameters);
+		return prevoius + include_mark + (queue.length - 1) + end_mark;
+	});
+
+	// [http://... ...]
+	// TODO: [{{}} ...]
+	wikitext = wikitext.replace_till_stable(
+	// 經測試，若為結尾 /$/ 亦會 parse 成 external link。
+	/\[((?:https?:|ftp:)?\/\/[^\/\s][^\]\s]+)(?:(\s)([^\]]*))?(?:\]|$)/gi,
+	//
+	function(all, URL, delimiter, parameters) {
+		URL = [ URL.includes(include_mark)
+		// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+		? parse_wikitext(URL, options, queue) : _set_wiki_type(URL, 'URL') ];
+		if (delimiter) {
+			if (normalize)
+				parameters = parameters.trim();
+			else {
+				// 紀錄 delimiter，否則 .toString() 時 .join() 後會與原先不同。
+				if (delimiter !== ' ')
+					URL.delimiter = delimiter;
+				// parameters 已去除最前面的 delimiter (space)。
+			}
+			// 經過改變，需再進一步處理。
+			URL.push(parse_wikitext(parameters, options, queue));
+		}
+		_set_wiki_type(URL, 'external_link');
+		queue.push(URL);
+		return include_mark + (queue.length - 1) + end_mark;
 	});
 
 	// [[Help:HTML in wikitext]]
@@ -1022,66 +1025,6 @@ function parse_wikitext(wikitext, options, queue) {
 		return include_mark + (queue.length - 1) + end_mark;
 	});
 
-	// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可!
-	// [[~:~|~]], [[~:~:~|~]]
-	wikitext = wikitext.replace_till_stable(
-	// or use ((PATTERN_link))
-	/\[\[([^\[\]]+)\]\]/g, function(all, parameters) {
-		if (normalize)
-			parameters = parameters.trim();
-		// 自 end_mark 向前回溯。
-		var index = parameters.lastIndexOf('[['), prevoius;
-		if (index > 0) {
-			prevoius = '[[' + parameters.slice(0, index);
-			parameters = parameters.slice(index + ']]'.length);
-		} else {
-			prevoius = '';
-		}
-		library_namespace.debug(prevoius + ' + ' + parameters, 4,
-				'parse_wikitext.link');
-
-		parameters = parameters.split('|').map(function(token, index) {
-			return index === 0
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			&& !token.includes(include_mark) ? _set_wiki_type(
-			// [[: en : abc]] is OK,
-			// [[ : en : abc]] is NOT OK.
-			token.split(normalize ? /\s*:\s*/ : ':'), 'namespace')
-			// 經過改變，需再進一步處理。
-			: parse_wikitext(token, options, queue);
-		});
-		_set_wiki_type(parameters, 'link');
-		queue.push(parameters);
-		return prevoius + include_mark + (queue.length - 1) + end_mark;
-	});
-
-	// [http://... ...]
-	// TODO: [{{}} ...]
-	wikitext = wikitext.replace_till_stable(
-	// 經測試，若為結尾 /$/ 亦會 parse 成 external link。
-	/\[((?:https?:|ftp:)?\/\/[^\/\s][^\]\s]+)(?:(\s)([^\]]*))?(?:\]|$)/gi,
-	//
-	function(all, URL, delimiter, parameters) {
-		URL = [ URL.includes(include_mark)
-		// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-		? parse_wikitext(URL, options, queue) : _set_wiki_type(URL, 'URL') ];
-		if (delimiter) {
-			if (normalize)
-				parameters = parameters.trim();
-			else {
-				// 紀錄 delimiter，否則 .toString() 時 .join() 後會與原先不同。
-				if (delimiter !== ' ')
-					URL.delimiter = delimiter;
-				// parameters 已去除最前面的 delimiter (space)。
-			}
-			// 經過改變，需再進一步處理。
-			URL.push(parse_wikitext(parameters, options, queue));
-		}
-		_set_wiki_type(URL, 'external_link');
-		queue.push(URL);
-		return include_mark + (queue.length - 1) + end_mark;
-	});
-
 	// table: \n{| ... \n|}
 	wikitext = wikitext.replace_till_stable(/\n{\|([\s\S]*?)\n\|}/g, function(
 			all, parameters) {
@@ -1149,6 +1092,70 @@ function parse_wikitext(wikitext, options, queue) {
 		queue.push(parameters);
 		// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
 		return '\n' + include_mark + (queue.length - 1) + end_mark;
+	});
+
+	// {{{...}}} 需在 {{...}} 之前解析。
+	// https://zh.wikipedia.org/wiki/Help:%E6%A8%A1%E6%9D%BF
+	// 在模板頁面中，用三個大括弧可以讀取參數
+	// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
+	wikitext = wikitext.replace_till_stable(/{{{([^{}][\s\S]*?)}}}/g, function(
+			all, parameters) {
+		// 自 end_mark 向前回溯。
+		var index = parameters.lastIndexOf('{{{'), prevoius;
+		if (index > 0) {
+			prevoius = '{{{' + parameters.slice(0, index);
+			parameters = parameters.slice(index + '}}}'.length);
+		} else {
+			prevoius = '';
+		}
+		library_namespace.debug(prevoius + ' + ' + parameters, 4,
+				'parse_wikitext.parameter');
+
+		parameters = parameters.split('|').map(function(token, index) {
+			return index === 0
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			&& !token.includes(include_mark) ? _set_wiki_type(
+			//
+			token.split(normalize ? /\s*:\s*/ : ':'), 'page_title')
+			// 經過改變，需再進一步處理。
+			: parse_wikitext(token, options, queue);
+		});
+		_set_wiki_type(parameters, 'parameter');
+		queue.push(parameters);
+		return prevoius + include_mark + (queue.length - 1) + end_mark;
+	});
+
+	// 模板（英語：Template，又譯作「樣板」、「範本」）
+	// {{Template name|}}
+	wikitext = wikitext.replace_till_stable(
+	// or use ((PATTERN_transclusion))
+	/{{([^{}][\s\S]*?)}}/g,
+	//
+	function(all, parameters) {
+		// 自 end_mark 向前回溯。
+		var index = parameters.lastIndexOf('{{'), prevoius;
+		if (index > 0) {
+			prevoius = '{{' + parameters.slice(0, index);
+			parameters = parameters.slice(index + '}}'.length);
+		} else {
+			prevoius = '';
+		}
+		library_namespace.debug(prevoius + ' + ' + parameters, 4,
+				'parse_wikitext.transclusion');
+
+		parameters = parameters.split('|').map(function(token, index) {
+			return index === 0
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
+			&& !token.includes(include_mark) ? _set_wiki_type(
+			//
+			token.split(normalize ? /\s*:\s*/ : ':'), 'page_title')
+			// 經過改變，需再進一步處理。
+			: parse_wikitext(token, options, queue);
+		});
+		_set_wiki_type(parameters, 'transclusion');
+		queue.push(parameters);
+		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
 
 	// TODO: Magic words
