@@ -110,6 +110,39 @@ if (false) {
 		log_to : ''
 	}, [ '史記' ]);
 
+
+	// test for parser, parse_wikitext()
+	var wiki_page = CeL.wiki.parser(page_data);
+	wiki_page.parse().each_text(function(token) { if (token = token.trim()) CeL.log(token); });
+	wiki_page.each('transclusion', function(token, parent, index) { ; });
+	//CeL.log('-'.repeat(70) + '\n' + wiki_page.toString());
+
+	CeL.wiki.parser.parse('{{temp|{{temp2|p{a}r{}}}}}');
+	JSON.stringify(CeL.wiki.parser.parse('a{{temp|e{{temp2|p{a}r}}}}b'));
+	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each_text(function(token) { CeL.log(token); });
+	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('template', function(template) { CeL.log(template.toString()); }) && '';
+	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b<!--ff[[r]]-->[[t|e]]\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}[http://r.r ee]').parse();
+	CeL.wiki.parser('{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function(table) { CeL.log(table); }) && '';
+	var p=CeL.wiki.parser('==[[L]]==\n==[[L|l]]==\n== [[L]] ==').parse();CeL.log(JSON.stringify(p)+'\n'+p.toString());p;
+	CeL.wiki.parser('a{{ #expr: {{CURRENTHOUR}}+8}}}}b').parse()[1];
+	CeL.wiki.parser('{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}').parse().toString();
+
+
+	// test for parse_template()
+	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 0, 0)
+	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 0, 1)
+	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 0)
+	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 1)
+	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 0)
+	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 1)
+
+	CeL.assert([ '{{temp|{{temp2|p{a}r}}}}',
+	             parse_template('a{{temp|{{temp2|p{a}r}}}}b')[0] ]);
+	CeL.assert([ '{{temp|{{temp2|p{a}r}}}}',
+	             parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp')[0] ]);
+	CeL.assert([ '{{temp2|p{a}r}}',
+	             parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]);
+
 	// TODO: http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 }
 
@@ -457,7 +490,12 @@ function unique_list(page_data_list) {
 // parse wikitext
 
 
-// 不包含 section title，因可能有 "==[[]]==" 的情況。
+/**
+ * 不包含可 parse 之要素，不包含 text 之 type。<br />
+ * 不應包含 section title，因可能有 "==[[]]==" 的情況。
+ * 
+ * @type {Object}
+ */
 var atom_type = {
 	namespace : true,
 	page_title : true,
@@ -468,7 +506,19 @@ var atom_type = {
 	comment : true
 };
 
-// {Array}token
+
+/**
+ * 設定 token 為指定 type。將 token 轉為指定 type。
+ * 
+ * @param {Array}token
+ *            parse_wikitext() 解析 wikitext 所得之，以 {Array} 組成之結構。
+ * @param {String}type
+ *            欲指定之類型。 e.g., 'transclusion'.
+ * 
+ * @returns {Array}token
+ * 
+ * @see wiki_toString
+ */
 function set_wiki_type(token, type) {
 	if (typeof token === 'string') {
 		token = [ token ];
@@ -493,32 +543,17 @@ class Wiki_page extends Array { }
 http://www.2ality.com/2015/02/es6-classes-final.html
 
 */
-var page_prototype = {
-	// 在執行 .each()、.each_text() 之前，應該先執行 .parse()。
-	each : for_each_token,
-	each_text : for_each_text,
-	parse : parse_page
-};
 
-
-if (false) {
-	var wiki_page = CeL.wiki.parser(page_data);
-	wiki_page.parse().each_text(function(token) { if (token = token.trim()) CeL.log(token); });
-	wiki_page.each('transclusion', function(token, parent, index) { ; });
-	//CeL.log('-'.repeat(70) + '\n' + wiki_page.toString());
-
-	CeL.wiki.parser.parse('{{temp|{{temp2|p{a}r{}}}}}');
-	JSON.stringify(CeL.wiki.parser.parse('a{{temp|e{{temp2|p{a}r}}}}b'));
-	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each_text(function(token) { CeL.log(token); });
-	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('template', function(template) { CeL.log(template.toString()); }) && '';
-	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b<!--ff[[r]]-->[[t|e]]\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}[http://r.r ee]').parse();
-	CeL.wiki.parser('{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function(table) { CeL.log(table); }) && '';
-	var p=CeL.wiki.parser('==[[L]]==\n==[[L|l]]==\n== [[L]] ==').parse();CeL.log(JSON.stringify(p)+'\n'+p.toString());p;
-	CeL.wiki.parser('a{{ #expr: {{CURRENTHOUR}}+8}}}}b').parse()[1];
-	CeL.wiki.parser('{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}').parse().toString();
-}
-
-// wiki page parser. wikitext 語法分析程式, wikitext 語法分析器
+/**
+ * constructor (建構子) of {wiki page parser}. wikitext 語法分析程式, wikitext 語法分析器.
+ * 
+ * @param {String|Object}wikitext
+ *            wikitext / page data to parse
+ * @param {Object}[options]
+ *            附加參數/設定選擇性/特殊功能與選項
+ * 
+ * @returns {wiki page parser}
+ */
 function page_parser(wikitext, options) {
 	if (typeof wikitext === 'string')
 		wikitext = [ wikitext ];
@@ -526,7 +561,7 @@ function page_parser(wikitext, options) {
 		var tmp = wikitext;
 		wikitext = [ get_page_content(wikitext) ];
 		wikitext.page = tmp;
-	} else if(!wikitext) {
+	} else if (!wikitext) {
 		library_namespace.warn('page_parser: No wikitext specified.');
 		wikitext = [];
 	} else
@@ -540,7 +575,25 @@ function page_parser(wikitext, options) {
 	return wikitext;
 }
 
-// processor({String}token, {Array}parent, {Integer}index)
+/** {Object}prototype of {wiki page parser} */
+var page_prototype = {
+	// 在執行 .each()、.each_text() 之前，應該先執行 .parse()。
+	each : for_each_token,
+	each_text : for_each_text,
+	parse : parse_page
+};
+
+
+/**
+ * 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
+ * 
+ * @param {Function}processor
+ *            執行特定作業 processor({String}token, {Array}parent, {Integer}index)
+ * @param {String}[modify_this]
+ *            modify this
+ * 
+ * @returns {wiki page parser}
+ */
 function for_each_text(processor, modify_this) {
 	this.forEach(function(token, index) {
 		if (typeof token === 'string') {
@@ -569,6 +622,7 @@ function for_each_text(processor, modify_this) {
 	return this;
 }
 
+/** {Object}alias name of type */
 page_parser.type_alias = {
 	row : 'table_row',
 	tr : 'table_row',
@@ -578,7 +632,18 @@ page_parser.type_alias = {
 	template : 'transclusion'
 };
 
-// 觸發器 : trigger({Array}inside nodes, {Array}parent, {Integer}index)
+/**
+ * 對所有指定類型，皆執行特定作業。
+ * 
+ * @param {String}type
+ *            欲搜尋之類型。 e.g., 'templated'.
+ * @param {Function}trigger
+ *            觸發器 : trigger({Array}inside nodes, {Array}parent, {Integer}index)
+ * 
+ * @returns {wiki page parser}
+ * 
+ * @see page_parser.type_alias
+ */
 function for_each_token(type, trigger) {
 	if (type in page_parser.type_alias)
 		type = page_parser.type_alias[type];
@@ -601,6 +666,16 @@ function for_each_token(type, trigger) {
 }
 
 
+/**
+ * 設定好，並執行解析頁面的作業。
+ * 
+ * @param {Object}[options]
+ *            附加參數/設定選擇性/特殊功能與選項
+ * 
+ * @returns {wiki page parser}
+ * 
+ * @see parse_wikitext()
+ */
 function parse_page(options) {
 	if (!this.parsed) {
 		// assert: this = [ {String} ]
@@ -616,6 +691,18 @@ function parse_page(options) {
 	return this;
 }
 
+/**
+ * 將特殊標記解譯/還原成 {Array} 組成之結構。
+ * 
+ * @param {Array}queue
+ *            temporary queue.
+ * @param {String}include_mark
+ *            解析用之起始特殊標記。
+ * @param {String}end_mark
+ *            結束之特殊標記。
+ * 
+ * @see parse_wikitext()
+ */
 function resolve_escaped(queue, include_mark, end_mark) {
 	library_namespace.debug('queue: ' + queue.join('\n--- '), 4,
 			'resolve_escaped');
@@ -661,11 +748,19 @@ function resolve_escaped(queue, include_mark, end_mark) {
 var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
 //
 PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
-// [[Help:Wiki markup]], HTML tags
+/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags */
 markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark';
 
 
-/** {Object}.toString() of wiki elements */
+/**
+ * .toString() of wiki elements<br />
+ * parse_wikitext() 將把 wikitext 解析為各 {Array} 組成之結構。當以 .toString() 結合時，將呼叫
+ * .join() 組合各次元素。此處即為各 .toString() 之定義。
+ * 
+ * @type {Object}
+ * 
+ * @see parse_wikitext()
+ */
 var wiki_toString = {
 	// Internal/interwiki link : language links : category links, file, subst,
 	// ... : title
@@ -801,14 +896,15 @@ function parse_wikitext(wikitext, options, queue) {
 
 	var
 	/**
-	 * 找出一個文件中不可包含，亦不會被解析的字串，作為解析用之特殊標記。<br />
+	 * 解析用之起始特殊標記。<br />
+	 * 需找出一個文件中不可包含，亦不會被解析的字串，作為解析用之起始特殊標記。<br />
 	 * e.g., '\u0000'.<br />
 	 * include_mark + ({Integer}index of queue) + end_mark
 	 * 
 	 * @type {String}
 	 */
 	include_mark = options && options.include_mark || '\0',
-	/** {String}end of include_mark. 不可為數字 (\d) 或 include_mark。 */
+	/** {String}結束之特殊標記。 end of include_mark. 不可為數字 (\d) 或 include_mark。 */
 	end_mark = options && options.end_mark || ';',
 	/** {Boolean}是否順便作正規化。預設不會規範頁面內容。 */
 	normalize = options && options.normalize,
@@ -1227,22 +1323,6 @@ TEMPLATE_START_PATTERN = new RegExp(TEMPLATE_NAME_PATTERN.source.replace(
 		/\[[^[]+$/, ''), 'g'),
 //內部連結
 LINK_NAME_PATTERN = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)(\||\]\])/;
-
-if (false) {
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 0, 0)
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 0, 1)
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 0)
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 1)
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 0)
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 1)
-
-	CeL.assert([ '{{temp|{{temp2|p{a}r}}}}',
-	             parse_template('a{{temp|{{temp2|p{a}r}}}}b')[0] ]);
-	CeL.assert([ '{{temp|{{temp2|p{a}r}}}}',
-	             parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp')[0] ]);
-	CeL.assert([ '{{temp2|p{a}r}}',
-	             parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]);
-}
 
 /**
  * parse template token. 取得完整的模板 token。<br />
@@ -3131,7 +3211,7 @@ wiki_API.check_stop = function(callback, options) {
 			options = library_namespace.null_Object();
 
 	/**
-	 * 緊急停止頁面標題 check title:<br />
+	 * 緊急停止作業將檢測之頁面標題。 check title:<br />
 	 * 只檢查此緊急停止頁面。
 	 * 
 	 * @type {String}
@@ -3162,6 +3242,7 @@ wiki_API.check_stop = function(callback, options) {
 			// 指定 pattern
 			PATTERN = options.pattern
 			// options.section: 指定的緊急停止章節標題, section title to check
+			/** {String}緊急停止作業將檢測之章節標題。 */
 			|| options.section
 			/**
 			 * <code>

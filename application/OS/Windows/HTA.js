@@ -258,11 +258,9 @@ instead of onload
 		}
 	},
 	eval : function(code, scope) {
-		try {
-			return (scope ? this.g(scope).parentWindow : this.win()).eval(code);
-		} catch (e) {
-			// TODO: handle exception
-		}
+		// IE 11 中無法使用 this.win().eval:
+		// Error 70 [Error] (facility code 10): 沒有使用權限
+		return (scope ? this.g(scope).parentWindow : this.win()).eval(code);
 	},
 /*
 reload:function(){
