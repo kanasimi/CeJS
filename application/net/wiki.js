@@ -143,6 +143,17 @@ if (false) {
 	CeL.assert([ '{{temp2|p{a}r}}',
 	             parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]);
 
+	// Flow
+	CeL.wiki.Flow('Wikipedia_talk:Flow_tests', function(page_data) {
+		CeL.log(page_data.is_Flow === true);
+	});
+	CeL.wiki.Flow('ABC', function(page_data) {
+		CeL.log(page_data.is_Flow === false);
+	});
+	CeL.wiki.Flow('not_exist', function(page_data) {
+		CeL.log(page_data.is_Flow === undefined);
+	});
+
 	// TODO: http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 }
 
@@ -2462,9 +2473,11 @@ wiki_API.page = function(title, callback, options) {
 			// e.g., Too many values supplied for parameter 'pageids': the limit is 50
 			if (data.warnings && data.warnings.query && data.warnings.query['*'])
 				library_namespace.warn(data.warnings.query['*']);
-			return callback();
+			callback();
+			return;
+		}
 
-		} else if (!data || !data.query || !data.query.pages) {
+		if (!data || !data.query || !data.query.pages) {
 			library_namespace.warn('wiki_API.page: Unknown response: [' + data + ']');
 			if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
@@ -3637,11 +3650,9 @@ wiki_API.redirects = function(title, callback, options) {
 	// 處理 [ {String}API_URL, {String}title ]
 	if (!Array.isArray(title))
 		title = [ , title ];
-	title[1] = wiki_API.query.title_param(title[1], true);
-
 	title[1] = 'query&prop=redirects&rdlimit=max&'
 	//
-	+ title[1];
+	+ wiki_API.query.title_param(title[1], true);
 	if (!title[0])
 		title = title[1];
 
@@ -3657,15 +3668,18 @@ wiki_API.redirects = function(title, callback, options) {
 			// e.g., Too many values supplied for parameter 'pageids': the limit is 50
 			if (data.warnings && data.warnings.query && data.warnings.query['*'])
 				library_namespace.warn(data.warnings.query['*']);
-			return callback();
+			callback();
+			return;
+		}
 
-		} else if (!data || !data.query || !data.query.pages) {
+		if (!data || !data.query || !data.query.pages) {
 			library_namespace.warn('wiki_API.redirects: Unknown response: [' + data + ']');
 			if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
 				library_namespace.show_value(data);
-			return callback();
+			callback();
+			return;
 		}
 
 		data = data.query.pages;
@@ -4135,9 +4149,139 @@ wiki_API.cache.title_only = function(operation) {
 // [[mediawikiwiki:Extension:Flow/API]]
 // https://www.mediawiki.org/w/api.php?action=help&modules=flow
 // TODO
+// wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
 
-function Flow_enabled(title) {
-	;
+// https://zh.wikipedia.org/w/api.php?action=query&prop=flowinfo&titles=Wikipedia_talk:Flow_tests
+// https://zh.wikipedia.org/w/api.php?action=flow&submodule=view-topiclist&page=Wikipedia_talk:Flow_tests&vtlformat=wikitext&utf8=1
+// .roots[0]
+// https://zh.wikipedia.org/w/api.php?action=flow&submodule=view-topic&page=Topic:sqs6skdav48d3xzn&vtformat=wikitext&utf8=1
+
+// https://www.mediawiki.org/w/api.php?action=flow&submodule=view-header&page=Talk:Sandbox&vhformat=wikitext
+// https://www.mediawiki.org/w/api.php?action=flow&submodule=view-topiclist&page=Talk:Sandbox
+
+// Flow info
+function Flow_info(title, callback, options) {
+	// 處理 [ {String}API_URL, {String}title ]
+	if (!Array.isArray(title)
+	// 為了預防輸入的是問題頁面。
+	|| title.length !== 2 || typeof title[0] === 'object')
+		title = [ , title ];
+	title[1] = wiki_API.query.title_param(title[1], true);
+
+	if (options && options.redirects)
+		title[1] += '&redirects=1';
+
+	title[1] = 'query&prop=flowinfo&' + title[1];
+	if (!title[0])
+		title = title[1];
+
+	wiki_API.query(title, typeof callback === 'function'
+	//
+	&& function(data) {
+		if (library_namespace.is_debug(2)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+			library_namespace.show_value(data, 'Flow_info: data');
+
+		var error = data && data.error;
+		// 檢查伺服器回應是否有錯誤資訊。
+		if (error) {
+			library_namespace.err('Flow_info: [' + error.code + '] ' + error.info);
+			// e.g., Too many values supplied for parameter 'pageids': the limit is 50
+			if (data.warnings && data.warnings.query && data.warnings.query['*'])
+				library_namespace.warn(data.warnings.query['*']);
+			callback();
+			return;
+		}
+
+		if (!data || !data.query || !data.query.pages) {
+			library_namespace.warn('Flow_info: Unknown response: [' + data + ']');
+			if (library_namespace.is_debug()
+				// .show_value() @ interact.DOM, application.debug
+				&& library_namespace.show_value)
+				library_namespace.show_value(data);
+			callback();
+			return;
+		}
+
+		data = data.query.pages;
+		var pages = [];
+		for ( var pageid in data) {
+			var page = data[pageid];
+			pages.push(page);
+		}
+
+		// options.multi: 即使只取得單頁面，依舊回傳 Array。
+		if (!options || !options.multi)
+			if (pages.length <= 1) {
+				if (pages = pages[0])
+					pages.is_Flow = is_Flow(pages);
+				library_namespace.debug('只取得單頁面 [[' + pages.title + ']]，將回傳此頁面資料，而非 Array。', 2, 'Flow_info');
+			} else
+				library_namespace.debug('Get ' + pages.length
+				//
+				+ ' page(s)! The pages will all passed to callback as Array!', 2, 'Flow_info');
+
+		// page 之 structure 將按照 wiki 本身之 return！
+		// page_data = {ns,title,missing:'']}
+		// page_data = {pageid,ns,title,flowinfo:{flow:[]}}
+		// page_data = {pageid,ns,title,flowinfo:{flow:{enabled:''}}}
+		callback(pages);
+	});
+}
+
+function is_Flow(page_data) {
+	var flowinfo = page_data &&
+	//get_page_content.is_page_data(page_data) &&
+	page_data.flowinfo;
+	// flowinfo:{flow:{enabled:''}}
+	return flowinfo && flowinfo.flow && ('enabled' in flowinfo.flow);
+}
+
+// get topic
+// title 可為話題id/頁面標題+話題標題
+function Flow_page(title, callback, options) {
+	// 處理 [ {String}API_URL, {String}title ]
+	if (!Array.isArray(title)
+	// 為了預防輸入的是問題頁面。
+	|| title.length !== 2 || typeof title[0] === 'object')
+		title = [ , title ];
+	title[1] = 'page=' + title[1];
+
+	if (options && options.redirects)
+		title[1] += '&redirects=1';
+
+	title[1] = 'flow&submodule=view-topiclist&vtlformat=wikitext&' + title[1];
+	if (!title[0])
+		title = title[1];
+
+	wiki_API.query(title, typeof callback === 'function'
+	//
+	&& function(data) {
+		if (library_namespace.is_debug(2)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+			library_namespace.show_value(data, 'Flow_page: data');
+
+		var error = data && data.error;
+		// 檢查伺服器回應是否有錯誤資訊。
+		if (error) {
+			library_namespace.err('Flow_page: [' + error.code + '] ' + error.info);
+			// e.g., Too many values supplied for parameter 'pageids': the limit is 50
+			if (data.warnings && data.warnings.query && data.warnings.query['*'])
+				library_namespace.warn(data.warnings.query['*']);
+			callback();
+			return;
+		}
+
+		// data = { flow: { 'view-topiclist': { result: [Object], status: 'ok' } } }
+		if (!(data = data.flow) || !(data = data['view-topiclist']) || data.status !== 'ok') {
+			library_namespace.err('Flow_page: Error status [' + data.status + ']');
+			callback();
+			return;
+		}
+		callback(data.result.topiclist);
+	});
 }
 
 /**
@@ -4165,10 +4309,12 @@ function edit_topic(title, topic, text, token, options, callback) {
 	;
 }
 
-// title 可為話題id/頁面標題+話題標題
-function get_topic(title, options, callback) {
-	;
-}
+
+Object.assign(Flow_info, {
+	is_Flow : is_Flow,
+	page : Flow_page,
+	edit : edit_topic
+});
 
 
 // --------------------------------------------------------------------------------------------- //
@@ -4194,7 +4340,9 @@ Object.assign(wiki_API, {
 	normalize_title : normalize_page_name,
 	normalize_title_pattern : normalize_name_pattern,
 	get_hash : list_to_hash,
-	uniq_list : unique_list
+	uniq_list : unique_list,
+
+	Flow : Flow_info
 });
 
 
