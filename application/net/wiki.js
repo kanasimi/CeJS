@@ -82,6 +82,16 @@ if (false) {
 					CeL.log(CeL.wiki.content_of(page_data));
 				});
 
+				wiki.page('Wikipedia_talk:Flow_tests')
+				.edit(function(page_data) {
+					return '* [[WP:Sandbox|沙盒]]';
+				}, {
+					section : 'new',
+					sectiontitle : '沙盒測試 section',
+					summary : '沙盒 test edit (section)',
+					nocreate : 1
+				});
+
 				wiki.logout();
 			});
 	
@@ -1706,6 +1716,38 @@ wiki_API.prototype.next = function() {
 				next[3].call(_this, title, '已停止作業');
 			this.next();
 
+		} else if (this.last_page.is_Flow) {
+			// next[2]: options to edit_topic()
+			// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
+			if (next[2].section !== 'new') {
+				library_namespace.warn('wiki_API.prototype.next: The page to edit is Flow. I can not edit directly.');
+				// next[3] : callback
+				if (typeof next[3] === 'function')
+					next[3].call(this, this.last_page.title, 'is Flow');
+				this.next();
+
+			} else {
+				library_namespace.debug('直接採用 Flow 的方式增添新話題。', 0);
+				if (typeof next[1] === 'function') {
+					// next[1] = next[1](get_page_content(this.last_page), this.last_page.title, this.last_page);
+					// 需要同時改變 wiki_API.edit!
+					next[1] = next[1](this.last_page);
+				}
+				edit_topic([ this.API_URL, this.last_page ],
+				// 新章節/新話題的標題文字。
+				next[2].sectiontitle,
+				// 因為已有 contents，直接餵給轉換函式。
+				// 新話題最初的內容。
+				next[1], this.token,
+				// next[2]: options to edit_topic()
+				next[2], function(title, error, result) {
+					// next[3] : callback
+					if (typeof next[3] === 'function')
+						next[3].call(_this, title, error, result);
+					_this.next();
+				});
+			}
+		
 		} else if (wiki_API.edit.denied(this.last_page, this.token.lgname, next[2] && next[2].action)) {
 			// 採用 this.last_page 的方法，在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 			library_namespace.warn('wiki_API.prototype.next: Denied to edit [[' + this.last_page.title + ']]');
@@ -1726,7 +1768,7 @@ wiki_API.prototype.next = function() {
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					next[3].call(this, this.last_page.title, 'nochange');
-				_this.next();
+				this.next();
 			} else
 				wiki_API.edit([ this.API_URL, this.last_page ],
 				// 因為已有 contents，直接餵給轉換函式。
@@ -2512,7 +2554,8 @@ wiki_API.page = function(title, callback, options) {
 		// options.multi: 即使只取得單頁面，依舊回傳 Array。
 		if (!options || !options.multi)
 			if (pages.length <= 1) {
-				pages = pages[0];
+				if (pages = pages[0])
+					pages.is_Flow = is_Flow(pages);
 				library_namespace.debug('只取得單頁面 [[' + pages.title + ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
 			} else
 				library_namespace.debug('Get ' + pages.length
@@ -3407,15 +3450,24 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 				&& ('[' + data.edit.result + '] '
 				//
 				+ (data.edit.info || data.edit.captcha && '必需輸入驗證碼'));
-		if (error)
-			library_namespace.warn('wiki_API.edit: Error to edit ['
-					+ get_page_title(title) + ']: ' + error);
-		else if (data.edit && ('nochange' in data.edit))
+		if (error) {
+			// wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
+			if (data.error && data.error.code === 'no-direct-editing'
+			// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
+			&& options.section === 'new') {
+				// 無法以正常方式 edit，嘗試當作 Flow。
+				edit_topic(title, options.sectiontitle, text, options.token, options, callback);
+				return;
+			}
+			library_namespace.warn('wiki_API.edit: Error to edit [['
+					+ get_page_title(title) + ']]: ' + error);
+		} else if (data.edit && ('nochange' in data.edit))
 			// 在極少的情況下，data.edit === undefined。
 			library_namespace.info('wiki_API.edit: ['
 					+ get_page_title(title) + ']: no change');
 		if (typeof callback === 'function')
-			callback(get_page_title(title), error, data);
+			// title.title === get_page_title(title)
+			callback(title.title, error, data);
 	}, options);
 };
 
@@ -4146,10 +4198,9 @@ wiki_API.cache.title_only = function(operation) {
 
 
 // --------------------------------------------------------------------------------------------- //
+// Flow討論系統。
 // [[mediawikiwiki:Extension:Flow/API]]
 // https://www.mediawiki.org/w/api.php?action=help&modules=flow
-// TODO
-// wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
 
 // https://zh.wikipedia.org/w/api.php?action=query&prop=flowinfo&titles=Wikipedia_talk:Flow_tests
 // https://zh.wikipedia.org/w/api.php?action=flow&submodule=view-topiclist&page=Wikipedia_talk:Flow_tests&vtlformat=wikitext&utf8=1
@@ -4234,8 +4285,12 @@ function is_Flow(page_data) {
 	var flowinfo = page_data &&
 	//get_page_content.is_page_data(page_data) &&
 	page_data.flowinfo;
-	// flowinfo:{flow:{enabled:''}}
-	return flowinfo && flowinfo.flow && ('enabled' in flowinfo.flow);
+	if (flowinfo)
+		// flowinfo:{flow:{enabled:''}}
+		return flowinfo.flow && ('enabled' in flowinfo.flow);
+	// e.g., 從 wiki_API.page 得到的 page_data
+	if (page_data = get_page_content.has_content(page_data))
+		return page_data.contentmodel === 'flow-board';
 }
 
 // get topic
@@ -4267,19 +4322,17 @@ function Flow_page(title, callback, options) {
 		// 檢查伺服器回應是否有錯誤資訊。
 		if (error) {
 			library_namespace.err('Flow_page: [' + error.code + '] ' + error.info);
-			// e.g., Too many values supplied for parameter 'pageids': the limit is 50
-			if (data.warnings && data.warnings.query && data.warnings.query['*'])
-				library_namespace.warn(data.warnings.query['*']);
 			callback();
 			return;
 		}
 
-		// data = { flow: { 'view-topiclist': { result: [Object], status: 'ok' } } }
+		// data = { flow: { 'view-topiclist': { result: {}, status: 'ok' } } }
 		if (!(data = data.flow) || !(data = data['view-topiclist']) || data.status !== 'ok') {
 			library_namespace.err('Flow_page: Error status [' + data.status + ']');
 			callback();
 			return;
 		}
+
 		callback(data.result.topiclist);
 	});
 }
@@ -4292,7 +4345,7 @@ function Flow_page(title, callback, options) {
  *            頁面標題。 {String}title or [ {String}API_URL, {String}title or
  *            {Object}page_data ]
  * @param {String}topic
- *            新話題標題。 {String}topic
+ *            新話題的標題文字。 {String}topic
  * @param {String|Function}text
  *            頁面內容 contents。 {String}text or {Function}text(page_data)
  * @param {Object}token
@@ -4306,7 +4359,45 @@ function Flow_page(title, callback, options) {
  * https://www.mediawiki.org/w/api.php?action=help&modules=flow%2Breply
  */
 function edit_topic(title, topic, text, token, options, callback) {
-	;
+	var	action = 'flow';
+	// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
+	if (Array.isArray(title))
+		action = [ title[0], action ], title = title[1];
+
+	if (get_page_content.is_page_data(title))
+		title = title.title;
+
+	wiki_API.query(action, typeof callback === 'function'
+	//
+	&& function(data) {
+		if (library_namespace.is_debug(2)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+			library_namespace.show_value(data, 'edit_topic: data');
+
+		var error = data && data.error;
+		// 檢查伺服器回應是否有錯誤資訊。
+		if (error) {
+			library_namespace.err('edit_topic: [' + error.code + '] ' + error.info);
+		} else if (!(data = data.flow) || !(data = data['new-topic']) || data.status !== 'ok') {
+			// data = { flow: { 'new-topic': { status: 'ok', workflow: '', committed: {} } } }
+			error = 'edit_topic: Error status [' + data.status + ']';
+			library_namespace.err(error);
+		}
+
+		if (typeof callback === 'function')
+			// title.title === get_page_title(title)
+			callback(title.title, error, data);
+	}, {
+		action : 'flow',
+		submodule : 'new-topic',
+		page : title,
+		nttopic : topic,
+		ntcontent : text,
+		ntformat : 'wikitext',
+		token : library_namespace.is_Object(token) ? token.csrftoken
+				: token
+	});
 }
 
 
