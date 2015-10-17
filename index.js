@@ -11,6 +11,8 @@
 > require('cejs');
 > CeL.run('data.math', function() { var n1 = 123, n2 = 234; CeL.log('GCD(' + n1 + ', ' + n2 + ') = ' + CeL.GCD(n1, n2)); });
 
+// MUST run `npm rebuild cejs` after modify package.json.
+
 # npm uninstall cejs
 
 
