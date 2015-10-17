@@ -6723,7 +6723,8 @@ if (support_dataset)
 	};
 
 else {
-	library_namespace.debug('The browser does not support dataset!');
+	// The browser does not support dataset!
+	library_namespace.debug('The runtime environment does not support dataset!');
 	dataset = dataset_compatible;
 }
 

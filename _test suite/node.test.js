@@ -678,17 +678,94 @@ function test_math() {
 }
 
 
+function test_CSV() {
+
+	CeL.info('test: 讀入 CSV 檔。');
+
+	CeL.info('basic test');
+	CeL.assert([CeL.parse_CSV('"a","b""c"\n_1,_2\n_3,_4\n_5,_6\n')[0][1],'b"c']);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6\n')[2][1],'_4']);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6')[2][1],'_4']);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{select_column:true})[2].b,'_4']);
+
+	CeL.info('title test');
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{has_title:1}).index.b,1]);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{has_title:1}).title.join('|'),'a|b']);
+
+	CeL.info('skip_title test');
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{skip_title:1}).join('|'),'a,b|_1,_2|_3,_4|_5,_6']);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{skip_title:1,has_title:1}).join('|'),'_1,_2|_3,_4|_5,_6']);
+
+	CeL.info('handle_array test');
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[2][0],'_3']);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[2][1],':_4']);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']);
+
+	CeL.info('no_text_qualifier test');
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_2']);
+	CeL.assert([CeL.parse_CSV('a,b\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_1']);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:1})[1][0],'_1']);
+
+	CeL.info('row_limit test');
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1})[1].join('|'),'_1|_2']);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1})[2],undefined]);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1,to_Object:1})._2.join('|'),'_1|_2']);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1,to_Object:1})._3,undefined]);
+
+	CeL.info('to_Object test');
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1})._4.join('|'),'_3|_4']);
+	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1,select_column:true})._4.b,'_4']);
+
+	CeL.info('test: 將 {Array|Object} 依設定轉成 CSV text。');
+
+	CeL.info('basic test');
+	CeL.to_CSV_String.config.line_separator="\n";
+	CeL.assert([CeL.to_CSV_String([["a","b"],[1,2],[3,4]]),'"a","b"\n"1","2"\n"3","4"']);
+	CeL.assert([CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]]),'"a","b"\n"""e""","2"\n"3","4"']);
+	CeL.assert([CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]],{no_text_qualifier:'auto'}),'a,b\n"""e""",2\n3,4']);
+	CeL.assert([CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]],{no_text_qualifier:true}),'a,b\n"e",2\n3,4']);
+
+	CeL.info('Object test');
+	CeL.assert([CeL.to_CSV_String({a:[1,2],b:[3,4]}),'"1","2"\n"3","4"']);
+	CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{t:3,u:4}}),'"1","2"\n"3","4"']);
+
+	CeL.info('select_column test');
+	CeL.assert([CeL.to_CSV_String([["a","b"],[1,2],[3,4]],{select_column:1}),'"b"\n"2"\n"4"']);
+	CeL.assert([CeL.to_CSV_String([["a","b","c"],[1,2,3],[3,4,5]],{select_column:[2,1]}),'"c","b"\n"3","2"\n"5","4"']);
+	CeL.assert([CeL.to_CSV_String({a:[1,2],b:[3,4]},{select_column:1}),'"2"\n"4"']);
+	CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4}},{select_column:'s'}),'"2"\n"4"']);
+	CeL.assert([CeL.to_CSV_String({a:{r:1,s:2,t:3},b:{r:3,s:4,t:5}},{select_column:['s','t']}),'"2","3"\n"4","5"']);
+	CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4,t:5}},{select_column:['s','t']}),'"2",""\n"4","5"']);
+
+	CeL.info('has_title test');
+	CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4,t:5}},{has_title:1,select_column:['s','t']}),'"s","t"\n"2",""\n"4","5"']);
+	CeL.assert([CeL.to_CSV_String([["a","b","c"],[1,2,3],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"3","2"\n"5","4"']);
+	CeL.assert([CeL.to_CSV_String([["a","b","c"],[1,2],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"","2"\n"5","4"']);
+
+	CeL.info('test CSV: All passed');
+}
+
 
 function test_era() {
 	CeL.assert([ '孺子嬰', CeL.era('初始').君主 ], '初始.君主: 孺子嬰#1');
 }
 
 function do_test() {
-	CeL.assert([ typeof CeL.assert, 'function' ], 'CeL.assert is working.');
-	CeL.run([ 'data.math', 'data.math.rational', 'data.math.quadratic' ],
-			test_math);
-	// CeL.run('data.date.era', test_era);
+	// CeL.assert([ typeof CeL.assert, 'function' ], 'CeL.assert is working.');
+	CeL.run(
+	//
+	[ 'data.math.rational', 'data.math.quadratic' ], test_math,
+	//
+	'data.date.era', test_era,
+	//
+	'data.CSV', test_CSV,
+	//
+	function() {
+		CeL.info('CeJS: All tests passed.');
+	});
 }
 
 CeL.set_debug();
+CeL.env.no_catch = true;
 CeL.run([ 'application.debug', 'application.debug.log' ], do_test);

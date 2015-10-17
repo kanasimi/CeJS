@@ -129,54 +129,23 @@ var default_config = {
  * @_memberOf _module_
  * 
  * @example <code>
- * //	to use:
- * CeL.run('data.CSV',function(){ 'code' ;});
- * var data=parse_CSV('data');
- * //data[_line_][_field_]
- *
- * //	there's a title line:
- * var data = parse_CSV('data',{has_title:true});
- * //data[_line_][data.t[_title_]]
- *
- * //	then:
- * data[title_word]	=	{title_field_name : field number of title};
- * data.title_array	=	[title_field_name];
- * data.it	=	ignored title array
- * data[num]	=	the num-th line (num: 0,1,2,..)
- * </code><br />
- * <br />
- * <code>
 
-//	basic test
-CeL.assert([CeL.parse_CSV('"a","b""c"\n_1,_2\n_3,_4\n_5,_6\n')[0][1],'b"c']);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6\n')[2][1],'_4']);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6')[2][1],'_4']);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{select_column:true})[2].b,'_4']);
-//	title test
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{has_title:1}).index.b,1]);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{has_title:1}).title.join('|'),'a|b']);
-//	skip_title test
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{skip_title:1}).join('|'),'a,b|_1,_2|_3,_4|_5,_6']);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{skip_title:1,has_title:1}).join('|'),'_1,_2|_3,_4|_5,_6']);
-//	handle_array test
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[2][0],'_3']);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[2][1],':_4']);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']);
-//	no_text_qualifier test
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_2']);
-CeL.assert([CeL.parse_CSV('a,b\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_1']);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:1})[1][0],'_1']);
-//	row_limit test
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1})[1].join('|'),'_1|_2']);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1})[2],undefined]);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1,to_Object:1})._2.join('|'),'_1|_2']);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1,to_Object:1})._3,undefined]);
-//	to_Object test
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1})._4.join('|'),'_3|_4']);
-CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1,select_column:true})._4.b,'_4']);
+//	to use:
+CeL.run('data.CSV',function(){ 'code' ;});
+var data=parse_CSV('data');
+//data[_line_][_field_]
 
-CeL.log('All passed');
+//	there's a title line:
+var data = parse_CSV('data',{has_title:true});
+//data[_line_][data.t[_title_]]
+
+//	then:
+data[title_word]	=	{title_field_name : field number of title};
+data.title_array	=	[title_field_name];
+data.it	=	ignored title array
+data[num]	=	the num-th line (num: 0,1,2,..)
+
+// other examples see "_test suite/node.test.js"
 
  * </code>
  * 
@@ -305,7 +274,7 @@ function parse_CSV(data, config) {
 
 	if (typeof config('no_text_qualifier') === 'undefined') {
 		if (matched = data.match(new RegExp('[^' + config('line_separator') + ']+'))) {
-			matched = match[0];
+			matched = matched[0];
 			matched = (new RegExp('^[' + text_qualifier + ']')).test(matched)
 				&& (new RegExp('[' + text_qualifier + ']$')).test(matched);
 			library_namespace.debug('auto detect: ' + (matched ? 'using' : 'no') + ' text_qualifier.', 1, 'parse_CSV');
@@ -471,32 +440,11 @@ parse_CSV = parse_CSV;
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 /**
- * 將 Array|Object 依設定轉成 CSV text。<br />
+ * 將 {Array|Object} 依設定轉成 CSV text。<br />
  * 
  * @example <code>
 
-//	basic test
-CeL.to_CSV_String.config.line_separator="\n";
-CeL.assert([CeL.to_CSV_String([["a","b"],[1,2],[3,4]]),'"a","b"\n"1","2"\n"3","4"']);
-CeL.assert([CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]]),'"a","b"\n"""e""","2"\n"3","4"']);
-CeL.assert([CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]],{no_text_qualifier:'auto'}),'a,b\n"""e""",2\n3,4']);
-CeL.assert([CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]],{no_text_qualifier:true}),'a,b\n"e",2\n3,4']);
-//	Object test
-CeL.assert([CeL.to_CSV_String({a:[1,2],b:[3,4]}),'"1","2"\n"3","4"']);
-CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{t:3,u:4}}),'"1","2"\n"3","4"']);
-//	select_column test
-CeL.assert([CeL.to_CSV_String([["a","b"],[1,2],[3,4]],{select_column:1}),'"b"\n"2"\n"4"']);
-CeL.assert([CeL.to_CSV_String([["a","b","c"],[1,2,3],[3,4,5]],{select_column:[2,1]}),'"c","b"\n"3","2"\n"5","4"']);
-CeL.assert([CeL.to_CSV_String({a:[1,2],b:[3,4]},{select_column:1}),'"2"\n"4"']);
-CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4}},{select_column:'s'}),'"2"\n"4"']);
-CeL.assert([CeL.to_CSV_String({a:{r:1,s:2,t:3},b:{r:3,s:4,t:5}},{select_column:['s','t']}),'"2","3"\n"4","5"']);
-CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4,t:5}},{select_column:['s','t']}),'"2",""\n"4","5"']);
-//	has_title test
-CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4,t:5}},{has_title:1,select_column:['s','t']}),'"s","t"\n"2",""\n"4","5"']);
-CeL.assert([CeL.to_CSV_String([["a","b","c"],[1,2,3],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"3","2"\n"5","4"']);
-CeL.assert([CeL.to_CSV_String([["a","b","c"],[1,2],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"","2"\n"5","4"']);
-
-CeL.log('All passed');
+// other examples see "_test suite/node.test.js"
 
  * </code>
  * 
@@ -754,20 +702,24 @@ jsdb.to_object(row_first)
  * @param {Boolean} has_title	there's a title line
  * @return	{Array}	[ [L1_1,L1_2,..], [L2_1,L2_2,..],.. ]
  * @_memberOf	_module_
- * @example
- * //	to use:
- * var data=parse_CSV('~');
- * data[_line_][_field_]
- *
- * //	has_title:
- * var data = parse_CSV('~',0,1);
- * //data[_line_][data.t[_title_]]
- *
- * //	then:
- * data.tA	=	title line
- * data.t[_field_name_]	=	field number of title
- * data.it	=	ignored title array
- * data[num]	=	the num-th line (num: 0,1,2,..)
+ * @example <code>
+
+//	to use:
+var data=parse_CSV('~');
+data[_line_][_field_]
+
+//	has_title:
+var data = parse_CSV('~',0,1);
+//data[_line_][data.t[_title_]]
+
+//	then:
+data.tA	=	title line
+data.t[_field_name_]	=	field number of title
+data.it	=	ignored title array
+data[num]	=	the num-th line (num: 0,1,2,..)
+
+ * </code>
+ * 
  * @see
  * <a href="http://www.jsdb.org/" accessdate="2010/1/1 0:53">JSDB: JavaScript for databases</a>,
  * <a href="http://hax.pie4.us/2009/05/lesson-of-regexp-50x-faster-with-just.html" accessdate="2010/1/1 0:53">John Hax: A lesson of RegExp: 50x faster with just one line patch</a>

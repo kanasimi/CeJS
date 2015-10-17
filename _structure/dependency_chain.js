@@ -3582,9 +3582,10 @@ if (typeof CeL === 'function')
 							// TODO: 可否加點 arguments?
 							item();
 						} catch (e) {
-							library_namespace
-									.err('check_and_run.run: Error to run function: '
-											+ e.message);
+							library_namespace.err(
+							//
+							'check_and_run.run: Error to run function: '
+									+ e.message);
 							library_namespace.debug('<code>'
 									+ ('' + item).replace(/</g, '&lt;')
 											.replace(/\n/g, '<br />')
