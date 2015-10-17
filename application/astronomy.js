@@ -560,9 +560,7 @@ if (typeof CeL === 'function')
 			EQUINOX_SOLSTICE_DEGREES
 			//
 			= TURN_TO_DEGREES / EQUINOX_SOLSTICE_COUNT,
-			/**
-			 * 二十四節氣名。每月有一個節氣，一個中氣，分別發生在每月的7日和22日前後。
-			 */
+			/** {Array}二十四節氣名。每月有一個節氣，一個中氣，分別發生在每月的7日和22日前後。 */
 			SOLAR_TERMS_NAME =
 			// Chinese name: 中氣,節氣,中氣,節氣,...
 			'春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,立春,雨水,驚蟄'
@@ -3470,9 +3468,11 @@ if (typeof CeL === 'function')
 			// ----------------------------------------------------------------------------------------------------------------------------------------------//
 			// 應用功能:輔助以節氣為年首之曆法
 
+			var
 			// copy from data.date.
-			// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
-			var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+			/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
+			ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1);
+			var
 			// 小寒(19) 1月5-7日交節，以春分分年的情況，已在下一年。
 			solar_term_starts_year = SOLAR_TERMS_NAME.indexOf('小寒'),
 			// solar_term_calendar_cache[term index / minute_offset]

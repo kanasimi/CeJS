@@ -252,7 +252,8 @@ if (typeof CeL === 'function')
 			//
 			strftime = Date_to_String_parser.strftime,
 
-			// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
+			// copy from data.date.
+			/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
 			ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
 
 			CE_REFORM_YEAR = library_namespace.Gregorian_reform_date

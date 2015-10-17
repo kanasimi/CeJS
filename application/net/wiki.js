@@ -340,6 +340,9 @@ get_namespace.hash = {
 	topic : 2600
 };
 
+/**
+ * build ((get_namespace.pattern))
+ */
 (function() {
 	var source = [];
 	for ( var namespace in get_namespace.hash)
@@ -350,6 +353,14 @@ get_namespace.hash = {
 })();
 
 
+/**
+ * remove namespace part of the title.
+ * 
+ * @param {String}title
+ *            頁面標題。
+ * 
+ * @returns {String}title without namespace
+ */
 function remove_namespace(title) {
 	if (typeof title !== 'string') {
 		library_namespace.debug(title, 5, 'remove_namespace');
@@ -377,7 +388,8 @@ function remove_namespace(title) {
  * 
  * 這種規範化只能通用於本 library 內。Wikipedia 並未硬性設限。<br />
  * 依照 [https://www.mediawiki.org/w/api.php?action=query&titles=Wikipedia_talk:Flow&prop=info]，
- * "Wikipedia_talk:Flow" → "Wikipedia talk:Flow"
+ * "Wikipedia_talk:Flow" → "Wikipedia talk:Flow"<br />
+ * 亦即底線 "_" → space " "
  * 
  * @param {String}page_name
  *            頁面名 page name。
@@ -1727,7 +1739,7 @@ wiki_API.prototype.next = function() {
 				this.next();
 
 			} else {
-				library_namespace.debug('直接採用 Flow 的方式增添新話題。', 0);
+				library_namespace.debug('直接採用 Flow 的方式增添新話題。');
 				if (typeof next[1] === 'function') {
 					// next[1] = next[1](get_page_content(this.last_page), this.last_page.title, this.last_page);
 					// 需要同時改變 wiki_API.edit!
@@ -1929,6 +1941,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	library_namespace.debug('wiki_API.work: 開始執行:先作環境建構與初始設定。');
 	if (config.summary)
+		// '開始處理 ' + config.summary + ' 作業'
 		library_namespace.info('wiki_API.work: start [' + config.summary + ']');
 
 	// default handler [ text replace function(title, content), {Object}options, callback(title, error, result) ]
@@ -2165,7 +2178,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				nocreate : 1,
 				// 標記此編輯為機器人編輯。
 				bot : 1,
-				// 就算設定停止編輯作業，仍強制編輯。
+				// 就算設定停止編輯作業，仍強制編輯。一般僅針對測試頁面或自己的頁面，例如寫入 log。
 				skip_stopped : true
 			};
 
@@ -2268,7 +2281,7 @@ wiki_API.query = function(action, callback, post_data) {
 		// 加上 "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
 		action[0] = get_URL.add_param(action[0], 'format=json&utf8=1');
 
-	// 開始處理。
+	// 開始處理 query request。
 	if (!post_data && wiki_API.query.allow_JSONP) {
 		library_namespace.debug('採用 JSONP callback 的方法。須注意：若有 error，將不會執行 callback！', 2, 'wiki_API.query');
 		library_namespace.debug('callback : (' + (typeof callback) + ') [' + callback + ']', 3, 'wiki_API.query');
@@ -2348,7 +2361,7 @@ wiki_API.query.last = library_namespace.null_Object();
  * @param {Object}page_data
  *            page data got from wiki API
  * @param {Boolean}[multi]
- *            is multi-pages
+ *            page_data is {Array}multi-page_data
  */
 wiki_API.query.title_param = function(page_data, multi) {
 	var pageid;
@@ -2451,21 +2464,23 @@ function normalize_title_parameter(title, options) {
 
 /**
  * 讀取頁面內容。可一次處理多個標題。
- *
+ * 
  * @example <code>
 
-CeL.wiki.page('道', function(p) {
-	CeL.show_value(p);
+CeL.wiki.page('史記', function(page_data) {
+	CeL.show_value(page_data);
 });
 
  </code>
+ * 
  * @param {String|Array}title
  *            title or [ {String}API_URL, {String}title ]
  * @param {Function}callback
- *            回調函數。 callback(page_data) { page_data.title; var content = CeL.wiki.content_of(page_data); }
+ *            回調函數。 callback(page_data) { page_data.title; var content =
+ *            CeL.wiki.content_of(page_data); }
  * @param {Object}[options]
  *            附加參數/設定選擇性/特殊功能與選項
- *
+ * 
  * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
  */
 wiki_API.page = function(title, callback, options) {
@@ -2520,7 +2535,9 @@ wiki_API.page = function(title, callback, options) {
 		}
 
 		if (!data || !data.query || !data.query.pages) {
-			library_namespace.warn('wiki_API.page: Unknown response: [' + data + ']');
+			library_namespace.warn('wiki_API.page: Unknown response: ['
+			// e.g., 'wiki_API.page: Unknown response: [{"batchcomplete":""}]'
+			+ (typeof data === 'object' && typeof JSON !== 'undefined' ? JSON.stringify(data) : data) + ']');
 			if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
@@ -2638,7 +2655,9 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 			} else {
 				library_namespace.warn(
 				//
-				'wiki_API.langlinks: Unknown response: [' + data + ']');
+				'wiki_API.langlinks: Unknown response: ['
+				//
+				+ (typeof data === 'object' && typeof JSON !== 'undefined' ? JSON.stringify(data) : data) + ']');
 				// console.log(data);
 			}
 			// console.warn(data);
@@ -2975,7 +2994,9 @@ function get_list(type, title, callback, namespace) {
 			title = title.title;
 
 		if (!data || !data.query) {
-			library_namespace.err('get_list: Unknown response: [' + data + ']');
+			library_namespace.err('get_list: Unknown response: ['
+			//
+			+ (typeof data === 'object' && typeof JSON !== 'undefined' ? JSON.stringify(data) : data) + ']');
 
 		} else if (data.query[type]) {
 			// 一般情況。
@@ -3231,6 +3252,7 @@ wiki_API.login = function(name, password, options) {
 	return session;
 };
 
+/** {Array}欲 copy 至 token 之 keys。 */
 wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
 
 
@@ -3452,6 +3474,7 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 				+ (data.edit.info || data.edit.captcha && '必需輸入驗證碼'));
 		if (error) {
 			// wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
+			// https://doc.wikimedia.org/mediawiki-core/master/php/ApiEditPage_8php_source.html
 			if (data.error && data.error.code === 'no-direct-editing'
 			// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 			&& options.section === 'new') {
@@ -3516,25 +3539,46 @@ wiki_API.edit.set_stamp = function(options, timestamp) {
 };
 
 
-// @see https://zh.wikipedia.org/wiki/Template:Bots
+/**
+ * Get the contents of [[Template:Bots]].
+ * 
+ * @param {String}content
+ *            頁面內容。
+ * 
+ * @returns {Array}contents of [[Template:Bots]].
+ * 
+ * @see https://zh.wikipedia.org/wiki/Template:Bots
+ */
 wiki_API.edit.get_bot = function(content) {
 	// TODO: use parse_template(content, 'bots')
 	var bots = [], matched, PATTERN = /{{[\s\n]*bots[\s\n]*([\S][\s\S]*?)}}/ig;
 	while (matched = PATTERN.exec(content)) {
-		library_namespace.debug(matched.join('<br />'), 1, 'wiki_API.edit.get_bot');
+		library_namespace.debug(matched.join('<br />'), 1,
+				'wiki_API.edit.get_bot');
 		if (matched = matched[1].trim().replace(/(^\|\s*|\s*\|$)/g, '')
-				// .split('|')
-				)
-					bots.push(matched);
+		// .split('|')
+		)
+			bots.push(matched);
 	}
 	if (0 < bots.length) {
-		library_namespace.debug(bots.join('<br />'), 1, 'wiki_API.edit.get_bot');
+		library_namespace
+				.debug(bots.join('<br />'), 1, 'wiki_API.edit.get_bot');
 		return bots;
 	}
 };
 
-// 遵守[[Template:Bots]]
-// 另須考慮{{Personal announcement}}的情況。
+/**
+ * 測試是否允許機器人帳戶訪問，遵守[[Template:Bots]]。機器人另須考慮{{Personal announcement}}的情況。
+ * 
+ * @param {String}content
+ *            頁面內容。
+ * @param {String}bot_id
+ *            機器人帳戶名稱。
+ * @param {String}action
+ *            按通知種類而過濾(optout)。
+ * 
+ * @returns {Boolean|String}封鎖機器人帳戶訪問。
+ */
 wiki_API.edit.denied = function(content, bot_id, action) {
 	if (!content || get_page_content.is_page_data(content) && !(content = get_page_content(content)))
 		return;
@@ -3543,12 +3587,12 @@ wiki_API.edit.denied = function(content, bot_id, action) {
 	if (bots) {
 		library_namespace.debug('test ' + bot_id + '/' + action, 3,
 				'wiki_API.edit.denied');
-		// botlist 以半形逗號作間隔
+		// botlist 以半形逗號作間隔。
 		bot_id = (bot_id = bot_id && bot_id.toLowerCase()) ?
 				new RegExp('(?:^|[\\s,])(?:all|' + bot_id + ')(?:$|[\\s,])', 'i')
 				: wiki_API.edit.denied.all;
 		if (action)
-			// optout 以半形逗號作間隔
+			// optout 以半形逗號作間隔。
 			// optout=all
 			action = new RegExp('(?:^|[\\s,])(?:all|' + action.toLowerCase()
 					+ ')(?:$|[\\s,])');
@@ -3557,7 +3601,7 @@ wiki_API.edit.denied = function(content, bot_id, action) {
 				'wiki_API.edit.denied');
 			data = data.toLowerCase();
 
-			// 封鎖機器人訪問之 pattern
+			// 封鎖機器人訪問之 pattern。
 			var matched, PATTERN;
 			if (!denied) {
 				PATTERN = /(?:^|\|)[\s\n]*deny[\s\n]*=[\s\n]*([^|]+)/ig;
@@ -3567,7 +3611,7 @@ wiki_API.edit.denied = function(content, bot_id, action) {
 					;
 			}
 
-			// 允許之機器人帳戶列表（以半形逗號作間隔）
+			// 允許之機器人帳戶名稱列表（以半形逗號作間隔）
 			if (!denied) {
 				PATTERN = /(?:^|\|)[\s\n]*allow[\s\n]*=[\s\n]*([^|]+)/ig;
 				while ((matched = PATTERN.exec(data))
@@ -3725,7 +3769,9 @@ wiki_API.redirects = function(title, callback, options) {
 		}
 
 		if (!data || !data.query || !data.query.pages) {
-			library_namespace.warn('wiki_API.redirects: Unknown response: [' + data + ']');
+			library_namespace.warn('wiki_API.redirects: Unknown response: ['
+			//
+			+ (typeof data === 'object' && typeof JSON !== 'undefined' ? JSON.stringify(data) : data) + ']');
 			if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
@@ -4198,7 +4244,7 @@ wiki_API.cache.title_only = function(operation) {
 
 
 // --------------------------------------------------------------------------------------------- //
-// Flow討論系統。
+// Flow 功能支援。
 // [[mediawikiwiki:Extension:Flow/API]]
 // https://www.mediawiki.org/w/api.php?action=help&modules=flow
 
@@ -4210,7 +4256,17 @@ wiki_API.cache.title_only = function(operation) {
 // https://www.mediawiki.org/w/api.php?action=flow&submodule=view-header&page=Talk:Sandbox&vhformat=wikitext
 // https://www.mediawiki.org/w/api.php?action=flow&submodule=view-topiclist&page=Talk:Sandbox
 
-// Flow info
+/**
+ * get the infomation of Flow.
+ * 
+ * @param {String|Array}title
+ *            頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [ {String}API_URL,
+ *            {String}title or {Object}page_data ]
+ * @param {Function}callback
+ *            回調函數。 callback({Object}page_data)
+ * @param {Object}[options]
+ *            附加參數/設定選擇性/特殊功能與選項
+ */
 function Flow_info(title, callback, options) {
 	// 處理 [ {String}API_URL, {String}title ]
 	if (!Array.isArray(title)
@@ -4246,7 +4302,9 @@ function Flow_info(title, callback, options) {
 		}
 
 		if (!data || !data.query || !data.query.pages) {
-			library_namespace.warn('Flow_info: Unknown response: [' + data + ']');
+			library_namespace.warn('Flow_info: Unknown response: ['
+			//
+			+ (typeof data === 'object' && typeof JSON !== 'undefined' ? JSON.stringify(data) : data) + ']');
 			if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
@@ -4281,9 +4339,17 @@ function Flow_info(title, callback, options) {
 	});
 }
 
+/**
+ * 檢測 page_data 是否為 Flow 討論頁面系統。
+ * 
+ * @param {Object}page_data
+ *            page data got from wiki API
+ * 
+ * @returns {Boolean}是否為 Flow 討論頁面。
+ */
 function is_Flow(page_data) {
 	var flowinfo = page_data &&
-	//get_page_content.is_page_data(page_data) &&
+	// get_page_content.is_page_data(page_data) &&
 	page_data.flowinfo;
 	if (flowinfo)
 		// flowinfo:{flow:{enabled:''}}
@@ -4293,8 +4359,18 @@ function is_Flow(page_data) {
 		return page_data.contentmodel === 'flow-board';
 }
 
-// get topic
-// title 可為話題id/頁面標題+話題標題
+
+/**
+ * get topics of the page.
+ * 
+ * @param {String|Array}title
+ *            頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [ {String}API_URL,
+ *            {String}title or {Object}page_data ]
+ * @param {Function}callback
+ *            回調函數。 callback({Object}topiclist)
+ * @param {Object}[options]
+ *            附加參數/設定選擇性/特殊功能與選項
+ */
 function Flow_page(title, callback, options) {
 	// 處理 [ {String}API_URL, {String}title ]
 	if (!Array.isArray(title)
@@ -4314,21 +4390,27 @@ function Flow_page(title, callback, options) {
 	//
 	&& function(data) {
 		if (library_namespace.is_debug(2)
-			// .show_value() @ interact.DOM, application.debug
-			&& library_namespace.show_value)
+		// .show_value() @ interact.DOM, application.debug
+		&& library_namespace.show_value)
 			library_namespace.show_value(data, 'Flow_page: data');
 
 		var error = data && data.error;
 		// 檢查伺服器回應是否有錯誤資訊。
 		if (error) {
-			library_namespace.err('Flow_page: [' + error.code + '] ' + error.info);
+			library_namespace.err(
+			//
+			'Flow_page: [' + error.code + '] ' + error.info);
 			callback();
 			return;
 		}
 
 		// data = { flow: { 'view-topiclist': { result: {}, status: 'ok' } } }
-		if (!(data = data.flow) || !(data = data['view-topiclist']) || data.status !== 'ok') {
-			library_namespace.err('Flow_page: Error status [' + data.status + ']');
+		if (!(data = data.flow)
+		//
+		|| !(data = data['view-topiclist']) || data.status !== 'ok') {
+			library_namespace.err(
+			//
+			'Flow_page: Error status [' + data.status + ']');
 			callback();
 			return;
 		}
@@ -4338,7 +4420,7 @@ function Flow_page(title, callback, options) {
 }
 
 /**
- * Create a new topic 發新話題。
+ * Create a new topic. 發新話題。
  * Reply to an existing topic.
  * 
  * @param {String|Array}title
@@ -4367,6 +4449,23 @@ function edit_topic(title, topic, text, token, options, callback) {
 	if (get_page_content.is_page_data(title))
 		title = title.title;
 
+	var _options = {
+		action : 'flow',
+		submodule : 'new-topic',
+		page : title,
+		nttopic : topic,
+		// [[mw:Flow]] 會自動簽名。
+		ntcontent : text.replace(/[\s\-]*~~~~[\s\-]*$/, ''),
+		ntformat : 'wikitext',
+		token : library_namespace.is_Object(token) ? token.csrftoken
+				: token
+	};
+
+	wiki_API.login.copy_keys.forEach(function(key) {
+		if (options[key])
+			_options[key] = options[key];
+	});
+
 	wiki_API.query(action, typeof callback === 'function'
 	//
 	&& function(data) {
@@ -4388,17 +4487,11 @@ function edit_topic(title, topic, text, token, options, callback) {
 		if (typeof callback === 'function')
 			// title.title === get_page_title(title)
 			callback(title.title, error, data);
-	}, {
-		action : 'flow',
-		submodule : 'new-topic',
-		page : title,
-		nttopic : topic,
-		ntcontent : text,
-		ntformat : 'wikitext',
-		token : library_namespace.is_Object(token) ? token.csrftoken
-				: token
-	});
+	}, _options);
 }
+
+/** {Array}欲 copy 至 Flow edit parameters 之 keys。 */
+wiki_API.login.copy_keys = 'summary|bot|redirect|nocreate'.split(',');
 
 
 Object.assign(Flow_info, {

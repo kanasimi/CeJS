@@ -1130,8 +1130,11 @@ add_tag.parse = function(group, data, line_separator, date_index, title_index,
 		return;
 	}
 
-	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
-	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+	var
+	// copy from data.date.
+	/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
+	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1);
+	var
 	// period to search
 	periods = CeL.sort_periods(draw_era.tags[group], function(period) {
 		return Array.isArray(period = period[0]) ? +period[0] : +period;
@@ -2248,8 +2251,11 @@ function set_era_by_url_data(era) {
 var thdl_solar_term,
 // 明清實曆節氣
 initialize_thdl_solar_term = function() {
-	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
-	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+	var
+	// copy from data.date.
+	/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
+	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1);
+	var
 	// STARTS_FROM: 節氣間間隔以 STARTS_FROM 日起跳。
 	STARTS_FROM = 14, DIGITS = 4, MAX_DIGITS = 10 + 26,
 	//
@@ -2690,7 +2696,7 @@ function affairs() {
 		S : 'color:#888;font-size:.8em;'
 	},
 	// copy from data.date.
-	// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
+	/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
 	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
 	//
 	建除_LIST = '建除滿平定執破危成收開閉'.split(''),

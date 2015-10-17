@@ -66,9 +66,12 @@ _// JSDT:_module_
 // 工具函數。
 
 
+var
 // copy from data.date.
-// 一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000.
-var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
+ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1);
+
+var
 // 24 hours
 ONE_DAY_HOURS = (new Date(1, 1, 1, -1)).getHours() | 0,
 // set weekday name converter.
