@@ -25,6 +25,7 @@ var test_level = 1;
 // index.js
 require('../index');
 
+// require("./_for include/node.loader.js");
 
 //============================================================================================================================================================
 
@@ -42,6 +43,72 @@ function test_math() {
 	// ---------------------------------------------------------------------//
 
 	CeL.run('data.math');
+
+	var v = Math.LN2, d = CeL.data.math.mutual_division(v), q = CeL.data.math.to_rational_number(v), tmp = 25;
+	CeL.assert([d.slice(0,tmp).join(','), [0,1,2,3,1,6,3,1,1,2,1,1,1,1,3,10,1,1,1,2,1,1,1,1,3,2,3,1,13,7,4,1,1,1,7,2,4,1,1,2,5,14,1,10,1,4,2,18,3,1,4,1,6,2,7,3].slice(0,tmp).join(',')], '連分數序列 (continued fraction)');
+	CeL.assert(Math.abs(1-q[0]/q[1] / v) < 1e-13, '取得值最接近之有理數');
+	if (false) {
+		CeL.log(
+		//
+		'值	' + v + '\n序列	' + d + '\n近似值	' + q[0] + ' / ' + q[1]
+		//
+		+ '\n約	' + (q = q[0] / q[1]) + '\n值-近似	' + (q -= v)
+		//
+		+ '\n差' + (Math.abs(q = 10000 * q / v) > 1
+		//
+		? '萬分之' + q.to_fixed(2) + ' ( ' + q + ' / 10000 )'
+		//
+		: '億分之' + (q *= 10000).to_fixed(2) + ' ( ' + q + ' / 100000000 )'), 0, '近似值	' + v);
+	}
+
+	if (false) {
+		var d = new Date, a = .142857, b = 1000000, i = 0, c;
+		for (i = 0; i < 10000; i++)
+			c = CeL.data.math.mutual_division(a);
+		CeL.log(c + '\n' + gDate(new Date - d));
+	}
+
+	var a=CeL.data.math.continued_fraction([1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]);
+	//CeL.log(a+'\n'+a[0]/a[1]+'\n'+Math.SQRT2+'\n'+(Math.SQRT2-a[0]/a[1])+'\n'+CeL.data.math.mutual_division(a[0],a[1]));
+	CeL.assert(Math.abs(1-a[0]/a[1] / Math.SQRT2) <= Number.EPSILON, '取得連分數序列的數值');
+
+	CeL.assert([CeL.data.math.GCD(5583697894,136671782),118126],'GCD type 1: input number sequence');
+	CeL.assert([CeL.data.math.GCD([342*1, 563*1, 3452*1, 5333*1]),1],'GCD type 2: input Array');
+	var v=5235;
+	CeL.assert([CeL.data.math.GCD([342*v, 563*v, 3452*v, 5333*v]),v],'GCD type 2: input Array');
+
+	CeL.assert([CeL.data.math.LCM(69790*656890,95897*656890),4396335929230700],'LCM type 1: input number sequence');
+	CeL.assert([CeL.data.math.LCM([389,4342,5411,442]),155369538506],'LCM type 2: input Array');
+	var v=6893;
+	CeL.assert([CeL.data.math.LCM([389*v,4342*v,5411*v,442*v]),1070962228921858],'LCM type 2: input Array');
+
+	CeL.assert([CeL.data.math.LCM2(69790*656890,95897*656890),4396335929230700],'LCM2 type 1: input number sequence');
+	CeL.assert([CeL.data.math.LCM2([389,4342,5411,442]),155369538506],'LCM2 type 2: input Array');
+	var v=6893;
+	CeL.assert([CeL.data.math.LCM2([389*v,4342*v,5411*v,442*v]),1070962228921858],'LCM2 type 2: input Array');
+
+	CeL.assert(Number.isSafeInteger(CeL.factorial(18)), 'Number.isSafeInteger()');
+	CeL.assert([CeL.data.math.factorial(18),6402373705728000], 'factorial');
+	CeL.assert(Math.abs(1-CeL.data.math.factorial(50)/30414093201713378043612608166064768844377641568960512000000000000) <= Number.EPSILON, 'factorial');
+
+	var p = 20374345;
+	CeL.assert([ CeL.data.math.floor_sqrt(p * p), p ], 'floor_sqrt');
+	CeL.assert([ CeL.data.math.floor_sqrt(p * p - 1), p - 1 ], 'floor_sqrt');
+	CeL.assert(CeL.data.math.is_square(p * p), 'is_square');
+	CeL.assert(!CeL.data.math.is_square(p * p - 1), 'is_square');
+
+	if (test_level)
+	CeL.assert([CeL.data.math.prime(490998), 7226371], 'prime');
+
+	CeL.assert([CeL.data.math.guess_exponent(Math.pow(2 / 3, 1 / 1)).join(','), '2,3,1,1'], '猜測一個數可能的次方數');
+
+
+	CeL.assert(Math.abs(1-Math.pow(CeL.secant_method(function(x) { return x * x; }, 3, 5, 15), 2)/15)<1e-15, 'secant method');
+	CeL.assert([CeL.secant_method(function(x) { return x * x * x - 8; }, 5, 4), 2], 'secant method');
+
+	CeL.assert(Math.abs(1-Math.pow(CeL.find_root(function(x) { return x * x; }, 3, 5, 15), 2)/15)<1e-15, 'find root');
+	CeL.assert([CeL.data.math.find_root(function(x) { return x * x * x - 8; }, 5, 4), 2], 'find root');
+
 
 	// ---------------------------------------------------------------------//
 
@@ -857,6 +924,7 @@ function test_date() {
 
 
 
+	CeL.set_debug(0);
 	//year=-2010
 	for(var year=-500;year<2010;year++)if(year){
 		CeL.assert([year+"/1/1 0:0:0.000",(year.pad(4)+'/1/1').to_Date('CE').format('CE')]);
@@ -866,6 +934,7 @@ function test_date() {
 		CeL.assert([year+"/3/1 0:0:0.000",(year.pad(4)+'/3/1').to_Date('CE').format('CE')]);
 		CeL.assert([year+"/12/31 0:0:0.000",(year.pad(4)+'/12/31').to_Date('CE').format('CE')]);
 	}
+	CeL.set_debug();
 	CeL.info('Basic test OK.');
 
 
@@ -971,8 +1040,11 @@ function test_date() {
 	CeL.assert(["1329/2/27 丙戌",'1329/2/丙戌'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW',parser:'CE'})],'String_to_Date.parser.Chinese: 元明宗天厯二年正月丙戌即位');
 
 
-	for (var i = 0; i < 60; i++)
+	CeL.set_debug(0);
+	for (var i = 0; i < 60; i++) {
 		CeL.assert([ i, CeL.stem_branch_index(CeL.to_stem_branch(i)) ]);
+	}
+	CeL.set_debug();
 
 
 }

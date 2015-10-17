@@ -39,38 +39,15 @@ _// JSDT:_module_
 
 
 
-
-
 /*
  * Math ---------------------------------------------------------------
  */
 
-if (false) {
-	var v = Math.LN2, d = mutual_division(v), q = to_rational_number(v);
-	alert(
-	//
-	'值	' + v + '\n序列	' + d + '\n近似值	' + q[0] + ' / ' + q[1]
-	//
-	+ '\n約	' + (q = q[0] / q[1]) + '\n值-近似	' + (q -= v)
-	//
-	+ '\n差' + (Math.abs(q = 10000 * q / v) > 1
-	//
-	? '萬分之' + q.to_fixed(2) + ' ( ' + q + ' / 10000 )'
-	//
-	: '億分之' + (q *= 10000).to_fixed(2) + ' ( ' + q + ' / 100000000 )'), 0,
-			'近似值	' + v);
-}
-if (false) {
-	var d = new Date, a = .142857, b = 1000000, i = 0, c;
-	for (i = 0; i < 10000; i++)
-		c = mutual_division(a);
-	alert(c + '\n' + gDate(new Date - d));
-}
 
 _// JSDT:_module_
 .
 /**
- * 輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數
+ * 輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數。
  * 
  * @param {Number}
  *            n1 number 1
@@ -78,7 +55,8 @@ _// JSDT:_module_
  *            [n2] number 2
  * @param {Number}
  *            times max 次數, 1,2,..
- * @return {Array} 連分數序列 ** 負數視 _.mutual_division.done 而定!
+ * 
+ * @return {Array} 連分數序列 (continued fraction) ** 負數視 _.mutual_division.done 而定!
  */
 mutual_division = function mutual_division(n1, n2, times) {
 	var q = [], c;
@@ -160,23 +138,16 @@ mutual_division.mode = 0;
 _// JSDT:_module_
 .
 /**
- * 取得連分數序列的數值
+ * 取得連分數序列的數值。
  * 
  * @param {Array}
  *            sequence 序列
  * @param {Number}
  *            [max_no] 取至第 max_no 個
  * 
- * @return
+ * @return {Number}連分數序列的數值
  * 
  * @requires mutual_division.done
- * 
- * @see
- * 
- * <code>
- * var a=continued_fraction([1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]);
- * alert(a+'\n'+a[0]/a[1]+'\n'+Math.SQRT2+'\n'+(Math.SQRT2-a[0]/a[1])+'\n'+mutual_division(a[0],a[1]));
- * </code>
  */
 continued_fraction = function(sequence, max_no) {
 	if (!Array.isArray(sequence) || !sequence.length)
@@ -263,6 +234,7 @@ _.quadratic_to_continued_fraction = quadratic_to_continued_fraction;
 // Rosen, Kenneth H. (2005). Elementary Number Theory and its Applications (5th
 // edition). Boston: Pearson Addison-Wesley. pp. 542-545.
 function solve_Pell(d, is_m1) {
+	// TODO
 	;
 }
 _.solve_Pell = solve_Pell;
@@ -274,14 +246,15 @@ _// JSDT:_module_
  * The best rational approximation. 取得值最接近之有理數 (use 連分數 continued fraction),
  * 取近似值. c.f., 調日法 在分子或分母小於下一個漸進分數的分數中，其值是最接近精確值的近似值。
  * 
- * @example to_rational_number(4088/783)
  * @param {Number}
  *            number number
  * @param {Number}
  *            [rate] 比例在 rate 以上
  * @param {Number}
  *            [max_no] 最多取至序列第 max_no 個 TODO : 並小於 l: limit
+ * 
  * @return [分子, 分母, 誤差]
+ * 
  * @requires mutual_division,continued_fraction
  * @see http://en.wikipedia.org/wiki/Continued_fraction#Best_to_rational_numbers
  */
@@ -303,7 +276,7 @@ to_rational_number = function(number, rate, max_no) {
 	if (false)
 		library_namespace.debug(
 			number + ' ' +
-			// 連分數表示
+			// 連分數表示 (continued fraction)
 			(d.length > 1 && d[d.length - 2] === _.mutual_division.done ?
 				'=' + ' [<em>' + d[0] + ';' + d.slice(1, i).join(', ') + '</em>'
 					+ (i < d.length - 2 ? ', ' + d.slice(i, -2).join(', ') : '')
@@ -330,14 +303,9 @@ to_rational_number = function(number, rate, max_no) {
  * 
  * TODO: 判斷互質.
  * 
- * @example <code>
- * // type 1: input number sequence
- * CeL.GCD(6,9);
- * // type 2: input Array
- * CeL.GCD([5,3,8,2,6,9]);
- * </code>
  * @param {Integers}
  *            number_array number array
+ * 
  * @returns {Integer} GCD of the numbers specified
  */
 function GCD(number_array) {
@@ -379,14 +347,9 @@ _// JSDT:_module_
  * 
  * TODO: 更快的方法： 短除法? 一次算出 GCD, LCM?
  * 
- * @example <code>
- * // type 1: input number sequence
- * CeL.LCM(6,9);
- * // type 2: input Array
- * CeL.LCM([5,3,8,2,6,9]);
- * </code>
  * @param {Integers}
  *            number_array number array
+ * 
  * @returns {Integer} LCM of the numbers specified
  */
 LCM = function(number_array) {
@@ -436,12 +399,6 @@ _// JSDT:_module_
  * 求多個數之 LCM(Least Common Multiple, 最小公倍數): method 2.<br />
  * Using 類輾轉相除法.<br />
  * 
- * @example <code>
- * // type 1: input number sequence
- * CeL.LCM2(6,9);
- * // type 2: input Array
- * CeL.LCM2([5,3,8,2,6,9]);
- * </code>
  * @param {Integers}
  *            number_array number array
  * @returns {Integer} LCM of the numbers specified
@@ -566,9 +523,9 @@ _.factorial = factorial;
  * 
  * @param {Number}
  *            positive number
+ * 
  * @return r, r^2 <= number < (r+1)^2
- * @example var p = 20374345, q = CeL.math.floor_sqrt(p = p * p - 1); CeL.log(q + '<br />' +
- *          (q * q) + '<br />' + p + '<br />' + (++q * q));
+ * 
  * @see <a href="http://www.azillionmonkeys.com/qed/sqroot.html"
  *      accessdate="2010/3/11 18:37">Paul Hsieh's Square Root page</a><br />
  *      <a
@@ -607,7 +564,7 @@ function is_square(number) {
 		return false;
 
 	number = Math.sqrt(number);
-	return number === number | 0;
+	return number === (number | 0);
 }
 _.is_square = is_square;
 
@@ -655,8 +612,7 @@ function prime(index, limit) {
 _.prime = prime;
 
 
-// prime #5484598 = 94906249, the biggest prime <
-// Math.sqrt(Number.MAX_SAFE_INTEGER) - 1
+// prime #5484598 = 94906249, the biggest prime < Math.sqrt(Number.MAX_SAFE_INTEGER) - 1.
 // the 2nd biggest prime is 94906247.
 
 // prime(prime_pi(Number.MAX_SAFE_INTEGER = 2^53 - 1)) = 9007199254740881
@@ -666,6 +622,7 @@ function prime_pi(value) {
 	return primes.search_sorted(value, true);
 }
 _.prime_pi = prime_pi;
+
 
 // return multiplicand × multiplier % modulus
 // assert: 三者皆為 natural number, and Number.isSafeInteger() is OK.
@@ -685,6 +642,7 @@ function multiply_modulo(multiplicand, multiplier, modulus) {
 	return quotient;
 }
 _.multiply_modulo = multiply_modulo;
+
 // return integer ^ exponent % modulus
 // assert: 三者皆為 natural number, and Number.isSafeInteger() is OK. 否則會出現錯誤!
 function power_modulo(integer, exponent, modulus) {
@@ -1007,11 +965,6 @@ _// JSDT:_module_
 /**
  * 猜測一個數可能的次方數。
  * 
- * @example <code>
- * var t = guess_exponent(Math.pow(2 / 3, 1 / 1));
- * alert(t[0] + '/' + t[1] + '^' + t[2] + '/' + t[3]);
- * </code>
- * 
  * @param {Number}
  *            number 數字
  * @param {Boolean}
@@ -1102,7 +1055,7 @@ function get_random_prime(count, exclude, all_different) {
 	return count === 1 ? p[0] : p;
 }
 
-// 加快速度。
+// cache 以加快速度。
 get_random_prime.primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
 	    47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113,
 	    127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193,
@@ -1275,9 +1228,6 @@ function secant_method(equation, x0, x1, y, options) {
 	return x2;
 }
 
-// Math.pow(CeL.secant_method(function(x) { return x * x; }, 3, 5, 15), 2)
-// CeL.secant_method(function(x) { return x * x * x - 8; }, 5, 4)
-
 _.secant_method = secant_method;
 
 
@@ -1305,7 +1255,10 @@ function Sidi_method(equation, x0, x1, y, options) {
 	var error = Number.EPSILON;
 	if (!options)
 		options = library_namespace.null_Object();
-	else if (options > 0)
+	else if (typeof options === 'number' && options > 0)
+		// ↑ @Firefox/44.0:
+		// isNaN(Object.create(null)): TypeError: can't convert v to number
+		// Number.isNaN(Object.create(null)) === false
 		error = options;
 	else if (options.error > 0)
 		error = Math.abs(options.error);
@@ -1397,7 +1350,7 @@ function Brent_method(equation, x0, x1, y, options) {
 	var error = 0;
 	if (!options)
 		options = library_namespace.null_Object();
-	else if (options > 0)
+	else if (typeof options === 'number' && options > 0)
 		error = options;
 	else if (options.error > 0)
 		error = Math.abs(options.error);
@@ -1511,8 +1464,6 @@ _.Brent_method = Brent_method;
 
 _.find_root = Brent_method;
 
-// Math.pow(CeL.find_root(function(x) { return x * x; }, 3, 5, 15), 2)
-// CeL.find_root(function(x) { return x * x * x - 8; }, 5, 4)
 
 
 

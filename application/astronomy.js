@@ -6060,7 +6060,7 @@ if (typeof CeL === 'function')
 			 * @returns {Array} [ Julian date (JD of 日常生活時間 UT), JD, ... ]
 			 */
 			function lunar_phase(year, phase, options) {
-				if (year | 0 === year) {
+				if (year === (year | 0)) {
 					if (options === true)
 						options = 1;
 					if (options > 0 && (options === options | 0))

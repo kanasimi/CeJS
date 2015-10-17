@@ -1821,7 +1821,7 @@ if (typeof CeL === 'function')
 					// assert: N >= D, NI >= DI
 
 					//決定 determines Q = thie next digit of quotient
-					// assert: (N + 1) / D | 0 === Math.floor((N + 1) / D)
+					// assert: (N + 1) / D === (Math.floor((N + 1) / D) | 0)
 					if (DI === 0)
 						//There is no digits of denominator lefting. The quotient digit has no other possibility.
 						Q = N / D | 0;
