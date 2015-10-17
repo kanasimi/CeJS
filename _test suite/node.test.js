@@ -481,6 +481,7 @@ if (test_level) {
 	//≈14 s @ Firefox/3.0.19
 	//≈3.5 m @ IE8
 if (test_level) {
+	CeL.set_debug(0);
 	var timer = new Date, tests = 101,
 	factor = 1, power = new CeL.data.math.integer('42364232342234'), I = new CeL.data.math.integer(factor), i = 0;
 	factor = Math.log(factor) / Math.log(power);
@@ -489,18 +490,22 @@ if (test_level) {
 	//使用/耗費時間。cf. eta, Estimated Time of Arrival
 	timer = new Date - timer;
 	CeL.info('All ' + --tests + ' tests OK. Elapsed time: ' + (timer / 1000).to_fixed(2) + ' s, ' + (tests / timer).to_fixed(2) + ' tests/ms.');
+	CeL.set_debug();
 }
 
 	// ---------------------------------------------------------------------//
 
+	CeL.set_debug(0);
 	for (var m = 'test square_root: ', i = 1, I2; i < 100000000; i += 1000000) {
 		I2 = (new CeL.data.math.integer(i)).square();
 		CeL.assert([I2.clone().square_root().compare(i), 0], m + i + '^2');
 		CeL.assert([I2.clone().add(1).square_root().compare(i), 0], m + i + '^2 + 1');
 		CeL.assert([I2.add(-1).square_root().compare(i - 1), 0], m + i + '^2 - 1');
 	}
+	CeL.set_debug();
 
 
+	CeL.set_debug(0);
 	// ~5 s @ Gecko/20100101 Firefox/35.0
 	var timer = new Date, tests = 200;
 	for (var i = tests, I = new CeL.data.math.integer(1), a = new CeL.data.math.integer('62537864798693472567385647825635478963754675867263725675627835674527634854699999999999'), I2;
@@ -511,6 +516,7 @@ if (test_level) {
 		CeL.assert([I2.clone().add(1).square_root().compare(I), 0], I.toString() + '^2 + 1');
 		CeL.assert([I2.add(-1).square_root().add(1).compare(I), 0], I.toString() + '^2 - 1');
 	}
+	CeL.set_debug();
 	// 使用/耗費時間。cf. eta, Estimated Time of Arrival
 	timer = new Date - timer;
 	CeL.info('All ' + tests + ' tests OK. Elapsed time: ' + (timer / 1000).to_fixed(2) + ' s, ' + (tests / timer).to_fixed(2) + ' tests/ms.');
@@ -1053,6 +1059,29 @@ function test_date() {
 //============================================================================================================================================================
 
 
+function test_check() {
+	CeL.assert([ CeL.parse_personal_name('歐陽司徒').名, '司徒' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('歐陽佩君').姓, '歐陽' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('歐陽佩君').名, '佩君' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('恒王岑').姓, '恒' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('恒岑王').姓, '恒' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('呂蕭王').姓, '呂蕭' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('呂王蕭').姓, '呂' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('林元月').名, '元月' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('歐陽林元月').姓, '歐陽林' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('歐陽林元月').多姓.join(','), '歐陽,林' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('林歐陽元月').多姓.join(','), '林,歐陽' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('呂蕭').姓, '呂' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('蕭呂').姓, '蕭' ], '解析姓名/人名');
+	CeL.assert([ CeL.parse_personal_name('林元').姓, '林' ], '解析姓名/人名');
+}
+
+
+
+
+//============================================================================================================================================================
+
+
 function test_era() {
 	CeL.assert([ '孺子嬰', CeL.era('初始').君主 ], '初始.君主: 孺子嬰#1');
 }
@@ -1065,12 +1094,16 @@ function do_test() {
 	// CeL.assert([ typeof CeL.assert, 'function' ], 'CeL.assert is working.');
 	CeL.set_debug();
 	CeL.run(
+/*
+*/
 	//
 	[ 'data.math.rational', 'data.math.quadratic' ], test_math,
 	//
 	'data.CSV', test_CSV,
 	//
 	'data.date', test_date,
+	//
+	'data.check', test_check,
 	//
 	//'data.date.era', test_era,
 	//
