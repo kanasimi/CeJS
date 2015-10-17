@@ -640,8 +640,7 @@ function String_to_Date(date_string, options) {
 					: isNaN(tmp)
 					//
 					? DEFAULT_TIME_ZONE : +tmp;
-	library_namespace
-	.debug(
+	library_namespace.debug(
 			'最終設定 offset '
 			+ (minute_offset === DEFAULT_TIME_ZONE
 					? '(default　= ' + String_to_Date.default_offset + ')'
@@ -888,21 +887,26 @@ function String_to_Date_default_parser(date_string,
 	if (typeof options.post_process === 'function')
 		options.post_process(date_data);
 
-	// 先設定小單位，再設定大單位：設定小單位時會影響到大單位。反之不然。
 	year = +year || 0;
 	// time zone.
 	tmp = (+date_data[4] || 0)
 	// 若是未設定，則當作 local zone。
 	+ String_to_Date.default_offset
 	- (+minute_offset || 0);
+
 	var date_value;
 	if (year < 100 && year >= 0) {
 		// 僅使用 new Date(0) 的話，會含入 timezone offset (.getTimezoneOffset)。
 		// 因此得使用 new Date(0, 0)。
-		(date_value = new Date(0, 0)).setFullYear(
+		date_value = new Date(0, 0);
+		// 先設定小單位，再設定大單位：設定小單位時會影響到大單位。反之不然。
+		// 下兩者得到的值不同。
+		//(d=new Date(0, 0)).setFullYear(0, 0, -1, 0, 480, 0, 0);d.toISOString()
+		//(d=new Date(0, 0)).setHours(0, 480, 0, 0);d.setFullYear(0, 0, -1);d.toISOString()
+		date_value.setHours(+date_data[3] || 0, tmp, +date_data[5] || 0, +date_data[6] || 0);
+		date_value.setFullYear(
 		// new Date(10, ..) === new Date(1910, ..)
-		year, date_data[1] ? date_data[1] - 1 : 0, date_data[2], +date_data[3] || 0,
-			tmp, +date_data[5] || 0, +date_data[6] || 0);
+		year, date_data[1] ? date_data[1] - 1 : 0, date_data[2]);
 	} else
 		date_value = new Date(year, date_data[1] ? date_data[1] - 1 : 0, date_data[2], +date_data[3] || 0,
 			tmp, +date_data[5] || 0, +date_data[6] || 0);
@@ -1006,56 +1010,8 @@ String_to_Date = String_to_Date;
 //---------------------------------------------------------
 
 
-/*
-
-test data:
-
-CeL.run('data.date');
-
-CeL.assert([0,new Date('May 5 2022')-'May 5 2022'.to_Date()],'無法 parse 的值');
-CeL.assert([0,new Date('May 5 2022 UTC+09:00')-'May 5 2022'.to_Date({zone:'UTC+9'})],'無法 parse 的值+TZ@options');
-CeL.assert([0,new Date('May 5 2022 UTC+09:00')-'May 5 2022 UTC+09:00'.to_Date()],'無法 parse 的值+TZ');
-
-CeL.assert([0,new Date('2022/5/5')-'2022/5/5'.to_Date()],'理應可 parse 的值');
-CeL.assert([0,new Date('2022/5/5 UTC+09:00')-'2022/5/5'.to_Date({zone:'UTC+9'})],'理應可 parse 的值+TZ @ options');
-CeL.assert([0,new Date('2022/5/5 UTC+09:00')-'2022/5/5 UTC+9'.to_Date()],'理應可 parse 的值+TZ');
-
-CeL.assert([0,new Date('2022/5/5 UTC')-'2022/5/5 UTC'.to_Date()],'理應可 parse 的值');
-CeL.assert([0,'2022/5/5'.to_Date({zone:0})-'2022/5/5 UTC'.to_Date()],'理應可 parse 的值');
-
-
-
-CeL.assert(["1582/10/15 0:0:0.000",'1582/10/5'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-
-CeL.assert(["1582/10/15 0:0:0.000",'1582/10/5'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-
-CeL.assert(["100/2/26 0:0:0.000",'100/2/28'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-CeL.assert(["100/2/27 0:0:0.000",'100/2/29'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-CeL.assert(["100/2/28 0:0:0.000",'100/3/1'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-
-CeL.assert(["-300/2/23 0:0:0.000",'-0300/2/28'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-CeL.assert(["-300/2/24 0:0:0.000",'-0300/2/29'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-CeL.assert(["-300/2/25 0:0:0.000",'-0300/3/1'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-
-CeL.assert(["-4714/11/24 0:0:0.000",'-4713/1/1'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-
-CeL.assert(["2000/2/27 0:0:0.000",'2000/2/26'.to_Date({parser : 'CE', period_end:true}).format()]);
-
-CeL.assert([0,new Date(tmp='2010/1/2 5:0')-tmp.to_Date()]);
-CeL.assert([0,new Date(tmp='2010/1/2 5:0')-tmp.to_Date('CE')]);
-
-
-
-Date.parse('100/2/29')===Date.parse('100/3/1')
-/(?:^|\D)29(?:\D|$)/.test('100/2/29');
-
-/(?!\d)29(?!\d|$)/.test('100/2/29');
-
-
-*/
-
 /**
- * test if the year is leap year. has year 0!
+ * test if the year is leap year. has year 0!<br />
  * 
  * @param {Integer}year
  * @param type
@@ -1177,12 +1133,9 @@ _.parse_English_date = parse_English_date;
  * 各 locale 有不同 format 與 time zone offset.
  * 
  * @example <code>
- * CeL.debug((new Date).format('\\%m\\x61%m/%d/%Y'));
- * 
- * var t='2001/8/7 03:35:8PM';
- * CeL.debug(t+' → '+t.to_Date('CST')+' → '+t.to_Date('CST').format('%Y年%m月%d日%H時%M分%S秒%f毫秒'));
- * CeL.assert(['2001年8月7日15時35分8秒000毫秒',t.to_Date('CST').format('%Y年%m月%d日%H時%M分%S秒%f毫秒')]);
- * CeL.assert(['2001年08月07日',t.to_Date('CST').format('%Y年%2m月%2d日')]);
+
+// other examples see "_test suite/node.test.js"
+
  * </code>
  * 
  * @param {Date}date_value
@@ -1755,99 +1708,6 @@ function Date_to_Gregorian(date_value, format, locale, options) {
 }
 
 
-/*
-
-test data:
-
-CeL.run('data.date');
-
-//Date_to_String.no_year_0 = true;
-
-//leap year @ Julian
-'-5/2/28'.to_Date('CE')
-'-5/2/29'.to_Date('CE')
-'-5/3/1'.to_Date('CE')
-
-//common year @ Julian
-'-4/2/28'.to_Date('CE')
-CeL.assert([0,'-4/2/29'.to_Date('CE')-'-4/3/1'.to_Date('CE')]);
-
-//leap year @ Julian
-'-1/2/28'.to_Date('CE')
-'-1/2/29'.to_Date('CE')
-'-1/3/1'.to_Date('CE')
-
-//Date_to_String.no_year_0 = false;
-
-//common year @ Julian
-'-5/2/28'.to_Date({parser : 'CE', no_year_0 : false})
-CeL.assert([0,'-5/2/29'.to_Date({parser : 'CE', no_year_0 : false})-'-5/3/1'.to_Date({parser : 'CE', no_year_0 : false})]);
-
-
-//leap year @ Julian
-'-4/2/28'.to_Date({parser : 'CE', no_year_0 : false})
-'-4/2/29'.to_Date({parser : 'CE', no_year_0 : false})
-'-4/3/1'.to_Date({parser : 'CE', no_year_0 : false})
-
-//common year @ Julian
-'-1/2/28'.to_Date({parser : 'CE', no_year_0 : false})
-CeL.assert([0,'-1/2/29'.to_Date({parser : 'CE', no_year_0 : false})-'-1/3/1'.to_Date({parser : 'CE', no_year_0 : false})]);
-
-
-//leap year @ Gregorian
-'0000/2/28'.to_Date()
-'0000/2/29'.to_Date()
-'0000/3/1'.to_Date()
-
-
-
-//y=-2010
-for(var y=-500;y<2010;y++)if(y){
-	CeL.assert([y+"/1/1 0:0:0.000",(y.pad(4)+'/1/1').to_Date('CE').format('CE')]);
-	CeL.assert([y+"/2/28 0:0:0.000",(y.pad(4)+'/2/28').to_Date('CE').format('CE')]);
-	if (y<=1582&&y%4===(y<0?-1:0))
-		CeL.assert([y+"/2/29 0:0:0.000",(y.pad(4)+'/2/29').to_Date('CE').format('CE')]);
-	CeL.assert([y+"/3/1 0:0:0.000",(y.pad(4)+'/3/1').to_Date('CE').format('CE')]);
-	CeL.assert([y+"/12/31 0:0:0.000",(y.pad(4)+'/12/31').to_Date('CE').format('CE')]);
-}
-CeL.log('Basic test OK.');
-
-
-//CeL.Date_to_String.no_year_0 = CeL.String_to_Date.no_year_0 = false;
-
-
-CeL.assert(["-300/2/28 0:0:0.000",'-0300/2/23'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-CeL.assert(["-300/2/29 0:0:0.000",'-0300/2/24'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-CeL.assert(["-300/3/1 0:0:0.000",'-0300/2/25'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-
-CeL.assert(["-100/2/28 0:0:0.000",'-0100/2/25'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-CeL.assert(["-100/2/29 0:0:0.000",'-0100/2/26'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-CeL.assert(["-100/3/1 0:0:0.000",'-0100/2/27'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-
-CeL.assert(["-99/1/3 0:0:0.000",'-0099/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-
-CeL.assert(["-1/1/3 0:0:0.000",'-0001/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-CeL.assert(["0/1/3 0:0:0.000",'0000/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-CeL.assert(["1/1/3 0:0:0.000",'0001/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-
-CeL.assert(["100/2/28 0:0:0.000",'0100/2/26'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-CeL.assert(["100/2/29 0:0:0.000",'0100/2/27'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-CeL.assert(["100/3/1 0:0:0.000",'0100/2/28'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-
-CeL.assert(["1582/10/4 0:0:0.000",'1582/10/14'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})],'Gregorian calendar 改曆前。');
-CeL.assert(["1582/10/15 0:0:0.000",'1582/10/15'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})],'Gregorian calendar 改曆後。');
-CeL.assert(["1582/10/5 0:0:0.000",'1582/10/15'.to_Date({no_year_0 : false}).format('Julian')],'Gregorian calendar 改曆後 using Julian。');
-
-CeL.assert(["1700/2/28 0:0:0.000",'1700/3/10'.to_Date({no_year_0 : false}).format('Julian')],'Julian 1700 閏日前。');
-CeL.assert(["1700/2/29 0:0:0.000",'1700/3/11'.to_Date({no_year_0 : false}).format('Julian')],'Julian 1700 閏日當日。');
-CeL.assert(["1700/3/1 0:0:0.000",'1700/3/12'.to_Date({no_year_0 : false}).format('Julian')],'Julian 1700 閏日後。');
-
-CeL.assert([2451545,CeL.Date_to_JD(new Date(Date.parse('1 January 2000 12:00 UTC')))],'標準曆元 J2000.0');
-CeL.assert([2451545,CeL.Date_to_JDN(new Date(Date.parse('1 January 2000 UTC')))],'標準曆元 J2000.0');
-CeL.assert([2456413,CeL.Date_to_JD(new Date(Date.parse('2013/4/30 12:00 UTC')))]);
-
-
-*/
 
 //	代替 getDate() 用。
 var leap_date = new Function('return 29');
@@ -2071,42 +1931,6 @@ date=new Date(1582,10,15);
 CeL.Date_to_JDN(new Date(1582,10,15));
 
 
-
-
-
-
-test data:
-
-CeL.run('data.date');
-
-//CeL.Date_to_String.no_year_0 = CeL.String_to_Date.no_year_0 = true;
-
-
-CeL.assert([0,			CeL.Date_to_JD('-4713/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'JD 0');
-
-CeL.assert([1096,		CeL.Date_to_JD('-4710/1/1 12:0'.to_Date({parser:'CE',zone:0}))]);
-CeL.assert([4383,		CeL.Date_to_JD('-4701/1/1 12:0'.to_Date({parser:'CE',zone:0}))]);
-CeL.assert([4749,		CeL.Date_to_JD('-4700/1/1 12:0'.to_Date({parser:'CE',zone:0}))]);
-CeL.assert([4807,		CeL.Date_to_JD('-4700/2/28 12:0'.to_Date({parser:'CE',zone:0}))]);
-CeL.assert([260424,		CeL.Date_to_JD('-4000/1/1 12:0'.to_Date({parser:'CE',zone:0}))]);
-CeL.assert([1356174,	CeL.Date_to_JD('-1000/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'1000 BCE');
-
-CeL.assert([1721057.5,	CeL.Date_to_JD('-0001/1/1 0:0'.to_Date({parser:'CE',zone:0}))],'-1 CE');
-CeL.assert([1721057.5,	CeL.Date_to_JD('0000/1/1 0:0'.to_Date({parser:'CE',zone:0}))],'bad test: 0 CE');
-
-CeL.assert([1721423,	CeL.Date_to_JD('-0001/12/31 12:0'.to_Date({parser:'CE',zone:0}))],'1 BCE');
-CeL.assert([1721423.5,	CeL.Date_to_JD('0001/1/1 0:0'.to_Date({parser:'CE',zone:0}))],'1 CE');
-
-CeL.assert([1722578,	CeL.Date_to_JD('0004/2/29 12:0'.to_Date({parser:'CE',zone:0}))],'4 CE leap day');
-CeL.assert([1722578.5,	CeL.Date_to_JD('0004/3/1 0:0'.to_Date({parser:'CE',zone:0}))],'after 4 CE leap day');
-
-CeL.assert([2299159.5,	CeL.Date_to_JD('1582/10/4 0:0'.to_Date({parser:'CE',zone:0}))],'before reform');
-CeL.assert([2299160.5,	CeL.Date_to_JD('1582/10/15 0:0'.to_Date({parser:'CE',zone:0}))],'after reform');
-
-CeL.assert([2451545,	CeL.Date_to_JD('2000/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'標準曆元 J2000.0');
-
-
-
 */
 
 
@@ -2115,7 +1939,6 @@ var Julian_Date_local_offset = String_to_Date.default_offset / 60 / 24;
 
 // Julian Date (JD)
 //<a href="http://aa.usno.navy.mil/data/docs/JulianDate.php" accessdate="2013/2/11 9:10">Julian Date Converter</a>
-// CeL.assert([2451545,CeL.Date_to_JD('2000/1/1 12:'.to_Date({zone:0}))],'J2000.0 fault');
 function Date_to_JD(date_value, options) {
 	date_value = ((options && options.original_Date || date_value) - Julian_Date_offset)
 	/ ONE_DAY_LENGTH_VALUE;
@@ -2240,46 +2063,6 @@ _.Gregorian_reform_of = Gregorian_reform_of;
 //	文化功能。
 
 
-/*
-
-test data:
-
-CeL.run('data.date');
-
-//CeL.Date_to_String.no_year_0 = CeL.String_to_Date.no_year_0 = true;
-
-CeL.assert(["甲子",'1912年2月18日'.to_Date('CE').format({format:'%日干支',locale:'cmn-Hant-TW'})],'1912年（中華民國元年）2月18日，合農曆壬子年正月初一，是「甲子日」');
-
-CeL.assert(["己巳",'公元前720年2月22日'.to_Date('CE').format({format:'%日干支',locale:'cmn-Hant-TW'})],'《春秋》所記，魯隱公三年夏曆二月己巳日（周平王五十一年，公元前720年2月22日）之日食');
-
-CeL.assert(["甲子",'1923年12月17日'.to_Date('CE').format({format:'%日干支',locale:'cmn-Hant-TW'})],'1923年12月17日 甲子日');
-
-CeL.assert(["庚辰庚辰",'1940年4月7日'.to_Date('CE').format({format:'%歲次%日干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日");
-
-CeL.assert(["庚辰庚辰庚辰",'1940年4月7日7時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時 start");
-CeL.assert(["庚辰庚辰庚辰",'1940年4月7日8時59分59秒'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時 end");
-CeL.assert(["庚辰庚辰辛巳",'1940年4月7日9時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日辛巳時");
-
-CeL.assert(["庚辰庚辰庚辰",'2120年4月23日7時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時始");
-CeL.assert(["庚辰庚辰庚辰",'2120年4月23日8時59分59秒'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時止");
-CeL.assert(["庚辰庚辰辛巳",'2120年4月23日9時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日辛巳時");
-
-CeL.assert(["甲子甲子甲子",'1984/3/31 0:0'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"(甲子年丁卯月)甲子日甲子時始");
-CeL.assert(["甲子甲子甲子",'1984/3/31 0:59:59.999'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"(甲子年丁卯月)甲子日甲子時止");
-
-CeL.String_to_Date.default_parser.year_padding = 0;
-CeL.assert(["甲子壬辰",'西元4年3月1日'.to_Date('CE').format({format:'%歲次%日干支',locale:'cmn-Hant-TW'})],"西元4年3月1日");
-
-
-
-CeL.assert(["1616/2/27 壬午",'1616年2月壬午'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW'})],'String_to_Date.parser.Chinese');
-CeL.assert(["1645/9/30 庚寅",'1645/9/庚寅'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW'})],'String_to_Date.parser.Chinese');
-CeL.assert(["1645/10/10 庚子",'1645/9/庚子'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW'})],'String_to_Date.parser.Chinese');
-CeL.assert(["1329/2/27 丙戌",'1329/2/丙戌'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW',parser:'CE'})],'String_to_Date.parser.Chinese: 元明宗天厯二年正月丙戌即位');
-
-
-
-*/
 
 //	const
 // const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
@@ -2426,12 +2209,6 @@ String_to_Date.parser.Chinese = function(date_string, minute_offset, options) {
 };
 
 
-/*
-
-for (i = 0; i < 60; i++)
-	CeL.assert([ i, CeL.stem_branch_index(CeL.to_stem_branch(i)) ]);
-
-*/
 
 
 /**
