@@ -1,5 +1,6 @@
 ﻿[![npm version](https://badge.fury.io/js/cejs.svg)](https://badge.fury.io/js/cejs)
 [![Build Status](https://travis-ci.org/kanasimi/CeJS.svg?branch=master)](https://travis-ci.org/kanasimi/CeJS)
+[![Build status](https://ci.appveyor.com/api/projects/status/ny0vr4x2uesiumm0?svg=true)](https://ci.appveyor.com/project/kanasimi/cejs)
 
 # [Colorless echo](http://lyrics.meicho.com.tw/) JavaScript kit
 This is a JavaScript module framework that is simple to use.
