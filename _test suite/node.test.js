@@ -811,8 +811,8 @@ function test_date() {
 
 	tmp = '2001/8/7 03:35:8PM';
 	CeL.debug(tmp+' → '+tmp.to_Date('CST')+' → '+tmp.to_Date('CST').format('%Y年%m月%d日%H時%M分%S秒%f毫秒'));
-	CeL.assert(['2001年8月7日15時35分8秒000毫秒',tmp.to_Date('CST').format('%Y年%m月%d日%H時%M分%S秒%f毫秒')]);
-	CeL.assert(['2001年08月07日',tmp.to_Date('CST').format('%Y年%2m月%2d日')]);
+	CeL.assert(['2001年8月7日15時35分8秒000毫秒',tmp.to_Date('CST').format({format:'%Y年%m月%d日%H時%M分%S秒%f毫秒',offset:8*60})]);
+	CeL.assert(['2001年08月07日',tmp.to_Date('CST').format({format:'%Y年%2m月%2d日',offset:8*60})]);
 
 
 	CeL.run('data.date');
