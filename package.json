@@ -1,6 +1,6 @@
 ﻿{
   "name": "cejs",
-  "version": "2.0.20151017",
+  "version": "2.0.20151017.153737",
   "description": "A JavaScript module framework that is simple to use.",
   "main": "ce.js",
   "scripts": {
