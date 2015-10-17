@@ -7,6 +7,8 @@
 
 # npm test
 
+(git push)
+
 # npm publish
 
 # npm view
