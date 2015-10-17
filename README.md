@@ -1,4 +1,6 @@
-﻿# [Colorless echo](http://lyrics.meicho.com.tw/) JavaScript kit
+﻿[![npm version](https://badge.fury.io/js/cejs.svg)](https://badge.fury.io/js/cejs)
+
+# [Colorless echo](http://lyrics.meicho.com.tw/) JavaScript kit
 This is a JavaScript module framework that is simple to use.
 本計畫希望能建立一個能簡單上手的 JavaScript 模組架構。
 

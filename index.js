@@ -13,6 +13,8 @@
 
 // MUST run `npm rebuild cejs` after modify package.json.
 
+# npm update cejs
+
 # npm uninstall cejs
 
 
