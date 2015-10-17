@@ -1,0 +1,26 @@
+{
+  "name": "cejs",
+  "version": "2.0.0",
+  "description": "A JavaScript module framework that is simple to use.",
+  "main": "ce.js",
+  "scripts": {
+    "test": "node \"_test suite/node.test.js\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kanasimi/CeJS.git"
+  },
+  "keywords": [
+    "arbitrary-precision",
+    "arithmetic",
+    "numerals",
+    "Chinese era",
+    "calendar"
+  ],
+  "author": "vimunci",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/kanasimi/CeJS/issues"
+  },
+  "homepage": "https://github.com/kanasimi/CeJS"
+}

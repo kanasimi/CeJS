@@ -298,7 +298,7 @@ language_tag = language_tag;
 
 
 /**
- * 為各種不同 domain 轉換文字（句子）。包括但不僅限於各種語系。<br />
+ * 為各種不同 domain 轉換文字（句子）、轉成符合當地語言的訊息內容。包括但不僅限於各種語系。<br />
  * 需要確認系統相應 domain resource 已載入時，請利用 gettext.use_domain(domain, callback)。
  * TODO:
  * using localStorage.
@@ -460,7 +460,9 @@ function gettext(text_id) {
 
 	var arg = arguments, length = arg.length,
 	//
-	domain_name = gettext_domain_name, domain = gettext_texts[domain_name],
+	domain_name = gettext_domain_name,
+	// 在不明環境，如 node.js 中執行時，((gettext_texts[domain_name])) 可能為 undefined。
+	domain = gettext_texts[domain_name] || library_namespace.null_Object(),
 	//
 	text = ''
 			+ (convert(library_namespace.is_Object(text_id) ? text_id[domain_name]

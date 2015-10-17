@@ -1,25 +1,18 @@
 
 /**
- * @name	CeL function for Wikipedia / 維基百科
- * @fileoverview
- * 本檔案包含了 Wikipedia / 維基百科 用的 functions。
+ * @name CeL function for MediaWiki (Wikipedia / 維基百科)
+ * 
+ * @fileoverview 本檔案包含了 MediaWiki 自動化作業用的程式庫，可用於編寫[[維基百科:機器人]]
+ *               ([[WP:{{{name|{{int:Group-bot}}}}}|{{{name|{{int:Group-bot}}}}}]])。
+ * 
  * @since 2015/1/1
- * @example <code>
-
- </code>
+ * @see https://www.mediawiki.org/w/api.php
  */
 
-// [[維基百科:機器人]], [[WP:{{{name|{{int:Group-bot}}}}}|{{{name|{{int:Group-bot}}}}}]]
-// https://www.mediawiki.org/w/api.php
-
-// Wikipedia:沙盒
-// https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92
-// https://zh.wikipedia.org/wiki/Special:API%E6%B2%99%E7%9B%92
-
 // TODO:
+// [[WP:維基化]]
 // https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 // https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
-// [[WP:維基化]]
 // 整合各 action=query 至單一公用 function。
 
 'use strict';
@@ -2252,7 +2245,7 @@ wiki_API.query = function(action, callback, post_data) {
 	library_namespace.debug('api URL: (' + (typeof action[0]) + ') [' + action[0] + '] → [' + api_URL(action[0]) + ']', 3, 'wiki_API.query');
 	action[0] = api_URL(action[0]);
 
-	// 檢測是否間隔過短。
+	// 檢測是否間隔過短。支援最大延遲功能。
 	var to_wait = Date.now() - wiki_API.query.last[action[0]];
 	// TODO: 伺服器負載過重的時候，使用 exponential backoff 進行延遲。
 	if (to_wait < wiki_API.query.lag) {
@@ -2463,7 +2456,7 @@ function normalize_title_parameter(title, options) {
 
 
 /**
- * 讀取頁面內容。可一次處理多個標題。
+ * 讀取頁面內容，取得頁面源碼。可一次處理多個標題。
  * 
  * @example <code>
 
@@ -2809,7 +2802,7 @@ function get_continue(title, callback) {
 //---------------------------------------------------------------------//
 
 /**
- * get list<br />
+ * get list. 檢索/提取列表<br />
  * 注意:可能會改變 options!
  *
  * @param {String}type
@@ -3148,7 +3141,7 @@ wiki_API.list.default_type = 'embeddedin';
 
 //---------------------------------------------------------------------//
 
-// 登入用。
+// 登入認證用。
 wiki_API.login = function(name, password, options) {
 	function _next() {
 		if (typeof callback === 'function')
@@ -3198,6 +3191,7 @@ wiki_API.login = function(name, password, options) {
 		}
 	}
 
+	// 支援斷言編輯功能。
 	var action = 'assert=user', callback, session;
 	if (library_namespace.is_Object(options)) {
 		session = options.session;
@@ -3478,8 +3472,10 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 			if (data.error && data.error.code === 'no-direct-editing'
 			// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 			&& options.section === 'new') {
-				// 無法以正常方式 edit，嘗試當作 Flow。
-				edit_topic(title, options.sectiontitle, text, options.token, options, callback);
+				// 無法以正常方式編輯，嘗試當作 Flow 討論頁面。
+				edit_topic(title, options.sectiontitle,
+				// [[mw:Flow]] 會自動簽名。
+				text.replace(/[\s\-]*~~~~[\s\-]*$/, ''), options.token, options, callback);
 				return;
 			}
 			library_namespace.warn('wiki_API.edit: Error to edit [['
@@ -4454,8 +4450,7 @@ function edit_topic(title, topic, text, token, options, callback) {
 		submodule : 'new-topic',
 		page : title,
 		nttopic : topic,
-		// [[mw:Flow]] 會自動簽名。
-		ntcontent : text.replace(/[\s\-]*~~~~[\s\-]*$/, ''),
+		ntcontent : text,
 		ntformat : 'wikitext',
 		token : library_namespace.is_Object(token) ? token.csrftoken
 				: token

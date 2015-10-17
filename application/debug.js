@@ -14,11 +14,10 @@ http://code.google.com/apis/ajax/playground/
 
 'use strict';
 if (typeof CeL === 'function')
-CeL.run([ 'data.code.compatibility', 'interact.DOM' ] , {
+CeL.run({
 	name : 'application.debug',
+	require : 'data.code.compatibility.|interact.DOM.',
 	code : function(library_namespace) {
-
-
 
 
 //JSalert[generateCode.dLK]='getScriptName';//,*var ScriptName=getScriptName();

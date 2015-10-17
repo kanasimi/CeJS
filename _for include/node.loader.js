@@ -1,5 +1,6 @@
 /**
  * @name framework loader for node.js.
+ * 
  * @example
  * 
  * for including:<br />
@@ -13,37 +14,32 @@
 
 "use strict";
 
-if (false)
-	(function() {
-		// Copy this section in front of the script. Path list from /path.txt/.
-		// @see node.demo.js
+if (false) {
+	// examples
 
-		"use strict";
+	// Copy this section in front of the script. Path list from /path.txt/.
+	// @see node.demo.js
 
-		// ----------------------------------------------------------------------------
-		// For node.js loading. Copy from /_for include/node.loader.js.
-		// ¸ü¤Jªx¥Î¡]«D¯S®í¥Øªº¨Ï¥Î¡^¤§¥\¯à¡C
-		'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS'
-		//
-		.split('|')
-		//
-		.some(
-				function(path) {
-					if (path.charAt(0) !== '#'
-							&& require('fs').existsSync(path)) {
-						var loader = '/_for include/node.loader.js';
-						require(path
-								//
-								+ (path.indexOf('/') !== -1 ? loader : loader
-										.replace(/\//g, '\\')));
-						return true;
-					}
-				});
-		// ----------------------------------------------------------------------------
+	"use strict";
 
-		CeL.run([ 'data.code.compatibility' ]);
+	// ----------------------------------------------------------------------------
+	// For node.js loading. Copy from /_for include/node.loader.js.
+	// è¼‰å…¥æ³›ç”¨ï¼ˆéç‰¹æ®Šç›®çš„ä½¿ç”¨ï¼‰ä¹‹åŠŸèƒ½ã€‚
+	'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS'
+	//
+	.split('|').some(function(path) {
+		if (path.charAt(0) !== '#' && require('fs').existsSync(path)) {
+			var loader = '/_for include/node.loader.js';
+			require(path + (path.indexOf('/') !== -1 ? loader
+			//
+			: loader.replace(/\//g, '\\')));
+			return true;
+		}
+	});
+	// ----------------------------------------------------------------------------
 
-	})();
+	CeL.run([ 'data.code.compatibility' ]);
+}
 
 // ---------------------------------------------------------------------//
 
@@ -107,6 +103,9 @@ try {
 
 	// delete cache.
 	delete CeL.get_old_namespace().script_code;
+
+	// for npm
+	module.exports = CeL;
 
 } catch (e) {
 	console.error(e);
