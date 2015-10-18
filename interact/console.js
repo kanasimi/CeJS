@@ -407,7 +407,6 @@ if (typeof CeL === 'function')
 			});
 
 			// -------------------------------------------------------------
-			//
 
 			/**
 			 * cf. String.prototype.split ( separator, limit )
@@ -609,6 +608,8 @@ if (typeof CeL === 'function')
 				return value instanceof SGR_code;
 			}
 
+			// -------------------------------------------------------------
+
 			/**
 			 * ANSI escape code (or escape sequences) Class
 			 * 
@@ -699,13 +700,12 @@ if (typeof CeL === 'function')
 				// 30–37
 				foreground : [ , library_namespace.platform.Windows
 				// Windows console 不支援 39。(e.g. node.js 下)
-					&& library_namespace.platform.nodejs ? 37 : 39 ],
+				&& library_namespace.platform.nodejs ? 37 : 39 ],
 				// background color (背景色 / 底色): 40–47
 				background : [ , 49 ],
 				// Overlined / Not overlined
 				overline : [ 53, 55 ]
 			};
-
 
 			/**
 			 * style name alias<br />
