@@ -541,7 +541,7 @@ application.net.wiki wiki_API.cache() CeL.wiki.cache()
 
 var get_file = library_namespace.get_file,
 // @see https://nodejs.org/api/fs.html
-write_file = library_namespace.is_node && require('fs').writeFileSync;
+write_file = library_namespace.platform.nodejs && require('fs').writeFileSync;
 
 
 /**
@@ -609,7 +609,7 @@ function cache_file(URL, options) {
 _.cache_file = cache_file;
 
 /** {String}預設 file encoding for fs of write_file。 */
-cache_file.encoding = library_namespace.is_node ? 'utf8' : 'UTF-8';
+cache_file.encoding = library_namespace.platform.nodejs ? 'utf8' : 'UTF-8';
 
 
 return (

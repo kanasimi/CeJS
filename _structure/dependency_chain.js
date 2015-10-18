@@ -1889,7 +1889,7 @@ if (typeof CeL === 'function')
 		// external resource tester.
 		external_RegExp = library_namespace.env.module_name_separator,
 		// Node.js 有比較特殊的 global scope 處理方法。
-		is_nodejs = library_namespace.env.nodejs,
+		is_nodejs = library_namespace.platform.nodejs,
 		// tag_map[tag name]=[URL attribute name, type/extension list];
 		tag_map = {
 			script : [ 'src', 'js' ],

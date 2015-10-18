@@ -9,6 +9,8 @@
  * TODO: 方程式圖形顯示 by SVG
  */
 
+// More examples: see /_test suite/test.js
+
 'use strict';
 if (typeof CeL === 'function')
 CeL.run(

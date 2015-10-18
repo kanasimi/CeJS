@@ -357,14 +357,28 @@ if (false) {
 
 	if (_.new_XMLHttp) {
 
-	} else if (typeof require === 'function'
+	} else if (
+	// typeof global === 'object' &&
+	typeof require === 'function'
 	//	for node.js, node_fs
 	&& (_.new_XMLHttp = require('fs'))
 	//
 	&& typeof process === 'object' && typeof process.versions === 'object' && process.versions.node
 	//
 	&& typeof console === 'object' && typeof console.log === 'function') {
-		_.platform = 'node ' + (_.is_node = process.versions.node);
+		_.platform.browser = 'node';
+		_.platform.version =
+		/**
+		 * shortcut for node.js: nodejs version.<br />
+		 * Node.js 有比較特殊的 global scope 處理方法。<br />
+		 * 有可能為 undefined!
+		 * 
+		 * @type {String}
+		 */
+		_.platform.nodejs = process.versions.node;
+		_.platform.OS = process.platform;
+		// shortcut for Windows
+		_.platform.Windows = _.platform.is_Windows();
 
 		// TODO: https://github.com/driverdan/node-XMLHttpRequest/blob/master/lib/XMLHttpRequest.js
 		var node_read_file = _.new_XMLHttp = _.new_XMLHttp.readFileSync;
@@ -432,7 +446,7 @@ if (false) {
 	} else if (typeof _configuration === 'object'
 		//	for jslibs
 		&& typeof File === 'function') {
-		_.platform = 'jsio';
+		_.platform.browser = 'jsio';
 		LoadModule('jsio');
 		_.get_file = function (path) {
 			//_configuration.stderr(path);
@@ -462,7 +476,7 @@ if (false) {
 
 	} else if (typeof Stream === 'function') {
 		//	for JSDB
-		_.platform = 'JSDB';
+		_.platform.browser = 'JSDB';
 		_.get_file = function (path) {
 			//_.log('get_file: ' + path);
 			try {

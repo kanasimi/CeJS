@@ -2285,7 +2285,7 @@ wiki_API.query = function(action, callback, post_data) {
 		get_URL(action, function(XMLHttp) {
 			var response = XMLHttp.responseText;
 			library_namespace.debug('response: '
-				+ (library_namespace.is_node ? '\n' + response : response.replace(/</g, '&lt;')), 3, 'wiki_API.query');
+				+ (library_namespace.platform.nodejs ? '\n' + response : response.replace(/</g, '&lt;')), 3, 'wiki_API.query');
 
 			// "<\": for Eclipse JSDoc.
 			if (/<\html[\s>]/.test(response.slice(0, 40))) {
@@ -2542,7 +2542,7 @@ wiki_API.page = function(title, callback, options) {
 		data = data.query.pages;
 		var pages = [],
 		//
-		page_cache_prefix = library_namespace.is_node && node_fs
+		page_cache_prefix = library_namespace.platform.nodejs && node_fs
 		//
 		&& options && options.page_cache_prefix;
 		for ( var pageid in data) {
@@ -3836,7 +3836,7 @@ wiki_API.redirects.count = function(root_name_hash, embeddedin_list) {
 /** {Object|Function}fs in node.js */
 var node_fs;
 try {
-	if (library_namespace.is_node)
+	if (library_namespace.platform.nodejs)
 		// @see https://nodejs.org/api/fs.html
 		node_fs = require('fs');
 	if (typeof node_fs.readFile !== 'function')

@@ -889,9 +889,10 @@ function (global) {
 	 */
 	function platform(key, version, exactly) {
 		// CeL.platform({name: version}, exactly);
+		var tmp;
 		if (_.is_Object(key)) {
-			for ( var n in key) {
-				if (platform(n, key[n], version))
+			for (tmp in key) {
+				if (platform(tmp, key[tmp], version))
 					return true;
 			}
 			return false;
@@ -899,16 +900,24 @@ function (global) {
 	
 		key = String(key).toLowerCase();
 		// CeL.platform(name, version, exactly);
-		if (platform.browser.toLowerCase() === key
+		tmp = platform.browser;
+		if (tmp && tmp.toLowerCase() === key
 				&& (!version || (exactly ? platform.version == version
 						: platform.version >= version)))
 			return true;
 	
-		if (platform.engine.toLowerCase() === key
+		tmp = platform.engine;
+		if (tmp && tmp.toLowerCase() === key
 				&& (!version || (exactly ? platform.engine_version == version
 						: platform.engine_version >= version)))
 			return true;
 	
+		tmp = platform.OS;
+		if (tmp && tmp.toLowerCase().indexOf(
+			//
+			key === 'windows' ? 'win' : key) === 0)
+			return true;
+
 		return false;
 	};
 
@@ -916,6 +925,8 @@ function (global) {
 		(function() {
 			// e.g., 'Win32'
 			platform.OS = navigator.platform;
+			// shortcut for Windows
+			platform.Windows = platform.is_Windows();
 	
 			var userAgent = String(navigator.userAgent), matched, tmp;
 			platform.mobile = /mobile/i.test(userAgent);
@@ -948,7 +959,11 @@ function (global) {
 				// Firefox: Gecko
 				platform.engine = tmp;
 		})();
-	
+
+	platform.is_Windows = function() {
+		return platform.OS && platform.OS.toLowerCase().indexOf('win') === 0;
+	};
+
 	platform.toString = function() {
 		return platform.browser + ' ' + platform.version;
 	};
@@ -1088,23 +1103,7 @@ function (global) {
 		 * @type Object
 		 */
 		env.global = global;
-
-		/**
-		 * nodejs version.<br />
-		 * Node.js 有比較特殊的 global scope 處理方法。<br />
-		 * 有可能為 undefined!
-		 * 
-		 * @name CeL.env.global
-		 * @type String
-		 */
-		env.nodejs =
-				// global 已被覆蓋。
-				// typeof global === 'object' &&
-				typeof require === 'function'
-				//
-				&& typeof process === 'object' && typeof process.versions === 'object'
-				//
-				&& process.versions.node;
+		// global 已被覆蓋。
 
 		/**
 		 * 在 registry 中存放 library 資料的 base path

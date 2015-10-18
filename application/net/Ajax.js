@@ -760,7 +760,7 @@ function get_URL_node(URL, onload, charset, post_data) {
 get_URL_node.default_user_agent = 'CeJS get_URL_node()';
 
 
-if (library_namespace.is_node) {
+if (library_namespace.platform.nodejs) {
 	node_url = require('url');
 	node_http = require('http');
 	node_https = require('https');
@@ -781,7 +781,7 @@ if (library_namespace.is_node) {
 /** {Object|Function}fs in node.js */
 var node_fs;
 try {
-	if (library_namespace.is_node)
+	if (library_namespace.platform.nodejs)
 		// @see https://nodejs.org/api/fs.html
 		node_fs = require('fs');
 	if (typeof node_fs.readFile !== 'function')
@@ -874,7 +874,7 @@ function get_URL_cache_node(URL, onload, options) {
 get_URL_cache_node.encoding = 'utf8';
 
 
-if (library_namespace.is_node) {
+if (library_namespace.platform.nodejs) {
 	_.get_URL_cache = get_URL_cache_node;
 }
 

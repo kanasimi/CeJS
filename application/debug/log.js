@@ -1194,36 +1194,45 @@ if (!CeL.Log) {
 		},
 
 		//	增加 debug 訊息。
-		debug : function(message, level, caller, clean) {
-			//alert(CeL.is_debug() + ',' + l + '(' + (l === undefined) + '),' + message);
+		debug : function a(message, level, caller, clean) {
+			// alert(CeL.is_debug() + ',' + l + '(' + (l === undefined) + '),' +
+			// message);
 			if (CeL.is_debug(level)) {
-				if(!caller && has_caller) {
-					// TODO: do not use arguments
-					caller = caller !== arguments.callee && CeL.get_function_name(arguments.callee.caller);
-					//CeL.log(CeL.is_type(arguments.callee.caller));
-					//CeL.log(Array.isArray(caller));
-					//CeL.log(caller+': '+arguments.callee.caller);
-					//CeL.warn(CeL.debug);
+				if (typeof message === 'function') {
+					// for .debug(function(){return some_function(..);}, 3);
+					message = 'function: [' + message + ']<br />return: [' + message()
+							+ ']';
 				}
 
-				if(typeof message === 'function') {
-					//	for .debug(function(){return some_function(..);}, 3);
-					message = 'function: [' + message + ']<br />return: [' + message() + ']';
+				if (!caller && has_caller) {
+					// TODO: do not use arguments
+					caller = caller !== arguments.callee
+							&& CeL.get_function_name(arguments.callee.caller);
+					// CeL.log(CeL.is_type(arguments.callee.caller));
+					// CeL.log(Array.isArray(caller));
+					// CeL.log(caller+': '+arguments.callee.caller);
+					// CeL.warn(CeL.debug);
 				}
-				CeL.Log.log.call(
-						CeL.Log,
-						caller ?
-								[ {
-									//(caller.charAt(0) === '.' ? CeL.Class + caller : caller)
-									span : caller,
-									'class' : 'debug_caller'
-								}, ': ', message ]
-							: message
-						, clean, {
-							level : 'debug',
-							add_class : 'debug_' + (level || CeL.is_debug())
-						}
-				);
+				if (caller) {
+					message = CeL.is_WWW() ? [ {
+						// (caller.charAt(0) === '.' ? CeL.Class + caller : caller)
+						span : caller,
+						'class' : 'debug_caller'
+					}, ': ', message ] :
+					// 注意: 這在 call stack 中有 SGR 時會造成:
+					// RangeError: Maximum call stack size exceeded
+					// 因此不能用於測試 SGR 本身!
+					// CeL.is_debug(3): assert: SGR 在這 level 以上才會呼叫 .debug()。
+					// TODO: 檢測 call stack。
+					!CeL.is_debug(3) && CeL.SGR? CeL.SGR(
+							[ '', 'fg:blue;bg=white', caller + ': ', '-fg;-bg', message ])
+							.toString() : caller + ': ' + message;
+				}
+
+				CeL.Log.log.call(CeL.Log, message, clean, {
+					level : 'debug',
+					add_class : 'debug_' + (level || CeL.is_debug())
+				});
 			}
 		},
 		trace : function() {
@@ -1449,7 +1458,7 @@ if (!CeL.Log) {
 		},
 
 		/**
-		 * 整套測試。
+		 * 整套測試, unit test 單元測試。
 		 * 
 		 * @example
 		 * <code>

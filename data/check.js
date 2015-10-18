@@ -117,57 +117,108 @@ function checkTWIDNo(ID) {
 }
 
 
+//最低位數downmost digit>1
+var is_lucky_number_dDigit = 3;
+/**
+ * 判斷キリ番等,counter專用<br />
+ * キリ番ゲッターidお名前(げっちゅ～) home mail num キリである理由 ip date msg point(得點)<br />
+ * キリ番 2000 まで、あと 265 です。ゲットは推定 5月31日(金) 9：17 頃です。
+ * キリの良い番号（キリ番）・数字の揃った番号（ゾロ目）または語呂の良い番号（ゴロ番、面白く読める番号）を踏んだ方
+ * 
+ * TODO: 還可以加的：445533等
+ * 
+ * 
+ * @param {Number}num
+ *            number
+ * 
+ * @returns {String}lucky kind
+ * 
+ * @since 2004/8/26 20:14
+ */
+function is_lucky_number(num) {
+	if (!/^\d{1,20}$/.test(num)) {
+		alert();
+		return;
+	}
+	num = parseInt(num, 10);
+	if (!num || num < 1)
+		return;
+	if (typeof num !== 'string')
+		num = String(num);
+	if (!is_lucky_number_dDigit || is_lucky_number_dDigit < 2)
+		// default
+		is_lucky_number_dDigit = 3;
+	if (false && num.length == 1)
+		return '首十位';
+	if (num.length < is_lucky_number_dDigit)
+		return;
+	if (num.match(new RegExp('(0{' + is_lucky_number_dDigit + ',})$')))
+		return '下' + RegExp.$1.length + '桁のキリ番';
+	if (num.match(new RegExp('(9{' + is_lucky_number_dDigit + ',})$')))
+		return '前後賞：差一' + (1 + RegExp.$1.length) + '位數整～';
+	if (num.match(new RegExp('(0{' + (is_lucky_number_dDigit - 1) + ',}1)$')))
+		return '前後賞：' + (1 + RegExp.$1.length) + '位數過一～';
+	if (num.match(new RegExp('(' + num.slice(-1) + '{' + is_lucky_number_dDigit
+			+ ',})$')))
+		return '下' + RegExp.$1.length + '桁のゾロ目';
 
+	var i = 2, c = Math.floor(num.charAt(0)), d = num.charAt(1) - c;
+	c += d;
+	while (i < num.length)
+		if (num.charAt(i++) != (c += d)) {
+			d = 0;
+			break;
+		}
+	if (d)
+		return '連番（公差' + d + 'の等差数列）';
 
+	i = 2, c = Math.floor(num.charAt(0)), d = num.charAt(1) / c;
+	c *= d;
+	while (i < num.length)
+		if (num.charAt(i++) != (c *= d)) {
+			d = 0;
+			break;
+		}
+	if (d)
+		return '公比' + (d > 1 ? d : '1/' + (1 / d)) + 'の等比数列';
 
-/*	判斷キリ番等,counter專用	2004/8/26 20:14
-	キリ番ゲッターidお名前(げっちゅ～)	home	mail	num	キリである理由	ip	date	msg	point(得點)
-	キリ番 2000 まで、あと 265 です。ゲットは推定 5月31日(金) 9：17 頃です。	キリの良い番号（キリ番）・数字の揃った番号（ゾロ目）または語呂の良い番号（ゴロ番、面白く読める番号）を踏んだ方
-	還可以加的：445533等
-*/
-var isLuckyNum_dDigit=3;	//	最低位數downmost digit>1
-function isLuckyNum(num){	//	return luck kind
- if(!/^\d{1,20}$/.test(num)){alert();return;}
- num=parseInt(num,10);
- if(!num||num<1)return;
- if(typeof num!=='string')
-	 num=String(num);
- if(!isLuckyNum_dDigit||isLuckyNum_dDigit<2)isLuckyNum_dDigit=3;	//	default
- //if(num.length==1)return '首十位';
- if(num.length<isLuckyNum_dDigit)return;
- if(num.match(new RegExp('(0{'+isLuckyNum_dDigit+',})$')))return '下'+RegExp.$1.length+'桁のキリ番';
- if(num.match(new RegExp('(9{'+isLuckyNum_dDigit+',})$')))return '前後賞：差一'+(1+RegExp.$1.length)+'位數整～';
- if(num.match(new RegExp('(0{'+(isLuckyNum_dDigit-1)+',}1)$')))return '前後賞：'+(1+RegExp.$1.length)+'位數過一～';
- if(num.match(new RegExp('('+num.slice(-1)+'{'+isLuckyNum_dDigit+',})$')))return '下'+RegExp.$1.length+'桁のゾロ目';
+	if (num.length >= is_lucky_number_dDigit) {
+		c = Math.floor(num.length / 2), d = 1;
+		if (num.slice(0, c) == num.substr(num.length - c))
+			return c + '桁の対称形';
 
- var i=2,c=Math.floor(num.charAt(0)),d=num.charAt(1)-c;c+=d;
- while(i<num.length)if(num.charAt(i++)!=(c+=d)){d=0;break;}
- if(d)return '連番（公差'+d+'の等差数列）';
+		for (i = 0; i <= c; i++)
+			if (num.charAt(i) != num.charAt(num.length - 1 - i)) {
+				d = 0;
+				break;
+			}
+		if (d)
+			return c + '桁の左右対称（鏡像、シンメトリィ）';
 
- i=2,c=Math.floor(num.charAt(0)),d=num.charAt(1)/c;c*=d;
- while(i<num.length)if(num.charAt(i++)!=(c*=d)){d=0;break;}
- if(d)return '公比'+(d>1?d:'1/'+(1/d))+'の等比数列';
+		for (i = 2; i <= c; i++) {
+			d = num.slice(0, i);
+			var s = d;
+			while (s.length < num.length)
+				s += d;
+			if (num == s.slice(0, num.length))
+				return i + '位數循環/回文';
+		}
 
- if( num.length>=isLuckyNum_dDigit){
-  c=Math.floor(num.length/2),d=1;
-  if(num.slice(0,c)==num.substr(num.length-c))return c+'桁の対称形';
-
-  for(i=0;i<=c;i++)if(num.charAt(i)!=num.charAt(num.length-1-i)){d=0;break;}
-  if(d)return c+'桁の左右対称（鏡像、シンメトリィ）';
-
-  for(i=2;i<=c;i++){
-   d=num.slice(0,i);var s=d;while(s.length<num.length)s+=d;
-   if(num==s.slice(0,num.length))return i+'位數循環/回文';
-  }
-
-  for(i=2,c=Math.floor(num.charAt(0)),d=Math.floor(num.charAt(1));i<num.length;i++)
-   if(num.charAt(i)==c+d)c=d,d=Math.floor(num.charAt(i));else{d=0;break;}
-  if(d)return 'Fibonacci数列';
- }
+		for (i = 2, c = Math.floor(num.charAt(0)), d = Math
+				.floor(num.charAt(1)); i < num.length; i++)
+			if (num.charAt(i) == c + d)
+				c = d, d = Math.floor(num.charAt(i));
+			else {
+				d = 0;
+				break;
+			}
+		if (d)
+			return 'Fibonacci数列';
+	}
 
 }
 
-
+_.is_lucky_number = is_lucky_number;
 
 
 /**

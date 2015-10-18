@@ -1,80 +1,18 @@
 /**
  * @name CeL function for console
+ * 
  * @fileoverview 本檔案包含了 console 操作用的 functions。<br />
- *               a.k.a. 一般論壇 (BBS) ANSI color 轉換程式
+ *               a.k.a. 一般論壇 (BBS) ANSI color 轉換程式。
+ * 
  * @since 2015/3/1 13:16:6
- * @example <code>
-
- * </code>
- * @see
  */
 
-if (false)
-	CeL.run('interact.console', function() {
-		// CeL.set_debug(3);
-		var SGR = CeL.interact.console.SGR;
-		SGR.CSI = '*[';
-		SGR.add_color_alias('黑紅綠黃藍紫青白'.split(''));
+'use strict';
 
-		var text = '0123456789', ansi = new SGR(text);
-
-		CeL.assert([ text, ansi.text ]);
-
-		CeL.log('set style {Object}');
-		ansi.style_at(3, {
-			bold : true,
-			fg : 32,
-			// blue background : 44
-			bg : 'blue'
-		});
-
-		CeL.log('Test @ 3');
-		CeL.assert([ 2, ansi.style_at(3, true).foreground ]);
-		CeL.assert([ '1;32;44', ansi.style_at(3, true).toString(false) ]);
-		CeL.assert([ undefined, ansi.style_at(4, true) ]);
-		CeL.assert([ ansi.style_at(3).toString(false),
-		//
-		ansi.style_at(4).toString(false) ]);
-
-		CeL.log('set style alias');
-		ansi.style_at(5, 'fg=紫');
-
-		CeL.log('Test @ 5');
-		CeL.assert([ 4, ansi.style_at(5).background ]);
-		CeL.assert([ 'blue', SGR.color[ansi.style_at(5).background] ]);
-
-		CeL.log('set style multi-alias');
-		ansi.style_at(7, '5;-bold');
-
-		CeL.assert([ true, ansi.style_at(8).blink ], '(8).blink');
-		CeL.assert([ false, ansi.style_at(9).bold ], '(9).bold');
-
-		CeL.log('Test all');
-		text = '012*[1;32;44m34*[1;35;44m56*[22;35;44;5m789';
-		CeL.assert([ text, ansi.toString() ]);
-		CeL.assert([ text, new SGR(text).toString() ]);
-
-		CeL.assert([ '0123*[32m4567*[44m890',
-		//
-		(new SGR([ '0123', {
-			fg : '綠'
-		}, '4567', {
-			bg : '藍'
-		}, '890' ])).toString() ]);
-
-		CeL.assert([ '(*[33m1,2*[39m)',
-		//
-		(new SGR([ '(', 'fg=黃', '1,2', '-fg', ')' ])).toString() ]);
-
-		// Not Yet Implemented!
-		// ansi.to_HTML(style_mapping);
-
-		CeL.info('All test OK.');
-	});
+// More examples: see /_test suite/test.js
 
 // ------------------------------------------------------------------------------------------------
 
-'use strict';
 if (typeof CeL === 'function')
 	CeL.run({
 		name : 'interact.console',
@@ -103,15 +41,18 @@ if (typeof CeL === 'function')
 			.prototype = {};
 
 			// -------------------------------------------------------------
-			// //
+			//
 
 			/**
 			 * parse style name
 			 * 
-			 * @param style_name
+			 * @param {String|Object}style_name
 			 *            style name to parse
 			 * 
-			 * @returns {String} style name
+			 * @returns {String}style name
+			 * 
+			 * @see <span title="Select Graphic Rendition">SGR</span>
+			 *      parameters
 			 */
 			function SGR_style_name(style_name) {
 				library_namespace.debug('Search style name [' + style_name
@@ -225,27 +166,31 @@ if (typeof CeL === 'function')
 					// skip.
 					return this;
 
-				library_namespace.debug('Search style (' + (typeof style)
-						+ ') [' + style
-						//
-						+ '] in SGR_code.style_value_alias', 3);
+				library_namespace.debug(
+				//
+				'Search style (' + (typeof style) + ') [' + style
+				//
+				+ '] in SGR_code.style_value_alias', 3, 'SGR_style_add');
 				if (typeof style !== 'object')
 					while (style in SGR_code.style_value_alias) {
 						library_namespace.debug('Find style [' + style
 								+ '] → [' + SGR_code.style_value_alias[style]
-								+ ']', 3);
+								+ ']', 3, 'SGR_style_add');
 						style = SGR_code.style_value_alias[style];
 					}
 
 				library_namespace.debug('parse (' + (typeof style) + ') ['
-						+ style + '] if it is a pure value.', 3);
+						+ style + '] if it is a pure value.', 3,
+						'SGR_style_add');
 				if (typeof style === 'string')
 					if (style.includes(SGR_code.separator))
 						style = style.split(SGR_code.separator);
 
 					else if (isNaN(style)) {
-						library_namespace.debug('test if [' + style
-								+ '] is "[+-] style name".', 3);
+						library_namespace.debug(
+						//
+						'test if [' + style + '] is "[+-] style name".', 3,
+								'SGR_style_add');
 						var matched = style.match(/^([+\-])\s*([^\s].*)$/);
 						if (matched
 								&& (matched[2] = SGR_style_name(matched[2]
@@ -255,12 +200,12 @@ if (typeof CeL === 'function')
 									matched[2]))
 								library_namespace.warn(
 								// Expects integer.
-								'Invalid configuration of style: ['
+								'SGR_style_add: Invalid configuration of style: ['
 										+ matched[2] + '].');
 							else {
 								library_namespace.debug('Set style "'
 										+ matched[2] + '" = ' + matched[1]
-										+ '.', 3);
+										+ '.', 3, 'SGR_style_add');
 								this[matched[2]] = matched[1];
 							}
 							return this;
@@ -269,7 +214,7 @@ if (typeof CeL === 'function')
 						library_namespace.debug('test if [' + style +
 						//
 						'] is "style name = style value (0,1,false,true,..)".',
-								3);
+								3, 'SGR_style_add');
 						matched = style.match(/^([^=]+)=(.+)$/);
 						if (matched
 								&& (matched[1] = SGR_style_name(matched[1]
@@ -288,7 +233,7 @@ if (typeof CeL === 'function')
 					style |= 0;
 
 				library_namespace.debug('parse (' + (typeof style) + ') ['
-						+ style + '] if it is a object.', 3);
+						+ style + '] if it is a object.', 3, 'SGR_style_add');
 				if (library_namespace.is_Object(style)) {
 					Object.keys(style).some(
 							function(style_name) {
@@ -306,8 +251,9 @@ if (typeof CeL === 'function')
 									this[style_name] = style_value;
 								} else if (is_reset_style(style_value)) {
 									library_namespace.debug('reset style ('
-											+ (typeof style) + ') [' + style
-											+ '].', 3);
+									//
+									+ (typeof style) + ') [' + style + '].', 3,
+											'SGR_style_add');
 									this.to_reset();
 									return true;
 								}
@@ -323,11 +269,14 @@ if (typeof CeL === 'function')
 				} else if (40 <= style && style <= 47) {
 					this.background = style;
 				} else if (is_reset_style(style)) {
-					library_namespace.debug('reset style (' + (typeof style)
-							+ ') [' + style + '].', 3);
+					library_namespace.debug(
+					//
+					'reset style (' + (typeof style) + ') [' + style + '].', 3,
+							'SGR_style_add');
 					this.to_reset();
 				} else if (library_namespace.is_debug()) {
-					library_namespace.warn('Unknown style: [' + style + ']');
+					library_namespace.warn('SGR_style_add: Unknown style: ['
+							+ style + ']');
 				}
 
 				return this;
@@ -345,15 +294,18 @@ if (typeof CeL === 'function')
 				if (false)
 					if (library_namespace.is_Object(options))
 						this.options = options;
-				library_namespace.debug('Set style [' + style + ']', 2);
+				library_namespace.debug('Set style [' + style + ']', 2,
+						'SGR_style');
 				this.add(style);
 				library_namespace.debug('Set style [' + style + '] finished.',
-						3);
+						3, 'SGR_style');
 			}
 
 			/**
 			 * indicate the color styles.<br />
 			 * 實際上應該列出所有設定值超過一種的格式名。
+			 * 
+			 * @type {Object}
 			 */
 			var color_shift = {
 				foreground : 30,
@@ -455,7 +407,7 @@ if (typeof CeL === 'function')
 			});
 
 			// -------------------------------------------------------------
-			// //
+			//
 
 			/**
 			 * cf. String.prototype.split ( separator, limit )
@@ -639,7 +591,9 @@ if (typeof CeL === 'function')
 			function SGR_style_toString(get_Array) {
 				var sequence = this.text.split('');
 				this.style.forEach(function(style, index) {
-					sequence[index] = style.toString() + sequence[index];
+					sequence[index] = style.toString()
+					// 在最後一個 item 時可能只剩 style。
+					+ (sequence[index] || '');
 				}, this);
 				return get_Array ? sequence : sequence.join('');
 			}
@@ -666,8 +620,8 @@ if (typeof CeL === 'function')
 			 * @see <a
 			 *      href="https://en.wikipedia.org/wiki/ANSI_escape_code#graphics"
 			 *      accessdate="2015/3/1 8:1" title="ANSI escape code (or escape
-			 *      sequences)"><span title="Select Graphic Rendition">SGR
-			 *      </span> parameters</a><br />
+			 *      sequences)"><span title="Select Graphic Rendition">SGR</span>
+			 *      parameters</a><br />
 			 *      <a href="http://vt100.net/docs/vt510-rm/SGR"
 			 *      accessdate="2015/3/1 8:1">SGR—Select Graphic Rendition</a>
 			 */
@@ -743,12 +697,15 @@ if (typeof CeL === 'function')
 				conceal : [ 8, 28 ],
 				// display (text color, foreground color, 文字部份前景色):
 				// 30–37
-				foreground : [ , 39 ],
+				foreground : [ , library_namespace.platform.Windows
+				// Windows console 不支援 39。(e.g. node.js 下)
+					&& library_namespace.platform.nodejs ? 37 : 39 ],
 				// background color (背景色 / 底色): 40–47
 				background : [ , 49 ],
 				// Overlined / Not overlined
 				overline : [ 53, 55 ]
 			};
+
 
 			/**
 			 * style name alias<br />

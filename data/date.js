@@ -1134,7 +1134,7 @@ _.parse_English_date = parse_English_date;
  * 
  * @example <code>
 
-// other examples see "_test suite/node.test.js"
+// More examples: see /_test suite/test.js
 
  * </code>
  * 

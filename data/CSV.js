@@ -145,7 +145,7 @@ data.title_array	=	[title_field_name];
 data.it	=	ignored title array
 data[num]	=	the num-th line (num: 0,1,2,..)
 
-// other examples see "_test suite/node.test.js"
+// More examples: see /_test suite/test.js
 
  * </code>
  * 
@@ -444,7 +444,7 @@ parse_CSV = parse_CSV;
  * 
  * @example <code>
 
-// other examples see "_test suite/node.test.js"
+// More examples: see /_test suite/test.js
 
  * </code>
  * 
