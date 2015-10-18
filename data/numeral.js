@@ -406,28 +406,7 @@ if (typeof CeL === 'function')
 				return r;
 			}
 
-			/**
-			 * <code>
-
-			CeL.assert(['一百兆〇八億〇八百',CeL.to_Chinese_numeral(100000800000800)],'小寫中文數字');
-			CeL.assert(['捌兆肆仟陸佰柒拾貳億捌仟柒佰參拾捌萬玖仟零肆拾柒',CeL.to_Chinese_numeral(8467287389047,true)],'大寫中文數字');
-			CeL.assert(['新臺幣肆萬參拾伍圓參角肆分貳文參',CeL.to_TWD(40035.3423)],'貨幣/currency test');
-			CeL.assert([8467287389047,CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(8467287389047,true))],'中文數字');
-			for(var i=0;i<=1000;i++)
-				CeL.assert([i,CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(i,true))],'中文數字 '+i);
-
-			CeL.assert(["壬辰以來，至景初元年丁已歲，積4046，算上。",CeL.from_Chinese_numeral('壬辰以來，至景初元年丁已歲，積四千四十六，算上。')]);
-			CeL.assert(['40179字',CeL.from_Chinese_numeral('四萬百七十九字')]);
-			CeL.assert([10000000000000000,CeL.from_Chinese_numeral('京')]);
-			CeL.assert(['10000字',CeL.from_Chinese_numeral('一萬字')]);
-			CeL.assert(['正常情況下:40379字',CeL.from_Chinese_numeral('正常情況下:四萬〇三百七十九字')]);
-			CeL.assert([4.5,CeL.from_Chinese_numeral('2分之九')]);
-			CeL.assert(["1974年",CeL.from_positional_Chinese_numeral('一九七四年')]);
-			CeL.assert(["一九七四年",CeL.to_positional_Chinese_numeral('1974年')]);
-			CeL.assert([4022,CeL.from_positional_Chinese_numeral('〤〇〢二')],'擴充蘇州碼子');
-
-			</code>
-			 */
+			// More examples: see /_test suite/test.js
 
 			function from_positional_Chinese_numeral(number_String) {
 				return isNaN(number_String = number_String.replace(
@@ -736,9 +715,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @example <code>
 
-				//	貨幣/currency test
-				CeL.assert([ '新臺幣肆萬參拾伍圓參角肆分貳文參',
-				    CeL.to_TWD(40035.3423) ]);
+			// More examples: see /_test suite/test.js
 
 			 * </code>
 			 * 

@@ -188,6 +188,36 @@ function test_console() {
 }
 
 
+
+
+//============================================================================================================================================================
+
+
+function test_numeral() {
+	CeL.assert(['一百兆〇八億〇八百',CeL.to_Chinese_numeral(100000800000800)],'小寫中文數字');
+	CeL.assert(['捌兆肆仟陸佰柒拾貳億捌仟柒佰參拾捌萬玖仟零肆拾柒',CeL.to_Chinese_numeral(8467287389047,true)],'大寫中文數字');
+	CeL.assert(['新臺幣肆萬參拾伍圓參角肆分貳文參',CeL.to_TWD(40035.3423)],'貨幣/currency test');
+	CeL.assert([8467287389047,CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(8467287389047,true))],'中文數字');
+	CeL.set_debug(0);
+	for(var i=0;i<=1000;i++)
+		CeL.assert([i,CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(i,true))],'中文數字 '+i);
+	CeL.set_debug();
+
+	CeL.assert(["壬辰以來，至景初元年丁已歲，積4046，算上。",CeL.from_Chinese_numeral('壬辰以來，至景初元年丁已歲，積四千四十六，算上。')]);
+	CeL.assert(['40179字',CeL.from_Chinese_numeral('四萬百七十九字')]);
+	CeL.assert([10000000000000000,CeL.from_Chinese_numeral('京')]);
+	CeL.assert(['10000字',CeL.from_Chinese_numeral('一萬字')]);
+	CeL.assert(['正常情況下:40379字',CeL.from_Chinese_numeral('正常情況下:四萬〇三百七十九字')]);
+	CeL.assert([4.5,CeL.from_Chinese_numeral('2分之九')]);
+	CeL.assert(["1974年",CeL.from_positional_Chinese_numeral('一九七四年')]);
+	CeL.assert(["一九七四年",CeL.to_positional_Chinese_numeral('1974年')]);
+	CeL.assert([4022,CeL.from_positional_Chinese_numeral('〤〇〢二')],'擴充蘇州碼子');
+
+	CeL.assert([ '新臺幣肆萬參拾伍圓參角肆分貳文參', CeL.to_TWD(40035.3423) ], '貨幣/currency test');
+}
+
+
+
 //============================================================================================================================================================
 
 
@@ -957,6 +987,8 @@ function test_CSV() {
 	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']);
 	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']);
 
+	CeL.set_debug(0);
+
 	node_info('test: CSV no_text_qualifier');
 	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_2']);
 	CeL.assert([CeL.parse_CSV('a,b\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_1']);
@@ -973,8 +1005,6 @@ function test_CSV() {
 	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1,select_column:true})._4.b,'_4']);
 
 	node_info('test: 將 {Array|Object} 依設定轉成 CSV text。');
-
-	CeL.set_debug(0);
 
 	node_info('test: CSV basic');
 	CeL.to_CSV_String.config.line_separator="\n";
@@ -1275,7 +1305,8 @@ node_info.color = {
 function node_info(messages) {
 	var matched;
 	if (typeof messages === 'string'
-			&& (matched = messages.match(/^([a-z\d\-]+)([:\s].+)$/i))) {
+			&& (matched = messages.match(/^([a-z\d\-]+)([:\s].+)$/i))
+			&& matched[1].toLowerCase() !== 'all') {
 		messages = [
 				'',
 				node_info.color[matched[1].toLowerCase()]
@@ -1285,24 +1316,28 @@ function node_info(messages) {
 	return CeL.info(new CeL.SGR(messages).toString());
 }
 
+
+// More examples: see /_test suite/test.js
 function do_test() {
 	// CeL.assert([ typeof CeL.assert, 'function' ], 'CeL.assert is working.');
 	CeL.set_debug();
 	CeL.run(
-/*
-*/
 	// 測試期間時需要用到的功能先作測試。
 	'interact.console', test_console,
+/*
+*/
 	// 基本的功能先作測試。
 	'data.native', test_native,
+	//
+	'data.date', test_date,
+	//
+	'data.check', test_check,
 	//
 	[ 'data.math.rational', 'data.math.quadratic' ], test_math,
 	//
 	'data.CSV', test_CSV,
 	//
-	'data.date', test_date,
-	//
-	'data.check', test_check,
+	'data.numeral', test_numeral,
 	//
 	//'data.date.era', test_era,
 	//

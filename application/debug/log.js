@@ -1225,7 +1225,7 @@ if (!CeL.Log) {
 					// CeL.is_debug(3): assert: SGR 在這 level 以上才會呼叫 .debug()。
 					// TODO: 檢測 call stack。
 					!CeL.is_debug(3) && CeL.SGR? new CeL.SGR(
-							[ '', 'fg:green;bg=white', caller + ': ', '-fg;-bg', message ])
+							[ '', 'fg=yellow', caller + ': ', '-fg', message ])
 							.toString() : caller + ': ' + message;
 				}
 
@@ -1450,8 +1450,10 @@ if (!CeL.Log) {
 					// caller: see: CeL.debug
 					i = CeL.get_function_name(arguments.callee.caller);
 				CeL.debug(OK_message
-						|| test_name + ' OK: (' + (typeof value) + ') [' + value + ']'
-						+ (error_message ? ' (if fault, message: ' + error_message + ')' : ''), 1, i);
+						|| test_name + ' OK: (' + (typeof value) + ') ['
+						+ ((value = String(value)).length > 200 ? value.slice(0, 200) + ']...(' + value.length + ')' : value + ']')
+						// if fault, message:
+						+ (error_message ? ' (' + error_message + ')' : ''), 1, i);
 			}
 
 			return true;
