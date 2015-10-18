@@ -1225,7 +1225,7 @@ if (!CeL.Log) {
 					// CeL.is_debug(3): assert: SGR 在這 level 以上才會呼叫 .debug()。
 					// TODO: 檢測 call stack。
 					!CeL.is_debug(3) && CeL.SGR? new CeL.SGR(
-							[ '', 'fg:blue;bg=white', caller + ': ', '-fg;-bg', message ])
+							[ '', 'fg:green;bg=white', caller + ': ', '-fg;-bg', message ])
 							.toString() : caller + ': ' + message;
 				}
 

@@ -29,6 +29,92 @@ require('../index');
 
 // require("./_for include/node.loader.js");
 
+
+
+//============================================================================================================================================================
+
+
+function test_native() {
+	CeL.assert([ CeL.pad(23, 5), '00023' ]);
+
+	CeL.assert([ ''.pad(5), '     ' ],'null string');
+
+	node_info('Test: pad(): basic test');
+	CeL.assert([ 'sa'.pad(5), '   sa' ]);
+	CeL.assert([ '23'.pad(5), '00023' ]);
+	CeL.assert([ '2347823'.pad(5), '2347823' ]);
+	CeL.assert([ '23'.pad(4, 's', 1), '23ss' ]);
+
+	node_info('Test: pad(): character.length > 1');
+	CeL.assert([ '23'.pad(6, '01'), '010123' ]);
+	CeL.assert([ '23'.pad(6, '012'), '012023' ]);
+	CeL.assert([ '2347823'.pad(5, '01'), '2347823' ]);
+	CeL.assert([ '23'.pad(6, '12', 1), '231212' ]);
+
+	node_info('Test: between(): character.length > 1');
+	CeL.assert([ '0123456789123456789'.between('567', '345'), '8912' ]);
+	CeL.assert([ '0123456789123456789'.between('567', '89'), '' ]);
+	CeL.assert([ '0123456789123456789'.between('54'), '' ]);
+	CeL.assert([ CeL.get_intermediate('0123456789123456789', '54'), undefined ]);
+	CeL.assert([ '0123456789123456789'.between('567'), '89123456789' ]);
+	CeL.assert([ '0123456789123456789'.between(null, '345'), '012' ]);
+
+	if (false) {
+		var a = new SubUint32Array(8, 7, 4), b = new Uint32Array(4);
+		a[6] = 3;
+		a[7] = 5;
+		a[8] = 4;
+		CeL.assert((a instanceof SubUint32Array) && (a instanceof Uint32Array),
+				'SubUint32Array');
+		CeL.assert(!a[8] && a[6] === 3 && a.length === 8 && a.last() === 5
+				&& !b.last, 'SubUint32Array');
+	}
+
+	node_info('Test: 檢驗準確度。');
+	CeL.set_debug(0);
+	[ 0, 1, 2, 3, 4, 8, 10, 127, 128, 129, 1023, 1024, 1025 ].forEach(function(
+			amount) {
+		CeL.debug('test ' + amount);
+		var array = this.array, i = array.length, test;
+		// 擴增 array。
+		array.length = amount;
+		for (; i < amount; i++)
+			// array = [ 0, 2, 4, 6, 8, .. ]
+			array[i] = i << 1;
+
+		if (amount > 0)
+			amount--;
+		// amount: array 之最大值。
+		for (i = 0, amount <<= 1; i < 2 + amount; i++) {
+			CeL.assert([ (i > amount ? amount : i) >> 1,
+					CeL.search_sorted_Array(array, i, {
+						found : true
+					}) ], 'search_sorted_Array(Array[ 0 - ' + (amount >> 1)
+					+ ' ], ' + i + ') = ' + CeL.search_sorted_Array(array, i, {
+						found : true
+					}) + ' !== ' + (i > amount ? amount : i) >> 1);
+		}
+	}, {
+		array : []
+	});
+	CeL.set_debug();
+
+	CeL.assert([ 1, CeL.search_sorted_Array([ 0, 2, 4 ], 3, {
+		found : true
+	}) ]);
+
+	CeL.assert([ 'r', [ 4, 7, 12 ].search_sorted(8, {
+		found : [ 'f', 'r', 'e' ]
+	}) ]);
+
+	CeL.assert([ undefined, [ 4, 7, 12 ].search_sorted(8, {
+		found : [ 'f', 'r', 'e' ],
+		// 以便未找到時回傳 undefined.
+		near : []
+	}) ]);
+}
+
+
 //============================================================================================================================================================
 
 
@@ -43,7 +129,7 @@ function test_console() {
 
 	CeL.assert([ text, ansi.text ]);
 
-	CeL.log('set style {Object}');
+	node_info('Test: SGR: set style {Object}');
 	ansi.style_at(3, {
 		bold : true,
 		fg : 32,
@@ -51,7 +137,7 @@ function test_console() {
 		bg : 'blue'
 	});
 
-	CeL.log('Test @ 3');
+	node_info('Test: SGR @ 3');
 	CeL.assert([ 2, ansi.style_at(3, true).foreground ]);
 	CeL.assert([ '1;32;44', ansi.style_at(3, true).toString(false) ]);
 	CeL.assert([ undefined, ansi.style_at(4, true) ]);
@@ -59,20 +145,20 @@ function test_console() {
 	//
 	ansi.style_at(4).toString(false) ]);
 
-	CeL.log('set style alias');
+	node_info('Test: SGR: set style alias');
 	ansi.style_at(5, 'fg=紫');
 
-	CeL.log('Test @ 5');
+	node_info('Test: SGR @ 5');
 	CeL.assert([ 4, ansi.style_at(5).background ]);
 	CeL.assert([ 'blue', SGR.color[ansi.style_at(5).background] ]);
 
-	CeL.log('set style multi-alias');
+	node_info('Test: SGR: set style multi-alias');
 	ansi.style_at(7, '5;-bold');
 
 	CeL.assert([ true, ansi.style_at(8).blink ], '(8).blink');
 	CeL.assert([ false, ansi.style_at(9).bold ], '(9).bold');
 
-	CeL.log('Test all');
+	node_info('Test: SGR: Test all');
 	text = '012*[1;32;44m34*[1;35;44m56*[22;35;44;5m789';
 	CeL.assert([ text, ansi.toString() ]);
 	CeL.assert([ text, new SGR(text).toString() ]);
@@ -888,6 +974,8 @@ function test_CSV() {
 
 	node_info('test: 將 {Array|Object} 依設定轉成 CSV text。');
 
+	CeL.set_debug(0);
+
 	node_info('test: CSV basic');
 	CeL.to_CSV_String.config.line_separator="\n";
 	CeL.assert([CeL.to_CSV_String([["a","b"],[1,2],[3,4]]),'"a","b"\n"1","2"\n"3","4"']);
@@ -911,6 +999,8 @@ function test_CSV() {
 	CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4,t:5}},{has_title:1,select_column:['s','t']}),'"s","t"\n"2",""\n"4","5"']);
 	CeL.assert([CeL.to_CSV_String([["a","b","c"],[1,2,3],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"3","2"\n"5","4"']);
 	CeL.assert([CeL.to_CSV_String([["a","b","c"],[1,2],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"","2"\n"5","4"']);
+
+	CeL.set_debug();
 
 	// test CSV: All passed
 	node_info('Passed: CSV');
@@ -1165,7 +1255,7 @@ function test_check() {
 
 
 
-// ============================================================================================================================================================
+//============================================================================================================================================================
 
 
 function test_era() {
@@ -1177,18 +1267,20 @@ function test_era() {
 
 
 node_info.color = {
-	error : 'red',
-	test : 'green'
+	test : 'fg=yellow',
+	passed : 'fg=green;bg=white',
+	error : 'fg=red;bg=white'
 };
 
 function node_info(messages) {
 	var matched;
 	if (typeof messages === 'string'
-			&& (matched = messages.match(/^(Passed|Error|Test)([:\s].+)$/i))) {
+			&& (matched = messages.match(/^([a-z\d\-]+)([:\s].+)$/i))) {
 		messages = [
 				'',
-				'fg=' + (node_info.color[matched[1].toLowerCase()] || 'blue')
-						+ ';bg=white', matched[1], '-fg;-bg', matched[2] ];
+				node_info.color[matched[1].toLowerCase()]
+						|| 'fg=black;bg=white', matched[1], '-fg;-bg',
+				matched[2] ];
 	}
 	return CeL.info(new CeL.SGR(messages).toString());
 }
@@ -1201,6 +1293,8 @@ function do_test() {
 */
 	// 測試期間時需要用到的功能先作測試。
 	'interact.console', test_console,
+	// 基本的功能先作測試。
+	'data.native', test_native,
 	//
 	[ 'data.math.rational', 'data.math.quadratic' ], test_math,
 	//

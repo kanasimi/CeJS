@@ -87,19 +87,9 @@ function subscript_integer() {
  * 效能測試:與 "return n > 9 ? n : '0' + n;" 相較。
  * 
  * @example <code>
- * CeL.assert([CeL.pad(23,5),'00023']);
- * //	null string
- * CeL.assert([''.pad(5),'     ']);
- * //	basic test
- * CeL.assert(['sa'.pad(5),'   sa']);
- * CeL.assert(['23'.pad(5),'00023']);
- * CeL.assert(['2347823'.pad(5),'2347823']);
- * CeL.assert(['23'.pad(4,'s',1),'23ss']);
- * //	character.length > 1
- * CeL.assert(['23'.pad(6,'01'),'010123']);
- * CeL.assert(['23'.pad(6,'012'),'012023']);
- * CeL.assert(['2347823'.pad(5,'01'),'2347823']);
- * CeL.assert(['23'.pad(6,'12',1),'231212']);
+
+// More examples: see /_test suite/test.js
+
  * </code>
  * 
  * @param {String}string
@@ -902,12 +892,7 @@ function codePoints() {
  * 
  * @example <code>
 
-CeL.assert([ '0123456789123456789'.between('567', '345'), '8912' ]);
-CeL.assert([ '0123456789123456789'.between('567', '89'), '' ]);
-CeL.assert([ '0123456789123456789'.between('54'), '' ]);
-CeL.assert([ CeL.get_intermediate([ '0123456789123456789', '54' ])[3], -1 ]);
-CeL.assert([ '0123456789123456789'.between('567'), '89123456789' ]);
-CeL.assert([ '0123456789123456789'.between(null, '345'), '012' ]);
+// More examples: see /_test suite/test.js
 
  * </code>
  * 
@@ -948,12 +933,7 @@ function get_intermediate_Array(data) {
  * 
  * @example <code>
 
-CeL.assert([ '0123456789123456789'.between('567', '345'), '8912' ]);
-CeL.assert([ '0123456789123456789'.between('567', '89'), '' ]);
-CeL.assert([ '0123456789123456789'.between('54'), '' ]);
-CeL.assert([ CeL.get_intermediate('0123456789123456789', '54'), undefined ]);
-CeL.assert([ '0123456789123456789'.between('567'), '89123456789' ]);
-CeL.assert([ '0123456789123456789'.between(null, '345'), '012' ]);
+// More examples: see /_test suite/test.js
 
  * </code>
  * 
@@ -1774,53 +1754,6 @@ set_method(Array, {
 });
 
 
-
-/**
- * <code>
-
-// 檢驗準確度。
-[ 0, 1, 2, 3, 4, 8, 10, 127, 128, 129, 1023, 1024, 1025 ].forEach(function(
-		amount) {
-	CeL.log('test ' + amount);
-	var array = this.array, i = array.length, test;
-	// 擴增 array。
-	array.length = amount;
-	for (; i < amount; i++)
-		// array = [ 0, 2, 4, 6, 8, .. ]
-		array[i] = i << 1;
-
-	if (amount > 0)
-		amount--;
-	// amount: array 之最大值。
-	for (i = 0, amount <<= 1; i < 2 + amount; i++) {
-		CeL.assert([ (i > amount ? amount : i) >> 1,
-				search_sorted_Array(array, i, {
-					found : true
-				}) ], 'search_sorted_Array(Array[ 0 - ' + (amount >> 1)
-				+ ' ], ' + i + ') = ' + search_sorted_Array(array, i, {
-					found : true
-				}) + ' !== ' + (i > amount ? amount : i) >> 1);
-	}
-}, {
-	array : []
-});
-
-CeL.assert([ 1, search_sorted_Array([ 0, 2, 4 ], 3, {
-	found : true
-}) ]);
-
-CeL.assert([ 'r', [ 4, 7, 12 ].search_sorted(8, {
-	found : [ 'f', 'r', 'e' ]
-}) ]);
-
-CeL.assert([ undefined, [ 4, 7, 12 ].search_sorted(8, {
-	found : [ 'f', 'r', 'e' ],
-	// 以便未找到時回傳 undefined.
-	near : []
-}) ]);
-
- </code>
- */
 
 /**
  * 以二分搜尋法(binary search)搜尋已排序的 array。<br />
