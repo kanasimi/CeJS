@@ -839,7 +839,7 @@ get_URI = get_URI;
  * 
  * @since 2009/10/18-19 22:09:49	main<br />
  *        2009/10/20 22:40:33	to function<br />
- *        2012/3/31 21:19:52	rewrite. get more data of video.
+ *        2012/3/31 21:19:52	refactoring 重構. get more data of video.
  * 
  * @see <a href="http://kej.tw/flvretriever/youtube.php" accessdate="2012/3/31 17:10">Kej's FLV Retriever</a>,
  *      <a href="http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/10404/youtube-blocked-httpyoutubecomgetvideo" accessdate="2012/3/31 21:20">Youtube blocked http://youtube.com/get_video | LongTail Video | Home of the JW Player</a>,

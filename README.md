@@ -13,8 +13,8 @@ For further introduction, please see [wiki](https://github.com/kanasimi/CeJS/wik
 ## Demo
 See [demo page](http://lyrics.meicho.com.tw/lib/JS/_test suite/demo.htm).
 
-*The page usually needs 10 to 20 seconds to load.*
-*由於頻寬不足，加上載入時須做初始化，本頁面在載入時得稍微等一下。*
+* The page usually needs 10 to 20 seconds to load.*
+* 由於頻寬不足，加上載入時須做初始化，本頁面在載入時得稍微等一下。*
 
 ## Requirements and dependencies
 * 本 library 須使用新一點的瀏覽器/執行環境。

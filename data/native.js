@@ -192,7 +192,7 @@ parse_function = function parse_function(function_name, flag) {
 			&& !(function_name = library_namespace.get_various(function_name)))
 		return;
 
-	var fs = String(function_name), m = fs.match(/^function[\s\n]+(\w*)[\s\n]*\(([\w,\s\n]*)\)[\s\n]*\{[\s\n]*([\s\S]*)[\s\n]*\}[\s\n]*$/);
+	var fs = String(function_name), m = fs.match(library_namespace.PATTERN_function);
 	//library_namespace.debug(typeof function_name + '\n' + fs + '\n' + m);
 
 	// detect error, 包含引數
@@ -1518,20 +1518,66 @@ parse_number = function(number) {
 };
 
 
-set_method(Object, {
-	// for Object.clone()
-	clone: function(object, deep) {
-		// for read-only??
-		// return Object.create(object);
+/**
+ * filter object. .map() of {Object}<br />
+ * for Object.filter()
+ * 
+ * @param {Object}object
+ *            object to filter
+ * @param {Function}filter
+ *            callback/receiver to filter the value. <br />
+ *            filter(value, key, object) is true: will be preserved.
+ * 
+ * @returns filtered object
+ */
+function Object_filter(object, filter) {
+	if (typeof filter !== 'function' || typeof object !== 'object')
+		return object;
 
-		if (deep)
-			// @see http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object
-			return JSON.parse(JSON.stringify(object));
-		// shallow clone Object.
-		return Object.assign(Object.create(
-			// copy prototype
-			Object.getPrototypeOf(object)), object);
+	var key, delete_keys = [];
+	for (key in object) {
+		if (!filter(object[key], key, object))
+			// 在這邊 delete object[key] 怕會因執行環境之不同實作方法影響到 text 的結構。
+			delete_keys.push(key);
 	}
+
+	if (delete_keys.length > 0)
+		delete_keys.forEach(function(key) {
+			delete object[key];
+		});
+}
+
+
+/**
+ * clone object.<br />
+ * for Object.clone()
+ * 
+ * @param {Object}object
+ *            object to clone
+ * @param {Boolean}deep
+ *            deep clone
+ * 
+ * @returns {Object}cloned object
+ */
+function Object_clone(object, deep) {
+	// for read-only??
+	// return Object.create(object);
+
+	if (deep)
+		// @see
+		// http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object
+		return JSON.parse(JSON.stringify(object));
+
+	// shallow clone Object.
+	return Object.assign(Object.create(
+	// copy prototype
+	Object.getPrototypeOf(object)), object);
+}
+
+
+set_method(Object, {
+	filter : Object_filter,
+	clone : Object_clone
 });
 
 

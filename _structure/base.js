@@ -876,7 +876,7 @@ function (global) {
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 	/**
-	 * 檢測 Web browser / engine 相容性。
+	 * 檢測 Web browser / engine 相容性，runtime environment 執行環境。
 	 * 
 	 * @param {String|Object}key
 	 *            Web browser / engine name.
@@ -921,6 +921,14 @@ function (global) {
 		return false;
 	};
 
+	platform.toString = function() {
+		return platform.browser + ' ' + platform.version;
+	};
+
+	platform.is_Windows = function() {
+		return platform.OS && platform.OS.toLowerCase().indexOf('win') === 0;
+	};
+
 	if (is_WWW)
 		(function() {
 			// e.g., 'Win32'
@@ -959,14 +967,6 @@ function (global) {
 				// Firefox: Gecko
 				platform.engine = tmp;
 		})();
-
-	platform.is_Windows = function() {
-		return platform.OS && platform.OS.toLowerCase().indexOf('win') === 0;
-	};
-
-	platform.toString = function() {
-		return platform.browser + ' ' + platform.version;
-	};
 
 	_.platform = platform;
 
@@ -1435,7 +1435,7 @@ OS='UNIX'; // unknown
 	 * @returns {Number} It's now in what debug level (Integer).
 	 */
 	is_debug = function (debug_level) {
-		return typeof debug_level === 'undefined' ? debug || 0
+		return typeof debug_level !== 'number' ? debug || 0
 				: debug >= debug_level;
 	};
 
@@ -1503,7 +1503,11 @@ OS='UNIX'; // unknown
 	// for JScript<=5
 	try {
 		// ^\s*: JScript 6-9 native object 需要這個。
-		function_name_pattern = new RegExp('^\s*function[\\s\\n]+(\\w+)[\\s\\n]*\\(');
+		//function_name_pattern = new RegExp('^\s*function[\\s\\n]+(\\w+)[\\s\\n]*\\(');
+		_.PATTERN_function = function_name_pattern =
+		// [ all, function name, function arguments, function body ]
+		/^\s*function(?:[\s\n]+([^\s\n]*?)[\s\n]*)?\([\s\n]*([^)]*?)[\s\n]*\)[\s\n]*{[\s\n]*([\s\S]*)[\s\n]*}[\s\n;]*$/;
+
 	} catch (e) {
 		function_name_pattern = function emulate_function_name(fs) {
 			fs = String(fs);
@@ -1531,7 +1535,7 @@ OS='UNIX'; // unknown
 	}
 
 	/**
-	 * 獲得函數名
+	 * 獲得函數名。
 	 * 
 	 * @param {Function}fr
 	 *            function reference
@@ -1922,6 +1926,7 @@ OS='UNIX'; // unknown
 
 	// ^\s*: JScript 6-9 native object 需要這個。
 	// console.log() @ node.js: "function () {..}"
+	// TODO: see ((function_name_pattern)) above
 	var native_pattern = /^\s*function\s(\w*)\s*\(\s*\)\s*{\s*\[native code\]\s*}\s*$/;
 
 	_.is_native_Function = function(variable) {
@@ -1932,7 +1937,7 @@ OS='UNIX'; // unknown
 
 	/**
 	 * 若 variable 為 Standard Built-in ECMAScript Objects / native object /
-	 * native ECMASCript object, 則回傳其 name。<br />
+	 * native ECMASCript object, 則回傳其 name / Constructor name。<br />
 	 * 現行實作並未有標準支持！
 	 * 
 	 * @param variable
@@ -2025,7 +2030,7 @@ OS='UNIX'; // unknown
 	 * @returns target name-space
 	 * @see
 	 * @since 2014/5/5<br />
-	 *        2014/5/6 rewrite
+	 *        2014/5/6 refactoring 重構
 	 */
 	function set_method(name_space, properties, filter, attributes) {
 		if (!attributes)

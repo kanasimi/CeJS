@@ -559,7 +559,7 @@ if(disabledKM){
  * 			{Number} type: 0: hidden(→none), 1: show(→block), 2||undefined: switch, others: get status only with no change
  * 			{String} type: set CSS: display type: none, '', block, inline, list-item. 其他恐造成 error?
  * @return	display status
- * @since	2010/4/1 10:24:43 rewrite
+ * @since	2010/4/1 10:24:43 refactoring 重構
  * @see
  * http://www.w3schools.com/CSS/pr_class_visibility.asp
  * http://www.w3schools.com/css/pr_class_display.asp
@@ -4683,7 +4683,7 @@ _// JSDT:_module_
  * var oCssRulers = document.styleSheets[0].cssRulers || document.styleSheets[0].rulers;
  * (前者是DOM方法，後者是IE私有方法)
  * alert(oCssRulers[0].style.display);
- * @since	2010/4/2 00:14:09	rewrite
+ * @since	2010/4/2 00:14:09	refactoring 重構
  * @_memberOf	_module_
  */
 get_style = function(element, name, not_computed) {

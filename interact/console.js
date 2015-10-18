@@ -777,8 +777,12 @@ if (typeof CeL === 'function')
 				 * Initiator.<br />
 				 * "\x1b" : [Esc]<br />
 				 * some 論壇 (BBS): 按 Esc 兩次, '\x1b\x1b['。
+				 * 
+				 * @see https://en.wikipedia.org/wiki/ANSI_escape_code#Sequence_elements
 				 */
 				CSI : '\x1b[',
+				// do not modify this value!
+				default_CSI : '\x1b[',
 				separator : ';',
 				end_code : 'm',
 

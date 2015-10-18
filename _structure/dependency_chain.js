@@ -804,7 +804,7 @@ if (typeof CeL === 'function')
 
 						if (this.has(hash, OP_HASH)) {
 							var list = hash_map[hash],
-							// 實際上應該以 SameValue Algorithm 判斷。
+							// 實際上應該以 SameValue Algorithm, Object.is() 判斷。
 							// NaN 等於 NaN, -0 不等於 +0.
 							index = list.indexOf(key);
 							if (library_namespace.is_debug(6)

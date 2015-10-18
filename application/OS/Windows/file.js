@@ -2204,7 +2204,7 @@ _.path_tag = path_tag;
  * 
  * @since 2011/12/26 11:25:04<br />
  *        2012/11/7 23:40:15 add file list.<br />
- *        2012/11/12 0:35:50 rewrite for sub function.<br />
+ *        2012/11/12 0:35:50 refactoring 重構 for sub function.<br />
  *        2012/11/12 17:48:34 置入 CeL.application.OS.Windows.file.
  */
 function show_path(path) {

@@ -3,7 +3,7 @@
  * 
  * @fileoverview 本檔案用於在 npm 中測試本 library，透過重複執行自動化測試，驗證輸出是否符合預期。
  * 
- * TODO: unit test 單元測試, 測試涵蓋率, 整合測試
+ * TODO: 測試涵蓋率, 整合測試
  * 
  * @example <code>
 

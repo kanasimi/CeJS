@@ -288,6 +288,7 @@ set_method(Object, {
 	},
 
 	// Object.is(): Return SameValue(value1, value2).
+	// 以 SameValue Algorithm 判斷。
 	is : function is(value1, value2) {
 		return value1 === value2 ? value1 !== 0
 		// check +0 and -0
@@ -993,7 +994,7 @@ if (!('flags' in RegExp.prototype)
  * http://blog.stevenlevithan.com/archives/fixing-javascript-regexp
  * 
  * @since 2010/1/1 19:03:40
- * 2015/1/28 17:43:0	rewrite
+ * 2015/1/28 17:43:0	refactoring 重構
  * 
  * @example <code>
 

@@ -68,7 +68,7 @@ if (false) {
 	 * 將 from_name_space 下的 variable_set 延展/覆蓋到 name_space。<br />
 	 * 
 	 * @remark
-	 * MooTools 1.4.5 會 rewrite 此函數!
+	 * MooTools 1.4.5 會 overwrite 此函數!
 	 * 
 	 * @param	{Object|Array|String}variable_set	欲延展之 variable set.
 	 * @param	{Object|Function}name_space	target name-space. extend to what name-space.
@@ -792,34 +792,40 @@ if (false) {
 
 	//----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
-	// we only need simple JSON.parse @ .get_script_base_path
-	var parse_JSON = function(text, reviver) {
-		try {
-			//	borrow from Google, jQuery
-			//	TODO: 對 String 只是做簡單處理，勢必得再加強。
-			var o = ((new Function("return({o:" + text + "\n})"))()).o, i, v, to_delete = [];
-			if (_.is_Object(o)) {
-				if (_.is_Function(reviver)) {
-					for (i in o)
-						if (typeof (v = reviver(i, o[i])) === 'undefined')
-							// 在這邊 delete o[i] 怕會因不同實作方法影響到 o 的結構。
-							to_delete.push(i);
-						else if (o[i] !== v)
-							o[i] = v;
+	/**
+	 * 較為安全的執行，可當作 JSON.parse()。<br />
+	 * we only need simple JSON.parse @ .get_script_base_path
+	 * 
+	 * @param {String}text
+	 *            string to evaluate
+	 * @param {Boolean}cache_error
+	 *            是否 cache error.<br />
+	 *            Warning: deprecated. 請自行 cache.
+	 * @param {Function}[filter]
+	 *            callback/receiver to filter the value<br />
+	 *            Warning: deprecated. Please use Object.filter () instead.
+	 * 
+	 * @returns evaluated value
+	 */
+	function eval_parse(text, cache_error, filter) {
+		if (cache_error)
+			try {
+				return eval_parse(text, filter);
+			} catch (e) {
+				if (_.is_debug(2))
+					_.err('eval_parse: SyntaxError: [' + text + ']');
+				// throw e;
+				return;
+			}
 
-					if (to_delete.length)
-						for (i in to_delete)
-							delete o[to_delete[i]];
-				}
-				return o;
-			} else
-				return {};
-		} catch (e) {
-			if (_.is_debug(2))
-				_.err('parse_JSON: SyntaxError: [' + text + ']');
-			//throw e;
-		}
-	};
+		if (text)
+			// borrow from Google, jQuery
+			// TODO: 對 {String}text 只是做簡單處理，勢必得再加強。
+			text = ((new Function("return({o:" + text + "\n})"))()).o;
+
+		return text;
+	}
+	_.parse_JSON = _.eval_parse = eval_parse;
 	if (typeof JSON === 'object' && JSON.parse)
 		(function() {
 			var t;
@@ -827,12 +833,11 @@ if (false) {
 				t = JSON.parse('{"V":"1","v":1}');
 			} catch (e) {}
 			if (_.is_Object(t) && t.V === '1' && t.v === 1)
-				parse_JSON = JSON.parse;
+				_.parse_JSON = JSON.parse;
 			else
 				// 未正確作動。
 				_.err('It seems the JSON.parse() does not work properly');
 		})();
-	_.parse_JSON = parse_JSON;
 
 
 	//	see Array.from of data.code.compatibility.
@@ -962,7 +967,7 @@ if (false) {
 					//	If there is a src attribute, the element must be either empty or contain only script documentation that also matches script content restrictions.
 					if (matched = config.match(/\/\*([\s\S]+?)\*\//))
 						config = matched[1];
-					if (config = parse_JSON(config.replace(/[\s\r\n]*\/\//g, '')))
+					if (config = _.parse_JSON(config.replace(/[\s\r\n]*\/\//g, '')))
 						env.script_config = config;
 				}
 			} catch (e) {
