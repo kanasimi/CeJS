@@ -1156,6 +1156,53 @@ if (!CeL.Log) {
 	// --------------------------------------------------------------------------------------------
 	// front ends of log function
 
+	// SGR: cache for CeL.SGR
+	var SGR, to_SGR =
+	/**
+	 * 處理 console 之 message。<br />
+	 * 若無法執行 new SGR()，則會將 messages 轉成 plain text。實作部分詳見 SGR。
+	 * 
+	 * @param {Array}messages
+	 *            messages with style. 將當作 new SGR() 之 arguments。
+	 * 
+	 * @returns {String}formatted messages
+	 */
+	function to_SGR(messages) {
+		return !SGR && !(SGR = CeL.SGR)
+		// 注意: 在 call stack 中有 SGR 時會造成:
+		// RangeError: Maximum call stack size exceeded
+		// 因此不能用於測試 SGR 本身! 故須避免之。
+		// CeL.is_debug(3): assert: SGR 在這 level 以上才會呼叫 .debug()。
+		// TODO: 檢測 call stack。
+		|| CeL.is_debug(3)
+		// 若 SGR.CSI 被改過，則即便顯示亦無法得到預期之結果，不如跳過。
+		|| SGR.CSI !== SGR.default_CSI ? SGR_to_plain(messages)
+		// 顯示具 color 的 messages。
+		: new SGR(messages).toString();
+	};
+
+	var SGR_to_plain =
+	/**
+	 * 將 messages 轉成 plain text。
+	 * 
+	 * @param {Array}messages
+	 *            messages with style. 將當作 new SGR() 之 arguments。
+	 * 
+	 * @returns {String}plain text messages
+	 */
+	function SGR_to_plain(messages) {
+		messages.forEach(function(message, index) {
+			if (index % 2 === 1)
+				messages[index] = '';
+		});
+		return messages.join('');
+	};
+
+	if (CeL.is_WWW())
+		to_SGR = SGR_to_plain;
+	else
+		to_SGR.to_plain = SGR_to_plain;
+
 	/**
 	 * 在 node.js v0.11.16 中，不使用 var 的模式設定 function，會造成:<br />
 	 * In strict mode code, functions can only be declared at top level or immediately within another function.
@@ -1213,14 +1260,7 @@ if (!CeL.Log) {
 					span : caller,
 					'class' : 'debug_caller'
 				}, ': ', message ] :
-				// 注意: 這在 call stack 中有 SGR 時會造成:
-				// RangeError: Maximum call stack size exceeded
-				// 因此不能用於測試 SGR 本身!
-				// CeL.is_debug(3): assert: SGR 在這 level 以上才會呼叫 .debug()。
-				// TODO: 檢測 call stack。
-				!CeL.is_debug(3) && CeL.SGR ? new CeL.SGR([ '', 'fg=yellow',
-						caller + ': ', '-fg', message ]).toString() : caller + ': '
-						+ message;
+				to_SGR([ '', 'fg=yellow', caller + ': ', '-fg', message ]);
 			}
 
 			CeL.Log.log.call(CeL.Log, message, clean, {
@@ -1301,6 +1341,7 @@ if (!CeL.Log) {
 	 *            {String}name: test name 此次測試名稱。,<br />
 	 *            {String}NG: meaning of failure,<br />
 	 *            {String}OK: meaning of passed,<br />
+	 *            {String}hide_OK: false: 當 passed 時不顯示,<br />
 	 *            {Boolean}ignorable: false / need 手動 check,<br />
 	 *            {String|Object}type: expected type,<br />
 	 *            {Boolean}no_cache: false,<br />
@@ -1440,10 +1481,7 @@ if (!CeL.Log) {
 			: '[' + message + ']');
 		}
 
-		var test_name = options.name ? quote(options.name) : 'Assertion',
-		//
-		SGR = !CeL.is_WWW() && !CeL.is_debug(3)
-				&& CeL.SGR.CSI === CeL.SGR.default_CSI && CeL.SGR;
+		var test_name = options.name ? quote(options.name) : 'Assertion';
 
 		// --------------------------------
 		// failed.
@@ -1455,7 +1493,7 @@ if (!CeL.Log) {
 			if (!error_message) {
 				error_message = [ test_name,
 				// if fault, message: 失敗時所要呈現訊息。
-				SGR ? new SGR([ ' ', 'fg=red', 'failed', '-fg', ' ' ]) : ' failed ' ];
+				to_SGR([ ' ', 'fg=red', 'failed', '-fg', ' ' ]) ];
 				if (type)
 					error_message.push('type of ' + quote(condition) + ' is not ('
 							+ type + ')');
@@ -1493,14 +1531,13 @@ if (!CeL.Log) {
 		// --------------------------------
 		// passed. 無錯誤發生。
 
-		if (CeL.is_debug()) {
+		if (!options.hide_OK && CeL.is_debug()) {
 			var passed_message = options.OK;
 			if (!passed_message)
 				passed_message = [
 						test_name,
 						//
-						SGR ? new SGR([ ' ', 'fg=green', 'passed', '-fg', ' ' ])
-								: ' passed ',
+						to_SGR([ ' ', 'fg=green', 'passed', '-fg', ' ' ]),
 						//
 						quote(condition[0], true) ].join('');
 			CeL.debug(passed_message, 1,
@@ -1529,6 +1566,8 @@ if (!CeL.Log) {
 
 	 * </code>
 	 * 
+	 * @param {String}[test_name]
+	 *            test name 此次測試名稱。
 	 * @param {Array}conditions
 	 *            condition list passed to assert(): [ [ condition / test value,
 	 *            options ], [], ... ].
@@ -1542,7 +1581,13 @@ if (!CeL.Log) {
 	 * 
 	 * @since 2012/9/19 00:20:49, 2015/10/18 23:8:9 refactoring 重構
 	 */
-	function log_front_end_test(conditions, options) {
+	function log_front_end_test(test_name, conditions, options) {
+		if (Array.isArray(test_name) && !options) {
+			// shift: 跳過 test_name。
+			options = conditions;
+			conditions = test_name;
+		}
+
 		if (!Array.isArray(conditions)) {
 			throw new Error(CeL.Class + '.test: PLease input {Array}!');
 			return;
@@ -1553,7 +1598,7 @@ if (!CeL.Log) {
 			// assert: input [ condition / test value, options ]
 			conditions = [ conditions ];
 
-		var test_name, assert = CeL.assert,
+		var assert = CeL.assert,
 		// default options for running CeL.assert().
 		default_options;
 
@@ -1563,7 +1608,8 @@ if (!CeL.Log) {
 					callback : options
 				};
 			} else if (typeof options === 'string') {
-				test_name = options;
+				if (!test_name)
+					test_name = options;
 				options = undefined;
 			} else if ('options' in options)
 				default_options = options.options;
@@ -1587,6 +1633,7 @@ if (!CeL.Log) {
 			try {
 				result = typeof condition === 'function' ? condition(recorder)
 						: assert(condition[0], Object.assign({
+							hide_OK : true,
 							no_cache : true
 						}, condition[1], default_options));
 			} catch (e) {
@@ -1608,20 +1655,23 @@ if (!CeL.Log) {
 		});
 
 		// --------------------------------
-		// report.
+		// Testing report.
 		if (options && typeof options.callback === 'function')
 			options.callback(recorder, test_name);
 
-		test_name = test_name ? [ 'Testing [' + test_name + ']: ' ] : [];
+		test_name = test_name ? [ to_SGR([ 'Test [', 'fg=green;bg=white',
+				test_name, '-fg;-bg', ']: ' ]) ] : [];
 		function join() {
 			if (recorder.ignored.length > 0)
-				test_name.push(', ' + recorder.ignored.length + ' ignored');
+				test_name.push(to_SGR([ ', ' + recorder.ignored.length + ' ',
+						'fg=yellow', 'ignored', '-fg' ]));
 			return test_name.join('') + '.';
 		}
 
 		if (recorder.failed.length === 0 && recorder.fatal.length === 0) {
 			// all passed
-			test_name.push('All ' + recorder.passed.length + ' passed');
+			test_name.push(to_SGR([ 'All ' + recorder.passed.length + ' ',
+					'fg=green', 'passed', '-fg' ]));
 
 			CeL.info(join());
 			return false;
@@ -1633,10 +1683,11 @@ if (!CeL.Log) {
 		+ (recorder.failed.length + recorder.passed.length));
 		if (recorder.failed.length + recorder.passed.length !== recorder.all.length)
 			test_name.push('/' + recorder.all.length);
-		test_name.push(' failed');
+		test_name.push(to_SGR([ ' ', 'fg=red', 'failed', '-fg' ]));
 		if (recorder.fatal.length > 0)
 			// fatal exception error 致命錯誤
-			test_name.push(', ' + recorder.fatal.length + ' fatal');
+			test_name.push(to_SGR([ ', ' + recorder.fatal.length + ' ',
+					'fg=red;bg=white', 'fatal', '-fg' ]));
 
 		if (recorder.passed.length) {
 			CeL.warn(join());
@@ -1646,6 +1697,7 @@ if (!CeL.Log) {
 
 		return recorder.failed.length + recorder.fatal.length;
 	}
+
 
 	Object.assign(CeL, {
 		log : o[1],

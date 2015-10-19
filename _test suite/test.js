@@ -22,6 +22,7 @@
 
 'use strict';
 
+/** {Integer}test level */
 var test_level = 1;
 
 // index.js
@@ -967,74 +968,86 @@ function test_CSV() {
 
 	node_info('test: 讀入 CSV 檔。');
 
-	node_info('test: CSV basic');
-	CeL.assert([CeL.parse_CSV('"a","b""c"\n_1,_2\n_3,_4\n_5,_6\n')[0][1],'b"c']);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6\n')[2][1],'_4']);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6')[2][1],'_4']);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{select_column:true})[2].b,'_4']);
+	CeL.test('CSV basic', [
+		[[CeL.parse_CSV('"a","b""c"\n_1,_2\n_3,_4\n_5,_6\n')[0][1],'b"c']],
+		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6\n')[2][1],'_4']],
+		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6')[2][1],'_4']],
+		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{select_column:true})[2].b,'_4']],
+	]);
 
-	node_info('test: CSV title');
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{has_title:1}).index.b,1]);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{has_title:1}).title.join('|'),'a|b']);
+	CeL.test('CSV title', [
+		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{has_title:1}).index.b,1]],
+		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{has_title:1}).title.join('|'),'a|b']],
+	]);
 
-	node_info('test: CSV skip_title');
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{skip_title:1}).join('|'),'a,b|_1,_2|_3,_4|_5,_6']);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{skip_title:1,has_title:1}).join('|'),'_1,_2|_3,_4|_5,_6']);
+	CeL.test('CSV skip_title', [
+		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{skip_title:1}).join('|'),'a,b|_1,_2|_3,_4|_5,_6']],
+		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{skip_title:1,has_title:1}).join('|'),'_1,_2|_3,_4|_5,_6']],
+	]);
 
-	node_info('test: CSV handle_array');
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[2][0],'_3']);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[2][1],':_4']);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']);
+	CeL.test('CSV handle_array', [
+  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[2][0],'_3']],
+  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[2][1],':_4']],
+  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']],
+  		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']],
+  	]);
 
-	CeL.set_debug(0);
+  	CeL.set_debug(0);
 
-	node_info('test: CSV no_text_qualifier');
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_2']);
-	CeL.assert([CeL.parse_CSV('a,b\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_1']);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:1})[1][0],'_1']);
+  	CeL.test('CSV no_text_qualifier', [
+  		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_2']],
+  		[[CeL.parse_CSV('a,b\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_1']],
+  		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:1})[1][0],'_1']],
+  	]);
 
-	node_info('test: CSV row_limit');
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1})[1].join('|'),'_1|_2']);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1})[2],undefined]);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1,to_Object:1})._2.join('|'),'_1|_2']);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1,to_Object:1})._3,undefined]);
+  	CeL.test('CSV row_limit', [
+  		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1})[1].join('|'),'_1|_2']],
+  		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1})[2],undefined]],
+  		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1,to_Object:1})._2.join('|'),'_1|_2']],
+  		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1,to_Object:1})._3,undefined]],
+  	]);
 
-	node_info('test: CSV to_Object');
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1})._4.join('|'),'_3|_4']);
-	CeL.assert([CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1,select_column:true})._4.b,'_4']);
+  	CeL.test('CSV to_Object', [
+  		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1})._4.join('|'),'_3|_4']],
+  		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1,select_column:true})._4.b,'_4']],
+  	]);
 
-	node_info('test: 將 {Array|Object} 依設定轉成 CSV text。');
+  	node_info('test: 將 {Array|Object} 依設定轉成 CSV text。');
 
-	node_info('test: CSV basic');
-	CeL.to_CSV_String.config.line_separator="\n";
-	CeL.assert([CeL.to_CSV_String([["a","b"],[1,2],[3,4]]),'"a","b"\n"1","2"\n"3","4"']);
-	CeL.assert([CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]]),'"a","b"\n"""e""","2"\n"3","4"']);
-	CeL.assert([CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]],{no_text_qualifier:'auto'}),'a,b\n"""e""",2\n3,4']);
-	CeL.assert([CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]],{no_text_qualifier:true}),'a,b\n"e",2\n3,4']);
+  	CeL.to_CSV_String.config.line_separator="\n";
+  	CeL.test('CSV basic', [
+  		[[CeL.to_CSV_String([["a","b"],[1,2],[3,4]]),'"a","b"\n"1","2"\n"3","4"']],
+  		[[CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]]),'"a","b"\n"""e""","2"\n"3","4"']],
+  		[[CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]],{no_text_qualifier:'auto'}),'a,b\n"""e""",2\n3,4']],
+  		[[CeL.to_CSV_String([["a","b"],['"e"',2],[3,4]],{no_text_qualifier:true}),'a,b\n"e",2\n3,4']],
+  	]);
 
-	node_info('test: CSV Object');
-	CeL.assert([CeL.to_CSV_String({a:[1,2],b:[3,4]}),'"1","2"\n"3","4"']);
-	CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{t:3,u:4}}),'"1","2"\n"3","4"']);
+  	CeL.test('CSV Object', [
+  		[[CeL.to_CSV_String({a:[1,2],b:[3,4]}),'"1","2"\n"3","4"']],
+  		[[CeL.to_CSV_String({a:{r:1,s:2},b:{t:3,u:4}}),'"1","2"\n"3","4"']],
+  	]);
 
-	node_info('test: CSV select_column');
-	CeL.assert([CeL.to_CSV_String([["a","b"],[1,2],[3,4]],{select_column:1}),'"b"\n"2"\n"4"']);
-	CeL.assert([CeL.to_CSV_String([["a","b","c"],[1,2,3],[3,4,5]],{select_column:[2,1]}),'"c","b"\n"3","2"\n"5","4"']);
-	CeL.assert([CeL.to_CSV_String({a:[1,2],b:[3,4]},{select_column:1}),'"2"\n"4"']);
-	CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4}},{select_column:'s'}),'"2"\n"4"']);
-	CeL.assert([CeL.to_CSV_String({a:{r:1,s:2,t:3},b:{r:3,s:4,t:5}},{select_column:['s','t']}),'"2","3"\n"4","5"']);
-	CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4,t:5}},{select_column:['s','t']}),'"2",""\n"4","5"']);
+  	CeL.test('CSV select_column', [
+  		[[CeL.to_CSV_String([["a","b"],[1,2],[3,4]],{select_column:1}),'"b"\n"2"\n"4"']],
+  		[[CeL.to_CSV_String([["a","b","c"],[1,2,3],[3,4,5]],{select_column:[2,1]}),'"c","b"\n"3","2"\n"5","4"']],
+  		[[CeL.to_CSV_String({a:[1,2],b:[3,4]},{select_column:1}),'"2"\n"4"']],
+  		[[CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4}},{select_column:'s'}),'"2"\n"4"']],
+  		[[CeL.to_CSV_String({a:{r:1,s:2,t:3},b:{r:3,s:4,t:5}},{select_column:['s','t']}),'"2","3"\n"4","5"']],
+  		[[CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4,t:5}},{select_column:['s','t']}),'"2",""\n"4","5"']],
+  	]);
 
-	node_info('test: CSV has_title');
-	CeL.assert([CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4,t:5}},{has_title:1,select_column:['s','t']}),'"s","t"\n"2",""\n"4","5"']);
-	CeL.assert([CeL.to_CSV_String([["a","b","c"],[1,2,3],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"3","2"\n"5","4"']);
-	CeL.assert([CeL.to_CSV_String([["a","b","c"],[1,2],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"","2"\n"5","4"']);
+  	CeL.test('CSV has_title', [
+  		[[CeL.to_CSV_String({a:{r:1,s:2},b:{r:3,s:4,t:5}},{has_title:1,select_column:['s','t']}),'"s","t"\n"2",""\n"4","5"']],
+  		[[CeL.to_CSV_String([["a","b","c"],[1,2,3],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"3","2"\n"5","4"']],
+  		[[CeL.to_CSV_String([["a","b","c"],[1,2],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"","2"\n"5","4"']],
+  	]);
 
 	CeL.set_debug();
 
 	// test CSV: All passed
 	node_info('Passed: CSV');
 }
+
 
 
 //============================================================================================================================================================
@@ -1265,7 +1278,7 @@ function test_date() {
 
 
 function test_check() {
-	CeL.test([
+	CeL.test('姓名 test', [
 		[[ CeL.parse_personal_name('歐陽司徒').名, '司徒' ], '解析姓名/人名'],
 		[[ CeL.parse_personal_name('歐陽佩君').姓, '歐陽' ], '解析姓名/人名'],
 		[[ CeL.parse_personal_name('歐陽佩君').名, '佩君' ], '解析姓名/人名'],
@@ -1280,9 +1293,8 @@ function test_check() {
 		[[ CeL.parse_personal_name('呂蕭').姓, '呂' ], '解析姓名/人名'],
 		[[ CeL.parse_personal_name('蕭呂').姓, '蕭' ], '解析姓名/人名'],
 		[[ CeL.parse_personal_name('林元').姓, '林' ], '解析姓名/人名'],
-	], '姓名 test');
+	]);
 
-	node_info('Passed: 姓名 test.');
 }
 
 
