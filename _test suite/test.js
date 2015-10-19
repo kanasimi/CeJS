@@ -1327,21 +1327,21 @@ function do_test() {
 	// 測試期間時需要用到的功能先作測試。
 	'interact.console', test_console,
 /*
+*/
 	// 基本的功能先作測試。
 	'data.native', test_native,
 	//
 	'data.date', test_date,
-*/
 	//
 	'data.check', test_check,
 /*
+*/
 	//
 	[ 'data.math.rational', 'data.math.quadratic' ], test_math,
 	//
 	'data.CSV', test_CSV,
 	//
 	'data.numeral', test_numeral,
-*/
 	//
 	//'data.date.era', test_era,
 	//
