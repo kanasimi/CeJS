@@ -1334,8 +1334,6 @@ function do_test() {
 	'data.date', test_date,
 	//
 	'data.check', test_check,
-/*
-*/
 	//
 	[ 'data.math.rational', 'data.math.quadratic' ], test_math,
 	//
@@ -1351,5 +1349,5 @@ function do_test() {
 }
 
 CeL.env.no_catch = true;
-CeL.set_debug(3);
+//CeL.set_debug(3);
 CeL.run([ 'application.debug', 'application.debug.log' ], do_test);
