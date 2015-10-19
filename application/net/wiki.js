@@ -3474,8 +3474,8 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 			&& options.section === 'new') {
 				// 無法以正常方式編輯，嘗試當作 Flow 討論頁面。
 				edit_topic(title, options.sectiontitle,
-				// [[mw:Flow]] 會自動簽名。
-				text.replace(/[\s\-]*~~~~[\s\-]*$/, ''), options.token, options, callback);
+				// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
+				text.replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''), options.token, options, callback);
 				return;
 			}
 			library_namespace.warn('wiki_API.edit: Error to edit [['

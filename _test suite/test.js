@@ -1265,20 +1265,22 @@ function test_date() {
 
 
 function test_check() {
-	CeL.assert([ CeL.parse_personal_name('歐陽司徒').名, '司徒' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('歐陽佩君').姓, '歐陽' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('歐陽佩君').名, '佩君' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('恒王岑').姓, '恒' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('恒岑王').姓, '恒' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('呂蕭王').姓, '呂蕭' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('呂王蕭').姓, '呂' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('林元月').名, '元月' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('歐陽林元月').姓, '歐陽林' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('歐陽林元月').多姓.join(','), '歐陽,林' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('林歐陽元月').多姓.join(','), '林,歐陽' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('呂蕭').姓, '呂' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('蕭呂').姓, '蕭' ], '解析姓名/人名');
-	CeL.assert([ CeL.parse_personal_name('林元').姓, '林' ], '解析姓名/人名');
+	CeL.test([
+		[[ CeL.parse_personal_name('歐陽司徒').名, '司徒' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('歐陽佩君').姓, '歐陽' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('歐陽佩君').名, '佩君' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('恒王岑').姓, '恒' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('恒岑王').姓, '恒' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('呂蕭王').姓, '呂蕭' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('呂王蕭').姓, '呂' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('林元月').名, '元月' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('歐陽林元月').姓, '歐陽林' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('歐陽林元月').多姓.join(','), '歐陽,林' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('林歐陽元月').多姓.join(','), '林,歐陽' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('呂蕭').姓, '呂' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('蕭呂').姓, '蕭' ], '解析姓名/人名'],
+		[[ CeL.parse_personal_name('林元').姓, '林' ], '解析姓名/人名'],
+	], '姓名 test');
 
 	node_info('Passed: 姓名 test.');
 }
@@ -1332,6 +1334,8 @@ function do_test() {
 	'data.date', test_date,
 	//
 	'data.check', test_check,
+/*
+*/
 	//
 	[ 'data.math.rational', 'data.math.quadratic' ], test_math,
 	//

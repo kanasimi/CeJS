@@ -1152,495 +1152,523 @@ if (!CeL.Log) {
 	//	在 CeL.log 被重新設定前先 cache 一下。
 	l = CeL.log && CeL.log.buffer;
 
+	// --------------------------------------------------------------------------------------------
+	// front ends of log function
+
+	//	致命錯誤。
+	function log_front_end_fatal(message, error_to_throw) {
+		// fatal: the most serious
+		try {
+			throw CeL.is_type(error_to_throw, 'Error') ? error_to_throw
+					: new Error(error_to_throw || 'Fatal error');
+		} catch (e) {
+			// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Error/Stack
+			CeL.err(e.stack ? message
+					+ '<br />stack:<div class="debug_stack">'
+					+ (typeof e.stack === 'string' ? e.stack.replace(/\n/g,
+							'<br />') : e.stack) + '</div>' : message);
+		}
+
+		if (typeof error_to_throw === 'undefined')
+			error_to_throw = message;
+
+		if (error_to_throw)
+			throw CeL.is_type(error_to_throw, 'Error') ? error_to_throw
+					: new Error(error_to_throw);
+	}
+
+	//	增加 debug 訊息。
+	function log_front_end_debug(message, level, caller, clean) {
+		// alert(CeL.is_debug() + ',' + l + '(' + (l === undefined) + '),' +
+		// message);
+		if (CeL.is_debug(level)) {
+			if (typeof message === 'function') {
+				// for .debug(function(){return some_function(..);}, 3);
+				message = 'function: [' + message + ']<br />return: [' + message()
+						+ ']';
+			}
+
+			if (!caller && has_caller) {
+				// TODO: do not use arguments
+				caller = caller !== arguments.callee
+						&& CeL.get_function_name(arguments.callee.caller);
+				// CeL.log(CeL.is_type(arguments.callee.caller));
+				// CeL.log(Array.isArray(caller));
+				// CeL.log(caller+': '+arguments.callee.caller);
+				// CeL.warn(CeL.debug);
+			}
+			if (caller) {
+				message = CeL.is_WWW() ? [ {
+					// (caller.charAt(0) === '.' ? CeL.Class + caller : caller)
+					span : caller,
+					'class' : 'debug_caller'
+				}, ': ', message ] :
+				// 注意: 這在 call stack 中有 SGR 時會造成:
+				// RangeError: Maximum call stack size exceeded
+				// 因此不能用於測試 SGR 本身!
+				// CeL.is_debug(3): assert: SGR 在這 level 以上才會呼叫 .debug()。
+				// TODO: 檢測 call stack。
+				!CeL.is_debug(3) && CeL.SGR ? new CeL.SGR([ '', 'fg=yellow',
+						caller + ': ', '-fg', message ]).toString() : caller + ': '
+						+ message;
+			}
+
+			CeL.Log.log.call(CeL.Log, message, clean, {
+				level : 'debug',
+				add_class : 'debug_' + (level || CeL.is_debug())
+			});
+		}
+	}
+
+	//	切換(顯示/隱藏)個別訊息。
+	function log_front_end_toggle_log(type, show) {
+		if (!type)
+			type = 'debug';
+		var hiding = type in CeL.Log.class_hide;
+		if (typeof show === 'undefined' || show && hiding || !show && !hiding)
+			try {
+				// need switch.
+				var style_sheet = document.styleSheets[0], selector = '.'
+						+ CeL.Log.className_set[type], CSS_index = hiding ? search_CSS_rule(
+						style_sheet, selector)
+						: undefined;
+				if (isNaN(CSS_index)) {
+					// assign a new index.
+					CSS_index = style_sheet.cssRules && style_sheet.cssRules.length
+							||
+							// IE6
+							style_sheet.rules && style_sheet.rules.length || 0;
+					CeL.debug('insert CSS index: ' + CSS_index, 2, 'toggle_log');
+					var style = 'display:none';
+					style_sheet.insertRule ?
+					// firefox, IE 必須輸入 index.
+					// <a
+					// href="https://developer.mozilla.org/en/DOM/CSSStyleSheet/insertRule"
+					// accessdate="2012/5/14 13:13">insertRule - MDN</a>
+					style_sheet
+							.insertRule(selector + '{' + style + ';}', CSS_index) :
+					// IE6:
+					// <a
+					// href="http://msdn.microsoft.com/en-us/library/aa358796%28v=vs.85%29.aspx"
+					// accessdate="2012/5/14 13:13">IHTMLStyleSheet::addRule method
+					// (Internet Explorer)</a>
+					style_sheet.addRule(selector, style, CSS_index);
+
+					// OK 之後才設定.
+					CeL.Log.class_hide[type] = CSS_index;
+
+				} else {
+					CeL.debug('delete CSS index: ' + CSS_index, 2, 'toggle_log');
+					style_sheet.deleteRule ? style_sheet.deleteRule(CSS_index) :
+					// IE6
+					style_sheet.removeRule(CSS_index);
+					// OK 之後才 delete.
+					delete CeL.Log.class_hide[type];
+				}
+				hiding = !hiding;
+			} catch (e) {
+				CeL
+						.log('The browser may not support <a href="http://www.w3.org/TR/DOM-Level-2-Style/css" target="_blank">Document Object Model CSS</a>? Can not toggle debug message: <em>'
+								+ e.message + '</em>');
+			}
+		return !hiding;
+	}
+
+	/**
+	 * 斷定/測試/驗證 verify/檢查狀態。<br />
+	 * 
+	 * @param {Boolean|Array|Function}condition
+	 *            test case.<br />
+	 *            {Function} testing function to run. Using default expected value:
+	 *            true<br />
+	 *            {Array} [ condition 1, condition 2 ]<br />
+	 *            {Object} 直接將之當作 options
+	 * 
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。 {<br />
+	 *            {String}name: test name 此次測試名稱。,<br />
+	 *            {String}NG: meaning of failure,<br />
+	 *            {String}OK: meaning of passed,<br />
+	 *            {Boolean}ignorable: false / need 手動 check,<br />
+	 *            {String|Object}type: expected type,<br />
+	 *            {Boolean}no_cache: false,<br />
+	 *            {Any}expect: expected value 預期的結果。should be what value.,<br />
+	 *            {Boolean}exactly: true, need exactly (value === expected) or
+	 *            false: equal (value == expected) is also OK.<br />
+	 *            {Boolean}force_true: false, 當測試效能時，強迫測試結果一定成功。<br />
+	 *            {String}eval: testing expression code to eval = value /
+	 *            function(){return value_to_test;}<br />
+	 *            {Function}callback: 回調函數。 callback(passed)<br /> }
+	 * 
+	 * @returns {Boolean|...} {Boolean}assertion is succeed.<br />
+	 *          {...} ignorable message.
+	 * 
+	 * @since 2012/9/19 00:20:49, 2015/10/18 21:31:35 重構
+	 */
+	function log_front_end_assert(condition, options) {
+
+		// --------------------------------
+		// 前置處理作業: condition。
+		if (!options)
+			if (CeL.is_Object(condition)) {
+				// 直接將之當作 options
+				options = condition;
+				condition = options.eval;
+			} else {
+				// 前置處理作業: options。
+				// (undefined | null).attribute is NOT accessable.
+				// ('attribute' in false), ('attribute' in 0) is NOT evaluable.
+
+				// options = CeL.null_Object();
+				// This is faster.
+				options = new Boolean;
+
+				// assert: options.attribute is accessable.
+				// assert: ('attribute' in options) is evaluable.
+			}
+		else if (typeof callback === 'function') {
+			options = {
+				callback : options
+			};
+		} else if (typeof options === 'string')
+			options = {
+				name : options
+			};
+
+		var type = options.type;
+		if (Array.isArray(condition)) {
+			condition = condition.slice(0, type ? 1 : 2);
+			if (!type && typeof condition[1] !== 'function'
+					&& typeof condition[1] !== 'object')
+				// record original condition.
+				condition.original = condition[0];
+		} else {
+			// 有 options.type 將忽略 options.expect 以及 condition[1]!!
+			if (type)
+				condition = [ condition ];
+			else {
+				condition = [ condition,
+				// default expected value: true
+				'expect' in options ? options.expect : true ];
+				// record original condition.
+				condition.original = condition[0];
+			}
+		}
+		// assert: condition = {Array} [ condition 1, condition 2 ]
+
+		function condition_handler(_c, index) {
+			if (options.eval && typeof _c === 'string')
+				_c = CeL.eval_parse(_c);
+
+			if (typeof _c === 'function')
+				_c = _c();
+
+			// may use .map()
+			condition[index] = _c;
+		}
+
+		var error;
+		// if(!options.force_true)
+		condition.forEach(options.no_cache ? condition_handler
+		//
+		: function(_c, index) {
+			try {
+				condition_handler(_c, index);
+			} catch (e) {
+				// 執行 condition 時出錯，throw 時的處置。
+				error = true;
+				CeL.warn('assert: 執行 condition 時出錯: ' + e.message);
+			}
+		});
+
+		// assert: condition = {Array} [ 純量 value 1, 純量 value 2: expected value ]
+		// condition = The actual value to test.
+
+		// --------------------------------
+		var exactly, equal;
+
+		if (!error
+		// && !options.force_true
+		)
+			// 前置處理作業: type。
+			if (type) {
+				condition = condition[0];
+				exactly = equal = typeof type === 'string'
+				//
+				? typeof condition === type || CeL.is_type(condition, type)
+				// TODO: check
+				// String|Function|Object|Array|Boolean|Number|Date|RegExp|Error|undefined
+				: condition.constructor === type
+						|| Object.getPrototypeOf(condition) === type
+						|| (type = CeL.native_name(type))
+						&& CeL.is_type(condition, type);
+			} else {
+				exactly = equal = Object.is(condition[0], condition[1]);
+				if (!exactly)
+					equal = condition[0] == condition[1];
+			}
+
+		// --------------------------------
+		// report.
+
+		function quote(message, add_type) {
+			if (add_type &&
+			// 有些 value 沒必要加上 type。
+			message !== null && message !== undefined && message === message) {
+				add_type = '(' + (typeof message) + ') ';
+			} else {
+				add_type = '';
+				if (typeof message !== 'string')
+					message = String(message);
+			}
+			return add_type + (message.length > 200
+			//
+			? '[' + message.slice(0, 200) + ']...' + message.length
+			//
+			: '[' + message + ']');
+		}
+
+		var test_name = options.name ? quote(options.name) : 'Assertion',
+		//
+		SGR = !CeL.is_WWW() && !CeL.is_debug(3)
+				&& CeL.SGR.CSI === CeL.SGR.default_CSI && CeL.SGR;
+
+		// --------------------------------
+		// failed.
+
+		if (!options.force_true && (!equal || !exactly &&
+		// assert: exactly === true 的條件比 equal === true 嚴苛。
+		(!('exactly' in options) || options.exactly))) {
+			var error_message = options.NG;
+			if (!error_message) {
+				error_message = [ test_name,
+				// if fault, message: 失敗時所要呈現訊息。
+				SGR ? new SGR([ ' ', 'fg=red', 'failed', '-fg', ' ' ]) : ' failed ' ];
+				if (type)
+					error_message.push('type of ' + quote(condition) + ' is not ('
+							+ type + ')');
+				else {
+					if (('original' in condition)
+							&& condition[0] !== condition.original) {
+						var original = '' + condition.original;
+						if (typeof condition.original === 'function') {
+							var matched = original.match(CeL.PATTERN_function);
+							if (matched)
+								original = matched[1];
+						}
+						error_message.push(quote(original) + '→');
+					}
+					error_message.push(quote(condition[0], true)
+					//
+					+ ' !== ' + quote(condition[1], true));
+				}
+
+				if (equal)
+					error_message.push('，但 "==" 之關係成立。');
+
+				error_message = error_message.join('');
+			}
+
+			CeL.fatal(error_message, CeL.assert.throw_Error &&
+			// exception to throw
+			new Error(error_message));
+
+			var ignorable = options.ignorable;
+			return ignorable ? ignorable === true ? 'ignored' : ignorable
+					: fatal ? undefined : false;
+		}
+
+		// --------------------------------
+		// passed. 無錯誤發生。
+
+		if (CeL.is_debug()) {
+			var passed_message = options.OK;
+			if (!passed_message)
+				passed_message = [
+						test_name,
+						//
+						SGR ? new SGR([ ' ', 'fg=green', 'passed', '-fg', ' ' ])
+								: ' passed ',
+						//
+						quote(condition[0], true) ].join('');
+			CeL.debug(passed_message, 1,
+			// caller: see: CeL.debug
+			has_caller && CeL.get_function_name(arguments.callee.caller));
+		}
+
+		return true;
+	}
+
+	/**
+	 * 整套測試, unit test 單元測試。
+	 * 
+	 * @example <code>
+
+	CeL.test([ [ 'aa', {
+		type : String
+	} ], [ 456, {
+		type : 123
+	} ], [ {}, {
+		type : Object
+	} ], [ false, {
+		type : Boolean
+	} ] ], 'type test');
+
+	 * </code>
+	 * 
+	 * @param {Array}conditions
+	 *            condition list passed to assert(): [ [ condition / test value,
+	 *            options ], [], ... ].
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。 {<br />
+	 *            {String}name: test name 此次測試名稱。<br />
+	 *            {Object}options: default options for running CeL.assert().<br />
+	 *            {Function}callback: 回調函數。 callback(recorder, test_name)<br /> }
+	 * 
+	 * @returns {Boolean}有錯誤發生。
+	 * 
+	 * @since 2012/9/19 00:20:49, 2015/10/18 23:8:9 refactoring 重構
+	 */
+	function log_front_end_test(conditions, options) {
+		if (!Array.isArray(conditions)) {
+			throw new Error(CeL.Class + '.test: PLease input {Array}!');
+			return;
+		}
+
+		// 為允許 {Function}condition
+		if (false && !Array.isArray(conditions[0]))
+			// assert: input [ condition / test value, options ]
+			conditions = [ conditions ];
+
+		var test_name, assert = CeL.assert,
+		// default options for running CeL.assert().
+		default_options;
+
+		if (options) {
+			if (typeof callback === 'function') {
+				options = {
+					callback : options
+				};
+			} else if (typeof options === 'string') {
+				test_name = options;
+				options = undefined;
+			} else if ('options' in options)
+				default_options = options.options;
+		}
+
+		var recorder = {
+			// OK
+			passed : [],
+			// skipped
+			ignored : [],
+			// value is not the same.
+			failed : [],
+			// 執行 condition 時出錯，throw。
+			fatal : [],
+			//
+			all : conditions
+		};
+
+		conditions.forEach(function(condition, index) {
+			var result;
+			try {
+				result = typeof condition === 'function' ? condition(recorder)
+						: assert(condition[0], Object.assign({
+							no_cache : true
+						}, condition[1], default_options));
+			} catch (e) {
+				recorder.fatal.push(condition);
+				return;
+			}
+
+			switch (result) {
+			case true:
+				recorder.passed.push(condition);
+				break;
+			case false:
+				recorder.failed.push(condition);
+				break;
+			default:
+				recorder.ignored.push(condition);
+				break;
+			}
+		});
+
+		// --------------------------------
+		// report.
+		if (options && typeof options.callback === 'function')
+			options.callback(recorder, test_name);
+
+		test_name = test_name ? [ 'Testing [' + test_name + ']: ' ] : [];
+		function join() {
+			if (recorder.ignored.length > 0)
+				test_name.push(', ' + recorder.ignored.length + ' ignored');
+			return test_name.join('') + '.';
+		}
+
+		if (recorder.failed.length === 0 && recorder.fatal.length === 0) {
+			// all passed
+			test_name.push('All ' + recorder.passed.length + ' passed');
+
+			CeL.info(join());
+			return false;
+		}
+
+		// not all passed.
+		test_name.push(recorder.failed.length + '/'
+		//
+		+ (recorder.failed.length + recorder.passed.length));
+		if (recorder.failed.length + recorder.passed.length !== recorder.all.length)
+			test_name.push('/' + recorder.all.length);
+		test_name.push(' failed');
+		if (recorder.fatal.length > 0)
+			// fatal exception error 致命錯誤
+			test_name.push(', ' + recorder.fatal.length + ' fatal');
+
+		if (recorder.passed.length) {
+			CeL.warn(join());
+		} else {
+			CeL.err(join());
+		}
+
+		return recorder.failed.length + recorder.fatal.length;
+	}
+
 	Object.assign(CeL, {
 		log : o[1],
 		warn : o[2],
 		err : o[3],
 
-		info : function(message, clean) {
+		info : function log_front_end_info(message, clean) {
 			//	information
 			CeL.Log.log.call(CeL.Log, message, clean, 'info');
 			//CeL.log.apply(CeL, arguments);
 		},
-		em : function(message, clean) {
+		em : function log_front_end_em(message, clean) {
 			//	emphasis
 			CeL.Log.log.call(CeL.Log, message, clean, 'em');
 		},
 
-		error : function() {
+		error : function log_front_end_error() {
 			//	使用 .apply() 預防 override.
 			CeL.err.apply(CeL, arguments);
 		},
 
 		//	致命錯誤。
-		fatal : function(message, error_to_throw) {
-			//	fatal: the most serious
-			try {
-				throw CeL.is_type(error_to_throw, 'Error') ? error_to_throw
-						: new Error(error_to_throw || 'Fatal error');
-			} catch (e) {
-				// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Error/Stack
-				CeL.err(e.stack ? message
-						+ '<br />stack:<div class="debug_stack">'
-						+ (typeof e.stack === 'string' ? e.stack.replace(/\n/g, '<br />') : e.stack)
-						+ '</div>'
-						: message);
-			}
-
-			if(typeof error_to_throw === 'undefined')
-				error_to_throw = message;
-
-			if (error_to_throw)
-				throw CeL.is_type(error_to_throw, 'Error') ? error_to_throw
-						: new Error(error_to_throw);
-		},
+		fatal : log_front_end_fatal,
 
 		//	增加 debug 訊息。
-		debug : function a(message, level, caller, clean) {
-			// alert(CeL.is_debug() + ',' + l + '(' + (l === undefined) + '),' +
-			// message);
-			if (CeL.is_debug(level)) {
-				if (typeof message === 'function') {
-					// for .debug(function(){return some_function(..);}, 3);
-					message = 'function: [' + message + ']<br />return: [' + message()
-							+ ']';
-				}
-
-				if (!caller && has_caller) {
-					// TODO: do not use arguments
-					caller = caller !== arguments.callee
-							&& CeL.get_function_name(arguments.callee.caller);
-					// CeL.log(CeL.is_type(arguments.callee.caller));
-					// CeL.log(Array.isArray(caller));
-					// CeL.log(caller+': '+arguments.callee.caller);
-					// CeL.warn(CeL.debug);
-				}
-				if (caller) {
-					message = CeL.is_WWW() ? [ {
-						// (caller.charAt(0) === '.' ? CeL.Class + caller : caller)
-						span : caller,
-						'class' : 'debug_caller'
-					}, ': ', message ] :
-					// 注意: 這在 call stack 中有 SGR 時會造成:
-					// RangeError: Maximum call stack size exceeded
-					// 因此不能用於測試 SGR 本身!
-					// CeL.is_debug(3): assert: SGR 在這 level 以上才會呼叫 .debug()。
-					// TODO: 檢測 call stack。
-					!CeL.is_debug(3) && CeL.SGR? new CeL.SGR(
-							[ '', 'fg=yellow', caller + ': ', '-fg', message ])
-							.toString() : caller + ': ' + message;
-				}
-
-				CeL.Log.log.call(CeL.Log, message, clean, {
-					level : 'debug',
-					add_class : 'debug_' + (level || CeL.is_debug())
-				});
-			}
-		},
-		trace : function() {
+		debug : log_front_end_debug,
+		trace : function log_front_end_trace() {
 			//	trace: the least serious
 			CeL.debug.apply(CeL, arguments);
 		},
 
 		//	切換(顯示/隱藏)個別訊息。
-		toggle_log : function toggle_log(type, show) {
-			if (!type)
-				type = 'debug';
-			var hiding = type in CeL.Log.class_hide;
-			if (typeof show === 'undefined'
-				|| show && hiding
-				|| !show && !hiding)
-				try {
-					// need switch.
-					var style_sheet = document.styleSheets[0],
-						selector = '.' + CeL.Log.className_set[type],
-						CSS_index = hiding ? search_CSS_rule(style_sheet, selector) : undefined;
-					if (isNaN(CSS_index)) {
-						// assign a new index.
-						CSS_index = style_sheet.cssRules && style_sheet.cssRules.length ||
-							// IE6
-							style_sheet.rules && style_sheet.rules.length
-							|| 0;
-						CeL.debug('insert CSS index: ' + CSS_index, 2, 'toggle_log');
-						var style = 'display:none';
-						style_sheet.insertRule ?
-							// firefox, IE 必須輸入 index.
-							// <a href="https://developer.mozilla.org/en/DOM/CSSStyleSheet/insertRule" accessdate="2012/5/14 13:13">insertRule - MDN</a>
-							style_sheet.insertRule(selector + '{' + style + ';}', CSS_index) :
-							// IE6:
-							// <a href="http://msdn.microsoft.com/en-us/library/aa358796%28v=vs.85%29.aspx" accessdate="2012/5/14 13:13">IHTMLStyleSheet::addRule method (Internet Explorer)</a>
-							style_sheet.addRule(selector, style, CSS_index);
+		toggle_log : log_front_end_toggle_log,
 
-						// OK 之後才設定.
-						CeL.Log.class_hide[type] = CSS_index;
-
-					} else {
-						CeL.debug('delete CSS index: ' + CSS_index, 2, 'toggle_log');
-						style_sheet.deleteRule ? style_sheet.deleteRule(CSS_index) :
-							// IE6
-							style_sheet.removeRule(CSS_index);
-						// OK 之後才 delete.
-						delete CeL.Log.class_hide[type];
-					}
-					hiding = !hiding;
-				} catch (e) {
-					CeL.log('The browser may not support <a href="http://www.w3.org/TR/DOM-Level-2-Style/css" target="_blank">Document Object Model CSS</a>? Can not toggle debug message: <em>'
-						+ e.message + '</em>');
-				}
-			return !hiding;
-		},
-
-		/**
-		 * 斷定/測試/驗證 verify/檢查狀態。<br />
-		 * 
-		 * @param {Boolean|Array|Function}condition
-		 *            test case.<br />
-		 *            {Function} testing function to run. Using default expected value:
-		 *            true<br />
-		 *            {Array} [ condition 1, condition 2 ]<br />
-		 *            {Object} 直接將之當作 options
-		 * 
-		 * @param {Object}[options]
-		 *            附加參數/設定選擇性/特殊功能與選項。 {<br />
-		 *            {String}name: test name 此次測試名稱。,<br />
-		 *            {String}NG: meaning of failure,<br />
-		 *            {String}OK: meaning of passed,<br />
-		 *            {Boolean}ignorable: false / need 手動 check,<br />
-		 *            {String|Object}type: expected type,<br />
-		 *            {Boolean}no_cache: false,<br />
-		 *            {Any}expect: expected value 預期的結果。should be what value.,<br />
-		 *            {Boolean}exactly: true, need exactly (value === expected) or
-		 *            false: equal (value == expected) is also OK.<br />
-		 *            {Boolean}force_true: false, 當測試效能時，強迫測試結果一定成功。<br />
-		 *            {String}eval: testing expression code to eval = value /
-		 *            function(){return value_to_test;}<br />
-		 *            {Function}callback: 回調函數。 callback(passed)<br /> }
-		 * 
-		 * @returns {Boolean|...} {Boolean}assertion is succeed.<br />
-		 *          {...} ignorable message.
-		 * 
-		 * @since 2012/9/19 00:20:49, 2015/10/18 21:31:35 重構
-		 */
-		assert : function(condition, options) {
-
-			// --------------------------------
-			// 前置處理作業: condition。
-			if (!options)
-				if (CeL.is_Object(condition)) {
-					// 直接將之當作 options
-					options = condition;
-					condition = options.eval;
-				} else {
-					// 前置處理作業: options。
-					// (undefined | null).attribute is NOT accessable.
-					// ('attribute' in false), ('attribute' in 0) is NOT evaluable.
-
-					// options = CeL.null_Object();
-					// This is faster.
-					options = new Boolean;
-
-					// assert: options.attribute is accessable.
-					// assert: ('attribute' in options) is evaluable.
-				}
-			else if (typeof callback === 'function') {
-				options = {
-					callback : options
-				};
-			} else if (typeof options === 'string')
-				options = {
-					name : options
-				};
-
-			var type = options.type;
-			if (Array.isArray(condition)) {
-				condition = condition.slice(0, type ? 1 : 2);
-				if (!type && typeof condition[1] !== 'function'
-						&& typeof condition[1] !== 'object')
-					// record original condition.
-					condition.original = condition[0];
-			} else {
-				// 有 options.type 將忽略 options.expect 以及 condition[1]!!
-				if (type)
-					condition = [ condition ];
-				else {
-					condition = [ condition,
-					// default expected value: true
-					'expect' in options ? options.expect : true ];
-					// record original condition.
-					condition.original = condition[0];
-				}
-			}
-			// assert: condition = {Array} [ condition 1, condition 2 ]
-
-			function condition_handler(_c, index) {
-				if (options.eval && typeof _c === 'string')
-					_c = CeL.eval_parse(_c);
-
-				if (typeof _c === 'function')
-					_c = _c();
-
-				// may use .map()
-				condition[index] = _c;
-			}
-
-			var error;
-			// if(!options.force_true)
-			condition.forEach(options.no_cache ? condition_handler
-			//
-			: function(_c, index) {
-				try {
-					condition_handler(_c, index);
-				} catch (e) {
-					// 執行 condition 時出錯，throw 時的處置。
-					error = true;
-					CeL.warn('assert: 執行 condition 時出錯: ' + e.message);
-				}
-			});
-
-			// assert: condition = {Array} [ 純量 value 1, 純量 value 2: expected value ]
-			// condition = The actual value to test.
-
-			// --------------------------------
-			var exactly, equal;
-
-			if (!error
-			// && !options.force_true
-			)
-				// 前置處理作業: type。
-				if (type) {
-					condition = condition[0];
-					exactly = equal = typeof type === 'string'
-					//
-					? typeof condition === type || CeL.is_type(condition, type)
-					// TODO: check
-					// String|Function|Object|Array|Boolean|Number|Date|RegExp|Error|undefined
-					: condition.constructor === type
-							|| Object.getPrototypeOf(condition) === type
-							|| (type = CeL.native_name(type))
-							&& CeL.is_type(condition, type);
-				} else {
-					exactly = equal = Object.is(condition[0], condition[1]);
-					if (!exactly)
-						equal = condition[0] == condition[1];
-				}
-
-			// --------------------------------
-			// report.
-
-			function quote(message, add_type) {
-				if (add_type &&
-				// 有些 value 沒必要加上 type。
-				message !== null && message !== undefined && message === message) {
-					add_type = '(' + (typeof message) + ') ';
-				} else {
-					add_type = '';
-					if (typeof message !== 'string')
-						message = String(message);
-				}
-				return add_type + (message.length > 200
-				//
-				? '[' + message.slice(0, 200) + ']...' + message.length
-				//
-				: '[' + message + ']');
-			}
-
-			var test_name = options.name ? quote(options.name) : 'Assertion',
-			//
-			SGR = !CeL.is_WWW() && !CeL.is_debug(3)
-					&& CeL.SGR.CSI === CeL.SGR.default_CSI && CeL.SGR;
-
-			// --------------------------------
-			// failed.
-
-			if (!options.force_true && (!equal || !exactly &&
-			// assert: exactly === true 的條件比 equal === true 嚴苛。
-			(!('exactly' in options) || options.exactly))) {
-				var error_message = options.NG;
-				if (!error_message) {
-					error_message = [ test_name,
-					// if fault, message: 失敗時所要呈現訊息。
-	          		SGR ? new SGR([ ' ', 'fg=red', 'failed', '-fg', ' ' ]) : ' failed ' ];
-					if (type)
-						error_message.push('type of ' + quote(condition) + ' is not ('
-								+ type + ')');
-					else {
-						if (('original' in condition)
-								&& condition[0] !== condition.original) {
-							var original = '' + condition.original;
-							if (typeof condition.original === 'function') {
-								var matched = original.match(CeL.PATTERN_function);
-								if (matched)
-									original = matched[1];
-							}
-							error_message.push(quote(original) + '→');
-						}
-						error_message.push(quote(condition[0], true)
-						//
-						+ ' !== ' + quote(condition[1], true));
-					}
-
-					if (equal)
-						error_message.push('，但 "==" 之關係成立。');
-
-					error_message = error_message.join('');
-				}
-
-				CeL.fatal(error_message, CeL.assert.throw_Error &&
-				// exception to throw
-				new Error(error_message));
-
-				var ignorable = options.ignorable;
-				return ignorable ? ignorable === true ? 'ignored' : ignorable
-						: fatal ? undefined : false;
-			}
-
-			// --------------------------------
-			// passed. 無錯誤發生。
-
-			if (CeL.is_debug()) {
-				var passed_message = options.OK;
-				if (!passed_message)
-					passed_message = [ test_name,
-					//
-	          		SGR ? new SGR([ ' ', 'fg=green', 'passed', '-fg', ' ' ]) : ' passed ',
-      				//
-      				quote(condition[0], true) ].join('');
-				CeL.debug(passed_message, 1,
-				// caller: see: CeL.debug
-				has_caller && CeL.get_function_name(arguments.callee.caller));
-			}
-
-			return true;
-		},
-
-		/**
-		 * 整套測試, unit test 單元測試。
-		 * 
-		 * @example <code>
-
-		CeL.test([ [ 'aa', {
-			type : String
-		} ], [ 456, {
-			type : 123
-		} ], [ {}, {
-			type : Object
-		} ], [ false, {
-			type : Boolean
-		} ] ], 'type test');
-
-		 * </code>
-		 * 
-		 * @param {Array}conditions
-		 *            condition list passed to assert(): [ [ condition / test value,
-		 *            options ], [], ... ].
-		 * @param {Object}[options]
-		 *            附加參數/設定選擇性/特殊功能與選項。 {<br />
-		 *            {String}name: test name 此次測試名稱。<br />
-		 *            {Object}options: default options for running CeL.assert().<br />
-		 *            {Function}callback: 回調函數。 callback(counter, test_name)<br /> }
-		 * 
-		 * @returns {Boolean}有錯誤發生。
-		 * 
-		 * @since 2012/9/19 00:20:49, 2015/10/18 23:8:9 refactoring 重構
-		 */
-		test : function(conditions, options) {
-			if (!Array.isArray(conditions)) {
-				throw new Error(CeL.Class + '.test: PLease input {Array}!');
-				return;
-			}
-
-			// 為允許 {Function}condition
-			if (false && !Array.isArray(conditions[0]))
-				// assert: input [ condition / test value, options ]
-				conditions = [ conditions ];
-
-			var test_name, assert = CeL.assert,
-			// default options for running CeL.assert().
-			default_options, counter = {
-				// OK
-				passed : 0,
-				// skipped
-				ignored : 0,
-				// value is not the same.
-				failed : 0,
-				// 執行 condition 時出錯，throw。
-				fatal : 0
-			};
-
-			if (options) {
-				if (typeof callback === 'function') {
-					options = {
-						callback : options
-					};
-				} else if (typeof options === 'string') {
-					test_name = options;
-					options = undefined;
-				} else if ('options' in options)
-					default_options = options.options;
-			}
-
-			conditions.forEach(function(condition, index) {
-				var result;
-				try {
-					result = typeof condition === 'function' ? condition(counter)
-							: assert(condition[0], Object.assign({
-								no_cache : true
-							}, condition[1], default_options));
-				} catch (e) {
-					counter.fatal++;
-					return;
-				}
-
-				switch (result) {
-				case true:
-					counter.passed++;
-					break;
-				case false:
-					counter.failed++;
-					break;
-				default:
-					counter.ignored++;
-				}
-			});
-
-			// --------------------------------
-			// report.
-			if (options & typeof options.callback === 'function')
-				options.callback(counter, test_name);
-
-			test_name = test_name ? [ 'Testing [' + test_name + ']: ' ] : [];
-			function join() {
-				if (counter.ignored)
-					test_name.push(', ' + counter.ignored + ' ignored');
-				return test_name.join('') + '.';
-			}
-
-			if (!counter.failed && !counter.fatal) {
-				// all passed
-				test_name.push('All ' + counter.passed + ' passed');
-
-				CeL.info(join());
-				return false;
-			}
-
-			// not all passed.
-			test_name.push(counter.failed + '/' + (counter.failed + counter.passed));
-			if (counter.failed + counter.passed !== conditions.length)
-				test_name.push('/' + conditions.length);
-			test_name.push(' failed');
-			if (counter.fatal)
-				// fatal exception error 致命錯誤
-				test_name.push(', ' + counter.fatal + ' fatal');
-
-			if (counter.passed) {
-				CeL.warn(join());
-			} else {
-				CeL.err(join());
-			}
-
-			return counter.failed + counter.fatal;
-		}
-
+		assert : log_front_end_assert,
+		test : log_front_end_test
 	});
 
 
