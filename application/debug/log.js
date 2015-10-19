@@ -35,6 +35,7 @@ emergency/urgent situation alert
 */
 
 'use strict';
+
 typeof CeL === 'function' && CeL.run({
 
 name : 'application.debug.log',
@@ -56,7 +57,7 @@ var
  * private storage pool
  * @ignore
  */
-p=[],
+p = [],
 
 
 has_performance_now,
@@ -1155,6 +1156,14 @@ if (!CeL.Log) {
 	// --------------------------------------------------------------------------------------------
 	// front ends of log function
 
+	/**
+	 * 在 node.js v0.11.16 中，不使用 var 的模式設定 function，會造成:<br />
+	 * In strict mode code, functions can only be declared at top level or immediately within another function.
+	 * 
+	 * 在 node.js v4.2.1 中可以順利 pass。
+	 */
+
+	var log_front_end_fatal =
 	//	致命錯誤。
 	function log_front_end_fatal(message, error_to_throw) {
 		// fatal: the most serious
@@ -1177,6 +1186,7 @@ if (!CeL.Log) {
 					: new Error(error_to_throw);
 	}
 
+	var log_front_end_debug =
 	//	增加 debug 訊息。
 	function log_front_end_debug(message, level, caller, clean) {
 		// alert(CeL.is_debug() + ',' + l + '(' + (l === undefined) + '),' +
@@ -1220,6 +1230,7 @@ if (!CeL.Log) {
 		}
 	}
 
+	var log_front_end_toggle_log =
 	//	切換(顯示/隱藏)個別訊息。
 	function log_front_end_toggle_log(type, show) {
 		if (!type)
@@ -1274,6 +1285,7 @@ if (!CeL.Log) {
 		return !hiding;
 	}
 
+	var log_front_end_assert =
 	/**
 	 * 斷定/測試/驗證 verify/檢查狀態。<br />
 	 * 
@@ -1499,6 +1511,7 @@ if (!CeL.Log) {
 		return true;
 	}
 
+	var log_front_end_test =
 	/**
 	 * 整套測試, unit test 單元測試。
 	 * 
@@ -1671,7 +1684,6 @@ if (!CeL.Log) {
 		test : log_front_end_test
 	});
 
-
 	//	處理 loading 本 module 前即已 log 之 message。
 	if (CeL.is_Object(l)) {
 		for (i in l)
@@ -1686,6 +1698,7 @@ if (!CeL.Log) {
 				break;
 			}
 	}
+
 }
 
 }
