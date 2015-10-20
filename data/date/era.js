@@ -66,108 +66,7 @@ function test_era_data() {
 		return;
 	}
 
-// 設計上所要求必須通過之測試範例：測試正確性。
-CeL.assert(['孺子嬰',CeL.era('初始').君主],'初始.君主: 孺子嬰#1');
-CeL.assert(['孺子嬰','初始元年11月1日'.to_Date('era').君主],'初始.君主: 孺子嬰#2');
-CeL.assert(['庚辰年庚辰月庚辰日庚辰時','一八八〇年四月二十一日七時'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'可提供統一時間標準與各干支間的轉換。統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。');
-CeL.assert(['清德宗光緒六年三月十三日',CeL.to_Chinese_numeral('一八八〇年四月二十一日七時'.to_Date('era').format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'}))],'查詢一八八〇年四月二十一日七時的中曆日期');
-CeL.assert(['1628年3月1日','明思宗崇禎1年1月26日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-CeL.assert(['1628年3月1日','天聰二年甲寅月戊子日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-CeL.assert(['1628年3月1日','天聰2年寅月戊子日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-CeL.assert(['1880年4月21日','清德宗光緒六年三月十三日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-CeL.assert(['1880年4月21日','清德宗光緒庚辰年三月十三日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-CeL.assert(['1880年4月21日','清德宗光緒庚辰年庚辰月庚辰日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-CeL.assert(['庚辰年庚辰月庚辰日','清德宗光緒六年三月十三日'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。');
-CeL.assert(['庚辰年庚辰月庚辰日庚辰時','一八八〇年庚辰月庚辰日7時'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'各特殊紀年→統一時間標準（中→西）：查詢某農曆+紀年/君主(帝王)對應的標準時間(如UTC+8)。');
-CeL.assert(['庚辰年庚辰月庚辰日庚辰時','一八八〇年庚辰月庚辰日庚辰時'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'各特殊紀年→統一時間標準（中→西）：查詢某農曆+紀年/君主(帝王)對應的標準時間(如UTC+8)。');
-CeL.assert(['清德宗光緒六年三月十三日',CeL.to_Chinese_numeral('一八八〇年庚辰月庚辰日庚辰時'.to_Date('era').format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'}))]);
-CeL.assert(['庚辰年庚辰月庚辰日庚辰時','西元一八八〇年四月二十一日七時'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。');
-CeL.assert(['庚辰年庚辰月庚辰日庚辰時','清德宗光緒六年三月十三日辰正一刻'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。');
-CeL.assert(['252年5月26日','魏少帝嘉平4年5月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-CeL.assert(['252年6月24日','魏少帝嘉平4年閏5月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-CeL.assert(['252年6月24日','魏少帝嘉平4年閏月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-CeL.assert(['1357/1/21','元至正十七年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正十七年');
-CeL.assert(['1357/1/21','元至正十七'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正十七');
-CeL.assert(['1357/1/21','至正十七年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正十七年');
-CeL.assert(['1357/1/21','至正十七'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正十七');
-CeL.assert(['1357/1/21','元至正17年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正17年');
-CeL.assert(['1357/1/21','元至正17'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正17');
-CeL.assert(['1357/1/21','至正17年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正17年');
-CeL.assert(['1357/1/21','至正17'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正17');
-CeL.assert(['1880年4月21日','庚辰年庚辰月庚辰日庚辰時'.to_Date({parser:'era',base:'1850年'}).format({parser:'CE',format:'%Y年%m月%d日'})]);
-CeL.assert(['1880年4月21日',CeL.era('庚辰年庚辰月庚辰日庚辰時',{base:'1850年'}).format({parser:'CE',format:'%Y年%m月%d日'})]);
-CeL.assert(['260年6月26日','魏元帝景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-CeL.assert(['260年6月26日','元帝景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-CeL.assert(['260年6月26日','景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-CeL.assert(['260年6月26日','魏元帝景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。');
-CeL.assert(['260年6月26日','元帝景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。');
-CeL.assert(['260年6月26日','景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。');
-CeL.assert(['260年7月25日','魏元帝景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。');
-CeL.assert(['260年7月25日','元帝景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。');
-CeL.assert(['260年7月25日','景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。');
-CeL.assert(['304/12/23', '西晉惠帝永安1年11月10日'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})]);
-CeL.assert(['304/12/23', '前涼太祖永安1年11月10日'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})]);
-CeL.assert(['1911年11月30日','清遜帝宣統三年10月10日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'閏月或之後');
-CeL.assert(['1329年9月1日','元文宗天曆2年8月8日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'天曆在元明宗(1329年)時被重複使用，共計3年。');
-CeL.assert(['762年1月1日','唐肅宗元年建丑月初二'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'唐肅宗上元二年九月二十一日去年號，稱元年，以建子之月為歲首。');
-CeL.assert(['694年11月25日 戊子小','證聖元年正月初三'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %月干支%大小月',locale:'cmn-Hant-TW'})],'證聖元年正月初一辛巳（694年11月23日），改元證聖。');
-CeL.assert(['1855年2月5日 '+(CeL.gettext?'星期二':2),'太平天囯乙榮五年正月初一甲寅'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %w',locale:'cmn-Hant-TW'})],'天历与夏历阳历对照及简表');
-CeL.assert(['西漢武帝元朔6年12月1日','武帝元朔六年十二月甲寅'.to_Date('era').format({parser:'CE',format:'%紀年名%年年%月月%日日',locale:'cmn-Hant-TW'})],'秦至汉初( 前246 至前104) 历法研究');
-CeL.assert(["癸丑年八月初一",'2033年8月25日'.to_Date().format('Chinese')],'2033年閏年八月初一');
-CeL.assert(["癸丑年閏十一月初一",'2033年12月22日'.to_Date().format('Chinese')],'2033年閏十一月初一');
-CeL.assert(["甲寅年正月初一",'2034年2月19日'.to_Date().format('Chinese')],'2034年正月初一');
-CeL.assert(["癸丑年閏11月1日",'2033年12月22日'.to_Date().format({parser:'Chinese',numeral:null,format:'%歲次年%月月%日日'})],'2033年閏十一月初一');
-CeL.assert(["癸丑年閏11月1日",'2033年12月22日'.to_Date().format({parser:'era',era:'中曆',format:'%歲次年%月月%日日',locale:'cmn-Hant-TW'})],'2033年閏十一月初一');
-CeL.assert([undefined,CeL.era('2200/1/1').共存紀年]);
-CeL.assert([undefined,CeL.era('-4000/1/1').共存紀年]);
-// .共存紀年 test: 可能需要因添加紀年而改變。
-CeL.assert(/吳大帝嘉禾7年5月3日(.*?)\|魏明帝景初2年6月3日(.*?)\|蜀後主延熙1年5月2日/.test(CeL.era('238/6/2').共存紀年.join('|')),'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#1');
-CeL.assert(['弥生時代神功皇后38年|高句麗東川王12年6月3日|新羅助賁尼師今9年6月3日|吳大帝嘉禾7年5月3日|百濟古尒王5年6月3日|魏明帝景初2年6月3日|魏燕王紹漢2年6月3日',CeL.era('延熙1年5月2日').共存紀年.join('|')],'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#1');
-CeL.assert(/魏明帝景初3年後12月8日(.*?),蜀後主延熙2年12月8日(.*?),吳大帝赤烏2年12月8日/.test(CeL.era('240-1-19').共存紀年.join()),'測試特殊月名');
-CeL.assert(['弥生時代神功皇后40年|高句麗東川王13年後12月8日|新羅助賁尼師今10年後12月8日|百濟古尒王6年後12月8日|蜀後主延熙2年12月8日|吳大帝赤烏2年12月8日',CeL.era('魏明帝景初3年後12月8日').共存紀年.join('|')],'測試特殊月名');
-CeL.assert(['高麗忠肅王16年8月8日|鎌倉時代後醍醐天皇嘉暦4年8月8日|陳憲宗開祐1年8月8日|元文宗天曆2年8月8日',CeL.era('1329年9月1日').共存紀年.join('|')],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#2');
-CeL.assert(['後黎神宗永祚10年1月26日|朝鮮仁祖6年1月26日|莫光祖隆泰6年1月26日|江戸時代後水尾天皇寛永5年1月26日|後金太宗天聰2年1月26日|明思宗崇禎1年1月26日',CeL.era('1628年3月1日').共存紀年.join('|')],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#3');
-CeL.assert(['後黎神宗永祚10年1月26日|朝鮮仁祖6年1月26日|莫光祖隆泰6年1月26日|江戸時代後水尾天皇寛永5年1月26日|明思宗崇禎1年1月26日',CeL.era('中國清太宗天聰2年1月26日').共存紀年.join('|')],'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#2');
-CeL.assert(['後黎神宗永祚10年1月26日|朝鮮仁祖6年1月26日|莫光祖隆泰6年1月26日|江戸時代後水尾天皇寛永5年1月26日|後金太宗天聰2年1月26日',CeL.era('中國明思宗崇禎1年1月26日').共存紀年.join('|')],'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#3');
-//
-CeL.assert(["唐代宗寶應2年1月13日",CeL.era('二年春正月丁亥', {base : '寶應元年'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'})],'寶應二年春正月丁亥');
-CeL.assert(["唐代宗寶應2年1月13日",CeL.era('丁亥', {base : '寶應二年春正月'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'})],'寶應二年春正月丁亥 (by base)');
-CeL.assert(["763/5/17",CeL.era('寶應二年三月晦日').format({parser:'CE',format:'%Y/%m/%d'})],'寶應二年三月晦日');
-CeL.assert(["唐代宗寶應|二|三|一",CeL.era('三月一日', {parse_only : true, base : '寶應二年春正月'}).slice(1).join('|')], 'parse_only + base: 寶應二年春正月');
-CeL.assert(["唐代宗寶應|二|三|一",CeL.era('三月一日', {parse_only : true, base : '寶應二年'}).slice(1).join('|')], 'parse_only + base: 寶應二年');
-CeL.assert(["唐代宗寶應|二|三|晦",CeL.era('晦日', {parse_only : true, base : '代宗寶應二年三月一日'}).slice(1).join('|')], 'parse_only + base: 代宗寶應二年三月一日');
-CeL.assert(["134/7/29",CeL.era('陽嘉3年6月20日', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年6月20日.末');
-CeL.assert(["134/8/8",CeL.era('陽嘉3年6月', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年6月.末');
-CeL.assert(["135/2/1",CeL.era('陽嘉3年', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年.末');
-CeL.assert(["136/2/20",CeL.era('陽嘉', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉.末');
-
-// 參照紀年之演算機制
-CeL.assert([8,CeL.era('明宣宗宣德',{get_era:1}).calendar[7].leap],'明宣宗宣德8年閏8月');
-//setup 8月–, CE~CE
-CeL.era.set('曆A|1433/8/15~9/13|:宣德');
-//setup 閏8月–
-CeL.era.set('曆B|1433/9/14~10/12|:宣德');
-//setup 9月–
-CeL.era.set('曆C|1433/10/13~11/11|:宣德');
-//test part
-var _c0=CeL.era('宣德',{get_era:1}).calendar[8-1];
-CeL.assert(['30,29,30,29,29,30,29,30,29,30,30,30,29',_c0.join(',')],'宣德8年 calendar data');
-// 取得 era 第一年之 calendar data, and do test.
-_c0=CeL.era('曆A',{get_era:1}).calendar[0];CeL.assert(['8,6,1',[_c0.start,_c0.length,+_c0.leap].join()],'測試 參照紀年之演算機制:8月–');
-_c0=CeL.era('曆B',{get_era:1}).calendar[0];CeL.assert(['9,5,0',[_c0.start,_c0.length,+_c0.leap].join()],'測試 參照紀年之演算機制:閏8月–');
-_c0=CeL.era('曆C',{get_era:1}).calendar[0];CeL.assert(['9,4,NaN',[_c0.start,_c0.length,+_c0.leap].join()],'測試 參照紀年之演算機制:9月–');
-
-// test period_end of era()
-CeL.assert([CeL.era('1627年',{date_only:true,period_end:true}).format('CE'), '1627年'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 年');
-CeL.assert([CeL.era('1627年9月',{date_only:true,period_end:true}).format('CE'), '1627年9月'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 月');
-CeL.assert([CeL.era('1627年9月3日',{date_only:true,period_end:true}).format('CE'), '1627年9月3日'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 日');
-CeL.assert(['0001年'.to_Date().format(),'0001/1/1'.to_Date().format()],'1/1/1');
-CeL.assert(['前1年'.to_Date().format(),'-1年'.to_Date().format()],'year -1');
-CeL.assert(['前1年'.to_Date({parser:'CE',period_end:true}).format('CE'),'0001年'.to_Date('CE').format('CE')],'period_end of CE');
-CeL.assert([CeL.era('前1年',{period_end:true}).format('CE'),'0001年'.to_Date('CE').format('CE')],'period_end of CE@era()');
-
-
-CeL.info('測試全部通過。');
+// More examples: see /_test suite/test.js
 
 }
 
@@ -4087,7 +3986,7 @@ if (typeof CeL === 'function')
 			 * @param {Object}[options]
 			 *            附加參數/設定特殊功能與選項
 			 */
-			function add_note(date, options) {
+			function sign_note(date, options) {
 				add_offset_function(date, this);
 
 				var date_index = this.notes, tmp, tmp2;
@@ -4097,7 +3996,7 @@ if (typeof CeL === 'function')
 					// do cache.
 					= library_namespace.null_Object();
 
-					add_note.copy_attributes.forEach(function(key) {
+					sign_note.copy_attributes.forEach(function(key) {
 						if (this[key])
 							date_index[key] = this[key];
 					}, this);
@@ -4151,7 +4050,7 @@ if (typeof CeL === 'function')
 				// [ 歲序, 月序, 日序 | 0 ]
 				date_index = this.Date_to_date_index(date);
 				if (!date_index) {
-					library_namespace.err('add_note: 加注日期於紀年 [' + this
+					library_namespace.err('sign_note: 加注日期於紀年 [' + this
 							+ '] 範圍外！');
 				} else {
 					// 欲使用 date_index，應該考慮採 (date.年, date.月, date.日)。
@@ -4251,7 +4150,7 @@ if (typeof CeL === 'function')
 				return date;
 			}
 
-			Object.assign(add_note, {
+			Object.assign(sign_note, {
 				// 預設會 copy 的紀年曆注。
 				// 據: 根據/出典/原始參考文獻/資料引用來源/典拠。
 				copy_attributes : '據,準,曆法'.split(','),
@@ -4304,7 +4203,7 @@ if (typeof CeL === 'function')
 				date_index_to_Date : date_index_to_Date,
 				Date_to_date_index : Date_to_date_index,
 
-				add_note : add_note,
+				sign_note : sign_note,
 				// 若偵測是否已經存在，則 IE 8 得特別設定。恐怕因原先已經存在?
 				toString : get_era_name
 			});
@@ -5951,11 +5850,13 @@ if (typeof CeL === 'function')
 			 *            duration: [start_date, end_date]
 			 * @param {Object}[options]
 			 *            附加參數/設定特殊功能與選項. 此 options 可能會被變更!<br />
-			 *            {String|Date}.base: base date<br />
-			 *            {Boolean}.get_era: 僅回傳所解析出之紀年 {Object}。<br />
-			 *            {Boolean}.get_era_list: 僅回傳所解析出之紀年 list: []。<br />
+			 *            {String|Date}.base: base date. 會選出最接近此日期之紀年。<br />
+			 *            {String}.range: 限定於此範圍內尋找紀年。e.g., '中國'<br />
+			 *            {Boolean}.get_era: 僅回傳所解析出之紀年 {Era}。<br />
+			 *            {Boolean}.get_era_list: 僅回傳所解析出之紀年 list: {Set}。<br />
 			 *            {Boolean}.get_range: 僅回傳所解析出之期間: [ "前", "後" ]。<br />
 			 *            {Boolean}.get_range_String: 僅回傳所解析出之期間: "前–後"。<br />
+			 *            {Boolean}.era_only: 僅回傳所解析出之共存紀年 list: {Array}。<br />
 			 *            {Boolean}.parse_only: 僅回傳所解析出之紀年資訊: [ 紀年_list, 紀年, 年,
 			 *            月, 日 ]<br />
 			 *            {Boolean}.is_era: 找不到可用之紀年時，直接 about 跳出，回傳 undefined。<br />
@@ -6349,8 +6250,8 @@ if (typeof CeL === 'function')
 
 					} else if (tmp = numeralized.match(
 					// assert: !紀年_list || 紀年_list.size === 0 未特定紀年。
-					/^JDN?\s*(\d+(?:.\d*)?)$/i)) {
-						date = library_namespace.JD_to_Date(tmp[1]);
+					/^(JDN?)\s*(\d+(?:.\d*)?)$/i)) {
+						date = library_namespace.JD_to_Date(tmp[2]);
 						// 此時不該當作符合了。
 
 					} else if (library_namespace.is_debug()
@@ -6360,13 +6261,15 @@ if (typeof CeL === 'function')
 							b : arguments[0],
 							S : 'color:#e92;'
 						}, '] 辨識出特殊地域之紀年名稱。（時間不在所求紀年範圍內？）',
-								'將視為標準時間（如公元紀年），嘗試以日期解析器 [',
+								'將視為標準紀年時間（如公元），嘗試以日期解析器 [',
 								standard_time_parser, '] 解析。' ]);
 
 					// 警告:請勿隨意更改這些回傳值，因為他們也為 module 內部其他功能所用!
 					if (options.get_era)
 						return 紀年;
-					if (options.get_era_list)
+					if (options.get_era_list
+					// 若是還未能解析出特殊紀年，例如輸入公元紀年，則待後面再行處理。
+					&& 紀年)
 						return 紀年_list;
 					if (options.parse_only)
 						return [ 紀年_list, 紀年, 年, 月, 日 ];
@@ -6428,6 +6331,7 @@ if (typeof CeL === 'function')
 						return;
 
 					} else if (年 && !isNaN(年 = numeralize_date_name(年))) {
+						// 視為標準紀年時間（如公元），嘗試以日期解析器解析
 						date = ((年 < 0 ? 年 : 年.pad(4)) + '年'
 						//
 						+ (月 ? (numeralize_date_name(月) || START_MONTH)
@@ -6441,6 +6345,8 @@ if (typeof CeL === 'function')
 							period_end : options.period_end
 						});
 
+						library_namespace.debug('parsed date: [' + date + ']',
+								3, 'to_era_Date');
 						if (!date || isNaN(date.getTime())) {
 							// 可能到這邊的:如 '1880年庚辰月庚辰日庚辰時'。
 							// 從 era_list.search_sorted() 擇出所有可能候選。
@@ -6482,21 +6388,26 @@ if (typeof CeL === 'function')
 						date = library_namespace.from_Chinese_numeral(
 								numeralized).to_Date(standard_time_parser);
 
-					if (date && tmp2)
-						while (0 < tmp2.length)
-							if ((tmp = tmp2.pop())
-									&& (tmp = library_namespace
-											.from_Chinese_numeral(tmp).replace(
-													/^\D+/, '').replace(
-													/[^\d時分秒]+$/, ''))
-									&& (tmp = String_to_Date(tmp))
-									&& (tmp -= new Date(tmp.getTime())
-											.setHours(0, 0, 0, 0))) {
+					if (date && tmp2) {
+						while (0 < tmp2.length) {
+							if ((tmp = tmp2.pop()) && (tmp = library_namespace
+							//
+							.from_Chinese_numeral(tmp)
+							//
+							.replace(/^\D+/, '').replace(/[^\d時分秒]+$/, ''))
+							//
+							&& (tmp = String_to_Date(tmp))
+							//
+							&& (tmp -= new Date(tmp.getTime())
+							//
+							.setHours(0, 0, 0, 0))) {
 								library_namespace.debug('處理時間。 [' + tmp + ']',
 										3, 'to_era_Date');
 								date.setTime(date.getTime() + tmp);
 								break;
 							}
+						}
+					}
 
 					// 處理完 {String}Date。
 					// -----------------------------
@@ -6504,7 +6415,7 @@ if (typeof CeL === 'function')
 					指定紀年 = 紀年;
 				}
 
-				if (options.get_era || options.get_era_list
+				if (options.get_era || options.get_era_list && (紀年 || !date)
 						|| options.parse_only || options.get_range
 						|| options.get_range_String)
 					return;
@@ -6535,19 +6446,38 @@ if (typeof CeL === 'function')
 				// 至此 date 應為 Date，並已篩出可能的主要紀年。
 				// Date → era information Date (Date += era information)
 
-				tmp = add_contemporary(date, 指定紀年, options);
+				if (tmp = add_contemporary(date, 指定紀年, options)) {
+					// 取得真正使用之紀年。
+					紀年 = tmp.紀年;
+
+					if (options.range && tmp.length > 0) {
+						if (!Array.isArray(偵測集 = options.range))
+							偵測集 = [ 偵測集 ];
+						紀年_list = library_namespace.Set_from_Array(tmp);
+						while (search_era() && get_intersection(matched[0])
+								&& 紀年_list.size > 1)
+							;
+						tmp = Array.from(紀年_list);
+						if (tmp.length === 1)
+							紀年 = tmp[0];
+						else if (tmp.length === 0)
+							tmp = 紀年_list = undefined;
+
+					} else
+						delete tmp.紀年;
+				}
+
+				if (options.get_era_list)
+					return 紀年_list;
+
 				if (!tmp)
 					return options.era_only ? [] : date;
-
-				// 取得真正使用之紀年。
-				紀年 = tmp.紀年;
-				delete tmp.紀年;
 
 				if (options.era_only)
 					// 此時未設定 (date.共存紀年)
 					return tmp;
 
-				紀年.add_note(date, options);
+				紀年.sign_note(date, options);
 
 				return date;
 			}
@@ -6826,7 +6756,7 @@ if (typeof CeL === 'function')
 				} : function(date_time, era) {
 					date_list.push(date = new Date(date_time));
 					add_contemporary(date, era, options);
-					era.add_note(date, options);
+					era.sign_note(date, options);
 				};
 
 				if (typeof era === 'string') {
@@ -7045,9 +6975,9 @@ if (typeof CeL === 'function')
 							});
 
 					if (!紀年) {
-						library_namespace
-								.warn('Date_to_era_String: 無法取得指定之紀年 [' + 紀年名
-										+ ']！');
+						library_namespace.warn(
+						//
+						'Date_to_era_String: 無法取得指定之紀年 [' + 紀年名 + ']！');
 						return;
 					}
 
@@ -7064,7 +6994,7 @@ if (typeof CeL === 'function')
 
 				// 警告: 此函數會更改原輸入之 date_value!
 
-				紀年.add_note(date_value, options);
+				紀年.sign_note(date_value, options);
 
 				return strftime(date_value,
 				//
@@ -7469,7 +7399,7 @@ if (typeof CeL === 'function')
 				to_HTML : era_text_to_HTML,
 				//
 				PERIOD_PATTERN : PERIOD_PATTERN
-			}, add_note.notes);
+			}, sign_note.notes);
 
 			// 加工處理。
 			(function() {
@@ -7478,14 +7408,14 @@ if (typeof CeL === 'function')
 					//
 					&& options.original_Date || date_value);
 				}
-				var notes = add_note.notes;
+				var notes = sign_note.notes;
 				for ( var name in notes)
 					notes[name]
 					//
 					= note_proxy.bind(notes[name]);
 			})();
 
-			Object.assign(add_note.notes, {
+			Object.assign(sign_note.notes, {
 				// 注意:依 .format() 之設定，在未設定值時將採本處之預設。
 				// 因此對於可能不設定的值，預設得設定為 ''。
 
@@ -7553,11 +7483,11 @@ if (typeof CeL === 'function')
 				// 注解
 				注 : ''
 			});
-			strftime.set_conversion(add_note.notes,
+			strftime.set_conversion(sign_note.notes,
 			//
 			library_namespace.gettext.to_standard('Chinese'));
 			// 已經作過改變，不再利用之。
-			delete add_note.notes;
+			delete sign_note.notes;
 
 			Object.assign(library_namespace, {
 				十二生肖_LIST : 十二生肖_LIST,
@@ -7566,11 +7496,18 @@ if (typeof CeL === 'function')
 
 			String_to_Date.parser.era = function(date_string, minute_offset,
 					options) {
-				if (minute_offset) {
-					// 前置處理。
-					if (!library_namespace.is_Object(options))
-						options = library_namespace.null_Object();
-					options.minute_offset = minute_offset;
+				if (false) {
+					// 依 String_to_Date() 當前之實作，不會出現此般差錯。
+
+					// 引數之前置處理。
+					if (library_namespace.is_Object(minute_offset)) {
+						if (!options)
+							options = minute_offset;
+					} else if (!isNaN(minute_offset)) {
+						if (!library_namespace.is_Object(options))
+							options = library_namespace.null_Object();
+						options.minute_offset = minute_offset;
+					}
 				}
 
 				library_namespace.debug('parse (' + typeof date_string + ') ['

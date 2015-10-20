@@ -1211,26 +1211,30 @@ if (!CeL.Log) {
 	 */
 
 	var log_front_end_fatal =
-	//	致命錯誤。
+	//	fatal: the most serious 致命錯誤。
 	function log_front_end_fatal(message, error_to_throw) {
-		// fatal: the most serious
-		try {
-			throw CeL.is_type(error_to_throw, 'Error') ? error_to_throw
-					: new Error(error_to_throw || 'Fatal error');
-		} catch (e) {
-			// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Error/Stack
-			CeL.err(e.stack ? message
-					+ '<br />stack:<div class="debug_stack">'
-					+ (typeof e.stack === 'string' ? e.stack.replace(/\n/g,
-							'<br />') : e.stack) + '</div>' : message);
-		}
+		if (CeL.is_WWW())
+			try {
+				throw CeL.is_type(error_to_throw, 'Error') ? error_to_throw
+						: new Error(error_to_throw || 'Fatal error');
+			} catch (e) {
+				// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Error/Stack
+				CeL.err(e.stack ? message
+						+ '<br />stack:<div class="debug_stack">'
+						+ (typeof e.stack === 'string' ? e.stack.replace(/\n/g,
+								'<br />') : e.stack) + '</div>' : message);
+			}
 
 		if (typeof error_to_throw === 'undefined')
 			error_to_throw = message;
 
-		if (error_to_throw)
+		if (error_to_throw) {
+			if (CeL.platform.nodejs)
+				// node.js 中，throw Error 可能無法顯示 local encoding，因此在此先顯示一次。
+				console.error(error_to_throw);
 			throw CeL.is_type(error_to_throw, 'Error') ? error_to_throw
 					: new Error(error_to_throw);
+		}
 	}
 
 	var log_front_end_debug =
@@ -1577,7 +1581,7 @@ if (!CeL.Log) {
 	 *            {Object}options: default options for running CeL.assert().<br />
 	 *            {Function}callback: 回調函數。 callback(recorder, test_name)<br /> }
 	 * 
-	 * @returns {Boolean}有錯誤發生。
+	 * @returns {Integer}有錯誤發生的數量。
 	 * 
 	 * @since 2012/9/19 00:20:49, 2015/10/18 23:8:9 refactoring 重構
 	 */
@@ -1659,7 +1663,7 @@ if (!CeL.Log) {
 		if (options && typeof options.callback === 'function')
 			options.callback(recorder, test_name);
 
-		test_name = test_name ? [ to_SGR([ 'Test [', 'fg=green;bg=white',
+		test_name = test_name ? [ to_SGR([ 'Test [', 'fg=blue;bg=white',
 				test_name, '-fg;-bg', ']: ' ]) ] : [];
 		function join() {
 			if (recorder.ignored.length > 0)
@@ -1674,7 +1678,7 @@ if (!CeL.Log) {
 					'fg=green', 'passed', '-fg' ]));
 
 			CeL.info(join());
-			return false;
+			return 0;
 		}
 
 		// not all passed.

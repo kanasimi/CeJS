@@ -96,10 +96,10 @@ https://zh.wikipedia.org/wiki/%E9%AB%98%E6%98%8C
 
 // console.info('Starting to load era data.');
 
-// node 中, this === undefined
+// node 中, 此處 this === undefined
 
-// tmp working space
-CeL.era.tmp = {
+/** {Object}為了不汙染 global，在 loading 時傳遞的暫時工作空間 temporary working space */
+CeL.era.pass_on = {
 	countries : CeL.null_Object(),
 	last_day : '2101/1/29'
 };
@@ -108,7 +108,7 @@ CeL.era.tmp = {
  * data from <a href="http://sinocal.sinica.edu.tw/" accessdate="2013/3/17
  * 19:23">中央研究院 兩千年中西曆轉換</a>
  */
-(CeL.era.tmp.countries.中國 = [
+(CeL.era.pass_on.countries.中國 = [
 		// Chinese: 中國傳統曆法。
 
 		// 共和元年（前841年）是中國歷史上有確切紀年的開始。
@@ -1597,7 +1597,7 @@ CeL.era.tmp = {
 		'/遜帝/宣統|1909/1/22~|4so25e9 3t52|君主名=愛新覺羅溥儀;溥儀|君主=末帝|生=1906年2月7日|卒=1967年10月17日|注=1917/7/1~12 張勳復辟。',
 
 		'中曆|1912/2/18~'
-				+ CeL.era.tmp.last_day
+				+ CeL.era.pass_on.last_day
 				+ '|1912/=4aa 3q2 3a0542z 3o5 3yoi4h0 4t535es 4ac 3nt150a 4yz 3pno5s9 4h4 4t8i5ew 4ihi3p1 3fe 4f39576 5s9 400j4i9 3ep33u2 3p1 380m42y 591 3qro5uq 4ia 3epu48a 3mw74z9 42y 4of95d1 49w 4pkz5as 3rdk3fu 505 3psm47e 5e1 3swk4a0 5ax 324z3my 4mg7591 4gi 4so55ea 4aa 3b503q2 3a2042z 42d 3yom4h0 5es 3t6s4ac 3nt650a 4yz 3po647d 4h4 4t8l5ew 52s 4g9f3fe 4fxk577 47d 40114i9 3u1 3a903p1 3mi 4mg2591 3qrr5uq 4ia 3epx48a 439 3mms46i 4ofd5dx 49w 4pl25as 48c 4c6c505 46i 4rky5e1 3swm4a9 3q1 32513os 579 4fv74gi 4sob5ea 4aa 3b5y3q2 3ot 37w542t 58y 4soy5es 3t6v4ac 47u 3mp14z1 46d 4oer4i0 4t8o5ew 52s 4g9i3fe 4zx 3qk447l 4i9 3eoj3u1 3a933p1 3mi 4mg5591 49e 4pic5aq 3rd448a 439 3mmu46i 59h 3sr849w 5as 3rer50s 4czr505 46i 4rl15e1 4a0 4pp03q1 32543ot 3md 4fva58y 5e9 3t444aa 3qi 38gy3os|紀年=農曆;陰曆;舊曆;夏曆|注=中國傳統曆法暫時名稱。又稱夏曆、黃曆、皇曆、漢曆、農曆、陰曆、舊曆等。|注=羅爾綱《不應稱舊曆為農曆》（1992，上海《文匯報》） 羅先生說，辛亥革命以後，一般是把舊曆（陰陽曆）叫做「夏曆」。',
 
 		// 清朝統治地區其他勢力年號
@@ -1717,18 +1717,18 @@ CeL.era.tmp = {
 		'/臺灣時期/戒嚴時期|1949/12/8~|38/=:CE|據=Wikipedia|注=中華民國臺灣省政府主席兼臺灣省警備總司令陳誠於1949年5月19日頒布的戒嚴令，內容為宣告自同年5月20日零時（中原標準時間）起在臺灣省全境實施戒嚴|注=1949年12月8日，行政院召集緊急會議，決議遷都臺北',
 		// https://zh.wikipedia.org/wiki/%E8%A7%A3%E5%9A%B4%E7%B4%80%E5%BF%B5%E6%97%A5
 		'/民主化時期|1987/7/15~'
-				+ CeL.era.tmp.last_day
+				+ CeL.era.pass_on.last_day
 				+ '|76/=:CE|注=1987年7月15日中華民國政府解除「臺灣省戒嚴令」。該戒嚴令自1949年5月19日頒布，次日開始行使',
 
 		'中华人民共和国/毛泽东|1949/9/21~|1949/=:CE|生=1893年12月26日|卒=1976年9月9日|君主字=潤之|據=Wikipedia|注=1949年9月21日，中国人民政治协商会议第一届全体会议正式宣布成立中华人民共和国。「中华人民共和国的紀年採用公元，今年為一九四九年」',
 		'/邓小平|1978/12/18~|1978/=:CE|生=1904年8月22日|卒=1997年2月19日在北京病逝|君主名=邓先圣;邓希贤|據=Wikipedia|注=中国共产党第十一届中央委员会第三次全体会议，简称中共十一届三中全会，於1978年12月18日至12月22日在北京举行。',
-		'/后邓时代|1997/2/19~' + CeL.era.tmp.last_day + '|1997/=:CE'
+		'/后邓时代|1997/2/19~' + CeL.era.pass_on.last_day + '|1997/=:CE'
 
 ]).minute_offset = 8 * 60;
 
 // ---------------------------------------------------------------------//
 
-(CeL.era.tmp.countries.日本 = [
+(CeL.era.pass_on.countries.日本 = [
 		// Japan: 中國農曆日期和韓國農曆日期也不一致。日本從1685年開始，就自行編製農曆，一直到明治六年。
 
 		'旧暦|593/2/7~2071/1/30|593/=59m 3quh579 47m 4ojp59m 579 3qs147o 4oka42y 59h 3qtz47p 42y 4of759l 3quj505 47e 4oiw59m 505 3ql147m 59m 4g4i591 3qsa47p 3oq 4o1359h 47p 39zo46i 4ofg59m 47p 3pso47e 59m 3qud579 47e 4ojm59m 4mgb59h 47o 4ok742y 59h 3qtv47p 3mn047e 59l 3quh505 47e 4oit59m 505 3qkx47m 4oka3oq 591 3qs747p 3oq 4o0z59h 3quj47p 46i 4ofd59m 47p 3psm47e 59m 3qua579 3ql647o 59m 4mg7591 47o 4ok442y 4o1859l 47p 3mmw46i 59l 3qv9505 46i 4oiq59l 4mu44h0 5es 3t6v52s 506 3pt04zu 5s9 3z4h4i0 4t943u1 3p1 31li3me 576 55425sh 408b4ia 3u2 3a93439 42u 4nys59g 5uq 408x4i4 3rd550q 46t 3mmu47e 5d0 4uqb4a0 4pln3px 3fu 4g4n579 47e 4sgz5e9 49w 4ppd3q1 38ex42y 591 3x3p4gy 5ea 3t4z4aa 3b6247u 42y 4o145r9 4h0 4t505ed 33x83hw 50a 4f3e4zu 5s9 3swm4i8 5ew 4ihf3p0 4mh7592 56y 55485eq 44x 3bid5ew 59x 380h3o6 4o0p59e 5t0 3tz95as 48a 3a1v4vp 3d1747e 5e0 57d35uw 5as 3ret50q 505 3qkx4ei 4sh65e9 4a8 4pom5at 3n0 4mg258z 3yos4gy 5ea 3t534ac 449 3mn842y 59h 3fpt4h0 43ux5es 52s 3qzb3fe 4zu 42ar5s9 3xng4i0 4mg 4ihj3p0 57e 4m7958y 5s9 400h4i9 3ep53u1 3p1 37x342t 58y 55b75uq 40984ic 48a 3mw84z9 46g 5dp05dw 5us 40aq5as 3rca50q 46l 3mly47d 4h0 4upv5go 4ja43p0 50a 4g4o578 5s8 5elg4lt 3vt 3b1e3px 38ey42y 591 3qs749u 5ea 3rcz48i 3b1n47p 46i 4oft3t0 5us 4pl15es 48k 3npd505 3psq47e 5s9 3swm4aw 5bc 4gwj3os 4mho3o5 58y 55bc5e9 4b5 3bj93u2 3ot 37wy42t 4nyy59g 5gi 3txi4b8 48a 3mw44z9 3prw47d 5ac 4uq05go 5as 4gnp3fu 505 3psh47e 4shn3tf 3hl 3b1j3px 3my 4mgz591 3sd84gy 5ea 3t534aa 449 3mmt42y 59h 3z2p4h0 4t555es 4ac 3qyv506 46i 54835s9 3z8c4i9 3u0 4ihk3p0 57a 4fv958y 5sh 400i4i9 3ep648i 3p1 380n42t 58y 55c35uq 40985as 48a 3mw8505 46i 4oet5dw 5us 40aq5as 4gnu3oq 505 3ql34ga 5e1 3swj4a1 3b4s3q1 3oq 4mg9591 4gi 4so55ea 4aa 3b4y449 3mmy46i 5np 3z2u4h0 5es 3t504ac 3qz0506 46i 54895s9 4h4 4t515ew 52s 4g8y57a 4fve58y 5sh 400m4i9 3u1 33xg3p1 39lo42t 590 55c95uq 4ia 3rd148a 439 3mmp46i 4oga5dw 5us 4pl35as 50q 4fc3505 3ql847e 5e1 3swo4a1 3px 32513oq 579 3qkx4gi 4sp65ea 4aa 3b53449 42y 4o105np 3z304h0 5es 3t6w52s 44a 3mna4zu 5r9 3z4i4i0 4t963u0 52s 4g9j3mi 577 3qk347l 4i9 3eoh3u1 3a953p1 3oa 4mg5590 5ua 40824ia 3rd648a 439 3mmv46i 59g 57b75uw 5as 3rcx50q 4g4p579 47e 4sdh5e1 4a0 4poy3q1 32563oq 579 3qs74gi 5e9 3t444aa 3b5847u 42z 39h546d 4gy 4sp15es 4ac 3nsy50a 3mp64zv 46h 3z4m4i0 5ew 4ih059w 4g9o3mi 577 3ql547l 4i9 3eol3u1 3p1 380i3oq 4o2259g 5ua 40874ic 48a 3a90445 3mn046i 59h 3st54a0 5as 3rd250q 505 3psi47e 4si25e1 4a0 4pp33qh 3ho 4g4k579 3wws4gi 5e9 3t484b6 3q1 3a1y431 3o5 4nyq4gy 4t3e5gk 4b8 3nt350a 431 3mic47d 4h0 4t4x5go 4ih559w 50a 4f52577 47d 400i4i9 3eq2489 3p1 380n3oq 591 3qs349u 4i9 3rcx48a 3a95445 42y 4o125d1 49w 4pky5as 3rm252k 505 3pzr47e 5e1 3swk4a0 4q3g3qh 3os 4g5l591 576 4sh15e9 4b5 3bj73qh 3a2y431 3o5 4nyv59e 5eq 3txg4b8 48a 3mox46l 3mjd47d 59g 4upx5go 53o 3rcz50a 4g5m579 47d 4pav4lt 3vs 4plg3px 38f042y 591 3qsa49u 4lt 3sxy48i 3px 39zm42y 4o225d1 4h0 4pl35b8 48k 3npg505 3pss47e 5s9 3z9k4aw 5bc 4ihi3os 506 4fv758y 558q47l 4b5 3bjb3u1 3p1 37x142t 58y 55c15gi 3txl4b8 48a 3mw646l 46h 4oeq59g 4uru4a0 5as 3rk750q 505 3psk47d 5e1 3g9e4a0 4pll3px 3my 4mg6591 49e 4so25e9 3t564aa 3q1 3a6v42y 59h 3yok4h0 5ec 3t4x4ac 3nt5506 46i 54865s9 4h4 4t4z5ew 4iiy438 506 4g2f58y 5s9 400k4i9 3u1 3a8x3p1 37x542t 58y 55c55uq 4b6 3epv48a 3mx6505 46i 4opz5ac 5us 40as5as 50q 3mw1505 3psq47e 5e1 3swm4a0 5as 4gnn3oq 4mh6591 4gi 4so75e9 4aa 3b51449 3oq 4o0x59h 3z2y4h0 5es 3t524ac 47u 3mn746i 548b5s9 4h4 4t933u0 52s 4g9157a 4zu 55415sh 40214i9 3u1 3a923p1 3mi 4mdu58y 55fu49u 4ia 3eq048a 439 3mms46i 59g 57b55us 40ax5as 50q 4c6e505 47e 4of65e1 3sy24a0 5ax 32543oq 56d 3ql14gi 5e9 3swx4aa 3b61449 42y 4o135np 4gy 4soz5es 3t574ac 47u 3mnc46i 5r9 3z4k4i0 5ew 3t6q52s 4g9m3mi 4zv 3qjq5sh 4i0 4t8z3u1 3a973p1 3oa 4mg8590 5ua 40844ia 48a 3a8y439 3mmy46i 59g 57ba5us 5as 3rcz50q 4g4r505 47e 4rl55e1 4a0 4plh3q1 3fw 4g4h579 3ql64gi 5e9 3sx24aa 3q1 3a1f42z 39gr5r9 4gy 4sp35es 4ac 3nt147u 431 3mi946d 3z624i0 5ew 3t6u59w 50a 4f4z577 3qjw5sh 4i8 4t943u1 3p1 31p13oq 579 3qkh5ua 408b4ia 48a 3a93439 42y 4o0z59h 49u 408x5as 3rd450q 505 3psl47e 5dx 3ssx4a0 4pp53q1 3ho 4g4n579 47e 4sgz5e9 3t4b4b6 3q1 3a20431 3o5 4nys4gy 5ea 3txe4b8 3nt647u 431 3mie46h 4h0 4t4z5go 4ih859w 50a 4f54577 47d 400k4i9 3u0 4osy3p1 31p63oq 591 3qrr5ua 4i9 3eoz48a 3a97445 42y 4o155d1 49u 4pj95as 48i 3noh505 3psq47e 5e1 3st24a0 5bc 4gwk3ho 4g5o579 4ei 4sh45e9 4b5 3bj93qh 3ot 37wy3o5 4nyy59e 5eq 3txi4b8 48a 3mp0431 3mik47d 59g 4uq05go 53o 3rd150a 579 3qkz4gi 5e9 3swh4aa 3b5444a 3ot 37w542t 4gi 4soy5es 3t6x4ac 47u 3mp44yz 46d 3z4k4i0 5ew 3t6p52s 4g9k3fe 4zv 3qjp5s9 4i0 4t8y3u1 3a963p1 3mi 4mg7591 49e 40844ia 48a 3a8x439 3mmx46i 59h 3sr949w 5as 3rcz50s 4c6j505 46i 4rl35e1 4a0 4pok5ax 32583os 579 4fve4gi 5e9 3sx24aa 3q1 38gy3ot 39h742t 4gy 4sp35es 4ac 3b5w47u 3mp84yz 46d 4oex4i0 5ew 3t6u59w 50a 4f4z505 3qkc47l 4i9 3eon3u1 3p1 31p13oq 579 3qkx49e 4pii4ia 48a 3a92439 42y 4o0y59h 3srf49w 5as 3rlz50s 4wm 3mms47e 5dx 3ssx4a0 4q3c3qh 3fw 4g5y3md 56y 55425e9 3twr4b6 3qi 3a20431 3o6 4nys59e 5ea 3txd4b8 3eq047u 431 3mja46h 59g 55s35go 3tzf5as 50q 4fc7579 47e 4pb85e9 3vs 4pld3px 323d3oq 579 3ql149e 5e9 3sx04a2 3px 38eq42y 4o135d1 4gy 4sp15es 4ac 3nsz506 3mmw4zu 5s5 3z4l4aw 5bc 4ihg3hw 4g623me 56y 55465sh 4b5 3bj93u2 3p1 37wz3o6 4nyv59e 5sy 3txh4b8 48a 3a90439 3mn046h 59g 57d25uw 5as 3rd150q 4z9 3psj47e 4sh45e9 4a0 4plh3px 3fu 4g4k579 47m 4sgy5e9 3t464aa 3q2 38f942y 591 3yoi4gy 4sp35es 4ac 3nt1506 46j 3mhw5s9 4h0 4t4y5ew 4ihi3hx 3fe 4f3956y 5s9 3z834i9 3ep33u2 3p1 380m42e 58y 55c45uq 4ia 3epu48a 3a93439 42y 4o115d0 5us 40ar5as 3rd450q 505 3psm47e 5e1 3swk4a0 5aw 4gpf3my 4g4n591 4eq 4so55e9 4a9 3b503q2 3a0842z 3o5 3yom4h0 5es 3t504ac 3nt650a 4yz 3mhy5s9 4h0 4t515ew 52s 4g9f3fe 4f3c576 5s9 400l4i9 3u1 33xg3p1 3mi 4mg258z 3qrr5uq 4ia 3epx48a 439 3knn42y 4ofd5dx 49w 4pl15as 48a 3mw4505 46i 4of65e1 3swm4a0 5aw 4gph3n0 579 3qkz4gi 4sob5e9 4aa 3b523q2 3ot 37w542d 4gi 4soy5es 3t6v4ac 44a 3mp14yz 46d 3z4j4h4 4t545ew 52s 4g9i3fe 4zx 3pro47d 4i0 4t8z3u1 3a933p1 3mi 4mg5591 47m 40844ia|參照用|注=和暦(邦暦):旧暦+新暦。和暦(わごよみ)は、明治5年12月2日以前は旧暦、明治6年1月1日以降は新暦です。',
@@ -2145,7 +2145,7 @@ CeL.era.tmp = {
 		'/昭和天皇/昭和|1926/12/25~|:CE|諡=裕仁天皇',
 		// 第125代天皇
 		// 「元号を改める政令」（昭和64年政令第1号）は新天皇の允裁（いんさい）を受けた後、官報号外によって公布され、翌1月8日から施行された。
-		'/明仁天皇/平成|1989/1/8~' + CeL.era.tmp.last_day + '|:CE|諡=今上天皇',
+		'/明仁天皇/平成|1989/1/8~' + CeL.era.pass_on.last_day + '|:CE|諡=今上天皇',
 
 		// 臺灣日治時期 武裝反抗日本對臺灣殖民統治發動起義而建立的政權
 		'臺灣民主國/唐景崧/永清|1895/5/25~|:清|疑|時期=日治臺灣|總統=唐景崧|注=臺灣通史/卷4:光緒二十一年夏五月朔，臺灣人民自立為民主國，奉巡撫唐景崧為大總統。...初二日，紳士邱逢甲率人民等公上大總統之章。景崧受之，建元永清，旗用藍地黃虎。|注=1895年5月25日，大總統唐景崧於《臺灣民主國獨立宣言》中，首度公布並使用此年號。',
@@ -2163,7 +2163,7 @@ CeL.era.tmp = {
 
 // ---------------------------------------------------------------------//
 
-(CeL.era.tmp.countries.한국 = [
+(CeL.era.pass_on.countries.한국 = [
 		// Korean
 
 		// 朝鮮三國時代
@@ -2388,17 +2388,17 @@ CeL.era.tmp = {
 
 		'대한민국/대한민국/대한민국|1919/3/1~|:CE|紀年=大韓民國|注=대한민국 임시 정부는 1919년 4월 11일, 날짜를 "대한민국 원년 4월 11일"로 표기한 대한민국 임시헌장을 제정·공포하면서부터 이 연호를 공식적인 기년법(紀年法)으로 채택하여 입법, 재정, 외교, 군사문서는 물론 한인애국단, 한국광복군 등 산하기관의 서류를 포함한 모든 공문서에 사용하였다.',
 		'/단군기원|1948/9/25~|4281/=:CE|紀年=檀君紀元;단기;檀紀|注=이가 단군(檀君)이며 국호(國號)는 조선(朝鮮)이었는데, 바로 당요(唐堯) 무진년(戊辰年: 기원전 2333년)이었다.',
-		'/서력기원|1962~' + CeL.era.tmp.last_day + '|1962/=:CE|紀年=西曆紀元;약칭 서기;西紀',
+		'/서력기원|1962~' + CeL.era.pass_on.last_day + '|1962/=:CE|紀年=西曆紀元;약칭 서기;西紀',
 
 		'조선//주체연호|1997/7/8~'
-				+ CeL.era.tmp.last_day
+				+ CeL.era.pass_on.last_day
 				+ '|86/=:CE|紀年=主體年號;주체;主體|政權=朝鮮;공화국;조선민주주의인민공화국;朝鮮民主主義人民共和國|注=주체력(主體曆)|注=朝鮮民主主義人民共和國成立以來一直以西曆紀元。1997年7月8日，朝鮮開始實行主體年號。'
 
 ]).minute_offset = 9 * 60;
 
 // ---------------------------------------------------------------------//
 
-(CeL.era.tmp.countries['Việt Nam'] = [
+(CeL.era.pass_on.countries['Việt Nam'] = [
 
 		// https://vi.wikipedia.org/wiki/Ni%C3%AAn_bi%E1%BB%83u_l%E1%BB%8Bch_s%E1%BB%AD_Vi%E1%BB%87t_Nam
 
@@ -2546,8 +2546,8 @@ CeL.era.tmp = {
 		'/景宗/武安|1592/2/13~|:中國|準=年|君主名=莫敬邦',
 		'/閔宗/寶定|1593/1/3~|:中國|準=年|君主名=莫敬止',
 		'/康佑|1593/2/1~|:中國|準=年',
-		'/代宗/乾統|1593/3/3~|:中國|準=年|君主名=莫敬恭',
-		'/光祖/隆泰|1623/1/31~|:中國|精=年|準=年|君主名=莫敬寬',
+		'/代宗/乾統|1593/3/3~1625/2/6|:中國|準=年|君主名=莫敬恭',
+		'/光祖/隆泰|1618/1/26	~|:中國|精=年|準=年|君主名=莫敬寬|《欽定越史通鑑綱目》莫敬寬於1618年建元隆泰，之後與父親莫敬恭分據高平。',
 		'/永祚|1625/2/7~|:中國|精=年|準=年|注=1625年，後黎朝討滅莫敬恭，莫敬寬投降，被封為太尉通國公，以後莫朝開始使用後黎朝的年號，直到1638年，改元順德。',
 		'/明宗/順德|1638/2/14~1678/1/22|:中國|精=年|準=年|君主名=莫敬宇|注=1638年莫敬寬死後繼位，改年號為順德（Thuận Đức）。1677年，鄭柞借黎熙宗的名義，以丁文左、阮有登等為將，再次討伐盤踞高平的莫氏。莫敬宇兵敗，逃往中國廣西的龍州。',
 		// 中興黎朝, Nhà Lê trung hưng
@@ -2590,7 +2590,7 @@ CeL.era.tmp = {
 		// accessdate="2014/3/13 23:29">Niên hiệu Việt Nam</a>
 
 		'Âm lịch|1800/1/25~'
-				+ CeL.era.tmp.last_day
+				+ CeL.era.pass_on.last_day
 				+ '|1800/=3psj47e 5s5 3z4h4aw 4q3c3qh 3hw 4g5y3md 56y 55425sh 4b5 3bj63u2 3a92431 42e 4nys59e 5uq 3txf4b8 3rd348a 439 3mmt46i 59g 57d05uw 4pl55as 50q 4fc6579 47e 4pb85e9 4a0 4plv3px 323b3oq 579 3qs54gy 5e9 3sxw4aa 3b60446 42y 4o135r9 4gy 4sqt5es 4ac 3nsz506 3pt44zu 5s9 3z4l4i0 5ew 4ihg3hx 31p63me 576 55465sh 4i9 3ep13u2 3p1 380j42e 4nyv59g 5uq 40914ic 48a 3a90439 42y 4of659g 57d25uw 5as 3rdh3fu 505 3psj47e 4sh45e9 4a0 4pph3q1 3my 4mg4591 4eq 4so25e9 3t524aa 3q2 3a1x42z 3o5 3yoi4h0 4t535ew 4ac 3nt150a 4yy 54845s9 4h4 4t8i5ew 4ihi3p1 3fe 4f39576 5s9 400j4i9 3ep33u2 3p1 380m42y 591 3qro5uq 4ia 3epu48a 3mw74z9 42y 4of95d1 49w 4pkz5as 3rdk3fu 505 3psm47e 5e1 3swk4a0 5ax 324z3mz 37w73o5 4gi 4so55ea 4aa 3b5w44a 3a2042z 42t 4nyu4h0 5es 3t6s4ac 47u 3moy4z1 3po747d 4i0 4t8l5ew 52s 4g9f3fe 4g4o591 47m 40114i9 3u1 3a903p1 3mi 4mg2591 3sd349u 4ic 3rd148a 439 3mms46i 4ofd5dx 49w 4pl25aw 50s 4c78505 46i 4rky5e1 3swm4a9 3q1 32513ot 3md 4m6r58y 4sob5eq 4aa 3b5y44a 431 37x142t 59e 4soy5es 3t6v4ac 47u 3mp14z1 46h 4oer5ag 4t943u0 59w 4g9i3mi 579 3ql047m 5ap 3eoj3u2 3a933p1 3my 4mg5591 49e 4pic5as 3rd448c 43a 3mmu46i 59h 3st04a0 5as 3rlv50s 4g5j505 46i 54bp5s9 4a0 4q383qh 325k3ot 3me 4m6u58y 5sh 3t444b6 3qi 3a8y431 39hz|紀年=陰曆越南|參照用',
 
 		'西山朝/阮光纘/景盛|Âm lịch 1800~|8/=:Âm lịch|國號=大越',
@@ -2618,7 +2618,7 @@ CeL.era.tmp = {
 		'/保大|Âm lịch 1926~|:Âm lịch',
 		'帝國越南/皇帝保大|1945/3/11~8/23|:CE|注=未確定是否使用公曆！|時期=法越戰爭|注=1925/11/6~1945/8/30在位|注=1945年3月11日（保大二十年農曆正月廿七日）上午，日本大使橫山前往順化，在太和殿覲見保大， 以「亞洲歸亞洲人」鼓動保大，於是在當天下午，保大就召集六部尚書和王公親貴，發布《獨立宣言》，宣布廢除越南與法國1884年簽訂的不平等條約，脫離法國保護，宣告越南成立獨立自主的國家，並加入以日本為首的「大東亞共榮圈」，決定與日本政府合作。4月17日任命著名歷史學家陳仲金為越南歷史上首位內閣總長〈亦即首相〉。',
 
-		'越南陰曆|1945/3/11~' + CeL.era.tmp.last_day + '|1945/=:Âm lịch',
+		'越南陰曆|1945/3/11~' + CeL.era.pass_on.last_day + '|1945/=:Âm lịch',
 
 		// Thời kỳ Chiến tranh Đông Dương 1945-1975
 		'國家越南|1949/6/14~|1949/=:CE|國號=Quốc gia Việt Nam;越南國|時期=法越戰爭',
@@ -2627,7 +2627,7 @@ CeL.era.tmp = {
 		'共和沔南越南|1969/6/8~1976/7/1|1969/=:CE|國號=Cộng hòa miền Nam Việt Nam;南越南共和國|時期=法越戰爭',
 
 		'越南民主共和|1945/9/2~|1945/=:CE|國號=Việt Nam Dân chủ Cộng hòa;北越|時期=法越戰爭|注=1953年越南民主共和國所發行的紙幣，上印有「越南民主共和」字樣。',
-		'共和社會主義越南|1976/7/2~' + CeL.era.tmp.last_day
+		'共和社會主義越南|1976/7/2~' + CeL.era.pass_on.last_day
 				+ '|1976/=:CE|國號=Cộng hòa Xã hội chủ nghĩa Việt Nam;越南社會主義共和國'
 
 ]).minute_offset = 7 * 60;
@@ -2635,7 +2635,7 @@ CeL.era.tmp = {
 // ---------------------------------------------------------------------//
 // 印度年表, ancient India
 
-(CeL.era.tmp.countries.India = [
+(CeL.era.pass_on.countries.India = [
 
 		// मगध (Magadha empire)
 		// https://en.wikipedia.org/wiki/Magadha
@@ -2747,7 +2747,7 @@ CeL.era.tmp = {
 // ---------------------------------------------------------------------//
 // 緬甸, Myanmar / Burma
 
-(CeL.era.tmp.countries['မြန်မာ'] = [
+(CeL.era.pass_on.countries['မြန်မာ'] = [
 
 		function() {
 			var start = -25 - 1, year = start, calendar = [],
@@ -2773,7 +2773,7 @@ CeL.era.tmp = {
 					// '月名=' +
 					// CeL.Myanmar_Date.month_name.en.slice(1).join(';'),
 					, '注=Myanmar calendar, Myanmar era' ];
-		}.call(CeL.era.tmp),
+		}.call(CeL.era.pass_on),
 
 		// 關係: 為前任者之～, Relationship with predecessor(s).
 
@@ -3085,7 +3085,7 @@ CeL.era.tmp = {
 		'Konbaung exiled/=|1885/11/29~|:CE',
 		'/Myat Paya Lat|1916/12/19~|:CE|疑|關係=Daughter',
 		'/Myat Phaya|1956/4/4~|:CE|疑|關係=Younger sister',
-		'/Taw Phaya|1962/7/20~' + CeL.era.tmp.last_day + '|:CE|疑|關係=Second son',
+		'/Taw Phaya|1962/7/20~' + CeL.era.pass_on.last_day + '|:CE|疑|關係=Second son',
 
 		// https://en.wikipedia.org/wiki/President_of_Myanmar
 		'British Burma|1824/3/5~1948/1/3|:CE|注=First Anglo-Burmese War: 1824/3/5. From 31 January 1862 to 1 May 1897, British Burma was headed by a Chief Commissioner.',
@@ -3110,7 +3110,7 @@ CeL.era.tmp = {
 		'Union of Myanmar/=|1989/6/18~|:CE|時期=Military rule|注=1989年6月18日緬甸軍人政府將緬甸的英文寫法「Burma」改為「Myanmar」。',
 		'/သန်းရွှေ|1992/4/23~|:CE|君主名=Than Shwe|注=1997年11月15日起改任國家和平與發展委員會主席(State Law and Order Restoration Council→State Peace and Development Council)',
 		'မြန်မာပြည်/=|2010/10/21~|:CE|國名=Republic of the Union of Myanmar|時期=Democratic reforms',
-		'/သိန်းစိန်|2011/3/30~' + CeL.era.tmp.last_day + '|:CE|君主名=Thein Sein'
+		'/သိန်းစိန်|2011/3/30~' + CeL.era.pass_on.last_day + '|:CE|君主名=Thein Sein'
 
 ]).minute_offset = 6.5 * 60;
 
@@ -3118,7 +3118,7 @@ CeL.era.tmp = {
 // 瑪雅文明, pre-Columbian Maya civilization
 // https://en.wikipedia.org/wiki/Category:Maya_rulers
 
-(CeL.era.tmp.countries.Maya = [
+(CeL.era.pass_on.countries.Maya = [
 		// http://www.mesoweb.com/palenque/resources/rulers/rulers_table.html
 		// http://research.famsi.org/whos_who/pm_index.php
 		// http://www.criscenzo.com/jaguarsun/dynasty.html
@@ -3154,7 +3154,7 @@ CeL.era.tmp = {
 // Mesopotamian
 // https://en.wikipedia.org/wiki/List_of_Mesopotamian_dynasties
 
-(CeL.era.tmp.countries.Mesopotamian = [
+(CeL.era.pass_on.countries.Mesopotamian = [
 
 		// Urartu (Akkadian Uraštu; Hebrew Ararat; Kingdom of Van; Biainele)
 		// https://en.wikipedia.org/wiki/List_of_kings_of_Urartu
@@ -3371,7 +3371,7 @@ CeL.era.tmp = {
  * @see http://www.trismegistos.org/top.php
  */
 
-(CeL.era.tmp.countries.Egypt = [
+(CeL.era.pass_on.countries.Egypt = [
 
 		(function() {
 			// Egyptian year (has year 0) = -26
@@ -3684,7 +3684,7 @@ if (false) {
 
 // ---------------------------------------------------------------------//
 
-CeL.era.tmp.step = function() {
+CeL.era.pass_on.step = function() {
 	var queue = this.queue,
 	// 因為載入時間較長，使用此功能可降低反應倦怠感，改善體驗。
 	loaded = typeof CeL.env.era_data_load === 'function'
@@ -3722,13 +3722,13 @@ CeL.era.tmp.step = function() {
 		// delete this.CeL_era_data;
 		// delete this.step;
 		// delete this.queue;
-		delete CeL.era.tmp;
+		delete CeL.era.pass_on;
 	} catch (e) {
 		// IE10 不允許 <code>delete this.*;</code>。
 		// Error 445 [TypeError] (facility code 10): 物件不支援此動作
 	}
 
-}.bind(CeL.era.tmp);
+}.bind(CeL.era.pass_on);
 
 if (typeof CeL === 'function')
 	CeL.run('data.date.era', function() {
@@ -3745,7 +3745,7 @@ if (typeof CeL === 'function')
 
 		setTimeout(this.step, 0);
 
-	}.bind(CeL.era.tmp));
+	}.bind(CeL.era.pass_on));
 
 else
-	CeL.era.tmp.step();
+	CeL.era.pass_on.step();

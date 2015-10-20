@@ -1502,8 +1502,10 @@ OS='UNIX'; // unknown
 
 	// for JScript<=5
 	try {
-		// ^\s*: JScript 6-9 native object 需要這個。
-		//function_name_pattern = new RegExp('^\s*function[\\s\\n]+(\\w+)[\\s\\n]*\\(');
+		//@deprecated /^\s*function[\s\n]+(\w+)[\s\n]*\(/
+		// ^\\s*: JScript 6-9 native object 需要這個。
+		//function_name_pattern = new RegExp('^\\s*function[\\s\\n]+(\\w+)[\\s\\n]*\\(');
+
 		_.PATTERN_function = function_name_pattern =
 		// [ all, function name, function arguments, function body ]
 		/^\s*function(?:[\s\n]+([^\s\n]*?)[\s\n]*)?\([\s\n]*([^)]*?)[\s\n]*\)[\s\n]*{[\s\n]*([\s\S]*)[\s\n]*}[\s\n;]*$/;
