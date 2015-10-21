@@ -132,20 +132,15 @@ if (false) {
 
 
 	// test for parse_template()
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 0, 0)
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 0, 1)
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 0)
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 1)
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 0)
-	parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 1)
+	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 0, 0)
+	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 0, 1)
+	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 0)
+	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 1)
+	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 0)
+	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 1)
 
-	CeL.assert([ '{{temp|{{temp2|p{a}r}}}}',
-	             parse_template('a{{temp|{{temp2|p{a}r}}}}b')[0] ]);
-	CeL.assert([ '{{temp|{{temp2|p{a}r}}}}',
-	             parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp')[0] ]);
-	CeL.assert([ '{{temp2|p{a}r}}',
-	             parse_template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]);
-
+	// More examples: see /_test suite/test.js
+	
 	// Flow
 	CeL.wiki.Flow('Wikipedia_talk:Flow_tests', function(page_data) {
 		CeL.log(page_data.is_Flow === true);

@@ -1587,7 +1587,7 @@ if (!CeL.Log) {
 	 * 
 	 * @since 2012/9/19 00:20:49, 2015/10/18 23:8:9 refactoring 重構
 	 */
-	function log_front_end_test(test_name, conditions, options) {
+		function log_front_end_test(test_name, conditions, options) {
 		if (Array.isArray(test_name) && !options) {
 			// shift: 跳過 test_name。
 			options = conditions;
@@ -1700,25 +1700,30 @@ if (!CeL.Log) {
 			if (options && typeof options.callback === 'function')
 				options.callback(recorder, test_name);
 
-			var messages = test_name ? [ to_SGR([ 'Test [', 'fg=blue;bg=yellow',
-			                                   test_name, '-fg;-bg', ']: ' ]) ] : [];
+			var messages = test_name ? [ to_SGR([ 'Test [', 'fg=cyan', test_name,
+					'-fg', ']: ' ]) ] : [];
 			function join() {
 				if (recorder.ignored.length > 0)
 					messages.push(to_SGR([ ', ' + recorder.ignored.length + ' ',
-					                        'fg=yellow', 'ignored', '-fg' ]));
+							'fg=yellow', 'ignored', '-fg' ]));
 
 				// 使用/耗費時間。cf. eta, Estimated Time of Arrival
 				var elapsed = Date.now() - assert_proxy.starts;
 				if (elapsed >= 1000)
 					messages.push(', ' + (elapsed / 1000).to_fixed(2) + 's');
-				messages.push(', ' + (recorder.all.length / elapsed).to_fixed(2) + ' tests/ms.');
+				messages.push(elapsed === 0 ? ', elapsed 0s.' : ', '
+						+ ((elapsed = recorder.all.length / elapsed) < 1
+						//
+						? (1000 * elapsed).to_fixed(2) + ' tests/s.'
+						//
+						: elapsed.to_fixed(2) + ' tests/ms.'));
 				return messages.join('');
 			}
 
 			if (recorder.failed.length === 0 && recorder.fatal.length === 0) {
 				// all passed 測試通過
 				messages.push(to_SGR([ 'All ' + recorder.passed.length + ' ',
-				                        'fg=green', 'passed', '-fg' ]));
+						'fg=green', 'passed', '-fg' ]));
 
 				CeL.info(join());
 				return 0;
@@ -1726,15 +1731,15 @@ if (!CeL.Log) {
 
 			// not all passed.
 			messages.push(recorder.failed.length + '/'
-					//
-					+ (recorder.failed.length + recorder.passed.length));
+			//
+			+ (recorder.failed.length + recorder.passed.length));
 			if (recorder.failed.length + recorder.passed.length !== recorder.all.length)
 				messages.push('/' + recorder.all.length);
 			messages.push(to_SGR([ ' ', 'fg=red', 'failed', '-fg' ]));
 			if (recorder.fatal.length > 0)
 				// fatal exception error 致命錯誤
 				messages.push(to_SGR([ ', ' + recorder.fatal.length + ' ',
-				                        'fg=red;bg=white', 'fatal', '-fg;-bg' ]));
+						'fg=red;bg=white', 'fatal', '-fg;-bg' ]));
 
 			if (recorder.passed.length > 0) {
 				CeL.warn(join());

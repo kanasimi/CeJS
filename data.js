@@ -67,13 +67,14 @@ equal()
 
 */
 /**
- * clone object<br />
- * Object.clone()
+ * clone object
  * 
  * @param object
  * @param {Boolean}deep
  *            deep / with trivial
  * @return
+ * 
+ * @see Object.clone() @ data.native
  * @since 2008/7/19 11:13:10, 2012/10/16 22:01:12, 2014/5/30 19:35:59.
  */
 function clone(object, deep) {

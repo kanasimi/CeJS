@@ -184,6 +184,18 @@ function test_console() {
 
 	// restore CSI.
 	SGR.CSI = CSI;
+
+	if (true) {
+		var demo = [ [ 'fg ' ], [ 'bg ' ] ];
+		new Array(8).fill(0).forEach(function(_, index) {
+			demo[0].push('fg=' + index, index);
+			demo[1].push('bg=' + index, index);
+		});
+		demo[0].push('-fg');
+		demo[1].push('-bg');
+		CeL.log(new SGR(demo[0]) + '\n' + new SGR(demo[1]));
+	}
+
 	node_info('Passed: All console tests.');
 }
 
@@ -976,8 +988,9 @@ function test_CSV() {
   		[[CeL.parse_CSV('"a","b"\n_1,_2\n_3,_4\n_5,_6',{handle_array:[,function(v){return ':'+v;}]})[0][1],'b']],
   	]);
 
+	CeL.set_debug(0);
 
-  	error_count += CeL.test('CSV no_text_qualifier', [
+	error_count += CeL.test('CSV no_text_qualifier', [
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_2']],
   		[[CeL.parse_CSV('a,b\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:undefined})[1][0],'_1']],
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{no_text_qualifier:1})[1][0],'_1']],
@@ -990,7 +1003,9 @@ function test_CSV() {
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{row_limit:1,to_Object:1})._3,undefined]],
   	]);
 
-  	error_count += CeL.test('CSV to_Object', [
+	CeL.set_debug();
+
+	error_count += CeL.test('CSV to_Object', [
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1})._4.join('|'),'_3|_4']],
   		[[CeL.parse_CSV('"a","b"\n_1,"_2"\n"_3",_4\n_5,_6',{to_Object:1,select_column:true})._4.b,'_4']],
   	]);
@@ -1295,6 +1310,26 @@ function test_check() {
 //============================================================================================================================================================
 
 
+function test_wiki() {
+	error_count += CeL.test('wiki: parse_template', [
+		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b')[0] ]],
+		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp')[0] ]],
+		[[ '{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]],
+	]);
+}
+
+
+//============================================================================================================================================================
+
+
+function test_calendar() {
+	//CeL.Tabular_Date.test(-2e4, 4e6, 4);
+}
+
+
+//============================================================================================================================================================
+
+
 function test_era() {
 	CeL.set_debug(0);
 	// 判斷是否已載入曆數資料。
@@ -1461,7 +1496,6 @@ function do_test() {
 	// 測試期間時需要用到的功能先作測試。
 	'interact.console', test_console,
 /*
-*/
 	// 基本的功能先作測試。
 	'data.native', test_native,
 	//
@@ -1475,6 +1509,11 @@ function do_test() {
 	'data.CSV', test_CSV,
 	//
 	'data.numeral', test_numeral,
+	//
+*/
+	'application.net.wiki', test_wiki,
+	//
+	'data.date.calendar', test_calendar,
 	//
 	'data.date.era', test_era);
 }

@@ -1620,9 +1620,11 @@ function Object_filter(object, filter) {
  * @param {Object}object
  *            object to clone
  * @param {Boolean}deep
- *            deep clone
+ *            deep clone / with trivial
  * 
  * @returns {Object}cloned object
+ * 
+ * @see clone() @ CeL.data
  */
 function Object_clone(object, deep) {
 	// for read-only??
