@@ -2,7 +2,7 @@
 /**
  * @name CeL function for MediaWiki (Wikipedia / 維基百科)
  * 
- * @fileoverview 本檔案包含了 MediaWiki 自動化作業用的程式庫，可用於編寫[[維基百科:機器人]]
+ * @fileoverview 本檔案包含了 MediaWiki 自動化作業用的程式庫，主要用於編寫[[維基百科:機器人]]
  *               ([[WP:{{{name|{{int:Group-bot}}}}}|{{{name|{{int:Group-bot}}}}}]])。
  * 
  * @since 2015/1/1

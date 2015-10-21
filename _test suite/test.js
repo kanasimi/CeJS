@@ -39,29 +39,31 @@ require('../index');
 
 
 function test_native() {
-	CeL.assert([ CeL.pad(23, 5), '00023' ]);
+	error_count += CeL.test('pad(): basic test', [
+		[[ CeL.pad(23, 5), '00023' ]],
+		[[ ''.pad(5), '     ' ],'pad(): empty string'],
 
-	CeL.assert([ ''.pad(5), '     ' ],'null string');
+		[[ 'sa'.pad(5), '   sa' ]],
+		[[ '23'.pad(5), '00023' ]],
+		[[ '2347823'.pad(5), '2347823' ]],
+		[[ '23'.pad(4, 's', 1), '23ss' ]],
+	]);
 
-	node_info('Test: pad(): basic test');
-	CeL.assert([ 'sa'.pad(5), '   sa' ]);
-	CeL.assert([ '23'.pad(5), '00023' ]);
-	CeL.assert([ '2347823'.pad(5), '2347823' ]);
-	CeL.assert([ '23'.pad(4, 's', 1), '23ss' ]);
+	error_count += CeL.test('pad(): character.length > 1', [
+		[[ '23'.pad(6, '01'), '010123' ]],
+		[[ '23'.pad(6, '012'), '012023' ]],
+		[[ '2347823'.pad(5, '01'), '2347823' ]],
+		[[ '23'.pad(6, '12', 1), '231212' ]],
+	]);
 
-	node_info('Test: pad(): character.length > 1');
-	CeL.assert([ '23'.pad(6, '01'), '010123' ]);
-	CeL.assert([ '23'.pad(6, '012'), '012023' ]);
-	CeL.assert([ '2347823'.pad(5, '01'), '2347823' ]);
-	CeL.assert([ '23'.pad(6, '12', 1), '231212' ]);
-
-	node_info('Test: between(): character.length > 1');
-	CeL.assert([ '0123456789123456789'.between('567', '345'), '8912' ]);
-	CeL.assert([ '0123456789123456789'.between('567', '89'), '' ]);
-	CeL.assert([ '0123456789123456789'.between('54'), '' ]);
-	CeL.assert([ CeL.get_intermediate('0123456789123456789', '54'), undefined ]);
-	CeL.assert([ '0123456789123456789'.between('567'), '89123456789' ]);
-	CeL.assert([ '0123456789123456789'.between(null, '345'), '012' ]);
+	error_count += CeL.test('between(): character.length > 1', [
+		[[ '0123456789123456789'.between('567', '345'), '8912' ]],
+		[[ '0123456789123456789'.between('567', '89'), '' ]],
+		[[ '0123456789123456789'.between('54'), '' ]],
+		[[ CeL.get_intermediate('0123456789123456789', '54'), undefined ]],
+		[[ '0123456789123456789'.between('567'), '89123456789' ]],
+		[[ '0123456789123456789'.between(null, '345'), '012' ]],
+	]);
 
 	if (false) {
 		var a = new SubUint32Array(8, 7, 4), b = new Uint32Array(4);
@@ -103,19 +105,11 @@ function test_native() {
 	});
 	CeL.set_debug();
 
-	CeL.assert([ 1, CeL.search_sorted_Array([ 0, 2, 4 ], 3, {
-		found : true
-	}) ]);
-
-	CeL.assert([ 'r', [ 4, 7, 12 ].search_sorted(8, {
-		found : [ 'f', 'r', 'e' ]
-	}) ]);
-
-	CeL.assert([ undefined, [ 4, 7, 12 ].search_sorted(8, {
-		found : [ 'f', 'r', 'e' ],
-		// 以便未找到時回傳 undefined.
-		near : []
-	}) ]);
+	error_count += CeL.test('search_sorted_Array()', [
+		[[ 1, CeL.search_sorted_Array([ 0, 2, 4 ], 3, { found : true }) ]],
+		[[ 'r', [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ] }) ]],
+		[[ undefined, [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ], /* 以便未找到時回傳 undefined. */ near : [] }) ]],
+	]);
 }
 
 
@@ -141,47 +135,48 @@ function test_console() {
 		bg : 'blue'
 	});
 
-	node_info('Test: SGR @ 3');
-	CeL.assert([ 2, ansi.style_at(3, true).foreground ]);
-	CeL.assert([ '1;32;44', ansi.style_at(3, true).toString(false) ]);
-	CeL.assert([ undefined, ansi.style_at(4, true) ]);
-	CeL.assert([ ansi.style_at(3).toString(false),
-	//
-	ansi.style_at(4).toString(false) ]);
+	error_count += CeL.test('SGR @ 3', [
+		[[ 2, ansi.style_at(3, true).foreground ]],
+		[[ '1;32;44', ansi.style_at(3, true).toString(false) ]],
+		[[ undefined, ansi.style_at(4, true) ]],
+		[[ ansi.style_at(3).toString(false), ansi.style_at(4).toString(false) ]],
+	]);
 
 	node_info('Test: SGR: set style alias');
 	ansi.style_at(5, 'fg=紫');
 
-	node_info('Test: SGR @ 5');
-	CeL.assert([ 4, ansi.style_at(5).background ]);
-	CeL.assert([ 'blue', SGR.color[ansi.style_at(5).background] ]);
+	error_count += CeL.test('SGR @ 5', [
+		[[ 4, ansi.style_at(5).background ]],
+		[[ 'blue', SGR.color[ansi.style_at(5).background] ]],
+	]);
 
-	node_info('Test: SGR: set style multi-alias');
 	ansi.style_at(7, '5;-bold');
+	error_count += CeL.test('SGR: set style multi-alias', [
+		[[ true, ansi.style_at(8).blink ], '(8).blink'],
+		[[ false, ansi.style_at(9).bold ], '(9).bold'],
+	]);
 
-	CeL.assert([ true, ansi.style_at(8).blink ], '(8).blink');
-	CeL.assert([ false, ansi.style_at(9).bold ], '(9).bold');
-
-	node_info('Test: SGR: Test all');
 	text = '012*[1;32;44m34*[1;35;44m56*[22;35;44;5m789';
-	CeL.assert([ text, ansi.toString() ]);
-	CeL.assert([ text, new SGR(text).toString() ]);
+	error_count += CeL.test('SGR: Test all', [
+		[[ text, ansi.toString() ]],
+		[[ text, new SGR(text).toString() ]],
 
-	CeL.assert([ '0123*[32m4567*[44m890',
-	//
-	(new SGR([ '0123', {
-		fg : '綠'
-	}, '4567', {
-		bg : '藍'
-	}, '890' ])).toString() ]);
+		[[ '0123*[32m4567*[44m890',
+		//
+		(new SGR([ '0123', {
+			fg : '綠'
+		}, '4567', {
+			bg : '藍'
+		}, '890' ])).toString() ]],
 
-	CeL.assert([ '(*[33m1,2*[' + SGR.style_data.foreground[1] + 'm)',
-	//
-	(new SGR([ '(', 'fg=黃', '1,2', '-fg', ')' ])).toString() ]);
+		[[ '(*[33m1,2*[' + SGR.style_data.foreground[1] + 'm)',
+		//
+		(new SGR([ '(', 'fg=黃', '1,2', '-fg', ')' ])).toString() ]],
 
-	CeL.assert([ '*[31mrr*[' + SGR.style_data.foreground[1] + 'm',
-	//
-	(new SGR([ '', 'fg=red', 'rr', '-fg' ])).toString() ]);
+		[[ '*[31mrr*[' + SGR.style_data.foreground[1] + 'm',
+		//
+		(new SGR([ '', 'fg=red', 'rr', '-fg' ])).toString() ]],
+	]);
 
 	// Not Yet Implemented!
 	// ansi.to_HTML(style_mapping);
@@ -198,26 +193,32 @@ function test_console() {
 
 
 function test_numeral() {
-	CeL.assert(['一百兆〇八億〇八百',CeL.to_Chinese_numeral(100000800000800)],'小寫中文數字');
-	CeL.assert(['捌兆肆仟陸佰柒拾貳億捌仟柒佰參拾捌萬玖仟零肆拾柒',CeL.to_Chinese_numeral(8467287389047,true)],'大寫中文數字');
-	CeL.assert(['新臺幣肆萬參拾伍圓參角肆分貳文參',CeL.to_TWD(40035.3423)],'貨幣/currency test');
-	CeL.assert([8467287389047,CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(8467287389047,true))],'中文數字');
+	error_count += CeL.test('中文數字 basic', [
+		[['一百兆〇八億〇八百',CeL.to_Chinese_numeral(100000800000800)],'小寫中文數字'],
+		[['捌兆肆仟陸佰柒拾貳億捌仟柒佰參拾捌萬玖仟零肆拾柒',CeL.to_Chinese_numeral(8467287389047,true)],'大寫中文數字'],
+		[['新臺幣肆萬參拾伍圓參角肆分貳文參',CeL.to_TWD(40035.3423)],'貨幣/currency test'],
+		[[8467287389047,CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(8467287389047,true))],'中文數字'],
+	]);
 	CeL.set_debug(0);
 	for(var i=0;i<=1000;i++)
 		CeL.assert([i,CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(i,true))],'中文數字 '+i);
 	CeL.set_debug();
 
-	CeL.assert(["壬辰以來，至景初元年丁已歲，積4046，算上。",CeL.from_Chinese_numeral('壬辰以來，至景初元年丁已歲，積四千四十六，算上。')]);
-	CeL.assert(['40179字',CeL.from_Chinese_numeral('四萬百七十九字')]);
-	CeL.assert([10000000000000000,CeL.from_Chinese_numeral('京')]);
-	CeL.assert(['10000字',CeL.from_Chinese_numeral('一萬字')]);
-	CeL.assert(['正常情況下:40379字',CeL.from_Chinese_numeral('正常情況下:四萬〇三百七十九字')]);
-	CeL.assert([4.5,CeL.from_Chinese_numeral('2分之九')]);
-	CeL.assert(["1974年",CeL.from_positional_Chinese_numeral('一九七四年')]);
-	CeL.assert(["一九七四年",CeL.to_positional_Chinese_numeral('1974年')]);
-	CeL.assert([4022,CeL.from_positional_Chinese_numeral('〤〇〢二')],'擴充蘇州碼子');
+	error_count += CeL.test('中文數字', [
+		[["壬辰以來，至景初元年丁已歲，積4046，算上。",CeL.from_Chinese_numeral('壬辰以來，至景初元年丁已歲，積四千四十六，算上。')]],
+		[['40179字',CeL.from_Chinese_numeral('四萬百七十九字')]],
+		[[10000000000000000,CeL.from_Chinese_numeral('京')]],
+		[['10000字',CeL.from_Chinese_numeral('一萬字')]],
+		[['正常情況下:40379字',CeL.from_Chinese_numeral('正常情況下:四萬〇三百七十九字')]],
+		[[4.5,CeL.from_Chinese_numeral('2分之九')]],
+		[["1974年",CeL.from_positional_Chinese_numeral('一九七四年')]],
+		[["一九七四年",CeL.to_positional_Chinese_numeral('1974年')]],
+		[[4022,CeL.from_positional_Chinese_numeral('〤〇〢二')],'擴充蘇州碼子'],
+	]);
 
-	CeL.assert([ '新臺幣肆萬參拾伍圓參角肆分貳文參', CeL.to_TWD(40035.3423) ], '貨幣/currency test');
+	error_count += CeL.test('貨幣/currency test', [
+		[[ '新臺幣肆萬參拾伍圓參角肆分貳文參', CeL.to_TWD(40035.3423) ], '中文貨幣/currency test'],
+	]);
 }
 
 
@@ -226,8 +227,6 @@ function test_numeral() {
 
 
 function test_math() {
-
-	'use strict';
 
 	// ---------------------------------------------------------------------//
 
@@ -919,47 +918,48 @@ if (test_level) {
 
 	// ---------------------------------------------------------------------//
 
-	CeL.assert(['√3', (new CeL.quadratic(3)).toString()], 'quadratic.assignment 1');
-	CeL.assert(['2√3', (new CeL.quadratic(12)).toString()], 'quadratic.assignment 2');
-	CeL.assert(['3√5', (new CeL.quadratic(5, 3)).toString()], 'quadratic.assignment 3');
-	CeL.assert(['6√2', (new CeL.quadratic(8, 3)).toString()], 'quadratic.assignment 4');
-	CeL.assert(['3+9√2', (new CeL.quadratic(2, 9, 3)).toString()], 'quadratic.assignment 5');
-	CeL.assert(['(4+3√7)/5', (new CeL.quadratic(7, 3, 4, 5)).toString()], 'quadratic.assignment 6');
-	CeL.assert(['(2√6)/3', (new CeL.quadratic(6, 2, 0, 3)).toString()], 'quadratic.assignment 7');
+	var solution;
+	error_count += CeL.test('quadratic', [
+		[['√3', (new CeL.quadratic(3)).toString()], 'quadratic.assignment 1'],
+		[['2√3', (new CeL.quadratic(12)).toString()], 'quadratic.assignment 2'],
+		[['3√5', (new CeL.quadratic(5, 3)).toString()], 'quadratic.assignment 3'],
+		[['6√2', (new CeL.quadratic(8, 3)).toString()], 'quadratic.assignment 4'],
+		[['3+9√2', (new CeL.quadratic(2, 9, 3)).toString()], 'quadratic.assignment 5'],
+		[['(4+3√7)/5', (new CeL.quadratic(7, 3, 4, 5)).toString()], 'quadratic.assignment 6'],
+		[['(2√6)/3', (new CeL.quadratic(6, 2, 0, 3)).toString()], 'quadratic.assignment 7'],
 
-	CeL.assert([-1, (new CeL.quadratic(2, 2, -3, 4)).sign()], 'quadratic.sign(-)');
-	CeL.assert([1, (new CeL.quadratic(2, 2, -3, -4)).sign()], 'quadratic.sign(+)');
+		[[-1, (new CeL.quadratic(2, 2, -3, 4)).sign()], 'quadratic.sign(-)'],
+		[[1, (new CeL.quadratic(2, 2, -3, -4)).sign()], 'quadratic.sign(+)'],
 
-	CeL.assert(['(22+78√6)/5', (new CeL.quadratic(24, 4, 2, 5)).add(new CeL.quadratic(24, 7, 4)).toString()], 'quadratic.add');
+		[['(22+78√6)/5', (new CeL.quadratic(24, 4, 2, 5)).add(new CeL.quadratic(24, 7, 4)).toString()], 'quadratic.add'],
 
-	CeL.assert(['27,6,2,6,58', (new CeL.quadratic(34, 5, -2)).to_continued_fraction().join(',')], 'continued fraction');
-	CeL.assert(['55,1,10,1,4,3,1,1,1,1,2,25,1,1,2,1,1,25,2,1,1,1,1,3,4,1,10,1,128', (new CeL.quadratic(86, 7, -9)).to_continued_fraction().join(',')], 'continued fraction');
-	CeL.assert(['1,3,1,8', (new CeL.quadratic(23)).to_continued_fraction().pop().join(',')], 'continued fraction');
-	CeL.assert(['(-5+6√3)/83', (new CeL.quadratic(12, 3, 5)).reciprocal().toString()], '倒數, multiplicative inverse or reciprocal');
+		[['27,6,2,6,58', (new CeL.quadratic(34, 5, -2)).to_continued_fraction().join(',')], 'continued fraction'],
+		[['55,1,10,1,4,3,1,1,1,1,2,25,1,1,2,1,1,25,2,1,1,1,1,3,4,1,10,1,128', (new CeL.quadratic(86, 7, -9)).to_continued_fraction().join(',')], 'continued fraction'],
+		[['1,3,1,8', (new CeL.quadratic(23)).to_continued_fraction().pop().join(',')], 'continued fraction'],
+		[['(-5+6√3)/83', (new CeL.quadratic(12, 3, 5)).reciprocal().toString()], '倒數, multiplicative inverse or reciprocal'],
 
-	var solution = CeL.quadratic.solve_quadratic(6, 4, 3)[0];
-	CeL.assert(solution.clone().multiply(3).multiply(solution).add(solution.multiply(4)).add(6).is_0(), "整係數一元二次方程式 3x^2+4x+6=0 的兩根公式解");
+		[(solution = CeL.quadratic.solve_quadratic(6, 4, 3)[0]).clone().multiply(3).multiply(solution).add(solution.multiply(4)).add(6).is_0(), "整係數一元二次方程式 3x^2+4x+6=0 的兩根公式解"],
 
-	solution = CeL.quadratic.solve_Pell(13, 1, 10)[9];
-	CeL.assert([solution[0].square().add(solution[1].clone().square().multiply(-13)).valueOf(), 1], "Get the 10th solution of Pell's equation: x^2 + 13 y^2 = 1.");
+		[[(solution = CeL.quadratic.solve_Pell(13, 1, 10)[9])[0].square().add(solution[1].clone().square().multiply(-13)).valueOf(), 1], "Get the 10th solution of Pell's equation: x^2 + 13 y^2 = 1."],
 
-	CeL.assert(['(3+2√7)/4', (new CeL.quadratic(7, 2, 3, 4)).abs().toString()], 'quadratic.abs(+real)');
-	CeL.assert(['(-18+5√13)/2', (new CeL.quadratic(13, -5, 18, 2)).abs().toString()], 'quadratic.abs(-real)');
-	CeL.assert(['√649', (new CeL.quadratic(-13, -5, 18)).abs().toString()], 'quadratic.abs(-complex)');
-	CeL.assert(['(√79)/5', (new CeL.quadratic(-3, 5, 2, 5)).abs().toString()], 'quadratic.abs(complex)');
+		[['(3+2√7)/4', (new CeL.quadratic(7, 2, 3, 4)).abs().toString()], 'quadratic.abs(+real)'],
+		[['(-18+5√13)/2', (new CeL.quadratic(13, -5, 18, 2)).abs().toString()], 'quadratic.abs(-real)'],
+		[['√649', (new CeL.quadratic(-13, -5, 18)).abs().toString()], 'quadratic.abs(-complex)'],
+		[['(√79)/5', (new CeL.quadratic(-3, 5, 2, 5)).abs().toString()], 'quadratic.abs(complex)'],
 
-	CeL.assert(['1', (new CeL.quadratic(2, 3, 8)).power(0).toString()], 'quadratic.power(0)');
-	CeL.assert(['8+3√2', (new CeL.quadratic(2, 3, 8)).power(1).toString()], 'quadratic.power(1)');
-	CeL.assert(['(196+48√5)/9', (new CeL.quadratic(5, 6, 4, 3)).square().toString()], 'quadratic.square()');
-	CeL.assert(['(2248025595671205504602012576111141463751576278371837411607230368027658579805709115310781933878876812858784756497723330301801242+849673809579121312776905852839499203983912155632466809914198420393630908927241613958279299255541956301528948931050605449034713√7)/58774717541114375398436826861112283890933277838604376075437585313920862972736358642578125', (new CeL.quadratic(7, 3, 2, 5)).power(127).toString()], 'quadratic.power(127)');
+		[['1', (new CeL.quadratic(2, 3, 8)).power(0).toString()], 'quadratic.power(0)'],
+		[['8+3√2', (new CeL.quadratic(2, 3, 8)).power(1).toString()], 'quadratic.power(1)'],
+		[['(196+48√5)/9', (new CeL.quadratic(5, 6, 4, 3)).square().toString()], 'quadratic.square()'],
+		[['(2248025595671205504602012576111141463751576278371837411607230368027658579805709115310781933878876812858784756497723330301801242+849673809579121312776905852839499203983912155632466809914198420393630908927241613958279299255541956301528948931050605449034713√7)/58774717541114375398436826861112283890933277838604376075437585313920862972736358642578125', (new CeL.quadratic(7, 3, 2, 5)).power(127).toString()], 'quadratic.power(127)'],
+	]);
 
 	// All test of quadratic OK. 測試通過。
-	node_info('Passed: quadratic 測試通過。');
+	//node_info('Passed: quadratic 測試通過。');
 
 	// ---------------------------------------------------------------------//
 
 	// All test of arbitrary-precision_arithmetic OK. 測試全部通過。
-	node_info('Passed: arbitrary-precision_arithmetic 測試全部通過。');
+	//node_info('Passed: arbitrary-precision_arithmetic 測試全部通過。');
 
 }
 
@@ -1059,39 +1059,42 @@ function test_CSV() {
 function test_date() {
 	CeL.run('data.date');
 
-	CeL.assert([0,new Date('May 5 2022')-'May 5 2022'.to_Date()],'無法 parse 的值');
-	CeL.assert([0,new Date('May 5 2022 UTC+09:00')-'May 5 2022'.to_Date({zone:'UTC+9'})],'無法 parse 的值+TZ@options');
-	CeL.assert([0,new Date('May 5 2022 UTC+09:00')-'May 5 2022 UTC+09:00'.to_Date()],'無法 parse 的值+TZ');
+  	error_count += CeL.test('parse date', [
+		[[0,new Date('May 5 2022')-'May 5 2022'.to_Date()],'無法 parse 的值'],
+		[[0,new Date('May 5 2022 UTC+09:00')-'May 5 2022'.to_Date({zone:'UTC+9'})],'無法 parse 的值+TZ@options'],
+		[[0,new Date('May 5 2022 UTC+09:00')-'May 5 2022 UTC+09:00'.to_Date()],'無法 parse 的值+TZ'],
 
-	CeL.assert([0,new Date('2022/5/5')-'2022/5/5'.to_Date()],'理應可 parse 的值');
-	CeL.assert([0,new Date('2022/5/5 UTC+09:00')-'2022/5/5'.to_Date({zone:'UTC+9'})],'理應可 parse 的值+TZ @ options');
-	CeL.assert([0,new Date('2022/5/5 UTC+09:00')-'2022/5/5 UTC+9'.to_Date()],'理應可 parse 的值+TZ');
+		[[0,new Date('2022/5/5')-'2022/5/5'.to_Date()],'理應可 parse 的值'],
+		[[0,new Date('2022/5/5 UTC+09:00')-'2022/5/5'.to_Date({zone:'UTC+9'})],'理應可 parse 的值+TZ @ options'],
+		[[0,new Date('2022/5/5 UTC+09:00')-'2022/5/5 UTC+9'.to_Date()],'理應可 parse 的值+TZ'],
 
-	CeL.assert([0,new Date('2022/5/5 UTC')-'2022/5/5 UTC'.to_Date()],'理應可 parse 的值');
-	CeL.assert([0,'2022/5/5'.to_Date({zone:0})-'2022/5/5 UTC'.to_Date()],'理應可 parse 的值');
+		[[0,new Date('2022/5/5 UTC')-'2022/5/5 UTC'.to_Date()],'理應可 parse 的值'],
+		[[0,'2022/5/5'.to_Date({zone:0})-'2022/5/5 UTC'.to_Date()],'理應可 parse 的值'],
+  	]);
 
-
-
-	CeL.assert(["1582/10/15 0:0:0.000",'1582/10/5'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-
-	CeL.assert(["1582/10/15 0:0:0.000",'1582/10/5'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-
-	CeL.assert(["100/2/26 0:0:0.000",'100/2/28'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-	CeL.assert(["100/2/27 0:0:0.000",'100/2/29'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-	CeL.assert(["100/2/28 0:0:0.000",'100/3/1'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-
-	CeL.assert(["-300/2/23 0:0:0.000",'-0300/2/28'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-	CeL.assert(["-300/2/24 0:0:0.000",'-0300/2/29'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-	CeL.assert(["-300/2/25 0:0:0.000",'-0300/3/1'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-
-	CeL.assert(["-4714/11/24 0:0:0.000",'-4713/1/1'.to_Date({parser : 'CE', no_year_0 : false}).format()]);
-
-	CeL.assert(["2000/2/27 0:0:0.000",'2000/2/26'.to_Date({parser : 'CE', period_end:true}).format()]);
 
 	var tmp;
-	CeL.assert([0,new Date(tmp='2010/1/2 5:0')-tmp.to_Date()]);
-	CeL.assert([0,new Date(tmp='2010/1/2 5:0')-tmp.to_Date('CE')]);
+  	error_count += CeL.test('to_Date(CE)', [
+		[["1582/10/15 0:0:0.000",'1582/10/5'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
 
+		[["1582/10/15 0:0:0.000",'1582/10/5'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
+
+		[["100/2/26 0:0:0.000",'100/2/28'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
+		[["100/2/27 0:0:0.000",'100/2/29'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
+		[["100/2/28 0:0:0.000",'100/3/1'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
+
+		[["-300/2/23 0:0:0.000",'-0300/2/28'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
+		[["-300/2/24 0:0:0.000",'-0300/2/29'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
+		[["-300/2/25 0:0:0.000",'-0300/3/1'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
+
+		[["-4714/11/24 0:0:0.000",'-4713/1/1'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
+
+		[["2000/2/27 0:0:0.000",'2000/2/26'.to_Date({parser : 'CE', period_end:true}).format()]],
+
+
+		[[0,new Date(tmp='2010/1/2 5:0')-tmp.to_Date()]],
+		[[0,new Date(tmp='2010/1/2 5:0')-tmp.to_Date('CE')]],
+	]);
 
 
 	// Date.parse('100/2/29')===Date.parse('100/3/1')
@@ -1168,68 +1171,40 @@ function test_date() {
 	//CeL.Date_to_String.no_year_0 = CeL.String_to_Date.no_year_0 = false;
 
 
-	CeL.assert(["-300/2/28 0:0:0.000",'-0300/2/23'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-	CeL.assert(["-300/2/29 0:0:0.000",'-0300/2/24'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-	CeL.assert(["-300/3/1 0:0:0.000",'-0300/2/25'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
+	error_count += CeL.test('date: .format(CE)', [
+		[["-300/2/28 0:0:0.000",'-0300/2/23'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
+		[["-300/2/29 0:0:0.000",'-0300/2/24'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
+		[["-300/3/1 0:0:0.000",'-0300/2/25'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
 
-	CeL.assert(["-100/2/28 0:0:0.000",'-0100/2/25'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-	CeL.assert(["-100/2/29 0:0:0.000",'-0100/2/26'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-	CeL.assert(["-100/3/1 0:0:0.000",'-0100/2/27'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
+		[["-100/2/28 0:0:0.000",'-0100/2/25'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
+		[["-100/2/29 0:0:0.000",'-0100/2/26'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
+		[["-100/3/1 0:0:0.000",'-0100/2/27'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
 
-	CeL.assert(["-99/1/3 0:0:0.000",'-0099/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
+		[["-99/1/3 0:0:0.000",'-0099/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
 
-	CeL.assert(["-1/1/3 0:0:0.000",'-0001/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-	CeL.assert(["0/1/3 0:0:0.000",'0000/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-	CeL.assert(["1/1/3 0:0:0.000",'0001/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
+		[["-1/1/3 0:0:0.000",'-0001/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
+		[["0/1/3 0:0:0.000",'0000/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
+		[["1/1/3 0:0:0.000",'0001/1/1'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
 
-	CeL.assert(["100/2/28 0:0:0.000",'0100/2/26'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-	CeL.assert(["100/2/29 0:0:0.000",'0100/2/27'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
-	CeL.assert(["100/3/1 0:0:0.000",'0100/2/28'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]);
+		[["100/2/28 0:0:0.000",'0100/2/26'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
+		[["100/2/29 0:0:0.000",'0100/2/27'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
+		[["100/3/1 0:0:0.000",'0100/2/28'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})]],
 
-	CeL.assert(["1582/10/4 0:0:0.000",'1582/10/14'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})],'Gregorian calendar 改曆前。');
-	CeL.assert(["1582/10/15 0:0:0.000",'1582/10/15'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})],'Gregorian calendar 改曆後。');
-	CeL.assert(["1582/10/5 0:0:0.000",'1582/10/15'.to_Date({no_year_0 : false}).format('Julian')],'Gregorian calendar 改曆後 using Julian。');
+		[["1582/10/4 0:0:0.000",'1582/10/14'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})],'Gregorian calendar 改曆前。'],
+		[["1582/10/15 0:0:0.000",'1582/10/15'.to_Date({no_year_0 : false}).format({parser : 'CE', no_year_0 : false})],'Gregorian calendar 改曆後。'],
+		[["1582/10/5 0:0:0.000",'1582/10/15'.to_Date({no_year_0 : false}).format('Julian')],'Gregorian calendar 改曆後 using Julian。'],
 
-	CeL.assert(["1700/2/28 0:0:0.000",'1700/3/10'.to_Date({no_year_0 : false}).format('Julian')],'Julian 1700 閏日前。');
-	CeL.assert(["1700/2/29 0:0:0.000",'1700/3/11'.to_Date({no_year_0 : false}).format('Julian')],'Julian 1700 閏日當日。');
-	CeL.assert(["1700/3/1 0:0:0.000",'1700/3/12'.to_Date({no_year_0 : false}).format('Julian')],'Julian 1700 閏日後。');
-
-	CeL.assert([2451545,CeL.Date_to_JD(new Date(Date.parse('1 January 2000 12:00 UTC')))],'標準曆元 J2000.0');
-	CeL.assert([2451545,CeL.Date_to_JDN(new Date(Date.parse('1 January 2000 UTC')))],'標準曆元 J2000.0');
-	CeL.assert([2456413,CeL.Date_to_JD(new Date(Date.parse('2013/4/30 12:00 UTC')))]);
+		[["1700/2/28 0:0:0.000",'1700/3/10'.to_Date({no_year_0 : false}).format('Julian')],'Julian 1700 閏日前。'],
+		[["1700/2/29 0:0:0.000",'1700/3/11'.to_Date({no_year_0 : false}).format('Julian')],'Julian 1700 閏日當日。'],
+		[["1700/3/1 0:0:0.000",'1700/3/12'.to_Date({no_year_0 : false}).format('Julian')],'Julian 1700 閏日後。'],
+	]);
 
 
-
-	CeL.run('data.date');
-
-	//CeL.Date_to_String.no_year_0 = CeL.String_to_Date.no_year_0 = true;
-
-
-	CeL.assert([0,			CeL.Date_to_JD('-4713/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'JD 0');
-
-	CeL.assert([1096,		CeL.Date_to_JD('-4710/1/1 12:0'.to_Date({parser:'CE',zone:0}))]);
-	CeL.assert([4383,		CeL.Date_to_JD('-4701/1/1 12:0'.to_Date({parser:'CE',zone:0}))]);
-	CeL.assert([4749,		CeL.Date_to_JD('-4700/1/1 12:0'.to_Date({parser:'CE',zone:0}))]);
-	CeL.assert([4807,		CeL.Date_to_JD('-4700/2/28 12:0'.to_Date({parser:'CE',zone:0}))]);
-	CeL.assert([260424,		CeL.Date_to_JD('-4000/1/1 12:0'.to_Date({parser:'CE',zone:0}))]);
-	CeL.assert([1356174,	CeL.Date_to_JD('-1000/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'1000 BCE');
-
-	CeL.assert([1721057.5,	CeL.Date_to_JD('-0001/1/1 0:0'.to_Date({parser:'CE',zone:0}))],'-1 CE');
-	CeL.assert([1721057.5,	CeL.Date_to_JD('0000/1/1 0:0'.to_Date({parser:'CE',zone:0}))],'bad test: 0 CE');
-
-	CeL.assert([1721423,	CeL.Date_to_JD('-0001/12/31 12:0'.to_Date({parser:'CE',zone:0}))],'1 BCE');
-	CeL.assert([1721423.5,	CeL.Date_to_JD('0001/1/1 0:0'.to_Date({parser:'CE',zone:0}))],'1 CE');
-
-	CeL.assert([1722578,	CeL.Date_to_JD('0004/2/29 12:0'.to_Date({parser:'CE',zone:0}))],'4 CE leap day');
-	CeL.assert([1722578.5,	CeL.Date_to_JD('0004/3/1 0:0'.to_Date({parser:'CE',zone:0}))],'after 4 CE leap day');
-
-	CeL.assert([2299159.5,	CeL.Date_to_JD('1582/10/4 0:0'.to_Date({parser:'CE',zone:0}))],'before reform');
-	CeL.assert([2299160.5,	CeL.Date_to_JD('1582/10/15 0:0'.to_Date({parser:'CE',zone:0}))],'after reform');
-
-	CeL.assert([2451545,	CeL.Date_to_JD('2000/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'標準曆元 J2000.0');
-
-
-	CeL.assert([2451545,CeL.Date_to_JD('2000/1/1 12:'.to_Date({zone:0}))],'J2000.0 fault');
+	error_count += CeL.test('Date_to_JD', [
+		[[2451545,CeL.Date_to_JD(new Date(Date.parse('1 January 2000 12:00 UTC')))],'標準曆元 J2000.0'],
+		[[2451545,CeL.Date_to_JDN(new Date(Date.parse('1 January 2000 UTC')))],'標準曆元 J2000.0'],
+		[[2456413,CeL.Date_to_JD(new Date(Date.parse('2013/4/30 12:00 UTC')))]],
+	]);
 
 
 
@@ -1237,34 +1212,72 @@ function test_date() {
 
 	//CeL.Date_to_String.no_year_0 = CeL.String_to_Date.no_year_0 = true;
 
-	CeL.assert(["甲子",'1912年2月18日'.to_Date('CE').format({format:'%日干支',locale:'cmn-Hant-TW'})],'1912年（中華民國元年）2月18日，合農曆壬子年正月初一，是「甲子日」');
 
-	CeL.assert(["己巳",'公元前720年2月22日'.to_Date('CE').format({format:'%日干支',locale:'cmn-Hant-TW'})],'《春秋》所記，魯隱公三年夏曆二月己巳日（周平王五十一年，公元前720年2月22日）之日食');
+	error_count += CeL.test('date: .to_Date(CE)', [
+		[[0,			CeL.Date_to_JD('-4713/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'JD 0'],
 
-	CeL.assert(["甲子",'1923年12月17日'.to_Date('CE').format({format:'%日干支',locale:'cmn-Hant-TW'})],'1923年12月17日 甲子日');
+		[[1096,		CeL.Date_to_JD('-4710/1/1 12:0'.to_Date({parser:'CE',zone:0}))]],
+		[[4383,		CeL.Date_to_JD('-4701/1/1 12:0'.to_Date({parser:'CE',zone:0}))]],
+		[[4749,		CeL.Date_to_JD('-4700/1/1 12:0'.to_Date({parser:'CE',zone:0}))]],
+		[[4807,		CeL.Date_to_JD('-4700/2/28 12:0'.to_Date({parser:'CE',zone:0}))]],
+		[[260424,		CeL.Date_to_JD('-4000/1/1 12:0'.to_Date({parser:'CE',zone:0}))]],
+		[[1356174,	CeL.Date_to_JD('-1000/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'1000 BCE'],
 
-	CeL.assert(["庚辰庚辰",'1940年4月7日'.to_Date('CE').format({format:'%歲次%日干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日");
+		[[1721057.5,	CeL.Date_to_JD('-0001/1/1 0:0'.to_Date({parser:'CE',zone:0}))],'-1 CE'],
+		[[1721057.5,	CeL.Date_to_JD('0000/1/1 0:0'.to_Date({parser:'CE',zone:0}))],'bad test: 0 CE'],
 
-	CeL.assert(["庚辰庚辰庚辰",'1940年4月7日7時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時 start");
-	CeL.assert(["庚辰庚辰庚辰",'1940年4月7日8時59分59秒'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時 end");
-	CeL.assert(["庚辰庚辰辛巳",'1940年4月7日9時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日辛巳時");
+		[[1721423,	CeL.Date_to_JD('-0001/12/31 12:0'.to_Date({parser:'CE',zone:0}))],'1 BCE'],
+		[[1721423.5,	CeL.Date_to_JD('0001/1/1 0:0'.to_Date({parser:'CE',zone:0}))],'1 CE'],
 
-	CeL.assert(["庚辰庚辰庚辰",'2120年4月23日7時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時始");
-	CeL.assert(["庚辰庚辰庚辰",'2120年4月23日8時59分59秒'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時止");
-	CeL.assert(["庚辰庚辰辛巳",'2120年4月23日9時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日辛巳時");
+		[[1722578,	CeL.Date_to_JD('0004/2/29 12:0'.to_Date({parser:'CE',zone:0}))],'4 CE leap day'],
+		[[1722578.5,	CeL.Date_to_JD('0004/3/1 0:0'.to_Date({parser:'CE',zone:0}))],'after 4 CE leap day'],
 
-	CeL.assert(["甲子甲子甲子",'1984/3/31 0:0'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"(甲子年丁卯月)甲子日甲子時始");
-	CeL.assert(["甲子甲子甲子",'1984/3/31 0:59:59.999'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"(甲子年丁卯月)甲子日甲子時止");
+		[[2299159.5,	CeL.Date_to_JD('1582/10/4 0:0'.to_Date({parser:'CE',zone:0}))],'before reform'],
+		[[2299160.5,	CeL.Date_to_JD('1582/10/15 0:0'.to_Date({parser:'CE',zone:0}))],'after reform'],
+
+		[[2451545,	CeL.Date_to_JD('2000/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'標準曆元 J2000.0'],
+
+
+		[[2451545,CeL.Date_to_JD('2000/1/1 12:'.to_Date({zone:0}))],'J2000.0 fault'],
+	]);
+
+
+
+	CeL.run('data.date');
+
+	//CeL.Date_to_String.no_year_0 = CeL.String_to_Date.no_year_0 = true;
+
+	error_count += CeL.test('日干支#1', [
+		[["甲子",'1912年2月18日'.to_Date('CE').format({format:'%日干支',locale:'cmn-Hant-TW'})],'1912年（中華民國元年）2月18日，合農曆壬子年正月初一，是「甲子日」'],
+
+		[["己巳",'公元前720年2月22日'.to_Date('CE').format({format:'%日干支',locale:'cmn-Hant-TW'})],'《春秋》所記，魯隱公三年夏曆二月己巳日（周平王五十一年，公元前720年2月22日）之日食'],
+
+		[["甲子",'1923年12月17日'.to_Date('CE').format({format:'%日干支',locale:'cmn-Hant-TW'})],'1923年12月17日 甲子日'],
+
+		[["庚辰庚辰",'1940年4月7日'.to_Date('CE').format({format:'%歲次%日干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日"],
+
+		[["庚辰庚辰庚辰",'1940年4月7日7時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時 start"],
+		[["庚辰庚辰庚辰",'1940年4月7日8時59分59秒'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時 end"],
+		[["庚辰庚辰辛巳",'1940年4月7日9時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日辛巳時"],
+
+		[["庚辰庚辰庚辰",'2120年4月23日7時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時始"],
+		[["庚辰庚辰庚辰",'2120年4月23日8時59分59秒'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日庚辰時止"],
+		[["庚辰庚辰辛巳",'2120年4月23日9時'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"庚辰年庚辰月庚辰日辛巳時"],
+
+		[["甲子甲子甲子",'1984/3/31 0:0'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"(甲子年丁卯月)甲子日甲子時始"],
+		[["甲子甲子甲子",'1984/3/31 0:59:59.999'.to_Date('CE').format({format:'%歲次%日干支%時干支',locale:'cmn-Hant-TW'})],"(甲子年丁卯月)甲子日甲子時止"],
+	]);
 
 	CeL.String_to_Date.default_parser.year_padding = 0;
-	CeL.assert(["甲子壬辰",'西元4年3月1日'.to_Date('CE').format({format:'%歲次%日干支',locale:'cmn-Hant-TW'})],"西元4年3月1日");
+	error_count += CeL.test('日干支#2', [
+		[["甲子壬辰",'西元4年3月1日'.to_Date('CE').format({format:'%歲次%日干支',locale:'cmn-Hant-TW'})],"西元4年3月1日"],
 
 
-
-	CeL.assert(["1616/2/27 壬午",'1616年2月壬午'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW'})],'String_to_Date.parser.Chinese');
-	CeL.assert(["1645/9/30 庚寅",'1645/9/庚寅'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW'})],'String_to_Date.parser.Chinese');
-	CeL.assert(["1645/10/10 庚子",'1645/9/庚子'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW'})],'String_to_Date.parser.Chinese');
-	CeL.assert(["1329/2/27 丙戌",'1329/2/丙戌'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW',parser:'CE'})],'String_to_Date.parser.Chinese: 元明宗天厯二年正月丙戌即位');
+		[["1616/2/27 壬午",'1616年2月壬午'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW'})],'String_to_Date.parser.Chinese'],
+		[["1645/9/30 庚寅",'1645/9/庚寅'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW'})],'String_to_Date.parser.Chinese'],
+		[["1645/10/10 庚子",'1645/9/庚子'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW'})],'String_to_Date.parser.Chinese'],
+		[["1329/2/27 丙戌",'1329/2/丙戌'.to_Date('Chinese').format({format:'%Y/%m/%d %日干支',locale:'cmn-Hant-TW',parser:'CE'})],'String_to_Date.parser.Chinese: 元明宗天厯二年正月丙戌即位'],
+	]);
 
 
 	CeL.set_debug(0);
@@ -1281,7 +1294,7 @@ function test_date() {
 
 
 function test_check() {
-	error_count += CeL.test('姓名 test', [
+	error_count += CeL.test('姓/名', [
 		[[ CeL.parse_personal_name('歐陽司徒').名, '司徒' ], '解析姓名/人名'],
 		[[ CeL.parse_personal_name('歐陽佩君').姓, '歐陽' ], '解析姓名/人名'],
 		[[ CeL.parse_personal_name('歐陽佩君').名, '佩君' ], '解析姓名/人名'],
@@ -1306,91 +1319,96 @@ function test_check() {
 
 
 function test_era() {
-	CeL.set_debug(0);
+	//CeL.set_debug(0);
 	// 判斷是否已載入曆數資料。
 	if (!CeL.era.loaded) {
 		setTimeout(test_era, 80);
 		return;
 	}
 
-	CeL.set_debug();
+	//CeL.set_debug(0);
 
 	// 設計上所要求必須通過之測試範例：測試正確性。
-	CeL.assert(['孺子嬰',CeL.era('初始').君主],'初始.君主: 孺子嬰#1');
-	CeL.assert(['孺子嬰','初始元年11月1日'.to_Date('era').君主],'初始.君主: 孺子嬰#2');
-	CeL.assert(['庚辰年庚辰月庚辰日庚辰時','一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'可提供統一時間標準與各干支間的轉換。統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。');
-	CeL.assert(['清德宗光緒六年三月十三日',CeL.to_Chinese_numeral('一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'}))],'查詢一八八〇年四月二十一日七時的中曆日期');
-	CeL.assert(['1628年3月1日','明思宗崇禎1年1月26日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-	CeL.assert(['1628年3月1日','天聰二年甲寅月戊子日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-	CeL.assert(['1628年3月1日','天聰2年寅月戊子日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-	CeL.assert(['1880年4月21日','清德宗光緒六年三月十三日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-	CeL.assert(['1880年4月21日','清德宗光緒庚辰年三月十三日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-	CeL.assert(['1880年4月21日','清德宗光緒庚辰年庚辰月庚辰日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。');
-	CeL.assert(['庚辰年庚辰月庚辰日','清德宗光緒六年三月十三日'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。');
-	CeL.assert(['庚辰年庚辰月庚辰日庚辰時','一八八〇年庚辰月庚辰日7時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'各特殊紀年→統一時間標準（中→西）：查詢某農曆+紀年/君主(帝王)對應的標準時間(如UTC+8)。');
-	CeL.assert(['庚辰年庚辰月庚辰日庚辰時','一八八〇年庚辰月庚辰日庚辰時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'各特殊紀年→統一時間標準（中→西）：查詢某農曆+紀年/君主(帝王)對應的時辰。');
-	CeL.assert(['清德宗光緒六年三月十三日',CeL.to_Chinese_numeral('一八八〇年庚辰月庚辰日庚辰時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'}))]);
-	CeL.assert(['庚辰年庚辰月庚辰日庚辰時','西元一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。');
-	CeL.assert(['庚辰年庚辰月庚辰日庚辰時','清德宗光緒六年三月十三日辰正一刻'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。');
-	CeL.assert(['252年5月26日','魏少帝嘉平4年5月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-	CeL.assert(['252年6月24日','魏少帝嘉平4年閏5月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-	CeL.assert(['252年6月24日','魏少帝嘉平4年閏月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-	CeL.assert(['1357/1/21','元至正十七年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正十七年');
-	CeL.assert(['1357/1/21','元至正十七'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正十七');
-	CeL.assert(['1357/1/21','至正十七年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正十七年');
-	CeL.assert(['1357/1/21','至正十七'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正十七');
-	CeL.assert(['1357/1/21','元至正17年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正17年');
-	CeL.assert(['1357/1/21','元至正17'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正17');
-	CeL.assert(['1357/1/21','至正17年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正17年');
-	CeL.assert(['1357/1/21','至正17'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正17');
-	CeL.assert(['1880年4月21日','庚辰年庚辰月庚辰日庚辰時'.to_Date({parser:'era',base:'1850年'}).format({parser:'CE',format:'%Y年%m月%d日'})]);
-	CeL.assert(['1880年4月21日',CeL.era('庚辰年庚辰月庚辰日庚辰時',{base:'1850年'}).format({parser:'CE',format:'%Y年%m月%d日'})]);
-	CeL.assert(['260年6月26日','魏元帝景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-	CeL.assert(['260年6月26日','元帝景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-	CeL.assert(['260年6月26日','景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]);
-	CeL.assert(['260年6月26日','魏元帝景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。');
-	CeL.assert(['260年6月26日','元帝景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。');
-	CeL.assert(['260年6月26日','景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。');
-	CeL.assert(['260年7月25日','魏元帝景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。');
-	CeL.assert(['260年7月25日','元帝景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。');
-	CeL.assert(['260年7月25日','景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。');
-	CeL.assert(['304/12/23', '西晉惠帝永安1年11月10日'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})]);
-	CeL.assert(['304/12/23', '前涼太祖永安1年11月10日'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})]);
-	CeL.assert(['1911年11月30日','清遜帝宣統三年10月10日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'閏月或之後');
-	CeL.assert(['1329年9月1日','元文宗天曆2年8月8日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'天曆在元明宗(1329年)時被重複使用，共計3年。');
-	CeL.assert(['762年1月1日','唐肅宗元年建丑月初二'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'唐肅宗上元二年九月二十一日去年號，稱元年，以建子之月為歲首。');
-	CeL.assert(['694年11月25日 戊子小','證聖元年正月初三'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %月干支%大小月',locale:'cmn-Hant-TW'})],'證聖元年正月初一辛巳（694年11月23日），改元證聖。');
-	CeL.assert(['1855年2月5日 '+(CeL.gettext?'星期二':2),'太平天囯乙榮五年正月初一甲寅'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %w',locale:'cmn-Hant-TW'})],'天历与夏历阳历对照及简表');
-	CeL.assert(['西漢武帝元朔6年12月1日','武帝元朔六年十二月甲寅'.to_Date('era').format({parser:'CE',format:'%紀年名%年年%月月%日日',locale:'cmn-Hant-TW'})],'秦至汉初( 前246 至前104) 历法研究');
-	CeL.assert(["癸丑年八月初一",'2033年8月25日'.to_Date().format('Chinese')],'2033年閏年八月初一');
-	CeL.assert(["癸丑年閏十一月初一",'2033年12月22日'.to_Date().format('Chinese')],'2033年閏十一月初一');
-	CeL.assert(["甲寅年正月初一",'2034年2月19日'.to_Date().format('Chinese')],'2034年正月初一');
-	CeL.assert(["癸丑年閏11月1日",'2033年12月22日'.to_Date().format({parser:'Chinese',numeral:null,format:'%歲次年%月月%日日'})],'2033年閏十一月初一');
-	CeL.assert(["癸丑年閏11月1日",'2033年12月22日'.to_Date().format({parser:'era',era:'中曆',format:'%歲次年%月月%日日',locale:'cmn-Hant-TW'})],'2033年閏十一月初一');
-	CeL.assert([undefined,CeL.era('2200/1/1').共存紀年]);
-	CeL.assert([undefined,CeL.era('-4000/1/1').共存紀年]);
-	// .共存紀年 test: 可能需要因添加紀年而改變。
-	CeL.assert(/吳大帝嘉禾7年5月3日(.*?)\|魏明帝景初2年6月3日(.*?)\|蜀後主延熙1年5月2日/.test(CeL.era('238/6/2').共存紀年.join('|')),'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#1');
-	CeL.assert(CeL.era('延熙1年5月2日').共存紀年.join('|').includes('弥生時代神功皇后38年|高句麗東川王12年6月3日|新羅助賁尼師今9年6月3日|吳大帝嘉禾7年5月3日|百濟古尒王5年6月3日|魏明帝景初2年6月3日|魏燕王紹漢2年6月3日'),'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#1');
-	CeL.assert(/魏明帝景初3年後12月8日(.*?),蜀後主延熙2年12月8日(.*?),吳大帝赤烏2年12月8日/.test(CeL.era('240-1-19').共存紀年.join()),'測試特殊月名');
-	CeL.assert(CeL.era('魏明帝景初3年後12月8日').共存紀年.join('|').includes('弥生時代神功皇后40年|高句麗東川王13年後12月8日|新羅助賁尼師今10年後12月8日|百濟古尒王6年後12月8日|Roman Empire Gordianus 3年Tybi月23日|蜀後主延熙2年12月8日|吳大帝赤烏2年12月8日'),'測試特殊月名');
-	CeL.assert(['高麗忠肅王16年8月8日|Prome Saw Yan Naung 8年7月8日|Hanthawaddy Saw Zein 7年7月8日|Toungoo Kayin Ba 6年7月8日|Pagan Uzana II 6年7月8日|Pinya Uzana I 6年7月8日|鎌倉時代後醍醐天皇嘉暦4年8月8日|Sagaing Tarabya I 4年7月8日|陳憲宗開祐1年8月8日|元文宗天曆2年8月8日',CeL.era('1329年9月1日').共存紀年.join('|')],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#2');
-	//
-	var tmp = 'Toungoo Anaukpetlun 23年12月28日|後黎神宗永祚10年1月26日|Prome Thado Dhamma Yaza IV 8年12月28日|Mrauk U Thiri Thudhamma 6年12月28日|朝鮮仁祖6年1月26日|江戸時代後水尾天皇寛永5年1月26日|莫光祖永祚4年|';
-	CeL.assert([tmp+'後金太宗天聰2年1月26日|明思宗崇禎1年1月26日',CeL.era('1628年3月1日').共存紀年.join('|')],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#3');
-	CeL.assert([tmp+'明思宗崇禎1年1月26日',CeL.era('中國清太宗天聰2年1月26日').共存紀年.join('|')],'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#2');
-	CeL.assert([tmp+'後金太宗天聰2年1月26日',CeL.era('中國明思宗崇禎1年1月26日').共存紀年.join('|')],'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#3');
-	//
-	CeL.assert(["唐代宗寶應2年1月13日",CeL.era('二年春正月丁亥', {base : '寶應元年'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'})],'寶應二年春正月丁亥');
-	CeL.assert(["唐代宗寶應2年1月13日",CeL.era('丁亥', {base : '寶應二年春正月'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'})],'寶應二年春正月丁亥 (by base)');
-	CeL.assert(["763/5/17",CeL.era('寶應二年三月晦日').format({parser:'CE',format:'%Y/%m/%d'})],'寶應二年三月晦日');
-	CeL.assert(["唐代宗寶應|二|三|一",CeL.era('三月一日', {parse_only : true, base : '寶應二年春正月'}).slice(1).join('|')], 'parse_only + base: 寶應二年春正月');
-	CeL.assert(["唐代宗寶應|二|三|一",CeL.era('三月一日', {parse_only : true, base : '寶應二年'}).slice(1).join('|')], 'parse_only + base: 寶應二年');
-	CeL.assert(["唐代宗寶應|二|三|晦",CeL.era('晦日', {parse_only : true, base : '代宗寶應二年三月一日'}).slice(1).join('|')], 'parse_only + base: 代宗寶應二年三月一日');
-	CeL.assert(["134/7/29",CeL.era('陽嘉3年6月20日', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年6月20日.末');
-	CeL.assert(["134/8/8",CeL.era('陽嘉3年6月', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年6月.末');
-	CeL.assert(["135/2/1",CeL.era('陽嘉3年', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年.末');
-	CeL.assert(["136/2/20",CeL.era('陽嘉', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉.末');
+	error_count += CeL.test('紀年/曆數', [
+		[['孺子嬰',CeL.era('初始').君主],'初始.君主: 孺子嬰#1'],
+		[['孺子嬰','初始元年11月1日'.to_Date('era').君主],'初始.君主: 孺子嬰#2'],
+		[['庚辰年庚辰月庚辰日庚辰時','一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'可提供統一時間標準與各干支間的轉換。統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
+		[['清德宗光緒六年三月十三日',CeL.to_Chinese_numeral('一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'}))],'查詢一八八〇年四月二十一日七時的中曆日期'],
+		[['1628年3月1日','明思宗崇禎1年1月26日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['1628年3月1日','天聰二年甲寅月戊子日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['1628年3月1日','天聰2年寅月戊子日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['1880年4月21日','清德宗光緒六年三月十三日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['1880年4月21日','清德宗光緒庚辰年三月十三日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['1880年4月21日','清德宗光緒庚辰年庚辰月庚辰日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['庚辰年庚辰月庚辰日','清德宗光緒六年三月十三日'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
+		[['庚辰年庚辰月庚辰日庚辰時','一八八〇年庚辰月庚辰日7時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'各特殊紀年→統一時間標準（中→西）：查詢某農曆+紀年/君主(帝王)對應的標準時間(如UTC+8)。'],
+		[['庚辰年庚辰月庚辰日庚辰時','一八八〇年庚辰月庚辰日庚辰時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'各特殊紀年→統一時間標準（中→西）：查詢某農曆+紀年/君主(帝王)對應的時辰。'],
+		[['清德宗光緒六年三月十三日',CeL.to_Chinese_numeral('一八八〇年庚辰月庚辰日庚辰時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'}))]],
+		[['庚辰年庚辰月庚辰日庚辰時','西元一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
+		[['庚辰年庚辰月庚辰日庚辰時','清德宗光緒六年三月十三日辰正一刻'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
+		[['252年5月26日','魏少帝嘉平4年5月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['252年6月24日','魏少帝嘉平4年閏5月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['252年6月24日','魏少帝嘉平4年閏月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['1357/1/21','元至正十七年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正十七年'],
+		[['1357/1/21','元至正十七'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正十七'],
+		[['1357/1/21','至正十七年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正十七年'],
+		[['1357/1/21','至正十七'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正十七'],
+		[['1357/1/21','元至正17年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正17年'],
+		[['1357/1/21','元至正17'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正17'],
+		[['1357/1/21','至正17年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正17年'],
+		[['1357/1/21','至正17'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正17'],
+		[['1880年4月21日','庚辰年庚辰月庚辰日庚辰時'.to_Date({parser:'era',base:'1850年'}).format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['1880年4月21日',CeL.era('庚辰年庚辰月庚辰日庚辰時',{base:'1850年'}).format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['260年6月26日','魏元帝景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['260年6月26日','元帝景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['260年6月26日','景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['260年6月26日','魏元帝景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。'],
+		[['260年6月26日','元帝景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。'],
+		[['260年6月26日','景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。'],
+		[['260年7月25日','魏元帝景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。'],
+		[['260年7月25日','元帝景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。'],
+		[['260年7月25日','景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。'],
+		[['304/12/23', '西晉惠帝永安1年11月10日'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})]],
+		[['304/12/23', '前涼太祖永安1年11月10日'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})]],
+		[['1911年11月30日','清遜帝宣統三年10月10日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'閏月或之後'],
+		[['1329年9月1日','元文宗天曆2年8月8日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'天曆在元明宗(1329年)時被重複使用，共計3年。'],
+		[['762年1月1日','唐肅宗元年建丑月初二'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'唐肅宗上元二年九月二十一日去年號，稱元年，以建子之月為歲首。'],
+		[['694年11月25日 戊子小','證聖元年正月初三'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %月干支%大小月',locale:'cmn-Hant-TW'})],'證聖元年正月初一辛巳（694年11月23日），改元證聖。'],
+		[['1855年2月5日 '+(CeL.gettext?'星期二':2),'太平天囯乙榮五年正月初一甲寅'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %w',locale:'cmn-Hant-TW'})],'天历与夏历阳历对照及简表'],
+		[['西漢武帝元朔6年12月1日','武帝元朔六年十二月甲寅'.to_Date('era').format({parser:'CE',format:'%紀年名%年年%月月%日日',locale:'cmn-Hant-TW'})],'秦至汉初( 前246 至前104) 历法研究'],
+		[["癸丑年八月初一",'2033年8月25日'.to_Date().format('Chinese')],'2033年閏年八月初一'],
+		[["癸丑年閏十一月初一",'2033年12月22日'.to_Date().format('Chinese')],'2033年閏十一月初一'],
+		[["甲寅年正月初一",'2034年2月19日'.to_Date().format('Chinese')],'2034年正月初一'],
+		[["癸丑年閏11月1日",'2033年12月22日'.to_Date().format({parser:'Chinese',numeral:null,format:'%歲次年%月月%日日'})],'2033年閏十一月初一'],
+		[["癸丑年閏11月1日",'2033年12月22日'.to_Date().format({parser:'era',era:'中曆',format:'%歲次年%月月%日日',locale:'cmn-Hant-TW'})],'2033年閏十一月初一'],
+		[[undefined,CeL.era('2200/1/1').共存紀年]],
+		[[undefined,CeL.era('-4000/1/1').共存紀年]],
+	]);
+
+	var tmp = '後黎神宗永祚10年1月26日|朝鮮仁祖6年1月26日|江戸時代後水尾天皇寛永5年1月26日|莫光祖永祚4年|';
+	error_count += CeL.test('.共存紀年 test: 可能需要因添加紀年而改變。', [
+		[CeL.era('238/6/2').共存紀年.join('|').covers('吳大帝嘉禾7年5月3日|魏明帝景初2年6月3日|蜀後主延熙1年5月2日'),'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#1'],
+		[CeL.era('延熙1年5月2日').共存紀年.join('|').covers('弥生時代神功皇后38年|高句麗東川王12年6月3日|新羅助賁尼師今9年6月3日|吳大帝嘉禾7年5月3日|百濟古尒王5年6月3日|魏明帝景初2年6月3日|魏燕王紹漢2年6月3日'),'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#1'],
+		[CeL.era('240-1-19').共存紀年.join().covers('魏明帝景初3年後12月8日,蜀後主延熙2年12月8日,吳大帝赤烏2年12月8日'),'測試特殊月名'],
+		[CeL.era('魏明帝景初3年後12月8日').共存紀年.join('|').covers('弥生時代神功皇后40年|高句麗東川王13年後12月8日|新羅助賁尼師今10年後12月8日|百濟古尒王6年後12月8日|Roman Empire Gordianus 3年Tybi月23日|蜀後主延熙2年12月8日|吳大帝赤烏2年12月8日'),'測試特殊月名'],
+		[CeL.era('1329年9月1日').共存紀年.join('|').covers('高麗忠肅王16年8月8日|鎌倉時代後醍醐天皇嘉暦4年8月8日|陳憲宗開祐1年8月8日|元文宗天曆2年8月8日'),'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#2'],
+
+		[CeL.era('1628年3月1日').共存紀年.join('|').covers(tmp+'後金太宗天聰2年1月26日|明思宗崇禎1年1月26日'),'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#3'],
+		[CeL.era('中國清太宗天聰2年1月26日').共存紀年.join('|').covers(tmp+'明思宗崇禎1年1月26日'),'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#2'],
+		[CeL.era('中國明思宗崇禎1年1月26日').共存紀年.join('|').covers(tmp+'後金太宗天聰2年1月26日'),'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#3'],
+
+		[["唐代宗寶應2年1月13日",CeL.era('二年春正月丁亥', {base : '寶應元年'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'})],'寶應二年春正月丁亥'],
+		[["唐代宗寶應2年1月13日",CeL.era('丁亥', {base : '寶應二年春正月'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'})],'寶應二年春正月丁亥 (by base)'],
+		[["763/5/17",CeL.era('寶應二年三月晦日').format({parser:'CE',format:'%Y/%m/%d'})],'寶應二年三月晦日'],
+		[["唐代宗寶應|二|三|一",CeL.era('三月一日', {parse_only : true, base : '寶應二年春正月'}).slice(1).join('|')], 'parse_only + base: 寶應二年春正月'],
+		[["唐代宗寶應|二|三|一",CeL.era('三月一日', {parse_only : true, base : '寶應二年'}).slice(1).join('|')], 'parse_only + base: 寶應二年'],
+		[["唐代宗寶應|二|三|晦",CeL.era('晦日', {parse_only : true, base : '代宗寶應二年三月一日'}).slice(1).join('|')], 'parse_only + base: 代宗寶應二年三月一日'],
+		[["134/7/29",CeL.era('陽嘉3年6月20日', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年6月20日.末'],
+		[["134/8/8",CeL.era('陽嘉3年6月', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年6月.末'],
+		[["135/2/1",CeL.era('陽嘉3年', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年.末'],
+		[["136/2/20",CeL.era('陽嘉', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉.末'],
+	]);
+
 
 	// 參照紀年之演算機制
 	CeL.assert([8,CeL.era('明宣宗宣德',{get_era:1}).calendar[7].leap],'明宣宗宣德8年閏8月');
@@ -1408,14 +1426,15 @@ function test_era() {
 	_c0=CeL.era('曆B',{get_era:1}).calendar[0];CeL.assert(['9,5,0',[_c0.start,_c0.length,+_c0.leap].join()],'測試 參照紀年之演算機制:閏8月–');
 	_c0=CeL.era('曆C',{get_era:1}).calendar[0];CeL.assert(['9,4,NaN',[_c0.start,_c0.length,+_c0.leap].join()],'測試 參照紀年之演算機制:9月–');
 
-	// test period_end of era()
-	CeL.assert([CeL.era('1627年',{date_only:true,period_end:true}).format('CE'), '1627年'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 年');
-	CeL.assert([CeL.era('1627年9月',{date_only:true,period_end:true}).format('CE'), '1627年9月'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 月');
-	CeL.assert([CeL.era('1627年9月3日',{date_only:true,period_end:true}).format('CE'), '1627年9月3日'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 日');
-	CeL.assert(['0001年'.to_Date().format(),'0001/1/1'.to_Date().format()],'1/1/1');
-	CeL.assert(['前1年'.to_Date().format(),'-1年'.to_Date().format()],'year -1');
-	CeL.assert(['前1年'.to_Date({parser:'CE',period_end:true}).format('CE'),'0001年'.to_Date('CE').format('CE')],'period_end of CE');
-	CeL.assert([CeL.era('前1年',{period_end:true}).format('CE'),'0001年'.to_Date('CE').format('CE')],'period_end of CE@era()');
+	error_count += CeL.test('period_end of era()', [
+		[[CeL.era('1627年',{date_only:true,period_end:true}).format('CE'), '1627年'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 年'],
+		[[CeL.era('1627年9月',{date_only:true,period_end:true}).format('CE'), '1627年9月'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 月'],
+		[[CeL.era('1627年9月3日',{date_only:true,period_end:true}).format('CE'), '1627年9月3日'.to_Date({parser:'CE',period_end:true}).format('CE')],'period_end of era() 日'],
+		[['0001年'.to_Date().format(),'0001/1/1'.to_Date().format()],'1/1/1'],
+		[['前1年'.to_Date().format(),'-1年'.to_Date().format()],'year -1'],
+		[['前1年'.to_Date({parser:'CE',period_end:true}).format('CE'),'0001年'.to_Date('CE').format('CE')],'period_end of CE'],
+		[[CeL.era('前1年',{period_end:true}).format('CE'),'0001年'.to_Date('CE').format('CE')],'period_end of CE@era()'],
+	]);
 	
 	finish_test();
 }
@@ -1448,7 +1467,9 @@ function node_info(messages) {
 function finish_test() {
 	if (error_count) {
 		node_info([ 'CeJS: ', 'fg=red;bg=white', error_count + ' errors occurred.', '-fg;-bg' ]);
-		throw new Error(error_count + ' errors');
+		setTimeout(function() {
+			throw new Error('All get ' + error_count + ' error(s)');
+		}, 0);
 	}
 
 	node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。', '-fg;-bg' ]);
@@ -1476,6 +1497,7 @@ function do_test() {
 	//
 	'data.numeral', test_numeral,
 	//
+	//function() { CeL.set_debug(0); },
 	'data.date.era', test_era);
 }
 

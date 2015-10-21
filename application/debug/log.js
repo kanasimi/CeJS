@@ -1632,10 +1632,10 @@ if (!CeL.Log) {
 			all : conditions
 		};
 
-		conditions.forEach(function(condition, index) {
+		function handler(condition) {
 			var result;
 			try {
-				result = typeof condition === 'function' ? condition(recorder)
+				result = typeof condition === 'function' ? condition(handler)
 						: assert(condition[0], Object.assign({
 							hide_OK : true,
 							no_cache : true
@@ -1656,7 +1656,9 @@ if (!CeL.Log) {
 				recorder.ignored.push(condition);
 				break;
 			}
-		});
+		}
+
+		conditions.forEach(handler);
 
 		// --------------------------------
 		// Testing report.
@@ -1691,7 +1693,7 @@ if (!CeL.Log) {
 		if (recorder.fatal.length > 0)
 			// fatal exception error 致命錯誤
 			test_name.push(to_SGR([ ', ' + recorder.fatal.length + ' ',
-					'fg=red;bg=white', 'fatal', '-fg' ]));
+					'fg=red;bg=white', 'fatal', '-fg;-bg' ]));
 
 		if (recorder.passed.length) {
 			CeL.warn(join());

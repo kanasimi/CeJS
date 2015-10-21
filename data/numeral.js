@@ -19,8 +19,8 @@ if (false) {
 if (typeof CeL === 'function')
 	CeL.run({
 		name : 'data.numeral',
-		//
-		require : 'data.code.compatibility.',
+		// data.native: .chars()
+		require : 'data.code.compatibility.|data.native.',
 
 		code : function(library_namespace) {
 			var

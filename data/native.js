@@ -762,6 +762,70 @@ remove_Object_value = remove_Object_value;
 //	string & Number 處理	-----------------------------------------------
 
 
+// String.covers()
+/*
+	return true: 兩者相同, false: 兩者等長但不相同,
+	1: str2為str1之擴展 (str2涵蓋str1), -1: str1為str2之擴展, 2: 兩者等價, 0: 皆非
+*/
+function String_covers(string_1, string_2, options) {
+	if (options && typeof options.preprocessor === 'function') {
+		string_1 = options.preprocessor(string_1);
+		string_2 = options.preprocessor(string_2);
+	}
+
+	if (string_1.length === string_2.length) {
+		if (string_1 === string_2)
+			return true;
+		if (!options || !options.force || typeof options.equals !== 'function')
+			// 就算兩者等長但不相同，還是有可能等價。
+			return false;
+	}
+
+	var result = 1;
+	//	swap: string_2 轉成長的
+	if (string_1.length > string_2.length) {
+		result = string_2, string_2 = string_1, string_1 = result;
+		result = -1;
+	}
+
+	//string_1 = string_1.replace(/\s+/g, ' ');
+
+	// .split('')
+	string_1 = string_1.chars();
+	string_2 = string_2.chars();
+
+	var string_1_index = 0, string_2_index = 0,
+		character_1 = string_1[0],
+		//
+		equals = options && typeof options.equals === 'function' ? options.equals : String_covers.equals;
+
+	string_2.some(function(character_2, index) {
+		if (equals(character_1, character_2))
+			if (++string_1_index === string_1.length) {
+				string_2_index = index;
+				return true;
+			} else
+				character_1 = string_1[string_1_index];
+	});
+
+	return string_1_index === string_1.length ? result : 0;
+}
+
+String_covers.equals = function(a, b) {
+	return a === b;
+};
+
+//	compare file name. 比較檔名是否相同。str2 為 str1 添加字元後的擴展？表示兩檔名等價
+String_covers.file_name_equals = function(a, b) {
+	return a === b || /^[ ・.]+$/.test(a + b) || /^[-～]+$/.test(a + b) || /^[［\[]+$/.test(a + b) || /^[］\]]+$/.test(a + b);
+};
+
+
+set_method(String, {
+	covers : String_covers
+});
+
+
 function split_String_by_length_(s, l, m) {
 	// less than,great than,index,left count index(left length now),text
 	// now,text index
@@ -825,7 +889,6 @@ function split_String_by_length(l, m) {
 }
 
 
-
 /**
  * 將字串以長 size 切割。
  * 
@@ -848,6 +911,7 @@ function chunk(size) {
 
 	return result;
 }
+
 
 
 var split_by_code_point, PATTERN_char;
@@ -875,6 +939,7 @@ try {
 	};
 }
 
+// String..prototype.codePoints()
 // http://docs.oracle.com/javase/8/docs/api/java/lang/CharSequence.html#codePoints--
 function codePoints() {
 	return split_by_code_point.call(this)
@@ -2042,6 +2107,12 @@ function replace_check_near(text, pattern, replace_to, match_previous,
 
 
 set_method(String.prototype, {
+	covers : function(string) {
+		return this.length >= string.length
+		//
+		&& !!String_covers(string, this);
+	},
+
 	count_of : set_bind(count_occurrence, true),
 	//gText : getText,
 	//turnU : turnUnicode,
@@ -2051,13 +2122,7 @@ set_method(String.prototype, {
 
 	// 對於可能出現 surrogate pairs 的字串，應當以此來取代 .split('')！
 	chars : split_by_code_point,
-	codePoints : function codePoints() {
-		return split_by_code_point.call(this)
-		//
-		.map(function(char) {
-			return char.codePointAt(0);
-		});
-	},
+	codePoints : codePoints,
 
 	// repeatedly replace till stable
 	replace_till_stable : function(pattern, replace_to) {
