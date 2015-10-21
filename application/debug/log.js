@@ -1366,7 +1366,7 @@ if (!CeL.Log) {
 
 		// --------------------------------
 		// 前置處理作業: condition。
-		if (!options)
+		if (!options) {
 			if (CeL.is_Object(condition)) {
 				// 直接將之當作 options
 				options = condition;
@@ -1383,14 +1383,15 @@ if (!CeL.Log) {
 				// assert: options.attribute is accessable.
 				// assert: ('attribute' in options) is evaluable.
 			}
-		else if (typeof callback === 'function') {
-			options = {
-				callback : options
-			};
-		} else if (typeof options === 'string')
+		} else if (typeof options === 'string') {
 			options = {
 				name : options
 			};
+		} else if (typeof options === 'function') {
+			options = {
+				callback : options
+			};
+		}
 
 		var type = options.type;
 		if (Array.isArray(condition)) {
@@ -1572,9 +1573,10 @@ if (!CeL.Log) {
 	 * 
 	 * @param {String}[test_name]
 	 *            test name 此次測試名稱。
-	 * @param {Array}conditions
+	 * @param {Array|Function}conditions
 	 *            condition list passed to assert(): [ [ condition / test value,
-	 *            options ], [], ... ].
+	 *            options ], [], ... ].<br />
+	 *            允許 {Function}condition(assert) 
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項。 {<br />
 	 *            {String}name: test name 此次測試名稱。<br />
@@ -1592,15 +1594,10 @@ if (!CeL.Log) {
 			conditions = test_name;
 		}
 
-		if (!Array.isArray(conditions)) {
+		if (!Array.isArray(conditions) && typeof conditions !== 'function') {
 			throw new Error(CeL.Class + '.test: PLease input {Array}!');
 			return;
 		}
-
-		// 為允許 {Function}condition
-		if (false && !Array.isArray(conditions[0]))
-			// assert: input [ condition / test value, options ]
-			conditions = [ conditions ];
 
 		var assert = CeL.assert,
 		// default options for running CeL.assert().
@@ -1619,6 +1616,11 @@ if (!CeL.Log) {
 				default_options = options.options;
 		}
 
+		default_options = Object.assign({
+			hide_OK : true,
+			no_cache : true
+		}, default_options);
+
 		var recorder = {
 			// OK
 			passed : [],
@@ -1629,79 +1631,137 @@ if (!CeL.Log) {
 			// 執行 condition 時出錯，throw。
 			fatal : [],
 			//
-			all : conditions
+			all : []
 		};
 
-		function handler(condition) {
+		function handler(condition_arguments) {
+			recorder.all.push(condition_arguments);
+
 			var result;
 			try {
-				result = typeof condition === 'function' ? condition(handler)
-						: assert(condition[0], Object.assign({
-							hide_OK : true,
-							no_cache : true
-						}, condition[1], default_options));
+				if (typeof condition_arguments === 'function')
+					result = condition_arguments(assert_proxy);
+				else {
+					// assert: Array.isArray(condition_arguments) or arguments
+					var options = condition_arguments[1],
+					//
+					condition = condition_arguments[0];
+					// 前置處理作業: condition, options。
+					// copy from log_front_end_assert()
+					// 目的在將輸入轉成 {Object}，以添入 options。
+					if (!options) {
+						if (CeL.is_Object(condition)) {
+							// 直接將之當作 options
+							options = condition;
+							condition = options.eval;
+						}
+					} else if (typeof options === 'string') {
+						options = {
+							name : options
+						};
+					} else if (typeof options === 'function') {
+						options = {
+							callback : options
+						};
+					}
+
+					// 不汙染 default_options, options
+					options = Object.assign(Object.clone(default_options), options);
+
+					result = assert(condition, options);
+				}
+
 			} catch (e) {
-				recorder.fatal.push(condition);
+				recorder.fatal.push(condition_arguments);
 				return;
 			}
 
 			switch (result) {
 			case true:
-				recorder.passed.push(condition);
+				recorder.passed.push(condition_arguments);
 				break;
 			case false:
-				recorder.failed.push(condition);
+				recorder.failed.push(condition_arguments);
 				break;
 			default:
-				recorder.ignored.push(condition);
+				recorder.ignored.push(condition_arguments);
 				break;
 			}
 		}
 
-		conditions.forEach(handler);
+		// 模擬 CeL.assert()
+		function assert_proxy() {
+			handler.call(null, arguments);
+		}
 
 		// --------------------------------
-		// Testing report.
-		if (options && typeof options.callback === 'function')
-			options.callback(recorder, test_name);
+		// report.
+		function report() {
+			if (options && typeof options.callback === 'function')
+				options.callback(recorder, test_name);
 
-		test_name = test_name ? [ to_SGR([ 'Test [', 'fg=blue;bg=white',
-				test_name, '-fg;-bg', ']: ' ]) ] : [];
-		function join() {
-			if (recorder.ignored.length > 0)
-				test_name.push(to_SGR([ ', ' + recorder.ignored.length + ' ',
-						'fg=yellow', 'ignored', '-fg' ]));
-			return test_name.join('') + '.';
+			var messages = test_name ? [ to_SGR([ 'Test [', 'fg=blue;bg=yellow',
+			                                   test_name, '-fg;-bg', ']: ' ]) ] : [];
+			function join() {
+				if (recorder.ignored.length > 0)
+					messages.push(to_SGR([ ', ' + recorder.ignored.length + ' ',
+					                        'fg=yellow', 'ignored', '-fg' ]));
+
+				// 使用/耗費時間。cf. eta, Estimated Time of Arrival
+				var elapsed = Date.now() - assert_proxy.starts;
+				if (elapsed >= 1000)
+					messages.push(', ' + (elapsed / 1000).to_fixed(2) + 's');
+				messages.push(', ' + (recorder.all.length / elapsed).to_fixed(2) + ' tests/ms.');
+				return messages.join('');
+			}
+
+			if (recorder.failed.length === 0 && recorder.fatal.length === 0) {
+				// all passed 測試通過
+				messages.push(to_SGR([ 'All ' + recorder.passed.length + ' ',
+				                        'fg=green', 'passed', '-fg' ]));
+
+				CeL.info(join());
+				return 0;
+			}
+
+			// not all passed.
+			messages.push(recorder.failed.length + '/'
+					//
+					+ (recorder.failed.length + recorder.passed.length));
+			if (recorder.failed.length + recorder.passed.length !== recorder.all.length)
+				messages.push('/' + recorder.all.length);
+			messages.push(to_SGR([ ' ', 'fg=red', 'failed', '-fg' ]));
+			if (recorder.fatal.length > 0)
+				// fatal exception error 致命錯誤
+				messages.push(to_SGR([ ', ' + recorder.fatal.length + ' ',
+				                        'fg=red;bg=white', 'fatal', '-fg;-bg' ]));
+
+			if (recorder.passed.length > 0) {
+				CeL.warn(join());
+			} else {
+				CeL.err(join());
+			}
+
+			return recorder.failed.length + recorder.fatal.length;
 		}
 
-		if (recorder.failed.length === 0 && recorder.fatal.length === 0) {
-			// all passed
-			test_name.push(to_SGR([ 'All ' + recorder.passed.length + ' ',
-					'fg=green', 'passed', '-fg' ]));
+		assert_proxy.report = report;
+		assert_proxy.options = default_options;
+		assert_proxy.starts = Date.now();
 
-			CeL.info(join());
-			return 0;
-		}
+		// --------------------------------
+		// ready to go
 
-		// not all passed.
-		test_name.push(recorder.failed.length + '/'
-		//
-		+ (recorder.failed.length + recorder.passed.length));
-		if (recorder.failed.length + recorder.passed.length !== recorder.all.length)
-			test_name.push('/' + recorder.all.length);
-		test_name.push(to_SGR([ ' ', 'fg=red', 'failed', '-fg' ]));
-		if (recorder.fatal.length > 0)
-			// fatal exception error 致命錯誤
-			test_name.push(to_SGR([ ', ' + recorder.fatal.length + ' ',
-					'fg=red;bg=white', 'fatal', '-fg;-bg' ]));
-
-		if (recorder.passed.length) {
-			CeL.warn(join());
+		if (Array.isArray(conditions)) {
+			conditions.forEach(handler);
 		} else {
-			CeL.err(join());
+			// assert: typeof conditions === 'function'
+			conditions(assert_proxy);
 		}
 
-		return recorder.failed.length + recorder.fatal.length;
+		if (!assert_proxy.pending)
+			// waiting
+			return report();
 	}
 
 
