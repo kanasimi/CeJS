@@ -130,15 +130,6 @@ if (false) {
 	CeL.wiki.parser('a{{ #expr: {{CURRENTHOUR}}+8}}}}b').parse()[1];
 	CeL.wiki.parser('{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}').parse().toString();
 
-
-	// test for parse_template()
-	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 0, 0)
-	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 0, 1)
-	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 0)
-	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', 1)
-	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 0)
-	CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', 1)
-
 	// More examples: see /_test suite/test.js
 	
 	// Flow

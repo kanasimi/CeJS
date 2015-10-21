@@ -639,7 +639,7 @@ function start_count(restart) {
 		});
 
 		/*
-		CeL.use('code.reorganize');
+		CeL.run('code.reorganize');
 		var c = CeL.get_file('../ce.js')+CeL.get_file('../code/log.js');
 		c = CeL.get_various_from_code(c);
 		c = CeL.get_code_from_generated_various(c);
@@ -715,7 +715,7 @@ function start_count(restart) {
 		CeL.run('application.math');
 
 		if (false)
-			CeL.use('data.code.API', function() {
+			CeL.run('data.code.API', function() {
 
 				CeL.use_API('Bing', function() {
 					//	http://msdn.microsoft.com/en-us/library/ff512406.aspx
@@ -768,7 +768,7 @@ function start_count(restart) {
 
 		/*
 		 CeL.debug('phase: data test',2);
-		 CeL.use('data');
+		 CeL.run('data');
 
 		 test_num=1125;
 		 CeL.log(test_num+' → '+CeL.to_1000_prefix(test_num,5));
@@ -797,9 +797,9 @@ function start_count(restart) {
 
 					// function aaa(v){alert('mmm='+mmm);var r={};r[v]=222;return r;}
 					// var fff3=33;eval('var mmm=1;(function(){var included=aaa("fff");alert(included.fff);})()');alert(fff);
-					//CeL.use('net.form.select_input');
+					//CeL.run('net.form.select_input');
 					if (false)
-						CeL.use( [ 'interact.form.address',
+						CeL.run( [ 'interact.form.address',
 								'interact.form.bank_account',
 								'interact.form.education' ]);
 
@@ -923,7 +923,7 @@ function start_count(restart) {
 			try {
 				if (location.protocol === 'file:')
 					document.getElementById('loading_error_message').innerHTML =
-					//	** 較新之 browser 通常需要使用 callback 的方法，不能使用 "CeL.use('module');_do_some_thing_;"!!
+					//	** 較新之 browser 通常需要使用 callback 的方法，不能使用 "CeL.run('module');_do_some_thing_;"!!
 					navigator.userAgent.indexOf('Chrome') === -1 ? CeL.get_file.error
 							|| 'Loading local file error!'
 							: 'You may <a href="http://code.google.com/p/chromium/issues/detail?id=4197#c26">add a flag_$ta --allow-file-access-from-files to run this tool._$tage.g., run '
@@ -937,7 +937,7 @@ function start_count(restart) {
 		}
 	};
 
-	//CeL.use('net.web',function(){});
+	//CeL.run('net.web',function(){});
 
 	//
 //]]></script>
@@ -1002,7 +1002,7 @@ if (typeof CeL == 'function' && typeof CeL.run == 'function')
 else
 	window.onload = load_detect;
 
-// CeL.use('net.web');CeL.on_load(load_detect);
+// CeL.run('net.web');CeL.on_load(load_detect);
 
 // for(var i=0,j=0;i<1e9;i++)j++;
 

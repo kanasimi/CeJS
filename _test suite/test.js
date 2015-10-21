@@ -185,7 +185,9 @@ function test_console() {
 	// restore CSI.
 	SGR.CSI = CSI;
 
-	if (true) {
+	if (false) {
+		// https://travis-ci.org/kanasimi/CeJS/builds/86612669#L104
+		// https://ci.appveyor.com/project/kanasimi/cejs/build/27/job/xswk33cd13owcrkd#L26
 		var demo = [ [ 'fg ' ], [ 'bg ' ] ];
 		new Array(8).fill(0).forEach(function(_, index) {
 			demo[0].push('fg=' + index, index);
@@ -957,6 +959,23 @@ if (test_level) {
 }
 
 
+
+//============================================================================================================================================================
+
+
+function test_Hamming() {
+	var data, code;
+	error_count += CeL.test('CSV basic', [
+		[[code = '101110010010', CeL.Hamming.encode(data = '11000010')]],
+		[[data, CeL.Hamming.decode(code)]],
+		[[code = '101001001111', CeL.Hamming.encode(data = '10101111')]],
+		[[data, CeL.Hamming.decode(code)]],
+		[[code = '001110001010', CeL.Hamming.encode(data = '11001010')]],
+		[[data, CeL.Hamming.decode(code)]],
+	]);
+}
+
+
 // ============================================================================================================================================================
 
 
@@ -1312,6 +1331,14 @@ function test_check() {
 
 function test_wiki() {
 	error_count += CeL.test('wiki: parse_template', [
+		[['temp', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', false)[1]]],
+		[['{{temp2,p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', false)[2].join()]],
+		[['|{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', true)[2]]],
+		[['{{temp2,p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', false)[2].join()]],
+		[['|{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', true)[2]]],
+		[['p{a}r', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', false)[2].join()]],
+		[['|p{a}r', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', true)[2]]],
+
 		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b')[0] ]],
 		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp')[0] ]],
 		[[ '{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]],
@@ -1479,10 +1506,11 @@ function node_info(messages) {
 
 function finish_test() {
 	if (error_count) {
-		node_info([ 'CeJS: ', 'fg=red;bg=white', error_count + ' errors occurred.', '-fg;-bg' ]);
+		node_info([ 'CeJS: ', 'fg=red;bg=white', 'All ' + error_count + ' errors occurred.', '-fg;-bg' ]);
 		setTimeout(function() {
 			throw new Error('All get ' + error_count + ' error(s)');
 		}, 0);
+		return;
 	}
 
 	node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。', '-fg;-bg' ]);
@@ -1496,6 +1524,7 @@ function do_test() {
 	// 測試期間時需要用到的功能先作測試。
 	'interact.console', test_console,
 /*
+*/
 	// 基本的功能先作測試。
 	'data.native', test_native,
 	//
@@ -1506,11 +1535,12 @@ function do_test() {
 	function() { CeL.set_debug(0); },
 	[ 'data.math.rational', 'data.math.quadratic' ], test_math,
 	//
+	'data.math.Hamming', test_Hamming,
+	//
 	'data.CSV', test_CSV,
 	//
 	'data.numeral', test_numeral,
 	//
-*/
 	'application.net.wiki', test_wiki,
 	//
 	'data.date.calendar', test_calendar,

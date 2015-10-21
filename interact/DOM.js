@@ -5528,7 +5528,7 @@ _// JSDT:_module_
  * 比起 add_listener()，本函數在已經 load 時依然會執行，而 add_listener 因為是用榜定的方法，因此 load 完就不再觸發(?)。
  * 這東西頂多只能擺在 include 的 JS file 中，不能 runtime include。
  * @example <code>
- * CeL.use('net.web');
+ * CeL.run('net.web');
  * CeL.on_load(function(){sl(1);},'sl(2);');
  * </code>
  * 
