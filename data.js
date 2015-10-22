@@ -1461,12 +1461,14 @@ library_namespace.set_method(Pair.prototype, {
 			options = library_namespace.null_Object();
 
 		var this_pair = this.pair, pair = library_namespace.null_Object(), keys = [], key, value, is_number = options.is_number;
+		// TODO: Pair.reverse 對 duplicated key 不穩定。
 		for (value in this_pair)
 			if ((key = this_pair[value]) || key === '') {
-				if (key in pair)
-					library_namespace.warn('Pair.reverse: duplicated key ['
+				if (key in pair) {
+					if (pair[key] !== is_number ? +value : value)
+						library_namespace.warn('Pair.reverse: duplicated key ['
 							+ key + ']');
-				else {
+				} else {
 					pair[key] = is_number ? +value : value;
 					keys.push(key);
 				}

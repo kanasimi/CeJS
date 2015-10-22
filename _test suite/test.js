@@ -36,6 +36,158 @@ require('../index');
 
 // More examples: see /_test suite/test.js
 
+
+//============================================================================================================================================================
+
+function test_compatibility() {
+
+	error_count += CeL.test('Set, Map, Array.from()', function(assert) {
+		var a = [1, 2, 3, 1],
+			s = new Set(a),
+			e = s.entries(),
+			v = s.values(),
+			m = new Map([
+				[5, 1],
+				[7, 1],
+				[5, 2],
+				[3, 1]
+			]);
+		// CeL.set_debug(6);
+		assert(e.next().value.join() === "1,1", 'set.entries().value');
+		assert(e.next().value.join() === "2,2", 'set.entries().value');
+		assert(e.next().value.join() === "3,3", 'set.entries().value');
+		assert(e.next().done, 'set.entries().done');
+		assert(v.next().value === 1, 'set.values().value');
+		assert(v.next().value === 2, 'set.values().value');
+		assert(v.next().value === 3, 'set.values().value');
+		assert(v.next().done, 'set.values().done');
+
+		v = s.values();
+		assert(v.next().value === 1, 'set.values().value');
+		assert(v.next().value === 2, 'set.values().value');
+		assert(v.next().value === 3, 'set.values().value');
+
+		s.add(4);
+		if (v.next().value !== 4)
+			CeL.err('iterator 無法反映 Set 之更動！');
+		assert(v.next().done, 'set.values().done');
+
+		e = a.entries();
+		assert(e.next().value.join() === "0,1", 'array.entries().value');
+		assert(e.next().value.join() === "1,2", 'array.entries().value');
+		assert(e.next().value.join() === "2,3", 'array.entries().value');
+		assert(e.next().value.join() === "3,1", 'array.entries().value');
+		assert(e.next().done, 'array.entries().done');
+
+		e = m.entries();
+		assert(e.next().value.join() === "5,2", 'map.entries().value');
+		assert(e.next().value.join() === "7,1", 'map.entries().value');
+		assert(e.next().value.join() === "3,1", 'map.entries().value');
+		assert(e.next().done, 'map.entries().done');
+
+		v = m.keys();
+		assert(v.next().value === 5, 'map.keys().value');
+		assert(v.next().value === 7, 'map.keys().value');
+		assert(v.next().value === 3, 'map.keys().value');
+		assert(v.next().done, 'map.keys().done');
+
+		v = m.values();
+		assert(v.next().value === 2, 'map.values().value');
+		assert(v.next().value === 1, 'map.values().value');
+		assert(v.next().value === 1, 'map.values().value');
+		assert(v.next().done, 'map.values().done');
+
+		//{String}string
+		//string.split('')
+		//Object(string)
+		//Array.from(string)
+		assert([ Array.from('abc').join(), "a,b,c" ], 'Array.from(String)');
+		assert([ Array.from(5).join(), "" ], 'Array.from(Number)');
+		assert([ Array.from(true).join(), "" ], 'Array.from(Boolean)');
+		assert([ Array.from(a).join(), "1,2,3,1" ], 'Array.from(Array)');
+		assert([ Array.from(a.entries()).join(';'), "0,1;1,2;2,3;3,1" ],
+		'Array.from(array.entries())');
+		assert([ Array.from({
+			length : 4
+		}, function(v, i) {
+			return i * i;
+		}).join(), "0,1,4,9" ], 'Array.from({length:\d})');
+		assert([ Array.from(s).join(), "1,2,3,4" ], 'Array.from(Set)');
+		assert([ Array.from(m).join(), "5,2,7,1,3,1" ], 'Array.from(Map)');
+		assert([ Array.from(m.keys()).join(), "5,7,3" ], 'Array.from(map.keys())');
+	});
+
+	error_count += CeL.test('dependency_chain', function(assert) {
+		var dc = new CeL.dependency_chain;
+		dc.add(1, 2);
+		assert(['1', Array.from(dc.get(2).previous.values()).join()]);
+		dc.add(2, 3);
+		assert(['2', Array.from(dc.get(3).previous.values()).join()]);
+		assert([1, dc.independent(3)]);
+		assert(['', Array.from(dc.get(3).next.values()).join()]);
+		assert(['1,2,3', Array.from(dc.get()).sort().join()]);
+		assert([1, dc.independent()]);
+		dc.add(0, 1);
+		assert([0, dc.independent()]);
+		dc['delete'](0);
+		assert([1, dc.independent()]);
+	});
+
+	// ----------------------------------------------------
+
+	error_count += CeL.test('Math.clz32()', function(assert) {
+		var BITS = 32;
+		assert([BITS, Math.clz32(0)], 'Math.clz32(0) === 32');
+		for (var i = BITS, test_number_in_2 = '1'; --i;) {
+			assert([i, Math.clz32(parseInt(test_number_in_2, 2))], i + ': ' + test_number_in_2);
+			test_number_in_2 = test_number_in_2.replace(new RegExp('^.{1,' + (1 + (test_number_in_2.length * Math.random()) | 0) + '}'), function ($) {
+				return $ + (Math.random() < .5 ? 0 : 1)
+			});
+		}
+	});
+
+	error_count += CeL.test('String.prototype.split()', [
+		[[ '11,22'.split(/,/).join(';'), '11;22' ]],
+		[[ '11,'.split(/,/).join(';'), '11;' ]],
+		[[ ',22'.split(/,/).join(';'), ';22' ]],
+		[[ '11,22'.split(/,?/).join(';'), '1;1;2;2' ]],
+		[[ '11,'.split(/,?/).join(';'), '1;1;' ]],
+		[[ ',22'.split(/,?/).join(';'), ';2;2' ]],
+		[[ ',,2'.split(/,?/).join(';'), ';;2' ]],
+		[[ '1'.split(/(,)?/).join(';'), '1' ]],
+		[[ '11,22'.split(/(,)?/).join(';'), '1;;1;,;2;;2' ]],
+		[[ '11,'.split(/(,)?/).join(';'), '1;;1;,;' ]],
+		[[ ',22'.split(/(,)?/).join(';'), ';,;2;;2' ]],
+		[[ ',,2'.split(/(,)?/).join(';'), ';,;;,;2' ]],
+		[[ 'ab'.split(new RegExp('(?:ab)*')).join(';'), ';' ]],
+		[[ '.'.split(/(.?)(.?)/).join(';'), ';.;;' ]],
+		[[ 'tesst'.split(new RegExp('(s)*')).join(';'), 't;;e;s;t' ]],
+		[[ 'test'.split(/(?:)/, -1).join(';'), 't;e;s;t' ]],
+		[[ ''.split(/.?/).length, 0 ]],
+		[[ '.'.split(/()()/).join(';'), '.' ]],
+		[[ 'dfg_dfg__shge'.split(/(_+)/).join(';'), 'dfg;_;dfg;__;shge' ]],
+		[[ '.'.split(/(.?)(.?)/).join(';'), ';.;;' ]],
+		// [ "aa", "__", "_", "bb", "___", "_", "cc" ]
+		[[ 'aa__bb___cc'.split(/((_)+)/).join(';'), 'aa;__;_;bb;___;_;cc' ]],
+		// [ "a", "", undefined, "a", "__", "_", "b", "", undefined, "b", "___", "_", "c", "", undefined, "c" ]
+		[[ 'aa__bb___cc'.split(/((_)*)/).join(';'), 'a;;;a;__;_;b;;;b;___;_;c;;;c' ]],
+		[[ 'ab'.split(/a*?/).join(';'), 'a;b' ]],
+		[[ 'ab'.split(new RegExp('a*')).join(';'), ';b' ]],
+		[[ "A<B>bold</B>and<CODE>coded</CODE>".split(/<(\/)?([^<>]+)>/).join(';'), "A;;B;bold;/;B;and;;CODE;coded;/;CODE;" ]],
+		[[ '..Word1 Word2..'.split(/([a-z]+)(\d+)/i).join(';'), "..;Word;1; ;Word;2;.."]],
+	]);
+
+	error_count += CeL.test('compatibility', [
+		[[/./ig.flags, 'gi']],
+		[[5, Math.hypot(3, 4)], 'normal positive Math.hypot'],
+		[[5, Math.hypot(-3, -4)], 'negative Math.hypot'],
+		[[Number.MAX_VALUE, Math.hypot(3 / 5 * Number.MAX_VALUE, 4 / 5 * Number.MAX_VALUE)], 'avoid overflow'],
+		[[5, Math.hypot(Number.MIN_VALUE * 3, Number.MIN_VALUE * 4) / Number.MIN_VALUE], 'avoid underflow'],
+	]);
+
+}
+
+
 //============================================================================================================================================================
 
 
@@ -1110,6 +1262,31 @@ function test_Hamming() {
 }
 
 
+
+//============================================================================================================================================================
+
+
+function test_quantity() {
+	error_count += CeL.test('單位換算', [
+		[[(new CeL.quantity('5.4cm')).toString(),'5.4 cm'],''],
+		[[(new CeL.quantity('4cm^2')).toString(),'4 cm²'],''],
+		[[(new CeL.quantity('4cm2')).toString(),'4 cm²'],''],
+		[[(new CeL.quantity('四千五百六十七公尺')).toString(),'4567 m'],''],
+		[[(new CeL.quantity('54公尺')).toString(),'54 m'],''],
+		[[(new CeL.quantity('5公尺')).multiple(4).toString(),'20 m'],''],
+		/*
+		// TODO
+		[[(new CeL.quantity('54cm')).multiple('8.5公尺').toString(),'4.59 m²'],''],
+		[[(new CeL.quantity('54cm')).multiple('8.5公尺').toString('繁體中文'),'4.59平方公尺'],''],
+		[[(new CeL.quantity('500平方公尺')).convert_to('a').toString(),'5 a'],''],
+		[[(new CeL.quantity('500平方公尺')).convert_to('ha').toString(),'0.05 ha'],''],
+		[[(new CeL.quantity('500平方公尺')).convert_to('a').toString('繁體中文'),'5 公畝'],''],
+		*/
+	]);
+}
+
+
+
 // ============================================================================================================================================================
 
 
@@ -1432,6 +1609,20 @@ function test_date() {
 
 	node_info('Passed: All date tests.');
 }
+
+
+
+//============================================================================================================================================================
+
+
+function test_encoding() {
+	error_count += CeL.test('ロマ字↔仮名', [
+		[[ 'わたし', CeL.to_kana('watasi') ], 'convert romaji to kana. ロマ字→仮名.'],
+		// TODO: Pair.reverse 對 duplicated key 不穩定。
+		// [[ 'watasi', CeL.to_romaji('わたし') ], 'convert romaji to kana. 仮名→ロマ字.'],
+	]);
+}
+
 
 
 //============================================================================================================================================================
@@ -1999,6 +2190,7 @@ function test_era() {
 }
 
 
+
 //============================================================================================================================================================
 
 
@@ -2009,6 +2201,11 @@ node_info.color = {
 };
 
 function node_info(messages) {
+	if (CeL.SGR.CSI !== CeL.SGR.default_CSI) {
+		CeL.info(messages);
+		return;
+	}
+
 	var matched;
 	if (typeof messages === 'string'
 			&& (matched = messages.match(/^([a-z\d\-]+)([:\s].+)$/i))
@@ -2019,7 +2216,7 @@ function node_info(messages) {
 						|| 'fg=black;bg=white', matched[1], '-fg;-bg',
 				matched[2] ];
 	}
-	return CeL.info(new CeL.SGR(messages).toString());
+	CeL.info(new CeL.SGR(messages).toString());
 }
 
 
@@ -2041,16 +2238,20 @@ function do_test() {
 	// CeL.assert([ typeof CeL.assert, 'function' ], 'CeL.assert is working.');
 	CeL.set_debug();
 	CeL.run(
-	// 測試期間時需要用到的功能先作測試。
+	// 測試期間時需要用到的功能先作測試。這些不可 comment out。
 	'interact.console', test_console,
 	//
 	'application.locale', test_locale,
+	// 基本的功能先作測試。
 /*
 */
-	// 基本的功能先作測試。
+	test_compatibility,
+	//
 	'data.native', test_native,
 	//
 	'data.date', test_date,
+	//
+	'application.locale.encoding', test_encoding,
 	//
 	'data.check', test_check,
 	//
@@ -2058,6 +2259,8 @@ function do_test() {
 	[ 'data.math.rational', 'data.math.quadratic' ], test_math,
 	//
 	'data.math.Hamming', test_Hamming,
+	//
+	'data.quantity', test_quantity,
 	//
 	'data.CSV', test_CSV,
 	//

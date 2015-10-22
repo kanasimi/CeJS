@@ -1732,7 +1732,7 @@ if (!CeL.Log) {
 			}
 
 			if (recorder.failed.length === 0 && recorder.fatal.length === 0) {
-				// all passed 測試通過
+				// all passed. 測試通過。
 				messages.push(to_SGR([ 'All ' + recorder.passed.length + ' ',
 						'fg=green', 'passed', '-fg' ]));
 

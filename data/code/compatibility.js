@@ -2,8 +2,10 @@
 /**
  * @name	CeL function for compatibility
  * @fileoverview
- * 本檔案包含了標準已規定，但先前版本未具備的內建物件功能；以及相容性 test 專用的 functions。<br />
- * 部分功能已經包含於 ce.js。
+ * 本檔案包含了 new ECMAScript standard 標準已規定，但先前版本未具備的內建物件功能；以及相容性 test 專用的 functions。<br />
+ * 部分標準功能已經包含於 ce.js。
+ * 
+ * More examples: see /_test suite/test.js
  * 
  * @since	
  * @see
@@ -765,22 +767,6 @@ function clz32(value) {
 	}
 	return BITS - MAX;
 }
-/*
-
-var BITS = 32;
-CeL.assert([BITS, Math.clz(0)], 'Math.clz(0) === 32');
-for (var i = BITS, test_number_in_2 = '1'; --i;) {
-	CeL.assert([i, Math.clz(parseInt(test_number_in_2, 2))], i + ': ' + test_number_in_2);
-	test_number_in_2 = test_number_in_2.replace(new RegExp('^.{1,' + (1 + (test_number_in_2.length * Math.random()) | 0) + '}'), function ($) {
-		return $ + (Math.random() < .5 ? 0 : 1)
-	});
-}
-CeL.log('OK');
-
-*/
-
-
-
 
 
 //	分界
@@ -814,15 +800,6 @@ function hypot(value1, value2, value3) {
 }
 
 
-/*
-
-CeL.assert([5, Math.hypot(3, 4)], 'normal positive Math.hypot');
-CeL.assert([5, Math.hypot(-3, -4)], 'negative Math.hypot');
-CeL.assert([Number.MAX_VALUE, Math.hypot(3 / 5 * Number.MAX_VALUE, 4 / 5 * Number.MAX_VALUE)], 'avoid overflow');
-CeL.assert([5, Math.hypot(Number.MIN_VALUE * 3, Number.MIN_VALUE * 4) / Number.MIN_VALUE], 'avoid underflow');
-
-
-*/
 
 
 set_method(Math, {
@@ -975,7 +952,6 @@ library_namespace.RegExp_flags = RegExp_flags;
 if (!('flags' in RegExp.prototype)
 // library_namespace.env('not_native_keyword')
 && !Object.defineProperty[library_namespace.env.not_native_keyword])
-	// CeL.assert([/./ig.flags, 'gi']);
 	Object.defineProperty(RegExp.prototype, 'flags', {
 		get : function () {
 			return RegExp_flags(this);
@@ -998,43 +974,7 @@ if (!('flags' in RegExp.prototype)
  * 
  * @example <code>
 
-
-CeL.assert([ '11,22'.split(/,/).join(';'), '11;22' ]);
-CeL.assert([ '11,'.split(/,/).join(';'), '11;' ]);
-CeL.assert([ ',22'.split(/,/).join(';'), ';22' ]);
-CeL.assert([ '11,22'.split(/,?/).join(';'), '1;1;2;2' ]);
-CeL.assert([ '11,'.split(/,?/).join(';'), '1;1;' ]);
-CeL.assert([ ',22'.split(/,?/).join(';'), ';2;2' ]);
-CeL.assert([ ',,2'.split(/,?/).join(';'), ';;2' ]);
-CeL.assert([ '1'.split(/(,)?/).join(';'), '1' ]);
-CeL.assert([ '11,22'.split(/(,)?/).join(';'), '1;;1;,;2;;2' ]);
-CeL.assert([ '11,'.split(/(,)?/).join(';'), '1;;1;,;' ]);
-CeL.assert([ ',22'.split(/(,)?/).join(';'), ';,;2;;2' ]);
-CeL.assert([ ',,2'.split(/(,)?/).join(';'), ';,;;,;2' ]);
-CeL.assert([ 'ab'.split(new RegExp('(?:ab)*')).join(';'), ';' ]);
-CeL.assert([ '.'.split(/(.?)(.?)/).join(';'), ';.;;' ]);
-CeL.assert([ 'tesst'.split(new RegExp('(s)*')).join(';'), 't;;e;s;t' ]);
-CeL.assert([ 'test'.split(/(?:)/, -1).join(';'), 't;e;s;t' ]);
-CeL.assert([ ''.split(/.?/).length, 0 ]);
-CeL.assert([ '.'.split(/()()/).join(';'), '.' ]);
-CeL.assert([ 'dfg_dfg__shge'.split(/(_+)/).join(';'),
-		'dfg;_;dfg;__;shge' ]);
-CeL.assert([ '.'.split(/(.?)(.?)/).join(';'), ';.;;' ]);
-// [ "aa", "__", "_", "bb", "___", "_", "cc" ]
-CeL.assert([ 'aa__bb___cc'.split(/((_)+)/).join(';'),
-		'aa;__;_;bb;___;_;cc' ]);
-// [ "a", "", undefined, "a", "__", "_", "b", "", undefined, "b", "___",
-// "_", "c", "", undefined, "c" ]
-CeL.assert([ 'aa__bb___cc'.split(/((_)*)/).join(';'),
-		'a;;;a;__;_;b;;;b;___;_;c;;;c' ]);
-CeL.assert([ 'ab'.split(/a*?/).join(';'), 'a;b' ]);
-CeL.assert([ 'ab'.split(new RegExp('a*')).join(';'), ';b' ]);
-CeL.assert([
-		"A<B>bold</B>and<CODE>coded</CODE>".split(/<(\/)?([^<>]+)>/)
-				.join(';'), "A;;B;bold;/;B;and;;CODE;coded;/;CODE;" ]);
-CeL.assert([ '..Word1 Word2..'.split(/([a-z]+)(\d+)/i).join(';'), "..;Word;1; ;Word;2;.."]);
-CeL.info('All test of String.prototype.split() passed. 測試通過。');
-
+// More examples: see /_test suite/test.js
 
  * </code>
  * 

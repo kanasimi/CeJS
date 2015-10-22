@@ -214,80 +214,7 @@ if (typeof CeL === 'function')
 		 * 
 		 * @example <code>
 
-		var a = [1, 2, 3, 1],
-			s = new Set(a),
-			e = s.entries(),
-			v = s.values(),
-			m = new Map([
-				[5, 1],
-				[7, 1],
-				[5, 2],
-				[3, 1]
-			]);
-		// CeL.set_debug(6);
-		CeL.assert(e.next().value.join() === "1,1", 'set.entries().value');
-		CeL.assert(e.next().value.join() === "2,2", 'set.entries().value');
-		CeL.assert(e.next().value.join() === "3,3", 'set.entries().value');
-		CeL.assert(e.next().done, 'set.entries().done');
-		CeL.assert(v.next().value === 1, 'set.values().value');
-		CeL.assert(v.next().value === 2, 'set.values().value');
-		CeL.assert(v.next().value === 3, 'set.values().value');
-		CeL.assert(v.next().done, 'set.values().done');
-
-		v = s.values();
-		CeL.assert(v.next().value === 1, 'set.values().value');
-		CeL.assert(v.next().value === 2, 'set.values().value');
-		CeL.assert(v.next().value === 3, 'set.values().value');
-
-		s.add(4);
-		if (v.next().value !== 4)
-			CeL.err('iterator 無法反映 Set 之更動！');
-		CeL.assert(v.next().done, 'set.values().done');
-
-		e = a.entries();
-		CeL.assert(e.next().value.join() === "0,1", 'array.entries().value');
-		CeL.assert(e.next().value.join() === "1,2", 'array.entries().value');
-		CeL.assert(e.next().value.join() === "2,3", 'array.entries().value');
-		CeL.assert(e.next().value.join() === "3,1", 'array.entries().value');
-		CeL.assert(e.next().done, 'array.entries().done');
-
-		e = m.entries();
-		CeL.assert(e.next().value.join() === "5,2", 'map.entries().value');
-		CeL.assert(e.next().value.join() === "7,1", 'map.entries().value');
-		CeL.assert(e.next().value.join() === "3,1", 'map.entries().value');
-		CeL.assert(e.next().done, 'map.entries().done');
-
-		v = m.keys();
-		CeL.assert(v.next().value === 5, 'map.keys().value');
-		CeL.assert(v.next().value === 7, 'map.keys().value');
-		CeL.assert(v.next().value === 3, 'map.keys().value');
-		CeL.assert(v.next().done, 'map.keys().done');
-
-		v = m.values();
-		CeL.assert(v.next().value === 2, 'map.values().value');
-		CeL.assert(v.next().value === 1, 'map.values().value');
-		CeL.assert(v.next().value === 1, 'map.values().value');
-		CeL.assert(v.next().done, 'map.values().done');
-
-		//{String}string
-		//string.split('')
-		//Object(string)
-		//Array.from(string)
-		CeL.assert([ Array.from('abc').join(), "a,b,c" ], 'Array.from(String)');
-		CeL.assert([ Array.from(5).join(), "" ], 'Array.from(Number)');
-		CeL.assert([ Array.from(true).join(), "" ], 'Array.from(Boolean)');
-		CeL.assert([ Array.from(a).join(), "1,2,3,1" ], 'Array.from(Array)');
-		CeL.assert([ Array.from(a.entries()).join(';'), "0,1;1,2;2,3;3,1" ],
-		'Array.from(array.entries())');
-		CeL.assert([ Array.from({
-		length : 4
-		}, function(v, i) {
-		return i * i;
-		}).join(), "0,1,4,9" ], 'Array.from({length:\d})');
-		CeL.assert([ Array.from(s).join(), "1,2,3,4" ], 'Array.from(Set)');
-		CeL.assert([ Array.from(m).join(), "5,2,7,1,3,1" ], 'Array.from(Map)');
-		CeL.assert([ Array.from(m.keys()).join(), "5,7,3" ], 'Array.from(map.keys())');
-		CeL.info('All test of Array.from() passed. 測試通過。');
+		// More examples: see /_test suite/test.js
 
 		 * </code>
 		 * 
@@ -1278,19 +1205,7 @@ if (typeof CeL === 'function')
 		 * 
 		 * @example <code>
 
-		var dc = new CeL.dependency_chain;
-		dc.add(1, 2);
-		CeL.assert(['1', Array.from(dc.get(2).previous.values()).join()]);
-		dc.add(2, 3);
-		CeL.assert(['2', Array.from(dc.get(3).previous.values()).join()]);
-		CeL.assert([1, dc.independent(3)]);
-		CeL.assert(['', Array.from(dc.get(3).next.values()).join()]);
-		CeL.assert(['1,2,3', Array.from(dc.get()).sort().join()]);
-		CeL.assert([1, dc.independent()]);
-		dc.add(0, 1);
-		CeL.assert([0, dc.independent()]);
-		dc['delete'](0);
-		CeL.assert([1, dc.independent()]);
+		// More examples: see /_test suite/test.js
 
 		 * </code>
 		 * 

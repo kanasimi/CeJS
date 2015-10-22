@@ -52,7 +52,7 @@ if (typeof CeL === 'function')
 		name : 'data.quantity',
 		// data.pair
 		// |data.native.
-		require : 'data.',
+		require : 'data.|data.numeral.',
 		code : function(library_namespace) {
 
 			/**
@@ -105,8 +105,8 @@ if (typeof CeL === 'function')
 				is_number : true
 			}),
 			//
-			prefix_pattern = new RegExp('^\s*(' + exponent_of.keys.join('|')
-					+ ')([^\s]+)$'),
+			prefix_pattern = new RegExp('^\\s*(' + exponent_of.keys.join('|')
+					+ ')([^\\s]+)$'),
 
 			// prefix name. prefix_name.pair.M === 'mega'.
 			prefix_name = new library_namespace.pair(
@@ -127,7 +127,7 @@ if (typeof CeL === 'function')
 
 			// Prefixes may not be used in combination.
 			function parse_prefix(unit) {
-				library_namespace.debug('parse_prefix(' + unit + ')');
+				library_namespace.debug('parse_prefix(' + unit + ')', 3);
 				var matched = String(unit).match(prefix_pattern);
 				// [ unit symbol, prefix exponent ]
 				return matched ? [ matched[2], exponent_of.pair[matched[1]] ]
@@ -204,7 +204,7 @@ if (typeof CeL === 'function')
 			}
 
 			function parse_unit(unit, quantity, is_division) {
-				library_namespace.debug('parse_unit(' + unit + ')');
+				library_namespace.debug('parse_unit(' + unit + ')', 2);
 				if (library_namespace.is_Object(unit))
 					return unit;
 
@@ -218,15 +218,15 @@ if (typeof CeL === 'function')
 				// reset pattern
 				PATTERN_UNIT.lastIndex = 0;
 				while (matched = PATTERN_UNIT.exec(unit)) {
-					library_namespace.debug('parse_unit: [' + matched + ']');
+					library_namespace.debug('parse_unit: [' + matched + ']', 3);
 					if (matched[4])
 						matched[2] = matched[4].length > 1 ? (matched[4]
 								.charAt(0) === '⁻' ? 1 : -1)
 								* SUPERSCRIPT_NUMBER.indexOf(matched[4]
 										.charAt(1)) : SUPERSCRIPT_NUMBER
 								.indexOf(matched[4]);
-					// [ unit symbol, prefix exponent ]
-					matched[1] = parse_prefix(matched[1]);
+					// return [ unit symbol, prefix exponent ]
+					matched[1] = parse_prefix(normalize_name(matched[1]));
 					multiple_unit(quantity, matched[1][0], matched[1][1],
 							matched[3] || matched[2]);
 				}
@@ -311,10 +311,17 @@ if (typeof CeL === 'function')
 						Object.assign(unit_name_all, unit_name[l]);
 				}
 
+				// TODO
+				if (false)
+					if (unit in unit_name_all)
+						return [ unit_name_all[unit],
+						//
+						prefix_exponent, unit_power ];
+
 				if (unit in unit_name_all)
-					return [ unit_name_all[unit],
-					//
-					prefix_exponent, unit_power ];
+					return unit_name_all[unit];
+
+				return unit;
 			}
 
 			// ---------------------------------------------------------------------//
