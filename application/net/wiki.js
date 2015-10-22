@@ -23,9 +23,6 @@ if (false) {
 
 	// for debug: 'interact.DOM', 'application.debug',
 	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
-	CeL.assert([ '!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
-	//
-	.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3') ]);
 
 	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ],
 			function() {

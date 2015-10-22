@@ -1,11 +1,11 @@
 /**
  * @name npm test frontend for CeL.
- * 
+ *
  * @fileoverview 本檔案用於在 npm 中測試本 library 正確性。
  *               透過重複執行自動化測試；以設計上所要求必須通過之測試範例，驗證輸出是否符合預期。
- * 
+ *
  * TODO: 測試涵蓋率, 整合測試
- * 
+ *
  * @example <code>
 
 # npm test
@@ -17,7 +17,7 @@
 # npm view
 
  * </code>
- * 
+ *
  * @since 2015/10/17 14:5:49
  */
 
@@ -34,7 +34,7 @@ require('../index');
 //require("./_for include/node.loader.js");
 
 
-//More examples: see /_test suite/test.js
+// More examples: see /_test suite/test.js
 
 //============================================================================================================================================================
 
@@ -202,6 +202,136 @@ function test_console() {
 	node_info('Passed: All console tests.');
 }
 
+
+
+//============================================================================================================================================================
+
+
+
+function test_locale() {
+
+	//	##i18n (Internationalization) / l10n (Localization)
+
+	//	###usage 2014/2/5
+
+	//	define gettext() user domain resource location.
+	//	gettext() will auto load (CeL.env.domain_location + language + '.js').
+	//	e.g., resource/cmn-Hant-TW.js, resource/ja-JP.js
+	CeL.env.domain_location = 'resource/';
+	//	declaration for gettext()
+	var _;
+
+	//	###including
+	CeL.run('application.locale', function() {
+		// alias for CeL.gettext, then we can use _('message').
+		_ = CeL.gettext;
+	});
+
+
+
+	//	###System message test
+	error_count += CeL.test('System message', function(assert) {
+		CeL.gettext.use_domain('TW', function() {
+			assert([ '載入中…', CeL.gettext('Loading...') ]);
+			assert([ '已載入 20%…', CeL.gettext('Loading %1%...', 20) ]);
+			//CeL.info('System message test OK.');
+		},
+		// 強制使用此 domain。 forces to this domain.
+		true);
+	});
+
+
+
+	//	###單數複數形式 (plural) test
+	error_count += CeL.test('單數複數形式 (plural)', function(assert) {
+		CeL.gettext.set_text({
+			'已載入 %1 筆資料。' : function(domain_name, arg) {
+				// with error detection:
+				//return (arg[1] < 2 ? (arg[1] ? arg[1] === 1 ? 'One' : 'ERROR: %1' : 'No') + ' entry' : '%1 entries') + ' loaded.';
+
+				// No, One & more.
+				return (arg[1] < 2 ? (arg[1] ? 'One' : 'No') + ' entry' : '%1 entries') + ' loaded.';
+
+				// More simplified:
+				// arg[>>>1<<<] : from %>>>1<<<'s "1"
+				//return '%1 ' + (1 < arg[1] ? 'entries' : 'entry') + ' loaded.';
+			}
+		}, 'en');
+
+		CeL.gettext.use_domain('en', function() {
+			assert([ 'No entry loaded.', CeL.gettext('已載入 %1 筆資料。', 0) ]);
+			assert([ 'One entry loaded.', CeL.gettext('已載入 %1 筆資料。', 1) ]);
+			assert([ '2 entries loaded.', CeL.gettext('已載入 %1 筆資料。', 2) ]);
+			assert([ '3 entries loaded.', CeL.gettext('已載入 %1 筆資料。', 3) ]);
+			//CeL.info('單數複數形式 (plural) test OK.');
+		}, true);
+	});
+
+
+	//	###basic test
+	CeL.gettext.use_domain('zh-TW', function() {
+		;
+	}, true);
+
+	//	設定欲轉換的文字格式。
+	error_count += CeL.test('設定欲轉換的文字格式。', function(assert) {
+		CeL.gettext.set_text({
+			'%n1 smart ways to spend %c2' : '%Chinese/n1個花%c2的聰明方法'
+		}, 'Traditional Chinese');
+
+		assert([ '十個花新臺幣柒萬圓整的聰明方法',
+				CeL.gettext('%n1 smart ways to spend %c2', 10, 70000) ],
+				'test it with 貨幣/currency#1');
+
+		assert([ '二十五個花新臺幣捌拾億捌萬圓整的聰明方法',
+				CeL.gettext('%n1 smart ways to spend %c2', 25, 8000080000) ],
+				'test it with 貨幣/currency#2');
+
+		assert([ '四萬〇三十五個花新臺幣伍佰玖拾捌萬陸仟玖佰貳拾捌圓整的聰明方法',
+				CeL.gettext('%n1 smart ways to spend %c2', 40035, 5986928) ],
+				'test it with 貨幣/currency#3');
+	});
+
+
+	//	###test with 貨幣
+	error_count += CeL.test('設定欲轉換的文字格式。', function(assert) {
+		CeL.gettext.conversion['smart way'] = [ 'no %n', '1 %n', '%d %ns' ];
+		// You can also use this:
+		CeL.gettext.conversion['smart way'] = function(count) {
+			var pattern = [ 'no %n', '1 %n', '%d %ns' ];
+			return pattern[count < pattern.length ? count : pattern.length - 1]
+					.replace(/%n/, 'smart way').replace(/%d/, count);
+		};
+
+		//	then we can use:
+		CeL.gettext.set_text({
+			'%smart way@1 to spend %c2' : '%Chinese/n1個花%c2的聰明方法'
+		}, 'TW');
+
+		CeL.gettext.use_domain('繁體中文');
+		assert([ '十個花新臺幣柒萬圓整的聰明方法',
+				CeL.gettext('%smart way@1 to spend %c2', 10, 70000) ]);
+		assert([ '二十五個花新臺幣捌拾億捌萬圓整的聰明方法',
+				CeL.gettext('%smart way@1 to spend %c2', 25, 8000080000) ]);
+		assert([ '四萬〇三十五個花新臺幣伍佰玖拾捌萬陸仟玖佰貳拾捌圓整的聰明方法',
+				CeL.gettext('%smart way@1 to spend %c2', 40035, 5986928) ]);
+
+		CeL.gettext.use_domain('en-US', true);
+		assert([ '10 smart ways to spend US$70,000',
+				CeL.gettext('%smart way@1 to spend %c2', 10, 70000) ]);
+	});
+
+
+	error_count += CeL.test('locale', [
+		[[ "二十世紀八十年代", CeL.gettext('%數1世紀%數2年代', 20, 80) ], 'conversion:小寫中文數字'],
+		[[ "央行上調基準利率2碼", CeL.gettext('央行上調基準利率%碼1', .005) ], 'conversion:碼'],
+
+		[[ "女人401枝花", CeL.gettext('女人%1|1枝花', 40) ], 'index 可以 "|" 終結#1'],
+		[[ "女人四十1枝花", CeL.gettext('女人%數1|1枝花', 40) ], 'index 可以 "|" 終結#2'],
+	]);
+
+
+}
 
 
 
@@ -1350,6 +1480,358 @@ function test_astronomy() {
 		[[ 2014, CeL.立春年(new Date('2015/2/3')) ], '立春年 2015/2/3'],
 
 	]);
+
+	return;
+
+
+	// other examples
+
+	CeL.JD_to_Date(CeL.equinox(1962, 1));
+	// get ≈ 1962-06-21 21:24
+
+	CeL.nutation(2446895.5);
+	// get ≈ [ -3.788/3600, 9.443/3600 ]
+
+	// 取得 Gregorian calendar 1977年，中曆 1978年年內之冬至日 midnight (0:0) 時間。
+	CeL.solar_term_JD(1977, '冬至');
+
+	// ----------------------------------------------------------------------------
+	// VSOP87
+
+	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
+	// p. 219, Example 32.a with full VSOP87
+	CeL.VSOP87.load_terms('Venus', function() {
+		// corresponds to JD 2448976.5
+		var JD = CeL.Julian_day.from_YMD(1992, 12, 20, 'CE') - .5;
+		console.log(CeL.VSOP87(JD, 'Venus'), {
+			degrees : true
+		});
+	});
+
+	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
+	// p. 221, Example 32.b with full VSOP87
+	CeL.VSOP87.load_terms('Saturn', function() {
+		var JD = CeL.Julian_day.from_YMD(1999, 7, 26, 'CE') - .5;
+		console.log(CeL.VSOP87(JD, 'Saturn', {
+			FK5 : false,
+			degrees : true
+		}));
+	});
+
+	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
+	// p. 225, Example 33.a with full VSOP87
+	CeL.VSOP87.load_terms([ 'Venus', 'Earth' ], function() {
+		var JD = CeL.Julian_day.from_YMD(1992, 12, 20, 'CE') - .5;
+		console.log(CeL.object_coordinates(JD, 'Venus'));
+	});
+
+	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
+	// p. 89, Example 12.b
+	CeL.GMST(CeL.Julian_day.from_YMD(1987, 4, 10, 'CE') - .5
+			+ CeL.Julian_day.from_HMS(19, 21));
+
+	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
+	// p. 95, Example 13.b with full VSOP87
+	CeL.VSOP87.load_terms([ 'Venus', 'Earth' ], function() {
+		var JD = CeL.Julian_day.from_YMD(1987, 4, 10, 'CE') - .5
+				+ CeL.Julian_day.from_HMS(19, 21);
+		console.log(CeL.object_coordinates(JD, 'Venus', {
+			// United States Naval Observatory (USNO)
+			// Coordinates: 38.921473°N 77.066946°W
+			// @see
+			// https://en.wikipedia.org/wiki/United_States_Naval_Observatory
+			local : [ 38.921473, -77.066946 ],
+			degrees : true
+		}));
+	});
+
+	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
+	// p. 82. Example 11.a
+	// p. 280. Example 40.a
+	CeL.VSOP87.load_terms([ 'Mars', 'Earth' ], function() {
+		var JD = CeL.Julian_day.from_YMD(2003, 8, 28, 'CE') - .5
+				+ CeL.Julian_day.from_HMS(3, 17);
+		console.log(CeL.object_coordinates(JD, 'Mars', {
+			// Palomar Observatory
+			// Coordinates: 33°21′21″N 116°51′50″W
+			// Altitude: 1,712 meters (5,617 ft)
+			// @see https://en.wikipedia.org/wiki/Palomar_Observatory
+			local : [ 33.355833, -116.863889, , 1712 ],
+			degrees : true
+		}));
+	});
+
+	// ----------------------------------------------------------------------------
+
+	// 取得 Le calendrier républicain (法國共和曆)行用期間之年首。
+	// method 1: 取得法國當地之 midnight (0:0)
+	for (var year = 1792, offset = 1 * 60; year <= 1805; year++)
+		console.log(CeL.JD_to_Date(
+		// 1: UTC+1 → minute offset
+		CeL.midnight_of(CeL.solar_term_JD(year, '秋分'), offset)).format({
+			offset : offset
+		}));
+	// method 2: 將 date 當作 local 之 midnight (0:0)
+	for (var year = 1792, offset = 1 * 60; year <= 1805; year++) {
+		// 1: UTC+1 → minute offset
+		var date = CeL.JD_to_Date(CeL.midnight_of(CeL.solar_term_JD(year,
+				'秋分'), offset)
+				+ (offset - CeL.String_to_Date.default_offset) / 60 / 24),
+		// 歸零用
+		ms = date.getMilliseconds();
+		// 歸零
+		if (ms)
+			date.setMilliseconds(Math.round(ms / 500) * 500);
+		console.log(date.format());
+	}
+	// method 3: using solar_term_calendar()
+	for (var c = CeL.solar_term_calendar('秋分', 1 * 60),
+	//
+	year = 1792; year <= 1805; year++)
+		console.log(new Date(c(year)).format());
+
+	// 取得 Iran 當地之春分時刻。
+	for (var year = 1975, offset = 3.5 * 60; year <= 2041; year++)
+		console.log(CeL.JD_to_Date(
+		// 3.5: UTC+3.5 → minute offset
+		CeL.solar_term_JD(year, '春分')).format({
+			offset : offset
+		}));
+
+	// 取得 Solar Hijri calendar (the official calendar in Iran and
+	// Afghanistan from 1979) 年首。
+	for (var year = 1975, offset = (3.5 + 12) * 60; year <= 2041; year++)
+		console.log(CeL.JD_to_Date(
+		// 3.5: UTC+3.5 → minute offset
+		// 12: 移半天可以取代正午之效果。
+		CeL.midnight_of(CeL.solar_term_JD(year, '春分'), offset)).format({
+			offset : offset
+		}));
+
+	// method: using solar_term_calendar()
+	for (var c = CeL.solar_term_calendar('春分', (3.5 + 12) * 60),
+	//
+	year = 1975; year <= 2041; year++)
+		console.log(new Date(c(year)).format());
+
+	// ----------------------------------------------------------------------------
+
+	CeL.assert([ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4');
+	CeL.assert([ 2014, CeL.立春年(new Date('2015/2/3')) ], '立春年 2015/2/3');
+
+	// 取得 2000/1/1 月亮地心瞬時黃道視黃經 in degrees。
+	CeL.LEA406.load_terms('V', function() {
+		CeL.format_degrees(CeL.LEA406(CeL.Julian_day.from_YMD(2000, 1, 1,
+				'CE'), 'V', {
+			degrees : true
+		}));
+	});
+
+	// 取得 2200年01月02日0:0 TT 月亮地心視黃經 in degrees。
+	CeL.format_degrees(CeL.lunar_coordinates(CeL.Date_to_JD(new Date(
+			'2200-01-02T00:00:00Z')), {
+		degrees : true
+	}).V, 3);
+
+	// 取得 Gregorian calendar 1977 年之整年度日月合朔時間。
+	CeL.lunar_phase(1977, 0, {
+		duration : 1,
+		mean : false,
+		to_Date : true,
+		format : 'CE'
+	});
+
+	CeL.lunar_phase_of_JD(2457101, {
+		time : true
+	});
+
+	// 取得今年之天文曆譜。
+	var 年朔日 = CeL.定朔((new Date).getFullYear(), {
+		月名 : true
+	});
+	年朔日.map(function(JD, index) {
+		return 年朔日.月名[index] + ': ' + CeL.JD_to_Date(JD).format('CE');
+	}).join('\n');
+
+	// 取得新王莽天鳳3年之天文曆譜。
+	var 年朔日 = CeL.定朔(CeL.era('新王莽天鳳3年'), {
+		歲首 : '丑',
+		月名 : true
+	});
+	年朔日.map(function(d, index) {
+		return 年朔日.月名[index] + ': ' + CeL.JD_to_Date(d).format('CE');
+	}).join('\n');
+	// 取得月日
+	var index = 年朔日.search_sorted(1727054, true);
+	年朔日.月名[index] + '月' + (1727054 - 年朔日[index] | 0) + '日'
+
+	// ----------------------------------------------------------------------------
+
+	var sun_coordinates = new CeL.celestial_coordinates(
+	//
+	'solar', new Date, [ 25.048592, 121.556940 ]);
+	sun_coordinates.object === 'sun';
+	sun_coordinates.UT === 2457249;
+	// TT in JD
+	typeof sun_coordinates.TT === 'number';
+
+	new CeL.celestial_coordinates('lunar',
+			new Date(2015, 7, 6, 23, 2, 4, 5), [ 39 + 54 / 60,
+					116 + 23 / 60 ]).Hd[1];
+
+	// CeL.LEA406.load_terms('R');
+	var moon_coordinates = new CeL.celestial_coordinates(
+	//
+	'lunar', new Date);
+	moon_coordinates.object === 'moon';
+	moon_coordinates.UT === 2457249;
+	//
+	typeof moon_coordinates.c('dynamical latitude') === 'number';
+
+	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
+	// p. 95, Example 13.b with full VSOP87
+	var Venus_coordinates = new CeL.celestial_coordinates('Venus',
+			CeL.Julian_day.from_YMD([ 1987, 4, 10 ], [ 19, 21 ], 'CE'), [
+					38.921473, -77.066946 ], {
+				TT : true
+			});
+	// Venus_coordinates.H
+
+	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
+	// p. 82. Example 11.a
+	// p. 280. Example 40.a
+	var Mars_coordinates = new CeL.celestial_coordinates('Mars',
+			CeL.Julian_day.from_YMD(2003, 8, 28, 'CE') - .5
+					+ CeL.Julian_day.from_HMS(3, 17), [ 33.355833,
+					-116.863889, , 1712 ], {
+				TT : true
+			});
+	// Mars_coordinates.E
+
+	// ----------------------------------------------------------------------------
+
+	// 壽星天文歷(V5.05) 北京市天安門 經 +116°23' 緯 + 39°54'
+	// 日出 05:17:00 日落 19:23:15 中天 12:20:26
+	/**
+	 * <q>["2015/8/6 0:20:29.307", "2015/8/6 5:16:39.667", "2015/8/6 12:20:26.147", "2015/8/6 19:23:35.709"]</q>
+	 */
+	CeL.rise_set([ 39 + 54 / 60, 116 + 23 / 60, 8 ],
+			CeL.Julian_day.from_YMD(2015, 8, 6, 'CE')).map(function(JD) {
+		return CeL.JD_to_Date(JD).format('CE');
+	});
+
+	CeL.rise_set([ 89 + 54 / 60, 116 + 23 / 60, 8 ],
+			CeL.Julian_day.from_YMD(2015, 8, 6, 'CE'), null, null, true)
+			.map(function(JD) {
+				return CeL.JD_to_Date(JD).format('CE');
+			});
+
+	// 日落
+	CeL.rise_set([ 25.048592, 121.556940 ],
+			CeL.Julian_day.from_YMD(2015, 8, 6, 'CE')).map(function(JD) {
+		return CeL.JD_to_Date(JD).format('CE');
+	});
+	// http://aa.usno.navy.mil/rstt/onedaytable?form=2&ID=AA&year=2015&month=8&day=6&place=&lon_sign=1&lon_deg=116&lon_min=23&lat_sign=1&lat_deg=39&lat_min=54&tz=8&tz_sign=1
+	CeL.rise_set([ 39 + 54 / 60, 116 + 23 / 60 ],
+			CeL.Julian_day.from_YMD(2015, 8, 6, 'CE')).map(function(JD) {
+		return CeL.JD_to_Date(JD).format('CE');
+	});
+	// 月出
+	CeL.LEA406.load_terms('V');
+	CeL.LEA406.load_terms('U');
+	CeL.LEA406.load_terms('R');
+	CeL.rise_set([ 39 + 54 / 60, 116 + 23 / 60 ],
+			CeL.Julian_day.from_YMD(2015, 8, 6, 'CE'), null, 'moon').map(
+			function(JD) {
+				return CeL.JD_to_Date(JD).format('CE');
+			});
+
+	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
+	// p. 103. Example 15.a
+	CeL.VSOP87.load_terms('Venus');
+	CeL.rise_set([ 42 + 20 / 60, -(71 + 5 / 60) ],
+			CeL.Julian_day.from_YMD(1988, 3, 20, 'CE'), null, 'Venus').map(
+			function(JD) {
+				return CeL.JD_to_Date(JD).format('CE');
+			});
+
+	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
+	// p. 109. formula 17.1
+	// 計算Arcturus(α Boo)和Spica(α Vir)之間的角距離。
+	CeL.format_radians(CeL.angular_distance({
+		α : CeL.time_to_radians(14, 15, 39.7),
+		δ : CeL.degrees_to_radians(19, 10, 57)
+	}, {
+		α : CeL.time_to_radians(13, 25, 11.6),
+		δ : CeL.degrees_to_radians(-11, 9, 41)
+	}));
+
+	CeL.LEA406.default_type = 'a';
+	CeL.LEA406.load_terms('Va');
+	CeL.LEA406.load_terms('Ua');
+	CeL.LEA406.load_terms('Ra');
+	(new CeL.celestial_coordinates('lunar', CeL.Julian_day.from_YMD(2257,
+			1, 1, 'CE'))).Gd;
+	/**
+	 * 1987年5月，月亮經過升交點的時刻。 1987/5/23 06:25:34.5 TT by JPL's HORIZONS system
+	 * DE-0431LE-0431
+	 * <q>
+	Date__(UT)__HR:MN:SC.fff Date_________JDUT            CT-UT    ObsEcLon    ObsEcLat
+	1987-May-23 06:24:39.000 2446938.767118055        55.185126  10.4622714  -0.0000047
+	1987-May-23 06:24:39.500 2446938.767123843        55.185126  10.4623472   0.0000021
+	</q>
+	 * .767118055+(.767123843-.767118055)*47/(47+21) + 55.185126/86400 ≈
+	 * 0.767760772265523 TT
+	 *
+	 * (((.767118055+(.767123843-.767118055)*47/(47+21))*24-18)*60-25)*60+55.185126 ≈
+	 * 34.5 s
+	 *
+	 * CeL.LEA406.default_type = 'a'; CeL.LEA406.load_terms('Va');
+	 * CeL.LEA406.load_terms('Ua'); CeL.LEA406.load_terms('Ra');
+	 * <code>CeL.find_root(function(TT){return CeL.LEA406(TT).U;},2446938.767,2446938.768)</code> ≈
+	 * 2446938.767738394 TT
+	 *
+	 * (.767738394-0.767760772265523)*86400 ≈ -1.9334821411856495
+	 *
+	 * <code>CeL.find_root(function(TT){return CeL.LEA406(TT,{FK5:false}).U;},2446938.767,2446938.768)</code> ≈
+	 * 2446938.767744784 TT
+	 *
+	 * (.767744784-0.767760772265523)*86400 ≈ -1.3813861411836825
+	 *
+	 * no FK5 較接近。但仍有誤差 1.4 s
+	 */
+	CeL.find_root(function(TT) {
+		return CeL.lunar_coordinates(TT, {
+			FK5 : false
+		}).β;
+	}, 2446938.767, 2446938.768);
+	(new CeL.celestial_coordinates('lunar', CeL.Julian_day.from_YMD(1987,
+			5, 23, 'CE')
+			- .5 + CeL.Julian_day.from_HMS(6, 24, 37.7))).Gd;
+
+	// ----------------------------------------------------------------------------
+
+	CeL.JD_to_Date(
+	// Jean Meeus, Astronomical Algorithms, 2nd Edition. 《天文算法》2版
+	// p. 357. Example 50.a
+	CeL.lunar_perigee_apogee(1988.75, true)[0]).format('CE');
+
+	// p. 353. Example 49.a
+	CeL.mean_lunar_phase(CeL.Julian_century(2443192) * 100 + 2000, 0, {
+		eclipse : true
+	});
+
+	// p. 384. Example 54.a - Solar eclipse of 1993 May 21.
+	CeL.mean_lunar_phase(
+			CeL.Julian_century(2449128.1673547593) * 100 + 2000, 0, {
+				eclipse : true
+			});
+	// p. 385. Example 54.b - Solar eclipse of 2009 July 22.
+	CeL.mean_lunar_phase(CeL.Julian_century(2455034) * 100 + 2000, 0, {
+		eclipse : true
+	});
+
+
 }
 
 
@@ -1359,6 +1841,10 @@ function test_astronomy() {
 
 function test_wiki() {
 	error_count += CeL.test('wiki: parse_template', [
+		[[ '!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
+		//
+		.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3') ], 'file_pattern'],
+
 		[['temp', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', false)[1]]],
 		[['{{temp2,p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', false)[2].join()]],
 		[['|{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', true)[2]]],
@@ -1386,6 +1872,11 @@ function test_calendar() {
 
 
 function test_era() {
+	if (!CeL.era) {
+		finish_test();
+		return;
+	}
+
 	CeL.set_debug(0);
 	// 判斷是否已載入曆數資料。
 	if (!CeL.era.loaded) {
@@ -1503,7 +1994,7 @@ function test_era() {
 		[['前1年'.to_Date({parser:'CE',period_end:true}).format('CE'),'0001年'.to_Date('CE').format('CE')],'period_end of CE'],
 		[[CeL.era('前1年',{period_end:true}).format('CE'),'0001年'.to_Date('CE').format('CE')],'period_end of CE@era()'],
 	]);
-	
+
 	finish_test();
 }
 
@@ -1533,15 +2024,17 @@ function node_info(messages) {
 
 
 function finish_test() {
-	if (error_count) {
-		node_info([ 'CeJS: ', 'fg=red;bg=white', 'All ' + error_count + ' errors occurred.', '-fg;-bg' ]);
-		setTimeout(function() {
-			throw new Error('All get ' + error_count + ' error(s)');
-		}, 0);
+	if (error_count === 0) {
+		node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。', '-fg;-bg' ]);
+		// normal done.
 		return;
 	}
 
-	node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。', '-fg;-bg' ]);
+	CeL.gettext.conversion['error'] = [ 'no %n', '1 %n', '%d %ns' ];
+	node_info([ 'CeJS: ', 'fg=red;bg=white', CeL.gettext('All %error@1 occurred.', error_count), '-fg;-bg' ]);
+	setTimeout(function() {
+		throw new Error(CeL.gettext('All %error@1.', error_count));
+	}, 0);
 }
 
 function do_test() {
@@ -1550,6 +2043,8 @@ function do_test() {
 	CeL.run(
 	// 測試期間時需要用到的功能先作測試。
 	'interact.console', test_console,
+	//
+	'application.locale', test_locale,
 /*
 */
 	// 基本的功能先作測試。
@@ -1574,7 +2069,9 @@ function do_test() {
 	//
 	'data.date.calendar', test_calendar,
 	//
-	'data.date.era', test_era);
+	'data.date.era',
+	//
+	test_era);
 }
 
 CeL.env.no_catch = true;

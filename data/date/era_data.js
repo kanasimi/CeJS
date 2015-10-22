@@ -3734,6 +3734,9 @@ if (typeof CeL === 'function')
 	CeL.run('data.date.era', function() {
 		// delete this.CeL_era_data.data;
 
+		// 準備開始載入曆數資料。
+		CeL.era.loaded = false;
+
 		this.queue = [];
 		// 國家
 		for ( var country in this.countries)

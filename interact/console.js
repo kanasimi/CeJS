@@ -64,7 +64,7 @@ if (typeof CeL === 'function')
 						&& (typeof style_name === 'object'
 						//
 						|| !(style_name in SGR_code.style_data)))
-					library_namespace.warn('Unknown style name: [' + style_name
+					library_namespace.warn('SGR_style_name: Unknown style name: [' + style_name
 							+ ']');
 				return style_name;
 			}
@@ -87,7 +87,7 @@ if (typeof CeL === 'function')
 						library_namespace.warn(
 						// Expects value in
 						// color_shift.
-						'Invalid name of color: [' + style_name + '].');
+						'SGR_style_value: Invalid name of color: [' + style_name + '].');
 						return;
 					}
 					// color_shift[style_name] +

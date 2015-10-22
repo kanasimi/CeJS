@@ -305,117 +305,7 @@ language_tag = language_tag;
  * 
  * @example <code>
 
-//	##i18n (Internationalization) / l10n (Localization)
-
-//	###usage 2014/2/5
-
-//	define gettext() user domain resource location.
-//	gettext() will auto load (CeL.env.domain_location + language + '.js').
-//	e.g., resource/cmn-Hant-TW.js, resource/ja-JP.js
-CeL.env.domain_location = 'resource/';
-//	declaration for gettext()
-var _;
-
-//	###including
-CeL.run('application.locale', function() {
-	// alias for CeL.gettext, then we can use _('message').
-	_ = CeL.gettext;
-});
-
-
-
-//	###System message test
-CeL.gettext.use_domain('TW', function() {
-	CeL.assert([ '載入中…', CeL.gettext('Loading...') ]);
-	CeL.assert([ '已載入 20%…', CeL.gettext('Loading %1%...', 20) ]);
-	CeL.info('System message test OK.');
-},
-// 強制使用此 domain。 forces to this domain.
-true);
-
-
-
-//	###單數複數形式 (plural) test
-CeL.gettext.set_text({
-	'已載入 %1 筆資料。' : function(domain_name, arg) {
-		// with error detection:
-		//return (arg[1] < 2 ? (arg[1] ? arg[1] === 1 ? 'One' : 'ERROR: %1' : 'No') + ' entry' : '%1 entries') + ' loaded.';
-
-		// No, One & more.
-		return (arg[1] < 2 ? (arg[1] ? 'One' : 'No') + ' entry' : '%1 entries') + ' loaded.';
-
-		// More simplified:
-		// arg[>>>1<<<] : from %>>>1<<<'s "1"
-		//return '%1 ' + (1 < arg[1] ? 'entries' : 'entry') + ' loaded.';
-	}
-}, 'en');
-
-CeL.gettext.use_domain('en', function() {
-	CeL.assert([ 'No entry loaded.', CeL.gettext('已載入 %1 筆資料。', 0) ]);
-	CeL.assert([ 'One entry loaded.', CeL.gettext('已載入 %1 筆資料。', 1) ]);
-	CeL.assert([ '2 entries loaded.', CeL.gettext('已載入 %1 筆資料。', 2) ]);
-	CeL.assert([ '3 entries loaded.', CeL.gettext('已載入 %1 筆資料。', 3) ]);
-	CeL.info('單數複數形式 (plural) test OK.');
-}, true);
-
-
-
-//	###basic test
-CeL.gettext.use_domain('zh-TW', function() {
-	;
-}, true);
-
-//	設定欲轉換的文字格式。
-CeL.gettext.set_text({
-	'%n1 smart ways to spend %c2' : '%Chinese/n1個花%c2的聰明方法'
-}, 'Traditional Chinese');
-
-CeL.assert([ '十個花新臺幣柒萬圓整的聰明方法',
-		CeL.gettext('%n1 smart ways to spend %c2', 10, 70000) ],
-		'test it with 貨幣/currency#1');
-
-CeL.assert([ '二十五個花新臺幣捌拾億捌萬圓整的聰明方法',
-		CeL.gettext('%n1 smart ways to spend %c2', 25, 8000080000) ],
-		'test it with 貨幣/currency#2');
-
-CeL.assert([ '四萬〇三十五個花新臺幣伍佰玖拾捌萬陸仟玖佰貳拾捌圓整的聰明方法',
-		CeL.gettext('%n1 smart ways to spend %c2', 40035, 5986928) ],
-		'test it with 貨幣/currency#3');
-
-
-//	###test with 貨幣
-CeL.gettext.conversion['smart way'] = [ 'no %n', '1 %n', '%d %ns' ];
-// You can also use this:
-CeL.gettext.conversion['smart way'] = function(count) {
-	var pattern = [ 'no %n', '1 %n', '%d %ns' ];
-	return pattern[count < pattern.length ? count : pattern.length - 1]
-			.replace(/%n/, 'smart way').replace(/%d/, count);
-};
-
-//	then we can use:
-CeL.gettext.set_text({
-	'%smart way@1 to spend %c2' : '%Chinese/n1個花%c2的聰明方法'
-}, 'TW');
-
-CeL.gettext.use_domain('繁體中文');
-CeL.assert([ '十個花新臺幣柒萬圓整的聰明方法',
-		CeL.gettext('%smart way@1 to spend %c2', 10, 70000) ]);
-CeL.assert([ '二十五個花新臺幣捌拾億捌萬圓整的聰明方法',
-		CeL.gettext('%smart way@1 to spend %c2', 25, 8000080000) ]);
-CeL.assert([ '四萬〇三十五個花新臺幣伍佰玖拾捌萬陸仟玖佰貳拾捌圓整的聰明方法',
-		CeL.gettext('%smart way@1 to spend %c2', 40035, 5986928) ]);
-
-CeL.gettext.use_domain('en-US', true);
-CeL.assert([ '10 smart ways to spend US$70,000',
-		CeL.gettext('%smart way@1 to spend %c2', 10, 70000) ]);
-
-
-CeL.assert([ "二十世紀八十年代", CeL.gettext('%數1世紀%數2年代', 20, 80) ], 'conversion:小寫中文數字');
-CeL.assert([ "央行上調基準利率2碼", CeL.gettext('央行上調基準利率%碼1', .005) ], 'conversion:碼');
-
-CeL.assert([ "女人401枝花", CeL.gettext('女人%1|1枝花', 40) ], 'index 可以 "|" 終結#1');
-CeL.assert([ "女人四十1枝花", CeL.gettext('女人%數1|1枝花', 40) ], 'index 可以 "|" 終結#2');
-
+// More examples: see /_test suite/test.js
 
  * </code>
  * 
@@ -673,7 +563,7 @@ gettext.is_domain_name = function(domain_name) {
  * 
  * @returns 當前使用之 domain。
  */
-gettext.use_domain = function(domain_name, callback, force) {
+gettext.use_domain = function use_domain(domain_name, callback, force) {
 	if (typeof callback !== 'function')
 		if (arguments.length === 2) {
 			// shift 掉 callback。
@@ -687,36 +577,26 @@ gettext.use_domain = function(domain_name, callback, force) {
 			&& (domain_name in gettext_texts || (domain_name = gettext
 					.to_standard(domain_name)
 					|| domain_name) in gettext_texts)
-					&& domain_name !== gettext_domain_name || force) {
+			&& domain_name !== gettext_domain_name || force) {
 
 		if (!domain_name)
 			// using the default domain name.
 			domain_name = gettext.default_domain;
-		else if (library_namespace
-				.is_included('interact.DOM'))
+		else if (library_namespace.is_WWW()
+				&& library_namespace.is_included('interact.DOM'))
 			// 顯示使用 domain name 之訊息：此時執行，仍無法改採新 domain 顯示訊息。
-			library_namespace
-			.debug(
-					{
-						T : [
-						     '%3載入/使用 [%2] (%1) 領域/語系。',
-						     domain_name,
-						     gettext
-						     .get_alias(domain_name),
-						     (domain_name === gettext_domain_name ? '強制重複'
-						    		 : '') ]
-					}, 1, 'gettext');
+			library_namespace.debug({
+				T : [ '%3載入/使用 [%2] (%1) 領域/語系。', domain_name,
+						gettext.get_alias(domain_name),
+						(domain_name === gettext_domain_name ? '強制重複' : '') ]
+			}, 1, 'gettext');
 		else
-			library_namespace
-			.debug(
-					(domain_name === gettext_domain_name ? 'FORCE '
-							: '')
-							+ 'Using domain/locale ['
-							+ gettext
-							.get_alias(domain_name)
-							+ '] ('
-							+ domain_name
-							+ ').', 1, 'gettext');
+			library_namespace.debug(
+			//
+			(domain_name === gettext_domain_name ? 'FORCE ' : '')
+			//
+			+ 'Using domain/locale [' + gettext.get_alias(domain_name) + '] ('
+					+ domain_name + ').', 1, 'gettext');
 
 		gettext_domain_name = domain_name;
 		if (!(domain_name in gettext_texts)) {
@@ -724,67 +604,42 @@ gettext.use_domain = function(domain_name, callback, force) {
 		}
 
 		var need_to_load = [];
-		// TODO: use <a href="http://en.wikipedia.org/wiki/JSONP" accessdate="2012/9/14 23:50">JSONP</a>
+		// TODO: use <a href="http://en.wikipedia.org/wiki/JSONP"
+		// accessdate="2012/9/14 23:50">JSONP</a>
 		if (!gettext_check_resource(domain_name, 1)) {
-			library_namespace.debug(
-					'準備載入系統相應 domain resource。', 2,
-			'gettext');
-			need_to_load
-			.push(
-					library_namespace
-					.get_module_path(
-							module_name,
-							'resource/'
-							+ domain_name
-							+ '.js'),
-							function() {
-						library_namespace
-						.debug(
-								'Resource of module included.',
-								2,
+			library_namespace.debug('準備載入系統相應 domain resource。', 2, 'gettext');
+			need_to_load.push(library_namespace.get_module_path(module_name,
+					'resource/' + domain_name + '.js'), function() {
+				library_namespace.debug('Resource of module included.', 2,
 						'gettext');
-						gettext_check_resource(
-								domain_name, 1,
-								true);
-					});
+				gettext_check_resource(domain_name, 1, true);
+			});
 		}
 
 		if (typeof gettext_location === 'string'
-			//
-			&& !gettext_check_resource(domain_name, 2)) {
-			library_namespace.debug(
-					'準備載入 user 指定 domain resource，如語系檔。',
-					2, 'gettext');
+		//
+		&& !gettext_check_resource(domain_name, 2)) {
+			library_namespace.debug('準備載入 user 指定 domain resource，如語系檔。', 2,
+					'gettext');
 			// TODO: .json
-			need_to_load
-			.push(
+			need_to_load.push(
 					typeof gettext_location === 'string' ? gettext_location
 							+ domain_name + '.js'
-							: gettext_location(domain_name),
-							function() {
-								library_namespace
-								.debug(
-										'User-defined resource included.',
-										2,
-								'gettext');
-								gettext_check_resource(
-										domain_name, 2,
-										true);
-							});
+							: gettext_location(domain_name), function() {
+						library_namespace
+								.debug('User-defined resource included.', 2,
+										'gettext');
+						gettext_check_resource(domain_name, 2, true);
+					});
 		}
 
 		if (need_to_load.length > 0)
-			library_namespace.run(need_to_load, callback
-					&& function() {
-				library_namespace.debug(
-						'Running callback..', 2,
-				'gettext');
+			library_namespace.run(need_to_load, callback && function() {
+				library_namespace.debug('Running callback...', 2, 'gettext');
 				callback(domain_name);
 			});
 		else {
-			library_namespace.debug(
-					'直接設定 user domain resource。', 2,
-			'gettext');
+			library_namespace.debug('直接設定 user domain resource。', 2, 'gettext');
 			gettext_check_resource(domain_name, 2, true);
 			callback && callback(domain_name);
 		}
@@ -792,15 +647,13 @@ gettext.use_domain = function(domain_name, callback, force) {
 	} else {
 		if (domain_name) {
 			if (domain_name !== gettext_domain_name)
-				library_namespace.warn('所指定之 domain ['
-						+ domain_name
+				library_namespace.warn('所指定之 domain [' + domain_name
 						+ '] 尚未載入，若有必要請使用強制載入 flag。');
 
 		} else if (callback && library_namespace.is_debug())
-			library_namespace
-			.warn('無法判別 domain，卻設定有 callback。');
+			library_namespace.warn('無法判別 domain，卻設定有 callback。');
 
-		//	無論如何還是執行 callback。
+		// 無論如何還是執行 callback。
 		callback && callback(domain_name);
 	}
 
@@ -1018,7 +871,7 @@ gettext.DOM_separator = '|';
 
 
 gettext.adapt_domain = function(language) {
-	library_namespace.debug('Loading ' + language + ' ..');
+	library_namespace.debug('Loading ' + language + ' ...');
 
 	gettext.use_domain(language, function() {
 		library_namespace.debug(language + ' loaded.');
@@ -1181,7 +1034,8 @@ gettext.ordinal = function(attribute, domain_name) {
 gettext.currency = function(attribute, domain_name) {
 	switch (domain_name || gettext_domain_name) {
 	case 'cmn-Hant-TW':
-		return to_TWD(attribute);
+		// data.numeral.to_TWD()
+		return library_namespace.to_TWD(attribute);
 
 	case 'en-US':
 		//	try: '-34235678908765456789098765423545.34678908765'

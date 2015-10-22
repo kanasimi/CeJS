@@ -1244,8 +1244,9 @@ if (!CeL.Log) {
 	var log_front_end_debug =
 	//	增加 debug 訊息。
 	function log_front_end_debug(message, level, caller, clean) {
-		// alert(CeL.is_debug() + ',' + l + '(' + (l === undefined) + '),' +
-		// message);
+		if (false)
+			alert(CeL.is_debug() + ',' + l + '(' + (l === undefined) + '),' + message);
+
 		if (CeL.is_debug(level)) {
 			if (typeof message === 'function') {
 				// for .debug(function(){return some_function(..);}, 3);
