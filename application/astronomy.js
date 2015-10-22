@@ -63,24 +63,8 @@ if (false) {
 	CeL.run('application.astronomy');
 
 	CeL.run('application.astronomy', function() {
-		CeL.assert([ CeL.polynomial_value([ 3, 4, 5, 6 ], 2),
-				3 + 4 * 2 + 5 * 2 * 2 + 6 * 2 * 2 * 2 ], 'polynomial value');
 
-		// http://songgz.iteye.com/blog/1571007
-		CeL.assert([ 66, Math.round(CeL.deltaT(2008)) ],
-				'get ΔT of year 2008 in seconds');
-		CeL.assert([ 29, Math.round(CeL.deltaT(1950)) ],
-				'get ΔT of year 1950 in seconds');
-		CeL.assert([ 5710, Math.round(CeL.deltaT(500)) ],
-				'get ΔT of year 500 in seconds');
-		CeL.assert([ 1.11, Math.round(10 * CeL.deltaT(2010) / 6) / 100 ],
-				'get ΔT of year 2010 in minutes');
-		CeL.assert([ 95.17, Math.round(10 * CeL.deltaT(500) / 6) / 100 ],
-				'get ΔT of year 500 in minutes');
-
-		// 例15.a：表面光滑的太陽圓盤下邊沿視緯度是30′。設太陽的真直徑是32′，氣溫及大氣壓為常規條件。求真位置。
-		CeL.refraction(CeL.refraction.to_real(30 / 60) + 32 / 60) * 60;
-		// get ≈ 57.9′
+		// More examples: see /_test suite/test.js
 
 		CeL.JD_to_Date(CeL.equinox(1962, 1));
 		// get ≈ 1962-06-21 21:24
@@ -434,14 +418,16 @@ if (false) {
 if (typeof CeL === 'function')
 	CeL.run({
 		name : 'application.astronomy',
-		// data.math.find_root
-		require : 'data.code.compatibility.|data.math.',
+		require : 'data.code.compatibility.'
+		// data.math.find_root()
+		// data.date.Date_to_JD()
+		+ '|data.math.polynomial_value|data.date.',
 
 		code : function(library_namespace) {
 
 			// requiring
-			// var String_to_Date;
-			// eval(this.use());
+			var polynomial_value;
+			eval(this.use());
 
 			/**
 			 * full module name.
@@ -824,27 +810,6 @@ if (typeof CeL === 'function')
 			}
 
 			_.parse_coordinates = parse_coordinates;
-
-			/**
-			 * use Horner's method to calculate the value of polynomial.
-			 * 
-			 * @param {Array}coefficients
-			 *            coefficients of polynomial.<br />
-			 *            coefficients: [ degree 0, degree 1, degree 2, .. ]
-			 * @param {Number}variable
-			 *            value of (x)
-			 * 
-			 * @returns {Number} the value of polynomial
-			 * 
-			 * @see https://en.wikipedia.org/wiki/Horner%27s_method
-			 */
-			function polynomial_value(coefficients, variable) {
-				return coefficients.reduceRight(function(value, coefficient) {
-					return value * variable + coefficient;
-				});
-			}
-
-			_.polynomial_value = polynomial_value;
 
 			/**
 			 * get Julian centuries since J2000.0.<br />

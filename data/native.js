@@ -768,6 +768,7 @@ remove_Object_value = remove_Object_value;
 	1: str2為str1之擴展 (str2涵蓋str1), -1: str1為str2之擴展, 2: 兩者等價, 0: 皆非
 */
 function String_covers(string_1, string_2, options) {
+	// 預先處理函數. e.g., 是否忽略大小寫
 	if (options && typeof options.preprocessor === 'function') {
 		string_1 = options.preprocessor(string_1);
 		string_2 = options.preprocessor(string_2);
@@ -782,7 +783,7 @@ function String_covers(string_1, string_2, options) {
 	}
 
 	var result = 1;
-	//	swap: string_2 轉成長的
+	//	swap: string_2 轉成長的。	(短,長)
 	if (string_1.length > string_2.length) {
 		result = string_2, string_2 = string_1, string_1 = result;
 		result = -1;
@@ -796,7 +797,7 @@ function String_covers(string_1, string_2, options) {
 
 	var string_1_index = 0, string_2_index = 0,
 		character_1 = string_1[0],
-		//
+		// comparer
 		equals = options && typeof options.equals === 'function' ? options.equals : String_covers.equals;
 
 	string_2.some(function(character_2, index) {

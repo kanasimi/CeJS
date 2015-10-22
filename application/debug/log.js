@@ -1215,6 +1215,7 @@ if (!CeL.Log) {
 	function log_front_end_fatal(message, error_to_throw) {
 		if (CeL.is_WWW())
 			try {
+				// 模擬 throw 以 get .stack
 				throw CeL.is_type(error_to_throw, 'Error') ? error_to_throw
 						: new Error(error_to_throw || 'Fatal error');
 			} catch (e) {
@@ -1224,12 +1225,15 @@ if (!CeL.Log) {
 						+ (typeof e.stack === 'string' ? e.stack.replace(/\n/g,
 								'<br />') : e.stack) + '</div>' : message);
 			}
+		else
+			CeL.err(message);
 
 		if (typeof error_to_throw === 'undefined')
+			// 預設會 throw message.
 			error_to_throw = message;
 
 		if (error_to_throw) {
-			if (CeL.platform.nodejs)
+			if (CeL.platform.nodejs && error_to_throw !== message)
 				// node.js 中，throw Error 可能無法顯示 local encoding，因此在此先顯示一次。
 				console.error(error_to_throw);
 			throw CeL.is_type(error_to_throw, 'Error') ? error_to_throw
@@ -1350,6 +1354,7 @@ if (!CeL.Log) {
 	 *            {String|Object}type: expected type,<br />
 	 *            {Boolean}no_cache: false,<br />
 	 *            {Any}expect: expected value 預期的結果。should be what value.,<br />
+	 *            {Number}error_rate > 0: 容許誤差率 permissible error ratio. e.g., Number.EPSILON,<br />
 	 *            {Boolean}exactly: true, need exactly (value === expected) or
 	 *            false: equal (value == expected) is also OK.<br />
 	 *            {Boolean}force_true: false, 當測試效能時，強迫測試結果一定成功。<br />
@@ -1425,7 +1430,8 @@ if (!CeL.Log) {
 			condition[index] = _c;
 		}
 
-		var error;
+		// fatal error
+		var fatal;
 		// if(!options.force_true)
 		condition.forEach(options.no_cache ? condition_handler
 		//
@@ -1434,7 +1440,7 @@ if (!CeL.Log) {
 				condition_handler(_c, index);
 			} catch (e) {
 				// 執行 condition 時出錯，throw 時的處置。
-				error = true;
+				fatal = true;
 				CeL.warn('assert: 執行 condition 時出錯: ' + e.message);
 			}
 		});
@@ -1445,11 +1451,11 @@ if (!CeL.Log) {
 		// --------------------------------
 		var exactly, equal;
 
-		if (!error
+		if (!fatal
 		// && !options.force_true
-		)
-			// 前置處理作業: type。
+		) {
 			if (type) {
+				// 處理作業: type。
 				condition = condition[0];
 				exactly = equal = typeof type === 'string'
 				//
@@ -1460,11 +1466,15 @@ if (!CeL.Log) {
 						|| Object.getPrototypeOf(condition) === type
 						|| (type = CeL.native_name(type))
 						&& CeL.is_type(condition, type);
+			} else if ((equal = +options.error_rate) > 0) {
+				// 容許誤差率 permissible error ratio / rate. e.g., Number.EPSILON
+				exactly = equal = Math.abs(1 - +condition[0] / +condition[1]) <= equal;
 			} else {
 				exactly = equal = Object.is(condition[0], condition[1]);
 				if (!exactly)
 					equal = condition[0] == condition[1];
 			}
+		}
 
 		// --------------------------------
 		// report.
@@ -1524,9 +1534,9 @@ if (!CeL.Log) {
 				error_message = error_message.join('');
 			}
 
-			CeL.fatal(error_message, CeL.assert.throw_Error &&
+			CeL.fatal(error_message, CeL.assert.throw_Error ?
 			// exception to throw
-			new Error(error_message));
+			new Error(error_message) : false);
 
 			var ignorable = options.ignorable;
 			return ignorable ? ignorable === true ? 'ignored' : ignorable
@@ -1587,7 +1597,7 @@ if (!CeL.Log) {
 	 * 
 	 * @since 2012/9/19 00:20:49, 2015/10/18 23:8:9 refactoring 重構
 	 */
-		function log_front_end_test(test_name, conditions, options) {
+	function log_front_end_test(test_name, conditions, options) {
 		if (Array.isArray(test_name) && !options) {
 			// shift: 跳過 test_name。
 			options = conditions;
@@ -1711,7 +1721,7 @@ if (!CeL.Log) {
 				var elapsed = Date.now() - assert_proxy.starts;
 				if (elapsed >= 1000)
 					messages.push(', ' + (elapsed / 1000).to_fixed(2) + 's');
-				messages.push(elapsed === 0 ? ', elapsed 0s.' : ', '
+				messages.push(elapsed === 0 ? ', elapse 0s.' : ', '
 						+ ((elapsed = recorder.all.length / elapsed) < 1
 						//
 						? (1000 * elapsed).to_fixed(2) + ' tests/s.'

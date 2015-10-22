@@ -45,6 +45,27 @@ _// JSDT:_module_
  * Math ---------------------------------------------------------------
  */
 
+/**
+ * use Horner's method to calculate the value of polynomial.
+ * 
+ * @param {Array}coefficients
+ *            coefficients of polynomial.<br />
+ *            coefficients: [ degree 0, degree 1, degree 2, .. ]
+ * @param {Number}variable
+ *            value of (x)
+ * 
+ * @returns {Number} the value of polynomial
+ * 
+ * @see https://en.wikipedia.org/wiki/Horner%27s_method
+ */
+function polynomial_value(coefficients, variable) {
+	return coefficients.reduceRight(function(value, coefficient) {
+		return value * variable + coefficient;
+	});
+}
+
+_.polynomial_value = polynomial_value;
+
 
 _// JSDT:_module_
 .

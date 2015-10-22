@@ -92,7 +92,7 @@ encode = function(data, no_reverse) {
 	}
 
 
-	if (library_namespace.is_debug()) {
+	if (library_namespace.is_debug(2)) {
 		//	for debug print
 		for (bin = i = 1, i_d = []; i < g.length; i++) {
 			ch = g[i];
