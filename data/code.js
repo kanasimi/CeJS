@@ -6,10 +6,13 @@
  * @since
  */
 
+// More examples: see /_test suite/test.js
 
 'use strict';
 if (typeof CeL === 'function')
 CeL.run({name:'data.code',
+// .set_bind()
+require : 'data.native.',
 code:function(library_namespace) {
 
 //	nothing required
@@ -31,18 +34,43 @@ _// JSDT:_module_
 .prototype = {
 };
 
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
-// example
-if (false)
-	CeL.run('data.code', function() {
-		var e = CeL.parse_escape('00%M0\\\\\\\\\\%Mg\\a1\\n1\\s1\\a222',
-				function(s) {
-					CeL.log('s: [' + s + ']');
-					return s.replace(/%M/g, '_');
-				});
-		CeL.info(e.replace(/\n/g, '<br />'));
-		CeL.assert(e === '00_0\\\\%Mga1\n1s1a222');
+// CamelCase to embedded_underscore/Snake case (underscore-based style) or even hyphenated name
+function Camel_to_underscore(identifier, separator) {
+	if (!separator)
+		separator = '_';
+	return identifier.replace(new RegExp('[\\' + separator + ']', 'g'),
+			separator + separator).replace(/[A-Z]/g, function($0) {
+		return separator + $0.toLowerCase();
 	});
+}
+
+_.to_underscore = Camel_to_underscore;
+
+// underscore-based style to CamelCase
+function underscore_to_CamelCase(identifier, separator) {
+	if (!separator)
+		separator = '_';
+	return identifier.replace(new RegExp('\\' + separator + '([a-zA-Z])', 'g'),
+			function($0, $1) {
+				return $1.toUpperCase();
+			}).replace(new RegExp('[\\' + separator + ']{2}', 'g'), separator);
+
+}
+
+library_namespace.set_method(String.prototype, {
+	to_underscore : library_namespace.set_bind(Camel_to_underscore),
+	to_Camel : library_namespace.set_bind(underscore_to_CamelCase)
+});
+
+
+
+// @see to_hyphenated() @ interact.DOM
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
 
 /**
  * 類似 sprintf，處理 escape sequence 字串之 function。

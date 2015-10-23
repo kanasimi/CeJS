@@ -253,8 +253,9 @@ if (false) {
 			var old_function = name_space[function_name],
 			new_function;
 			if (old_function === do_replace) {
+				// 實際執行。
 				try {
-					new_function = initializor.call(_, function_name, arguments);
+					new_function = initializor.call(name_space, function_name, arguments);
 					//new_function = initializor.apply(_, arguments);
 					//_.debug('new_function = [' + (typeof new_function) + ']' + new_function);
 				} catch (r) {
@@ -272,10 +273,10 @@ if (false) {
 					};
 
 				// searching for other extends
-				if (_[function_name] === old_function)
-					_.debug('Replace base name-space function [' + function_name + '].', 1, 'set_initializor'),
+				if (_[function_name] === old_function) {
+					_.debug('Replace base name-space function [' + function_name + '].', 1, 'set_initializor');
 					_[function_name] = new_function;
-				else
+				} else
 					_.debug('Base name-space function [' + function_name + ']: ' + _[function_name] + '.', 1, 'set_initializor');
 
 				//	設定 name_space[function_name]。
@@ -284,6 +285,7 @@ if (false) {
 				//_.debug(name_space[function_name] === do_replace);
 				//_.debug(name_space.Class+'['+function_name+']='+name_space[function_name]);
 			} else {
+				// 已經替換過。
 				if (_.is_debug(2))
 					_.warn('set_initializor: The function [' + function_name + '] had replaced with a new one.');
 				new_function = old_function;

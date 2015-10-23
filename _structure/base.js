@@ -1722,21 +1722,21 @@ OS='UNIX'; // unknown
 			 * _.log.buffer === this.log.buffer !== log.buffer<br />
 			 * 
 			 * 在 WScript 中 需要用 _.log，其他則可用 log。<br />
-			 * 因此應該將所有類似的值指定給雙方，並注意非[常數]的情況。
-			 */			var _s = _.log;
+			 * 因此應該將所有類似的值指定給雙方，並注意不是[常數]的情況。
+			 */
+			var _s = _.log;
 			// _s.function_to_call.apply(null,arguments);
 			// _s.function_to_call.apply(global, arguments);
 
 			_s.buffer.push(message);
 
-			if (!_s.max_length)
+			if (!(_s.max_length >= 0))
 				_s.max_length = 0;
 
-			if (
-				// 沒加 'debug &&' 在 IE 中會跳出大量 alert.
-					debug &&
-					_s.buffer.length > _s.max_length) {
+			// 沒加 'debug &&' 在 IE 中會跳出大量 alert.
+			if (debug && _s.buffer.length > _s.max_length) {
 				_s.function_to_call.call(global, _s.buffer.join('\n\n'));
+				// reset buffer
 				_s.buffer = [];
 			}
 		};
@@ -2127,17 +2127,13 @@ OS='UNIX'; // unknown
 
 			// Warning: 由於執行時可能處於 log() stack 中，若 log() 會用到 set_method()，這邊又
 			// call .debug()，可能會循環呼叫，造成 stack overflow。
-			if (_.is_debug()) {
+			if (_.is_debug(name ? 1 : 3)) {
 				// 若更動 native Object 等，則作個警示。
 				_.debug((name || '(' + _.is_type(name_space) + ')')
-						+ '.'
-						+ key
-						+ ' = ('
-						+ (typeof value)
-						+ ')'
+						+ '.' + key + ' = (' + (typeof value) + ')'
 						+ (_.is_debug(4) || typeof value !== 'function'
 								&& typeof value !== 'object' ? ' [' + value + ']'
-								: ''), name ? 1 : 3, 'set_method');
+								: ''), 1, 'set_method');
 			}
 		}
 

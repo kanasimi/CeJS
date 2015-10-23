@@ -593,10 +593,13 @@ FSO_attributes = {
 };
 
 //	reverse map
-_.FSO_attributes_reverse=[];
-for (i in _.FSO_attributes)
-	if (i !== 'none')
-		_.FSO_attributes_reverse[_.FSO_attributes[i]] = i;
+_.FSO_attributes_reverse = [];
+(function() {
+	for (var i in _.FSO_attributes)
+		if (i !== 'none')
+			_.FSO_attributes_reverse[_.FSO_attributes[i]] = i;
+})
+
 
 /*
 TODO
@@ -1144,6 +1147,7 @@ Ado_binary = function(data, pos) {
 	} else
 		this.setData(data, pos);
 };
+
 _// JSDT:_module_
 .
 /**
@@ -1485,7 +1489,7 @@ function open_file(file_path, format, IO_mode) {
 //	character encoding used in guess_encoding.mapping : character encoding name used in OS.
 //	TODO: 與 guess_encoding.OS_alias 統合。
 open_file.OS_alias = {
-		'GB 2312' : 'GB2312'
+	'GB 2312' : 'GB2312'
 };
 
 
@@ -1864,8 +1868,6 @@ TODO:
 //_.traverse_file_system.stop=false;
 
 //_.traverse_file_system[generateCode.dLK]='initialization_WScript_Objects';
-_// JSDT:_module_
-.
 /**
  * 巡覽 file system 的公用函數
  * @param FS_function_array	file system handle function array
@@ -1877,7 +1879,7 @@ _// JSDT:_module_
  * @_memberOf	_module_
  * @see	<a href="http://msdn.microsoft.com/library/en-US/script56/html/0fa93e5b-b657-408d-9dd3-a43846037a0e.asp">FileSystemObject</a>
  */
-traverse_file_system = function traverse_file_system(FS_function_array, path, filter, flag) {
+function traverse_file_system(FS_function_array, path, filter, flag) {
 	var _s = _.traverse_file_system, _f = _s.f, callback, callback_timeout;
 
 	if (arguments.length === 3) {
@@ -2076,6 +2078,10 @@ traverse_file_system = function traverse_file_system(FS_function_array, path, fi
 		else
 			callback(path);
 };
+
+_// JSDT:_module_
+.
+traverse_file_system = traverse_file_system;
 
 
 //set_Object_value('traverse_file_system.f','get_object=-2,NULL=-1,file,folder,driver,func_length,traverse=0,no_traverse=4',1);//,sort=8,preOrder=0,widthFirst=0,postOrder=16,depthFirst=16
@@ -2652,6 +2658,7 @@ library_namespace.set_method(cacher.prototype, {
 });
 
 _.cacher = cacher;
+
 
 // ------------------------------------------------------------------------- //
 

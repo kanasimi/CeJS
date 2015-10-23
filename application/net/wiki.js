@@ -13,135 +13,13 @@
 // [[WP:維基化]]
 // https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 // https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
+// http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 // 整合各 action=query 至單一公用 function。
 
 'use strict';
 //'use asm';
 
-if (false) {
-	// examples
-
-	// for debug: 'interact.DOM', 'application.debug',
-	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
-
-	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ],
-			function() {
-				var wiki = CeL.wiki.login('', '')
-				// get the content of page
-				.page('Wikipedia:沙盒', function(page_data) {
-					CeL.info(page_data.title);
-					var content = CeL.wiki.content_of(page_data);
-					CeL.log(content === undefined ? 'page deleted!' : content);
-				})
-				// get the content of page, and then replace it.
-				.page('Wikipedia:沙盒').edit('* [[沙盒]]', {
-					section : 'new',
-					sectiontitle : '沙盒測試 section',
-					summary : '沙盒 test edit (section)',
-					nocreate : 1
-				})
-				// get the content of page, and then modify it.
-				.page('Wikipedia:沙盒').edit(function(page_data) {
-					return CeL.wiki.content_of(page_data) + '\n\n* [[WP:Sandbox|沙盒]]';
-				}, {
-					summary : '沙盒 test edit',
-					nocreate : 1,
-					bot : 1
-				})
-				// 執行過 .page() 後，與上一種方法相同。
-				.page(function(page_data) {
-					CeL.info(page_data.title);
-					CeL.log(CeL.wiki.content_of(page_data));
-				})
-				// get the content of page, replace it, and set summary.
-				.edit('text to replace', {
-					summary : 'summary'
-				})
-				// get the content of page, modify it, and set summary.
-				.edit(function(page_data) {
-					var title = page_data.title,
-					//
-					content = CeL.wiki.content_of(page_data);
-					return 'text to replace';
-				}, {
-					summary : 'summary'
-				});
-
-				CeL.wiki.page('Wikipedia:沙盒', function(page_data) {
-					CeL.info(page_data.title);
-					CeL.log(CeL.wiki.content_of(page_data));
-				});
-
-				wiki.page('Wikipedia_talk:Flow_tests')
-				.edit(function(page_data) {
-					return '* [[WP:Sandbox|沙盒]]';
-				}, {
-					section : 'new',
-					sectiontitle : '沙盒測試 section',
-					summary : '沙盒 test edit (section)',
-					nocreate : 1
-				});
-
-				wiki.logout();
-			});
-	
-	// 取得完整 embeddedin list 後才作業。
-	CeL.wiki.list('Template:a‎‎', function(pages) {
-		// console.log(pages);
-		console.log(pages.length + ' pages got.');
-	}, {
-		type : 'embeddedin'
-	});
-
-	var wiki = CeL.wiki.login('', '', 'zh.wikisource');
-	wiki.page('史記').edit(function(page_data) {
-		var title = page_data.title,
-		//
-		content = CeL.wiki.content_of(page_data);
-		CeL.info(title);
-		CeL.log(content);
-	});
-	//
-	wiki.work({
-		each : function(page_data) {
-			var content = CeL.wiki.content_of(page_data);
-		},
-		summary : '',
-		log_to : ''
-	}, [ '史記' ]);
-
-
-	// test for parser, parse_wikitext()
-	var wiki_page = CeL.wiki.parser(page_data);
-	wiki_page.parse().each_text(function(token) { if (token = token.trim()) CeL.log(token); });
-	wiki_page.each('transclusion', function(token, parent, index) { ; });
-	//CeL.log('-'.repeat(70) + '\n' + wiki_page.toString());
-
-	CeL.wiki.parser.parse('{{temp|{{temp2|p{a}r{}}}}}');
-	JSON.stringify(CeL.wiki.parser.parse('a{{temp|e{{temp2|p{a}r}}}}b'));
-	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each_text(function(token) { CeL.log(token); });
-	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('template', function(template) { CeL.log(template.toString()); }) && '';
-	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b<!--ff[[r]]-->[[t|e]]\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}[http://r.r ee]').parse();
-	CeL.wiki.parser('{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function(table) { CeL.log(table); }) && '';
-	var p=CeL.wiki.parser('==[[L]]==\n==[[L|l]]==\n== [[L]] ==').parse();CeL.log(JSON.stringify(p)+'\n'+p.toString());p;
-	CeL.wiki.parser('a{{ #expr: {{CURRENTHOUR}}+8}}}}b').parse()[1];
-	CeL.wiki.parser('{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}').parse().toString();
-
-	// More examples: see /_test suite/test.js
-	
-	// Flow
-	CeL.wiki.Flow('Wikipedia_talk:Flow_tests', function(page_data) {
-		CeL.log(page_data.is_Flow === true);
-	});
-	CeL.wiki.Flow('ABC', function(page_data) {
-		CeL.log(page_data.is_Flow === false);
-	});
-	CeL.wiki.Flow('not_exist', function(page_data) {
-		CeL.log(page_data.is_Flow === undefined);
-	});
-
-	// TODO: http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
-}
+// More examples: see /_test suite/test.js
 
 // --------------------------------------------------------------------------------------------- //
 

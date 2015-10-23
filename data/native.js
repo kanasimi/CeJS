@@ -1987,6 +1987,7 @@ _.search_sorted_Array = search_sorted_Array;
 // to_title_case()
 // Capitalize the first letter of string
 // also use CSS: text-transform:capitalize;
+// @see Camel_to_underscore() @ data.code
 function toTitleCase(to_lower_first) {
 	var title = this.trim();
 	if (to_lower_first)

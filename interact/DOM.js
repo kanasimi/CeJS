@@ -39,7 +39,7 @@ CeL.run(
 {
 name : 'interact.DOM',
 //data.code.compatibility.trim
-require : 'data.code.compatibility.|data.native.|data.split_String_to_Object|application.locale.gettext',
+require : 'data.code.compatibility.|data.code.|data.native.|data.split_String_to_Object|application.locale.gettext',
 code : function(library_namespace) {
 
 var module_name = this.id,
@@ -6461,78 +6461,10 @@ function reduce_HTML(t) {
 };
 
 
-_// JSDT:_module_
-.
-/**
- * 將 BIG5 日文假名碼修改為 Unicode 日文假名。
- * @param {String} text	Unicode text
- * @return
- * @see
- * from Unicode 補完計畫 jrename.js
- */
-Big5_kana_fix = function(text) {
-	var H = '', t, i = 0;
-	for (; i < text.length; i++)
-		t = c.charCodeAt(0)
-		// 某次破解Windows Installer所用的資料
-		// ,H+=String.fromCharCode(t>61300?t-48977:t);
-		, H += t === 63219 ? 'ー' : String.fromCharCode(
-				// ひらがな
-				t >= 63223 && t <= 63305 ? t - 50870 :
-				// カタカナ
-				t >= 63306 && t <= 63391 ? t - 50857 :
-				// text.charAt(i);
-				t);
-	return H;
-};
-
-
-
-
-// CamelCase to embedded_underscore/Snake case (underscore-based style) or even hyphenated name
-var Camel_to_underscore = function(identifier, separator) {
-	if (!separator)
-		separator = '_';
-	return identifier.replace(new RegExp('[\\' + separator + ']', 'g'),
-			separator + separator).replace(/[A-Z]/g, function($0) {
-		return separator + $0.toLowerCase();
-	});
-};
-// underscore-based style to CamelCase
-var underscore_to_Camel = function(identifier, separator) {
-	if (!separator)
-		separator = '_';
-	return identifier.replace(new RegExp('\\' + separator + '([a-zA-Z])', 'g'),
-			function($0, $1) {
-				return $1.toUpperCase();
-			}).replace(new RegExp('[\\' + separator + ']{2}', 'g'), separator);
-};
-
-
-/*
-var Camel_test = function(identifier, separator) {
-	var _1, _2;
-	if (identifier.indexOf(separator) === -1) {
-		_1 = Camel_to_underscore(identifier, separator);
-		_2 = underscore_to_Camel(_1, separator);
-		CeL.assert(identifier === _2, 'Camel [' + identifier
-				+ '] → underscore [' + _1 + '] → Camel [' + _2 + ']');
-	} else {
-		_1 = underscore_to_Camel(identifier, separator);
-		_2 = Camel_to_underscore(_1, separator);
-		CeL.assert(identifier === _2, 'underscore [' + identifier
-				+ '] → Camel [' + _1 + '] → underscore [' + _2 + ']');
-	}
-};
-
-CeL.assert.throw_Error = 0;
-Camel_test('idOfShip', '-');
-Camel_test('id-of-ship', '-');
-*/
 
 
 /**
- * 傳回 element's data-* attributes 相對的 name。
+ * 傳回 element's data-* attributes 相對應帶有連字符號的 name。
  * 
  * @param {String}[name]
  *            dataset name.
@@ -6550,6 +6482,7 @@ function to_hyphenated(name) {
 		return '-' + $0.toLowerCase();
 	});
 }
+
 
 /**
  * 設定 dataset。<br />

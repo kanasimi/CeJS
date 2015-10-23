@@ -1151,7 +1151,7 @@ if (!CeL.Log) {
 	};
 
 	//	在 CeL.log 被重新設定前先 cache 一下。
-	l = CeL.log && CeL.log.buffer;
+	var log_buffer = CeL.log && CeL.log.buffer;
 
 	// --------------------------------------------------------------------------------------------
 	// front ends of log function
@@ -1718,11 +1718,11 @@ if (!CeL.Log) {
 					messages.push(to_SGR([ ', ' + recorder.ignored.length + ' ',
 							'fg=yellow', 'ignored', '-fg' ]));
 
-				// 使用/耗費時間。cf. eta, Estimated Time of Arrival
+				// Time elapsed, 使用/耗費時間。cf. eta, Estimated Time of Arrival
 				var elapsed = Date.now() - assert_proxy.starts;
 				if (elapsed >= 1000)
 					messages.push(', ' + (elapsed / 1000).to_fixed(2) + 's');
-				messages.push(elapsed === 0 ? ', elapse 0s.' : ', '
+				messages.push(elapsed === 0 ? ', 0s elapsed.' : ', '
 						+ ((elapsed = recorder.all.length / elapsed) < 1
 						//
 						? (1000 * elapsed).to_fixed(2) + ' tests/s.'
@@ -1819,18 +1819,15 @@ if (!CeL.Log) {
 	});
 
 	//	處理 loading 本 module 前即已 log 之 message。
-	if (CeL.is_Object(l)) {
-		for (i in l)
-			if (i) {
-				CeL.debug({
-					em : 'Before loading ' + module_name + ', there are some debugging message.'
-				});
-				for (i in l) {
-					CeL.debug(l[i]);
-				}
-				CeL.debug('<em>' + module_name + ' loaded.<\/em>');
-				break;
-			}
+	if (Array.isArray(log_buffer) && log_buffer.length > 0) {
+		CeL.debug({
+			em : 'Before loading ' + module_name + ', there are some debugging message.'
+		});
+		log_buffer.forEach(function(message) {
+			CeL.debug(message);
+		});
+
+		CeL.debug('<em>' + module_name + ' loaded.<\/em>');
 	}
 
 }

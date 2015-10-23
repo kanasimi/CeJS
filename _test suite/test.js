@@ -219,6 +219,7 @@ function test_native() {
 	]);
 
 	if (false) {
+		// TODO
 		var a = new SubUint32Array(8, 7, 4), b = new Uint32Array(4);
 		a[6] = 3;
 		a[7] = 5;
@@ -281,7 +282,7 @@ function test_console() {
 		[[ text, ansi.text ]],
 	]);
 
-	node_info('Test: SGR: set style {Object}');
+	node_info('Test SGR: set style {Object}');
 	ansi.style_at(3, {
 		bold : true,
 		fg : 32,
@@ -296,7 +297,7 @@ function test_console() {
 		[[ ansi.style_at(3).toString(false), ansi.style_at(4).toString(false) ]],
 	]);
 
-	node_info('Test: SGR: set style alias');
+	node_info('Test SGR: set style alias');
 	ansi.style_at(5, 'fg=紫');
 
 	error_count += CeL.test('SGR @ 5', [
@@ -446,7 +447,7 @@ function test_locale() {
 
 
 	//	###test with 貨幣
-	error_count += CeL.test('設定欲轉換的文字格式。', function(assert) {
+	error_count += CeL.test('轉換文字 with 貨幣。', function(assert) {
 		CeL.gettext.conversion['smart way'] = [ 'no %n', '1 %n', '%d %ns' ];
 		// You can also use this:
 		CeL.gettext.conversion['smart way'] = function(count) {
@@ -980,7 +981,7 @@ if (test_level) {
 
 	// ---------------------------------------------------------------------//
 
-	error_count += CeL.test('square root', function(assert) {
+	error_count += CeL.test('square root of small integer', function(assert) {
 		for (var m = 'test square_root: ', i = 1, I2; i < 100000000; i += 1000000) {
 			I2 = (new CeL.data.math.integer(i)).square();
 			assert([I2.clone().square_root().compare(i), 0], m + i + '^2');
@@ -990,7 +991,7 @@ if (test_level) {
 	});
 
 
-	error_count += CeL.test('square root', function(assert) {
+	error_count += CeL.test('square root of big integer', function(assert) {
 		// ~5 s @ Gecko/20100101 Firefox/35.0
 		var test_count = 200
 		for (var i = test_count, I = new CeL.data.math.integer(1), a = new CeL.data.math.integer('62537864798693472567385647825635478963754675867263725675627835674527634854699999999999'), I2;
@@ -1286,6 +1287,42 @@ function test_quantity() {
 }
 
 
+//============================================================================================================================================================
+
+
+function test_code() {
+	return;
+	error_count += CeL.test('code', function(assert) {
+		var e = CeL.parse_escape('00%M0\\\\\\\\\\%Mg\\a1\\n1\\s1\\a222',
+				function(s) {
+					//CeL.log('s: [' + s + ']');
+					return s.replace(/%M/g, '_');
+				});
+		//CeL.info(e.replace(/\n/g, '<br />'));
+		assert(e === '00_0\\\\%Mga1\n1s1a222', 'parse_escape()');
+
+		// --------------------------------------------------------------------
+
+		var Camel_test = function(identifier, separator) {
+			var _1, _2;
+			if (identifier.indexOf(separator) === -1) {
+				_1 = identifier.to_underscore(separator);
+				_2 = _1.to_Camel(separator);
+				assert(identifier === _2, 'Camel [' + identifier
+						+ '] → underscore [' + _1 + '] → Camel [' + _2 + ']');
+			} else {
+				_1 = identifier.to_Camel(separator);
+				_2 = _1.to_underscore(separator);
+				assert(identifier === _2, 'underscore [' + identifier
+						+ '] → Camel [' + _1 + '] → underscore [' + _2 + ']');
+			}
+		};
+
+		Camel_test('idOfShip', '-');
+		Camel_test('id-of-ship', '-');
+	});
+}
+
 
 // ============================================================================================================================================================
 
@@ -1371,6 +1408,20 @@ function test_CSV() {
 	CeL.set_debug();
 
   	node_info('Passed: All CSV tests');
+}
+
+
+
+//============================================================================================================================================================
+
+
+function test_XML() {
+  	error_count += CeL.test('XML', [
+		[[
+			JSON.stringify(CeL.XML_to_JSON('<?xml version="1.0" encoding="UTF-8"?><root><t1 a1="a1"><c1 a2="a2"></c1><c2 a3="a3"/><c3 /></t1></root>',{numeralize:true})),
+			JSON.stringify({"root":{"t1":[{"c1":null,"a2":"a2"},{"c2":null,"a3":"a3"},{"c3":null}],"a1":"a1"}})
+		], 'XML_to_JSON()'],
+	]);
 }
 
 
@@ -1667,8 +1718,8 @@ function test_astronomy() {
 		// get ≈ 57.9′
 		[[ 57.9, CeL.refraction(CeL.refraction.to_real(30 / 60) + 32 / 60) * 60 ], { name : '例15.a：表面光滑的太陽圓盤下邊沿視緯度是30′。設太陽的真直徑是32′，氣溫及大氣壓為常規條件。求真位置。', error_rate : .001 }],
 
-		[[ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4'],
 		[[ 2014, CeL.立春年(new Date('2015/2/3')) ], '立春年 2015/2/3'],
+		[[ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4'],
 
 	]);
 
@@ -1807,8 +1858,9 @@ function test_astronomy() {
 
 	// ----------------------------------------------------------------------------
 
-	CeL.assert([ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4');
+	// 立春年
 	CeL.assert([ 2014, CeL.立春年(new Date('2015/2/3')) ], '立春年 2015/2/3');
+	CeL.assert([ 2015, CeL.立春年(new Date('2015/2/4')) ], '立春年 2015/2/4');
 
 	// 取得 2000/1/1 月亮地心瞬時黃道視黃經 in degrees。
 	CeL.LEA406.load_terms('V', function() {
@@ -2048,6 +2100,130 @@ function test_wiki() {
 		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp')[0] ]],
 		[[ '{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]],
 	]);
+
+	return;
+
+	// examples
+
+	// for debug: 'interact.DOM', 'application.debug',
+	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
+
+	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ],
+			function() {
+				var wiki = CeL.wiki.login('', '')
+				// get the content of page
+				.page('Wikipedia:沙盒', function(page_data) {
+					CeL.info(page_data.title);
+					var content = CeL.wiki.content_of(page_data);
+					CeL.log(content === undefined ? 'page deleted!' : content);
+				})
+				// get the content of page, and then replace it.
+				.page('Wikipedia:沙盒').edit('* [[沙盒]]', {
+					section : 'new',
+					sectiontitle : '沙盒測試 section',
+					summary : '沙盒 test edit (section)',
+					nocreate : 1
+				})
+				// get the content of page, and then modify it.
+				.page('Wikipedia:沙盒').edit(function(page_data) {
+					return CeL.wiki.content_of(page_data) + '\n\n* [[WP:Sandbox|沙盒]]';
+				}, {
+					summary : '沙盒 test edit',
+					nocreate : 1,
+					bot : 1
+				})
+				// 執行過 .page() 後，與上一種方法相同。
+				.page(function(page_data) {
+					CeL.info(page_data.title);
+					CeL.log(CeL.wiki.content_of(page_data));
+				})
+				// get the content of page, replace it, and set summary.
+				.edit('text to replace', {
+					summary : 'summary'
+				})
+				// get the content of page, modify it, and set summary.
+				.edit(function(page_data) {
+					var title = page_data.title,
+					//
+					content = CeL.wiki.content_of(page_data);
+					return 'text to replace';
+				}, {
+					summary : 'summary'
+				});
+
+				CeL.wiki.page('Wikipedia:沙盒', function(page_data) {
+					CeL.info(page_data.title);
+					CeL.log(CeL.wiki.content_of(page_data));
+				});
+
+				wiki.page('Wikipedia_talk:Flow_tests')
+				.edit(function(page_data) {
+					return '* [[WP:Sandbox|沙盒]]';
+				}, {
+					section : 'new',
+					sectiontitle : '沙盒測試 section',
+					summary : '沙盒 test edit (section)',
+					nocreate : 1
+				});
+
+				wiki.logout();
+			});
+	
+	// 取得完整 embeddedin list 後才作業。
+	CeL.wiki.list('Template:a‎‎', function(pages) {
+		// console.log(pages);
+		console.log(pages.length + ' pages got.');
+	}, {
+		type : 'embeddedin'
+	});
+
+	var wiki = CeL.wiki.login('', '', 'zh.wikisource');
+	wiki.page('史記').edit(function(page_data) {
+		var title = page_data.title,
+		//
+		content = CeL.wiki.content_of(page_data);
+		CeL.info(title);
+		CeL.log(content);
+	});
+	//
+	wiki.work({
+		each : function(page_data) {
+			var content = CeL.wiki.content_of(page_data);
+		},
+		summary : '',
+		log_to : ''
+	}, [ '史記' ]);
+
+
+	// test for parser, parse_wikitext()
+	var wiki_page = CeL.wiki.parser(page_data);
+	wiki_page.parse().each_text(function(token) { if (token = token.trim()) CeL.log(token); });
+	wiki_page.each('transclusion', function(token, parent, index) { ; });
+	//CeL.log('-'.repeat(70) + '\n' + wiki_page.toString());
+
+	CeL.wiki.parser.parse('{{temp|{{temp2|p{a}r{}}}}}');
+	JSON.stringify(CeL.wiki.parser.parse('a{{temp|e{{temp2|p{a}r}}}}b'));
+	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each_text(function(token) { CeL.log(token); });
+	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('template', function(template) { CeL.log(template.toString()); }) && '';
+	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b<!--ff[[r]]-->[[t|e]]\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}[http://r.r ee]').parse();
+	CeL.wiki.parser('{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function(table) { CeL.log(table); }) && '';
+	var p=CeL.wiki.parser('==[[L]]==\n==[[L|l]]==\n== [[L]] ==').parse();CeL.log(JSON.stringify(p)+'\n'+p.toString());p;
+	CeL.wiki.parser('a{{ #expr: {{CURRENTHOUR}}+8}}}}b').parse()[1];
+	CeL.wiki.parser('{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}').parse().toString();
+
+	// More examples: see /_test suite/test.js
+	
+	// Flow
+	CeL.wiki.Flow('Wikipedia_talk:Flow_tests', function(page_data) {
+		CeL.log(page_data.is_Flow === true);
+	});
+	CeL.wiki.Flow('ABC', function(page_data) {
+		CeL.log(page_data.is_Flow === false);
+	});
+	CeL.wiki.Flow('not_exist', function(page_data) {
+		CeL.log(page_data.is_Flow === undefined);
+	});
+
 }
 
 
@@ -2230,12 +2406,13 @@ function finish_test() {
 	CeL.gettext.conversion['error'] = [ 'no %n', '1 %n', '%d %ns' ];
 	node_info([ 'CeJS: ', 'fg=red;bg=white', CeL.gettext('All %error@1 occurred.', error_count), '-fg;-bg' ]);
 	setTimeout(function() {
-		throw new Error(CeL.gettext('All %error@1.', error_count));
+		//throw new Error(CeL.gettext('All %error@1.', error_count));
 	}, 0);
 }
 
 function do_test() {
 	// CeL.assert([ typeof CeL.assert, 'function' ], 'CeL.assert is working.');
+	CeL.env.ignore_COM_error = true;
 	CeL.set_debug();
 	CeL.run(
 	// 測試期間時需要用到的功能先作測試。這些不可 comment out。
@@ -2253,6 +2430,8 @@ function do_test() {
 	//
 	'application.locale.encoding', test_encoding,
 	//
+	'data.code', test_code,
+	//
 	'data.check', test_check,
 	//
 	function() { CeL.set_debug(0); },
@@ -2263,6 +2442,8 @@ function do_test() {
 	'data.quantity', test_quantity,
 	//
 	'data.CSV', test_CSV,
+	//
+	'data.XML', test_XML,
 	//
 	'data.numeral', test_numeral,
 	//

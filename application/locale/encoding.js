@@ -1105,6 +1105,39 @@ function initialize_kana_romaji(function_name) {
 library_namespace.set_initializor('to_kana', initialize_kana_romaji, _);
 library_namespace.set_initializor('to_romaji', initialize_kana_romaji, _);
 
+
+// --------------------------------------------------------
+
+
+_// JSDT:_module_
+.
+/**
+ * 將 BIG5 日文假名碼修改為 Unicode 日文假名。
+ * @param {String} text	Unicode text
+ * @return {String}Unicode 日文假名。
+ * @see
+ * from Unicode 補完計畫 jrename.js
+ */
+Big5_kana_fix = function(text) {
+	var H = [], t, i = 0;
+	for (; i < text.length; i++) {
+		t = c.charCodeAt(0);
+		// 某次破解 Windows Installer 所用的資料
+		// ,H+=String.fromCharCode(t>61300?t-48977:t);
+		H.push(t === 63219 ? 'ー' : String.fromCharCode(
+				// ひらがな
+				t >= 63223 && t <= 63305 ? t - 50870 :
+				// カタカナ
+				t >= 63306 && t <= 63391 ? t - 50857 :
+				// text.charAt(i);
+				t));
+	}
+	return H.join('');
+};
+
+
+
+
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 return (

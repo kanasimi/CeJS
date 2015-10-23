@@ -6,6 +6,8 @@
  * @since	
  */
 
+// More examples: see /_test suite/test.js
+
 'use strict';
 if (typeof CeL === 'function')
 CeL.run({name:'data.XML',
@@ -233,11 +235,6 @@ PATTERN_EMPTY = /<([^\0-\-:->\s]+)(\s[^<>]*?)?\/>/,
 // [ , last children, tag name ]
 PATTERN_END = /^([\S\s]*?)<\/([^\0-\-:->\s]+)\s*>/;
 
-if (false)
-	CeL.assert([
-		JSON.stringify(CeL.XML_to_JSON('<?xml version="1.0" encoding="UTF-8"?><root><t1 a1="a1"><c1 a2="a2"></c1><c2 a3="a3"/><c3 /></t1></root>',{numeralize:true})),
-		JSON.stringify({"root":{"t1":[{"c1":null,"a2":"a2"},{"c2":null,"a3":"a3"},{"c3":null}],"a1":"a1"}})
-	]);
 
 
 /**
