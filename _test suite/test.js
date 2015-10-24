@@ -2106,69 +2106,68 @@ function test_wiki() {
 	// examples
 
 	// for debug: 'interact.DOM', 'application.debug',
-	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
+	//CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
 
-	CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ],
-			function() {
-				var wiki = CeL.wiki.login('', '')
-				// get the content of page
-				.page('Wikipedia:沙盒', function(page_data) {
-					CeL.info(page_data.title);
-					var content = CeL.wiki.content_of(page_data);
-					CeL.log(content === undefined ? 'page deleted!' : content);
-				})
-				// get the content of page, and then replace it.
-				.page('Wikipedia:沙盒').edit('* [[沙盒]]', {
-					section : 'new',
-					sectiontitle : '沙盒測試 section',
-					summary : '沙盒 test edit (section)',
-					nocreate : 1
-				})
-				// get the content of page, and then modify it.
-				.page('Wikipedia:沙盒').edit(function(page_data) {
-					return CeL.wiki.content_of(page_data) + '\n\n* [[WP:Sandbox|沙盒]]';
-				}, {
-					summary : '沙盒 test edit',
-					nocreate : 1,
-					bot : 1
-				})
-				// 執行過 .page() 後，與上一種方法相同。
-				.page(function(page_data) {
-					CeL.info(page_data.title);
-					CeL.log(CeL.wiki.content_of(page_data));
-				})
-				// get the content of page, replace it, and set summary.
-				.edit('text to replace', {
-					summary : 'summary'
-				})
-				// get the content of page, modify it, and set summary.
-				.edit(function(page_data) {
-					var title = page_data.title,
-					//
-					content = CeL.wiki.content_of(page_data);
-					return 'text to replace';
-				}, {
-					summary : 'summary'
-				});
+	var wiki = CeL.wiki.login('', '')
+	// get the content of page
+	.page('Wikipedia:沙盒', function(page_data) {
+		CeL.info(page_data.title);
+		var content = CeL.wiki.content_of(page_data);
+		CeL.log(content === undefined ? 'page deleted!' : content);
+	})
+	// get the content of page, and then replace it.
+	.page('Wikipedia:沙盒').edit('* [[沙盒]]', {
+		section : 'new',
+		sectiontitle : '沙盒測試 section',
+		summary : '沙盒 test edit (section)',
+		nocreate : 1
+	})
+	// get the content of page, and then modify it.
+	.page('Wikipedia:沙盒').edit(function(page_data) {
+		return CeL.wiki.content_of(page_data) + '\n\n* [[WP:Sandbox|沙盒]]';
+	}, {
+		summary : '沙盒 test edit',
+		nocreate : 1,
+		bot : 1
+	})
+	// 執行過 .page() 後，與上一種方法相同。
+	.page(function(page_data) {
+		CeL.info(page_data.title);
+		CeL.log(CeL.wiki.content_of(page_data));
+	})
+	// get the content of page, replace it, and set summary.
+	.edit('text to replace', {
+		summary : 'summary'
+	})
+	// get the content of page, modify it, and set summary.
+	.edit(function(page_data) {
+		var title = page_data.title,
+		//
+		content = CeL.wiki.content_of(page_data);
+		return 'text to replace';
+	}, {
+		summary : 'summary'
+	});
 
-				CeL.wiki.page('Wikipedia:沙盒', function(page_data) {
-					CeL.info(page_data.title);
-					CeL.log(CeL.wiki.content_of(page_data));
-				});
+	CeL.wiki.page('Wikipedia:沙盒', function(page_data) {
+		CeL.info(page_data.title);
+		CeL.log(CeL.wiki.content_of(page_data));
+	});
 
-				wiki.page('Wikipedia_talk:Flow_tests')
-				.edit(function(page_data) {
-					return '* [[WP:Sandbox|沙盒]]';
-				}, {
-					section : 'new',
-					sectiontitle : '沙盒測試 section',
-					summary : '沙盒 test edit (section)',
-					nocreate : 1
-				});
+	wiki.page('Wikipedia_talk:Flow_tests')
+	.edit(function(page_data) {
+		return '* [[WP:Sandbox|沙盒]]';
+	}, {
+		section : 'new',
+		sectiontitle : '沙盒測試 section',
+		summary : '沙盒 test edit (section)',
+		nocreate : 1
+	});
 
-				wiki.logout();
-			});
-	
+	wiki.logout();
+
+	// --------------------------------
+
 	// 取得完整 embeddedin list 後才作業。
 	CeL.wiki.list('Template:a‎‎', function(pages) {
 		// console.log(pages);
@@ -2222,6 +2221,20 @@ function test_wiki() {
 	});
 	CeL.wiki.Flow('not_exist', function(page_data) {
 		CeL.log(page_data.is_Flow === undefined);
+	});
+
+	CeL.wiki.Flow.page('Wikipedia_talk:Flow_tests', function(page_data) {
+		CeL.log(page_data.revision.content.content);
+	}, {
+		view : 'header'
+	});
+
+	// edit flow page
+	var wiki = CeL.wiki.login('', '');
+	wiki.page('Wikipedia talk:Flow tests').edit('test edit', {
+		section : 'new',
+		sectiontitle : 'test {{bot}}',
+		action : 'afd'
 	});
 
 }

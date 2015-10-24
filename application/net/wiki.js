@@ -1346,10 +1346,27 @@ function get_page_title(page_data) {
 		// [ {String}API_URL, {String}title || {Object}page_data ]
 		page_data = page_data[1];
 	}
-	// should use get_page_content.is_page_data(page_data)
-	return library_namespace.is_Object(page_data) ? 'title' in page_data ? page_data.title
-			: null
-			: page_data;
+
+	if (library_namespace.is_Object(page_data)) {
+		var title = page_data.title;
+		// 檢測一般頁面
+		if (title)
+			// should use get_page_content.is_page_data(page_data)
+			return title;
+
+		// for flow page
+		// page_data.header: 在 wiki_API.prototype.next 中設定。
+		// page_data.revision: 由 Flow_page() 取得。
+		title = (page_data.header || page_data).revision;
+		if (title && (title = title.articleTitle))
+			// e.g., "Wikipedia talk:Flow tests"
+			return title;
+
+		return null;
+	}
+
+	// e.g., (typeof page_data === 'string')
+	return page_data;
 }
 
 
@@ -1362,10 +1379,18 @@ function get_page_title(page_data) {
  * @returns {String} content of page
  */
 function get_page_content(page_data) {
-	return get_page_content.is_page_data(page_data) ?
-	//
-	(page_data = get_page_content.has_content(page_data)) && page_data['*']
-			|| null
+	// for flow page: 因為 page_data 可能符合一般頁面標準，此時會先得到 {"flow-workflow":""} 之類的內容，因此必須在檢測一般頁面之前先檢測 flow page。
+	// page_data.header: 在 wiki_API.prototype.next 中設定。
+	// page_data.revision: 由 Flow_page() 取得。
+	var content = (page_data.header || page_data).revision;
+	if (content && (content = content.content))
+		// page_data.revision.content.content
+		return content.content;
+
+	// 檢測一般頁面
+	if (get_page_content.is_page_data(page_data))
+		return (content = get_page_content.has_content(page_data)) ? content['*']
+			: null;
 
 	// 一般都會輸入 page_data: {"pageid":0,"ns":0,"title":""}
 	//: typeof page_data === 'string' ? page_data
@@ -1373,7 +1398,7 @@ function get_page_content(page_data) {
 	// ('missing' in page_data): 此頁面已刪除。
 	// e.g., { ns: 0, title: 'title', missing: '' }
 	// TODO: 提供此頁面的刪除和移動日誌以便參考。
-	: page_data && ('missing' in page_data) ? undefined : String(page_data);
+	return page_data && ('missing' in page_data) ? undefined : String(page_data || '');
 }
 
 /**
@@ -1592,8 +1617,29 @@ wiki_API.prototype.next = function() {
 					next[3].call(this, this.last_page.title, 'is Flow');
 				this.next();
 
+			} else if (!this.last_page.header) {
+				// rollback
+				this.actions.unshift(next);
+				// 先取得關於討論板的描述。以此為依據，檢測頁面是否允許機器人帳戶訪問。
+				Flow_page(this.last_page, function(flow_data) {
+					_this.last_page.header = flow_data;
+					_this.next();
+				}, {
+					view : 'header'
+				});
+
+			} else if (wiki_API.edit.denied(this.last_page, this.token.lgname, next[2] && next[2].action)) {
+				// {{bot}} support for flow page
+				// 採用 this.last_page 的方法，在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
+				library_namespace.warn('wiki_API.prototype.next: Denied to edit flow [[' + this.last_page.title + ']]');
+				// next[3] : callback
+				if (typeof next[3] === 'function')
+					next[3].call(this, this.last_page.title, 'denied');
+				this.next();
+
 			} else {
 				library_namespace.debug('直接採用 Flow 的方式增添新話題。');
+				// get the contents
 				if (typeof next[1] === 'function') {
 					// next[1] = next[1](get_page_content(this.last_page), this.last_page.title, this.last_page);
 					// 需要同時改變 wiki_API.edit!
@@ -1621,6 +1667,7 @@ wiki_API.prototype.next = function() {
 			if (typeof next[3] === 'function')
 				next[3].call(this, this.last_page.title, 'denied');
 			this.next();
+
 		} else {
 			if (typeof next[1] === 'function') {
 				// next[1] = next[1](get_page_content(this.last_page), this.last_page.title, this.last_page);
@@ -2892,7 +2939,7 @@ get_list.default_parameter = 'list';
 // https://zh.wikipedia.org/wiki/Help:%E9%93%BE%E5%85%A5%E9%A1%B5%E9%9D%A2
 get_list.type = {
 
-	// 'type name' : 'prefix' (parameter : 'list')
+	// 'type name' : 'abbreviation 縮寫 / prefix' (parameter : 'list')
 
 	// 取得連結到 [[title]] 的頁面。
 	// e.g., [[name]], [[:Template:name]].
@@ -2911,7 +2958,7 @@ get_list.type = {
 	// https://www.mediawiki.org/wiki/API:Imageusage
 	imageusage : 'iu',
 
-	// 'type name' : [ 'prefix', 'parameter' ]
+	// 'type name' : [ 'abbreviation 縮寫 / prefix', 'parameter' ]
 	// ** 可一次處理多個標題，但可能較耗資源、較慢。
 
 	// linkshere: 取得連結到 [[title]] 的頁面。
@@ -3222,7 +3269,8 @@ wiki_API.check_stop.pattern = /\n=([^\n]+)=\n/;
 //---------------------------------------------------------------------//
 
 /**
- * 編輯頁面。一次處理一個標題。
+ * 編輯頁面。一次處理一個標題。<br />
+ * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問!此時需要另外含入檢查機制! 
  *
  * @param {String|Array}title
  *            頁面標題。 {String}title or [ {String}API_URL, {String}title or {Object}page_data ]
@@ -3241,20 +3289,20 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	if (typeof text === 'function') {
 		library_namespace.debug('先取得內容再 edit [' + get_page_title(title)
 				+ ']。', 1, 'wiki_API.edit');
-		return wiki_API.page(title,
-				function(page_data) {
-					if (wiki_API.edit.denied(page_data, options.bot_id,
-							options.action)) {
-						library_namespace
-								.warn('wiki_API.edit: Denied to edit ['
-										+ page_data.title + ']');
-						callback(page_data.title, 'denied');
-					} else {
-						// text(get_page_content(page_data), page_data.title, page_data)
-						// 需要同時改變 wiki_API.prototype.next!
-						wiki_API.edit(page_data, text(page_data), token, options, callback);
-					}
-				});
+		wiki_API.page(title, function(page_data) {
+			if (wiki_API.edit.denied(page_data, options.bot_id,
+					options.action)) {
+				library_namespace.warn(
+				// Permission denied
+				'wiki_API.edit: Denied to edit [' + get_page_title(page_data) + ']');
+				callback(get_page_title(page_data), 'denied');
+			} else {
+				// text(get_page_content(page_data), page_data.title, page_data)
+				// 需要同時改變 wiki_API.prototype.next!
+				wiki_API.edit(page_data, text(page_data), token, options, callback);
+			}
+		});
+		return;
 	}
 
 	var action;
@@ -3425,7 +3473,7 @@ wiki_API.edit.get_bot = function(content) {
 };
 
 /**
- * 測試是否允許機器人帳戶訪問，遵守[[Template:Bots]]。機器人另須考慮{{Personal announcement}}的情況。
+ * 測試頁面是否允許機器人帳戶訪問，遵守[[Template:Bots]]。機器人另須考慮{{Personal announcement}}的情況。
  * 
  * @param {String}content
  *            頁面內容。
@@ -3439,6 +3487,8 @@ wiki_API.edit.get_bot = function(content) {
 wiki_API.edit.denied = function(content, bot_id, action) {
 	if (!content || get_page_content.is_page_data(content) && !(content = get_page_content(content)))
 		return;
+
+	library_namespace.debug('contents to test: [' + content + ']', 3, 'wiki_API.edit.denied');
 
 	var bots = wiki_API.edit.get_bot(content), denied;
 	if (bots) {
@@ -4110,8 +4160,8 @@ wiki_API.cache.title_only = function(operation) {
 // .roots[0]
 // https://zh.wikipedia.org/w/api.php?action=flow&submodule=view-topic&page=Topic:sqs6skdav48d3xzn&vtformat=wikitext&utf8=1
 
-// https://www.mediawiki.org/w/api.php?action=flow&submodule=view-header&page=Talk:Sandbox&vhformat=wikitext
-// https://www.mediawiki.org/w/api.php?action=flow&submodule=view-topiclist&page=Talk:Sandbox
+// https://www.mediawiki.org/w/api.php?action=flow&submodule=view-header&page=Talk:Sandbox&vhformat=wikitext&utf8=1
+// https://www.mediawiki.org/w/api.php?action=flow&submodule=view-topiclist&utf8=1&page=Talk:Sandbox
 
 /**
  * get the infomation of Flow.
@@ -4216,6 +4266,13 @@ function is_Flow(page_data) {
 		return page_data.contentmodel === 'flow-board';
 }
 
+/** {Object}abbreviation 縮寫 */
+var Flow_abbreviation = {
+		// 關於討論板的描述。
+		header : 'h',
+		// 討論板話題列表。
+		topiclist : 'tl'
+};
 
 /**
  * get topics of the page.
@@ -4234,12 +4291,17 @@ function Flow_page(title, callback, options) {
 	// 為了預防輸入的是問題頁面。
 	|| title.length !== 2 || typeof title[0] === 'object')
 		title = [ , title ];
-	title[1] = 'page=' + title[1];
+	title[1] = 'page=' + get_page_title(title[1]);
 
 	if (options && options.redirects)
 		title[1] += '&redirects=1';
 
-	title[1] = 'flow&submodule=view-topiclist&vtlformat=wikitext&' + title[1];
+	// e.g., { view : 'header' }
+	var view = options && options.view || 'topiclist';
+	title[1] = 'flow&submodule=view-' + view + '&v'
+	+ (Flow_abbreviation[view] || view.charAt(0).toLowerCase()) + 'format='
+	+ (options && options.format || 'wikitext') + '&' + title[1];
+
 	if (!title[0])
 		title = title[1];
 
@@ -4264,7 +4326,7 @@ function Flow_page(title, callback, options) {
 		// data = { flow: { 'view-topiclist': { result: {}, status: 'ok' } } }
 		if (!(data = data.flow)
 		//
-		|| !(data = data['view-topiclist']) || data.status !== 'ok') {
+		|| !(data = data['view-' + view]) || data.status !== 'ok') {
 			library_namespace.err(
 			//
 			'Flow_page: Error status [' + data.status + ']');
@@ -4272,9 +4334,10 @@ function Flow_page(title, callback, options) {
 			return;
 		}
 
-		callback(data.result.topiclist);
+		callback(data.result[view]);
 	});
 }
+
 
 /**
  * Create a new topic. 發新話題。
@@ -4305,6 +4368,7 @@ function edit_topic(title, topic, text, token, options, callback) {
 
 	if (get_page_content.is_page_data(title))
 		title = title.title;
+	// assert: typeof title === 'string'　or title is invalid.
 
 	var _options = {
 		action : 'flow',
