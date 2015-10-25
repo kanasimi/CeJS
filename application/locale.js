@@ -1389,6 +1389,8 @@ gettext.set_alias({
 
 // setup default/current domain. ユーザーロケール(言語と地域)の判定。
 // 偏好的語言/優先言語
+// TODO: `wmic.exe os get locale, oslanguage, codeset`
+// TODO: `REG QUERY HKLM\System\CurrentControlSet\Control\Nls\Language /v InstallLanguage`
 if (library_namespace.is_WWW()
 		// http://stackoverflow.com/questions/1043339/javascript-for-detecting-browser-language-preference
 		&& (gettext.default_domain = gettext.to_standard(navigator.userLanguage || navigator.language

@@ -1355,9 +1355,11 @@ function get_page_title(page_data) {
 			return title;
 
 		// for flow page
-		// page_data.header: 在 wiki_API.prototype.next 中設定。
+		// page_data.header: 在 Flow_page() 中設定。
 		// page_data.revision: 由 Flow_page() 取得。
-		title = (page_data.header || page_data).revision;
+		title =
+		//page_data.is_Flow &&
+		(page_data.header || page_data).revision;
 		if (title && (title = title.articleTitle))
 			// e.g., "Wikipedia talk:Flow tests"
 			return title;
@@ -1375,14 +1377,19 @@ function get_page_title(page_data) {
  *
  * @param {Object}page_data
  *            page data got from wiki API
+ * @param {String}flow_view
+ *            對 flow page，所欲取得之頁面內容項目。<br />
+ *            default: 'header'
  *
  * @returns {String} content of page
  */
-function get_page_content(page_data) {
+function get_page_content(page_data, flow_view) {
 	// for flow page: 因為 page_data 可能符合一般頁面標準，此時會先得到 {"flow-workflow":""} 之類的內容，因此必須在檢測一般頁面之前先檢測 flow page。
-	// page_data.header: 在 wiki_API.prototype.next 中設定。
+	// page_data.header: 在 Flow_page() 中設定。
 	// page_data.revision: 由 Flow_page() 取得。
-	var content = (page_data.header || page_data).revision;
+	var content =
+	//page_data.is_Flow &&
+	(page_data[flow_view || 'header'] || page_data).revision;
 	if (content && (content = content.content))
 		// page_data.revision.content.content
 		return content.content;
@@ -1500,7 +1507,9 @@ wiki_API.prototype.next = function() {
 				if (typeof next[2] === 'function')
 					next[2].call(_this, page_data);
 				_this.next();
-			}, next[3]);
+			},
+			// next[3] : options
+			next[3]);
 		break;
 
 	case 'backlinks':
@@ -1621,11 +1630,10 @@ wiki_API.prototype.next = function() {
 				// rollback
 				this.actions.unshift(next);
 				// 先取得關於討論板的描述。以此為依據，檢測頁面是否允許機器人帳戶訪問。
-				Flow_page(this.last_page, function(flow_data) {
-					_this.last_page.header = flow_data;
+				Flow_page(this.last_page, function() {
 					_this.next();
 				}, {
-					view : 'header'
+					flow_view : 'header'
 				});
 
 			} else if (wiki_API.edit.denied(this.last_page, this.token.lgname, next[2] && next[2].action)) {
@@ -2472,9 +2480,13 @@ wiki_API.page = function(title, callback, options) {
 		// options.multi: 即使只取得單頁面，依舊回傳 Array。
 		if (!options || !options.multi)
 			if (pages.length <= 1) {
-				if (pages = pages[0])
-					pages.is_Flow = is_Flow(pages);
 				library_namespace.debug('只取得單頁面 [[' + pages.title + ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
+				if ((pages = pages[0]) && (pages.is_Flow = is_Flow(pages))
+				// e.g., { flow_view : 'header' }
+				&& options.flow_view) {
+					Flow_page(pages, callback, options);
+					return;
+				}
 			} else
 				library_namespace.debug('Get ' + pages.length
 				//
@@ -4151,7 +4163,7 @@ wiki_API.cache.title_only = function(operation) {
 
 
 // --------------------------------------------------------------------------------------------- //
-// Flow 功能支援。
+// Flow page support. Flow 功能支援。
 // [[mediawikiwiki:Extension:Flow/API]]
 // https://www.mediawiki.org/w/api.php?action=help&modules=flow
 
@@ -4291,13 +4303,18 @@ function Flow_page(title, callback, options) {
 	// 為了預防輸入的是問題頁面。
 	|| title.length !== 2 || typeof title[0] === 'object')
 		title = [ , title ];
+
+	var page_data;
+	if (get_page_content.is_page_data(title[1]))
+		page_data = title[1];
+
 	title[1] = 'page=' + get_page_title(title[1]);
 
 	if (options && options.redirects)
 		title[1] += '&redirects=1';
 
-	// e.g., { view : 'header' }
-	var view = options && options.view || 'topiclist';
+	// e.g., { flow_view : 'header' }
+	var view = options && options.flow_view || 'topiclist';
 	title[1] = 'flow&submodule=view-' + view + '&v'
 	+ (Flow_abbreviation[view] || view.charAt(0).toLowerCase()) + 'format='
 	+ (options && options.format || 'wikitext') + '&' + title[1];
@@ -4319,7 +4336,7 @@ function Flow_page(title, callback, options) {
 			library_namespace.err(
 			//
 			'Flow_page: [' + error.code + '] ' + error.info);
-			callback();
+			callback(page_data);
 			return;
 		}
 
@@ -4330,11 +4347,16 @@ function Flow_page(title, callback, options) {
 			library_namespace.err(
 			//
 			'Flow_page: Error status [' + data.status + ']');
-			callback();
+			callback(page_data);
 			return;
 		}
 
-		callback(data.result[view]);
+		if (page_data)
+			// assert: data.result = { ((view)) : {} }
+			Object.assign(page_data, data.result);
+		else
+			page_data = data.result[view];
+		callback(page_data);
 	});
 }
 

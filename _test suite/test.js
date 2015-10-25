@@ -2083,11 +2083,12 @@ function test_astronomy() {
 
 
 function test_wiki() {
-	error_count += CeL.test('wiki: parse_template', [
+	error_count += CeL.test('wiki: file_pattern & parse_template', [
 		[[ '!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
 		//
 		.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3') ], 'file_pattern'],
 
+		[[undefined, CeL.wiki.parser.template('a{temp}b', 'temp')]],
 		[['temp', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', false)[1]]],
 		[['{{temp2,p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', false)[2].join()]],
 		[['|{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', true)[2]]],
@@ -2212,7 +2213,7 @@ function test_wiki() {
 
 	// More examples: see /_test suite/test.js
 	
-	// Flow
+	// Flow support
 	CeL.wiki.Flow('Wikipedia_talk:Flow_tests', function(page_data) {
 		CeL.log(page_data.is_Flow === true);
 	});
@@ -2224,17 +2225,31 @@ function test_wiki() {
 	});
 
 	CeL.wiki.Flow.page('Wikipedia_talk:Flow_tests', function(page_data) {
-		CeL.log(page_data.revision.content.content);
+		var title = CeL.wiki.title_of(page_data),
+		//
+		content = CeL.wiki.content_of(page_data);
+		CeL.info(title);
+		CeL.log(content);
 	}, {
-		view : 'header'
+		flow_view : 'header'
+	});
+
+	CeL.wiki.page('Wikipedia_talk:Flow_tests', function(page_data) {
+		var title = page_data.title,
+		//
+		content = CeL.wiki.content_of(page_data);
+		CeL.info(title);
+		CeL.log(content);
+	}, {
+		flow_view : 'header'
 	});
 
 	// edit flow page
 	var wiki = CeL.wiki.login('', '');
 	wiki.page('Wikipedia talk:Flow tests').edit('test edit', {
+		action : 'afd',
 		section : 'new',
-		sectiontitle : 'test {{bot}}',
-		action : 'afd'
+		sectiontitle : 'test {{bot}}'
 	});
 
 }
