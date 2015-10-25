@@ -211,7 +211,7 @@ get_namespace.hash = {
  * remove namespace part of the title.
  * 
  * @param {String}title
- *            頁面標題。
+ *            page title 頁面標題。
  * 
  * @returns {String}title without namespace
  */
@@ -1636,7 +1636,7 @@ wiki_API.prototype.next = function() {
 					flow_view : 'header'
 				});
 
-			} else if (wiki_API.edit.denied(this.last_page, this.token.lgname, next[2] && next[2].action)) {
+			} else if (wiki_API.edit.denied(this.last_page, this.token.lgname, next[2] && next[2].notification)) {
 				// {{bot}} support for flow page
 				// 採用 this.last_page 的方法，在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 				library_namespace.warn('wiki_API.prototype.next: Denied to edit flow [[' + this.last_page.title + ']]');
@@ -1668,7 +1668,7 @@ wiki_API.prototype.next = function() {
 				});
 			}
 		
-		} else if (wiki_API.edit.denied(this.last_page, this.token.lgname, next[2] && next[2].action)) {
+		} else if (wiki_API.edit.denied(this.last_page, this.token.lgname, next[2] && next[2].notification)) {
 			// 採用 this.last_page 的方法，在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 			library_namespace.warn('wiki_API.prototype.next: Denied to edit [[' + this.last_page.title + ']]');
 			// next[3] : callback
@@ -2728,7 +2728,7 @@ function get_continue(title, callback) {
  * @param {String}type
  *            one of get_list.type
  * @param {String}title
- *            頁面標題。
+ *            page title 頁面標題。
  * @param {Function}callback
  *            回調函數。 callback(title, titles, pages)
  * @param {Number|String}namespace
@@ -3016,7 +3016,7 @@ get_list.type = {
  * 注意:可能會改變 options!
  * 
  * @param {String}target
- *            頁面標題。
+ *            page title 頁面標題。
  * @param {Function}callback
  *            回調函數。 callback(pages, target, options)
  * @param {Object}[options]
@@ -3285,9 +3285,9 @@ wiki_API.check_stop.pattern = /\n=([^\n]+)=\n/;
  * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問!此時需要另外含入檢查機制! 
  *
  * @param {String|Array}title
- *            頁面標題。 {String}title or [ {String}API_URL, {String}title or {Object}page_data ]
+ *            page title 頁面標題。 {String}title or [ {String}API_URL, {String}title or {Object}page_data ]
  * @param {String|Function}text
- *            頁面內容 contents。 {String}text or {Function}text(page_data)
+ *            page contents 頁面內容。 {String}text or {Function}text(page_data)
  * @param {Object}token
  *            login 資訊，包含“csrf”令牌/密鑰。
  * @param {Object}[options]
@@ -3303,7 +3303,7 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 				+ ']。', 1, 'wiki_API.edit');
 		wiki_API.page(title, function(page_data) {
 			if (wiki_API.edit.denied(page_data, options.bot_id,
-					options.action)) {
+					options.notification)) {
 				library_namespace.warn(
 				// Permission denied
 				'wiki_API.edit: Denied to edit [' + get_page_title(page_data) + ']');
@@ -3460,7 +3460,7 @@ wiki_API.edit.set_stamp = function(options, timestamp) {
  * Get the contents of [[Template:Bots]].
  * 
  * @param {String}content
- *            頁面內容。
+ *            page contents 頁面內容。
  * 
  * @returns {Array}contents of [[Template:Bots]].
  * 
@@ -3488,15 +3488,15 @@ wiki_API.edit.get_bot = function(content) {
  * 測試頁面是否允許機器人帳戶訪問，遵守[[Template:Bots]]。機器人另須考慮{{Personal announcement}}的情況。
  * 
  * @param {String}content
- *            頁面內容。
+ *            page contents 頁面內容。
  * @param {String}bot_id
  *            機器人帳戶名稱。
- * @param {String}action
- *            按通知種類而過濾(optout)。
+ * @param {String}notification
+ *            message notifications of action. 按通知種類而過濾(optout)。
  * 
  * @returns {Boolean|String}封鎖機器人帳戶訪問。
  */
-wiki_API.edit.denied = function(content, bot_id, action) {
+wiki_API.edit.denied = function(content, bot_id, notification) {
 	if (!content || get_page_content.is_page_data(content) && !(content = get_page_content(content)))
 		return;
 
@@ -3504,17 +3504,31 @@ wiki_API.edit.denied = function(content, bot_id, action) {
 
 	var bots = wiki_API.edit.get_bot(content), denied;
 	if (bots) {
-		library_namespace.debug('test ' + bot_id + '/' + action, 3,
+		library_namespace.debug('test ' + bot_id + '/' + notification, 3,
 				'wiki_API.edit.denied');
 		// botlist 以半形逗號作間隔。
 		bot_id = (bot_id = bot_id && bot_id.toLowerCase()) ?
 				new RegExp('(?:^|[\\s,])(?:all|' + bot_id + ')(?:$|[\\s,])', 'i')
 				: wiki_API.edit.denied.all;
-		if (action)
+		if (notification) {
+			if (typeof notification === 'string'
 			// optout 以半形逗號作間隔。
-			// optout=all
-			action = new RegExp('(?:^|[\\s,])(?:all|' + action.toLowerCase()
-					+ ')(?:$|[\\s,])');
+			&& notification.includes(','))
+				notification = notification.split(',');
+			if (Array.isArray(notification))
+				notification = notification.join('|');
+			if (typeof notification === 'string')
+				// 預設必須包含 optout=all
+				notification = new RegExp('(?:^|[\\s,])(?:all|'
+						+ notification.toLowerCase() + ')(?:$|[\\s,])');
+			else if (!library_namespace.is_RegExp(notification)) {
+				library_namespace.warn(
+				//
+				'wiki_API.edit.denied: Invalid notification: [' + notification + ']');
+				notification = null;
+			}
+			// 自訂 {RegExp}notification 可能頗危險。
+		}
 		bots.forEach(function(data) {
 			library_namespace.debug('test [' + data + ']', 1,
 				'wiki_API.edit.denied');
@@ -3543,11 +3557,11 @@ wiki_API.edit.denied = function(content, bot_id, action) {
 
 			// 過濾機器人所發出的通知/提醒
 			// 用戶以bots模板封鎖通知
-			if (!denied && action) {
+			if (!denied && notification) {
 				PATTERN = /(?:^|\|)[\s\n]*optout[\s\n]*=[\s\n]*([^|]+)/ig;
 				while ((matched = PATTERN.exec(data))
 						// 一被拒絕即跳出。
-						&& !(denied = action.test(matched[1]) && ('Opt out of ' + matched[1])))
+						&& !(denied = notification.test(matched[1]) && ('Opt out of ' + matched[1])))
 					;
 			}
 
@@ -4179,7 +4193,7 @@ wiki_API.cache.title_only = function(operation) {
  * get the infomation of Flow.
  * 
  * @param {String|Array}title
- *            頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [ {String}API_URL,
+ *            page title 頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [ {String}API_URL,
  *            {String}title or {Object}page_data ]
  * @param {Function}callback
  *            回調函數。 callback({Object}page_data)
@@ -4290,7 +4304,7 @@ var Flow_abbreviation = {
  * get topics of the page.
  * 
  * @param {String|Array}title
- *            頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [ {String}API_URL,
+ *            page title 頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [ {String}API_URL,
  *            {String}title or {Object}page_data ]
  * @param {Function}callback
  *            回調函數。 callback({Object}topiclist)
@@ -4366,12 +4380,12 @@ function Flow_page(title, callback, options) {
  * Reply to an existing topic.
  * 
  * @param {String|Array}title
- *            頁面標題。 {String}title or [ {String}API_URL, {String}title or
+ *            page title 頁面標題。 {String}title or [ {String}API_URL, {String}title or
  *            {Object}page_data ]
  * @param {String}topic
  *            新話題的標題文字。 {String}topic
  * @param {String|Function}text
- *            頁面內容 contents。 {String}text or {Function}text(page_data)
+ *            page contents 頁面內容。 {String}text or {Function}text(page_data)
  * @param {Object}token
  *            login 資訊，包含“csrf”令牌/密鑰。
  * @param {Object}[options]
@@ -4393,7 +4407,7 @@ function edit_topic(title, topic, text, token, options, callback) {
 	// assert: typeof title === 'string'　or title is invalid.
 
 	var _options = {
-		action : 'flow',
+		notification : 'flow',
 		submodule : 'new-topic',
 		page : title,
 		nttopic : topic,
