@@ -2100,6 +2100,8 @@ function test_wiki() {
 		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b')[0] ]],
 		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp')[0] ]],
 		[[ '{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]],
+
+		[[ 'vfd', CeL.wiki.parser.template('{{vfd|已提刪}}\n...', [ 'vfd', 'afd' ], true)[1] ]],
 	]);
 
 	return;

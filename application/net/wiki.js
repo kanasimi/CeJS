@@ -1656,9 +1656,9 @@ wiki_API.prototype.next = function() {
 				edit_topic([ this.API_URL, this.last_page ],
 				// 新章節/新話題的標題文字。
 				next[2].sectiontitle,
-				// 因為已有 contents，直接餵給轉換函式。
-				// 新話題最初的內容。
-				next[1], this.token,
+				// 新話題最初的內容。因為已有 contents，直接餵給轉換函式。
+				// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
+				next[1].replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''), this.token,
 				// next[2]: options to edit_topic()
 				next[2], function(title, error, result) {
 					// next[3] : callback
