@@ -23,9 +23,9 @@
 
 'use strict';
 
-/** {Integer}test level */
+/** {ℕ⁰:Natural+0}test level */
 var test_level = 1,
-/** {Integer}count of errors (failed + fatal) */
+/** {ℕ⁰:Natural+0}count of errors (failed + fatal) */
 error_count = 0;
 
 // index.js
@@ -2102,6 +2102,7 @@ function test_wiki() {
 		[[ '{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]],
 
 		[[ 'vfd', CeL.wiki.parser.template('{{vfd|已提刪}}\n...', [ 'vfd', 'afd' ], true)[1] ]],
+		[[ '2015/10/21', CeL.wiki.parser.template('\n{{vfd|已提刪|date=2015/10/21}}\n...', [ 'vfd', 'afd' ])[2].date ]],
 	]);
 
 	return;

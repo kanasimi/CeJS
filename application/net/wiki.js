@@ -131,7 +131,7 @@ function api_URL(project) {
  * @param {String}namespace
  *            namespace
  * 
- * @returns {Integer}namespace NO.
+ * @returns {ℕ⁰:Natural+0}namespace NO.
  */
 function get_namespace(namespace) {
 	if (typeof namespace === 'string'
@@ -475,7 +475,7 @@ var page_prototype = {
  * 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
  * 
  * @param {Function}processor
- *            執行特定作業 processor({String}token, {Array}parent, {Integer}index)
+ *            執行特定作業 processor({String}token, {Array}parent, {ℕ⁰:Natural+0}index)
  * @param {String}[modify_this]
  *            modify this
  * 
@@ -525,7 +525,7 @@ page_parser.type_alias = {
  * @param {String}type
  *            欲搜尋之類型。 e.g., 'templated'.
  * @param {Function}trigger
- *            觸發器 : trigger({Array}inside nodes, {Array}parent, {Integer}index)
+ *            觸發器 : trigger({Array}inside nodes, {Array}parent, {ℕ⁰:Natural+0}index)
  * 
  * @returns {wiki page parser}
  * 
@@ -743,7 +743,7 @@ var wiki_toString = {
  * 
  * 此功能之工作機制/原理：<br />
  * 找出完整的最小單元，並將之 push 入 queue，並把原 string 中之單元 token 替換成:<br />
- * {String}include_mark + ({Integer}index of queue) + end_mark<br />
+ * {String}include_mark + ({ℕ⁰:Natural+0}index of queue) + end_mark<br />
  * e.g.,<br />
  * "a[[p]]b{{t}}" →<br />
  * "a[[p]]b\00;", queue = [ ["t"].type='transclusion' ] →<br />
@@ -786,7 +786,7 @@ function parse_wikitext(wikitext, options, queue) {
 	 * 解析用之起始特殊標記。<br />
 	 * 需找出一個文件中不可包含，亦不會被解析的字串，作為解析用之起始特殊標記。<br />
 	 * e.g., '\u0000'.<br />
-	 * include_mark + ({Integer}index of queue) + end_mark
+	 * include_mark + ({ℕ⁰:Natural+0}index of queue) + end_mark
 	 * 
 	 * @type {String}
 	 */
@@ -1275,8 +1275,25 @@ function parse_template(wikitext, template_name, no_parse) {
 		// {Array}parameters
 		// 警告:這邊只是單純的以 '|' 分割，但照理來說應該再 call parser 來處理。
 		// 最起碼應該除掉所有可能包含 '|' 的語法，例如內部連結 [[~|~]], 模板 {{~|~}}。
+		wikitext = result[2].split(/[\s\n]*\|[\s\n]*/);
 		// .shift(): parameters 以 '|' 起始，因此需去掉最前面一個。
-		(result[2] = result[2].split(/[\s\n]*\|[\s\n]*/)).shift();
+		wikitext.shift();
+		wikitext.forEach(function(token) {
+			matched = token.match(/^([^=]+)=(.*)$/);
+			if (matched) {
+				var key = matched[1].trim(),
+				//
+				value = matched[2].trim();
+				if (key in wikitext) {
+					if (Array.isArray(wikitext[key]))
+						wikitext[key].push(value);
+					else
+						wikitext[key] = [ wikitext[key], value ];
+				} else
+					wikitext[key] = value;
+			}
+		});
+		result[2] = wikitext;
 	}
 
 	return result;
@@ -2240,7 +2257,7 @@ wiki_API.query = function(action, callback, post_data) {
  * 最大延遲參數。<br />
  * default: 使用5秒的最大延遲參數。
  * 
- * @type {Number}
+ * @type {ℕ⁰:Natural+0}
  * 
  * @see https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
  */
@@ -2278,7 +2295,7 @@ wiki_API.query.title_param = function(page_data, multi) {
 		pageid = [];
 		// 確認所有 page_data 皆有 pageid 屬性。
 		if (page_data.every(function(page) {
-			// {Number}page.pageid
+			// {ℕ⁰:Natural+0}page.pageid
 			if (page = page && page.pageid)
 				pageid.push(page);
 			return page;
@@ -2312,7 +2329,7 @@ wiki_API.query.title_param = function(page_data, multi) {
 		else
 			page_data = page_data.title;
 	else if (typeof page_data === 'number'
-	// {Number}pageid should > 0.
+	// {ℕ⁰:Natural+0}pageid should > 0.
 	// pageid 0 回傳格式不同於 > 0。
 	// https://www.mediawiki.org/w/api.php?action=query&prop=revisions&pageids=0
 	&& page_data > 0 && page_data === page_data | 0)
@@ -2731,7 +2748,7 @@ function get_continue(title, callback) {
  *            page title 頁面標題。
  * @param {Function}callback
  *            回調函數。 callback(title, titles, pages)
- * @param {Number|String}namespace
+ * @param {ℕ⁰:Natural+0|String}namespace
  *            one of get_namespace.hash
  */
 function get_list(type, title, callback, namespace) {
@@ -3176,7 +3193,7 @@ wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
  * check if need to stop / 檢查是否需要緊急停止作業 (Emergency shutoff-compliant).
  * 
  * 此功能之工作機制/原理：<br />
- * 在 .edit() 編輯之前，先檢查是否有人在緊急停止頁面留言要求 stop。<br />
+ * 在 .edit() 編輯（機器人執行作業）之前，先檢查是否有人在緊急停止頁面留言要求 stop。<br />
  * 只要在緊急停止頁面有指定的章節標題、或任何章節，就當作有人留言要 stop，並放棄編輯。
  * 
  * TODO:<br />
@@ -3609,7 +3626,7 @@ wiki_API.search = function(key, callback, options) {
 		API_URL = key[0], key = key[1];
 	wiki_API.query([ API_URL, 'query&list=search&' + get_URL.param_to_String(Object.assign({
 		srsearch : key
-	}, wiki_API.search.default_parameter, options)) ], function(data) {
+	}, wiki_API.search.default_parameters, options)) ], function(data) {
 		if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value)
@@ -3631,7 +3648,7 @@ wiki_API.search = function(key, callback, options) {
 	});
 };
 
-wiki_API.search.default_parameter = {
+wiki_API.search.default_parameters = {
 	srprop : 'redirecttitle',
 	//srlimit : 10,
 	srinterwiki : 1
@@ -3754,7 +3771,7 @@ wiki_API.redirects = function(title, callback, options) {
  * @param {Array}embeddedin_list
  *            頁面嵌入包含之模板 list。
  * 
- * @returns {Integer}normalized count
+ * @returns {ℕ⁰:Natural+0}normalized count
  */
 wiki_API.redirects.count = function(root_name_hash, embeddedin_list) {
 	var name_hash = library_namespace.null_Object();
@@ -4406,6 +4423,7 @@ function edit_topic(title, topic, text, token, options, callback) {
 		title = title.title;
 	// assert: typeof title === 'string'　or title is invalid.
 
+	// default parameters
 	var _options = {
 		notification : 'flow',
 		submodule : 'new-topic',

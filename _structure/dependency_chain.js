@@ -478,7 +478,7 @@ if (typeof CeL === 'function')
 						has_hash,
 						// {Object}value objects 的 id hash map。可用來維持插入順序。
 						// value_of_id[
-						// id: {String}hash + "_" + {Integral}index
+						// id: {String}hash + "_" + {ℕ⁰:Natural+0}index
 						// ] = value.
 						//
 						// 在 Set 中 value_of_id={ id: key object }，
@@ -3824,7 +3824,7 @@ if (typeof CeL === 'function')
 		 * 
 		 * running sequence:<br />
 		 * {Integer} PARALLEL (平行處理), SEQUENTIAL (循序/依序執行, in order).<br />
-		 * {Integer} timeout (ms): 載入 resource 之時間限制 (millisecond)。<br />
+		 * {ℕ⁰:Natural+0} timeout (ms): 載入 resource 之時間限制 (millisecond)。<br />
 		 * {Array} 另一組動作串 (required sequence): [{String|Function|Integer}, ..] →
 		 * 拆開全部當作 PARALLEL loading.<br />
 		 * {String} library module name to import, resource (URL/file path)

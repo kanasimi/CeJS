@@ -118,7 +118,7 @@ function (global) {
 		/**
 		 * default debug level
 		 * 
-		 * @type {Integer}
+		 * @type {ℕ⁰:Natural+0}
 		 * @ignore
 		 */
 		debug = 0,
@@ -1428,11 +1428,11 @@ OS='UNIX'; // unknown
 	/**
 	 * Tell if it's now debugging.
 	 * 
-	 * @param {Integer}[debug_level]
+	 * @param {ℕ⁰:Natural+0}[debug_level]
 	 *            if it's now in this debug level.
 	 * 
 	 * @returns {Boolean} It's now in specified debug level.
-	 * @returns {Number} It's now in what debug level (Integer).
+	 * @returns {ℕ⁰:Natural+0} It's now in what debug level (Integer).
 	 */
 	is_debug = function (debug_level) {
 		return typeof debug_level !== 'number' ? debug || 0
@@ -1444,11 +1444,11 @@ OS='UNIX'; // unknown
 	/**
 	 * Set debugging level
 	 * 
-	 * @param {Integer}[debug_level]
+	 * @param {ℕ⁰:Natural+0}[debug_level]
 	 *            The debugging level to set.
 	 * 
-	 * @type Integer
-	 * @returns {Number} debugging level now
+	 * @type {ℕ⁰:Natural+0}
+	 * @returns {ℕ⁰:Natural+0} debugging level now
 	 */
 	set_debug = function (debug_level) {
 		if (!isNaN(debug_level))
