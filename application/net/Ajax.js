@@ -310,7 +310,7 @@ function get_URL(URL, onload, charset, post_data) {
 }
 
 
-// parameters to String
+// {Object}parameters to String
 // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
 get_URL.param_to_String = function(param) {
 	if (library_namespace.is_Object(param)) {

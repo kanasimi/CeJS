@@ -825,7 +825,7 @@ function parse_wikitext(wikitext, options, queue) {
 		wikitext = options.prefix(wikitext, queue, include_mark, end_mark)
 				|| wikitext;
 
-	// ------------------------------------------
+	// ------------------------------------------------------------------------
 	// parse sequence start / start parse
 
 	// parse 範圍基本上由小到大。
@@ -835,6 +835,7 @@ function parse_wikitext(wikitext, options, queue) {
 	// 例如修復章節標題 section title 前後 level 不一，
 	// table "|-" 未起新行等。
 
+	// ----------------------------------------------------
 	// comments: <!-- ... -->
 	// "<\": for Eclipse JSDoc.
 	if (initialized_fix) {
@@ -858,6 +859,7 @@ function parse_wikitext(wikitext, options, queue) {
 	// 為了 "{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}"，
 	// 將 -{}-, [], [[]] 等，所有中間可穿插 "|" 的置於 {{{}}}, {{}} 前。
 
+	// ----------------------------------------------------
 	// -{...}-
 	wikitext = wikitext.replace_till_stable(/-{(.+?)}-/g, function(all,
 			parameters) {
@@ -881,6 +883,7 @@ function parse_wikitext(wikitext, options, queue) {
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
 
+	// ----------------------------------------------------
 	// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可!
 	// [[~:~|~]], [[~:~:~|~]]
 	wikitext = wikitext.replace_till_stable(
@@ -914,6 +917,7 @@ function parse_wikitext(wikitext, options, queue) {
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
 
+	// ----------------------------------------------------
 	// [http://... ...]
 	// TODO: [{{}} ...]
 	wikitext = wikitext.replace_till_stable(
@@ -941,6 +945,7 @@ function parse_wikitext(wikitext, options, queue) {
 		return include_mark + (queue.length - 1) + end_mark;
 	});
 
+	// ----------------------------------------------------
 	// [[Help:HTML in wikitext]]
 	// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
 
@@ -984,6 +989,7 @@ function parse_wikitext(wikitext, options, queue) {
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
 
+	// ----------------------------------------------------
 	// <hr />
 	// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
 	wikitext = wikitext.replace_till_stable(
@@ -1010,6 +1016,7 @@ function parse_wikitext(wikitext, options, queue) {
 		return include_mark + (queue.length - 1) + end_mark;
 	});
 
+	// ----------------------------------------------------
 	// table: \n{| ... \n|}
 	wikitext = wikitext.replace_till_stable(/\n{\|([\s\S]*?)\n\|}/g, function(
 			all, parameters) {
@@ -1079,6 +1086,7 @@ function parse_wikitext(wikitext, options, queue) {
 		return '\n' + include_mark + (queue.length - 1) + end_mark;
 	});
 
+	// ----------------------------------------------------
 	// {{{...}}} 需在 {{...}} 之前解析。
 	// https://zh.wikipedia.org/wiki/Help:%E6%A8%A1%E6%9D%BF
 	// 在模板頁面中，用三個大括弧可以讀取參數
@@ -1110,6 +1118,7 @@ function parse_wikitext(wikitext, options, queue) {
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
 
+	// ----------------------------------------------------
 	// 模板（英語：Template，又譯作「樣板」、「範本」）
 	// {{Template name|}}
 	wikitext = wikitext.replace_till_stable(
@@ -1149,6 +1158,7 @@ function parse_wikitext(wikitext, options, queue) {
 	// ~~~~~
 	// ----
 
+	// ----------------------------------------------------
 	// parse_wikitext.section_title
 	wikitext = wikitext.replace_till_stable(/\n(=+)(.+)\1(\s*)\n/g, function(
 			all, prefix, parameters, postfix) {
@@ -1178,7 +1188,7 @@ function parse_wikitext(wikitext, options, queue) {
 	}
 
 	// ↑ parse sequence end
-	// ------------------------------------------
+	// ------------------------------------------------------------------------
 
 	if (options && typeof options.postfix === 'function')
 		wikitext = options.postfix(wikitext, queue, include_mark, end_mark)
@@ -1306,10 +1316,12 @@ function parse_template(wikitext, template_name, no_parse) {
 
 // parse date string to {Date}
 function parse_date(wikitext) {
+	// $dateFormats, 'Y年n月j日 (D) H:i'
+	// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hans.php
 	return wikitext && wikitext
 	// 去掉年分前之雜項。
 	.replace(/.+(\d{4}年)/, '$1')
-	// 去掉星期。
+	// 去掉星期與其後之雜項。
 	.replace(/日\s*\([^()]+\)/, '日 ')
 	// Warning: need data.date.
 	.to_Date();
@@ -1319,6 +1331,7 @@ function parse_date(wikitext) {
 function parse_user(wikitext) {
 	var matched = wikitext && wikitext.match(
 	// 使用者/用戶對話頁面
+	// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
 	/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论)|用戶(?:討論))\s*:\s*([^\|\]]+)/i);
 	if (matched)
 		return matched[1].trim();
