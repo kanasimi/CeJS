@@ -159,10 +159,12 @@ get_namespace.hash = {
 	// Virtual namespaces
 	media : -2,
 	special : -1,
-	// 0: (Main/Article) main namespace 主要(條目)命名空間/識別領域
+	// 0: (Main/Article) main namespace 主要(條目/內容頁面)命名空間/識別領域
 	// 條目 entry 文章 article: ns = 0, 頁面 page: ns = any. 章節/段落 section
 	'' : 0,
+	// 對話頁面
 	talk : 1,
+	// 使用者頁面
 	user : 2,
 	user_talk : 3,
 	// project
@@ -1326,7 +1328,7 @@ function parse_user(wikitext) {
 // 若重定向到其他頁面，則回傳其頁面名。
 function parse_redirect(wikitext) {
 	var matched = wikitext && wikitext.match(
-	//
+	// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
 	/(?:^|[\s\n]*)#(?:REDIRECT|重定向)\s*\[\[([^\]]+)\]\]/i);
 	if (matched)
 		return matched[1].trim();
@@ -1880,7 +1882,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		nocreate : 1,
 		// 該編輯是一個小修訂 (minor edit)。
 		minor : 1,
-		// 標記此編輯為機器人編輯。
+		// 標記此編輯為機器人編輯。[[WP:AL|機器人對其他使用者對話頁的小修改將不會觸發新訊息提示]]。
 		bot : 1,
 		// 設定寫入目標。一般為 debug、test 測試期間用。
 		write_to : '',
@@ -2500,7 +2502,7 @@ wiki_API.page = function(title, callback, options) {
 				library_namespace.debug('只取得單頁面 [[' + pages.title + ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
 				if ((pages = pages[0]) && (pages.is_Flow = is_Flow(pages))
 				// e.g., { flow_view : 'header' }
-				&& options.flow_view) {
+				&& options && options.flow_view) {
 					Flow_page(pages, callback, options);
 					return;
 				}
@@ -3519,7 +3521,10 @@ wiki_API.edit.denied = function(content, bot_id, notification) {
 
 	library_namespace.debug('contents to test: [' + content + ']', 3, 'wiki_API.edit.denied');
 
-	var bots = wiki_API.edit.get_bot(content), denied;
+	var bots = wiki_API.edit.get_bot(content),
+	/** {String}denied messages */
+	denied;
+
 	if (bots) {
 		library_namespace.debug('test ' + bot_id + '/' + notification, 3,
 				'wiki_API.edit.denied');
@@ -3527,6 +3532,7 @@ wiki_API.edit.denied = function(content, bot_id, notification) {
 		bot_id = (bot_id = bot_id && bot_id.toLowerCase()) ?
 				new RegExp('(?:^|[\\s,])(?:all|' + bot_id + ')(?:$|[\\s,])', 'i')
 				: wiki_API.edit.denied.all;
+
 		if (notification) {
 			if (typeof notification === 'string'
 			// optout 以半形逗號作間隔。
@@ -3546,48 +3552,55 @@ wiki_API.edit.denied = function(content, bot_id, notification) {
 			}
 			// 自訂 {RegExp}notification 可能頗危險。
 		}
-		bots.forEach(function(data) {
+
+		bots.some(function(data) {
 			library_namespace.debug('test [' + data + ']', 1,
 				'wiki_API.edit.denied');
 			data = data.toLowerCase();
 
-			// 封鎖機器人訪問之 pattern。
-			var matched, PATTERN;
-			if (!denied) {
-				PATTERN = /(?:^|\|)[\s\n]*deny[\s\n]*=[\s\n]*([^|]+)/ig;
-				while ((matched = PATTERN.exec(data))
-						// 一被拒絕即跳出。
-						&& !(denied = bot_id.test(matched[1]) && ('Banned: ' + matched[1])))
-					;
+			var matched,
+			/** {RegExp}封鎖機器人訪問之 pattern。 */
+			PATTERN;
+
+			PATTERN = /(?:^|\|)[\s\n]*deny[\s\n]*=[\s\n]*([^|]+)/ig;
+			while (matched = PATTERN.exec(data)) {
+				if (bot_id.test(matched[1])) {
+					// 一被拒絕即跳出。
+					return denied = 'Banned: ' + matched[1];
+				}
 			}
 
 			// 允許之機器人帳戶名稱列表（以半形逗號作間隔）
-			if (!denied) {
-				PATTERN = /(?:^|\|)[\s\n]*allow[\s\n]*=[\s\n]*([^|]+)/ig;
-				while ((matched = PATTERN.exec(data))
-						// 一被拒絕即跳出。
-						&& !(denied = !bot_id.test(matched[1])
-						// denied messages
-						&& ('Not in allowed bots list: [' + matched[1] + ']')))
-					;
+			PATTERN = /(?:^|\|)[\s\n]*allow[\s\n]*=[\s\n]*([^|]+)/ig;
+			while (matched = PATTERN.exec(data)) {
+				if (!bot_id.test(matched[1])) {
+					// 一被拒絕即跳出。
+					return denied = 'Not in allowed bots list: [' + matched[1] + ']';
+				}
 			}
 
 			// 過濾機器人所發出的通知/提醒
 			// 用戶以bots模板封鎖通知
-			if (!denied && notification) {
+			if (notification) {
 				PATTERN = /(?:^|\|)[\s\n]*optout[\s\n]*=[\s\n]*([^|]+)/ig;
-				while ((matched = PATTERN.exec(data))
+				while (matched = PATTERN.exec(data)) {
+					if (notification.test(matched[1])) {
 						// 一被拒絕即跳出。
-						&& !(denied = notification.test(matched[1]) && ('Opt out of ' + matched[1])))
-					;
+						return denied = 'Opt out of ' + matched[1];
+					}
+				}
 			}
 
-			if (denied)
-				library_namespace.warn('wiki_API.edit.denied: Denied for ' + data);
 		});
 	}
 
-	return denied || /{{[\s\n]*nobots[\s\n]*}}/i.test(content) && 'Ban all compliant bots.';
+	if (!denied && /{{[\s\n]*nobots[\s\n]*}}/i.test(content))
+		denied = 'Ban all compliant bots.';
+
+	if (denied) {
+		library_namespace.warn('wiki_API.edit.denied: ' + denied);
+		return denied;
+	}
 };
 
 /**
@@ -4339,13 +4352,15 @@ function Flow_page(title, callback, options) {
 	if (get_page_content.is_page_data(title[1]))
 		page_data = title[1];
 
-	title[1] = 'page=' + get_page_title(title[1]);
+	title[1] = 'page=' + encodeURIComponent(get_page_title(title[1]));
 
 	if (options && options.redirects)
 		title[1] += '&redirects=1';
 
 	// e.g., { flow_view : 'header' }
-	var view = options && options.flow_view || 'topiclist';
+	var view = options && options.flow_view
+	//
+	|| Flow_page.default_flow_view;
 	title[1] = 'flow&submodule=view-' + view + '&v'
 	+ (Flow_abbreviation[view] || view.charAt(0).toLowerCase()) + 'format='
 	+ (options && options.format || 'wikitext') + '&' + title[1];
@@ -4377,7 +4392,7 @@ function Flow_page(title, callback, options) {
 		|| !(data = data['view-' + view]) || data.status !== 'ok') {
 			library_namespace.err(
 			//
-			'Flow_page: Error status [' + data.status + ']');
+			'Flow_page: Error status [' + (data && data.status) + ']');
 			callback(page_data);
 			return;
 		}
@@ -4390,6 +4405,9 @@ function Flow_page(title, callback, options) {
 		callback(page_data);
 	});
 }
+
+/** {String}default view to flow page */
+Flow_page.default_flow_view = 'topiclist';
 
 
 /**
@@ -4454,7 +4472,7 @@ function edit_topic(title, topic, text, token, options, callback) {
 			library_namespace.err('edit_topic: [' + error.code + '] ' + error.info);
 		} else if (!(data = data.flow) || !(data = data['new-topic']) || data.status !== 'ok') {
 			// data = { flow: { 'new-topic': { status: 'ok', workflow: '', committed: {} } } }
-			error = 'edit_topic: Error status [' + data.status + ']';
+			error = 'edit_topic: Error status [' + (data && data.status) + ']';
 			library_namespace.err(error);
 		}
 
