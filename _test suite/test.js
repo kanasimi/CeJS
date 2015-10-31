@@ -16,7 +16,8 @@
 
 # npm view
 
-TODO: https://github.com/kanasimi/CeJS/releases
+TODO: https://github.com/kanasimi/CeJS/tags
+# git tag "v2.0.0" master
 
  * </code>
  *
@@ -620,6 +621,16 @@ function test_math() {
 		assert([CeL.data.math.factorial(18), 6402373705728000], 'math.factorial(18)');
 		assert([CeL.data.math.factorial(19), 121645100408832000], 'math.factorial(19)');
 		assert([CeL.data.math.factorial(20), 2432902008176640000], 'math.factorial(20)');
+
+		// ---------------------------------------------------------------------//
+
+		assert([CeL.math.closest_product([ 2, 3, 7, 11, 47, 557 ], 26200).join(), '21,47*557'], 'closest_product#1');
+		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 996).join(), '5,7*11*13'], 'closest_product#2');
+		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 995).join(), '6,7*11*13,23*43'], 'closest_product#3');
+		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 995, 1).join(), '6,7*11*13'], 'closest_product#4');
+		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 995, -1).join(), '6,23*43'], 'closest_product#5');
+		assert([!!CeL.math.closest_product([], 995), false], 'closest_product#6');
+		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 996, -1).join(), '7,23*43'], 'closest_product#7');
 	});
 
 

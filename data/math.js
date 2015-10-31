@@ -19,7 +19,7 @@ name: 'data.math',
 require: 'data.code.compatibility.',
 code : function(library_namespace) {
 
-	
+
 
 
 /**
@@ -44,6 +44,16 @@ _// JSDT:_module_
 /*
  * Math ---------------------------------------------------------------
  */
+
+
+/*
+
+數位
+十分位 tenths digit
+整數 whole number
+
+*/
+
 
 /**
  * use Horner's method to calculate the value of polynomial.
@@ -456,7 +466,7 @@ LCM2 = function(number_array) {
  *            number 2
  * @returns [ GCD, m1, m2 ]: GCD = m1 * n1 + m2 * n2
  * 
- * @see Euclidean_division() @ data.native
+ * @see Euclidean_division() @ data.math
  * @since 2013/8/3 20:24:30
  */
 function Extended_Euclidean(n1, n2) {
@@ -481,6 +491,174 @@ function Extended_Euclidean(n1, n2) {
 }
 
 _.EGCD = Extended_Euclidean;
+
+
+
+/**
+ * 帶餘除法 Euclidean division。<br />
+ * 除非設定 closest，否則預設 remainder >= 0.
+ * 
+ * @param {Number}dividend
+ *            被除數。
+ * @param {Number}divisor
+ *            除數。
+ * @param {Boolean}[closest]
+ *            get the closest quotient
+ * 
+ * @returns {Array} [ {Integer}quotient 商, {Number}remainder 餘數 ]
+ * 
+ * @see http://stackoverflow.com/questions/14997165/fastest-way-to-get-a-positive-modulo-in-c-c
+ * @see Extended_Euclidean() @ data.math
+ * 
+ * @since 2015/10/31 10:4:45
+ */
+function Euclidean_division(dividend, divisor, closest) {
+	if (false)
+		return [ Math.floor(dividend / divisor),
+		// 轉正。保證餘數值非負數。
+		(dividend % divisor + divisor) % divisor ];
+
+	var remainder = dividend % divisor;
+	if (closest) {
+		if (remainder !== 0
+		//
+		&& Math.abs(2 * remainder) > Math.abs(divisor))
+			if (remainder < 0)
+				remainder += Math.abs(divisor);
+			else
+				remainder -= Math.abs(divisor);
+
+	} else if (remainder < 0)
+		// assert: (-0 < 0) === false
+		remainder += Math.abs(divisor);
+
+	return [ Math.round((dividend - remainder) / divisor), remainder ];
+}
+
+_.division = Euclidean_division;
+
+
+
+
+/**
+ * 從數集 set 中挑出某些數，使其積最接近指定的數 target。<br />
+ * To picks some numbers from set, so the product is approximately the target
+ * number.
+ * 
+ * TODO: improve
+ * 
+ * @param {Array}set
+ *            number set of {Natural}
+ * @param {Natural}target
+ *            target number
+ * @param {Object}[options]
+ *            options 設定特殊功能:<br />
+ * 
+ * @returns {Array}某些數，其積最接近 target。
+ * 
+ * @see http://stackoverflow.com/questions/19572043/given-a-target-sum-and-a-set-of-integers-find-the-closest-subset-of-numbers-tha
+ */
+function closest_product(set, target, options) {
+	var status, minor_data;
+	if (Array.isArray(options)) {
+		status = options;
+		minor_data = status[0];
+		options = minor_data.options;
+
+	} else {
+		// 初始化
+		if (!options)
+			options = new Boolean;
+		else if (typeof options === 'number')
+			options = {
+				direction : options
+			};
+		else if (typeof options === 'boolean')
+			options = {
+				sorted : options
+			};
+		minor_data = [ Infinity ];
+		minor_data.options = options;
+		// status = [ [minor, set of minor], product, set of product ]
+		// 1: number ^ 0
+		status = [ minor_data, 1, [] ];
+		if (!options.sorted)
+			set = set.clone()
+			// 由小至大排序。
+			.sort(function(a, b) {
+				return a - b;
+			});
+	}
+
+	// direction = -1: 僅接受小於 target 的積。
+	// direction = +1: 僅接受大於 target 的積。
+	var direction = options.direction,
+	//
+	product = status[1], selected = status[2];
+
+	set.some(function(natural, index) {
+		if (selected[index])
+			// 已經處理過，跳過。
+			return;
+
+		var _product = product * natural, _selected,
+		/** {Number}差 >= 0 */
+		difference = Math.abs(target - _product),
+		// 是否發現新極小值。採用 minor_data 而不 cache 是因為此間 minor_data 可能已經改變。
+		_status = difference <= minor_data[0];
+		library_namespace.debug(target + '=' + (target - _product) + '+'
+				+ natural + '×' + product + ', ' + product + '='
+				+ (set.filter(function(n, index) {
+					return selected[index];
+				}).join('⋅') || 1), 6, 'closest_product');
+
+		if (target < _product) {
+			library_namespace.debug('target < _product, direction: ' + direction, 6, 'closest_product');
+			if (!_status || direction < 0) {
+				library_namespace.debug('積已經過大，之後不會有合適的。', 5, 'closest_product');
+				return true;
+			}
+		}
+
+		_selected = selected.clone();
+		_selected[index] = true;
+
+		if (_status && (!(direction > 0) || target <= _product)) {
+			_status = set.filter(function(n, index) {
+				return _selected[index];
+			}).join(closest_product.separator);
+			if (difference === minor_data[0]) {
+				if (minor_data.includes(_status)) {
+					library_namespace.debug('已經處理過相同的，跳過。', 5,
+							'closest_product');
+					return;
+				}
+				minor_data.push(_status);
+			} else {
+				minor_data.clear();
+				minor_data.push(difference, _status);
+			}
+			library_namespace.debug('發現極小值:' + target + '=' + difference + '+'
+					+ natural + '×' + product + ', ' + product + '='
+					+ (set.filter(function(n, index) {
+						return selected[index];
+					}).join('⋅') || 1), 3, 'closest_product');
+		}
+
+		_status = [ minor_data, _product, _selected ];
+		library_namespace.debug('繼續探究是否有更小的差:' + _status.join(';'), 4,
+				'closest_product');
+		closest_product(set, target, _status);
+	});
+
+	return minor_data.length > 1 && minor_data;
+}
+
+closest_product.separator = '*';
+
+_.closest_product = closest_product;
+
+// TODO:將數列分為積最接近的兩組。
 
 
 /**
@@ -854,7 +1032,7 @@ function factors_toString(exponentiation_sign, multiplication_sign) {
  * Fundamental Theorem of Arithmeric) 的數學金科玉律。<br />
  * 
  * @param {Number}natural
- *            integer number
+ *            integer number >= 2
  * @param {Number}radix
  *            output radix
  * @param {Number}index
@@ -936,6 +1114,11 @@ function factorize(natural, radix, index, factors) {
 		fA.push(i);
 	};
 	fac(natural);
+
+	if (Array.isArray(factors)) {
+		// TODO
+	}
+
 	fA.sort(function (a, b) { return a - b; });
 	fA.forEach(function (p) {
 		p = p.toString(radix);
@@ -944,6 +1127,7 @@ function factorize(natural, radix, index, factors) {
 		else
 			factors[p] = 1;
 	});
+
 	return factors;
 }
 factorize._toString = factors_toString;
@@ -1853,6 +2037,18 @@ Math.hav = hav;
 /*
  * ↑Math ---------------------------------------------------------------
  */
+
+
+library_namespace.set_method(Number.prototype, {
+	// division, divided_by
+	//divided : set_bind(Euclidean_division)
+	divided : function(divisor, closest) {
+		return Euclidean_division(this, divisor, closest);
+	},
+	floor_sqrt : function(number) {
+		return floor_sqrt(this);
+	}
+});
 
 
 

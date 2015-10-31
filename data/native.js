@@ -763,6 +763,7 @@ remove_Object_value = remove_Object_value;
 
 
 // String.covers()
+// @see Knuth–Morris–Pratt algorithm
 /*
 	return true: 兩者相同, false: 兩者等長但不相同,
 	1: str2為str1之擴展 (str2涵蓋str1), -1: str1為str2之擴展, 2: 兩者等價, 0: 皆非
@@ -1419,24 +1420,6 @@ function non_negative_modulo(dividend, divisor) {
 	return dividend;
 }
 
-/**
- * 帶餘除法。remainder >= 0.
- * 
- * @param {Number}dividend
- *            被除數。
- * @param {Number}divisor
- *            除數。
- * 
- * @returns {Array} [ {Number}quotient 商, {Number}remainder 餘數 ]
- * 
- * @see http://stackoverflow.com/questions/14997165/fastest-way-to-get-a-positive-modulo-in-c-c
- * @see Extended_Euclidean() @ data.math
- */
-function Euclidean_division(dividend, divisor) {
-	return [ Math.floor(dividend / divisor),
-	// 轉正。保證餘數值非負數。
-	(dividend % divisor + divisor) % divisor ];
-}
 
 
 //var sourceF=WScript.ScriptName,targetF='test.js';simpleWrite('tmp.js',alert+'\n'+simpleRead+'\n'+simpleWrite+'\nvar t="",ForReading=1,ForWriting=2,ForAppending=8\n,TristateUseDefault=-2,TristateTrue=-1,TristateFalse=0\n,WshShell=WScript.CreateObject("WScript.Shell"),fso=WScript.CreateObject("Scripting.FileSystemObject");\nt='+dQuote(simpleRead(sourceF),80)+';\nsimpleWrite("'+targetF+'",t);//eval(t);\nalert(simpleRead("'+sourceF+'")==simpleRead("'+targetF+'")?"The same (test dQuote OK!)":"Different!");');//WshShell.Run('"'+getFolder(WScript.ScriptFullName)+targetF+'"');
@@ -2156,7 +2139,6 @@ set_method(Number.prototype, {
 	to_sub : subscript_integer,
 	to_fixed : to_fixed,
 	mod : set_bind(non_negative_modulo),
-	divided : set_bind(Euclidean_division),
 	pad : set_bind(pad, true)
 });
 
@@ -2192,6 +2174,7 @@ set_method(Array.prototype, {
 			this.splice(index, 1);
 	},
 	sum: function() {
+		// total
 		var sum = 0;
 		this.forEach(function(e) {
 			sum += +e;
@@ -2211,7 +2194,17 @@ set_method(Array.prototype, {
 	//clone: Array.prototype.slice,
 	append: append_to_Array,
 	uniq: unique_Array,
-	search_sorted: set_bind(search_sorted_Array, true)
+	search_sorted: set_bind(search_sorted_Array, true),
+
+	// empty the array. 清空 array
+	// Array.prototype.clear()
+	clear : function(length) {
+		length = Math.max(0, length | 0);
+		// This is faster than ((this.length = 0))
+		while (this.length > length)
+			this.pop();
+		return this;
+	}
 });
 
 //---------------------------------------------------------------------//

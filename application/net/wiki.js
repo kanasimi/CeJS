@@ -13,7 +13,7 @@
 // [[WP:維基化]]
 // https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 // https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
-// http://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
+// https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 // 整合各 action=query 至單一公用 function。
 
 'use strict';
