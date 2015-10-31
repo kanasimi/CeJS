@@ -654,7 +654,8 @@ function closest_product(set, target, options) {
 	return minor_data.length > 1 && minor_data;
 }
 
-closest_product.separator = '*';
+// '⋅', '*', '×'
+closest_product.separator = '⋅';
 
 _.closest_product = closest_product;
 
@@ -750,15 +751,17 @@ function floor_sqrt(number) {
 	// library_namespace.debug('end: ' + t + ', ' + v);
 	return g;
 }
+
 _.floor_sqrt = floor_sqrt;
 
-//
+
+// all possible last 2 digits of square number
 var square_ending = library_namespace.null_Object();
 [0, 1, 4, 9, 16, 21, 24, 25, 29, 36, 41, 44, 49, 56, 61, 64, 69, 76, 81, 84, 89, 96].forEach(function(n) {
 	square_ending[n] = 1;
 });
 
-// 完全平方數. TODO: use 牛頓法
+// 完全平方數, a square number or perfect square. TODO: use 牛頓法
 // is square number
 function is_square(number) {
 	if (!((number % 100) in square_ending))
@@ -769,11 +772,18 @@ function is_square(number) {
 }
 _.is_square = is_square;
 
-var primes = [2, 3],
-// last prime tested.
+// cache 以加快速度。
+var primes = [2, 3, 5],
+/**
+ * last prime tested.<br />
+ * assert: primes_last_test is ((6n ± 1)). 因此最起碼應該從 5 開始。
+ * 
+ * @type {Natural}
+ */
 primes_last_test = primes[primes.length - 1];
 
-function test_prime(integer, index, sqrt) {
+// integer: number to test
+function test_is_prime(integer, index, sqrt) {
 	// assert: integer === Math.floor(integer)
 	index |= 0;
 	if (!sqrt)
@@ -787,28 +797,25 @@ function test_prime(integer, index, sqrt) {
 	// 質數列表中的質數尚無法檢測 integer。
 }
 
+// index starts from 1!
 function prime(index, limit) {
 	if (primes.length < index) {
-		var integer = primes_last_test,
-		p1 = primes_last_test % 6;
-		if (!p1)
-			integer++, p1 = true;
-		else if (1 < p1)
-			integer += 5 - p1, p1 = false;
-		// assert: p1 === true: integer is 6n+1. else: integer is 6n-1
+		// assert: primes_last_test is ((6n ± 1))
+		/** {Boolean}p1 === true: primes_last_test is 6n+1. else: primes_last_test is 6n-1 */
+		var p1 = primes_last_test % 6 === 1;
 
-		for (; primes.length < index && Number.isSafeInteger(integer) ;
-			integer += (p1 = !p1) ? 2 : 4) {
+		for (; primes.length < index && Number.isSafeInteger(primes_last_test);) {
+			primes_last_test += (p1 = !p1) ? 2 : 4;
 			// 實質為 https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
-			if (!test_prime(integer, 2))
-				primes.push(integer);
-			if (limit && limit <= integer)
+			if (!test_is_prime(primes_last_test, 2))
+				primes.push(primes_last_test);
+			if (limit && limit <= primes_last_test)
 				break;
 		}
-		primes_last_test = integer;
+		library_namespace.debug('primes_last_test = ' + primes_last_test);
 	}
 
-	return index ? primes[--index] : primes;
+	return index > 0 ? primes[index - 1] : primes;
 }
 _.prime = prime;
 
@@ -816,11 +823,13 @@ _.prime = prime;
 // prime #5484598 = 94906249, the biggest prime < Math.sqrt(Number.MAX_SAFE_INTEGER) - 1.
 // the 2nd biggest prime is 94906247.
 
-// prime(prime_pi(Number.MAX_SAFE_INTEGER = 2^53 - 1)) = 9007199254740881
+// CeL.prime(CeL.prime_pi(Number.MAX_SAFE_INTEGER = 2^53 - 1)) = 9007199254740881
 function prime_pi(value) {
-	if (primes_last_test < (value |= 0))
+	value = Math.abs(Math.floor(value));
+	if (primes_last_test < value)
 		prime(value, value);
-	return primes.search_sorted(value, true);
+	// +1: index of function prime() starts from 1!
+	return primes.search_sorted(value, true) + 1;
 }
 _.prime_pi = prime_pi;
 
@@ -931,7 +940,7 @@ function not_prime(natural) {
 	if (false) {
 		var sqrt = floor_sqrt(natural = p);
 		p = 0;
-		while ((p = test_prime(natural, p, sqrt)) === undefined) {
+		while ((p = test_is_prime(natural, p, sqrt)) === undefined) {
 			// 多取一些質數。
 			prime((p = primes.length) + 1);
 		}
@@ -940,7 +949,7 @@ function not_prime(natural) {
 
 	// 為 Miller_Rabin() 暖身。
 	prime(70);
-	if ((p = test_prime(natural)) === undefined)
+	if ((p = test_is_prime(natural)) === undefined)
 		p = Miller_Rabin(natural);
 
 	return p;
@@ -1216,24 +1225,27 @@ guess_exponent = function(number, type) {
 /**
  * get random prime(s)
  * 
- * @param {Integer}
- *            count 個數
- * @param {Boolean}
- *            exclude 排除
- * @param all_different
+ * @param {Integer}count
+ *            個數
+ * @param {Array}exclude
+ *            排除
+ * @param {Boolean}all_different
  * 
  * @returns random prime / random prime array
  * 
  * @since 2009/10/21 11:57:47
  */
 function get_random_prime(count, exclude, all_different) {
-	var _f = get_random_prime, i, j, p = [], l;
+	var i, j, p = [], l;
 	if (!count || count < 1)
 		count = 1;
-	if (!_f.excluded)
-		_f.excluded = [];
+	if (!get_random_prime.excluded)
+		get_random_prime.excluded = [];
 	if (exclude)
 		exclude = [];
+
+	// 先行準備好足夠的 primes。
+	prime(2 * count, 2 * count);
 
 	for (j = 0; j < count; j++) {
 		// timeout
@@ -1243,8 +1255,8 @@ function get_random_prime(count, exclude, all_different) {
 			if (!--l)
 				// timeout
 				return;
-		} while (_f.excluded[i]);
-		p.push(_f.primes[i]);
+		} while (get_random_prime.excluded[i]);
+		p.push(primes[i]);
 		if (exclude)
 			exclude.push(i);
 	}
@@ -1253,28 +1265,15 @@ function get_random_prime(count, exclude, all_different) {
 	if (exclude)
 		for (j = 0, l = exclude.length; j < l; j++) {
 			i = exclude[j];
-			if (_f.excluded[i])
-				_f.excluded[i]++;
+			if (get_random_prime.excluded[i])
+				get_random_prime.excluded[i]++;
 			else
-				_f.excluded[i] = 1;
+				get_random_prime.excluded[i] = 1;
 		}
 
 	return count === 1 ? p[0] : p;
 }
 
-// cache 以加快速度。
-get_random_prime.primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
-	    47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113,
-	    127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193,
-	    197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271,
-	    277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359,
-	    367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443,
-	    449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541,
-	    547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619,
-	    631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719,
-	    727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821,
-	    823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911,
-	    919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997 ];
 
 // return [GCD, n1, n2, ..]
 get_random_prime.get_different_number_set = function(count, till, GCD_till) {
