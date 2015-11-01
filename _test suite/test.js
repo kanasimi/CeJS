@@ -589,8 +589,8 @@ function test_math() {
 		assert([CeL.data.math.LCM2([389*v,4342*v,5411*v,442*v]),1070962228921858],'LCM2 type 2: input Array');
 
 		assert(Number.isSafeInteger(CeL.factorial(18)), 'Number.isSafeInteger()');
-		assert([CeL.data.math.factorial(18),6402373705728000], 'factorial');
-		assert([30414093201713378043612608166064768844377641568960512000000000000,CeL.data.math.factorial(50)], { name : 'factorial', error_rate : Number.EPSILON });
+		assert([CeL.data.math.factorial(18), 6402373705728000], 'factorial');
+		assert([30414093201713378043612608166064768844377641568960512000000000000, CeL.data.math.factorial(50)], { name : 'factorial', error_rate : Number.EPSILON });
 
 		var p = 20374345;
 		assert([ CeL.data.math.floor_sqrt(p * p), p ], 'floor_sqrt');

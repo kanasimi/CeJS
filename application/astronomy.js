@@ -101,6 +101,7 @@ if (typeof CeL === 'function')
 			// basic constants. 定義基本常數。
 
 			var
+
 			// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
 			NOT_FOUND = ''.indexOf('_'),
 

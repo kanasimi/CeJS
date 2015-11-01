@@ -21,7 +21,6 @@ code : function(library_namespace) {
 
 
 
-
 /**
  * null module constructor
  * 
@@ -53,6 +52,69 @@ _// JSDT:_module_
 整數 whole number
 
 */
+
+// ---------------------------------------------------------------------//
+// basic constants. 定義基本常數。
+
+var 
+
+/**
+ * empty product, or nullary product, 乘法單位元素.<br />
+ * number * MULTIPLICATIVE_IDENTITY === number.<br />
+ * 2/2, 3/3, ..
+ * 
+ * MULTIPLICATIVE_IDENTITY = 1
+ * 
+ * @type {Number}
+ * @constant
+ * 
+ * @see https://en.wikipedia.org/wiki/Identity_element
+ *      https://en.wikipedia.org/wiki/Empty_product
+ */
+MULTIPLICATIVE_IDENTITY = 1 / 1,
+/**
+ * Any nonzero number raised by the exponent 0 is 1.<br />
+ * (any number) ^ 0 === Math.pow(number, 0) === ZERO_EXPONENT<br />
+ * Math.pow(2, 0), Math.pow(3, 0), ..
+ * 
+ * ZERO_EXPONENT = 1
+ * 
+ * @type {Number}
+ * @constant
+ * 
+ * @see https://en.wikipedia.org/wiki/Exponentiation
+ */
+ZERO_EXPONENT = Math.pow(1, 0),
+/**
+ * absorbing element, zero element.<br />
+ * number * ABSORBING_ELEMENT === ABSORBING_ELEMENT<br />
+ * Math.pow(2, 0), Math.pow(3, 0), ..
+ * 
+ * @type {Number}
+ * @constant
+ * 
+ * @see https://en.wikipedia.org/wiki/Absorbing_element
+ */
+ABSORBING_ELEMENT = 0,
+/**
+ * multiplication sign. e.g., '⋅', '*', '×'.
+ * 
+ * @type {String}
+ * @constant
+ * 
+ * @see https://en.wikipedia.org/wiki/Multiplication_sign
+ *      https://en.wikipedia.org/wiki/Interpunct
+ */
+MULTIPLICATION_SIGN = '⋅',
+/**
+ * The biggest integer we can square. 超過此數則無法安全操作平方。
+ * 
+ * @type {Integer}
+ */
+sqrt_max_integer = Math.sqrt(Number.MAX_SAFE_INTEGER) | 0;
+
+
+// ---------------------------------------------------------------------//
 
 
 /**
@@ -157,6 +219,7 @@ mutual_division = function mutual_division(n1, n2, times) {
 
 	return q;
 };
+
 _// JSDT:_module_
 .
 mutual_division.done = -7;// ''
@@ -289,7 +352,7 @@ _// JSDT:_module_
  * @return [分子, 分母, 誤差]
  * 
  * @requires mutual_division,continued_fraction
- * @see http://en.wikipedia.org/wiki/Continued_fraction#Best_to_rational_numbers
+ * @see https://en.wikipedia.org/wiki/Continued_fraction#Best_to_rational_numbers
  */
 to_rational_number = function(number, rate, max_no) {
 	if (!rate)
@@ -315,7 +378,7 @@ to_rational_number = function(number, rate, max_no) {
 					+ (i < d.length - 2 ? ', ' + d.slice(i, -2).join(', ') : '')
 					+ '] .. ' + d.slice(-1) :
 				// 約等於的符號是≈或≒，不等於的符號是≠。
-				// http://zh.wikipedia.org/wiki/%E7%AD%89%E4%BA%8E
+				// https://zh.wikipedia.org/wiki/%E7%AD%89%E4%BA%8E
 				'≈' + ' [<em>' + d[0] + ';' + d.slice(1, i).join(', ') + '</em>'
 					+ (i < d.length ? ', ' + d.slice(i).join(', ') : '') + ']: '
 					+ d.length + ',' + i + ',' + d[i]
@@ -457,7 +520,7 @@ LCM2 = function(number_array) {
 
 
 /**
- * Get <a href="http://en.wikipedia.org/wiki/Extended_Euclidean_algorithm"
+ * Get <a href="https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm"
  * accessdate="2013/8/3 19:45">Extended Euclidean algorithm</a><br />
  * 
  * @param {Integer}n1
@@ -580,8 +643,7 @@ function closest_product(set, target, options) {
 		minor_data = [ Infinity ];
 		minor_data.options = options;
 		// status = [ [minor, set of minor], product, set of product ]
-		// 1: number ^ 0
-		status = [ minor_data, 1, [] ];
+		status = [ minor_data, ZERO_EXPONENT, [] ];
 		if (!options.sorted)
 			set = set.clone()
 			// 由小至大排序。
@@ -654,8 +716,7 @@ function closest_product(set, target, options) {
 	return minor_data.length > 1 && minor_data;
 }
 
-// '⋅', '*', '×'
-closest_product.separator = '⋅';
+closest_product.separator = MULTIPLICATION_SIGN;
 
 _.closest_product = closest_product;
 
@@ -663,7 +724,7 @@ _.closest_product = closest_product;
 
 
 /**
- * Get <a href="http://en.wikipedia.org/wiki/Modular_multiplicative_inverse"
+ * Get <a href="https://en.wikipedia.org/wiki/Modular_multiplicative_inverse"
  * accessdate="2013/8/3 20:10">modular multiplicative inverse</a> (模反元素)<br />
  * TODO:<br />
  * untested!
@@ -755,7 +816,7 @@ function floor_sqrt(number) {
 _.floor_sqrt = floor_sqrt;
 
 
-// all possible last 2 digits of square number
+/** all possible last 2 digits of square number */
 var square_ending = library_namespace.null_Object();
 [0, 1, 4, 9, 16, 21, 24, 25, 29, 36, 41, 44, 49, 56, 61, 64, 69, 76, 81, 84, 89, 96].forEach(function(n) {
 	square_ending[n] = 1;
@@ -772,7 +833,58 @@ function is_square(number) {
 }
 _.is_square = is_square;
 
-// cache 以加快速度。
+
+
+// ---------------------------------------------------------------------//
+
+/** {Array}Collatz_conjecture_steps[number] = steps. cache 以加快速度。 */
+var Collatz_conjecture_steps = [ , 1 ];
+
+// https://en.wikipedia.org/wiki/Collatz_conjecture
+function Collatz_conjecture(natural) {
+	if (!(natural > 0))
+		return;
+
+	var sequence = [ natural ];
+	while (natural > 1) {
+		sequence.push(natural % 2 === 0 ? natural /= 2
+				: (natural = natural * 3 + 1));
+	}
+	// 紀錄 steps。
+	Collatz_conjecture_steps[natural] = sequence.length;
+	return sequence;
+}
+
+_.Collatz_conjecture = Collatz_conjecture;
+
+// 為計算 steps 特殊化。
+// assert: CeL.Collatz_conjecture.steps(natural) === CeL.Collatz_conjecture(natural).length
+Collatz_conjecture.steps = function(natural) {
+	if (!(natural > 0))
+		return;
+
+	var sequence = [];
+	while (!(natural in Collatz_conjecture_steps)) {
+		sequence.push(natural);
+		if (natural % 2 === 0)
+			natural /= 2;
+		else
+			natural = natural * 3 + 1;
+	}
+
+	var steps = Collatz_conjecture_steps[natural] + sequence.length, s = steps;
+	// 紀錄 steps。
+	sequence.forEach(function(natural) {
+		Collatz_conjecture_steps[natural] = s--;
+	});
+	return steps;
+};
+
+
+// ---------------------------------------------------------------------//
+
+
+/** {Array}質數列表。 cache 以加快速度。 */
 var primes = [2, 3, 5],
 /**
  * last prime tested.<br />
@@ -832,6 +944,7 @@ function prime_pi(value) {
 	return primes.search_sorted(value, true) + 1;
 }
 _.prime_pi = prime_pi;
+
 
 
 // return multiplicand × multiplier % modulus
@@ -923,7 +1036,6 @@ function Miller_Rabin(natural, times) {
 }
 _.Miller_Rabin = Miller_Rabin;
 
-var sqrt_max_integer = Math.sqrt(Number.MAX_SAFE_INTEGER) | 0;
 
 // return false: is prime,
 // number: min factor,
@@ -1001,7 +1113,10 @@ function Pollards_rho_1980(natural) {
 }
 _.Pollards_rho = Pollards_rho_1980;
 
-var ZERO_EXPONENT = Math.pow(1, 0);
+
+
+// ---------------------------------------------------------------------//
+
 
 // CeL.factorize(natural > 1).toString(exponentiation_sign, multiplication_sign)
 function factors_toString(exponentiation_sign, multiplication_sign) {
@@ -1033,6 +1148,37 @@ function factors_toString(exponentiation_sign, multiplication_sign) {
 	}
 
 	return list.join(multiplication_sign);
+}
+
+// 計算所有因數個數。
+// 計算所有質因數個數: Object.keys(factors).length
+// 質因數列表: Object.keys(factors)
+function count_all_factors() {
+	var count = MULTIPLICATIVE_IDENTITY;
+	for (var prime in this) {
+		// exponent
+		count *= this[prime] + 1;
+	}
+	// re-define count
+	Object.defineProperty(factors, 'count', {
+		enumerable : false,
+		value : count
+	});
+	return count;
+}
+
+// 歐拉函數 φ(n) 是小於或等於n的正整數中與n互質的數的數目。
+function coprime() {
+	var count = this.natural;
+	for (var prime in this) {
+		count = count / prime * (prime - 1);
+	}
+	// re-define coprime
+	Object.defineProperty(factors, 'coprime', {
+		enumerable : false,
+		value : count
+	});
+	return count;
 }
 
 /**
@@ -1076,9 +1222,25 @@ function factorize(natural, radix, index, factors) {
 	}
 	if (!factors)
 		factors = library_namespace.null_Object();
-	Object.defineProperty(factors, 'toString', {
-		enumerable: false,
-		value: factors_toString
+	Object.defineProperties(factors, {
+		natural : {
+			enumerable : false,
+			value : natural
+		},
+		toString : {
+			enumerable : false,
+			value : factors_toString
+		},
+		count : {
+			enumerable : false,
+			configurable : true,
+			get : count_all_factors
+		},
+		coprime : {
+			enumerable : false,
+			configurable : true,
+			get : coprime
+		}
 	});
 
 
@@ -1139,7 +1301,9 @@ function factorize(natural, radix, index, factors) {
 
 	return factors;
 }
+
 factorize._toString = factors_toString;
+
 _.factorize = factorize;
 
 
@@ -1172,6 +1336,7 @@ function first_factor(natural) {
 }
 
 _.first_factor = first_factor;
+
 
 // ---------------------------------------------------------------------//
 
@@ -1839,8 +2004,8 @@ _.find_maxima = function(equation, min, max, options) {
 		return -equation(x);
 	}, min, max, options);
 };
-//不用微分求取局部極值 get local maximum and minimum
-//_.find_extremum = Brent_minima;
+// 不用微分求取局部極值 get local maximum and minimum
+// _.find_extremum = Brent_minima;
 
 
 // ------------------------------------------------------------------------------------------------------//
@@ -1871,8 +2036,8 @@ _// JSDT:_module_
  * @return {Number} base 1: 1's Complement, 2: 2's Complement, (TODO: 3, 4, ..)
  * @example alert(complement())
  * @see http://www.tomzap.com/notes/DigitalSystemsEngEE316/1sAnd2sComplement.pdf
- *      http://en.wikipedia.org/wiki/Method_of_complements
- *      http://en.wikipedia.org/wiki/Signed_number_representations
+ *      https://en.wikipedia.org/wiki/Method_of_complements
+ *      https://en.wikipedia.org/wiki/Signed_number_representations
  * @since 2010/3/12 23:47:52
  */
 complement = function() {
@@ -1889,7 +2054,7 @@ base : 2,
 bits : 8,
 
 // radix complement or diminished radix complement.
-// http://en.wikipedia.org/wiki/Method_of_complements
+// https://en.wikipedia.org/wiki/Method_of_complements
 diminished : 0,
 
 /**
@@ -2031,11 +2196,20 @@ function hav(θ) {
 	// hav(θ) = sin^2(θ/2)
 }
 
-Math.hav = hav;
 
 /*
  * ↑Math ---------------------------------------------------------------
  */
+
+
+// ---------------------------------------------------------------------//
+// export 導出.
+
+
+_.MULTIPLICATIVE_IDENTITY = MULTIPLICATIVE_IDENTITY;
+_.ZERO_EXPONENT = ZERO_EXPONENT;
+_.ABSORBING_ELEMENT = ABSORBING_ELEMENT;
+_.MULTIPLICATION_SIGN = MULTIPLICATION_SIGN;
 
 
 library_namespace.set_method(Number.prototype, {
@@ -2047,6 +2221,10 @@ library_namespace.set_method(Number.prototype, {
 	floor_sqrt : function(number) {
 		return floor_sqrt(this);
 	}
+});
+
+library_namespace.set_method(Math, {
+	hav : hav
 });
 
 

@@ -80,12 +80,14 @@ if (typeof CeL === 'function')
 			eval(this.use());
 
 			// ---------------------------------------------------------------------//
-			// 定義基本常數。
+			// basic constants. 定義基本常數。
+
+			var
 
 			// assert: isNaN(KEY_*)
 			// {safe integer} MIN_BASE <= instance[KEY_BASE] <= MAX_BASE
 			// instance[KEY_BASE] 基數/底數初始設定完後，除非歸零，否則不可再改變!
-			var KEY_BASE = 'base',
+			KEY_BASE = 'base',
 			// sign. true: *this* is negative, false/undefined: positive.
 			KEY_NEGATIVE = 'negative',
 			//{integer|Undefined}[exponent]	輸入數值標記之科學記數法指數 in instance[KEY_BASE]。default 0.
@@ -150,7 +152,7 @@ if (typeof CeL === 'function')
 			 * <a href="https://en.wikipedia.org/wiki/Hexadecimal" accessdate="2013/9/8 17:26">Hexadecimal</a>
 			 */
 			MAX_RADIX = 0,
-			//之後再作初始化。
+			// 之後再作初始化。
 			MIN_RADIX = 0,
 			// 應與 parseInt() 一致。
 			DEFAULT_RADIX = parseInt('10'),
@@ -163,18 +165,12 @@ if (typeof CeL === 'function')
 			DEFAULT_DIGITS = '',
 			DEFAULT_DIGITS_CACHE,
 
-			// 乘法單位元素
-			// https://en.wikipedia.org/wiki/Identity_element
-			// number * MULTIPLICATIVE_IDENTITY === number
-			// 2/2, 3/3, ..
-			MULTIPLICATIVE_IDENTITY = 1 / 1,
-			// https://en.wikipedia.org/wiki/Absorbing_element
-			// number * ABSORBING_ELEMENT === ABSORBING_ELEMENT
-			ABSORBING_ELEMENT = 0,
-			// https://en.wikipedia.org/wiki/Exponentiation
-			//(any number) ^ 0 === Math.pow(number, 0) === ZERO_EXPONENT
-			// Math.pow(2, 0), Math.pow(3, 0), ..
-			ZERO_EXPONENT = Math.pow(1, 0),
+			// copy from data.math
+			MULTIPLICATIVE_IDENTITY = library_namespace.MULTIPLICATIVE_IDENTITY,
+			// copy from data.math
+			ZERO_EXPONENT = library_namespace.ZERO_EXPONENT,
+			// copy from data.math
+			ABSORBING_ELEMENT = library_namespace.ABSORBING_ELEMENT,
 
 			trim_0,
 

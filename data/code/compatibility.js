@@ -43,7 +43,13 @@ _// JSDT:_module_
 var Array_slice = Array.prototype.slice,
 // cache
 set_method = library_namespace.set_method,
-// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
+/**
+ * The index return when not found.<br />
+ * 未找到時的 index。基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
+ * 
+ * @type {Number}
+ * @constant
+ */
 NOT_FOUND = ''.indexOf('_');
 
 
