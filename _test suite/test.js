@@ -475,6 +475,8 @@ function test_locale() {
 		CeL.gettext.use_domain('en-US', true);
 		assert([ '10 smart ways to spend US$70,000',
 				CeL.gettext('%smart way@1 to spend %c2', 10, 70000) ]);
+
+		assert([ 'one thousand and fifty-four days', CeL.gettext('%n1 days', 1054) ], 'written out in words');
 	});
 
 
@@ -632,6 +634,11 @@ function test_math() {
 		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 995, -1).join(), '6,23'+MULTIPLICATION_SIGN+'43'], 'closest_product#5');
 		assert([!!CeL.math.closest_product([], 995), false], 'closest_product#6');
 		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 996, -1).join(), '7,23'+MULTIPLICATION_SIGN+'43'], 'closest_product#7');
+
+		// ---------------------------------------------------------------------//
+
+		assert([CeL.Collatz_conjecture(70).join(), '70,35,106,53,160,80,40,20,10,5,16,8,4,2,1'], 'Collatz conjecture');
+		assert([CeL.Collatz_conjecture.longest(99).join(), '97,119'], 'longest Collatz conjecture');
 	});
 
 

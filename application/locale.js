@@ -18,6 +18,7 @@ Microsoft | 語言入口網站
 if (typeof CeL === 'function')
 CeL.run({
 name : 'application.locale',
+// data.numeral.to_Chinese_numeral|data.numeral.to_positional_Chinese_numeral|data.numeral.to_English_numeral
 require : 'data.numeral.to_Chinese_numeral|data.numeral.to_positional_Chinese_numeral',
 code : function(library_namespace) {
 
@@ -786,7 +787,7 @@ gettext.to_standard = function(alias) {
 	}
 };
 
-//------------------------------------
+// ------------------------------------
 //	DOM 操作。
 
 /**
@@ -934,7 +935,7 @@ create_domain_menu.onchange = [];
 
 gettext.create_menu = create_domain_menu;
 
-//------------------------------------
+// ------------------------------------
 //	conversion specifications (轉換規格). e.g., 各區文化特色 - 數字、貨幣、時間、日期格式。
 
 // 數字系統。numeral system.
@@ -944,8 +945,12 @@ gettext.numeral = function(attribute, domain_name) {
 	case 'Chinese':
 		return to_Chinese_numeral(attribute);
 
+	case 'en-US':
+		return library_namespace.to_English_numeral(attribute);
+
 	// 一般民間使用，相較於中文數字，更常使用阿拉伯數字。
 	case 'cmn-Hant-TW':
+
 	//	TODO: others
 
 	default:
@@ -1056,9 +1061,9 @@ gettext.currency = function(attribute, domain_name) {
 	}
 };
 
-//------------------------------------
+// ------------------------------------
 
-//工具函數。
+// 工具函數。
 
 function year_name(ordinal, domain_name) {
 	switch (domain_name) {
@@ -1110,10 +1115,10 @@ function date_name(ordinal, domain_name) {
 }
 
 var is_Date = library_namespace.is_Date,
-//中文月名: Chinese_month_name[1]=正
-Chinese_month_name = ['', '正'],
+// 中文月名: Chinese_month_name[1]=正
+Chinese_month_name = [ '', '正' ],
 // 中文日名: Chinese_date_name[1]=初一
-Chinese_date_name = [''];
+Chinese_date_name = [ '' ];
 
 // 初一, 初二, ..初十,十一..十九,二十,廿一,廿九,三十
 (function () {
@@ -1238,7 +1243,7 @@ gettext.datetime = function(date, domain_name) {
 };
 
 
-//------------------------------------
+// ------------------------------------
 
 //	{ format : function }
 gettext.conversion = {
@@ -1320,7 +1325,7 @@ gettext.conversion = {
 };
 
 
-//------------------------------------
+// ------------------------------------
 //	initialization
 
 var gettext_DOM_id,

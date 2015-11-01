@@ -583,10 +583,10 @@ if (typeof CeL === 'function')
 			}
 
 			/**
-			 * 將阿拉伯數字轉為中文數字<b>下數系統</b>大寫、小寫兩種表示法/讀法<br />
-			 * 處理1-99999的數,尚有bug
+			 * 將阿拉伯數字轉為中文數字<b>下數系統</b>大寫(Long scale)、小寫(Short scale)兩種表示法/讀法<br />
+			 * 處理1-99999的數,尚有bug。
 			 */
-			function to_Chinese_numeral_Low_count(number_String, formal) {
+			function to_Chinese_numeral_Low_scale(number_String, formal) {
 				// 用r=[]約多花一倍時間!
 				var i = 0, r = '', l = number_String.length - 1, d,
 				//
@@ -687,7 +687,7 @@ if (typeof CeL === 'function')
 					// parseInt('0~')會用八進位，其他也有奇怪的效果。
 					if (Math.floor(m = m ? number.slice(0, m) : number.substr(
 							j += 4, 4))) {
-						m = to_Chinese_numeral_Low_count(m, formal);
+						m = to_Chinese_numeral_Low_scale(m, formal);
 						if (addZero = addZero && m.charAt(0) != zero) {
 							i += zero + m
 							//
@@ -759,6 +759,117 @@ if (typeof CeL === 'function')
 			}
 
 			_.to_Japanese_numeral = to_Japanese_numeral;
+
+			// https://en.wikipedia.org/wiki/Long_and_short_scales
+			// http://blog.functionalfun.net/2008/08/project-euler-problem-17-converting.html
+			var English_numerals = {
+				0 : "zero",
+				1 : "one",
+				2 : "two",
+				3 : "three",
+				4 : "four",
+				5 : "five",
+				6 : "six",
+				7 : "seven",
+				8 : "eight",
+				9 : "nine",
+				10 : "ten",
+				11 : "eleven",
+				12 : "twelve",
+				13 : "thirteen",
+				14 : "fourteen",
+				15 : "fifteen",
+				16 : "sixteen",
+				17 : "seventeen",
+				18 : "eighteen",
+				19 : "nineteen",
+				20 : "twenty",
+				30 : "thirty",
+				40 : "forty",
+				50 : "fifty",
+				60 : "sixty",
+				70 : "seventy",
+				80 : "eighty",
+				90 : "ninety",
+				100 : "hundred",
+				1000 : "thousand",
+				1000000 : "million",
+				1000000000 : "billion",
+				1000000000000 : "trillion",
+				1000000000000000 : "quadrillion",
+				// Number.isSafeInteger(1000000000000000000) === false
+				'1000000000000000000' : "quintillion"
+			};
+
+			// @inner
+			function to_English_numeral_small(number) {
+				// assert: number = 1 ~ 999
+				// hundreds
+				var conversion = number / 100 | 0;
+
+				if (number %= 100)
+					if (number in English_numerals)
+						number = English_numerals[number];
+					else {
+						// units
+						var _1 = number % 10;
+						_1 = _1 ? English_numerals[_1] : '';
+						// tens
+						number = number / 10 | 0;
+						if (number) {
+							number = English_numerals[number * 10];
+							if (_1)
+								number += '-' + _1;
+						} else
+							number = _1;
+					}
+
+				if (conversion) {
+					conversion = English_numerals[conversion] + ' '
+							+ English_numerals[100];
+					if (number)
+						conversion += ' and ' + number;
+				} else
+					conversion = number;
+				return conversion;
+			}
+
+			// written out numbers in words
+			// British usage
+			// @see http://www.grammarbook.com/numbers/numbers.asp
+			function to_English_numeral(number) {
+				if (number != Math.floor(number)) {
+					library_namespace.err('Can not conver [' + number + ']!');
+				}
+
+				number = Math.floor(number);
+				if (number < 0)
+					return "negative " + to_English_numeral(-number);
+				if (number < 91 && (number in English_numerals))
+					// for zero.
+					return English_numerals[number];
+
+				var base = 1000, unit = 1, conversion = [], remainder,
+				// remainder, 0 ~ 999 (1000-1)
+				small = number % base;
+				while (number = Math.floor(number / base)) {
+					unit *= base;
+					if (remainder = number % base)
+						conversion.unshift(to_English_numeral_small(remainder)
+								+ ' ' + English_numerals[unit]);
+				}
+
+				if (conversion = conversion.join(', ')) {
+					if (small)
+						conversion += ' and '
+						//
+						+ to_English_numeral_small(small);
+				} else
+					conversion = small ? to_English_numeral_small(small) : '';
+				return conversion;
+			}
+
+			_.to_English_numeral = to_English_numeral;
 
 			// -----------------------------------------------------------------------------------------------------------------
 			// (十進位)位值直接轉換用

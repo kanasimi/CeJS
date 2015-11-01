@@ -41,11 +41,6 @@ _// JSDT:_module_
 
 
 /*
- * Math ---------------------------------------------------------------
- */
-
-
-/*
 
 數位
 十分位 tenths digit
@@ -844,7 +839,9 @@ if (false) {
 	Collatz_conjecture_steps_cache = new Array(1000001);
 	Collatz_conjecture_steps_cache[1] = 1;
 }
+// assert: Collatz_conjecture_steps_cache[1] === 1 (因程式判別方法需要此項)
 
+// Collatz conjecture
 // https://en.wikipedia.org/wiki/Collatz_conjecture
 function Collatz_conjecture(natural) {
 	if (!(natural > 0))
@@ -855,8 +852,9 @@ function Collatz_conjecture(natural) {
 		chain.push(natural % 2 === 0 ? natural /= 2
 				: (natural = natural * 3 + 1));
 	}
-	// 紀錄 steps。
-	Collatz_conjecture_steps_cache[natural] = chain.length;
+	//Collatz_conjecture_steps_cache[natural] = chain.length;
+
+	// return all terms
 	return chain;
 }
 
@@ -883,6 +881,20 @@ function Collatz_conjecture_steps(natural) {
 	});
 	return steps;
 }
+
+/*
+
+backwards 反向:
+1000000: 153 steps
+999999: 259 steps
+999667: 290 steps
+999295: 396 steps
+997823: 440 steps
+970599: 458 steps
+939497: 507 steps
+837799: 525 steps
+
+*/
 
 // search the longest chain / sequence below ((natural))
 function Collatz_conjecture_longest(natural) {
@@ -1195,7 +1207,7 @@ function count_all_factors() {
 		count *= this[prime] + 1;
 	}
 	// re-define count
-	Object.defineProperty(factors, 'count', {
+	Object.defineProperty(this, 'count', {
 		enumerable : false,
 		value : count
 	});
@@ -1209,7 +1221,7 @@ function coprime() {
 		count = count / prime * (prime - 1);
 	}
 	// re-define coprime
-	Object.defineProperty(factors, 'coprime', {
+	Object.defineProperty(this, 'coprime', {
 		enumerable : false,
 		value : count
 	});
@@ -2231,10 +2243,6 @@ function hav(θ) {
 	// hav(θ) = sin^2(θ/2)
 }
 
-
-/*
- * ↑Math ---------------------------------------------------------------
- */
 
 
 // ---------------------------------------------------------------------//
