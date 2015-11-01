@@ -838,47 +838,82 @@ _.is_square = is_square;
 // ---------------------------------------------------------------------//
 
 /** {Array}Collatz_conjecture_steps[number] = steps. cache 以加快速度。 */
-var Collatz_conjecture_steps = [ , 1 ];
+var Collatz_conjecture_steps_cache = [ , 1 ];
+if (false) {
+	// 此法費時 1.5 倍， 12s → 19s
+	Collatz_conjecture_steps_cache = new Array(1000001);
+	Collatz_conjecture_steps_cache[1] = 1;
+}
 
 // https://en.wikipedia.org/wiki/Collatz_conjecture
 function Collatz_conjecture(natural) {
 	if (!(natural > 0))
 		return;
 
-	var sequence = [ natural ];
+	var chain = [ natural ];
 	while (natural > 1) {
-		sequence.push(natural % 2 === 0 ? natural /= 2
+		chain.push(natural % 2 === 0 ? natural /= 2
 				: (natural = natural * 3 + 1));
 	}
 	// 紀錄 steps。
-	Collatz_conjecture_steps[natural] = sequence.length;
-	return sequence;
+	Collatz_conjecture_steps_cache[natural] = chain.length;
+	return chain;
 }
 
-_.Collatz_conjecture = Collatz_conjecture;
 
 // 為計算 steps 特殊化。
 // assert: CeL.Collatz_conjecture.steps(natural) === CeL.Collatz_conjecture(natural).length
-Collatz_conjecture.steps = function(natural) {
+function Collatz_conjecture_steps(natural) {
 	if (!(natural > 0))
 		return;
 
-	var sequence = [];
-	while (!(natural in Collatz_conjecture_steps)) {
-		sequence.push(natural);
+	var chain = [];
+	while (!(natural in Collatz_conjecture_steps_cache)) {
+		chain.push(natural);
 		if (natural % 2 === 0)
 			natural /= 2;
 		else
 			natural = natural * 3 + 1;
 	}
 
-	var steps = Collatz_conjecture_steps[natural] + sequence.length, s = steps;
+	var steps = Collatz_conjecture_steps_cache[natural] + chain.length, s = steps;
 	// 紀錄 steps。
-	sequence.forEach(function(natural) {
-		Collatz_conjecture_steps[natural] = s--;
+	chain.forEach(function(natural) {
+		Collatz_conjecture_steps_cache[natural] = s--;
 	});
 	return steps;
-};
+}
+
+// search the longest chain / sequence below ((natural))
+function Collatz_conjecture_longest(natural) {
+	if (!(natural > 0))
+		return;
+
+	var max_steps = 0, max_steps_natural;
+	// brute force
+	for (var n = 1, steps, _n; n <= natural; n++) {
+		if (n in Collatz_conjecture_steps_cache)
+			steps = Collatz_conjecture_steps_cache[_n = n];
+		else {
+			steps = Collatz_conjecture_steps(_n = n);
+			// 預先快速處理所有 2倍數字。採用此方法，約可增加 5% 速度。不採用此方法，n 正反向速度差不多。
+			while (_n * 2 <= natural) {
+				Collatz_conjecture_steps_cache[_n *= 2] = ++steps;
+			}
+		}
+		if (max_steps < steps) {
+			library_namespace.debug(natural + ': ' + steps + ' steps', 3,
+					'Collatz_conjecture.longest');
+			max_steps = steps;
+			max_steps_natural = _n;
+		}
+	}
+	return [ max_steps_natural, max_steps ];
+}
+
+_.Collatz_conjecture = Collatz_conjecture;
+Collatz_conjecture.steps = Collatz_conjecture_steps;
+Collatz_conjecture.longest = Collatz_conjecture_longest;
 
 
 // ---------------------------------------------------------------------//

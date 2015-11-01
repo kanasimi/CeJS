@@ -624,13 +624,14 @@ function test_math() {
 
 		// ---------------------------------------------------------------------//
 
-		assert([CeL.math.closest_product([ 2, 3, 7, 11, 47, 557 ], 26200).join(), '21,47*557'], 'closest_product#1');
-		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 996).join(), '5,7*11*13'], 'closest_product#2');
-		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 995).join(), '6,7*11*13,23*43'], 'closest_product#3');
-		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 995, 1).join(), '6,7*11*13'], 'closest_product#4');
-		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 995, -1).join(), '6,23*43'], 'closest_product#5');
+		var MULTIPLICATION_SIGN = CeL.math.closest_product.separator;
+		assert([CeL.math.closest_product([ 2, 3, 7, 11, 47, 557 ], 26200).join(), '21,47'+MULTIPLICATION_SIGN+'557'], 'closest_product#1');
+		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 996).join(), '5,7'+MULTIPLICATION_SIGN+'11'+MULTIPLICATION_SIGN+'13'], 'closest_product#2');
+		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 995).join(), '6,7'+MULTIPLICATION_SIGN+'11'+MULTIPLICATION_SIGN+'13,23'+MULTIPLICATION_SIGN+'43'], 'closest_product#3');
+		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 995, 1).join(), '6,7'+MULTIPLICATION_SIGN+'11'+MULTIPLICATION_SIGN+'13'], 'closest_product#4');
+		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 995, -1).join(), '6,23'+MULTIPLICATION_SIGN+'43'], 'closest_product#5');
 		assert([!!CeL.math.closest_product([], 995), false], 'closest_product#6');
-		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 996, -1).join(), '7,23*43'], 'closest_product#7');
+		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 996, -1).join(), '7,23'+MULTIPLICATION_SIGN+'43'], 'closest_product#7');
 	});
 
 
@@ -2449,9 +2450,10 @@ function finish_test() {
 
 	CeL.gettext.conversion['error'] = [ 'no %n', '1 %n', '%d %ns' ];
 	node_info([ 'CeJS: ', 'fg=red;bg=white', CeL.gettext('All %error@1 occurred.', error_count), '-fg;-bg' ]);
-	setTimeout(function() {
-		//throw new Error(CeL.gettext('All %error@1.', error_count));
-	}, 0);
+	if (error_count > 0)
+		setTimeout(function() {
+			throw new Error(CeL.gettext('All %error@1.', error_count));
+		}, 0);
 }
 
 function do_test() {
