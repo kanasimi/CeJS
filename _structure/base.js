@@ -1510,6 +1510,10 @@ OS='UNIX'; // unknown
 		// [ all, function name, function arguments, function body ]
 		/^\s*function(?:[\s\n]+([^\s\n]*?)[\s\n]*)?\([\s\n]*([^)]*?)[\s\n]*\)[\s\n]*{[\s\n]*([\s\S]*)[\s\n]*}[\s\n;]*$/;
 
+		// TODO: arrow function expression
+		// e.g., "(n) => {return n>0;}"
+		/^\s*\([\s\n]*([^)]*?)[\s\n]*\)[\s\n]*=>[\s\n]*{[\s\n]*([\s\S]*)[\s\n]*}[\s\n;]*$/;
+
 	} catch (e) {
 		function_name_pattern = function emulate_function_name(fs) {
 			fs = String(fs);

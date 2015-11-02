@@ -3,14 +3,17 @@
 # http://lint.travis-ci.org/
 language: node_js
 node_js:
-  - "4"
-#  - "4.1"
-#  - "0.12"
 # FreeBSD ports node-devel
 # But it seems problems at v8 engine of Travis CI when running CeL.value_of()?
 # @see https://travis-ci.org/kanasimi/CeJS/jobs/86175787
 # @see https://ci.appveyor.com/project/kanasimi/cejs/build/job/co0jl2uj6r1m4ex8
 # It's OK at my FreeBSD under node.js v0.11.16.
 #  - "0.11"
+
+#  - "0.12"
+  - "4"
+#  - "4.1"
+  - "5"
+
 install:
   - npm install

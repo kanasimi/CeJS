@@ -2157,6 +2157,7 @@ set_method(library_namespace.env.global, {
 
 //	建議不用，因為在for(in Array)時會...
 set_method(Array.prototype, {
+	// Array.prototype.clone
 	clone : function() {
 		// TODO: this.hasOwnProperty()
 		return this.slice();
@@ -2173,10 +2174,13 @@ set_method(Array.prototype, {
 		while((index = this.indexOf(value, index)) !== NOT_FOUND)
 			this.splice(index, 1);
 	},
-	sum: function() {
+	// Array.prototype.sum
+	sum: function(using_index) {
 		// total
 		var sum = 0;
-		this.forEach(function(e) {
+		this.forEach(using_index ? function(e, i) {
+			sum += i;
+		} : function(e) {
 			sum += +e;
 		});
 		return sum;

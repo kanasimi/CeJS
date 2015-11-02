@@ -482,12 +482,14 @@ var Gregorian_reform_JDN = Julian_day.from_YMD(1582, 10, 15);
  * @param {Boolean}to_ISO
  *            to ISO type.
  * 
- * @returns {Integer} weekday index
+ * @returns {Integer} weekday index.
  * 
  * @see https://en.wikipedia.org/wiki/Zeller's_congruence
  */
 Julian_day.weekday = function(JD, to_ISO) {
-	return to_ISO ? (Math.floor(JD) % 7) + 1 : (Math.floor(JD) + 1) % 7;
+	return to_ISO ? (Math.floor(JD) % 7) + 1
+	// Sunday: 0, Monday: 1, ...
+	: (Math.floor(JD) + 1) % 7;
 };
 
 _.Julian_day = Julian_day;

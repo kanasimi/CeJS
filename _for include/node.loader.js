@@ -28,12 +28,16 @@ if (false) {
 	'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS'
 	//
 	.split('|').some(function(path) {
-		if (path.charAt(0) !== '#' && require('fs').existsSync(path)) {
-			var loader = '/_for include/node.loader.js';
-			require(path + (path.indexOf('/') !== -1 ? loader
-			//
-			: loader.replace(/\//g, '\\')));
-			return true;
+		try {
+			// accessSync() maybe throw
+			if (path.charAt(0) !== '#' && require('fs').accessSync(path) >= 0) {
+				var loader = '/_for include/node.loader.js';
+				require(path + (path.indexOf('/') !== -1 ? loader
+				//
+				: loader.replace(/\//g, '\\')));
+				return true;
+			}
+		} catch(e) {
 		}
 	});
 	// ----------------------------------------------------------------------------

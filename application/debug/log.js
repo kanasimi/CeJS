@@ -1724,7 +1724,7 @@ if (!CeL.Log) {
 					messages.push(', ' + (elapsed / 1000).to_fixed(2) + 's');
 				messages.push(elapsed === 0 ? ', 0s elapsed.' : ', '
 						+ ((elapsed = recorder.all.length / elapsed) < 1
-						//
+						// Hz
 						? (1000 * elapsed).to_fixed(2) + ' tests/s.'
 						//
 						: elapsed.to_fixed(2) + ' tests/ms.'));

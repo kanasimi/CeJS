@@ -603,7 +603,7 @@ _.division = Euclidean_division;
  * To picks some numbers from set, so the product is approximately the target
  * number.
  * 
- * TODO: improve
+ * TODO: improve/optimize
  * 
  * @param {Array}set
  *            number set of {Natural}
@@ -720,7 +720,8 @@ _.closest_product = closest_product;
 
 /**
  * Get <a href="https://en.wikipedia.org/wiki/Modular_multiplicative_inverse"
- * accessdate="2013/8/3 20:10">modular multiplicative inverse</a> (模反元素)<br />
+ * accessdate="2013/8/3 20:10">modular multiplicative inverse</a> (模反元素)
+ * 
  * TODO:<br />
  * untested!
  * 
@@ -2144,7 +2145,7 @@ from : function(number, base, diminished) {
 	var value = number.indexOf('.'), tmp;
 	if (value == -1)
 		value = number.length;
-	// TODO: not good
+	// TODO: not good/optimize
 	if (value > this.bits)
 		// throw 'overflow';
 		library_namespace.err('complement.from: overflow: ' + value);
