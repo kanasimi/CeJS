@@ -2976,7 +2976,7 @@ CeL.era.pass_on = {
 		'/Dikkha|1554/1/11~|:ME|關係=Son',
 		'/Saw Hla|1556/3/6~|:ME|關係=Son',
 		'/Sekkya|1564/7/24~|:ME|關係=Brother',
-		'/Min Phalaung|1572/2/7~|:ME|關係=Son of Min Bin|君主名=Min Hpalaung',
+		'/Min Phalaung|1572/2/7~|:ME|關係=Son of Min Bin|君主名=Min Phalaung;မင်းဖလောင်း;Min Hpalaung',
 		'/Razagri|1593/7/4~|:ME|關係=Son',
 		'/Khamaung|1612/7/4~|:ME|關係=Son',
 		'/Thiri Thudhamma|1622/5/14~|:ME|關係=Son',

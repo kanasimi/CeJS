@@ -597,6 +597,46 @@ _.division = Euclidean_division;
 
 
 
+/**
+ * 取得所有分母為 denominator，分子分母互質的循環小數的循環節位數。<br />
+ * Repeating decimal: get period (repetend length)
+ * 
+ * @param {Natural}denominator
+ *            分母
+ * @param {Boolean}with_transient
+ *            亦取得非循環節部分位數
+ * @param {Natural}min
+ *            必須最小長度，在測試大量數字時使用。若發現長度必小於 min 則即時跳出。效果不俗 (test Euler_26(1e7))。
+ * 
+ * @returns {Array}[{Number}period length 循環節位數 < denominator, {Number}transient
+ *          非循環節部分位數 ]
+ * 
+ * @see https://en.wikipedia.org/wiki/Repeating_decimal#Reciprocals_of_composite_integers_coprime_to_10
+ */
+function period_length(denominator, with_transient, min) {
+	// 去除所有 2 或 5 的因子。
+	var non_repeating = 0, non_repeating_5 = 0;
+	while (denominator % 5 === 0)
+		denominator /= 5, non_repeating_5++;
+	while (denominator % 2 === 0)
+		denominator /= 2, non_repeating++;
+	if (non_repeating < non_repeating_5)
+		non_repeating = non_repeating_5;
+
+	if (denominator === 1 || denominator <= min)
+		return with_transient ? [ 0, non_repeating ] : 0;
+
+	for (var length = 1, remainder = 1;; length++) {
+		remainder = remainder * 10 % denominator;
+		if (remainder === 1)
+			return with_transient ? [ length, non_repeating ] : length;
+	}
+}
+
+_.period_length = period_length;
+
+//---------------------------------------------------------------------//
+
 
 /**
  * 從數集 set 中挑出某些數，使其積最接近指定的數 target。<br />

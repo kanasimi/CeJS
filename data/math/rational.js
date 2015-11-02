@@ -770,17 +770,26 @@ if (typeof CeL === 'function')
 				return n;
 			}
 
+			// default: numerator/denominator
+			// e.g., 1 2/3
 			var TYPE_MIX = 1,
-			TYPE_DECIMAL = 2;
+			// e.g., 1.2¯3
+			TYPE_DECIMAL = 2,
+			// Parentheses, e.g., 1.2(3)
+			TYPE_PARENTHESES = 3;
 			function toString(type) {
 				if (!(KEY_DENOMINATOR in this))
 					return this[KEY_NUMERATOR].toString();
 
 				var string = this[KEY_NUMERATOR];
-				if (type === TYPE_DECIMAL) {
+				if (type === TYPE_DECIMAL || type === TYPE_PARENTHESES) {
 					string = string.precise_divide(this[KEY_DENOMINATOR]);
 					if (string[2]) {
-						string[1] += '¯' + string[2];
+						string[1] += type === TYPE_DECIMAL
+						// e.g., 1.2¯3
+						? '¯' + string[2]
+						// Parentheses, e.g., 1.2(3)
+						: '(' + string[2] + ')';
 						// using the combining overline (U+0305)
 						// https://en.wikipedia.org/wiki/Vinculum_(symbol)#Computer_entry_of_the_symbol
 						// https://en.wikipedia.org/wiki/Overline
