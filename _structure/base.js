@@ -1511,6 +1511,7 @@ OS='UNIX'; // unknown
 		/^\s*function(?:[\s\n]+([^\s\n]*?)[\s\n]*)?\([\s\n]*([^)]*?)[\s\n]*\)[\s\n]*{[\s\n]*([\s\S]*)[\s\n]*}[\s\n;]*$/;
 
 		// TODO: arrow function expression
+		// [ all, function arguments, function body ]
 		// e.g., "(n) => {return n>0;}"
 		/^\s*\([\s\n]*([^)]*?)[\s\n]*\)[\s\n]*=>[\s\n]*{[\s\n]*([\s\S]*)[\s\n]*}[\s\n;]*$/;
 

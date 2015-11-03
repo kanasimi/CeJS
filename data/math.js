@@ -2285,6 +2285,31 @@ function hav(θ) {
 }
 
 
+// ---------------------------------------------------------------------//
+
+if (typeof Uint32Array === 'function' && Uint32Array.BYTES_PER_ELEMENT === 4) {
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
+	(_.number_array = function number_array_ArrayBuffer(size, fill, type) {
+		if (false) {
+			var buffer = new ArrayBuffer(type.BYTES_PER_ELEMENT * size);
+		}
+		// DataView
+		var array = new (type || _.number_array.default_type)(
+		// buffer
+		size);
+		if (fill)
+			array.fill(fill);
+		return array;
+	})
+	// should TypedArray.
+	.default_type = Uint32Array;
+} else {
+	_.number_array = function number_array_Array(size, fill) {
+		return new Array(size).fill(fill || 0);
+	};
+}
+
+
 
 // ---------------------------------------------------------------------//
 // export 導出.

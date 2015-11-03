@@ -1,10 +1,35 @@
 ﻿[![npm version](https://badge.fury.io/js/cejs.svg)](https://badge.fury.io/js/cejs)
 [![Build Status](https://travis-ci.org/kanasimi/CeJS.svg?branch=master)](https://travis-ci.org/kanasimi/CeJS)
 [![Build status](https://ci.appveyor.com/api/projects/status/ny0vr4x2uesiumm0?svg=true)](https://ci.appveyor.com/project/kanasimi/cejs)
+[![Dependency Status](https://david-dm.org/kanasimi/CeJS.svg)](https://david-dm.org/kanasimi/CeJS)
 
 # [Colorless echo](http://lyrics.meicho.com.tw/) JavaScript kit
 This is a JavaScript module framework that is simple to use.
 本計畫希望能建立一個能簡單上手的 JavaScript 模組架構。
+
+## Web page usage 
+``` HTML
+<script type="text/javascript" src="path/to/ce.js">
+	//{"run":"module name or callback"}
+</script>
+```
+
+``` javascript
+CeL.run( 'module.name', function callback() { /* ... */ } );
+```
+
+## Node.js usage
+
+## Installation
+``` bash
+$ npm install cejs
+```
+
+## running
+``` javascript
+require('cejs');
+CeL.run( 'module.name', function callback() { /* ... */ } );
+```
 
 ## Features and examples
 For further introduction, please see [wiki](https://github.com/kanasimi/CeJS/wiki).
