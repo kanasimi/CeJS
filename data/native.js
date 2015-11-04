@@ -1866,7 +1866,7 @@ set_method(Array, {
  * @param value
  *            value to search.
  * @param {Object}[options]
- *            options = {<br />
+ *            附加參數/設定特殊功能與選項 options = {<br />
  *            found : found_callback(index, not_found: closed/未準確相符合，僅為趨近、近似),<br />
  *            near : not_found_callback(較小的 index, not_found),<br />
  *            start : start index,<br />
@@ -2176,7 +2176,7 @@ set_method(Array.prototype, {
 	},
 	// Array.prototype.sum
 	sum: function(using_index) {
-		// total
+		// total summation
 		var sum = 0;
 		this.forEach(using_index ? function(e, i) {
 			sum += i;

@@ -2642,7 +2642,7 @@ Myanmar_Date.month_days = function(year, options) {
 	if (options && ('start_month' in options)
 	// assert: options.start_month < date[1]. e.g., ((0))
 	&& (end = date[1] - options.start_month) > 0)
-		Array.prototype.unshift.apply(month_days, (new Array(end)).fill(0));
+		Array.prototype.unshift.apply(month_days, new Array(end).fill(0));
 
 	return month_days;
 };

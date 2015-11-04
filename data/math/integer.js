@@ -2264,9 +2264,9 @@ if (typeof CeL === 'function')
 				delete this[KEY_NEGATIVE];
 				this[KEY_EXPONENT] *= 2;
 
-				var i = 0, j, this_length = this.length, length = 2 * this_length, result = new Array(length--), product, value;
+				var i = 0, j, this_length = this.length, length = 2 * this_length, product, value,
 				//初始化。
-				result.fill(0);
+				result = new Array(length--).fill(0);
 
 				for (; i < length ; i++)
 					for (j = Math.max(0, i + 1 - this_length) ; 2 * j <= i; j++)

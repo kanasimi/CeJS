@@ -554,7 +554,7 @@ _.EGCD = Extended_Euclidean;
 
 /**
  * 帶餘除法 Euclidean division。<br />
- * 除非設定 closest，否則預設 remainder >= 0.
+ * 除非設定 closest，否則預設 remainder ≥ 0.
  * 
  * @param {Number}dividend
  *            被除數。
@@ -650,7 +650,7 @@ _.period_length = period_length;
  * @param {Natural}target
  *            target number
  * @param {Object}[options]
- *            options 設定特殊功能:<br />
+ *            附加參數/設定特殊功能與選項
  * 
  * @returns {Array}某些數，其積最接近 target。
  * 
@@ -699,7 +699,7 @@ function closest_product(set, target, options) {
 			return;
 
 		var _product = product * natural, _selected,
-		/** {Number}差 >= 0 */
+		/** {Number}差 ≥ 0 */
 		difference = Math.abs(target - _product),
 		// 是否發現新極小值。採用 minor_data 而不 cache 是因為此間 minor_data 可能已經改變。
 		_status = difference <= minor_data[0];
@@ -788,7 +788,7 @@ var factorial_cache = [ 1 ], factorial_cache_to;
  * Get the factorial (階乘) of (integer).<br />
  * 
  * @param {integer}integer
- *            safe integer. 0 ~ 18
+ *            safe integer. 0–18
  * @returns {safe integer} n的階乘.
  * @see https://en.wikipedia.org/wiki/Factorial
  */
@@ -823,7 +823,7 @@ _.factorial = factorial;
  * @param {Number}
  *            positive number
  * 
- * @return r, r^2 <= number < (r+1)^2
+ * @return r, r^2 ≤ number < (r+1)^2
  * 
  * @see <a href="http://www.azillionmonkeys.com/qed/sqroot.html"
  *      accessdate="2010/3/11 18:37">Paul Hsieh's Square Root page</a><br />
@@ -1275,7 +1275,7 @@ function coprime() {
  * Fundamental Theorem of Arithmeric) 的數學金科玉律。<br />
  * 
  * @param {Number}natural
- *            integer number >= 2
+ *            integer number ≥ 2
  * @param {Number}radix
  *            output radix
  * @param {Number}index
@@ -1424,6 +1424,121 @@ function first_factor(natural) {
 }
 
 _.first_factor = first_factor;
+
+
+
+/**
+ * Get the summation map 1–limit of proper factors.
+ * 
+ * A proper factor of a positive integer n is a factor of n other than 1 or n
+ * (Derbyshire 2004, p. 32).<br />
+ * A positive divisor of n which is different from n is called a proper divisor
+ * or an aliquot part of n.
+ * 
+ * @param {Natural}limit
+ *            處理到哪個數字。include limit itself.
+ * @param {Object}[options]
+ *            附加參數/設定特殊功能與選項
+ * 
+ * @returns {Natural}summation of proper factors
+ * 
+ * @see http://mathworld.wolfram.com/ProperFactor.html
+ */
+function factor_sum(limit, options) {
+	var add_1, add_self,
+	// default: {Natural}∑ summation of proper factors
+	get_sum = true;
+
+	if (options) {
+		add_1 = options.add_1;
+		add_self = options.add_self;
+		if (options.all_factors)
+			add_1 = add_self = true;
+		// options.list: get list instead of summation.
+		get_sum = !options.list;
+	}
+
+	// assert: limit≥1
+	// ++limit: number up to ((limit)), but need ((limit+1)) elements.
+	++limit;
+
+	var
+	// ((number)) starts from 2.
+	// skip 0: needless, natural numbers starts from 1.
+	// skip 1: already precessed by .fill(1).
+	number = 2,
+	// options.add_1: every number has factor 1,
+	// set this if you want include 1 into sum.
+	factor_map = get_sum ? _.number_array(limit, add_1 ? 1 : 0)
+	//
+	: add_1 ? [ , [ 1 ] ] : [];
+
+	if (false)
+		// factor_map[0] is nonsense 無意義，預設成 0。
+		factor_map[0] = 0;
+
+	// generate factor map: a kind of sieve method.
+	for (; number < limit; number++) {
+		for (var n = add_self ? number : 2 * number; n < limit; n += number)
+			// 將所有 ((number)) 之倍數都加上 ((number))。
+			// Append ((number)) to every multiple of ((number)).
+			if (get_sum)
+				// factor_map[0] is nonsense 無意義
+				// factor_map[number>0]
+				// = summation of the proper factors of number.
+				factor_map[n] += number;
+			else if (n in factor_map)
+				factor_map[n].push(number);
+			else
+				factor_map[n] = add_1 ? [ 1, number ] : [ number ];
+	}
+
+	library_namespace.debug('factor map: [' + factor_map.length + '] '
+			+ factor_map.slice(0, 30).join(';') + '...', 1, 'factor_sum');
+
+	return factor_map;
+}
+
+_.factor_sum = factor_sum;
+
+
+function perfect_numbers(limit, type) {
+	var numbers = [], factor_map = factor_sum(limit, {
+		add_1 : true
+	});
+
+	// skip 0: needless, natural numbers starts from 1.
+	// 僅對過剩數才需要做此處置。
+	if (type > 0)
+		factor_map[0] = 0;
+
+	// 雖然設定 add_1，但對 1 本身，應該為 0。
+	factor_map[1] = 0;
+
+	factor_map.forEach(type > 0 ? function(factor_sum, index) {
+		// abundant number or excessive number. 過剩數又稱作豐數或盈數
+		// https://en.wikipedia.org/wiki/Abundant_number
+		if (factor_sum > index)
+			numbers.push(index);
+	} : type < 0 ? function(factor_sum, index) {
+		// deficient or deficient number. 虧數又稱作缺數
+		// https://en.wikipedia.org/wiki/Deficient_number
+		if (factor_sum < index)
+			numbers.push(index);
+	} : function(factor_sum, index) {
+		// perfect numbers. 完全數，又稱完美數或完備數
+		// https://en.wikipedia.org/wiki/Perfect_number
+		if (factor_sum === index)
+			numbers.push(index);
+	});
+
+	library_namespace.debug('numbers: [' + numbers.length + '] '
+			+ numbers.slice(0, 30) + '...', 1, 'perfect_numbers');
+
+	return numbers;
+}
+
+_.perfect_numbers = perfect_numbers;
 
 
 // ---------------------------------------------------------------------//
@@ -1634,7 +1749,7 @@ function get_boundary(caculator, result, down, up, limit) {
  * @param {Number}[y]
  *            目標值。default: 0. get (equation^-1)(y)
  * @param {Object}[options]
- *            options 設定特殊功能:<br />
+ *            附加參數/設定特殊功能與選項
  * 
  * @returns {Number}root: equation(root)≈y
  * 
@@ -1702,7 +1817,7 @@ _.secant_method = secant_method;
  * @param {Number}[y]
  *            目標值。default: 0. get (equation^-1)(y)
  * @param {Object}[options]
- *            options 設定特殊功能:<br />
+ *            附加參數/設定特殊功能與選項
  * 
  * @returns {Number}root: equation(root)≈y
  * 
@@ -1792,7 +1907,7 @@ _.Sidi_method = Sidi_method;
  * @param {Number}[y]
  *            目標值。default: 0. get (equation^-1)(y)
  * @param {Object}[options]
- *            options 設定特殊功能:<br />
+ *            附加參數/設定特殊功能與選項
  * 
  * @returns {Number}root: equation(root)≈y
  * 
@@ -1938,7 +2053,7 @@ _.find_root = Brent_method;
  * @param {Number}max
  *            求值之自變數 variable 上限，設定初始近似值。
  * @param {Object}[options]
- *            options 設定特殊功能:<br />
+ *            附加參數/設定特殊功能與選項
  * 
  * @returns {Number}[x,fx]: equation(x)≈fx≈minimum
  * 
@@ -2249,7 +2364,7 @@ to : function(base, diminished) {
 		if (diminished)
 			// TODO: 僅對 integer 有效
 			tmp--;
-		// library_namespace.debug('負數 ' + value + '，sum=' + tmp);
+		// library_namespace.debug('負數 ' + value + '，summation=' + tmp);
 		// 負數，添上兩補數之和
 		value = tmp - value;
 	}
@@ -2305,6 +2420,7 @@ if (typeof Uint32Array === 'function' && Uint32Array.BYTES_PER_ELEMENT === 4) {
 	.default_type = Uint32Array;
 } else {
 	_.number_array = function number_array_Array(size, fill) {
+		// 經過 .fill() 以定義每個元素，這樣在 .forEach() 時才會遍歷到。
 		return new Array(size).fill(fill || 0);
 	};
 }
