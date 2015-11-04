@@ -2415,7 +2415,7 @@ function hav(θ) {
 // ---------------------------------------------------------------------//
 
 //  CeL.math.number_array()
-if (typeof Uint32Array === 'function' && Uint32Array.BYTES_PER_ELEMENT === 4) {
+if (library_namespace.typed_arrays) {
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
 	(_.number_array = function number_array_ArrayBuffer(size, fill, type) {
 		if (false) {
@@ -2426,10 +2426,7 @@ if (typeof Uint32Array === 'function' && Uint32Array.BYTES_PER_ELEMENT === 4) {
 		// buffer
 		size);
 		if (fill)
-			if (array.fill)
-				array.fill(fill);
-			else
-				Array.prototype.fill.call(array, fill);
+			array.fill(fill);
 		return array;
 	})
 	// should TypedArray.

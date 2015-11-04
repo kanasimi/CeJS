@@ -20,12 +20,12 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 
 ## Node.js usage
 
-## Installation
+### Installation
 ``` bash
 $ npm install cejs
 ```
 
-## running
+### Running
 ``` javascript
 require('cejs');
 CeL.run( 'module.name', function callback() { /* ... */ } );
