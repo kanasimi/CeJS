@@ -615,7 +615,7 @@ function test_math() {
 		// Essentially the same as A001065, but with a(1)=1.
 		// https://oeis.org/A001065
 		// Sum of proper divisors (or aliquot parts) of n: sum of divisors of n that are less than n.
-		assert([CeL.factor_sum(40, {add_1 : true}).slice(1).join(), '1,1,1,3,1,6,1,7,4,8,1,16,1,10,9,15,1,21,1,22,11,14,1,36,6,16,13,28,1,42,1,31,15,20,13,55,1,22,17,50'], 'Sum of proper divisors');
+		assert([CeL.factor_sum_map(40, {add_1 : true}).slice(1).join(), '1,1,1,3,1,6,1,7,4,8,1,16,1,10,9,15,1,21,1,22,11,14,1,36,6,16,13,28,1,42,1,31,15,20,13,55,1,22,17,50'], 'Sum of proper divisors');
 		assert([CeL.perfect_numbers(500).join(), '6,28,496'], 'Perfect numbers n: n is equal to the sum of the proper divisors of n.');
 		assert([CeL.perfect_numbers(40,-1).join(), '1,2,3,4,5,7,8,9,10,11,13,14,15,16,17,19,21,22,23,25,26,27,29,31,32,33,34,35,37,38,39'], 'Deficient numbers: numbers n such that sigma(n) < 2n.');
 		assert([CeL.perfect_numbers(99,1).join(), '12,18,20,24,30,36,40,42,48,54,56,60,66,70,72,78,80,84,88,90,96'], 'Abundant numbers (sum of divisors of n exceeds 2n).');

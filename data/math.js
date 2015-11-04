@@ -1444,7 +1444,7 @@ _.first_factor = first_factor;
  * 
  * @see http://mathworld.wolfram.com/ProperFactor.html
  */
-function factor_sum(limit, options) {
+function factor_sum_map(limit, options) {
 	var add_1, add_self,
 	// default: {Natural}∑ summation of proper factors
 	get_sum = true;
@@ -1494,16 +1494,28 @@ function factor_sum(limit, options) {
 	}
 
 	library_namespace.debug('factor map: [' + factor_map.length + '] '
-			+ factor_map.slice(0, 30).join(';') + '...', 1, 'factor_sum');
+			+ factor_map.slice(0, 30).join(';') + '...', 1, 'factor_sum_map');
 
 	return factor_map;
 }
 
-_.factor_sum = factor_sum;
+_.factor_sum_map = factor_sum_map;
 
 
+/**
+ * Get perfect number list.
+ * 
+ * @param {Natural}limit
+ *            處理到哪個數字。include limit itself.
+ * @param {Number}type
+ *            type>0: abundant number.<br />
+ *            type<0: deficient number.<br />
+ *            default: perfect number
+ * 
+ * @returns {Array}number list
+ */
 function perfect_numbers(limit, type) {
-	var numbers = [], factor_map = factor_sum(limit, {
+	var numbers = [], factor_map = factor_sum_map(limit, {
 		add_1 : true
 	});
 
@@ -2402,6 +2414,7 @@ function hav(θ) {
 
 // ---------------------------------------------------------------------//
 
+//  CeL.math.number_array()
 if (typeof Uint32Array === 'function' && Uint32Array.BYTES_PER_ELEMENT === 4) {
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
 	(_.number_array = function number_array_ArrayBuffer(size, fill, type) {
@@ -2413,7 +2426,10 @@ if (typeof Uint32Array === 'function' && Uint32Array.BYTES_PER_ELEMENT === 4) {
 		// buffer
 		size);
 		if (fill)
-			array.fill(fill);
+			if (array.fill)
+				array.fill(fill);
+			else
+				Array.prototype.fill.call(array, fill);
 		return array;
 	})
 	// should TypedArray.
