@@ -8,7 +8,7 @@ node_js:
 # @see https://travis-ci.org/kanasimi/CeJS/jobs/86175787
 # @see https://ci.appveyor.com/project/kanasimi/cejs/build/job/co0jl2uj6r1m4ex8
 # It's OK at my FreeBSD under node.js v0.11.16.
-#  - "0.11"
+  - "0.11"
 
 #  - "0.12"
   - "4"

@@ -634,6 +634,7 @@ set_method(Array.prototype, {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 
+// It's hard to full simulate typed arrays.
 var typed_arrays = [];
 if (typeof Uint32Array === 'function')
 	(function() {
@@ -643,7 +644,7 @@ if (typeof Uint32Array === 'function')
 				.split(',');
 		'Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array'
 		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
-		.forEach(function(typed_array) {
+		.split(',').forEach(function(typed_array) {
 			try {
 				typed_array = eval(typed_array);
 			} catch (e) {
@@ -653,7 +654,9 @@ if (typeof Uint32Array === 'function')
 			var prototype = typed_array.prototype;
 			typed_array_methods.forEach(function(method) {
 				if (!(method in typed_array.prototype))
-					prototype[method] = Array_prototype[method];
+					Object.defineProperty(prototype, method, {
+						value : Array_prototype[method]
+					});
 			});
 			typed_arrays.push(typed_array);
 		});
@@ -663,6 +666,7 @@ if (typed_arrays.length === 0)
 	typed_arrays = null;
 
 _.typed_arrays = typed_arrays;
+
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // Number.*

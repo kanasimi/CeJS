@@ -181,7 +181,7 @@ function test_compatibility() {
 	]);
 
 	error_count += CeL.test('compatibility', [
-		[[/./ig.flags, 'gi']],
+		[[/./ig.flags, 'gi'], '/./ig.flags'],
 		[[5, Math.hypot(3, 4)], 'normal positive Math.hypot'],
 		[[5, Math.hypot(-3, -4)], 'negative Math.hypot'],
 		[[Number.MAX_VALUE, Math.hypot(3 / 5 * Number.MAX_VALUE, 4 / 5 * Number.MAX_VALUE)], 'avoid overflow'],
