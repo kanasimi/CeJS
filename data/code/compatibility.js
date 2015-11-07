@@ -634,7 +634,9 @@ set_method(Array.prototype, {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 
-// It's hard to full simulate typed arrays.
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
+// It's hard to fully simulate typed arrays.
+// 只能把原先即存在的功能加強到可用。
 var typed_arrays = [];
 if (typeof Uint32Array === 'function')
 	(function() {
@@ -643,7 +645,7 @@ if (typeof Uint32Array === 'function')
 		typed_array_methods = 'copyWithin,entries,every,fill,filter,find,findIndex,forEach,includes,indexOf,join,keys,lastIndexOf,map,reduce,reduceRight,reverse,set,slice,some,subarray,values'
 				.split(',');
 		'Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array'
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
+		//
 		.split(',').forEach(function(typed_array) {
 			try {
 				typed_array = eval(typed_array);

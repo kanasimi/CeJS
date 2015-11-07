@@ -634,6 +634,8 @@ function test_math() {
 
 		assert([CeL.math.period_length(562424324), 303858], 'Repeating decimal: get period (repetend length)');
 
+		assert([CeL.integer_partitions(100, null, [ 1, 2, 5 ]), 541], 'Get the count of integer partitions');
+
 		// ---------------------------------------------------------------------//
 
 		var MULTIPLICATION_SIGN = CeL.math.closest_product.separator;

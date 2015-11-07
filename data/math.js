@@ -139,11 +139,11 @@ _// JSDT:_module_
 /**
  * 輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數。
  * 
- * @param {Number}
+ * @param {Natural}
  *            n1 number 1
- * @param {Number}
+ * @param {Natural}
  *            [n2] number 2
- * @param {Number}
+ * @param {Natural}
  *            times max 次數, 1,2,..
  * 
  * @return {Array} 連分數序列 (continued fraction) ** 負數視 _.mutual_division.done 而定!
@@ -231,12 +231,12 @@ _// JSDT:_module_
 /**
  * 取得連分數序列的數值。
  * 
- * @param {Array}
- *            sequence 序列
- * @param {Number}
- *            [max_no] 取至第 max_no 個
+ * @param {Array}sequence
+ *            序列
+ * @param {Natural}[max_no]
+ *            取至第 max_no 個
  * 
- * @return {Number}連分數序列的數值
+ * @return {Array}連分數序列的數值
  * 
  * @requires mutual_division.done
  */
@@ -337,14 +337,14 @@ _// JSDT:_module_
  * The best rational approximation. 取得值最接近之有理數 (use 連分數 continued fraction),
  * 取近似值. c.f., 調日法 在分子或分母小於下一個漸進分數的分數中，其值是最接近精確值的近似值。
  * 
- * @param {Number}
- *            number number
- * @param {Number}
- *            [rate] 比例在 rate 以上
- * @param {Number}
- *            [max_no] 最多取至序列第 max_no 個 TODO : 並小於 l: limit
+ * @param {Number}number
+ *            number
+ * @param {Number}[rate]
+ *            比例在 rate 以上
+ * @param {Natural}[max_no]
+ *            最多取至序列第 max_no 個 TODO : 並小於 l: limit
  * 
- * @return [分子, 分母, 誤差]
+ * @return {Array}[分子, 分母, 誤差]
  * 
  * @requires mutual_division,continued_fraction
  * @see https://en.wikipedia.org/wiki/Continued_fraction#Best_to_rational_numbers
@@ -394,8 +394,8 @@ to_rational_number = function(number, rate, max_no) {
  * 
  * TODO: 判斷互質.
  * 
- * @param {Integers}
- *            number_array number array
+ * @param {Integers}number_array
+ *            number array
  * 
  * @returns {Integer} GCD of the numbers specified
  */
@@ -438,8 +438,8 @@ _// JSDT:_module_
  * 
  * TODO: 更快的方法： 短除法? 一次算出 GCD, LCM?
  * 
- * @param {Integers}
- *            number_array number array
+ * @param {Integers}number_array
+ *            number array
  * 
  * @returns {Integer} LCM of the numbers specified
  */
@@ -490,8 +490,9 @@ _// JSDT:_module_
  * 求多個數之 LCM(Least Common Multiple, 最小公倍數): method 2.<br />
  * Using 類輾轉相除法.<br />
  * 
- * @param {Integers}
- *            number_array number array
+ * @param {Integers}number_array
+ *            number array
+ * 
  * @returns {Integer} LCM of the numbers specified
  */
 LCM2 = function(number_array) {
@@ -769,7 +770,9 @@ _.closest_product = closest_product;
  *            number
  * @param {Integer}modulo
  *            modulo
+ * 
  * @returns {Integer} modular multiplicative inverse
+ * 
  * @since 2013/8/3 20:24:30
  */
 function modular_inverse(number, modulo) {
@@ -787,9 +790,11 @@ var factorial_cache = [ 1 ], factorial_cache_to;
 /**
  * Get the factorial (階乘) of (integer).<br />
  * 
- * @param {integer}integer
+ * @param {ℕ⁰:Natural+0}integer
  *            safe integer. 0–18
- * @returns {safe integer} n的階乘.
+ * 
+ * @returns {Natural|Number}n的階乘.
+ * 
  * @see https://en.wikipedia.org/wiki/Factorial
  */
 function factorial(integer) {
@@ -806,6 +811,7 @@ function factorial(integer) {
 	}
 	return integer < length ? factorial_cache[integer] : Infinity;
 }
+
 _.factorial = factorial;
 
 
@@ -972,6 +978,7 @@ Collatz_conjecture.longest = Collatz_conjecture_longest;
 // ---------------------------------------------------------------------//
 
 
+// https://en.wikipedia.org/wiki/Memoization
 /** {Array}質數列表。 cache 以加快速度。 */
 var primes = [2, 3, 5],
 /**
@@ -997,11 +1004,23 @@ function test_is_prime(integer, index, sqrt) {
 	// 質數列表中的質數尚無法檢測 integer。
 }
 
-// index starts from 1!
+/**
+ * Get the prime[index] or prime list.
+ * 
+ * @param {Natural}index
+ *            prime index starts from 1
+ * @param {Natural}limit
+ *            the upper boundary of prime value
+ * 
+ * @returns {Natural}prime value
+ */
 function prime(index, limit) {
 	if (primes.length < index) {
 		// assert: primes_last_test is ((6n ± 1))
-		/** {Boolean}p1 === true: primes_last_test is 6n+1. else: primes_last_test is 6n-1 */
+		/**
+		 * {Boolean}p1 === true: primes_last_test is 6n+1. else:
+		 * primes_last_test is 6n-1
+		 */
 		var p1 = primes_last_test % 6 === 1;
 
 		for (; primes.length < index && Number.isSafeInteger(primes_last_test);) {
@@ -1017,6 +1036,7 @@ function prime(index, limit) {
 
 	return index > 0 ? primes[index - 1] : primes;
 }
+
 _.prime = prime;
 
 
@@ -1274,11 +1294,13 @@ function coprime() {
  * 唯一分解定理(The Unique Factorization Theorem)告訴我們素因子分解是唯一的，這即是稱為算術基本定理 (The
  * Fundamental Theorem of Arithmeric) 的數學金科玉律。<br />
  * 
- * @param {Number}natural
+ * use Object.keys(factors) to get primes
+ * 
+ * @param {Natural}natural
  *            integer number ≥ 2
- * @param {Number}radix
+ * @param {Natural}radix
  *            output radix
- * @param {Number}index
+ * @param {Natural}index
  *            start prime index
  * 
  * @return {Object}prime factors { prime1:power1, prime2:power2, .. }
@@ -2226,6 +2248,114 @@ _.find_maxima = function(equation, min, max, options) {
 // ------------------------------------------------------------------------------------------------------//
 
 
+// 組合數學/總價值固定之錢幣排列組合方法數
+// http://www.cnblogs.com/python27/p/3303721.html
+// http://mathworld.wolfram.com/Partition.html
+// http://www.zhihu.com/question/21075235
+// http://blog.csdn.net/iheng_scau/article/details/8170669
+// http://www.mobile01.com/topicdetail.php?f=37&t=2195318&p=3
+
+// 組合數學反向思考: 有重複的=全-沒有重複的
+// 解法之所以錯誤往往是因為重複計數。
+
+// 裝載問題
+// http://codex.wiki/post/117994-555
+
+/**
+ * Get the count of integer partitions. 整數分拆
+ * 
+ * TODO: part
+ * 
+ * @param {Natural}sum
+ *            integer to be apart.
+ * @param {Natural|Array}[part_count]
+ *            TODO: 給出恰好劃分成 part_count 個整數的劃分。
+ * @param {Array}[summands]
+ *            給出只包括 summands 的劃分。
+ * @param {Array}cache
+ *            cache[sum][summands] = count
+ * 
+ * @returns {Natural}組合方法數
+ * 
+ * @inner
+ */
+function count_partitions(sum, part_count, summands, cache) {
+	var key = summands.join(''), _c = cache[sum];
+	// https://en.wikipedia.org/wiki/Memoization
+	if (!_c)
+		_c = cache[sum] = [];
+	else if (key in _c)
+		return _c[key];
+
+	CeL.debug([ sum, summands ], 3);
+	// 不更動 summands
+	summands = summands.slice();
+	var summand = summands.pop(), count = sum / summand | 0;
+	sum %= summand;
+	if (summands.length === 0) {
+		// 檢查當前解是否是可行解。
+		// 若有餘數，表示此法不通。
+		// e.g., 以2元分3元
+		return sum === 0 ? 1 : 0;
+	}
+
+	var counter = 0;
+	for (; count >= 0; count--, sum += summand) {
+		CeL.debug(summand + '⋅' + count + '+' + sum + '; ' + counter + '; '
+				+ summands, 3);
+		if (sum === 0) {
+			// e.g., 以 5元分100元，當count===20時，此時也算一次。
+			counter++;
+		} else {
+			counter += count_partitions(sum, part_count, summands, cache);
+		}
+	}
+	return _c[key] = counter;
+}
+
+// 整數分拆:兌換/分桶/分配問題
+// https://en.wikipedia.org/wiki/Greedy_algorithm
+// https://en.wikipedia.org/wiki/Partition_%28number_theory%29
+
+/**
+ * Get the count of integer partitions. 整數分拆
+ * 
+ * TODO: part, count of summands, options
+ * 
+ * @param {Natural}sum
+ *            integer to be apart.
+ * @param {Natural|Array}[part_count]
+ *            TODO: 給出恰好劃分成 part_count 個整數的劃分。
+ * @param {Array}[summands]
+ *            給出只包括 summands 的劃分。
+ * 
+ * @returns {Natural}組合方法數
+ */
+function integer_partitions(sum, part_count, summands) {
+	// assert: sum≥0
+	if (!sum)
+		return 0;
+
+	if (!summands || !summands.length) {
+		throw 'integer_partitions: NYI';
+	}
+
+	// 檢查是否有解。
+	if (sum % CeL.GCD.apply(null, summands) !== 0)
+		return;
+	summands = summands.slice().sort(function(a, b) {
+		// 小→大
+		return a - b;
+	});
+
+	return count_partitions(sum, part_count, summands, []);
+}
+
+_.integer_partitions = integer_partitions;
+
+
+// ------------------------------------------------------------------------------------------------------//
+
 _// JSDT:_module_
 .
 /**
@@ -2233,7 +2363,9 @@ _// JSDT:_module_
  * 
  * @param {Number}
  *            number
+ * 
  * @return {String} number in hex
+ * 
  * @example alert('0x'+CeL.hex(16725))
  */
 hex = function(number) {
@@ -2429,8 +2561,8 @@ if (library_namespace.typed_arrays) {
 			array.fill(fill);
 		return array;
 	})
-	// should TypedArray.
-	.default_type = Uint32Array;
+	// should TypedArray. e.g., Int32Array, Uint32Array
+	.default_type = Int32Array;
 } else {
 	_.number_array = function number_array_Array(size, fill) {
 		// 經過 .fill() 以定義每個元素，這樣在 .forEach() 時才會遍歷到。

@@ -834,7 +834,7 @@ if (typeof CeL === 'function')
 				return conversion;
 			}
 
-			// written out numbers in words
+			// written out numbers in words. Get number name.
 			// British usage
 			// @see http://www.grammarbook.com/numbers/numbers.asp
 			function to_English_numeral(number) {
