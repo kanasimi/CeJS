@@ -790,18 +790,18 @@ var factorial_cache = [ 1 ], factorial_cache_to;
 /**
  * Get the factorial (階乘) of (integer).<br />
  * 
- * @param {ℕ⁰:Natural+0}integer
+ * @param {ℕ⁰:Natural+0}natural
  *            safe integer. 0–18
  * 
  * @returns {Natural|Number}n的階乘.
  * 
  * @see https://en.wikipedia.org/wiki/Factorial
  */
-function factorial(integer) {
+function factorial(natural) {
 	var length = factorial_cache.length;
-	if (length <= integer && !factorial_cache_to) {
+	if (length <= natural && !factorial_cache_to) {
 		var f = factorial_cache[--length];
-		while (length++ < integer)
+		while (length++ < natural)
 			if (isFinite(f *= length))
 				factorial_cache.push(f);
 			else {
@@ -809,8 +809,20 @@ function factorial(integer) {
 				break;
 			}
 	}
-	return integer < length ? factorial_cache[integer] : Infinity;
+	return natural < length ? factorial_cache[natural] : Infinity;
 }
+
+// var factorial_map = CeL.math.factorial.map(9);
+// generate factorial map
+factorial.map = function(natural) {
+	if (!natural)
+		natural = 9;
+	if (factorial_cache.length <= natural
+			&& !factorial_cache_to)
+		factorial(natural);
+	return factorial_cache.slice(0, natural + 1);
+};
+
 
 _.factorial = factorial;
 
@@ -1007,19 +1019,27 @@ function test_is_prime(integer, index, sqrt) {
 /**
  * Get the prime[index] or prime list.
  * 
- * @param {Natural}index
+ * @param {Natural}[index]
  *            prime index starts from 1
- * @param {Natural}limit
+ * @param {Natural}[limit]
  *            the upper boundary of prime value
  * 
  * @returns {Natural}prime value
  */
 function prime(index, limit) {
+	if (!(index > 0)) {
+		if (limit > 0) {
+			index = prime_pi(limit);
+			return primes.slice(0, index);
+		}
+		return primes;
+	}
+
 	if (primes.length < index) {
 		// assert: primes_last_test is ((6n ± 1))
 		/**
-		 * {Boolean}p1 === true: primes_last_test is 6n+1. else:
-		 * primes_last_test is 6n-1
+		 * {Boolean}p1 === true: primes_last_test is 6n+1.<br />
+		 * else: primes_last_test is 6n-1
 		 */
 		var p1 = primes_last_test % 6 === 1;
 
@@ -1034,7 +1054,7 @@ function prime(index, limit) {
 		library_namespace.debug('primes_last_test = ' + primes_last_test);
 	}
 
-	return index > 0 ? primes[index - 1] : primes;
+	return primes[index - 1];
 }
 
 _.prime = prime;
@@ -2248,12 +2268,6 @@ _.find_maxima = function(equation, min, max, options) {
 // ------------------------------------------------------------------------------------------------------//
 
 
-// 組合數學/總價值固定之錢幣排列組合方法數
-// http://www.cnblogs.com/python27/p/3303721.html
-// http://mathworld.wolfram.com/Partition.html
-// http://www.zhihu.com/question/21075235
-// http://blog.csdn.net/iheng_scau/article/details/8170669
-// http://www.mobile01.com/topicdetail.php?f=37&t=2195318&p=3
 
 // 組合數學反向思考: 有重複的=全-沒有重複的
 // 解法之所以錯誤往往是因為重複計數。
@@ -2277,6 +2291,8 @@ _.find_maxima = function(equation, min, max, options) {
  * 
  * @returns {Natural}組合方法數
  * 
+ * @see https://en.wikipedia.org/wiki/Greedy_algorithm
+ * 
  * @inner
  */
 function count_partitions(sum, part_count, summands, cache) {
@@ -2287,7 +2303,7 @@ function count_partitions(sum, part_count, summands, cache) {
 	else if (key in _c)
 		return _c[key];
 
-	CeL.debug([ sum, summands ], 3);
+	library_namespace.debug([ sum, summands ], 3);
 	// 不更動 summands
 	summands = summands.slice();
 	var summand = summands.pop(), count = sum / summand | 0;
@@ -2301,7 +2317,7 @@ function count_partitions(sum, part_count, summands, cache) {
 
 	var counter = 0;
 	for (; count >= 0; count--, sum += summand) {
-		CeL.debug(summand + '⋅' + count + '+' + sum + '; ' + counter + '; '
+		library_namespace.debug(summand + '⋅' + count + '+' + sum + '; ' + counter + '; '
 				+ summands, 3);
 		if (sum === 0) {
 			// e.g., 以 5元分100元，當count===20時，此時也算一次。
@@ -2313,14 +2329,14 @@ function count_partitions(sum, part_count, summands, cache) {
 	return _c[key] = counter;
 }
 
-// 整數分拆:兌換/分桶/分配問題
-// https://en.wikipedia.org/wiki/Greedy_algorithm
-// https://en.wikipedia.org/wiki/Partition_%28number_theory%29
 
 /**
- * Get the count of integer partitions. 整數分拆
+ * Get the count of integer partitions. 整數分拆:兌換/分桶/分配問題
  * 
  * TODO: part, count of summands, options
+ * 
+ * TODO: 部分應該有 O(1) 的方法。 see
+ * http://www.mobile01.com/topicdetail.php?f=37&t=2195318&p=3
  * 
  * @param {Natural}sum
  *            integer to be apart.
@@ -2330,6 +2346,13 @@ function count_partitions(sum, part_count, summands, cache) {
  *            給出只包括 summands 的劃分。
  * 
  * @returns {Natural}組合方法數
+ * 
+ * @see https://en.wikipedia.org/wiki/Partition_%28number_theory%29
+ *      組合數學/總價值固定之錢幣排列組合方法數<br />
+ *      http://www.cnblogs.com/python27/p/3303721.html
+ *      http://mathworld.wolfram.com/Partition.html
+ *      http://www.zhihu.com/question/21075235
+ *      http://blog.csdn.net/iheng_scau/article/details/8170669
  */
 function integer_partitions(sum, part_count, summands) {
 	// assert: sum≥0
@@ -2341,7 +2364,7 @@ function integer_partitions(sum, part_count, summands) {
 	}
 
 	// 檢查是否有解。
-	if (sum % CeL.GCD.apply(null, summands) !== 0)
+	if (sum % GCD.apply(null, summands) !== 0)
 		return;
 	summands = summands.slice().sort(function(a, b) {
 		// 小→大
@@ -2570,6 +2593,126 @@ if (library_namespace.typed_arrays) {
 	};
 }
 
+
+
+/**
+ * Create digit value table. 建構出位數值表。
+ * 
+ * 對一般問題，所要求的，即是以 Greedy algorithm 遞歸搜索，從 digit_table[0–末位數]各選出一位數值，使其總合為0。<br />
+ * 因為各位數值有其特性，因此可能存有些技巧以降低所需處理之數據量。
+ * 
+ * @param {Array}initial_value
+ *            當位數每一位數值應當減去的初始值。
+ * @param {Object}[options]
+ *            附加參數/設定特殊功能與選項
+ * 
+ * @returns {Array}digit value table
+ */
+function digit_table(initial_value, options) {
+	var base = options && options.base
+	// default base: {Natural}parseInt('10')
+	|| 10;
+
+	if (typeof initial_value === 'string') {
+		if (initial_value === 'factorial') {
+			initial_value = factorial.map(base - 1);
+		} else {
+			var matched = initial_value.match(/power[\s:=]*(\d+)/i);
+			if (matched) {
+				matched = +matched[1];
+				// initial_value[digit] = digit^power
+				initial_value = _.number_array(base).map(function(id, index) {
+					return Math.pow(index, matched);
+				});
+			}
+		}
+	}
+
+	/**
+	 * value of each digit.
+	 * 
+	 * table[exponent=0–(max exponent)][digit=0–9] =<br />
+	 * {Number} digit*base^exponent - digit^exponent
+	 * 
+	 * @type {Array} [][]
+	 */
+	var table = [],
+	/**
+	 * accumulated max/min. 自個位數起累積的最大最小值。
+	 * 
+	 * sum_min[exponent=0–(max exponent)] =<br />
+	 * ∑自0至(exponent-1)位累積的(digit value之最小值)
+	 * 
+	 * @type {Array}
+	 */
+	sum_min = [], sum_max = [];
+	table.min = sum_min;
+	table.max = sum_max;
+
+	// 準備好 digit_value table, min/max value。
+	for (var exponent = 0,
+	/** {Natural}power = base^exponent */
+	power = 1;
+	// 不需要此項限制，照理來說應該在其之前即已跳出。
+	// exponent < base
+	; exponent++) {
+		// value_array[digit=0–9] = 位數值(digit value)
+		var value_array = _.number_array(base), min = Infinity, max = 0;
+		// 計算 (base^exponent) 之位數值(digit value)，並記錄最大最小值。
+		for (var digit = 1; digit < base; digit++) {
+			var digit_value = value_array[digit] = digit * power
+					- initial_value[digit];
+			if (digit_value < min)
+				min = digit_value;
+			if (max < digit_value)
+				max = digit_value;
+		}
+		if (exponent > 0) {
+			// 記錄自個位數起之最大最小值。
+			min += sum_min[exponent - 1];
+			max += sum_max[exponent - 1];
+		}
+		if (min > 0)
+			// 對 n 位數，數值範圍為 base^(n-1)–base^n-1。但位數值和若已經過大，
+			// 代表此位數以上，如第 (n+1) 位數，就算每個位數值和都取最小值，總和也不可能為0。
+			break;
+		sum_min.push(min);
+		sum_max.push(max);
+		table.push(value_array);
+		power *= base;
+	}
+
+	if (!options || !options.find)
+		return table;
+
+	// ------------------------------------------
+	// process: 以 Greedy algorithm 遞歸搜索
+
+	function caculate_sum(sum, exponent, digits) {
+		if (exponent < 0) {
+			// 0,1 為當然結果。
+			if (sum === 0 && (digits |= 0) > 1)
+				result.push(digits);
+			return;
+		}
+
+		if (sum > 0 ? sum + sum_min[exponent] > 0 : sum + sum_max[exponent] < 0)
+			// 接下來的總和也不可能為0。
+			return;
+
+		table[exponent--].forEach(function(v, d) {
+			caculate_sum(sum + v, exponent, digits + d);
+		});
+	}
+
+	var result = [];
+	caculate_sum(0, table.length - 1, '');
+
+	library_namespace.debug(result, 2);
+	return result;
+}
+
+_.digit_table = digit_table;
 
 
 // ---------------------------------------------------------------------//
