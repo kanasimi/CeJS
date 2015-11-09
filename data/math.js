@@ -1597,6 +1597,72 @@ _.perfect_numbers = perfect_numbers;
 
 // ---------------------------------------------------------------------//
 
+// 回文數 palindromic number or numeral palindrome
+// http://www.csie.ntnu.edu.tw/~u91029/Palindrome.html
+function palindrome_list(limit, base) {
+	if (!base)
+		// default base: {Natural}parseInt('10')
+		base = 10;
+	// 個位數皆為回文數。
+	var list = new Array(Math.min(base, limit)).fill(0).map(function(v, i) {
+		return i;
+	});
+	if (limit <= base)
+		return list;
+
+	for (var power = 1, next_power = base, n;;) {
+		// 2e 位數(e), e.g., 1001
+		// left: 10^e–10^(e+1)-1
+		for (var l = power; l < next_power; l++) {
+			var left = l.toString(base),
+			// right side
+			right = left.split('').reverse().join('');
+			n = parseInt(left + right, base);
+			if (n >= limit)
+				break;
+			list.push(n);
+		}
+		if (n >= limit)
+			break;
+
+		// 2e+1 位數, e.g., 10201
+		// left: 10^e–10^(e+1)-1
+		for (var l = power; l < next_power; l++) {
+			var left = l.toString(base),
+			// right side
+			right = left.split('').reverse().join('');
+			for (var middle = 0; middle < base; middle++) {
+				n = parseInt(left + middle + right, base);
+				if (n >= limit)
+					break;
+				list.push(n);
+			}
+		}
+		if (n >= limit)
+			break;
+
+		power = next_power;
+		next_power *= base;
+	}
+
+	return list;
+}
+
+_.palindrome_list = palindrome_list;
+
+function is_palindrome(natural, base) {
+	if (typeof natural !== 'srting')
+		// assert: typeof natural !== 'number'
+		natural = natural.toString(base);
+	// 將這個數的數字按相反的順序重新排列後，所得到的數和原來的數一樣。
+	return natural === natural.split('').reverse().join('');
+}
+
+_.is_palindrome = is_palindrome;
+
+
+// ---------------------------------------------------------------------//
+
 
 _// JSDT:_module_
 .
