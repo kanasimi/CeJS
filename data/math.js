@@ -2628,6 +2628,9 @@ function digit_table(initial_value, options) {
 		}
 	}
 
+	// assert: initial_value 之元素皆 {Natural} > 0
+	library_namespace.debug(initial_value, 3);
+
 	/**
 	 * value of each digit.
 	 * 
@@ -2638,16 +2641,15 @@ function digit_table(initial_value, options) {
 	 */
 	var table = [],
 	/**
-	 * accumulated max/min. 自個位數起累積的最大最小值。
+	 * accumulated min. 自個位數起累積的最小值。
 	 * 
 	 * sum_min[exponent=0–(max exponent)] =<br />
 	 * ∑自0至(exponent-1)位累積的(digit value之最小值)
 	 * 
 	 * @type {Array}
 	 */
-	sum_min = [], sum_max = [];
+	sum_min = [];
 	table.min = sum_min;
-	table.max = sum_max;
 
 	// 準備好 digit_value table, min/max value。
 	for (var exponent = 0,
@@ -2656,28 +2658,32 @@ function digit_table(initial_value, options) {
 	// 不需要此項限制，照理來說應該在其之前即已跳出。
 	// exponent < base
 	; exponent++) {
-		// value_array[digit=0–9] = 位數值(digit value)
-		var value_array = _.number_array(base), min = Infinity, max = 0;
-		// 計算 (base^exponent) 之位數值(digit value)，並記錄最大最小值。
-		for (var digit = 1; digit < base; digit++) {
+		/** {Array}value_array[digit=0–9] = {Number}位數值(digit value) */
+		var value_array = _.number_array(base),
+		/** {Number}本位數各數字位數值的最小值，不包含0 */
+		min = Infinity;
+		// 計算 (base^exponent) 之位數值(digit value)，並記錄最小值。
+		for (var digit = 0; digit < base; digit++) {
 			var digit_value = value_array[digit] = digit * power
 					- initial_value[digit];
-			if (digit_value < min)
+			// 因為0不能當數字頭，[0] 不設定極值。
+			if (digit > 0 && digit_value < min)
 				min = digit_value;
-			if (max < digit_value)
-				max = digit_value;
 		}
+		/** {Number}本位數各數字位數值的最小值，包含0 */
+		var min_0 = Math.min(min, value_array[0]);
+		// console.log(value_array);
 		if (exponent > 0) {
-			// 記錄自個位數起之最大最小值。
-			min += sum_min[exponent - 1];
-			max += sum_max[exponent - 1];
+			// 記錄自個位數起之累積之最小值。
+			var last_min = sum_min[exponent - 1];
+			min += last_min;
+			min_0 += last_min;
 		}
 		if (min > 0)
 			// 對 n 位數，數值範圍為 base^(n-1)–base^n-1。但位數值和若已經過大，
 			// 代表此位數以上，如第 (n+1) 位數，就算每個位數值和都取最小值，總和也不可能為0。
 			break;
-		sum_min.push(min);
-		sum_max.push(max);
+		sum_min.push(min_0);
 		table.push(value_array);
 		power *= base;
 	}
@@ -2689,23 +2695,39 @@ function digit_table(initial_value, options) {
 	// process: 以 Greedy algorithm 遞歸搜索
 
 	function caculate_sum(sum, exponent, digits) {
+		// 測試是否應終結。
 		if (exponent < 0) {
 			// 0,1 為當然結果。
-			if (sum === 0 && (digits |= 0) > 1)
+			if (sum === 0 && (digits = +digits) > min)
 				result.push(digits);
 			return;
 		}
 
-		if (sum > 0 ? sum + sum_min[exponent] > 0 : sum + sum_max[exponent] < 0)
+		if (sum > 0 && sum + sum_min[exponent] > 0)
 			// 接下來的總和也不可能為0。
 			return;
 
+		// 遞歸搜索
 		table[exponent--].forEach(function(v, d) {
-			caculate_sum(sum + v, exponent, digits + d);
+			caculate_sum(digits || d ? sum + v : sum, exponent,
+			// 對於 0 開頭者，視做少一位數，同時不計算本位數之 [0]。
+			digits || d ? digits + d : digits);
 		});
 	}
 
-	var result = [];
+	var result = [],
+	/** {Natural}所得值需要大於此值。 */
+	min;
+	if (options && ('min' in options))
+		min = options.min;
+	else if (!initial_value.some(function(v, d) {
+		if (d && v !== d) {
+			min = d;
+			return true;
+		}
+	}))
+		min = 0;
+
 	caculate_sum(0, table.length - 1, '');
 
 	library_namespace.debug(result, 2);
