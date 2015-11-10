@@ -1003,12 +1003,15 @@ primes_last_test = primes[primes.length - 1];
 
 // integer: number to test
 function test_is_prime(integer, index, sqrt) {
-	// assert: integer === Math.floor(integer)
+	// assert: integer === Math.floor(integer), integer ≥ 0
 	index |= 0;
 	if (!sqrt)
 		sqrt = floor_sqrt(integer);
+	// 採用試除法, use trial division。
+	// 從第一個質數一直除到 ≤ sqrt(integer) 之質數
 	for (var prime, length = primes.length ; index < length;) {
 		if (integer % (prime = primes[index++]) === 0)
+			// return: prime factor found
 			return integer === prime ? false : prime;
 		if (sqrt < prime)
 			return false;
@@ -1165,18 +1168,25 @@ function Miller_Rabin(natural, times) {
 _.Miller_Rabin = Miller_Rabin;
 
 
-// return false: is prime,
-// number: min factor,
-// undefined: probable prime (PRP) / invalid number,
-// true: is composite.
+/**
+ * Test if ((natural)) is not prime.
+ * 
+ * 對大數，僅能確定為合數，不是質數；不能保證是質數。
+ * 
+ * @param {Natural}natural
+ *            natural number to test
+ * 
+ * @returns true: is composite.<br />
+ *          false: is prime.<br />
+ *          number: min factor.<br />
+ *          undefined: probable prime (PRP) / invalid number.
+ */
 function not_prime(natural) {
 	if (!Number.isSafeInteger(natural) || natural < 2)
 		return;
 
 	var p;
-	// 可先檢測此數是否在質數列表中。
 
-	// 採用試除法, use trial division。
 	if (false) {
 		var sqrt = floor_sqrt(natural = p);
 		p = 0;
@@ -1186,14 +1196,31 @@ function not_prime(natural) {
 		}
 	}
 
-
 	// 為 Miller_Rabin() 暖身。
 	prime(70);
-	if ((p = test_is_prime(natural)) === undefined)
+
+	// 先從耗費少的檢測開始。
+
+	// 先檢測此數是否在質數列表中。
+	if (natural <= primes_last_test)
+		// -1: NOT_FOUND
+		return primes.search_sorted(natural) === -1;
+
+	p = primes.length < 1e3 && primes_last_test * primes_last_test < natural
+	// ↑ 1e3: 當有太多質數要測，test_is_prime()就不划算了。
+	? undefined : test_is_prime(natural);
+	if (p === undefined)
 		p = Miller_Rabin(natural);
+	if (p === undefined) {
+		if (primes.length < 1e5)
+			// 多取一些質數。一般說來，產生這表的速度頗快。
+			prime(1e5);
+		p = test_is_prime(natural);
+	}
 
 	return p;
 }
+
 _.not_prime = not_prime;
 
 
@@ -1239,6 +1266,7 @@ function Pollards_rho_1980(natural) {
 
 	return natural === G && G;
 }
+
 _.Pollards_rho = Pollards_rho_1980;
 
 
@@ -1377,7 +1405,7 @@ function factorize(natural, radix, index, factors) {
 	index |= 0;
 	var p = 1, sqrt = floor_sqrt(natural);
 	for (var power, length = primes.length ; p <= sqrt ;)
-		// 採用試除法, trial division。
+		// 採用試除法, use trial division。
 		if (natural % (p = index < length ? primes[index++]
 			// find enough primes
 			: prime(++index)) === 0) {
@@ -1457,7 +1485,7 @@ _.factorize = factorize;
 
 function first_factor(natural) {
 	for (var p = 1, sqrt = floor_sqrt(natural), index = 0, length = primes.length ; p <= sqrt ;)
-		// 採用試除法, trial division。
+		// 採用試除法, use trial division。
 		if (natural % (p = index < length ? primes[index++]
 			// find enough primes
 			: prime(++index)) === 0)
@@ -2531,6 +2559,7 @@ from : function(number, base, diminished) {
 
 	// 整數部分位數
 	var value = number.indexOf('.'), tmp;
+	// -1: NOT_FOUND
 	if (value == -1)
 		value = number.length;
 	// TODO: not good/optimize
