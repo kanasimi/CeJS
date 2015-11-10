@@ -276,6 +276,9 @@ function normalize_name_pattern(file_name, add_group) {
 	if (!file_name)
 		return file_name;
 
+	if (file_name.includes('|'))
+		file_name = file_name.split('|');
+
 	if (Array.isArray(file_name)) {
 		var files = [];
 		file_name.forEach(function(name) {
