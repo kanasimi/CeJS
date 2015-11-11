@@ -700,7 +700,7 @@ openDataTest = function(FN, NOTexist, IO_mode) {
 		return 0;
 	if (!IO_mode)
 		IO_mode = _.IO_mode.ForAppending;
-	for (;;)
+	while (true)
 		try {
 			var Fs = FSO.OpenTextFile(FN, ForAppending);
 			Fs.Close();

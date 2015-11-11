@@ -888,7 +888,7 @@ function is_square(number) {
 _.is_square = is_square;
 
 
-
+// 勾股數
 var 素勾股數 = [], last_Pythagorean_m = 2;
 
 /**
@@ -2153,7 +2153,7 @@ function Brent_method(equation, x0, x1, y, options) {
 
 	d = e = b - a;
 
-	for (;;) {
+	while (true) {
 		if (Math.abs(fc) < Math.abs(fb)) {
 			sa = sb, sb = c, c = sa;
 			fa = fb, fb = fc, fc = fa;

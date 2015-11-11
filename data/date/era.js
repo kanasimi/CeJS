@@ -1655,7 +1655,7 @@ if (typeof CeL === 'function')
 						歲數++, 差距月數 -= this.calendar[歲序--].length;
 
 				if (月序 > 0)
-					for (;;) {
+					while (true) {
 						if (歲序 >= this.calendar.length) {
 							if (library_namespace.is_debug())
 								// 可能是孝徳天皇之類，期間過短，又嘗試
@@ -2108,7 +2108,7 @@ if (typeof CeL === 'function')
 						 */
 
 						// main copy loop
-						for (;;) {
+						while (true) {
 							/**
 							 * 查找下一參照紀元。
 							 */

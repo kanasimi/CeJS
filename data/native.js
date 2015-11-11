@@ -1907,7 +1907,7 @@ function search_sorted_Array(array, value, options) {
 
 	// main comparare loop
 	// http://codereview.stackexchange.com/questions/1480/better-more-efficient-way-of-writing-this-javascript-binary-search
-	for (;;)
+	while (true)
 		if (small > big) {
 			if (comparison < 0 && index > start)
 				// 修正成較小的 index。
@@ -2093,6 +2093,109 @@ function replace_check_near(text, pattern, replace_to, match_previous,
 }
 
 
+
+// ------------------------------------
+
+// use CeL.PATTERN_duplicated(string) to test if string contains duplicated chars.
+_.PATTERN_duplicated = /(.).*?\1/;
+
+
+/**
+ * 按升序/降序排列處理每一序列至最後。
+ * 
+ * 注意: 不會先做排序!
+ * 
+ * @param {Function}handler
+ *            處理 function
+ * @param {Boolean}descending
+ *            default: ascending (small→big 升序序列為最小排列，降序序列為最大的排列), or will be
+ *            descending (big→small 降序)
+ * @param {Boolean}inplace
+ *            no clone, do not clone array.
+ * 
+ * @returns {Array}the last array processed
+ */
+function Array_for_permutation(handler, descending, inplace) {
+	var array = inplace ? this : this.slice(), last_index = array.length - 1;
+	if (last_index >= 0)
+		handler(array);
+	if (last_index < 1)
+		return;
+
+	var index;
+	do {
+		// 求出下一個按升序排列序列。
+		// http://en.cppreference.com/w/cpp/algorithm/next_permutation
+		// http://leonard1853.iteye.com/blog/1450085
+		// http://www.cplusplus.com/reference/algorithm/next_permutation/
+		index = last_index;
+		for (var now = array[index], _next; index > 0;) {
+			// search [index]=now < [index+1]=_next
+			_next = now;
+			now = array[--index];
+			if (descending ? now > _next : now < _next) {
+				var later_index = last_index;
+				// search [index]=now < [later_index]=_next
+				while (true) {
+					_next = array[later_index];
+					if (descending ? _next < now : _next > now)
+						break;
+					later_index--;
+				}
+				// swap [index]=now, [later_index]=_next
+				array[later_index] = now;
+				array[index] = _next;
+				// reverse elements 元素: [index+1] to [last_index]
+				for (index++, later_index = last_index; index < later_index; index++, later_index--) {
+					_next = array[index];
+					array[index] = array[later_index];
+					array[later_index] = _next;
+				}
+				if (handler(array))
+					index = 0;
+				break;
+			}
+		}
+	} while (index > 0);
+	return array;
+}
+
+function String_for_permutation(handler, descending, sort) {
+	if (this.length < 2) {
+		handler(this);
+		return;
+	}
+	var array = this.split('');
+	if (sort)
+		typeof sort === 'function' ? array.sort(sort) : array.sort();
+	return array.for_permutation(function(array) {
+		handler(array.join(''));
+	}, descending, true);
+}
+
+function Number_for_permutation(handler, descending, sort, base) {
+	if (!base)
+		base = 10;
+	if (this < base) {
+		handler(this);
+		return;
+	}
+	var array = this.toString(base).split('').map(function(v) {
+		return +v;
+	});
+	if (sort)
+		array.sort(typeof sort === 'function' ? sort : function(a, b) {
+			return a - b;
+		});
+	return +array.for_permutation(function(array) {
+		handler(+array.join(''));
+	}, descending, true).join('');
+}
+
+
+// ------------------------------------
+
+
 set_method(String.prototype, {
 	covers : function(string) {
 		return this.length >= string.length
@@ -2130,7 +2233,9 @@ set_method(String.prototype, {
 		*/
 		return get_intermediate(this, head, foot, index, return_data) || '';
 	},
-	set_intermediate : set_intermediate
+	set_intermediate : set_intermediate,
+
+	for_permutation : String_for_permutation
 });
 
 set_method(Number.prototype, {
@@ -2139,7 +2244,9 @@ set_method(Number.prototype, {
 	to_sub : subscript_integer,
 	to_fixed : to_fixed,
 	mod : set_bind(non_negative_modulo),
-	pad : set_bind(pad, true)
+	pad : set_bind(pad, true),
+
+	for_permutation : Number_for_permutation
 });
 
 set_method(RegExp.prototype, {
@@ -2208,7 +2315,9 @@ set_method(Array.prototype, {
 		while (this.length > length)
 			this.pop();
 		return this;
-	}
+	},
+
+	for_permutation : Array_for_permutation
 });
 
 //---------------------------------------------------------------------//

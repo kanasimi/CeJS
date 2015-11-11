@@ -1175,7 +1175,7 @@ function repeat(count) {
 
 	//	http://stackoverflow.com/questions/202605/repeat-string-javascript
 	//	此法較 (new Array( count + 1 ).join(this)) 稍快。
-	for (;;) {
+	while (true) {
 		library_namespace.debug('left: ' + count, 3, 'String.prototype.repeat');
 		if (count & 1)
 			result.push(piece);

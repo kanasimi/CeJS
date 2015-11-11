@@ -1399,7 +1399,7 @@ if (typeof CeL === 'function')
 					year += (month - 0.5) / 12;
 
 				var index = 0;
-				for (;;) {
+				while (true) {
 					if (year >= ΔT_year_start[index])
 						break;
 					if (++index === ΔT_year_start.length) {

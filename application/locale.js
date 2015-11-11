@@ -746,7 +746,7 @@ gettext.set_alias = function(list) {
 				// 正規化: 不分大小寫, _ → -
 				alias = alias.replace(/_/g, '-').toLowerCase();
 				// for fallback
-				for (;;) {
+				while (true) {
 					gettext_aliases[alias] = norm;
 
 					index = alias.lastIndexOf('-');
@@ -775,7 +775,7 @@ gettext.to_standard = function(alias) {
 	alias = alias.toLowerCase().replace(/_/g, '-');
 	var index;
 	// for fallback
-	for (;;) {
+	while (true) {
 		//library_namespace.debug('test [' + alias + ']', 3, 'gettext.to_standard');
 		if (alias in gettext_aliases)
 			return gettext_aliases[alias];

@@ -675,7 +675,7 @@ convert_MathML.process = function(text, order, queue) {
 	// library_namespace.debug('convert_MathML.process: [' + text + '] (' + order
 	// + ')');
 	var changed, operator;
-	for (;;) {
+	while (true) {
 		if (changed)
 			changed = false;
 		else if (!(operator = convert_MathML.operator[order++]))

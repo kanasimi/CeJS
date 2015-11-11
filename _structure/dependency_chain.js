@@ -3140,7 +3140,7 @@ if (typeof CeL === 'function')
 			var v, i = 0;
 			try {
 				// find a undefined variable name.
-				for (;;)
+				while (true)
 					eval(v = 'tmp_' + i++);
 			} catch (i) {
 			}

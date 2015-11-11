@@ -4797,7 +4797,7 @@ function Date_to_Revised_Julian(date, options) {
 	year = date.getFullYear() | 0, month = date.getMonth() + 1 | 0;
 
 	// TODO: ugly method. Try to improve it.
-	for (;;) {
+	while (true) {
 		date = days - Revised_Julian_Date.days(year, month);
 		// 經測試，在前後萬年範圍內，最多僅修正一次。
 		if (date < 0) {
