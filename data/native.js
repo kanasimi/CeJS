@@ -2096,6 +2096,7 @@ function replace_check_near(text, pattern, replace_to, match_previous,
 
 // ------------------------------------
 
+// 檢查是否有重複的數字。
 // use CeL.PATTERN_duplicated(string) to test if string contains duplicated chars.
 _.PATTERN_duplicated = /(.).*?\1/;
 
@@ -2169,7 +2170,7 @@ function String_for_permutation(handler, descending, sort) {
 	if (sort)
 		typeof sort === 'function' ? array.sort(sort) : array.sort();
 	return array.for_permutation(function(array) {
-		handler(array.join(''));
+		return handler(array.join(''));
 	}, descending, true);
 }
 
@@ -2188,7 +2189,7 @@ function Number_for_permutation(handler, descending, sort, base) {
 			return a - b;
 		});
 	return +array.for_permutation(function(array) {
-		handler(+array.join(''));
+		return handler(+array.join(''));
 	}, descending, true).join('');
 }
 

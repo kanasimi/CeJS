@@ -102,9 +102,18 @@ ABSORBING_ELEMENT = 0,
  */
 MULTIPLICATION_SIGN = '⋅',
 /**
+ * default base = 10.<br />
+ * 內定：10位數。應與 parseInt() 一致。
+ * 
+ * @type {Natural}
+ * @constant
+ */
+DEFAULT_BASE = parseInt('10'),
+/**
  * The biggest integer we can square. 超過此數則無法安全操作平方。
  * 
  * @type {Integer}
+ * @constant
  */
 sqrt_max_integer = Math.sqrt(Number.MAX_SAFE_INTEGER) | 0;
 
@@ -873,7 +882,7 @@ _.floor_sqrt = floor_sqrt;
 /** all possible last 2 digits of square number */
 var square_ending = library_namespace.null_Object();
 [0, 1, 4, 9, 16, 21, 24, 25, 29, 36, 41, 44, 49, 56, 61, 64, 69, 76, 81, 84, 89, 96].forEach(function(n) {
-	square_ending[n] = 1;
+	square_ending[n] = null;
 });
 
 // 完全平方數, a square number or perfect square. TODO: use 牛頓法
@@ -885,7 +894,27 @@ function is_square(number) {
 	number = Math.sqrt(number);
 	return number === (number | 0);
 }
+
 _.is_square = is_square;
+
+
+
+function is_generalized_pentagonal(generalized) {
+	// https://en.wikipedia.org/wiki/Pentagonal_number
+	return is_square(24 * generalized + 1);
+}
+_.is_generalized_pentagonal = is_generalized_pentagonal;
+
+function is_pentagonal(natural) {
+	// https://en.wikipedia.org/wiki/Pentagonal_number
+	var delta = 24 * natural + 1;
+	return is_square(delta)
+	//floor_sqrt(delta);
+	&& Math.sqrt(delta) % 6 === 5;
+}
+_.is_pentagonal = is_pentagonal;
+
+
 
 
 // 勾股數
@@ -1028,7 +1057,7 @@ Collatz_conjecture.longest = Collatz_conjecture_longest;
 
 
 // https://en.wikipedia.org/wiki/Memoization
-/** {Array}質數列表。 cache 以加快速度。 */
+/** {Array}質數列表。 cache / memoization 以加快速度。 */
 var primes = [2, 3, 5],
 /**
  * last prime tested.<br />
@@ -1413,7 +1442,7 @@ function factorize(natural, radix, index, factors) {
 		radix.toString(radix);
 	} catch (e) {
 		// IE8?
-		radix = 10;
+		radix = DEFAULT_BASE;
 	}
 	if (!factors)
 		factors = library_namespace.null_Object();
@@ -1666,8 +1695,7 @@ _.perfect_numbers = perfect_numbers;
 // http://www.csie.ntnu.edu.tw/~u91029/Palindrome.html
 function palindrome_list(limit, base) {
 	if (!base)
-		// default base: {Natural}parseInt('10')
-		base = 10;
+		base = DEFAULT_BASE;
 	// 個位數皆為回文數。
 	var list = new Array(Math.min(base, limit)).fill(0).map(function(v, i) {
 		return i;
