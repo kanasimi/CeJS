@@ -881,7 +881,7 @@ _.floor_sqrt = floor_sqrt;
 
 /** all possible last 2 digits of square number */
 var square_ending = library_namespace.null_Object();
-[0, 1, 4, 9, 16, 21, 24, 25, 29, 36, 41, 44, 49, 56, 61, 64, 69, 76, 81, 84, 89, 96].forEach(function(n) {
+[ 0, 1, 4, 9, 16, 21, 24, 25, 29, 36, 41, 44, 49, 56, 61, 64, 69, 76, 81, 84, 89, 96 ].forEach(function(n) {
 	square_ending[n] = null;
 });
 
@@ -892,11 +892,41 @@ function is_square(number) {
 		return false;
 
 	number = Math.sqrt(number);
-	return number === (number | 0);
+	return number === (number | 0) && number;
+
+	// another method
+	var sqrt = floor_sqrt(number);
+	return sqrt * sqrt === number && sqrt;
 }
 
 _.is_square = is_square;
 
+/*
+
+n(n+1)/2=T, n∈ℕ, n=?
+n(n+1)/2=T, n=?
+n = 1/2 (sqrt(8 T+1)-1)
+Reduce[(n (1 + n))/2 == T, n]
+n = 1/2 (sqrt(8 T+1)-1)
+
+
+Reduce[n(3n−1)/2==P, n]
+n = 1/6 (sqrt(24 P+1)+1)
+
+// hexagonal
+Reduce[n(2n−1)==H, n]
+n = 1/4 (sqrt(8 H+1)+1)
+
+*/
+
+
+function is_triangular(natural) {
+	// https://en.wikipedia.org/wiki/Triangular_number
+	var sqrt = is_square(8 * natural + 1);
+	return sqrt && sqrt % 2 === 1;
+}
+
+_.is_triangular = is_triangular;
 
 
 function is_generalized_pentagonal(generalized) {
@@ -907,10 +937,8 @@ _.is_generalized_pentagonal = is_generalized_pentagonal;
 
 function is_pentagonal(natural) {
 	// https://en.wikipedia.org/wiki/Pentagonal_number
-	var delta = 24 * natural + 1;
-	return is_square(delta)
-	//floor_sqrt(delta);
-	&& Math.sqrt(delta) % 6 === 5;
+	var sqrt = is_square(24 * natural + 1);
+	return sqrt && sqrt % 6 === 5;
 }
 _.is_pentagonal = is_pentagonal;
 
