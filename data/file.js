@@ -1210,9 +1210,9 @@ if (typeof CeL === 'function')
 				// private property:
 				// this.order = ['path'];
 				if (options) {
-					if (typeof options.sort_function === 'function')
+					if (typeof options.comparator === 'function')
 						// e.g., function(a, b){return a-b;};
-						this.sort_function = options.sort_function;
+						this.comparator = options.comparator;
 				}
 
 				this.add(path_list, options);
@@ -1285,9 +1285,9 @@ if (typeof CeL === 'function')
 					order = false;
 				}
 
-				if (order && this.sort_function)
+				if (order && this.comparator)
 					this.sort(
-					// default: this.sort_function
+					// default: this.comparator
 					);
 
 				return this;
@@ -1309,11 +1309,11 @@ if (typeof CeL === 'function')
 				return this.order;
 			}
 
-			function Files_sort(sort_function, options) {
+			function Files_sort(comparator, options) {
 				// 重製 order。
 				var order = this.list(),
 				//
-				use_function = sort_function || this.sort_function;
+				comparator = comparator || this.comparator;
 
 				if (options && options.no_set_order)
 					order = order.slice();
@@ -1335,9 +1335,9 @@ if (typeof CeL === 'function')
 				if (options) {
 					if (!options.no_set_order) {
 						this.order = order;
-						if (sort_function === 'function'
+						if (comparator === 'function'
 								&& !options.no_set_sort)
-							this.sort_function = sort_function;
+							this.comparator = comparator;
 					}
 
 					if (options.get_list)
@@ -1633,13 +1633,13 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Function}callback
 			 *            callback(path, data)
-			 * @param {Function}sort_function
+			 * @param {Function}comparator
 			 * @returns {@Files}
 			 */
-			function Files_forEach(callback, sort_function) {
+			function Files_forEach(callback, comparator) {
 				var data = this.data,
 				//
-				order = sort_function ? this.sort(sort_function, {
+				order = comparator ? this.sort(comparator, {
 					no_set_order : true,
 					get_list : true
 				}) : this.list();

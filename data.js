@@ -167,10 +167,8 @@ function sortValue(a, mode) {
 			s[j].push(b);
 		else
 			s[j] = [ s[j], b ];
-	// sort 方法會在原地排序 Array 物件
-	for (i = 0, k.sort(function(a, b) {
-		return a - b;
-	}); i < k.length; i++)
+	// 注意：sort 方法會在原地排序 Array 物件。
+	for (i = 0, k.sort(library_namespace.ascending); i < k.length; i++)
 		if (typeof (b = s[k[i]]) == 'object')
 			if (mode == 1)
 				// b.join(',')與''+b效能相同
@@ -1119,7 +1117,7 @@ function Pair(source, options) {
 		this.pair = Object.assign(library_namespace.null_Object(), this.pair);
 		this.keys = this.keys.slice();
 		if (!options.no_sort)
-			this.keys.sort(options.compare_function || this.compare_function);
+			this.keys.sort(options.comparator || this.comparator);
 	}
 }
 
@@ -1252,7 +1250,7 @@ library_namespace.set_method(Pair.prototype, {
 		// 會造成的問題：若 key 為 RegExp 之 source 時，.length 不代表可能 match 之長度。
 		// e.g., '([\d〇一二三四五六七八九])米'
 		if (keys && !options.no_sort)
-			keys.sort(options.compare_function || this.compare_function);
+			keys.sort(options.comparator || this.comparator);
 
 		return this;
 	},
@@ -1364,7 +1362,7 @@ library_namespace.set_method(Pair.prototype, {
 			// 排序：長的 key 排前面。
 			// 會造成的問題：若 key 為 RegExp 之 source 時，.length 不代表可能 match 之長度。
 			// e.g., '([\d〇一二三四五六七八九])米'
-			keys.sort(this.compare_function);
+			keys.sort(this.comparator);
 			this.keys = keys;
 		}
 		return this.keys;
@@ -1475,7 +1473,7 @@ library_namespace.set_method(Pair.prototype, {
 			}
 
 		if (!options.no_sort)
-			keys.sort(options.compare_function || this.compare_function);
+			keys.sort(options.comparator || this.comparator);
 
 		this.keys = keys;
 		this.new_keys = keys.slice();
@@ -1487,7 +1485,7 @@ library_namespace.set_method(Pair.prototype, {
 		return new Pair(this, options);
 	},
 
-	compare_function : function(key_1, key_2) {
+	comparator : function(key_1, key_2) {
 		// long → short
 		return key_2.length - key_1.length;
 	},

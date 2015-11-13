@@ -1399,6 +1399,7 @@ strftime.set_conversion = function(conversion, locale, options) {
 			v += i;
 	// 從長的排到短的。
 	search.sort(function(a, b) {
+		// 長→短
 		return b.length - a.length;
 	});
 	if (v)
@@ -2711,7 +2712,7 @@ function sort_periods(period_list, start_index, end_index, unit_length) {
 			add_index(period_list[key], key);
 
 	// sort by start time
-	start_list.sort(function comparator(period1, period2) {
+	start_list.sort(function(period1, period2) {
 		return period1[0] - period2[0];
 	});
 

@@ -5395,7 +5395,7 @@ Punycode.encode=function(UString){
   cA.push(c=UString.charCodeAt(i));
   if(c>n)mA.push(c);
  }
- mA.sort(function(a,b){return b-a;});
+ mA.sort(library_namespace.descending);
 
  while(h<cA.length){
   do{c=mA.pop();}while(m==c);	//	預防重複
@@ -5852,8 +5852,8 @@ stop_event = function(event, c) {
 
 
 
-//sort_function([key, original index])
-function sort_nodes(node_list, sort_function, key_generator) {
+//comparator([key, original index])
+function sort_nodes(node_list, comparator, key_generator) {
 
 	if (typeof key_generator !== 'function')
 		key_generator = function(n) {
@@ -5864,7 +5864,7 @@ function sort_nodes(node_list, sort_function, key_generator) {
 	for (; i < length; i++)
 		list.push([ key_generator(node_list[i]), i ]);
 
-	list.sort(sort_function);
+	list.sort(comparator);
 
 	// 依照次序排列 nodes。
 	// TODO: 採用 .insertBefore() 時的最佳演算法，最小化（最少化）.insertBefore() 操作。找出 sort 後之連續 node list，有需要更動時才改。

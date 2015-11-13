@@ -1160,12 +1160,12 @@ _.set_bind = need_valueOf ? set_bind_valueOf : set_bind;
 /**
  * 
  * @param {Array}array
- * @param {Function}[sortFunction]
+ * @param {Function}[comparator]
  * @returns
  */
-function unique_and_sort_Array(array, sortFunction) {
-	if (sortFunction)
-		array.sort(sortFunction);
+function unique_and_sort_Array(array, comparator) {
+	if (comparator)
+		array.sort(comparator);
 	else
 		array.sort();
 
@@ -1851,11 +1851,36 @@ set_method(Array, {
 });
 
 
+//------------------------------------
+// comparator, compare_function, sort_function
+
+
+// 用於由小至大升序序列排序, ascending, smallest to largest, A to Z。
+// 注意：sort 方法會在原地排序 Array 物件。
+// @see std::less<int>()
+function ascending(a, b) {
+	// 升序序列排序: 小→大
+	return a < b ? -1 : a > b ? 1 : 0;
+	// '12/34', '56/78' 可以比大小，但不能相減。
+
+	//return a - b;
+	//return _1 - _2;
+	//return Math.sign(a - b);
+}
+
+function descending(a, b) {
+	// 降序序列排序: 大→小
+	return a < b ? 1 : a > b ? -1 : 0;
+}
+
+_.ascending = ascending;
+_.descending = descending;
+
 
 /**
  * 以二分搜尋法(binary search)搜尋已排序的 array。<br />
  * binary search an Array.<br />
- * **注意：使用前須先手動將 array 排序！<br />
+ * ** 注意：使用前須先手動將 array 排序！<br />
  * TODO: 依資料分布:趨近等差/等比/對數等，以加速搜尋。
  * 
  * cf.
@@ -1954,12 +1979,7 @@ function search_sorted_Array(array, value, options) {
 	: not_found && !callback ? NOT_FOUND : index;
 }
 
-search_sorted_Array.default_comparator = function(a, b) {
-	return a < b ? -1 : a > b ? 1 : 0;
-	// '12/34', '56/78' 可以比大小，但不能相減。
-	// return a - b;
-	// return Math.sign(a - b);
-};
+search_sorted_Array.default_comparator = ascending;
 
 _.search_sorted_Array = search_sorted_Array;
 
@@ -2117,7 +2137,7 @@ _.PATTERN_duplicated = /(.).*?\1/;
  * @returns {Array}the last array processed
  */
 function Array_for_permutation(handler, descending, inplace) {
-	var array = inplace ? this : this.slice(), last_index = array.length - 1;
+	var array = inplace ? this : this.clone(), last_index = array.length - 1;
 	if (last_index >= 0)
 		handler(array);
 	if (last_index < 1)
@@ -2185,13 +2205,77 @@ function Number_for_permutation(handler, descending, sort, base) {
 		return +v;
 	});
 	if (sort)
-		array.sort(typeof sort === 'function' ? sort : function(a, b) {
-			return a - b;
-		});
+		array.sort(typeof sort === 'function' ? sort : ascending);
 	return +array.for_permutation(function(array) {
 		return handler(+array.join(''));
 	}, descending, true).join('');
 }
+
+
+// ------------------------------------
+
+
+/*
+
+[1,2,4,8,16,32].for_combination(3,function(s){console.log(s);})
+CeL.for_combination(6,3,function(s){console.log(s);})
+TODO:
+CeL.for_combination(6,3,function(s){console.log(s);},true)
+
+
+*/
+
+// combinatorics
+// next_combination
+// select ((select)) elements, ((select))-selection
+function for_combination(elements, select, handler, descending) {
+	if (!((select |= 0) > 0))
+		// nothing select
+		return;
+
+	var map;
+	if (Array.isArray(elements)) {
+		// elements as map array
+		map = elements;
+		elements = map.length;
+	}
+
+	var index = 0,
+	/** {Array}index array */
+	selected = [];
+
+	// initialization
+	for (; index < select; index++)
+		selected.push(index);
+
+	while (true) {
+		// TODO: descending
+		handler(map ? selected.map(function(index) {
+			return descending ? map[elements - index] : map[index];
+		}) : descending ? selected.map(function(index) {
+			return elements - index - 1;
+		}).reverse() : selected);
+
+		index = 1;
+		for (; index < select && selected[index] === selected[index - 1] + 1; index++)
+			;
+		if (++selected[--index] === elements)
+			break;
+		--index;
+		if (selected[index] !== index)
+			for (; index >= 0; index--)
+				selected[index] = index;
+	}
+}
+
+_.for_combination = for_combination;
+
+
+function Array_for_combination(select, handler, descending, inplace) {
+	return for_combination(inplace ? this : this.clone(), select, handler,
+			descending);
+}
+
 
 
 // ------------------------------------
@@ -2318,7 +2402,8 @@ set_method(Array.prototype, {
 		return this;
 	},
 
-	for_permutation : Array_for_permutation
+	for_permutation : Array_for_permutation,
+	for_combination : Array_for_combination
 });
 
 //---------------------------------------------------------------------//

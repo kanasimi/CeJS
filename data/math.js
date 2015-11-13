@@ -692,9 +692,7 @@ function closest_product(set, target, options) {
 		if (!options.sorted)
 			set = set.clone()
 			// 由小至大排序。
-			.sort(function(a, b) {
-				return a - b;
-			});
+			.sort(library_namespace.ascending);
 	}
 
 	// direction = -1: 僅接受小於 target 的積。
@@ -879,14 +877,14 @@ function floor_sqrt(number) {
 _.floor_sqrt = floor_sqrt;
 
 
-/** all possible last 2 digits of square number */
+/** {Object}all possible last 2 digits of square number */
 var square_ending = library_namespace.null_Object();
 [ 0, 1, 4, 9, 16, 21, 24, 25, 29, 36, 41, 44, 49, 56, 61, 64, 69, 76, 81, 84, 89, 96 ].forEach(function(n) {
 	square_ending[n] = null;
 });
 
 // 完全平方數, a square number or perfect square. TODO: use 牛頓法
-// is square number
+// is square number, n²
 function is_square(number) {
 	if (!((number % 100) in square_ending))
 		return false;
@@ -1542,7 +1540,7 @@ function factorize(natural, radix, index, factors) {
 		// TODO
 	}
 
-	fA.sort(function (a, b) { return a - b; });
+	fA.sort(library_namespace.ascending);
 	fA.forEach(function (p) {
 		p = p.toString(radix);
 		if (p in factors)
@@ -2553,10 +2551,7 @@ function integer_partitions(sum, part_count, summands) {
 	// 檢查是否有解。
 	if (sum % GCD.apply(null, summands) !== 0)
 		return;
-	summands = summands.slice().sort(function(a, b) {
-		// 小→大
-		return a - b;
-	});
+	summands = summands.slice().sort(library_namespace.ascending);
 
 	return count_partitions(sum, part_count, summands, []);
 }
