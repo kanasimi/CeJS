@@ -2366,9 +2366,10 @@ set_method(Array.prototype, {
 		while((index = this.indexOf(value, index)) !== NOT_FOUND)
 			this.splice(index, 1);
 	},
-	// Array.prototype.sum
+	// Array.prototype.sum()
 	sum: function(using_index) {
 		// total summation
+		// ABSORBING_ELEMENT
 		var sum = 0;
 		this.forEach(using_index ? function(e, i) {
 			sum += i;
@@ -2376,6 +2377,17 @@ set_method(Array.prototype, {
 			sum += +e;
 		});
 		return sum;
+	},
+	// Array.prototype.product()
+	product: function(using_index) {
+		// MULTIPLICATIVE_IDENTITY
+		var product = 1;
+		this.every(using_index ? function(e, i) {
+			return product *= i;
+		} : function(e) {
+			return product *= +e;
+		});
+		return product;
 	},
 	to_hash: function(get_key, hash) {
 		if (!hash)

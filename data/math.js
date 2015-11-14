@@ -188,7 +188,7 @@ mutual_division = function mutual_division(n1, n2, times) {
 	}
 
 	// old:
-	if(false){
+	if (false) {
 		while (b && n--) {
 			// 2.08s@10000
 			// 可能因為少設定（=）一次c所以較快。但（若輸入不為整數）不確保d為整數？用Math.floor((a-(c=a%b))/b)可確保，速度與下式一樣快。
@@ -1609,15 +1609,21 @@ _.first_factor = first_factor;
 function factor_sum_map(limit, options) {
 	var add_1, add_self,
 	// default: {Natural}∑ summation of proper factors
-	get_sum = true;
+	get_sum = true, processor, list;
 
 	if (options) {
+		if (typeof options === 'function')
+			processor = options.processor;
 		add_1 = options.add_1;
 		add_self = options.add_self;
+		list = options.list;
 		if (options.all_factors)
 			add_1 = add_self = true;
-		// options.list: get list instead of summation.
-		get_sum = !options.list;
+		if (typeof options.processor === 'function')
+			processor = options.processor;
+		else
+			// options.list: get factor list instead of summation.
+			get_sum = !options.get_list;
 	}
 
 	// assert: limit≥1
@@ -1625,10 +1631,10 @@ function factor_sum_map(limit, options) {
 	++limit;
 
 	var
-	// ((number)) starts from 2.
+	// ((index)) starts from 2.
 	// skip 0: needless, natural numbers starts from 1.
 	// skip 1: already precessed by .fill(1).
-	number = 2,
+	index = list ? 0 : 2,
 	// options.add_1: every number has factor 1,
 	// set this if you want include 1 into sum.
 	factor_map = get_sum ? _.number_array(limit, add_1 ? 1 : 0)
@@ -1640,11 +1646,18 @@ function factor_sum_map(limit, options) {
 		factor_map[0] = 0;
 
 	// generate factor map: a kind of sieve method.
-	for (; number < limit; number++) {
-		for (var n = add_self ? number : 2 * number; n < limit; n += number)
-			// 將所有 ((number)) 之倍數都加上 ((number))。
-			// Append ((number)) to every multiple of ((number)).
-			if (get_sum)
+	for (;; index++) {
+		var number = list ? list[index] : index;
+		if (!(number < limit))
+			break;
+		for (var n = add_self ? number : 2 * number; n < limit; n += number) {
+			// 處理所有 ((number)) 之倍數。
+			if (processor)
+				processor(factor_map, number, n);
+			else if (get_sum)
+				// 將所有 ((number)) 之倍數都加上 ((number))。
+				// Append ((number)) to every multiple of ((number)).
+				//
 				// factor_map[0] is nonsense 無意義
 				// factor_map[number>0]
 				// = summation of the proper factors of number.
@@ -1653,6 +1666,7 @@ function factor_sum_map(limit, options) {
 				factor_map[n].push(number);
 			else
 				factor_map[n] = add_1 ? [ 1, number ] : [ number ];
+		}
 	}
 
 	library_namespace.debug('factor map: [' + factor_map.length + '] '
