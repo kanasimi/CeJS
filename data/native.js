@@ -1631,7 +1631,8 @@ function Object_clone(object, deep) {
  * Test if no property in the object.<br />
  * for Object.is_empty()
  * 
- * for ArrayLike, use .length instead. This method includes non-numeric property.
+ * for ArrayLike, use .length instead. This method includes non-numeric
+ * property.
  * 
  * @param {Object}object
  *            object to test
@@ -1643,7 +1644,7 @@ function Object_clone(object, deep) {
 function Object_is_empty(object) {
 	if (object !== null)
 		for ( var key in object) {
-			if (object.hasOwnProperty(key)) {
+			if (!object.hasOwnProperty || object.hasOwnProperty(key)) {
 				return false;
 			}
 		}
@@ -1654,7 +1655,8 @@ function Object_is_empty(object) {
  * Count properties of the object.<br />
  * for Object.size()
  * 
- * for ArrayLike, use .length instead. This method will count non-numeric properties.
+ * for ArrayLike, use .length instead. This method will count non-numeric
+ * properties.
  * 
  * @param {Object}object
  *            object to count properties
@@ -1668,7 +1670,7 @@ function Object_size(object) {
 		return 0;
 	var count = 0;
 	for ( var key in object) {
-		if (object.hasOwnProperty(key)) {
+		if (!object.hasOwnProperty || object.hasOwnProperty(key)) {
 			count++;
 		}
 	}
@@ -2038,6 +2040,119 @@ _.search_sorted_Array = search_sorted_Array;
 
 
 
+/**
+ * merge / combine string with duplicated characters.<br />
+ * merge 2 array by order, without order change<br />
+ * 警告: 此法僅於無重複元素時有效。
+ * 
+ * @param {Array}sequence_list
+ *            sequence list to merge
+ * 
+ * @returns {Array}merged chain
+ * 
+ * @see find duplicate part of 2 strings<br />
+ *      https://en.wikipedia.org/wiki/String_metric
+ *      https://en.wikipedia.org/wiki/Shortest_common_supersequence_problem
+ *      http://codegolf.stackexchange.com/questions/17127/array-merge-without-duplicates
+ */
+function merge_unduplicated_sequence(sequence_list) {
+	var map = library_namespace.null_Object();
+
+	function append_map(element, index) {
+		var i = 0, chain = map[element];
+		if (!chain)
+			chain = map[element]
+			// [ 0: possible backward, 1: possible foreword ]
+			= [ library_namespace.null_Object(),
+					library_namespace.null_Object() ];
+		for (; i < index; i++)
+			// 登記前面的。
+			chain[0][this[i]] = true;
+		// i++: skip self
+		for (i++; i < this.length; i++)
+			// 登記後面的。
+			chain[1][this[i]] = true;
+	}
+
+	sequence_list.forEach(function(sequence) {
+		if (typeof sequence === 'string')
+			sequence = sequence.split('');
+		if (typeof sequence.forEach === 'function'
+		// && Array.isArray(sequence)
+		) {
+			sequence.forEach(append_map, sequence);
+		} else {
+			library_namespace
+					.warn('merge_unduplicated_sequence: Invalid sequence: ['
+							+ sequence + ']');
+		}
+	});
+
+	// 此法僅於無重複時有效。
+	/**
+	 * result chain / sequence.<br />
+	 * result = [ start of chain, ends of chain ]
+	 * 
+	 * @type {Array}
+	 */
+	var result = [ [], [] ];
+	while (true) {
+		/** {Array}temporary queue */
+		var queue = [ [], [] ],
+		/** {Array}elements added */
+		added = [];
+		for ( var element in map) {
+			if (element in added)
+				continue;
+			// 先考慮添入起首，再考慮結尾。
+			if (Object.is_empty(map[element][0])) {
+				queue[0].push(element);
+				// 登記。
+				added.push(element);
+				continue;
+			}
+			if (Object.is_empty(map[element][1])) {
+				queue[1].push(element);
+				// 登記。
+				added.push(element);
+				continue;
+			}
+		}
+
+		if (added.length === 0)
+			// nothing can do.
+			// e.g., a ring, 有重複。
+			break;
+
+		if (queue[0].length === 1)
+			result[0].push(queue[0][0]);
+		else if (queue[0].length > 0) {
+			// 有多重起頭。
+			throw 'Invalid starts: ' + queue[0];
+		}
+		if (queue[1].length === 1)
+			result[1].unshift(queue[1][0]);
+		else if (queue[1].length > 0) {
+			// 有多重結尾。
+			throw 'Invalid ends: ' + queue[1];
+		}
+
+		// remove node.
+		added.forEach(function(element) {
+			var data = map[element];
+			for ( var node in data[0])
+				delete map[node][1][element];
+			for ( var node in data[1])
+				delete map[node][0][element];
+			delete map[element];
+		});
+	}
+
+	result = result[0].concat(result[1]);
+	return result;
+}
+
+_.merge_sequence = merge_unduplicated_sequence;
 
 
 // ---------------------------------------------------------------------//
