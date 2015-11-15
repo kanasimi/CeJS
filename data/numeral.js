@@ -1030,7 +1030,7 @@ if (typeof CeL === 'function')
 			// Roman numerals
 			// https://en.wikipedia.org/wiki/Roman_numerals
 			// https://en.wiktionary.org/wiki/Appendix:Roman_numerals
-			// TODO: Alternative forms
+			// TODO: to Alternative forms
 			var Roman_numeral_alternative = {
 				'ↅ' : 'VI',
 				'ↆ' : 'L',
@@ -1052,7 +1052,7 @@ if (typeof CeL === 'function')
 			// assert: 2個一組為十進位。
 			Roman_numeral_value = 'IVXLCDMↁↂↇↈ'.split(''),
 			// Roman_numeral_value[apostrophus_starts] 開始為 apostrophus 表示法。
-			apostrophus_starts = 7;
+			apostrophus_starts = Roman_numeral_value.indexOf('ↁ');
 
 			Roman_numeral_value.forEach(function(digit, index) {
 				var is_unit = index % 2 === 0, next;

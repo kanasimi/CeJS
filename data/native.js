@@ -2113,6 +2113,30 @@ function replace_check_near(text, pattern, replace_to, match_previous,
 }
 
 
+var PATTERN_bigrams = /.{2}/g;
+
+// Sørensen index or Dice's coefficient.
+// https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
+function similarity_coefficient(string_1, string_2) {
+	var count = 0,
+	//
+	group_1 = string_1.match(PATTERN_bigrams).concat(
+			string_1.slice(1).match(PATTERN_bigrams)),
+	//
+	group_2 = string_2.match(PATTERN_bigrams).concat(
+			string_2.slice(1).match(PATTERN_bigrams));
+
+	group_1.forEach(function(bigram) {
+		if (group_2.includes(bigram))
+			count++;
+	});
+
+	// 0–1
+	return 2 * count / (group_1.length + group_2.length);
+}
+
+String.similarity = similarity_coefficient;
+
 
 // ------------------------------------
 

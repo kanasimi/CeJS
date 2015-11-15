@@ -266,6 +266,11 @@ function test_native() {
 		[[ 'r', [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ] }) ]],
 		[[ undefined, [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ], /* 以便未找到時回傳 undefined. */ near : [] }) ]],
 	]);
+
+	error_count += CeL.test("Sørensen index or Dice's coefficient.", [
+		[[ String.similarity('night','nacht'), .25 ], 'night & nacht'],
+	]);
+
 }
 
 
