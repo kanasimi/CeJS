@@ -48,7 +48,7 @@ _// JSDT:_module_
 
 
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 // cache
 var set_method = library_namespace.set_method,
@@ -1092,7 +1092,7 @@ function set_intermediate(head, foot) {
 }
 
 
-//---------------------------------------------------------------------//
+// ---------------------------------------------------------------------//
 
 
 function set_bind(handler, need_meny_arg) {
@@ -1626,9 +1626,61 @@ function Object_clone(object, deep) {
 }
 
 
+
+/**
+ * Test if no property in the object.<br />
+ * for Object.is_empty()
+ * 
+ * for ArrayLike, use .length instead. This method includes non-numeric property.
+ * 
+ * @param {Object}object
+ *            object to test
+ * 
+ * @returns {Boolean}the object is empty.
+ * 
+ * @see http://stackoverflow.com/questions/3426979/javascript-checking-if-an-object-has-no-properties-or-if-a-map-associative-arra
+ */
+function Object_is_empty(object) {
+	if (object !== null)
+		for ( var key in object) {
+			if (object.hasOwnProperty(key)) {
+				return false;
+			}
+		}
+	return true;
+}
+
+/**
+ * Count properties of the object.<br />
+ * for Object.size()
+ * 
+ * for ArrayLike, use .length instead. This method will count non-numeric properties.
+ * 
+ * @param {Object}object
+ *            object to count properties
+ * 
+ * @returns {Boolean}properties count
+ * 
+ * @see http://stackoverflow.com/questions/5223/length-of-a-javascript-object-that-is-associative-array
+ */
+function Object_size(object) {
+	if (object === null)
+		return 0;
+	var count = 0;
+	for ( var key in object) {
+		if (object.hasOwnProperty(key)) {
+			count++;
+		}
+	}
+	return count;
+}
+
+
 set_method(Object, {
 	filter : Object_filter,
-	clone : Object_clone
+	clone : Object_clone,
+	is_empty : Object_is_empty,
+	size : Object_size
 });
 
 
@@ -1851,7 +1903,7 @@ set_method(Array, {
 });
 
 
-//------------------------------------
+// ------------------------------------
 // comparator, compare_function, sort_function
 
 
@@ -1984,6 +2036,12 @@ search_sorted_Array.default_comparator = ascending;
 _.search_sorted_Array = search_sorted_Array;
 
 
+
+
+
+
+// ---------------------------------------------------------------------//
+
 // https://en.wikipedia.org/wiki/Letter_case#Headings_and_publication_titles
 // http://adminsecret.monster.com/training/articles/358-what-to-capitalize-in-a-title
 // http://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
@@ -2115,19 +2173,29 @@ function replace_check_near(text, pattern, replace_to, match_previous,
 
 var PATTERN_bigrams = /.{2}/g;
 
-// Sørensen index or Dice's coefficient.
-// https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
+/**
+ * Get Sørensen index, or Dice's coefficient.
+ * 
+ * @param {String}string_1
+ *            sequence 1
+ * @param {String}string_2
+ *            sequence 2
+ * 
+ * @returns {Number}index (or named coefficient)
+ * 
+ * @see https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
+ */
 function similarity_coefficient(string_1, string_2) {
 	var count = 0,
 	//
-	group_1 = string_1.match(PATTERN_bigrams).concat(
+	bigrams_1 = string_1.match(PATTERN_bigrams).concat(
 			string_1.slice(1).match(PATTERN_bigrams)),
 	//
-	group_2 = string_2.match(PATTERN_bigrams).concat(
+	bigrams_2 = string_2.match(PATTERN_bigrams).concat(
 			string_2.slice(1).match(PATTERN_bigrams));
 
-	group_1.forEach(function(bigram) {
-		if (group_2.includes(bigram))
+	bigrams_1.forEach(function(bigram) {
+		if (bigrams_2.includes(bigram))
 			count++;
 	});
 
@@ -2442,7 +2510,7 @@ set_method(Array.prototype, {
 	for_combination : Array_for_combination
 });
 
-//---------------------------------------------------------------------//
+// ---------------------------------------------------------------------//
 
 
 /**
@@ -2498,7 +2566,7 @@ set_method(Date.prototype, {
 });
 
 
-//---------------------------------------------------------------------//
+// ---------------------------------------------------------------------//
 
 
 return (

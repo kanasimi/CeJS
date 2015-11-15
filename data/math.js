@@ -2801,7 +2801,7 @@ if (library_namespace.typed_arrays) {
 /**
  * Create digit value table. 建構出位數值表。
  * 
- * 對一般問題，所要求的，即是以 Greedy algorithm （貪心算法,貪心法）遞歸搜索，從 digit_table[0–末位數]各選出一位數值，使其總合為0。<br />
+ * 對一般問題，所要求的，即是以 greedy algorithm （貪心算法,貪心法）遞歸搜索，從 digit_table[0–末位數]各選出一位數值，使其總合為0。<br />
  * 因為各位數值有其特性，因此可能存有些技巧以降低所需處理之數據量。
  * 
  * @param {Array}initial_value
@@ -2895,7 +2895,7 @@ function digit_table(initial_value, options) {
 		return table;
 
 	// ------------------------------------------
-	// process: 以 Greedy algorithm （貪心算法,貪心法）遞歸搜索
+	// process: 以 greedy algorithm （貪心算法,貪心法）遞歸搜索
 
 	/**
 	 * caculate sum of digit values
