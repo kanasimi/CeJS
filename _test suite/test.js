@@ -504,8 +504,21 @@ function test_numeral() {
 		[[8467287389047,CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(8467287389047,true))],'中文數字'],
 	]);
 	error_count += CeL.test('中文數字 0 to 1000', function(assert) {
-		for(var i=0;i<=1000;i++)
-			assert([i,CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(i,true))],'中文數字 '+i);
+		for (var natural = 0; natural <= 1000; natural++) {
+			assert([ natural, CeL.from_Chinese_numeral(
+			//
+			CeL.to_Chinese_numeral(natural, true)) ], '中文數字 ' + natural);
+		}
+	});
+
+	error_count += CeL.test('Roman numerals 1 to 1000000', function(assert) {
+		for (var natural = 1; natural < 1e6; natural++) {
+			if (natural % 10000 === 0)
+				CeL.debug(natural + ': ' + CeL.to_Roman_numeral(natural, true));
+			assert([ natural,
+					CeL.from_Roman_numeral(CeL.to_Roman_numeral(natural, true)) ],
+					'Roman numeral ' + natural);
+		}
 	});
 
 	error_count += CeL.test('中文數字', [
@@ -597,7 +610,7 @@ function test_math() {
 		var p = 20374345;
 		assert([ CeL.data.math.floor_sqrt(p * p), p ], 'floor_sqrt');
 		assert([ CeL.data.math.floor_sqrt(p * p - 1), p - 1 ], 'floor_sqrt');
-		assert(CeL.data.math.is_square(p * p), 'is_square');
+		assert(!!CeL.data.math.is_square(p * p), 'is_square');
 		assert(!CeL.data.math.is_square(p * p - 1), 'is_square');
 
 		if (test_level)

@@ -1415,7 +1415,8 @@ function count_all_factors() {
 	return count;
 }
 
-// 歐拉函數 φ(n) 是小於或等於n的正整數中與n互質的數的數目。
+// 歐拉函數 φ(n), Euler's totient function, Euler's phi function 是小於或等於n的正整數中與n互質的數的數目。
+// https://en.wikipedia.org/wiki/Euler's_totient_function
 function coprime() {
 	var count = this.natural;
 	for (var prime in this) {
@@ -1637,13 +1638,16 @@ function factor_sum_map(limit, options) {
 	index = list ? 0 : 2,
 	// options.add_1: every number has factor 1,
 	// set this if you want include 1 into sum.
-	factor_map = get_sum ? _.number_array(limit, add_1 ? 1 : 0)
+	factor_map = get_sum ? _.number_array(limit, add_1 ? 1 : 0, options.type)
 	//
 	: add_1 ? [ , [ 1 ] ] : [];
 
 	if (false)
 		// factor_map[0] is nonsense 無意義，預設成 0。
 		factor_map[0] = 0;
+
+	if (options && typeof options.preprocessor === 'function')
+		factor_map = options.preprocessor(factor_map) || factor_map;
 
 	// generate factor map: a kind of sieve method.
 	for (;; index++) {
@@ -1653,6 +1657,8 @@ function factor_sum_map(limit, options) {
 		for (var n = add_self ? number : 2 * number; n < limit; n += number) {
 			// 處理所有 ((number)) 之倍數。
 			if (processor)
+				// count factors:
+				// processor : function(factor_map, factor, natural) {factor_map[natural]++;}
 				processor(factor_map, number, n);
 			else if (get_sum)
 				// 將所有 ((number)) 之倍數都加上 ((number))。
@@ -2475,7 +2481,7 @@ _.find_maxima = function(equation, min, max, options) {
 // http://codex.wiki/post/117994-555
 
 /**
- * Get the count of integer partitions. 整數分拆
+ * Get the count of integer partitions. 整數分拆: 將正整數 sum 拆分，表達成一些正整數的和。
  * 
  * TODO: part
  * 
@@ -2490,7 +2496,7 @@ _.find_maxima = function(equation, min, max, options) {
  * 
  * @returns {Natural}組合方法數
  * 
- * @see https://en.wikipedia.org/wiki/Greedy_algorithm
+ * @see 貪心算法,貪心法 https://en.wikipedia.org/wiki/Greedy_algorithm
  * 
  * @inner
  */
@@ -2530,7 +2536,7 @@ function count_partitions(sum, part_count, summands, cache) {
 
 
 /**
- * Get the count of integer partitions. 整數分拆:兌換/分桶/分配問題
+ * Get the count of integer partitions. 整數分拆: 將正整數 sum 拆分，表達成一些正整數的和。 兌換/分桶/分配問題
  * 
  * TODO: part, count of summands, options
  * 
@@ -2795,7 +2801,7 @@ if (library_namespace.typed_arrays) {
 /**
  * Create digit value table. 建構出位數值表。
  * 
- * 對一般問題，所要求的，即是以 Greedy algorithm 遞歸搜索，從 digit_table[0–末位數]各選出一位數值，使其總合為0。<br />
+ * 對一般問題，所要求的，即是以 Greedy algorithm （貪心算法,貪心法）遞歸搜索，從 digit_table[0–末位數]各選出一位數值，使其總合為0。<br />
  * 因為各位數值有其特性，因此可能存有些技巧以降低所需處理之數據量。
  * 
  * @param {Array}initial_value
@@ -2889,7 +2895,7 @@ function digit_table(initial_value, options) {
 		return table;
 
 	// ------------------------------------------
-	// process: 以 Greedy algorithm 遞歸搜索
+	// process: 以 Greedy algorithm （貪心算法,貪心法）遞歸搜索
 
 	/**
 	 * caculate sum of digit values

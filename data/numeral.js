@@ -1030,7 +1030,7 @@ if (typeof CeL === 'function')
 			// Roman numerals
 			// https://en.wikipedia.org/wiki/Roman_numerals
 			// https://en.wiktionary.org/wiki/Appendix:Roman_numerals
-			// Alternative forms
+			// TODO: Alternative forms
 			var Roman_numeral_alternative = {
 				'ↅ' : 'VI',
 				'ↆ' : 'L',
@@ -1049,7 +1049,10 @@ if (typeof CeL === 'function')
 			// 
 			PATTERN_Roman = [],
 
-			Roman_numeral_value = 'IVXLCDMↁↂↇↈ'.split('');
+			// assert: 2個一組為十進位。
+			Roman_numeral_value = 'IVXLCDMↁↂↇↈ'.split(''),
+			// Roman_numeral_value[apostrophus_starts] 開始為 apostrophus 表示法。
+			apostrophus_starts = 7;
 
 			Roman_numeral_value.forEach(function(digit, index) {
 				var is_unit = index % 2 === 0, next;
@@ -1069,28 +1072,56 @@ if (typeof CeL === 'function')
 			// console.log(PATTERN_Roman);
 			// /(ↈ*)(ↂ[ↇↈ]|ↇ?ↂ*)(M[ↁↂ]|ↁ?M*)(C[DM]|D?C*)(X[LC]|L?X*)(I[VX]|V?I*)/i
 
-			function to_Roman_numeral(number) {
-				if (!(number > 0) || number != (number | 0))
+			// apostrophus: expressed in "apostrophus" notation.
+			function to_Roman_numeral(number, apostrophus) {
+				if (!(number > 0) || number != (number | 0)) {
+					/**
+					 * the word nulla (the Latin word meaning "none") was used
+					 * by medieval computists in lieu of 0.<br />
+					 * About 725, Bede or one of his colleagues used the letter
+					 * N, the initial of nulla, in a table of epacts, all
+					 * written in Roman numerals.
+					 */
+					// return number === 0 ? 'N' : number;
 					return number;
+				}
 
-				var value = [], left = number | 0;
+				/** {Natural}已處理的 Roman 數字。 */
+				var value = [],
+				/** {Natural}剩下尚未處理的數值。 */
+				left = number | 0;
+
+				// 將 apostrophus 轉成可接受的最大 index。
+				apostrophus = apostrophus ? Roman_numeral_value.length
+						: apostrophus_starts;
+
+				// index += 2: assert: 2個一組為十進位。
 				for (var index = 0; left > 0; index += 2) {
-					if (index >= Roman_numeral_value.length)
-						// OUT OF RANGE
-						throw new Error('The number is too large: ' + number);
+					if (index >= apostrophus) {
+						library_namespace.err(
+						// OUT OF RANGE: number ≥ 1000000
+						'The number is too large to be expressed in Roman numerals: '
+								+ number);
+						return;
+					}
 
-					var digits, position = left % 10;
+					var digits,
+					/** {Integer}位值。 */
+					position = left % 10;
 					left = left / 10 | 0;
-					if ((position + 1) % 5 === 0)
+					if ((position + 1) % 5 === 0 && apostrophus >
+					// position = 4 or 9 時之特殊處置。必須有此數字表示法，才允許通過。
+					(digits = index + (position === 4 ? 1 : 2))) {
 						digits = Roman_numeral_value[index]
-								+ Roman_numeral_value[index
-										+ (position === 4 ? 1 : 2)];
-					else {
-						if (position > 4) {
+								+ Roman_numeral_value[digits];
+					} else {
+						if (position > 4
+						// [index + 1] 可能已經越界。
+						&& (digits = Roman_numeral_value[index + 1])) {
 							position -= 5;
-							digits = Roman_numeral_value[index + 1];
-						} else
+						} else {
 							digits = '';
+						}
 						digits += Roman_numeral_value[index].repeat(position);
 					}
 					value.push(digits);
