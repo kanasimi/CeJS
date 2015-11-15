@@ -2315,7 +2315,7 @@ function similarity_coefficient(string_1, string_2) {
 	});
 
 	// 0–1
-	return 2 * count / (group_1.length + group_2.length);
+	return 2 * count / (bigrams_1.length + bigrams_2.length);
 }
 
 String.similarity = similarity_coefficient;
