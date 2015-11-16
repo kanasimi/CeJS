@@ -1192,23 +1192,33 @@ var type_index = {
  * 去掉 Array 中重複的 items。<br />
  * 應能確保順序不變。
  */
-function unique_Array() {
-	var array = [],
-	// 以 hash 純量 index 加速判別是否重複。
-	hash = library_namespace.null_Object();
+function unique_Array(sorted) {
+	var array = [];
 
-	this.forEach(function(element) {
-		var type = typeof element;
-		// 能確保順序不變。
-		if (type in type_index) {
-			// TODO: -0
-			if(!(element in hash) || !(type_index[type] in hash[element])) {
+	if (sorted) {
+		var last;
+		this.forEach(function(element) {
+			if (last !== element)
 				array.push(element);
-				(hash[element] = [])[type_index[type]] = null;
-			}
-		} else if (array.indexOf(element) === NOT_FOUND)
-			array.push(element);
-	});
+			last = element;
+		});
+
+	} else {
+		// 以 hash 純量 index 加速判別是否重複。
+		var hash = library_namespace.null_Object();
+		this.forEach(function(element) {
+			var type = typeof element;
+			// 能確保順序不變。
+			if (type in type_index) {
+				// TODO: -0
+				if(!(element in hash) || !(type_index[type] in hash[element])) {
+					array.push(element);
+					(hash[element] = [])[type_index[type]] = null;
+				}
+			} else if (array.indexOf(element) === NOT_FOUND)
+				array.push(element);
+		});
+	}
 
 	return array;
 }
@@ -1629,7 +1639,7 @@ function Object_clone(object, deep) {
 
 /**
  * Test if no property in the object.<br />
- * for Object.is_empty()
+ * for Object.is_empty(), Object.isEmpty()
  * 
  * for ArrayLike, use .length instead. This method includes non-numeric
  * property.
@@ -1914,16 +1924,21 @@ set_method(Array, {
 // @see std::less<int>()
 function ascending(a, b) {
 	// 升序序列排序: 小→大
-	return a < b ? -1 : a > b ? 1 : 0;
-	// '12/34', '56/78' 可以比大小，但不能相減。
+	return a - b;
 
-	//return a - b;
-	//return _1 - _2;
-	//return Math.sign(a - b);
+	// '12/34', '56/78' 可以比大小，但不能相減。
+	// 但這對數字有問題: '1212'<'987'
+	// 若對一般物件，採用 .sort() 即可。
+	return a < b ? -1 : a > b ? 1 : 0;
+
+	return _1 - _2;
+	return Math.sign(a - b);
 }
 
 function descending(a, b) {
 	// 降序序列排序: 大→小
+	return b - a;
+
 	return a < b ? 1 : a > b ? -1 : 0;
 }
 
@@ -2054,17 +2069,27 @@ _.search_sorted_Array = search_sorted_Array;
  *      https://en.wikipedia.org/wiki/String_metric
  *      https://en.wikipedia.org/wiki/Shortest_common_supersequence_problem
  *      http://codegolf.stackexchange.com/questions/17127/array-merge-without-duplicates
+ *      https://en.wikipedia.org/wiki/Topological_sorting
  */
 function merge_unduplicated_sequence(sequence_list) {
 	var map = library_namespace.null_Object();
 
-	function append_map(element, index) {
-		var i = 0, chain = map[element];
+	function add_node(element, index) {
+		var chain = map[element];
 		if (!chain)
 			chain = map[element]
 			// [ 0: possible backward, 1: possible foreword ]
 			= [ library_namespace.null_Object(),
 					library_namespace.null_Object() ];
+		if (index > 0)
+			// 登記前面的。
+			chain[0][this[index - 1]] = true;
+		if (index + 1 < this.length)
+			// 登記前面的。
+			chain[1][this[index + 1]] = true;
+		return;
+		// 不必記太多，反而稱加操作複雜度。上面的相當於把 'abc' 拆成 'ab', 'bc'
+		var i = 0;
 		for (; i < index; i++)
 			// 登記前面的。
 			chain[0][this[i]] = true;
@@ -2080,7 +2105,7 @@ function merge_unduplicated_sequence(sequence_list) {
 		if (typeof sequence.forEach === 'function'
 		// && Array.isArray(sequence)
 		) {
-			sequence.forEach(append_map, sequence);
+			sequence.forEach(add_node, sequence);
 		} else {
 			library_namespace
 					.warn('merge_unduplicated_sequence: Invalid sequence: ['
@@ -2121,7 +2146,7 @@ function merge_unduplicated_sequence(sequence_list) {
 
 		if (added.length === 0)
 			// nothing can do.
-			// e.g., a ring, 有重複。
+			// e.g., a ring / cycle, 有重複。
 			break;
 
 		if (queue[0].length === 1)
