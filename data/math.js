@@ -859,6 +859,8 @@ _.factorial = factorial;
  *      EmbeddedRelated.com</a>
  */
 function floor_sqrt(number) {
+	// return Math.sqrt(number) | 0;
+
 	if (isNaN(number = Math.floor(number)))
 		return;
 	var g = 0, v, h, t;

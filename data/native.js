@@ -2345,6 +2345,66 @@ function similarity_coefficient(string_1, string_2) {
 
 String.similarity = similarity_coefficient;
 
+// ------------------------------------
+
+/**
+ * Test if the array combines an arithmetic progression.<br />
+ * 判斷 ((this)) 是否為等差數列/連續整數，不計較次序。
+ * 
+ * @param {String}type
+ *            'integer': arithmetic integers,<br />
+ *            'consecutive': consecutive integers 連續整數型別, if the array contains
+ *            only consecutive integers;<br />
+ *            'odd': odd consecutive integers,<br />
+ *            'even': even consecutive integers
+ * @param {Integer}MIN
+ *            acceptable minimum
+ * 
+ * @returns {Number}difference
+ * 
+ * @see https://simple.wikipedia.org/wiki/Consecutive_integer
+ */
+function Array_combines_AP(type, MIN) {
+	var length = this.length;
+	if (length <= 1)
+		return length === 1;
+
+	var min = Infinity, max = -Infinity,
+	// ABSORBING_ELEMENT
+	sum = 0,
+	/** {Boolean}為奇數或偶數型別。 */
+	parity = type === 'odd' || type === 'even';
+
+	if (this.some(function(number) {
+		if (number < min) {
+			min = number;
+			if (min < MIN)
+				return true;
+		}
+		if (max < number)
+			max = number;
+		if (parity ? max - min > 2 * (length - 1) : type === 'consecutive'
+				&& max - min > length - 1)
+			return true;
+		sum += number;
+	}))
+		return false;
+
+	if (2 * sum !== (max + min) * length)
+		return false;
+
+	if (parity && min % 2 !== (type === 'odd' ? 1 : 0))
+		return false;
+
+	var difference = (max - min) / (length - 1);
+	if (type && difference !== (parity ? 2 : type === 'consecutive' ? 1
+	// 當前只要設定 type，皆為整數型別。
+	: Math.floor(difference)))
+		return false;
+
+	return difference;
+}
+
 
 // ------------------------------------
 
@@ -2394,7 +2454,7 @@ function Array_is_permutation(sequence_2) {
 }
 
 
-// 純量變數(scalar variable)
+// 純量變數 (scalar variable)
 function String_is_permutation(sequence_2) {
 	var sequence_1 = this, last = sequence_1.length;
 	if (last !== sequence_2.length)
@@ -2402,28 +2462,17 @@ function String_is_permutation(sequence_2) {
 	// 直接比較較快。
 	if (sequence_1 === sequence_2)
 		return true;
-	sequence_1 = sequence_1.split('');
-	sequence_2 = sequence_2.split('');
 	// processed elements
 	var processed = library_namespace.null_Object();
 	for (var start = 0; start < last; start++) {
-		var element = sequence_1[start];
+		var element = sequence_1.charAt(start);
 		if (element in processed)
 			// skip element counted
 			continue;
 		processed[element] = null;
+		if (count_occurrence(sequence_1, element, start + 1) + 1
 		// O(n^2)
-		// 因為已分割成 {Array}，因此不採用 count_occurrence()
-		var index = start, difference = sequence_2[index++] === element ? 0 : 1;
-		for (; index < last; index++) {
-			if (sequence_1[index] === element)
-				difference++;
-		}
-		for (index = 0; index < last; index++) {
-			if (sequence_2[index] === element)
-				difference--;
-		}
-		if (difference !== 0) {
+		!== count_occurrence(sequence_2, element)) {
 			return false;
 		}
 	}
@@ -2735,6 +2784,7 @@ set_method(Array.prototype, {
 		return this;
 	},
 
+	combines_AP : Array_combines_AP,
 	is_permutation : Array_is_permutation,
 	for_permutation : Array_for_permutation,
 	for_combination : Array_for_combination

@@ -267,10 +267,17 @@ function test_native() {
 		[[ undefined, [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ], /* 以便未找到時回傳 undefined. */ near : [] }) ]],
 	]);
 
-	error_count += CeL.test("Sørensen index or Dice's coefficient.", [
-		[[ String.similarity('night','nacht'), .25 ], 'night & nacht'],
-	]);
+	error_count += CeL.test('Combinatorics 組合數學', function(assert) {
+		assert([ 2, 3, 5, 6, 4 ].combines_AP(), 'combines_AP()');
+		var n = 8260569835;
+		assert(n.is_permutation(3680589526), 'Permutation 排列');
+		n = 1233455;
+		n.for_permutation(function(permutation) {
+			assert(n.is_permutation(permutation), 'Permutation 排列: ' + permutation);
+		});
+	});
 
+	
 }
 
 
