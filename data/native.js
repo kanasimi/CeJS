@@ -2352,9 +2352,96 @@ String.similarity = similarity_coefficient;
 // use CeL.PATTERN_duplicated(string) to test if string contains duplicated chars.
 _.PATTERN_duplicated = /(.).*?\1/;
 
+// all the same characters
+_.PATTERN_all_same = /^(.)\1*$/;
+
+// http://en.cppreference.com/w/cpp/algorithm/is_permutation
+function Array_is_permutation(sequence_2) {
+	var sequence_1 = this, last = sequence_1.length;
+	if (last !== sequence_2.length)
+		return false;
+	if (sequence_1 === sequence_2)
+		return true;
+	while (last-- > 0 && sequence_1[last] === sequence_2[last])
+		;
+	if (last < 0)
+		return true;
+	last++;
+	// assert: sequence_1, sequence_2 有不同。
+	var start = 0;
+	while (sequence_1[start] === sequence_2[start])
+		start++;
+	// count elements
+	var processed = new Set();
+	for (; start < last; start++) {
+		var element = sequence_1[start];
+		if (processed.has(element))
+			// skip element counted
+			continue;
+		processed.add(element);
+		// O(n^2)
+		var index = start, difference = sequence_2[index++] === element ? 0 : 1;
+		for (; index < last; index++) {
+			if (sequence_1[index] === element)
+				difference++;
+			if (sequence_2[index] === element)
+				difference--;
+		}
+		if (difference !== 0)
+			return false;
+	}
+	return true;
+}
+
+
+// 純量變數(scalar variable)
+function String_is_permutation(sequence_2) {
+	var sequence_1 = this, last = sequence_1.length;
+	if (last !== sequence_2.length)
+		return false;
+	// 直接比較較快。
+	if (sequence_1 === sequence_2)
+		return true;
+	sequence_1 = sequence_1.split('');
+	sequence_2 = sequence_2.split('');
+	// processed elements
+	var processed = library_namespace.null_Object();
+	for (var start = 0; start < last; start++) {
+		var element = sequence_1[start];
+		if (element in processed)
+			// skip element counted
+			continue;
+		processed[element] = null;
+		// O(n^2)
+		// 因為已分割成 {Array}，因此不採用 count_occurrence()
+		var index = start, difference = sequence_2[index++] === element ? 0 : 1;
+		for (; index < last; index++) {
+			if (sequence_1[index] === element)
+				difference++;
+		}
+		for (index = 0; index < last; index++) {
+			if (sequence_2[index] === element)
+				difference--;
+		}
+		if (difference !== 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function Number_is_permutation(sequence_2) {
+	return String(this).is_permutation(String(sequence_2));
+}
+
+
+
+// ------------------------------------
+
 
 /**
- * 按升序/降序排列處理每一序列至最後。
+ * 按升序/降序排列處理每一序列至最後。<br />
+ * contain exactly the same digits, but in a different order.
  * 
  * 注意: 不會先做排序!
  * 
@@ -2552,6 +2639,7 @@ set_method(String.prototype, {
 	},
 	set_intermediate : set_intermediate,
 
+	is_permutation : String_is_permutation,
 	for_permutation : String_for_permutation
 });
 
@@ -2563,6 +2651,7 @@ set_method(Number.prototype, {
 	mod : set_bind(non_negative_modulo),
 	pad : set_bind(pad, true),
 
+	is_permutation : Number_is_permutation,
 	for_permutation : Number_for_permutation
 });
 
@@ -2646,6 +2735,7 @@ set_method(Array.prototype, {
 		return this;
 	},
 
+	is_permutation : Array_is_permutation,
 	for_permutation : Array_for_permutation,
 	for_combination : Array_for_combination
 });
