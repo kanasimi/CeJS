@@ -2348,8 +2348,50 @@ String.similarity = similarity_coefficient;
 // ------------------------------------
 
 /**
+ * Test if the array is an arithmetic progression.<br />
+ * 判斷 ((this)) 是否為等差數列/連續整數。<br />
+ * O(n)
+ * 
+ * @param {String}type
+ *            'integer': arithmetic integers,<br />
+ *            'consecutive': consecutive integers 連續整數型別, if the array contains
+ *            only consecutive integers;<br />
+ *            'odd': odd consecutive integers,<br />
+ *            'even': even consecutive integers
+ * 
+ * @returns {Boolean}is AP
+ * 
+ * @see https://simple.wikipedia.org/wiki/Consecutive_integer
+ */
+function Array_is_AP(type) {
+	var length = this.length;
+	if (length <= 1)
+		return length === 1;
+
+	var number = this[1],
+	/** {Boolean}為奇數或偶數型別。 */
+	parity = type === 'odd' || type === 'even';
+	if (parity && number % 2 !== (type === 'odd' ? 1 : 0))
+		return false;
+
+	var difference = number - this[0];
+	if (type && difference !== (parity ? 2 : type === 'consecutive' ? 1
+	// 當前只要設定 type，皆為整數型別。
+	: Math.floor(difference)))
+		return false;
+
+	for (var index = 2; index < length; index++)
+		if (this[index] !== (number += difference))
+			return false;
+
+	return true;
+}
+
+
+/**
  * Test if the array combines an arithmetic progression.<br />
- * 判斷 ((this)) 是否為等差數列/連續整數，不計較次序。
+ * 判斷 ((this)) 是否可組成等差數列/連續整數，不計較次序。<br />
+ * O(n)
  * 
  * @param {String}type
  *            'integer': arithmetic integers,<br />
@@ -2784,6 +2826,7 @@ set_method(Array.prototype, {
 		return this;
 	},
 
+	is_AP : Array_is_AP,
 	combines_AP : Array_combines_AP,
 	is_permutation : Array_is_permutation,
 	for_permutation : Array_for_permutation,
