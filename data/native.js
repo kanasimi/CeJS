@@ -2388,6 +2388,18 @@ function Array_is_AP(type) {
 }
 
 
+/*
+
+Sum[m + n ((M - m)/(l - 1)), {n, 0, -1 + l}]
+=
+l(m+M)/2
+
+Sum[(m + n (M - m)/(l - 1) - b)^2, {n, 0, l - 1}]
+=
+(l (6 b^2 (l-1)-6 b (l-1) (m+M)+(2 l-1) m^2+2 (l-2) m M+(2 l-1) M^2))/(6 (l-1))
+
+*/
+
 /**
  * Test if the array combines an arithmetic progression.<br />
  * 判斷 ((this)) 是否可組成等差數列/連續整數，不計較次序。<br />
@@ -2414,6 +2426,8 @@ function Array_combines_AP(type, MIN) {
 	var min = Infinity, max = -Infinity,
 	// ABSORBING_ELEMENT
 	sum = 0,
+	// 不能僅由 min/max/sum 即定奪是否等差。
+	square_sum = 0, square_base = this[0],
 	/** {Boolean}為奇數或偶數型別。 */
 	parity = type === 'odd' || type === 'even';
 
@@ -2429,10 +2443,19 @@ function Array_combines_AP(type, MIN) {
 				&& max - min > length - 1)
 			return true;
 		sum += number;
+		number -= square_base;
+		square_sum += number * number;
 	}))
 		return false;
 
 	if (2 * sum !== (max + min) * length)
+		return false;
+
+	// check sum of square
+	if (square_sum !== ((2 * length * ((min + max) * (min + max) - min * max)
+			- (min + max) * (min + max) - 2 * min * max)
+			/ 6 / (length - 1) - square_base * (min + max - square_base))
+			* length)
 		return false;
 
 	if (parity && min % 2 !== (type === 'odd' ? 1 : 0))

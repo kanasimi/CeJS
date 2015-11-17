@@ -270,8 +270,9 @@ function test_native() {
 	error_count += CeL.test('Combinatorics 組合數學', function(assert) {
 		assert([ false, [ 2, 3, 5, 6, 4 ].is_AP() ], 'is_AP(): false');
 		assert([ true, [ 5, 6, 7, 8, 9 ].is_AP() ], 'is_AP(): true');
-		assert([ false, [ 2, 3, 5, 6, 4, 4 ].combines_AP() ], 'combines_AP()');
-		assert([ 1, [ 2, 3, 5, 6, 4 ].combines_AP() ], 'combines_AP()');
+		assert([ false, [ 2, 3, 5, 6, 4, 4 ].combines_AP() ], 'combines_AP(): false');
+		assert([ 1, [ 2, 3, 5, 6, 4 ].combines_AP() ], 'combines_AP(): 1');
+		assert([ false, [ 2, 3, 5, 6, 4 ].combines_AP('integer', 3) ], 'combines_AP(): min');
 		var n = 8260569835;
 		assert(n.is_permutation(3680589526), 'Permutation 排列');
 		n = 1233455;
