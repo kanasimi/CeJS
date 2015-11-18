@@ -1760,6 +1760,61 @@ function append_to_Array(list, index) {
 
 
 
+// Array.prototype.frequency()
+// values count, 發生率
+function array_frequency(select_max, target) {
+	var count = 0;
+	if (target !== undefined) {
+		this.forEach(library_namespace.is_RegExp(pattern) ? function(item) {
+			if (target.test(item))
+				count++;
+		} : function(item) {
+			if (item === target)
+				count++;
+		});
+		return count;
+	}
+
+	// new Map()
+	var hash = library_namespace.null_Object();
+	if (!select_max) {
+		this.forEach(function(item) {
+			if (item in hash) {
+				hash[item]++;
+			} else
+				hash[item] = 1;
+		});
+		return hash;
+	}
+
+	var max_count = 0, max_index;
+	this.forEach(function(item, index) {
+		var count;
+		if (item in hash) {
+			count = ++hash[item];
+		} else
+			count = hash[item] = 1;
+		if (select_max === true) {
+			if (max_count < count) {
+				max_count = count;
+				max_index = index;
+			}
+		} else if (max_count <= count) {
+			if (max_count < count
+			// select_max = 1: max case 也選擇較大的 item, -1: max case 選擇較小的 item
+			|| !(select_max < 0 ? max_index < item : max_index > item))
+				max_index = index;
+			max_count = count;
+		}
+	});
+	// hash[this[max_index]] === max_count
+	return {
+		hash : hash,
+		value : this[max_index],
+		count : max_count,
+		index : max_index
+	};
+}
 
 /*
 
@@ -2355,7 +2410,7 @@ String.similarity = similarity_coefficient;
  * @param {String}type
  *            'integer': arithmetic integers,<br />
  *            'consecutive': consecutive integers 連續整數型別, if the array contains
- *            only consecutive integers;<br />
+ *            only consecutive integers / consecutive values;<br />
  *            'odd': odd consecutive integers,<br />
  *            'even': even consecutive integers
  * 
@@ -2408,13 +2463,13 @@ Sum[(m + n (M - m)/(l - 1) - b)^2, {n, 0, l - 1}]
  * @param {String}type
  *            'integer': arithmetic integers,<br />
  *            'consecutive': consecutive integers 連續整數型別, if the array contains
- *            only consecutive integers;<br />
+ *            only consecutive integers / consecutive values;<br />
  *            'odd': odd consecutive integers,<br />
  *            'even': even consecutive integers
  * @param {Integer}MIN
  *            acceptable minimum
  * 
- * @returns {Number}difference
+ * @returns {Number}difference or {Boolean}false
  * 
  * @see https://simple.wikipedia.org/wiki/Consecutive_integer
  */
@@ -2427,6 +2482,7 @@ function Array_combines_AP(type, MIN) {
 	// ABSORBING_ELEMENT
 	sum = 0,
 	// 不能僅由 min/max/sum 即定奪是否等差。
+	// 但尚未確認如此條件即已充分!!
 	square_sum = 0, square_base = this[0],
 	/** {Boolean}為奇數或偶數型別。 */
 	parity = type === 'odd' || type === 'even';
@@ -2826,7 +2882,7 @@ set_method(Array.prototype, {
 	},
 	to_hash: function(get_key, hash) {
 		if (!hash)
-			hash = {};
+			hash = library_namespace.null_Object();
 		this.forEach(get_key ? function(item) {
 			hash[get_key(item)] = item;
 		} : function(item) {
@@ -2834,6 +2890,8 @@ set_method(Array.prototype, {
 		});
 		return hash;
 	},
+	// Array.prototype.frequency()
+	frequency : array_frequency,
 	//clone: Array.prototype.slice,
 	append: append_to_Array,
 	uniq: unique_Array,

@@ -281,6 +281,9 @@ function test_native() {
 		});
 	});
 
+	error_count += CeL.test('native', function(assert) {
+		assert([ 6, [ 3, 6, 5, 2, 3, 6, 2, 4, 6, 4, 2, 4 ].frequency(1).value ], 'frequency(1)');
+	});
 	
 }
 
