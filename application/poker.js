@@ -1,9 +1,10 @@
 /**
  * @name CeL function for poker calculations.
- * @fileoverview 本檔案包含了撲克牌演算用的日期轉換功能。
+ * @fileoverview 本檔案包含了撲克牌演算用的功能。
+ * 
+ * @see https://en.wikipedia.org/wiki/Poker
  * 
  * @since 2015/11/19 17:16:35
- * 
  */
 
 'use strict';
@@ -19,56 +20,28 @@ if (typeof CeL === 'function')
 
 			// ------------------------------------------------------------------------------------------------------//
 
+			var
+			/** {RegExp}判斷輸入 Poker_cards() 之撲克牌牌面表達規則。 */
+			PATTERN_poker_card = /(10?|[2-9TJQKA])([SHDC♠♥♦♣])/g,
 
-			// https://en.wikipedia.org/wiki/List_of_poker_hands
+			/**
+			 * 各點數 index 值之名稱。
+			 * 
+			 * 0–12. 0:2, 1:3, ...<br />
+			 * 7:9, 8:10, 9:Jack, 10:Queen, 11:King, 12:Ace
+			 * 
+			 * @type {Array}
+			 */
+			value_name = '234567891JQKA'.split(''),
+			/** {Object}各點數之 index 值。 */
+			value_index = library_namespace.null_Object(),
+			/** {Array}各花色 index 值之名稱。 */
+			suit_name = '♠♥♦♣'.split(''),
+			/** {Object}各花色之 index 值。 */
+			suit_index = library_namespace.null_Object(),
 
-			function Poker_cards(cards) {
-				var values = this.values = [], suits = this.suits = [];
-				if (cards.forEach) {
-					cards.forEach(function() {
-						Poker_cards.parse(cards, values, suits);
-					});
-				} else if (typeof cards == 'string') {
-					Poker_cards.parse(cards, values, suits);
-				}
-			}
-
-			var PATTERN_poker_card = /(10?|[2-9JQKA])([SHDC♠♥♦♣])/g;
-
-			Poker_cards.value_index = {};
-			// 0–12. 0:2, 1:3, ...
-			// 7:9, 8:10, 9:Jack, 10:Queen, 11:King, 12:Ace
-			Poker_cards.value_name = '234567891JQKA'.split('');
-			// [9]: 1 → 10
-			Poker_cards.value_name[9] += 0;
-			Poker_cards.value_name.forEach(function(name, index) {
-				Poker_cards.value_index[name] = index;
-			});
-			Poker_cards.value_index[1] = Poker_cards.value_name.indexOf('A');
-
-			Poker_cards.suit_index = {};
-			Poker_cards.suit_name = '♠♥♦♣'.split('');
-			Poker_cards.set_suit_index = function(names) {
-				if (typeof names === 'string')
-					names = names.split('');
-				names.forEach(function(name, index) {
-					Poker_cards.suit_index[name] = index;
-				})
-			};
-
-			Poker_cards.set_suit_index(Poker_cards.suit_name);
-			Poker_cards.set_suit_index('SHDC');
-
-			Poker_cards.parse = function(card, values, suits) {
-				var matched;
-				card = card.toUpperCase();
-				while (matched = PATTERN_poker_card.exec(card)) {
-					values.push(Poker_cards.value_index[matched[1]]);
-					suits.push(Poker_cards.suit_index[matched[2]]);
-				}
-			};
-
-			Poker_cards.category_score = {
+			/** {Object}各牌型之基礎配分。 */
+			category_score = {
 				'High Card' : 100,
 				'One Pair' : 200,
 				'Two Pairs' : 300,
@@ -81,215 +54,276 @@ if (typeof CeL === 'function')
 				'Royal Flush' : 1000
 			};
 
-			Poker_cards.prototype.to_Array = function() {
+			// [10 - 2]: 1 → 10
+			value_name[10 - 2] += 0;
+			value_name.forEach(function(name, index) {
+				value_index[name] = index;
+			});
+			value_index[1] = value_name.indexOf('A');
+			// Ten
+			value_index['T'] = value_name.indexOf('10');
+
+			function set_suit_index(names) {
+				if (typeof names === 'string')
+					names = names.split('');
+				names.forEach(function(name, index) {
+					suit_index[name] = index;
+				})
+			}
+
+			set_suit_index(suit_name);
+			set_suit_index('SHDC');
+
+			// ----------------------------------------------------------------
+
+			/**
+			 * parse poker card.
+			 * 
+			 * @param {String}hand
+			 *            card 牌面。
+			 * @param {Array}values
+			 *            value array
+			 * @param {Array}suits
+			 *            suit array
+			 */
+			function parse(hand, values, suits) {
+				var matched;
+				hand = hand.toUpperCase();
+				while (matched = PATTERN_poker_card.exec(hand)) {
+					values.push(value_index[matched[1]]);
+					suits.push(suit_index[matched[2]]);
+				}
+			}
+
+			// ----------------------------------------------------------------
+
+			/**
+			 * poker cards handler.
+			 * 
+			 * @param {String}hand
+			 *            cards 牌面。
+			 * 
+			 * @constructor
+			 */
+			function Poker_cards(hand) {
+				var values = this.values = [], suits = this.suits = [];
+				if (hand.forEach) {
+					hand.forEach(function(card) {
+						parse(card, values, suits);
+					});
+				} else if (typeof hand == 'string') {
+					parse(hand, values, suits);
+				}
+			}
+
+			function to_Array() {
 				return this.values.map(function(value, index) {
-					return Poker_cards.value_name[value]
-							+ Poker_cards.suit_name[this.suits[index]];
+					return value_name[value] + suit_name[this.suits[index]];
 				}, this);
-			};
+			}
 
-			Poker_cards.prototype.toString = function() {
+			function toString() {
 				return this.to_Array().join(' ');
-			};
+			}
 
-			Poker_cards.prototype.consecutive = function() {
+			function consecutive() {
 				var values = this.values;
 				return values.combines_AP('consecutive')
-				//
+				// 同花順和順子中A如果配上2345時當做1點
 				|| values.includes(12) && values.map(function(value) {
 					return value === 12 ? -1 : value;
 				}).combines_AP('consecutive');
-			};
+			}
 
-
-			//------------------------
+			// ----------------------------------------------------------------
 
 			// five-card deal 牌型
 			// TODO: get specified category
-			Poker_cards.prototype.category = function(get_rank) {
+			function category(get_rank) {
 				function category_name(name) {
-					if (high_card && high_card.length)
-						_this.high_card = high_card.sort();
+					var score = 0;
+					if (high_card && high_card.length > 0) {
+						if (get_rank && high_card.length === 1)
+							// 只有一張時，直接將之配入 score，也無須登記 high_card 了。
+							score = high_card[0];
+						else
+							_this.high_card = high_card;
+					}
 					// card rank
-					return get_rank ? Poker_cards.category_score[name] : name;
+					return get_rank ? category_score[name] + score : name;
 				}
 
 				var suits = this.suits;
 				if (this.suits.length !== 5)
 					return;
 
-				var max_suit = suits.max = suits.frequency(1), max_suit_count = max_suit.count,
+				suits.max = suits.frequency(1);
+				var max_suit = suits.max.value,
 				//
-				values = this.values, max_value = Math.max(values);
-				// console.log(max_suit);
-				max_suit = max_suit.value;
+				max_suit_count = suits.max.count,
+				//
+				values = this.values, max_value = Math.max.apply(null, values);
+				// console.log(suits.max);
 
 				if (max_suit_count === 5 && this.consecutive()) {
-					return category_name(max_value === 12 ? 'Royal Flush' : 'Straight Flush');
+					if (max_value === 12)
+						return category_name('Royal Flush');
+					high_card.push(max_value);
+					return category_name('Straight Flush');
 				}
 
-				var value_frequency = values.max = values.frequency(1), high_card = [], _this=this,
+				values.max = values.frequency(1);
+				var value, value_frequency = values.max,
+				// Hands are ranked first by category, then by individual card
+				// ranks
+				// 這邊僅列出需要比較之點數，由小至大由後比起。
+				// assert: 同種牌型具有相同的 high_card.length
+				high_card = [], _this = this,
 				//
-				max_of_a_kind = value_frequency.count, most_frequency_value = value_frequency.value;
+				max_of_a_kind = value_frequency.count,
+				//
+				most_frequency_value = value_frequency.value;
 				// console.log(value_frequency);
+
 				if (max_of_a_kind === 4) {
-					for ( var value in value_frequency.hash)
-						if (+value !== most_frequency_value){
+					for (value in value_frequency.hash)
+						if (+value !== most_frequency_value) {
 							high_card.push(+value);
+							// 應該就只有這一張。
 							break;
 						}
+					high_card.push(most_frequency_value);
 					return category_name('Four of a Kind');
 				}
 
 				if (max_of_a_kind === 3) {
-					for ( var value in value_frequency.hash)
-						if (+value !== most_frequency_value
-								&& value_frequency.hash[value] === 2)
-							return category_name('Full House');
+					for (value in value_frequency.hash)
+						if (+value !== most_frequency_value) {
+							if (value_frequency.hash[value] === 2) {
+								// [3,2]。
+								high_card.push(+value, most_frequency_value);
+								return category_name('Full House');
+							}
+							// 應該為 'Three of a Kind', [3,1,1]。
+							break;
+						}
 				}
 
-				if (max_suit_count === 5){
-					high_card=values.clone();
+				if (max_suit_count === 5) {
+					high_card = values.clone().sort();
 					return category_name('Flush');
 				}
 
-				if (this.consecutive())
+				if (this.consecutive()) {
+					high_card.push(most_frequency_value);
 					return category_name('Straight');
+				}
 
-				if (max_of_a_kind === 3){
-					for ( var value in value_frequency.hash)
-						if (+value !== most_frequency_value){
+				if (max_of_a_kind === 3) {
+					// assert: [3,2] 已經在 'Full House' 處理過了，
+					// 因此此處應該為 [3,1,1]。
+					for (value in value_frequency.hash)
+						if (+value !== most_frequency_value) {
 							high_card.push(+value);
-							if(value_frequency.hash[value]===2)
-								high_card.push(+value);
 						}
+					high_card.push(most_frequency_value);
 					return category_name('Three of a Kind');
 				}
 
 				if (max_of_a_kind === 2) {
-					for ( var value in value_frequency.hash)
+					max_of_a_kind = [];
+					// 此處應該為 [2,1,1,1] or [2,2,1]。
+					for (value in value_frequency.hash) {
 						if (value_frequency.hash[value] === 1)
 							high_card.push(+value);
-					return category_name(high_card.length===1?'Two Pairs' : 'One Pair');
+						else
+							// assert: value_frequency.hash[value] === 2
+							max_of_a_kind.push(+value);
+					}
+					if (max_of_a_kind.length === 1) {
+						// 此處應該為 [2,1,1,1]。
+						high_card.sort();
+						high_card.push(most_frequency_value);
+						return category_name('One Pair');
+					}
+
+					// 此處應該為 [2,2,1]。
+					if (max_of_a_kind[0] < max_of_a_kind[1]) {
+						high_card.push(max_of_a_kind[0], max_of_a_kind[1]);
+					} else {
+						high_card.push(max_of_a_kind[1], max_of_a_kind[2]);
+					}
+					return category_name('Two Pairs');
 				}
 
-				if (get_rank){
-					high_card=values.clone().sort();
+				// assert: max_of_a_kind === 1
+				// 'High Card'
+				if (get_rank) {
+					// max 會被 return
+					(this.high_card = values.clone().sort()).pop();
 
-					// 'High Card'
 					// assert: score ≥ 1, it's when [2,2,2,2,3]
 					return most_frequency_value;
 				}
-			};
+			}
 
-			// wins, beats 贏對手
-			// return undefined: ties with
-			Poker_cards.prototype.defeats = function(hands) {
-				if (typeof hands === 'string')
-					hands = new Poker_cards(hands);
-				var my_category = this.category(true), category = hands.category(true);
+			/**
+			 * 判斷是否贏對手。
+			 * 
+			 * @param {String}hand
+			 *            cards 對手牌面。
+			 * 
+			 * @returns {Boolean}wins, beats; or undefined: ties with
+			 */
+			function defeats(hand) {
+				if (typeof hand === 'string')
+					hand = new Poker_cards(hand);
+				var my_category = this.category(true), category = hand
+						.category(true);
 				if (category !== my_category)
 					return category < my_category;
 
 				var my_high_card = this.high_card;
 				if (!my_high_card)
 					return;
-				my_high_card = my_high_card.sort();
 
-				var index=this.values.length,
-				// 先比牌型，再比點數 (最後花色)
-				high_card = hands.high_card.clone().sort();
-				while(index--)
-					if(high_card[index]!== my_high_card[index])
-						return high_card[index]< my_high_card[index];
-			};
-
-
-
-			//------------------------
-
-
-			// five-card deal 牌型
-			// TODO: get specified category
-			Poker_cards.prototype.category = function(get_rank) {
-				function category_name(name) {
-					// card rank
-					return get_rank ? Poker_cards.category_score[name] : name;
+				var index = my_high_card.length,
+				// 先比牌型，再比點數 (最後花色)。
+				// 先比同樣點數張數最多的牌，再比同樣點數張數少的牌。
+				high_card = hand.high_card;
+				if (!high_card) {
+					CeL.warn(this.toString() + ', ' + hand.toString());
+					CeL.warn(this);
+					CeL.warn(hand);
 				}
-
-				var suits = this.suits;
-				if (this.suits.length !== 5)
-					return;
-
-				var max_suit = suits.max = suits.frequency(1), max_suit_count = max_suit.count,
-				//
-				values = this.values, max_value = Math.max(values);
-				// console.log(max_suit);
-				max_suit = max_suit.value;
-
-				if (max_suit_count === 5 && this.consecutive()) {
-					return category_name(max_value === 12 ? 'Royal Flush' : 'Straight Flush');
-				}
-
-				var value_frequency = values.max = values.frequency(1),
-				//
-				max_of_a_kind = value_frequency.count, most_frequency_value = value_frequency.value;
-				// console.log(value_frequency);
-				if (max_of_a_kind === 4) {
-					return category_name('Four of a Kind');
-				}
-
-				if (max_of_a_kind === 3) {
-					for ( var value in value_frequency.hash)
-						if (+value !== most_frequency_value
-								&& value_frequency.hash[value] === 2)
-							return category_name('Full House');
-				}
-
-				if (max_suit_count === 5)
-					return category_name('Flush');
-
-				if (this.consecutive())
-					return category_name('Straight');
-
-				if (max_of_a_kind === 3)
-					return category_name('Three of a Kind');
-
-				if (max_of_a_kind === 2) {
-					for ( var value in value_frequency.hash)
-						if (+value !== most_frequency_value
-								&& value_frequency.hash[value] === 2)
-							return category_name('Two Pairs');
-					return category_name('One Pair');
-				}
-
-				if (get_rank)
-					// 'High Card'
-					// assert: score ≥ 1, it's when [2,2,2,2,3]
-					return most_frequency_value;
-			};
-
-			// wins, beats 贏對手
-			// return undefined: ties with
-			Poker_cards.prototype.defeats = function(hands) {
-				if (typeof hands === 'string')
-					hands = new Poker_cards(hands);
-				var my_category = this.category(true), category = hands.category(true);
-				if (category !== my_category)
-					return category < my_category;
-
-				var index=this.values.length,
-				// 先比牌型，再比點數 (最後花色)
-				my_values = this.values.clone().sort(),values = hands.values.clone().sort();
-				while(index--)
-					if(values[index]!== my_values[index])
-						return values[index]< my_values[index];
-			};
-
-			// Poker_cards.prototype.arrange
+				while (index--)
+					if (high_card[index] !== my_high_card[index])
+						return high_card[index] < my_high_card[index];
+			}
 
 			// ---------------------------------------------------------------------------------------------------------------------------------------//
 			// export.
+
+			Poker_cards.value_name = value_name;
+			Poker_cards.value_index = value_index;
+
+			Poker_cards.suit_name = suit_name;
+			Poker_cards.suit_index = suit_index;
+			Poker_cards.set_suit_index = set_suit_index;
+
+			Poker_cards.category_score = category_score;
+
+			Poker_cards.prototype = {
+				to_Array : to_Array,
+				toString : toString,
+
+				// TODO: arrange : arrange
+
+				consecutive : consecutive,
+
+				category : category,
+				defeats : defeats
+			};
 
 			// ---------------------------------------
 

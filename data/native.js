@@ -1802,11 +1802,12 @@ function array_frequency(select_max, target) {
 		} else if (max_count <= count) {
 			if (max_count < count
 			// select_max = 1: max case 也選擇較大的 item, -1: max case 選擇較小的 item
-			|| !(select_max < 0 ? max_index < item : max_index > item))
+			|| !(select_max < 0 ? this[max_index] < (isNaN(item) ? item : +item)
+								: this[max_index] > (isNaN(item) ? item : +item)))
 				max_index = index;
 			max_count = count;
 		}
-	});
+	}, this);
 	// hash[this[max_index]] === max_count
 	return {
 		hash : hash,
