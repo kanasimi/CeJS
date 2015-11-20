@@ -285,6 +285,8 @@ function test_native() {
 		assert([ 6, [ 3, 6, 5, 2, 3, 6, 2, 4, 6, 4, 2, 4 ].frequency(1).value ], 'frequency(1)');
 		assert('123321'.is_palindromic(), '.is_palindromic()');
 		assert('1234321'.is_palindromic(), '.is_palindromic()');
+		assert([7654321, (1234567).reverse()], '.reverse()');
+		assert([98706540321, (123045607890).reverse()], '.reverse()');
 	});
 	
 }
@@ -700,7 +702,8 @@ function test_math() {
 		assert([(new CeL.data.math.integer(123)).add(2).toString(), '125']);
 		assert([(new CeL.data.math.integer(123)).add(-2).toString(), '121']);
 		assert([ new CeL.data.math.integer(967803).digits().join(','), '9,6,7,8,0,3' ], '.digits()');
-		var v;
+		var v = '41232000000000000000000000003423';
+		assert([ new CeL.data.math.integer(v).digits().join(','), v.split('').join(',') ], v+'.digits()');
 		v = '76350768902347890756892374607'; assert([(new CeL.data.math.integer(v)).toString(), v]);
 		assert([ new CeL.data.math.integer(v).digits().join(','), v.split('').join(',') ], v+'.digits()');
 		v = '2893746179283692.863092367498021379480794'; assert([(new CeL.data.math.integer(v)).toString(), v]);

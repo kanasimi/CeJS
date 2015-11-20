@@ -2415,12 +2415,26 @@ function similarity_coefficient(string_1, string_2) {
 }
 
 
-// 迴文數, 回文數
+// ------------------------------------
+
+function Number_reverse(natural, base) {
+	if (!base)
+		base = parseInt('10');
+	// ABSORBING_ELEMENT
+	var reversed = 0;
+	while (natural > 0) {
+		reversed = reversed * base + (natural % base);
+		natural = Math.floor(natural / base);
+	}
+	return reversed;
+}
+
+// for palindromic number or numeral palindrome 迴文數, 回文數
+// http://articles.leetcode.com/2012/01/palindrome-number.html
 function is_palindromic(chars) {
-	var index = 0, l_index = chars.length - 1;
-	if (l_index < 0)
+	if (!chars)
 		return false;
-	for (; index < l_index; index++, l_index--)
+	for (var index = 0, l_index = chars.length - 1; index < l_index; index++, l_index--)
 		if (chars.charAt(index) !== chars.charAt(l_index))
 			return false;
 	return true;
@@ -2854,6 +2868,7 @@ set_method(Number.prototype, {
 	mod : set_bind(non_negative_modulo),
 	pad : set_bind(pad, true),
 	digits : set_bind(Number_digits),
+	reverse : set_bind(Number_reverse),
 
 	is_permutation : Number_is_permutation,
 	for_permutation : Number_for_permutation
