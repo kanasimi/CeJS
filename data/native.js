@@ -63,7 +63,7 @@ SUBSCRIPT_NUMBER['-'] = '₋';
 
 function superscript_integer() {
 	var v = [];
-	String(this | 0).split('').forEach(function(i) {
+	this.digits().forEach(function(i) {
 		v.push(SUPERSCRIPT_NUMBER[i]);
 	});
 	return v.join('');
@@ -71,7 +71,7 @@ function superscript_integer() {
 
 function subscript_integer() {
 	var v = [];
-	String(this | 0).split('').forEach(function(i) {
+	this.digits().forEach(function(i) {
 		v.push(SUBSCRIPT_NUMBER[i]);
 	});
 	return v.join('');
@@ -150,14 +150,15 @@ function pad(string, length, character, from_right) {
 
 _.pad = pad;
 
-
+// assert: {ℕ⁰:Natural+0}integer
+// fast than String(integer).chars(), integer.toString().chars() or integer.toString(base).chars()
 // TODO: 處理小數/負數/大數
 function Number_digits(integer, base) {
 	if (!((base |= 0) >= 2))
 		base = parseInt('10');
 	var digits = [];
 	do {
-		digits.unshift(integer % base | 0);
+		digits.unshift(integer % base);
 	} while ((integer = Math.floor(integer / base)) > 0);
 	return digits;
 }
@@ -836,7 +837,8 @@ String_covers.file_name_equals = function(a, b) {
 
 
 set_method(String, {
-	covers : String_covers
+	covers : String_covers,
+	similarity : similarity_coefficient
 });
 
 
@@ -1292,16 +1294,15 @@ function count_occurrence(string, search, position) {
  * 取至小數 digits 位， 肇因： JScript即使在做加減運算時，有時還是會出現 3*1.6=4.800000000000001,
  * 2.4/3=0.7999999999999999 等數值。此函數可取至 1.4 與 0.1。 c.f., round()
  * 
- * @param {Number}
- *            [decimals] 1,2,..: number of decimal places shown
- * @param {Number}
- *            [max] max decimals max===0:round() else floor()
- * @return
- * 取至小數 digits 位後之數字。
+ * @param {Number}[decimals]
+ *            1,2,...: number of decimal places shown
+ * @param {Number}[max]
+ *            maximum decimals. max===0:round() else floor()
+ * 
+ * @return 取至小數 digits 位後之數字。
  * 
  * @see https://bugzilla.mozilla.org/show_bug.cgi?id=5856
- *      IEEE754の丸め演算は最も報告されるES3「バグ」である。
- *      http://www.jibbering.com/faq/#FAQ4_6
+ *      IEEE754の丸め演算は最も報告されるES3「バグ」である。 http://www.jibbering.com/faq/#FAQ4_6
  *      http://en.wikipedia.org/wiki/Rounding
  * 
  * @example <code>
@@ -1527,7 +1528,7 @@ checkSQLInput = function(string) {
 	if (!string)
 		return '';
 
-	// 限制長度
+	// 限制長度 maximum input length
 	if (maxInput && string.length > maxInput)
 		string = string.slice(0, maxInput);
 
@@ -1813,7 +1814,7 @@ function array_frequency(select_max, target) {
 			}
 		} else if (max_count <= count) {
 			if (max_count < count
-			// select_max = 1: max case 也選擇較大的 item, -1: max case 選擇較小的 item
+			// select_max = 1: maximum case 也選擇較大的 item, -1: min case 選擇較小的 item
 			|| !(select_max < 0 ? this[max_index] < (isNaN(item) ? item : +item)
 								: this[max_index] > (isNaN(item) ? item : +item)))
 				max_index = index;
@@ -2384,6 +2385,8 @@ var PATTERN_bigrams = /.{2}/g;
 /**
  * Get Sørensen index, or Dice's coefficient.
  * 
+ * String.similarity()
+ * 
  * @param {String}string_1
  *            sequence 1
  * @param {String}string_2
@@ -2411,7 +2414,18 @@ function similarity_coefficient(string_1, string_2) {
 	return 2 * count / (bigrams_1.length + bigrams_2.length);
 }
 
-String.similarity = similarity_coefficient;
+
+// 迴文數, 回文數
+function is_palindromic(chars) {
+	var index = 0, l_index = chars.length - 1;
+	if (l_index < 0)
+		return false;
+	for (; index < l_index; index++, l_index--)
+		if (chars.charAt(index) !== chars.charAt(l_index))
+			return false;
+	return true;
+}
+
 
 // ------------------------------------
 
@@ -2491,7 +2505,9 @@ function Array_combines_AP(type, MIN) {
 	if (length <= 1)
 		return length === 1;
 
-	var min = Infinity, max = -Infinity,
+	var min = Infinity,
+	// maximum
+	max = -Infinity,
 	// ABSORBING_ELEMENT
 	sum = 0,
 	// 不能僅由 min/max/sum 即定奪是否等差。
@@ -2703,11 +2719,13 @@ function Number_for_permutation(handler, descending, sort, base) {
 		handler(this);
 		return;
 	}
-	var array = this.toString(base).split('').map(function(v) {
-		return +v;
-	});
-	if (sort)
-		array.sort(typeof sort === 'function' ? sort : ascending);
+	var array = this.digits();
+	if (sort) {
+		if (typeof sort === 'function')
+			array.sort(sort);
+		else
+			array.sort();
+	}
 	return +array.for_permutation(function(array) {
 		return handler(+array.join(''));
 	}, descending, true).join('');
@@ -2821,6 +2839,8 @@ set_method(String.prototype, {
 		return get_intermediate(this, head, foot, index, return_data) || '';
 	},
 	set_intermediate : set_intermediate,
+
+	is_palindromic : set_bind(is_palindromic),
 
 	is_permutation : String_is_permutation,
 	for_permutation : String_for_permutation

@@ -283,6 +283,8 @@ function test_native() {
 
 	error_count += CeL.test('native', function(assert) {
 		assert([ 6, [ 3, 6, 5, 2, 3, 6, 2, 4, 6, 4, 2, 4 ].frequency(1).value ], 'frequency(1)');
+		assert('123321'.is_palindromic(), '.is_palindromic()');
+		assert('1234321'.is_palindromic(), '.is_palindromic()');
 	});
 	
 }

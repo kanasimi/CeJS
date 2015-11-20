@@ -674,7 +674,7 @@ if (typeof CeL === 'function')
 				return number1.compare(number2);
 			}
 
-			// get the extreme value (極端值: max/min) of input values
+			// get the extreme value (極端值: maximum/min) of input values
 			function extreme(values, get_minima) {
 				var index = values.length, extreme_value, value, compare;
 				if (!index)
@@ -703,7 +703,7 @@ if (typeof CeL === 'function')
 
 			// range:
 			// 1 – Number.MAX_SAFE_INTEGER 當作 digits
-			// Number.MAX_SAFE_INTEGER + 1 – Number.MAX_VALUE || (is_Integer(range) && !(KEY_TYPE in range)) 當作 max value
+			// Number.MAX_SAFE_INTEGER + 1 – Number.MAX_VALUE || (is_Integer(range) && !(KEY_TYPE in range)) 當作 maximum value
 			// 其他採預設值 digits = 2
 			function random(range, base) {
 				var r, i;
@@ -826,7 +826,7 @@ if (typeof CeL === 'function')
 			// factorial_cache[ n ] = n!
 			// factorial_cache = [ 0! = 1, 1!, 2!, .. ]
 			var factorial_cache = [1],
-			// max cache length.
+			// maximum cache length.
 			// assert: (factorial_cache_limit!) 已逾越 SafeInteger 範圍， 約為 18。
 			factorial_cache_limit = 80,
 			factorial_SafeInteger_limit;
@@ -1006,6 +1006,7 @@ if (typeof CeL === 'function')
 				set_operate: set_operate,
 
 				random: random,
+				// maximum
 				max: function Integer_max() {
 					// get max()
 					return extreme(arguments);
@@ -2685,11 +2686,27 @@ if (typeof CeL === 'function')
 				return this[KEY_CACHE][radix] = digits.join('');
 			}
 
+			// assert: {ℕ⁰:Natural+0}this
+			// TODO: 處理小數/負數
 			function digits(radix) {
-				// TODO: 處理小數/負數
-				return this.toString(radix).split('').map(function(digit) {
-					return parseInt(digit, radix);
+				if (!valid_radix(radix))
+					radix = DEFAULT_RADIX;
+				var count = count_exponent(this[KEY_BASE], radix);
+				if (!(count > 0))
+					return this.toString(radix).split('').map(function(digit) {
+						return parseInt(digit, radix);
+					});
+
+				var digits = [];
+				this.forEach(function(value) {
+					for (var index = 0; index < count; index++) {
+						digits.unshift(value % radix);
+						value = value / radix | 0;
+					}
 				});
+				while (!digits[0])
+					digits.shift();
+				return digits;
 			}
 
 
@@ -2775,9 +2792,9 @@ if (typeof CeL === 'function')
 
 			var get_prime = library_namespace.data.math.prime,
 				math_not_prime = library_namespace.data.math.not_prime,
-				math_factorize = library_namespace.data.math.factorize;
-
-			var sqrt_max_integer = Math.sqrt(Number.MAX_SAFE_INTEGER) | 0;
+				math_factorize = library_namespace.data.math.factorize,
+			// copy from data.math
+			sqrt_max_integer = Math.sqrt(Number.MAX_SAFE_INTEGER) | 0;
 			// return false: number: min factor, is prime, true: not prime, undefined: maybe prime (unknown)
 			// ** modified from data.math.not_prime()
 			function not_prime(limit) {
@@ -2878,16 +2895,23 @@ if (typeof CeL === 'function')
 
 			// TODO: the elliptic curve method (ECM)
 
-			//https://en.wikipedia.org/wiki/Integer_factorization
 			/**
 			 * 取得某數的質因數分解，整數分解/因式分解/素因子分解, prime factorization, get floor factor.<br />
-			 * 唯一分解定理(The Unique Factorization Theorem)告訴我們素因子分解是唯一的，這即是稱為算術基本定理 (The Fundamental Theorem of Arithmeric) 的數學金科玉律。<br />
+			 * 唯一分解定理(The Unique Factorization Theorem)告訴我們素因子分解是唯一的，這即是稱為算術基本定理 (The
+			 * Fundamental Theorem of Arithmeric) 的數學金科玉律。
+			 * 
 			 * ** modified from data.math.factorize()
-			 * @param {Number}radix output radix
-			 * @param {Number}limit max prime to test
-			 * @return	{Object}factor {prime1:power1, prime2:power2, ..}
-			 * @see
-			 * <a href="http://homepage2.nifty.com/m_kamada/math/10001.htm" accessdate="2010/3/11 18:7">Factorizations of 100...001</a>
+			 * 
+			 * @param {Number}radix
+			 *            output radix
+			 * @param {Number}limit
+			 *            maximum prime to test
+			 * 
+			 * @return {Object}factor {prime1:power1, prime2:power2, ..}
+			 * 
+			 * @see <a href="http://homepage2.nifty.com/m_kamada/math/10001.htm"
+			 *      accessdate="2010/3/11 18:7">Factorizations of 100...001</a>
+			 *      https://en.wikipedia.org/wiki/Integer_factorization
 			 */
 			function factorize(radix, limit) {
 				var integer = this.valueOf();

@@ -112,7 +112,7 @@ DEFAULT_BASE = parseInt('10'),
 /**
  * The biggest integer we can square. 超過此數則無法安全操作平方。
  * 
- * @type {Integer}
+ * @type {Natural}
  * @constant
  */
 sqrt_max_integer = Math.sqrt(Number.MAX_SAFE_INTEGER) | 0;
@@ -153,7 +153,7 @@ _// JSDT:_module_
  * @param {Natural}
  *            [n2] number 2
  * @param {Natural}
- *            times max 次數, 1,2,..
+ *            maximum times 次數, 1,2,..
  * 
  * @return {Array} 連分數序列 (continued fraction) ** 負數視 _.mutual_division.done 而定!
  */
@@ -243,7 +243,7 @@ _// JSDT:_module_
  * @param {Array}sequence
  *            序列
  * @param {Natural}[max_no]
- *            取至第 max_no 個
+ *            maximum no. 取至第 max_no 個
  * 
  * @return {Array}連分數序列的數值
  * 
@@ -351,7 +351,7 @@ _// JSDT:_module_
  * @param {Number}[rate]
  *            比例在 rate 以上
  * @param {Natural}[max_no]
- *            最多取至序列第 max_no 個 TODO : 並小於 l: limit
+ *            maximum no. 最多取至序列第 max_no 個 TODO : 並小於 l: limit
  * 
  * @return {Array}[分子, 分母, 誤差]
  * 
@@ -1054,6 +1054,7 @@ function Collatz_conjecture_longest(natural) {
 	if (!(natural > 0))
 		return;
 
+	// maximum steps
 	var max_steps = 0, max_steps_natural;
 	// brute force
 	for (var n = 1, steps, _n; n <= natural; n++) {
@@ -2312,7 +2313,7 @@ _.find_root = Brent_method;
  * @param {Number}min
  *            求值之自變數 variable 下限，設定初始近似值。
  * @param {Number}max
- *            求值之自變數 variable 上限，設定初始近似值。
+ *            maximum. 求值之自變數 variable 上限，設定初始近似值。
  * @param {Object}[options]
  *            附加參數/設定特殊功能與選項
  * 
@@ -2357,7 +2358,7 @@ function Brent_minima(equation, min, max, options) {
 	delta2,
 	// function evaluations at u, v, w, x
 	fu, fv, fw, fx,
-	// midpoint of min and max
+	// midpoint of ((min)) and ((max))
 	mid,
 	// minimal relative movement in x
 	fract1, fract2,
@@ -2839,7 +2840,7 @@ function digit_table(initial_value, options) {
 	/**
 	 * value of each digit.
 	 * 
-	 * table[exponent=0–(max exponent)][digit=0–9] =<br />
+	 * table[exponent=0–(maximum exponent)][digit=0–9] =<br />
 	 * {Number} digit*base^exponent - digit^exponent
 	 * 
 	 * @type {Array} [][]
@@ -2848,7 +2849,7 @@ function digit_table(initial_value, options) {
 	/**
 	 * accumulated min. 自個位數起累積的最小值。
 	 * 
-	 * sum_min[exponent=0–(max exponent)] =<br />
+	 * sum_min[exponent=0–(maximum exponent)] =<br />
 	 * ∑自0至(exponent-1)位累積的(digit value之最小值)
 	 * 
 	 * @type {Array}
@@ -2856,7 +2857,7 @@ function digit_table(initial_value, options) {
 	sum_min = [];
 	table.min = sum_min;
 
-	// 準備好 digit_value table, min/max value。
+	// 準備好 digit_value table, min/maximum value。
 	for (var exponent = 0,
 	/** {Natural}power = base^exponent */
 	power = 1;
