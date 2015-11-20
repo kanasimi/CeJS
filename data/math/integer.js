@@ -174,7 +174,7 @@ if (typeof CeL === 'function')
 
 			trim_0,
 
-			// radix point / radix character / decimal mark
+			// radix point / radix character / decimal mark 小數點
 			radix_point = '.',
 
 			// Array 或 Uint32Array。
@@ -548,13 +548,13 @@ if (typeof CeL === 'function')
 				precise_divide: precise_divide,
 
 				clone: clone,
-				//偶數的
+				// 偶數的
 				is_even: function (test_odd) {
 					return !(KEY_TYPE in this) && this[KEY_EXPONENT] === 0
 						//
 						&& this.modulo(2) === (test_odd ? 1 : 0);
 				},
-				//奇數的,單數的
+				// 奇數的,單數的
 				is_odd: function () {
 					return this.is_odd(true);
 				},
@@ -650,6 +650,7 @@ if (typeof CeL === 'function')
 
 				ratio_to: ratio_to,
 				valueOf: valueOf,
+				digits: digits,
 				toString: toString
 			});
 
@@ -2503,6 +2504,7 @@ if (typeof CeL === 'function')
 				return min_digits[base];
 			}
 
+
 			// 當數字過大，轉回傳 {String}
 			var TYPE_String_for_large = 1,
 			// return [value, exponent]: this = value * base ^ exponent，value 已為可計算之極端值（最大或最小）
@@ -2630,6 +2632,7 @@ if (typeof CeL === 'function')
 						base = DEFAULT_DIGITS;
 					if (typeof base === 'string')
 						// IE8 不能用 string[index]。'ab'[1] === undefined, 'ab'[1] !== 'b'。
+						// base.chars()
 						base = base.split('');
 					// assert: Array.isArray(base)
 					zero = base[0];
@@ -2652,6 +2655,7 @@ if (typeof CeL === 'function')
 								} else
 									for (var i = digits.length; i < value;)
 										digits[i++] = zero;
+							// add 小數點
 							digits.splice(value, 0, radix_point);
 							while (digits[0] == zero)
 								// 去除末端的 '0'。
@@ -2679,6 +2683,13 @@ if (typeof CeL === 'function')
 				if (!Array.isArray(this[KEY_CACHE]))
 					this[KEY_CACHE] = [];
 				return this[KEY_CACHE][radix] = digits.join('');
+			}
+
+			function digits(radix) {
+				// TODO: 處理小數/負數
+				return this.toString(radix).split('').map(function(digit) {
+					return parseInt(digit, radix);
+				});
 			}
 
 

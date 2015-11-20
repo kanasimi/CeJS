@@ -627,6 +627,7 @@ function test_math() {
 		assert([30414093201713378043612608166064768844377641568960512000000000000, CeL.data.math.factorial(50)], { name : 'factorial', error_rate : Number.EPSILON });
 
 		var p = 20374345;
+		assert([ p.digits().join(','), '2,0,3,7,4,3,4,5' ], '.digits()');
 		assert([ CeL.data.math.floor_sqrt(p * p), p ], 'floor_sqrt');
 		assert([ CeL.data.math.floor_sqrt(p * p - 1), p - 1 ], 'floor_sqrt');
 		assert(!!CeL.data.math.is_square(p * p), 'is_square');
@@ -696,8 +697,10 @@ function test_math() {
 	error_count += CeL.test('Basic integer examples', function(assert) {
 		assert([(new CeL.data.math.integer(123)).add(2).toString(), '125']);
 		assert([(new CeL.data.math.integer(123)).add(-2).toString(), '121']);
+		assert([ new CeL.data.math.integer(967803).digits().join(','), '9,6,7,8,0,3' ], '.digits()');
 		var v;
 		v = '76350768902347890756892374607'; assert([(new CeL.data.math.integer(v)).toString(), v]);
+		assert([ new CeL.data.math.integer(v).digits().join(','), v.split('').join(',') ], v+'.digits()');
 		v = '2893746179283692.863092367498021379480794'; assert([(new CeL.data.math.integer(v)).toString(), v]);
 		v = '40%'; assert([(new CeL.data.math.integer(v)).toString(), '0.4']);
 		v = '76.3%'; assert([(new CeL.data.math.integer(v)).toString(), '0.763']);

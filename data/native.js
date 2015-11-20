@@ -151,6 +151,18 @@ function pad(string, length, character, from_right) {
 _.pad = pad;
 
 
+// TODO: 處理小數/負數/大數
+function Number_digits(integer, base) {
+	if (!((base |= 0) >= 2))
+		base = parseInt('10');
+	var digits = [];
+	do {
+		digits.unshift(integer % base | 0);
+	} while ((integer = Math.floor(integer / base)) > 0);
+	return digits;
+}
+
+
 
 
 /*
@@ -2821,6 +2833,7 @@ set_method(Number.prototype, {
 	to_fixed : to_fixed,
 	mod : set_bind(non_negative_modulo),
 	pad : set_bind(pad, true),
+	digits : set_bind(Number_digits),
 
 	is_permutation : Number_is_permutation,
 	for_permutation : Number_for_permutation
