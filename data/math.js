@@ -271,8 +271,13 @@ continued_fraction = function(sequence, max_no) {
 		b = 1, a = 0;
 	else
 		a = 1, b = 0;
-	if(false){ sequence[max_no++]=1;if(--max_no%2)b=sequence[max_no],a=s[--max_no];else
-	 a=sequence[max_no],b=sequence[--max_no];}
+	if (false) {
+		sequence[max_no++] = 1;
+		if (--max_no % 2)
+			b = sequence[max_no], a = s[--max_no];
+		else
+			a = sequence[max_no], b = sequence[--max_no];
+	}
 
 	// library_namespace.debug('a=' + a + ', b=' + b + ', max_no=' + max_no);
 	while (max_no--)
@@ -883,7 +888,7 @@ function floor_sqrt(number) {
 _.floor_sqrt = floor_sqrt;
 
 
-// count digits of integer
+// count digits of integer: using .digit_length()
 function ceil_log(number, base) {
 	if (!number)
 		return 0;
@@ -891,11 +896,13 @@ function ceil_log(number, base) {
 		base = DEFAULT_BASE;
 	// assert: base >= 2, base === (base | 0)
 	number = Math.abs(number);
-	if (false)
-		// ideal
-		return Math.ceil(base === 10 ? Math.log10(number) : Math.log(number)
-				/ Math.log(base));
+	// ideal
+	return Math.ceil(base === 10 ? Math.log10(number) : base === 2 ? Math
+			.log2(number)
+	// TODO: base = 2^n
+	: Math.log(number) / Math.log(base));
 
+	// slow... should use multiply by exponents
 	// Logarithm
 	var log = 0;
 	if (number < ZERO_EXPONENT) {
@@ -910,6 +917,7 @@ function ceil_log(number, base) {
 	} else {
 		while (number > ZERO_EXPONENT) {
 			// 因為可能損失 base^exp + (...) 之剩餘部分，因此不能僅採用 Math.floor(number / base)
+			// 但如此較費時。
 			number /= base;
 			// library_namespace.log(number);
 			log++;
@@ -917,6 +925,7 @@ function ceil_log(number, base) {
 	}
 	return log;
 }
+
 
 // add binding
 _.ceil_log = ceil_log;
@@ -2996,9 +3005,27 @@ _.digit_table = digit_table;
 function Number_digits(base) {
 	if (!((base |= 0) >= 2))
 		base = parseInt('10');
-	var natural = +this, digits = [];
+	var natural = Math.abs(this), digits = [];
 	do {
 		digits.unshift(natural % base);
+	} while ((natural = Math.floor(natural / base)) > 0);
+	return digits;
+}
+
+// count digits of integer
+function Number_digit_length(base) {
+	if (!((base |= 0) >= 2))
+		base = parseInt('10');
+	return base === 10 ? Math.log10(this) | 0
+	//
+	: base === 2 ? Math.log2(this) | 0
+	// TODO: base = 2^n
+	: Math.log(this) / Math.log(base) | 0;
+
+	// slow... should use multiply by exponents
+	var natural = Math.abs(this), digits = 0;
+	do {
+		digits++;
 	} while ((natural = Math.floor(natural / base)) > 0);
 	return digits;
 }
@@ -3446,6 +3473,7 @@ library_namespace.set_method(Number.prototype, {
 	ceil_log : set_bind(ceil_log),
 
 	digits : Number_digits,
+	digit_length : Number_digit_length,
 	reverse : Number_reverse,
 	is_palindromic : Number_is_palindromic,
 
