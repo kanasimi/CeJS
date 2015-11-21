@@ -642,11 +642,11 @@ function test_math() {
 		p = 1e12;
 		assert([ CeL.data.math.ceil_log(p), Math.ceil(Math.log10(p)) ], 'ceil_log('+p+')');
 		assert([ CeL.data.math.ceil_log(p,2), Math.ceil(Math.log(p)/Math.log(2)) ], 'ceil_log('+p+',2)');
-		assert([ CeL.data.math.ceil_log(1e12), 12 ], 'ceil_log('+p+')');
+		assert([ CeL.data.math.ceil_log(p), 12 ], 'ceil_log('+p+')');
 		p = 1e-12;
 		assert([ CeL.data.math.ceil_log(p), Math.ceil(Math.log10(p)) ], 'ceil_log('+p+')');
 		assert([ CeL.data.math.ceil_log(p,2), Math.ceil(Math.log(p)/Math.log(2)) ], 'ceil_log('+p+',2)');
-		assert([ CeL.data.math.ceil_log(1e12), -12 ], 'ceil_log('+p+')');
+		assert([ CeL.data.math.ceil_log(p), -12 ], 'ceil_log('+p+')');
 
 		if (test_level)
 		assert([CeL.data.math.prime(490998), 7226371], 'prime');

@@ -909,6 +909,7 @@ function ceil_log(number, base) {
 	return log;
 }
 
+_.ceil_log = ceil_log;
 
 
 /** {Object}all possible last 2 digits of square number */
