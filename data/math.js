@@ -884,6 +884,7 @@ function ceil_log(number, base) {
 		return 0;
 	if (!base)
 		base = DEFAULT_BASE;
+	// assert: base >= 2, base === (base | 0)
 	number = Math.abs(number);
 	if (false)
 		return Math.ceil(base === 10 ? Math.log10(number) : Math.log(number)
@@ -897,18 +898,20 @@ function ceil_log(number, base) {
 			// library_namespace.debug(number);
 			log--;
 		}
-		if (number > ZERO_EXPONENT)
+		if (number !== ZERO_EXPONENT)
 			// 修正。
 			log++;
 	} else {
 		while (number > ZERO_EXPONENT) {
-			number = Math.floor(number / base);
+			number /= base;
+			// library_namespace.log(number);
 			log++;
 		}
 	}
 	return log;
 }
 
+// add binding
 _.ceil_log = ceil_log;
 
 
