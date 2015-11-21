@@ -16,8 +16,12 @@ if (typeof CeL === 'function')
 CeL.run(
 {
 name: 'data.math',
-require: 'data.code.compatibility.',
+require: 'data.code.compatibility.|data.native.set_bind',
 code : function(library_namespace) {
+
+//	requiring
+var set_bind;
+eval(this.use());
 
 
 
@@ -645,7 +649,7 @@ function period_length(denominator, with_transient, min) {
 
 _.period_length = period_length;
 
-//---------------------------------------------------------------------//
+// ---------------------------------------------------------------------//
 
 
 /**
@@ -904,18 +908,9 @@ function ceil_log(number, base) {
 			// 修正。
 			log++;
 	} else {
-		var fragment;
 		while (number > ZERO_EXPONENT) {
 			// 因為可能損失 base^exp + (...) 之剩餘部分，因此不能僅採用 Math.floor(number / base)
-			if (fragment) {
-				number = Math.floor(number / base);
-			} else {
-				number /= base;
-				if (number !== Math.floor(number)) {
-					number = Math.floor(number);
-					fragment = true;
-				}
-			}
+			number /= base;
 			// library_namespace.log(number);
 			log++;
 		}
@@ -2993,6 +2988,436 @@ function digit_table(initial_value, options) {
 
 _.digit_table = digit_table;
 
+// ---------------------------------------------------------------------//
+
+// assert: {ℕ⁰:Natural+0}((this))
+// fast than String(natural).chars(), natural.toString().chars() or natural.toString(base).chars()
+// TODO: 處理小數/負數/大數
+function Number_digits(base) {
+	if (!((base |= 0) >= 2))
+		base = parseInt('10');
+	var natural = +this, digits = [];
+	do {
+		digits.unshift(natural % base);
+	} while ((natural = Math.floor(natural / base)) > 0);
+	return digits;
+}
+
+
+// reverse the digits
+// assert: {ℕ⁰:Natural+0}((this))
+// TODO: 處理小數/負數/大數
+function Number_reverse(base) {
+	if (!base)
+		base = parseInt('10');
+	// ABSORBING_ELEMENT
+	var natural = +this, reversed = 0;
+	while (natural > 0) {
+		reversed = reversed * base + (natural % base);
+		natural = Math.floor(natural / base);
+	}
+	return reversed;
+}
+
+
+
+function Number_is_palindromic(base) {
+	return this === this.reverse(base);
+}
+
+// for palindromic number or numeral palindrome 迴文數, 回文數
+// http://articles.leetcode.com/2012/01/palindrome-number.html
+function String_is_palindromic(chars) {
+	if (!chars)
+		return false;
+	for (var index = 0, l_index = chars.length - 1; index < l_index; index++, l_index--)
+		if (chars.charAt(index) !== chars.charAt(l_index))
+			return false;
+	return true;
+}
+
+
+
+function Number_tail(natural, base) {
+	// TODO
+	;
+}
+
+
+// ---------------------------------------------------------------------//
+
+
+/**
+ * Test if the array is an arithmetic progression.<br />
+ * 判斷 ((this)) 是否為等差數列/連續整數。<br />
+ * O(n)
+ * 
+ * @param {String}type
+ *            'integer': arithmetic integers,<br />
+ *            'consecutive': consecutive integers 連續整數型別, if the array contains
+ *            only consecutive integers / consecutive values;<br />
+ *            'odd': odd consecutive integers,<br />
+ *            'even': even consecutive integers
+ * 
+ * @returns {Boolean}is AP
+ * 
+ * @see https://simple.wikipedia.org/wiki/Consecutive_integer
+ */
+function Array_is_AP(type) {
+	var length = this.length;
+	if (length <= 1)
+		return length === 1;
+
+	var number = this[1],
+	/** {Boolean}為奇數或偶數型別。 */
+	parity = type === 'odd' || type === 'even';
+	if (parity && number % 2 !== (type === 'odd' ? 1 : 0))
+		return false;
+
+	var difference = number - this[0];
+	if (type && difference !== (parity ? 2 : type === 'consecutive' ? 1
+	// 當前只要設定 type，皆為整數型別。
+	: Math.floor(difference)))
+		return false;
+
+	for (var index = 2; index < length; index++)
+		if (this[index] !== (number += difference))
+			return false;
+
+	return true;
+}
+
+
+/*
+
+Sum[m + n ((M - m)/(l - 1)), {n, 0, -1 + l}]
+=
+l(m+M)/2
+
+Sum[(m + n (M - m)/(l - 1) - b)^2, {n, 0, l - 1}]
+=
+(l (6 b^2 (l-1)-6 b (l-1) (m+M)+(2 l-1) m^2+2 (l-2) m M+(2 l-1) M^2))/(6 (l-1))
+
+*/
+
+/**
+ * Test if the array combines an arithmetic progression.<br />
+ * 判斷 ((this)) 是否可組成等差數列/連續整數，不計較次序。<br />
+ * O(n)
+ * 
+ * @param {String}type
+ *            'integer': arithmetic integers,<br />
+ *            'consecutive': consecutive integers 連續整數型別, if the array contains
+ *            only consecutive integers / consecutive values;<br />
+ *            'odd': odd consecutive integers,<br />
+ *            'even': even consecutive integers
+ * @param {Integer}MIN
+ *            acceptable minimum
+ * 
+ * @returns {Number}difference or {Boolean}false
+ * 
+ * @see https://simple.wikipedia.org/wiki/Consecutive_integer
+ */
+function Array_combines_AP(type, MIN) {
+	var length = this.length;
+	if (length <= 1)
+		return length === 1;
+
+	var min = Infinity,
+	// maximum
+	max = -Infinity,
+	// ABSORBING_ELEMENT
+	sum = 0,
+	// 不能僅由 min/max/sum 即定奪是否等差。
+	// 但尚未確認如此條件即已充分!!
+	square_sum = 0, square_base = this[0],
+	/** {Boolean}為奇數或偶數型別。 */
+	parity = type === 'odd' || type === 'even';
+
+	if (this.some(function(number) {
+		if (number < min) {
+			min = number;
+			if (min < MIN)
+				return true;
+		}
+		if (max < number)
+			max = number;
+		if (parity ? max - min > 2 * (length - 1) : type === 'consecutive'
+				&& max - min > length - 1)
+			return true;
+		sum += number;
+		number -= square_base;
+		square_sum += number * number;
+	}))
+		return false;
+
+	if (2 * sum !== (max + min) * length)
+		return false;
+
+	// check sum of square
+	if (square_sum !== ((2 * length * ((min + max) * (min + max) - min * max)
+			- (min + max) * (min + max) - 2 * min * max)
+			/ 6 / (length - 1) - square_base * (min + max - square_base))
+			* length)
+		return false;
+
+	if (parity && min % 2 !== (type === 'odd' ? 1 : 0))
+		return false;
+
+	var difference = (max - min) / (length - 1);
+	if (type && difference !== (parity ? 2 : type === 'consecutive' ? 1
+	// 當前只要設定 type，皆為整數型別。
+	: Math.floor(difference)))
+		return false;
+
+	return difference;
+}
+
+
+// ---------------------------------------------------------------------//
+
+
+// 檢查是否有重複的數字。
+// use CeL.PATTERN_duplicated(string) to test if string contains duplicated chars.
+_.PATTERN_duplicated = /(.).*?\1/;
+
+// all the same characters
+_.PATTERN_all_same = /^(.)\1*$/;
+
+// http://en.cppreference.com/w/cpp/algorithm/is_permutation
+function Array_is_permutation(sequence_2) {
+	var sequence_1 = this, last = sequence_1.length;
+	if (last !== sequence_2.length)
+		return false;
+	if (sequence_1 === sequence_2)
+		return true;
+	while (last-- > 0 && sequence_1[last] === sequence_2[last])
+		;
+	if (last < 0)
+		return true;
+	last++;
+	// assert: sequence_1, sequence_2 有不同。
+	var start = 0;
+	while (sequence_1[start] === sequence_2[start])
+		start++;
+	// count elements
+	var processed = new Set();
+	for (; start < last; start++) {
+		var element = sequence_1[start];
+		if (processed.has(element))
+			// skip element counted
+			continue;
+		processed.add(element);
+		// O(n^2)
+		var index = start, difference = sequence_2[index++] === element ? 0 : 1;
+		for (; index < last; index++) {
+			if (sequence_1[index] === element)
+				difference++;
+			if (sequence_2[index] === element)
+				difference--;
+		}
+		if (difference !== 0)
+			return false;
+	}
+	return true;
+}
+
+
+// 純量變數 (scalar variable)
+function String_is_permutation(sequence_2) {
+	var sequence_1 = this, last = sequence_1.length;
+	if (last !== sequence_2.length)
+		return false;
+	// 直接比較較快。
+	if (sequence_1 === sequence_2)
+		return true;
+	// processed elements
+	var processed = library_namespace.null_Object();
+	for (var start = 0; start < last; start++) {
+		var element = sequence_1.charAt(start);
+		if (element in processed)
+			// skip element counted
+			continue;
+		processed[element] = null;
+		if (sequence_1.count_of(element, start + 1) + 1
+		// O(n^2)
+		!== sequence_2.count_of(element)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function Number_is_permutation(sequence_2) {
+	return String(this).is_permutation(String(sequence_2));
+}
+
+
+
+// ---------------------------------------------------------------------//
+
+
+
+/**
+ * 按升序/降序排列處理每一序列至最後。<br />
+ * contain exactly the same digits, but in a different order.
+ * 
+ * 注意: 不會先做排序!
+ * 
+ * @param {Function}handler
+ *            處理 function
+ * @param {Boolean}descending
+ *            default: ascending (small→big 升序序列為最小排列，降序序列為最大的排列), or will be
+ *            descending (big→small 降序)
+ * @param {Boolean}inplace
+ *            no clone, do not clone array.
+ * 
+ * @returns {Array}the last array processed
+ */
+function Array_for_permutation(handler, descending, inplace) {
+	var array = inplace ? this : this.clone(), last_index = array.length - 1;
+	if (last_index >= 0)
+		handler(array);
+	if (last_index < 1)
+		return;
+
+	var index;
+	do {
+		// 求出下一個按升序排列序列。
+		// http://en.cppreference.com/w/cpp/algorithm/next_permutation
+		// http://leonard1853.iteye.com/blog/1450085
+		// http://www.cplusplus.com/reference/algorithm/next_permutation/
+		index = last_index;
+		for (var now = array[index], _next; index > 0;) {
+			// search [index]=now < [index+1]=_next
+			_next = now;
+			now = array[--index];
+			if (descending ? now > _next : now < _next) {
+				var later_index = last_index;
+				// search [index]=now < [later_index]=_next
+				while (true) {
+					_next = array[later_index];
+					if (descending ? _next < now : _next > now)
+						break;
+					later_index--;
+				}
+				// swap [index]=now, [later_index]=_next
+				array[later_index] = now;
+				array[index] = _next;
+				// reverse elements 元素: [index+1] to [last_index]
+				for (index++, later_index = last_index; index < later_index; index++, later_index--) {
+					_next = array[index];
+					array[index] = array[later_index];
+					array[later_index] = _next;
+				}
+				if (handler(array))
+					index = 0;
+				break;
+			}
+		}
+	} while (index > 0);
+	return array;
+}
+
+function String_for_permutation(handler, descending, sort) {
+	if (this.length < 2) {
+		handler(this);
+		return;
+	}
+	var array = this.split('');
+	if (sort)
+		typeof sort === 'function' ? array.sort(sort) : array.sort();
+	return array.for_permutation(function(array) {
+		return handler(array.join(''));
+	}, descending, true);
+}
+
+function Number_for_permutation(handler, descending, sort, base) {
+	if (!base)
+		base = 10;
+	if (this < base) {
+		handler(this);
+		return;
+	}
+	var array = this.digits();
+	if (sort) {
+		if (typeof sort === 'function')
+			array.sort(sort);
+		else
+			array.sort();
+	}
+	return +array.for_permutation(function(array) {
+		return handler(+array.join(''));
+	}, descending, true).join('');
+}
+
+
+// ---------------------------------------------------------------------//
+// combinatorics 組合數學
+
+
+
+/*
+
+[1,2,4,8,16,32].for_combination(3,function(s){console.log(s);})
+CeL.for_combination(6,3,function(s){console.log(s);})
+TODO:
+CeL.for_combination(6,3,function(s){console.log(s);},true)
+
+
+*/
+
+// next_combination
+// select ((select)) elements, ((select))-selection
+function for_combination(elements, select, handler, descending) {
+	if (!((select |= 0) > 0))
+		// nothing select
+		return;
+
+	var map;
+	if (Array.isArray(elements)) {
+		// elements as map array
+		map = elements;
+		elements = map.length;
+	}
+
+	var index = 0,
+	/** {Array}index array */
+	selected = [];
+
+	// initialization
+	for (; index < select; index++)
+		selected.push(index);
+
+	while (true) {
+		// TODO: descending
+		handler(map ? selected.map(function(index) {
+			return descending ? map[elements - index] : map[index];
+		}) : descending ? selected.map(function(index) {
+			return elements - index - 1;
+		}).reverse() : selected);
+
+		index = 1;
+		for (; index < select && selected[index] === selected[index - 1] + 1; index++)
+			;
+		if (++selected[--index] === elements)
+			break;
+		--index;
+		if (selected[index] !== index)
+			for (; index >= 0; index--)
+				selected[index] = index;
+	}
+}
+
+_.for_combination = for_combination;
+
+
+function Array_for_combination(select, handler, descending, inplace) {
+	return for_combination(inplace ? this : this.clone(), select, handler,
+			descending);
+}
+
+
 
 // ---------------------------------------------------------------------//
 // export 導出.
@@ -3003,19 +3428,37 @@ _.ZERO_EXPONENT = ZERO_EXPONENT;
 _.ABSORBING_ELEMENT = ABSORBING_ELEMENT;
 _.MULTIPLICATION_SIGN = MULTIPLICATION_SIGN;
 
+library_namespace.set_method(String.prototype, {
+	is_palindromic : set_bind(String_is_palindromic),
+
+	is_permutation : String_is_permutation,
+	for_permutation : String_for_permutation
+});
+
+library_namespace.set_method(String, {
+	is_palindromic : String_is_palindromic
+});
 
 library_namespace.set_method(Number.prototype, {
 	// division, divided_by
-	//divided : set_bind(Euclidean_division)
-	divided : function(divisor, closest) {
-		return Euclidean_division(this, divisor, closest);
-	},
-	floor_sqrt : function() {
-		return floor_sqrt(this);
-	},
-	ceil_log : function(base) {
-		return ceil_log(this, base);
-	}
+	divided : set_bind(Euclidean_division, true),
+	floor_sqrt : set_bind(floor_sqrt),
+	ceil_log : set_bind(ceil_log),
+
+	digits : Number_digits,
+	reverse : Number_reverse,
+	is_palindromic : Number_is_palindromic,
+
+	is_permutation : Number_is_permutation,
+	for_permutation : Number_for_permutation
+});
+
+library_namespace.set_method(Array.prototype, {
+	is_AP : Array_is_AP,
+	combines_AP : Array_combines_AP,
+	is_permutation : Array_is_permutation,
+	for_permutation : Array_for_permutation,
+	for_combination : Array_for_combination
 });
 
 library_namespace.set_method(Math, {

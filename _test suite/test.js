@@ -267,28 +267,6 @@ function test_native() {
 		[[ undefined, [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ], /* 以便未找到時回傳 undefined. */ near : [] }) ]],
 	]);
 
-	error_count += CeL.test('Combinatorics 組合數學', function(assert) {
-		assert([ false, [ 2, 3, 5, 6, 4 ].is_AP() ], 'is_AP(): false');
-		assert([ true, [ 5, 6, 7, 8, 9 ].is_AP() ], 'is_AP(): true');
-		assert([ false, [ 2, 3, 5, 6, 4, 4 ].combines_AP() ], 'combines_AP(): false');
-		assert([ 1, [ 2, 3, 5, 6, 4 ].combines_AP() ], 'combines_AP(): 1');
-		assert([ false, [ 2, 3, 5, 6, 4 ].combines_AP('integer', 3) ], 'combines_AP(): min');
-		var n = 8260569835;
-		assert(n.is_permutation(3680589526), 'Permutation 排列');
-		n = 1233455;
-		n.for_permutation(function(permutation) {
-			assert(n.is_permutation(permutation), 'Permutation 排列: ' + permutation);
-		});
-	});
-
-	error_count += CeL.test('native', function(assert) {
-		assert([ 6, [ 3, 6, 5, 2, 3, 6, 2, 4, 6, 4, 2, 4 ].frequency(1).value ], 'frequency(1)');
-		assert('123321'.is_palindromic(), '.is_palindromic()');
-		assert('1234321'.is_palindromic(), '.is_palindromic()');
-		assert([7654321, (1234567).reverse()], '.reverse()');
-		assert([98706540321, (123045607890).reverse()], '.reverse()');
-	});
-	
 }
 
 
@@ -579,6 +557,20 @@ function test_math() {
 
 	CeL.run('data.math');
 
+	error_count += CeL.test('Combinatorics 組合數學', function(assert) {
+		assert([ false, [ 2, 3, 5, 6, 4 ].is_AP() ], 'is_AP(): false');
+		assert([ true, [ 5, 6, 7, 8, 9 ].is_AP() ], 'is_AP(): true');
+		assert([ false, [ 2, 3, 5, 6, 4, 4 ].combines_AP() ], 'combines_AP(): false');
+		assert([ 1, [ 2, 3, 5, 6, 4 ].combines_AP() ], 'combines_AP(): 1');
+		assert([ false, [ 2, 3, 5, 6, 4 ].combines_AP('integer', 3) ], 'combines_AP(): min');
+		var n = 8260569835;
+		assert(n.is_permutation(3680589526), 'Permutation 排列');
+		n = 1233455;
+		n.for_permutation(function(permutation) {
+			assert(n.is_permutation(permutation), 'Permutation 排列: ' + permutation);
+		});
+	});
+
 	error_count += CeL.test('Basic math functions', function(assert) {
 		assert([ CeL.polynomial_value([ 3, 4, 5, 6 ], 2),
 				3 + 4 * 2 + 5 * 2 * 2 + 6 * 2 * 2 * 2 ], 'polynomial value');
@@ -688,6 +680,14 @@ function test_math() {
 
 		// ---------------------------------------------------------------------//
 
+		assert([ 6, [ 3, 6, 5, 2, 3, 6, 2, 4, 6, 4, 2, 4 ].frequency(1).value ], 'frequency(1)');
+		assert('123321'.is_palindromic(), '.is_palindromic()');
+		assert('1234321'.is_palindromic(), '.is_palindromic()');
+		assert([7654321, (1234567).reverse()], '.reverse()');
+		assert([98706540321, (123045607890).reverse()], '.reverse()');
+
+		// ---------------------------------------------------------------------//
+
 		var MULTIPLICATION_SIGN = CeL.math.closest_product.separator;
 		assert([CeL.math.closest_product([ 2, 3, 7, 11, 47, 557 ], 26200).join(), '21,47'+MULTIPLICATION_SIGN+'557'], 'closest_product#1');
 		assert([CeL.math.closest_product([ 7, 11, 13, 23, 43 ], 996).join(), '5,7'+MULTIPLICATION_SIGN+'11'+MULTIPLICATION_SIGN+'13'], 'closest_product#2');
@@ -701,6 +701,7 @@ function test_math() {
 
 		assert([CeL.Collatz_conjecture(70).join(), '70,35,106,53,160,80,40,20,10,5,16,8,4,2,1'], 'Collatz conjecture');
 		assert([CeL.Collatz_conjecture.longest(99).join(), '97,119'], 'longest Collatz conjecture');
+
 	});
 
 
