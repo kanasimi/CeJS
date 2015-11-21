@@ -1325,7 +1325,7 @@ _.Miller_Rabin = Miller_Rabin;
  * 
  * @returns true: is composite.<br />
  *          false: is prime.<br />
- *          number: min factor.<br />
+ *          prime: min prime factor.<br />
  *          undefined: probable prime (PRP) / invalid number.
  */
 function not_prime(natural) {
@@ -1343,7 +1343,7 @@ function not_prime(natural) {
 		}
 	}
 
-	// 為 Miller_Rabin() 暖身。
+	// warming up. 為 Miller_Rabin() 暖身。
 	prime(70);
 
 	// 先從耗費少的檢測開始。
@@ -3013,16 +3013,17 @@ function Number_digits(base) {
 }
 
 // count digits of integer
+// = floor(log_10(base)) + 1
 function Number_digit_length(base) {
 	if (!((base |= 0) >= 2))
 		base = parseInt('10');
-	return base === 10 ? Math.log10(this) | 0
+	return (base === 10 ? Math.log10(this) | 0
 	//
 	: base === 2 ? Math.log2(this) | 0
 	// TODO: base = 2^n
-	: Math.log(this) / Math.log(base) | 0;
+	: Math.log(this) / Math.log(base) | 0) + 1;
 
-	// slow... should use multiply by exponents
+	// slow... should use multiply by exponents, or Math.clz32()
 	var natural = Math.abs(this), digits = 0;
 	do {
 		digits++;
@@ -3275,8 +3276,14 @@ function String_is_permutation(sequence_2) {
 	return true;
 }
 
+/**
+ * 關於尋找相同排列的數字，亦可採用紀錄各數字和的方法。<br />
+ * 另外，若數字之數量遠小於計算 .is_permutation() 之工作量，則 cache .sort() 反而會快很多。
+ */
 function Number_is_permutation(sequence_2) {
-	return String(this).is_permutation(String(sequence_2));
+	return this.digits().sum() === (+sequence_2).digits().sum()
+	// ↑ 先測試數字和是否相同。
+	&& String(this).is_permutation(String(sequence_2));
 }
 
 
