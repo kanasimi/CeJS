@@ -150,16 +150,16 @@ function pad(string, length, character, from_right) {
 
 _.pad = pad;
 
-// assert: {ℕ⁰:Natural+0}integer
-// fast than String(integer).chars(), integer.toString().chars() or integer.toString(base).chars()
+// assert: {ℕ⁰:Natural+0}natural
+// fast than String(natural).chars(), natural.toString().chars() or natural.toString(base).chars()
 // TODO: 處理小數/負數/大數
-function Number_digits(integer, base) {
+function Number_digits(natural, base) {
 	if (!((base |= 0) >= 2))
 		base = parseInt('10');
 	var digits = [];
 	do {
-		digits.unshift(integer % base);
-	} while ((integer = Math.floor(integer / base)) > 0);
+		digits.unshift(natural % base);
+	} while ((natural = Math.floor(natural / base)) > 0);
 	return digits;
 }
 
@@ -2417,6 +2417,9 @@ function similarity_coefficient(string_1, string_2) {
 
 // ------------------------------------
 
+// reverse the digits
+// assert: {ℕ⁰:Natural+0}natural
+// TODO: 處理小數/負數/大數
 function Number_reverse(natural, base) {
 	if (!base)
 		base = parseInt('10');
@@ -2429,15 +2432,25 @@ function Number_reverse(natural, base) {
 	return reversed;
 }
 
+function Number_is_palindromic(natural, base) {
+	return natural === Number_reverse(natural, base);
+}
+
 // for palindromic number or numeral palindrome 迴文數, 回文數
 // http://articles.leetcode.com/2012/01/palindrome-number.html
-function is_palindromic(chars) {
+function String_is_palindromic(chars) {
 	if (!chars)
 		return false;
 	for (var index = 0, l_index = chars.length - 1; index < l_index; index++, l_index--)
 		if (chars.charAt(index) !== chars.charAt(l_index))
 			return false;
 	return true;
+}
+
+
+function Number_tail(natural, base) {
+	// TODO
+	;
 }
 
 
@@ -2759,7 +2772,7 @@ CeL.for_combination(6,3,function(s){console.log(s);},true)
 
 */
 
-// combinatorics
+// combinatorics 組合數學
 // next_combination
 // select ((select)) elements, ((select))-selection
 function for_combination(elements, select, handler, descending) {
@@ -2854,7 +2867,7 @@ set_method(String.prototype, {
 	},
 	set_intermediate : set_intermediate,
 
-	is_palindromic : set_bind(is_palindromic),
+	is_palindromic : set_bind(String_is_palindromic),
 
 	is_permutation : String_is_permutation,
 	for_permutation : String_for_permutation
@@ -2869,6 +2882,7 @@ set_method(Number.prototype, {
 	pad : set_bind(pad, true),
 	digits : set_bind(Number_digits),
 	reverse : set_bind(Number_reverse),
+	is_palindromic : set_bind(Number_is_palindromic),
 
 	is_permutation : Number_is_permutation,
 	for_permutation : Number_for_permutation

@@ -878,6 +878,38 @@ function floor_sqrt(number) {
 
 _.floor_sqrt = floor_sqrt;
 
+// count digits of integer
+function ceil_log(number, base) {
+	if (!number)
+		return 0;
+	if (!base)
+		base = DEFAULT_BASE;
+	number = Math.abs(number);
+	if (false)
+		return Math.ceil(base === 10 ? Math.log10(number) : Math.log(number)
+				/ Math.log(base));
+
+	// Logarithm
+	var log = 0;
+	if (number < ZERO_EXPONENT) {
+		while (number < ZERO_EXPONENT) {
+			number *= base;
+			// library_namespace.debug(number);
+			log--;
+		}
+		if (number > ZERO_EXPONENT)
+			// 修正。
+			log++;
+	} else {
+		while (number > ZERO_EXPONENT) {
+			number = Math.floor(number / base);
+			log++;
+		}
+	}
+	return log;
+}
+
+
 
 /** {Object}all possible last 2 digits of square number */
 var square_ending = library_namespace.null_Object();
@@ -2962,8 +2994,11 @@ library_namespace.set_method(Number.prototype, {
 	divided : function(divisor, closest) {
 		return Euclidean_division(this, divisor, closest);
 	},
-	floor_sqrt : function(number) {
+	floor_sqrt : function() {
 		return floor_sqrt(this);
+	},
+	ceil_log : function(base) {
+		return ceil_log(this, base);
 	}
 });
 

@@ -632,10 +632,21 @@ function test_math() {
 
 		var p = 20374345;
 		assert([ p.digits().join(','), '2,0,3,7,4,3,4,5' ], '.digits()');
-		assert([ CeL.data.math.floor_sqrt(p * p), p ], 'floor_sqrt');
-		assert([ CeL.data.math.floor_sqrt(p * p - 1), p - 1 ], 'floor_sqrt');
-		assert(!!CeL.data.math.is_square(p * p), 'is_square');
-		assert(!CeL.data.math.is_square(p * p - 1), 'is_square');
+		assert([ CeL.data.math.floor_sqrt(p * p), p ], 'floor_sqrt(p^2)');
+		assert([ CeL.data.math.floor_sqrt(p * p - 1), p - 1 ], 'floor_sqrt(p^2-1)');
+		assert(!!CeL.data.math.is_square(p * p), 'is_square(p^2)');
+		assert(!CeL.data.math.is_square(p * p - 1), 'is_square(p^2-1)');
+		assert([ CeL.data.math.ceil_log(p), String(p).length ], 'ceil_log');
+		assert([ CeL.data.math.ceil_log(p, 2), p.toString(2).length ], 'ceil_log(,2)');
+		assert([ 1/CeL.data.math.ceil_log(p), p.toString(2).length ], 'ceil_log(,2)');
+		p = 1e12;
+		assert([ CeL.data.math.ceil_log(p), Math.ceil(Math.log10(p)) ], 'ceil_log('+p+')');
+		assert([ CeL.data.math.ceil_log(p,2), Math.ceil(Math.log(p)/Math.log(2)) ], 'ceil_log('+p+',2)');
+		assert([ CeL.data.math.ceil_log(1e12), 12 ], 'ceil_log('+p+')');
+		p = 1e-12;
+		assert([ CeL.data.math.ceil_log(p), Math.ceil(Math.log10(p)) ], 'ceil_log('+p+')');
+		assert([ CeL.data.math.ceil_log(p,2), Math.ceil(Math.log(p)/Math.log(2)) ], 'ceil_log('+p+',2)');
+		assert([ CeL.data.math.ceil_log(1e12), -12 ], 'ceil_log('+p+')');
 
 		if (test_level)
 		assert([CeL.data.math.prime(490998), 7226371], 'prime');
