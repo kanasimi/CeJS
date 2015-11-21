@@ -878,6 +878,7 @@ function floor_sqrt(number) {
 
 _.floor_sqrt = floor_sqrt;
 
+
 // count digits of integer
 function ceil_log(number, base) {
 	if (!number)
@@ -887,6 +888,7 @@ function ceil_log(number, base) {
 	// assert: base >= 2, base === (base | 0)
 	number = Math.abs(number);
 	if (false)
+		// ideal
 		return Math.ceil(base === 10 ? Math.log10(number) : Math.log(number)
 				/ Math.log(base));
 
@@ -902,8 +904,18 @@ function ceil_log(number, base) {
 			// 修正。
 			log++;
 	} else {
+		var fragment;
 		while (number > ZERO_EXPONENT) {
-			number /= base;
+			// 因為可能損失 base^exp + (...) 之剩餘部分，因此不能僅採用 Math.floor(number / base)
+			if (fragment) {
+				number = Math.floor(number / base);
+			} else {
+				number /= base;
+				if (number !== Math.floor(number)) {
+					number = Math.floor(number);
+					fragment = true;
+				}
+			}
 			// library_namespace.log(number);
 			log++;
 		}
