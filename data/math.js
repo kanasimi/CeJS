@@ -152,11 +152,11 @@ _// JSDT:_module_
 /**
  * 輾轉相除 n1/n2 或 小數 n1/1 轉成 整數/整數。
  * 
- * @param {Natural}
- *            n1 number 1
- * @param {Natural}
- *            [n2] number 2
- * @param {Natural}
+ * @param {Natural}n1
+ *            number 1
+ * @param {Natural}[n2]
+ *            number 2
+ * @param {Natural}times
  *            maximum times 次數, 1,2,..
  * 
  * @return {Array} 連分數序列 (continued fraction) ** 負數視 _.mutual_division.done 而定!
@@ -173,7 +173,7 @@ mutual_division = function mutual_division(n1, n2, times) {
 		var i = 9, f = n2;
 		while (i--)
 			// 以整數運算比較快！這樣會造成整數多4%，浮點數多1/3倍的時間，但仍值得。
-			if (f *= 10, c *= 10, c === Math.floor(c)) {
+			if (f *= DEFAULT_BASE, c *= DEFAULT_BASE, c === Math.floor(c)) {
 				n1 = c, n2 = f;
 				break;
 			}
@@ -328,7 +328,7 @@ function quadratic_to_continued_fraction(r, m, i, D) {
 			sequence.push(ptr = []);
 		}
 		ptr.push(a = Math.floor(A = (sqrt + P) / Q));
-		library_namespace.debug(((sequence === ptr ? 0 : sequence.length - 1) + ptr.length - 1) + ': P=' + P + ', Q=' + Q + ', α≈' + (10 * A | 0) / 10 + ', a=' + a);
+		library_namespace.debug(((sequence === ptr ? 0 : sequence.length - 1) + ptr.length - 1) + ': P=' + P + ', Q=' + Q + ', α≈' + (DEFAULT_BASE * A | 0) / DEFAULT_BASE + ', a=' + a);
 
 		// set next Pn = a(n-1)Q(n-1) - P(n-1), Qn = (d - Pn^2) / Q(n-1).
 		P = a * Q - P;
@@ -646,7 +646,7 @@ function period_length(denominator, with_transient, min) {
 		return with_transient ? [ 0, non_repeating ] : 0;
 
 	for (var length = 1, remainder = 1;; length++) {
-		remainder = remainder * 10 % denominator;
+		remainder = remainder * DEFAULT_BASE % denominator;
 		if (remainder === 1)
 			return with_transient ? [ length, non_repeating ] : length;
 	}
@@ -1798,7 +1798,7 @@ function palindrome_list(limit, base) {
 	if (!base)
 		base = DEFAULT_BASE;
 	// 個位數皆為回文數。
-	var list = new Array(Math.min(base, limit)).fill(0).map(function(v, i) {
+	var list = new Array(Math.min(base, limit)).fill(ABSORBING_ELEMENT).map(function(v, i) {
 		return i;
 	});
 	if (limit <= base)
@@ -2867,9 +2867,7 @@ if (library_namespace.typed_arrays) {
  * @returns {Array}digit value table
  */
 function digit_table(initial_value, options) {
-	var base = options && options.base
-	// default base: {Natural}parseInt('10')
-	|| 10;
+	var base = options && options.base || DEFAULT_BASE;
 
 	if (typeof initial_value === 'string') {
 		if (initial_value === 'factorial') {
@@ -3004,19 +3002,30 @@ _.digit_table = digit_table;
 // TODO: 處理小數/負數/大數
 function Number_digits(base) {
 	if (!((base |= 0) >= 2))
-		base = parseInt('10');
-	var natural = Math.abs(this), digits = [];
+		base = DEFAULT_BASE;
+	var natural = Math.floor(Math.abs(this)), digits = [];
 	do {
 		digits.unshift(natural % base);
 	} while ((natural = Math.floor(natural / base)) > 0);
 	return digits;
 }
 
+function Number_digit_sum(base) {
+	if (!((base |= 0) >= 2))
+		base = DEFAULT_BASE;
+	var natural = Math.floor(Math.abs(this)), sum = ABSORBING_ELEMENT;
+	do {
+		sum += natural % base;
+	} while ((natural = Math.floor(natural / base)) > 0);
+	return sum;
+}
+
 // count digits of integer
 // = floor(log_10(base)) + 1
+// TODO: 測試二分搜尋 [base,base^2,base^3,...] 方法之效率。 e.g., [10,100,100,...]
 function Number_digit_length(base) {
 	if (!((base |= 0) >= 2))
-		base = parseInt('10');
+		base = DEFAULT_BASE;
 	return (base === 10 ? Math.log10(this) | 0
 	//
 	: base === 2 ? Math.log2(this) | 0
@@ -3024,7 +3033,7 @@ function Number_digit_length(base) {
 	: Math.log(this) / Math.log(base) | 0) + 1;
 
 	// slow... should use multiply by exponents, or Math.clz32()
-	var natural = Math.abs(this), digits = 0;
+	var natural = Math.floor(Math.abs(this)), digits = 0;
 	do {
 		digits++;
 	} while ((natural = Math.floor(natural / base)) > 0);
@@ -3037,7 +3046,7 @@ function Number_digit_length(base) {
 // TODO: 處理小數/負數/大數
 function Number_reverse(base) {
 	if (!base)
-		base = parseInt('10');
+		base = DEFAULT_BASE;
 	// ABSORBING_ELEMENT
 	var natural = +this, reversed = 0;
 	while (natural > 0) {
@@ -3480,6 +3489,7 @@ library_namespace.set_method(Number.prototype, {
 	ceil_log : set_bind(ceil_log),
 
 	digits : Number_digits,
+	digit_sum : Number_digit_sum,
 	digit_length : Number_digit_length,
 	reverse : Number_reverse,
 	is_palindromic : Number_is_palindromic,
