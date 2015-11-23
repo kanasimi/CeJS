@@ -1225,6 +1225,40 @@ function unique_Array(sorted) {
 	return array;
 }
 
+
+
+/**
+ * 取交集 a1 ∩ a2
+ * 
+ * @param {Array}a1
+ *            array 1
+ * @param {Array}a2
+ *            array 2
+ * @param {Boolean}[sorted]
+ *            a1, a2 are sorted.
+ * 
+ * @returns {Array}intersection of a1 and a2
+ */
+function Array_intersection(a1, a2, sorted) {
+	if (!sorted) {
+		a1 = a1.clone().sort(ascending);
+		a2 = a2.clone().sort(ascending);
+	}
+
+	var index = 0;
+	return a1.filter(function(item) {
+		while (a2[index] < item)
+			index++;
+		if (a2[index] === item) {
+			// 相同元素最多取 a1, a2 之最小個數。
+			index++;
+			return true;
+		}
+	});
+}
+
+
+
 /**
  * Count occurrence of $search in string.<br />
  * 計算 string 中出現 search 之次數。<br />
@@ -1968,7 +2002,8 @@ if (Object.setPrototypeOf && !(a instanceof SubUint32Array) || !(a instanceof Ui
 set_method(Array, {
 	// for data.clone()
 	clone: Array_clone,
-	derive: Object.setPrototypeOf ? Array_derive : Array_derive_no_proto
+	derive: Object.setPrototypeOf ? Array_derive : Array_derive_no_proto,
+	intersection: Array_intersection
 });
 
 

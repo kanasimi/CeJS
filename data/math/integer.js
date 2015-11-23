@@ -651,6 +651,7 @@ if (typeof CeL === 'function')
 				ratio_to: ratio_to,
 				valueOf: valueOf,
 				digits: digits,
+				digit_sum: digit_sum,
 				toString: toString
 			});
 
@@ -2709,6 +2710,9 @@ if (typeof CeL === 'function')
 				return digits;
 			}
 
+			function digit_sum(radix) {
+				return this.digits(radix).sum();
+			}
 
 			// ---------------------------------------------------------------------//
 			//初等數論函數/數學常數

@@ -1325,12 +1325,12 @@ _.Miller_Rabin = Miller_Rabin;
  * 
  * @returns true: is composite.<br />
  *          false: is prime.<br />
- *          prime: min prime factor.<br />
+ *          prime: min prime factor. The least prime divisor of ((natural)).<br />
  *          undefined: probable prime (PRP) / invalid number.
  */
 function not_prime(natural) {
 	if (!Number.isSafeInteger(natural) || natural < 2)
-		return;
+		return true;
 
 	var result;
 
@@ -2529,6 +2529,10 @@ _.find_maxima = function(equation, min, max, options) {
 
 
 
+// ------------------------------------------------------------------------------------------------------//
+
+
+
 // 組合數學反向思考: 有重複的=全-沒有重複的
 // 解法之所以錯誤往往是因為重複計數。
 
@@ -3010,6 +3014,9 @@ function Number_digits(base) {
 	return digits;
 }
 
+// 數字和
+// natural.digits().sum()
+// https://en.wikipedia.org/wiki/Digit_sum
 function Number_digit_sum(base) {
 	if (!((base |= 0) >= 2))
 		base = DEFAULT_BASE;
@@ -3290,7 +3297,7 @@ function String_is_permutation(sequence_2) {
  * 另外，若數字之數量遠小於計算 .is_permutation() 之工作量，則 cache .sort() 反而會快很多。
  */
 function Number_is_permutation(sequence_2) {
-	return this.digits().sum() === (+sequence_2).digits().sum()
+	return this.digit_sum() === (+sequence_2).digit_sum()
 	// ↑ 先測試數字和是否相同。
 	&& String(this).is_permutation(String(sequence_2));
 }
