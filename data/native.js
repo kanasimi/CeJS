@@ -1245,17 +1245,22 @@ function Array_intersection(a1, a2, sorted) {
 		a2 = a2.clone().sort(ascending);
 	}
 
-	var index = 0;
-	return a1.filter(function(item) {
-		while (a2[index] < item)
-			index++;
-		if (a2[index] === item) {
+	var index_a1 = 0, index_a2 = 0,
+	// Object.create(a1)
+	result = [];
+	for (; index_a1 < a1.length && index_a2 < a2.length; index_a1++) {
+		var item = a1[index_a1];
+		while (a2[index_a2] < item)
+			index_a2++;
+		if (a2[index_a2] === item) {
 			// 相同元素最多取 a1, a2 之最小個數。
-			index++;
-			return true;
+			index_a2++;
+			result.push(item);
 		}
-	});
+	}
+	return result;
 }
+
 
 
 

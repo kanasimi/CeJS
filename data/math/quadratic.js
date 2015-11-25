@@ -245,7 +245,6 @@ if (typeof CeL === 'function')
 				return [a, b];
 			}
 
-
 			function from_continued_fraction(sequence, length, base) {
 				TODO;
 			}

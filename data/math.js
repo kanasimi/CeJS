@@ -289,10 +289,13 @@ continued_fraction = function(sequence, max_no) {
 	return [ a, b ];
 };
 
-// quadratic (m√r + i) / D → continued fraction [.. , [period ..]]
+// quadratic (m√r + i) / D → continued fraction [... , [period ...]]
+// Rosen, Kenneth H. (2011). Elementary Number Theory and its Applications (6th
+// edition). Boston: Pearson Addison-Wesley. pp. 508–511.
 // https://en.wikipedia.org/wiki/Periodic_continued_fraction
-// Rosen, Kenneth H. (2005). Elementary Number Theory and its Applications (5th
-// edition). Boston: Pearson Addison-Wesley. pp. 510-512.
+// https://en.wikipedia.org/wiki/Square_root_of_2
+// https://en.wikipedia.org/wiki/Square_root#As_periodic_continued_fractions
+// https://en.wikipedia.org/wiki/Generalized_continued_fraction#Roots_of_positive_numbers
 function quadratic_to_continued_fraction(r, m, i, D) {
 	if (!i)
 		i = 0;
@@ -333,6 +336,9 @@ function quadratic_to_continued_fraction(r, m, i, D) {
 		// set next Pn = a(n-1)Q(n-1) - P(n-1), Qn = (d - Pn^2) / Q(n-1).
 		P = a * Q - P;
 		Q = (d - P * P) / Q;
+		if (Q === 0)
+			// is not a quadratic irrationality?
+			return sequence;
 		// assert: Pn, Qn are both integers.
 	}
 }

@@ -267,6 +267,10 @@ function test_native() {
 		[[ undefined, [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ], /* 以便未找到時回傳 undefined. */ near : [] }) ]],
 	]);
 
+	error_count += CeL.test('data.native', function(assert) {
+		assert(['2,8', Array.intersection([2,3,5,6,8], [1,2,4,8,9], true).join(',')], 'Array.intersection()');
+	});
+
 }
 
 

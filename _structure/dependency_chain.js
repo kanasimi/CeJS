@@ -2710,21 +2710,23 @@ if (typeof CeL === 'function')
 								onload = ' onload="' + library_namespace.Class
 										+ '.onload_queue[' + onload + ']()"';
 
-								// TODO: 若在 window.onload 之後使用會清空頁面!
-								document
-										.write(type === 'js' ? '<script type="text/javascript" src="'
-												+ encode_URL
-												// language="JScript"
-												+ '"' + onload + '><\/script>'
-												: type === 'css' ?
-												// TODO: security concern: 對
-												// path 作 filter。
-												'<link type="text/css" rel="stylesheet" href="'
-														+ encode_URL + '"'
-														+ onload + '><\/link>'
-												//
-												: '<img src="' + encode_URL
-														+ '" />');
+								// TODO: 若在 window.onload 之後使用 document.write()
+								// 會清空頁面!
+								document.write(type === 'js'
+								//
+								? '<script type="text/javascript" src="'
+										+ encode_URL
+										// language="JScript"
+										+ '"' + onload + '><\/script>'
+										: type === 'css' ?
+										// TODO: security concern: 對
+										// path 作 filter。
+										'<link type="text/css" rel="stylesheet" href="'
+
+										+ encode_URL + '"' + onload
+												+ '><\/link>'
+										//
+										: '<img src="' + encode_URL + '" />');
 							}
 
 						} else if (library_namespace.is_debug(2)) {
@@ -2734,7 +2736,10 @@ if (typeof CeL === 'function')
 									+ ' 沒有可以載入 resource 的方法！');
 						}
 
-					if (!declaration.included)
+					if (!declaration.included
+					// 在 web 環境才警告 web 資源檔載入問題。
+					// 此時 type 尚未設定。
+					&& (library_namespace.is_WWW() || !/\.css/i.test(id)))
 						library_namespace.warn(
 						//
 						'load_named: 載入 [' + id + '] 失敗！');
