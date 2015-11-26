@@ -1145,14 +1145,49 @@ Collatz_conjecture.longest = Collatz_conjecture_longest;
 
 // https://en.wikipedia.org/wiki/Memoization
 /** {Array}質數列表。 cache / memoization 以加快速度。 */
-var primes = [2, 3, 5],
+var primes = [ 2, 3, 5 ],
 /**
  * last prime tested.<br />
- * assert: primes_last_test is ((6n ± 1)). 因此最起碼應該從 5 開始。
+ * assert: last_prime_tested is ((6n ± 1)). 因此最起碼應該從 5 開始。
  * 
  * @type {Natural}
  */
-primes_last_test = primes[primes.length - 1];
+last_prime_tested = primes[primes.length - 1];
+
+// https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
+// the sieve of Eratosthenes 篩法
+function prime_sieve(limit, limit_index) {
+	//var list = _.number_array(limit + 1, 0, Int8Array);
+	var list = new Array(limit + 1);
+	// 重建 re-build list (table)
+	primes.forEach(function(prime) {
+		for (var number = prime; number <= limit;) {
+			//list[number += prime] = 1;
+			list[number += prime] = true;
+		}
+	});
+
+	for (var n = last_prime_tested; n <= limit;) {
+		if (list[++n])
+			continue;
+		// n is prime
+		//library_namespace.debug(n + ' is prime');
+		primes.push(n);
+		if (limit_index && primes.length > limit_index)
+			break;
+		// 登記所有倍數。
+		for (var number = n; number <= limit;) {
+			//list[number += prime] = 1;
+			list[number += prime] = true;
+		}
+	}
+
+	last_prime_tested = primes[primes.length - 1];
+	return primes;
+}
+
+_.prime_sieve = prime_sieve;
+
 
 // integer: number to test
 function test_is_prime(integer, index, sqrt) {
@@ -1192,22 +1227,31 @@ function prime(index, limit) {
 	}
 
 	if (primes.length < index) {
-		// assert: primes_last_test is ((6n ± 1))
-		/**
-		 * {Boolean}p1 === true: primes_last_test is 6n+1.<br />
-		 * else: primes_last_test is 6n-1
-		 */
-		var p1 = primes_last_test % 6 === 1;
+		if (false && index - primes.length > 1e6) {
+			// using the sieve of Eratosthenes 篩法
+			// 沒比較快。
+			// 詳細數量應採 prime π(x)。
+			// https://zh.wikipedia.org/wiki/%E8%B3%AA%E6%95%B8%E5%AE%9A%E7%90%86
+			prime_sieve(limit || index * 10, index);
+		} else {
+			// assert: last_prime_tested is ((6n ± 1))
+			/**
+			 * {Boolean}p1 === true: last_prime_tested is 6n+1.<br />
+			 * else: last_prime_tested is 6n-1
+			 */
+			var p1 = last_prime_tested % 6 === 1;
 
-		for (; primes.length < index && Number.isSafeInteger(primes_last_test);) {
-			primes_last_test += (p1 = !p1) ? 2 : 4;
-			// 實質為 https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
-			if (!test_is_prime(primes_last_test, 2))
-				primes.push(primes_last_test);
-			if (limit && limit <= primes_last_test)
-				break;
+			for (; primes.length < index
+					&& Number.isSafeInteger(last_prime_tested);) {
+				last_prime_tested += (p1 = !p1) ? 2 : 4;
+				// 實質為 https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
+				if (!test_is_prime(last_prime_tested, 2))
+					primes.push(last_prime_tested);
+				if (limit && limit <= last_prime_tested)
+					break;
+			}
+			library_namespace.debug('last prime tested = ' + last_prime_tested);
 		}
-		library_namespace.debug('primes_last_test = ' + primes_last_test);
 	}
 
 	return primes[index - 1];
@@ -1222,7 +1266,7 @@ _.prime = prime;
 // CeL.prime(CeL.prime_pi(Number.MAX_SAFE_INTEGER = 2^53 - 1)) = 9007199254740881
 function prime_pi(value) {
 	value = Math.abs(Math.floor(value));
-	if (primes_last_test < value)
+	if (last_prime_tested < value)
 		prime(value, value);
 	// +1: index of function prime() starts from 1!
 	return primes.search_sorted(value, true) + 1;
@@ -1355,11 +1399,11 @@ function not_prime(natural) {
 	// 先從耗費少的檢測開始。
 
 	// 先檢測此數是否在質數列表中。
-	if (natural <= primes_last_test)
+	if (natural <= last_prime_tested)
 		// -1: NOT_FOUND
 		return primes.search_sorted(natural) === -1;
 
-	result = primes.length < 1e3 && primes_last_test * primes_last_test < natural
+	result = primes.length < 1e3 && last_prime_tested * last_prime_tested < natural
 	// ↑ 1e3: 當有太多質數要測，test_is_prime()就不划算了。
 	? undefined : test_is_prime(natural);
 	if (result === undefined)
@@ -1681,14 +1725,17 @@ function factor_sum_map(limit, options) {
 		list = options.list;
 		if (options.all_factors)
 			add_1 = add_self = true;
-		if (typeof options.processor === 'function')
-			processor = options.processor;
-		else
+		processor = options.processor;
+		if (typeof processor === 'string' && factor_sum_map[processor])
+			processor = factor_sum_map[processor];
+		if (typeof processor !== 'function') {
+			processor = undefined;
 			// options.list: get factor list instead of summation.
 			get_sum = !options.get_list;
+		}
 	}
 
-	// assert: limit≥1
+	// assert: limit ≥ 1
 	// ++limit: number up to ((limit)), but need ((limit+1)) elements.
 	++limit;
 
@@ -1710,7 +1757,8 @@ function factor_sum_map(limit, options) {
 	if (options && typeof options.preprocessor === 'function')
 		factor_map = options.preprocessor(factor_map) || factor_map;
 
-	// generate factor map: a kind of sieve method.
+	// generate factor map: a kind of sieve method 篩法.
+	// https://en.wikipedia.org/wiki/Sieve_theory
 	for (;; index++) {
 		var number = list ? list[index] : index;
 		if (!(number < limit))
@@ -1718,8 +1766,7 @@ function factor_sum_map(limit, options) {
 		for (var n = add_self ? number : 2 * number; n < limit; n += number) {
 			// 處理所有 ((number)) 之倍數。
 			if (processor)
-				// count factors:
-				// processor : function(factor_map, factor, natural) {factor_map[natural]++;}
+				// processor : function(factor_map, factor, natural) {;}
 				processor(factor_map, number, n);
 			else if (get_sum)
 				// 將所有 ((number)) 之倍數都加上 ((number))。
@@ -1743,6 +1790,12 @@ function factor_sum_map(limit, options) {
 }
 
 _.factor_sum_map = factor_sum_map;
+
+// count factors
+factor_sum_map.count = function(factor_map, factor, natural) {
+	factor_map[natural]++;
+};
+
 
 
 /**
