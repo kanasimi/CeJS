@@ -694,6 +694,7 @@ auto_hide : false,
 
 /**
  * 等待多久才顯示 log。若為 0 則直接顯示。<br />
+ * e.g., 即時顯示，不延遲顯示： CeL.Log.interval = 0;<br />
  * (WScript 沒有 setTimeout)
  * @_name	_module_.prototype.interval
  */
@@ -752,7 +753,7 @@ log : function(message, clean, option) {
 	else
 		_p.buf.push(message);
 
-	if (!t.interval)
+	if (!(t.interval>0))
 		t.do_log();
 	else if (!_p.th)
 		// no window.setTimeout @ node.js

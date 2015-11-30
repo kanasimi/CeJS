@@ -6671,7 +6671,7 @@ _.DOM_data = dataset;
 
 
 var is_Safari = library_namespace.is_WWW(true) && navigator.userAgent,
-// support CSS position sticky
+/** {Boolean}support CSS position sticky */
 CSS_position_sticky;
 
 if (is_Safari) {
@@ -6683,7 +6683,7 @@ if (is_Safari) {
 	// Warning: 未完善。
 	// https://developer.mozilla.org/en-US/docs/Web/CSS/position#Browser_compatibility
 	// Firefox (Gecko): 32.0~
-	CSS_position_sticky = is_Safari || /Firefox\/3[2-9]/.test(navigator.userAgent);
+	CSS_position_sticky = is_Safari || /Firefox\/(?:[4-9]\d|3[2-9])/.test(navigator.userAgent);
 }
 
 /**

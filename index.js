@@ -1,5 +1,5 @@
 ﻿/**
- * @name CeL frontend for node.js.
+ * @name CeL frontend for npm of node.js.
  * 
  * @fileoverview 本檔案用於在 npm (node.js) 中 require 本 library。
  * 

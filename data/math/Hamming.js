@@ -123,11 +123,11 @@ split_code = function(code) {
 	if (Array.isArray(code))
 		code = code.join('');
 	code = (' ' + code).split('');
-	library_namespace.debug('split [' + code + ']', 1, module_name + '.split_code');
+	library_namespace.debug('split [' + code + ']', 1, module_name + '.split_code', 3);
 	var i = 1, l = code.length, cb = [];
 	while (i < l)
 		cb.push(code[i]), code[i] = '', i *= 2;
-	library_namespace.debug('→ data [' + code.join('').replace(/ +/g, '') + '], check bits  [' + cb + ']', 1, module_name + '.split_code');
+	library_namespace.debug('→ data [' + code.join('').replace(/ +/g, '') + '], check bits  [' + cb + ']', 1, module_name + '.split_code', 3);
 	return [ code.join('').replace(/ +/g, ''), cb ];
 };
 

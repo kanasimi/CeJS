@@ -1753,7 +1753,8 @@ if (typeof CeL === 'function')
 					if (matched = matched.match(MONTH_NAME_PATTERN))
 						// 去空白與"月"字。
 						date_name[1] = (matched[1] || '') + matched[2];
-					else if (date_name[1] !== LEAP_MONTH_PREFIX)
+					else if (library_namespace.is_debug()
+							&& date_name[1] !== LEAP_MONTH_PREFIX)
 						library_namespace.warn(
 						//
 						'parse_calendar_date_name: 特殊月名: [' + date_name[1]
@@ -1963,6 +1964,9 @@ if (typeof CeL === 'function')
 
 							// 減去參照紀元 era 之參照月序
 							month_diff -= era_month;
+
+							if (!library_namespace.is_debug())
+								return;
 
 							if (month_diff > 0) {
 								library_namespace.debug('引入 [' + era
@@ -5598,9 +5602,10 @@ if (typeof CeL === 'function')
 				}
 
 				if (era_index === 0 && date < 紀年.start) {
-					library_namespace.warn('add_contemporary: 日期 ['
-							+ date.format(standard_time_format)
-							+ '] 在所有已知紀年之前！');
+					if (library_namespace.is_debug())
+						library_namespace.warn('add_contemporary: 日期 ['
+								+ date.format(standard_time_format)
+								+ '] 在所有已知紀年之前！');
 					return;
 				}
 
@@ -5678,17 +5683,19 @@ if (typeof CeL === 'function')
 				// 作結尾檢測 (bounds check)。
 				if (紀年.end <= date) {
 					if (指定紀年) {
-						library_namespace.warn(
-						//
-						'add_contemporary: 日期 ['
-								+ date.format(standard_time_format)
-								+ '] 在指定紀年 [' + 指定紀年 + '] 之後！');
+						if (library_namespace.is_debug())
+							library_namespace.warn(
+							//
+							'add_contemporary: 日期 ['
+									+ date.format(standard_time_format)
+									+ '] 在指定紀年 [' + 指定紀年 + '] 之後！');
 						return;
 					}
 					if (共存紀年.length === 0) {
-						library_namespace.warn('add_contemporary: 日期 ['
-								+ date.format(standard_time_format)
-								+ '] 在所有已知紀年之後！');
+						if (library_namespace.is_debug())
+							library_namespace.warn('add_contemporary: 日期 ['
+									+ date.format(standard_time_format)
+									+ '] 在所有已知紀年之後！');
 						return;
 					}
 					紀年 = 共存紀年[0];
@@ -6242,7 +6249,7 @@ if (typeof CeL === 'function')
 								// 有超過1個紀年。
 								if (options.pick)
 									tmp = options.pick(tmp) || tmp;
-								else
+								else if (library_namespace.is_debug())
 									library_namespace.warn('to_era_Date: 共取得 '
 											+ tmp.length + ' 個可能的紀年名稱！ ['
 											+ tmp.join(', ') + ']');

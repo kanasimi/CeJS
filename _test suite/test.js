@@ -26,8 +26,9 @@ TODO: https://github.com/kanasimi/CeJS/tags
 
 'use strict';
 
+var test_debug_level = 0,
 /** {ℕ⁰:Natural+0}test level */
-var test_level = 1,
+test_level = 1,
 /** {ℕ⁰:Natural+0}count of errors (failed + fatal) */
 error_count = 0;
 
@@ -519,7 +520,7 @@ function test_numeral() {
 	error_count += CeL.test('Roman numerals 1 to 1000000', function(assert) {
 		for (var natural = 1; natural < 1e6; natural++) {
 			if (natural % 10000 === 0)
-				CeL.debug(natural + ': ' + CeL.to_Roman_numeral(natural, true));
+				CeL.debug(natural + ': ' + CeL.to_Roman_numeral(natural, true), 2);
 			assert([ natural,
 					CeL.from_Roman_numeral(CeL.to_Roman_numeral(natural, true)) ],
 					'Roman numeral ' + natural);
@@ -549,7 +550,7 @@ function test_numeral() {
 
 
 function test_math() {
-	CeL.set_debug();
+	CeL.set_debug(test_debug_level);
 
 	// ---------------------------------------------------------------------//
 
@@ -1501,7 +1502,7 @@ function test_CSV() {
   		[[CeL.to_CSV_String([["a","b","c"],[1,2],[3,4,5]],{has_title:1,select_column:[2,1]}),'"2","1"\n"c","b"\n"","2"\n"5","4"']],
   	]);
 
-	CeL.set_debug();
+	CeL.set_debug(test_debug_level);
 
   	node_info('Passed: All CSV tests');
 }
@@ -2538,10 +2539,13 @@ function finish_test() {
 		}, 0);
 }
 
+var test
 function do_test() {
 	// CeL.assert([ typeof CeL.assert, 'function' ], 'CeL.assert is working.');
 	CeL.env.ignore_COM_error = true;
-	CeL.set_debug();
+	CeL.set_debug(test_debug_level);
+	// 即時顯示，不延遲顯示
+	CeL.Log.interval = 0;
 	CeL.run(
 	// 測試期間時需要用到的功能先作測試。這些不可 comment out。
 	'interact.console', test_console,

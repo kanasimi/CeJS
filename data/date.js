@@ -2159,7 +2159,8 @@ function convert_stem_branch_date(stem_branch, date_value, end_date_diff) {
 					+ (stem_branch % SEXAGENARY_CYCLE_LENGTH);
 		if (Math.abs(end_date_diff) < stem_branch) {
 			// 找出距離範圍最近的日干支。
-			library_namespace.warn('convert_stem_branch_date: 所欲求之日干支 [' + stem_branch + '] 並不在範圍內！');
+			if (library_namespace.is_debug())
+				library_namespace.warn('convert_stem_branch_date: 所欲求之日干支 [' + stem_branch + '] 並不在範圍內！');
 			if (stem_branch - Math.abs(end_date_diff) > SEXAGENARY_CYCLE_LENGTH
 					- stem_branch)
 				stem_branch -= SEXAGENARY_CYCLE_LENGTH;

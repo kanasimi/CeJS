@@ -331,7 +331,7 @@ function quadratic_to_continued_fraction(r, m, i, D) {
 			sequence.push(ptr = []);
 		}
 		ptr.push(a = Math.floor(A = (sqrt + P) / Q));
-		library_namespace.debug(((sequence === ptr ? 0 : sequence.length - 1) + ptr.length - 1) + ': P=' + P + ', Q=' + Q + ', α≈' + (DEFAULT_BASE * A | 0) / DEFAULT_BASE + ', a=' + a);
+		library_namespace.debug(((sequence === ptr ? 0 : sequence.length - 1) + ptr.length - 1) + ': P=' + P + ', Q=' + Q + ', α≈' + (DEFAULT_BASE * A | 0) / DEFAULT_BASE + ', a=' + a, 3);
 
 		// set next Pn = a(n-1)Q(n-1) - P(n-1), Qn = (d - Pn^2) / Q(n-1).
 		P = a * Q - P;
@@ -1681,12 +1681,20 @@ _.factorize = factorize;
 });
 
 
+/**
+ * 得到第一個質數因子。
+ * 
+ * @param {Natural}natural
+ *            natural number ≥ 2
+ * 
+ * @returns{Natural}the first prime factor of ((natural))
+ */
 function first_factor(natural) {
-	for (var p = 1, sqrt = floor_sqrt(natural), index = 0, length = primes.length ; p <= sqrt ;)
+	for (var p = 1, sqrt = floor_sqrt(natural), index = 0, length = primes.length; p <= sqrt;)
 		// 採用試除法, use trial division。
 		if (natural % (p = index < length ? primes[index++]
-			// find enough primes
-			: prime(++index)) === 0)
+		// find enough primes
+		: prime(++index)) === 0)
 			return p;
 	return natural;
 }
@@ -1795,6 +1803,39 @@ _.factor_sum_map = factor_sum_map;
 factor_sum_map.count = function(factor_map, factor, natural) {
 	factor_map[natural]++;
 };
+
+
+/**
+ * count coprime numbers below ((limit)).<br />
+ * 計算所有比各數字小，並與各數字互質的數。<br />
+ * 歐拉函數 φ(n), Euler's totient function, Euler's phi function 是小於或等於n的正整數中與n互質的數的數目。
+ * 
+ * @param {Natural}limit
+ *            natural number ≥ 2
+ * 
+ * @returns {Array}coprime map
+ * 
+ * @see function coprime()<br />
+ *      https://en.wikipedia.org/wiki/Euler's_totient_function
+ * 
+ */
+function coprime_map(limit, options) {
+	return factor_sum_map(limit, {
+		add_self : true,
+		// 初始化。
+		preprocessor : function(factor_map) {
+			factor_map.forEach(function(v, i) {
+				factor_map[i] = i;
+			});
+		},
+		list : prime(0, limit),
+		processor : function(factor_map, prime, number) {
+			factor_map[number] = factor_map[number] / prime * (prime - 1);
+		}
+	});
+}
+
+_.coprime_map = coprime_map;
 
 
 
@@ -2674,6 +2715,7 @@ function count_partitions(sum, part_count, summands, cache) {
  *      組合數學/總價值固定之錢幣排列組合方法數<br />
  *      http://www.cnblogs.com/python27/p/3303721.html
  *      http://mathworld.wolfram.com/Partition.html
+ *      http://mathworld.wolfram.com/PartitionFunctionP.html
  *      http://www.zhihu.com/question/21075235
  *      http://blog.csdn.net/iheng_scau/article/details/8170669
  */
@@ -2683,7 +2725,22 @@ function integer_partitions(sum, part_count, summands) {
 		return 0;
 
 	if (!summands || !summands.length) {
-		throw 'integer_partitions: NYI';
+		if (part_count)
+			throw 'integer_partitions: NYI';
+
+		if (sum < 0)
+			// p(n) = 0 for n negative.
+			return 0;
+		// the partition function p(n)
+		// https://en.wikipedia.org/wiki/Partition_%28number_theory%29#Partitions_in_a_rectangle_and_Gaussian_binomial_coefficients
+		var count = _.number_array(sum + 1);
+		// p(0) = 1
+		count[0] = 1;
+		for (var i = 1; i <= sum; i++)
+			for (var j = i; j <= sum; j++)
+				count[j] += count[j - i];
+		library_namespace.debug(count, 3);
+		return count[sum];
 	}
 
 	// 檢查是否有解。
@@ -2704,7 +2761,7 @@ _// JSDT:_module_
 /**
  * VBScript has a Hex() function but JScript does not.
  * 
- * @param {Number}
+ * @param {Number}number
  *            number
  * 
  * @return {String} number in hex
@@ -2720,7 +2777,7 @@ _// JSDT:_module_
 /**
  * 補數計算。 正數的補數即為自身。若要求得互補之後的數字，請設成負數。
  * 
- * @param {Number}
+ * @param {Number}number
  *            number
  *
  * @return {Number} base 1: 1's Complement, 2: 2's Complement, (TODO: 3, 4, ..)
@@ -2780,7 +2837,7 @@ set : function(value) {
  */
 from : function(number, base, diminished) {
 	// 正規化
-	number = ('' + (number||0)).replace(/\s+$|^[\s0]+/g, '') || '0';
+	number = ('' + (number || 0)).replace(/\s+$|^[\s0]+/g, '') || '0';
 	// library_namespace.debug(number + ':' + number.length + ',' + this.bits);
 
 	// 整數部分位數
@@ -2788,7 +2845,7 @@ from : function(number, base, diminished) {
 	// -1: NOT_FOUND
 	if (value == -1)
 		value = number.length;
-	// TODO: not good/optimize
+	// TODO: not good, need to optimize
 	if (value > this.bits)
 		// throw 'overflow';
 		library_namespace.err('complement.from: overflow: ' + value);
@@ -2799,11 +2856,11 @@ from : function(number, base, diminished) {
 	else
 		this.diminished = diminished;
 
-	if ((base = Math.floor(base)) && base > 0){
+	if ((base = Math.floor(base)) && base > 0) {
 		if (base === 1)
 			base = 2, this.diminished = 1;
 		this.base = base;
-	}else
+	} else
 		// illegal base
 		base = this.base;
 	// library_namespace.debug(base + "'s Complement");
@@ -2819,8 +2876,9 @@ from : function(number, base, diminished) {
 	if (value < tmp)
 		this.sign = 0;
 	else {
-		library_namespace.debug('負數 ' + (tmp * base - (diminished ? 1 : 0)) + '-'
-				+ value + '=' + (tmp * base - (diminished ? 1 : 0) - value), 3);
+		library_namespace.debug('負數 ' + (tmp * base - (diminished ? 1 : 0))
+				+ '-' + value + '='
+				+ (tmp * base - (diminished ? 1 : 0) - value), 3);
 		this.sign = 1;
 		value = tmp * base - (diminished ? 1 : 0) - value;
 	}
@@ -3073,9 +3131,10 @@ function Number_digits(base) {
 	return digits;
 }
 
-// 數字和
-// natural.digits().sum()
+// 數字和, 位數和
+// natural.digits(base).sum()
 // https://en.wikipedia.org/wiki/Digit_sum
+// to get digit root: using natural.digit_sum(base) % base
 function Number_digit_sum(base) {
 	if (!((base |= 0) >= 2))
 		base = DEFAULT_BASE;
