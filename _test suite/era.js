@@ -246,7 +246,7 @@ default_column = [
 			a : {
 				T : CE_name
 			},
-			R : 'Common Era: Y/m/d\nReform after 1582/10/4.',
+			R : 'Common Era: Y/m/d\nReform after 1582/10/4. -1: 1 BCE',
 			href : 'https://en.wikipedia.org/wiki/Common_Era'
 		} ];
 
@@ -2744,7 +2744,9 @@ function affairs() {
 
 	// add 東亞陰陽曆法
 	function add_曆法(曆名, 說明, link) {
-		if (Array.isArray(說明))
+		if (!說明)
+			說明 = '';
+		else if (Array.isArray(說明))
 			說明 = 說明.join('\n');
 		var 行用 = CeL[曆名 + '_Date'].行用;
 		if (行用) {
@@ -2759,7 +2761,7 @@ function affairs() {
 			a : {
 				T : 曆名
 			},
-			R : 說明 + '\n* 以平氣平朔無中置閏規則計算得出，非實曆。',
+			R : 說明.trim() + '\n* 以平氣平朔無中置閏規則計算得出，非實曆。',
 			href : 'https://' + (曆名.includes('暦') ? 'ja' : 'zh')
 			//
 			+ '.wikipedia.org/wiki/' + encodeURIComponent(link || 曆名)
@@ -3964,6 +3966,7 @@ function affairs() {
 			href : 'https://zh.wikipedia.org/wiki/%E5%8F%A4%E5%85%AD%E6%AD%B7'
 		}, add_陰陽暦('子') ],
 
+		// 黃帝曆 : add_曆法('黃帝曆', '非黃帝紀元'),
 		太初曆 : add_曆法('太初曆', '從漢武帝太初元年夏五月（前104年）至後漢章帝元和二年二月甲寅（85年），太初曆共實行了188年。'),
 		後漢四分曆 : add_曆法('後漢四分曆', '東漢章帝元和二年二月四日甲寅至曹魏青龍五年二月末（東吳用至黃武二年）施用《四分曆》。'),
 		乾象曆 : add_曆法('乾象曆', '三國東吳孫權黃武二年正月（223年）施行，直到天紀三年（280年）東吳滅亡。'),

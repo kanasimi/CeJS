@@ -2262,7 +2262,7 @@ Myanmar_adjust_fullmoon = {
 	1377 : 1
 },
 // for fullmoon: Cool Emerald - Based on various evidence such as inscriptions, books, etc...
-// Cool Emerald(2015/5)
+// Cool Emerald(2015/11)
 // got modified dates based on feedback from U Aung Zeya who referred to multiple resources such as Mhan Nan Yar Za Win, Mahar Yar Za Win, J. C. Eade, and inscriptions etc...
 Myanmar_adjust_CE = {
 	205 : 1,
@@ -2278,6 +2278,7 @@ Myanmar_adjust_CE = {
 	849 : -1,
 	851 : -1,
 	854 : -1,
+	927 : -1,
 	1039 : -1
 },
 // for fullmoon: Tin Naing Toe & Dr. Than Tun
@@ -2473,7 +2474,6 @@ Myanmar leap year on 2,5,7,10,13,15,18 / 19
 for(var i=0;i<19;i++){for(var y=0,_y,l=[];y<19;y++){_y=(7*y+i)%19;if(_y<7)l.push(y);}console.log(i+':'+l);}
 // 9:2,5,7,10,13,15,18
 @see Tabular_list_leap()
-
 
 → Myanmar year is a leap year if:
 (7*year+9).mod(19)<7
@@ -5317,6 +5317,22 @@ add_平氣平朔曆法.epoch = Julian_day.YMD_to_Date(-2000, 1, 1, null, true);
 
 
 add_平氣平朔曆法({
+	// 曆名 : '每月日數,每節氣日數,曆元JDN,行用起訖日期,options'
+
+	// 古六歷或古六曆, 置閏於年底
+	// https://zh.wikipedia.org/wiki/%E5%8F%A4%E5%85%AD%E6%AD%B7
+	// http://www.bsm.org.cn/show_article.php?id=2372
+	// https://github.com/suchowan/when_exe/blob/master/lib/when_exe/region/chinese/twins.rb
+	// 近元在前1350年。
+	// 黃帝曆 : '27759/940,487/32,1228331',
+	// 近元在前1506年。
+	// 顓頊曆 : '27759/940,487/32,1171396',
+	// 後期顓頊曆 : '27759/940,487/32,1171396',
+	// 古夏曆 : '27759/940,487/32,1328411',
+	// 古殷曆 : '27759/940,487/32,1149071',
+	// 古周曆 : '27759/940,487/32,1128251',
+	// 魯曆 : '27759/940,487/32,1048991',
+
 	// 《太初曆》於漢成帝末年，由劉歆重新編訂，改稱三統曆。行用於太初元年夏五月至後漢章帝元和二年二月甲寅(104 BCE–85 CE)
 	// 曆元: 西漢武帝元封7年11月1日 (天正月, 冬至十一月), 105/12/25 BC, -105/12/25
 	// 至於元封七年，復得閼逢攝提格之歲，中冬(仲冬)十一月甲子朔旦冬至，日月在建星，太歲在子，已得太初本星度新正。
