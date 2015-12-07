@@ -1,8 +1,10 @@
 
 /**
- * @name CeL function for math
+ * @name CeL function for mathematics.
  * @fileoverview 本檔案包含了數學演算相關的 functions。
- * @since
+ * 
+ * @see http://www.wolframalpha.com/<br />
+ *      http://www.numberempire.com/
  */
 
 /*
@@ -810,12 +812,12 @@ _.modular_inverse = modular_inverse;
 // factorial_cache = [ 0! = 1, 1!, 2!, .. ]
 var factorial_cache = [ 1 ], factorial_cache_to;
 /**
- * Get the factorial (階乘) of (integer).<br />
+ * Get the factorial (階乘) of (natural).<br />
  * 
  * @param {ℕ⁰:Natural+0}natural
  *            safe integer. 0–18
  * 
- * @returns {Natural|Number}n的階乘.
+ * @returns {Natural}natural的階乘.
  * 
  * @see https://en.wikipedia.org/wiki/Factorial
  */
@@ -1274,6 +1276,49 @@ function prime_pi(value) {
 _.prime_pi = prime_pi;
 
 
+/**
+ * Get the primorial (質數階乘, p_n#) of (NO).<br />
+ * 
+ * @param {Natural}NO
+ *            safe integer. 1–13
+ * 
+ * @returns {Natural}p_NO的質數階乘.
+ * 
+ * @see https://en.wikipedia.org/wiki/Primorial
+ */
+function primorial(NO) {
+	if (!(NO >= 1))
+		return MULTIPLICATIVE_IDENTITY;
+	prime(NO);
+	var index = 0, product = MULTIPLICATIVE_IDENTITY;
+	while (index < NO)
+		product *= primes[index++];
+	return product;
+}
+
+/**
+ * Get the primorial (質數階乘, n#) of (natural).<br />
+ * 
+ * @param {Natural}natural
+ *            safe integer. 2–42
+ * 
+ * @returns {Natural}natural的質數階乘.
+ * 
+ * @see https://en.wikipedia.org/wiki/Primorial
+ */
+function primorial_natural(natural) {
+	// 2: primes[0]
+	if (!(natural >= 2))
+		return MULTIPLICATIVE_IDENTITY;
+	var index = 0, length = prime_pi(natural), product = MULTIPLICATIVE_IDENTITY;
+	while (index < length)
+		product *= primes[index++];
+	return product;
+}
+
+_.primorial = primorial;
+primorial.natural = primorial_natural;
+
 
 // return multiplicand × multiplier % modulus
 // assert: 三者皆為 natural number, and Number.isSafeInteger() is OK.
@@ -1366,7 +1411,7 @@ _.Miller_Rabin = Miller_Rabin;
 
 
 /**
- * Test if ((natural)) is not prime.
+ * Test if ((natural)) is not prime. 是否不為質數。
  * 
  * 對大數，僅能確定為合數，不是質數；不能保證是質數。
  * 

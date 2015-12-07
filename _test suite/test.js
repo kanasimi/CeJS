@@ -626,6 +626,8 @@ function test_math() {
 		assert(Number.isSafeInteger(CeL.factorial(18)), 'Number.isSafeInteger()');
 		assert([CeL.data.math.factorial(18), 6402373705728000], 'factorial');
 		assert([30414093201713378043612608166064768844377641568960512000000000000, CeL.data.math.factorial(50)], { name : 'factorial', error_rate : Number.EPSILON });
+		assert([CeL.data.math.primorial(13), 304250263527210], 'primorial(13)');
+		assert([CeL.data.math.primorial.natural(42), 304250263527210], 'primorial.natural(42)');
 
 		var p = 20374345;
 		assert([ p.digits().join(','), '2,0,3,7,4,3,4,5' ], '.digits()');
