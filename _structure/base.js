@@ -1028,14 +1028,14 @@ function (global) {
 		 * library main file base name
 		 * 
 		 * @name CeL.env.main_script_name
-		 * @type String
+		 * @type {String}
 		 */
 		env.main_script_name = 'ce';
 
 		/**
 		 * default extension of script file.<br />
 		 * setup_extension @ CeL.get_script_base_path() 可能會再設定一次，偵測為 .txt 的情況。
-		 * @type String
+		 * @type {String}
 		 * @see <a
 		 *      href="http://soswitcher.blogspot.com/2009/05/blogger-host-javascript-file-for-free.html"
 		 *      accessdate="2010/3/11 23:30">Blogger - Host Javascript File for
@@ -1056,7 +1056,7 @@ function (global) {
 		 * </code>
 		 * 
 		 * @name CeL.env.main_script
-		 * @type String
+		 * @type {String}
 		 */
 		env.main_script = env.main_script_name + env.script_extension;
 
@@ -1064,7 +1064,7 @@ function (global) {
 		 * module 中的這 member 定義了哪些 member 不被 extend。
 		 * 
 		 * @name CeL.env.not_to_extend_keyword
-		 * @type String
+		 * @type {String}
 		 */
 		env.not_to_extend_keyword = 'no_extend';
 
@@ -1075,7 +1075,7 @@ function (global) {
 		 * don't have native support for Object.defineProperty().
 		 * 
 		 * @name CeL.env.not_to_extend_keyword
-		 * @type String
+		 * @type {String}
 		 */
 		env.not_native_keyword = KEY_not_native;
 
@@ -1084,7 +1084,7 @@ function (global) {
 		 * 不使用會產生語法錯誤!
 		 * 
 		 * @name CeL.env.source_encoding
-		 * @type String
+		 * @type {String}
 		 */
 		env.source_encoding = 'UTF-16';
 
@@ -1092,7 +1092,7 @@ function (global) {
 		 * creator group / 組織名稱 organization name
 		 * 
 		 * @name CeL.env.organization
-		 * @type String
+		 * @type {String}
 		 */
 		env.organization = 'Colorless echo';
 
@@ -1100,16 +1100,16 @@ function (global) {
 		 * default global object. 有可能為 undefined!
 		 * 
 		 * @name CeL.env.global
-		 * @type Object
+		 * @type {Object}
 		 */
 		env.global = global;
-		// global 已被覆蓋。
+		// from now, global 已被覆蓋。
 
 		/**
 		 * 在 registry 中存放 library 資料的 base path
 		 * 
 		 * @name CeL.env.registry_base
-		 * @type String
+		 * @type {String}
 		 */
 		env.registry_base = 'HKCU\\Software\\' + env.organization + '\\' + this.Class
 					+ '\\';
@@ -1117,25 +1117,30 @@ function (global) {
 		 * 在 registry 中存放 library 在 File System 中的 base path 的 key name
 		 * 
 		 * @name CeL.env.registry_base
-		 * @type String
+		 * @type {String}
 		 */
 		env.registry_path_key_name = env.registry_base + 'path';
 		// if(typeof WScript === 'object')
 		try {
 			// WScript.Echo(env.registry_path_key_name);
-
+			// WScript.Echo(_.get_script_base_path());
+			
+			var WshShell = WScript.CreateObject("WScript.Shell");
 			/**
-			 * 存放在 registry 中的 path，通常指的是 library 在 File System 中的 base path。
+			 * 存放在 registry 中的 path，通常指的是 library 在 File System 中的 base path。<br />
+			 * 將在 setup_library_base_path 以此設定 base path，並以此決定 module path。
 			 * 
 			 * @name CeL.env.registry_path
-			 * @type String
+			 * @type {String}
+			 * @see https://msdn.microsoft.com/en-us/library/x83z1d9f.aspx
+			 * 
 			 */
-			env.registry_path = (WScript.CreateObject("WScript.Shell"))
-				.RegRead(env.registry_path_key_name)
+			env.registry_path = WshShell.RegRead(env.registry_path_key_name)
 			// 去除 filename
 			// .replace(/[^\\\/]+$/, '')
 			;
 			// this.debug(env.registry_path);
+
 		} catch (e) {
 			// this.warn(e.message);
 		}
@@ -1167,7 +1172,7 @@ OS='UNIX'; // unknown
 		 * 本次執行所在 OS 平台。
 		 * 
 		 * @name CeL.env.OS
-		 * @type String
+		 * @type {String}
 		 */
 		env.OS = OS = OS_type || OS ||
 				// 假如未設定則由 path 判斷。
@@ -1178,7 +1183,7 @@ OS='UNIX'; // unknown
 		 * in VB: vbCrLf
 		 * 
 		 * @name CeL.env.line_separator
-		 * @type String
+		 * @type {String}
 		 */
 		env.line_separator =
 				OS === 'UNIX' ? '\n' : OS === 'Mac' ? '\r' : '\r\n';
@@ -1188,7 +1193,7 @@ OS='UNIX'; // unknown
 		 * platform-dependent path separator character, 決定目錄(directory)分隔。
 		 * 
 		 * @name CeL.env.path_separator
-		 * @type String
+		 * @type {String}
 		 */
 		env.path_separator =
 				OS === 'UNIX' ? '/' : '\\';
@@ -1197,7 +1202,7 @@ OS='UNIX'; // unknown
 		 * library 之外部檔案 (external source files) 放置地。 純目錄名，不加目錄分隔。
 		 * 
 		 * @name CeL.env.external_directory_name
-		 * @type String
+		 * @type {String}
 		 */
 		env.external_directory_name = 'external';
 
@@ -1205,7 +1210,7 @@ OS='UNIX'; // unknown
 		 * library 之資源文件 (resource files) 放置地。 純目錄名，不加目錄分隔。
 		 * 
 		 * @name CeL.env.resource_directory_name
-		 * @type String
+		 * @type {String}
 		 */
 		env.resource_directory_name = 'resource';
 
@@ -1213,14 +1218,14 @@ OS='UNIX'; // unknown
 		 * 預設 module name separator。
 		 * 
 		 * @name CeL.env.module_name_separator
-		 * @type String
+		 * @type {String}
 		 */
 		env.module_name_separator = '.';
 		/**
 		 * path_separator in 通用(regular)運算式。
 		 * 
 		 * @name CeL.env.path_separator_RegExp
-		 * @type RegExp
+		 * @type {RegExp}
 		 */
 		env.path_separator_RegExp = this.to_RegExp_pattern ?
 				this.to_RegExp_pattern(env.path_separator)
@@ -1234,7 +1239,7 @@ OS='UNIX'; // unknown
 		 * @see <a
 		 *      href="http://msdn.microsoft.com/zh-tw/library/system.globalization.cultureinfo(VS.80).aspx">CultureInfo
 		 *      類別</a>
-		 * @type Number
+		 * @type {Number}
 		 */
 		env.locale = 0x404;
 
@@ -1242,7 +1247,7 @@ OS='UNIX'; // unknown
 		 * script name.
 		 * 
 		 * @name CeL.env.script_name
-		 * @type String
+		 * @type {String}
 		 */
 		env.script_name = this.get_script_name();
 		/**
@@ -1252,7 +1257,7 @@ OS='UNIX'; // unknown
 		 * 以 reg 代替
 		 * 
 		 * @name CeL.env.script_base_path
-		 * @type String
+		 * @type {String}
 		 */
 		env.script_base_path = this.get_script_full_name()
 			// 去除 filename
@@ -1271,8 +1276,8 @@ OS='UNIX'; // unknown
 		 * 20:6">基于正则的URL匹配安全性考虑</a>
 		 * 
 		 * @name CeL.env.identifier_RegExp
+		 * @type {RegExp}
 		 * @see ECMA-262 7.6 Identifier Names and Identifiers
-		 * @type RegExp
 		 */
 		env.identifier_RegExp = /([a-zA-Z$_]|\\u[0-9a-fA-F]{4})([a-zA-Z$_0-9]+|\\u[0-9a-fA-F]{4}){0,63}/;
 
@@ -1502,9 +1507,10 @@ OS='UNIX'; // unknown
 
 	// for JScript<=5
 	try {
-		//@deprecated /^\s*function[\s\n]+(\w+)[\s\n]*\(/
+		// @deprecated /^\s*function[\s\n]+(\w+)[\s\n]*\(/
 		// ^\\s*: JScript 6-9 native object 需要這個。
-		//function_name_pattern = new RegExp('^\\s*function[\\s\\n]+(\\w+)[\\s\\n]*\\(');
+		// function_name_pattern = new
+		// RegExp('^\\s*function[\\s\\n]+(\\w+)[\\s\\n]*\\(');
 
 		_.PATTERN_function = function_name_pattern =
 		// [ all, function name, function arguments, function body ]

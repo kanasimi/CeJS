@@ -26,11 +26,16 @@ TODO: https://github.com/kanasimi/CeJS/tags
 
 'use strict';
 
-var test_debug_level = 0,
+var test_start = new Date - 0,
+/** {ℕ⁰:Natural+0}debug level during normal test period */
+test_debug_level = 0,
 /** {ℕ⁰:Natural+0}test level */
 test_level = 1,
 /** {ℕ⁰:Natural+0}count of errors (failed + fatal) */
-error_count = 0;
+error_count = 0,
+still_running = {
+	left_count : 0
+};
 
 // index.js
 require('../index');
@@ -2367,13 +2372,13 @@ function test_calendar() {
 
 //============================================================================================================================================================
 
-
 function test_era() {
 	if (!CeL.era) {
-		finish_test();
+		// 未載入必要的元件。
 		return;
 	}
 
+	set_running('era');
 	CeL.set_debug(0);
 	// 判斷是否已載入曆數資料。
 	if (!CeL.era.loaded) {
@@ -2492,7 +2497,7 @@ function test_era() {
 		[[CeL.era('前1年',{period_end:true}).format('CE'),'0001年'.to_Date('CE').format('CE')],'period_end of CE@era()'],
 	]);
 
-	finish_test();
+	finish_test('era');
 }
 
 
@@ -2526,9 +2531,27 @@ function node_info(messages) {
 }
 
 
-function finish_test() {
+function set_running(type) {
+	if (type && !still_running[type]) {
+		still_running[type] = true;
+		++still_running.left_count;
+		return true;
+	}
+}
+
+function finish_test(type) {
+	if (type && still_running[type]) {
+		delete still_running[type];
+		--still_running.left_count;
+	}
+	if (still_running.left_count) {
+		return;
+	}
+
 	if (error_count === 0) {
-		node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。', '-fg;-bg' ]);
+		node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。', '-fg;-bg',
+		//
+		' Takes ' + (new Date - test_start) + ' ms.' ]);
 		// normal done.
 		return;
 	}
@@ -2541,7 +2564,6 @@ function finish_test() {
 		}, 0);
 }
 
-var test
 function do_test() {
 	// CeL.assert([ typeof CeL.assert, 'function' ], 'CeL.assert is working.');
 	CeL.env.ignore_COM_error = true;
@@ -2587,9 +2609,9 @@ function do_test() {
 	//
 	'data.date.calendar', test_calendar,
 	//
-	'data.date.era',
+	'data.date.era', test_era,
 	//
-	test_era);
+	finish_test);
 }
 
 CeL.env.no_catch = true;

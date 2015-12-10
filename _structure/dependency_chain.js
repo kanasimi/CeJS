@@ -1433,7 +1433,7 @@ if (typeof CeL === 'function')
 		 * 
 		 * @inner
 		 * @ignore
-		 * @type Object
+		 * @type {Object}
 		 */
 		var named_code = null_Object();
 
@@ -2164,7 +2164,8 @@ if (typeof CeL === 'function')
 									}
 
 								} else {
-									if (l && l.Class)
+									if (l && l.Class
+											&& library_namespace.is_debug())
 										library_namespace.warn(
 										// 目的基底已有 (l)，將直接以新的 module (id) 取代之。
 										'load_named: 將以 ('
@@ -3629,10 +3630,15 @@ if (typeof CeL === 'function')
 		 * </code>
 		 */
 		var library_base_path,
-
+		/**
+		 * 設定 library base path，並以此決定 module path。
+		 */
 		setup_library_base_path = function() {
 			if (!library_base_path) {
-				library_base_path = library_namespace.env.registry_path
+				// 當執行程式為 library base (ce.js)，則採用本執行程式所附帶之整組 library；
+				library_base_path = library_namespace.env.script_name !== library_namespace.env.main_script_name
+						// 否則先嘗試存放在 registry 中的 path。
+						&& library_namespace.env.registry_path
 						|| library_namespace
 								.get_script_base_path(library_namespace.env.main_script_name)
 						|| library_namespace.get_script_base_path();

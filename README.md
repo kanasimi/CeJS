@@ -1,4 +1,11 @@
-﻿[![npm version](https://badge.fury.io/js/cejs.svg)](https://badge.fury.io/js/cejs)
+﻿<!--
+GitHub uses "GitHub Flavored Markdown," or GFM
+https://help.github.com/articles/github-flavored-markdown/
+
+try: README.wiki
+-->
+
+[![npm version](https://badge.fury.io/js/cejs.svg)](https://badge.fury.io/js/cejs)
 [![Build Status](https://travis-ci.org/kanasimi/CeJS.svg?branch=master)](https://travis-ci.org/kanasimi/CeJS)
 [![Build status](https://ci.appveyor.com/api/projects/status/ny0vr4x2uesiumm0?svg=true)](https://ci.appveyor.com/project/kanasimi/cejs)
 <!--
@@ -11,12 +18,12 @@ This is a JavaScript module framework that is simple to use.
 
 ## Web page usage 
 ``` HTML
-<script type="text/javascript" src="path/to/ce.js">
+<script type="text/JavaScript" src="path/to/ce.js">
 	//{"run":"module name or callback"}
 </script>
 ```
 
-``` javascript
+``` JavaScript
 CeL.run( 'module.name', function callback() { /* ... */ } );
 ```
 
@@ -28,7 +35,7 @@ $ npm install cejs
 ```
 
 ### Running
-``` javascript
+``` JavaScript
 require('cejs');
 CeL.run( 'module.name', function callback() { /* ... */ } );
 ```
