@@ -31,6 +31,9 @@ if (typeof CeL === 'function' && !CeL.no_initialization) {
 			_.run([ 'application.OS.Windows', 'application.OS.Windows.registry' ]);
 			// _.debug(_.reg);
 			if (!_.reg) {
+				// 會到這邊，表示所有可用的 path 都無法利用；
+				// registry 的 path，或是本 include 的附屬 module 都有問題。
+				// 像是  library base 造成的問題，不該出現於此。
 				WScript.Echo('無法載入 module，您可能需要手動檢查 registry，看看是否設定到了錯誤的路徑？');
 				return;
 			}

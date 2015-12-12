@@ -44,6 +44,9 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 For further introduction, please see [wiki](https://github.com/kanasimi/CeJS/wiki).
 進一步介紹請參閱本計畫之 [wiki](https://github.com/kanasimi/CeJS/wiki)。
 
+### 中西曆轉換
+[![紀年轉換工具](https://lh3.googleusercontent.com/N9NilsxV-YIiGqYgzKkQWsKxeGoplKLeJXWo4f-hqgwIT4PHzp1UxI4b-hnFV_Fotr7ENNGcB03uGLZHLvyI6CmmN0DXn2yGzq48gPq9BxPOqtKiqEgcqlK2UNzqCcAoe8dK2V-9lZRJ_HuSGYjbw-lnkdRVTZ1UwhSNHAKO8sg67ICwpkKdZlugrzMxO3x2WQ--oqzAVCQJ_NFsB2oJh8ZZv4U5r85M6eQirL5dNoCo-SoXXRVuAAOJqEG7-ymiOR2_rPTIs1JzAVGiugkoRb2avi8Oi7NjIBwZHXt-Id5C9v5B6T1kejG3GGLt_wWfUcANONgYSsoLKp37AkKZHrvV6M6bDMSqvOwm81hHRUoQS9pDoAw_cLI6oZmmYIFADwgcqFf3Xusf8ZkhVDI0PejCls-laEEeCHBKLI0_s-e__OG-n72oLXHm_cYgLTcmXWaA7U_sG9OxfApHcLRkb1foyY9bcGJV-xpRwA4-gHwMpLlyhbsEYq-92AwYckFT5rzD0kCNfV7tEoG1gqQIM-6gvi4gyD3Y3FDKEKIr9sZA-i7CYvnrKNmVbsrNFj2oJiiE=w1229-h669-no)](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/era.htm)
+
 ### 直式四則運算
 直式四則運算 (elementary arithmetic)，即直式加減乘除、長除法。
 
