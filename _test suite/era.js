@@ -1960,6 +1960,7 @@ function translate_era(era) {
 					onclick : click_title_as_era
 				};
 
+			// 還需要更改 ((sign_note.copy_attributes))!
 			add_注('曆法', '採用曆法', function(曆法) {
 				return {
 					a : 曆法,

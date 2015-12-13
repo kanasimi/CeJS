@@ -4157,7 +4157,8 @@ if (typeof CeL === 'function')
 			Object.assign(sign_note, {
 				// 預設會 copy 的紀年曆注。
 				// 據: 根據/出典/原始參考文獻/資料引用來源/典拠。
-				copy_attributes : '據,準,曆法'.split(','),
+				copy_attributes : '據,準,曆法,君主名,表字,君主號,諱,諡,廟號,生,卒,在位,年號'
+						.split(','),
 				// 曆注, note
 				// 減輕負擔:要這些曆注的自己算。
 				notes : {
@@ -5005,7 +5006,7 @@ if (typeof CeL === 'function')
 							era_data = [];
 
 						for (i in 紀年名稱索引值)
-							// 當正式名稱闕如時，將附加屬性 copy 作為正式名稱。
+							// 當正式名稱闕如時，改附加屬性作為正式名稱。
 							if (!era_data[j = 紀年名稱索引值[i]] && (i in 附加屬性)) {
 								era_data[j] = 附加屬性[i];
 								delete 附加屬性[i];
@@ -5042,7 +5043,7 @@ if (typeof CeL === 'function')
 								// 預設將屬性定為 true。
 								add_attribute(附加屬性, pair, true);
 							else
-								library_namespace.debug(
+								library_namespace.warn(
 								//
 								'無法解析屬性值[' + pair + ']！');
 						});
@@ -5338,7 +5339,11 @@ if (typeof CeL === 'function')
 								else
 									j[tmp] = k;
 
-								// 將此屬性搬移、設定到 period_root 之 tree 中。
+								// 僅將(留下)君主、紀元年號相關的附加屬性供查閱，其他較高階的朝代、國家等則省略之。
+								// 恐還需要更改 ((sign_note.copy_attributes))!
+								if (Period_屬性歸屬[tmp] <= Period_屬性歸屬.君主)
+									add_attribute(last_era_data, tmp, j[tmp]);
+								// 實際效用:將此屬性搬移、設定到 period_root 之 tree 中。
 								delete 附加屬性[tmp];
 							}
 
@@ -5356,6 +5361,8 @@ if (typeof CeL === 'function')
 										// 對 i 不為 0–2 的情況，將 last_era_data 直接加進去。
 										i >= 0 ? 紀年[i] : last_era_data);
 
+										// 實際效用:除了既定的((紀年名稱索引值))外，
+										// ((紀年)) 都被拿來放屬性索引值。
 										// TODO:
 										// 對其他同性質的亦能加入此屬性。
 										// 例如設定
@@ -5363,6 +5370,7 @@ if (typeof CeL === 'function')
 										// 則所有曹魏紀年皆能加入此屬性，
 										// 如此則不須每個紀年皆個別設定。
 										if (i === 0)
+											// ((紀年)) === last_era_data.name
 											紀年.push(name);
 									}
 								});
@@ -5466,8 +5474,7 @@ if (typeof CeL === 'function')
 						// 這方法還會跳過相同時間的。
 						i++;
 
-					// 以 Array.prototype.splice(插入點 index, 0,
-					// 紀年) 插入紀年E，
+					// 以 Array.prototype.splice(插入點 index, 0, 紀年) 插入紀年E，
 					// 使本紀年E 之 index 為 (插入點 index)。
 					era_list.splice(i, 0, last_era_data);
 
@@ -7432,6 +7439,7 @@ if (typeof CeL === 'function')
 				朝代 : '',
 				// 君主(帝王)號
 				君主 : '',
+
 				// 共和
 				// 君主(帝王)/年號/民國
 				紀年 : '',
