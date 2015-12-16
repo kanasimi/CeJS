@@ -5319,7 +5319,7 @@ add_平氣平朔曆法.epoch = Julian_day.YMD_to_Date(-2000, 1, 1, null, true);
 add_平氣平朔曆法({
 	// 曆名 : '每月日數,每節氣日數,曆元JDN,行用起訖日期,options'
 
-	// 古六歷或古六曆, 四分曆術（四分法）, 年終置閏, 置閏於年底
+	// 古六歷或古六曆, 四分曆術（四分法, 戰國四分曆）, 年終置閏, 置閏於年底
 	// https://zh.wikipedia.org/wiki/%E5%8F%A4%E5%85%AD%E6%AD%B7
 	// http://www.bsm.org.cn/show_article.php?id=2372
 	// https://github.com/suchowan/when_exe/blob/master/lib/when_exe/region/chinese/twins.rb
