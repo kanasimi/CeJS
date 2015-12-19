@@ -294,9 +294,9 @@ function add_calendar_column(name, no_jump, to_remove) {
 	&& (name = name.match(/:\s+(.+)$/)))
 		name = name[1];
 
-	var column = name;
+	var column = name.trim();
 	if (typeof to_remove !== 'boolean' && column.charAt(0) === '-')
-		column = column.slice(1), to_remove = true;
+		column = column.slice(1).trim(), to_remove = true;
 
 	if ((column in calendar_columns)
 	// get full column name
@@ -2230,17 +2230,18 @@ function set_era_by_url_data(era) {
 		//
 		CeL.parse_URI.parse_search(location.hash.slice(1)));
 
+		// column=增加此欄,增加此欄
 		if (column = data.column)
-			// 增加此欄。
 			add_calendar_column(column.split(','), true);
 
+		// era=紀年名稱
 		if (!(era = data.era)
 				&& !/[&=]/.test(items = location.search.slice(1)
 						|| location.hash.slice(1)))
 			era = items;
 
+		// layer=增加資料圖層,增加資料圖層
 		if (items = data.layer) {
-			// 增加資料圖層。
 			if (!Array.isArray(items))
 				items = items.split(',')
 			items.forEach(function(item) {
