@@ -57,7 +57,7 @@ For further introduction, please see [wiki](https://github.com/kanasimi/CeJS/wik
 
 ## Demo
 See [demo page](http://lyrics.meicho.com.tw/lib/JS/_test suite/demo.htm).
-* The page usually needs 10 to 20 seconds to load.
+* The page usually takes 10 to 20 seconds to load.
 * 由於頻寬不足，加上載入時須做初始化，本頁面在載入時得稍微等一下。
 
 ## Requirements and dependencies

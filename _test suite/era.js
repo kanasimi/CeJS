@@ -260,38 +260,62 @@ function pin_text(gettext) {
 	return text;
 }
 
-function full_column_name(name) {
-	if (name.includes('/'))
-		return name;
-	for ( var n in calendar_columns.alias)
-		;
-}
+/**
+ * 增加此欄。
+ * 
+ * @param {String|Array|Undefined}name
+ *            可選用的文字式年曆欄位名稱。
+ * @param {Boolean}no_jump
+ *            是否重繪文字式年曆。
+ * @param {Boolean}to_remove
+ *            是否為刪除，而非添加。
+ * 
+ * @returns {Boolean}false
+ */
+function add_calendar_column(name, no_jump, to_remove) {
+	if (Array.isArray(name)) {
+		if (name.length > 1) {
+			name.forEach(function(column) {
+				add_calendar_column(column, true, to_remove);
+			});
+			// 此時未判斷是否有更動。
+			if (!no_jump)
+				translate_era();
+			return false;
+		}
+		if (name.length !== 1)
+			// name.length === 0
+			return;
+		name = name[0];
+	}
 
-function remove_calendar_columns() {
-	var n = this.title.match(/: (.+)$/);
-	if (n && ((n = n[1]) in calendar_columns)
-	//		
-	|| (n = calendar_column_alias[n]) && (n in calendar_columns))
-		delete selected_columns[n];
-	else
-		CeL.warn('Unkonwn column: [' + this.title + ']');
-	translate_era();
-	return false;
-}
+	if (typeof name !== 'string' || !name && (name = this.title) && to_remove
+	// e.g., title="除去此欄: 東亞陰陽曆/玄始曆"
+	&& (name = name.match(/:\s+(.+)$/)))
+		name = name[1];
 
-function add_calendar_columns(name, no_jump) {
-	if (typeof name !== 'string' || !name)
-		name = this.title;
 	var column = name;
+	if (typeof to_remove !== 'boolean' && column.charAt(0) === '-')
+		column = column.slice(1), to_remove = true;
+
 	if ((column in calendar_columns)
-			|| (column = calendar_column_alias[column])
-			&& (column in calendar_columns))
-		selected_columns[column] = true;
-	else
-		CeL.warn('Unkonwn column: [' + name + ']');
-	if (!no_jump)
-		translate_era();
+	// get full column name
+	|| (column = calendar_column_alias[column]) && (column in calendar_columns)) {
+		if (to_remove)
+			// 直接除掉不留。
+			delete selected_columns[column];
+		else
+			selected_columns[column] = true;
+		if (!no_jump)
+			translate_era();
+	} else
+		CeL.warn('add_calendar_column: Unkonwn column: [' + name + ']');
+
 	return false;
+}
+
+function remove_calendar_column(name, no_jump) {
+	return add_calendar_column(name, no_jump, true);
 }
 
 // 文字式年曆。
@@ -329,7 +353,7 @@ function show_calendar(era_name) {
 					span : '×',
 					title : _('除去此欄') + ': ' + i,
 					C : 'remove_mark',
-					onclick : remove_calendar_columns
+					onclick : remove_calendar_column
 				} ]
 			});
 		} else
@@ -372,7 +396,7 @@ function show_calendar(era_name) {
 				} : i,
 				title : i,
 				C : 'add_mark',
-				onclick : add_calendar_columns
+				onclick : add_calendar_column
 			}, ' | ');
 		}
 	}
@@ -544,7 +568,7 @@ function show_calendar(era_name) {
 			});
 		});
 
-		// 添加各個欄位。
+		// 增加此欄: 添加各個欄位。
 		for (tmp in selected_columns) {
 			if (conversion = calendar_columns[tmp])
 				list.push({
@@ -1902,17 +1926,15 @@ function translate_era(era) {
 
 		output = date.曆法;
 		if (output && !(output in had_inputted)) {
-			add_calendar_columns(output, true);
+			add_calendar_column(output, true);
 			had_inputted[output] = true;
 		}
 
 		output = date.國家;
 		if (!(output in had_inputted)) {
 			// 依特定國家自動增加這些欄。
-			if (output in auto_add_column)
-				auto_add_column[output].forEach(function(note) {
-					selected_columns[note] = true;
-				});
+			if (auto_add_column[output])
+				add_calendar_column(auto_add_column[output], true);
 			had_inputted[output] = true;
 		}
 
@@ -1966,7 +1988,7 @@ function translate_era(era) {
 					a : 曆法,
 					href : '#',
 					title : 曆法,
-					onclick : add_calendar_columns
+					onclick : add_calendar_column
 				};
 			});
 			add_注('據', '出典');
@@ -2208,24 +2230,17 @@ function set_era_by_url_data(era) {
 		//
 		CeL.parse_URI.parse_search(location.hash.slice(1)));
 
-		if (column = data.column) {
-			(Array.isArray(column) ? column : [ column ])
-			//
-			.forEach(function(item) {
-				var to_remove;
-				if (to_remove = item.charAt(0) === '-')
-					item = item.slice(1);
-				selected_columns[item] = !to_remove;
-			});
-		}
+		if (column = data.column)
+			// 增加此欄。
+			add_calendar_column(column.split(','), true);
 
 		if (!(era = data.era)
-				//
 				&& !/[&=]/.test(items = location.search.slice(1)
 						|| location.hash.slice(1)))
 			era = items;
 
 		if (items = data.layer) {
+			// 增加資料圖層。
 			if (!Array.isArray(items))
 				items = items.split(',')
 			items.forEach(function(item) {
@@ -3974,7 +3989,7 @@ function affairs() {
 		景初曆 : add_曆法('景初曆',
 				'魏明帝景初元年（237年）施行。南北朝劉宋用到444年，被《元嘉曆》取代。北魏用到451年，被《玄始曆》取代。'),
 		三紀曆 : add_曆法('三紀曆', '姜岌在十六國後秦白雀元年（384年）編制。同年起施行三十多年。'),
-		玄始曆 : add_曆法('玄始曆', '北涼、北魏於452年用至正光三年（522年）施行《正光曆》。'),
+		玄始曆 : add_曆法('玄始曆', '北涼、北魏於452年用玄始曆、元始曆至正光三年（522年）施行《正光曆》。'),
 		元嘉曆 : add_曆法('元嘉曆', [ '劉宋二十二年，普用元嘉曆。梁武帝天監九年（510年）被《大明曆》取代。',
 				'文武天皇元年（697年）からは元嘉暦を廃して儀鳳暦を正式に採用することとなった。' ]),
 		大明曆 : add_曆法('大明曆', [ '大明曆，亦稱「甲子元曆」。梁天監九年（510年）施行至陳後主禎明三年（589年）。',
