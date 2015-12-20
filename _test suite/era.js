@@ -289,9 +289,12 @@ function add_calendar_column(name, no_jump, to_remove) {
 		name = name[0];
 	}
 
-	if (typeof name !== 'string' || !name && (name = this.title) && to_remove
+	if ((typeof name !== 'string' || !name) && !(name = this && this.title))
+		return;
+	// assert: typeof name === 'string' && name !== ''
+
 	// e.g., title="除去此欄: 東亞陰陽曆/玄始曆"
-	&& (name = name.match(/:\s+(.+)$/)))
+	if (to_remove && (name = name.match(/:\s+(.+)$/)))
 		name = name[1];
 
 	var column = name.trim();
@@ -315,7 +318,7 @@ function add_calendar_column(name, no_jump, to_remove) {
 }
 
 function remove_calendar_column(name, no_jump) {
-	return add_calendar_column(name, no_jump, true);
+	return add_calendar_column.call(this, name, no_jump, true);
 }
 
 // 文字式年曆。
