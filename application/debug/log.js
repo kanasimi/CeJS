@@ -1647,6 +1647,10 @@ if (!CeL.Log) {
 		};
 
 		function handler(condition_arguments) {
+			if (!condition_arguments)
+				// skip this one.
+				return;
+
 			recorder.all.push(condition_arguments);
 
 			var result;

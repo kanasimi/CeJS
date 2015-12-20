@@ -2443,6 +2443,8 @@ function test_era() {
 		[["癸丑年閏11月1日",'2033年12月22日'.to_Date().format({parser:'era',era:'中曆',format:'%歲次年%月月%日日',locale:'cmn-Hant-TW'})],'2033年閏十一月初一'],
 		[[undefined,CeL.era('2200/1/1').共存紀年]],
 		[[undefined,CeL.era('-4000/1/1').共存紀年]],
+		[[0, CeL.era('明年',{base:'嘉靖元年'}) - CeL.era('二年',{base:'嘉靖元年'})], '明年'],
+		[[0, CeL.era('去年',{base:'嘉靖二年'}) - CeL.era('元年',{base:'嘉靖二年'})], '去年'],
 	]);
 
 	var tmp = '後黎神宗永祚10年1月26日|朝鮮仁祖6年1月26日|江戸時代後水尾天皇寛永5年1月26日|莫光祖永祚4年|';

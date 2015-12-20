@@ -6097,6 +6097,8 @@ if (typeof CeL === 'function')
 								&& (tmp = tmp2.match(/([朔晦])日?/)
 										|| tmp2.match(/^(望)日?$/)))
 							日 = tmp[1];
+						if (options.base && (tmp = tmp2.match(/([明隔去])年/)))
+							年 = tmp[1];
 						if (tmp = tmp2.replace(to_era_Date.ignore_pattern, ''))
 							偵測集.push(tmp);
 						library_namespace.debug('無法辨識出 [' + date + '] 之紀年樣式'
@@ -6159,15 +6161,16 @@ if (typeof CeL === 'function')
 						if (Array.isArray(date)) {
 							// e.g.,
 							// options.base 之後，第一個符合 argument(date) 的日期。
-							// ('二年春正月丁亥朔', {base : '寶應元年'})
-							// ('丁亥朔', {base : '寶應元年二年春正月'})
+							// CeL.era('二年春正月丁亥朔', {base : '寶應元年'})
+							// CeL.era('丁亥朔', {base : '寶應元年二年春正月'})
+							// CeL.era('明年',{base:'嘉靖元年'})
 
 							tmp = [ 年, 月, 日 ];
 							for (matched = 0; matched < tmp.length; matched++)
 								if (tmp[matched])
 									break;
 							switch (matched) {
-							// 此處需要與 options.parse_only 之 return 一致。
+							// 此處需要與 options.parse_only 之 return 配合。
 							case 3:
 								日 = date[4];
 							case 2:
@@ -6177,6 +6180,16 @@ if (typeof CeL === 'function')
 							case 0:
 								origin = true;
 								紀年_list = date[0];
+								tmp = 0;
+								if (/[明隔]/.test(年))
+									tmp = 1;
+								else if (/[去]/.test(年))
+									tmp = -1;
+								if (tmp)
+									// assert: numeralize_date_name('元') === '1'
+									年 = +(date[2] > 0 ? date[2]
+											: numeralize_date_name(date[2]))
+											+ tmp;
 							}
 
 						} else if (date && !isNaN(date.getTime())) {
@@ -7367,12 +7380,13 @@ if (typeof CeL === 'function')
 				// "一二三四五六七八九"
 				var 日 = library_namespace.Chinese_numerals_Normal_digits
 						.slice(1),
-				//
-				年 = '(?:[元' + 日 + ']|[十廿卅][有又]?){1,4}年',
+				// e.g., 元, 二, 二十, 二十二, 二十有二, 卅又二
+				年 = '(?:(?:[廿卅]|[' + 日 + ']?十)[有又]?[' + 日 + ']?|[' + 日
+						+ '元明隔去]){1,4}年',
 				// 春王正月 冬十有二月
-				月 = 季_SOURCE + '閏?(?:[正臘' + 日 + ']|十有?){1,3}月';
+				月 = 季_SOURCE + '閏?(?:[正臘' + 日 + ']|十[有又]?){1,3}月';
 				日 = '(?:(?:(?:干支)?(?:初[' + 日 + ']日?|(?:' + 日
-						+ '|(?:[一二三]?十|[廿卅])有?[元' + 日 + ']?|[元' + 日
+						+ '|(?:[一二三]?十|[廿卅])[有又]?[元' + 日 + ']?|[元' + 日
 						+ '])日)|干支日?)[朔晦望]?旦?|[朔晦望]日?)';
 
 				// TODO: 地皇三年，天鳳六年改為地皇。
