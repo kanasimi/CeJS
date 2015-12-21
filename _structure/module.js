@@ -1096,7 +1096,6 @@ if (false) {
 			return path;
 		};
 
-	var path_separator_double = new RegExp(_.env.path_separator + _.env.path_separator, 'g');
 	_// JSDT:_module_
 	.
 	/**
@@ -1106,57 +1105,61 @@ if (false) {
 	 * @returns	{String} path
 	 */
 	simplify_path = function (path) {
-		if (typeof path === 'string') {
-			var i, j, l,
-			// 有 head 表示 is absolute
-			head;
+		if (typeof path !== 'string')
+			return path;
 
-			path = path
-				.replace(/^(?:[\w\d\-]+:\/\/|[a-zA-Z]:\\|\\\\(?:[^\\\/]+))/, function ($0) {
-					head = $0;
-					return '';
-				})
-				//	去除前後空白. TODO: use String.prototype.trim()
-				//.replace(/\s+$|^\s+/g,'')
-				//.replace(/\/\/+/g,'/')
-				.split(/[\\\/]/);
+		if (/^[\w\d\-]+:\/\//.test(path))
+			// 對於 URL 如：
+			// https://web.archive.org/web/http://site.org
+			// http://site.org?p=//\\#a/b/c
+			// 由於有太多不可不可預測因素，因此直接回傳之。
+			return path;
 
-			i = 0;
-			l = path.length;
+		// 有 head 表示 is absolute
+		var head;
 
-			for (; i < l; i++) {
-				if (path[i] === '.')
-					path[i] = '';
-
-				else if (path[i] === '..') {
-					j = i;
-					while (j > 0)
-						if (path[--j] && path[j] !== '..') {
-							// 相消。
-							path[i] = path[j] = '';
-							break;
-						}
-				}
-			}
-
-			while (!path[0])
-				path.shift();
-
-			path = path.join(_.env.path_separator)
-				// 預防有些情況下需要 '//'。對 archive.org 之類的網站，不可以簡化 '//'。
-				//.replace(/[\\\/]{2,}/g, _.env.path_separator)
-				.replace(head ? /^([\\\/]\.\.)+/g : /^(\.[\\\/])+/g, '')
-				// '//' → '/'
-				.replace(path_separator_double, '')
+		path = path
+			.replace(/^(?:[a-zA-Z]:\\?|\\\\(?:[^\\\/]+)\\?|\\|\/)/, function ($0) {
+				head = $0;
+				return '';
+			})
+			//	去除前後空白. TODO: use String.prototype.trim()
+			//.replace(/\s+$|^\s+/g,'')
+			//.replace(/\/\/+/g,'/')
 			;
 
-			if (head)
-				path = head + path;
-			else if (!path)
-				path = '.';
+		var separator_matched = path.match(/[\\\/]/);
+		if (!separator_matched)
+			return head ? head + path : path || '.';
+		path = path.split(/[\\\/]+/);
+
+		for (var i = 0, length = path.length; i < length; i++) {
+			if (path[i] === '.')
+				path[i] = '';
+
+			else if (path[i] === '..') {
+				var j = i;
+				while (j > 0)
+					if (path[--j] && path[j] !== '..') {
+						// 找到第一個非 '', '..' 的以相消。
+						path[i] = path[j] = '';
+						break;
+					}
+			}
 		}
 
-		return path;
+		while (!path[0])
+			path.shift();
+
+		path = path.join(separator_matched[0])
+			// 對 archive.org 之類的網站，不可以簡化 '//'。
+			// 若為了預防有些情況下需要 '//'，此條需要 comment out。
+			// '//' → '/'
+			.replace(/([\\\/])[\\\/]+/g, '$1')
+			//.replace(head ? /^([\\\/]\.\.)+/g : /^(\.[\\\/])+/g, '')
+		;
+
+		return head ? head + path : path || '.';
 	};
 
 

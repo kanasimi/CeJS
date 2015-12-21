@@ -191,6 +191,11 @@ function test_compatibility() {
 		[ [ 'js.js', CeL.simplify_path('./aaa/../js.js') ], 'simplify_path #2' ],
 		[ [ 'js.js', CeL.simplify_path('aaa/../js.js') ], 'simplify_path #3' ],
 		[ [ 'js.js', CeL.simplify_path("aaa/bbbb/../../js.js") ], 'simplify_path #4' ],
+		[ [ '/a/b/js.js', CeL.simplify_path('/a//c///../b////js.js') ], 'simplify_path #5' ],
+		[ [ '/a/b/js.js', CeL.simplify_path('/a/b/js.js') ], 'simplify_path #6' ],
+		[ [ 'c:\\aa\\bb\\js.js', CeL.simplify_path('c:\\aa\\bb\\js.js') ], 'simplify_path #7' ],
+		[ [ 'c:\\aa\\bb\\js.js', CeL.simplify_path('c:\\aa\\cc\\..\\\\bb\\js.js') ], 'simplify_path #8' ],
+		[ [ '../../js.js', CeL.simplify_path("aa/../b/..//../c///../../js.js") ], 'simplify_path #9' ],
 	]);
 
 	error_count += CeL.test('compatibility', [
