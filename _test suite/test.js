@@ -186,6 +186,13 @@ function test_compatibility() {
 		[[ '..Word1 Word2..'.split(/([a-z]+)(\d+)/i).join(';'), "..;Word;1; ;Word;2;.."]],
 	]);
 
+	error_count += CeL.test('library base functions', [
+		[ [ 'js.js', CeL.simplify_path('./aaa///./../js.js') ], 'simplify_path #1' ],
+		[ [ 'js.js', CeL.simplify_path('./aaa/../js.js') ], 'simplify_path #2' ],
+		[ [ 'js.js', CeL.simplify_path('aaa/../js.js') ], 'simplify_path #3' ],
+		[ [ 'js.js', CeL.simplify_path("aaa/bbbb/../../js.js") ], 'simplify_path #4' ],
+	]);
+
 	error_count += CeL.test('compatibility', [
 		[[/./ig.flags, 'gi'], '/./ig.flags'],
 		[[5, Math.hypot(3, 4)], 'normal positive Math.hypot'],

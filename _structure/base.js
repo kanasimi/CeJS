@@ -1222,12 +1222,12 @@ OS='UNIX'; // unknown
 		 */
 		env.module_name_separator = '.';
 		/**
-		 * path_separator in 通用(regular)運算式。
+		 * path_separator pattern in 通用(regular)運算式。
 		 * 
-		 * @name CeL.env.path_separator_RegExp
-		 * @type {RegExp}
+		 * @name CeL.env.path_separator_pattern
+		 * @type {String}
 		 */
-		env.path_separator_RegExp = this.to_RegExp_pattern ?
+		env.path_separator_pattern = this.to_RegExp_pattern ?
 				this.to_RegExp_pattern(env.path_separator)
 				: (env.path_separator === '\\' ? '\\' : '') + env.path_separator;
 		/**

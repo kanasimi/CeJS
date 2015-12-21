@@ -135,7 +135,7 @@ open_format = {
 
 var WshShell = new_COM("WScript.Shell"),
 path_separator = library_namespace.env.path_separator,
-path_separator_RegExp = library_namespace.env.path_separator_RegExp,
+path_separator_pattern = library_namespace.env.path_separator_pattern,
 line_separator = library_namespace.env.line_separator,
 /**
  * FileSystemObject
@@ -1843,7 +1843,7 @@ function folderFunction(folderItem){
  t=folderItem.Path.slice(same_length(basePath,folderItem.Path));
  //if(t==folderItem.Name)	//	僅單層subdir次目錄
  //if(t.indexOf(path_separator)==t.lastIndexOf(path_separator))	//	僅單層及次層subdir次目錄
- if(t.replace(new RegExp('[^'+path_separator_RegExp+']','g'),'').length<3)	//	僅3層subdir以下
+ if(t.replace(new RegExp('[^'+path_separator_pattern+']','g'),'').length<3)	//	僅3層subdir以下
   ;
 }
 

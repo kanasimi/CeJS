@@ -1540,9 +1540,8 @@ if (typeof CeL === 'function')
 			// 先嘗試是否為變數/數值名。
 			id = library_namespace.value_of(name);
 			if (id !== undefined
-					&&
 					// 若存在此值，且並未載入過（載入過的皆應該有資料），才判別為變數/數值名。
-					(!(declaration = library_namespace.to_module_name(name)) || !(declaration in named_code))) {
+					&& (!(declaration = library_namespace.to_module_name(name)) || !(declaration in named_code))) {
 				library_namespace.is_debug('treat [' + name
 						+ '] as variable name.', 2, 'get_named');
 				return id;
@@ -1592,7 +1591,7 @@ if (typeof CeL === 'function')
 						named_code[id] = declaration;
 				} else {
 					library_namespace.debug('treat resource [' + name
-							+ '] as URL/path.', 5, 'get_named');
+							+ '] as URL/path. 登記 [' + id + ']', 5, 'get_named');
 					declaration.URL = id;
 				}
 			}
@@ -3099,6 +3098,7 @@ if (typeof CeL === 'function')
 		 *            初始設定 items.
 		 * @param {Object}options
 		 *            初始設定 options.
+		 * 
 		 * @returns {check_and_run}
 		 */
 		function check_and_run(initial_Array, options) {
@@ -3625,8 +3625,10 @@ if (typeof CeL === 'function')
 		 * 同目錄時，應為 "./"。
 		 * 
 		 * @example <code>
-		 * // 在特殊環境下，設置 library base path。
-		 * var CeL = { library_path : 'path/to/ce.js' };
+
+		 // 在特殊環境下，設置 library base path。
+		 var CeL = { library_path : 'path/to/ce.js' };
+
 		 * </code>
 		 */
 		var library_base_path,
@@ -3682,10 +3684,10 @@ if (typeof CeL === 'function')
 		 * 例如 file_name 改成相對於 library 本身來說的路徑。
 		 * 
 		 * @example <code>
-		 * 
-		 * // 存放 data 的 path path =
-		 * library_namespace.get_module_path(this, '');
-		 * 
+
+		// 存放 data 的 path path =
+		library_namespace.get_module_path(this, '');
+
 		 * </code>
 		 * 
 		 * @param {String}[module_name]
@@ -3943,9 +3945,10 @@ if (typeof CeL === 'function')
 			 * 初始化 user 設定: 處理在 <script> 中插入的初始設定。
 			 * 
 			 * TODO: 若是設定: <code>
-			 * {"run":["css.css","js.js"]}
-			 * </code> 則 .js
-			 * 可能執行不到，會被跳過。
+
+			<script type="text/javascript" src="lib/JS/ce.js">// {"run":["css.css","js.js"]}</script>
+
+			 * </code> 則 .css 後的 .js 可能執行不到，會被跳過。
 			 */
 			var queue = library_namespace.env.script_config;
 			if (library_namespace.is_Object(queue) && (queue = queue.run))

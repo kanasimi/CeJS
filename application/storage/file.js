@@ -70,7 +70,8 @@ function reduce_path(path, mode) {
 				path.replace(new RegExp(i, "ig"), WinEnvironment[i]);
 
 	var path_separator = library_namespace.env.path_separator,
-	path_separator_RegExp = library_namespace.env.path_separator_RegExp;
+	//
+	path_separator_pattern = library_namespace.env.path_separator_pattern;
 
 	path = path.replace(new RegExp(path_separator == '/' ? '\\\\' : '/', "g"),
 			path_separator);
@@ -87,12 +88,12 @@ function reduce_path(path, mode) {
 
 	path = path
 		// .\→''
-		.replace(new RegExp('^(\\.' + path_separator_RegExp + ')+'), '')
+		.replace(new RegExp('^(\\.' + path_separator_pattern + ')+'), '')
 		// \.\→\
-		.replace(new RegExp(path_separator_RegExp + '(\\.' + path_separator_RegExp + ')+', 'g'), path_separator)
+		.replace(new RegExp(path_separator_pattern + '(\\.' + path_separator_pattern + ')+', 'g'), path_separator)
 		// xx\..\→''
-		.replace(new RegExp('[^.' + path_separator_RegExp + ']+'
-				+ path_separator_RegExp + '\\.\\.' + path_separator_RegExp, 'g'), '');
+		.replace(new RegExp('[^.' + path_separator_pattern + ']+'
+				+ path_separator_pattern + '\\.\\.' + path_separator_pattern, 'g'), '');
 	library_namespace.debug('→ [' + path + ']', 2, 'reduce_path');
 	return path;
 }
@@ -139,7 +140,7 @@ function getPathOnly(p){
   //	\\\zzzz的情形：不合法的路徑
   else if(i!=-1)throw new Error(1,'illegal path:'+p);
  if(typeof isFile=='function'&&isFile(p))	//	!isWeb()&&~
-  p=p.replace(new RegExp(library_namespace.env.path_separator_RegExp+'[^'+library_namespace.env.path_separator_RegExp+']+$'),library_namespace.env.path_separator);
+  p=p.replace(new RegExp(library_namespace.env.path_separator_pattern+'[^'+library_namespace.env.path_separator_pattern+']+$'),library_namespace.env.path_separator);
  return p;
 }
 
@@ -214,7 +215,7 @@ _// JSDT:_module_
  * 
  * @since 2003/10/1 15:57
  * @since 2011/8/28 00:16:40
- * @requres reduce_path,getPathOnly,library_namespace.env.path_separator,library_namespace.env.path_separator_RegExp
+ * @requres reduce_path,getPathOnly,library_namespace.env.path_separator,library_namespace.env.path_separator_pattern
  * @_memberOf _module_
  */
 get_relative_path = function(base_path, working_path, get_full_path) {
@@ -364,7 +365,7 @@ _// JSDT:_module_
  * test FULL path.
  * @param {String} local path
  * @return
- * @requires	library_namespace.env.path_separator,library_namespace.env.path_separator_RegExp
+ * @requires	library_namespace.env.path_separator,library_namespace.env.path_separator_pattern
  * @_memberOf	_module_
  */
 is_absolute_path = function (path) {
@@ -373,7 +374,7 @@ is_absolute_path = function (path) {
 	/*
 	return path
 		&& (library_namespace.env.path_separator === '/' && path.charAt(0) === library_namespace.env.path_separator || new RegExp(
-		'^(\\\\|[A-Za-z]+:)' + library_namespace.env.path_separator_RegExp).test(path))
+		'^(\\\\|[A-Za-z]+:)' + library_namespace.env.path_separator_pattern).test(path))
 		// ?true:false
 		;
 	*/

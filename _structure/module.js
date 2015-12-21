@@ -1096,6 +1096,7 @@ if (false) {
 			return path;
 		};
 
+	var path_separator_double = new RegExp(_.env.path_separator + _.env.path_separator, 'g');
 	_// JSDT:_module_
 	.
 	/**
@@ -1106,10 +1107,12 @@ if (false) {
 	 */
 	simplify_path = function (path) {
 		if (typeof path === 'string') {
-			var i, j, l, is_absolute, head;
+			var i, j, l,
+			// 有 head 表示 is absolute
+			head;
 
 			path = path
-				.replace(/^([\w\d\-]+:\/\/|[a-zA-Z]:\\|\\\\([^\\\/]+))/, function ($0) {
+				.replace(/^(?:[\w\d\-]+:\/\/|[a-zA-Z]:\\|\\\\(?:[^\\\/]+))/, function ($0) {
 					head = $0;
 					return '';
 				})
@@ -1120,7 +1123,6 @@ if (false) {
 
 			i = 0;
 			l = path.length;
-			is_absolute = !path[0];
 
 			for (; i < l; i++) {
 				if (path[i] === '.')
@@ -1129,7 +1131,7 @@ if (false) {
 				else if (path[i] === '..') {
 					j = i;
 					while (j > 0)
-						if (path[--j] && path[j] != '..') {
+						if (path[--j] && path[j] !== '..') {
 							// 相消。
 							path[i] = path[j] = '';
 							break;
@@ -1137,20 +1139,21 @@ if (false) {
 				}
 			}
 
-			if (!is_absolute && !path[0])
-				path[0] = '.';
+			while (!path[0])
+				path.shift();
 
 			path = path.join(_.env.path_separator)
 				// 預防有些情況下需要 '//'。對 archive.org 之類的網站，不可以簡化 '//'。
 				//.replace(/[\\\/]{2,}/g, _.env.path_separator)
-				.replace(is_absolute ? /^([\\\/]\.\.)+/g : /^(\.[\\\/])+/g, '')
+				.replace(head ? /^([\\\/]\.\.)+/g : /^(\.[\\\/])+/g, '')
+				// '//' → '/'
+				.replace(path_separator_double, '')
 			;
 
 			if (head)
 				path = head + path;
 			else if (!path)
 				path = '.';
-
 		}
 
 		return path;
