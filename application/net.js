@@ -895,18 +895,36 @@ function get_video(video_url, download_to, options) {
 
 					if (URI.filename === 'playlist') {
 						if (matched = URI._search.list.match(/^PL(.+)/)) {
-							title = 'playlist.' + matched[1] + '.info';
-							result = get_URI('http://gdata.youtube.com/feeds/api/playlists/'
+							if (false) {
+								// YouTube Data API v2 Deprecation
+								title = 'playlist.' + matched[1] + '.info';
+								result = get_URI('http://gdata.youtube.com/feeds/api/playlists/'
+										+ matched[1], title, get_video.getter_setting);
+							}
+							// get from HTML
+							// https://developers.google.com/youtube/v3/docs/playlistItems/list
+							// https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=PL~~
+							// https://www.youtube.com/playlist?list=PL~~
+							title = 'playlist.' + matched[1] + '.info.htm';
+							result = get_URI('https://www.youtube.com/playlist?list='
 									+ matched[1], title, get_video.getter_setting);
+
 							if (!result) {
 								result = library_namespace.get_file(title);
+								// 刪調暫存檔
 								try {
 									FSO.DeleteFile(title);
 								} catch (e) {
 									// TODO: handle exception
 								}
 								library_namespace.debug('playlist info: ' + result.replace(/</g, '&lt;'), 3);
-								var playlist = matched[1],pattern = /<media:player\s+url=['"]([^'"]+)['"]/g, url = result.match(/<title\s+type='text'>([^<]+)<\/title>/), j = 0, l, p;
+								// 取得 title 並創建 sub-directory。
+								var playlist = matched[1],
+								//pattern = /<media:player\s+url=['"]([^'"]+)['"]/g,
+								pattern = / data-video-id="([^'"]+)"/g,
+								//url = result.match(/<title\s+type='text'>([^<]+)<\/title>/),
+								url = result.match(/<meta name="title" content="([^"]+)">/),
+								j = 0, l, p;
 								if (!url) {
 									library_namespace.err('Error to get playlist [' + playlist + ']: ' + result + '.');
 									continue;
@@ -930,9 +948,11 @@ function get_video(video_url, download_to, options) {
 									}
 								}
 
+								// 取得 play list。
 								url = [];
 								while (matched = pattern.exec(result)) {
-									url.push(matched[1].replace(/(\?v=[^&]+).+$/, '$1'));
+									//url.push(matched[1].replace(/(\?v=[^&]+).+$/, '$1'));
+									url.push('https://www.youtube.com/watch?v=' + matched[1]);
 								}
 								l = url.length;
 								if (!l) {

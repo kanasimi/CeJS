@@ -1035,67 +1035,6 @@ if (false) {
 	};
 
 
-
-	/*
-	sample to test:
-	
-	./a/b
-	./a/b/
-	../a/b
-	../a/b/
-	a/../b		./b
-	a/./b		a/b
-	/../a/b		/a/b
-	/./a/b		/a/b
-	/a/./b		/a/b
-	/a/../b		/b
-	/a/../../../b	/b
-	/a/b/..		/a
-	/a/b/../	/a/
-	a/b/..		a
-	a/b/../		a/
-	a/..		.
-	./a/b/../../../a.b/../c	../c
-	../../../a.b/../c	../../../c
-	
-	*/
-
-	//	2009/11/23 22:12:5 廢除!
-	if (false)
-		_// JSDT:_module_
-		.
-		deprecated_simplify_path = function (path) {
-			if (typeof path === 'string') {
-				//	去除前後空白. TODO: use String.prototype.trim()
-				path = path.replace(/\s+$|^\s+/, '').replace(/\/\/+/g, '/');
-
-				var p, is_absolute = '/' === path.charAt(0);
-
-				while (path !== (p = path.replace(/\/\.(\/|$)/g, function ($0, $1) { return $1; })))
-					path = p;
-				_.debug('1. ' + p);
-
-				while (path !== (p = path.replace(
-						/\/([^\/]+)\/\.\.(\/|$)/g, function ($0, $1, $2) {
-							alert([$0, $1, $2].join('\n'));
-							return $1 === '..' ? $0 : $2;
-				})))
-					path = p;
-				_.debug('2. ' + p);
-
-				if (is_absolute)
-					path = path.replace(/^(\/\.\.)+/g, '');
-				else
-					path = path.replace(/^(\.\/)+/g, '');
-				_.debug('3. ' + p);
-
-				if (!path)
-					path = '.';
-			}
-
-			return path;
-		};
-
 	_// JSDT:_module_
 	.
 	/**
@@ -1108,25 +1047,37 @@ if (false) {
 		if (typeof path !== 'string')
 			return path;
 
-		if (/^[\w\d\-]+:\/\//.test(path))
+		// 有 head 表示 is absolute
+		var head, tail,
+		// 對於 URL 如：
+		// https://web.archive.org/web/http://site.org
+		// http://site.org?p=//\\#a/b/c
+		// 由於有太多不可不可預測因素，因此需特別處理之。
+		is_URL = path.match(/^([\w\d\-]+:\/\/)(.*)$/);
+		if (is_URL) {
+			head = is_URL[1];
+			path = is_URL[2];
+			is_URL = true;
 			// 對於 URL 如：
 			// https://web.archive.org/web/http://site.org
 			// http://site.org?p=//\\#a/b/c
-			// 由於有太多不可不可預測因素，因此直接回傳之。
-			return path;
-
-		// 有 head 表示 is absolute
-		var head;
-
-		path = path
-			.replace(/^(?:[a-zA-Z]:\\?|\\\\(?:[^\\\/]+)\\?|\\|\/)/, function ($0) {
-				head = $0;
-				return '';
-			})
-			//	去除前後空白. TODO: use String.prototype.trim()
-			//.replace(/\s+$|^\s+/g,'')
-			//.replace(/\/\/+/g,'/')
-			;
+			// 由於有太多不可不可預測因素，因此需特別處理之。
+			if (tail = path.match(/^([^#?]+)([#?].*?)$/))
+				path = tail[1], tail = tail [2];
+			path = path.replace(/:\/\//g, encodeURIComponent(':/') + '/');
+		} else {
+			path = path
+				.replace(/^(?:[a-zA-Z]:\\?|\\\\(?:[^\\\/]+)\\?|\\|\/)/, function ($0) {
+					head = $0;
+					return '';
+				})
+				//	不應去除前後空白. TODO: use String.prototype.trim()
+				//.replace(/\s+$|^\s+/g,'')
+				//.replace(/\/\/+/g,'/')
+				;
+			if (tail = path.match(/^(.*?)([\\\/]+)$/))
+				path = tail[1], tail = tail[2].charAt(0);
+		}
 
 		var separator_matched = path.match(/[\\\/]/);
 		if (!separator_matched)
@@ -1148,18 +1099,34 @@ if (false) {
 			}
 		}
 
-		while (!path[0])
+		while (path.length > 0 && !path[0]
+		// '/../path' to '/path'
+		|| path[0] === '..' && head)
 			path.shift();
+		while (path.length > 0 && !path[path.length - 1])
+			// 因為有 separator 結尾的話，應該都放在 tail 了；因此此處能去掉所有的空結尾。
+			path.pop();
 
 		path = path.join(separator_matched[0])
-			// 對 archive.org 之類的網站，不可以簡化 '//'。
-			// 若為了預防有些情況下需要 '//'，此條需要 comment out。
+			// 對 archive.org 之類的網站，不可以簡化 '://'。
+			// 若為了預防有些情況下需要保留 '//'，此條需要 comment out。
 			// '//' → '/'
 			.replace(/([\\\/])[\\\/]+/g, '$1')
 			//.replace(head ? /^([\\\/]\.\.)+/g : /^(\.[\\\/])+/g, '')
 		;
 
-		return head ? head + path : path || '.';
+		// postfix
+		if (is_URL)
+			// recover. '%3A%2F': encodeURIComponent(':/')
+			path = path.replace(/%3A%2F\//g, '://');
+		if (head)
+			path = head + path;
+		else if (!path)
+			path = '.';
+		if (tail)
+			path += tail;
+
+		return path;
 	};
 
 
@@ -1190,8 +1157,6 @@ if (false) {
 		} else
 			return [''];
 	};
-
-
 
 
 	_// JSDT:_module_
