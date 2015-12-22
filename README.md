@@ -1,16 +1,4 @@
-﻿[//]: # (
-
-comment:
-http://stackoverflow.com/questions/4823468/comments-in-markdown
-
-
-GitHub uses "GitHub Flavored Markdown," or GFM
-https://help.github.com/articles/github-flavored-markdown/
-
-try: README.wiki
-)
-
-[![npm version](https://badge.fury.io/js/cejs.svg)](https://badge.fury.io/js/cejs)
+﻿[![npm version](https://badge.fury.io/js/cejs.svg)](https://badge.fury.io/js/cejs)
 [![Build Status](https://travis-ci.org/kanasimi/CeJS.svg?branch=master)](https://travis-ci.org/kanasimi/CeJS)
 [![Build status](https://ci.appveyor.com/api/projects/status/ny0vr4x2uesiumm0?svg=true)](https://ci.appveyor.com/project/kanasimi/cejs)
 <!--
@@ -79,3 +67,14 @@ Contact us at [Google+](https://plus.google.com/101633590909790225455) or [githu
 (This document is written by [GitHub Flavored Markdown](https://help.github.com/articles/github-flavored-markdown).)
 
 [![logo](http://lyrics.meicho.com.tw/logo.png)](http://lyrics.meicho.com.tw/)
+
+<!--
+Markdown comment: need check under github and npmjs
+http://stackoverflow.com/questions/4823468/comments-in-markdown
+
+
+GitHub uses "GitHub Flavored Markdown," or GFM
+https://help.github.com/articles/github-flavored-markdown/
+
+try: README.wiki
+-->
