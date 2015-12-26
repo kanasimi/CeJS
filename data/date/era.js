@@ -340,7 +340,7 @@ if (typeof CeL === 'function')
 
 			孟仲季_LIST = '孟仲季'.split(''),
 
-			// see: 時刻_to_hour()
+			// see: numeralize_time()
 			時刻_PATTERN = generate_pattern(
 			// '(?:[早晚夜])'+
 			/(支)(?:時?\s*([初正])([初一二三123])刻|時)/.source),
@@ -543,7 +543,7 @@ if (typeof CeL === 'function')
 			月の別名_LIST = '睦月,如月,弥生,卯月,皐月,水無月,文月,葉月,長月,神無月,霜月,師走'.split(','),
 			// '大安赤口先勝友引先負仏滅'.match(/../g)
 			六曜_LIST = '大安,赤口,先勝,友引,先負,仏滅'.split(','),
-			// 七曜, 曜日
+			// 七曜, 曜日. ㈪-㈰: ㈰㈪㈫㈬㈭㈮㈯. ㊊-㊐: ㊐㊊㊋㊌㊍㊎㊏
 			七曜_LIST = '日月火水木金土'.split(''),
 			// "十二值位星"（十二值:建除十二神,十二值位:十二建星） @ 「通勝」或農民曆
 			// 建、除、滿、平、定、執、破、危、成、收、開、閉。
@@ -1103,32 +1103,51 @@ if (typeof CeL === 'function')
 			// 處理農曆之工具函數。
 
 			/**
-			 * 正規化名稱，盡量將中文數字轉為阿拉伯數字。
+			 * 正規化名稱，盡量將中文數字、漢字數字轉為阿拉伯數字。
 			 * 
 			 * @param {String}number_String
-			 *            中文數字
+			 *            中文數字。
+			 * 
 			 * @returns {String}數字化名稱
 			 */
 			function normalize_number(number_String) {
+				number_String = String(number_String).trim()
+				//
+				.replace(/([十廿卅])有/g, '$1')
+				// ㋀㋁㋂㋃㋄㋅㋆㋇㋈㋉㋊㋋
+				.replace(/[㋀-㋋]/g, function($0) {
+					return ($0.charCodeAt(0) - START_INDEX_0月) + '月';
+				})
+				// ㏠㏡㏢㏣㏤㏥㏦㏧㏨㏩㏪㏫㏬㏭㏮㏯㏰㏱㏲㏳㏴㏵㏶㏷㏸㏹㏺㏻㏼㏽㏾
+				.replace(/[㏠-㏾]/g, function($0) {
+					return ($0.charCodeAt(0) - START_INDEX_0日) + '日';
+				});
+
 				return library_namespace.Chinese_numerals_Formal_to_Normal(
 				// "有": e.g., 十有二月。
-				library_namespace.normalize_Chinese_numeral(number_String
-						.trim().replace(/([十廿卅])有/g, '$1')));
+				library_namespace.normalize_Chinese_numeral(number_String));
 			}
 
+			// 處理 square symbols
+			// http://unicode.org/cldr/utility/list-unicodeset.jsp?a=[%E3%8B%80-%E3%8B%8B%E3%8F%A0-%E3%8F%BE%E3%8D%98-%E3%8D%B0]
+			var START_INDEX_0月 = '㋀'.charCodeAt(0) - 1, START_INDEX_0日 = '㏠'
+					.charCodeAt(0) - 1, START_INDEX_0時 = '㍘'.charCodeAt(0);
+
 			/**
-			 * 正規化日期名稱，盡量將中文數字轉為阿拉伯數字。
+			 * 正規化日期名稱，盡量將中文數字、漢字數字轉為阿拉伯數字。
 			 * 
 			 * @param {String}number_String
-			 *            中文數字年/月/日
-			 * @returns {String}日期名稱
+			 *            中文數字年/月/日。
+			 * 
+			 * @returns {String}數字化日期名稱
 			 */
 			function numeralize_date_name(number_String, no_alias) {
 				if (!number_String)
 					return number_String === 0 ? 0 : '';
-				// 處理元年, 閏?[正元]月, 初日
+
 				number_String = String(number_String).trim();
 
+				// 處理元年, 閏?[正元]月, 初日
 				if (!no_alias)
 					number_String = number_String.replace(/^初/, '')
 					// 初吉即陰曆初一朔日。
@@ -1149,25 +1168,49 @@ if (typeof CeL === 'function')
 				: library_namespace.from_Chinese_numeral(number_String);
 			}
 
-			// 至順治二年（公元1645年）頒行時憲曆後，改為日96刻，每時辰八刻（初初刻、初一刻、初二刻、初三刻、正初刻、正一刻、正二刻、正三刻）。自此每刻15分，無「四刻」之名。
-			function 時刻_to_hour(時刻_String) {
-				return String(時刻_String).trim().replace(時刻_PATTERN,
-						function($0, 時, 初正, 刻) {
-							return (2
-							//
-							* library_namespace.BRANCH_LIST.indexOf(時)
-							//
-							- (初正 === '初' ? 1 : 0)) + '時'
-							//
-							+ (刻 && (刻 = isNaN(刻)
-							//
-							? '初一二三'.indexOf(刻) : +刻) ? 15 * 刻 + '分' : '');
-						});
+			/**
+			 * 正規化時間名稱，盡量將中文數字、漢字數字轉為阿拉伯數字。
+			 * 
+			 * 至順治二年（公元1645年）頒行時憲曆後，改為日96刻，每時辰八刻（初初刻、初一刻、初二刻、初三刻、正初刻、正一刻、正二刻、正三刻）。自此每刻15分，無「四刻」之名。
+			 * 
+			 * @param {String}time_String
+			 *            中文數字時間。
+			 * 
+			 * @returns {String}數字化時間名稱
+			 */
+			function numeralize_time(time_String) {
+				time_String = String(time_String).trim()
+				// 時刻 to hour
+				.replace(時刻_PATTERN, function($0, 時, 初正, 刻) {
+					return (2
+					//
+					* library_namespace.BRANCH_LIST.indexOf(時)
+					//
+					- (初正 === '初' ? 1 : 0)) + '時'
+					//
+					+ (刻 && (刻 = isNaN(刻)
+					//
+					? '初一二三'.indexOf(刻) : +刻) ? 15 * 刻 + '分' : '');
+				});
+
+				// ㍘㍙㍚㍛㍜㍝㍞㍟㍠㍡㍢㍣㍤㍥㍦㍧㍨㍩㍪㍫㍬㍭㍮㍯㍰
+				time_String.replace(/[㍘-㍰]/g, function($0) {
+					return ($0.charCodeAt(0) - START_INDEX_0時) + '時';
+				});
+
+				return time_String;
 			}
 
-			// 檢查是否可能是日數。
-			// 因為得考慮月中起始的情況，因此只檢查是否小於最大可能之日數。
+			/**
+			 * 檢查是否可能是日數。
+			 * 
+			 * @param {String}string
+			 *            欲檢查之字串。
+			 * 
+			 * @returns {Boolean}可能是日數。
+			 */
 			function maybe_month_days(string) {
+				// 因為得考慮月中起始的情況，因此只檢查是否小於最大可能之日數。
 				return string <= MAX_MONTH_DAYS;
 			}
 
@@ -6085,11 +6128,11 @@ if (typeof CeL === 'function')
 
 						// 依照習慣，前置多為(通常應為)紀年。
 						tmp2 = tmp[1].replace(to_era_Date.ignore_pattern, '');
-						if (tmp2 = 時刻_to_hour(tmp2))
+						if (tmp2 = numeralize_time(tmp2))
 							偵測集.push(tmp2);
 						// 依照習慣，後置多為(通常應為)時間。
 						tmp2 = tmp[5].replace(to_era_Date.ignore_pattern, '');
-						if (tmp2 = 時刻_to_hour(tmp2))
+						if (tmp2 = numeralize_time(tmp2))
 							偵測集.push(tmp2);
 
 					} else {
