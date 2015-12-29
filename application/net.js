@@ -385,10 +385,29 @@ _// JSDT:_module_
 to_file_name = to_file_name;
 
 
-var TARGET_FILE_EXISTS = new Error, NO_EXECUTABLE_FILE = new Error, NOT_YET_IMPLEMENTED = new Error;
+var
+/**
+ * 取得副檔名。
+ * 
+ * @type {RegExp}
+ */
+PATTERN_extension = /\.([a-z\d\-]+)$/i,
+/**
+ * 一般字元，非特殊字元之 folder 名。<br />
+ * [...]{1,512}<br />
+ * 
+ * @type {RegExp}
+ */
+PATTERN_ordinary_folder_name = /^[a-z\d ~!@#$%^&()-_+={}[],.]+[\\\/]$/i,
+
+TARGET_FILE_EXISTS = new Error,
+NO_EXECUTABLE_FILE = new Error,
+NOT_YET_IMPLEMENTED = new Error;
+
 TARGET_FILE_EXISTS.name = 'TARGET_FILE_EXISTS';
 NO_EXECUTABLE_FILE.name = 'NO_EXECUTABLE_FILE';
 NOT_YET_IMPLEMENTED.name = 'NOT_YET_IMPLEMENTED';
+
 
 /**
  * 取得 URI/取得器
@@ -462,10 +481,10 @@ URI_accessor.setting = {
 	// temporary_file : function(URI, save_to, FSO) { return temporary_file_path; },
 	// temporary_file : function(URI, save_to, FSO) { return save_to + '.unfinished'; },
 	temporary_file: function (URI, save_to) {
-		var ext = save_to.match(/\.[a-z\d\-]+$/i),
+		var extension = save_to.match(PATTERN_extension),
 		//	應該用 save_to 的 md5 值。
 		hash_id = Math.ceil(Math.random() * 1e9);
-		return 'URI_accessor.' + (ext ? 'temp.' + hash_id + ext[0] : hash_id + '.temp');
+		return 'URI_accessor.' + (extension ? 'temp.' + hash_id + extension[0] : hash_id + '.temp');
 	},
 
 	// do not overwrite:
@@ -856,7 +875,7 @@ function get_video(video_url, download_to, options) {
 	if (!Array.isArray(video_url)) {
 		if (!video_url)
 			return;
-		video_url = [video_url];
+		video_url = [ video_url ];
 	}
 
 	var count = video_url.length, error_count = 0, i, info_hash = library_namespace.null_Object(), video_info, result,
@@ -865,6 +884,10 @@ function get_video(video_url, download_to, options) {
 	 */
 	file_message, title, matched, URI;
 
+	if (download_to && typeof download_to === 'string' && !/[\\\/]$/.test(download_to)) {
+		download_to += library_namespace.env.path_separator;
+	}
+
 	// 處理 options。
 	if (typeof options === 'function')
 		options = {
@@ -872,9 +895,8 @@ function get_video(video_url, download_to, options) {
 		};
 	else if (!library_namespace.is_Object(options))
 		options = library_namespace.null_Object();
-
-	if (download_to && !/[\\\/]$/.test(download_to))
-		download_to += library_namespace.env.path_separator;
+	if (!options.base_directory)
+		options.base_directory = download_to;
 
 	for (i = 0; i < count; i++) {
 		file_message = '[' + (i + 1) + '/' + count + '] ' + video_url[i];
@@ -895,80 +917,88 @@ function get_video(video_url, download_to, options) {
 
 					if (URI.filename === 'playlist') {
 						if (matched = URI._search.list.match(/^PL(.+)/)) {
+							// 取得 title 並創建 sub-directory。
+							var playlist_id = matched[1], url;
 							if (false) {
 								// YouTube Data API v2 Deprecation
-								title = 'playlist.' + matched[1] + '.info';
+								url = 'playlist.' + playlist_id + '.info';
 								result = get_URI('http://gdata.youtube.com/feeds/api/playlists/'
-										+ matched[1], title, get_video.getter_setting);
+										+ playlist_id, url, get_video.getter_setting);
 							}
 							// get from HTML
 							// https://developers.google.com/youtube/v3/docs/playlistItems/list
 							// https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=PL~~
 							// https://www.youtube.com/playlist?list=PL~~
-							title = 'playlist.' + matched[1] + '.info.htm';
+							url = 'playlist.' + playlist_id + '.info.htm';
 							result = get_URI('https://www.youtube.com/playlist?list='
-									+ matched[1], title, get_video.getter_setting);
+									+ playlist_id, url, get_video.getter_setting);
 
 							if (!result) {
-								result = library_namespace.get_file(title);
-								// 刪調暫存檔
-								try {
-									FSO.DeleteFile(title);
-								} catch (e) {
-									// TODO: handle exception
-								}
+								result = library_namespace.get_file(url);
+								matched = true;
 								library_namespace.debug('playlist info: ' + result.replace(/</g, '&lt;'), 3);
-								// 取得 title 並創建 sub-directory。
-								var playlist = matched[1],
 								//pattern = /<media:player\s+url=['"]([^'"]+)['"]/g,
-								pattern = / data-video-id="([^'"]+)"/g,
-								//url = result.match(/<title\s+type='text'>([^<]+)<\/title>/),
-								url = result.match(/<meta name="title" content="([^"]+)">/),
-								j = 0, l, p;
-								if (!url) {
-									library_namespace.err('Error to get playlist [' + playlist + ']: ' + result + '.');
+								var pattern = / data-video-id="([^'"]+)"/g;
+								//title = result.match(/<title\s+type='text'>([^<]+)<\/title>/),
+								title = result.match(/<meta name="title" content="([^"]+)">/);
+								if (!title) {
+									library_namespace.err('Error to get playlist [' + playlist_id + ']: ' + result + '.');
 									continue;
 								}
-								if (url = URI_accessor.regularize_file_name(HTML_to_Unicode(url[1]), true)) {
+								if (title = URI_accessor.regularize_file_name(HTML_to_Unicode(title[1]), true)) {
 									// 準備好 sub-directory。
 									try {
-										library_namespace.debug('Try to create directory [' + download_to + url + ']', 3);
-										FSO.CreateFolder(download_to + url);
-										download_to += url + library_namespace.env.path_separator;
+										library_namespace.debug('Try to create directory [' + download_to + title + ']', 3);
+										FSO.CreateFolder(download_to + title);
+										download_to += title + library_namespace.env.path_separator;
 										library_namespace.info('Create directory [' + download_to + ']');
+										// 移走暫存檔
+										try {
+											FSO.MoveFile(url, download_to + url);
+											matched = false;
+										} catch (e) {
+											// TODO: handle exception
+										}
 									} catch (e) {
 										if ((e.number & 0xFFFF) === 58) {
 											//	檔案已存在. File already exists.
 											//	http://msdn.microsoft.com/en-us/library/aa264975(v=vs.60).aspx
-											download_to += url + library_namespace.env.path_separator;
+											download_to += title + library_namespace.env.path_separator;
 										} else {
-											library_namespace.warn('Create directory [' + download_to + url + '] error:');
+											library_namespace.warn('Create directory [' + download_to + title + '] error:');
 											library_namespace.err(e);
 										}
 									}
 								}
+								// 刪掉暫存檔
+								if (matched)
+									try {
+										FSO.DeleteFile(url);
+									} catch (e) {
+										// TODO: handle exception
+									}
 
-								// 取得 play list。
+								// 取得 play list urls。
 								url = [];
 								while (matched = pattern.exec(result)) {
 									//url.push(matched[1].replace(/(\?v=[^&]+).+$/, '$1'));
 									url.push('https://www.youtube.com/watch?v=' + matched[1]);
 								}
-								l = url.length;
-								if (!l) {
+								var length = url.length;
+								if (length === 0) {
 									library_namespace.info('No video get.');
 									// to next list/file.
 									continue;
 								}
 
-								for (p = String(l).length; j < l; j++) {
-									library_namespace.info('get_video: playlist [' + (j + 1) + '/' + l + '] <a href="' + url[j] + '">' + url[j] + '</a> to [' + download_to + ']');
+								for (var j = 0, to_pad = String(length).length; j < length; j++) {
+									library_namespace.info('get_video: playlist [' + (j + 1) + '/' + length + '] <a href="' + url[j] + '">' + url[j] + '</a> to [' + download_to + ']');
 									// add track number.
-									options.prefix = '[' + (j + 1).pad(p) + '] ';
+									options.prefix = '[' + (j + 1).pad(to_pad) + '] ';
 									get_video(url[j], download_to, options);
 								}
 
-								library_namespace.info(playlist + ': All ' + l + ' video(s) done.');
+								library_namespace.info(playlist_id + ' (<b>' + title + '</b>): All ' + length + ' video(s) done.');
 								// to next list/file.
 								continue;
 							}
@@ -1005,7 +1035,12 @@ function get_video(video_url, download_to, options) {
 							};
 
 							setting.referer = 'http://www.youtube.com/watch?v=' + URI._search.v;
-							setting.temporary_file = download_to + URI._search.v + '.' + video_info.best.extension;
+							setting.temporary_file
+							// 處理 folder 為特殊名稱，因此 curl 或 console 無法 handle 的情況。
+							// 亦可先測試無法建檔後，才採用上一層的 options.base_directory。
+							= (PATTERN_ordinary_folder_name.test(download_to) ? download_to : options.base_directory || '')
+							// e.g., xxxxxxxxxxx.mp4
+							+ URI._search.v + '.' + video_info.best.extension;
 
 							library_namespace.info('Downloading [' + target + ']←[' + setting.temporary_file + ']');
 							result = get_URI(video_info.best.url, target, setting);

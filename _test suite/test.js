@@ -26,6 +26,7 @@ TODO: https://github.com/kanasimi/CeJS/tags
 
 'use strict';
 
+// Date.now()
 var test_start = new Date - 0,
 /** {ℕ⁰:Natural+0}debug level during normal test period */
 test_debug_level = 0,
