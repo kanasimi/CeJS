@@ -946,19 +946,11 @@ function get_video(video_url, download_to, options) {
 									continue;
 								}
 								if (title = URI_accessor.regularize_file_name(HTML_to_Unicode(title[1]), true)) {
-									// 準備好 sub-directory。
 									try {
-										library_namespace.debug('Try to create directory [' + download_to + title + ']', 3);
+										library_namespace.debug('準備好 sub-directory。 Try to create directory [' + download_to + title + ']', 3);
 										FSO.CreateFolder(download_to + title);
 										download_to += title + library_namespace.env.path_separator;
 										library_namespace.info('Create directory [' + download_to + ']');
-										// 移走暫存檔
-										try {
-											FSO.MoveFile(url, download_to + url);
-											matched = false;
-										} catch (e) {
-											// TODO: handle exception
-										}
 									} catch (e) {
 										if ((e.number & 0xFFFF) === 58) {
 											//	檔案已存在. File already exists.
@@ -969,10 +961,17 @@ function get_video(video_url, download_to, options) {
 											library_namespace.err(e);
 										}
 									}
+									try {
+										library_namespace.debug('移動暫存檔 [' + url + ']→[' + download_to + url + ']');
+										FSO.MoveFile(url, download_to + url);
+										matched = false;
+									} catch (e) {
+										// TODO: handle exception
+									}
 								}
-								// 刪掉暫存檔
 								if (matched)
 									try {
+										library_namespace.debug('刪掉暫存檔 [' + url + ']');
 										FSO.DeleteFile(url);
 									} catch (e) {
 										// TODO: handle exception
