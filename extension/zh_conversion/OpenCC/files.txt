@@ -1,4 +1,4 @@
 Please puts the dictionary files of OpenCC here.
 
-You can download them at:
+You may download them at:
 https://github.com/BYVoid/OpenCC/tree/master/data/dictionary

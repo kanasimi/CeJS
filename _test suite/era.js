@@ -1266,6 +1266,8 @@ function draw_era(hierarchy) {
 
 	SVG_object.hierarchy = hierarchy;
 	var periods = CeL.era.periods(hierarchy, draw_era.options),
+	// [ eras, blocks, 歷史時期 periods ]
+	count_layers = [ 0, 0, 0 ],
 	//
 	period_hierarchy = Array.isArray(hierarchy) && hierarchy.length > 0 ? hierarchy
 			.join(era_name_classifier)
@@ -1479,6 +1481,7 @@ function draw_era(hierarchy) {
 			lastAdd.onclick
 			//
 			= is_Era ? draw_era.click_Era : draw_era.click_Period;
+			count_layers[is_Era ? 0 : is_歷史時期 ? 2 : 1]++;
 		};
 
 		periods.forEach(function(region) {
@@ -1508,7 +1511,7 @@ function draw_era(hierarchy) {
 		CeL.toggle_display('era_graph_unobvious', period_hierarchy);
 	}
 
-	draw_era.draw_navigation(hierarchy);
+	draw_era.draw_navigation(hierarchy, undefined, count_layers);
 
 	// -----------------------------
 
@@ -1596,7 +1599,7 @@ draw_era.default_group = '\n';
 // draw_era.tags[group][period] = [ date_range, height_range, title, style ];
 draw_era.tags = CeL.null_Object();
 
-draw_era.draw_navigation = function(hierarchy, last_is_Era) {
+draw_era.draw_navigation = function(hierarchy, last_is_Era, count_layers) {
 	var period_hierarchy = '',
 	// 
 	navigation_list = [ {
@@ -1655,10 +1658,22 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era) {
 			}
 		});
 
+	if (count_layers && count_layers.sum() > 2)
+		// 在導覽列記上紀年/國家/君主/歷史時期數量。
+		Array.prototype.push.apply(navigation_list, count_layers.map(function(
+				count, index) {
+			return count > 0 ? {
+				T : [ draw_era.draw_navigation.count_title[index], count ],
+				C : 'era_graph_count'
+			} : '';
+		}));
+
 	// 清理場地。
 	CeL.remove_all_child('era_graph_navigation');
 	CeL.new_node(navigation_list, 'era_graph_navigation');
 };
+// [ 紀年 eras, blocks (國家/君主), 歷史時期 periods ]
+draw_era.draw_navigation.count_title = [ '%1 eras', '%1 blocks', '%1 periods' ];
 
 draw_era.click_navigation_date = function() {
 	era_input_object.setValue(this.title);
