@@ -7589,6 +7589,7 @@ if (typeof CeL === 'function')
 				return to_era_Date(date_string, options);
 			};
 
+			// 更正 data.date .age_of.get_new_year
 			library_namespace.date.age_of.get_new_year = get_Date_of_key_by_CE;
 
 			// ---------------------------------------

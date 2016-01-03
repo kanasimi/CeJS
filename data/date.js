@@ -2381,6 +2381,7 @@ function age_of(start, end, options) {
 				difference++;
 			if (end - age_of.get_new_year(end.getFullYear()) < 0)
 				difference--;
+			// 時年實歲。
 			diff = difference + '歲, ' + diff;
 		}
 
@@ -2405,7 +2406,8 @@ function age_of(start, end, options) {
 	return (difference / 24).to_fixed(1) + 'D';
 }
 
-age_of.get_new_year = function(year) {
+// 將在 data.date.era 更正。
+age_of.get_new_year = function(year, 月, 日, era_key) {
 	// 取平均值。因無法準確判別春節（農曆正月初一）日期，此方法尚有誤差！
 	return new Date((year < 0 ? year : '000' + year) + '/2/1');
 };
