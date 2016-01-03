@@ -892,6 +892,7 @@ function (global) {
 		var tmp;
 		if (_.is_Object(key)) {
 			for (tmp in key) {
+				// version 當作 exactly
 				if (platform(tmp, key[tmp], version))
 					return true;
 			}
@@ -899,6 +900,8 @@ function (global) {
 		}
 	
 		key = String(key).toLowerCase();
+		if (key in platform.alias)
+			key = platform.alias[key];
 		// CeL.platform(name, version, exactly);
 		tmp = platform.browser;
 		if (tmp && tmp.toLowerCase() === key
@@ -921,6 +924,12 @@ function (global) {
 		return false;
 	};
 
+	platform.alias = {
+		ie : 'msie',
+		explorer : 'msie',
+		'internet explorer' : 'msie'
+	};
+
 	platform.toString = function() {
 		return platform.browser + ' ' + platform.version;
 	};
@@ -939,7 +948,7 @@ function (global) {
 			var userAgent = String(navigator.userAgent), matched, tmp;
 			platform.mobile = /mobile/i.test(userAgent);
 
-			// 特別的網頁瀏覽器放前面。
+			// 特別的網頁瀏覽器放前面。因此 "IE" 應置於後。
 			if (matched = userAgent
 					.match(/(Chromium|Chrome|Opera|Safari|Firefox|(?:MS)?IE)[\/ ](\d+\.\d+)/i)) {
 				platform.browser = matched[1];

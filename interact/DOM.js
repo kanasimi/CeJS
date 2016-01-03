@@ -610,7 +610,7 @@ function toggle_display(element, type){
 
 	return type;
 };
-//simpleWrite('a.txt',reduce_code([f,toggle,set_Object_value]));
+//simpleWrite('a.txt',reduce_code([f,toggle,library_namespace.set_Object_value]));
 //for(var i in style)tt+=i+'='+document.getElementById("others").style[i]+"<br />";document.write(tt);
 _// JSDT:_module_
 .
@@ -3489,7 +3489,7 @@ var referenceDoc,loadReferenceDone;//,loadReferenceCount;
 function loadReference(referenceURL,iframeId){
  if(loadReferenceDone||typeof location!='object'||!location.protocol||location.protocol=='https:')return;	//	https會拒絕存取，所以直接放棄。
  //if(loadReferenceDone)return;	//	https會拒絕存取，所以直接放棄。
- var o=get_element(iframeId||'reference'),thisFuncName=parseFunction().funcName;
+ var o=get_element(iframeId||'reference');
  if(typeof referenceDoc=='object' && typeof referenceDoc.document=='object' && referenceDoc.document){	//	referenceDoc is still contentWindow here.	typeof referenceDoc.document:預防使用https時產生不能讀取的權限問題。
   referenceDoc=o.contentWindow.document;//referenceDoc.document;	//	遺憾：在舊版IE不能用後者。也許是因為舊版IE連contentWindow都會重造。
   o=referenceDoc.body;//alert(o.innerHTML.length+'\n'+o.innerHTML);
@@ -3502,12 +3502,12 @@ function loadReference(referenceURL,iframeId){
   }else{
    //try{window.status='Wait while reference page loading..3',alert(window.status+'\nURL:'+o.contentWindow.document.src+'\ncontent('+o.contentWindow.document.body.innerHTML.length+'):\n'+o.contentWindow.document.body.innerHTML);}catch(e){}
    //if(!--loadReferenceCount)history.go(0);
-   setTimeout(thisFuncName+'();',200);
+   setTimeout(function(){loadReference();},200);
   }
   return;
  }
  if(typeof document!='object'||!document.body){	//	document尚未load
-  setTimeout(thisFuncName+'();',90);
+  setTimeout(function(){loadReference();},90);
   return 1;
  }
  //o=get_element(iframeId||'reference');	//	原來把設定放在這，不過反正都要在前面用到…
@@ -3520,7 +3520,7 @@ function loadReference(referenceURL,iframeId){
   referenceDoc=o.contentWindow;//.document;	o.contentWindow.document still index to a blank window here, when new document load, this point to document won't work.
 
   //window.status='Wait while reference page loading..2';alert(window.status+'\nURL:'+o.src);
-  setTimeout(thisFuncName+'();',20);//loadReferenceCount=9;
+  setTimeout(function(){loadReference();},20);//loadReferenceCount=9;
  }else{
   //if(location.protocol=='https:')return;	//	https會拒絕存取，所以直接放棄。最晚在這就得判別
   if(!referenceDoc)referenceDoc=40;	//	尚未load完成時作倒數計時..假如加上if(o.contentWindow)，這方法正確嗎?
@@ -3528,7 +3528,7 @@ function loadReference(referenceURL,iframeId){
   try{
    if(referenceDoc--){
     //window.status='Wait while reference page loading..';alert(window.status);
-    setTimeout(thisFuncName+'();',300);return 2;
+    setTimeout(function(){loadReference();},300);return 2;
    }else{
     //window.status='reference page load FAILED!';alert(window.status);
     return 4;
@@ -3996,6 +3996,7 @@ find_class = find_class;
 //set_up_popup[generateCode.dLK]='sPop,has_class';
 function set_up_popup(tag,classN,func){
 	if (!tag)
+		// 'span'
 		tag = 'b';
 
 /*
@@ -4040,6 +4041,10 @@ function set_up_popup(tag,classN,func){
 			}
 		}
 }
+
+_.set_up_popup = set_up_popup;
+
+
 /*	注釋(reference) / show popup-window or ruby	2004/4/3 17:20
 	http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K742.aspx
 
@@ -4093,9 +4098,17 @@ time limit
 
 */
 var sPopP=library_namespace.null_Object()	//	sPop properties object
-	,sPopF	//	flag
-	,sPopError//	for error
-	;
+	//	flag
+	,sPopF = {
+		title:0,
+		auto:0,
+		nopop:8,
+		repeat:16,
+		clearPop:32,
+		force:64
+	},
+	//	for error
+	sPopError;
 
 //	初始值設定 & 設定flag
 //if(sPopP)alert('sPopP 已被佔用！');else
@@ -4120,26 +4133,29 @@ function sPopInit(){
 	//	所有可用的types，可用來detect是否能為sPop()所接受。但Mozilla中無法使用title之外的attribute。
 	sPopP.allTypes=(sPopP.autoTypes+','+sPopP.types).split(',');
 	//	function name
-	sPopP.functionName='';//;parseFunction().funcName;
+	sPopP.functionName='';//;library_namespace.parse_function().funcName;
 	//	popup window(for popup)
 	if(typeof window.createPopup!='undefined')sPopP.window=window.createPopup();
-{
- var i=0,t=sPopP.types.split(','),T='';
- for(;i<t.length;)T+=t[i]+'='+ ++i+',';//alert(T);
- set_Object_value('sPopF','title=0,auto=0,'
-	//+'_'+sPopP.functionName+'=0,'
-	+T+'nopop=8,repeat=16,clearPop=32,force=64','int');
+	{
+		var i=0,t=sPopP.types.split(','),T='';
+		for(;i<t.length;)sPopF[t[i]]= ++i;
+		//sPopF['_'+sPopP.functionName]=0
+	}
+	//	sPopP.types[index]=type name
+	sPopP.types=(
+		//'_'+sPopP.functionName+
+		','+sPopP.types).split(',');
+	sPopP.commentTitle='Comment';	//	註解
+	sPopP.commentTitlePattern=sPopP.commentTitle+' of %s';
+	sPopP.closeM='Close';	//	close message: 關閉視窗或popup
+	sPopP.biggerM='Bigger';	//	bigger message: 放大
+	sPopP.resetM='Reset size';	//	reset size message: 回復原大小
 }
-//	sPopP.types[index]=type name
-sPopP.types=(
-	//'_'+sPopP.functionName+
-	','+sPopP.types).split(',');
-sPopP.commentTitle='Comment';	//	註解
-sPopP.commentTitlePattern=sPopP.commentTitle+' of %s';
-sPopP.closeM='Close';	//	close message: 關閉視窗或popup
-sPopP.biggerM='Bigger';	//	bigger message: 放大
-sPopP.resetM='Reset size';	//	reset size message: 回復原大小
-}
+sPopInit();
+
+//	只有 IE 5, firefox 38 提供ruby，所以沒有的時候不宜加入旁點功能。IE, Chrome 旁點顯示正確，但 firefox 字體過小，僅 2/3。
+// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
+var has_ruby_tag = library_namespace.platform({ie:5,firefox:38,chrome:5,safari:5});
 
 //	主object(正文或主object，會從之取得正文與注釋)[, flag, text string or object(注釋,會蓋過從主object取得之text), 使用的class name]
 //sPop[generateCode.dLK]='sPopP,sPopF,sPopInit,*sPopInit();';
@@ -4154,8 +4170,10 @@ function sPop(oPos,flag,oTxt,classN){
  if(!sPopP.height)sPopP.height=100;if(sPopP.height>limitH)sPopP.height=limitH;
 
  //	初始值設定
- if(!sPopP.functionName)
-  sPopF[ sPopP.types[0]='_'+(sPopP.functionName=parseFunction().funcName) ]=0;
+ if(!sPopP.functionName&&(sPopP.functionName=library_namespace.parse_function()))
+  sPopF[ sPopP.types[0]='_'+(sPopP.functionName=sPopP.functionName.funcName) ]=0;
+ else
+ 	sPopP.functionName='';
 
  var repopMark='repop',repop=oPos===repopMark,nopop=flag&sPopF.nopop,tp=flag&7
 	,useAttbTxt=false,brReg=/\r*\n/g,brT='<br />\n';	//	轉成br用
@@ -4230,8 +4248,10 @@ if(repop){
   if(typeof oPos!='object'||!oPos.innerHTML)return;	//	oPop非HTML element就return
   if(oPos.doneRuby)return tp;	//	已經處理過<ruby>就pass
   //	處理repeat
-  if( flag&sPopF.repeat || sPopP.RepeatC.indexOf(oTxt)!=-1 )
-   oPos.title='',oTxt=window.navigator.userAgent.indexOf("MSIE")<0?'':oTxt.repeat(oPos.innerHTML.length/oTxt.length);	//	只有IE提供ruby，所以這時候不宜加入旁點功能。
+  if( flag&sPopF.repeat || sPopP.RepeatC.indexOf(oTxt)!==-1 ) {
+   oPos.title='';
+   oTxt=has_ruby_tag?oTxt.repeat(oPos.innerHTML.length/oTxt.length):'';
+  }
 
   try{
    oPos.innerHTML='<ruby><rb>'+oPos.innerHTML+'<\/rb><rp>'
@@ -4451,7 +4471,7 @@ window.execScript( sExpression, sLanguage );
 */
 //var VBalert_f;VBalert();	//	init
 function VBalert(prompt,buttons,title,helpfile,context){
- if(typeof VBalert_f!='object')VBalert_f=library_namespace.null_Object(),set_Object_value('VBalert_f','ret=0,'
+ if(typeof VBalert_f!='object')VBalert_f=library_namespace.null_Object(),library_namespace.set_Object_value('VBalert_f','ret=0,'
 	//	http://msdn.microsoft.com/library/en-us/script56/html/vsfctmsgbox.asp
 	+'vbOK=1,vbCancel=2,vbAbort=3,vbRetry=4,vbIgnore=5,vbYes=6,vbNo=7,'
 	+'vbOKOnly=0,vbOKCancel=1,vbAbortRetryIgnore=2,vbYesNoCancel=3,vbYesNo=4,vbRetryCancel=5,'
@@ -4966,7 +4986,7 @@ locate_nodeClip=[l,t,w,h]:	resizable時將obj限制在這個範圍內
 
 to top:
 var locate_node_flag;
-set_Object_value('locate_node_flag','resizable=0,moveable=0,autoLocate=0,auto=0,absolute=1,abs=1,relative=2,rel=2,asDialog=3,dialog=3,modeFlag=3,dialogDown=3,dialogUp=7,dialogRight=11,dialogLeft=15,dialogFlag=15,dialogForce=16,noResize=32,noMove=64,keepDisplay=128,create=256',1);	//	revise
+library_namespace.set_Object_value('locate_node_flag','resizable=0,moveable=0,autoLocate=0,auto=0,absolute=1,abs=1,relative=2,rel=2,asDialog=3,dialog=3,modeFlag=3,dialogDown=3,dialogUp=7,dialogRight=11,dialogLeft=15,dialogFlag=15,dialogForce=16,noResize=32,noMove=64,keepDisplay=128,create=256',1);	//	revise
 */
 var locate_node_flag = {
 		resizable : 0,
@@ -5490,11 +5510,11 @@ c.f.	setTimeout('~',0);	不過這不能確定已經load好
 function addonload(s,where){
  if(!s||typeof window!='object')return 1;
  if(typeof s=='function'){
-  s=parseFunction(s);
+  s=library_namespace.parse_function(s);
   if(!s||!s.funcName)return 2;
   s=s.funcName+'()';
  }
- var o=window.onload?typeof window.onload=='string'?window.onload:parseFunction(window.onload).contents:'';
+ var o=window.onload?typeof window.onload=='string'?window.onload:library_namespace.parse_function(window.onload).contents:'';
  window.onload=new Function(where?s+';\n'+o:o+';\n'+s);
 }
 */

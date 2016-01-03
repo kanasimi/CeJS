@@ -186,9 +186,14 @@ _// JSDT:_module_
  * @since	2010/5/16 23:04:54
  */
 parse_function = function parse_function(function_name, flag) {
-	if (!function_name
-			&& typeof (function_name = parse_function.caller) !== 'function')
-		return;
+	if (!function_name)
+		try {
+			function_name = parse_function.caller;
+			if (typeof function_name !== 'function')
+				return;
+		} catch (e) {
+			return;
+		}
 	if (typeof function_name === 'string'
 			&& !(function_name = library_namespace.get_various(function_name)))
 		return;
