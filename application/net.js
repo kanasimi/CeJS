@@ -321,60 +321,63 @@ _// JSDT:_module_
 parse_URI = parse_URI;
 
 
-//	2012/10/13 13:31:21
-//	排除會導致error的字元
-//	@see data.is_matched.string_pre_handler(), application.storage.file.get_file_name()
+/**
+ * 正規化 file name，排除會導致error的字元。
+ * 
+ * @param {String}file_name
+ *            file name
+ * @param {Boolean}do_escape
+ *            是否作 escape
+ * 
+ * @returns {String}正規化 file name
+ * 
+ * @see data.is_matched.string_pre_handler(),
+ *      application.storage.file.get_file_name()
+ * @since 2012/10/13 13:31:21
+ */
 function to_file_name(file_name, do_escape) {
 	file_name = file_name.trim();
 
 	// 處理 illegal file name. 去除檔名中不被允許的字元。
-	//	http://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+	// http://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
 
 	if (do_escape)
 		file_name = file_name
-		//	若本來就含有這些 functional 字元的情況，須作 escape。
+		// 若本來就含有這些 functional 字元的情況，須作 escape。
 		.replace(/([＼／｜？＊])/g, '＼$1');
 	// else: make result readable.
 
-	file_name = file_name
-			.replace(
-					/[\0-\x1f]/g,
-					function ($0) {
-						var c = $0.charCodeAt(0).toString(
-								16), l = c.length;
-						if (l === 1 || l === 3)
-							c = '0' + c;
-						else if (4 < l && l < 8)
-							c = '000'.slice(l - 5) + c;
-						return '＼'
-						+ (c.length === 2 ? 'x'
-								: 'u') + c;
-					})
+	file_name = file_name.replace(/[\0-\x1f]/g, function($0) {
+		var c = $0.charCodeAt(0).toString(16), l = c.length;
+		if (l === 1 || l === 3)
+			c = '0' + c;
+		else if (4 < l && l < 8)
+			c = '000'.slice(l - 5) + c;
+		return '＼' + (c.length === 2 ? 'x' : 'u') + c;
+	})
 
-			//	functional characters in RegExp.
-			.replace(/[\\\/|?*]/g, function ($0) {
-				return {
-					'\\': '＼',
-					'/': '／',
-					'|': '｜',
-					'?': '？',
-					'*': '＊'
-				}[$0];
-			})
+	// functional characters in RegExp.
+	.replace(/[\\\/|?*]/g, function($0) {
+		return {
+			'\\' : '＼',
+			'/' : '／',
+			'|' : '｜',
+			'?' : '？',
+			'*' : '＊'
+		}[$0];
+	})
 
-			//	normalize string.
-			// 全寬引號（fullwidth quotation mark）[＂]
-			.replace(/"([^"'“”＂]+)"/g, '“$1”')
-			.replace(/"/g, '”')
-			.replace(/:/g, '：')
-			.replace(/</g, '＜')
-			.replace(/>/g, '＞');
+	// normalize string.
+	// 全寬引號（fullwidth quotation mark）[＂]
+	.replace(/"([^"'“”＂]+)"/g, '“$1”').replace(/"/g, '”').replace(/:/g, '：')
+			.replace(/</g, '＜').replace(/>/g, '＞');
 
-	//	限制長度.
-	//	http://en.wikipedia.org/wiki/Filename#Length_restrictions
-	//	http://msdn.microsoft.com/en-us/library/aa365247.aspx#maxpath
+	// 限制長度.
+	// http://en.wikipedia.org/wiki/Filename#Length_restrictions
+	// http://msdn.microsoft.com/en-us/library/aa365247.aspx#maxpath
 	if (file_name.length > 255) {
-		library_namespace.warn('to_file_name: The file name will be cutted! [' + file_name.length + '] [' + file_name + ']');
+		library_namespace.warn('to_file_name: The file name will be cutted! ['
+				+ file_name.length + '] [' + file_name + ']');
 		file_name = file_name.slice(0, 255);
 	}
 	return file_name;
@@ -457,16 +460,19 @@ URI_accessor.test_module = function (module_name) {
  * @returns	file name
  * @throws	decodeURIComponent error
  */
-URI_accessor.extract_file_name = function (URI) {
-	//	須處理非標準之符號，可能會有 &#x27; 之類的東西。因此對 #hash 之處理得放在 HTML_to_Unicode() 後面。
-	var m = URI.replace(/([^&])#.*/, '$1').match(/(([^\/\\]+)[\/\\]+)?([^\/\\]*)$/);
+URI_accessor.extract_file_name = function(URI) {
+	// 須處理非標準之符號，可能會有 &#x27; 之類的東西。因此對 #hash 之處理得放在 HTML_to_Unicode() 後面。
+	var m = URI.replace(/([^&])#.*/, '$1')
+	//
+	.match(/(([^\/\\]+)[\/\\]+)?([^\/\\]*)$/);
 	if (m) {
 		return URI_accessor.regularize_file_name(
-				HTML_to_Unicode(decodeURIComponent(m[3] || m[1]))
-				, true);
+		// 因為 escape 會多出不必要符號，因此不 escape。
+		HTML_to_Unicode(decodeURIComponent(m[3] || m[1])), false);
 	}
 };
 
+// 正規化 file name
 URI_accessor.regularize_file_name = to_file_name;
 
 URI_accessor.setting = {
@@ -945,7 +951,8 @@ function get_video(video_url, download_to, options) {
 									library_namespace.err('Error to get playlist [' + playlist_id + ']: ' + result + '.');
 									continue;
 								}
-								if (title = URI_accessor.regularize_file_name(HTML_to_Unicode(title[1]), true)) {
+								// 因為 escape 會多出不必要符號，因此不 escape。
+								if (title = URI_accessor.regularize_file_name(HTML_to_Unicode(title[1]), false)) {
 									try {
 										library_namespace.debug('準備好 sub-directory。 Try to create directory [' + download_to + title + ']', 3);
 										FSO.CreateFolder(download_to + title);
