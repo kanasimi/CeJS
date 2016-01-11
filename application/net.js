@@ -997,10 +997,14 @@ function get_video(video_url, download_to, options) {
 									continue;
 								}
 
+								var prefix = options.prefix;
 								for (var j = 0, to_pad = String(length).length; j < length; j++) {
 									library_namespace.info('get_video: playlist [' + (j + 1) + '/' + length + '] <a href="' + url[j] + '">' + url[j] + '</a> to [' + download_to + ']');
-									// add track number.
-									options.prefix = '[' + (j + 1).pad(to_pad) + '] ';
+									if (prefix === undefined)
+										// default: add track number.
+										options.prefix = '[' + (j + 1).pad(to_pad) + '] ';
+									 else if (typeof prefix === 'function')
+										options.prefix = prefix(title, url[j], download_to, j, length);
 									get_video(url[j], download_to, options);
 								}
 

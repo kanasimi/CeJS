@@ -5317,6 +5317,8 @@ function locate_node(obj, loc, margin, flag) {
 				|| movekind == locate_node_flag.dialogLeft ? loc.top : 0);
 	}
 
+	// 需要設在如 auto_TOC() layer 之上。
+	obj.style.zIndex = 100;
 	// 設定位置
 	// alert(boxL+','+boxT+','+boxW+','+boxH+','+Display);
 	obj.style.position = 'absolute';
@@ -6457,11 +6459,11 @@ function reduce_HTML(t) {
 		.replace(/<(span|p|div|t[dr])([^>]*>)<(span|p)>(([\s\n]+|&nbsp;)*?)<\/(span|p)><\/(span|p|div|t[dr])>/ig, '<$1$2$4</$7>')
 		.replace(/[\s\n]*<\/p>([\s\n]*<br\s*\/?>)*[\s\n]*<p[^>]*>/ig, '<br />\n')
 		.replace(/<link rel=(File-List|colorSchemeMapping|themeData|Edit-Time-Data)[^>]+>/ig, '')
-		.replace(/^[\s\n]*<html[^>]*>[\s\n]*/, '<html>')
-		.replace(/[\s\n]*<body[^>]+>[\s\n]*/, '<body>')
+		.replace(/^[\s\n]*<\html[^>]*>[\s\n]*/, '<\html>')
+		.replace(/[\s\n]*<\body[^>]+>[\s\n]*/, '<\body>')
 		.replace(/[\s\n]*<!--\[if [^\]]+\]>[\s\S]*?<!\[endif\]-->(\r?\n)*/ig, '')
-		.replace(/[\s\n]*<style[^>]*>[\s\S]*?<\/style>[\s\n]*/ig, '')
-		.replace(/[\s\n]*<meta[\s\n][^>]+>[\s\n]*/ig, '')
+		.replace(/[\s\n]*<\style[^>]*>[\s\S]*?<\/style>[\s\n]*/ig, '')
+		.replace(/[\s\n]*<\meta[\s\n][^>]+>[\s\n]*/ig, '')
 	
 		//	from HTML_to_Unicode()
 		.replace(/&#0*(\d{2,7});/ig, function ($0, $1) { return $1 > 1114111 ? $0 : String.fromCharCode($1); })	//預防error之版本,~10FFFF=1114111
@@ -6474,7 +6476,7 @@ function reduce_HTML(t) {
 
 	if (/<(img|table)[>\s\n]/.test(t)) {
 		library_namespace.debug('Has table or images.');
-		t = t.replace(/<\/head>/i, '<style type="text/css">table,th,td{border:1px solid #888;border-collapse:collapse;}img{border:0;max-width:99%;}</style></head>');
+		t = t.replace(/<\/head>/i, '<\style type="text/css">table,th,td{border:1px solid #888;border-collapse:collapse;}img{border:0;max-width:99%;}</style></head>');
 	}
 
 	return t;

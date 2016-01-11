@@ -5757,6 +5757,8 @@ if (typeof CeL === 'function')
 				共存紀年.紀年 = 紀年;
 
 				if (共存紀年.length > 0) {
+					if (typeof options.contemporary_filter === 'function')
+						共存紀年 = 共存紀年.filter(options.contemporary_filter);
 					tmp = [];
 					共存紀年.forEach(function(era) {
 						if (date_index = era.Date_to_date_index(date)) {
@@ -6599,6 +6601,62 @@ if (typeof CeL === 'function')
 				}
 
 				return list;
+			}
+
+			/**
+			 * 取得公元 CE_year 年, 中曆 月/日 之 CE Date。<br />
+			 * TODO: 若中曆月取太晚，例如超過10月，可能會出問題，取得下一年的日期!
+			 * 
+			 * @param {Natural}CE_year
+			 *            公元年
+			 * @param {Natural}[月]
+			 *            中曆月 (=1)
+			 * @param {Natural}[日]
+			 *            中曆日 (=1)
+			 * @param {String}[country]
+			 *            國家 (= 中國)
+			 * 
+			 * @returns {Date|Undefined}date: 公元 CE date.<br />
+			 *          {String}date.era: 紀年日期.
+			 */
+			function 中曆(CE_year, 月, 日, country) {
+				if (!country)
+					country = '中國';
+				月 |= 0;
+				if (月 < START_MONTH)
+					月 = START_MONTH;
+				日 |= 0;
+				if (日 < START_DATE)
+					日 = START_DATE;
+
+				var candidate,
+				// 中曆當年比公元碗兩個月的日期，應該已經跨中曆年。因此以之作為基準。
+				// e.g., 公元412年，則 412/3/1 應該已在中曆當年內。
+				date = new Date(CE_year.pad(4) + '-' + (月 + 2).pad(2) + '-'
+						+ 日.pad(2));
+				// 測試每一個共存紀年。
+				add_contemporary(date, null, {
+					contemporary_filter : function(era) {
+						if (candidate || era.name[3] !== country)
+							return false;
+						var date_index = era.Date_to_date_index(date);
+						if (date_index) {
+							date_index = era.toString() + era.歲名(date_index[0])
+									+ '年' + 月 + '月' + 日 + '日';
+							candidate = to_era_Date(date_index, {
+								date_only : true
+							});
+							// TODO: 若中曆月取太晚，例如超過10月，可能會出問題，取得下一年的日期!
+							if (candidate) {
+								candidate.era = date_index;
+								return true;
+							}
+						}
+						return false;
+					}
+				});
+				if (candidate)
+					return candidate;
 			}
 
 			// 將 era object 增加到 list 結構中。
@@ -7456,6 +7514,7 @@ if (typeof CeL === 'function')
 				for_dynasty : for_dynasty,
 				for_monarch : for_monarch,
 				numeralize : numeralize_date_name,
+				中曆 : 中曆,
 
 				NEED_SPLIT_PREFIX : NEED_SPLIT_PREFIX,
 				NEED_SPLIT_POSTFIX : NEED_SPLIT_POSTFIX,

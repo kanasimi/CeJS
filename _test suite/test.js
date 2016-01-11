@@ -2485,6 +2485,9 @@ function test_era() {
 		[[undefined,CeL.era('-4000/1/1').共存紀年]],
 		[[0, CeL.era('明年',{base:'嘉靖元年'}) - CeL.era('二年',{base:'嘉靖元年'})], '明年'],
 		[[0, CeL.era('去年',{base:'嘉靖二年'}) - CeL.era('元年',{base:'嘉靖二年'})], '去年'],
+
+		[['412/3/29', CeL.era.中曆(412,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 412 年, 中曆 3/1 之 CE Date。'],
+		[['2016/3/11', CeL.era.中曆(2016,2,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 2016 年, 中曆 2/3 之 CE Date。'],
 	]);
 
 	var tmp = '後黎神宗永祚10年1月26日|朝鮮仁祖6年1月26日|江戸時代後水尾天皇寛永5年1月26日|莫光祖永祚4年|';
