@@ -51,6 +51,9 @@ CeL.log(['今天是農曆: ', 今天的農曆日期]);
 今天的農曆日期 = CeL.era({date:new Date, era:'農曆'}).format({parser:'CE',format:'農曆%年(%歲次)年%月月%日日',locale:'cmn-Hant-TW'});
 CeL.log(['今天是農曆: ', 今天的農曆日期]);
 
+// 取得公元 415年, 中曆 三月 之 CE Date。
+CeL.era.中曆('415年三月');
+
 
 CeL.env.era_data_load = function(country, queue) {
 	if (!queue)
@@ -73,7 +76,7 @@ function test_era_data() {
 CeL.run('data.date.era', test_era_data);
 
 
- // should be error: 清任一紀年無第一八八〇年。
+ // should be error: 清任何一個紀年無第一八八〇年。
  '清一八八〇年四月二十一日七時'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})
  // should be error
  '元一八八〇年四月二十一日七時'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})
@@ -6603,13 +6606,16 @@ if (typeof CeL === 'function')
 				return list;
 			}
 
+			var PATTERN_公元年中曆月日
+			// [ 公元年, 中曆月, 中曆日, 中曆日 ]
+			= /(-?\d+)年(?:(閏?\d{1,2})月)?(?:初(\d)|(\d{1,2})日)?/;
+
 			/**
-			 * 取得公元 CE_year 年, 中曆 月/日 之 CE Date。<br />
-			 * TODO: 若中曆月取太晚，例如超過10月，可能會出問題，取得下一年的日期!
+			 * 取得公元 CE_year 年, 中曆 月/日 之 CE Date。
 			 * 
-			 * @param {Natural}CE_year
+			 * @param {Natural|String}CE_year
 			 *            公元年
-			 * @param {Natural}[月]
+			 * @param {Natural|String}[月]
 			 *            中曆月 (=1)
 			 * @param {Natural}[日]
 			 *            中曆日 (=1)
@@ -6618,22 +6624,57 @@ if (typeof CeL === 'function')
 			 * 
 			 * @returns {Date|Undefined}date: 公元 CE date.<br />
 			 *          {String}date.era: 紀年日期.
+			 * 
+			 * @since 2016/1/11
 			 */
-			function 中曆(CE_year, 月, 日, country) {
+			function 公元年中曆月日(CE_year, 月, 日, country) {
+				var candidate,
+				//
+				date = typeof CE_year === 'string'
+				// e.g., '401年閏八月初六'
+				&& numeralize_date_name(CE_year).match(PATTERN_公元年中曆月日);
+				if (date) {
+					if (!日 && !country)
+						country = 月;
+					CE_year = date[1];
+					月 = date[2];
+					日 = date[3] || date[4];
+				}
+
 				if (!country)
 					country = '中國';
-				月 |= 0;
-				if (月 < START_MONTH)
-					月 = START_MONTH;
 				日 |= 0;
 				if (日 < START_DATE)
 					日 = START_DATE;
 
-				var candidate,
-				// 中曆當年比公元碗兩個月的日期，應該已經跨中曆年。因此以之作為基準。
+				// 轉成連續年分
+				if (CE_year < 0)
+					CE_year++;
+
+				if (isNaN(月)) {
+					// for 閏月
+					date = numeralize_date_name(月).match(MONTH_NAME_PATTERN);
+					if (date)
+						date = date[2] | 0;
+					else
+						date = START_MONTH;
+				} else
+					date = 月 | 0;
+				if (date < START_MONTH)
+					date = START_MONTH;
+
+				// 先估計最接近目標之公元日期。
+				// +2: 中曆當年比公元晚兩個月的日期，應該已經跨中曆年。因此以之作為基準。
 				// e.g., 公元412年，則 412/3/1 應該已在中曆當年內。
-				date = new Date(CE_year.pad(4) + '-' + (月 + 2).pad(2) + '-'
-						+ 日.pad(2));
+				// <9: 若中曆月取太晚，例如超過10月，可能會出問題，取得下一年的日期!
+				date += (date < 9 ? 2 : 0)
+				// -1: month serial → month index.
+				// e.g., 2000/1/1: new Date(2000,0,1)
+				- 1;
+				date = new Date(CE_year, date, 日);
+				if (CE_year < 100)
+					date.setFullYear(CE_year);
+
 				// 測試每一個共存紀年。
 				add_contemporary(date, null, {
 					contemporary_filter : function(era) {
@@ -6646,7 +6687,6 @@ if (typeof CeL === 'function')
 							candidate = to_era_Date(date_index, {
 								date_only : true
 							});
-							// TODO: 若中曆月取太晚，例如超過10月，可能會出問題，取得下一年的日期!
 							if (candidate) {
 								candidate.era = date_index;
 								return true;
@@ -6655,8 +6695,10 @@ if (typeof CeL === 'function')
 						return false;
 					}
 				});
+
 				if (candidate)
 					return candidate;
+				// else: undefined
 			}
 
 			// 將 era object 增加到 list 結構中。
@@ -7514,7 +7556,7 @@ if (typeof CeL === 'function')
 				for_dynasty : for_dynasty,
 				for_monarch : for_monarch,
 				numeralize : numeralize_date_name,
-				中曆 : 中曆,
+				中曆 : 公元年中曆月日,
 
 				NEED_SPLIT_PREFIX : NEED_SPLIT_PREFIX,
 				NEED_SPLIT_POSTFIX : NEED_SPLIT_POSTFIX,

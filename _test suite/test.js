@@ -2488,6 +2488,9 @@ function test_era() {
 
 		[['412/3/29', CeL.era.中曆(412,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 412 年, 中曆 3/1 之 CE Date。'],
 		[['2016/3/11', CeL.era.中曆(2016,2,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 2016 年, 中曆 2/3 之 CE Date。'],
+		[['525/12/30', CeL.era.中曆(525,12).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 525 年, 中曆 12月 之 CE Date。'],
+		[['415/3/26', CeL.era.中曆('415年三月').format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 415年, 中曆 三月 之 CE Date。'],
+		[['401/9/29', CeL.era.中曆('401年閏八月初六').format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 401年, 中曆 閏八月初六 之 CE Date。'],
 	]);
 
 	var tmp = '後黎神宗永祚10年1月26日|朝鮮仁祖6年1月26日|江戸時代後水尾天皇寛永5年1月26日|莫光祖永祚4年|';
