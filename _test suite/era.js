@@ -2468,7 +2468,7 @@ function affairs() {
 	= CeL.get_element('output_format').onkeypress = function(e) {
 		if (!e)
 			e = window.event;
-		// press [Enter]
+		// press <kbd>Enter</kbd>
 		if (13 === (e.keyCode || e.which || e.charCode))
 			translate_era();
 	};
@@ -4709,6 +4709,31 @@ function affairs() {
 	}
 	change_coordinates(i);
 	CeL.new_node(place_nodes, 'place_list');
+
+	// -----------------------------
+
+	CeL.get_element('公元年_中曆月日').onkeypress = function(e) {
+		if (!e)
+			e = window.event;
+		// press <kbd>Enter</kbd>
+		if (13 === (e.keyCode || e.which || e.charCode)) {
+			var date = CeL.set_text('公元年_中曆月日'), 公元日期 = CeL.era.中曆(date);
+			if (公元日期) {
+				CeL.set_text('中曆月日轉公元日期', 公元日期.format({
+					parser : 'CE',
+					format : '%Y/%m/%d'
+				}));
+				CeL.get_element('中曆月日轉公元日期').select();
+				CeL.set_text('中曆月日轉紀年日期', 公元日期.era);
+				CeL.get_element('中曆月日轉紀年日期').title = 公元日期.era;
+				return false;
+			} else if (date) {
+				CeL.warn('Can not convert: [' + date + ']!');
+			}
+		}
+	};
+
+	CeL.get_element('中曆月日轉紀年日期').onclick = click_title_as_era;
 
 	// -----------------------------
 

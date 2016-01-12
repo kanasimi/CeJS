@@ -6606,7 +6606,7 @@ if (typeof CeL === 'function')
 				return list;
 			}
 
-			var PATTERN_公元年中曆月日
+			var PATTERN_公元年_中曆月日
 			// [ 公元年, 中曆月, 中曆日, 中曆日 ]
 			= /(-?\d+)年(?:(閏?\d{1,2})月)?(?:初(\d)|(\d{1,2})日)?/;
 
@@ -6627,12 +6627,15 @@ if (typeof CeL === 'function')
 			 * 
 			 * @since 2016/1/11
 			 */
-			function 公元年中曆月日(CE_year, 月, 日, country) {
+			function 公元年_中曆月日(CE_year, 月, 日, country) {
+				if (!CE_year && CE_year !== 0)
+					return;
+
 				var candidate,
 				//
 				date = typeof CE_year === 'string'
 				// e.g., '401年閏八月初六'
-				&& numeralize_date_name(CE_year).match(PATTERN_公元年中曆月日);
+				&& numeralize_date_name(CE_year).match(PATTERN_公元年_中曆月日);
 				if (date) {
 					if (!日 && !country)
 						country = 月;
@@ -6662,6 +6665,8 @@ if (typeof CeL === 'function')
 					date = 月 | 0;
 				if (date < START_MONTH)
 					date = START_MONTH;
+				if (!月 || 月 < START_MONTH)
+					月 = START_MONTH;
 
 				// 先估計最接近目標之公元日期。
 				// +2: 中曆當年比公元晚兩個月的日期，應該已經跨中曆年。因此以之作為基準。
@@ -7556,7 +7561,7 @@ if (typeof CeL === 'function')
 				for_dynasty : for_dynasty,
 				for_monarch : for_monarch,
 				numeralize : numeralize_date_name,
-				中曆 : 公元年中曆月日,
+				中曆 : 公元年_中曆月日,
 
 				NEED_SPLIT_PREFIX : NEED_SPLIT_PREFIX,
 				NEED_SPLIT_POSTFIX : NEED_SPLIT_POSTFIX,
