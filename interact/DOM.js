@@ -3705,41 +3705,62 @@ function init(){doAlertInit('kousi');}
 
 </body>
 */
-function doAlertResize(){	//	確保置中
- if(typeof doAlertDivName!='string'||!doAlertDivName||!(o=document.getElementById(doAlertDivName)))return;
+//確保置中
+function doAlertResize() {
+	if (typeof doAlertDivName != 'string' || !doAlertDivName
+			|| !(o = document.getElementById(doAlertDivName)))
+		return;
 
- o.style.position='absolute',o.style.display='block',o.style.width='70%';
-/*	因為'%'是以整體長寬為主，故不適用。
-  var t=Math.round(50*(1-o.offsetHeight/document.body.clientHeight));
-  if(t<0)o.style.width='99%',o.style.top='0';else o.style.top=t+'%';
-  t=Math.round(50*(1-o.offsetWidth/document.body.clientWidth));
-  o.style.left=t<0?'0':t+'%';
-*/
-  //alert(o.style.offsetHeight+','+window.offsetHeight+','+window.innerHeight+','+window.outerHeight);
-  if(typeof window.innerHeight=='undefined')
-	  window.innerHeight=document.body.clientHeight;
-  if(typeof window.innerWidth=='undefined')
-	  window.innerWidth=document.body.clientWidth;
-  var t=(window.innerHeight-o.offsetHeight)/2;
-  if(t<0)o.style.width=o.style.height='99%',o.style.top=0;else o.style.top=t+'px';
-  t=(window.innerWidth-o.offsetWidth)/2;
-  o.style.left=t<0?0:t+'px';	//	不用marginTop與marginLeft，因為這裡要放置div
- 
+	o.style.position = 'absolute', o.style.display = 'block',
+			o.style.width = '70%';
+	// 因為'%'是以整體長寬為主，故不適用。
+	if (false) {
+		var t = Math.round(50 * (1 - o.offsetHeight
+				/ document.body.clientHeight));
+		if (t < 0)
+			o.style.width = '99%', o.style.top = '0';
+		else
+			o.style.top = t + '%';
+		t = Math.round(50 * (1 - o.offsetWidth / document.body.clientWidth));
+		o.style.left = t < 0 ? '0' : t + '%';
+	}
+	if (false)
+		alert(o.style.offsetHeight + ',' + window.offsetHeight + ','
+				+ window.innerHeight + ',' + window.outerHeight);
+	if (typeof window.innerHeight == 'undefined')
+		window.innerHeight = document.body.clientHeight;
+	if (typeof window.innerWidth == 'undefined')
+		window.innerWidth = document.body.clientWidth;
+	var t = (window.innerHeight - o.offsetHeight) / 2;
+	if (t < 0)
+		o.style.width = o.style.height = '99%', o.style.top = 0;
+	else
+		o.style.top = t + 'px';
+	t = (window.innerWidth - o.offsetWidth) / 2;
+	// 不用marginTop與marginLeft，因為這裡要放置div
+	o.style.left = t < 0 ? 0 : t + 'px';
+
 }
-//	初始化
-//doAlertInit[generateCode.dLK]='set_cookie,doAlert';
-function doAlertInit(n){	//	n:div name
- //if(typeof doAlertDone!='undefined'&&doAlertDone)return;	//	防止重複執行
- if(!n){	//	doAlertInit()重設
-	 _.set_cookie(_.set_cookie.f.set_root);	//	Gecko need this
-	 _.set_cookie('doAlert');
-  return;
- }
- var d=document.getElementById(n);
- if(d){
-  if(typeof doAlertDivName=='undefined')doAlertDivName=n;
-  doAlert();
- }
+// 初始化
+// doAlertInit[generateCode.dLK]='set_cookie,doAlert';
+// n:div name
+function doAlertInit(n) {
+	// 防止重複執行
+	if (false && typeof doAlertDone != 'undefined' && doAlertDone)
+		return;
+	// doAlertInit()重設
+	if (!n) {
+		// Gecko need this
+		_.set_cookie(_.set_cookie.f.set_root);
+		_.set_cookie('doAlert');
+		return;
+	}
+	var d = document.getElementById(n);
+	if (d) {
+		if (typeof doAlertDivName == 'undefined')
+			doAlertDivName = n;
+		doAlert();
+	}
 }
 //	出現警告
 //doAlert[generateCode.dLK]='doAlertInit,doAlertResize,doAlertAccess,doAlertScroll,doAlertDivName,doAlertOldScrollLocation,get_cookie,get_window_status';
@@ -4045,6 +4066,7 @@ function set_up_popup(tag,classN,func){
 _.set_up_popup = set_up_popup;
 
 
+
 /*	注釋(reference) / show popup-window or ruby	2004/4/3 17:20
 	http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K742.aspx
 
@@ -4112,44 +4134,53 @@ var sPopP=library_namespace.null_Object()	//	sPop properties object
 
 //	初始值設定 & 設定flag
 //if(sPopP)alert('sPopP 已被佔用！');else
-function sPopInit(){
-
-	//	預設style class name:(null:used last time),ruby,popup,window
-	sPopP.DclassName=',popupedTxt_ruby,popupedTxt,popupedTxt'.split(',');
-	//	已登記的背景style,請在CSS中加入[sPopC]_[body class name]
-	sPopP.bgS='bgb,bgn';
-{
- var i=0,t=sPopP.bgS.split(',');sPopP.bgS=library_namespace.null_Object();
- for(;i<t.length;i++)sPopP.bgS[t[i]]=i+1;
-}
-	//	popup window style
-	sPopP.popupS="color:blue;padding:.5em;overflow:auto;position:absolute;top:0;left:0;width:100%;height:100%;scrollbar-face-color:khaki;scrollbar-arrow-color:teal;border:1px solid green;font:normal 10pt tahoma;filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#ffd700, EndColorStr=#ffffff);";
-	//	chars to repeat(for ruby)
-	sPopP.RepeatC='‧．。ヽ○●◎☆★※＊＃▽▼△▲◆◇□■↓↑';//.turnU();
-	//	types:auto,這些attribute可被處理，且將被視為自動選取type。
-	sPopP.autoTypes='title,_sPop';//+',_'+sPopP.functionName
-	//	types,最多七種
-	sPopP.types='ruby,popup,window';	//	+div(參考showLinkPopup() @ link.js)
-	//	所有可用的types，可用來detect是否能為sPop()所接受。但Mozilla中無法使用title之外的attribute。
-	sPopP.allTypes=(sPopP.autoTypes+','+sPopP.types).split(',');
-	//	function name
-	sPopP.functionName='';//;library_namespace.parse_function().funcName;
-	//	popup window(for popup)
-	if(typeof window.createPopup!='undefined')sPopP.window=window.createPopup();
+function sPopInit() {
+	// 預設style class name:(null:used last time),ruby,popup,window
+	sPopP.DclassName = ',popupedTxt_ruby,popupedTxt,popupedTxt'.split(',');
+	// 已登記的背景style,請在CSS中加入[sPopC]_[body class name]
+	sPopP.bgS = 'bgb,bgn';
 	{
-		var i=0,t=sPopP.types.split(','),T='';
-		for(;i<t.length;)sPopF[t[i]]= ++i;
-		//sPopF['_'+sPopP.functionName]=0
+		var i = 0, t = sPopP.bgS.split(',');
+		sPopP.bgS = library_namespace.null_Object();
+		for (; i < t.length; i++)
+			sPopP.bgS[t[i]] = i + 1;
 	}
-	//	sPopP.types[index]=type name
-	sPopP.types=(
-		//'_'+sPopP.functionName+
-		','+sPopP.types).split(',');
-	sPopP.commentTitle='Comment';	//	註解
-	sPopP.commentTitlePattern=sPopP.commentTitle+' of %s';
-	sPopP.closeM='Close';	//	close message: 關閉視窗或popup
-	sPopP.biggerM='Bigger';	//	bigger message: 放大
-	sPopP.resetM='Reset size';	//	reset size message: 回復原大小
+	// popup window style
+	sPopP.popupS = "color:blue;padding:.5em;overflow:auto;position:absolute;top:0;left:0;width:100%;height:100%;scrollbar-face-color:khaki;scrollbar-arrow-color:teal;border:1px solid green;font:normal 10pt tahoma;filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#ffd700, EndColorStr=#ffffff);";
+	// chars to repeat(for ruby)
+	sPopP.RepeatC = '‧．。ヽ○●◎☆★※＊＃▽▼△▲◆◇□■↓↑';// .turnU();
+	// types:auto,這些attribute可被處理，且將被視為自動選取type。
+	sPopP.autoTypes = 'title,_sPop';// +',_'+sPopP.functionName
+	// types,最多七種
+	// +div(參考showLinkPopup() @ link.js)
+	sPopP.types = 'ruby,popup,window';
+	// 所有可用的types，可用來detect是否能為sPop()所接受。但Mozilla中無法使用title之外的attribute。
+	sPopP.allTypes = (sPopP.autoTypes + ',' + sPopP.types).split(',');
+	// function name
+	sPopP.functionName = '';
+	// sPopP.functionName=library_namespace.parse_function().funcName;
+	// popup window(for popup)
+	if (library_namespace.is_WWW() && typeof window.createPopup != 'undefined')
+		sPopP.window = window.createPopup();
+	{
+		var i = 0, t = sPopP.types.split(','), T = '';
+		for (; i < t.length;)
+			sPopF[t[i]] = ++i;
+		// sPopF['_'+sPopP.functionName]=0
+	}
+	// sPopP.types[index]=type name
+	sPopP.types = (
+	// '_'+sPopP.functionName+
+	',' + sPopP.types).split(',');
+	// 註解
+	sPopP.commentTitle = 'Comment';
+	sPopP.commentTitlePattern = sPopP.commentTitle + ' of %s';
+	// close message: 關閉視窗或popup
+	sPopP.closeM = 'Close';
+	// bigger message: 放大
+	sPopP.biggerM = 'Bigger';
+	// reset size message: 回復原大小
+	sPopP.resetM = 'Reset size';
 }
 sPopInit();
 
@@ -4449,9 +4480,6 @@ delayRun.run = function(i) {
 		delete _t.fL[i];
 	}
 };
-
-
-
 
 
 
@@ -4771,7 +4799,6 @@ get_style = function(element, name, not_computed) {
 
 	return value;
 };
-
 
 
 
