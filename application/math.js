@@ -612,7 +612,7 @@ convert_MathML.handler['default'] = convert_MathML.handler.mathml;
 // [≁-⊋]: ≁≂≃≄≅≆≇≈≉≊≋≌≍≎≏≐≑≒≓≔≕≖≗≘≙≚≛≜≝≞≟≠≡≢≣≤≥≦≧≨≩≪≫≬≭≮≯≰≱≲≳≴≵≶≷≸≹≺≻≼≽≾≿⊀⊁⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋
 // [⋀-⋭]: ⋀⋁⋂⋃⋄⋅⋆⋇⋈⋉⋊⋋⋌⋍⋎⋏⋐⋑⋒⋓⋔⋕⋖⋗⋘⋙⋚⋛⋜⋝⋞⋟⋠⋡⋢⋣⋤⋥⋦⋧⋨⋩⋪⋫⋬⋭
 // TODO: "~"
-convert_MathML.RELATIONSHIP_PATTERN = '=><≁-⊋⋀-⋭';
+convert_MathML.RELATIONSHIP_PATTERN = '=><∝≁-⊋⋀-⋭';
 
 convert_MathML.non_scalar_chars = '(){}^√∛*\\/⁄∕×⋅÷+\\-±' + convert_MathML.RELATIONSHIP_PATTERN + ',;\r\n';
 
