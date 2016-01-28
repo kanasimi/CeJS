@@ -27,6 +27,7 @@ TODO: https://github.com/kanasimi/CeJS/tags
 'use strict';
 
 // Date.now()
+// console.time(''), console.timeEnd('')
 var test_start = new Date - 0,
 /** {ℕ⁰:Natural+0}debug level during normal test period */
 test_debug_level = 0,
@@ -549,10 +550,10 @@ function test_locale() {
 
 function test_numeral() {
 	error_count += CeL.test('中文數字 basic', [
-		[['一百兆〇八億〇八百',CeL.to_Chinese_numeral(100000800000800)],'小寫中文數字'],
-		[['捌兆肆仟陸佰柒拾貳億捌仟柒佰參拾捌萬玖仟零肆拾柒',CeL.to_Chinese_numeral(8467287389047,true)],'大寫中文數字'],
-		[['新臺幣肆萬參拾伍圓參角肆分貳文參',CeL.to_TWD(40035.3423)],'貨幣/currency test'],
-		[[8467287389047,CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(8467287389047,true))],'中文數字'],
+		[['一百兆〇八億〇八百', CeL.to_Chinese_numeral(100000800000800)],'小寫中文數字'],
+		[['捌兆肆仟陸佰柒拾貳億捌仟柒佰參拾捌萬玖仟零肆拾柒', CeL.to_Chinese_numeral(8467287389047,true)],'大寫中文數字'],
+		[['新臺幣肆萬參拾伍圓參角肆分貳文參', CeL.to_TWD(40035.3423)],'貨幣/currency test'],
+		[[8467287389047, CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(8467287389047,true))],'中文數字'],
 	]);
 	error_count += CeL.test('中文數字 0 to 1000', function(assert) {
 		for (var natural = 0; natural <= 1000; natural++) {
@@ -573,15 +574,15 @@ function test_numeral() {
 	});
 
 	error_count += CeL.test('中文數字', [
-		[["壬辰以來，至景初元年丁已歲，積4046，算上。",CeL.from_Chinese_numeral('壬辰以來，至景初元年丁已歲，積四千四十六，算上。')]],
-		[['40179字',CeL.from_Chinese_numeral('四萬百七十九字')]],
-		[[10000000000000000,CeL.from_Chinese_numeral('京')]],
-		[['10000字',CeL.from_Chinese_numeral('一萬字')]],
-		[['正常情況下:40379字',CeL.from_Chinese_numeral('正常情況下:四萬〇三百七十九字')]],
-		[[4.5,CeL.from_Chinese_numeral('2分之九')]],
-		[["1974年",CeL.from_positional_Chinese_numeral('一九七四年')]],
-		[["一九七四年",CeL.to_positional_Chinese_numeral('1974年')]],
-		[[4022,CeL.from_positional_Chinese_numeral('〤〇〢二')],'擴充蘇州碼子'],
+		[["壬辰以來，至景初元年丁已歲，積4046，算上。", CeL.from_Chinese_numeral('壬辰以來，至景初元年丁已歲，積四千四十六，算上。')]],
+		[['40179字', CeL.from_Chinese_numeral('四萬百七十九字')]],
+		[[10000000000000000, CeL.from_Chinese_numeral('京')]],
+		[['10000字', CeL.from_Chinese_numeral('一萬字')]],
+		[['正常情況下:40379字', CeL.from_Chinese_numeral('正常情況下:四萬〇三百七十九字')]],
+		[[4.5, CeL.from_Chinese_numeral('2分之九')]],
+		[["1974年", CeL.from_positional_Chinese_numeral('一九七四年')]],
+		[["一九七四年", CeL.to_positional_Chinese_numeral('1974年')]],
+		[[4022, CeL.from_positional_Chinese_numeral('〤〇〢二')],'擴充蘇州碼子'],
 	]);
 
 	error_count += CeL.test('貨幣/currency test', [
@@ -1717,9 +1718,9 @@ function test_date() {
 
 
 	error_count += CeL.test('Date_to_JD', [
-		[[2451545,CeL.Date_to_JD(new Date(Date.parse('1 January 2000 12:00 UTC')))],'標準曆元 J2000.0'],
-		[[2451545,CeL.Date_to_JDN(new Date(Date.parse('1 January 2000 UTC')))],'標準曆元 J2000.0'],
-		[[2456413,CeL.Date_to_JD(new Date(Date.parse('2013/4/30 12:00 UTC')))]],
+		[[2451545, CeL.Date_to_JD(new Date(Date.parse('1 January 2000 12:00 UTC')))],'標準曆元 J2000.0'],
+		[[2451545, CeL.Date_to_JDN(new Date(Date.parse('1 January 2000 UTC')))],'標準曆元 J2000.0'],
+		[[2456413, CeL.Date_to_JD(new Date(Date.parse('2013/4/30 12:00 UTC')))]],
 	]);
 
 
@@ -1754,7 +1755,7 @@ function test_date() {
 		[[2451545,	CeL.Date_to_JD('2000/1/1 12:0'.to_Date({parser:'CE',zone:0}))],'標準曆元 J2000.0'],
 
 
-		[[2451545,CeL.Date_to_JD('2000/1/1 12:'.to_Date({zone:0}))],'J2000.0 fault'],
+		[[2451545, CeL.Date_to_JD('2000/1/1 12:'.to_Date({zone:0}))],'J2000.0 fault'],
 	]);
 
 
@@ -2430,61 +2431,65 @@ function test_era() {
 
 	// 設計上所要求必須通過之測試範例：測試正確性。
 	error_count += CeL.test('紀年/曆數', [
-		[['孺子嬰',CeL.era('初始').君主],'初始.君主: 孺子嬰#1'],
-		[['孺子嬰','初始元年11月1日'.to_Date('era').君主],'初始.君主: 孺子嬰#2'],
-		[['庚辰年庚辰月庚辰日庚辰時','一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'可提供統一時間標準與各干支間的轉換。統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
-		[['清德宗光緒六年三月十三日',CeL.to_Chinese_numeral('一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'}))],'查詢一八八〇年四月二十一日七時的中曆日期'],
-		[['1628年3月1日','明思宗崇禎1年1月26日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
-		[['1628年3月1日','天聰二年甲寅月戊子日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
-		[['1628年3月1日','天聰2年寅月戊子日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
-		[['1880年4月21日','清德宗光緒六年三月十三日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
-		[['1880年4月21日','清德宗光緒庚辰年三月十三日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
-		[['1880年4月21日','清德宗光緒庚辰年庚辰月庚辰日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'可提供統一時間標準與各特殊紀年間的轉換。'],
-		[['庚辰年庚辰月庚辰日','清德宗光緒六年三月十三日'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
-		[['庚辰年庚辰月庚辰日庚辰時','一八八〇年庚辰月庚辰日7時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'各特殊紀年→統一時間標準（中→西）：查詢某農曆+紀年/君主(帝王)對應的標準時間(如UTC+8)。'],
-		[['庚辰年庚辰月庚辰日庚辰時','一八八〇年庚辰月庚辰日庚辰時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'各特殊紀年→統一時間標準（中→西）：查詢某農曆+紀年/君主(帝王)對應的時辰。'],
-		[['清德宗光緒六年三月十三日',CeL.to_Chinese_numeral('一八八〇年庚辰月庚辰日庚辰時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'}))]],
-		[['庚辰年庚辰月庚辰日庚辰時','西元一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
-		[['庚辰年庚辰月庚辰日庚辰時','清德宗光緒六年三月十三日辰正一刻'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})],'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
-		[['252年5月26日','魏少帝嘉平4年5月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
-		[['252年6月24日','魏少帝嘉平4年閏5月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
-		[['252年6月24日','魏少帝嘉平4年閏月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
-		[['1357/1/21','元至正十七年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正十七年'],
-		[['1357/1/21','元至正十七'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正十七'],
-		[['1357/1/21','至正十七年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正十七年'],
-		[['1357/1/21','至正十七'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正十七'],
-		[['1357/1/21','元至正17年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正17年'],
-		[['1357/1/21','元至正17'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 元至正17'],
-		[['1357/1/21','至正17年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正17年'],
-		[['1357/1/21','至正17'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})],'parse 年 only: 至正17'],
-		[['1880年4月21日','庚辰年庚辰月庚辰日庚辰時'.to_Date({parser:'era',base:'1850年'}).format({parser:'CE',format:'%Y年%m月%d日'})]],
-		[['1880年4月21日',CeL.era('庚辰年庚辰月庚辰日庚辰時',{base:'1850年'}).format({parser:'CE',format:'%Y年%m月%d日'})]],
-		[['260年6月26日','魏元帝景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
-		[['260年6月26日','元帝景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
-		[['260年6月26日','景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
-		[['260年6月26日','魏元帝景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。'],
-		[['260年6月26日','元帝景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。'],
-		[['260年6月26日','景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略月日，當作年初。'],
-		[['260年7月25日','魏元帝景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。'],
-		[['260年7月25日','元帝景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。'],
-		[['260年7月25日','景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'省略日，當作月初。'],
+		[['孺子嬰', CeL.era('初始').君主], '初始.君主: 孺子嬰#1'],
+		[['孺子嬰', '初始元年11月1日'.to_Date('era').君主], '初始.君主: 孺子嬰#2'],
+		[['庚辰年庚辰月庚辰日庚辰時', '一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})], '可提供統一時間標準與各干支間的轉換。統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
+		[['清德宗光緒六年三月十三日', CeL.to_Chinese_numeral('一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'}))], '查詢一八八〇年四月二十一日七時的中曆日期'],
+		[['1628年3月1日', '明思宗崇禎1年1月26日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['1628年3月1日', '天聰二年甲寅月戊子日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['1628年3月1日', '天聰2年寅月戊子日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['1880年4月21日', '清德宗光緒六年三月十三日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['1880年4月21日', '清德宗光緒庚辰年三月十三日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['1880年4月21日', '清德宗光緒庚辰年庚辰月庚辰日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '可提供統一時間標準與各特殊紀年間的轉換。'],
+		[['庚辰年庚辰月庚辰日', '清德宗光緒六年三月十三日'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日',locale:'cmn-Hant-TW'})], '統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
+		[['庚辰年庚辰月庚辰日庚辰時', '一八八〇年庚辰月庚辰日7時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})], '各特殊紀年→統一時間標準（中→西）：查詢某農曆+紀年/君主(帝王)對應的標準時間(如UTC+8)。'],
+		[['庚辰年庚辰月庚辰日庚辰時', '一八八〇年庚辰月庚辰日庚辰時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})], '各特殊紀年→統一時間標準（中→西）：查詢某農曆+紀年/君主(帝王)對應的時辰。'],
+		[['清德宗光緒六年三月十三日', CeL.to_Chinese_numeral('一八八〇年庚辰月庚辰日庚辰時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'}))]],
+		[['庚辰年庚辰月庚辰日庚辰時', '西元一八八〇年四月二十一日七時'.to_Date({parser:'era',range:'中國'}).format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})], '統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
+		[['庚辰年庚辰月庚辰日庚辰時', '清德宗光緒六年三月十三日辰正一刻'.to_Date('era').format({parser:'CE',format:'%歲次年%月干支月%日干支日%時干支時',locale:'cmn-Hant-TW'})], '統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）的日期資訊，如月干支等。'],
+		[['252年5月26日', '魏少帝嘉平4年5月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['252年6月24日', '魏少帝嘉平4年閏5月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['252年6月24日', '魏少帝嘉平4年閏月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['1357/1/21', '元至正十七年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})], 'parse 年分 only: 元至正十七年'],
+		[['1357/1/21', '元至正十七'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})], 'parse 年分 only: 元至正十七'],
+		[['1357/1/21', '至正十七年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})], 'parse 年分 only: 至正十七年'],
+		[['1357/1/21', '至正十七'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})], 'parse 年分 only: 至正十七'],
+		[['1357/1/21', '元至正17年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})], 'parse 年分 only: 元至正17年'],
+		[['1357/1/21', '元至正17'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})], 'parse 年分 only: 元至正17'],
+		[['1357/1/21', '至正17年'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})], 'parse 年分 only: 至正17年'],
+		[['1357/1/21', '至正17'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})], 'parse 年分 only: 至正17'],
+		[['1880年4月21日', '庚辰年庚辰月庚辰日庚辰時'.to_Date({parser:'era',base:'1850年'}).format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['1880年4月21日', CeL.era('庚辰年庚辰月庚辰日庚辰時',{base:'1850年'}).format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['260年6月26日', '魏元帝景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['260年6月26日', '元帝景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['260年6月26日', '景元元年6月1日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})]],
+		[['260年6月26日', '魏元帝景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '省略月日，當作年初。'],
+		[['260年6月26日', '元帝景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '省略月日，當作年初。'],
+		[['260年6月26日', '景元元年'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '省略月日，當作年初。'],
+		[['260年7月25日', '魏元帝景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '省略日，當作月初。'],
+		[['260年7月25日', '元帝景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '省略日，當作月初。'],
+		[['260年7月25日', '景元元年7月'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '省略日，當作月初。'],
 		[['304/12/23', '西晉惠帝永安1年11月10日'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})]],
 		[['304/12/23', '前涼太祖永安1年11月10日'.to_Date('era').format({parser:'CE',format:'%Y/%m/%d'})]],
-		[['1911年11月30日','清遜帝宣統三年10月10日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'閏月或之後'],
-		[['1329年9月1日','元文宗天曆2年8月8日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'天曆在元明宗(1329年)時被重複使用，共計3年。'],
-		[['762年1月1日','唐肅宗元年建丑月初二'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})],'唐肅宗上元二年九月二十一日去年號，稱元年，以建子之月為歲首。'],
-		[['694年11月25日 戊子小','證聖元年正月初三'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %月干支%大小月',locale:'cmn-Hant-TW'})],'證聖元年正月初一辛巳（694年11月23日），改元證聖。'],
-		[['1855年2月5日 '+(CeL.gettext?'星期二':2),'太平天囯乙榮五年正月初一甲寅'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %w',locale:'cmn-Hant-TW'})],'天历与夏历阳历对照及简表'],
-		[['西漢武帝元朔6年12月1日','武帝元朔六年十二月甲寅'.to_Date('era').format({parser:'CE',format:'%紀年名%年年%月月%日日',locale:'cmn-Hant-TW'})],'秦至汉初( 前246 至前104) 历法研究'],
-		[["癸丑年八月初一",'2033年8月25日'.to_Date().format('Chinese')],'2033年閏年八月初一'],
-		[["癸丑年閏十一月初一",'2033年12月22日'.to_Date().format('Chinese')],'2033年閏十一月初一'],
-		[["甲寅年正月初一",'2034年2月19日'.to_Date().format('Chinese')],'2034年正月初一'],
-		[["癸丑年閏11月1日",'2033年12月22日'.to_Date().format({parser:'Chinese',numeral:null,format:'%歲次年%月月%日日'})],'2033年閏十一月初一'],
-		[["癸丑年閏11月1日",'2033年12月22日'.to_Date().format({parser:'era',era:'中曆',format:'%歲次年%月月%日日',locale:'cmn-Hant-TW'})],'2033年閏十一月初一'],
-		[[undefined,CeL.era('2200/1/1').共存紀年]],
-		[[undefined,CeL.era('-4000/1/1').共存紀年]],
+		[['1911年11月30日', '清遜帝宣統三年10月10日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '閏月或之後'],
+		[['1329年9月1日', '元文宗天曆2年8月8日'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '天曆在元明宗(1329年)時被重複使用，共計3年。'],
+		[['762年1月1日', '唐肅宗元年建丑月初二'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日'})], '唐肅宗上元二年九月二十一日去年號，稱元年，以建子之月為歲首。'],
+		[['694年11月25日 戊子小', '證聖元年正月初三'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %月干支%大小月',locale:'cmn-Hant-TW'})], '證聖元年正月初一辛巳（694年11月23日），改元證聖。'],
+		[['1855年2月5日 '+(CeL.gettext?'星期二':2), '太平天囯乙榮五年正月初一甲寅'.to_Date('era').format({parser:'CE',format:'%Y年%m月%d日 %w',locale:'cmn-Hant-TW'})], '天历与夏历阳历对照及简表'],
+		[['西漢武帝元朔6年12月1日', '武帝元朔六年十二月甲寅'.to_Date('era').format({parser:'CE',format:'%紀年名%年年%月月%日日',locale:'cmn-Hant-TW'})], '秦至汉初( 前246 至前104) 历法研究'],
+		[["癸丑年八月初一", '2033年8月25日'.to_Date().format('Chinese')], '2033年閏年八月初一'],
+		[["癸丑年閏十一月初一", '2033年12月22日'.to_Date().format('Chinese')], '2033年閏十一月初一'],
+		[["甲寅年正月初一", '2034年2月19日'.to_Date().format('Chinese')], '2034年正月初一'],
+		[["癸丑年閏11月1日", '2033年12月22日'.to_Date().format({parser:'Chinese',numeral:null,format:'%歲次年%月月%日日'})], '2033年閏十一月初一'],
+		[["癸丑年閏11月1日", '2033年12月22日'.to_Date().format({parser:'era',era:'中曆',format:'%歲次年%月月%日日',locale:'cmn-Hant-TW'})], '2033年閏十一月初一'],
+		[[undefined, CeL.era('2200/1/1').共存紀年]],
+		[[undefined, CeL.era('-4000/1/1').共存紀年]],
 		[[0, CeL.era('明年',{base:'嘉靖元年'}) - CeL.era('二年',{base:'嘉靖元年'})], '明年'],
 		[[0, CeL.era('去年',{base:'嘉靖二年'}) - CeL.era('元年',{base:'嘉靖二年'})], '去年'],
+		[[0, CeL.era('五千六百七十八') - CeL.era('公元5678年1月1日')], '公元5678年'],
+		[[0, CeL.era('前五千六百七十八') - CeL.era('公元前5678年1月1日')], '公元前5678年'],
+		[[0, CeL.era('五千六百七十八') - CeL.era('五千六百七十八年')], '五千六百七十八年'],
+		[[0, CeL.era('前五千六百七十八') - CeL.era('前五千六百七十八年')], '前五千六百七十八年'],
 
 		[['412/3/29', CeL.era.中曆(412,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 412 年, 中曆 3/1 之 CE Date。'],
 		[['2016/3/11', CeL.era.中曆(2016,2,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 2016 年, 中曆 2/3 之 CE Date。'],
@@ -2495,31 +2500,31 @@ function test_era() {
 
 	var tmp = '後黎神宗永祚10年1月26日|朝鮮仁祖6年1月26日|江戸時代後水尾天皇寛永5年1月26日|莫光祖永祚4年|';
 	error_count += CeL.test('.共存紀年 test: 可能需要因添加紀年而改變。', [
-		[CeL.era('238/6/2').共存紀年.join('|').covers('吳大帝嘉禾7年5月3日|魏明帝景初2年6月3日|蜀後主延熙1年5月2日'),'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#1'],
-		[CeL.era('延熙1年5月2日').共存紀年.join('|').covers('弥生時代神功皇后38年|高句麗東川王12年6月3日|新羅助賁尼師今9年6月3日|吳大帝嘉禾7年5月3日|百濟古尒王5年6月3日|魏明帝景初2年6月3日|魏燕王紹漢2年6月3日'),'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#1'],
-		[CeL.era('240-1-19').共存紀年.join().covers('魏明帝景初3年後12月8日,蜀後主延熙2年12月8日,吳大帝赤烏2年12月8日'),'測試特殊月名'],
-		[CeL.era('魏明帝景初3年後12月8日').共存紀年.join('|').covers('弥生時代神功皇后40年|高句麗東川王13年後12月8日|新羅助賁尼師今10年後12月8日|百濟古尒王6年後12月8日|Roman Empire Gordianus 3年Tybi月23日|蜀後主延熙2年12月8日|吳大帝赤烏2年12月8日'),'測試特殊月名'],
-		[CeL.era('1329年9月1日').共存紀年.join('|').covers('高麗忠肅王16年8月8日|鎌倉時代後醍醐天皇嘉暦4年8月8日|陳憲宗開祐1年8月8日|元文宗天曆2年8月8日'),'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#2'],
+		[CeL.era('238/6/2').共存紀年.join('|').covers('吳大帝嘉禾7年5月3日|魏明帝景初2年6月3日|蜀後主延熙1年5月2日'), '統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#1'],
+		[CeL.era('延熙1年5月2日').共存紀年.join('|').covers('弥生時代神功皇后38年|高句麗東川王12年6月3日|新羅助賁尼師今9年6月3日|吳大帝嘉禾7年5月3日|百濟古尒王5年6月3日|魏明帝景初2年6月3日|魏燕王紹漢2年6月3日'), '各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#1'],
+		[CeL.era('240-1-19').共存紀年.join().covers('魏明帝景初3年後12月8日,蜀後主延熙2年12月8日,吳大帝赤烏2年12月8日'), '測試特殊月名'],
+		[CeL.era('魏明帝景初3年後12月8日').共存紀年.join('|').covers('弥生時代神功皇后40年|高句麗東川王13年後12月8日|新羅助賁尼師今10年後12月8日|百濟古尒王6年後12月8日|Roman Empire Gordianus 3年Tybi月23日|蜀後主延熙2年12月8日|吳大帝赤烏2年12月8日'), '測試特殊月名'],
+		[CeL.era('1329年9月1日').共存紀年.join('|').covers('高麗忠肅王16年8月8日|鎌倉時代後醍醐天皇嘉暦4年8月8日|陳憲宗開祐1年8月8日|元文宗天曆2年8月8日'), '統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#2'],
 
-		[CeL.era('1628年3月1日').共存紀年.join('|').covers(tmp+'後金太宗天聰2年1月26日|明思宗崇禎1年1月26日'),'統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#3'],
-		[CeL.era('中國清太宗天聰2年1月26日').共存紀年.join('|').covers(tmp+'明思宗崇禎1年1月26日'),'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#2'],
-		[CeL.era('中國明思宗崇禎1年1月26日').共存紀年.join('|').covers(tmp+'後金太宗天聰2年1月26日'),'各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#3'],
+		[CeL.era('1628年3月1日').共存紀年.join('|').covers(tmp+'後金太宗天聰2年1月26日|明思宗崇禎1年1月26日'), '統一時間標準→各特殊紀年（西→中）：查詢某時間點（時刻）存在的所有紀年與資訊。#3'],
+		[CeL.era('中國清太宗天聰2年1月26日').共存紀年.join('|').covers(tmp+'明思宗崇禎1年1月26日'), '各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#2'],
+		[CeL.era('中國明思宗崇禎1年1月26日').共存紀年.join('|').covers(tmp+'後金太宗天聰2年1月26日'), '各特殊紀年→統一時間標準（中→西）：查詢某朝代/君主(帝王)所有的共存紀年與資訊。#3'],
 
-		[["唐代宗寶應2年1月13日",CeL.era('二年春正月丁亥', {base : '寶應元年'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'})],'寶應二年春正月丁亥'],
-		[["唐代宗寶應2年1月13日",CeL.era('丁亥', {base : '寶應二年春正月'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'})],'寶應二年春正月丁亥 (by base)'],
-		[["763/5/17",CeL.era('寶應二年三月晦日').format({parser:'CE',format:'%Y/%m/%d'})],'寶應二年三月晦日'],
-		[["唐代宗寶應|二|三|一",CeL.era('三月一日', {parse_only : true, base : '寶應二年春正月'}).slice(1).join('|')], 'parse_only + base: 寶應二年春正月'],
-		[["唐代宗寶應|二|三|一",CeL.era('三月一日', {parse_only : true, base : '寶應二年'}).slice(1).join('|')], 'parse_only + base: 寶應二年'],
-		[["唐代宗寶應|二|三|晦",CeL.era('晦日', {parse_only : true, base : '代宗寶應二年三月一日'}).slice(1).join('|')], 'parse_only + base: 代宗寶應二年三月一日'],
-		[["134/7/29",CeL.era('陽嘉3年6月20日', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年6月20日.末'],
-		[["134/8/8",CeL.era('陽嘉3年6月', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年6月.末'],
-		[["135/2/1",CeL.era('陽嘉3年', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉3年.末'],
-		[["136/2/20",CeL.era('陽嘉', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})],'陽嘉.末'],
+		[["唐代宗寶應2年1月13日", CeL.era('二年春正月丁亥', {base : '寶應元年'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'})], '寶應二年春正月丁亥'],
+		[["唐代宗寶應2年1月13日", CeL.era('丁亥', {base : '寶應二年春正月'}).format({parser:'CE',format:'%朝代%君主%紀年%年年%月月%日日',locale:'cmn-Hant-TW'})], '寶應二年春正月丁亥 (by base)'],
+		[["763/5/17", CeL.era('寶應二年三月晦日').format({parser:'CE',format:'%Y/%m/%d'})], '寶應二年三月晦日'],
+		[["唐代宗寶應|二|三|一", CeL.era('三月一日', {parse_only : true, base : '寶應二年春正月'}).slice(1).join('|')], 'parse_only + base: 寶應二年春正月'],
+		[["唐代宗寶應|二|三|一", CeL.era('三月一日', {parse_only : true, base : '寶應二年'}).slice(1).join('|')], 'parse_only + base: 寶應二年'],
+		[["唐代宗寶應|二|三|晦", CeL.era('晦日', {parse_only : true, base : '代宗寶應二年三月一日'}).slice(1).join('|')], 'parse_only + base: 代宗寶應二年三月一日'],
+		[["134/7/29", CeL.era('陽嘉3年6月20日', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})], '陽嘉3年6月20日.末'],
+		[["134/8/8", CeL.era('陽嘉3年6月', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})], '陽嘉3年6月.末'],
+		[["135/2/1", CeL.era('陽嘉3年', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})], '陽嘉3年.末'],
+		[["136/2/20", CeL.era('陽嘉', {get_range : true})[1].format({parser:'CE',format:'%Y/%m/%d'})], '陽嘉.末'],
 	]);
 
 
 	error_count += CeL.test('參照紀年之演算機制', function(assert) {
-		assert([8,CeL.era('明宣宗宣德',{get_era:1}).calendar[7].leap],'明宣宗宣德8年閏8月');
+		assert([8, CeL.era('明宣宗宣德',{get_era:1}).calendar[7].leap], '明宣宗宣德8年閏8月');
 		//setup 8月–, CE~CE
 		CeL.era.set('曆A|1433/8/15~9/13|:宣德');
 		//setup 閏8月–

@@ -1939,7 +1939,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		Object.assign(options, each[1]);
 	options.summary = (callback = config.summary)
 	// 是為 Robot 運作。
-	? /bot/i.test(callback) ? callback : 'Robot: ' + callback
+	? /bot/i.test(callback) ? callback
+	// Robot: 若用戶名包含 'bot'，則直接引用之。
+	: (/bot/i.test(this.token.lgname) ? this.token.lgname : 'Robot') + ': ' + callback
 	// 未設置時，一樣添附 Robot。
 	: 'Robot';
 
@@ -2116,7 +2118,10 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				sectiontitle : '[' + (new Date).format(config.date_format || this.date_format) + '] ' + done
 				//
 				+ (done === pages.length ? '' : '/' + pages.length) + ' 條目',
-				summary : 'Robot: ' + config.summary + ': 完成 ' + done + (done === pages.length ? '' : '/' + pages.length) + ' 條目',
+				// Robot: 若用戶名包含 'bot'，則直接引用之。
+				summary : (/bot/i.test(this.token.lgname) ? this.token.lgname : 'Robot') + ': '
+				//
+				+ config.summary + ': 完成 ' + done + (done === pages.length ? '' : '/' + pages.length) + ' 條目',
 				// Throw an error if the page doesn't exist.
 				// 若頁面不存在，則產生錯誤。
 				nocreate : 1,

@@ -2025,7 +2025,8 @@ function translate_era(era) {
 				},
 				href : 'https://zh.wikipedia.org/wiki/%E5%90%8D%E8%AB%B1'
 			}, add_注_link);
-			if (date.name[1] && date.name[1].includes('天皇'))
+			if (Array.isArray(date.name) && date.name[1]
+					&& date.name[1].includes('天皇'))
 				// append name.
 				if (Array.isArray(date.諡))
 					// 不動到原 data。
@@ -2074,18 +2075,19 @@ function translate_era(era) {
 
 			add_注('注');
 
-			add_注('紀年線圖', {
-				a : {
-					T : '展示線圖'
-				},
-				D : {
-					hierarchy : date.name.slice().reverse().slice(0, -1).join(
-							'/')
-				},
-				href : '#',
-				onclick : draw_era.click_Period,
-				S : 'cursor:pointer;background-color:#ffa;color:#a26;'
-			}, true);
+			if (Array.isArray(date.name))
+				add_注('紀年線圖', {
+					a : {
+						T : '展示線圖'
+					},
+					D : {
+						hierarchy : date.name.slice().reverse().slice(0, -1)
+								.join('/')
+					},
+					href : '#',
+					onclick : draw_era.click_Period,
+					S : 'cursor:pointer;background-color:#ffa;color:#a26;'
+				}, true);
 
 			if (date.準 || date.精) {
 				if (!Array.isArray(output))
@@ -4169,7 +4171,7 @@ function affairs() {
 			a : {
 				T : '反支'
 			},
-			R : '中曆曆注。反枳（反支）依睡虎地《日書》（12日一反支）和孔家坡《日書》（6日一反支，以淡色標示。）'
+			R : '中曆曆注。反枳（反支）依睡虎地《日書》（12日一反支）和孔家坡《日書》（6日一反支，獨屬孔家坡者以淡色標示。）'
 			//
 			+ '\n警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
 			href : 'http://www.bsm.org.cn/show_article.php?id=867',

@@ -382,7 +382,7 @@ if (typeof CeL === 'function')
 					+ /\s*(?:([01]?\d)|([^\s\/.\-年月日]{1,20})月)?/.source
 					+ 後置_SOURCE),
 
-			// parse 年 only
+			// 減縮版 ERA_DATE_PATTERN: parse 年分 only。
 			// matched: [ , prefix, year, , , suffix ]
 			ERA_DATE_PATTERN_YEAR = generate_pattern(前置_SOURCE
 			// 年分名稱。
@@ -503,7 +503,9 @@ if (typeof CeL === 'function')
 			DEFAULT_DATE_PARSER = 'Chinese',
 			// 不使用 parser。
 			PASS_PARSER = [ 'PASS_PARSER' ],
-			// 標準時間（如公元紀年）分析器
+			// 標準時間分析器名稱（如公元）
+			standard_time_parser_name = '公元',
+			// 標準時間分析器（如公元紀年日期）, 標準紀年時間
 			standard_time_parser = 'CE',
 			// default date format
 			// 基本上與程式碼設計合一，不可更改。
@@ -6093,19 +6095,28 @@ if (typeof CeL === 'function')
 						月 = tmp[3];
 						日 = tmp[4];
 
-						if (tmp2)
-							if (日 && !月
-									&& (matched = tmp[5].match(/^\s*([朔晦望])/)))
-								// 處理月相
-								// e.g.,
-								// '寶應二年三月晦日'
-								月 = 日, 日 = matched[1];
-							else {
-								if (!月)
+						if (tmp2) {
+							// .match(ERA_DATE_PATTERN_NO_DATE)
+							// 減縮版 ERA_DATE_PATTERN: 省略日期，或亦省略月分。
+							if (!月)
+								if (日) {
 									月 = 日;
-								日 = '';
-							}
-						else if (matched) {
+									// 處理月相
+									// e.g.,
+									// '寶應二年三月晦日'
+									matched = tmp[5].match(/^\s*([朔晦望])/);
+									日 = matched ? matched[1] : '';
+								} else if (!isNaN(numeralize_date_name(tmp[1]
+										+ 年))) {
+									// 省略日期月分。修正僅有年分時出現之問題。
+									// e.g., '五千六百七十八年', '前五千六百七十八年'
+									年 = tmp[1] + 年;
+									tmp[1] = '';
+								}
+
+						} else if (matched) {
+							// .match(ERA_DATE_PATTERN_YEAR)
+							// 減縮版 ERA_DATE_PATTERN: parse 年分 only。
 							if (matched = tmp[5].match(/^月(?:([^日]{1,3})日?)?/))
 								// e.g., '三月一日'
 								月 = 年, 年 = null, 日 = matched[1];
@@ -6127,6 +6138,12 @@ if (typeof CeL === 'function')
 								// e.g., 百濟多婁王, 四条天皇天福, 四条天皇文暦, 後一条天皇長元.
 								// 但須考量 "元至正十七"
 								年 = '';
+							else if (!月 && !日 && tmp[5]
+							// 修正僅有年分時出現之問題。
+							// e.g., '五千六百七十八', '前五千六百七十八'
+							&& !isNaN(numeralize_date_name(tmp[5])))
+								年 += tmp[5], tmp[5] = '';
+							// 預防萬一，將 date 資料偵測一次。
 							// 不用 numeralized，預防有些紀年名稱包含可數字化資料。
 							偵測集.push(date, null);
 						}
@@ -6338,8 +6355,10 @@ if (typeof CeL === 'function')
 							b : arguments[0],
 							S : 'color:#e92;'
 						}, '] 辨識出特殊地域之紀年名稱。（時間不在所求紀年範圍內？）',
-								'將視為標準紀年時間（如公元），嘗試以日期解析器 [',
-								standard_time_parser, '] 解析。' ]);
+						//
+						'將視為' + standard_time_parser_name
+						//
+						+ '紀年時間，嘗試以日期解析器 [', standard_time_parser, '] 解析。' ]);
 
 					// 警告:請勿隨意更改這些回傳值，因為他們也為 module 內部其他功能所用!
 					if (options.get_era)
@@ -6431,7 +6450,7 @@ if (typeof CeL === 'function')
 							//
 							紀年起序 = era_list.search_sorted({
 								// 年初
-								start : new Date(年, 0, 1)
+								start : new Date(年 | 0, 0, 1)
 							}, {
 								comparator : compare_start_date,
 								found : true
@@ -6442,36 +6461,63 @@ if (typeof CeL === 'function')
 								comparator : compare_start_date,
 								found : true
 							});
+							// 找出所有可能之共存紀年。
 							紀年_list = era_list[紀年起序].contemporary
 									.concat(era_list.slice(紀年起序, 紀年迄序 + 1));
 
-							for (date = new Date(年, 6, 1), 紀年起序 = 0;
-							//
+							for (date = new Date(年 | 0, 6, 1), 紀年起序 = 0;
+							// 紀年起序 as tmp
 							紀年起序 < 紀年_list.length; 紀年起序++) {
 								紀年 = 紀年_list[紀年起序];
-								if ((候選 = 紀年.Date_to_date_index(date))
-										//
-										&& (候選 = 紀年.date_name_to_Date(紀年
-												.歲名(候選[0]), 月, 日)))
+								候選 = 紀年.Date_to_date_index(date);
+								if (候選 && (候選
+								// 確定共存紀年延續至當年中。
+								= 紀年.date_name_to_Date(紀年.歲名(候選[0]), 月, 日)))
 									break;
 							}
+
 							date = 候選;
+							if (!date) {
+								library_namespace.warn(
+								//
+								'to_era_Date: 無可選的紀年。將 ['
+								//
+								+ numeralized + '] 當作系統日期 ' + 年 + '/'
+								//
+								+ (numeralize_date_name(月) || START_MONTH)
+								//
+								+ '/' + (numeralize_date_name(日) || START_DATE)
+										+ '。');
+								// 沒當作公元日期的原因，是當前尚不能正反解析如"公元8899年1月1日"之類。
+								date = new Date(年,
+								//
+								(numeralize_date_name(月) || START_MONTH) - 1,
+								//
+								numeralize_date_name(日) || START_DATE);
+								紀年_list = null;
+							}
 						}
 					}
 
 					if (!date)
 						// 死馬當活馬醫。
 						// 不可用 DEFAULT_DATE_PARSER，恐造成循環參照。
-						date = library_namespace.from_Chinese_numeral(
-								numeralized).to_Date(standard_time_parser);
+						date = String(
+								library_namespace
+										.from_Chinese_numeral(numeralized))
+								.to_Date(standard_time_parser);
 
 					if (date && tmp2) {
 						while (0 < tmp2.length) {
-							if ((tmp = tmp2.pop()) && (tmp = library_namespace
+							if ((tmp = tmp2.pop())
 							//
-							.from_Chinese_numeral(tmp)
+							&& (tmp = String(library_namespace
+							//
+							.from_Chinese_numeral(tmp))
 							//
 							.replace(/^\D+/, '').replace(/[^\d時分秒]+$/, ''))
+							// e.g., '五千六百七十八', '前五千六百七十八'
+							&& !(Math.abs(tmp) > 60)
 							//
 							&& (tmp = String_to_Date(tmp))
 							//
@@ -6502,7 +6548,8 @@ if (typeof CeL === 'function')
 
 				if (!is_Date(date) || isNaN(date.getTime())) {
 					library_namespace.err('to_era_Date: 無法判別紀年 ['
-							+ arguments[0] + '] 之時間或名稱資訊！');
+					// numeralized
+					+ arguments[0] + '] 之時間或名稱資訊！');
 					return;
 				}
 
@@ -7320,7 +7367,7 @@ if (typeof CeL === 'function')
 			// range
 			caculate_node_era.format = {
 				parser : standard_time_parser,
-				format : '公元%Y年%m月%d日'
+				format : standard_time_parser_name + '%Y年%m月%d日'
 			};
 
 			/**
