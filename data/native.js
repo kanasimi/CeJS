@@ -2387,7 +2387,7 @@ function replace_check_near(text, pattern, replace_to, match_previous,
 		match_next) {
 	var matched, results = [], last_index = 0;
 	if (!pattern.global) {
-		library_namespace.warn("replace_check_near: The pattern doesn't has 'global' flag!");
+		library_namespace.debug("replace_check_near: The pattern doesn't has 'global' flag!", 2);
 	}
 	while (matched = pattern.exec(text)) {
 		// library_namespace.log(pattern + ': ' + matched);

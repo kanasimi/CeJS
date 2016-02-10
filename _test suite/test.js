@@ -316,6 +316,7 @@ function test_native() {
 
 	error_count += CeL.test('data.native', function(assert) {
 		assert(['2,8', Array.intersection([2,3,5,6,8], [1,2,4,8,9], true).join(',')], 'Array.intersection()');
+		assert(['[df [h [r]r] [ew] g]', '<df <h <r>r> <ew> g>'.replace_till_stable(/<([^<>]+)*>/,'[$1]')], '.replace_till_stable()');
 	});
 
 }

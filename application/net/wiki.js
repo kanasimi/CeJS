@@ -10,6 +10,7 @@
  */
 
 // TODO:
+// 遇到 Invalid token 之類問題，中途跳出 about 時，無法紀錄。應將紀錄顯示於 console。
 // [[WP:維基化]]
 // https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 // https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
@@ -237,7 +238,7 @@ function remove_namespace(title) {
 
 
 //---------------------------------------------------------------------//
-// 創建 match patten 相關函數。
+// 創建 match pattern 相關函數。
 
 /**
  * 規範/正規化頁面名稱 page name。
@@ -272,20 +273,28 @@ function normalize_page_name(page_name) {
 	return name_list.join(':');
 }
 
-function normalize_name_pattern(file_name, add_group) {
+function normalize_name_pattern(file_name, add_group, remove_namespace) {
+	if (get_page_content.is_page_data(file_name))
+		file_name = file_name.title;
 	if (!file_name)
 		return file_name;
 
-	if (file_name.includes('|'))
+	if (typeof file_name === 'string' && file_name.includes('|'))
 		file_name = file_name.split('|');
 
 	if (Array.isArray(file_name)) {
 		var files = [];
 		file_name.forEach(function(name) {
-			if (name = normalize_name_pattern(name))
+			if (name = normalize_name_pattern(name, false, remove_namespace))
 				files.push(name);
 		});
 		return (add_group ? '(' : '(?:') + files.join('|') + ')';
+	}
+
+	if (remove_namespace) {
+		// 去除 namespace。e.g., Template:
+		//console.log('去除 namespace: [' + file_name + ']');
+		file_name = file_name.replace(/^[^:]+:\s*/, '');
 	}
 
 	file_name =
@@ -304,14 +313,14 @@ function normalize_name_pattern(file_name, add_group) {
 }
 
 /**
- * 創建匹配 [[File:file_name]] 之 patten。
+ * 創建匹配 [[File:file_name]] 之 pattern。
  *
  * @param {String}file_name
  *            file name
  * @param {String}flag
  *            RegExp flag
  *
- * @returns {RegExp} 能 match [[File:file_name]] 之 patten。
+ * @returns {RegExp} 能 match [[File:file_name]] 之 pattern。
  */
 function file_pattern(file_name, flag) {
 	return (file_name = normalize_name_pattern(file_name, true))
@@ -742,9 +751,10 @@ var wiki_toString = {
 // TODO: {{L<!-- -->L}} .valueOf() === '{{LL}}'
 // TODO: <p<!-- -->re>...</pre>
 /**
- * parse The MediaWiki markup language (wikitext)
+ * parse The MediaWiki markup language (wikitext).
  * 
- * TODO: 提高效率。
+ * TODO: 提高效率。<br />
+ * TODO: 可能為模板參數特殊設計？有些 template 內含不完整的起始或結尾，使 parameter 亦未首尾對應。
  * 
  * 此功能之工作機制/原理：<br />
  * 找出完整的最小單元，並將之 push 入 queue，並把原 string 中之單元 token 替換成:<br />
@@ -1228,6 +1238,7 @@ LINK_NAME_PATTERN = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)(\||\]\])/;
 
 /**
  * parse template token. 取得完整的模板 token。<br />
+ * CeL.wiki.parser.template();
  * 
  * @param {String}wikitext
  *            模板前後之 content。<br />
@@ -1242,11 +1253,11 @@ LINK_NAME_PATTERN = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)(\||\]\])/;
  *          token.index, token.lastIndex: index.
  */
 function parse_template(wikitext, template_name, no_parse) {
-	var matched = (template_name = normalize_name_pattern(template_name, true))
+	var matched = (template_name = normalize_name_pattern(template_name, true, true))
 	// 模板起始。
 	? new RegExp(/{{[\s\n]*/.source + template_name + '\\s*[|}]', 'gi')
 			: new RegExp(TEMPLATE_NAME_PATTERN.source, 'g');
-	library_namespace.debug('Use patten: ' + matched, 2);
+	library_namespace.debug('Use pattern: ' + matched, 2);
 	// template_name : start token
 	template_name = matched.exec(wikitext);
 
@@ -1732,19 +1743,29 @@ wiki_API.prototype.next = function() {
 				// next[2]: options to edit()
 				next[2], function(title, error, result) {
 					// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
-					if (result && result.error && result.error.code === 'badtoken') {
+					if (result ? result.error ? result.error.code === 'badtoken'
+					// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
+					: !result.edit : result === '') {
 						// Invalid token
 						library_namespace.warn('wiki_API.prototype.next: It seems we lost the token.');
 						if (!_this.token.lgpassword) {
-							library_namespace.err('wiki_API.prototype.next: No password to get token again. About.');
-							return;
+							library_namespace.err('wiki_API.prototype.next: No password preserved!');
+							// 死馬當活馬醫，仍然嘗試重新取得 token。
+							//return;
 						}
 						library_namespace.info('wiki_API.prototype.next: Try to get token again. 似乎丟失了 token，嘗試重新取得 token。');
 						// rollback
 						_this.actions.unshift(next);
-						// see wiki_API.login
-						delete _this.token.csrftoken;
+						if (result === '') {
+							// 應付 2016/1 MediaWiki 系統更新...無效，恐需要連 HTTP handler 都重換一個，重起 cookie。
+							// force login: see wiki_API.login
+							delete _this.token.csrftoken;
+							delete _this.token.lgtoken;
+							//library_namespace.set_debug(6);
+						}
+						// 重新取得 token。
 						wiki_API.login(_this.token.lgname, _this.token.lgpassword, {
+							force : true,
 							session : _this,
 							// 將 'login' 置於最前頭。
 							login_mark : true
@@ -1905,7 +1926,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		// 採用 skip_nochange 可以跳過實際 edit 的動作。
 		// 對於大部分不會改變頁面的作業，能大幅加快速度。
 		skip_nochange : true
-	}, callback, nochange_count = 0;
+	}, callback,
+	/** {ℕ⁰:Natural+0}全無變更頁面數。 */
+	nochange_count = 0;
 
 	if (typeof config.each === 'function') {
 		// {Function}
@@ -1941,7 +1964,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	// 是為 Robot 運作。
 	? /bot/i.test(callback) ? callback
 	// Robot: 若用戶名包含 'bot'，則直接引用之。
-	: (/bot/i.test(this.token.lgname) ? this.token.lgname : 'Robot') + ': ' + callback
+	: (this.token.lgname.length < 9 && /bot/i.test(this.token.lgname) ? this.token.lgname : 'Robot') + ': ' + callback
 	// 未設置時，一樣添附 Robot。
 	: 'Robot';
 
@@ -1962,10 +1985,16 @@ wiki_API.prototype.work = function(config, pages, titles) {
 					result = 'nochange';
 				} else {
 					// 有錯誤發生。
+					// e.g., [protectedpage] The "editprotected" right is required to edit this page
 					result = [ 'error', error ];
 					error = '結束: ' + error;
 				}
-			else {
+			else if (!result.edit) {
+				// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
+				library_namespace.err('wiki_API.work: 無 result.edit' + (result.edit ? '.newrevid' : '') + '! 可能是 token lost!');
+				error = '無 result.edit' + (result.edit ? '.newrevid' : '') + '。';
+				result = [ 'error', 'token lost?' ];
+			} else {
 				// 成功完成。
 				done++;
 				if (result.edit.newrevid) {
@@ -2023,17 +2052,16 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	if (Array.isArray(pages) && Array.isArray(titles) && pages.length !== titles.length)
 		library_namespace.warn('wiki_API.work: The length of pages and titles are different!');
 
-	library_namespace.debug('wiki_API.work: 設定一次先取得所有 revisions (page content)。', 2);
-	this.page(pages || titles, function(data) {
+	var main_work = (function(data) {
 		if (!Array.isArray(data))
 			if (!data && pages.length === 0) {
-				library_namespace.info('wiki_API.work: 未取得或設定任何頁面。已完成？');
+				library_namespace.info('wiki_API.work: ' + config.summary + ': 未取得或設定任何頁面。已完成？');
 				data = [];
 			} else
 				// 可能是 page data 或 title。
 				data = [ data ];
 
-		if (Array.isArray(pages) && data.length !== pages.length)
+		if (Array.isArray(pages) && data.length !== pages.length && !setup_target)
 			library_namespace.warn('wiki_API.work: query 所得之 length (' + data.length + ') !== pages.length (' + pages.length + ') ！');
 		// 傳入標題列表，則由程式自行控制，毋須設定後續檢索用索引值。
 		if (!messages.input_title_list
@@ -2105,6 +2133,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				messages.unshift(config.summary.replace(/</g, '&lt;'));
 
 			if (typeof config.last === 'function')
+				// 對於量過大而被分割者，每次分段結束都將執行一次 .last()。
 				config.last.call(this, messages, titles, pages);
 
 			var log_to = 'log_to' in config ? config.log_to
@@ -2119,7 +2148,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				//
 				+ (done === pages.length ? '' : '/' + pages.length) + ' 條目',
 				// Robot: 若用戶名包含 'bot'，則直接引用之。
-				summary : (/bot/i.test(this.token.lgname) ? this.token.lgname : 'Robot') + ': '
+				summary : (this.token.lgname.length < 9 && /bot/i.test(this.token.lgname) ? this.token.lgname : 'Robot') + ': '
 				//
 				+ config.summary + ': 完成 ' + done + (done === pages.length ? '' : '/' + pages.length) + ' 條目',
 				// Throw an error if the page doesn't exist.
@@ -2132,7 +2161,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			};
 
 			if (log_to && (done !== nochange_count
-				// 若全無變更，則預設僅從 console 提示，不寫入 log 頁面。
+				// 若全無變更，則預設僅從 console 提示，不寫入 log 頁面。因此無變更者將不顯示。
 				|| config.log_nochange)) {
 				this.page(log_to)
 				// 將 robot 運作記錄、log summary 報告結果寫入 log 頁面。
@@ -2151,14 +2180,48 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				library_namespace.log('\nlog:<br />\n' + messages.join('<br />\n'));
 			}
 
+			if (setup_target && work_continue < target.length) {
+				// reset
+				messages.start = messages.last = new Date;
+				// clear
+				messages.length = 0;
+				// 繼續下一批。
+				setup_target();
+				return;
+			}
+
 			// config.callback()
 			// 只有在成功時，才會繼續執行。
 			if (typeof config.after === 'function')
 				this.run(config.after);
 		});
-	}, {
-		multi : true
-	});
+	}).bind(this);
+
+	var target = pages || titles,
+	// 處理 limit。單一頁面才能取得多 revisions。多頁面(<=50)只能取得單一 revision。
+	// https://www.mediawiki.org/w/api.php?action=help&modules=query
+	// titles/pageids: Maximum number of values is 50 (500 for bots).
+	slice_size = config.slice >= 1 ? Math.min(config.slice | 0, 500) : 500, work_continue = 0, setup_target;
+
+	if (Array.isArray(target) && target.length > slice_size) {
+		// Split when length is too long. 分割過長的 list。
+		setup_target = (function() {
+			library_namespace.info('wiki_API.work: ' + config.summary
+					+ ': 處理分塊 ' + (work_continue + 1) + '-'
+					+ Math.min(work_continue + slice_size, target.length) + '/' + target.length + '。');
+			this.page(target.slice(work_continue, work_continue + slice_size), main_work, {
+				multi : true
+			});
+			work_continue += slice_size;
+		}).bind(this);
+		setup_target();
+
+	} else {
+		library_namespace.debug('wiki_API.work: 設定一次先取得所有 revisions (page content)。', 2);
+		this.page(target, main_work, {
+			multi : true
+		});
+	}
 };
 
 /**
@@ -3152,22 +3215,28 @@ wiki_API.login = function(name, password, options) {
 	}
 
 	// 支援斷言編輯功能。
-	var action = 'assert=user', callback, session;
+	var action = 'assert=user', callback, session, API_URL;
 	if (library_namespace.is_Object(options)) {
+		API_URL = options.API_URL;
 		session = options.session;
 		callback = options.callback;
 	} else {
-		if (typeof options === 'function'
-		// treat as API_URL
-		|| typeof options === 'string')
+		if (typeof options === 'function')
 			callback = options;
+		// treat as API_URL
+		else if (typeof options === 'string')
+			API_URL = options;
 		// 前置處理。
 		options = library_namespace.null_Object();
 	}
 
 	if (!session)
 		// 初始化 session。這裡 callback 當作 API_URL。
-		session = new wiki_API(name, password, callback);
+		session = new wiki_API(name, password, API_URL);
+	// copy configurations
+	if (options.preserve_password)
+		session.preserve_password = options.preserve_password;
+
 	if (!('login_mark' in options) || options.login_mark) {
 		// hack: 這表示正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。
 		// @see wiki_API.prototype.next
@@ -3187,7 +3256,7 @@ wiki_API.login = function(name, password, options) {
 	library_namespace.debug('準備登入 [' + name + ']。', 1, 'wiki_API.login');
 	wiki_API.query(action, function(data) {
 		// 確認尚未登入，才作登入動作。
-		if (data === '') {
+		if (data === '' && !options.force) {
 			// 您已登入。
 			library_namespace.debug('You are already logged in.', 1, 'wiki_API.login');
 			_done();
@@ -3198,8 +3267,10 @@ wiki_API.login = function(name, password, options) {
 			if (data && data.login && data.login.result === 'NeedToken') {
 				session.token.lgtoken = data.login.token;
 				wiki_API.query([ session.API_URL, 'login' ], _done, session.token);
-			} else
+			} else {
+				library_namespace.err('wiki_API.login: 無法 login! About! Response:');
 				library_namespace.err(data);
+			}
 		}, session.token);
 	});
 
