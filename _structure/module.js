@@ -1048,22 +1048,29 @@ if (false) {
 			return path;
 
 		// 有 head 表示 is absolute
-		var head, tail,
+		var head, tail, is_URL;
 		// 對於 URL 如：
 		// https://web.archive.org/web/http://site.org
 		// http://site.org?p=//\\#a/b/c
 		// 由於有太多不可不可預測因素，因此需特別處理之。
-		is_URL = path.match(/^([\w\d\-]+:\/\/)(.*)$/);
-		if (is_URL) {
-			head = is_URL[1];
-			path = is_URL[2];
+		if (/[\w\d]:\/\//.test(path)) {
+			is_URL = path.match(/^((?:(?:[\w\d\-]+:)?\/)?\/)(.*?)$/);
+			if (is_URL) {
+				// e.g.,
+				// 'http://example.org/path/to/'
+				// '//example.org/path/to/'
+				// '/example.org/path/to/'
+				head = is_URL[1];
+				path = is_URL[2];
+			} else {
+				// e.g., '/path/to/http://example.org/path/to/'
+			}
 			is_URL = true;
-			// 對於 URL 如：
-			// https://web.archive.org/web/http://site.org
-			// http://site.org?p=//\\#a/b/c
-			// 由於有太多不可不可預測因素，因此需特別處理之。
-			if (tail = path.match(/^([^#?]+)([#?].*?)$/))
-				path = tail[1], tail = tail [2];
+			if (tail = path.match(/^([^#?]+)([#?].*?)$/) || '')
+				path = tail[1], tail = tail[2];
+			if (/\/$/.test(path))
+				// 保存 path 最後的 '/'。
+				path = path.slice(0, -1), tail = '/' + tail;
 			path = path.replace(/:\/\//g, encodeURIComponent(':/') + '/');
 		} else {
 			path = path

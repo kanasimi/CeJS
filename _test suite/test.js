@@ -225,6 +225,10 @@ function test_compatibility() {
 		[ [ 'https://github.com/kanasimi/CeJS', CeL.simplify_path('https://github.com/kanasimi/a/../CeJS') ], 'simplify_path http://-2' ],
 		[ [ 'https://github.com/kanasimi/CeJS', CeL.simplify_path('https://github.com/kanasimi/a/b/../../CeJS') ], 'simplify_path http://-3' ],
 		[ [ 'https://github.com/kanasimi/http://CeJS', CeL.simplify_path('https://github.com/kanasimi/http://a/b/../../CeJS') ], 'simplify_path http://-4' ],
+		[ [ '/p/a/http://d.o/p/a', CeL.simplify_path('/p/a/http://d.o/p/a') ], 'simplify_path /http://#1' ],
+		[ [ '/p/a/http://d.o/p/a', CeL.simplify_path('/p/a/http://d.o//p/a') ], 'simplify_path /http://#2' ],
+		[ [ 'https://d.o/p/a/http://d.o/p/a', CeL.simplify_path('https://d.o/p/a/http://d.o/p/a') ], 'simplify_path /http://#3' ],
+		[ [ 'https://d.o/p/a/http://d.o/p/a/', CeL.simplify_path('https://d.o//p/a/http://d.o//p//a/') ], 'simplify_path /http://#4' ],
 	]);
 
 	error_count += CeL.test('compatibility', [
