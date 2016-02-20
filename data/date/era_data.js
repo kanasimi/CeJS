@@ -2,7 +2,7 @@
  * @name CeL data for era calendar.
  * @fileoverview 本檔案包含了東亞傳統曆法/中國傳統曆法 (traditional civil
  *               calendar)，農曆、夏曆、陰曆的各紀年期間曆數資料。
- *
+ * 
  * @summary <code>
 
 TODO:
@@ -274,7 +274,7 @@ CeL.era.pass_on = {
 
 		/**
 		 * 曲循經傳曆日
-		 *
+		 * 
 		 * @see https://zh.wikipedia.org/wiki/%E9%B2%81%E5%9B%BD
 		 * @seealso 杜預《春秋長曆》，原書已佚，今本是清四庫館臣從《永樂大典》中輯出的，附於杜預《春秋釋例》之後。按此書主要以《乾度曆》推算朔閏，凡與經傳不符者則附以作者考證
 		 */
@@ -956,7 +956,6 @@ CeL.era.pass_on = {
 		'/麴智盛/|640/7/24~641/2/15|:中國|疑|君主名=麴智盛|關係=麴文泰子|在位=640年|注=640年唐朝滅麴氏高昌。',
 		// 高昌統治地區其他不詳的年號:
 		// 吐魯番地區曾出土高昌時期的白雀年號。至於此白雀年號為高昌本身之年號或奉後秦之年號則仍然待考
-
 
 		'南燕/世宗/燕平|398/2/3~|:中國|疑|君主=獻武帝|君主名=慕容德;慕容備德|表字=玄明|據=時間規範資料庫|時期=五胡十六國|生=336年|卒=405年|在位=398年~405年|注=諸書未言燕平年號之事，所據不詳',
 		'/建平|400/2/11~|:中國|疑',
@@ -2930,7 +2929,7 @@ CeL.era.pass_on = {
 		 * The Mahameghavahana dynasty (Oriya: ମହାମେଘବାହନ; Mahā-Mēgha-Bāhana, c.
 		 * 250s BC to 400s AD) was an ancient ruling dynasty of Kalinga after
 		 * the decline of the Maurya Empire.
-		 *
+		 * 
 		 * @see https://en.wikipedia.org/wiki/Mahameghavahana_dynasty
 		 */
 		'ମହାମେଘବାହନ/ଖାରବେଳ|-193~-170|:CE|疑|準=年|朝代=Mahāmēghabāhana;Maha-Meghavahana;Mahameghavahana|君主名=ଖାରେବଳ;खारवेल;Khārabēḷa;Khāravēla;Kharavela|注=the third and greatest emperor of the Mahameghavahana dynasty of Kalinga (present-day Odisha).',
@@ -3487,36 +3486,36 @@ CeL.era.pass_on = {
 
 		/**
 		 * 塞琉古紀元，是一套塞琉古帝國以及之後受希臘化文明影響的古代國家所採用的紀年方式。
-		 *
+		 * 
 		 * The Seleucid era or Anno Graecorum (literally "year of the Greeks" or
 		 * "Greek year"), sometimes denoted "AG", was a system of numbering
 		 * years in use by the Seleucid Empire and other countries among the
 		 * ancient Hellenistic civilizations.
-		 *
+		 * 
 		 * The natives of the empire used the Babylonian calendar, in which the
 		 * new year falls on 1 Nisanu (3 April in 311 BC)
-		 *
+		 * 
 		 * The Macedonian court adopted the Babylonian calendar (substituting
 		 * the Macedonian month names ) but reckoned the new year to be in the
 		 * autumn (the exact date is unknown).
-		 *
+		 * 
 		 * @see https://en.wikipedia.org/wiki/Seleucid_era
 		 */
 		/**
 		 * 古代馬其頓曆 The Macedonian calendar was in essence the Babylonian calendar
 		 * with the substitution of Macedonian names for the Babylonian ones.
-		 *
+		 * 
 		 * Under the Seleucid Empire, the Macedonians adopted the Seleucid era.
 		 * The year beginning on the 1st of Dios during what we call October 312
 		 * BCE was declared to be the year one of the Seleucid era.
-		 *
+		 * 
 		 * @see https://en.wikipedia.org/wiki/Ancient_Macedonian_calendar
 		 */
 		/**
 		 * His return to Babylon was afterwards officially regarded as the
 		 * beginning of the Seleucid Empire and that year as the first of the
 		 * Seleucid era.
-		 *
+		 * 
 		 * @see https://en.wikipedia.org/wiki/Seleucus_I_Nicator
 		 */
 		/**
@@ -3529,7 +3528,7 @@ CeL.era.pass_on = {
 		 * and finally, when in the 19th year of Darius the beginning of the
 		 * year coincided with spring equinox, to the 19-year cycle” (1985, p.
 		 * 747).
-		 *
+		 * 
 		 * Alex­ander probably used the Macedonian calendar, but the Achaemenid
 		 * system seems not to have been abolished. In the time of Seleucus I
 		 * (321-281 B.C.) the Babylonian calendar was adopted, but the original
@@ -3539,7 +3538,7 @@ CeL.era.pass_on = {
 		 * from material discovered at Nisa (2nd-1st century B.C.) and Avroman
 		 * (1st cent. a.d.) that the Zoroastrian solar calendar (see below) was
 		 * also used.
-		 *
+		 * 
 		 * @see http://www.iranicaonline.org/articles/calendars
 		 */
 		'Seleucid era|Babylonian-311~76/3/24|:Babylonian|疑|準=年',
@@ -3586,7 +3585,7 @@ CeL.era.pass_on = {
 /**
  * A Chronological Survey of Precisely Dated Demotic and Abnormal Hieratic
  * Sources, Version 1.0 (February 2007)
- *
+ * 
  * @see http://www.trismegistos.org/top.php
  */
 
@@ -3760,7 +3759,7 @@ CeL.era.pass_on = {
 		/**
 		 * The Era of the Martyrs (Latin: anno martyrum or AM), also known as
 		 * the Diocletian era (Latin: anno Diocletiani)
-		 *
+		 * 
 		 * @see https://en.wikipedia.org/wiki/Era_of_Martyrs
 		 */
 
