@@ -674,6 +674,7 @@ var wiki_toString = {
 	page_title : function() {
 		return this.join(':');
 	},
+	// 內部連結
 	link : function() {
 		return '[[' + this.join('|') + ']]';
 	},
@@ -810,14 +811,14 @@ function parse_wikitext(wikitext, options, queue) {
 	end_mark = options && options.end_mark || ';',
 	/** {Boolean}是否順便作正規化。預設不會規範頁面內容。 */
 	normalize = options && options.normalize,
-	/** {Array}是否需要初始化。 [ length prefix added, length postfix added ] */
-	initialized_fix = !queue && [ 0 ];
+	/** {Array}是否需要初始化。 [ {String}prefix added, {String}postfix added ] */
+	initialized_fix = !queue && [ '', '' ];
 
 	if (/\d/.test(end_mark) || include_mark.includes(end_mark))
 		throw new Error('Error end of include_mark!');
 
 	if (initialized_fix) {
-		// 初始化
+		// 初始化。
 		wikitext = wikitext.replace(/\r\n/g, '\n').replace(
 		// 先 escape 掉會造成問題之 chars。
 		new RegExp(include_mark.replace(/([\s\S])/g, '\\$1'), 'g'),
@@ -827,9 +828,9 @@ function parse_wikitext(wikitext, options, queue) {
 		// https://www.mediawiki.org/wiki/Markup_spec/BNF/Article#Wiki-page
 		// https://www.mediawiki.org/wiki/Markup_spec#Start_of_line_only
 		/^(?:[*#:;= ]|{\|)/.test(wikitext))
-			wikitext = '\n' + wikitext, initialized_fix[0] = 1;
+			wikitext = (initialized_fix[0] = '\n') + wikitext;
 		if (!wikitext.endsWith('\n'))
-			wikitext += '\n', initialized_fix[1] = -1;
+			wikitext += (initialized_fix[1] = '\n');
 		// temporary queue
 		queue = [];
 	}
@@ -859,8 +860,14 @@ function parse_wikitext(wikitext, options, queue) {
 					// 不再作 parse。
 					queue.push(_set_wiki_type(parameters, 'comment'));
 					return include_mark + (queue.length - 1) + end_mark;
-				}).replace(/<\!--([\s\S]*)$/g, function(all, parameters) {
+				})
+		// 缺 end mark
+		.replace(/<\!--([\s\S]*)$/g, function(all, parameters) {
 			// 不再作 parse。
+			if (initialized_fix[1]) {
+				parameters = parameters.slice(0, -initialized_fix[1].length);
+				initialized_fix[1] = '';
+			}
 			parameters = _set_wiki_type(parameters, 'comment');
 			if (!normalize)
 				parameters.no_end = true;
@@ -934,8 +941,8 @@ function parse_wikitext(wikitext, options, queue) {
 	// [http://... ...]
 	// TODO: [{{}} ...]
 	wikitext = wikitext.replace_till_stable(
-	// 經測試，若為結尾 /$/ 亦會 parse 成 external link。
-	/\[((?:https?:|ftp:)?\/\/[^\/\s][^\]\s]+)(?:(\s)([^\]]*))?(?:\]|$)/gi,
+	// 2016/2/23: 經測試，若為結尾 /$/ 不會 parse 成 external link。
+	/\[((?:https?:|ftp:)?\/\/[^\/\s][^\]\s]+)(?:(\s)([^\]]*))?\]/gi,
 	//
 	function(all, URL, delimiter, parameters) {
 		URL = [ URL.includes(include_mark)
@@ -1166,8 +1173,8 @@ function parse_wikitext(wikitext, options, queue) {
 	});
 
 	// TODO: Magic words
-	// '''~'''
-	// ''~''
+	// '''~''' 不能跨行！
+	// ''~'' 不能跨行！
 	// ~~~~~
 	// ----
 
@@ -1209,10 +1216,14 @@ function parse_wikitext(wikitext, options, queue) {
 
 	if (initialized_fix) {
 		// 去掉初始化時添加的 fix。
+		// 須預防有些為完結的標記，把所添加的部分吃掉了。此時不能直接 .slice()，
+		// 而應該先檢查是不是有被吃掉的狀況。
 		if (initialized_fix[0] || initialized_fix[1])
-			wikitext = wikitext.slice(initialized_fix[0],
+			wikitext = wikitext.slice(initialized_fix[0].length,
+			// assert: '123'.slice(1, undefined) === '23'
+			// if use length as initialized_fix[1]:
 			// assert: '1'.slice(0, [ 1 ][1]) === '1'
-			initialized_fix[1]);
+			initialized_fix[1] ? -initialized_fix[1].length : undefined);
 	}
 
 	queue.push(wikitext);
@@ -1979,7 +1990,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			if (error)
 				if (error === 'nochange') {
 					done++;
-					// 未經過 wiki 操作，於 wiki_API.edit 發現為無改變的。
+					// 未經過 wiki 操作，於 wiki_API.edit 發現為[[WP:NULLEDIT|無改變]]的。
 					nochange_count++;
 					error = '無改變。';
 					result = 'nochange';
@@ -2002,7 +2013,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 					error = ' [[Special:Diff/' + result.edit.newrevid + '|完成]]。';
 					result = 'succeed';
 				} else if ('nochange' in result.edit) {
-					// 經過 wiki 操作，發現為無改變的。
+					// 經過 wiki 操作，發現為[[WP:NULLEDIT|無改變]]的。
 					nochange_count++;
 					error = '無改變。';
 					result = 'nochange';
@@ -2233,7 +2244,7 @@ wiki_API.prototype.work.log_item = {
 	title : true,
 	report : true,
 	get_pages : true,
-	// 跳過無改變的。
+	// 跳過[[WP:NULLEDIT|無改變]]的。
 	// nochange : false,
 	error : true,
 	succeed : true

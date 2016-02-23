@@ -41,11 +41,11 @@ if (typeof CeL === 'function')
 			_// JSDT:_module_
 			.prototype = {};
 
-			var fs = require('fs');
+			var node_fs = require('fs');
 
 			function copy_attributes(source, target) {
-				var stat = fs.statSync(source);
-				fs.utimesSync(target, stat.atime, stat.mtime);
+				var stat = node_fs.statSync(source);
+				node_fs.utimesSync(target, stat.atime, stat.mtime);
 			}
 			_.copy_attributes = copy_attributes;
 
@@ -58,15 +58,15 @@ if (typeof CeL === 'function')
 							library_namespace.error(error);
 					};
 
-				if (fs.existsSync(target))
+				if (node_fs.existsSync(target))
 					if (overwrite)
-						fs.unlinkSync(path);
+						node_fs.unlinkSync(path);
 					else
 						callback();
 
-				var source_stream = fs.createReadStream(source),
+				var source_stream = node_fs.createReadStream(source),
 				//
-				target_stream = fs.createWriteStream(target);
+				target_stream = node_fs.createWriteStream(target);
 
 				source_stream.on("error", callback);
 				target_stream.on("error", callback);
@@ -81,9 +81,9 @@ if (typeof CeL === 'function')
 
 			// returns undefined if successful
 			function fs_copySync(source, target, overwrite) {
-				if (fs.existsSync(target))
+				if (node_fs.existsSync(target))
 					if (overwrite)
-						fs.unlinkSync(target);
+						node_fs.unlinkSync(target);
 					else
 						return new Error('Target file exists: [' + target
 								+ ']!');
@@ -92,21 +92,21 @@ if (typeof CeL === 'function')
 				//
 				buffer = new Buffer(buffer_length),
 				//
-				source_descriptor = fs.openSync(source, 'r'),
+				source_descriptor = node_fs.openSync(source, 'r'),
 				//
-				target_descriptor = fs.openSync(target, 'w'),
+				target_descriptor = node_fs.openSync(target, 'w'),
 				//
 				bytesRead, position = 0;
 
 				while (0 < (bytesRead
 				//
-				= fs.readSync(source_descriptor, buffer, 0, buffer_length,
+				= node_fs.readSync(source_descriptor, buffer, 0, buffer_length,
 						position))) {
-					fs.writeSync(target_descriptor, buffer, 0, bytesRead);
+					node_fs.writeSync(target_descriptor, buffer, 0, bytesRead);
 					position += bytesRead;
 				}
-				fs.closeSync(source_descriptor);
-				fs.closeSync(target_descriptor);
+				node_fs.closeSync(source_descriptor);
+				node_fs.closeSync(target_descriptor);
 
 				copy_attributes(source, target);
 			}
@@ -121,16 +121,17 @@ if (typeof CeL === 'function')
 			 * @returns error count
 			 */
 			function create_directory(directories, mode) {
-				// var fs = require('fs');
+				// var node_fs = require('fs');
 				if (isNaN(mode))
-					mode = fs.F_OK | fs.R_OK | fs.W_OK | fs.X_OK;
+					mode = node_fs.F_OK | node_fs.R_OK | node_fs.W_OK
+							| node_fs.X_OK;
 				var error = 0;
 				directories.forEach(function(directory_name) {
 					try {
-						fs.accessSync(directory_name);
+						node_fs.accessSync(directory_name);
 					} catch (e) {
 						try {
-							fs.mkdirSync(directory_name, mode);
+							node_fs.mkdirSync(directory_name, mode);
 						} catch (e) {
 							if (e.code !== 'EEXIST')
 								;
@@ -146,13 +147,13 @@ if (typeof CeL === 'function')
 			// move file
 
 			function export_function() {
-				fs.copy = fs_copy;
-				fs.copySync = fs_copySync;
+				node_fs.copy = fs_copy;
+				node_fs.copySync = fs_copySync;
 			}
 			_['export'] = export_function;
 
 			// 當 require('fs') 得到同一 instance 時，才作 export。
-			if (fs === require('fs'))
+			if (node_fs === require('fs'))
 				export_function();
 
 			return (_// JSDT:_module_

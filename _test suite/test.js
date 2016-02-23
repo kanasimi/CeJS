@@ -2255,6 +2255,12 @@ function test_wiki() {
 		[[ '2015/10/21', CeL.wiki.parser.template('\n{{vfd|已提刪|date=2015/10/21}}\n...', [ 'vfd', 'afd' ])[2].date ]],
 	]);
 
+	var wikitext;
+	error_count += CeL.test('CeL.wiki.parser.parse()', [
+		[[ wikitext = 't[http://a.b/ x[[l]]', CeL.wiki.parser.parse(wikitext).toString() ], 'CeL.wiki.parser.parse() #1' ],
+		[[ wikitext = 't<!--=', CeL.wiki.parser.parse(wikitext).toString() ], 'CeL.wiki.parser.parse() #2' ],
+	]);
+
 	return;
 
 	// examples
