@@ -537,29 +537,41 @@ page_parser.type_alias = {
  * 對所有指定類型，皆執行特定作業。
  * 
  * @param {String}type
- *            欲搜尋之類型。 e.g., 'templated'.
+ *            欲搜尋之類型。 e.g., 'template'. see ((wiki_toString)).
  * @param {Function}trigger
- *            觸發器 : trigger({Array}inside nodes, {Array}parent, {ℕ⁰:Natural+0}index)
+ *            觸發器 : trigger({Array}inside nodes, {Array}parent, {ℕ⁰:Natural+0}index) {return {String}wikitext;}
+ * @param {Boolean}replace
+ *            若 trigger 的回傳值為{String}wikitext，則將指定類型節點替換作此回傳值。
  * 
  * @returns {wiki page parser}
  * 
  * @see page_parser.type_alias
  */
-function for_each_token(type, trigger) {
+function for_each_token(type, trigger, replace) {
 	if (type in page_parser.type_alias)
 		type = page_parser.type_alias[type];
 
 	this.forEach(function(token, index) {
 		if (Array.isArray(token)) {
-			if (token.type === type)
-				trigger(token, this, index);
+			if (token.type === type) {
+				var result = trigger(token, this, index);
+				if (replace) {
+					if (typeof result === 'string')
+						result = parse_wikitext(result);
+					if (typeof result === 'string' || Array.isArray(result)) {
+						this[index] = token = result;
+					}
+				}
+			}
+			// depth-first search (DFS) 向下層巡覽。
 			// is_atom: 不包含可 parse 之要素，不包含 text。
 			if (!token.is_atom
 			// comment 可以放在任何地方，因此能滲透至任一層。
 			// 但這可能性已經在 parse_wikitext() 中偵測並去除。
 			// && type !== 'comment'
-			)
+			) {
 				for_each_token.call(token, type, trigger);
+			}
 		}
 	}, this);
 
@@ -1233,7 +1245,6 @@ function parse_wikitext(wikitext, options, queue) {
 	return wikitext;
 }
 
-page_parser.parse = parse_wikitext;
 
 //---------------------------------------------------------------------//
 
@@ -1374,6 +1385,8 @@ function parse_redirect(wikitext) {
 
 // TODO: 統合於 parser 之中。
 Object.assign(page_parser, {
+	parse : parse_wikitext,
+
 	template : parse_template,
 	date : parse_date,
 	user : parse_user,
