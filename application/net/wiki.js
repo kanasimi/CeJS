@@ -328,12 +328,17 @@ function file_pattern(file_name, flag) {
 	&& new RegExp(file_pattern.source.replace(/name/, file_name), flag || 'g');
 }
 
-file_pattern.source =
-//[ ':', file name, 接續 ]
- /\[\[[\s\n]*(?:(:)[\s\n]*)?(?:Tag)[\s\n]*:[\s\n]*name\s*(\||\]\])/
-//[[ :File:name]] === [[File:name]]
-.source.replace('Tag', library_namespace.ignore_case_pattern('File|Image|[檔档]案|[圖图]像'));
+var PATTERN_file_prefix = 'File|Image|[檔档]案|[圖图]像';
 
+file_pattern.source =
+// 不允許 [\s\n]，僅允許 ' '。
+//[ ':', file name, 接續 ]
+ /\[\[ *(?:(:) *)?(?:Tag) *: *name *(\||\]\])/
+//[[ :File:name]] === [[File:name]]
+.source.replace('Tag', library_namespace.ignore_case_pattern(PATTERN_file_prefix));
+
+// [ all, file name ]
+PATTERN_file_prefix = new RegExp('^ *(?:: *)?(?:' + PATTERN_file_prefix + ') *: *([^\| ][^\| ]*)', 'i');
 
 //---------------------------------------------------------------------//
 
@@ -533,29 +538,45 @@ page_parser.type_alias = {
 	template : 'transclusion'
 };
 
+
+/*
+wikitext = 'a\n[[File:f.jpg|thumb|d]]\nb', CeL.wiki.parser(wikitext).parse().each('namespace', function(token, parent, index){console.log([index, token, parent]);}, true).toString()
+*/
+
 /**
  * 對所有指定類型，皆執行特定作業。
  * 
  * @param {String}type
  *            欲搜尋之類型。 e.g., 'template'. see ((wiki_toString)).
- * @param {Function}trigger
- *            觸發器 : trigger({Array}inside nodes, {Array}parent, {ℕ⁰:Natural+0}index) {return {String}wikitext;}
- * @param {Boolean}replace
- *            若 trigger 的回傳值為{String}wikitext，則將指定類型節點替換作此回傳值。
+ * @param {Function}processor
+ *            觸發器 trigger: processor({Array}inside nodes, {Array}parent, {ℕ⁰:Natural+0}index) {return {String}wikitext;}
+ * @param {Boolean}modify_this
+ *            若 processor 的回傳值為{String}wikitext，則將指定類型節點替換/replace作此回傳值。
  * 
  * @returns {wiki page parser}
  * 
  * @see page_parser.type_alias
  */
-function for_each_token(type, trigger, replace) {
+function for_each_token(type, processor, modify_this) {
+	if (!type) {
+		return this.each_text(processor, modify_this);
+	}
+	if (typeof type !== 'string') {
+		library_namespace.warn('for_each_token: Invalid type specified! [' + type + ']');
+		return this;
+	}
+	// normalize type
+	type = type.toLowerCase().replace(/\s/g, '_');
 	if (type in page_parser.type_alias)
 		type = page_parser.type_alias[type];
 
 	this.forEach(function(token, index) {
+		//console.log('token:');
+		//console.log(token);
 		if (Array.isArray(token)) {
 			if (token.type === type) {
-				var result = trigger(token, this, index);
-				if (replace) {
+				var result = processor(token, this, index);
+				if (modify_this) {
 					if (typeof result === 'string')
 						result = parse_wikitext(result);
 					if (typeof result === 'string' || Array.isArray(result)) {
@@ -570,7 +591,7 @@ function for_each_token(type, trigger, replace) {
 			// 但這可能性已經在 parse_wikitext() 中偵測並去除。
 			// && type !== 'comment'
 			) {
-				for_each_token.call(token, type, trigger);
+				for_each_token.call(token, type, processor);
 			}
 		}
 	}, this);
@@ -668,7 +689,8 @@ markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|syntaxhig
 /**
  * .toString() of wiki elements<br />
  * parse_wikitext() 將把 wikitext 解析為各 {Array} 組成之結構。當以 .toString() 結合時，將呼叫
- * .join() 組合各次元素。此處即為各 .toString() 之定義。
+ * .join() 組合各次元素。此處即為各 .toString() 之定義。<br />
+ * 所有的 key (type) 皆為小寫。
  * 
  * @type {Object}
  * 
@@ -686,6 +708,10 @@ var wiki_toString = {
 	page_title : function() {
 		return this.join(':');
 	},
+	// link 的變體。但可採用 .name 取得 file name。
+	file : function() {
+		return '[[' + this.join('|') + ']]';
+	},
 	// 內部連結
 	link : function() {
 		return '[[' + this.join('|') + ']]';
@@ -694,7 +720,7 @@ var wiki_toString = {
 	external_link : function() {
 		return '[' + this.join(this.delimiter || ' ') + ']';
 	},
-	URL : function() {
+	url : function() {
 		return this.join('');
 	},
 	// template parameter
@@ -934,6 +960,8 @@ function parse_wikitext(wikitext, options, queue) {
 		library_namespace.debug(prevoius + ' + ' + parameters, 4,
 				'parse_wikitext.link');
 
+		// test [[file:name|...|...]]
+		var file_matched = parameters.match(PATTERN_file_prefix);
 		parameters = parameters.split('|').map(function(token, index) {
 			return index === 0
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
@@ -944,7 +972,10 @@ function parse_wikitext(wikitext, options, queue) {
 			// 經過改變，需再進一步處理。
 			: parse_wikitext(token, options, queue);
 		});
-		_set_wiki_type(parameters, 'link');
+		if (file_matched)
+			// file name
+			parameters.name = file_matched[1];
+		_set_wiki_type(parameters, file_matched ? 'file' : 'link');
 		queue.push(parameters);
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
 	});
@@ -959,7 +990,7 @@ function parse_wikitext(wikitext, options, queue) {
 	function(all, URL, delimiter, parameters) {
 		URL = [ URL.includes(include_mark)
 		// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-		? parse_wikitext(URL, options, queue) : _set_wiki_type(URL, 'URL') ];
+		? parse_wikitext(URL, options, queue) : _set_wiki_type(URL, 'url') ];
 		if (delimiter) {
 			if (normalize)
 				parameters = parameters.trim();
