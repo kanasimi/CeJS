@@ -483,50 +483,11 @@ function page_parser(wikitext, options) {
 
 /** {Object}prototype of {wiki page parser} */
 var page_prototype = {
-	// 在執行 .each()、.each_text() 之前，應該先執行 .parse()。
+	// 在執行 .each() 之前，應該先執行 .parse()。
 	each : for_each_token,
-	each_text : for_each_text,
 	parse : parse_page
 };
 
-
-/**
- * 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
- * 
- * @param {Function}processor
- *            執行特定作業 processor({String}token, {Array}parent, {ℕ⁰:Natural+0}index)
- * @param {String}[modify_this]
- *            modify this
- * 
- * @returns {wiki page parser}
- */
-function for_each_text(processor, modify_this) {
-	this.forEach(function(token, index) {
-		if (typeof token === 'string') {
-			// get result
-			token = processor(token, this, index);
-			if (false && modify_this) {
-				if (this.type === 'text' && token.type === 'text'
-						&& token.length > 1) {
-					// 經過改變，需再進一步處理。
-					for_each_text.call(token, processor, modify_this);
-					token.unshift(index, 1);
-					this[index].splice(token);
-
-				} else if (this[index] !== token) {
-					this[index] = token;
-					// 經過改變，需再進一步處理。
-					if (Array.isArray(token))
-						for_each_text.call(token, processor, modify_this);
-				}
-			}
-
-		} else if (Array.isArray(token) && !token.is_atom)
-			for_each_text.call(token, processor, modify_this);
-	}, this);
-
-	return this;
-}
 
 /** {Object}alias name of type */
 page_parser.type_alias = {
@@ -544,13 +505,15 @@ wikitext = 'a\n[[File:f.jpg|thumb|d]]\nb', CeL.wiki.parser(wikitext).parse().eac
 */
 
 /**
- * 對所有指定類型，皆執行特定作業。
+ * 對所有指定類型 type，皆執行特定作業 processor。
  * 
- * @param {String}type
- *            欲搜尋之類型。 e.g., 'template'. see ((wiki_toString)).
+ * @param {String}[type]
+ *            欲搜尋之類型。 e.g., 'template'. see ((wiki_toString)).<br />
+ *            未指定: 處理所有節點。
  * @param {Function}processor
- *            觸發器 trigger: processor({Array}inside nodes, {Array}parent, {ℕ⁰:Natural+0}index) {return {String}wikitext;}
- * @param {Boolean}modify_this
+ *            執行特定作業: processor({Array}inside token list, {Array}parent,
+ *            {ℕ⁰:Natural+0}index) {return {String}wikitext or {Object}element;}
+ * @param {Boolean}[modify_this]
  *            若 processor 的回傳值為{String}wikitext，則將指定類型節點替換/replace作此回傳值。
  * 
  * @returns {wiki page parser}
@@ -558,11 +521,12 @@ wikitext = 'a\n[[File:f.jpg|thumb|d]]\nb', CeL.wiki.parser(wikitext).parse().eac
  * @see page_parser.type_alias
  */
 function for_each_token(type, processor, modify_this) {
-	if (!type) {
-		return this.each_text(processor, modify_this);
-	}
-	if (typeof type !== 'string') {
-		library_namespace.warn('for_each_token: Invalid type specified! [' + type + ']');
+	if (typeof type === 'function' && modify_this === undefined)
+		// shift arguments.
+		modify_this = processor, processor = type;
+	if (type && typeof type !== 'string') {
+		library_namespace.warn('for_each_token: Invalid type specified! ['
+				+ type + ']');
 		return this;
 	}
 	// normalize type
@@ -570,31 +534,42 @@ function for_each_token(type, processor, modify_this) {
 	if (type in page_parser.type_alias)
 		type = page_parser.type_alias[type];
 
-	this.forEach(function(token, index) {
-		//console.log('token:');
-		//console.log(token);
-		if (Array.isArray(token)) {
-			if (token.type === type) {
-				var result = processor(token, this, index);
+	function travel(_this) {
+		_this.forEach(function(token, index) {
+			// console.log('token:');
+			// console.log(token);
+
+			if (!type
+			// 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
+			|| (typeof token === 'string' ? type === 'text'
+			//
+			: token.type === type)) {
+				// get result.
+				var result = processor(token, _this, index);
 				if (modify_this) {
 					if (typeof result === 'string')
+						// {String}wikitext to ( {Object}element or '' )
 						result = parse_wikitext(result);
 					if (typeof result === 'string' || Array.isArray(result)) {
-						this[index] = token = result;
+						// 將指定類型節點替換作此回傳值。
+						_this[index] = token = result;
 					}
 				}
 			}
-			// depth-first search (DFS) 向下層巡覽。
+
+			// depth-first search (DFS) 向下層巡覽，再進一步處理。
 			// is_atom: 不包含可 parse 之要素，不包含 text。
-			if (!token.is_atom
+			if (Array.isArray(token) && !token.is_atom
 			// comment 可以放在任何地方，因此能滲透至任一層。
 			// 但這可能性已經在 parse_wikitext() 中偵測並去除。
 			// && type !== 'comment'
 			) {
-				for_each_token.call(token, type, processor);
+				travel(token);
 			}
-		}
-	}, this);
+		});
+	}
+
+	travel(this);
 
 	return this;
 }
