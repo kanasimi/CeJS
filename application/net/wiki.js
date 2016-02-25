@@ -496,7 +496,8 @@ page_parser.type_alias = {
 	// table_cell 包含 th + td !
 	th : 'table_cell',
 	td : 'table_cell',
-	template : 'transclusion'
+	template : 'transclusion',
+	'' : 'plain'
 };
 
 
@@ -511,8 +512,9 @@ wikitext = 'a\n[[File:f.jpg|thumb|d]]\nb', CeL.wiki.parser(wikitext).parse().eac
  *            欲搜尋之類型。 e.g., 'template'. see ((wiki_toString)).<br />
  *            未指定: 處理所有節點。
  * @param {Function}processor
- *            執行特定作業: processor({Array}inside token list, {Array}parent,
- *            {ℕ⁰:Natural+0}index) {return {String}wikitext or {Object}element;}
+ *            執行特定作業: processor({Array|String|undefined}inside token list,
+ *            {Array}parent, {ℕ⁰:Natural+0}index) {<br />
+ *            return {String}wikitext or {Object}element;}
  * @param {Boolean}[modify_this]
  *            若 processor 的回傳值為{String}wikitext，則將指定類型節點替換/replace作此回傳值。
  * 
@@ -540,11 +542,9 @@ function for_each_token(type, processor, modify_this) {
 			// console.log(token);
 
 			if (!type
-			// 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
-			|| (typeof token === 'string' ? type === 'text'
-			//
-			: token.type === type)) {
-				// get result.
+			// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
+			|| type === (Array.isArray(token) ? token.type : 'plain')) {
+				// get result. 須注意: 此 token 可能為 Array, string, undefined!
 				var result = processor(token, _this, index);
 				if (modify_this) {
 					if (typeof result === 'string')
@@ -764,6 +764,7 @@ var wiki_toString = {
 
 // TODO: {{L<!-- -->L}} .valueOf() === '{{LL}}'
 // TODO: <p<!-- -->re>...</pre>
+// TODO: parse [[上海外国语大学]]
 /**
  * parse The MediaWiki markup language (wikitext).
  * 
@@ -1055,76 +1056,6 @@ function parse_wikitext(wikitext, options, queue) {
 	});
 
 	// ----------------------------------------------------
-	// table: \n{| ... \n|}
-	wikitext = wikitext.replace_till_stable(/\n{\|([\s\S]*?)\n\|}/g, function(
-			all, parameters) {
-		// 經測試，table 不會向前回溯。
-		parameters = parameters.split('\n|-').map(function(token, index) {
-			if (index === 0
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			&& !token.includes(include_mark)
-			// 含有 delimiter 的話，即使位在 "{|" 之後，依舊會被當作 row。
-			&& !/\n[!|]|!!|\|\|/.test(token)) {
-				// table style / format modifier (not displayed)
-				return _set_wiki_type(token, 'style');
-			}
-			var row, matched, delimiter,
-			// 必須有實體才能如預期作 .exec()。
-			pattern = /([\s\S]*?)(\n[!|]|!!|\|\||$)/g;
-			while (matched = pattern.exec(token)) {
-				if (row || /[<>]/.test(token)) {
-					var cell = matched[1].match(/^([^|]+)(\|[\s\S]*)$/);
-					if (cell)
-						cell = [ cell[1].includes(include_mark)
-						// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-						? parse_wikitext(cell[1], options, queue)
-						//
-						: _set_wiki_type(cell[1],
-						// cell style / format modifier (not displayed)
-						'style'), parse_wikitext(cell[2], options, queue) ];
-					else {
-						// 經過改變，需再進一步處理。
-						cell = parse_wikitext(matched[1], options, queue);
-						if (cell.type !== 'text')
-							// {String} or other elements
-							cell = [ cell ];
-					}
-					_set_wiki_type(cell, 'table_cell');
-					if (delimiter) {
-						cell.delimiter = delimiter;
-						cell.table_type
-						//
-						= delimiter.includes('!') ? 'th' : 'td';
-					}
-					if (!row)
-						row = [];
-					row.push(cell);
-				} else
-					// assert: matched.index === 0
-					row = [ matched[1].includes(include_mark)
-					// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-					? parse_wikitext(matched[1], options, queue)
-					//
-					: _set_wiki_type(matched[1],
-					// row style / format modifier (not displayed)
-					'style') ];
-
-				delimiter = matched[2];
-				if (!delimiter)
-					// assert: /$/, no separater, ended.
-					break;
-			}
-			// assert: Array.isArray(row)
-			return _set_wiki_type(row, 'table_row');
-		});
-
-		_set_wiki_type(parameters, 'table');
-		queue.push(parameters);
-		// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
-		return '\n' + include_mark + (queue.length - 1) + end_mark;
-	});
-
-	// ----------------------------------------------------
 	// {{{...}}} 需在 {{...}} 之前解析。
 	// https://zh.wikipedia.org/wiki/Help:%E6%A8%A1%E6%9D%BF
 	// 在模板頁面中，用三個大括弧可以讀取參數
@@ -1188,6 +1119,81 @@ function parse_wikitext(wikitext, options, queue) {
 		_set_wiki_type(parameters, 'transclusion');
 		queue.push(parameters);
 		return prevoius + include_mark + (queue.length - 1) + end_mark;
+	});
+
+	// ----------------------------------------------------
+	// table: \n{| ... \n|}
+	// 因為 table 中較可能包含 {{Template}}，但 {{Template}} 少包含 table，
+	// 因此先處理 {{Template}} 再處理 table。
+	// {|表示表格開始，|}表示表格結束。
+	wikitext = wikitext.replace_till_stable(/\n{\|([\s\S]*?)\n\|}/g, function(
+			all, parameters) {
+		// 經測試，table 不會向前回溯。
+		// 添加新行由一個豎線和連字符 "|-" 組成。
+		parameters = parameters.split('\n|-').map(function(token, index) {
+			if (index === 0
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			&& !token.includes(include_mark)
+			// 含有 delimiter 的話，即使位在 "{|" 之後，依舊會被當作 row。
+			&& !/\n[!|]|!!|\|\|/.test(token)) {
+				// table style / format modifier (not displayed)
+				// "\n|-" 後面的 string
+				return _set_wiki_type(token, 'style');
+			}
+			var row, matched, delimiter,
+			// 必須有實體才能如預期作 .exec()。
+			pattern = /([\s\S]*?)(\n[!|]|!!|\|\||$)/g;
+			while (matched = pattern.exec(token)) {
+				if (row || /[<>]/.test(token)) {
+					var cell = matched[1].match(/^([^|]+)(\|[\s\S]*)$/);
+					if (cell)
+						cell = [ cell[1].includes(include_mark)
+						// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+						? parse_wikitext(cell[1], options, queue)
+						//
+						: _set_wiki_type(cell[1],
+						// cell style / format modifier (not displayed)
+						'style'), parse_wikitext(cell[2], options, queue) ];
+					else {
+						// 經過改變，需再進一步處理。
+						cell = parse_wikitext(matched[1], options, queue);
+						if (cell.type !== 'text')
+							// {String} or other elements
+							cell = [ cell ];
+					}
+					_set_wiki_type(cell, 'table_cell');
+					if (delimiter) {
+						cell.delimiter = delimiter;
+						cell.table_type
+						//
+						= delimiter.includes('!') ? 'th' : 'td';
+					}
+					if (!row)
+						row = [];
+					row.push(cell);
+				} else
+					// assert: matched.index === 0
+					row = [ matched[1].includes(include_mark)
+					// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+					? parse_wikitext(matched[1], options, queue)
+					//
+					: _set_wiki_type(matched[1],
+					// row style / format modifier (not displayed)
+					'style') ];
+
+				delimiter = matched[2];
+				if (!delimiter)
+					// assert: /$/, no separater, ended.
+					break;
+			}
+			// assert: Array.isArray(row)
+			return _set_wiki_type(row, 'table_row');
+		});
+
+		_set_wiki_type(parameters, 'table');
+		queue.push(parameters);
+		// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
+		return '\n' + include_mark + (queue.length - 1) + end_mark;
 	});
 
 	// TODO: Magic words

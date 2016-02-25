@@ -2360,13 +2360,13 @@ function test_wiki() {
 
 	// test for parser, parse_wikitext()
 	var wiki_page = CeL.wiki.parser(page_data);
-	wiki_page.parse().each('text', function(token) { if (token = token.trim()) CeL.log(token); });
+	wiki_page.parse().each('plain', function(token) { if (token = token.trim()) CeL.log(token); });
 	wiki_page.each('transclusion', function(token, parent, index) { ; });
 	//CeL.log('-'.repeat(70) + '\n' + wiki_page.toString());
 
 	CeL.wiki.parser.parse('{{temp|{{temp2|p{a}r{}}}}}');
 	JSON.stringify(CeL.wiki.parser.parse('a{{temp|e{{temp2|p{a}r}}}}b'));
-	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('text', function(token) { CeL.log(token); });
+	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('plain', function(token) { CeL.log(token); });
 	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('template', function(template) { CeL.log(template.toString()); }) && '';
 	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b<!--ff[[r]]-->[[t|e]]\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}[http://r.r ee]').parse();
 	CeL.wiki.parser('{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}').parse().each('table', function(table) { CeL.log(table); }) && '';
