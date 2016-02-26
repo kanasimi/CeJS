@@ -770,7 +770,7 @@ var wiki_toString = {
 
 // TODO: {{L<!-- -->L}} .valueOf() === '{{LL}}'
 // TODO: <p<!-- -->re>...</pre>
-// TODO: parse [[上海外国语大学]]
+// TODO: CeL.wiki.page('上海外国语大学',function(page_data){CeL.wiki.parser(page_data).parse();})
 /**
  * parse The MediaWiki markup language (wikitext).
  * 
@@ -991,80 +991,9 @@ function parse_wikitext(wikitext, options, queue) {
 	});
 
 	// ----------------------------------------------------
-	// [[Help:HTML in wikitext]]
-	// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
-
-	// 不採用 global pattern，預防 multitasking 並行處理。
-	var pattern = new RegExp('<(' + markup_tags
-			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'gi');
-
-	// HTML tags that must be closed
-	// <pre>...</pre>, <code>int f()</code>
-	wikitext = wikitext.replace_till_stable(pattern, function(all, tag,
-			attribute, inner, end_tag) {
-		// 自 end_mark 向前回溯。
-		var matched = inner.match(new RegExp(
-		//
-		'<(' + tag + ')(\\s[^<>]*)?>([\s\S]*?)$', 'i')), prevoius;
-		if (matched) {
-			prevoius = all.slice(0, -matched[0].length
-			// length of </end_tag>
-			- end_tag.length - 3);
-			tag = matched[1];
-			attribute = matched[2];
-			inner = matched[3];
-		} else {
-			prevoius = '';
-		}
-		library_namespace.debug(prevoius + ' + <' + tag + '>', 4,
-				'parse_wikitext.tag');
-
-		// 經過改變，需再進一步處理。
-		all = parse_wikitext(inner, options, queue);
-		if (all.type !== 'text')
-			all = [ all ];
-		if (normalize)
-			tag = tag.toLowerCase();
-		else if (tag !== end_tag)
-			all.end_tag = end_tag;
-		all.tag = tag;
-		all.unshift(parse_wikitext(attribute, options, queue));
-		_set_wiki_type(all, 'tag');
-		queue.push(all);
-		return prevoius + include_mark + (queue.length - 1) + end_mark;
-	});
-
-	// ----------------------------------------------------
-	// <hr />
-	// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
-	wikitext = wikitext.replace_till_stable(
-	// HTML tags that may not be closed
-	/<(nowiki|references|ref|[bh]r|li|d[td]|center)(\s[^<>]*|\/)?>/gi,
-	//
-	function(all, tag, attribute) {
-		if (attribute) {
-			if (normalize)
-				attribute = attribute.replace(/[\s\/]*$/, ' /');
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			all = parse_wikitext(attribute, options, queue);
-			if (all.type !== 'text')
-				all = [ all ];
-		} else
-			// use '' as attribute in case the .join() in .toString() doesn't
-			// work.
-			all = [ '' ];
-		if (normalize)
-			tag = tag.toLowerCase();
-		all.tag = tag;
-		_set_wiki_type(all, 'tag_single');
-		queue.push(all);
-		return include_mark + (queue.length - 1) + end_mark;
-	});
-
-	// ----------------------------------------------------
 	// {{{...}}} 需在 {{...}} 之前解析。
 	// https://zh.wikipedia.org/wiki/Help:%E6%A8%A1%E6%9D%BF
-	// 在模板頁面中，用三個大括弧可以讀取參數
+	// 在模板頁面中，用三個大括弧可以讀取參數。
 	// MediaWiki 會把{{{{{{XYZ}}}}}}解析為{{{ {{{XYZ}}} }}}而不是{{ {{ {{XYZ}} }} }}
 	wikitext = wikitext.replace_till_stable(/{{{([^{}][\s\S]*?)}}}/g, function(
 			all, parameters) {
@@ -1128,6 +1057,85 @@ function parse_wikitext(wikitext, options, queue) {
 	});
 
 	// ----------------------------------------------------
+	// [[Help:HTML in wikitext]]
+	// 由於 <tag>... 可能被 {{Template}} 截斷，因此先處理 {{Template}} 再處理 <t></t>。
+	// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
+
+	// 不採用 global pattern，預防 multitasking 並行處理。
+	var PATTERN_TAG = new RegExp('<(' + markup_tags
+			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'gi');
+
+	// HTML tags that must be closed.
+	// <pre>...</pre>, <code>int f()</code>
+	wikitext = wikitext.replace_till_stable(PATTERN_TAG, function(all, tag,
+			attribute, inner, end_tag) {
+		// 在章節標題、表格 td/th 或 template parameter 結束時，
+		// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
+		// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
+		if (/\n(?:[=|!]|\|})|[|!]{2}/.test(inner)) {
+			// 此時視為一般 text，當作未匹配 match 成功。
+			return all;
+		}
+		// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
+		var matched = inner.match(new RegExp(
+		//
+		'<(' + tag + ')(\\s[^<>]*)?>([\s\S]*?)$', 'i')), prevoius;
+		if (matched) {
+			prevoius = all.slice(0, -matched[0].length
+			// length of </end_tag>
+			- end_tag.length - 3);
+			tag = matched[1];
+			attribute = matched[2];
+			inner = matched[3];
+		} else {
+			prevoius = '';
+		}
+		library_namespace.debug(prevoius + ' + <' + tag + '>', 4,
+				'parse_wikitext.tag');
+
+		// 經過改變，需再進一步處理。
+		all = parse_wikitext(inner, options, queue);
+		if (all.type !== 'text')
+			all = [ all ];
+		if (normalize)
+			tag = tag.toLowerCase();
+		else if (tag !== end_tag)
+			all.end_tag = end_tag;
+		all.tag = tag;
+		all.unshift(parse_wikitext(attribute, options, queue));
+		_set_wiki_type(all, 'tag');
+		queue.push(all);
+		return prevoius + include_mark + (queue.length - 1) + end_mark;
+	});
+
+	// ----------------------------------------------------
+	// single tags. e.g., <hr />
+	// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
+	wikitext = wikitext.replace_till_stable(
+	// HTML tags that may not be closed
+	/<(nowiki|references|ref|[bh]r|li|d[td]|center)(\s[^<>]*|\/)?>/gi,
+	//
+	function(all, tag, attribute) {
+		if (attribute) {
+			if (normalize)
+				attribute = attribute.replace(/[\s\/]*$/, ' /');
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			all = parse_wikitext(attribute, options, queue);
+			if (all.type !== 'text')
+				all = [ all ];
+		} else
+			// use '' as attribute in case the .join() in .toString() doesn't
+			// work.
+			all = [ '' ];
+		if (normalize)
+			tag = tag.toLowerCase();
+		all.tag = tag;
+		_set_wiki_type(all, 'tag_single');
+		queue.push(all);
+		return include_mark + (queue.length - 1) + end_mark;
+	});
+
+	// ----------------------------------------------------
 	// table: \n{| ... \n|}
 	// 因為 table 中較可能包含 {{Template}}，但 {{Template}} 少包含 table，
 	// 因此先處理 {{Template}} 再處理 table。
@@ -1137,8 +1145,8 @@ function parse_wikitext(wikitext, options, queue) {
 		// 經測試，table 不會向前回溯。
 		// 處理表格標題。
 		var main_caption;
-		parameters = parameters.replace(/\n\|\+(.*)/g, function (all, caption) {
-			// '||': 應採用 /\n[!|]{1,2}|!!|\|\|/
+		parameters = parameters.replace(/\n\|\+(.*)/g, function(all, caption) {
+			// '||': 應採用 /\n[|!]{1,2}|\|\||!!/
 			caption = caption.split('||').map(function(piece) {
 				return parse_wikitext(piece, options, queue);
 			});
@@ -1167,13 +1175,15 @@ function parse_wikitext(wikitext, options, queue) {
 			// 分隔 <td>, <th>
 			// [ all, inner, delimiter ]
 			// 必須有實體才能如預期作 .exec()。
-			PATTERN_CELL = /([\s\S]*?)(\n[!|]{1,2}|!!|\|\||$)/g;
+			PATTERN_CELL = /([\s\S]*?)(\n[|!]{1,2}|\|\||!!|$)/g;
 			while (matched = PATTERN_CELL.exec(token)) {
-				if (matched[2].length === 3
+				if (matched[2].length === 3 && matched[2].charAt(2)
 				// e.g., "\n||| t"
-				&& matched[2].charAt(2) === token.charAt(PATTERN_CELL.lastIndex))
-					// 此時須回退 1 char
-					matched[2] = matched[2].slice(0, -1), PATTERN_CELL.lastIndex--;
+				=== token.charAt(PATTERN_CELL.lastIndex)) {
+					// 此時須回退 matched 1字元。
+					matched[2] = matched[2].slice(0, -1);
+					PATTERN_CELL.lastIndex--;
+				}
 				if (row || /[<>]/.test(token)) {
 					var cell = matched[1].match(/^([^|]+)(\|[\s\S]*)$/);
 					if (cell)
@@ -2940,7 +2950,7 @@ function get_list(type, title, callback, namespace) {
 		if(continue_wiki.constructor === wiki_API) {
 			library_namespace.debug('直接傳入了 {wiki_API}；可延續使用上次的後續檢索用索引值，避免重複 loading page。', 4, 'get_list');
 			// usage: options: { continue_wiki : wiki, get_continue : log_to }
-			// 注意:這裡會改變 options！
+			// 注意: 這裡會改變 options！
 			// assert: {Object}continue_wiki.next_mark
 			if (continue_from in continue_wiki.next_mark) {
 				// {String}continue_wiki.next_mark[continue_from]: 後續檢索用索引值。
@@ -2971,7 +2981,7 @@ function get_list(type, title, callback, namespace) {
 			callback : function(continuation_data) {
 				if (continuation_data = continuation_data[continue_from]) {
 					library_namespace.info('get_list: continue from [' + continuation_data + '] via page');
-					// 注意:這裡會改變 options！
+					// 注意: 這裡會改變 options！
 					// 刪掉標記，避免無窮迴圈。
 					delete options.get_continue;
 					// 設定/紀錄後續檢索用索引值，避免無窮迴圈。
