@@ -301,7 +301,7 @@ function normalize_name_pattern(file_name, add_group, remove_namespace) {
 	// wiki file 首字不區分大小寫。
 	// the case of the first letter is not significant.
 	library_namespace.ignore_first_char_case(
-	// escape 特殊字元。注意:照理說來檔案或模板名不應該具有特殊字元!
+	// escape 特殊字元。注意:照理說來檔案或模板名不應該具有特殊字元！
 	library_namespace.to_RegExp_pattern(String(file_name).trim()))
 	// 不區分空白與底線。
 	.replace(/[ _]/g, '[ _]');
@@ -433,7 +433,8 @@ function set_wiki_type(token, type) {
 	}
 	// assert: Array.isArray(token)
 	token.type = type;
-	token.is_atom = type in atom_type;
+	if (type in atom_type)
+		token.is_atom = true;
 	// check
 	if (false && !wiki_toString[type])
 		throw new Error('.toString() not exists for type [' + type + ']!');
@@ -493,7 +494,7 @@ var page_prototype = {
 page_parser.type_alias = {
 	row : 'table_row',
 	tr : 'table_row',
-	// table_cell 包含 th + td !
+	// table_cell 包含 th + td，須自行判別！
 	th : 'table_cell',
 	td : 'table_cell',
 	template : 'transclusion',
@@ -544,7 +545,7 @@ function for_each_token(type, processor, modify_this) {
 			if (!type
 			// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
 			|| type === (Array.isArray(token) ? token.type : 'plain')) {
-				// get result. 須注意: 此 token 可能為 Array, string, undefined!
+				// get result. 須注意: 此 token 可能為 Array, string, undefined！
 				var result = processor(token, _this, index);
 				if (modify_this) {
 					if (typeof result === 'string')
@@ -710,6 +711,11 @@ var wiki_toString = {
 	table : function() {
 		// this: [ table style, row, row, ... ]
 		return '{|' + this.join('\n|-') + '\n|}';
+	},
+	// table caption
+	caption : function() {
+		// this: [ main caption, invalid caption, ... ]
+		return '\n|+' + this.join('||');
 	},
 	table_row : function() {
 		// this: [ row style, cell, cell, ... ]
@@ -918,7 +924,7 @@ function parse_wikitext(wikitext, options, queue) {
 	});
 
 	// ----------------------------------------------------
-	// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可!
+	// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
 	// [[~:~|~]], [[~:~:~|~]]
 	wikitext = wikitext.replace_till_stable(
 	// or use ((PATTERN_link))
@@ -1129,6 +1135,22 @@ function parse_wikitext(wikitext, options, queue) {
 	wikitext = wikitext.replace_till_stable(/\n{\|([\s\S]*?)\n\|}/g, function(
 			all, parameters) {
 		// 經測試，table 不會向前回溯。
+		// 處理表格標題。
+		var main_caption;
+		parameters = parameters.replace(/\n\|\+(.*)/g, function (all, caption) {
+			// '||': 應採用 /\n[!|]{1,2}|!!|\|\|/
+			caption = caption.split('||').map(function(piece) {
+				return parse_wikitext(piece, options, queue);
+			});
+			if (main_caption === undefined)
+				// 表格標題以首次出現的為主。
+				// .toString(): 可能會包括 include_mark, end_mark，應去除之！
+				main_caption = caption[0].toString().trim();
+			// 'table_caption'
+			caption = _set_wiki_type(caption, 'caption');
+			queue.push(caption);
+			return include_mark + (queue.length - 1) + end_mark;
+		});
 		// 添加新行由一個豎線和連字符 "|-" 組成。
 		parameters = parameters.split('\n|-').map(function(token, index) {
 			if (index === 0
@@ -1137,13 +1159,21 @@ function parse_wikitext(wikitext, options, queue) {
 			// 含有 delimiter 的話，即使位在 "{|" 之後，依舊會被當作 row。
 			&& !/\n[!|]|!!|\|\|/.test(token)) {
 				// table style / format modifier (not displayed)
+				// 'table_style'
 				// "\n|-" 後面的 string
 				return _set_wiki_type(token, 'style');
 			}
 			var row, matched, delimiter,
+			// 分隔 <td>, <th>
+			// [ all, inner, delimiter ]
 			// 必須有實體才能如預期作 .exec()。
-			pattern = /([\s\S]*?)(\n[!|]|!!|\|\||$)/g;
-			while (matched = pattern.exec(token)) {
+			PATTERN_CELL = /([\s\S]*?)(\n[!|]{1,2}|!!|\|\||$)/g;
+			while (matched = PATTERN_CELL.exec(token)) {
+				if (matched[2].length === 3
+				// e.g., "\n||| t"
+				&& matched[2].charAt(2) === token.charAt(PATTERN_CELL.lastIndex))
+					// 此時須回退 1 char
+					matched[2] = matched[2].slice(0, -1), PATTERN_CELL.lastIndex--;
 				if (row || /[<>]/.test(token)) {
 					var cell = matched[1].match(/^([^|]+)(\|[\s\S]*)$/);
 					if (cell)
@@ -1191,6 +1221,8 @@ function parse_wikitext(wikitext, options, queue) {
 		});
 
 		_set_wiki_type(parameters, 'table');
+		if (main_caption !== undefined)
+			parameters.caption = main_caption;
 		queue.push(parameters);
 		// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
 		return '\n' + include_mark + (queue.length - 1) + end_mark;
@@ -1732,7 +1764,7 @@ wiki_API.prototype.next = function() {
 				// get the contents
 				if (typeof next[1] === 'function') {
 					// next[1] = next[1](get_page_content(this.last_page), this.last_page.title, this.last_page);
-					// 需要同時改變 wiki_API.edit!
+					// 需要同時改變 wiki_API.edit！
 					next[1] = next[1](this.last_page);
 				}
 				edit_topic([ this.API_URL, this.last_page ],
@@ -1761,7 +1793,7 @@ wiki_API.prototype.next = function() {
 		} else {
 			if (typeof next[1] === 'function') {
 				// next[1] = next[1](get_page_content(this.last_page), this.last_page.title, this.last_page);
-				// 需要同時改變 wiki_API.edit!
+				// 需要同時改變 wiki_API.edit！
 				next[1] = next[1](this.last_page);
 			}
 			if (next[2] && next[2].skip_nochange
@@ -1910,7 +1942,7 @@ function add_message(message, title) {
 
 /**
  * robot 作業操作之輔助套裝函數。<br />
- * 不會推入 this.actions queue，即時執行。因此需要先 get list!
+ * 不會推入 this.actions queue，即時執行。因此需要先 get list！
  * 
  * @param {Object}config
  *            configuration
@@ -2862,7 +2894,7 @@ function get_continue(title, callback) {
 
 /**
  * get list. 檢索/提取列表<br />
- * 注意:可能會改變 options!
+ * 注意: 可能會改變 options！
  *
  * @param {String}type
  *            one of get_list.type
@@ -2908,7 +2940,7 @@ function get_list(type, title, callback, namespace) {
 		if(continue_wiki.constructor === wiki_API) {
 			library_namespace.debug('直接傳入了 {wiki_API}；可延續使用上次的後續檢索用索引值，避免重複 loading page。', 4, 'get_list');
 			// usage: options: { continue_wiki : wiki, get_continue : log_to }
-			// 注意:這裡會改變 options!
+			// 注意:這裡會改變 options！
 			// assert: {Object}continue_wiki.next_mark
 			if (continue_from in continue_wiki.next_mark) {
 				// {String}continue_wiki.next_mark[continue_from]: 後續檢索用索引值。
@@ -2939,7 +2971,7 @@ function get_list(type, title, callback, namespace) {
 			callback : function(continuation_data) {
 				if (continuation_data = continuation_data[continue_from]) {
 					library_namespace.info('get_list: continue from [' + continuation_data + '] via page');
-					// 注意:這裡會改變 options!
+					// 注意:這裡會改變 options！
 					// 刪掉標記，避免無窮迴圈。
 					delete options.get_continue;
 					// 設定/紀錄後續檢索用索引值，避免無窮迴圈。
@@ -3135,7 +3167,7 @@ get_list.type = {
 	methods.forEach(function(method) {
 		library_namespace.debug('add action to wiki_API.prototype: ' + method, 2);
 		wiki_API.prototype[method] = function() {
-			// assert: 不可改動 method @ IE!
+			// assert: 不可改動 method @ IE！
 			var args = [ method ];
 			Array.prototype.push.apply(args, arguments);
 			library_namespace.debug('add action: ' + args.join('<br />\n'), 3, 'wiki_API.prototype.' + method);
@@ -3152,7 +3184,7 @@ get_list.type = {
 
 /**
  * 取得完整 list 後才作業。<br />
- * 注意:可能會改變 options!
+ * 注意: 可能會改變 options！
  * 
  * @param {String}target
  *            page title 頁面標題。
@@ -3457,7 +3489,7 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 				callback(get_page_title(page_data), 'denied');
 			} else {
 				// text(get_page_content(page_data), page_data.title, page_data)
-				// 需要同時改變 wiki_API.prototype.next!
+				// 需要同時改變 wiki_API.prototype.next！
 				wiki_API.edit(page_data, text(page_data), token, options, callback);
 			}
 		});
@@ -3570,7 +3602,7 @@ wiki_API.edit.cancel = {
 /**
  * 處理編輯衝突用。 to detect edit conflicts.
  * 
- * 注意:會改變 options! Warning: will modify options!
+ * 注意: 會改變 options! Warning: will modify options！
  * 
  * 此功能之工作機制/原理：<br />
  * 在 .page() 會取得每個頁面之 page_data.revisions[0].timestamp（各頁面不同）。於
@@ -4054,7 +4086,7 @@ wiki_API.cache = function(operation, callback, _this) {
 			list = list.call(_this, operation);
 
 		// 自行設定之檔名 operation.file_name 優先度較 type/title 高。
-		// 需要自行創建目錄!
+		// 需要自行創建目錄！
 		file_name = _this[type + '_prefix'] || type;
 		file_name = [ file_name ? file_name + '/' : '',
 		//
@@ -4121,7 +4153,7 @@ wiki_API.cache = function(operation, callback, _this) {
 			library_namespace.debug('Cached data: [' + data.slice(0, 200)
 					+ ']...', 5, 'wiki_API.cache');
 			finish_work(use_JSON ? data ? JSON.parse(data)
-			// error? 注意: 若中途 about，此時可能需要手動刪除大小為 0 的 cache file!
+			// error? 注意: 若中途 about，此時可能需要手動刪除大小為 0 的 cache file！
 			: undefined : data);
 			return;
 		}
