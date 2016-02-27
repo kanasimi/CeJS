@@ -774,7 +774,7 @@ var wiki_toString = {
 /**
  * parse The MediaWiki markup language (wikitext).
  * 
- * TODO: 提高效率。<br />
+ * TODO: 提高效率。e.g., [[三国杀武将列表]]<br />
  * TODO: 可能為模板參數特殊設計？有些 template 內含不完整的起始或結尾，使 parameter 亦未首尾對應。
  * 
  * 此功能之工作機制/原理：<br />
@@ -1146,7 +1146,7 @@ function parse_wikitext(wikitext, options, queue) {
 		// 處理表格標題。
 		var main_caption;
 		parameters = parameters.replace(/\n\|\+(.*)/g, function(all, caption) {
-			// '||': 應採用 /\n[|!]{1,2}|\|\||!!/
+			// '||': 應採用 /\n(?:\|\|?|!)|\|\||!!/
 			caption = caption.split('||').map(function(piece) {
 				return parse_wikitext(piece, options, queue);
 			});
@@ -1175,12 +1175,13 @@ function parse_wikitext(wikitext, options, queue) {
 			// 分隔 <td>, <th>
 			// [ all, inner, delimiter ]
 			// 必須有實體才能如預期作 .exec()。
-			PATTERN_CELL = /([\s\S]*?)(\n[|!]{1,2}|\|\||!!|$)/g;
+			// "\n|| t" === "\n| t"
+			PATTERN_CELL = /([\s\S]*?)(\n(?:\|\|?|!)|\|\||!!|$)/g;
 			while (matched = PATTERN_CELL.exec(token)) {
 				if (matched[2].length === 3 && matched[2].charAt(2)
 				// e.g., "\n||| t"
 				=== token.charAt(PATTERN_CELL.lastIndex)) {
-					// 此時須回退 matched 1字元。
+					// 此時 matched 須回退 1字元。
 					matched[2] = matched[2].slice(0, -1);
 					PATTERN_CELL.lastIndex--;
 				}
@@ -1202,16 +1203,21 @@ function parse_wikitext(wikitext, options, queue) {
 							cell = [ cell ];
 					}
 					_set_wiki_type(cell, 'table_cell');
+
 					if (delimiter) {
 						cell.delimiter = delimiter;
-						cell.table_type
-						//
-						= delimiter.includes('!') ? 'th' : 'td';
+						cell.is_head = delimiter.startsWith('\n')
+						// TODO: .is_head, .table_type 擇一。
+						? delimiter.endsWith('!') : row.is_head;
+						// is cell <th> or <td> ?
+						cell.table_type = cell.is_head ? 'th' : 'td';
 					}
+
 					if (!row)
 						row = [];
 					row.push(cell);
-				} else
+
+				} else {
 					// assert: matched.index === 0
 					row = [ matched[1].includes(include_mark)
 					// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
@@ -1220,11 +1226,25 @@ function parse_wikitext(wikitext, options, queue) {
 					: _set_wiki_type(matched[1],
 					// row style / format modifier (not displayed)
 					'style') ];
+				}
 
+				// matched[2] 屬於下一 cell。
 				delimiter = matched[2];
 				if (!delimiter)
 					// assert: /$/, no separater, ended.
 					break;
+
+				// assert: !!delimiter === true, and is the first time matched.
+				if (!('is_head' in row)
+				// 初始設定本行之 type。
+				&& !(row.is_head = delimiter.includes('!'))) {
+					// 經測試，當此行非 table head 時，會省略 '!!' 不匹配。
+					// 但 '\n!' 仍有作用。
+					var lastIndex = PATTERN_CELL.lastIndex;
+					// console.log("省略 '!!' 不匹配: " + token.slice(lastIndex));
+					PATTERN_CELL = /([\s\S]*?)(\n(?:\|\|?|!)|\|\||$)/g;
+					PATTERN_CELL.lastIndex = lastIndex;
+				}
 			}
 			// assert: Array.isArray(row)
 			return _set_wiki_type(row, 'table_row');
