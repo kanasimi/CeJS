@@ -227,7 +227,8 @@ function (global) {
 	prototype = {
 	};
 
-	_.library_version = library_version;
+	//_.library_version =
+	_.version = library_version;
 	_.build_date = new Date();
 
 	// name-space 歸屬設定

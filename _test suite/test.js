@@ -13,6 +13,9 @@
 (git push)
 
 # npm publish
+$ npm install cejs
+$ npm update
+## after update, the old package will be preserved.
 
 # npm view
 

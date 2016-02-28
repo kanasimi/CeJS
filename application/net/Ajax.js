@@ -760,7 +760,11 @@ function get_URL_node(URL, onload, charset, post_data) {
 get_URL_node.default_user_agent = 'CeJS get_URL_node()';
 
 
-if (library_namespace.platform.nodejs) {
+// setup/reset node agent.
+function setup_node() {
+	if (!library_namespace.platform.nodejs)
+		return;
+
 	node_url = require('url');
 	node_http = require('http');
 	node_https = require('https');
@@ -774,6 +778,11 @@ if (library_namespace.platform.nodejs) {
 	_.get_URL = library_namespace.copy_properties(get_URL, get_URL_node);
 }
 
+_.setup_node_net = setup_node;
+
+// CeL.application.net.Ajax.setup_node_net();
+// library_namespace.application.net.Ajax.setup_node_net();
+setup_node();
 
 //---------------------------------------------------------------------//
 // TODO: for non-nodejs

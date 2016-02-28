@@ -537,6 +537,11 @@ function for_each_token(type, processor, modify_this) {
 	if (type in page_parser.type_alias)
 		type = page_parser.type_alias[type];
 
+	if(!this.parsed)
+		// 因為本函數為 CeL.wiki.parser(content) 最常使用者，
+		// 因此放在這少一道 .parse() 工序。
+		this.parse();
+
 	function travel(_this) {
 		_this.forEach(function(token, index) {
 			// console.log('token:');
@@ -1852,6 +1857,9 @@ wiki_API.prototype.next = function() {
 							//return;
 						}
 						library_namespace.info('wiki_API.prototype.next: Try to get token again. 似乎丟失了 token，嘗試重新取得 token。');
+						// reset node agent.
+						// [[Wikipedia:机器人/申请/Cewbot/8]] 恐需要連 HTTP handler 都重換一個，重起 cookie。
+						library_namespace.application.net.Ajax.setup_node_net();
 						// rollback
 						_this.actions.unshift(next);
 						if (result === '') {
