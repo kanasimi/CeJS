@@ -22,6 +22,8 @@ $ npm update
 TODO: https://github.com/kanasimi/CeJS/tags
 # git tag "v2.0.0" master
 
+# ** package.json should be ASCII for some programs may extract files directly and npm don't know how to read Unicode.
+
  * </code>
  *
  * @since 2015/10/17 14:5:49
