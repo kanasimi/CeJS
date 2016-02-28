@@ -122,15 +122,18 @@ if (typeof CeL === 'function')
 			 */
 			function create_directory(directories, mode) {
 				// var node_fs = require('fs');
-				if (isNaN(mode))
-					mode = node_fs.F_OK | node_fs.R_OK | node_fs.W_OK
-							| node_fs.X_OK;
 				var error = 0;
 				directories.forEach(function(directory_name) {
 					try {
-						node_fs.accessSync(directory_name);
+						node_fs.accessSync(directory_name, node_fs.F_OK
+						//
+						| node_fs.R_OK | node_fs.W_OK | node_fs.X_OK);
 					} catch (e) {
 						try {
+							if (isNaN(mode))
+								mode = parseInt('700', 8)
+								//
+								| (parseInt('777', 8) ^ process.umask());
 							node_fs.mkdirSync(directory_name, mode);
 						} catch (e) {
 							if (e.code !== 'EEXIST')

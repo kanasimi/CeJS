@@ -774,7 +774,7 @@ var wiki_toString = {
 /**
  * parse The MediaWiki markup language (wikitext).
  * 
- * TODO: 提高效率。e.g., [[三国杀武将列表]]<br />
+ * TODO: 提高效率。e.g., [[三国杀武将列表]], [[世界大桥列表]], [[三国杀武将列表]]<br />
  * TODO: 可能為模板參數特殊設計？有些 template 內含不完整的起始或結尾，使 parameter 亦未首尾對應。
  * 
  * 此功能之工作機制/原理：<br />
