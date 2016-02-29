@@ -4216,23 +4216,38 @@ wiki_API.cache = function(operation, callback, _this) {
 				library_namespace.debug('Cache data: '
 						+ (data && JSON.stringify(data).slice(0, 190)) + '...',
 						3, 'wiki_API.cache.write_cache');
-				node_fs.writeFile(file_name, use_JSON ? JSON.stringify(data)
-						: data, encoding, function(error) {
-					var matched = error && error.code === 'ENOENT'
+				var write = function() {
+					// 為了預防需要建立目錄，影響到後面的作業，
+					// 因此採用 fs.writeFileSync() 而非 fs.writeFile()。
+					node_fs.writeFileSync(file_name, use_JSON ? JSON
+							.stringify(data) : data, encoding);
+				};
+				try {
+					write();
+				} catch (error) {
+					// assert: 此 error.code 表示上層目錄不存在。
+					var matched = error.code === 'ENOENT'
 					// 未設定 operation.mkdir 的話，預設會自動嘗試建立目錄。
 					&& try_mkdir !== false
-					// assert: 此 error.code 表示上層目錄不存在。
+					//
 					&& file_name.match(/[\\\/][^\\\/]+$/);
 					if (matched) {
 						// 僅測試一次。設定 "已嘗試過" flag。
 						try_mkdir = false;
-						// create directory
+						// create parent directory
 						library_namespace.fs_mkdir(file_name.slice(0,
 								matched.index));
 						// re-write file again.
-						write_cache(data);
+						try {
+							write();
+						} catch (e) {
+							library_namespace.err(
+							//
+							'wiki_API.cache: Error to write cache data!');
+							library_namespace.err(e);
+						}
 					}
-				});
+				}
 			}
 			finish_work(data);
 		}

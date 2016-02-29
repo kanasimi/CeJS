@@ -410,19 +410,17 @@ if (typeof CeL === 'function')
 						// 使用較原始的方法。
 						new_hash_set = function() {
 							var hash_map = {};
-							return [
-									hash_map,
-									// has_hash()
-									hash_map.hasOwnProperty ? function(key) {
-										return hash_map.hasOwnProperty(key);
-									}
-											: Object.prototype ? function(key) {
-												return key in hash_map
-														&& hash_map[key] !== Object.prototype[key];
-											}
-													: function(key) {
-														return key in hash_map;
-													} ];
+							return [ hash_map,
+							// has_hash()
+							hash_map.hasOwnProperty ? function(key) {
+								return hash_map.hasOwnProperty(key);
+							} : Object.prototype ? function(key) {
+								return key in hash_map
+								//
+								&& hash_map[key] !== Object.prototype[key];
+							} : function(key) {
+								return key in hash_map;
+							} ];
 						};
 					}
 
@@ -749,13 +747,14 @@ if (typeof CeL === 'function')
 								// incase NaN. 可用 Number.isNaN().
 								// 但不可用 isNaN(key), 因為 isNaN(非數字) === true.
 								if (key !== key) {
-									for (var i = 0, length = list.length; i < length; i++)
+									for (var i = 0, length = list.length; i < length; i++) {
 										// 若具有所有可偵測的相同特徵(特徵碼相同+本身與本身不相等)，
 										// 則判別為相同。
 										if (list[i] !== list[i]) {
 											index = i;
 											break;
 										}
+									}
 								}
 
 							}
@@ -1043,8 +1042,9 @@ if (typeof CeL === 'function')
 							}, this);
 							// last check.
 							if (this.size > 0)
-								library_namespace
-										.warn('collection_clear: 仍有元素存在於 collection 中！');
+								library_namespace.warn(
+								//
+								'collection_clear: 仍有元素存在於 collection 中！');
 						}
 					}
 
@@ -2096,24 +2096,28 @@ if (typeof CeL === 'function')
 						 * Extend to specified name-space that you can use
 						 * [name_space]._func_ to run it.
 						 */
-						extend_to = 'extend_to' in declaration ? declaration.extend_to
-								/**
-								 * 預設會 extend 到 library 本身之下。<br />
-								 * extend to root of this library.<br />
-								 * 
-								 * e.g., call CeL._function_name_ and we can get
-								 * the specified function.
-								 */
-								: library_namespace;
+						extend_to = 'extend_to' in declaration
+						//
+						? declaration.extend_to
+						/**
+						 * 預設會 extend 到 library 本身之下。<br />
+						 * extend to root of this library.<br />
+						 * 
+						 * e.g., call CeL._function_name_ and we can get the
+						 * specified function.
+						 */
+						: library_namespace;
 
 						if (extend_to) {
 							library_namespace.debug(
-									'設定完 name space。執行擴充 member 的工作。'
-									//
-									+ (extend_to === library_namespace
-									//
-									? '將 extend 到 library 本身之下。' : ''), 2,
-									'load_named');
+							//
+							'設定完 name space。執行擴充 member 的工作。'
+							//
+							+ (extend_to === library_namespace
+							//
+							? '將 extend 到 library 本身之下。' : ''),
+							//
+							2, 'load_named');
 
 							if (no_extend = declaration[library_namespace.env.not_to_extend_keyword]) {
 								if (typeof no_extend === 'string')
@@ -2155,8 +2159,9 @@ if (typeof CeL === 'function')
 										}, l);
 									for (i in initializator) {
 										if (i in l)
-											library_namespace.debug('目的基底 ['
-													+ name + '] 已有 [' + i
+											library_namespace.debug(
+											//
+											'目的基底 [' + name + '] 已有 [' + i
 													+ ']，將取代之。', 1,
 													'load_named');
 										l[i] = initializator[i];
@@ -2185,17 +2190,15 @@ if (typeof CeL === 'function')
 
 									if ((i in extend_to)
 											&& library_namespace.is_debug())
-										library_namespace
-												.warn('load_named: 將以 ['
-														+ id
-														+ '.'
-														+ i
-														+ '] 取代擴充目的基底之同名 property'
-														+ (library_namespace
-																.is_debug(2) ? ' ['
-																+ extend_to[i]
-																+ ']'
-																: '') + '。');
+										library_namespace.warn(
+										//
+										'load_named: 將以 [' + id + '.' + i
+										//
+										+ '] 取代擴充目的基底之同名 property'
+										//
+										+ (library_namespace.is_debug(2) ? ' ['
+										//
+										+ extend_to[i] + ']' : '') + '。');
 
 									extend_to[i] = initializator[i];
 								}
@@ -2256,17 +2259,18 @@ if (typeof CeL === 'function')
 						if (external) {
 							declaration.included = !failed;
 							library_namespace.debug(
-									'由於引用的是 library 外部檔案，自動將之設定為 included '
-											+ (declaration.included ? '成功'
-													: '失敗') + '。', 5,
-									'load_named.is_external');
+							//
+							'由於引用的是 library 外部檔案，自動將之設定為 included '
+									+ (declaration.included ? '成功' : '失敗')
+									+ '。', 5, 'load_named.is_external');
 						}
 						return external;
 					};
 
 					library_namespace.debug(
-							'準備載入 (load) [<a style="color:#ef0;background-color:#018;" href="'
-									+ encodeURI(URL) + '">' + id + '</a>]。', 5,
+					//
+					'準備載入 (load) [<a style="color:#ef0;background-color:#018;" href="'
+							+ encodeURI(URL) + '">' + id + '</a>]。', 5,
 							'load_named');
 
 					// ---------------------------------------
@@ -2323,18 +2327,19 @@ if (typeof CeL === 'function')
 
 							// 以 .get_file() 成功依序載入結束。
 							if (!('included' in declaration) && !is_external())
-								library_namespace
-										.warn('load_named: 雖已處理完 [<a href="'
-												+ encodeURI(URL)
-												+ '">'
-												+ id
-												+ '</a>] ，但程式碼並未使用所規範的方法來載入，導致 included flag 未被設定！');
+								library_namespace.warn(
+								//
+								'load_named: 雖已處理完 [<a href="'
+								//
+								+ encodeURI(URL) + '">' + id + '</a>] ，'
+								//
+								+ '但程式碼並未使用所規範的方法來載入，導致 included flag 未被設定！');
 
 							if (declaration.included) {
 								library_namespace.debug(
-										'已 include [<a href="' + encodeURI(URL)
-												+ '">' + id + '</a>]。', 5,
-										'load_named');
+								//
+								'已 include [<a href="' + encodeURI(URL) + '">'
+										+ id + '</a>]。', 5, 'load_named');
 								return PROCESSED;
 							}
 
@@ -2356,16 +2361,17 @@ if (typeof CeL === 'function')
 								if (library_namespace
 										.is_type(e, 'DOMException')
 										&& e.code === 1012) {
-									library_namespace
-											.err('load_named:\n'
-													+ e.message
-													+ '\n'
-													+ URL
-													+ '\n\n程式可能呼叫了一個'
-													+ (library_namespace
-															.is_local() ? '不存在的，\n或是繞經上層目錄'
-															: 'cross domain')
-													+ '的檔案？\n\n請嘗試使用相對路徑，\n或 call .run()。');
+									library_namespace.err(
+									//
+									'load_named:\n' + e.message + '\n'
+									//
+									+ URL + '\n\n程式可能呼叫了一個'
+									//
+									+ (library_namespace.is_local()
+									//
+									? '不存在的，\n或是繞經上層目錄' : 'cross domain')
+									//
+									+ '的檔案？\n\n請嘗試使用相對路徑，\n或 call .run()。');
 								} else if (
 								// 系統找不到指定的資源/存取被拒。
 								library_namespace.is_type(e, 'Error')
@@ -2375,40 +2381,52 @@ if (typeof CeL === 'function')
 										&& ('' + e.message)
 												.indexOf('NS_ERROR_FILE_NOT_FOUND') !== NOT_FOUND) {
 									if (library_namespace.is_debug())
-										library_namespace
-												.err('load_named: 檔案可能不存在或存取被拒？\n['
-														+ URL
-														+ ']'
-														+ (library_namespace.get_error_message ? ('<br />' + library_namespace
-																.get_error_message(e))
-																: '\n'
-																		+ e.message));
+										library_namespace.err(
+										//
+										'load_named: 檔案可能不存在或存取被拒？\n['
+										//
+										+ URL + ']' + (
+										//
+										library_namespace.get_error_message
+										//
+										? ('<br />' + library_namespace
+										//
+										.get_error_message(e))
+										//
+										: '\n' + e.message));
 								} else if (library_namespace.is_debug())
-									library_namespace
-											.err('load_named: Cannot load [<a href="'
-													+ encodeURI(URL)
-													+ '">'
-													+ id
-													+ '</a>]!'
-													+ (library_namespace.get_error_message ? ('<br />'
-															+ library_namespace
-																	.get_error_message(e) + '<br />')
-															: '\n['
-																	+ (e.constructor)
-																	+ '] '
-																	+ (e.number ? (e.number & 0xFFFF)
-																			: e.code)
-																	+ ': '
-																	+ e.message
-																	+ '\n')
-													+ '抱歉！在載入其他網頁時發生錯誤，有些功能可能失常。\n重新讀取(reload)，或是過段時間再嘗試或許可以解決問題。');
+									library_namespace.err(
+									//
+									'load_named: Cannot load [<a href="'
+									//
+									+ encodeURI(URL) + '">' + id + '</a>]!' + (
+									//
+									library_namespace.get_error_message
+									//
+									? ('<br />' +
+									//
+									library_namespace.get_error_message(e)
+									//
+									+ '<br />') : '\n[' + (e.constructor)
+									//
+									+ '] '
+									//
+									+ (e.number ? (e.number & 0xFFFF) : e.code)
+									//
+									+ ': ' + e.message + '\n')
+									//
+									+ '抱歉！在載入其他網頁時發生錯誤，有些功能可能失常。\n'
+									//
+									+ '重新讀取(reload)，或是過段時間再嘗試或許可以解決問題。');
 							}
 
 							// 不能直接用 .get_file()，得採用異序(asynchronously,不同時)的方式載入。
 							library_namespace.debug(
-									'Cannot load [' + id
-											+ ']! 以 .get_file() 依序載入的方法失敗：'
-											+ e.message, 2, 'load_named');
+							//
+							'Cannot load [' + id
+							//
+							+ ']! 以 .get_file() 依序載入的方法失敗：' + e.message, 2,
+									'load_named');
 
 							// 除非為 eval 錯誤，否則不設定 .included。
 							if (!library_namespace.env.same_origin_policy) {
@@ -2798,7 +2816,7 @@ if (typeof CeL === 'function')
 					library_namespace.debug('[' + id
 							+ '] 之善後/收尾工作函式已執行完畢，清除 cache/stack…', 5,
 							'load_named');
-				// release. 早點 delete 以釋放記憶體空間/資源。
+				// release. delete cache, 早點 delete 以釋放記憶體空間/資源。
 				// 預防出現問題，如 memory leak 等。
 				delete declaration.code;
 				delete declaration.finish;
