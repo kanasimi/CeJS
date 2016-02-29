@@ -10,7 +10,7 @@
  */
 
 // TODO:
-// 遇到 Invalid token 之類問題，中途跳出 about 時，無法紀錄。應將紀錄顯示於 console。
+// 遇到 Invalid token 之類問題，中途跳出 about 時，無法紀錄。應將紀錄顯示於 console 或 local file。
 // [[WP:維基化]]
 // https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 // https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
@@ -21,6 +21,7 @@
 //'use asm';
 
 // More examples: see /_test suite/test.js
+// Wikipedia bots demo: https://github.com/kanasimi/wikibot
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -32,6 +33,7 @@ name : 'application.net.wiki',
 // .between() @ data.native
 // (new Date).format('%4Y%2m%2d'), (new Date).format() @ data.date
 // optional: .show_value() @ interact.DOM, application.debug
+// optional: .fs_mkdir() @ CeL.wiki.cache() @ application.platform.nodejs
 require : 'data.code.compatibility.|data.native.|application.net.Ajax.get_URL|data.date.',
 code : function(library_namespace) {
 
@@ -4032,7 +4034,8 @@ application.net.wiki wiki_API.cache() CeL.wiki.cache()
 
 
 /**
- * cache 作業操作之輔助套裝函數。
+ * cache 作業操作之輔助套裝函數。<br />
+ * only for node.js.
  * 
  * 注意: 需要自行先創建各 type 之次目錄，如 page, redirects, embeddedin, ...<br />
  * 注意: 會改變 operation, _this! Warning: will modify operation, _this!
@@ -4110,8 +4113,12 @@ wiki_API.cache = function(operation, callback, _this) {
 	if (typeof file_name === 'function')
 		file_name = file_name.call(_this, operation);
 
-	// operation.type: method to get data
-	var type = operation.type,
+	var
+	/** {String}method to get data */
+	type = operation.type,
+	/** {Boolean}是否自動嘗試建立目錄。 */
+	try_mkdir = typeof library_namespace.fs_mkdir === 'function'
+			&& operation.mkdir,
 	//
 	operator = typeof operation.operator === 'function' && operation.operator,
 	//
@@ -4200,7 +4207,7 @@ wiki_API.cache = function(operation, callback, _this) {
 				'wiki_API.cache');
 
 		/**
-		 * 寫入cache。
+		 * 寫入 cache 至檔案系統。
 		 */
 		function write_cache(data) {
 			if (/[^\\\/]$/.test(file_name)) {
@@ -4210,7 +4217,22 @@ wiki_API.cache = function(operation, callback, _this) {
 						+ (data && JSON.stringify(data).slice(0, 190)) + '...',
 						3, 'wiki_API.cache.write_cache');
 				node_fs.writeFile(file_name, use_JSON ? JSON.stringify(data)
-						: data, encoding);
+						: data, encoding, function(error) {
+					var matched = error && error.code === 'ENOENT'
+					// 未設定 operation.mkdir 的話，預設會自動嘗試建立目錄。
+					&& try_mkdir !== false
+					// assert: 此 error.code 表示上層目錄不存在。
+					&& file_name.match(/[\\\/][^\\\/]+$/);
+					if (matched) {
+						// 僅測試一次。設定 "已嘗試過" flag。
+						try_mkdir = false;
+						// create directory
+						library_namespace.fs_mkdir(file_name.slice(0,
+								matched.index));
+						// re-write file again.
+						write_cache(data);
+					}
+				});
 			}
 			finish_work(data);
 		}
