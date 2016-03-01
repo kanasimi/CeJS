@@ -4000,6 +4000,9 @@ wiki_API.redirects.count = function(root_name_hash, embeddedin_list) {
 
 //---------------------------------------------------------------------//
 
+/** {String}default language */
+var default_language = 'zh';
+
 /** {Object|Function}fs in node.js */
 var node_fs;
 try {
@@ -4019,6 +4022,131 @@ try {
 		writeFile : library_namespace.null_function
 	};
 }
+
+
+//---------------------------------------------------------------------//
+// SQL 相關函數
+
+var
+// http://stackoverflow.com/questions/9080085/node-js-find-home-directory-in-platform-agnostic-way
+// Windows: process.platform.toLowerCase().startsWith('win')
+/** {String}user home directory */
+home_directory = process.env.HOME || process.env.USERPROFILE,
+/** {String}user/bot name */
+user_name,
+/** {String}Tool Labs name */
+wmflabs;
+
+// only for node.js.
+// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#How_can_I_detect_if_I.27m_running_in_Labs.3F_And_which_project_.28tools_or_toolsbeta.29.3F
+if (node_fs) {
+	/** {String}Tool Labs name */
+	wmflabs = node_fs.existsSync('/etc/wmflabs-project')
+			&& process.env.INSTANCENAME;
+}
+
+if (wmflabs) {
+	wiki_API.wmflabs = wmflabs;
+}
+
+if (home_directory && (home_directory = home_directory.replace(/[^\\\/]$/, ''))) {
+	user_name = home_directory.match(/[^\\\/]+$/);
+	user_name = user_name ? user_name[0] : undefined;
+	if (user_name)
+		wiki_API.user_name = user_name;
+	home_directory += library_namespace.env.path_separator;
+}
+
+/**
+ * 讀取並解析出 SQL 設定。
+ * 
+ * @param {String}file_name
+ *            file name
+ * 
+ * @returns {Object}SQL config
+ */
+function parse_SQL_config(file_name) {
+	var config;
+	try {
+		config = library_namespace.get_file(file_name);
+	} catch (e) {
+		library_namespace.err('Can not read config file!');
+		return;
+	}
+
+	// 應該用 parser。
+	var user = config.match(/\n\s*user\s*=\s*([^\s]+)/), password;
+	if (!user || !(password = config.match(/\n\s*password\s*=\s*([^\s]+)/)))
+		return;
+
+	config = {
+		user : user[1],
+		password : password[1],
+		// setup SQL config language.
+		// e.g., 'zh', 'en', 'commons', 'wikidata', 'meta'
+		set_language : function(language) {
+			if (language === 'meta') {
+				// @see /usr/bin/sql
+				this.host = 's7.labsdb';
+				// https://wikitech.wikimedia.org/wiki/Nova_Resource:Tools/Help#Metadata_database
+				this.database = 'meta_p';
+				return;
+			}
+			this.host = language + 'wiki.labsdb';
+			this.database = language + 'wiki_p';
+		}
+	};
+	config.set_language(default_language);
+	return config;
+}
+
+var mysql, database;
+if (wmflabs) {
+	try {
+		if (mysql = require('mysql'))
+			database = parse_SQL_config(home_directory + 'replica.my.cnf');
+	} catch (e) {
+		// TODO: handle exception
+	}
+}
+
+/**
+ * execute SQL command.
+ * 
+ * @param {String}SQL
+ *            SQL command
+ * @param {Function}callback
+ *            回調函數。 callback({Object}page_data)
+ * 
+ * @require https://github.com/felixge/node-mysql<br />
+ *          TODO: https://github.com/sidorares/node-mysql2
+ */
+function run_SQL(SQL, callback) {
+	if (!database)
+		return;
+
+	var connection = mysql.createConnection(database);
+	connection.connect();
+	connection.query(SQL, callback);
+	connection.end();
+}
+
+
+if (false)
+	run_SQL('SELECT * FROM revision LIMIT 3000,1;',
+	//
+	function(err, rows, fields) {
+		if (err)
+			throw err;
+		console.log('The solution is: ');
+		console.log(rows);
+	});
+
+if (database)
+	wiki_API.SQL = run_SQL;
+
+
+//---------------------------------------------------------------------//
 
 
 /*
@@ -4736,7 +4864,7 @@ Object.assign(wiki_API, {
 	// default api URL. Use <code>CeL.wiki.API_URL = api_URL('en')</code> to change it.
 	// see also: application.locale
 	API_URL : api_URL((library_namespace.is_WWW()
-			&& (navigator.userLanguage || navigator.language) || 'zh')
+			&& (navigator.userLanguage || navigator.language) || default_language)
 			.toLowerCase().replace(/-.+$/, '')),
 
 	namespace : get_namespace,
