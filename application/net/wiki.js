@@ -4035,19 +4035,10 @@ home_directory = process.env.HOME || process.env.USERPROFILE,
 /** {String}user/bot name */
 user_name,
 /** {String}Tool Labs name */
-wmflabs;
+wmflabs,
+// mysql handler
+mysql, SQL_config;
 
-// only for node.js.
-// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#How_can_I_detect_if_I.27m_running_in_Labs.3F_And_which_project_.28tools_or_toolsbeta.29.3F
-if (node_fs) {
-	/** {String}Tool Labs name */
-	wmflabs = node_fs.existsSync('/etc/wmflabs-project')
-			&& process.env.INSTANCENAME;
-}
-
-if (wmflabs) {
-	wiki_API.wmflabs = wmflabs;
-}
 
 if (home_directory && (home_directory = home_directory.replace(/[\\\/]$/, ''))) {
 	user_name = home_directory.match(/[^\\\/]+$/);
@@ -4056,6 +4047,7 @@ if (home_directory && (home_directory = home_directory.replace(/[\\\/]$/, ''))) 
 		wiki_API.user_name = user_name;
 	home_directory += library_namespace.env.path_separator;
 }
+
 
 /**
  * 讀取並解析出 SQL 設定。
@@ -4100,11 +4092,28 @@ function parse_SQL_config(file_name) {
 	return config;
 }
 
-var mysql, SQL_config;
+// only for node.js.
+// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#How_can_I_detect_if_I.27m_running_in_Labs.3F_And_which_project_.28tools_or_toolsbeta.29.3F
+if (node_fs) {
+	/** {String}Tool Labs name */
+	wmflabs = node_fs.existsSync('/etc/wmflabs-project')
+	// e.g., 'tools-bastion-05'.
+	// if use ((process.env.INSTANCEPROJECT)), you may get 'tools' or 'tools-login'.
+	&& process.env.INSTANCENAME;
+}
+
 if (wmflabs) {
+	wiki_API.wmflabs = wmflabs;
+	// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#Dumps
+	// 可在 /public/dumps/public/zhwiki 找到舊 dumps。 (using `df -BT`)
 	try {
 		if (mysql = require('mysql'))
-			SQL_config = parse_SQL_config(home_directory + 'replica.my.cnf');
+			SQL_config = parse_SQL_config(home_directory
+			// The production replicas.
+			// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#The_databases
+			// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database
+			// 此資料庫僅為正式上線版之刪節副本。資料並非最新版本(但誤差多於數分內)，也不完全，甚至可能為其他 users 竄改過。
+			+ 'replica.my.cnf');
 	} catch (e) {
 		// TODO: handle exception
 	}
@@ -4117,6 +4126,8 @@ if (wmflabs) {
  *            SQL command.
  * @param {Function}callback
  *            回調函數。 callback({Object}error, {Array}rows, {Array}fields)
+ * 
+ * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database
  * 
  * @require https://github.com/felixge/node-mysql<br />
  *          TODO: https://github.com/sidorares/node-mysql2
@@ -4133,18 +4144,20 @@ function run_SQL(SQL, callback) {
 
 
 if (false)
-	run_SQL('SELECT * FROM revision LIMIT 3000,1;',
+	CeL.wiki.SQL('SELECT * FROM revision LIMIT 3000,1;',
 	//
 	function(error, rows, fields) {
 		if (error)
 			throw error;
-		console.log('The solution is: ');
+		// console.log('The result is:');
 		console.log(rows);
 	});
 
-if (SQL_config)
-	// CeL.wiki.SQL() 僅可在 Tool Labs 使用。
+if (SQL_config) {
+	library_namespace.log('wiki_API: Using SQL to get data.');
+	// export 導出: CeL.wiki.SQL() 僅可在 Tool Labs 使用。
 	wiki_API.SQL = run_SQL;
+}
 
 
 //---------------------------------------------------------------------//
