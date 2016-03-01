@@ -4049,7 +4049,7 @@ if (wmflabs) {
 	wiki_API.wmflabs = wmflabs;
 }
 
-if (home_directory && (home_directory = home_directory.replace(/[^\\\/]$/, ''))) {
+if (home_directory && (home_directory = home_directory.replace(/[\\\/]$/, ''))) {
 	user_name = home_directory.match(/[^\\\/]+$/);
 	user_name = user_name ? user_name[0] : undefined;
 	if (user_name)
@@ -4070,7 +4070,7 @@ function parse_SQL_config(file_name) {
 	try {
 		config = library_namespace.get_file(file_name);
 	} catch (e) {
-		library_namespace.err('Can not read config file!');
+		library_namespace.err('parse_SQL_config: Can not read config file [ ' + file_name + ']!');
 		return;
 	}
 
@@ -4100,11 +4100,11 @@ function parse_SQL_config(file_name) {
 	return config;
 }
 
-var mysql, database;
+var mysql, SQL_config;
 if (wmflabs) {
 	try {
 		if (mysql = require('mysql'))
-			database = parse_SQL_config(home_directory + 'replica.my.cnf');
+			SQL_config = parse_SQL_config(home_directory + 'replica.my.cnf');
 	} catch (e) {
 		// TODO: handle exception
 	}
@@ -4114,18 +4114,18 @@ if (wmflabs) {
  * execute SQL command.
  * 
  * @param {String}SQL
- *            SQL command
+ *            SQL command.
  * @param {Function}callback
- *            回調函數。 callback({Object}page_data)
+ *            回調函數。 callback({Object}error, {Array}rows, {Array}fields)
  * 
  * @require https://github.com/felixge/node-mysql<br />
  *          TODO: https://github.com/sidorares/node-mysql2
  */
 function run_SQL(SQL, callback) {
-	if (!database)
+	if (!SQL_config)
 		return;
 
-	var connection = mysql.createConnection(database);
+	var connection = mysql.createConnection(SQL_config);
 	connection.connect();
 	connection.query(SQL, callback);
 	connection.end();
@@ -4135,14 +4135,15 @@ function run_SQL(SQL, callback) {
 if (false)
 	run_SQL('SELECT * FROM revision LIMIT 3000,1;',
 	//
-	function(err, rows, fields) {
-		if (err)
-			throw err;
+	function(error, rows, fields) {
+		if (error)
+			throw error;
 		console.log('The solution is: ');
 		console.log(rows);
 	});
 
-if (database)
+if (SQL_config)
+	// CeL.wiki.SQL() 僅可在 Tool Labs 使用。
 	wiki_API.SQL = run_SQL;
 
 
