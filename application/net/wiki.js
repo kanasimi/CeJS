@@ -1753,7 +1753,7 @@ wiki_API.prototype.next = function() {
 			library_namespace.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first!');
 			// next[3] : callback
 			if (typeof next[3] === 'function')
-				next[3].call(_this, title, 'no page');
+				next[3].call(_this, this.last_page.title, 'no page');
 			this.next();
 
 		} else if (!('stopped' in this)) {
@@ -1764,7 +1764,7 @@ wiki_API.prototype.next = function() {
 			library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯[[' + this.last_page.title + ']]！');
 			// next[3] : callback
 			if (typeof next[3] === 'function')
-				next[3].call(_this, title, '已停止作業');
+				next[3].call(_this, this.last_page.title, '已停止作業');
 			this.next();
 
 		} else if (this.last_page.is_Flow) {
@@ -2200,6 +2200,11 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
 				library_namespace.show_value(page, 'page');
+			if (!page) {
+				//nochange_count++;
+				// Skip invalid page. 預防如 .work(['']) 的情況。
+				return;
+			}
 			if (config.no_edit)
 				// 不作編輯作業。
 				// 取得頁面內容。
@@ -4014,7 +4019,7 @@ try {
 } catch (e) {
 	// enumerate for wiki_API.cache
 	// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
-	library_namespace.warn('無 node.js 之 fs，因此不具備cache 功能。');
+	library_namespace.warn('無 node.js 之 fs，因此不具備 cache 或 SQL 功能。');
 	node_fs = {
 		readFile : function(file_name, encoding, callback) {
 			callback(true);
@@ -4025,7 +4030,7 @@ try {
 
 
 //---------------------------------------------------------------------//
-// SQL 相關函數
+// SQL 相關函數。
 
 var
 // http://stackoverflow.com/questions/9080085/node-js-find-home-directory-in-platform-agnostic-way
@@ -4036,8 +4041,10 @@ home_directory = process.env.HOME || process.env.USERPROFILE,
 user_name,
 /** {String}Tool Labs name */
 wmflabs,
-// mysql handler
-mysql, SQL_config;
+/** mysql handler */
+mysql,
+/** {Object}SQL configurations */
+SQL_config;
 
 
 if (home_directory && (home_directory = home_directory.replace(/[\\\/]$/, ''))) {
@@ -4156,7 +4163,9 @@ if (false)
 if (SQL_config) {
 	library_namespace.log('wiki_API: Using SQL to get data.');
 	// export 導出: CeL.wiki.SQL() 僅可在 Tool Labs 使用。
+	run_SQL.config = SQL_config;
 	wiki_API.SQL = run_SQL;
+	// use CeL.wiki.SQL.config.set_language('en') to change language.
 }
 
 

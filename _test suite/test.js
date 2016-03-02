@@ -15,7 +15,7 @@
 # npm publish
 $ npm install cejs
 $ npm update
-## after update, the old package will be preserved.
+## after update, the old package will be preserved in .npm/cejs/.
 
 # npm view
 

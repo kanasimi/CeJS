@@ -30,7 +30,12 @@ $ npm install cejs
 ### Running
 ``` JavaScript
 require('cejs');
-CeL.run( 'module.name', function callback() { /* ... */ } );
+// CeL.run( 'module.name', function callback() { /* ... */ } );
+CeL.run('data.math');
+CeL.GCD(48, 64);
+// 16
+CeL.factorize(689269837048).toString();
+// "2³⋅13⋅80611⋅82217"
 ```
 
 ## Features and examples
