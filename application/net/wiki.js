@@ -1991,8 +1991,8 @@ function check_max_length(piece_list, limit, limit_length) {
 				.replace(/[^|]+$/, '');
 
 	piece_list.some(function(piece, i) {
-		// +1: separator '|'
-		length += encodeURIComponent(piece).length + 1;
+		// +3 === encodeURIComponent('|').length: separator '|'
+		length += encodeURIComponent(piece).length + 3;
 		if (i >= limit || length >= limit_length) {
 			index = i;
 			return true;
@@ -2442,6 +2442,11 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				//
 				+ (work_continue + 1) + '–' + (work_continue + max_size) + '/'
 						+ target.length + '。');
+
+			// reset count and log.
+			done = nochange_count = 0;
+			messages = [];
+
 			work_continue += max_size;
 			this.page(this_slice, main_work, {
 				multi : true
@@ -2559,6 +2564,8 @@ wiki_API.query = function(action, callback, post_data) {
 					response = library_namespace.parse_JSON(response);
 				} catch (e) {
 					library_namespace.err('wiki_API.query: Invalid content: [' + response + ']');
+					if (response.includes('>414 Request-URI Too Long<'))
+						library_namespace.log('query: ' + action[0]);
 					// exit!
 					return;
 				}
