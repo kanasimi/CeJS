@@ -1959,6 +1959,12 @@ function add_message(message, title) {
 	this.push('* ' + ((title = get_page_title(title)) ? '[[' + title + ']]: ' : '') + message);
 }
 
+function reset_messages() {
+	// 設定 time stamp。
+	this.start = this.last = new Date;
+	// clear
+	this.clear();
+}
 
 /**
  * 輸入 URI component list，得出自 [0] 至 [邊際index-1] 以 encodeURIComponent() 串聯起來，長度不超過
@@ -2197,9 +2203,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	each = each[0];
 
 	var done = 0, messages = [];
-	// 設定 time stamp。
-	messages.start = messages.last = new Date;
 	messages.add = add_message;
+	messages.reset = reset_messages;
+	messages.reset();
 	if (Array.isArray(pages) && pages.slice(0, 10).every(function(item) {
 		return typeof item === 'string';
 	})) {
@@ -2308,10 +2314,13 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 		this.run(function() {
 			library_namespace.debug('wiki_API.work: 收尾。');
+			var count_summary = ': 完成 ' + done
+			//
+			+ (done === pages.length ? '' : '/' + pages.length)
+			//
+			+ (pages.length === target.length ? '' : '/' + target.length) + ' 條目';
 			if (log_item.report)
-				messages.unshift(': 完成 ' + done
-				//
-				+ (done === pages.length ? '' : '/' + pages.length) + ' 條目，'
+				messages.unshift(count_summary + '，'
 				// 未改變任何條目。
 				+ (nochange_count ? (done === nochange_count
 				//
@@ -2341,10 +2350,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				// 章節標題
 				sectiontitle : '['
 						+ (new Date).format(config.date_format
-								|| this.date_format) + '] ' + done
-						//
-						+ (done === pages.length ? '' : '/' + pages.length)
-						+ ' 條目',
+								|| this.date_format) + ']' + count_summary,
 				// Robot: 若用戶名包含 'bot'，則直接引用之。
 				summary : (this.token.lgname.length < 9
 				//
@@ -2352,9 +2358,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				//
 				? this.token.lgname : 'Robot') + ': '
 				//
-				+ config.summary + ': 完成 ' + done
-				//
-				+ (done === pages.length ? '' : '/' + pages.length) + ' 條目',
+				+ config.summary + count_summary,
 				// Throw an error if the page doesn't exist.
 				// 若頁面不存在，則產生錯誤。
 				nocreate : 1,
@@ -2396,10 +2400,6 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			}
 
 			if (setup_target && work_continue < target.length) {
-				// reset
-				messages.start = messages.last = new Date;
-				// clear
-				messages.length = 0;
 				// 繼續下一批。
 				setup_target();
 				return;
@@ -2445,7 +2445,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 			// reset count and log.
 			done = nochange_count = 0;
-			messages = [];
+			messages.reset();
 
 			work_continue += max_size;
 			this.page(this_slice, main_work, {
