@@ -4234,7 +4234,10 @@ if (node_fs) {
 	wmflabs = node_fs.existsSync('/etc/wmflabs-project')
 	// e.g., 'tools-bastion-05'.
 	// if use ((process.env.INSTANCEPROJECT)), you may get 'tools' or 'tools-login'.
-	&& process.env.INSTANCENAME;
+	&& (process.env.INSTANCENAME
+	// 以 /usr/bin/jsub 執行時可得。
+	// e.g., 'tools-exec-1210.eqiad.wmflabs'
+	|| process.env.HOSTNAME || true);
 }
 
 if (wmflabs) {
