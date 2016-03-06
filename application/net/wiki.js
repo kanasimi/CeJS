@@ -4303,23 +4303,42 @@ if (SQL_config) {
 }
 
 
+
+// ----------------------------------------------------
+
+// https://www.mediawiki.org/wiki/Manual:Timestamp
 // UTC: 'yyyymmddhhmmss' → 'yyyy-mm-ddThh:mm:ss'
 function SQL_timestamp_to_ISO(timestamp) {
+	if (!timestamp)
+		// ''?
+		return;
 	timestamp = timestamp.toString('utf8').chunk(2);
+	if (timestamp.length === 7)
+		// 'NULL'?
+		return;
 	return timestamp[0] + timestamp[1] + '-' + timestamp[2] + '-' + timestamp[3]
 	//
 	+ 'T' + timestamp[4] + ':' + timestamp[5] + ':' + timestamp[6];
 }
 
 
-// https://www.mediawiki.org/wiki/Manual:Recentchanges_table
+/*
+
+cd ~ && node
+require('./wikibot/wiki loder.js');
+// get title list
+CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));},0,20);
+
+*/
+
+// new → old, may contain duplicate title.
 function get_recent(callback, namespace, limit) {
 	var SQL = 'SELECT * FROM `recentchanges` WHERE `rc_bot`=0'
-	//
+	// https://www.mediawiki.org/wiki/Manual:Recentchanges_table
 	+ (namespace === undefined ? '' : ' AND `rc_namespace`=' + namespace)
 	//
 	+ ' ORDER BY `rc_timestamp` DESC LIMIT ' + (limit || 10);
-	SQL_config(SQL, function (error, rows, fields) {
+	run_SQL(SQL, function (error, rows, fields) {
 		if (error)
 			callback();
 		else {
@@ -4349,6 +4368,7 @@ function get_recent(callback, namespace, limit) {
 if (SQL_config) {
 	wiki_API.recent = get_recent;
 }
+
 
 //---------------------------------------------------------------------//
 
