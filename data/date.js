@@ -271,21 +271,21 @@ Julian_day.from_YMD = function(year, month, date, type, no_year_0) {
 	// method: 自 3月起算。
 	if (false)
 		if (month < 3) {
-			year = year + 4800 - 1 | 0;
-			month = month + 12 - 3 | 0;
+			year = +year + 4800 - 1 | 0;
+			month = +month + 12 - 3 | 0;
 		} else {
-			year = year + 4800 | 0;
-			month = month - 3 | 0;
+			year = +year + 4800 | 0;
+			month = +month - 3 | 0;
 		}
 	// a=1: 1–2月, a=0: 3–12月
 	//var a = (14 - month) / 12 | 0;
 	var a = month < 3 ? 1 : 0;
-	year = year + 4800 - a | 0;
-	month = month + 12 * a - 3 | 0;
+	year = +year + 4800 - a | 0;
+	month = +month + 12 * a - 3 | 0;
 	// assert: year, month are integers. month >= 0
 
 	// 3–7月:153日
-	return date + ((153 * month + 2) / 5 | 0)
+	return +date + ((153 * month + 2) / 5 | 0)
 	//
 	+ 365 * year + Math.floor(year / 4) -
 	// for Gregorian calendar
@@ -313,13 +313,13 @@ Julian_day.from_HMS = function(hour, minute, second, millisecond) {
 	// initialization, milliseconds to seconds
 	var time = millisecond ? millisecond / 1000 : 0;
 	if (second)
-		time += second;
+		time += +second;
 	// to minutes
 	time /= 60;
 	if (minute)
-		time += minute;
+		time += +minute;
 	// to hours → to days
-	return (time / 60 + (hour || 0)) / 24;
+	return (time / 60 + (+hour || 0)) / 24;
 };
 
 

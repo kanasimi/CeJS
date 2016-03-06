@@ -665,7 +665,7 @@ function resolve_escaped(queue, include_mark, end_mark) {
 var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
 //
 PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
-/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags */
+/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
 markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark';
 
 
@@ -778,6 +778,9 @@ var wiki_toString = {
 // TODO: {{L<!-- -->L}} .valueOf() === '{{LL}}'
 // TODO: <p<!-- -->re>...</pre>
 // TODO: CeL.wiki.page('上海外国语大学',function(page_data){CeL.wiki.parser(page_data).parse();})
+// TODO: [https://a.b <a>a</a><!-- -->]
+// TODO: [[<a>a</a>]]
+
 /**
  * parse The MediaWiki markup language (wikitext).
  * 
@@ -2318,7 +2321,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			//
 			+ (done === pages.length ? '' : '/' + pages.length)
 			//
-			+ (pages.length === target.length ? '' : '/' + target.length) + ' 條目';
+			+ (pages.length === target.length ? '' : '//' + target.length) + ' 條目';
 			if (log_item.report)
 				messages.unshift(count_summary + '，'
 				// 未改變任何條目。
@@ -4299,6 +4302,53 @@ if (SQL_config) {
 	// use CeL.wiki.SQL.config.set_language('en') to change language.
 }
 
+
+// UTC: 'yyyymmddhhmmss' → 'yyyy-mm-ddThh:mm:ss'
+function SQL_timestamp_to_ISO(timestamp) {
+	timestamp = timestamp.toString('utf8').chunk(2);
+	return timestamp[0] + timestamp[1] + '-' + timestamp[2] + '-' + timestamp[3]
+	//
+	+ 'T' + timestamp[4] + ':' + timestamp[5] + ':' + timestamp[6];
+}
+
+
+// https://www.mediawiki.org/wiki/Manual:Recentchanges_table
+function get_recent(callback, namespace, limit) {
+	var SQL = 'SELECT * FROM `recentchanges` WHERE `rc_bot`=0'
+	//
+	+ (namespace === undefined ? '' : ' AND `rc_namespace`=' + namespace)
+	//
+	+ ' ORDER BY `rc_timestamp` DESC LIMIT ' + (limit || 10);
+	SQL_config(SQL, function (error, rows, fields) {
+		if (error)
+			callback();
+		else {
+			rows = rows.map(function (row) {
+				return {
+					// page id
+					id : row.rc_cur_id,
+					namespace : row.rc_namespace,
+					title : row.rc_title.toString('utf8'),
+					//
+					user : row.rc_user,
+					new : row.rc_new,
+					length : row.rc_new_len,
+					old_len : row.rc_old_len,
+					// use new Date(.timestamp)
+					timestamp : SQL_timestamp_to_ISO(row.rc_timestamp.toString('utf8')),
+					//
+					oldid : row.rc_this_oldid,
+				};
+			});
+			callback(rows);
+		}
+	});
+}
+
+
+if (SQL_config) {
+	wiki_API.recent = get_recent;
+}
 
 //---------------------------------------------------------------------//
 
