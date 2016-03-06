@@ -4324,20 +4324,19 @@ function SQL_timestamp_to_ISO(timestamp) {
 
 /*
 
-cd ~ && node
-require('./wikibot/wiki loder.js');
 // get title list
-CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));},0,20);
+CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, 0, 20);
 
 */
 
-// new → old, may contain duplicate title.
+// [[Special:最近更改]]
+// TODO: filter
 function get_recent(callback, namespace, limit) {
 	var SQL = 'SELECT * FROM `recentchanges` WHERE `rc_bot`=0'
 	// https://www.mediawiki.org/wiki/Manual:Recentchanges_table
-	+ (namespace === undefined ? '' : ' AND `rc_namespace`=' + namespace)
-	//
-	+ ' ORDER BY `rc_timestamp` DESC LIMIT ' + (limit || 10);
+	+ (library_namespace.is_digits(namespace) ? ' AND `rc_namespace`=' + namespace : '')
+	// new → old, may contain duplicate title.
+	+ ' ORDER BY `rc_timestamp` DESC LIMIT ' + (library_namespace.is_digits(limit) ? limit : 10);
 	run_SQL(SQL, function (error, rows, fields) {
 		if (error)
 			callback();

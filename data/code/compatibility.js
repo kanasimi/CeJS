@@ -1237,6 +1237,14 @@ function trim() {
 	.replace(/[\s\n]+$|^[\s\n]+/g, '');
 }
 
+function trimRight() {
+	return String(this).replace(/[\s\n]+$/g, '');
+}
+
+function trimLeft() {
+	return String(this).replace(/^[\s\n]+/g, '');
+}
+
 
 // String.prototype.startsWith()
 function startsWith(searchString, position) {
@@ -1269,6 +1277,8 @@ function endsWith(searchString, endPosition) {
 set_method(String.prototype, {
 	repeat : repeat,
 	trim : trim,
+	trimRight : trimRight,
+	trimLeft : trimLeft,
 	// String.prototype.includes()
 	includes : function includes(searchString, position) {
 		return this.indexOf(searchString, position) !== NOT_FOUND;
