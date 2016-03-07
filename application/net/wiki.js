@@ -110,7 +110,9 @@ function api_URL(project) {
 	var matched = /^(https?:\/\/)?[a-z]+(\.[a-z]+)+(\/?)$/i.test(project);
 	if (matched)
 		// e.g., 'http://zh.wikipedia.org/'
-		return (matched[1] || 'https://') + project + (matched[2] || '/')
+		return (matched[1] || api_URL.default_protocol
+		// 若在 Tool Labs 中，則視為在同一機房內，不採加密。如此亦可加快速度。
+		|| (wmflabs ? 'http://' : 'https://')) + project + (matched[2] || '/')
 				+ 'w/api.php';
 
 	if (/^https?:\/\//i.test(project))
@@ -123,6 +125,7 @@ function api_URL(project) {
 
 	return wiki_API.API_URL;
 }
+
 
 
 //---------------------------------------------------------------------//
@@ -1756,7 +1759,7 @@ wiki_API.prototype.next = function() {
 			library_namespace.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first!');
 			// next[3] : callback
 			if (typeof next[3] === 'function')
-				next[3].call(_this, this.last_page.title, 'no page');
+				next[3].call(_this, undefined, 'no page');
 			this.next();
 
 		} else if (!('stopped' in this)) {
@@ -1855,13 +1858,13 @@ wiki_API.prototype.next = function() {
 					// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
 					: !result.edit : result === '') {
 						// Invalid token
-						library_namespace.warn('wiki_API.prototype.next: It seems we lost the token.');
+						library_namespace.warn('wiki_API.prototype.next: It seems we lost the token. 似乎丟失了 token。');
 						if (!_this.token.lgpassword) {
 							library_namespace.err('wiki_API.prototype.next: No password preserved!');
 							// 死馬當活馬醫，仍然嘗試重新取得 token。
 							//return;
 						}
-						library_namespace.info('wiki_API.prototype.next: Try to get token again. 似乎丟失了 token，嘗試重新取得 token。');
+						library_namespace.info('wiki_API.prototype.next: Try to get token again. 嘗試重新取得 token。');
 						// reset node agent.
 						// [[Wikipedia:机器人/申请/Cewbot/8]] 恐需要連 HTTP handler 都重換一個，重起 cookie。
 						library_namespace.application.net.Ajax.setup_node_net();
@@ -4200,7 +4203,8 @@ function parse_SQL_config(file_name) {
 	try {
 		config = library_namespace.get_file(file_name);
 	} catch (e) {
-		library_namespace.err('parse_SQL_config: Can not read config file [ ' + file_name + ']!');
+		library_namespace.err('parse_SQL_config: Can not read config file [ '
+				+ file_name + ']!');
 		return;
 	}
 
@@ -4236,7 +4240,8 @@ if (node_fs) {
 	/** {String}Tool Labs name */
 	wmflabs = node_fs.existsSync('/etc/wmflabs-project')
 	// e.g., 'tools-bastion-05'.
-	// if use ((process.env.INSTANCEPROJECT)), you may get 'tools' or 'tools-login'.
+	// if use ((process.env.INSTANCEPROJECT)), you may get 'tools' or
+	// 'tools-login'.
 	&& (process.env.INSTANCENAME
 	// 以 /usr/bin/jsub 執行時可得。
 	// e.g., 'tools-exec-1210.eqiad.wmflabs'
@@ -4283,7 +4288,6 @@ function run_SQL(SQL, callback) {
 	connection.end();
 }
 
-
 if (false)
 	CeL.wiki.SQL('SELECT * FROM revision LIMIT 3000,1;',
 	//
@@ -4303,11 +4307,19 @@ if (SQL_config) {
 }
 
 
-
 // ----------------------------------------------------
 
-// https://www.mediawiki.org/wiki/Manual:Timestamp
-// UTC: 'yyyymmddhhmmss' → 'yyyy-mm-ddThh:mm:ss'
+/**
+ * Convert MediaWiki database timestamp to ISO 8601 format.<br />
+ * UTC: 'yyyymmddhhmmss' → 'yyyy-mm-ddThh:mm:ss'
+ * 
+ * @param {String}timestamp
+ *            MediaWiki database timestamp
+ * 
+ * @returns {String}ISO 8601 Data elements and interchange formats
+ * 
+ * @see https://www.mediawiki.org/wiki/Manual:Timestamp
+ */
 function SQL_timestamp_to_ISO(timestamp) {
 	if (!timestamp)
 		// ''?
@@ -4316,32 +4328,47 @@ function SQL_timestamp_to_ISO(timestamp) {
 	if (timestamp.length === 7)
 		// 'NULL'?
 		return;
-	return timestamp[0] + timestamp[1] + '-' + timestamp[2] + '-' + timestamp[3]
+
+	return timestamp[0] + timestamp[1]
+	//
+	+ '-' + timestamp[2] + '-' + timestamp[3]
 	//
 	+ 'T' + timestamp[4] + ':' + timestamp[5] + ':' + timestamp[6];
 }
 
 
-/*
-
-// get title list
-CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, 0, 20);
-
-*/
-
-// [[Special:最近更改]]
-// TODO: filter
+/**
+ * Get page title 頁面標題 list of [[Special:RecentChanges]] 最近更改.
+ * 
+ * <code>
+   // get title list
+   CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, 0, 20);
+   </code>
+ * 
+ * TODO: filter
+ * 
+ * @param {Function}callback
+ *            回調函數。 callback({Array}page title 頁面標題 list)
+ * @param {Integer}[namespace]
+ *            namespace NO.
+ * @param {ℕ⁰:Natural+0}[limit]
+ *            limit count
+ */
 function get_recent(callback, namespace, limit) {
 	var SQL = 'SELECT * FROM `recentchanges` WHERE `rc_bot`=0'
 	// https://www.mediawiki.org/wiki/Manual:Recentchanges_table
-	+ (library_namespace.is_digits(namespace) ? ' AND `rc_namespace`=' + namespace : '')
+	+ (library_namespace.is_digits(namespace)
+	//
+	? ' AND `rc_namespace`=' + namespace : '')
 	// new → old, may contain duplicate title.
-	+ ' ORDER BY `rc_timestamp` DESC LIMIT ' + (library_namespace.is_digits(limit) ? limit : 10);
-	run_SQL(SQL, function (error, rows, fields) {
+	+ ' ORDER BY `rc_timestamp` DESC LIMIT '
+			+ (library_namespace.is_digits(limit) ? limit : 10);
+
+	run_SQL(SQL, function(error, rows, fields) {
 		if (error)
 			callback();
 		else {
-			rows = rows.map(function (row) {
+			rows = rows.map(function(row) {
 				return {
 					// page id
 					id : row.rc_cur_id,
@@ -4349,11 +4376,12 @@ function get_recent(callback, namespace, limit) {
 					title : row.rc_title.toString('utf8'),
 					//
 					user : row.rc_user,
-					new : row.rc_new,
+					is_new : !!row.rc_new,
 					length : row.rc_new_len,
 					old_len : row.rc_old_len,
 					// use new Date(.timestamp)
-					timestamp : SQL_timestamp_to_ISO(row.rc_timestamp.toString('utf8')),
+					timestamp : SQL_timestamp_to_ISO(row.rc_timestamp
+							.toString('utf8')),
 					//
 					oldid : row.rc_this_oldid,
 				};
