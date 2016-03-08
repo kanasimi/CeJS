@@ -2539,6 +2539,8 @@ wiki_API.query = function(action, callback, post_data) {
 	if (need_check)
 		// reset timer
 		wiki_API.query.last[action[0]] = Date.now();
+	else
+		library_namespace.debug('非 edit (modify)，不延遲等待。', 3, 'wiki_API.query');
 
 	// https://www.mediawiki.org/wiki/API:Data_formats
 	// 因不在 white-list 中，無法使用 CORS。
@@ -2553,6 +2555,30 @@ wiki_API.query = function(action, callback, post_data) {
 	if (!action[1].format)
 		// 加上 "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
 		action[0] = get_URL.add_param(action[0], 'format=json&utf8=1');
+
+	if (wmflabs) {
+		// UA → Nginx → Varnish:80 → Varnish:3128 → Apache → HHVM → database
+		library_namespace.debug('connect to Varnish:3128 directly.', 3,
+				'wiki_API.query');
+		// [[User:Antigng/https expected]]
+		var HOST;
+		action[0] = action[0].replace(
+		//
+		/^https?:\/\/([a-z]{2,9}\.wikipedia\.org)\//, function(all, host) {
+			HOST = host;
+			return 'http://cp1008.wikimedia.org:3128/';
+		});
+		if (HOST) {
+			action = {
+				URL : action,
+				headers : {
+					HOST : HOST,
+					'X-Forwarded-For' : '127.0.0.1',
+					'X-Forwarded-Proto' : 'https'
+				}
+			};
+		}
+	}
 
 	// 開始處理 query request。
 	if (!post_data && wiki_API.query.allow_JSONP) {
