@@ -94,8 +94,8 @@ function wiki_API(name, password, API_URL) {
  * 
  * @returns {String}API URL
  * 
- * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
- * TODO: https://zh.wikipedia.org/wiki/Wikipedia:%E5%A7%8A%E5%A6%B9%E8%AE%A1%E5%88%92#.E9.93.BE.E6.8E.A5.E5.9E.8B
+ * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects TODO:
+ *      https://zh.wikipedia.org/wiki/Wikipedia:%E5%A7%8A%E5%A6%B9%E8%AE%A1%E5%88%92#.E9.93.BE.E6.8E.A5.E5.9E.8B
  */
 function api_URL(project) {
 	if (project)
@@ -111,9 +111,9 @@ function api_URL(project) {
 	if (matched)
 		// e.g., 'http://zh.wikipedia.org/'
 		return (matched[1] || api_URL.default_protocol
-		// 若在 Tool Labs 中，則視為在同一機房內，不採加密。如此亦可加快速度。
-		|| (wmflabs ? 'http://' : 'https://')) + project + (matched[2] || '/')
-				+ 'w/api.php';
+		// 若在 Tool Labs 中，則視為在同一機房內，不採加密。如此亦可加快傳輸速度。
+		// 一般情況下會重新導向至 https。
+		|| 'https://') + project + (matched[2] || '/') + 'w/api.php';
 
 	if (/^https?:\/\//i.test(project))
 		// e.g., 'https://www.mediawiki.org/w/api.php'
@@ -783,6 +783,7 @@ var wiki_toString = {
 // TODO: CeL.wiki.page('上海外国语大学',function(page_data){CeL.wiki.parser(page_data).parse();})
 // TODO: [https://a.b <a>a</a><!-- -->]
 // TODO: [[<a>a</a>]]
+// TODO: a[[未來日記-ANOTHER:WORLD-]]b
 
 /**
  * parse The MediaWiki markup language (wikitext).
@@ -1861,17 +1862,16 @@ wiki_API.prototype.next = function() {
 						library_namespace.warn('wiki_API.prototype.next: It seems we lost the token. 似乎丟失了 token。');
 						if (!_this.token.lgpassword) {
 							library_namespace.err('wiki_API.prototype.next: No password preserved!');
-							// 死馬當活馬醫，仍然嘗試重新取得 token。
-							//return;
+							// 死馬當活馬醫，仍然嘗試重新取得 token...沒有密碼無效。
+							return;
 						}
 						library_namespace.info('wiki_API.prototype.next: Try to get token again. 嘗試重新取得 token。');
 						// reset node agent.
-						// [[Wikipedia:机器人/申请/Cewbot/8]] 恐需要連 HTTP handler 都重換一個，重起 cookie。
+						// 應付 2016/1 MediaWiki 系統更新，需要連 HTTP handler 都重換一個，重起 cookie。
 						library_namespace.application.net.Ajax.setup_node_net();
 						// rollback
 						_this.actions.unshift(next);
 						if (result === '') {
-							// 應付 2016/1 MediaWiki 系統更新...無效，恐需要連 HTTP handler 都重換一個，重起 cookie。
 							// force login: see wiki_API.login
 							delete _this.token.csrftoken;
 							delete _this.token.lgtoken;
@@ -2192,7 +2192,8 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 			// error: message, result: result type.
 
-			error = '間隔 ' + messages.last.age(new Date) + '，'
+			// 間隔
+			error = '隔 ' + messages.last.age(new Date) + '，'
 			// 紀錄使用時間, 歷時, 費時
 			+ (messages.last = new Date)
 			//
@@ -2509,22 +2510,27 @@ wiki_API.query = function(action, callback, post_data) {
 	library_namespace.debug('api URL: (' + (typeof action[0]) + ') [' + action[0] + '] → [' + api_URL(action[0]) + ']', 3, 'wiki_API.query');
 	action[0] = api_URL(action[0]);
 
+	// https://www.mediawiki.org/w/api.php?action=help&modules=query
+	if (!/^[a-z]+=/.test(action[1]))
+		action[1] = 'action=' + action[1];
+
+	// 若為 query，非 edit (modify)，則不延遲等待。
+	// assert: typeof action[1] === 'string'
+	var need_check = !action[1].includes('action=query&'),
 	// 檢測是否間隔過短。支援最大延遲功能。
-	var to_wait = Date.now() - wiki_API.query.last[action[0]];
+	to_wait = need_check ? wiki_API.query.lag - (Date.now() - wiki_API.query.last[action[0]]) : 0;
 	// TODO: 伺服器負載過重的時候，使用 exponential backoff 進行延遲。
-	if (to_wait < wiki_API.query.lag) {
-		to_wait = wiki_API.query.lag - to_wait;
+	if (to_wait > 0) {
 		library_namespace.debug('Waiting ' + to_wait + ' ms..', 2, 'wiki_API.query');
 		setTimeout(function() {
 			wiki_API.query(action, callback, post_data);
 		}, to_wait);
 		return;
 	}
-	wiki_API.query.last[action[0]] = Date.now();
+	if (need_check)
+		// reset timer
+		wiki_API.query.last[action[0]] = Date.now();
 
-	// https://www.mediawiki.org/w/api.php?action=help&modules=query
-	if (!/^[a-z]+=/.test(action[1]))
-		action[1] = 'action=' + action[1];
 	// https://www.mediawiki.org/wiki/API:Data_formats
 	// 因不在 white-list 中，無法使用 CORS。
 	action[0] += '?' + action[1];
@@ -2570,7 +2576,9 @@ wiki_API.query = function(action, callback, post_data) {
 					response = library_namespace.parse_JSON(response);
 				} catch (e) {
 					library_namespace.err('wiki_API.query: Invalid content: [' + response + ']');
-					if (response.includes('>414 Request-URI Too Long<'))
+					// <title>414 Request-URI Too Long</title>
+					// <title>414 Request-URI Too Large</title>
+					if (response.includes('>414 Request-URI Too'))
 						library_namespace.log('query: ' + action[0]);
 					// exit!
 					return;
@@ -2587,8 +2595,8 @@ wiki_API.query = function(action, callback, post_data) {
 };
 
 /**
- * 最大延遲參數。<br />
- * default: 使用5秒的最大延遲參數。
+ * edit (modify) 時之最大延遲參數。<br />
+ * default: 使用5秒 (5000 ms) 的最大延遲參數。
  * 
  * @type {ℕ⁰:Natural+0}
  * 
