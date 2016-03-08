@@ -250,6 +250,15 @@ function test_compatibility() {
 
 
 function test_native() {
+	error_count += CeL.test('CeL.RegExp()', [
+		[ CeL.RegExp(/T/i).test('t') ],
+		[ CeL.RegExp(/T/, 'i').test('t') ],
+		[ CeL.RegExp('T', 'i').test('t') ],
+		[ CeL.RegExp(/[\p{C}]/i).test('\u200E') ],
+		[ CeL.RegExp(/[\p{C}]/i).test('\u200Et') ],
+		[ !CeL.RegExp(/[\p{C}]/i).test('t') ],
+	]);
+
 	error_count += CeL.test('pad(): basic test', [
 		[[ CeL.pad(23, 5), '00023' ]],
 		[[ ''.pad(5), '     ' ],'pad(): empty string'],

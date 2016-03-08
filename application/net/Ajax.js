@@ -662,7 +662,10 @@ function get_URL_node(URL, onload, charset, post_data) {
 	agent = _URL.protocol === 'https:' ? node_https_agent : node_http_agent,
 	//
 	_onload = function(result) {
-		library_namespace.debug('STATUS: ' + result.statusCode, 2, 'get_URL_node');
+		if (/^2/.test(result.statusCode))
+			library_namespace.debug('STATUS: ' + result.statusCode, 2, 'get_URL_node');
+		else
+			library_namespace.warn('get_URL_node: status ' + result.statusCode);
 		library_namespace.debug('HEADERS: ' + JSON.stringify(result.headers), 4, 'get_URL_node');
 		merge_cookie(agent, result.headers['set-cookie']);
 		// 未設定 charset 的話，將回傳 Buffer。
@@ -688,6 +691,9 @@ function get_URL_node(URL, onload, charset, post_data) {
 					library_namespace.debug('BODY: ' + data, 1, 'get_URL_node');
 				// 模擬 XMLHttp。
 				onload({
+					// {Number}result.statusCode
+					// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
+					status : result.statusCode,
 					responseText : data
 				});
 				// free

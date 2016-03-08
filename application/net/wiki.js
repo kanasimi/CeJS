@@ -85,6 +85,9 @@ function wiki_API(name, password, API_URL) {
 //--------------------------------------------------------------------------------------------- //
 // 工具函數。
 
+// https://phabricator.wikimedia.org/rOPUP558bcc29adc3dd7dfebbc66c1bf88a54a8b09535#3ce6dc61
+// server: (wikipedia|wikibooks|wikinews|wikiquote|wikisource|wikiversity|wikivoyage|wikidata|wikimediafoundation|wiktionary|mediawiki)
+
 /**
  * Get the API URL of specified project.
  * 
@@ -1992,7 +1995,8 @@ function check_max_length(piece_list, limit, limit_length) {
 	// defaule LimitRequestLine: 8190
 	//
 	// assert: 除了 piece_list 外必要之字串長 < 192
-	// e.g., "https://zh.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content|timestamp&titles=...&format=json&utf8=1"
+	// e.g.,
+	// "https://zh.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content|timestamp&titles=...&format=json&utf8=1"
 	if (!(limit_length > 0))
 		limit_length = 8000;
 
@@ -2010,7 +2014,7 @@ function check_max_length(piece_list, limit, limit_length) {
 			return true;
 		}
 	});
-	CeL.debug('check_max_length: 0–' + index + ': ' + length, 4);
+	CeL.debug('0–' + index + ': length ' + length, 4, 'check_max_length');
 
 	return index;
 }
@@ -2506,8 +2510,11 @@ wiki_API.query = function(action, callback, post_data) {
 	if (typeof action === 'string')
 		action = [ , action ];
 	else if (!Array.isArray(action))
-		library_namespace.err('wiki_API.query: Invalid action: [' + action + ']');
-	library_namespace.debug('api URL: (' + (typeof action[0]) + ') [' + action[0] + '] → [' + api_URL(action[0]) + ']', 3, 'wiki_API.query');
+		library_namespace.err('wiki_API.query: Invalid action: [' + action
+				+ ']');
+	library_namespace.debug('api URL: (' + (typeof action[0]) + ') ['
+			+ action[0] + '] → [' + api_URL(action[0]) + ']', 3,
+			'wiki_API.query');
 	action[0] = api_URL(action[0]);
 
 	// https://www.mediawiki.org/w/api.php?action=help&modules=query
@@ -2518,10 +2525,12 @@ wiki_API.query = function(action, callback, post_data) {
 	// assert: typeof action[1] === 'string'
 	var need_check = !action[1].includes('action=query&'),
 	// 檢測是否間隔過短。支援最大延遲功能。
-	to_wait = need_check ? wiki_API.query.lag - (Date.now() - wiki_API.query.last[action[0]]) : 0;
+	to_wait = need_check ? wiki_API.query.lag
+			- (Date.now() - wiki_API.query.last[action[0]]) : 0;
 	// TODO: 伺服器負載過重的時候，使用 exponential backoff 進行延遲。
 	if (to_wait > 0) {
-		library_namespace.debug('Waiting ' + to_wait + ' ms..', 2, 'wiki_API.query');
+		library_namespace.debug('Waiting ' + to_wait + ' ms..', 2,
+				'wiki_API.query');
 		setTimeout(function() {
 			wiki_API.query(action, callback, post_data);
 		}, to_wait);
@@ -2539,15 +2548,19 @@ wiki_API.query = function(action, callback, post_data) {
 	// [ {String}URL, {Object}other parameters ]
 	action = library_namespace.is_Object(action[2]) ? [ action[0], action[2] ]
 	//
-	: [ action[2] ? action[0] + action[2] : action[0], library_namespace.null_Object() ];
+	: [ action[2] ? action[0] + action[2] : action[0],
+			library_namespace.null_Object() ];
 	if (!action[1].format)
 		// 加上 "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
 		action[0] = get_URL.add_param(action[0], 'format=json&utf8=1');
 
 	// 開始處理 query request。
 	if (!post_data && wiki_API.query.allow_JSONP) {
-		library_namespace.debug('採用 JSONP callback 的方法。須注意：若有 error，將不會執行 callback！', 2, 'wiki_API.query');
-		library_namespace.debug('callback : (' + (typeof callback) + ') [' + callback + ']', 3, 'wiki_API.query');
+		library_namespace.debug(
+				'採用 JSONP callback 的方法。須注意：若有 error，將不會執行 callback！', 2,
+				'wiki_API.query');
+		library_namespace.debug('callback : (' + (typeof callback) + ') ['
+				+ callback + ']', 3, 'wiki_API.query');
 		get_URL(action, {
 			callback : callback
 		});
@@ -2555,13 +2568,16 @@ wiki_API.query = function(action, callback, post_data) {
 		get_URL(action, function(XMLHttp) {
 			var response = XMLHttp.responseText;
 			library_namespace.debug('response: '
-				+ (library_namespace.platform.nodejs ? '\n' + response : response.replace(/</g, '&lt;')), 3, 'wiki_API.query');
+					+ (library_namespace.platform.nodejs ? '\n' + response
+							: response.replace(/</g, '&lt;')), 3,
+					'wiki_API.query');
 
 			// "<\": for Eclipse JSDoc.
 			if (/<\html[\s>]/.test(response.slice(0, 40))) {
-				response = response.between('source-javascript', '</pre>').between('>')
-				// 去掉所有 HTML tag。
-				.replace(/<[^>]+>/g, '');
+				response = response.between('source-javascript', '</pre>')
+						.between('>')
+						// 去掉所有 HTML tag。
+						.replace(/<[^>]+>/g, '');
 
 				// '&#123;' : (")
 				// 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況?
@@ -2575,19 +2591,22 @@ wiki_API.query = function(action, callback, post_data) {
 				try {
 					response = library_namespace.parse_JSON(response);
 				} catch (e) {
-					library_namespace.err('wiki_API.query: Invalid content: [' + response + ']');
+					library_namespace.err('wiki_API.query: Invalid content: ['
+							+ response + ']');
 					// <title>414 Request-URI Too Long</title>
 					// <title>414 Request-URI Too Large</title>
-					if (response.includes('>414 Request-URI Too'))
-						library_namespace.log('query: ' + action[0]);
+					if (response.includes('>414 Request-URI Too '))
+						library_namespace.debug(
+						//
+						action[0], 1, 'wiki_API.query');
 					// exit!
 					return;
 				}
 
 			// response = XMLHttp.responseXML;
 			if (library_namespace.is_debug()
-				// .show_value() @ interact.DOM, application.debug
-				&& library_namespace.show_value)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
 				library_namespace.show_value(response);
 			if (typeof callback === 'function')
 				callback(response);
@@ -2805,6 +2824,7 @@ wiki_API.page = function(title, callback, options) {
 			library_namespace.warn('wiki_API.page: Unknown response: ['
 			// e.g., 'wiki_API.page: Unknown response: [{"batchcomplete":""}]'
 			+ (typeof data === 'object' && typeof JSON !== 'undefined' ? JSON.stringify(data) : data) + ']');
+			// library_namespace.set_debug(6);
 			if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
