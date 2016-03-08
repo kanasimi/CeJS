@@ -1871,6 +1871,7 @@ wiki_API.prototype.next = function() {
 						library_namespace.info('wiki_API.prototype.next: Try to get token again. 嘗試重新取得 token。');
 						// reset node agent.
 						// 應付 2016/1 MediaWiki 系統更新，需要連 HTTP handler 都重換一個，重起 cookie。
+						// 發現大多是因為 status 413 的問題。
 						library_namespace.application.net.Ajax.setup_node_net();
 						// rollback
 						_this.actions.unshift(next);
@@ -2884,7 +2885,8 @@ wiki_API.page = function(title, callback, options) {
 		// options.multi: 即使只取得單頁面，依舊回傳 Array。
 		if (!options || !options.multi)
 			if (pages.length <= 1) {
-				library_namespace.debug('只取得單頁面 [[' + pages.title + ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
+				// e.g., pages: { '1850031': [Object] }
+				library_namespace.debug('只取得單頁面 [[' + pages + ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
 				if ((pages = pages[0]) && (pages.is_Flow = is_Flow(pages))
 				// e.g., { flow_view : 'header' }
 				&& options && options.flow_view) {
@@ -4891,8 +4893,8 @@ wiki_API.cache.title_only = function(operation) {
  * get the infomation of Flow.
  * 
  * @param {String|Array}title
- *            page title 頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [ {String}API_URL,
- *            {String}title or {Object}page_data ]
+ *            page title 頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [
+ *            {String}API_URL, {String}title or {Object}page_data ]
  * @param {Function}callback
  *            回調函數。 callback({Object}page_data)
  * @param {Object}[options]
@@ -4917,16 +4919,21 @@ function Flow_info(title, callback, options) {
 	//
 	&& function(data) {
 		if (library_namespace.is_debug(2)
-			// .show_value() @ interact.DOM, application.debug
-			&& library_namespace.show_value)
+		// .show_value() @ interact.DOM, application.debug
+		&& library_namespace.show_value)
 			library_namespace.show_value(data, 'Flow_info: data');
 
 		var error = data && data.error;
 		// 檢查伺服器回應是否有錯誤資訊。
 		if (error) {
-			library_namespace.err('Flow_info: [' + error.code + '] ' + error.info);
-			// e.g., Too many values supplied for parameter 'pageids': the limit is 50
-			if (data.warnings && data.warnings.query && data.warnings.query['*'])
+			library_namespace.err('Flow_info: [' + error.code + '] '
+			//
+			+ error.info);
+			// e.g., Too many values supplied for parameter 'pageids': the limit
+			// is 50
+			if (data.warnings && data.warnings.query
+			//
+			&& data.warnings.query['*'])
 				library_namespace.warn(data.warnings.query['*']);
 			callback();
 			return;
@@ -4935,10 +4942,12 @@ function Flow_info(title, callback, options) {
 		if (!data || !data.query || !data.query.pages) {
 			library_namespace.warn('Flow_info: Unknown response: ['
 			//
-			+ (typeof data === 'object' && typeof JSON !== 'undefined' ? JSON.stringify(data) : data) + ']');
+			+ (typeof data === 'object' && typeof JSON !== 'undefined'
+			//
+			? JSON.stringify(data) : data) + ']');
 			if (library_namespace.is_debug()
-				// .show_value() @ interact.DOM, application.debug
-				&& library_namespace.show_value)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
 				library_namespace.show_value(data);
 			callback();
 			return;
@@ -4956,11 +4965,16 @@ function Flow_info(title, callback, options) {
 			if (pages.length <= 1) {
 				if (pages = pages[0])
 					pages.is_Flow = is_Flow(pages);
-				library_namespace.debug('只取得單頁面 [[' + pages.title + ']]，將回傳此頁面資料，而非 Array。', 2, 'Flow_info');
-			} else
+				library_namespace.debug('只取得單頁面 [[' + pages.title
+				//
+				+ ']]，將回傳此頁面資料，而非 Array。', 2, 'Flow_info');
+			} else {
 				library_namespace.debug('Get ' + pages.length
 				//
-				+ ' page(s)! The pages will all passed to callback as Array!', 2, 'Flow_info');
+				+ ' page(s)! The pages'
+				//
+				+ ' will all passed to callback as Array!', 2, 'Flow_info');
+			}
 
 		// page 之 structure 將按照 wiki 本身之 return！
 		// page_data = {ns,title,missing:'']}
