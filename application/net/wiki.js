@@ -49,7 +49,7 @@ eval(this.use());
  * web Wikipedia / 維基百科 用的 functions。<br />
  * 可執行環境: node.js, JScript。
  * 
- * @param {String}name
+ * @param {String}user_name
  *            user name
  * @param {String}password
  *            user password
@@ -58,13 +58,13 @@ eval(this.use());
  * 
  * @constructor
  */
-function wiki_API(name, password, API_URL) {
+function wiki_API(user_name, password, API_URL) {
 	if (!this || this.constructor !== wiki_API)
 		return wiki_API.query.apply(null, arguments);
 
 	this.token = {
 		// lgusername
-		lgname : name,
+		lgname : user_name,
 		lgpassword : password
 	};
 
@@ -113,10 +113,7 @@ function api_URL(project) {
 	var matched = /^(https?:\/\/)?[a-z]+(\.[a-z]+)+(\/?)$/i.test(project);
 	if (matched)
 		// e.g., 'http://zh.wikipedia.org/'
-		return (matched[1] || api_URL.default_protocol
-		// 若在 Tool Labs 中，則視為在同一機房內，不採加密。如此亦可加快傳輸速度。
-		// 一般情況下會重新導向至 https。
-		|| 'https://') + project + (matched[2] || '/') + 'w/api.php';
+		return (matched[1] || api_URL.default_protocol || 'https://') + project + (matched[2] || '/') + 'w/api.php';
 
 	if (/^https?:\/\//i.test(project))
 		// e.g., 'https://www.mediawiki.org/w/api.php'
@@ -336,7 +333,9 @@ function file_pattern(file_name, flag) {
 	&& new RegExp(file_pattern.source.replace(/name/, file_name), flag || 'g');
 }
 
-var PATTERN_file_prefix = 'File|Image|[檔档]案|[圖图]像';
+// [[維基百科:名字空間#文件名字空间]]
+// [[Media:image.png]]：產生一個指向檔案本身的連結
+var PATTERN_file_prefix = 'File|Image|Media|[檔档]案|[圖图]像|文件|媒[體体]';
 
 file_pattern.source =
 // 不允許 [\s\n]，僅允許 ' '。
@@ -688,8 +687,12 @@ markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|syntaxhig
 var wiki_toString = {
 	// Internal/interwiki link : language links : category links, file, subst,
 	// ... : title
-	// e.g., [[m:en:Help:Parser function]]
+	// e.g., [[m:en:Help:Parser function]], [[m:Help:Interwiki_linking]], [[:File:image.png]], [[wikt:en:Wiktionary:A]], [[:en:Template:Editnotices/Group/Wikipedia:Miscellany for deletion]]
+	// @see [[Wikipedia:Namespace]]
 	// https://www.mediawiki.org/wiki/Markup_spec#Namespaces
+	// [[  m :  abc ]] is OK, as "m : abc".
+	// [[: en : abc  ]] is OK, as "en : abc".
+	// [[ :en:abc]] is NOT OK.
 	namespace : function() {
 		return this.join(':');
 	},
@@ -965,8 +968,7 @@ function parse_wikitext(wikitext, options, queue) {
 			return index === 0
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 			&& !token.includes(include_mark) ? _set_wiki_type(
-			// [[: en : abc]] is OK,
-			// [[ : en : abc]] is NOT OK.
+			// TODO: normalize 對 [[文章名稱 : 次名稱]] 可能出現問題。
 			token.split(normalize ? /\s*:\s*/ : ':'), 'namespace')
 			// 經過改變，需再進一步處理。
 			: parse_wikitext(token, options, queue);
@@ -1490,10 +1492,14 @@ Object.assign(page_parser, {
 /**
  * get title of page.
  * 
+ * @example <code>
+   var title = CeL.wiki.title_of(page_data);
+ * </code>
+ * 
  * @param {Object}page_data
  *            page data got from wiki API
  * 
- * @returns {String} title of page
+ * @returns {String}title of page
  * 
  * @seealso wiki_API.query.title_param()
  */
@@ -1505,7 +1511,7 @@ function get_page_title(page_data) {
 			return page_data.map(get_page_title);
 		// assert: page_data =
 		// [ {String}API_URL, {String}title || {Object}page_data ]
-		page_data = page_data[1];
+		return page_data[1];
 	}
 
 	if (library_namespace.is_Object(page_data)) {
@@ -1519,7 +1525,7 @@ function get_page_title(page_data) {
 		// page_data.header: 在 Flow_page() 中設定。
 		// page_data.revision: 由 Flow_page() 取得。
 		title =
-		//page_data.is_Flow &&
+		// page_data.is_Flow &&
 		(page_data.header || page_data).revision;
 		if (title && (title = title.articleTitle))
 			// e.g., "Wikipedia talk:Flow tests"
@@ -1529,27 +1535,34 @@ function get_page_title(page_data) {
 	}
 
 	// e.g., (typeof page_data === 'string')
+	// e.g., page_data === undefined
 	return page_data;
 }
 
 
 /**
  * get the contents of page data. 取得頁面內容。
- *
+ * 
+ * @example <code>
+   var content = CeL.wiki.content_of(page_data);
+ * </code>
+ * 
  * @param {Object}page_data
  *            page data got from wiki API
  * @param {String}flow_view
  *            對 flow page，所欲取得之頁面內容項目。<br />
  *            default: 'header'
- *
+ * 
  * @returns {String} content of page
  */
 function get_page_content(page_data, flow_view) {
-	// for flow page: 因為 page_data 可能符合一般頁面標準，此時會先得到 {"flow-workflow":""} 之類的內容，因此必須在檢測一般頁面之前先檢測 flow page。
+	// for flow page: 因為 page_data 可能符合一般頁面標準，
+	// 此時會先得到 {"flow-workflow":""} 之類的內容，
+	// 因此必須在檢測一般頁面之前先檢測 flow page。
 	// page_data.header: 在 Flow_page() 中設定。
 	// page_data.revision: 由 Flow_page() 取得。
 	var content =
-	//page_data.is_Flow &&
+	// page_data.is_Flow &&
 	(page_data[flow_view || 'header'] || page_data).revision;
 	if (content && (content = content.content))
 		// page_data.revision.content.content
@@ -1558,15 +1571,16 @@ function get_page_content(page_data, flow_view) {
 	// 檢測一般頁面
 	if (get_page_content.is_page_data(page_data))
 		return (content = get_page_content.has_content(page_data)) ? content['*']
-			: null;
+				: null;
 
 	// 一般都會輸入 page_data: {"pageid":0,"ns":0,"title":""}
-	//: typeof page_data === 'string' ? page_data
+	// : typeof page_data === 'string' ? page_data
 
 	// ('missing' in page_data): 此頁面已刪除。
 	// e.g., { ns: 0, title: 'title', missing: '' }
 	// TODO: 提供此頁面的刪除和移動日誌以便參考。
-	return page_data && ('missing' in page_data) ? undefined : String(page_data || '');
+	return page_data && ('missing' in page_data) ? undefined : String(page_data
+			|| '');
 }
 
 /**
@@ -2557,6 +2571,8 @@ wiki_API.query = function(action, callback, post_data) {
 		// 加上 "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
 		action[0] = get_URL.add_param(action[0], 'format=json&utf8=1');
 
+	// 一般情況下會重新導向至 https。
+	// 若在 Tool Labs 中，則視為在同一機房內，不採加密。如此亦可加快傳輸速度。
 	if (wmflabs) {
 		// UA → Nginx → Varnish:80 → Varnish:3128 → Apache → HHVM → database
 		library_namespace.debug('connect to Varnish:3128 directly.', 3,
@@ -4355,7 +4371,7 @@ if (false)
 	});
 
 if (SQL_config) {
-	library_namespace.log('wiki_API: Using SQL to get data.');
+	library_namespace.debug('wiki_API: You may use SQL to get data.');
 	// export 導出: CeL.wiki.SQL() 僅可在 Tool Labs 使用。
 	run_SQL.config = SQL_config;
 	wiki_API.SQL = run_SQL;
@@ -5193,8 +5209,8 @@ Object.assign(wiki_API, {
 
 	parser : page_parser,
 
-	content_of : get_page_content,
 	title_of : get_page_title,
+	content_of : get_page_content,
 	normalize_title : normalize_page_name,
 	normalize_title_pattern : normalize_name_pattern,
 	get_hash : list_to_hash,

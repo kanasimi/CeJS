@@ -2286,9 +2286,9 @@ function test_wiki() {
 	//CeL.run([ 'interact.DOM', 'application.debug', 'application.net.wiki' ]);
 
 	var wiki = CeL.wiki.login('', '')
-	// get the content of page
+	// Select page and get the content of page.
 	.page('Wikipedia:沙盒', function(page_data) {
-		CeL.info(page_data.title);
+		CeL.info(CeL.wiki.title_of(page_data));
 		var content = CeL.wiki.content_of(page_data);
 		CeL.log(content === undefined ? 'page deleted!' : content);
 	})
@@ -2309,7 +2309,7 @@ function test_wiki() {
 	})
 	// 執行過 .page() 後，與上一種方法相同。
 	.page(function(page_data) {
-		CeL.info(page_data.title);
+		CeL.info(CeL.wiki.title_of(page_data));
 		CeL.log(CeL.wiki.content_of(page_data));
 	})
 	// get the content of page, replace it, and set summary.
@@ -2318,7 +2318,7 @@ function test_wiki() {
 	})
 	// get the content of page, modify it, and set summary.
 	.edit(function(page_data) {
-		var title = page_data.title,
+		var title = CeL.wiki.title_of(page_data),
 		//
 		content = CeL.wiki.content_of(page_data);
 		return 'text to replace';
@@ -2327,7 +2327,7 @@ function test_wiki() {
 	});
 
 	CeL.wiki.page('Wikipedia:沙盒', function(page_data) {
-		CeL.info(page_data.title);
+		CeL.info(CeL.wiki.title_of(page_data));
 		CeL.log(CeL.wiki.content_of(page_data));
 	});
 
@@ -2355,7 +2355,7 @@ function test_wiki() {
 
 	var wiki = CeL.wiki.login('', '', 'zh.wikisource');
 	wiki.page('史記').edit(function(page_data) {
-		var title = page_data.title,
+		var title = CeL.wiki.title_of(page_data),
 		//
 		content = CeL.wiki.content_of(page_data);
 		CeL.info(title);
@@ -2411,7 +2411,7 @@ function test_wiki() {
 	});
 
 	CeL.wiki.page('Wikipedia_talk:Flow_tests', function(page_data) {
-		var title = page_data.title,
+		var title = CeL.wiki.title_of(page_data),
 		//
 		content = CeL.wiki.content_of(page_data);
 		CeL.info(title);

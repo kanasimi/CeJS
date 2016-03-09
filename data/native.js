@@ -695,7 +695,8 @@ if (!('unicode' in RegExp.prototype))
 
 // invalid characters @ wikitext, XML.
 Unicode_category.invalid = Unicode_category.C.replace('\0',
-	'\0-\x08\x0B\x0C\x0E');
+// 去除 \t\n\r
+'\0-\x08\x0B\x0C\x0E');
 
 /**
  * 可以使用 /\p{C}/ 的 RegExp。

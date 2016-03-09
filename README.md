@@ -12,7 +12,7 @@ This is a JavaScript module framework that is simple to use.
 ## Web page usage 
 ``` HTML
 <script type="text/JavaScript" src="path/to/ce.js">
-	//{"run":"module name or callback"}
+	// { "run" : "module name or callback" }
 </script>
 ```
 
