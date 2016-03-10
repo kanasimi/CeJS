@@ -699,7 +699,7 @@ Unicode_category.invalid = Unicode_category.C.replace('\0',
 '\0-\x08\x0B\x0C\x0E');
 
 /**
- * 可以使用 /\p{C}/ 的 RegExp。
+ * 可以使用 /\p{C}/ 之類的 RegExp。
  * 
  * @param {String|RegExp}source
  *            source of RegExp instance.

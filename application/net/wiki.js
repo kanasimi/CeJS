@@ -789,7 +789,7 @@ var wiki_toString = {
 // TODO: CeL.wiki.page('上海外国语大学',function(page_data){CeL.wiki.parser(page_data).parse();})
 // TODO: [https://a.b <a>a</a><!-- -->]
 // TODO: [[<a>a</a>]]
-// TODO: a[[未來日記-ANOTHER:WORLD-]]b
+// TODO: CeL.wiki.parser('a[[未來日記-ANOTHER:WORLD-]]b').parse()[1]
 
 /**
  * parse The MediaWiki markup language (wikitext).
@@ -1561,7 +1561,7 @@ function get_page_content(page_data, flow_view) {
 	// 因此必須在檢測一般頁面之前先檢測 flow page。
 	// page_data.header: 在 Flow_page() 中設定。
 	// page_data.revision: 由 Flow_page() 取得。
-	var content =
+	var content = page_data &&
 	// page_data.is_Flow &&
 	(page_data[flow_view || 'header'] || page_data).revision;
 	if (content && (content = content.content))
@@ -1885,7 +1885,7 @@ wiki_API.prototype.next = function() {
 						library_namespace.info('wiki_API.prototype.next: Try to get token again. 嘗試重新取得 token。');
 						// reset node agent.
 						// 應付 2016/1 MediaWiki 系統更新，需要連 HTTP handler 都重換一個，重起 cookie。
-						// 發現大多是因為 status 413 的問題。
+						// 發現大多是因為一次處理數十頁面，可能遇上 status 413 的問題。
 						library_namespace.application.net.Ajax.setup_node_net();
 						// rollback
 						_this.actions.unshift(next);
