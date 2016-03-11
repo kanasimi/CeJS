@@ -1848,22 +1848,24 @@ function pushUnique(array_pushTo, element_toPush, array_reverse) {
 
 /**
  * append/merge to original Array.<br />
- * Array.prototype.concat does not change the existing arrays, it only returns a copy of the joined arrays.
+ * Array.prototype.concat does not change the existing arrays, it only returns a
+ * copy of the joined arrays.
  * 
  * @param {Array}array
  *            添加至此 Array list.
  * @param {Array}list
- *            欲添加的 Array list.
+ *            欲添加的 Array list. TODO: 若非Array，則會當作單一元素 .push()。
  * @param {Integer}index
  *            從 list[index] 開始 append。
+ * 
  * @returns this
  */
 function append_to_Array(list, index) {
-	if (list
-			&& (index ? 0 < (index = parseInt(index)) && index < list.length
-					: list.length))
-		Array.prototype.push.apply(this,
-				index ? Array.prototype.slice.call(list, index) : list);
+	if (Array.isArray(list) && (index ? 0 < (index = parseInt(index))
+	//
+	&& index < list.length : list.length))
+		Array.prototype.push.apply(this, index ? Array.prototype.slice.call(
+				list, index) : list);
 
 	return this;
 }

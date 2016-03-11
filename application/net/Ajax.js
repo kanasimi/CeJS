@@ -565,24 +565,51 @@ node_http_agent, node_https_agent;
 
 
 /**
- * 快速 merge cookie: 只檢查若沒有重複的，則直接加入。不檢查也不處理。
+ * 快速 merge cookie: 只檢查若沒有重複的 key，則直接加入。不檢查 path 也不處理 expires, domain, secure。<br />
+ * 為增加效率，不檢查 agent.last_cookie 本身之重複的 cookie。
  * 
- * @param agent
- * @param cookie
+ * @param {Object}agent
+ *            node_http_agent / node_https_agent
+ * @param {Array}cookie
+ *            new cookie to merge
  * 
- * @returns
+ * @returns {Object}agent.last_cookie
  * 
  * @inner
  */
 function merge_cookie(agent, cookie) {
+	// normalize
 	if (!Array.isArray(agent.last_cookie))
 		agent.last_cookie = agent.last_cookie ? [ agent.last_cookie ] : [];
 	if (!Array.isArray(cookie))
 		cookie = cookie ? [ cookie ] : [];
+
+	// remove duplicate cookie
+
+	if (!agent.last_cookie_hash)
+		agent.last_cookie_hash = library_namespace.null_Object();
+	// key_hash[key] = index of agent.last_cookie
+	var key_hash = agent.last_cookie_hash;
+
 	cookie.forEach(function(piece) {
-		if (!agent.last_cookie.includes(piece))
+		var matched = piece.match(/^[^=;]+/);
+		if (!matched) {
+			library_namespace.warn('merge_cookie: Invalid cookie? [' + piece
+					+ ']');
 			agent.last_cookie.push(piece);
+		} else if (matched[0] in key_hash) {
+			library_namespace.debug('duplicated cookie! 以後/新出現者為準。 ['
+					+ agent.last_cookie[key_hash[matched[0]]] + ']→[' + piece
+					+ ']', 3, 'merge_cookie');
+			agent.last_cookie[key_hash[matched[0]]] = piece;
+		} else {
+			// 正常情況。
+			// 登記已存在之cookie。
+			key_hash[matched[0]] = agent.last_cookie.length;
+			agent.last_cookie.push(piece);
+		}
 	});
+
 	// console.log(agent.last_cookie);
 	return agent.last_cookie;
 }
@@ -601,11 +628,10 @@ function merge_cookie(agent, cookie) {
  * @param {String|Object}[post_data]
  *            text data to send when method is POST
  * 
- * @see
- * http://nodejs.org/api/http.html#http_http_request_options_callback
- * http://nodejs.org/api/https.html#https_https_request_options_callback
+ * @see http://nodejs.org/api/http.html#http_http_request_options_callback
+ *      http://nodejs.org/api/https.html#https_https_request_options_callback
  * 
- * @since	2015/1/13 23:23:38
+ * @since 2015/1/13 23:23:38
  */
 function get_URL_node(URL, onload, charset, post_data) {
 	// 前導作業。
@@ -632,12 +658,13 @@ function get_URL_node(URL, onload, charset, post_data) {
 	if (options.search || options.hash)
 		URL = get_URL.add_param(URL, options.search, options.hash);
 
-	library_namespace.debug('URL: (' + (typeof URL) + ') [' + URL + ']', 3, 'get_URL_node');
+	library_namespace.debug('URL: (' + (typeof URL) + ') [' + URL + ']', 3,
+			'get_URL_node');
 
 	if (typeof onload === 'object')
 		// use JSONP.
 		// need callback.
-		for (var callback_param in onload)
+		for ( var callback_param in onload)
 			if (callback_param && typeof onload[callback_param] === 'function') {
 				// 模擬 callback。
 				URL += '&' + callback_param + '=cb';
@@ -653,8 +680,7 @@ function get_URL_node(URL, onload, charset, post_data) {
 			options.onchange(readyState_done);
 		};
 
-	if (options.async === false && onload
-			|| typeof onload !== 'function')
+	if (options.async === false && onload || typeof onload !== 'function')
 		onload = false;
 
 	var request, _URL = node_url.parse(URL),
@@ -663,10 +689,12 @@ function get_URL_node(URL, onload, charset, post_data) {
 	//
 	_onload = function(result) {
 		if (/^2/.test(result.statusCode))
-			library_namespace.debug('STATUS: ' + result.statusCode, 2, 'get_URL_node');
+			library_namespace.debug('STATUS: ' + result.statusCode, 2,
+					'get_URL_node');
 		else
 			library_namespace.warn('get_URL_node: status ' + result.statusCode);
-		library_namespace.debug('HEADERS: ' + JSON.stringify(result.headers), 4, 'get_URL_node');
+		library_namespace.debug('HEADERS: ' + JSON.stringify(result.headers),
+				4, 'get_URL_node');
 		merge_cookie(agent, result.headers['set-cookie']);
 		// 未設定 charset 的話，將回傳 Buffer。
 		if (charset !== 'binary')
@@ -676,21 +704,25 @@ function get_URL_node(URL, onload, charset, post_data) {
 		if (typeof onload === 'function') {
 			var data = [];
 			result.on('data', function(chunk) {
-				library_namespace.debug('receive BODY.length: ' + chunk.length, 3, 'get_URL_node');
+				library_namespace.debug('receive BODY.length: ' + chunk.length,
+						3, 'get_URL_node');
 				data.push(chunk);
 			});
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			result.on('end', function() {
-				//console.log('No more data in response.');
+				// console.log('No more data in response.');
 				if (charset !== 'binary')
 					data = data.join('');
 				else {
-					//TODO:  (binary)
+					// TODO: (binary)
 				}
 				if (library_namespace.is_debug(4))
-					library_namespace.debug('BODY: ' + data, 1, 'get_URL_node');
+					library_namespace.debug(
+					//
+					'BODY: ' + data, 1, 'get_URL_node');
 				// 模擬 XMLHttp。
 				onload({
+					node_agent : agent,
 					// {Number}result.statusCode
 					// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
 					status : result.statusCode,
@@ -700,25 +732,26 @@ function get_URL_node(URL, onload, charset, post_data) {
 				data = null;
 			});
 		} else {
-			library_namespace.warn('get_URL_node: got [' + URL + '], but no listener!');
-			//console.log(result);
+			library_namespace.warn('get_URL_node: got [' + URL
+					+ '], but no listener!');
+			// console.log(result);
 		}
 	};
 
 	if (post_data) {
 		_URL.method = 'POST';
 		_URL.headers = {
-			'Content-Type': 'application/x-www-form-urlencoded',
+			'Content-Type' : 'application/x-www-form-urlencoded',
 			// prevent HTTP 411 錯誤 – 需要內容長度頭 (411 Length Required)
-			'Content-Length': post_data.length,
+			'Content-Length' : post_data.length,
 			// User Agent
 			'User-Agent' : get_URL_node.default_user_agent
 		};
 	} else {
 		_URL.headers = {
-				// User Agent
-				'User-Agent' : get_URL_node.default_user_agent
-			};
+			// User Agent
+			'User-Agent' : get_URL_node.default_user_agent
+		};
 	}
 
 	if (headers) {
@@ -731,29 +764,37 @@ function get_URL_node(URL, onload, charset, post_data) {
 	if (agent.last_cookie) {
 		if (!_URL.headers)
 			_URL.headers = {};
-		library_namespace.debug('Set cookie: ' + JSON.stringify(agent.last_cookie), 3, 'get_URL_node');
-		_URL.headers.Cookie = (_URL.headers.Cookie ? _URL.headers.Cookie + ';' : '')
-		// cookie is Array @ Wikipedia
-		+ (Array.isArray(agent.last_cookie) ? agent.last_cookie.join(';') : agent.last_cookie);
-		//console.log(_URL.headers.Cookie);
+		library_namespace.debug('Set cookie: '
+				+ JSON.stringify(agent.last_cookie), 3, 'get_URL_node');
+		_URL.headers.Cookie = (_URL.headers.Cookie ? _URL.headers.Cookie + ';'
+				: '')
+				// cookie is Array @ Wikipedia
+				+ (Array.isArray(agent.last_cookie) ? agent.last_cookie
+						.join(';') : agent.last_cookie);
+		// console.log(_URL.headers.Cookie);
 	}
 	library_namespace.debug('set protocol ' + _URL.protocol, 3, 'get_URL_node');
-	//console.log(_URL.headers);
-	request = _URL.protocol === 'https:' ? node_https.request(_URL, _onload) : node_http.request(_URL, _onload);
+	// console.log(_URL.headers);
+	request = _URL.protocol === 'https:' ? node_https.request(_URL, _onload)
+			: node_http.request(_URL, _onload);
 
 	if (post_data) {
-		//console.log(post_data);
-		library_namespace.debug('set post data: length ' + post_data.length, 3, 'get_URL_node');
+		// console.log(post_data);
+		library_namespace.debug('set post data: length ' + post_data.length, 3,
+				'get_URL_node');
 		request.write(post_data);
 	}
 
 	request.end();
 
-	library_namespace.debug('set onerror: ' + (options.onfail ? 'user defined' : 'default handler'), 3, 'get_URL_node');
-	request.on('error', typeof options.onfail === 'function' ? options.onfail : function (err) {
-		console.error('get_URL_node: Get error:');
-		console.error(err);
-	});
+	library_namespace.debug('set onerror: '
+			+ (options.onfail ? 'user defined' : 'default handler'), 3,
+			'get_URL_node');
+	request.on('error', typeof options.onfail === 'function' ? options.onfail
+			: function(err) {
+				console.error('get_URL_node: Get error:');
+				console.error(err);
+			});
 	// 遇到 "Unhandled 'error' event"，或許是 print 到 stdout 時出錯了，不一定是本函數的問題。
 }
 
@@ -789,6 +830,9 @@ _.setup_node_net = setup_node;
 // CeL.application.net.Ajax.setup_node_net();
 // library_namespace.application.net.Ajax.setup_node_net();
 setup_node();
+
+
+
 
 //---------------------------------------------------------------------//
 // TODO: for non-nodejs

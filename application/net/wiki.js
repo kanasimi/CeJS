@@ -2609,6 +2609,7 @@ wiki_API.query = function(action, callback, post_data) {
 		});
 	} else
 		get_URL(action, function(XMLHttp) {
+			global.xx=XMLHttp;
 			var response = XMLHttp.responseText;
 			library_namespace.debug('response: '
 					+ (library_namespace.platform.nodejs ? '\n' + response
