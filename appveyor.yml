@@ -3,7 +3,7 @@
 environment:
   matrix:
 # Wikimedia Tool Labs: v0.10.25
-#    - nodejs_version: "0.10"
+    - nodejs_version: "0.10.25"
 # FreeBSD ports node-devel
     - nodejs_version: "0.11"
 #    - nodejs_version: "0.12"

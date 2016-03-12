@@ -4491,15 +4491,17 @@ if (SQL_config) {
  */
 function get_latest(project, callback, options) {
 	function extract() {
+		library_namespace.log('get_latest: Extracting [' + directory + filename
+				+ ']...');
 		require('child_process').exec(
 		//
 		'/bin/bzip2 -cd "' + directory + filename + extension + '" > "'
 		//
 		+ directory + filename + '"', function(error, stdout, stderr) {
 			if (error) {
-				console.error(error);
+				library_namespace.err(error);
 			} else {
-				console.log('Done. callback...');
+				library_namespace.log('get_latest: Done. Running callback...');
 			}
 			callback(directory + filename);
 		});
@@ -4565,7 +4567,8 @@ function get_latest(project, callback, options) {
 	try {
 		// check if file exists
 		node_fs.statSync(directory + filename);
-		console.log('File exists: [' + directory + filename + ']');
+		library_namespace.log('get_latest: File exists: [' + directory
+				+ filename + ']');
 		callback(directory + filename);
 		return;
 	} catch (e) {
@@ -4575,10 +4578,11 @@ function get_latest(project, callback, options) {
 	try {
 		// check if file exists.
 		node_fs.statSync(directory + filename + extension);
-		console.log('Archive exists. Extracting...');
+		library_namespace.log('get_latest: Archive exists.');
 		extract();
 	} catch (e) {
-		console.log('Get [' + filename + ']...');
+		library_namespace.log('get_latest: Get [' + filename + extension
+				+ ']...');
 		// https://nodejs.org/api/child_process.html
 		var child = require('child_process').spawn(
 		//
@@ -4618,7 +4622,7 @@ function get_latest(project, callback, options) {
 				console.error(error_code);
 				return;
 			}
-			console.log('Done. Extracting...');
+			library_namespace.log('get_latest: Got archive file.');
 			extract();
 		});
 	}
@@ -4684,6 +4688,7 @@ function read_dump(filename, callback, options) {
 
 	var buffer = '';
 
+	// Parse Wikimedia dump xml file.
 	function parse_page() {
 		var index = buffer.indexOf('</page>');
 		// -1: NOT_FOUND
@@ -4700,6 +4705,7 @@ function read_dump(filename, callback, options) {
 			ns : buffer.between('<ns>', '</ns>') | 0,
 			title : unescape_xml(buffer.between('<title>', '</title>')),
 			revisions : [ {
+				// e.g., '2000-01-01T00:00:00Z'
 				timestamp : buffer.between('<timestamp>', '</timestamp>'),
 				'*' : buffer.between('<text xml:space="preserve">', '</text>')
 			} ]
@@ -4709,8 +4715,8 @@ function read_dump(filename, callback, options) {
 
 		// node_fs.fstatSync(file_stream.fd);
 
-		// 截斷. 7: '</page>'.length
-		buffer = buffer.slice(index + 7);
+		// 截斷. 16: '</page>\n  <page>'.length
+		buffer = buffer.slice(index + 16);
 		return true;
 	}
 

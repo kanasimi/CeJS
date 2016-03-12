@@ -10,6 +10,9 @@ node_js:
 # It's OK at my FreeBSD under node.js v0.11.16.
 #  - "0.11"
 
+# Wikimedia Tool Labs: v0.10.25
+  - "0.10.25"
+
 #  - "0.12"
   - "4"
 #  - "4.1"
