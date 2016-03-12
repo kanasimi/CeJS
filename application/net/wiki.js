@@ -4567,7 +4567,7 @@ function get_latest(project, callback, options) {
 	try {
 		// check if file exists
 		node_fs.statSync(directory + filename);
-		library_namespace.log('get_latest: File exists: [' + directory
+		library_namespace.log('get_latest: Using file: [' + directory
 				+ filename + ']');
 		callback(directory + filename);
 		return;

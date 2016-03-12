@@ -927,10 +927,12 @@ set_method(Math, {
 		return value ? Math.log((1 + value) / (1 - value)) / 2 : value;
 	},
 
+	// Math.log2()
 	log2: function log2(value) {
 		//return Math.log(value) / Math.LN2;
-		return Math.log(value) / Math.LOG2E;
+		return Math.log(value) * Math.LOG2E;
 	},
+	// Math.log10()
 	log10: function log10(value) {
 		// 採用 /Math.LN10 會造成 Math.log10(1e-12) !== -12
 		//return Math.log(value) / Math.LN10;
