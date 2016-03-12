@@ -2609,7 +2609,6 @@ wiki_API.query = function(action, callback, post_data) {
 		});
 	} else
 		get_URL(action, function(XMLHttp) {
-			global.xx=XMLHttp;
 			var response = XMLHttp.responseText;
 			library_namespace.debug('response: '
 					+ (library_namespace.platform.nodejs ? '\n' + response
@@ -4474,22 +4473,10 @@ if (SQL_config) {
 // --------------------------------------------------------------------------------------------- //
 
 
-/*
-
-node
-require('../wikibot/wiki loder.js');
-var start=Date.now(),count=0;
-file_stream=CeL.wiki.read_dump('../dumps/zhwiki-20160305-pages-articles.xml',function(page_data){if(++count%10000===0)console.log(count+': '+count/(Date.now()-start)+' page/ms\t'+ page_data.title);
-if(!page_data.title)console.warn('* No title: '+page_data.id);
-//[[Wikipedia:快速删除方针]]
-if(!page_data.revisions[0]['*'])console.warn('* No content: '+page_data.title);
-});
-
-*/
-
-
 /**
  * 取得最新之 Wikimedia dump。
+ * 
+ * TODO: search the latest file in the directory.
  * 
  * @param {String}[project]
  *            project code name. e.g., 'enwiki'
@@ -4522,30 +4509,43 @@ function get_latest(project, callback, options) {
 		// 前置處理。
 		options = library_namespace.null_Object();
 
-	if (typeof project === 'function' && !callback) {
+	if (typeof project === 'function' && typeof callback !== 'function'
+			&& !options) {
+		// shift arguments
+		options = callback;
 		callback = project;
-		project = options.project || default_language + 'wiki';
+		project = null;
 	}
+
+	if (!project)
+		project = options.project || default_language + 'wiki';
 
 	// dump host
 	var host = options.host || 'http://dumps.wikimedia.org/',
 	//
-	latest = options.latest || 0;
-	if (!latest)
+	latest = options.latest;
+	if (!latest) {
 		library_namespace.get_URL(
 		// Get the latest version.
-		host + project, function(data) {
-			var PATTERN = / href="(\d{8,})/g, matched;
-			while (matched = PATTERN.exec(data)) {
+		host + project + '/', function(XMLHttp) {
+			var response = XMLHttp.responseText;
+			var latest = 0, matched,
+			//
+			PATTERN = / href="(\d{8,})/g;
+			while (matched = PATTERN.exec(response)) {
 				matched = matched[1] | 0;
 				if (latest < matched)
 					latest = matched;
 			}
+			// 不動到原來的 options。
+			options = Object.clone(options);
+			// default: 'latest'
+			options.latest = latest || 'latest';
+			get_latest(project, callback, options);
 		});
+		return;
+	}
 
-	if (!latest)
-		// default
-		latest = 'latest';
 	var directory = options.directory || './',
 	//
 	filename = options.filename || project + '-' + latest
@@ -4555,6 +4555,7 @@ function get_latest(project, callback, options) {
 	// less zhwiki-20160305-pages-meta-current1.xml
 	// tail -n 80 zhwiki-20160305-pages-meta-current1.xml
 
+	// e.g.,
 	// callback=function (data) {console.log(data);};
 	// latest='20160305';
 	// project='zhwiki';
@@ -4590,6 +4591,24 @@ function get_latest(project, callback, options) {
 			process.stdout.write(data);
 		});
 		child.stderr.on('data', function(data) {
+			data = data.toString('utf8');
+			/**
+			 * <code>
+			 e.g.,
+			259000K .......... .......... .......... .......... .......... 21%  282M 8m26s
+			999950K .......... .......... .......... .......... .......... 82% 94.2M 1m46s
+			1000000K .......... .......... .......... .......... .......... 82%  103M 1m46s
+			</code>
+			 */
+			// [ all, downloaded, percentage, speed, remaining 剩下時間 ]
+			var matched = data
+					.match(/([^\n\.]+)[.\s]+(\d+%)\s+([^\s]+)\s+([^\s]+)/);
+			if (matched) {
+				data = matched[2] + '  ' + matched[1] + '  ' + matched[4]
+						+ '                    \r';
+			} else if (data.includes('....') || /\d+[ms]/.test(data)
+					|| /\.\.\s*\d+%/.test(data))
+				return;
 			process.stderr.write(data);
 		});
 		child.on('close', function(error_code) {
@@ -4646,11 +4665,14 @@ var NOT_FOUND = ''.indexOf('_');
  * @since 2016/3/11
  */
 function read_dump(filename, callback, options) {
-	if (typeof filename === 'function' && !callback) {
+	if (typeof filename === 'function' && typeof callback !== 'function'
+		&& !options) {
+		// shift arguments
+		options = callback;
 		callback = filename;
 		filename = null;
 	}
-	if (!filename || !filename.endsWith('.xml')) {
+	if (typeof filename !== 'string' || !filename.endsWith('.xml')) {
 		get_latest(filename, function(filename) {
 			read_dump(filename, callback, options);
 		}, options);

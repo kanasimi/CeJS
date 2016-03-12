@@ -689,6 +689,19 @@ function get_URL_node(URL, onload, charset, post_data) {
 	agent = _URL.protocol === 'https:' ? node_https_agent : node_http_agent,
 	//
 	_onload = function(result) {
+		if (/^3/.test(result.statusCode) && result.headers.location
+		//
+		&& !options.no_redirect) {
+			// e.g., 301
+			// 不動到原來的 options。
+			options = Object.clone(options);
+			options.URL = result.headers.location;
+			library_namespace.debug('Redirecting to [' + result.statusCode
+					+ ']', 1, 'get_URL_node');
+			get_URL_node(options, onload, charset, post_data);
+			return;
+		}
+
 		if (/^2/.test(result.statusCode))
 			library_namespace.debug('STATUS: ' + result.statusCode, 2,
 					'get_URL_node');
@@ -723,7 +736,7 @@ function get_URL_node(URL, onload, charset, post_data) {
 					'BODY: ' + data, 1, 'get_URL_node');
 				// 模擬 XMLHttp。
 				onload({
-					node_agent : agent,
+					// node_agent : agent,
 					// {Number}result.statusCode
 					// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
 					status : result.statusCode,
