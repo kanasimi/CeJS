@@ -4493,7 +4493,7 @@ function get_latest(project, callback, options) {
 	function extract() {
 		require('child_process').exec(
 		//
-		'/bin/bzip2 -cd "' + directory + filename + '.bz2" > "'
+		'/bin/bzip2 -cd "' + directory + filename + extension + '" > "'
 		//
 		+ directory + filename + '"', function(error, stdout, stderr) {
 			if (error) {
@@ -4565,15 +4565,16 @@ function get_latest(project, callback, options) {
 	try {
 		// check if file exists
 		node_fs.statSync(directory + filename);
-		console.log('File exists.');
+		console.log('File exists: [' + directory + filename + ']');
 		callback(directory + filename);
 		return;
 	} catch (e) {
 	}
 
+	var extension = options.filename || '.bz2';
 	try {
 		// check if file exists.
-		node_fs.statSync(directory + filename + '.bz2');
+		node_fs.statSync(directory + filename + extension);
 		console.log('Archive exists. Extracting...');
 		extract();
 	} catch (e) {
@@ -4581,9 +4582,10 @@ function get_latest(project, callback, options) {
 		// https://nodejs.org/api/child_process.html
 		var child = require('child_process').spawn(
 		//
-		'/usr/bin/wget', [ '--input-file="' + directory + filename + '.bz2"',
-		//
-		host + project + '/' + latest + '/' + filename + '.bz2' ]);
+		'/usr/bin/wget',
+				[ '--input-file="' + directory + filename + extension + '"',
+				//
+				host + project + '/' + latest + '/' + filename + extension ]);
 		// http://stackoverflow.com/questions/6157497/node-js-printing-to-console-without-a-trailing-newline
 		// In Windows console (Linux, too), you should replace '\r' with its
 		// equivalent code \033[0G:

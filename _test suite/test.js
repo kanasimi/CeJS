@@ -714,6 +714,7 @@ function test_math() {
 		p = 1e-12;
 		assert([ CeL.data.math.ceil_log(p), Math.ceil(Math.log10(p)) ], 'ceil_log('+p+')');
 		assert([ CeL.data.math.ceil_log(p,2), Math.ceil(Math.log(p)/Math.log(2)) ], 'ceil_log('+p+',2)');
+		assert([ Math.log10(p), -12 ], 'Math.log10('+p+')');
 		assert([ CeL.data.math.ceil_log(p), -12 ], 'ceil_log('+p+')');
 
 		if (test_level)

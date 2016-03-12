@@ -928,10 +928,13 @@ set_method(Math, {
 	},
 
 	log2: function log2(value) {
-		return Math.log(value) / Math.LN2;
+		//return Math.log(value) / Math.LN2;
+		return Math.log(value) / Math.LOG2E;
 	},
 	log10: function log10(value) {
-		return Math.log(value) / Math.LN10;
+		// 採用 /Math.LN10 會造成 Math.log10(1e-12) !== -12
+		//return Math.log(value) / Math.LN10;
+		return Math.log(value) * Math.LOG10E;
 	},
 	log1p: function log1p(value) {
 		// If x is −0, the result is −0.
