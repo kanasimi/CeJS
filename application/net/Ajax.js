@@ -558,6 +558,7 @@ deprecated_get_URL.clean=function(i,force){
 //	↑XMLHttp set	==================
 //---------------------------------------------------------------------//
 
+// @see https://github.com/request/request
 
 var node_url, node_http, node_https,
 // reuse the sockets (keep-alive connection).

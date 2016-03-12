@@ -1079,9 +1079,9 @@ function get_intermediate_Array(data) {
  * @param {String}text
  *            欲篩選字串。
  * @param {String}[head]
- *            首字串。
+ *            首字串。 TODO: RegExp
  * @param {String}[foot]
- *            尾字串。
+ *            尾字串。 TODO: RegExp
  * 
  * @returns head 與 foot 之間的字串。undefined 表示沒找到。
  * 

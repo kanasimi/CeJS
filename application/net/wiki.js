@@ -2915,7 +2915,7 @@ wiki_API.page = function(title, callback, options) {
 				//
 				+ ' page(s)! The pages will all passed to callback as Array!', 2, 'wiki_API.page');
 
-		// page 之 structure 將按照 wiki 本身之 return！
+		// page 之 structure 將按照 wiki API 本身之 return！
 		// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
 		callback(pages);
 	});
@@ -3016,7 +3016,7 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 				'wiki_API.langlinks: Get ' + pages.length
 				//
 				+ ' page(s)! We will pass all pages to callback!');
-			// page 之 structure 按照 wiki 本身之 return！
+			// page 之 structure 按照 wiki API 本身之 return！
 			// page = {pageid,ns,title,revisions:[{langlinks,'*'}]}
 			callback(pages);
 		} else {
@@ -4169,7 +4169,7 @@ wiki_API.redirects = function(title, callback, options) {
 
 		pages = pages[0];
 
-		// page 之 structure 將按照 wiki 本身之 return！
+		// page 之 structure 將按照 wiki API 本身之 return！
 		// page = {pageid,ns,title,redirects:[{},{}]}
 		var redirects = pages.redirects || [];
 		library_namespace.debug(get_page_title(pages)
@@ -4468,6 +4468,260 @@ function get_recent(callback, namespace, limit) {
 if (SQL_config) {
 	wiki_API.recent = get_recent;
 }
+
+
+
+// --------------------------------------------------------------------------------------------- //
+
+
+/*
+
+node
+require('../wikibot/wiki loder.js');
+var start=Date.now(),count=0;
+file_stream=CeL.wiki.read_dump('../dumps/zhwiki-20160305-pages-articles.xml',function(page_data){if(++count%10000===0)console.log(count+': '+count/(Date.now()-start)+' page/ms\t'+ page_data.title);
+if(!page_data.title)console.warn('* No title: '+page_data.id);
+//[[Wikipedia:快速删除方针]]
+if(!page_data.revisions[0]['*'])console.warn('* No content: '+page_data.title);
+});
+
+*/
+
+
+/**
+ * 取得最新之 Wikimedia dump。
+ * 
+ * @param {String}[project]
+ *            project code name. e.g., 'enwiki'
+ * @param {Function}callback
+ *            回調函數。
+ * @param {Object}[options]
+ *            附加參數/設定選擇性/特殊功能與選項
+ * 
+ * @see https://en.wikipedia.org/wiki/Wikipedia:Database_download#Where_do_I_get...
+ * 
+ * @inner
+ */
+function get_latest(project, callback, options) {
+	function extract() {
+		require('child_process').exec(
+		//
+		'/bin/bzip2 -cd "' + directory + filename + '.bz2" > "'
+		//
+		+ directory + filename + '"', function(error, stdout, stderr) {
+			if (error) {
+				console.error(error);
+			} else {
+				console.log('Done. callback...');
+			}
+			callback(directory + filename);
+		});
+	}
+
+	if (!options)
+		// 前置處理。
+		options = library_namespace.null_Object();
+
+	if (typeof project === 'function' && !callback) {
+		callback = project;
+		project = options.project || default_language + 'wiki';
+	}
+
+	// dump host
+	var host = options.host || 'http://dumps.wikimedia.org/',
+	//
+	latest = options.latest || 0;
+	if (!latest)
+		library_namespace.get_URL(
+		// Get the latest version.
+		host + project, function(data) {
+			var PATTERN = / href="(\d{8,})/g, matched;
+			while (matched = PATTERN.exec(data)) {
+				matched = matched[1] | 0;
+				if (latest < matched)
+					latest = matched;
+			}
+		});
+
+	if (!latest)
+		// default
+		latest = 'latest';
+	var directory = options.directory || './',
+	//
+	filename = options.filename || project + '-' + latest
+			+ '-pages-articles.xml';
+
+	// head -n 80 zhwiki-20160305-pages-meta-current1.xml
+	// less zhwiki-20160305-pages-meta-current1.xml
+	// tail -n 80 zhwiki-20160305-pages-meta-current1.xml
+
+	// callback=function (data) {console.log(data);};
+	// latest='20160305';
+	// project='zhwiki';
+	// directory='/data/project/cewbot/dumps/';
+	// filename=project+'-'+latest+'-pages-articles-multistream-index.txt';
+
+	try {
+		// check if file exists
+		node_fs.statSync(directory + filename);
+		console.log('File exists.');
+		callback(directory + filename);
+		return;
+	} catch (e) {
+	}
+
+	try {
+		// check if file exists.
+		node_fs.statSync(directory + filename + '.bz2');
+		console.log('Archive exists. Extracting...');
+		extract();
+	} catch (e) {
+		console.log('Get [' + filename + ']...');
+		// https://nodejs.org/api/child_process.html
+		var child = require('child_process').spawn(
+		//
+		'/usr/bin/wget', [ '--input-file="' + directory + filename + '.bz2"',
+		//
+		host + project + '/' + latest + '/' + filename + '.bz2' ]);
+		// http://stackoverflow.com/questions/6157497/node-js-printing-to-console-without-a-trailing-newline
+		// In Windows console (Linux, too), you should replace '\r' with its
+		// equivalent code \033[0G:
+		child.stdout.on('data', function(data) {
+			process.stdout.write(data);
+		});
+		child.stderr.on('data', function(data) {
+			process.stderr.write(data);
+		});
+		child.on('close', function(error_code) {
+			if (error_code) {
+				console.error(error_code);
+				return;
+			}
+			console.log('Done. Extracting...');
+			extract();
+		});
+	}
+}
+
+
+
+/**
+ * 還原 XML text 成原先之文本。
+ * 
+ * @param {String}xml
+ *            XML text
+ * 
+ * @returns {String}還原成原先之文本。
+ * 
+ * @inner
+ */
+function unescape_xml(xml) {
+	return xml.replace(/&quot;/g, '"')
+	// 2016/3/11: Wikimedia dumps do NOT include '&apos;'.
+	.replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+	// MUST be the last one.
+	.replace(/&amp;/g, '&');
+}
+
+
+// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
+var NOT_FOUND = ''.indexOf('_');
+
+/**
+ * 讀取/parse Wikimedia dumps 之 xml 檔案。
+ * 
+ * @param {String}filename
+ *            欲讀取的檔案名稱。
+ * @param {Function}callback
+ *            回調函數。 callback({Object}page_data)
+ * @param {Object}[options]
+ *            附加參數/設定選擇性/特殊功能與選項
+ * 
+ * @returns {node_fs.ReadStream}handler
+ * 
+ * @see <a href="http://dumps.wikimedia.org/backup-index.html">Wikimedia
+ *      database backup dumps</a>
+ * @see https://www.mediawiki.org/wiki/Help:Export
+ * 
+ * @since 2016/3/11
+ */
+function read_dump(filename, callback, options) {
+	if (typeof filename === 'function' && !callback) {
+		callback = filename;
+		filename = null;
+	}
+	if (!filename || !filename.endsWith('.xml')) {
+		get_latest(filename, function(filename) {
+			read_dump(filename, callback, options);
+		}, options);
+		// 警告: 無法馬上取得檔案時，將不會回傳 file handler！
+		return;
+	}
+
+	var buffer = '';
+
+	function parse_page() {
+		var index = buffer.indexOf('</page>');
+		// -1: NOT_FOUND
+		if (index === -1)
+			// 資料尚未完整，繼續讀取。
+			return;
+
+		// TODO: check '<model>wikitext</model>'
+
+		// page 之 structure 按照 wiki API 本身之 return
+		// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
+		callback({
+			pageid : buffer.between('<id>', '</id>') | 0,
+			ns : buffer.between('<ns>', '</ns>') | 0,
+			title : unescape_xml(buffer.between('<title>', '</title>')),
+			revisions : [ {
+				timestamp : buffer.between('<timestamp>', '</timestamp>'),
+				'*' : buffer.between('<text xml:space="preserve">', '</text>')
+			} ]
+		});
+		// file_stream.resume();
+		// file_stream.pause();
+
+		// node_fs.fstatSync(file_stream.fd);
+
+		// 截斷. 7: '</page>'.length
+		buffer = buffer.slice(index + 7);
+		return true;
+	}
+
+	// e.g., 'zhwiki-20160305-pages-meta-current1.xml'
+	var file_stream = new node_fs.ReadStream(filename);
+	file_stream.setEncoding('utf8');
+
+	// old: e.g., '<text xml:space="preserve" bytes="80">'??
+	// 2016/3/11: e.g., '<text xml:space="preserve">'
+	file_stream.on('data', function(chunk) {
+		// console.log(chunk.toString('utf8'));
+
+		// buffer += chunk.toString('utf8');
+		buffer += chunk;
+		while (parse_page())
+			;
+		if (buffer.length > 1e8) {
+			console.err('buffer too long (' + buffer.length + ')! Paused!');
+			console.log(buffer.slice(0, 1e4));
+			file_stream.pause();
+			// throw buffer.slice(0,1e4);
+		}
+	});
+	file_stream.on('end', function() {
+		while (parse_page())
+			;
+		library_namespace.debug('Done.', 1, 'read_dump');
+		if (options && typeof options.last === 'function')
+			options.last.call(file_stream);
+	});
+
+	return file_stream;
+}
+
+wiki_API.read_dump = read_dump;
 
 
 //---------------------------------------------------------------------//
@@ -4993,7 +5247,7 @@ function Flow_info(title, callback, options) {
 				+ ' will all passed to callback as Array!', 2, 'Flow_info');
 			}
 
-		// page 之 structure 將按照 wiki 本身之 return！
+		// page 之 structure 將按照 wiki API 本身之 return！
 		// page_data = {ns,title,missing:'']}
 		// page_data = {pageid,ns,title,flowinfo:{flow:[]}}
 		// page_data = {pageid,ns,title,flowinfo:{flow:{enabled:''}}}

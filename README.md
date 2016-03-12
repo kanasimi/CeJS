@@ -23,7 +23,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 ## Node.js usage
 
 ### Installation
-``` bash
+``` sh
 $ npm install cejs
 ```
 
