@@ -16,6 +16,9 @@
 // https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
 // https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 // 整合各 action=query 至單一公用 function。
+// 添加主控端報告的顏色。
+// 添加網頁報告。
+// 調用超過一個Template中參數的值，只有最後提供的值會被使用。
 
 'use strict';
 //'use asm';
@@ -790,6 +793,7 @@ var wiki_toString = {
 // TODO: [https://a.b <a>a</a><!-- -->]
 // TODO: [[<a>a</a>]]
 // TODO: CeL.wiki.parser('a[[未來日記-ANOTHER:WORLD-]]b').parse()[1]
+// 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
 
 /**
  * parse The MediaWiki markup language (wikitext).
@@ -4476,7 +4480,7 @@ if (SQL_config) {
 /**
  * 取得最新之 Wikimedia dump。
  * 
- * TODO: search the latest file in the directory.
+ * TODO: search the latest file in the local directory. e.g., /public/dumps/public/zhwiki/20160203/zhwiki-20160203-pages-articles.xml.bz2
  * 
  * @param {String}[project]
  *            project code name. e.g., 'enwiki'
@@ -4506,6 +4510,10 @@ function get_latest(project, callback, options) {
 			callback(directory + filename);
 		});
 	}
+
+	if (false && !wmflabs)
+		// 最起碼須有 bzip2, wget 特定版本輸出訊息 @ /bin/sh
+		throw new Error('Only for Tool Labs!');
 
 	if (!options)
 		// 前置處理。
@@ -4655,6 +4663,10 @@ var NOT_FOUND = ''.indexOf('_');
 /**
  * 讀取/parse Wikimedia dumps 之 xml 檔案。
  * 
+ * 注意: 必須自行 include 'application.platform.nodejs'。 <code>
+   CeL.run('application.platform.nodejs');
+ * </code><br />
+ * 
  * @param {String}filename
  *            欲讀取的檔案名稱。
  * @param {Function}callback
@@ -4773,6 +4785,9 @@ application.net.wiki wiki_API.cache() CeL.wiki.cache()
  * cache 作業操作之輔助套裝函數。<br />
  * only for node.js.
  * 
+ * 注意: 必須自行 include 'application.platform.nodejs'。 <code>
+   CeL.run('application.platform.nodejs');
+ * </code><br />
  * 注意: 需要自行先創建各 type 之次目錄，如 page, redirects, embeddedin, ...<br />
  * 注意: 會改變 operation, _this! Warning: will modify operation, _this!
  * 

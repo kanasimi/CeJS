@@ -419,6 +419,32 @@ function (global) {
 	// export.
 	_.null_Object = null_Object;
 
+
+	// 2016/3/13 13:58:9
+	// setup options. 前置處理 options，避免修改或覆蓋附加參數。
+	function setup_options(options) {
+		// for:
+		//	// 前置處理。
+		//	if (!library_namespace.is_Object(options))
+		//		options = library_namespace.null_Object();
+		// →
+		//	options = library_namespace.setup_options(options);
+
+		if (options && ('new_NO' in options)) {
+			// options.new_NO++;
+			return options;
+		}
+
+		// create a new one. copy options.
+		// or use Object.clone(options)
+		options = Object.assign(null_Object(), options);
+		// 註冊為副本。
+		options.new_NO = 1;
+		return options;
+	}
+	_.setup_options = setup_options;
+
+
 	var modify_function_hash = null_Object();
 
 	_// JSDT:_module_
