@@ -49,7 +49,7 @@ eval(this.use());
 
 // @see 'application.debug.log'
 function SGR(messages) {
-	return CeL.SGR ? new SGR(messages).toString()
+	return CeL.SGR ? new CeL.SGR(messages).toString()
 	// 將 messages 轉成 plain text。
 	: messages.filter(function(message, index) {
 		return index % 2 === 0;
@@ -2105,7 +2105,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	library_namespace.debug('wiki_API.work: 開始執行:先作環境建構與初始設定。');
 	if (config.summary)
 		// '開始處理 ' + config.summary + ' 作業'
-		library_namespace.info('wiki_API.work: start [' + config.summary + ']');
+		library_namespace.info(SGR([ 'wiki_API.work: start [', 'fg=yellow', config.summary, '-fg', ']' ]));
 
 	/**
 	 * <code>
