@@ -16,7 +16,6 @@
 // https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
 // https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 // 整合各 action=query 至單一公用 function。
-// 添加主控端報告的顏色。
 // 添加網頁報告。
 // 調用超過一個Template中參數的值，只有最後提供的值會被使用。
 
@@ -44,6 +43,18 @@ code : function(library_namespace) {
 var get_URL;
 eval(this.use());
 
+
+// --------------------------------------------------------------------------------------------- //
+// 添加主控端報告的顏色。
+
+// @see 'application.debug.log'
+function SGR(messages) {
+	return CeL.SGR ? new SGR(messages).toString()
+	// 將 messages 轉成 plain text。
+	: messages.filter(function(message, index) {
+		return index % 2 === 0;
+	}).join('');
+}
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -2331,11 +2342,11 @@ wiki_API.prototype.work = function(config, pages, titles) {
 					// edit/process
 					library_namespace.info(
 					//
-					'wiki_API.work: edit '
+					SGR([ 'wiki_API.work: edit '
 					//
 					+ (index + 1) + '/' + pages.length
 					//
-					+ ' [[' + page_data.title + ']]');
+					+ ' [[', 'fg=yellow', page_data.title, '-fg', ']]' ]));
 					// 以 each() 的回傳作為要改變成什麼內容。
 					return each(page_data, messages, work_options);
 				}, work_options, callback);
@@ -2468,10 +2479,10 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			else
 				library_namespace.info(
 				//
-				'wiki_API.work: ' + config.summary + ': 處理分塊 '
+				SGR([ 'wiki_API.work: ', 'fg=green', config.summary, '-fg', ': 處理分塊 '
 				//
 				+ (work_continue + 1) + '–' + (work_continue + max_size) + '/'
-						+ target.length + '。');
+						+ target.length + '。' ]));
 
 			// reset count and log.
 			done = nochange_count = 0;

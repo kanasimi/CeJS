@@ -1192,11 +1192,9 @@ if (!CeL.Log) {
 	 * @returns {String}plain text messages
 	 */
 	function SGR_to_plain(messages) {
-		messages.forEach(function(message, index) {
-			if (index % 2 === 1)
-				messages[index] = '';
-		});
-		return messages.join('');
+		return messages.filter(function(message, index) {
+			return index % 2 === 0;
+		}).join('');
 	};
 
 	if (CeL.is_WWW())

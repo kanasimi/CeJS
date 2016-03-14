@@ -420,18 +420,29 @@ function (global) {
 	_.null_Object = null_Object;
 
 
-	// 2016/3/13 13:58:9
-	// setup options. 前置處理 options，避免修改或覆蓋附加參數。
-	function setup_options(options) {
-		// for:
-		//	// 前置處理。
-		//	if (!library_namespace.is_Object(options))
-		//		options = library_namespace.null_Object();
-		// →
-		//	options = library_namespace.setup_options(options);
-
-		if (options && ('new_NO' in options)) {
-			// options.new_NO++;
+	/**
+	 * setup options. 前置處理 options，避免修改或覆蓋附加參數。
+	 * 
+	 * @example<code>
+	   //	// 前導作業/前置處理。
+	   //	if (!library_namespace.is_Object(options))
+	   //		options = library_namespace.null_Object();
+	   // →
+	   //	options = library_namespace.setup_options(options);
+	   //	options = library_namespace.setup_options(options, true);
+	 * </code>
+	 * 
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 * @param {Boolean}[new_one]
+	 *            重新造出可被更改的選項。當會更改到options時，再設定此項。
+	 * 
+	 * @returns {Object}選項。
+	 * 
+	 * @since 2016/3/13 13:58:9
+	 */
+	function setup_options(options, new_one) {
+		if (options && !new_one) {
 			return options;
 		}
 
@@ -439,10 +450,57 @@ function (global) {
 		// or use Object.clone(options)
 		options = Object.assign(null_Object(), options);
 		// 註冊為副本。
-		options.new_NO = 1;
+		options.new_NO = (options.new_NO | 0) + 1;
 		return options;
 	}
+	/**
+	 * setup options. 前置處理 options，避免修改或覆蓋附加參數。<br />
+	 * 僅用在<b>不會改變</b> options 的情況。
+	 * 
+	 * @example<code>
+	   //	// 前導作業/前置處理。
+	   //	if (!library_namespace.is_Object(options))
+	   //		options = library_namespace.null_Object();
+	   // →
+	   //	options = library_namespace.setup_options(options);
+	 * </code>
+	 * 
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 * 
+	 * @returns {Object}選項。
+	 * 
+	 * @since 2016/3/13 13:58:9
+	 */
+	function setup_options(options) {
+		return options || Object.assign(null_Object(), options);
+	}
+	/**
+	 * setup options. 前置處理 options，避免修改或覆蓋附加參數。<br />
+	 * 重新造出可被更改的選項。當會更改到options時，再使用此函數。
+	 * 
+	 * @example<code>
+	   //	// 前導作業/前置處理。
+	   //	if (!library_namespace.is_Object(options))
+	   //		options = library_namespace.null_Object();
+	   // →
+	   //	options = library_namespace.new_options(options);
+	 * </code>
+	 * 
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項。
+	 * 
+	 * @returns {Object}選項。
+	 * 
+	 * @since 2016/03/14 16:34:09
+	 */
+	function new_options(options, new_one) {
+		// create a new one. copy options.
+		// or use Object.clone(options)
+		return options ? Object.assign(null_Object(), options) : null_Object();
+	}
 	_.setup_options = setup_options;
+	_.new_options = new_options;
 
 
 	var modify_function_hash = null_Object();
