@@ -1777,7 +1777,76 @@ OS='UNIX'; // unknown
 	};
 
 
+	// ---------------------------------------------------------------------//
 	// Initialization
+
+	// ---------------------------------------------------------------------//
+	// 處理 styled messages.
+
+	/**
+	 * 將 messages 去掉 style，轉成 plain text messages。
+	 * 
+	 * @param {Array}messages
+	 *            附加格式的訊息。 messages with style.
+	 * 
+	 * @returns {String}plain text messages.
+	 */
+	function SGR_to_plain(messages) {
+		return messages.filter(function(message, index) {
+			return index % 2 === 0;
+		}).join('');
+	}
+
+	/** {Object}cache for interact.console.SGR */
+	var SGR;
+
+	/**
+	 * 在已經存在 SGR 的功能下，以之格式化訊息。
+	 * 
+	 * @param {Array}messages
+	 *            附加格式的訊息。 messages with style. 將當作 new SGR() 之 arguments。
+	 * 
+	 * @returns {String}formatted messages. 格式化後的訊息。
+	 * 
+	 * @see 'interact.console'
+	 */
+	function new_SGR(messages) {
+		// 注意: 在 call stack 中有 SGR 時會造成:
+		// RangeError: Maximum call stack size exceeded
+		// 因此不能用於測試 SGR 本身! 故須避免之。
+		// CeL.is_debug(3): assert: SGR 在這 level 以上才會呼叫 .debug()。
+		// TODO: 檢測 call stack。
+		return _.is_debug(3)
+		// 若 SGR.CSI 被改過，則即便顯示亦無法得到預期之結果，不如跳過。
+		|| SGR.CSI !== SGR.default_CSI ? SGR_to_plain(messages)
+		// 顯示具格式（如 color 顏色）的 messages。
+		: new SGR(messages).toString();
+	}
+
+	/**
+	 * 處理 console 之 message。添加主控端報告的顯示格式（如 color 顏色）。<br />
+	 * 若無法執行 new SGR()，則會將 messages 轉成 plain text。實作部分詳見 SGR。
+	 * 
+	 * @param {Array}messages
+	 *            附加格式的訊息。 messages with style.
+	 * 
+	 * @returns {String}格式化後的訊息。
+	 * 
+	 * @see to_SGR() @ 'application.debug.log'
+	 */
+	function to_SGR(messages) {
+		if (_.SGR) {
+			SGR = _.SGR;
+			return (_.to_SGR = new_SGR)(messages);
+		}
+		// 將 messages 去掉 style，轉成 plain text messages。
+		return SGR_to_plain(messages);
+	}
+
+	// 在 WWW 的環境下，則直接 pass style 設定。
+	_.to_SGR = is_WWW ? SGR_to_plain : to_SGR;
+
+	// --------------------------------
 
 	// temporary decoration of debug console,
 	// in case we call for nothing and raise error
@@ -2333,6 +2402,16 @@ OS='UNIX'; // unknown
 						// 少一道手續。
 						callbackfn(this[index], index, this);
 		}
+	});
+
+	// ---------------------------------------------------------------------//
+
+	// setup frontend of styled messages.
+	// e.g., 使可輸入 CeL.slog([ styled messages ])
+	'debug,log,info,warn,err'.split(',').forEach(function(type) {
+		_['s' + type] = function(messages, _1, _2) {
+			_[type](_.to_SGR(messages), _1, _2);
+		};
 	});
 
 

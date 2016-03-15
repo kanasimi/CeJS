@@ -1157,51 +1157,6 @@ if (!CeL.Log) {
 	// --------------------------------------------------------------------------------------------
 	// front ends of log function
 
-	// SGR: cache for CeL.SGR
-	var SGR, to_SGR =
-	/**
-	 * 處理 console 之 message。<br />
-	 * 若無法執行 new SGR()，則會將 messages 轉成 plain text。實作部分詳見 SGR。
-	 * 
-	 * @param {Array}messages
-	 *            messages with style. 將當作 new SGR() 之 arguments。
-	 * 
-	 * @returns {String}formatted messages
-	 */
-	function to_SGR(messages) {
-		return !SGR && !(SGR = CeL.SGR)
-		// 注意: 在 call stack 中有 SGR 時會造成:
-		// RangeError: Maximum call stack size exceeded
-		// 因此不能用於測試 SGR 本身! 故須避免之。
-		// CeL.is_debug(3): assert: SGR 在這 level 以上才會呼叫 .debug()。
-		// TODO: 檢測 call stack。
-		|| CeL.is_debug(3)
-		// 若 SGR.CSI 被改過，則即便顯示亦無法得到預期之結果，不如跳過。
-		|| SGR.CSI !== SGR.default_CSI ? SGR_to_plain(messages)
-		// 顯示具 color 的 messages。
-		: new SGR(messages).toString();
-	};
-
-	var SGR_to_plain =
-	/**
-	 * 將 messages 轉成 plain text。
-	 * 
-	 * @param {Array}messages
-	 *            messages with style. 將當作 new SGR() 之 arguments。
-	 * 
-	 * @returns {String}plain text messages
-	 */
-	function SGR_to_plain(messages) {
-		return messages.filter(function(message, index) {
-			return index % 2 === 0;
-		}).join('');
-	};
-
-	if (CeL.is_WWW())
-		to_SGR = SGR_to_plain;
-	else
-		to_SGR.to_plain = SGR_to_plain;
-
 	/**
 	 * 在 node.js v0.11.16 中，不使用 var 的模式設定 function，會造成:<br />
 	 * In strict mode code, functions can only be declared at top level or immediately within another function.
@@ -1268,7 +1223,7 @@ if (!CeL.Log) {
 					span : caller,
 					'class' : 'debug_caller'
 				}, ': ', message ] :
-				to_SGR([ '', 'fg=yellow', caller + ': ', '-fg', message ]);
+				CeL.to_SGR([ '', 'fg=yellow', caller + ': ', '-fg', message ]);
 			}
 
 			CeL.Log.log.call(CeL.Log, message, clean, {
@@ -1508,7 +1463,7 @@ if (!CeL.Log) {
 			if (!error_message) {
 				error_message = [ test_name,
 				// if fault, message: 失敗時所要呈現訊息。
-				to_SGR([ ' ', 'fg=red', 'failed', '-fg', ' ' ]) ];
+				CeL.to_SGR([ ' ', 'fg=red', 'failed', '-fg', ' ' ]) ];
 				if (type)
 					error_message.push('type of ' + quote(condition) + ' is not ('
 							+ type + ')');
@@ -1552,7 +1507,7 @@ if (!CeL.Log) {
 				passed_message = [
 						test_name,
 						//
-						to_SGR([ ' ', 'fg=green', 'passed', '-fg', ' ' ]),
+						CeL.to_SGR([ ' ', 'fg=green', 'passed', '-fg', ' ' ]),
 						//
 						quote(condition[0], true) ].join('');
 			CeL.debug(passed_message, 1,
@@ -1714,11 +1669,11 @@ if (!CeL.Log) {
 			if (options && typeof options.callback === 'function')
 				options.callback(recorder, test_name);
 
-			var messages = test_name ? [ to_SGR([ 'Test [', 'fg=cyan', test_name,
+			var messages = test_name ? [ CeL.to_SGR([ 'Test [', 'fg=cyan', test_name,
 					'-fg', ']: ' ]) ] : [];
 			function join() {
 				if (recorder.ignored.length > 0)
-					messages.push(to_SGR([ ', ' + recorder.ignored.length + ' ',
+					messages.push(CeL.to_SGR([ ', ' + recorder.ignored.length + ' ',
 							'fg=yellow', 'ignored', '-fg' ]));
 
 				// Time elapsed, 使用/耗費時間。cf. eta, Estimated Time of Arrival
@@ -1736,7 +1691,7 @@ if (!CeL.Log) {
 
 			if (recorder.failed.length === 0 && recorder.fatal.length === 0) {
 				// all passed. 測試通過。
-				messages.push(to_SGR([ 'All ' + recorder.passed.length + ' ',
+				messages.push(CeL.to_SGR([ 'All ' + recorder.passed.length + ' ',
 						'fg=green', 'passed', '-fg' ]));
 
 				CeL.info(join());
@@ -1749,10 +1704,10 @@ if (!CeL.Log) {
 			+ (recorder.failed.length + recorder.passed.length));
 			if (recorder.failed.length + recorder.passed.length !== recorder.all.length)
 				messages.push('/' + recorder.all.length);
-			messages.push(to_SGR([ ' ', 'fg=red', 'failed', '-fg' ]));
+			messages.push(CeL.to_SGR([ ' ', 'fg=red', 'failed', '-fg' ]));
 			if (recorder.fatal.length > 0)
 				// fatal exception error 致命錯誤
-				messages.push(to_SGR([ ', ' + recorder.fatal.length + ' ',
+				messages.push(CeL.to_SGR([ ', ' + recorder.fatal.length + ' ',
 						'fg=red;bg=white', 'fatal', '-fg;-bg' ]));
 
 			if (recorder.passed.length > 0) {

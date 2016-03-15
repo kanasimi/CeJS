@@ -45,18 +45,6 @@ eval(this.use());
 
 
 // --------------------------------------------------------------------------------------------- //
-// 添加主控端報告的顏色。
-
-// @see 'application.debug.log'
-function SGR(messages) {
-	return CeL.SGR ? new CeL.SGR(messages).toString()
-	// 將 messages 轉成 plain text。
-	: messages.filter(function(message, index) {
-		return index % 2 === 0;
-	}).join('');
-}
-
-// --------------------------------------------------------------------------------------------- //
 
 
 /**
@@ -2105,7 +2093,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	library_namespace.debug('wiki_API.work: 開始執行:先作環境建構與初始設定。');
 	if (config.summary)
 		// '開始處理 ' + config.summary + ' 作業'
-		library_namespace.info(SGR([ 'wiki_API.work: start [', 'fg=yellow', config.summary, '-fg', ']' ]));
+		library_namespace.sinfo([
+				'wiki_API.work: start [', 'fg=yellow', config.summary, '-fg',
+				']' ]);
 
 	/**
 	 * <code>
@@ -2340,13 +2330,11 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				// 編輯頁面內容。
 				.edit(function(page_data) {
 					// edit/process
-					library_namespace.info(
-					//
-					SGR([ 'wiki_API.work: edit '
+					library_namespace.sinfo([ 'wiki_API.work: edit '
 					//
 					+ (index + 1) + '/' + pages.length
 					//
-					+ ' [[', 'fg=yellow', page_data.title, '-fg', ']]' ]));
+					+ ' [[', 'fg=yellow', page_data.title, '-fg', ']]' ]);
 					// 以 each() 的回傳作為要改變成什麼內容。
 					return each(page_data, messages, work_options);
 				}, work_options, callback);
@@ -2359,7 +2347,8 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			//
 			+ (done === pages.length ? '' : '/' + pages.length)
 			//
-			+ (pages.length === target.length ? '' : '//' + target.length) + ' 條目';
+			+ (pages.length === target.length ? '' : '//' + target.length)
+					+ ' 條目';
 			if (log_item.report)
 				messages.unshift(count_summary + '，'
 				// 未改變任何條目。
@@ -2477,12 +2466,13 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				//
 				+ target.length + ' 個頁面之 revisions (page content)。', 2);
 			else
-				library_namespace.info(
+				library_namespace.sinfo([
 				//
-				SGR([ 'wiki_API.work: ', 'fg=green', config.summary, '-fg', ': 處理分塊 '
+				'wiki_API.work: ', 'fg=green', config.summary, '-fg', ': 處理分塊 '
 				//
-				+ (work_continue + 1) + '–' + (work_continue + max_size) + '/'
-						+ target.length + '。' ]));
+				+ (work_continue + 1) + '–'
+				//
+				+ (work_continue + max_size) + '/' + target.length + '。' ]);
 
 			// reset count and log.
 			done = nochange_count = 0;
