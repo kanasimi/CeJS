@@ -4294,6 +4294,7 @@ function new_SQL_config(language, user, password) {
 
 			} else if (language === 'tools-db') {
 				this.host = language;
+				// delete this.database;
 
 			} else if ((typeof language === 'string') && language) {
 				this.host = language + 'wiki.labsdb';
@@ -4401,14 +4402,6 @@ if (false)
 		console.log(rows);
 	});
 
-if (SQL_config) {
-	library_namespace.debug('wiki_API: You may use SQL to get data.');
-	// export 導出: CeL.wiki.SQL() 僅可在 Tool Labs 使用。
-	run_SQL.config = SQL_config;
-	wiki_API.SQL = run_SQL;
-	// use CeL.wiki.SQL.config.set_language('en') to change language.
-}
-
 
 // ----------------------------------------------------
 
@@ -4505,10 +4498,6 @@ if (SQL_config) {
 /**
  * Create a new user database.
  * 
- * @example <code>
- * CeL.wiki.SQL.create('zhwiki', function callback(error, rows, fields) { } );
- * </code>
- * 
  * @param {String}dbname
  *            database name.
  * @param {Function}callback
@@ -4520,12 +4509,10 @@ function create_database(dbname, callback, language) {
 	if (!SQL_config)
 		return;
 
-	var config = new_SQL_config(language);
-	config.host = 'tools-db';
-	if (language)
-		config.set_language(language);
-	else
+	var config = new_SQL_config(language || 'tools-db');
+	if (!language) {
 		delete config.database;
+	}
 
 	run_SQL('CREATE DATABASE `' + config.user + '__' + dbname + '`', function(
 			error, rows, fields) {
@@ -4533,10 +4520,75 @@ function create_database(dbname, callback, language) {
 			callback(null, rows, fields);
 		callback(error);
 	}, config);
+
+	return config;
 }
 
+/**
+ * @example <code>
+ * // change language (and database).
+ * CeL.wiki.SQL.config.set_language('en');
+ * CeL.wiki.SQL(SQL, function callback(error, rows, fields) { }, 'en');
+ * </code>
+ * 
+ * @example <code>
+ * new CeL.wiki.SQL('mydb', function callback(error, rows, fields) { } )
+ * // run SQL query
+ * .SQL(SQL, function callback(error, rows, fields) { } );
+ * </code>
+ */
+function SQL_session(dbname, callback, language) {
+	if (!this) {
+		if (language)
+			// change language (and database).
+			SQL_config.set_language(language);
+		// dbname as SQL.
+		return run_SQL(dbname, callback);
+	}
+
+	this.config = new_SQL_config(language || 'tools-db');
+	if (dbname) {
+		config.database = dbname;
+	} else {
+		delete config.database;
+	}
+
+	this.connection = mysql.createConnection(config);
+	try {
+		this.connect();
+	} catch (e) {
+		if (dbname) {
+			create_database(dbname, this.connect.bind(this), language);
+		}
+	}
+}
+
+SQL_session.prototype.SQL = function(SQL) {
+	try {
+		this.connection.query(SQL, callback);
+	} catch (e) {
+		this.connect();
+		this.connection.query(SQL, callback);
+	}
+};
+
+// re-connect.
+SQL_session.prototype.connect = function() {
+	try {
+		this.connection.end();
+	} catch (e) {
+		// TODO: handle exception
+	}
+	this.connection = mysql.createConnection(config);
+	this.connection.connect();
+};
+
 if (SQL_config) {
-	run_SQL.create = create_database;
+	library_namespace.debug('wiki_API: You may use SQL to get data.');
+	wiki_API.SQL = SQL_session;
+	// export 導出: CeL.wiki.SQL() 僅可在 Tool Labs 使用。
+	wiki_API.SQL.config = SQL_config;
+	// wiki_API.SQL.create = create_database;
 }
 
 
