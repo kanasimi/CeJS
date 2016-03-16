@@ -4495,23 +4495,6 @@ if (SQL_config) {
  * @inner
  */
 function get_latest(project, callback, options) {
-	function extract() {
-		library_namespace.log('get_latest: Extracting [' + directory + filename
-				+ ']...');
-		require('child_process').exec(
-		//
-		'/bin/bzip2 -cd "' + directory + filename + extension + '" > "'
-		//
-		+ directory + filename + '"', function(error, stdout, stderr) {
-			if (error) {
-				library_namespace.err(error);
-			} else {
-				library_namespace.log('get_latest: Done. Running callback...');
-			}
-			callback(directory + filename);
-		});
-	}
-
 	if (false && !wmflabs)
 		// 最起碼須有 bzip2, wget 特定版本輸出訊息 @ /bin/sh
 		throw new Error('Only for Tool Labs!');
@@ -4581,6 +4564,23 @@ function get_latest(project, callback, options) {
 		callback(directory + filename);
 		return;
 	} catch (e) {
+	}
+
+	function extract() {
+		library_namespace.log('get_latest: Extracting [' + directory + filename
+				+ ']...');
+		require('child_process').exec(
+		//
+		'/bin/bzip2 -cd "' + directory + filename + extension + '" > "'
+		//
+		+ directory + filename + '"', function(error, stdout, stderr) {
+			if (error) {
+				library_namespace.err(error);
+			} else {
+				library_namespace.log('get_latest: Done. Running callback...');
+			}
+			callback(directory + filename);
+		});
 	}
 
 	var extension = options.filename || '.bz2';
@@ -5439,17 +5439,21 @@ function edit_topic(title, topic, text, token, options, callback) {
 	if (get_page_content.is_page_data(title))
 		title = title.title;
 	// assert: typeof title === 'string'　or title is invalid.
-
-	// default parameters
-	var _options = {
-		notification : 'flow',
-		submodule : 'new-topic',
+	if (title.length > 260) {
 		// [nttopic] 話題標題已限制在 260 位元組內。
 		// 260 characters
 		// https://github.com/wikimedia/mediawiki-extensions-Flow/blob/master/includes/Model/PostRevision.php
 		// const MAX_TOPIC_LENGTH = 260;
 		// https://github.com/wikimedia/mediawiki-extensions-Flow/blob/master/i18n/zh-hant.json
-		page : String(title).slice(0, 260),
+		library_namespace.warn('edit_topic: Title is too long and will be truncated: [' + error.code + ']');
+		title = title.slice(0, 260);
+	}
+
+	// default parameters
+	var _options = {
+		notification : 'flow',
+		submodule : 'new-topic',
+		page : title,
 		nttopic : topic,
 		ntcontent : text,
 		ntformat : 'wikitext',

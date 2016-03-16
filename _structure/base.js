@@ -1781,7 +1781,7 @@ OS='UNIX'; // unknown
 	// Initialization
 
 	// ---------------------------------------------------------------------//
-	// 處理 styled messages.
+	// 處理 styled/stylized messages.
 
 	/**
 	 * 將 messages 去掉 style，轉成 plain text messages。
@@ -1848,46 +1848,145 @@ OS='UNIX'; // unknown
 
 	// --------------------------------
 
+	var
+	/** {RegExp}是否具有 caller。能辨識紀錄之 caller。 */
+	PATTERN_log_caller = /^([a-z_\d.]+:\s*)(.+)$/i,
+	/** {Boolean}使用 style 紀錄。 */
+	using_style = _.env.no_log_style,
+	/** {Object}default style of console. */
+	default_style = {
+		trace : '',
+		// debug 另外設定。
+		// debug : '',
+		log : 'green',
+		// information
+		info : 'cyan',
+		// warning
+		warn : 'yellow',
+		err : 'red;bg=white'
+	};
+
+
+	if (using_style === undefined && typeof process === 'object' && process.versions)
+		// 若為 nodejs，預設使用 style 紀錄。
+		// using_style = _.platform.nodejs
+		using_style = process.versions.node;
+
+	/**
+	 * 預先處理 messages。
+	 * 
+	 * TODO: 判別 console 是否具備 stylify/著色功能。
+	 * 
+	 * @param {Array|String}messages
+	 *            欲記錄訊息。
+	 * @param {Boolean}[from_styled_logger]
+	 *            caller is styled logger.
+	 * 
+	 * @returns {Array}styled messages
+	 */
+	function preprocess_messages(messages, type, from_styled_logger) {
+		if (!using_style)
+			// 不採用 style。
+			return typeof messages === 'string' ? messages : SGR_to_plain(messages);
+
+		if (typeof messages === 'string') {
+			// 自動著色。
+			var matched = messages.match(PATTERN_log_caller);
+			if (matched) {
+				// e.g., CeL.log("function_name: messages");
+				messages = [ matched[1], 'fg=' + (default_style[type] || ''),
+						matched[2], 0 ];
+			} else {
+				messages = [ '', 'fg=' + (default_style[type] || ''), messages, 0 ];
+			}
+
+		} else if (from_styled_logger) {
+			// assert: Array.isArray(messages)
+			// 自動著色。
+			// TODO: 效果不佳。
+			var matched = messages[0].match(PATTERN_log_caller);
+			if (matched) {
+				// e.g., CeL.log([ 'function_name: messages 0', 'style',
+				// 'messages 1' ]);
+				messages.splice(0, 1, '', 'fg=' + (default_style[type] || ''),
+						matched[1], 0, matched[2]);
+				// 最後設定 reset，避免影響到後頭之顯示。
+				if (messages.length % 2 === 0)
+					messages.push('', 0);
+				else
+					messages.push(0);
+			}
+		}
+
+		return _.to_SGR(messages);
+	}
+
 	// temporary decoration of debug console,
 	// in case we call for nothing and raise error
 	if (has_console) {
 		// 利用原生 console 來 debug。
 		// 不直接指定 console.*: 預防 'Uncaught TypeError: Illegal invocation'.
 
-		_.log = function (message, clear) {
-			if (clear && console.clear)
-				console.clear();
-			// IE8 中，無法使用 console.log.apply()。
-			// return console.log.apply(console, arguments);
-			return console.log(message);
-		};
-		// warning
-		_.warn = function (message, clear) {
-			if (clear && console.clear)
-				console.clear();
-			// return console.warn.apply(console, arguments);
-			return console.warn(message);
-		};
-		// info
-		if (console.info)
-			_.info = function (message, clear) {
+		function setup_log(type) {
+			var _type = type === 'err' ? 'error' : type;
+			if (!console[_type])
+				// e.g., 不見得在所有平台上都有 console.info() 。
+				return;
+
+			_[type] = function(messages, clear) {
 				if (clear && console.clear)
 					console.clear();
-				// return console.info.apply(console, arguments);
-				return console.info(message);
+				// IE8 中，無法使用 console.log.apply()。
+				// return console[type].apply(console, arguments);
+				console[_type](preprocess_messages(messages, type));
 			};
-		_.err = function (message, clear) {
-			if (clear && console.clear)
-				console.clear();
-			// return console.error.apply(console, arguments);
-			return console.error(message);
+
+			/**
+			 * setup frontend of styled messages. 使可輸入 CeL.s*().
+			 * 
+			 * <code>
+			   CeL.slog([ 'CeJS: This is a ', 'fg=yellow', 'styled', '-fg', ' message.' ]);
+			   CeL.sinfo('CeJS: There are some informations.');
+			   </code>
+			 */
+			_['s' + type] = function(messages, clear) {
+				if (clear && console.clear)
+					console.clear();
+				console[_type](preprocess_messages(messages, type, true));
+			};
+		}
+
+		(function() {
+			for ( var type in default_style) {
+				setup_log(type);
+			}
+		})();
+
+		// caller: from what caller
+		_.debug = function (messages, level, caller) {
+			if (!_.is_debug(level))
+				return;
+			if (caller)
+				messages = _.get_function_name(caller) + ': ' + messages;
+			// console.trace()
+			console.log(preprocess_messages(messages, 'debug'));
 		};
-		_.debug = function (message, level, from) {
-			if (_.is_debug(level))
-				// return console.info.call(console, (from ?
-				// _.get_function_name(from) + ': ' : '') + message);
-				return console.info((from ? _.get_function_name(from) + ': ' : '') + message);
-		};
+		// styled logger
+		_.sdebug = function (messages, level, caller) {
+			if (!_.is_debug(level))
+				return;
+			if (caller) {
+				if (!Array.isArray(messages))
+					// assert: (typeof messages === 'string')
+					messages = [ messages ];
+				messages.unshift('fg=blue', _.get_function_name(caller) + ': ', 0);
+				messages = _.to_SGR(messages);
+			} else {
+				messages = preprocess_messages(messages, 'debug', true);
+			}
+			// console.trace()
+			console.log(messages);
+		}
 
 	} else {
 		_.err = _.warn = _.log = function (message) {
@@ -1943,7 +2042,7 @@ OS='UNIX'; // unknown
 		prepare_message = function (message) {
 			message = String(message);
 			if (message.length > 2 * max_log_length)
-				message = message.slice(0, max_log_length) + '\n\n..\n\n' + message.slice(-max_log_length);
+				message = message.slice(0, max_log_length) + '\n\n...\n\n' + message.slice(-max_log_length);
 			return message;
 		};
 
@@ -2402,16 +2501,6 @@ OS='UNIX'; // unknown
 						// 少一道手續。
 						callbackfn(this[index], index, this);
 		}
-	});
-
-	// ---------------------------------------------------------------------//
-
-	// setup frontend of styled messages. 使可輸入 CeL.s*().
-	// CeL.slog([ 'This is a ', 'fg=yellow', 'styled', '-fg', ' message.' ]);
-	'debug,log,info,warn,err'.split(',').forEach(function(type) {
-		_['s' + type] = function(messages, _1, _2) {
-			_[type](_.to_SGR(messages), _1, _2);
-		};
 	});
 
 

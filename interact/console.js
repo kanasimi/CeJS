@@ -64,8 +64,9 @@ if (typeof CeL === 'function')
 						&& (typeof style_name === 'object'
 						//
 						|| !(style_name in SGR_code.style_data)))
-					library_namespace.warn('SGR_style_name: Unknown style name: [' + style_name
-							+ ']');
+					library_namespace
+							.warn('SGR_style_name: Unknown style name: ['
+									+ style_name + ']');
 				return style_name;
 			}
 
@@ -87,7 +88,8 @@ if (typeof CeL === 'function')
 						library_namespace.warn(
 						// Expects value in
 						// color_shift.
-						'SGR_style_value: Invalid name of color: [' + style_name + '].');
+						'SGR_style_value: Invalid name of color: ['
+								+ style_name + '].');
 						return;
 					}
 					// color_shift[style_name] +
@@ -585,6 +587,7 @@ if (typeof CeL === 'function')
 			 * 
 			 * @param {Boolean}[get_Array]
 			 *            get Array, else String.
+			 * 
 			 * @returns {String}
 			 */
 			function SGR_style_toString(get_Array) {
@@ -601,7 +604,8 @@ if (typeof CeL === 'function')
 			 * 測試 value 是否為 SGR_code instance。
 			 * 
 			 * @param value
-			 *            測試值
+			 *            測試值。
+			 * 
 			 * @returns {Boolean} 測試值為 SGR_code instance
 			 */
 			function is_SGR_code(value) {
@@ -677,6 +681,8 @@ if (typeof CeL === 'function')
 			 * 為允許使用者參照，因此放在 public。<br />
 			 * 注意: 一般論壇 (BBS) 使用 VT100，僅支援如 reset, bold, blink, reverse,
 			 * foreground, background。
+			 * 
+			 * @type {Object}
 			 */
 			SGR_code.style_data = {
 				// name : [ on, off ]
