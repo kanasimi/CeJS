@@ -4268,6 +4268,47 @@ if (home_directory && (home_directory = home_directory.replace(/[\\\/]$/, ''))) 
 
 
 /**
+ * return new SQL config
+ * 
+ * @param {String}[language]
+ *            database language.<br />
+ *            e.g., 'zh', 'en', 'commons', 'wikidata', 'meta'.
+ * @param {String}[user]
+ *            SQL database user name
+ * @param {String}[password]
+ *            SQL database user password
+ * 
+ * @returns {Object}SQL config
+ */
+function new_SQL_config(language, user, password) {
+	var config = user ? {
+		user : user,
+		password : password,
+		// setup SQL config language.
+		set_language : function(language) {
+			if (language === 'meta') {
+				// @see /usr/bin/sql
+				this.host = 's7.labsdb';
+				// https://wikitech.wikimedia.org/wiki/Nova_Resource:Tools/Help#Metadata_database
+				this.database = 'meta_p';
+
+			} else if (language === 'tools-db') {
+				this.host = language;
+
+			} else if ((typeof language === 'string') && language) {
+				this.host = language + 'wiki.labsdb';
+				this.database = language + 'wiki_p';
+			}
+		}
+	} : SQL_config && Object.clone(SQL_config);
+
+	if (language)
+		config.set_language(language);
+
+	return config;
+}
+
+/**
  * 讀取並解析出 SQL 設定。
  * 
  * @param {String}file_name
@@ -4290,26 +4331,9 @@ function parse_SQL_config(file_name) {
 	if (!user || !(password = config.match(/\n\s*password\s*=\s*([^\s]+)/)))
 		return;
 
-	config = {
-		user : user[1],
-		password : password[1],
-		// setup SQL config language.
-		// e.g., 'zh', 'en', 'commons', 'wikidata', 'meta'
-		set_language : function(language) {
-			if (language === 'meta') {
-				// @see /usr/bin/sql
-				this.host = 's7.labsdb';
-				// https://wikitech.wikimedia.org/wiki/Nova_Resource:Tools/Help#Metadata_database
-				this.database = 'meta_p';
-				return;
-			}
-			this.host = language + 'wiki.labsdb';
-			this.database = language + 'wiki_p';
-		}
-	};
-	config.set_language(default_language);
-	return config;
+	return new_SQL_config(default_language, user[1], password[1]);
 }
+
 
 // only for node.js.
 // https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#How_can_I_detect_if_I.27m_running_in_Labs.3F_And_which_project_.28tools_or_toolsbeta.29.3F
@@ -4479,26 +4503,30 @@ if (SQL_config) {
 //----------------------------------------------------
 
 /**
- * Create a new credentials user database.
+ * Create a new user database.
  * 
  * @example <code>
- * CeL.wiki.SQL.create('zhwiki', function(error, rows, fields) {});
+ * CeL.wiki.SQL.create('zhwiki', function callback(error, rows, fields) { } );
  * </code>
  * 
  * @param {String}dbname
- *            database name
+ *            database name.
  * @param {Function}callback
  *            回調函數。
  * 
  * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database#Creating_new_databases
  */
-function create_database(dbname, callback) {
+function create_database(dbname, callback, language) {
 	if (!SQL_config)
 		return;
 
-	var config = Object.clone(SQL_config);
+	var config = new_SQL_config(language);
 	config.host = 'tools-db';
-	delete config.database;
+	if (language)
+		config.set_language(language);
+	else
+		delete config.database;
+
 	run_SQL('CREATE DATABASE `' + config.user + '__' + dbname + '`', function(
 			error, rows, fields) {
 		if (!error || error.code === 'ER_DB_CREATE_EXISTS')
