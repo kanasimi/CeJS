@@ -1921,40 +1921,42 @@ OS='UNIX'; // unknown
 		return _.to_SGR(messages);
 	}
 
+	// 不能放在 if (has_console) {} 中:
+	// SyntaxError: In strict mode code, functions can only be declared at top level or immediately within another function.
+	function setup_log(type) {
+		var _type = type === 'err' ? 'error' : type;
+		if (!console[_type])
+			// e.g., 不見得在所有平台上都有 console.info() 。
+			return;
+
+		_[type] = function(messages, clear) {
+			if (clear && console.clear)
+				console.clear();
+			// IE8 中，無法使用 console.log.apply()。
+			// return console[type].apply(console, arguments);
+			console[_type](preprocess_messages(messages, type));
+		};
+
+		/**
+		 * setup frontend of styled messages. 使可輸入 CeL.s*().
+		 * 
+		 * <code>
+		   CeL.slog([ 'CeJS: This is a ', 'fg=yellow', 'styled', '-fg', ' message.' ]);
+		   CeL.sinfo('CeJS: There are some informations.');
+		   </code>
+		 */
+		_['s' + type] = function(messages, clear) {
+			if (clear && console.clear)
+				console.clear();
+			console[_type](preprocess_messages(messages, type, true));
+		};
+	}
+
 	// temporary decoration of debug console,
 	// in case we call for nothing and raise error
 	if (has_console) {
 		// 利用原生 console 來 debug。
 		// 不直接指定 console.*: 預防 'Uncaught TypeError: Illegal invocation'.
-
-		function setup_log(type) {
-			var _type = type === 'err' ? 'error' : type;
-			if (!console[_type])
-				// e.g., 不見得在所有平台上都有 console.info() 。
-				return;
-
-			_[type] = function(messages, clear) {
-				if (clear && console.clear)
-					console.clear();
-				// IE8 中，無法使用 console.log.apply()。
-				// return console[type].apply(console, arguments);
-				console[_type](preprocess_messages(messages, type));
-			};
-
-			/**
-			 * setup frontend of styled messages. 使可輸入 CeL.s*().
-			 * 
-			 * <code>
-			   CeL.slog([ 'CeJS: This is a ', 'fg=yellow', 'styled', '-fg', ' message.' ]);
-			   CeL.sinfo('CeJS: There are some informations.');
-			   </code>
-			 */
-			_['s' + type] = function(messages, clear) {
-				if (clear && console.clear)
-					console.clear();
-				console[_type](preprocess_messages(messages, type, true));
-			};
-		}
 
 		(function() {
 			for ( var type in default_style) {
