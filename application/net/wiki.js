@@ -4349,17 +4349,19 @@ if (wmflabs) {
  *            SQL command.
  * @param {Function}callback
  *            回調函數。 callback({Object}error, {Array}rows, {Array}fields)
+ * @param {Object}[config]
+ *            configuration.
  * 
  * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database
  * 
  * @require https://github.com/felixge/node-mysql<br />
  *          TODO: https://github.com/sidorares/node-mysql2
  */
-function run_SQL(SQL, callback) {
-	if (!SQL_config)
+function run_SQL(SQL, callback, config) {
+	if (!config || !(config = SQL_config))
 		return;
 
-	var connection = mysql.createConnection(SQL_config);
+	var connection = mysql.createConnection(config);
 	connection.connect();
 	connection.query(SQL, callback);
 	connection.end();
@@ -4473,6 +4475,41 @@ if (SQL_config) {
 	wiki_API.recent = get_recent;
 }
 
+
+//----------------------------------------------------
+
+/**
+ * Create a new credentials user database.
+ * 
+ * @example <code>
+ * CeL.wiki.SQL.create('zhwiki', function(error, rows, fields) {});
+ * </code>
+ * 
+ * @param {String}dbname
+ *            database name
+ * @param {Function}callback
+ *            回調函數。
+ * 
+ * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database#Creating_new_databases
+ */
+function create_database(dbname, callback) {
+	if (!SQL_config)
+		return;
+
+	var config = Object.clone(SQL_config);
+	config.host = 'tools-db';
+	delete config.database;
+	run_SQL('CREATE DATABASE `' + config.user + '__' + dbname + '`', function(
+			error, rows, fields) {
+		if (!error || error.code === 'ER_DB_CREATE_EXISTS')
+			callback(null, rows, fields);
+		callback(error);
+	}, config);
+}
+
+if (SQL_config) {
+	run_SQL.create = create_database;
+}
 
 
 // --------------------------------------------------------------------------------------------- //

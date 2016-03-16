@@ -1921,8 +1921,13 @@ OS='UNIX'; // unknown
 		return _.to_SGR(messages);
 	}
 
-	// 不能放在 if (has_console) {} 中:
-	// SyntaxError: In strict mode code, functions can only be declared at top level or immediately within another function.
+	/**
+	 * 不能放在 if (has_console) {} 中 @ node.js v0.10.25:
+	 * 
+	 * <code>
+	   SyntaxError: In strict mode code, functions can only be declared at top level or immediately within another function.
+	   </code>
+	 */
 	function setup_log(type) {
 		var _type = type === 'err' ? 'error' : type;
 		if (!console[_type])

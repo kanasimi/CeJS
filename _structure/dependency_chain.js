@@ -222,14 +222,13 @@ if (typeof CeL === 'function')
 
 		// Array.from()
 		function from(items, mapfn, thisArg) {
-			var array, i, iterator = items
-					&& !Array.isArray(items)
-					// 測試是否有 iterator。
-					&& (
-					// items['@@iterator'] ||
-					items.constructor === Set ? 'values'
-							: (items.entries ? 'entries' : items.values
-									&& 'values'));
+			var array, i, iterator = items && !Array.isArray(items)
+			// 測試是否有 iterator。
+			&& (
+			// items['@@iterator'] ||
+			items.constructor === Set ? 'values'
+			//
+			: (items.entries ? 'entries' : items.values && 'values'));
 
 			if (!iterator && typeof items.next === 'function')
 				// items itself is an iterator.

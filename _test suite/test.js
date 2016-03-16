@@ -87,7 +87,7 @@ function test_compatibility() {
 
 		s.add(4);
 		if (v.next().value !== 4)
-			CeL.err('iterator 無法反映 Set 之更動！');
+			CeL.err('test_compatibility: iterator 無法反映 Set 之更動！將不把此視作 fatal error。');
 		assert(v.next().done, 'set.values().done');
 
 		e = a.entries();
