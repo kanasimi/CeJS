@@ -18,6 +18,7 @@
 // 整合各 action=query 至單一公用 function。
 // 添加網頁報告。
 // 調用超過一個Template中參數的值，只有最後提供的值會被使用。
+// 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
 
 'use strict';
 //'use asm';
@@ -792,7 +793,6 @@ var wiki_toString = {
 // TODO: [https://a.b <a>a</a><!-- -->]
 // TODO: [[<a>a</a>]]
 // TODO: CeL.wiki.parser('a[[未來日記-ANOTHER:WORLD-]]b').parse()[1]
-// 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
 
 /**
  * parse The MediaWiki markup language (wikitext).
@@ -5444,7 +5444,12 @@ function edit_topic(title, topic, text, token, options, callback) {
 	var _options = {
 		notification : 'flow',
 		submodule : 'new-topic',
-		page : title,
+		// [nttopic] 話題標題已限制在 260 位元組內。
+		// 260 characters
+		// https://github.com/wikimedia/mediawiki-extensions-Flow/blob/master/includes/Model/PostRevision.php
+		// const MAX_TOPIC_LENGTH = 260;
+		// https://github.com/wikimedia/mediawiki-extensions-Flow/blob/master/i18n/zh-hant.json
+		page : String(title).slice(0, 260),
 		nttopic : topic,
 		ntcontent : text,
 		ntformat : 'wikitext',

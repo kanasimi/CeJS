@@ -6654,7 +6654,7 @@ if (typeof CeL === 'function')
 			}
 
 			var PATTERN_公元年_中曆月日
-			// [ 公元年, 中曆月, 中曆日, 中曆日 ]
+			// [ all, 公元年, 中曆月, 中曆日, 中曆日 ]
 			= /(-?\d+)年(?:(閏?\d{1,2})月)?(?:初(\d)|(\d{1,2})日)?/;
 
 			/**
@@ -6682,8 +6682,10 @@ if (typeof CeL === 'function')
 				//
 				date = typeof CE_year === 'string'
 				// e.g., '401年閏八月初六'
-				&& numeralize_date_name(CE_year).match(PATTERN_公元年_中曆月日);
-				if (date) {
+				&& numeralize_date_name(CE_year);
+				if (date && (date = date.match(PATTERN_公元年_中曆月日)
+				// 把 2000/1/1 當作公元2000年 中曆1月1日。
+				|| date.match(/(\d+)[\/年 ](\d+)\/(\d+)/))) {
 					if (!日 && !country)
 						country = 月;
 					CE_year = date[1];

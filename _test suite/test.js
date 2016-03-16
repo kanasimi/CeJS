@@ -20,7 +20,10 @@ $ npm update
 # npm view
 
 TODO: https://github.com/kanasimi/CeJS/tags
+// git add release
+// https://git-scm.com/book/en/v2/Git-Basics-Tagging
 # git tag "v2.0.0" master
+# git tag -a "v2.0.0" -m "tagging message"
 
 
  * </code>

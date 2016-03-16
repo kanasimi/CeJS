@@ -227,7 +227,7 @@ function (global) {
 	prototype = {
 	};
 
-	//_.library_version =
+	// _.library_version =
 	_.version = library_version;
 	_.build_date = new Date();
 
@@ -1797,7 +1797,7 @@ OS='UNIX'; // unknown
 		}).join('');
 	}
 
-	/** {Object}cache for interact.console.SGR */
+	/** {Object}cache for CeL.interact.console.SGR */
 	var SGR;
 
 	/**
@@ -2406,8 +2406,8 @@ OS='UNIX'; // unknown
 
 	// ---------------------------------------------------------------------//
 
-	// setup frontend of styled messages.
-	// e.g., 使可輸入 CeL.slog([ styled messages ])
+	// setup frontend of styled messages. 使可輸入 CeL.s*().
+	// CeL.slog([ 'This is a ', 'fg=yellow', 'styled', '-fg', ' message.' ]);
 	'debug,log,info,warn,err'.split(',').forEach(function(type) {
 		_['s' + type] = function(messages, _1, _2) {
 			_[type](_.to_SGR(messages), _1, _2);
