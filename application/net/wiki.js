@@ -4367,6 +4367,8 @@ if (wmflabs) {
 	}
 }
 
+//----------------------------------------------------
+
 /**
  * execute SQL command.
  * 
@@ -4401,6 +4403,150 @@ if (false)
 		// console.log('The result is:');
 		console.log(rows);
 	});
+
+
+//----------------------------------------------------
+
+/**
+ * Create a new user database.
+ * 
+ * @param {String}dbname
+ *            database name.
+ * @param {Function}callback
+ *            回調函數。
+ * @param {String}[language]
+ *            database language.<br />
+ *            e.g., 'zh', 'en', 'commons', 'wikidata', 'meta'.
+ * 
+ * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database#Creating_new_databases
+ */
+function create_database(dbname, callback, language) {
+	if (!SQL_config)
+		return;
+
+	var config = new_SQL_config(language || 'tools-db');
+	if (!language) {
+		delete config.database;
+	}
+
+	run_SQL('CREATE DATABASE `' + config.user + '__' + dbname + '`', function(
+			error, rows, fields) {
+		if (!error || error.code === 'ER_DB_CREATE_EXISTS')
+			callback(null, rows, fields);
+		callback(error);
+	}, config);
+
+	return config;
+}
+
+
+//----------------------------------------------------
+
+/**
+ * SQL 查詢功能之前端。
+ * 
+ * @example <code>
+ * // change language (and database).
+ * //CeL.wiki.SQL.config.set_language('en');
+ * CeL.wiki.SQL(SQL, function callback(error, rows, fields) { }, 'en');
+ * </code>
+ * 
+ * @example <code>
+ * new CeL.wiki.SQL('mydb', function callback(error, rows, fields) { } )
+ * // run SQL query
+ * .SQL(SQL, function callback(error, rows, fields) { } );
+ * </code>
+ * 
+ * @param {String}dbname
+ *            database name.
+ * @param {Function}callback
+ *            回調函數。
+ * @param {String}[language]
+ *            database language.<br />
+ *            e.g., 'zh', 'en', 'commons', 'wikidata', 'meta'.
+ * 
+ * @returns {SQL_session}instance
+ * 
+ * @constructor
+ */
+function SQL_session(dbname, callback, language) {
+	if (!(this instanceof SQL_session)) {
+		if (language)
+			// change language (and database).
+			SQL_config.set_language(language);
+		// dbname as SQL.
+		return run_SQL(dbname, callback);
+	}
+
+	this.config = new_SQL_config(language || 'tools-db');
+	if (dbname) {
+		if (typeof dbname === 'object')
+			Object.assign(this.config, dbname);
+		else
+			this.config.database = dbname;
+	} else {
+		delete this.config.database;
+	}
+
+	this.connection = mysql.createConnection(config);
+
+	var _this = this;
+	function connect(error) {
+		if (!error)
+			_this.connect();
+		callback(error);
+	}
+
+	try {
+		connect();
+	} catch (e) {
+		console.error(e);
+		if (dbname) {
+			create_database(dbname, connect, language);
+		} else {
+			callback(e);
+		}
+	}
+}
+
+// run SQL query
+SQL_session.prototype.SQL = function(SQL, callback) {
+	try {
+		this.connection.query(SQL, callback);
+	} catch (e) {
+		// re-connect. 可能已經斷線。
+		this.connect();
+		this.connection.query(SQL, callback);
+	}
+	return this;
+};
+
+// re-connect.
+SQL_session.prototype.connect = function() {
+	try {
+		this.connection.end();
+	} catch (e) {
+		// TODO: handle exception
+	}
+	// this.connection = mysql.createConnection(config);
+	this.connection.connect();
+	return this;
+};
+
+SQL_session.prototype.databases = function(callback) {
+	this.connection.query("SHOW DATABASES LIKE '" + this.config.user + "__%';",
+			callback);
+	return this;
+};
+
+if (SQL_config) {
+	library_namespace
+			.debug('wiki_API.SQL_session: You may use SQL to get data.');
+	wiki_API.SQL = SQL_session;
+	// export 導出: CeL.wiki.SQL() 僅可在 Tool Labs 使用。
+	wiki_API.SQL.config = SQL_config;
+	// wiki_API.SQL.create = create_database;
+}
 
 
 // ----------------------------------------------------
@@ -4490,105 +4636,6 @@ function get_recent(callback, namespace, limit) {
 
 if (SQL_config) {
 	wiki_API.recent = get_recent;
-}
-
-
-//----------------------------------------------------
-
-/**
- * Create a new user database.
- * 
- * @param {String}dbname
- *            database name.
- * @param {Function}callback
- *            回調函數。
- * 
- * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database#Creating_new_databases
- */
-function create_database(dbname, callback, language) {
-	if (!SQL_config)
-		return;
-
-	var config = new_SQL_config(language || 'tools-db');
-	if (!language) {
-		delete config.database;
-	}
-
-	run_SQL('CREATE DATABASE `' + config.user + '__' + dbname + '`', function(
-			error, rows, fields) {
-		if (!error || error.code === 'ER_DB_CREATE_EXISTS')
-			callback(null, rows, fields);
-		callback(error);
-	}, config);
-
-	return config;
-}
-
-/**
- * @example <code>
- * // change language (and database).
- * CeL.wiki.SQL.config.set_language('en');
- * CeL.wiki.SQL(SQL, function callback(error, rows, fields) { }, 'en');
- * </code>
- * 
- * @example <code>
- * new CeL.wiki.SQL('mydb', function callback(error, rows, fields) { } )
- * // run SQL query
- * .SQL(SQL, function callback(error, rows, fields) { } );
- * </code>
- */
-function SQL_session(dbname, callback, language) {
-	if (!this) {
-		if (language)
-			// change language (and database).
-			SQL_config.set_language(language);
-		// dbname as SQL.
-		return run_SQL(dbname, callback);
-	}
-
-	this.config = new_SQL_config(language || 'tools-db');
-	if (dbname) {
-		config.database = dbname;
-	} else {
-		delete config.database;
-	}
-
-	this.connection = mysql.createConnection(config);
-	try {
-		this.connect();
-	} catch (e) {
-		if (dbname) {
-			create_database(dbname, this.connect.bind(this), language);
-		}
-	}
-}
-
-SQL_session.prototype.SQL = function(SQL) {
-	try {
-		this.connection.query(SQL, callback);
-	} catch (e) {
-		this.connect();
-		this.connection.query(SQL, callback);
-	}
-};
-
-// re-connect.
-SQL_session.prototype.connect = function() {
-	try {
-		this.connection.end();
-	} catch (e) {
-		// TODO: handle exception
-	}
-	this.connection = mysql.createConnection(config);
-	this.connection.connect();
-};
-
-if (SQL_config) {
-	library_namespace.debug('wiki_API: You may use SQL to get data.');
-	wiki_API.SQL = SQL_session;
-	// export 導出: CeL.wiki.SQL() 僅可在 Tool Labs 使用。
-	wiki_API.SQL.config = SQL_config;
-	// wiki_API.SQL.create = create_database;
 }
 
 
