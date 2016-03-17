@@ -4457,15 +4457,28 @@ function create_database(dbname, callback, language) {
 	}
 
 	console.log('Try to create database [' + dbname + ']');
-	run_SQL({
-		// placeholder
-		sql : 'CREATE DATABASE ?',
-		values : [ dbname ]
-	}, function(error, rows, fields) {
-		if (!error || error.code === 'ER_DB_CREATE_EXISTS')
-			callback(null, rows, fields);
-		else
+	if (false) {
+		// 用此方法會:
+		// [Error: ER_PARSE_ERROR: You have an error in your SQL syntax; check
+		// the manual that corresponds to your MariaDB server version for the
+		// right syntax to use near ''user__db'' at line 1]
+		var SQL = {
+			// placeholder
+			// 避免 error.code === 'ER_DB_CREATE_EXISTS'
+			sql : 'CREATE DATABASE IF NOT EXISTS ?',
+			values : [ dbname ]
+		};
+	}
+
+	if (dbname.includes('`'))
+		throw new Error('Invalid database name: [' + dbname + ']');
+
+	run_SQL('CREATE DATABASE IF NOT EXISTS `' + dbname + '`', function(error,
+			rows, fields) {
+		if (error)
 			callback(error);
+		else
+			callback(null, rows, fields);
 	}, config);
 
 	return config;
@@ -4561,24 +4574,60 @@ SQL_session.prototype.SQL = function(SQL, callback) {
 };
 
 // re-connect.
-SQL_session.prototype.connect = function(callback) {
-	try {
-		this.connection.connect(callback);
-	} catch (e) {
+SQL_session.prototype.connect = function(callback, force) {
+	if (!force)
 		try {
-			this.connection.end();
+			var _this = this;
+			this.connection.connect(function(error) {
+				if (error
+				// Error: Cannot enqueue Handshake after fatal error.
+				&& error.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR') {
+					_this.connect(callback, true);
+				} else
+					callback(error);
+			});
+			return this;
 		} catch (e) {
 			// TODO: handle exception
 		}
-		// 需要重新設定 this.connection，否則會出現:
-		// Error: Cannot enqueue Handshake after invoking quit.
-		this.connection = mysql.createConnection(this.config);
-		this.connection.connect(callback);
+
+	try {
+		this.connection.end();
+	} catch (e) {
+		// TODO: handle exception
 	}
+	// 需要重新設定 this.connection，否則會出現:
+	// Error: Cannot enqueue Handshake after invoking quit.
+	this.connection = mysql.createConnection(this.config);
+	this.connection.connect(callback);
 	return this;
 };
 
-// get database list
+/**
+ * get database list.
+ * 
+ * <code>
+
+var SQL_session = new CeL.wiki.SQL('testdb',
+//
+function callback(error, rows, fields) {
+	if (error)
+		console.error(error);
+	else
+		s.databases(function(list) {
+			console.log(list);
+		});
+});
+
+</code>
+ * 
+ * @param {Function}callback
+ *            回調函數。
+ * @param {Boolean}all
+ *            get all databases. else: get my databases.
+ * 
+ * @returns {SQL_session}
+ */
 SQL_session.prototype.databases = function(callback, all) {
 	var _this = this;
 	function filter(dbname) {
@@ -4597,21 +4646,26 @@ SQL_session.prototype.databases = function(callback, all) {
 	if (false && !all)
 		// SHOW DATABASES LIKE 'pattern';
 		SQL += " LIKE '" + this.config.db_prefix + "%'";
-	this.connection.query(SQL, function(error, rows, fields) {
-		if (error || !Array.isArray(rows)) {
-			console.error(error);
-			rows = null;
-		} else {
-			rows = rows.map(function(row) {
-				for ( var field in row)
-					return row[field];
-			});
-			_this.database_cache = rows;
-			if (!all)
-				rows = rows.filter(filter);
-			// console.log(rows);
-		}
-		callback(rows);
+
+	this.connect(function(error) {
+		// reset connection,
+		// 預防 PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR
+		_this.connection.query(SQL, function(error, rows, fields) {
+			if (error || !Array.isArray(rows)) {
+				console.error(error);
+				rows = null;
+			} else {
+				rows = rows.map(function(row) {
+					for ( var field in row)
+						return row[field];
+				});
+				_this.database_cache = rows;
+				if (!all)
+					rows = rows.filter(filter);
+				// console.log(rows);
+			}
+			callback(rows);
+		});
 	});
 
 	return this;
