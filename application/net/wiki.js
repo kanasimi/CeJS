@@ -4267,6 +4267,25 @@ if (home_directory && (home_directory = home_directory.replace(/[\\\/]$/, ''))) 
 }
 
 
+//setup SQL config language (and database/host).
+function set_SQL_config_language(language) {
+	if (language === 'meta') {
+		// @see /usr/bin/sql
+		this.host = 's7.labsdb';
+		// https://wikitech.wikimedia.org/wiki/Nova_Resource:Tools/Help#Metadata_database
+		this.database = 'meta_p';
+
+	} else if (language === 'tools-db') {
+		this.host = language;
+		// delete this.database;
+
+	} else if ((typeof language === 'string') && language) {
+		this.host = language + 'wiki.labsdb';
+		this.database = language + 'wiki_p';
+	}
+}
+
+
 /**
  * return new SQL config
  * 
@@ -4281,30 +4300,31 @@ if (home_directory && (home_directory = home_directory.replace(/[\\\/]$/, ''))) 
  * @returns {Object}SQL config
  */
 function new_SQL_config(language, user, password) {
-	var config = user ? {
-		user : user,
-		password : password,
-		// setup SQL config language.
-		set_language : function(language) {
-			if (language === 'meta') {
-				// @see /usr/bin/sql
-				this.host = 's7.labsdb';
-				// https://wikitech.wikimedia.org/wiki/Nova_Resource:Tools/Help#Metadata_database
-				this.database = 'meta_p';
+	var config, is_clone;
+	if (user)
+		config = {
+			user : user,
+			password : password,
+			db_prefix : user + '__',
+			set_language : set_SQL_config_language
+		};
+	else if (SQL_config) {
+		is_clone = true;
+		config = Object.clone(SQL_config);
+	} else {
+		config = {};
+	}
 
-			} else if (language === 'tools-db') {
-				this.host = language;
-				// delete this.database;
-
-			} else if ((typeof language === 'string') && language) {
-				this.host = language + 'wiki.labsdb';
-				this.database = language + 'wiki_p';
-			}
-		}
-	} : SQL_config && Object.clone(SQL_config);
-
-	if (language)
-		config.set_language(language);
+	if (typeof language === 'object') {
+		if (is_clone)
+			delete config.database;
+		Object.assign(config, language);
+	} else if (typeof language === 'string' && language) {
+		if (is_clone)
+			delete config.database;
+		// change language (and database/host).
+		config.set_language(language, !user);
+	}
 
 	return config;
 }
@@ -4336,8 +4356,8 @@ function parse_SQL_config(file_name) {
 }
 
 
-// only for node.js.
-// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#How_can_I_detect_if_I.27m_running_in_Labs.3F_And_which_project_.28tools_or_toolsbeta.29.3F
+//only for node.js.
+//https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#How_can_I_detect_if_I.27m_running_in_Labs.3F_And_which_project_.28tools_or_toolsbeta.29.3F
 if (node_fs) {
 	/** {String}Tool Labs name */
 	wmflabs = node_fs.existsSync('/etc/wmflabs-project')
@@ -4385,7 +4405,7 @@ if (wmflabs) {
  *          TODO: https://github.com/sidorares/node-mysql2
  */
 function run_SQL(SQL, callback, config) {
-	if (!config || !(config = SQL_config))
+	if (!config && !(config = SQL_config))
 		return;
 
 	var connection = mysql.createConnection(config);
@@ -4424,16 +4444,28 @@ function create_database(dbname, callback, language) {
 	if (!SQL_config)
 		return;
 
-	var config = new_SQL_config(language || 'tools-db');
-	if (!language) {
+	var config;
+	if (typeof dbname === 'object') {
+		config = Object.clone(dbname);
+		dbname = config.database;
 		delete config.database;
+	} else {
+		config = new_SQL_config(language || 'tools-db');
+		if (!language) {
+			delete config.database;
+		}
 	}
 
-	run_SQL('CREATE DATABASE `' + config.user + '__' + dbname + '`', function(
-			error, rows, fields) {
+	console.log('Try to create database [' + dbname + ']');
+	run_SQL({
+		// placeholder
+		sql : 'CREATE DATABASE ?',
+		values : [ dbname ]
+	}, function(error, rows, fields) {
 		if (!error || error.code === 'ER_DB_CREATE_EXISTS')
 			callback(null, rows, fields);
-		callback(error);
+		else
+			callback(error);
 	}, config);
 
 	return config;
@@ -4446,18 +4478,18 @@ function create_database(dbname, callback, language) {
  * SQL 查詢功能之前端。
  * 
  * @example <code>
- * // change language (and database).
+ * // change language (and database/host).
  * //CeL.wiki.SQL.config.set_language('en');
- * CeL.wiki.SQL(SQL, function callback(error, rows, fields) { }, 'en');
+ * CeL.wiki.SQL(SQL, function callback(error, rows, fields) { if(error) console.error(error); }, 'en');
  * </code>
  * 
  * @example <code>
- * new CeL.wiki.SQL('mydb', function callback(error, rows, fields) { } )
+ * new CeL.wiki.SQL('mydb', function callback(error, rows, fields) { if(error) console.error(error); } )
  * // run SQL query
- * .SQL(SQL, function callback(error, rows, fields) { } );
+ * .SQL(SQL, function callback(error, rows, fields) { if(error) console.error(error); } );
  * </code>
  * 
- * @param {String}dbname
+ * @param {String}[dbname]
  *            database name.
  * @param {Function}callback
  *            回調函數。
@@ -4471,42 +4503,49 @@ function create_database(dbname, callback, language) {
  */
 function SQL_session(dbname, callback, language) {
 	if (!(this instanceof SQL_session)) {
-		if (language)
-			// change language (and database).
+		if (typeof language === 'object') {
+			language = new_SQL_config(language);
+		} else if (typeof language === 'string' && language) {
+			// change language (and database/host).
 			SQL_config.set_language(language);
-		// dbname as SQL.
-		return run_SQL(dbname, callback);
+			if (language === 'tools-db')
+				delete SQL_config.database;
+			language = null;
+		}
+		// dbname as SQL query string.
+		return run_SQL(dbname, callback, language);
+	}
+
+	if (typeof dbname === 'function' && !language) {
+		// shift arguments
+		language = callback;
+		callback = dbname;
+		dbname = null;
 	}
 
 	this.config = new_SQL_config(language || 'tools-db');
 	if (dbname) {
-		if (typeof dbname === 'object')
+		if (typeof dbname === 'object') {
 			Object.assign(this.config, dbname);
-		else
-			this.config.database = dbname;
+		} else {
+			// 自動添加 prefix。
+			this.config.database = this.config.db_prefix + dbname;
+		}
 	} else {
 		delete this.config.database;
 	}
 
-	this.connection = mysql.createConnection(config);
-
 	var _this = this;
-	function connect(error) {
-		if (!error)
-			_this.connect();
-		callback(error);
-	}
-
-	try {
-		connect();
-	} catch (e) {
-		console.error(e);
-		if (dbname) {
-			create_database(dbname, connect, language);
+	this.connect(function(error) {
+		// console.error(error);
+		if (error && error.code === 'ER_BAD_DB_ERROR'
+				&& !_this.config.no_create && _this.config.database) {
+			// Error: ER_BAD_DB_ERROR: Unknown database '...'
+			create_database(_this.config, callback);
 		} else {
-			callback(e);
+			callback(error);
 		}
-	}
+	});
 }
 
 // run SQL query
@@ -4522,22 +4561,62 @@ SQL_session.prototype.SQL = function(SQL, callback) {
 };
 
 // re-connect.
-SQL_session.prototype.connect = function() {
+SQL_session.prototype.connect = function(callback) {
 	try {
-		this.connection.end();
+		this.connection.connect(callback);
 	} catch (e) {
-		// TODO: handle exception
+		try {
+			this.connection.end();
+		} catch (e) {
+			// TODO: handle exception
+		}
+		// 需要重新設定 this.connection，否則會出現:
+		// Error: Cannot enqueue Handshake after invoking quit.
+		this.connection = mysql.createConnection(this.config);
+		this.connection.connect(callback);
 	}
-	// this.connection = mysql.createConnection(config);
-	this.connection.connect();
 	return this;
 };
 
-SQL_session.prototype.databases = function(callback) {
-	this.connection.query("SHOW DATABASES LIKE '" + this.config.user + "__%';",
-			callback);
+// get database list
+SQL_session.prototype.databases = function(callback, all) {
+	var _this = this;
+	function filter(dbname) {
+		return dbname.startsWith(_this.config.db_prefix);
+	}
+
+	if (this.database_cache) {
+		var list = this.database_cache;
+		if (!all)
+			list = list.filter(filter);
+		callback(list);
+		return this;
+	}
+
+	var SQL = 'SHOW DATABASES';
+	if (false && !all)
+		// SHOW DATABASES LIKE 'pattern';
+		SQL += " LIKE '" + this.config.db_prefix + "%'";
+	this.connection.query(SQL, function(error, rows, fields) {
+		if (error || !Array.isArray(rows)) {
+			console.error(error);
+			rows = null;
+		} else {
+			rows = rows.map(function(row) {
+				for ( var field in row)
+					return row[field];
+			});
+			_this.database_cache = rows;
+			if (!all)
+				rows = rows.filter(filter);
+			// console.log(rows);
+		}
+		callback(rows);
+	});
+
 	return this;
 };
+
 
 if (SQL_config) {
 	library_namespace
