@@ -4217,7 +4217,39 @@ wiki_API.redirects.count = function(root_name_hash, embeddedin_list) {
 //---------------------------------------------------------------------//
 
 /** {String}default language */
-var default_language = 'zh';
+var default_language;
+
+/**
+ * 改變預設之語言。
+ * 
+ * @param {String}[language]
+ *            language.<br />
+ *            e.g., 'zh', 'en'.
+ * 
+ * @returns {String}預設之語言。
+ */
+function set_default_language(language) {
+	if (typeof language !== 'string' || !/^[a-z]{2,3}$/.test(language)) {
+		library_namespace.warn('set_default_language: Invalid language: ['
+				+ language + ']. e.g., "en".');
+		return default_language;
+	}
+
+	default_language = language.toLowerCase();
+	// default api URL. Use <code>CeL.wiki.API_URL = api_URL('en')</code> to
+	// change it.
+	// see also: application.locale
+	wiki_API.API_URL = api_URL((library_namespace.is_WWW()
+			&& (navigator.userLanguage || navigator.language) || default_language)
+			.toLowerCase().replace(/-.+$/, ''));
+	return default_language;
+}
+
+set_default_language('zh');
+
+
+
+//---------------------------------------------------------------------//
 
 /** {Object|Function}fs in node.js */
 var node_fs;
@@ -4233,7 +4265,8 @@ try {
 	library_namespace.warn('無 node.js 之 fs，因此不具備 cache 或 SQL 功能。');
 	node_fs = {
 		readFile : function(file_name, encoding, callback) {
-			callback(true);
+			if (typeof callback === 'function')
+				callback(true);
 		},
 		writeFile : library_namespace.null_function
 	};
@@ -4267,7 +4300,7 @@ if (home_directory && (home_directory = home_directory.replace(/[\\\/]$/, ''))) 
 }
 
 
-//setup SQL config language (and database/host).
+// setup SQL config language (and database/host).
 function set_SQL_config_language(language) {
 	if (language === 'meta') {
 		// @see /usr/bin/sql
@@ -4356,8 +4389,8 @@ function parse_SQL_config(file_name) {
 }
 
 
-//only for node.js.
-//https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#How_can_I_detect_if_I.27m_running_in_Labs.3F_And_which_project_.28tools_or_toolsbeta.29.3F
+// only for node.js.
+// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#How_can_I_detect_if_I.27m_running_in_Labs.3F_And_which_project_.28tools_or_toolsbeta.29.3F
 if (node_fs) {
 	/** {String}Tool Labs name */
 	wmflabs = node_fs.existsSync('/etc/wmflabs-project')
@@ -4380,14 +4413,14 @@ if (wmflabs) {
 			// The production replicas.
 			// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#The_databases
 			// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database
-			// 此資料庫僅為正式上線版之刪節副本。資料並非最新版本(但誤差多於數分內)，也不完全，甚至可能為其他 users 竄改過。
+			// 此資料庫僅為正式上線版之刪節副本。資料並非最新版本(但誤差多於數分內)，也不完全，<s>甚至可能為其他 users 竄改過</s>。
 			+ 'replica.my.cnf');
 	} catch (e) {
 		// TODO: handle exception
 	}
 }
 
-//----------------------------------------------------
+//---------------------------------------------------------------------//
 
 /**
  * execute SQL command.
@@ -4425,7 +4458,7 @@ if (false)
 	});
 
 
-//----------------------------------------------------
+//---------------------------------------------------------------------//
 
 /**
  * Create a new user database.
@@ -4475,6 +4508,8 @@ function create_database(dbname, callback, language) {
 
 	run_SQL('CREATE DATABASE IF NOT EXISTS `' + dbname + '`', function(error,
 			rows, fields) {
+		if (typeof callback !== 'function')
+			return;
 		if (error)
 			callback(error);
 		else
@@ -4485,7 +4520,7 @@ function create_database(dbname, callback, language) {
 }
 
 
-//----------------------------------------------------
+//---------------------------------------------------------------------//
 
 /**
  * SQL 查詢功能之前端。
@@ -4555,7 +4590,7 @@ function SQL_session(dbname, callback, language) {
 				&& !_this.config.no_create && _this.config.database) {
 			// Error: ER_BAD_DB_ERROR: Unknown database '...'
 			create_database(_this.config, callback);
-		} else {
+		} else if (typeof callback === 'function') {
 			callback(error);
 		}
 	});
@@ -4583,7 +4618,7 @@ SQL_session.prototype.connect = function(callback, force) {
 				// Error: Cannot enqueue Handshake after fatal error.
 				&& error.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR') {
 					_this.connect(callback, true);
-				} else
+				} else if (typeof callback === 'function')
 					callback(error);
 			});
 			return this;
@@ -4638,7 +4673,8 @@ SQL_session.prototype.databases = function(callback, all) {
 		var list = this.database_cache;
 		if (!all)
 			list = list.filter(filter);
-		callback(list);
+		if (typeof callback === 'function')
+			callback(list);
 		return this;
 	}
 
@@ -4664,7 +4700,8 @@ SQL_session.prototype.databases = function(callback, all) {
 					rows = rows.filter(filter);
 				// console.log(rows);
 			}
-			callback(rows);
+			if (typeof callback === 'function')
+				callback(rows);
 		});
 	});
 
@@ -4778,7 +4815,8 @@ if (SQL_config) {
 /**
  * 取得最新之 Wikimedia dump。
  * 
- * TODO: search the latest file in the local directory. e.g., /public/dumps/public/zhwiki/20160203/zhwiki-20160203-pages-articles.xml.bz2
+ * TODO: search the latest file in the local directory. e.g.,
+ * /public/dumps/public/zhwiki/20160203/zhwiki-20160203-pages-articles.xml.bz2
  * 
  * @param {String}[project]
  *            project code name. e.g., 'enwiki'
@@ -4863,31 +4901,38 @@ function get_latest(project, callback, options) {
 	} catch (e) {
 	}
 
+	// ----------------------------------------------------
+
 	function extract() {
-		library_namespace.log('get_latest: Extracting [' + directory + filename
-				+ ']...');
-		require('child_process').exec(
-		//
-		'/bin/bzip2 -cd "' + directory + filename + extension + '" > "'
-		//
-		+ directory + filename + '"', function(error, stdout, stderr) {
-			if (error) {
-				library_namespace.err(error);
-			} else {
-				library_namespace.log('get_latest: Done. Running callback...');
-			}
-			callback(directory + filename);
-		});
+		library_namespace.log('get_latest.extract: Extracting [' + directory
+				+ filename + ']...');
+		require('child_process')
+				.exec(
+						//
+						'/bin/bzip2 -cd "' + directory + filename + extension
+								+ '" > "'
+								//
+								+ directory + filename + '"',
+						function(error, stdout, stderr) {
+							if (error) {
+								library_namespace.err(error);
+							} else {
+								library_namespace
+										.log('get_latest.extract: Done. Running callback...');
+							}
+							callback(directory + filename);
+						});
 	}
 
 	var extension = options.filename || '.bz2';
 	try {
 		// check if file exists.
 		node_fs.statSync(directory + filename + extension);
-		library_namespace.log('get_latest: Archive exists.');
+		library_namespace.log('get_latest: Archive [' + directory + filename
+				+ extension + '] exists.');
 		extract();
 	} catch (e) {
-		library_namespace.log('get_latest: Get [' + filename + extension
+		library_namespace.log('get_latest: Try to get [' + filename + extension
 				+ ']...');
 		// https://nodejs.org/api/child_process.html
 		var child = require('child_process').spawn(
@@ -4972,7 +5017,7 @@ var NOT_FOUND = ''.indexOf('_');
  * @param {Object}[options]
  *            附加參數/設定選擇性/特殊功能與選項
  * 
- * @returns {node_fs.ReadStream}handler
+ * @returns {String}file path
  * 
  * @see <a href="http://dumps.wikimedia.org/backup-index.html">Wikimedia
  *      database backup dumps</a>
@@ -4982,17 +5027,19 @@ var NOT_FOUND = ''.indexOf('_');
  */
 function read_dump(filename, callback, options) {
 	if (typeof filename === 'function' && typeof callback !== 'function'
-		&& !options) {
+			&& !options) {
 		// shift arguments
 		options = callback;
 		callback = filename;
 		filename = null;
 	}
 	if (typeof filename !== 'string' || !filename.endsWith('.xml')) {
+		library_namespace.log('read_dump: Invalid file path: [' + filename
+				+ '], try to get the latest dump file...');
 		get_latest(filename, function(filename) {
 			read_dump(filename, callback, options);
 		}, options);
-		// 警告: 無法馬上取得檔案時，將不會回傳 file handler！
+		// 警告: 無法馬上取得檔案時，將不會回傳任何資訊！
 		return;
 	}
 
@@ -5025,14 +5072,19 @@ function read_dump(filename, callback, options) {
 
 		// node_fs.fstatSync(file_stream.fd);
 
-		// 截斷. 16: '</page>\n  <page>'.length
+		// 截斷. 16: '</page>\n <page>'.length
 		buffer = buffer.slice(index + 16);
 		return true;
 	}
 
+	if (options && typeof options.first === 'function')
+		options.first(filename);
+
 	// e.g., 'zhwiki-20160305-pages-meta-current1.xml'
 	var file_stream = new node_fs.ReadStream(filename);
 	file_stream.setEncoding('utf8');
+
+	library_namespace.info('read_dump: Starting read data...');
 
 	// old: e.g., '<text xml:space="preserve" bytes="80">'??
 	// 2016/3/11: e.g., '<text xml:space="preserve">'
@@ -5058,7 +5110,10 @@ function read_dump(filename, callback, options) {
 			options.last.call(file_stream);
 	});
 
-	return file_stream;
+	// * @returns {String}file path
+	// * @returns {node_fs.ReadStream}file handler
+	// return file_stream;
+	return;
 }
 
 wiki_API.read_dump = read_dump;
@@ -5803,11 +5858,7 @@ Object.assign(Flow_info, {
 // export 導出.
 Object.assign(wiki_API, {
 	api_URL : api_URL,
-	// default api URL. Use <code>CeL.wiki.API_URL = api_URL('en')</code> to change it.
-	// see also: application.locale
-	API_URL : api_URL((library_namespace.is_WWW()
-			&& (navigator.userLanguage || navigator.language) || default_language)
-			.toLowerCase().replace(/-.+$/, '')),
+	set_language : set_default_language,
 
 	namespace : get_namespace,
 	remove_namespace : remove_namespace,
