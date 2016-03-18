@@ -4405,8 +4405,6 @@ if (node_fs) {
 
 if (wmflabs) {
 	wiki_API.wmflabs = wmflabs;
-	// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#Dumps
-	// 可在 /public/dumps/public/zhwiki 找到舊 dumps。 (using `df -BT`)
 	try {
 		if (mysql = require('mysql'))
 			SQL_config = parse_SQL_config(home_directory
@@ -4815,9 +4813,6 @@ if (SQL_config) {
 /**
  * 取得最新之 Wikimedia dump。
  * 
- * TODO: search the latest file in the local directory. e.g.,
- * /public/dumps/public/zhwiki/20160203/zhwiki-20160203-pages-articles.xml.bz2
- * 
  * @param {String}[project]
  *            project code name. e.g., 'enwiki'
  * @param {Function}callback
@@ -4847,11 +4842,12 @@ function get_latest(project, callback, options) {
 	}
 
 	if (!project)
+		// e.g., 'zhwiki'.
 		project = options.project || default_language + 'wiki';
 
 	// dump host
 	var host = options.host || 'http://dumps.wikimedia.org/',
-	//
+	// e.g., '20160305'.
 	latest = options.latest;
 	if (!latest) {
 		library_namespace.get_URL(
@@ -4904,79 +4900,107 @@ function get_latest(project, callback, options) {
 	// ----------------------------------------------------
 
 	function extract() {
-		library_namespace.log('get_latest.extract: Extracting [' + directory
-				+ filename + ']...');
-		require('child_process')
-				.exec(
-						//
-						'/bin/bzip2 -cd "' + directory + filename + extension
-								+ '" > "'
-								//
-								+ directory + filename + '"',
-						function(error, stdout, stderr) {
-							if (error) {
-								library_namespace.err(error);
-							} else {
-								library_namespace
-										.log('get_latest.extract: Done. Running callback...');
-							}
-							callback(directory + filename);
-						});
+		library_namespace.log('get_latest.extract: Extracting ['
+				+ source_directory + archive + ']...');
+		require('child_process').exec(
+		//
+		'/bin/bzip2 -cd "' + source_directory + archive + '" > "'
+		//
+		+ directory + filename + '"', function(error, stdout, stderr) {
+			if (error) {
+				library_namespace.err(error);
+			} else {
+				library_namespace.log(
+				//
+				'get_latest.extract: Done. Running callback...');
+			}
+			callback(directory + filename);
+		});
 	}
 
-	var extension = options.filename || '.bz2';
+	// search the latest file in the local directory.
+	// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#Dumps
+	// 可在 /public/dumps/public/zhwiki/ 找到舊 dumps。 (using `df -BT`)
+	// e.g.,
+	// /public/dumps/public/zhwiki/20160203/zhwiki-20160203-pages-articles.xml.bz2
+	var source_directory, archive = options.archive || filename + '.bz2';
+
+	if (wmflabs) {
+		source_directory = '/public/dumps/public/' + project + '/' + latest
+				+ '/';
+		try {
+			// check if file exists.
+			fs.accessSync(source_directory + filename);
+			library_namespace.log('get_latest: Archive [' + source_directory
+					+ archive + '] exists.');
+			extract();
+			return;
+		} catch (e) {
+		}
+	}
+
+	// ----------------------------------------------------
+
+	source_directory = directory;
+
 	try {
 		// check if file exists.
-		node_fs.statSync(directory + filename + extension);
-		library_namespace.log('get_latest: Archive [' + directory + filename
-				+ extension + '] exists.');
+		node_fs.statSync(source_directory + archive);
+		library_namespace.log('get_latest: Archive [' + source_directory
+				+ archive + '] exists.');
 		extract();
+		return;
 	} catch (e) {
-		library_namespace.log('get_latest: Try to get [' + filename + extension
-				+ ']...');
-		// https://nodejs.org/api/child_process.html
-		var child = require('child_process').spawn(
-		//
-		'/usr/bin/wget',
-				[ '--input-file="' + directory + filename + extension + '"',
-				//
-				host + project + '/' + latest + '/' + filename + extension ]);
-		// http://stackoverflow.com/questions/6157497/node-js-printing-to-console-without-a-trailing-newline
-		// In Windows console (Linux, too), you should replace '\r' with its
-		// equivalent code \033[0G:
-		child.stdout.on('data', function(data) {
-			process.stdout.write(data);
-		});
-		child.stderr.on('data', function(data) {
-			data = data.toString('utf8');
-			/**
-			 * <code>
-			 e.g.,
-			259000K .......... .......... .......... .......... .......... 21%  282M 8m26s
-			999950K .......... .......... .......... .......... .......... 82% 94.2M 1m46s
-			1000000K .......... .......... .......... .......... .......... 82%  103M 1m46s
-			</code>
-			 */
-			// [ all, downloaded, percentage, speed, remaining 剩下時間 ]
-			var matched = data
-					.match(/([^\n\.]+)[.\s]+(\d+%)\s+([^\s]+)\s+([^\s]+)/);
-			if (matched) {
-				data = matched[2] + '  ' + matched[1] + '  ' + matched[4]
-						+ '                    \r';
-			} else if (data.includes('....') || /\d+[ms]/.test(data)
-					|| /\.\.\s*\d+%/.test(data))
-				return;
-			process.stderr.write(data);
-		});
-		child.on('close', function(error_code) {
-			if (error_code) {
-				console.error(error_code);
-				return;
-			}
-			library_namespace.log('get_latest: Got archive file.');
-			extract();
-		});
 	}
+
+	// ----------------------------------------------------
+
+	library_namespace
+			.log('get_latest: Try to get archive [' + archive + ']...');
+	// https://nodejs.org/api/child_process.html
+	var child = require('child_process').spawn('/usr/bin/wget',
+	//
+	[ '--input-file="' + source_directory + archive + '"',
+	//
+	host + project + '/' + latest + '/' + archive ]);
+
+	// http://stackoverflow.com/questions/6157497/node-js-printing-to-console-without-a-trailing-newline
+	// In Windows console (Linux, too), you should replace '\r' with its
+	// equivalent code \033[0G:
+	child.stdout.on('data', function(data) {
+		process.stdout.write(data);
+	});
+
+	child.stderr.on('data', function(data) {
+		data = data.toString('utf8');
+		/**
+		 * <code>
+		 e.g.,
+		259000K .......... .......... .......... .......... .......... 21%  282M 8m26s
+		999950K .......... .......... .......... .......... .......... 82% 94.2M 1m46s
+		1000000K .......... .......... .......... .......... .......... 82%  103M 1m46s
+		</code>
+		 */
+		// [ all, downloaded, percentage, speed, remaining 剩下時間 ]
+		var matched = data
+				.match(/([^\n\.]+)[.\s]+(\d+%)\s+([^\s]+)\s+([^\s]+)/);
+		if (matched) {
+			data = matched[2] + '  ' + matched[1] + '  ' + matched[4]
+					+ '                    \r';
+		} else if (data.includes('....') || /\d+[ms]/.test(data)
+				|| /\.\.\s*\d+%/.test(data))
+			return;
+		process.stderr.write(data);
+	});
+
+	child.on('close', function(error_code) {
+		if (error_code) {
+			library_namespace.err('Error: ' + error_code);
+			return;
+		}
+		library_namespace.log('get_latest: Got archive file.');
+		extract();
+	});
 }
 
 
