@@ -1514,7 +1514,7 @@ function get_page_title(page_data) {
 			return page_data.map(get_page_title);
 		// assert: page_data =
 		// [ {String}API_URL, {String}title || {Object}page_data ]
-		return page_data[1];
+		return get_page_title(page_data[1]);
 	}
 
 	if (library_namespace.is_Object(page_data)) {
@@ -1983,7 +1983,9 @@ wiki_API.prototype.continue_key = '後續索引';
  *            message title
  */
 function add_message(message, title) {
-	this.push('* ' + ((title = get_page_title(title)) ? '[[' + title + ']]: ' : '') + message);
+	this.push('* ' + ((title = get_page_title(title))
+	// escape 具有特殊作用的 title。
+	? '[[' + (/^Category:/.test(title) ? ':' : '') + title + ']]: ' : '') + message);
 }
 
 function reset_messages() {
@@ -3762,7 +3764,7 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 		if (action.length === 1)
 			action[1] = action[0];
 	} else if (text === wiki_API.edit.cancel)
-		action = [ '放棄編輯頁面', '放棄編輯頁面' ];
+		action = [ 'cancel', '放棄編輯頁面' ];
 	else if (!text)
 		// 內容被清空
 		action = [ 'empty', '未設定編輯內容' ];
@@ -4894,7 +4896,7 @@ function get_latest(project, callback, options) {
 	try {
 		// check if file exists
 		node_fs.statSync(directory + filename);
-		library_namespace.log('get_latest: Using file: [' + directory
+		library_namespace.log('get_latest: Using data file: [' + directory
 				+ filename + ']');
 		callback(directory + filename);
 		return;
