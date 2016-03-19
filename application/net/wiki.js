@@ -3391,6 +3391,7 @@ get_list.type = {
 
 	// 按標題排序列出指定的名字空間的頁面 title。
 	// https://www.mediawiki.org/wiki/API:Allpages
+	// 警告: 不在 Tool Labs 執行 allpages 速度太慢。但若在 Tool Labs，當改用 database。
 	allpages : 'ap',
 
 	// 取得連結到 [[title]] 的頁面。
@@ -3418,7 +3419,10 @@ get_list.type = {
 
 	// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
 	// 基本上同 imageusage。
-	fileusage : [ 'fu', 'prop' ]
+	fileusage : [ 'fu', 'prop' ],
+
+	// https://www.mediawiki.org/wiki/API:Alllinks
+	alllinks : [ 'al', 'prop' ]
 };
 
 
@@ -5355,7 +5359,8 @@ wiki_API.cache = function(operation, callback, _this) {
 		 * 寫入 cache 至檔案系統。
 		 */
 		function write_cache(data) {
-			if (/[^\\\/]$/.test(file_name)) {
+			// 當設定 operation.cache: false 時，不寫入 cache。
+			if (operation.cache !== false && /[^\\\/]$/.test(file_name)) {
 				library_namespace.info('wiki_API.cache: Write cache data to ['
 						+ file_name + '].');
 				library_namespace.debug('Cache data: '
@@ -5496,20 +5501,23 @@ wiki_API.cache = function(operation, callback, _this) {
 		case 'page':
 			// page content 內容
 			to_get_data = function(title, callback) {
-				library_namespace.log('Get content of [[' + title + ']].');
+				library_namespace.log(
+				//
+				'wiki_API.cache: Get content of [[' + get_page_title(title) + ']].');
 				wiki_API.page(title, function(page_data) {
 					callback(page_data);
 				}, Object.assign(library_namespace.null_Object(), _this,
 						operation));
 			};
 			break;
+
 		case 'redirects':
 			to_get_data = function(title, callback) {
 				wiki_API.redirects(title, function(root_page_data,
 						redirect_list) {
 					library_namespace.log(
 					//
-					'redirects (alias) of [[' + title + ']]: ('
+					'redirects (alias) of [[' + get_page_title(title) + ']]: ('
 					//
 					+ redirect_list.length + ') [' + redirect_list.slice(0, 3)
 					//
@@ -5531,9 +5539,11 @@ wiki_API.cache = function(operation, callback, _this) {
 		case 'list':
 			to_get_data = function(title, callback) {
 				wiki_API.list(title, function(pages) {
-					library_namespace.log('[[' + get_page_title(title) + ']]: '
+					library_namespace.log(list_type
+					// allpages 不具有 title。
+					+ (title ? '[[' + get_page_title(title) + ']]' : '')
 					//
-					+ pages.length + ' page(s) ' + list_type + '.');
+					+ ': ' + pages.length + ' page(s).');
 					// page list, title page_data
 					callback(pages);
 				}, Object.assign({
