@@ -1892,7 +1892,7 @@ wiki_API.prototype.next = function() {
 						library_namespace.info('wiki_API.prototype.next: Try to get token again. 嘗試重新取得 token。');
 						// reset node agent.
 						// 應付 2016/1 MediaWiki 系統更新，需要連 HTTP handler 都重換一個，重起 cookie。
-						// 發現大多是因為一次處理數十頁面，可能遇上 status 413 的問題。
+						// 發現大多是因為一次處理數十頁面，可能遇上 HTTP status 413 的問題。
 						library_namespace.application.net.Ajax.setup_node_net();
 						// rollback
 						_this.actions.unshift(next);
@@ -3260,7 +3260,7 @@ function get_list(type, title, callback, namespace) {
 	}
 
 	title[1] = 'query&' + parameter + '=' + type
-	//
+	// allpages 不具有 title。
 	+ (title[1] ?  '&' + (parameter === get_list.default_parameter ? prefix : '')
 	//
 	+ wiki_API.query.title_param(title[1]) : '')
@@ -3270,8 +3270,9 @@ function get_list(type, title, callback, namespace) {
 	+ (options.limit > 0 || options.limit === 'max' ? '&' + prefix + 'limit=' + options.limit : '')
 	// next start from here.
 	+ (continue_from ?
-	//
-	'&' + prefix + 'continue=' + continue_from : '')
+	// allpages 的 apcontinue 為 title，需要 encodeURIComponent()。
+	// 未處理可能造成 HTTP status 400。
+	'&' + prefix + 'continue=' + encodeURIComponent(continue_from) : '')
 	//
 	+ ('namespace' in options
 	//
@@ -4228,7 +4229,7 @@ wiki_API.redirects.count = function(root_name_hash, embeddedin_list) {
 
 //---------------------------------------------------------------------//
 
-/** {String}default language */
+/** {String}default language / wiki name */
 var default_language;
 
 /**
