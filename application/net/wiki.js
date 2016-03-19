@@ -96,7 +96,7 @@ function wiki_API(user_name, password, API_URL) {
  * 
  * @param {String}project
  *            wiki project, domain or language. 指定維基百科語言/姊妹計劃<br />
- *            e.g., 'zh', 'en', 'zh.wikisource'.
+ *            e.g., 'en', 'en.wikisource'.
  * 
  * @returns {String}API URL
  * 
@@ -107,10 +107,10 @@ function api_URL(project) {
 	if (project)
 		// /^[a-z]+$/i.test(undefined) === true
 		if (/^[a-z]+$/i.test(project))
-			// e.g., 'zh' → 'zh.wikipedia.org' ({{SERVERNAME}})
+			// e.g., 'en' → 'en.wikipedia.org' ({{SERVERNAME}})
 			project += '.wikipedia.org';
 		else if (/^[a-z]+\.[a-z]+$/i.test(project))
-			// e.g., 'zh.wikisource', 'zh.wiktionary'
+			// e.g., 'en.wikisource', 'en.wiktionary'
 			project += '.org';
 
 	var matched = /^(https?:\/\/)?[a-z]+(\.[a-z]+)+(\/?)$/i.test(project);
@@ -4222,9 +4222,13 @@ var default_language;
 /**
  * 改變預設之語言。
  * 
+ * @example <code>
+   CeL.wiki.set_language('en');
+ * </code>
+ * 
  * @param {String}[language]
  *            language.<br />
- *            e.g., 'zh', 'en'.
+ *            e.g., 'en'.
  * 
  * @returns {String}預設之語言。
  */
@@ -4245,7 +4249,7 @@ function set_default_language(language) {
 	return default_language;
 }
 
-set_default_language('zh');
+set_default_language('en');
 
 
 
@@ -4324,7 +4328,7 @@ function set_SQL_config_language(language) {
  * 
  * @param {String}[language]
  *            database language.<br />
- *            e.g., 'zh', 'en', 'commons', 'wikidata', 'meta'.
+ *            e.g., 'en', 'commons', 'wikidata', 'meta'.
  * @param {String}[user]
  *            SQL database user name
  * @param {String}[password]
@@ -4467,7 +4471,7 @@ if (false)
  *            回調函數。
  * @param {String}[language]
  *            database language.<br />
- *            e.g., 'zh', 'en', 'commons', 'wikidata', 'meta'.
+ *            e.g., 'en', 'commons', 'wikidata', 'meta'.
  * 
  * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database#Creating_new_databases
  */
@@ -4541,7 +4545,7 @@ function create_database(dbname, callback, language) {
  *            回調函數。
  * @param {String}[language]
  *            database language.<br />
- *            e.g., 'zh', 'en', 'commons', 'wikidata', 'meta'.
+ *            e.g., 'en', 'commons', 'wikidata', 'meta'.
  * 
  * @returns {SQL_session}instance
  * 
@@ -4842,7 +4846,7 @@ function get_latest(project, callback, options) {
 	}
 
 	if (!project)
-		// e.g., 'zhwiki'.
+		// e.g., 'enwiki'.
 		project = options.project || default_language + 'wiki';
 
 	// dump host
@@ -4883,7 +4887,7 @@ function get_latest(project, callback, options) {
 	// e.g.,
 	// callback=function (data) {console.log(data);};
 	// latest='20160305';
-	// project='zhwiki';
+	// project='enwiki';
 	// directory='/data/project/cewbot/dumps/';
 	// filename=project+'-'+latest+'-pages-articles-multistream-index.txt';
 
@@ -5104,7 +5108,7 @@ function read_dump(filename, callback, options) {
 	if (options && typeof options.first === 'function')
 		options.first(filename);
 
-	// e.g., 'zhwiki-20160305-pages-meta-current1.xml'
+	// e.g., 'enwiki-20160305-pages-meta-current1.xml'
 	var file_stream = new node_fs.ReadStream(filename);
 	file_stream.setEncoding('utf8');
 
