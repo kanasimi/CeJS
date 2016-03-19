@@ -43,6 +43,13 @@ if (typeof CeL === 'function')
 			// -------------------------------------------------------------
 			//
 
+			// 本 module 所能使用之最低 debug level。
+			// see function new_SGR(messages) @ base.js
+			var min_debug = 3;
+
+			// -------------------------------------------------------------
+			//
+
 			/**
 			 * parse style name
 			 * 
@@ -56,7 +63,7 @@ if (typeof CeL === 'function')
 			 */
 			function SGR_style_name(style_name) {
 				library_namespace.debug('Search style name [' + style_name
-						+ '] in SGR_code.style_name_alias', 3);
+						+ '] in SGR_code.style_name_alias', min_debug, 'SGR_style_name');
 				if (typeof style_name !== 'object'
 						&& (style_name in SGR_code.style_name_alias))
 					style_name = SGR_code.style_name_alias[style_name];
@@ -172,17 +179,17 @@ if (typeof CeL === 'function')
 				//
 				'Search style (' + (typeof style) + ') [' + style
 				//
-				+ '] in SGR_code.style_value_alias', 3, 'SGR_style_add');
+				+ '] in SGR_code.style_value_alias', min_debug, 'SGR_style_add');
 				if (typeof style !== 'object')
 					while (style in SGR_code.style_value_alias) {
 						library_namespace.debug('Find style [' + style
 								+ '] → [' + SGR_code.style_value_alias[style]
-								+ ']', 3, 'SGR_style_add');
+								+ ']', min_debug, 'SGR_style_add');
 						style = SGR_code.style_value_alias[style];
 					}
 
 				library_namespace.debug('parse (' + (typeof style) + ') ['
-						+ style + '] if it is a pure value.', 3,
+						+ style + '] if it is a pure value.', min_debug,
 						'SGR_style_add');
 				if (typeof style === 'string')
 					if (style.includes(SGR_code.separator))
@@ -191,7 +198,7 @@ if (typeof CeL === 'function')
 					else if (isNaN(style)) {
 						library_namespace.debug(
 						//
-						'test if [' + style + '] is "[+-] style name".', 3,
+						'test if [' + style + '] is "[+-] style name".', min_debug,
 								'SGR_style_add');
 						var matched = style.match(/^([+\-])\s*([^\s].*)$/);
 						if (matched
@@ -207,7 +214,7 @@ if (typeof CeL === 'function')
 							else {
 								library_namespace.debug('Set style "'
 										+ matched[2] + '" = ' + matched[1]
-										+ '.', 3, 'SGR_style_add');
+										+ '.', min_debug, 'SGR_style_add');
 								this[matched[2]] = matched[1];
 							}
 							return this;
@@ -216,7 +223,7 @@ if (typeof CeL === 'function')
 						library_namespace.debug('test if [' + style +
 						//
 						'] is "style name = style value (0,1,false,true,..)".',
-								3, 'SGR_style_add');
+								min_debug, 'SGR_style_add');
 						matched = style.match(/^([^=]+)=(.+)$/);
 						if (matched
 								&& (matched[1] = SGR_style_name(matched[1]
@@ -235,7 +242,7 @@ if (typeof CeL === 'function')
 					style |= 0;
 
 				library_namespace.debug('parse (' + (typeof style) + ') ['
-						+ style + '] if it is a object.', 3, 'SGR_style_add');
+						+ style + '] if it is a object.', min_debug, 'SGR_style_add');
 				if (library_namespace.is_Object(style)) {
 					Object.keys(style).some(
 							function(style_name) {
@@ -249,12 +256,12 @@ if (typeof CeL === 'function')
 								if (style_value !== undefined) {
 									library_namespace.debug('Set ['
 											+ style_name + '] = ['
-											+ style_value + '].', 3);
+											+ style_value + '].', min_debug + 1, 'SGR_style_add');
 									this[style_name] = style_value;
 								} else if (is_reset_style(style_value)) {
 									library_namespace.debug('reset style ('
 									//
-									+ (typeof style) + ') [' + style + '].', 3,
+									+ (typeof style) + ') [' + style + '].', min_debug,
 											'SGR_style_add');
 									this.to_reset();
 									return true;
@@ -273,7 +280,7 @@ if (typeof CeL === 'function')
 				} else if (is_reset_style(style)) {
 					library_namespace.debug(
 					//
-					'reset style (' + (typeof style) + ') [' + style + '].', 3,
+					'reset style (' + (typeof style) + ') [' + style + '].', min_debug,
 							'SGR_style_add');
 					this.to_reset();
 				} else if (library_namespace.is_debug()) {
@@ -296,11 +303,11 @@ if (typeof CeL === 'function')
 				if (false)
 					if (library_namespace.is_Object(options))
 						this.options = options;
-				library_namespace.debug('Set style [' + style + ']', 2,
+				library_namespace.debug('Set style [' + style + ']', min_debug,
 						'SGR_style');
 				this.add(style);
 				library_namespace.debug('Set style [' + style + '] finished.',
-						3, 'SGR_style');
+						min_debug + 1, 'SGR_style');
 			}
 
 			/**
@@ -331,7 +338,7 @@ if (typeof CeL === 'function')
 				},
 
 				to_reset : function() {
-					library_namespace.debug('reset style.', 2,
+					library_namespace.debug('reset style.', min_debug,
 							'SGR_style.prototype.to_reset');
 					this.forEach(function(style_name) {
 						delete this[style_name];
@@ -340,7 +347,7 @@ if (typeof CeL === 'function')
 					return this;
 				},
 				clone : function(options) {
-					library_namespace.debug('clone [' + this + '].', 2,
+					library_namespace.debug('clone [' + this + '].', min_debug,
 							'SGR_style.prototype.clone');
 					var result = new SGR_style();
 					this.forEach(function(style_name) {
@@ -354,17 +361,17 @@ if (typeof CeL === 'function')
 
 				to_Array : function() {
 					var array = [];
-					if (library_namespace.is_debug(3))
+					if (library_namespace.is_debug(min_debug))
 						library_namespace.debug('style [' + Object.keys(this)
 								+ ']', 1, 'SGR_style.prototype.to_Array');
 					if (false)
 						for ( var name in this)
-							library_namespace.debug('[' + name + ']', 3);
+							library_namespace.debug('[' + name + ']', min_debug + 1);
 					this.forEach(function(style_name) {
 						var value = this[style_name];
 						library_namespace.debug('style "' + style_name + '" ['
 								+ SGR_code.style_data[style_name] + '] = ('
-								+ (typeof value) + ') [' + value + ']', 3,
+								+ (typeof value) + ') [' + value + ']', min_debug + 1,
 								'SGR_style.prototype.to_Array');
 						if (style_name in color_shift) {
 							if (typeof value === 'boolean')
@@ -386,18 +393,18 @@ if (typeof CeL === 'function')
 							array.push(value);
 						// else: e.g., reset.
 					});
-					library_namespace.debug('style array [' + array + ']', 3,
+					library_namespace.debug('style array [' + array + ']', min_debug + 1,
 							'SGR_style.prototype.to_Array');
 					array.sort();
 					library_namespace.debug('sorted style array [' + array
-							+ ']', 2, 'SGR_style.prototype.to_Array');
+							+ ']', min_debug, 'SGR_style.prototype.to_Array');
 					return array;
 				},
 				// (): use default CSI
 				// (false): No CSI
 				toString : function(CSI, end_code) {
 					var code = this.to_Array().join(SGR_code.separator);
-					library_namespace.debug('code [' + code + ']', 2,
+					library_namespace.debug('code [' + code + ']', min_debug,
 							'SGR_style.prototype.toString');
 					// 假如有設定 .reset，那應該會有 '0'。
 					// 否則代表是空的 style，此時不回傳以避免被當作 reset。
@@ -483,7 +490,7 @@ if (typeof CeL === 'function')
 								|| SGR_code.end_code), 'g');
 
 				while (matched = pattern.exec(styled_text)) {
-					library_namespace.debug(matched.join(), 3);
+					library_namespace.debug(matched.join(), min_debug, 'SGR_parse');
 					text_now += styled_text.slice(lastIndex, matched.index);
 					style[text_now.length] = new SGR_style(matched[1] || 0);
 					lastIndex = pattern.lastIndex;
@@ -540,12 +547,12 @@ if (typeof CeL === 'function')
 					return this.style[index];
 
 				var style_now;
-				library_namespace.debug('start 遍歷 to ' + index, 2);
+				library_namespace.debug('start 遍歷 to ' + index, min_debug, 'SGR_style_at');
 				this.style.some(function(this_style, this_index) {
 					if (this_index > index)
 						return true;
 
-					library_namespace.debug('遍歷 to index ' + this_index, 3);
+					library_namespace.debug('遍歷 to index ' + this_index, min_debug + 1, 'SGR_style_at');
 					if (style_now) {
 						// TODO: reduce. 決定最短顯示法。
 						style_now.add(this_style);
@@ -558,12 +565,12 @@ if (typeof CeL === 'function')
 
 				if (style) {
 					library_namespace.debug('設定 style of "' + this.text + '"['
-							+ index + '] = [' + style + ']', 2);
+							+ index + '] = [' + style + ']', min_debug, 'SGR_style_at');
 					if (!this.style[index])
 						this.style[index] = style_now;
 					style_now.add(style = new SGR_style(style));
 
-					library_namespace.debug('設定 to_index', 2);
+					library_namespace.debug('設定 to_index', min_debug, 'SGR_style_at');
 					if (index < to_index) {
 						// TODO: 更有效率點。
 						while (index < to_index)
@@ -777,6 +784,7 @@ if (typeof CeL === 'function')
 			Object.seal(SGR_code.style_data);
 
 			Object.assign(SGR_code, {
+				min_debug_level : min_debug,
 				add_color_alias : add_color_alias,
 				/**
 				 * {String} Control Sequence Introducer, or Control Sequence

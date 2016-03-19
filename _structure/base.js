@@ -1798,7 +1798,7 @@ OS='UNIX'; // unknown
 	}
 
 	/** {Object}cache for CeL.interact.console.SGR */
-	var SGR;
+	var SGR, SGR_debug;
 
 	/**
 	 * 在已經存在 SGR 的功能下，以之格式化訊息。
@@ -1814,9 +1814,9 @@ OS='UNIX'; // unknown
 		// 注意: 在 call stack 中有 SGR 時會造成:
 		// RangeError: Maximum call stack size exceeded
 		// 因此不能用於測試 SGR 本身! 故須避免之。
-		// CeL.is_debug(3): assert: SGR 在這 level 以上才會呼叫 .debug()。
+		// CeL.is_debug(min_debug): assert: SGR 在這 level 以上才會呼叫 .debug()。
 		// TODO: 檢測 call stack。
-		return _.is_debug(3)
+		return _.is_debug(SGR_debug)
 		// 若 SGR.CSI 被改過，則即便顯示亦無法得到預期之結果，不如跳過。
 		|| SGR.CSI !== SGR.default_CSI ? SGR_to_plain(messages)
 		// 顯示具格式（如 color 顏色）的 messages。
@@ -1837,6 +1837,7 @@ OS='UNIX'; // unknown
 	function to_SGR(messages) {
 		if (_.SGR) {
 			SGR = _.SGR;
+			SGR_debug = SGR.min_debug_level;
 			return (_.to_SGR = new_SGR)(messages);
 		}
 		// 將 messages 去掉 style，轉成 plain text messages。

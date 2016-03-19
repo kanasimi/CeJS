@@ -19,6 +19,7 @@
 // 添加網頁報告。
 // 調用超過一個Template中參數的值，只有最後提供的值會被使用。
 // 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
+// 遍歷 pages
 
 'use strict';
 //'use asm';
@@ -1657,9 +1658,16 @@ wiki_API.prototype.next = function() {
 		// .show_value() @ interact.DOM, application.debug
 		&& library_namespace.show_value)
 		library_namespace.show_value(this.actions.slice());
-	var _this = this, next = this.actions.shift();
+	var _this = this, next = this.actions.shift(),
+	// 不改動 next。
+	type = next[0], list_type;
+	if (type in get_list.type) {
+		list_type = type;
+		type = 'list';
+	}
+
 	library_namespace.debug('處理 ' + (this.token.lgname ? this.token.lgname + ' ' : '') + '[' + next + ']', 2, 'wiki_API.prototype.next');
-	switch (next[0]) {
+	switch (type) {
 	case 'page':
 		// this.page(page data, callback) → 採用所輸入之 page data 作為 this.last_page。
 		if (get_page_content.is_page_data(next[1]) && get_page_content.has_content(next[1])) {
@@ -1690,14 +1698,10 @@ wiki_API.prototype.next = function() {
 			next[3]);
 		break;
 
-	case 'backlinks':
-	case 'embeddedin':
-	case 'imageusage':
-	case 'linkshere':
-	case 'fileusage':
+	case 'list':
 		// get_list(). e.g., 反向連結/連入頁面.
 		// next[1] : title
-		wiki_API[next[0]]([ this.API_URL, next[1] ], function(title, titles, pages) {
+		wiki_API[list_type]([ this.API_URL, next[1] ], function(title, titles, pages) {
 			// [ last_list ]
 			_this.last_titles = titles;
 			// [ page_data ]
@@ -1980,12 +1984,15 @@ wiki_API.prototype.continue_key = '後續索引';
  * @param {String}message
  *            message
  * @param {String}[title]
- *            message title
+ *            message title.
  */
 function add_message(message, title) {
-	this.push('* ' + ((title = get_page_title(title))
+	title = get_page_title(title);
 	// escape 具有特殊作用的 title。
-	? '[[' + (/^Category:/.test(title) ? ':' : '') + title + ']]: ' : '') + message);
+	// assert: 為規範過之 title，如採用 File: 而非 Image:, 檔案:。
+	if (title && /^(?:Category|File):/.test(title))
+		title = ':' + title;
+	this.push('* ' + (title ? '[[' + title + ']]: ' : '') + message);
 }
 
 function reset_messages() {
@@ -2990,10 +2997,8 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 			 */
 			if (data && ('batchcomplete' in data)) {
 				// assert: data.batchcomplete === ''
-				if (false)
-					library_namespace.info(
-					//
-					'wiki_API.langlinks: [' + title + ']: Done.');
+				library_namespace.debug(
+					'[' + title + ']: Done.', 1, 'wiki_API.langlinks');
 			} else {
 				library_namespace.warn(
 				//
@@ -3164,7 +3169,7 @@ function get_continue(title, callback) {
  *            one of get_namespace.hash
  */
 function get_list(type, title, callback, namespace) {
-	library_namespace.debug(type + '[[' + title + ']], callback: ' + callback,
+	library_namespace.debug(type + (title ? ' [[' + title + ']]' : '') + ', callback: ' + callback,
 			3);
 	var options,
 	// 前置字首
@@ -3250,15 +3255,15 @@ function get_list(type, title, callback, namespace) {
 	}
 
 	if (continue_from = options[continue_from]) {
-		library_namespace.debug('[[' + title[1] + ']]: start from '
+		library_namespace.debug(type + (title ? ' [[' + title + ']]' : '') + ': start from '
 				+ continue_from, 2, 'get_list');
 	}
 
-	title[1] = 'query&' + parameter + '=' + type + '&'
+	title[1] = 'query&' + parameter + '=' + type
 	//
-	+ (parameter === get_list.default_parameter ? prefix : '')
+	+ (title[1] ?  '&' + (parameter === get_list.default_parameter ? prefix : '')
 	//
-	+ wiki_API.query.title_param(title[1])
+	+ wiki_API.query.title_param(title[1]) : '')
 	// 數目限制。No more than 500 (5,000 for bots) allowed.
 	// Type: integer or max
 	// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
@@ -3372,15 +3377,20 @@ function get_list(type, title, callback, namespace) {
 }
 
 
-// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== 'list')
+// const: 基本上與程式碼設計合一，僅表示名義，不可更改。
 get_list.default_parameter = 'list';
 
+// https://www.mediawiki.org/wiki/API:Lists/All
 // [[Special:Whatlinkshere]]
 // 使用說明:連入頁面
 // https://zh.wikipedia.org/wiki/Help:%E9%93%BE%E5%85%A5%E9%A1%B5%E9%9D%A2
 get_list.type = {
 
-	// 'type name' : 'abbreviation 縮寫 / prefix' (parameter : 'list')
+	// 'type name' : 'abbreviation 縮寫 / prefix' (parameter : get_list.default_parameter)
+
+	// 按標題排序列出指定的名字空間的頁面 title。
+	// https://www.mediawiki.org/wiki/API:Allpages
+	allpages : 'ap',
 
 	// 取得連結到 [[title]] 的頁面。
 	// e.g., [[name]], [[:Template:name]].
@@ -3403,11 +3413,11 @@ get_list.type = {
 	// ** 可一次處理多個標題，但可能較耗資源、較慢。
 
 	// linkshere: 取得連結到 [[title]] 的頁面。
-	linkshere : ['lh', 'prop' ],
+	linkshere : [ 'lh', 'prop' ],
 
 	// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
 	// 基本上同 imageusage。
-	fileusage : ['fu', 'prop' ]
+	fileusage : [ 'fu', 'prop' ]
 };
 
 
@@ -4493,7 +4503,7 @@ function create_database(dbname, callback, language) {
 		}
 	}
 
-	console.log('Try to create database [' + dbname + ']');
+	library_namespace.log('create_database: Try to create database [' + dbname + ']');
 	if (false) {
 		// 用此方法會:
 		// [Error: ER_PARSE_ERROR: You have an error in your SQL syntax; check
@@ -4692,7 +4702,7 @@ SQL_session.prototype.databases = function(callback, all) {
 		// 預防 PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR
 		_this.connection.query(SQL, function(error, rows, fields) {
 			if (error || !Array.isArray(rows)) {
-				console.error(error);
+				library_namespace.err(error);
 				rows = null;
 			} else {
 				rows = rows.map(function(row) {
@@ -5126,7 +5136,7 @@ function read_dump(filename, callback, options) {
 		while (parse_page())
 			;
 		if (buffer.length > 1e8) {
-			console.err('buffer too long (' + buffer.length + ')! Paused!');
+			library_namespace.err('read_dump: buffer too long (' + buffer.length + ')! Paused!');
 			console.log(buffer.slice(0, 1e4));
 			file_stream.pause();
 			// throw buffer.slice(0,1e4);
@@ -5475,7 +5485,11 @@ wiki_API.cache = function(operation, callback, _this) {
 		 * 以下為處理單一項作業。
 		 */
 
-		var to_get_data;
+		var to_get_data, list_type;
+		if (type in get_list.type) {
+			list_type = type;
+			type = 'list';
+		}
 
 		switch (type) {
 		case 'page':
@@ -5512,23 +5526,21 @@ wiki_API.cache = function(operation, callback, _this) {
 				}, _this, operation));
 			};
 			break;
-		case 'backlinks':
-		case 'embeddedin':
-		case 'imageusage':
-		case 'linkshere':
-		case 'fileusage':
+
+		case 'list':
 			to_get_data = function(title, callback) {
 				wiki_API.list(title, function(pages) {
 					library_namespace.log('[[' + get_page_title(title) + ']]: '
 					//
-					+ pages.length + ' pages ' + type + '.');
+					+ pages.length + ' page(s) ' + list_type + '.');
 					// page list, title page_data
 					callback(pages);
 				}, Object.assign({
-					type : type
+					type : list_type
 				}, _this, operation));
 			};
 			break;
+
 		default:
 			if (typeof type === 'function')
 				to_get_data = type.bind(Object.assign(library_namespace
@@ -5542,6 +5554,9 @@ wiki_API.cache = function(operation, callback, _this) {
 				return;
 			}
 		}
+
+		// recover type
+		//if (list_type) type = list_type;
 
 		var title = list;
 		if (typeof title === 'string' && _this.title_prefix)
