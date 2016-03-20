@@ -2220,13 +2220,24 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	// assert: 因為要作排程，為預防衝突與不穩定的操作結果，自此以後不再 modify options。
 
-	var log_item = Object.assign(library_namespace.null_Object(),
-			wiki_API.prototype.work.log_item, config.log_item);
+	var done = 0,
+	//
+	log_item = Object.assign(library_namespace.null_Object(),
+			wiki_API.prototype.work.log_item, config.log_item),
+	/** {Boolean}console 不顯示訊息，也不處理 {Array}messages。 */
+	no_message = config.no_message, messages = [];
+	messages.add = no_message ? library_namespace.null_function : add_message;
+	messages.reset = no_message ? library_namespace.null_function
+			: reset_messages;
+	messages.reset();
 
 	callback = each[2];
+	// each 現在轉作為對每一頁面執行之工作。
+	each = each[0];
 	if (!callback) {
+		callback = no_message ? library_namespace.null_function
 		// default logger.
-		callback = function(title, error, result) {
+		: function(title, error, result) {
 			if (error)
 				if (error === 'nochange') {
 					done++;
@@ -2286,13 +2297,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			}
 		};
 	}
-	// each 現在轉作為對每一頁面執行之工作。
-	each = each[0];
 
-	var done = 0, messages = [];
-	messages.add = add_message;
-	messages.reset = reset_messages;
-	messages.reset();
 	if (Array.isArray(pages) && pages.slice(0, 10).every(function(item) {
 		return typeof item === 'string';
 	})) {
@@ -2386,11 +2391,12 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				// 編輯頁面內容。
 				.edit(function(page_data) {
 					// edit/process
-					library_namespace.sinfo([ 'wiki_API.work: edit '
-					//
-					+ (index + 1) + '/' + pages.length
-					//
-					+ ' [[', 'fg=yellow', page_data.title, '-fg', ']]' ]);
+					if (!no_message)
+						library_namespace.sinfo([ 'wiki_API.work: edit '
+						//
+						+ (index + 1) + '/' + pages.length
+						//
+						+ ' [[', 'fg=yellow', page_data.title, '-fg', ']]' ]);
 					// 以 each() 的回傳作為要改變成什麼內容。
 					return each(page_data, messages, work_options);
 				}, work_options, callback);
@@ -2425,7 +2431,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				// 對於量過大而被分割者，每次分段結束都將執行一次 .last()。
 				config.last.call(this, messages, titles, pages);
 
-			var log_to = 'log_to' in config ? config.log_to
+			var log_to = 'log_to' in config ? config.log_to : no_message ? null
 			// default log_to
 			: 'User:' + this.token.lgname + '/log/'
 					+ (new Date).format('%4Y%2m%2d'),
