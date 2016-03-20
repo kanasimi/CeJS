@@ -37,7 +37,7 @@ if (false) {
 				: loader.replace(/\//g, '\\')));
 				return true;
 			}
-		} catch(e) {
+		} catch (e) {
 		}
 	});
 	// ----------------------------------------------------------------------------
@@ -59,22 +59,28 @@ try {
 		global.require = require;
 
 	(function() {
+		// 若非 absolute path，則將之改為 absolute path，
+		// 否則 setup_library_base_path() 會抓不到。
+		if (!/^([A-Z]:)?[\\\/]/i.test(CeL.library_path))
+			// 這裡 __filename 是 loader 本身之 path。
+			CeL.library_path = __filename
+					.replace(/[^\\\/]+$/, CeL.library_path);
 
 		var script_code = [], fs = require('fs'),
 		// http://nodejs.org/api/fs.html#fs.readFileSync
-		main_lib_binary = fs
-				.readFileSync(/^[\\\/]/.test(CeL.library_path) ? CeL.library_path
-						: __filename.replace(/[^\\\/]+$/, CeL.library_path)
-				// The encoding can be 'utf8', 'ascii', or 'base64'.
-				// http://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
-				// , 'binary'
-				),
+		main_lib_binary = fs.readFileSync(CeL.library_path
+		// The encoding can be 'utf8', 'ascii', or 'base64'.
+		// http://nodejs.org/api/fs.html#fs_fs_createreadstream_path_options
+		// , 'binary'
+		),
 		// pass the first 2 bytes (BOM)
 		i = 2, l =
 		// 10
 		main_lib_binary.length;
 
-		// console.log(typeof main_lib_binary.length);
+		if (false)
+			console.log([ CeL.library_path, typeof main_lib_binary.length,
+					main_lib_binary.length ]);
 
 		// a simplified .get_file() for UTF-32.
 		for (; i < l;) {

@@ -3667,8 +3667,10 @@ if (typeof CeL === 'function')
 								.get_old_namespace())
 						&& (library_base_path = library_namespace
 								.get_old_namespace().library_path)) {
-					if (/^[^\/]/.test(library_base_path)) {
-						// library_base_path is relative path
+					// /path
+					// C:\path
+					if (!/^([A-Z]:)?[\\\/]/i.test(library_base_path)) {
+						// assert: library_base_path is relative path
 						// library_namespace.debug(library_namespace.get_script_full_name());
 						library_base_path = library_namespace
 								.simplify_path(library_namespace

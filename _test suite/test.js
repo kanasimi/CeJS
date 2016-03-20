@@ -2293,7 +2293,7 @@ function test_wiki() {
 	// Select page and get the content of page.
 	.page('Wikipedia:沙盒', function(page_data) {
 		CeL.info(CeL.wiki.title_of(page_data));
-		/** {String}page content */
+		/** {String}page content, maybe undefined. */
 		var content = CeL.wiki.content_of(page_data);
 		CeL.log(content === undefined ? 'page deleted!' : content);
 	})
@@ -2325,7 +2325,7 @@ function test_wiki() {
 	.edit(function(page_data) {
 		/** {String}page title */
 		var title = CeL.wiki.title_of(page_data),
-		/** {String}page content */
+		/** {String}page content, maybe undefined. */
 		content = CeL.wiki.content_of(page_data);
 		return 'text to replace';
 	}, {
@@ -2363,7 +2363,7 @@ function test_wiki() {
 	wiki.page('史記').edit(function(page_data) {
 		/** {String}page title */
 		var title = CeL.wiki.title_of(page_data),
-		/** {String}page content */
+		/** {String}page content, maybe undefined. */
 		content = CeL.wiki.content_of(page_data);
 		CeL.info(title);
 		CeL.log(content);
@@ -2371,7 +2371,7 @@ function test_wiki() {
 	//
 	wiki.work({
 		each : function(page_data) {
-			/** {String}page content */
+			/** {String}page content, maybe undefined. */
 			var content = CeL.wiki.content_of(page_data);
 		},
 		summary : '',
@@ -2411,7 +2411,7 @@ function test_wiki() {
 	CeL.wiki.Flow.page('Wikipedia_talk:Flow_tests', function(page_data) {
 		/** {String}page title */
 		var title = CeL.wiki.title_of(page_data),
-		/** {String}page content */
+		/** {String}page content, maybe undefined. */
 		content = CeL.wiki.content_of(page_data);
 		CeL.info(title);
 		CeL.log(content);
@@ -2422,7 +2422,7 @@ function test_wiki() {
 	CeL.wiki.page('Wikipedia_talk:Flow_tests', function(page_data) {
 		/** {String}page title */
 		var title = CeL.wiki.title_of(page_data),
-		/** {String}page content */
+		/** {String}page content, maybe undefined. */
 		content = CeL.wiki.content_of(page_data);
 		CeL.info(title);
 		CeL.log(content);

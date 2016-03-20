@@ -557,7 +557,8 @@ function for_each_token(type, processor, modify_this) {
 		// 因此放在這少一道 .parse() 工序。
 		this.parse();
 
-	function travel(_this) {
+	// 遍歷 tokens
+	function traversal_tokens(_this) {
 		_this.forEach(function(token, index) {
 			// console.log('token:');
 			// console.log(token);
@@ -585,12 +586,12 @@ function for_each_token(type, processor, modify_this) {
 			// 但這可能性已經在 parse_wikitext() 中偵測並去除。
 			// && type !== 'comment'
 			) {
-				travel(token);
+				traversal_tokens(token);
 			}
 		});
 	}
 
-	travel(this);
+	traversal_tokens(this);
 
 	return this;
 }
@@ -1513,7 +1514,7 @@ Object.assign(page_parser, {
  * @param {Object}page_data
  *            page data got from wiki API
  * 
- * @returns {String}title of page
+ * @returns {String|Undefined}title of page, maybe undefined.
  * 
  * @seealso wiki_API.query.title_param()
  */
@@ -1545,7 +1546,7 @@ function get_page_title(page_data) {
 			// e.g., "Wikipedia talk:Flow tests"
 			return title;
 
-		return null;
+		return undefined;
 	}
 
 	// e.g., (typeof page_data === 'string')
@@ -1567,7 +1568,7 @@ function get_page_title(page_data) {
  *            對 flow page，所欲取得之頁面內容項目。<br />
  *            default: 'header'
  * 
- * @returns {String} content of page
+ * @returns {String|Undefined}content of page, maybe undefined.
  */
 function get_page_content(page_data, flow_view) {
 	// for flow page: 因為 page_data 可能符合一般頁面標準，
@@ -2532,14 +2533,16 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				//
 				'wiki_API.work: 設定一次先取得所有 '
 				//
-				+ target.length + ' 個頁面之 revisions (page content)。', 2);
+				+ target.length + ' 個頁面之 revisions (page contents 頁面內容)。', 2);
 			} else {
+				nochange_count = target.length;
 				// start-end/all
 				done = '處理分塊 ' + (work_continue + 1) + '–'
-						+ (work_continue + max_size) + '/' + target.length;
+						+ (work_continue + max_size) + '/' + nochange_count;
 				// Add percentage.
-				if (target.length.length > 1e4)
-					done += ' (' + (work_continue / target.length | 0) + '%)';
+				if (nochange_count > 1e4)
+					done += ' (' + (100 * work_continue / nochange_count | 0)
+							+ '%)';
 				// done += '。';
 				nochange_count = 'wiki_API.work: ';
 				done = config.summary ? [ nochange_count, 'fg=green',
@@ -2561,7 +2564,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 
 	} else {
 		// assert: target is {String}title or {Object}page_data
-		library_namespace.debug('wiki_API.work: 取得單一頁面之 (page content)。', 2);
+		library_namespace.debug('wiki_API.work: 取得單一頁面之 (page contents 頁面內容)。', 2);
 		this.page(target, main_work, {
 			multi : true
 		});
@@ -3497,7 +3500,7 @@ get_list.type = {
 	// get_list.default_parameter)
 
 	// 按標題排序列出指定的名字空間的頁面 title。
-	// 可用來遍歷 pages。
+	// 可用來遍歷 traversal pages。
 	// https://www.mediawiki.org/wiki/API:Allpages
 	// 警告: 不在 Tool Labs 執行 allpages 速度太慢。但若在 Tool Labs，當改用 database。
 	allpages : 'ap',
@@ -5645,7 +5648,7 @@ wiki_API.cache = function(operation, callback, _this) {
 
 		switch (type) {
 		case 'page':
-			// get page content 內容
+			// get page contents 頁面內容。
 			to_get_data = function(title, callback) {
 				library_namespace.log('wiki_API.cache: Get content of [['
 						+ get_page_title(title) + ']].');
@@ -5744,6 +5747,36 @@ wiki_API.cache.title_only = function(operation) {
 	return operation.type + '/' + remove_namespace(list);
 };
 
+
+// --------------------------------------------------------------------------------------------- //
+
+// 應用功能: 遍歷 pages
+// callback(page_data, messages)
+// config.last(messages, titles, pages)
+function traversal_pages(config, callback) {
+	var title_list;
+	wiki_API.cache({
+		file_name : 'all title list',
+		type : 'allpages',
+		operator : function(list) {
+			// library_namespace.log('All ' + list.length + ' pages.');
+			title_list = list;
+		}
+	}, function() {
+		wiki.work({
+			no_message : true,
+			no_edit : 'no_edit' in config?config.no_edit:true,
+			each : callback,
+			after : config.last
+		}, title_list);
+	}, {
+		// cache path prefix
+		prefix : base_directory
+	});
+}
+
+//TODO
+//wiki_API.traversal = traversal_pages;
 
 // --------------------------------------------------------------------------------------------- //
 // Flow page support. Flow 功能支援。

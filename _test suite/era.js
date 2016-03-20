@@ -415,7 +415,8 @@ function show_calendar(era_name) {
 			main_date_value = main_date_value.getTime();
 		}
 
-	function add_traveler(name, is_next) {
+	// 遍歷
+	function add_traversal(name, is_next) {
 		if (name)
 			output.push({
 				tr : {
@@ -441,14 +442,14 @@ function show_calendar(era_name) {
 
 	// 添加前一紀年之日期捷徑。
 	if (dates.previous)
-		add_traveler(dates.previous);
+		add_traversal(dates.previous);
 	// 添加同一朝代共存紀年之日期捷徑。
 	if (main_date.共存紀年 && (i = main_date.朝代)) {
 		if (Array.isArray(i))
 			i = i[0];
 		main_date.共存紀年.forEach(function(era_name) {
 			if (era_name.startsWith(i))
-				add_traveler(era_name, {
+				add_traversal(era_name, {
 					span : '↔',
 					R : 'contemporary'
 				});
@@ -583,7 +584,7 @@ function show_calendar(era_name) {
 		var 未延續前紀年 = (後紀年名 !== date.紀年名);
 		if (date.前紀年 !== 前紀年名) {
 			if (未延續前紀年)
-				add_traveler(date.前紀年);
+				add_traversal(date.前紀年);
 			前紀年名 = date.前紀年;
 		}
 
@@ -603,17 +604,17 @@ function show_calendar(era_name) {
 
 		if (date.後紀年 !== 後紀年名) {
 			if (未延續前紀年)
-				add_traveler(後紀年名, true);
+				add_traversal(後紀年名, true);
 			後紀年名 = date.後紀年;
 		}
 	});
 
 	if (後紀年名)
-		add_traveler(後紀年名, true);
+		add_traversal(後紀年名, true);
 
 	// 添加後一紀年之日期捷徑。
 	if (dates.next)
-		add_traveler(dates.next, true);
+		add_traversal(dates.next, true);
 
 	era_caption = era_caption ? [ {
 		a : era_caption,

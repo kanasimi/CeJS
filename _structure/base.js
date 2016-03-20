@@ -293,6 +293,7 @@ function (global) {
 		// &&!!document.createElement
 		// type: Object @ IE5.5
 		&& document.getElementsByTagName,
+	// is Microsoft Windows Script Host (WSH)
 	script_host = !is_WWW && typeof WScript === 'object';
 
 	_// JSDT:_module_
@@ -632,24 +633,34 @@ function (global) {
 	};
 
 
+	// cache
+	var script_full_path = is_WWW && unescape(window.location.pathname)
+	// 在 .hta 中取代 WScript.ScriptFullName。
+	|| script_host && WScript.ScriptFullName
+	// for newer node.js. 須放置於 ((__filename)) 判斷前!
+	// 以 require('/path/to/node.loader.js') 之方法 include library 時，
+	// ((__filename)) 會得到 loader 之 path，
+	// 且不能從 global.__filename 獲得 script path，只好另尋出路。
+	|| typeof process === 'object' && process.mainModule && process.mainModule.filename
+	// for old node.js
+	// @see __dirname
+	|| typeof __filename === 'string' && __filename
+	// for jslibs
+	|| _.is_Object(old_namespace) && old_namespace.loader_script
+	// Unknown environment
+	|| '';
+	// console.trace(script_full_path);
+
 	_// JSDT:_module_
 	.
 	/**
-	 * 取得執行 script 之 path, 在 .hta 中取代 WScript.ScriptFullName。
+	 * 取得執行 script 之 path。
 	 * 
-	 * @returns {String} 執行 script 之 path。
+	 * @returns {String}執行 script 之 path。
 	 * @returns '' Unknown environment
 	 */
 	get_script_full_name = function () {
-		return is_WWW && unescape(window.location.pathname)
-			//
-			|| script_host && WScript.ScriptFullName
-			// for node.js
-			|| typeof __filename === 'string' && __filename
-			// for jslibs
-			|| _.is_Object(old_namespace) && old_namespace.loader_script
-			// Unknown environment
-			|| '';
+		return script_full_path;
 	};
 
 	_// JSDT:_module_
