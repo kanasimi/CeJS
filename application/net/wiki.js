@@ -5755,12 +5755,15 @@ wiki_API.cache.title_only = function(operation) {
 // --------------------------------------------------------------------------------------------- //
 
 // https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
-var all_title_SQL = 'SELECT `page_title` AS t FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0 LIMIT 8';
+// LIMIT 8
+var all_title_SQL = 'SELECT `page_title` AS t FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
 
 /**
  * 應用功能: 遍歷 pages。
  * 
- * @param {Object}config
+ * TODO: 讀取 dump
+ * 
+ * @param {Object}[config]
  *            configuration
  * @param {Function}callback
  *            回調函數。 callback(page_data, messages)
@@ -5772,11 +5775,44 @@ function traversal_pages(config, callback) {
 	else
 		config = library_namespace.new_options(config);
 
-	var title_list,
-	// all title list
-	file_path = config.file_name || 'all_title.json';
+	if (wmflabs && !config.no_database && !config.list) {
+		library_namespace.info('嘗試讀取 Tool Labs 之 database 資料...');
+		run_SQL(all_title_SQL, function(error, rows, fields) {
+			if (error) {
+				library_namespace.err(error);
+				config.no_database = error;
+			} else {
+				library_namespace.log('All ' + rows.length + ' pages. 轉換中...');
+				config.list = rows.map(function(row) {
+					for ( var title in row)
+						return row[title].toString('utf8');
+				});
+			}
+			library_namespace.log('開始遍歷 pages...');
+			traversal_pages(config, callback);
+		});
+		return;
+	}
 
-	function for_page() {
+	var title_list,
+	//
+	cache_config = {
+		// all title list
+		file_name : config.file_name || 'all_title',
+		operator : function(list) {
+			title_list = list;
+		}
+	};
+
+	if (Array.isArray(config.list)) {
+		cache_config.list = config.list;
+	} else {
+		cache_config.type = 'allpages';
+	}
+
+	wiki_API.cache(cache_config, function for_page() {
+		var wiki = config.wiki
+				|| new wiki_API(config.user, config.password, config.language);
 		wiki.work({
 			no_message : true,
 			no_edit : 'no_edit' in config ? config.no_edit : true,
@@ -5784,35 +5820,10 @@ function traversal_pages(config, callback) {
 			// config.last(messages, titles, pages)
 			after : config.last
 		}, title_list);
-	}
-
-	if (wmflabs && !config.no_database) {
-		// 在 Tool Labs，改用 database。
-		run_SQL(all_title_SQL, function(error, rows, fields) {
-			if (error) {
-				config.no_database = true;
-				traversal_pages(config, callback);
-			} else {
-				title_list = rows.map(function(row) {
-					for ( var title in row)
-						return row[title].toString('utf8');
-				});
-				for_page();
-			}
-		});
-	} else {
-		wiki_API.cache({
-			file_name : config.file_name || 'all_title.json',
-			type : 'allpages',
-			operator : function(list) {
-				// library_namespace.log('All ' + list.length + ' pages.');
-				title_list = list;
-			}
-		}, for_page, {
-			// cache path prefix
-			prefix : config.directory
-		});
-	}
+	}, {
+		// cache path prefix
+		prefix : config.directory
+	});
 }
 
 wiki_API.traversal = traversal_pages;
