@@ -10,7 +10,7 @@
  */
 
 // TODO:
-// 遇到 Invalid token 之類問題，中途跳出 about 時，無法紀錄。應將紀錄顯示於 console 或 local file。
+// 遇到 Invalid token 之類問題，中途跳出 abort 時，無法紀錄。應將紀錄顯示於 console 或 local file。
 // [[WP:維基化]]
 // https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 // https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
@@ -2773,9 +2773,12 @@ wiki_API.query.last = library_namespace.null_Object();
  *            page data got from wiki API
  * @param {Boolean}[multi]
  *            page_data is {Array}multi-page_data
+ * @param {Boolean}[is_id]
+ *            page_data is page_id instead of page_data
  */
-wiki_API.query.title_param = function(page_data, multi) {
+wiki_API.query.title_param = function(page_data, multi, is_id) {
 	var pageid;
+
 	if (Array.isArray(page_data)) {
 		pageid = [];
 		// 確認所有 page_data 皆有 pageid 屬性。
@@ -2789,15 +2792,20 @@ wiki_API.query.title_param = function(page_data, multi) {
 			if (multi === undefined)
 				multi = pageid.length > 1;
 			pageid = pageid.join('|');
+
 		} else {
 			if (library_namespace.is_Object(page_data)) {
-				library_namespace.warn('wiki_API.query.title_param: 看似有些非正規之頁面資料。');
-				library_namespace.info('wiki_API.query.title_param: 將採用 title 為主要查詢方法。');
+				library_namespace
+						.warn('wiki_API.query.title_param: 看似有些非正規之頁面資料。');
+				library_namespace
+						.info('wiki_API.query.title_param: 將採用 title 為主要查詢方法。');
 			}
+			// reset
 			pageid = [];
 			page_data.forEach(function(page) {
 				// {String}title or {title:'title'}
-				pageid.push((typeof page === 'object' ? page.title : page) || '');
+				pageid.push((typeof page === 'object' ? page.title : page)
+						|| '');
 			});
 			// auto detect
 			if (multi === undefined)
@@ -2807,26 +2815,30 @@ wiki_API.query.title_param = function(page_data, multi) {
 			pageid = undefined;
 		}
 
-	} else if (library_namespace.is_Object(page_data))
+	} else if (library_namespace.is_Object(page_data)) {
 		if (page_data.pageid)
 			// 有 pageid 則使用之，以加速 search。
 			pageid = page_data.pageid;
 		else
 			page_data = page_data.title;
-	else if (typeof page_data === 'number'
+
+	} else if (is_id !== false && typeof page_data === 'number'
 	// {ℕ⁰:Natural+0}pageid should > 0.
 	// pageid 0 回傳格式不同於 > 0。
 	// https://www.mediawiki.org/w/api.php?action=query&prop=revisions&pageids=0
-	&& page_data > 0 && page_data === page_data | 0)
+	&& page_data > 0 && page_data === page_data | 0) {
 		pageid = page_data;
-	else if (!page_data) {
-		library_namespace.err('wiki_API.query.title_param: Invalid title: [' + page_data + ']');
-		//console.warn(page_data);
+
+	} else if (!page_data) {
+		library_namespace.err('wiki_API.query.title_param: Invalid title: ['
+				+ page_data + ']');
+		// console.warn(page_data);
 	}
 
 	multi = multi ? 's=' : '=';
 
-	return pageid === undefined ? 'title' + multi + encodeURIComponent(page_data)
+	return pageid === undefined ? 'title' + multi
+			+ encodeURIComponent(page_data)
 	//
 	: 'pageid' + multi + pageid;
 };
@@ -2862,7 +2874,8 @@ function normalize_title_parameter(title, options) {
 	// 為了預防輸入的是問題頁面。
 	|| title.length !== 2 || typeof title[0] === 'object')
 		title = [ , title ];
-	title[1] = wiki_API.query.title_param(title[1], true);
+	title[1] = wiki_API.query.title_param(title[1], true, options
+			&& options.is_id);
 
 	if (options && options.redirects)
 		title[1] += '&redirects=1';
@@ -2901,7 +2914,8 @@ wiki_API.page = function(title, callback, options) {
 	// 為了預防輸入的是問題頁面。
 	|| title.length !== 2 || typeof title[0] === 'object')
 		title = [ , title ];
-	title[1] = wiki_API.query.title_param(title[1], true);
+	title[1] = wiki_API.query.title_param(title[1], true, options
+			&& options.is_id);
 
 	// 處理 limit。單一頁面才能取得多 revisions。多頁面(<=50)只能取得單一 revision。
 	// https://www.mediawiki.org/w/api.php?action=help&modules=query
@@ -3057,11 +3071,12 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 	if (Array.isArray(title) && title.length === 2
 			&& (!title[0] || typeof title[0] === 'string'))
 		from_lang = title[0], title = title[1];
-	title = 'query&prop=langlinks&' + wiki_API.query.title_param(title, true);
+	title = 'query&prop=langlinks&'
+			+ wiki_API.query.title_param(title, true, options && options.is_id);
 	if (to_lang)
 		title += (to_lang > 0 || to_lang === 'max' ? '&lllimit=' : '&lllang=')
 				+ to_lang;
-	if (options.limit > 0 || options.limit === 'max')
+	if (options && (options.limit > 0 || options.limit === 'max'))
 		title += '&lllimit=' + options.limit;
 	// console.log('ll title:' + title);
 	if (from_lang)
@@ -3082,13 +3097,16 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 			if (data && ('batchcomplete' in data)) {
 				// assert: data.batchcomplete === ''
 				library_namespace.debug(
-					'[' + title + ']: Done.', 1, 'wiki_API.langlinks');
+				//
+				'[' + title + ']: Done.', 1, 'wiki_API.langlinks');
 			} else {
 				library_namespace.warn(
 				//
 				'wiki_API.langlinks: Unknown response: ['
 				//
-				+ (typeof data === 'object' && typeof JSON !== 'undefined' ? JSON.stringify(data) : data) + ']');
+				+ (typeof data === 'object' && typeof JSON !== 'undefined'
+				//
+				? JSON.stringify(data) : data) + ']');
 				// console.log(data);
 			}
 			// console.warn(data);
@@ -3120,9 +3138,9 @@ wiki_API.langlinks = function(title, callback, to_lang, options) {
 				//
 				+ ('pageid' in pages[0] ? '無' + (to_lang && isNaN(to_lang)
 				//
-				? '所欲求語言[' + to_lang + ']之' : '其他語言') + '連結' : '不存在此頁面')
+				? '所欲求語言[' + to_lang + ']之' : '其他語言')
 				//
-				+ ': [' + pages[0].title + ']');
+				+ '連結' : '不存在此頁面') + ': [' + pages[0].title + ']');
 				// library_namespace.show_value(pages);
 			}
 			pages = pages[0].langlinks;
@@ -3725,7 +3743,7 @@ wiki_API.login = function(name, password, options) {
 				session.token.lgtoken = data.login.token;
 				wiki_API.query([ session.API_URL, 'login' ], _done, session.token);
 			} else {
-				library_namespace.err('wiki_API.login: 無法 login! About! Response:');
+				library_namespace.err('wiki_API.login: 無法 login! Abort! Response:');
 				library_namespace.err(data);
 			}
 		}, session.token);
@@ -4276,7 +4294,7 @@ wiki_API.redirects = function(title, callback, options) {
 		title = [ , title ];
 	title[1] = 'query&prop=redirects&rdlimit=max&'
 	//
-	+ wiki_API.query.title_param(title[1], true);
+	+ wiki_API.query.title_param(title[1], true, options && options.is_id);
 	if (!title[0])
 		title = title[1];
 
@@ -4288,21 +4306,30 @@ wiki_API.redirects = function(title, callback, options) {
 		var error = data && data.error;
 		// 檢查伺服器回應是否有錯誤資訊。
 		if (error) {
-			library_namespace.err('wiki_API.redirects: [' + error.code + '] ' + error.info);
-			// e.g., Too many values supplied for parameter 'pageids': the limit is 50
-			if (data.warnings && data.warnings.query && data.warnings.query['*'])
+			library_namespace.err(
+			//
+			'wiki_API.redirects: [' + error.code + '] ' + error.info);
+			// e.g., Too many values supplied for parameter 'pageids':
+			// the limit is 50
+			if (data.warnings && data.warnings.query
+			//
+			&& data.warnings.query['*'])
 				library_namespace.warn(data.warnings.query['*']);
 			callback();
 			return;
 		}
 
 		if (!data || !data.query || !data.query.pages) {
-			library_namespace.warn('wiki_API.redirects: Unknown response: ['
+			library_namespace.warn(
 			//
-			+ (typeof data === 'object' && typeof JSON !== 'undefined' ? JSON.stringify(data) : data) + ']');
+			'wiki_API.redirects: Unknown response: ['
+			//
+			+ (typeof data === 'object' && typeof JSON !== 'undefined'
+			//
+			? JSON.stringify(data) : data) + ']');
 			if (library_namespace.is_debug()
-				// .show_value() @ interact.DOM, application.debug
-				&& library_namespace.show_value)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
 				library_namespace.show_value(data);
 			callback();
 			return;
@@ -4316,7 +4343,9 @@ wiki_API.redirects = function(title, callback, options) {
 			// 僅處理第一頁。
 			if ('missing' in page)
 				// 頁面不存在。Page does not exist. Deleted?
-				library_namespace.warn('wiki_API.redirects: Not exists: [' + page.title + ']');
+				library_namespace.warn(
+				//
+				'wiki_API.redirects: Not exists: [' + page.title + ']');
 			break;
 		}
 
@@ -4325,8 +4354,11 @@ wiki_API.redirects = function(title, callback, options) {
 		// page 之 structure 將按照 wiki API 本身之 return！
 		// page = {pageid,ns,title,redirects:[{},{}]}
 		var redirects = pages.redirects || [];
-		library_namespace.debug(get_page_title(pages)
-				+ ': 有 ' + redirects.length + ' 個同名頁面(重定向至此頁面).', 2, 'wiki_API.redirects');
+		library_namespace.debug(
+		//
+		get_page_title(pages) + ': 有 ' + redirects.length
+		//
+		+ ' 個同名頁面(重定向至此頁面).', 2, 'wiki_API.redirects');
 		if (options.include_root) {
 			redirects = redirects.slice();
 			redirects.unshift(pages);
@@ -5424,6 +5456,10 @@ wiki_API.cache = function(operation, callback, _this) {
 		// 基本上，設定 this.* 應該在 operation.operator() 中，而不是在 operation.list() 中。
 		if (typeof list === 'function')
 			list = list.call(_this, operation);
+		if (list === wiki_API.cache.abort) {
+			library_namespace.debug('Abort operation.', 1, 'wiki_API.cache');
+			return;
+		}
 
 		// 自行設定之檔名 operation.file_name 優先度較 type/title 高。
 		// 需要自行創建目錄！
@@ -5493,7 +5529,7 @@ wiki_API.cache = function(operation, callback, _this) {
 			library_namespace.debug('Cached data: [' + data.slice(0, 200)
 					+ ']...', 5, 'wiki_API.cache');
 			finish_work(use_JSON ? data ? JSON.parse(data)
-			// error? 注意: 若中途 about，此時可能需要手動刪除大小為 0 的 cache file！
+			// error? 注意: 若中途 abort，此時可能需要手動刪除大小為 0 的 cache file！
 			: undefined : data);
 			return;
 		}
@@ -5737,6 +5773,12 @@ wiki_API.cache.prefix = '';
 /** {String}檔名預設後綴。 */
 wiki_API.cache.postfix = '.json';
 /**
+ * 若 operation.list() return wiki_API.cache.abort，<br />
+ * 則將直接中斷離開 operation，不執行 callback。<br />
+ * 此時須由 operation.list() 自行處理 callback。
+ */
+wiki_API.cache.abort = library_namespace.null_Object();
+/**
  * 只取檔名，僅用在 operation.each_file_name。<br />
  * <code>{
  * each_file_name : CeL.wiki.cache.title_only,
@@ -5755,13 +5797,16 @@ wiki_API.cache.title_only = function(operation) {
 // --------------------------------------------------------------------------------------------- //
 
 // https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
-// LIMIT 8
-var all_title_SQL = 'SELECT `page_title` AS t FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
+// `page_title`
+var all_title_SQL = 'SELECT `page_id` AS i FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
+if (false)
+	all_title_SQL += ' LIMIT 8';
 
 /**
  * 應用功能: 遍歷 pages。
  * 
- * TODO: 讀取 dump
+ * TODO: 若 revision 相同，讀取 dump 而不從 API。<br />
+ * TODO: 採用 page_id 而非 page_title 來 query。
  * 
  * @param {Object}[config]
  *            configuration
@@ -5775,37 +5820,44 @@ function traversal_pages(config, callback) {
 	else
 		config = library_namespace.new_options(config);
 
-	if (wmflabs && !config.no_database && !config.list) {
-		library_namespace.info('嘗試讀取 Tool Labs 之 database 資料...');
-		run_SQL(all_title_SQL, function(error, rows, fields) {
-			if (error) {
-				library_namespace.err(error);
-				config.no_database = error;
-			} else {
-				library_namespace.log('All ' + rows.length + ' pages. 轉換中...');
-				config.list = rows.map(function(row) {
-					for ( var title in row)
-						return row[title].toString('utf8');
-				});
-			}
-			library_namespace.log('開始遍歷 pages...');
-			traversal_pages(config, callback);
-		});
-		return;
-	}
-
 	var title_list,
 	//
 	cache_config = {
-		// all title list
-		file_name : config.file_name || 'all_title',
+		// all title/id list
+		file_name : config.file_name || 'all_pages',
 		operator : function(list) {
 			title_list = list;
-		}
+		},
+		after : config.after
 	};
 
 	if (Array.isArray(config.list)) {
 		cache_config.list = config.list;
+
+	} else if (wmflabs && !config.no_database) {
+		// 若沒有 cache，則嘗試讀取 database 之資料。
+		cache_config.list = function() {
+			library_namespace
+					.info('traversal_pages: 嘗試讀取 Tool Labs 之 database 資料...');
+			run_SQL(all_title_SQL, function(error, rows, fields) {
+				if (error) {
+					library_namespace.err(error);
+					config.no_database = error;
+				} else {
+					library_namespace.log('traversal_pages: All ' + rows.length
+							+ ' pages. 轉換中...');
+					config.list = rows.map(function(row) {
+						for ( var id in row)
+							return row[id].toString('utf8');
+					});
+					config.is_id = true;
+				}
+				library_namespace.log('traversal_pages: 開始遍歷 pages...');
+				traversal_pages(config, callback);
+			});
+			return wiki_API.cache.abort;
+		};
+
 	} else {
 		cache_config.type = 'allpages';
 	}
@@ -5845,8 +5897,9 @@ wiki_API.traversal = traversal_pages;
  * get the infomation of Flow.
  * 
  * @param {String|Array}title
- *            page title 頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [
- *            {String}API_URL, {String}title or {Object}page_data ]
+ *            page title 頁面標題。可為話題id/頁面標題+話題標題。<br />
+ *            {String}title or [ {String}API_URL, {String}title or
+ *            {Object}page_data ]
  * @param {Function}callback
  *            回調函數。 callback({Object}page_data)
  * @param {Object}[options]
@@ -5858,7 +5911,8 @@ function Flow_info(title, callback, options) {
 	// 為了預防輸入的是問題頁面。
 	|| title.length !== 2 || typeof title[0] === 'object')
 		title = [ , title ];
-	title[1] = wiki_API.query.title_param(title[1], true);
+	title[1] = wiki_API.query.title_param(title[1], true, options
+			&& options.is_id);
 
 	if (options && options.redirects)
 		title[1] += '&redirects=1';

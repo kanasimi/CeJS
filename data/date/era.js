@@ -5925,7 +5925,7 @@ if (typeof CeL === 'function')
 			 *            {Boolean}.era_only: 僅回傳所解析出之共存紀年 list: {Array}。<br />
 			 *            {Boolean}.parse_only: 僅回傳所解析出之紀年資訊: [ 紀年_list, 紀年, 年,
 			 *            月, 日 ]<br />
-			 *            {Boolean}.is_era: 找不到可用之紀年時，直接 about 跳出，回傳 undefined。<br />
+			 *            {Boolean}.is_era: 找不到可用之紀年時，直接 abort 跳出，回傳 undefined。<br />
 			 * 
 			 * @returns {Date} 解析出之日期
 			 */

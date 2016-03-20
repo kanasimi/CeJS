@@ -393,7 +393,7 @@ arguments f:{
 	header:{contentType:'text/xml'},
 	contentType:'text/xml',
 	run:true/false,	//	do eval
-	update:DOMDocument,	//	use onLoad/onFailed to 加工 return text. onFailed(){throw;} will about change.
+	update:DOMDocument,	//	use onLoad/onFailed to 加工 return text. onFailed(){throw;} will abort change.
 	interval:\d,
 	decay:\d,	//	wait decay*interval when no change
 	maxInterval::\d,
