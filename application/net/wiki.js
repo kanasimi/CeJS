@@ -4395,6 +4395,10 @@ function set_default_language(language) {
 	wiki_API.API_URL = api_URL((library_namespace.is_WWW()
 			&& (navigator.userLanguage || navigator.language) || default_language)
 			.toLowerCase().replace(/-.+$/, ''));
+
+	if (SQL_config)
+		SQL_config.set_language(default_language);
+
 	return default_language;
 }
 
@@ -4440,7 +4444,7 @@ user_name,
 wmflabs,
 /** mysql handler */
 mysql,
-/** {Object}SQL configurations */
+/** {Object}default SQL configurations */
 SQL_config;
 
 
@@ -5750,33 +5754,68 @@ wiki_API.cache.title_only = function(operation) {
 
 // --------------------------------------------------------------------------------------------- //
 
-// 應用功能: 遍歷 pages
-// callback(page_data, messages)
-// config.last(messages, titles, pages)
+// https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
+var all_title_SQL = 'SELECT `page_title` AS t FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0 LIMIT 8';
+
+/**
+ * 應用功能: 遍歷 pages。
+ * 
+ * @param {Object}config
+ *            configuration
+ * @param {Function}callback
+ *            回調函數。 callback(page_data, messages)
+ */
 function traversal_pages(config, callback) {
-	var title_list;
-	wiki_API.cache({
-		file_name : 'all title list',
-		type : 'allpages',
-		operator : function(list) {
-			// library_namespace.log('All ' + list.length + ' pages.');
-			title_list = list;
-		}
-	}, function() {
+	if (typeof config === 'function' && callback === undefined)
+		// shift arguments.
+		callback = config, config = library_namespace.null_Object();
+	else
+		config = library_namespace.new_options(config);
+
+	var title_list,
+	// all title list
+	file_path = config.file_name || 'all_title.json';
+
+	function for_page() {
 		wiki.work({
 			no_message : true,
-			no_edit : 'no_edit' in config?config.no_edit:true,
+			no_edit : 'no_edit' in config ? config.no_edit : true,
 			each : callback,
+			// config.last(messages, titles, pages)
 			after : config.last
 		}, title_list);
-	}, {
-		// cache path prefix
-		prefix : base_directory
-	});
+	}
+
+	if (wmflabs && !config.no_database) {
+		// 在 Tool Labs，改用 database。
+		run_SQL(all_title_SQL, function(error, rows, fields) {
+			if (error) {
+				config.no_database = true;
+				traversal_pages(config, callback);
+			} else {
+				title_list = rows.map(function(row) {
+					for ( var title in row)
+						return row[title].toString('utf8');
+				});
+				for_page();
+			}
+		});
+	} else {
+		wiki_API.cache({
+			file_name : config.file_name || 'all_title.json',
+			type : 'allpages',
+			operator : function(list) {
+				// library_namespace.log('All ' + list.length + ' pages.');
+				title_list = list;
+			}
+		}, for_page, {
+			// cache path prefix
+			prefix : config.directory
+		});
+	}
 }
 
-//TODO
-//wiki_API.traversal = traversal_pages;
+wiki_API.traversal = traversal_pages;
 
 // --------------------------------------------------------------------------------------------- //
 // Flow page support. Flow 功能支援。

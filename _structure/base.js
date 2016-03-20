@@ -500,7 +500,9 @@ function (global) {
 		// or use Object.clone(options)
 		return options ? Object.assign(null_Object(), options) : null_Object();
 	}
+	// 不會更動 options 的用此。
 	_.setup_options = setup_options;
+	// 會更動 options 的用此。
 	_.new_options = new_options;
 
 
