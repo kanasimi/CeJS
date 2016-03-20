@@ -2541,9 +2541,10 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				if (target.length.length > 1e4)
 					done += ' (' + (work_continue / target.length | 0) + '%)';
 				// done += '。';
-				done = config.summary ? [ 'fg=green', config.summary, '-fg',
-						': ' + done ] : [ done ];
-				done.unshift('wiki_API.work: ');
+				nochange_count = 'wiki_API.work: ';
+				done = config.summary ? [ nochange_count, 'fg=green',
+						config.summary, '-fg', ': ' + done ] : [ nochange_count
+						+ done ];
 				library_namespace.sinfo(done);
 			}
 
