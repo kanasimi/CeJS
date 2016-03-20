@@ -292,9 +292,7 @@ function (global) {
 		&& document.createElement
 		// &&!!document.createElement
 		// type: Object @ IE5.5
-		&& document.getElementsByTagName,
-	// is Microsoft Windows Script Host (WSH)
-	script_host = !is_WWW && typeof WScript === 'object';
+		&& document.getElementsByTagName;
 
 	_// JSDT:_module_
 	.
@@ -635,73 +633,7 @@ function (global) {
 	};
 
 
-	// cache
-	var script_full_path = is_WWW && unescape(window.location.pathname)
-	// 在 .hta 中取代 WScript.ScriptFullName。
-	|| script_host && WScript.ScriptFullName
-	// for newer node.js. 須放置於 ((__filename)) 判斷前!
-	// 以 require('/path/to/node.loader.js') 之方法 include library 時，
-	// ((__filename)) 會得到 loader 之 path，
-	// 且不能從 global.__filename 獲得 script path，只好另尋出路。
-	|| typeof process === 'object' && process.mainModule && process.mainModule.filename
-	// for old node.js
-	// @see __dirname
-	|| typeof __filename === 'string' && __filename
-	// for jslibs
-	|| _.is_Object(old_namespace) && old_namespace.loader_script
-	// Unknown environment
-	|| '';
-	// console.trace(script_full_path);
-
-	_// JSDT:_module_
-	.
-	/**
-	 * 取得執行 script 之 path。
-	 * 
-	 * @returns {String}執行 script 之 path。
-	 * @returns '' Unknown environment
-	 */
-	get_script_full_name = function () {
-		return script_full_path;
-	};
-
-	_// JSDT:_module_
-	.
-	/**
-	 * 取得執行 script 之名稱(不包括 .js 等 extension).
-	 * 
-	 * @returns {String} 執行 script 之 名稱。
-	 * @returns '' unknown environment
-	 */
-	get_script_name = function (get_file_name) {
-		var full_path = _.get_script_full_name(), m = full_path.match(/[^\\\/]*$/);
-		return get_file_name ? m[0] : m[0].replace(/\.[^.]*$/, '');
-	};
-
-	if (false)
-		_// JSDT:_module_
-		.
-		deprecated_get_script_name = function () {
-			// deprecated
-			var n, i, j;
-
-			if (script_host) {
-				n = WScript.ScriptName;
-				i = n.lastIndexOf('.');
-				return i == -1 ? n : n.slice(0, i);
-			}
-
-			if (is_WWW) {
-				n = unescape(window.location.pathname), j = n.lastIndexOf('.');
-				if (!(i = n.lastIndexOf('\\') + 1))
-					// location.pathname 在 .hta 中會回傳 '\' 形式的 path
-					i = n.lastIndexOf('/') + 1;
-				// return window.document.title;
-				return i < j ? n.slice(i, j) : n.slice(i);
-			}
-		};
-
-
+	// ------------------------------------------------------------------------
 
 	_// JSDT:_module_
 	.
@@ -958,20 +890,8 @@ function (global) {
 	} : _.type_tester('Date');
 
 
-	// for JScript: 在 IE8, IE9 中，get_object_type(WScript) 為 '[object Object]' !!
-	if (script_host = script_host && (!_.is_Object(WScript) || String(WScript) == 'Windows Script Host') && WScript.FullName)
-		_// JSDT:_module_
-		.
-		/**
-		 * the fully qualified path of the host executable.<br />
-		 * 'cscript' || 'wscript'
-		 * 
-		 * @see http://msdn.microsoft.com/en-us/library/z00t383b(v=vs.84).aspx
-		 * @_memberOf _module_
-		 */
-		script_host = script_host = script_host.replace(/^(.+)\\/, '').toLowerCase().replace(/\.exe$/, '');
-
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
 
 	/**
 	 * 檢測 Web browser / engine 相容性，runtime environment 執行環境。
@@ -1076,6 +996,93 @@ function (global) {
 		})();
 
 	_.platform = platform;
+
+
+	// ------------------------------------------------------------------------
+
+	var
+	// is Microsoft Windows Script Host (WSH)
+	script_host = !is_WWW && typeof WScript === 'object';
+
+	// for JScript: 在 IE8, IE9 中，get_object_type(WScript) 為 '[object Object]' !!
+	if (script_host = script_host && (!_.is_Object(WScript) || String(WScript) == 'Windows Script Host') && WScript.FullName)
+		_// JSDT:_module_
+		.
+		/**
+		 * the fully qualified path of the host executable.<br />
+		 * 'cscript' || 'wscript'
+		 * 
+		 * @see http://msdn.microsoft.com/en-us/library/z00t383b(v=vs.84).aspx
+		 * @_memberOf _module_
+		 */
+		script_host = script_host = script_host.replace(/^(.+)\\/, '').toLowerCase().replace(/\.exe$/, '');
+
+
+	// cache
+	var script_full_path = is_WWW && unescape(window.location.pathname)
+	// 在 .hta 中取代 WScript.ScriptFullName。
+	|| script_host && WScript.ScriptFullName
+	// for newer node.js. 須放置於 ((__filename)) 判斷前!
+	// 以 require('/path/to/node.loader.js') 之方法 include library 時，
+	// ((__filename)) 會得到 loader 之 path，
+	// 且不能從 global.__filename 獲得 script path，只好另尋出路。
+	|| typeof process === 'object' && process.mainModule && process.mainModule.filename
+	// for old node.js
+	// @see __dirname
+	|| typeof __filename === 'string' && __filename
+	// for jslibs 與特殊環境. 需確認已定義 _.is_Object()
+	|| _.is_Object(old_namespace) && old_namespace.loader_script
+	// Unknown environment
+	|| '';
+	// console.trace(script_full_path);
+
+	_// JSDT:_module_
+	.
+	/**
+	 * 取得執行 script 之 path。
+	 * 
+	 * @returns {String}執行 script 之 path。
+	 * @returns '' Unknown environment
+	 */
+	get_script_full_name = function () {
+		return script_full_path;
+	};
+
+	_// JSDT:_module_
+	.
+	/**
+	 * 取得執行 script 之名稱(不包括 .js 等 extension).
+	 * 
+	 * @returns {String} 執行 script 之 名稱。
+	 * @returns '' unknown environment
+	 */
+	get_script_name = function (get_file_name) {
+		var full_path = _.get_script_full_name(), m = full_path.match(/[^\\\/]*$/);
+		return get_file_name ? m[0] : m[0].replace(/\.[^.]*$/, '');
+	};
+
+	if (false)
+		_// JSDT:_module_
+		.
+		deprecated_get_script_name = function () {
+			// deprecated
+			var n, i, j;
+
+			if (script_host) {
+				n = WScript.ScriptName;
+				i = n.lastIndexOf('.');
+				return i == -1 ? n : n.slice(0, i);
+			}
+
+			if (is_WWW) {
+				n = unescape(window.location.pathname), j = n.lastIndexOf('.');
+				if (!(i = n.lastIndexOf('\\') + 1))
+					// location.pathname 在 .hta 中會回傳 '\' 形式的 path
+					i = n.lastIndexOf('/') + 1;
+				// return window.document.title;
+				return i < j ? n.slice(i, j) : n.slice(i);
+			}
+		};
 
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//

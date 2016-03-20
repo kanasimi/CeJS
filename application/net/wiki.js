@@ -2530,7 +2530,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			var this_slice = target.slice(work_continue, work_continue
 					+ slice_size),
 			// 自動判別最大可用 index，預防 "414 Request-URI Too Long"。
-			max_size = check_max_length(this_slice);
+			// 因為 8000/500-3 = 13 > 最長 page id，因此即使 500頁也不會超過。
+			// 為提高效率，不作 check。
+			max_size = config.is_id ? 500 : check_max_length(this_slice);
 			if (max_size < slice_size)
 				this_slice = this_slice.slice(0, max_size);
 			if (work_continue === 0 && max_size === target.length) {
