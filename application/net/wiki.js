@@ -2347,18 +2347,20 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		// pages: 後續檢索用索引值之暫存值。
 		&& (pages = pages.show_next()))
 			messages.add(this.continue_key + ': ' + pages);
-		// 使用時間, 費時
-		pages = '首先使用 ' + messages.last.age(new Date) + ' 以取得 ' + data.length
-				+ ' 個頁面內容。';
-		// 在「首先使用」之後才設定 .last，才能正確抓到「首先使用」。
-		messages.last = new Date;
-		if (log_item.get_pages)
-			messages.add(pages);
-		library_namespace.debug(pages, 2, wiki_API.work);
-		if (library_namespace.is_debug()
-		// .show_value() @ interact.DOM, application.debug
-		&& library_namespace.show_value)
-			library_namespace.show_value(data, 'pages');
+		if (!no_message) {
+			// 使用時間, 費時
+			pages = '首先使用 ' + messages.last.age(new Date) + ' 以取得 '
+					+ data.length + ' 個頁面內容。';
+			// 在「首先使用」之後才設定 .last，才能正確抓到「首先使用」。
+			messages.last = new Date;
+			if (log_item.get_pages)
+				messages.add(pages);
+			library_namespace.debug(pages, 2, wiki_API.work);
+			if (library_namespace.is_debug()
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+				library_namespace.show_value(data, 'pages');
+		}
 		pages = data;
 
 		if (typeof config.first === 'function')
@@ -2404,34 +2406,36 @@ wiki_API.prototype.work = function(config, pages, titles) {
 		}, this);
 
 		this.run(function() {
-			library_namespace.debug('wiki_API.work: 收尾。');
-			var count_summary = ': 完成 ' + done
-			//
-			+ (done === pages.length ? '' : '/' + pages.length)
-			//
-			+ (pages.length === target.length ? '' : '//' + target.length)
-					+ ' 條目';
-			if (log_item.report)
-				messages.unshift(count_summary + '，'
-				// 未改變任何條目。
-				+ (nochange_count ? (done === nochange_count
+			if (!no_message) {
+				library_namespace.debug('wiki_API.work: 收尾。');
+				var count_summary = ': 完成 ' + done
 				//
-				? '所有' : nochange_count + ' ') + '條目未作變更，' : '')
-				// 使用時間, 費時
-				+ '前後總共 ' + messages.start.age(new Date) + '。');
-			if (this.stopped)
-				messages.add("'''已停止作業'''，放棄編輯。");
-			if (done === nochange_count)
-				messages.add('全無變更。');
-			if (log_item.title && config.summary)
-				// unescape
-				messages.unshift(config.summary.replace(/</g, '&lt;'));
+				+ (done === pages.length ? '' : '/' + pages.length)
+				//
+				+ (pages.length === target.length ? '' : '//' + target.length)
+						+ ' 條目';
+				if (log_item.report)
+					messages.unshift(count_summary + '，'
+					// 未改變任何條目。
+					+ (nochange_count ? (done === nochange_count
+					//
+					? '所有' : nochange_count + ' ') + '條目未作變更，' : '')
+					// 使用時間, 費時
+					+ '前後總共 ' + messages.start.age(new Date) + '。');
+				if (this.stopped)
+					messages.add("'''已停止作業'''，放棄編輯。");
+				if (done === nochange_count)
+					messages.add('全無變更。');
+				if (log_item.title && config.summary)
+					// unescape
+					messages.unshift(config.summary.replace(/</g, '&lt;'));
+			}
 
 			if (typeof config.last === 'function')
 				// 對於量過大而被分割者，每次分段結束都將執行一次 .last()。
 				config.last.call(this, messages, titles, pages);
 
-			var log_to = 'log_to' in config ? config.log_to : no_message ? null
+			var log_to = 'log_to' in config ? config.log_to
 			// default log_to
 			: 'User:' + this.token.lgname + '/log/'
 					+ (new Date).format('%4Y%2m%2d'),
@@ -2460,7 +2464,9 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				skip_stopped : true
 			};
 
-			if (log_to && (done !== nochange_count
+			if (no_message) {
+				;
+			} else if (log_to && (done !== nochange_count
 			// 若全無變更，則預設僅從 console 提示，不寫入 log 頁面。因此無變更者將不顯示。
 			|| config.log_nochange)) {
 				this.page(log_to)
@@ -2522,20 +2528,27 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			max_size = check_max_length(this_slice);
 			if (max_size < slice_size)
 				this_slice = this_slice.slice(0, max_size);
-			if (work_continue === 0 && max_size === target.length)
+			if (work_continue === 0 && max_size === target.length) {
 				library_namespace.debug(
 				//
 				'wiki_API.work: 設定一次先取得所有 '
 				//
 				+ target.length + ' 個頁面之 revisions (page content)。', 2);
-			else
-				library_namespace.sinfo([
+			} else {
+				library_namespace.sinfo([ 'wiki_API.work: ', 'fg=green',
 				//
-				'wiki_API.work: ', 'fg=green', config.summary, '-fg', ': 處理分塊 '
+				config.summary, '-fg', ': 處理分塊 '
 				//
 				+ (work_continue + 1) + '–'
 				//
-				+ (work_continue + max_size) + '/' + target.length + '。' ]);
+				+ (work_continue + max_size) + '/' + target.length
+				//
+				+ (target.length.length > 1e4
+				//
+				? ' (' + (work_continue / target.length | 0)
+				//
+				+ '%)' : '') + '。' ]);
+			}
 
 			// reset count and log.
 			done = nochange_count = 0;
