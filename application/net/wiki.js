@@ -5327,22 +5327,32 @@ wiki_API.cache = function(operation, callback, _this) {
 	 * 連續作業時，轉到下一作業。
 	 */
 	function next_operator(data) {
-		library_namespace.debug('處理連續作業，轉到下一作業: ' + index + '/'
+		library_namespace.debug('處理連續作業，轉到下一作業: ' + (index + 1) + '/'
 				+ operation.length, 2, 'wiki_API.cache.next_operator');
 		// [ {Object}operation, {Object}operation, ... ]
 		// operation = { type:'embeddedin', operator:function(data) }
 		if (index < operation.length) {
-			if (!('list' in operation[index])) {
-				// use previous data as list.
-				library_namespace.debug('未特別指定 list，以前一次之回傳 data 作為 list。', 3,
+			var this_operation = operation[index++];
+			if (!this_operation) {
+				// Allow null operation.
+				library_namespace.debug('未設定 operation[' + (index - 1)
+						+ ']。Skip this operation.', 1,
 						'wiki_API.cache.next_operator');
-				library_namespace.debug('前一次之回傳 data: '
-						+ (data && JSON.stringify(data).slice(0, 180)) + '...',
-						3, 'wiki_API.cache.next_operator');
-				operation[index].list = data;
+				next_operator();
+			} else {
+				if (!('list' in this_operation)) {
+					// use previous data as list.
+					library_namespace.debug('未特別指定 list，以前一次之回傳 data 作為 list。',
+							3, 'wiki_API.cache.next_operator');
+					library_namespace.debug('前一次之回傳 data: '
+							+ (data && JSON.stringify(data).slice(0, 180))
+							+ '...', 3, 'wiki_API.cache.next_operator');
+					this_operation.list = data;
+				}
+				// default options === _this: 傳遞於各 operator 間的 ((this))。
+				wiki_API.cache(this_operation, next_operator, _this);
 			}
-			// default options === _this: 傳遞於各 operator 間的 ((this))。
-			wiki_API.cache(operation[index++], next_operator, _this);
+
 		} else if (typeof callback === 'function') {
 			// last 收尾
 			callback.call(_this);
