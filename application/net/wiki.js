@@ -2813,10 +2813,10 @@ wiki_API.query.title_param = function(page_data, multi, is_id) {
 			if (is_id) {
 				pageid = pageid.join('|');
 			} else {
-				pageid = undefined;
 				page_data = pageid.join('|');
+				pageid = undefined;
 			}
-			library_namespace.debug(page_data, 2, 'wiki_API.query.title_param');
+			library_namespace.debug(pageid || page_data, 2, 'wiki_API.query.title_param');
 		}
 
 	} else if (library_namespace.is_Object(page_data)) {
