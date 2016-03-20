@@ -2061,7 +2061,7 @@ function reset_messages() {
  * @param {Natural}[limit_length]
  *            limit length
  * 
- * @returns {Number}邊際index
+ * @returns {Number}邊際index。
  */
 function check_max_length(piece_list, limit, limit_length) {
 	// 8000: 8192 - (除了 piece_list 外必要之字串長)。
@@ -2512,6 +2512,11 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	}).bind(this);
 
 	var target = pages || titles,
+	// 首先取得多個頁面內容所用之 options。
+	page_options = {
+		is_id : config.is_id,
+		multi : true
+	},
 	// 處理 limit。單一頁面才能取得多 revisions。多頁面(<=50)只能取得單一 revision。
 	// https://www.mediawiki.org/w/api.php?action=help&modules=query
 	// titles/pageids: Maximum number of values is 50 (500 for bots).
@@ -2556,18 +2561,15 @@ wiki_API.prototype.work = function(config, pages, titles) {
 			messages.reset();
 
 			work_continue += max_size;
-			this.page(this_slice, main_work, {
-				multi : true
-			});
+			this.page(this_slice, main_work, page_options);
 		}).bind(this);
 		setup_target();
 
 	} else {
 		// assert: target is {String}title or {Object}page_data
-		library_namespace.debug('wiki_API.work: 取得單一頁面之 (page contents 頁面內容)。', 2);
-		this.page(target, main_work, {
-			multi : true
-		});
+		library_namespace.debug('wiki_API.work: 取得單一頁面之 (page contents 頁面內容)。',
+				2);
+		this.page(target, main_work, page_options);
 	}
 };
 
@@ -5830,6 +5832,10 @@ function traversal_pages(config, callback) {
 		// all title/id list
 		file_name : config.file_name || 'all_pages',
 		operator : function(list) {
+			if (JSON.stringify(list[0]) === '{}') {
+				list.shift();
+				list.is_id = true;
+			}
 			title_list = list;
 		},
 		after : config.after
@@ -5862,7 +5868,10 @@ function traversal_pages(config, callback) {
 							return is_id ? row[id] | 0 : row[id]
 									.toString('utf8');
 					});
-					config.is_id = is_id;
+					// indicate it's page id instead of page title.
+					// 須採用絕不可能用來當作標題之 value。
+					config.list.unshift({});
+					// config.is_id = is_id;
 				}
 				traversal_pages(config, callback);
 			});
@@ -5875,17 +5884,20 @@ function traversal_pages(config, callback) {
 		cache_config.type = 'allpages';
 	}
 
-	wiki_API.cache(cache_config, function for_page() {
+	wiki_API.cache(cache_config,
+	// do for each page
+	function() {
 		var wiki = config.wiki
 				|| new wiki_API(config.user, config.password, config.language);
 		library_namespace.log('traversal_pages: 開始遍歷 '
 				+ (title_list && title_list.length) + ' pages...');
 		wiki.work({
+			is_id : title_list.is_id,
 			no_message : true,
 			no_edit : 'no_edit' in config ? config.no_edit : true,
 			each : callback,
 			// config.last(messages, titles, pages)
-			after : config.last
+			after : config.after
 		}, title_list);
 	}, {
 		// cache path prefix
