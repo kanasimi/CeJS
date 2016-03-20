@@ -2782,6 +2782,10 @@ wiki_API.query.title_param = function(page_data, multi, is_id) {
 	var pageid;
 
 	if (Array.isArray(page_data)) {
+		// auto detect multi
+		if (multi === undefined)
+			multi = pageid.length > 1;
+
 		pageid = [];
 		// 確認所有 page_data 皆有 pageid 屬性。
 		if (page_data.every(function(page) {
@@ -2790,9 +2794,6 @@ wiki_API.query.title_param = function(page_data, multi, is_id) {
 				pageid.push(page);
 			return page;
 		})) {
-			// auto detect
-			if (multi === undefined)
-				multi = pageid.length > 1;
 			pageid = pageid.join('|');
 
 		} else {
@@ -2803,18 +2804,17 @@ wiki_API.query.title_param = function(page_data, multi, is_id) {
 						.info('wiki_API.query.title_param: 將採用 title 為主要查詢方法。');
 			}
 			// reset
-			pageid = [];
-			page_data.forEach(function(page) {
+			pageid = page_data.map(function(page) {
 				// {String}title or {title:'title'}
-				pageid.push((typeof page === 'object' ? page.title : page)
-						|| '');
+				return (typeof page === 'object' ? page.title : page) || '';
 			});
-			// auto detect
-			if (multi === undefined)
-				multi = pageid.length > 1;
-			page_data = pageid.join('|');
+			if (is_id) {
+				pageid = pageid.join('|');
+			} else {
+				pageid = undefined;
+				page_data = pageid.join('|');
+			}
 			library_namespace.debug(page_data, 2, 'wiki_API.query.title_param');
-			pageid = undefined;
 		}
 
 	} else if (library_namespace.is_Object(page_data)) {
@@ -5833,6 +5833,7 @@ function traversal_pages(config, callback) {
 		file_name : config.file_name || 'all_pages',
 		operator : function(list) {
 			if (JSON.stringify(list[0]) === '{}') {
+				library_namespace.info('traversal_pages: 此資料似乎來自 database，為 page id。');
 				list.shift();
 				list.is_id = true;
 			}
