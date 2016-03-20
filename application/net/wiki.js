@@ -19,7 +19,6 @@
 // 添加網頁報告。
 // 調用超過一個Template中參數的值，只有最後提供的值會被使用。
 // 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
-// 遍歷 pages
 // 所有子頁面加入白名單 whitelist
 
 'use strict';
@@ -2535,19 +2534,17 @@ wiki_API.prototype.work = function(config, pages, titles) {
 				//
 				+ target.length + ' 個頁面之 revisions (page content)。', 2);
 			} else {
-				library_namespace.sinfo([ 'wiki_API.work: ', 'fg=green',
-				//
-				config.summary, '-fg', ': 處理分塊 '
-				//
-				+ (work_continue + 1) + '–'
-				//
-				+ (work_continue + max_size) + '/' + target.length
-				//
-				+ (target.length.length > 1e4
-				//
-				? ' (' + (work_continue / target.length | 0)
-				//
-				+ '%)' : '') + '。' ]);
+				// start-end/all
+				done = '處理分塊 ' + (work_continue + 1) + '–'
+						+ (work_continue + max_size) + '/' + target.length;
+				// Add percentage.
+				if (target.length.length > 1e4)
+					done += ' (' + (work_continue / target.length | 0) + '%)';
+				// done += '。';
+				done = config.summary ? [ 'fg=green', config.summary, '-fg',
+						': ' + done ] : [ done ];
+				done.unshift('wiki_API.work: ');
+				library_namespace.sinfo(done);
 			}
 
 			// reset count and log.
@@ -3499,6 +3496,7 @@ get_list.type = {
 	// get_list.default_parameter)
 
 	// 按標題排序列出指定的名字空間的頁面 title。
+	// 可用來遍歷 pages。
 	// https://www.mediawiki.org/wiki/API:Allpages
 	// 警告: 不在 Tool Labs 執行 allpages 速度太慢。但若在 Tool Labs，當改用 database。
 	allpages : 'ap',
