@@ -330,7 +330,7 @@ function normalize_name_pattern(file_name, add_group, remove_namespace) {
  * 創建匹配 [[File:file_name]] 之 pattern。
  * 
  * @param {String}file_name
- *            file name
+ *            file name.
  * @param {String}flag
  *            RegExp flag
  * 
@@ -5316,7 +5316,7 @@ application.net.wiki wiki_API.cache() CeL.wiki.cache()
  * @param {Object|Array}operation
  *            作業設定。
  * @param {Function}[callback]
- *            回調函數。 callback(response data)
+ *            所有作業(operation)執行完後之回調函數。 callback(response data)
  * @param {Object}[_this]
  *            傳遞於各 operator 間的 ((this))。
  */
@@ -5481,9 +5481,10 @@ wiki_API.cache = function(operation, callback, _this) {
 		 */
 		function write_cache(data) {
 			if (operation.cache === false) {
-				library_namespace.info('wiki_API.cache.write_cache: '
 				// 當設定 operation.cache: false 時，不寫入 cache。
-				+ '設定 operation.cache === false，不寫入 cache。');
+				library_namespace.debug(
+						'設定 operation.cache === false，不寫入 cache。', 3,
+						'wiki_API.cache.write_cache');
 			} else if (/[^\\\/]$/.test(file_name)) {
 				library_namespace.info('wiki_API.cache: Write cache data to ['
 						+ file_name + '].');
@@ -5559,7 +5560,8 @@ wiki_API.cache = function(operation, callback, _this) {
 				return;
 			}
 			if (list.length > 1e6) {
-				library_namespace.warn('wiki_API.cache: 耗時過長而不實際。');
+				library_namespace.warn('wiki_API.cache: 警告: list 過長 (length '
+						+ list.length + ')，將過於耗時而不實際！');
 			}
 
 			/**

@@ -234,11 +234,66 @@ if (typeof CeL === 'function')
 
 				return r();
 			}
-
 			_.fs_remove = remove_fso;
 
-			// TODO:
-			// move file
+			/**
+			 * fs.readFileSync() without throw.
+			 * 
+			 * @param {String}file_path
+			 *            file path.
+			 * @param {Object}[options]
+			 *            附加參數/設定選擇性/特殊功能與選項
+			 * 
+			 * @returns error
+			 */
+			function fs_readFileSync(file_path, options) {
+				try {
+					node_fs.readFileSync(file_path, options);
+				} catch (e) {
+					return e;
+				}
+			}
+			_.fs_read = fs_readFileSync;
+
+			/**
+			 * fs.writeFileSync() without throw.
+			 * 
+			 * @param {String}file_path
+			 *            file path.
+			 * @param data
+			 *            data to write.
+			 * @param {Object}[options]
+			 *            附加參數/設定選擇性/特殊功能與選項
+			 * 
+			 * @returns error
+			 */
+			function fs_writeFileSync(file_path, data, options) {
+				try {
+					node_fs.writeFileSync(file_path, data, options);
+				} catch (e) {
+					return e;
+				}
+			}
+			_.fs_write = fs_writeFileSync;
+
+			/**
+			 * move file, fs.renameSync() without throw.
+			 * 
+			 * @param {String}old_path
+			 *            old file path.
+			 * @param {String}new_path
+			 *            new file path.
+			 * 
+			 * @returns error
+			 */
+			function fs_renameSync(old_path, new_path) {
+				try {
+					node_fs.renameSync(old_path, new_path);
+				} catch (e) {
+					return e;
+				}
+			}
+			_.fs_move = fs_renameSync;
 
 			function export_function() {
 				node_fs.copy = fs_copy;
