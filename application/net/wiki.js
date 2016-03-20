@@ -3576,8 +3576,12 @@ get_list.type = {
 			// assert: 不可改動 method @ IE！
 			var args = [ method ];
 			Array.prototype.push.apply(args, arguments);
-			library_namespace.debug('add action: ' + args.join('<br />\n'), 3,
-					'wiki_API.prototype.' + method);
+			try {
+				library_namespace.debug('add action: ' + args.join('<br />\n'),
+						3, 'wiki_API.prototype.' + method);
+			} catch (e) {
+				// TODO: handle exception
+			}
 			this.actions.push(args);
 			if (!this.running)
 				this.next();
@@ -5456,10 +5460,6 @@ wiki_API.cache = function(operation, callback, _this) {
 		// 基本上，設定 this.* 應該在 operation.operator() 中，而不是在 operation.list() 中。
 		if (typeof list === 'function')
 			list = list.call(_this, operation);
-		if (list === wiki_API.cache.abort) {
-			library_namespace.debug('Abort operation.', 1, 'wiki_API.cache');
-			return;
-		}
 
 		// 自行設定之檔名 operation.file_name 優先度較 type/title 高。
 		// 需要自行創建目錄！
@@ -5613,6 +5613,11 @@ wiki_API.cache = function(operation, callback, _this) {
 
 		if (typeof list === 'function')
 			list = list.call(_this, operation);
+		if (list === wiki_API.cache.abort) {
+			library_namespace.debug('Abort operation.', 1, 'wiki_API.cache');
+			return;
+		}
+
 		if (Array.isArray(list)) {
 			if (!type) {
 				library_namespace.debug('採用 list (length ' + list.length
@@ -5797,7 +5802,6 @@ wiki_API.cache.title_only = function(operation) {
 // --------------------------------------------------------------------------------------------- //
 
 // https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
-// `page_title`
 var all_title_SQL = 'SELECT `page_id` AS i FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
 if (false)
 	all_title_SQL += ' LIMIT 8';
@@ -5805,8 +5809,7 @@ if (false)
 /**
  * 應用功能: 遍歷 pages。
  * 
- * TODO: 若 revision 相同，讀取 dump 而不從 API。<br />
- * TODO: 採用 page_id 而非 page_title 來 query。
+ * TODO: 若 revision 相同，讀取 dump 而不從 API。
  * 
  * @param {Object}[config]
  *            configuration
@@ -5814,10 +5817,11 @@ if (false)
  *            回調函數。 callback(page_data, messages)
  */
 function traversal_pages(config, callback) {
-	if (typeof config === 'function' && callback === undefined)
+	if (typeof config === 'function' && callback === undefined) {
 		// shift arguments.
-		callback = config, config = library_namespace.null_Object();
-	else
+		callback = config;
+		config = library_namespace.null_Object();
+	} else
 		config = library_namespace.new_options(config);
 
 	var title_list,
@@ -5832,14 +5836,21 @@ function traversal_pages(config, callback) {
 	};
 
 	if (Array.isArray(config.list)) {
+		library_namespace.debug(
+				'採用輸入之 list，length ' + config.list.length + '。', 1,
+				'traversal_pages');
 		cache_config.list = config.list;
 
 	} else if (wmflabs && !config.no_database) {
-		// 若沒有 cache，則嘗試讀取 database 之資料。
+		library_namespace.debug('若沒有 cache，則嘗試讀取 database 之資料。', 1,
+				'traversal_pages');
 		cache_config.list = function() {
 			library_namespace
 					.info('traversal_pages: 嘗試讀取 Tool Labs 之 database 資料...');
-			run_SQL(all_title_SQL, function(error, rows, fields) {
+			// default: 採用 page_id 而非 page_title 來 query。
+			var is_id = 'is_id' in config ? config.is_id : true;
+			run_SQL(is_id ? all_title_SQL : all_title_SQL.replace(/page_id/g,
+					'page_title'), function(error, rows, fields) {
 				if (error) {
 					library_namespace.err(error);
 					config.no_database = error;
@@ -5848,23 +5859,27 @@ function traversal_pages(config, callback) {
 							+ ' pages. 轉換中...');
 					config.list = rows.map(function(row) {
 						for ( var id in row)
-							return row[id].toString('utf8');
+							return is_id ? row[id] | 0 : row[id]
+									.toString('utf8');
 					});
-					config.is_id = true;
+					config.is_id = is_id;
 				}
-				library_namespace.log('traversal_pages: 開始遍歷 pages...');
 				traversal_pages(config, callback);
 			});
 			return wiki_API.cache.abort;
 		};
 
 	} else {
+		library_namespace
+				.debug('採用 API type = allpages。', 1, 'traversal_pages');
 		cache_config.type = 'allpages';
 	}
 
 	wiki_API.cache(cache_config, function for_page() {
 		var wiki = config.wiki
 				|| new wiki_API(config.user, config.password, config.language);
+		library_namespace.log('traversal_pages: 開始遍歷 '
+				+ (title_list && title_list.length) + ' pages...');
 		wiki.work({
 			no_message : true,
 			no_edit : 'no_edit' in config ? config.no_edit : true,
