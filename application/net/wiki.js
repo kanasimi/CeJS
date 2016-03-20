@@ -20,6 +20,7 @@
 // 調用超過一個Template中參數的值，只有最後提供的值會被使用。
 // 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
 // 遍歷 pages
+// 所有子頁面加入白名單 whitelist
 
 'use strict';
 //'use asm';
@@ -80,7 +81,7 @@ function wiki_API(user_name, password, API_URL) {
 	this.next_mark = library_namespace.null_Object();
 
 	// setup session.
-	//this.set_URL(API_URL);
+	// this.set_URL(API_URL);
 	if (API_URL)
 		this.API_URL = api_URL(API_URL);
 }
@@ -117,7 +118,8 @@ function api_URL(project) {
 	var matched = /^(https?:\/\/)?[a-z]+(\.[a-z]+)+(\/?)$/i.test(project);
 	if (matched)
 		// e.g., 'http://zh.wikipedia.org/'
-		return (matched[1] || api_URL.default_protocol || 'https://') + project + (matched[2] || '/') + 'w/api.php';
+		return (matched[1] || api_URL.default_protocol || 'https://') + project
+				+ (matched[2] || '/') + 'w/api.php';
 
 	if (/^https?:\/\//i.test(project))
 		// e.g., 'https://www.mediawiki.org/w/api.php'
@@ -253,7 +255,8 @@ function remove_namespace(title) {
  * 規範/正規化頁面名稱 page name。
  * 
  * 這種規範化只能通用於本 library 內。Wikipedia 並未硬性設限。<br />
- * 依照 [https://www.mediawiki.org/w/api.php?action=query&titles=Wikipedia_talk:Flow&prop=info]，
+ * 依照
+ * [https://www.mediawiki.org/w/api.php?action=query&titles=Wikipedia_talk:Flow&prop=info]，
  * "Wikipedia_talk:Flow" → "Wikipedia talk:Flow"<br />
  * 亦即底線 "_" → space " "
  * 
@@ -269,9 +272,11 @@ function normalize_page_name(page_name) {
 	var name_list = [];
 	page_name.forEach(function(section, index) {
 		section = section.trim();
-		if (index > 1 || index > 0 && page_name[0] || index === page_name.length - 1)
+		if (index > 1 || index > 0 && page_name[0]
+				|| index === page_name.length - 1)
 			// ' ' → '_': 在 URL 上可更簡潔。
-			name_list.push(section.charAt(0).toUpperCase() + section.slice(1).replace(/ /g, '_'));
+			name_list.push(section.charAt(0).toUpperCase()
+					+ section.slice(1).replace(/ /g, '_'));
 		else if (section in get_namespace.hash)
 			// Wikipedia namespace
 			name_list.push(section.charAt(0).toUpperCase() + section.slice(1));
@@ -302,7 +307,7 @@ function normalize_name_pattern(file_name, add_group, remove_namespace) {
 
 	if (remove_namespace) {
 		// 去除 namespace。e.g., Template:
-		//console.log('去除 namespace: [' + file_name + ']');
+		// console.log('去除 namespace: [' + file_name + ']');
 		file_name = file_name.replace(/^[^:]+:\s*/, '');
 	}
 
@@ -323,12 +328,12 @@ function normalize_name_pattern(file_name, add_group, remove_namespace) {
 
 /**
  * 創建匹配 [[File:file_name]] 之 pattern。
- *
+ * 
  * @param {String}file_name
  *            file name
  * @param {String}flag
  *            RegExp flag
- *
+ * 
  * @returns {RegExp} 能 match [[File:file_name]] 之 pattern。
  */
 function file_pattern(file_name, flag) {
@@ -548,7 +553,7 @@ function for_each_token(type, processor, modify_this) {
 	if (type in page_parser.type_alias)
 		type = page_parser.type_alias[type];
 
-	if(!this.parsed)
+	if (!this.parsed)
 		// 因為本函數為 CeL.wiki.parser(content) 最常使用者，
 		// 因此放在這少一道 .parse() 工序。
 		this.parse();
@@ -691,11 +696,14 @@ markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|syntaxhig
 var wiki_toString = {
 	// Internal/interwiki link : language links : category links, file, subst,
 	// ... : title
-	// e.g., [[m:en:Help:Parser function]], [[m:Help:Interwiki_linking]], [[:File:image.png]], [[wikt:en:Wiktionary:A]], [[:en:Template:Editnotices/Group/Wikipedia:Miscellany for deletion]]
+	// e.g., [[m:en:Help:Parser function]], [[m:Help:Interwiki_linking]],
+	// [[:File:image.png]], [[wikt:en:Wiktionary:A]],
+	// [[:en:Template:Editnotices/Group/Wikipedia:Miscellany for deletion]]
+	//
 	// @see [[Wikipedia:Namespace]]
 	// https://www.mediawiki.org/wiki/Markup_spec#Namespaces
-	// [[  m :  abc ]] is OK, as "m : abc".
-	// [[: en : abc  ]] is OK, as "en : abc".
+	// [[ m : abc ]] is OK, as "m : abc".
+	// [[: en : abc ]] is OK, as "en : abc".
 	// [[ :en:abc]] is NOT OK.
 	namespace : function() {
 		return this.join(':');
@@ -788,18 +796,20 @@ var wiki_toString = {
 };
 
 
-// TODO: {{L<!-- -->L}} .valueOf() === '{{LL}}'
-// TODO: <p<!-- -->re>...</pre>
-// TODO: CeL.wiki.page('上海外国语大学',function(page_data){CeL.wiki.parser(page_data).parse();})
-// TODO: [https://a.b <a>a</a><!-- -->]
-// TODO: [[<a>a</a>]]
-// TODO: CeL.wiki.parser('a[[未來日記-ANOTHER:WORLD-]]b').parse()[1]
+// TODO:
+// {{L<!-- -->L}} .valueOf() === '{{LL}}'
+// <p<!-- -->re>...</pre>
+// CeL.wiki.page('上海外国语大学',function(page_data){CeL.wiki.parser(page_data).parse();})
+// [https://a.b <a>a</a><!-- -->]
+// [[<a>a</a>]]
+// CeL.wiki.parser('a[[未來日記-ANOTHER:WORLD-]]b').parse()[1]
 
 /**
  * parse The MediaWiki markup language (wikitext).
  * 
- * TODO: 提高效率。e.g., [[三国杀武将列表]], [[世界大桥列表]], [[三国杀武将列表]]<br />
- * TODO: 可能為模板參數特殊設計？有些 template 內含不完整的起始或結尾，使 parameter 亦未首尾對應。
+ * TODO:<br />
+ * 提高效率。e.g., [[三国杀武将列表]], [[世界大桥列表]], [[三国杀武将列表]]<br />
+ * 可能為模板參數特殊設計？有些 template 內含不完整的起始或結尾，使 parameter 亦未首尾對應。
  * 
  * 此功能之工作機制/原理：<br />
  * 找出完整的最小單元，並將之 push 入 queue，並把原 string 中之單元 token 替換成:<br />
@@ -1372,7 +1382,8 @@ LINK_NAME_PATTERN = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)(\||\]\])/;
  *          token.index, token.lastIndex: index.
  */
 function parse_template(wikitext, template_name, no_parse) {
-	var matched = (template_name = normalize_name_pattern(template_name, true, true))
+	template_name = normalize_name_pattern(template_name, true, true);
+	var matched = template_name
 	// 模板起始。
 	? new RegExp(/{{[\s\n]*/.source + template_name + '\\s*[|}]', 'gi')
 			: new RegExp(TEMPLATE_NAME_PATTERN.source, 'g');
@@ -1630,13 +1641,15 @@ wiki_API.prototype.toString = function(type) {
 };
 
 // @see function get_continue(), get_list()
-wiki_API.prototype.show_next = typeof JSON === 'object' && JSON.stringify ? function() {
+wiki_API.prototype.show_next = typeof JSON === 'object' && JSON.stringify
+//
+? function() {
 	return this.next_mark && JSON.stringify(this.next_mark);
 } : function() {
 	if (!this.next_mark)
 		return;
 	var line = [], value;
-	for (var name in this.next_mark) {
+	for ( var name in this.next_mark) {
 		value = this.next_mark[name];
 		line.push(name + ':' + (typeof value === 'string'
 		//
@@ -1649,14 +1662,15 @@ wiki_API.prototype.show_next = typeof JSON === 'object' && JSON.stringify ? func
 wiki_API.prototype.next = function() {
 	if (!(this.running = 0 < this.actions.length)) {
 		library_namespace.debug('Empty queue.', 2, 'wiki_API.prototype.next');
-		//console.warn(this);
+		// console.warn(this);
 		return;
 	}
 
-	library_namespace.debug('剩餘 ' + this.actions.length + ' action(s)', 2, 'wiki_API.prototype.next');
+	library_namespace.debug('剩餘 ' + this.actions.length + ' action(s)', 2,
+			'wiki_API.prototype.next');
 	if (library_namespace.is_debug(3)
-		// .show_value() @ interact.DOM, application.debug
-		&& library_namespace.show_value)
+	// .show_value() @ interact.DOM, application.debug
+	&& library_namespace.show_value)
 		library_namespace.show_value(this.actions.slice());
 	var _this = this, next = this.actions.shift(),
 	// 不改動 next。
@@ -1666,12 +1680,16 @@ wiki_API.prototype.next = function() {
 		type = 'list';
 	}
 
-	library_namespace.debug('處理 ' + (this.token.lgname ? this.token.lgname + ' ' : '') + '[' + next + ']', 2, 'wiki_API.prototype.next');
+	library_namespace.debug('處理 '
+			+ (this.token.lgname ? this.token.lgname + ' ' : '') + '[' + next
+			+ ']', 2, 'wiki_API.prototype.next');
 	switch (type) {
 	case 'page':
 		// this.page(page data, callback) → 採用所輸入之 page data 作為 this.last_page。
-		if (get_page_content.is_page_data(next[1]) && get_page_content.has_content(next[1])) {
-			library_namespace.debug('採用所輸入之 [' + next[1].title + '] 作為 this.last_page。', 2, 'wiki_API.prototype.next');
+		if (get_page_content.is_page_data(next[1])
+				&& get_page_content.has_content(next[1])) {
+			library_namespace.debug('採用所輸入之 [' + next[1].title
+					+ '] 作為 this.last_page。', 2, 'wiki_API.prototype.next');
 			this.last_page = next[1];
 			if (typeof next[2] === 'function')
 				// next[1] : callback
@@ -1688,7 +1706,8 @@ wiki_API.prototype.next = function() {
 			// next[3] : options
 			// [ {String}API_URL, {String}title ]
 			wiki_API.page([ this.API_URL, next[1] ], function(page_data) {
-				_this.last_page = Array.isArray(page_data) ? page_data[0] : page_data;
+				_this.last_page = Array.isArray(page_data) ? page_data[0]
+						: page_data;
 				// next[2] : callback
 				if (typeof next[2] === 'function')
 					next[2].call(_this, page_data);
@@ -1701,7 +1720,8 @@ wiki_API.prototype.next = function() {
 	case 'list':
 		// get_list(). e.g., 反向連結/連入頁面.
 		// next[1] : title
-		wiki_API[list_type]([ this.API_URL, next[1] ], function(title, titles, pages) {
+		wiki_API[list_type]([ this.API_URL, next[1] ], function(title, titles,
+				pages) {
 			// [ last_list ]
 			_this.last_titles = titles;
 			// [ page_data ]
@@ -1751,7 +1771,9 @@ wiki_API.prototype.next = function() {
 		break;
 
 	case 'check':
-		next[1] = Object.assign(library_namespace.null_Object(), this.check_options,
+		next[1] = Object.assign(library_namespace.null_Object(),
+		//
+		this.check_options,
 		// next[1]: options
 		typeof next[1] === 'boolean' ? {
 			force : next[1]
@@ -1760,14 +1782,17 @@ wiki_API.prototype.next = function() {
 		} : library_namespace.is_Object(next[1]) ? next[1] : {});
 
 		// ('stopped' in this): 已經有 cache。
-		if (('stopped' in this) 
+		if (('stopped' in this)
 		// force to check
 		&& next[1].force) {
-			library_namespace.debug('Skip check_stop().', 1, 'wiki_API.prototype.next');
+			library_namespace.debug('Skip check_stop().', 1,
+					'wiki_API.prototype.next');
 			this.next();
 		} else {
-			library_namespace.debug('以 .check_stop() 檢查與設定是否須停止編輯作業。', 1, 'wiki_API.prototype.next');
-			library_namespace.debug('Using options to check_stop(): ' + JSON.stringify(next[1]), 2, 'wiki_API.prototype.next');
+			library_namespace.debug('以 .check_stop() 檢查與設定是否須停止編輯作業。', 1,
+					'wiki_API.prototype.next');
+			library_namespace.debug('Using options to check_stop(): '
+					+ JSON.stringify(next[1]), 2, 'wiki_API.prototype.next');
 			next[1].token = this.token;
 			wiki_API.check_stop(function(stopped) {
 				// cache
@@ -1781,7 +1806,8 @@ wiki_API.prototype.next = function() {
 	case 'edit':
 		// TODO: {String|RegExp|Array}filter
 		if (!this.last_page) {
-			library_namespace.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first!');
+			library_namespace
+					.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first!');
 			// next[3] : callback
 			if (typeof next[3] === 'function')
 				next[3].call(_this, undefined, 'no page');
@@ -1792,7 +1818,8 @@ wiki_API.prototype.next = function() {
 			this.actions.unshift([ 'check' ], next);
 			this.next();
 		} else if (this.stopped && !next[2].skip_stopped) {
-			library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯[[' + this.last_page.title + ']]！');
+			library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯[['
+					+ this.last_page.title + ']]！');
 			// next[3] : callback
 			if (typeof next[3] === 'function')
 				next[3].call(_this, this.last_page.title, '已停止作業');
@@ -1802,7 +1829,8 @@ wiki_API.prototype.next = function() {
 			// next[2]: options to edit_topic()
 			// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 			if (next[2].section !== 'new') {
-				library_namespace.warn('wiki_API.prototype.next: The page to edit is Flow. I can not edit directly.');
+				library_namespace
+						.warn('wiki_API.prototype.next: The page to edit is Flow. I can not edit directly.');
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					next[3].call(this, this.last_page.title, 'is Flow');
@@ -1818,10 +1846,14 @@ wiki_API.prototype.next = function() {
 					flow_view : 'header'
 				});
 
-			} else if (wiki_API.edit.denied(this.last_page, this.token.lgname, next[2] && next[2].notification)) {
+			} else if (wiki_API.edit.denied(this.last_page, this.token.lgname,
+					next[2] && next[2].notification)) {
 				// {{bot}} support for flow page
-				// 採用 this.last_page 的方法，在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
-				library_namespace.warn('wiki_API.prototype.next: Denied to edit flow [[' + this.last_page.title + ']]');
+				// 採用 this.last_page 的方法，在 multithreading 下可能因其他 threading
+				// 插入而造成問題，須注意！
+				library_namespace
+						.warn('wiki_API.prototype.next: Denied to edit flow [['
+								+ this.last_page.title + ']]');
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					next[3].call(this, this.last_page.title, 'denied');
@@ -1831,7 +1863,8 @@ wiki_API.prototype.next = function() {
 				library_namespace.debug('直接採用 Flow 的方式增添新話題。');
 				// get the contents
 				if (typeof next[1] === 'function') {
-					// next[1] = next[1](get_page_content(this.last_page), this.last_page.title, this.last_page);
+					// next[1] = next[1](get_page_content(this.last_page),
+					// this.last_page.title, this.last_page);
 					// 需要同時改變 wiki_API.edit！
 					next[1] = next[1](this.last_page);
 				}
@@ -1849,10 +1882,13 @@ wiki_API.prototype.next = function() {
 					_this.next();
 				});
 			}
-		
-		} else if (wiki_API.edit.denied(this.last_page, this.token.lgname, next[2] && next[2].notification)) {
-			// 採用 this.last_page 的方法，在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
-			library_namespace.warn('wiki_API.prototype.next: Denied to edit [[' + this.last_page.title + ']]');
+
+		} else if (wiki_API.edit.denied(this.last_page, this.token.lgname,
+				next[2] && next[2].notification)) {
+			// 採用 this.last_page 的方法，在 multithreading 下可能因其他 threading
+			// 插入而造成問題，須注意！
+			library_namespace.warn('wiki_API.prototype.next: Denied to edit [['
+					+ this.last_page.title + ']]');
 			// next[3] : callback
 			if (typeof next[3] === 'function')
 				next[3].call(this, this.last_page.title, 'denied');
@@ -1860,14 +1896,16 @@ wiki_API.prototype.next = function() {
 
 		} else {
 			if (typeof next[1] === 'function') {
-				// next[1] = next[1](get_page_content(this.last_page), this.last_page.title, this.last_page);
+				// next[1] = next[1](get_page_content(this.last_page),
+				// this.last_page.title, this.last_page);
 				// 需要同時改變 wiki_API.edit！
 				next[1] = next[1](this.last_page);
 			}
 			if (next[2] && next[2].skip_nochange
 			// 採用 skip_nochange 可以跳過實際 edit 的動作。
 			&& next[1] === get_page_content(this.last_page)) {
-				library_namespace.debug('Skip [' + this.last_page.title + ']: The same contents.');
+				library_namespace.debug('Skip [' + this.last_page.title
+						+ ']: The same contents.');
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					next[3].call(this, this.last_page.title, 'nochange');
@@ -1879,36 +1917,45 @@ wiki_API.prototype.next = function() {
 				// next[2]: options to edit()
 				next[2], function(title, error, result) {
 					// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
-					if (result ? result.error ? result.error.code === 'badtoken'
+					if (result ? result.error
+					//
+					? result.error.code === 'badtoken'
 					// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
 					: !result.edit : result === '') {
 						// Invalid token
-						library_namespace.warn('wiki_API.prototype.next: It seems we lost the token. 似乎丟失了 token。');
+						library_namespace.warn('wiki_API.prototype.next: '
+								+ 'It seems we lost the token. 似乎丟失了 token。');
 						if (!_this.token.lgpassword) {
-							library_namespace.err('wiki_API.prototype.next: No password preserved!');
+							library_namespace.err('wiki_API.prototype.next: '
+									+ 'No password preserved!');
 							// 死馬當活馬醫，仍然嘗試重新取得 token...沒有密碼無效。
 							return;
 						}
-						library_namespace.info('wiki_API.prototype.next: Try to get token again. 嘗試重新取得 token。');
+						library_namespace.info('wiki_API.prototype.next: '
+								+ 'Try to get token again. 嘗試重新取得 token。');
 						// reset node agent.
-						// 應付 2016/1 MediaWiki 系統更新，需要連 HTTP handler 都重換一個，重起 cookie。
+						// 應付 2016/1 MediaWiki 系統更新，
+						// 需要連 HTTP handler 都重換一個，重起 cookie。
 						// 發現大多是因為一次處理數十頁面，可能遇上 HTTP status 413 的問題。
-						library_namespace.application.net.Ajax.setup_node_net();
+						library_namespace.application.net
+						//
+						.Ajax.setup_node_net();
 						// rollback
 						_this.actions.unshift(next);
 						if (result === '') {
 							// force login: see wiki_API.login
 							delete _this.token.csrftoken;
 							delete _this.token.lgtoken;
-							//library_namespace.set_debug(6);
+							// library_namespace.set_debug(6);
 						}
 						// 重新取得 token。
-						wiki_API.login(_this.token.lgname, _this.token.lgpassword, {
-							force : true,
-							session : _this,
-							// 將 'login' 置於最前頭。
-							login_mark : true
-						});
+						wiki_API.login(_this.token.lgname,
+								_this.token.lgpassword, {
+									force : true,
+									session : _this,
+									// 將 'login' 置於最前頭。
+									login_mark : true
+								});
 					} else {
 						// next[3] : callback
 						if (typeof next[3] === 'function')
@@ -1920,7 +1967,8 @@ wiki_API.prototype.next = function() {
 		break;
 
 	case 'login':
-		library_namespace.debug('正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。', 2, 'wiki_API.prototype.next');
+		library_namespace.debug('正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。',
+				2, 'wiki_API.prototype.next');
 	case 'wait':
 		// rollback
 		this.actions.unshift(next);
@@ -2102,9 +2150,8 @@ wiki_API.prototype.work = function(config, pages, titles) {
 	library_namespace.debug('wiki_API.work: 開始執行:先作環境建構與初始設定。');
 	if (config.summary)
 		// '開始處理 ' + config.summary + ' 作業'
-		library_namespace.sinfo([
-				'wiki_API.work: start [', 'fg=yellow', config.summary, '-fg',
-				']' ]);
+		library_namespace.sinfo([ 'wiki_API.work: start [', 'fg=yellow',
+				config.summary, '-fg', ']' ]);
 
 	/**
 	 * <code>
@@ -2428,6 +2475,7 @@ wiki_API.prototype.work = function(config, pages, titles) {
 						//
 						'\nlog:<br />\n' + messages.join('<br />\n'));
 						// 改寫於可寫入處。e.g., 'Wikipedia:Sandbox'
+						// TODO: bug: 當分批時，只會寫入最後一次。
 						this.page('User:' + this.token.lgname)
 						//
 						.edit(messages.join('\n'), options);
@@ -2781,7 +2829,8 @@ wiki_API.query.id_of_page = function(page_data, title_only) {
 		return !title_only && page_data.pageid || page_data.title;
 
 	if (!page_data)
-		library_namespace.err('wiki_API.query.id_of_page: Invalid title: [' + page_data + ']');
+		library_namespace.err('wiki_API.query.id_of_page: Invalid title: ['
+				+ page_data + ']');
 	return page_data;
 };
 
@@ -2862,16 +2911,21 @@ wiki_API.page = function(title, callback, options) {
 	//
 	&& function(data) {
 		if (library_namespace.is_debug(2)
-			// .show_value() @ interact.DOM, application.debug
-			&& library_namespace.show_value)
+		// .show_value() @ interact.DOM, application.debug
+		&& library_namespace.show_value)
 			library_namespace.show_value(data, 'wiki_API.page: data');
 
 		var error = data && data.error;
 		// 檢查伺服器回應是否有錯誤資訊。
 		if (error) {
-			library_namespace.err('wiki_API.page: [' + error.code + '] ' + error.info);
-			// e.g., Too many values supplied for parameter 'pageids': the limit is 50
-			if (data.warnings && data.warnings.query && data.warnings.query['*'])
+			library_namespace.err('wiki_API.page: ['
+			//
+			+ error.code + '] ' + error.info);
+			// e.g., Too many values supplied for parameter 'pageids': the limit
+			// is 50
+			if (data.warnings && data.warnings.query
+			//
+			&& data.warnings.query['*'])
 				library_namespace.warn(data.warnings.query['*']);
 			callback();
 			return;
@@ -2880,11 +2934,13 @@ wiki_API.page = function(title, callback, options) {
 		if (!data || !data.query || !data.query.pages) {
 			library_namespace.warn('wiki_API.page: Unknown response: ['
 			// e.g., 'wiki_API.page: Unknown response: [{"batchcomplete":""}]'
-			+ (typeof data === 'object' && typeof JSON !== 'undefined' ? JSON.stringify(data) : data) + ']');
+			+ (typeof data === 'object' && typeof JSON !== 'undefined'
+			//
+			? JSON.stringify(data) : data) + ']');
 			// library_namespace.set_debug(6);
 			if (library_namespace.is_debug()
-				// .show_value() @ interact.DOM, application.debug
-				&& library_namespace.show_value)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
 				library_namespace.show_value(data);
 			callback();
 			return;
@@ -2902,7 +2958,9 @@ wiki_API.page = function(title, callback, options) {
 			if (!get_page_content.has_content(page)) {
 				library_namespace.warn('wiki_API.page: '
 				// 頁面不存在。Page does not exist. Deleted?
-				+ ('missing' in page ? 'Not exists' : 'No content') + ': [[' + page.title + ']]');
+				+ ('missing' in page ? 'Not exists' : 'No content')
+				//
+				+ ': [[' + page.title + ']]');
 			} else if (page_cache_prefix) {
 				node_fs.writeFile(page_cache_prefix + page.title + '.json',
 				/**
@@ -2916,17 +2974,23 @@ wiki_API.page = function(title, callback, options) {
 		if (!options || !options.multi)
 			if (pages.length <= 1) {
 				// e.g., pages: { '1850031': [Object] }
-				library_namespace.debug('只取得單頁面 [[' + pages + ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
-				if ((pages = pages[0]) && (pages.is_Flow = is_Flow(pages))
+				library_namespace.debug('只取得單頁面 [[' + pages
+				//
+				+ ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
+				pages = pages[0];
+				if (pages && (pages.is_Flow = is_Flow(pages))
 				// e.g., { flow_view : 'header' }
 				&& options && options.flow_view) {
 					Flow_page(pages, callback, options);
 					return;
 				}
-			} else
+			} else {
 				library_namespace.debug('Get ' + pages.length
 				//
-				+ ' page(s)! The pages will all passed to callback as Array!', 2, 'wiki_API.page');
+				+ ' page(s)! The pages will all '
+				//
+				+ 'passed to the callback as Array!', 2, 'wiki_API.page');
+			}
 
 		// page 之 structure 將按照 wiki API 本身之 return！
 		// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
@@ -3092,8 +3156,9 @@ wiki_API.langlinks.parse = function(langlinks, to_lang) {
 //---------------------------------------------------------------------//
 
 /**
- * 自 title 頁面取得後續檢索用索引值 (continuation data)。 e.g., 'continue'
- *
+ * 自 title 頁面取得後續檢索用索引值 (continuation data)。<br />
+ * e.g., 'continue'
+ * 
  * @param {String|Array}title
  *            the page title to search continue information
  * @param {Function|Object}callback
@@ -3123,7 +3188,8 @@ function get_continue(title, callback) {
 		library_namespace.debug('pattern: ' + pattern, 2, 'get_continue');
 
 		while (matched = pattern.exec(content)) {
-			library_namespace.debug('continue data: [' + matched[1] + ']', 2, 'get_continue');
+			library_namespace.debug('continue data: [' + matched[1] + ']', 2,
+					'get_continue');
 			if (!(done = /^{\s*}$/.test(matched[1])))
 				data = Object.assign(data,
 				//
@@ -3133,7 +3199,8 @@ function get_continue(title, callback) {
 		// options.get_all: get all continue data.
 		if (!options.get_all)
 			if (done) {
-				library_namespace.debug('最後一次之後續檢索用索引值為空，可能已完成？', 1, 'get_continue');
+				library_namespace.debug('最後一次之後續檢索用索引值為空，可能已完成？', 1,
+						'get_continue');
 				data = null;
 			} else {
 				// {String|Boolean}[options.type]: what type to search.
@@ -3158,7 +3225,7 @@ function get_continue(title, callback) {
 /**
  * get list. 檢索/提取列表<br />
  * 注意: 可能會改變 options！
- *
+ * 
  * @param {String}type
  *            one of get_list.type
  * @param {String}title
@@ -3169,8 +3236,8 @@ function get_continue(title, callback) {
  *            one of get_namespace.hash
  */
 function get_list(type, title, callback, namespace) {
-	library_namespace.debug(type + (title ? ' [[' + title + ']]' : '') + ', callback: ' + callback,
-			3);
+	library_namespace.debug(type + (title ? ' [[' + title + ']]' : '')
+			+ ', callback: ' + callback, 3);
 	var options,
 	// 前置字首
 	prefix = get_list.type[type], parameter;
@@ -3200,8 +3267,10 @@ function get_list(type, title, callback, namespace) {
 	// 若未設定 .next_mark，才會自 options.get_continue 取得後續檢索用索引值。
 	continue_wiki = options.continue_wiki;
 	if (continue_wiki)
-		if(continue_wiki.constructor === wiki_API) {
-			library_namespace.debug('直接傳入了 {wiki_API}；可延續使用上次的後續檢索用索引值，避免重複 loading page。', 4, 'get_list');
+		if (continue_wiki.constructor === wiki_API) {
+			library_namespace.debug(
+					'直接傳入了 {wiki_API}；可延續使用上次的後續檢索用索引值，避免重複 loading page。', 4,
+					'get_list');
 			// usage: options: { continue_wiki : wiki, get_continue : log_to }
 			// 注意: 這裡會改變 options！
 			// assert: {Object}continue_wiki.next_mark
@@ -3209,14 +3278,16 @@ function get_list(type, title, callback, namespace) {
 				// {String}continue_wiki.next_mark[continue_from]: 後續檢索用索引值。
 				options[continue_from] = continue_wiki.next_mark[continue_from];
 				// 經由,經過,通過來源
-				library_namespace.info('get_list: continue from [' + options[continue_from] + '] via {wiki_API}');
+				library_namespace.info('get_list: continue from ['
+						+ options[continue_from] + '] via {wiki_API}');
 				// 刪掉標記，避免無窮迴圈。
 				delete options.get_continue;
 			} else {
 				// 設定好 options.get_continue，以進一步從 page 取得後續檢索用索引值。
 				if (typeof options.get_continue === 'string')
 					// 採用 continue_wiki 之 domain。
-					options.get_continue = [ continue_wiki.API_URL, options.get_continue ];
+					options.get_continue = [ continue_wiki.API_URL,
+							options.get_continue ];
 			}
 		} else {
 			library_namespace.debug('傳入的不是 {wiki_API}。 ', 4, 'get_list');
@@ -3227,25 +3298,30 @@ function get_list(type, title, callback, namespace) {
 	// {String}title || {Array}[ API_URL, title ]
 	if (options.get_continue) {
 		// 在多人共同編輯的情況下，才需要每次重新 load page。
-		get_continue(Array.isArray(options.get_continue) ? options.get_continue : [ title[0], options.get_continue ], {
+		get_continue(Array.isArray(options.get_continue) ? options.get_continue
+				: [ title[0], options.get_continue ], {
 			type : type,
 			// options.wiki: 作業中之 {wiki_API}
 			continue_key : (continue_wiki || options.wiki).continue_key,
 			callback : function(continuation_data) {
 				if (continuation_data = continuation_data[continue_from]) {
-					library_namespace.info('get_list: continue from [' + continuation_data + '] via page');
+					library_namespace.info('get_list: continue from ['
+							+ continuation_data + '] via page');
 					// 注意: 這裡會改變 options！
 					// 刪掉標記，避免無窮迴圈。
 					delete options.get_continue;
 					// 設定/紀錄後續檢索用索引值，避免無窮迴圈。
 					if (continue_wiki)
-						continue_wiki.next_mark[continue_from] = continuation_data;
+						continue_wiki.next_mark
+
+						[continue_from] = continuation_data;
 					else
 						options[continue_from] = continuation_data;
 					get_list(type, title, callback, options);
 				} else {
-					//delete options[continue_from];
-					library_namespace.debug('Nothing to continue!', 1, 'get_list');
+					// delete options[continue_from];
+					library_namespace.debug('Nothing to continue!', 1,
+							'get_list');
 					if (typeof callback === 'function')
 						callback();
 				}
@@ -3255,24 +3331,26 @@ function get_list(type, title, callback, namespace) {
 	}
 
 	if (continue_from = options[continue_from]) {
-		library_namespace.debug(type + (title ? ' [[' + title + ']]' : '') + ': start from '
-				+ continue_from, 2, 'get_list');
+		library_namespace.debug(type + (title ? ' [[' + title + ']]' : '')
+				+ ': start from ' + continue_from, 2, 'get_list');
 	}
 
-	title[1] = 'query&' + parameter + '=' + type
+	title[1] = 'query&' + parameter + '=' + type + (title[1] ? '&'
 	// allpages 不具有 title。
-	+ (title[1] ?  '&' + (parameter === get_list.default_parameter ? prefix : '')
+	+ (parameter === get_list.default_parameter ? prefix : '')
 	//
 	+ wiki_API.query.title_param(title[1]) : '')
 	// 數目限制。No more than 500 (5,000 for bots) allowed.
-	// Type: integer or max
+	+ (options.limit > 0 || options.limit === 'max'
+	// @type integer or 'max'
 	// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
-	+ (options.limit > 0 || options.limit === 'max' ? '&' + prefix + 'limit=' + options.limit : '')
+	? '&' + prefix + 'limit=' + options.limit : '')
 	// next start from here.
 	+ (continue_from ?
 	// allpages 的 apcontinue 為 title，需要 encodeURIComponent()。
-	// 未處理可能造成 HTTP status 400。
-	'&' + prefix + 'continue=' + encodeURIComponent(continue_from) : '')
+	'&' + prefix + 'continue='
+	// 未處理allpages 的 escape 可能造成 HTTP status 400。
+	+ encodeURIComponent(continue_from) : '')
 	//
 	+ ('namespace' in options
 	//
@@ -3312,22 +3390,28 @@ function get_list(type, title, callback, namespace) {
 		next_index = data['continue'] || data['query-continue'];
 		if (library_namespace.is_Object(next_index)) {
 			pages.next_index = next_index;
-			library_namespace.debug('因為 continue_wiki 可能與作業中之 {wiki_API} 不同，因此需要在本函數 function get_list() 中設定好。', 4, 'get_list');
-			//console.log(continue_wiki);
+			library_namespace.debug('因為 continue_wiki 可能與作業中之 {wiki_API} 不同，'
+			//
+			+ '因此需要在本函數 function get_list() 中設定好。', 4, 'get_list');
+			// console.log(continue_wiki);
 			if (continue_wiki
-				// options.wiki: 作業中之 {wiki_API}
-				|| (continue_wiki = options.wiki)) {
-				//console.log(continue_wiki.next_mark);
-				//console.log(next_index);
-				//console.log(continue_wiki);
+			// options.wiki: 作業中之 {wiki_API}
+			|| (continue_wiki = options.wiki)) {
+				// console.log(continue_wiki.next_mark);
+				// console.log(next_index);
+				// console.log(continue_wiki);
 				if ('query-continue' in data)
-					// style of 2014 CE. 例如 {backlinks:{blcontinue:'[0|12]'}}。
+					// style of 2014 CE. 例如:
+					// {backlinks:{blcontinue:'[0|12]'}}
 					for ( var type_index in next_index)
-						Object.assign(continue_wiki.next_mark, next_index[type_index]);
+						Object.assign(continue_wiki.next_mark,
+								next_index[type_index]);
 				else
-					// nowadays. e.g., {continue: { blcontinue: '0|123', continue: '-||' }}
+					// nowadays. e.g.,
+					// {continue: { blcontinue: '0|123', continue: '-||' }}
 					Object.assign(continue_wiki.next_mark, next_index);
-				library_namespace.debug('next index of ' + type + ': ' + continue_wiki.show_next());
+				library_namespace.debug('next index of ' + type + ': '
+						+ continue_wiki.show_next());
 			}
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
@@ -3342,9 +3426,11 @@ function get_list(type, title, callback, namespace) {
 			title = title.title;
 
 		if (!data || !data.query) {
-			library_namespace.err('get_list: Unknown response: ['
-			//
-			+ (typeof data === 'object' && typeof JSON !== 'undefined' ? JSON.stringify(data) : data) + ']');
+			library_namespace
+					.err('get_list: Unknown response: ['
+							+ (typeof data === 'object'
+									&& typeof JSON !== 'undefined' ? JSON
+									.stringify(data) : data) + ']');
 
 		} else if (data.query[type]) {
 			// 一般情況。
@@ -3356,7 +3442,7 @@ function get_list(type, title, callback, namespace) {
 			callback(title, titles, pages);
 
 		} else {
-			//console.log(data.query);
+			// console.log(data.query);
 			data = data.query.pages;
 			for ( var pageid in data) {
 				if (pages.length)
@@ -3381,13 +3467,17 @@ function get_list(type, title, callback, namespace) {
 // const: 基本上與程式碼設計合一，僅表示名義，不可更改。
 get_list.default_parameter = 'list';
 
-// https://www.mediawiki.org/wiki/API:Lists/All
-// [[Special:Whatlinkshere]]
-// 使用說明:連入頁面
-// https://zh.wikipedia.org/wiki/Help:%E9%93%BE%E5%85%A5%E9%A1%B5%E9%9D%A2
+/**
+ * All list types MediaWiki supported.
+ * 
+ * @type {Object}
+ * 
+ * @see https://www.mediawiki.org/wiki/API:Lists/All
+ */
 get_list.type = {
 
-	// 'type name' : 'abbreviation 縮寫 / prefix' (parameter : get_list.default_parameter)
+	// 'type name' : 'abbreviation 縮寫 / prefix' (parameter :
+	// get_list.default_parameter)
 
 	// 按標題排序列出指定的名字空間的頁面 title。
 	// https://www.mediawiki.org/wiki/API:Allpages
@@ -3415,6 +3505,9 @@ get_list.type = {
 	// ** 可一次處理多個標題，但可能較耗資源、較慢。
 
 	// linkshere: 取得連結到 [[title]] 的頁面。
+	// [[Special:Whatlinkshere]]
+	// 使用說明:連入頁面
+	// https://zh.wikipedia.org/wiki/Help:%E9%93%BE%E5%85%A5%E9%A1%B5%E9%9D%A2
 	linkshere : [ 'lh', 'prop' ],
 
 	// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
@@ -3430,7 +3523,7 @@ get_list.type = {
 	// 登記 methods。
 	var methods = wiki_API.prototype.next.methods;
 
-	for (var name in get_list.type) {
+	for ( var name in get_list.type) {
 		methods.push(name);
 		wiki_API[name] = get_list.bind(null, name);
 	}
@@ -3438,12 +3531,14 @@ get_list.type = {
 	// add method to wiki_API.prototype
 	// setup other wiki_API.prototype methods.
 	methods.forEach(function(method) {
-		library_namespace.debug('add action to wiki_API.prototype: ' + method, 2);
+		library_namespace.debug('add action to wiki_API.prototype: ' + method,
+				2);
 		wiki_API.prototype[method] = function() {
 			// assert: 不可改動 method @ IE！
 			var args = [ method ];
 			Array.prototype.push.apply(args, arguments);
-			library_namespace.debug('add action: ' + args.join('<br />\n'), 3, 'wiki_API.prototype.' + method);
+			library_namespace.debug('add action: ' + args.join('<br />\n'), 3,
+					'wiki_API.prototype.' + method);
 			this.actions.push(args);
 			if (!this.running)
 				this.next();
@@ -3734,10 +3829,11 @@ wiki_API.check_stop.pattern = /\n=([^\n]+)=\n/;
 
 /**
  * 編輯頁面。一次處理一個標題。<br />
- * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問!此時需要另外含入檢查機制! 
- *
+ * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問!此時需要另外含入檢查機制!
+ * 
  * @param {String|Array}title
- *            page title 頁面標題。 {String}title or [ {String}API_URL, {String}title or {Object}page_data ]
+ *            page title 頁面標題。 {String}title or [ {String}API_URL, {String}title
+ *            or {Object}page_data ]
  * @param {String|Function}text
  *            page contents 頁面內容。 {String}text or {Function}text(page_data)
  * @param {Object}token
@@ -3751,19 +3847,21 @@ wiki_API.check_stop.pattern = /\n=([^\n]+)=\n/;
  */
 wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 	if (typeof text === 'function') {
-		library_namespace.debug('先取得內容再 edit [' + get_page_title(title)
-				+ ']。', 1, 'wiki_API.edit');
+		library_namespace.debug('先取得內容再 edit [' + get_page_title(title) + ']。',
+				1, 'wiki_API.edit');
 		wiki_API.page(title, function(page_data) {
 			if (wiki_API.edit.denied(page_data, options.bot_id,
 					options.notification)) {
 				library_namespace.warn(
 				// Permission denied
-				'wiki_API.edit: Denied to edit [' + get_page_title(page_data) + ']');
+				'wiki_API.edit: Denied to edit [' + get_page_title(page_data)
+						+ ']');
 				callback(get_page_title(page_data), 'denied');
 			} else {
 				// text(get_page_content(page_data), page_data.title, page_data)
 				// 需要同時改變 wiki_API.prototype.next！
-				wiki_API.edit(page_data, text(page_data), token, options, callback);
+				wiki_API.edit(page_data, text(page_data), token, options,
+						callback);
 			}
 		});
 		return;
@@ -3788,7 +3886,8 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 		title = get_page_title(title);
 		if (action[1] !== 'skip') {
 			// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
-			library_namespace.warn('wiki_API.edit: [[' + title + ']]: ' + action[1]);
+			library_namespace.warn('wiki_API.edit: [[' + title + ']]: '
+					+ action[1]);
 		} else {
 			library_namespace.debug('Skip [[' + title + ']]', 2);
 		}
@@ -3804,13 +3903,13 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 		// e.g., write_to:'Wikipedia:沙盒',
 		title = options.write_to;
 		library_namespace.debug('依 options.write_to 寫入至 [[' + title + ']]', 1,
-			'wiki_API.edit');
+				'wiki_API.edit');
 	}
 
 	// 造出可 modify 的 options。
 	if (options)
 		library_namespace.debug('#1: ' + Object.keys(options).join(','), 4,
-			'wiki_API.edit');
+				'wiki_API.edit');
 	options = Object.assign({
 		text : text
 	}, options);
@@ -3840,23 +3939,35 @@ wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 				//
 				+ (data.edit.info || data.edit.captcha && '必需輸入驗證碼'));
 		if (error) {
-			// wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
-			// https://doc.wikimedia.org/mediawiki-core/master/php/ApiEditPage_8php_source.html
+			/**
+			 * <code>
+			   wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
+			 * </code>
+			 * 
+			 * @see https://doc.wikimedia.org/mediawiki-core/master/php/ApiEditPage_8php_source.html
+			 */
 			if (data.error && data.error.code === 'no-direct-editing'
 			// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 			&& options.section === 'new') {
 				// 無法以正常方式編輯，嘗試當作 Flow 討論頁面。
 				edit_topic(title, options.sectiontitle,
 				// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
-				text.replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''), options.token, options, callback);
+				text.replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''), options.token,
+						options, callback);
 				return;
 			}
+			/**
+			 * <s>遇到過長的頁面 (e.g., 過多 transclusion。系統上限 2,048 KB。)，可能產生錯誤：<br />
+			 * [editconflict] Edit conflict detected</s><br />
+			 * 
+			 * 須注意是否有其他競相編輯的 bots。
+			 */
 			library_namespace.warn('wiki_API.edit: Error to edit [['
 					+ get_page_title(title) + ']]: ' + error);
 		} else if (data.edit && ('nochange' in data.edit))
 			// 在極少的情況下，data.edit === undefined。
-			library_namespace.info('wiki_API.edit: ['
-					+ get_page_title(title) + ']: no change');
+			library_namespace.info('wiki_API.edit: [' + get_page_title(title)
+					+ ']: no change');
 		if (typeof callback === 'function')
 			// title.title === get_page_title(title)
 			callback(title.title, error, data);
@@ -5359,8 +5470,11 @@ wiki_API.cache = function(operation, callback, _this) {
 		 * 寫入 cache 至檔案系統。
 		 */
 		function write_cache(data) {
-			// 當設定 operation.cache: false 時，不寫入 cache。
-			if (operation.cache !== false && /[^\\\/]$/.test(file_name)) {
+			if (operation.cache === false) {
+				library_namespace.info('wiki_API.cache.write_cache: '
+				// 當設定 operation.cache: false 時，不寫入 cache。
+				+ '設定 operation.cache === false，不寫入 cache。');
+			} else if (/[^\\\/]$/.test(file_name)) {
 				library_namespace.info('wiki_API.cache: Write cache data to ['
 						+ file_name + '].');
 				library_namespace.debug('Cache data: '
@@ -5434,6 +5548,9 @@ wiki_API.cache = function(operation, callback, _this) {
 				write_cache(list);
 				return;
 			}
+			if (list.length > 1e6) {
+				library_namespace.warn('wiki_API.cache: 耗時過長而不實際。');
+			}
 
 			/**
 			 * 處理多項列表作業。
@@ -5449,7 +5566,6 @@ wiki_API.cache = function(operation, callback, _this) {
 			}
 			if (typeof _operation.each === 'function') {
 				// 每一項執行一次 .each()
-				_operation.operator = _operation.each;
 				delete _operation.each;
 			} else {
 				if (typeof _operation.each_retrieve === 'function')
@@ -5499,11 +5615,10 @@ wiki_API.cache = function(operation, callback, _this) {
 
 		switch (type) {
 		case 'page':
-			// page content 內容
+			// get page content 內容
 			to_get_data = function(title, callback) {
-				library_namespace.log(
-				//
-				'wiki_API.cache: Get content of [[' + get_page_title(title) + ']].');
+				library_namespace.log('wiki_API.cache: Get content of [['
+						+ get_page_title(title) + ']].');
 				wiki_API.page(title, function(page_data) {
 					callback(page_data);
 				}, Object.assign(library_namespace.null_Object(), _this,
@@ -5567,7 +5682,7 @@ wiki_API.cache = function(operation, callback, _this) {
 		}
 
 		// recover type
-		//if (list_type) type = list_type;
+		// if (list_type) type = list_type;
 
 		var title = list;
 		if (typeof title === 'string' && _this.title_prefix)
@@ -5577,7 +5692,6 @@ wiki_API.cache = function(operation, callback, _this) {
 		to_get_data(title, write_cache);
 	});
 };
-
 
 /** {String}預設 file encoding for fs of node.js。 */
 wiki_API.encoding = 'utf8';
@@ -5731,18 +5845,18 @@ function is_Flow(page_data) {
 
 /** {Object}abbreviation 縮寫 */
 var Flow_abbreviation = {
-		// 關於討論板的描述。
-		header : 'h',
-		// 討論板話題列表。
-		topiclist : 'tl'
+	// 關於討論板的描述。
+	header : 'h',
+	// 討論板話題列表。
+	topiclist : 'tl'
 };
 
 /**
  * get topics of the page.
  * 
  * @param {String|Array}title
- *            page title 頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [ {String}API_URL,
- *            {String}title or {Object}page_data ]
+ *            page title 頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [
+ *            {String}API_URL, {String}title or {Object}page_data ]
  * @param {Function}callback
  *            回調函數。 callback({Object}topiclist)
  * @param {Object}[options]
@@ -5769,8 +5883,9 @@ function Flow_page(title, callback, options) {
 	//
 	|| Flow_page.default_flow_view;
 	title[1] = 'flow&submodule=view-' + view + '&v'
-	+ (Flow_abbreviation[view] || view.charAt(0).toLowerCase()) + 'format='
-	+ (options && options.format || 'wikitext') + '&' + title[1];
+			+ (Flow_abbreviation[view] || view.charAt(0).toLowerCase())
+			+ 'format=' + (options && options.format || 'wikitext') + '&'
+			+ title[1];
 
 	if (!title[0])
 		title = title[1];

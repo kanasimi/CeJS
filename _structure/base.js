@@ -107,7 +107,7 @@ function (global) {
 		/** @const */ library_name = 'CeL',
 
 		/**
-		 * library version
+		 * library version.
 		 * 
 		 * @type {String}
 		 * @ignore
