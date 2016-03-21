@@ -9,23 +9,23 @@
  * @see https://www.mediawiki.org/w/api.php
  */
 
+// More examples: see /_test suite/test.js
+// Wikipedia bots demo: https://github.com/kanasimi/wikibot
+
 // TODO:
-// 遇到 Invalid token 之類問題，中途跳出 abort 時，無法紀錄。應將紀錄顯示於 console 或 local file。
-// [[WP:維基化]]
+// wiki_API.work() 遇到 Invalid token 之類問題，中途跳出 abort 時，無法紀錄。應將紀錄顯示於 console 或 local file。
+// wiki_API.work() 添加網頁報告。
+// wiki_API.page() 整合各 action=query 至單一公用 function。
+// paser 調用超過一個Template中參數的值，只有最後提供的值會被使用。
+// paser 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
+// paser 所有子頁面加入白名單 whitelist
+// paser [[WP:維基化]]
 // https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 // https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
 // https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
-// 整合各 action=query 至單一公用 function。
-// 添加網頁報告。
-// 調用超過一個Template中參數的值，只有最後提供的值會被使用。
-// 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
-// 所有子頁面加入白名單 whitelist
 
 'use strict';
 //'use asm';
-
-// More examples: see /_test suite/test.js
-// Wikipedia bots demo: https://github.com/kanasimi/wikibot
 
 // --------------------------------------------------------------------------------------------- //
 
@@ -3522,7 +3522,8 @@ get_list.type = {
 	// get_list.default_parameter)
 
 	// 按標題排序列出指定的名字空間的頁面 title。
-	// 可用來遍歷 traversal pages。
+	// 可用來遍歷所有頁面。
+	// @see traversal_pages()
 	// https://www.mediawiki.org/wiki/API:Allpages
 	// 警告: 不在 Tool Labs 執行 allpages 速度太慢。但若在 Tool Labs，當改用 database。
 	allpages : 'ap',
@@ -5808,12 +5809,13 @@ wiki_API.cache.title_only = function(operation) {
 // https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
 var all_title_SQL = 'SELECT `page_id` AS i FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
 if (false)
+	// for debug.
 	all_title_SQL += ' LIMIT 8';
 
 /**
- * 應用功能: 遍歷 pages。
+ * 應用功能: 遍歷所有頁面。
  * 
- * TODO: 若 revision 相同，讀取 dump 而不從 API。
+ * TODO: 若 revision 相同，從 dump 而不從 API 讀取。
  * 
  * @param {Object}[config]
  *            configuration
@@ -5828,14 +5830,25 @@ function traversal_pages(config, callback) {
 	} else
 		config = library_namespace.new_options(config);
 
+	if (config.use_dump) {
+		// @see process_dump.js
+		read_dump(callback, {
+			directory : config.directory,
+			first : config.first,
+			last : config.last
+		});
+		return;
+	}
+
 	var title_list,
 	//
 	cache_config = {
 		// all title/id list
 		file_name : config.file_name || 'all_pages',
 		operator : function(list) {
-			if (JSON.stringify(list[0]) === '{}') {
-				library_namespace.info('traversal_pages: 此資料似乎來自 database，為 page id。');
+			if (JSON.stringify(list[0]) === JSON.stringify(traversal_pages.id_mark)) {
+				library_namespace.info('traversal_pages: 此資料似乎為 page id，來自 database。');
+				// popup traversal_pages.id_mark
 				list.shift();
 				list.is_id = true;
 			}
@@ -5873,7 +5886,7 @@ function traversal_pages(config, callback) {
 					});
 					// indicate it's page id instead of page title.
 					// 須採用絕不可能用來當作標題之 value。
-					config.list.unshift({});
+					config.list.unshift(traversal_pages.id_mark);
 					// config.is_id = is_id;
 				}
 				traversal_pages(config, callback);
@@ -5907,6 +5920,9 @@ function traversal_pages(config, callback) {
 		prefix : config.directory
 	});
 }
+
+/** 表示此 cache list 為 page id，而非 page title。勿用過於複雜、無法 JSON.stringify() 或過於簡單的結構。 */
+traversal_pages.id_mark = {};
 
 wiki_API.traversal = traversal_pages;
 
