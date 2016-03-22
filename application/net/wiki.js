@@ -2919,8 +2919,10 @@ function module_code(library_namespace) {
 	 *            page_data is {Array}multi-page_data
 	 * @param {Boolean}[is_id]
 	 *            page_data is page_id instead of page_data
+	 * @param {String}[param_name]
+	 *            param name. default: 'title' or 'titles'.
 	 */
-	wiki_API.query.title_param = function(page_data, multi, is_id) {
+	wiki_API.query.title_param = function(page_data, multi, is_id, param_name) {
 		var pageid;
 
 		if (Array.isArray(page_data)) {
@@ -2988,7 +2990,7 @@ function module_code(library_namespace) {
 
 		return pageid === undefined
 		//
-		? 'title' + multi + encodeURIComponent(page_data)
+		? (param_name || 'title' + multi) + encodeURIComponent(page_data)
 		//
 		: 'pageid' + multi + pageid;
 	};
@@ -3536,11 +3538,18 @@ function module_code(library_namespace) {
 					+ ': start from ' + continue_from, 2, 'get_list');
 		}
 
-		title[1] = 'query&' + parameter + '=' + type + (title[1] ? '&'
+		title[1] = title[1] ? '&'
 		// allpages 不具有 title。
 		+ (parameter === get_list.default_parameter ? prefix : '')
 		//
-		+ wiki_API.query.title_param(title[1]) : '')
+		+ wiki_API.query.title_param(title[1]) : '';
+
+		if (type === 'prefixsearch') {
+			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bprefixsearch
+			title[1] = title[1].replace(/^&pstitle=/, '&pssearch=');
+		}
+
+		title[1] = 'query&' + parameter + '=' + type + title[1]
 		// 處理數目限制 limit。
 		// No more than 500 (5,000 for bots) allowed.
 		+ (options.limit > 0 || options.limit === 'max'
@@ -3688,6 +3697,17 @@ function module_code(library_namespace) {
 		// 警告: 不在 Tool Labs 執行 allpages 速度太慢。但若在 Tool Labs，當改用 database。
 		allpages : 'ap',
 
+		// https://www.mediawiki.org/wiki/API:Alllinks
+		alllinks : 'al',
+
+		/**
+		 * 為頁面標題執行前綴搜索。<br />
+		 * <code>
+		CeL.wiki.prefixsearch('User:Cewbot/log/20151002/', function(title, titles, pages){ console.log(titles); });
+		 * </code>
+		 */
+		prefixsearch : 'ps',
+
 		// 取得連結到 [[title]] 的頁面。
 		// e.g., [[name]], [[:Template:name]].
 		// https://www.mediawiki.org/wiki/API:Backlinks
@@ -3716,10 +3736,8 @@ function module_code(library_namespace) {
 
 		// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
 		// 基本上同 imageusage。
-		fileusage : [ 'fu', 'prop' ],
+		fileusage : [ 'fu', 'prop' ]
 
-		// https://www.mediawiki.org/wiki/API:Alllinks
-		alllinks : [ 'al', 'prop' ]
 	};
 
 	(function() {
