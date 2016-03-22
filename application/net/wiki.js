@@ -1974,8 +1974,10 @@ function module_code(library_namespace) {
 						flow_view : 'header'
 					});
 
-				} else if (wiki_API.edit.denied(this.last_page,
-						this.token.lgname, next[2] && next[2].notification)) {
+				} else if ((!next[2] || !next[2].ignore_denial)
+						&& wiki_API.edit.denied(this.last_page,
+								this.token.lgname, next[2]
+										&& next[2].notification)) {
 					// {{bot}} support for flow page
 					// 採用 this.last_page 的方法，
 					// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
@@ -2011,8 +2013,9 @@ function module_code(library_namespace) {
 					});
 				}
 
-			} else if (wiki_API.edit.denied(this.last_page, this.token.lgname,
-					next[2] && next[2].notification)) {
+			} else if ((!next[2] || !next[2].ignore_denial)
+					&& wiki_API.edit.denied(this.last_page, this.token.lgname,
+							next[2] && next[2].notification)) {
 				// 採用 this.last_page 的方法，
 				// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 				library_namespace
@@ -3703,7 +3706,8 @@ function module_code(library_namespace) {
 		/**
 		 * 為頁面標題執行前綴搜索。<br />
 		 * <code>
-		CeL.wiki.prefixsearch('User:Cewbot/log/20151002/', function(title, titles, pages){ console.log(titles); });
+		CeL.wiki.prefixsearch('User:Cewbot/log/20151002/', function(title, titles, pages){ console.log(titles); }, {limit:'max'});
+		wiki_instance.prefixsearch('User:Cewbot', function(title, titles, pages){ console.log(titles); }, {limit:'max'});
 		 * </code>
 		 */
 		prefixsearch : 'ps',
@@ -4093,8 +4097,9 @@ function module_code(library_namespace) {
 			library_namespace.debug('先取得內容再 edit [' + get_page_title(title)
 					+ ']。', 1, 'wiki_API.edit');
 			wiki_API.page(title, function(page_data) {
-				if (wiki_API.edit.denied(page_data, options.bot_id,
-						options.notification)) {
+				if (!options.ignore_denial
+						&& wiki_API.edit.denied(page_data, options.bot_id,
+								options.notification)) {
 					library_namespace.warn(
 					// Permission denied
 					'wiki_API.edit: Denied to edit ['
@@ -6081,27 +6086,28 @@ function module_code(library_namespace) {
 						.info('traversal_pages: 嘗試讀取 Tool Labs 之 database 資料...');
 				// default: 採用 page_id 而非 page_title 來 query。
 				var is_id = 'is_id' in config ? config.is_id : true;
-				run_SQL(is_id ? all_title_SQL : all_title_SQL.replace(
-						/page_id/g, 'page_title'),
-						function(error, rows, fields) {
-							if (error) {
-								library_namespace.err(error);
-								config.no_database = error;
-							} else {
-								library_namespace.log('traversal_pages: All '
-										+ rows.length + ' pages. 轉換中...');
-								config.list = rows.map(function(row) {
-									for ( var id in row)
-										return is_id ? row[id] | 0 : row[id]
-												.toString('utf8');
-								});
-								// indicate it's page id instead of page title.
-								// 須採用絕不可能用來當作標題之 value。
-								config.list.unshift(traversal_pages.id_mark);
-								// config.is_id = is_id;
-							}
-							traversal_pages(config, callback);
+				run_SQL(is_id ? all_title_SQL
+				//
+				: all_title_SQL.replace(/page_id/g, 'page_title'), function(
+						error, rows, fields) {
+					if (error) {
+						library_namespace.err(error);
+						config.no_database = error;
+					} else {
+						library_namespace.log('traversal_pages: All '
+								+ rows.length + ' pages. 轉換中...');
+						config.list = rows.map(function(row) {
+							for ( var id in row)
+								return is_id ? row[id] | 0 : row[id]
+										.toString('utf8');
 						});
+						// indicate it's page id instead of page title.
+						// 須採用絕不可能用來當作標題之 value。
+						config.list.unshift(traversal_pages.id_mark);
+						// config.is_id = is_id;
+					}
+					traversal_pages(config, callback);
+				});
 				return wiki_API.cache.abort;
 			};
 
@@ -6184,78 +6190,82 @@ function module_code(library_namespace) {
 			title = title[1];
 
 		wiki_API.query(title, typeof callback === 'function'
+		//
+		&& function(data) {
+			if (library_namespace.is_debug(2)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+				library_namespace.show_value(data, 'Flow_info: data');
+
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.err('Flow_info: ['
 				//
-				&& function(data) {
-					if (library_namespace.is_debug(2)
-					// .show_value() @ interact.DOM, application.debug
-					&& library_namespace.show_value)
-						library_namespace.show_value(data, 'Flow_info: data');
+				+ error.code + '] ' + error.info);
+				/**
+				 * e.g., Too many values supplied for parameter 'pageids': the
+				 * limit is 50
+				 */
+				if (data.warnings
+				//
+				&& data.warnings.query && data.warnings.query['*'])
+					library_namespace.warn(data.warnings.query['*']);
+				callback();
+				return;
+			}
 
-					var error = data && data.error;
-					// 檢查伺服器回應是否有錯誤資訊。
-					if (error) {
-						library_namespace.err('Flow_info: ['
-						//
-						+ error.code + '] ' + error.info);
-						/**
-						 * e.g., Too many values supplied for parameter
-						 * 'pageids': the limit is 50
-						 */
-						if (data.warnings && data.warnings.query
-						//
-						&& data.warnings.query['*'])
-							library_namespace.warn(data.warnings.query['*']);
-						callback();
-						return;
-					}
+			if (!data || !data.query || !data.query.pages) {
+				library_namespace.warn('Flow_info: Unknown response: ['
+				//
+				+ (typeof data === 'object'
+				//
+				&& typeof JSON !== 'undefined'
+				//
+				? JSON.stringify(data) : data) + ']');
+				if (library_namespace.is_debug()
+				// .show_value() @ interact.DOM, application.debug
+				&& library_namespace.show_value)
+					library_namespace.show_value(data);
+				callback();
+				return;
+			}
 
-					if (!data || !data.query || !data.query.pages) {
-						library_namespace.warn('Flow_info: Unknown response: ['
-								+ (typeof data === 'object'
-										&& typeof JSON !== 'undefined' ? JSON
-										.stringify(data) : data) + ']');
-						if (library_namespace.is_debug()
-						// .show_value() @ interact.DOM, application.debug
-						&& library_namespace.show_value)
-							library_namespace.show_value(data);
-						callback();
-						return;
-					}
+			data = data.query.pages;
+			var pages = [];
+			for ( var pageid in data) {
+				var page = data[pageid];
+				pages.push(page);
+			}
 
-					data = data.query.pages;
-					var pages = [];
-					for ( var pageid in data) {
-						var page = data[pageid];
-						pages.push(page);
-					}
+			// options.multi: 即使只取得單頁面，依舊回傳 Array。
+			if (!options || !options.multi)
+				if (pages.length <= 1) {
+					if (pages = pages[0])
+						pages.is_Flow = is_Flow(pages);
+					library_namespace.debug('只取得單頁面 [[' + pages.title
+					//
+					+ ']]，將回傳此頁面資料，而非 Array。', 2, 'Flow_info');
+				} else {
+					library_namespace.debug('Get ' + pages.length
+					//
+					+ ' page(s)! The pages'
+					//
+					+ ' will all passed to callback as Array!'
+					//
+					, 2, 'Flow_info');
+				}
 
-					// options.multi: 即使只取得單頁面，依舊回傳 Array。
-					if (!options || !options.multi)
-						if (pages.length <= 1) {
-							if (pages = pages[0])
-								pages.is_Flow = is_Flow(pages);
-							library_namespace.debug('只取得單頁面 [[' + pages.title
-							//
-							+ ']]，將回傳此頁面資料，而非 Array。', 2, 'Flow_info');
-						} else {
-							library_namespace.debug('Get ' + pages.length
-							//
-							+ ' page(s)! The pages'
-							//
-							+ ' will all passed to callback as Array!', 2,
-									'Flow_info');
-						}
-
-					/**
-					 * page 之 structure 將按照 wiki API 本身之 return！<br />
-					 * <code>
-					page_data = {ns,title,missing:'']}
-					page_data = {pageid,ns,title,flowinfo:{flow:[]}}
-					page_data = {pageid,ns,title,flowinfo:{flow:{enabled:''}}}
-					 * </code>
-					 */
-					callback(pages);
-				});
+			/**
+			 * page 之 structure 將按照 wiki API 本身之 return！<br />
+			 * <code>
+			page_data = {ns,title,missing:'']}
+			page_data = {pageid,ns,title,flowinfo:{flow:[]}}
+			page_data = {pageid,ns,title,flowinfo:{flow:{enabled:''}}}
+			 * </code>
+			 */
+			callback(pages);
+		});
 	}
 
 	/**
@@ -6426,32 +6436,34 @@ function module_code(library_namespace) {
 		});
 
 		wiki_API.query(action, typeof callback === 'function'
+		//
+		&& function(data) {
+			if (library_namespace.is_debug(2)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+				library_namespace.show_value(data, 'edit_topic: data');
+
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.err('edit_topic: ['
 				//
-				&& function(data) {
-					if (library_namespace.is_debug(2)
-					// .show_value() @ interact.DOM, application.debug
-					&& library_namespace.show_value)
-						library_namespace.show_value(data, 'edit_topic: data');
+				+ error.code + '] ' + error.info);
+			} else if (!(data = data.flow)
+			//
+			|| !(data = data['new-topic']) || data.status !== 'ok') {
+				// data = { flow: { 'new-topic': { status: 'ok',
+				// workflow: '', committed: {} } } }
+				error = 'edit_topic: Error status ['
+				//
+				+ (data && data.status) + ']';
+				library_namespace.err(error);
+			}
 
-					var error = data && data.error;
-					// 檢查伺服器回應是否有錯誤資訊。
-					if (error) {
-						library_namespace.err('edit_topic: [' + error.code
-								+ '] ' + error.info);
-					} else if (!(data = data.flow)
-							|| !(data = data['new-topic'])
-							|| data.status !== 'ok') {
-						// data = { flow: { 'new-topic': { status: 'ok',
-						// workflow: '', committed: {} } } }
-						error = 'edit_topic: Error status ['
-								+ (data && data.status) + ']';
-						library_namespace.err(error);
-					}
-
-					if (typeof callback === 'function')
-						// title.title === get_page_title(title)
-						callback(title.title, error, data);
-				}, _options);
+			if (typeof callback === 'function')
+				// title.title === get_page_title(title)
+				callback(title.title, error, data);
+		}, _options);
 	}
 
 	/** {Array}欲 copy 至 Flow edit parameters 之 keys。 */
