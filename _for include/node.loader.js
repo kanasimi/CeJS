@@ -10,6 +10,7 @@
  * 
  * @since 2011/11/26 23:33:32
  * @see http://nodejs.org/
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Shells
  */
 
 "use strict";
