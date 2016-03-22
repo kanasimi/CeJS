@@ -30,7 +30,7 @@ https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 
 // --------------------------------------------------------------------------------------------
 
-// 不採用if陳述式，可以避免eclipse多縮排一層。
+// 不採用 if 陳述式，可以避免 Eclipse JSDoc 多縮排一層。
 typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki',
@@ -1533,7 +1533,7 @@ function module_code(library_namespace) {
 	/**
 	 * Wikipedia:Wikimedia sister projects 之 URL。
 	 * 
-	 * matched: [ all, language, title 條目名稱, section 章節, 說明 ]
+	 * matched: [ all, language, title 條目名稱, section 章節, link說明 ]
 	 * 
 	 * TODO: /wiki/條目#hash 說明
 	 * 
@@ -1552,35 +1552,68 @@ function module_code(library_namespace) {
 	 *            URL
 	 * @param {Boolean}[add_quote]
 	 *            是否添加 [[]] 或 []。
+	 * @param {Function}[callback]
+	 *            回調函數。 callback({String}wiki link)
 	 * 
 	 * @returns {String}wiki link
 	 */
-	function URL_to_wiki_link(URL, add_quote) {
+	function URL_to_wiki_link(URL, add_quote, callback) {
 		URL = URL.trim();
+
 		var matched = URL.match(PATTERN_WIKI_URL);
 		if (!matched) {
 			library_namespace.debug('Can not parse URL: [' + URL + ']', 3,
 					'URL_to_wiki_link');
-			return add_quote ? '[' + URL + ']' : URL;
+			if (add_quote)
+				URL = '[[' + URL + ']]';
+			if (callback)
+				callback(URL);
+			return URL;
 		}
 
-		URL = (matched[1].toLowerCase() === default_language ? '' : ':'
-				+ matched[1] + ':')
-				// title 條目名稱
-				+ decodeURIComponent(matched[2])
-				// URL hash = section 章節
-				+ decodeURIComponent((matched[3] || '').replace(/\./g, '%'))
-				// 說明
-				+ (matched[4]
-						&& (matched[4] = matched[4].trim()) !== matched[2] ? '|'
-						+ matched[4]
-						: '');
+		/** {String}URL之語言 */
+		var language = matched[1].toLowerCase(),
+		/** {String}條目名稱 */
+		title = decodeURIComponent(matched[2]),
+		/** {String}章節 = URL hash */
+		section = decodeURIComponent((matched[3] || '').replace(/\./g, '%'));
 
-		if (add_quote)
-			URL = '[[' + URL + ']]';
+		function compose_link() {
+			var link = (language === default_language ? '' : ':' + language
+					+ ':')
+					+ title
+					+ section
+					// link 說明
+					+ (matched[4] && (matched[4] = matched[4].trim()) !== title ? '|'
+							+ matched[4]
+							: '');
 
-		return URL;
+			if (add_quote)
+				link = '[[' + link + ']]';
+
+			return link;
+		}
+
+		// 無 callback，直接回傳 link。
+		if (!callback)
+			return compose_link();
+
+		// 若非外project 或不同 language，則直接 callback(link)。
+		if (section || language === default_language)
+			callback(compose_link());
+
+		// 嘗試取得本project 之對應連結。
+		wiki_API.langlinks([ language, title ], function(to_title) {
+			if (to_title) {
+				language = default_language;
+				title = to_title;
+				// assert: section === ''
+			}
+			callback(compose_link());
+		}, default_language);
 	}
+
+	// ----------------------------------------------------
 
 	// TODO: 統合於 parser 之中。
 	Object.assign(page_parser, {
@@ -3153,24 +3186,26 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	if (false) {
-		'Language' === CeL.wiki.langlinks('語言', function(p) {
-			if (p)
-				CeL.show_value(p);
+		CeL.wiki.langlinks('語言', function(title) {
+			title === 'Language';
+			if (title)
+				CeL.show_value(title);
 		}, 'en');
 
-		'語言' === CeL.wiki.langlinks([ 'en', 'Language' ], function(p) {
-			if (p)
-				CeL.show_value(p);
+		CeL.wiki.langlinks([ 'en', 'Language' ], function(title) {
+			title === '語言';
+			if (title)
+				CeL.show_value(title);
 		}, 'zh');
 
 		// TODO?
 		// return 'title' or {langs:['',''], lang:'title'}
-		CeL.wiki.langlinks('語言', function(p) {
-			if (p)
-				CeL.show_value(p);
-		}) == CeL.wiki.langlinks('語言', function(p) {
-			if (p)
-				CeL.show_value(p);
+		CeL.wiki.langlinks('語言', function(title) {
+			if (title)
+				CeL.show_value(title);
+		}) == CeL.wiki.langlinks('語言', function(title) {
+			if (title)
+				CeL.show_value(title);
 		}, 10)
 		// == {langs:['',''], lang:'title'}
 
@@ -3185,9 +3220,11 @@ function module_code(library_namespace) {
 	 * @param {Function|Object}callback
 	 *            回調函數 or options。
 	 * @param {String}to_lang
-	 *            所欲求語言
+	 *            所欲求語言。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @see https://www.mediawiki.org/wiki/Manual:Langlinks_table
 	 */
 	wiki_API.langlinks = function(title, callback, to_lang, options) {
 		var from_lang;
@@ -6409,6 +6446,7 @@ function module_code(library_namespace) {
 	});
 
 	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 	Object.assign(wiki_API, {
 		api_URL : api_URL,
