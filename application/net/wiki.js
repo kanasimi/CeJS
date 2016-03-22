@@ -1523,6 +1523,65 @@ function module_code(library_namespace) {
 			return matched[1].trim();
 	}
 
+	// ----------------------------------------------------
+
+	// https://zh.wikipedia.org/wiki/條目#hash 說明
+	// https://zh.wikipedia.org/zh-tw/條目#hash 說明
+	// https://zh.wikipedia.org/zh-hans/條目#hash 說明
+	// https://zh.wikipedia.org/w/index.php?title=條目
+	// https://zh.wikipedia.org/w/index.php?uselang=zh-tw&title=條目
+	/**
+	 * Wikipedia:Wikimedia sister projects 之 URL。
+	 * 
+	 * matched: [ all, language, title 條目名稱, section 章節, 說明 ]
+	 * 
+	 * TODO: /wiki/條目#hash 說明
+	 * 
+	 * @type {RegExp}
+	 * 
+	 * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
+	 */
+	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z]{2,9})\.wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
+
+	/**
+	 * Convert URL to wiki link.
+	 * 
+	 * TODO: 在 default_language 非 zh 使用 uselang, /zh-tw/條目 會有問題。
+	 * 
+	 * @param {String}URL
+	 *            URL
+	 * @param {Boolean}[add_quote]
+	 *            是否添加 [[]] 或 []。
+	 * 
+	 * @returns {String}wiki link
+	 */
+	function URL_to_wiki_link(URL, add_quote) {
+		URL = URL.trim();
+		var matched = URL.match(PATTERN_WIKI_URL);
+		if (!matched) {
+			library_namespace.debug('Can not parse URL: [' + URL + ']', 3,
+					'URL_to_wiki_link');
+			return add_quote ? '[' + URL + ']' : URL;
+		}
+
+		URL = (matched[1].toLowerCase() === default_language ? '' : ':'
+				+ matched[1] + ':')
+				// title 條目名稱
+				+ decodeURIComponent(matched[2])
+				// URL hash = section 章節
+				+ decodeURIComponent((matched[3] || '').replace(/\./g, '%'))
+				// 說明
+				+ (matched[4]
+						&& (matched[4] = matched[4].trim()) !== matched[2] ? '|'
+						+ matched[4]
+						: '');
+
+		if (add_quote)
+			URL = '[[' + URL + ']]';
+
+		return URL;
+	}
+
 	// TODO: 統合於 parser 之中。
 	Object.assign(page_parser, {
 		parse : parse_wikitext,
@@ -1530,7 +1589,9 @@ function module_code(library_namespace) {
 		template : parse_template,
 		date : parse_date,
 		user : parse_user,
-		redirect : parse_redirect
+		redirect : parse_redirect,
+
+		wiki_URL : URL_to_wiki_link
 	});
 
 	// ------------------------------------------------------------------------
@@ -4513,6 +4574,7 @@ function module_code(library_namespace) {
 			return default_language;
 		}
 
+		// assert: default_language is in lower case. See URL_to_wiki_link().
 		default_language = language.toLowerCase();
 		// default api URL. Use <code>CeL.wiki.API_URL = api_URL('en')</code> to
 		// change it.

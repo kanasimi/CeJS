@@ -2250,6 +2250,9 @@ function test_astronomy() {
 
 
 function test_wiki() {
+	// Set default language. 改變預設之語言。
+	CeL.wiki.set_language('zh');
+
 	error_count += CeL.test('wiki: file_pattern & parse_template', [
 		[[ '!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
 		//
@@ -2270,6 +2273,20 @@ function test_wiki() {
 
 		[[ 'vfd', CeL.wiki.parser.template('{{vfd|已提刪}}\n...', [ 'vfd', 'afd' ], true)[1] ]],
 		[[ '2015/10/21', CeL.wiki.parser.template('\n{{vfd|已提刪|date=2015/10/21}}\n...', [ 'vfd', 'afd' ])[2].date ]],
+
+		[[ '[[Special:用户贡献/Cewbot|cewbot]]', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/Special:%E7%94%A8%E6%88%B7%E8%B4%A1%E7%8C%AE/Cewbot cewbot', true) ], 'URL_to_wiki_link' ],
+		[[ 'Wikipedia:沙盒', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92') ], 'URL_to_wiki_link' ],
+		[[ '[[Wikipedia:沙盒]]', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92', true) ], 'URL_to_wiki_link' ],
+		[[ '[[Wikipedia:沙盒|SB]]', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92 SB', true) ], 'URL_to_wiki_link' ],
+		[[ ':en:Wikipedia:Sandbox', CeL.wiki.parser.wiki_URL('https://en.wikipedia.org/wiki/Wikipedia:Sandbox') ], 'URL_to_wiki_link' ],
+		[[ '網頁', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
+		[[ '網頁|頁面', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81 頁面') ], 'URL_to_wiki_link' ],
+		[[ '網頁#儲存網頁', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81#.E5.84.B2.E5.AD.98.E7.B6.B2.E9.A0.81') ], 'URL_to_wiki_link' ],
+		[[ '網頁#儲存網頁|頁面', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81#.E5.84.B2.E5.AD.98.E7.B6.B2.E9.A0.81 頁面') ], 'URL_to_wiki_link' ],
+		[[ '網頁', CeL.wiki.parser.wiki_URL('http://zh.wikipedia.org/zh-tw/%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
+		[[ '網頁', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/w/index.php?title=%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
+		[[ '網頁', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/w/index.php?uselang=zh-tw&title=%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
+
 	]);
 
 	error_count += CeL.test('CeL.wiki.parser', function(assert) {
