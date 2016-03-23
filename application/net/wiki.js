@@ -1782,6 +1782,12 @@ function module_code(library_namespace) {
 			return '{' + line.join(',') + '}';
 	};
 
+	/**
+	 * 設定工作/添加新的工作。
+	 * 
+	 * 工作原理: 每個實體會hold住一個queue (this.actions)。 當設定工作時，就把工作推入佇列中。
+	 * 另外內部會有另一個行程負責依序執行每一個工作。
+	 */
 	wiki_API.prototype.next = function() {
 		if (!(this.running = 0 < this.actions.length)) {
 			library_namespace.debug('Empty queue.', 2,
@@ -2580,7 +2586,7 @@ function module_code(library_namespace) {
 						+ (new Date).format('%4Y%2m%2d'),
 				// options for summary.
 				options = {
-					// append 章節/段落 after all, at bottom.
+					// new section. append 章節/段落 after all, at bottom.
 					section : 'new',
 					// 章節標題
 					sectiontitle : '['
@@ -3053,8 +3059,8 @@ function module_code(library_namespace) {
 	 * @param {String|Array}title
 	 *            title or [ {String}API_URL, {String}title ]
 	 * @param {Function}callback
-	 *            回調函數。 callback(page_data) { page_data.title; var content =
-	 *            CeL.wiki.content_of(page_data); }
+	 *            回調函數。 callback(page_data, error) { page_data.title; var
+	 *            content = CeL.wiki.content_of(page_data); }
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
@@ -3116,7 +3122,7 @@ function module_code(library_namespace) {
 				//
 				&& data.warnings.query['*'])
 					library_namespace.warn(data.warnings.query['*']);
-				callback();
+				callback(undefined, error);
 				return;
 			}
 
@@ -3132,7 +3138,7 @@ function module_code(library_namespace) {
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
 					library_namespace.show_value(data);
-				callback();
+				callback(undefined, 'Unknown response');
 				return;
 			}
 
@@ -4205,8 +4211,9 @@ function module_code(library_namespace) {
 					return;
 				}
 				/**
-				 * <s>遇到過長的頁面 (e.g., 過多 transclusion。系統上限 2,048 KB。)，可能產生錯誤：<br />
+				 * <s>遇到過長的頁面 (e.g., 過多 transclusion。)，可能產生錯誤：<br />
 				 * [editconflict] Edit conflict detected</s><br />
+				 * 頁面大小系統上限 2,048 KB = 2 MB。
 				 * 
 				 * 須注意是否有其他競相編輯的 bots。
 				 */
@@ -5420,8 +5427,9 @@ function module_code(library_namespace) {
 		.replace(/&amp;/g, '&');
 	}
 
-	// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
-	var NOT_FOUND = ''.indexOf('_');
+	var
+	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
+	NOT_FOUND = ''.indexOf('_');
 
 	/**
 	 * 讀取/parse Wikimedia dumps 之 xml 檔案。

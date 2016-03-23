@@ -2067,9 +2067,9 @@ _.Gregorian_reform_of = Gregorian_reform_of;
 
 
 
-//	const
-// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
-var NOT_FOUND = ''.indexOf('_'),
+var
+/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
+NOT_FOUND = ''.indexOf('_'),
 // 10 天干. celestial stem, Heavenly Stem
 STEM_LIST = '甲乙丙丁戊己庚辛壬癸',
 // 12 地支. Earthly Branches

@@ -209,7 +209,7 @@ if (typeof CeL === 'function')
 			// proleptic Gregorian calendar -1500 – 2100 CE。
 			中氣日 = [ 19, 18, 20, 19, 20, 20, 22, 22, 22, 22, 21, 20 ],
 
-			// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(== -1)
+			/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 			NOT_FOUND = ''.indexOf('_'),
 
 			// 起始年月日。年月日 starts form 1.

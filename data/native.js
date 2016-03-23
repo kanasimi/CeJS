@@ -26,8 +26,9 @@ code : function(library_namespace) {
 //var parse_escape;
 //eval(this.use());
 
-// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
-var NOT_FOUND = ''.indexOf('_');
+var
+/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
+NOT_FOUND = ''.indexOf('_');
 
 /**
  * null module constructor

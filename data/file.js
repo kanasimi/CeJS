@@ -194,7 +194,7 @@ if (typeof CeL === 'function')
 						delete options[filter_name];
 			}
 
-			// const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
+			/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 			var NOT_FOUND = ''.indexOf('_');
 
 			/**

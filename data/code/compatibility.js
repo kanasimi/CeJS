@@ -45,7 +45,7 @@ var Array_slice = Array.prototype.slice,
 set_method = library_namespace.set_method,
 /**
  * The index return when not found.<br />
- * 未找到時的 index。基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
+ * 未發現之index。未找到時的 index。基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1)
  * 
  * @type {Number}
  * @constant
