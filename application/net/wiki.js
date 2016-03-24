@@ -8,13 +8,15 @@
 wiki_API.work() 遇到 Invalid token 之類問題，中途跳出 abort 時，無法紀錄。應將紀錄顯示於 console 或 local file。
 wiki_API.work() 添加網頁報告。
 wiki_API.page() 整合各 action=query 至單一公用 function。
+
 paser 調用超過一個Template中參數的值，只有最後提供的值會被使用。
 paser 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
-paser 所有子頁面加入白名單 whitelist
+paser 所有子頁面加入白名單 white-list
 paser [[WP:維基化]]
 https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
 https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
+
 處理[[朱載𪉖]]
 
 </code>
@@ -380,7 +382,7 @@ function module_code(library_namespace) {
 		var hash = library_namespace.null_Object();
 		page_data_list.forEach(use_id ? function(page_data) {
 			// = true
-			hash[page_data.id] = page_data;
+			hash[page_data.pageid] = page_data;
 		} : function(page_data) {
 			// = true
 			hash[page_data.title] = page_data;
@@ -1785,7 +1787,7 @@ function module_code(library_namespace) {
 	/**
 	 * 設定工作/添加新的工作。
 	 * 
-	 * 工作原理: 每個實體會hold住一個queue (this.actions)。 當設定工作時，就把工作推入佇列中。
+	 * 工作原理: 每個實體會hold住一個queue ({Array}this.actions)。 當設定工作時，就把工作推入佇列中。
 	 * 另外內部會有另一個行程負責依序執行每一個工作。
 	 */
 	wiki_API.prototype.next = function() {
@@ -1836,9 +1838,13 @@ function module_code(library_namespace) {
 				// next[1] : title
 				// next[3] : options
 				// [ {String}API_URL, {String}title ]
-				wiki_API.page([ this.API_URL, next[1] ], function(page_data) {
-					_this.last_page = Array.isArray(page_data) ? page_data[0]
-							: page_data;
+				wiki_API.page([ this.API_URL, next[1] ], function(page_data,
+						error) {
+					// assert: 當錯誤發生，例如頁面不存在，依然需要模擬出 page_data。
+					// 如此才能執行 .page().edit()。
+					_this.last_page
+					// 正常情況。
+					= Array.isArray(page_data) ? page_data[0] : page_data;
 					// next[2] : callback
 					if (typeof next[2] === 'function')
 						next[2].call(_this, page_data);
@@ -4212,7 +4218,12 @@ function module_code(library_namespace) {
 				}
 				/**
 				 * <s>遇到過長的頁面 (e.g., 過多 transclusion。)，可能產生錯誤：<br />
-				 * [editconflict] Edit conflict detected</s><br />
+				 * [editconflict] Edit conflict detected</s>
+				 * 
+				 * when edit:<br />
+				 * [contenttoobig] The content you supplied exceeds the article
+				 * size limit of 2048 kilobytes
+				 * 
 				 * 頁面大小系統上限 2,048 KB = 2 MB。
 				 * 
 				 * 須注意是否有其他競相編輯的 bots。
@@ -5473,27 +5484,41 @@ function module_code(library_namespace) {
 
 		var buffer = '';
 
-		// Parse Wikimedia dump xml file.
+		/**
+		 * Parse Wikimedia dump xml file.
+		 */
 		function parse_page() {
 			var index = buffer.indexOf('</page>');
-			// -1: NOT_FOUND
-			if (index === -1)
+			if (index === NOT_FOUND)
 				// 資料尚未完整，繼續讀取。
 				return;
 
-			// TODO: check '<model>wikitext</model>'
+			var revision_index = buffer.indexOf('<revision>');
+			if (revision_index === NOT_FOUND
+			// check '<model>wikitext</model>'
+			// || buffer.indexOf('<model>wikitext</model>') === NOT_FOUND
+			) {
+				// 有 '</page>' 卻沒有 '<revision>'
+				library_namespace.debug('Bad data:\n' + buffer.slice(0, index),
+						6, 'parse_page');
+				buffer = buffer.slice(index + 16);
+				return;
+			}
 
 			// page 之 structure 按照 wiki API 本身之 return
-			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
+			// page_data = {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
 			callback({
 				pageid : buffer.between('<id>', '</id>') | 0,
 				ns : buffer.between('<ns>', '</ns>') | 0,
 				title : unescape_xml(buffer.between('<title>', '</title>')),
 				revisions : [ {
+					// rev_id
+					revid : buffer.between('<id>', '</id>', revision_index) | 0,
 					// e.g., '2000-01-01T00:00:00Z'
-					timestamp : buffer.between('<timestamp>', '</timestamp>'),
+					timestamp : buffer.between('<timestamp>', '</timestamp>',
+							revision_index),
 					'*' : buffer.between('<text xml:space="preserve">',
-							'</text>')
+							'</text>', revision_index)
 				} ]
 			});
 			// file_stream.resume();
