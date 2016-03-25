@@ -5334,25 +5334,36 @@ function module_code(library_namespace) {
 		filename = options.filename || project + '-' + latest
 				+ '-pages-articles.xml';
 
-		// head -n 80 zhwiki-20160305-pages-meta-current1.xml
-		// less zhwiki-20160305-pages-meta-current1.xml
-		// tail -n 80 zhwiki-20160305-pages-meta-current1.xml
+		/**
+		 * <code>
+		head -n 80 zhwiki-20160305-pages-meta-current1.xml
+		less zhwiki-20160305-pages-meta-current1.xml
+		tail -n 80 zhwiki-20160305-pages-meta-current1.xml
+		</code>
+		 */
 
-		// e.g.,
-		// callback=function (data) {console.log(data);};
-		// latest='20160305';
-		// project='enwiki';
-		// directory='/data/project/cewbot/dumps/';
-		// filename=project+'-'+latest+'-pages-articles-multistream-index.txt';
+		/**
+		 * e.g., <code>
+		callback = function(data) { console.log(data); };
+		latest = '20160305';
+		project = 'enwiki';
+		directory = '/data/project/cewbot/dumps/';
+		filename = project + '-' + latest + '-pages-articles-multistream-index.txt';
+		</code>
+		 */
 
+		var data_file_OK;
 		try {
 			// check if file exists
-			node_fs.statSync(directory + filename);
-			library_namespace.log('get_latest: Using data file: [' + directory
-					+ filename + ']');
+			data_file_OK = node_fs.statSync(directory + filename);
+		} catch (e) {
+		}
+
+		if (data_file_OK) {
+			library_namespace.log('get_latest: Using data file (.xml): ['
+					+ directory + filename + ']');
 			callback(directory + filename);
 			return;
-		} catch (e) {
 		}
 
 		// ----------------------------------------------------
@@ -5389,7 +5400,7 @@ function module_code(library_namespace) {
 			try {
 				// check if file exists.
 				fs.accessSync(source_directory + filename);
-				library_namespace.log('get_latest: Archive ['
+				library_namespace.log('get_latest: Public dump archive ['
 						+ source_directory + archive + '] exists.');
 				extract();
 				return;
@@ -5493,8 +5504,8 @@ function module_code(library_namespace) {
 	   CeL.run('application.platform.nodejs');
 	 * </code><br />
 	 * 
-	 * @param {String}filename
-	 *            欲讀取的檔案名稱。
+	 * @param {String}[filename]
+	 *            欲讀取的 .xml 檔案名稱。
 	 * @param {Function}callback
 	 *            回調函數。 callback({Object}page_data)
 	 * @param {Object}[options]
@@ -5516,6 +5527,7 @@ function module_code(library_namespace) {
 			callback = filename;
 			filename = null;
 		}
+
 		if (typeof filename !== 'string' || !filename.endsWith('.xml')) {
 			if (filename)
 				library_namespace.log('read_dump: Invalid file path: ['
@@ -5582,7 +5594,10 @@ function module_code(library_namespace) {
 		// e.g., 'enwiki-20160305-pages-meta-current1.xml'
 		file_stream = new node_fs.ReadStream(filename),
 		// 掌握進度用。 (status.pos / status.size)
-		status = node_fs.fstatSync(file_stream.fd);
+		// 此時 stream 可能尚未初始化，(file_stream.fd===null)，
+		// 因此不能使用 fs.fstatSync()。
+		// status = node_fs.fstatSync(file_stream.fd);
+		status = node_fs.statSync(filename);
 		file_stream.setEncoding('utf8');
 		status.pos = 0;
 
@@ -5604,9 +5619,9 @@ function module_code(library_namespace) {
 			if (buffer.length > 1e8) {
 				library_namespace.err('read_dump: buffer too long ('
 						+ buffer.length + ')! Paused!');
-				console.log(buffer.slice(0, 1e4));
+				console.log(buffer.slice(0, 1e3) + '...');
 				file_stream.pause();
-				// throw buffer.slice(0,1e4);
+				// throw buffer.slice(0,1e3);
 			}
 		});
 		file_stream.on('end', function() {
