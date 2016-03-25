@@ -5593,15 +5593,21 @@ function module_code(library_namespace) {
 		// filename: XML file
 		// e.g., 'enwiki-20160305-pages-meta-current1.xml'
 		file_stream = new node_fs.ReadStream(filename),
-		// 掌握進度用。 (status.pos / status.size)
+		// 掌握進度用。 (100 * status.pos / status.size | 0) + '%'
 		// 此時 stream 可能尚未初始化，(file_stream.fd===null)，
 		// 因此不能使用 fs.fstatSync()。
 		// status = node_fs.fstatSync(file_stream.fd);
 		status = node_fs.statSync(filename);
-		file_stream.setEncoding('utf8');
+		// 若是預設 encoding，會造成 chunk.length 無法獲得正確的值。
+		// 為了能掌握進度，因此不預設 encoding。
+		// file_stream.setEncoding('utf8');
 		status.pos = 0;
 
 		library_namespace.info('read_dump: Starting read data...');
+
+		file_stream.on('error', options.onerror || function(error) {
+			library_namespace.err('read_dump: Error occurred: ' + error);
+		});
 
 		// old: e.g., '<text xml:space="preserve" bytes="80">'??
 		// 2016/3/11: e.g., '<text xml:space="preserve">'
@@ -5609,24 +5615,25 @@ function module_code(library_namespace) {
 			// console.log(chunk.toString('utf8'));
 
 			// 已經讀取的資料長度。
-			// bytes, 非 characters?
+			// https://nodejs.org/api/stream.html#stream_event_end
+			// 應為 bytes, 非 characters.
+			// 若是預設 encoding 'utf8'，實際上只會跑到 74%。
 			status.pos += chunk.length;
 
-			// buffer += chunk.toString('utf8');
-			buffer += chunk;
+			buffer += chunk.toString('utf8');
+			// buffer += chunk;
 			while (parse_page())
 				;
 			if (buffer.length > 1e8) {
-				library_namespace.err('read_dump: buffer too long ('
-						+ buffer.length + ')! Paused!');
+				library_namespace
+						.err('read_dump: buffer too long (' + buffer.length
+								+ ')! Paused! 有太多無法處理的 buffer，可能是格式錯誤?');
 				console.log(buffer.slice(0, 1e3) + '...');
 				file_stream.pause();
 				// throw buffer.slice(0,1e3);
 			}
 		});
 		file_stream.on('end', function() {
-			while (parse_page())
-				;
 			library_namespace.debug('Done.', 1, 'read_dump');
 			if (options && typeof options.last === 'function')
 				options.last.call(file_stream);
@@ -5635,7 +5642,6 @@ function module_code(library_namespace) {
 		// * @returns {String}file path
 		// * @returns {node_fs.ReadStream}file handler
 		// return file_stream;
-		return;
 	}
 
 	wiki_API.read_dump = read_dump;
