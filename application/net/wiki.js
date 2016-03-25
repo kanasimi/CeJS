@@ -3707,6 +3707,7 @@ function module_code(library_namespace) {
 
 		// 按標題排序列出指定的名字空間的頁面 title。
 		// 可用來遍歷所有頁面。
+		// includes redirection 包含重新導向頁面.
 		// @see traversal_pages()
 		// https://www.mediawiki.org/wiki/API:Allpages
 		// 警告: 不在 Tool Labs 執行 allpages 速度太慢。但若在 Tool Labs，當改用 database。
@@ -5134,6 +5135,7 @@ function module_code(library_namespace) {
 		if (this.database_cache) {
 			var list = this.database_cache;
 			if (!all)
+				// .filter() 會失去 array 之其他屬性。
 				list = list.filter(filter);
 			if (typeof callback === 'function')
 				callback(list);
@@ -5159,6 +5161,7 @@ function module_code(library_namespace) {
 					});
 					_this.database_cache = rows;
 					if (!all)
+						// .filter() 會失去 array 之其他屬性。
 						rows = rows.filter(filter);
 					// console.log(rows);
 				}
@@ -5562,6 +5565,8 @@ function module_code(library_namespace) {
 
 			// page 之 structure 按照 wiki API 本身之 return
 			// page_data = {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
+			// includes redirection 包含重新導向頁面.
+			// includes non-ns0.
 			callback({
 				pageid : buffer.between('<id>', '</id>') | 0,
 				ns : buffer.between('<ns>', '</ns>') | 0,
@@ -6137,7 +6142,7 @@ function module_code(library_namespace) {
 	 * @param {Object}[config]
 	 *            configuration
 	 * @param {Function}callback
-	 *            回調函數。 callback(page_data, messages)
+	 *            回調函數。 callback(page_data)
 	 */
 	function traversal_pages(config, callback) {
 		if (typeof config === 'function' && callback === undefined) {
@@ -6159,7 +6164,8 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var title_list,
+		/** {Array}id/title list */
+		var id_list,
 		//
 		cache_config = {
 			// all title/id list
@@ -6174,7 +6180,7 @@ function module_code(library_namespace) {
 					list.shift();
 					list.is_id = true;
 				}
-				title_list = list;
+				id_list = list;
 			},
 			after : config.after
 		};
@@ -6230,15 +6236,26 @@ function module_code(library_namespace) {
 					|| new wiki_API(config.user, config.password,
 							config.language);
 			library_namespace.log('traversal_pages: 開始遍歷 '
-					+ (title_list && title_list.length) + ' pages...');
-			wiki.work({
-				is_id : title_list.is_id,
-				no_message : true,
-				no_edit : 'no_edit' in config ? config.no_edit : true,
-				each : callback,
-				// config.last(messages, titles, pages)
-				after : config.after
-			}, title_list);
+					+ (id_list && id_list.length) + ' pages...');
+
+			function run_work(id_list) {
+				wiki.work({
+					is_id : id_list.is_id,
+					no_message : true,
+					no_edit : 'no_edit' in config ? config.no_edit : true,
+					each : callback,
+					// config.last(/* no meaningful arguments */)
+					after : config.after
+				}, id_list);
+			}
+
+			// preprocessor before running .work()
+			if (typeof config.filter === 'function') {
+				config.filter(id_list, callback, run_work);
+			} else {
+				run_work(id_list);
+			}
+
 		}, {
 			// cache path prefix
 			// e.g., task name
