@@ -4618,6 +4618,11 @@ function module_code(library_namespace) {
 	 * @returns {ℕ⁰:Natural+0}normalized count
 	 */
 	wiki_API.redirects.count = function(root_name_hash, embeddedin_list) {
+		if (!Array.isArray(embeddedin_list)) {
+			library_namespace
+					.warn('wiki_API.redirects.count: Invalid embeddedin list.');
+			return 0;
+		}
 		var name_hash = library_namespace.null_Object();
 		embeddedin_list.forEach(function(title) {
 			title = get_page_title(title);
@@ -6129,7 +6134,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
-	var all_title_SQL = 'SELECT `page_id`,`page_latest` AS i FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
+	var all_title_SQL = 'SELECT `page_id` AS i, `page_latest` AS l FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
 	if (false)
 		// for debug.
 		all_title_SQL += ' LIMIT 8';
@@ -6175,7 +6180,7 @@ function module_code(library_namespace) {
 					// 來自 The production replicas (database)
 					library_namespace
 							.info('traversal_pages: 此資料似乎為 page id，來自 production replicas。');
-					// skip traversal_pages.id_mark
+					// Skip list[0] = traversal_pages.id_mark
 					rev_list = list[2];
 					list = list[1];
 					list.is_id = true;
@@ -6195,7 +6200,7 @@ function module_code(library_namespace) {
 					'traversal_pages');
 			cache_config.list = function() {
 				library_namespace
-						.info('traversal_pages: 嘗試讀取 Tool Labs 之 database 資料...');
+						.info('traversal_pages: 嘗試讀取 Tool Labs 之 database replica 資料...');
 				// default: 採用 page_id 而非 page_title 來 query。
 				var is_id = 'is_id' in config ? config.is_id : true;
 				run_SQL(is_id ? all_title_SQL
@@ -6208,11 +6213,13 @@ function module_code(library_namespace) {
 					} else {
 						library_namespace.log('traversal_pages: All '
 								+ rows.length + ' pages. 轉換中...');
+						// console.log(rows.slice(0, 2));
 						var id_list = [], rev_list = [];
 						rows.forEach(function(row) {
-							id_list.push(is_id ? row.page_id | 0
-									: row.page_title.toString('utf8'));
-							rev_list.push(row.page_latest);
+							// .i, .l: @see all_title_SQL
+							id_list.push(is_id ? row.i | 0 : row.i
+									.toString('utf8'));
+							rev_list.push(row.l);
 						});
 						config.list = [ traversal_pages.id_mark, id_list,
 								rev_list ];
@@ -6256,6 +6263,7 @@ function module_code(library_namespace) {
 				// preprocessor before running .work()
 				// 可用於額外功能。
 				// e.g., 若 revision 相同，從 dump 而不從 API 讀取。
+				// id_list, rev_list 採用相同的 index。
 				config.filter(run_work, callback, id_list, rev_list);
 			} else {
 				run_work(id_list);
