@@ -244,19 +244,26 @@ if (typeof CeL === 'function')
 			 * @param {Object}[options]
 			 *            附加參數/設定選擇性/特殊功能與選項
 			 * 
-			 * @returns error
+			 * @returns {String}檔案內容
+			 * @returns {Undefined}error occurred
 			 */
 			function fs_readFileSync(file_path, options) {
 				try {
-					node_fs.readFileSync(file_path, options);
+					return node_fs.readFileSync(file_path, options);
 				} catch (e) {
-					return e;
+					if (library_namespace.is_debug())
+						library_namespace.err(e);
+					// return e;
 				}
 			}
 			_.fs_read = fs_readFileSync;
 
 			/**
 			 * fs.writeFileSync() without throw.
+			 * 
+			 * @example <code>
+			 * CeL.fs_write(path, data, 'utf8');
+			 * </code>
 			 * 
 			 * @param {String}file_path
 			 *            file path.
