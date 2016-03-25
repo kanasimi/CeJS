@@ -4723,6 +4723,19 @@ function module_code(library_namespace) {
 
 	// setup SQL config language (and database/host).
 	function set_SQL_config_language(language) {
+		if (!language)
+			return;
+		if (typeof language !== 'string') {
+			library_namespace.err(
+			//
+			'set_SQL_config_language: Invalid language: [' + language + ']');
+			return;
+		}
+
+		// 正規化。
+		language = language.trim().toLowerCase().replace(/wiki$/, '');
+		this.language = language;
+
 		if (language === 'meta') {
 			// @see /usr/bin/sql
 			this.host = 's7.labsdb';
@@ -4733,8 +4746,14 @@ function module_code(library_namespace) {
 			this.host = language;
 			// delete this.database;
 
-		} else if ((typeof language === 'string') && language) {
+		} else {
 			this.host = language + 'wiki.labsdb';
+			/**
+			 * The database names themselves consist of the mediawiki project
+			 * name, suffixed with _p
+			 * 
+			 * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database
+			 */
 			this.database = language + 'wiki_p';
 		}
 	}
@@ -4795,9 +4814,9 @@ function module_code(library_namespace) {
 		try {
 			config = library_namespace.get_file(file_name);
 		} catch (e) {
-			library_namespace
-					.err('parse_SQL_config: Can not read config file [ '
-							+ file_name + ']!');
+			library_namespace.err(
+			//
+			'parse_SQL_config: Can not read config file [ ' + file_name + ']!');
 			return;
 		}
 
@@ -5014,13 +5033,7 @@ function module_code(library_namespace) {
 		} else if (this.config.host === TOOLSDB) {
 			delete this.config.database;
 		} else {
-			/**
-			 * The database names themselves consist of the mediawiki project
-			 * name, suffixed with _p
-			 * 
-			 * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database
-			 */
-			this.config.database = this.config.host + '_p';
+			// this.config.database 已經在 set_SQL_config_language() 設定。
 		}
 
 		var _this = this;
