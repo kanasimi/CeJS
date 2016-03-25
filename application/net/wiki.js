@@ -4664,7 +4664,7 @@ function module_code(library_namespace) {
 		if (SQL_config)
 			SQL_config.set_language(default_language);
 
-		return default_language;
+		return wiki_API.language = default_language;
 	}
 
 	// 設定預設之語言。 English
@@ -4701,6 +4701,8 @@ function module_code(library_namespace) {
 	// Windows: process.platform.toLowerCase().startsWith('win')
 	/** {String}user home directory */
 	home_directory = process.env.HOME || process.env.USERPROFILE,
+	/** {String}Tool Labs database host */
+	TOOLSDB = 'tools-db',
 	/** {String}user/bot name */
 	user_name,
 	/** {String}Tool Labs name */
@@ -4727,7 +4729,7 @@ function module_code(library_namespace) {
 			// https://wikitech.wikimedia.org/wiki/Nova_Resource:Tools/Help#Metadata_database
 			this.database = 'meta_p';
 
-		} else if (language === 'tools-db') {
+		} else if (language === TOOLSDB) {
 			this.host = language;
 			// delete this.database;
 
@@ -4899,7 +4901,7 @@ function module_code(library_namespace) {
 			dbname = config.database;
 			delete config.database;
 		} else {
-			config = new_SQL_config(language || 'tools-db');
+			config = new_SQL_config(language || TOOLSDB);
 			if (!language) {
 				delete config.database;
 			}
@@ -4950,9 +4952,21 @@ function module_code(library_namespace) {
 	 * </code>
 	 * 
 	 * @example <code>
-	 * new CeL.wiki.SQL('mydb', function callback(error, rows, fields) { if(error) console.error(error); } )
-	 * // run SQL query
-	 * .SQL(SQL, function callback(error, rows, fields) { if(error) console.error(error); } );
+
+	// 進入 default host (TOOLSDB)。
+	var SQL_session = new CeL.wiki.SQL(()=>{});
+	// 進入 default host (TOOLSDB)，並預先創建 user's database 'dbname' (e.g., 's00000__dbname')
+	var SQL_session = new CeL.wiki.SQL('dbname', ()=>{});
+	// 進入 zhwiki.zhwiki_p。
+	var SQL_session = new CeL.wiki.SQL(()=>{}, 'zh');
+	// 進入 zhwiki.zhwiki_p，並預先創建 user's database 'dbname' (e.g., 's00000__dbname')
+	var SQL_session = new CeL.wiki.SQL('dbname', ()=>{}, 'zh');
+
+	// create {SQL_session}instance
+	new CeL.wiki.SQL('mydb', function callback(error, rows, fields) { if(error) console.error(error); } )
+	// run SQL query
+	.SQL(SQL, function callback(error, rows, fields) { if(error) console.error(error); } );
+
 	 * </code>
 	 * 
 	 * @param {String}[dbname]
@@ -4960,7 +4974,7 @@ function module_code(library_namespace) {
 	 * @param {Function}callback
 	 *            回調函數。
 	 * @param {String}[language]
-	 *            database language.<br />
+	 *            database language (and database/host). default host: TOOLSDB.<br />
 	 *            e.g., 'en', 'commons', 'wikidata', 'meta'.
 	 * 
 	 * @returns {SQL_session}instance
@@ -4974,7 +4988,7 @@ function module_code(library_namespace) {
 			} else if (typeof language === 'string' && language) {
 				// change language (and database/host).
 				SQL_config.set_language(language);
-				if (language === 'tools-db')
+				if (language === TOOLSDB)
 					delete SQL_config.database;
 				language = null;
 			}
@@ -4989,7 +5003,7 @@ function module_code(library_namespace) {
 			dbname = null;
 		}
 
-		this.config = new_SQL_config(language || 'tools-db');
+		this.config = new_SQL_config(language || TOOLSDB);
 		if (dbname) {
 			if (typeof dbname === 'object') {
 				Object.assign(this.config, dbname);
@@ -4997,8 +5011,16 @@ function module_code(library_namespace) {
 				// 自動添加 prefix。
 				this.config.database = this.config.db_prefix + dbname;
 			}
-		} else {
+		} else if (this.config.host === TOOLSDB) {
 			delete this.config.database;
+		} else {
+			/**
+			 * The database names themselves consist of the mediawiki project
+			 * name, suffixed with _p
+			 * 
+			 * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database
+			 */
+			this.config.database = this.config.host + '_p';
 		}
 
 		var _this = this;
@@ -5016,17 +5038,25 @@ function module_code(library_namespace) {
 
 	// run SQL query
 	SQL_session.prototype.SQL = function(SQL, callback) {
-		try {
-			this.connection.query(SQL, callback);
-		} catch (e) {
-			// re-connect. 可能已經斷線。
-			this.connect();
-			this.connection.query(SQL, callback);
-		}
+		var _this = this;
+		this.connection.query(SQL, function(error) {
+			if (error
+			// Error: Cannot enqueue Handshake after fatal error.
+			&& error.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR') {
+				// re-connect. 可能已經斷線。
+				_this.connection.connect(function(error) {
+					if (error) {
+						// console.error(error);
+					}
+					_this.connection.query(SQL, callback);
+				});
+			} else {
+				callback.apply(null, arguments);
+			}
+		});
 		return this;
 	};
 
-	// re-connect.
 	SQL_session.prototype.connect = function(callback, force) {
 		if (!force)
 			try {
@@ -5035,6 +5065,7 @@ function module_code(library_namespace) {
 					if (error
 					// Error: Cannot enqueue Handshake after fatal error.
 					&& error.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR') {
+						// re-connect.
 						_this.connect(callback, true);
 					} else if (typeof callback === 'function')
 						callback(error);
@@ -5473,16 +5504,15 @@ function module_code(library_namespace) {
 			filename = null;
 		}
 		if (typeof filename !== 'string' || !filename.endsWith('.xml')) {
-			library_namespace.log('read_dump: Invalid file path: [' + filename
-					+ '], try to get the latest dump file...');
+			if (filename)
+				library_namespace.log('read_dump: Invalid file path: ['
+						+ filename + '], try to get the latest dump file...');
 			get_latest(filename, function(filename) {
 				read_dump(filename, callback, options);
 			}, options);
 			// 警告: 無法馬上取得檔案時，將不會回傳任何資訊！
 			return;
 		}
-
-		var buffer = '';
 
 		/**
 		 * Parse Wikimedia dump xml file.
@@ -5513,18 +5543,18 @@ function module_code(library_namespace) {
 				title : unescape_xml(buffer.between('<title>', '</title>')),
 				revisions : [ {
 					// rev_id
-					revid : buffer.between('<id>', '</id>', revision_index) | 0,
+					revid : buffer.between('<id>', '</id>',
+					//
+					revision_index) | 0,
 					// e.g., '2000-01-01T00:00:00Z'
 					timestamp : buffer.between('<timestamp>', '</timestamp>',
 							revision_index),
 					'*' : buffer.between('<text xml:space="preserve">',
 							'</text>', revision_index)
 				} ]
-			});
+			}, status);
 			// file_stream.resume();
 			// file_stream.pause();
-
-			// node_fs.fstatSync(file_stream.fd);
 
 			// 截斷. 16: '</page>\n <page>'.length
 			buffer = buffer.slice(index + 16);
@@ -5534,9 +5564,14 @@ function module_code(library_namespace) {
 		if (options && typeof options.first === 'function')
 			options.first(filename);
 
+		var buffer = '',
+		// filename: XML file
 		// e.g., 'enwiki-20160305-pages-meta-current1.xml'
-		var file_stream = new node_fs.ReadStream(filename);
+		file_stream = new node_fs.ReadStream(filename),
+		// 掌握進度用。 (status.pos / status.size)
+		status = node_fs.fstatSync(file_stream.fd);
 		file_stream.setEncoding('utf8');
+		status.pos = 0;
 
 		library_namespace.info('read_dump: Starting read data...');
 
@@ -5544,6 +5579,10 @@ function module_code(library_namespace) {
 		// 2016/3/11: e.g., '<text xml:space="preserve">'
 		file_stream.on('data', function(chunk) {
 			// console.log(chunk.toString('utf8'));
+
+			// 已經讀取的資料長度。
+			// bytes, 非 characters?
+			status.pos += chunk.length;
 
 			// buffer += chunk.toString('utf8');
 			buffer += chunk;
