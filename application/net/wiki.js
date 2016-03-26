@@ -2874,15 +2874,19 @@ function module_code(library_namespace) {
 					try {
 						response = library_namespace.parse_JSON(response);
 					} catch (e) {
-						library_namespace
-								.err('wiki_API.query: Invalid content: ['
-										+ response + ']');
 						// <title>414 Request-URI Too Long</title>
 						// <title>414 Request-URI Too Large</title>
-						if (response.includes('>414 Request-URI Too '))
+						if (response.includes('>414 Request-URI Too ')) {
 							library_namespace.debug(
 							//
 							action[0], 1, 'wiki_API.query');
+						} else {
+							library_namespace.err(
+							//
+							'wiki_API.query: Invalid content: ['
+									+ String(response).slice(0, 400) + ']');
+							library_namespace.err(e);
+						}
 						// exit!
 						return;
 					}
@@ -5609,8 +5613,8 @@ function module_code(library_namespace) {
 		// status = node_fs.fstatSync(file_stream.fd);
 		status = node_fs.statSync(filename);
 		// 若是預設 encoding，會造成 chunk.length 無法獲得正確的值。
-		// 為了能掌握進度，因此不預設 encoding。
-		// file_stream.setEncoding('utf8');
+		// 若是為了能掌握進度，則不預設 encoding。但這會造成破碎/錯誤的編碼，只好放棄。
+		file_stream.setEncoding('utf8');
 		status.pos = 0;
 
 		library_namespace.info('read_dump: Starting read data...');
@@ -5630,8 +5634,19 @@ function module_code(library_namespace) {
 			// 若是預設 encoding 'utf8'，實際上只會跑到 74%。
 			status.pos += chunk.length;
 
-			buffer += chunk.toString('utf8');
-			// buffer += chunk;
+			/**
+			 * 當未採用 .setEncoding('utf8')，之後才 += chunk.toString('utf8')；
+			 * 則一個字元可能被切分成兩邊，這會造成破碎/錯誤的編碼。
+			 * 
+			 * This properly handles multi-byte characters that would otherwise
+			 * be potentially mangled if you simply pulled the Buffers directly
+			 * and called buf.toString(encoding) on them. If you want to read
+			 * the data as strings, always use this method.
+			 * 
+			 * @see https://nodejs.org/api/stream.html#stream_class_stream_readable
+			 */
+			// buffer += chunk.toString('utf8');
+			buffer += chunk;
 			while (parse_page())
 				;
 			if (buffer.length > 1e8) {
@@ -5643,6 +5658,7 @@ function module_code(library_namespace) {
 				// throw buffer.slice(0,1e3);
 			}
 		});
+
 		file_stream.on('end', function() {
 			library_namespace.debug('Done.', 1, 'read_dump');
 			if (options && typeof options.last === 'function')
@@ -6199,8 +6215,9 @@ function module_code(library_namespace) {
 			library_namespace.debug('若沒有 cache，則嘗試讀取 database 之資料。', 1,
 					'traversal_pages');
 			cache_config.list = function() {
-				library_namespace
-						.info('traversal_pages: 嘗試讀取 Tool Labs 之 database replica 資料...');
+				library_namespace.info(
+				// database replicas
+				'traversal_pages: 嘗試讀取 Tool Labs 之 database replication 資料...');
 				// default: 採用 page_id 而非 page_title 來 query。
 				var is_id = 'is_id' in config ? config.is_id : true;
 				run_SQL(is_id ? all_title_SQL
@@ -6247,8 +6264,9 @@ function module_code(library_namespace) {
 			+ (id_list && id_list.length) + ' pages...');
 
 			function run_work(id_list) {
-				library_namespace.log('traversal_pages: 開始執行 .work(): '
-						+ (id_list && id_list.length) + ' pages...');
+				if (typeof config.filter === 'function')
+					library_namespace.log('traversal_pages: 開始執行 .work(): '
+							+ (id_list && id_list.length) + ' pages...');
 				wiki.work({
 					is_id : id_list.is_id,
 					no_message : true,
