@@ -5558,6 +5558,62 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		if (options && typeof options.first === 'function')
+			options.first(filename);
+
+		/** {String}處理中之資料。 */
+		var buffer = '',
+		/** end mark */
+		end_mark = '</page>',
+		/**
+		 * 錨/定位點.<br />
+		 * anchor[pageid] = [ position of the xml dump file, length in bytes ]
+		 * 
+		 * @type {Array}
+		 */
+		anchor = [],
+		/**
+		 * filename: XML file path.<br />
+		 * e.g., 'enwiki-20160305-pages-meta-current1.xml'
+		 * 
+		 * @type {String}
+		 */
+		file_stream = new node_fs.ReadStream(filename),
+		/**
+		 * 掌握進度用。 (100 * file_status.pos / file_status.size | 0) + '%'<br />
+		 * 此時 stream 可能尚未初始化，(file_stream.fd===null)，<br />
+		 * 因此不能使用 fs.fstatSync()。
+		 * 
+		 * @type {Object}
+		 */
+		// file_status = node_fs.fstatSync(file_stream.fd);
+		// file_status = node_fs.statSync(filename),
+		/** {Natural}檔案長度。掌握進度用。 */
+		// file_size = node_fs.statSync(filename).size,
+		/**
+		 * byte counter. 已經處理過的資料長度，為 bytes，非 characters。指向 buffer 起頭在 file
+		 * 中的位置。
+		 * 
+		 * @type {ℕ⁰:Natural+0}
+		 */
+		bytes = 0;
+		// 若是預設 encoding，會造成 chunk.length 無法獲得正確的值。
+		// 若是為了能掌握進度，則不預設 encoding。
+		// 2016/3/26: 但這會造成破碎/錯誤的編碼，只好放棄。
+		file_stream.setEncoding('utf8');
+
+		file_stream.on('error', options.onerror || function(error) {
+			library_namespace.err('read_dump: Error occurred: ' + error);
+		});
+
+		/**
+		 * 工作流程: 循序讀取檔案內容。每次讀到一個區塊/段落 (chunk)，檢查是不是有結束標記。若是沒有，則得繼續讀下去。<br />
+		 * 有結束標記，則取出開始標記至結束標記中間之頁面文字資料，紀錄起始與結尾檔案位置，放置於 anchor[pageid]，並開始解析頁面。<br />
+		 * 此時 bytes 指向檔案中 start position of buffer，可用來設定錨/定位點。
+		 */
+
+		library_namespace.info('read_dump: Starting read data...');
+
 		/**
 		 * Parse Wikimedia dump xml file.
 		 */
@@ -5626,62 +5682,6 @@ function module_code(library_namespace) {
 			return true;
 		}
 
-		if (options && typeof options.first === 'function')
-			options.first(filename);
-
-		/** {String}處理中之資料。 */
-		var buffer = '',
-		/** end mark */
-		end_mark = '</page>',
-		/**
-		 * 錨/定位點.<br />
-		 * anchor[pageid] = [ position of the xml dump file, length in bytes ]
-		 * 
-		 * @type {Array}
-		 */
-		anchor = [],
-		/**
-		 * filename: XML file path.<br />
-		 * e.g., 'enwiki-20160305-pages-meta-current1.xml'
-		 * 
-		 * @type {String}
-		 */
-		file_stream = new node_fs.ReadStream(filename),
-		/**
-		 * 掌握進度用。 (100 * file_status.pos / file_status.size | 0) + '%'<br />
-		 * 此時 stream 可能尚未初始化，(file_stream.fd===null)，<br />
-		 * 因此不能使用 fs.fstatSync()。
-		 * 
-		 * @type {Object}
-		 */
-		// file_status = node_fs.fstatSync(file_stream.fd);
-		// file_status = node_fs.statSync(filename),
-		/** {Natural}檔案長度。掌握進度用。 */
-		// file_size = node_fs.statSync(filename).size,
-		/**
-		 * byte counter. 已經處理過的資料長度，為 bytes，非 characters。指向 buffer 起頭在 file
-		 * 中的位置。
-		 * 
-		 * @type {ℕ⁰:Natural+0}
-		 */
-		bytes = 0;
-		// 若是預設 encoding，會造成 chunk.length 無法獲得正確的值。
-		// 若是為了能掌握進度，則不預設 encoding。
-		// 2016/3/26: 但這會造成破碎/錯誤的編碼，只好放棄。
-		file_stream.setEncoding('utf8');
-
-		library_namespace.info('read_dump: Starting read data...');
-
-		file_stream.on('error', options.onerror || function(error) {
-			library_namespace.err('read_dump: Error occurred: ' + error);
-		});
-
-		/**
-		 * 工作流程: 循序讀取檔案內容。每次讀到一個區塊/段落 (chunk)，檢查是不是有結束標記。若是沒有，則得繼續讀下去。<br />
-		 * 有結束標記，則取出開始標記至結束標記中間之頁面文字資料，紀錄起始與結尾檔案位置，放置於 anchor[pageid]，並開始解析頁面。<br />
-		 * 此時 bytes 指向檔案中 start position of buffer，可用來設定錨/定位點。
-		 */
-
 		// old: e.g., '<text xml:space="preserve" bytes="80">'??
 		// 2016/3/11: e.g., '<text xml:space="preserve">'
 		file_stream.on('data', function(chunk) {
@@ -5697,6 +5697,8 @@ function module_code(library_namespace) {
 			 * 
 			 * @see https://nodejs.org/api/stream.html#stream_class_stream_readable
 			 */
+			buffer += chunk;
+			// buffer += chunk.toString('utf8');
 
 			// --------------------------------------------
 			/**
