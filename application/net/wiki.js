@@ -5622,6 +5622,7 @@ function module_code(library_namespace) {
 			if (index === NOT_FOUND)
 				// 資料尚未完整，繼續讀取。
 				return;
+
 			// 回頭找 start mark '<page>'
 			var start_index = buffer.lastIndexOf('<page>', index);
 			if (start_index === NOT_FOUND) {
@@ -5629,6 +5630,7 @@ function module_code(library_namespace) {
 						'parse_dump_xml: We have end mark without start mark!');
 			}
 
+			// 主要頁面內容所在。
 			var revision_index = buffer.indexOf('<revision>');
 			if (revision_index === NOT_FOUND
 			// check '<model>wikitext</model>'
@@ -5676,8 +5678,11 @@ function module_code(library_namespace) {
 			// 截斷。
 			buffer = buffer.slice(index + end_mark.length);
 
-			// ({Object}page_data, {Natural}position: 到本page結束時之檔案位置)
-			callback(page_data, bytes/* , file_status */);
+			/**
+			 * function({Object}page_data, {Natural}position: 到本page結束時之檔案位置,
+			 * {Array}page_anchor)
+			 */
+			callback(page_data, bytes, anchor[pageid]/* , file_status */);
 
 			return true;
 		}
