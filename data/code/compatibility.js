@@ -3,7 +3,8 @@
  * @name	CeL function for compatibility
  * @fileoverview
  * 本檔案包含了 new ECMAScript standard 標準已規定，但先前版本未具備的內建物件功能；以及相容性 test 專用的 functions。<br />
- * 部分標準功能已經包含於 ce.js。
+ * 部分標準功能已經包含於 ce.js。<br />
+ * ES6 shim / polyfill
  * 
  * More examples: see /_test suite/test.js
  * 
@@ -402,6 +403,7 @@ function normalize_position(position, length) {
 	: (position |= 0) > length ? length : position;
 }
 
+// Array.prototype.copyWithin(target, start[, end = this.length])
 function copyWithin(target, start, end) {
 	var length = this.length;
 	start = normalize_position(start, length);
@@ -424,10 +426,11 @@ function copyWithin(target, start, end) {
 }
 
 set_method(Array.prototype, {
-	// Array.prototype.copyWithin(target, start [ , end ])
+	// Array.prototype.copyWithin(target, start[, end = this.length])
 	copyWithin : copyWithin,
 	// Array.prototype.includes()
 	// part of the Harmony (ECMAScript 7) proposal.
+	// http://www.2ality.com/2016/01/ecmascript-2016.html
 	includes : function Array_includes(search_target, position) {
 		if (search_target === search_target)
 			return this.indexOf(search_target, position) !== NOT_FOUND;

@@ -56,6 +56,9 @@ For further introduction, please see [wiki](https://github.com/kanasimi/CeJS/wik
 ![直式四則運算-乘](https://lh3.googleusercontent.com/DFa-judnb6zgyexIckEuNJ5vMdN0XDpW9D_kPyywkwScabTBsApuWl8K3ipgstRDNSV0nf_-rWA13J-KHma3AVqiie9i6voKdLCxnEUMtJM3gbkTUcYN1QBXO-THLpsSPgtatIiylWp0HYSPK_NGmt15Ur4SBTG4x9J-UUvPwDdi4QhkqifDn13-FzFC1QmqsOJK3JRoP_oAdTf4rNfWaY33WMkATiW6zLKQjJP_LbCIIUyg_ED_byfE2K0bdmnnQVl7Av1iBhaGNCHgsyp_rqmyvIrd2sWf_yP06KnQmim-wIBa5XWVkccH29kzlv6LCBzjg50yrhCcvL43Pcwm87xDDJhJBvjOQOeCNjTltvvI3m0a0Q00WKvVToANkc-1O8ZFIffANiTI4nFLeS7YiSfSSj1EHH4tUiavlMtMWqLhSYGcol7Jbj9lwZMxHIkmkUb6bFLnB_Pnk1dYrAcPSu1W3k2JPuX4IpIxDEsoGt0A3rRDBq7baFzDjZoQsR0f2cEej-AEF0Pgviu0vkqgttTDJ9U6DWJ3RldNhd509t2aUwbbKQnabUfulIEviiSBhBlI=w119-h124-no)
 ![直式四則運算-除](https://lh3.googleusercontent.com/GAxL2YTiJruCCb1Hx0FxsjykGjy9qjatlHnKngfAijamXrIRXG0w7xFUDqEKVpz8KLNLAs0T2iGR4zkWKT5lzUNdpbVLAsgGuv9qAaKbQesNjdX67lfgYoqxwXNhAgT9g2oJ-swoUx6wnPLMO1x-IROrR5GTIv5V0DNIfsZGnit183uHN23MKoF0Er0XpWU9gjSzC53TTqEKxStnhCD-7cahI7WKxOws54vek9bAAIkq7OeUx94u-R9AtSMBmuJG0iFzxvqSlejvTdYjyWguQbv4RN_hdYB7Fp9KEZnyX1gl_Epr1vWBeXKDMHtFK2VArf458esi7wvM5DanY2cILAxDu9wO3e9Ms_jrPOGk33AjtlNRUzNm7GxQev_nDH6zFzed5wX6BlYAI7y-WrCuvKXlu33Xgk5o2LSGcUK_nb8Qak80xJ8pnevnaxMNxwzBohPqlHXOpzG6Wii07fXyUL5Ft7jTKdyJJKecLdw0KZ87jvEmmZLP4EtRJ2lLdavjVnvpA4KB7W_ks0x-JYjL9mwmtgaoObfLtTQb8vJoSDFf9829Q00rjHliyLoFAowjuPeu=w196-h220-no)
 
+### ES6 shim
+See [compatibility.js](https://github.com/kanasimi/CeJS/blob/master/data/code/compatibility.js) and [native.js](https://github.com/kanasimi/CeJS/blob/master/data/native.js).
+
 ## Demo
 <!-- See [demo page](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/demo.htm). -->
 * The page usually takes 10 to 20 seconds to load.

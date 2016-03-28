@@ -5,6 +5,7 @@
  *               ([[WP:{{{name|{{int:Group-bot}}}}}|{{{name|{{int:Group-bot}}}}}]])。
  * 
  * TODO:<code>
+
 wiki_API.work() 遇到 Invalid token 之類問題，中途跳出 abort 時，無法紀錄。應將紀錄顯示於 console 或 local file。
 wiki_API.work() 添加網頁報告。
 wiki_API.page() 整合各 action=query 至單一公用 function。
@@ -16,6 +17,9 @@ paser [[WP:維基化]]
 https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
 https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
+
+Wikimedia REST API
+https://www.mediawiki.org/wiki/RESTBase
 
 處理[[朱載𪉖]]
 
@@ -5445,6 +5449,9 @@ function module_code(library_namespace) {
 		//
 		host + project + '/' + latest + '/' + archive ]);
 
+		child.stdout.setEncoding('utf8');
+		child.stderr.setEncoding('utf8');
+
 		/**
 		 * http://stackoverflow.com/questions/6157497/node-js-printing-to-console-without-a-trailing-newline
 		 * 
@@ -5554,7 +5561,7 @@ function module_code(library_namespace) {
 		/**
 		 * Parse Wikimedia dump xml file.
 		 */
-		function parse_page() {
+		function parse_dump_xml() {
 			var index = buffer.indexOf('</page>');
 			if (index === NOT_FOUND)
 				// 資料尚未完整，繼續讀取。
@@ -5567,7 +5574,7 @@ function module_code(library_namespace) {
 			) {
 				// 有 '</page>' 卻沒有 '<revision>'
 				library_namespace.debug('Bad data:\n' + buffer.slice(0, index),
-						6, 'parse_page');
+						6, 'parse_dump_xml');
 				buffer = buffer.slice(index + 16);
 				return;
 			}
@@ -5591,7 +5598,7 @@ function module_code(library_namespace) {
 					'*' : buffer.between('<text xml:space="preserve">',
 							'</text>', revision_index)
 				} ]
-			}, status);
+			}, status/* , start_index, end_index */);
 			// file_stream.resume();
 			// file_stream.pause();
 
@@ -5604,6 +5611,12 @@ function module_code(library_namespace) {
 			options.first(filename);
 
 		var buffer = '',
+		//
+		binary_buffer = new Buffer,
+		//
+		end_mark = new Buffer('</page>'),
+		// TODO: 錨/定位點. anchor[pageid] = position of the xml dump file.
+		anchor = [],
 		// filename: XML file
 		// e.g., 'enwiki-20160305-pages-meta-current1.xml'
 		file_stream = new node_fs.ReadStream(filename),
@@ -5613,8 +5626,10 @@ function module_code(library_namespace) {
 		// status = node_fs.fstatSync(file_stream.fd);
 		status = node_fs.statSync(filename);
 		// 若是預設 encoding，會造成 chunk.length 無法獲得正確的值。
-		// 若是為了能掌握進度，則不預設 encoding。但這會造成破碎/錯誤的編碼，只好放棄。
+		// 若是為了能掌握進度，則不預設 encoding。
+		// 2016/3/26: 但這會造成破碎/錯誤的編碼，只好放棄。
 		file_stream.setEncoding('utf8');
+		//
 		status.pos = 0;
 
 		library_namespace.info('read_dump: Starting read data...');
@@ -5622,6 +5637,12 @@ function module_code(library_namespace) {
 		file_stream.on('error', options.onerror || function(error) {
 			library_namespace.err('read_dump: Error occurred: ' + error);
 		});
+
+		/**
+		 * TODO: 工作流程: 循序讀取檔案內容。每次讀到一個段落 (chunk)，檢查是不是有結束標記。若是沒有，則得繼續讀下去。<br />
+		 * 有結束標記，則取出開始標記至結束標記中間之頁面文字資料，放置於 {String}page_text，並開始解析頁面。<br />
+		 * 此時 status.pos 指向檔案中 start position of binary_buffer，可用來設定錨/定位點。
+		 */
 
 		// old: e.g., '<text xml:space="preserve" bytes="80">'??
 		// 2016/3/11: e.g., '<text xml:space="preserve">'
@@ -5632,7 +5653,10 @@ function module_code(library_namespace) {
 			// https://nodejs.org/api/stream.html#stream_event_end
 			// 應為 bytes, 非 characters.
 			// 若是預設 encoding 'utf8'，實際上只會跑到 74%。
-			status.pos += chunk.length;
+			// status.pos += chunk.length;
+			//
+			// an alternative method:
+			// status.pos += Buffer.byteLength(chunk);
 
 			/**
 			 * 當未採用 .setEncoding('utf8')，之後才 += chunk.toString('utf8')；
@@ -5646,9 +5670,34 @@ function module_code(library_namespace) {
 			 * @see https://nodejs.org/api/stream.html#stream_class_stream_readable
 			 */
 			// buffer += chunk.toString('utf8');
-			buffer += chunk;
-			while (parse_page())
+			// buffer += chunk;
+			// 以上廢棄。
+			//
+			// --------------------------------------------
+			/**
+			 * 另一個方法是不設定 file_stream.setEncoding()，而直接搜尋 buffer 有無 end_mark '</page>'。若有才分割、執行
+			 * .toString('utf8')。但這需要依賴最終 encoding 之特性，並且若要採 Buffer.concat()
+			 * 也不見得更高效，或許需要自己寫更底層的功能，直接 call
+			 * fs.read()。此外由於測試後，發現瓶頸在網路傳輸而不在程式碼執行，因此不如犧牲點效能，確保採用無須依賴 encoding
+			 * 特性之實作法。
+			 */
+
+			//
+			// workaround: Buffer.prototype.indexOf() needs newer node.js
+			// https://nodejs.org/api/buffer.html
+			binary_buffer = Buffer.concat([ binary_buffer, chunk ]);
+			// 直到確認不會打斷 character，才解 Buffer。
+			var end_index = binary_buffer.indexOf(end_mark);
+			if (end_index === NOT_FOUND)
+				return;
+
+			status.pos += end_index;
+			buffer += binary_buffer.slice(0, end_index).toString('utf8');
+			binary_buffer = binary_buffer.slice(end_index);
+
+			while (parse_dump_xml())
 				;
+
 			if (buffer.length > 1e8) {
 				library_namespace
 						.err('read_dump: buffer too long (' + buffer.length
