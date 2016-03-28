@@ -5562,31 +5562,42 @@ function module_code(library_namespace) {
 		 * Parse Wikimedia dump xml file.
 		 */
 		function parse_dump_xml() {
-			var index = buffer.indexOf('</page>');
+			var index = buffer.indexOf(end_mark);
 			if (index === NOT_FOUND)
 				// 資料尚未完整，繼續讀取。
 				return;
+			// 回頭找 start mark '<page>'
+			var start_index = buffer.lastIndexOf('<page>', index);
+			if (start_index === NOT_FOUND) {
+				throw new Error(
+						'parse_dump_xml: We have end mark without start mark!');
+			}
 
 			var revision_index = buffer.indexOf('<revision>');
 			if (revision_index === NOT_FOUND
 			// check '<model>wikitext</model>'
 			// || buffer.indexOf('<model>wikitext</model>') === NOT_FOUND
 			) {
-				// 有 '</page>' 卻沒有 '<revision>'
-				library_namespace.debug('Bad data:\n' + buffer.slice(0, index),
-						6, 'parse_dump_xml');
-				buffer = buffer.slice(index + 16);
+				// 有 end_mark '</page>' 卻沒有 '<revision>'
+				library_namespace.err('parse_dump_xml: Bad data:\n'
+						+ buffer.slice(0, index));
+				// 跳過此筆紀錄。
+				bytes += Buffer.byteLength(buffer.slice(0, index
+						+ end_mark.length));
+				buffer = buffer.slice(index + end_mark.length);
 				return;
 			}
 
+			var pageid = buffer.between('<id>', '</id>', start_index) | 0,
 			// page 之 structure 按照 wiki API 本身之 return
 			// page_data = {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
 			// includes redirection 包含重新導向頁面.
 			// includes non-ns0.
-			callback({
-				pageid : buffer.between('<id>', '</id>') | 0,
-				ns : buffer.between('<ns>', '</ns>') | 0,
-				title : unescape_xml(buffer.between('<title>', '</title>')),
+			page_data = {
+				pageid : pageid,
+				ns : buffer.between('<ns>', '</ns>', start_index) | 0,
+				title : unescape_xml(buffer.between('<title>', '</title>',
+						start_index)),
 				revisions : [ {
 					// rev_id
 					revid : buffer.between('<id>', '</id>',
@@ -5598,39 +5609,66 @@ function module_code(library_namespace) {
 					'*' : buffer.between('<text xml:space="preserve">',
 							'</text>', revision_index)
 				} ]
-			}, status/* , start_index, end_index */);
-			// file_stream.resume();
-			// file_stream.pause();
+			};
 
-			// 截斷. 16: '</page>\n <page>'.length
-			buffer = buffer.slice(index + 16);
+			var start_pos = Buffer.byteLength(buffer.slice(0, start_index)),
+			// 犧牲效能以確保採用無須依賴 encoding 特性之實作法。
+			page_bytes = Buffer.byteLength(buffer.slice(start_index, index
+					+ end_mark.length));
+			anchor[pageid] = [ bytes + start_pos, page_bytes ];
+			bytes += start_pos + page_bytes;
+			// 截斷。
+			buffer = buffer.slice(index + end_mark.length);
+
+			// ({Object}page_data, {Natural}position: 到本page結束時之檔案位置)
+			callback(page_data, bytes/* , file_status */);
+
 			return true;
 		}
 
 		if (options && typeof options.first === 'function')
 			options.first(filename);
 
+		/** {String}處理中之資料。 */
 		var buffer = '',
-		//
-		binary_buffer = new Buffer,
-		//
-		end_mark = new Buffer('</page>'),
-		// TODO: 錨/定位點. anchor[pageid] = position of the xml dump file.
+		/** end mark */
+		end_mark = '</page>',
+		/**
+		 * 錨/定位點.<br />
+		 * anchor[pageid] = [ position of the xml dump file, length in bytes ]
+		 * 
+		 * @type {Array}
+		 */
 		anchor = [],
-		// filename: XML file
-		// e.g., 'enwiki-20160305-pages-meta-current1.xml'
+		/**
+		 * filename: XML file path.<br />
+		 * e.g., 'enwiki-20160305-pages-meta-current1.xml'
+		 * 
+		 * @type {String}
+		 */
 		file_stream = new node_fs.ReadStream(filename),
-		// 掌握進度用。 (100 * status.pos / status.size | 0) + '%'
-		// 此時 stream 可能尚未初始化，(file_stream.fd===null)，
-		// 因此不能使用 fs.fstatSync()。
-		// status = node_fs.fstatSync(file_stream.fd);
-		status = node_fs.statSync(filename);
+		/**
+		 * 掌握進度用。 (100 * file_status.pos / file_status.size | 0) + '%'<br />
+		 * 此時 stream 可能尚未初始化，(file_stream.fd===null)，<br />
+		 * 因此不能使用 fs.fstatSync()。
+		 * 
+		 * @type {Object}
+		 */
+		// file_status = node_fs.fstatSync(file_stream.fd);
+		// file_status = node_fs.statSync(filename),
+		/** {Natural}檔案長度。掌握進度用。 */
+		// file_size = node_fs.statSync(filename).size,
+		/**
+		 * byte counter. 已經處理過的資料長度，為 bytes，非 characters。指向 buffer 起頭在 file
+		 * 中的位置。
+		 * 
+		 * @type {ℕ⁰:Natural+0}
+		 */
+		bytes = 0;
 		// 若是預設 encoding，會造成 chunk.length 無法獲得正確的值。
 		// 若是為了能掌握進度，則不預設 encoding。
 		// 2016/3/26: 但這會造成破碎/錯誤的編碼，只好放棄。
 		file_stream.setEncoding('utf8');
-		//
-		status.pos = 0;
 
 		library_namespace.info('read_dump: Starting read data...');
 
@@ -5639,24 +5677,14 @@ function module_code(library_namespace) {
 		});
 
 		/**
-		 * TODO: 工作流程: 循序讀取檔案內容。每次讀到一個段落 (chunk)，檢查是不是有結束標記。若是沒有，則得繼續讀下去。<br />
-		 * 有結束標記，則取出開始標記至結束標記中間之頁面文字資料，放置於 {String}page_text，並開始解析頁面。<br />
-		 * 此時 status.pos 指向檔案中 start position of binary_buffer，可用來設定錨/定位點。
+		 * 工作流程: 循序讀取檔案內容。每次讀到一個區塊/段落 (chunk)，檢查是不是有結束標記。若是沒有，則得繼續讀下去。<br />
+		 * 有結束標記，則取出開始標記至結束標記中間之頁面文字資料，紀錄起始與結尾檔案位置，放置於 anchor[pageid]，並開始解析頁面。<br />
+		 * 此時 bytes 指向檔案中 start position of buffer，可用來設定錨/定位點。
 		 */
 
 		// old: e.g., '<text xml:space="preserve" bytes="80">'??
 		// 2016/3/11: e.g., '<text xml:space="preserve">'
 		file_stream.on('data', function(chunk) {
-			// console.log(chunk.toString('utf8'));
-
-			// 已經讀取的資料長度。
-			// https://nodejs.org/api/stream.html#stream_event_end
-			// 應為 bytes, 非 characters.
-			// 若是預設 encoding 'utf8'，實際上只會跑到 74%。
-			// status.pos += chunk.length;
-			//
-			// an alternative method:
-			// status.pos += Buffer.byteLength(chunk);
 
 			/**
 			 * 當未採用 .setEncoding('utf8')，之後才 += chunk.toString('utf8')；
@@ -5669,41 +5697,29 @@ function module_code(library_namespace) {
 			 * 
 			 * @see https://nodejs.org/api/stream.html#stream_class_stream_readable
 			 */
-			// buffer += chunk.toString('utf8');
-			// buffer += chunk;
-			// 以上廢棄。
-			//
+
 			// --------------------------------------------
 			/**
-			 * 另一個方法是不設定 file_stream.setEncoding()，而直接搜尋 buffer 有無 end_mark '</page>'。若有才分割、執行
-			 * .toString('utf8')。但這需要依賴最終 encoding 之特性，並且若要採 Buffer.concat()
-			 * 也不見得更高效，或許需要自己寫更底層的功能，直接 call
+			 * 以下廢棄。 an alternative method: 另一個方法是不設定
+			 * file_stream.setEncoding('utf8')，而直接搜尋 buffer 有無 end_mark '</page>'。直到確認不會打斷
+			 * character，才解 Buffer。若有才分割、執行 .toString('utf8')。但這需要依賴最終 encoding
+			 * 之特性，並且若要採 Buffer.concat() 也不見得更高效， and Buffer.prototype.indexOf()
+			 * needs newer node.js. 或許需要自己寫更底層的功能，直接 call
 			 * fs.read()。此外由於測試後，發現瓶頸在網路傳輸而不在程式碼執行，因此不如犧牲點效能，確保採用無須依賴 encoding
 			 * 特性之實作法。
 			 */
-
-			//
-			// workaround: Buffer.prototype.indexOf() needs newer node.js
-			// https://nodejs.org/api/buffer.html
-			binary_buffer = Buffer.concat([ binary_buffer, chunk ]);
-			// 直到確認不會打斷 character，才解 Buffer。
-			var end_index = binary_buffer.indexOf(end_mark);
-			if (end_index === NOT_FOUND)
-				return;
-
-			status.pos += end_index;
-			buffer += binary_buffer.slice(0, end_index).toString('utf8');
-			binary_buffer = binary_buffer.slice(end_index);
 
 			while (parse_dump_xml())
 				;
 
 			if (buffer.length > 1e8) {
-				library_namespace
-						.err('read_dump: buffer too long (' + buffer.length
-								+ ')! Paused! 有太多無法處理的 buffer，可能是格式錯誤?');
+				library_namespace.err(
+				//
+				'read_dump: buffer too long (' + buffer.length
+						+ ')! Paused! 有太多無法處理的 buffer，可能是格式錯誤?');
 				console.log(buffer.slice(0, 1e3) + '...');
 				file_stream.pause();
+				// file_stream.resume();
 				// throw buffer.slice(0,1e3);
 			}
 		});
@@ -5711,7 +5727,7 @@ function module_code(library_namespace) {
 		file_stream.on('end', function() {
 			library_namespace.debug('Done.', 1, 'read_dump');
 			if (options && typeof options.last === 'function')
-				options.last.call(file_stream);
+				options.last.call(file_stream, anchor);
 		});
 
 		// * @returns {String}file path
