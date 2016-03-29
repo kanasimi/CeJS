@@ -5517,6 +5517,58 @@ function module_code(library_namespace) {
 	NOT_FOUND = ''.indexOf('_');
 
 	/**
+	 * Parse Wikimedia dump xml text.
+	 * 
+	 * @param {String}xml
+	 *            xml text
+	 * @param {ℕ⁰:Natural+0}[start_index]
+	 *            start index to parse.
+	 * 
+	 * @returns {Object}page_data =
+	 *          {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
+	 */
+	function parse_dump_xml(xml, start_index) {
+		if (!(start_index >= 0))
+			start_index = 0;
+
+		// 主要頁面內容所在。
+		var revision_index = xml.indexOf('<revision>', start_index);
+		if (revision_index === NOT_FOUND
+		// check '<model>wikitext</model>'
+		// || xml.indexOf('<model>wikitext</model>') === NOT_FOUND
+		) {
+			// 有 end_mark '</page>' 卻沒有 '<revision>'
+			library_namespace.err('parse_dump_xml: Bad data:\n'
+					+ xml.slice(0, index));
+			return;
+		}
+
+		// page 之 structure 按照 wiki API 本身之 return
+		// page_data = {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
+		// includes redirection 包含重新導向頁面.
+		// includes non-ns0.
+		var page_data = {
+			pageid : xml.between('<id>', '</id>', start_index) | 0,
+			ns : xml.between('<ns>', '</ns>', start_index) | 0,
+			title : unescape_xml(xml
+					.between('<title>', '</title>', start_index)),
+			revisions : [ {
+				// rev_id
+				revid : xml.between('<id>', '</id>', revision_index) | 0,
+				// e.g., '2000-01-01T00:00:00Z'
+				timestamp : xml.between('<timestamp>', '</timestamp>',
+						revision_index),
+				// old: e.g., '<text xml:space="preserve" bytes="80">'??
+				// 2016/3/11: e.g., '<text xml:space="preserve">'
+				'*' : xml.between('<text xml:space="preserve">', '</text>',
+						revision_index)
+			} ]
+		};
+
+		return page_data;
+	}
+
+	/**
 	 * 讀取/parse Wikimedia dumps 之 xml 檔案。
 	 * 
 	 * 注意: 必須自行 include 'application.platform.nodejs'。 <code>
@@ -5561,24 +5613,32 @@ function module_code(library_namespace) {
 		if (options && typeof options.first === 'function')
 			options.first(filename);
 
+		/** {String}file encoding for dump file. */
+		var encoding = options && options.encoding || wiki_API.encoding,
 		/** {String}處理中之資料。 */
-		var buffer = '',
+		buffer = '',
 		/** end mark */
 		end_mark = '</page>',
 		/**
 		 * 錨/定位點.<br />
-		 * anchor[pageid] = [ position of the xml dump file, length in bytes ]
+		 * anchor[pageid] = [ position of the xml dump file, page length in
+		 * bytes ]
 		 * 
 		 * @type {Array}
 		 */
 		anchor = [],
 		/**
+		 * dump file stream.
+		 * 
 		 * filename: XML file path.<br />
 		 * e.g., 'enwiki-20160305-pages-meta-current1.xml'
 		 * 
 		 * @type {String}
 		 */
-		file_stream = new node_fs.ReadStream(filename),
+		file_stream = new node_fs.ReadStream(filename, {
+			// 加大 buffer。據測試，改到 1 MiB 反而慢。
+			highWaterMark : 128 * 1024
+		}),
 		/**
 		 * 掌握進度用。 (100 * file_status.pos / file_status.size | 0) + '%'<br />
 		 * 此時 stream 可能尚未初始化，(file_stream.fd===null)，<br />
@@ -5600,9 +5660,9 @@ function module_code(library_namespace) {
 		// 若是預設 encoding，會造成 chunk.length 無法獲得正確的值。
 		// 若是為了能掌握進度，則不預設 encoding。
 		// 2016/3/26: 但這會造成破碎/錯誤的編碼，只好放棄。
-		file_stream.setEncoding('utf8');
+		file_stream.setEncoding(encoding);
 
-		file_stream.on('error', options.onerror || function(error) {
+		file_stream.on('error', options && options.onerror || function(error) {
 			library_namespace.err('read_dump: Error occurred: ' + error);
 		});
 
@@ -5617,7 +5677,7 @@ function module_code(library_namespace) {
 		/**
 		 * Parse Wikimedia dump xml file.
 		 */
-		function parse_dump_xml() {
+		function parse_buffer() {
 			var index = buffer.indexOf(end_mark);
 			if (index === NOT_FOUND)
 				// 資料尚未完整，繼續讀取。
@@ -5627,53 +5687,31 @@ function module_code(library_namespace) {
 			var start_index = buffer.lastIndexOf('<page>', index);
 			if (start_index === NOT_FOUND) {
 				throw new Error(
-						'parse_dump_xml: We have end mark without start mark!');
+						'parse_buffer: We have end mark without start mark!');
 			}
 
-			// 主要頁面內容所在。
-			var revision_index = buffer.indexOf('<revision>');
-			if (revision_index === NOT_FOUND
-			// check '<model>wikitext</model>'
-			// || buffer.indexOf('<model>wikitext</model>') === NOT_FOUND
-			) {
-				// 有 end_mark '</page>' 卻沒有 '<revision>'
-				library_namespace.err('parse_dump_xml: Bad data:\n'
-						+ buffer.slice(0, index));
+			var page_data = parse_dump_xml(buffer, start_index);
+			if (!page_data) {
 				// 跳過此筆紀錄。
 				bytes += Buffer.byteLength(buffer.slice(0, index
-						+ end_mark.length));
+						+ end_mark.length), encoding);
+				// 截斷。
 				buffer = buffer.slice(index + end_mark.length);
 				return;
 			}
 
-			var pageid = buffer.between('<id>', '</id>', start_index) | 0,
-			// page 之 structure 按照 wiki API 本身之 return
-			// page_data = {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
-			// includes redirection 包含重新導向頁面.
-			// includes non-ns0.
-			page_data = {
-				pageid : pageid,
-				ns : buffer.between('<ns>', '</ns>', start_index) | 0,
-				title : unescape_xml(buffer.between('<title>', '</title>',
-						start_index)),
-				revisions : [ {
-					// rev_id
-					revid : buffer.between('<id>', '</id>',
-					//
-					revision_index) | 0,
-					// e.g., '2000-01-01T00:00:00Z'
-					timestamp : buffer.between('<timestamp>', '</timestamp>',
-							revision_index),
-					'*' : buffer.between('<text xml:space="preserve">',
-							'</text>', revision_index)
-				} ]
-			};
-
-			var start_pos = Buffer.byteLength(buffer.slice(0, start_index)),
+			var pageid = page_data.pageid,
+			//
+			start_pos = Buffer.byteLength(buffer.slice(0, start_index),
+					encoding),
 			// 犧牲效能以確保採用無須依賴 encoding 特性之實作法。
 			page_bytes = Buffer.byteLength(buffer.slice(start_index, index
-					+ end_mark.length));
+					+ end_mark.length), encoding);
+			if (false && (pageid in anchor))
+				library_namespace.err('parse_buffer: Duplicated page id: '
+						+ pageid);
 			anchor[pageid] = [ bytes + start_pos, page_bytes ];
+			// 跳到下一筆紀錄。
 			bytes += start_pos + page_bytes;
 			// 截斷。
 			buffer = buffer.slice(index + end_mark.length);
@@ -5687,12 +5725,10 @@ function module_code(library_namespace) {
 			return true;
 		}
 
-		// old: e.g., '<text xml:space="preserve" bytes="80">'??
-		// 2016/3/11: e.g., '<text xml:space="preserve">'
 		file_stream.on('data', function(chunk) {
 
 			/**
-			 * 當未採用 .setEncoding('utf8')，之後才 += chunk.toString('utf8')；
+			 * 當未採用 .setEncoding(encoding)，之後才 += chunk.toString(encoding)；
 			 * 則一個字元可能被切分成兩邊，這會造成破碎/錯誤的編碼。
 			 * 
 			 * This properly handles multi-byte characters that would otherwise
@@ -5703,20 +5739,20 @@ function module_code(library_namespace) {
 			 * @see https://nodejs.org/api/stream.html#stream_class_stream_readable
 			 */
 			buffer += chunk;
-			// buffer += chunk.toString('utf8');
+			// buffer += chunk.toString(encoding);
 
 			// --------------------------------------------
 			/**
 			 * 以下廢棄。 an alternative method: 另一個方法是不設定
-			 * file_stream.setEncoding('utf8')，而直接搜尋 buffer 有無 end_mark '</page>'。直到確認不會打斷
-			 * character，才解 Buffer。若有才分割、執行 .toString('utf8')。但這需要依賴最終 encoding
-			 * 之特性，並且若要採 Buffer.concat() 也不見得更高效， and Buffer.prototype.indexOf()
-			 * needs newer node.js. 或許需要自己寫更底層的功能，直接 call
-			 * fs.read()。此外由於測試後，發現瓶頸在網路傳輸而不在程式碼執行，因此不如犧牲點效能，確保採用無須依賴 encoding
-			 * 特性之實作法。
+			 * file_stream.setEncoding(encoding)，而直接搜尋 buffer 有無 end_mark '</page>'。直到確認不會打斷
+			 * character，才解 Buffer。若有才分割、執行 .toString(encoding)。但這需要依賴最終
+			 * encoding 之特性，並且若要採 Buffer.concat() 也不見得更高效， and
+			 * Buffer.prototype.indexOf() needs newer node.js. 或許需要自己寫更底層的功能，直接
+			 * call fs.read()。此外由於測試後，發現瓶頸在網路傳輸而不在程式碼執行，因此不如犧牲點效能，確保採用無須依賴
+			 * encoding 特性之實作法。
 			 */
 
-			while (parse_dump_xml())
+			while (parse_buffer())
 				;
 
 			if (buffer.length > 1e8) {
@@ -6128,15 +6164,17 @@ function module_code(library_namespace) {
 							redirect_list) {
 						library_namespace.log(
 						//
-						'redirects (alias) of [[' + get_page_title(title)
-								+ ']]: ('
-								//
-								+ redirect_list.length + ') ['
-								+ redirect_list.slice(0, 3)
-								//
-								.map(function(page_data) {
-									return page_data.title;
-								}) + ']...');
+						'redirects (alias) of [['
+						//
+						+ get_page_title(title) + ']]: ('
+						//
+						+ redirect_list.length + ') ['
+						//
+						+ redirect_list.slice(0, 3)
+						//
+						.map(function(page_data) {
+							return page_data.title;
+						}) + ']...');
 						if (!operation.keep_redirects && redirect_list
 								&& redirect_list[0])
 							// cache 中不需要此累贅之資料。
@@ -6289,7 +6327,8 @@ function module_code(library_namespace) {
 			cache_config.list = function() {
 				library_namespace.info(
 				// database replicas
-				'traversal_pages: 嘗試讀取 Tool Labs 之 database replication 資料...');
+				'traversal_pages: 嘗試讀取 Tool Labs 之 database replication 資料，'
+						+ '一次讀取完所有頁面最新版本之版本號 rev_id...');
 				// default: 採用 page_id 而非 page_title 來 query。
 				var is_id = 'is_id' in config ? config.is_id : true;
 				run_SQL(is_id ? all_title_SQL
@@ -6722,6 +6761,8 @@ function module_code(library_namespace) {
 		normalize_title_pattern : normalize_name_pattern,
 		get_hash : list_to_hash,
 		uniq_list : unique_list,
+
+		parse_dump_xml : parse_dump_xml,
 
 		Flow : Flow_info
 	});

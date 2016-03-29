@@ -647,6 +647,7 @@ function (global) {
 	 */
 	is_digits = function (value) {
 		// value == value | 0
+		// value == (value >>> 0)
 		return /^\d+$/.test(value);
 	};
 
