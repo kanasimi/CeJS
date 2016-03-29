@@ -5523,11 +5523,14 @@ function module_code(library_namespace) {
 	 *            xml text
 	 * @param {ℕ⁰:Natural+0}[start_index]
 	 *            start index to parse.
+	 * @param {Function}[filter]
+	 *            filter :<br />
+	 *            function(pageid, revid) { return {Boolean}need_process; }
 	 * 
 	 * @returns {Object}page_data =
 	 *          {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
 	 */
-	function parse_dump_xml(xml, start_index) {
+	function parse_dump_xml(xml, start_index, filter) {
 		if (!(start_index >= 0))
 			start_index = 0;
 
@@ -5543,18 +5546,25 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		var pageid = xml.between('<id>', '</id>', start_index) | 0,
+		//
+		revid = xml.between('<id>', '</id>', revision_index) | 0;
+
+		if (filter && !filter(pageid, revid))
+			return;
+
 		// page 之 structure 按照 wiki API 本身之 return
 		// page_data = {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
 		// includes redirection 包含重新導向頁面.
 		// includes non-ns0.
 		var page_data = {
-			pageid : xml.between('<id>', '</id>', start_index) | 0,
+			pageid : pageid,
 			ns : xml.between('<ns>', '</ns>', start_index) | 0,
 			title : unescape_xml(xml
 					.between('<title>', '</title>', start_index)),
 			revisions : [ {
 				// rev_id
-				revid : xml.between('<id>', '</id>', revision_index) | 0,
+				revid : revid,
 				// e.g., '2000-01-01T00:00:00Z'
 				timestamp : xml.between('<timestamp>', '</timestamp>',
 						revision_index),
@@ -5610,11 +5620,13 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (options && typeof options.first === 'function')
+		options = library_namespace.setup_options(options);
+
+		if (typeof options.first === 'function')
 			options.first(filename);
 
 		/** {String}file encoding for dump file. */
-		var encoding = options && options.encoding || wiki_API.encoding,
+		var encoding = options.encoding || wiki_API.encoding,
 		/** {String}處理中之資料。 */
 		buffer = '',
 		/** end mark */
@@ -5626,7 +5638,9 @@ function module_code(library_namespace) {
 		 * 
 		 * @type {Array}
 		 */
-		anchor = [],
+		anchor = options.anchor && [],
+		//
+		filter = options.filter,
 		/**
 		 * dump file stream.
 		 * 
@@ -5662,7 +5676,7 @@ function module_code(library_namespace) {
 		// 2016/3/26: 但這會造成破碎/錯誤的編碼，只好放棄。
 		file_stream.setEncoding(encoding);
 
-		file_stream.on('error', options && options.onerror || function(error) {
+		file_stream.on('error', options.onerror || function(error) {
 			library_namespace.err('read_dump: Error occurred: ' + error);
 		});
 
@@ -5690,7 +5704,7 @@ function module_code(library_namespace) {
 						'parse_buffer: We have end mark without start mark!');
 			}
 
-			var page_data = parse_dump_xml(buffer, start_index);
+			var page_data = parse_dump_xml(buffer, start_index, filter);
 			if (!page_data) {
 				// 跳過此筆紀錄。
 				bytes += Buffer.byteLength(buffer.slice(0, index
@@ -5706,11 +5720,14 @@ function module_code(library_namespace) {
 					encoding),
 			// 犧牲效能以確保採用無須依賴 encoding 特性之實作法。
 			page_bytes = Buffer.byteLength(buffer.slice(start_index, index
-					+ end_mark.length), encoding);
-			if (false && (pageid in anchor))
+					+ end_mark.length), encoding),
+			// [ start position of file, length in bytes ]
+			position = [ bytes + start_pos, page_bytes ];
+			if (false && anchor && (pageid in anchor))
 				library_namespace.err('parse_buffer: Duplicated page id: '
 						+ pageid);
-			anchor[pageid] = [ bytes + start_pos, page_bytes ];
+			if (anchor)
+				anchor[pageid] = position;
 			// 跳到下一筆紀錄。
 			bytes += start_pos + page_bytes;
 			// 截斷。
@@ -5720,7 +5737,7 @@ function module_code(library_namespace) {
 			 * function({Object}page_data, {Natural}position: 到本page結束時之檔案位置,
 			 * {Array}page_anchor)
 			 */
-			callback(page_data, bytes, anchor[pageid]/* , file_status */);
+			callback(page_data, bytes, position/* , file_status */);
 
 			return true;
 		}
@@ -5743,7 +5760,7 @@ function module_code(library_namespace) {
 
 			// --------------------------------------------
 			/**
-			 * 以下廢棄。 an alternative method: 另一個方法是不設定
+			 * 以下方法廢棄 deprecated。 an alternative method: 另一個方法是不設定
 			 * file_stream.setEncoding(encoding)，而直接搜尋 buffer 有無 end_mark '</page>'。直到確認不會打斷
 			 * character，才解 Buffer。若有才分割、執行 .toString(encoding)。但這需要依賴最終
 			 * encoding 之特性，並且若要採 Buffer.concat() 也不見得更高效， and
@@ -5752,6 +5769,9 @@ function module_code(library_namespace) {
 			 * encoding 特性之實作法。
 			 */
 
+			;
+
+			// --------------------------------------------
 			while (parse_buffer())
 				;
 
@@ -5769,7 +5789,7 @@ function module_code(library_namespace) {
 
 		file_stream.on('end', function() {
 			library_namespace.debug('Done.', 1, 'read_dump');
-			if (options && typeof options.last === 'function')
+			if (typeof options.last === 'function')
 				options.last.call(file_stream, anchor);
 		});
 
