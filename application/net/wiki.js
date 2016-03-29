@@ -5550,8 +5550,12 @@ function module_code(library_namespace) {
 		//
 		revid = xml.between('<id>', '</id>', revision_index) | 0;
 
-		if (filter && !filter(pageid, revid))
+		if (filter && !filter(pageid, revid)) {
+			if (false)
+				library_namespace.debug('Skip id ' + pageid, 4,
+						'parse_dump_xml');
 			return;
+		}
 
 		// page 之 structure 按照 wiki API 本身之 return
 		// page_data = {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
@@ -5689,10 +5693,10 @@ function module_code(library_namespace) {
 		library_namespace.info('read_dump: Starting read data...');
 
 		/**
-		 * Parse Wikimedia dump xml file.
+		 * Parse Wikimedia dump xml file slice.
 		 */
-		function parse_buffer() {
-			var index = buffer.indexOf(end_mark);
+		function parse_buffer(index) {
+			index = buffer.indexOf(end_mark, index);
 			if (index === NOT_FOUND)
 				// 資料尚未完整，繼續讀取。
 				return;
@@ -5706,12 +5710,17 @@ function module_code(library_namespace) {
 
 			var page_data = parse_dump_xml(buffer, start_index, filter);
 			if (!page_data) {
-				// 跳過此筆紀錄。
+				if (false)
+					library_namespace.debug(
+					//
+					'跳過此筆紀錄。 index: ' + index + ', buffer: ' + buffer.length,
+							3, 'parse_dump_xml');
 				bytes += Buffer.byteLength(buffer.slice(0, index
 						+ end_mark.length), encoding);
 				// 截斷。
 				buffer = buffer.slice(index + end_mark.length);
-				return;
+				// 雖然跳過此筆紀錄，但既然還能處理，便需要繼續處理。
+				return true;
 			}
 
 			var pageid = page_data.pageid,
@@ -5744,6 +5753,9 @@ function module_code(library_namespace) {
 
 		file_stream.on('data', function(chunk) {
 
+			// 之前的 buffer 已經搜尋過，不包含 end_mark。
+			var index = buffer.length;
+
 			/**
 			 * 當未採用 .setEncoding(encoding)，之後才 += chunk.toString(encoding)；
 			 * 則一個字元可能被切分成兩邊，這會造成破碎/錯誤的編碼。
@@ -5772,14 +5784,16 @@ function module_code(library_namespace) {
 			;
 
 			// --------------------------------------------
-			while (parse_buffer())
-				;
+			while (parse_buffer(index))
+				// 因為 buffer 已經改變，reset index.
+				index = 0;
 
-			if (buffer.length > 1e8) {
+			// 頁面大小系統上限 2,048 KB = 2 MB。
+			if (buffer.length > 3e6) {
 				library_namespace.err(
 				//
 				'read_dump: buffer too long (' + buffer.length
-						+ ')! Paused! 有太多無法處理的 buffer，可能是格式錯誤?');
+						+ ' characters)! Paused! 有太多無法處理的 buffer，可能是格式錯誤?');
 				console.log(buffer.slice(0, 1e3) + '...');
 				file_stream.pause();
 				// file_stream.resume();
