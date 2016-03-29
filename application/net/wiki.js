@@ -5731,12 +5731,12 @@ function module_code(library_namespace) {
 			page_bytes = Buffer.byteLength(buffer.slice(start_index, index
 					+ end_mark.length), encoding),
 			// [ start position of file, length in bytes ]
-			position = [ bytes + start_pos, page_bytes ];
+			page_anchor = [ bytes + start_pos, page_bytes ];
 			if (false && anchor && (pageid in anchor))
 				library_namespace.err('parse_buffer: Duplicated page id: '
 						+ pageid);
 			if (anchor)
-				anchor[pageid] = position;
+				anchor[pageid] = page_anchor;
 			// 跳到下一筆紀錄。
 			bytes += start_pos + page_bytes;
 			// 截斷。
@@ -5746,7 +5746,7 @@ function module_code(library_namespace) {
 			 * function({Object}page_data, {Natural}position: 到本page結束時之檔案位置,
 			 * {Array}page_anchor)
 			 */
-			callback(page_data, bytes, position/* , file_status */);
+			callback(page_data, bytes, page_anchor/* , file_status */);
 
 			return true;
 		}
