@@ -2523,35 +2523,44 @@ function module_code(library_namespace) {
 
 			/**
 			 * 處理回傳超過 limit (12 MB)，被截斷之情形。
+			 * 
+			 * @deprecated: 已經在 wiki_API.page 處理。
 			 */
-			if ('continue' in pages) {
+			if (false && ('continue' in pages)) {
 				if (setup_target) {
-					// e.g., continue: {
-					// rvcontinue: '2421|39477047', continue: '||' },
 					var continue_id = pages['continue'].rvcontinue
 					// assert: pages['continue'].rvcontinue = 'id|...'。
-					.match(/^\d+/)[0] | 0,
+					.match(/^\d+/)[0],
 					// -pages.length: 先回溯到 pages 開頭之 index。
 					effect_length = -(work_continue - pages.length);
 					/**
 					 * 找到 pages.continue 所指之 index。
 					 */
 					if (config.is_id) {
-						// 從後頭搜尋比較快。
 						// 須注意 type，有 number 1 !== string '1' 之問題。
+						if (typeof target[--work_continue] === 'number')
+							continue_id |= 0;
+						// 從後頭搜尋比較快。
 						work_continue = target.lastIndexOf(continue_id,
-								work_continue - 1);
+								work_continue);
+						if (work_continue === NOT_FOUND)
+							throw new Error('page id not found: ' + continue_id);
 						// assert: 一定找得到。
 						// work_continue>=pages開頭之index=(原work_continue)-pages.length
 					} else {
+						continue_id |= 0;
 						while (pages[--work_continue].pageid !== continue_id)
 							;
 					}
 					effect_length += work_continue;
+					if (false)
+						console.log([ effect_length, pages.length,
+								work_continue ]);
 
 					// assert: 0 < effect_length < pages.length
-					library_namespace.debug('回傳內容過長而被截斷。將回退 '
-							+ (pages.length - effect_length) + '頁，下次將自 [['
+					library_namespace.debug('一次取得大量頁面時，回傳內容過長而被截斷。將回退 '
+							+ (pages.length - effect_length) + '頁，下次將自 '
+							+ effect_length + '/' + pages.length + ' [['
 							+ pages[effect_length].title + ']] id '
 							+ continue_id + ' 開始。', 1, 'wiki_API.work');
 					pages = pages.slice(0, effect_length);
@@ -2559,6 +2568,26 @@ function module_code(library_namespace) {
 				} else {
 					library_namespace.err('wiki_API.work: 回傳內容過長而被截斷!');
 				}
+			}
+
+			/**
+			 * 處理回傳超過 limit (12 MB)，被截斷之情形。
+			 */
+			if ('OK_length' in pages) {
+				if (setup_target) {
+					// -pages.length: 先回溯到 pages 開頭之 index。
+					work_continue -= pages.length - pages.OK_length;
+				} else {
+					library_namespace.err('wiki_API.work: 回傳內容過長而被截斷!');
+				}
+
+				library_namespace.debug('一次取得大量頁面時，回傳內容過長而被截斷。將回退 '
+						+ (pages.length - pages.OK_length) + '頁，下次將自 '
+						+ pages.OK_length + '/' + pages.length + ' [['
+						+ pages[pages.OK_length].title + ']] id '
+						+ pages[pages.OK_length].pageid + ' 開始。', 1,
+						'wiki_API.work');
+				pages = pages.slice(0, pages.OK_length);
 			}
 
 			library_namespace.debug('for each page: 主要機制是把工作全部推入 queue。', 2,
@@ -3188,7 +3217,9 @@ function module_code(library_namespace) {
 				if (data.warnings && data.warnings.query
 				//
 				&& data.warnings.query['*'])
-					library_namespace.warn(data.warnings.query['*']);
+					library_namespace.warn(
+					//
+					'wiki_API.page: ' + data.warnings.query['*']);
 				callback(undefined, error);
 				return;
 			}
@@ -3208,7 +3239,9 @@ function module_code(library_namespace) {
 			&& data.warnings.result['*']) {
 				if (false && data.warnings.result['*'].includes('truncated'))
 					data.truncated = true;
-				library_namespace.warn(data.warnings.result['*']);
+				library_namespace.warn(
+				//
+				'wiki_API.page: ' + data.warnings.result['*']);
 			}
 
 			if (!data || !data.query || !data.query.pages) {
@@ -3233,24 +3266,42 @@ function module_code(library_namespace) {
 			//
 			&& options && options.page_cache_prefix;
 
+			var continue_id;
 			if ('continue' in data) {
-				pages['continue'] = data['continue'];
+				// pages['continue'] = data['continue'];
+				if (data['continue']
+				//
+				&& typeof data['continue'].rvcontinue === 'string'
+				//
+				&& (continue_id = data['continue'].rvcontinue
+				// assert: pages['continue'].rvcontinue = 'id|...'。
+				.match(/^[1-9]\d*/))) {
+					continue_id = continue_id[0] | 0;
+				}
 				if (false && data.truncated)
 					pages.truncated = true;
 			}
 			data = data.query.pages;
 
 			for ( var pageid in data) {
-				var page = data[pageid];
-				pages.push(page);
+				var page = data[pageid], need_warn = true;
 				if (!get_page_content.has_content(page)) {
-					library_namespace.warn('wiki_API.page: '
-					// 頁面不存在。Page does not exist. Deleted?
-					+ ('missing' in page ? 'Not exists' : 'No content')
-					//
-					+ ': ' + (page.title ? '[[' + page.title + ']]'
-					//
-					: ' id ' + page.pageid));
+					if (continue_id && continue_id === page.pageid) {
+						// 找到了 pages.continue 所指之 index。
+						// effect length
+						pages.OK_length = pages.length;
+						// 當過了 continue_id 之後，表示已經被截斷，則不再警告。
+						need_warn = false;
+					}
+					if (need_warn) {
+						library_namespace.warn('wiki_API.page: '
+						// 頁面不存在。Page does not exist. Deleted?
+						+ ('missing' in page ? 'Not exists' : 'No content')
+						//
+						+ ': ' + (page.title ? '[[' + page.title + ']]'
+						//
+						: ' id ' + page.pageid));
+					}
 				} else if (page_cache_prefix) {
 					node_fs.writeFile(page_cache_prefix + page.title + '.json',
 					/**
@@ -3258,6 +3309,7 @@ function module_code(library_namespace) {
 					 */
 					JSON.stringify(data), wiki_API.encoding);
 				}
+				pages.push(page);
 			}
 
 			// options.multi: 即使只取得單頁面，依舊回傳 Array。

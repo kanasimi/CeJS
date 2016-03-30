@@ -1813,9 +1813,11 @@ OS='UNIX'; // unknown
 	 * @returns {String}plain text messages.
 	 */
 	function SGR_to_plain(messages) {
-		return messages.filter(function(message, index) {
+		return Array.isArray(messages) ? messages.filter(function(message, index) {
 			return index % 2 === 0;
-		}).join('');
+		}).join('')
+		// '' + messages
+		: messages;
 	}
 
 	/** {Object}cache for CeL.interact.console.SGR */
