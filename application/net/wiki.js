@@ -3104,15 +3104,22 @@ function module_code(library_namespace) {
 		if (options && options.redirects)
 			title[1] += '&redirects=1';
 
-		title[1] = 'query&prop=revisions&rvprop=content|timestamp&'
-		// &rvexpandtemplates=1
 		// prop=info|revisions
+		title[1] = 'query&prop=revisions&rvprop='
+		//
+		+ (options && Array.isArray(options.prop)
+		//
+		&& options.prop.join('|') || options.prop
+		//
+		|| wiki_API.page.default_properties) + '&'
+		// &rvexpandtemplates=1
 		+ title[1];
 		if (!title[0])
 			title = title[1];
 
-		// library_namespace.debug('get url token: ' + title, 0,
-		// 'wiki_API.page');
+		if (false)
+			library_namespace.debug('get url token: ' + title, 0,
+					'wiki_API.page');
 
 		wiki_API.query(title, typeof callback === 'function'
 		//
@@ -3170,7 +3177,9 @@ function module_code(library_namespace) {
 					// 頁面不存在。Page does not exist. Deleted?
 					+ ('missing' in page ? 'Not exists' : 'No content')
 					//
-					+ ': [[' + page.title + ']]');
+					+ ': ' + (page.title ? '[[' + page.title + ']]'
+					//
+					: ' id ' + page.pageid));
 				} else if (page_cache_prefix) {
 					node_fs.writeFile(page_cache_prefix + page.title + '.json',
 					/**
@@ -3207,6 +3216,9 @@ function module_code(library_namespace) {
 			callback(pages);
 		});
 	};
+
+	// timestamp 是為了 wiki_API.edit 檢查用。
+	wiki_API.page.default_properties = 'content|timestamp';
 
 	// ------------------------------------------------------------------------
 
@@ -4588,7 +4600,11 @@ function module_code(library_namespace) {
 					// 頁面不存在。Page does not exist. Deleted?
 					library_namespace.warn(
 					//
-					'wiki_API.redirects: Not exists: [' + page.title + ']');
+					'wiki_API.redirects: Not exists: '
+					//
+					+ (page.title ? '[[' + page.title + ']]'
+					//
+					: ' id ' + page.pageid));
 				break;
 			}
 
@@ -5063,13 +5079,20 @@ function module_code(library_namespace) {
 		});
 	}
 
+	// need reset connection,
+	function need_reconnect(error) {
+		return error
+		// Error: Cannot enqueue Handshake after fatal error.
+		&& (error.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR'
+		// ECONNRESET: socket hang up
+		|| error.code === 'ECONNRESET');
+	}
+
 	// run SQL query
 	SQL_session.prototype.SQL = function(SQL, callback) {
 		var _this = this;
 		this.connection.query(SQL, function(error) {
-			if (error
-			// Error: Cannot enqueue Handshake after fatal error.
-			&& error.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR') {
+			if (need_reconnect(error)) {
 				// re-connect. 可能已經斷線。
 				_this.connection.connect(function(error) {
 					if (error) {
@@ -5089,9 +5112,7 @@ function module_code(library_namespace) {
 			try {
 				var _this = this;
 				this.connection.connect(function(error) {
-					if (error
-					// Error: Cannot enqueue Handshake after fatal error.
-					&& error.code === 'PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR') {
+					if (need_reconnect(error)) {
 						// re-connect.
 						_this.connect(callback, true);
 					} else if (typeof callback === 'function')
