@@ -2521,8 +2521,10 @@ function module_code(library_namespace) {
 			if (typeof config.first === 'function')
 				config.first.call(this, messages, titles, pages);
 
-			// 處理回傳超過 limit (12 MB)，被截斷之情形。
-			if ('continue' in pages)
+			/**
+			 * 處理回傳超過 limit (12 MB)，被截斷之情形。
+			 */
+			if ('continue' in pages) {
 				if (setup_target) {
 					// e.g., continue: {
 					// rvcontinue: '2421|39477047', continue: '||' },
@@ -2557,6 +2559,7 @@ function module_code(library_namespace) {
 				} else {
 					library_namespace.err('wiki_API.work: 回傳內容過長而被截斷!');
 				}
+			}
 
 			library_namespace.debug('for each page: 主要機制是把工作全部推入 queue。', 2,
 					'wiki_API.work');
