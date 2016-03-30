@@ -2490,6 +2490,7 @@ function module_code(library_namespace) {
 				library_namespace.warn('wiki_API.work: query 所得之 length ('
 						+ data.length + ') !== pages.length (' + pages.length
 						+ ') ！');
+
 			// 傳入標題列表，則由程式自行控制，毋須設定後續檢索用索引值。
 			if (!messages.input_title_list
 					// config.continue_wiki:
@@ -2499,6 +2500,7 @@ function module_code(library_namespace) {
 					// pages: 後續檢索用索引值之暫存值。
 					&& (pages = pages.show_next()))
 				messages.add(this.continue_key + ': ' + pages);
+
 			if (!no_message) {
 				// 使用時間, 費時
 				pages = '首先使用 ' + messages.last.age(new Date) + ' 以取得 '
@@ -2513,13 +2515,51 @@ function module_code(library_namespace) {
 				&& library_namespace.show_value)
 					library_namespace.show_value(data, 'pages');
 			}
+
 			pages = data;
 
 			if (typeof config.first === 'function')
 				config.first.call(this, messages, titles, pages);
 
-			library_namespace.debug(
-					'wiki_API.work: for each page: 主要機制是把工作全部推入 queue。', 2);
+			// 處理回傳超過 limit (12 MB)，被截斷之情形。
+			if ('continue' in pages)
+				if (setup_target) {
+					// e.g., continue: {
+					// rvcontinue: '2421|39477047', continue: '||' },
+					var continue_id = pages['continue'].rvcontinue
+					// assert: pages['continue'].rvcontinue = 'id|...'。
+					.match(/^\d+/)[0] | 0,
+					// -pages.length: 先回溯到 pages 開頭之 index。
+					effect_length = -(work_continue - pages.length);
+					/**
+					 * 找到 pages.continue 所指之 index。
+					 */
+					if (config.is_id) {
+						// 從後頭搜尋比較快。
+						// 須注意 type，有 number 1 !== string '1' 之問題。
+						work_continue = target.lastIndexOf(continue_id,
+								work_continue - 1);
+						// assert: 一定找得到。
+						// work_continue>=pages開頭之index=(原work_continue)-pages.length
+					} else {
+						while (pages[--work_continue].pageid !== continue_id)
+							;
+					}
+					effect_length += work_continue;
+
+					// assert: 0 < effect_length < pages.length
+					library_namespace.debug('回傳內容過長而被截斷。將回退 '
+							+ (pages.length - effect_length) + '頁，下次將自 [['
+							+ pages[effect_length].title + ']] id '
+							+ continue_id + ' 開始。', 1, 'wiki_API.work');
+					pages = pages.slice(0, effect_length);
+
+				} else {
+					library_namespace.err('wiki_API.work: 回傳內容過長而被截斷!');
+				}
+
+			library_namespace.debug('for each page: 主要機制是把工作全部推入 queue。', 2,
+					'wiki_API.work');
 			pages.forEach(function(page, index) {
 				if (library_namespace.is_debug(2)
 				// .show_value() @ interact.DOM, application.debug
@@ -2561,7 +2601,7 @@ function module_code(library_namespace) {
 
 			this.run(function() {
 				if (!no_message) {
-					library_namespace.debug('wiki_API.work: 收尾。');
+					library_namespace.debug('收尾。', 1, 'wiki_API.work');
 					var count_summary = ': 完成 '
 							+ done
 							//
@@ -2668,10 +2708,10 @@ function module_code(library_namespace) {
 
 		var target = pages || titles,
 		// 首先取得多個頁面內容所用之 options。
-		page_options = {
+		page_options = Object.assign({
 			is_id : config.is_id,
 			multi : true
-		},
+		}, config.page_options),
 		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(<=50)只能取得單一 revision。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		// titles/pageids: Maximum number of values is 50 (500 for bots).
@@ -2691,12 +2731,9 @@ function module_code(library_namespace) {
 				if (max_size < slice_size)
 					this_slice = this_slice.slice(0, max_size);
 				if (work_continue === 0 && max_size === target.length) {
-					library_namespace.debug(
-					//
-					'wiki_API.work: 設定一次先取得所有 '
-					//
-					+ target.length + ' 個頁面之 revisions (page contents 頁面內容)。',
-							2);
+					library_namespace.debug('設定一次先取得所有 ' + target.length
+							+ ' 個頁面之 revisions (page contents 頁面內容)。', 2,
+							'wiki_API.work');
 				} else {
 					nochange_count = target.length;
 					// start-end/all
@@ -2726,8 +2763,8 @@ function module_code(library_namespace) {
 
 		} else {
 			// assert: target is {String}title or {Object}page_data
-			library_namespace.debug(
-					'wiki_API.work: 取得單一頁面之 (page contents 頁面內容)。', 2);
+			library_namespace.debug('取得單一頁面之 (page contents 頁面內容)。', 2,
+					'wiki_API.work');
 			this.page(target, main_work, page_options);
 		}
 	};
@@ -3153,6 +3190,24 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			if (data.warnings && data.warnings.result
+			/**
+			 * e.g., <code>
+			 * { continue: { rvcontinue: '2421|39477047', continue: '||' },
+			 *   warnings: { result: { '*': 'This result was truncated because it would otherwise  be larger than the limit of 12,582,912 bytes' } },
+			 *   query: 
+			 *    { pages: 
+			 *       { '13': [Object],
+			 *       ...
+			 * </code>
+			 * limit: 12 MB. 此時應該有 .continue。
+			 */
+			&& data.warnings.result['*']) {
+				if (false && data.warnings.result['*'].includes('truncated'))
+					data.truncated = true;
+				library_namespace.warn(data.warnings.result['*']);
+			}
+
 			if (!data || !data.query || !data.query.pages) {
 				library_namespace.warn('wiki_API.page: Unknown response: ['
 				// e.g., 'wiki_API.page: Unknown response:
@@ -3169,12 +3224,19 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			data = data.query.pages;
 			var pages = [],
 			//
 			page_cache_prefix = library_namespace.platform.nodejs && node_fs
 			//
 			&& options && options.page_cache_prefix;
+
+			if ('continue' in data) {
+				pages['continue'] = data['continue'];
+				if (false && data.truncated)
+					pages.truncated = true;
+			}
+			data = data.query.pages;
+
 			for ( var pageid in data) {
 				var page = data[pageid];
 				pages.push(page);
