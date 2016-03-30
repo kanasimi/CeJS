@@ -2535,13 +2535,13 @@ function module_code(library_namespace) {
 					// 取得頁面內容。
 					this.page(page, function(page_data) {
 						each(page_data, messages);
-					});
+					}, config.page_options);
 				else {
 					// clone() 是為了能個別改變 summary。
 					// 例如: each() { options.summary += " -- ..."; }
 					var work_options = Object.clone(options);
 					// 取得頁面內容。一頁頁處理。
-					this.page(page)
+					this.page(page, null, config.page_options)
 					// 編輯頁面內容。
 					.edit(function(page_data) {
 						// edit/process
@@ -3072,7 +3072,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String|Array}title
 	 *            title or [ {String}API_URL, {String}title ]
-	 * @param {Function}callback
+	 * @param {Function}[callback]
 	 *            回調函數。 callback(page_data, error) { page_data.title; var
 	 *            content = CeL.wiki.content_of(page_data); }
 	 * @param {Object}[options]
@@ -3081,6 +3081,12 @@ function module_code(library_namespace) {
 	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 	 */
 	wiki_API.page = function(title, callback, options) {
+		if (typeof callback === 'object' && options === undefined) {
+			// shift arguments
+			options = callback;
+			callback = undefined;
+		}
+
 		// 處理 [ {String}API_URL, {String}title ]
 		if (!Array.isArray(title)
 		// 為了預防輸入的是問題頁面。
@@ -3107,11 +3113,11 @@ function module_code(library_namespace) {
 		// prop=info|revisions
 		title[1] = 'query&prop=revisions&rvprop='
 		//
-		+ (options && Array.isArray(options.prop)
+		+ (options && Array.isArray(options.rvprop)
 		//
-		&& options.prop.join('|') || options.prop
+		&& options.rvprop.join('|') || options.rvprop
 		//
-		|| wiki_API.page.default_properties) + '&'
+		|| wiki_API.page.rvprop) + '&'
 		// &rvexpandtemplates=1
 		+ title[1];
 		if (!title[0])
@@ -3217,8 +3223,9 @@ function module_code(library_namespace) {
 		});
 	};
 
+	// default properties of revisions
 	// timestamp 是為了 wiki_API.edit 檢查用。
-	wiki_API.page.default_properties = 'content|timestamp';
+	wiki_API.page.rvprop = 'content|timestamp';
 
 	// ------------------------------------------------------------------------
 
@@ -6438,6 +6445,7 @@ function module_code(library_namespace) {
 					no_message : true,
 					no_edit : 'no_edit' in config ? config.no_edit : true,
 					each : callback,
+					page_options : config.page_options,
 					// config.last(/* no meaningful arguments */)
 					after : config.after
 				}, id_list);
