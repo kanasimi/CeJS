@@ -3283,8 +3283,9 @@ function module_code(library_namespace) {
 			}
 			data = data.query.pages;
 
+			var need_warn = true;
 			for ( var pageid in data) {
-				var page = data[pageid], need_warn = true;
+				var page = data[pageid];
 				if (!get_page_content.has_content(page)) {
 					if (continue_id && continue_id === page.pageid) {
 						// 找到了 pages.continue 所指之 index。
