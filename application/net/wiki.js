@@ -3182,9 +3182,9 @@ function module_code(library_namespace) {
 		// prop=info|revisions
 		title[1] = 'query&prop=revisions&rvprop='
 		//
-		+ (options && Array.isArray(options.rvprop)
+		+ (options && (Array.isArray(options.rvprop)
 		//
-		&& options.rvprop.join('|') || options.rvprop
+		&& options.rvprop.join('|') || options.rvprop)
 		//
 		|| wiki_API.page.rvprop) + '&'
 		// &rvexpandtemplates=1
