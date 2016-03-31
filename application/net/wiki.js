@@ -2957,7 +2957,7 @@ function module_code(library_namespace) {
 							library_namespace.err(
 							//
 							'wiki_API.query: Invalid content: ['
-									+ String(response).slice(0, 400) + ']');
+									+ String(response).slice(0, 4000) + ']');
 							library_namespace.err(e);
 						}
 						// exit!
@@ -3301,7 +3301,7 @@ function module_code(library_namespace) {
 						//
 						+ ': ' + (page.title ? '[[' + page.title + ']]'
 						//
-						: ' id ' + page.pageid));
+						: 'id ' + page.pageid));
 					}
 				} else if (page_cache_prefix) {
 					node_fs.writeFile(page_cache_prefix + page.title + '.json',
@@ -5720,8 +5720,8 @@ function module_code(library_namespace) {
 						revision_index),
 				// old: e.g., '<text xml:space="preserve" bytes="80">'??
 				// 2016/3/11: e.g., '<text xml:space="preserve">'
-				'*' : xml.between('<text xml:space="preserve">', '</text>',
-						revision_index)
+				'*' : unescape_xml(xml.between('<text xml:space="preserve">',
+						'</text>', revision_index))
 			} ]
 		};
 
@@ -5917,6 +5917,7 @@ function module_code(library_namespace) {
 			// buffer += chunk.toString(encoding);
 
 			// --------------------------------------------
+
 			/**
 			 * 以下方法廢棄 deprecated。 an alternative method: 另一個方法是不設定
 			 * file_stream.setEncoding(encoding)，而直接搜尋 buffer 有無 end_mark '</page>'。直到確認不會打斷
@@ -6439,7 +6440,16 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
+	/**
+	 * 讀取所有頁面最新版本之版本號 rev_id。
+	 * 
+	 * 極大問題: the page.page_latest is not the latest revision id of a page in
+	 * Tool Labs database replication.
+	 * 
+	 * @type {String}
+	 * 
+	 * @see https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
+	 */
 	var all_title_SQL = 'SELECT `page_id` AS i, `page_latest` AS l FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
 	if (false)
 		// for debug.
@@ -6478,7 +6488,7 @@ function module_code(library_namespace) {
 		//
 		cache_config = {
 			// all title/id list
-			file_name : config.file_name || 'all_pages',
+			file_name : config.file_name || traversal_pages.list_file,
 			operator : function(list) {
 				if (list.length === 3
 						&& JSON.stringify(list[0]) === JSON
@@ -6489,6 +6499,7 @@ function module_code(library_namespace) {
 					// Skip list[0] = traversal_pages.id_mark
 					rev_list = list[2];
 					list = list[1];
+					// 讀取 production replicas 時，儲存的是 pageid。
 					list.is_id = true;
 				}
 				id_list = list;
@@ -6592,6 +6603,9 @@ function module_code(library_namespace) {
 	 * 勿用過於複雜、無法 JSON.stringify() 或過於簡單的結構。
 	 */
 	traversal_pages.id_mark = {};
+
+	/** {String}default list file name (will append .json by wiki_API.cache) */
+	traversal_pages.list_file = 'all_pages';
 
 	wiki_API.traversal = traversal_pages;
 
