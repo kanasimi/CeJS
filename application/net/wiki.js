@@ -2436,7 +2436,7 @@ function module_code(library_namespace) {
 
 				// 間隔
 				error = '隔 ' + messages.last.age(new Date) + '，'
-				// 紀錄使用時間, 歷時, 費時
+				// 紀錄使用時間, 歷時, 費時, elapsed time
 				+ (messages.last = new Date)
 				//
 				.format(config.date_format || this.date_format) + ' ' + error;
@@ -2502,7 +2502,7 @@ function module_code(library_namespace) {
 				messages.add(this.continue_key + ': ' + pages);
 
 			if (!no_message) {
-				// 使用時間, 費時
+				// 使用時間, 歷時, 費時, elapsed time
 				pages = '首先使用 ' + messages.last.age(new Date) + ' 以取得 '
 						+ data.length + ' 個頁面內容。';
 				// 在「首先使用」之後才設定 .last，才能正確抓到「首先使用」。
@@ -2647,7 +2647,7 @@ function module_code(library_namespace) {
 						+ (nochange_count ? (done === nochange_count
 						//
 						? '所有' : nochange_count + ' ') + '條目未作變更，' : '')
-						// 使用時間, 費時
+						// 使用時間, 歷時, 費時, elapsed time
 						+ '前後總共 ' + messages.start.age(new Date) + '。');
 					if (this.stopped)
 						messages.add("'''已停止作業'''，放棄編輯。");
@@ -6441,23 +6441,25 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	/**
-	 * 讀取所有頁面最新版本之版本號 rev_id。
+	 * 由 Tool Labs database replication 讀取所有 ns0 且未被刪除頁面最新版本之版本號 rev_id (包含重定向)。<br />
+	 * 從 `page` 之 page id 確認 page 之 namespace，以及未被刪除。然後選擇其中最大的 revision id。
 	 * 
 	 * @type {String}
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
 	 */
-	var all_title_SQL = 'SELECT `rev_page` AS i, MAX(`rev_id`) AS r FROM `revision` INNER JOIN `page` ON `page`.`page_id` = `revision`.`rev_page` WHERE `page`.`page_namespace` = 0 AND `revision`.`rev_deleted` = 0 GROUP BY `rev_page`';
+	var all_revision_SQL = 'SELECT `rev_page` AS i, MAX(`rev_id`) AS r FROM `revision` INNER JOIN `page` ON `page`.`page_id` = `revision`.`rev_page` WHERE `page`.`page_namespace` = 0 AND `revision`.`rev_deleted` = 0 GROUP BY `rev_page`';
 
 	if (false)
 		/**
-		 * 採用此 SQL 之極大問題: the page.page_latest is not the latest revision id of
-		 * a page in Tool Labs database replication.
+		 * 採用此 SQL 之極大問題: page.page_latest 並非最新 revision id.<br />
+		 * the page.page_latest is not the latest revision id of a page in Tool
+		 * Labs database replication.
 		 */
-		all_title_SQL = 'SELECT `page_id` AS i, `page_latest` AS l FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
+		all_revision_SQL = 'SELECT `page_id` AS i, `page_latest` AS l FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
 	if (false)
 		// for debug.
-		all_title_SQL += ' LIMIT 8';
+		all_revision_SQL += ' LIMIT 8';
 
 	/**
 	 * 應用功能: 遍歷所有頁面。
@@ -6526,9 +6528,9 @@ function module_code(library_namespace) {
 						+ '一次讀取完所有頁面最新版本之版本號 rev_id...');
 				// default: 採用 page_id 而非 page_title 來 query。
 				var is_id = 'is_id' in config ? config.is_id : true;
-				run_SQL(is_id ? all_title_SQL
+				run_SQL(is_id ? all_revision_SQL
 				//
-				: all_title_SQL.replace(/page_id/g, 'page_title'), function(
+				: all_revision_SQL.replace(/page_id/g, 'page_title'), function(
 						error, rows, fields) {
 					if (error) {
 						library_namespace.err(error);
@@ -6539,7 +6541,7 @@ function module_code(library_namespace) {
 						// console.log(rows.slice(0, 2));
 						var id_list = [], rev_list = [];
 						rows.forEach(function(row) {
-							// .i, .r: @see all_title_SQL
+							// .i, .r: @see all_revision_SQL
 							id_list.push(is_id ? row.i | 0 : row.i
 									.toString('utf8'));
 							rev_list.push(row.r);
