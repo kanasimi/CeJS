@@ -6443,14 +6443,18 @@ function module_code(library_namespace) {
 	/**
 	 * 讀取所有頁面最新版本之版本號 rev_id。
 	 * 
-	 * 極大問題: the page.page_latest is not the latest revision id of a page in
-	 * Tool Labs database replication.
-	 * 
 	 * @type {String}
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
 	 */
-	var all_title_SQL = 'SELECT `page_id` AS i, `page_latest` AS l FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
+	var all_title_SQL = 'SELECT `rev_page` AS i, MAX(`rev_id`) AS r FROM `revision` INNER JOIN `page` ON `page`.`page_id` = `revision`.`rev_page` WHERE `page`.`page_namespace` = 0 AND `revision`.`rev_deleted` = 0 GROUP BY `rev_page`';
+
+	if (false)
+		/**
+		 * 採用此 SQL 之極大問題: the page.page_latest is not the latest revision id of
+		 * a page in Tool Labs database replication.
+		 */
+		all_title_SQL = 'SELECT `page_id` AS i, `page_latest` AS l FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
 	if (false)
 		// for debug.
 		all_title_SQL += ' LIMIT 8';
@@ -6535,10 +6539,10 @@ function module_code(library_namespace) {
 						// console.log(rows.slice(0, 2));
 						var id_list = [], rev_list = [];
 						rows.forEach(function(row) {
-							// .i, .l: @see all_title_SQL
+							// .i, .r: @see all_title_SQL
 							id_list.push(is_id ? row.i | 0 : row.i
 									.toString('utf8'));
-							rev_list.push(row.l);
+							rev_list.push(row.r);
 						});
 						config.list = [ traversal_pages.id_mark, id_list,
 								rev_list ];
