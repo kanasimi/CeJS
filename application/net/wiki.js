@@ -6478,8 +6478,9 @@ function module_code(library_namespace) {
 			config = library_namespace.new_options(config);
 
 		if (config.use_dump) {
+			// 僅僅使用 dump，不採用 API 取得最新頁面內容。
 			// @see process_dump.js
-			read_dump(callback, {
+			read_dump(config.use_dump, callback, {
 				// directory to save dump file.
 				// e.g., 'dumps/'
 				directory : config.directory,
@@ -6571,6 +6572,127 @@ function module_code(library_namespace) {
 			// includes redirection 包含重新導向頁面.
 			+ (id_list && id_list.length) + ' pages...');
 
+			/**
+			 * 工作原理:<code>
+
+			 * 經測試，讀取 file 會比讀取 MariaDB 快，且又更勝於經 API 取得資料。
+			 * 經測試，遍歷 xml dump file 約 3分鐘(see process_dump.js)，會比隨機存取快得多。
+			 * database replicas @ Tool Labs 無 `text` table，因此實際頁面內容不僅能經過 replicas 存取。
+
+			# 先將最新的 xml dump file 下載到本地(實為 network drive)並解開: read_dump()
+			# 由 Tool Labs database replication 讀取所有 ns0 且未被刪除頁面最新版本之版本號 rev_id (包含重定向): traversal_pages() + all_revision_SQL
+			# 遍歷 xml dump file，若 dump 中為最新版本，則先用之 (約 95%): get_dump_data()
+			# 經 API 讀取餘下 dump 後近 5% 更動過的頁面內容: traversal_pages() + wiki_API.prototype.work
+			# 於 Tool Labs，解開 xml 後；自重新抓最新版本之版本號起，整個作業時間約 12分鐘。
+
+			</code>
+			 */
+
+			function try_dump() {
+				var start_read_time = Date.now(), length = id_list.length,
+				// max_length = 0,
+				count = 0, file_size, rev_of_id = [], is_id = id_list.is_id;
+
+				id_list.forEach(function(id, index) {
+					if (id in rev_of_id)
+						library_namespace.warn('traversal_pages: 存在重複之id: '
+								+ id);
+					rev_of_id[id] = rev_list[index];
+				});
+
+				// release
+				id_list = rev_list = null;
+
+				read_dump(dump_file,
+				//
+				function(page_data, position, page_anchor) {
+					// filter
+					if (false && page_data.ns !== 0)
+						return;
+
+					if (++count % 1e4 === 0) {
+						// e.g.,
+						// "2730000 (99%): 21.326 page/ms [[Category:大洋洲火山岛]]"
+						library_namespace.log(
+						// 'traversal_pages: ' +
+						count + ' ('
+						//
+						+ (100 * position / file_size | 0) + '%): '
+						//
+						+ (count / (Date.now() - start_read_time)).toFixed(3)
+						//
+						+ ' page/ms [[' + page_data.title + ']]');
+					}
+
+					// ----------------------------
+					// Check data.
+
+					if (false) {
+						var revision = page_data.revisions[0];
+						// var title = page_data.title, content = revision['*'];
+
+						// 似乎沒 !page_data.title 這種問題。
+						if (false && !page_data.title)
+							library_namespace.warn('* No title: [['
+									+ page_data.pageid + ']]');
+						// [[Wikipedia:快速删除方针]]
+						if (revision['*']) {
+							// max_length = Math.max(max_length,
+							// revision['*'].length);
+
+							// filter patterns
+
+						} else {
+							library_namespace.warn('* No content: [['
+									+ page_data.title + ']]');
+						}
+					}
+
+					// 註記為 dump。
+					page_data.dump = true;
+					// page_data.dump = dump_file;
+
+					callback(page_data);
+
+				}, {
+					directory : config.dump_directory,
+					first : function(xml_filename) {
+						dump_file = xml_filename;
+						file_size = node_fs.statSync(xml_filename).size;
+					},
+					filter : function(pageid, revid) {
+						if ((pageid in rev_of_id)
+								&& rev_of_id[pageid] === revid) {
+							// 隨時 delete rev_of_id[] 會使速度極慢。
+							// delete rev_of_id[pageid];
+							rev_of_id[pageid] = null;
+							return true;
+						}
+					},
+					last : function() {
+						// e.g.,
+						// "All 1491092 pages in dump xml file, 198.165 s."
+						// includes redirection 包含重新導向頁面.
+						library_namespace.log('traversal_pages: All ' + count
+								+ '/' + length + ' pages using dump xml file ('
+								+ (1000 * count / length | 0) / 10 + '%), '
+								+ (Date.now() - start_read_time) / 1000
+								+ ' s elapsed.');
+						var need_API = [];
+						need_API.is_id = is_id;
+						for ( var id in rev_of_id)
+							if (rev_of_id[id] !== null)
+								need_API.push(id);
+						// release
+						rev_of_id = null;
+
+						// library_namespace.set_debug(3);
+						// 一般可以達到 95% 以上採用 dump file 的程度，10分鐘內跑完。
+						run_work(need_API);
+					}
+				});
+			}
+
 			function run_work(id_list) {
 				if (typeof config.filter === 'function')
 					library_namespace.log('traversal_pages: 開始執行 .work(): '
@@ -6584,6 +6706,19 @@ function module_code(library_namespace) {
 					// config.last(/* no meaningful arguments */)
 					after : config.after
 				}, id_list);
+			}
+
+			// 工作流程: config.filter() → run_work()
+
+			// 若 config.filter 非 function，則將之當作 dump file path，
+			// 並以 try_dump() 當作 filter()。
+
+			// 若不想使用 dump，可不設定 .filter。
+			// 經測試，全部使用 API，最快可入50分鐘內，一般在 1-2 hours 左右。
+			var dump_file;
+			if (config.filter && (typeof config.filter !== 'function')) {
+				dump_file = config.filter;
+				config.filter = try_dump;
 			}
 
 			if (typeof config.filter === 'function') {
