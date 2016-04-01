@@ -6486,7 +6486,7 @@ function module_code(library_namespace) {
 			read_dump(config.use_dump, callback, {
 				// directory to save dump file.
 				// e.g., 'dumps/'
-				directory : config.directory,
+				directory : config.dump_directory,
 				first : config.first,
 				last : config.last
 			});
@@ -6661,6 +6661,7 @@ function module_code(library_namespace) {
 					callback(page_data);
 
 				}, {
+					// 指定 dump file 放置的 directory。
 					directory : config.dump_directory,
 					first : function(xml_filename) {
 						dump_file = xml_filename;
@@ -6682,7 +6683,7 @@ function module_code(library_namespace) {
 						library_namespace.log('traversal_pages: All ' + count
 								+ '/' + length + ' pages using dump xml file ('
 								+ (1000 * count / length | 0) / 10 + '%), '
-								+ (Date.now() - start_read_time) / 1000
+								+ ((Date.now() - start_read_time) / 1000 | 0)
 								+ ' s elapsed.');
 						var need_API = [];
 						need_API.is_id = is_id;
@@ -6708,6 +6709,7 @@ function module_code(library_namespace) {
 					no_message : true,
 					no_edit : 'no_edit' in config ? config.no_edit : true,
 					each : callback,
+					// 取得多個頁面內容所用之 options。
 					page_options : config.page_options,
 					// config.last(/* no meaningful arguments */)
 					after : config.after
