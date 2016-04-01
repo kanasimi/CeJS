@@ -5751,10 +5751,8 @@ function module_code(library_namespace) {
 	 * @since 2016/3/11
 	 */
 	function read_dump(filename, callback, options) {
-		if (filename === true)
-			filename = null;
-		else if (typeof filename === 'function'
-				&& typeof callback !== 'function' && !options) {
+		if (typeof filename === 'function' && typeof callback !== 'function'
+				&& !options) {
 			// shift arguments
 			options = callback;
 			callback = filename;
@@ -6482,6 +6480,9 @@ function module_code(library_namespace) {
 		if (config.use_dump) {
 			// 僅僅使用 dump，不採用 API 取得最新頁面內容。
 			// @see process_dump.js
+			if (config.use_dump === true)
+				// 這邊的 ((true)) 僅表示要使用，並不代表設定 dump file path。
+				config.use_dump = null;
 			read_dump(config.use_dump, callback, {
 				// directory to save dump file.
 				// e.g., 'dumps/'
@@ -6583,7 +6584,7 @@ function module_code(library_namespace) {
 
 			# 先將最新的 xml dump file 下載到本地(實為 network drive)並解開: read_dump()
 			# 由 Tool Labs database replication 讀取所有 ns0 且未被刪除頁面最新版本之版本號 rev_id (包含重定向): traversal_pages() + all_revision_SQL
-			# 遍歷 xml dump file，若 dump 中為最新版本，則先用之 (約 95%): get_dump_data()
+			# 遍歷 xml dump file，若 dump 中為最新版本，則先用之 (約 95%): try_dump()
 			# 經 API 讀取餘下 dump 後近 5% 更動過的頁面內容: traversal_pages() + wiki_API.prototype.work
 			# 於 Tool Labs，解開 xml 後；自重新抓最新版本之版本號起，整個作業時間約 12分鐘。
 
@@ -6605,6 +6606,9 @@ function module_code(library_namespace) {
 				// release
 				id_list = rev_list = null;
 
+				if (dump_file === true)
+					// 這邊的 ((true)) 僅表示要使用，並不代表設定 dump file path。
+					dump_file = null;
 				read_dump(dump_file,
 				//
 				function(page_data, position, page_anchor) {
