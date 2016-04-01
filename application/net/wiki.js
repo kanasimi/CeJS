@@ -5751,8 +5751,10 @@ function module_code(library_namespace) {
 	 * @since 2016/3/11
 	 */
 	function read_dump(filename, callback, options) {
-		if (typeof filename === 'function' && typeof callback !== 'function'
-				&& !options) {
+		if (filename === true)
+			filename = null;
+		else if (typeof filename === 'function'
+				&& typeof callback !== 'function' && !options) {
 			// shift arguments
 			options = callback;
 			callback = filename;
