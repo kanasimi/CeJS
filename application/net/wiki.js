@@ -45,7 +45,8 @@ typeof CeL === 'function' && CeL.run({
 	require : 'data.code.compatibility.|data.native.'
 	// (new Date).format('%4Y%2m%2d'), (new Date).format() @ data.date
 	// optional: .show_value() @ interact.DOM, application.debug
-	// optional: .fs_mkdir() @ CeL.wiki.cache() @ application.platform.nodejs
+	// optional: .fs_mkdir() @ CeL.wiki.cache()
+	// @ CeL.wiki.traversal() @ application.platform.nodejs
 	+ '|application.net.Ajax.get_URL|data.date.',
 	// 為了方便格式化程式碼，因此將module函式主體另外抽出。
 	code : module_code,
@@ -1585,14 +1586,16 @@ function module_code(library_namespace) {
 		section = decodeURIComponent((matched[3] || '').replace(/\./g, '%'));
 
 		function compose_link() {
-			var link = (language === default_language ? '' : ':' + language
-					+ ':')
-					+ title
-					+ section
-					// link 說明
-					+ (matched[4] && (matched[4] = matched[4].trim()) !== title ? '|'
-							+ matched[4]
-							: '');
+			var link = (language === default_language ? ''
+			//
+			: ':' + language + ':') + title + section
+			// link 說明
+			+ (matched[4] && (matched[4] = matched[4].trim())
+			//
+			!== title ? '|' + matched[4]
+			// [[Help:編輯頁面#链接]]
+			// 若"|"後直接以"]]"結束，則儲存時會自動添加連結頁面名。
+			: !section && title.endsWith(')') ? '|' : '');
 
 			if (add_quote)
 				link = '[[' + link + ']]';
@@ -1643,7 +1646,7 @@ function module_code(library_namespace) {
 	 * </code>
 	 * 
 	 * @param {Object}page_data
-	 *            page data got from wiki API
+	 *            page data got from wiki API.
 	 * 
 	 * @returns {String|Undefined}title of page, maybe undefined.
 	 * 
@@ -1693,7 +1696,7 @@ function module_code(library_namespace) {
 	 * </code>
 	 * 
 	 * @param {Object}page_data
-	 *            page data got from wiki API
+	 *            page data got from wiki API.
 	 * @param {String}flow_view
 	 *            對 flow page，所欲取得之頁面內容項目。<br />
 	 *            default: 'header'
@@ -1732,7 +1735,7 @@ function module_code(library_namespace) {
 	 * check if page_data is page data.
 	 * 
 	 * @param {Object}page_data
-	 *            page data got from wiki API
+	 *            page data got from wiki API.
 	 * 
 	 * @returns {String|Number} pageid
 	 */
@@ -1746,7 +1749,7 @@ function module_code(library_namespace) {
 	 * get the id of page
 	 * 
 	 * @param {Object}page_data
-	 *            page data got from wiki API
+	 *            page data got from wiki API.
 	 * 
 	 * @returns {String|Number} pageid
 	 */
@@ -1822,7 +1825,7 @@ function module_code(library_namespace) {
 		switch (type) {
 		case 'page':
 			// this.page(page data, callback)
-			// → 採用所輸入之 page data 作為 this.last_page。
+			// → 採用所輸入之 page data 作為 this.last_page，不再重新擷取 page。
 			if (get_page_content.is_page_data(next[1])
 					&& get_page_content.has_content(next[1])) {
 				library_namespace.debug('採用所輸入之 [' + next[1].title
@@ -2565,7 +2568,7 @@ function module_code(library_namespace) {
 						if (work_continue === NOT_FOUND)
 							throw new Error('page id not found: ' + continue_id);
 						// assert: 一定找得到。
-						// work_continue>=pages開頭之index=(原work_continue)-pages.length
+						// work_continue≥pages開頭之index=(原work_continue)-pages.length
 					} else {
 						continue_id |= 0;
 						while (pages[--work_continue].pageid !== continue_id)
@@ -2763,7 +2766,7 @@ function module_code(library_namespace) {
 			is_id : config.is_id,
 			multi : true
 		}, config.page_options),
-		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(<=50)只能取得單一 revision。
+		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		// titles/pageids: Maximum number of values is 50 (500 for bots).
 		slice_size = config.slice >= 1 ? Math.min(config.slice | 0, 500) : 500,
@@ -3028,7 +3031,7 @@ function module_code(library_namespace) {
 	 * e.g., 'abc' → 'title=abc'<br />
 	 * 
 	 * @param {Object}page_data
-	 *            page data got from wiki API
+	 *            page data got from wiki API.
 	 * @param {Boolean}[multi]
 	 *            page_data is {Array}multi-page_data
 	 * @param {Boolean}[is_id]
@@ -3113,7 +3116,7 @@ function module_code(library_namespace) {
 	 * get id of page
 	 * 
 	 * @param {Object}page_data
-	 *            page data got from wiki API
+	 *            page data got from wiki API.
 	 * @param {Boolean}[title_only]
 	 *            get title only
 	 */
@@ -3186,7 +3189,7 @@ function module_code(library_namespace) {
 		title[1] = wiki_API.query.title_param(title[1], true, options
 				&& options.is_id);
 
-		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(<=50)只能取得單一 revision。
+		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		// titles/pageids: Maximum number of values is 50 (500 for bots).
 		if (options && ('rvlimit' in options)) {
@@ -5881,6 +5884,8 @@ function module_code(library_namespace) {
 
 		/**
 		 * Parse Wikimedia dump xml file slice.
+		 * 
+		 * TODO: 把工具函數寫到 application.platform.nodejs 裡面去。
 		 */
 		function parse_buffer(index) {
 			index = buffer.indexOf(end_mark, index);
@@ -6614,9 +6619,10 @@ function module_code(library_namespace) {
 		wiki_API.cache(cache_config,
 		// do for each page
 		function() {
+			// 有設定 config.wiki 才能獲得如 bot 之類，一次讀取/操作更多頁面的好處。
 			var wiki = config.wiki
-					|| new wiki_API(config.user, config.password,
-							config.language);
+			//
+			|| new wiki_API(config.user, config.password, config.language);
 			library_namespace.log('traversal_pages: 開始遍歷 '
 			// includes redirection 包含重新導向頁面.
 			+ (id_list && id_list.length) + ' pages...');
@@ -6632,7 +6638,7 @@ function module_code(library_namespace) {
 			# 由 Tool Labs database replication 讀取所有 ns0 且未被刪除頁面最新版本之版本號 rev_id (包含重定向): traversal_pages() + all_revision_SQL
 			# 遍歷 xml dump file，若 dump 中為最新版本，則先用之 (約 95%): try_dump()
 			# 經 API 讀取餘下 dump 後近 5% 更動過的頁面內容: traversal_pages() + wiki_API.prototype.work
-			# 於 Tool Labs，解開 xml 後；自重新抓最新版本之版本號起，整個作業時間約 12分鐘。
+			# 於 Tool Labs，解開 xml 後；自重新抓最新版本之版本號起，網路連線順暢時整個作業時間約 12分鐘。
 
 			</code>
 			 */
@@ -6756,6 +6762,8 @@ function module_code(library_namespace) {
 					no_edit : 'no_edit' in config ? config.no_edit : true,
 					each : callback,
 					// 取得多個頁面內容所用之 options。
+					// e.g., { rvprop : 'ids|timestamp|content' }
+					// Warning: 這對經由 dump 取得之 page 無效！
 					page_options : config.page_options,
 					// config.last(/* no meaningful arguments */)
 					after : config.after
@@ -6764,8 +6772,10 @@ function module_code(library_namespace) {
 
 			// 工作流程: config.filter() → run_work()
 
-			// 若 config.filter 非 function，則將之當作 dump file path，
+			// 若 config.filter 非 function，表示要先比對 dump，若版本號相同則使用之，否則自 API 擷取。
 			// 並以 try_dump() 當作 filter()。
+			// 設定 config.filter 為 ((true)) 表示要使用預設為最新的 dump，
+			// 否則將之當作 dump file path。
 
 			// 若不想使用 dump，可不設定 .filter。
 			// 經測試，全部使用 API，最快可入50分鐘內，一般在 1-2 hours 左右。
@@ -6928,7 +6938,7 @@ function module_code(library_namespace) {
 	 * 檢測 page_data 是否為 Flow 討論頁面系統。
 	 * 
 	 * @param {Object}page_data
-	 *            page data got from wiki API
+	 *            page data got from wiki API.
 	 * 
 	 * @returns {Boolean}是否為 Flow 討論頁面。
 	 */
