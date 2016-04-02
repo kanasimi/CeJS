@@ -608,7 +608,7 @@ function merge_cookie(agent, cookie) {
 					+ ']');
 			agent.last_cookie.push(piece);
 		} else if (matched[0] in key_hash) {
-			library_namespace.debug('duplicated cookie! 以後/新出現者為準。 ['
+			library_namespace.debug('duplicated cookie! 以後來/新出現者為準。 ['
 					+ agent.last_cookie[key_hash[matched[0]]] + ']→[' + piece
 					+ ']', 3, 'merge_cookie');
 			agent.last_cookie[key_hash[matched[0]]] = piece;

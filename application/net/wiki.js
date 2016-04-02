@@ -691,7 +691,7 @@ function module_code(library_namespace) {
 			else
 				result = result[0];
 			if (result.includes(include_mark))
-				throw new Error('resolve_escaped: 仍有 include mark 殘留!');
+				throw new Error('resolve_escaped: 仍有 include mark 殘留！');
 			queue[index] = result;
 		});
 	}
@@ -2407,7 +2407,7 @@ function module_code(library_namespace) {
 					// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
 					library_namespace.err('wiki_API.work: 無 result.edit'
 							+ (result.edit ? '.newrevid' : '')
-							+ '! 可能是 token lost!');
+							+ '！可能是 token lost！');
 					error = '無 result.edit' + (result.edit ? '.newrevid' : '')
 							+ '。';
 					result = [ 'error', 'token lost?' ];
@@ -2566,7 +2566,7 @@ function module_code(library_namespace) {
 					pages = pages.slice(0, effect_length);
 
 				} else {
-					library_namespace.err('wiki_API.work: 回傳內容過長而被截斷!');
+					library_namespace.err('wiki_API.work: 回傳內容過長而被截斷！');
 				}
 			}
 
@@ -2578,7 +2578,7 @@ function module_code(library_namespace) {
 					// -pages.length: 先回溯到 pages 開頭之 index。
 					work_continue -= pages.length - pages.OK_length;
 				} else {
-					library_namespace.err('wiki_API.work: 回傳內容過長而被截斷!');
+					library_namespace.err('wiki_API.work: 回傳內容過長而被截斷！');
 				}
 
 				library_namespace.debug('一次取得大量頁面時，回傳內容過長而被截斷。將回退 '
@@ -3962,21 +3962,27 @@ function module_code(library_namespace) {
 		}
 
 		options.wiki[options.type](target, function(title, titles, pages) {
-			library_namespace.debug('Get ' + pages.length + ' pages', 2,
-					'wiki_API.list');
-			if (typeof options.callback === 'function')
+			library_namespace.debug('Get ' + pages.length + ' ' + options.type
+					+ ' pages of [[' + title + ']]', 2, 'wiki_API.list');
+			if (typeof options.callback === 'function') {
+				// options.callback() 為取得每一階段清單時所會被執行的函數
 				options.callback(title, titles, pages);
+			}
 			if (options.pages)
 				Array.prototype.push.apply(options.pages, pages);
 			else
 				options.pages = pages;
-			if (pages.next_index)
+			if (pages.next_index) {
+				library_namespace.debug('尚未取得所有清單，因此繼續取得下一階段清單。', 2,
+						'wiki_API.list');
 				setTimeout(function() {
 					wiki_API.list(target, callback, options);
 				}, 0);
-			else
-				// run callback after all list got.
+			} else {
+				library_namespace.debug('run callback after all list got.', 2,
+						'wiki_API.list');
 				callback(options.pages, target, options);
+			}
 		}, {
 			continue_wiki : options.wiki,
 			limit : options.limit || 'max'
@@ -4031,14 +4037,13 @@ function module_code(library_namespace) {
 						//
 						? ' (login as anonymous!)' : ''), 1, 'wiki_API.login');
 					} else {
-						library_namespace
-								.err('wiki_API.login: Unknown response: ['
-								//
-								+ (data && data.warnings
-								//
-								&& data.warnings.tokens
-								//
-								&& data.warnings.tokens['*'] || data) + ']');
+						library_namespace.err(
+						//
+						'wiki_API.login: Unknown response: ['
+						//
+						+ (data && data.warnings && data.warnings.tokens
+						//
+						&& data.warnings.tokens['*'] || data) + ']');
 						if (library_namespace.is_debug()
 						// .show_value() @ interact.DOM, application.debug
 						&& library_namespace.show_value)
@@ -4078,7 +4083,7 @@ function module_code(library_namespace) {
 			// hack: 這表示正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。
 			// @see wiki_API.prototype.next
 			if (options.login_mark)
-				// 將 'login' 置於最前頭。
+				// 將 'login' 置於工作佇列最前頭。
 				session.actions.unshift([ 'login' ]);
 			else
 				// default: 依順序將 'login' 置於最末端。
@@ -4103,9 +4108,16 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			// https://www.mediawiki.org/w/api.php?action=help&modules=login
+			var token = Object.assign(library_namespace.null_Object(),
+					session.token);
+			// .csrftoken 是本函式為 cache 加上的，非正規 parameter。
+			delete token.csrftoken;
 			wiki_API.query([ session.API_URL, 'login' ], function(data) {
 				if (data && data.login && data.login.result === 'NeedToken') {
 					session.token.lgtoken = data.login.token;
+					// session.sessionid = data.login.sessionid;
+					// session.cookieprefix = data.login.cookieprefix;
 					wiki_API.query([ session.API_URL, 'login' ], _done,
 							session.token);
 				} else {
@@ -4113,7 +4125,7 @@ function module_code(library_namespace) {
 							.err('wiki_API.login: 無法 login! Abort! Response:');
 					library_namespace.err(data);
 				}
-			}, session.token);
+			}, token);
 		});
 
 		return session;
@@ -4234,7 +4246,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 編輯頁面。一次處理一個標題。<br />
-	 * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問!此時需要另外含入檢查機制!
+	 * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問!此時需要另外含入檢查機制！
 	 * 
 	 * @param {String|Array}title
 	 *            page title 頁面標題。 {String}title or [ {String}API_URL,
@@ -4742,7 +4754,7 @@ function module_code(library_namespace) {
 			//
 			get_page_title(pages) + ': 有 ' + redirects.length
 			//
-			+ ' 個同名頁面(重定向至此頁面).', 2, 'wiki_API.redirects');
+			+ ' 個同名頁面(重定向至此頁面)。', 2, 'wiki_API.redirects');
 			if (options.include_root) {
 				redirects = redirects.slice();
 				redirects.unshift(pages);
@@ -5940,7 +5952,7 @@ function module_code(library_namespace) {
 				library_namespace.err(
 				//
 				'read_dump: buffer too long (' + buffer.length
-						+ ' characters)! Paused! 有太多無法處理的 buffer，可能是格式錯誤?');
+						+ ' characters)! Paused! 有太多無法處理的 buffer，可能是格式錯誤？');
 				console.log(buffer.slice(0, 1e3) + '...');
 				file_stream.pause();
 				// file_stream.resume();
@@ -6000,7 +6012,7 @@ function module_code(library_namespace) {
 	 * @param {Function}[callback]
 	 *            所有作業(operation)執行完後之回調函數。 callback(response data)
 	 * @param {Object}[_this]
-	 *            傳遞於各 operator 間的 ((this))。
+	 *            傳遞於各 operator 間的 ((this))。注意: 會被本函數更動！
 	 */
 	wiki_API.cache = function(operation, callback, _this) {
 		/**
@@ -6137,6 +6149,8 @@ function module_code(library_namespace) {
 				.test(file_name),
 		/** {String}file encoding for fs of node.js. */
 		encoding = _this.encoding || wiki_API.encoding;
+		// list file path
+		_this.file_name = file_name;
 
 		node_fs.readFile(file_name, encoding, function(error, data) {
 			/**
@@ -6223,7 +6237,7 @@ function module_code(library_namespace) {
 			// declared
 			// at top level or immediately within another function.
 			/**
-			 * 取得下一項 data。
+			 * 取得並處理下一項 data。
 			 */
 			function get_next_item(data) {
 				library_namespace.debug('處理多項列表作業: ' + index + '/'
@@ -6278,7 +6292,8 @@ function module_code(library_namespace) {
 					delete _operation.file_name;
 				}
 				if (typeof _operation.each === 'function') {
-					// 每一項執行一次 .each()
+					// 每一項 list 之項目執行一次 .each()。
+					_operation.operator = _operation.each;
 					delete _operation.each;
 				} else {
 					if (typeof _operation.each_retrieve === 'function')
@@ -6481,7 +6496,7 @@ function module_code(library_namespace) {
 			// 僅僅使用 dump，不採用 API 取得最新頁面內容。
 			// @see process_dump.js
 			if (config.use_dump === true)
-				// 這邊的 ((true)) 僅表示要使用，並不代表設定 dump file path。
+				// 這邊的 ((true)) 僅表示要使用，並採用預設值；不代表設定 dump file path。
 				config.use_dump = null;
 			read_dump(config.use_dump, callback, {
 				// directory to save dump file.
@@ -6495,7 +6510,7 @@ function module_code(library_namespace) {
 
 		/** {Array}id/title list */
 		var id_list, rev_list,
-		//
+		/** {Object}用在 wiki_API.cache 之 configuration。 */
 		cache_config = {
 			// all title/id list
 			file_name : config.file_name || traversal_pages.list_file,
@@ -6503,9 +6518,11 @@ function module_code(library_namespace) {
 				if (list.length === 3
 						&& JSON.stringify(list[0]) === JSON
 								.stringify(traversal_pages.id_mark)) {
-					// 來自 The production replicas (database)
-					library_namespace
-							.info('traversal_pages: 此資料似乎為 page id，來自 production replicas。');
+					library_namespace.info(
+					// cache file 內容來自 The production replicas (database)，
+					// 為經過 cache_config.list 整理過之資料。
+					'traversal_pages: 此資料似乎為 page id，來自 production replicas: ['
+							+ this.file_name + ']');
 					// Skip list[0] = traversal_pages.id_mark
 					rev_list = list[2];
 					list = list[1];
