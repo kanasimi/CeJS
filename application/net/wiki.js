@@ -2098,6 +2098,22 @@ function module_code(library_namespace) {
 								delete _this.token.lgtoken;
 								// library_namespace.set_debug(6);
 							}
+
+							// 直到 .edit 動作才會出現 badtoken，
+							// 因此在 wiki_API.login 尚無法偵測是否 badtoken。
+							if ('retry_login' in _this) {
+								if (++_this.retry_login > 2) {
+									throw new Error(
+									// 當錯誤 login 太多次時，直接跳出。
+									'wiki_API.next: Too many failed login attempts: ['
+											+ name + ']');
+								}
+								library_namespace.info('wiki_API.next: Retry '
+										+ _this.retry_login);
+							} else {
+								_this.retry_login = 0;
+							}
+
 							// 重新取得 token。
 							wiki_API.login(_this.token.lgname,
 							//
@@ -2108,6 +2124,8 @@ function module_code(library_namespace) {
 								login_mark : true
 							});
 						} else {
+							// 去除 retry flag。
+							delete _this.retry_login;
 							// next[3] : callback
 							if (typeof next[3] === 'function')
 								next[3].call(_this, title, error, result);
@@ -2850,7 +2868,8 @@ function module_code(library_namespace) {
 
 		// 若為 query，非 edit (modify)，則不延遲等待。
 		// assert: typeof action[1] === 'string'
-		var need_check = !/action=(?:query|login)&/.test(action[1]),
+		var need_check = !/action=(?:query|login)&/.test(action[1])
+				&& !action[1].includes('assert='),
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait = need_check ? wiki_API.query.lag
 				- (Date.now() - wiki_API.query.last[action[0]]) : 0;
@@ -4001,7 +4020,6 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/wiki/API:Edit
 	wiki_API.login = function(name, password, options) {
 		function _next() {
-			delete session.retry;
 			if (typeof callback === 'function')
 				callback(session.token.lgname);
 			library_namespace.debug('已登入 [' + session.token.lgname
@@ -4117,19 +4135,6 @@ function module_code(library_namespace) {
 						'wiki_API.login');
 				_done();
 				return;
-			}
-
-			if ('retry' in session) {
-				if (++session.retry > 2) {
-					throw new Error(
-					// 當錯誤 login 太多次時，直接跳出。
-					'wiki_API.login: Too many failed login attempts: [' + name
-							+ ']');
-				}
-				library_namespace
-						.info('wiki_API.login: Retry ' + session.retry);
-			} else {
-				session.retry = 0;
 			}
 
 			// https://www.mediawiki.org/w/api.php?action=help&modules=login
@@ -6413,7 +6418,7 @@ function module_code(library_namespace) {
 					wiki_API.list(title, function(pages) {
 						library_namespace.log(list_type
 						// allpages 不具有 title。
-						+ (title ? '[[' + get_page_title(title) + ']]' : '')
+						+ (title ? ' [[' + get_page_title(title) + ']]' : '')
 						//
 						+ ': ' + pages.length + ' page(s).');
 						// page list, title page_data
