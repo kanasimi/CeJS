@@ -2849,7 +2849,7 @@ function module_code(library_namespace) {
 
 		// 若為 query，非 edit (modify)，則不延遲等待。
 		// assert: typeof action[1] === 'string'
-		var need_check = !action[1].includes('action=query&'),
+		var need_check = !/action=(?:query|login)&/.test(action[1]),
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait = need_check ? wiki_API.query.lag
 				- (Date.now() - wiki_API.query.last[action[0]]) : 0;
@@ -4015,14 +4015,15 @@ function module_code(library_namespace) {
 				// 捨棄 password。
 				delete session.token.lgpassword;
 			if (data && (data = data.login)) {
-				if (data.result === 'NeedToken')
+				if (data.result === 'NeedToken') {
 					library_namespace.err('wiki_API.login: login ['
 							+ session.token.lgname + '] failed!');
-				else
+				} else {
 					wiki_API.login.copy_keys.forEach(function(key) {
 						if (data[key])
 							session.token[key] = data[key];
 					});
+				}
 			}
 			if (session.token.csrftoken)
 				_next();
@@ -4031,7 +4032,8 @@ function module_code(library_namespace) {
 						'wiki_API.login');
 				wiki_API.query([ session.API_URL,
 				// https://www.mediawiki.org/wiki/API:Tokens
-				'query&meta=tokens&type=csrf|login|watch' ],
+				// 'query&meta=tokens&type=csrf|login|watch'
+				'query&meta=tokens' ],
 				//
 				function(data) {
 					if (data && data.query && data.query.tokens) {
@@ -4124,7 +4126,7 @@ function module_code(library_namespace) {
 			// 'query&meta=tokens&type=login'
 			'login' ], function(data) {
 				if (data && data.login && data.login.result === 'NeedToken') {
-					session.token.lgtoken = data.login.token;
+					token.lgtoken = session.token.lgtoken = data.login.token;
 					wiki_API.query([ session.API_URL, 'login' ], _done, token);
 				} else {
 					library_namespace
