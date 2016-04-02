@@ -719,12 +719,10 @@ function get_URL_node(URL, onload, charset, post_data) {
 		library_namespace.debug('HEADERS: ' + JSON.stringify(result.headers),
 				4, 'get_URL_node');
 		merge_cookie(agent, result.headers['set-cookie']);
-		// 未設定 charset 的話，將回傳 Buffer。
-		if (charset !== 'binary')
-			// default charset: UTF-8.
-			result.setEncoding(charset || 'utf8');
+		// 為預防字元編碼破碎，因此不能設定 result.setEncoding()。
 		// listener must be a function
 		if (typeof onload === 'function') {
+			/** {Array} [{Buffer}, {Buffer}, ... ] */ 
 			var data = [];
 			result.on('data', function(chunk) {
 				library_namespace.debug('receive BODY.length: ' + chunk.length,
@@ -734,11 +732,13 @@ function get_URL_node(URL, onload, charset, post_data) {
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			result.on('end', function() {
 				// console.log('No more data in response.');
-				if (charset !== 'binary')
-					data = data.join('');
-				else {
-					// TODO: (binary)
+				data = Buffer.concat(data);
+				// 設定 charset = 'binary' 的話，將回傳 Buffer。
+				if (charset !== 'binary') {
+					// 未設定 charset 的話，default charset: UTF-8.
+					data = data.toString(charset || 'utf8');
 				}
+
 				if (library_namespace.is_debug(4))
 					library_namespace.debug(
 					//

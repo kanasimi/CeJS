@@ -2923,7 +2923,9 @@ function module_code(library_namespace) {
 		} else
 			get_URL(action, function(XMLHttp) {
 				var response = XMLHttp.responseText;
-				library_namespace.debug('response: '
+				library_namespace.debug('response ('
+						+ response.length
+						+ ' characters): '
 						+ (library_namespace.platform.nodejs ? '\n' + response
 								: response.replace(/</g, '&lt;')), 3,
 						'wiki_API.query');
@@ -3994,6 +3996,8 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// 登入認證用。
+	// https://www.mediawiki.org/wiki/API:Login
+	// https://www.mediawiki.org/wiki/API:Edit
 	wiki_API.login = function(name, password, options) {
 		function _next() {
 			if (typeof callback === 'function')
@@ -4010,7 +4014,7 @@ function module_code(library_namespace) {
 			if (!session.preserve_password)
 				// 捨棄 password。
 				delete session.token.lgpassword;
-			if (data && (data = data.login))
+			if (data && (data = data.login)) {
 				if (data.result === 'NeedToken')
 					library_namespace.err('wiki_API.login: login ['
 							+ session.token.lgname + '] failed!');
@@ -4019,16 +4023,19 @@ function module_code(library_namespace) {
 						if (data[key])
 							session.token[key] = data[key];
 					});
+			}
 			if (session.token.csrftoken)
 				_next();
 			else {
 				library_namespace.debug('Try to get the csrftoken ...', 1,
 						'wiki_API.login');
-				wiki_API.query([ session.API_URL, 'query&meta=tokens' ],
+				wiki_API.query([ session.API_URL,
+				// https://www.mediawiki.org/wiki/API:Tokens
+				'query&meta=tokens&type=csrf|login|watch' ],
 				//
 				function(data) {
 					if (data && data.query && data.query.tokens) {
-						session.token.csrftoken = data.query.tokens.csrftoken;
+						Object.assign(session.token, data.query.tokens);
 						library_namespace.debug('csrftoken: '
 						//
 						+ session.token.csrftoken
@@ -4113,13 +4120,12 @@ function module_code(library_namespace) {
 					session.token);
 			// .csrftoken 是本函式為 cache 加上的，非正規 parameter。
 			delete token.csrftoken;
-			wiki_API.query([ session.API_URL, 'login' ], function(data) {
+			wiki_API.query([ session.API_URL,
+			// 'query&meta=tokens&type=login'
+			'login' ], function(data) {
 				if (data && data.login && data.login.result === 'NeedToken') {
 					session.token.lgtoken = data.login.token;
-					// session.sessionid = data.login.sessionid;
-					// session.cookieprefix = data.login.cookieprefix;
-					wiki_API.query([ session.API_URL, 'login' ], _done,
-							session.token);
+					wiki_API.query([ session.API_URL, 'login' ], _done, token);
 				} else {
 					library_namespace
 							.err('wiki_API.login: 無法 login! Abort! Response:');
@@ -4131,8 +4137,9 @@ function module_code(library_namespace) {
 		return session;
 	};
 
-	/** {Array}欲 copy 至 token 之 keys。 */
-	wiki_API.login.copy_keys = 'lguserid,cookieprefix,sessionid'.split(',');
+	/** {Array}欲 copy 至 session.token 之 keys。 */
+	wiki_API.login.copy_keys = 'lguserid,lgtoken,cookieprefix,sessionid'
+			.split(',');
 
 	// ------------------------------------------------------------------------
 
