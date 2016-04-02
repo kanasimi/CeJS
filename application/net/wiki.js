@@ -4119,13 +4119,17 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (!session.retry) {
+			if ('retry' in session) {
+				if (++session.retry > 2) {
+					throw new Error(
+					// 當錯誤 login 太多次時，直接跳出。
+					'wiki_API.login: Too many failed login attempts: [' + name
+							+ ']');
+				}
+				library_namespace
+						.info('wiki_API.login: Retry ' + session.retry);
+			} else {
 				session.retry = 0;
-			} else if (++session.retry > 4) {
-				throw new Error(
-				// 當錯誤 login 太多次時，直接跳出。
-				'wiki_API.login: Too many failed login attempts: [' + name
-						+ ']');
 			}
 
 			// https://www.mediawiki.org/w/api.php?action=help&modules=login
