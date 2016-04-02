@@ -720,9 +720,11 @@ function get_URL_node(URL, onload, charset, post_data) {
 				4, 'get_URL_node');
 		merge_cookie(agent, result.headers['set-cookie']);
 		// 為預防字元編碼破碎，因此不能設定 result.setEncoding()。
+		// 但經測試，Wikipedia 有時似乎會有回傳字元錯位之情形？
+
 		// listener must be a function
 		if (typeof onload === 'function') {
-			/** {Array} [{Buffer}, {Buffer}, ... ] */ 
+			/** {Array} [ {Buffer}, {Buffer}, ... ] */ 
 			var data = [];
 			result.on('data', function(chunk) {
 				library_namespace.debug('receive BODY.length: ' + chunk.length,

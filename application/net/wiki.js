@@ -2100,12 +2100,13 @@ function module_code(library_namespace) {
 							}
 							// 重新取得 token。
 							wiki_API.login(_this.token.lgname,
-									_this.token.lgpassword, {
-										force : true,
-										session : _this,
-										// 將 'login' 置於最前頭。
-										login_mark : true
-									});
+							//
+							_this.token.lgpassword, {
+								force : true,
+								session : _this,
+								// 將 'login' 置於最前頭。
+								login_mark : true
+							});
 						} else {
 							// next[3] : callback
 							if (typeof next[3] === 'function')
@@ -2959,7 +2960,7 @@ function module_code(library_namespace) {
 							library_namespace.err(
 							//
 							'wiki_API.query: Invalid content: ['
-									+ String(response).slice(0, 4000) + ']');
+									+ String(response).slice(0, 40000) + ']');
 							library_namespace.err(e);
 						}
 						// exit!
@@ -4000,6 +4001,7 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/wiki/API:Edit
 	wiki_API.login = function(name, password, options) {
 		function _next() {
+			delete session.retry;
 			if (typeof callback === 'function')
 				callback(session.token.lgname);
 			library_namespace.debug('已登入 [' + session.token.lgname
@@ -4115,6 +4117,15 @@ function module_code(library_namespace) {
 						'wiki_API.login');
 				_done();
 				return;
+			}
+
+			if (!session.retry) {
+				session.retry = 0;
+			} else if (++session.retry > 4) {
+				throw new Error(
+				// 當錯誤 login 太多次時，直接跳出。
+				'wiki_API.login: Too many failed login attempts: [' + name
+						+ ']');
 			}
 
 			// https://www.mediawiki.org/w/api.php?action=help&modules=login
