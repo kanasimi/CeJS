@@ -1515,7 +1515,7 @@ function module_code(library_namespace) {
 		var matched = wikitext && wikitext.match(
 		// 使用者/用戶對話頁面
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
-		/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论)|用戶(?:討論))\s*:\s*([^\|\]]+)/i);
+		/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论)?|用戶(?:討論)?)\s*:\s*([^\|\]]+)/i);
 		if (matched)
 			return matched[1].trim();
 	}
