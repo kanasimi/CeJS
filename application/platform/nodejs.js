@@ -302,6 +302,10 @@ if (typeof CeL === 'function')
 			}
 			_.fs_move = fs_renameSync;
 
+			// TODO:
+			// Buffer.prototype.indexOf()
+			// https://github.com/nodejs/node/blob/master/lib/buffer.js#L578
+
 			function export_function() {
 				node_fs.copy = fs_copy;
 				node_fs.copySync = fs_copySync;

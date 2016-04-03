@@ -4153,7 +4153,7 @@ function module_code(library_namespace) {
 					wiki_API.query([ session.API_URL, 'login' ], _done, token);
 				} else {
 					library_namespace
-							.err('wiki_API.login: 無法 login! Abort! Response:');
+							.err('wiki_API.login: 無法 login！ Abort! Response:');
 					library_namespace.err(data);
 				}
 			}, token);
@@ -4278,7 +4278,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 編輯頁面。一次處理一個標題。<br />
-	 * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問!此時需要另外含入檢查機制！
+	 * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問！此時需要另外含入檢查機制！
 	 * 
 	 * @param {String|Array}title
 	 *            page title 頁面標題。 {String}title or [ {String}API_URL,
@@ -4683,7 +4683,7 @@ function module_code(library_namespace) {
 	 *            callback(root_page_data, redirect_list) { redirect_list = [
 	 *            page_data, page_data, ... ]; }
 	 * @param {Object}[options]
-	 *            附加參數/設定選擇性/特殊功能與選項. 此 options 可能會被變更!<br />
+	 *            附加參數/設定選擇性/特殊功能與選項. 此 options 可能會被變更！<br />
 	 *            {Boolean}options.no_trace: 若頁面還重定向到其他頁面則不溯源。溯源時 title 將以 root
 	 *            替代。<br />
 	 *            {Boolean}options.include_root 回傳 list 包含 title，而不只是所有 redirect
@@ -6026,7 +6026,7 @@ function module_code(library_namespace) {
 	   CeL.run('application.platform.nodejs');
 	 * </code><br />
 	 * 注意: 需要自行先創建各 type 之次目錄，如 page, redirects, embeddedin, ...<br />
-	 * 注意: 會改變 operation, _this! Warning: will modify operation, _this!
+	 * 注意: 會改變 operation, _this！ Warning: will modify operation, _this!
 	 * 
 	 * 連續作業: 依照 _this 設定 {Object}default options，即傳遞於各 operator 間的 ((this))。<br />
 	 * 依照 operation 順序個別執行單一項作業。
@@ -6636,7 +6636,7 @@ function module_code(library_namespace) {
 
 			# 先將最新的 xml dump file 下載到本地(實為 network drive)並解開: read_dump()
 			# 由 Tool Labs database replication 讀取所有 ns0 且未被刪除頁面最新版本之版本號 rev_id (包含重定向): traversal_pages() + all_revision_SQL
-			# 遍歷 xml dump file，若 dump 中為最新版本，則先用之 (約 95%): try_dump()
+			# 遍歷 xml dump file，若 dump 中為最新版本，則先用之 (約 95%)；純粹篩選約需近 3 minutes: try_dump()
 			# 經 API 讀取餘下 dump 後近 5% 更動過的頁面內容: traversal_pages() + wiki_API.prototype.work
 			# 於 Tool Labs，解開 xml 後；自重新抓最新版本之版本號起，網路連線順暢時整個作業時間約 12分鐘。
 
