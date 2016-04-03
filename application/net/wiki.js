@@ -1527,7 +1527,7 @@ function module_code(library_namespace) {
 			return matched[1].trim();
 	}
 
-	// 若重定向到其他頁面，則回傳其頁面名。
+	// 若重定向到其他頁面，則回傳其{String}頁面名。
 	function parse_redirect(wikitext) {
 		var matched = wikitext && wikitext.match(
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
@@ -2294,7 +2294,6 @@ function module_code(library_namespace) {
 		write_to : '',
 		/** {String}運作記錄存放頁面。 */
 		log_to : 'User:Robot/log/%4Y%2m%2d',
-		// 採用 {{tlx|template_name}} 時，[[Special:最近更改]]頁面無法自動解析成 link。
 		/** {String}編輯摘要。總結報告。「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」 */
 		summary : ''
 	});
@@ -2392,6 +2391,7 @@ function module_code(library_namespace) {
 
 		if (each[1])
 			Object.assign(options, each[1]);
+		// 採用 {{tlx|template_name}} 時，[[Special:最近更改]]頁面無法自動解析成 link。
 		options.summary = (callback = config.summary)
 		// 是為 Robot 運作。
 		? /bot/i.test(callback) ? callback
@@ -2553,8 +2553,12 @@ function module_code(library_namespace) {
 
 			pages = data;
 
-			if (typeof config.first === 'function')
+			// 注意: 一次取得大量頁面時，回傳內容不一定會按照原先輸入的次序排列！
+			// 若有必要，此時得用 config.first 自行處理！
+			if (typeof config.first === 'function') {
+				// titles 可能為 undefined！
 				config.first.call(this, messages, titles, pages);
+			}
 
 			/**
 			 * 處理回傳超過 limit (12 MB)，被截斷之情形。
@@ -3661,7 +3665,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('parameters: ' + JSON.stringify(prefix), 3,
 				'get_list');
 		if (Array.isArray(prefix)) {
-			parameter = prefix[1];
+			parameter = prefix[1] || get_list.default_parameter;
 			title_preprocessor = prefix[2];
 			prefix = prefix[0];
 		} else {
