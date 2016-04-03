@@ -1422,6 +1422,7 @@ function module_code(library_namespace) {
 	 * @param {Boolean}[no_parse]
 	 *            是否不解析 parameters。
 	 * 
+	 * @returns {Undefine}wikitext 不包含此模板。
 	 * @returns {Array}token = [ {String}完整的模板token, {String}模板名,
 	 *          {Array}parameters ];<br />
 	 *          token.count = count('{{') - count('}}')，正常情況下應為 0。<br />
@@ -1831,12 +1832,14 @@ function module_code(library_namespace) {
 		library_namespace.debug('處理 '
 				+ (this.token.lgname ? this.token.lgname + ' ' : '') + '['
 				+ next + ']', 2, 'wiki_API.prototype.next');
+
 		switch (type) {
 		case 'page':
 			// this.page(page data, callback)
 			// → 採用所輸入之 page data 作為 this.last_page，不再重新擷取 page。
 			if (get_page_content.is_page_data(next[1])
-					&& get_page_content.has_content(next[1])) {
+			// 必須有頁面內容，要不可能僅有資訊。有時可能已經擷取過卻發生錯誤而沒有頁面內容，此時依然會再擷取一次。
+			&& get_page_content.has_content(next[1])) {
 				library_namespace.debug('採用所輸入之 [' + next[1].title
 						+ '] 作為 this.last_page。', 2, 'wiki_API.prototype.next');
 				this.last_page = next[1];
@@ -1970,7 +1973,7 @@ function module_code(library_namespace) {
 				this.next();
 
 			} else if (!('stopped' in this)) {
-				// rollback
+				// rollback, check if need stop 緊急停止.
 				this.actions.unshift([ 'check' ], next);
 				this.next();
 			} else if (this.stopped && !next[2].skip_stopped) {
@@ -2291,6 +2294,7 @@ function module_code(library_namespace) {
 		write_to : '',
 		/** {String}運作記錄存放頁面。 */
 		log_to : 'User:Robot/log/%4Y%2m%2d',
+		// 採用 {{tlx|template_name}} 時，[[Special:最近更改]]頁面無法自動解析成 link。
 		/** {String}編輯摘要。總結報告。「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」 */
 		summary : ''
 	});
@@ -2633,13 +2637,14 @@ function module_code(library_namespace) {
 					// Skip invalid page. 預防如 .work(['']) 的情況。
 					return;
 				}
-				if (config.no_edit)
+				if (config.no_edit) {
 					// 不作編輯作業。
 					// 取得頁面內容。
 					this.page(page, function(page_data) {
 						each(page_data, messages);
 					}, config.page_options);
-				else {
+
+				} else {
 					// clone() 是為了能個別改變 summary。
 					// 例如: each() { options.summary += " -- ..."; }
 					var work_options = Object.clone(options);
@@ -2782,6 +2787,21 @@ function module_code(library_namespace) {
 		/** {ℕ⁰:Natural+0}自此 index 開始繼續作業 */
 		work_continue = 0, setup_target;
 
+		if (!config.no_edit) {
+			var check_options = config.check_options;
+			if (!check_options && typeof config.log_to === 'string'
+			// 若 log_to 以數字作結，自動將其當作 section。
+			&& (check_options = config.log_to.match(/\d+$/))) {
+				check_options = {
+					section : check_options[0]
+				};
+			}
+
+			if (check_options)
+				// wiki_API.check_stop()
+				this.check(check_options);
+		}
+
 		if (Array.isArray(target)) {
 			// Split when length is too long. 分割過長的 list。
 			setup_target = (function() {
@@ -2880,10 +2900,10 @@ function module_code(library_namespace) {
 
 		// 若為 query，非 edit (modify)，則不延遲等待。
 		// assert: typeof action[1] === 'string'
-		var need_check = !/action=(?:query|login)&/.test(action[1])
+		var need_check_lag = !/action=(?:query|login)&/.test(action[1])
 				&& !action[1].includes('assert='),
 		// 檢測是否間隔過短。支援最大延遲功能。
-		to_wait = need_check ? wiki_API.query.lag
+		to_wait = need_check_lag ? wiki_API.query.lag
 				- (Date.now() - wiki_API.query.last[action[0]]) : 0;
 		// TODO: 伺服器負載過重的時候，使用 exponential backoff 進行延遲。
 		if (to_wait > 0) {
@@ -2894,7 +2914,7 @@ function module_code(library_namespace) {
 			}, to_wait);
 			return;
 		}
-		if (need_check)
+		if (need_check_lag)
 			// reset timer
 			wiki_API.query.last[action[0]] = Date.now();
 		else
@@ -4254,10 +4274,11 @@ function module_code(library_namespace) {
 					//
 					'wiki_API.check_stop: 已設定停止編輯作業！');
 				content = null;
+
 			} else {
 				// 指定 pattern
 				PATTERN = options.pattern
-				// options.section: 指定的緊急停止章節標題, section title to check
+				// options.section: 指定的緊急停止章節標題, section title to check.
 				/** {String}緊急停止作業將檢測之章節標題。 */
 				|| options.section
 				/**
@@ -4271,6 +4292,9 @@ function module_code(library_namespace) {
 			if (content) {
 				if (!library_namespace.is_RegExp(PATTERN))
 					PATTERN = wiki_API.check_stop.pattern;
+				library_namespace.debug(
+				//
+				'wiki_API.check_stop: 採用 pattern: ' + PATTERN);
 				stopped = PATTERN.test(content, page_data);
 				if (stopped)
 					library_namespace
@@ -6714,13 +6738,21 @@ function module_code(library_namespace) {
 					// Check data.
 
 					if (false) {
-						var revision = page_data.revisions[0];
-						// var title = page_data.title, content = revision['*'];
+						/** {Object}revision data. 版本資料。 */
+						var revision = page_data.revisions
+								&& page_data.revisions[0];
+						/** {String}page title = page_data.title */
+						var title = CeL.wiki.title_of(page_data),
+						/**
+						 * {String}page content, maybe undefined. 頁面內容 =
+						 * revision['*']
+						 */
+						content = CeL.wiki.content_of(page_data);
 
 						// 似乎沒 !page_data.title 這種問題。
 						if (false && !page_data.title)
 							library_namespace.warn('* No title: [['
-									+ page_data.pageid + ']]');
+									+ page_data.pageid + ']]!');
 						// [[Wikipedia:快速删除方针]]
 						if (revision['*']) {
 							// max_length = Math.max(max_length,
@@ -6729,8 +6761,8 @@ function module_code(library_namespace) {
 							// filter patterns
 
 						} else {
-							library_namespace.warn('* No content: [['
-									+ page_data.title + ']]');
+							library_namespace.warn('* No contents: [['
+									+ page_data.title + ']]! 沒有頁面內容！');
 						}
 					}
 
