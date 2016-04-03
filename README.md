@@ -35,7 +35,7 @@ require('cejs');
 // CeL.run( 'module.name', function callback() { /* ... */ } );
 CeL.run([ 'data.math', 'application.debug.log' ]);
 
-// run code
+// Running code.
 CeL.assert(CeL.GCD(48, 64) === 16);
 CeL.assert([ "2³⋅13⋅80611⋅82217",
 		CeL.factorize(689269837048).toString() ], 'factorize');

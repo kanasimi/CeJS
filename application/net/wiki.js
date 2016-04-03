@@ -21,6 +21,11 @@ https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 Wikimedia REST API
 https://www.mediawiki.org/wiki/RESTBase
 
+https://github.com/maxlath/wikidata-sdk
+https://www.wikidata.org/w/api.php?action=help&modules=query
+https://query.wikidata.org/
+http://wdq.wmflabs.org/api_documentation.html
+
 處理[[朱載𪉖]]
 
 </code>
@@ -1553,7 +1558,9 @@ function module_code(library_namespace) {
 	/**
 	 * Convert URL to wiki link.
 	 * 
-	 * TODO: 在 default_language 非 zh 使用 uselang, /zh-tw/條目 會有問題。
+	 * TODO: 在 default_language 非 zh 使用 uselang, /zh-tw/條目 會有問題。 TODO: [[en
+	 * link]] → [[:en:en link]] TODO: use {{tsl}} or {{link-en}},
+	 * {{en:Template:Interlanguage link multi}}.
 	 * 
 	 * @param {String}URL
 	 *            URL
@@ -1563,6 +1570,8 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback({String}wiki link)
 	 * 
 	 * @returns {String}wiki link
+	 * 
+	 * @see [[WP:LINK#跨语言链接]]
 	 */
 	function URL_to_wiki_link(URL, add_quote, callback) {
 		URL = URL.trim();
@@ -3549,6 +3558,8 @@ function module_code(library_namespace) {
 	 *            the page title to search continue information
 	 * @param {Function|Object}callback
 	 *            回調函數 or options。 callback({Object} continue data);
+	 * 
+	 * @see https://www.mediawiki.org/wiki/API:Query#Continuing_queries
 	 */
 	function get_continue(title, callback) {
 		var options;
@@ -3623,15 +3634,19 @@ function module_code(library_namespace) {
 	 */
 	function get_list(type, title, callback, namespace) {
 		library_namespace.debug(type + (title ? ' [[' + title + ']]' : '')
-				+ ', callback: ' + callback, 3);
+				+ ', callback: ' + callback, 3, 'get_list');
 		var options,
-		// 前置字首。
-		prefix = get_list.type[type], parameter;
+		/** {String} 前置字首。 */
+		prefix = get_list.type[type], parameter, title_preprocessor;
+		library_namespace.debug('parameters: ' + JSON.stringify(prefix), 3,
+				'get_list');
 		if (Array.isArray(prefix)) {
 			parameter = prefix[1];
+			title_preprocessor = prefix[2];
 			prefix = prefix[0];
-		} else
+		} else {
 			parameter = get_list.default_parameter;
+		}
 		if (library_namespace.is_Object(namespace))
 			// 當作 options。
 			namespace = (options = namespace).namespace;
@@ -3729,9 +3744,12 @@ function module_code(library_namespace) {
 		//
 		+ wiki_API.query.title_param(title[1]) : '';
 
-		if (type === 'prefixsearch') {
-			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bprefixsearch
-			title[1] = title[1].replace(/^&pstitle=/, '&pssearch=');
+		if (typeof title_preprocessor === 'function') {
+			// title_preprocessor(title_parameter)
+			library_namespace.debug('title_parameter: [' + title[1] + ']', 3,
+					'get_list');
+			title[1] = title_preprocessor(title[1]);
+			library_namespace.debug('→ [' + title[1] + ']', 3, 'get_list');
 		}
 
 		title[1] = 'query&' + parameter + '=' + type + title[1]
@@ -3884,6 +3902,7 @@ function module_code(library_namespace) {
 		allpages : 'ap',
 
 		// https://www.mediawiki.org/wiki/API:Alllinks
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Balllinks
 		alllinks : 'al',
 
 		/**
@@ -3892,8 +3911,12 @@ function module_code(library_namespace) {
 		CeL.wiki.prefixsearch('User:Cewbot/log/20151002/', function(title, titles, pages){ console.log(titles); }, {limit:'max'});
 		wiki_instance.prefixsearch('User:Cewbot', function(title, titles, pages){ console.log(titles); }, {limit:'max'});
 		 * </code>
+		 * 
+		 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bprefixsearch
 		 */
-		prefixsearch : 'ps',
+		prefixsearch : [ 'ps', , function(title_parameter) {
+			return title_parameter.replace(/^&pstitle=/, '&pssearch=');
+		} ],
 
 		// 取得連結到 [[title]] 的頁面。
 		// e.g., [[name]], [[:Template:name]].
@@ -3923,8 +3946,13 @@ function module_code(library_namespace) {
 
 		// 取得所有使用 title (e.g., [[File:title.jpg]]) 的頁面。
 		// 基本上同 imageusage。
-		fileusage : [ 'fu', 'prop' ]
+		fileusage : [ 'fu', 'prop' ],
 
+		// 回傳指定頁面的所有連結。
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Blinks
+		links : [ 'pl', 'prop', function(title_parameter) {
+			return title_parameter.replace(/^&title=/, '&titles=');
+		} ]
 	};
 
 	(function() {

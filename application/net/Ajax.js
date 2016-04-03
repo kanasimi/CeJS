@@ -629,6 +629,8 @@ function merge_cookie(agent, cookie) {
  * 讀取 URL via node http/https。<br />
  * assert: arguments 必須與 get_URL() 相容！
  * 
+ * TODO: zlib: https://nodejs.org/docs/latest/api/zlib.html
+ * 
  * @param {String|Object}URL
  *            請求目的URL or options
  * @param {Function}[onload]
@@ -829,7 +831,7 @@ function get_URL_node(URL, onload, charset, post_data) {
  * 
  * @type {String}
  */
-get_URL_node.default_user_agent = 'CeJS get_URL_node()';
+get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
 
 
 // setup/reset node agent.
