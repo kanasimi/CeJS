@@ -271,12 +271,14 @@ function module_code(library_namespace) {
 	 * 依照
 	 * [https://www.mediawiki.org/w/api.php?action=query&titles=Wikipedia_talk:Flow&prop=info]，
 	 * "Wikipedia_talk:Flow" → "Wikipedia talk:Flow"<br />
-	 * 亦即底線 "_" → space " "
+	 * 亦即底線 "_" → space " "，首字大寫。
 	 * 
 	 * @param {String}page_name
 	 *            頁面名 page name。
 	 * 
 	 * @returns {String}規範後之頁面名稱。
+	 * 
+	 * @see https://en.wikipedia.org/wiki/Wikipedia:Page_name#Technical_restrictions_and_limitations
 	 */
 	function normalize_page_name(page_name) {
 		if (!page_name || typeof page_name !== 'string')
@@ -1338,7 +1340,7 @@ function module_code(library_namespace) {
 		});
 
 		// TODO: Magic words
-		// '''~''' 不能跨行！
+		// '''~''' 不能跨行！ 注意: '''{{font color}}''', '''{{tsl}}'''
 		// ''~'' 不能跨行！
 		// ~~~~~
 		// ----
@@ -2904,7 +2906,7 @@ function module_code(library_namespace) {
 
 		// 若為 query，非 edit (modify)，則不延遲等待。
 		// assert: typeof action[1] === 'string'
-		var need_check_lag = !/action=(?:query|login)&/.test(action[1])
+		var need_check_lag = !/action=(?:query|login)(?:&|$)/.test(action[1])
 				&& !action[1].includes('assert='),
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait = need_check_lag ? wiki_API.query.lag
@@ -5609,7 +5611,10 @@ function module_code(library_namespace) {
 		callback = function(data) { console.log(data); };
 		latest = '20160305';
 		project = 'enwiki';
-		directory = '/data/project/cewbot/dumps/';
+		//dump_directory = '~/dumps/';
+		// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Developing#Using_the_shared_Pywikibot_files_.28recommended_setup.29
+		// /shared/: shared files
+		dump_directory = '/shared/dump/'
 		filename = project + '-' + latest + '-pages-articles-multistream-index.txt';
 		</code>
 		 */
@@ -6589,8 +6594,8 @@ function module_code(library_namespace) {
 				// 這邊的 ((true)) 僅表示要使用，並採用預設值；不代表設定 dump file path。
 				config.use_dump = null;
 			read_dump(config.use_dump, callback, {
-				// directory to save dump file.
-				// e.g., 'dumps/'
+				// directory to restore dump file.
+				// e.g., '/shared/dump/', '~/dumps/'
 				directory : config.dump_directory,
 				first : config.first,
 				last : config.last
@@ -6721,8 +6726,12 @@ function module_code(library_namespace) {
 				//
 				function(page_data, position, page_anchor) {
 					// filter
-					if (false && page_data.ns !== 0)
-						return;
+					if (false) {
+						if ('missing' in page_data)
+							return [ CeL.wiki.edit.cancel, '條目已不存在或被刪除' ];
+						if (page_data.ns !== 0)
+							return [ CeL.wiki.edit.cancel, '本作業僅處理條目命名空間' ];
+					}
 
 					if (++count % 1e4 === 0) {
 						// e.g.,
