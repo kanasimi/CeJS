@@ -5664,9 +5664,9 @@ function module_code(library_namespace) {
 		if (wmflabs) {
 			source_directory = '/public/dumps/public/' + project + '/' + latest
 					+ '/';
+			library_namespace.debug('Check if public dump archive exists: [' + source_directory + archive + ']', 1, 'get_latest');
 			try {
-				// check if file exists.
-				fs.accessSync(source_directory + filename);
+				fs.accessSync(source_directory + archive);
 				library_namespace.log('get_latest: Public dump archive ['
 						+ source_directory + archive + '] exists.');
 				extract();
@@ -5679,8 +5679,8 @@ function module_code(library_namespace) {
 
 		source_directory = directory;
 
+		library_namespace.debug('Check if file exists: [' + source_directory + archive + ']', 1, 'get_latest');
 		try {
-			// check if file exists.
 			node_fs.statSync(source_directory + archive);
 			library_namespace.log('get_latest: Archive [' + source_directory
 					+ archive + '] exists.');
