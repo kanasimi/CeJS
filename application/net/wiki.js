@@ -124,31 +124,68 @@ function module_code(library_namespace) {
 	 *      https://zh.wikipedia.org/wiki/Wikipedia:%E5%A7%8A%E5%A6%B9%E8%AE%A1%E5%88%92#.E9.93.BE.E6.8E.A5.E5.9E.8B
 	 */
 	function api_URL(project) {
-		if (project)
-			// /^[a-z]+$/i.test(undefined) === true
-			if (/^[a-z]+$/i.test(project))
-				// e.g., 'en' → 'en.wikipedia.org' ({{SERVERNAME}})
-				project += '.wikipedia.org';
-			else if (/^[a-z]+\.[a-z]+$/i.test(project))
-				// e.g., 'en.wikisource', 'en.wiktionary'
-				project += '.org';
+		if (!project) {
+			return wiki_API.API_URL;
+		}
 
-		var matched = /^(https?:\/\/)?[a-z]+(\.[a-z]+)+(\/?)$/i.test(project);
-		if (matched)
+		project = String(project);
+		if (project in api_URL.alias)
+			project = api_URL.alias[project];
+		// /^[a-z]+$/i.test(undefined) === true
+		if (/^[a-z]+$/i.test(project)) {
+			if (project in api_URL.wikimedia) {
+				project += '.wikimedia';
+			} else if (project in api_URL.project) {
+				// (default_language || 'www') + '.' + project
+				project = default_language + '.' + project;
+			} else if (/wiki/i.test(project)) {
+				// e.g., 'mediawiki' → 'www.mediawiki'
+				// e.g., 'wikidata' → 'www.wikidata'
+				project = 'www.' + project;
+			} else {
+				// e.g., 'en' → 'en.wikipedia' ({{SERVERNAME}})
+				project += '.wikipedia';
+			}
+		}
+		if (/^[a-z]+\.[a-z]+$/i.test(project))
+			// e.g., 'en.wikisource', 'en.wiktionary'
+			project += '.org';
+
+		var matched = project
+				.match(/^(https?:)?(?:\/\/)?([a-z]+(?:\.[a-z]+)+)/i);
+		if (matched) {
 			// e.g., 'http://zh.wikipedia.org/'
-			return (matched[1] || api_URL.default_protocol || 'https://')
-					+ project + (matched[2] || '/') + 'w/api.php';
-
-		if (/^https?:\/\//i.test(project))
 			// e.g., 'https://www.mediawiki.org/w/api.php'
-			return project;
+			// e.g., 'https://www.mediawiki.org/wiki/'
+			return (matched[1] || api_URL.default_protocol || 'https:') + '//'
+					+ matched[2] + '/w/api.php';
+		}
 
-		if (project)
-			library_namespace.err('Unknown project: [' + project
-					+ ']! Using default API URL.');
-
+		library_namespace.err('Unknown project: [' + project
+				+ ']! Using default API URL.');
 		return wiki_API.API_URL;
 	}
+
+	// https://www.wikimedia.org/
+	api_URL.wikimedia = {
+		meta : true,
+		commons : true,
+		species : true,
+		incubator : true,
+		wikitech : true
+	}
+	// project with language prefix
+	api_URL.project = {
+		wikipedia : true,
+		wikibooks : true,
+		wikinews : true,
+		wikiquote : true,
+		wikisource : true,
+		wikiversity : true,
+		wikivoyage : true,
+		wiktionary : true
+	};
+	api_URL.alias = {};
 
 	// ------------------------------------------------------------------------
 
