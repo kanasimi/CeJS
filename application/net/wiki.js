@@ -1520,19 +1520,26 @@ function module_code(library_namespace) {
 	}
 
 	// parse user name
-	function parse_user(wikitext) {
+	function parse_user(wikitext, full_link) {
 		var matched = wikitext && wikitext.match(
 		// 使用者/用戶對話頁面
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
-		/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论)?|用戶(?:討論)?)\s*:\s*([^\|\]]+)/i);
-		if (matched)
-			return matched[1].trim();
+		// "\/": e.g., [[user talk:user_name/Flow]]
+		/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论)?|用戶(?:討論)?)\s*:\s*([^\|\]\/]+)/i);
+		if (matched) {
+			matched = full_link ? matched[0].trimRight() + ']]' : matched[1]
+					.trim();
+			return matched;
+		}
 	}
 
 	// 若重定向到其他頁面，則回傳其{String}頁面名。
 	function parse_redirect(wikitext) {
 		var matched = wikitext && wikitext.match(
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
+		// https://en.wikipedia.org/wiki/Help:Redirect
+		// Note that the redirect link must be explicit – it cannot contain
+		// magic words, templates, etc.
 		/(?:^|[\s\n]*)#(?:REDIRECT|重定向)\s*\[\[([^\]]+)\]\]/i);
 		if (matched)
 			return matched[1].trim();
@@ -5638,6 +5645,8 @@ function module_code(library_namespace) {
 		function extract() {
 			library_namespace.log('get_latest.extract: Extracting ['
 					+ source_directory + archive + ']...');
+			// share the xml dump file. 應由 caller 自行設定。
+			// process.umask(parseInt('0022', 8));
 			require('child_process').exec(
 			//
 			'/bin/bzip2 -cd "' + source_directory + archive + '" > "'
@@ -5664,9 +5673,10 @@ function module_code(library_namespace) {
 		if (wmflabs) {
 			source_directory = '/public/dumps/public/' + project + '/' + latest
 					+ '/';
-			library_namespace.debug('Check if public dump archive exists: [' + source_directory + archive + ']', 1, 'get_latest');
+			library_namespace.debug('Check if public dump archive exists: ['
+					+ source_directory + archive + ']', 1, 'get_latest');
 			try {
-				fs.accessSync(source_directory + archive);
+				node_fs.accessSync(source_directory + archive);
 				library_namespace.log('get_latest: Public dump archive ['
 						+ source_directory + archive + '] exists.');
 				extract();
@@ -5679,7 +5689,8 @@ function module_code(library_namespace) {
 
 		source_directory = directory;
 
-		library_namespace.debug('Check if file exists: [' + source_directory + archive + ']', 1, 'get_latest');
+		library_namespace.debug('Check if file exists: [' + source_directory
+				+ archive + ']', 1, 'get_latest');
 		try {
 			node_fs.statSync(source_directory + archive);
 			library_namespace.log('get_latest: Archive [' + source_directory

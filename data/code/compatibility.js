@@ -1245,10 +1245,12 @@ function trim() {
 	.replace(/[\s\n]+$|^[\s\n]+/g, '');
 }
 
+// String.prototype.trimRight()
 function trimRight() {
 	return String(this).replace(/[\s\n]+$/g, '');
 }
 
+//String.prototype.trimLeft()
 function trimLeft() {
 	return String(this).replace(/^[\s\n]+/g, '');
 }
