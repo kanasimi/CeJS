@@ -21,10 +21,6 @@ https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
 Wikimedia REST API
 https://www.mediawiki.org/wiki/RESTBase
 
-https://github.com/maxlath/wikidata-sdk
-https://www.wikidata.org/w/api.php?action=help&modules=query
-https://query.wikidata.org/
-http://wdq.wmflabs.org/api_documentation.html
 
 處理[[朱載𪉖]]
 
@@ -1882,7 +1878,7 @@ function module_code(library_namespace) {
 		switch (type) {
 		case 'page':
 			// this.page(page data, callback)
-			// → 採用所輸入之 page data 作為 this.last_page，不再重新擷取 page。
+			// → 此法會採用所輸入之 page data 作為 this.last_page，不再重新擷取 page。
 			if (get_page_content.is_page_data(next[1])
 			// 必須有頁面內容，要不可能僅有資訊。有時可能已經擷取過卻發生錯誤而沒有頁面內容，此時依然會再擷取一次。
 			&& get_page_content.has_content(next[1])) {
@@ -5187,7 +5183,7 @@ function module_code(library_namespace) {
 	}
 
 	if (false)
-		CeL.wiki.SQL('SELECT * FROM revision LIMIT 3000,1;',
+		CeL.wiki.SQL('SELECT * FROM `revision` LIMIT 3000,1;',
 		//
 		function(error, rows, fields) {
 			if (error)
@@ -6599,7 +6595,8 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	/**
-	 * 由 Tool Labs database replication 讀取所有 ns0 且未被刪除頁面最新版本之版本號 rev_id (包含重定向)。<br />
+	 * 由 Tool Labs database replication 讀取所有 ns0，且未被刪除頁面最新修訂版本之版本號 rev_id
+	 * (包含重定向)。<br />
 	 * 從 `page` 之 page id 確認 page 之 namespace，以及未被刪除。然後選擇其中最大的 revision id。
 	 * 
 	 * @type {String}
@@ -6689,7 +6686,7 @@ function module_code(library_namespace) {
 				library_namespace.info(
 				// database replicas
 				'traversal_pages: 嘗試讀取 Tool Labs 之 database replication 資料，'
-						+ '一次讀取完所有頁面最新版本之版本號 rev_id...');
+						+ '一次讀取完所有頁面最新修訂版本之版本號 rev_id...');
 				// default: 採用 page_id 而非 page_title 來 query。
 				var is_id = 'is_id' in config ? config.is_id : true;
 				run_SQL(is_id ? all_revision_SQL
@@ -6744,10 +6741,10 @@ function module_code(library_namespace) {
 			 * database replicas @ Tool Labs 無 `text` table，因此實際頁面內容不僅能經過 replicas 存取。
 
 			# 先將最新的 xml dump file 下載到本地(實為 network drive)並解開: read_dump()
-			# 由 Tool Labs database replication 讀取所有 ns0 且未被刪除頁面最新版本之版本號 rev_id (包含重定向): traversal_pages() + all_revision_SQL
-			# 遍歷 xml dump file，若 dump 中為最新版本，則先用之 (約 95%)；純粹篩選約需近 3 minutes: try_dump()
+			# 由 Tool Labs database replication 讀取所有 ns0 且未被刪除頁面最新修訂版本之版本號 rev_id (包含重定向): traversal_pages() + all_revision_SQL
+			# 遍歷 xml dump file，若 dump 中為最新修訂版本，則先用之 (約 95%)；純粹篩選約需近 3 minutes: try_dump()
 			# 經 API 讀取餘下 dump 後近 5% 更動過的頁面內容: traversal_pages() + wiki_API.prototype.work
-			# 於 Tool Labs，解開 xml 後；自重新抓最新版本之版本號起，網路連線順暢時整個作業時間約 12分鐘。
+			# 於 Tool Labs，解開 xml 後；自重新抓最新修訂版本之版本號起，網路連線順暢時整個作業時間約 12分鐘。
 
 			</code>
 			 */
@@ -6799,7 +6796,7 @@ function module_code(library_namespace) {
 					// Check data.
 
 					if (false) {
-						/** {Object}revision data. 版本資料。 */
+						/** {Object}revision data. 修訂版本資料。 */
 						var revision = page_data.revisions
 								&& page_data.revisions[0];
 						/** {String}page title = page_data.title */
@@ -6893,7 +6890,7 @@ function module_code(library_namespace) {
 
 			// 工作流程: config.filter() → run_work()
 
-			// 若 config.filter 非 function，表示要先比對 dump，若版本號相同則使用之，否則自 API 擷取。
+			// 若 config.filter 非 function，表示要先比對 dump，若修訂版本號相同則使用之，否則自 API 擷取。
 			// 並以 try_dump() 當作 filter()。
 			// 設定 config.filter 為 ((true)) 表示要使用預設為最新的 dump，
 			// 否則將之當作 dump file path。
@@ -7264,6 +7261,101 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	/**
+	 * <code>
+
+	// Wikidata
+
+	https://www.wikidata.org/wiki/Wikidata:Data_access
+
+	//search
+	https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
+	//實體entity
+	https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=labels&utf8=1
+	//聲明
+	https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=claims&utf8=1
+	//維基百科 sitelinks
+	https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=sitelinks&utf8=1
+	//edit實體entity
+	https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
+	//創建Wikibase聲稱。
+	https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
+	//創建實體重定向。
+	https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
+
+	//實體值的鏈接數據界面
+	CeL.get_URL('https://www.wikidata.org/wiki/Special:EntityData/Q1.json',function(r){r=JSON.parse(r.responseText);console.log(r.entities.Q1.labels.zh.value)})
+	https://www.wikidata.org/wiki/Wikidata:Creating_a_bot/zh
+
+	https://meta.wikimedia.org/wiki/Wikidata/Notes/Inclusion_syntax
+	{{label}}, {{Q}}, [[d:Q1]]
+
+	https://query.wikidata.org/
+	http://wdq.wmflabs.org/api_documentation.html
+	https://github.com/maxlath/wikidata-sdk
+	https://query.wikidata.org/bigdata/namespace/wdq/sparql?query=
+
+
+	CeL.wiki.entity(1, function(data) {console.log(data.labels['en'].value+': '+data.labels['zh'].value);});
+	CeL.wiki.entity(1, 'labels', function(data) {console.log(data['en'].value+': '+data['zh'].value);});
+
+	wiki = CeL.wiki.login(user_name, pw, 'wikidata');
+	wiki = Wiki(true, 'wikidata');
+	wiki.entity(key/id, function(entity){}).edit(function(entity){});
+	wiki.claim(key/id, function(claim){}).edit(function(entity){});
+
+	</code>
+	 * 
+	 * @since
+	 */
+
+	function Wikidata_search(key, language) {
+		;
+	}
+
+	// Q1
+	function Wikidata_entity(id, props, callback, filter) {
+		if (typeof props === 'function' && !filter) {
+			// shift arguments.
+			filter = callback;
+			callback = props;
+			props = null;
+		}
+
+		if (Array.isArray(id))
+			id = id.join('|Q');
+		else if (typeof id !== 'number') {
+			Wikidata_search(id, filter);
+			return;
+		}
+
+		var action = 'wbgetentities&ids=Q' + id;
+		if (props)
+			action += '&props=' + props;
+		wiki_API.query([ 'https://www.wikidata.org/w/api.php', action ],
+		//
+		function(data) {
+			if (data && data.entities) {
+				data = data.entities;
+				for ( var id in data) {
+					data = data[id];
+					break;
+				}
+				if (props) {
+					data = data[props];
+				}
+			}
+			callback(data);
+		});
+	}
+
+	// P1
+	function Wikidata_claim(id) {
+		;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 	Object.assign(wiki_API, {
 		api_URL : api_URL,
@@ -7285,7 +7377,10 @@ function module_code(library_namespace) {
 
 		parse_dump_xml : parse_dump_xml,
 
-		Flow : Flow_info
+		Flow : Flow_info,
+
+		entity : Wikidata_entity,
+		claim : Wikidata_claim
 	});
 
 	return wiki_API;
