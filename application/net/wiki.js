@@ -95,8 +95,15 @@ function module_code(library_namespace) {
 
 		// setup session.
 		// this.set_URL(API_URL);
-		if (API_URL)
+		if (API_URL) {
+			// e.g., 'zh-yue', 'zh-classical'
+			if (/^[a-z\-]{2}$/i.test(API_URL))
+				this.language = API_URL.toLowerCase();
 			this.API_URL = api_URL(API_URL);
+		}
+
+		if (!(language in this))
+			this.language = default_language;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -127,8 +134,8 @@ function module_code(library_namespace) {
 		project = String(project);
 		if (project in api_URL.alias)
 			project = api_URL.alias[project];
-		// /^[a-z]+$/i.test(undefined) === true
-		if (/^[a-z]+$/i.test(project)) {
+		// /^[a-z\-]+$/i.test(undefined) === true
+		if (/^[a-z\-]+$/i.test(project)) {
 			if (project in api_URL.wikimedia) {
 				project += '.wikimedia';
 			} else if (project in api_URL.project) {
@@ -140,15 +147,16 @@ function module_code(library_namespace) {
 				project = 'www.' + project;
 			} else {
 				// e.g., 'en' → 'en.wikipedia' ({{SERVERNAME}})
+				// e.g., 'zh-yue' → 'zh-yue.wikipedia', 'zh-classical'
 				project += '.wikipedia';
 			}
 		}
-		if (/^[a-z]+\.[a-z]+$/i.test(project))
+		if (/^[a-z\-]+\.[a-z]+$/i.test(project))
 			// e.g., 'en.wikisource', 'en.wiktionary'
 			project += '.org';
 
 		var matched = project
-				.match(/^(https?:)?(?:\/\/)?([a-z]+(?:\.[a-z]+)+)/i);
+				.match(/^(https?:)?(?:\/\/)?([a-z\-]+(?:\.[a-z]+)+)/i);
 		if (matched) {
 			// e.g., 'http://zh.wikipedia.org/'
 			// e.g., 'https://www.mediawiki.org/w/api.php'
@@ -1588,7 +1596,7 @@ function module_code(library_namespace) {
 	/**
 	 * Wikipedia:Wikimedia sister projects 之 URL。
 	 * 
-	 * matched: [ all, language, title 條目名稱, section 章節, link說明 ]
+	 * matched: [ all, language code, title 條目名稱, section 章節, link說明 ]
 	 * 
 	 * TODO: /wiki/條目#hash 說明
 	 * 
@@ -1596,7 +1604,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
 	 */
-	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z]{2,9})\.wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
+	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z\-]{2,20})\.wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
 
 	/**
 	 * Convert URL to wiki link.
@@ -1705,7 +1713,7 @@ function module_code(library_namespace) {
 	 * @seealso wiki_API.query.title_param()
 	 */
 	function get_page_title(page_data) {
-		// 處理 [ {String}API_URL, {String}title ]
+		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (Array.isArray(page_data)) {
 			if (get_page_content.is_page_data(page_data[0]))
 				// assert: page_data = [ page data, page data, ... ]
@@ -1875,6 +1883,7 @@ function module_code(library_namespace) {
 				+ (this.token.lgname ? this.token.lgname + ' ' : '') + '['
 				+ next + ']', 2, 'wiki_API.prototype.next');
 
+		// 若需改變，需同步更改 wiki_API.prototype.next.methods
 		switch (type) {
 		case 'page':
 			// this.page(page data, callback)
@@ -1898,7 +1907,7 @@ function module_code(library_namespace) {
 				// this.page(title, callback)
 				// next[1] : title
 				// next[3] : options
-				// [ {String}API_URL, {String}title ]
+				// [ {String}API_URL, {String}title or {Object}page_data ]
 				wiki_API.page([ this.API_URL, next[1] ], function(page_data,
 						error) {
 					// assert: 當錯誤發生，例如頁面不存在，依然需要模擬出 page_data。
@@ -2992,7 +3001,7 @@ function module_code(library_namespace) {
 			var HOST;
 			action[0] = action[0].replace(
 			//
-			/^https?:\/\/([a-z]{2,9}\.wikipedia\.org)\//, function(all, host) {
+			/^https?:\/\/([a-z\-]{2,20}\.wikipedia\.org)\//, function(all, host) {
 				HOST = host;
 				return 'http://cp1008.wikimedia.org:3128/';
 			});
@@ -3212,7 +3221,7 @@ function module_code(library_namespace) {
 
 	// TODO
 	function normalize_title_parameter(title, options) {
-		// 處理 [ {String}API_URL, {String}title ]
+		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (!Array.isArray(title)
 		// 為了預防輸入的是問題頁面。
 		|| title.length !== 2 || typeof title[0] === 'object')
@@ -3240,7 +3249,7 @@ function module_code(library_namespace) {
 	 </code>
 	 * 
 	 * @param {String|Array}title
-	 *            title or [ {String}API_URL, {String}title ]
+	 *            title or [ {String}API_URL, {String}title or {Object}page_data ]
 	 * @param {Function}[callback]
 	 *            回調函數。 callback(page_data, error) { page_data.title; var
 	 *            content = CeL.wiki.content_of(page_data); }
@@ -3256,7 +3265,7 @@ function module_code(library_namespace) {
 			callback = undefined;
 		}
 
-		// 處理 [ {String}API_URL, {String}title ]
+		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (!Array.isArray(title)
 		// 為了預防輸入的是問題頁面。
 		|| title.length !== 2 || typeof title[0] === 'object')
@@ -3725,7 +3734,7 @@ function module_code(library_namespace) {
 		else
 			options.namespace = namespace;
 
-		// 處理 [ {String}API_URL, {String}title ]
+		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (!Array.isArray(title))
 			title = [ , title ];
 
@@ -4809,7 +4818,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// 處理 [ {String}API_URL, {String}title ]
+		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (!Array.isArray(title))
 			title = [ , title ];
 		title[1] = 'query&prop=redirects&rdlimit=max&'
@@ -4943,7 +4952,8 @@ function module_code(library_namespace) {
 	 * @returns {String}預設之語言。
 	 */
 	function set_default_language(language) {
-		if (typeof language !== 'string' || !/^[a-z]{2,3}$/.test(language)) {
+		// e.g., 'zh-yue', 'zh-classical'
+		if (typeof language !== 'string' || !/^[a-z\-]{2,20}$/.test(language)) {
 			library_namespace.warn('set_default_language: Invalid language: ['
 					+ language + ']. e.g., "en".');
 			return default_language;
@@ -6958,7 +6968,7 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
 	function Flow_info(title, callback, options) {
-		// 處理 [ {String}API_URL, {String}title ]
+		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (!Array.isArray(title)
 		// 為了預防輸入的是問題頁面。
 		|| title.length !== 2 || typeof title[0] === 'object')
@@ -7092,7 +7102,7 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
 	function Flow_page(title, callback, options) {
-		// 處理 [ {String}API_URL, {String}title ]
+		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (!Array.isArray(title)
 		// 為了預防輸入的是問題頁面。
 		|| title.length !== 2 || typeof title[0] === 'object')
@@ -7270,22 +7280,23 @@ function module_code(library_namespace) {
 
 	//search
 	https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
-	//實體entity
+	//實體項目entity
 	https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=labels&utf8=1
-	//聲明
-	https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=claims&utf8=1
+	//聲明/屬性
+	https://www.wikidata.org/w/api.php?action=wbgetclaims&ids=P1&props=claims&utf8=1
 	//維基百科 sitelinks
 	https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=sitelinks&utf8=1
-	//edit實體entity
+	//edit實體項目entity
 	https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
 	//創建Wikibase聲稱。
 	https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
-	//創建實體重定向。
+	//創建實體項目重定向。
 	https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
 
-	//實體值的鏈接數據界面
+	//實體項目值的鏈接數據界面
 	CeL.get_URL('https://www.wikidata.org/wiki/Special:EntityData/Q1.json',function(r){r=JSON.parse(r.responseText);console.log(r.entities.Q1.labels.zh.value)})
 	https://www.wikidata.org/wiki/Wikidata:Creating_a_bot/zh
+	add P143 導入自
 
 	https://meta.wikimedia.org/wiki/Wikidata/Notes/Inclusion_syntax
 	{{label}}, {{Q}}, [[d:Q1]]
@@ -7296,62 +7307,99 @@ function module_code(library_namespace) {
 	https://query.wikidata.org/bigdata/namespace/wdq/sparql?query=
 
 
-	CeL.wiki.entity(1, function(data) {console.log(data.labels['en'].value+': '+data.labels['zh'].value);});
-	CeL.wiki.entity(1, 'labels', function(data) {console.log(data['en'].value+': '+data['zh'].value);});
+	CeL.wiki.data('Q1', function(data) {console.log(JSON.stringify(data));});
+	CeL.wiki.data('Q1', function(data) {console.log(data);});
+	CeL.wiki.data('Q1', function(data) {console.log(data.labels['en'].value+': '+data.labels['zh'].value);});
+	// Get the property of wikidata entity.
+	// 取得wikidata中指定實體項目的指定屬性。
+	CeL.wiki.data('Q1', function(data) {console.log(data['en'].value+': '+data['zh'].value);}, 'labels');
+	CeL.wiki.data('Q1|P1', function(data) {console.log(data);});
+
+	CeL.wiki.data('Q11188', function(data) {property=data;console.log(data);});
 
 	wiki = CeL.wiki.login(user_name, pw, 'wikidata');
 	wiki = Wiki(true, 'wikidata');
-	wiki.entity(key/id, function(entity){}).edit(function(entity){});
-	wiki.claim(key/id, function(claim){}).edit(function(entity){});
+	wiki.data(id, function(entity){}, {is_key:true}).edit_data(function(entity){});
+	wiki.page().data(function(entity){}, options).edit_data().edit()
+
+	wiki.data('宇宙',function(data){data.labels['en'].value==='universe';})
+	wiki.data('宇宙','形狀',function(data){data==='宇宙的形狀';})
+	// key_language: language of key and property name
+	// value_language: language of callback, 擷取 retrieve language
+	// language: key_language + value_language. default: wiki.language
+	wiki.data('宇宙','形狀',function(data){data['en'].value==='宇宙的形狀';},{value_language:null})
 
 	</code>
 	 * 
 	 * @since
 	 */
 
+	// https://www.wikidata.org/w/api.php
+	var wikidata_API = api_URL('wikidata');
+
 	function Wikidata_search(key, language) {
 		;
 	}
 
-	// Q1
-	function Wikidata_entity(id, props, callback, filter) {
-		if (typeof props === 'function' && !filter) {
-			// shift arguments.
-			filter = callback;
-			callback = props;
-			props = null;
-		}
-
-		if (Array.isArray(id))
-			id = id.join('|Q');
-		else if (typeof id !== 'number') {
-			Wikidata_search(id, filter);
+	// get entity id: Q1, P1
+	function Wikidata_entity(id, callback, options) {
+		if (options && options.is_key) {
+			// need search
+			delete options.is_key;
+			Wikidata_search(id, function(list) {
+				Wikidata_entity(filter(list), callback, options);
+			});
 			return;
 		}
 
-		var action = 'wbgetentities&ids=Q' + id;
-		if (props)
-			action += '&props=' + props;
-		wiki_API.query([ 'https://www.wikidata.org/w/api.php', action ],
-		//
-		function(data) {
+		if (typeof options === 'string') {
+			options = {
+				props : options
+			};
+		} else if (typeof options === 'function') {
+			options = {
+				filter : options
+			};
+		} else if (options) {
+			options = library_namespace.new_options(options);
+		} else {
+			options = library_namespace.null_Object();
+		}
+
+		// 處理 [ {String}API_URL, {String}id or {Object}page_data ]
+		if (!Array.isArray(id)
+		// 為了預防輸入的是問題頁面。
+		|| id.length !== 2 || typeof id[0] === 'object')
+			id = [ wikidata_API, id ];
+
+		if (Array.isArray(id[1]))
+			id[1] = id[1].join('|');
+
+		id[1] = 'wbgetentities&ids=' + id[1];
+		if (options.props)
+			id[1] += '&props=' + options.props;
+		if (options.languages)
+			id[1] += '&languages=' + options.languages;
+
+		wiki_API.query(id, function(data) {
+			// data:
+			// {entities:{Q1:{pageid:129,lastrevid:0,id:'P1',labels:{},claims:{},...},P1:{id:'P1',missing:''}},success:1}
 			if (data && data.entities) {
 				data = data.entities;
+				var list = [];
 				for ( var id in data) {
-					data = data[id];
-					break;
+					list.push(data[id]);
 				}
-				if (props) {
-					data = data[props];
+				data = list;
+				if (data.length === 1) {
+					data = data[0];
+					if (options.props) {
+						data = data[options.props];
+					}
 				}
 			}
 			callback(data);
 		});
-	}
-
-	// P1
-	function Wikidata_claim(id) {
-		;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -7379,8 +7427,7 @@ function module_code(library_namespace) {
 
 		Flow : Flow_info,
 
-		entity : Wikidata_entity,
-		claim : Wikidata_claim
+		data : Wikidata_entity
 	});
 
 	return wiki_API;
