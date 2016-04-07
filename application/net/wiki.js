@@ -3001,10 +3001,11 @@ function module_code(library_namespace) {
 			var HOST;
 			action[0] = action[0].replace(
 			//
-			/^https?:\/\/([a-z\-]{2,20}\.wikipedia\.org)\//, function(all, host) {
-				HOST = host;
-				return 'http://cp1008.wikimedia.org:3128/';
-			});
+			/^https?:\/\/([a-z\-]{2,20}\.wikipedia\.org)\//,
+					function(all, host) {
+						HOST = host;
+						return 'http://cp1008.wikimedia.org:3128/';
+					});
 			if (HOST) {
 				action = {
 					URL : action,
@@ -7282,13 +7283,13 @@ function module_code(library_namespace) {
 	https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
 	//實體項目entity
 	https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=labels&utf8=1
-	//聲明/屬性
+	//claim/聲明/屬性/陳述/statement
 	https://www.wikidata.org/w/api.php?action=wbgetclaims&ids=P1&props=claims&utf8=1
 	//維基百科 sitelinks
 	https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=sitelinks&utf8=1
 	//edit實體項目entity
 	https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
-	//創建Wikibase聲稱。
+	//創建Wikibase陳述。
 	https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
 	//創建實體項目重定向。
 	https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
@@ -7308,26 +7309,40 @@ function module_code(library_namespace) {
 
 
 	CeL.wiki.data('Q1', function(data) {console.log(JSON.stringify(data));});
-	CeL.wiki.data('Q1', function(data) {console.log(data);});
+	CeL.wiki.data('Q1', function(data) {console.log(data);}, {languages:'zh'});
 	CeL.wiki.data('Q1', function(data) {console.log(data.labels['en'].value+': '+data.labels['zh'].value);});
 	// Get the property of wikidata entity.
-	// 取得wikidata中指定實體項目的指定屬性。
+	// 取得wikidata中指定實體項目的指定屬性/陳述。
 	CeL.wiki.data('Q1', function(data) {console.log(data['en'].value+': '+data['zh'].value);}, 'labels');
+	// { id: 'P1', missing: '' }
 	CeL.wiki.data('Q1|P1', function(data) {console.log(data);});
 
 	CeL.wiki.data('Q11188', function(data) {property=data;console.log(data);});
+
+	CeL.wiki.data('P6', function(data) {console.log(data);});
+
+	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);});
 
 	wiki = CeL.wiki.login(user_name, pw, 'wikidata');
 	wiki = Wiki(true, 'wikidata');
 	wiki.data(id, function(entity){}, {is_key:true}).edit_data(function(entity){});
 	wiki.page().data(function(entity){}, options).edit_data().edit()
 
-	wiki.data('宇宙',function(data){data.labels['en'].value==='universe';})
-	wiki.data('宇宙','形狀',function(data){data==='宇宙的形狀';})
+	wiki.data('宇宙', function(data){data.labels['en'].value==='universe';})
+	wiki.data('宇宙', function(data){data.labels['en'].value==='universe';})
+	wiki.data('宇宙', '形狀', function(data){data==='宇宙的形狀';})
 	// key_language: language of key and property name
 	// value_language: language of callback, 擷取 retrieve language
 	// language: key_language + value_language. default: wiki.language
 	wiki.data('宇宙','形狀',function(data){data['en'].value==='宇宙的形狀';},{value_language:null})
+
+	// Wikidata filter claim
+	https://wdq.wmflabs.org/api_documentation.html
+	https://wdq.wmflabs.org/wdq/?q=
+	https://wdq.wmflabs.org/api?q=claim[31:146]&callback=eer
+
+	https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#time
+	時間精度單位 = '十億年,億年,千萬年,百萬年,十萬年,一萬年,千紀,世紀,年代,年,月,日,時,分,秒,毫秒,微秒,納秒'.split(',');
 
 	</code>
 	 * 
@@ -7337,19 +7352,34 @@ function module_code(library_namespace) {
 	// https://www.wikidata.org/w/api.php
 	var wikidata_API = api_URL('wikidata');
 
-	function Wikidata_search(key, language) {
-		;
+	function Wikidata_search(key, callback, language) {
+		key = key.trim();
+		var action = [ wikidata_API, 'wbsearchentities&search=' + encodeURIComponent(key)
+		//
+		+ '&language=' + (language || default_language) + '&limit=max' ];
+
+		wiki_API.query(action, function(data) {
+			var list = [];
+			if (Array.isArray(data.search)) {
+				data.search.forEach(function (item) {
+					if (item.match.text === key)
+						list.push(item);
+				});
+				if (list.length <= 1)
+					list = list[0];
+			}
+			callback(list);
+		});
 	}
 
 	// get entity id: Q1, P1
-	function Wikidata_entity(id, callback, options) {
-		if (options && options.is_key) {
-			// need search
-			delete options.is_key;
-			Wikidata_search(id, function(list) {
-				Wikidata_entity(filter(list), callback, options);
-			});
-			return;
+	// https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON
+	function Wikidata_entity(key, property, callback, options) {
+		if (typeof property === 'function' && !options) {
+			// shift arguments.
+			options = callback;
+			callback = property;
+			property = null;
 		}
 
 		if (typeof options === 'string') {
@@ -7366,24 +7396,32 @@ function module_code(library_namespace) {
 			options = library_namespace.null_Object();
 		}
 
-		// 處理 [ {String}API_URL, {String}id or {Object}page_data ]
-		if (!Array.isArray(id)
+		if ('is_title' in options) {
+			// TODO
+		}
+
+		// 處理 [ {String}API_URL, {String}key or {Object}page_data ]
+		if (!Array.isArray(key)
 		// 為了預防輸入的是問題頁面。
-		|| id.length !== 2 || typeof id[0] === 'object')
-			id = [ wikidata_API, id ];
+		|| key.length !== 2 || typeof key[0] === 'object')
+			key = [ wikidata_API, key ];
 
-		if (Array.isArray(id[1]))
-			id[1] = id[1].join('|');
+		if (Array.isArray(key[1]))
+			key[1] = key[1].join('|');
 
-		id[1] = 'wbgetentities&ids=' + id[1];
+		key[1] = 'wbgetentities&ids=' + key[1];
 		if (options.props)
-			id[1] += '&props=' + options.props;
+			// retrieve properties. 僅擷取這些屬性。
+			key[1] += '&props=' + options.props;
 		if (options.languages)
-			id[1] += '&languages=' + options.languages;
+			// retrieve languages. 僅擷取這些語言。
+			key[1] += '&languages=' + options.languages;
 
-		wiki_API.query(id, function(data) {
+		wiki_API.query(key, function(data) {
 			// data:
 			// {entities:{Q1:{pageid:129,lastrevid:0,id:'P1',labels:{},claims:{},...},P1:{id:'P1',missing:''}},success:1}
+			// @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON
+			// @see https://www.wikidata.org/wiki/Special:ListDatatypes
 			if (data && data.entities) {
 				data = data.entities;
 				var list = [];
@@ -7401,6 +7439,13 @@ function module_code(library_namespace) {
 			callback(data);
 		});
 	}
+
+	function Wikidata_query(key, callback, language) {
+		;
+	}
+
+	Wikidata_entity.search = Wikidata_search;
+	Wikidata_entity.query = Wikidata_query;
 
 	// --------------------------------------------------------------------------------------------
 

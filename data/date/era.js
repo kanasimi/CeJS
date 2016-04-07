@@ -807,7 +807,7 @@ if (typeof CeL === 'function')
 
 			function append_period(object, name) {
 				var start = object.start,
-				//
+				// 處理精度
 				format = object.精 === '年' ? standard_year_format
 						: standard_time_format;
 				name.push(' (', (is_Date(start) ? start : new Date(start))
@@ -5450,7 +5450,8 @@ if (typeof CeL === 'function')
 							last_era_data.精 = '年';
 					}
 
-					// 處理 precision/精度。
+					// 處理 precision/精度準度/精密度準確度。
+					// cf. https://en.wikipedia.org/wiki/Module:Wikidata
 					i = last_era_data.精;
 					if (i === '年') {
 						if (!last_era_data.calendar)
