@@ -102,7 +102,7 @@ function module_code(library_namespace) {
 			this.API_URL = api_URL(API_URL);
 		}
 
-		if (!(language in this))
+		if (!('language' in this))
 			this.language = default_language;
 	}
 
