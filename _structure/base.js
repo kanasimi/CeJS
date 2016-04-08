@@ -420,7 +420,7 @@ function (global) {
 
 
 	/**
-	 * setup options. 前置處理 options，避免修改或覆蓋附加參數。
+	 * setup options. 前置處理 options，正規化 read-only 參數。
 	 * 
 	 * @example<code>
 	   //	// 前導作業/前置處理。
@@ -453,7 +453,7 @@ function (global) {
 		return options;
 	}
 	/**
-	 * setup options. 前置處理 options，避免修改或覆蓋附加參數。<br />
+	 * setup options. 前置處理 options，正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。<br />
 	 * 僅用在<b>不會改變</b> options 的情況。
 	 * 
 	 * @example<code>

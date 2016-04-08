@@ -97,7 +97,7 @@ function module_code(library_namespace) {
 		// this.set_URL(API_URL);
 		if (API_URL) {
 			// e.g., 'zh-yue', 'zh-classical'
-			if (/^[a-z\-]{2}$/i.test(API_URL))
+			if (/^[a-z\-]{2,20}$/i.test(API_URL))
 				this.language = API_URL.toLowerCase();
 			this.API_URL = api_URL(API_URL);
 		}
@@ -134,8 +134,8 @@ function module_code(library_namespace) {
 		project = String(project);
 		if (project in api_URL.alias)
 			project = api_URL.alias[project];
-		// /^[a-z\-]+$/i.test(undefined) === true
-		if (/^[a-z\-]+$/i.test(project)) {
+		// /^[a-z\-]{2,20}$/i.test(undefined) === true
+		if (/^[a-z\-]{2,20}$/i.test(project)) {
 			if (project in api_URL.wikimedia) {
 				project += '.wikimedia';
 			} else if (project in api_URL.project) {
@@ -151,12 +151,12 @@ function module_code(library_namespace) {
 				project += '.wikipedia';
 			}
 		}
-		if (/^[a-z\-]+\.[a-z]+$/i.test(project))
+		if (/^[a-z\-]{2,20}\.[a-z]+$/i.test(project))
 			// e.g., 'en.wikisource', 'en.wiktionary'
 			project += '.org';
 
 		var matched = project
-				.match(/^(https?:)?(?:\/\/)?([a-z\-]+(?:\.[a-z]+)+)/i);
+				.match(/^(https?:)?(?:\/\/)?([a-z\-]{2,20}(?:\.[a-z]+)+)/i);
 		if (matched) {
 			// e.g., 'http://zh.wikipedia.org/'
 			// e.g., 'https://www.mediawiki.org/w/api.php'
@@ -3010,10 +3010,11 @@ function module_code(library_namespace) {
 			action[0] = action[0].replace(
 			//
 			/^https?:\/\/([a-z\-]{2,20}\.wikipedia\.org)\//,
-					function(all, host) {
-						HOST = host;
-						return 'http://cp1008.wikimedia.org:3128/';
-					});
+			//
+			function(all, host) {
+				HOST = host;
+				return 'http://cp1008.wikimedia.org:3128/';
+			});
 			if (HOST) {
 				action = {
 					URL : action,
@@ -6652,6 +6653,7 @@ function module_code(library_namespace) {
 			callback = config;
 			config = library_namespace.null_Object();
 		} else
+			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			config = library_namespace.new_options(config);
 
 		if (config.use_dump) {
@@ -7336,6 +7338,12 @@ function module_code(library_namespace) {
 	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);}, {get_id:true, limit:1});
 	CeL.wiki.data.search('形狀', function(data) {result=data;console.log(data);}, {get_id:true,type:'property'});
 
+	CeL.wiki.data('宇宙', '形狀', function(data) {result=data;console.log(data);})
+	CeL.wiki.data('荷马', '出生日期', function(data) {result=data;console.log(''+data);})
+	CeL.wiki.data('荷马', function(data) {result=data;})
+	CeL.wiki.data('艾薩克·牛頓', '出生日期', function(data) {result=data;console.log(''+data);})
+
+
 	wiki = CeL.wiki.login(user_name, pw, 'wikidata');
 	wiki = Wiki(true, 'wikidata');
 	wiki.data(id, function(entity){}, {is_key:true}).edit_data(function(entity){});
@@ -7354,8 +7362,6 @@ function module_code(library_namespace) {
 	https://wdq.wmflabs.org/wdq/?q=
 	https://wdq.wmflabs.org/api?q=claim[31:146]&callback=eer
 
-	https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#time
-	時間精度單位 = '十億年,億年,千萬年,百萬年,十萬年,一萬年,千紀,世紀,年代,年,月,日,時,分,秒,毫秒,微秒,納秒'.split(',');
 
 	</code>
 	 * 
@@ -7365,6 +7371,8 @@ function module_code(library_namespace) {
 	// https://www.wikidata.org/w/api.php
 	var wikidata_API = api_URL('wikidata');
 
+	// 此搜索有極大問題:不能自動偵測與轉換中文繁簡體。
+	// 或須轉成英語再行搜尋。
 	function Wikidata_search(key, callback, options) {
 
 		if (typeof options === 'function')
@@ -7376,7 +7384,12 @@ function module_code(library_namespace) {
 				language : options
 			};
 		else
+			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			options = library_namespace.new_options(options);
+
+		if (Array.isArray(key))
+			// for [ {String}language, {String}key ]
+			options.language = key[0], key = key[1];
 
 		key = key.trim();
 		var action = [ wikidata_API,
@@ -7443,6 +7456,127 @@ function module_code(library_namespace) {
 		});
 	}
 
+	// 時間精度單位
+	// https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#time
+	var time_unit = '十億年,億年,千萬年,百萬年,十萬年,萬年,千紀,世紀,年代,年,月,日,時,分,秒,毫秒,微秒,納秒'
+			.split(',');
+
+	function time_toString() {
+		var unit = this.unit;
+		if (this.power) {
+			return this.power > 1e4 ? Math.abs(this[0]) + unit[0]
+					+ (this[0] < 0 ? '前' : '後')
+			//
+			: (this[0] < 0 ? '前' + -this[0] : this[0]) + unit[0];
+		}
+		return this.map(function(value, index) {
+			return value + unit[index];
+		}).join('');
+	}
+
+	// https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#Claims_and_Statements
+	// https://www.mediawiki.org/wiki/Wikibase/API
+	// https://www.mediawiki.org/wiki/Wikibase/Indexing/RDF_Dump_Format#Value_representation
+	function Wikidata_datavalue(value, callback) {
+		if (Array.isArray(value)) {
+			if (value.length > 1) {
+				// TODO: array + ('numeric-id' in value)
+				value = value.map(Wikidata_datavalue);
+				if (typeof callback === 'function')
+					callback(value);
+				return value;
+			}
+			value = value[0];
+		}
+
+		if (value.mainsnak)
+			value = value.mainsnak;
+
+		if (value.datavalue)
+			value = value.datavalue;
+
+		var type = value.type;
+
+		if (value.value)
+			value = value.value;
+
+		if (typeof value !== 'object') {
+			if (typeof callback === 'function')
+				callback(value);
+			return value;
+		}
+
+		if ('amount' in value) {
+			if (typeof callback === 'function')
+				callback(+value.amount);
+			return +value.amount;
+		}
+
+		if ('time' in value) {
+			var matched, year, precision = value.precision;
+
+			if (precision <= 9) {
+				matched = value.time.match(/^[+\-]\d+/);
+				year = +matched[0];
+				var power = Math.pow(10, 9 - precision);
+				matched = [ year / power | 0 ];
+				matched.unit = [ time_unit[precision] ];
+				matched.power = power;
+
+			} else {
+				matched = value.time.match(
+				// [ all, Y, m, d, H, M, S ]
+				/^([+\-]\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+)Z$/);
+				// +1: is length, not index
+				// +1: year starts from 1.
+				matched = matched.slice(1, precision - 9 + 1 + 1)
+				//
+				.map(function(value) {
+					return +value;
+				});
+				year = matched[0];
+				matched.unit = time_unit.slice(9, precision + 1);
+			}
+
+			// proleptic Gregorian calendar:
+			// http://www.wikidata.org/entity/Q1985727
+			// proleptic Julian calendar:
+			// http://www.wikidata.org/entity/Q1985786
+			var type = value.calendarmodel.match(/[^\\\/]+$/);
+			if (type && type[0] === 'Q1985786') {
+				matched.Julian = true;
+				// matched.type = 'Julian';
+			} else if (type && type === 'Q1985727') {
+				// matched.type = 'Gregorian';
+			} else {
+				// matched.type = type || value.calendarmodel;
+			}
+
+			var Julian_day;
+			if (year >= -4716
+			//
+			&& (Julian_day = library_namespace.Julian_day))
+				// start JDN
+				matched.JD = Julian_day.from_YMD(year, matched[1], matched[2],
+						!matched.Julian);
+			matched.toString = time_toString;
+			if (typeof callback === 'function')
+				callback(matched);
+			return matched;
+		}
+
+		if ('numeric-id' in value) {
+			if (typeof callback === 'function') {
+				Wikidata_entity(value['numeric-id'], callback);
+			}
+			return value['numeric-id'];
+		}
+
+		library_namespace.warn('Wikidata_datavalue: 尚無法處理此屬性: [' + type
+				+ ']，請修改本函數。');
+		return value;
+	}
+
 	// get entity id: Q1, P1
 	// https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON
 	function Wikidata_entity(key, property, callback, options) {
@@ -7462,33 +7596,86 @@ function module_code(library_namespace) {
 				filter : options
 			};
 		} else if (options) {
+			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			options = library_namespace.new_options(options);
 		} else {
 			options = library_namespace.null_Object();
 		}
 
-		if ('is_title' in options) {
-			// TODO
+		// ----------------------------
+		// convert property: title to id
+		if (typeof property === 'string' && !/^P\d{1,10}$/.test(property))
+			property = [ options.language || default_language, property ];
+
+		if (Array.isArray(property) && property.length === 2
+		// for property =
+		// [ {String}language, {String}title or {Array}titles ]
+		&& /^[a-z]{2,3}$/i.test(property[0])) {
+			Wikidata_search(property, function(id) {
+				library_namespace.debug(
+				//
+				'property ' + id + ' ← [' + property.join(':') + ']', 1,
+						'Wikidata_entity');
+				Wikidata_entity(key, id, callback, options);
+			}, {
+				type : 'property',
+				get_id : true,
+				limit : 1
+			});
+			// Waiting for conversion
+			return;
 		}
+
+		// ----------------------------
+
+		var action;
 
 		// 處理 [ {String}API_URL, {String}key or {Object}page_data ]
 		if (!Array.isArray(key)
 		// 為了預防輸入的是問題頁面。
 		|| key.length !== 2 || typeof key[0] === 'object')
-			key = [ wikidata_API, key ];
+			action = [ wikidata_API, key ];
+		else
+			action = key, key = key[1];
 
-		if (Array.isArray(key[1]))
-			key[1] = key[1].join('|');
+		// ----------------------------
+		// convert key: title to id
+		if (typeof key === 'string' && !/^[PQ]\d{1,10}$/.test(key))
+			key = [ options.language || default_language, key ];
 
-		key[1] = 'wbgetentities&ids=' + key[1];
+		if (Array.isArray(key)) {
+			if (Array.isArray(key) && key.length === 2
+			// for key = [ {String}language, {String}title or {Array}titles ]
+			&& /^[a-z\-]{2,20}$/i.test(key[0])) {
+				Wikidata_search(key, function(id) {
+					library_namespace.debug(
+					//
+					'entity ' + id + ' ← [' + key.join(':') + ']', 1,
+							'Wikidata_entity');
+					Wikidata_entity(id, property, callback, options);
+				}, {
+					get_id : true,
+					limit : 1
+				});
+				// Waiting for conversion
+				return;
+			}
+			key = key.join('|');
+		}
+
+		// ----------------------------
+
+		action = [ action[0], 'wbgetentities&ids=' + key ];
+		if (property && !options.props)
+			options.props = 'claims';
 		if (options.props)
 			// retrieve properties. 僅擷取這些屬性。
-			key[1] += '&props=' + options.props;
+			action[1] += '&props=' + options.props;
 		if (options.languages)
 			// retrieve languages. 僅擷取這些語言。
-			key[1] += '&languages=' + options.languages;
+			action[1] += '&languages=' + options.languages;
 
-		wiki_API.query(key, function(data) {
+		wiki_API.query(action, function(data) {
 			// data:
 			// {entities:{Q1:{pageid:129,lastrevid:0,id:'P1',labels:{},claims:{},...},P1:{id:'P1',missing:''}},success:1}
 			// @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON
@@ -7507,7 +7694,13 @@ function module_code(library_namespace) {
 					}
 				}
 			}
-			callback(data);
+
+			property = data.claims ? data.claims[property] : data[property];
+			if (property) {
+				Wikidata_datavalue(property, callback);
+			} else {
+				callback(data);
+			}
 		});
 	}
 
@@ -7515,8 +7708,12 @@ function module_code(library_namespace) {
 		;
 	}
 
-	Wikidata_entity.search = Wikidata_search;
-	Wikidata_entity.query = Wikidata_query;
+	// export 導出.
+	Object.assign(Wikidata_entity, {
+		search : Wikidata_search,
+		value_of : Wikidata_datavalue,
+		query : Wikidata_query
+	});
 
 	// --------------------------------------------------------------------------------------------
 

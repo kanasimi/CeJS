@@ -128,7 +128,7 @@ function test_compatibility() {
 
 		s.add(4);
 		if (v.next().value !== 4)
-			CeL.err('test_compatibility: iterator 無法反映 Set 之更動！將不把此視作 fatal error。');
+			CeL.err('test_compatibility: iterator 無法反映 Set 之更動！但此項為平台問題，將不被視作 fatal error。');
 		assert(v.next().done, 'set.values().done');
 
 		e = a.entries();
@@ -2704,7 +2704,6 @@ function do_test() {
 	// 即時顯示，不延遲顯示
 	CeL.Log.interval = 0;
 	CeL.run(
-	test_base,
 	// 測試期間時需要用到的功能先作測試。這些不可 comment out。
 	'interact.console', test_console,
 	//
@@ -2712,6 +2711,7 @@ function do_test() {
 	// 基本的功能先作測試。
 /*
 */
+	test_base,
 	test_compatibility,
 	//
 	'data.native', test_native,
