@@ -57,6 +57,43 @@ require('../index');
 
 //============================================================================================================================================================
 
+
+function test_base() {
+	error_count += CeL.test('set options', function(assert) {
+		assert(CeL.is_Object({}), 'CeL.is_Object({})');
+		assert(CeL.is_Object(Object.create(null)), 'CeL.is_Object(Object.create(null))');
+
+		assert(CeL.is_Object(CeL.setup_options()), 'CeL.setup_options()');
+		assert(CeL.is_Object(CeL.new_options()), 'CeL.new_options()');
+
+		var options = { a:2, b:'abc', c:function(a,b){return a>b;} };
+		assert([options, CeL.setup_options(options)], 'CeL.setup_options(options)===options #1');
+		assert([JSON.stringify(options), JSON.stringify(CeL.setup_options(options))], 'CeL.setup_options(options)===options #2');
+
+		var o1 = CeL.new_options(options), o2 = CeL.new_options(o2);
+		assert(options !== o1, 'CeL.new_options(options) #1');
+		assert([o1, o2], 'CeL.new_options(options) #2');
+		assert([JSON.stringify(options), JSON.stringify(o1)], 'CeL.new_options(options) #3');
+		assert([JSON.stringify(o1), JSON.stringify(o2)], 'CeL.new_options(options) #4');
+	});
+	
+	error_count += CeL.test('dependency_chain', function(assert) {
+		var dc = new CeL.dependency_chain;
+		dc.add(1, 2);
+		assert(['1', Array.from(dc.get(2).previous.values()).join()]);
+		dc.add(2, 3);
+		assert(['2', Array.from(dc.get(3).previous.values()).join()]);
+		assert([1, dc.independent(3)]);
+		assert(['', Array.from(dc.get(3).next.values()).join()]);
+		assert(['1,2,3', Array.from(dc.get()).sort().join()]);
+		assert([1, dc.independent()]);
+		dc.add(0, 1);
+		assert([0, dc.independent()]);
+		dc['delete'](0);
+		assert([1, dc.independent()]);
+	});
+}
+
 function test_compatibility() {
 
 	error_count += CeL.test('Set, Map, Array.from()', function(assert) {
@@ -133,22 +170,6 @@ function test_compatibility() {
 		assert([ Array.from(s).join(), "1,2,3,4" ], 'Array.from(Set)');
 		assert([ Array.from(m).join(), "5,2,7,1,3,1" ], 'Array.from(Map)');
 		assert([ Array.from(m.keys()).join(), "5,7,3" ], 'Array.from(map.keys())');
-	});
-
-	error_count += CeL.test('dependency_chain', function(assert) {
-		var dc = new CeL.dependency_chain;
-		dc.add(1, 2);
-		assert(['1', Array.from(dc.get(2).previous.values()).join()]);
-		dc.add(2, 3);
-		assert(['2', Array.from(dc.get(3).previous.values()).join()]);
-		assert([1, dc.independent(3)]);
-		assert(['', Array.from(dc.get(3).next.values()).join()]);
-		assert(['1,2,3', Array.from(dc.get()).sort().join()]);
-		assert([1, dc.independent()]);
-		dc.add(0, 1);
-		assert([0, dc.independent()]);
-		dc['delete'](0);
-		assert([1, dc.independent()]);
 	});
 
 	// ----------------------------------------------------
@@ -2679,6 +2700,7 @@ function do_test() {
 	// 即時顯示，不延遲顯示
 	CeL.Log.interval = 0;
 	CeL.run(
+	test_base,
 	// 測試期間時需要用到的功能先作測試。這些不可 comment out。
 	'interact.console', test_console,
 	//
