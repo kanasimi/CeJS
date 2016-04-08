@@ -496,8 +496,17 @@ function (global) {
 	function new_options(options, new_one) {
 		// create a new one. copy options.
 		// or use Object.clone(options)
-		return options ? Object.assign(null_Object(), options) : null_Object();
+		if (options) {
+			if (new_options.is_new_key in options)
+				return options;
+			options = Object.assign(null_Object(), options);
+		} else {
+			options = null_Object();
+		}
+		options[new_options.is_new_key] = true;
+		return options;
 	}
+	new_options.is_new_key = 'is new options';
 	// 不會更動 options 的用此。
 	_.setup_options = setup_options;
 	// 會更動 options 的用此。

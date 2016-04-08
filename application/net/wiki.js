@@ -2955,11 +2955,18 @@ function module_code(library_namespace) {
 
 		// 若為 query，非 edit (modify)，則不延遲等待。
 		// assert: typeof action[1] === 'string'
-		var need_check_lag = !/action=(?:query|login)(?:&|$)/.test(action[1])
-				&& !action[1].includes('assert='),
+		var need_check_lag = action[1].match(/action=([a-z]+)(?:&|$)/),
 		// 檢測是否間隔過短。支援最大延遲功能。
-		to_wait = need_check_lag ? wiki_API.query.lag
-				- (Date.now() - wiki_API.query.last[action[0]]) : 0;
+		to_wait;
+
+		if (!need_check_lag) {
+			library_namespace.warn('wiki_API.query: Invalid action: '
+					+ action[1]);
+		} else if (need_check_lag = /edit/i.test(need_check_lag[1])) {
+			to_wait = wiki_API.query.lag
+					- (Date.now() - wiki_API.query.last[action[0]]);
+		}
+
 		// TODO: 伺服器負載過重的時候，使用 exponential backoff 進行延遲。
 		if (to_wait > 0) {
 			library_namespace.debug('Waiting ' + to_wait + ' ms..', 2,
@@ -2969,12 +2976,13 @@ function module_code(library_namespace) {
 			}, to_wait);
 			return;
 		}
-		if (need_check_lag)
+		if (need_check_lag) {
 			// reset timer
 			wiki_API.query.last[action[0]] = Date.now();
-		else
+		} else {
 			library_namespace.debug('非 edit (modify)，不延遲等待。', 3,
 					'wiki_API.query');
+		}
 
 		// https://www.mediawiki.org/wiki/API:Data_formats
 		// 因不在 white-list 中，無法使用 CORS。
@@ -4955,8 +4963,11 @@ function module_code(library_namespace) {
 	function set_default_language(language) {
 		// e.g., 'zh-yue', 'zh-classical'
 		if (typeof language !== 'string' || !/^[a-z\-]{2,20}$/.test(language)) {
-			library_namespace.warn('set_default_language: Invalid language: ['
-					+ language + ']. e.g., "en".');
+			if (language)
+				library_namespace.warn(
+				//
+				'set_default_language: Invalid language: [' + language
+						+ ']. e.g., "en".');
 			return default_language;
 		}
 
@@ -7321,7 +7332,9 @@ function module_code(library_namespace) {
 
 	CeL.wiki.data('P6', function(data) {console.log(data);});
 
-	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);});
+	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);}, {get_id:true});
+	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);}, {get_id:true, limit:1});
+	CeL.wiki.data.search('形狀', function(data) {result=data;console.log(data);}, {get_id:true,type:'property'});
 
 	wiki = CeL.wiki.login(user_name, pw, 'wikidata');
 	wiki = Wiki(true, 'wikidata');
@@ -7352,21 +7365,79 @@ function module_code(library_namespace) {
 	// https://www.wikidata.org/w/api.php
 	var wikidata_API = api_URL('wikidata');
 
-	function Wikidata_search(key, callback, language) {
+	function Wikidata_search(key, callback, options) {
+
+		if (typeof options === 'function')
+			options = {
+				filter : options
+			};
+		else if (typeof options === 'string')
+			options = {
+				language : options
+			};
+		else
+			options = library_namespace.new_options(options);
+
 		key = key.trim();
-		var action = [ wikidata_API, 'wbsearchentities&search=' + encodeURIComponent(key)
+		var action = [ wikidata_API,
 		//
-		+ '&language=' + (language || default_language) + '&limit=max' ];
+		'wbsearchentities&search=' + encodeURIComponent(key)
+		//
+		+ '&language=' + (options.language || default_language)
+		//
+		+ '&limit=' + (options.limit || 'max') ];
+
+		if (options.type)
+			action[1] += '&type=' + options.type;
+
+		if (options['continue'] > 0)
+			action[1] += '&continue=' + options['continue'];
 
 		wiki_API.query(action, function(data) {
-			var list = [];
-			if (Array.isArray(data.search)) {
-				data.search.forEach(function (item) {
-					if (item.match.text === key)
-						list.push(item);
+			// console.log(data);
+			var list;
+			if (!Array.isArray(data.search)) {
+				list = [];
+			} else if (!('filter' in options)
+					|| typeof options.filter === 'function') {
+				list = data.search.filter(options.filter ||
+				// default filter
+				function(item) {
+					// 自此結果能得到的資訊有限。
+					// label: 'Universe'
+					// match: { type: 'label', language: 'zh', text: '宇宙' }
+					if (key === item.match.text)
+						return true;
 				});
-				if (list.length <= 1)
-					list = list[0];
+			}
+
+			if (Array.isArray(options.list)) {
+				options.list.push(list);
+			} else {
+				options.list = [ list ];
+			}
+			list = options.list;
+
+			if (!options.limit && data['search-continue'] > 0) {
+				options['continue'] = data['search-continue'];
+				Wikidata_search(key, callback, options);
+				return;
+			}
+
+			if (Array.isArray(list.length > 1)) {
+				list = Array.prototype.concat.apply([], list);
+			} else {
+				list = list[0];
+			}
+			if (options.get_id) {
+				list = list.map(function(item) {
+					return item.id;
+				});
+			}
+			if (!options.multi && (
+			// options.limit <= 1
+			list.length <= 1)) {
+				list = list[0];
 			}
 			callback(list);
 		});
