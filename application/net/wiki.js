@@ -7345,11 +7345,14 @@ function module_code(library_namespace) {
 	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);}, {get_id:true, limit:1});
 	CeL.wiki.data.search('形狀', function(data) {result=data;console.log(data);}, {get_id:true,type:'property'});
 
-	CeL.wiki.data('宇宙', '形狀', function(data) {result=data;console.log(data);})
+	CeL.wiki.data('宇宙', '形狀', function(data) {result=data;console.log(data.labels['zh'].value);})
 	CeL.wiki.data('荷马', '出生日期', function(data) {result=data;console.log(''+data);})
 	CeL.wiki.data('荷马', function(data) {result=data;})
 	CeL.wiki.data('艾薩克·牛頓', '出生日期', function(data) {result=data;console.log(''+data);})
 
+	// ------------------------------------------------------------------------
+
+	TODO:
 
 	wiki = CeL.wiki.login(user_name, pw, 'wikidata');
 	wiki = Wiki(true, 'wikidata');
@@ -7618,10 +7621,12 @@ function module_code(library_namespace) {
 
 		if ('numeric-id' in value) {
 			// wikidata entity
+			value = 'Q' + value['numeric-id'];
 			if (typeof callback === 'function') {
-				Wikidata_entity(value['numeric-id'], callback);
+				library_namespace.debug('Trying to get entity ' + value, 1, 'Wikidata_datavalue');
+				Wikidata_entity(value, callback);
 			}
-			return value['numeric-id'];
+			return value;
 		}
 
 		library_namespace.warn('Wikidata_datavalue: 尚無法處理此屬性: [' + type
