@@ -422,10 +422,10 @@ if (typeof CeL === 'function')
 			})();
 
 			// 經緯度
-			// [ latitude, longitude ]
+			// [ latitude 緯度, longitude 經度 ]
 			function parse_coordinates(coordinates) {
 				var latitude, longitude,
-				// e.g., 25.032969, 121.565418
+				// e.g., '25.032969, 121.565418'
 				matched = coordinates.match(
 				//		
 				/([+-]?\d+(?:\.\d+)?)(?:\s+|\s*,\s*)([+-]?\d+(?:\.\d+)?)/);

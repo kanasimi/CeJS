@@ -7471,14 +7471,21 @@ function module_code(library_namespace) {
 	function time_toString() {
 		var unit = this.unit;
 		if (this.power) {
-			return this.power > 1e4 ? Math.abs(this[0]) + unit[0]
-					+ (this[0] < 0 ? '前' : '後')
+			unit = Math.abs(this[0]) + unit[0];
+			return this.power > 1e4 ? unit + (this[0] < 0 ? '前' : '後')
 			//
-			: (this[0] < 0 ? '前' + -this[0] : this[0]) + unit[0];
+			: (this[0] < 0 ? '前' : '') + unit;
 		}
 		return this.map(function(value, index) {
 			return value + unit[index];
 		}).join('');
+	}
+
+	function coordinate_toString(type) {
+		// 經緯度座標 coordinates [ latitude 緯度, longitude 經度 ]
+		return Marh.abs(this[0]) + ' ' + (this[0] < 0 ? 'S' : 'N')
+		//
+		+ ', ' + Marh.abs(this[1]) + ' ' + (this[1] < 0 ? 'W' : 'E');
 	}
 
 	// https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#Claims_and_Statements
@@ -7508,18 +7515,55 @@ function module_code(library_namespace) {
 			value = value.value;
 
 		if (typeof value !== 'object') {
+			// e.g., typeof value === 'string'
 			if (typeof callback === 'function')
 				callback(value);
 			return value;
 		}
 
 		if ('amount' in value) {
+			// qualifiers
 			if (typeof callback === 'function')
 				callback(+value.amount);
 			return +value.amount;
 		}
 
+		if ('latitude' in value) {
+			// 經緯度座標 coordinates [ latitude 緯度, longitude 經度 ]
+			var coordinate = [ value.latitude, value.longitude ];
+			if (false) {
+				// geodetic reference system, 大地座標系/坐標系統測量基準
+				var system = value.globe.match(/[^\\\/]+$/);
+				system = system && system[0];
+				switch (system) {
+				case 'Q2':
+					coordinate.system = 'Earth';
+					break;
+				case 'Q11902211':
+					coordinate.system = 'WGS84';
+					break;
+				case 'Q215848':
+					coordinate.system = 'WGS';
+					break;
+				case 'Q1378064':
+					coordinate.system = 'ED50';
+					break;
+				default:
+					if (system)
+						coordinate.system = system;
+					else
+						// invalid data?
+						;
+				}
+			}
+			// TODO: precision
+			coordinate.precision = value.precision;
+			coordinate.toString = coordinate_toString;
+			return coordinate;
+		}
+
 		if ('time' in value) {
+			// date & time
 			var matched, year, precision = value.precision;
 
 			if (precision <= 9) {
@@ -7573,6 +7617,7 @@ function module_code(library_namespace) {
 		}
 
 		if ('numeric-id' in value) {
+			// wikidata entity
 			if (typeof callback === 'function') {
 				Wikidata_entity(value['numeric-id'], callback);
 			}
