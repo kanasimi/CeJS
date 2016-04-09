@@ -2172,7 +2172,7 @@ function module_code(library_namespace) {
 									throw new Error(
 									// 當錯誤 login 太多次時，直接跳出。
 									'wiki_API.next: Too many failed login attempts: ['
-											+ name + ']');
+											+ this.token.lgname + ']');
 								}
 								library_namespace.info('wiki_API.next: Retry '
 										+ _this.retry_login);
@@ -5165,8 +5165,12 @@ function module_code(library_namespace) {
 
 	if (wmflabs) {
 		wiki_API.wmflabs = wmflabs;
-		// default: use Wikimedia Varnish Cache
+
+		// default: use Wikimedia Varnish Cache.
 		wiki_API.use_Varnish = true;
+		// 2016/4/9 9:9:7	不使用 Wikimedia Varnish Cache。速度較慢，但較有保障。
+		// delete CeL.wiki.use_Varnish;
+
 		try {
 			if (mysql = require('mysql'))
 				SQL_config = parse_SQL_config(home_directory
