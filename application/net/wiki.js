@@ -2172,7 +2172,7 @@ function module_code(library_namespace) {
 									throw new Error(
 									// 當錯誤 login 太多次時，直接跳出。
 									'wiki_API.next: Too many failed login attempts: ['
-											+ this.token.lgname + ']');
+											+ _this.token.lgname + ']');
 								}
 								library_namespace.info('wiki_API.next: Retry '
 										+ _this.retry_login);

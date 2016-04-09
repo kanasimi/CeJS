@@ -1888,7 +1888,7 @@ OS='UNIX'; // unknown
 	using_style = _.env.no_log_style,
 	/** {Object}default style of console. */
 	default_style = {
-		trace : '',
+		//trace : '',
 		// debug 另外設定。
 		// debug : '',
 		log : 'green',
@@ -1927,10 +1927,10 @@ OS='UNIX'; // unknown
 			var matched = messages.match(PATTERN_log_caller);
 			if (matched) {
 				// e.g., CeL.log("function_name: messages");
-				messages = [ matched[1], 'fg=' + (default_style[type] || ''),
+				messages = [ matched[1], default_style[type] || '',
 						matched[2], 0 ];
 			} else {
-				messages = [ '', 'fg=' + (default_style[type] || ''), messages, 0 ];
+				messages = [ '', default_style[type] || '', messages, 0 ];
 			}
 
 		} else if (from_styled_logger) {
@@ -1941,7 +1941,7 @@ OS='UNIX'; // unknown
 			if (matched) {
 				// e.g., CeL.log([ 'function_name: messages 0', 'style',
 				// 'messages 1' ]);
-				messages.splice(0, 1, '', 'fg=' + (default_style[type] || ''),
+				messages.splice(0, 1, '', default_style[type] || '',
 						matched[1], 0, matched[2]);
 				// 最後設定 reset，避免影響到後頭之顯示。
 				if (messages.length % 2 === 0)
@@ -1998,6 +1998,8 @@ OS='UNIX'; // unknown
 
 		(function() {
 			for ( var type in default_style) {
+				// default style: foreground 前景
+				default_style[type] = 'fg=' + default_style[type];
 				setup_log(type);
 			}
 		})();
