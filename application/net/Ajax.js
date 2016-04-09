@@ -721,22 +721,26 @@ function get_URL_node(URL, onload, charset, post_data) {
 		library_namespace.debug('HEADERS: ' + JSON.stringify(result.headers),
 				4, 'get_URL_node');
 		merge_cookie(agent, result.headers['set-cookie']);
-		// 為預防字元編碼破碎，因此不能設定 result.setEncoding()。
+		// 為預防字元編碼破碎，因此不能設定 result.setEncoding()？
 		// 但經測試，Wikipedia 有時似乎會有回傳字元錯位之情形？
+		// 2016/4/9 9:9:7	藉由 delete wiki_API.use_Varnish 似可解決。
 
 		// listener must be a function
 		if (typeof onload === 'function') {
-			/** {Array} [ {Buffer}, {Buffer}, ... ] */ 
-			var data = [];
+			/** {Array} [ {Buffer}, {Buffer}, ... ] */
+			var data = [], length = 0;
 			result.on('data', function(chunk) {
-				library_namespace.debug('receive BODY.length: ' + chunk.length,
+				length += chunk.length;
+				library_namespace.debug('receive BODY.length: ' + chunk.length + '/' + length,
 						3, 'get_URL_node');
 				data.push(chunk);
+				// node_fs.appendFileSync('get_URL_node.data', chunk);
 			});
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			result.on('end', function() {
 				// console.log('No more data in response.');
-				data = Buffer.concat(data);
+				// it is faster to provide the length explicitly.
+				data = Buffer.concat(data, length);
 				// 設定 charset = 'binary' 的話，將回傳 Buffer。
 				if (charset !== 'binary') {
 					// 未設定 charset 的話，default charset: UTF-8.
@@ -757,6 +761,7 @@ function get_URL_node(URL, onload, charset, post_data) {
 				});
 				// free
 				data = null;
+				// node_fs.appendFileSync('get_URL_node.data', '\n');
 			});
 		} else {
 			library_namespace.warn('get_URL_node: got [' + URL

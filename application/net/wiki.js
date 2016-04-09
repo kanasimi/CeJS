@@ -2955,12 +2955,12 @@ function module_code(library_namespace) {
 
 		// 若為 query，非 edit (modify)，則不延遲等待。
 		// assert: typeof action[1] === 'string'
-		var need_check_lag = action[1].match(/action=([a-z]+)(?:&|$)/),
+		var need_check_lag = action[1].match(/(?:action|assert)=([a-z]+)(?:&|$)/),
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait;
 
 		if (!need_check_lag) {
-			library_namespace.warn('wiki_API.query: Invalid action: '
+			library_namespace.warn('wiki_API.query: Unknown action: '
 					+ action[1]);
 		} else if (need_check_lag = /edit/i.test(need_check_lag[1])) {
 			to_wait = wiki_API.query.lag
@@ -3001,8 +3001,9 @@ function module_code(library_namespace) {
 
 		// 一般情況下會重新導向至 https。
 		// 若在 Tool Labs 中，則視為在同一機房內，不採加密。如此亦可加快傳輸速度。
-		if (wmflabs) {
-			// UA → Nginx → Varnish:80 → Varnish:3128 → Apache → HHVM → database
+		if (wmflabs && wiki_API.use_Varnish) {
+			// UA → nginx → Varnish:80 → Varnish:3128 → Apache → HHVM → database
+			// https://wikitech.wikimedia.org/wiki/LVS_and_Varnish
 			library_namespace.debug('connect to Varnish:3128 directly.', 3,
 					'wiki_API.query');
 			// [[User:Antigng/https expected]]
@@ -5164,6 +5165,8 @@ function module_code(library_namespace) {
 
 	if (wmflabs) {
 		wiki_API.wmflabs = wmflabs;
+		// default: use Wikimedia Varnish Cache
+		wiki_API.use_Varnish = true;
 		try {
 			if (mysql = require('mysql'))
 				SQL_config = parse_SQL_config(home_directory
