@@ -230,7 +230,7 @@ function module_code(library_namespace) {
 		// 0: (Main/Article) main namespace 主要(條目/內容頁面)命名空間/識別領域
 		// 條目 entry 文章 article: ns = 0, 頁面 page: ns = any. 章節/段落 section
 		'' : 0,
-		// 對話頁面
+		// 討論對話頁面
 		talk : 1,
 		// 使用者頁面
 		user : 2,
@@ -2955,7 +2955,8 @@ function module_code(library_namespace) {
 
 		// 若為 query，非 edit (modify)，則不延遲等待。
 		// assert: typeof action[1] === 'string'
-		var need_check_lag = action[1].match(/(?:action|assert)=([a-z]+)(?:&|$)/),
+		var need_check_lag = action[1]
+				.match(/(?:action|assert)=([a-z]+)(?:&|$)/),
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait;
 
@@ -5168,7 +5169,7 @@ function module_code(library_namespace) {
 
 		// default: use Wikimedia Varnish Cache.
 		wiki_API.use_Varnish = true;
-		// 2016/4/9 9:9:7	不使用 Wikimedia Varnish Cache。速度較慢，但較有保障。
+		// 2016/4/9 9:9:7 不使用 Wikimedia Varnish Cache。速度較慢，但較有保障。
 		// delete CeL.wiki.use_Varnish;
 
 		try {
@@ -7345,7 +7346,7 @@ function module_code(library_namespace) {
 	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);}, {get_id:true, limit:1});
 	CeL.wiki.data.search('形狀', function(data) {result=data;console.log(data);}, {get_id:true,type:'property'});
 
-	CeL.wiki.data('宇宙', '形狀', function(data) {result=data;console.log(data.labels['zh'].value);})
+	CeL.wiki.data('宇宙', '形狀', function(data) {result=data;console.log(data);})
 	CeL.wiki.data('荷马', '出生日期', function(data) {result=data;console.log(''+data);})
 	CeL.wiki.data('荷马', function(data) {result=data;})
 	CeL.wiki.data('艾薩克·牛頓', '出生日期', function(data) {result=data;console.log(''+data);})
@@ -7369,8 +7370,10 @@ function module_code(library_namespace) {
 
 	// Wikidata filter claim
 	https://wdq.wmflabs.org/api_documentation.html
-	https://wdq.wmflabs.org/wdq/?q=
+	https://wdq.wmflabs.org/wdq/?q=claim[31:146]&callback=eer
 	https://wdq.wmflabs.org/api?q=claim[31:146]&callback=eer
+	CeL.get_URL('https://wdq.wmflabs.org/api?q=claim[31:146]', function(data) {result=data=JSON.parse(data.responseText);console.log(data.items);})
+	CeL.get_URL('https://wdq.wmflabs.org/api?q=string[label:宇宙]', function(data) {result=data=JSON.parse(data.responseText);console.log(data.items);})
 
 
 	</code>
@@ -7494,7 +7497,7 @@ function module_code(library_namespace) {
 	// https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#Claims_and_Statements
 	// https://www.mediawiki.org/wiki/Wikibase/API
 	// https://www.mediawiki.org/wiki/Wikibase/Indexing/RDF_Dump_Format#Value_representation
-	function Wikidata_datavalue(value, callback) {
+	function Wikidata_datavalue(value, callback, options) {
 		if (Array.isArray(value)) {
 			if (value.length > 1) {
 				// TODO: array + ('numeric-id' in value)
@@ -7506,15 +7509,12 @@ function module_code(library_namespace) {
 			value = value[0];
 		}
 
-		if (value.mainsnak)
-			value = value.mainsnak;
-
-		if (value.datavalue)
-			value = value.datavalue;
+		value = value.mainsnak || value;
+		value = value.datavalue || value;
 
 		var type = value.type;
 
-		if (value.value)
+		if ('value' in value)
 			value = value.value;
 
 		if (typeof value !== 'object') {
@@ -7623,8 +7623,16 @@ function module_code(library_namespace) {
 			// wikidata entity
 			value = 'Q' + value['numeric-id'];
 			if (typeof callback === 'function') {
-				library_namespace.debug('Trying to get entity ' + value, 1, 'Wikidata_datavalue');
-				Wikidata_entity(value, callback);
+				library_namespace.debug('Trying to get entity ' + value, 1,
+						'Wikidata_datavalue');
+				Wikidata_entity(value, options && options.get_object ? callback
+				// default: get label
+				: function(entity) {
+					entity = entity.labels || entity;
+					entity = entity[options.language || default_language]
+							|| entity;
+					callback('value' in entity ? entity.value : entity);
+				}, options && options.language);
 			}
 			return value;
 		}
@@ -7754,7 +7762,7 @@ function module_code(library_namespace) {
 
 			property = data.claims ? data.claims[property] : data[property];
 			if (property) {
-				Wikidata_datavalue(property, callback);
+				Wikidata_datavalue(property, callback, options);
 			} else {
 				callback(data);
 			}
