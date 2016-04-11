@@ -2223,8 +2223,11 @@ function module_code(library_namespace) {
 			break;
 
 		case 'set_URL':
-			if (next[1] && typeof next[1] === 'string')
-				this.API_URL = api_URL(next[1]);
+			if (next[1] && typeof next[1] === 'string') {
+				// ((!!next[2])): set Wikidata API URL, this.data_API_URL
+				// else: set this.API_URL
+				this[next[2] ? 'data_API_URL' : 'API_URL'] = api_URL(next[1]);
+			}
 			this.next();
 			break;
 
@@ -2246,13 +2249,14 @@ function module_code(library_namespace) {
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			next[4] = library_namespace.new_options(next[4]);
 			// next[4]: options
-			next[4].API_URL = next[4].API_URL || this.API_URL;
+			next[4].API_URL = next[4].API_URL || this.data_API_URL;
 
 			// wikidata_entity(key, property, callback, options)
 			wikidata_entity(next[1], next[2], function(data) {
 				_this.last_data = data;
 				// next[3] : callback
-				next[3](data);
+				if (typeof next[3] === 'function')
+					next[3].call(this, data);
 				_this.next();
 			}, next[4]);
 			break;
@@ -2267,14 +2271,15 @@ function module_code(library_namespace) {
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			next[3] = library_namespace.new_options(next[3]);
 			// next[3]: options
-			next[3].API_URL = next[3].API_URL || this.API_URL;
+			next[3].API_URL = next[3].API_URL || this.data_API_URL;
 
 			// wikidata_edit(id, data, token, options, callback)
 			wikidata_edit(next[1], next[2], this.token, next[3],
 			//
 			function(data) {
 				// next[4] : callback
-				next[4](data);
+				if (typeof next[4] === 'function')
+					next[4].call(this, data);
 				_this.next();
 			});
 			this.next();
@@ -2285,7 +2290,8 @@ function module_code(library_namespace) {
 			wikidata_query(next[1], function(data) {
 				_this.last_list = Array.isArray(data) ? data : null;
 				// next[2] : callback
-				next[2](data);
+				if (typeof next[2] === 'function')
+					next[2].call(this, data);
 				_this.next();
 			}, next[3]);
 			break;
