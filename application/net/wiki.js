@@ -2201,6 +2201,8 @@ function module_code(library_namespace) {
 			}
 			break;
 
+		// ------------------------------------------------
+
 		case 'login':
 			library_namespace.debug(
 					'正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。', 2,
@@ -2231,6 +2233,35 @@ function module_code(library_namespace) {
 			this.next();
 			break;
 
+		// ------------------------------------------------
+
+		case 'data':
+			if (typeof next[2] === 'function') {
+				next.splice(2, 0, '');
+			}
+			wikidata_entity(next[1], next[2], function(data) {
+				next[3](data);
+				_this.next();
+			}, next[4]);
+			break;
+
+		case 'edit_data':
+			wikidata_edit(next[1], next[2], next[3], next[4], function(data) {
+				next[5](data);
+				_this.next();
+			});
+			this.next();
+			break;
+
+		case 'query':
+			wikidata_query(next[1], function(data) {
+				next[2](data);
+				_this.next();
+			}, next[3]);
+			break;
+
+		// ------------------------------------------------
+
 		default:
 			library_namespace.warn('Unknown operation: [' + next.join() + ']');
 			this.next();
@@ -2245,7 +2276,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,check,edit,search,logout,run,set_URL'
+	wiki_API.prototype.next.methods = 'page,check,edit,search,logout,run,set_URL,data,edit_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -2963,7 +2994,7 @@ function module_code(library_namespace) {
 		if (!need_check_lag) {
 			library_namespace.warn('wiki_API.query: Unknown action: '
 					+ action[1]);
-		} else if (need_check_lag = /edit/i.test(need_check_lag[1])) {
+		} else if (need_check_lag = /edit|create/i.test(need_check_lag[1])) {
 			to_wait = wiki_API.query.lag
 					- (Date.now() - wiki_API.query.last[action[0]]);
 		}
@@ -7292,64 +7323,27 @@ function module_code(library_namespace) {
 	});
 
 	// --------------------------------------------------------------------------------------------
+	// Wikidata 操作函數
+	// https://www.wikidata.org/wiki/Wikidata:Data_access
 
 	/**
 	 * <code>
 
-	// Wikidata
+	// edit實體項目entity
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
+	// 創建Wikibase陳述。
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
+	// 創建實體項目重定向。
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
 
-	https://www.wikidata.org/wiki/Wikidata:Data_access
 
-	//search
-	https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
-	//實體項目entity
-	https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=labels&utf8=1
-	//claim/聲明/屬性/陳述/statement
-	https://www.wikidata.org/w/api.php?action=wbgetclaims&ids=P1&props=claims&utf8=1
-	//維基百科 sitelinks
-	https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=sitelinks&utf8=1
-	//edit實體項目entity
-	https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
-	//創建Wikibase陳述。
-	https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
-	//創建實體項目重定向。
-	https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
-
-	//實體項目值的鏈接數據界面
-	CeL.get_URL('https://www.wikidata.org/wiki/Special:EntityData/Q1.json',function(r){r=JSON.parse(r.responseText);console.log(r.entities.Q1.labels.zh.value)})
-	https://www.wikidata.org/wiki/Wikidata:Creating_a_bot/zh
-	add P143 導入自
-
-	https://meta.wikimedia.org/wiki/Wikidata/Notes/Inclusion_syntax
+	// https://meta.wikimedia.org/wiki/Wikidata/Notes/Inclusion_syntax
 	{{label}}, {{Q}}, [[d:Q1]]
 
 	https://query.wikidata.org/
 	http://wdq.wmflabs.org/api_documentation.html
 	https://github.com/maxlath/wikidata-sdk
 	https://query.wikidata.org/bigdata/namespace/wdq/sparql?query=
-
-
-	CeL.wiki.data('Q1', function(data) {console.log(JSON.stringify(data));});
-	CeL.wiki.data('Q1', function(data) {console.log(data);}, {languages:'zh'});
-	CeL.wiki.data('Q1', function(data) {console.log(data.labels['en'].value+': '+data.labels['zh'].value);});
-	// Get the property of wikidata entity.
-	// 取得wikidata中指定實體項目的指定屬性/陳述。
-	CeL.wiki.data('Q1', function(data) {console.log(data['en'].value+': '+data['zh'].value);}, 'labels');
-	// { id: 'P1', missing: '' }
-	CeL.wiki.data('Q1|P1', function(data) {console.log(data);});
-
-	CeL.wiki.data('Q11188', function(data) {property=data;console.log(data);});
-
-	CeL.wiki.data('P6', function(data) {console.log(data);});
-
-	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);}, {get_id:true});
-	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);}, {get_id:true, limit:1});
-	CeL.wiki.data.search('形狀', function(data) {result=data;console.log(data);}, {get_id:true,type:'property'});
-
-	CeL.wiki.data('宇宙', '形狀', function(data) {result=data;console.log(data);})
-	CeL.wiki.data('荷马', '出生日期', function(data) {result=data;console.log(''+data);})
-	CeL.wiki.data('荷马', function(data) {result=data;})
-	CeL.wiki.data('艾薩克·牛頓', '出生日期', function(data) {result=data;console.log(''+data);})
 
 	// ------------------------------------------------------------------------
 
@@ -7368,25 +7362,38 @@ function module_code(library_namespace) {
 	// language: key_language + value_language. default: wiki.language
 	wiki.data('宇宙','形狀',function(data){data['en'].value==='宇宙的形狀';},{value_language:null})
 
-	// Wikidata filter claim
-	https://wdq.wmflabs.org/api_documentation.html
-	https://wdq.wmflabs.org/wdq/?q=claim[31:146]&callback=eer
-	https://wdq.wmflabs.org/api?q=claim[31:146]&callback=eer
-	CeL.get_URL('https://wdq.wmflabs.org/api?q=claim[31:146]', function(data) {result=data=JSON.parse(data.responseText);console.log(data.items);})
-	CeL.get_URL('https://wdq.wmflabs.org/api?q=string[label:宇宙]', function(data) {result=data=JSON.parse(data.responseText);console.log(data.items);})
-
 
 	</code>
 	 * 
 	 * @since
 	 */
 
-	// https://www.wikidata.org/w/api.php
-	var wikidata_API = api_URL('wikidata');
+	/** {String}API URL of wikidata. e.g., 'https://www.wikidata.org/w/api.php' */
+	var wikidata_API = api_URL('wikidata'),
+	/** {String}API URL of wikidata query. */
+	wikidata_query_API = 'https://wdq.wmflabs.org/api';
 
-	// 此搜索有極大問題:不能自動偵測與轉換中文繁簡體。
-	// 或須轉成英語再行搜尋。
-	function Wikidata_search(key, callback, options) {
+	/**
+	 * 搜索包含特定關鍵字(label=key)的項目。
+	 * 
+	 * 此搜索有極大問題:不能自動偵測與轉換中文繁簡體。 或須轉成英語再行搜尋。
+	 * 
+	 * @example<code>
+
+	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);}, {get_id:true});
+	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);}, {get_id:true, limit:1});
+	CeL.wiki.data.search('形狀', function(data) {result=data;console.log(data);}, {get_id:true,type:'property'});
+
+	</code>
+	 * 
+	 * @param {String}key
+	 *            要搜尋的關鍵字。
+	 * @param {Function}[callback]
+	 *            回調函數。 callback({Array}entity or {String}list)
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 */
+	function wikidata_search(key, callback, options) {
 
 		if (typeof options === 'function')
 			options = {
@@ -7406,7 +7413,8 @@ function module_code(library_namespace) {
 
 		key = key.trim();
 		var action = [ wikidata_API,
-		//
+		// search. e.g.,
+		// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
 		'wbsearchentities&search=' + encodeURIComponent(key)
 		//
 		+ '&language=' + (options.language || default_language)
@@ -7446,7 +7454,7 @@ function module_code(library_namespace) {
 
 			if (!options.limit && data['search-continue'] > 0) {
 				options['continue'] = data['search-continue'];
-				Wikidata_search(key, callback, options);
+				wikidata_search(key, callback, options);
 				return;
 			}
 
@@ -7469,11 +7477,21 @@ function module_code(library_namespace) {
 		});
 	}
 
-	// 時間精度單位
-	// https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#time
+	// ------------------------------------------------------------------------
+
+	/**
+	 * {Array}時間精度單位。
+	 * 
+	 * @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#time
+	 */
 	var time_unit = '十億年,億年,千萬年,百萬年,十萬年,萬年,千紀,世紀,年代,年,月,日,時,分,秒,毫秒,微秒,納秒'
 			.split(',');
 
+	/**
+	 * 將時間轉為字串。
+	 * 
+	 * @inner
+	 */
 	function time_toString() {
 		var unit = this.unit;
 		if (this.power) {
@@ -7482,11 +7500,17 @@ function module_code(library_namespace) {
 			//
 			: (this[0] < 0 ? '前' : '') + unit;
 		}
+
 		return this.map(function(value, index) {
 			return value + unit[index];
 		}).join('');
 	}
 
+	/**
+	 * 將經緯度座標轉為字串。
+	 * 
+	 * @inner
+	 */
 	function coordinate_toString(type) {
 		// 經緯度座標 coordinates [ latitude 緯度, longitude 經度 ]
 		return Marh.abs(this[0]) + ' ' + (this[0] < 0 ? 'S' : 'N')
@@ -7494,14 +7518,27 @@ function module_code(library_namespace) {
 		+ ', ' + Marh.abs(this[1]) + ' ' + (this[1] < 0 ? 'W' : 'E');
 	}
 
-	// https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#Claims_and_Statements
-	// https://www.mediawiki.org/wiki/Wikibase/API
-	// https://www.mediawiki.org/wiki/Wikibase/Indexing/RDF_Dump_Format#Value_representation
-	function Wikidata_datavalue(value, callback, options) {
+	/**
+	 * 將特定的屬性值轉為JavaScript的物件。
+	 * 
+	 * @param {Object}value
+	 *            從Wikidata所得到的屬性值。
+	 * @param {Function}[callback]
+	 *            回調函數。 callback(轉成JavaScript的值)
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns 轉成JavaScript的值。
+	 * 
+	 * @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#Claims_and_Statements
+	 *      https://www.mediawiki.org/wiki/Wikibase/API
+	 *      https://www.mediawiki.org/wiki/Wikibase/Indexing/RDF_Dump_Format#Value_representation
+	 */
+	function wikidata_datavalue(value, callback, options) {
 		if (Array.isArray(value)) {
 			if (value.length > 1) {
 				// TODO: array + ('numeric-id' in value)
-				value = value.map(Wikidata_datavalue);
+				value = value.map(wikidata_datavalue);
 				if (typeof callback === 'function')
 					callback(value);
 				return value;
@@ -7525,7 +7562,7 @@ function module_code(library_namespace) {
 		}
 
 		if ('amount' in value) {
-			// qualifiers
+			// qualifiers 純量數值
 			if (typeof callback === 'function')
 				callback(+value.amount);
 			return +value.amount;
@@ -7566,7 +7603,7 @@ function module_code(library_namespace) {
 		}
 
 		if ('time' in value) {
-			// date & time
+			// date & time. 時間日期
 			var matched, year, precision = value.precision;
 
 			if (precision <= 9) {
@@ -7620,12 +7657,12 @@ function module_code(library_namespace) {
 		}
 
 		if ('numeric-id' in value) {
-			// wikidata entity
+			// wikidata entity. 實體
 			value = 'Q' + value['numeric-id'];
 			if (typeof callback === 'function') {
 				library_namespace.debug('Trying to get entity ' + value, 1,
-						'Wikidata_datavalue');
-				Wikidata_entity(value, options && options.get_object ? callback
+						'wikidata_datavalue');
+				wikidata_entity(value, options && options.get_object ? callback
 				// default: get label
 				: function(entity) {
 					entity = entity.labels || entity;
@@ -7637,14 +7674,55 @@ function module_code(library_namespace) {
 			return value;
 		}
 
-		library_namespace.warn('Wikidata_datavalue: 尚無法處理此屬性: [' + type
+		library_namespace.warn('wikidata_datavalue: 尚無法處理此屬性: [' + type
 				+ ']，請修改本函數。');
 		return value;
 	}
 
-	// get entity id: Q1, P1
-	// https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON
-	function Wikidata_entity(key, property, callback, options) {
+	// ------------------------------------------------------------------------
+
+	/**
+	 * 取得特定實體的特定屬性值。
+	 * 
+	 * @example<code>
+
+	CeL.wiki.data('Q1', function(data) {console.log(JSON.stringify(data));});
+	CeL.wiki.data('Q1', function(data) {console.log(data);}, {languages:'zh'});
+	CeL.wiki.data('Q1', function(data) {console.log(data.labels['en'].value+': '+data.labels['zh'].value);});
+	// Get the property of wikidata entity.
+	// 取得Wikidata中指定實體項目的指定屬性/陳述。
+	CeL.wiki.data('Q1', function(data) {console.log(data['en'].value+': '+data['zh'].value);}, 'labels');
+	// { id: 'P1', missing: '' }
+	CeL.wiki.data('Q1|P1', function(data) {console.log(data);});
+
+	CeL.wiki.data('Q11188', function(data) {property=data;console.log(data);});
+
+	CeL.wiki.data('P6', function(data) {console.log(data);});
+
+	CeL.wiki.data('宇宙', '形狀', function(data) {result=data;console.log(data);})
+	CeL.wiki.data('荷马', '出生日期', function(data) {result=data;console.log(''+data);})
+	CeL.wiki.data('荷马', function(data) {result=data;})
+	CeL.wiki.data('艾薩克·牛頓', '出生日期', function(data) {result=data;console.log(''+data);})
+
+	// 實體項目值的鏈接數據界面
+	CeL.get_URL('https://www.wikidata.org/wiki/Special:EntityData/Q1.json',function(r){r=JSON.parse(r.responseText);console.log(r.entities.Q1.labels.zh.value)})
+	// https://www.wikidata.org/wiki/Wikidata:Creating_a_bot/zh
+	// add P143 導入自
+
+	</code>
+	 * 
+	 * @param {String|Array}key
+	 *            entity id. 特定實體id。 e.g., 'Q1', 'P6'
+	 * @param {String}[property]
+	 *            取得特定屬性值。
+	 * @param {Function}[callback]
+	 *            回調函數。 callback(轉成JavaScript的值)
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON
+	 */
+	function wikidata_entity(key, property, callback, options) {
 		if (typeof property === 'function' && !options) {
 			// shift arguments.
 			options = callback;
@@ -7660,11 +7738,9 @@ function module_code(library_namespace) {
 			options = {
 				filter : options
 			};
-		} else if (options) {
+		} else {
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			options = library_namespace.new_options(options);
-		} else {
-			options = library_namespace.null_Object();
 		}
 
 		// ----------------------------
@@ -7676,12 +7752,12 @@ function module_code(library_namespace) {
 		// for property =
 		// [ {String}language, {String}title or {Array}titles ]
 		&& /^[a-z]{2,3}$/i.test(property[0])) {
-			Wikidata_search(property, function(id) {
+			wikidata_search(property, function(id) {
 				library_namespace.debug(
 				//
 				'property ' + id + ' ← [' + property.join(':') + ']', 1,
-						'Wikidata_entity');
-				Wikidata_entity(key, id, callback, options);
+						'wikidata_entity');
+				wikidata_entity(key, id, callback, options);
 			}, {
 				type : 'property',
 				get_id : true,
@@ -7699,25 +7775,27 @@ function module_code(library_namespace) {
 		if (!Array.isArray(key)
 		// 為了預防輸入的是問題頁面。
 		|| key.length !== 2 || typeof key[0] === 'object')
-			action = [ wikidata_API, key ];
+			action = wikidata_API;
 		else
-			action = key, key = key[1];
+			action = key[0], key = key[1];
 
 		// ----------------------------
 		// convert key: title to id
-		if (typeof key === 'string' && !/^[PQ]\d{1,10}$/.test(key))
+		if (typeof key === 'number')
+			key = [ key ];
+		else if (typeof key === 'string' && !/^[PQ]\d{1,10}$/.test(key))
 			key = [ options.language || default_language, key ];
 
 		if (Array.isArray(key)) {
 			if (Array.isArray(key) && key.length === 2
 			// for key = [ {String}language, {String}title or {Array}titles ]
 			&& /^[a-z\-]{2,20}$/i.test(key[0])) {
-				Wikidata_search(key, function(id) {
+				wikidata_search(key, function(id) {
 					library_namespace.debug(
 					//
 					'entity ' + id + ' ← [' + key.join(':') + ']', 1,
-							'Wikidata_entity');
-					Wikidata_entity(id, property, callback, options);
+							'wikidata_entity');
+					wikidata_entity(id, property, callback, options);
 				}, {
 					get_id : true,
 					limit : 1
@@ -7725,12 +7803,25 @@ function module_code(library_namespace) {
 				// Waiting for conversion
 				return;
 			}
-			key = key.join('|');
+			key = key.map(function(id) {
+				if (/^[PQ]\d{1,10}$/.test(id))
+					return id;
+				if (library_namespace.is_digits(id))
+					return 'Q' + id;
+				library_namespace.warn('wikidata_entity: Invalid id: ' + id);
+				return '';
+			}).join('|');
 		}
 
 		// ----------------------------
 
-		action = [ action[0], 'wbgetentities&ids=' + key ];
+		// 實體項目 entity
+		// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=labels&utf8=1
+		// TODO: claim/聲明/屬性/陳述/statement
+		// https://www.wikidata.org/w/api.php?action=wbgetclaims&ids=P1&props=claims&utf8=1
+		// TODO: 維基百科 sitelinks
+		// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=sitelinks&utf8=1
+		action = [ action, 'wbgetentities&ids=' + key ];
 		if (property && !options.props)
 			options.props = 'claims';
 		if (options.props)
@@ -7762,22 +7853,139 @@ function module_code(library_namespace) {
 
 			property = data.claims ? data.claims[property] : data[property];
 			if (property) {
-				Wikidata_datavalue(property, callback, options);
+				wikidata_datavalue(property, callback, options);
 			} else {
 				callback(data);
 			}
 		});
 	}
 
-	function Wikidata_query(key, callback, language) {
-		;
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Creates or modifies Wikibase entity. 創建或編輯Wikidata實體。
+	 * 
+	 * @param {String}id
+	 *            id to modify or entity you want to create.
+	 * @param {Object}data
+	 *            used as the data source.
+	 * @param {Object}token
+	 *            login 資訊，包含“csrf”令牌/密鑰。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * @param {Function}callback
+	 *            回調函數。
+	 */
+	function wikidata_edit(id, data, token, options, callback) {
+		if ((typeof title === 'object' || typeof title === 'function')
+				&& !callback) {
+			// shift arguments.
+			callback = options;
+			options = token;
+			token = data;
+			data = title;
+			title = null;
+		}
+
+		if (typeof data === 'function') {
+			wikidata_entity(key, property, function(_data) {
+				// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+				options = library_namespace.new_options(options);
+				delete options.props;
+				delete options.languages;
+				wikidata_edit(id, data(_data), token, options, callback);
+			}, options);
+			return;
+		}
+
+		var action = [ wikidata_API, 'wbeditentity' ];
+
+		if (id)
+			if (id === 'item' || id === 'property')
+				option['new'] = id;
+			else if (/^Q\d{1,10}$/.test(id))
+				// e.g., 'Q1'
+				option.id = id;
+			else {
+				library_namespace.warn('wikidata_edit: Invalid id: ' + id);
+			}
+
+		option.data = encodeURIComponent(JSON.stringify(data));
+
+		// the token should be sent as the last parameter.
+		options.token = library_namespace.is_Object(token) ? token.csrftoken
+				: token;
+
+		wiki_API.query(action, function(data) {
+			callback(data);
+		}, options);
 	}
 
+	// ------------------------------------------------------------------------
+
+	/**
+	 * 查詢 Wikidata Query。
+	 * 
+	 * @example<code>
+
+	CeL.wiki.wdq('claim[31:146]', function(data) {result=data;console.log(data);})
+	CeL.wiki.wdq('CLAIM[31:14827288] AND CLAIM[31:593744]', function(data) {result=data;console.log(data);})
+
+
+	// Wikidata filter claim
+	// https://wdq.wmflabs.org/api_documentation.html
+	// https://wdq.wmflabs.org/wdq/?q=claim[31:146]&callback=eer
+	// https://wdq.wmflabs.org/api?q=claim[31:146]&callback=eer
+	CeL.get_URL('https://wdq.wmflabs.org/api?q=claim[31:146]', function(data) {result=data=JSON.parse(data.responseText);console.log(data.items);})
+	CeL.get_URL('https://wdq.wmflabs.org/api?q=string[label:宇宙]', function(data) {result=data=JSON.parse(data.responseText);console.log(data.items);})
+
+	</code>
+	 * 
+	 * @param {String}query
+	 *            查詢語句。
+	 * @param {Function}[callback]
+	 *            回調函數。 callback(轉成JavaScript的值)
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 */
+	function wikidata_query(query, callback, options) {
+		var action = [ wikidata_query_API, '?q=', encodeURIComponent(query) ];
+
+		if (options) {
+			if (typeof options === 'string') {
+				options = {
+					props : options
+				};
+			} else if (Array.isArray(options)) {
+				options = {
+					props : options.join(',')
+				};
+			}
+
+			if (options.wdq_props)
+				action.push('&props=', options.wdq_props);
+			if (options.noitems)
+				action.push('&noitems=1');
+			// &callback=
+		}
+
+		library_namespace.get_URL(action.join(''), function(data) {
+			data = JSON.parse(data.responseText);
+			var items = data.items;
+			if (!items || options && options.get_id) {
+				callback(data.status);
+				return;
+			}
+			wikidata_entity(items, callback, options);
+		});
+	}
+
+	// ------------------------------------------------------------------------
+
 	// export 導出.
-	Object.assign(Wikidata_entity, {
-		search : Wikidata_search,
-		value_of : Wikidata_datavalue,
-		query : Wikidata_query
+	Object.assign(wikidata_entity, {
+		search : wikidata_search,
+		value_of : wikidata_datavalue
 	});
 
 	// --------------------------------------------------------------------------------------------
@@ -7805,7 +8013,9 @@ function module_code(library_namespace) {
 
 		Flow : Flow_info,
 
-		data : Wikidata_entity
+		data : wikidata_entity,
+		edit_data : wikidata_edit,
+		wdq : wikidata_query
 	});
 
 	return wiki_API;
