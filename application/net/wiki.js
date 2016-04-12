@@ -2146,6 +2146,13 @@ function module_code(library_namespace) {
 							library_namespace.warn('wiki_API.prototype.next: '
 							//
 							+ 'It seems we lost the token. 似乎丟失了 token。');
+							if (!library_namespace.platform.nodejs) {
+								library_namespace
+										.err('wiki_API.prototype.next: '
+												+ 'Not using nod.js!');
+								return;
+							}
+							// 下面的 workaround 僅適用於 node.js。
 							if (!_this.token.lgpassword) {
 								library_namespace
 										.err('wiki_API.prototype.next: '
@@ -2230,11 +2237,15 @@ function module_code(library_namespace) {
 		case 'set_URL':
 			if (next[1] && typeof next[1] === 'string') {
 				next[1] = api_URL(next[1]);
-				if (/wikidata/i.test(next[1]))
+				if (/wikidata/i.test(next[1])) {
 					// set Wikidata API URL
 					this.data_API_URL = next[1];
-				else
+				} else {
 					this.API_URL = next[1];
+					delete this.last_page;
+					// 據測試，不同 project 間之 token 不能通用。
+					delete this.token;
+				}
 			}
 			this.next();
 			break;
@@ -2294,6 +2305,7 @@ function module_code(library_namespace) {
 			break;
 
 		case 'query':
+			// wdq
 			// wikidata_query(query, callback, options)
 			wikidata_query(next[1], function(data) {
 				_this.last_list = Array.isArray(data) ? data : null;
@@ -7398,6 +7410,20 @@ function module_code(library_namespace) {
 	 */
 	var wikidata_API_URL = api_URL('wikidata');
 
+	wiki_API.prototype.setup_data = function(API_URL, password) {
+		if (!this.data_API) {
+			if (API_URL)
+				API_URL = this.data_API_URL || wikidata_API_URL;
+			// delete this.data_API_URL;
+
+			this.data_API = new wiki_API(this.token.lgname, password
+					|| this.token.lgpassword, API_URL);
+		}
+		return this.data_API;
+	};
+
+	// ------------------------------------------------------------------------
+
 	/**
 	 * 搜索包含特定關鍵字(label=key)的項目。
 	 * 
@@ -7899,6 +7925,15 @@ function module_code(library_namespace) {
 
 	/**
 	 * Creates or modifies Wikibase entity. 創建或編輯Wikidata實體。
+	 * 
+	 * @example<code>
+
+	wiki = Wiki(true, 'test.wikidata');
+	// TODO:
+	wiki.page('宇宙').data(function(){}).edit(function(){return '';}).edit_data(function(){return {};});
+	wiki.page('宇宙').edit_data(function(){return {};});
+
+	</code>
 	 * 
 	 * @param {String}id
 	 *            id to modify or entity you want to create.

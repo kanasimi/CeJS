@@ -162,25 +162,28 @@ document_head = library_namespace.is_WWW(true) && (document.head || document.get
  *            character encoding. e.g., 'UTF-8', big5, euc-jp, ...
  * @param {String|Object}[post_data]
  *            text data to send when method is POST
+ * @param {Object}[options]
+ *            附加參數/設定選擇性/特殊功能與選項
  * 
  * @see
  * https://developer.mozilla.org/zh-TW/docs/DOM/XMLHttpRequest
  * http://msdn.microsoft.com/en-us/library/ie/ms535874.aspx
  */
-function get_URL(URL, onload, charset, post_data) {
+function get_URL(URL, onload, charset, post_data, options) {
 	// 前導作業。
 	if (library_namespace.is_Object(charset)) {
 		post_data = charset;
 		charset = null;
 	}
-	var options;
+	// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+	options = library_namespace.new_options(options);
 	if (library_namespace.is_Object(URL) && URL.URL) {
-		onload = URL.onload || onload;
-		post_data = URL.post || post_data;
-		charset = URL.charset || charset;
-		URL = (options = URL).URL;
-	} else
-		options = library_namespace.null_Object();
+		Object.assign(options, URL);
+		onload = options.onload || onload;
+		post_data = options.post || post_data;
+		charset = options.charset || charset;
+		URL = options.URL;
+	}
 
 	// https://developer.mozilla.org/en-US/docs/Web/API/URL
 	// [ origin + pathname, search, hash ]
@@ -639,27 +642,29 @@ function merge_cookie(agent, cookie) {
  *            character encoding. e.g., 'UTF-8', big5, euc-jp,..
  * @param {String|Object}[post_data]
  *            text data to send when method is POST
+ * @param {Object}[options]
+ *            附加參數/設定選擇性/特殊功能與選項
  * 
  * @see http://nodejs.org/api/http.html#http_http_request_options_callback
  *      http://nodejs.org/api/https.html#https_https_request_options_callback
  * 
  * @since 2015/1/13 23:23:38
  */
-function get_URL_node(URL, onload, charset, post_data) {
+function get_URL_node(URL, onload, charset, post_data, options) {
 	// 前導作業。
 	if (library_namespace.is_Object(charset)) {
 		post_data = charset;
 		charset = null;
 	}
-	var options, headers;
+	// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+	options = library_namespace.new_options(options);
 	if (library_namespace.is_Object(URL) && URL.URL) {
-		onload = URL.onload || onload;
-		post_data = URL.post || post_data;
-		charset = URL.charset || charset;
-		headers = URL.headers;
-		URL = (options = URL).URL;
-	} else
-		options = library_namespace.null_Object();
+		Object.assign(options, URL);
+		onload = options.onload || onload;
+		post_data = options.post || post_data;
+		charset = options.charset || charset;
+		URL = options.URL;
+	}
 
 	// https://developer.mozilla.org/en-US/docs/Web/API/URL
 	// [ origin + pathname, search, hash ]
@@ -695,9 +700,15 @@ function get_URL_node(URL, onload, charset, post_data) {
 	if (options.async === false && onload || typeof onload !== 'function')
 		onload = false;
 
+	if (!agent) {
+		agent = _URL.protocol === 'https:' ? node_https_agent : node_http_agent;
+	}
+
 	var request, _URL = node_url.parse(URL),
 	//
-	agent = _URL.protocol === 'https:' ? node_https_agent : node_http_agent,
+	headers = options.headers,
+	//
+	agent = options.agent || (_URL.protocol === 'https:' ? node_https_agent : node_http_agent),
 	//
 	_onload = function(result) {
 		if (/^3/.test(result.statusCode) && result.headers.location
@@ -840,21 +851,32 @@ get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
 
 
 // setup/reset node agent.
-function setup_node() {
+function setup_node(type, options) {
 	if (!library_namespace.platform.nodejs)
 		return;
 
-	node_url = require('url');
-	node_http = require('http');
-	node_https = require('https');
+	if (_.get_URL !== get_URL_node) {
+		// 初始化。
+		node_url = require('url');
+		node_http = require('http');
+		node_https = require('https');
+
+		// 不需要。
+		//node_http_agent.maxSockets = 1;
+		//node_https_agent.maxSockets = 1;
+
+		_.get_URL = library_namespace.copy_properties(get_URL, get_URL_node);
+	}
+
+	if (type !== undefined) {
+		if (typeof type === 'string')
+			type = /^https/i.test(type);
+		return type ? new node_https.Agent(options) : new node_http.Agent(options);
+	}
 
 	node_http_agent = new node_http.Agent;
 	node_https_agent = new node_https.Agent;
-	// 不需要。
-	//node_http_agent.maxSockets = 1;
-	//node_https_agent.maxSockets = 1;
 
-	_.get_URL = library_namespace.copy_properties(get_URL, get_URL_node);
 }
 
 _.setup_node_net = setup_node;
