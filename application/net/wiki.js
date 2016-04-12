@@ -94,12 +94,13 @@ function module_code(library_namespace) {
 		this.next_mark = library_namespace.null_Object();
 
 		// setup session.
-		// this.set_URL(API_URL);
 		if (API_URL) {
 			// e.g., 'zh-yue', 'zh-classical'
-			if (/^[a-z\-\d]{2,20}$/i.test(API_URL))
+			if (/^[a-z\-\d]{2,20}$/i.test(API_URL)
+			// 不包括 test2 之類。
+			&& !/test|wiki/i.test(API_URL))
 				this.language = API_URL.toLowerCase();
-			this.API_URL = api_URL(API_URL);
+			this.set_URL(API_URL);
 		}
 
 		if (!('language' in this))
@@ -405,7 +406,9 @@ function module_code(library_namespace) {
 
 	// [[維基百科:名字空間#文件名字空间]]
 	// [[Media:image.png]]：產生一個指向檔案本身的連結
-	var PATTERN_file_prefix = 'File|Image|Media|[檔档]案|[圖图]像|文件|媒[體体]';
+	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/settings/zhwiki-configuration.xml
+	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/scala/org/dbpedia/extraction/wikiparser/impl/wikipedia/Namespaces.scala
+	var PATTERN_file_prefix = 'File|Image|Media|[檔档]案|[圖图]像|文件|媒[體体](?:文件)?';
 
 	file_pattern.source =
 	// 不允許 [\s\n]，僅允許 ' '。
@@ -1563,11 +1566,13 @@ function module_code(library_namespace) {
 
 	// parse user name
 	function parse_user(wikitext, full_link) {
-		var matched = wikitext && wikitext.match(
-		// 使用者/用戶對話頁面
-		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
-		// "\/": e.g., [[user talk:user_name/Flow]]
-		/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论)?|用戶(?:討論)?)\s*:\s*([^\|\]\/]+)/i);
+		var matched = wikitext
+				&& wikitext
+						.match(
+						// 使用者/用戶對話頁面
+						// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
+						// "\/": e.g., [[user talk:user_name/Flow]]
+						/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?)\s*:\s*([^\|\]\/]+)/i);
 		if (matched) {
 			matched = full_link ? matched[0].trimRight() + ']]' : matched[1]
 					.trim();
@@ -2224,9 +2229,12 @@ function module_code(library_namespace) {
 
 		case 'set_URL':
 			if (next[1] && typeof next[1] === 'string') {
-				// ((!!next[2])): set Wikidata API URL, this.data_API_URL
-				// else: set this.API_URL
-				this[next[2] ? 'data_API_URL' : 'API_URL'] = api_URL(next[1]);
+				next[1] = api_URL(next[1]);
+				if (/wikidata/i.test(next[1]))
+					// set Wikidata API URL
+					this.data_API_URL = next[1];
+				else
+					this.API_URL = next[1];
 			}
 			this.next();
 			break;
@@ -7397,9 +7405,9 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
-	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);}, {get_id:true});
-	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data);}, {get_id:true, limit:1});
-	CeL.wiki.data.search('形狀', function(data) {result=data;console.log(data);}, {get_id:true,type:'property'});
+	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data[0]==='Q1');}, {get_id:true});
+	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data==='Q1');}, {get_id:true, limit:1});
+	CeL.wiki.data.search('形狀', function(data) {result=data;console.log(data==='P1419');}, {get_id:true,type:'property'});
 
 	</code>
 	 * 
@@ -7578,6 +7586,11 @@ function module_code(library_namespace) {
 			return value;
 		}
 
+		if ('text' in value) {
+			// e.g., { text: 'Ὅμηρος', language: 'grc' }
+			return value.text;
+		}
+
 		if ('amount' in value) {
 			// qualifiers 純量數值
 			if (typeof callback === 'function')
@@ -7683,7 +7696,8 @@ function module_code(library_namespace) {
 				// default: get label
 				: function(entity) {
 					entity = entity.labels || entity;
-					entity = entity[options.language || default_language]
+					entity = entity[options && options.language
+							|| default_language]
 							|| entity;
 					callback('value' in entity ? entity.value : entity);
 				}, options && options.language);
@@ -7703,23 +7717,24 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
-	CeL.wiki.data('Q1', function(data) {console.log(JSON.stringify(data));});
-	CeL.wiki.data('Q1', function(data) {console.log(data);}, {languages:'zh'});
-	CeL.wiki.data('Q1', function(data) {console.log(data.labels['en'].value+': '+data.labels['zh'].value);});
+	CeL.wiki.data('Q2', function(data) {result=data;console.log(JSON.stringify(data).slice(0,400));});
+	CeL.wiki.data('Q1', function(data) {console.log(data.id==='Q1'&&JSON.stringify(data.labels)==='{"zh":{"language":"zh","value":"宇宙"}}');}, {languages:'zh'});
+	CeL.wiki.data('Q1', function(data) {console.log(data.labels['en'].value+': '+data.labels['zh'].value==='universe: 宇宙');});
 	// Get the property of wikidata entity.
 	// 取得Wikidata中指定實體項目的指定屬性/陳述。
-	CeL.wiki.data('Q1', function(data) {console.log(data['en'].value+': '+data['zh'].value);}, 'labels');
+	CeL.wiki.data('Q1', function(data) {console.log(data['en'].value+': '+data['zh'].value==='universe: 宇宙');}, 'labels');
 	// { id: 'P1', missing: '' }
-	CeL.wiki.data('Q1|P1', function(data) {console.log(data);});
+	CeL.wiki.data('Q1|P1', function(data) {console.log(JSON.stringify(data[1])==='{"id":"P1","missing":""}');});
+	CeL.wiki.data(['Q1','P1'], function(data) {console.log(data);});
 
-	CeL.wiki.data('Q11188', function(data) {property=data;console.log(data);});
+	CeL.wiki.data('Q11188', function(data) {result=data;console.log(JSON.stringify(data.labels.zh)==='{"language":"zh","value":"世界人口"}');});
 
-	CeL.wiki.data('P6', function(data) {console.log(data);});
+	CeL.wiki.data('P6', function(data) {result=data;console.log(JSON.stringify(data.labels.zh)==='{"language":"zh","value":"政府首长"');});
 
-	CeL.wiki.data('宇宙', '形狀', function(data) {result=data;console.log(data);})
-	CeL.wiki.data('荷马', '出生日期', function(data) {result=data;console.log(''+data);})
-	CeL.wiki.data('荷马', function(data) {result=data;})
-	CeL.wiki.data('艾薩克·牛頓', '出生日期', function(data) {result=data;console.log(''+data);})
+	CeL.wiki.data('宇宙', '形狀', function(data) {result=data;console.log(data==='宇宙的形狀');})
+	CeL.wiki.data('荷马', '出生日期', function(data) {result=data;console.log(''+data==='前8世紀');})
+	CeL.wiki.data('荷马', function(data) {result=data;console.log(CeL.wiki.data.value_of(data.claims.P1477)==='Ὅμηρος');})
+	CeL.wiki.data('艾薩克·牛頓', '出生日期', function(data) {result=data;console.log(''+data==='1643年1月4日,1642年12月25日');})
 
 	// 實體項目值的鏈接數據界面 (無法篩選所要資料，傳輸量較大。)
 	CeL.get_URL('https://www.wikidata.org/wiki/Special:EntityData/Q1.json',function(r){r=JSON.parse(r.responseText);console.log(r.entities.Q1.labels.zh.value)})
@@ -7727,12 +7742,13 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	wiki = CeL.wiki.login(user_name, pw, 'wikidata');
-	wiki = Wiki(true, 'wikidata');
 	wiki.data(id, function(entity){}, {is_key:true}).edit_data(function(entity){});
 	wiki.page('title').data(function(entity){}, options).edit_data().edit()
 
-	wiki.data('宇宙', function(data){result=data;data.labels['en'].value==='universe';})
-	wiki.data('宇宙', '形狀', function(data){result=data;data==='宇宙的形狀';})
+	wiki = Wiki(true, 'wikidata');
+	wiki.data('宇宙', function(data){result=data;console.log(data.labels['en'].value==='universe');})
+	wiki.data('宇宙', '形狀', function(data){result=data;console.log(data==='宇宙的形狀');})
+	wiki.query('CLAIM[31:14827288] AND CLAIM[31:593744]', function(data) {result=data;console.log(data.labels['zh-tw'].value==='維基資料');})
 
 	</code>
 	 * 
@@ -7798,7 +7814,8 @@ function module_code(library_namespace) {
 		// convert key: title to id
 		if (typeof key === 'number')
 			key = [ key ];
-		else if (typeof key === 'string' && !/^[PQ]\d{1,10}$/.test(key))
+		else if (typeof key === 'string'
+				&& !/^[PQ]\d{1,10}(\|[PQ]\d{1,10})*$/.test(key))
 			/** {String}setup language of key and property name. 僅在需要 search 時使用。 */
 			key = [ options.language || default_language, key ];
 
