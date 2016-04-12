@@ -105,6 +105,15 @@ function module_code(library_namespace) {
 
 		if (!('language' in this))
 			this.language = default_language;
+
+		if (library_namespace.platform.nodejs) {
+			// create a new agent.
+			this.get_URL_options = {
+				agent : library_namespace.application.net
+				//
+				.Ajax.setup_node_net(this.API_URL || wiki_API.API_URL)
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -1927,7 +1936,9 @@ function module_code(library_namespace) {
 					_this.next();
 				},
 				// next[3] : options
-				next[3]);
+				Object.assign({
+					get_URL_options : this.get_URL_options
+				}, next[3]));
 			break;
 
 		case 'list':
@@ -1981,7 +1992,9 @@ function module_code(library_namespace) {
 				_this.next();
 			},
 			// next[3] : options
-			next[3]);
+			Object.assign({
+				get_URL_options : this.get_URL_options
+			}, next[3]));
 			break;
 
 		case 'check':
@@ -2015,7 +2028,11 @@ function module_code(library_namespace) {
 					_this.stopped = stopped;
 
 					_this.next();
-				}, next[1]);
+				},
+				// next[1] : options
+				Object.assign({
+					get_URL_options : this.get_URL_options
+				}, next[1]));
 			}
 			break;
 
@@ -2135,7 +2152,9 @@ function module_code(library_namespace) {
 					// 因為已有 contents，直接餵給轉換函式。
 					next[1], this.token,
 					// next[2]: options to edit()
-					next[2], function(title, error, result) {
+					Object.assign({
+						get_URL_options : this.get_URL_options
+					}, next[2]), function(title, error, result) {
 						// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
 						if (result ? result.error
 						//
@@ -2231,7 +2250,11 @@ function module_code(library_namespace) {
 				if (typeof next[1] === 'function')
 					next[1].call(_this);
 				_this.next();
-			});
+			},
+			// next[2] : options
+			Object.assign({
+				get_URL_options : this.get_URL_options
+			}, next[2]));
 			break;
 
 		case 'set_URL':
@@ -2265,11 +2288,6 @@ function module_code(library_namespace) {
 				next.splice(2, 0, null);
 			}
 
-			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
-			next[4] = library_namespace.new_options(next[4]);
-			// next[4]: options
-			next[4].API_URL = next[4].API_URL || this.data_API_URL;
-
 			// wikidata_entity(key, property, callback, options)
 			wikidata_entity(next[1], next[2], function(data) {
 				_this.last_data = data;
@@ -2277,7 +2295,12 @@ function module_code(library_namespace) {
 				if (typeof next[3] === 'function')
 					next[3].call(this, data);
 				_this.next();
-			}, next[4]);
+			},
+			// next[4] : options
+			Object.assign({
+				API_URL : next[4].API_URL || this.data_API_URL,
+				get_URL_options : this.get_URL_options
+			}, next[4]));
 			break;
 
 		case 'edit_data':
@@ -2287,13 +2310,13 @@ function module_code(library_namespace) {
 				next.splice(1, 0, this.last_data.id);
 			}
 
-			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
-			next[3] = library_namespace.new_options(next[3]);
-			// next[3]: options
-			next[3].API_URL = next[3].API_URL || this.data_API_URL;
-
 			// wikidata_edit(id, data, token, options, callback)
-			wikidata_edit(next[1], next[2], this.token, next[3],
+			wikidata_edit(next[1], next[2], this.token,
+			// next[3] : options
+			Object.assign({
+				API_URL : next[3].API_URL || this.data_API_URL,
+				get_URL_options : this.get_URL_options
+			}, next[3]),
 			//
 			function(data) {
 				// next[4] : callback
@@ -3022,8 +3045,10 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback(response data)
 	 * @param {Object}[post_data]
 	 *            data when need using POST method
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
-	wiki_API.query = function(action, callback, post_data) {
+	wiki_API.query = function(action, callback, post_data, options) {
 		// 處理 action
 		library_namespace.debug('action: ' + action, 2, 'wiki_API.query');
 		if (typeof action === 'string')
@@ -3060,7 +3085,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('Waiting ' + to_wait + ' ms..', 2,
 					'wiki_API.query');
 			setTimeout(function() {
-				wiki_API.query(action, callback, post_data);
+				wiki_API.query(action, callback, post_data, options);
 			}, to_wait);
 			return;
 		}
@@ -3116,6 +3141,21 @@ function module_code(library_namespace) {
 			}
 		}
 
+		if (false) {
+			// test options.get_URL_options
+			if (options && options.get_URL_options) {
+				console.log('wiki_API.query: Using get_URL_options: '
+						+ options.get_URL_options.agent.protocol);
+				console.log(options);
+				console.log(action);
+			} else {
+				console.log('wiki_API.query: Without get_URL_options:');
+				console.log(action);
+				console.trace('!!!!');
+				throw '!!!!';
+			}
+		}
+
 		// 開始處理 query request。
 		if (!post_data && wiki_API.query.allow_JSONP) {
 			library_namespace.debug(
@@ -3126,7 +3166,7 @@ function module_code(library_namespace) {
 			get_URL(action, {
 				callback : callback
 			});
-		} else
+		} else {
 			get_URL(action, function(XMLHttp) {
 				var response = XMLHttp.responseText;
 				library_namespace.debug('response ('
@@ -3179,7 +3219,8 @@ function module_code(library_namespace) {
 					library_namespace.show_value(response);
 				if (typeof callback === 'function')
 					callback(response);
-			}, '', post_data);
+			}, undefined, post_data, options && options.get_URL_options);
+		}
 	};
 
 	/**
@@ -3546,7 +3587,7 @@ function module_code(library_namespace) {
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
 			callback(pages);
-		});
+		}, null, options);
 	};
 
 	// default properties of revisions
@@ -3680,7 +3721,7 @@ function module_code(library_namespace) {
 				//
 				: wiki_API.langlinks.parse(pages) : pages);
 			}
-		});
+		}, null, options);
 	};
 
 	wiki_API.langlinks.parse = function(langlinks, to_lang) {
@@ -4049,7 +4090,7 @@ function module_code(library_namespace) {
 				}
 				library_namespace.err('get_list: No page got!');
 			}
-		});
+		}, null, options);
 	}
 
 	// const: 基本上與程式碼設計合一，僅表示名義，不可更改。
@@ -4286,7 +4327,7 @@ function module_code(library_namespace) {
 					_next();
 				},
 				// Tokens may not be obtained when using a callback
-				library_namespace.null_Object());
+				library_namespace.null_Object(), session);
 			}
 		}
 
@@ -4352,14 +4393,15 @@ function module_code(library_namespace) {
 			'login' ], function(data) {
 				if (data && data.login && data.login.result === 'NeedToken') {
 					token.lgtoken = session.token.lgtoken = data.login.token;
-					wiki_API.query([ session.API_URL, 'login' ], _done, token);
+					wiki_API.query([ session.API_URL, 'login' ], _done, token,
+							session);
 				} else {
 					library_namespace
 							.err('wiki_API.login: 無法 login！ Abort! Response:');
 					library_namespace.err(data);
 				}
-			}, token);
-		});
+			}, token, session);
+		}, null, session);
 
 		return session;
 	};
@@ -4456,7 +4498,7 @@ function module_code(library_namespace) {
 			}
 
 			callback(stopped);
-		});
+		}, options);
 	};
 
 	/**
@@ -4586,6 +4628,14 @@ function module_code(library_namespace) {
 		library_namespace.debug('#2: ' + Object.keys(options).join(','), 4,
 				'wiki_API.edit');
 
+		var with_get_URL_options;
+		if (options.get_URL_options) {
+			with_get_URL_options = {
+				get_URL_options : options.get_URL_options
+			};
+			delete options.get_URL_options;
+		}
+
 		wiki_API.query(action, function(data) {
 			var error = data.error
 			// 檢查伺服器回應是否有錯誤資訊。
@@ -4633,7 +4683,7 @@ function module_code(library_namespace) {
 			if (typeof callback === 'function')
 				// title.title === get_page_title(title)
 				callback(title.title, error, data);
-		}, options);
+		}, options, with_get_URL_options);
 	};
 
 	/**
@@ -4868,7 +4918,7 @@ function module_code(library_namespace) {
 			if (typeof callback === 'function')
 				// callback(key, pages, hits)
 				callback(key, data, data.hits);
-		});
+		}, null, options);
 	};
 
 	wiki_API.search.default_parameters = {
@@ -4999,7 +5049,7 @@ function module_code(library_namespace) {
 			}
 			// callback(root_page_data 本名, redirect_list 別名 alias list)
 			callback(pages, redirects);
-		});
+		}, null, options);
 	};
 
 	/**
@@ -5704,7 +5754,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @inner
 	 */
-	function get_latest(project, callback, options) {
+	function get_latest_dump(project, callback, options) {
 		if (false && !wmflabs)
 			// 最起碼須有 bzip2, wget 特定版本輸出訊息 @ /bin/sh
 			throw new Error('Only for Tool Labs!');
@@ -5730,7 +5780,7 @@ function module_code(library_namespace) {
 		// e.g., '20160305'.
 		latest = options.latest;
 		if (!latest) {
-			library_namespace.get_URL(
+			get_URL(
 			// Get the latest version.
 			host + project + '/', function(XMLHttp) {
 				var response = XMLHttp.responseText;
@@ -5746,7 +5796,7 @@ function module_code(library_namespace) {
 				options = Object.clone(options);
 				// default: 'latest'
 				options.latest = latest || 'latest';
-				get_latest(project, callback, options);
+				get_latest_dump(project, callback, options);
 			});
 			return;
 		}
@@ -5785,7 +5835,7 @@ function module_code(library_namespace) {
 		}
 
 		if (data_file_OK) {
-			library_namespace.log('get_latest: Using data file (.xml): ['
+			library_namespace.log('get_latest_dump: Using data file (.xml): ['
 					+ directory + filename + ']');
 			callback(directory + filename);
 			return;
@@ -5794,7 +5844,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 
 		function extract() {
-			library_namespace.log('get_latest.extract: Extracting ['
+			library_namespace.log('get_latest_dump.extract: Extracting ['
 					+ source_directory + archive + ']...');
 			// share the xml dump file. 應由 caller 自行設定。
 			// process.umask(parseInt('0022', 8));
@@ -5808,7 +5858,7 @@ function module_code(library_namespace) {
 				} else {
 					library_namespace.log(
 					//
-					'get_latest.extract: Done. Running callback...');
+					'get_latest_dump.extract: Done. Running callback...');
 				}
 				callback(directory + filename);
 			});
@@ -5825,10 +5875,10 @@ function module_code(library_namespace) {
 			source_directory = '/public/dumps/public/' + project + '/' + latest
 					+ '/';
 			library_namespace.debug('Check if public dump archive exists: ['
-					+ source_directory + archive + ']', 1, 'get_latest');
+					+ source_directory + archive + ']', 1, 'get_latest_dump');
 			try {
 				node_fs.accessSync(source_directory + archive);
-				library_namespace.log('get_latest: Public dump archive ['
+				library_namespace.log('get_latest_dump: Public dump archive ['
 						+ source_directory + archive + '] exists.');
 				extract();
 				return;
@@ -5841,11 +5891,11 @@ function module_code(library_namespace) {
 		source_directory = directory;
 
 		library_namespace.debug('Check if file exists: [' + source_directory
-				+ archive + ']', 1, 'get_latest');
+				+ archive + ']', 1, 'get_latest_dump');
 		try {
 			node_fs.statSync(source_directory + archive);
-			library_namespace.log('get_latest: Archive [' + source_directory
-					+ archive + '] exists.');
+			library_namespace.log('get_latest_dump: Archive ['
+					+ source_directory + archive + '] exists.');
 			extract();
 			return;
 		} catch (e) {
@@ -5853,7 +5903,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 
-		library_namespace.log('get_latest: Try to get archive [' + archive
+		library_namespace.log('get_latest_dump: Try to get archive [' + archive
 				+ ']...');
 		// https://nodejs.org/api/child_process.html
 		var child = require('child_process').spawn('/usr/bin/wget',
@@ -5902,7 +5952,7 @@ function module_code(library_namespace) {
 				library_namespace.err('Error: ' + error_code);
 				return;
 			}
-			library_namespace.log('get_latest: Got archive file.');
+			library_namespace.log('get_latest_dump: Got archive file.');
 			extract();
 		});
 	}
@@ -6030,7 +6080,7 @@ function module_code(library_namespace) {
 			if (filename)
 				library_namespace.log('read_dump: Invalid file path: ['
 						+ filename + '], try to get the latest dump file...');
-			get_latest(filename, function(filename) {
+			get_latest_dump(filename, function(filename) {
 				read_dump(filename, callback, options);
 			}, options);
 			// 警告: 無法馬上取得檔案時，將不會回傳任何資訊！
@@ -7168,7 +7218,7 @@ function module_code(library_namespace) {
 			 * </code>
 			 */
 			callback(pages);
-		});
+		}, null, options);
 	}
 
 	/**
@@ -7274,7 +7324,7 @@ function module_code(library_namespace) {
 			else
 				page_data = data.result[view];
 			callback(page_data);
-		});
+		}, null, options);
 	}
 
 	/** {String}default view to flow page */
@@ -7366,7 +7416,7 @@ function module_code(library_namespace) {
 			if (typeof callback === 'function')
 				// title.title === get_page_title(title)
 				callback(title.title, error, data);
-		}, _options);
+		}, _options, options);
 	}
 
 	/** {Array}欲 copy 至 Flow edit parameters 之 keys。 */
@@ -7525,7 +7575,7 @@ function module_code(library_namespace) {
 				list = list[0];
 			}
 			callback(list);
-		});
+		}, null, options);
 	}
 
 	// ------------------------------------------------------------------------
@@ -7918,7 +7968,7 @@ function module_code(library_namespace) {
 			} else {
 				callback(data);
 			}
-		});
+		}, null, options);
 	}
 
 	// ------------------------------------------------------------------------
@@ -7996,9 +8046,17 @@ function module_code(library_namespace) {
 		options.token = library_namespace.is_Object(token) ? token.csrftoken
 				: token;
 
+		var with_get_URL_options;
+		if (options.get_URL_options) {
+			with_get_URL_options = {
+				get_URL_options : options.get_URL_options
+			};
+			delete options.get_URL_options;
+		}
+
 		wiki_API.query(action, function(data) {
 			callback(data);
-		}, options);
+		}, options, with_get_URL_options);
 	}
 
 	// ------------------------------------------------------------------------
@@ -8053,7 +8111,7 @@ function module_code(library_namespace) {
 			// &callback=
 		}
 
-		library_namespace.get_URL(action.join(''), function(data) {
+		get_URL(action.join(''), function(data) {
 			data = JSON.parse(data.responseText);
 			var items = data.items;
 			if (!items || options && options.get_id) {

@@ -678,16 +678,18 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	library_namespace.debug('URL: (' + (typeof URL) + ') [' + URL + ']', 1,
 			'get_URL_node');
 
-	if (typeof onload === 'object')
+	if (typeof onload === 'object') {
 		// use JSONP.
 		// need callback.
-		for ( var callback_param in onload)
+		for ( var callback_param in onload) {
 			if (callback_param && typeof onload[callback_param] === 'function') {
 				// 模擬 callback。
 				URL += '&' + callback_param + '=cb';
 				onload = onload[callback_param];
 				break;
 			}
+		}
+	}
 
 	if (post_data)
 		post_data = get_URL.param_to_String(post_data);
@@ -699,10 +701,6 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 	if (options.async === false && onload || typeof onload !== 'function')
 		onload = false;
-
-	if (!agent) {
-		agent = _URL.protocol === 'https:' ? node_https_agent : node_http_agent;
-	}
 
 	var request, _URL = node_url.parse(URL),
 	//
