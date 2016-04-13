@@ -5359,8 +5359,8 @@ function module_code(library_namespace) {
 		wiki_API.wmflabs = wmflabs;
 
 		// default: use Wikimedia Varnish Cache.
-		wiki_API.use_Varnish = true;
-		// 2016/4/9 9:9:7 不使用 Wikimedia Varnish Cache。速度較慢，但較有保障。
+		// wiki_API.use_Varnish = true;
+		// 2016/4/9 9:9:7 預設不使用 Wikimedia Varnish Cache。速度較慢，但較有保障。
 		// delete CeL.wiki.use_Varnish;
 
 		try {
