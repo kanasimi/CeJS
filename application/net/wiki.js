@@ -17,6 +17,7 @@ paser [[WP:維基化]]
 https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
 https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
+https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
 
 Wikimedia REST API
 https://www.mediawiki.org/wiki/RESTBase
@@ -86,7 +87,7 @@ function module_code(library_namespace) {
 			lgpassword : password
 		};
 
-		// action queue。應以 append，而非整個換掉的方式更改。
+		// action queue 貯列。應以 append，而非整個換掉的方式更改。
 		this.actions = [];
 
 		// 紀錄各種後續檢索用索引值。應以 append，而非整個換掉的方式更改。
@@ -97,23 +98,14 @@ function module_code(library_namespace) {
 		if (API_URL) {
 			// e.g., 'zh-yue', 'zh-classical'
 			if (/^[a-z\-\d]{2,20}$/i.test(API_URL)
-			// 不包括 test2 之類。
+			// 不包括 test2.wikipedia.org 之類。
 			&& !/test|wiki/i.test(API_URL))
 				this.language = API_URL.toLowerCase();
-			this.set_URL(API_URL);
+			setup_API_URL(this /* session */, API_URL);
 		}
 
 		if (!('language' in this))
 			this.language = default_language;
-
-		if (library_namespace.platform.nodejs) {
-			// create a new agent.
-			this.get_URL_options = {
-				agent : library_namespace.application.net
-				//
-				.Ajax.setup_node_net(this.API_URL || wiki_API.API_URL)
-			}
-		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -122,6 +114,15 @@ function module_code(library_namespace) {
 	// https://phabricator.wikimedia.org/rOPUP558bcc29adc3dd7dfebbc66c1bf88a54a8b09535#3ce6dc61
 	// server:
 	// (wikipedia|wikibooks|wikinews|wikiquote|wikisource|wikiversity|wikivoyage|wikidata|wikimediafoundation|wiktionary|mediawiki)
+
+	/**
+	 * Wikimedia projects 的 URL pattern
+	 * 
+	 * matched: [ protocol + host name, protocol, host name ]
+	 * 
+	 * @type {String}
+	 */
+	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?([a-z\-\d]{2,20}(?:\.[a-z]+)+)/i;
 
 	/**
 	 * Get the API URL of specified project.
@@ -166,8 +167,7 @@ function module_code(library_namespace) {
 			// e.g., 'en.wikisource', 'en.wiktionary'
 			project += '.org';
 
-		var matched = project
-				.match(/^(https?:)?(?:\/\/)?([a-z\-\d]{2,20}(?:\.[a-z]+)+)/i);
+		var matched = project.match(PATTERN_wiki_project_URL);
 		if (matched) {
 			// e.g., 'http://zh.wikipedia.org/'
 			// e.g., 'https://www.mediawiki.org/w/api.php'
@@ -201,6 +201,44 @@ function module_code(library_namespace) {
 		wiktionary : true
 	};
 	api_URL.alias = {};
+
+	/**
+	 * setup API URL.
+	 * 
+	 * @param {wiki_API}session
+	 *            正作業中之 wiki_API instance。
+	 * @param {String}[API_URL]
+	 *            language code or API URL of Wikidata
+	 * 
+	 * @inner
+	 */
+	function setup_API_URL(session, API_URL) {
+		if (API_URL === true)
+			// force to login.
+			API_URL = session.API_URL || wiki_API.API_URL;
+
+		if (API_URL && typeof API_URL === 'string') {
+			session.API_URL = api_URL(API_URL);
+			delete session.last_page;
+			// force to login again: see wiki_API.login
+			// 據測試，不同 project 間之 token 不能通用。
+			delete session.token.csrftoken;
+			delete session.token.lgtoken;
+			// library_namespace.set_debug(6);
+
+			if (library_namespace.platform.nodejs) {
+				// 初始化 agent。
+				// create and keep a new agent. 維持一個獨立的 agent。
+				// 以不同 agent 應對不同 host。
+				var agent = library_namespace.application.net
+				//
+				.Ajax.setup_node_net(session.API_URL);
+				// agent.start_time = Date.now();
+				// agent.API_URL = session.API_URL;
+				session.get_URL_options = agent;
+			}
+		}
+	}
 
 	// ------------------------------------------------------------------------
 
@@ -1634,12 +1672,14 @@ function module_code(library_namespace) {
 	 *            是否添加 [[]] 或 []。
 	 * @param {Function}[callback]
 	 *            回調函數。 callback({String}wiki link)
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @returns {String}wiki link
 	 * 
 	 * @see [[WP:LINK#跨语言链接]]
 	 */
-	function URL_to_wiki_link(URL, add_quote, callback) {
+	function URL_to_wiki_link(URL, add_quote, callback, options) {
 		URL = URL.trim();
 
 		var matched = URL.match(PATTERN_WIKI_URL);
@@ -1694,7 +1734,7 @@ function module_code(library_namespace) {
 				// assert: section === ''
 			}
 			callback(compose_link());
-		}, default_language);
+		}, default_language, options);
 	}
 
 	// ----------------------------------------------------
@@ -1937,7 +1977,7 @@ function module_code(library_namespace) {
 				},
 				// next[3] : options
 				Object.assign({
-					get_URL_options : this.get_URL_options
+					session : this
 				}, next[3]));
 			break;
 
@@ -1965,10 +2005,9 @@ function module_code(library_namespace) {
 				_this.next();
 			},
 			// next[3] : options
-			Object.assign(library_namespace.null_Object(), this.next_mark, {
-				// 作業中之 {wiki_API}
-				wiki : _this
-			}, next[3]));
+			Object.assign({
+				session : this
+			}, this.next_mark, next[3]));
 			break;
 
 		case 'search':
@@ -1993,20 +2032,18 @@ function module_code(library_namespace) {
 			},
 			// next[3] : options
 			Object.assign({
-				get_URL_options : this.get_URL_options
+				session : this
 			}, next[3]));
 			break;
 
 		case 'check':
-			next[1] = Object.assign(library_namespace.null_Object(),
-			//
-			this.check_options,
+			next[1] = library_namespace.new_options(this.check_options,
 			// next[1]: options
 			typeof next[1] === 'boolean' ? {
 				force : next[1]
 			} : typeof options === 'string' ? {
 				title : next[1]
-			} : library_namespace.is_Object(next[1]) ? next[1] : {});
+			} : next[1]);
 
 			// ('stopped' in this): 已經有 cache。
 			if (('stopped' in this)
@@ -2023,6 +2060,8 @@ function module_code(library_namespace) {
 								+ JSON.stringify(next[1]), 2,
 								'wiki_API.prototype.next');
 				next[1].token = this.token;
+				// 正作業中之 wiki_API instance。
+				next[1].session = this;
 				wiki_API.check_stop(function(stopped) {
 					// cache
 					_this.stopped = stopped;
@@ -2030,9 +2069,7 @@ function module_code(library_namespace) {
 					_this.next();
 				},
 				// next[1] : options
-				Object.assign({
-					get_URL_options : this.get_URL_options
-				}, next[1]));
+				next[1]);
 			}
 			break;
 
@@ -2076,7 +2113,8 @@ function module_code(library_namespace) {
 					Flow_page(this.last_page, function() {
 						_this.next();
 					}, {
-						flow_view : 'header'
+						flow_view : 'header',
+						session : this
 					});
 
 				} else if ((!next[2] || !next[2].ignore_denial)
@@ -2108,9 +2146,13 @@ function module_code(library_namespace) {
 					next[2].sectiontitle,
 					// 新話題最初的內容。因為已有 contents，直接餵給轉換函式。
 					// [[mw:Flow]] 會自動簽名，因此去掉簽名部分。
-					next[1].replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''), this.token,
+					next[1].replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''),
+					//
+					this.token,
 					// next[2]: options to edit_topic()
-					next[2], function(title, error, result) {
+					Object.assign({
+						session : this
+					}, next[2]), function(title, error, result) {
 						// next[3] : callback
 						if (typeof next[3] === 'function')
 							next[3].call(_this, title, error, result);
@@ -2153,7 +2195,7 @@ function module_code(library_namespace) {
 					next[1], this.token,
 					// next[2]: options to edit()
 					Object.assign({
-						get_URL_options : this.get_URL_options
+						session : this
 					}, next[2]), function(title, error, result) {
 						// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
 						if (result ? result.error
@@ -2185,17 +2227,15 @@ function module_code(library_namespace) {
 							// 應付 2016/1 MediaWiki 系統更新，
 							// 需要連 HTTP handler 都重換一個，重起 cookie。
 							// 發現大多是因為一次處理數十頁面，可能遇上 HTTP status 413 的問題。
-							library_namespace.application.net
-							//
-							.Ajax.setup_node_net();
-							// rollback
-							_this.actions.unshift(next);
-							if (result === '') {
-								// force login: see wiki_API.login
+							setup_API_URL(_this /* session */, true);
+							if (false && result === '') {
+								// force to login again: see wiki_API.login
 								delete _this.token.csrftoken;
 								delete _this.token.lgtoken;
 								// library_namespace.set_debug(6);
 							}
+							// rollback
+							_this.actions.unshift(next);
 
 							// 直到 .edit 動作才會出現 badtoken，
 							// 因此在 wiki_API.login 尚無法偵測是否 badtoken。
@@ -2222,8 +2262,9 @@ function module_code(library_namespace) {
 								login_mark : true
 							});
 						} else {
-							// 去除 retry flag。
-							delete _this.retry_login;
+							if ('retry_login' in _this)
+								// 已成功 edit，去除 retry flag。
+								delete _this.retry_login;
 							// next[3] : callback
 							if (typeof next[3] === 'function')
 								next[3].call(_this, title, error, result);
@@ -2253,23 +2294,18 @@ function module_code(library_namespace) {
 			},
 			// next[2] : options
 			Object.assign({
-				get_URL_options : this.get_URL_options
+				session : this
 			}, next[2]));
 			break;
 
 		case 'set_URL':
-			if (next[1] && typeof next[1] === 'string') {
-				next[1] = api_URL(next[1]);
-				if (/wikidata/i.test(next[1])) {
-					// set Wikidata API URL
-					this.data_API_URL = next[1];
-				} else {
-					this.API_URL = next[1];
-					delete this.last_page;
-					// 據測試，不同 project 間之 token 不能通用。
-					delete this.token;
-				}
-			}
+			setup_API_URL(this /* session */, next[1]);
+			this.next();
+			break;
+
+		case 'set_data':
+			// 設定 this.data_session。
+			setup_data_session(this /* session */, next[1], next[2], next[3]);
 			this.next();
 			break;
 
@@ -2298,8 +2334,7 @@ function module_code(library_namespace) {
 			},
 			// next[4] : options
 			Object.assign({
-				API_URL : next[4].API_URL || this.data_API_URL,
-				get_URL_options : this.get_URL_options
+				session : this.data_session
 			}, next[4]));
 			break;
 
@@ -2314,8 +2349,7 @@ function module_code(library_namespace) {
 			wikidata_edit(next[1], next[2], this.token,
 			// next[3] : options
 			Object.assign({
-				API_URL : next[3].API_URL || this.data_API_URL,
-				get_URL_options : this.get_URL_options
+				session : this.data_session
 			}, next[3]),
 			//
 			function(data) {
@@ -2355,7 +2389,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,check,edit,search,logout,run,set_URL,data,edit_data,query'
+	wiki_API.prototype.next.methods = 'page,check,edit,search,logout,run,set_URL,set_data,data,edit_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -2689,9 +2723,9 @@ function module_code(library_namespace) {
 
 			// 傳入標題列表，則由程式自行控制，毋須設定後續檢索用索引值。
 			if (!messages.input_title_list
-					// config.continue_wiki:
+					// config.continue_session:
 					// 後續檢索用索引值存儲所在的 {wiki_API}，將會以此 instance 之值寫入 log。
-					&& (pages = 'continue_wiki' in config ? config.continue_wiki
+					&& (pages = 'continue_session' in config ? config.continue_session
 							: this)
 					// pages: 後續檢索用索引值之暫存值。
 					&& (pages = pages.show_next()))
@@ -3033,10 +3067,14 @@ function module_code(library_namespace) {
 	};
 
 	// --------------------------------------------------------------------------------------------
-	// 以下皆泛用，無須 instance。
+	// 以下皆泛用，無須 wiki_API instance。
 
 	/**
 	 * 實際執行 query 操作，直接 call API 之核心函數。
+	 * 
+	 * 所有會利用到 wiki_API.prototype.work ← wiki_API.prototype.next ← <br />
+	 * wiki_API.page, wiki_API.edit, ... ← wiki_API.query ← get_URL ← <br />
+	 * need standalone http agent 的功能，都需要添附 session 參數。
 	 * 
 	 * @param {String|Array}action
 	 *            {String}action or [ {String}api URL, {String}action,
@@ -3141,21 +3179,6 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (false) {
-			// test options.get_URL_options
-			if (options && options.get_URL_options) {
-				console.log('wiki_API.query: Using get_URL_options: '
-						+ options.get_URL_options.agent.protocol);
-				console.log(options);
-				console.log(action);
-			} else {
-				console.log('wiki_API.query: Without get_URL_options:');
-				console.log(action);
-				console.trace('!!!!');
-				throw '!!!!';
-			}
-		}
-
 		// 開始處理 query request。
 		if (!post_data && wiki_API.query.allow_JSONP) {
 			library_namespace.debug(
@@ -3166,7 +3189,38 @@ function module_code(library_namespace) {
 			get_URL(action, {
 				callback : callback
 			});
+
 		} else {
+			var get_URL_options;
+			if (options && !(get_URL_options = options.get_URL_options)) {
+				if ((get_URL_options = options.session)
+						|| (options.token && ((get_URL_options = options)))) {
+					if (!get_URL_options.get_URL_options) {
+						library_namespace.debug(
+								'為 wiki_API instance，但無 agent，需要造出 agent。', 2,
+								'wiki_API.query');
+						setup_API_URL(get_URL_options, true);
+					}
+					get_URL_options = get_URL_options.get_URL_options;
+
+				}
+			}
+
+			if (false) {
+				// test options.get_URL_options
+				if (get_URL_options) {
+					if (false)
+						console.log('wiki_API.query: Using get_URL_options: '
+								+ get_URL_options.agent);
+					// console.log(options);
+					// console.log(action);
+				} else {
+					// console.trace('wiki_API.query: Without get_URL_options');
+					// console.log(action);
+					throw 'wiki_API.query: Without get_URL_options';
+				}
+			}
+
 			get_URL(action, function(XMLHttp) {
 				var response = XMLHttp.responseText;
 				library_namespace.debug('response ('
@@ -3219,7 +3273,7 @@ function module_code(library_namespace) {
 					library_namespace.show_value(response);
 				if (typeof callback === 'function')
 					callback(response);
-			}, undefined, post_data, options && options.get_URL_options);
+			}, undefined, post_data, get_URL_options);
 		}
 	};
 
@@ -3844,7 +3898,7 @@ function module_code(library_namespace) {
 	 *            page title 頁面標題。
 	 * @param {Function}callback
 	 *            回調函數。 callback(title, titles, pages)
-	 * @param {ℕ⁰:Natural+0|String}namespace
+	 * @param {ℕ⁰:Natural+0|String|Object}namespace
 	 *            one of get_namespace.hash
 	 */
 	function get_list(type, title, callback, namespace) {
@@ -3879,21 +3933,23 @@ function module_code(library_namespace) {
 			title = [ , title ];
 
 		var continue_from = prefix + 'continue',
-		// {wiki_API}options.continue_wiki: 藉以取得後續檢索用索引值之 {wiki_API}。
+		// {wiki_API}options.continue_session: 藉以取得後續檢索用索引值之 {wiki_API}。
 		// 若未設定 .next_mark，才會自 options.get_continue 取得後續檢索用索引值。
-		continue_wiki = options.continue_wiki;
-		if (continue_wiki)
-			if (continue_wiki.constructor === wiki_API) {
+		continue_session = options.continue_session;
+		if (continue_session)
+			if (continue_session.constructor === wiki_API) {
 				library_namespace.debug(
 						'直接傳入了 {wiki_API}；可延續使用上次的後續檢索用索引值，避免重複 loading page。',
 						4, 'get_list');
 				// usage:
-				// options: { continue_wiki : wiki, get_continue : log_to }
+				// options: { continue_session : wiki_API instance ,
+				// get_continue : log_to }
 				// 注意: 這裡會改變 options！
-				// assert: {Object}continue_wiki.next_mark
-				if (continue_from in continue_wiki.next_mark) {
-					// {String}continue_wiki.next_mark[continue_from]: 後續檢索用索引值。
-					options[continue_from] = continue_wiki.next_mark[continue_from];
+				// assert: {Object}continue_session.next_mark
+				if (continue_from in continue_session.next_mark) {
+					// {String}continue_session.next_mark[continue_from]:
+					// 後續檢索用索引值。
+					options[continue_from] = continue_session.next_mark[continue_from];
 					// 經由,經過,通過來源
 					library_namespace.info('get_list: continue from ['
 							+ options[continue_from] + '] via {wiki_API}');
@@ -3902,13 +3958,13 @@ function module_code(library_namespace) {
 				} else {
 					// 設定好 options.get_continue，以進一步從 page 取得後續檢索用索引值。
 					if (typeof options.get_continue === 'string')
-						// 採用 continue_wiki 之 domain。
-						options.get_continue = [ continue_wiki.API_URL,
+						// 採用 continue_session 之 domain。
+						options.get_continue = [ continue_session.API_URL,
 								options.get_continue ];
 				}
 			} else {
 				library_namespace.debug('傳入的不是 {wiki_API}。 ', 4, 'get_list');
-				continue_wiki = undefined;
+				continue_session = undefined;
 			}
 
 		// options.get_continue: 用以取用後續檢索用索引值之 title。
@@ -3919,8 +3975,8 @@ function module_code(library_namespace) {
 			//
 			? options.get_continue : [ title[0], options.get_continue ], {
 				type : type,
-				// options.wiki: 作業中之 {wiki_API}
-				continue_key : (continue_wiki || options.wiki).continue_key,
+				session : continue_session || session,
+				continue_key : (continue_session || session).continue_key,
 				callback : function(continuation_data) {
 					if (continuation_data = continuation_data[continue_from]) {
 						library_namespace.info('get_list: continue from ['
@@ -3929,8 +3985,8 @@ function module_code(library_namespace) {
 						// 刪掉標記，避免無窮迴圈。
 						delete options.get_continue;
 						// 設定/紀錄後續檢索用索引值，避免無窮迴圈。
-						if (continue_wiki)
-							continue_wiki.next_mark
+						if (continue_session)
+							continue_session.next_mark
 
 							[continue_from] = continuation_data;
 						else
@@ -4020,28 +4076,28 @@ function module_code(library_namespace) {
 			if (library_namespace.is_Object(next_index)) {
 				pages.next_index = next_index;
 				library_namespace.debug(
-						'因為 continue_wiki 可能與作業中之 {wiki_API} 不同，'
+						'因為 continue_session 可能與作業中之 wiki_API instance 不同，'
 						//
 						+ '因此需要在本函數 function get_list() 中設定好。', 4, 'get_list');
-				// console.log(continue_wiki);
-				if (continue_wiki
-				// options.wiki: 作業中之 {wiki_API}
-				|| (continue_wiki = options.wiki)) {
-					// console.log(continue_wiki.next_mark);
+				// console.log(continue_session);
+				if (continue_session
+				//
+				|| (continue_session = session)) {
+					// console.log(continue_session.next_mark);
 					// console.log(next_index);
-					// console.log(continue_wiki);
+					// console.log(continue_session);
 					if ('query-continue' in data)
 						// style of 2014 CE. 例如:
 						// {backlinks:{blcontinue:'[0|12]'}}
 						for ( var type_index in next_index)
-							Object.assign(continue_wiki.next_mark,
+							Object.assign(continue_session.next_mark,
 									next_index[type_index]);
 					else
 						// nowadays. e.g.,
 						// {continue: { blcontinue: '0|123', continue: '-||' }}
-						Object.assign(continue_wiki.next_mark, next_index);
+						Object.assign(continue_session.next_mark, next_index);
 					library_namespace.debug('next index of ' + type + ': '
-							+ continue_wiki.show_next());
+							+ continue_session.show_next());
 				}
 				if (library_namespace.is_debug(2)
 				// .show_value() @ interact.DOM, application.debug
@@ -4222,14 +4278,14 @@ function module_code(library_namespace) {
 			options = library_namespace.null_Object();
 
 		if (!options.initialized) {
-			if (!options.wiki)
-				options.wiki = new wiki_API;
+			if (!options.session)
+				options.session = new wiki_API;
 			if (!options.type)
 				options.type = wiki_API.list.default_type;
 			options.initialized = true;
 		}
 
-		options.wiki[options.type](target, function(title, titles, pages) {
+		options.session[options.type](target, function(title, titles, pages) {
 			library_namespace.debug('Get ' + pages.length + ' ' + options.type
 					+ ' pages of [[' + title + ']]', 2, 'wiki_API.list');
 			if (typeof options.callback === 'function') {
@@ -4252,7 +4308,7 @@ function module_code(library_namespace) {
 				callback(options.pages, target, options);
 			}
 		}, {
-			continue_wiki : options.wiki,
+			continue_session : options.session,
 			limit : options.limit || 'max'
 		});
 	};
@@ -4348,7 +4404,7 @@ function module_code(library_namespace) {
 		}
 
 		if (!session)
-			// 初始化 session。這裡 callback 當作 API_URL。
+			// 初始化 session 與 agent。這裡 callback 當作 API_URL。
 			session = new wiki_API(name, password, API_URL);
 		// copy configurations
 		if (options.preserve_password)
@@ -4562,7 +4618,7 @@ function module_code(library_namespace) {
 					// page_data.title, page_data)
 					text(page_data), token, options, callback);
 				}
-			});
+			}, options);
 			return;
 		}
 
@@ -4628,12 +4684,10 @@ function module_code(library_namespace) {
 		library_namespace.debug('#2: ' + Object.keys(options).join(','), 4,
 				'wiki_API.edit');
 
-		var with_get_URL_options;
-		if (options.get_URL_options) {
-			with_get_URL_options = {
-				get_URL_options : options.get_URL_options
-			};
-			delete options.get_URL_options;
+		var session;
+		if ('session' in options) {
+			session = options.session;
+			delete options.session;
 		}
 
 		wiki_API.query(action, function(data) {
@@ -4683,7 +4737,7 @@ function module_code(library_namespace) {
 			if (typeof callback === 'function')
 				// title.title === get_page_title(title)
 				callback(title.title, error, data);
-		}, options, with_get_URL_options);
+		}, options, session);
 	};
 
 	/**
@@ -4963,7 +5017,7 @@ function module_code(library_namespace) {
 					wiki_API.redirects(redirect_to, callback, options);
 				else
 					wiki_API.redirects(title, callback, options);
-			});
+			}, options);
 			return;
 		}
 
@@ -6656,8 +6710,7 @@ function module_code(library_namespace) {
 							+ get_page_title(title) + ']].');
 					wiki_API.page(title, function(page_data) {
 						callback(page_data);
-					}, Object.assign(library_namespace.null_Object(), _this,
-							operation));
+					}, library_namespace.new_options(_this, operation));
 				};
 				break;
 
@@ -7378,15 +7431,17 @@ function module_code(library_namespace) {
 			page : title,
 			nttopic : topic,
 			ntcontent : text,
-			ntformat : 'wikitext',
-			token : library_namespace.is_Object(token) ? token.csrftoken
-					: token
+			ntformat : 'wikitext'
 		};
 
 		wiki_API.login.copy_keys.forEach(function(key) {
 			if (options[key])
 				_options[key] = options[key];
 		});
+
+		// the token should be sent as the last parameter.
+		_options.token = library_namespace.is_Object(token) ? token.csrftoken
+				: token;
 
 		wiki_API.query(action, typeof callback === 'function'
 		//
@@ -7460,17 +7515,49 @@ function module_code(library_namespace) {
 	 */
 	var wikidata_API_URL = api_URL('wikidata');
 
-	wiki_API.prototype.setup_data = function(API_URL, password) {
-		if (!this.data_API) {
-			if (API_URL)
-				API_URL = this.data_API_URL || wikidata_API_URL;
-			// delete this.data_API_URL;
-
-			this.data_API = new wiki_API(this.token.lgname, password
-					|| this.token.lgpassword, API_URL);
+	/**
+	 * Combine ((session)) with Wikidata. 立即性(asynchronous)設定 this.data_session。
+	 * 
+	 * @param {wiki_API}session
+	 *            正作業中之 wiki_API instance。
+	 * @param {String}[API_URL]
+	 *            language code or API URL of Wikidata
+	 * @param {String}[password]
+	 *            user password
+	 * @param {Boolean}[force]
+	 *            無論如何重新設定 this.data_session。
+	 * 
+	 * @inner
+	 */
+	function setup_data_session(session, API_URL, password, force) {
+		if (force === undefined) {
+			if (typeof password === 'boolean') {
+				// shift arguments.
+				force = password;
+				password = null;
+			} else if (typeof API_URL === 'boolean' && password === undefined) {
+				// shift arguments.
+				force = API_URL;
+				API_URL = null;
+			}
 		}
-		return this.data_API;
-	};
+
+		if (session.data_session && API_URL & !force)
+			return;
+
+		if (session.data_session) {
+			// 直接清空貯列。
+			// TODO: 強制中斷所有正在執行之任務。
+			session.data_session.actions.clear();
+		}
+
+		// set Wikidata session
+		session.data_session = new wiki_API(session.token.lgname,
+		// wiki.set_data(host, password)
+		password || session.token.lgpassword,
+		// API_URL: host
+		typeof API_URL === 'string' && api_URL(API_URL || wikidata_API_URL));
+	}
 
 	// ------------------------------------------------------------------------
 
@@ -8046,17 +8133,15 @@ function module_code(library_namespace) {
 		options.token = library_namespace.is_Object(token) ? token.csrftoken
 				: token;
 
-		var with_get_URL_options;
-		if (options.get_URL_options) {
-			with_get_URL_options = {
-				get_URL_options : options.get_URL_options
-			};
-			delete options.get_URL_options;
+		var session;
+		if ('session' in options) {
+			session = options.session;
+			delete options.session;
 		}
 
 		wiki_API.query(action, function(data) {
 			callback(data);
-		}, options, with_get_URL_options);
+		}, options, session);
 	}
 
 	// ------------------------------------------------------------------------

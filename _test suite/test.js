@@ -79,6 +79,13 @@ function test_base() {
 		// 可以用 delete options[library_namespace.new_options.new_key] 的方法強迫造出新的 options。
 		o2 = CeL.new_options(o1);
 		assert(o1 !== o2, 'CeL.new_options(options) #5');
+
+		o1 = { r:3, w:'22' };
+		o2 = CeL.new_options(o1, options);
+		delete o2[CeL.new_options.new_key];
+		Object.assign(o1, options);
+		assert(o2 !== o1, 'CeL.new_options(options) #6');
+		assert([JSON.stringify(o2), JSON.stringify(o1)], 'CeL.new_options(options) #7');
 	});
 	
 	error_count += CeL.test('dependency_chain', function(assert) {

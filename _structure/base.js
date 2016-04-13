@@ -440,7 +440,7 @@ function (global) {
 	 * 
 	 * @since 2016/3/13 13:58:9
 	 */
-	function setup_options(options, new_one) {
+	function _setup_options(options, new_one) {
 		if (options && !new_one) {
 			return options;
 		}
@@ -493,15 +493,22 @@ function (global) {
 	 * 
 	 * @since 2016/03/14 16:34:09
 	 */
-	function new_options(options, new_one) {
+	function new_options(options) {
 		// create a new one. copy options.
 		// or use Object.clone(options)
+		var length = arguments.length;
 		if (options) {
-			if (new_options.new_key in options)
+			if ((new_options.new_key in options) && length === 1)
 				return options;
 			options = Object.assign(null_Object(), options);
 		} else {
 			options = null_Object();
+		}
+		if (length > 1) {
+			for(var i = 1; i < length; i++)
+				//if (_.is_Object(arguments[i]))
+				if (arguments[i])
+					Object.assign(options, arguments[i]);
 		}
 		options[new_options.new_key] = true;
 		return options;
@@ -1888,7 +1895,7 @@ OS='UNIX'; // unknown
 	using_style = _.env.no_log_style,
 	/** {Object}default style of console. */
 	default_style = {
-		//trace : '',
+		// trace : '',
 		// debug 另外設定。
 		// debug : '',
 		log : 'green',
