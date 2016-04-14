@@ -3180,6 +3180,29 @@ function module_code(library_namespace) {
 			}
 		}
 
+		/**
+		 * TODO: 簡易的泛用先期處理程式。
+		 * 
+		 * @inner
+		 */
+		function response_handler(response) {
+			if (library_namespace.is_debug(3)
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+				library_namespace.show_value(data, 'wiki_API.query: data');
+
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.err('wiki_API.query: ['
+				//
+				+ error.code + '] ' + error.info);
+			}
+
+			if (typeof callback === 'function')
+				callback(response);
+		}
+
 		// 開始處理 query request。
 		if (!post_data && wiki_API.query.allow_JSONP) {
 			library_namespace.debug(
@@ -3224,6 +3247,7 @@ function module_code(library_namespace) {
 
 			get_URL(action, function(XMLHttp) {
 				var response = XMLHttp.responseText;
+				// response = XMLHttp.responseXML;
 				library_namespace.debug('response ('
 						+ response.length
 						+ ' characters): '
@@ -3267,11 +3291,6 @@ function module_code(library_namespace) {
 						return;
 					}
 
-				// response = XMLHttp.responseXML;
-				if (library_namespace.is_debug()
-				// .show_value() @ interact.DOM, application.debug
-				&& library_namespace.show_value)
-					library_namespace.show_value(response);
 				if (typeof callback === 'function')
 					callback(response);
 			}, undefined, post_data, get_URL_options);
@@ -7625,6 +7644,16 @@ function module_code(library_namespace) {
 			action[1] += '&continue=' + options['continue'];
 
 		wiki_API.query(action, function(data) {
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.err('wikidata_edit: ['
+				//
+				+ error.code + '] ' + error.info);
+				callback(undefined, error);
+				return;
+			}
+
 			// console.log(data);
 			var list;
 			if (!Array.isArray(data.search)) {
@@ -8041,6 +8070,16 @@ function module_code(library_namespace) {
 			action[1] += '&languages=' + options.languages;
 
 		wiki_API.query(action, function(data) {
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.err('wikidata_edit: ['
+				//
+				+ error.code + '] ' + error.info);
+				callback(undefined, error);
+				return;
+			}
+
 			// data:
 			// {entities:{Q1:{pageid:129,lastrevid:0,id:'P1',labels:{},claims:{},...},P1:{id:'P1',missing:''}},success:1}
 			// @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON
@@ -8150,13 +8189,21 @@ function module_code(library_namespace) {
 			}
 		}
 
-		options.data = encodeURIComponent(JSON.stringify(data));
+		options.data = JSON.stringify(data);
 
 		// the token should be sent as the last parameter.
 		options.token = library_namespace.is_Object(token) ? token.csrftoken
 				: token;
 
 		wiki_API.query(action, function(data) {
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.err('wikidata_edit: ['
+				//
+				+ error.code + '] ' + error.info);
+			}
+
 			callback(data);
 		}, options, session);
 	}
