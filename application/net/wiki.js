@@ -2322,6 +2322,13 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 
 		case 'data':
+			if (!('data_session' in this)) {
+				// rollback, 確保已設定 this.data_session。
+				this.actions.unshift([ 'set_data' ], next);
+				this.next();
+				break;
+			}
+
 			if (typeof next[2] === 'function') {
 				// 未設定 property
 				// shift arguments
@@ -2343,6 +2350,13 @@ function module_code(library_namespace) {
 			break;
 
 		case 'edit_data':
+			if (!('data_session' in this)) {
+				// rollback, 確保已設定 this.data_session。
+				this.actions.unshift([ 'set_data' ], next);
+				this.next();
+				break;
+			}
+
 			// wiki.edit_data([id, ]data[, options, callback])
 			if (typeof next[1] === 'function'
 			//
