@@ -2344,17 +2344,24 @@ function module_code(library_namespace) {
 
 		case 'edit_data':
 			// wiki.edit_data([id, ]data[, options, callback])
-			if (typeof next[1] === 'object' && next[1] && !next[1].id) {
+			if (typeof next[1] === 'function'
+			//
+			|| typeof next[1] === 'object' && next[1] && !next[1].id) {
 				// 未設定 id，第一個即為 data。
 				// shift arguments
 				next.splice(1, 0, this.last_data);
+			}
+
+			if (typeof next[3] === 'function' && !next[4]) {
+				// 未輸入 options，但輸入 callback。
+				next.splice(3, 0, null);
 			}
 
 			// wikidata_edit(id, data, token, options, callback)
 			wikidata_edit(next[1], next[2], this.data_session.token,
 			// next[3] : options
 			Object.assign({
-				session : this.data_session,
+				session : this.data_session
 			}, next[3]),
 			//
 			function(data) {
@@ -7019,7 +7026,9 @@ function module_code(library_namespace) {
 			function try_dump() {
 				var start_read_time = Date.now(), length = id_list.length,
 				// max_length = 0,
-				count = 0, file_size, rev_of_id = [], is_id = id_list.is_id;
+				count = 0, limit = config.limit,
+				//
+				file_size, rev_of_id = [], is_id = id_list.is_id;
 
 				id_list.forEach(function(id, index) {
 					if (id in rev_of_id)
@@ -7043,6 +7052,11 @@ function module_code(library_namespace) {
 							return [ CeL.wiki.edit.cancel, '條目已不存在或被刪除' ];
 						if (page_data.ns !== 0)
 							return [ CeL.wiki.edit.cancel, '本作業僅處理條目命名空間' ];
+					}
+
+					// TODO
+					if (false && limit > 0 && count > limit) {
+						library_namespace.log(count + '筆資料，已到 limit，跳出。');
 					}
 
 					if (++count % 1e4 === 0) {
@@ -7196,8 +7210,6 @@ function module_code(library_namespace) {
 
 	/** {String}default list file name (will append .json by wiki_API.cache) */
 	traversal_pages.list_file = 'all_pages';
-
-	wiki_API.traversal = traversal_pages;
 
 	// --------------------------------------------------------------------------------------------
 	// Flow page support. Flow 功能支援。
@@ -8154,7 +8166,7 @@ function module_code(library_namespace) {
 
 	</code>
 	 * 
-	 * @param {String}id
+	 * @param {String|Array}id
 	 *            id to modify or entity you want to create.
 	 * @param {Object|Function}data
 	 *            used as the data source. data(entity)
@@ -8222,14 +8234,19 @@ function module_code(library_namespace) {
 		delete options.API_URL;
 
 		if (id) {
-			if (id === 'item' || id === 'property')
+			if (id === 'item' || id === 'property') {
 				options['new'] = id;
-			else if (/^Q\d{1,10}$/.test(id))
+			} else if (/^Q\d{1,10}$/.test(id)) {
 				// e.g., 'Q1'
 				options.id = id;
-			else if (typeof id === 'object' && /^Q\d{1,10}$/.test(id.id))
+			} else if (typeof id === 'object' && /^Q\d{1,10}$/.test(id.id)) {
 				options.id = id.id;
-			else {
+			} else if (Array.isArray(id) && id.length === 2
+			// for id = [ {String}language/site, {String}title ]
+			&& /^[a-z]{2,20}$/i.test(id[0])) {
+				options.site = id[0].includes('wiki') ? id[0] : id[0] + 'wiki';
+				options.title = id[1];
+			} else {
 				library_namespace.warn('wikidata_edit: Invalid id: ' + id);
 			}
 		}
@@ -8349,6 +8366,7 @@ function module_code(library_namespace) {
 		uniq_list : unique_list,
 
 		parse_dump_xml : parse_dump_xml,
+		traversal : traversal_pages,
 
 		Flow : Flow_info,
 
