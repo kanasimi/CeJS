@@ -2305,8 +2305,12 @@ function module_code(library_namespace) {
 
 		case 'set_data':
 			// 設定 this.data_session。
-			setup_data_session(this /* session */, next[1], next[2], next[3]);
-			this.next();
+			// setup_data_session(session, API_URL, password, force, callback)
+			setup_data_session(this /* session */, next[1], next[2], next[3],
+			// 確保 data_session login 了才執行下一步。
+			function() {
+				_this.next();
+			});
 			break;
 
 		case 'run':
@@ -2340,26 +2344,27 @@ function module_code(library_namespace) {
 
 		case 'edit_data':
 			// wiki.edit_data([id, ]data[, options, callback])
-			if (typeof next[1] === 'object' && !next[1].id) {
+			if (typeof next[1] === 'object' && next[1] && !next[1].id) {
 				// 未設定 id，第一個即為 data。
 				// shift arguments
-				next.splice(1, 0, this.last_data.id);
+				next.splice(1, 0, this.last_data);
 			}
 
 			// wikidata_edit(id, data, token, options, callback)
 			wikidata_edit(next[1], next[2], this.data_session.token,
 			// next[3] : options
 			Object.assign({
-				session : this.data_session
+				session : this.data_session,
 			}, next[3]),
 			//
 			function(data) {
+				if (is_entity(data))
+					_this.last_data = data;
 				// next[4] : callback
 				if (typeof next[4] === 'function')
 					next[4].call(this, data);
 				_this.next();
 			});
-			this.next();
 			break;
 
 		case 'query':
@@ -4642,30 +4647,9 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var action;
-		// 基本檢測。
-		if (Array.isArray(text) && text[0] === wiki_API.edit.cancel) {
-			action = text.slice(1);
-			library_namespace.debug('採用個別特殊訊息: ' + action, 2, 'wiki_API.edit');
-			// 可以利用 ((return [ CeL.wiki.edit.cancel, 'reason' ];)) 來回傳 reason。
-			// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來 skip。
-			if (action.length === 1)
-				action[1] = action[0];
-		} else if (text === wiki_API.edit.cancel)
-			action = [ 'cancel', '放棄編輯頁面' ];
-		else if (!text)
-			action = [ 'empty', typeof text === 'string' ? '內容被清空' : '未設定編輯內容' ];
-
+		var action = wiki_API.edit.check_data(text, title, 'wiki_API.edit');
 		if (action) {
-			title = get_page_title(title);
-			if (action[1] !== 'skip') {
-				// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
-				library_namespace.warn('wiki_API.edit: [[' + title + ']]: '
-						+ action[1]);
-			} else {
-				library_namespace.debug('Skip [[' + title + ']]', 2);
-			}
-			return callback(title, action[0]);
+			return callback(get_page_title(title), action);
 		}
 
 		action = 'edit';
@@ -4761,12 +4745,53 @@ function module_code(library_namespace) {
 	};
 
 	/**
-	 * 放棄編輯頁面用。
+	 * 放棄編輯頁面用。<br />
+	 * assert: true === !!wiki_API.edit.cancel
 	 * 
 	 * @type any
 	 */
 	wiki_API.edit.cancel = {
 		cancel : '放棄編輯頁面用'
+	};
+
+	/**
+	 * 對要編輯的資料作基本檢測。
+	 * 
+	 * @param data
+	 *            要編輯的資料。
+	 * @param title
+	 *            title or id.
+	 * @param {String}caller
+	 *            caller to show.
+	 */
+	wiki_API.edit.check_data = function(data, title, caller) {
+		var action;
+		if (Array.isArray(data) && data[0] === wiki_API.edit.cancel) {
+			action = data.slice(1);
+			library_namespace.debug('採用個別特殊訊息: ' + action, 2, caller
+					|| 'wiki_API.edit.check_data');
+			// 可以利用 ((return [ CeL.wiki.edit.cancel, 'reason' ];)) 來回傳 reason。
+			// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來 skip。
+			if (action.length === 1)
+				action[1] = action[0];
+		} else if (data === wiki_API.edit.cancel) {
+			action = [ 'cancel', '放棄編輯頁面' ];
+		} else if (!data) {
+			action = [ 'empty', typeof data === 'string' ? '內容被清空' : '未設定編輯內容' ];
+		}
+
+		if (action) {
+			title = get_page_title(title);
+			if (action[1] !== 'skip') {
+				// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
+				library_namespace.warn((caller || 'wiki_API.edit.check_data')
+						+ ': [[' + title + ']]: ' + action[1]);
+			} else {
+				library_namespace.debug('Skip [[' + title + ']]', 2, caller
+						|| 'wiki_API.edit.check_data');
+			}
+			return action[0];
+		}
 	};
 
 	/**
@@ -7526,6 +7551,11 @@ function module_code(library_namespace) {
 	 * @since
 	 */
 
+	function is_entity(value) {
+		return library_namespace.is_Object(value) && value.id
+				&& typeof value.labels === 'object';
+	}
+
 	/**
 	 * API URL of wikidata.<br />
 	 * e.g., 'https://www.wikidata.org/w/api.php',
@@ -7549,7 +7579,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @inner
 	 */
-	function setup_data_session(session, API_URL, password, force) {
+	function setup_data_session(session, API_URL, password, force, callback) {
 		if (force === undefined) {
 			if (typeof password === 'boolean') {
 				// shift arguments.
@@ -7583,12 +7613,13 @@ function module_code(library_namespace) {
 		password || session.token.lgpassword,
 		// API_URL: host
 		typeof API_URL === 'string' && api_URL(API_URL) || wikidata_API_URL);
+		session.data_session.run(callback);
 	}
 
 	// ------------------------------------------------------------------------
 
 	/**
-	 * 搜索包含特定關鍵字(label=key)的項目。
+	 * 搜索標籤包含特定關鍵字(label=key)的項目。
 	 * 
 	 * 此搜索有極大問題:不能自動偵測與轉換中文繁簡體。 或須轉成英語再行搜尋。
 	 * 
@@ -7603,7 +7634,8 @@ function module_code(library_namespace) {
 	 * @param {String}key
 	 *            要搜尋的關鍵字。
 	 * @param {Function}[callback]
-	 *            回調函數。 callback({Array}entity or {String}list)
+	 *            回調函數。 callback({Array}entity list or {Object}entity or
+	 *            {String}entity id)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
@@ -7894,7 +7926,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('Trying to get entity ' + value, 1,
 						'wikidata_datavalue');
 				wikidata_entity(value, options && options.get_object ? callback
-				// default: get label
+				// default: get label 標籤
 				: function(entity) {
 					entity = entity.labels || entity;
 					entity = entity[options && options.language
@@ -8124,24 +8156,20 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}id
 	 *            id to modify or entity you want to create.
-	 * @param {Object}data
-	 *            used as the data source.
+	 * @param {Object|Function}data
+	 *            used as the data source. data(entity)
 	 * @param {Object}token
 	 *            login 資訊，包含“csrf”令牌/密鑰。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @param {Function}callback
-	 *            回調函數。
+	 *            回調函數。 callback(entity, error)
 	 */
 	function wikidata_edit(id, data, token, options, callback) {
-		if ((typeof title === 'object' || typeof title === 'function')
-				&& !callback) {
+		if (typeof options === 'function' && !callback) {
 			// shift arguments.
 			callback = options;
-			options = token;
-			token = data;
-			data = title;
-			title = null;
+			options = null;
 		}
 
 		if (!library_namespace.is_Object(options))
@@ -8149,12 +8177,29 @@ function module_code(library_namespace) {
 			options = library_namespace.null_Object();
 
 		if (typeof data === 'function') {
-			wikidata_entity(key, property, function(_data) {
+			wikidata_entity(key, property, function(entity) {
+				if ('missing' in entity) {
+					// TODO
+				}
 				delete options.props;
 				delete options.languages;
-				wikidata_edit(id, data(_data), token, options, callback);
+				wikidata_edit(id, data(entity), token, options, callback);
 			}, options);
 			return;
+		}
+
+		if (typeof id === 'object' && id.id) {
+			// 輸入 id 為實體項目entity
+			if (!options.baserevid) {
+				// 檢測編輯衝突用。
+				options.baserevid = id.lastrevid;
+			}
+			id = id.id;
+		}
+
+		var action = wiki_API.edit.check_data(data, id, 'wikidata_edit');
+		if (action) {
+			return callback(id, action);
 		}
 
 		var session;
@@ -8163,15 +8208,15 @@ function module_code(library_namespace) {
 			delete options.session;
 		}
 
-		// edit實體項目entity
-		// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
 		// TODO: 創建Wikibase陳述。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
 		// TODO: 創建實體項目重定向。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
-		var action = [
-				options.API_URL || session && session.API_URL
-						|| wikidata_API_URL, 'wbeditentity' ];
+		action = [
+		// edit實體項目entity
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
+		options.API_URL || session && session.API_URL || wikidata_API_URL,
+				'wbeditentity' ];
 
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！
 		delete options.API_URL;
@@ -8202,8 +8247,11 @@ function module_code(library_namespace) {
 				library_namespace.err('wikidata_edit: ['
 				//
 				+ error.code + '] ' + error.info);
+				callback(undefined, error);
 			}
 
+			if (data.entity)
+				data = data.entity;
 			callback(data);
 		}, options, session);
 	}
