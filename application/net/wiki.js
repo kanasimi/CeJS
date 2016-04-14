@@ -7607,7 +7607,9 @@ function module_code(library_namespace) {
 			options.language = key[0], key = key[1];
 
 		key = key.trim();
-		var action = [ options.API_URL || wikidata_API_URL,
+		var action = [ options.API_URL
+		//
+		|| options.session && options.session.API_URL || wikidata_API_URL,
 		// search. e.g.,
 		// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
 		'wbsearchentities&search=' + encodeURIComponent(key)
@@ -7954,6 +7956,9 @@ function module_code(library_namespace) {
 			options = library_namespace.new_options(options);
 		}
 
+		var API_URL = options.API_URL || options.session
+				&& options.session.API_URL || wikidata_API_URL;
+
 		// ----------------------------
 		// convert property: title to id
 		if (typeof property === 'string' && !/^P\d{1,10}$/.test(property))
@@ -7971,7 +7976,7 @@ function module_code(library_namespace) {
 						'wikidata_entity');
 				wikidata_entity(key, id, callback, options);
 			}, {
-				API_URL : options.API_URL,
+				API_URL : API_URL,
 				type : 'property',
 				get_id : true,
 				limit : 1
@@ -8000,7 +8005,7 @@ function module_code(library_namespace) {
 							'wikidata_entity');
 					wikidata_entity(id, property, callback, options);
 				}, {
-					API_URL : options.API_URL,
+					API_URL : API_URL,
 					get_id : true,
 					limit : 1
 				});
@@ -8025,8 +8030,7 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=wbgetclaims&ids=P1&props=claims&utf8=1
 		// TODO: 維基百科 sitelinks
 		// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=sitelinks&utf8=1
-		var action = [ options.API_URL || wikidata_API_URL,
-				'wbgetentities&ids=' + key ];
+		var action = [ API_URL, 'wbgetentities&ids=' + key ];
 		if (property && !options.props)
 			options.props = 'claims';
 		if (options.props)
@@ -8114,13 +8118,21 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		var session;
+		if ('session' in options) {
+			session = options.session;
+			delete options.session;
+		}
+
 		// edit實體項目entity
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
 		// TODO: 創建Wikibase陳述。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
 		// TODO: 創建實體項目重定向。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
-		var action = [ options.API_URL || wikidata_API_URL, 'wbeditentity' ];
+		var action = [
+				options.API_URL || session && session.API_URL
+						|| wikidata_API_URL, 'wbeditentity' ];
 
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！
 		delete options.API_URL;
@@ -8143,12 +8155,6 @@ function module_code(library_namespace) {
 		// the token should be sent as the last parameter.
 		options.token = library_namespace.is_Object(token) ? token.csrftoken
 				: token;
-
-		var session;
-		if ('session' in options) {
-			session = options.session;
-			delete options.session;
-		}
 
 		wiki_API.query(action, function(data) {
 			callback(data);
