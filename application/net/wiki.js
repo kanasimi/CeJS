@@ -2346,7 +2346,7 @@ function module_code(library_namespace) {
 			// wiki.edit_data([id, ]data[, options, callback])
 			if (typeof next[1] === 'function'
 			//
-			|| typeof next[1] === 'object' && next[1] && !next[1].id) {
+			|| typeof next[1] === 'object' && !is_entity(next[1])) {
 				// 未設定 id，第一個即為 data。
 				// shift arguments
 				next.splice(1, 0, this.last_data);
@@ -4656,7 +4656,8 @@ function module_code(library_namespace) {
 
 		var action = wiki_API.edit.check_data(text, title, 'wiki_API.edit');
 		if (action) {
-			return callback(get_page_title(title), action);
+			callback(get_page_title(title), action);
+			return;
 		}
 
 		action = 'edit';
@@ -8184,23 +8185,32 @@ function module_code(library_namespace) {
 			options = null;
 		}
 
+		if (!id) {
+			callback(undefined, 'Did not set id!');
+			return;
+		}
+
 		if (!library_namespace.is_Object(options))
 			// 前置處理。
 			options = library_namespace.null_Object();
 
 		if (typeof data === 'function') {
-			wikidata_entity(key, property, function(entity) {
-				if ('missing' in entity) {
-					// TODO
-				}
-				delete options.props;
-				delete options.languages;
-				wikidata_edit(id, data(entity), token, options, callback);
-			}, options);
-			return;
+			if (is_entity(id)) {
+				data = data(id);
+			} else {
+				wikidata_entity(id, options.props, function(entity) {
+					if (entity && ('missing' in entity)) {
+						// TODO
+					}
+					delete options.props;
+					delete options.languages;
+					wikidata_edit(id, data(entity), token, options, callback);
+				}, options);
+				return;
+			}
 		}
 
-		if (typeof id === 'object' && id.id) {
+		if (is_entity(id)) {
 			// 輸入 id 為實體項目entity
 			if (!options.baserevid) {
 				// 檢測編輯衝突用。
@@ -8211,7 +8221,8 @@ function module_code(library_namespace) {
 
 		var action = wiki_API.edit.check_data(data, id, 'wikidata_edit');
 		if (action) {
-			return callback(id, action);
+			callback(id, action);
+			return;
 		}
 
 		var session;
