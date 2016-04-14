@@ -2339,14 +2339,15 @@ function module_code(library_namespace) {
 			break;
 
 		case 'edit_data':
-			if (typeof next[1] === 'object') {
-				// 未設定 id
+			// wiki.edit_data([id, ]data[, options, callback])
+			if (typeof next[1] === 'object' && !next[1].id) {
+				// 未設定 id，第一個即為 data。
 				// shift arguments
 				next.splice(1, 0, this.last_data.id);
 			}
 
 			// wikidata_edit(id, data, token, options, callback)
-			wikidata_edit(next[1], next[2], this.token,
+			wikidata_edit(next[1], next[2], this.data_session.token,
 			// next[3] : options
 			Object.assign({
 				session : this.data_session
@@ -7551,12 +7552,18 @@ function module_code(library_namespace) {
 			session.data_session.actions.clear();
 		}
 
+		if (typeof API_URL === 'string' && !/wikidata/i.test(API_URL)
+				&& !/^[a-z\d]$/i.test(API_URL)) {
+			// e.g., 'test' → 'test.wikidata'
+			API_URL += '.wikidata';
+		}
+
 		// set Wikidata session
-		session.data_session = new wiki_API(session.token.lgname,
+		session.data_session = wiki_API.login(session.token.lgname,
 		// wiki.set_data(host, password)
 		password || session.token.lgpassword,
 		// API_URL: host
-		typeof API_URL === 'string' && api_URL(API_URL || wikidata_API_URL));
+		typeof API_URL === 'string' && api_URL(API_URL) || wikidata_API_URL);
 	}
 
 	// ------------------------------------------------------------------------
@@ -8094,8 +8101,9 @@ function module_code(library_namespace) {
 			title = null;
 		}
 
-		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
-		options = library_namespace.new_options(options);
+		if (!library_namespace.is_Object(options))
+			// 前置處理。
+			options = library_namespace.null_Object();
 
 		if (typeof data === 'function') {
 			wikidata_entity(key, property, function(_data) {
@@ -8117,17 +8125,20 @@ function module_code(library_namespace) {
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！
 		delete options.API_URL;
 
-		if (id)
+		if (id) {
 			if (id === 'item' || id === 'property')
-				option['new'] = id;
+				options['new'] = id;
 			else if (/^Q\d{1,10}$/.test(id))
 				// e.g., 'Q1'
-				option.id = id;
+				options.id = id;
+			else if (typeof id === 'object' && /^Q\d{1,10}$/.test(id.id))
+				options.id = id.id;
 			else {
 				library_namespace.warn('wikidata_edit: Invalid id: ' + id);
 			}
+		}
 
-		option.data = encodeURIComponent(JSON.stringify(data));
+		options.data = encodeURIComponent(JSON.stringify(data));
 
 		// the token should be sent as the last parameter.
 		options.token = library_namespace.is_Object(token) ? token.csrftoken
