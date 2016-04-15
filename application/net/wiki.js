@@ -2329,6 +2329,22 @@ function module_code(library_namespace) {
 				break;
 			}
 
+			if (typeof next[1] === 'function') {
+				// 直接輸入 callback。
+				if (this.last_data) {
+					next[1](this.last_data);
+					break;
+				} else {
+					if (!this.last_page) {
+						next[1].call(this, undefined,
+								'Did not set id! 未設定欲取得之特定實體id。');
+						this.next();
+						break;
+					}
+					next.splice(1, 0, this.last_page);
+				}
+			}
+
 			if (typeof next[2] === 'function') {
 				// 未設定 property
 				// shift arguments
@@ -2362,8 +2378,19 @@ function module_code(library_namespace) {
 			//
 			|| typeof next[1] === 'object' && !is_entity(next[1])) {
 				// 未設定 id，第一個即為 data。
-				// shift arguments
-				next.splice(1, 0, this.last_data);
+				// 直接輸入 callback。
+				if (this.last_data) {
+					// shift arguments
+					next.splice(1, 0, this.last_data);
+				} else {
+					if (!this.last_page) {
+						next[1].call(this, undefined,
+								'Did not set id! 未設定欲取得之特定實體id。');
+						this.next();
+						break;
+					}
+					next.splice(1, 0, this.last_page);
+				}
 			}
 
 			if (typeof next[3] === 'function' && !next[4]) {
@@ -3132,18 +3159,25 @@ function module_code(library_namespace) {
 
 		// 若為 query，非 edit (modify)，則不延遲等待。
 		var need_check_lag
-		// method 1:
-		// assert: typeof action[1] === 'string'
-		// = action[1].match(/(?:action|assert)=([a-z]+)(?:&|$)/),
 		// method 2: edit 時皆必須設定 token。
 		= post_data && post_data.token,
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait;
 
-		if (!need_check_lag) {
-			library_namespace.warn('wiki_API.query: Unknown action: '
-					+ action[1]);
-		} else if (need_check_lag = /edit|create/i.test(need_check_lag[1])) {
+		if (false) {
+			// method 1:
+			// assert: typeof action[1] === 'string'
+			need_check_lag = action[1]
+					.match(/(?:action|assert)=([a-z]+)(?:&|$)/);
+			if (!need_check_lag) {
+				library_namespace.warn('wiki_API.query: Unknown action: '
+						+ action[1]);
+			} else if (need_check_lag = /edit|create/i.test(need_check_lag[1])) {
+				to_wait = wiki_API.query.lag
+						- (Date.now() - wiki_API.query.last[action[0]]);
+			}
+		}
+		if (need_check_lag) {
 			to_wait = wiki_API.query.lag
 					- (Date.now() - wiki_API.query.last[action[0]]);
 		}
@@ -7976,6 +8010,35 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
+	 * 自 options.session 取得 wikidata API 所須之 site parameter。
+	 * 
+	 * @param {Object}options
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @return {String}wikidata API 所須之 site parameter。
+	 * 
+	 * @inner
+	 */
+	function wikidata_get_site(options) {
+		var site = options.session;
+		if (site) {
+			// 注意:在取得 page 後，中途更改過 API_URL 的話，這邊會取得錯誤的資訊！
+			if (site.language) {
+				site = site.language + 'wiki';
+			} else if (site = site.API_URL.match(PATTERN_wiki_project_URL)) {
+				// 去掉 '.org' 之類。
+				site = site[2].replace(/\.[^.]+$/, '').replace('.', '')
+						.replace(/pedia$/, '');
+			}
+		}
+		if (!site)
+			site = default_language + 'wiki';
+		// e.g., 'zh-min-nanwiki' → 'zh_min_nanwiki'
+		site = site.replace(/-/g, '_');
+		return site;
+	}
+
+	/**
 	 * 取得特定實體的特定屬性值。
 	 * 
 	 * @example<code>
@@ -8008,6 +8071,9 @@ function module_code(library_namespace) {
 	wiki.data(id, function(entity){}, {is_key:true}).edit_data(function(entity){});
 	wiki.page('title').data(function(entity){}, options).edit_data().edit()
 
+	wiki = Wiki(true)
+	wiki.page('宇宙').data(function(data){result=data;console.log(data);})
+
 	wiki = Wiki(true, 'wikidata');
 	wiki.data('宇宙', function(data){result=data;console.log(data.labels['en'].value==='universe');})
 	wiki.data('宇宙', '形狀', function(data){result=data;console.log(data==='宇宙的形狀');})
@@ -8016,7 +8082,7 @@ function module_code(library_namespace) {
 	</code>
 	 * 
 	 * @param {String|Array}key
-	 *            entity id. 特定實體id。 e.g., 'Q1', 'P6'
+	 *            entity id. 欲取得之特定實體id。 e.g., 'Q1', 'P6'
 	 * @param {String}[property]
 	 *            取得特定屬性值。
 	 * @param {Function}[callback]
@@ -8121,7 +8187,15 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=wbgetclaims&ids=P1&props=claims&utf8=1
 		// TODO: 維基百科 sitelinks
 		// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=sitelinks&utf8=1
-		var action = [ API_URL, 'wbgetentities&ids=' + key ];
+		var action;
+		if (get_page_content.is_page_data(key)) {
+			action = 'sites=' + wikidata_get_site(options) + '&titles='
+					+ encodeURIComponent(key.title);
+		} else {
+			action = 'ids=' + key;
+		}
+		action = [ API_URL, 'wbgetentities&' + action ];
+
 		if (property && !options.props)
 			options.props = 'claims';
 		if (options.props)
@@ -8179,8 +8253,8 @@ function module_code(library_namespace) {
 
 	wiki = Wiki(true, 'test.wikidata');
 	// TODO:
-	wiki.page('宇宙').data(function(){}).edit(function(){return '';}).edit_data(function(){return {};});
-	wiki.page('宇宙').edit_data(function(){return {};});
+	wiki.page('宇宙').data(function(data){result=data;console.log(data);}).edit(function(){return '';}).edit_data(function(){return {};});
+	wiki.page('宇宙').edit_data(function(data){result=data;console.log(data);});
 
 	</code>
 	 * 
@@ -8203,7 +8277,7 @@ function module_code(library_namespace) {
 		}
 
 		if (!id) {
-			callback(undefined, 'Did not set id!');
+			callback(undefined, 'Did not set id! 未設定欲取得之特定實體id。');
 			return;
 		}
 
@@ -8242,6 +8316,34 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		if (id) {
+			if (is_entity(id)
+			// && /^Q\d{1,10}$/.test(id.id)
+			) {
+				options.id = id.id;
+
+			} else if (get_page_content.is_page_data(id)) {
+				options.site = wikidata_get_site(options);
+				options.title = encodeURIComponent(id.title);
+
+			} else if (id === 'item' || id === 'property') {
+				options['new'] = id;
+
+			} else if (/^Q\d{1,10}$/.test(id)) {
+				// e.g., 'Q1'
+				options.id = id;
+
+			} else if (Array.isArray(id) && id.length === 2
+			// for id = [ {String}language/site, {String}title ]
+			&& /^[a-z]{2,20}$/i.test(id[0])) {
+				options.site = id[0].includes('wiki') ? id[0] : id[0] + 'wiki';
+				options.title = id[1];
+
+			} else {
+				library_namespace.warn('wikidata_edit: Invalid id: ' + id);
+			}
+		}
+
 		var session;
 		if ('session' in options) {
 			session = options.session;
@@ -8260,24 +8362,6 @@ function module_code(library_namespace) {
 
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！
 		delete options.API_URL;
-
-		if (id) {
-			if (id === 'item' || id === 'property') {
-				options['new'] = id;
-			} else if (/^Q\d{1,10}$/.test(id)) {
-				// e.g., 'Q1'
-				options.id = id;
-			} else if (typeof id === 'object' && /^Q\d{1,10}$/.test(id.id)) {
-				options.id = id.id;
-			} else if (Array.isArray(id) && id.length === 2
-			// for id = [ {String}language/site, {String}title ]
-			&& /^[a-z]{2,20}$/i.test(id[0])) {
-				options.site = id[0].includes('wiki') ? id[0] : id[0] + 'wiki';
-				options.title = id[1];
-			} else {
-				library_namespace.warn('wikidata_edit: Invalid id: ' + id);
-			}
-		}
 
 		options.data = JSON.stringify(data);
 
