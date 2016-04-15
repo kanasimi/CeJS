@@ -3131,9 +3131,12 @@ function module_code(library_namespace) {
 			action[1] = 'action=' + action[1];
 
 		// 若為 query，非 edit (modify)，則不延遲等待。
+		var need_check_lag
+		// method 1:
 		// assert: typeof action[1] === 'string'
-		var need_check_lag = action[1]
-				.match(/(?:action|assert)=([a-z]+)(?:&|$)/),
+		// = action[1].match(/(?:action|assert)=([a-z]+)(?:&|$)/),
+		// method 2: edit 時皆必須設定 token。
+		= post_data && post_data.token,
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait;
 
@@ -8360,6 +8363,8 @@ function module_code(library_namespace) {
 			wikidata_entity(items, callback, options);
 		});
 	}
+
+	// TODO: https://www.wikidata.org/wiki/Wikidata:Data_access#SPARQL_endpoints
 
 	// ------------------------------------------------------------------------
 
