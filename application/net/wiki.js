@@ -4825,18 +4825,26 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.edit.check_data = function(data, title, caller) {
 		var action;
-		if (Array.isArray(data) && data[0] === wiki_API.edit.cancel) {
+		// 可以利用 ((return [ CeL.wiki.edit.cancel, 'reason' ];)) 來回傳 reason。
+		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來 skip。
+		if (data === wiki_API.edit.cancel)
+			// 統一規範放棄編輯頁面訊息。
+			data = [ wiki_API.edit.cancel ];
+
+		if (!data) {
+			action = [ 'empty', typeof data === 'string' ? '內容被清空' : '未設定編輯內容' ];
+
+		} else if (Array.isArray(data) && data[0] === wiki_API.edit.cancel) {
 			action = data.slice(1);
+			if (action.length === 1)
+				// error messages
+				action[1] = action[0] || '放棄編輯頁面';
+			if (!action[0])
+				// error code
+				action[0] = 'cancel';
+
 			library_namespace.debug('採用個別特殊訊息: ' + action, 2, caller
 					|| 'wiki_API.edit.check_data');
-			// 可以利用 ((return [ CeL.wiki.edit.cancel, 'reason' ];)) 來回傳 reason。
-			// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來 skip。
-			if (action.length === 1)
-				action[1] = action[0];
-		} else if (data === wiki_API.edit.cancel) {
-			action = [ 'cancel', '放棄編輯頁面' ];
-		} else if (!data) {
-			action = [ 'empty', typeof data === 'string' ? '內容被清空' : '未設定編輯內容' ];
 		}
 
 		if (action) {
@@ -4844,7 +4852,8 @@ function module_code(library_namespace) {
 			if (action[1] !== 'skip') {
 				// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
 				library_namespace.warn((caller || 'wiki_API.edit.check_data')
-						+ ': [[' + title + ']]: ' + action[1]);
+				// 未提供原因
+				+ ': [[' + title + ']]: ' + (action[1] || '未描述原因'));
 			} else {
 				library_namespace.debug('Skip [[' + title + ']]', 2, caller
 						|| 'wiki_API.edit.check_data');
@@ -8271,6 +8280,8 @@ function module_code(library_namespace) {
 	/**
 	 * Creates or modifies Wikibase entity. 創建或編輯Wikidata實體。
 	 * 
+	 * 注意: 若是本來已有某個值(例如 label)，採用 add 會被取代。或須偵測並避免之。
+	 * 
 	 * @example<code>
 
 	wiki = Wiki(true, 'test.wikidata');
@@ -8283,7 +8294,8 @@ function module_code(library_namespace) {
 	 * @param {String|Array}id
 	 *            id to modify or entity you want to create.
 	 * @param {Object|Function}data
-	 *            used as the data source. data(entity)
+	 *            used as the data source to modify. 要編輯（更改或創建）的資料。<br />
+	 *            {Object}data or {Function}data(entity)
 	 * @param {Object}token
 	 *            login 資訊，包含“csrf”令牌/密鑰。
 	 * @param {Object}[options]
