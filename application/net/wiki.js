@@ -7615,9 +7615,10 @@ function module_code(library_namespace) {
 	 * @since
 	 */
 
+	// 為 Q\d+ 或 P\d+。
 	function is_entity(value) {
 		return library_namespace.is_Object(value) && value.id
-				&& typeof value.labels === 'object';
+				&& library_namespace.is_Object(value.labels);
 	}
 
 	/**
@@ -7868,6 +7869,22 @@ function module_code(library_namespace) {
 			value = value[0];
 		}
 
+		if (is_entity(value)) {
+			// get label of entity
+			value = value.labels;
+			var language = options && options.session && options.session.language;
+			language = value[language] || value[default_language] || value.en;
+			if (!language) {
+				// 隨便挑一個語言的 label。
+				for (language in value) {
+					value = value[language];
+					break;
+				}
+			}
+			return value.value;
+		}
+
+		// TODO: value.qualifiers, value['qualifiers-order']
 		value = value.mainsnak || value;
 		value = value.datavalue || value;
 
