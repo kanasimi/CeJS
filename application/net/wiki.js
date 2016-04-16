@@ -7615,10 +7615,11 @@ function module_code(library_namespace) {
 	 * @since
 	 */
 
-	// 為 Q\d+ 或 P\d+。
+	// value 為實體項目 wikidata entity / wikibase-item.
 	function is_entity(value) {
-		return library_namespace.is_Object(value) && value.id
-				&& library_namespace.is_Object(value.labels);
+		return library_namespace.is_Object(value)
+		// {String}id: Q\d+ 或 P\d+。
+		&& value.id && library_namespace.is_Object(value.labels);
 	}
 
 	/**
@@ -7690,9 +7691,9 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
-	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data[0]==='Q1');}, {get_id:true});
-	CeL.wiki.data.search('宇宙', function(data) {result=data;console.log(data==='Q1');}, {get_id:true, limit:1});
-	CeL.wiki.data.search('形狀', function(data) {result=data;console.log(data==='P1419');}, {get_id:true,type:'property'});
+	CeL.wiki.data.search('宇宙', function(entity) {result=entity;console.log(entity[0]==='Q1');}, {get_id:true});
+	CeL.wiki.data.search('宇宙', function(entity) {result=entity;console.log(entity==='Q1');}, {get_id:true, limit:1});
+	CeL.wiki.data.search('形狀', function(entity) {result=entity;console.log(entity==='P1419');}, {get_id:true,type:'property'});
 
 	</code>
 	 * 
@@ -7700,7 +7701,7 @@ function module_code(library_namespace) {
 	 *            要搜尋的關鍵字。
 	 * @param {Function}[callback]
 	 *            回調函數。 callback({Array}entity list or {Object}entity or
-	 *            {String}entity id)
+	 *            {String}entity id, error)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
@@ -7872,8 +7873,11 @@ function module_code(library_namespace) {
 		if (is_entity(value)) {
 			// get label of entity
 			value = value.labels;
-			var language = options && options.session && options.session.language;
-			language = value[language] || value[default_language] || value.en;
+			var language = options && options.session
+					&& options.session.language;
+			language = language && value[language] || value[default_language]
+			// 最起碼選個國際通用的。
+			|| value.en;
 			if (!language) {
 				// 隨便挑一個語言的 label。
 				for (language in value) {
@@ -7885,6 +7889,7 @@ function module_code(library_namespace) {
 		}
 
 		// TODO: value.qualifiers, value['qualifiers-order']
+		// TODO: value.references
 		value = value.mainsnak || value;
 		value = value.datavalue || value;
 
@@ -8060,24 +8065,24 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
-	CeL.wiki.data('Q2', function(data) {result=data;console.log(JSON.stringify(data).slice(0,400));});
-	CeL.wiki.data('Q1', function(data) {console.log(data.id==='Q1'&&JSON.stringify(data.labels)==='{"zh":{"language":"zh","value":"宇宙"}}');}, {languages:'zh'});
-	CeL.wiki.data('Q1', function(data) {console.log(data.labels['en'].value+': '+data.labels['zh'].value==='universe: 宇宙');});
+	CeL.wiki.data('Q2', function(entity) {result=entity;console.log(JSON.stringify(entity).slice(0,400));});
+	CeL.wiki.data('Q1', function(entity) {console.log(entity.id==='Q1'&&JSON.stringify(entity.labels)==='{"zh":{"language":"zh","value":"宇宙"}}');}, {languages:'zh'});
+	CeL.wiki.data('Q1', function(entity) {console.log(entity.labels['en'].value+': '+entity.labels['zh'].value==='universe: 宇宙');});
 	// Get the property of wikidata entity.
 	// 取得Wikidata中指定實體項目的指定屬性/陳述。
-	CeL.wiki.data('Q1', function(data) {console.log(data['en'].value+': '+data['zh'].value==='universe: 宇宙');}, 'labels');
+	CeL.wiki.data('Q1', function(entity) {console.log(entity['en'].value+': '+entity['zh'].value==='universe: 宇宙');}, 'labels');
 	// { id: 'P1', missing: '' }
-	CeL.wiki.data('Q1|P1', function(data) {console.log(JSON.stringify(data[1])==='{"id":"P1","missing":""}');});
-	CeL.wiki.data(['Q1','P1'], function(data) {console.log(data);});
+	CeL.wiki.data('Q1|P1', function(entity) {console.log(JSON.stringify(entity[1])==='{"id":"P1","missing":""}');});
+	CeL.wiki.data(['Q1','P1'], function(entity) {console.log(entity);});
 
-	CeL.wiki.data('Q11188', function(data) {result=data;console.log(JSON.stringify(data.labels.zh)==='{"language":"zh","value":"世界人口"}');});
+	CeL.wiki.data('Q11188', function(entity) {result=entity;console.log(JSON.stringify(entity.labels.zh)==='{"language":"zh","value":"世界人口"}');});
 
-	CeL.wiki.data('P6', function(data) {result=data;console.log(JSON.stringify(data.labels.zh)==='{"language":"zh","value":"政府首长"');});
+	CeL.wiki.data('P6', function(entity) {result=entity;console.log(JSON.stringify(entity.labels.zh)==='{"language":"zh","value":"政府首长"');});
 
-	CeL.wiki.data('宇宙', '形狀', function(data) {result=data;console.log(data==='宇宙的形狀');})
-	CeL.wiki.data('荷马', '出生日期', function(data) {result=data;console.log(''+data==='前8世紀');})
-	CeL.wiki.data('荷马', function(data) {result=data;console.log(CeL.wiki.data.value_of(data.claims.P1477)==='Ὅμηρος');})
-	CeL.wiki.data('艾薩克·牛頓', '出生日期', function(data) {result=data;console.log(''+data==='1643年1月4日,1642年12月25日');})
+	CeL.wiki.data('宇宙', '形狀', function(entity) {result=entity;console.log(entity==='宇宙的形狀');})
+	CeL.wiki.data('荷马', '出生日期', function(entity) {result=entity;console.log(''+entity==='前8世紀');})
+	CeL.wiki.data('荷马', function(entity) {result=entity;console.log(CeL.wiki.entity.value_of(entity.claims.P1477)==='Ὅμηρος');})
+	CeL.wiki.data('艾薩克·牛頓', '出生日期', function(entity) {result=entity;console.log(''+entity==='1643年1月4日,1642年12月25日');})
 
 	// 實體項目值的鏈接數據界面 (無法篩選所要資料，傳輸量較大。)
 	CeL.get_URL('https://www.wikidata.org/wiki/Special:EntityData/Q1.json',function(r){r=JSON.parse(r.responseText);console.log(r.entities.Q1.labels.zh.value)})
@@ -8089,12 +8094,12 @@ function module_code(library_namespace) {
 	wiki.page('title').data(function(entity){}, options).edit_data().edit()
 
 	wiki = Wiki(true)
-	wiki.page('宇宙').data(function(data){result=data;console.log(data);})
+	wiki.page('宇宙').data(function(entity){result=entity;console.log(entity);})
 
 	wiki = Wiki(true, 'wikidata');
-	wiki.data('宇宙', function(data){result=data;console.log(data.labels['en'].value==='universe');})
-	wiki.data('宇宙', '形狀', function(data){result=data;console.log(data==='宇宙的形狀');})
-	wiki.query('CLAIM[31:14827288] AND CLAIM[31:593744]', function(data) {result=data;console.log(data.labels['zh-tw'].value==='維基資料');})
+	wiki.data('宇宙', function(entity){result=entity;console.log(entity.labels['en'].value==='universe');})
+	wiki.data('宇宙', '形狀', function(entity){result=entity;console.log(entity==='宇宙的形狀');})
+	wiki.query('CLAIM[31:14827288] AND CLAIM[31:593744]', function(entity) {result=entity;console.log(entity.labels['zh-tw'].value==='維基資料');})
 
 	</code>
 	 * 
@@ -8270,8 +8275,8 @@ function module_code(library_namespace) {
 
 	wiki = Wiki(true, 'test.wikidata');
 	// TODO:
-	wiki.page('宇宙').data(function(data){result=data;console.log(data);}).edit(function(){return '';}).edit_data(function(){return {};});
-	wiki.page('宇宙').edit_data(function(data){result=data;console.log(data);});
+	wiki.page('宇宙').data(function(entity){result=entity;console.log(entity);}).edit(function(){return '';}).edit_data(function(){return {};});
+	wiki.page('宇宙').edit_data(function(entity){result=entity;console.log(entity);});
 
 	</code>
 	 * 
@@ -8319,7 +8324,7 @@ function module_code(library_namespace) {
 		}
 
 		if (is_entity(id)) {
-			// 輸入 id 為實體項目entity
+			// 輸入 id 為實體項目 entity
 			if (!options.baserevid) {
 				// 檢測編輯衝突用。
 				options.baserevid = id.lastrevid;
@@ -8412,8 +8417,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
-	CeL.wiki.wdq('claim[31:146]', function(data) {result=data;console.log(data);})
-	CeL.wiki.wdq('CLAIM[31:14827288] AND CLAIM[31:593744]', function(data) {result=data;console.log(data);})
+	CeL.wiki.wdq('claim[31:146]', function(list) {result=list;console.log(list);})
+	CeL.wiki.wdq('CLAIM[31:14827288] AND CLAIM[31:593744]', function(list) {result=list;console.log(list);})
 
 
 	// Wikidata filter claim
@@ -8428,7 +8433,7 @@ function module_code(library_namespace) {
 	 * @param {String}query
 	 *            查詢語句。
 	 * @param {Function}[callback]
-	 *            回調函數。 callback(轉成JavaScript的值)
+	 *            回調函數。 callback(轉成JavaScript的值. e.g., {Array}list)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
