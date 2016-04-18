@@ -8548,6 +8548,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
+	CeL.wiki.SPARQL('SELECT ?item ?itemLabel WHERE { ?item wdt:P31 wd:Q146 . SERVICE wikibase:label { bd:serviceParam wikibase:language "en" } }', function(list) {result=list;console.log(list);})
+
 	</code>
 	 * 
 	 * @param {String}query
@@ -8557,16 +8559,17 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
-	 * @see https://www.wikidata.org/wiki/Wikidata:Data_access#SPARQL_endpoints
+	 * @see https://www.mediawiki.org/wiki/Wikidata_query_service/User_Manual
+	 *      https://www.wikidata.org/wiki/Wikidata:Data_access#SPARQL_endpoints
 	 */
 	function wikidata_SPARQL(query, callback, options) {
 		var action = [ options && options.API_URL || wikidata_SPARQL_API_URL,
-				'?query=', encodeURIComponent(query) ];
+				'?query=', encodeURIComponent(query), '&format=json' ];
 
 		get_URL(action.join(''), function(data) {
 			data = JSON.parse(data.responseText);
 			var items = data.results;
-			if (!items || !(items = items.bindings)) {
+			if (!items || !Array.isArray(items = items.bindings)) {
 				callback(data);
 				return;
 			}
