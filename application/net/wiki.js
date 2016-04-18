@@ -22,6 +22,8 @@ https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
 Wikimedia REST API
 https://www.mediawiki.org/wiki/RESTBase
 
+https://www.wikidata.org/wiki/Wikidata:Bots
+https://www.mediawiki.org/wiki/API:Etiquette
 
 處理[[朱載𪉖]]
 
@@ -2352,11 +2354,11 @@ function module_code(library_namespace) {
 			}
 
 			// wikidata_entity(key, property, callback, options)
-			wikidata_entity(next[1], next[2], function(data) {
+			wikidata_entity(next[1], next[2], function(data, error) {
 				_this.last_data = data;
 				// next[3] : callback
 				if (typeof next[3] === 'function')
-					next[3].call(this, data);
+					next[3].call(this, data, error);
 				_this.next();
 			},
 			// next[4] : options
@@ -2376,7 +2378,7 @@ function module_code(library_namespace) {
 			// wiki.edit_data([id, ]data[, options, callback])
 			if (typeof next[1] === 'function'
 			//
-			|| typeof next[1] === 'object' && !is_entity(next[1])) {
+			|| library_namespace.is_Object(next[1]) && !is_entity(next[1])) {
 				// 未設定 id，第一個即為 data。
 				// 直接輸入 callback。
 				if (this.last_data) {
@@ -2890,11 +2892,25 @@ function module_code(library_namespace) {
 					// Skip invalid page. 預防如 .work(['']) 的情況。
 					return;
 				}
+
+				var _this = this;
+
+				function clear_work() {
+					// 警告: 直接清空 .actions 不安全！
+					// _this.actions.clear();
+					var next = this.actions[0][0];
+					if (next = 'page' || next === 'edit')
+						this.actions.shift();
+				}
+
 				if (config.no_edit) {
 					// 不作編輯作業。
 					// 取得頁面內容。
 					this.page(page, function(page_data) {
 						each(page_data, messages);
+						if (messages.quit_operation) {
+							clear_work();
+						}
 					}, config.page_options);
 
 				} else {
@@ -2915,7 +2931,11 @@ function module_code(library_namespace) {
 							//
 							page_data.title, '-fg', ']]' ]);
 						// 以 each() 的回傳作為要改變成什麼內容。
-						return each(page_data, messages, work_options);
+						var content = each(page_data, messages, work_options);
+						if (messages.quit_operation) {
+							clear_work();
+						}
+						return content;
 					}, work_options, callback);
 				}
 			}, this);
@@ -3157,7 +3177,7 @@ function module_code(library_namespace) {
 		if (!/^[a-z]+=/.test(action[1]))
 			action[1] = 'action=' + action[1];
 
-		// 若為 query，非 edit (modify)，則不延遲等待。
+		// respect maxlag. 若為 query，非 edit (modify)，則不延遲等待。
 		var need_check_lag
 		// method 2: edit 時皆必須設定 token。
 		= post_data && post_data.token,
@@ -6374,11 +6394,13 @@ function module_code(library_namespace) {
 			// 截斷。
 			buffer = buffer.slice(index + end_mark.length);
 
+			if (wiki_API.quit_operation ===
 			/**
 			 * function({Object}page_data, {Natural}position: 到本page結束時之檔案位置,
 			 * {Array}page_anchor)
 			 */
-			callback(page_data, bytes, page_anchor/* , file_status */);
+			callback(page_data, bytes, page_anchor/* , file_status */))
+				file_stream.end();
 
 			return true;
 		}
@@ -6963,9 +6985,10 @@ function module_code(library_namespace) {
 			// shift arguments.
 			callback = config;
 			config = library_namespace.null_Object();
-		} else
+		} else {
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			config = library_namespace.new_options(config);
+		}
 
 		if (config.use_dump) {
 			// 僅僅使用 dump，不採用 API 取得最新頁面內容。
@@ -7169,6 +7192,21 @@ function module_code(library_namespace) {
 					// 註記為 dump。
 					page_data.dump = true;
 					// page_data.dump = dump_file;
+
+					// ------------------------------------
+					// 有必要中途跳出時則須在 callback() 中設定：
+					// @ callback(page_data, messages):
+					if (false && need_quit) {
+						if (messages) {
+							// 當在 .work() 執行時。
+							messages.quit_operation = true;
+							// 在 .edit() 時不設定內容。但照理應該會在 .page() 中。
+							return;
+						}
+						// 當在本函數，下方執行時，不包含 messages。
+						return CeL.wiki.quit_operation;
+					}
+					// ------------------------------------
 
 					callback(page_data);
 
@@ -7624,7 +7662,14 @@ function module_code(library_namespace) {
 	 * @since
 	 */
 
-	// value 為實體項目 wikidata entity / wikibase-item.
+	/**
+	 * 測試 value 是否為實體項目 wikidata entity / wikibase-item.
+	 * 
+	 * @param value
+	 *            要測試的值。
+	 * 
+	 * @returns {Boolean}value 為實體項目。
+	 */
 	function is_entity(value) {
 		return library_namespace.is_Object(value)
 		// {String}id: Q\d+ 或 P\d+。
@@ -7754,7 +7799,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('wikidata_edit: ['
+				library_namespace.err('wikidata_search: ['
 				//
 				+ error.code + '] ' + error.info);
 				callback(undefined, error);
@@ -8222,8 +8267,11 @@ function module_code(library_namespace) {
 		if (get_page_content.is_page_data(key)) {
 			action = 'sites=' + wikidata_get_site(options) + '&titles='
 					+ encodeURIComponent(key.title);
-		} else {
+		} else if (key) {
 			action = 'ids=' + key;
+		} else {
+			library_namespace.error('wikidata_entity: 未設定欲取得之特定實體id。');
+			callback(undefined, 'no_key');
 		}
 		action = [ API_URL, 'wbgetentities&' + action ];
 
@@ -8240,7 +8288,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('wikidata_edit: ['
+				library_namespace.err('wikidata_entity: ['
 				//
 				+ error.code + '] ' + error.info);
 				callback(undefined, error);
@@ -8280,7 +8328,16 @@ function module_code(library_namespace) {
 	/**
 	 * Creates or modifies Wikibase entity. 創建或編輯Wikidata實體。
 	 * 
-	 * 注意: 若是本來已有某個值(例如 label)，採用 add 會被取代。或須偵測並避免之。
+	 * 注意: 若是本來已有某個值（例如 label），採用 add 會被取代。或須偵測並避免更動原有值。
+	 * 
+	 * https://www.wikidata.org/wiki/Wikidata:Bots<br />
+	 * Monitor
+	 * https://www.wikidata.org/wiki/Wikidata:Database_reports/Constraint_violations<br />
+	 * Bots should add instance of (P31) or subclass of (P279) if possible<br />
+	 * Bots importing from Wikipedia should add in addition to imported from
+	 * (P143) also reference URL (P854) with the value of the full URL and
+	 * either retrieved (P813) or include the version id of the source page in
+	 * the full URL.
 	 * 
 	 * @example<code>
 
@@ -8350,32 +8407,33 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (id) {
-			if (is_entity(id)
-			// && /^Q\d{1,10}$/.test(id.id)
-			) {
-				options.id = id.id;
+		if (!id) {
+			library_namespace.debug('未設定 id，您可能需要手動檢查。', 2, 'wikidata_edit');
 
-			} else if (get_page_content.is_page_data(id)) {
-				options.site = wikidata_get_site(options);
-				options.title = encodeURIComponent(id.title);
+		} else if (is_entity(id)
+		// && /^Q\d{1,10}$/.test(id.id)
+		) {
+			options.id = id.id;
 
-			} else if (id === 'item' || id === 'property') {
-				options['new'] = id;
+		} else if (get_page_content.is_page_data(id)) {
+			options.site = wikidata_get_site(options);
+			options.title = encodeURIComponent(id.title);
 
-			} else if (/^Q\d{1,10}$/.test(id)) {
-				// e.g., 'Q1'
-				options.id = id;
+		} else if (id === 'item' || id === 'property') {
+			options['new'] = id;
 
-			} else if (Array.isArray(id) && id.length === 2
-			// for id = [ {String}language/site, {String}title ]
-			&& /^[a-z]{2,20}$/i.test(id[0])) {
-				options.site = id[0].includes('wiki') ? id[0] : id[0] + 'wiki';
-				options.title = id[1];
+		} else if (/^Q\d{1,10}$/.test(id)) {
+			// e.g., 'Q1'
+			options.id = id;
 
-			} else {
-				library_namespace.warn('wikidata_edit: Invalid id: ' + id);
-			}
+		} else if (Array.isArray(id) && id.length === 2
+		// for id = [ {String}language/site, {String}title ]
+		&& /^[a-z]{2,20}$/i.test(id[0])) {
+			options.site = id[0].includes('wiki') ? id[0] : id[0] + 'wiki';
+			options.title = id[1];
+
+		} else {
+			library_namespace.warn('wikidata_edit: Invalid id: ' + id);
 		}
 
 		var session;
@@ -8421,7 +8479,7 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	/** {String}API URL of wikidata query. */
+	/** {String}API URL of Wikidata Query. */
 	var wikidata_query_API_URL = 'https://wdq.wmflabs.org/api';
 
 	/**
@@ -8482,7 +8540,39 @@ function module_code(library_namespace) {
 		});
 	}
 
-	// TODO: https://www.wikidata.org/wiki/Wikidata:Data_access#SPARQL_endpoints
+	/** {String}API URL of Wikidata Query Service (SPARQL). */
+	var wikidata_SPARQL_API_URL = 'https://query.wikidata.org/bigdata/namespace/wdq/sparql';
+
+	/**
+	 * 查詢 Wikidata Query Service (SPARQL)。
+	 * 
+	 * @example<code>
+
+	</code>
+	 * 
+	 * @param {String}query
+	 *            查詢語句。
+	 * @param {Function}[callback]
+	 *            回調函數。 callback(轉成JavaScript的值. e.g., {Array}list)
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @see https://www.wikidata.org/wiki/Wikidata:Data_access#SPARQL_endpoints
+	 */
+	function wikidata_SPARQL(query, callback, options) {
+		var action = [ options && options.API_URL || wikidata_SPARQL_API_URL,
+				'?query=', encodeURIComponent(query) ];
+
+		get_URL(action.join(''), function(data) {
+			data = JSON.parse(data.responseText);
+			var items = data.results;
+			if (!items || !(items = items.bindings)) {
+				callback(data);
+				return;
+			}
+			callback(items);
+		});
+	}
 
 	// ------------------------------------------------------------------------
 
@@ -8506,6 +8596,12 @@ function module_code(library_namespace) {
 
 		parser : page_parser,
 
+		/** 中途跳出作業用。 */
+		quit_operation : {},
+
+		is_page_data : get_page_content.is_page_data,
+		is_entity : is_entity,
+
 		title_of : get_page_title,
 		content_of : get_page_content,
 		normalize_title : normalize_page_name,
@@ -8520,7 +8616,8 @@ function module_code(library_namespace) {
 
 		data : wikidata_entity,
 		edit_data : wikidata_edit,
-		wdq : wikidata_query
+		wdq : wikidata_query,
+		SPARQL : wikidata_SPARQL
 	});
 
 	return wiki_API;

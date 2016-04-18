@@ -2,6 +2,7 @@
  * @name CeL function for 繁簡中文字詞彙轉換。
  * 
  * TODO:<br />
+ * 在量大的時候，此方法速度頗慢。<br />
  * words conversion
  * 
  * @fileoverview 本檔案包含了繁體/簡體中文轉換的 functions。
@@ -113,6 +114,9 @@ if (typeof CeL === 'function')
 
 				return text;
 			}
+
+			// 提供自行更改的功能。
+			CN_to_TW.conversions = CN_to_TW_conversions;
 
 			CN_to_TW.file = function(from, to, target_encoding) {
 				var text = library_namespace.get_file(from);
