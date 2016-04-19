@@ -2898,9 +2898,18 @@ function module_code(library_namespace) {
 				function clear_work() {
 					// 警告: 直接清空 .actions 不安全！
 					// _this.actions.clear();
-					var next = this.actions[0][0];
-					if (next = 'page' || next === 'edit')
-						this.actions.shift();
+
+					var next;
+					while (next = _this.actions[0]) {
+						next = next[0];
+						if (next === 'page' || next === 'edit')
+							_this.actions.shift();
+						else
+							break;
+					}
+					library_namespace.debug('清空 actions queue: 剩下'
+							+ _this.actions.length + ' actions。', 1,
+							'wiki_API.work');
 				}
 
 				if (config.no_edit) {
@@ -3045,6 +3054,7 @@ function module_code(library_namespace) {
 				if (typeof config.after === 'function')
 					this.run(config.after);
 			});
+
 		}).bind(this);
 
 		var target = pages || titles,
@@ -6295,10 +6305,10 @@ function module_code(library_namespace) {
 
 		var run_last = function() {
 			library_namespace.debug('Finish work.', 1, 'read_dump');
-			// run once.
 			if (run_last && typeof options.last === 'function') {
 				options.last.call(file_stream, anchor);
 			}
+			// run once only.
 			run_last = null;
 		},
 		/** {String}file encoding for dump file. */
@@ -6423,8 +6433,12 @@ function module_code(library_namespace) {
 			 */
 			callback(page_data, bytes, page_anchor/* , file_status */)) {
 				// console.log(file_stream);
+				library_namespace.info('read_dump: Quit operation...');
 				file_stream.close();
+				// free
+				buffer = '';
 				run_last();
+				return;
 			}
 
 			return true;
