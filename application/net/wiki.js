@@ -6293,8 +6293,16 @@ function module_code(library_namespace) {
 		if (typeof options.first === 'function')
 			options.first(filename);
 
+		var run_last = function() {
+			library_namespace.debug('Finish work.', 1, 'read_dump');
+			// run once.
+			if (run_last && typeof options.last === 'function') {
+				options.last.call(file_stream, anchor);
+			}
+			run_last = null;
+		},
 		/** {String}file encoding for dump file. */
-		var encoding = options.encoding || wiki_API.encoding,
+		encoding = options.encoding || wiki_API.encoding,
 		/** {String}處理中之資料。 */
 		buffer = '',
 		/** end mark */
@@ -6413,8 +6421,11 @@ function module_code(library_namespace) {
 			 * function({Object}page_data, {Natural}position: 到本page結束時之檔案位置,
 			 * {Array}page_anchor)
 			 */
-			callback(page_data, bytes, page_anchor/* , file_status */))
-				file_stream.end();
+			callback(page_data, bytes, page_anchor/* , file_status */)) {
+				// console.log(file_stream);
+				file_stream.close();
+				run_last();
+			}
 
 			return true;
 		}
@@ -6470,11 +6481,7 @@ function module_code(library_namespace) {
 			}
 		});
 
-		file_stream.on('end', function() {
-			library_namespace.debug('Done.', 1, 'read_dump');
-			if (typeof options.last === 'function')
-				options.last.call(file_stream, anchor);
-		});
+		file_stream.on('end', run_last);
 
 		// * @returns {String}file path
 		// * @returns {node_fs.ReadStream}file handler
@@ -7203,8 +7210,8 @@ function module_code(library_namespace) {
 						}
 					}
 
-					// 註記為 dump。
-					page_data.dump = true;
+					// 註記為 dump。可以 ((messages)) 判斷是在 .work() 中執行或取用 dump 資料。
+					// page_data.dump = true;
 					// page_data.dump = dump_file;
 
 					// ------------------------------------
@@ -7212,7 +7219,7 @@ function module_code(library_namespace) {
 					// @ callback(page_data, messages):
 					if (false && need_quit) {
 						if (messages) {
-							// 當在 .work() 執行時。
+							// 當在 .work() 中執行時。
 							messages.quit_operation = true;
 							// 在 .edit() 時不設定內容。但照理應該會在 .page() 中。
 							return;
@@ -7222,7 +7229,7 @@ function module_code(library_namespace) {
 					}
 					// ------------------------------------
 
-					callback(page_data);
+					return callback(page_data);
 
 				}, {
 					// 指定 dump file 放置的 directory。
