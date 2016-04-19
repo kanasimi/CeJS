@@ -4958,16 +4958,21 @@ function module_code(library_namespace) {
 	 * @returns {Boolean|String}封鎖機器人帳戶訪問。
 	 */
 	wiki_API.edit.denied = function(content, bot_id, notification) {
-		if (!content || get_page_content.is_page_data(content)
-				&& !(content = get_page_content(content)))
+		if (!content)
 			return;
+		var page_data;
+		if (get_page_content.is_page_data(content)) {
+			if (!(content = get_page_content(content)))
+				return;
+			page_data = content;
+		}
 
 		library_namespace.debug('contents to test: [' + content + ']', 3,
 				'wiki_API.edit.denied');
 
 		var bots = wiki_API.edit.get_bot(content),
 		/** {String}denied messages */
-		denied;
+		denied, allow_bot;
 
 		if (bots) {
 			library_namespace.debug('test ' + bot_id + '/' + notification, 3,
@@ -5007,24 +5012,6 @@ function module_code(library_namespace) {
 				/** {RegExp}封鎖機器人訪問之 pattern。 */
 				PATTERN;
 
-				PATTERN = /(?:^|\|)[\s\n]*deny[\s\n]*=[\s\n]*([^|]+)/ig;
-				while (matched = PATTERN.exec(data)) {
-					if (bot_id.test(matched[1])) {
-						// 一被拒絕即跳出。
-						return denied = 'Banned: ' + matched[1];
-					}
-				}
-
-				// 允許之機器人帳戶名稱列表（以半形逗號作間隔）
-				PATTERN = /(?:^|\|)[\s\n]*allow[\s\n]*=[\s\n]*([^|]+)/ig;
-				while (matched = PATTERN.exec(data)) {
-					if (!bot_id.test(matched[1])) {
-						// 一被拒絕即跳出。
-						return denied = 'Not in allowed bots list: ['
-								+ matched[1] + ']';
-					}
-				}
-
 				// 過濾機器人所發出的通知/提醒
 				// 頁面/用戶以bots模板封鎖通知
 				if (notification) {
@@ -5037,6 +5024,28 @@ function module_code(library_namespace) {
 					}
 				}
 
+				// 檢查被拒絕之機器人帳戶名稱列表（以半形逗號作間隔）
+				PATTERN = /(?:^|\|)[\s\n]*deny[\s\n]*=[\s\n]*([^|]+)/ig;
+				while (matched = PATTERN.exec(data)) {
+					if (bot_id.test(matched[1])) {
+						// 一被拒絕即跳出。
+						return denied = 'Banned: ' + matched[1];
+					}
+				}
+
+				// 檢查被允許之機器人帳戶名稱列表（以半形逗號作間隔）
+				PATTERN = /(?:^|\|)[\s\n]*allow[\s\n]*=[\s\n]*([^|]+)/ig;
+				while (matched = PATTERN.exec(data)) {
+					if (!bot_id.test(matched[1])) {
+						// 一被拒絕即跳出。
+						return denied = 'Not in allowed bots list: ['
+								+ matched[1] + ']';
+					}
+
+					if (page_data)
+						allow_bot = matched[1];
+				}
+
 			});
 		}
 
@@ -5046,6 +5055,11 @@ function module_code(library_namespace) {
 		if (denied) {
 			library_namespace.warn('wiki_API.edit.denied: ' + denied);
 			return denied;
+		}
+
+		if (allow_bot) {
+			// 特別標記本 bot 為被允許之 bot。
+			page_data.allow_bot = allow_bot;
 		}
 	};
 
@@ -7649,13 +7663,8 @@ function module_code(library_namespace) {
 	// https://meta.wikimedia.org/wiki/Wikidata/Notes/Inclusion_syntax
 	{{label}}, {{Q}}, [[d:Q1]]
 
-	https://query.wikidata.org/
 	http://wdq.wmflabs.org/api_documentation.html
 	https://github.com/maxlath/wikidata-sdk
-	https://query.wikidata.org/bigdata/namespace/wdq/sparql?query=
-
-	// https://www.wikidata.org/wiki/Wikidata:Creating_a_bot/zh
-	// add P143 導入自
 
 	</code>
 	 * 
@@ -8330,15 +8339,6 @@ function module_code(library_namespace) {
 	 * 
 	 * 注意: 若是本來已有某個值（例如 label），採用 add 會被取代。或須偵測並避免更動原有值。
 	 * 
-	 * https://www.wikidata.org/wiki/Wikidata:Bots<br />
-	 * Monitor
-	 * https://www.wikidata.org/wiki/Wikidata:Database_reports/Constraint_violations<br />
-	 * Bots should add instance of (P31) or subclass of (P279) if possible<br />
-	 * Bots importing from Wikipedia should add in addition to imported from
-	 * (P143) also reference URL (P854) with the value of the full URL and
-	 * either retrieved (P813) or include the version id of the source page in
-	 * the full URL.
-	 * 
 	 * @example<code>
 
 	wiki = Wiki(true, 'test.wikidata');
@@ -8359,6 +8359,17 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @param {Function}callback
 	 *            回調函數。 callback(entity, error)
+	 * 
+	 * @see https://www.wikidata.org/wiki/Wikidata:Creating_a_bot
+	 * @see https://www.wikidata.org/wiki/Wikidata:Bots<br />
+	 *      Monitor
+	 *      https://www.wikidata.org/wiki/Wikidata:Database_reports/Constraint_violations<br />
+	 *      Bots should add instance of (P31) or subclass of (P279) if possible<br />
+	 *      Bots importing from Wikipedia should add in addition to imported
+	 *      from (P143) also reference URL (P854) with the value of the full URL
+	 *      and either retrieved (P813) or include the version id of the source
+	 *      page in the full URL.
+	 * 
 	 */
 	function wikidata_edit(id, data, token, options, callback) {
 		if (typeof options === 'function' && !callback) {
