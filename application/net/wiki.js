@@ -6323,10 +6323,10 @@ function module_code(library_namespace) {
 		if (typeof options.first === 'function')
 			options.first(filename);
 
-		var run_last = function() {
+		var run_last = function(quit_operation) {
 			library_namespace.debug('Finish work.', 1, 'read_dump');
 			if (run_last && typeof options.last === 'function') {
-				options.last.call(file_stream, anchor);
+				options.last.call(file_stream, anchor, quit_operation);
 			}
 			// run once only.
 			run_last = null;
@@ -6457,7 +6457,7 @@ function module_code(library_namespace) {
 				file_stream.close();
 				// free
 				buffer = '';
-				run_last();
+				run_last(true);
 				return;
 			}
 
@@ -7305,7 +7305,14 @@ function module_code(library_namespace) {
 				});
 			}
 
-			function run_work(id_list) {
+			function run_work(id_list, quit_operation) {
+				if (quit_operation) {
+					library_namespace.info('traversal_pages: 已中途跳出，直接結束作業。');
+					if (typeof config.after === 'function')
+						config.after();
+					return;
+				}
+
 				if (typeof config.filter === 'function')
 					library_namespace.log('traversal_pages: 開始執行 .work(): '
 							+ (id_list && id_list.length) + ' pages...');
