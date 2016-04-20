@@ -120,11 +120,11 @@ function module_code(library_namespace) {
 	/**
 	 * Wikimedia projects 的 URL pattern
 	 * 
-	 * matched: [ protocol + host name, protocol, host name ]
+	 * matched: [ protocol + host name, protocol, host name, language / project ]
 	 * 
 	 * @type {String}
 	 */
-	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?([a-z\-\d]{2,20}(?:\.[a-z]+)+)/i;
+	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z\-\d]{2,20})(?:\.[a-z]+)+)/i;
 
 	/**
 	 * Get the API URL of specified project.
@@ -154,7 +154,7 @@ function module_code(library_namespace) {
 			} else if (project in api_URL.project) {
 				// (default_language || 'www') + '.' + project
 				project = default_language + '.' + project;
-			} else if (/wiki/i.test(project)) {
+			} else if (/wik/i.test(project)) {
 				// e.g., 'mediawiki' → 'www.mediawiki'
 				// e.g., 'wikidata' → 'www.wikidata'
 				project = 'www.' + project;
@@ -5999,7 +5999,7 @@ function module_code(library_namespace) {
 
 		if (!project)
 			// e.g., 'enwiki'.
-			project = options.project || default_language + 'wiki';
+			project = language_to_project(options.project);
 
 		// dump host
 		var host = options.host || 'http://dumps.wikimedia.org/',
@@ -7767,7 +7767,7 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof API_URL === 'string' && !/wikidata/i.test(API_URL)
-				&& !/^[a-z\d]$/i.test(API_URL)) {
+				&& !/^[a-z\-\d]$/i.test(API_URL)) {
 			// e.g., 'test' → 'test.wikidata'
 			API_URL += '.wikidata';
 		}
@@ -8130,28 +8130,16 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// label of entity
-	function get_entity_label(entity, language) {
-		var labels = entity && entity.labels;
-		if (labels) {
-			var label = labels[language || default_language];
-			if (label)
-				return label.value;
-			return labels;
-		}
-	}
-
-	// site link of entity
-	function get_entity_link(entity, language) {
-		var sitelinks = entity && entity.sitelinks;
-		if (sitelinks) {
-			var link = sitelinks[
-			//
-			(language || default_language || '').replace(/-/g, '_') + 'wiki'];
-			if (link)
-				return link.title;
-			return sitelinks;
-		}
+	// language → Wikidata site name / Wikimedia project name
+	function language_to_project(language) {
+		// 正規化。
+		language = (language && String(language).trim().toLowerCase() || default_language)
+		// e.g., 'zh-min-nanwiki' → 'zh_min_nanwiki'
+		.replace(/-/g, '_');
+		// 以防 incase wikt, wikisource
+		if (!language.includes('wik'))
+			language += 'wiki';
+		return language;
 	}
 
 	/**
@@ -8165,22 +8153,44 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function wikidata_get_site(options) {
-		var site = options.session;
-		if (site) {
+		var language = options.session;
+		if (language) {
 			// 注意:在取得 page 後，中途更改過 API_URL 的話，這邊會取得錯誤的資訊！
-			if (site.language) {
-				site = site.language + 'wiki';
-			} else if (site = site.API_URL.match(PATTERN_wiki_project_URL)) {
+			if (language.language) {
+				language = language.language;
+			} else if (language = language.API_URL
+					.match(PATTERN_wiki_project_URL)) {
 				// 去掉 '.org' 之類。
-				site = site[2].replace(/\.[^.]+$/, '').replace('.', '')
-						.replace(/pedia$/, '');
+				language = language[3];
 			}
 		}
-		if (!site)
-			site = default_language + 'wiki';
-		// e.g., 'zh-min-nanwiki' → 'zh_min_nanwiki'
-		site = site.replace(/-/g, '_');
-		return site;
+		return language_to_project(language);
+	}
+
+	// label of entity
+	// CeL.wiki.data.label_of(entity, language)
+	function get_entity_label(entity, language) {
+		var labels = entity && entity.labels;
+		if (labels) {
+			var label = labels[language || default_language];
+			if (label)
+				return label.value;
+			if (!language)
+				return labels;
+		}
+	}
+
+	// site link of entity
+	// CeL.wiki.data.title_of(entity, language)
+	function get_entity_link(entity, language) {
+		var sitelinks = entity && entity.sitelinks;
+		if (sitelinks) {
+			var link = sitelinks[language_to_project(language)];
+			if (link)
+				return link.title;
+			if (!language)
+				return sitelinks;
+		}
 	}
 
 	/**
@@ -8301,11 +8311,34 @@ function module_code(library_namespace) {
 			// for key = [ {String}language, {String}title or {Array}titles ]
 			&& /^[a-z\-\d]{2,20}$/i.test(key[0])) {
 				wikidata_search(key, function(id) {
-					library_namespace.debug(
-					//
-					'entity ' + id + ' ← [' + key.join(':') + ']', 1,
-							'wikidata_entity');
-					wikidata_entity(id, property, callback, options);
+					if (id) {
+						library_namespace.debug(
+						//
+						'entity ' + id + ' ← [[:' + key.join(':') + ']]', 1,
+								'wikidata_entity');
+						wikidata_entity(id, property, callback, options);
+
+					} else {
+						// 可能為重定向頁面。
+						wiki_API.page(key, function(page_data) {
+							var content = get_page_content(page_data),
+							// 測試是否為重定向頁面。
+							redirect = parse_redirect(content);
+							if (redirect) {
+								// 處理重定向頁面。
+								wikidata_entity([ key[0], redirect ], property,
+										callback, options);
+								return;
+							}
+
+							library_namespace.err(
+							//
+							'wikidata_entity: Wikidata 不存在 [[:' + key.join(':')
+									+ ']] 之數據，' + (content ? '但' : '且不')
+									+ '存在此 Wikipedia 頁面。無法處理此 Wikidata 數據要求。');
+							callback(undefined, 'no_key');
+						});
+					}
 				}, {
 					API_URL : API_URL,
 					get_id : true,
@@ -8341,6 +8374,7 @@ function module_code(library_namespace) {
 		} else {
 			library_namespace.err('wikidata_entity: 未設定欲取得之特定實體id。');
 			callback(undefined, 'no_key');
+			return;
 		}
 		action = [ API_URL, 'wbgetentities&' + action ];
 
@@ -8398,7 +8432,7 @@ function module_code(library_namespace) {
 	Object.assign(wikidata_entity, {
 		search : wikidata_search,
 		label_of : get_entity_label,
-		link_of : get_entity_link,
+		title_of : get_entity_link,
 		value_of : wikidata_datavalue
 	});
 
@@ -8510,7 +8544,7 @@ function module_code(library_namespace) {
 		} else if (Array.isArray(id) && id.length === 2
 		// for id = [ {String}language/site, {String}title ]
 		&& /^[a-z]{2,20}$/i.test(id[0])) {
-			options.site = id[0].includes('wiki') ? id[0] : id[0] + 'wiki';
+			options.site = language_to_project(id[0]);
 			options.title = id[1];
 
 		} else {
