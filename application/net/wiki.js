@@ -2355,7 +2355,11 @@ function module_code(library_namespace) {
 
 			// wikidata_entity(key, property, callback, options)
 			wikidata_entity(next[1], next[2], function(data, error) {
-				_this.last_data = data;
+				// 就算發生錯誤，依然設定一個 dummy，預防 edit_data 時引用可能非所欲的 this.last_page。
+				_this.last_data = data || {
+					key : next[1],
+					error : error
+				};
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					next[3].call(this, data, error);
@@ -2382,8 +2386,15 @@ function module_code(library_namespace) {
 				// 未設定 id，第一個即為 data。
 				// 直接輸入 callback。
 				if (this.last_data) {
+					if (!is_entity(this.last_data)) {
+						next[1].call(this, undefined, '前一次之實體['
+								+ this.last_data.key + ']取得失敗。');
+						this.next();
+						break;
+					}
 					// shift arguments
 					next.splice(1, 0, this.last_data);
+
 				} else {
 					if (!this.last_page) {
 						next[1].call(this, undefined,
@@ -2407,12 +2418,15 @@ function module_code(library_namespace) {
 				session : this.data_session
 			}, next[3]),
 			//
-			function(data) {
-				if (is_entity(data))
-					_this.last_data = data;
+			function(data, error) {
+				_this.last_data = data || {
+					last_data : _this.last_data,
+					key : next[1],
+					error : error
+				};
 				// next[4] : callback
 				if (typeof next[4] === 'function')
-					next[4].call(this, data);
+					next[4].call(this, data, error);
 				_this.next();
 			});
 			break;
@@ -2898,6 +2912,7 @@ function module_code(library_namespace) {
 				function clear_work() {
 					// 警告: 直接清空 .actions 不安全！
 					// _this.actions.clear();
+					work_continue = target.length;
 
 					var next;
 					while (next = _this.actions[0]) {
@@ -8300,7 +8315,7 @@ function module_code(library_namespace) {
 		} else if (key) {
 			action = 'ids=' + key;
 		} else {
-			library_namespace.error('wikidata_entity: 未設定欲取得之特定實體id。');
+			library_namespace.err('wikidata_entity: 未設定欲取得之特定實體id。');
 			callback(undefined, 'no_key');
 		}
 		action = [ API_URL, 'wbgetentities&' + action ];
