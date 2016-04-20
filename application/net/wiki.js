@@ -8130,6 +8130,30 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// label of entity
+	function get_entity_label(entity, language) {
+		var labels = entity && entity.labels;
+		if (labels) {
+			var label = labels[language || default_language];
+			if (label)
+				return label.value;
+			return labels;
+		}
+	}
+
+	// site link of entity
+	function get_entity_link(entity, language) {
+		var sitelinks = entity && entity.sitelinks;
+		if (sitelinks) {
+			var link = sitelinks[
+			//
+			(language || default_language || '').replace(/-/g, '_') + 'wiki'];
+			if (link)
+				return link.title;
+			return sitelinks;
+		}
+	}
+
 	/**
 	 * 自 options.session 取得 wikidata API 所須之 site parameter。
 	 * 
@@ -8367,6 +8391,16 @@ function module_code(library_namespace) {
 			}
 		}, null, options);
 	}
+
+	// ------------------------------------------------------------------------
+
+	// export 導出.
+	Object.assign(wikidata_entity, {
+		search : wikidata_search,
+		label_of : get_entity_label,
+		link_of : get_entity_link,
+		value_of : wikidata_datavalue
+	});
 
 	// ------------------------------------------------------------------------
 
@@ -8623,14 +8657,6 @@ function module_code(library_namespace) {
 			callback(items);
 		});
 	}
-
-	// ------------------------------------------------------------------------
-
-	// export 導出.
-	Object.assign(wikidata_entity, {
-		search : wikidata_search,
-		value_of : wikidata_datavalue
-	});
 
 	// --------------------------------------------------------------------------------------------
 
