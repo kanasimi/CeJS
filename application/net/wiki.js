@@ -8169,7 +8169,11 @@ function module_code(library_namespace) {
 				language = language[3];
 			}
 		}
-		return language_to_project(language);
+		if (false)
+			library_namespace.debug('language: ' + options + '→'
+					+ language_to_project(language || options), 3,
+					'wikidata_get_site');
+		return language_to_project(language || options);
 	}
 
 	// label of entity
@@ -8383,7 +8387,8 @@ function module_code(library_namespace) {
 			// 不採用 get_page_content.is_page_data(key)
 			// 以允許自行設定 {title:title,language:language}。
 			if (key.title) {
-				action = 'sites=' + wikidata_get_site(key.language || options)
+				action = 'sites='
+						+ (key.language && language_to_project(key.language) || wikidata_get_site(options))
 						+ '&titles=' + encodeURIComponent(key.title);
 			} else {
 				action = 'ids=' + key;
@@ -8393,6 +8398,8 @@ function module_code(library_namespace) {
 			callback(undefined, 'no_key');
 			return;
 		}
+		library_namespace.debug('action: [' + action + ']', 2,
+				'wikidata_entity');
 		action = [ API_URL, 'wbgetentities&' + action ];
 
 		if (property && !options.props)
