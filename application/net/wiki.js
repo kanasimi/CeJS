@@ -8331,9 +8331,11 @@ function module_code(library_namespace) {
 						// 測試是否為重定向頁面。
 						redirect = parse_redirect(content);
 						if (redirect) {
-							library_namespace.debug('處理重定向頁面: [[:'
-									+ key.join(':') + ']] → [[:' + key[0] + ':'
-									+ redirect + ']]。', 1, 'wikidata_entity');
+							library_namespace.info(
+							//
+							'wikidata_entity: 處理重定向頁面: [[:' + key.join(':')
+									+ ']] → [[:' + key[0] + ':' + redirect
+									+ ']]。');
 							wikidata_entity([ key[0],
 							// normalize_page_name():
 							// 此 API 無法自動轉換首字大小寫之類！因此需要自行正規化。
@@ -8377,11 +8379,15 @@ function module_code(library_namespace) {
 		// TODO: 維基百科 sitelinks
 		// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=sitelinks&utf8=1
 		var action;
-		if (get_page_content.is_page_data(key)) {
-			action = 'sites=' + wikidata_get_site(options) + '&titles='
-					+ encodeURIComponent(key.title);
-		} else if (key) {
-			action = 'ids=' + key;
+		if (key) {
+			// 不採用 get_page_content.is_page_data(key)
+			// 以允許自行設定 {title:title,language:language}。
+			if (key.title) {
+				action = 'sites=' + wikidata_get_site(key.language || options)
+						+ '&titles=' + encodeURIComponent(key.title);
+			} else {
+				action = 'ids=' + key;
+			}
 		} else {
 			library_namespace.err('wikidata_entity: 未設定欲取得之特定實體id。');
 			callback(undefined, 'no_key');
