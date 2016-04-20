@@ -367,12 +367,14 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}page_name
 	 *            頁面名 page name。
+	 * @param {Boolean}[use_underline]
+	 *            採用 "_" 取代 " "。
 	 * 
 	 * @returns {String}規範後之頁面名稱。
 	 * 
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Page_name#Technical_restrictions_and_limitations
 	 */
-	function normalize_page_name(page_name) {
+	function normalize_page_name(page_name, use_underline) {
 		if (!page_name || typeof page_name !== 'string')
 			return page_name;
 		page_name = page_name.trim().split(':');
@@ -380,17 +382,20 @@ function module_code(library_namespace) {
 		page_name.forEach(function(section, index) {
 			section = section.trim();
 			if (index > 1 || index > 0 && page_name[0]
-					|| index === page_name.length - 1)
+					|| index === page_name.length - 1) {
+				section = use_underline
 				// ' ' → '_': 在 URL 上可更簡潔。
+				? section.replace(/ /g, '_') : section.replace(/_/g, ' ');
 				name_list.push(section.charAt(0).toUpperCase()
-						+ section.slice(1).replace(/ /g, '_'));
-			else if (section in get_namespace.hash)
+						+ section.slice(1));
+			} else if (section in get_namespace.hash) {
 				// Wikipedia namespace
 				name_list.push(section.charAt(0).toUpperCase()
 						+ section.slice(1));
-			else
+			} else {
 				// lang code
 				name_list.push(section.toLowerCase());
+			}
 		});
 		return name_list.join(':');
 	}
@@ -1636,7 +1641,7 @@ function module_code(library_namespace) {
 		// https://en.wikipedia.org/wiki/Help:Redirect
 		// Note that the redirect link must be explicit – it cannot contain
 		// magic words, templates, etc.
-		/(?:^|[\s\n]*)#(?:REDIRECT|重定向)\s*\[\[([^\]]+)\]\]/i);
+		/(?:^|[\s\n]*)#(?:REDIRECT|重定向)\s*\[\[([^\[\]]+)\]\]/i);
 		if (matched)
 			return matched[1].trim();
 	}
@@ -6651,7 +6656,7 @@ function module_code(library_namespace) {
 			//
 			get_page_content.is_page_data(list) ? list.title
 			// 若 Array.isArray(list)，則 ((file_name = ''))。
-			: typeof list === 'string' && normalize_page_name(list) ];
+			: typeof list === 'string' && normalize_page_name(list, true) ];
 			if (file_name[1]) {
 				file_name = file_name[0]
 				// 正規化檔名。
@@ -8317,28 +8322,34 @@ function module_code(library_namespace) {
 						'entity ' + id + ' ← [[:' + key.join(':') + ']]', 1,
 								'wikidata_entity');
 						wikidata_entity(id, property, callback, options);
-
-					} else {
-						// 可能為重定向頁面。
-						wiki_API.page(key, function(page_data) {
-							var content = get_page_content(page_data),
-							// 測試是否為重定向頁面。
-							redirect = parse_redirect(content);
-							if (redirect) {
-								// 處理重定向頁面。
-								wikidata_entity([ key[0], redirect ], property,
-										callback, options);
-								return;
-							}
-
-							library_namespace.err(
-							//
-							'wikidata_entity: Wikidata 不存在 [[:' + key.join(':')
-									+ ']] 之數據，' + (content ? '但' : '且不')
-									+ '存在此 Wikipedia 頁面。無法處理此 Wikidata 數據要求。');
-							callback(undefined, 'no_key');
-						});
+						return;
 					}
+
+					// 可能為重定向頁面？
+					wiki_API.page(key.clone(), function(page_data) {
+						var content = get_page_content(page_data),
+						// 測試是否為重定向頁面。
+						redirect = parse_redirect(content);
+						if (redirect) {
+							library_namespace.debug('處理重定向頁面: [[:'
+									+ key.join(':') + ']] → [[:' + key[0] + ':'
+									+ redirect + ']]。', 1, 'wikidata_entity');
+							wikidata_entity([ key[0],
+							// normalize_page_name():
+							// 此 API 無法自動轉換首字大小寫之類！因此需要自行正規化。
+							normalize_page_name(redirect) ], property,
+									callback, options);
+							return;
+						}
+
+						library_namespace.err(
+						//
+						'wikidata_entity: Wikidata 不存在 [[:' + key.join(':')
+								+ ']] 之數據，' + (content ? '但' : '且不')
+								+ '存在此 Wikipedia 頁面。無法處理此 Wikidata 數據要求。');
+						callback(undefined, 'no_key');
+					});
+
 				}, {
 					API_URL : API_URL,
 					get_id : true,
