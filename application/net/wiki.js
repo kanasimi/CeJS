@@ -6453,9 +6453,9 @@ function module_code(library_namespace) {
 			 */
 			callback(page_data, bytes, page_anchor/* , file_status */)) {
 				// console.log(file_stream);
-				library_namespace.info('read_dump: Quit operation...');
+				library_namespace.info('read_dump: Quit operation, 中途跳出作業...');
 				file_stream.close();
-				// free
+				// free RAM.
 				buffer = '';
 				run_last(true);
 				return;
@@ -7281,7 +7281,7 @@ function module_code(library_namespace) {
 							return true;
 						}
 					},
-					last : function() {
+					last : function(anchor, quit_operation) {
 						// e.g.,
 						// "All 1491092 pages in dump xml file, 198.165 s."
 						// includes redirection 包含重新導向頁面.
@@ -7300,21 +7300,25 @@ function module_code(library_namespace) {
 
 						// library_namespace.set_debug(3);
 						// 一般可以達到 95% 以上採用 dump file 的程度，10分鐘內跑完。
-						run_work(need_API);
+						run_work(need_API, quit_operation);
 					}
 				});
 			}
 
 			function run_work(id_list, quit_operation) {
 				if (quit_operation) {
-					library_namespace.info('traversal_pages: 已中途跳出，直接結束作業。');
+					library_namespace.info(
+					// 直接結束作業
+					'traversal_pages: 已中途跳出作業，不讀取 production。');
 					if (typeof config.after === 'function')
 						config.after();
 					return;
 				}
 
 				if (typeof config.filter === 'function')
-					library_namespace.log('traversal_pages: 開始執行 .work(): '
+					library_namespace.log(
+					//
+					'traversal_pages: 開始讀取 production，執行 .work(): '
 							+ (id_list && id_list.length) + ' pages...');
 				wiki.work({
 					is_id : id_list.is_id,
