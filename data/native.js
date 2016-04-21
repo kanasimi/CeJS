@@ -1262,7 +1262,7 @@ var type_index = {
 	'undefined' : 3
 };
 /**
- * 去掉 Array 中重複的 items。<br />
+ * 去掉已排序，或最起碼將相同元素集在一起之 Array 中重複的 items。<br />
  * 應能確保順序不變。
  */
 function unique_Array(sorted) {

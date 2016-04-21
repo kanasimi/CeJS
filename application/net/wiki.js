@@ -27,6 +27,8 @@ https://www.mediawiki.org/wiki/API:Etiquette
 
 處理[[朱載𪉖]]
 
+https://zh.wikipedia.org/w/index.php?title=title&action=history&hilight=123,456
+
 </code>
  * 
  * @since 2015/1/1
@@ -2118,6 +2120,8 @@ function module_code(library_namespace) {
 					this.actions.unshift(next);
 					// 先取得關於討論板的描述。以此為依據，檢測頁面是否允許機器人帳戶訪問。
 					Flow_page(this.last_page, function() {
+						// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。
+						delete _this.last_page;
 						_this.next();
 					}, {
 						flow_view : 'header',
@@ -2163,6 +2167,8 @@ function module_code(library_namespace) {
 						// next[3] : callback
 						if (typeof next[3] === 'function')
 							next[3].call(_this, title, error, result);
+						// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。
+						delete _this.last_page;
 						_this.next();
 					});
 				}
@@ -2268,6 +2274,7 @@ function module_code(library_namespace) {
 								// 將 'login' 置於最前頭。
 								login_mark : true
 							});
+
 						} else {
 							if ('retry_login' in _this)
 								// 已成功 edit，去除 retry flag。
@@ -2275,6 +2282,8 @@ function module_code(library_namespace) {
 							// next[3] : callback
 							if (typeof next[3] === 'function')
 								next[3].call(_this, title, error, result);
+							// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。
+							delete _this.last_page;
 							_this.next();
 						}
 					});
@@ -7309,7 +7318,7 @@ function module_code(library_namespace) {
 				if (quit_operation) {
 					library_namespace.info(
 					// 直接結束作業
-					'traversal_pages: 已中途跳出作業，不讀取 production。');
+					'traversal_pages: 已中途跳出作業，不再讀取 production database。');
 					if (typeof config.after === 'function')
 						config.after();
 					return;
@@ -8343,7 +8352,7 @@ function module_code(library_namespace) {
 					// 可能為重定向頁面？
 					wiki_API.page(key.clone(), function(page_data) {
 						var content = get_page_content(page_data),
-						// 測試是否為重定向頁面。
+						// 測試檢查是否為重定向頁面。
 						redirect = parse_redirect(content);
 						if (redirect) {
 							library_namespace.info(
@@ -8387,27 +8396,27 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 
+		if (!key) {
+			library_namespace.err('wikidata_entity: 未設定欲取得之特定實體id。');
+			callback(undefined, 'no_key');
+			return;
+		}
+
 		// 實體項目 entity
 		// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=labels&utf8=1
-		// TODO: claim/聲明/屬性/陳述/statement
+		// TODO: claim/聲明/屬性/分類/陳述/statement
 		// https://www.wikidata.org/w/api.php?action=wbgetclaims&ids=P1&props=claims&utf8=1
 		// TODO: 維基百科 sitelinks
 		// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q1&props=sitelinks&utf8=1
 		var action;
-		if (key) {
-			// 不採用 get_page_content.is_page_data(key)
-			// 以允許自行設定 {title:title,language:language}。
-			if (key.title) {
-				action = 'sites='
-						+ (key.language && language_to_project(key.language) || wikidata_get_site(options))
-						+ '&titles=' + encodeURIComponent(key.title);
-			} else {
-				action = 'ids=' + key;
-			}
+		// 不採用 get_page_content.is_page_data(key)
+		// 以允許自行設定 {title:title,language:language}。
+		if (key.title) {
+			action = 'sites='
+					+ (key.language && language_to_project(key.language) || wikidata_get_site(options))
+					+ '&titles=' + encodeURIComponent(key.title);
 		} else {
-			library_namespace.err('wikidata_entity: 未設定欲取得之特定實體id。');
-			callback(undefined, 'no_key');
-			return;
+			action = 'ids=' + key;
 		}
 		library_namespace.debug('action: [' + action + ']', 2,
 				'wikidata_entity');
@@ -8503,7 +8512,8 @@ function module_code(library_namespace) {
 	 * @see https://www.wikidata.org/wiki/Wikidata:Bots<br />
 	 *      Monitor
 	 *      https://www.wikidata.org/wiki/Wikidata:Database_reports/Constraint_violations<br />
-	 *      Bots should add instance of (P31) or subclass of (P279) if possible<br />
+	 *      Bots should add instance of (P31 性質) or subclass of (P279 上一級分類) or
+	 *      part of (P361 屬於) if possible<br />
 	 *      Bots importing from Wikipedia should add in addition to imported
 	 *      from (P143) also reference URL (P854) with the value of the full URL
 	 *      and either retrieved (P813) or include the version id of the source
@@ -8616,7 +8626,9 @@ function module_code(library_namespace) {
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				library_namespace.err('wikidata_edit: ['
-				//
+				// [readonly] The wiki is currently in read-only mode
+				// e.g., 數據庫被禁止寫入以進行維護，所以您目前將無法保存您所作的編輯
+				// Mediawiki is in read-only mode during maintenance
 				+ error.code + '] ' + error.info);
 				callback(undefined, error);
 			}
