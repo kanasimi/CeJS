@@ -8439,9 +8439,6 @@ function module_code(library_namespace) {
 		// console.log(action);
 		// console.log(arguments);
 		// TODO:
-		// wikidata_entity: [param-missing] A parameter that is required was
-		// missing. (Either provide the item "ids" or pairs of "sites" and
-		// "titles" for corresponding pages)
 		wiki_API.query(action, function(data) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
@@ -8449,6 +8446,18 @@ function module_code(library_namespace) {
 				library_namespace.err('wikidata_entity: ['
 				//
 				+ error.code + '] ' + error.info);
+				if (false && error.code === 'param-missing') {
+					library_namespace.err(
+					/**
+					 * 可能是錯把 "category" 之類當作 sites name??
+					 * 
+					 * wikidata_entity: [param-missing] A parameter that is
+					 * required was missing. (Either provide the item "ids" or
+					 * pairs of "sites" and "titles" for corresponding pages)
+					 */
+					'wikidata_entity: 請確定您的請求，尤其是 sites 無誤: '
+							+ decodeURI(action[0]));
+				}
 				callback(undefined, error);
 				return;
 			}
