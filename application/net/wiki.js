@@ -3082,6 +3082,11 @@ function module_code(library_namespace) {
 				// 只有在成功時，才會繼續執行。
 				if (typeof config.after === 'function')
 					this.run(config.after);
+
+				this.run(function() {
+					library_namespace.log('wiki_API.work: 已完成作業 ['
+							+ config.summary + ']');
+				});
 			});
 
 		}).bind(this);
@@ -8431,6 +8436,12 @@ function module_code(library_namespace) {
 			// retrieve languages, language to callback. 僅擷取這些語言。
 			action[1] += '&languages=' + options.languages;
 
+		// console.log(action);
+		// console.log(arguments);
+		// TODO:
+		// wikidata_entity: [param-missing] A parameter that is required was
+		// missing. (Either provide the item "ids" or pairs of "sites" and
+		// "titles" for corresponding pages)
 		wiki_API.query(action, function(data) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
@@ -8638,6 +8649,10 @@ function module_code(library_namespace) {
 			callback(data);
 		}, options, session);
 	}
+
+	wikidata_edit.add_label = function(label_list, language, entity, data) {
+		// TODO: @see 20160414.import_label_from_wiki_link.js
+	};
 
 	// ------------------------------------------------------------------------
 
