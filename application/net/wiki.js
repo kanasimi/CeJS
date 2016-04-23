@@ -8443,10 +8443,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('wikidata_entity: ['
-				//
-				+ error.code + '] ' + error.info);
-				if (false && error.code === 'param-missing') {
+				if (error.code === 'param-missing') {
 					library_namespace.err(
 					/**
 					 * 可能是錯把 "category" 之類當作 sites name??
@@ -8455,8 +8452,12 @@ function module_code(library_namespace) {
 					 * required was missing. (Either provide the item "ids" or
 					 * pairs of "sites" and "titles" for corresponding pages)
 					 */
-					'wikidata_entity: 請確定您的請求，尤其是 sites 無誤: '
+					'wikidata_entity: 未設定欲取得之特定實體id。請確定您的要求，尤其是 sites 存在: '
 							+ decodeURI(action[0]));
+				} else {
+					library_namespace.err('wikidata_entity: ['
+					//
+					+ error.code + '] ' + error.info);
 				}
 				callback(undefined, error);
 				return;
@@ -8659,8 +8660,147 @@ function module_code(library_namespace) {
 		}, options, session);
 	}
 
-	wikidata_edit.add_label = function(label_list, language, entity, data) {
-		// TODO: @see 20160414.import_label_from_wiki_link.js
+	function entity_labels_and_aliases(entity, language, list) {
+		if (!Array.isArray(list))
+			// 初始化。
+			list = [];
+
+		if (!entity)
+			return list;
+
+		if (false && language && is_entity(entity) && !list) {
+			// faster
+
+			/** {Object|Array}label */
+			var label = entity.labels[language],
+			/** {Array}aliases */
+			list = entity.aliases && entity.aliases[language];
+
+			if (label) {
+				label = label.value;
+				if (list)
+					// 不更動到原 aliases。
+					(list = list.map(function(item) {
+						return item.value;
+					})).unshift(label);
+				else
+					list = [ label ];
+			} else if (!list) {
+				return [];
+			}
+
+			return list;
+		}
+
+		function add_list(item_list) {
+			if (Array.isArray(item_list)) {
+				// assert: {Array}item_list 為 wikidata_edit() 要編輯（更改或創建）的資料。
+				// assert: item_list = [{language:'',value:''}, ...]
+				list = list.concat(item_list.map(function(item) {
+					return item.value;
+				}));
+
+			} else if (!language) {
+				// assert: {Object}item_list
+				for ( var _language in item_list) {
+					// assert: Array.isArray(aliases[label])
+					add_list(item_list[_language]);
+				}
+
+			} else if (language in item_list) {
+				// assert: {Object}item_list
+				item_list = item_list[language];
+				if (Array.isArray(item_list))
+					add_list(item_list);
+				else
+					list.push(item_list.value);
+			}
+		}
+
+		entity.labels && add_list(entity.labels);
+		entity.aliases && add_list(entity.aliases);
+		return list;
+	}
+
+	var PATTERN_label = {
+		en : /^[a-z,.!:;'"()\-\d\s\&<>\\\/]+$/i,
+		ja : / /,
+		ko : / /,
+		// 改為 non-Chinese
+		// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement
+		'' : /^[\u0000-\u2E7F]+$/i
+	};
+
+	// _language: default language
+	wikidata_edit.add_item = function(label, language, _language, add_to) {
+		if (!language || typeof language !== 'string') {
+			for ( var language in PATTERN_label) {
+				if (PATTERN_label[language].test(label))
+					break;
+			}
+			if (!language && !(language = _language)) {
+				// 此處事實上為未知語言。
+				return;
+			}
+		}
+		label = {
+			language : language,
+			value : label,
+			add : 1
+		};
+		if (add_to)
+			add_to.push(label);
+		return label;
+	};
+
+	// {Object}labels = {language:[label list]}
+	wikidata_edit.add_labels = function(labels, entity, data) {
+		var list = [], data_alias;
+
+		// assert: {Object}data 為 wikidata_edit() 要編輯（更改或創建）的資料。
+		// data={labels:[{language:'',value:'',add:},...],aliases:[{language:'',value:'',add:},...]}
+		if (data && (Array.isArray(data.labels) || Array.isArray(data.aliases)))
+			// {Array}data_alias
+			data_alias = entity_labels_and_aliases(data);
+		else
+			// library_namespace.null_Object();
+			data = {};
+
+		// excludes existing label or alias. 去除已存在的 label/alias。
+		for ( var language in labels) {
+			// TODO: 提高效率。
+			var alias = entity_labels_and_aliases(entity, language, data_alias);
+			// assert: Array.isArray(labels[language])
+			labels[language].forEach(function(label) {
+				if (label && typeof label === 'string'
+						&& !alias.includes(label))
+					list.push(label), data_alias.push(label);
+			});
+		}
+
+		if (list.length === 0) {
+			// No labels to set. 已無剩下需要設定之新 label。
+			return;
+		}
+
+		if (!data.labels) {
+			// 直接登錄。
+			// 注意: 若是本來已有某個值（例如 label），採用 add 會被取代。或須偵測並避免更動原有值。
+			data.labels = [ wikidata_edit.add_item(list[0], language) ];
+			list.shift();
+		}
+
+		if (list.length > 0) {
+			list = list.maps(function(item) {
+				return wikidata_edit.add_item(item, language);
+			});
+			if (data.aliases)
+				data.aliases = data.aliases.concat(list);
+			else
+				data.aliases = list;
+		}
+
+		return data;
 	};
 
 	// ------------------------------------------------------------------------
