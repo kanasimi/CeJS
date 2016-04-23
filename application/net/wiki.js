@@ -8722,10 +8722,11 @@ function module_code(library_namespace) {
 		return list;
 	}
 
-	var PATTERN_label = {
+	// @see application.locale.encoding
+	var PATTERN_label_language = {
 		en : /^[a-z,.!:;'"()\-\d\s\&<>\\\/]+$/i,
-		ja : / /,
-		ko : / /,
+		ja : /\u3041-\u30FF\u31F0-\u31FF\uFA30-\uFA6A/,
+		ko : /\uAC00-\uD7A3\u1100-\u11FF\u3131-\u318E/,
 		// 改為 non-Chinese
 		// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement
 		'' : /^[\u0000-\u2E7F]+$/i
@@ -8734,8 +8735,8 @@ function module_code(library_namespace) {
 	// _language: default language
 	wikidata_edit.add_item = function(label, language, _language, add_to) {
 		if (!language || typeof language !== 'string') {
-			for ( var language in PATTERN_label) {
-				if (PATTERN_label[language].test(label))
+			for ( var language in PATTERN_label_language) {
+				if (PATTERN_label_language[language].test(label))
 					break;
 			}
 			if (!language && !(language = _language)) {
