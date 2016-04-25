@@ -8166,6 +8166,11 @@ function module_code(library_namespace) {
 		language = (language && String(language).trim().toLowerCase() || default_language)
 		// e.g., 'zh-min-nanwiki' → 'zh_min_nanwiki'
 		.replace(/-/g, '_');
+
+		// 為日文特別處理。
+		if (language === 'jp')
+			language = 'ja';
+
 		// 以防 incase wikt, wikisource
 		if (!language.includes('wik'))
 			language += 'wiki';
@@ -8828,8 +8833,10 @@ function module_code(library_namespace) {
 			}
 			labels[language].forEach(function(label) {
 				if (label && typeof label === 'string'
-						&& !alias.includes(label))
-					list.push(label), data_alias.push(label);
+						&& !alias.includes(label)) {
+					list.push(label);
+					data_alias && data_alias.push(label);
+				}
 			});
 		}
 
@@ -8851,7 +8858,7 @@ function module_code(library_namespace) {
 		}
 
 		if (list.length > 0) {
-			list = list.maps(function(item) {
+			list = list.map(function(item) {
 				return wikidata_edit.add_item(item, language);
 			});
 			if (data.aliases)
