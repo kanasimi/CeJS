@@ -2466,7 +2466,7 @@ function replace_check_near(text, pattern, replace_to, match_previous,
 		//
 		_last_index = matched.index + matched[0].length;
 		if ((!match_previous || match_previous(previous_text))
-		// context 上下文
+		// context 上下文 前後文
 		// 前面的 foregoing paragraphs, see above, previously stated, precedent
 		// 後面的 behind rearwards;back;posteriority;atergo;rearward
 		&& (!match_next || match_next(text.slice(_last_index)))) {

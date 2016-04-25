@@ -2785,7 +2785,7 @@ function module_code(library_namespace) {
 		//
 		&& pages.length !== titles.length)
 			library_namespace.warn(
-			//		
+			//
 			'wiki_API.work: The length of pages and titles are different!');
 
 		var main_work = (function(data) {
@@ -8742,6 +8742,7 @@ function module_code(library_namespace) {
 		return list;
 	}
 
+	var en_chars = /[a-z,.:;'"!()\-\&<>\\\/]+/ig,
 	/**
 	 * 判定 label 標籤標題語言使用之 pattern。
 	 * 
@@ -8749,16 +8750,18 @@ function module_code(library_namespace) {
 	 * 
 	 * @see application.locale.encoding
 	 */
-	var PATTERN_label_language = {
-		en : /^[\s\da-z,.!:;'"()\-\&<>\\\/]+$/i,
-		ja : /^[\s\d\u3041-\u30FF\u31F0-\u31FF\uFA30-\uFA6A]+$/,
-		ko : /^[\s\d\uAC00-\uD7A3\u1100-\u11FF\u3131-\u318E]+$/,
+	PATTERN_label_language = {
+		// en 與泛用符號/字元需要放置於第一個測試的。
+		// en : new RegExp('^' + en_chars.source + '$', 'i'),
+
+		ja : /^[\u3041-\u30FF\u31F0-\u31FF\uFA30-\uFA6A]+$/,
+		ko : /^[\uAC00-\uD7A3\u1100-\u11FF\u3131-\u318E]+$/,
 		// [[Arabic script in Unicode]] [[阿拉伯字母]]
 		// \u10E60-\u10E7F
-		ar : /^[\s\d\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+$/,
+		ar : /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+$/,
 		// [[Unicode and HTML for the Hebrew alphabet]] [[希伯來字母]]
 		// [[Hebrew (Unicode block)]]
-		he : /^[\s\d\u0591-\u05F4]+$/,
+		he : /^[\u0591-\u05F4]+$/,
 		// non-Chinese / non-CJK: 必須置於所有非中日韓語言之後測試!!
 		// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement
 		// 此處事實上為非中日韓漢字之未知語言。
@@ -8776,6 +8779,11 @@ function module_code(library_namespace) {
 	 * @returns {String|Undefined}label 之語言。
 	 */
 	function guess_language(label, CJK_language) {
+		// 先去掉所有泛用符號/字元。
+		label = label.replace(en_chars, '');
+		if (!label)
+			return 'en';
+
 		for ( var language in PATTERN_label_language) {
 			if (PATTERN_label_language[language].test(label)) {
 				if (!language) {
@@ -8835,15 +8843,28 @@ function module_code(library_namespace) {
 	 * @returns {Object}wikidata_edit() 可用的編輯資料。
 	 */
 	wikidata_edit.add_labels = function(labels, entity, data) {
-		var list = [], data_alias;
+		var data_alias;
 
 		// assert: {Object}data 為 wikidata_edit() 要編輯（更改或創建）的資料。
 		// data={labels:[{language:'',value:'',add:},...],aliases:[{language:'',value:'',add:},...]}
 		if (data && (Array.isArray(data.labels) || Array.isArray(data.aliases))) {
 			// {Array}data_alias
 			data_alias = entity_labels_and_aliases(data);
+			if (!Array.isArray(data.labels))
+				data.labels = [];
+			else if (!Array.isArray(data.aliases))
+				data.aliases = [];
+
+		} else {
+			// 初始化。
+			// library_namespace.null_Object();
+			data = {
+				labels : [],
+				aliases : []
+			};
 		}
 
+		var count = 0;
 		// excludes existing label or alias. 去除已存在的 label/alias。
 		for ( var language in labels) {
 			// TODO: 提高效率。
@@ -8856,41 +8877,42 @@ function module_code(library_namespace) {
 						+ (typeof labels[language]) + ')' + labels[language]);
 				continue;
 			}
+
+			var has_this_language_label
+			// 注意: 若是本來已有某個值（例如 label），採用 add 會被取代。或須偵測並避免更動原有值。
+			= entity.labels && entity.labels[language]
+			//
+			|| data.labels.some(function(item) {
+				return item.language === language;
+			});
+
 			labels[language].forEach(function(label) {
 				if (label && typeof label === 'string'
 						&& !alias.includes(label)) {
-					list.push(label);
 					data_alias && data_alias.push(label);
+					count++;
+					var item = wikidata_edit.add_item(label, language);
+					if (!has_this_language_label) {
+						// 第一個當作 label。直接登錄。
+						data.labels.push(item);
+					} else {
+						// 其他的當作 alias
+						data.aliases.push(item);
+					}
 				}
 			});
 		}
 
-		if (list.length === 0) {
-			// No labels to set. 已無剩下需要設定之新 label。
+		if (count === 0) {
+			// No labels/aliases to set. 已無剩下需要設定之新 label/aliases。
 			return;
 		}
 
-		if (!data) {
-			// library_namespace.null_Object();
-			data = {};
-		}
-
-		if (!data.labels) {
-			// 直接登錄。
-			// 注意: 若是本來已有某個值（例如 label），採用 add 會被取代。或須偵測並避免更動原有值。
-			data.labels = [ wikidata_edit.add_item(list[0], language) ];
-			list.shift();
-		}
-
-		if (list.length > 0) {
-			list = list.map(function(item) {
-				return wikidata_edit.add_item(item, language);
-			});
-			if (data.aliases)
-				data.aliases = data.aliases.concat(list);
-			else
-				data.aliases = list;
-		}
+		// trim 修剪；修整
+		if (data.labels.length === 0)
+			delete data.labels;
+		if (data.aliases.length === 0)
+			delete data.aliases;
 
 		return data;
 	};
