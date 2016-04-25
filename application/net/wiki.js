@@ -8663,12 +8663,13 @@ function module_code(library_namespace) {
 	/**
 	 * 取得指定實體，指定語言的所有 labels 與 aliases 值之列表。
 	 * 
-	 * @param {Object}[entity]
+	 * @param {Object}entity
 	 *            指定實體的 JSON 值。
 	 * @param {String}[language]
 	 *            指定取得此語言。
 	 * @param {Array}[list]
-	 *            添加在此列表中。
+	 *            添加此原有之 label 列表。<br />
+	 *            list = [ {String}label, ... ]
 	 * 
 	 * @returns {Array}所有 labels 與 aliases 值之列表。
 	 */
@@ -8795,7 +8796,7 @@ function module_code(library_namespace) {
 	 * 當想把 labels 加入 entity 時，輸入之則可自動去除重複的 labels，並回傳 wikidata_edit() 可用的編輯資料。
 	 * 
 	 * @param {Object}labels
-	 *            labels = {language:[label list]}
+	 *            labels = {language:[label list],...}
 	 * @param {Object}[entity]
 	 *            指定實體的 JSON 值。
 	 * @param {Object}[data]
@@ -8808,18 +8809,23 @@ function module_code(library_namespace) {
 
 		// assert: {Object}data 為 wikidata_edit() 要編輯（更改或創建）的資料。
 		// data={labels:[{language:'',value:'',add:},...],aliases:[{language:'',value:'',add:},...]}
-		if (data && (Array.isArray(data.labels) || Array.isArray(data.aliases)))
+		if (data && (Array.isArray(data.labels) || Array.isArray(data.aliases))) {
 			// {Array}data_alias
 			data_alias = entity_labels_and_aliases(data);
-		else
-			// library_namespace.null_Object();
-			data = {};
+		}
 
 		// excludes existing label or alias. 去除已存在的 label/alias。
 		for ( var language in labels) {
 			// TODO: 提高效率。
 			var alias = entity_labels_and_aliases(entity, language, data_alias);
-			// assert: Array.isArray(labels[language])
+			if (!Array.isArray(labels[language])) {
+				if (labels[language])
+					;
+				library_namespace.warn('wikidata_edit.add_labels: language ['
+						+ language + '] is not Array: ('
+						+ (typeof labels[language]) + ')' + labels[language]);
+				continue;
+			}
 			labels[language].forEach(function(label) {
 				if (label && typeof label === 'string'
 						&& !alias.includes(label))
@@ -8830,6 +8836,11 @@ function module_code(library_namespace) {
 		if (list.length === 0) {
 			// No labels to set. 已無剩下需要設定之新 label。
 			return;
+		}
+
+		if (!data) {
+			// library_namespace.null_Object();
+			data = {};
 		}
 
 		if (!data.labels) {
