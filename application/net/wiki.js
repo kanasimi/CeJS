@@ -8743,6 +8743,7 @@ function module_code(library_namespace) {
 		return list;
 	}
 
+	// English characters & common characters.
 	var en_chars = /[a-z,.:;'"!()\-\&<>\\\/]+/ig,
 	/**
 	 * 判定 label 標籤標題語言使用之 pattern。
@@ -8752,7 +8753,7 @@ function module_code(library_namespace) {
 	 * @see application.locale.encoding
 	 */
 	PATTERN_label_language = {
-		// en 與泛用符號/字元需要放置於第一個測試的。
+		// English 與泛用符號/字元需要放置於第一個測試的。
 		// en : new RegExp('^' + en_chars.source + '$', 'i'),
 
 		ja : /^[\u3041-\u30FF\u31F0-\u31FF\uFA30-\uFA6A]+$/,
@@ -8763,6 +8764,7 @@ function module_code(library_namespace) {
 		// [[Unicode and HTML for the Hebrew alphabet]] [[希伯來字母]]
 		// [[Hebrew (Unicode block)]]
 		he : /^[\u0591-\u05F4]+$/,
+
 		// non-Chinese / non-CJK: 必須置於所有非中日韓語言之後測試!!
 		// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement
 		// 此處事實上為非中日韓漢字之未知語言。
@@ -8780,6 +8782,7 @@ function module_code(library_namespace) {
 	 * @returns {String|Undefined}label 之語言。
 	 */
 	function guess_language(label, CJK_language) {
+		// English 與泛用符號/字元需要放置於第一個測試的。
 		// 先去掉所有泛用符號/字元。
 		label = label.replace(en_chars, '');
 		if (!label)
@@ -8880,7 +8883,7 @@ function module_code(library_namespace) {
 				continue;
 			}
 
-			var has_this_language_label, new_alias;
+			var has_this_language_label = undefined, new_alias = undefined;
 
 			labels[language].forEach(function(label) {
 				if (label && typeof label === 'string'
