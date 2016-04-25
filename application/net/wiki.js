@@ -8660,6 +8660,18 @@ function module_code(library_namespace) {
 		}, options, session);
 	}
 
+	/**
+	 * 取得指定實體，指定語言的所有 labels 與 aliases 值之列表。
+	 * 
+	 * @param {Object}[entity]
+	 *            指定實體的 JSON 值。
+	 * @param {String}[language]
+	 *            指定取得此語言。
+	 * @param {Array}[list]
+	 *            添加在此列表中。
+	 * 
+	 * @returns {Array}所有 labels 與 aliases 值之列表。
+	 */
 	function entity_labels_and_aliases(entity, language, list) {
 		if (!Array.isArray(list))
 			// 初始化。
@@ -8722,18 +8734,43 @@ function module_code(library_namespace) {
 		return list;
 	}
 
-	// @see application.locale.encoding
+	/**
+	 * 判定 label 語言使用之 pattern。
+	 * 
+	 * @type {Object}
+	 * 
+	 * @see application.locale.encoding
+	 */
 	var PATTERN_label_language = {
-		en : /^[a-z,.!:;'"()\-\d\s\&<>\\\/]+$/i,
-		ja : /\u3041-\u30FF\u31F0-\u31FF\uFA30-\uFA6A/,
-		ko : /\uAC00-\uD7A3\u1100-\u11FF\u3131-\u318E/,
+		en : /^[\s\da-z,.!:;'"()\-\&<>\\\/]+$/i,
+		ja : /^[\s\d\u3041-\u30FF\u31F0-\u31FF\uFA30-\uFA6A]+$/,
+		ko : /^[\s\d\uAC00-\uD7A3\u1100-\u11FF\u3131-\u318E]+$/,
+		// [[Arabic script in Unicode]] [[阿拉伯字母]]
+		// \u10E60-\u10E7F
+		ar : /^[\s\d\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+$/,
+		// [[Unicode and HTML for the Hebrew alphabet]] [[希伯來字母]]
+		// [[Hebrew (Unicode block)]]
+		he : /^[\s\d\u0591-\u05F4]+$/,
 		// 改為 non-Chinese
 		// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement
 		'' : /^[\u0000-\u2E7F]+$/i
 	};
 
-	// _language: default language
-	wikidata_edit.add_item = function(label, language, _language, add_to) {
+	/**
+	 * 回傳 wikidata_edit() 可用的個別 label 或 alias 設定項。
+	 * 
+	 * @param {String}label
+	 *            label 值。
+	 * @param {String}[language]
+	 *            設定此 label 之語言。
+	 * @param {String}[_language]
+	 *            default language to use
+	 * @param {Array}[add_to_list]
+	 *            添加在此編輯資料列表中。
+	 * 
+	 * @returns {Object}個別 label 或 alias 設定項。
+	 */
+	wikidata_edit.add_item = function(label, language, _language, add_to_list) {
 		if (!language || typeof language !== 'string') {
 			for ( var language in PATTERN_label_language) {
 				if (PATTERN_label_language[language].test(label))
@@ -8749,12 +8786,23 @@ function module_code(library_namespace) {
 			value : label,
 			add : 1
 		};
-		if (add_to)
-			add_to.push(label);
+		if (add_to_list)
+			add_to_list.push(label);
 		return label;
 	};
 
-	// {Object}labels = {language:[label list]}
+	/**
+	 * 當想把 labels 加入 entity 時，輸入之則可自動去除重複的 labels，並回傳 wikidata_edit() 可用的編輯資料。
+	 * 
+	 * @param {Object}labels
+	 *            labels = {language:[label list]}
+	 * @param {Object}[entity]
+	 *            指定實體的 JSON 值。
+	 * @param {Object}[data]
+	 *            添加在此編輯資料中。
+	 * 
+	 * @returns {Object}wikidata_edit() 可用的編輯資料。
+	 */
 	wikidata_edit.add_labels = function(labels, entity, data) {
 		var list = [], data_alias;
 

@@ -2442,12 +2442,12 @@ function replace_till_stable(text, pattern, replace_to) {
  *            要搜索的正規表示式/規則運算式模式。
  * @param {String|Function}replace_to
  *            用於替換的字串。
- * @param {Function}[match_previous]
- *            match_previous(previous token) return true if it's OK to replace,
+ * @param {Function|Undefined}[match_previous]
+ *            filter match_previous(previous token) return true if it's OK to
+ *            replace, false if it's NOT OK to replace.
+ * @param {Function|Undefined}[match_next]
+ *            filter match_next(next token) return true if it's OK to replace,
  *            false if it's NOT OK to replace.
- * @param {Function}[match_next]
- *            match_next(next token) return true if it's OK to replace, false if
- *            it's NOT OK to replace.
  * 
  * @returns {String}replaced text. 變更/取代後的結果。
  */
@@ -2455,17 +2455,25 @@ function replace_check_near(text, pattern, replace_to, match_previous,
 		match_next) {
 	var matched, results = [], last_index = 0;
 	if (!pattern.global) {
-		library_namespace.debug("replace_check_near: The pattern doesn't has 'global' flag!", 2);
+		library_namespace.debug("The pattern doesn't has 'global' flag!", 2,
+				'replace_check_near');
 	}
+
 	while (matched = pattern.exec(text)) {
-		// library_namespace.log(pattern + ': ' + matched);
+		library_namespace.debug(pattern + ': ' + matched, 5,
+				'replace_check_near');
 		var previous_text = text.slice(last_index, matched.index),
 		//
 		_last_index = matched.index + matched[0].length;
 		if ((!match_previous || match_previous(previous_text))
-		//
+		// context 上下文
+		// 前面的 foregoing paragraphs, see above, previously stated, precedent
+		// 後面的 behind rearwards;back;posteriority;atergo;rearward
 		&& (!match_next || match_next(text.slice(_last_index)))) {
 			last_index = pattern.lastIndex;
+			library_namespace.debug(previous_text + ',' + matched[0] + ','
+					+ matched[0].replace(pattern, replace_to), 5,
+					'replace_check_near');
 			results.push(
 			//
 			previous_text, matched[0].replace(pattern, replace_to));
@@ -2473,10 +2481,19 @@ function replace_check_near(text, pattern, replace_to, match_previous,
 			pattern.lastIndex = last_index;
 			last_index = _last_index;
 		}
+		if (!pattern.global) {
+			// 僅執行此一次。
+			break;
+		}
 	}
+
 	// 收尾。理想的 pattern 應該用 /([\s\S]*?)(delimiter|$)/g 之類，如此則無須收尾。
-	if (last_index < text.length)
+	if (last_index < text.length) {
+		if (last_index === 0)
+			// 完全沒相符的。
+			return text;
 		results.push(text.slice(last_index));
+	}
 	return results.join('');
 }
 
