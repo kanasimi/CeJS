@@ -8850,17 +8850,18 @@ function module_code(library_namespace) {
 		if (data && (Array.isArray(data.labels) || Array.isArray(data.aliases))) {
 			// {Array}data_alias
 			data_alias = entity_labels_and_aliases(data);
-			if (!Array.isArray(data.labels))
-				data.labels = [];
-			else if (!Array.isArray(data.aliases))
-				data.aliases = [];
+			if (false)
+				if (!Array.isArray(data.labels))
+					data.labels = [];
+				else if (!Array.isArray(data.aliases))
+					data.aliases = [];
 
 		} else {
 			// 初始化。
 			// library_namespace.null_Object();
 			data = {
-				labels : [],
-				aliases : []
+			// labels : [],
+			// aliases : []
 			};
 		}
 
@@ -8878,24 +8879,35 @@ function module_code(library_namespace) {
 				continue;
 			}
 
-			var has_this_language_label
-			// 注意: 若是本來已有某個值（例如 label），採用 add 會被取代。或須偵測並避免更動原有值。
-			= entity.labels && entity.labels[language]
-			//
-			|| data.labels.some(function(item) {
-				return item.language === language;
-			});
+			var has_this_language_label;
 
 			labels[language].forEach(function(label) {
 				if (label && typeof label === 'string'
 						&& !alias.includes(label)) {
 					data_alias && data_alias.push(label);
 					count++;
+
 					var item = wikidata_edit.add_item(label, language);
+
+					if (has_this_language_label === undefined)
+						has_this_language_label
+						// 注意: 若是本來已有某個值（例如 label），採用 add 會被取代。或須偵測並避免更動原有值。
+						= entity.labels && entity.labels[language]
+						//
+						|| data.labels && data.labels.some(function(item) {
+							return item.language === language;
+						});
+
 					if (!has_this_language_label) {
+						// 因為預料會增加的 label/aliases 很少，因此採後初始化。
+						if (!data.labels)
+							data.labels = [];
 						// 第一個當作 label。直接登錄。
 						data.labels.push(item);
 					} else {
+						// 因為預料會增加的 label/aliases 很少，因此採後初始化。
+						if (!data.aliases)
+							data.aliases = [];
 						// 其他的當作 alias
 						data.aliases.push(item);
 					}
@@ -8908,11 +8920,14 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// trim 修剪；修整
-		if (data.labels.length === 0)
-			delete data.labels;
-		if (data.aliases.length === 0)
-			delete data.aliases;
+		if (false) {
+			// 已採後初始化。既然造出實例，表示必定有資料。
+			// trim 修剪；修整
+			if (data.labels.length === 0)
+				delete data.labels;
+			if (data.aliases.length === 0)
+				delete data.aliases;
+		}
 
 		return data;
 	};
