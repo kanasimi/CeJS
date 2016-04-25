@@ -48,6 +48,7 @@ typeof CeL === 'function' && CeL.run({
 	name : 'application.net.wiki',
 	// .includes() @ data.code.compatibility
 	// .between() @ data.native
+	// .append() @ data.native
 	require : 'data.code.compatibility.|data.native.'
 	// (new Date).format('%4Y%2m%2d'), (new Date).format() @ data.date
 	// optional: .show_value() @ interact.DOM, application.debug
@@ -8716,7 +8717,7 @@ function module_code(library_namespace) {
 			if (Array.isArray(item_list)) {
 				// assert: {Array}item_list 為 wikidata_edit() 要編輯（更改或創建）的資料。
 				// assert: item_list = [{language:'',value:''}, ...]
-				list = list.concat(item_list.map(function(item) {
+				list.append(item_list.map(function(item) {
 					return item.value;
 				}));
 
@@ -8879,13 +8880,18 @@ function module_code(library_namespace) {
 				continue;
 			}
 
-			var has_this_language_label;
+			var has_this_language_label, new_alias;
 
 			labels[language].forEach(function(label) {
 				if (label && typeof label === 'string'
-						&& !alias.includes(label)) {
-					data_alias && data_alias.push(label);
+						&& !alias.includes(label)
+						// 避免 labels[language] 本身即有重複。
+						&& (!new_alias || !new_alias.includes(label))) {
 					count++;
+					if (new_alias)
+						new_alias.push(label);
+					else
+						new_alias = [ label ];
 
 					var item = wikidata_edit.add_item(label, language);
 
@@ -8913,6 +8919,13 @@ function module_code(library_namespace) {
 					}
 				}
 			});
+
+			if (new_alias) {
+				if (data_alias)
+					data_alias.append(new_alias);
+				else
+					data_alias = new_alias;
+			}
 		}
 
 		if (count === 0) {
