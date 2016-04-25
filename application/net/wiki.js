@@ -8141,7 +8141,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('Trying to get entity ' + value, 1,
 						'wikidata_datavalue');
 				wikidata_entity(value, options && options.get_object ? callback
-				// default: get label 標籤
+				// default: get label 標籤標題
 				: function(entity) {
 					entity = entity.labels || entity;
 					entity = entity[options && options.language
@@ -8501,7 +8501,9 @@ function module_code(library_namespace) {
 	// export 導出.
 	Object.assign(wikidata_entity, {
 		search : wikidata_search,
+		// 標籤
 		label_of : get_entity_label,
+		// 標題
 		title_of : get_entity_link,
 		value_of : wikidata_datavalue
 	});
@@ -8741,7 +8743,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 判定 label 語言使用之 pattern。
+	 * 判定 label 標籤標題語言使用之 pattern。
 	 * 
 	 * @type {Object}
 	 * 
@@ -8757,10 +8759,35 @@ function module_code(library_namespace) {
 		// [[Unicode and HTML for the Hebrew alphabet]] [[希伯來字母]]
 		// [[Hebrew (Unicode block)]]
 		he : /^[\s\d\u0591-\u05F4]+$/,
-		// 改為 non-Chinese
+		// non-Chinese / non-CJK: 必須置於所有非中日韓語言之後測試!!
 		// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement
-		'' : /^[\u0000-\u2E7F]+$/i
+		// 此處事實上為非中日韓漢字之未知語言。
+		'' : /^[\u0008-\u2E7F]+$/i
 	};
+
+	/**
+	 * 猜測 label 標籤標題之語言。
+	 * 
+	 * @param {String}label
+	 *            標籤標題
+	 * @param {String}[CJK_language]
+	 *            中日韓語言 code。
+	 * 
+	 * @returns {String|Undefined}label 之語言。
+	 */
+	function guess_language(label, CJK_language) {
+		for ( var language in PATTERN_label_language) {
+			if (PATTERN_label_language[language].test(label)) {
+				if (!language) {
+					library_namespace.warn(
+					//
+					'guess_language: Unknown non-CJK label: [' + label + ']');
+				}
+				return language;
+			}
+		}
+		return CJK_language;
+	}
 
 	/**
 	 * 回傳 wikidata_edit() 可用的個別 label 或 alias 設定項。
@@ -8769,21 +8796,19 @@ function module_code(library_namespace) {
 	 *            label 值。
 	 * @param {String}[language]
 	 *            設定此 label 之語言。
-	 * @param {String}[_language]
+	 * @param {String}[default_lang]
 	 *            default language to use
 	 * @param {Array}[add_to_list]
 	 *            添加在此編輯資料列表中。
 	 * 
 	 * @returns {Object}個別 label 或 alias 設定項。
 	 */
-	wikidata_edit.add_item = function(label, language, _language, add_to_list) {
+	wikidata_edit.add_item = function(label, language, default_lang,
+			add_to_list) {
 		if (!language || typeof language !== 'string') {
-			for ( var language in PATTERN_label_language) {
-				if (PATTERN_label_language[language].test(label))
-					break;
-			}
-			if (!language && !(language = _language)) {
-				// 此處事實上為未知語言。
+			// 無法猜出則使用預設之語言。
+			language = guess_language(label) || default_lang;
+			if (!language) {
 				return;
 			}
 		}
@@ -9001,6 +9026,8 @@ function module_code(library_namespace) {
 		traversal : traversal_pages,
 
 		Flow : Flow_info,
+
+		guess_language : guess_language,
 
 		data : wikidata_entity,
 		edit_data : wikidata_edit,
