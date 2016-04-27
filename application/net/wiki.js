@@ -8872,8 +8872,6 @@ function module_code(library_namespace) {
 		var count = 0;
 		// excludes existing label or alias. 去除已存在的 label/alias。
 		for ( var language in labels) {
-			// TODO: 提高效率。
-			var alias = entity_labels_and_aliases(entity, language, data_alias);
 			if (!Array.isArray(labels[language])) {
 				if (labels[language])
 					;
@@ -8883,7 +8881,19 @@ function module_code(library_namespace) {
 				continue;
 			}
 
-			var has_this_language_label = undefined, new_alias = undefined;
+			// TODO: 提高效率。
+			var alias = entity_labels_and_aliases(entity, language, data_alias),
+			/** {Boolean}此語言是否有此label */
+			has_this_language_label = undefined,
+			/** {Array}本次 labels[language] 已添加之 label list */
+			new_alias = undefined,
+			//
+			matched = language.match(/^([a-z]{2,3})-/);
+
+			if (matched) {
+				// 若是要添加 'zh-tw'，則應該順便檢查 'zh'。
+				entity_labels_and_aliases(entity, matched[1], alias);
+			}
 
 			labels[language].forEach(function(label) {
 				if (label && typeof label === 'string'
