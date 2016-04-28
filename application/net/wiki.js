@@ -8500,6 +8500,13 @@ function module_code(library_namespace) {
 		}, null, options);
 	}
 
+	// is Q4167410: Wikimedia disambiguation page 維基媒體消歧義頁
+	// CeL.wiki.data.is_DAB(entity)
+	function is_DAB(entity) {
+		var property = entity && entity.claims && entity.claims.P31;
+		return property && wikidata_datavalue(property) === 'Q4167410';
+	}
+
 	// ------------------------------------------------------------------------
 
 	// export 導出.
@@ -8509,7 +8516,8 @@ function module_code(library_namespace) {
 		label_of : get_entity_label,
 		// 標題
 		title_of : get_entity_link,
-		value_of : wikidata_datavalue
+		value_of : wikidata_datavalue,
+		is_DAB : is_DAB
 	});
 
 	// ------------------------------------------------------------------------
