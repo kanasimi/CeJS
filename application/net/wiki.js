@@ -2121,8 +2121,11 @@ function module_code(library_namespace) {
 					this.actions.unshift(next);
 					// 先取得關於討論板的描述。以此為依據，檢測頁面是否允許機器人帳戶訪問。
 					Flow_page(this.last_page, function() {
-						// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。
-						delete _this.last_page;
+						// next[3] : callback
+						if (typeof next[3] === 'function')
+							next[3].call(this, this.last_page.title);
+						// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
+						delete _this.last_page.revisions;
 						_this.next();
 					}, {
 						flow_view : 'header',
@@ -2168,8 +2171,8 @@ function module_code(library_namespace) {
 						// next[3] : callback
 						if (typeof next[3] === 'function')
 							next[3].call(_this, title, error, result);
-						// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。
-						delete _this.last_page;
+						// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
+						delete _this.last_page.revisions;
 						_this.next();
 					});
 				}
@@ -2283,8 +2286,8 @@ function module_code(library_namespace) {
 							// next[3] : callback
 							if (typeof next[3] === 'function')
 								next[3].call(_this, title, error, result);
-							// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。
-							delete _this.last_page;
+							// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
+							delete _this.last_page.revisions;
 							_this.next();
 						}
 					});
