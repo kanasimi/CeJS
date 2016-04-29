@@ -5382,7 +5382,7 @@ function module_code(library_namespace) {
 	// 找出使用了由右至左的文字，可用於{{lang}}模板。
 	// 應該改用{{tl|rtl-lang}}處理右至左文字如阿拉伯語及希伯來語，請參見{{tl|lang}}的說明。
 	// [ all ]
-	LTR_SCRIPTS = 'ar[cz]?|he|fa|bcc|bqi|ckb|dv|glk|kk|lrc|mzn|pnb|ps|sd|u[gr]|yi|tg-Arab';
+	var LTR_SCRIPTS = 'ar[cz]?|he|fa|bcc|bqi|ckb|dv|glk|kk|lrc|mzn|pnb|ps|sd|u[gr]|yi|tg-Arab',
 	// CeL.wiki.PATTERN_LTR.test('ar')===true
 	PATTERN_LTR = new RegExp('^(?:' + LTR_SCRIPTS + ')$');
 
