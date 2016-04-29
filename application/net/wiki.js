@@ -5378,6 +5378,14 @@ function module_code(library_namespace) {
 	// 設定預設之語言。 English
 	set_default_language('en');
 
+	// [[:en:right-to-left#RTL Wikipedia languages]]
+	// 找出使用了由右至左的文字，可用於{{lang}}模板。
+	// 應該改用{{tl|rtl-lang}}處理右至左文字如阿拉伯語及希伯來語，請參見{{tl|lang}}的說明。
+	// [ all ]
+	LTR_SCRIPTS = 'ar[cz]?|he|fa|bcc|bqi|ckb|dv|glk|kk|lrc|mzn|pnb|ps|sd|u[gr]|yi|tg-Arab';
+	// CeL.wiki.PATTERN_LTR.test('ar')===true
+	PATTERN_LTR = new RegExp('^(?:' + LTR_SCRIPTS + ')$');
+
 	// ------------------------------------------------------------------------
 
 	/** {Object|Function}fs in node.js */
@@ -9075,6 +9083,8 @@ function module_code(library_namespace) {
 	Object.assign(wiki_API, {
 		api_URL : api_URL,
 		set_language : set_default_language,
+		LTR_SCRIPTS : LTR_SCRIPTS,
+		PATTERN_LTR : PATTERN_LTR,
 
 		namespace : get_namespace,
 		remove_namespace : remove_namespace,
