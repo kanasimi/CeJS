@@ -1703,12 +1703,21 @@ function module_code(library_namespace) {
 			return URL;
 		}
 
+		/** {String}章節 = URL hash */
+		var section = matched[3] || '';
+		// for [[:mw:Multimedia/Media Viewer]],
+		// [[:mw:Extension:MultimediaViewer|媒體檢視器]]
+		if (section.startsWith('#/media/File:')) {
+			// 13 === '#/media/File:'.length
+			return section.slice(13);
+		}
+
 		/** {String}URL之語言 */
 		var language = matched[1].toLowerCase(),
 		/** {String}條目名稱 */
-		title = decodeURIComponent(matched[2]),
-		/** {String}章節 = URL hash */
-		section = decodeURIComponent((matched[3] || '').replace(/\./g, '%'));
+		title = decodeURIComponent(matched[2]);
+
+		section = decodeURIComponent(section.replace(/\./g, '%'));
 
 		function compose_link() {
 			var link = (language === default_language ? ''

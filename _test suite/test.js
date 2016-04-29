@@ -2318,6 +2318,7 @@ function test_wiki() {
 		[[ '網頁', CeL.wiki.parser.wiki_URL('http://zh.wikipedia.org/zh-tw/%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
 		[[ '網頁', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/w/index.php?title=%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
 		[[ '網頁', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/w/index.php?uselang=zh-tw&title=%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
+		[[ 'File:ShanghaiMetro2020plus.svg', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/%E4%B8%8A%E6%B5%B7%E5%9C%B0%E9%93%81#/media/File:ShanghaiMetro2020plus.svg') ], 'URL_to_wiki_link' ],
 
 	]);
 
