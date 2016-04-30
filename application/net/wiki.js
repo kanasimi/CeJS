@@ -3100,8 +3100,9 @@ function module_code(library_namespace) {
 					this.run(config.after);
 
 				this.run(function() {
-					library_namespace.log('wiki_API.work: 已完成作業 ['
-							+ config.summary + ']');
+					library_namespace.log('wiki_API.work: 已完成作業'
+					//
+					+ (config.summary ? ' [' + config.summary + ']' : ''));
 				});
 			});
 
@@ -3291,8 +3292,8 @@ function module_code(library_namespace) {
 		: [ action[2] ? action[0] + action[2] : action[0],
 				library_namespace.null_Object() ];
 		if (!action[1].format)
-			// 加上 "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
-			action[0] = get_URL.add_param(action[0], 'format=json&utf8=1');
+			// 加上 "&utf8", "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
+			action[0] = get_URL.add_param(action[0], 'format=json&utf8');
 
 		// 一般情況下會重新導向至 https。
 		// 若在 Tool Labs 中，則視為在同一機房內，不採加密。如此亦可加快傳輸速度。
@@ -3587,7 +3588,8 @@ function module_code(library_namespace) {
 				&& options.is_id);
 
 		if (options && options.redirects)
-			title[1] += '&redirects=1';
+			// 毋須 '&redirects=1'
+			title[1] += '&redirects';
 
 		return title;
 	}
@@ -3643,7 +3645,8 @@ function module_code(library_namespace) {
 			title[1] += '&rvlimit=1';
 
 		if (options && options.redirects)
-			title[1] += '&redirects=1';
+			// 毋須 '&redirects=1'
+			title[1] += '&redirects';
 
 		// prop=info|revisions
 		title[1] = 'query&prop=revisions&rvprop='
@@ -5189,6 +5192,12 @@ function module_code(library_namespace) {
 	};
 
 	// ------------------------------------------------------------------------
+
+	// TODO:
+	// https://zh.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
+	// https://zh.wikipedia.org/w/api.php?action=query&prop=redirects&rdprop&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
+	// https://zh.wikipedia.org/w/api.php?action=query&prop=redirects&rdprop=title&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
+	// wiki_API.redirect_to()
 
 	/**
 	 * 取得所有 redirect 到 [[title]] 之 pages。<br />
@@ -7449,7 +7458,8 @@ function module_code(library_namespace) {
 				&& options.is_id);
 
 		if (options && options.redirects)
-			title[1] += '&redirects=1';
+			// 毋須 '&redirects=1'
+			title[1] += '&redirects';
 
 		title[1] = 'query&prop=flowinfo&' + title[1];
 		if (!title[0])
@@ -7587,7 +7597,8 @@ function module_code(library_namespace) {
 		title[1] = 'page=' + encodeURIComponent(get_page_title(title[1]));
 
 		if (options && options.redirects)
-			title[1] += '&redirects=1';
+			// 毋須 '&redirects=1'
+			title[1] += '&redirects';
 
 		// e.g., { flow_view : 'header' }
 		var view = options && options.flow_view
@@ -9037,7 +9048,8 @@ function module_code(library_namespace) {
 			if (options.wdq_props)
 				action.push('&props=', options.wdq_props);
 			if (options.noitems)
-				action.push('&noitems=1');
+				// 毋須 '&noitems=1'
+				action.push('&noitems');
 			// &callback=
 		}
 
