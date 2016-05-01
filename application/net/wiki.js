@@ -8207,8 +8207,11 @@ function module_code(library_namespace) {
 			language = 'ja';
 
 		// 以防 incase wikt, wikisource
-		if (!language.includes('wik'))
+		if (!language.includes('wik')
+		// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
+		&& !/^category/i.test(language)
 			language += 'wiki';
+
 		return language;
 	}
 
