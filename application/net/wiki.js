@@ -2059,6 +2059,7 @@ function module_code(library_namespace) {
 			break;
 
 		case 'check':
+			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			next[1] = library_namespace.new_options(this.check_options,
 			// next[1]: options
 			typeof next[1] === 'boolean' ? {
@@ -6033,13 +6034,10 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function get_latest_dump(project, callback, options) {
-		if (false && !wmflabs)
+		if (false && !wmflabs) {
 			// 最起碼須有 bzip2, wget 特定版本輸出訊息 @ /bin/sh
 			throw new Error('Only for Tool Labs!');
-
-		if (!options)
-			// 前置處理。
-			options = library_namespace.null_Object();
+		}
 
 		if (typeof project === 'function' && typeof callback !== 'function'
 				&& !options) {
@@ -6049,6 +6047,9 @@ function module_code(library_namespace) {
 			project = null;
 		}
 
+		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+		options = library_namespace.new_options(options);
+
 		if (!project)
 			// e.g., 'enwiki'.
 			project = language_to_project(options.project);
@@ -6056,7 +6057,9 @@ function module_code(library_namespace) {
 		// dump host
 		var host = options.host || 'http://dumps.wikimedia.org/',
 		// e.g., '20160305'.
-		latest = options.latest;
+		latest = options.latest,
+		// latest 的前一個版本
+		previous = options.previous;
 		if (!latest) {
 			get_URL(
 			// Get the latest version.
@@ -6068,7 +6071,7 @@ function module_code(library_namespace) {
 				while (matched = PATTERN.exec(response)) {
 					matched = matched[1] | 0;
 					if (latest < matched)
-						latest = matched;
+						previous = latest, latest = matched;
 				}
 				// 不動到原來的 options。
 				options = Object.clone(options);
@@ -6227,7 +6230,20 @@ function module_code(library_namespace) {
 
 		child.on('close', function(error_code) {
 			if (error_code) {
-				library_namespace.err('Error: ' + error_code);
+				library_namespace.err('get_latest_dump: Error code '
+						+ error_code);
+				// 有時最新版本可能 dump 到一半，正等待中。
+				if (previous) {
+					library_namespace.info(
+					//
+					'get_latest_dump: Use previous version: [' + previous
+							+ '].');
+					options.latest = previous;
+					delete options.previous;
+					get_latest_dump(project, callback, options);
+				} else {
+					callback();
+				}
 				return;
 			}
 			library_namespace.log('get_latest_dump: Got archive file.');
@@ -8209,7 +8225,7 @@ function module_code(library_namespace) {
 		// 以防 incase wikt, wikisource
 		if (!language.includes('wik')
 		// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
-		&& !/^category/i.test(language)
+		&& !/^category/i.test(language))
 			language += 'wiki';
 
 		return language;
