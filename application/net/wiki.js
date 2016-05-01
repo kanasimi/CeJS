@@ -6057,15 +6057,13 @@ function module_code(library_namespace) {
 		// dump host
 		var host = options.host || 'http://dumps.wikimedia.org/',
 		// e.g., '20160305'.
-		latest = options.latest,
-		// latest 的前一個版本
-		previous = options.previous;
+		latest = options.latest;
 		if (!latest) {
 			get_URL(
 			// Get the latest version.
 			host + project + '/', function(XMLHttp) {
 				var response = XMLHttp.responseText;
-				var latest = 0, matched,
+				var latest = 0, previous, matched,
 				//
 				PATTERN = / href="(\d{8,})/g;
 				while (matched = PATTERN.exec(response)) {
@@ -6077,6 +6075,8 @@ function module_code(library_namespace) {
 				options = Object.clone(options);
 				// default: 'latest'
 				options.latest = latest || 'latest';
+				if (previous)
+					options.previous = previous;
 				get_latest_dump(project, callback, options);
 			});
 			return;
@@ -6233,12 +6233,12 @@ function module_code(library_namespace) {
 				library_namespace.err('get_latest_dump: Error code '
 						+ error_code);
 				// 有時最新版本可能 dump 到一半，正等待中。
-				if (previous) {
+				if (options.previous) {
 					library_namespace.info(
-					//
-					'get_latest_dump: Use previous version: [' + previous
-							+ '].');
-					options.latest = previous;
+					// options.previous: latest 的前一個版本。
+					'get_latest_dump: Use previous version: ['
+							+ options.previous + '].');
+					options.latest = options.previous;
 					delete options.previous;
 					get_latest_dump(project, callback, options);
 				} else {
