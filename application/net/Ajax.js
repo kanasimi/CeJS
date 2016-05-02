@@ -707,8 +707,6 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 	var request, _URL = node_url.parse(URL),
 	//
-	headers = options.headers,
-	//
 	agent = options.agent || (_URL.protocol === 'https:' ? node_https_agent : node_http_agent),
 	//
 	_onload = function(result) {
@@ -754,6 +752,18 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 				// console.log('No more data in response.');
 				// it is faster to provide the length explicitly.
 				data = Buffer.concat(data, length);
+
+				// https://gist.github.com/narqo/5265413
+				// https://github.com/request/request/blob/master/request.js
+				switch ((result.headers['content-encoding'] || '').trim().toLowerCase()) {
+				case 'zlib':
+					data = require('zlib').gunzipSync(data);
+					break;
+				case 'deflate':
+					data = require('zlib').deflateSync(data);
+					break;
+				}
+
 				// 設定 charset = 'binary' 的話，將回傳 Buffer。
 				if (charset !== 'binary') {
 					// 未設定 charset 的話，default charset: UTF-8.
@@ -787,10 +797,10 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 	_URL.headers = Object.assign({
 		// User Agent
-		'User-Agent' : get_URL_node.default_user_agent
-		// https://github.com/request/request/blob/master/request.js
-		//'Accept-Encoding': 'gzip, deflate'
-	}, headers);
+		'User-Agent' : get_URL_node.default_user_agent,
+		// 'gzip, deflate, *'
+		'Accept-Encoding': 'gzip,deflate'
+	}, options.headers);
 
 	if (post_data) {
 		_URL.method = 'POST';
@@ -800,6 +810,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			'Content-Length' : post_data.length
 		});
 	}
+	if (options.method)
+		// e.g., 'HEAD'
+		_URL.method = options.method;
 
 	_URL.agent = agent;
 	if (agent.last_cookie) {
