@@ -742,6 +742,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			/** {Array} [ {Buffer}, {Buffer}, ... ] */
 			var data = [], length = 0;
 			result.on('data', function(chunk) {
+				// {Buffer}chunk
 				length += chunk.length;
 				library_namespace.debug('receive BODY.length: ' + chunk.length + '/' + length,
 						3, 'get_URL_node');
@@ -769,9 +770,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 					// {Number}result.statusCode
 					// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
 					status : result.statusCode,
-					responseText : data,
+					responseText : data
 					// for debug
-					URL : _URL
+					//URL : _URL
 				});
 				// free
 				data = null;
@@ -784,34 +785,24 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		}
 	};
 
+	_URL.headers = Object.assign({
+		// User Agent
+		'User-Agent' : get_URL_node.default_user_agent
+		// https://github.com/request/request/blob/master/request.js
+		//'Accept-Encoding': 'gzip, deflate'
+	}, headers);
+
 	if (post_data) {
 		_URL.method = 'POST';
-		_URL.headers = {
+		Object.assign(_URL.headers, {
 			'Content-Type' : 'application/x-www-form-urlencoded',
 			// prevent HTTP 411 錯誤 – 需要內容長度頭 (411 Length Required)
-			'Content-Length' : post_data.length,
-			// User Agent
-			'User-Agent' : get_URL_node.default_user_agent
-		};
-	} else {
-		_URL.headers = {
-			// User Agent
-			'User-Agent' : get_URL_node.default_user_agent
-			// https://github.com/request/request/blob/master/request.js
-			//'Accept-Encoding': 'gzip, deflate'
-		};
-	}
-
-	if (headers) {
-		if (!_URL.headers)
-			_URL.headers = {};
-		Object.assign(_URL.headers, headers);
+			'Content-Length' : post_data.length
+		});
 	}
 
 	_URL.agent = agent;
 	if (agent.last_cookie) {
-		if (!_URL.headers)
-			_URL.headers = {};
 		library_namespace.debug('Set cookie: '
 				+ JSON.stringify(agent.last_cookie), 3, 'get_URL_node');
 		_URL.headers.Cookie = (_URL.headers.Cookie ? _URL.headers.Cookie + ';'

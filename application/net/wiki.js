@@ -3430,7 +3430,7 @@ function module_code(library_namespace) {
 								// workaround: 處理 API 傳回結尾亂編碼的情況。
 								// https://phabricator.wikimedia.org/T134094
 								// 不一定總是有效。
-								response = response.replace(/[^}]+/g, '');
+								response = response.replace(/[^}]+$/, '');
 								try {
 									response = library_namespace
 											.parse_JSON(response);
