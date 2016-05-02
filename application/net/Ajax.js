@@ -632,11 +632,6 @@ function merge_cookie(agent, cookie) {
  * 讀取 URL via node http/https。<br />
  * assert: arguments 必須與 get_URL() 相容！
  * 
- * TODO:
- * zlib: https://nodejs.org/docs/latest/api/zlib.html
- * http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression
- * http://nickfishman.com/post/49533681471/nodejs-http-requests-with-gzip-deflate-compression
- * 
  * @param {String|Object}URL
  *            請求目的URL or options
  * @param {Function}[onload]
@@ -753,15 +748,27 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 				// it is faster to provide the length explicitly.
 				data = Buffer.concat(data, length);
 
+				var encoding = result.headers['content-encoding'];
+				// https://nodejs.org/docs/latest/api/zlib.html
 				// https://gist.github.com/narqo/5265413
 				// https://github.com/request/request/blob/master/request.js
-				switch ((result.headers['content-encoding'] || '').trim().toLowerCase()) {
-				case 'zlib':
-					data = require('zlib').gunzipSync(data);
-					break;
-				case 'deflate':
-					data = require('zlib').deflateSync(data);
-					break;
+				// http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression
+				// http://nickfishman.com/post/49533681471/nodejs-http-requests-with-gzip-deflate-compression
+				if (encoding) {
+					library_namespace.debug('content-encoding: ' + encoding, 3, 'get_URL_node');
+					switch (encoding && encoding.trim().toLowerCase()) {
+					case 'gzip':
+						library_namespace.debug('gunzip', 3, 'get_URL_node');
+						data = require('zlib').gunzipSync(data);
+						break;
+					case 'deflate':
+						library_namespace.debug('deflate', 3, 'get_URL_node');
+						data = require('zlib').deflateSync(data);
+						break;
+					default:
+						library_namespace.warn('get_URL_node: Unknown encoding: [' + encoding + ']');
+						break;
+					}
 				}
 
 				// 設定 charset = 'binary' 的話，將回傳 Buffer。

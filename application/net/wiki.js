@@ -3426,21 +3426,9 @@ function module_code(library_namespace) {
 							//
 							action[0], 1, 'wiki_API.query');
 						} else {
-							if (!response.endsWith('}')) {
-								// workaround: 處理 API 傳回結尾亂編碼的情況。
-								// https://phabricator.wikimedia.org/T134094
-								// 不一定總是有效。
-								response = response.replace(/[^}]+$/, '');
-								try {
-									response = library_namespace
-											.parse_JSON(response);
-									if (typeof callback === 'function')
-										callback(response);
-									return;
-								} catch (e) {
-									// TODO: handle exception
-								}
-							}
+							// TODO: 處理 API 傳回結尾亂編碼的情況。
+							// https://phabricator.wikimedia.org/T134094
+							// 不一定總是有效。
 
 							library_namespace.err(
 							//
