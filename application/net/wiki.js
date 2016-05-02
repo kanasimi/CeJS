@@ -3101,8 +3101,8 @@ function module_code(library_namespace) {
 					this.run(config.after);
 
 				this.run(function() {
-					library_namespace.log('wiki_API.work: 已完成作業'
-					//
+					library_namespace.log('wiki_API.work: 結束作業'
+					// 已完成作業
 					+ (config.summary ? ' [' + config.summary + ']' : ''));
 				});
 			});
@@ -6184,12 +6184,12 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 
-		library_namespace.log('get_latest_dump: Try to get archive [' + archive
-				+ ']...');
+		library_namespace.log('get_latest_dump: Try to save archive to ['
+				+ source_directory + archive + ']...');
 		// https://nodejs.org/api/child_process.html
 		var child = require('child_process').spawn('/usr/bin/wget',
 		//
-		[ '--input-file="' + source_directory + archive + '"',
+		[ '--output-document="' + source_directory + archive + '"',
 		//
 		host + project + '/' + latest + '/' + archive ]);
 
@@ -6246,6 +6246,7 @@ function module_code(library_namespace) {
 				}
 				return;
 			}
+
 			library_namespace.log('get_latest_dump: Got archive file.');
 			extract();
 		});
@@ -8212,6 +8213,15 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// language → Wikidata site name / Wikimedia project name
+	// TODO:
+	// [[:sourceforge:project/shownotes.php?release id=226003&group id=34373]]
+	// http://sourceforge.net/project/shownotes.php%3Frelease_id%3D226003%26group_id%3D34373
+	// [[:gerrit:gitweb?p=mediawiki/core.git;a=blob;f=RELEASE-NOTES-1.23]]
+	// https://gerrit.wikimedia.org/r/gitweb%3Fp%3Dmediawiki/core.git;a%3Dblob;f%3DRELEASE-NOTES-1.23
+	// [[:google:湘江]]
+	// https://www.google.com/search?q=%E6%B9%98%E6%B1%9F
+	// [[:imdbtitle:0075713]]
+	// http://www.imdb.com/title/tt0075713/
 	function language_to_project(language) {
 		// 正規化。
 		language = (language && String(language).trim().toLowerCase() || default_language)
