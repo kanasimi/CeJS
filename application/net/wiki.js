@@ -3415,7 +3415,7 @@ function module_code(library_namespace) {
 
 				// library_namespace.log(response);
 				// library_namespace.log(library_namespace.HTML_to_Unicode(response));
-				if (response)
+				if (response) {
 					try {
 						response = library_namespace.parse_JSON(response);
 					} catch (e) {
@@ -3426,6 +3426,22 @@ function module_code(library_namespace) {
 							//
 							action[0], 1, 'wiki_API.query');
 						} else {
+							if (!response.endsWith('}')) {
+								// workaround: 處理 API 傳回結尾亂編碼的情況。
+								// https://phabricator.wikimedia.org/T134094
+								// 不一定總是有效。
+								response = response.replace(/[^}]+/g, '');
+								try {
+									response = library_namespace
+											.parse_JSON(response);
+									if (typeof callback === 'function')
+										callback(response);
+									return;
+								} catch (e) {
+									// TODO: handle exception
+								}
+							}
+
 							library_namespace.err(
 							//
 							'wiki_API.query: Invalid content: ['
@@ -3435,6 +3451,7 @@ function module_code(library_namespace) {
 						// exit!
 						return;
 					}
+				}
 
 				if (typeof callback === 'function')
 					callback(response);
@@ -4487,6 +4504,8 @@ function module_code(library_namespace) {
 	// 登入認證用。
 	// https://www.mediawiki.org/wiki/API:Login
 	// https://www.mediawiki.org/wiki/API:Edit
+	// 認證用 cookie:
+	// {zhwikiSession,centralauth_User,centralauth_Token,centralauth_Session,wikidatawikiSession,wikidatawikiUserID,wikidatawikiUserName}
 	wiki_API.login = function(name, password, options) {
 		function _next() {
 			if (typeof callback === 'function')
@@ -6247,7 +6266,8 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			library_namespace.log('get_latest_dump: Got archive file.');
+			library_namespace.log('get_latest_dump: Got archive file ['
+					+ source_directory + archive + '].');
 			extract();
 		});
 	}

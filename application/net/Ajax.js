@@ -632,7 +632,10 @@ function merge_cookie(agent, cookie) {
  * 讀取 URL via node http/https。<br />
  * assert: arguments 必須與 get_URL() 相容！
  * 
- * TODO: zlib: https://nodejs.org/docs/latest/api/zlib.html
+ * TODO:
+ * zlib: https://nodejs.org/docs/latest/api/zlib.html
+ * http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression
+ * http://nickfishman.com/post/49533681471/nodejs-http-requests-with-gzip-deflate-compression
  * 
  * @param {String|Object}URL
  *            請求目的URL or options
@@ -766,7 +769,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 					// {Number}result.statusCode
 					// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
 					status : result.statusCode,
-					responseText : data
+					responseText : data,
+					// for debug
+					URL : _URL
 				});
 				// free
 				data = null;
@@ -792,6 +797,8 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		_URL.headers = {
 			// User Agent
 			'User-Agent' : get_URL_node.default_user_agent
+			// https://github.com/request/request/blob/master/request.js
+			//'Accept-Encoding': 'gzip, deflate'
 		};
 	}
 
