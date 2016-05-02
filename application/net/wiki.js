@@ -6188,9 +6188,9 @@ function module_code(library_namespace) {
 				+ source_directory + archive + ']...');
 		// https://nodejs.org/api/child_process.html
 		var child = require('child_process').spawn('/usr/bin/wget',
-		//
-		[ '--output-document="' + source_directory + archive + '"',
-		//
+		// -O=""
+		[ '--output-document=' + source_directory + archive,
+		// 經測試，採用 .spawn() 此種方法毋須考慮 '"' 之類 quote 的問題。
 		host + project + '/' + latest + '/' + archive ]);
 
 		child.stdout.setEncoding('utf8');
