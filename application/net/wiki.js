@@ -9154,7 +9154,7 @@ function module_code(library_namespace) {
 
 		parser : page_parser,
 
-		/** 中途跳出作業用。 */
+		/** const 中途跳出作業用。 */
 		quit_operation : {},
 
 		is_page_data : get_page_content.is_page_data,

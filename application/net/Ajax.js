@@ -574,7 +574,9 @@ deprecated_get_URL.clean=function(i,force){
 
 var node_url, node_http, node_https,
 // reuse the sockets (keep-alive connection).
-node_http_agent, node_https_agent;
+node_http_agent, node_https_agent,
+//
+node_zlib;
 
 
 /**
@@ -755,15 +757,15 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 				// http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression
 				// http://nickfishman.com/post/49533681471/nodejs-http-requests-with-gzip-deflate-compression
 				if (encoding) {
-					library_namespace.debug('content-encoding: ' + encoding, 3, 'get_URL_node');
+					library_namespace.debug('content-encoding: ' + encoding, 5, 'get_URL_node');
 					switch (encoding && encoding.trim().toLowerCase()) {
 					case 'gzip':
-						library_namespace.debug('gunzip', 3, 'get_URL_node');
-						data = require('zlib').gunzipSync(data);
+						library_namespace.debug('gunzip data...', 2, 'get_URL_node');
+						data = node_zlib.gunzipSync(data);
 						break;
 					case 'deflate':
-						library_namespace.debug('deflate', 3, 'get_URL_node');
-						data = require('zlib').deflateSync(data);
+						library_namespace.debug('deflate data...', 2, 'get_URL_node');
+						data = node_zlib.deflateSync(data);
 						break;
 					default:
 						library_namespace.warn('get_URL_node: Unknown encoding: [' + encoding + ']');
@@ -804,10 +806,16 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 	_URL.headers = Object.assign({
 		// User Agent
-		'User-Agent' : get_URL_node.default_user_agent,
-		// 'gzip, deflate, *'
-		'Accept-Encoding': 'gzip,deflate'
+		'User-Agent' : get_URL_node.default_user_agent
 	}, options.headers);
+
+	if (node_zlib.gunzipSync
+	// && node_zlib.deflateSync
+	) {
+		// 早期 node v0.10.25 無 zlib.gunzipSync。
+		// 'gzip, deflate, *'
+		_URL.headers['Accept-Encoding'] = 'gzip,deflate';
+	}
 
 	if (post_data) {
 		_URL.method = 'POST';
@@ -876,6 +884,7 @@ function setup_node(type, options) {
 		node_url = require('url');
 		node_http = require('http');
 		node_https = require('https');
+		node_zlib = require('zlib');
 
 		// 不需要。
 		//node_http_agent.maxSockets = 1;
