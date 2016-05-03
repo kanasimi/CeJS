@@ -8822,8 +8822,8 @@ function module_code(library_namespace) {
 		return list;
 	}
 
-	// English characters & common characters.
-	var en_chars = /[a-z,.:;'"!()\-\&<>\\\/]+/ig,
+	// common characters. 泛用符號/字元。
+	var common_characters = /[\s\d_,.:;'"!()\-\&<>\\\/]+/g,
 	/**
 	 * 判定 label 標籤標題語言使用之 pattern。
 	 * 
@@ -8832,8 +8832,8 @@ function module_code(library_namespace) {
 	 * @see application.locale.encoding
 	 */
 	PATTERN_label_language = {
-		// English 與泛用符號/字元需要放置於第一個測試的。
-		// en : new RegExp('^' + en_chars.source + '$', 'i'),
+		// English characters 字元需要放置於第一個測試的。
+		en : /^[a-z]+$/i,
 
 		ja : /^[\u3041-\u30FF\u31F0-\u31FF\uFA30-\uFA6A]+$/,
 		ko : /^[\uAC00-\uD7A3\u1100-\u11FF\u3131-\u318E]+$/,
@@ -8856,16 +8856,17 @@ function module_code(library_namespace) {
 	 * @param {String}label
 	 *            標籤標題
 	 * @param {String}[CJK_language]
-	 *            中日韓語言 code。
+	 *            預設之中日韓語言 code。
 	 * 
 	 * @returns {String|Undefined}label 之語言。
 	 */
 	function guess_language(label, CJK_language) {
-		// English 與泛用符號/字元需要放置於第一個測試的。
 		// 先去掉所有泛用符號/字元。
-		label = label.replace(en_chars, '');
-		if (!label)
-			return 'en';
+		label = label.replace(common_characters, '');
+		if (!label) {
+			// 刪掉泛用符號/字元後已無東西剩下。
+			return;
+		}
 
 		for ( var language in PATTERN_label_language) {
 			if (PATTERN_label_language[language].test(label)) {

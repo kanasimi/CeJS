@@ -886,10 +886,6 @@ function setup_node(type, options) {
 		node_https = require('https');
 		node_zlib = require('zlib');
 
-		// 不需要。
-		//node_http_agent.maxSockets = 1;
-		//node_https_agent.maxSockets = 1;
-
 		_.get_URL = library_namespace.copy_properties(get_URL, get_URL_node);
 	}
 
@@ -901,7 +897,9 @@ function setup_node(type, options) {
 
 	node_http_agent = new node_http.Agent;
 	node_https_agent = new node_https.Agent;
-
+	// 不需要。
+	//node_http_agent.maxSockets = 1;
+	//node_https_agent.maxSockets = 1;
 }
 
 _.setup_node_net = setup_node;
