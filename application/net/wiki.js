@@ -1516,7 +1516,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * parse template token. 取得完整的模板 token。<br />
-	 * CeL.wiki.parser.template();
+	 * CeL.wiki.parse.template();
 	 * 
 	 * @param {String}wikitext
 	 *            模板前後之 content。<br />
@@ -1761,16 +1761,62 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
-	// TODO: 統合於 parser 之中。
-	Object.assign(page_parser, {
-		parse : parse_wikitext,
+	// 簡易快速但很有可能出錯的 parser。
+	// e.g.,
+	// CeL.wiki.parse.every('{{lang}}','~~{{lang|en|ers}}ff{{ee|vf}}__{{lang|fr|fff}}@@{{lang}}',function(token){console.log(token);})
+	// CeL.wiki.parse.every('{{lang|ee}}','~~{{lang|en|ers}}ff{{ee|vf}}__{{lang|fr|fff}}@@{{lang}}',function(token){console.log(token);})
+	// CeL.wiki.parse.every(['template','lang'],'~~{{lang|en|ers}}ff{{ee|vf}}__{{lang|fr|fff}}@@{{lang}}',function(token){console.log(token);})
+	// CeL.wiki.parse.every(/{{[Ll]ang\b[^{}]*}}/g,'~~{{lang|en|ers}}ff{{ee|vf}}__{{lang|fr|fff}}@@{{lang}}',function(token){console.log(token);},CeL.wiki.parse.template)
+	function parse_every(pattern, wikitext, callback, parser) {
+		// assert: pattern.global === true
+		var matched, count = 0;
 
+		if (!parser) {
+			if (typeof pattern === 'string'
+					&& (matched = pattern.match(/{{([^{}]+)}}/)))
+				pattern = [ 'template', matched[1] ];
+
+			if (Array.isArray(pattern)) {
+				parser = parse_wikitext[matched = pattern[0]];
+				pattern = pattern[1];
+				if (typeof pattern === 'string') {
+					if (matched === 'template')
+						pattern = new RegExp('{{ *(?:' + pattern
+								+ ')(?:}}|[^a-z].*?}})', 'gi');
+				}
+			}
+		}
+
+		while (matched = pattern.exec(wikitext)) {
+			if (parser) {
+				var data = matched;
+				matched = parser(matched[0]);
+				if (!matched)
+					// nothing got.
+					continue;
+
+				// recover index
+				matched.index = data.index;
+			}
+
+			matched.lastIndex = pattern.lastIndex;
+			matched.count = count++;
+			callback(matched);
+		}
+	}
+
+	// CeL.wiki.parser(wikitext) 傳回 parser，可作 parser.parse()。
+	// CeL.wiki.parse.*(wikitext) 僅處理單一 token，傳回 parse 過的 data。
+	// TODO: 統合於 CeL.wiki.parser 之中。
+	Object.assign(parse_wikitext, {
 		template : parse_template,
 		date : parse_date,
 		user : parse_user,
 		redirect : parse_redirect,
 
-		wiki_URL : URL_to_wiki_link
+		wiki_URL : URL_to_wiki_link,
+
+		every : parse_every
 	});
 
 	// ------------------------------------------------------------------------
@@ -8829,17 +8875,30 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Object}
 	 * 
-	 * @see application.locale.encoding
+	 * @see [[以人口排列的語言列表]], application.locale.encoding
 	 */
 	PATTERN_label_language = {
-		// English characters 字元需要放置於第一個測試的。
+		// 常用的 English characters 需要放置於第一個測試。
 		en : /^[a-z]+$/i,
 
 		ja : /^[\u3041-\u30FF\u31F0-\u31FF\uFA30-\uFA6A]+$/,
 		ko : /^[\uAC00-\uD7A3\u1100-\u11FF\u3131-\u318E]+$/,
+
+		// [[西班牙語字母]]
+		es : /^[a-zñáéíóúü]+$/i,
+
 		// [[Arabic script in Unicode]] [[阿拉伯字母]]
 		// \u10E60-\u10E7F
 		ar : /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+$/,
+
+		// 印地語天城文
+		bh : /^[\u0900-\u097F\uA8E0-\uA8FF\u1CD0-\u1CFF]+$/,
+		// [[:en:Bengali (Unicode block)]]
+		bn : /^[\u0980-\u09FF]+$/,
+
+		// [[俄語字母]], [\p{IsCyrillic}]+
+		ru : /^[\u0401-\u044F]+$/,
+
 		// [[Unicode and HTML for the Hebrew alphabet]] [[希伯來字母]]
 		// [[Hebrew (Unicode block)]]
 		he : /^[\u0591-\u05F4]+$/,
@@ -9153,6 +9212,7 @@ function module_code(library_namespace) {
 
 		file_pattern : file_pattern,
 
+		parse : parse_wikitext,
 		parser : page_parser,
 
 		/** const 中途跳出作業用。 */

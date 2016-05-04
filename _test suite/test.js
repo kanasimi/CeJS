@@ -2290,44 +2290,44 @@ function test_wiki() {
 		//
 		.replace(CeL.wiki.file_pattern('abc d.png'), '[[$1File:abc d.svg$3') ], 'file_pattern'],
 
-		[[undefined, CeL.wiki.parser.template('a{temp}b', 'temp')]],
-		[['temp', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', false)[1]]],
-		[['{{temp2,p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', false)[2].join()]],
-		[['|{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', '', true)[2]]],
-		[['{{temp2,p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', false)[2].join()]],
-		[['|{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', true)[2]]],
-		[['p{a}r', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', false)[2].join()]],
-		[['|p{a}r', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', true)[2]]],
+		[[undefined, CeL.wiki.parse.template('a{temp}b', 'temp')]],
+		[['temp', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b', '', false)[1]]],
+		[['{{temp2,p{a}r}}', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b', '', false)[2].join()]],
+		[['|{{temp2|p{a}r}}', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b', '', true)[2]]],
+		[['{{temp2,p{a}r}}', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', false)[2].join()]],
+		[['|{{temp2|p{a}r}}', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp', true)[2]]],
+		[['p{a}r', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', false)[2].join()]],
+		[['|p{a}r', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2', true)[2]]],
 
-		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b')[0] ]],
-		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp')[0] ]],
-		[[ '{{temp2|p{a}r}}', CeL.wiki.parser.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]],
+		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b')[0] ]],
+		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp')[0] ]],
+		[[ '{{temp2|p{a}r}}', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]],
 
-		[[ 'vfd', CeL.wiki.parser.template('{{vfd|已提刪}}\n...', [ 'vfd', 'afd' ], true)[1] ]],
-		[[ '2015/10/21', CeL.wiki.parser.template('\n{{vfd|已提刪|date=2015/10/21}}\n...', [ 'vfd', 'afd' ])[2].date ]],
+		[[ 'vfd', CeL.wiki.parse.template('{{vfd|已提刪}}\n...', [ 'vfd', 'afd' ], true)[1] ]],
+		[[ '2015/10/21', CeL.wiki.parse.template('\n{{vfd|已提刪|date=2015/10/21}}\n...', [ 'vfd', 'afd' ])[2].date ]],
 
-		[[ '[[Special:用户贡献/Cewbot|cewbot]]', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/Special:%E7%94%A8%E6%88%B7%E8%B4%A1%E7%8C%AE/Cewbot cewbot', true) ], 'URL_to_wiki_link' ],
-		[[ 'Wikipedia:沙盒', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92') ], 'URL_to_wiki_link' ],
-		[[ '[[Wikipedia:沙盒]]', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92', true) ], 'URL_to_wiki_link' ],
-		[[ '[[Wikipedia:沙盒|SB]]', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92 SB', true) ], 'URL_to_wiki_link' ],
-		[[ ':en:Wikipedia:Sandbox', CeL.wiki.parser.wiki_URL('https://en.wikipedia.org/wiki/Wikipedia:Sandbox') ], 'URL_to_wiki_link' ],
-		[[ '網頁', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
-		[[ '網頁|頁面', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81 頁面') ], 'URL_to_wiki_link' ],
-		[[ '網頁#儲存網頁', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81#.E5.84.B2.E5.AD.98.E7.B6.B2.E9.A0.81') ], 'URL_to_wiki_link' ],
-		[[ '網頁#儲存網頁|頁面', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81#.E5.84.B2.E5.AD.98.E7.B6.B2.E9.A0.81 頁面') ], 'URL_to_wiki_link' ],
-		[[ '網頁', CeL.wiki.parser.wiki_URL('http://zh.wikipedia.org/zh-tw/%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
-		[[ '網頁', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/w/index.php?title=%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
-		[[ '網頁', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/w/index.php?uselang=zh-tw&title=%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
-		[[ 'File:ShanghaiMetro2020plus.svg', CeL.wiki.parser.wiki_URL('https://zh.wikipedia.org/wiki/%E4%B8%8A%E6%B5%B7%E5%9C%B0%E9%93%81#/media/File:ShanghaiMetro2020plus.svg') ], 'URL_to_wiki_link' ],
+		[[ '[[Special:用户贡献/Cewbot|cewbot]]', CeL.wiki.parse.wiki_URL('https://zh.wikipedia.org/wiki/Special:%E7%94%A8%E6%88%B7%E8%B4%A1%E7%8C%AE/Cewbot cewbot', true) ], 'URL_to_wiki_link' ],
+		[[ 'Wikipedia:沙盒', CeL.wiki.parse.wiki_URL('https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92') ], 'URL_to_wiki_link' ],
+		[[ '[[Wikipedia:沙盒]]', CeL.wiki.parse.wiki_URL('https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92', true) ], 'URL_to_wiki_link' ],
+		[[ '[[Wikipedia:沙盒|SB]]', CeL.wiki.parse.wiki_URL('https://zh.wikipedia.org/wiki/Wikipedia:%E6%B2%99%E7%9B%92 SB', true) ], 'URL_to_wiki_link' ],
+		[[ ':en:Wikipedia:Sandbox', CeL.wiki.parse.wiki_URL('https://en.wikipedia.org/wiki/Wikipedia:Sandbox') ], 'URL_to_wiki_link' ],
+		[[ '網頁', CeL.wiki.parse.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
+		[[ '網頁|頁面', CeL.wiki.parse.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81 頁面') ], 'URL_to_wiki_link' ],
+		[[ '網頁#儲存網頁', CeL.wiki.parse.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81#.E5.84.B2.E5.AD.98.E7.B6.B2.E9.A0.81') ], 'URL_to_wiki_link' ],
+		[[ '網頁#儲存網頁|頁面', CeL.wiki.parse.wiki_URL('https://zh.wikipedia.org/wiki/%E7%B6%B2%E9%A0%81#.E5.84.B2.E5.AD.98.E7.B6.B2.E9.A0.81 頁面') ], 'URL_to_wiki_link' ],
+		[[ '網頁', CeL.wiki.parse.wiki_URL('http://zh.wikipedia.org/zh-tw/%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
+		[[ '網頁', CeL.wiki.parse.wiki_URL('https://zh.wikipedia.org/w/index.php?title=%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
+		[[ '網頁', CeL.wiki.parse.wiki_URL('https://zh.wikipedia.org/w/index.php?uselang=zh-tw&title=%E7%B6%B2%E9%A0%81') ], 'URL_to_wiki_link' ],
+		[[ 'File:ShanghaiMetro2020plus.svg', CeL.wiki.parse.wiki_URL('https://zh.wikipedia.org/wiki/%E4%B8%8A%E6%B5%B7%E5%9C%B0%E9%93%81#/media/File:ShanghaiMetro2020plus.svg') ], 'URL_to_wiki_link' ],
 
 	]);
 
 	error_count += CeL.test('CeL.wiki.parser', function(assert) {
 		var wikitext;
 		wikitext = 't[http://a.b/ x[[l]]';
-		assert([ wikitext, CeL.wiki.parser.parse(wikitext).toString() ]);
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ]);
 		wikitext = 't<!--=';
-		assert([ wikitext, CeL.wiki.parser.parse(wikitext).toString() ]);
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ]);
 		wikitext = 'a[[l]]b';
 		assert([ 'a{{t}}b', CeL.wiki.parser(wikitext).parse().each('link', function(token, parent, index){return '{{t}}';}, true).toString() ]);
 	});
@@ -2435,8 +2435,8 @@ function test_wiki() {
 	wiki_page.each('transclusion', function(token, parent, index) { ; });
 	//CeL.log('-'.repeat(70) + '\n' + wiki_page.toString());
 
-	CeL.wiki.parser.parse('{{temp|{{temp2|p{a}r{}}}}}');
-	JSON.stringify(CeL.wiki.parser.parse('a{{temp|e{{temp2|p{a}r}}}}b'));
+	CeL.wiki.parse('{{temp|{{temp2|p{a}r{}}}}}');
+	JSON.stringify(CeL.wiki.parse('a{{temp|e{{temp2|p{a}r}}}}b'));
 	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('plain', function(token) { CeL.log(token); });
 	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b').parse().each('template', function(template) { CeL.log(template.toString()); }) && '';
 	CeL.wiki.parser('a{{temp|e{{temp2|p{a}r}}}}b<!--ff[[r]]-->[[t|e]]\n{|\n|r1-1||r1-2\n|-\n|r2-1\n|r2-2\n|}[http://r.r ee]').parse();
