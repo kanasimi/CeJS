@@ -1522,17 +1522,21 @@ function module_code(library_namespace) {
 	 *            模板前後之 content。<br />
 	 *            assert: wikitext 為良好結構 (well-constructed)。
 	 * @param {String|Array}[template_name]
-	 *            擷取模板名。
-	 * @param {Boolean}[no_parse]
-	 *            是否不解析 parameters。
+	 *            擷取模板名 template name。
+	 * @param {Number}[parse_type]
+	 *            1: [ {String}模板名, parameters ]<br />
+	 *            true: 不解析 parameters。<br />
+	 *            false: 解析 parameters。
 	 * 
 	 * @returns {Undefine}wikitext 不包含此模板。
 	 * @returns {Array}token = [ {String}完整的模板token, {String}模板名,
 	 *          {Array}parameters ];<br />
 	 *          token.count = count('{{') - count('}}')，正常情況下應為 0。<br />
-	 *          token.index, token.lastIndex: index.
+	 *          token.index, token.lastIndex: index.<br />
+	 *          parameters[0] is {{{1}}}, parameters[1] is {{{2}}}, ...<br />
+	 *          parameters[p] is {{{p}}}
 	 */
-	function parse_template(wikitext, template_name, no_parse) {
+	function parse_template(wikitext, template_name, parse_type) {
 		template_name = normalize_name_pattern(template_name, true, true);
 		var matched = template_name
 		// 模板起始。
@@ -1578,7 +1582,7 @@ function module_code(library_namespace) {
 			lastIndex : pattern.lastIndex
 		});
 
-		if (!no_parse) {
+		if (!parse_type || parse_type === 1) {
 			// {Array}parameters
 			// 警告:這邊只是單純的以 '|' 分割，但照理來說應該再 call parser 來處理。
 			// 最起碼應該除掉所有可能包含 '|' 的語法，例如內部連結 [[~|~]], 模板 {{~|~}}。
@@ -1601,6 +1605,15 @@ function module_code(library_namespace) {
 				}
 			});
 			result[2] = wikitext;
+
+			if (parse_type === 1) {
+				// result[0] is template name.
+				// result[p] is {{{p}}}
+				// result[1] is {{{1}}}
+				// result[2] is {{{2}}}
+				result[2].unshift(result[1]);
+				result = result[2];
+			}
 		}
 
 		return result;
@@ -1976,6 +1989,8 @@ function module_code(library_namespace) {
 
 	/**
 	 * 設定工作/添加新的工作。
+	 * 
+	 * 警告: 若 callback throw，可能導致工作中斷，不會自動復原，得要以 wiki.next() 重起工作。
 	 * 
 	 * 工作原理: 每個實體會hold住一個queue ({Array}this.actions)。 當設定工作時，就把工作推入佇列中。
 	 * 另外內部會有另一個行程負責依序執行每一個工作。
@@ -6765,6 +6780,7 @@ function module_code(library_namespace) {
 			// 若自行設定了檔名，則慢點執行 list()，先讀讀 cache。因為 list() 可能會頗耗時間。
 			// 基本上，設定 this.* 應該在 operation.operator() 中，而不是在 operation.list() 中。
 			if (typeof list === 'function')
+				// TODO: 允許非同步方法。
 				list = list.call(_this, operation);
 
 			// 自行設定之檔名 operation.file_name 優先度較 type/title 高。
