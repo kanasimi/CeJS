@@ -8885,7 +8885,7 @@ function module_code(library_namespace) {
 	}
 
 	// common characters. 泛用符號/字元。
-	var common_characters = /[\s\d_,.:;'"!()\-\&<>\\\/]+/g,
+	var common_characters = /[\s\d_,.:;'"!()\-+\&<>\\\/@#$%^&*=]+/g,
 	/**
 	 * 判定 label 標籤標題語言使用之 pattern。
 	 * 
