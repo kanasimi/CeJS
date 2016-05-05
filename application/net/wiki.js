@@ -8896,7 +8896,11 @@ function module_code(library_namespace) {
 	}
 
 	// common characters. 泛用符號/字元。
+	// ☆
 	var PATTERN_common_characters = /[\s\d_,.:;'"!()–\-+\&<>\\\/\?@#$%^&*=]+/g,
+	// non-Chinese / non-CJK: 必須置於所有非中日韓語言之後測試!!
+	// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement
+	PATTERN_non_CJK = /^[\u0008-\u2E7F]+$/i,
 	/**
 	 * 判定 label 標籤標題語言使用之 pattern。
 	 * 
@@ -8907,9 +8911,6 @@ function module_code(library_namespace) {
 	label_language_patterns = {
 		// 常用的 English characters 需要放置於第一個測試。
 		en : /^[a-z]+$/i,
-
-		ja : /^[\u3041-\u30FF\u31F0-\u31FF\uFA30-\uFA6A]+$/,
-		ko : /^[\uAC00-\uD7A3\u1100-\u11FF\u3131-\u318E]+$/,
 
 		// [[西班牙語字母]]
 		// 'áéíñóúü'.toLowerCase().split('').sort().uniq().join('')
@@ -8932,12 +8933,11 @@ function module_code(library_namespace) {
 
 		// [[Unicode and HTML for the Hebrew alphabet]] [[希伯來字母]]
 		// [[Hebrew (Unicode block)]]
-		he : /^[\u0591-\u05F4]+$/,
+		he : /^[\u0591-\u05F4]+$/
 
-		// non-Chinese / non-CJK: 必須置於所有非中日韓語言之後測試!!
-		// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement
-		// 此處事實上為非中日韓漢字之未知語言。
-		'' : /^[\u0008-\u2E7F]+$/i
+	}, label_CJK_patterns = {
+		ja : /^[\u3041-\u30FF\u31F0-\u31FF\uFA30-\uFA6A]+$/,
+		ko : /^[\uAC00-\uD7A3\u1100-\u11FF\u3131-\u318E]+$/
 	};
 
 	/**
@@ -8958,18 +8958,25 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		for ( var language in label_language_patterns) {
+		// non_CJK: 此處事實上為非中日韓漢字之未知語言。
+		var non_CJK = PATTERN_non_CJK.test(label),
+		//
+		patterns = non_CJK ? label_language_patterns : label_CJK_patterns;
+
+		for ( var language in patterns) {
 			if (label_language_patterns[language].test(label)) {
-				if (!language) {
-					library_namespace.warn(
-					//
-					'guess_language: Unknown non-CJK label: [' + label + ']');
-				}
-				// language === ''
 				return language;
 			}
 		}
-		return CJK_language;
+
+		if (!non_CJK) {
+			return CJK_language;
+		}
+
+		library_namespace.warn(
+		//
+		'guess_language: Unknown non-CJK label: [' + label + ']');
+		return '';
 	}
 
 	/**
