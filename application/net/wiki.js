@@ -7344,7 +7344,7 @@ function module_code(library_namespace) {
 
 					if (++count % 1e4 === 0) {
 						var speed = count / (Date.now() - start_read_time);
-						speed = speed < .05 ? (1e3 * speed).toFixed(2)
+						speed = speed < .1 ? (1e3 * speed).toFixed(2)
 								+ ' page/s' : speed.toFixed(3) + ' page/ms';
 						// e.g.,
 						// "2730000 (99%): 21.326 page/ms [[Category:大洋洲火山岛]]"
@@ -8896,7 +8896,7 @@ function module_code(library_namespace) {
 	}
 
 	// common characters. 泛用符號/字元。
-	var common_characters = /[\s\d_,.:;'"!()\-+\&<>\\\/\?@#$%^&*=]+/g,
+	var PATTERN_common_characters = /[\s\d_,.:;'"!()–\-+\&<>\\\/\?@#$%^&*=]+/g,
 	/**
 	 * 判定 label 標籤標題語言使用之 pattern。
 	 * 
@@ -8904,7 +8904,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see [[以人口排列的語言列表]], application.locale.encoding
 	 */
-	PATTERN_label_language = {
+	label_language_patterns = {
 		// 常用的 English characters 需要放置於第一個測試。
 		en : /^[a-z]+$/i,
 
@@ -8953,13 +8953,13 @@ function module_code(library_namespace) {
 	function guess_language(label, CJK_language) {
 		if (!label
 		// 先去掉所有泛用符號/字元。
-		|| !(label = label.replace(common_characters, ''))) {
+		|| !(label = label.replace(PATTERN_common_characters, ''))) {
 			// 刪掉泛用符號/字元後已無東西剩下。
 			return;
 		}
 
-		for ( var language in PATTERN_label_language) {
-			if (PATTERN_label_language[language].test(label)) {
+		for ( var language in label_language_patterns) {
+			if (label_language_patterns[language].test(label)) {
 				if (!language) {
 					library_namespace.warn(
 					//
@@ -9238,6 +9238,7 @@ function module_code(library_namespace) {
 		set_language : set_default_language,
 		LTR_SCRIPTS : LTR_SCRIPTS,
 		PATTERN_LTR : PATTERN_LTR,
+		PATTERN_common_characters : PATTERN_common_characters,
 
 		namespace : get_namespace,
 		remove_namespace : remove_namespace,
