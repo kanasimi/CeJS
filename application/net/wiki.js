@@ -7343,6 +7343,9 @@ function module_code(library_namespace) {
 					}
 
 					if (++count % 1e4 === 0) {
+						var speed = count / (Date.now() - start_read_time);
+						speed = speed < .05 ? (1e3 * speed).toFixed(2)
+								+ ' page/s' : speed.toFixed(3) + ' page/ms';
 						// e.g.,
 						// "2730000 (99%): 21.326 page/ms [[Category:大洋洲火山岛]]"
 						library_namespace.log(
@@ -7351,9 +7354,7 @@ function module_code(library_namespace) {
 						//
 						+ (100 * position / file_size | 0) + '%): '
 						//
-						+ (count / (Date.now() - start_read_time)).toFixed(3)
-						//
-						+ ' page/ms [[' + page_data.title + ']]');
+						+ speed + ' [[' + page_data.title + ']]');
 					}
 
 					// ----------------------------
