@@ -1587,32 +1587,42 @@ function module_code(library_namespace) {
 			// 警告:這邊只是單純的以 '|' 分割，但照理來說應該再 call parser 來處理。
 			// 最起碼應該除掉所有可能包含 '|' 的語法，例如內部連結 [[~|~]], 模板 {{~|~}}。
 			wikitext = result[2].split(/[\s\n]*\|[\s\n]*/);
-			// .shift(): parameters 以 '|' 起始，因此需去掉最前面一個。
-			wikitext.shift();
-			wikitext.forEach(function(token) {
+			wikitext.forEach(function(token, index) {
+				if (index === 0) {
+					// 不處理 template name。
+					return;
+				}
 				matched = token.match(/^([^=]+)=(.*)$/);
 				if (matched) {
 					var key = matched[1].trim(),
 					//
 					value = matched[2].trim();
-					if (key in wikitext) {
-						if (Array.isArray(wikitext[key]))
-							wikitext[key].push(value);
-						else
-							wikitext[key] = [ wikitext[key], value ];
-					} else
-						wikitext[key] = value;
+					if (false) {
+						if (key in wikitext) {
+							// 參數名重複, [[Category:調用重複模板參數的頁面]]
+							// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
+							if (Array.isArray(wikitext[key]))
+								wikitext[key].push(value);
+							else
+								wikitext[key] = [ wikitext[key], value ];
+						} else {
+							wikitext[key] = value;
+						}
+					}
+					wikitext[key] = value;
 				}
 			});
-			result[2] = wikitext;
 
 			if (parse_type === 1) {
+				result = wikitext;
 				// result[0] is template name.
 				// result[p] is {{{p}}}
 				// result[1] is {{{1}}}
 				// result[2] is {{{2}}}
-				result[2].unshift(result[1]);
-				result = result[2];
+			} else {
+				// .shift(): parameters 以 '|' 起始，因此需去掉最前面一個。
+				wikitext.shift();
+				result[2] = wikitext;
 			}
 		}
 
@@ -1622,7 +1632,7 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------
 
 	// parse date string to {Date}
-	function parse_date(wikitext) {
+	function parse_date_zh(wikitext) {
 		// $dateFormats, 'Y年n月j日 (D) H:i'
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hans.php
 		return wikitext && wikitext
@@ -1823,7 +1833,7 @@ function module_code(library_namespace) {
 	// TODO: 統合於 CeL.wiki.parser 之中。
 	Object.assign(parse_wikitext, {
 		template : parse_template,
-		date : parse_date,
+		date : parse_date_zh,
 		user : parse_user,
 		redirect : parse_redirect,
 
@@ -8885,7 +8895,7 @@ function module_code(library_namespace) {
 	}
 
 	// common characters. 泛用符號/字元。
-	var common_characters = /[\s\d_,.:;'"!()\-+\&<>\\\/@#$%^&*=]+/g,
+	var common_characters = /[\s\d_,.:;'"!()\-+\&<>\\\/\?@#$%^&*=]+/g,
 	/**
 	 * 判定 label 標籤標題語言使用之 pattern。
 	 * 
@@ -8901,7 +8911,11 @@ function module_code(library_namespace) {
 		ko : /^[\uAC00-\uD7A3\u1100-\u11FF\u3131-\u318E]+$/,
 
 		// [[西班牙語字母]]
-		es : /^[a-zñáéíóúü]+$/i,
+		// 'áéíñóúü'.toLowerCase().split('').sort().uniq().join('')
+		es : /^[a-záéíñóúü]+$/i,
+		// [[:en:French orthography]]
+		// http://character-code.com/french-html-codes.php
+		fr : /^[a-z«»àâæçèéêëîïôùûüÿœ₣€]+$/i,
 
 		// [[Arabic script in Unicode]] [[阿拉伯字母]]
 		// \u10E60-\u10E7F
@@ -8913,7 +8927,7 @@ function module_code(library_namespace) {
 		bn : /^[\u0980-\u09FF]+$/,
 
 		// [[俄語字母]], [\p{IsCyrillic}]+
-		ru : /^[\u0401-\u044F]+$/,
+		ru : /^[\u0401-\u0451]+$/,
 
 		// [[Unicode and HTML for the Hebrew alphabet]] [[希伯來字母]]
 		// [[Hebrew (Unicode block)]]
@@ -8936,9 +8950,9 @@ function module_code(library_namespace) {
 	 * @returns {String|Undefined}label 之語言。
 	 */
 	function guess_language(label, CJK_language) {
+		if (!label
 		// 先去掉所有泛用符號/字元。
-		label = label.replace(common_characters, '');
-		if (!label) {
+		|| !(label = label.replace(common_characters, ''))) {
 			// 刪掉泛用符號/字元後已無東西剩下。
 			return;
 		}
@@ -8950,6 +8964,7 @@ function module_code(library_namespace) {
 					//
 					'guess_language: Unknown non-CJK label: [' + label + ']');
 				}
+				// language === ''
 				return language;
 			}
 		}
