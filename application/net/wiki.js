@@ -8964,7 +8964,7 @@ function module_code(library_namespace) {
 		patterns = non_CJK ? label_language_patterns : label_CJK_patterns;
 
 		for ( var language in patterns) {
-			if (label_language_patterns[language].test(label)) {
+			if (patterns[language].test(label)) {
 				return language;
 			}
 		}
