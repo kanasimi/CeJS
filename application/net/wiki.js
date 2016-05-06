@@ -8895,9 +8895,11 @@ function module_code(library_namespace) {
 		return list;
 	}
 
-	// common characters. 泛用符號/字元。
-	// ☆
-	var PATTERN_common_characters = /[\s\d_,.:;'"!()–\-+\&<>\\\/\?@#$%^&*=]+/g,
+	// common characters. 不能用來判別語言的泛用符號/字元。
+	// Øω…～Ⅱ“”
+	// [[:en:Chùa Báo Quốc]]
+	// {{tsl|ja|オメガクインテット|*ω*Quintet}}
+	var PATTERN_common_characters = /[\s\d_,.:;'"!()\-+\&<>\\\/\?–`@#$%^&*=~×☆★♪♫♬♩○●©®℗™℠]+/g,
 	// non-Chinese / non-CJK: 必須置於所有非中日韓語言之後測試!!
 	// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement
 	PATTERN_non_CJK = /^[\u0008-\u2E7F]+$/i,
@@ -8906,10 +8908,11 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Object}
 	 * 
-	 * @see [[以人口排列的語言列表]], application.locale.encoding
+	 * @see [[以人口排列的語言列表]], [[維基百科:維基百科語言列表]], [[Special:統計#其他語言的維基百科]],
+	 *      application.locale.encoding
 	 */
 	label_language_patterns = {
-		// 常用的 English characters 需要放置於第一個測試。
+		// 常用的[[英文字母]]需要放置於第一個測試。
 		en : /^[a-z]+$/i,
 
 		// [[西班牙語字母]]
@@ -8918,12 +8921,14 @@ function module_code(library_namespace) {
 		// [[:en:French orthography]]
 		// http://character-code.com/french-html-codes.php
 		fr : /^[a-z«»àâæçèéêëîïôùûüÿœ₣€]+$/i,
+		// [[德語字母]], [[:de:Deutsches Alphabet]]
+		de : /^[a-zäöüß]+$/i,
 
 		// [[Arabic script in Unicode]] [[阿拉伯字母]]
 		// \u10E60-\u10E7F
 		ar : /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+$/,
 
-		// 印地語天城文
+		// 印度 [[印地語]][[天城文]]
 		bh : /^[\u0900-\u097F\uA8E0-\uA8FF\u1CD0-\u1CFF]+$/,
 		// [[:en:Bengali (Unicode block)]]
 		bn : /^[\u0980-\u09FF]+$/,
@@ -8933,10 +8938,14 @@ function module_code(library_namespace) {
 
 		// [[Unicode and HTML for the Hebrew alphabet]] [[希伯來字母]]
 		// [[Hebrew (Unicode block)]]
-		he : /^[\u0591-\u05F4]+$/
+		he : /^[\u0591-\u05F4]+$/,
+
+		// [[越南文字母]]
+		vi : /^[aăâbcdđeêghiklmnoôơpqrstuưvxy]+$/i
 
 	}, label_CJK_patterns = {
 		ja : /^[\u3041-\u30FF\u31F0-\u31FF\uFA30-\uFA6A]+$/,
+		// [[朝鮮字母]]
 		ko : /^[\uAC00-\uD7A3\u1100-\u11FF\u3131-\u318E]+$/
 	};
 

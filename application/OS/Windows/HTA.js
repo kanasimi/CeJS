@@ -243,6 +243,7 @@ instead of onload
 			// TODO: handle exception
 		}
 	},
+	// get URL
 	href : function() {
 		try {
 			return this.app.LocationURL;

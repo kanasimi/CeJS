@@ -3978,13 +3978,15 @@ function find_class(class_name, parent_node, tag_name, selector, options) {
 		if ((pattern = has_class.pattern(class_name)) || selector) {
 			library_namespace.debug('length: ' + length + ', pattern: ' + pattern, 2);
 			for (i = 0; i < length; i++) {
-				library_namespace.debug('#' + length + ': ' + elements[i].className, 2);
+				library_namespace.debug('#' + i + ': ' + elements[i].className, 2);
 				if ((!pattern || pattern.test(elements[i].className))
-						&& (!selector || selector.call(elements[i])))
+						&& (!selector || selector.call(elements[i]))) {
 					list.push(elements[i]);
+				}
 			}
-		} else
+		} else {
 			list = elements;
+		}
 	}
 
 	return list;
