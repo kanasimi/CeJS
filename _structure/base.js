@@ -150,11 +150,12 @@ function (global) {
 		if (undefined !== undefined) {
 			throw 1;
 		}
-		//eval('if(undefined!==undefined){throw 1;}');
+		// eval('if(undefined!==undefined){throw 1;}');
 	} catch (e) {
 		// Firefox/49.0 WebExtensions 可能 throw:
 		// Error: call to eval() blocked by CSP
-		// @see https://developer.mozilla.org/en-US/docs/Archive/Firefox_OS/Firefox_OS_apps/Building_apps_for_Firefox_OS/CSP
+		// @see
+		// https://developer.mozilla.org/en-US/docs/Archive/Firefox_OS/Firefox_OS_apps/Building_apps_for_Firefox_OS/CSP
 
 		// or: undefined=void 0
 		if (e === 1)
@@ -378,8 +379,8 @@ function (global) {
 		/**
 		 * evaluate @ Global scope.<br />
 		 * 
-		 * By the ECMA-262, new Function() will 'Pass in the Global Environment as
-		 * the Scope parameter.'<br />
+		 * By the ECMA-262, new Function() will 'Pass in the Global Environment
+		 * as the Scope parameter.'<br />
 		 * 
 		 * copy from jQuery core.js
 		 * 
@@ -523,7 +524,7 @@ function (global) {
 		}
 		if (length > 1) {
 			for(var i = 1; i < length; i++)
-				//if (_.is_Object(arguments[i]))
+				// if (_.is_Object(arguments[i]))
 				if (arguments[i])
 					Object.assign(options, arguments[i]);
 		}

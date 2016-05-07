@@ -2627,17 +2627,14 @@ if (typeof CeL === 'function')
 													|| library_namespace
 															.is_debug())
 												library_namespace.warn([
-														'load_named: ',
-														{
-															T : 'Load failed'
-														},
-														' (',
-														{
-															T : 'timeout'
-														},
-														' ' + options.timeout
-																+ ' ms): ['
-																+ id + ']' ]);
+
+												'load_named: ', {
+													T : 'Load failed'
+												}, ' (', {
+													T : 'timeout'
+												}, ' ' + options.timeout
+												//
+												+ ' ms): [' + id + ']' ]);
 											clean(true);
 										}, options.timeout);
 									break;
@@ -2766,10 +2763,11 @@ if (typeof CeL === 'function')
 				// force 僅使用一次。
 				// delete item.force;
 
-			} else
+			} else {
 				library_namespace.debug('之前已處理過 [' + id + '] 之載入程序：'
 						+ (declaration.included ? '成功' : '無法') + '載入。', 5,
 						'load_named');
+			}
 
 			// ---------------------------------------
 			// 最後收尾程序。
@@ -3750,6 +3748,13 @@ if (typeof CeL === 'function')
 
 		// export.
 		library_namespace.get_module_path = get_module_path;
+
+		if (has_Set) {
+			console && console.debug(
+			//		
+			'已經有近代的 Set，跳過 shim，相容性 test 專用的 functions。');
+			get_named('data.code.compatibility', true).included = true;
+		}
 
 		/**
 		 * (module 中)模擬繼承時使用。<br />
