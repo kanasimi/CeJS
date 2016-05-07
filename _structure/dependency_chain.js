@@ -1564,10 +1564,6 @@ if (typeof CeL === 'function')
 					/**
 					 * initialization. 為 declaration 所作的初始化工作。<br />
 					 * 因為 URL 可能也具有 named code 功能，因此一視同仁都設定 full function。
-					 * 
-					 * note:<br />
-					 * "use" 是 JScript.NET 的保留字。或可考慮 "requires"。<br />
-					 * use -> using because of 'use' is a keyword of JScript.
 					 */
 					(declaration = named_code[id] = {
 						id : id,
@@ -1575,7 +1571,25 @@ if (typeof CeL === 'function')
 						error_handler : new Set,
 						load_later : load_later,
 						base : library_namespace
-					}).use = use_function;
+					}).r = function require_variable(variable_name) {
+						// require variable without eval()
+						if (variable_name in declaration.variable_hash) {
+							variable_name = declaration.variable_hash[variable_name];
+						} else {
+							library_namespace.warn(
+							//
+							'require_variable: unregistered variable ['
+									+ variable_name + '] @ module [' + id
+									+ '].');
+						}
+						return library_namespace.value_of(variable_name);
+					};
+					/**
+					 * note:<br />
+					 * "use" 是 JScript.NET 的保留字。或可考慮 "requires"。<br />
+					 * use -> using because of 'use' is a keyword of JScript.
+					 */
+					declaration.use = use_function;
 					if (is_module)
 						// 判別 URL 並預先登記。但先不處理。
 						named_code[library_namespace.get_module_path(id)] = declaration;
@@ -1711,6 +1725,14 @@ if (typeof CeL === 'function')
 		function parse_require(declaration) {
 			var code_required = declaration.require;
 
+			if (false) {
+				// TODO: 自 declaration.code 擷取出 requires。
+				var matched, pattern = /=\s*this\s*\.\s*r\s*\(\s*["']\s*([^()"']+)\s*["']\s*\)/g;
+				while (matched = pattern.exec(declaration.code)) {
+					code_required.push(matched[1]);
+				}
+			}
+
 			if (code_required) {
 				library_namespace.debug('解析 [' + declaration.id
 				//
@@ -1724,7 +1746,7 @@ if (typeof CeL === 'function')
 					// 挑出所有需要的 resource，
 					// 把需要的 variable 填入 variable_hash 中，
 					// 並去除重複。
-					var i, require_resource = null_Object(),
+					var require_resource = null_Object(),
 					// required variables.
 					// variable_hash = {
 					// variable name : variable full name
@@ -1732,20 +1754,21 @@ if (typeof CeL === 'function')
 					variable_hash = declaration.variable_hash = null_Object();
 
 					code_required.forEach(function(variable) {
-						var match = variable.match(/^(.+)\.([^.]*)$/);
-						if (match && library_namespace
+						// [ variable full name, modele name, variable name ]
+						var matched = variable.match(/^(.+)\.([^.]*)$/);
+						if (matched && library_namespace
 						//
-						.match_module_name_pattern(match[1])) {
+						.match_module_name_pattern(matched[1])) {
 							// module/variable name?
 							// 類似 'data.split_String_to_Object' 的形式，為 function。
 							// 類似 'data.' 的形式，為 module。
-							if (match[2])
-								variable_hash[match[2]]
+							if (matched[2])
+								variable_hash[matched[2]]
 								//
 								= library_namespace.to_module_name(
 								//
-								match[1], '.') + '.' + match[2];
-							require_resource[match[1]] = null;
+								matched[1], '.') + '.' + matched[2];
+							require_resource[matched[1]] = null;
 						} else {
 							// URL/path?
 							require_resource[variable] = null;
@@ -1754,19 +1777,21 @@ if (typeof CeL === 'function')
 
 					// cache. 作個紀錄。
 					declaration.require_resource = code_required = [];
-					for (i in require_resource)
+					for ( var i in require_resource)
 						code_required.push(i);
 
 					// 處理完把待處理清單消掉。
 					delete declaration.require;
 
-				} else
+				} else {
 					// TODO: 此處實尚未規範，應不可能執行到。
-					library_namespace.warn('無法解析 [' + declaration.id
-							+ '] 之 dependency：[' + code_required + ']！');
+					library_namespace.warn('parse_require: 無法解析 ['
+							+ declaration.id + '] 之 dependency：['
+							+ declaration.require + ']！');
+				}
 			}
 
-			if (Array.isArray(code_required) && code_required.length > 0) {
+			if (code_required && code_required.length > 0) {
 				var require_now = [];
 				code_required.forEach(function(item) {
 					var declaration = get_named(item);
@@ -2076,10 +2101,11 @@ if (typeof CeL === 'function')
 								// 須注意是否因 name_space 為 function，預設會當作 function
 								// 處理，而出問題！
 								Object.assign(initializator, name_space[name]);
-							} else
+							} else {
 								library_namespace.warn(
 								//
 								'load_named: 已存在 name-space [' + id + ']！');
+							}
 						// else: 尚未被定義或宣告過
 
 						// TODO: alias
@@ -2865,7 +2891,7 @@ if (typeof CeL === 'function')
 			name : 'module name',
 
 			// dependency. function name, module name.
-			require : 'module.function_name|module_name.',
+			require : 'module_name.required_function|module_name.',
 
 			/**
 			 * 執行成功後，最後階段收拾善後/收尾工作之函式。post action.<br />
@@ -2935,9 +2961,11 @@ if (typeof CeL === 'function')
 				 * 
 				 * @see parse_require()
 				 */
-				required_function;
+				required_function = this.r('required_function');
+
 				// 初始設定本模組需要用到的變數。
-				eval(this.use());
+				// 2016/5/7 11:42:45: 為了避免使用 eval()，已改成 this.r()。
+				// eval(this.use());
 
 				// or..
 				// nothing required.
@@ -3749,7 +3777,8 @@ if (typeof CeL === 'function')
 		// export.
 		library_namespace.get_module_path = get_module_path;
 
-		if (has_Set) {
+		// node 4 does not has Array.prototype.includes.
+		if (has_Set && Array.prototype.includes) {
 			console && console.log(
 			//		
 			'已經有近代的 Set，跳過 shim、相容性 test 專用的 functions。');

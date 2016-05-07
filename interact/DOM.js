@@ -44,8 +44,8 @@ code : function(library_namespace) {
 
 var module_name = this.id,
 //	requiring
-split_String_to_Object, gettext;
-eval(this.use());
+split_String_to_Object = this.r('split_String_to_Object'),
+gettext = this.r('gettext');
 
 
 /**

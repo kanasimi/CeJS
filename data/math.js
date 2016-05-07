@@ -22,8 +22,7 @@ require: 'data.code.compatibility.|data.native.set_bind',
 code : function(library_namespace) {
 
 //	requiring
-var set_bind;
-eval(this.use());
+var set_bind = this.r('set_bind');
 
 
 
