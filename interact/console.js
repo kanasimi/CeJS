@@ -21,8 +21,7 @@ if (typeof CeL === 'function')
 		code : function(library_namespace) {
 
 			// requiring
-			var to_RegExp_pattern;
-			eval(this.use());
+			var to_RegExp_pattern = this.r('to_RegExp_pattern');
 
 			/**
 			 * null module constructor

@@ -38,9 +38,9 @@ if (typeof CeL === 'function')
 		code: function (library_namespace) {
 
 			//	requiring
-			var quadratic_to_continued_fraction,
+			var quadratic_to_continued_fraction = this.r('quadratic_to_continued_fraction'),
+			//
 			Integer = library_namespace.data.math.integer;
-			eval(this.use());
 
 			// ---------------------------------------------------------------------//
 			// basic constants. 定義基本常數。

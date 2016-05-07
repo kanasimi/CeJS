@@ -14,11 +14,10 @@ require : 'data.native.to_fixed',
 code : function(library_namespace) {
 
 // requiring
-var to_fixed,
+var to_fixed = this.r('to_fixed'),
 /** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
 NOT_FOUND = ''.indexOf('_');
 
-eval(this.use());
 
 
 /**

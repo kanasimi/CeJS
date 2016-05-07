@@ -19,8 +19,7 @@ code : function(library_namespace) {
 
 var module_name = this.id,
 //requiring
-new_COM, language_tag, open_file, is_file, AdoEnums, translate_ADO_Stream_binary_data;
-eval(this.use());
+new_COM = this.r('new_COM'), language_tag = this.r('language_tag'), open_file = this.r('open_file'), is_file = this.r('is_file'), AdoEnums = this.r('AdoEnums'), translate_ADO_Stream_binary_data = this.r('translate_ADO_Stream_binary_data');
 
 //var to_standard_language_tag = gettext.to_standard;
 

@@ -16,8 +16,7 @@ if (typeof CeL === 'function')
 		code : function(library_namespace) {
 
 			// requiring.
-			var new_COM, Serial_execute;
-			eval(this.use());
+			var new_COM = this.r('new_COM'), Serial_execute = this.r('Serial_execute');
 
 			// ---------------------------------------------------------------------//
 			// 基本宣告與定義。

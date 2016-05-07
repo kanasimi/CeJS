@@ -30,8 +30,7 @@ if (typeof CeL === 'function')
 		require : 'data.pair|application.OS.Windows.file.',
 		code : function(library_namespace) {
 			// requiring
-			var pair;
-			eval(this.use());
+			var pair = this.r('pair');
 
 			/**
 			 * null module constructor

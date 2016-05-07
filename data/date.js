@@ -17,8 +17,7 @@ require : 'data.code.compatibility.|data.native.set_bind|data.code.parse_escape|
 code : function(library_namespace) {
 
 //	requiring
-var set_bind, parse_escape, pad;
-eval(this.use());
+var set_bind = this.r('set_bind'), parse_escape = this.r('parse_escape'), pad = this.r('pad');
 
 
 /**

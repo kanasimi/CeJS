@@ -40,8 +40,8 @@ require : 'data.code.compatibility.|data.native.set_bind|data.date.String_to_Dat
 code : function(library_namespace) {
 
 //	requiring
-var set_bind, String_to_Date, is_leap_year, Julian_day;
-eval(this.use());
+var set_bind = this.r('set_bind'), String_to_Date = this.r('String_to_Date'), is_leap_year = this.r('is_leap_year'), Julian_day = this.r('Julian_day');
+
 
 
 /**

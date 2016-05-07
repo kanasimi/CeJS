@@ -26,8 +26,8 @@ code : function(library_namespace) {
 
 
 //requiring
-var new_COM, is_COM, set_Object_value, is_absolute_path, file_system_structure;
-eval(this.use());
+var new_COM = this.r('new_COM'), is_COM = this.r('is_COM'), set_Object_value = this.r('set_Object_value'), is_absolute_path = this.r('is_absolute_path'), file_system_structure = this.r('file_system_structure');
+
 
 var module_name = this.id;
 

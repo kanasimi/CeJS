@@ -64,8 +64,7 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var get_URL;
-	eval(this.use());
+	var get_URL = this.r('get_URL');
 
 	// --------------------------------------------------------------------------------------------
 

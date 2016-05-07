@@ -21,10 +21,6 @@ name : 'application.math',
 require : 'data.code.compatibility.|data.math.',
 code : function(library_namespace) {
 
-//		requiring
-//var ;
-eval(this.use());
-
 
 /**
  * null module constructor

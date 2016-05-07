@@ -71,8 +71,7 @@ if (typeof CeL === 'function')
 		code : function(library_namespace) {
 
 			// requiring
-			var polynomial_value;
-			eval(this.use());
+			var polynomial_value = this.r('polynomial_value');
 
 			/**
 			 * full module name.

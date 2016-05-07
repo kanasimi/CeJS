@@ -22,9 +22,6 @@ name : 'data.native',
 //require : '',
 code : function(library_namespace) {
 
-//	requiring
-//var parse_escape;
-//eval(this.use());
 
 var
 /** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */

@@ -24,8 +24,7 @@ code : function(library_namespace) {
 
 var module_name = this.id,
 // requiring
-to_Chinese_numeral, to_positional_Chinese_numeral;
-eval(this.use());
+to_Chinese_numeral = this.r('to_Chinese_numeral'), to_positional_Chinese_numeral = this.r('to_positional_Chinese_numeral');
 
 /**
  * null module constructor

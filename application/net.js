@@ -17,8 +17,7 @@ code : function(library_namespace) {
 'use strict';
 
 //requiring
-var get_WScript_object, HTML_to_Unicode;
-eval(this.use());
+var get_WScript_object = this.r('get_WScript_object'), HTML_to_Unicode = this.r('HTML_to_Unicode');
 
 
 

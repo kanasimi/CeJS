@@ -75,7 +75,6 @@ if (typeof CeL === 'function')
 			valid_radix = Integer.valid_radix,
 			DEFAULT_BASE = Integer.DEFAULT_BASE
 			;
-			//eval(this.use());
 
 			// ---------------------------------------------------------------------//
 			// basic constants. 定義基本常數。

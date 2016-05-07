@@ -76,8 +76,7 @@ if (typeof CeL === 'function')
 			'use strict';
 
 			//	requiring
-			var GCD;
-			eval(this.use());
+			var GCD = this.r('GCD');
 
 			// ---------------------------------------------------------------------//
 			// basic constants. 定義基本常數。

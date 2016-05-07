@@ -16,9 +16,8 @@ require : 'data.code.compatibility.|interact.DOM.select_node|interact.DOM.fill_f
 code : function(library_namespace) {
 
 //	requiring
-var select_node, fill_form;
+var select_node = this.r('select_node'), fill_form = this.r('fill_form');
 
-eval(this.use());
 
 
 

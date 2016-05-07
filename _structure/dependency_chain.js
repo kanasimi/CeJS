@@ -1589,7 +1589,7 @@ if (typeof CeL === 'function')
 					 * "use" 是 JScript.NET 的保留字。或可考慮 "requires"。<br />
 					 * use -> using because of 'use' is a keyword of JScript.
 					 */
-					declaration.use = use_function;
+					// declaration.use = use_function;
 					if (is_module)
 						// 判別 URL 並預先登記。但先不處理。
 						named_code[library_namespace.get_module_path(id)] = declaration;
