@@ -8303,6 +8303,7 @@ function module_code(library_namespace) {
 	// https://www.google.com/search?q=%E6%B9%98%E6%B1%9F
 	// [[:imdbtitle:0075713]]
 	// http://www.imdb.com/title/tt0075713/
+	// [[:arxiv:Hep-ex/0403017]]
 	function language_to_project(language) {
 		// 正規化。
 		language = (language && String(language).trim().toLowerCase() || default_language)
@@ -8895,10 +8896,12 @@ function module_code(library_namespace) {
 		return list;
 	}
 
-	// common characters. 不能用來判別語言的泛用符號/字元。
-	// Øω…～Ⅱ“”
+	// common characters. 不能用來判別語言的泛用符號/字元。應該是英語也能接受的符號。
+	// Øω…～Ⅱ“”·
 	// [[:en:Chùa Báo Quốc]]
 	// {{tsl|ja|オメガクインテット|*ω*Quintet}}
+	// {{tsl|en|Tamara de Lempicka|Tamara Łempicka}}
+	// {{link-en|Željko Ivanek|Zeljko Ivanek}}
 	var PATTERN_common_characters = /[\s\d_,.:;'"!()\-+\&<>\\\/\?–`@#$%^&*=~×☆★♪♫♬♩○●©®℗™℠]+/g,
 	// non-Chinese / non-CJK: 必須置於所有非中日韓語言之後測試!!
 	// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement

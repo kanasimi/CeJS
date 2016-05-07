@@ -1206,7 +1206,7 @@ node_value = function node_value(node, value, base_space) {
 						}
 						//else node.onchange && node.onchange();
 					}
-				} else {
+				} else if (value !== undefined && value !== null) {
 					//	IE9 的相容Quirks模式中使用 'maxLength'.
 					var kw = 'maxLength';
 					if (!(kw in node))

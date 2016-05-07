@@ -147,10 +147,18 @@ function (global) {
 
 	// define 'undefined'
 	try {
-		eval('if(undefined!==undefined){throw 1;}');
+		if (undefined !== undefined) {
+			throw 1;
+		}
+		//eval('if(undefined!==undefined){throw 1;}');
 	} catch (e) {
+		// Firefox/49.0 WebExtensions 可能 throw:
+		// Error: call to eval() blocked by CSP
+		// @see https://developer.mozilla.org/en-US/docs/Archive/Firefox_OS/Firefox_OS_apps/Building_apps_for_Firefox_OS/CSP
+
 		// or: undefined=void 0
-		eval('undefined=this.undefined;');
+		if (e === 1)
+			eval('undefined=this.undefined;');
 	}
 
 
@@ -364,31 +372,40 @@ function (global) {
 	};
 
 
-	_// JSDT:_module_
-	.
-	/**
-	 * evaluate @ Global scope.<br />
-	 * 
-	 * By the ECMA-262, new Function() will 'Pass in the Global Environment as
-	 * the Scope parameter.'<br />
-	 * 
-	 * copy from jQuery core.js
-	 * 
-	 * @param {String}code
-	 *            script code to evaluate
-	 * 
-	 * @returns value that evaluate process returned
-	 * @see <a
-	 *      href="http://weblogs.java.net/blog/driscoll/archive/2009/09/08/eval-javascript-global-context"
-	 *      accessdate="2011/8/6 8:56">Eval JavaScript in a global context |
-	 *      Java.net</a> use execScript on Internet Explorer
-	 */
-	global_eval = new Function('code', 'return '
+	try {
+		_// JSDT:_module_
+		.
+		/**
+		 * evaluate @ Global scope.<br />
+		 * 
+		 * By the ECMA-262, new Function() will 'Pass in the Global Environment as
+		 * the Scope parameter.'<br />
+		 * 
+		 * copy from jQuery core.js
+		 * 
+		 * @param {String}code
+		 *            script code to evaluate
+		 * 
+		 * @returns value that evaluate process returned
+		 * @see <a
+		 *      href="http://weblogs.java.net/blog/driscoll/archive/2009/09/08/eval-javascript-global-context"
+		 *      accessdate="2011/8/6 8:56">Eval JavaScript in a global context |
+		 *      Java.net</a> use execScript on Internet Explorer
+		 */
+		global_eval = new Function('code', 'return '
 			+ (
 					typeof execScript === 'function' ? 'execScript('
 					: is_WWW ? 'window.eval(' : 'eval.call(null,'
 			)
 			+ 'code)');
+	} catch (e) {
+		// Firefox/49.0 WebExtensions 可能 throw:
+		// Error: call to Function() blocked by CSP
+		_.global_eval = function(code) {
+			library_namespace.error('global_eval: Can not eval()!');
+		};
+	}
+
 
 	/**
 	 * 取得裸 Object (naked Object)。<br />
@@ -1801,7 +1818,7 @@ OS='UNIX'; // unknown
 
 	_// JSDT:_module_
 	.
-	constant_function = function constant_function(value) {
+	constant_function = function(value) {
 		value = String(value);
 
 		if (!(value in constant_function)
@@ -1813,6 +1830,17 @@ OS='UNIX'; // unknown
 		return constant_function[value];
 	};
 
+	try {
+		_.constant_function(false);
+	} catch (e) {
+		// Firefox/49.0 WebExtensions 可能 throw:
+		// Error: call to Function() blocked by CSP
+		_.constant_function = function(value) {
+			return function() {
+				return value;
+			};
+		};
+	}
 
 	// ---------------------------------------------------------------------//
 	// Initialization
@@ -2587,8 +2615,14 @@ OS='UNIX'; // unknown
 			throw 1;
 		// TODO: test delete global object.
 	} catch (e) {
-		// 若失敗，表示其他對 global 的操作亦無法成功。可能因為 global 並非真的 Global，或權限被限制了？
-		_.warn('無法正確設定 global object!');
+		if (e === 1) {
+			// 若失敗，表示其他對 global 的操作亦無法成功。可能因為 global 並非真的 Global，或權限被限制了？
+			_.warn('無法正確設定 global object!');
+		} else if (e && e.message && e.message.indexOf('by CSP') !== -1) {
+			// Firefox/49.0 WebExtensions 可能 throw:
+			// Error: call to eval() blocked by CSP
+			_.env.no_eval = true;
+		}
 	}
 
 

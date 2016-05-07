@@ -2276,6 +2276,7 @@ if (typeof CeL === 'function')
 					// loading code: 採用循序/依序執行的方法。
 
 					if (!library_namespace.env.same_origin_policy
+							&& !library_namespace.env.no_eval
 							&& /\.js$/i.test(URL))
 						try {
 							// 對 .js 先試試 .get_file()。

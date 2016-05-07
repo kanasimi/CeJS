@@ -619,7 +619,8 @@ reload:function(){
 	}
 };
 
-IEA.prototype.getE = IEA.prototype.get_element;
+
+_.IEA.prototype.getE = _.IEA.prototype.get_element;
 
 var IEA_instance;
 /**
