@@ -3750,9 +3750,9 @@ if (typeof CeL === 'function')
 		library_namespace.get_module_path = get_module_path;
 
 		if (has_Set) {
-			console && console.debug(
+			console && console.log(
 			//		
-			'已經有近代的 Set，跳過 shim，相容性 test 專用的 functions。');
+			'已經有近代的 Set，跳過 shim、相容性 test 專用的 functions。');
 			get_named('data.code.compatibility', true).included = true;
 		}
 
