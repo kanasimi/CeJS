@@ -5,7 +5,7 @@
  * 
  * for including:<br />
  * <code>
- * require("path/to/node.loader.js");
+ * require("./path/to/node.loader.js");
  * </code>
  * 
  * @since 2011/11/26 23:33:32

@@ -302,6 +302,56 @@ if (typeof CeL === 'function')
 			}
 			_.fs_move = fs_renameSync;
 
+			// --------------------------------------------
+
+			if (false) {
+				require('./_for include/node.loader.js');
+				CeL.run('application.platform.nodejs');
+
+				CeL.traverse_file_system('.',
+						function(path, stat, is_directory) {
+							console.log(path);
+						}, /\.js$/);
+			}
+
+			// https://github.com/coolaj86/node-walk
+			// https://github.com/oleics/node-filewalker/blob/master/lib/filewalker.js
+			function traverse_file_system(path, handler, filter) {
+				var list = node_fs.readdirSync(path);
+				path += '/';
+				list.forEach(function(name) {
+					try {
+						var full_path = path + name, stat = node_fs
+								.lstatSync(full_path);
+						// https://nodejs.org/api/fs.html#fs_class_fs_stats
+						if (!stat.isDirectory()) {
+							if (!filter || filter.test(full_path))
+								handler(full_path, stat);
+							return;
+						}
+
+						traverse_file_system(full_path, handler, filter);
+						if (!filter || filter.test(full_path))
+							handler(full_path, stat, true);
+
+					} catch (e) {
+						// https://nodejs.org/api/errors.html
+						if (e.code === 'EPERM')
+							// TODO: .chmodSync(path, 666) @ Windows??
+							;
+						if (e.code === 'EBUSY')
+							// TODO
+							;
+						if (e.code !== 'ENOENT')
+							;
+					}
+				});
+			}
+
+			_.traverse_file_system = traverse_file_system;
+
+			// --------------------------------------------
+
 			// TODO:
 			// Buffer.prototype.indexOf()
 			// https://github.com/nodejs/node/blob/master/lib/buffer.js#L578

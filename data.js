@@ -811,6 +811,7 @@ function set_order_prefix(symbol, base, index_of_1, intervening) {
 
 	// cache 引入: symbol, value, length.
 
+	return (
 	/**
 	 * 將數字轉為 K, M, G 等數量級(order of magnitude)表示方式。
 	 * 
@@ -822,7 +823,7 @@ function set_order_prefix(symbol, base, index_of_1, intervening) {
 	 * @return {String} 指定數量級(order of magnitude)表示方式
 	 * @requires to_fixed
 	 */
-	return function(number, digits) {
+	function(number, digits) {
 		if (typeof number === 'string')
 			number = parseFloat(number.replace(/[, ]/g, ''));
 		if (!number || isNaN(number))
@@ -848,7 +849,7 @@ function set_order_prefix(symbol, base, index_of_1, intervening) {
 				isNaN(digits) || digits < 0 ? (r = Math.floor(l)) < 10 ? 2
 						: r < 100 ? 1 : 0 : digits)
 				+ symbol[i];
-	};
+	});
 };
 
 /**

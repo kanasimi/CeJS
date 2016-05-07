@@ -1004,7 +1004,7 @@ _.is_pentagonal = is_pentagonal;
 
 
 
-// 勾股數
+// 素勾股數 primitive Pythagorean triple
 var 素勾股數 = [], last_Pythagorean_m = 2;
 
 /**

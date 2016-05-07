@@ -2623,6 +2623,7 @@ OS='UNIX'; // unknown
 			// Firefox/49.0 WebExtensions 可能 throw:
 			// Error: call to eval() blocked by CSP
 			_.env.no_eval = true;
+			// use chrome.tabs.executeScript(null, {code:''});
 		}
 	}
 
