@@ -594,6 +594,7 @@ var RegExp_flags = /./g.flags === 'g'
 	return regexp.flags;
 } : function(regexp) {
 	// regexp = RegExp.prototype.toString.call(regexp);
+	// return ('' + regexp).match(/[^\/]*$/)[0];
 	regexp = '' + regexp;
 	return regexp.slice(regexp.lastIndexOf('/') + 1);
 
@@ -605,13 +606,13 @@ var RegExp_flags = /./g.flags === 'g'
 };
 
 RegExp_flags.flags = {
-		// Proposed for ES6
-		// extended : 'x',
-		global : 'g',
-		ignoreCase : 'i',
-		multiline : 'm',
-		unicode : 'u',
-		sticky : 'y'
+	// Proposed for ES6
+	// extended : 'x',
+	global : 'g',
+	ignoreCase : 'i',
+	multiline : 'm',
+	unicode : 'u',
+	sticky : 'y'
 };
 
 library_namespace.RegExp_flags = RegExp_flags;

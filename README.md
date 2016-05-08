@@ -60,10 +60,10 @@ For further introduction, please see [wiki](https://github.com/kanasimi/CeJS/wik
 See [compatibility.js](https://github.com/kanasimi/CeJS/blob/master/data/code/compatibility.js) and [native.js](https://github.com/kanasimi/CeJS/blob/master/data/native.js).
 
 ## Demo
-<!-- See [demo page](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/demo.htm). -->
-* The page usually takes 10 to 20 seconds to load.
+<!-- See [live demo page](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/demo.htm). -->
+* The demo page usually takes 10 to 20 seconds to load.
 * 由於頻寬不足，加上載入時須做初始化，本頁面在載入時得稍微等一下。
-[![demo page](https://lh3.googleusercontent.com/mnxTEY5szTdGeYdUWjC4Pw18CwzJ4EkflaIA42lsBMQRXGthF8rBHbFSKIZ5LjokCQthIQOnxxmH8_eke4oD3Yr-kU1YzUPzOEINiBwdiCHhazHQVYdYRii4oc966DUmE-MV_B_o8j2Ko1XJ-X7Ro4K-xHA6rGY11Q7WIv3Qne-4Q9tfmgYkgysaYOBxUtsZIOrpKghFCfTXsnjVGVhsiCjc9pyT-x3udMZ-RBs6hF8AxFAprU5WX5utht69g9w6d2inJlLHuImvIHuL1dLNCU9PBHWbleOyRkEs_fUrou5-aqpaxYo07W_cfwmYsGQUVU1_g4eQNydlKMNOUAcuQm21sop7qT-j9LKrTPkGh4fbCi8Fw99PA9GsCMX_KK6PX1HKgnoBzCJDjPFjjQthhx3FCXLGuSZmhYp5Y2FN-Atm1MBQMgtigpLixZ52pQD6UIObrC0Mw33fGmhfe9nfnjDtVvjoXbvNaoZ2ZyKrQ-7peMaExoVRLKtUY_ZN2EwHPfVjBAFFZVKPwCg3hKK5ERM69cSrWUSkfdWlHp7_yIQ74wReMgDtu_bpvqF0D8SffAQu=w506-h297-no)](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/demo.htm)
+[![live demo page](https://lh3.googleusercontent.com/mnxTEY5szTdGeYdUWjC4Pw18CwzJ4EkflaIA42lsBMQRXGthF8rBHbFSKIZ5LjokCQthIQOnxxmH8_eke4oD3Yr-kU1YzUPzOEINiBwdiCHhazHQVYdYRii4oc966DUmE-MV_B_o8j2Ko1XJ-X7Ro4K-xHA6rGY11Q7WIv3Qne-4Q9tfmgYkgysaYOBxUtsZIOrpKghFCfTXsnjVGVhsiCjc9pyT-x3udMZ-RBs6hF8AxFAprU5WX5utht69g9w6d2inJlLHuImvIHuL1dLNCU9PBHWbleOyRkEs_fUrou5-aqpaxYo07W_cfwmYsGQUVU1_g4eQNydlKMNOUAcuQm21sop7qT-j9LKrTPkGh4fbCi8Fw99PA9GsCMX_KK6PX1HKgnoBzCJDjPFjjQthhx3FCXLGuSZmhYp5Y2FN-Atm1MBQMgtigpLixZ52pQD6UIObrC0Mw33fGmhfe9nfnjDtVvjoXbvNaoZ2ZyKrQ-7peMaExoVRLKtUY_ZN2EwHPfVjBAFFZVKPwCg3hKK5ERM69cSrWUSkfdWlHp7_yIQ74wReMgDtu_bpvqF0D8SffAQu=w506-h297-no)](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/demo.htm)
 
 ## Requirements and dependencies
 * 本 library 須使用新一點的瀏覽器/執行環境。

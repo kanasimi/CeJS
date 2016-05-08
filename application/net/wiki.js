@@ -7788,6 +7788,7 @@ function module_code(library_namespace) {
 		// assert: typeof title === 'string' or title is invalid.
 		if (title.length > 260) {
 			// [nttopic] 話題標題已限制在 260 位元組內。
+			// 自動評論與摘要的長度限制是260個字符。需要小心任何超出上述限定的東西將被裁剪掉。
 			// 260 characters
 			// https://github.com/wikimedia/mediawiki-extensions-Flow/blob/master/includes/Model/PostRevision.php
 			// const MAX_TOPIC_LENGTH = 260;
@@ -9152,6 +9153,64 @@ function module_code(library_namespace) {
 
 		return data;
 	};
+
+	// ------------------------------------------------------------------------
+
+	// 要合併自的ID
+	// 要合併到的ID
+	// 要忽略衝突的項的元素數組，只能包含值“description”和/或“sitelink”和/或“statement”。
+	// 多值 (以 | 分隔)：description、sitelink、statement
+	// 網站鏈接和描述
+	function wikidata_merge(to, from, callback, options) {
+		if (!/^Q\d{1,10}$/.test(to)) {
+			wikidata_entity(to, function(entity) {
+				wikidata_merge(entity.id, from, callback, options);
+			});
+			return;
+		}
+
+		if (!/^Q\d{1,10}$/.test(from)) {
+			wikidata_entity(from, function(entity) {
+				wikidata_merge(to, entity.id, callback, options);
+			});
+			return;
+		}
+
+		options = library_namespace.new_options(options);
+
+		var ignoreconflicts = 'ignoreconflicts' in options ? options.ignoreconflicts
+				// 最常使用的功能是合併2頁面。忽略任何衝突的網站鏈接
+				: 'sitelink';
+
+		var action = 'wbmergeitems?fromid=' + from + '&toid=' + to;
+		if (ignoreconflicts)
+			action += '&ignoreconflicts=' + ignoreconflicts;
+
+		action = [
+		// 合併重複項。
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbmergeitems
+		options.API_URL || session && session.API_URL || wikidata_API_URL,
+				action ];
+
+		var session;
+		if ('session' in options) {
+			session = options.session;
+			delete options.session;
+		}
+
+		wiki_API.query(action, function(data) {
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.err('wikidata_merge: ['
+				//
+				+ error.code + '] ' + error.info);
+				callback(undefined, error);
+			}
+
+			callback(data);
+		}, options, session);
+	}
 
 	// ------------------------------------------------------------------------
 

@@ -1018,7 +1018,7 @@ if (
 			separator = new RegExp(separator.source,
 					(separator.global ? '' : 'g')
 					// should use: RegExp_flags(separator)
-					//String(separator).match(/[^\/]*/)[0]
+					+ ('' + separator).match(/[^\/]*$/)[0]
 					);
 			var matched, result = [], last_index = 0;
 			if (0 <= limit)
