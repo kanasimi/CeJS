@@ -2490,29 +2490,43 @@ function module_code(library_namespace) {
 			if (typeof next[1] === 'function'
 			//
 			|| library_namespace.is_Object(next[1]) && !is_entity(next[1])) {
-				// 未設定 id，第一個即為 data。
+				// 未設定 id，第一個 next[1] 即為 data。
+				// next = [ 'edit_data', data[, options, callback] ]
 				// 直接輸入 callback。
+				if (typeof next[2] === 'function' && !next[3]) {
+					// 未輸入 options，但輸入 callback。
+					next.splice(2, 0, null);
+				}
+
+				// next = [ 'edit_data', data, options[, callback] ]
 				if (this.last_data) {
 					if (!is_entity(this.last_data)) {
-						next[1].call(this, undefined, '前一次之實體['
-								+ this.last_data.key + ']取得失敗。');
+						next[3]
+								&& next[3].call(this, undefined, '前一次之實體['
+										+ this.last_data.key + ']取得失敗。');
 						this.next();
 						break;
 					}
 					// shift arguments
 					next.splice(1, 0, this.last_data);
 
-				} else {
-					if (!this.last_page) {
-						next[1].call(this, undefined,
-								'Did not set id! 未設定欲取得之特定實體id。');
-						this.next();
-						break;
-					}
+				} else if (this.last_page) {
 					next.splice(1, 0, this.last_page);
+
+				} else if (next[2] && next[2]['new']) {
+					// create item/property
+					next.splice(1, 0, null);
+
+				} else {
+					next[3]
+							&& next[3].call(this, undefined,
+									'Did not set id! 未設定欲取得之特定實體id。');
+					this.next();
+					break;
 				}
 			}
 
+			// next = [ 'edit_data', id, data[, options, callback] ]
 			if (typeof next[3] === 'function' && !next[4]) {
 				// 未輸入 options，但輸入 callback。
 				next.splice(3, 0, null);
@@ -8685,7 +8699,8 @@ function module_code(library_namespace) {
 	</code>
 	 * 
 	 * @param {String|Array}id
-	 *            id to modify or entity you want to create.
+	 *            id to modify or entity you want to create.<br />
+	 *            item/property 將會創建實體。
 	 * @param {Object|Function}data
 	 *            used as the data source to modify. 要編輯（更改或創建）的資料。<br />
 	 *            {Object}data or {Function}data(entity)
@@ -8715,14 +8730,14 @@ function module_code(library_namespace) {
 			options = null;
 		}
 
-		if (!id) {
-			callback(undefined, 'Did not set id! 未設定欲取得之特定實體id。');
-			return;
-		}
-
 		if (!library_namespace.is_Object(options))
 			// 前置處理。
 			options = library_namespace.null_Object();
+
+		if (!id && !options['new']) {
+			callback(undefined, 'Did not set id! 未設定欲取得之特定實體id。');
+			return;
+		}
 
 		if (typeof data === 'function') {
 			if (is_entity(id)) {
@@ -8756,7 +8771,9 @@ function module_code(library_namespace) {
 		}
 
 		if (!id) {
-			library_namespace.debug('未設定 id，您可能需要手動檢查。', 2, 'wikidata_edit');
+			if (!options['new'])
+				library_namespace
+						.debug('未設定 id，您可能需要手動檢查。', 2, 'wikidata_edit');
 
 		} else if (is_entity(id)
 		// && /^Q\d{1,10}$/.test(id.id)
