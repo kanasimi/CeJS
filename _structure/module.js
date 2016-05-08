@@ -723,7 +723,10 @@ if (false) {
 				// e.g., @ "Mozilla/5.0 (Windows NT 6.1; rv:29.0) Gecko/20100101 Firefox/29.0"
 				&& navigator.userAgent.indexOf(' Gecko/2') !== -1) {
 				_.env.same_origin_policy = true;
-				throw new Error('get_file: Can not parse UTF-32 encoding of [' + path + '] @ Firefox!');
+				var error = new Error('get_file: Can not parse UTF-32 encoding of [' + path + '] @ Firefox!');
+				// 於 load_name() 使用，避免顯示 '重新讀取(reload)，或是過段時間再嘗試或許可以解決問題。'
+				error.type = 'encode';
+				throw error;
 			}
 
 			delete get_file.error;
@@ -731,9 +734,10 @@ if (false) {
 		} catch (e) {
 			if (e.number === -1072896658
 				//|| e.message.indexOf('c00ce56e') !== -1
-				)
+				) {
 				// http://support.microsoft.com/kb/304625
 				throw new Error('指定的資源回傳了系統不支援的文字編碼，因此無法解碼資料。請檢查此網頁回傳之 header，確認系統可解碼 Content-Type 之 charset。');
+			}
 
 			//	Chome: XMLHttpRequest cannot load file:///X:/*.js. Cross origin requests are only supported for HTTP.
 			//	Opera 11.50: 不會 throw，但是 .responseText === ''。

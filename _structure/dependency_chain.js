@@ -2440,10 +2440,14 @@ if (typeof CeL === 'function')
 									+ (e.number ? (e.number & 0xFFFF) : e.code)
 									//
 									+ ': ' + e.message + '\n')
+									// 對於encode之類問題，reload不能解決。
+									+ (e.type === 'encode'
 									//
-									+ '抱歉！在載入其他網頁時發生錯誤，有些功能可能失常。\n'
+									? '往後將改採用插入 HTML tag 的替代方式載入。'
 									//
-									+ '重新讀取(reload)，或是過段時間再嘗試或許可以解決問題。');
+									: '抱歉！在載入其他網頁時發生錯誤，有些功能可能失常。\n'
+									//
+									+ '重新讀取(reload)，或是過段時間再嘗試或許可以解決問題。'));
 							}
 
 							// 不能直接用 .get_file()，得採用異序(asynchronously,不同時)的方式載入。
@@ -2644,8 +2648,6 @@ if (typeof CeL === 'function')
 									 */
 									node.async = true;
 									// node.setAttribute('src', URL);
-									library_namespace.debug('插入js:[' + URL
-											+ ']');
 									node.src = URL;
 									// timeout for giving up.
 									if (options.timeout > 0)
@@ -2675,13 +2677,14 @@ if (typeof CeL === 'function')
 									node.rel = 'stylesheet';
 									// https://developer.mozilla.org/en-US/docs/HTML/Element/link#Stylesheet_load_events
 									node.onerror = onload;
-									library_namespace.debug('插入css:[' + URL
-											+ ']');
 									node.href = URL;
 									break;
 
 								default:
 								}
+
+								library_namespace.debug('插入 .' + type + ' ['
+										+ URL + ']', 2, 'load_named');
 
 								// 在 IE 10 中，當 .appendChild() 時，
 								// 會先中斷，執行所插入 node 的內容。

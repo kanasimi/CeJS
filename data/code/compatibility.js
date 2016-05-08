@@ -1014,10 +1014,12 @@ if (
 			if (!library_namespace.is_RegExp(separator))
 				return native_String_split.apply(this, arguments);
 
-			// 不改變 separator 本身。
+			// 不改變 separator 本身，加上 .global flag。
 			separator = new RegExp(separator.source,
 					(separator.global ? '' : 'g')
-					+ RegExp_flags(separator));
+					// should use: RegExp_flags(separator)
+					//String(separator).match(/[^\/]*/)[0]
+					);
 			var matched, result = [], last_index = 0;
 			if (0 <= limit)
 				// ToLength(),  ToUint32()
