@@ -587,6 +587,47 @@ function is_matched(pattern, text, unknown_handler) {
 _.is_matched = is_matched;
 
 
+
+var RegExp_flags = /./g.flags === 'g'
+	// get RegExp.prototype.flags
+	? function(regexp) {
+	return regexp.flags;
+} : function(regexp) {
+	// regexp = RegExp.prototype.toString.call(regexp);
+	regexp = '' + regexp;
+	return regexp.slice(regexp.lastIndexOf('/') + 1);
+
+	var flags = [];
+	for ( var flag in RegExp_flags.flags)
+		if (regexp[flag])
+			flags.push(RegExp_flags.flags[flag]);
+	return flags.join('');
+};
+
+RegExp_flags.flags = {
+		// Proposed for ES6
+		// extended : 'x',
+		global : 'g',
+		ignoreCase : 'i',
+		multiline : 'm',
+		unicode : 'u',
+		sticky : 'y'
+};
+
+library_namespace.RegExp_flags = RegExp_flags;
+
+// RegExp.prototype.flags
+// 注意: 本 shim 實際上應放置於 data.code.compatibility。惟其可能會被省略執行，因此放置於此。
+if (!('flags' in RegExp.prototype)
+		// library_namespace.env('not_native_keyword')
+		&& !Object.defineProperty[library_namespace.env.not_native_keyword])
+	Object.defineProperty(RegExp.prototype, 'flags', {
+		get : function() {
+			return RegExp_flags(this);
+		}
+	});
+
+
 /*
 
 use (new RegExp(regexp.source, flag)) instead.

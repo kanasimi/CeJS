@@ -3,8 +3,9 @@
  * @name	CeL function for compatibility
  * @fileoverview
  * 本檔案包含了 new ECMAScript standard 標準已規定，但先前版本未具備的內建物件功能；以及相容性 test 專用的 functions。<br />
+ * ES6 shim / polyfill<br />
  * 部分標準功能已經包含於 ce.js。<br />
- * ES6 shim / polyfill
+ * 注意: 本檔案可能會被省略執行，因此不應有標準之外的設定，應將之放置於 data.native。<br />
  * 
  * More examples: see /_test suite/test.js
  * 
@@ -973,43 +974,7 @@ set_method(Math, {
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // RegExp.*
 
-var RegExp_flags = /./g.flags === 'g'
-// get RegExp.prototype.flags
-? function(regexp) {
-	return regexp.flags;
-} : function(regexp) {
-	// regexp = RegExp.prototype.toString.call(regexp);
-	regexp = '' + regexp;
-	return regexp.slice(regexp.lastIndexOf('/') + 1);
-
-	var flags = [];
-	for ( var flag in RegExp_flags.flags)
-		if (regexp[flag])
-			flags.push(RegExp_flags.flags[flag]);
-	return flags.join('');
-};
-
-RegExp_flags.flags = {
-	// Proposed for ES6
-	// extended : 'x',
-	global : 'g',
-	ignoreCase : 'i',
-	multiline : 'm',
-	unicode : 'u',
-	sticky : 'y'
-};
-
-library_namespace.RegExp_flags = RegExp_flags;
-
-// RegExp.prototype.flags
-if (!('flags' in RegExp.prototype)
-// library_namespace.env('not_native_keyword')
-&& !Object.defineProperty[library_namespace.env.not_native_keyword])
-	Object.defineProperty(RegExp.prototype, 'flags', {
-		get : function () {
-			return RegExp_flags(this);
-		}
-	});
+// 注意: 因為要設定額外功能，RegExp.prototype.flags 放在 data.native
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//

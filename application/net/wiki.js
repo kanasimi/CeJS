@@ -280,7 +280,7 @@ function module_code(library_namespace) {
 		// Virtual namespaces
 		media : -2,
 		special : -1,
-		// 0: (Main/Article) main namespace 主要(條目/內容頁面)命名空間/識別領域
+		// 0: (Main/Article) main namespace 主要(條目內容/內文)命名空間/識別領域
 		// 條目 entry 文章 article: ns = 0, 頁面 page: ns = any. 章節/段落 section
 		'' : 0,
 		// 討論對話頁面
@@ -1827,12 +1827,18 @@ function module_code(library_namespace) {
 		}
 	}
 
+	function parse_timestamp(timestamp) {
+		// return Date.parse(timestamp);
+		return new Date(timestamp);
+	}
+
 	// CeL.wiki.parser(wikitext) 傳回 parser，可作 parser.parse()。
 	// CeL.wiki.parse.*(wikitext) 僅處理單一 token，傳回 parse 過的 data。
 	// TODO: 統合於 CeL.wiki.parser 之中。
 	Object.assign(parse_wikitext, {
 		template : parse_template,
 		date : parse_date_zh,
+		// timestamp : parse_timestamp,
 		user : parse_user,
 		redirect : parse_redirect,
 
@@ -7366,7 +7372,7 @@ function module_code(library_namespace) {
 						/** {String}page title = page_data.title */
 						var title = CeL.wiki.title_of(page_data),
 						/**
-						 * {String}page content, maybe undefined. 頁面內容 =
+						 * {String}page content, maybe undefined. 條目/頁面內容 =
 						 * revision['*']
 						 */
 						content = CeL.wiki.content_of(page_data);
