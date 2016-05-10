@@ -2556,6 +2556,32 @@ function module_code(library_namespace) {
 			});
 			break;
 
+		case 'merge_data':
+			if (!('data_session' in this)) {
+				// rollback, 確保已設定 this.data_session。
+				this.actions.unshift([ 'set_data' ], next);
+				this.next();
+				break;
+			}
+
+			wikidata_merge(next[1], next[2],
+			//
+			function(data, error) {
+				_this.last_data = data || {
+					last_data : _this.last_data,
+					error : error
+				};
+				// next[3] : callback
+				if (typeof next[3] === 'function')
+					next[3].call(this, data, error);
+				_this.next();
+			},
+			// next[4] : options
+			Object.assign({
+				session : this.data_session
+			}, next[4]));
+			break;
+
 		case 'query':
 			// wdq
 			// wikidata_query(query, callback, options)
@@ -9377,6 +9403,7 @@ function module_code(library_namespace) {
 
 		data : wikidata_entity,
 		edit_data : wikidata_edit,
+		merge_data : wikidata_merge,
 		wdq : wikidata_query,
 		SPARQL : wikidata_SPARQL
 	});
