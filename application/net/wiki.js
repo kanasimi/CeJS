@@ -2487,42 +2487,46 @@ function module_code(library_namespace) {
 			}
 
 			// wiki.edit_data([id, ]data[, options, callback])
+
 			if (typeof next[1] === 'function'
 			//
 			|| library_namespace.is_Object(next[1]) && !is_entity(next[1])) {
 				// 未設定 id，第一個 next[1] 即為 data。
 				// next = [ 'edit_data', data[, options, callback] ]
-				// 直接輸入 callback。
-				if (typeof next[2] === 'function' && !next[3]) {
-					// 未輸入 options，但輸入 callback。
-					next.splice(2, 0, null);
-				}
-
-				// next = [ 'edit_data', data, options[, callback] ]
-				if (this.last_data) {
-					if (!is_entity(this.last_data)) {
-						next[3]
-								&& next[3].call(this, undefined, '前一次之實體['
-										+ this.last_data.key + ']取得失敗。');
-						this.next();
-						break;
-					}
-					// shift arguments
-					next.splice(1, 0, this.last_data);
-
-				} else if (this.last_page) {
-					next.splice(1, 0, this.last_page);
-
-				} else if (next[2] && next[2]['new']) {
+				if (library_namespace.is_Object(next[2]) && next[2]['new']) {
 					// create item/property
 					next.splice(1, 0, null);
 
 				} else {
-					next[3]
-							&& next[3].call(this, undefined,
-									'Did not set id! 未設定欲取得之特定實體id。');
-					this.next();
-					break;
+					// 自動填補 id。
+					// 直接輸入 callback。
+					if (typeof next[2] === 'function' && !next[3]) {
+						// 未輸入 options，但輸入 callback。
+						next.splice(2, 0, null);
+					}
+
+					// next = [ 'edit_data', data, options[, callback] ]
+					if (this.last_data) {
+						if (!is_entity(this.last_data)) {
+							next[3] && next[3].call(this, undefined,
+							//
+							'前一次之實體[' + this.last_data.key + ']取得失敗。');
+							this.next();
+							break;
+						}
+						// shift arguments
+						next.splice(1, 0, this.last_data);
+
+					} else if (this.last_page) {
+						next.splice(1, 0, this.last_page);
+
+					} else {
+						next[3] && next[3].call(this, undefined,
+						//
+						'Did not set id! 未設定欲取得之特定實體id。');
+						this.next();
+						break;
+					}
 				}
 			}
 
@@ -8324,6 +8328,9 @@ function module_code(library_namespace) {
 	// [[:imdbtitle:0075713]]
 	// http://www.imdb.com/title/tt0075713/
 	// [[:arxiv:Hep-ex/0403017]]
+	// [[:gutenberg:27690]]
+	// [[:scores:Das wohltemperierte Klavier I, BWV 846-869 (Bach, Johann
+	// Sebastian)]]
 	function language_to_project(language) {
 		// 正規化。
 		language = (language && String(language).trim().toLowerCase() || default_language)
