@@ -2578,10 +2578,7 @@ function module_code(library_namespace) {
 			}, next[3]),
 			// next[4] : callback
 			function(data, error) {
-				_this.last_data = data || {
-					last_data : _this.last_data,
-					error : error
-				};
+				// 此 wbmergeitems 之回傳 data 不包含 item 資訊。
 				// next[4] : callback
 				if (typeof next[4] === 'function')
 					next[4].call(this, data, error);
@@ -9273,6 +9270,10 @@ function module_code(library_namespace) {
 				callback(undefined, error);
 			}
 
+			// Will create redirection.
+			// 此 wbmergeitems 之回傳 data 不包含 item 資訊。
+			// data =
+			// {"success":1,"redirected":1,"from":{"id":"Q1","type":"item","lastrevid":1},"to":{"id":"Q2","type":"item","lastrevid":2}}
 			callback(data);
 		}, options, session);
 	}
