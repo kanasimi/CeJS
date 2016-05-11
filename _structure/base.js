@@ -528,8 +528,10 @@ function (global) {
 				if (arguments[i])
 					Object.assign(options, arguments[i]);
 		}
-		// 不允許 enumerable 以避免此屬性被使用。
 		Object.defineProperty(options, new_options.new_key, {
+			// let [new_options.new_key] deletable
+			configurable : true,
+			// 不允許 enumerable 以避免此屬性被使用。
 			// enumerable : false
 			value : true
 		});
