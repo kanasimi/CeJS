@@ -9236,13 +9236,10 @@ function module_code(library_namespace) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
 
-		var ignoreconflicts = options.ignoreconflicts;
-
-		if (false) {
-			// 最常使用的功能是合併2頁面。可忽略任何衝突的 description, statement。
-			ignoreconflicts = 'ignoreconflicts' in options ? options.ignoreconflicts
-					: 'description|statement';
-		}
+		var ignoreconflicts = 'ignoreconflicts' in options ? options.ignoreconflicts
+				// 最常使用的功能是合併2頁面。可忽略任何衝突的 description, statement。
+				// https://www.wikidata.org/wiki/Help:Statements
+				: 'description';
 
 		var session;
 		if ('session' in options) {
@@ -9269,7 +9266,8 @@ function module_code(library_namespace) {
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				library_namespace.err('wikidata_merge: ['
-				//
+				// [failed-modify] Attempted modification of the item failed.
+				// (Conflicting descriptions for language zh)
 				+ error.code + '] ' + error.info);
 				callback(undefined, error);
 			}
