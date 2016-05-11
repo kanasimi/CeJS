@@ -528,7 +528,11 @@ function (global) {
 				if (arguments[i])
 					Object.assign(options, arguments[i]);
 		}
-		options[new_options.new_key] = true;
+		// 不允許 enumerable 以避免此屬性被使用。
+		Object.defineProperty(options, new_options.new_key, {
+			// enumerable : false
+			value : true
+		});
 		return options;
 	}
 	new_options.new_key = 'is new options';
