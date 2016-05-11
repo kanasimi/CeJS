@@ -9236,9 +9236,13 @@ function module_code(library_namespace) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
 
-		var ignoreconflicts = 'ignoreconflicts' in options ? options.ignoreconflicts
-				// 最常使用的功能是合併2頁面。忽略任何衝突的網站鏈接
-				: 'sitelink';
+		var ignoreconflicts = options.ignoreconflicts;
+
+		if (false) {
+			// 最常使用的功能是合併2頁面。可忽略任何衝突的 description, statement。
+			ignoreconflicts = 'ignoreconflicts' in options ? options.ignoreconflicts
+					: 'description|statement';
+		}
 
 		var session;
 		if ('session' in options) {
