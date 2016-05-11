@@ -2564,22 +2564,29 @@ function module_code(library_namespace) {
 				break;
 			}
 
-			wikidata_merge(next[1], next[2],
-			//
+			// next = [ 'merge_data', to, from[, options, callback] ]
+			if (typeof next[3] === 'function' && !next[4]) {
+				// 未輸入 options，但輸入 callback。
+				next.splice(3, 0, null);
+			}
+
+			// next = [ 'merge_data', to, from, options[, callback] ]
+			wikidata_merge(next[1], next[2], this.data_session.token,
+			// next[3] : options
+			Object.assign({
+				session : this.data_session
+			}, next[3]),
+			// next[4] : callback
 			function(data, error) {
 				_this.last_data = data || {
 					last_data : _this.last_data,
 					error : error
 				};
-				// next[3] : callback
-				if (typeof next[3] === 'function')
-					next[3].call(this, data, error);
+				// next[4] : callback
+				if (typeof next[4] === 'function')
+					next[4].call(this, data, error);
 				_this.next();
-			},
-			// next[4] : options
-			Object.assign({
-				session : this.data_session
-			}, next[4]));
+			});
 			break;
 
 		case 'query':
@@ -2610,7 +2617,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,check,edit,search,logout,run,set_URL,set_data,data,edit_data,query'
+	wiki_API.prototype.next.methods = 'page,check,edit,search,logout,run,set_URL,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -8351,12 +8358,14 @@ function module_code(library_namespace) {
 	// https://gerrit.wikimedia.org/r/gitweb%3Fp%3Dmediawiki/core.git;a%3Dblob;f%3DRELEASE-NOTES-1.23
 	// [[:google:湘江]]
 	// https://www.google.com/search?q=%E6%B9%98%E6%B1%9F
-	// [[:imdbtitle:0075713]]
+	// [[:imdbtitle:0075713]], [[:imdbname:2339825]]
 	// http://www.imdb.com/title/tt0075713/
 	// [[:arxiv:Hep-ex/0403017]]
 	// [[:gutenberg:27690]]
 	// [[:scores:Das wohltemperierte Klavier I, BWV 846-869 (Bach, Johann
 	// Sebastian)]]
+	// [[:wikt:제비]]
+	// [[:yue:海珠湖國家濕地公園]]
 	function language_to_project(language) {
 		// 正規化。
 		language = (language && String(language).trim().toLowerCase() || default_language)
@@ -8863,11 +8872,12 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('wikidata_edit: ['
-				// [readonly] The wiki is currently in read-only mode
+				library_namespace.err(
 				// e.g., 數據庫被禁止寫入以進行維護，所以您目前將無法保存您所作的編輯
 				// Mediawiki is in read-only mode during maintenance
-				+ error.code + '] ' + error.info);
+				'wikidata_edit: ' + (options.id ? options.id + ': ' : '')
+				// [readonly] The wiki is currently in read-only mode
+				+ '[' + error.code + '] ' + error.info);
 				callback(undefined, error);
 			}
 
@@ -9211,7 +9221,7 @@ function module_code(library_namespace) {
 	// 要忽略衝突的項的元素數組，只能包含值“description”和/或“sitelink”和/或“statement”。
 	// 多值 (以 | 分隔)：description、sitelink、statement
 	// 網站鏈接和描述
-	function wikidata_merge(to, from, callback, options) {
+	function wikidata_merge(to, from, token, options, callback) {
 		if (!/^Q\d{1,10}$/.test(to)) {
 			wikidata_entity(to, function(entity) {
 				wikidata_merge(entity.id, from, callback, options);
@@ -9226,13 +9236,20 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
 
 		var ignoreconflicts = 'ignoreconflicts' in options ? options.ignoreconflicts
 				// 最常使用的功能是合併2頁面。忽略任何衝突的網站鏈接
 				: 'sitelink';
 
-		var action = 'wbmergeitems?fromid=' + from + '&toid=' + to;
+		var session;
+		if ('session' in options) {
+			session = options.session;
+			delete options.session;
+		}
+
+		var action = 'wbmergeitems&fromid=' + from + '&toid=' + to;
 		if (ignoreconflicts)
 			action += '&ignoreconflicts=' + ignoreconflicts;
 
@@ -9242,11 +9259,9 @@ function module_code(library_namespace) {
 		options.API_URL || session && session.API_URL || wikidata_API_URL,
 				action ];
 
-		var session;
-		if ('session' in options) {
-			session = options.session;
-			delete options.session;
-		}
+		// the token should be sent as the last parameter.
+		options.token = library_namespace.is_Object(token) ? token.csrftoken
+				: token;
 
 		wiki_API.query(action, function(data) {
 			var error = data && data.error;
