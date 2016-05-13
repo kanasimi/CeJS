@@ -1582,46 +1582,51 @@ function module_code(library_namespace) {
 		});
 
 		if (!parse_type || parse_type === 1) {
-			// {Array}parameters
+			// {{t|p=p|1|q=q|2}} → [ , 1, 2; p:'p', q:'q' ]
+			var index = 1,
+			/** {Array}parameters */
+			parameters = [];
 			// 警告:這邊只是單純的以 '|' 分割，但照理來說應該再 call parser 來處理。
 			// 最起碼應該除掉所有可能包含 '|' 的語法，例如內部連結 [[~|~]], 模板 {{~|~}}。
-			wikitext = result[2].split(/[\s\n]*\|[\s\n]*/);
-			wikitext.forEach(function(token, index) {
-				if (index === 0) {
-					// 不處理 template name。
-					return;
-				}
-				matched = token.match(/^([^=]+)=(.*)$/);
+			result[2].split(/[\s\n]*\|[\s\n]*/)
+			// 不處理 template name。
+			.slice(1)
+			//
+			.forEach(function(token) {
+				var matched = token.match(/^([^=]+)=(.*)$/);
 				if (matched) {
 					var key = matched[1].trim(),
 					//
 					value = matched[2].trim();
 					if (false) {
-						if (key in wikitext) {
+						if (key in parameters) {
 							// 參數名重複, [[Category:調用重複模板參數的頁面]]
 							// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
-							if (Array.isArray(wikitext[key]))
-								wikitext[key].push(value);
+							if (Array.isArray(parameters[key]))
+								parameters[key].push(value);
 							else
-								wikitext[key] = [ wikitext[key], value ];
+								parameters[key] = [ parameters[key], value ];
 						} else {
-							wikitext[key] = value;
+							parameters[key] = value;
 						}
 					}
-					wikitext[key] = value;
+					parameters[key] = value;
+				} else {
+					parameters[index++] = token;
 				}
 			});
 
 			if (parse_type === 1) {
-				result = wikitext;
+				parameters[0] = result[1];
+				result = parameters;
 				// result[0] is template name.
 				// result[p] is {{{p}}}
 				// result[1] is {{{1}}}
 				// result[2] is {{{2}}}
 			} else {
 				// .shift(): parameters 以 '|' 起始，因此需去掉最前面一個。
-				wikitext.shift();
-				result[2] = wikitext;
+				parameters.shift();
+				result[2] = parameters;
 			}
 		}
 
@@ -9218,6 +9223,7 @@ function module_code(library_namespace) {
 	// 要忽略衝突的項的元素數組，只能包含值“description”和/或“sitelink”和/或“statement”。
 	// 多值 (以 | 分隔)：description、sitelink、statement
 	// 網站鏈接和描述
+	// TODO: wikidata_merge([to, from1, from2], ...)
 	function wikidata_merge(to, from, token, options, callback) {
 		if (!/^Q\d{1,10}$/.test(to)) {
 			wikidata_entity(to, function(entity) {
@@ -9276,6 +9282,7 @@ function module_code(library_namespace) {
 			// 此 wbmergeitems 之回傳 data 不包含 item 資訊。
 			// data =
 			// {"success":1,"redirected":1,"from":{"id":"Q1","type":"item","lastrevid":1},"to":{"id":"Q2","type":"item","lastrevid":2}}
+			// {"success":1,"redirected":0,"from":{"id":"Q1","type":"item","lastrevid":1},"to":{"id":"Q2","type":"item","lastrevid":2}}
 			callback(data);
 		}, options, session);
 	}
