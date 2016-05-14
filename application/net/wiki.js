@@ -253,6 +253,7 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// @see set_default_language()
 	function setup_API_language(session, language_code) {
 		// e.g., 'zh-yue', 'zh-classical'
 		if (/^[a-z\-\d]{2,20}$/i.test(language_code)
@@ -1652,7 +1653,8 @@ function module_code(library_namespace) {
 				// result[2] is {{{2}}}
 			} else {
 				// .shift(): parameters 以 '|' 起始，因此需去掉最前面一個。
-				parameters.shift();
+				// 2016/5/14 18:1:51 採用 [index] 的方法加入，因此無須此動作。
+				// parameters.shift();
 				result[2] = parameters;
 			}
 		}
@@ -5548,6 +5550,8 @@ function module_code(library_namespace) {
 	 *            e.g., 'en'.
 	 * 
 	 * @returns {String}預設之語言。
+	 * 
+	 * @see setup_API_language()
 	 */
 	function set_default_language(language) {
 		// e.g., 'zh-yue', 'zh-classical'

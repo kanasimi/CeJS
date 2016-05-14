@@ -2302,6 +2302,10 @@ function test_wiki() {
 		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b')[0] ]],
 		[[ '{{temp|{{temp2|p{a}r}}}}', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp')[0] ]],
 		[[ '{{temp2|p{a}r}}', CeL.wiki.parse.template('a{{temp|{{temp2|p{a}r}}}}b', 'temp2')[0] ]],
+		[[ '1', CeL.wiki.parse.template('"{{t|p=p|1|q=q|2}}"', 't')[2][1] ]],
+		[[ '2', CeL.wiki.parse.template('"{{t|p=p|1|q=q|2}}"', 't')[2][2] ]],
+		[[ 'p', CeL.wiki.parse.template('"{{t|p=p|1|q=q|2}}"', 't')[2].p ]],
+		[[ 'q', CeL.wiki.parse.template('"{{t|p=p|1|q=q|2}}"', 't')[2].q ]],
 
 		[[ 'vfd', CeL.wiki.parse.template('{{vfd|已提刪}}\n...', [ 'vfd', 'afd' ], true)[1] ]],
 		[[ '2015/10/21', CeL.wiki.parse.template('\n{{vfd|已提刪|date=2015/10/21}}\n...', [ 'vfd', 'afd' ])[2].date ]],
