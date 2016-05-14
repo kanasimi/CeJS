@@ -1556,7 +1556,7 @@ function module_code(library_namespace) {
 	 *            false: 解析 parameters。
 	 * 
 	 * @returns {Undefine}wikitext 不包含此模板。
-	 * @returns {Array}token = [ {String}完整的模板token, {String}模板名,
+	 * @returns {Array}token = [ {String}完整的模板 wikitext token, {String}模板名,
 	 *          {Array}parameters ];<br />
 	 *          token.count = count('{{') - count('}}')，正常情況下應為 0。<br />
 	 *          token.index, token.lastIndex: index.<br />
