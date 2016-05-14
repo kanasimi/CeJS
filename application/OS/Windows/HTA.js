@@ -137,7 +137,7 @@ _.IEA.prototype = {
 		return this.baseD;
 	},
 	/**
-	 * go to URL
+	 * go to URL. 注意: 若是 .go('URL#hash') 則可能無反應，須改成 .go('URL')。
 	 * @param URL	URL or history num
 	 * @returns
 	 */

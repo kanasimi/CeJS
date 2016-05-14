@@ -29,6 +29,19 @@ https://www.mediawiki.org/wiki/API:Etiquette
 
 https://zh.wikipedia.org/w/index.php?title=title&action=history&hilight=123,456
 
+
+
+
+-{zh-hans:访问;zh-hant:訪問;zh-tw:瀏覽}-量
+https://wikitech.wikimedia.org/wiki/Analytics/PageviewAPI
+https://en.wikipedia.org/wiki/Wikipedia:Pageview_statistics
+https://dumps.wikimedia.org/other/pagecounts-raw/
+https://tools.wmflabs.org/pageviews
+https://wikitech.wikimedia.org/wiki/Analytics/Data/Pagecounts-raw
+https://meta.wikimedia.org/wiki/Research:Page_view
+
+
+
 </code>
  * 
  * @since 2015/1/1
@@ -100,16 +113,12 @@ function module_code(library_namespace) {
 
 		// setup session.
 		if (API_URL) {
-			// e.g., 'zh-yue', 'zh-classical'
-			if (/^[a-z\-\d]{2,20}$/i.test(API_URL)
-			// 不包括 test2.wikipedia.org 之類。
-			&& !/test|wiki/i.test(API_URL))
-				this.language = API_URL.toLowerCase();
+			setup_API_language(this /* session */, API_URL);
 			setup_API_URL(this /* session */, API_URL);
 		}
 
 		if (!('language' in this))
-			this.language = default_language;
+			setup_API_language(this /* session */, default_language);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -240,6 +249,24 @@ function module_code(library_namespace) {
 				// agent.start_time = Date.now();
 				// agent.API_URL = session.API_URL;
 				session.get_URL_options = agent;
+			}
+		}
+	}
+
+	function setup_API_language(session, language_code) {
+		// e.g., 'zh-yue', 'zh-classical'
+		if (/^[a-z\-\d]{2,20}$/i.test(language_code)
+		// 不包括 test2.wikipedia.org 之類。
+		&& !/test|wiki/i.test(language_code)) {
+			session.language
+			//
+			= language_code = language_code.toLowerCase();
+			// apply local lag interval rule.
+			if (language_code in wiki_API.query.lag) {
+				session.lag = wiki_API.query.lag[language_code];
+				library_namespace.debug('Use interval ' + session.lag
+						+ ' for language ' + language_code, 1,
+						'setup_API_language');
 			}
 		}
 	}
@@ -2417,6 +2444,11 @@ function module_code(library_namespace) {
 			this.next();
 			break;
 
+		case 'set_language':
+			setup_API_language(this /* session */, next[1]);
+			this.next();
+			break;
+
 		case 'set_data':
 			// 設定 this.data_session。
 			// setup_data_session(session, API_URL, password, force, callback)
@@ -2619,7 +2651,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,check,edit,search,logout,run,set_URL,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,check,edit,search,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -3373,7 +3405,10 @@ function module_code(library_namespace) {
 		// method 2: edit 時皆必須設定 token。
 		= post_data && post_data.token,
 		// 檢測是否間隔過短。支援最大延遲功能。
-		to_wait;
+		to_wait,
+		// interval.
+		lag_interval = options && options.session && options.session.lag
+				|| wiki_API.query.default_lag;
 
 		if (false) {
 			// method 1:
@@ -3384,12 +3419,12 @@ function module_code(library_namespace) {
 				library_namespace.warn('wiki_API.query: Unknown action: '
 						+ action[1]);
 			} else if (need_check_lag = /edit|create/i.test(need_check_lag[1])) {
-				to_wait = wiki_API.query.lag
+				to_wait = lag_interval
 						- (Date.now() - wiki_API.query.last[action[0]]);
 			}
 		}
 		if (need_check_lag) {
-			to_wait = wiki_API.query.lag
+			to_wait = lag_interval
 					- (Date.now() - wiki_API.query.last[action[0]]);
 		}
 
@@ -3580,11 +3615,18 @@ function module_code(library_namespace) {
 	 * edit (modify) 時之最大延遲參數。<br />
 	 * default: 使用5秒 (5000 ms) 的最大延遲參數。
 	 * 
-	 * @type {ℕ⁰:Natural+0}
+	 * @type {Object} of {ℕ⁰:Natural+0}
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
 	 */
-	wiki_API.query.lag = 5000;
+	wiki_API.query.default_lag = 5000;
+
+	// local rule
+	wiki_API.query.lag = {
+		// [[:ja:WP:bot]]
+		// Botの速度は、おおよそ毎分 6 編集を限度としてください。
+		ja : 10000
+	};
 
 	/**
 	 * 對於可以不用 XMLHttp 的，直接採 JSONP callback 法。
