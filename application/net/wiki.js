@@ -1801,8 +1801,10 @@ function module_code(library_namespace) {
 			return compose_link();
 
 		// 若非外project 或不同 language，則直接 callback(link)。
-		if (section || language === default_language)
+		if (section || language === default_language) {
 			callback(compose_link());
+			return;
+		}
 
 		// 嘗試取得本project 之對應連結。
 		wiki_API.langlinks([ language, title ], function(to_title) {
@@ -2494,7 +2496,7 @@ function module_code(library_namespace) {
 			}
 
 			if (typeof next[2] === 'function') {
-				// 未設定 property
+				// 未設定/不設定 property
 				// shift arguments
 				next.splice(2, 0, null);
 			}
@@ -2530,7 +2532,7 @@ function module_code(library_namespace) {
 			if (typeof next[1] === 'function'
 			//
 			|| library_namespace.is_Object(next[1]) && !is_entity(next[1])) {
-				// 未設定 id，第一個 next[1] 即為 data。
+				// 未設定/不設定 id，第一個 next[1] 即為 data。
 				// next = [ 'edit_data', data[, options, callback] ]
 				if (library_namespace.is_Object(next[2]) && next[2]['new']) {
 					// create item/property
@@ -5107,7 +5109,7 @@ function module_code(library_namespace) {
 	wiki_API.edit.check_data = function(data, title, caller) {
 		var action;
 		// 可以利用 ((return [ CeL.wiki.edit.cancel, 'reason' ];)) 來回傳 reason。
-		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來 skip。
+		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來跳過 skip。
 		if (data === wiki_API.edit.cancel)
 			// 統一規範放棄編輯頁面訊息。
 			data = [ wiki_API.edit.cancel ];
@@ -8969,6 +8971,7 @@ function module_code(library_namespace) {
 				// [readonly] The wiki is currently in read-only mode
 				+ '[' + error.code + '] ' + error.info);
 				callback(undefined, error);
+				return;
 			}
 
 			if (data.entity)
@@ -9364,6 +9367,7 @@ function module_code(library_namespace) {
 				// (Conflicting descriptions for language zh)
 				+ error.code + '] ' + error.info);
 				callback(undefined, error);
+				return;
 			}
 
 			// Will create redirection.
