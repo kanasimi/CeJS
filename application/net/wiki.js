@@ -4320,8 +4320,10 @@ function module_code(library_namespace) {
 			//
 			? options.get_continue : [ title[0], options.get_continue ], {
 				type : type,
-				session : continue_session || session,
-				continue_key : (continue_session || session).continue_key,
+				session : continue_session || options.session,
+				continue_key : (continue_session || options.session)
+				//
+				.continue_key,
 				callback : function(continuation_data) {
 					if (continuation_data = continuation_data[continue_from]) {
 						library_namespace.info('get_list: continue from ['
@@ -4427,7 +4429,7 @@ function module_code(library_namespace) {
 				// console.log(continue_session);
 				if (continue_session
 				//
-				|| (continue_session = session)) {
+				|| (continue_session = options.session)) {
 					// console.log(continue_session.next_mark);
 					// console.log(next_index);
 					// console.log(continue_session);
@@ -4550,6 +4552,15 @@ function module_code(library_namespace) {
 		// e.g., [[File:title.jpg]].
 		// https://www.mediawiki.org/wiki/API:Imageusage
 		imageusage : 'iu',
+
+		// 列出在指定分類中的所有頁面。
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bcategorymembers
+		categorymembers : [ 'cm', , function(title_parameter) {
+			// 要列舉的分類（必需）。必須包括Category:前綴。不能與cmpageid一起使用。
+			if (/^&cmtitle=[Cc]ategory%3A/.test(title_parameter))
+				return title_parameter;
+			return title_parameter.replace(/^&cmtitle=/, '&cmtitle=Category:');
+		} ],
 
 		// 'type name' : [ 'abbreviation 縮寫 / prefix', 'parameter' ]
 		// ** 可一次處理多個標題，但可能較耗資源、較慢。
@@ -5293,6 +5304,7 @@ function module_code(library_namespace) {
 			});
 		}
 
+		// {{Nobots}}判定
 		if (!denied && /{{[\s\n]*nobots[\s\n]*}}/i.test(content))
 			denied = 'Ban all compliant bots.';
 
@@ -8406,7 +8418,7 @@ function module_code(library_namespace) {
 	// https://gerrit.wikimedia.org/r/gitweb%3Fp%3Dmediawiki/core.git;a%3Dblob;f%3DRELEASE-NOTES-1.23
 	// [[:google:湘江]]
 	// https://www.google.com/search?q=%E6%B9%98%E6%B1%9F
-	// [[:imdbtitle:0075713]], [[:imdbname:2339825]]
+	// [[:imdbtitle:0075713]], [[:imdbname:2339825]] → {{imdb name}}
 	// http://www.imdb.com/title/tt0075713/
 	// [[:arxiv:Hep-ex/0403017]]
 	// [[:gutenberg:27690]]
