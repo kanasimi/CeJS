@@ -8442,15 +8442,17 @@ function module_code(library_namespace) {
 		// e.g., 'zh-min-nanwiki' → 'zh_min_nanwiki'
 		.replace(/-/g, '_');
 
-		// 為日文特別處理。
-		if (language === 'jp')
-			language = 'ja';
-
 		// 以防 incase wikt, wikisource
 		if (!language.includes('wik')
 		// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
 		&& !/^category/i.test(language))
 			language += 'wiki';
+
+		// 為日文特別處理。
+		if (language === 'jpwiki')
+			language = 'jawiki';
+		else if (language === 'yuewiki')
+			language = 'zh_yuewiki';
 
 		return language;
 	}
