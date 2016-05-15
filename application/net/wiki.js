@@ -970,6 +970,7 @@ function module_code(library_namespace) {
 	[https://a.b <a>a</a><!-- -->]
 	[[<a>a</a>]]
 	CeL.wiki.parser('a[[未來日記-ANOTHER:WORLD-]]b').parse()[1]
+	<nowiki>...<!-- -->...</nowiki> 中的註解不應被削掉!
 
 	 * </code>
 	 * 
@@ -3611,6 +3612,7 @@ function module_code(library_namespace) {
 
 				if (typeof callback === 'function')
 					callback(response);
+
 			}, undefined, post_data, get_URL_options);
 		}
 	};
@@ -8730,9 +8732,16 @@ function module_code(library_namespace) {
 
 		if (property && !options.props)
 			options.props = 'claims';
-		if (options.props)
+		var props = options.props;
+		if (Array.isArray(props))
+			props = props.join('|');
+		if (props) {
 			// retrieve properties. 僅擷取這些屬性。
-			action[1] += '&props=' + options.props;
+			action[1] += '&props=' + props;
+			if (props.includes('|'))
+				// 對於多種屬性，不特別取之。
+				props = null;
+		}
 		if (options.languages)
 			// retrieve languages, language to callback. 僅擷取這些語言。
 			action[1] += '&languages=' + options.languages;
@@ -8777,13 +8786,17 @@ function module_code(library_namespace) {
 				data = list;
 				if (data.length === 1) {
 					data = data[0];
-					if (options.props) {
-						data = data[options.props];
+					if (props && (props in data)) {
+						data = data[props];
 					}
 				}
 			}
 
-			property = data.claims ? data.claims[property] : data[property];
+			if (property = data) {
+				property = data.claims
+				//
+				? data.claims[property] : data[property];
+			}
 			if (property) {
 				wikidata_datavalue(property, callback, options);
 			} else {
