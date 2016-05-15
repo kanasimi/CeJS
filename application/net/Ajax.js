@@ -760,11 +760,11 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 					library_namespace.debug('content-encoding: ' + encoding, 5, 'get_URL_node');
 					switch (encoding && encoding.trim().toLowerCase()) {
 					case 'gzip':
-						library_namespace.debug('gunzip data...', 2, 'get_URL_node');
+						library_namespace.debug('gunzip data ' + data.length + ' bytes...', 2, 'get_URL_node');
 						data = node_zlib.gunzipSync(data);
 						break;
 					case 'deflate':
-						library_namespace.debug('deflate data...', 2, 'get_URL_node');
+						library_namespace.debug('deflate data ' + data.length + ' bytes...', 2, 'get_URL_node');
 						data = node_zlib.deflateSync(data);
 						break;
 					default:

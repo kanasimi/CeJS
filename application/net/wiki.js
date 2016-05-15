@@ -3627,6 +3627,11 @@ function module_code(library_namespace) {
 	wiki_API.query.lag = {
 		// [[:ja:WP:bot]]
 		// Botの速度は、おおよそ毎分 6 編集を限度としてください。
+		// e.g., @ User contributions,
+		// Due to high database server lag, changes newer than 30 seconds may not be shown in this list.
+		// 由於資料庫回應延遲，此清單可能不會顯示最近 30 秒內的變更。
+		// Changes newer than 25 seconds may not be shown in this list.
+		// 此清單可能不會顯示最近 25 秒內的變更。
 		ja : 10000
 	};
 
@@ -8500,6 +8505,8 @@ function module_code(library_namespace) {
 		}
 	}
 
+	var wikidata_search_cache = library_namespace.null_Object();
+
 	/**
 	 * 取得特定實體的特定屬性值。
 	 * 
@@ -8588,20 +8595,27 @@ function module_code(library_namespace) {
 		// for property =
 		// [ {String}language, {String}title or {Array}titles ]
 		&& /^[a-z]{2,3}$/i.test(property[0])) {
-			wikidata_search(property, function(id) {
-				library_namespace.debug(
-				//
-				'property ' + id + ' ← [' + property.join(':') + ']', 1,
-						'wikidata_entity');
-				wikidata_entity(key, id, callback, options);
-			}, {
-				API_URL : API_URL,
-				type : 'property',
-				get_id : true,
-				limit : 1
-			});
-			// Waiting for conversion
-			return;
+			// TODO: property 可能是 [ language code, 'labels|aliases' ] 之類。
+			if (property.join(':') in wikidata_search_cache) {
+				property = wikidata_search_cache[property.join(':')];
+			} else {
+				wikidata_search(property, function(id) {
+					library_namespace.debug(
+					//
+					'property ' + id + ' ← [' + property.join(':') + ']', 1,
+							'wikidata_entity');
+					// cache
+					wikidata_search_cache[property.join(':')] = id;
+					wikidata_entity(key, id, callback, options);
+				}, {
+					API_URL : API_URL,
+					type : 'property',
+					get_id : true,
+					limit : 1
+				});
+				// Waiting for conversion
+				return;
+			}
 		}
 
 		// ----------------------------

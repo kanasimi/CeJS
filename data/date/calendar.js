@@ -1216,9 +1216,13 @@ _.Hebrew_Date = Hebrew_Date;
 // <a href="https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar" accessdate="2014/4/28 22:15" title="Mesoamerican Long Count calendar">中美洲長紀曆</a>
 
 // GMT correlation: starting-point is equivalent to August 11, 3114 BCE in the proleptic Gregorian calendar
-// GMT 584283
 // https://en.wikipedia.org/wiki/Template:Maya_Calendar
-var Maya_epoch = (new Date(-3114 + 1, 8 - 1, 11)).getTime(),
+// GMT 584283
+// GMT+2 584285
+// Thompson (Lounsbury) 584,285
+// 注意：據 mayaman@ptt 言，<q>目前比較流行的是GMT+2  如果你要統治者紀年的話</q>。
+Maya_Date.epoch = (new Date(-3114 + 1, 8 - 1, 11/* + 2*/)).getTime();
+
 // Era Base date, the date of creation is expressed as 13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.13.0.0.0.0 4 Ajaw 8 Kumk'u
 /*
 // get offset:
@@ -1228,6 +1232,7 @@ for (i = 0, d = 3, l = 20; i < l; i++, d += 13)
 		throw d;
 // 159
 */
+var
 Tzolkin_day_offset = 159,
 Tzolkin_day_period = 13 * 20,
 /*
@@ -1259,11 +1264,11 @@ function Maya_Date(date, minute_offset, options) {
 	if (options && options.period_end)
 		days++;
 
-	return new Date(days * ONE_DAY_LENGTH_VALUE + Maya_epoch);
+	return new Date(days * ONE_DAY_LENGTH_VALUE + Maya_Date.epoch);
 }
 
 Maya_Date.days = function(date) {
-	return Math.floor((date - Maya_epoch) / ONE_DAY_LENGTH_VALUE);
+	return Math.floor((date - Maya_Date.epoch) / ONE_DAY_LENGTH_VALUE);
 };
 
 Maya_Date.to_Long_Count = function(date, get_Array) {
