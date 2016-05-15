@@ -2057,7 +2057,7 @@ function module_code(library_namespace) {
 		if (library_namespace.is_debug(3)
 		// .show_value() @ interact.DOM, application.debug
 		&& library_namespace.show_value)
-			library_namespace.show_value(this.actions.slice());
+			library_namespace.show_value(this.actions.slice(0, 10));
 		var _this = this, next = this.actions.shift(),
 		// 不改動 next。
 		type = next[0], list_type;
@@ -3628,7 +3628,8 @@ function module_code(library_namespace) {
 		// [[:ja:WP:bot]]
 		// Botの速度は、おおよそ毎分 6 編集を限度としてください。
 		// e.g., @ User contributions,
-		// Due to high database server lag, changes newer than 30 seconds may not be shown in this list.
+		// Due to high database server lag, changes newer than 30 seconds may
+		// not be shown in this list.
 		// 由於資料庫回應延遲，此清單可能不會顯示最近 30 秒內的變更。
 		// Changes newer than 25 seconds may not be shown in this list.
 		// 此清單可能不會顯示最近 25 秒內的變更。
@@ -8587,25 +8588,36 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 		// convert property: title to id
-		if (typeof property === 'string' && !/^P\d{1,10}$/.test(property))
+		if (typeof property === 'string' && !/^P\d{1,10}$/.test(property)) {
+			if (library_namespace.is_debug(2)
+					&& /^(?:(?:info|sitelinks|sitelinks\/urls|aliases|labels|descriptions|claims|datatype)\|)+$/
+							.test(property + '|'))
+				library_namespace.warn(
+				//
+				'wikidata_entity: 您或許該採用 options.props = ' + property);
 			/** {String}setup language of key and property name. 僅在需要 search 時使用。 */
 			property = [ options.language || default_language, property ];
+		}
 
 		if (Array.isArray(property) && property.length === 2
 		// for property =
 		// [ {String}language, {String}title or {Array}titles ]
 		&& /^[a-z]{2,3}$/i.test(property[0])) {
 			// TODO: property 可能是 [ language code, 'labels|aliases' ] 之類。
-			if (property.join(':') in wikidata_search_cache) {
-				property = wikidata_search_cache[property.join(':')];
+			// property.join(':')
+			var property_title = property[0] + ':' + property[1];
+			if (property_title in wikidata_search_cache) {
+				// has cache.
+				property = wikidata_search_cache[property_title];
+
 			} else {
 				wikidata_search(property, function(id) {
 					library_namespace.debug(
 					//
-					'property ' + id + ' ← [' + property.join(':') + ']', 1,
+					'property ' + id + ' ← [' + property_title + ']', 1,
 							'wikidata_entity');
 					// cache
-					wikidata_search_cache[property.join(':')] = id;
+					wikidata_search_cache[property_title] = id;
 					wikidata_entity(key, id, callback, options);
 				}, {
 					API_URL : API_URL,
@@ -8857,7 +8869,11 @@ function module_code(library_namespace) {
 
 		if (typeof data === 'function') {
 			if (is_entity(id)) {
+				library_namespace.debug('餵給設定值函數 ' + id.id + ' ('
+						+ (get_entity_label(id) || get_entity_link(id)) + ')。',
+						2, 'wikidata_edit');
 				data = data(id);
+
 			} else {
 				wikidata_entity(id, options.props, function(entity) {
 					if (entity && ('missing' in entity)) {
