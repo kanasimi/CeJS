@@ -1546,6 +1546,10 @@ function module_code(library_namespace) {
 	 * parse template token. 取得完整的模板 token。<br />
 	 * CeL.wiki.parse.template();
 	 * 
+	 * TODO:<br />
+	 * {{link-en|{{convert|198|cuin|L|abbr=on}} ''斜置-6'' 198|Chrysler Slant 6
+	 * engine#198}}
+	 * 
 	 * @param {String}wikitext
 	 *            模板前後之 content。<br />
 	 *            assert: wikitext 為良好結構 (well-constructed)。
@@ -2069,9 +2073,13 @@ function module_code(library_namespace) {
 			type = 'list';
 		}
 
-		library_namespace.debug('處理 '
-				+ (this.token.lgname ? this.token.lgname + ' ' : '') + '['
-				+ next + ']', 2, 'wiki_API.prototype.next');
+		if (library_namespace.is_debug(2))
+			library_namespace.debug('處理 '
+					+ (this.token.lgname ? this.token.lgname + ' ' : '') + '['
+					+ next.map(function(arg) {
+						// for function
+						return String(arg).slice(0, 80);
+					}) + ']', 1, 'wiki_API.prototype.next');
 
 		// 若需改變，需同步更改 wiki_API.prototype.next.methods
 		switch (type) {
@@ -6800,9 +6808,69 @@ function module_code(library_namespace) {
 	 * 
 	 * @see application.storage.file.get_cache_file
 	 *      application.OS.Windows.file.cacher
-	 *      application.net.Ajax.get_URL_cache application.net.wiki
+	 *      application.net.Ajax.get_URL_cache<br />
+	 *      application.net.wiki<br />
 	 *      wiki_API.cache() CeL.wiki.cache()
 	 */
+
+	if (false) {
+		// example
+
+		CeL.wiki.cache({
+			type : 'page',
+			file_name : 'file_name',
+			list : 'WP:SB',
+			operator : function(data) {
+				console.log(data);
+			}
+		}, function callback(data) {
+			console.log(data);
+		}, {
+			// default options === this
+			// wiki : wiki,
+			// title_prefix : 'Template:',
+			// cache path prefix
+			prefix : 'base_directory/'
+		});
+
+		CeL.set_debug(6);
+		CeL.wiki.cache({
+			type : 'manual',
+			file_name : 'file_name',
+			list : function(callback) {
+				callback([ 1, 2, 3 ]);
+			},
+			operator : function(data) {
+				console.log(data);
+			}
+		}, function callback(data) {
+			console.log(data);
+		}, {
+			// default options === this
+			// wiki : wiki,
+			// title_prefix : 'Template:',
+			// cache path prefix
+			prefix : './'
+		});
+
+		CeL.set_debug(6);
+		CeL.wiki.cache({
+			type : 'wdq',
+			file_name : 'countries',
+			list : 'claim[31:6256]',
+			operator : function(list) {
+				// console.log(list);
+			}
+		}, function callback(list) {
+			// console.log(list);
+		}, {
+			// default options === this
+			// wiki : wiki,
+			// title_prefix : 'Template:',
+			// cache path prefix
+			prefix : './'
+		});
+	}
 
 	/**
 	 * cache 作業操作之輔助套裝函數。<br />
@@ -6918,6 +6986,12 @@ function module_code(library_namespace) {
 			if (typeof list === 'function')
 				// TODO: 允許非同步方法。
 				list = list.call(_this, operation);
+
+			if (!operation.postfix)
+				if (type === 'file')
+					operation.postfix = '.txt';
+				else if (type === 'URL')
+					operation.postfix = '.htm';
 
 			// 自行設定之檔名 operation.file_name 優先度較 type/title 高。
 			// 需要自行創建目錄！
@@ -7078,7 +7152,7 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (typeof list === 'function')
+			if (typeof list === 'function' && type !== 'manual')
 				list = list.call(_this, operation);
 			if (list === wiki_API.cache.abort) {
 				library_namespace
@@ -7163,6 +7237,54 @@ function module_code(library_namespace) {
 			}
 
 			switch (type) {
+			case 'manual':
+				// 手動取得資料。使用 list=function(){}
+				to_get_data = function(title, callback) {
+					library_namespace.log(
+					//
+					'wiki_API.cache: manually get data.');
+					if (typeof title === 'function') {
+						// 自己回 call
+						title.call(operation, callback);
+					}
+				};
+				break;
+
+			case 'file':
+				// 一般不應用到。
+				// get file 內容。
+				to_get_data = function(file_path, callback) {
+					library_namespace.log('wiki_API.cache: Get file ['
+							+ file_path + '].');
+					node_fs.readFile(file_path, operation.encoding, function(
+							error, data) {
+						if (error)
+							library_namespace.err(
+							//
+							'wiki_API.cache: Error get file [' + file_path
+									+ ']: ' + error);
+						callback(data);
+					});
+				};
+				break;
+
+			case 'URL':
+				// get URL 頁面內容。
+				to_get_data = function(URL, callback) {
+					library_namespace.log('wiki_API.cache: Get URL of [' + URL
+							+ '].');
+					get_URL(URL, callback);
+				};
+				break;
+
+			case 'wdq':
+				to_get_data = function(query, callback) {
+					library_namespace.log('wiki_API.cache: Wikidata Query ['
+							+ query + '].');
+					wikidata_query(query, callback, operation);
+				};
+				break;
+
 			case 'page':
 				// get page contents 頁面內容。
 				to_get_data = function(title, callback) {
@@ -8451,6 +8573,7 @@ function module_code(library_namespace) {
 		// 為日文特別處理。
 		if (language === 'jpwiki')
 			language = 'jawiki';
+		// 為粵文維基百科特別處理。
 		else if (language === 'yuewiki')
 			language = 'zh_yuewiki';
 
@@ -9404,8 +9527,10 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
-	CeL.wiki.wdq('claim[31:146]', function(list) {result=list;console.log(list);})
-	CeL.wiki.wdq('CLAIM[31:14827288] AND CLAIM[31:593744]', function(list) {result=list;console.log(list);})
+	CeL.wiki.wdq('claim[31:146]', function(list) {result=list;console.log(list);});
+	CeL.wiki.wdq('CLAIM[31:14827288] AND CLAIM[31:593744]', function(list) {result=list;console.log(list);});
+	//	查詢國家
+	CeL.wiki.wdq('claim[31:6256]', function(list) {result=list;console.log(list);});
 
 
 	// Wikidata filter claim

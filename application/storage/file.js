@@ -574,17 +574,18 @@ function cache_file(URL, options) {
 
 	var file_encoding = options.file_encoding || options.encoding || cache_file.encoding, data;
 
-	if (!options.force)
+	if (!options.force) {
 		try {
 			// get cache file
 			data = get_file(file_path, file_encoding);
 			//data = read_file(file_name, encoding);
 		} catch (e) {
-			library_namespace.debug('嘗試讀取 cache file [' + file_path + '] 失敗。');
+			library_namespace.debug('嘗試讀取 cache file [' + file_path + '] 失敗。', 1, 'cache_file');
 		}
+	}
 
 	if (data === undefined) {
-		library_namespace.debug('重新取得 [' + URL + ']。');
+		library_namespace.debug('重新取得 [' + URL + ']。', 1, 'cache_file');
 		if ((data = get_file(URL, options.encoding))
 		// 預防此時尚未 loaded.
 		&& (write_file || (write_file = library_namespace.write_file))) {
