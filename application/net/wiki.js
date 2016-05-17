@@ -1691,6 +1691,7 @@ function module_code(library_namespace) {
 				&& wikitext
 						.match(
 						// 使用者/用戶對話頁面
+						// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|statistics&utf8
 						// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
 						// "\/": e.g., [[user talk:user_name/Flow]]
 						/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?)\s*:\s*([^\|\]\/]+)/i);
@@ -2138,16 +2139,18 @@ function module_code(library_namespace) {
 				// [ page_data ]
 				_this.last_pages = pages;
 
-				if (typeof next[2] === 'function')
+				if (typeof next[2] === 'function') {
 					// next[2] : callback(title, titles, pages)
 					next[2].call(_this, title, titles, pages);
-				else if (next[2] && next[2].each)
+				} else if (next[2] && next[2].each) {
 					// next[2] : 當作 work，處理積存工作。
-					if (pages)
+					if (pages) {
 						_this.work(next[2]);
-					else
+					} else {
 						// 只有在本次有處理頁面時，才繼續下去。
 						library_namespace.info('無頁面可處理（已完成？），中斷跳出。');
+					}
+				}
 
 				_this.next();
 			},
@@ -4265,6 +4268,30 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	if (false) {
+		// 若是想一次取得所有 list，不應使用單次版:
+		wiki.categorymembers('Category_name', function(title, titles, pages) {
+			console.log(pages.length);
+		}, {
+			limit : 'max'
+		});
+
+		// 而應使用循環取得版:
+		CeL.wiki.cache({
+			type : 'categorymembers',
+			list : 'Category_name',
+		}, function(list) {
+			CeL.log('Get ' + list.length + ' item(s).');
+		}, {
+			// default options === this
+			// [SESSION_KEY]
+			session : wiki,
+			// title_prefix : 'Template:',
+			// cache path prefix
+			prefix : base_directory
+		});
+	}
+
 	/**
 	 * get list. 檢索/提取列表<br />
 	 * 注意: 可能會改變 options！
@@ -4447,7 +4474,7 @@ function module_code(library_namespace) {
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value)
-				library_namespace.show_value(data, 'get_list:' + type);
+				library_namespace.show_value(data, 'get_list: ' + type);
 
 			var titles = [], pages = [],
 			// 取得列表後，設定/紀錄新的後續檢索用索引值。
@@ -4484,7 +4511,7 @@ function module_code(library_namespace) {
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
 					library_namespace.show_value(next_index,
-							'get_list:get the continue value');
+							'get_list: get the continue value');
 			}
 			// 紀錄清單類型。
 			// assert: overwrite 之屬性不應該是原先已經存在之屬性。
@@ -8971,9 +8998,24 @@ function module_code(library_namespace) {
 
 	// is Q4167410: Wikimedia disambiguation page 維基媒體消歧義頁
 	// CeL.wiki.data.is_DAB(entity)
-	function is_DAB(entity) {
+	function is_DAB(entity, callback) {
 		var property = entity && entity.claims && entity.claims.P31;
-		return property && wikidata_datavalue(property) === 'Q4167410';
+		if (property && wikidata_datavalue(property) === 'Q4167410') {
+			if (callback)
+				callback(true, entity);
+			else
+				return true;
+		}
+		if (!callback)
+			return;
+
+		// wikidata 的 item 或 Q4167410 需要手動加入，非自動連結。
+
+		// TODO: 檢查 [[Category:All disambiguation pages]]
+		// TODO: 檢查標題是否有 "(消歧義)" 之類。
+		// https://en.wikipedia.org/w/api.php?action=query&titles=title&prop=pageprops
+		// 看看是否 ('disambiguation' in page_data.pageprops)
+		callback(null, entity);
 	}
 
 	// ------------------------------------------------------------------------
