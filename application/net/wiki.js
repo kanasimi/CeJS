@@ -419,6 +419,7 @@ function module_code(library_namespace) {
 				section = use_underline
 				// ' ' → '_': 在 URL 上可更簡潔。
 				? section.replace(/ /g, '_') : section.replace(/_/g, ' ');
+				// page title.
 				name_list.push(section.charAt(0).toUpperCase()
 						+ section.slice(1));
 			} else if (section in get_namespace.hash) {
@@ -635,20 +636,24 @@ function module_code(library_namespace) {
 	 * @returns {wiki page parser}
 	 */
 	function page_parser(wikitext, options) {
-		if (typeof wikitext === 'string')
+		if (typeof wikitext === 'string') {
 			wikitext = [ wikitext ];
-		else if (get_page_content.is_page_data(wikitext)) {
-			var tmp = wikitext;
-			wikitext = [ get_page_content(wikitext) ];
-			wikitext.page = tmp;
+		} else if (get_page_content.is_page_data(wikitext)) {
+			// 可以用 "CeL.wiki.parser(page_data).parse();" 來設置 parser。
+			var page_data = wikitext;
+			page_data.parsed = wikitext = [ get_page_content(page_data) ];
+			wikitext.page = page_data;
 		} else if (!wikitext) {
 			library_namespace.warn('page_parser: No wikitext specified.');
 			wikitext = [];
-		} else
-			throw new Error('page_parser: Unknown wikitext.');
+		} else {
+			throw new Error('page_parser: Unknown wikitext: [' + wikitext
+					+ '].');
+		}
 
-		if (library_namespace.is_Object(options))
+		if (library_namespace.is_Object(options)) {
 			wikitext.options = options;
+		}
 		// copy prototype methods
 		Object.assign(wikitext, page_prototype);
 		set_wiki_type(wikitext, 'text');
@@ -2088,7 +2093,11 @@ function module_code(library_namespace) {
 		// 若需改變，需同步更改 wiki_API.prototype.next.methods
 		switch (type) {
 		case 'page':
-			// this.page(page data, callback)
+			// this.page(page data, callback, options);
+			if (library_namespace.is_Object(next[2]) && !next[3])
+				// 直接輸入 options，未輸入 callback。
+				next.splice(2, 0, null);
+
 			// → 此法會採用所輸入之 page data 作為 this.last_page，不再重新擷取 page。
 			if (get_page_content.is_page_data(next[1])
 			// 必須有頁面內容，要不可能僅有資訊。有時可能已經擷取過卻發生錯誤而沒有頁面內容，此時依然會再擷取一次。
@@ -3292,9 +3301,9 @@ function module_code(library_namespace) {
 					this.run(config.after);
 
 				this.run(function() {
-					library_namespace.log('wiki_API.work: 結束作業'
+					library_namespace.log('wiki_API.work: 結束 .work() 作業'
 					// 已完成作業
-					+ (config.summary ? ' [' + config.summary + ']' : ''));
+					+ (config.summary ? ' [' + config.summary + ']' : '。'));
 				});
 			});
 
@@ -3810,6 +3819,13 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	if (false) {
+		wiki.page('巴黎協議 (消歧義)', {
+			query_props : 'pageprops'
+		});
+		// wiki.last_page
+	}
+
 	/**
 	 * 讀取頁面內容，取得頁面源碼。可一次處理多個標題。
 	 * 
@@ -3838,48 +3854,101 @@ function module_code(library_namespace) {
 			callback = undefined;
 		}
 
+		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+		options = library_namespace.new_options(options);
+
+		if (options.query_props) {
+			var query_props = options.query_props, page_data,
+			//
+			get_properties = function(page) {
+				if (page) {
+					if (page_data)
+						Object.assign(page_data, page);
+					else
+						page_data = page;
+				}
+				var prop;
+				while (query_props.length > 0
+				//
+				&& !(prop = query_props.pop()))
+					;
+
+				if (!prop || page_data && ('missing' in page_data)) {
+					callback(page_data);
+				} else {
+					library_namespace.info('wiki_API.page: Get property: ['
+							+ prop + ']');
+					options.prop = prop;
+					wiki_API.page(title, get_properties, options);
+				}
+			};
+
+			delete options.query_props;
+			if (typeof query_props === 'string')
+				query_props = query_props.split('|');
+			if (Array.isArray(query_props)) {
+				if (!options.no_content)
+					query_props.push('revisions');
+				get_properties();
+			} else {
+				library_namespace.err('wiki_API.page: Invalid .query_props!');
+				throw 'Invalid .query_props';
+			}
+			return;
+		}
+
+		var action = Array.isArray(title) ? title.clone() : title;
+
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!Array.isArray(title)
+		if (!Array.isArray(action)
 		// 為了預防輸入的是問題頁面。
-		|| title.length !== 2 || typeof title[0] === 'object')
-			title = [ , title ];
-		title[1] = wiki_API.query.title_param(title[1], true, options
+		|| action.length !== 2 || typeof action[0] === 'object')
+			action = [ , action ];
+		action[1] = wiki_API.query.title_param(action[1], true, options
 				&& options.is_id);
 
-		// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
-		// https://www.mediawiki.org/w/api.php?action=help&modules=query
-		// titles/pageids: Maximum number of values is 50 (500 for bots).
-		if (options && ('rvlimit' in options)) {
-			if (options.rvlimit > 0 || options.rvlimit === 'max')
-				title[1] += '&rvlimit=' + options.rvlimit;
-		} else if (!title[1].includes('|')
-		//
-		&& !title[1].includes(encodeURIComponent('|')))
-			// default: 僅取得單一 revision。
-			title[1] += '&rvlimit=1';
-
-		if (options && options.redirects)
+		if (options.redirects)
 			// 毋須 '&redirects=1'
-			title[1] += '&redirects';
+			action[1] += '&redirects';
 
-		// prop=info|revisions
-		title[1] = 'query&prop=revisions&rvprop='
-		//
-		+ (options && (Array.isArray(options.rvprop)
-		//
-		&& options.rvprop.join('|') || options.rvprop)
-		//
-		|| wiki_API.page.rvprop) + '&'
-		// &rvexpandtemplates=1
-		+ title[1];
-		if (!title[0])
-			title = title[1];
+		if (!options.prop || options.prop === 'revisions') {
+			// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
+			// https://www.mediawiki.org/w/api.php?action=help&modules=query
+			// titles/pageids: Maximum number of values is 50 (500 for bots).
+			if ('rvlimit' in options) {
+				if (options.rvlimit > 0 || options.rvlimit === 'max')
+					action[1] += '&rvlimit=' + options.rvlimit;
+			} else if (!action[1].includes('|')
+			//
+			&& !action[1].includes(encodeURIComponent('|')))
+				// default: 僅取得單一 revision。
+				action[1] += '&rvlimit=1';
+
+			// prop=info|revisions
+			action[1] = 'revisions&rvprop='
+			//
+			+ ((Array.isArray(options.rvprop)
+			//
+			&& options.rvprop.join('|') || options.rvprop)
+			//
+			|| wiki_API.page.rvprop) + '&'
+			// &rvexpandtemplates=1
+			+ action[1];
+		} else {
+			// e.g., prop=pageprops
+			action[1] = options.prop + '&' + action[1];
+		}
+
+		action[1] = 'query&prop=' + action[1];
+
+		if (!action[0])
+			action = action[1];
 
 		if (false)
-			library_namespace.debug('get url token: ' + title, 0,
+			library_namespace.debug('get url token: ' + action, 0,
 					'wiki_API.page');
 
-		wiki_API.query(title, typeof callback === 'function'
+		wiki_API.query(action, typeof callback === 'function'
 		//
 		&& function(data) {
 			if (library_namespace.is_debug(2)
@@ -3947,7 +4016,7 @@ function module_code(library_namespace) {
 			//
 			page_cache_prefix = library_namespace.platform.nodejs && node_fs
 			//
-			&& options && options.page_cache_prefix;
+			&& options.page_cache_prefix;
 
 			var continue_id;
 			if ('continue' in data) {
@@ -3997,7 +4066,7 @@ function module_code(library_namespace) {
 			}
 
 			// options.multi: 即使只取得單頁面，依舊回傳 Array。
-			if (!options || !options.multi)
+			if (!options.multi)
 				if (pages.length <= 1) {
 					// e.g., pages: { '1850031': [Object] }
 					library_namespace.debug('只取得單頁面 [[' + pages
@@ -4006,7 +4075,7 @@ function module_code(library_namespace) {
 					pages = pages[0];
 					if (pages && (pages.is_Flow = is_Flow(pages))
 					// e.g., { flow_view : 'header' }
-					&& options && options.flow_view) {
+					&& options.flow_view) {
 						Flow_page(pages, callback, options);
 						return;
 					}
@@ -9012,9 +9081,13 @@ function module_code(library_namespace) {
 		// wikidata 的 item 或 Q4167410 需要手動加入，非自動連結。
 
 		// TODO: 檢查 [[Category:All disambiguation pages]]
+
 		// TODO: 檢查標題是否有 "(消歧義)" 之類。
+
+		// TODO: 檢查
 		// https://en.wikipedia.org/w/api.php?action=query&titles=title&prop=pageprops
-		// 看看是否 ('disambiguation' in page_data.pageprops)
+		// 看看是否 ('disambiguation' in page_data.pageprops)；
+		// 這方法即使在 wikipedia 沒 entity 時依然有效。
 		callback(null, entity);
 	}
 
