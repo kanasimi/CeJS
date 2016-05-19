@@ -683,7 +683,7 @@ function module_code(library_namespace) {
 	if (false) {
 		wikitext = 'a\n[[File:f.jpg|thumb|d]]\nb';
 		CeL.wiki.parser(wikitext).parse().each('namespace',
-				function(token, parent, index) {
+				function(token, index, parent) {
 					console.log([ index, token, parent ]);
 				}, true).toString();
 	}
@@ -696,7 +696,7 @@ function module_code(library_namespace) {
 	 *            未指定: 處理所有節點。
 	 * @param {Function}processor
 	 *            執行特定作業: processor({Array|String|undefined}inside token list,
-	 *            {Array}parent, {ℕ⁰:Natural+0}index) {<br />
+	 *            {ℕ⁰:Natural+0}index, {Array}parent) {<br />
 	 *            return {String}wikitext or {Object}element;}
 	 * @param {Boolean}[modify_this]
 	 *            若 processor 的回傳值為{String}wikitext，則將指定類型節點替換/replace作此回傳值。
@@ -734,7 +734,7 @@ function module_code(library_namespace) {
 				// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
 				|| type === (Array.isArray(token) ? token.type : 'plain')) {
 					// get result. 須注意: 此 token 可能為 Array, string, undefined！
-					var result = processor(token, _this, index);
+					var result = processor(token, index, _this);
 					if (modify_this) {
 						if (typeof result === 'string')
 							// {String}wikitext to ( {Object}element or '' )
@@ -1243,7 +1243,9 @@ function module_code(library_namespace) {
 		//
 		function(all, parameters) {
 			// 自 end_mark 向前回溯。
-			var index = parameters.lastIndexOf('{{'), prevoius;
+			var index = parameters.lastIndexOf('{{'), prevoius,
+			//
+			_parameters = [];
 			if (index > 0) {
 				prevoius = '{{' + parameters.slice(0, index);
 				parameters = parameters.slice(index + '}}'.length);
@@ -1253,18 +1255,68 @@ function module_code(library_namespace) {
 			library_namespace.debug(prevoius + ' + ' + parameters, 4,
 					'parse_wikitext.transclusion');
 
-			parameters = parameters.split('|').map(function(token, index) {
-				return index === 0
+			index = 1;
+			parameters = parameters.split('|').map(function(token, _index) {
+				if (_index === 0
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 				// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
-				&& !token.includes(include_mark) ? _set_wiki_type(
-				//
-				token.split(normalize ? /\s*:\s*/ : ':'), 'page_title')
+				&& !token.includes(include_mark)) {
+					return _set_wiki_type(
+					//
+					token.split(normalize ? /\s*:\s*/ : ':'), 'page_title');
+				}
+
 				// 經過改變，需再進一步處理。
-				: parse_wikitext(token, options, queue);
+				token = parse_wikitext(token, options, queue);
+
+				var _token = token;
+				if (Array.isArray(_token)) {
+					_token = _token[0];
+				}
+				if (typeof _token === 'string') {
+					_token = _token.trim();
+					// @see function parse_template()
+					var matched = _token.match(/^([^=]+)=(.*)$/);
+					if (matched) {
+						var key = matched[1].trimRight(),
+						//
+						value = matched[2].trimLeft();
+
+						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
+						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
+						if (typeof _token === 'string') {
+							_parameters[key] = value;
+						} else {
+							// assert: Array.isArray(token)
+							_token = token.clone();
+							_token[0] = value;
+							_parameters[key] = _token;
+						}
+					} else {
+						_parameters[index++]
+						//
+						= typeof token === 'string' ? _token : token;
+					}
+
+				} else {
+					library_namespace.err(
+					//
+					'parse_wikitext.transclusion: Can not parse ['
+					//
+					+ token + ']');
+					library_namespace.err(token);
+				}
+
+				return token;
 			});
+
+			parameters.name = parameters[0].toString().trim().replace(
+					/\s*:\s*/g, ':');
+			parameters.parameters = _parameters;
+
 			_set_wiki_type(parameters, 'transclusion');
 			queue.push(parameters);
+			// TODO: parameters.parameters = []
 			return prevoius + include_mark + (queue.length - 1) + end_mark;
 		});
 
@@ -1641,7 +1693,7 @@ function module_code(library_namespace) {
 					value = matched[2].trim();
 					if (false) {
 						if (key in parameters) {
-							// 參數名重複, [[Category:調用重複模板參數的頁面]]
+							// 參數名重複: @see [[Category:調用重複模板參數的頁面]]
 							// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
 							if (Array.isArray(parameters[key]))
 								parameters[key].push(value);
@@ -3870,14 +3922,14 @@ function module_code(library_namespace) {
 				var prop;
 				while (query_props.length > 0
 				//
-				&& !(prop = query_props.pop()))
+				&& !(prop = query_props.shift()))
 					;
 
 				if (!prop || page_data && ('missing' in page_data)) {
 					callback(page_data);
 				} else {
-					library_namespace.info('wiki_API.page: Get property: ['
-							+ prop + ']');
+					library_namespace.debug('Get property: [' + prop + ']', 1,
+							'wiki_API.page');
 					options.prop = prop;
 					wiki_API.page(title, get_properties, options);
 				}
@@ -3911,7 +3963,10 @@ function module_code(library_namespace) {
 			// 毋須 '&redirects=1'
 			action[1] += '&redirects';
 
-		if (!options.prop || options.prop === 'revisions') {
+		var get_content = !options.prop || options.prop === 'revisions',
+		// 其他 .prop 本來就不會有內容。
+		need_warn = get_content;
+		if (get_content) {
 			// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query
 			// titles/pageids: Maximum number of values is 50 (500 for bots).
@@ -4035,7 +4090,6 @@ function module_code(library_namespace) {
 			}
 			data = data.query.pages;
 
-			var need_warn = true;
 			for ( var pageid in data) {
 				var page = data[pageid];
 				if (!get_page_content.has_content(page)) {
@@ -4073,7 +4127,9 @@ function module_code(library_namespace) {
 					//
 					+ ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
 					pages = pages[0];
-					if (pages && (pages.is_Flow = is_Flow(pages))
+					if (pages && get_content
+					//
+					&& (pages.is_Flow = is_Flow(pages))
 					// e.g., { flow_view : 'header' }
 					&& options.flow_view) {
 						Flow_page(pages, callback, options);
@@ -4127,7 +4183,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 取得 title 在其他語系 (to_lang) 之標題。可一次處理多個標題。
+	 * 取得 title 在其他語系 (to_lang) 之標題。 Interlanguage title. 可一次處理多個標題。
 	 * 
 	 * @param {String|Array}title
 	 *            the page title to search continue information
