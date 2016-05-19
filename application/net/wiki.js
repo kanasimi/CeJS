@@ -1299,12 +1299,16 @@ function module_code(library_namespace) {
 					}
 
 				} else {
-					library_namespace.err(
-					//
-					'parse_wikitext.transclusion: Can not parse ['
-					//
-					+ token + ']');
-					library_namespace.err(token);
+					// e.g., {{t|[http://... ...]}}
+					if (library_namespace.is_debug(2)) {
+						library_namespace.err(
+						//
+						'parse_wikitext.transclusion: Can not parse ['
+						//
+						+ token + ']');
+						library_namespace.err(token);
+					}
+					_parameters[index++] = token;
 				}
 
 				return token;
