@@ -2171,13 +2171,13 @@ function module_code(library_namespace) {
 				// next[1] : callback
 				next[1].call(this, this.last_page);
 				this.next();
-			} else
+			} else {
 				// this.page(title, callback)
 				// next[1] : title
 				// next[3] : options
 				// [ {String}API_URL, {String}title or {Object}page_data ]
-				wiki_API.page([ this.API_URL, next[1] ], function(page_data,
-						error) {
+				wiki_API.page(Array.isArray(next[1]) ? next[1] : [
+						this.API_URL, next[1] ], function(page_data, error) {
 					// assert: 當錯誤發生，例如頁面不存在，依然需要模擬出 page_data。
 					// 如此才能執行 .page().edit()。
 					_this.last_page
@@ -2193,6 +2193,7 @@ function module_code(library_namespace) {
 					// [SESSION_KEY]
 					session : this
 				}, next[3]));
+			}
 			break;
 
 		case 'list':
@@ -2645,8 +2646,9 @@ function module_code(library_namespace) {
 								code : 'no_last_data',
 								message : '前一次之實體[' + (this.last_data.key
 								// 例如提供的 foreign title 錯誤，
-								|| (this.last_data.site
 								// 或是 foreign title 為 redirected。
+								|| (this.last_data.site
+								// 抑或者存在 foreign title 頁面，但沒有 wikidata entity。
 								+ ':' + this.last_data.title)) + ']取得失敗。'
 							});
 							this.next();
