@@ -1294,13 +1294,13 @@ function module_code(library_namespace) {
 						}
 					} else {
 						_parameters[index++]
-						//
+						// TODO: token 本身並未 .trim()
 						= typeof token === 'string' ? _token : token;
 					}
 
 				} else {
 					// e.g., {{t|[http://... ...]}}
-					if (library_namespace.is_debug(2)) {
+					if (library_namespace.is_debug(3)) {
 						library_namespace.err(
 						//
 						'parse_wikitext.transclusion: Can not parse ['
@@ -1308,6 +1308,7 @@ function module_code(library_namespace) {
 						+ token + ']');
 						library_namespace.err(token);
 					}
+					// TODO: token 本身並未 .trim()
 					_parameters[index++] = token;
 				}
 
@@ -2574,8 +2575,10 @@ function module_code(library_namespace) {
 					break;
 				} else {
 					if (!this.last_page) {
-						next[1].call(this, undefined,
-								'Did not set id! 未設定欲取得之特定實體id。');
+						next[1].call(this, undefined, {
+							code : 'no_id',
+							message : 'Did not set id! 未設定欲取得之特定實體id。'
+						});
 						this.next();
 						break;
 					}
@@ -2638,9 +2641,14 @@ function module_code(library_namespace) {
 					// next = [ 'edit_data', data, options[, callback] ]
 					if (this.last_data) {
 						if (!is_entity(this.last_data)) {
-							next[3] && next[3].call(this, undefined,
-							//
-							'前一次之實體[' + this.last_data.key + ']取得失敗。');
+							next[3] && next[3].call(this, undefined, {
+								code : 'no_last_data',
+								message : '前一次之實體[' + (this.last_data.key
+								// 例如提供的 foreign title 錯誤，
+								|| (this.last_data.site
+								// 或是 foreign title 為 redirected。
+								+ ':' + this.last_data.title)) + ']取得失敗。'
+							});
 							this.next();
 							break;
 						}
@@ -2651,9 +2659,10 @@ function module_code(library_namespace) {
 						next.splice(1, 0, this.last_page);
 
 					} else {
-						next[3] && next[3].call(this, undefined,
-						//
-						'Did not set id! 未設定欲取得之特定實體id。');
+						next[3] && next[3].call(this, undefined, {
+							code : 'no_id',
+							message : 'Did not set id! 未設定欲取得之特定實體id。'
+						});
 						this.next();
 						break;
 					}
@@ -3649,6 +3658,16 @@ function module_code(library_namespace) {
 				}
 			}
 
+			if (false && typeof callback === 'function'
+			// use options.get_URL_options:{onfail:function(error){}} instead.
+			&& (!get_URL_options || !get_URL_options.onfail)) {
+				get_URL_options = Object.assign({
+					onfail : function(error) {
+						callback(undefined, error);
+					}
+				}, get_URL_options);
+			}
+
 			get_URL(action, function(XMLHttp) {
 				var response = XMLHttp.responseText;
 				// response = XMLHttp.responseXML;
@@ -3967,9 +3986,16 @@ function module_code(library_namespace) {
 			// 毋須 '&redirects=1'
 			action[1] += '&redirects';
 
-		var get_content = !options.prop || options.prop === 'revisions',
-		// 其他 .prop 本來就不會有內容。
-		need_warn = get_content;
+		var get_content;
+		if ('prop' in options) {
+			get_content = options.prop &&
+			// {String|Array}
+			options.prop.includes('revisions');
+		} else {
+			options.prop = 'revisions';
+			get_content = true;
+		}
+
 		if (get_content) {
 			// 處理數目限制 limit。單一頁面才能取得多 revisions。多頁面(≤50)只能取得單一 revision。
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query
@@ -3984,7 +4010,7 @@ function module_code(library_namespace) {
 				action[1] += '&rvlimit=1';
 
 			// prop=info|revisions
-			action[1] = 'revisions&rvprop='
+			action[1] = 'rvprop='
 			//
 			+ ((Array.isArray(options.rvprop)
 			//
@@ -3993,12 +4019,18 @@ function module_code(library_namespace) {
 			|| wiki_API.page.rvprop) + '&'
 			// &rvexpandtemplates=1
 			+ action[1];
-		} else {
-			// e.g., prop=pageprops
-			action[1] = options.prop + '&' + action[1];
 		}
 
-		action[1] = 'query&prop=' + action[1];
+		// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規標題。
+		if (options.prop) {
+			if (Array.isArray(options.prop))
+				options.prop = options.prop.join('|');
+
+			// e.g., prop=pageprops|revisions
+			action[1] = 'prop=' + options.prop + '&' + action[1];
+		}
+
+		action[1] = 'query&' + action[1];
 
 		if (!action[0])
 			action = action[1];
@@ -4097,6 +4129,9 @@ function module_code(library_namespace) {
 			for ( var pageid in data) {
 				var page = data[pageid];
 				if (!get_page_content.has_content(page)) {
+					// 其他 .prop 本來就不會有內容。
+					var need_warn = get_content;
+
 					if (continue_id && continue_id === page.pageid) {
 						// 找到了 pages.continue 所指之 index。
 						// effect length
@@ -4104,6 +4139,7 @@ function module_code(library_namespace) {
 						// 當過了 continue_id 之後，表示已經被截斷，則不再警告。
 						need_warn = false;
 					}
+
 					if (need_warn) {
 						library_namespace.warn('wiki_API.page: '
 						// 頁面不存在。Page does not exist. Deleted?
@@ -4113,6 +4149,7 @@ function module_code(library_namespace) {
 						//
 						: 'id ' + page.pageid));
 					}
+
 				} else if (page_cache_prefix) {
 					node_fs.writeFile(page_cache_prefix + page.title + '.json',
 					/**
@@ -4120,6 +4157,7 @@ function module_code(library_namespace) {
 					 */
 					JSON.stringify(data), wiki_API.encoding);
 				}
+
 				pages.push(page);
 			}
 
@@ -5225,7 +5263,8 @@ function module_code(library_namespace) {
 			? '[' + data.error.code + '] ' + data.error.info : data.edit
 					&& data.edit.result !== 'Success'
 					&& ('[' + data.edit.result + '] '
-					//
+					// 新用戶要輸入過多或特定內容如URL，可能遇到:<br />
+					// [Failure] 必需輸入驗證碼
 					+ (data.edit.info || data.edit.captcha && '必需輸入驗證碼'));
 			if (error) {
 				/**
@@ -9217,7 +9256,10 @@ function module_code(library_namespace) {
 			options = library_namespace.null_Object();
 
 		if (!id && !options['new']) {
-			callback(undefined, 'Did not set id! 未設定欲取得之特定實體id。');
+			callback(undefined, {
+				code : 'no_id',
+				message : 'Did not set id! 未設定欲取得之特定實體id。'
+			});
 			return;
 		}
 

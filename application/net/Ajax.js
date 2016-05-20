@@ -637,7 +637,7 @@ function merge_cookie(agent, cookie) {
  * @param {String|Object}URL
  *            請求目的URL or options
  * @param {Function}[onload]
- *            callback when successful loaded
+ *            callback when successful loaded. For failure handling, using option.onfail(error);
  * @param {String}[charset]
  *            character encoding. e.g., 'UTF-8', big5, euc-jp,..
  * @param {String|Object}[post_data]
