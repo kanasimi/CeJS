@@ -1213,7 +1213,7 @@ library_namespace.set_method(Pair.prototype, {
 						throw new Error('Pair.add: No assignment sign detected! 請手動指定！');
 				}
 
-				library_namespace.debug('Add ' + source.length + ' pairs..', 3, 'Pair.add');
+				library_namespace.debug('Add ' + source.length + ' pairs...', 3, 'Pair.add');
 				source.forEach(function(item) {
 					if (item_processor)
 						item = item_processor(item);
@@ -1429,13 +1429,13 @@ library_namespace.set_method(Pair.prototype, {
 	convert : function(text) {
 		text = String(text);
 		var pair = this.pair, flag = this.flag;
-		if (library_namespace.is_debug(2)) {
+		if (library_namespace.is_debug(3)) {
 			library_namespace.debug('Convert ' + text.length
 					+ ' characters, using ' + this.keys.length
-					+ ' pairs with flag [' + flag + '].', 1, 'Pair.convert');
+					+ ' pairs with flag [' + flag + '].', 3, 'Pair.convert');
 			library_namespace.debug('keys of pairs: '
-					+ this.keys.slice(0, library_namespace.is_debug(3) ? 200
-							: 20) + '..', 2, 'Pair.convert');
+					+ this.keys.slice(0, library_namespace.is_debug(6) ? 200
+							: 20) + '...', 4, 'Pair.convert');
 		}
 
 		this.for_each(function(key, value) {
