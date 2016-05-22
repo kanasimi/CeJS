@@ -7167,7 +7167,7 @@ function module_code(library_namespace) {
 
 			} else if (typeof callback === 'function') {
 				// last 收尾
-				callback.call(_this);
+				callback.call(_this, last_data);
 			}
 		}
 
@@ -7193,8 +7193,10 @@ function module_code(library_namespace) {
 
 		var file_name = operation.file_name;
 
-		if (typeof file_name === 'function')
-			file_name = file_name.call(_this, operation);
+		if (typeof file_name === 'function') {
+			// @see wiki_API.cache.title_only
+			file_name = file_name.call(_this, last_data, operation);
+		}
 
 		var
 		/** {String}method to get data */
@@ -7213,7 +7215,7 @@ function module_code(library_namespace) {
 			// 基本上，設定 this.* 應該在 operation.operator() 中，而不是在 operation.list() 中。
 			if (typeof list === 'function')
 				// TODO: 允許非同步方法。
-				list = list.call(_this, operation);
+				list = list.call(_this, last_data, operation);
 
 			if (!operation.postfix)
 				if (type === 'file')
@@ -7262,13 +7264,14 @@ function module_code(library_namespace) {
 		library_namespace.debug('Try to read cache file: [' + file_name + ']',
 				3, 'wiki_API.cache');
 
+		var last_data,
 		/**
 		 * 採用 JSON<br />
 		 * TODO: parse & stringify 機制
 		 * 
 		 * @type {Boolean}
 		 */
-		var use_JSON = 'json' in operation ? operation.json : /\.json$/i
+		use_JSON = 'json' in operation ? operation.json : /\.json$/i
 				.test(file_name),
 		/** {String}file encoding for fs of node.js. */
 		encoding = _this.encoding || wiki_API.encoding;
@@ -7280,6 +7283,7 @@ function module_code(library_namespace) {
 			 * 結束作業。
 			 */
 			function finish_work(data) {
+				last_data = data;
 				if (operator)
 					operator.call(_this, data, operation);
 				if (typeof callback === 'function')
@@ -7381,7 +7385,7 @@ function module_code(library_namespace) {
 			}
 
 			if (typeof list === 'function' && type !== 'manual')
-				list = list.call(_this, operation);
+				list = list.call(_this, last_data, operation);
 			if (list === wiki_API.cache.abort) {
 				library_namespace
 						.debug('Abort operation.', 1, 'wiki_API.cache');
@@ -7472,8 +7476,8 @@ function module_code(library_namespace) {
 					//
 					'wiki_API.cache: manually get data.');
 					if (typeof title === 'function') {
-						// 自己回 call
-						title.call(operation, callback);
+						// 必須自己回 call！
+						title.call(_this, callback, last_data, operation);
 					}
 				};
 				break;
@@ -7591,7 +7595,7 @@ function module_code(library_namespace) {
 				else if (type)
 					throw new Error('wiki_API.cache: Bad type: ' + type);
 				else {
-					library_namespace.debug('採用 list 作為 data。', 1,
+					library_namespace.debug('直接採用 list 作為 data。', 1,
 							'wiki_API.cache');
 					write_cache(list);
 					return;
@@ -7630,10 +7634,10 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Function}
 	 */
-	wiki_API.cache.title_only = function(operation) {
+	wiki_API.cache.title_only = function(last_data, operation) {
 		var list = operation.list;
 		if (typeof list === 'function')
-			operation.list = list = list.call(_this, operation);
+			operation.list = list = list.call(this, last_data, operation);
 		return operation.type + '/' + remove_namespace(list);
 	};
 
