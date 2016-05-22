@@ -4453,7 +4453,7 @@ function module_code(library_namespace) {
 			limit : 'max'
 		});
 
-		// 而應使用循環取得版:
+		// 而應使用循環取得資料版:
 		CeL.wiki.cache({
 			type : 'categorymembers',
 			list : 'Category_name',
@@ -8856,8 +8856,8 @@ function module_code(library_namespace) {
 	}
 
 	// label of entity
-	// CeL.wiki.data.label_of(entity, language)
-	function get_entity_label(entity, language) {
+	// CeL.wiki.data.label_of()
+	function get_entity_label(entity, language, use_link) {
 		var labels = entity && entity.labels;
 		if (labels) {
 			var label = labels[language || default_language];
@@ -8865,6 +8865,10 @@ function module_code(library_namespace) {
 				return label.value;
 			if (!language)
 				return labels;
+		}
+
+		if (use_link) {
+			return get_entity_link(entity, language);
 		}
 	}
 
@@ -8888,10 +8892,10 @@ function module_code(library_namespace) {
 			return;
 		var session = options[SESSION_KEY];
 		if (session)
-			return session.data_session ? session.data_session.API_URL : session.API_URL;
+			return session.data_session ? session.data_session.API_URL
+					: session.API_URL;
 		return options.API_URL || default_API_URL || wikidata_API_URL;
 	}
-
 
 	/**
 	 * 取得特定實體的特定屬性值。
