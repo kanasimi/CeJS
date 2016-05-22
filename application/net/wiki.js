@@ -3488,7 +3488,8 @@ function module_code(library_namespace) {
 	 * @param {Object}[post_data]
 	 *            data when need using POST method
 	 * @param {Object}[options]
-	 *            附加參數/設定選擇性/特殊功能與選項
+	 *            附加參數/設定選擇性/特殊功能與選項<br />
+	 *            wiki_API.edit 可能輸入 session 當作 options。
 	 */
 	wiki_API.query = function(action, callback, post_data, options) {
 		// 處理 action
@@ -3514,8 +3515,11 @@ function module_code(library_namespace) {
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait,
 		// interval.
-		lag_interval = options && options[SESSION_KEY]
-				&& options[SESSION_KEY].lag || wiki_API.query.default_lag;
+		lag_interval = options && options.lag
+		// ↑ wiki_API.edit 可能輸入 session 當作 options。
+		// || options[SESSION_KEY] && options[SESSION_KEY].lag
+		//
+		|| wiki_API.query.default_lag;
 
 		if (false) {
 			// method 1:
