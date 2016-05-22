@@ -2546,12 +2546,14 @@ function module_code(library_namespace) {
 
 		case 'set_data':
 			// 設定 this.data_session。
-			// setup_data_session(session, API_URL, password, force, callback)
-			setup_data_session(this /* session */, next[1], next[2], next[3],
+			// setup_data_session(session, callback, API_URL, password, force)
+			setup_data_session(this /* session */,
 			// 確保 data_session login 了才執行下一步。
 			function() {
+				if (typeof next[1] === 'function')
+					next[1].call(_this);
 				_this.next();
-			});
+			}, next[2], next[3], next[4]);
 			break;
 
 		case 'run':
@@ -8387,6 +8389,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {wiki_API}session
 	 *            正作業中之 wiki_API instance。
+	 * @param {Function}[callback]
+	 *            回調函數。 callback({Array}entity list or {Object}entity or
 	 * @param {String}[API_URL]
 	 *            language code or API URL of Wikidata
 	 * @param {String}[password]
@@ -8396,7 +8400,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @inner
 	 */
-	function setup_data_session(session, API_URL, password, force, callback) {
+	function setup_data_session(session, callback, API_URL, password, force) {
 		if (force === undefined) {
 			if (typeof password === 'boolean') {
 				// shift arguments.
@@ -9847,6 +9851,20 @@ function module_code(library_namespace) {
 				// 上限值為 50 (機器人為 500)。
 				library_namespace.debug('wikidata_query: Get ' + items.length
 						+ ' items, more than 50.');
+				var session = options && options.session || options;
+				if (typeof session.set_data === 'function') {
+					if (session.data_session) {
+						options = {
+							session : session.data_session
+						};
+					} else {
+						session.set_data(function() {
+							wikidata_entity(items, callback, {
+								session : session.data_session
+							});
+						});
+					}
+				}
 			}
 			wikidata_entity(items, callback, options);
 		});
