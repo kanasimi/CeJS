@@ -7059,7 +7059,7 @@ function module_code(library_namespace) {
 
 		CeL.set_debug(6);
 		CeL.wiki.cache({
-			type : 'manual',
+			type : 'callback',
 			file_name : 'file_name',
 			list : function(callback) {
 				callback([ 1, 2, 3 ]);
@@ -7149,7 +7149,8 @@ function module_code(library_namespace) {
 					library_namespace.debug('未設定 operation[' + (index - 1)
 							+ ']。Skip this operation.', 1,
 							'wiki_API.cache.next_operator');
-					next_operator();
+					next_operator(data);
+
 				} else {
 					if (!('list' in this_operation)) {
 						// use previous data as list.
@@ -7161,13 +7162,14 @@ function module_code(library_namespace) {
 								+ '...', 3, 'wiki_API.cache.next_operator');
 						this_operation.list = data;
 					}
+					operation.last_data = data;
 					// default options === _this: 傳遞於各 operator 間的 ((this))。
 					wiki_API.cache(this_operation, next_operator, _this);
 				}
 
 			} else if (typeof callback === 'function') {
 				// last 收尾
-				callback.call(_this, last_data);
+				callback.call(_this, data);
 			}
 		}
 
@@ -7191,7 +7193,9 @@ function module_code(library_namespace) {
 			// _this: 傳遞於各 operator 間的 ((this))。
 			_this = library_namespace.null_Object();
 
-		var file_name = operation.file_name;
+		var file_name = operation.file_name,
+		/** 前一次之回傳 data。每次產出的 data。 */
+		last_data = operation.last_data;
 
 		if (typeof file_name === 'function') {
 			// @see wiki_API.cache.title_only
@@ -7264,7 +7268,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('Try to read cache file: [' + file_name + ']',
 				3, 'wiki_API.cache');
 
-		var last_data,
+		var
 		/**
 		 * 採用 JSON<br />
 		 * TODO: parse & stringify 機制
@@ -7357,6 +7361,7 @@ function module_code(library_namespace) {
 						}
 					}
 				}
+
 				finish_work(data);
 			}
 
@@ -7384,7 +7389,7 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (typeof list === 'function' && type !== 'manual')
+			if (typeof list === 'function' && type !== 'callback')
 				list = list.call(_this, last_data, operation);
 			if (list === wiki_API.cache.abort) {
 				library_namespace
@@ -7469,15 +7474,21 @@ function module_code(library_namespace) {
 			}
 
 			switch (type) {
-			case 'manual':
-				// 手動取得資料。使用 list=function(){}
-				to_get_data = function(title, callback) {
-					library_namespace.log(
-					//
-					'wiki_API.cache: manually get data.');
-					if (typeof title === 'function') {
-						// 必須自己回 call！
-						title.call(_this, callback, last_data, operation);
+			// case 'manual':
+			case 'callback':
+				if (typeof list !== 'function') {
+					library_namespace
+							.warn('wiki_API.cache: list is not function!');
+					callback(last_data);
+					break;
+				}
+				// 手動取得資料。使用 list=function(callback){callback(list);}
+				to_get_data = function(list, callback) {
+					library_namespace.log('wiki_API.cache: '
+							+ 'manually get data and then callback(list).');
+					if (typeof list === 'function') {
+						// assert: (typeof list === 'function') 必須自己回 call！
+						list.call(_this, callback, last_data, operation);
 					}
 				};
 				break;
