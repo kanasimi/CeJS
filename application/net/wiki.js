@@ -9851,19 +9851,13 @@ function module_code(library_namespace) {
 				// 上限值為 50 (機器人為 500)。
 				library_namespace.debug('wikidata_query: Get ' + items.length
 						+ ' items, more than 50.');
-				var session = options && options.session || options;
-				if (typeof session.set_data === 'function') {
-					if (session.data_session) {
-						options = {
-							session : session.data_session
-						};
-					} else {
-						session.set_data(function() {
-							wikidata_entity(items, callback, {
-								session : session.data_session
-							});
-						});
-					}
+				var session = options && options[SESSION_KEY];
+				if (session && !session.data_session) {
+					// 得先登入。
+					session.set_data(function() {
+						wikidata_entity(items, callback, options);
+					});
+					return;
 				}
 			}
 			wikidata_entity(items, callback, options);
