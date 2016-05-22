@@ -1244,8 +1244,8 @@ function module_code(library_namespace) {
 		function(all, parameters) {
 			// 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('{{'), prevoius,
-			//
-			_parameters = [];
+			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
+			_parameters = {};
 			if (index > 0) {
 				prevoius = '{{' + parameters.slice(0, index);
 				parameters = parameters.slice(index + '}}'.length);
@@ -1639,13 +1639,14 @@ function module_code(library_namespace) {
 		// 模板起始。
 		? new RegExp(/{{[\s\n]*/.source + template_name + '\\s*[|}]', 'gi')
 				: new RegExp(TEMPLATE_NAME_PATTERN.source, 'g');
-		library_namespace.debug('Use pattern: ' + matched, 2);
+		library_namespace.debug('Use pattern: ' + matched, 3, 'parse_template');
 		// template_name : start token
 		template_name = matched.exec(wikitext);
 
-		if (!template_name)
+		if (!template_name) {
 			// not found.
 			return;
+		}
 
 		var pattern = new RegExp('}}|'
 		// 不用 TEMPLATE_NAME_PATTERN，預防把模板結尾一起吃掉了。
@@ -4179,6 +4180,7 @@ function module_code(library_namespace) {
 						Flow_page(pages, callback, options);
 						return;
 					}
+
 				} else {
 					library_namespace.debug('Get ' + pages.length
 					//
@@ -7654,7 +7656,7 @@ function module_code(library_namespace) {
 		all_revision_SQL += ' LIMIT 8';
 
 	/**
-	 * 應用功能: 遍歷所有頁面。
+	 * 應用功能: 遍歷所有頁面。 CeL.wiki.traversal()
 	 * 
 	 * @param {Object}[config]
 	 *            configuration
@@ -7813,7 +7815,7 @@ function module_code(library_namespace) {
 				function(page_data, position, page_anchor) {
 					// filter
 					if (false) {
-						if ('missing' in page_data)
+						if (!page_data || ('missing' in page_data))
 							return [ CeL.wiki.edit.cancel, '條目已不存在或被刪除' ];
 						if (page_data.ns !== 0)
 							return [ CeL.wiki.edit.cancel, '本作業僅處理條目命名空間' ];
