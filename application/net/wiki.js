@@ -8883,6 +8883,16 @@ function module_code(library_namespace) {
 
 	var wikidata_search_cache = library_namespace.null_Object();
 
+	function get_data_API_URL(options, default_API_URL) {
+		if (!options)
+			return;
+		var session = options[SESSION_KEY];
+		if (session)
+			return session.data_session ? session.data_session.API_URL : session.API_URL;
+		return options.API_URL || default_API_URL || wikidata_API_URL;
+	}
+
+
 	/**
 	 * 取得特定實體的特定屬性值。
 	 * 
@@ -8958,8 +8968,7 @@ function module_code(library_namespace) {
 			options = library_namespace.new_options(options);
 		}
 
-		var API_URL = options.API_URL || options[SESSION_KEY]
-				&& options[SESSION_KEY].API_URL || wikidata_API_URL;
+		var API_URL = get_data_API_URL(options);
 
 		// ----------------------------
 		// convert property: title to id
@@ -9354,8 +9363,7 @@ function module_code(library_namespace) {
 		action = [
 		// edit實體項目entity
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
-		options.API_URL || session && session.API_URL || wikidata_API_URL,
-				'wbeditentity' ];
+		get_data_API_URL(options), 'wbeditentity' ];
 
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！
 		delete options.API_URL;
@@ -9757,8 +9765,7 @@ function module_code(library_namespace) {
 		action = [
 		// 合併重複項。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbmergeitems
-		options.API_URL || session && session.API_URL || wikidata_API_URL,
-				action ];
+		get_data_API_URL(options), action ];
 
 		// the token should be sent as the last parameter.
 		options.token = library_namespace.is_Object(token) ? token.csrftoken
@@ -9830,6 +9837,9 @@ function module_code(library_namespace) {
 				options = {
 					props : options.join(',')
 				};
+			} else {
+				// 已使用過。
+				delete options.API_URL;
 			}
 
 			if (options.wdq_props)
