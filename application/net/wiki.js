@@ -7144,7 +7144,7 @@ function module_code(library_namespace) {
 		 * at top level or immediately within another function.
 		 */
 		function next_operator(data) {
-			library_namespace.debug('處理連續作業，轉到下一作業: ' + (index + 1) + '/'
+			library_namespace.debug('處理連續作業序列，轉到下一作業: ' + (index + 1) + '/'
 					+ operation.length, 2, 'wiki_API.cache.next_operator');
 			// [ {Object}operation, {Object}operation, ... ]
 			// operation = { type:'embeddedin', operator:function(data) }
@@ -7168,7 +7168,9 @@ function module_code(library_namespace) {
 								+ '...', 3, 'wiki_API.cache.next_operator');
 						this_operation.list = data;
 					}
-					operation.last_data = data;
+					if (data) {
+						this_operation.last_data = data;
+					}
 					// default options === _this: 傳遞於各 operator 間的 ((this))。
 					wiki_API.cache(this_operation, next_operator, _this);
 				}
@@ -7401,8 +7403,9 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (typeof list === 'function' && type !== 'callback')
+			if (typeof list === 'function' && type !== 'callback') {
 				list = list.call(_this, last_data, operation);
+			}
 			if (list === wiki_API.cache.abort) {
 				library_namespace
 						.debug('Abort operation.', 1, 'wiki_API.cache');
