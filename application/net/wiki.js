@@ -7131,6 +7131,12 @@ function module_code(library_namespace) {
 	 *            傳遞於各 operator 間的 ((this))。注意: 會被本函數更動！
 	 */
 	wiki_API.cache = function(operation, callback, _this) {
+		if (library_namespace.is_Object(callback) && !_this) {
+			// shift arguments.
+			_this = callback;
+			callback = undefined;
+		}
+
 		/**
 		 * 連續作業時，轉到下一作業。
 		 * 
@@ -7189,9 +7195,10 @@ function module_code(library_namespace) {
 				'using operation: ' + JSON.stringify(operation), 6,
 				'wiki_API.cache');
 
-		if (typeof _this !== 'object')
+		if (typeof _this !== 'object') {
 			// _this: 傳遞於各 operator 間的 ((this))。
 			_this = library_namespace.null_Object();
+		}
 
 		var file_name = operation.file_name,
 		/** 前一次之回傳 data。每次產出的 data。 */
@@ -7246,6 +7253,11 @@ function module_code(library_namespace) {
 		}
 
 		if (file_name) {
+			if (!('postfix' in operation) && !('postfix' in _this)
+					&& /\.[a-z\d\-]+$/.test(file_name)) {
+				// auto detect filename extension
+				operation.postfix = '';
+			}
 			file_name = [ 'prefix' in operation ? operation.prefix
 			// _this.prefix: cache path prefix
 			: 'prefix' in _this
@@ -7474,7 +7486,6 @@ function module_code(library_namespace) {
 			}
 
 			switch (type) {
-			// case 'manual':
 			case 'callback':
 				if (typeof list !== 'function') {
 					library_namespace
