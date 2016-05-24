@@ -7257,15 +7257,16 @@ function module_code(library_namespace) {
 		if (file_name) {
 			if (!('postfix' in operation) && !('postfix' in _this)
 					&& /\.[a-z\d\-]+$/.test(file_name)) {
-				// auto detect filename extension
+				// 若已設定 filename extension，則不自動添加。
 				operation.postfix = '';
 			}
+
 			file_name = [ 'prefix' in operation ? operation.prefix
 			// _this.prefix: cache path prefix
 			: 'prefix' in _this
 			//
 			? _this.prefix : wiki_API.cache.prefix, file_name,
-			//
+			// auto detect filename extension
 			'postfix' in operation ? operation.postfix
 			//
 			: 'postfix' in _this ? _this.postfix : wiki_API.cache.postfix ];
@@ -8817,7 +8818,6 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// language → Wikidata site name / Wikimedia project name
 	// TODO:
 	// [[:sourceforge:project/shownotes.php?release id=226003&group id=34373]]
 	// http://sourceforge.net/project/shownotes.php%3Frelease_id%3D226003%26group_id%3D34373
@@ -8833,6 +8833,15 @@ function module_code(library_namespace) {
 	// Sebastian)]]
 	// [[:wikt:제비]]
 	// [[:yue:海珠湖國家濕地公園]]
+	/**
+	 * language code → Wikidata site name / Wikimedia project name<br />
+	 * 將語言代碼轉為 Wikidata API 可使用之 site name。
+	 * 
+	 * @param {String}language
+	 *            語言代碼。
+	 * 
+	 * @returns {String}Wikidata API 可使用之 site name。
+	 */
 	function language_to_project(language) {
 		// 正規化。
 		language = (language && String(language).trim().toLowerCase() || default_language)
@@ -8884,9 +8893,32 @@ function module_code(library_namespace) {
 		return language_to_project(language || options);
 	}
 
-	// label of entity
-	// CeL.wiki.data.label_of()
-	function get_entity_label(entity, language, use_link) {
+	/**
+	 * get label of entity. 取得指定實體的標籤。
+	 * 
+	 * CeL.wiki.data.label_of()
+	 * 
+	 * @param {Object}entity
+	 *            指定實體。
+	 * @param {String}[language]
+	 *            指定取得此語言之資料。
+	 * @param {Boolean}[use_title]
+	 *            當沒有標籤的時候，使用各語言連結標題。
+	 * @param {Boolean}[get_labels]
+	 *            取得所有標籤。
+	 * 
+	 * @returns {String|Array}標籤。
+	 */
+	function get_entity_label(entity, language, use_title, get_labels) {
+		if (get_labels) {
+			if (use_title) {
+				use_title = get_entity_link(entity, language);
+				if (!Array.isArray(use_title))
+					use_title = use_title ? [ use_title ] : [];
+			}
+			return entity_labels_and_aliases(entity, language, use_title);
+		}
+
 		var labels = entity && entity.labels;
 		if (labels) {
 			var label = labels[language || default_language];
@@ -8896,24 +8928,40 @@ function module_code(library_namespace) {
 				return labels;
 		}
 
-		if (use_link) {
+		if (use_title) {
 			return get_entity_link(entity, language);
 		}
 	}
 
-	// site link of entity
-	// CeL.wiki.data.title_of(entity, language)
+	/**
+	 * get site link of entity. 取得指定實體的語言連結標題。
+	 * 
+	 * CeL.wiki.data.title_of(entity, language)
+	 * 
+	 * @param {Object}entity
+	 *            指定實體。
+	 * @param {String}[language]
+	 *            指定取得此語言之資料。
+	 * 
+	 * @returns {String}語言標題。
+	 */
 	function get_entity_link(entity, language) {
 		var sitelinks = entity && entity.sitelinks;
 		if (sitelinks) {
 			var link = sitelinks[language_to_project(language)];
 			if (link)
 				return link.title;
-			if (!language)
-				return sitelinks;
+			if (!language) {
+				link = [];
+				for (language in sitelinks) {
+					link.push(sitelinks[language].title);
+				}
+				return link;
+			}
 		}
 	}
 
+	// wikidata_search_cache[{String}"性質"] = {String}"P31";
 	var wikidata_search_cache = library_namespace.null_Object();
 
 	function get_data_API_URL(options, default_API_URL) {
@@ -9433,7 +9481,7 @@ function module_code(library_namespace) {
 	 * @param {Object}entity
 	 *            指定實體的 JSON 值。
 	 * @param {String}[language]
-	 *            指定取得此語言。
+	 *            指定取得此語言之資料。
 	 * @param {Array}[list]
 	 *            添加此原有之 label 列表。<br />
 	 *            list = [ {String}label, ... ]
