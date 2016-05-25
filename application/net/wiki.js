@@ -7123,6 +7123,9 @@ function module_code(library_namespace) {
 	 * >>> 寫入cache。<br />
 	 * 執行 operation.operator(data)
 	 * 
+	 * TODO: file_stream<br />
+	 * TODO: do not write file
+	 * 
 	 * @param {Object|Array}operation
 	 *            作業設定。
 	 * @param {Function}[callback]
