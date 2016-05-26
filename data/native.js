@@ -2634,7 +2634,24 @@ set_method(RegExp.prototype, {
 
 set_method(library_namespace.env.global, {
 	//	在 old IE 中 typeof alert==='object'
-	//alert : JSalert
+	//alert : JSalert,
+
+	// https://developer.mozilla.org/en-US/docs/Web/API/Window/setImmediate
+	// TODO: window.postMessage can be used to trigger an immediate but yielding callback.
+	setImmediate : function setImmediate(callback, parameters) {
+		return setTimeout(typeof callback === 'function' ? function() {
+			if (parameters)
+				callback.apply(null, parameters);
+			else
+				// 因為 setTimeout(callback, 0) 可能傳入未規範的 arguments，因此不在外面處理 callback。
+				callback();
+		}
+		// 特殊功能... for {String}
+		: callback, 0);
+	},
+	clearImmediate : function clearImmediate(id) {
+		return clearTimeout(id);
+	}
 });
 
 //	建議不用，因為在for(in Array)時會...

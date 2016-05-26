@@ -857,6 +857,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	library_namespace.debug('set onerror: '
 			+ (options.onfail ? 'user defined' : 'default handler'), 3,
 			'get_URL_node');
+
 	request.on('error', typeof options.onfail === 'function' ? options.onfail
 			: function(err) {
 				console.error('get_URL_node: Get error:');

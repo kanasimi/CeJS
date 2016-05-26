@@ -389,17 +389,23 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 	// 創建 match pattern 相關函數。
 
+	function upper_case_initial(word) {
+		return word.charAt(0).toUpperCase() + word.slice(1);
+	}
+
 	/**
 	 * 規範/正規化頁面名稱 page name。
+	 * 
+	 * TODO: 簡化。
 	 * 
 	 * 這種規範化只能通用於本 library 內。Wikipedia 並未硬性設限。<br />
 	 * 依照
 	 * [https://www.mediawiki.org/w/api.php?action=query&titles=Wikipedia_talk:Flow&prop=info]，
 	 * "Wikipedia_talk:Flow" → "Wikipedia talk:Flow"<br />
-	 * 亦即底線 "_" → space " "，首字大寫。
+	 * 亦即底線 "_" → space " "，首字母大寫。
 	 * 
 	 * @param {String}page_name
-	 *            頁面名 page name。
+	 *            頁面名 valid page name。
 	 * @param {Boolean}[use_underline]
 	 *            採用 "_" 取代 " "。
 	 * 
@@ -410,30 +416,65 @@ function module_code(library_namespace) {
 	function normalize_page_name(page_name, use_underline) {
 		if (!page_name || typeof page_name !== 'string')
 			return page_name;
-		page_name = page_name.trim().split(':');
-		var name_list = [];
-		page_name.forEach(function(section, index) {
-			section = section.trim();
-			if (index > 1 || index > 0 && page_name[0]
-					|| index === page_name.length - 1) {
-				section = use_underline
-				// ' ' → '_': 在 URL 上可更簡潔。
-				? section.replace(/ /g, '_') : section.replace(/_/g, ' ');
-				// page title.
-				name_list.push(section.charAt(0).toUpperCase()
-						+ section.slice(1));
-			} else if (section in get_namespace.hash) {
-				// Wikipedia namespace
-				name_list.push(section.charAt(0).toUpperCase()
-						+ section.slice(1));
-			} else {
-				// lang code
-				name_list.push(section.toLowerCase());
+
+		page_name = page_name.trimRight().replace(/^[\s:]+/, '');
+
+		page_name = use_underline
+		// ' ' → '_': 在 URL 上可更簡潔。
+		? page_name.replace(/ /g, '_') : page_name.replace(/_/g, ' ');
+
+		page_name = page_name.split(':');
+		var has_language;
+
+		page_name.some(function(section, index) {
+			section = use_underline ? section.replace(/^[\s_]+/, '') : section
+					.trimLeft();
+			if (index === page_name.length - 1
+			//
+			|| !(use_underline ? /^[a-z\-\d_]{2,20}$/i
+			//
+			: /^[a-z\-\d ]{2,20}$/i).test(section.trimRight())) {
+				// page title: 將首個字母轉成大寫。
+				page_name[index] = upper_case_initial(section);
+				return true;
 			}
+
+			if ((use_underline ? section : section.replace(/ /g, '_'))
+			//
+			.trimRight().toLowerCase() in get_namespace.hash) {
+				// Wikipedia namespace
+				section = section.trimRight().toLowerCase();
+				if (!use_underline) {
+					section = section.replace(/_/g, ' ');
+				}
+				page_name[index] = upper_case_initial(section);
+
+			} else if (has_language) {
+				// page title: 將首個字母轉成大寫。
+				page_name[index] = upper_case_initial(section);
+				return true;
+
+			} else {
+				section = use_underline ? section.replace(/[\s_]+$/, '')
+						: section.trimRight();
+				section = section.toLowerCase();
+				if (section.length > 1) {
+					// lang code
+					has_language = true;
+					if (use_underline) {
+						section = section.replace(/_/g, '-');
+					}
+				}
+				// else: e.g., [[m:Abc]]
+				page_name[index] = section;
+			}
+
 		});
-		return name_list.join(':');
+
+		return page_name.join(':');
 	}
 
+	// @see wiki_toString
 	function normalize_name_pattern(file_name, add_group, remove_namespace) {
 		if (get_page_content.is_page_data(file_name))
 			file_name = file_name.title;
@@ -867,6 +908,7 @@ function module_code(library_namespace) {
 		// e.g., [[m:en:Help:Parser function]], [[m:Help:Interwiki_linking]],
 		// [[:File:image.png]], [[wikt:en:Wiktionary:A]],
 		// [[:en:Template:Editnotices/Group/Wikipedia:Miscellany for deletion]]
+		// [[:en:Marvel vs. Capcom 3: Fate of Two Worlds]]
 		//
 		// @see [[Wikipedia:Namespace]]
 		// https://www.mediawiki.org/wiki/Markup_spec#Namespaces
@@ -3671,6 +3713,8 @@ function module_code(library_namespace) {
 			// use options.get_URL_options:{onfail:function(error){}} instead.
 			&& (!get_URL_options || !get_URL_options.onfail)) {
 				get_URL_options = Object.assign({
+					// 警告: 若是自行設定 .onfail，則需要自己處理 callback。
+					// 例如可能得自己執行 ((wiki.running = false))。
 					onfail : function(error) {
 						callback(undefined, error);
 					}
@@ -3728,8 +3772,9 @@ function module_code(library_namespace) {
 					}
 				}
 
-				if (typeof callback === 'function')
+				if (typeof callback === 'function') {
 					callback(response);
+				}
 
 			}, undefined, post_data, get_URL_options);
 		}
@@ -4894,9 +4939,9 @@ function module_code(library_namespace) {
 			if (pages.next_index) {
 				library_namespace.debug('尚未取得所有清單，因此繼續取得下一階段清單。', 2,
 						'wiki_API.list');
-				setTimeout(function() {
+				setImmediate(function() {
 					wiki_API.list(target, callback, options);
-				}, 0);
+				});
 			} else {
 				library_namespace.debug('run callback after all list got.', 2,
 						'wiki_API.list');
@@ -5872,7 +5917,8 @@ function module_code(library_namespace) {
 	// http://stackoverflow.com/questions/9080085/node-js-find-home-directory-in-platform-agnostic-way
 	// Windows: process.platform.toLowerCase().startsWith('win')
 	/** {String}user home directory */
-	home_directory = process.env.HOME || process.env.USERPROFILE,
+	home_directory = library_namespace.platform.nodejs
+			&& (process.env.HOME || process.env.USERPROFILE),
 	/** {String}Tool Labs database host */
 	TOOLSDB = 'tools-db',
 	/** {String}user/bot name */
@@ -6002,7 +6048,7 @@ function module_code(library_namespace) {
 
 	// only for node.js.
 	// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#How_can_I_detect_if_I.27m_running_in_Labs.3F_And_which_project_.28tools_or_toolsbeta.29.3F
-	if (node_fs) {
+	if (library_namespace.platform.nodejs) {
 		/** {String}Tool Labs name */
 		wmflabs = node_fs.existsSync('/etc/wmflabs-project')
 		// e.g., 'tools-bastion-05'.
@@ -7259,7 +7305,7 @@ function module_code(library_namespace) {
 
 		if (file_name) {
 			if (!('postfix' in operation) && !('postfix' in _this)
-					&& /\.[a-z\d\-]+$/.test(file_name)) {
+					&& /\.[a-z\-\d]+$/.test(file_name)) {
 				// 若已設定 filename extension，則不自動添加。
 				operation.postfix = '';
 			}
@@ -8456,7 +8502,7 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof API_URL === 'string' && !/wikidata/i.test(API_URL)
-				&& !/^[a-z\-\d]$/i.test(API_URL)) {
+				&& !/^[a-z\-\d]{2,20}$/i.test(API_URL)) {
 			// e.g., 'test' → 'test.wikidata'
 			API_URL += '.wikidata';
 		}

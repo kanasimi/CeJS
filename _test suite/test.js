@@ -2285,6 +2285,25 @@ function test_wiki() {
 	// Set default language. 改變預設之語言。
 	CeL.wiki.set_language('zh');
 
+	error_count += CeL.test('wiki: regular', [
+
+		[['Abc', CeL.wiki.normalize_title('abc')], 'normalize_title #0'],
+		[['en:Abc', CeL.wiki.normalize_title('EN:abc')], 'normalize_title #1'],
+		[['A. bc: abc', CeL.wiki.normalize_title('a. bc: abc')], 'normalize_title #2'],
+		[['en:Abc', CeL.wiki.normalize_title(' En : abc')], 'normalize_title #3'],
+		[['en:Abc', CeL.wiki.normalize_title(':eN:abc')], 'normalize_title #4'],
+		[['en:Abc: def', CeL.wiki.normalize_title('En:abc: def')], 'normalize_title #5'],
+		[['User talk:Abc', CeL.wiki.normalize_title('user_talk: abc')], 'normalize_title #6'],
+		[['User:Abc', CeL.wiki.normalize_title('user: abc')], 'normalize_title #7'],
+		[['en:Wikipedia:SD', CeL.wiki.normalize_title(' :En:wikipedia: SD')], 'normalize_title #8'],
+		[['Abc def', CeL.wiki.normalize_title('abc_def')], 'normalize_title #9'],
+		[['en-us:Abc', CeL.wiki.normalize_title('en-us:abc')], 'normalize_title #10'],
+		[['en-us:Abc def', CeL.wiki.normalize_title('en-us:abc_def')], 'normalize_title #11'],
+		[['Abc_def', CeL.wiki.normalize_title('abc def', true)], 'normalize_title #12'],
+		[['User_talk:Abc_def', CeL.wiki.normalize_title('user talk: abc def', true)], 'normalize_title #13'],
+
+	]);
+
 	error_count += CeL.test('wiki: file_pattern & parse_template', [
 		[[ '!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
 		//
