@@ -55,7 +55,7 @@ https://meta.wikimedia.org/wiki/Research:Page_view
 
 // --------------------------------------------------------------------------------------------
 
-// 不採用 if 陳述式，可以避免 Eclipse JSDoc 多縮排一層。
+// 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki',
@@ -2242,6 +2242,11 @@ function module_code(library_namespace) {
 			}
 			break;
 
+		// case 'redirect_to':
+		// TODO:
+		// wiki_API.redirect_to();
+		// break;
+
 		case 'list':
 			// get_list(). e.g., 反向連結/連入頁面.
 			// next[1] : title
@@ -3728,12 +3733,11 @@ function module_code(library_namespace) {
 				}, get_URL_options);
 			}
 
-			if (get_URL_options && get_URL_options.agent
+			var agent = get_URL_options && get_URL_options.agent;
+			if (agent && agent.last_cookie && (agent.last_cookie.length > 70
 			// 若是用同一個 agent 來 access 過多 Wikipedia 網站，
 			// 可能因 wikiSession 過多(如.length === 86)而造成 413 (請求實體太大)。
-			&& (agent.last_cookie.length > 70
-			//
-			|| agent.last_cookie.cookie_cache)) {
+			|| agent.cookie_cache)) {
 				if (agent.last_cookie.length > 70) {
 					library_namespace.debug('重整 cookie['
 							+ agent.last_cookie.length + ']。', 1,
@@ -4323,8 +4327,9 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// TODO
-	// callback({String}title that redirect to)
+	// 取得頁面之重新導向資料。
+	// callback({String}title that redirect to or {Object}with redirect to what
+	// section, {Object}page_data)
 	wiki_API.redirect_to = function(title, callback, options) {
 		wiki_API.page(title, function(page_data) {
 			if (!page_data) {
@@ -4334,19 +4339,33 @@ function module_code(library_namespace) {
 			}
 
 			// e.g., [ { from: 'AA', to: 'A', tofragment: 'aa' } ]
-			var redirects = page_data.response.redirects;
+			var redirect_data = page_data.response.query.redirects;
+			if (redirect_data) {
+				if (redirect_data.length !== 1) {
+					library_namespace.warn('get_continue: Get '
+							+ redirect_data.length + ' redirect links for [['
+							+ title + ']]!');
+				}
+				// 僅回傳第一筆資料。
+				redirect_data = redirect_data[0];
+				// assert: redirect_data && redirect_data.to === page_data.title
+				if (redirect_data.tofragment) {
+					library_namespace.debug('[[' + title
+							+ ']] redirected to [[' + redirect_data.to + '#'
+							+ redirect_data.tofragment + ']]!', 1,
+							'wiki_API.redirect_to');
+					callback(redirect_data, page_data);
+					return;
+				}
 
-			callback(redirects && redirects[0]
-			//
-			&& redirects[0].tofragment ? redirects
-			// normalized title.
-			// assert: redirects && redirects.to === page_data.title
-			: page_data.title, page_data);
+			}
+
+			// page_data.title is normalized title.
+			callback(page_data.title, page_data);
 
 		}, Object.assign({
 			// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規標題。
 			prop : '',
-			// TODO: 取消重新導向到章節的情況。對於導向相同目標的情況，可能導致重複編輯。
 			redirects : 1,
 			save_response : true
 		}, options));
@@ -8831,6 +8850,7 @@ function module_code(library_namespace) {
 		value = value.datavalue || value;
 
 		var type = value.type;
+		// TODO: type 可能為 undefined!
 
 		if ('value' in value)
 			value = value.value;
@@ -9430,6 +9450,11 @@ function module_code(library_namespace) {
 			return;
 
 		// wikidata 的 item 或 Q4167410 需要手動加入，非自動連結。
+		// 因此不能光靠 Q4167410 準確判定是否為消歧義頁。其他屬性相同。
+		// 準確判定得自行檢查原維基之資訊，例如檢查 action=query&prop=info。
+
+		// 基本上只有 Q(entity, 可連結 wikipedia page) 與 P(entity 的屬性) 之分。
+		// 再把各 wikipedia page 手動加入 entity 之 sitelink。
 
 		// TODO: 檢查 [[Category:All disambiguation pages]]
 
