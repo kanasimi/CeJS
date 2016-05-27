@@ -2285,7 +2285,7 @@ function test_wiki() {
 	// Set default language. 改變預設之語言。
 	CeL.wiki.set_language('zh');
 
-	error_count += CeL.test('wiki: regular', [
+	error_count += CeL.test('wiki: regular functions', [
 
 		[['Abc', CeL.wiki.normalize_title('abc')], 'normalize_title #0'],
 		[['en:Abc', CeL.wiki.normalize_title('EN:abc')], 'normalize_title #1'],

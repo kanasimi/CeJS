@@ -287,8 +287,9 @@ function get_URL(URL, onload, charset, post_data, options) {
 				if (0 < XMLHttp.readyState && XMLHttp.readyState < readyState_done) {
 					if (typeof options.onchange === 'function')
 						options.onchange(XMLHttp.readyState, XMLHttp);
-				} else if (typeof options.onfail === 'function')
+				} else if (typeof options.onfail === 'function') {
 					options.onfail(XMLHttp);
+				}
 			};
 
 		// 若檔案不存在，會 throw。
@@ -306,8 +307,9 @@ function get_URL(URL, onload, charset, post_data, options) {
 
 	} catch (e) {
 		library_namespace.err(e);
-		if (typeof options.onfail === 'function')
+		if (typeof options.onfail === 'function') {
 			options.onfail(XMLHttp, e);
+		}
 	}
 
 }
@@ -702,6 +704,10 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	if (options.async === false && onload || typeof onload !== 'function')
 		onload = false;
 
+	if (options.agent) {
+		library_namespace.debug('使用自定義 agent。', 6, 'get_URL_node');
+	}
+
 	var request, _URL = node_url.parse(URL),
 	//
 	agent = options.agent || (_URL.protocol === 'https:' ? node_https_agent : node_http_agent),
@@ -725,8 +731,10 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 					'get_URL_node');
 		else
 			library_namespace.warn('get_URL_node: status ' + result.statusCode);
+
 		library_namespace.debug('HEADERS: ' + JSON.stringify(result.headers),
 				4, 'get_URL_node');
+
 		merge_cookie(agent, result.headers['set-cookie']);
 		// 為預防字元編碼破碎，因此不能設定 result.setEncoding()？
 		// 但經測試，Wikipedia 有時似乎會有回傳字元錯位之情形？
@@ -859,9 +867,10 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			'get_URL_node');
 
 	request.on('error', typeof options.onfail === 'function' ? options.onfail
-			: function(err) {
-				console.error('get_URL_node: Get error:');
-				console.error(err);
+			: function(error) {
+				console.error('get_URL_node: Get error when get [' + URL
+						+ ']:');
+				console.error(error);
 			});
 	// 遇到 "Unhandled 'error' event"，或許是 print 到 stdout 時出錯了，不一定是本函數的問題。
 }

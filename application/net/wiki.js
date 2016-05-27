@@ -229,9 +229,10 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function setup_API_URL(session, API_URL) {
-		if (API_URL === true)
+		if (API_URL === true) {
 			// force to login.
 			API_URL = session.API_URL || wiki_API.API_URL;
+		}
 
 		if (API_URL && typeof API_URL === 'string') {
 			session.API_URL = api_URL(API_URL);
@@ -249,9 +250,11 @@ function module_code(library_namespace) {
 				var agent = library_namespace.application.net
 				//
 				.Ajax.setup_node_net(session.API_URL);
-				// agent.start_time = Date.now();
-				// agent.API_URL = session.API_URL;
-				session.get_URL_options = agent;
+				session.get_URL_options = {
+					// start_time : Date.now(),
+					// API_URL : session.API_URL,
+					agent : agent
+				};
 			}
 		}
 	}
@@ -3528,7 +3531,7 @@ function module_code(library_namespace) {
 	 *            {String}action or [ {String}api URL, {String}action,
 	 *            {Object}other parameters ]
 	 * @param {Function}callback
-	 *            回調函數。 callback(response data)
+	 *            回調函數。 callback(response data, error)
 	 * @param {Object}[post_data]
 	 *            data when need using POST method
 	 * @param {Object}[options]
@@ -3679,17 +3682,21 @@ function module_code(library_namespace) {
 			});
 
 		} else {
-			var get_URL_options;
-			if (options && !(get_URL_options = options.get_URL_options)) {
-				if ((get_URL_options = options[SESSION_KEY])
-						|| (options.token && ((get_URL_options = options)))) {
-					if (!get_URL_options.get_URL_options) {
+			var get_URL_options = options && options.get_URL_options;
+			// @see function setup_API_URL(session, API_URL)
+			if (!get_URL_options) {
+				var session = options[SESSION_KEY]
+				// 檢查若 options 本身即為 session。
+				|| options.token && options;
+				if (session) {
+					// assert: get_URL_options 為 session。
+					if (!session.get_URL_options) {
 						library_namespace.debug(
 								'為 wiki_API instance，但無 agent，需要造出 agent。', 2,
 								'wiki_API.query');
-						setup_API_URL(get_URL_options, true);
+						setup_API_URL(session, true);
 					}
-					get_URL_options = get_URL_options.get_URL_options;
+					get_URL_options = session.get_URL_options;
 
 				}
 			}
@@ -3714,15 +3721,69 @@ function module_code(library_namespace) {
 			&& (!get_URL_options || !get_URL_options.onfail)) {
 				get_URL_options = Object.assign({
 					// 警告: 若是自行設定 .onfail，則需要自己處理 callback。
-					// 例如可能得自己執行 ((wiki.running = false))。
+					// 例如可能得在最後自己執行 ((wiki.running = false))。
 					onfail : function(error) {
 						callback(undefined, error);
 					}
 				}, get_URL_options);
 			}
 
+			if (get_URL_options && get_URL_options.agent
+			// 若是用同一個 agent 來 access 過多 Wikipedia 網站，
+			// 可能因 wikiSession 過多(如.length === 86)而造成 413 (請求實體太大)。
+			&& (agent.last_cookie.length > 70
+			//
+			|| agent.last_cookie.cookie_cache)) {
+				if (agent.last_cookie.length > 70) {
+					library_namespace.debug('重整 cookie['
+							+ agent.last_cookie.length + ']。', 1,
+							'wiki_API.query');
+					if (!agent.cookie_cache)
+						agent.cookie_cache
+						// {zh:['','',...],en:['','',...]}
+						= library_namespace.null_Object();
+					var last_cookie = agent.last_cookie;
+					agent.last_cookie = [];
+					while (last_cookie.length > 0) {
+						var cookie_item = last_cookie.pop(),
+						//
+						matched = cookie_item.match(/^([a-z_\d]{2,20})wiki/);
+						if (matched) {
+							var language = matched[1];
+							if (language in agent.cookie_cache)
+								agent.cookie_cache[language].push(cookie_item);
+							else
+								agent.cookie_cache[language] = [ cookie_item ];
+						} else {
+							agent.last_cookie.push(cookie_item);
+						}
+					}
+					library_namespace.debug('重整 cookie: → ['
+							+ agent.last_cookie.length + ']。', 1,
+							'wiki_API.query');
+				}
+
+				var language = session.language.replace(/-/g, '_');
+				if (language in agent.cookie_cache) {
+					agent.last_cookie.append(agent.cookie_cache[language]);
+					delete agent.cookie_cache[language];
+				}
+			}
+
 			get_URL(action, function(XMLHttp) {
-				var response = XMLHttp.responseText;
+				var response = XMLHttp.status;
+				if (/^4/.test(response)) {
+					if (get_URL_options.onfail) {
+						get_URL_options.onfail(response);
+					} else {
+						library_namespace.warn('wiki_API.query: Get error '
+								+ response);
+						callback(XMLHttp.responseText, response);
+					}
+					return;
+				}
+
+				response = XMLHttp.responseText;
 				// response = XMLHttp.responseXML;
 				library_namespace.debug('response ('
 						+ response.length
@@ -4157,7 +4218,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			var pages = [],
+			var page_list = [],
 			//
 			page_cache_prefix = library_namespace.platform.nodejs && node_fs
 			//
@@ -4165,31 +4226,32 @@ function module_code(library_namespace) {
 
 			var continue_id;
 			if ('continue' in data) {
-				// pages['continue'] = data['continue'];
+				// page_list['continue'] = data['continue'];
 				if (data['continue']
 				//
 				&& typeof data['continue'].rvcontinue === 'string'
 				//
 				&& (continue_id = data['continue'].rvcontinue
-				// assert: pages['continue'].rvcontinue = 'id|...'。
+				// assert: page_list['continue'].rvcontinue = 'id|...'。
 				.match(/^[1-9]\d*/))) {
 					continue_id = continue_id[0] | 0;
 				}
 				if (false && data.truncated)
-					pages.truncated = true;
+					page_list.truncated = true;
 			}
-			data = data.query.pages;
 
-			for ( var pageid in data) {
-				var page = data[pageid];
+			var pages = data.query.pages;
+
+			for ( var pageid in pages) {
+				var page = pages[pageid];
 				if (!get_page_content.has_content(page)) {
 					// 其他 .prop 本來就不會有內容。
 					var need_warn = get_content;
 
 					if (continue_id && continue_id === page.pageid) {
-						// 找到了 pages.continue 所指之 index。
+						// 找到了 page_list.continue 所指之 index。
 						// effect length
-						pages.OK_length = pages.length;
+						page_list.OK_length = page_list.length;
 						// 當過了 continue_id 之後，表示已經被截斷，則不再警告。
 						need_warn = false;
 					}
@@ -4209,46 +4271,86 @@ function module_code(library_namespace) {
 					/**
 					 * 寫入cache。
 					 */
-					JSON.stringify(data), wiki_API.encoding);
+					JSON.stringify(pages), wiki_API.encoding);
 				}
 
-				pages.push(page);
+				page_list.push(page);
 			}
 
 			// options.multi: 即使只取得單頁面，依舊回傳 Array。
-			if (!options.multi)
-				if (pages.length <= 1) {
+			if (!options.multi) {
+				if (page_list.length <= 1) {
 					// e.g., pages: { '1850031': [Object] }
-					library_namespace.debug('只取得單頁面 [[' + pages
+					library_namespace.debug('只取得單頁面 [[' + page_list
 					//
 					+ ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
-					pages = pages[0];
-					if (pages && get_content
+					page_list = page_list[0];
+					if (page_list && get_content
 					//
-					&& (pages.is_Flow = is_Flow(pages))
+					&& (page_list.is_Flow = is_Flow(page_list))
 					// e.g., { flow_view : 'header' }
 					&& options.flow_view) {
-						Flow_page(pages, callback, options);
+						Flow_page(page_list, callback, options);
 						return;
 					}
 
 				} else {
-					library_namespace.debug('Get ' + pages.length
+					library_namespace.debug('Get ' + page_list.length
 					//
 					+ ' page(s)! The pages will all '
 					//
 					+ 'passed to the callback as Array!', 2, 'wiki_API.page');
 				}
+			}
+
+			if (options.save_response) {
+				// 附帶原始回傳查詢資料。
+				// save_data, query_data
+				// assert: !('response' in page_list)
+				page_list.response = data;
+			}
 
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
-			callback(pages);
+			callback(page_list);
+
 		}, null, options);
 	};
 
 	// default properties of revisions
 	// timestamp 是為了 wiki_API.edit 檢查用。
 	wiki_API.page.rvprop = 'content|timestamp';
+
+	// ------------------------------------------------------------------------
+
+	// TODO
+	// callback({String}title that redirect to)
+	wiki_API.redirect_to = function(title, callback, options) {
+		wiki_API.page(title, function(page_data) {
+			if (!page_data) {
+				// error?
+				callback(undefined, page_data);
+				return;
+			}
+
+			// e.g., [ { from: 'AA', to: 'A', tofragment: 'aa' } ]
+			var redirects = page_data.response.redirects;
+
+			callback(redirects && redirects[0]
+			//
+			&& redirects[0].tofragment ? redirects
+			// normalized title.
+			// assert: redirects && redirects.to === page_data.title
+			: page_data.title, page_data);
+
+		}, Object.assign({
+			// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規標題。
+			prop : '',
+			// TODO: 取消重新導向到章節的情況。對於導向相同目標的情況，可能導致重複編輯。
+			redirects : 1,
+			save_response : true
+		}, options));
+	};
 
 	// ------------------------------------------------------------------------
 
@@ -5675,7 +5777,6 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
 	// https://zh.wikipedia.org/w/api.php?action=query&prop=redirects&rdprop&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
 	// https://zh.wikipedia.org/w/api.php?action=query&prop=redirects&rdprop=title&titles=Money|貨幣|數據|說明&redirects&format=json&utf8
-	// wiki_API.redirect_to()
 
 	/**
 	 * 取得所有 redirect 到 [[title]] 之 pages。<br />
