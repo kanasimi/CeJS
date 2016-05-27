@@ -2218,7 +2218,7 @@ function module_code(library_namespace) {
 				next[1].call(this, this.last_page);
 				this.next();
 			} else {
-				// this.page(title, callback)
+				// this.page(title, callback, options)
 				// next[1] : title
 				// next[3] : options
 				// [ {String}API_URL, {String}title or {Object}page_data ]
@@ -2231,7 +2231,7 @@ function module_code(library_namespace) {
 					= Array.isArray(page_data) ? page_data[0] : page_data;
 					// next[2] : callback
 					if (typeof next[2] === 'function')
-						next[2].call(_this, page_data);
+						next[2].call(_this, page_data, error);
 					_this.next();
 				},
 				// next[3] : options
@@ -2242,10 +2242,30 @@ function module_code(library_namespace) {
 			}
 			break;
 
-		// case 'redirect_to':
-		// TODO:
-		// wiki_API.redirect_to();
-		// break;
+		case 'redirect_to':
+			// this.redirect_to(page data, callback, options);
+			if (library_namespace.is_Object(next[2]) && !next[3])
+				// 直接輸入 options，未輸入 callback。
+				next.splice(2, 0, null);
+
+			// this.redirect_to(title, callback, options)
+			// next[1] : title
+			// next[3] : options
+			// [ {String}API_URL, {String}title or {Object}page_data ]
+			wiki_API.redirect_to(Array.isArray(next[1]) ? next[1] : [
+					this.API_URL, next[1] ], function(redirect_data, page_data,
+					error) {
+				// next[2] : callback
+				if (typeof next[2] === 'function')
+					next[2].call(_this, redirect_data, page_data, error);
+				_this.next();
+			},
+			// next[3] : options
+			Object.assign({
+				// [SESSION_KEY]
+				session : this
+			}, next[3]));
+			break;
 
 		case 'list':
 			// get_list(). e.g., 反向連結/連入頁面.
@@ -2810,7 +2830,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,check,edit,search,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,redirect_to,check,edit,search,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -4328,13 +4348,14 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// 取得頁面之重新導向資料。
+	// CeL.wiki.redirect_to()
 	// callback({String}title that redirect to or {Object}with redirect to what
-	// section, {Object}page_data)
+	// section, {Object}page_data, error)
 	wiki_API.redirect_to = function(title, callback, options) {
-		wiki_API.page(title, function(page_data) {
-			if (!page_data) {
+		wiki_API.page(title, function(page_data, error) {
+			if (!page_data || error) {
 				// error?
-				callback(undefined, page_data);
+				callback(undefined, page_data, error);
 				return;
 			}
 
