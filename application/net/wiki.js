@@ -3588,11 +3588,10 @@ function module_code(library_namespace) {
 		// 檢測是否間隔過短。支援最大延遲功能。
 		to_wait,
 		// interval.
-		lag_interval = options && options.lag
+		lag_interval = options && options.lag >= 0 ? options.lag :
 		// ↑ wiki_API.edit 可能輸入 session 當作 options。
-		// || options[SESSION_KEY] && options[SESSION_KEY].lag
-		//
-		|| wiki_API.query.default_lag;
+		// options[SESSION_KEY] && options[SESSION_KEY].lag ||
+		wiki_API.query.default_lag;
 
 		if (false) {
 			// method 1:
@@ -4385,7 +4384,8 @@ function module_code(library_namespace) {
 				// assert: redirect_data && redirect_data.to === page_data.title
 				if (redirect_data.tofragment) {
 					library_namespace.debug('[[' + title
-							+ ']] redirected to [[' + redirect_data.to + '#'
+					// →
+					+ ']] redirected to [[' + redirect_data.to + '#'
 							+ redirect_data.tofragment + ']]!', 1,
 							'wiki_API.redirect_to');
 					callback(redirect_data, page_data);
