@@ -6738,7 +6738,7 @@ function module_code(library_namespace) {
 		//dump_directory = '~/dumps/';
 		// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Developing#Using_the_shared_Pywikibot_files_.28recommended_setup.29
 		// /shared/: shared files
-		dump_directory = '/shared/dump/'
+		dump_directory = '/shared/dumps/'
 		filename = project + '-' + latest + '-pages-articles-multistream-index.txt';
 		</code>
 		 */
@@ -7919,8 +7919,8 @@ function module_code(library_namespace) {
 				// 這邊的 ((true)) 僅表示要使用，並採用預設值；不代表設定 dump file path。
 				config.use_dump = null;
 			read_dump(config.use_dump, callback, {
-				// directory to restore dump file.
-				// e.g., '/shared/dump/', '~/dumps/'
+				// directory to restore dump files.
+				// e.g., '/shared/dumps/', '~/dumps/'
 				directory : config.dump_directory,
 				first : config.first,
 				last : config.last
@@ -8140,7 +8140,17 @@ function module_code(library_namespace) {
 					directory : config.dump_directory,
 					first : function(xml_filename) {
 						dump_file = xml_filename;
-						file_size = node_fs.statSync(xml_filename).size;
+						try {
+							file_size = node_fs.statSync(xml_filename).size;
+						} catch (e) {
+							// 若不存在 dump directory，則會在此出錯。
+							if (e.code === 'ENOENT') {
+								library_namespace.err('traversal_pages: '
+										+ 'You may need to create '
+										+ 'the dump directory yourself!');
+							}
+							throw e;
+						}
 					},
 					filter : function(pageid, revid) {
 						if ((pageid in rev_of_id)
