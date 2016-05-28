@@ -111,8 +111,11 @@ function module_code(library_namespace) {
 			setup_API_URL(this /* session */, API_URL);
 		}
 
-		if (!('language' in this))
+		if (!('language' in this)
+		// wikidata 不設定 language。
+		&& (!API_URL || !/wikidata/i.test(API_URL))) {
 			setup_API_language(this /* session */, default_language);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -5194,9 +5197,11 @@ function module_code(library_namespace) {
 			options = library_namespace.null_Object();
 		}
 
-		if (!session)
+		if (!session) {
 			// 初始化 session 與 agent。這裡 callback 當作 API_URL。
 			session = new wiki_API(name, password, API_URL);
+		}
+
 		// copy configurations
 		if (options.preserve_password)
 			session.preserve_password = options.preserve_password;
