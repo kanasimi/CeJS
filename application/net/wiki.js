@@ -7,13 +7,11 @@
  * TODO:<code>
 
 wiki_API.work() 遇到 Invalid token 之類問題，中途跳出 abort 時，無法紀錄。應將紀錄顯示於 console 或 local file。
-wiki_API.work() 添加網頁報告。
 wiki_API.page() 整合各 action=query 至單一公用 function。
 
-paser 調用超過一個Template中參數的值，只有最後提供的值會被使用。
-paser 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
-paser 所有子頁面加入白名單 white-list
-paser [[WP:維基化]]
+parser 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
+parser 所有子頁面加入白名單 white-list
+parser [[WP:維基化]]
 https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
 https://www.mediawiki.org/wiki/API:Edit_-_Set_user_preferences
@@ -22,14 +20,8 @@ https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
 Wikimedia REST API
 https://www.mediawiki.org/wiki/RESTBase
 
-https://www.wikidata.org/wiki/Wikidata:Bots
-https://www.mediawiki.org/wiki/API:Etiquette
-
-處理[[朱載𪉖]]
 
 https://zh.wikipedia.org/w/index.php?title=title&action=history&hilight=123,456
-
-
 
 
 -{zh-hans:访问;zh-hant:訪問;zh-tw:瀏覽}-量
@@ -39,7 +31,6 @@ https://dumps.wikimedia.org/other/pagecounts-raw/
 https://tools.wmflabs.org/pageviews
 https://wikitech.wikimedia.org/wiki/Analytics/Data/Pagecounts-raw
 https://meta.wikimedia.org/wiki/Research:Page_view
-
 
 
 </code>
@@ -68,7 +59,7 @@ typeof CeL === 'function' && CeL.run({
 	// optional: .fs_mkdir() @ CeL.wiki.cache()
 	// @ CeL.wiki.traversal() @ application.platform.nodejs
 	+ '|application.net.Ajax.get_URL|data.date.',
-	// 為了方便格式化程式碼，因此將module函式主體另外抽出。
+	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
 	code : module_code,
 	// 設定不匯出的子函式。
 	no_extend : '*'
@@ -107,7 +98,7 @@ function module_code(library_namespace) {
 			lgpassword : password
 		};
 
-		// action queue 貯列。應以 append，而非整個換掉的方式更改。
+		// action queue 佇列。應以 append，而非整個換掉的方式更改。
 		this.actions = [];
 
 		// 紀錄各種後續檢索用索引值。應以 append，而非整個換掉的方式更改。
@@ -1329,6 +1320,7 @@ function module_code(library_namespace) {
 
 						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
 						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
+						// parser 調用超過一個Template中參數的值，只有最後提供的值會被使用。
 						if (typeof _token === 'string') {
 							_parameters[key] = value;
 						} else {
@@ -1746,6 +1738,7 @@ function module_code(library_namespace) {
 						if (key in parameters) {
 							// 參數名重複: @see [[Category:調用重複模板參數的頁面]]
 							// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
+							// parser 調用超過一個Template中參數的值，只有最後提供的值會被使用。
 							if (Array.isArray(parameters[key]))
 								parameters[key].push(value);
 							else
@@ -3405,7 +3398,7 @@ function module_code(library_namespace) {
 					// 將 robot 運作記錄、log summary 報告結果寫入 log 頁面。
 					// TODO: 以表格呈現。
 					.edit(messages.join('\n'), options,
-					//
+					// wiki_API.work() 添加網頁報告。
 					function(title, error, result) {
 						if (error) {
 							library_namespace.warn(
@@ -3884,6 +3877,7 @@ function module_code(library_namespace) {
 	 * @type {Object} of {ℕ⁰:Natural+0}
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
+	 *      https://www.mediawiki.org/wiki/API:Etiquette
 	 */
 	wiki_API.query.default_lag = 5000;
 
@@ -8662,7 +8656,7 @@ function module_code(library_namespace) {
 			return;
 
 		if (session.data_session) {
-			// 直接清空貯列。
+			// 直接清空佇列。
 			// TODO: 強制中斷所有正在執行之任務。
 			session.data_session.actions.clear();
 		}
