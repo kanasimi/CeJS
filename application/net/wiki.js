@@ -269,7 +269,7 @@ function module_code(library_namespace) {
 			//
 			= language_code = language_code.toLowerCase();
 			// apply local lag interval rule.
-			if (language_code in wiki_API.query.lag) {
+			if (!(session.lag >= 0) && (language_code in wiki_API.query.lag)) {
 				session.lag = wiki_API.query.lag[language_code];
 				library_namespace.debug('Use interval ' + session.lag
 						+ ' for language ' + language_code, 1,
