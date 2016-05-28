@@ -113,7 +113,7 @@ function module_code(library_namespace) {
 
 		if (!('language' in this)
 		// wikidata 不設定 language。
-		&& !session.is_wikidata) {
+		&& !this.is_wikidata) {
 			setup_API_language(this /* session */, default_language);
 		}
 	}
