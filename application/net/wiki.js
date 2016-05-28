@@ -113,7 +113,7 @@ function module_code(library_namespace) {
 
 		if (!('language' in this)
 		// wikidata 不設定 language。
-		&& (!API_URL || !/wikidata/i.test(API_URL))) {
+		&& !session.is_wikidata) {
 			setup_API_language(this /* session */, default_language);
 		}
 	}
@@ -230,6 +230,8 @@ function module_code(library_namespace) {
 
 		if (API_URL && typeof API_URL === 'string') {
 			session.API_URL = api_URL(API_URL);
+			// is data session.
+			session.is_wikidata = /wikidata/i.test(API_URL);
 			delete session.last_page;
 			// force to login again: see wiki_API.login
 			// 據測試，不同 project 間之 token 不能通用。
