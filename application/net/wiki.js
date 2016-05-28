@@ -3985,7 +3985,7 @@ function module_code(library_namespace) {
 		// {ℕ⁰:Natural+0}pageid should > 0.
 		// pageid 0 回傳格式不同於 > 0 時。
 		// https://www.mediawiki.org/w/api.php?action=query&prop=revisions&pageids=0
-		&& page_data > 0 && page_data === page_data | 0) {
+		&& page_data > 0 && page_data === (page_data | 0)) {
 			pageid = page_data;
 
 		} else if (!page_data) {
@@ -4271,7 +4271,7 @@ function module_code(library_namespace) {
 				&& (continue_id = data['continue'].rvcontinue
 				// assert: page_list['continue'].rvcontinue = 'id|...'。
 				.match(/^[1-9]\d*/))) {
-					continue_id = continue_id[0] | 0;
+					continue_id = Math.floor(continue_id[0]);
 				}
 				if (false && data.truncated)
 					page_list.truncated = true;
@@ -6702,7 +6702,7 @@ function module_code(library_namespace) {
 				//
 				PATTERN = / href="(\d{8,})/g;
 				while (matched = PATTERN.exec(response)) {
-					matched = matched[1] | 0;
+					matched = Math.floor(matched[1]);
 					if (latest < matched)
 						previous = latest, latest = matched;
 				}
@@ -6941,8 +6941,8 @@ function module_code(library_namespace) {
 		}
 
 		var pageid = xml.between('<id>', '</id>', start_index) | 0,
-		//
-		revid = xml.between('<id>', '</id>', revision_index) | 0;
+		// ((revid|0)) 可能出問題。
+		revid = Math.floor(xml.between('<id>', '</id>', revision_index));
 
 		if (filter && !filter(pageid, revid)) {
 			if (false)
@@ -8143,7 +8143,7 @@ function module_code(library_namespace) {
 						try {
 							file_size = node_fs.statSync(xml_filename).size;
 						} catch (e) {
-							// 若不存在 dump directory，則會在此出錯。
+							// 若不存在 dump_directory，則會在此出錯。
 							if (e.code === 'ENOENT') {
 								library_namespace.err('traversal_pages: '
 										+ 'You may need to create '
