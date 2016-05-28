@@ -1903,9 +1903,12 @@ function pushUnique(array_pushTo, element_toPush, array_reverse) {
 function append_to_Array(list, index) {
 	if (Array.isArray(list) && (index ? 0 < (index = parseInt(index))
 	//
-	&& index < list.length : list.length))
+	&& index < list.length : list.length)) {
 		Array.prototype.push.apply(this, index ? Array.prototype.slice.call(
 				list, index) : list);
+		//this = this.concat(list);
+		//this = Array.prototype.concat.apply(this, arguments);
+	}
 
 	return this;
 }

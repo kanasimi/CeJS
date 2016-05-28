@@ -2717,7 +2717,7 @@ function module_code(library_namespace) {
 						if (!is_entity(this.last_data)) {
 							next[3] && next[3].call(this, undefined, {
 								code : 'no_last_data',
-								message : '前一次之實體[' + (this.last_data.key
+								message : '前一次之wikidata實體[' + (this.last_data.key
 								// 例如提供的 foreign title 錯誤，
 								// 或是 foreign title 為 redirected。
 								|| (this.last_data.site
@@ -3748,17 +3748,17 @@ function module_code(library_namespace) {
 					// 警告: 若是自行設定 .onfail，則需要自己處理 callback。
 					// 例如可能得在最後自己執行 ((wiki.running = false))。
 					onfail : function(error) {
-						callback(undefined, error);
+						callback && callback(undefined, error);
 					}
 				}, get_URL_options);
 			}
 
 			var agent = get_URL_options && get_URL_options.agent;
-			if (agent && agent.last_cookie && (agent.last_cookie.length > 70
+			if (agent && agent.last_cookie && (agent.last_cookie.length > 80
 			// 若是用同一個 agent 來 access 過多 Wikipedia 網站，
 			// 可能因 wikiSession 過多(如.length === 86)而造成 413 (請求實體太大)。
 			|| agent.cookie_cache)) {
-				if (agent.last_cookie.length > 70) {
+				if (agent.last_cookie.length > 80) {
 					library_namespace.debug('重整 cookie['
 							+ agent.last_cookie.length + ']。', 1,
 							'wiki_API.query');
@@ -3795,19 +3795,21 @@ function module_code(library_namespace) {
 			}
 
 			get_URL(action, function(XMLHttp) {
-				var response = XMLHttp.status;
-				if (/^4/.test(response)) {
+				var status_code = XMLHttp.status,
+				//
+				response = XMLHttp.responseText;
+				if (/^[45]/.test(status_code)) {
+					// e.g., 503, 413
 					if (get_URL_options.onfail) {
-						get_URL_options.onfail(response);
-					} else {
+						get_URL_options.onfail(status_code);
+					} else if (typeof callback === 'function') {
 						library_namespace.warn('wiki_API.query: Get error '
-								+ response);
-						callback(XMLHttp.responseText, response);
+								+ status_code);
+						callback(response, status_code);
 					}
 					return;
 				}
 
-				response = XMLHttp.responseText;
 				// response = XMLHttp.responseXML;
 				library_namespace.debug('response ('
 						+ response.length
@@ -3852,6 +3854,14 @@ function module_code(library_namespace) {
 									+ String(response).slice(0, 40000) + ']');
 							library_namespace.err(e);
 						}
+
+						// error handling
+						if (get_URL_options.onfail) {
+							get_URL_options.onfail(e);
+						} else if (typeof callback === 'function') {
+							callback(response, e);
+						}
+
 						// exit!
 						return;
 					}
@@ -3868,6 +3878,8 @@ function module_code(library_namespace) {
 	/**
 	 * edit (modify) 時之最大延遲參數。<br />
 	 * default: 使用5秒 (5000 ms) 的最大延遲參數。
+	 * 
+	 * 在 Tool Labs edit wikidata，單線程均速最快約 1584 ms/edits。
 	 * 
 	 * @type {Object} of {ℕ⁰:Natural+0}
 	 * 
