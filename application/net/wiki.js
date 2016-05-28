@@ -2717,8 +2717,9 @@ function module_code(library_namespace) {
 						if (!is_entity(this.last_data)) {
 							next[3] && next[3].call(this, undefined, {
 								code : 'no_last_data',
-								message : '前一次之wikidata實體[' + (this.last_data.key
+								message : '前一次之wikidata實體['
 								// 例如提供的 foreign title 錯誤，
+								+ (this.last_data.key
 								// 或是 foreign title 為 redirected。
 								|| (this.last_data.site
 								// 抑或者存在 foreign title 頁面，但沒有 wikidata entity。
@@ -7932,7 +7933,9 @@ function module_code(library_namespace) {
 		/** {Object}用在 wiki_API.cache 之 configuration。 */
 		cache_config = {
 			// all title/id list
-			file_name : config.file_name || traversal_pages.list_file,
+			file_name : config.file_name
+			// use default_language
+			|| traversal_pages.list_file + '.' + default_language + '.json',
 			operator : function(list) {
 				if (list.length === 3
 						&& JSON.stringify(list[0]) === JSON
