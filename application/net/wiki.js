@@ -9925,11 +9925,12 @@ function module_code(library_namespace) {
 		if (data && (Array.isArray(data.labels) || Array.isArray(data.aliases))) {
 			// {Array}data_alias
 			data_alias = entity_labels_and_aliases(data);
-			if (false)
+			if (false) {
 				if (!Array.isArray(data.labels))
 					data.labels = [];
 				else if (!Array.isArray(data.aliases))
 					data.aliases = [];
+			}
 
 		} else {
 			// 初始化。
@@ -9966,11 +9967,21 @@ function module_code(library_namespace) {
 				entity_labels_and_aliases(entity, matched[1], alias);
 			}
 
+			// 處理各 label。
 			labels[language].forEach(function(label) {
+				var label_without_type = /\([^()]+\)$/.test(label)
+				// e.g., label === "title (type)"
+				// → label_without_type = "title"
+				&& label.replace(/\s*\([^()]+\)$/, '');
+
 				if (label && typeof label === 'string'
 						&& !alias.includes(label)
-						// 避免 labels[language] 本身即有重複。
-						&& (!new_alias || !new_alias.includes(label))) {
+						// 當已有 "蜂" 時，不添加 "蜂 (喜劇)"。
+						&& (!label_without_type || !alias.includes(label_without_type))
+						// 避免後來添加的 labels[language] 本身即有重複。
+						&& (!new_alias || !new_alias.includes(label)
+						//
+						&& (!label_without_type || !new_alias.includes(label_without_type)))) {
 					count++;
 					if (new_alias)
 						new_alias.push(label);
