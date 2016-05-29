@@ -9967,51 +9967,61 @@ function module_code(library_namespace) {
 				entity_labels_and_aliases(entity, matched[1], alias);
 			}
 
+			labels[language]
+			// 確保 "title" 在 "title (type)" 之前。
+			.sort()
+			// 避免要添加的 labels[language] 本身即有重複。
+			.uniq()
 			// 處理各 label。
-			labels[language].forEach(function(label) {
+			.forEach(function(label) {
+				if (!label || typeof label !== 'string') {
+					// warnning: Invalid label.
+					return;
+				}
+
 				var label_without_type = /\([^()]+\)$/.test(label)
 				// e.g., label === "title (type)"
 				// → label_without_type = "title"
 				&& label.replace(/\s*\([^()]+\)$/, '');
 
-				if (label && typeof label === 'string'
-						&& !alias.includes(label)
-						// 當已有 "蜂" 時，不添加 "蜂 (喜劇)"。
-						&& (!label_without_type || !alias.includes(label_without_type))
-						// 避免後來添加的 labels[language] 本身即有重複。
-						&& (!new_alias || !new_alias.includes(label)
-						//
-						&& (!label_without_type || !new_alias.includes(label_without_type)))) {
-					count++;
-					if (new_alias)
-						new_alias.push(label);
-					else
-						new_alias = [ label ];
+				if (alias.includes(label)
+					// 當已有 "title" 時，不添加 "title (type)"。
+					|| label_without_type && (alias.includes(label_without_type)
+					// assert: !new_alias.includes(label)，已被 .uniq() 除去。
+					|| new_alias && new_alias.includes(label_without_type))) {
+					// Skip. 已有此 label 或等價之 label。
+					return;
+				}
 
-					var item = wikidata_edit.add_item(label, language);
+				count++;
+				if (new_alias)
+					new_alias.push(label);
+				else
+					new_alias = [ label ];
 
-					if (has_this_language_label === undefined)
-						has_this_language_label
-						// 注意: 若是本來已有某個值（例如 label），採用 add 會被取代。或須偵測並避免更動原有值。
-						= entity.labels && entity.labels[language]
-						//
-						|| data.labels && data.labels.some(function(item) {
-							return item.language === language;
-						});
+				var item = wikidata_edit.add_item(label, language);
 
-					if (!has_this_language_label) {
-						// 因為預料會增加的 label/aliases 很少，因此採後初始化。
-						if (!data.labels)
-							data.labels = [];
-						// 第一個當作 label。直接登錄。
-						data.labels.push(item);
-					} else {
-						// 因為預料會增加的 label/aliases 很少，因此採後初始化。
-						if (!data.aliases)
-							data.aliases = [];
-						// 其他的當作 alias
-						data.aliases.push(item);
-					}
+				if (has_this_language_label === undefined)
+					has_this_language_label
+					// 注意: 若是本來已有某個值（例如 label），採用 add 會被取代。或須偵測並避免更動原有值。
+					= entity.labels && entity.labels[language]
+					//
+					|| data.labels && data.labels.some(function(item) {
+						return item.language === language;
+					});
+
+				if (!has_this_language_label) {
+					// 因為預料會增加的 label/aliases 很少，因此採後初始化。
+					if (!data.labels)
+						data.labels = [];
+					// 第一個當作 label。直接登錄。
+					data.labels.push(item);
+				} else {
+					// 因為預料會增加的 label/aliases 很少，因此採後初始化。
+					if (!data.aliases)
+						data.aliases = [];
+					// 其他的當作 alias
+					data.aliases.push(item);
 				}
 			});
 
