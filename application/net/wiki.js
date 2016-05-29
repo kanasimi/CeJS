@@ -1903,10 +1903,14 @@ function module_code(library_namespace) {
 			!== title ? '|' + matched[4]
 			// [[Help:編輯頁面#链接]]
 			// 若"|"後直接以"]]"結束，則儲存時會自動添加連結頁面名。
-			: !section && title.endsWith(')') ? '|' : '');
+			: !section && /\([^()]+\)$/.test(title)
+			// e.g., [[title (type)]] → [[title (type)|title]]
+			// 在 <gallery> 中，"[[title (type)|]]" 無效，因此需要明確指定。
+			? '|' + title.replace(/\s*\([^()]+\)$/, '') : '');
 
-			if (add_quote)
+			if (add_quote) {
 				link = '[[' + link + ']]';
+			}
 
 			return link;
 		}
@@ -9411,8 +9415,9 @@ function module_code(library_namespace) {
 		if (property && !options.props)
 			options.props = 'claims';
 		var props = options.props;
-		if (Array.isArray(props))
+		if (Array.isArray(props)) {
 			props = props.join('|');
+		}
 		if (props) {
 			// retrieve properties. 僅擷取這些屬性。
 			action[1] += '&props=' + props;
