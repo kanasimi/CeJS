@@ -4272,8 +4272,8 @@ function module_code(library_namespace) {
 			 * e.g., <code>
 			 * { continue: { rvcontinue: '2421|39477047', continue: '||' },
 			 *   warnings: { result: { '*': 'This result was truncated because it would otherwise  be larger than the limit of 12,582,912 bytes' } },
-			 *   query: 
-			 *    { pages: 
+			 *   query:
+			 *    { pages:
 			 *       { '13': [Object],
 			 *       ...
 			 * </code>
@@ -4408,13 +4408,30 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// 取得頁面之重新導向資料。
-	// CeL.wiki.redirect_to()
-	// callback({String}title that redirect to or {Object}with redirect to what
-	// section, {Object}page_data, error)
+	/**
+	 * 取得頁面之重新導向資料。
+	 * 
+	 * @example <code>
+
+	CeL.wiki.redirect_to('史記', function(redirect_data, page_data) {
+		CeL.show_value(redirect_data);
+	});
+
+	 </code>
+	 * 
+	 * @param {String|Array}title
+	 *            title or [ {String}API_URL, {String}title or {Object}page_data ]
+	 * @param {Function}[callback]
+	 *            回調函數。 callback({String}title that redirect to or {Object}with
+	 *            redirect to what section, {Object}page_data, error)
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
+	 */
 	wiki_API.redirect_to = function(title, callback, options) {
 		wiki_API.page(title, function(page_data, error) {
-			if (!page_data || error) {
+			if (!page_data || ('missing' in page_data) || error) {
 				// error?
 				callback(undefined, page_data, error);
 				return;
@@ -4424,17 +4441,19 @@ function module_code(library_namespace) {
 			var redirect_data = page_data.response.query.redirects;
 			if (redirect_data) {
 				if (redirect_data.length !== 1) {
-					library_namespace.warn('get_continue: Get '
+					library_namespace.warn('wiki_API.redirect_to: Get '
 							+ redirect_data.length + ' redirect links for [['
 							+ title + ']]!');
 				}
-				// 僅回傳第一筆資料。
+				// 僅取用並回傳第一筆資料。
 				redirect_data = redirect_data[0];
 				// assert: redirect_data && redirect_data.to === page_data.title
+
+				// test REDIRECT [[title#section]]
 				if (redirect_data.tofragment) {
 					library_namespace.debug('[[' + title
 					// →
-					+ ']] redirected to [[' + redirect_data.to + '#'
+					+ ']] redirected to section [[' + redirect_data.to + '#'
 							+ redirect_data.tofragment + ']]!', 1,
 							'wiki_API.redirect_to');
 					callback(redirect_data, page_data);
