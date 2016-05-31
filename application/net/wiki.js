@@ -1641,7 +1641,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// 模板名#後的內容會忽略。
-	// [ , Template name ]
+	// matched: [ , Template name ]
 	var TEMPLATE_NAME_PATTERN = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)[|}]/,
 	//
 	TEMPLATE_START_PATTERN = new RegExp(TEMPLATE_NAME_PATTERN.source.replace(
@@ -1778,7 +1778,14 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
-	// parse date string to {Date}
+	/**
+	 * parse date string to {Date}
+	 * 
+	 * @param {String}wikitext
+	 *            wikitext to parse
+	 * 
+	 * @returns {Date}date of the date string
+	 */
 	function parse_date_zh(wikitext) {
 		// $dateFormats, 'Y年n月j日 (D) H:i'
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hans.php
@@ -1791,16 +1798,33 @@ function module_code(library_namespace) {
 		.to_Date();
 	}
 
-	// parse user name
+	/**
+	 * 使用者/用戶對話頁面所符合的模式。
+	 * 
+	 * matched: [ all, "user name" ]
+	 * 
+	 * @type {RegExp}
+	 * 
+	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|statistics&utf8
+	 *      https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
+	 */
+	var PATTERN_user =
+	// "\/": e.g., [[user talk:user_name/Flow]]
+	/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?|利用者(?:‐会話)?|사용자(?:토론)?)\s*:\s*([^\|\]\/]+)/i;
+
+	/**
+	 * parse user name. 解析使用者/用戶對話頁面資訊。
+	 * 
+	 * @param {String}wikitext
+	 *            wikitext to parse
+	 * @param {Boolean}full_link
+	 *            get a full link
+	 * 
+	 * @returns {String}user name / full link
+	 * @returns {Undefined}Not a user link.
+	 */
 	function parse_user(wikitext, full_link) {
-		var matched = wikitext
-				&& wikitext
-						.match(
-						// 使用者/用戶對話頁面
-						// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|statistics&utf8
-						// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
-						// "\/": e.g., [[user talk:user_name/Flow]]
-						/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?)\s*:\s*([^\|\]\/]+)/i);
+		var matched = wikitext && wikitext.match(PATTERN_user);
 		if (matched) {
 			matched = full_link ? matched[0].trimRight() + ']]' : matched[1]
 					.trim();
@@ -1808,16 +1832,38 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// 若重定向到其他頁面，則回傳其{String}頁面名。
+	//
+	/**
+	 * 重定向頁所符合的模式。 Note that the redirect link must be explicit – it cannot
+	 * contain magic words, templates, etc.
+	 * 
+	 * matched: [ all, "title#section" ]
+	 * 
+	 * @type {RegExp}
+	 * 
+	 * @see https://en.wikipedia.org/wiki/Module:Redirect
+	 *      https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|statistics&utf8
+	 *      https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
+	 *      https://en.wikipedia.org/wiki/Help:Redirect
+	 *      https://phabricator.wikimedia.org/T68974
+	 */
+	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|넘겨주기)\s*(?::\s*)?\[\[([^\[\]{}|]+)(?:\|[^\[\]{}]+)?\]\]/i;
+
+	/**
+	 * parse redirect page. 解析重定向資訊。 若 wikitext 重定向到其他頁面，則回傳其{String}頁面名:
+	 * "title#section"。
+	 * 
+	 * @param {String}wikitext
+	 *            wikitext to parse
+	 * 
+	 * @returns {String}title#section
+	 * @returns {Undefined}Not a redirect page.
+	 */
 	function parse_redirect(wikitext) {
-		var matched = wikitext && wikitext.match(
-		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
-		// https://en.wikipedia.org/wiki/Help:Redirect
-		// Note that the redirect link must be explicit – it cannot contain
-		// magic words, templates, etc.
-		/(?:^|[\s\n]*)#(?:REDIRECT|重定向)\s*\[\[([^\[\]]+)\]\]/i);
-		if (matched)
+		var matched = wikitext && wikitext.match(PATTERN_redirect);
+		if (matched) {
 			return matched[1].trim();
+		}
 	}
 
 	// ----------------------------------------------------
@@ -2719,13 +2765,13 @@ function module_code(library_namespace) {
 						if (!is_entity(this.last_data)) {
 							next[3] && next[3].call(this, undefined, {
 								code : 'no_last_data',
-								message : '前一次之wikidata實體['
+								message : '前一次之wikidata實體取得失敗: ['
 								// 例如提供的 foreign title 錯誤，
 								+ (this.last_data.key
 								// 或是 foreign title 為 redirected。
 								|| (this.last_data.site
 								// 抑或者存在 foreign title 頁面，但沒有 wikidata entity。
-								+ ':' + this.last_data.title)) + ']取得失敗。'
+								+ ':' + this.last_data.title)) + ']'
 							});
 							this.next();
 							break;
@@ -3806,7 +3852,7 @@ function module_code(library_namespace) {
 						get_URL_options.onfail(status_code);
 					} else if (typeof callback === 'function') {
 						library_namespace.warn('wiki_API.query: Get error '
-								+ status_code);
+								+ status_code + ': [' + action + ']');
 						callback(response, status_code);
 					}
 					return;
@@ -3886,7 +3932,7 @@ function module_code(library_namespace) {
 	 * @type {Object} of {ℕ⁰:Natural+0}
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
-	 *      https://www.mediawiki.org/wiki/API:Etiquette
+	 *      https://www.mediawiki.org/wiki/API:Etiquette 禮儀
 	 */
 	wiki_API.query.default_lag = 5000;
 
@@ -5866,10 +5912,11 @@ function module_code(library_namespace) {
 				// clone Object, 避免更改 options.
 				options = Object.clone(options);
 				options.no_trace = true;
-				if (redirect_to)
+				if (redirect_to) {
 					wiki_API.redirects(redirect_to, callback, options);
-				else
+				} else {
 					wiki_API.redirects(title, callback, options);
+				}
 			}, options);
 			return;
 		}
@@ -7940,6 +7987,7 @@ function module_code(library_namespace) {
 			// all title/id list
 			file_name : config.file_name
 			// use default_language
+			// all_pages.*.json 存有當前語言維基百科當前所有的頁面id以及最新版本 (*:當前語言)
 			|| traversal_pages.list_file + '.' + default_language + '.json',
 			operator : function(list) {
 				if (list.length === 3
@@ -9985,10 +10033,10 @@ function module_code(library_namespace) {
 				&& label.replace(/\s*\([^()]+\)$/, '');
 
 				if (alias.includes(label)
-					// 當已有 "title" 時，不添加 "title (type)"。
-					|| label_without_type && (alias.includes(label_without_type)
-					// assert: !new_alias.includes(label)，已被 .uniq() 除去。
-					|| new_alias && new_alias.includes(label_without_type))) {
+				// 當已有 "title" 時，不添加 "title (type)"。
+				|| label_without_type && (alias.includes(label_without_type)
+				// assert: !new_alias.includes(label)，已被 .uniq() 除去。
+				|| new_alias && new_alias.includes(label_without_type))) {
 					// Skip. 已有此 label 或等價之 label。
 					return;
 				}
@@ -10258,7 +10306,7 @@ function module_code(library_namespace) {
 		parse : parse_wikitext,
 		parser : page_parser,
 
-		/** const 中途跳出作業用。 */
+		/** constant 中途跳出作業用。 */
 		quit_operation : {},
 
 		is_page_data : get_page_content.is_page_data,
