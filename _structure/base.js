@@ -1067,9 +1067,11 @@ function (global) {
 	// 以 require('/path/to/node.loader.js') 之方法 include library 時，
 	// ((__filename)) 會得到 loader 之 path，
 	// 且不能從 global.__filename 獲得 script path，只好另尋出路。
-	|| typeof process === 'object' && process.mainModule
-	// isTTY: 為 interactive 互動形式。
-	&& process.stdout.isTTY && process.mainModule.filename
+	|| typeof process === 'object'
+	// isTTY: 為 nodejs: interactive 互動形式。
+	&& process.stdout && !process.stdout.isTTY
+	//
+	&& process.mainModule && process.mainModule.filename
 	// for old node.js
 	// @see __dirname
 	|| typeof __filename === 'string' && __filename
