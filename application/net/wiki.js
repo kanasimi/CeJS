@@ -2174,6 +2174,7 @@ function module_code(library_namespace) {
 	get_page_content.has_content = function(page_data) {
 		return library_namespace.is_Object(page_data)
 		// treat as page data. Try to get page contents: page.revisions[0]['*']
+		// 一般說來應該是由新排到舊，[0] 為最新的版本。
 		&& page_data.revisions && page_data.revisions[0];
 	};
 
@@ -2484,7 +2485,9 @@ function module_code(library_namespace) {
 						// next[1] = next[1](get_page_content(this.last_page),
 						// this.last_page.title, this.last_page);
 						// 需要同時改變 wiki_API.edit！
-						next[1] = next[1](this.last_page);
+						// next[2]: options to edit_topic()
+						// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
+						next[1] = next[1].call(next[2], this.last_page);
 					}
 					edit_topic([ this.API_URL, this.last_page ],
 					// 新章節/新話題的標題文字。
@@ -2526,7 +2529,9 @@ function module_code(library_namespace) {
 					// next[1] = next[1](get_page_content(this.last_page),
 					// this.last_page.title, this.last_page);
 					// 需要同時改變 wiki_API.edit！
-					next[1] = next[1](this.last_page);
+					// next[2]: options to edit_topic()
+					// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
+					next[1] = next[1].call(next[2], this.last_page);
 				}
 				if (next[2] && next[2].skip_nochange
 				// 採用 skip_nochange 可以跳過實際 edit 的動作。
@@ -4409,7 +4414,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * 取得頁面之重新導向資料。
+	 * 取得頁面之重定向/重新導向資料。
 	 * 
 	 * @example <code>
 
@@ -4441,9 +4446,13 @@ function module_code(library_namespace) {
 			var redirect_data = page_data.response.query.redirects;
 			if (redirect_data) {
 				if (redirect_data.length !== 1) {
+					// 可能是多重重定向？
+					// e.g., A→B→C
 					library_namespace.warn('wiki_API.redirect_to: Get '
-							+ redirect_data.length + ' redirect links for [['
-							+ title + ']]!');
+							+ redirect_data.length + ' redirect links for ['
+							// title.join(':')
+							+ title + ']!');
+					library_namespace.warn(redirect_data);
 				}
 				// 僅取用並回傳第一筆資料。
 				redirect_data = redirect_data[0];
@@ -5019,7 +5028,7 @@ function module_code(library_namespace) {
 
 		// 按標題排序列出指定的名字空間的頁面 title。
 		// 可用來遍歷所有頁面。
-		// includes redirection 包含重新導向頁面.
+		// includes redirection 包含重定向頁面.
 		// @see traversal_pages()
 		// https://www.mediawiki.org/wiki/API:Allpages
 		// 警告: 不在 Tool Labs 執行 allpages 速度太慢。但若在 Tool Labs，當改用 database。
@@ -5483,7 +5492,8 @@ function module_code(library_namespace) {
 					wiki_API.edit(page_data,
 					// or: text(get_page_content(page_data),
 					// page_data.title, page_data)
-					text(page_data), token, options, callback);
+					// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
+					text.call(options, page_data), token, options, callback);
 				}
 			}, options);
 			return;
@@ -9267,6 +9277,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
+	CeL.wiki.data('Q1', function(entity) {result=entity;});
 	CeL.wiki.data('Q2', function(entity) {result=entity;console.log(JSON.stringify(entity).slice(0,400));});
 	CeL.wiki.data('Q1', function(entity) {console.log(entity.id==='Q1'&&JSON.stringify(entity.labels)==='{"zh":{"language":"zh","value":"宇宙"}}');}, {languages:'zh'});
 	CeL.wiki.data('Q1', function(entity) {console.log(entity.labels['en'].value+': '+entity.labels['zh'].value==='universe: 宇宙');});
@@ -9664,7 +9675,8 @@ function module_code(library_namespace) {
 				library_namespace.debug('餵給設定值函數 ' + id.id + ' ('
 						+ (get_entity_label(id) || get_entity_link(id)) + ')。',
 						2, 'wikidata_edit');
-				data = data(id);
+				// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
+				data = data.call(options, id);
 
 			} else {
 				wikidata_entity(id, options.props, function(entity) {
@@ -9673,7 +9685,9 @@ function module_code(library_namespace) {
 					}
 					delete options.props;
 					delete options.languages;
-					wikidata_edit(id, data(entity), token, options, callback);
+					wikidata_edit(id,
+					// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
+					data.call(options, entity), token, options, callback);
 				}, options);
 				return;
 			}
@@ -9735,8 +9749,9 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
 		// TODO: 創建實體項目重定向。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
-		action = [
+
 		// edit實體項目entity
+		action = [
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
 		get_data_API_URL(options), 'wbeditentity' ];
 
