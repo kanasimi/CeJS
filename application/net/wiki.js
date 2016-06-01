@@ -5485,21 +5485,25 @@ function module_code(library_namespace) {
 		//
 		undo_count = options
 				&& (options.undo_count || is_undo
-						&& (options.undo < wiki_API.edit.undo_limit
-								&& options.undo || 1));
+						&& (options.undo < wiki_API.edit.undo_count_limit && options.undo));
 
 		if (undo_count || typeof text === 'function') {
 			library_namespace.debug('先取得內容再 edit [' + get_page_title(title)
 					+ ']。', 1, 'wiki_API.edit');
+			// console.log(title);
 			if (undo_count) {
-				if (!options.rvlimit) {
-					options.rvlimit = undo_count;
+				var _options = Object.clone(options);
+				if (!_options.rvlimit) {
+					_options.rvlimit = undo_count;
 				}
-				if (!options.rvprop) {
-					options.rvprop = 'ids|user|timestamp';
+				if (!_options.rvprop) {
+					_options.rvprop = 'ids|user|timestamp';
 				}
 			}
-			wiki_API.page(title, function(page_data) {
+
+			wiki_API.page(
+			//
+			Array.isArray(title) ? title.clone() : title, function(page_data) {
 				if (options && (!options.ignore_denial && wiki_API.edit
 				//
 				.denied(page_data, options.bot_id, options.notification))) {
@@ -5508,24 +5512,30 @@ function module_code(library_namespace) {
 					'wiki_API.edit: Denied to edit ['
 							+ get_page_title(page_data) + ']');
 					callback(get_page_title(page_data), 'denied');
+
 				} else {
 					if (undo_count) {
 						delete options.undo_count;
-						undo_count = page_data.revisions
+						// page_data =
+						// {pageid:0,ns:0,title:'',revisions:[{revid:0,parentid:0,user:'',timestamp:''},...]}
+						timestamp = page_data.revisions[0].timestamp;
+						options.undo = page_data.revisions[0].revid;
+						options.undoafter = page_data.revisions
 						// get the oldest revision
-						[page_data.revisions.length - 1];
-						timestamp = undo_count.timestamp;
-						options.undo = undo_count.revid;
+						[page_data.revisions.length - 1].parentid;
 					}
 					// 需要同時改變 wiki_API.prototype.next！
-					wiki_API.edit(page_data, undo_count ? '' :
+					wiki_API.edit(title,
+					// 這裡不直接指定 text，是為了讓使[回傳要編輯資料]的函數能即時依page_data變更 options。
+					// undo_count ? '' :
+					typeof text === 'function' &&
 					// or: text(get_page_content(page_data),
 					// page_data.title, page_data)
 					// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
 					text.call(options, page_data), token, options, callback,
 							timestamp);
 				}
-			}, options);
+			}, _options);
 			return;
 		}
 
@@ -5640,7 +5650,7 @@ function module_code(library_namespace) {
 	};
 
 	/** {Natural}小於此數則代表當作 undo 幾個版本。 */
-	wiki_API.edit.undo_limit = 100;
+	wiki_API.edit.undo_count_limit = 100;
 
 	/**
 	 * 對要編輯的資料作基本檢測。
