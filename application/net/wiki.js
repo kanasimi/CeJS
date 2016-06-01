@@ -5477,17 +5477,21 @@ function module_code(library_namespace) {
 	wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 		var is_undo = options && options.undo >= 1,
 		//
-		undo_count = options && options.undo_count
-				|| (is_undo < wiki_API.edit.undo_limit && is_undo);
+		undo_count = options
+				&& (options.undo_count || is_undo
+						&& (options.undo < wiki_API.edit.undo_limit
+								&& options.undo || 1));
 
 		if (undo_count || typeof text === 'function') {
 			library_namespace.debug('先取得內容再 edit [' + get_page_title(title)
 					+ ']。', 1, 'wiki_API.edit');
 			if (undo_count) {
-				if (!options.rvlimit)
+				if (!options.rvlimit) {
 					options.rvlimit = undo_count;
-				if (!options.rvprop)
+				}
+				if (!options.rvprop) {
 					options.rvprop = 'ids|user|timestamp';
+				}
 			}
 			wiki_API.page(title, function(page_data) {
 				if (options && (!options.ignore_denial && wiki_API.edit
