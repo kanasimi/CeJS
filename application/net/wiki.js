@@ -5481,11 +5481,19 @@ function module_code(library_namespace) {
 	 *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
 	 */
 	wiki_API.edit = function(title, text, token, options, callback, timestamp) {
-		var is_undo = options && options.undo >= 1,
-		//
-		undo_count = options
+		var is_undo = options && options.undo;
+		if (is_undo) {
+			if (is_undo === true) {
+				options.undo = is_undo = 1;
+			} else if (!(is_undo >= 1)) {
+				delete options.undo;
+			}
+		}
+
+		// 一般 undo_count 超過1也不一定能成功。
+		var undo_count = options
 				&& (options.undo_count || is_undo
-						&& (options.undo < wiki_API.edit.undo_count_limit && options.undo));
+						&& (is_undo < wiki_API.edit.undo_count_limit && is_undo));
 
 		if (undo_count || typeof text === 'function') {
 			library_namespace.debug('先取得內容再 edit [' + get_page_title(title)
@@ -5497,7 +5505,11 @@ function module_code(library_namespace) {
 					_options.rvlimit = undo_count;
 				}
 				if (!_options.rvprop) {
-					_options.rvprop = 'ids|user|timestamp';
+					_options.rvprop =
+					// user: 提供 user name 給 text() 用。
+					typeof text === 'function' ? 'ids|timestamp|user'
+					// 無須 content，盡量減少索求的資料量。
+					: 'ids|timestamp';
 				}
 			}
 
@@ -5519,6 +5531,7 @@ function module_code(library_namespace) {
 						// page_data =
 						// {pageid:0,ns:0,title:'',revisions:[{revid:0,parentid:0,user:'',timestamp:''},...]}
 						timestamp = page_data.revisions[0].timestamp;
+						// 指定 rev_id。
 						options.undo = page_data.revisions[0].revid;
 						options.undoafter = page_data.revisions
 						// get the oldest revision
@@ -5562,9 +5575,13 @@ function module_code(library_namespace) {
 		if (options)
 			library_namespace.debug('#1: ' + Object.keys(options).join(','), 4,
 					'wiki_API.edit');
-		options = Object.assign({
-			text : text
-		}, options);
+		if (is_undo) {
+			options = library_namespace.setup_options(options);
+		} else {
+			options = Object.assign({
+				text : text
+			}, options);
+		}
 		if (library_namespace.is_Object(title)) {
 			wiki_API.edit.set_stamp(options, title);
 			if (title.pageid)
