@@ -5483,8 +5483,11 @@ function module_code(library_namespace) {
 		if (undo_count || typeof text === 'function') {
 			library_namespace.debug('先取得內容再 edit [' + get_page_title(title)
 					+ ']。', 1, 'wiki_API.edit');
-			if (undo_count && !options.rvlimit) {
-				options.rvlimit = undo_count;
+			if (undo_count) {
+				if (!options.rvlimit)
+					options.rvlimit = undo_count;
+				if (!options.rvprop)
+					options.rvprop = 'ids|user|timestamp';
 			}
 			wiki_API.page(title, function(page_data) {
 				if (options && (!options.ignore_denial && wiki_API.edit
