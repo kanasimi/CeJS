@@ -5475,31 +5475,49 @@ function module_code(library_namespace) {
 	 *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
 	 */
 	wiki_API.edit = function(title, text, token, options, callback, timestamp) {
-		if (typeof text === 'function') {
+		var is_undo = options && options.undo >= 1,
+		//
+		undo_count = options && options.undo_count
+				|| (is_undo < wiki_API.edit.undo_limit && is_undo);
+
+		if (undo_count || typeof text === 'function') {
 			library_namespace.debug('先取得內容再 edit [' + get_page_title(title)
 					+ ']。', 1, 'wiki_API.edit');
+			if (undo_count && !options.rvlimit) {
+				options.rvlimit = undo_count;
+			}
 			wiki_API.page(title, function(page_data) {
-				if (!options.ignore_denial
-						&& wiki_API.edit.denied(page_data, options.bot_id,
-								options.notification)) {
+				if (options && (!options.ignore_denial && wiki_API.edit
+				//
+				.denied(page_data, options.bot_id, options.notification))) {
 					library_namespace.warn(
 					// Permission denied
 					'wiki_API.edit: Denied to edit ['
 							+ get_page_title(page_data) + ']');
 					callback(get_page_title(page_data), 'denied');
 				} else {
+					if (undo_count) {
+						delete options.undo_count;
+						undo_count = page_data.revisions
+						// get the oldest revision
+						[page_data.revisions.length - 1];
+						timestamp = undo_count.timestamp;
+						options.undo = undo_count.revid;
+					}
 					// 需要同時改變 wiki_API.prototype.next！
-					wiki_API.edit(page_data,
+					wiki_API.edit(page_data, undo_count ? '' :
 					// or: text(get_page_content(page_data),
 					// page_data.title, page_data)
 					// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
-					text.call(options, page_data), token, options, callback);
+					text.call(options, page_data), token, options, callback,
+							timestamp);
 				}
 			}, options);
 			return;
 		}
 
-		var action = wiki_API.edit.check_data(text, title, 'wiki_API.edit');
+		var action = !is_undo
+				&& wiki_API.edit.check_data(text, title, 'wiki_API.edit');
 		if (action) {
 			callback(get_page_title(title), action);
 			return;
@@ -5607,6 +5625,9 @@ function module_code(library_namespace) {
 	wiki_API.edit.cancel = {
 		cancel : '放棄編輯頁面用'
 	};
+
+	/** {Natural}小於此數則代表當作 undo 幾個版本。 */
+	wiki_API.edit.undo_limit = 100;
 
 	/**
 	 * 對要編輯的資料作基本檢測。
