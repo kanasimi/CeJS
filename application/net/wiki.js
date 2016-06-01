@@ -2486,7 +2486,7 @@ function module_code(library_namespace) {
 						// this.last_page.title, this.last_page);
 						// 需要同時改變 wiki_API.edit！
 						// next[2]: options to edit_topic()
-						// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
+						// .call(options,): 使(回傳要編輯資料的)設定值函數能即時變更 options。
 						next[1] = next[1].call(next[2], this.last_page);
 					}
 					edit_topic([ this.API_URL, this.last_page ],
@@ -2530,7 +2530,7 @@ function module_code(library_namespace) {
 					// this.last_page.title, this.last_page);
 					// 需要同時改變 wiki_API.edit！
 					// next[2]: options to edit_topic()
-					// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
+					// .call(options,): 使(回傳要編輯資料的)設定值函數能即時變更 options。
 					next[1] = next[1].call(next[2], this.last_page);
 				}
 				if (next[2] && next[2].skip_nochange
@@ -2720,9 +2720,7 @@ function module_code(library_namespace) {
 			}
 
 			// wikidata_entity(key, property, callback, options)
-			wikidata_entity(Array.isArray(next[1]) ? next[1] : [
-					this.data_session.API_URL, next[1] ], next[2], function(
-					data, error) {
+			wikidata_entity(next[1], next[2], function(data, error) {
 				// 就算發生錯誤，依然設定一個 dummy，預防 edit_data 時引用可能非所欲的 this.last_page。
 				_this.last_data = data || {
 					key : next[1],
@@ -2800,7 +2798,8 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (!Array.isArray(next[1])) {
+			// needless: 會從 get_data_API_URL(options) 取得 API_URL。
+			if (false && !Array.isArray(next[1])) {
 				next[1] = [ this.data_session.API_URL, next[1] ];
 			}
 
@@ -5483,6 +5482,7 @@ function module_code(library_namespace) {
 	wiki_API.edit = function(title, text, token, options, callback, timestamp) {
 		var is_undo = options && options.undo;
 		if (is_undo) {
+			// 一般 undo_count 超過1也不一定能成功？因此設定輸入 {undo:1} 時改 {undo:true} 亦可。
 			if (is_undo === true) {
 				options.undo = is_undo = 1;
 			} else if (!(is_undo >= 1)) {
@@ -5490,7 +5490,6 @@ function module_code(library_namespace) {
 			}
 		}
 
-		// 一般 undo_count 超過1也不一定能成功。
 		var undo_count = options
 				&& (options.undo_count || is_undo
 						&& (is_undo < wiki_API.edit.undo_count_limit && is_undo));
@@ -5539,12 +5538,12 @@ function module_code(library_namespace) {
 					}
 					// 需要同時改變 wiki_API.prototype.next！
 					wiki_API.edit(title,
-					// 這裡不直接指定 text，是為了讓使[回傳要編輯資料]的函數能即時依page_data變更 options。
+					// 這裡不直接指定 text，是為了讓使(回傳要編輯資料的)設定值函數能即時依page_data變更 options。
 					// undo_count ? '' :
 					typeof text === 'function' &&
 					// or: text(get_page_content(page_data),
 					// page_data.title, page_data)
-					// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
+					// .call(options,): 使(回傳要編輯資料的)設定值函數能即時變更 options。
 					text.call(options, page_data), token, options, callback,
 							timestamp);
 				}
@@ -9324,12 +9323,14 @@ function module_code(library_namespace) {
 	var wikidata_search_cache = library_namespace.null_Object();
 
 	function get_data_API_URL(options, default_API_URL) {
-		if (!options)
+		if (!options) {
 			return;
+		}
 		var session = options[SESSION_KEY];
-		if (session)
+		if (session) {
 			return session.data_session ? session.data_session.API_URL
 					: session.API_URL;
+		}
 		return options.API_URL || default_API_URL || wikidata_API_URL;
 	}
 
@@ -9733,10 +9734,10 @@ function module_code(library_namespace) {
 
 		if (typeof data === 'function') {
 			if (is_entity(id)) {
-				library_namespace.debug('餵給設定值函數 ' + id.id + ' ('
+				library_namespace.debug('餵給(回傳要編輯資料的)設定值函數 ' + id.id + ' ('
 						+ (get_entity_label(id) || get_entity_link(id)) + ')。',
 						2, 'wikidata_edit');
-				// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
+				// .call(options,): 使(回傳要編輯資料的)設定值函數能即時變更 options。
 				data = data.call(options, id);
 
 			} else {
@@ -9747,7 +9748,7 @@ function module_code(library_namespace) {
 					delete options.props;
 					delete options.languages;
 					wikidata_edit(id,
-					// .call(options,): 使[回傳要編輯資料]的函數能即時變更 options。
+					// .call(options,): 使(回傳要編輯資料的)設定值函數能即時變更 options。
 					data.call(options, entity), token, options, callback);
 				}, options);
 				return;
