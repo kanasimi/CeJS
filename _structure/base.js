@@ -1071,10 +1071,10 @@ function (global) {
 	// isTTY: 為 nodejs: interactive 互動形式。
 	&& process.stdout && !process.stdout.isTTY
 	//
-	&& process.mainModule && process.mainModule.filename
+	&& (process.mainModule && process.mainModule.filename
 	// for old node.js
 	// @see __dirname
-	|| typeof __filename === 'string' && __filename
+	|| typeof __filename === 'string' && __filename)
 	// for jslibs 與特殊環境. 需確認已定義 _.is_Object()
 	|| _.is_Object(old_namespace) && old_namespace.loader_script
 	// Unknown environment
