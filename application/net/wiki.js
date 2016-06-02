@@ -186,7 +186,7 @@ function module_code(library_namespace) {
 					+ matched[2] + '/w/api.php';
 		}
 
-		library_namespace.err('Unknown project: [' + project
+		library_namespace.err('api_URL: Unknown project: [' + project
 				+ ']! Using default API URL.');
 		return wiki_API.API_URL;
 	}
@@ -1885,7 +1885,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
 	 */
-	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z\-\d]{2,20})\.wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
+	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z\-\d]{2,20})\.(?:m\.)?wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
 
 	/**
 	 * Convert URL to wiki link.
@@ -3815,7 +3815,7 @@ function module_code(library_namespace) {
 
 			var agent = get_URL_options && get_URL_options.agent;
 			if (agent && agent.last_cookie && (agent.last_cookie.length > 80
-			// 若是用同一個 agent 來 access 過多 Wikipedia 網站，
+			// cache cache: 若是用同一個 agent 來 access 過多 Wikipedia 網站，
 			// 可能因 wikiSession 過多(如.length === 86)而造成 413 (請求實體太大)。
 			|| agent.cookie_cache)) {
 				if (agent.last_cookie.length > 80) {
@@ -3851,7 +3851,14 @@ function module_code(library_namespace) {
 							'wiki_API.query');
 				}
 
-				var language = session.language.replace(/-/g, '_');
+				var language = session && session.language;
+				if (!language) {
+					language = typeof action[0] === 'string'
+					// 自 API_URL 擷取 language。
+					&& action[0].match(/^https?:\/\/([a-z\-\d]{2,20})\./);
+					language = language && language[1] || default_language;
+				}
+				language = language.replace(/-/g, '_');
 				if (language in agent.cookie_cache) {
 					agent.last_cookie.append(agent.cookie_cache[language]);
 					delete agent.cookie_cache[language];
@@ -3864,7 +3871,8 @@ function module_code(library_namespace) {
 				response = XMLHttp.responseText;
 				if (/^[45]/.test(status_code)) {
 					// e.g., 503, 413
-					if (get_URL_options.onfail) {
+					if (get_URL_options
+							&& typeof get_URL_options.onfail === 'function') {
 						get_URL_options.onfail(status_code);
 					} else if (typeof callback === 'function') {
 						library_namespace.warn(
