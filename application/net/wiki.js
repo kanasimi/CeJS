@@ -1873,6 +1873,7 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/zh-hans/條目#hash 說明
 	// https://zh.wikipedia.org/w/index.php?title=條目
 	// https://zh.wikipedia.org/w/index.php?uselang=zh-tw&title=條目
+	// https://zh.m.wikipedia.org/wiki/條目#hash
 	/**
 	 * Wikipedia:Wikimedia sister projects 之 URL。
 	 * 
@@ -3146,6 +3147,7 @@ function module_code(library_namespace) {
 					done++;
 					if (result.edit.newrevid) {
 						// https://en.wikipedia.org/wiki/Help:Wiki_markup#Linking_to_old_revisions_of_pages.2C_diffs.2C_and_specific_history_pages
+						// https://zh.wikipedia.org/?diff=000
 						error = ' [[Special:Diff/' + result.edit.newrevid
 								+ '|完成]]。';
 						result = 'succeed';
@@ -3768,9 +3770,9 @@ function module_code(library_namespace) {
 			var get_URL_options = options && options.get_URL_options;
 			// @see function setup_API_URL(session, API_URL)
 			if (!get_URL_options) {
-				var session = options[SESSION_KEY]
+				var session = options && (options[SESSION_KEY]
 				// 檢查若 options 本身即為 session。
-				|| options.token && options;
+				|| options.token && options);
 				if (session) {
 					// assert: get_URL_options 為 session。
 					if (!session.get_URL_options) {
@@ -3861,8 +3863,12 @@ function module_code(library_namespace) {
 					if (get_URL_options.onfail) {
 						get_URL_options.onfail(status_code);
 					} else if (typeof callback === 'function') {
-						library_namespace.warn('wiki_API.query: Get error '
-								+ status_code + ': [' + action + ']');
+						library_namespace.warn(
+						//
+						'wiki_API.query: Get error ' + status_code + ': '
+						// 避免 TypeError:
+						// Cannot convert object to primitive value
+						+ JSON.stringify(action));
 						callback(response, status_code);
 					}
 					return;
@@ -3943,6 +3949,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
 	 *      https://www.mediawiki.org/wiki/API:Etiquette 禮儀
+	 *      https://phabricator.wikimedia.org/T135240
 	 */
 	wiki_API.query.default_lag = 5000;
 

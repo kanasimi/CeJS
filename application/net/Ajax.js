@@ -868,8 +868,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 	request.on('error', typeof options.onfail === 'function' ? options.onfail
 			: function(error) {
-				console.error('get_URL_node: Get error when get [' + URL
+				console.error('get_URL_node: Get error when retrieving [' + URL
 						+ ']:');
+				// 這裡用太多並列處理，會造成 error.code "EMFILE"。
 				console.error(error);
 			});
 	// 遇到 "Unhandled 'error' event"，或許是 print 到 stdout 時出錯了，不一定是本函數的問題。
