@@ -3829,9 +3829,13 @@ function module_code(library_namespace) {
 					var last_cookie = agent.last_cookie;
 					agent.last_cookie = [];
 					while (last_cookie.length > 0) {
-						var cookie_item = last_cookie.pop(),
-						//
-						matched = cookie_item.match(/^([a-z_\d]{2,20})wiki/);
+						var cookie_item = last_cookie.pop();
+						if (!cookie_item) {
+							// 不知為何，也可能出現這種 cookie_item === undefined 的情況。
+							continue;
+						}
+						var matched = cookie_item
+								.match(/^([a-z_\d]{2,20})wiki/);
 						if (matched) {
 							var language = matched[1];
 							if (language in agent.cookie_cache)
