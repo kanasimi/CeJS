@@ -3853,10 +3853,15 @@ function module_code(library_namespace) {
 
 				var language = session && session.language;
 				if (!language) {
+					library_namespace.debug(
+							'未設定 session，自 API_URL 擷取 language: [' + action[0]
+									+ ']。', 1, 'wiki_API.query');
 					language = typeof action[0] === 'string'
-					// 自 API_URL 擷取 language。
+					// TODO: 似乎不能真的擷取到所需 language。
 					&& action[0].match(/^https?:\/\/([a-z\-\d]{2,20})\./);
 					language = language && language[1] || default_language;
+					library_namespace.warn('wiki_API.query: Get "' + language
+							+ '" from ' + JSON.stringify(action));
 				}
 				language = language.replace(/-/g, '_');
 				if (language in agent.cookie_cache) {
