@@ -2433,7 +2433,7 @@ function module_code(library_namespace) {
 						+ this.last_page.title + ']]！');
 				// next[3] : callback
 				if (typeof next[3] === 'function')
-					next[3].call(_this, this.last_page.title, '已停止作業');
+					next[3].call(this, this.last_page.title, '已停止作業');
 				this.next();
 
 			} else if (this.last_page.is_Flow) {
@@ -2591,6 +2591,9 @@ function module_code(library_namespace) {
 							}
 							// rollback
 							_this.actions.unshift(next);
+							// TODO: 在這即使 rollback 了 action，
+							// 還是可能出現丟失 this.last_page 的現象。
+							// e.g., @ 20160517.解消済み仮リンクをリンクに置き換える.js
 
 							// 直到 .edit 動作才會出現 badtoken，
 							// 因此在 wiki_API.login 尚無法偵測是否 badtoken。
@@ -4147,6 +4150,8 @@ function module_code(library_namespace) {
 	/**
 	 * 讀取頁面內容，取得頁面源碼。可一次處理多個標題。
 	 * 
+	 * 注意: 用太多 CeL.wiki.page() 並列處理，會造成 error.code "EMFILE"。
+	 * 
 	 * @example <code>
 
 	CeL.wiki.page('史記', function(page_data) {
@@ -4594,7 +4599,9 @@ function module_code(library_namespace) {
 				 * 
 				 * @see https://www.mediawiki.org/wiki/API:Query#batchcomplete
 				 */
-				if (data && ('batchcomplete' in data)) {
+				if (library_namespace.is_Object(data)
+				// status 503 時，data 可能為 string 之類。
+				&& ('batchcomplete' in data)) {
 					// assert: data.batchcomplete === ''
 					library_namespace.debug(
 					//
