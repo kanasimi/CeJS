@@ -3402,14 +3402,14 @@ function module_code(library_namespace) {
 			this.run(function() {
 				if (!no_message) {
 					library_namespace.debug('收尾。', 1, 'wiki_API.work');
-					var count_summary = ': 完成 '
-							+ done
-							//
-							+ (done === pages.length ? '' : '/' + pages.length)
-							//
-							+ (pages.length === target.length ? '' : '//'
-									+ target.length) + ' 條目';
-					if (log_item.report)
+					var count_summary = ': 完成 ' + done
+					//
+					+ (done === pages.length ? '' : '/' + pages.length)
+					//
+					+ (pages.length === target.length ? ''
+					//
+					: '//' + target.length) + ' 條目';
+					if (log_item.report) {
 						messages.unshift(count_summary + '，'
 						// 未改變任何條目。
 						+ (nochange_count ? (done === nochange_count
@@ -3417,13 +3417,17 @@ function module_code(library_namespace) {
 						? '所有' : nochange_count + ' ') + '條目未作變更，' : '')
 						// 使用時間, 歷時, 費時, elapsed time
 						+ '前後總共 ' + messages.start.age(new Date) + '。');
-					if (this.stopped)
+					}
+					if (this.stopped) {
 						messages.add("'''已停止作業'''，放棄編輯。");
-					if (done === nochange_count)
+					}
+					if (done === nochange_count && !config.no_edit) {
 						messages.add('全無變更。');
-					if (log_item.title && config.summary)
+					}
+					if (log_item.title && config.summary) {
 						// unescape
 						messages.unshift(config.summary.replace(/</g, '&lt;'));
+					}
 				}
 
 				if (typeof config.last === 'function')
@@ -3808,15 +3812,26 @@ function module_code(library_namespace) {
 			// use options.get_URL_options:{onfail:function(error){}} instead.
 			&& (!get_URL_options || !get_URL_options.onfail)) {
 				get_URL_options = Object.assign({
-					// 警告: 若是自行設定 .onfail，則需要自己處理 callback。
-					// 例如可能得在最後自己執行 ((wiki.running = false))。
 					onfail : function(error) {
-						if (error.code === 'ENOTFOUND'
-						// CeL.wiki.wmflabs
-						&& wmflabs) {
-							// 若在 Tool Labs 取得 wikipedia 的資料，
-							// 卻遇上 domain name not found，
-							// 通常表示 language (API_URL) 設定錯誤。
+						if (false) {
+							if (error.code === 'ENOTFOUND'
+							// CeL.wiki.wmflabs
+							&& wmflabs) {
+								// 若在 Tool Labs 取得 wikipedia 的資料，
+								// 卻遇上 domain name not found，
+								// 通常表示 language (API_URL) 設定錯誤。
+							}
+
+							// do next action.
+							// 警告: 若是自行設定 .onfail，則需要自行處理 callback。
+							// 例如可能得在最後自行執行 ((wiki.running = false))。
+							// wiki.running = false;
+							var session = options && (options[SESSION_KEY]
+							// 檢查若 options 本身即為 session。
+							|| options.token && options);
+							if (session) {
+								session.running = false;
+							}
 						}
 						callback && callback(undefined, error);
 					}
@@ -7625,7 +7640,9 @@ function module_code(library_namespace) {
 			// 自行設定之檔名 operation.file_name 優先度較 type/title 高。
 			// 需要自行創建目錄！
 			file_name = _this[type + '_prefix'] || type;
-			file_name = [ file_name ? file_name + '/' : '',
+			file_name = [ file_name
+			// treat file_name as directory
+			? /[\\\/]/.test(file_name) ? file_name : file_name + '/' : '',
 			//
 			get_page_content.is_page_data(list) ? list.title
 			// 若 Array.isArray(list)，則 ((file_name = ''))。
