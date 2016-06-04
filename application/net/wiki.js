@@ -3808,6 +3808,13 @@ function module_code(library_namespace) {
 					// 警告: 若是自行設定 .onfail，則需要自己處理 callback。
 					// 例如可能得在最後自己執行 ((wiki.running = false))。
 					onfail : function(error) {
+						if (error.code === 'ENOTFOUND'
+						// CeL.wiki.wmflabs
+						&& wmflabs) {
+							// 若在 Tool Labs 取得 wikipedia 的資料，
+							// 卻遇上 domain name not found，
+							// 通常表示 language (API_URL) 設定錯誤。
+						}
 						callback && callback(undefined, error);
 					}
 				}, get_URL_options);
@@ -3860,8 +3867,10 @@ function module_code(library_namespace) {
 					// TODO: 似乎不能真的擷取到所需 language。
 					&& action[0].match(/^https?:\/\/([a-z\-\d]{2,20})\./);
 					language = language && language[1] || default_language;
-					library_namespace.warn('wiki_API.query: Get "' + language
-							+ '" from ' + JSON.stringify(action));
+					// e.g., wiki_API.query: Get "ja" from
+					// ["https://ja.wikipedia.org/w/api.php?action=edit&format=json&utf8",{}]
+					library_namespace.debug('Get "' + language + '" from '
+							+ JSON.stringify(action), 1, 'wiki_API.query');
 				}
 				language = language.replace(/-/g, '_');
 				if (language in agent.cookie_cache) {
@@ -4261,6 +4270,7 @@ function module_code(library_namespace) {
 				options.prop = options.prop.join('|');
 
 			// e.g., prop=pageprops|revisions
+			// 沒 .pageprops 的似乎大多是沒有 Wikidata entity 的？
 			action[1] = 'prop=' + options.prop + '&' + action[1];
 		}
 
@@ -6242,7 +6252,7 @@ function module_code(library_namespace) {
 	TOOLSDB = 'tools-db',
 	/** {String}user/bot name */
 	user_name,
-	/** {String}Tool Labs name */
+	/** {String}Tool Labs name. CeL.wiki.wmflabs */
 	wmflabs,
 	/** mysql handler */
 	mysql,
@@ -6368,7 +6378,7 @@ function module_code(library_namespace) {
 	// only for node.js.
 	// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#How_can_I_detect_if_I.27m_running_in_Labs.3F_And_which_project_.28tools_or_toolsbeta.29.3F
 	if (library_namespace.platform.nodejs) {
-		/** {String}Tool Labs name */
+		/** {String}Tool Labs name. CeL.wiki.wmflabs */
 		wmflabs = node_fs.existsSync('/etc/wmflabs-project')
 		// e.g., 'tools-bastion-05'.
 		// if use ((process.env.INSTANCEPROJECT)), you may get 'tools' or
@@ -6380,6 +6390,7 @@ function module_code(library_namespace) {
 	}
 
 	if (wmflabs) {
+		// CeL.wiki.wmflabs
 		wiki_API.wmflabs = wmflabs;
 
 		// default: use Wikimedia Varnish Cache.
