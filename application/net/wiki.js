@@ -8091,23 +8091,25 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	if (false) {
-		var processed_data = new CeL.wiki.revision_cacher(base_directory
-				+ 'processed.' + use_language + '.json');
+		(function() {
+			var processed_data = new CeL.wiki.revision_cacher(base_directory
+					+ 'processed.' + use_language + '.json');
 
-		function for_each_page(page_data) {
-			// check_revid
-			if (!processed_data.older_than(page_data))
-				return;
+			function for_each_page(page_data) {
+				// check_revid
+				if (!processed_data.older_than(page_data))
+					return;
 
-			// page_data is new than processed data
+				// page_data is new than processed data
 
-			// ...
+				// ...
 
-			processed_data.cache(data_to_cache, page_data);
-		}
+				processed_data.cache(data_to_cache, page_data);
+			}
 
-		// write to file
-		processed_data.write();
+			// write to file
+			processed_data.write();
+		})();
 	}
 
 	// TODO
