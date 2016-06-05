@@ -2214,8 +2214,9 @@ function module_code(library_namespace) {
 	 * 另外內部會有另一個行程負責依序執行每一個工作。
 	 */
 	wiki_API.prototype.next = function() {
-		if (!(this.running = 0 < this.actions.length)) {
-			library_namespace.debug('Empty queue.', 2,
+		this.running = 0 < this.actions.length;
+		if (!this.running) {
+			library_namespace.debug('The queue is empty.', 2,
 					'wiki_API.prototype.next');
 			// console.warn(this);
 			return;
@@ -3402,13 +3403,15 @@ function module_code(library_namespace) {
 			this.run(function() {
 				if (!no_message) {
 					library_namespace.debug('收尾。', 1, 'wiki_API.work');
-					var count_summary = ': 完成 ' + done
+					var count_summary = ': 完成 '
 					//
-					+ (done === pages.length ? '' : '/' + pages.length)
+					+ (config.no_edit ? pages.length + '/'
 					//
-					+ (pages.length === target.length ? ''
+					: done + (done === pages.length ? '' : '/' + pages.length)
 					//
-					: '//' + target.length) + ' 條目';
+					+ (pages.length === target.length ? '' : '//'))
+					//
+					+ target.length + ' 條目';
 					if (log_item.report) {
 						messages.unshift(count_summary + '，'
 						// 未改變任何條目。
@@ -3822,10 +3825,18 @@ function module_code(library_namespace) {
 								// 通常表示 language (API_URL) 設定錯誤。
 							}
 
-							// do next action.
-							// 警告: 若是自行設定 .onfail，則需要自行處理 callback。
-							// 例如可能得在最後自行執行 ((wiki.running = false))。
-							// wiki.running = false;
+							/**
+							 * do next action. 警告: 若是自行設定 .onfail，則需要自行處理
+							 * callback。 例如可能得在最後自行執行 ((wiki.running = false))，
+							 * 使 wiki_API.prototype.next() 知道不應當做重複呼叫而跳出。
+							 */
+							wiki.running = false;
+							/**
+							 * 或者是當沒有自行設定 callback 時，手動呼叫 wiki.next()。
+							 * wiki.next() 會設定 wiki.running，因此兩方法二擇一。
+							 */
+							wiki.next();
+
 							var session = options && (options[SESSION_KEY]
 							// 檢查若 options 本身即為 session。
 							|| options.token && options);
@@ -5184,8 +5195,9 @@ function module_code(library_namespace) {
 					// TODO: handle exception
 				}
 				this.actions.push(args);
-				if (!this.running)
+				if (!this.running) {
 					this.next();
+				}
 				return this;
 			};
 		});
@@ -5586,7 +5598,7 @@ function module_code(library_namespace) {
 						// page_data =
 						// {pageid:0,ns:0,title:'',revisions:[{revid:0,parentid:0,user:'',timestamp:''},...]}
 						timestamp = page_data.revisions[0].timestamp;
-						// 指定 rev_id。
+						// 指定 rev_id 版本編號。
 						options.undo = page_data.revisions[0].revid;
 						options.undoafter = page_data.revisions
 						// get the oldest revision
@@ -8065,15 +8077,43 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.cache.title_only = function(last_data, operation) {
 		var list = operation.list;
-		if (typeof list === 'function')
+		if (typeof list === 'function') {
 			operation.list = list = list.call(this, last_data, operation);
+		}
 		return operation.type + '/' + remove_namespace(list);
 	};
 
 	// --------------------------------------------------------------------------------------------
 
+	if (false) {
+		var processed_data = new CeL.wiki.revision_cacher(base_directory
+				+ 'processed.' + use_language + '.json');
+
+		function for_each_page(page_data) {
+			// check_revid
+			if (!processed_data.older_than(page_data))
+				return;
+
+			// page_data is new than processed data
+
+			// ...
+
+			processed_data.cache(data_to_cache, page_data);
+		}
+
+		// write to file
+		processed_data.write();
+	}
+
+	// TODO
+	function revision_cacher(cache_file) {
+		;
+	}
+
+	// --------------------------------------------------------------------------------------------
+
 	/**
-	 * 由 Tool Labs database replication 讀取所有 ns0，且未被刪除頁面最新修訂版本之版本號 rev_id
+	 * 由 Tool Labs database replication 讀取所有 ns0，且未被刪除頁面最新修訂版本之版本編號 rev_id
 	 * (包含重定向)。<br />
 	 * 從 `page` 之 page id 確認 page 之 namespace，以及未被刪除。然後選擇其中最大的 revision id。
 	 * 
@@ -8289,7 +8329,10 @@ function module_code(library_namespace) {
 					if (false) {
 						/** {Object}revision data. 修訂版本資料。 */
 						var revision = page_data.revisions
-								&& page_data.revisions[0];
+								&& page_data.revisions[0],
+						/** {Natural}所取得之版本編號。 */
+						revid = page_data.revisions[0].revid;
+
 						/** {String}page title = page_data.title */
 						var title = CeL.wiki.title_of(page_data),
 						/**
