@@ -736,7 +736,7 @@ function module_code(library_namespace) {
 	 *            未指定: 處理所有節點。
 	 * @param {Function}processor
 	 *            執行特定作業: processor({Array|String|undefined}inside token list,
-	 *            {ℕ⁰:Natural+0}index, {Array}parent) {<br />
+	 *            {ℕ⁰:Natural+0}index of token, {Array}parent of token) {<br />
 	 *            return {String}wikitext or {Object}element;}
 	 * @param {Boolean}[modify_this]
 	 *            若 processor 的回傳值為{String}wikitext，則將指定類型節點替換/replace作此回傳值。
@@ -774,6 +774,7 @@ function module_code(library_namespace) {
 				// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
 				|| type === (Array.isArray(token) ? token.type : 'plain')) {
 					// get result. 須注意: 此 token 可能為 Array, string, undefined！
+					// for_each_token(token, token_index, token_parent)
 					var result = processor(token, index, _this);
 					if (modify_this) {
 						if (typeof result === 'string')
@@ -3371,7 +3372,11 @@ function module_code(library_namespace) {
 						if (messages.quit_operation) {
 							clear_work();
 						}
-					}, config.page_options);
+					},
+					// e.g., page_options:{rvprop:'ids|content|timestamp'}
+					// @see
+					// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
+					config.page_options);
 
 				} else {
 					// clone() 是為了能個別改變 summary。
