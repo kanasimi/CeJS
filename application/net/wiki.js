@@ -8168,9 +8168,15 @@ function module_code(library_namespace) {
 	}
 
 	revision_cacher.prototype = {
+		// id or 'revid'
+		KEY_ID : 'id',
+		KEY_DATA : 'data',
+		encoding : wiki_API.encoding,
+
 		// renew cache data
 		renew : function() {
-			this.data = library_namespace.null_Object();
+			// library_namespace.null_Object()
+			this[KEY_DATA] = {};
 		},
 		read : function(cache_file_path, options) {
 			if (typeof cache_file_path === 'object' && !options) {
@@ -8187,8 +8193,8 @@ function module_code(library_namespace) {
 				options = {
 					// Do NOT discard old data, use the old one.
 					// 保存舊資料不廢棄。
-					// 為了預防 this.data 肥大，一般應將舊資料放在 this.cached，
-					// 本次新處理的才放在 this.data。
+					// 為了預防 this[KEY_DATA] 肥大，一般應將舊資料放在 this.cached，
+					// 本次新處理的才放在 this[KEY_DATA]。
 					preserve : true
 				};
 			} else {
@@ -8196,37 +8202,42 @@ function module_code(library_namespace) {
 				setup_new = !options.preserve;
 			}
 
-			this.options = options;
+			// this.options = options;
+
+			// for .id_only, .KEY_ID, .encoding
+			Object.assign(this, options);
 
 			/**
 			 * {Object}舊資料/舊結果報告。 cache 已經處理完成操作的 data，但其本身可能也會占用一些以至大量RAM。
 			 * 
-			 * cached_data[local page title] = { revid : 0, user_defined_data }
+			 * cached_data[local page title] = { this.KEY_ID : 0,
+			 * user_defined_data }
+			 * 
+			 * if set .id_only, then:<br />
+			 * cached_data[local page title] = {Natural}revid
 			 */
 			var cached_data;
 			try {
 				cached_data = node_fs.readFileSync(cache_file_path,
-						options.encoding || wiki_API.encoding);
+						this.encoding);
 			} catch (e) {
 				// nothing get.
 			}
-			cached_data = cached_data && JSON.parse(cached_data)
-					|| library_namespace.null_Object();
+			cached_data = cached_data && JSON.parse(cached_data) || {};
 			this.cached = cached_data;
 
 			if (setup_new) {
 				Object.seal(cached_data);
 				this.renew();
 			} else {
-				// this.data: processed data
-				this.data = cached_data;
+				// this[KEY_DATA]: processed data
+				this[KEY_DATA] = cached_data;
 			}
 		},
 		write : function(cache_file_path) {
 			// node_fs.writeFileSync()
 			node_fs.writeFile(cache_file_path || this.file, JSON
-					.stringify(this.data), options.encoding
-					|| wiki_API.encoding);
+					.stringify(this[KEY_DATA]), this.encoding);
 		},
 
 		had : function(page_data) {
@@ -8240,21 +8251,26 @@ function module_code(library_namespace) {
 			library_namespace.debug('[[' + title + ']] revid ' + revid, 3,
 					'revision_cacher.had');
 			if (title in this.cached) {
-				var setup_new = this.data !== this.cached;
-				if (this.cached[title].revid === revid) {
+				var setup_new = this[KEY_DATA] !== this.cached,
+				//
+				cached_revid = this.cached[title];
+				if (this.id_only) {
+					cached_revid = cached_revid[this.KEY_ID];
+				}
+				if (cached_revid === revid) {
 					// copy old data.
-					// assert: this.data[title] is modifiable.
+					// assert: this[KEY_DATA][title] is modifiable.
 					if (setup_new) {
-						this.data[title] = this.cached[title];
+						this[KEY_DATA][title] = this.cached[title];
 					}
 					library_namespace.debug('Skip [[' + title + ']] revid '
 							+ revid, 2, 'revision_cacher.had');
 					return true;
 				}
-				// assert: this.cached[title].revid < revid
+				// assert: cached_revid < revid
 				// rebuild data
 				if (setup_new) {
-					delete this.data[title];
+					delete this[KEY_DATA][title];
 				}
 				return false;
 			}
@@ -8265,13 +8281,19 @@ function module_code(library_namespace) {
 			title = typeof page_data === 'string' ? page_data
 					: get_page_title(page_data),
 			/** {Object}本頁之 processed data。 */
-			data = this.data[title];
+			data = this[KEY_DATA][title];
 
 			if (!data) {
 				// 登記 page_data 之 revid。只有經過 .data_of() 的才造出新實體。
-				this.data[title] = data = {
-					revid : revid || page_data.revisions[0].revid
-				};
+				if (!revid) {
+					revid = page_data.revisions[0].revid;
+				}
+				if (this.id_only) {
+					data = revid;
+				} else {
+					(data = {})[this.KEY_ID] = revid;
+				}
+				this[KEY_DATA][title] = data;
 			}
 			return data;
 		},
@@ -8281,8 +8303,8 @@ function module_code(library_namespace) {
 			title = typeof page_data === 'string' ? page_data
 					: get_page_title(page_data);
 
-			if (title in this.data) {
-				delete this.data[title];
+			if (title in this[KEY_DATA]) {
+				delete this[KEY_DATA][title];
 			}
 		}
 	};
