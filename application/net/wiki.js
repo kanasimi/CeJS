@@ -1943,7 +1943,7 @@ function module_code(library_namespace) {
 				return section.slice(8);
 			}
 
-			// 對某些 section 可能 throw！
+			// 須注意: 對某些 section 可能 throw！
 			section = decodeURIComponent(section.replace(/\./g, '%'));
 		}
 
@@ -8297,24 +8297,26 @@ function module_code(library_namespace) {
 		},
 		data_of : function(page_data, revid) {
 			var this_data = this[this.KEY_DATA],
-			/** {Object}本頁之 processed data。 */
-			data = this_data[title],
 			/** {String}page title = page_data.title */
 			title = typeof page_data === 'string' ? page_data
-					: get_page_title(page_data);
+					: get_page_title(page_data),
+			/** {Object}本頁之 processed data。 */
+			data = this_data[title];
 
-			if (!data) {
-				// 登記 page_data 之 revid。只有經過 .data_of() 的才造出新實體。
-				if (!revid) {
-					revid = page_data.revisions[0].revid;
-				}
-				if (this.id_only) {
-					data = revid;
-				} else {
-					(data = {})[this.KEY_ID] = revid;
-				}
-				this_data[title] = data;
+			if (data) {
+				/** {Object}本頁之 processed data。 */
+				return data;
 			}
+
+			// 登記 page_data 之 revid。只有經過 .data_of() 的才造出新實體。
+			if (!revid) {
+				revid = page_data.revisions[0].revid;
+			}
+			if (this.id_only) {
+				return this_data[title] = revid;
+			}
+
+			(data = {})[this.KEY_ID] = revid;
 			return data;
 		},
 		remove : function(page_data) {
