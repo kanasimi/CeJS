@@ -8249,20 +8249,18 @@ function module_code(library_namespace) {
 			revid = page_data.revisions[0].revid;
 			// console.log(CeL.wiki.content_of(page_data));
 
-			library_namespace.debug('[[' + title + ']] revid ' + revid, 3,
+			library_namespace.debug('[[' + title + ']] revid ' + revid, 4,
 					'revision_cacher.had');
 			if (title in this.cached) {
-				var setup_new = this[this.KEY_DATA] !== this.cached,
-				//
-				cached_revid = this.cached[title];
-				if (this.id_only) {
-					cached_revid = cached_revid[this.KEY_ID];
-				}
+				var this_data = this[this.KEY_DATA], setup_new = this_data !== this.cached, cached = this.cached[title], cached_revid = this.id_only ? cached
+						: cached[this.KEY_ID];
+				library_namespace.debug('[[' + title + ']] cached revid '
+						+ cached_revid, 4, 'revision_cacher.had');
 				if (cached_revid === revid) {
-					// copy old data.
-					// assert: this[this.KEY_DATA][title] is modifiable.
 					if (setup_new) {
-						this[this.KEY_DATA][title] = this.cached[title];
+						// copy old data.
+						// assert: this_data[title] is modifiable.
+						this_data[title] = cached;
 					}
 					library_namespace.debug('Skip [[' + title + ']] revid '
 							+ revid, 2, 'revision_cacher.had');
@@ -8271,18 +8269,18 @@ function module_code(library_namespace) {
 				// assert: cached_revid < revid
 				// rebuild data
 				if (setup_new) {
-					delete this[this.KEY_DATA][title];
+					delete this_data[title];
 				}
 				return false;
 			}
 		},
 		data_of : function(page_data, revid) {
-			var
+			var this_data = this[this.KEY_DATA],
+			/** {Object}本頁之 processed data。 */
+			data = this_data[title];
 			/** {String}page title = page_data.title */
 			title = typeof page_data === 'string' ? page_data
-					: get_page_title(page_data),
-			/** {Object}本頁之 processed data。 */
-			data = this[this.KEY_DATA][title];
+					: get_page_title(page_data);
 
 			if (!data) {
 				// 登記 page_data 之 revid。只有經過 .data_of() 的才造出新實體。
@@ -8294,18 +8292,18 @@ function module_code(library_namespace) {
 				} else {
 					(data = {})[this.KEY_ID] = revid;
 				}
-				this[this.KEY_DATA][title] = data;
+				this_data[title] = data;
 			}
 			return data;
 		},
 		remove : function(page_data) {
-			var
+			var this_data = this[this.KEY_DATA],
 			/** {String}page title = page_data.title */
 			title = typeof page_data === 'string' ? page_data
 					: get_page_title(page_data);
 
-			if (title in this[this.KEY_DATA]) {
-				delete this[this.KEY_DATA][title];
+			if (title in this_data) {
+				delete this_data[title];
 			}
 		}
 	};
