@@ -8172,6 +8172,8 @@ function module_code(library_namespace) {
 		KEY_ID : 'id',
 		KEY_DATA : 'data',
 		encoding : wiki_API.encoding,
+		// 連續跳過超過此頁面數 .show_skip 則會顯示訊息。
+		show_skip : 9,
 
 		// renew cache data
 		renew : function() {
@@ -8204,8 +8206,15 @@ function module_code(library_namespace) {
 
 			// this.options = options;
 
-			// for .id_only, .KEY_ID, .encoding
+			// for .id_only, .KEY_ID, .encoding, .show_skip
 			Object.assign(this, options);
+
+			// reset skipped_count
+			// this.skipped = 0;
+			// 連續跳過計數。
+			if (this.show_skip > 0) {
+				this.continuous_skip = 0;
+			}
 
 			/**
 			 * {Object}舊資料/舊結果報告。
@@ -8264,6 +8273,7 @@ function module_code(library_namespace) {
 					}
 					library_namespace.debug('Skip [[' + title + ']] revid '
 							+ revid, 2, 'revision_cacher.had');
+					// this.skipped++;
 					return true;
 				}
 				// assert: cached_revid < revid
@@ -8271,13 +8281,22 @@ function module_code(library_namespace) {
 				if (setup_new) {
 					delete this_data[title];
 				}
-				return false;
+				// 因為要顯示連續跳過計數資訊，因此不先跳出。
+				// return false;
+			}
+
+			if (this.continuous_skip > 0) {
+				if (this.continuous_skip > this.show_skip) {
+					library_namespace.log('revision_cacher: Skip '
+							+ this.continuous_skip + ' pages.');
+				}
+				this.continuous_skip = 0;
 			}
 		},
 		data_of : function(page_data, revid) {
 			var this_data = this[this.KEY_DATA],
 			/** {Object}本頁之 processed data。 */
-			data = this_data[title];
+			data = this_data[title],
 			/** {String}page title = page_data.title */
 			title = typeof page_data === 'string' ? page_data
 					: get_page_title(page_data);
