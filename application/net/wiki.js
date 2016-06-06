@@ -8271,9 +8271,11 @@ function module_code(library_namespace) {
 						// assert: this_data[title] is modifiable.
 						this_data[title] = cached;
 					}
-					library_namespace.debug('Skip [[' + title + ']] revid '
-							+ revid, 2, 'revision_cacher.had');
 					// this.skipped++;
+					this.continuous_skip++;
+					library_namespace.debug('Skip ' + this.continuous_skip
+							+ ': [[' + title + ']] revid ' + revid, 2,
+							'revision_cacher.had');
 					return true;
 				}
 				// assert: cached_revid < revid
