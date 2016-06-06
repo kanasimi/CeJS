@@ -5766,7 +5766,7 @@ function module_code(library_namespace) {
 	wiki_API.edit.check_data = function(data, title, caller) {
 		var action;
 		// 可以利用 ((return [ CeL.wiki.edit.cancel, 'reason' ];)) 來回傳 reason。
-		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來跳過 skip。
+		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來跳過 (skip) 不特別顯示。
 		if (data === wiki_API.edit.cancel)
 			// 統一規範放棄編輯頁面訊息。
 			data = [ wiki_API.edit.cancel ];
@@ -8117,7 +8117,7 @@ function module_code(library_namespace) {
 				// Check if page_data had processed useing revid.
 				if (processed_data.had(page_data)) {
 					// skipped_count++;
-					return;
+					return [ CeL.wiki.edit.cancel, 'skip' ];
 				}
 
 				// 在耗費資源的操作後，登記已處理之 title/revid。其他為節省空間，不做登記。
