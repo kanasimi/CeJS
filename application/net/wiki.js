@@ -126,11 +126,11 @@ function module_code(library_namespace) {
 	// (wikipedia|wikibooks|wikinews|wikiquote|wikisource|wikiversity|wikivoyage|wikidata|wikimediafoundation|wiktionary|mediawiki)
 
 	/**
-	 * Wikimedia projects 的 URL pattern
+	 * Wikimedia projects 的 URL match pattern 匹配模式。
 	 * 
 	 * matched: [ protocol + host name, protocol, host name, language / project ]
 	 * 
-	 * @type {String}
+	 * @type {RegExp}
 	 */
 	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z\-\d]{2,20})(?:\.[a-z]+)+)/i;
 
@@ -191,7 +191,7 @@ function module_code(library_namespace) {
 		return wiki_API.API_URL;
 	}
 
-	// https://www.wikimedia.org/
+	// @see https://www.wikimedia.org/
 	api_URL.wikimedia = {
 		meta : true,
 		commons : true,
@@ -388,6 +388,14 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 	// 創建 match pattern 相關函數。
 
+	/**
+	 * 將第一個字母轉成大寫。
+	 * 
+	 * @param {String}word
+	 *            要轉換的文字。
+	 * 
+	 * @returns {String}轉換過的文字。
+	 */
 	function upper_case_initial(word) {
 		return word.charAt(0).toUpperCase() + word.slice(1);
 	}
@@ -536,6 +544,7 @@ function module_code(library_namespace) {
 	// [[Media:image.png]]：產生一個指向檔案本身的連結
 	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/settings/zhwiki-configuration.xml
 	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/scala/org/dbpedia/extraction/wikiparser/impl/wikipedia/Namespaces.scala
+	/** {RegExp}檔案的匹配模式。 */
 	var PATTERN_file_prefix = 'File|Image|Media|[檔档]案|[圖图]像|文件|媒[體体](?:文件)?';
 
 	file_pattern.source =
@@ -651,10 +660,8 @@ function module_code(library_namespace) {
 	}
 
 	/*
-	 * 
 	 * should use: class Wiki_page extends Array { }
 	 * http://www.2ality.com/2015/02/es6-classes-final.html
-	 * 
 	 */
 
 	/**
@@ -872,12 +879,14 @@ function module_code(library_namespace) {
 					result.push(token);
 			});
 
-			if (result.length > 1)
+			if (result.length > 1) {
 				set_wiki_type(result, 'text');
-			else
+			} else {
 				result = result[0];
-			if (result.includes(include_mark))
+			}
+			if (result.includes(include_mark)) {
 				throw new Error('resolve_escaped: 仍有 include mark 殘留！');
+			}
 			queue[index] = result;
 		});
 	}
@@ -885,8 +894,9 @@ function module_code(library_namespace) {
 	// 經測試發現 {{...}} 名稱中不可有 [{}<>\[\]]
 	// while(/{{{[^{}\[\]]+}}}/g.exec(wikitext));
 	// 模板名#後的內容會忽略。
+	/** {RegExp}模板的匹配模式。 */
 	var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
-	//
+	/** {RegExp}內部連結的匹配模式。 */
 	PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
 	markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark';
@@ -1373,7 +1383,8 @@ function module_code(library_namespace) {
 		// 由於 <tag>... 可能被 {{Template}} 截斷，因此先處理 {{Template}} 再處理 <t></t>。
 		// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
 
-		// 不採用 global pattern，預防 multitasking 並行處理。
+		// 不採用 global variable，預防 multitasking 並行處理。
+		/** {RegExp}HTML tag 的匹配模式。 */
 		var PATTERN_TAG = new RegExp('<(' + markup_tags
 				+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'gi');
 
@@ -1800,7 +1811,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 使用者/用戶對話頁面所符合的模式。
+	 * 使用者/用戶對話頁面所符合的匹配模式。
 	 * 
 	 * matched: [ all, "user name" ]
 	 * 
@@ -1835,7 +1846,7 @@ function module_code(library_namespace) {
 
 	//
 	/**
-	 * 重定向頁所符合的模式。 Note that the redirect link must be explicit – it cannot
+	 * 重定向頁所符合的匹配模式。 Note that the redirect link must be explicit – it cannot
 	 * contain magic words, templates, etc.
 	 * 
 	 * matched: [ all, "title#section" ]
@@ -1876,7 +1887,7 @@ function module_code(library_namespace) {
 	// https://zh.wikipedia.org/w/index.php?uselang=zh-tw&title=條目
 	// https://zh.m.wikipedia.org/wiki/條目#hash
 	/**
-	 * Wikipedia:Wikimedia sister projects 之 URL。
+	 * Wikipedia:Wikimedia sister projects 之 URL 匹配模式。
 	 * 
 	 * matched: [ all, language code, title 條目名稱, section 章節, link說明 ]
 	 * 
@@ -3223,10 +3234,11 @@ function module_code(library_namespace) {
 					data = [ data ];
 
 			if (Array.isArray(pages) && data.length !== pages.length
-					&& !setup_target)
+					&& !setup_target) {
 				library_namespace.warn('wiki_API.work: query 所得之 length ('
 						+ data.length + ') !== pages.length (' + pages.length
 						+ ') ！');
+			}
 
 			// 傳入標題列表，則由程式自行控制，毋須設定後續檢索用索引值。
 			if (!messages.input_title_list
@@ -3313,6 +3325,8 @@ function module_code(library_namespace) {
 
 			/**
 			 * 處理回傳超過 limit (12 MB)，被截斷之情形。
+			 * 
+			 * TODO: 有時可能連 pages.length 都是 trimmed 過的。
 			 */
 			if ('OK_length' in pages) {
 				if (setup_target) {
@@ -3562,15 +3576,17 @@ function module_code(library_namespace) {
 				// 因為 8000/500-3 = 13 > 最長 page id，因此即使 500頁也不會超過。
 				// 為提高效率，不作 check。
 				max_size = config.is_id ? 500 : check_max_length(this_slice);
-				if (max_size < slice_size)
+				// console.log([ 'max_size:', max_size, config.is_id ]);
+				if (max_size < slice_size) {
 					this_slice = this_slice.slice(0, max_size);
+				}
 				if (work_continue === 0 && max_size === target.length) {
 					library_namespace.debug('設定一次先取得所有 ' + target.length
 							+ ' 個頁面之 revisions (page contents 頁面內容)。', 2,
 							'wiki_API.work');
 				} else {
 					nochange_count = target.length;
-					// start-end/all
+					// start–end/all
 					done = '處理分塊 ' + (work_continue + 1) + '–'
 							+ (work_continue + max_size) + '/' + nochange_count;
 					// Add percentage.
@@ -3591,6 +3607,7 @@ function module_code(library_namespace) {
 				messages.reset();
 
 				work_continue += max_size;
+				// console.log([ 'page_options:', page_options ]);
 				this.page(this_slice, main_work, page_options);
 			}).bind(this);
 			setup_target();
@@ -3831,14 +3848,9 @@ function module_code(library_namespace) {
 							}
 
 							/**
-							 * do next action. 警告: 若是自行設定 .onfail，則需要自行處理
-							 * callback。 例如可能得在最後自行執行 ((wiki.running = false))，
-							 * 使 wiki_API.prototype.next() 知道不應當做重複呼叫而跳出。
-							 */
-							wiki.running = false;
-							/**
-							 * 或者是當沒有自行設定 callback 時，手動呼叫 wiki.next()。
-							 * wiki.next() 會設定 wiki.running，因此兩方法二擇一。
+							 * do next action. 警告: 若是自行設定 .onfail，則需要自行善後。
+							 * 例如可能得在最後自行執行(手動呼叫) wiki.next()， 使
+							 * wiki_API.prototype.next() 知道應當重新啟動以處理 queue。
 							 */
 							wiki.next();
 
@@ -8092,30 +8104,174 @@ function module_code(library_namespace) {
 
 	if (false) {
 		(function() {
-			var processed_data = new CeL.wiki.revision_cacher(base_directory
+			/**
+			 * usage of revision_cacher()
+			 */
+
+			var
+			/** {revision_cacher}記錄處理過的文章。 */
+			processed_data = new CeL.wiki.revision_cacher(base_directory
 					+ 'processed.' + use_language + '.json');
 
 			function for_each_page(page_data) {
-				// check_revid
-				if (!processed_data.older_than(page_data))
+				// Check if page_data had processed useing revid.
+				if (processed_data.had(page_data)) {
+					// skipped_count++;
 					return;
+				}
+
+				// 在耗費資源的操作後，登記已處理之 title/revid。其他為節省空間，不做登記。
+				// 初始化本頁之 processed data: 只要處理過，無論成功失敗都作登記。
+				var data_to_cache = processed_data.data_of(page_data);
+				// or
+				processed_data.data_of(title, revid);
 
 				// page_data is new than processed data
 
-				// ...
+				// main task...
 
-				processed_data.cache(data_to_cache, page_data);
+				// 成功才登記。失敗則下次重試。
+				processed_data.remove(title);
+
+				// 可能中途 killed, crashed，因此尚不能 write_processed()，
+				// 否則會把 throw 的當作已處理過。
 			}
 
-			// write to file
+			function finish_work() {
+				// 由於造出 data 的時間過長，可能丟失 token，
+				// 因此將 processed_data 放在 finish_work() 階段。
+				processed_data.renew();
+			}
+
+			function onfail() {
+				// 確保沒有因特殊錯誤產生的漏網之魚。
+				titles.uniq().forEach(processed_data.remove, processed_data);
+			}
+
+			// Finally: Write to cache file.
 			processed_data.write();
 		})();
 	}
 
-	// TODO
-	function revision_cacher(cache_file) {
-		;
+	/**
+	 * 
+	 * @param {String}cache_file_path
+	 *            記錄處理過的文章。 *
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 */
+	function revision_cacher(cache_file_path, options) {
+		this.read(cache_file_path, options);
 	}
+
+	revision_cacher.prototype = {
+		// renew cache data
+		renew : function() {
+			this.data = library_namespace.null_Object();
+		},
+		read : function(cache_file_path, options) {
+			this.file = cache_file_path;
+
+			var setup_new;
+			if (options === true) {
+				setup_new = false;
+				options = {
+					// Do NOT discard old data, use the old one.
+					// 保存舊資料不廢棄。
+					// 為了預防 this.data 肥大，一般應將舊資料放在 this.cached，
+					// 本次新處理的才放在 this.data。
+					preserve : true
+				};
+			} else {
+				options = library_namespace.setup_options(config);
+				setup_new = !options.preserve;
+			}
+
+			this.options = options;
+
+			/**
+			 * {Object}舊資料/舊結果報告。 cache 已經處理完成操作的 data，但其本身可能也會占用一些以至大量RAM。
+			 * 
+			 * cached_data[local page title] = { revid : 0, user_defined_data }
+			 */
+			var cached_data = node_fs.readFile(cache_file_path,
+					options.encoding || wiki_API.encoding);
+			cached_data = cached_data && JSON.parse(cached_data)
+					|| library_namespace.null_Object();
+			this.cached = cached_data;
+
+			if (setup_new) {
+				Object.seal(cached_data);
+				this.renew();
+			} else {
+				// this.data: processed data
+				this.data = cached_data;
+			}
+		},
+		write : function(cache_file_path) {
+			node_fs.writeFile(cache_file_path || this.file, JSON
+					.stringify(this.data), options.encoding
+					|| wiki_API.encoding);
+		},
+
+		had : function(page_data) {
+			var
+			/** {String}page title = page_data.title */
+			title = get_page_title(page_data),
+			/** {Natural}所取得之版本編號。 */
+			revid = page_data.revisions[0].revid;
+			// console.log(CeL.wiki.content_of(page_data));
+
+			library_namespace.debug('[[' + title + ']] revid ' + revid, 3,
+					'revision_cacher.had');
+			if (title in this.cached) {
+				var setup_new = this.data !== this.cached;
+				if (this.cached[title].revid === revid) {
+					// copy old data.
+					// assert: this.data[title] is modifiable.
+					if (setup_new) {
+						this.data[title] = this.cached[title];
+					}
+					library_namespace.debug('Skip [[' + title + ']] revid '
+							+ revid, 2, 'revision_cacher.had');
+					return true;
+				}
+				// assert: this.cached[title].revid < revid
+				// rebuild data
+				if (setup_new) {
+					delete this.data[title];
+				}
+				return false;
+			}
+		},
+		data_of : function(page_data, revid) {
+			var
+			/** {String}page title = page_data.title */
+			title = typeof page_data === 'string' ? page_data
+					: get_page_title(page_data),
+			/** {Object}本頁之 processed data。 */
+			data = this.data[title];
+
+			if (!data) {
+				// 登記 page_data 之 revid。只有經過 .data_of() 的才造出新實體。
+				this.data[title] = data = {
+					revid : revid || page_data.revisions[0].revid
+				};
+			}
+			return data;
+		},
+		remove : function(page_data) {
+			var
+			/** {String}page title = page_data.title */
+			title = typeof page_data === 'string' ? page_data
+					: get_page_title(page_data);
+
+			if (title in this.data) {
+				delete this.data[title];
+			}
+		}
+	};
 
 	// --------------------------------------------------------------------------------------------
 
@@ -8347,6 +8503,11 @@ function module_code(library_namespace) {
 						 * revision['*']
 						 */
 						content = CeL.wiki.content_of(page_data);
+
+						if (!page_data || ('missing' in page_data)) {
+							// error?
+							return;
+						}
 
 						// 似乎沒 !page_data.title 這種問題。
 						if (false && !page_data.title)
@@ -10036,9 +10197,11 @@ function module_code(library_namespace) {
 	// {{tsl|ja|オメガクインテット|*ω*Quintet}}
 	// {{tsl|en|Tamara de Lempicka|Tamara Łempicka}}
 	// {{link-en|Željko Ivanek|Zeljko Ivanek}}
+	/** {RegExp}常用字母的匹配模式。 */
 	var PATTERN_common_characters = /[\s\d_,.:;'"!()\-+\&<>\\\/\?–`@#$%^&*=~×☆★♪♫♬♩○●©®℗™℠]+/g,
 	// non-Chinese / non-CJK: 必須置於所有非中日韓語言之後測試!!
 	// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement
+	/** {RegExp}非漢文化字母的匹配模式。 */
 	PATTERN_non_CJK = /^[\u0008-\u2E7F]+$/i,
 	/**
 	 * 判定 label 標籤標題語言使用之 pattern。
@@ -10305,12 +10468,22 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// 要合併自的ID
-	// 要合併到的ID
-	// 要忽略衝突的項的元素數組，只能包含值“description”和/或“sitelink”和/或“statement”。
-	// 多值 (以 | 分隔)：description、sitelink、statement
-	// 網站鏈接和描述
-	// TODO: wikidata_merge([to, from1, from2], ...)
+	/**
+	 * 合併自 wikidata 的 entity。
+	 * 
+	 * TODO: wikidata_merge([to, from1, from2], ...)
+	 * 
+	 * @param {String}to
+	 *            要合併自的ID
+	 * @param {String}from
+	 *            要合併到的ID
+	 * @param {Object}token
+	 *            login 資訊，包含“csrf”令牌/密鑰。
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * @param {Function}[callback]
+	 *            回調函數。 callback(轉成JavaScript的值. e.g., {Array}list)
+	 */
 	function wikidata_merge(to, from, token, options, callback) {
 		if (!/^Q\d{1,10}$/.test(to)) {
 			wikidata_entity(to, function(entity) {
@@ -10329,6 +10502,9 @@ function module_code(library_namespace) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
 
+		// 要忽略衝突的項的元素數組，只能包含值“description”和/或“sitelink”和/或“statement”。
+		// 多值 (以 | 分隔)：description、sitelink、statement
+		// 網站鏈接和描述
 		var ignoreconflicts = 'ignoreconflicts' in options ? options.ignoreconflicts
 				// 最常使用的功能是合併2頁面。可忽略任何衝突的 description, statement。
 				// https://www.wikidata.org/wiki/Help:Statements
@@ -10530,6 +10706,8 @@ function module_code(library_namespace) {
 		Flow : Flow_info,
 
 		guess_language : guess_language,
+
+		revision_cacher : revision_cacher,
 
 		data : wikidata_entity,
 		edit_data : wikidata_edit,
