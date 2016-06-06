@@ -8154,12 +8154,14 @@ function module_code(library_namespace) {
 	}
 
 	/**
+	 * 記錄處理過的文章。
 	 * 
 	 * @param {String}cache_file_path
-	 *            記錄處理過的文章。 *
+	 *            記錄處理過的文章。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
+	 * @constructor
 	 */
 	function revision_cacher(cache_file_path, options) {
 		this.read(cache_file_path, options);
@@ -8171,7 +8173,13 @@ function module_code(library_namespace) {
 			this.data = library_namespace.null_Object();
 		},
 		read : function(cache_file_path, options) {
-			this.file = cache_file_path;
+			if (typeof cache_file_path === 'object' && !options) {
+				options = cache_file_path;
+				cache_file_path = options.file;
+			}
+			if (cache_file_path) {
+				this.file = cache_file_path;
+			}
 
 			var setup_new;
 			if (options === true) {
@@ -8184,7 +8192,7 @@ function module_code(library_namespace) {
 					preserve : true
 				};
 			} else {
-				options = library_namespace.setup_options(config);
+				options = library_namespace.setup_options(options);
 				setup_new = !options.preserve;
 			}
 
@@ -8195,8 +8203,13 @@ function module_code(library_namespace) {
 			 * 
 			 * cached_data[local page title] = { revid : 0, user_defined_data }
 			 */
-			var cached_data = node_fs.readFile(cache_file_path,
-					options.encoding || wiki_API.encoding);
+			var cached_data;
+			try {
+				cached_data = node_fs.readFileSync(cache_file_path,
+						options.encoding || wiki_API.encoding);
+			} catch (e) {
+				// nothing get.
+			}
 			cached_data = cached_data && JSON.parse(cached_data)
 					|| library_namespace.null_Object();
 			this.cached = cached_data;
@@ -8210,6 +8223,7 @@ function module_code(library_namespace) {
 			}
 		},
 		write : function(cache_file_path) {
+			// node_fs.writeFileSync()
 			node_fs.writeFile(cache_file_path || this.file, JSON
 					.stringify(this.data), options.encoding
 					|| wiki_API.encoding);
