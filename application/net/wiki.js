@@ -3214,7 +3214,7 @@ function module_code(library_namespace) {
 				// error: message, result: result type.
 
 				if (log_item[Array.isArray(result)
-				// {Array}result = [ main, sub ]
+				// {Array}result = [ main error code, sub ]
 				? result.join('_') in log_item ? result.join('_') : result[0]
 						: result]) {
 					error = gettext('%1 elapsed, %2 %3',
@@ -3466,13 +3466,13 @@ function module_code(library_namespace) {
 					if (log_item.report) {
 						messages.unshift(count_summary + (nochange_count > 0
 						//
-						? gettext(', %1%2 pages no change,',
+						? gettext(', %1%2 pages no change',
 						// 
 						done === nochange_count
 						// 未改變任何條目。
 						? gettext('all ') : '', nochange_count) : '')
 						// 使用時間, 歷時, 費時, elapsed time
-						+ gettext('%1 elapsed.',
+						+ gettext(', %1 elapsed.',
 						//
 						messages.start.age(new Date)));
 					}
@@ -5104,12 +5104,17 @@ function module_code(library_namespace) {
 					library_namespace.show_value(next_index,
 							'get_list: get the continue value');
 
-			} else if (('batchcomplete' in data) && continue_session
-			// check "batchcomplete"
-			&& (type in continue_session)) {
-				library_namespace.debug('去除已經不需要的檢索用索引值。', 3, 'get_list');
-				// needless.
-				delete continue_session[type];
+			} else if (('batchcomplete' in data) && continue_session) {
+				// ↑ check "batchcomplete"
+				var keyword_continue = get_list.type[type];
+				if (Array.isArray(keyword_continue)) {
+					keyword_continue = keyword_continue[0];
+				}
+				if (keyword_continue in continue_session.next_mark) {
+					library_namespace.debug('去除已經不需要的檢索用索引值。', 3, 'get_list');
+					// needless.
+					delete continue_session.next_mark[keyword_continue];
+				}
 			}
 
 			// 紀錄清單類型。
