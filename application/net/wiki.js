@@ -2919,8 +2919,8 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.prototype.date_format = '%4Y%2m%2dT%2H%2M';
 
-	/** {String}後續檢索用索引值標記名稱 */
-	wiki_API.prototype.continue_key = '後續索引';
+	/** {String}後續索引。後續檢索用索引值標記名稱。 */
+	wiki_API.prototype.continue_key = 'Continue key';
 
 	/**
 	 * 規範 log 之格式。(for wiki_API.prototype.work)
@@ -2968,8 +2968,12 @@ function module_code(library_namespace) {
 		// assert: 除了 piece_list 外必要之字串長 < 192
 		// e.g.,
 		// "https://zh.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content|timestamp&titles=...&format=json&utf8=1"
-		if (!(limit_length > 0))
+		if (!(limit_length >= 0)) {
 			limit_length = 8000;
+		}
+		if (false && !(limit >= 0)) {
+			limit = 5000;
+		}
 
 		var length = 0, index = piece_list.length;
 
@@ -3183,6 +3187,7 @@ function module_code(library_namespace) {
 				// error: message, result: result type.
 
 				// 間隔
+				// %1 later, %2 finished
 				error = '隔 ' + messages.last.age(new Date) + '，'
 				// 紀錄使用時間, 歷時, 費時, elapsed time
 				+ (messages.last = new Date)
@@ -3252,6 +3257,7 @@ function module_code(library_namespace) {
 
 			if (!no_message) {
 				// 使用時間, 歷時, 費時, elapsed time
+				// First, use %1 to get %2 pages.
 				pages = '首先使用 ' + messages.last.age(new Date) + ' 以取得 '
 						+ data.length + ' 個頁面內容。';
 				// 在「首先使用」之後才設定 .last，才能正確抓到「首先使用」。
@@ -3575,7 +3581,8 @@ function module_code(library_namespace) {
 				// 自動判別最大可用 index，預防 "414 Request-URI Too Long"。
 				// 因為 8000/500-3 = 13 > 最長 page id，因此即使 500頁也不會超過。
 				// 為提高效率，不作 check。
-				max_size = config.is_id ? 500 : check_max_length(this_slice);
+				max_size = config.is_id ? 500 : check_max_length(this_slice,
+						500);
 				// console.log([ 'max_size:', max_size, config.is_id ]);
 				if (max_size < slice_size) {
 					this_slice = this_slice.slice(0, max_size);
@@ -5016,14 +5023,20 @@ function module_code(library_namespace) {
 
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
-			&& library_namespace.show_value)
+			&& library_namespace.show_value) {
 				library_namespace.show_value(data, 'get_list: ' + type);
+			}
 
 			var titles = [], pages = [],
 			// 取得列表後，設定/紀錄新的後續檢索用索引值。
 			// https://www.mediawiki.org/wiki/API:Query#Backwards_compatibility_of_continue
 			// {Object}next_index: 後續檢索用索引值。
 			next_index = data['continue'] || data['query-continue'];
+			if (!continue_session) {
+				continue_session = options[SESSION_KEY];
+				// assert: continue_session &&
+				// library_namespace.is_Object(continue_session.next_mark)
+			}
 			if (library_namespace.is_Object(next_index)) {
 				pages.next_index = next_index;
 				library_namespace.debug(
@@ -5031,22 +5044,21 @@ function module_code(library_namespace) {
 						//
 						+ '因此需要在本函數 function get_list() 中設定好。', 4, 'get_list');
 				// console.log(continue_session);
-				if (continue_session
-				//
-				|| (continue_session = options[SESSION_KEY])) {
+				if (continue_session) {
 					// console.log(continue_session.next_mark);
 					// console.log(next_index);
 					// console.log(continue_session);
-					if ('query-continue' in data)
+					if ('query-continue' in data) {
 						// style of 2014 CE. 例如:
 						// {backlinks:{blcontinue:'[0|12]'}}
 						for ( var type_index in next_index)
 							Object.assign(continue_session.next_mark,
 									next_index[type_index]);
-					else
+					} else {
 						// nowadays. e.g.,
 						// {continue: { blcontinue: '0|123', continue: '-||' }}
 						Object.assign(continue_session.next_mark, next_index);
+					}
 					library_namespace.debug('next index of ' + type + ': '
 							+ continue_session.show_next());
 				}
@@ -5055,12 +5067,21 @@ function module_code(library_namespace) {
 				&& library_namespace.show_value)
 					library_namespace.show_value(next_index,
 							'get_list: get the continue value');
+
+			} else if (('batchcomplete' in data) && continue_session
+			// check "batchcomplete"
+			&& (type in continue_session.next_mark)) {
+				library_namespace.debug('去除已經不需要的檢索用索引值。', 3, 'get_list');
+				// needless.
+				delete continue_session.next_mark[type];
 			}
+
 			// 紀錄清單類型。
 			// assert: overwrite 之屬性不應該是原先已經存在之屬性。
 			pages.list_type = type;
-			if (get_page_content.is_page_data(title))
+			if (get_page_content.is_page_data(title)) {
 				title = title.title;
+			}
 
 			if (!data || !data.query) {
 				library_namespace.err('get_list: Unknown response: ['
@@ -5070,8 +5091,9 @@ function module_code(library_namespace) {
 
 			} else if (data.query[type]) {
 				// 一般情況。
-				if (Array.isArray(data = data.query[type]))
+				if (Array.isArray(data = data.query[type])) {
 					data.forEach(add_page);
+				}
 
 				library_namespace.debug('[' + title + ']: ' + titles.length
 						+ ' page(s)', 2, 'get_list');
@@ -8168,9 +8190,9 @@ function module_code(library_namespace) {
 	}
 
 	revision_cacher.prototype = {
+		KEY_DATA : 'data',
 		// id or 'revid'
 		KEY_ID : 'id',
-		KEY_DATA : 'data',
 		encoding : wiki_API.encoding,
 		// 連續跳過超過此頁面數 .show_skip 則會顯示訊息。
 		show_skip : 9,
@@ -8295,28 +8317,29 @@ function module_code(library_namespace) {
 				this.continuous_skip = 0;
 			}
 		},
+		// 注意: 只有經過 .data_of() 的才造出新實體。因此即使沒有要取得資料，也需要呼叫一次 .data_of() 以造出新實體。
 		data_of : function(page_data, revid) {
 			var this_data = this[this.KEY_DATA],
 			/** {String}page title = page_data.title */
 			title = typeof page_data === 'string' ? page_data
-					: get_page_title(page_data),
-			/** {Object}本頁之 processed data。 */
-			data = this_data[title];
+					: get_page_title(page_data);
 
-			if (data) {
-				/** {Object}本頁之 processed data。 */
-				return data;
+			if (title in this_data) {
+				return this_data[title];
 			}
 
-			// 登記 page_data 之 revid。只有經過 .data_of() 的才造出新實體。
+			// 登記 page_data 之 revid。
 			if (!revid) {
 				revid = page_data.revisions[0].revid;
 			}
 			if (this.id_only) {
+				// 注意: 這個時候回傳的不是 {Object}
 				return this_data[title] = revid;
 			}
 
-			(data = {})[this.KEY_ID] = revid;
+			/** {Object}本頁之 processed data。 */
+			var data = this_data[title] = {};
+			data[this.KEY_ID] = revid;
 			return data;
 		},
 		remove : function(page_data) {
