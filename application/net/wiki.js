@@ -3453,14 +3453,16 @@ function module_code(library_namespace) {
 					count_summary = ': '
 							+ gettext('%1 pages done', count_summary);
 					if (log_item.report) {
-						if (nochange_count > 0) {
-							count_summary
-							// 未改變任何條目。
-							+= gettext(', %1 %2 pages no change,',
-									gettext('all'), nochange_count);
-						}
-						messages.unshift(count_summary + gettext('%1 elapsed.',
+						messages.unshift(count_summary + (nochange_count > 0
+						//
+						? gettext(', %1%2 pages no change,',
+						// 
+						done === nochange_count
+						// 未改變任何條目。
+						? gettext('all ') : '', nochange_count) : '')
 						// 使用時間, 歷時, 費時, elapsed time
+						+ gettext('%1 elapsed.',
+						//
 						messages.start.age(new Date)));
 					}
 					if (this.stopped) {
