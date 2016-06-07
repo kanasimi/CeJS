@@ -2934,8 +2934,9 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.prototype.date_format = '%4Y%2m%2dT%2H%2M';
 
+	var default_continue_key = 'Continue key';
 	/** {String}後續索引。後續檢索用索引值標記名稱。 */
-	wiki_API.prototype.continue_key = 'Continue key';
+	wiki_API.prototype.continue_key = default_continue_key;
 
 	/**
 	 * 規範 log 之格式。(for wiki_API.prototype.work)
@@ -5095,10 +5096,10 @@ function module_code(library_namespace) {
 
 			} else if (('batchcomplete' in data) && continue_session
 			// check "batchcomplete"
-			&& (type in continue_session.next_mark)) {
+			&& (type in continue_session)) {
 				library_namespace.debug('去除已經不需要的檢索用索引值。', 3, 'get_list');
 				// needless.
-				delete continue_session.next_mark[type];
+				delete continue_session[type];
 			}
 
 			// 紀錄清單類型。
@@ -6297,8 +6298,11 @@ function module_code(library_namespace) {
 				&& (navigator.userLanguage || navigator.language) || default_language)
 				.toLowerCase().replace(/-.+$/, ''));
 
-		if (SQL_config)
+		if (SQL_config) {
 			SQL_config.set_language(default_language);
+		}
+
+		wiki_API.prototype.continue_key = gettext(default_continue_key);
 
 		return wiki_API.language = default_language;
 	}
