@@ -4812,12 +4812,13 @@ function module_code(library_namespace) {
 			// {Object} continue data
 			data = library_namespace.null_Object();
 
-			if (!pattern)
+			if (!pattern) {
 				pattern = new RegExp(library_namespace.to_RegExp_pattern(
 				//
 				(options.continue_key || wiki_API.prototype.continue_key)
 						.trim())
 						+ ' *:? *({[^{}]{0,80}})', 'g');
+			}
 			library_namespace.debug('pattern: ' + pattern, 2, 'get_continue');
 
 			while (matched = pattern.exec(content)) {
@@ -5107,13 +5108,17 @@ function module_code(library_namespace) {
 			} else if (('batchcomplete' in data) && continue_session) {
 				// ↑ check "batchcomplete"
 				var keyword_continue = get_list.type[type];
-				if (Array.isArray(keyword_continue)) {
-					keyword_continue = keyword_continue[0];
-				}
-				if (keyword_continue in continue_session.next_mark) {
-					library_namespace.debug('去除已經不需要的檢索用索引值。', 3, 'get_list');
-					// needless.
-					delete continue_session.next_mark[keyword_continue];
+				if (keyword_continue) {
+					if (Array.isArray(keyword_continue)) {
+						keyword_continue = keyword_continue[0];
+					}
+					// e.g., "cmcontinue"
+					keyword_continue += 'continue';
+					if (keyword_continue in continue_session.next_mark) {
+						library_namespace.debug('去除已經不需要的檢索用索引值。', 3, 'get_list');
+						// needless.
+						delete continue_session.next_mark[keyword_continue];
+					}
 				}
 			}
 
