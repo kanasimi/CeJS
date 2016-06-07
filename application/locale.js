@@ -1,6 +1,6 @@
 
 /**
- * @name	CeL function for locale / i18n (Internationalization) 系列
+ * @name	CeL function for locale / i18n (Internationalization, ja:地域化) 系列
  * @fileoverview
  * 本檔案包含了地區語系/文化設定的 functions。
  * @since	
@@ -1362,10 +1362,6 @@ gettext.set_alias({
 
 	'arb-Arab' : 'العربية|ar|Arabic|阿拉伯語|ar-arb-Arab',
 
-	//	Subtag: cmn, Preferred-Value: cmn
-	'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|简化字|简化中文|簡化字|簡體中文|普通话|中国|官话|Simplified Chinese|Mandarin Chinese',
-	// 現代標準漢語
-	'cmn-Hant-TW' : '繁體中文|zh-TW|繁體|zh-cmn-Hant-TW|TW|Chinese|傳統中文|正體中文|正體|漢語|華語|中文|中國|臺灣|台灣|官話|中華民國國語|Traditional Chinese',
 	// Min Nan Chinese. Macrolanguage: zh.
 	// zh-min-nan: http://taigi-pahkho.wikia.com/wiki/%E9%A0%AD%E9%A0%81
 	// using 臺灣閩南語推薦用字
@@ -1374,6 +1370,10 @@ gettext.set_alias({
 	'cmn-Hant-HK' : '香港普通話|zh-yue-Hant-HK|Cantonese|香港華語|香港官話',
 	// 粵語審音配詞字庫 http://humanum.arts.cuhk.edu.hk/Lexis/lexi-can/
 	'yue-Hant-HK' : '香港粵語|zh-yue-Hant-HK|Hong Kong Cantonese|港式粵語|香港話|港式廣東話|港式廣州話',
+	//	Subtag: cmn, Preferred-Value: cmn
+	'cmn-Hans-CN' : '简体中文|zh-CN|简体|zh-cmn-Hans-CN|CN|简化字|简化中文|簡化字|簡體中文|普通话|中国|官话|Simplified Chinese|Mandarin Chinese',
+	// 現代標準漢語
+	'cmn-Hant-TW' : '繁體中文|zh-TW|繁體|zh-cmn-Hant-TW|TW|Chinese|傳統中文|正體中文|正體|漢語|華語|中文|中國|臺灣|台灣|官話|中華民國國語|Traditional Chinese',
 
 	//	Subtag: en, Suppress-Script: Latn
 	//	"zh-Hant" and "zh-Hans" represent Chinese written in Traditional and Simplified scripts respectively, while the language subtag "en" has a "Suppress-Script" field in the registry indicating that most English texts are written in the Latin script, discouraging a tag such as "en-Latn-US".

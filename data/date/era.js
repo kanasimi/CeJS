@@ -121,7 +121,8 @@ if (typeof CeL === 'function')
 		code : function(library_namespace) {
 
 			// requiring
-			var String_to_Date = this.r('String_to_Date'), Julian_day = this.r('Julian_day');
+			var String_to_Date = this.r('String_to_Date'), Julian_day = this
+					.r('Julian_day');
 
 			// ---------------------------------------------------------------------//
 			// basic constants. 定義基本常數。

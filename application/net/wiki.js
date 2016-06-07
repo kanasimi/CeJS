@@ -54,10 +54,12 @@ typeof CeL === 'function' && CeL.run({
 	// .between() @ data.native
 	// .append() @ data.native
 	require : 'data.code.compatibility.|data.native.'
-	// (new Date).format('%4Y%2m%2d'), (new Date).format() @ data.date
-	// optional: .show_value() @ interact.DOM, application.debug
-	// optional: .fs_mkdir() @ CeL.wiki.cache()
-	// @ CeL.wiki.traversal() @ application.platform.nodejs
+	// (new Date).format('%4Y%2m%2d'), (new Date).format() @ CeL.data.date
+	// optional 選用: .show_value() @ CeL.interact.DOM, CeL.application.debug
+	// optional 選用: CeL.wiki.cache(): CeL.application.platform.nodejs.fs_mkdir()
+	// optional 選用: CeL.wiki.traversal(): CeL.application.platform.nodejs
+	// optional 選用 : wiki_API.work(), gettext():
+	// CeL.application.platform.nodejs.gettext()
 	+ '|application.net.Ajax.get_URL|data.date.',
 	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
 	code : module_code,
@@ -68,7 +70,20 @@ typeof CeL === 'function' && CeL.run({
 function module_code(library_namespace) {
 
 	// requiring
-	var get_URL = this.r('get_URL');
+	var get_URL = this.r('get_URL'),
+	//
+	gettext = library_namespace.gettext || function(text_id) {
+		if (library_namespace.gettext) {
+			gettext = library_namespace.gettext;
+			return gettext.apply(null, arguments);
+		}
+
+		// a simplified version
+		var arg = arguments;
+		return text_id.replace(/%(\d+)/g, function(all, NO) {
+			return arg[NO];
+		});
+	};
 
 	// --------------------------------------------------------------------------------------------
 
@@ -3098,15 +3113,17 @@ function module_code(library_namespace) {
 				}
 			}
 
-		} else if (Array.isArray(config.each))
+		} else if (Array.isArray(config.each)) {
 			each = config;
-		else
+		} else {
 			library_namespace.err(
 			//
 			'wiki_API.work: Invalid function for each page!');
+		}
 
-		if (each[1])
+		if (each[1]) {
 			Object.assign(options, each[1]);
+		}
 		// 採用 {{tlx|template_name}} 時，[[Special:最近更改]]頁面無法自動解析成 link。
 		options.summary = (callback = config.summary)
 		// 是為 Robot 運作。
@@ -3144,7 +3161,7 @@ function module_code(library_namespace) {
 						done++;
 						// 未經過 wiki 操作，於 wiki_API.edit 發現為[[WP:NULLEDIT|無改變]]的。
 						nochange_count++;
-						error = '無改變。';
+						error = gettext('no change');
 						result = 'nochange';
 					} else {
 						// 有錯誤發生。
@@ -3152,15 +3169,15 @@ function module_code(library_namespace) {
 						// The "editprotected" right is required to edit this
 						// page
 						result = [ 'error', error ];
-						error = '結束: ' + error;
+						error = gettext('finished: %1', error);
 					}
 				else if (!result.edit) {
 					// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
 					library_namespace.err('wiki_API.work: 無 result.edit'
 							+ (result.edit ? '.newrevid' : '')
 							+ '！可能是 token lost！');
-					error = '無 result.edit' + (result.edit ? '.newrevid' : '')
-							+ '。';
+					error = 'no "result.edit'
+							+ (result.edit ? '.newrevid".' : '.');
 					result = [ 'error', 'token lost?' ];
 				} else {
 					// 成功完成。
@@ -3168,31 +3185,29 @@ function module_code(library_namespace) {
 					if (result.edit.newrevid) {
 						// https://en.wikipedia.org/wiki/Help:Wiki_markup#Linking_to_old_revisions_of_pages.2C_diffs.2C_and_specific_history_pages
 						// https://zh.wikipedia.org/?diff=000
-						error = ' [[Special:Diff/' + result.edit.newrevid
-								+ '|完成]]。';
+						error = ' [[Special:Diff/' + result.edit.newrevid + '|'
+								+ gettext('finished') + ']]';
 						result = 'succeed';
 					} else if ('nochange' in result.edit) {
 						// 經過 wiki 操作，發現為[[WP:NULLEDIT|無改變]]的。
 						nochange_count++;
-						error = '無改變。';
+						error = gettext('no change');
 						result = 'nochange';
 					} else {
 						// 有時無 result.edit.newrevid。
 						library_namespace.err('無 result.edit.newrevid');
-						error = '完成。';
+						error = gettext('finished');
 						result = 'succeed';
 					}
 				}
 
 				// error: message, result: result type.
 
-				// 間隔
-				// %1 later, %2 finished
-				error = '隔 ' + messages.last.age(new Date) + '，'
+				error = gettext('%1 elapsed, %2 %3',
 				// 紀錄使用時間, 歷時, 費時, elapsed time
-				+ (messages.last = new Date)
+				messages.last.age(new Date), (messages.last = new Date)
 				//
-				.format(config.date_format || this.date_format) + ' ' + error;
+				.format(config.date_format || this.date_format), error);
 				if (log_item[Array.isArray(result)
 				// {Array}result = [ main, sub ]
 				? result.join('_') in log_item ? result.join('_') : result[0]
@@ -3257,9 +3272,8 @@ function module_code(library_namespace) {
 
 			if (!no_message) {
 				// 使用時間, 歷時, 費時, elapsed time
-				// First, use %1 to get %2 pages.
-				pages = '首先使用 ' + messages.last.age(new Date) + ' 以取得 '
-						+ data.length + ' 個頁面內容。';
+				pages = gettext('First, use %1 to get %2 pages.', messages.last
+						.age(new Date), data.length);
 				// 在「首先使用」之後才設定 .last，才能正確抓到「首先使用」。
 				messages.last = new Date;
 				if (log_item.get_pages)
@@ -3302,8 +3316,9 @@ function module_code(library_namespace) {
 						// 從後頭搜尋比較快。
 						work_continue = target.lastIndexOf(continue_id,
 								work_continue);
-						if (work_continue === NOT_FOUND)
+						if (work_continue === NOT_FOUND) {
 							throw new Error('page id not found: ' + continue_id);
+						}
 						// assert: 一定找得到。
 						// work_continue≥pages開頭之index=(原work_continue)-pages.length
 					} else {
@@ -3428,29 +3443,33 @@ function module_code(library_namespace) {
 			this.run(function() {
 				if (!no_message) {
 					library_namespace.debug('收尾。', 1, 'wiki_API.work');
-					var count_summary = ': 完成 '
-					//
-					+ (config.no_edit ? pages.length + '/'
+					var count_summary = (config.no_edit ? pages.length + '/'
 					//
 					: done + (done === pages.length ? '' : '/' + pages.length)
 					//
 					+ (pages.length === target.length ? '' : '//'))
 					//
-					+ target.length + ' 條目';
+					+ target.length;
+					count_summary = ': '
+							+ gettext('%1 pages done', count_summary);
 					if (log_item.report) {
-						messages.unshift(count_summary + '，'
-						// 未改變任何條目。
-						+ (nochange_count ? (done === nochange_count
-						//
-						? '所有' : nochange_count + ' ') + '條目未作變更，' : '')
+						if (nochange_count > 0) {
+							count_summary
+							// 未改變任何條目。
+							+= gettext(', %1 %2 pages no change,',
+									gettext('all'), nochange_count);
+						}
+						messages.unshift(count_summary + gettext('%1 elapsed.',
 						// 使用時間, 歷時, 費時, elapsed time
-						+ '前後總共 ' + messages.start.age(new Date) + '。');
+						messages.start.age(new Date)));
 					}
 					if (this.stopped) {
-						messages.add("'''已停止作業'''，放棄編輯。");
+						messages.add(
+						//
+						gettext("'''Stopped''', give up editing."));
 					}
 					if (done === nochange_count && !config.no_edit) {
-						messages.add('全無變更。');
+						messages.add(gettext('Nothing change.'));
 					}
 					if (log_item.title && config.summary) {
 						// unescape
@@ -3458,9 +3477,10 @@ function module_code(library_namespace) {
 					}
 				}
 
-				if (typeof config.last === 'function')
+				if (typeof config.last === 'function') {
 					// 對於量過大而被分割者，每次分段結束都將執行一次 .last()。
 					config.last.call(this, messages, titles, pages);
+				}
 
 				var log_to = 'log_to' in config ? config.log_to
 				// default log_to
@@ -3662,6 +3682,9 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項<br />
 	 *            wiki_API.edit 可能輸入 session 當作 options。
+	 * 
+	 * @see api source:
+	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/includes/api
 	 */
 	wiki_API.query = function(action, callback, post_data, options) {
 		// 處理 action
@@ -8145,7 +8168,10 @@ function module_code(library_namespace) {
 				// 在耗費資源的操作後，登記已處理之 title/revid。其他為節省空間，不做登記。
 				// 初始化本頁之 processed data: 只要處理過，無論成功失敗都作登記。
 				var data_to_cache = processed_data.data_of(page_data);
-				// or
+				// or:
+				// 注意: 只有經過 .data_of() 的才造出新實體。
+				// 因此即使沒有要取得資料，也需要呼叫一次 .data_of() 以造出新實體、登記 page_data 之 revid。
+				processed_data.data_of(page_data);
 				processed_data.data_of(title, revid);
 
 				// page_data is new than processed data
@@ -8317,7 +8343,8 @@ function module_code(library_namespace) {
 				this.continuous_skip = 0;
 			}
 		},
-		// 注意: 只有經過 .data_of() 的才造出新實體。因此即使沒有要取得資料，也需要呼叫一次 .data_of() 以造出新實體。
+		// 注意: 只有經過 .data_of() 的才造出新實體。
+		// 因此即使沒有要取得資料，也需要呼叫一次 .data_of() 以造出新實體、登記 page_data 之 revid。
 		data_of : function(page_data, revid) {
 			var this_data = this[this.KEY_DATA],
 			/** {String}page title = page_data.title */
@@ -8364,6 +8391,7 @@ function module_code(library_namespace) {
 	 * @type {String}
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
+	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/maintenance/tables.sql
 	 */
 	var all_revision_SQL = 'SELECT `rev_page` AS i, MAX(`rev_id`) AS r FROM `revision` INNER JOIN `page` ON `page`.`page_id` = `revision`.`rev_page` WHERE `page`.`page_namespace` = 0 AND `revision`.`rev_deleted` = 0 GROUP BY `rev_page`';
 
