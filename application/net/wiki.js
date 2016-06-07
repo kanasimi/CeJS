@@ -3157,7 +3157,16 @@ function module_code(library_namespace) {
 			callback = no_message ? library_namespace.null_function
 			// default logger.
 			: function(title, error, result) {
-				if (error)
+				if (error) {
+					// ((return [ CeL.wiki.edit.cancel, 'skip' ];))
+					// 來跳過，不特別顯示或處理。
+					// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
+					if (error === 'skip') {
+						done++;
+						nochange_count++;
+						return;
+					}
+
 					if (error === 'nochange') {
 						done++;
 						// 未經過 wiki 操作，於 wiki_API.edit 發現為[[WP:NULLEDIT|無改變]]的。
@@ -3172,7 +3181,7 @@ function module_code(library_namespace) {
 						result = [ 'error', error ];
 						error = gettext('finished: %1', error);
 					}
-				else if (!result.edit) {
+				} else if (!result.edit) {
 					// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
 					library_namespace.err('wiki_API.work: 無 result.edit'
 							+ (result.edit ? '.newrevid' : '')
@@ -3204,15 +3213,16 @@ function module_code(library_namespace) {
 
 				// error: message, result: result type.
 
-				error = gettext('%1 elapsed, %2 %3',
-				// 紀錄使用時間, 歷時, 費時, elapsed time
-				messages.last.age(new Date), (messages.last = new Date)
-				//
-				.format(config.date_format || this.date_format), error);
 				if (log_item[Array.isArray(result)
 				// {Array}result = [ main, sub ]
 				? result.join('_') in log_item ? result.join('_') : result[0]
 						: result]) {
+					error = gettext('%1 elapsed, %2 %3',
+					// 紀錄使用時間, 歷時, 費時, elapsed time
+					messages.last.age(new Date), (messages.last = new Date)
+					//
+					.format(config.date_format || this.date_format), error);
+
 					messages.add(error, title);
 				}
 			};
@@ -5810,26 +5820,31 @@ function module_code(library_namespace) {
 	 *            title or id.
 	 * @param {String}caller
 	 *            caller to show.
+	 * 
+	 * @returns
 	 */
 	wiki_API.edit.check_data = function(data, title, caller) {
 		var action;
 		// 可以利用 ((return [ CeL.wiki.edit.cancel, 'reason' ];)) 來回傳 reason。
-		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來跳過 (skip) 不特別顯示。
-		if (data === wiki_API.edit.cancel)
+		// ((return [ CeL.wiki.edit.cancel, 'skip' ];)) 來跳過 (skip)，不特別顯示或處理。
+		if (data === wiki_API.edit.cancel) {
 			// 統一規範放棄編輯頁面訊息。
 			data = [ wiki_API.edit.cancel ];
+		}
 
 		if (!data) {
 			action = [ 'empty', typeof data === 'string' ? '內容被清空' : '未設定編輯內容' ];
 
 		} else if (Array.isArray(data) && data[0] === wiki_API.edit.cancel) {
 			action = data.slice(1);
-			if (action.length === 1)
+			if (action.length === 1) {
 				// error messages
 				action[1] = action[0] || '放棄編輯頁面';
-			if (!action[0])
+			}
+			if (!action[0]) {
 				// error code
 				action[0] = 'cancel';
+			}
 
 			library_namespace.debug('採用個別特殊訊息: ' + action, 2, caller
 					|| 'wiki_API.edit.check_data');
