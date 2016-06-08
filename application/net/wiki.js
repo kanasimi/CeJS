@@ -2509,7 +2509,7 @@ function module_code(library_namespace) {
 
 				} else {
 					library_namespace.debug('直接採用 Flow 的方式增添新話題。');
-					// get the contents
+					// use/get the contents of this.last_page
 					if (typeof next[1] === 'function') {
 						// next[1] = next[1](get_page_content(this.last_page),
 						// this.last_page.title, this.last_page);
@@ -5115,7 +5115,8 @@ function module_code(library_namespace) {
 					// e.g., "cmcontinue"
 					keyword_continue += 'continue';
 					if (keyword_continue in continue_session.next_mark) {
-						library_namespace.debug('去除已經不需要的檢索用索引值。', 3, 'get_list');
+						library_namespace.debug('去除已經不需要的檢索用索引值。', 3,
+								'get_list');
 						// needless.
 						delete continue_session.next_mark[keyword_continue];
 					}
@@ -5843,12 +5844,14 @@ function module_code(library_namespace) {
 		}
 
 		if (!data) {
+			// 内容はクリアされます 内容が設定されていません
 			action = [ 'empty', typeof data === 'string' ? '內容被清空' : '未設定編輯內容' ];
 
 		} else if (Array.isArray(data) && data[0] === wiki_API.edit.cancel) {
 			action = data.slice(1);
 			if (action.length === 1) {
 				// error messages
+				// 編集を放棄した
 				action[1] = action[0] || '放棄編輯頁面';
 			}
 			if (!action[0]) {
@@ -5865,7 +5868,7 @@ function module_code(library_namespace) {
 			if (action[1] !== 'skip') {
 				// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
 				library_namespace.warn((caller || 'wiki_API.edit.check_data')
-				// 未提供原因
+				// 未提供原因 説明がありません
 				+ ': [[' + title + ']]: ' + (action[1] || '未描述原因'));
 			} else {
 				library_namespace.debug('Skip [[' + title + ']]', 2, caller
