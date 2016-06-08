@@ -352,6 +352,37 @@ if (typeof CeL === 'function')
 
 			// --------------------------------------------
 
+			/**
+			 * test code: <code>
+			 * '-h|--help|-f=|--file=|-f=File|--file=File|File|file=File'.split('|').forEach(function(arg) { console.log(arg.match(/^(-{0,2})([^=]+?)(=(.*))?$/)); });
+			 * </code>
+			 */
+			if (process.argv && process.argv.length > 2) {
+				process.argv.slice(2).forEach(function(arg) {
+					var matched = arg.match(/^(-{0,2})([^=]+?)(=(.*))?$/);
+					if (matched[2].startsWith('-')) {
+						console.warn(
+						//
+						'platform.nodejs: Invalid argument: [' + arg + ']');
+						this[arg] = undefined;
+						return;
+					}
+
+					if (!matched[3]) {
+						this[matched[2]] = undefined;
+						return;
+					}
+
+					this[matched[2]] = matched[4];
+				},
+				// use ((CeL.env.argv)) to get command line arguments
+				library_namespace.env.argv
+				//
+				= library_namespace.null_Object());
+			}
+
+			// --------------------------------------------
+
 			// TODO:
 			// Buffer.prototype.indexOf()
 			// https://github.com/nodejs/node/blob/master/lib/buffer.js#L578

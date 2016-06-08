@@ -8363,7 +8363,9 @@ function module_code(library_namespace) {
 			library_namespace.debug('[[' + title + ']] revid ' + revid, 4,
 					'revision_cacher.had');
 			if (title in this.cached) {
-				var this_data = this[this.KEY_DATA], setup_new = this_data !== this.cached, cached = this.cached[title], cached_revid = this.id_only ? cached
+				var this_data = this[this.KEY_DATA], setup_new = this_data !== this.cached,
+				//
+				cached = this.cached[title], cached_revid = this.id_only ? cached
 						: cached[this.KEY_ID];
 				library_namespace.debug('[[' + title + ']] cached revid '
 						+ cached_revid, 4, 'revision_cacher.had');
