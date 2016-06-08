@@ -2157,9 +2157,10 @@ function module_code(library_namespace) {
 			return content.content;
 
 		// 檢測一般頁面
-		if (get_page_content.is_page_data(page_data))
-			return (content = get_page_content.has_content(page_data)) ? content['*']
+		if (get_page_content.is_page_data(page_data)) {
+			return (content = get_page_content.revision(page_data)) ? content['*']
 					: null;
+		}
 
 		// 一般都會輸入 page_data: {"pageid":0,"ns":0,"title":""}
 		// : typeof page_data === 'string' ? page_data
@@ -2197,13 +2198,18 @@ function module_code(library_namespace) {
 		return get_page_content.is_page_data(page_data) && page_data.pageid;
 	};
 
-	// return .revisions[0]
-	// 不回傳 {String}，減輕負擔。
-	get_page_content.has_content = function(page_data) {
+	// return main revision
+	get_page_content.revision = function(page_data) {
 		return library_namespace.is_Object(page_data)
 		// treat as page data. Try to get page contents: page.revisions[0]['*']
 		// 一般說來應該是由新排到舊，[0] 為最新的版本。
 		&& page_data.revisions && page_data.revisions[0];
+	};
+
+	// return .revisions[0]
+	// 不回傳 {String}，減輕負擔。
+	get_page_content.has_content = function(page_data) {
+		return get_page_content.revision(page_data);
 	};
 
 	// --------------------------------------------------------------------------------------------
@@ -5683,9 +5689,12 @@ function module_code(library_namespace) {
 						delete options.undo_count;
 						// page_data =
 						// {pageid:0,ns:0,title:'',revisions:[{revid:0,parentid:0,user:'',timestamp:''},...]}
-						timestamp = page_data.revisions[0].timestamp;
-						// 指定 rev_id 版本編號。
-						options.undo = page_data.revisions[0].revid;
+						var revision = get_page_content.revision(page_data);
+						if (revision) {
+							timestamp = revision.timestamp;
+							// 指定 rev_id 版本編號。
+							options.undo = revision.revid;
+						}
 						options.undoafter = page_data.revisions
 						// get the oldest revision
 						[page_data.revisions.length - 1].parentid;
@@ -5902,7 +5911,7 @@ function module_code(library_namespace) {
 	wiki_API.edit.set_stamp = function(options, timestamp) {
 		if (get_page_content.is_page_data(timestamp)
 		// 在 .page() 會取得 page_data.revisions[0].timestamp
-		&& (timestamp = get_page_content.has_content(timestamp)))
+		&& (timestamp = get_page_content.revision(timestamp)))
 			// 自 page_data 取得 timestamp.
 			timestamp = timestamp.timestamp;
 		// timestamp = '2000-01-01T00:00:00Z';
@@ -8332,15 +8341,22 @@ function module_code(library_namespace) {
 					.stringify(this[this.KEY_DATA]), this.encoding);
 		},
 
+		// 注意: 若未 return true，則表示 page_data 為正規且 cache 中沒有，或較 cache 新的頁面資料。
 		had : function(page_data) {
+			// page_data 為正規?
+			if (!page_data || ('missing' in page_data)) {
+				// error?
+				return 'missing';
+			}
+
 			var
 			/** {String}page title = page_data.title */
 			title = get_page_title(page_data),
-			/** {Object}revision data. 修訂版本資料。 */
-			revision = page_data && page_data.revisions
-					&& page_data.revisions[0],
 			/** {Natural}所取得之版本編號。 */
-			revid = revision && revision.revid;
+			revid = get_page_content.revision(page_data);
+			if (revid) {
+				revid = revid.revid;
+			}
 
 			// console.log(CeL.wiki.content_of(page_data));
 
@@ -8375,7 +8391,7 @@ function module_code(library_namespace) {
 
 			if (this.continuous_skip > 0) {
 				if (this.continuous_skip > this.show_skip) {
-					library_namespace.log('revision_cacher: Skip '
+					library_namespace.log('revision_cacher.had: Skip '
 							+ this.continuous_skip + ' pages.');
 				}
 				this.continuous_skip = 0;
@@ -8394,14 +8410,15 @@ function module_code(library_namespace) {
 			}
 
 			// 登記 page_data 之 revid。
-			if (!revid) {
-				var
-				/** {Object}revision data. 修訂版本資料。 */
-				revision = page_data && page_data.revisions
-						&& page_data.revisions[0];
-				/** {Natural}所取得之版本編號。 */
-				revid = revision && revision.revid;
+			if (!revid || !(revid = get_page_content.revision(page_data))
+			/** {Natural}所取得之版本編號。 */
+			|| !(revid = revid.revid)) {
+				// 照理來說，會來到這裡的都應該是經過 .had() 確認，因此不該出現此情況。
+				library_namespace.err('revision_cacher.data_of: Invalid page: '
+						+ JSON.stringify(page_data));
+				return;
 			}
+
 			if (this.id_only) {
 				// 注意: 這個時候回傳的不是 {Object}
 				return this_data[title] = revid;
@@ -8612,10 +8629,13 @@ function module_code(library_namespace) {
 				function(page_data, position, page_anchor) {
 					// filter
 					if (false) {
-						if (!page_data || ('missing' in page_data))
+						if (!page_data || ('missing' in page_data)) {
 							return [ CeL.wiki.edit.cancel, '條目已不存在或被刪除' ];
-						if (page_data.ns !== 0)
+						}
+						if (page_data.ns !== 0) {
+							// 記事だけを編集する
 							return [ CeL.wiki.edit.cancel, '本作業僅處理條目命名空間' ];
+						}
 					}
 
 					// TODO
@@ -8647,6 +8667,9 @@ function module_code(library_namespace) {
 								&& page_data.revisions[0],
 						/** {Natural}所取得之版本編號。 */
 						revid = revision && revision.revid;
+						revid = page_data && page_data.revisions
+								&& page_data.revisions[0]
+								&& page_data.revisions[0].revid;
 
 						/** {String}page title = page_data.title */
 						var title = CeL.wiki.title_of(page_data),
@@ -8957,7 +8980,7 @@ function module_code(library_namespace) {
 			// flowinfo:{flow:{enabled:''}}
 			return flowinfo.flow && ('enabled' in flowinfo.flow);
 		// e.g., 從 wiki_API.page 得到的 page_data
-		if (page_data = get_page_content.has_content(page_data))
+		if (page_data = get_page_content.revision(page_data))
 			return page_data.contentmodel === 'flow-board';
 	}
 
