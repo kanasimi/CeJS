@@ -8336,8 +8336,12 @@ function module_code(library_namespace) {
 			var
 			/** {String}page title = page_data.title */
 			title = get_page_title(page_data),
+			/** {Object}revision data. 修訂版本資料。 */
+			revision = page_data && page_data.revisions
+					&& page_data.revisions[0],
 			/** {Natural}所取得之版本編號。 */
-			revid = page_data.revisions[0].revid;
+			revid = revision && revision.revid;
+
 			// console.log(CeL.wiki.content_of(page_data));
 
 			library_namespace.debug('[[' + title + ']] revid ' + revid, 4,
@@ -8391,7 +8395,12 @@ function module_code(library_namespace) {
 
 			// 登記 page_data 之 revid。
 			if (!revid) {
-				revid = page_data.revisions[0].revid;
+				var
+				/** {Object}revision data. 修訂版本資料。 */
+				revision = page_data && page_data.revisions
+						&& page_data.revisions[0];
+				/** {Natural}所取得之版本編號。 */
+				revid = revision && revision.revid;
 			}
 			if (this.id_only) {
 				// 注意: 這個時候回傳的不是 {Object}
@@ -8634,10 +8643,10 @@ function module_code(library_namespace) {
 
 					if (false) {
 						/** {Object}revision data. 修訂版本資料。 */
-						var revision = page_data.revisions
+						var revision = page_data && page_data.revisions
 								&& page_data.revisions[0],
 						/** {Natural}所取得之版本編號。 */
-						revid = page_data.revisions[0].revid;
+						revid = revision && revision.revid;
 
 						/** {String}page title = page_data.title */
 						var title = CeL.wiki.title_of(page_data),
