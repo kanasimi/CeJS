@@ -1922,7 +1922,7 @@ function module_code(library_namespace) {
 	 * {{en:Template:Interlanguage link multi}}.
 	 * 
 	 * @param {String}URL
-	 *            URL
+	 *            URL text
 	 * @param {Boolean}[add_quote]
 	 *            是否添加 [[]] 或 []。
 	 * @param {Function}[callback]
@@ -1939,12 +1939,22 @@ function module_code(library_namespace) {
 
 		var matched = URL.match(PATTERN_WIKI_URL);
 		if (!matched) {
-			library_namespace.debug('Can not parse URL: [' + URL + ']', 3,
-					'URL_to_wiki_link');
-			if (add_quote)
-				URL = '[[' + URL + ']]';
-			if (callback)
+			library_namespace.debug('Can not parse URL: [' + URL
+					+ ']. Not a wikipedia link?', 3, 'URL_to_wiki_link');
+			if (add_quote) {
+				if (/^https?:\/\//i.test(URL)) {
+					// TODO: parse.
+					// @see function fix_86() @ 20151002.WPCHECK.js
+					// matched = URL.match(/^([^\|]+)\|(.*)$/);
+					URL = '[' + URL + ']';
+				} else {
+					// 當作內部連結 internal link
+					URL = '[[' + URL + ']]';
+				}
+			}
+			if (callback) {
 				callback(URL);
+			}
 			return URL;
 		}
 
@@ -1990,8 +2000,9 @@ function module_code(library_namespace) {
 		}
 
 		// 無 callback，直接回傳 link。
-		if (!callback)
+		if (!callback) {
 			return compose_link();
+		}
 
 		// 若非外project 或不同 language，則直接 callback(link)。
 		if (section || language === default_language) {
