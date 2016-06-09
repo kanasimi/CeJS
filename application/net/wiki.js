@@ -1139,7 +1139,7 @@ function module_code(library_namespace) {
 		// e.g., transclusion 不能包括 table，因此在 table 前。
 
 		// 可順便作正規化/維護清理/修正明顯破壞/修正維基語法/維基化，
-		// 例如修復章節標題 section title 前後 level 不一，
+		// 例如修復章節標題 (section title, 節タイトル) 前後 level 不一，
 		// table "|-" 未起新行等。
 
 		// ----------------------------------------------------
@@ -3514,9 +3514,8 @@ function module_code(library_namespace) {
 							+ (new Date).format(config.date_format
 									|| this.date_format) + ']' + count_summary,
 					// Robot: 若用戶名包含 'bot'，則直接引用之。
-					summary : (this.token.lgname.length < 9
-					//
-					&& /bot/i.test(this.token.lgname)
+					// 注意: this.token.lgname 可能為 undefined！
+					summary : (/bot/i.test(this.token.lgname)
 					//
 					? this.token.lgname : 'Robot') + ': '
 					//
