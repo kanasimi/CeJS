@@ -955,7 +955,7 @@ function module_code(library_namespace) {
 		link : function() {
 			return '[[' + this.join('|') + ']]';
 		},
-		// external link
+		// 外部連結 external link
 		external_link : function() {
 			return '[' + this.join(this.delimiter || ' ') + ']';
 		},
@@ -1936,6 +1936,7 @@ function module_code(library_namespace) {
 	 */
 	function URL_to_wiki_link(URL, add_quote, callback, options) {
 		URL = URL.trim();
+		// URL = URL.replace(/[\s\n]+/g, ' ');
 
 		var matched = URL.match(PATTERN_WIKI_URL);
 		if (!matched) {
@@ -1943,12 +1944,17 @@ function module_code(library_namespace) {
 					+ ']. Not a wikipedia link?', 3, 'URL_to_wiki_link');
 			if (add_quote) {
 				if (/^https?:\/\//i.test(URL)) {
+					// 當作正常外部連結 external link。
+					// e.g., 'http://a.b.c ABC'
+
 					// TODO: parse.
 					// @see function fix_86() @ 20151002.WPCHECK.js
 					// matched = URL.match(/^([^\|]+)\|(.*)$/);
+
 					URL = '[' + URL + ']';
 				} else {
-					// 當作內部連結 internal link
+					// 當作正常內部連結 internal link。
+					// e.g., 'ABC (disambiguation)|ABC'
 					URL = '[[' + URL + ']]';
 				}
 			}
