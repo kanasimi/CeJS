@@ -2215,7 +2215,7 @@ function module_code(library_namespace) {
 		return get_page_content.is_page_data(page_data) && page_data.pageid;
 	};
 
-	// return main revision
+	// return {Object}main revision (.revisions[0])
 	get_page_content.revision = function(page_data) {
 		return library_namespace.is_Object(page_data)
 		// treat as page data. Try to get page contents: page.revisions[0]['*']
@@ -2223,9 +2223,9 @@ function module_code(library_namespace) {
 		&& page_data.revisions && page_data.revisions[0];
 	};
 
-	// return .revisions[0]
 	// 不回傳 {String}，減輕負擔。
 	get_page_content.has_content = function(page_data) {
+		// TODO: should return {Boolean}
 		return get_page_content.revision(page_data);
 	};
 
@@ -8447,8 +8447,14 @@ function module_code(library_namespace) {
 			/** {Natural}所取得之版本編號。 */
 			|| !(revid = revid.revid)) {
 				// 照理來說，會來到這裡的都應該是經過 .had() 確認，因此不該出現此情況。
-				library_namespace.err('revision_cacher.data_of: Invalid page: '
-						+ JSON.stringify(page_data));
+				library_namespace.err('revision_cacher.data_of: revision: '
+						+ JSON.stringify(get_page_content.revision(page_data))
+								.slice(0, 800));
+				library_namespace
+						.err('revision_cacher.data_of: No revision id (.revid): ('
+								+ (typeof page_data)
+								+ ') '
+								+ JSON.stringify(page_data).slice(0, 800));
 				return;
 			}
 
