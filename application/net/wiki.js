@@ -927,7 +927,7 @@ function module_code(library_namespace) {
 	 * @see parse_wikitext()
 	 */
 	var wiki_toString = {
-		// Internal/interwiki link : language links : category links, file,
+		// internal/interwiki link : language links : category links, file,
 		// subst,
 		// ... : title
 		// e.g., [[m:en:Help:Parser function]], [[m:Help:Interwiki_linking]],
@@ -951,11 +951,11 @@ function module_code(library_namespace) {
 		file : function() {
 			return '[[' + this.join('|') + ']]';
 		},
-		// 內部連結
+		// 內部連結 internal link
 		link : function() {
 			return '[[' + this.join('|') + ']]';
 		},
-		// External link
+		// external link
 		external_link : function() {
 			return '[' + this.join(this.delimiter || ' ') + ']';
 		},
@@ -3460,15 +3460,30 @@ function module_code(library_namespace) {
 			this.run(function() {
 				if (!no_message) {
 					library_namespace.debug('收尾。', 1, 'wiki_API.work');
-					var count_summary = (config.no_edit ? pages.length + '/'
-					//
-					: done + (done === pages.length ? '' : '/' + pages.length)
-					//
-					+ (pages.length === target.length ? '' : '//'))
-					//
-					+ target.length;
+					var count_summary;
+
+					if (config.no_edit) {
+						if (pages.length === target.length)
+							count_summary = '';
+						else
+							count_summary = pages.length + '/';
+					} else if (pages.length === target.length) {
+						if (done === pages.length)
+							count_summary = '';
+						else
+							count_summary = done + '/';
+					} else {
+						if (done === pages.length)
+							count_summary = done + '//';
+						else
+							count_summary = done + '/' + pages.length + '//';
+					}
+
+					count_summary += target.length;
+
 					count_summary = ': '
 							+ gettext('%1 pages done', count_summary);
+
 					if (log_item.report) {
 						messages.unshift(count_summary + (nochange_count > 0
 						//
@@ -8469,6 +8484,8 @@ function module_code(library_namespace) {
 
 	/**
 	 * 應用功能: 遍歷所有頁面。 CeL.wiki.traversal()
+	 * 
+	 * TODO: 配合 revision_cacher，進一步加快速度。
 	 * 
 	 * @param {Object}[config]
 	 *            configuration
