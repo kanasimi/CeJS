@@ -1046,7 +1046,7 @@ function (global) {
 	script_host = !is_WWW && typeof WScript === 'object';
 
 	// for JScript: 在 IE8, IE9 中，get_object_type(WScript) 為 '[object Object]' !!
-	if (script_host = script_host && (!_.is_Object(WScript) || String(WScript) == 'Windows Script Host') && WScript.FullName)
+	if (script_host = script_host && (!_.is_Object(WScript) || String(WScript) == 'Windows Script Host') && WScript.FullName) {
 		_// JSDT:_module_
 		.
 		/**
@@ -1057,29 +1057,65 @@ function (global) {
 		 * @_memberOf _module_
 		 */
 		script_host = script_host = script_host.replace(/^(.+)\\/, '').toLowerCase().replace(/\.exe$/, '');
+	}
+
+	// 需要測試的環境 (both old and new; node, WScript, ...)：
+	// Unix (e.g., Tool Labs) (included + jsub + interactive 互動形式)
+	// Windows console (both included / interactive 互動形式)
+
+	// cache. (('')) for unknown environment.
+	var script_full_path = '';
+
+	if (is_WWW) {
+		script_full_path = unescape(window.location.pathname) || script_full_path;
+
+	} else if (script_host) {
+		// 在 .hta 中取代 WScript.ScriptFullName。
+		script_full_path = WScript.ScriptFullName || script_full_path;
+
+	} else if (typeof require === 'function' && typeof process === 'object') {
+		if (require.main) {
+			script_full_path = require.main.filename || script_full_path;
+
+		} else if (false && process.mainModule) {
+			// for newer node.js. 須放置於 ((__filename)) 判斷前!
+			script_full_path = process.mainModule.filename || script_full_path;
+		} else if (false /* 20160609 deprecated */) {
+			// 以 require('/path/to/node.loader.js') 之方法 include library 時，
+			// ((__filename)) 會得到 loader 之 path，
+			// 且不能從 global.__filename 獲得 script path，只好另尋出路。
+
+			// isTTY: 為 nodejs: interactive 互動形式。
+			// 但 isTTY 在 command line 執行程式時也會為 true！
+			// && (process.stdout && !process.stdout.isTTY
+
+			// Unix node console 時 include 的話無 process.mainModule，而 __filename 為
+			// node.loader.js 之 full path。
+
+			// for old node.js
+			// @see __dirname
+			script_full_path = typeof __filename === 'string' && __filename || script_full_path;
+			// process.argv[1]: 這不一定會包含 path！
+			// || process.argv && process.argv[1])
+
+			if (!script_full_path) {
+				// debug
+				console.error('No script_full_path @ nodejs!');
+				console.log(process);
+				console.log(process.mainModule);
+				console.log('require.main: ' + JSON.stringify(require.main));
+				console.log('require.main.filename: ' + (require.main && require.main.filename));
+				console.log('__filename: ' + __filename);
+				console.trace(script_full_path);
+			}
+		}
+
+	} else if (_.is_Object(old_namespace)) {
+		// for jslibs 與特殊環境. 需確認已定義 _.is_Object()
+		script_full_path = old_namespace.loader_script || script_full_path;
+	}
 
 
-	// cache
-	var script_full_path = is_WWW && unescape(window.location.pathname)
-	// 在 .hta 中取代 WScript.ScriptFullName。
-	|| script_host && WScript.ScriptFullName
-	// for newer node.js. 須放置於 ((__filename)) 判斷前!
-	// 以 require('/path/to/node.loader.js') 之方法 include library 時，
-	// ((__filename)) 會得到 loader 之 path，
-	// 且不能從 global.__filename 獲得 script path，只好另尋出路。
-	|| typeof process === 'object'
-	// isTTY: 為 nodejs: interactive 互動形式。
-	&& process.stdout && !process.stdout.isTTY
-	//
-	&& (process.mainModule && process.mainModule.filename
-	// for old node.js
-	// @see __dirname
-	|| typeof __filename === 'string' && __filename)
-	// for jslibs 與特殊環境. 需確認已定義 _.is_Object()
-	|| _.is_Object(old_namespace) && old_namespace.loader_script
-	// Unknown environment
-	|| '';
-	// console.trace(script_full_path);
 
 	_// JSDT:_module_
 	.
@@ -1097,6 +1133,9 @@ function (global) {
 	.
 	/**
 	 * 取得執行 script 之名稱(不包括 .js 等 extension).
+	 * 
+	 * 在有 script 的情況，應該為 script name。<br />
+	 * 在 node.js interactive 的情況，應該為 ''。
 	 * 
 	 * @returns {String} 執行 script 之 名稱。
 	 * @returns '' unknown environment

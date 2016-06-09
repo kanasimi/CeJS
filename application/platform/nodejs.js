@@ -374,10 +374,8 @@ if (typeof CeL === 'function')
 					}
 
 					this[matched[2]] = matched[4];
-				},
-				// use ((CeL.env.argv)) to get command line arguments
-				library_namespace.env.argv
-				//
+				}, library_namespace.env.argv
+				// ↑ use ((CeL.env.argv)) to get command line arguments
 				= library_namespace.null_Object());
 			}
 
