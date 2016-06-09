@@ -8443,18 +8443,14 @@ function module_code(library_namespace) {
 			}
 
 			// 登記 page_data 之 revid。
-			if (!revid || !(revid = get_page_content.revision(page_data))
+			if (!revid && (!(revid = get_page_content.revision(page_data))
 			/** {Natural}所取得之版本編號。 */
-			|| !(revid = revid.revid)) {
+			|| !(revid = revid.revid))) {
+				library_namespace.err(
 				// 照理來說，會來到這裡的都應該是經過 .had() 確認，因此不該出現此情況。
-				library_namespace.err('revision_cacher.data_of: revision: '
-						+ JSON.stringify(get_page_content.revision(page_data))
-								.slice(0, 800));
-				library_namespace
-						.err('revision_cacher.data_of: No revision id (.revid): ('
-								+ (typeof page_data)
-								+ ') '
-								+ JSON.stringify(page_data).slice(0, 800));
+				'revision_cacher.data_of: No revision id (.revid): ('
+						+ (typeof page_data) + ') '
+						+ JSON.stringify(page_data).slice(0, 800));
 				return;
 			}
 
