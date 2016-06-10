@@ -3505,7 +3505,7 @@ function module_code(library_namespace) {
 						messages.unshift(count_summary + (nochange_count > 0
 						//
 						? gettext(', %1%2 pages no change',
-						// 
+						//
 						done === nochange_count
 						// 未改變任何條目。
 						? gettext('all ') : '', nochange_count) : '')
@@ -5577,12 +5577,13 @@ function module_code(library_namespace) {
 	wiki_API.check_stop = function(callback, options) {
 		// 前置處理。
 		if (!library_namespace.is_Object(options))
-			if (typeof options === 'string')
+			if (typeof options === 'string') {
 				options = {
 					title : options
 				};
-			else
+			} else {
 				options = library_namespace.null_Object();
+			}
 
 		/**
 		 * 緊急停止作業將檢測之頁面標題。 check title:<br />
@@ -5898,15 +5899,15 @@ function module_code(library_namespace) {
 		}
 
 		if (!data) {
-			// 内容はクリアされます 内容が設定されていません
-			action = [ 'empty', typeof data === 'string' ? '內容被清空' : '未設定編輯內容' ];
+			action = [ 'empty', gettext(typeof data === 'string'
+			// 
+			? 'Content is empty' : 'Content is not settled') ];
 
 		} else if (Array.isArray(data) && data[0] === wiki_API.edit.cancel) {
 			action = data.slice(1);
 			if (action.length === 1) {
 				// error messages
-				// 編集を放棄した
-				action[1] = action[0] || '放棄編輯頁面';
+				action[1] = action[0] || gettext('Abandon change');
 			}
 			if (!action[0]) {
 				// error code
@@ -5922,8 +5923,9 @@ function module_code(library_namespace) {
 			if (action[1] !== 'skip') {
 				// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
 				library_namespace.warn((caller || 'wiki_API.edit.check_data')
-				// 未提供原因 説明がありません
-				+ ': [[' + title + ']]: ' + (action[1] || '未描述原因'));
+				//
+				+ ': [[' + title + ']]: '
+						+ (action[1] || gettext('No reason provided')));
 			} else {
 				library_namespace.debug('Skip [[' + title + ']]', 2, caller
 						|| 'wiki_API.edit.check_data');
