@@ -2063,7 +2063,7 @@ function module_code(library_namespace) {
 					// nothing got.
 					continue;
 
-				// recover index
+				// 回復 recover index
 				matched.index = data.index;
 			}
 
@@ -8193,7 +8193,7 @@ function module_code(library_namespace) {
 				}
 			}
 
-			// recover type
+			// 回復 recover type
 			// if (list_type) type = list_type;
 
 			var title = list;
