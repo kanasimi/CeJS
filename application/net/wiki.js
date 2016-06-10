@@ -5402,24 +5402,38 @@ function module_code(library_namespace) {
 		}
 
 		function _done(data) {
-			// 在 mass edit 時會 lose token (badtoken)，需要保存 password。
-			if (!session.preserve_password)
+			// 注意: 在 mass edit 時會 lose token (badtoken)，需要保存 password。
+			if (!session.preserve_password) {
 				// 捨棄 password。
 				delete session.token.lgpassword;
+			}
+
 			if (data && (data = data.login)) {
-				if (data.result === 'NeedToken') {
-					library_namespace.err('wiki_API.login: login ['
-							+ session.token.lgname + '] failed!');
-				} else {
+				if (data.result === 'Success') {
 					wiki_API.login.copy_keys.forEach(function(key) {
-						if (data[key])
+						if (data[key]) {
 							session.token[key] = data[key];
+						}
 					});
+				} else {
+					/**
+					 * 當沒有登入成功時的處理以及警訊。
+					 * 
+					 * e.g., data = <code>
+					 * {"login":{"result":"Failed","reason":"Incorrect password entered.\nPlease try again."}}
+					 * </code>
+					 */
+					library_namespace.err('wiki_API.login: login ['
+							+ session.token.lgname + '] failed! ['
+							+ data.result + '] ' + data.reason);
+					if (data.result !== 'Failed' || data.result !== 'NeedToken') {
+						// Unknown result
+					}
 				}
 			}
-			if (session.token.csrftoken)
+			if (session.token.csrftoken) {
 				_next();
-			else {
+			} else {
 				library_namespace.debug('Try to get the csrftoken ...', 1,
 						'wiki_API.login');
 				wiki_API.query([ session.API_URL,
