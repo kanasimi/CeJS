@@ -406,6 +406,8 @@ function module_code(library_namespace) {
 	/**
 	 * 將第一個字母轉成大寫。
 	 * 
+	 * cf. {{lcfirst:}}
+	 * 
 	 * @param {String}word
 	 *            要轉換的文字。
 	 * 
@@ -433,6 +435,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String}規範後之頁面名稱。
 	 * 
+	 * @see [[Wikipedia:命名常規]]
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Page_name#Technical_restrictions_and_limitations
 	 */
 	function normalize_page_name(page_name, use_underline) {
