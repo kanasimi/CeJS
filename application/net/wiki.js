@@ -9934,7 +9934,8 @@ function module_code(library_namespace) {
 			// property.join(':')
 			var property_title = property[0] + ':' + property[1];
 			if (property_title in wikidata_search_cache) {
-				// has cache.
+				library_namespace.debug('has cache: [' + property_title + ']',
+						4, 'wikidata_entity');
 				property = wikidata_search_cache[property_title];
 
 			} else {
@@ -10158,6 +10159,33 @@ function module_code(library_namespace) {
 		// 看看是否 ('disambiguation' in page_data.pageprops)；
 		// 這方法即使在 wikipedia 沒 entity 時依然有效。
 		callback(null, entity);
+	}
+
+	// ------------------------------------------------------------------------
+
+	// TODO: 自 root 開始尋找所有的 property
+	function property_tree(root, property, callback, options) {
+		if (typeof options === 'string') {
+			options = {
+				擷取特性 : options
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
+
+		var entity_now = root,
+		// 擷取特性。 label/sitelink/property/entity
+		擷取特性 = options.擷取特性 || 'label',
+		//
+		tree = [];
+
+		function next_entity() {
+			wikidata_entity(entity_now, function() {
+				;
+			});
+		}
+
+		next_entity();
 	}
 
 	// ------------------------------------------------------------------------
@@ -10554,6 +10582,9 @@ function module_code(library_namespace) {
 
 	/**
 	 * 當想把 labels 加入 entity 時，輸入之則可自動去除重複的 labels，並回傳 wikidata_edit() 可用的編輯資料。
+	 * merge labels / alias
+	 * 
+	 * TODO: 不區分大小寫與空格（這有時可能為 typo），只要存在即跳過。或最起碼忽略首字大小寫差異。
 	 * 
 	 * @param {Object}labels
 	 *            labels = {language:[label list],...}
