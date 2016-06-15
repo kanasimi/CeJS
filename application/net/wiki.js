@@ -10167,15 +10167,15 @@ function module_code(library_namespace) {
 	function property_tree(root, property, callback, options) {
 		if (typeof options === 'string') {
 			options = {
-				擷取特性 : options
+				retrieve : options
 			};
 		} else {
 			options = library_namespace.setup_options(options);
 		}
 
 		var entity_now = root,
-		// 擷取特性。 label/sitelink/property/entity
-		擷取特性 = options.擷取特性 || 'label',
+		// 擷取具有代表性的特性。 label/sitelink/property/entity
+		retrieve = options.retrieve || 'label',
 		//
 		tree = [];
 

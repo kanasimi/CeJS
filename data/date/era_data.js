@@ -32,6 +32,10 @@ bug:
 閩越
 https://zh.wikipedia.org/wiki/%E6%B1%89%E6%9C%9D%E5%90%9B%E4%B8%BB%E5%88%97%E8%A1%A8
 
+
+大天興（興源國）（928年-929年）
+https://zh.wikipedia.org/wiki/%E5%A4%A7%E5%A4%A9%E8%88%88
+年號尊聖。
 大理國
 https://zh.wikipedia.org/wiki/%E9%9B%B2%E5%8D%97%E5%90%9B%E4%B8%BB%E5%88%97%E8%A1%A8
 https://zh.wikipedia.org/wiki/%E5%A4%A7%E7%90%86%E5%90%9B%E4%B8%BB%E5%88%97%E8%A1%A8
