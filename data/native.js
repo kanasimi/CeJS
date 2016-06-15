@@ -716,6 +716,12 @@ renew_RegExp_flag = renew_RegExp_flag;
 // 使用例之說明：
 // @see CeL.data.native for Unicode category (e.g., \p{Cf})
 
+if (false) {
+	var
+	/** 振り仮名 / 読み仮名 の正規表現。 @type {RegExp} @see [[d:Property:P1814|假名]] */
+	PATTERN_読み仮名 = CeL.RegExp(/^[\p{Hiragana}\p{Katakana}ー・ 　]+$/);
+}
+
 var Unicode_category = {
 		// Control
 		Cc : '\0-\x1F\x7F-\x9F',
@@ -768,7 +774,7 @@ function new_RegExp(source, flag) {
 		flag = flag.replace(/u/g, '');
 
 	// 後處理 Unicode category。
-	source = source.replace(/\\p{(C[a-z]?)}/g, function(all, category) {
+	source = source.replace(/\\p{([A-Z][A-Za-z_]*)}/g, function(all, category) {
 		return Unicode_category[category] || all;
 	});
 
