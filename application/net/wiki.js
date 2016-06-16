@@ -2099,7 +2099,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * 取得 lead section 文字用。 match/去除一開始的維護模板。<br />
+	 * 快速取得 lead section 文字用。 match/去除一開始的維護模板。<br />
 	 * <s>[[File:file|[[link]]...]] 因為不容易除盡，放棄處理。</s>
 	 * 
 	 * @example <code>
@@ -2122,11 +2122,12 @@ function module_code(library_namespace) {
 		if (matched >= 0) {
 			wikitext = wikitext.slice(0, matched);
 		}
-		while (matched = wikitext.match(/^[\s\n]({{|\[\[)/)) {
-			wikitext = wikitext.replace(matched[1] === '{{' ? /{{[\s\S]*?}}/
-					: /\[\[[\s\S]*?\]\]/, '');
+		while (matched = wikitext.match(/^[\s\n]*({{|\[\[)/)) {
+			// 注意: 此處的 {{ / [[ 可能為中間的 token，而非最前面的一個。
+			wikitext = wikitext.replace(matched[1] === '{{' ? /{{[^{}]*?}}/
+					: /\[\[[^\[\]]*?\]\]/, '');
 		}
-		return wikitext;
+		return wikitext.trim();
 	}
 
 	// ------------------------------------------------------------------------
