@@ -2122,10 +2122,17 @@ function module_code(library_namespace) {
 		if (matched >= 0) {
 			wikitext = wikitext.slice(0, matched);
 		}
+
 		while (matched = wikitext.match(/^[\s\n]*({{|\[\[)/)) {
 			// 注意: 此處的 {{ / [[ 可能為中間的 token，而非最前面的一個。
-			wikitext = wikitext.replace(matched[1] === '{{' ? /{{[^{}]*?}}/
+			var new_text = wikitext.replace(matched[1] === '{{' ? /{{[^{}]*?}}/
 					: /\[\[[^\[\]]*?\]\]/, '');
+			if (new_text === wikitext) {
+				library_namespace.warn('有問題的 wikitext，例如有首無尾？ [' + wikitext
+						+ ']');
+				break;
+			}
+			wikitext = new_text;
 		}
 		return wikitext.trim();
 	}
