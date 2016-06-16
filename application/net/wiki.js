@@ -2099,6 +2099,39 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
+	 * 取得 lead section 文字用。 match/去除一開始的維護模板。<br />
+	 * <s>[[File:file|[[link]]...]] 因為不容易除盡，放棄處理。</s>
+	 * 
+	 * @example <code>
+	CeL.wiki.lead_text(content);
+	 * </code>
+	 * 
+	 * @param {String}wikitext
+	 *            wikitext to parse
+	 * 
+	 * @returns {String}lead section wikitext 文字
+	 * 
+	 * @see 文章的開頭部分[[WP:LEAD|導言章節]] (lead section, introduction)
+	 */
+	function lead_text(wikitext) {
+		if (!wikitext || typeof wikitext !== 'string') {
+			return wikitext;
+		}
+
+		var matched = wikitext.indexOf('\n=');
+		if (matched >= 0) {
+			wikitext = wikitext.slice(0, matched);
+		}
+		while (matched = wikitext.match(/^[\s\n]({{|\[\[)/)) {
+			wikitext = wikitext.replace(matched[1] === '{{' ? /{{[\s\S]*?}}/
+					: /\[\[[\s\S]*?\]\]/, '');
+		}
+		return wikitext;
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
 	 * get title of page.
 	 * 
 	 * @example <code>
@@ -10945,6 +10978,7 @@ function module_code(library_namespace) {
 		remove_namespace : remove_namespace,
 
 		file_pattern : file_pattern,
+		lead_text : lead_text,
 
 		parse : parse_wikitext,
 		parser : page_parser,
