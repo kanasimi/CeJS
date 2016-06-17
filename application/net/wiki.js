@@ -954,7 +954,7 @@ function module_code(library_namespace) {
 		file : function() {
 			return '[[' + this.join('|') + ']]';
 		},
-		// 內部連結 internal link
+		// 內部連結 wikilink / internal link
 		link : function() {
 			return '[[' + this.join('|') + ']]';
 		},
@@ -1956,7 +1956,7 @@ function module_code(library_namespace) {
 
 					URL = '[' + URL + ']';
 				} else {
-					// 當作正常內部連結 internal link。
+					// 當作正常內部連結 wikilink / internal link。
 					// e.g., 'ABC (disambiguation)|ABC'
 					URL = '[[' + URL + ']]';
 				}
@@ -2104,9 +2104,41 @@ function module_code(library_namespace) {
 				.test("[[                                     [[ ]] [[ ]] [[ ]] ]]");
 	}
 
+	if (false) {
+		// 若要消除 "'''" 與 "''"，應將長的置於前面。
+		wikitext = CeL.wiki.remove_head_tail(CeL.wiki.remove_head_tail(
+				wikitext, "'''", 0, ' '), "''", 0, ' ');
+	}
+
+	// 去除首尾。這或許該置於 CeL.data.native...
+	// 有設定 insert_string 時，會保留內容物。未設定 insert_string 時，會將內容物連同首尾一同移除。
+	function remove_head_tail(string, head, tail, insert_string) {
+		if (!tail) {
+			tail = head;
+		}
+
+		while (true) {
+			var index_end = string.indexOf(tail);
+			if (index_end === NOT_FOUND) {
+				// 無尾
+				return string;
+			}
+			// 須預防中間包含 head / tail 之字元。
+			var index_start = string.lastIndexOf(head, index_end);
+			if (index_start === NOT_FOUND) {
+				// 有尾無首
+				return string;
+			}
+			string = string.slice(0, index_start)
+					+ (insert_string === undefined ? '' : insert_string
+							+ string.slice(index_start + index_start.length,
+									index_end) + insert_string)
+					+ string.slice(index_end + tail.length);
+		}
+	}
+
 	/**
-	 * 快速取得 lead section 文字用。 match/去除一開始的維護模板。<br />
-	 * <s>[[File:file|[[link]]...]] 因為不容易除盡，放棄處理。</s>
+	 * 快速取得 lead section 文字用。
 	 * 
 	 * @example <code>
 	CeL.wiki.lead_text(content);
@@ -2129,6 +2161,8 @@ function module_code(library_namespace) {
 			wikitext = wikitext.slice(0, matched);
 		}
 
+		// match/去除一開始的維護模板。
+		// <s>[[File:file|[[link]]...]] 因為不容易除盡，放棄處理。</s>
 		while (matched = wikitext.match(/^[\s\n]*({{|\[\[)/)) {
 			// 注意: 此處的 {{ / [[ 可能為中間的 token，而非最前面的一個。但若是沒有中間的 token，則一定是第一個。
 			matched = matched[1];
@@ -10997,6 +11031,7 @@ function module_code(library_namespace) {
 		remove_namespace : remove_namespace,
 
 		file_pattern : file_pattern,
+		remove_head_tail : remove_head_tail,
 		lead_text : lead_text,
 
 		parse : parse_wikitext,
