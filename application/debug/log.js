@@ -1773,6 +1773,7 @@ if (!CeL.Log) {
 		toggle_log : log_front_end_toggle_log,
 
 		assert : log_front_end_assert,
+		// CeL.test()
 		test : log_front_end_test
 	});
 

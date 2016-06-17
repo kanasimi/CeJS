@@ -2475,6 +2475,85 @@ toTitleCase
 
 
 
+
+if (false) {
+	// 警告:這將使 node.js 卡住。
+	/\[\[(?:[^\[\]]+|\[[^\[]|\][^\]])*\]\]/
+			.test("[[                                     [[ ]] [[ ]] [[ ]] ]]");
+}
+
+if (false) {
+	// 若要消除 "'''" 與 "''"，應將長的置於前面。
+	wikitext = wikitext.remove_head_tail("'''", 0, ' ').remove_head_tail("''",
+			0, ' ');
+}
+
+/**
+ * 去除首尾。這或許該置於 CeL.data.native...
+ * 
+ * @param {String}text
+ *            指定的輸入字串。
+ * @param {String}head
+ *            欲移除之首字串。
+ * @param {String}[tail]
+ *            欲移除之尾字串。
+ * @param {String}[insert_string]
+ *            將首尾以((insert_string))取代。 有設定 insert_string 時，會保留內容物。未設定
+ *            insert_string 時，會將內容物連同首尾一同移除。
+ * 
+ * @returns {String}replaced text. 變更/取代後的結果。
+ */
+function remove_head_tail(text, head, tail, insert_string) {
+	var head_eq_tail, index_start, index_end;
+	if (!tail) {
+		tail = head;
+		head_eq_tail = true;
+	} else {
+		head_eq_tail = head === tail;
+	}
+
+	var head_length = head.length, tail_length = tail.length;
+
+	while (true) {
+
+		if (head_eq_tail) {
+			// 改採自前面搜尋模式。
+			index_start = text.indexOf(head);
+			if (index_start === NOT_FOUND) {
+				// 無首
+				return text;
+			}
+			index_end = text.indexOf(tail, index_start + head_length);
+			if (index_end === NOT_FOUND) {
+				// 有首無尾
+				return text;
+			}
+
+		} else {
+			index_end = text.indexOf(tail);
+			if (index_end === NOT_FOUND) {
+				// 無尾
+				return text;
+			}
+			// 須預防中間包含 head / tail 之字元。
+			index_start = text.lastIndexOf(head, index_end - head_length);
+			if (index_start === NOT_FOUND) {
+				// 有尾無首
+				return text;
+			}
+		}
+
+		text = text.slice(0, index_start)
+		// 未設定 insert_string 時，會將內容物連同首尾一同移除。
+		+ (insert_string === undefined ? '' : insert_string
+		// 有設定 insert_string 時，會保留內容物。
+		+ text.slice(index_start + head_length, index_end) + insert_string)
+				+ text.slice(index_end + tail_length);
+	}
+}
+
+
+
 /**
  * 持續執行 .replace()，直到處理至穩定平衡無變動為止。
  * 
@@ -2620,13 +2699,11 @@ set_method(String.prototype, {
 	chars : split_by_code_point,
 	codePoints : codePoints,
 
+	remove_head_tail : set_bind(remove_head_tail, true),
+
 	// repeatedly replace till stable
-	replace_till_stable : function(pattern, replace_to) {
-		return replace_till_stable(this, pattern, replace_to);
-	},
-	replace_check_near : function(pattern, replace_to, match_previous, match_next) {
-		return replace_check_near(this, pattern, replace_to, match_previous, match_next);
-	},
+	replace_till_stable : set_bind(replace_till_stable, true),
+	replace_check_near : set_bind(replace_check_near, true),
 
 	pad : set_bind(pad, true),
 	toRegExp : set_bind(String_to_RegExp, true),

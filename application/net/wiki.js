@@ -85,6 +85,10 @@ function module_code(library_namespace) {
 		});
 	};
 
+	var
+	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
+	NOT_FOUND = ''.indexOf('_');
+
 	// --------------------------------------------------------------------------------------------
 
 	/** {String} old key: 'wiki' */
@@ -2097,45 +2101,6 @@ function module_code(library_namespace) {
 	});
 
 	// ------------------------------------------------------------------------
-
-	if (false) {
-		// 警告:這將使 node 卡住。
-		/\[\[(?:[^\[\]]+|\[[^\[]|\][^\]])*\]\]/
-				.test("[[                                     [[ ]] [[ ]] [[ ]] ]]");
-	}
-
-	if (false) {
-		// 若要消除 "'''" 與 "''"，應將長的置於前面。
-		wikitext = CeL.wiki.remove_head_tail(CeL.wiki.remove_head_tail(
-				wikitext, "'''", 0, ' '), "''", 0, ' ');
-	}
-
-	// 去除首尾。這或許該置於 CeL.data.native...
-	// 有設定 insert_string 時，會保留內容物。未設定 insert_string 時，會將內容物連同首尾一同移除。
-	function remove_head_tail(string, head, tail, insert_string) {
-		if (!tail) {
-			tail = head;
-		}
-
-		while (true) {
-			var index_end = string.indexOf(tail);
-			if (index_end === NOT_FOUND) {
-				// 無尾
-				return string;
-			}
-			// 須預防中間包含 head / tail 之字元。
-			var index_start = string.lastIndexOf(head, index_end);
-			if (index_start === NOT_FOUND) {
-				// 有尾無首
-				return string;
-			}
-			string = string.slice(0, index_start)
-					+ (insert_string === undefined ? '' : insert_string
-							+ string.slice(index_start + index_start.length,
-									index_end) + insert_string)
-					+ string.slice(index_end + tail.length);
-		}
-	}
 
 	/**
 	 * 快速取得 lead section 文字用。
@@ -7356,10 +7321,6 @@ function module_code(library_namespace) {
 		// MUST be the last one.
 		.replace(/&amp;/g, '&');
 	}
-
-	var
-	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
-	NOT_FOUND = ''.indexOf('_');
 
 	/**
 	 * Parse Wikimedia dump xml text.

@@ -368,7 +368,11 @@ function test_native() {
 
 	error_count += CeL.test('data.native', function(assert) {
 		assert(['2,8', Array.intersection([2,3,5,6,8], [1,2,4,8,9], true).join(',')], 'Array.intersection()');
-		assert(['[df [h [r]r] [ew] g]', '<df <h <r>r> <ew> g>'.replace_till_stable(/<([^<>]+)*>/,'[$1]')], '.replace_till_stable()');
+		assert(["aa fff", "aa '''fff'''".remove_head_tail("'''")], 'string.remove_head_tail() #1');
+		assert(["aa f'ff", "aa '''f'ff'''".remove_head_tail("'''")], 'string.remove_head_tail() #2');
+		assert(["aa b'b c'c dd ", "aa'''b'b'''c'c'''dd'''".remove_head_tail("'''", 0, ' ')], 'string.remove_head_tail() #3');
+		assert(["aa", "aa[[bb[[cc]]dd]]".remove_head_tail("[[", "]]")], 'string.remove_head_tail() #4');
+		assert(['[df [h [r]r] [ew] g]', '<df <h <r>r> <ew> g>'.replace_till_stable(/<([^<>]+)*>/, '[$1]')], 'string.replace_till_stable()');
 	});
 
 }
