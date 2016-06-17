@@ -2134,15 +2134,15 @@ function module_code(library_namespace) {
 			matched = matched[1];
 			var index_end = wikitext.indexOf(matched === '{{' ? '}}' : ']]');
 			if (index_end === NOT_FOUND) {
-				library_namespace.warn('lead_text: 有問題的 wikitext，例如有首 "'
-						+ matched + '" 無尾？ [' + wikitext + ']');
+				library_namespace.debug('有問題的 wikitext，例如有首 "' + matched
+						+ '" 無尾？ [' + wikitext + ']', 2, 'lead_text');
 				break;
 			}
 			// 須預防 "-{}-" 之類。
 			var index_start = wikitext.lastIndexOf(matched, index_end);
 			wikitext = wikitext.slice(0, index_start)
 			// +2: '}}'.length, ']]'.length
-			+ wikitext.slice(0, index_end + 2);
+			+ wikitext.slice(index_end + 2);
 		}
 
 		return wikitext.trim();
