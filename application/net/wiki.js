@@ -2125,8 +2125,10 @@ function module_code(library_namespace) {
 
 		while (matched = wikitext.match(/^[\s\n]*({{|\[\[)/)) {
 			// 注意: 此處的 {{ / [[ 可能為中間的 token，而非最前面的一個。但若是沒有中間的 token，則一定是第一個。
-			var new_text = wikitext.replace(matched[1] === '{{' ? /{{[^{}]*}}/
-					: /\[\[[^\[\]]*\]\]/, '');
+			var new_text = wikitext.replace(matched[1] === '{{'
+			// 預防 "-{}-" 之類。
+			? /{{(?:{[^{]|}[^}]|[^{}]*)*}}/
+					: /\[\[(?:\[[^\[]|\][^\]]|[^\[\]]*)*\]\]/, '');
 			if (new_text === wikitext) {
 				library_namespace.warn('lead_text: 有問題的 wikitext，例如有首無尾？ ['
 						+ wikitext + ']');

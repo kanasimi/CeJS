@@ -1069,13 +1069,15 @@ fill_form = function fill_form(pair, config) {
 				//	<input type="radio|checkbox" value="~" />
 				for ( var i = 0, l = node.length, n, vl = pair[name], v; i < l; i++) {
 					n = node[i];
+					// TODO: 若是輸入數字，則有時會強制當作index？
 					v = library_namespace.is_Object(vl)? vl[n.value] :
 						Array.isArray(vl) ? vl.indexOf(n.value) !== -1 : vl;
 					library_namespace.debug('set value [' + v + '].', 2, 'fill_form');
-					//	n.value 必為 string，因此不用 ===。
-					if (n.checked !== (typeof v === 'boolean' ? v : v == n.value))
+					//	n.value 必為 string，v 可能為數字，因此不用 ===。
+					if (n.checked !== (typeof v === 'boolean' ? v : v == n.value)) {
 						//	有改變才 fire event.
 						event_sequence(n, !n.checked);
+					}
 				}
 			}
 			//	reset event_object.
