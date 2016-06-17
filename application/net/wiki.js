@@ -10992,7 +10992,6 @@ function module_code(library_namespace) {
 		remove_namespace : remove_namespace,
 
 		file_pattern : file_pattern,
-		remove_head_tail : remove_head_tail,
 		lead_text : lead_text,
 
 		parse : parse_wikitext,
