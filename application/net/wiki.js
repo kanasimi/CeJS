@@ -10710,10 +10710,12 @@ function module_code(library_namespace) {
 		// 去掉無關緊要（不造成主要意義）的字元。 ja:"・", "ー"
 		.replace(/[\s\-ー・·．˙•]+/g, '').toLowerCase()
 		// 去掉複數。 TODO: 此法過於簡略。
-		.replace(/s$/, '');
+		.replace(/s$/, '')
+		// 保證回傳 {String}。 TODO: {Number}0
+		|| '';
 	}
 
-	// 測試是否包含等價（而不僅僅是完全相同的） label。
+	// 測試是否包含等價或延伸（而不僅僅是完全相同的） label。
 	// 複雜版 original.includes(label_to_test)
 	function include_label(original, label_to_test) {
 		// 沒東西要測試，表示也毋須作進一步處理。
@@ -10729,12 +10731,12 @@ function module_code(library_namespace) {
 
 		if (Array.isArray(original)) {
 			return original.some(function(label) {
-				return key_of_label(label) === label_to_test;
+				return key_of_label(label).includes(label_to_test);
 			});
 		}
 
-		// 測試正規化後是否等價。
-		return key_of_label(original) === label_to_test;
+		// 測試正規化後是否包含。
+		return key_of_label(original).includes(label_to_test);
 	}
 
 	/**
@@ -10828,7 +10830,7 @@ function module_code(library_namespace) {
 				// → label_without_type = "title"
 				&& label.replace(/\s*\([^()]+\)$/, '');
 
-				// 測試是否包含等價（而不僅僅是完全相同的） label。
+				// 測試是否包含等價或延伸（而不僅僅是完全相同的） label。
 				// TODO: 每個 label 每次測試皆得重新 key_of_label()，效率過差。
 				if (include_label(alias, label)
 				//

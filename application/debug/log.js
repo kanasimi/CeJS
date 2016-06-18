@@ -4,8 +4,6 @@
  * @fileoverview
  * 本檔案包含了記錄用 functions。
  * 
- * TODO: 增加 console 的 style (color)
- * 
  * @since	2009/11/17
  * @see
  * <a href="http://getfirebug.com/lite.html" accessdate="2010/1/1 14:54">Firebug Lite</a>,
@@ -1743,7 +1741,8 @@ if (!CeL.Log) {
 
 
 	// 在 console 則沿用舊 function。
-	if (!CeL.platform.nodejs) {
+	// TODO: 增加 console 的 style (color)
+	if (true || !CeL.platform.nodejs) {
 		Object.assign(CeL, {
 			log : o[1],
 			warn : o[2],
