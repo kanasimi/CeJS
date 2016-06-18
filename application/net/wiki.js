@@ -9581,6 +9581,10 @@ function module_code(library_namespace) {
 			return value.value;
 		}
 
+		if (!value) {
+			return value;
+		}
+
 		// TODO: value.qualifiers, value['qualifiers-order']
 		// TODO: value.references
 		value = value.mainsnak || value;
