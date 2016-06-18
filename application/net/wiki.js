@@ -10785,7 +10785,7 @@ function module_code(library_namespace) {
 						+ '] → [nb]', 2, 'wikidata_edit.add_labels');
 				// using the language code "nb", not "no", at no.wikipedia.org
 				// @see [[phab:T102533]]
-				language === 'nb';
+				language = 'nb';
 			}
 			if (!Array.isArray(label_data)) {
 				if (label_data)
