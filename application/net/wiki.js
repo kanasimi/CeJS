@@ -9739,8 +9739,6 @@ function module_code(library_namespace) {
 		// hbs : 'sh',
 		lzh : 'zh-classical',
 		nan : 'zh-min-nan',
-		// using the language code "nb", not "no", at no.wikipedia.org
-		// @see [[phab:T102533]]
 		// nb : 'no',
 		rup : 'roa-rup',
 		sgs : 'bat-smg',
@@ -9755,9 +9753,6 @@ function module_code(library_namespace) {
 	// @see https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
 	// for sites
 	wikidata_site_alias = {
-		// using the language code "nb", not "no", at no.wikipedia.org
-		// @see [[phab:T102533]]
-		nowiki : 'nbwiki',
 		// 為粵文維基百科特別處理。
 		yuewiki : 'zh_yuewiki',
 
@@ -10783,12 +10778,21 @@ function module_code(library_namespace) {
 		var count = 0;
 		// excludes existing label or alias. 去除已存在的 label/alias。
 		for ( var language in labels) {
-			if (!Array.isArray(labels[language])) {
-				if (labels[language])
+			// 此語言要添加的 label data。
+			var label_data = labels[language];
+			if (language === 'no') {
+				library_namespace.debug('change language [' + language
+						+ '] → [nb]', 2, 'wikidata_edit.add_labels');
+				// using the language code "nb", not "no", at no.wikipedia.org
+				// @see [[phab:T102533]]
+				language === 'nb';
+			}
+			if (!Array.isArray(label_data)) {
+				if (label_data)
 					;
 				library_namespace.warn('wikidata_edit.add_labels: language ['
-						+ language + '] is not Array: ('
-						+ (typeof labels[language]) + ')' + labels[language]);
+						+ language + '] is not Array: (' + (typeof label_data)
+						+ ')' + label_data);
 				continue;
 			}
 
@@ -10796,7 +10800,7 @@ function module_code(library_namespace) {
 			var alias = entity_labels_and_aliases(entity, language, data_alias),
 			/** {Boolean}此語言是否有此label */
 			has_this_language_label = undefined,
-			/** {Array}本次 labels[language] 已添加之 label list */
+			/** {Array}本次 label_data 已添加之 label list */
 			new_alias = undefined,
 			//
 			matched = language.match(/^([a-z]{2,3})-/);
@@ -10806,10 +10810,10 @@ function module_code(library_namespace) {
 				entity_labels_and_aliases(entity, matched[1], alias);
 			}
 
-			labels[language]
+			label_data
 			// 確保 "title" 在 "title (type)" 之前。
 			.sort()
-			// 避免要添加的 labels[language] 本身即有重複。
+			// 避免要添加的 label_data 本身即有重複。
 			.uniq()
 			// 處理各 label。
 			.forEach(function(label) {
@@ -11044,8 +11048,8 @@ function module_code(library_namespace) {
 			}
 			if (items.length > 50) {
 				// 上限值為 50 (機器人為 500)。
-				library_namespace.debug('wikidata_query: Get ' + items.length
-						+ ' items, more than 50.');
+				library_namespace.debug('Get ' + items.length
+						+ ' items, more than 50.', 2, 'wikidata_query');
 				var session = options && options[SESSION_KEY];
 				if (session && !session.data_session) {
 					// 得先登入。
