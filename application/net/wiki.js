@@ -10317,6 +10317,7 @@ function module_code(library_namespace) {
 		title_of : get_entity_link,
 		value_of : wikidata_datavalue,
 		is_DAB : is_DAB,
+
 		// CeL.wiki.data.include_label()
 		include_label : include_label
 	});

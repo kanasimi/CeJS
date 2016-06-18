@@ -3,6 +3,9 @@
  * @name	CeL log function
  * @fileoverview
  * 本檔案包含了記錄用 functions。
+ * 
+ * TODO: 增加 console 的 style (color)
+ * 
  * @since	2009/11/17
  * @see
  * <a href="http://getfirebug.com/lite.html" accessdate="2010/1/1 14:54">Firebug Lite</a>,
@@ -1739,16 +1742,24 @@ if (!CeL.Log) {
 	}
 
 
-	Object.assign(CeL, {
-		log : o[1],
-		warn : o[2],
-		err : o[3],
+	// 在 console 則沿用舊 function。
+	if (!CeL.platform.nodejs) {
+		Object.assign(CeL, {
+			log : o[1],
+			warn : o[2],
+			err : o[3],
 
-		info : function log_front_end_info(message, clean) {
-			//	information
-			CeL.Log.log.call(CeL.Log, message, clean, 'info');
-			//CeL.log.apply(CeL, arguments);
-		},
+			info : function log_front_end_info(message, clean) {
+				//	information
+				CeL.Log.log.call(CeL.Log, message, clean, 'info');
+				//CeL.log.apply(CeL, arguments);
+			},
+
+			debug : log_front_end_debug
+		});
+	}
+
+	Object.assign(CeL, {
 		em : function log_front_end_em(message, clean) {
 			//	emphasis
 			CeL.Log.log.call(CeL.Log, message, clean, 'em');
@@ -1763,7 +1774,6 @@ if (!CeL.Log) {
 		fatal : log_front_end_fatal,
 
 		//	增加 debug 訊息。
-		debug : log_front_end_debug,
 		trace : function log_front_end_trace() {
 			//	trace: the least serious
 			CeL.debug.apply(CeL, arguments);
