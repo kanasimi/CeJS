@@ -7101,9 +7101,10 @@ function module_code(library_namespace) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
 
-		if (!project)
+		if (!project) {
 			// e.g., 'enwiki'.
 			project = language_to_project(options.project);
+		}
 
 		// dump host
 		var host = options.host || 'http://dumps.wikimedia.org/',
@@ -9724,7 +9725,44 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// Wikimedia project code alias
+	// language_code_to_project[language code] = project code
+	// @see [[en:Wikimedia_project#Project_codes]]
+	var language_code_to_project = {
+		// als : 'sq',
+		// cmn : 'zh',
+		// gsw : 'als',
+		// hbs : 'sh',
+		lzh : 'zh-classical',
+		nan : 'zh-min-nan',
+		// using the language code "nb", not "no", at no.wikipedia.org
+		// @see [[phab:T102533]]
+		// nb : 'no',
+		rup : 'roa-rup',
+		sgs : 'bat-smg',
+		vro : 'fiu-vro',
+		// 為粵文維基百科特別處理。
+		yue : 'zh-yue',
+
+		// 為日文特別修正: 'jp' is wrong!
+		jp : 'ja'
+	},
+	// wikidata_site_alias[site code] = Wikidata site code
+	// @see https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
+	// for sites
+	wikidata_site_alias = {
+		// using the language code "nb", not "no", at no.wikipedia.org
+		// @see [[phab:T102533]]
+		nowiki : 'nbwiki',
+		// 為粵文維基百科特別處理。
+		yuewiki : 'zh_yuewiki',
+
+		// 為日文特別修正: 'jp' is wrong!
+		jpwiki : 'jawiki'
+	};
+
 	// TODO:
+	// [[:phab:T102533]]
 	// [[:sourceforge:project/shownotes.php?release id=226003&group id=34373]]
 	// http://sourceforge.net/project/shownotes.php%3Frelease_id%3D226003%26group_id%3D34373
 	// [[:gerrit:gitweb?p=mediawiki/core.git;a=blob;f=RELEASE-NOTES-1.23]]
@@ -9739,8 +9777,38 @@ function module_code(library_namespace) {
 	// Sebastian)]]
 	// [[:wikt:제비]]
 	// [[:yue:海珠湖國家濕地公園]]
+
 	/**
 	 * language code → Wikidata site name / Wikimedia project name<br />
+	 * 將語言代碼轉為 Wikidata site name / Wikimedia project name。
+	 * 
+	 * @param {String}language
+	 *            語言代碼。
+	 * 
+	 * @returns {String}Wikidata site name / Wikimedia project name。
+	 */
+	function language_to_project(language) {
+		// 正規化。
+		language = language && String(language).trim().toLowerCase()
+		// 以防 incase wikt, wikisource
+		.replace(/wik.+$/, '') || default_language;
+
+		if (language.startsWith('category')) {
+			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
+			return language;
+			return default_language + 'wiki';
+		}
+
+		if (language in language_code_to_project) {
+			language = language_code_to_project[language];
+		}
+
+		// e.g., 'zh-min-nan' → 'zh_min_nan'
+		return language.replace(/-/g, '_') + 'wiki';
+	}
+
+	/**
+	 * language code → Wikidata site code<br />
 	 * 將語言代碼轉為 Wikidata API 可使用之 site name。
 	 * 
 	 * @param {String}language
@@ -9748,26 +9816,29 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String}Wikidata API 可使用之 site name。
 	 */
-	function language_to_project(language) {
+	function language_to_site(language) {
 		// 正規化。
-		language = (language && String(language).trim().toLowerCase() || default_language)
-		// e.g., 'zh-min-nanwiki' → 'zh_min_nanwiki'
-		.replace(/-/g, '_');
+		language = language && String(language).trim().toLowerCase()
+				|| default_language;
 
-		// 以防 incase wikt, wikisource
-		if (!language.includes('wik')
-		// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
-		&& !/^category/i.test(language))
-			language += 'wiki';
+		if (language.startsWith('category')) {
+			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
+			return language;
+			return default_language + 'wiki';
+		}
 
-		// 為日文特別處理。
-		if (language === 'jpwiki')
-			language = 'jawiki';
-		// 為粵文維基百科特別處理。
-		else if (language === 'yuewiki')
-			language = 'zh_yuewiki';
+		// e.g., 'zh-min-nan' → 'zh_min_nan'
+		var site = language.replace(/-/g, '_');
+		if (!site.includes('wik')) {
+			// 以防 incase wikt, wikisource
+			site += 'wiki';
+		}
 
-		return language;
+		if (site in wikidata_site_alias) {
+			site = wikidata_site_alias[site];
+		}
+
+		return site;
 	}
 
 	/**
@@ -9792,11 +9863,12 @@ function module_code(library_namespace) {
 				language = language[3];
 			}
 		}
-		if (false)
+		if (false) {
 			library_namespace.debug('language: ' + options + '→'
-					+ language_to_project(language || options), 3,
+					+ language_to_site(language || options), 3,
 					'wikidata_get_site');
-		return language_to_project(language || options);
+		}
+		return language_to_site(language || options);
 	}
 
 	/**
@@ -9854,7 +9926,7 @@ function module_code(library_namespace) {
 	function get_entity_link(entity, language) {
 		var sitelinks = entity && entity.sitelinks;
 		if (sitelinks) {
-			var link = sitelinks[language_to_project(language)];
+			var link = sitelinks[language_to_site(language)];
 			if (link)
 				return link.title;
 			if (!language) {
@@ -10092,7 +10164,7 @@ function module_code(library_namespace) {
 		// 以允許自行設定 {title:title,language:language}。
 		if (key.title) {
 			action = 'sites='
-					+ (key.language && language_to_project(key.language) || wikidata_get_site(options))
+					+ (key.language && language_to_site(key.language) || wikidata_get_site(options))
 					+ '&titles=' + encodeURIComponent(key.title);
 		} else {
 			action = 'ids=' + key;
@@ -10370,7 +10442,7 @@ function module_code(library_namespace) {
 		} else if (Array.isArray(id) && id.length === 2
 		// for id = [ {String}language/site, {String}title ]
 		&& /^[a-z]{2,20}$/i.test(id[0])) {
-			options.site = language_to_project(id[0]);
+			options.site = language_to_site(id[0]);
 			options.title = id[1];
 
 		} else {
