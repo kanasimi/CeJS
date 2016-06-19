@@ -3415,9 +3415,10 @@ function module_code(library_namespace) {
 							;
 					}
 					effect_length += work_continue;
-					if (false)
+					if (false) {
 						console.log([ effect_length, pages.length,
 								work_continue ]);
+					}
 
 					// assert: 0 < effect_length < pages.length
 					library_namespace.debug('一次取得大量頁面時，回傳內容過長而被截斷。將回退 '
@@ -8491,8 +8492,9 @@ function module_code(library_namespace) {
 
 			if (this.continuous_skip > 0) {
 				if (this.continuous_skip > this.show_skip) {
-					library_namespace.log('revision_cacher.had: Skip '
-							+ this.continuous_skip + ' pages.');
+					library_namespace.debug(
+					// 實際運用時，很少會到這邊。
+					'Skip ' + this.continuous_skip + ' pages.', 1, 'revision_cacher.had');
 				}
 				this.continuous_skip = 0;
 			}
@@ -10267,6 +10269,8 @@ function module_code(library_namespace) {
 
 		// 基本上只有 Q(entity, 可連結 wikipedia page) 與 P(entity 的屬性) 之分。
 		// 再把各 wikipedia page 手動加入 entity 之 sitelink。
+
+		// TODO: 檢查 __DISAMBIG__ page property
 
 		// TODO: 檢查 [[Category:All disambiguation pages]]
 

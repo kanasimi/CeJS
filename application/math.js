@@ -400,12 +400,18 @@ function convert_MathML(handler) {
 				|| !(text = node.firstChild.nodeValue.trim()))
 			continue;
 		// temporary usage.
-		var structure = node.getAttribute('title');
-		if (structure)
+		var attribute = 'alt',
+		//
+		structure = node.getAttribute(attribute) || node.getAttribute(attribute = 'title');
+		if (structure) {
+			// 當可以使用 <math> 時，把原先展示的內容物 .childNodes 轉而擺到 .title 去。注意：這可能覆蓋原先的 .title。
+			// 使用例： <math alt="e^(-)" title="e-">電子</math>, <math alt="H_2 O" title="水 H2O">水分子</math>
+			node.setAttribute('title', text);
 			text = '\n' + structure;
-		node.setAttribute('title', text);
-		if (!node.getAttribute('xmlns'))
+		}
+		if (!node.getAttribute('xmlns')) {
 			node.setAttribute('xmlns', "http://www.w3.org/1998/Math/MathML");
+		}
 		// library_namespace.debug(node);
 
 		structure = convert_MathML.parse(text);
