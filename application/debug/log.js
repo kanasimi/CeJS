@@ -140,8 +140,9 @@ write_log = function(id) {
 
 				new_node(m, o);
 
-			} else
+			} else {
 				o = document.createTextNode(m);
+			}
 			B.appendChild(o);
 		}
 	}

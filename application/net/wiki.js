@@ -4963,6 +4963,8 @@ function module_code(library_namespace) {
 			CeL.log('Get ' + list.length + ' item(s).');
 		}, {
 			// default options === this
+			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bcategorymembers
+			namespace : '0|1',
 			// [SESSION_KEY]
 			session : wiki,
 			// title_prefix : 'Template:',
@@ -4974,6 +4976,8 @@ function module_code(library_namespace) {
 	/**
 	 * get list. 檢索/提取列表<br />
 	 * 注意: 可能會改變 options！
+	 * 
+	 * TODO: options.get_sub options.ns
 	 * 
 	 * @param {String}type
 	 *            one of get_list.type
@@ -4987,6 +4991,7 @@ function module_code(library_namespace) {
 	function get_list(type, title, callback, namespace) {
 		library_namespace.debug(type + (title ? ' [[' + title + ']]' : '')
 				+ ', callback: ' + callback, 3, 'get_list');
+
 		var options,
 		/** {String} 前置字首。 */
 		prefix = get_list.type[type], parameter, title_preprocessor;
@@ -4999,12 +5004,13 @@ function module_code(library_namespace) {
 		} else {
 			parameter = get_list.default_parameter;
 		}
-		if (library_namespace.is_Object(namespace))
+		if (library_namespace.is_Object(namespace)) {
 			// 當作 options。
 			namespace = (options = namespace).namespace;
-		else
+		} else {
 			// 前置處理。
 			options = library_namespace.null_Object();
+		}
 
 		if (isNaN(namespace = get_namespace(namespace)))
 			delete options.namespace;
@@ -5078,12 +5084,14 @@ function module_code(library_namespace) {
 						else
 							options[continue_from] = continuation_data;
 						get_list(type, title, callback, options);
+
 					} else {
 						// delete options[continue_from];
 						library_namespace.debug('Nothing to continue!', 1,
 								'get_list');
-						if (typeof callback === 'function')
+						if (typeof callback === 'function') {
 							callback();
+						}
 					}
 				}
 			});
@@ -5242,10 +5250,10 @@ function module_code(library_namespace) {
 				// console.log(data.query);
 				data = data.query.pages;
 				for ( var pageid in data) {
-					if (pages.length)
+					if (pages.length) {
 						library_namespace
 								.warn('get_list: More than 1 page got!');
-					else {
+					} else {
 						var page = data[pageid];
 						if (Array.isArray(page[type]))
 							page[type].forEach(add_page);
@@ -5430,10 +5438,12 @@ function module_code(library_namespace) {
 						'wiki_API.list');
 				callback(options.pages, target, options);
 			}
-		}, {
+		},
+		// 引入 options，避免 get_list() 不能確實僅取指定 namespace。
+		Object.assign({
 			continue_session : options[SESSION_KEY],
 			limit : options.limit || 'max'
-		});
+		}, options));
 	};
 
 	wiki_API.list.default_type = 'embeddedin';
@@ -7664,6 +7674,7 @@ function module_code(library_namespace) {
 			console.log(data);
 		}, {
 			// default options === this
+			// namespace : '0|1',
 			// [SESSION_KEY]
 			// session : wiki,
 			// title_prefix : 'Template:',
@@ -7685,6 +7696,7 @@ function module_code(library_namespace) {
 			console.log(data);
 		}, {
 			// default options === this
+			// namespace : '0|1',
 			// [SESSION_KEY]
 			// session : wiki,
 			// title_prefix : 'Template:',
@@ -7706,6 +7718,7 @@ function module_code(library_namespace) {
 			// console.log(list);
 		}, {
 			// default options === this
+			// namespace : '0|1',
 			// [SESSION_KEY]
 			session : wiki,
 			// title_prefix : 'Template:',
@@ -8494,7 +8507,8 @@ function module_code(library_namespace) {
 				if (this.continuous_skip > this.show_skip) {
 					library_namespace.debug(
 					// 實際運用時，很少會到這邊。
-					'Skip ' + this.continuous_skip + ' pages.', 1, 'revision_cacher.had');
+					'Skip ' + this.continuous_skip + ' pages.', 1,
+							'revision_cacher.had');
 				}
 				this.continuous_skip = 0;
 			}
