@@ -574,16 +574,16 @@ extend = function(obj, className_set) {
 	 * @inner
 	 * @ignore
 	 */
-	var o = new _// JSDT:_module_
+	var log_controller = new _// JSDT:_module_
 			(obj || _.default_log_target, className_set);
 
 	// TODO: do not use arguments
-	return [ o, function() {
-		o.log.apply(o, arguments);
+	return [ log_controller, function() {
+		log_controller.log.apply(log_controller, arguments);
 	}, function() {
-		o.warn.apply(o, arguments);
+		log_controller.warn.apply(log_controller, arguments);
 	}, function() {
-		o.err.apply(o, arguments);
+		log_controller.err.apply(log_controller, arguments);
 	} ];
 
 };
@@ -1020,8 +1020,10 @@ if (!CeL.Log) {
 	}
 
 
-	// override CeL.log
-	Object.assign((CeL.Log = log_controller[0]).className_set, {
+	console.log('override: CeL.log = ' + log_controller[0]);
+	CeL.Log = log_controller[0];
+	console.log('setup CeL.Log.className_set');
+	Object.assign(CeL.Log.className_set, {
 		info : 'debug_info',
 		em : 'debug_em',
 		debug : 'debug_debug'
