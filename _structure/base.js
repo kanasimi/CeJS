@@ -1985,10 +1985,11 @@ OS='UNIX'; // unknown
 	};
 
 
-	if (using_style === undefined && typeof process === 'object' && process.versions)
+	if (using_style === undefined && typeof process === 'object' && process.versions) {
 		// 若為 nodejs，預設使用 style 紀錄。
 		// using_style = _.platform.nodejs
 		using_style = process.versions.node;
+	}
 
 	/**
 	 * 預先處理 messages。
@@ -2003,9 +2004,10 @@ OS='UNIX'; // unknown
 	 * @returns {Array}styled messages
 	 */
 	function preprocess_messages(messages, type, from_styled_logger) {
-		if (!using_style)
-			// 不採用 style。
+		if (!using_style) {
+			// 不採用 styled log。不自動著色。
 			return typeof messages === 'string' ? messages : SGR_to_plain(messages);
+		}
 
 		if (typeof messages === 'string') {
 			// 自動著色。
@@ -2091,6 +2093,7 @@ OS='UNIX'; // unknown
 		_.debug = function (messages, level, caller) {
 			if (!_.is_debug(level))
 				return;
+
 			if (caller)
 				messages = _.get_function_name(caller) + ': ' + messages;
 			// console.trace()

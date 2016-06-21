@@ -64,11 +64,11 @@ p = [],
 has_performance_now,
 
 
-log_data = function(message, option) {
+log_data = function(message, options) {
 	//	由於 .set_method() 會用到 .debug()，若在 log 的 core 中用上 .set_method() 會循環呼叫，造成 stack overflow。
-	// ** NG: library_namespace.set_method(this, option);
-	if (library_namespace.is_Object(option))
-		Object.assign(this, option);
+	// ** NG: library_namespace.set_method(this, options);
+	if (library_namespace.is_Object(options))
+		Object.assign(this, options);
 
 	this.date = new Date();
 	if (has_performance_now)
@@ -162,7 +162,9 @@ write_log = function(id) {
  * @param	force	force to clean the message area
  */
 do_save_log = function(m, id, force) {
-	var _p = p[id], _t = _p.instance, f = _p.logF, s = _t.save_log;
+	var _p = p[id], _t = _p.instance,
+	// log file handler
+	f = _p.logF, s = _t.save_log;
 	if (!s || typeof s === 'function' && !s(m, l))
 		return;
 
@@ -726,34 +728,36 @@ do_log : function(level) {
  *            message message
  * @param {Boolean}clean
  *            clean message area
- * @param {Object}option
+ * @param {Object}options
  *            選擇性項目. { level : log level, 記錄複雜度. }
  * @return
  * @_name _module_.prototype.log
  */
-log : function(message, clean, option) {
+log : function(message, clean, options) {
 	var t = this, _p = p[t.id], level, force_save;
 
-	if (library_namespace.is_Object(option)) {
-		level = option.level;
-		force_save = option.save;
-	} else if (option) {
-		force_save = level = option;
-		(option = {}).level = level;
+	if (library_namespace.is_Object(options)) {
+		level = options.level;
+		force_save = options.save;
+	} else if (options) {
+		force_save = level = options;
+		(options = {}).level = level;
 	}
 
 	//var message_head=(arguments.callee.caller+'').match(/function\do_save_log([^\(]+)/);if(message_head)message_head=message_head[1]+' ';
 	do_save_log(message, t.id, force_save);
 
 	// window.status = message;
-	if (option)
-		message = new log_data(message, option);
+	if (options) {
+		message = new log_data(message, options);
+	}
 
-	if (clean)
+	if (clean) {
 		// clean log next time
 		_p.clean = 1, _p.buf = [ message ];
-	else
+	} else {
 		_p.buf.push(message);
+	}
 
 	if (!(t.interval>0))
 		t.do_log();
@@ -1742,8 +1746,11 @@ if (!CeL.Log) {
 
 
 	// 在 console 則沿用舊 function。
+	// 這裡的判別式與 base.js 中的相符: "_.to_SGR = is_WWW ? SGR_to_plain : to_SGR;"
+	// 因為 base.js 中的 styled log 也需要此條件才能發動。
 	// TODO: 增加 console 的 style (color)
-	if (true || !CeL.platform.nodejs) {
+	if (CeL.is_WWW()) {
+		// 這裡列出的是 base.js 中即已提供，不設定也會由原先之預設函式處理的函式。
 		Object.assign(CeL, {
 			log : o[1],
 			warn : o[2],

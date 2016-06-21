@@ -3885,6 +3885,8 @@ function module_code(library_namespace) {
 			//
 			function(all, host) {
 				HOST = host;
+				// Warning: 這方式已被 blocked。
+				// @see https://phabricator.wikimedia.org/T137707
 				return 'http://cp1008.wikimedia.org:3128/';
 			});
 			if (HOST) {
