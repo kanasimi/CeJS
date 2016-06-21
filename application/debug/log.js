@@ -969,7 +969,7 @@ CeL.run(CeL.get_module_path(module_name, 'log.css'));
 
 //	為本 library 用
 if (!CeL.Log) {
-	var i, l, o = name_space.extend(), has_caller,
+	var i, l, log_controller = name_space.extend(), has_caller,
 	//	偵錯等級, debug level, log level.
 	log_icon = {
 		/*
@@ -1021,7 +1021,7 @@ if (!CeL.Log) {
 
 
 	// override CeL.log
-	Object.assign((CeL.Log = o[0]).className_set, {
+	Object.assign((CeL.Log = log_controller[0]).className_set, {
 		info : 'debug_info',
 		em : 'debug_em',
 		debug : 'debug_debug'
@@ -1237,6 +1237,12 @@ if (!CeL.Log) {
 				add_class : 'debug_' + (level || CeL.is_debug())
 			});
 		}
+	}
+
+	function log_front_end_info(message, clean) {
+		//	information
+		CeL.Log.log.call(CeL.Log, message, clean, 'info');
+		//CeL.log.apply(CeL, arguments);
 	}
 
 	var log_front_end_toggle_log =
@@ -1700,7 +1706,7 @@ if (!CeL.Log) {
 				messages.push(CeL.to_SGR([ 'All ' + recorder.passed.length + ' ',
 						'fg=green', 'passed', '-fg' ]));
 
-				CeL.info(join());
+				log_front_end_info(join());
 				return 0;
 			}
 
@@ -1716,10 +1722,14 @@ if (!CeL.Log) {
 				messages.push(CeL.to_SGR([ ', ' + recorder.fatal.length + ' ',
 						'fg=red;bg=white', 'fatal', '-fg;-bg' ]));
 
+			// 不採用 log_controller，在 console 會出現奇怪的著色。
+			// e.g., @ Travis CI
 			if (recorder.passed.length > 0) {
-				CeL.warn(join());
+				// CeL.warn(join());
+				log_controller[2](join());
 			} else {
-				CeL.err(join());
+				// CeL.err(join());
+				log_controller[3](join());
 			}
 
 			return recorder.failed.length + recorder.fatal.length;
@@ -1752,15 +1762,11 @@ if (!CeL.Log) {
 	if (CeL.is_WWW()) {
 		// 這裡列出的是 base.js 中即已提供，不設定也會由原先之預設函式處理的函式。
 		Object.assign(CeL, {
-			log : o[1],
-			warn : o[2],
-			err : o[3],
+			log : log_controller[1],
+			warn : log_controller[2],
+			err : log_controller[3],
 
-			info : function log_front_end_info(message, clean) {
-				//	information
-				CeL.Log.log.call(CeL.Log, message, clean, 'info');
-				//CeL.log.apply(CeL, arguments);
-			},
+			info : log_front_end_info,
 
 			debug : log_front_end_debug
 		});
