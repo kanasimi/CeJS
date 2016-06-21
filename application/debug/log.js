@@ -1020,9 +1020,9 @@ if (!CeL.Log) {
 	}
 
 
-	console.log('override: CeL.log = ' + log_controller[0]);
+	//console.log('override: CeL.Log = ' + log_controller[0]);
 	CeL.Log = log_controller[0];
-	console.log('setup CeL.Log.className_set');
+	//console.log('setup CeL.Log.className_set');
 	Object.assign(CeL.Log.className_set, {
 		info : 'debug_info',
 		em : 'debug_em',
@@ -1241,11 +1241,13 @@ if (!CeL.Log) {
 		}
 	}
 
+	var log_front_end_info =
+	//
 	function log_front_end_info(message, clean) {
 		//	information
 		CeL.Log.log.call(CeL.Log, message, clean, 'info');
 		//CeL.log.apply(CeL, arguments);
-	}
+	};
 
 	var log_front_end_toggle_log =
 	//	切換(顯示/隱藏)個別訊息。
