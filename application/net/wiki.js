@@ -3092,16 +3092,19 @@ function module_code(library_namespace) {
 	// wiki_API.prototype.work(config): configuration:
 	({
 		// 注意: 與 wiki_API.prototype.work(config)
-		// 之 config.first/config.last 連動。
-		first : function(messages, pages, titles) {
+		// 之 config.before/config.after 連動。
+		before : function(messages, pages, titles) {
 		},
 		// {Function|Array} 每個 page 執行一次。
 		each : function(page_data, messages) {
 			return 'text to replace';
 		},
 		// 注意: 與 wiki_API.prototype.work(config)
-		// 之 config.first/config.last 連動。
-		last : function(messages, pages, titles) {
+		// 之 config.before/config.after 連動。
+		after : function(messages, pages, titles) {
+		},
+		// run this at last. 在wiki_API.prototype.work()工作最後執行此config.last()。
+		last : function() {
 		},
 		// 不作編輯作業。
 		no_edit : true,
@@ -3146,10 +3149,11 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.debug('wiki_API.work: 開始執行:先作環境建構與初始設定。');
-		if (config.summary)
+		if (config.summary) {
 			// '開始處理 ' + config.summary + ' 作業'
 			library_namespace.sinfo([ 'wiki_API.work: start [', 'fg=yellow',
 					config.summary, '-fg', ']' ]);
+		}
 
 		/**
 		 * <code>
@@ -3337,15 +3341,17 @@ function module_code(library_namespace) {
 			'wiki_API.work: The length of pages and titles are different!');
 
 		var main_work = (function(data) {
-			if (!Array.isArray(data))
+			if (!Array.isArray(data)) {
 				if (!data && pages.length === 0) {
 					library_namespace.info(
 					//
 					'wiki_API.work: ' + config.summary + ': 未取得或設定任何頁面。已完成？');
 					data = [];
-				} else
+				} else {
 					// 可能是 page data 或 title。
 					data = [ data ];
+				}
+			}
 
 			if (Array.isArray(pages) && data.length !== pages.length
 					&& !setup_target) {
@@ -3361,8 +3367,9 @@ function module_code(library_namespace) {
 					&& (pages = 'continue_session' in config ? config.continue_session
 							: this)
 					// pages: 後續檢索用索引值之暫存值。
-					&& (pages = pages.show_next()))
+					&& (pages = pages.show_next())) {
 				messages.add(this.continue_key + ': ' + pages);
+			}
 
 			if (!no_message) {
 				// 使用時間, 歷時, 費時, elapsed time
@@ -3381,13 +3388,14 @@ function module_code(library_namespace) {
 
 			pages = data;
 
+			// run before every batch task. 在處理每個批次前執行此function。
 			// 注意: 一次取得大量頁面時，回傳內容不一定會按照原先輸入的次序排列！
-			// 若有必要，此時得用 config.first 自行處理！
-			if (typeof config.first === 'function') {
+			// 若有必要，此時得用 config.before() 自行處理！
+			if (typeof config.before === 'function') {
 				// titles 可能為 undefined！
 				// 注意: 與 wiki_API.prototype.work(config)
-				// 之 config.first/config.last 連動。
-				config.first.call(this, messages, pages, titles);
+				// 之 config.before/config.after 連動。
+				config.before.call(this, messages, pages, titles);
 			}
 
 			/**
@@ -3591,11 +3599,12 @@ function module_code(library_namespace) {
 					}
 				}
 
-				if (typeof config.last === 'function') {
-					// 對於量過大而被分割者，每次分段結束都將執行一次 .last()。
+				// run after every batch task. 在處理每個批次後執行此function。
+				if (typeof config.after === 'function') {
+					// 對於量過大而被分割者，每次分段結束都將執行一次 config.after()。
 					// 注意: 與 wiki_API.prototype.work(config)
-					// 之 config.first/config.last 連動。
-					config.last.call(this, messages, pages, titles);
+					// 之 config.before/config.after 連動。
+					config.after.call(this, messages, pages, titles);
 				}
 
 				var log_to = 'log_to' in config ? config.log_to
@@ -3666,10 +3675,13 @@ function module_code(library_namespace) {
 					return;
 				}
 
+				// run this at last.
+				// 在wiki_API.prototype.work()工作最後執行此config.last()。
 				// config.callback()
 				// 只有在成功時，才會繼續執行。
-				if (typeof config.after === 'function')
-					this.run(config.after);
+				if (typeof config.last === 'function') {
+					this.run(config.last);
+				}
 
 				this.run(function() {
 					library_namespace.log('wiki_API.work: 結束 .work() 作業'
@@ -4964,7 +4976,7 @@ function module_code(library_namespace) {
 
 	if (false) {
 		// 若是想一次取得所有 list，不應使用單次版:
-// 注意: arguments 與 get_list() 之 callback 連動。
+		// 注意: arguments 與 get_list() 之 callback 連動。
 		wiki.categorymembers('Category_name', function(pages, titles, title) {
 			console.log(pages.length);
 		}, {
@@ -8645,11 +8657,19 @@ function module_code(library_namespace) {
 				// 這邊的 ((true)) 僅表示要使用，並採用預設值；不代表設定 dump file path。
 				config.use_dump = null;
 			read_dump(config.use_dump, callback, {
+				// 一般來說只會用到 config.last，將在本函數中稍後執行，
+				// 因此先不開放 config.first, config.last。
+
+				// options.first(filename) of read_dump()
+				// first : config.first,
+
+				// options.last.call(file_stream, anchor, quit_operation)
+				// of read_dump()
+				// last : config.last,
+
 				// directory to restore dump files.
 				// e.g., '/shared/dumps/', '~/dumps/'
-				directory : config.dump_directory,
-				first : config.first,
-				last : config.last
+				directory : config.dump_directory
 			});
 			return;
 		}
@@ -8679,8 +8699,7 @@ function module_code(library_namespace) {
 					list.is_id = true;
 				}
 				id_list = list;
-			},
-			after : config.after
+			}
 		};
 
 		if (Array.isArray(config.list)) {
@@ -8879,6 +8898,7 @@ function module_code(library_namespace) {
 				}, {
 					// 指定 dump file 放置的 directory。
 					directory : config.dump_directory,
+					// options.first(filename) of read_dump()
 					first : function(xml_filename) {
 						dump_file = xml_filename;
 						try {
@@ -8902,6 +8922,8 @@ function module_code(library_namespace) {
 							return true;
 						}
 					},
+					// options.last.call(file_stream, anchor, quit_operation)
+					// of read_dump()
 					last : function(anchor, quit_operation) {
 						// e.g.,
 						// "All 1491092 pages in dump xml file, 198.165 s."
@@ -8931,8 +8953,13 @@ function module_code(library_namespace) {
 					library_namespace.info(
 					// 直接結束作業
 					'traversal_pages: 已中途跳出作業，不再讀取 production database。');
-					if (typeof config.after === 'function')
-						config.after();
+					// 模擬 wiki_API.prototype.work(config) 之config.last()，與之連動。
+					// 此處僅能傳入 .work() 在執行 .last() 時提供的 arguments。
+					// 但因為 .work() 在執行 .last() 時也沒傳入 arguments，
+					// 因此此處亦不傳入 arguments。
+					if (typeof config.last === 'function') {
+						config.last();
+					}
 					return;
 				}
 
@@ -8950,8 +8977,11 @@ function module_code(library_namespace) {
 					// e.g., { rvprop : 'ids|timestamp|content' }
 					// Warning: 這對經由 dump 取得之 page 無效！
 					page_options : config.page_options,
+					// run this at last.
+					// 在wiki_API.prototype.work()工作最後執行此config.last()。
 					// config.last(/* no meaningful arguments */)
-					after : config.after
+					// 沒傳入 arguments的原因見前 "config.last();"。
+					last : config.last
 				}, id_list);
 			}
 
