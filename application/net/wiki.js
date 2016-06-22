@@ -5357,10 +5357,11 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/wiki/API:Embeddedin
 		embeddedin : 'ei',
 
+		// ** 暫時使用 wiki_API.redirects()
 		// 回傳連結至指定頁面的所有重新導向。 Returns all redirects to the given pages.
 		// 転送ページ
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bredirects
-		redirects : 'rd',
+		// redirects : 'rd',
 
 		// 取得所有使用 file 的頁面。
 		// title 必須包括File:前綴。
@@ -5463,7 +5464,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('Get ' + pages.length + ' ' + options.type
 					+ ' pages of [[' + title + ']]', 2, 'wiki_API.list');
 			if (typeof options.callback === 'function') {
-				// options.callback() 為取得每一階段清單時所會被執行的函數
+				// options.callback() 為取得每一階段清單時所會被執行的函數。
 				// 注意: arguments 與 get_list() 之 callback 連動。
 				options.callback(pages, titles, title);
 			}
