@@ -1166,7 +1166,7 @@ if (!CeL.Log) {
 	// front ends of log function
 
 	/**
-	 * 在 node.js v0.11.16 中，不使用 var 的模式設定 function，會造成:<br />
+	 * 警告: 在 node.js v0.10.25, v0.11.16 中，不使用 var 的模式設定 function，會造成:<br />
 	 * In strict mode code, functions can only be declared at top level or immediately within another function.
 	 * 
 	 * 在 node.js v4.2.1 中可以順利 pass。

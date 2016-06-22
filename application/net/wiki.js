@@ -2425,16 +2425,18 @@ function module_code(library_namespace) {
 		case 'list':
 			// get_list(). e.g., 反向連結/連入頁面.
 			// next[1] : title
-			wiki_API[list_type]([ this.API_URL, next[1] ], function(title,
-					titles, pages) {
+			// 注意: arguments 與 get_list() 之 callback 連動。
+			wiki_API[list_type]([ this.API_URL, next[1] ], function(pages,
+					titles, title) {
 				// [ last_list ]
 				_this.last_titles = titles;
 				// [ page_data ]
 				_this.last_pages = pages;
 
 				if (typeof next[2] === 'function') {
-					// next[2] : callback(title, titles, pages)
-					next[2].call(_this, title, titles, pages);
+					// 注意: arguments 與 get_list() 之 callback 連動。
+					// next[2] : callback(pages, titles, title)
+					next[2].call(_this, pages, titles, title);
 				} else if (next[2] && next[2].each) {
 					// next[2] : 當作 work，處理積存工作。
 					if (pages) {
@@ -3089,13 +3091,17 @@ function module_code(library_namespace) {
 
 	// wiki_API.prototype.work(config): configuration:
 	({
-		first : function(messages, titles, pages) {
+		// 注意: 與 wiki_API.prototype.work(config)
+		// 之 config.first/config.last 連動。
+		first : function(messages, pages, titles) {
 		},
 		// {Function|Array} 每個 page 執行一次。
 		each : function(page_data, messages) {
 			return 'text to replace';
 		},
-		last : function(messages, titles, pages) {
+		// 注意: 與 wiki_API.prototype.work(config)
+		// 之 config.first/config.last 連動。
+		last : function(messages, pages, titles) {
 		},
 		// 不作編輯作業。
 		no_edit : true,
@@ -3379,7 +3385,9 @@ function module_code(library_namespace) {
 			// 若有必要，此時得用 config.first 自行處理！
 			if (typeof config.first === 'function') {
 				// titles 可能為 undefined！
-				config.first.call(this, messages, titles, pages);
+				// 注意: 與 wiki_API.prototype.work(config)
+				// 之 config.first/config.last 連動。
+				config.first.call(this, messages, pages, titles);
 			}
 
 			/**
@@ -3585,7 +3593,9 @@ function module_code(library_namespace) {
 
 				if (typeof config.last === 'function') {
 					// 對於量過大而被分割者，每次分段結束都將執行一次 .last()。
-					config.last.call(this, messages, titles, pages);
+					// 注意: 與 wiki_API.prototype.work(config)
+					// 之 config.first/config.last 連動。
+					config.last.call(this, messages, pages, titles);
 				}
 
 				var log_to = 'log_to' in config ? config.log_to
@@ -3920,8 +3930,9 @@ function module_code(library_namespace) {
 				+ error.code + '] ' + error.info);
 			}
 
-			if (typeof callback === 'function')
+			if (typeof callback === 'function') {
 				callback(response);
+			}
 		}
 
 		// 開始處理 query request。
@@ -4810,12 +4821,13 @@ function module_code(library_namespace) {
 			for ( var pageid in data)
 				pages.push(data[pageid]);
 			if (pages.length !== 1 || (options && options.multi)) {
-				if (library_namespace.is_debug())
+				if (library_namespace.is_debug()) {
 					library_namespace.info(
 					//
 					'wiki_API.langlinks: Get ' + pages.length
 					//
 					+ ' page(s)! We will pass all pages to callback!');
+				}
 				// page 之 structure 按照 wiki API 本身之 return！
 				// page = {pageid,ns,title,revisions:[{langlinks,'*'}]}
 				callback(pages);
@@ -4938,8 +4950,9 @@ function module_code(library_namespace) {
 
 					content = data;
 					data = library_namespace.null_Object();
-					if (matched in content)
+					if (matched in content) {
 						data[matched] = content[matched];
+					}
 				}
 
 			// callback({Object} continue data);
@@ -4951,7 +4964,8 @@ function module_code(library_namespace) {
 
 	if (false) {
 		// 若是想一次取得所有 list，不應使用單次版:
-		wiki.categorymembers('Category_name', function(title, titles, pages) {
+// 注意: arguments 與 get_list() 之 callback 連動。
+		wiki.categorymembers('Category_name', function(pages, titles, title) {
 			console.log(pages.length);
 		}, {
 			limit : 'max'
@@ -4986,7 +5000,8 @@ function module_code(library_namespace) {
 	 * @param {String}title
 	 *            page title 頁面標題。
 	 * @param {Function}callback
-	 *            回調函數。 callback(title, titles, pages)
+	 *            回調函數。 callback(pages, titles, title)<br />
+	 *            注意: arguments 與 get_list() 之 callback 連動。
 	 * @param {ℕ⁰:Natural+0|String|Object}namespace
 	 *            one of get_namespace.hash
 	 */
@@ -5246,7 +5261,10 @@ function module_code(library_namespace) {
 
 				library_namespace.debug('[' + title + ']: ' + titles.length
 						+ ' page(s)', 2, 'get_list');
-				callback(title, titles, pages);
+				// 注意: arguments 與 get_list() 之 callback 連動。
+				// 2016/6/22:
+				// 因為 callback 所欲知最重要的資訊是 pages，因此將 pages 置於第一 argument。
+				callback(pages, titles, title);
 
 			} else {
 				// console.log(data.query);
@@ -5262,7 +5280,8 @@ function module_code(library_namespace) {
 
 						library_namespace.debug('[' + page.title + ']: '
 								+ titles.length + ' page(s)', 1, 'get_list');
-						callback(page.title, titles, pages);
+						// 注意: arguments 與 get_list() 之 callback 連動。
+						callback(pages, titles, page.title);
 					}
 					return;
 				}
@@ -5301,8 +5320,9 @@ function module_code(library_namespace) {
 		/**
 		 * 為頁面標題執行前綴搜索。<br />
 		 * <code>
-		CeL.wiki.prefixsearch('User:Cewbot/log/20151002/', function(title, titles, pages){ console.log(titles); }, {limit:'max'});
-		wiki_instance.prefixsearch('User:Cewbot', function(title, titles, pages){ console.log(titles); }, {limit:'max'});
+		// 注意: arguments 與 get_list() 之 callback 連動。
+		CeL.wiki.prefixsearch('User:Cewbot/log/20151002/', function(pages, titles, title){ console.log(titles); }, {limit:'max'});
+		wiki_instance.prefixsearch('User:Cewbot', function(pages, titles, title){ console.log(titles); }, {limit:'max'});
 		 * </code>
 		 * 
 		 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bprefixsearch
@@ -5312,18 +5332,26 @@ function module_code(library_namespace) {
 		} ],
 
 		// 取得連結到 [[title]] 的頁面。
+		// リンク元
 		// e.g., [[name]], [[:Template:name]].
 		// https://www.mediawiki.org/wiki/API:Backlinks
 		backlinks : 'bl',
 
 		// 取得所有嵌入包含 title 的頁面。 (transclusion, inclusion)
+		// 参照読み込み
 		// e.g., {{Template name}}, {{/title}}.
 		// 設定 title 'Template:tl' 可取得使用指定 Template 的頁面。
 		// https://en.wikipedia.org/wiki/Wikipedia:Transclusion
 		// https://www.mediawiki.org/wiki/API:Embeddedin
 		embeddedin : 'ei',
 
+		// 回傳連結至指定頁面的所有重新導向。 Returns all redirects to the given pages.
+		// 転送ページ
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bredirects
+		redirects : 'rd',
+
 		// 取得所有使用 file 的頁面。
+		// title 必須包括File:前綴。
 		// e.g., [[File:title.jpg]].
 		// https://www.mediawiki.org/wiki/API:Imageusage
 		imageusage : 'iu',
@@ -5417,18 +5445,22 @@ function module_code(library_namespace) {
 			options.initialized = true;
 		}
 
-		options[SESSION_KEY][options.type](target, function(title, titles,
-				pages) {
+		// 注意: arguments 與 get_list() 之 callback 連動。
+		options[SESSION_KEY][options.type](target, function(pages, titles,
+				title) {
 			library_namespace.debug('Get ' + pages.length + ' ' + options.type
 					+ ' pages of [[' + title + ']]', 2, 'wiki_API.list');
 			if (typeof options.callback === 'function') {
 				// options.callback() 為取得每一階段清單時所會被執行的函數
-				options.callback(title, titles, pages);
+				// 注意: arguments 與 get_list() 之 callback 連動。
+				options.callback(pages, titles, title);
 			}
-			if (options.pages)
-				Array.prototype.push.apply(options.pages, pages);
-			else
+			if (options.pages) {
+				// Array.prototype.push.apply(options.pages, pages);
+				options.pages.append(pages);
+			} else {
 				options.pages = pages;
+			}
 			if (pages.next_index) {
 				library_namespace.debug('尚未取得所有清單，因此繼續取得下一階段清單。', 2,
 						'wiki_API.list');

@@ -613,13 +613,16 @@ function test_numeral() {
 		[['新臺幣肆萬參拾伍圓參角肆分貳文參', CeL.to_TWD(40035.3423)],'貨幣/currency test'],
 		[[8467287389047, CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(8467287389047,true))],'中文數字'],
 	]);
-	error_count += CeL.test('中文數字 0 to 1000', function(assert) {
-		for (var natural = 0; natural <= 1000; natural++) {
-			assert([ natural, CeL.from_Chinese_numeral(
-			//
-			CeL.to_Chinese_numeral(natural, true)) ], '中文數字 ' + natural);
-		}
-	});
+	// 此步驟頗費時。
+	if (test_level) {
+		error_count += CeL.test('中文數字 0 to 1000', function(assert) {
+			for (var natural = 0; natural <= 1000; natural++) {
+				assert([ natural, CeL.from_Chinese_numeral(
+				//
+				CeL.to_Chinese_numeral(natural, true)) ], '中文數字 ' + natural);
+			}
+		});
+	}
 
 	error_count += CeL.test('Roman numerals 1 to 1000000', function(assert) {
 		for (var natural = 1; natural < 1e6; natural++) {
@@ -941,6 +944,7 @@ function test_math() {
 	// ---------------------------------------------------------------------//
 
 if (test_level) {
+	// 此步驟頗費時。
 	error_count += CeL.test('division test', function(assert) {
 		// ≈1.5 m @ Chrome/31.0.1640.0
 		var base = 10, limit = parseInt('1111', base) + 2, d = 1, n, numerator, denominator = new CeL.data.math.integer(d, null, base), q;
