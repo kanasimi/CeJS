@@ -318,28 +318,28 @@ function get_URL(URL, onload, charset, post_data, options) {
 // {Object}parameters to String
 // https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
 get_URL.param_to_String = function(param) {
-	if (library_namespace.is_Object(param)) {
-		var array = [];
-		library_namespace.debug(Object.keys(param).join(','), 3,
-				'get_URL.param_to_String');
-		Object.keys(param).forEach(function(key) {
-			library_namespace.debug(key, 5, 'get_URL.param_to_String.forEach');
-			array.push(encodeURIComponent(key) + '='
-			//
-			+ encodeURIComponent(String(param[key])));
-		});
-		library_namespace.debug(array.length + ' parameters:<br />\n'
-		//
-		+ array.map(function(param) {
-			return param.length > 400 ? param.slice(0,
-			//
-			library_namespace.is_debug(6) ? 2000 : 400) + '...' : param;
-		}).join('<br />\n'), 4, 'get_URL.param_to_String');
-		return array.join('&');
+	if (!library_namespace.is_Object(param)) {
+		// '' + param
+		return param && String(param) || '';
 	}
 
-	// '' + param
-	return param && String(param) || '';
+	var array = [];
+	library_namespace.debug(Object.keys(param).join(','), 3,
+			'get_URL.param_to_String');
+	Object.keys(param).forEach(function(key) {
+		library_namespace.debug(key, 5, 'get_URL.param_to_String.forEach');
+		array.push(encodeURIComponent(key) + '='
+		//
+		+ encodeURIComponent(String(param[key])));
+	});
+	library_namespace.debug(array.length + ' parameters:<br />\n'
+	//
+	+ array.map(function(param) {
+		return param.length > 400 ? param.slice(0,
+		//
+		library_namespace.is_debug(6) ? 2000 : 400) + '...' : param;
+	}).join('<br />\n'), 4, 'get_URL.param_to_String');
+	return array.join('&');
 };
 
 

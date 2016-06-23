@@ -493,7 +493,7 @@ function (global) {
 		return options || Object.assign(null_Object(), options);
 	}
 	/**
-	 * setup options. 前置處理 options，避免修改或覆蓋附加參數。<br />
+	 * setup options. 前置處理 / clone options，避免修改或覆蓋附加參數。<br />
 	 * 重新造出可被更改的選項。當會更改到options時，再使用此函數。
 	 * 
 	 * @example<code>

@@ -3395,6 +3395,11 @@ function module_code(library_namespace) {
 				// titles 可能為 undefined！
 				// 注意: 與 wiki_API.prototype.work(config)
 				// 之 config.before/config.after 連動。
+				//
+				// 2016/6/22 change API 應用程式介面變更:
+				// .first(messages, titles, pages) → .before(messages, pages,
+				// titles)
+				// 按照需求程度編排 arguments，並改變適合之函數名。
 				config.before.call(this, messages, pages, titles);
 			}
 
@@ -3604,6 +3609,11 @@ function module_code(library_namespace) {
 					// 對於量過大而被分割者，每次分段結束都將執行一次 config.after()。
 					// 注意: 與 wiki_API.prototype.work(config)
 					// 之 config.before/config.after 連動。
+					//
+					// 2016/6/22 change API 應用程式介面變更:
+					// .last(messages, titles, pages) → .after(messages, pages,
+					// titles)
+					// 按照需求程度編排 arguments，並改變適合之函數名。
 					config.after.call(this, messages, pages, titles);
 				}
 
@@ -3679,6 +3689,10 @@ function module_code(library_namespace) {
 				// 在wiki_API.prototype.work()工作最後執行此config.last()。
 				// config.callback()
 				// 只有在成功時，才會繼續執行。
+				//
+				// 2016/6/22 change API 應用程式介面變更:
+				// .after() → .last()
+				// 改變適合之函數名。
 				if (typeof config.last === 'function') {
 					this.run(config.last);
 				}
@@ -4661,7 +4675,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * 取得頁面之重定向/重新導向資料。
+	 * 取得頁面之重定向資料（重新導向至哪一頁）。
 	 * 
 	 * @example <code>
 
@@ -4916,11 +4930,12 @@ function module_code(library_namespace) {
 	 */
 	function get_continue(title, callback) {
 		var options;
-		if (library_namespace.is_Object(callback))
+		if (library_namespace.is_Object(callback)) {
 			callback = (options = callback).callback;
-		else
+		} else {
 			// 前置處理。
 			options = library_namespace.null_Object();
+		}
 
 		wiki_API.page(title, function(page_data) {
 			var matched, done, content = get_page_content(page_data),
@@ -5014,10 +5029,10 @@ function module_code(library_namespace) {
 	 * @param {Function}callback
 	 *            回調函數。 callback(pages, titles, title)<br />
 	 *            注意: arguments 與 get_list() 之 callback 連動。
-	 * @param {ℕ⁰:Natural+0|String|Object}namespace
-	 *            one of get_namespace.hash
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
-	function get_list(type, title, callback, namespace) {
+	function get_list(type, title, callback, options) {
 		library_namespace.debug(type + (title ? ' [[' + title + ']]' : '')
 				+ ', callback: ' + callback, 3, 'get_list');
 
@@ -5033,18 +5048,26 @@ function module_code(library_namespace) {
 		} else {
 			parameter = get_list.default_parameter;
 		}
-		if (library_namespace.is_Object(namespace)) {
-			// 當作 options。
-			namespace = (options = namespace).namespace;
-		} else {
-			// 前置處理。
-			options = library_namespace.null_Object();
-		}
 
-		if (isNaN(namespace = get_namespace(namespace)))
+		if (typeof options === 'string' || !isNaN(options)) {
+			// 當作 namespace。
+			options = {
+				// {ℕ⁰:Natural+0|String|Object}namespace
+				// one of get_namespace.hash.
+				namespace : options
+			};
+		} else if (!library_namespace.is_Object(options)) {
+			options = {
+				// original option
+				option : namespace
+			};
+		}
+		if (options.namespace && isNaN(options.namespace)
+		// 檢查 options.namespace。
+		&& isNaN(options.namespace = get_namespace(options.namespace))) {
+			// namespace 並非為正規 namespace。
 			delete options.namespace;
-		else
-			options.namespace = namespace;
+		}
 
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (!Array.isArray(title))
@@ -5136,13 +5159,13 @@ function module_code(library_namespace) {
 		// allpages 不具有 title。
 		+ (parameter === get_list.default_parameter ? prefix : '')
 		//
-		+ wiki_API.query.title_param(title[1]) : '';
+		+ wiki_API.query.title_param(title[1], true, options.is_id) : '';
 
 		if (typeof title_preprocessor === 'function') {
 			// title_preprocessor(title_parameter)
 			library_namespace.debug('title_parameter: [' + title[1] + ']', 3,
 					'get_list');
-			title[1] = title_preprocessor(title[1]);
+			title[1] = title_preprocessor(title[1], options);
 			library_namespace.debug('→ [' + title[1] + ']', 3, 'get_list');
 		}
 
@@ -5160,9 +5183,22 @@ function module_code(library_namespace) {
 		// 未處理allpages 的 escape 可能造成 HTTP status 400。
 		+ encodeURIComponent(continue_from) : '')
 		//
-		+ ('namespace' in options
+		+ (namespace in options
 		//
 		? '&' + prefix + 'namespace=' + options.namespace : '');
+
+		// additional parameters.
+		if (options.parameters) {
+			if (typeof options.parameters === 'string') {
+				title[1] += '&' + options.parameters;
+			} else if (library_namespace.is_Object(options.parameters)) {
+				title[1] += '&' + get_URL.param_to_String(options.parameters);
+			} else {
+				library_namespace.debug('無法處理之 options.parameters: ['
+						+ options.parameters + ']', 1, 'get_list');
+			}
+		}
+
 		if (!title[0])
 			title = title[1];
 		// console.log('get_list: title: ' + title);
@@ -5274,7 +5310,9 @@ function module_code(library_namespace) {
 				library_namespace.debug('[' + title + ']: ' + titles.length
 						+ ' page(s)', 2, 'get_list');
 				// 注意: arguments 與 get_list() 之 callback 連動。
-				// 2016/6/22:
+				// 2016/6/22 change API 應用程式介面變更:
+				// (title, titles, pages) → (pages, titles, title)
+				// 按照需求程度編配/編排 arguments。
 				// 因為 callback 所欲知最重要的資訊是 pages，因此將 pages 置於第一 argument。
 				callback(pages, titles, title);
 
@@ -5357,7 +5395,7 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/wiki/API:Embeddedin
 		embeddedin : 'ei',
 
-		// ** 暫時使用 wiki_API.redirects()
+		// **暫時使用wiki_API.redirects()，因為尚未整合，在跑舊程式20150916.Multiple_issues.v2.js會有問題。
 		// 回傳連結至指定頁面的所有重新導向。 Returns all redirects to the given pages.
 		// 転送ページ
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bredirects
@@ -5380,6 +5418,15 @@ function module_code(library_namespace) {
 
 		// 'type name' : [ 'abbreviation 縮寫 / prefix', 'parameter' ]
 		// ** 可一次處理多個標題，但可能較耗資源、較慢。
+
+		// TODO
+		// **暫時使用wiki_API.langlinks()，因為尚未整合，在跑舊程式會有問題。
+		NYI_langlinks : [ 'll', 'prop', function(title_parameter, options) {
+			if (options && options.lang && typeof options.lang === 'string') {
+				return title_parameter + '&lllang=' + options.lang;
+			}
+			return title_parameter;
+		} ],
 
 		// linkshere: 取得連結到 [[title]] 的頁面。
 		// [[Special:Whatlinkshere]]
@@ -6012,7 +6059,7 @@ function module_code(library_namespace) {
 
 		if (!data) {
 			action = [ 'empty', gettext(typeof data === 'string'
-			// 
+			//
 			? 'Content is empty' : 'Content is not settled') ];
 
 		} else if (Array.isArray(data) && data[0] === wiki_API.edit.cancel) {
@@ -6317,24 +6364,18 @@ function module_code(library_namespace) {
 	 *            到 [[title]] 之 pages。
 	 */
 	wiki_API.redirects = function(title, callback, options) {
-		// 前置處理。
-		if (!library_namespace.is_Object(options))
-			options = library_namespace.null_Object();
+		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+		options = library_namespace.new_options(options);
 
 		if (!options.no_trace) {
-			// 溯源(追尋重定向終點)
+			// 先溯源(追尋至重定向終點)
 			wiki_API.page(title, function(page_data) {
-				var content = get_page_content(page_data),
-				//
-				redirect_to = parse_redirect(content);
-				// clone Object, 避免更改 options.
-				options = Object.clone(options);
+				// 已追尋至重定向終點，不再溯源。
 				options.no_trace = true;
-				if (redirect_to) {
-					wiki_API.redirects(redirect_to, callback, options);
-				} else {
-					wiki_API.redirects(title, callback, options);
-				}
+				wiki_API.redirects(
+				// redirect_to: 追尋至重定向終點
+				parse_redirect(get_page_content(page_data)) || title, callback,
+						options);
 			}, options);
 			return;
 		}
@@ -6416,6 +6457,7 @@ function module_code(library_namespace) {
 			//
 			+ ' 個同名頁面(重定向至此頁面)。', 2, 'wiki_API.redirects');
 			if (options.include_root) {
+				// 避免修改或覆蓋 pages.redirects。
 				redirects = redirects.slice();
 				redirects.unshift(pages);
 			}
