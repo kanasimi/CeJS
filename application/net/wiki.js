@@ -5158,8 +5158,9 @@ function module_code(library_namespace) {
 		title[1] = title[1] ? '&'
 		// allpages 不具有 title。
 		+ (parameter === get_list.default_parameter ? prefix : '')
-		//
-		+ wiki_API.query.title_param(title[1], true, options.is_id) : '';
+		// 不能設定 wiki_API.query.title_param(title, true)，有些用 title 而不用 titles。
+		// e.g., 20150916.Multiple_issues.v2.js
+		+ wiki_API.query.title_param(title[1]/* , true, options.is_id */) : '';
 
 		if (typeof title_preprocessor === 'function') {
 			// title_preprocessor(title_parameter)
@@ -5183,7 +5184,7 @@ function module_code(library_namespace) {
 		// 未處理allpages 的 escape 可能造成 HTTP status 400。
 		+ encodeURIComponent(continue_from) : '')
 		//
-		+ (namespace in options
+		+ ('namespace' in options
 		//
 		? '&' + prefix + 'namespace=' + options.namespace : '');
 
