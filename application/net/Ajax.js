@@ -726,11 +726,13 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			return;
 		}
 
-		if (/^2/.test(result.statusCode))
+		// 在有 options.onfail 時僅 .debug()。但這並沒啥條理...
+		if (options.onfail || /^2/.test(result.statusCode)) {
 			library_namespace.debug('STATUS: ' + result.statusCode, 2,
 					'get_URL_node');
-		else
-			library_namespace.warn('get_URL_node: status ' + result.statusCode);
+		} else {
+			library_namespace.warn('get_URL_node: [' + URL + ']: status ' + result.statusCode);
+		}
 
 		library_namespace.debug('HEADERS: ' + JSON.stringify(result.headers),
 				4, 'get_URL_node');
