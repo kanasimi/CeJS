@@ -23,12 +23,20 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 ## Node.js usage
 
 ### Installation
+First, go to [nodejs.org](https://nodejs.org/), download the runtime environment and install the node.js package.
+
+Then, install the CeJS library:
 ``` sh
 $ npm install cejs
 ```
 
 ### Running
+Let's try it:
+``` sh
+$ node
+```
 ``` JavaScript
+// Load CeJS library.
 require('cejs');
 
 // Load module.
