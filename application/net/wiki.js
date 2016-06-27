@@ -3354,7 +3354,7 @@ function module_code(library_namespace) {
 			}
 
 			if (Array.isArray(pages) && data.length !== pages.length
-					&& !setup_target) {
+					&& (!setup_target || library_namespace.is_debug())) {
 				library_namespace.warn('wiki_API.work: query 所得之 length ('
 						+ data.length + ') !== pages.length (' + pages.length
 						+ ') ！');
@@ -3377,8 +3377,9 @@ function module_code(library_namespace) {
 						.age(new Date), data.length);
 				// 在「首先使用」之後才設定 .last，才能正確抓到「首先使用」。
 				messages.last = new Date;
-				if (log_item.get_pages)
+				if (log_item.get_pages) {
 					messages.add(pages);
+				}
 				library_namespace.debug(pages, 2, wiki_API.work);
 				if (library_namespace.is_debug()
 				// .show_value() @ interact.DOM, application.debug
@@ -4589,6 +4590,7 @@ function module_code(library_namespace) {
 				}
 				if (false && data.truncated)
 					page_list.truncated = true;
+
 			}
 
 			var pages = data.query.pages;
@@ -4626,6 +4628,22 @@ function module_code(library_namespace) {
 				}
 
 				page_list.push(page);
+			}
+
+			if (data.warnings && data.warnings.query
+			//
+			&& typeof data.warnings.query['*'] === 'string') {
+				/**
+				 * 2016/6/27 22:23:25 修正: 當非 bot 索求過多頁面時之回傳。<br />
+				 * e.g., <code>
+				 * { batchcomplete: '', warnings: { query: { '*': 'Too many values supplied for parameter \'pageids\': the limit is 50' } },
+				 * query: { pages: { '0000': [Object],... '0000': [Object] } } }
+				 * </code>
+				 */
+				if (data.warnings.query['*'].includes('the limit is ')) {
+					// 注記此時真正取得之頁面數。
+					page_list.OK_length = page_list.length;
+				}
 			}
 
 			// options.multi: 即使只取得單頁面，依舊回傳 Array。
