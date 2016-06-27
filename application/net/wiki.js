@@ -3465,15 +3465,16 @@ function module_code(library_namespace) {
 					// -pages.length: 先回溯到 pages 開頭之 index。
 					work_continue -= pages.length - pages.OK_length;
 				} else {
-					library_namespace.err('wiki_API.work: 回傳內容過長而被截斷！');
+					library_namespace.err('wiki_API.work: 回傳內容超過限度而被截斷！');
 				}
 
-				library_namespace.debug('一次取得大量頁面時，回傳內容過長而被截斷。將回退 '
-						+ (pages.length - pages.OK_length) + '頁，下次將自 '
-						+ pages.OK_length + '/' + pages.length + ' [['
-						+ pages[pages.OK_length].title + ']] id '
-						+ pages[pages.OK_length].pageid + ' 開始。', 1,
-						'wiki_API.work');
+				library_namespace.debug('一次取得大量頁面時，回傳內容超過限度而被截斷。將回退 '
+						+ (pages.length - pages.OK_length)
+						+ '頁'
+						+ (pages[pages.OK_length] ? '，下次將自 ' + pages.OK_length + '/'
+								+ pages.length + ' [[' + pages[pages.OK_length].title
+								+ ']] id ' + pages[pages.OK_length].pageid + ' 開始' : '') + '。',
+						1, 'wiki_API.work');
 				pages = pages.slice(0, pages.OK_length);
 			}
 
@@ -6019,7 +6020,7 @@ function module_code(library_namespace) {
 					return;
 				}
 				/**
-				 * <s>遇到過長的頁面 (e.g., 過多 transclusion。)，可能產生錯誤：<br />
+				 * <s>遇到過長/超過限度的頁面 (e.g., 過多 transclusion。)，可能產生錯誤：<br />
 				 * [editconflict] Edit conflict detected</s>
 				 * 
 				 * when edit:<br />
@@ -8163,7 +8164,7 @@ function module_code(library_namespace) {
 				if (list.length > 1e6) {
 					library_namespace.warn(
 					//
-					'wiki_API.cache: 警告: list 過長 (length ' + list.length
+					'wiki_API.cache: 警告: list 過長/超過限度 (length ' + list.length
 							+ ')，將過於耗時而不實際！');
 				}
 
