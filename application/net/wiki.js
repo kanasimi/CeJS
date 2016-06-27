@@ -3342,7 +3342,7 @@ function module_code(library_namespace) {
 
 		var main_work = (function(data) {
 			if (!Array.isArray(data)) {
-				if (!data && pages.length === 0) {
+				if (!data && this_slice_size === 0) {
 					library_namespace.info(
 					//
 					'wiki_API.work: ' + config.summary + ': 未取得或設定任何頁面。已完成？');
@@ -3353,11 +3353,24 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (Array.isArray(pages) && data.length !== pages.length
-					&& (!setup_target || library_namespace.is_debug())) {
-				library_namespace.warn('wiki_API.work: query 所得之 length ('
-						+ data.length + ') !== pages.length (' + pages.length
-						+ ') ！');
+			if (Array.isArray(pages) && data.length !== this_slice_size) {
+				// 處理有時可能連 data 都是 trimmed 過的。
+				// assert: data.length < this_slice_size
+				if (data.truncated) {
+					if(!setup_target || library_namespace.is_debug())
+						library_namespace.warn('wiki_API.work: query 所得之 length ('
+								+ data.length + ') !== this slice size (' + this_slice_size
+								+ ') ！');
+
+					if (setup_target) {
+						// -this_slice_size: 先回溯到 pages 開頭之 index。
+						work_continue -= this_slice_size-data.length;
+						library_namespace.debug('一次取得大量頁面時，回傳內容超過限度而被截斷。將回退 '
+								+ (this_slice_size-data.length)
+								+ '頁。',
+								1, 'wiki_API.work');
+					}
+				}
 			}
 
 			// 傳入標題列表，則由程式自行控制，毋須設定後續檢索用索引值。
@@ -3457,8 +3470,6 @@ function module_code(library_namespace) {
 
 			/**
 			 * 處理回傳超過 limit (12 MB)，被截斷之情形。
-			 * 
-			 * TODO: 有時可能連 pages.length 都是 trimmed 過的。
 			 */
 			if ('OK_length' in pages) {
 				if (setup_target) {
@@ -3719,7 +3730,7 @@ function module_code(library_namespace) {
 		// titles/pageids: Maximum number of values is 50 (500 for bots).
 		slice_size = config.slice >= 1 ? Math.min(config.slice | 0, 500) : 500,
 		/** {ℕ⁰:Natural+0}自此 index 開始繼續作業 */
-		work_continue = 0, setup_target;
+		work_continue = 0, this_slice_size,setup_target;
 
 		if (!config.no_edit) {
 			var check_options = config.check_options;
@@ -3776,7 +3787,8 @@ function module_code(library_namespace) {
 				done = nochange_count = 0;
 				messages.reset();
 
-				work_continue += max_size;
+				this_slice_size=this_slice.length;
+				work_continue += this_slice_size;
 				// console.log([ 'page_options:', page_options ]);
 				this.page(this_slice, main_work, page_options);
 			}).bind(this);
@@ -3786,6 +3798,7 @@ function module_code(library_namespace) {
 			// assert: target is {String}title or {Object}page_data
 			library_namespace.debug('取得單一頁面之 (page contents 頁面內容)。', 2,
 					'wiki_API.work');
+			this_slice_size=target.length;
 			this.page(target, main_work, page_options);
 		}
 	};
@@ -4635,15 +4648,16 @@ function module_code(library_namespace) {
 			//
 			&& typeof data.warnings.query['*'] === 'string') {
 				/**
-				 * 2016/6/27 22:23:25 修正: 當非 bot 索求過多頁面時之回傳。<br />
+				 * 2016/6/27 22:23:25 修正: 處理當非 bot 索求過多頁面時之回傳。<br />
 				 * e.g., <code>
 				 * { batchcomplete: '', warnings: { query: { '*': 'Too many values supplied for parameter \'pageids\': the limit is 50' } },
 				 * query: { pages: { '0000': [Object],... '0000': [Object] } } }
 				 * </code>
 				 */
 				if (data.warnings.query['*'].includes('the limit is ')) {
-					// 注記此時真正取得之頁面數。
-					page_list.OK_length = page_list.length;
+					// TODO: 注記此時真正取得之頁面數。
+					// page_list.OK_length = page_list.length;
+					page_list.truncated = true;
 				}
 			}
 
