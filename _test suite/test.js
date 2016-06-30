@@ -2365,6 +2365,7 @@ function test_wiki() {
 		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ]);
 		wikitext = 'a[[l]]b';
 		assert([ 'a{{t}}b', CeL.wiki.parser(wikitext).parse().each('link', function(token, parent, index){return '{{t}}';}, true).toString() ]);
+		// TODO: "[[Image:a.svg|b{{c|d[[e]]f}}|g]]"
 	});
 
 	return;

@@ -1787,8 +1787,13 @@ function Object_filter(object, filter) {
  * @see clone() @ CeL.data
  */
 function Object_clone(object, deep) {
+	if (!object)
+		return object;
+
 	// for read-only??
 	// return Object.create(object);
+
+	// TODO: for {Array}
 
 	if (deep)
 		// @see

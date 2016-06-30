@@ -1210,7 +1210,7 @@ function module_code(library_namespace) {
 		// [[~:~|~]], [[~:~:~|~]]
 		wikitext = wikitext.replace_till_stable(
 		// or use ((PATTERN_link))
-		/\[\[([^\[\]]+)\]\]/g, function(all, parameters) {
+		/\[\[([^\[\]][\s\S]*?)\]\]/g, function(all, parameters) {
 			if (normalize)
 				parameters = parameters.trim();
 			// 自 end_mark 向前回溯。
@@ -1235,9 +1235,10 @@ function module_code(library_namespace) {
 				// 經過改變，需再進一步處理。
 				: parse_wikitext(token, options, queue);
 			});
-			if (file_matched)
+			if (file_matched) {
 				// file name
 				parameters.name = file_matched[1];
+			}
 			_set_wiki_type(parameters, file_matched ? 'file' : 'link');
 			queue.push(parameters);
 			return prevoius + include_mark + (queue.length - 1) + end_mark;
