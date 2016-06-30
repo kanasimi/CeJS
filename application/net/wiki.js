@@ -1149,6 +1149,90 @@ function module_code(library_namespace) {
 		// 例如修復章節標題 (section title, 節タイトル) 前後 level 不一，
 		// table "|-" 未起新行等。
 
+		function for_transclusion(all, parameters) {
+			// 自 end_mark 向前回溯。
+			var index = parameters.lastIndexOf('{{'), prevoius,
+			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
+			_parameters = {};
+			if (index > 0) {
+				prevoius = '{{' + parameters.slice(0, index);
+				parameters = parameters.slice(index + '}}'.length);
+			} else {
+				prevoius = '';
+			}
+			library_namespace.debug(prevoius + ' + ' + parameters, 4,
+					'parse_wikitext.transclusion');
+
+			index = 1;
+			parameters = parameters.split('|').map(function(token, _index) {
+				if (_index === 0
+				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+				// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
+				&& !token.includes(include_mark)) {
+					return _set_wiki_type(
+					//
+					token.split(normalize ? /\s*:\s*/ : ':'), 'page_title');
+				}
+
+				// 經過改變，需再進一步處理。
+				token = parse_wikitext(token, options, queue);
+
+				var _token = token;
+				if (Array.isArray(_token)) {
+					_token = _token[0];
+				}
+				if (typeof _token === 'string') {
+					_token = _token.trim();
+					// @see function parse_template()
+					var matched = _token.match(/^([^=]+)=(.*)$/);
+					if (matched) {
+						var key = matched[1].trimRight(),
+						//
+						value = matched[2].trimLeft();
+
+						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
+						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
+						// parser 調用超過一個Template中參數的值，只有最後提供的值會被使用。
+						if (typeof _token === 'string') {
+							_parameters[key] = value;
+						} else {
+							// assert: Array.isArray(token)
+							_token = token.clone();
+							_token[0] = value;
+							_parameters[key] = _token;
+						}
+					} else {
+						_parameters[index++]
+						// TODO: token 本身並未 .trim()
+						= typeof token === 'string' ? _token : token;
+					}
+
+				} else {
+					// e.g., {{t|[http://... ...]}}
+					if (library_namespace.is_debug(3)) {
+						library_namespace.err(
+						//
+						'parse_wikitext.transclusion: Can not parse ['
+						//
+						+ token + ']');
+						library_namespace.err(token);
+					}
+					// TODO: token 本身並未 .trim()
+					_parameters[index++] = token;
+				}
+
+				return token;
+			});
+
+			parameters.name = parameters[0].toString().trim().replace(
+					/\s*:\s*/g, ':');
+			parameters.parameters = _parameters;
+
+			_set_wiki_type(parameters, 'transclusion');
+			queue.push(parameters);
+			// TODO: parameters.parameters = []
+			return prevoius + include_mark + (queue.length - 1) + end_mark;
+		}
 		// ----------------------------------------------------
 		// comments: <!-- ... -->
 		// "<\": for Eclipse JSDoc.
@@ -1206,6 +1290,7 @@ function module_code(library_namespace) {
 		});
 
 		// ----------------------------------------------------
+		// wikilink
 		// 須注意: [[p|\nt]] 可，但 [[p\n|t]] 不可！
 		// [[~:~|~]], [[~:~:~|~]]
 		wikitext = wikitext.replace_till_stable(
@@ -1223,6 +1308,15 @@ function module_code(library_namespace) {
 			}
 			library_namespace.debug(prevoius + ' + ' + parameters, 4,
 					'parse_wikitext.link');
+
+			if (parameters.includes('{{')) {
+				// <s>fix</s> workaround for "[[Image:a.svg|b{{c|d[[e]]f}}|g]]"
+				// TODO: 其實本函數應該採用 while(!done){wikitext = wikitext.replace(...);...}
+				parameters = parameters.replace_till_stable(
+				// or use ((PATTERN_transclusion))
+				/{{([^{}][\s\S]*?)}}/g, for_transclusion);
+				library_namespace.debug(parameters, 4 ,'parse_wikitext.link');
+			}
 
 			// test [[file:name|...|...]]
 			var file_matched = parameters.match(PATTERN_file_prefix);
@@ -1314,92 +1408,7 @@ function module_code(library_namespace) {
 		// {{Template name|}}
 		wikitext = wikitext.replace_till_stable(
 		// or use ((PATTERN_transclusion))
-		/{{([^{}][\s\S]*?)}}/g,
-		//
-		function(all, parameters) {
-			// 自 end_mark 向前回溯。
-			var index = parameters.lastIndexOf('{{'), prevoius,
-			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
-			_parameters = {};
-			if (index > 0) {
-				prevoius = '{{' + parameters.slice(0, index);
-				parameters = parameters.slice(index + '}}'.length);
-			} else {
-				prevoius = '';
-			}
-			library_namespace.debug(prevoius + ' + ' + parameters, 4,
-					'parse_wikitext.transclusion');
-
-			index = 1;
-			parameters = parameters.split('|').map(function(token, _index) {
-				if (_index === 0
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				// e.g., {{ #expr: {{CURRENTHOUR}}+8}}}}
-				&& !token.includes(include_mark)) {
-					return _set_wiki_type(
-					//
-					token.split(normalize ? /\s*:\s*/ : ':'), 'page_title');
-				}
-
-				// 經過改變，需再進一步處理。
-				token = parse_wikitext(token, options, queue);
-
-				var _token = token;
-				if (Array.isArray(_token)) {
-					_token = _token[0];
-				}
-				if (typeof _token === 'string') {
-					_token = _token.trim();
-					// @see function parse_template()
-					var matched = _token.match(/^([^=]+)=(.*)$/);
-					if (matched) {
-						var key = matched[1].trimRight(),
-						//
-						value = matched[2].trimLeft();
-
-						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
-						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
-						// parser 調用超過一個Template中參數的值，只有最後提供的值會被使用。
-						if (typeof _token === 'string') {
-							_parameters[key] = value;
-						} else {
-							// assert: Array.isArray(token)
-							_token = token.clone();
-							_token[0] = value;
-							_parameters[key] = _token;
-						}
-					} else {
-						_parameters[index++]
-						// TODO: token 本身並未 .trim()
-						= typeof token === 'string' ? _token : token;
-					}
-
-				} else {
-					// e.g., {{t|[http://... ...]}}
-					if (library_namespace.is_debug(3)) {
-						library_namespace.err(
-						//
-						'parse_wikitext.transclusion: Can not parse ['
-						//
-						+ token + ']');
-						library_namespace.err(token);
-					}
-					// TODO: token 本身並未 .trim()
-					_parameters[index++] = token;
-				}
-
-				return token;
-			});
-
-			parameters.name = parameters[0].toString().trim().replace(
-					/\s*:\s*/g, ':');
-			parameters.parameters = _parameters;
-
-			_set_wiki_type(parameters, 'transclusion');
-			queue.push(parameters);
-			// TODO: parameters.parameters = []
-			return prevoius + include_mark + (queue.length - 1) + end_mark;
-		});
+		/{{([^{}][\s\S]*?)}}/g, for_transclusion);
 
 		// ----------------------------------------------------
 		// [[Help:HTML in wikitext]]
@@ -1647,7 +1656,7 @@ function module_code(library_namespace) {
 			/\[\[([^\|\[\]{}]+)/g;
 		}
 
-		// ↑ parse sequence end
+		// ↑ parse sequence finished
 		// ------------------------------------------------------------------------
 
 		if (options && typeof options.postfix === 'function')

@@ -1787,18 +1787,23 @@ function Object_filter(object, filter) {
  * @see clone() @ CeL.data
  */
 function Object_clone(object, deep) {
-	if (!object)
+	if (!object || typeof object !== 'object') {
+		// 純量。
 		return object;
+	}
 
 	// for read-only??
 	// return Object.create(object);
 
-	// TODO: for {Array}
+	if (Array.isArray(object)) {
+		// TODO: for {Array}
+	}
 
-	if (deep)
+	if (deep) {
 		// @see
 		// http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object
 		return JSON.parse(JSON.stringify(object));
+	}
 
 	// shallow clone Object.
 	return Object.assign(Object.create(
