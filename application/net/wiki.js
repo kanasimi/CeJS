@@ -1982,7 +1982,11 @@ function module_code(library_namespace) {
 			}
 
 			// 須注意: 對某些 section 可能 throw！
-			section = decodeURIComponent(section.replace(/\./g, '%'));
+			try {
+				section = decodeURIComponent(section.replace(/\./g, '%'));
+			} catch (e) {
+				// TODO: handle exception
+			}
 		}
 
 		/** {String}URL之語言 */
@@ -3353,10 +3357,10 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (Array.isArray(pages) && data.length !== this_slice_size) {
+			if (data.length !== this_slice_size) {
 				// 處理有時可能連 data 都是 trimmed 過的。
 				// assert: data.length < this_slice_size
-				if (data.truncated) {
+				if (true || data.truncated) {
 					if(!setup_target || library_namespace.is_debug())
 						library_namespace.warn('wiki_API.work: query 所得之 length ('
 								+ data.length + ') !== this slice size (' + this_slice_size
@@ -3730,7 +3734,7 @@ function module_code(library_namespace) {
 		// titles/pageids: Maximum number of values is 50 (500 for bots).
 		slice_size = config.slice >= 1 ? Math.min(config.slice | 0, 500) : 500,
 		/** {ℕ⁰:Natural+0}自此 index 開始繼續作業 */
-		work_continue = 0, this_slice_size,setup_target;
+		work_continue = 0, this_slice_size, setup_target;
 
 		if (!config.no_edit) {
 			var check_options = config.check_options;
@@ -3787,7 +3791,7 @@ function module_code(library_namespace) {
 				done = nochange_count = 0;
 				messages.reset();
 
-				this_slice_size=this_slice.length;
+				this_slice_size = this_slice.length;
 				work_continue += this_slice_size;
 				// console.log([ 'page_options:', page_options ]);
 				this.page(this_slice, main_work, page_options);
@@ -3798,7 +3802,7 @@ function module_code(library_namespace) {
 			// assert: target is {String}title or {Object}page_data
 			library_namespace.debug('取得單一頁面之 (page contents 頁面內容)。', 2,
 					'wiki_API.work');
-			this_slice_size=target.length;
+			this_slice_size = target.length;
 			this.page(target, main_work, page_options);
 		}
 	};
@@ -4548,7 +4552,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (data.warnings && data.warnings.result
+			if (false && data.warnings && data.warnings.result
 			/**
 			 * e.g., <code>
 			 * { continue: { rvcontinue: '2421|39477047', continue: '||' },
@@ -4737,6 +4741,7 @@ function module_code(library_namespace) {
 			}
 
 			// e.g., [ { from: 'AA', to: 'A', tofragment: 'aa' } ]
+			// e.g., [ { from: 'AA', to: 'A', tofragment: '.AA.BB.CC' } ]
 			var redirect_data = page_data.response.query.redirects;
 			if (redirect_data) {
 				if (redirect_data.length !== 1) {
@@ -4752,8 +4757,17 @@ function module_code(library_namespace) {
 				redirect_data = redirect_data[0];
 				// assert: redirect_data && redirect_data.to === page_data.title
 
-				// test REDIRECT [[title#section]]
+				// test if is #REDIRECT [[title#section]]
 				if (redirect_data.tofragment) {
+					try {
+						redirect_data.to_link = redirect_data.to + '#'
+						// 須注意: 對某些 section 可能 throw！
+						+ decodeURIComponent(redirect_data.tofragment.replace(/\./g, '%'));
+					} catch (e) {
+						redirect_data.to_link = redirect_data.to + '#'
+						//
+						+ redirect_data.tofragment;
+					}
 					library_namespace.debug('[[' + title
 					// →
 					+ ']] redirected to section [[' + redirect_data.to + '#'
@@ -8878,15 +8892,6 @@ function module_code(library_namespace) {
 				//
 				function(page_data, position, page_anchor) {
 					// filter
-					if (false) {
-						if (!page_data || ('missing' in page_data)) {
-							return [ CeL.wiki.edit.cancel, '條目已不存在或被刪除' ];
-						}
-						if (page_data.ns !== 0) {
-							// 記事だけを編集する
-							return [ CeL.wiki.edit.cancel, '本作業僅處理條目命名空間' ];
-						}
-					}
 
 					// TODO
 					if (false && limit > 0 && count > limit) {
@@ -8912,6 +8917,16 @@ function module_code(library_namespace) {
 					// Check data.
 
 					if (false) {
+						if (!page_data || ('missing' in page_data)) {
+							// error?
+							return [ CeL.wiki.edit.cancel, '條目已不存在或被刪除' ];
+						}
+						if (page_data.ns !== 0) {
+							// 記事だけを編集する
+							return [ CeL.wiki.edit.cancel, '本作業僅處理條目命名空間或模板' ];
+							throw '非條目:[[' + page_data.title + ']]! 照理來說不應該出現有 ns !== 0 的情況。';
+						}
+
 						/** {Object}revision data. 修訂版本資料。 */
 						var revision = page_data && page_data.revisions
 								&& page_data.revisions[0],
@@ -8929,15 +8944,16 @@ function module_code(library_namespace) {
 						 */
 						content = CeL.wiki.content_of(page_data);
 
-						if (!page_data || ('missing' in page_data)) {
-							// error?
-							return;
-						}
-
 						// 似乎沒 !page_data.title 這種問題。
 						if (false && !page_data.title)
 							library_namespace.warn('* No title: [['
 									+ page_data.pageid + ']]!');
+
+						if (!content) {
+							return [ CeL.wiki.edit.cancel, 'No contents: [['
+										+ title + ']]! 沒有頁面內容！' ];
+						}
+
 						// [[Wikipedia:快速删除方针]]
 						if (revision['*']) {
 							// max_length = Math.max(max_length,
