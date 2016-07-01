@@ -1140,16 +1140,11 @@ function module_code(library_namespace) {
 					|| wikitext;
 
 		// ------------------------------------------------------------------------
-		// parse sequence start / start parse
+		// parse functions
 
-		// parse 範圍基本上由小到大。
-		// e.g., transclusion 不能包括 table，因此在 table 前。
-
-		// 可順便作正規化/維護清理/修正明顯破壞/修正維基語法/維基化，
-		// 例如修復章節標題 (section title, 節タイトル) 前後 level 不一，
-		// table "|-" 未起新行等。
-
-		function for_transclusion(all, parameters) {
+		// or use ((PATTERN_transclusion))
+		var PATTERN_for_transclusion = /{{([^{}][\s\S]*?)}}/g;
+		function parse_transclusion(all, parameters) {
 			// 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('{{'), prevoius,
 			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
@@ -1233,6 +1228,17 @@ function module_code(library_namespace) {
 			// TODO: parameters.parameters = []
 			return prevoius + include_mark + (queue.length - 1) + end_mark;
 		}
+
+		// ------------------------------------------------------------------------
+		// parse sequence start / start parse
+
+		// parse 範圍基本上由小到大。
+		// e.g., transclusion 不能包括 table，因此在 table 前。
+
+		// 可順便作正規化/維護清理/修正明顯破壞/修正維基語法/維基化，
+		// 例如修復章節標題 (section title, 節タイトル) 前後 level 不一，
+		// table "|-" 未起新行等。
+
 		// ----------------------------------------------------
 		// comments: <!-- ... -->
 		// "<\": for Eclipse JSDoc.
@@ -1311,10 +1317,11 @@ function module_code(library_namespace) {
 
 			if (parameters.includes('{{')) {
 				// <s>fix</s> workaround for "[[Image:a.svg|b{{c|d[[e]]f}}|g]]"
-				// TODO: 其實本函數應該採用 while(!done){wikitext = wikitext.replace(...);...}
+				// TODO: 其實本函數應該 rewrite，
+				// 採用 while(!done){wikitext = wikitext.replace(...);...}
 				parameters = parameters.replace_till_stable(
-				// or use ((PATTERN_transclusion))
-				/{{([^{}][\s\S]*?)}}/g, for_transclusion);
+				//
+				PATTERN_for_transclusion, parse_transclusion);
 				library_namespace.debug(parameters, 4 ,'parse_wikitext.link');
 			}
 
@@ -1407,8 +1414,8 @@ function module_code(library_namespace) {
 		// 模板（英語：Template，又譯作「樣板」、「範本」）
 		// {{Template name|}}
 		wikitext = wikitext.replace_till_stable(
-		// or use ((PATTERN_transclusion))
-		/{{([^{}][\s\S]*?)}}/g, for_transclusion);
+		//
+		PATTERN_for_transclusion, parse_transclusion);
 
 		// ----------------------------------------------------
 		// [[Help:HTML in wikitext]]
