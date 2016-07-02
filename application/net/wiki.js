@@ -2853,6 +2853,7 @@ function module_code(library_namespace) {
 
 			// wikidata_entity(key, property, callback, options)
 			wikidata_entity(next[1], next[2], function(data, error) {
+				// entity data
 				// 就算發生錯誤，依然設定一個 dummy，預防 edit_data 時引用可能非所欲的 this.last_page。
 				_this.last_data = data || {
 					key : next[1],
@@ -10007,8 +10008,8 @@ function module_code(library_namespace) {
 	 */
 	function language_to_site(language) {
 		// 正規化。
-		language = language && String(language).trim().toLowerCase()
-				|| default_language;
+		language = language ? String(language).trim().toLowerCase()
+				: default_language;
 
 		if (language.startsWith('category')) {
 			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
@@ -10116,8 +10117,9 @@ function module_code(library_namespace) {
 		var sitelinks = entity && entity.sitelinks;
 		if (sitelinks) {
 			var link = sitelinks[language_to_site(language)];
-			if (link)
+			if (link) {
 				return link.title;
+			}
 			if (!language) {
 				link = [];
 				for (language in sitelinks) {
