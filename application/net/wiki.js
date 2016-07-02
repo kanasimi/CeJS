@@ -4630,12 +4630,12 @@ function module_code(library_namespace) {
 			}
 
 			var pages = data.query.pages;
+			// 其他 .prop 本來就不會有內容。
+			var need_warn = get_content;
 
 			for ( var pageid in pages) {
 				var page = pages[pageid];
 				if (!get_page_content.has_content(page)) {
-					// 其他 .prop 本來就不會有內容。
-					var need_warn = get_content;
 
 					if (continue_id && continue_id === page.pageid) {
 						// 找到了 page_list.continue 所指之 index。
