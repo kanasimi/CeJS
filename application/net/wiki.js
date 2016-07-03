@@ -91,6 +91,26 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// TODO: 各種 type 間的轉換: 先要能擷取出 language + project
+	// type: 'API', 'db', 'site', 'link', ...
+	// API URL (default): e.g., 'https://www.wikidata.org/w/api.php'
+	//
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
+	// site: e.g., 'zhwiki'
+	//
+	// https://en.wikipedia.org/wiki/Help:Interwikimedia_links
+	// link prefix: e.g., 'zh:n:'
+	//
+	// SHOW DATABASES;
+	// db: e.g., 'zhwiki_p'
+	//
+	// language: 'en', 'zh', 'ja', ... (default: default_language)
+	// project: 'wikipedia' (default), 'news', 'source', 'books', 'quote', ...
+	function get_project(language, project, type) {
+		;
+	}
+
+
 	/** {String} old key: 'wiki' */
 	var SESSION_KEY = 'session';
 
@@ -108,8 +128,9 @@ function module_code(library_namespace) {
 	 * @constructor
 	 */
 	function wiki_API(user_name, password, API_URL) {
-		if (!this || this.constructor !== wiki_API)
+		if (!this || this.constructor !== wiki_API) {
 			return wiki_API.query.apply(null, arguments);
+		}
 
 		this.token = {
 			// lgusername
@@ -172,8 +193,9 @@ function module_code(library_namespace) {
 		}
 
 		project = String(project);
-		if (project in api_URL.alias)
+		if (project in api_URL.alias) {
 			project = api_URL.alias[project];
+		}
 		// /^[a-z\-\d]{2,20}$/i.test(undefined) === true
 		if (/^[a-z\-\d]{2,20}$/i.test(project)) {
 			if (project in api_URL.wikimedia) {
@@ -6752,7 +6774,16 @@ function module_code(library_namespace) {
 			if (is_clone) {
 				delete config.database;
 			}
-			Object.assign(config, language);
+			if (language.API_URL) {
+				// treat language as session.
+				language = language.API_URL.toLowerCase().match(/\/\/([a-z\-\d]{2,20})\.([a-z]+)/);
+				// TODO: error handling
+				config.set_language(language[1].replace(/-/g, '_')
+				// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
+				+ (language[2] === 'wikipedia' ? 'wiki' : language[2]), !user);
+			} else {
+				Object.assign(config, language);
+			}
 		} else if (typeof language === 'string' && language) {
 			if (is_clone) {
 				delete config.database;
@@ -8871,7 +8902,9 @@ function module_code(library_namespace) {
 						// config.is_id = is_id;
 					}
 					traversal_pages(config, callback);
-				}, config && config.SQL_config || new_SQL_config(use_language));
+				}, config && config.SQL_config
+				// 光從 use_language 無法獲得如 wikinews 之資訊。
+				|| new_SQL_config(config[SESSION_KEY] || use_language));
 				return wiki_API.cache.abort;
 			};
 
