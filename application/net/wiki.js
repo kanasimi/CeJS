@@ -1,9 +1,9 @@
 /**
  * @name CeL function for MediaWiki (Wikipedia / 維基百科)
- * 
+ *
  * @fileoverview 本檔案包含了 MediaWiki 自動化作業用的程式庫，主要用於編寫[[維基百科:機器人]]
  *               ([[WP:{{{name|{{int:Group-bot}}}}}|{{{name|{{int:Group-bot}}}}}]])。
- * 
+ *
  * TODO:<code>
 
 wiki_API.work() 遇到 Invalid token 之類問題，中途跳出 abort 時，無法紀錄。應將紀錄顯示於 console 或 local file。
@@ -34,7 +34,7 @@ https://meta.wikimedia.org/wiki/Research:Page_view
 
 
 </code>
- * 
+ *
  * @since 2015/1/1
  * @see https://www.mediawiki.org/w/api.php
  */
@@ -97,14 +97,14 @@ function module_code(library_namespace) {
 	/**
 	 * web Wikipedia / 維基百科 用的 functions。<br />
 	 * 可執行環境: node.js, JScript。
-	 * 
+	 *
 	 * @param {String}user_name
 	 *            user name
 	 * @param {String}password
 	 *            user password
 	 * @param {String}[API_URL]
 	 *            language code or API URL
-	 * 
+	 *
 	 * @constructor
 	 */
 	function wiki_API(user_name, password, API_URL) {
@@ -146,22 +146,22 @@ function module_code(library_namespace) {
 
 	/**
 	 * Wikimedia projects 的 URL match pattern 匹配模式。
-	 * 
+	 *
 	 * matched: [ protocol + host name, protocol, host name, language / project ]
-	 * 
+	 *
 	 * @type {RegExp}
 	 */
 	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z\-\d]{2,20})(?:\.[a-z]+)+)/i;
 
 	/**
 	 * Get the API URL of specified project.
-	 * 
+	 *
 	 * @param {String}project
 	 *            wiki project, domain or language. 指定維基百科語言/姊妹計劃<br />
 	 *            e.g., 'en', 'en.wikisource'.
-	 * 
+	 *
 	 * @returns {String}API URL
-	 * 
+	 *
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
 	 *      TODO:
 	 *      https://zh.wikipedia.org/wiki/Wikipedia:%E5%A7%8A%E5%A6%B9%E8%AE%A1%E5%88%92#.E9.93.BE.E6.8E.A5.E5.9E.8B
@@ -233,12 +233,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * setup API URL.
-	 * 
+	 *
 	 * @param {wiki_API}session
 	 *            正作業中之 wiki_API instance。
 	 * @param {String}[API_URL]
 	 *            language code or API URL of Wikidata
-	 * 
+	 *
 	 * @inner
 	 */
 	function setup_API_URL(session, API_URL) {
@@ -297,10 +297,10 @@ function module_code(library_namespace) {
 
 	/**
 	 * get NO of namespace
-	 * 
+	 *
 	 * @param {String}namespace
 	 *            namespace
-	 * 
+	 *
 	 * @returns {ℕ⁰:Natural+0}namespace NO.
 	 */
 	function get_namespace(namespace) {
@@ -318,11 +318,11 @@ function module_code(library_namespace) {
 
 	/**
 	 * The namespace number of the page. 列舉型別 (enumeration)
-	 * 
+	 *
 	 * {{NAMESPACENUMBER:{{FULLPAGENAME}}}}
-	 * 
+	 *
 	 * @type {Object}
-	 * 
+	 *
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Namespace
 	 */
 	get_namespace.hash = {
@@ -380,10 +380,10 @@ function module_code(library_namespace) {
 
 	/**
 	 * remove namespace part of the title.
-	 * 
+	 *
 	 * @param {String}title
 	 *            page title 頁面標題。
-	 * 
+	 *
 	 * @returns {String}title without namespace
 	 */
 	function remove_namespace(title) {
@@ -409,12 +409,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * 將第一個字母轉成大寫。
-	 * 
+	 *
 	 * cf. {{lcfirst:}}
-	 * 
+	 *
 	 * @param {String}word
 	 *            要轉換的文字。
-	 * 
+	 *
 	 * @returns {String}轉換過的文字。
 	 */
 	function upper_case_initial(word) {
@@ -423,22 +423,22 @@ function module_code(library_namespace) {
 
 	/**
 	 * 規範/正規化頁面名稱 page name。
-	 * 
+	 *
 	 * TODO: 簡化。
-	 * 
+	 *
 	 * 這種規範化只能通用於本 library 內。Wikipedia 並未硬性設限。<br />
 	 * 依照
 	 * [https://www.mediawiki.org/w/api.php?action=query&titles=Wikipedia_talk:Flow&prop=info]，
 	 * "Wikipedia_talk:Flow" → "Wikipedia talk:Flow"<br />
 	 * 亦即底線 "_" → space " "，首字母大寫。
-	 * 
+	 *
 	 * @param {String}page_name
 	 *            頁面名 valid page name。
 	 * @param {Boolean}[use_underline]
 	 *            採用 "_" 取代 " "。
-	 * 
+	 *
 	 * @returns {String}規範後之頁面名稱。
-	 * 
+	 *
 	 * @see [[Wikipedia:命名常規]]
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Page_name#Technical_restrictions_and_limitations
 	 */
@@ -547,12 +547,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * 創建匹配 [[File:file_name]] 之 pattern。
-	 * 
+	 *
 	 * @param {String}file_name
 	 *            file name.
 	 * @param {String}flag
 	 *            RegExp flag
-	 * 
+	 *
 	 * @returns {RegExp} 能 match [[File:file_name]] 之 pattern。
 	 */
 	function file_pattern(file_name, flag) {
@@ -586,12 +586,12 @@ function module_code(library_namespace) {
 	/**
 	 * 將 page data list 轉為 hash。<br />
 	 * cf. Array.prototype.to_hash @ data.native
-	 * 
+	 *
 	 * @param {Array}page_data_list
 	 *            list of page_data.
 	 * @param {Boolean}use_id
 	 *            use page id instead of title.
-	 * 
+	 *
 	 * @returns {Object}title/id hash
 	 */
 	function list_to_hash(page_data_list, use_id) {
@@ -609,10 +609,10 @@ function module_code(library_namespace) {
 	/**
 	 * 去掉 page data list 中重複的 items。<br />
 	 * cf. Array.prototype.uniq @ data.native
-	 * 
+	 *
 	 * @param {Array}page_data_list
 	 *            list of page_data.
-	 * 
+	 *
 	 * @returns {Array}unique list
 	 */
 	function unique_list(page_data_list) {
@@ -639,7 +639,7 @@ function module_code(library_namespace) {
 	/**
 	 * 不包含可 parse 之要素，不包含 text 之 type。<br />
 	 * 不應包含 section title，因可能有 "==[[]]==" 的情況。
-	 * 
+	 *
 	 * @type {Object}
 	 */
 	var atom_type = {
@@ -654,14 +654,14 @@ function module_code(library_namespace) {
 
 	/**
 	 * 設定 token 為指定 type。將 token 轉為指定 type。
-	 * 
+	 *
 	 * @param {Array}token
 	 *            parse_wikitext() 解析 wikitext 所得之，以 {Array} 組成之結構。
 	 * @param {String}type
 	 *            欲指定之類型。 e.g., 'transclusion'.
-	 * 
+	 *
 	 * @returns {Array}token
-	 * 
+	 *
 	 * @see wiki_toString
 	 */
 	function set_wiki_type(token, type) {
@@ -688,7 +688,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * constructor (建構子) of {wiki page parser}. wikitext 語法分析程式, wikitext 語法分析器.
-	 * 
+	 *
 	 * TODO:<code>
 
 	should use:
@@ -696,12 +696,12 @@ function module_code(library_namespace) {
 	http://www.2ality.com/2015/02/es6-classes-final.html
 
 	 * </code>
-	 * 
+	 *
 	 * @param {String|Object}wikitext
 	 *            wikitext / page data to parse
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @returns {wiki page parser}
 	 */
 	function page_parser(wikitext, options) {
@@ -759,7 +759,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 對所有指定類型 type，皆執行特定作業 processor。
-	 * 
+	 *
 	 * @param {String}[type]
 	 *            欲搜尋之類型。 e.g., 'template'. see ((wiki_toString)).<br />
 	 *            未指定: 處理所有節點。
@@ -769,9 +769,9 @@ function module_code(library_namespace) {
 	 *            return {String}wikitext or {Object}element;}
 	 * @param {Boolean}[modify_this]
 	 *            若 processor 的回傳值為{String}wikitext，則將指定類型節點替換/replace作此回傳值。
-	 * 
+	 *
 	 * @returns {wiki page parser}
-	 * 
+	 *
 	 * @see page_parser.type_alias
 	 */
 	function for_each_token(type, processor, modify_this) {
@@ -837,12 +837,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * 設定好，並執行解析頁面的作業。
-	 * 
+	 *
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @returns {wiki page parser}
-	 * 
+	 *
 	 * @see parse_wikitext()
 	 */
 	function parse_page(options) {
@@ -862,14 +862,14 @@ function module_code(library_namespace) {
 
 	/**
 	 * 將特殊標記解譯/還原成 {Array} 組成之結構。
-	 * 
+	 *
 	 * @param {Array}queue
 	 *            temporary queue.
 	 * @param {String}include_mark
 	 *            解析用之起始特殊標記。
 	 * @param {String}end_mark
 	 *            結束之特殊標記。
-	 * 
+	 *
 	 * @see parse_wikitext()
 	 */
 	function resolve_escaped(queue, include_mark, end_mark) {
@@ -928,9 +928,9 @@ function module_code(library_namespace) {
 	 * parse_wikitext() 將把 wikitext 解析為各 {Array} 組成之結構。當以 .toString() 結合時，將呼叫
 	 * .join() 組合各次元素。此處即為各 .toString() 之定義。<br />
 	 * 所有的 key (type) 皆為小寫。
-	 * 
+	 *
 	 * @type {Object}
-	 * 
+	 *
 	 * @see parse_wikitext()
 	 */
 	var wiki_toString = {
@@ -1041,7 +1041,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * parse The MediaWiki markup language (wikitext).
-	 * 
+	 *
 	 * TODO:<code>
 	提高效率。e.g., [[三国杀武将列表]], [[世界大桥列表]], [[三国杀武将列表]]<br />
 	可能為模板參數特殊設計？有些 template 內含不完整的起始或結尾，使 parameter 亦未首尾對應。
@@ -1055,7 +1055,7 @@ function module_code(library_namespace) {
 	<nowiki>...<!-- -->...</nowiki> 中的註解不應被削掉!
 
 	 * </code>
-	 * 
+	 *
 	 * 此功能之工作機制/原理：<br />
 	 * 找出完整的最小單元，並將之 push 入 queue，並把原 string 中之單元 token 替換成:<br />
 	 * {String}include_mark + ({ℕ⁰:Natural+0}index of queue) + end_mark<br />
@@ -1064,16 +1064,16 @@ function module_code(library_namespace) {
 	 * "a[[p]]b\00;", queue = [ ["t"].type='transclusion' ] →<br />
 	 * "a\01;b\00;", queue = [ ["t"].type='transclusion', ["p"].type='link' ]<br />
 	 * 最後再依 queue 與剩下的 wikitext，以 resolve_escaped() 作 resolve。
-	 * 
+	 *
 	 * @param {String}wikitext
 	 *            wikitext to parse
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @param {Array}[queue]
 	 *            temporary queue. 基本上僅供內部使用。
-	 * 
+	 *
 	 * @returns {Array}parsed data
-	 * 
+	 *
 	 * @see [[:en:Wiki markup]], [[Wiki標記式語言]]
 	 *      https://www.mediawiki.org/wiki/Markup_spec/BNF/Article
 	 *      https://www.mediawiki.org/wiki/Markup_spec/BNF/Inline_text
@@ -1103,7 +1103,7 @@ function module_code(library_namespace) {
 		 * 需找出一個文件中不可包含，亦不會被解析的字串，作為解析用之起始特殊標記。<br />
 		 * e.g., '\u0000'.<br />
 		 * include_mark + ({ℕ⁰:Natural+0}index of queue) + end_mark
-		 * 
+		 *
 		 * @type {String}
 		 */
 		include_mark = options && options.include_mark || '\0',
@@ -1703,11 +1703,11 @@ function module_code(library_namespace) {
 	/**
 	 * parse template token. 取得完整的模板 token。<br />
 	 * CeL.wiki.parse.template();
-	 * 
+	 *
 	 * TODO:<br />
 	 * {{link-en|{{convert|198|cuin|L|abbr=on}} ''斜置-6'' 198|Chrysler Slant 6
 	 * engine#198}}
-	 * 
+	 *
 	 * @param {String}wikitext
 	 *            模板前後之 content。<br />
 	 *            assert: wikitext 為良好結構 (well-constructed)。
@@ -1717,7 +1717,7 @@ function module_code(library_namespace) {
 	 *            1: [ {String}模板名, parameters ]<br />
 	 *            true: 不解析 parameters。<br />
 	 *            false: 解析 parameters。
-	 * 
+	 *
 	 * @returns {Undefine}wikitext 不包含此模板。
 	 * @returns {Array}token = [ {String}完整的模板 wikitext token, {String}模板名,
 	 *          {Array}parameters ];<br />
@@ -1831,10 +1831,10 @@ function module_code(library_namespace) {
 
 	/**
 	 * parse date string to {Date}
-	 * 
+	 *
 	 * @param {String}wikitext
 	 *            wikitext to parse
-	 * 
+	 *
 	 * @returns {Date}date of the date string
 	 */
 	function parse_date_zh(wikitext) {
@@ -1851,11 +1851,11 @@ function module_code(library_namespace) {
 
 	/**
 	 * 使用者/用戶對話頁面所符合的匹配模式。
-	 * 
+	 *
 	 * matched: [ all, "user name" ]
-	 * 
+	 *
 	 * @type {RegExp}
-	 * 
+	 *
 	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|statistics&utf8
 	 *      https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
 	 */
@@ -1865,12 +1865,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * parse user name. 解析使用者/用戶對話頁面資訊。
-	 * 
+	 *
 	 * @param {String}wikitext
 	 *            wikitext to parse
 	 * @param {Boolean}full_link
 	 *            get a full link
-	 * 
+	 *
 	 * @returns {String}user name / full link
 	 * @returns {Undefined}Not a user link.
 	 */
@@ -1887,11 +1887,11 @@ function module_code(library_namespace) {
 	/**
 	 * 重定向頁所符合的匹配模式。 Note that the redirect link must be explicit – it cannot
 	 * contain magic words, templates, etc.
-	 * 
+	 *
 	 * matched: [ all, "title#section" ]
-	 * 
+	 *
 	 * @type {RegExp}
-	 * 
+	 *
 	 * @see https://en.wikipedia.org/wiki/Module:Redirect
 	 *      https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|statistics&utf8
 	 *      https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
@@ -1903,10 +1903,10 @@ function module_code(library_namespace) {
 	/**
 	 * parse redirect page. 解析重定向資訊。 若 wikitext 重定向到其他頁面，則回傳其{String}頁面名:
 	 * "title#section"。
-	 * 
+	 *
 	 * @param {String}wikitext
 	 *            wikitext to parse
-	 * 
+	 *
 	 * @returns {String}title#section
 	 * @returns {Undefined}Not a redirect page.
 	 */
@@ -1927,24 +1927,24 @@ function module_code(library_namespace) {
 	// https://zh.m.wikipedia.org/wiki/條目#hash
 	/**
 	 * Wikipedia:Wikimedia sister projects 之 URL 匹配模式。
-	 * 
+	 *
 	 * matched: [ all, language code, title 條目名稱, section 章節, link說明 ]
-	 * 
+	 *
 	 * TODO: /wiki/條目#hash 說明
-	 * 
+	 *
 	 * @type {RegExp}
-	 * 
+	 *
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
 	 */
 	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z\-\d]{2,20})\.(?:m\.)?wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
 
 	/**
 	 * Convert URL to wiki link.
-	 * 
+	 *
 	 * TODO: 在 default_language 非 zh 使用 uselang, /zh-tw/條目 會有問題。 TODO: [[en
 	 * link]] → [[:en:en link]] TODO: use {{tsl}} or {{link-en}},
 	 * {{en:Template:Interlanguage link multi}}.
-	 * 
+	 *
 	 * @param {String}URL
 	 *            URL text
 	 * @param {Boolean}[add_quote]
@@ -1953,9 +1953,9 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback({String}wiki link)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @returns {String}wiki link
-	 * 
+	 *
 	 * @see [[WP:LINK#跨语言链接]]
 	 */
 	function URL_to_wiki_link(URL, add_quote, callback, options) {
@@ -2125,16 +2125,16 @@ function module_code(library_namespace) {
 
 	/**
 	 * 快速取得 lead section 文字用。
-	 * 
+	 *
 	 * @example <code>
 	CeL.wiki.lead_text(content);
 	 * </code>
-	 * 
+	 *
 	 * @param {String}wikitext
 	 *            wikitext to parse
-	 * 
+	 *
 	 * @returns {String}lead section wikitext 文字
-	 * 
+	 *
 	 * @see 文章的開頭部分[[WP:LEAD|導言章節]] (lead section, introduction)
 	 */
 	function lead_text(wikitext) {
@@ -2172,16 +2172,16 @@ function module_code(library_namespace) {
 
 	/**
 	 * get title of page.
-	 * 
+	 *
 	 * @example <code>
 	   var title = CeL.wiki.title_of(page_data);
 	 * </code>
-	 * 
+	 *
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
-	 * 
+	 *
 	 * @returns {String|Undefined}title of page, maybe undefined.
-	 * 
+	 *
 	 * @seealso wiki_API.query.title_param()
 	 */
 	function get_page_title(page_data) {
@@ -2222,17 +2222,17 @@ function module_code(library_namespace) {
 
 	/**
 	 * get the contents of page data. 取得頁面內容。
-	 * 
+	 *
 	 * @example <code>
 	   var content = CeL.wiki.content_of(page_data);
 	 * </code>
-	 * 
+	 *
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
 	 * @param {String}flow_view
 	 *            對 flow page，所欲取得之頁面內容項目。<br />
 	 *            default: 'header'
-	 * 
+	 *
 	 * @returns {String|Undefined}content of page, maybe undefined.
 	 */
 	function get_page_content(page_data, flow_view) {
@@ -2266,10 +2266,10 @@ function module_code(library_namespace) {
 
 	/**
 	 * check if page_data is page data.
-	 * 
+	 *
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
-	 * 
+	 *
 	 * @returns {String|Number} pageid
 	 */
 	get_page_content.is_page_data = function(page_data) {
@@ -2280,10 +2280,10 @@ function module_code(library_namespace) {
 
 	/**
 	 * get the id of page
-	 * 
+	 *
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
-	 * 
+	 *
 	 * @returns {String|Number} pageid
 	 */
 	get_page_content.pageid = function(page_data) {
@@ -2332,9 +2332,9 @@ function module_code(library_namespace) {
 
 	/**
 	 * 設定工作/添加新的工作。
-	 * 
+	 *
 	 * 警告: 若 callback throw，可能導致工作中斷，不會自動復原，得要以 wiki.next() 重起工作。
-	 * 
+	 *
 	 * 工作原理: 每個實體會hold住一個queue ({Array}this.actions)。 當設定工作時，就把工作推入佇列中。
 	 * 另外內部會有另一個行程負責依序執行每一個工作。
 	 */
@@ -3019,7 +3019,7 @@ function module_code(library_namespace) {
 	 * wiki_API.prototype.next() 已登記之 methods。<br />
 	 * 之後會再自動加入 get_list.type 之 methods。<br />
 	 * NG: ,login
-	 * 
+	 *
 	 * @type {Array}
 	 */
 	wiki_API.prototype.next.methods = 'page,redirect_to,check,edit,search,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
@@ -3029,7 +3029,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * default date format. 預設的日期格式
-	 * 
+	 *
 	 * @type {String}
 	 * @see ISO 8601
 	 */
@@ -3041,7 +3041,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 規範 log 之格式。(for wiki_API.prototype.work)
-	 * 
+	 *
 	 * @param {String}message
 	 *            message
 	 * @param {String}[title]
@@ -3066,14 +3066,14 @@ function module_code(library_namespace) {
 	/**
 	 * 輸入 URI component list，得出自 [0] 至 [邊際index-1] 以 encodeURIComponent()
 	 * 串聯起來，長度不超過 limit_length。
-	 * 
+	 *
 	 * @param {Array}piece_list
 	 *            URI component list
 	 * @param {Natural}[limit]
 	 *            limit index
 	 * @param {Natural}[limit_length]
 	 *            limit length
-	 * 
+	 *
 	 * @returns {Number}邊際index。
 	 */
 	function check_max_length(piece_list, limit, limit_length) {
@@ -3141,7 +3141,7 @@ function module_code(library_namespace) {
 	/**
 	 * robot 作業操作之輔助套裝函數。<br />
 	 * 不會推入 this.actions queue，即時執行。因此需要先 get list！
-	 * 
+	 *
 	 * @param {Object}config
 	 *            configuration
 	 * @param {Array}pages
@@ -3441,7 +3441,7 @@ function module_code(library_namespace) {
 
 			/**
 			 * 處理回傳超過 limit (12 MB)，被截斷之情形。
-			 * 
+			 *
 			 * @deprecated: 已經在 wiki_API.page 處理。
 			 */
 			if (false && ('continue' in pages)) {
@@ -3827,7 +3827,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 選擇要紀錄的項目。在大量編輯時，可利用此縮減 log。
-	 * 
+	 *
 	 * @type {Object}
 	 */
 	wiki_API.prototype.work.log_item = {
@@ -3845,11 +3845,11 @@ function module_code(library_namespace) {
 
 	/**
 	 * 實際執行 query 操作，直接 call API 之核心函數。
-	 * 
+	 *
 	 * 所有會利用到 wiki_API.prototype.work ← wiki_API.prototype.next ← <br />
 	 * wiki_API.page, wiki_API.edit, ... ← wiki_API.query ← get_URL ← <br />
 	 * need standalone http agent 的功能，都需要添附 session 參數。
-	 * 
+	 *
 	 * @param {String|Array}action
 	 *            {String}action or [ {String}api URL, {String}action,
 	 *            {Object}other parameters ]
@@ -3860,7 +3860,7 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項<br />
 	 *            wiki_API.edit 可能輸入 session 當作 options。
-	 * 
+	 *
 	 * @see api source:
 	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/includes/api
 	 */
@@ -3976,7 +3976,7 @@ function module_code(library_namespace) {
 
 		/**
 		 * TODO: 簡易的泛用先期處理程式。
-		 * 
+		 *
 		 * @inner
 		 */
 		function response_handler(response) {
@@ -4225,11 +4225,11 @@ function module_code(library_namespace) {
 	/**
 	 * edit (modify) 時之最大延遲參數。<br />
 	 * default: 使用5秒 (5000 ms) 的最大延遲參數。
-	 * 
+	 *
 	 * 在 Tool Labs edit wikidata，單線程均速最快約 1584 ms/edits。
-	 * 
+	 *
 	 * @type {Object} of {ℕ⁰:Natural+0}
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
 	 *      https://www.mediawiki.org/wiki/API:Etiquette 禮儀
 	 *      https://phabricator.wikimedia.org/T135240
@@ -4251,7 +4251,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 對於可以不用 XMLHttp 的，直接採 JSONP callback 法。
-	 * 
+	 *
 	 * @type {Boolean}
 	 */
 	wiki_API.query.allow_JSONP = library_namespace.is_WWW(true);
@@ -4259,7 +4259,7 @@ function module_code(library_namespace) {
 	/**
 	 * URL last queried.<br />
 	 * wiki_API.query.last[URL] = {Date}last queried date
-	 * 
+	 *
 	 * @type {Object}
 	 */
 	wiki_API.query.last = library_namespace.null_Object();
@@ -4269,7 +4269,7 @@ function module_code(library_namespace) {
 	 * e.g., {pageid:8,title:'abc'} → 'pageid=8'<br />
 	 * e.g., {title:'abc'} → 'title=abc'<br />
 	 * e.g., 'abc' → 'title=abc'<br />
-	 * 
+	 *
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
 	 * @param {Boolean}[multi]
@@ -4354,7 +4354,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * get id of page
-	 * 
+	 *
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
 	 * @param {Boolean}[title_only]
@@ -4403,9 +4403,9 @@ function module_code(library_namespace) {
 
 	/**
 	 * 讀取頁面內容，取得頁面源碼。可一次處理多個標題。
-	 * 
+	 *
 	 * 注意: 用太多 CeL.wiki.page() 並列處理，會造成 error.code "EMFILE"。
-	 * 
+	 *
 	 * @example <code>
 
 	CeL.wiki.page('史記', function(page_data) {
@@ -4413,7 +4413,7 @@ function module_code(library_namespace) {
 	});
 
 	 </code>
-	 * 
+	 *
 	 * @param {String|Array}title
 	 *            title or [ {String}API_URL, {String}title or {Object}page_data ]
 	 * @param {Function}[callback]
@@ -4421,7 +4421,7 @@ function module_code(library_namespace) {
 	 *            content = CeL.wiki.content_of(page_data); }
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 	 */
 	wiki_API.page = function(title, callback, options) {
@@ -4731,7 +4731,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 取得頁面之重定向資料（重新導向至哪一頁）。
-	 * 
+	 *
 	 * @example <code>
 
 	CeL.wiki.redirect_to('史記', function(redirect_data, page_data) {
@@ -4739,7 +4739,7 @@ function module_code(library_namespace) {
 	});
 
 	 </code>
-	 * 
+	 *
 	 * @param {String|Array}title
 	 *            title or [ {String}API_URL, {String}title or {Object}page_data ]
 	 * @param {Function}[callback]
@@ -4747,7 +4747,7 @@ function module_code(library_namespace) {
 	 *            redirect to what section, {Object}page_data, error)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 	 */
 	wiki_API.redirect_to = function(title, callback, options) {
@@ -4839,7 +4839,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 取得 title 在其他語系 (to_lang) 之標題。 Interlanguage title. 可一次處理多個標題。
-	 * 
+	 *
 	 * @param {String|Array}title
 	 *            the page title to search continue information
 	 * @param {Function|Object}callback
@@ -4848,7 +4848,7 @@ function module_code(library_namespace) {
 	 *            所欲求語言。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/Manual:Langlinks_table
 	 */
 	wiki_API.langlinks = function(title, callback, to_lang, options) {
@@ -4878,7 +4878,7 @@ function module_code(library_namespace) {
 				 * From version 1.25 onwards, the API returns a batchcomplete
 				 * element to indicate that all data for the current "batch" of
 				 * pages has been returned.
-				 * 
+				 *
 				 * @see https://www.mediawiki.org/wiki/API:Query#batchcomplete
 				 */
 				if (library_namespace.is_Object(data)
@@ -4985,12 +4985,12 @@ function module_code(library_namespace) {
 	/**
 	 * 自 title 頁面取得後續檢索用索引值 (continuation data)。<br />
 	 * e.g., 'continue'
-	 * 
+	 *
 	 * @param {String|Array}title
 	 *            the page title to search continue information
 	 * @param {Function|Object}callback
 	 *            回調函數 or options。 callback({Object} continue data);
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/API:Query#Continuing_queries
 	 */
 	function get_continue(title, callback) {
@@ -5084,9 +5084,9 @@ function module_code(library_namespace) {
 	/**
 	 * get list. 檢索/提取列表<br />
 	 * 注意: 可能會改變 options！
-	 * 
+	 *
 	 * TODO: options.get_sub options.ns
-	 * 
+	 *
 	 * @param {String}type
 	 *            one of get_list.type
 	 * @param {String}title
@@ -5411,9 +5411,9 @@ function module_code(library_namespace) {
 
 	/**
 	 * All list types MediaWiki supported.
-	 * 
+	 *
 	 * @type {Object}
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/API:Lists/All
 	 */
 	get_list.type = {
@@ -5440,7 +5440,7 @@ function module_code(library_namespace) {
 		CeL.wiki.prefixsearch('User:Cewbot/log/20151002/', function(pages, titles, title){ console.log(titles); }, {limit:'max'});
 		wiki_instance.prefixsearch('User:Cewbot', function(pages, titles, title){ console.log(titles); }, {limit:'max'});
 		 * </code>
-		 * 
+		 *
 		 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bprefixsearch
 		 */
 		prefixsearch : [ 'ps', , function(title_parameter) {
@@ -5550,7 +5550,7 @@ function module_code(library_namespace) {
 	/**
 	 * 取得完整 list 後才作業。<br />
 	 * 注意: 可能會改變 options！
-	 * 
+	 *
 	 * @param {String}target
 	 *            page title 頁面標題。
 	 * @param {Function}callback
@@ -5643,7 +5643,7 @@ function module_code(library_namespace) {
 				} else {
 					/**
 					 * 當沒有登入成功時的處理以及警訊。
-					 * 
+					 *
 					 * e.g., data = <code>
 					 * {"login":{"result":"Failed","reason":"Incorrect password entered.\nPlease try again."}}
 					 * </code>
@@ -5781,19 +5781,19 @@ function module_code(library_namespace) {
 
 	/**
 	 * check if need to stop / 檢查是否需要緊急停止作業 (Emergency shutoff-compliant).
-	 * 
+	 *
 	 * 此功能之工作機制/原理：<br />
 	 * 在 .edit() 編輯（機器人執行作業）之前，先檢查是否有人在緊急停止頁面留言要求 stop。<br />
 	 * 只要在緊急停止頁面有指定的章節標題、或任何章節，就當作有人留言要 stop，並放棄編輯。
-	 * 
+	 *
 	 * TODO:<br />
 	 * https://www.mediawiki.org/w/api.php?action=query&meta=userinfo&uiprop=hasmsg
-	 * 
+	 *
 	 * @param {Function}callback
 	 *            回調函數。 callback({Boolean}need stop)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/Manual:Parameters_to_index.php#Edit_and_submit
 	 *      https://www.mediawiki.org/wiki/Help:Magic_words#URL_encoded_page_names
 	 *      https://www.mediawiki.org/wiki/Help:Links
@@ -5813,7 +5813,7 @@ function module_code(library_namespace) {
 		/**
 		 * 緊急停止作業將檢測之頁面標題。 check title:<br />
 		 * 只檢查此緊急停止頁面。
-		 * 
+		 *
 		 * @type {String}
 		 */
 		var title = options.title;
@@ -5872,10 +5872,10 @@ function module_code(library_namespace) {
 	/**
 	 * default page title to check:<br />
 	 * [[{{TALKSPACE}}:{{ROOTPAGENAME}}/Stop]]
-	 * 
+	 *
 	 * @param {Object}token
 	 *            login 資訊，包含“csrf”令牌/密鑰。
-	 * 
+	 *
 	 * @returns {String}
 	 */
 	wiki_API.check_stop.title = function(token) {
@@ -5885,7 +5885,7 @@ function module_code(library_namespace) {
 	/**
 	 * default check pattern: 任何章節/段落 section<br />
 	 * default: 只要在緊急停止頁面有任何章節，就當作有人留言要求 stop。
-	 * 
+	 *
 	 * @type {RegExp}
 	 */
 	wiki_API.check_stop.pattern = /\n=([^\n]+)=\n/;
@@ -5895,7 +5895,7 @@ function module_code(library_namespace) {
 	/**
 	 * 編輯頁面。一次處理一個標題。<br />
 	 * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問！此時需要另外含入檢查機制！
-	 * 
+	 *
 	 * @param {String|Array}title
 	 *            page title 頁面標題。 {String}title or [ {String}API_URL,
 	 *            {String}title or {Object}page_data ]
@@ -6052,7 +6052,7 @@ function module_code(library_namespace) {
 				 * <code>
 				   wiki_API.edit: Error to edit [User talk:Flow]: [no-direct-editing] Direct editing via API is not supported for content model flow-board used by User_talk:Flow
 				 * </code>
-				 * 
+				 *
 				 * @see https://doc.wikimedia.org/mediawiki-core/master/php/ApiEditPage_8php_source.html
 				 */
 				if (data.error && data.error.code === 'no-direct-editing'
@@ -6068,13 +6068,13 @@ function module_code(library_namespace) {
 				/**
 				 * <s>遇到過長/超過限度的頁面 (e.g., 過多 transclusion。)，可能產生錯誤：<br />
 				 * [editconflict] Edit conflict detected</s>
-				 * 
+				 *
 				 * when edit:<br />
 				 * [contenttoobig] The content you supplied exceeds the article
 				 * size limit of 2048 kilobytes
-				 * 
+				 *
 				 * 頁面大小系統上限 2,048 KB = 2 MB。
-				 * 
+				 *
 				 * 須注意是否有其他競相編輯的 bots。
 				 */
 				library_namespace.warn('wiki_API.edit: Error to edit [['
@@ -6092,7 +6092,7 @@ function module_code(library_namespace) {
 	/**
 	 * 放棄編輯頁面用。<br />
 	 * assert: true === !!wiki_API.edit.cancel
-	 * 
+	 *
 	 * @type any
 	 */
 	wiki_API.edit.cancel = {
@@ -6104,14 +6104,14 @@ function module_code(library_namespace) {
 
 	/**
 	 * 對要編輯的資料作基本檢測。
-	 * 
+	 *
 	 * @param data
 	 *            要編輯的資料。
 	 * @param title
 	 *            title or id.
 	 * @param {String}caller
 	 *            caller to show.
-	 * 
+	 *
 	 * @returns
 	 */
 	wiki_API.edit.check_data = function(data, title, caller) {
@@ -6161,23 +6161,23 @@ function module_code(library_namespace) {
 
 	/**
 	 * 處理編輯衝突用。 to detect edit conflicts.
-	 * 
+	 *
 	 * 注意: 會改變 options! Warning: will modify options！
-	 * 
+	 *
 	 * 此功能之工作機制/原理：<br />
 	 * 在 .page() 會取得每個頁面之 page_data.revisions[0].timestamp（各頁面不同）。於 .edit()
 	 * 時將會以從 page_data 取得之 timestamp 作為時間戳記傳入呼叫，當 MediaWiki 系統 (API)
 	 * 發現有新的時間戳記，會回傳編輯衝突，並放棄編輯此頁面。<br />
 	 * 詳見 [https://github.com/kanasimi/CeJS/blob/master/application/net/wiki.js
 	 * wiki_API.edit.set_stamp]。
-	 * 
+	 *
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @param {String}timestamp
 	 *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
-	 * 
+	 *
 	 * @returns {Object}options
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/API:Edit
 	 */
 	wiki_API.edit.set_stamp = function(options, timestamp) {
@@ -6196,12 +6196,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * Get the contents of [[Template:Bots]].
-	 * 
+	 *
 	 * @param {String}content
 	 *            page contents 頁面內容。
-	 * 
+	 *
 	 * @returns {Array}contents of [[Template:Bots]].
-	 * 
+	 *
 	 * @see https://zh.wikipedia.org/wiki/Template:Bots
 	 */
 	wiki_API.edit.get_bot = function(content) {
@@ -6224,14 +6224,14 @@ function module_code(library_namespace) {
 
 	/**
 	 * 測試頁面是否允許機器人帳戶訪問，遵守[[Template:Bots]]。機器人另須考慮{{Personal announcement}}的情況。
-	 * 
+	 *
 	 * @param {String}content
 	 *            page contents 頁面內容。
 	 * @param {String}bot_id
 	 *            機器人帳戶名稱。
 	 * @param {String}notification
 	 *            message notifications of action. 按通知種類而過濾(optout)。
-	 * 
+	 *
 	 * @returns {Boolean|String}封鎖機器人帳戶訪問。
 	 */
 	wiki_API.edit.denied = function(content, bot_id, notification) {
@@ -6344,7 +6344,7 @@ function module_code(library_namespace) {
 	/**
 	 * pattern that will be denied.<br />
 	 * i.e. "deny=all", !("allow=all")
-	 * 
+	 *
 	 * @type {RegExp}
 	 */
 	wiki_API.edit.denied.all = /(?:^|[\s,])all(?:$|[\s,])/;
@@ -6355,14 +6355,14 @@ function module_code(library_namespace) {
 	 * full text search<br />
 	 * search wikitext: using prefix "insource:". e.g.,
 	 * https://www.mediawiki.org/w/api.php?action=query&list=search&srwhat=text&srsearch=insource:abc+def
-	 * 
+	 *
 	 * @param {String}key
 	 *            search key
 	 * @param {Function}[callback]
 	 *            回調函數。 callback(key, pages, hits)
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/API:Search_and_discovery
 	 * @see https://www.mediawiki.org/wiki/Help:CirrusSearch
 	 */
@@ -6416,7 +6416,7 @@ function module_code(library_namespace) {
 	/**
 	 * 取得所有 redirect 到 [[title]] 之 pages。<br />
 	 * 可以 [[Special:链入页面]] 確認。
-	 * 
+	 *
 	 * @param {String}title
 	 *            頁面名。
 	 * @param {Function}callback
@@ -6534,16 +6534,16 @@ function module_code(library_namespace) {
 
 	/**
 	 * 計算實質嵌入包含(transclusion)之頁面數。
-	 * 
+	 *
 	 * 若條目(頁面)嵌入包含有模板(頁面)別名，則將同時登記 embeddedin 於別名 alias 與 root。<br />
 	 * e.g., 當同時包含 {{Refimprove}}, {{RefImprove}} 時會算作兩個，但實質僅一個。<br />
 	 * 惟計數時，此時應僅計算一次。本函數可以去除重複名稱，避免模板尚有名稱重複者。
-	 * 
+	 *
 	 * @param {Object}root_name_hash
 	 *            模板本名 hash. 模板本名[{String}模板別名/本名] = {String}root 模板本名
 	 * @param {Array}embeddedin_list
 	 *            頁面嵌入包含之模板 list。
-	 * 
+	 *
 	 * @returns {ℕ⁰:Natural+0}normalized count
 	 */
 	wiki_API.redirects.count = function(root_name_hash, embeddedin_list) {
@@ -6569,17 +6569,17 @@ function module_code(library_namespace) {
 
 	/**
 	 * Set default language. 改變預設之語言。
-	 * 
+	 *
 	 * @example <code>
 	   CeL.wiki.set_language('en');
 	 * </code>
-	 * 
+	 *
 	 * @param {String}[language]
 	 *            language.<br />
 	 *            e.g., 'en'.
-	 * 
+	 *
 	 * @returns {String}預設之語言。
-	 * 
+	 *
 	 * @see setup_API_language()
 	 */
 	function set_default_language(language) {
@@ -6676,8 +6676,9 @@ function module_code(library_namespace) {
 
 	// setup SQL config language (and database/host).
 	function set_SQL_config_language(language) {
-		if (!language)
+		if (!language) {
 			return;
+		}
 		if (typeof language !== 'string') {
 			library_namespace.err(
 			//
@@ -6686,7 +6687,11 @@ function module_code(library_namespace) {
 		}
 
 		// 正規化。
-		language = language.trim().toLowerCase().replace(/wiki$/, '');
+		language = language.trim().toLowerCase()
+		// 'zhwiki' →  'zh'
+		.replace(/wiki$/, '');
+		// TODO: 'zh.news'
+		// 警告: this.language 可能包含 'zhwikinews' 之類。
 		this.language = language;
 
 		if (language === 'meta') {
@@ -6699,21 +6704,24 @@ function module_code(library_namespace) {
 			this.host = language;
 			// delete this.database;
 
-		} else {
-			this.host = language + 'wiki.labsdb';
+		} else if (language.includes('wiki')) {
+			this.host = language + '.labsdb';
 			/**
 			 * The database names themselves consist of the mediawiki project
 			 * name, suffixed with _p
-			 * 
+			 *
 			 * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database
 			 */
+			this.database = language + '_p';
+		} else {
+			this.host = language + 'wiki.labsdb';
 			this.database = language + 'wiki_p';
 		}
 	}
 
 	/**
 	 * return new SQL config
-	 * 
+	 *
 	 * @param {String}[language]
 	 *            database language.<br />
 	 *            e.g., 'en', 'commons', 'wikidata', 'meta'.
@@ -6721,19 +6729,19 @@ function module_code(library_namespace) {
 	 *            SQL database user name
 	 * @param {String}[password]
 	 *            SQL database user password
-	 * 
+	 *
 	 * @returns {Object}SQL config
 	 */
 	function new_SQL_config(language, user, password) {
 		var config, is_clone;
-		if (user)
+		if (user) {
 			config = {
 				user : user,
 				password : password,
 				db_prefix : user + '__',
 				set_language : set_SQL_config_language
 			};
-		else if (SQL_config) {
+		} else if (SQL_config) {
 			is_clone = true;
 			config = Object.clone(SQL_config);
 		} else {
@@ -6741,12 +6749,14 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof language === 'object') {
-			if (is_clone)
+			if (is_clone) {
 				delete config.database;
+			}
 			Object.assign(config, language);
 		} else if (typeof language === 'string' && language) {
-			if (is_clone)
+			if (is_clone) {
 				delete config.database;
+			}
 			// change language (and database/host).
 			config.set_language(language, !user);
 		}
@@ -6756,10 +6766,10 @@ function module_code(library_namespace) {
 
 	/**
 	 * 讀取並解析出 SQL 設定。
-	 * 
+	 *
 	 * @param {String}file_name
 	 *            file name
-	 * 
+	 *
 	 * @returns {Object}SQL config
 	 */
 	function parse_SQL_config(file_name) {
@@ -6805,7 +6815,7 @@ function module_code(library_namespace) {
 		// delete CeL.wiki.use_Varnish;
 
 		try {
-			if (mysql = require('mysql'))
+			if (mysql = require('mysql')) {
 				SQL_config = parse_SQL_config(home_directory
 				// The production replicas.
 				// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#The_databases
@@ -6813,6 +6823,7 @@ function module_code(library_namespace) {
 				// 此資料庫僅為正式上線版之刪節副本。資料並非最新版本(但誤差多於數分內)，也不完全，
 				// <s>甚至可能為其他 users 竄改過</s>。
 				+ 'replica.my.cnf');
+			}
 		} catch (e) {
 			// TODO: handle exception
 		}
@@ -6822,16 +6833,16 @@ function module_code(library_namespace) {
 
 	/**
 	 * execute SQL command.
-	 * 
+	 *
 	 * @param {String}SQL
 	 *            SQL command.
 	 * @param {Function}callback
 	 *            回調函數。 callback({Object}error, {Array}rows, {Array}fields)
 	 * @param {Object}[config]
 	 *            configuration.
-	 * 
+	 *
 	 * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database
-	 * 
+	 *
 	 * @require https://github.com/felixge/node-mysql<br />
 	 *          TODO: https://github.com/sidorares/node-mysql2
 	 */
@@ -6860,7 +6871,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * Create a new user database.
-	 * 
+	 *
 	 * @param {String}dbname
 	 *            database name.
 	 * @param {Function}callback
@@ -6868,7 +6879,7 @@ function module_code(library_namespace) {
 	 * @param {String}[language]
 	 *            database language.<br />
 	 *            e.g., 'en', 'commons', 'wikidata', 'meta'.
-	 * 
+	 *
 	 * @see https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database#Creating_new_databases
 	 */
 	function create_database(dbname, callback, language) {
@@ -6924,13 +6935,13 @@ function module_code(library_namespace) {
 
 	/**
 	 * SQL 查詢功能之前端。
-	 * 
+	 *
 	 * @example <code>
 	 * // change language (and database/host).
 	 * //CeL.wiki.SQL.config.set_language('en');
 	 * CeL.wiki.SQL(SQL, function callback(error, rows, fields) { if(error) console.error(error); }, 'en');
 	 * </code>
-	 * 
+	 *
 	 * @example <code>
 
 	// 進入 default host (TOOLSDB)。
@@ -6948,7 +6959,7 @@ function module_code(library_namespace) {
 	.SQL(SQL, function callback(error, rows, fields) { if(error) console.error(error); } );
 
 	 * </code>
-	 * 
+	 *
 	 * @param {String}[dbname]
 	 *            database name.
 	 * @param {Function}callback
@@ -6956,9 +6967,9 @@ function module_code(library_namespace) {
 	 * @param {String}[language]
 	 *            database language (and database/host). default host: TOOLSDB.<br />
 	 *            e.g., 'en', 'commons', 'wikidata', 'meta'.
-	 * 
+	 *
 	 * @returns {SQL_session}instance
-	 * 
+	 *
 	 * @constructor
 	 */
 	function SQL_session(dbname, callback, language) {
@@ -7068,7 +7079,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * get database list.
-	 * 
+	 *
 	 * <code>
 
 	var SQL_session = new CeL.wiki.SQL('testdb',
@@ -7083,12 +7094,12 @@ function module_code(library_namespace) {
 	});
 
 	</code>
-	 * 
+	 *
 	 * @param {Function}callback
 	 *            回調函數。
 	 * @param {Boolean}all
 	 *            get all databases. else: get my databases.
-	 * 
+	 *
 	 * @returns {SQL_session}
 	 */
 	SQL_session.prototype.databases = function(callback, all) {
@@ -7152,12 +7163,12 @@ function module_code(library_namespace) {
 	/**
 	 * Convert MediaWiki database timestamp to ISO 8601 format.<br />
 	 * UTC: 'yyyymmddhhmmss' → 'yyyy-mm-ddThh:mm:ss'
-	 * 
+	 *
 	 * @param {String}timestamp
 	 *            MediaWiki database timestamp
-	 * 
+	 *
 	 * @returns {String}ISO 8601 Data elements and interchange formats
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/Manual:Timestamp
 	 */
 	function SQL_timestamp_to_ISO(timestamp) {
@@ -7178,14 +7189,14 @@ function module_code(library_namespace) {
 
 	/**
 	 * Get page title 頁面標題 list of [[Special:RecentChanges]] 最近更改.
-	 * 
+	 *
 	 * <code>
 	   // get title list
 	   CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, 0, 20);
 	   </code>
-	 * 
+	 *
 	 * TODO: filter
-	 * 
+	 *
 	 * @param {Function}callback
 	 *            回調函數。 callback({Array}page title 頁面標題 list)
 	 * @param {Integer}[namespace]
@@ -7238,16 +7249,16 @@ function module_code(library_namespace) {
 
 	/**
 	 * 取得最新之 Wikimedia dump。
-	 * 
+	 *
 	 * @param {String}[project]
 	 *            project code name. e.g., 'enwiki'
 	 * @param {Function}callback
 	 *            回調函數。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Database_download#Where_do_I_get...
-	 * 
+	 *
 	 * @inner
 	 */
 	function get_latest_dump(project, callback, options) {
@@ -7416,7 +7427,7 @@ function module_code(library_namespace) {
 
 		/**
 		 * http://stackoverflow.com/questions/6157497/node-js-printing-to-console-without-a-trailing-newline
-		 * 
+		 *
 		 * In Windows console (Linux, too), you should replace '\r' with its
 		 * equivalent code \033[0G:
 		 */
@@ -7473,12 +7484,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * 還原 XML text 成原先之文本。
-	 * 
+	 *
 	 * @param {String}xml
 	 *            XML text
-	 * 
+	 *
 	 * @returns {String}還原成原先之文本。
-	 * 
+	 *
 	 * @inner
 	 */
 	function unescape_xml(xml) {
@@ -7491,7 +7502,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * Parse Wikimedia dump xml text.
-	 * 
+	 *
 	 * @param {String}xml
 	 *            xml text
 	 * @param {ℕ⁰:Natural+0}[start_index]
@@ -7499,7 +7510,7 @@ function module_code(library_namespace) {
 	 * @param {Function}[filter]
 	 *            filter :<br />
 	 *            function(pageid, revid) { return {Boolean}need_process; }
-	 * 
+	 *
 	 * @returns {Object}page_data =
 	 *          {pageid,ns,title,revisions:[{revid,timestamp,'*'}]}
 	 */
@@ -7557,24 +7568,24 @@ function module_code(library_namespace) {
 
 	/**
 	 * 讀取/parse Wikimedia dumps 之 xml 檔案。
-	 * 
+	 *
 	 * 注意: 必須自行 include 'application.platform.nodejs'。 <code>
 	   CeL.run('application.platform.nodejs');
 	 * </code><br />
-	 * 
+	 *
 	 * @param {String}[filename]
 	 *            欲讀取的 .xml 檔案名稱。
 	 * @param {Function}callback
 	 *            回調函數。 callback({Object}page_data)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @returns {String}file path
-	 * 
+	 *
 	 * @see <a href="http://dumps.wikimedia.org/backup-index.html">Wikimedia
 	 *      database backup dumps</a>
 	 * @see https://www.mediawiki.org/wiki/Help:Export
-	 * 
+	 *
 	 * @since 2016/3/11
 	 */
 	function read_dump(filename, callback, options) {
@@ -7620,7 +7631,7 @@ function module_code(library_namespace) {
 		 * 錨/定位點.<br />
 		 * anchor[pageid] = [ position of the xml dump file, page length in
 		 * bytes ]
-		 * 
+		 *
 		 * @type {Array}
 		 */
 		anchor = options.anchor && [],
@@ -7628,10 +7639,10 @@ function module_code(library_namespace) {
 		filter = options.filter,
 		/**
 		 * dump file stream.
-		 * 
+		 *
 		 * filename: XML file path.<br />
 		 * e.g., 'enwiki-20160305-pages-meta-current1.xml'
-		 * 
+		 *
 		 * @type {String}
 		 */
 		file_stream = new node_fs.ReadStream(filename, {
@@ -7642,7 +7653,7 @@ function module_code(library_namespace) {
 		 * 掌握進度用。 (100 * file_status.pos / file_status.size | 0) + '%'<br />
 		 * 此時 stream 可能尚未初始化，(file_stream.fd===null)，<br />
 		 * 因此不能使用 fs.fstatSync()。
-		 * 
+		 *
 		 * @type {Object}
 		 */
 		// file_status = node_fs.fstatSync(file_stream.fd);
@@ -7652,7 +7663,7 @@ function module_code(library_namespace) {
 		/**
 		 * byte counter. 已經處理過的資料長度，為 bytes，非 characters。指向 buffer 起頭在 file
 		 * 中的位置。
-		 * 
+		 *
 		 * @type {ℕ⁰:Natural+0}
 		 */
 		bytes = 0;
@@ -7675,7 +7686,7 @@ function module_code(library_namespace) {
 
 		/**
 		 * Parse Wikimedia dump xml file slice.
-		 * 
+		 *
 		 * TODO: 把工具函數寫到 application.platform.nodejs 裡面去。
 		 */
 		function parse_buffer(index) {
@@ -7751,12 +7762,12 @@ function module_code(library_namespace) {
 			/**
 			 * 當未採用 .setEncoding(encoding)，之後才 += chunk.toString(encoding)；
 			 * 則一個字元可能被切分成兩邊，這會造成破碎/錯誤的編碼。
-			 * 
+			 *
 			 * This properly handles multi-byte characters that would otherwise
 			 * be potentially mangled if you simply pulled the Buffers directly
 			 * and called buf.toString(encoding) on them. If you want to read
 			 * the data as strings, always use this method.
-			 * 
+			 *
 			 * @see https://nodejs.org/api/stream.html#stream_class_stream_readable
 			 */
 			buffer += chunk;
@@ -7807,7 +7818,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * cache 相關函數:
-	 * 
+	 *
 	 * @see application.storage.file.get_cache_file
 	 *      application.OS.Windows.file.cacher
 	 *      application.net.Ajax.get_URL_cache<br />
@@ -7885,16 +7896,16 @@ function module_code(library_namespace) {
 	/**
 	 * cache 作業操作之輔助套裝函數。<br />
 	 * only for node.js.
-	 * 
+	 *
 	 * 注意: 必須自行 include 'application.platform.nodejs'。 <code>
 	   CeL.run('application.platform.nodejs');
 	 * </code><br />
 	 * 注意: 需要自行先創建各 type 之次目錄，如 page, redirects, embeddedin, ...<br />
 	 * 注意: 會改變 operation, _this！ Warning: will modify operation, _this!
-	 * 
+	 *
 	 * 連續作業: 依照 _this 設定 {Object}default options，即傳遞於各 operator 間的 ((this))。<br />
 	 * 依照 operation 順序個別執行單一項作業。
-	 * 
+	 *
 	 * 單一項作業:<br />
 	 * 設定檔名。<br />
 	 * 若不存在此檔，則:<br />
@@ -7904,10 +7915,10 @@ function module_code(library_namespace) {
 	 * >>> 執行 data = operation.retrieve()，以其回傳作為將要 cache 之 data。<br />
 	 * >>> 寫入cache。<br />
 	 * 執行 operation.operator(data)
-	 * 
+	 *
 	 * TODO: file_stream<br />
 	 * TODO: do not write file
-	 * 
+	 *
 	 * @param {Object|Array}operation
 	 *            作業設定。
 	 * @param {Function}[callback]
@@ -7924,7 +7935,7 @@ function module_code(library_namespace) {
 
 		/**
 		 * 連續作業時，轉到下一作業。
-		 * 
+		 *
 		 * node.js v0.11.16: In strict mode code, functions can only be declared
 		 * at top level or immediately within another function.
 		 */
@@ -8074,7 +8085,7 @@ function module_code(library_namespace) {
 		/**
 		 * 採用 JSON<br />
 		 * TODO: parse & stringify 機制
-		 * 
+		 *
 		 * @type {Boolean}
 		 */
 		use_JSON = 'json' in operation ? operation.json : /\.json$/i
@@ -8444,7 +8455,7 @@ function module_code(library_namespace) {
 	 * <code>{
 	 * each_file_name : CeL.wiki.cache.title_only,
 	 * }</code>
-	 * 
+	 *
 	 * @type {Function}
 	 */
 	wiki_API.cache.title_only = function(last_data, operation) {
@@ -8513,12 +8524,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * 記錄處理過的文章。
-	 * 
+	 *
 	 * @param {String}cache_file_path
 	 *            記錄處理過的文章。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @constructor
 	 */
 	function revision_cacher(cache_file_path, options) {
@@ -8576,10 +8587,10 @@ function module_code(library_namespace) {
 
 			/**
 			 * {Object}舊資料/舊結果報告。
-			 * 
+			 *
 			 * cached_data[local page title] = { this.KEY_ID : 0,
 			 * user_defined_data }
-			 * 
+			 *
 			 * if set .id_only, then:<br />
 			 * cached_data[local page title] = {Natural}revid<br />
 			 * 這可進一步減少空間消耗。cached_data cache 已經處理完成操作的 data，但其本身可能也會占用一些以至大量RAM。
@@ -8720,30 +8731,34 @@ function module_code(library_namespace) {
 	 * 由 Tool Labs database replication 讀取所有 ns0，且未被刪除頁面最新修訂版本之版本編號 rev_id
 	 * (包含重定向)。<br />
 	 * 從 `page` 之 page id 確認 page 之 namespace，以及未被刪除。然後選擇其中最大的 revision id。
-	 * 
+	 *
+	 * .i: page id, .r: revision id
+	 *
 	 * @type {String}
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/Manual:Page_table#Sample_MySQL_code
 	 *      https://phabricator.wikimedia.org/diffusion/MW/browse/master/maintenance/tables.sql
 	 */
 	var all_revision_SQL = 'SELECT `rev_page` AS i, MAX(`rev_id`) AS r FROM `revision` INNER JOIN `page` ON `page`.`page_id` = `revision`.`rev_page` WHERE `page`.`page_namespace` = 0 AND `revision`.`rev_deleted` = 0 GROUP BY `rev_page`';
 
-	if (false)
+	if (false) {
 		/**
 		 * 採用此 SQL 之極大問題: page.page_latest 並非最新 revision id.<br />
 		 * the page.page_latest is not the latest revision id of a page in Tool
 		 * Labs database replication.
 		 */
 		all_revision_SQL = 'SELECT `page_id` AS i, `page_latest` AS l FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
-	if (false)
+	}
+	if (false) {
 		// for debug.
 		all_revision_SQL += ' LIMIT 8';
+	}
 
 	/**
 	 * 應用功能: 遍歷所有頁面。 CeL.wiki.traversal()
-	 * 
+	 *
 	 * TODO: 配合 revision_cacher，進一步加快速度。
-	 * 
+	 *
 	 * @param {Object}[config]
 	 *            configuration
 	 * @param {Function}callback
@@ -8760,11 +8775,13 @@ function module_code(library_namespace) {
 		}
 
 		if (config.use_dump) {
+			// use dump only
 			// 僅僅使用 dump，不採用 API 取得最新頁面內容。
 			// @see process_dump.js
-			if (config.use_dump === true)
+			if (config.use_dump === true) {
 				// 這邊的 ((true)) 僅表示要使用，並採用預設值；不代表設定 dump file path。
 				config.use_dump = null;
+			}
 			read_dump(config.use_dump, callback, {
 				// 一般來說只會用到 config.last，將在本函數中稍後執行，
 				// 因此先不開放 config.first, config.last。
@@ -8785,13 +8802,18 @@ function module_code(library_namespace) {
 
 		/** {Array}id/title list */
 		var id_list, rev_list,
+		//
+		use_language = config.language
+		// use session.language
+		|| config[SESSION_KEY] && config[SESSION_KEY].language
+		// else use default_language
+		|| default_language,
 		/** {Object}用在 wiki_API.cache 之 configuration。 */
 		cache_config = {
 			// all title/id list
 			file_name : config.file_name
-			// use default_language
 			// all_pages.*.json 存有當前語言維基百科當前所有的頁面id以及最新版本 (*:當前語言)
-			|| traversal_pages.list_file + '.' + default_language + '.json',
+			|| traversal_pages.list_file + '.' + use_language + '.json',
 			operator : function(list) {
 				if (list.length === 3
 						&& JSON.stringify(list[0]) === JSON
@@ -8849,7 +8871,7 @@ function module_code(library_namespace) {
 						// config.is_id = is_id;
 					}
 					traversal_pages(config, callback);
-				});
+				}, config && config.SQL_config || new_SQL_config(use_language));
 				return wiki_API.cache.abort;
 			};
 
@@ -9153,7 +9175,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * get the infomation of Flow.
-	 * 
+	 *
 	 * @param {String|Array}title
 	 *            page title 頁面標題。可為話題id/頁面標題+話題標題。<br />
 	 *            {String}title or [ {String}API_URL, {String}title or
@@ -9261,10 +9283,10 @@ function module_code(library_namespace) {
 
 	/**
 	 * 檢測 page_data 是否為 Flow 討論頁面系統。
-	 * 
+	 *
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
-	 * 
+	 *
 	 * @returns {Boolean}是否為 Flow 討論頁面。
 	 */
 	function is_Flow(page_data) {
@@ -9289,7 +9311,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * get topics of the page.
-	 * 
+	 *
 	 * @param {String|Array}title
 	 *            page title 頁面標題。可為話題id/頁面標題+話題標題。 {String}title or [
 	 *            {String}API_URL, {String}title or {Object}page_data ]
@@ -9371,7 +9393,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * Create a new topic. 發新話題。 Reply to an existing topic.
-	 * 
+	 *
 	 * @param {String|Array}title
 	 *            page title 頁面標題。 {String}title or [ {String}API_URL,
 	 *            {String}title or {Object}page_data ]
@@ -9385,7 +9407,7 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @param {Function}[callback]
 	 *            回調函數。 callback(title, error, result)
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=flow%2Bnew-topic
 	 *      https://www.mediawiki.org/w/api.php?action=help&modules=flow%2Breply
 	 */
@@ -9484,16 +9506,16 @@ function module_code(library_namespace) {
 	https://github.com/maxlath/wikidata-sdk
 
 	</code>
-	 * 
+	 *
 	 * @since
 	 */
 
 	/**
 	 * 測試 value 是否為實體項目 wikidata entity / wikibase-item.
-	 * 
+	 *
 	 * @param value
 	 *            要測試的值。
-	 * 
+	 *
 	 * @returns {Boolean}value 為實體項目。
 	 */
 	function is_entity(value) {
@@ -9506,14 +9528,14 @@ function module_code(library_namespace) {
 	 * API URL of wikidata.<br />
 	 * e.g., 'https://www.wikidata.org/w/api.php',
 	 * 'https://test.wikidata.org/w/api.php'
-	 * 
+	 *
 	 * @type {String}
 	 */
 	var wikidata_API_URL = api_URL('wikidata');
 
 	/**
 	 * Combine ((session)) with Wikidata. 立即性(asynchronous)設定 this.data_session。
-	 * 
+	 *
 	 * @param {wiki_API}session
 	 *            正作業中之 wiki_API instance。
 	 * @param {Function}[callback]
@@ -9524,7 +9546,7 @@ function module_code(library_namespace) {
 	 *            user password
 	 * @param {Boolean}[force]
 	 *            無論如何重新設定 this.data_session。
-	 * 
+	 *
 	 * @inner
 	 */
 	function setup_data_session(session, callback, API_URL, password, force) {
@@ -9568,9 +9590,9 @@ function module_code(library_namespace) {
 
 	/**
 	 * 搜索標籤包含特定關鍵字(label=key)的項目。
-	 * 
+	 *
 	 * 此搜索有極大問題:不能自動偵測與轉換中文繁簡體。 或須轉成英語再行搜尋。
-	 * 
+	 *
 	 * @example<code>
 
 	CeL.wiki.data.search('宇宙', function(entity) {result=entity;console.log(entity[0]==='Q1');}, {get_id:true});
@@ -9578,7 +9600,7 @@ function module_code(library_namespace) {
 	CeL.wiki.data.search('形狀', function(entity) {result=entity;console.log(entity==='P1419');}, {get_id:true,type:'property'});
 
 	</code>
-	 * 
+	 *
 	 * @param {String}key
 	 *            要搜尋的關鍵字。
 	 * @param {Function}[callback]
@@ -9689,7 +9711,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * {Array}時間精度單位。
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#time
 	 */
 	var time_unit = '十億年,億年,千萬年,百萬年,十萬年,萬年,千紀,世紀,年代,年,月,日,時,分,秒,毫秒,微秒,納秒'
@@ -9697,7 +9719,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 將時間轉為字串。
-	 * 
+	 *
 	 * @inner
 	 */
 	function time_toString() {
@@ -9716,7 +9738,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 將經緯度座標轉為字串。
-	 * 
+	 *
 	 * @inner
 	 */
 	function coordinate_toString(type) {
@@ -9728,16 +9750,16 @@ function module_code(library_namespace) {
 
 	/**
 	 * 將特定的屬性值轉為JavaScript的物件。
-	 * 
+	 *
 	 * @param {Object}value
 	 *            從Wikidata所得到的屬性值。
 	 * @param {Function}[callback]
 	 *            回調函數。 callback(轉成JavaScript的值)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @returns 轉成JavaScript的值。
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#Claims_and_Statements
 	 *      https://www.mediawiki.org/wiki/Wikibase/API
 	 *      https://www.mediawiki.org/wiki/Wikibase/Indexing/RDF_Dump_Format#Value_representation
@@ -9971,10 +9993,10 @@ function module_code(library_namespace) {
 	/**
 	 * language code → Wikidata site name / Wikimedia project name<br />
 	 * 將語言代碼轉為 Wikidata site name / Wikimedia project name。
-	 * 
+	 *
 	 * @param {String}language
 	 *            語言代碼。
-	 * 
+	 *
 	 * @returns {String}Wikidata site name / Wikimedia project name。
 	 */
 	function language_to_project(language) {
@@ -10000,10 +10022,10 @@ function module_code(library_namespace) {
 	/**
 	 * language code → Wikidata site code<br />
 	 * 將語言代碼轉為 Wikidata API 可使用之 site name。
-	 * 
+	 *
 	 * @param {String}language
 	 *            語言代碼。
-	 * 
+	 *
 	 * @returns {String}Wikidata API 可使用之 site name。
 	 */
 	function language_to_site(language) {
@@ -10033,12 +10055,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * 自 options[SESSION_KEY] 取得 wikidata API 所須之 site parameter。
-	 * 
+	 *
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @return {String}wikidata API 所須之 site parameter。
-	 * 
+	 *
 	 * @inner
 	 */
 	function wikidata_get_site(options) {
@@ -10063,9 +10085,9 @@ function module_code(library_namespace) {
 
 	/**
 	 * get label of entity. 取得指定實體的標籤。
-	 * 
+	 *
 	 * CeL.wiki.data.label_of()
-	 * 
+	 *
 	 * @param {Object}entity
 	 *            指定實體。
 	 * @param {String}[language]
@@ -10074,7 +10096,7 @@ function module_code(library_namespace) {
 	 *            當沒有標籤的時候，使用各語言連結標題。
 	 * @param {Boolean}[get_labels]
 	 *            取得所有標籤。
-	 * 
+	 *
 	 * @returns {String|Array}標籤。
 	 */
 	function get_entity_label(entity, language, use_title, get_labels) {
@@ -10103,14 +10125,14 @@ function module_code(library_namespace) {
 
 	/**
 	 * get site link of entity. 取得指定實體的語言連結標題。
-	 * 
+	 *
 	 * CeL.wiki.data.title_of(entity, language)
-	 * 
+	 *
 	 * @param {Object}entity
 	 *            指定實體。
 	 * @param {String}[language]
 	 *            指定取得此語言之資料。
-	 * 
+	 *
 	 * @returns {String}語言標題。
 	 */
 	function get_entity_link(entity, language) {
@@ -10147,7 +10169,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 取得特定實體的特定屬性值。
-	 * 
+	 *
 	 * @example<code>
 
 	CeL.wiki.data('Q1', function(entity) {result=entity;});
@@ -10188,7 +10210,7 @@ function module_code(library_namespace) {
 	wiki.query('CLAIM[31:14827288] AND CLAIM[31:593744]', function(entity) {result=entity;console.log(entity.labels['zh-tw'].value==='維基資料');})
 
 	</code>
-	 * 
+	 *
 	 * @param {String|Array}key
 	 *            entity id. 欲取得之特定實體id。 e.g., 'Q1', 'P6'
 	 * @param {String}[property]
@@ -10197,7 +10219,7 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback(轉成JavaScript的值)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON
 	 */
 	function wikidata_entity(key, property, callback, options) {
@@ -10392,7 +10414,7 @@ function module_code(library_namespace) {
 					library_namespace.err(
 					/**
 					 * 可能是錯把 "category" 之類當作 sites name??
-					 * 
+					 *
 					 * wikidata_entity: [param-missing] A parameter that is
 					 * required was missing. (Either provide the item "ids" or
 					 * pairs of "sites" and "titles" for corresponding pages)
@@ -10520,9 +10542,9 @@ function module_code(library_namespace) {
 
 	/**
 	 * Creates or modifies Wikibase entity. 創建或編輯Wikidata實體。
-	 * 
+	 *
 	 * 注意: 若是本來已有某個值（例如 label），採用 add 會被取代。或須偵測並避免更動原有值。
-	 * 
+	 *
 	 * @example<code>
 
 	wiki = Wiki(true, 'test.wikidata');
@@ -10531,7 +10553,7 @@ function module_code(library_namespace) {
 	wiki.page('宇宙').edit_data(function(entity){result=entity;console.log(entity);});
 
 	</code>
-	 * 
+	 *
 	 * @param {String|Array}id
 	 *            id to modify or entity you want to create.<br />
 	 *            item/property 將會創建實體。
@@ -10544,7 +10566,7 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @param {Function}callback
 	 *            回調函數。 callback(entity, error)
-	 * 
+	 *
 	 * @see https://www.wikidata.org/wiki/Wikidata:Creating_a_bot
 	 * @see https://www.wikidata.org/wiki/Wikidata:Bots<br />
 	 *      Monitor
@@ -10555,7 +10577,7 @@ function module_code(library_namespace) {
 	 *      from (P143) also reference URL (P854) with the value of the full URL
 	 *      and either retrieved (P813) or include the version id of the source
 	 *      page in the full URL.
-	 * 
+	 *
 	 */
 	function wikidata_edit(id, data, token, options, callback) {
 		if (typeof options === 'function' && !callback) {
@@ -10692,7 +10714,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 取得指定實體，指定語言的所有 labels 與 aliases 值之列表。
-	 * 
+	 *
 	 * @param {Object}entity
 	 *            指定實體的 JSON 值。
 	 * @param {String}[language]
@@ -10700,7 +10722,7 @@ function module_code(library_namespace) {
 	 * @param {Array}[list]
 	 *            添加此原有之 label 列表。<br />
 	 *            list = [ {String}label, ... ]
-	 * 
+	 *
 	 * @returns {Array}所有 labels 與 aliases 值之列表。
 	 */
 	function entity_labels_and_aliases(entity, language, list) {
@@ -10779,9 +10801,9 @@ function module_code(library_namespace) {
 	PATTERN_non_CJK = /^[\u0008-\u2E7F]+$/i,
 	/**
 	 * 判定 label 標籤標題語言使用之 pattern。
-	 * 
+	 *
 	 * @type {Object}
-	 * 
+	 *
 	 * @see [[以人口排列的語言列表]], [[維基百科:維基百科語言列表]], [[Special:統計#其他語言的維基百科]],
 	 *      application.locale.encoding
 	 */
@@ -10825,12 +10847,12 @@ function module_code(library_namespace) {
 
 	/**
 	 * 猜測 label 標籤標題之語言。
-	 * 
+	 *
 	 * @param {String}label
 	 *            標籤標題
 	 * @param {String}[CJK_language]
 	 *            預設之中日韓語言 code。
-	 * 
+	 *
 	 * @returns {String|Undefined}label 之語言。
 	 */
 	function guess_language(label, CJK_language) {
@@ -10864,7 +10886,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 回傳 wikidata_edit() 可用的個別 label 或 alias 設定項。
-	 * 
+	 *
 	 * @param {String}label
 	 *            label 值。
 	 * @param {String}[language]
@@ -10873,7 +10895,7 @@ function module_code(library_namespace) {
 	 *            default language to use
 	 * @param {Array}[add_to_list]
 	 *            添加在此編輯資料列表中。
-	 * 
+	 *
 	 * @returns {Object}個別 label 或 alias 設定項。
 	 */
 	wikidata_edit.add_item = function(label, language, default_lang,
@@ -10936,16 +10958,16 @@ function module_code(library_namespace) {
 	/**
 	 * 當想把 labels 加入 entity 時，輸入之則可自動去除重複的 labels，並回傳 wikidata_edit() 可用的編輯資料。
 	 * merge labels / alias
-	 * 
+	 *
 	 * TODO: 不區分大小寫與空格（這有時可能為 typo），只要存在即跳過。或最起碼忽略首字大小寫差異。
-	 * 
+	 *
 	 * @param {Object}labels
 	 *            labels = {language:[label list],...}
 	 * @param {Object}[entity]
 	 *            指定實體的 JSON 值。
 	 * @param {Object}[data]
 	 *            添加在此編輯資料中。
-	 * 
+	 *
 	 * @returns {Object}wikidata_edit() 可用的編輯資料。
 	 */
 	wikidata_edit.add_labels = function(labels, entity, data) {
@@ -11098,9 +11120,9 @@ function module_code(library_namespace) {
 
 	/**
 	 * 合併自 wikidata 的 entity。
-	 * 
+	 *
 	 * TODO: wikidata_merge([to, from1, from2], ...)
-	 * 
+	 *
 	 * @param {String}to
 	 *            要合併自的ID
 	 * @param {String}from
@@ -11185,7 +11207,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 查詢 Wikidata Query。
-	 * 
+	 *
 	 * @example<code>
 
 	CeL.wiki.wdq('claim[31:146]', function(list) {result=list;console.log(list);});
@@ -11202,7 +11224,7 @@ function module_code(library_namespace) {
 	CeL.get_URL('https://wdq.wmflabs.org/api?q=string[label:宇宙]', function(data) {result=data=JSON.parse(data.responseText);console.log(data.items);})
 
 	</code>
-	 * 
+	 *
 	 * @param {String}query
 	 *            查詢語句。
 	 * @param {Function}[callback]
@@ -11265,20 +11287,20 @@ function module_code(library_namespace) {
 
 	/**
 	 * 查詢 Wikidata Query Service (SPARQL)。
-	 * 
+	 *
 	 * @example<code>
 
 	CeL.wiki.SPARQL('SELECT ?item ?itemLabel WHERE { ?item wdt:P31 wd:Q146 . SERVICE wikibase:label { bd:serviceParam wikibase:language "en" } }', function(list) {result=list;console.log(list);})
 
 	</code>
-	 * 
+	 *
 	 * @param {String}query
 	 *            查詢語句。
 	 * @param {Function}[callback]
 	 *            回調函數。 callback(轉成JavaScript的值. e.g., {Array}list)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
-	 * 
+	 *
 	 * @see https://www.mediawiki.org/wiki/Wikidata_query_service/User_Manual
 	 *      https://www.wikidata.org/wiki/Wikidata:Data_access#SPARQL_endpoints
 	 */
