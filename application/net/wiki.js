@@ -7314,8 +7314,8 @@ function module_code(library_namespace) {
 			project = language_to_project(options.project);
 		}
 
-		// dump host
-		var host = options.host || 'http://dumps.wikimedia.org/',
+		// dump host: http "301 Moved Permanently" to https
+		var host = options.host || 'https://dumps.wikimedia.org/',
 		// e.g., '20160305'.
 		latest = options.latest;
 		if (!latest) {
