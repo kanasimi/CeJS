@@ -6786,11 +6786,8 @@ function module_code(library_namespace) {
 			}
 			if (language.API_URL) {
 				// treat language as session.
-				language = language.API_URL.toLowerCase().match(/\/\/([a-z\-\d]{2,20})\.([a-z]+)/);
 				// TODO: error handling
-				config.set_language(language[1].replace(/-/g, '_')
-				// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
-				+ (language[2] === 'wikipedia' ? 'wiki' : language[2]), !user);
+				config.set_language(language_to_project(language), !user);
 			} else {
 				Object.assign(config, language);
 			}
@@ -7323,12 +7320,7 @@ function module_code(library_namespace) {
 			//console.log(options);
 			//console.log(options[SESSION_KEY]);
 			//throw options[SESSION_KEY].language;
-			if (options[SESSION_KEY]) {
-				project = language_to_project(options[SESSION_KEY].language);
-			} else {
-				// e.g., 'enwiki'.
-				project = language_to_project(options.project);
-			}
+			project = language_to_project(options[SESSION_KEY] || options.project);
 		}
 
 		// dump host: http "301 Moved Permanently" to https
@@ -10054,6 +10046,15 @@ function module_code(library_namespace) {
 	 * @returns {String}Wikidata site name / Wikimedia project name。
 	 */
 	function language_to_project(language) {
+		if (typeof language === 'object' && language.API_URL) {
+			// treat language as session.
+			// assert: typeof language.API_URL === 'string'
+			language = language.API_URL.toLowerCase().match(/\/\/([a-z\-\d]{2,20})\.([a-z]+)/);
+			return language[1].replace(/-/g, '_')
+			// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
+			+ (language[2] === 'wikipedia' ? 'wiki' : language[2]);
+		}
+
 		// 正規化。
 		language = language && String(language).trim().toLowerCase()
 		// 以防 incase wikt, wikisource
