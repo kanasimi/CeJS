@@ -6786,7 +6786,6 @@ function module_code(library_namespace) {
 			}
 			if (language.API_URL) {
 				// treat language as session.
-				// TODO: error handling
 				config.set_language(language_to_project(language), !user);
 			} else {
 				Object.assign(config, language);
@@ -10050,9 +10049,12 @@ function module_code(library_namespace) {
 			// treat language as session.
 			// assert: typeof language.API_URL === 'string'
 			language = language.API_URL.toLowerCase().match(/\/\/([a-z\-\d]{2,20})\.([a-z]+)/);
-			return language[1].replace(/-/g, '_')
+			// TODO: error handling
+			language = language[1].replace(/-/g, '_')
 			// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
 			+ (language[2] === 'wikipedia' ? 'wiki' : language[2]);
+			library_namespace.debug(language, 1, 'language_to_projects');
+			return language;
 		}
 
 		// 正規化。
