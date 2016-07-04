@@ -92,20 +92,30 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// TODO: 各種 type 間的轉換: 先要能擷取出 language + project
-	// type: 'API', 'db', 'site', 'link', ...
+	// @see language_to_project()
+	//
+	//
+	// type: 'API', 'db', 'site', 'link', 'dump', ...
 	// API URL (default): e.g., 'https://www.wikidata.org/w/api.php'
 	//
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
 	// site: e.g., 'zhwiki'
 	//
 	// https://en.wikipedia.org/wiki/Help:Interwikimedia_links
-	// link prefix: e.g., 'zh:n:'
+	// link prefix: e.g., 'zh:n:' for zh.wikinews
+	//
+	// https://dumps.wikimedia.org/backup-index.html
+	// dump: e.g., 'zhwikinews'
 	//
 	// SHOW DATABASES;
 	// db: e.g., 'zhwiki_p'
 	//
-	// language: 'en', 'zh', 'ja', ... (default: default_language)
-	// project: 'wikipedia' (default), 'news', 'source', 'books', 'quote', ...
+	//
+	// language (or project): 'en', 'zh', 'ja', ... (default: default_language)
+	// project = language.family
+	//
+	// https://meta.wikimedia.org/wiki/List_of_Wikimedia_projects_by_size
+	// family: 'wikipedia' (default), 'news', 'source', 'books', 'quote', ...
 	function get_project(language, project, type) {
 		;
 	}
@@ -7310,8 +7320,15 @@ function module_code(library_namespace) {
 		options = library_namespace.new_options(options);
 
 		if (!project) {
-			// e.g., 'enwiki'.
-			project = language_to_project(options.project);
+			//console.log(options);
+			//console.log(options[SESSION_KEY]);
+			//throw options[SESSION_KEY].language;
+			if (options[SESSION_KEY]) {
+				project = language_to_project(options[SESSION_KEY].language);
+			} else {
+				// e.g., 'enwiki'.
+				project = language_to_project(options.project);
+			}
 		}
 
 		// dump host: http "301 Moved Permanently" to https
@@ -7629,9 +7646,10 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof filename !== 'string' || !filename.endsWith('.xml')) {
-			if (filename)
+			if (filename) {
 				library_namespace.log('read_dump: Invalid file path: ['
 						+ filename + '], try to get the latest dump file...');
+			}
 			get_latest_dump(filename, function(filename) {
 				read_dump(filename, callback, options);
 			}, options);
@@ -7641,8 +7659,9 @@ function module_code(library_namespace) {
 
 		options = library_namespace.setup_options(options);
 
-		if (typeof options.first === 'function')
+		if (typeof options.first === 'function') {
 			options.first(filename);
+		}
 
 		var run_last = function(quit_operation) {
 			library_namespace.debug('Finish work.', 1, 'read_dump');
@@ -8958,9 +8977,10 @@ function module_code(library_namespace) {
 				// release
 				id_list = rev_list = null;
 
-				if (dump_file === true)
+				if (dump_file === true) {
 					// 這邊的 ((true)) 僅表示要使用，並不代表設定 dump file path。
 					dump_file = null;
+				}
 				read_dump(dump_file,
 				//
 				function(page_data, position, page_anchor) {
@@ -8996,7 +9016,7 @@ function module_code(library_namespace) {
 						}
 						if (page_data.ns !== 0) {
 							// 記事だけを編集する
-							return [ CeL.wiki.edit.cancel, '本作業僅處理條目命名空間或模板' ];
+							return [ CeL.wiki.edit.cancel, '本作業僅處理條目命名空間或模板或category' ];
 							throw '非條目:[[' + page_data.title + ']]! 照理來說不應該出現有 ns !== 0 的情況。';
 						}
 
@@ -9062,6 +9082,7 @@ function module_code(library_namespace) {
 					return callback(page_data);
 
 				}, {
+					session : config[SESSION_KEY],
 					// 指定 dump file 放置的 directory。
 					directory : config.dump_directory,
 					// options.first(filename) of read_dump()
