@@ -3821,9 +3821,9 @@ function module_code(library_namespace) {
 							'wiki_API.work');
 				} else {
 					nochange_count = target.length;
+					done = '處理分塊 ' + (work_continue + 1) + '–' + (work_continue
 					// start–end/all
-					done = '處理分塊 ' + (work_continue + 1) + '–'
-							+ (work_continue + max_size) + '/' + nochange_count;
+					+ Math.min(max_size, nochange_count)) + '/' + nochange_count;
 					// Add percentage.
 					if (nochange_count > 1e4)
 						done += ' ('
@@ -10049,11 +10049,12 @@ function module_code(library_namespace) {
 			// treat language as session.
 			// assert: typeof language.API_URL === 'string'
 			language = language.API_URL.toLowerCase().match(/\/\/([a-z\-\d]{2,20})\.([a-z]+)/);
+			library_namespace.debug(language, 4, 'language_to_projects');
 			// TODO: error handling
 			language = language[1].replace(/-/g, '_')
 			// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
 			+ (language[2] === 'wikipedia' ? 'wiki' : language[2]);
-			library_namespace.debug(language, 1, 'language_to_projects');
+			library_namespace.debug(language, 3, 'language_to_projects');
 			return language;
 		}
 
