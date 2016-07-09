@@ -1251,8 +1251,8 @@ function module_code(library_namespace) {
 				return token;
 			});
 
-			parameters.name = parameters[0].toString().trim().replace(
-					/\s*:\s*/g, ':');
+			// 正規化 template name。
+			parameters.name = normalize_page_name(parameters[0].toString());
 			parameters.parameters = _parameters;
 
 			_set_wiki_type(parameters, 'transclusion');
