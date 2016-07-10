@@ -227,14 +227,16 @@ function get_URL(URL, onload, charset, post_data, options) {
 	if (post_data)
 		post_data = get_URL.param_to_String(post_data);
 
-	if (!onload && typeof options.onchange === 'function')
+	if (!onload && typeof options.onchange === 'function') {
 		onload = function() {
 			options.onchange(readyState_done, XMLHttp);
 		};
+	}
 
 	if (options.async === false && onload
-			|| typeof onload !== 'function')
+			|| typeof onload !== 'function') {
 		onload = false;
+	}
 
 	/**
 	 * The XMLHttpRequest object can't be cached.
@@ -696,13 +698,15 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	if (post_data)
 		post_data = get_URL.param_to_String(post_data);
 
-	if (!onload && typeof options.onchange === 'function')
+	if (!onload && typeof options.onchange === 'function') {
 		onload = function() {
 			options.onchange(readyState_done);
 		};
+	}
 
-	if (options.async === false && onload || typeof onload !== 'function')
+	if (options.async === false && onload || typeof onload !== 'function') {
 		onload = false;
+	}
 
 	if (options.agent) {
 		library_namespace.debug('使用自定義 agent。', 6, 'get_URL_node');
@@ -808,8 +812,8 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 				// node_fs.appendFileSync('get_URL_node.data', '\n');
 			});
 		} else {
-			library_namespace.warn('get_URL_node: got [' + URL
-					+ '], but no listener!');
+			library_namespace.debug('got [' + URL
+					+ '], but there is no listener!', 1, 'get_URL_node');
 			// console.log(result);
 		}
 	};
