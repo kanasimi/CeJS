@@ -974,6 +974,9 @@ function module_code(library_namespace) {
 		// [[:en:Template:Editnotices/Group/Wikipedia:Miscellany for deletion]]
 		// [[:en:Marvel vs. Capcom 3: Fate of Two Worlds]]
 		//
+		// 應當使用 [[w:zh:維基百科:編輯提示|編輯提示]] 而非 [[:zh:w:維基百科:編輯提示|編輯提示]]，
+		// 見 [[User:Cewbot/Stop]]。
+		//
 		// @see [[Wikipedia:Namespace]]
 		// https://www.mediawiki.org/wiki/Markup_spec#Namespaces
 		// [[ m : abc ]] is OK, as "m : abc".
@@ -5849,10 +5852,12 @@ function module_code(library_namespace) {
 		 * @type {String}
 		 */
 		var title = options.title;
-		if (typeof title === 'function')
+		if (typeof title === 'function') {
 			title = title(options.token);
-		if (!title)
+		}
+		if (!title) {
 			title = wiki_API.check_stop.title(options.token);
+		}
 
 		library_namespace.debug('檢查緊急停止頁面 [[' + title + ']]', 1,
 				'wiki_API.check_stop');
@@ -5865,10 +5870,11 @@ function module_code(library_namespace) {
 			if (typeof options.checker === 'function') {
 				// 以 options.checker 的回傳來設定是否stopped。
 				stopped = options.checker(content);
-				if (stopped)
+				if (stopped) {
 					library_namespace.warn(
 					//
 					'wiki_API.check_stop: 已設定停止編輯作業！');
+				}
 				content = null;
 
 			} else {
@@ -5878,11 +5884,12 @@ function module_code(library_namespace) {
 				/** {String}緊急停止作業將檢測之章節標題。 */
 				|| options.section
 				/**
+				 * for == 停止作業: 20150503 機器人作業 ==
 				 * <code>
 				 * (new RegExp('\n==(.*?)' + '20150503' + '\\s*==\n')).test('\n== 停止作業:20150503 ==\n') === true
 				 * </code>
 				 */
-				&& new RegExp('\n==(.*?)' + options.section + '\\s*==\n');
+				&& new RegExp('\n==(.*?)' + options.section + '(.*?)==\n');
 			}
 
 			if (content) {
@@ -5892,9 +5899,10 @@ function module_code(library_namespace) {
 				//
 				'wiki_API.check_stop: 採用 pattern: ' + PATTERN);
 				stopped = PATTERN.test(content, page_data);
-				if (stopped)
+				if (stopped) {
 					library_namespace
 							.warn('緊急停止頁面[[' + title + ']]有留言要停止編輯作業！');
+				}
 			}
 
 			callback(stopped);
