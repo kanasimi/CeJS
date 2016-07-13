@@ -2811,7 +2811,7 @@ set_method(Array.prototype, {
 		return product;
 	},
 	// Array.prototype.to_hash()
-	// ['e',5]→{e:0,'5':1}
+	// ['1e3',5,66]→{'1e3':0,'5':1,'66':2}
 	// {Function}[get_key]
 	to_hash: function(get_key, hash) {
 		if (!hash) {

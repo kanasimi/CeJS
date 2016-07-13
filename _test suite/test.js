@@ -374,6 +374,8 @@ function test_native() {
 		assert(["aa", "aa[[bb[[cc]]dd]]".remove_head_tail("[[", "]]")], 'string.remove_head_tail() #4');
 		assert(['[df [h [r]r] [ew] g]', '<df <h <r>r> <ew> g>'.replace_till_stable(/<([^<>]+)*>/, '[$1]')], 'string.replace_till_stable() #1');
 		assert(['[a]', '{{a1{{b2}}c3}}'.replace_till_stable(/{{([^{}])[^{}]*}}/, '[$1]')], 'string.replace_till_stable() #2');
+		// OBject 可能重排。
+		assert([JSON.stringify({'1e3':0,'5':1,'66':2}), JSON.stringify(['1e3',5,66].to_hash())], 'Array.prototype.to_hash()');
 	});
 
 }
