@@ -2810,13 +2810,17 @@ set_method(Array.prototype, {
 		});
 		return product;
 	},
+	// Array.prototype.to_hash()
+	// ['e',5]→{e:0,'5':1}
+	// {Function}[get_key]
 	to_hash: function(get_key, hash) {
-		if (!hash)
+		if (!hash) {
 			hash = library_namespace.null_Object();
-		this.forEach(get_key ? function(item) {
-			hash[get_key(item)] = item;
-		} : function(item) {
-			hash[item] = item;
+		}
+		this.forEach(get_key ? function(item, index) {
+			hash[get_key(item)] = index;
+		} : function(item, index) {
+			hash[item] = index;
 		});
 		return hash;
 	},

@@ -2992,6 +2992,10 @@ function hav(θ) {
 
 // ---------------------------------------------------------------------//
 
+
+
+//---------------------------------------------------------------------//
+
 //  CeL.math.number_array()
 if (library_namespace.typed_arrays) {
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
