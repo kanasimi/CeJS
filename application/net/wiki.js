@@ -8155,7 +8155,6 @@ function module_code(library_namespace) {
 					callback.call(_this, data);
 			}
 
-			// operation.reget: 放棄 cache，重新取得資料。
 			if (!operation.reget && !error && (data ||
 			// 當資料 Invalid，例如採用 JSON 卻獲得空資料時；則視為 error，不接受此資料。
 			('accept_empty_data' in _this
@@ -8171,8 +8170,9 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			library_namespace.debug('No valid cached data. Try to get data...',
-					3, 'wiki_API.cache');
+			library_namespace.debug(operation.reget ? 'Dispose cache. Reget again.'
+			// ↑ operation.reget: 放棄 cache，重新取得資料。
+			: 'No valid cached data. Try to get data...', 3, 'wiki_API.cache');
 
 			/**
 			 * 寫入 cache 至檔案系統。
