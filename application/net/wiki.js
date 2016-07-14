@@ -5818,8 +5818,8 @@ function module_code(library_namespace) {
 	 * check if need to stop / 檢查是否需要緊急停止作業 (Emergency shutoff-compliant).
 	 * 
 	 * 此功能之工作機制/原理：<br />
-	 * 在 .edit() 編輯（機器人執行作業）之前，先檢查是否有人在緊急停止頁面留言要求 stop。<br />
-	 * 只要在緊急停止頁面有指定的章節標題、或任何章節，就當作有人留言要 stop，並放棄編輯。
+	 * 在 .edit() 編輯（機器人執行作業）之前，先檢查是否有人在緊急停止頁面留言要求停止作業。<br />
+	 * 只要在緊急停止頁面有指定的章節標題、或任何章節，就當作有人留言要停止作業，並放棄編輯。
 	 * 
 	 * TODO:<br />
 	 * https://www.mediawiki.org/w/api.php?action=query&meta=userinfo&uiprop=hasmsg
@@ -5892,8 +5892,10 @@ function module_code(library_namespace) {
 			}
 
 			if (content) {
-				if (!library_namespace.is_RegExp(PATTERN))
+				if (!library_namespace.is_RegExp(PATTERN)) {
+					// use default pattern
 					PATTERN = wiki_API.check_stop.pattern;
+				}
 				library_namespace.debug(
 				//
 				'wiki_API.check_stop: 採用 pattern: ' + PATTERN);

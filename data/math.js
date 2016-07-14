@@ -2993,6 +2993,117 @@ function hav(θ) {
 // ---------------------------------------------------------------------//
 
 
+/**
+ * 取差集。<br />
+ * set_1 → set_1 - set_2 <br />
+ * set_2 → set_2 - set_1
+ * 
+ * @param {Array|Object}set_1
+ *            set / hash 1
+ * @param {Array|Object}set_2
+ *            set / hash 2
+ * @param {Boolean}[clone]
+ *            clone === true 表示先 clone，不直接在原物件上寫入結果。但若為 {Array}，則*必定*為 clone! 
+ * 
+ * @returns {Array}[ complement of set_1, complement of set_2 ]
+ */
+function get_set_complement(set_1, set_2, clone) {
+	if (!set_1 || !set_2 || typeof set_1 !== 'object'
+			|| typeof set_2 !== 'object') {
+		throw new Error('get_set_complement: Invalid type');
+	}
+
+	var hash_1, hash_2;
+	// 確保 keys 準備好，並把為 hash 的全部轉到 hash_*。
+	if (!Array.isArray(set_1)) {
+		hash_1 = clone ? Object.clone(set_1) : set_1;
+		set_1 = Object.keys(hash_1);
+	}
+	if (!Array.isArray(set_2)) {
+		hash_2 = clone ? Object.clone(set_2) : set_2;
+		set_2 = Object.keys(hash_2);
+	}
+
+	// assert: set_1, set_2 are {Array}
+
+	// 從比較小的來處理比較快。
+	// 若 set_1 比較短，則看 hash_2 是否存在；若沒 hash_2 則將key指到比較短的 _2。
+	// 依之後的演算法，hash_2 必須存在，又需建造，因此務必為比較短的，因為消耗高。
+	// 因此若是另一方已經有 hash，則直接用之。
+	var key_is_2 = !(set_1.length > set_2.length ? hash_1 : hash_2);
+
+	if (key_is_2) {
+		// swap 1, 2
+		var tmp = set_1;
+		set_1 = set_2;
+		set_2 = tmp;
+		tmp = hash_1;
+		hash_1 = hash_2;
+		hash_2 = tmp;
+	}
+
+	var no_hash_2 = !hash_2;
+	// 建造 hash: 依之後的演算法，hash_2 必須存在
+	if (no_hash_2) {
+		hash_2 = set_2.to_hash();
+	}
+
+	var resort_1 = [];
+
+	set_1.forEach(function(key) {
+		// assert: key is in _1
+		if (key in hash_2) {
+			// key 在 _1 + 在 _2: 在兩方都刪掉。
+			delete hash_2[key];
+			if (hash_1) {
+				delete hash_1[key];
+			}
+		} else {
+			// key 在 _1 不在 _2: 留下 _1 的 key。
+			if (!hash_1) {
+				resort_1.push(key);
+			}
+			// _2 本來就沒有，不動。
+		}
+	});
+
+	set_1 = resort_1;
+	if (no_hash_2) {
+		// 得造出 set_2。
+
+		// 維持 set_2 的順序，並避免去掉重複。
+		var keep_order = true;
+		if (keep_order) {
+			var resort_2 = [];
+			set_2.forEach(function(key) {
+				if (key in hash_2) {
+					resort_2.push(key);
+				}
+			});
+			set_2 = resort_2;
+		} else {
+			// 這會比較快，但實際應用上會造成不確定性：不能確定截掉的是哪一個。
+			set_2 = Object.keys(hash_2);
+		}
+
+		hash_2 = undefined;
+	}
+
+	if (key_is_2) {
+		// swap 1, 2
+		var tmp = set_1;
+		set_1 = set_2;
+		set_2 = tmp;
+		tmp = hash_1;
+		hash_1 = hash_2;
+		hash_2 = tmp;
+	}
+
+	return [ hash_1 || set_1, hash_2 || set_2 ];
+}
+
+_.get_set_complement = get_set_complement;
+
 
 //---------------------------------------------------------------------//
 

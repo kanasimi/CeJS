@@ -2817,6 +2817,7 @@ set_method(Array.prototype, {
 		if (!hash) {
 			hash = library_namespace.null_Object();
 		}
+		// TODO: 衝突時處理。
 		this.forEach(get_key ? function(item, index) {
 			hash[get_key(item)] = index;
 		} : function(item, index) {
