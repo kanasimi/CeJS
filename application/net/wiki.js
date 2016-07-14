@@ -4515,14 +4515,18 @@ function module_code(library_namespace) {
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (!Array.isArray(action)
 		// 為了預防輸入的是問題頁面。
-		|| action.length !== 2 || typeof action[0] === 'object')
-			action = [ , action ];
+		|| action.length !== 2 || typeof action[0] === 'object') {
+			// assert: {Array}((action = title)) 為 page list。
+			// 此時嘗試從 options[SESSION_KEY] 取得 API_URL。
+			action = [ options[SESSION_KEY] && options[SESSION_KEY].API_URL, action ];
+		}
 		action[1] = wiki_API.query.title_param(action[1], true, options
 				&& options.is_id);
 
-		if (options.redirects)
+		if (options.redirects) {
 			// 毋須 '&redirects=1'
 			action[1] += '&redirects';
+		}
 
 		var get_content;
 		if ('prop' in options) {
