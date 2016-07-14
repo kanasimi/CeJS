@@ -2819,9 +2819,10 @@ set_method(Array.prototype, {
 		}
 		// TODO: 衝突時處理。
 		this.forEach(get_key ? function(item, index) {
-			hash[get_key(item)] = index;
+			item = get_key(item);
+			hash[typeof item === 'object' ? JSON.stringify(item) : item] = index;
 		} : function(item, index) {
-			hash[item] = index;
+			hash[typeof item === 'object' ? JSON.stringify(item) : item] = index;
 		});
 		return hash;
 	},
