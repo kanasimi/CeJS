@@ -719,6 +719,10 @@ function test_math() {
 		         JSON.stringify(CeL.get_set_complement({a:2,b:4,c:6}, {c:6,d:1})) ], 'get_set_complement() #2');
 		assert([ JSON.stringify([{a:2}, {d:1}]),
 		         JSON.stringify(CeL.get_set_complement({a:2,b:4,c:6}, {b:4,c:6,d:1})) ], 'get_set_complement() #3');
+		assert([ JSON.stringify([[2,6], [1,5]]),
+		         JSON.stringify(CeL.get_set_complement([2,4,6], [1,4,5])) ], 'get_set_complement() #4');
+		assert([ JSON.stringify([[2], [5]]),
+		         JSON.stringify(CeL.get_set_complement([1,2,4,6], [1,4,5,6])) ], 'get_set_complement() #5');
 
 		var a=CeL.data.math.continued_fraction([1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]);
 		//CeL.log(a+'\n'+a[0]/a[1]+'\n'+Math.SQRT2+'\n'+(Math.SQRT2-a[0]/a[1])+'\n'+CeL.data.math.mutual_division(a[0],a[1]));
