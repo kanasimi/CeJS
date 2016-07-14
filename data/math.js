@@ -3043,8 +3043,8 @@ function get_set_complement(set_1, set_2, clone) {
 	}
 
 	var no_hash_2 = !hash_2;
-	// 建造 hash: 依之後的演算法，hash_2 必須存在
 	if (no_hash_2) {
+		library_namespace.debug('建造 hash: 依之後的演算法，hash_2 必須存在。', 3, 'get_set_complement');
 		hash_2 = set_2.to_hash();
 	}
 
@@ -3052,6 +3052,11 @@ function get_set_complement(set_1, set_2, clone) {
 
 	set_1.forEach(function(key) {
 		// assert: key is in _1
+		if (typeof key === 'object') {
+			// 處理 set_1 之成員為 {Object} 的情況。
+			// 警告:這邊需要與 Array.prototype.product() 採用相同的 to string 方法。
+			key = JSON.stringify(key);
+		}
 		if (key in hash_2) {
 			// key 在 _1 + 在 _2: 在兩方都刪掉。
 			delete hash_2[key];
