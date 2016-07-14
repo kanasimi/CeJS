@@ -3799,9 +3799,10 @@ function module_code(library_namespace) {
 				};
 			}
 
-			if (check_options)
+			if (check_options) {
 				// wiki_API.check_stop()
 				this.check(check_options);
+			}
 		}
 
 		if (Array.isArray(target)) {
@@ -5862,7 +5863,8 @@ function module_code(library_namespace) {
 		library_namespace.debug('檢查緊急停止頁面 [[' + title + ']]', 1,
 				'wiki_API.check_stop');
 
-		wiki_API.page([ this.API_URL, title ], function(page_data) {
+		var session = options[SESSION_KEY] || this;
+		wiki_API.page([ session.API_URL, title ], function(page_data) {
 			var content = get_page_content(page_data),
 			// default: NOT stopped
 			stopped = false, PATTERN;
