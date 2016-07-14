@@ -3033,7 +3033,7 @@ function get_set_complement(set_1, set_2, clone) {
 	// 依之後的演算法，hash_2 必須存在，又需建造，因此務必為比較短的，因為消耗高。
 	// 因此若是另一方已經有 hash，則直接用之。
 	var key_is_2 = !(set_1.length > set_2.length ? hash_1 : hash_2);
-	library_namespace.debug('key_is_2: ' + key_is_2, 0, 'get_set_complement');
+	library_namespace.debug('key_is_2: ' + key_is_2, 3, 'get_set_complement');
 
 	if (key_is_2) {
 		// swap 1, 2
@@ -3059,13 +3059,13 @@ function get_set_complement(set_1, set_2, clone) {
 		// 警告:這邊需要與 Array.prototype.product() 採用相同的 to string 方法。
 		var key = typeof item === 'object' ? JSON.stringify(item) : item;
 		if (key in hash_2) {
-			library_namespace.debug('key 在 _1 + 在 _2: 在兩方都刪掉: ' + key, 0, 'get_set_complement');
+			library_namespace.debug('key 在 _1 + 在 _2: 在兩方都刪掉: ' + key, 5, 'get_set_complement');
 			delete hash_2[key];
 			if (hash_1) {
 				delete hash_1[key];
 			}
 		} else {
-			library_namespace.debug('key 在 _1 不在 _2: 留下 _1 的 key: ' + key, 0, 'get_set_complement');
+			library_namespace.debug('key 在 _1 不在 _2: 留下 _1 的 key: ' + key, 5, 'get_set_complement');
 			if (!hash_1) {
 				resort_1.push(item);
 			}
