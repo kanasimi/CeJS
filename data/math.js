@@ -2995,6 +2995,8 @@ function hav(θ) {
 
 /**
  * 取差集。<br />
+ * 警告: 若有成員為 {Object}，或許先自行處理會比較有效率。
+ * 
  * set_1 → set_1 - set_2 <br />
  * set_2 → set_2 - set_1
  * 
@@ -3050,13 +3052,11 @@ function get_set_complement(set_1, set_2, clone) {
 
 	var resort_1 = [];
 
-	set_1.forEach(function(key) {
-		// assert: key is in _1
-		if (typeof key === 'object') {
-			// 處理 set_1 之成員為 {Object} 的情況。
-			// 警告:這邊需要與 Array.prototype.product() 採用相同的 to string 方法。
-			key = JSON.stringify(key);
-		}
+	set_1.forEach(function(item) {
+		// assert: item is in _1
+		// 處理 set_1 之成員為 {Object} 的情況。
+		// 警告:這邊需要與 Array.prototype.product() 採用相同的 to string 方法。
+		var key = typeof item === 'object' ? JSON.stringify(item) : item;
 		if (key in hash_2) {
 			// key 在 _1 + 在 _2: 在兩方都刪掉。
 			delete hash_2[key];
@@ -3066,7 +3066,7 @@ function get_set_complement(set_1, set_2, clone) {
 		} else {
 			// key 在 _1 不在 _2: 留下 _1 的 key。
 			if (!hash_1) {
-				resort_1.push(key);
+				resort_1.push(item);
 			}
 			// _2 本來就沒有，不動。
 		}
@@ -3080,9 +3080,12 @@ function get_set_complement(set_1, set_2, clone) {
 		var keep_order = true;
 		if (keep_order) {
 			var resort_2 = [];
-			set_2.forEach(function(key) {
-				if (key in hash_2) {
-					resort_2.push(key);
+			set_2.forEach(function(item) {
+				// 處理 set_2 之成員為 {Object} 的情況。
+				// 警告:這邊需要與前面採用相同的 to string 方法。
+				item = typeof item === 'object' ? JSON.stringify(item) : item;
+				if (item in hash_2) {
+					resort_2.push(item);
 				}
 			});
 			set_2 = resort_2;
