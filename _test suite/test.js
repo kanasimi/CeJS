@@ -713,6 +713,13 @@ function test_math() {
 			CeL.log(c + '\n' + gDate(new Date - d));
 		}
 
+		assert([ JSON.stringify([{a:2,b:4}, {d:1}]),
+		         JSON.stringify(CeL.get_set_complement({a:2,b:4}, {d:1})) ], 'get_set_complement() #1');
+		assert([ JSON.stringify([{a:2,b:4}, {d:1}]),
+		         JSON.stringify(CeL.get_set_complement({a:2,b:4,c:6}, {c:6,d:1})) ], 'get_set_complement() #2');
+		assert([ JSON.stringify([{a:2}, {d:1}]),
+		         JSON.stringify(CeL.get_set_complement({a:2,b:4,c:6}, {b:4,c:6,d:1})) ], 'get_set_complement() #3');
+
 		var a=CeL.data.math.continued_fraction([1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]);
 		//CeL.log(a+'\n'+a[0]/a[1]+'\n'+Math.SQRT2+'\n'+(Math.SQRT2-a[0]/a[1])+'\n'+CeL.data.math.mutual_division(a[0],a[1]));
 		assert([a[0]/a[1], Math.SQRT2], { name : '取得連分數序列的數值', error_rate : Number.EPSILON });
