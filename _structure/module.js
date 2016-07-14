@@ -382,6 +382,10 @@ if (false) {
 		// shortcut for Windows
 		_.platform.Windows = _.platform.is_Windows();
 
+		// argument vector
+		_.env.argv = process.argv;
+		// env hash: see CeL.env.arg_hash @ CeL.application.platform.nodejs
+
 		// TODO: https://github.com/driverdan/node-XMLHttpRequest/blob/master/lib/XMLHttpRequest.js
 		var node_read_file = _.new_XMLHttp = _.new_XMLHttp.readFileSync;
 

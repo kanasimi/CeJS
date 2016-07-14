@@ -353,11 +353,14 @@ if (typeof CeL === 'function')
 			// --------------------------------------------
 
 			/**
+			 * command line arguments 指令列參數
+			 * 
 			 * test code: <code>
 			 * '-h|--help|-f=|--file=|-f=File|--file=File|File|file=File'.split('|').forEach(function(arg) { console.log(arg.match(/^(-{0,2})([^=]+?)(=(.*))?$/)); });
 			 * </code>
 			 */
 			if (process.argv && process.argv.length > 2) {
+				// CeL.env.argv: see module.js
 				process.argv.slice(2).forEach(function(arg) {
 					var matched = arg.match(/^(-{0,2})([^=]+?)(=(.*))?$/);
 					if (matched[2].startsWith('-')) {
@@ -374,8 +377,8 @@ if (typeof CeL === 'function')
 					}
 
 					this[matched[2]] = matched[4];
-				}, library_namespace.env.argv
-				// ↑ use ((CeL.env.argv)) to get command line arguments
+				}, library_namespace.env.arg_hash
+				// ↑ use ((CeL.env.arg_hash)) to get command line arguments
 				= library_namespace.null_Object());
 			}
 
