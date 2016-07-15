@@ -2317,8 +2317,8 @@ function search_sorted_Array(array, value, options) {
 	: not_found && (!callback
 	// 當 library_namespace.is_RegExp(value) 時，callback 僅表示匹不匹配。
 	|| library_namespace.is_RegExp(value)
-	// assert: 此時 index === 0
-	&& comparator(array[0]) > 0) ? NOT_FOUND : index;
+	// assert: 此時 index === 0 or array.length-1
+	&& comparator(array[index]) > 0) ? NOT_FOUND : index;
 }
 
 search_sorted_Array.default_comparator = ascending;
