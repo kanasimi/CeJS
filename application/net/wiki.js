@@ -2279,14 +2279,32 @@ function module_code(library_namespace) {
 		var content = page_data &&
 		// page_data.is_Flow &&
 		(page_data[flow_view || 'header'] || page_data).revision;
-		if (content && (content = content.content))
+		if (content && (content = content.content)) {
 			// page_data.revision.content.content
 			return content.content;
+		}
 
-		// 檢測一般頁面
+		// 檢測一般頁面。
 		if (get_page_content.is_page_data(page_data)) {
-			return (content = get_page_content.revision(page_data)) ? content['*']
-					: null;
+			// @see get_page_content.revision
+			content = library_namespace.is_Object(page_data)
+			//
+			&& page_data.revisions;
+			if (!Array.isArray(content) || !content[0]) {
+				// invalid page data
+				// 就算 content.length === 0，本來就不該回傳東西。
+				// 警告：可能回傳 null or undefined，尚未規範。
+				return;
+			}
+			if (content.length > 1) {
+				// 多版本的情況：因為此狀況極少，不統一處理。
+				// 一般說來caller自己應該知道自己設定了rvlimit>1，因此此處不警告。
+				// 警告：但多版本的情況需要自行偵測是否回傳{Array}！
+				return content.map(function(revision) {
+					return revision['*'];
+				});
+			}
+			return content[0]['*'];
 		}
 
 		// 一般都會輸入 page_data: {"pageid":0,"ns":0,"title":""}
@@ -2333,7 +2351,7 @@ function module_code(library_namespace) {
 		&& page_data.revisions && page_data.revisions[0];
 	};
 
-	// 不回傳 {String}，減輕負擔。
+	// 不回傳 {String}，減輕需要複製字串的負擔。
 	get_page_content.has_content = function(page_data) {
 		// TODO: should return {Boolean}
 		return get_page_content.revision(page_data);
@@ -2593,7 +2611,7 @@ function module_code(library_namespace) {
 				this.next();
 			} else if (this.stopped && !next[2].skip_stopped) {
 				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄編輯[['
-						+ this.last_page.title + ']]！');
+						+ (this.last_page && this.last_page.title) + ']]！');
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					next[3].call(this, this.last_page.title, '已停止作業');
@@ -2804,16 +2822,26 @@ function module_code(library_namespace) {
 
 		case 'protect':
 			// wiki.protect(options, callback)
-			if (!next[1].title && !next[1].pageid && this.last_page) {
-				next[1].pageid = this.last_page.pageid;
-			}
-			next[1][SESSION_KEY] = this;
-			wiki_API.protect(next[1], function(result) {
+			if (this.stopped && !next[1].skip_stopped) {
+				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄保護作業[['
+						+ (next[1].title || next[1].pageid || this.last_page && this.last_page.title) + ']]！');
 				// next[2] : callback
 				if (typeof next[2] === 'function')
-					next[2].call(_this, result);
-				_this.next();
-			});
+					next[2].call(this, next[1], '已停止作業');
+				this.next();
+
+			} else {
+				if (!next[1].title && !next[1].pageid && this.last_page) {
+					next[1].pageid = this.last_page.pageid;
+				}
+				next[1][SESSION_KEY] = this;
+				wiki_API.protect(next[1], function(result) {
+					// next[2] : callback
+					if (typeof next[2] === 'function')
+						next[2].call(_this, result);
+					_this.next();
+				});
+			}
 			break;
 
 		// ------------------------------------------------
@@ -4748,6 +4776,10 @@ function module_code(library_namespace) {
 					//
 					+ ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
 					page_list = page_list[0];
+					if (get_page_content.is_page_data(title)) {
+						// import data to original page_data. 盡可能多保留資訊。
+						page_list = Object.assign(title, page_list);
+					}
 					if (page_list && get_content
 					//
 					&& (page_list.is_Flow = is_Flow(page_list))

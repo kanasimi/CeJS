@@ -2218,16 +2218,32 @@ _.descending = Number_descending;
  * @since 2013/3/3 19:30:2 create.<br />
  */
 function search_sorted_Array(array, value, options) {
-	if (typeof options === 'function')
+	if (library_namespace.is_RegExp(value) && (!options || !options.comparator)) {
+		// 處理搜尋 {RegExp} 的情況。
+		if (!options) {
+			options = library_namespace.null_Object();
+		}
+		options.comparator = function (_, v) {
+			return value.test(v) ? 1 : -1;
+		};
+		if (!options.near) {
+			options.near = true;
+		}
+	} if (typeof value === 'function') {
+		options = value;
+		value = undefined;
+	}
+
+	if (typeof options === 'function') {
 		options = {
 			comparator : options
 		};
-	else if (typeof options === 'boolean'
-			|| Array.isArray(options))
+	} else if (typeof options === 'boolean'
+			|| Array.isArray(options)) {
 		options = {
 			found : options
 		};
-	else if (library_namespace.is_digits(options)) {
+	} else if (library_namespace.is_digits(options)) {
 		options = {
 			start : options
 		};

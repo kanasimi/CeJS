@@ -364,6 +364,10 @@ function test_native() {
 		[[ 1, CeL.search_sorted_Array([ 0, 2, 4 ], 3, { found : true }) ]],
 		[[ 'r', [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ] }) ]],
 		[[ undefined, [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ], /* 以便未找到時回傳 undefined. */ near : [] }) ]],
+		// [[ 0, '0a,1a,2a,3a,4b,5b,6c'.split(',').search_sorted(/a/) ], '處理搜尋 {RegExp} 的情況#1'],
+		// [[ 4, '0a,1a,2a,3a,4b,5b,6c'.split(',').search_sorted(/b/) ], '處理搜尋 {RegExp} 的情況#2'],
+		// [[ 6, '0a,1a,2a,3a,4b,5b,6c'.split(',').search_sorted(/c/) ], '處理搜尋 {RegExp} 的情況#3'],
+		// [[ -1, '0a,1a,2a,3a,4b,5b,6c'.split(',').search_sorted(/d/) ], '處理搜尋 {RegExp} 的情況#4'],
 	]);
 
 	error_count += CeL.test('data.native', function(assert) {
