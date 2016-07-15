@@ -2331,7 +2331,7 @@ _.search_sorted_Array = search_sorted_Array;
 
 // return first matched index.
 // assert: array 嚴格依照 mismatched→matched，有個首次出現的切分點。
-function first_matched(array, pattern) {
+function first_matched(array, pattern, get_last_matched) {
 	if (!array || !pattern) {
 		return NOT_FOUND;
 	}
@@ -2342,10 +2342,12 @@ function first_matched(array, pattern) {
 		return NOT_FOUND;
 	}
 
+	var matched;
 	while (last_mismatched_index < first_matched_index) {
 		// binary search
 		var index = (last_mismatched_index + first_matched_index) / 2 | 0;
-		if (is_RegExp ? pattern.test(array[index]) : is_Function ? pattern(array[index]) : array[index].includes(pattern)) {
+		matched = is_RegExp ? pattern.test(array[index]) : is_Function ? pattern(array[index]) : array[index].includes(pattern);
+		if (get_last_matched ? !matched : matched) {
 			first_matched_index = index;
 		} else if (last_mismatched_index === index) {
 			break;
@@ -2354,10 +2356,18 @@ function first_matched(array, pattern) {
 		}
 	}
 
+	if (get_last_matched) {
+		if (last_mismatched_index === 0 && !matched) {
+			return NOT_FOUND;
+		}
+		return last_mismatched_index;
+	}
+
 	return first_matched_index === array.length ? NOT_FOUND : first_matched_index;
 }
 
 _.first_matched = first_matched;
+
 
 
 /**
@@ -2893,7 +2903,7 @@ set_method(Array.prototype, {
 	// Array.prototype.search_sorted
 	search_sorted: set_bind(search_sorted_Array, true),
 	// Array.prototype.first_matched
-	first_matched: set_bind(first_matched),
+	first_matched: set_bind(first_matched, true),
 
 	// empty the array. 清空 array
 	// Array.prototype.clear()

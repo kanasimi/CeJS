@@ -373,15 +373,12 @@ function test_native() {
 	]);
 
 	error_count += CeL.test('data.native misc', function(assert) {
-		assert(['2,8', Array.intersection([2,3,5,6,8], [1,2,4,8,9], true).join(',')], 'Array.intersection()');
-		assert(["aa ", "aa '''fff'''".remove_head_tail("'''")], 'string.remove_head_tail() #1');
-		assert(["aa f'ff", "aa '''f'ff'''".remove_head_tail("'''", 0, '')], 'string.remove_head_tail() #2');
-		assert(["aa b'b c'c dd ", "aa'''b'b'''c'c'''dd'''".remove_head_tail("'''", 0, ' ')], 'string.remove_head_tail() #3');
-		assert(["aa", "aa[[bb[[cc]]dd]]".remove_head_tail("[[", "]]")], 'string.remove_head_tail() #4');
-		assert(['[df [h [r]r] [ew] g]', '<df <h <r>r> <ew> g>'.replace_till_stable(/<([^<>]+)*>/, '[$1]')], 'string.replace_till_stable() #1');
-		assert(['[a]', '{{a1{{b2}}c3}}'.replace_till_stable(/{{([^{}])[^{}]*}}/, '[$1]')], 'string.replace_till_stable() #2');
-		// OBject 可能重排。
-		assert([JSON.stringify({'1e3':0,'5':1,'66':2}), JSON.stringify(['1e3',5,66].to_hash())], 'Array.prototype.to_hash()');
+		// @see '處理搜尋 {RegExp} 的情況' above
+		assert([ 7, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').first_matched(/a/, true) ], 'first_matched(get_last_matched) #1');
+		assert([ 5, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').first_matched(/b/, true) ], 'first_matched(get_last_matched) #2');
+		assert([ 2, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').first_matched(/c/, true) ], 'first_matched(get_last_matched) #3');
+		assert([ 0, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').first_matched(/d/, true) ], 'first_matched(get_last_matched) #4');
+		assert([-1, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').first_matched(/e/, true) ], 'first_matched(get_last_matched) #5');
 
 		assert([ 0, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/a/) ], 'first_matched() #1');
 		assert([ 1, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/b/) ], 'first_matched() #2');
@@ -391,6 +388,16 @@ function test_native() {
 		assert([ 1, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched('b') ], 'first_matched() #6');
 		assert([ 7, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched('d') ], 'first_matched() #7');
 		assert([ 0, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(function(v){return v.includes('a');}) ], 'first_matched() #8');
+
+		assert(['2,8', Array.intersection([2,3,5,6,8], [1,2,4,8,9], true).join(',')], 'Array.intersection()');
+		assert(["aa ", "aa '''fff'''".remove_head_tail("'''")], 'string.remove_head_tail() #1');
+		assert(["aa f'ff", "aa '''f'ff'''".remove_head_tail("'''", 0, '')], 'string.remove_head_tail() #2');
+		assert(["aa b'b c'c dd ", "aa'''b'b'''c'c'''dd'''".remove_head_tail("'''", 0, ' ')], 'string.remove_head_tail() #3');
+		assert(["aa", "aa[[bb[[cc]]dd]]".remove_head_tail("[[", "]]")], 'string.remove_head_tail() #4');
+		assert(['[df [h [r]r] [ew] g]', '<df <h <r>r> <ew> g>'.replace_till_stable(/<([^<>]+)*>/, '[$1]')], 'string.replace_till_stable() #1');
+		assert(['[a]', '{{a1{{b2}}c3}}'.replace_till_stable(/{{([^{}])[^{}]*}}/, '[$1]')], 'string.replace_till_stable() #2');
+		// OBject 可能重排。
+		assert([JSON.stringify({'1e3':0,'5':1,'66':2}), JSON.stringify(['1e3',5,66].to_hash())], 'Array.prototype.to_hash()');
 	});
 
 }
