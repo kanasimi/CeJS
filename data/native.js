@@ -2219,7 +2219,7 @@ _.descending = Number_descending;
  */
 function search_sorted_Array(array, value, options) {
 	if (library_namespace.is_RegExp(value) && (!options || !options.comparator)) {
-		// 處理搜尋 {RegExp} 的情況:　此時回傳最後一個匹配的 index。
+		// 處理搜尋 {RegExp} 的情況:　此時回傳最後一個匹配的 index。欲找首次出現，請用 first_matched()。
 		if (!options) {
 			options = library_namespace.null_Object();
 		}
@@ -2319,7 +2319,8 @@ function search_sorted_Array(array, value, options) {
 	// 當 library_namespace.is_RegExp(value) 時，callback 僅表示匹不匹配。
 	|| library_namespace.is_RegExp(value)
 	// assert: 此時 index === 0 or array.length-1
-	&& index === 0 && comparator(array[index]) > 0) ? NOT_FOUND : index;
+	// 這樣會判別並回傳首個匹配的。
+	&& (index === 0 && comparator(array[index]) > 0)) ? NOT_FOUND : index;
 }
 
 search_sorted_Array.default_comparator = ascending;
@@ -2327,6 +2328,33 @@ search_sorted_Array.default_comparator = ascending;
 _.search_sorted_Array = search_sorted_Array;
 
 
+
+// return first matched index.
+function first_matched(array, pattern) {
+	if (!array || !pattern) {
+		return NOT_FOUND;
+	}
+	var is_RegExp = library_namespace.is_RegExp(pattern), is_Function = library_namespace.is_Function(pattern),
+	//
+	last_mismatched_index = 0, first_matched_index = array.length;
+	if (first_matched_index === 0) {
+		return NOT_FOUND;
+	}
+	while (true) {
+		// binary search
+		var index = (last_mismatched_index + first_matched_index) / 2 | 0;
+		if (is_RegExp ? pattern.test(array[index]) : is_Function ? pattern(array[index]) : array[index].includes(pattern)) {
+			first_matched_index = index;
+		} else {
+			last_mismatched_index = index;
+		}
+		if (last_mismatched_index + 1 === first_matched_index) {
+			return first_matched_index === array.length ? NOT_FOUND : first_matched_index;
+		}
+	}
+}
+
+_.first_matched = first_matched;
 
 
 /**
@@ -2859,7 +2887,10 @@ set_method(Array.prototype, {
 	//clone: Array.prototype.slice,
 	append: append_to_Array,
 	uniq: unique_Array,
+	// Array.prototype.search_sorted
 	search_sorted: set_bind(search_sorted_Array, true),
+	// Array.prototype.first_matched
+	first_matched: set_bind(first_matched),
 
 	// empty the array. 清空 array
 	// Array.prototype.clear()

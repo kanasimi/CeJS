@@ -364,16 +364,15 @@ function test_native() {
 		[[ 1, CeL.search_sorted_Array([ 0, 2, 4 ], 3, { found : true }) ]],
 		[[ 'r', [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ] }) ]],
 		[[ undefined, [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ], /* 以便未找到時回傳 undefined. */ near : [] }) ]],
-		// 處理搜尋 {RegExp} 的情況:　此時回傳最後一個匹配的 index。
+		// 處理搜尋 {RegExp} 的情況:　此時回傳最後一個匹配的 index。欲找首次出現，請用 first_matched()。
 		[[ 7, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/a/) ], '處理搜尋 {RegExp} 的情況#1-1'],
 		[[ 5, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/b/) ], '處理搜尋 {RegExp} 的情況#1-2'],
 		[[ 2, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/c/) ], '處理搜尋 {RegExp} 的情況#1-3'],
 		[[ 0, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/d/) ], '處理搜尋 {RegExp} 的情況#1-4'],
 		[[-1, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/e/) ], '處理搜尋 {RegExp} 的情況#1-5'],
-		//[[ -1, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted({comparator:function(_,v){return /a/.test(v)?-1:1;},near:true}) ], '處理搜尋 {RegExp} 的情況#1-1'],
 	]);
 
-	error_count += CeL.test('data.native', function(assert) {
+	error_count += CeL.test('data.native misc', function(assert) {
 		assert(['2,8', Array.intersection([2,3,5,6,8], [1,2,4,8,9], true).join(',')], 'Array.intersection()');
 		assert(["aa ", "aa '''fff'''".remove_head_tail("'''")], 'string.remove_head_tail() #1');
 		assert(["aa f'ff", "aa '''f'ff'''".remove_head_tail("'''", 0, '')], 'string.remove_head_tail() #2');
@@ -383,6 +382,15 @@ function test_native() {
 		assert(['[a]', '{{a1{{b2}}c3}}'.replace_till_stable(/{{([^{}])[^{}]*}}/, '[$1]')], 'string.replace_till_stable() #2');
 		// OBject 可能重排。
 		assert([JSON.stringify({'1e3':0,'5':1,'66':2}), JSON.stringify(['1e3',5,66].to_hash())], 'Array.prototype.to_hash()');
+
+		assert([ 0, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/a/) ], 'first_matched() #1');
+		assert([ 1, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/b/) ], 'first_matched() #2');
+		assert([ 4, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/c/) ], 'first_matched() #3');
+		assert([ 7, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/d/) ], 'first_matched() #4');
+		assert([-1, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/e/) ], 'first_matched() #5');
+		assert([ 1, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched('b') ], 'first_matched() #6');
+		assert([ 7, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched('d') ], 'first_matched() #7');
+		assert([ 0, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(function(v){return v.includes('a');}) ], 'first_matched() #8');
 	});
 
 }
