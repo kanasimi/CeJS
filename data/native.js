@@ -1222,6 +1222,77 @@ function set_intermediate(head, foot) {
 
 // ---------------------------------------------------------------------//
 
+var no_string_index;
+try {
+	no_string_index = '01';
+	no_string_index = !(no_string_index[1] === '1');
+} catch (e) {
+	// e.g., IE 6
+	no_string_index = true;
+}
+
+// @see
+// https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_two_matrix_rows
+// http://www.codeproject.com/Articles/13525/Fast-memory-efficient-Levenshtein-algorithm
+// http://locutus.io/php/strings/levenshtein/
+// https://github.com/component/levenshtein/blob/master/index.js
+function Levenshtein_distance(string_1, string_2) {
+	var length_1 = string_1 && string_1.length || 0, length_2 = string_2 && string_2.length || 0;
+	// degenerate cases
+	if (length_1 === 0) {
+		return length_2;
+	}
+	if (length_2 === 0) {
+		return length_1;
+	}
+	if (length_1 === length_2 && string_1 === string_2) {
+		return 0;
+	}
+
+	if (no_string_index) {
+		// for IE 6
+		string_1 = string_1.split();
+		string_2 = string_2.split();
+	}
+
+	// create two work vectors of integer distances
+	var vector_1 = new Array(length_2 + 1), i = 0;
+	// initialize vector_1 (the previous row of distances)
+	// this row is A[0][i]: edit distance for an empty string_1
+	// the distance is just the number of characters to delete from string_2
+	for (; i <= length_2; i++) {
+		vector_1[i] = i;
+	}
+
+	for (i = 0; i < length_1; i++) {
+		// calculate vector_2 (current row distances) from the previous row vector_1
+
+		// first element of vector_2 is A[i+1][0]
+		//   edit distance is delete (i+1) chars from string_1 to match empty string_2
+		var last_vector_2 = i + 1, vector_2 = [ last_vector_2 ];
+
+		// use formula to fill in the rest of the row
+		for (var j = 0; j < length_2; j++) {
+			last_vector_2 = Math.min(
+			// The cell immediately above + 1
+			last_vector_2 + 1,
+			// The cell immediately to the left + 1
+			vector_1[j + 1] + 1,
+			// The cell diagonally above and to the left plus the cost
+			vector_1[j] + (/*cost*/ string_1[i] === string_2[j] ? 0 : 1));
+			vector_2.push(last_vector_2);
+		}
+
+		// copy vector_2 (current row) to vector_1 (previous row) for next iteration
+		vector_1 = vector_2;
+	}
+
+	return vector_2[length_2];
+}
+
+_.edit_distance = Levenshtein_distance;
+
+// =====================================================================================================================
 
 function set_bind(handler, need_meny_arg) {
 	if (typeof need_meny_arg !== 'boolean')
@@ -2795,7 +2866,9 @@ set_method(String.prototype, {
 		*/
 		return get_intermediate(this, head, foot, index, return_data) || '';
 	},
-	set_intermediate : set_intermediate
+	set_intermediate : set_intermediate,
+
+	edit_distance : set_bind(Levenshtein_distance)
 });
 
 set_method(Number.prototype, {
