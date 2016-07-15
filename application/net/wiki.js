@@ -2804,7 +2804,6 @@ function module_code(library_namespace) {
 
 		case 'protect':
 			// wiki.protect(options, callback)
-			this.actions.unshift(next);
 			if (!next[1].title && !next[1].pageid && this.last_page) {
 				next[1].pageid = this.last_page.pageid;
 			}
@@ -6644,7 +6643,7 @@ function module_code(library_namespace) {
 		if (options.pageid >= 0) {
 			parameters.pageid = options.pageid;
 		} else if (options.title) {
-			parameters.pageid = options.title;
+			parameters.title = options.title;
 		} else {
 			// TODO: use page_data
 			library_namespace.err('wiki_API.protect: No page specified: ' + options);
