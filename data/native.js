@@ -2229,7 +2229,9 @@ function search_sorted_Array(array, value, options) {
 		if (!('near' in options)) {
 			options.near = true;
 		}
-	} else if (typeof value === 'object' || typeof value === 'function') {
+	} else if (!options
+	//
+	&& (typeof value === 'object' || typeof value === 'function')) {
 		options = value;
 		value = undefined;
 	}
@@ -2313,9 +2315,10 @@ function search_sorted_Array(array, value, options) {
 	: typeof callback === 'function' ? callback.call(array, index, not_found)
 	//
 	: not_found && (!callback
-	// assert: 此時 index === 0
 	// 當 library_namespace.is_RegExp(value) 時，callback 僅表示匹不匹配。
-	|| library_namespace.is_RegExp(value) && comparator(array[0]) < 0) ? NOT_FOUND : index;
+	|| library_namespace.is_RegExp(value)
+	// assert: 此時 index === 0
+	&& comparator(array[0]) > 0) ? NOT_FOUND : index;
 }
 
 search_sorted_Array.default_comparator = ascending;
