@@ -364,11 +364,13 @@ function test_native() {
 		[[ 1, CeL.search_sorted_Array([ 0, 2, 4 ], 3, { found : true }) ]],
 		[[ 'r', [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ] }) ]],
 		[[ undefined, [ 4, 7, 12 ].search_sorted(8, { found : [ 'f', 'r', 'e' ], /* 以便未找到時回傳 undefined. */ near : [] }) ]],
-		[[ 7, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/a/) ], '處理搜尋 {RegExp} 的情況#1'],
-		[[ 5, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/b/) ], '處理搜尋 {RegExp} 的情況#2'],
-		[[ 2, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/c/) ], '處理搜尋 {RegExp} 的情況#3'],
-		[[ 0, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/d/) ], '處理搜尋 {RegExp} 的情況#4'],
-		[[-1, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/e/) ], '處理搜尋 {RegExp} 的情況#5'],
+		// 處理搜尋 {RegExp} 的情況:　此時回傳最後一個匹配的 index。
+		[[ 7, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/a/) ], '處理搜尋 {RegExp} 的情況#1-1'],
+		[[ 5, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/b/) ], '處理搜尋 {RegExp} 的情況#1-2'],
+		[[ 2, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/c/) ], '處理搜尋 {RegExp} 的情況#1-3'],
+		[[ 0, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/d/) ], '處理搜尋 {RegExp} 的情況#1-4'],
+		[[-1, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted(/e/) ], '處理搜尋 {RegExp} 的情況#1-5'],
+		//[[ -1, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').search_sorted({comparator:function(_,v){return /a/.test(v)?-1:1;},near:true}) ], '處理搜尋 {RegExp} 的情況#1-1'],
 	]);
 
 	error_count += CeL.test('data.native', function(assert) {

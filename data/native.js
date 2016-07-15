@@ -2219,17 +2219,17 @@ _.descending = Number_descending;
  */
 function search_sorted_Array(array, value, options) {
 	if (library_namespace.is_RegExp(value) && (!options || !options.comparator)) {
-		// 處理搜尋 {RegExp} 的情況:此時回傳最後一個匹配的 index。
+		// 處理搜尋 {RegExp} 的情況:　此時回傳最後一個匹配的 index。
 		if (!options) {
 			options = library_namespace.null_Object();
 		}
-		options.comparator = function (_, v) {
-			return value.test(v) ? 1 : -1;
+		options.comparator = function (v) {
+			return value.test(v) ? -1 : 1;
 		};
 		if (!('near' in options)) {
 			options.near = true;
 		}
-	} if (typeof value === 'function') {
+	} else if (typeof value === 'object' || typeof value === 'function') {
 		options = value;
 		value = undefined;
 	}
@@ -2273,7 +2273,7 @@ function search_sorted_Array(array, value, options) {
 			break;
 
 		} else {
-			comparison = comparator(value, array[index = (small + big) >> 1]
+			comparison = comparator(array[index = (small + big) >> 1], value
 			// , index
 			);
 
@@ -2282,13 +2282,15 @@ function search_sorted_Array(array, value, options) {
 			// 或
 			// start = index, big; value 介於兩者間。
 
-			if (comparison < 0) {
+			if (comparison > 0) {
+				// 往前找
 				big = index - 1;
 				// 若下一 loop 跳出，則此時之狀態為
 				// big, start = index
 				// value 介於兩者間。
 
-			} else if (comparison > 0) {
+			} else if (comparison < 0) {
+				// 往後找
 				small = index + 1;
 				// 若下一 loop 跳出，則此時之狀態為
 				// index = big, small
@@ -2306,8 +2308,11 @@ function search_sorted_Array(array, value, options) {
 	return Array.isArray(callback) ? callback[index]
 	//
 	: typeof callback === 'function' ? callback.call(array, index, not_found)
+	//
+	: not_found && (!callback
+	// assert: 此時 index === 0
 	// 當 library_namespace.is_RegExp(value) 時，callback 僅表示匹不匹配。
-	: not_found && (!callback || library_namespace.is_RegExp(value)) ? NOT_FOUND : index;
+	|| library_namespace.is_RegExp(value) && !comparison(array[0])) ? NOT_FOUND : index;
 }
 
 search_sorted_Array.default_comparator = ascending;
