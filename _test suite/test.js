@@ -398,6 +398,10 @@ function test_native() {
 		assert(['[a]', '{{a1{{b2}}c3}}'.replace_till_stable(/{{([^{}])[^{}]*}}/, '[$1]')], 'string.replace_till_stable() #2');
 		// OBject 可能重排。
 		assert([JSON.stringify({'1e3':0,'5':1,'66':2}), JSON.stringify(['1e3',5,66].to_hash())], 'Array.prototype.to_hash()');
+
+		assert([ 17, 'correction systems'.edit_distance('spell checkers, correction system') ], 'edit_distance() #1');
+		assert([ 9, 'Levenshtein distance'.edit_distance('edit distance') ], 'edit_distance() #2');
+		assert([ 7, 'spell check'.edit_distance('Spell Check Tool') ], 'edit_distance() #3');
 	});
 
 }

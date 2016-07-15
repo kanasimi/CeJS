@@ -1231,11 +1231,14 @@ try {
 	no_string_index = true;
 }
 
+// Levenshtein distance (edit distance)
 // @see
 // https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_two_matrix_rows
 // http://www.codeproject.com/Articles/13525/Fast-memory-efficient-Levenshtein-algorithm
 // http://locutus.io/php/strings/levenshtein/
 // https://github.com/component/levenshtein/blob/master/index.js
+// https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance
+// http://jsperf.com/levenshtein-distance-2
 function Levenshtein_distance(string_1, string_2) {
 	var length_1 = string_1 && string_1.length || 0, length_2 = string_2 && string_2.length || 0;
 	// degenerate cases
@@ -1251,8 +1254,8 @@ function Levenshtein_distance(string_1, string_2) {
 
 	if (no_string_index) {
 		// for IE 6
-		string_1 = string_1.split();
-		string_2 = string_2.split();
+		string_1 = string_1.split('');
+		string_2 = string_2.split('');
 	}
 
 	// create two work vectors of integer distances
@@ -1267,12 +1270,11 @@ function Levenshtein_distance(string_1, string_2) {
 	for (i = 0; i < length_1; i++) {
 		// calculate vector_2 (current row distances) from the previous row vector_1
 
+		// use formula to fill in the rest of the row
+		for (var j = 0,
 		// first element of vector_2 is A[i+1][0]
 		//   edit distance is delete (i+1) chars from string_1 to match empty string_2
-		var last_vector_2 = i + 1, vector_2 = [ last_vector_2 ];
-
-		// use formula to fill in the rest of the row
-		for (var j = 0; j < length_2; j++) {
+		last_vector_2 = i + 1, vector_2 = [ last_vector_2 ]; j < length_2; j++) {
 			last_vector_2 = Math.min(
 			// The cell immediately above + 1
 			last_vector_2 + 1,
