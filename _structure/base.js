@@ -686,9 +686,11 @@ function (global) {
 	 * @returns if value only digits.
 	 */
 	is_digits = function (value) {
+		// 須預防 TypeError: Cannot convert object to primitive value。
+		return typeof value !== 'object'
 		// value == value | 0
 		// value == (value >>> 0)
-		return /^\d+$/.test(value);
+		&& /^\d+$/.test(value);
 	};
 
 

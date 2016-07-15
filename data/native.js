@@ -2219,14 +2219,14 @@ _.descending = Number_descending;
  */
 function search_sorted_Array(array, value, options) {
 	if (library_namespace.is_RegExp(value) && (!options || !options.comparator)) {
-		// 處理搜尋 {RegExp} 的情況。
+		// 處理搜尋 {RegExp} 的情況:此時回傳最後一個匹配的 index。
 		if (!options) {
 			options = library_namespace.null_Object();
 		}
 		options.comparator = function (_, v) {
 			return value.test(v) ? 1 : -1;
 		};
-		if (!options.near) {
+		if (!('near' in options)) {
 			options.near = true;
 		}
 	} if (typeof value === 'function') {
@@ -2306,8 +2306,8 @@ function search_sorted_Array(array, value, options) {
 	return Array.isArray(callback) ? callback[index]
 	//
 	: typeof callback === 'function' ? callback.call(array, index, not_found)
-	//
-	: not_found && !callback ? NOT_FOUND : index;
+	// 當 library_namespace.is_RegExp(value) 時，callback 僅表示匹不匹配。
+	: not_found && (!callback || library_namespace.is_RegExp(value)) ? NOT_FOUND : index;
 }
 
 search_sorted_Array.default_comparator = ascending;
