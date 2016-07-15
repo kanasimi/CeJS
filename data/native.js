@@ -1240,20 +1240,18 @@ try {
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance
 // http://jsperf.com/levenshtein-distance-2
 function Levenshtein_distance(string_1, string_2) {
-	var length_1 = string_1 && string_1.length || 0, length_2 = string_2 && string_2.length || 0;
+	var
+	length_1 = string_1 && string_1.length || 0,
+	length_2 = string_2 && string_2.length || 0;
 	// degenerate cases
-	if (length_1 === 0) {
-		return length_2;
-	}
-	if (length_2 === 0) {
-		return length_1;
-	}
+	if (length_1 === 0) { return length_2; }
+	if (length_2 === 0) { return length_1; }
 	if (length_1 === length_2 && string_1 === string_2) {
 		return 0;
 	}
 
 	if (no_string_index) {
-		// for IE 6
+		// for IE 6, or use .charAt()
 		string_1 = string_1.split('');
 		string_2 = string_2.split('');
 	}

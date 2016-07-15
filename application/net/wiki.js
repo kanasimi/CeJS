@@ -11,6 +11,7 @@ wiki_API.page() 整合各 action=query 至單一公用 function。
 
 parser 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
 parser 所有子頁面加入白名單 white-list
+parser 提供 .previousSibling, .nextSibling, .parentNode 將文件結構串起來。
 parser [[WP:維基化]]
 https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
 https://en.wikipedia.org/wiki/Wikipedia:AutoWikiBrowser/General_fixes
@@ -598,8 +599,8 @@ function module_code(library_namespace) {
 	// [[Media:image.png]]：產生一個指向檔案本身的連結
 	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/settings/zhwiki-configuration.xml
 	// https://github.com/dbpedia/extraction-framework/blob/master/core/src/main/scala/org/dbpedia/extraction/wikiparser/impl/wikipedia/Namespaces.scala
-	/** {RegExp}檔案的匹配模式。 */
-	var PATTERN_file_prefix = 'File|Image|Media|[檔档]案|[圖图]像|文件|媒[體体](?:文件)?';
+	/** {RegExp}檔案的匹配模式 for parser。 */
+	var PATTERN_file_prefix = 'File|Image|Media|檔案|档案|圖像|图像|文件|媒[體体](?:文件)?';
 
 	file_pattern.source =
 	// 不允許 [\s\n]，僅允許 ' '。
@@ -612,6 +613,13 @@ function module_code(library_namespace) {
 	// [ all, file name ]
 	PATTERN_file_prefix = new RegExp('^ *(?:: *)?(?:' + PATTERN_file_prefix
 			+ ') *: *([^\| ][^\| ]*)', 'i');
+
+	var
+	// @ 20160714.archive_news.js
+	// [ all category, category name, sort order ]
+	PATTERN_category = /\[\[ *(?:Category|分類|分类) *: *([^\[\]\|]+)(?:\|([^\[\]]*))?\]\]/ig,
+	/** {RegExp}分類的匹配模式 for parser。 */
+	PATTERN_category_prefix = /^ *(?:Category|分類|分类) *: *([^\[\]\|]+)/;
 
 	// ------------------------------------------------------------------------
 
@@ -993,6 +1001,10 @@ function module_code(library_namespace) {
 		file : function() {
 			return '[[' + this.join('|') + ']]';
 		},
+		// link 的變體。但可採用 .name 取得 category name。
+		category : function() {
+			return '[[' + this.join('|') + ']]';
+		},
 		// 內部連結 wikilink / internal link
 		link : function() {
 			return '[[' + this.join('|') + ']]';
@@ -1361,7 +1373,9 @@ function module_code(library_namespace) {
 			}
 
 			// test [[file:name|...|...]]
-			var file_matched = parameters.match(PATTERN_file_prefix);
+			var file_matched = parameters.match(PATTERN_file_prefix),
+			// test [[Category:name|order]]
+			category_matched = !file_matched && parameters.match(PATTERN_category_prefix);
 			parameters = parameters.split('|').map(function(token, index) {
 				return index === 0
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
@@ -1372,10 +1386,13 @@ function module_code(library_namespace) {
 				: parse_wikitext(token, options, queue);
 			});
 			if (file_matched) {
-				// file name
-				parameters.name = file_matched[1];
+				// File name
+				parameters.name = normalize_page_name(file_matched[1]);
+			} else if (category_matched) {
+				// Category name
+				parameters.name = normalize_page_name(category_matched[1]);
 			}
-			_set_wiki_type(parameters, file_matched ? 'file' : 'link');
+			_set_wiki_type(parameters, file_matched ? 'file' : category_matched ? 'category' : 'link');
 			queue.push(parameters);
 			return prevoius + include_mark + (queue.length - 1) + end_mark;
 		});
