@@ -2264,7 +2264,7 @@ function search_sorted_Array(array, value, options) {
 
 	// main comparare loop
 	// http://codereview.stackexchange.com/questions/1480/better-more-efficient-way-of-writing-this-javascript-binary-search
-	while (true)
+	while (true) {
 		if (small > big) {
 			if (comparison > 0 && index > start)
 				// 修正成較小的 index。
@@ -2274,6 +2274,7 @@ function search_sorted_Array(array, value, options) {
 			break;
 
 		} else {
+			// 首引數應該採用最多資訊者，因此array[]擺在value前。
 			comparison = comparator(array[index = (small + big) >> 1], value
 			// , index
 			);
@@ -2302,6 +2303,7 @@ function search_sorted_Array(array, value, options) {
 				break;
 			}
 		}
+	}
 
 	// 挑一個可用的。
 	callback = not_found && options.near || options.found;
@@ -2313,7 +2315,7 @@ function search_sorted_Array(array, value, options) {
 	: not_found && (!callback
 	// assert: 此時 index === 0
 	// 當 library_namespace.is_RegExp(value) 時，callback 僅表示匹不匹配。
-	|| library_namespace.is_RegExp(value) && !comparison(array[0])) ? NOT_FOUND : index;
+	|| library_namespace.is_RegExp(value) && !comparator(array[0])) ? NOT_FOUND : index;
 }
 
 search_sorted_Array.default_comparator = ascending;
