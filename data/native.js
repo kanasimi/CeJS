@@ -2340,7 +2340,8 @@ function first_matched(array, pattern) {
 	if (first_matched_index === 0) {
 		return NOT_FOUND;
 	}
-	while (true) {
+
+	while (last_mismatched_index < first_matched_index) {
 		// binary search
 		var index = (last_mismatched_index + first_matched_index) / 2 | 0;
 		if (is_RegExp ? pattern.test(array[index]) : is_Function ? pattern(array[index]) : array[index].includes(pattern)) {
@@ -2348,10 +2349,9 @@ function first_matched(array, pattern) {
 		} else {
 			last_mismatched_index = index;
 		}
-		if (last_mismatched_index + 1 === first_matched_index) {
-			return first_matched_index === array.length ? NOT_FOUND : first_matched_index;
-		}
 	}
+
+	return first_matched_index === array.length ? NOT_FOUND : first_matched_index;
 }
 
 _.first_matched = first_matched;
