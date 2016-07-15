@@ -2247,8 +2247,9 @@ function search_sorted_Array(array, value, options) {
 		options = {
 			start : options
 		};
-	} else if (!library_namespace.is_Object(options))
+	} else if (!library_namespace.is_Object(options)) {
 		options = library_namespace.null_Object();
+	}
 
 	var callback, comparison, not_found = true,
 	//
@@ -2265,7 +2266,7 @@ function search_sorted_Array(array, value, options) {
 	// http://codereview.stackexchange.com/questions/1480/better-more-efficient-way-of-writing-this-javascript-binary-search
 	while (true)
 		if (small > big) {
-			if (comparison < 0 && index > start)
+			if (comparison > 0 && index > start)
 				// 修正成較小的 index。
 				// 除非是 [2,3].search_sorted(1.5,{found:1})，
 				// 否則 assert: big + 1 === start === index
