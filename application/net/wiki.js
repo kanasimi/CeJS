@@ -6633,7 +6633,7 @@ function module_code(library_namespace) {
 	wiki_API.protect = function (options, callback) {
 		if (!options || !options.protections) {
 			library_namespace.err('wiki_API.protect: Invalid options/parameters: ' + options);
-			callback();
+			callback('Invalid options/parameters');
 		}
 		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
 		var parameters = {
@@ -6647,7 +6647,7 @@ function module_code(library_namespace) {
 		} else {
 			// TODO: use page_data
 			library_namespace.err('wiki_API.protect: No page specified: ' + options);
-			callback();
+			callback('No page specified');
 		}
 		if (options.reason) {
 			parameters.reason = options.reason;
@@ -6672,14 +6672,27 @@ function module_code(library_namespace) {
 		if (!parameters.token) {
 			// TODO: use session
 			library_namespace.err('wiki_API.protect: No token specified: ' + options);
-			callback();
+			callback('No token specified');
 		}
 		var action = 'action=protect';
 		if (session && session.API_URL) {
 			action = [ session.API_URL, action ];
 		}
 
-		wiki_API.query(action, callback, parameters, session);
+		/**
+		 * response: <code>
+		   {"protect":{"title":"title","reason":"存檔保護作業","protections":[{"edit":"sysop","expiry":"infinite"},{"move":"sysop","expiry":"infinite"}]}}
+		   {"servedby":"mw1203","error":{"code":"nosuchpageid","info":"There is no page with ID 2006","*":"See https://zh.wikinews.org/w/api.php for API usage"}}
+		 * </code>
+		 */
+		wiki_API.query(action, function(response) {
+			var error = response && response.error;
+			if (error) {
+				callback(response, error);
+			} else {
+				callback(response.protect);
+			}
+		}, parameters, session);
 	};
 
 	// Warning: 這邊只要是能指定給 API 的，皆必須列入！
