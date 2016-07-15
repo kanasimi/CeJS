@@ -2800,6 +2800,24 @@ function module_code(library_namespace) {
 			break;
 
 		// ------------------------------------------------
+		// administrator functions
+
+		case 'protect':
+			// wiki.protect(options, callback)
+			this.actions.unshift(next);
+			if (this.last_page) {
+				next[1].pageid = this.last_page.pageid;
+			}
+			next[1][SESSION_KEY] = this;
+			wiki_API.protect(next[1], function() {
+				// next[2] : callback
+				if (typeof next[2] === 'function')
+					next[2].call(_this, result);
+				_this.next();
+			});
+			break;
+
+		// ------------------------------------------------
 
 		case 'login':
 			library_namespace.debug(
@@ -6610,6 +6628,72 @@ function module_code(library_namespace) {
 	};
 
 	// ------------------------------------------------------------------------
+	// administrator functions. 管理員相關函數。
+
+	// Change the protection level of a page.
+	wiki_API.protect = function (options, callback) {
+		if (!options || !options.protections) {
+			library_namespace.err('wiki_API.protect: Invalid options/parameters: ' + options);
+			callback();
+		}
+		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
+		var action = {
+			action : protect,
+			// e.g., 'edit=sysop|move=sysop', 一般說來edit應與move同步。
+			protections : options.protections
+		};
+		if (options.pageid >= 0) {
+			action.pageid = options.pageid;
+		} else if (options.title) {
+			action.pageid = options.title;
+		} else {
+			// TODO: use page_data
+			library_namespace.err('wiki_API.protect: No page specified: ' + options);
+			callback();
+		}
+		if (options.reason) {
+			action.reason = options.reason;
+		} else {
+			// @see [[MediaWiki:Protect-dropdown]]
+			library_namespace.err('wiki_API.protect: No reason specified: ' + options);
+		}
+
+		for (var parameter in wiki_API.protect.default_parameters) {
+			if (options[parameter]) {
+				action[parameter] = options[parameter];
+			}
+		}
+
+		var session = options[SESSION_KEY];
+		if (session && session.token && !action.token) {
+			action.token = session.token;
+		}
+		if (typeof action.token === 'object') {
+			action.token = action.token.csrftoken;
+		}
+		if (!action.token) {
+			// TODO: use session
+			library_namespace.err('wiki_API.protect: No token specified: ' + options);
+			callback();
+		}
+		action = get_URL.param_to_String(action);
+		if (session && session.API_URL) {
+			action = [ session.API_URL, action ];
+		}
+
+		wiki_API.query(action, callback);
+	};
+
+	// Warning: 這邊只要是能指定給 API 的，皆必須列入！
+	wiki_API.protect.default_parameters = {
+		expiry : 'infinite',
+		tags : '',
+		cascade : '',
+		watchlist : '',
+		token : ''
+	};
+
+	// ========================================================================
 
 	/** {String}default language / wiki name */
 	var default_language;
