@@ -2330,6 +2330,7 @@ _.search_sorted_Array = search_sorted_Array;
 
 
 // return first matched index.
+// assert: array 嚴格依照 mismatched→matched，有個首次出現的切分點。
 function first_matched(array, pattern) {
 	if (!array || !pattern) {
 		return NOT_FOUND;
@@ -2346,6 +2347,8 @@ function first_matched(array, pattern) {
 		var index = (last_mismatched_index + first_matched_index) / 2 | 0;
 		if (is_RegExp ? pattern.test(array[index]) : is_Function ? pattern(array[index]) : array[index].includes(pattern)) {
 			first_matched_index = index;
+		} else if (last_mismatched_index === index) {
+			break;
 		} else {
 			last_mismatched_index = index;
 		}
