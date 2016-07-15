@@ -2805,11 +2805,11 @@ function module_code(library_namespace) {
 		case 'protect':
 			// wiki.protect(options, callback)
 			this.actions.unshift(next);
-			if (this.last_page) {
+			if (!next[1].title && !next[1].pageid && this.last_page) {
 				next[1].pageid = this.last_page.pageid;
 			}
 			next[1][SESSION_KEY] = this;
-			wiki_API.protect(next[1], function() {
+			wiki_API.protect(next[1], function(result) {
 				// next[2] : callback
 				if (typeof next[2] === 'function')
 					next[2].call(_this, result);
@@ -3075,7 +3075,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,redirect_to,check,edit,search,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,redirect_to,check,edit,search,protect,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -6637,22 +6637,21 @@ function module_code(library_namespace) {
 			callback();
 		}
 		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
-		var action = {
-			action : protect,
+		var parameters = {
 			// e.g., 'edit=sysop|move=sysop', 一般說來edit應與move同步。
 			protections : options.protections
 		};
 		if (options.pageid >= 0) {
-			action.pageid = options.pageid;
+			parameters.pageid = options.pageid;
 		} else if (options.title) {
-			action.pageid = options.title;
+			parameters.pageid = options.title;
 		} else {
 			// TODO: use page_data
 			library_namespace.err('wiki_API.protect: No page specified: ' + options);
 			callback();
 		}
 		if (options.reason) {
-			action.reason = options.reason;
+			parameters.reason = options.reason;
 		} else {
 			// @see [[MediaWiki:Protect-dropdown]]
 			library_namespace.err('wiki_API.protect: No reason specified: ' + options);
@@ -6660,28 +6659,28 @@ function module_code(library_namespace) {
 
 		for (var parameter in wiki_API.protect.default_parameters) {
 			if (options[parameter]) {
-				action[parameter] = options[parameter];
+				parameters[parameter] = options[parameter];
 			}
 		}
 
 		var session = options[SESSION_KEY];
-		if (session && session.token && !action.token) {
-			action.token = session.token;
+		if (session && session.token && !parameters.token) {
+			parameters.token = session.token;
 		}
-		if (typeof action.token === 'object') {
-			action.token = action.token.csrftoken;
+		if (typeof parameters.token === 'object') {
+			parameters.token = parameters.token.csrftoken;
 		}
-		if (!action.token) {
+		if (!parameters.token) {
 			// TODO: use session
 			library_namespace.err('wiki_API.protect: No token specified: ' + options);
 			callback();
 		}
-		action = get_URL.param_to_String(action);
+		var action = 'action=protect';
 		if (session && session.API_URL) {
 			action = [ session.API_URL, action ];
 		}
 
-		wiki_API.query(action, callback);
+		wiki_API.query(action, callback, parameters, session);
 	};
 
 	// Warning: 這邊只要是能指定給 API 的，皆必須列入！
