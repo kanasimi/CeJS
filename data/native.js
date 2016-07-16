@@ -2415,7 +2415,7 @@ function first_matched(array, pattern, get_last_matched) {
 	}
 
 	var matched;
-	while (last_mismatched_index + 1 < first_matched_index) {
+	while (last_mismatched_index < first_matched_index) {
 		// binary search
 		var index = (last_mismatched_index + first_matched_index) / 2 | 0;
 		matched = is_RegExp ? pattern.test(array[index]) : is_Function ? pattern(array[index]) : array[index].includes(pattern);
