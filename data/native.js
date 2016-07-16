@@ -2291,6 +2291,9 @@ _.descending = Number_descending;
 function search_sorted_Array(array, value, options) {
 	if (library_namespace.is_RegExp(value) && (!options || !options.comparator)) {
 		// 處理搜尋 {RegExp} 的情況:　此時回傳最後一個匹配的 index。欲找首次出現，請用 first_matched()。
+		if (value.global) {
+			library_namespace.err('search_sorted_Array: 當匹配時，不應採用 .global！ ' + value);
+		}
 		if (!options) {
 			options = library_namespace.null_Object();
 		}
