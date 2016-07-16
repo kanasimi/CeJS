@@ -4621,23 +4621,30 @@ function module_code(library_namespace) {
 				// default: 僅取得單一 revision。
 				action[1] += '&rvlimit=1';
 
-			// prop=info|revisions
-			action[1] = 'rvprop='
-			//
-			+ ((Array.isArray(options.rvprop)
+			// Which properties to get for each revision
+			get_content = (Array.isArray(options.rvprop)
 			//
 			&& options.rvprop.join('|') || options.rvprop)
 			//
-			|| wiki_API.page.rvprop) + '&'
+			|| wiki_API.page.rvprop;
+
+			action[1] = 'rvprop='
+			//
+			+ get_content + '&'
 			// &rvexpandtemplates=1
 			+ action[1];
+
+			get_content = get_content.includes('content');
 		}
 
+		// Which properties to get for the queried pages
 		// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規標題。
 		if (options.prop) {
-			if (Array.isArray(options.prop))
+			if (Array.isArray(options.prop)) {
 				options.prop = options.prop.join('|');
+			}
 
+			// e.g., prop=info|revisions
 			// e.g., prop=pageprops|revisions
 			// 沒 .pageprops 的似乎大多是沒有 Wikidata entity 的？
 			action[1] = 'prop=' + options.prop + '&' + action[1];
