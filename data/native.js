@@ -2420,7 +2420,7 @@ function first_matched(array, pattern, get_last_matched) {
 		var index = (last_mismatched_index + first_matched_index) / 2 | 0;
 		matched = is_RegExp ? pattern.test(array[index]) : is_Function ? pattern(array[index]) : array[index].includes(pattern);
 		if (false && matched && is_RegExp) {
-			library_namespace.log(last_mismatched_index + '-[' + index + ']-' + first_matched_index + '/' + array.length + ': ' + matched + ' ' + pattern));
+			library_namespace.log(last_mismatched_index + '-[' + index + ']-' + first_matched_index + '/' + array.length + ': ' + matched + ' ' + pattern);
 			console.log(array[index].match(pattern));
 		}
 		if (get_last_matched ? !matched : matched) {
