@@ -2314,7 +2314,7 @@ function module_code(library_namespace) {
 				return;
 			}
 			if (content.length > 1) {
-				// 多版本的情況：因為此狀況極少，不統一處理。
+				// 有多個版本的情況：因為此狀況極少，不統一處理。
 				// 一般說來caller自己應該知道自己設定了rvlimit>1，因此此處不警告。
 				// 警告：但多版本的情況需要自行偵測是否回傳{Array}！
 				return content.map(function(revision) {
@@ -2368,10 +2368,18 @@ function module_code(library_namespace) {
 		&& page_data.revisions && page_data.revisions[0];
 	};
 
-	// 不回傳 {String}，減輕需要複製字串的負擔。
+	/**
+	 * check if the page_data has contents. 不回傳 {String}，減輕需要複製字串的負擔。
+	 * 
+	 * @param {Object}page_data
+	 *            page data got from wiki API.
+	 * 
+	 * @returns {Boolean} the page_data has / do not has contents.
+	 * @returns {Undefined} the page_data do not has contents.
+	 */
 	get_page_content.has_content = function(page_data) {
-		// TODO: should return {Boolean}
-		return get_page_content.revision(page_data);
+		var revision = get_page_content.revision(page_data);
+		return revision && !!revision['*'];
 	};
 
 	// --------------------------------------------------------------------------------------------
