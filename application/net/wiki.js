@@ -6574,16 +6574,28 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!Array.isArray(title))
-			title = [ , title ];
-		title[1] = 'query&prop=redirects&rdlimit=max&'
-		//
-		+ wiki_API.query.title_param(title[1], true, options && options.is_id);
-		if (!title[0])
-			title = title[1];
+		// -----------------------------
+		// copy from wiki_API.page
+		var action = Array.isArray(title) ? title.clone() : title;
 
-		wiki_API.query(title, typeof callback === 'function'
+		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
+		if (!Array.isArray(action)
+		// 為了預防輸入的是問題頁面。
+		|| action.length !== 2 || typeof action[0] === 'object') {
+			// assert: {Array}((action = title)) 為 page list。
+			// 此時嘗試從 options[SESSION_KEY] 取得 API_URL。
+			action = [ options[SESSION_KEY] && options[SESSION_KEY].API_URL, action ];
+		}
+		action[1] = wiki_API.query.title_param(action[1], true, options && options.is_id);
+
+		// -----------------------------
+
+
+		action[1] = 'query&prop=redirects&rdlimit=max&' + action[1];
+		if (!action[0])
+			action = action[1];
+
+		wiki_API.query(action, typeof callback === 'function'
 		//
 		&& function(data) {
 			// copy from wiki_API.page()
@@ -8584,6 +8596,7 @@ function module_code(library_namespace) {
 
 			case 'redirects':
 				to_get_data = function(title, callback) {
+					// wiki_API.redirects(title, callback, options)
 					wiki_API.redirects(title, function(root_page_data,
 							redirect_list) {
 						library_namespace.log(
