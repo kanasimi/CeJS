@@ -2406,12 +2406,16 @@ function first_matched(array, pattern, get_last_matched) {
 	if (!array || !pattern) {
 		return NOT_FOUND;
 	}
-	var is_RegExp = library_namespace.is_RegExp(pattern),
-	is_Function = library_namespace.is_Function(pattern),
-	//
-	last_mismatched_index = 0, first_matched_index = array.length;
+	var first_matched_index = array.length;
 	if (first_matched_index === 0) {
 		return NOT_FOUND;
+	}
+	var is_RegExp = library_namespace.is_RegExp(pattern),
+	is_Function = !is_RegExp && library_namespace.is_Function(pattern),
+	//
+	last_mismatched_index = 0;
+	if (is_RegExp && pattern.global) {
+		library_namespace.err('first_matched: 當匹配時，不應採用 .global！ ' + pattern);
 	}
 
 	var matched;
