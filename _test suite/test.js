@@ -373,13 +373,16 @@ function test_native() {
 	]);
 
 	error_count += CeL.test('data.native misc', function(assert) {
-		// @see '處理搜尋 {RegExp} 的情況' above
+		// 找最後一個匹配的 index。
+		// @see above: '處理搜尋 {RegExp} 的情況'
+		assert([ 3, 'aaa'.split('').first_matched(/a/, true) ], 'first_matched(get_last_matched) #1');
+		assert([ 6, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7'.split(',').first_matched(/a/, true) ], 'first_matched(get_last_matched) #1');
 		assert([ 7, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').first_matched(/a/, true) ], 'first_matched(get_last_matched) #1');
 		assert([ 5, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').first_matched(/b/, true) ], 'first_matched(get_last_matched) #2');
 		assert([ 2, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').first_matched(/c/, true) ], 'first_matched(get_last_matched) #3');
 		assert([ 0, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').first_matched(/d/, true) ], 'first_matched(get_last_matched) #4');
 		assert([-1, '0abcd,1abc,2abc,3ab,4ab,5ab,6a,7a'.split(',').first_matched(/e/, true) ], 'first_matched(get_last_matched) #5');
-
+		// 找首次匹配的 index。
 		assert([ 0, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/a/) ], 'first_matched() #1');
 		assert([ 1, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/b/) ], 'first_matched() #2');
 		assert([ 4, '0a,1ab,2ab,3ab,4abc,5abc,6abc,7abcd'.split(',').first_matched(/c/) ], 'first_matched() #3');

@@ -7422,13 +7422,17 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {Function}callback
 	 *            回調函數。 callback({Array}page title 頁面標題 list)
-	 * @param {Integer}[namespace]
-	 *            namespace NO.
-	 * @param {ℕ⁰:Natural+0}[limit]
-	 *            limit count
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項.
 	 */
-	function get_recent(callback, namespace, limit) {
-		var SQL = 'SELECT * FROM `recentchanges` WHERE `rc_bot`=0'
+	function get_recent(callback, options) {
+		options = library_namespace.setup_options(options);
+		/** {Integer}namespace NO. */
+		var namespace = options.namespace,
+		/** {ℕ⁰:Natural+0}limit count. */
+		limit = options.limit,
+		//
+		SQL = 'SELECT * FROM `recentchanges` WHERE `rc_bot`=0'
 		// https://www.mediawiki.org/wiki/Manual:Recentchanges_table
 		+ (library_namespace.is_digits(namespace)
 		//
@@ -7461,12 +7465,37 @@ function module_code(library_namespace) {
 				});
 				callback(rows);
 			}
-		});
+		},
+		// SQL config
+		options.config);
 	}
 
 	if (SQL_config) {
 		wiki_API.recent = get_recent;
 	}
+
+	// ----------------------------------------------------
+
+	function add_listener(listener, options) {
+		if (!options) {
+			options = library_namespace.null_Object();
+		} else if (options > 0) {
+			options = {
+				interval : options
+			};
+		} else if (typeof options === 'string'
+		//
+		|| library_namespace.is_RegExp(options)) {
+			options = {
+				title_filter : options
+			};
+		}
+
+		TODO
+	}
+
+
+	wiki_API.listen = add_listener;
 
 	// --------------------------------------------------------------------------------------------
 

@@ -2406,7 +2406,8 @@ function first_matched(array, pattern, get_last_matched) {
 	if (!array || !pattern) {
 		return NOT_FOUND;
 	}
-	var is_RegExp = library_namespace.is_RegExp(pattern), is_Function = library_namespace.is_Function(pattern),
+	var is_RegExp = library_namespace.is_RegExp(pattern),
+	is_Function = library_namespace.is_Function(pattern),
 	//
 	last_mismatched_index = 0, first_matched_index = array.length;
 	if (first_matched_index === 0) {
@@ -2414,10 +2415,14 @@ function first_matched(array, pattern, get_last_matched) {
 	}
 
 	var matched;
-	while (last_mismatched_index < first_matched_index) {
+	while (last_mismatched_index + 1 < first_matched_index) {
 		// binary search
 		var index = (last_mismatched_index + first_matched_index) / 2 | 0;
 		matched = is_RegExp ? pattern.test(array[index]) : is_Function ? pattern(array[index]) : array[index].includes(pattern);
+		if (false && matched && is_RegExp) {
+			library_namespace.log(last_mismatched_index + '-[' + index + ']-' + first_matched_index + '/' + array.length + ': ' + matched + ' ' + pattern));
+			console.log(array[index].match(pattern));
+		}
 		if (get_last_matched ? !matched : matched) {
 			first_matched_index = index;
 		} else if (last_mismatched_index === index) {
@@ -2429,8 +2434,10 @@ function first_matched(array, pattern, get_last_matched) {
 
 	if (get_last_matched) {
 		if (last_mismatched_index === 0 && !matched) {
+			library_namespace.debug('Not found.', 3, 'first_matched');
 			return NOT_FOUND;
 		}
+		library_namespace.debug('return ' + last_mismatched_index, 3, 'first_matched');
 		return last_mismatched_index;
 	}
 

@@ -12,6 +12,7 @@
  * @since	
  * @see
  * <a href="http://msdn.microsoft.com/en-us/library/s4esdbwz%28v=VS.85%29.aspx" accessdate="2010/4/16 20:4">Version Information (Windows Scripting - JScript)</a>
+ * http://espadrine.github.io/New-In-A-Spec/es2017/
  */
 
 'use strict';
