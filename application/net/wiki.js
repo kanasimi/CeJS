@@ -5751,6 +5751,7 @@ function module_code(library_namespace) {
 			// default_type
 			type = 'csrf';
 		}
+		// TODO: for {Array}type
 		var session = this, token = session.token;
 		if (!options.force && token[type + 'token']) {
 			// 已存有此 token。
@@ -5767,6 +5768,7 @@ function module_code(library_namespace) {
 		//
 		function(data) {
 			if (data && data.query && data.query.tokens) {
+				// 設定 tokens。
 				Object.assign(session.token, data.query.tokens);
 				library_namespace.debug(type + 'token: '
 				//
@@ -5775,20 +5777,22 @@ function module_code(library_namespace) {
 				+ (session.token[type + 'token'] === '+\\'
 				//
 				? ' (login as anonymous!)' : ''), 1, 'wiki_API.prototype.token');
-			} else {
-				library_namespace.err(
-				//
-				'wiki_API.prototype.token: Unknown response: ['
-				//
-				+ (data && data.warnings && data.warnings.tokens
-				//
-				&& data.warnings.tokens['*'] || data) + ']');
-				if (library_namespace.is_debug()
-				// .show_value() @ interact.DOM, application.debug
-				&& library_namespace.show_value)
-					library_namespace.show_value(data);
+				callback(session.token[type + 'token'] || session.token);
+				return;
 			}
-			_next();
+
+			library_namespace.err(
+			//
+			'wiki_API.prototype.token: Unknown response: ['
+			//
+			+ (data && data.warnings && data.warnings.tokens
+			//
+			&& data.warnings.tokens['*'] || data) + ']');
+			if (library_namespace.is_debug()
+			// .show_value() @ interact.DOM, application.debug
+			&& library_namespace.show_value)
+				library_namespace.show_value(data);
+			callback();
 		},
 		// Tokens may not be obtained when using a callback
 		library_namespace.null_Object(), session);
