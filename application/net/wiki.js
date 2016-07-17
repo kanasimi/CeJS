@@ -2873,10 +2873,10 @@ function module_code(library_namespace) {
 
 			} else {
 				next[1][SESSION_KEY] = this;
-				wiki_API[type](next[1], function(result) {
+				wiki_API[type](next[1], function(result, error) {
 					// next[2] : callback
 					if (typeof next[2] === 'function')
-						next[2].call(_this, result);
+						next[2].call(_this, result, error);
 					_this.next();
 				});
 			}
@@ -6856,11 +6856,11 @@ function module_code(library_namespace) {
 		if (!parameters.user) {
 			// 抓最後的編輯者試試。
 			// 要用pageid的話，得採page_data，就必須保證兩者相同。
-			if (!options.title && page_data && options.pageid !== page_data.pageid) {
-				callback(undefined, 'options.pageid !== page_data.pageid');
+			if (!parameters.title && page_data && parameters.pageid !== page_data.pageid) {
+				callback(undefined, 'parameters.pageid !== page_data.pageid');
 				return;
 			}
-			wiki_API.page(page_data || options.title, function(page_data, error) {
+			wiki_API.page(page_data || parameters.title, function(page_data, error) {
 				if (error || !get_page_content.revision(page_data)
 				// 保證不會再持續執行。
 				|| !get_page_content.revision(page_data).user) {
@@ -6871,7 +6871,7 @@ function module_code(library_namespace) {
 				wiki_API.rollback(options, callback);
 			}, Object.assign({
 				rvprop : 'ids|timestamp|user'
-			}));
+			}, options));
 			return;
 		}
 
