@@ -2854,6 +2854,14 @@ function module_code(library_namespace) {
 			// wiki.page(title).protect(options, callback)
 		case 'rollback':
 			// 保護/回退
+			if (typeof next[1] === 'function') {
+				next[2] = next[1];
+				next[1] = undefined;
+			}
+			if (!next[1]) {
+				// initialize options
+				next[1] = library_namespace.null_Object();
+			}
 			// wiki.page(title).rollback(options, callback)
 			if (this.stopped && !next[1].skip_stopped) {
 				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄 ' + type + '[['
@@ -2864,9 +2872,6 @@ function module_code(library_namespace) {
 				this.next();
 
 			} else {
-				if (!next[1].title && !next[1].pageid && this.last_page) {
-					next[1].pageid = this.last_page.pageid;
-				}
 				next[1][SESSION_KEY] = this;
 				wiki_API[type](next[1], function(result) {
 					// next[2] : callback
@@ -6716,57 +6721,89 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 	// administrator functions. 管理員相關函數。
 
-	// Change the protection level of a page.
-	wiki_API.protect = function (options, callback) {
-		if (!options || !options.protections) {
-			library_namespace.err('wiki_API.protect: Invalid options/parameters: ' + options);
-			callback('Invalid options/parameters');
-			return;
+	// 自 options 汲取出 parameters。
+	// TODO: 整合進 normalize_parameters。
+	// default_parameters[parameter name] = required
+	function draw_parameters(options, default_parameters) {
+		if (!options) {
+			// Invalid options/parameters
+			return 'No options specified';
 		}
-		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
-		var parameters = {
-			// e.g., 'edit=sysop|move=sysop', 一般說來edit應與move同步。
-			protections : options.protections
-		};
+
+		// 汲取出 parameters。
+		var parameters = library_namespace.null_Object();
+		if (default_parameters) {
+			for (var parameter_name in default_parameters) {
+				if (parameter_name in options) {
+					parameters[parameter_name] = options[parameter_name];
+				} else if (default_parameters[parameter_name]) {
+					// 表示此屬性為必須存在/指定的屬性。
+					return 'No property ' + parameter_name + ' specified';
+				}
+				
+			}
+		}
+
+		var session = options[SESSION_KEY],
+		// 都先從 options 取值，再從 session 取值。
+		page_data = options.page_data || session && session.last_page;
+
+		// assert: 有parameters, e.g., {Object}parameters
+		// 可能沒有 session, page_data
+
+		// 處理 pageid/title。
 		if (options.pageid >= 0) {
 			parameters.pageid = options.pageid;
 		} else if (options.title) {
 			parameters.title = options.title;
+		} else if (page_data) {
+			parameters.pageid = page_data.pageid;
 		} else {
-			// TODO: use page_data
-			library_namespace.err('wiki_API.protect: No page specified: ' + options);
-			callback('No page specified');
-			return;
-		}
-		if (options.reason) {
-			parameters.reason = options.reason;
-		} else {
-			// @see [[MediaWiki:Protect-dropdown]]
-			library_namespace.err('wiki_API.protect: No reason specified: ' + options);
+			// library_namespace.err('draw_parameters No page specified: ' + options);
+			return 'No page specified';
 		}
 
-		for (var parameter in wiki_API.protect.default_parameters) {
-			if (options[parameter]) {
-				parameters[parameter] = options[parameter];
-			}
+		// 處理 token。
+		var token = options.token || session && session.token;
+		if (token && typeof token === 'object') {
+			token = token.csrftoken;
 		}
-
-		var session = options[SESSION_KEY];
-		if (session && session.token && !parameters.token) {
-			parameters.token = session.token;
-		}
-		if (typeof parameters.token === 'object') {
-			parameters.token = parameters.token.csrftoken;
-		}
-		if (!parameters.token) {
+		if (!token) {
 			// TODO: use session
-			library_namespace.err('wiki_API.protect: No token specified: ' + options);
-			callback('No token specified');
-			return;
+			// library_namespace.err('wiki_API.protect: No token specified: ' + options);
+			return 'No token specified';
 		}
-		var action = 'action=protect';
-		if (session && session.API_URL) {
-			action = [ session.API_URL, action ];
+		parameters.token = token;
+
+		return parameters;
+	}
+
+	// Change the protection level of a page.
+	wiki_API.protect = function (options, callback) {
+		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
+		var parameters = draw_parameters(options, {
+			// default_parameters
+			// Warning: 除外pageid/title/token這邊只要是能指定給 API 的，皆必須列入！
+			// protections: e.g., 'edit=sysop|move=sysop', 一般說來edit應與move同步。
+			protections : true,
+			// reason: @see [[MediaWiki:Protect-dropdown]]
+			reason : true,
+			// expiry : 'infinite',
+			expiry : false,
+			tags : false,
+			cascade : false,
+			watchlist : false
+		});
+		if (!library_namespace.is_Object(parameters)) {
+			// error occurred.
+			callback(undefined, parameters);
+		}
+
+		var action = 'action=protect',
+		//
+		API_URL = options[SESSION_KEY] && options[SESSION_KEY].API_URL;
+		if (API_URL) {
+			action = [API_URL, action ];
 		}
 
 		/**
@@ -6785,78 +6822,70 @@ function module_code(library_namespace) {
 		}, parameters, session);
 	};
 
-	// Warning: 這邊只要是能指定給 API 的，皆必須列入！
-	wiki_API.protect.default_parameters = {
-		expiry : 'infinite',
-		tags : '',
-		cascade : '',
-		watchlist : '',
-		token : ''
-	};
 
 	// ----------------------------------------------------
 
 	wiki_API.rollback = function(options, callback) {
-		options = library_namespace.new_options(options);
+		var parameters = draw_parameters(options, {
+			// default_parameters
+			// Warning: 除外pageid/title/token這邊只要是能指定給 API 的，皆必須列入！
+			user : false,
+			summary : false,
+			markbot : false,
+			tags : false
+		});
+		if (!library_namespace.is_Object(parameters)) {
+			// error occurred.
+			callback(undefined, parameters);
+		}
 
-		var title = options.pageid || options.title;
-		if (!options.user && get_page_content.has_content(title)) {
+		var session = options[SESSION_KEY],
+		// 都先從 options 取值，再從 session 取值。
+		page_data = options.page_data || session && session.last_page;
+
+		// assert: 有parameters, e.g., {Object}parameters
+		// 可能沒有 session, page_data
+
+		if (!parameters.user && get_page_content.revision(page_data)) {
 			// 將最後一位編輯者當作回退對象。
-			options.user = title.revisions[0].user;
+			parameters.user = get_page_content.revision(page_data).user;
 		}
 
 		// https://www.mediawiki.org/w/api.php?action=help&modules=rollback
 		// If the last user who edited the page made multiple edits in a row, they will all be rolled back.
-		if (!options.user) {
-			options.rvprop = 'ids|timestamp|user';
-			wiki_API.page(title, function(page_data) {
-				wiki_API.rollback(page_data, options, callback);
-			}, options);
+		if (!parameters.user) {
+			// 抓最後的編輯者試試。
+			// 要用pageid的話，得採page_data，就必須保證兩者相同。
+			if (!options.title && page_data && options.pageid !== page_data.pageid) {
+				callback(undefined, 'options.pageid !== page_data.pageid');
+				return;
+			}
+			wiki_API.page(page_data || options.title, function(page_data, error) {
+				if (error || !get_page_content.revision(page_data)
+				// 保證不會再持續執行。
+				|| !get_page_content.revision(page_data).user) {
+					// library_namespace.err('wiki_API.rollback: No user name specified!');
+					callback(undefined, 'No user name specified and I can not guess it!');
+					return;
+				}
+				wiki_API.rollback(options, callback);
+			}, Object.assign({
+				rvprop : 'ids|timestamp|user'
+			}));
 			return;
 		}
 
-		var parameters = {
-			user : options.user,
-			summary : options.summary || ''
-		};
-
-		// -----------------------------
-		// copy from wiki_API.protect()
-		if (options.pageid >= 0) {
-			parameters.pageid = options.pageid;
-		} else if (options.title) {
-			parameters.title = options.title;
-		} else {
-			// TODO: use page_data
-			library_namespace.err('wiki_API.rollback: No page specified: ' + options);
-			callback('No page specified');
-			return;
+		if (!('markbot' in parameters) && options.bot) {
+			parameters.markbot = options.bot;
 		}
 
 
-		var session = options[SESSION_KEY];
-		if (session && session.token && !parameters.token) {
-			parameters.token = session.token;
-		}
-		if (typeof parameters.token === 'object') {
-			parameters.token = parameters.token.csrftoken;
-		}
-		if (!parameters.token) {
-			// TODO: use session
-			library_namespace.err('wiki_API.protect: No token specified: ' + options);
-			callback('No token specified');
-			return;
-		}
 		var action = 'action=rollback';
 		if (session && session.API_URL) {
 			action = [ session.API_URL, action ];
 		}
 
 		// -----------------------------
-
-		if (options.markbot || options.bot) {
-			parameters.markbot = 1;
-		}
 
 		/**
 		 * response: <code>
