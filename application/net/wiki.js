@@ -5745,6 +5745,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// get token
+	// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Btokens
 	wiki_API.prototype.get_token = function(callback, type) {
 		// assert: this (session) 已登入成功， callback 已設定好。
 		if (!type) {
@@ -6851,7 +6852,7 @@ function module_code(library_namespace) {
 		var session = options[SESSION_KEY];
 
 		if (session && !session.token.rollbacktoken) {
-			session.get_token(session, function() {
+			session.get_token(function() {
 				wiki_API.rollback(options, callback);
 			}, 'rollback');
 		}
