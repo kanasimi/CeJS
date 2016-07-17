@@ -5751,7 +5751,7 @@ function module_code(library_namespace) {
 			// default_type
 			type = 'csrf';
 		}
-		var token = this.token;
+		var session = this, token = session.token;
 		if (!options.force && token[type + 'token']) {
 			// 已存有此 token。
 			callback(token[type + 'token']);
@@ -5792,6 +5792,7 @@ function module_code(library_namespace) {
 		},
 		// Tokens may not be obtained when using a callback
 		library_namespace.null_Object(), session);
+		return this;
 	};
 
 	// 登入認證用。
