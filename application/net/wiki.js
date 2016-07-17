@@ -5744,6 +5744,56 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// get token
+	wiki_API.prototype.get_token = function(callback, type) {
+		// assert: this (session) 已登入成功， callback 已設定好。
+		if (!type) {
+			// default_type
+			type = 'csrf';
+		}
+		var token = this.token;
+		if (!options.force && token[type + 'token']) {
+			// 已存有此 token。
+			callback(token[type + 'token']);
+			return this;
+		}
+
+		library_namespace.debug('Try to get the ' + type + 'token ...', 1,
+				'wiki_API.prototype.get_token');
+		wiki_API.query([ session.API_URL,
+		// https://www.mediawiki.org/wiki/API:Tokens
+		// 'query&meta=tokens&type=csrf|login|watch'
+		'query&meta=tokens' + (type ? '&type=' + type : '') ],
+		//
+		function(data) {
+			if (data && data.query && data.query.tokens) {
+				Object.assign(session.token, data.query.tokens);
+				library_namespace.debug(type + 'token: '
+				//
+				+ session.token[type + 'token']
+				//
+				+ (session.token[type + 'token'] === '+\\'
+				//
+				? ' (login as anonymous!)' : ''), 1, 'wiki_API.prototype.token');
+			} else {
+				library_namespace.err(
+				//
+				'wiki_API.prototype.token: Unknown response: ['
+				//
+				+ (data && data.warnings && data.warnings.tokens
+				//
+				&& data.warnings.tokens['*'] || data) + ']');
+				if (library_namespace.is_debug()
+				// .show_value() @ interact.DOM, application.debug
+				&& library_namespace.show_value)
+					library_namespace.show_value(data);
+			}
+			_next();
+		},
+		// Tokens may not be obtained when using a callback
+		library_namespace.null_Object(), session);
+	};
+
 	// 登入認證用。
 	// https://www.mediawiki.org/wiki/API:Login
 	// https://www.mediawiki.org/wiki/API:Edit
@@ -5790,44 +5840,7 @@ function module_code(library_namespace) {
 					}
 				}
 			}
-			if (session.token.csrftoken) {
-				_next();
-			} else {
-				library_namespace.debug('Try to get the csrftoken ...', 1,
-						'wiki_API.login');
-				wiki_API.query([ session.API_URL,
-				// https://www.mediawiki.org/wiki/API:Tokens
-				// 'query&meta=tokens&type=csrf|login|watch'
-				'query&meta=tokens' ],
-				//
-				function(data) {
-					if (data && data.query && data.query.tokens) {
-						Object.assign(session.token, data.query.tokens);
-						library_namespace.debug('csrftoken: '
-						//
-						+ session.token.csrftoken
-						//
-						+ (session.token.csrftoken === '+\\'
-						//
-						? ' (login as anonymous!)' : ''), 1, 'wiki_API.login');
-					} else {
-						library_namespace.err(
-						//
-						'wiki_API.login: Unknown response: ['
-						//
-						+ (data && data.warnings && data.warnings.tokens
-						//
-						&& data.warnings.tokens['*'] || data) + ']');
-						if (library_namespace.is_debug()
-						// .show_value() @ interact.DOM, application.debug
-						&& library_namespace.show_value)
-							library_namespace.show_value(data);
-					}
-					_next();
-				},
-				// Tokens may not be obtained when using a callback
-				library_namespace.null_Object(), session);
-			}
+			session.get_token(_next);
 		}
 
 		// 支援斷言編輯功能。
@@ -6724,7 +6737,7 @@ function module_code(library_namespace) {
 	// 自 options 汲取出 parameters。
 	// TODO: 整合進 normalize_parameters。
 	// default_parameters[parameter name] = required
-	function draw_parameters(options, default_parameters) {
+	function draw_parameters(options, default_parameters, token_type) {
 		if (!options) {
 			// Invalid options/parameters
 			return 'No options specified';
@@ -6764,14 +6777,18 @@ function module_code(library_namespace) {
 		}
 
 		// 處理 token。
+		if (!token_type) {
+			token_type = 'csrf';
+		}
 		var token = options.token || session && session.token;
 		if (token && typeof token === 'object') {
-			token = token.csrftoken;
+			// session.token.csrftoken
+			token = token[token_type + 'token'];
 		}
 		if (!token) {
 			// TODO: use session
 			// library_namespace.err('wiki_API.protect: No token specified: ' + options);
-			return 'No token specified';
+			return 'No ' + token_type + 'token specified';
 		}
 		parameters.token = token;
 
@@ -6826,6 +6843,14 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------
 
 	wiki_API.rollback = function(options, callback) {
+		var session = options[SESSION_KEY];
+
+		if (session && !session.token.rollbacktoken) {
+			session.get_token(session, function() {
+				wiki_API.rollback(options, callback);
+			}, 'rollback');
+		}
+
 		var parameters = draw_parameters(options, {
 			// default_parameters
 			// Warning: 除外pageid/title/token這邊只要是能指定給 API 的，皆必須列入！
@@ -6833,15 +6858,14 @@ function module_code(library_namespace) {
 			summary : false,
 			markbot : false,
 			tags : false
-		});
+		}, 'rollback');
 		if (!library_namespace.is_Object(parameters)) {
 			// error occurred.
 			callback(undefined, parameters);
 		}
 
-		var session = options[SESSION_KEY],
 		// 都先從 options 取值，再從 session 取值。
-		page_data = options.page_data || session && session.last_page;
+		var page_data = options.page_data || session && session.last_page;
 
 		// assert: 有parameters, e.g., {Object}parameters
 		// 可能沒有 session, page_data
@@ -6898,6 +6922,7 @@ function module_code(library_namespace) {
 			if (error) {
 				callback(response, error);
 			} else {
+				// TODO: need test
 				callback(response.rollback);
 			}
 		}, parameters, session);
