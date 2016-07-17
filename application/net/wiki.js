@@ -1288,9 +1288,13 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// comments: <!-- ... -->
+
+		// TODO: <nowiki> 之優先度更高！置於 <nowiki> 中，
+		// 如 "<nowiki><!-- --></nowiki>" 則雖無功用，但會當作一般文字顯示，而非註解。
+
 		// "<\": for Eclipse JSDoc.
 		if (initialized_fix) {
-			// 因為前後標記間所有內容無作用、能置於任何地方（除了 <nowiki> 中，"<no<!---->wiki>"
+			// 因為前後標記間所有內容無作用、能置於任何地方（除了 <nowiki> 中，"<no<!-- -->wiki>"
 			// 之類），又無需向前回溯；只需在第一次檢測，不會有遺珠之憾。
 			wikitext = wikitext.replace(/<\!--([\s\S]*?)-->/g,
 					function(all, parameters) {
@@ -2621,6 +2625,7 @@ function module_code(library_namespace) {
 			break;
 
 		case 'edit':
+			// wiki.edit(page, options, callback)
 			// TODO: {String|RegExp|Array}filter
 			if (!this.last_page) {
 				library_namespace
@@ -2846,9 +2851,12 @@ function module_code(library_namespace) {
 		// administrator functions
 
 		case 'protect':
-			// wiki.protect(options, callback)
+			// wiki.page(title).protect(options, callback)
+		case 'rollback':
+			// 保護/回退
+			// wiki.page(title).rollback(options, callback)
 			if (this.stopped && !next[1].skip_stopped) {
-				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄保護作業[['
+				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄 ' + type + '[['
 						+ (next[1].title || next[1].pageid || this.last_page && this.last_page.title) + ']]！');
 				// next[2] : callback
 				if (typeof next[2] === 'function')
@@ -2860,7 +2868,7 @@ function module_code(library_namespace) {
 					next[1].pageid = this.last_page.pageid;
 				}
 				next[1][SESSION_KEY] = this;
-				wiki_API.protect(next[1], function(result) {
+				wiki_API[type](next[1], function(result) {
 					// next[2] : callback
 					if (typeof next[2] === 'function')
 						next[2].call(_this, result);
@@ -3127,7 +3135,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,redirect_to,check,edit,search,protect,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,redirect_to,check,edit,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -3239,7 +3247,7 @@ function module_code(library_namespace) {
 		write_to : '',
 		/** {String}運作記錄存放頁面。 */
 		log_to : 'User:Robot/log/%4Y%2m%2d',
-		/** {String}編輯摘要。總結報告。「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」 */
+		/** {String}編輯摘要。總結報告。reason.「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」 */
 		summary : ''
 	});
 
@@ -4481,7 +4489,7 @@ function module_code(library_namespace) {
 		return page_data;
 	};
 
-	// TODO
+	// TODO: copy from wiki_API.page()
 	function normalize_title_parameter(title, options) {
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (!Array.isArray(title)
@@ -6024,6 +6032,9 @@ function module_code(library_namespace) {
 	 * 編輯頁面。一次處理一個標題。<br />
 	 * 警告:除非 text 輸入 {Function}，否則此函數不會檢查頁面是否允許機器人帳戶訪問！此時需要另外含入檢查機制！
 	 * 
+	 * 2016/7/17 18:55:24<br />
+	 * 當採用 section=new 時，minor=1 似乎無效？
+	 * 
 	 * @param {String|Array}title
 	 *            page title 頁面標題。 {String}title or [ {String}API_URL,
 	 *            {String}title or {Object}page_data ]
@@ -6575,7 +6586,7 @@ function module_code(library_namespace) {
 		}
 
 		// -----------------------------
-		// copy from wiki_API.page
+		// copy from wiki_API.page()
 		var action = Array.isArray(title) ? title.clone() : title;
 
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
@@ -6710,6 +6721,7 @@ function module_code(library_namespace) {
 		if (!options || !options.protections) {
 			library_namespace.err('wiki_API.protect: Invalid options/parameters: ' + options);
 			callback('Invalid options/parameters');
+			return;
 		}
 		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
 		var parameters = {
@@ -6724,6 +6736,7 @@ function module_code(library_namespace) {
 			// TODO: use page_data
 			library_namespace.err('wiki_API.protect: No page specified: ' + options);
 			callback('No page specified');
+			return;
 		}
 		if (options.reason) {
 			parameters.reason = options.reason;
@@ -6749,6 +6762,7 @@ function module_code(library_namespace) {
 			// TODO: use session
 			library_namespace.err('wiki_API.protect: No token specified: ' + options);
 			callback('No token specified');
+			return;
 		}
 		var action = 'action=protect';
 		if (session && session.API_URL) {
@@ -6779,6 +6793,87 @@ function module_code(library_namespace) {
 		watchlist : '',
 		token : ''
 	};
+
+	// ----------------------------------------------------
+
+	wiki_API.rollback = function(options, callback) {
+		options = library_namespace.new_options(options);
+
+		var title = options.pageid || options.title;
+		if (!options.user && get_page_content.has_content(title)) {
+			// 將最後一位編輯者當作回退對象。
+			options.user = title.revisions[0].user;
+		}
+
+		// https://www.mediawiki.org/w/api.php?action=help&modules=rollback
+		// If the last user who edited the page made multiple edits in a row, they will all be rolled back.
+		if (!options.user) {
+			options.rvprop = 'ids|timestamp|user';
+			wiki_API.page(title, function(page_data) {
+				wiki_API.rollback(page_data, options, callback);
+			}, options);
+			return;
+		}
+
+		var parameters = {
+			user : options.user,
+			summary : options.summary || ''
+		};
+
+		// -----------------------------
+		// copy from wiki_API.protect()
+		if (options.pageid >= 0) {
+			parameters.pageid = options.pageid;
+		} else if (options.title) {
+			parameters.title = options.title;
+		} else {
+			// TODO: use page_data
+			library_namespace.err('wiki_API.rollback: No page specified: ' + options);
+			callback('No page specified');
+			return;
+		}
+
+
+		var session = options[SESSION_KEY];
+		if (session && session.token && !parameters.token) {
+			parameters.token = session.token;
+		}
+		if (typeof parameters.token === 'object') {
+			parameters.token = parameters.token.csrftoken;
+		}
+		if (!parameters.token) {
+			// TODO: use session
+			library_namespace.err('wiki_API.protect: No token specified: ' + options);
+			callback('No token specified');
+			return;
+		}
+		var action = 'action=rollback';
+		if (session && session.API_URL) {
+			action = [ session.API_URL, action ];
+		}
+
+		// -----------------------------
+
+		if (options.markbot || options.bot) {
+			parameters.markbot = 1;
+		}
+
+		/**
+		 * response: <code>
+		   {"protect":{"title":"title","reason":"存檔保護作業","protections":[{"edit":"sysop","expiry":"infinite"},{"move":"sysop","expiry":"infinite"}]}}
+		   {"servedby":"mw1203","error":{"code":"nosuchpageid","info":"There is no page with ID 2006","*":"See https://zh.wikinews.org/w/api.php for API usage"}}
+		 * </code>
+		 */
+		wiki_API.query(action, function(response) {
+			var error = response && response.error;
+			if (error) {
+				callback(response, error);
+			} else {
+				callback(response.rollback);
+			}
+		}, parameters, session);
+	};
+
 
 	// ========================================================================
 
