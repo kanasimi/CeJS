@@ -1156,11 +1156,17 @@ function module_code(library_namespace) {
 				resolve_escaped(queue, include_mark, end_mark);
 				token = [ queue.pop() ];
 			}
-			return set_wiki_type(token, type, depth);
+			return set_wiki_type(token, type, wikitext);
 		}
 
+		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+		// 每個parse_wikitext()都需要新的options，需要全新的。
+		//options = Object.assign({},options);
+
 		// assert: false>=0, (undefined>=0)
-		var depth = options && options[KEY_DEPTH] || undefined,
+		var depth = options && options[KEY_DEPTH]
+		// wikitext as parent
+		|| wikitext[KEY_DEPTH] || undefined,
 		/**
 		 * 解析用之起始特殊標記。<br />
 		 * 需找出一個文件中不可包含，亦不會被解析的字串，作為解析用之起始特殊標記。<br />
