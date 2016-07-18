@@ -723,15 +723,17 @@ function module_code(library_namespace) {
 			throw new Error('.toString() not exists for type [' + type + ']!');
 		token.toString = wiki_toString[type];
 
-		var depth;
-		if (parent >= 0) {
-			// 當作直接輸入 parent depth。
-			depth = parent + 1;
-		} else if (parent && parent[KEY_DEPTH] >= 0) {
-			depth = parent[KEY_DEPTH] + 1;
+		if (false) {
+			var depth;
+			if (parent >= 0) {
+				// 當作直接輸入 parent depth。
+				depth = parent + 1;
+			} else if (parent && parent[KEY_DEPTH] >= 0) {
+				depth = parent[KEY_DEPTH] + 1;
+			}
+			// root 的 depth 為 (undefined|0)===0
+			token[KEY_DEPTH] = depth | 0;
 		}
-		// root 的 depth 為 (undefined|0)===0
-		token[KEY_DEPTH] = depth | 0;
 
 		return token;
 	}
@@ -1156,17 +1158,24 @@ function module_code(library_namespace) {
 				resolve_escaped(queue, include_mark, end_mark);
 				token = [ queue.pop() ];
 			}
-			return set_wiki_type(token, type, wikitext);
+
+			//return set_wiki_type(token, type, wikitext);
+
+			var node = set_wiki_type(token, type);
+			node[KEY_DEPTH] = depth_of_children;
+			return node;
 		}
 
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		// 每個parse_wikitext()都需要新的options，需要全新的。
-		//options = Object.assign({},options);
+		// options = Object.assign({}, options);
 
 		// assert: false>=0, (undefined>=0)
-		var depth = options && options[KEY_DEPTH]
-		// wikitext as parent
-		|| wikitext[KEY_DEPTH] || undefined,
+		// assert: NaN | 0 === 0
+		var depth_of_children = (options && options[KEY_DEPTH] | 0) + 1;
+		// assert: depth_of_children >= 1
+
+		var
 		/**
 		 * 解析用之起始特殊標記。<br />
 		 * 需找出一個文件中不可包含，亦不會被解析的字串，作為解析用之起始特殊標記。<br />
@@ -1764,6 +1773,7 @@ function module_code(library_namespace) {
 		resolve_escaped(queue, include_mark, end_mark);
 
 		wikitext = queue[queue.length - 1];
+		wikitext[KEY_DEPTH] = depth_of_children - 1;
 		return wikitext;
 	}
 
