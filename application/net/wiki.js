@@ -3992,7 +3992,7 @@ function module_code(library_namespace) {
 		this.page(from_title, function(page_data) {
 			var content_to_copy = get_page_content(page_data);
 			// TODO: to 為另一 wiki_API
-			wiki.page(to).edit(function(page_data) {
+			this.page(to).edit(function(page_data) {
 				// target content
 				var content = get_page_content(page_data);
 				if (typeof options.processor === 'function') {
