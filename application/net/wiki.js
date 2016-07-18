@@ -124,7 +124,7 @@ function module_code(library_namespace) {
 
 
 	/** {String} old key: 'wiki' */
-	var SESSION_KEY = 'session';
+	var KEY_SESSION = 'session';
 
 	/**
 	 * web Wikipedia / 維基百科 用的 functions。<br />
@@ -2510,7 +2510,7 @@ function module_code(library_namespace) {
 				},
 				// next[3] : options
 				Object.assign({
-					// [SESSION_KEY]
+					// [KEY_SESSION]
 					session : this
 				}, next[3]));
 			}
@@ -2536,7 +2536,7 @@ function module_code(library_namespace) {
 			},
 			// next[3] : options
 			Object.assign({
-				// [SESSION_KEY]
+				// [KEY_SESSION]
 				session : this
 			}, next[3]));
 			break;
@@ -2570,7 +2570,7 @@ function module_code(library_namespace) {
 			},
 			// next[3] : options
 			Object.assign({
-				// [SESSION_KEY]
+				// [KEY_SESSION]
 				session : this
 			}, this.next_mark, next[3]));
 			break;
@@ -2597,7 +2597,7 @@ function module_code(library_namespace) {
 			},
 			// next[3] : options
 			Object.assign({
-				// [SESSION_KEY]
+				// [KEY_SESSION]
 				session : this
 			}, next[3]));
 			break;
@@ -2628,7 +2628,7 @@ function module_code(library_namespace) {
 								'wiki_API.prototype.next');
 				next[1].token = this.token;
 				// 正作業中之 wiki_API instance。
-				next[1][SESSION_KEY] = this;
+				next[1][KEY_SESSION] = this;
 				wiki_API.check_stop(function(stopped) {
 					// cache
 					_this.stopped = stopped;
@@ -2687,7 +2687,7 @@ function module_code(library_namespace) {
 						_this.next();
 					}, {
 						flow_view : 'header',
-						// [SESSION_KEY]
+						// [KEY_SESSION]
 						session : this
 					});
 
@@ -2727,7 +2727,7 @@ function module_code(library_namespace) {
 					this.token,
 					// next[2]: options to edit_topic()
 					Object.assign({
-						// [SESSION_KEY]
+						// [KEY_SESSION]
 						session : this
 					}, next[2]), function(title, error, result) {
 						// next[3] : callback
@@ -2776,7 +2776,7 @@ function module_code(library_namespace) {
 					next[1], this.token,
 					// next[2]: options to edit()
 					Object.assign({
-						// [SESSION_KEY]
+						// [KEY_SESSION]
 						session : this
 					}, next[2]), function(title, error, result) {
 						// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
@@ -2842,7 +2842,7 @@ function module_code(library_namespace) {
 							//
 							_this.token.lgpassword, {
 								force : true,
-								// [SESSION_KEY]
+								// [KEY_SESSION]
 								session : _this,
 								// 將 'login' 置於最前頭。
 								login_mark : true
@@ -2889,7 +2889,7 @@ function module_code(library_namespace) {
 				this.next();
 
 			} else {
-				next[1][SESSION_KEY] = this;
+				next[1][KEY_SESSION] = this;
 				wiki_API[type](next[1], function(result, error) {
 					// next[2] : callback
 					if (typeof next[2] === 'function')
@@ -2919,7 +2919,7 @@ function module_code(library_namespace) {
 			},
 			// next[2] : options
 			Object.assign({
-				// [SESSION_KEY]
+				// [KEY_SESSION]
 				session : this
 			}, next[2]));
 			break;
@@ -3001,7 +3001,7 @@ function module_code(library_namespace) {
 			},
 			// next[4] : options
 			Object.assign({
-				// [SESSION_KEY]
+				// [KEY_SESSION]
 				session : this.data_session
 			}, next[4]));
 			break;
@@ -3081,7 +3081,7 @@ function module_code(library_namespace) {
 			wikidata_edit(next[1], next[2], this.data_session.token,
 			// next[3] : options
 			Object.assign({
-				// [SESSION_KEY]
+				// [KEY_SESSION]
 				session : this.data_session
 			}, next[3]),
 			//
@@ -3116,7 +3116,7 @@ function module_code(library_namespace) {
 			wikidata_merge(next[1], next[2], this.data_session.token,
 			// next[3] : options
 			Object.assign({
-				// [SESSION_KEY]
+				// [KEY_SESSION]
 				session : this.data_session
 			}, next[3]),
 			// next[4] : callback
@@ -3988,29 +3988,32 @@ function module_code(library_namespace) {
 		if (!options) {
 			options = library_namespace.null_Object();
 		}
+		options = Object.assign({
+			// [KEY_SESSION]
+			session : this
+		}, options);
 
-		this.page(from_title, function(page_data) {
-			var content_to_copy = get_page_content(page_data);
+		// wiki_API.page(title, callback, options)
+		wiki_API.page(from_title, function(from_page_data) {
 			// TODO: to 為另一 wiki_API
 			this.page(to).edit(function(page_data) {
 				// target content
-				var content = get_page_content(page_data);
+				var content, content_to_copy = get_page_content(from_page_data);
 				if (typeof options.processor === 'function') {
-					content = options.processor(content_to_copy, content);
-				} else if (options.append && content) {
-					content = content.trimRight() + '\n' + content_to_copy;
-				} else {
-					content = content_to_copy;
+					return options.processor(content_to_copy, get_page_content(page_data));
 				}
-				return content;
+				if (options.append && (content = get_page_content(page_data).trimRight())) {
+					return content + '\n' + content_to_copy;
+				}
+				return content_to_copy;
 			}, {
-				summary : options.summary || 'copy page'
+				summary : options.summary || 'Copy from [[' + from_page_data.title + ']]'
 			}, function (title, error, result) {
 				if (typeof callback === 'function') {
 					callback(title, error, result);
 				}
 			});
-		});
+		}, options);
 
 		return this;
 	};
@@ -4065,7 +4068,7 @@ function module_code(library_namespace) {
 		// interval.
 		lag_interval = options && options.lag >= 0 ? options.lag :
 		// ↑ wiki_API.edit 可能輸入 session 當作 options。
-		// options[SESSION_KEY] && options[SESSION_KEY].lag ||
+		// options[KEY_SESSION] && options[KEY_SESSION].lag ||
 		wiki_API.query.default_lag;
 
 		if (false) {
@@ -4188,7 +4191,7 @@ function module_code(library_namespace) {
 			var get_URL_options = options && options.get_URL_options;
 			// @see function setup_API_URL(session, API_URL)
 			if (!get_URL_options) {
-				var session = options && (options[SESSION_KEY]
+				var session = options && (options[KEY_SESSION]
 				// 檢查若 options 本身即為 session。
 				|| options.token && options);
 				if (session) {
@@ -4240,7 +4243,7 @@ function module_code(library_namespace) {
 							 */
 							wiki.next();
 
-							var session = options && (options[SESSION_KEY]
+							var session = options && (options[KEY_SESSION]
 							// 檢查若 options 本身即為 session。
 							|| options.token && options);
 							if (session) {
@@ -4656,8 +4659,8 @@ function module_code(library_namespace) {
 		// 為了預防輸入的是問題頁面。
 		|| action.length !== 2 || typeof action[0] === 'object') {
 			// assert: {Array}((action = title)) 為 page list。
-			// 此時嘗試從 options[SESSION_KEY] 取得 API_URL。
-			action = [ options[SESSION_KEY] && options[SESSION_KEY].API_URL, action ];
+			// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
+			action = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL, action ];
 		}
 		action[1] = wiki_API.query.title_param(action[1], true, options
 				&& options.is_id);
@@ -5263,7 +5266,7 @@ function module_code(library_namespace) {
 			// default options === this
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bcategorymembers
 			namespace : '0|1',
-			// [SESSION_KEY]
+			// [KEY_SESSION]
 			session : wiki,
 			// title_prefix : 'Template:',
 			// cache path prefix
@@ -5371,9 +5374,9 @@ function module_code(library_namespace) {
 			//
 			? options.get_continue : [ title[0], options.get_continue ], {
 				type : type,
-				// [SESSION_KEY]
-				session : continue_session || options[SESSION_KEY],
-				continue_key : (continue_session || options[SESSION_KEY])
+				// [KEY_SESSION]
+				session : continue_session || options[KEY_SESSION],
+				continue_key : (continue_session || options[KEY_SESSION])
 				//
 				.continue_key,
 				callback : function(continuation_data) {
@@ -5491,7 +5494,7 @@ function module_code(library_namespace) {
 			// {Object}next_index: 後續檢索用索引值。
 			next_index = data['continue'] || data['query-continue'];
 			if (!continue_session) {
-				continue_session = options[SESSION_KEY];
+				continue_session = options[KEY_SESSION];
 				// assert: continue_session &&
 				// library_namespace.is_Object(continue_session.next_mark)
 			}
@@ -5754,15 +5757,15 @@ function module_code(library_namespace) {
 			options = library_namespace.null_Object();
 
 		if (!options.initialized) {
-			if (!options[SESSION_KEY])
-				options[SESSION_KEY] = new wiki_API;
+			if (!options[KEY_SESSION])
+				options[KEY_SESSION] = new wiki_API;
 			if (!options.type)
 				options.type = wiki_API.list.default_type;
 			options.initialized = true;
 		}
 
 		// 注意: arguments 與 get_list() 之 callback 連動。
-		options[SESSION_KEY][options.type](target, function(pages, titles,
+		options[KEY_SESSION][options.type](target, function(pages, titles,
 				title) {
 			library_namespace.debug('Get ' + pages.length + ' ' + options.type
 					+ ' pages of [[' + title + ']]', 2, 'wiki_API.list');
@@ -5791,7 +5794,7 @@ function module_code(library_namespace) {
 		},
 		// 引入 options，避免 get_list() 不能確實僅取指定 namespace。
 		Object.assign({
-			continue_session : options[SESSION_KEY],
+			continue_session : options[KEY_SESSION],
 			limit : options.limit || 'max'
 		}, options));
 	};
@@ -5909,7 +5912,7 @@ function module_code(library_namespace) {
 		var action = 'assert=user', callback, session, API_URL;
 		if (library_namespace.is_Object(options)) {
 			API_URL = options.API_URL;
-			session = options[SESSION_KEY];
+			session = options[KEY_SESSION];
 			callback = options.callback;
 		} else {
 			if (typeof options === 'function')
@@ -6036,7 +6039,7 @@ function module_code(library_namespace) {
 		library_namespace.debug('檢查緊急停止頁面 [[' + title + ']]', 1,
 				'wiki_API.check_stop');
 
-		var session = options[SESSION_KEY] || this;
+		var session = options[KEY_SESSION] || this;
 		wiki_API.page([ session.API_URL, title ], function(page_data) {
 			var content = get_page_content(page_data),
 			// default: NOT stopped
@@ -6253,8 +6256,8 @@ function module_code(library_namespace) {
 
 		var session;
 		if ('session' in options) {
-			session = options[SESSION_KEY];
-			delete options[SESSION_KEY];
+			session = options[KEY_SESSION];
+			delete options[KEY_SESSION];
 		}
 
 		wiki_API.query(action, function(data) {
@@ -6674,8 +6677,8 @@ function module_code(library_namespace) {
 		// 為了預防輸入的是問題頁面。
 		|| action.length !== 2 || typeof action[0] === 'object') {
 			// assert: {Array}((action = title)) 為 page list。
-			// 此時嘗試從 options[SESSION_KEY] 取得 API_URL。
-			action = [ options[SESSION_KEY] && options[SESSION_KEY].API_URL, action ];
+			// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
+			action = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL, action ];
 		}
 		action[1] = wiki_API.query.title_param(action[1], true, options && options.is_id);
 
@@ -6819,7 +6822,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var session = options[SESSION_KEY],
+		var session = options[KEY_SESSION],
 		// 都先從 options 取值，再從 session 取值。
 		page_data = options.page_data || session && session.last_page;
 
@@ -6880,7 +6883,7 @@ function module_code(library_namespace) {
 
 		var action = 'action=protect',
 		//
-		API_URL = options[SESSION_KEY] && options[SESSION_KEY].API_URL;
+		API_URL = options[KEY_SESSION] && options[KEY_SESSION].API_URL;
 		if (API_URL) {
 			action = [API_URL, action ];
 		}
@@ -6906,7 +6909,7 @@ function module_code(library_namespace) {
 	// rollback 僅能撤銷/回退最新版本之作者一系列所有編輯
 	// The rollback revision will be marked as minor.
 	wiki_API.rollback = function(options, callback) {
-		var session = options[SESSION_KEY];
+		var session = options[KEY_SESSION];
 
 		if (session && !session.token.rollbacktoken) {
 			session.get_token(function() {
@@ -7752,9 +7755,9 @@ function module_code(library_namespace) {
 
 		if (!project) {
 			// console.log(options);
-			// console.log(options[SESSION_KEY]);
-			// throw options[SESSION_KEY].language;
-			project = language_to_project(options[SESSION_KEY] || options.project);
+			// console.log(options[KEY_SESSION]);
+			// throw options[KEY_SESSION].language;
+			project = language_to_project(options[KEY_SESSION] || options.project);
 		}
 
 		// dump host: http "301 Moved Permanently" to https
@@ -8317,7 +8320,7 @@ function module_code(library_namespace) {
 		}, {
 			// default options === this
 			// namespace : '0|1',
-			// [SESSION_KEY]
+			// [KEY_SESSION]
 			// session : wiki,
 			// title_prefix : 'Template:',
 			// cache path prefix
@@ -8339,7 +8342,7 @@ function module_code(library_namespace) {
 		}, {
 			// default options === this
 			// namespace : '0|1',
-			// [SESSION_KEY]
+			// [KEY_SESSION]
 			// session : wiki,
 			// title_prefix : 'Template:',
 			// cache path prefix
@@ -8361,7 +8364,7 @@ function module_code(library_namespace) {
 		}, {
 			// default options === this
 			// namespace : '0|1',
-			// [SESSION_KEY]
+			// [KEY_SESSION]
 			session : wiki,
 			// title_prefix : 'Template:',
 			// cache path prefix
@@ -8812,18 +8815,18 @@ function module_code(library_namespace) {
 
 			case 'wdq':
 				to_get_data = function(query, callback) {
-					if (_this[SESSION_KEY]) {
-						if (!_this[SESSION_KEY].data_session) {
-							_this[SESSION_KEY].set_data();
-							_this[SESSION_KEY].run(function() {
+					if (_this[KEY_SESSION]) {
+						if (!_this[KEY_SESSION].data_session) {
+							_this[KEY_SESSION].set_data();
+							_this[KEY_SESSION].run(function() {
 								// retry again
 								to_get_data(query, callback);
 							});
 							return;
 						}
-						operation[SESSION_KEY]
+						operation[KEY_SESSION]
 						//
-						= _this[SESSION_KEY].data_session;
+						= _this[KEY_SESSION].data_session;
 					}
 
 					library_namespace.log('wiki_API.cache: Wikidata Query ['
@@ -9283,7 +9286,7 @@ function module_code(library_namespace) {
 		//
 		use_language = config.language
 		// use session.language
-		|| config[SESSION_KEY] && config[SESSION_KEY].language
+		|| config[KEY_SESSION] && config[KEY_SESSION].language
 		// else use default_language
 		|| default_language,
 		/** {Object}用在 wiki_API.cache 之 configuration。 */
@@ -9351,7 +9354,7 @@ function module_code(library_namespace) {
 					traversal_pages(config, callback);
 				}, config && config.SQL_config
 				// 光從 use_language 無法獲得如 wikinews 之資訊。
-				|| new_SQL_config(config[SESSION_KEY] || use_language));
+				|| new_SQL_config(config[KEY_SESSION] || use_language));
 				return wiki_API.cache.abort;
 			};
 
@@ -9364,8 +9367,8 @@ function module_code(library_namespace) {
 		wiki_API.cache(cache_config,
 		// do for each page
 		function() {
-			// 有設定 config[SESSION_KEY] 才能獲得如 bot 之類，一次讀取/操作更多頁面的好處。
-			var session = config[SESSION_KEY]
+			// 有設定 config[KEY_SESSION] 才能獲得如 bot 之類，一次讀取/操作更多頁面的好處。
+			var session = config[KEY_SESSION]
 			//
 			|| new wiki_API(config.user, config.password, config.language);
 			library_namespace.log('traversal_pages: 開始遍歷 '
@@ -9510,7 +9513,7 @@ function module_code(library_namespace) {
 					return callback(page_data);
 
 				}, {
-					session : config[SESSION_KEY],
+					session : config[KEY_SESSION],
 					// 指定 dump file 放置的 directory。
 					directory : config.dump_directory,
 					// options.first(filename) of read_dump()
@@ -10113,7 +10116,7 @@ function module_code(library_namespace) {
 		var action = [
 				options.API_URL
 				//
-				|| options[SESSION_KEY] && options[SESSION_KEY].API_URL
+				|| options[KEY_SESSION] && options[KEY_SESSION].API_URL
 						|| wikidata_API_URL,
 				// search. e.g.,
 				// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
@@ -10261,8 +10264,8 @@ function module_code(library_namespace) {
 		if (is_entity(value)) {
 			// get label of entity
 			value = value.labels;
-			var language = options && options[SESSION_KEY]
-					&& options[SESSION_KEY].language;
+			var language = options && options[KEY_SESSION]
+					&& options[KEY_SESSION].language;
 			language = language && value[language] || value[default_language]
 			// 最起碼選個國際通用的。
 			|| value.en;
@@ -10549,7 +10552,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 自 options[SESSION_KEY] 取得 wikidata API 所須之 site parameter。
+	 * 自 options[KEY_SESSION] 取得 wikidata API 所須之 site parameter。
 	 * 
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
@@ -10559,7 +10562,7 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function wikidata_get_site(options) {
-		var language = options[SESSION_KEY];
+		var language = options[KEY_SESSION];
 		if (language) {
 			// 注意:在取得 page 後，中途更改過 API_URL 的話，這邊會取得錯誤的資訊！
 			if (language.language) {
@@ -10654,7 +10657,7 @@ function module_code(library_namespace) {
 		if (!options) {
 			return;
 		}
-		var session = options[SESSION_KEY];
+		var session = options[KEY_SESSION];
 		if (session) {
 			return session.data_session ? session.data_session.API_URL
 					: session.API_URL;
@@ -11164,8 +11167,8 @@ function module_code(library_namespace) {
 
 		var session;
 		if ('session' in options) {
-			session = options[SESSION_KEY];
-			delete options[SESSION_KEY];
+			session = options[KEY_SESSION];
+			delete options[KEY_SESSION];
 		}
 
 		// TODO: 創建Wikibase陳述。
@@ -11657,8 +11660,8 @@ function module_code(library_namespace) {
 
 		var session;
 		if ('session' in options) {
-			session = options[SESSION_KEY];
-			delete options[SESSION_KEY];
+			session = options[KEY_SESSION];
+			delete options[KEY_SESSION];
 		}
 
 		var action = 'wbmergeitems&fromid=' + from + '&toid=' + to;
@@ -11765,7 +11768,7 @@ function module_code(library_namespace) {
 				// 上限值為 50 (機器人為 500)。
 				library_namespace.debug('Get ' + items.length
 						+ ' items, more than 50.', 2, 'wikidata_query');
-				var session = options && options[SESSION_KEY];
+				var session = options && options[KEY_SESSION];
 				if (session && !session.data_session) {
 					// 得先登入。
 					session.set_data(function() {
