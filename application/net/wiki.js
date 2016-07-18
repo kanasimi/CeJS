@@ -3976,6 +3976,45 @@ function module_code(library_namespace) {
 		succeed : true
 	};
 
+
+	// ------------------------------------------------------------------------
+
+	wiki_API.prototype.copy_page = function(from_title, to, options, callback) {
+		// TODO: 即時性，不用 async。
+		if (typeof options === 'function') {
+			callback = options;
+			options = undefined;
+		}
+		if (!options) {
+			options = library_namespace.null_Object();
+		}
+
+		this.page(from_title, function(page_data) {
+			var content_to_copy = get_page_content(page_data);
+			// TODO: to 為另一 wiki_API
+			wiki.page(to).edit(function(page_data) {
+				// target content
+				var content = get_page_content(page_data);
+				if (typeof options.processor === 'function') {
+					content = options.processor(content_to_copy, content);
+				} else if (options.append && content) {
+					content = content.trimRight() + '\n' + content_to_copy;
+				} else {
+					content = content_to_copy;
+				}
+				return content;
+			}, {
+				summary : options.summary || 'copy page'
+			}, function (title, error, result) {
+				if (typeof callback === 'function') {
+					callback(title, error, result);
+				}
+			});
+		});
+
+		return this;
+	};
+
 	// --------------------------------------------------------------------------------------------
 	// 以下皆泛用，無須 wiki_API instance。
 
