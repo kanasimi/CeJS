@@ -11,6 +11,7 @@ wiki_API.page() 整合各 action=query 至單一公用 function。
 
 parser 標籤中的空屬性現根據HTML5規格進行解析。<pages from= to= section=1>將解析為<pages from="to=" section="1">而不是像以前那樣的<pages from="" to="" section="1">。請改用<pages from="" to="" section=1> or <pages section=1>。這很可能影響維基文庫項目上的頁面。
 parser 所有子頁面加入白名單 white-list
+parser 所有node當前之level層級
 parser 提供 .previousSibling, .nextSibling, .parentNode 將文件結構串起來。
 parser [[WP:維基化]]
 https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Check_Wikipedia
@@ -692,6 +693,9 @@ function module_code(library_namespace) {
 		comment : true
 	};
 
+	// tree level
+	var KEY_DEPTH = 'depth';
+
 	/**
 	 * 設定 token 為指定 type。將 token 轉為指定 type。
 	 * 
@@ -704,7 +708,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see wiki_toString
 	 */
-	function set_wiki_type(token, type) {
+	function set_wiki_type(token, type, parent) {
 		if (typeof token === 'string') {
 			token = [ token ];
 		} else if (!Array.isArray(token)) {
@@ -718,6 +722,17 @@ function module_code(library_namespace) {
 		if (false && !wiki_toString[type])
 			throw new Error('.toString() not exists for type [' + type + ']!');
 		token.toString = wiki_toString[type];
+
+		var depth;
+		if (parent >= 0) {
+			// 當作直接輸入 parent depth。
+			depth = parent + 1;
+		} else if (parent && parent[KEY_DEPTH] >= 0) {
+			depth = parent[KEY_DEPTH] + 1;
+		}
+		// root 的 depth 為 (undefined|0)===0
+		token[KEY_DEPTH] = depth | 0;
+
 		return token;
 	}
 
@@ -1141,10 +1156,11 @@ function module_code(library_namespace) {
 				resolve_escaped(queue, include_mark, end_mark);
 				token = [ queue.pop() ];
 			}
-			return set_wiki_type(token, type);
+			return set_wiki_type(token, type, depth);
 		}
 
-		var
+		// assert: false>=0, (undefined>=0)
+		var depth = options && options[KEY_DEPTH] || undefined,
 		/**
 		 * 解析用之起始特殊標記。<br />
 		 * 需找出一個文件中不可包含，亦不會被解析的字串，作為解析用之起始特殊標記。<br />
@@ -2853,7 +2869,8 @@ function module_code(library_namespace) {
 		case 'protect':
 			// wiki.page(title).protect(options, callback)
 		case 'rollback':
-			// 保護/回退
+			// wiki.page(title).rollback(options, callback)
+
 			if (typeof next[1] === 'function') {
 				next[2] = next[1];
 				next[1] = undefined;
@@ -2862,7 +2879,7 @@ function module_code(library_namespace) {
 				// initialize options
 				next[1] = library_namespace.null_Object();
 			}
-			// wiki.page(title).rollback(options, callback)
+			// 保護/回退
 			if (this.stopped && !next[1].skip_stopped) {
 				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄 ' + type + '[['
 						+ (next[1].title || next[1].pageid || this.last_page && this.last_page.title) + ']]！');
@@ -6845,9 +6862,10 @@ function module_code(library_namespace) {
 		}, parameters, session);
 	};
 
-
 	// ----------------------------------------------------
 
+	// rollback 僅能撤銷/回退最新版本之作者一系列所有編輯
+	// The rollback revision will be marked as minor.
 	wiki_API.rollback = function(options, callback) {
 		var session = options[SESSION_KEY];
 
@@ -6877,7 +6895,7 @@ function module_code(library_namespace) {
 		// 可能沒有 session, page_data
 
 		if (!parameters.user && get_page_content.revision(page_data)) {
-			// 將最後一位編輯者當作回退對象。
+			// 將最後一個版本的編輯者當作回退對象。
 			parameters.user = get_page_content.revision(page_data).user;
 		}
 
@@ -6915,12 +6933,10 @@ function module_code(library_namespace) {
 			action = [ session.API_URL, action ];
 		}
 
-		// -----------------------------
-
 		/**
 		 * response: <code>
-		   {"protect":{"title":"title","reason":"存檔保護作業","protections":[{"edit":"sysop","expiry":"infinite"},{"move":"sysop","expiry":"infinite"}]}}
-		   {"servedby":"mw1203","error":{"code":"nosuchpageid","info":"There is no page with ID 2006","*":"See https://zh.wikinews.org/w/api.php for API usage"}}
+		   {"rollback":{"title":"title","pageid":1,"summary":"","revid":9,"old_revid":7,"last_revid":1,"messageHtml":"<p></p>"}}
+		   {"servedby":"mw1190","error":{"code":"badtoken","info":"Invalid token","*":"See https://zh.wikinews.org/w/api.php for API usage"}}
 		 * </code>
 		 */
 		wiki_API.query(action, function(response) {
@@ -6928,12 +6944,22 @@ function module_code(library_namespace) {
 			if (error) {
 				callback(response, error);
 			} else {
-				// TODO: need test
+				// revid 回滾的版本ID。
+				// old_revid	被回滾的第一個（最新）修訂的修訂ID。
+				// last_revid	被回滾最後一個（最舊）版本的修訂ID。
+				// 如果回滾不會改變的頁面，沒有新修訂而成。在這種情況下，revid將等於old_revid。
 				callback(response.rollback);
 			}
 		}, parameters, session);
 	};
 
+	// ----------------------------------------------------
+
+	// 目前的修訂，不可隱藏。
+	// This is the current revision. It cannot be hidden.
+	wiki_API.hide = function(options, callback) {
+		TODO
+	};
 
 	// ========================================================================
 
