@@ -1159,21 +1159,28 @@ function module_code(library_namespace) {
 				token = [ queue.pop() ];
 			}
 
-			//return set_wiki_type(token, type, wikitext);
+			return set_wiki_type(token, type, wikitext);
 
+			// 因為parse_wikitext()採用的是從leaf到root的解析法，因此無法在解析leaf時就知道depth。
+			// 故以下廢棄。
 			var node = set_wiki_type(token, type);
+			library_namespace.debug('set depth ' + depth_of_children + ' to children [' + node + ']', 3, '_set_wiki_type');
 			node[KEY_DEPTH] = depth_of_children;
 			return node;
 		}
 
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		// 每個parse_wikitext()都需要新的options，需要全新的。
-		// options = Object.assign({}, options);
+		//options = Object.assign({}, options);
 
-		// assert: false>=0, (undefined>=0)
-		// assert: NaN | 0 === 0
-		var depth_of_children = (options && options[KEY_DEPTH] | 0) + 1;
-		// assert: depth_of_children >= 1
+		if (false) {
+			// assert: false>=0, (undefined>=0)
+			// assert: NaN | 0 === 0
+			var depth_of_children = ((options && options[KEY_DEPTH]) | 0) + 1;
+			// assert: depth_of_children >= 1
+			library_namespace.debug('[' + wikitext + ']: depth_of_children: ' + depth_of_children, 3, 'parse_wikitext');
+			options[KEY_DEPTH] = depth_of_children;
+		}
 
 		var
 		/**
@@ -1773,7 +1780,10 @@ function module_code(library_namespace) {
 		resolve_escaped(queue, include_mark, end_mark);
 
 		wikitext = queue[queue.length - 1];
-		wikitext[KEY_DEPTH] = depth_of_children - 1;
+		if (false) {
+			library_namespace.debug('set depth ' + (depth_of_children - 1) + ' to node [' + wikitext + ']', 3, 'parse_wikitext');
+			wikitext[KEY_DEPTH] = depth_of_children - 1;
+		}
 		return wikitext;
 	}
 
