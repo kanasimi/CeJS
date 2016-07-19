@@ -621,11 +621,10 @@ function module_code(library_namespace) {
 			+ ') *: *([^\| ][^\| ]*)', 'i');
 
 	var
-	// @ 20160714.archive_news.js
 	// [ all category, category name, sort order ]
 	PATTERN_category = /\[\[ *(?:Category|分類|分类) *: *([^\[\]\|]+)(?:\|([^\[\]]*))?\]\]/ig,
-	/** {RegExp}分類的匹配模式 for parser。 */
-	PATTERN_category_prefix = /^ *(?:Category|分類|分类) *: *([^\[\]\|]+)/;
+	/** {RegExp}分類的匹配模式 for parser。 [all,name] */
+	PATTERN_category_prefix = /^ *(?:Category|分類|分类) *: *([^\[\]\|]+)/i;
 
 	// ------------------------------------------------------------------------
 
@@ -810,6 +809,9 @@ function module_code(library_namespace) {
 		'' : 'plain'
 	};
 
+	// CeL.wiki.parser.footer_order()
+	page_parser.footer_order = footer_order;
+
 	// ------------------------------------------
 
 	if (false) {
@@ -951,7 +953,8 @@ function module_code(library_namespace) {
 	// {{DEFAULTSORT:}}
 	// [[Category:]]
 	// {{Stub}}
-	var footer_name_order = '|coord,coord missing|authority control|featured list,featured article,good article|persondata|DEFAULTSORT|category|stub'
+	/** {Array}default footer order */
+	var default_footer_order = 'transclusion|Coord,Coord Missing|Authority Control|Featured List,Featured Article,Good Article|Persondata|DEFAULTSORT|category|Stub'
 	//
 	.split('|').map(function(name) {
 		if (name.includes(','))
@@ -959,6 +962,10 @@ function module_code(library_namespace) {
 		return name;
 	});
 
+	// return
+	// {Natural+0}: nodes listed in order_list
+	// undefined: comments / <nowiki> or text may ignored ('\n') or other texts
+	// NOT_FOUND < 0: unknown node
 	function footer_order(node_to_test, order_list) {
 		if (false && typeof node_to_test === 'string') {
 			// skip text. e.g., '\n\n'
@@ -967,7 +974,7 @@ function module_code(library_namespace) {
 
 		var type = node_to_test.type;
 		if (!order_list) {
-			order_list = footer_name_order;
+			order_list = default_footer_order;
 		}
 		if (type === 'category') {
 			var order = order_list.lastIndexOf('category');
@@ -985,33 +992,39 @@ function module_code(library_namespace) {
 					return order;
 				}
 			}
-			// skip [0]
-			return 0;
-
-			// other methods 1
-			// assert: NOT_FOUND + 1 === 0
-			return order_list.indexOf(node_to_test.name) + 1;
-
-			// other methods 2
-			if (order === NOT_FOUND) {
-				// 當作 Navigation templates。
+			if (order_list[0] === 'transclusion') {
+				// skip [0]
 				return 0;
-				library_namespace.debug('skip error/unknown transclusion: '
-						+ node_to_test);
 			}
-			return order;
+
+			if (false) {
+				// other methods 1
+				// assert: NOT_FOUND + 1 === 0
+				return order_list.indexOf(node_to_test.name) + 1;
+
+				// other methods 2
+				if (order === NOT_FOUND) {
+					// 當作 Navigation templates。
+					return 0;
+					library_namespace.debug('skip error/unknown transclusion: '
+							+ node_to_test);
+				}
+				return order;
+			}
 
 		}
 
-		// 其他都不管了。
-		return;
-
-		if (type === 'comment' || type === 'tag' || type === 'tag_single') {
+		if (type === 'comment' || node_to_test.tag === 'nowiki') {
 			// skip comment. e.g., <!-- -->, <nowiki />
 			return;
 		}
 
-		library_namespace.debug('skip error/unknown node: ' + node_to_test);
+		if (type) {
+			library_namespace.debug('skip error/unknown node: ' + node_to_test);
+			return NOT_FOUND;
+		}
+
+		// 其他都不管了。
 	}
 
 	function insert_before(before_node, to_insert) {
@@ -1026,6 +1039,7 @@ function module_code(library_namespace) {
 		}
 
 		var index = this.length;
+		// 從後面開始搜尋。
 		while (index-- > 0) {
 			// find the node/place to insert before
 			if (typeof this[index] === 'string') {

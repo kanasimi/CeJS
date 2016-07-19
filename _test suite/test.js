@@ -2414,6 +2414,17 @@ function test_wiki() {
 		wikitext = '{{c|d[[e]]f}}';
 		assert([ '{{c|df}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true).toString() ]);
 		assert([ '{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true, 1).toString() ]);
+		assert([ 'file', CeL.wiki.parse('[[FiLe:a]]').type ]);
+		assert([ 'Ab', CeL.wiki.parse('[[FiLe:ab]]').name ]);
+		// TODO: 當前解析為 'link', 應為 'text'
+		// assert([ 'text', CeL.wiki.parse('[[File:]]').type ]);
+		assert([ 'link', CeL.wiki.parse('[[File]]').type ]);
+		assert([ 'category', CeL.wiki.parse('[[Category:a]]').type ]);
+		assert([ 'Ab', CeL.wiki.parse('[[Category:ab]]').name ]);
+		// TODO: 當前解析為 'link', 應為 'text'
+		// assert([ 'text', CeL.wiki.parse('[[Category:]]').type ]);
+		assert([ 'link', CeL.wiki.parse('[[Category]]').type ]);
+		// CeL.wiki.parser('[[Category:a]]').each('category', function(token) {console.log(token);});0;
 	});
 
 	return;
