@@ -846,7 +846,8 @@ function module_code(library_namespace) {
 			max_depth = modify_this, modify_this = processor, processor = type,
 					type = undefined;
 		}
-		if (modify_this > 0 && max_depth === undefined) {
+		if (typeof modify_this === 'number' && modify_this > 0
+				&& max_depth === undefined) {
 			// for_each_token(type, processor, max_depth)
 			// shift arguments.
 			max_depth = modify_this, modify_this = undefined;
@@ -875,7 +876,7 @@ function module_code(library_namespace) {
 		// 遍歷 tokens
 		function traversal_tokens(_this, depth) {
 			_this.forEach(function(token, index) {
-				// console.log('token:');
+				// console.log('token depth ' + depth + '/' + max_depth + ':');
 				// console.log(token);
 
 				if (!type
@@ -884,10 +885,13 @@ function module_code(library_namespace) {
 					// get result. 須注意: 此 token 可能為 Array, string, undefined！
 					// for_each_token(token, token_index, token_parent, depth)
 					var result = processor(token, index, _this, depth);
+					// console.log(modify_this);
+					// console.log(result);
 					if (modify_this) {
-						if (typeof result === 'string')
+						if (typeof result === 'string') {
 							// {String}wikitext to ( {Object}element or '' )
 							result = parse_wikitext(result);
+						}
 						if (typeof result === 'string'
 						//
 						|| Array.isArray(result)) {
@@ -903,7 +907,7 @@ function module_code(library_namespace) {
 				// comment 可以放在任何地方，因此能滲透至任一層。
 				// 但這可能性已經在 parse_wikitext() 中偵測並去除。
 				// && type !== 'comment'
-				&& depth < max_depth) {
+				&& (!max_depth || depth < max_depth)) {
 					traversal_tokens(token, depth + 1);
 				}
 			});

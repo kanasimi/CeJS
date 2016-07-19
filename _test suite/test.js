@@ -2407,7 +2407,13 @@ function test_wiki() {
 		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ]);
 		wikitext = 'a[[l]]b';
 		assert([ 'a{{t}}b', CeL.wiki.parser(wikitext).parse().each('link', function(token, parent, index){return '{{t}}';}, true).toString() ]);
-		// TODO: "[[Image:a.svg|b{{c|d[[e]]f}}|g]]"
+		wikitext = '[[Image:a.svg|b{{c|d[[e]]f}}|g]]';
+		assert([ 'file', CeL.wiki.parser(wikitext).parse()[0].type ]);
+		assert([ 'A.svg', CeL.wiki.parser(wikitext).parse()[0].name ]);
+		assert([ '{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).parse()[0][1][1].toString() ]);
+		wikitext = '{{c|d[[e]]f}}';
+		assert([ '{{c|df}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true).toString() ]);
+		assert([ '{{c|d[[e]]f}}', CeL.wiki.parser(wikitext).each('link', function(token, parent, index){return '';}, true, 1).toString() ]);
 	});
 
 	return;
