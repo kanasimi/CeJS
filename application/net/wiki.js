@@ -122,7 +122,6 @@ function module_code(library_namespace) {
 		;
 	}
 
-
 	/** {String} old key: 'wiki' */
 	var KEY_SESSION = 'session';
 
@@ -168,6 +167,12 @@ function module_code(library_namespace) {
 		&& !this.is_wikidata) {
 			setup_API_language(this /* session */, default_language);
 		}
+	}
+
+	// 檢查若 value 為 session。
+	function is_wiki_API(value) {
+		return value
+				&& ((value instanceof wiki_API) || value.API_URL && value.token);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -790,7 +795,8 @@ function module_code(library_namespace) {
 	var page_prototype = {
 		// 在執行 .each() 之前，應該先執行 .parse()。
 		each : for_each_token,
-		parse : parse_page
+		parse : parse_page,
+		insert_before : insert_before
 	};
 
 	/** {Object}alias name of type */
@@ -826,32 +832,48 @@ function module_code(library_namespace) {
 	 *            return {String}wikitext or {Object}element;}
 	 * @param {Boolean}[modify_this]
 	 *            若 processor 的回傳值為{String}wikitext，則將指定類型節點替換/replace作此回傳值。
+	 * @param {Natural}[max_depth]
+	 *            最大深度。
 	 * 
 	 * @returns {wiki page parser}
 	 * 
 	 * @see page_parser.type_alias
 	 */
-	function for_each_token(type, processor, modify_this) {
-		if (typeof type === 'function' && modify_this === undefined)
+	function for_each_token(type, processor, modify_this, max_depth) {
+		if (typeof type === 'function' && max_depth === undefined) {
+			// for_each_token(processor, modify_this, max_depth)
 			// shift arguments.
-			modify_this = processor, processor = type;
-		if (type && typeof type !== 'string') {
-			library_namespace.warn('for_each_token: Invalid type specified! ['
-					+ type + ']');
-			return this;
+			max_depth = modify_this, modify_this = processor, processor = type,
+					type = undefined;
 		}
-		// normalize type
-		type = type.toLowerCase().replace(/\s/g, '_');
-		if (type in page_parser.type_alias)
-			type = page_parser.type_alias[type];
+		if (modify_this > 0 && max_depth === undefined) {
+			// for_each_token(type, processor, max_depth)
+			// shift arguments.
+			max_depth = modify_this, modify_this = undefined;
+		}
 
-		if (!this.parsed)
+		if (type) {
+			if (typeof type !== 'string') {
+				library_namespace.warn(
+				//
+				'for_each_token: Invalid type specified! [' + type + ']');
+				return this;
+			}
+			// normalize type
+			// assert: typeof type === 'string'
+			type = type.toLowerCase().replace(/\s/g, '_');
+			if (type in page_parser.type_alias)
+				type = page_parser.type_alias[type];
+		}
+
+		if (!this.parsed) {
 			// 因為本函數為 CeL.wiki.parser(content) 最常使用者，
 			// 因此放在這少一道 .parse() 工序。
 			this.parse();
+		}
 
 		// 遍歷 tokens
-		function traversal_tokens(_this) {
+		function traversal_tokens(_this, depth) {
 			_this.forEach(function(token, index) {
 				// console.log('token:');
 				// console.log(token);
@@ -860,8 +882,8 @@ function module_code(library_namespace) {
 				// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
 				|| type === (Array.isArray(token) ? token.type : 'plain')) {
 					// get result. 須注意: 此 token 可能為 Array, string, undefined！
-					// for_each_token(token, token_index, token_parent)
-					var result = processor(token, index, _this);
+					// for_each_token(token, token_index, token_parent, depth)
+					var result = processor(token, index, _this, depth);
 					if (modify_this) {
 						if (typeof result === 'string')
 							// {String}wikitext to ( {Object}element or '' )
@@ -881,13 +903,13 @@ function module_code(library_namespace) {
 				// comment 可以放在任何地方，因此能滲透至任一層。
 				// 但這可能性已經在 parse_wikitext() 中偵測並去除。
 				// && type !== 'comment'
-				) {
-					traversal_tokens(token);
+				&& depth < max_depth) {
+					traversal_tokens(token, depth + 1);
 				}
 			});
 		}
 
-		traversal_tokens(this);
+		traversal_tokens(this, 0);
 
 		return this;
 	}
@@ -914,6 +936,115 @@ function module_code(library_namespace) {
 				this[0] = parsed;
 			this.parsed = true;
 		}
+		return this;
+	}
+
+	// {{*Navigation templates}} (footer navboxes)
+	// {{Coord}} or {{coord missing}}
+	// {{Authority control}}
+	// {{featured list}}, {{featured article}}, {{good article}}
+	// {{Persondata}}
+	// {{DEFAULTSORT:}}
+	// [[Category:]]
+	// {{Stub}}
+	var footer_name_order = '|coord,coord missing|authority control|featured list,featured article,good article|persondata|DEFAULTSORT|category|stub'
+	//
+	.split('|').map(function(name) {
+		if (name.includes(','))
+			return name.split(',');
+		return name;
+	});
+
+	function footer_order(node_to_test, order_list) {
+		if (false && typeof node_to_test === 'string') {
+			// skip text. e.g., '\n\n'
+			return;
+		}
+
+		var type = node_to_test.type;
+		if (!order_list) {
+			order_list = footer_name_order;
+		}
+		if (type === 'category') {
+			var order = order_list.lastIndexOf('category');
+			if (order >= 0) {
+				return order;
+			}
+		}
+
+		if (type === 'transclusion') {
+			var order = order_list.length, name = node_to_test.name;
+			while (--order > 0) {
+				var transclusion_name = order_list[order];
+				if (Array.isArray(transclusion_name) ? transclusion_name
+						.includes(name) : transclusion_name === name) {
+					return order;
+				}
+			}
+			// skip [0]
+			return 0;
+
+			// other methods 1
+			// assert: NOT_FOUND + 1 === 0
+			return order_list.indexOf(node_to_test.name) + 1;
+
+			// other methods 2
+			if (order === NOT_FOUND) {
+				// 當作 Navigation templates。
+				return 0;
+				library_namespace.debug('skip error/unknown transclusion: '
+						+ node_to_test);
+			}
+			return order;
+
+		}
+
+		// 其他都不管了。
+		return;
+
+		if (type === 'comment' || type === 'tag' || type === 'tag_single') {
+			// skip comment. e.g., <!-- -->, <nowiki />
+			return;
+		}
+
+		library_namespace.debug('skip error/unknown node: ' + node_to_test);
+	}
+
+	function insert_before(before_node, to_insert) {
+		var order_needed = parse_wikitext(before_node), order_list = this.order_list;
+		if (order_needed) {
+			order_needed = footer_order(order_needed, order_list);
+		}
+		if (!(order_needed >= 0)) {
+			library_namespace.warn('insert_before: skip error/unknown node: '
+					+ node_to_test);
+			return this;
+		}
+
+		var index = this.length;
+		while (index-- > 0) {
+			// find the node/place to insert before
+			if (typeof this[index] === 'string') {
+				// skip text. e.g., '\n\n'
+				continue;
+			}
+			var order = footer_order(this[index], order_list);
+			if (order >= 0) {
+				if (order === order_needed) {
+					// insert before node_to_test
+					this.splice(index, 0, to_insert);
+					break;
+				}
+
+				if (order < order_needed) {
+					// 已經過頭。
+					// insert AFTER node_to_test
+					this.splice(index + 1, 0, to_insert);
+					break;
+				}
+			}
+		}
+
 		return this;
 	}
 
@@ -1103,6 +1234,9 @@ function module_code(library_namespace) {
 		}
 	};
 
+	var Magic_words_hash = 'DISPLAYTITLE|DEFAULTSORT|CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
+			.split('|').to_hash();
+
 	/**
 	 * parse The MediaWiki markup language (wikitext).
 	 * 
@@ -1164,21 +1298,23 @@ function module_code(library_namespace) {
 			// 因為parse_wikitext()採用的是從leaf到root的解析法，因此無法在解析leaf時就知道depth。
 			// 故以下廢棄。
 			var node = set_wiki_type(token, type);
-			library_namespace.debug('set depth ' + depth_of_children + ' to children [' + node + ']', 3, '_set_wiki_type');
+			library_namespace.debug('set depth ' + depth_of_children
+					+ ' to children [' + node + ']', 3, '_set_wiki_type');
 			node[KEY_DEPTH] = depth_of_children;
 			return node;
 		}
 
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		// 每個parse_wikitext()都需要新的options，需要全新的。
-		//options = Object.assign({}, options);
+		// options = Object.assign({}, options);
 
 		if (false) {
 			// assert: false>=0, (undefined>=0)
 			// assert: NaN | 0 === 0
 			var depth_of_children = ((options && options[KEY_DEPTH]) | 0) + 1;
 			// assert: depth_of_children >= 1
-			library_namespace.debug('[' + wikitext + ']: depth_of_children: ' + depth_of_children, 3, 'parse_wikitext');
+			library_namespace.debug('[' + wikitext + ']: depth_of_children: '
+					+ depth_of_children, 3, 'parse_wikitext');
 			options[KEY_DEPTH] = depth_of_children;
 		}
 
@@ -1305,7 +1441,15 @@ function module_code(library_namespace) {
 			});
 
 			// 正規化 template name。
-			parameters.name = normalize_page_name(parameters[0].toString());
+			parameters.name = typeof parameters[0][0] === 'string'
+			// test if token is [[Help:Magic words]]
+			&& parameters[0][0].toUpperCase();
+			if (parameters.name && (parameters.name in Magic_words_hash)) {
+				// 此時以 parameters[0][1] 可獲得首 parameter。
+				parameters.is_magic_word = true;
+			} else {
+				parameters.name = normalize_page_name(parameters[0].toString());
+			}
 			parameters.parameters = _parameters;
 
 			_set_wiki_type(parameters, 'transclusion');
@@ -1411,13 +1555,14 @@ function module_code(library_namespace) {
 				parameters = parameters.replace_till_stable(
 				//
 				PATTERN_for_transclusion, parse_transclusion);
-				library_namespace.debug(parameters, 4 ,'parse_wikitext.link');
+				library_namespace.debug(parameters, 4, 'parse_wikitext.link');
 			}
 
 			// test [[file:name|...|...]]
 			var file_matched = parameters.match(PATTERN_file_prefix),
 			// test [[Category:name|order]]
-			category_matched = !file_matched && parameters.match(PATTERN_category_prefix);
+			category_matched = !file_matched
+					&& parameters.match(PATTERN_category_prefix);
 			parameters = parameters.split('|').map(function(token, index) {
 				return index === 0
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
@@ -1434,7 +1579,8 @@ function module_code(library_namespace) {
 				// Category name
 				parameters.name = normalize_page_name(category_matched[1]);
 			}
-			_set_wiki_type(parameters, file_matched ? 'file' : category_matched ? 'category' : 'link');
+			_set_wiki_type(parameters, file_matched ? 'file'
+					: category_matched ? 'category' : 'link');
 			queue.push(parameters);
 			return prevoius + include_mark + (queue.length - 1) + end_mark;
 		});
@@ -1781,7 +1927,8 @@ function module_code(library_namespace) {
 
 		wikitext = queue[queue.length - 1];
 		if (false) {
-			library_namespace.debug('set depth ' + (depth_of_children - 1) + ' to node [' + wikitext + ']', 3, 'parse_wikitext');
+			library_namespace.debug('set depth ' + (depth_of_children - 1)
+					+ ' to node [' + wikitext + ']', 3, 'parse_wikitext');
 			wikitext[KEY_DEPTH] = depth_of_children - 1;
 		}
 		return wikitext;
@@ -2527,7 +2674,7 @@ function module_code(library_namespace) {
 					// assert: 當錯誤發生，例如頁面不存在，依然需要模擬出 page_data。
 					// 如此才能執行 .page().edit()。
 					_this.last_page
-					// 正常情況。
+					// 正常情況。確保this.last_page為單頁面。
 					= Array.isArray(page_data) ? page_data[0] : page_data;
 					// next[2] : callback
 					if (typeof next[2] === 'function')
@@ -2664,6 +2811,10 @@ function module_code(library_namespace) {
 				// next[1] : options
 				next[1]);
 			}
+			break;
+
+		case 'copy_from':
+			wiki_API_prototype_copy_from.apply(this, next.slice(1));
 			break;
 
 		case 'edit':
@@ -2907,8 +3058,13 @@ function module_code(library_namespace) {
 			}
 			// 保護/回退
 			if (this.stopped && !next[1].skip_stopped) {
-				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄 ' + type + '[['
-						+ (next[1].title || next[1].pageid || this.last_page && this.last_page.title) + ']]！');
+				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄 '
+				//
+				+ type + '[['
+				//
+				+ (next[1].title || next[1].pageid || this.last_page
+				//
+				&& this.last_page.title) + ']]！');
 				// next[2] : callback
 				if (typeof next[2] === 'function')
 					next[2].call(this, next[1], '已停止作業');
@@ -3183,7 +3339,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,redirect_to,check,edit,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,redirect_to,check,copy_from,edit,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -3540,18 +3696,19 @@ function module_code(library_namespace) {
 				// 處理有時可能連 data 都是 trimmed 過的。
 				// assert: data.length < this_slice_size
 				if (true || data.truncated) {
-					if(!setup_target || library_namespace.is_debug())
-						library_namespace.warn('wiki_API.work: query 所得之 length ('
-								+ data.length + ') !== this slice size (' + this_slice_size
-								+ ') ！');
+					if (!setup_target || library_namespace.is_debug())
+						library_namespace.warn(
+						//
+						'wiki_API.work: query 所得之 length (' + data.length
+						//
+						+ ') !== this slice size (' + this_slice_size + ') ！');
 
 					if (setup_target) {
 						// -this_slice_size: 先回溯到 pages 開頭之 index。
-						work_continue -= this_slice_size-data.length;
+						work_continue -= this_slice_size - data.length;
 						library_namespace.debug('一次取得大量頁面時，回傳內容超過限度而被截斷。將回退 '
-								+ (this_slice_size-data.length)
-								+ '頁。',
-								1, 'wiki_API.work');
+								+ (this_slice_size - data.length) + '頁。', 1,
+								'wiki_API.work');
 					}
 				}
 			}
@@ -3665,10 +3822,11 @@ function module_code(library_namespace) {
 				library_namespace.debug('一次取得大量頁面時，回傳內容超過限度而被截斷。將回退 '
 						+ (pages.length - pages.OK_length)
 						+ '頁'
-						+ (pages[pages.OK_length] ? '，下次將自 ' + pages.OK_length + '/'
-								+ pages.length + ' [[' + pages[pages.OK_length].title
-								+ ']] id ' + pages[pages.OK_length].pageid + ' 開始' : '') + '。',
-						1, 'wiki_API.work');
+						+ (pages[pages.OK_length] ? '，下次將自 ' + pages.OK_length
+								+ '/' + pages.length + ' [['
+								+ pages[pages.OK_length].title + ']] id '
+								+ pages[pages.OK_length].pageid + ' 開始' : '')
+						+ '。', 1, 'wiki_API.work');
 				pages = pages.slice(0, pages.OK_length);
 			}
 
@@ -3953,7 +4111,8 @@ function module_code(library_namespace) {
 					nochange_count = target.length;
 					done = '處理分塊 ' + (work_continue + 1) + '–' + (work_continue
 					// start–end/all
-					+ Math.min(max_size, nochange_count)) + '/' + nochange_count;
+					+ Math.min(max_size, nochange_count)) + '/'
+							+ nochange_count;
 					// Add percentage.
 					if (nochange_count > 1e4)
 						done += ' ('
@@ -4002,47 +4161,73 @@ function module_code(library_namespace) {
 		succeed : true
 	};
 
-
 	// ------------------------------------------------------------------------
 
-	wiki_API.prototype.copy_page = function(from_title, to, options, callback) {
-		// TODO: 即時性，不用 async。
+	// 不用 copy_to 的原因是 copy_to(wiki) 得遠端操作 wiki，不能保證同步性。
+	// this_wiki.copy_from(wiki) 則呼叫時多半已經設定好 wiki，直接在本this_wiki中操作比較不會有同步性問題。
+	// 因為直接採wiki_API.prototype.copy_from()會造成.page().copy_from()時.page()尚未執行完，
+	// 這會使執行.copy_from()時尚未取得.last_page，因此只好另開function。
+	var wiki_API_prototype_copy_from = function(title, options, callback) {
 		if (typeof options === 'function') {
+			// shift arguments
 			callback = options;
 			options = undefined;
 		}
-		if (!options) {
-			options = library_namespace.null_Object();
-		}
+
 		options = Object.assign({
 			// [KEY_SESSION]
 			session : this
 		}, options);
 
-		// wiki_API.page(title, callback, options)
-		wiki_API.page(from_title, function(from_page_data) {
-			// TODO: to 為另一 wiki_API
-			this.page(to).edit(function(page_data) {
-				// target content
-				var content, content_to_copy = get_page_content(from_page_data);
-				if (typeof options.processor === 'function') {
-					return options.processor(content_to_copy, get_page_content(page_data));
-				}
-				if (options.append && (content = get_page_content(page_data).trimRight())) {
-					return content + '\n' + content_to_copy;
-				}
-				return content_to_copy;
-			}, {
-				summary : options.summary || 'Copy from [[' + from_page_data.title + ']]'
-			}, function (title, error, result) {
-				if (typeof callback === 'function') {
-					callback(title, error, result);
-				}
-			});
-		}, options);
+		var _this = this;
+		function edit() {
+			// assert: get_page_content.is_page_data(title)
+			if (!options.summary)
+				options.summary = 'Copy from [[' + title.title + ']]';
+			var content_to_copy = get_page_content(title);
+			if (typeof options.processor === 'function') {
+				// options.processor(from content_to_copy, to content)
+				content_to_copy = options.processor(title,
+						get_page_content(_this.last_page));
+			}
+			var content;
+			if (options.append && (content
+			//
+			= get_page_content(_this.last_page).trimRight())) {
+				content_to_copy = content + '\n' + content_to_copy;
+			}
+			// wiki.edit(page, options, callback)
+			_this.actions
+					.unshift([ 'edit', content_to_copy, options, callback ]);
+			_this.next();
+		}
+
+		if (is_wiki_API(title)) {
+			// from page 為另一 wiki_API
+			// wiki.page().copy_from(wiki)
+			title = title.last_page;
+		}
+
+		if (get_page_content.is_page_data(title)) {
+			// wiki.page().copy_from(page_data)
+			edit();
+
+		} else {
+			// treat title as {String}page title in this wiki
+			// wiki.page().copy_from(title)
+			var to_page_data = this.last_page;
+			// 即時性，不用 async。
+			// wiki_API.page(title, callback, options)
+			wiki_API.page(title, function(from_page_data) {
+				// recover this.last_page
+				_this.last_page = to_page_data;
+				title = from_page_data;
+				edit();
+			}, options);
+		}
 
 		return this;
-	};
+	}
 
 	// --------------------------------------------------------------------------------------------
 	// 以下皆泛用，無須 wiki_API instance。
@@ -4219,7 +4404,7 @@ function module_code(library_namespace) {
 			if (!get_URL_options) {
 				var session = options && (options[KEY_SESSION]
 				// 檢查若 options 本身即為 session。
-				|| options.token && options);
+				|| is_wiki_API(options));
 				if (session) {
 					// assert: get_URL_options 為 session。
 					if (!session.get_URL_options) {
@@ -4271,7 +4456,7 @@ function module_code(library_namespace) {
 
 							var session = options && (options[KEY_SESSION]
 							// 檢查若 options 本身即為 session。
-							|| options.token && options);
+							|| is_wiki_API(options));
 							if (session) {
 								session.running = false;
 							}
@@ -4686,7 +4871,8 @@ function module_code(library_namespace) {
 		|| action.length !== 2 || typeof action[0] === 'object') {
 			// assert: {Array}((action = title)) 為 page list。
 			// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
-			action = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL, action ];
+			action = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL,
+					action ];
 		}
 		action[1] = wiki_API.query.title_param(action[1], true, options
 				&& options.is_id);
@@ -4999,7 +5185,9 @@ function module_code(library_namespace) {
 					try {
 						redirect_data.to_link = redirect_data.to + '#'
 						// 須注意: 對某些 section 可能 throw！
-						+ decodeURIComponent(redirect_data.tofragment.replace(/\./g, '%'));
+						+ decodeURIComponent(redirect_data.tofragment
+						//
+						.replace(/\./g, '%'));
 					} catch (e) {
 						redirect_data.to_link = redirect_data.to + '#'
 						//
@@ -5856,13 +6044,15 @@ function module_code(library_namespace) {
 			if (data && data.query && data.query.tokens) {
 				// 設定 tokens。
 				Object.assign(session.token, data.query.tokens);
-				library_namespace.debug(type + 'token: '
-				//
-				+ session.token[type + 'token']
-				//
-				+ (session.token[type + 'token'] === '+\\'
-				//
-				? ' (login as anonymous!)' : ''), 1, 'wiki_API.prototype.token');
+				library_namespace
+						.debug(type + 'token: '
+						//
+						+ session.token[type + 'token']
+						//
+						+ (session.token[type + 'token'] === '+\\'
+						//
+						? ' (login as anonymous!)' : ''), 1,
+								'wiki_API.prototype.token');
 				callback(session.token[type + 'token'] || session.token);
 				return;
 			}
@@ -6704,12 +6894,13 @@ function module_code(library_namespace) {
 		|| action.length !== 2 || typeof action[0] === 'object') {
 			// assert: {Array}((action = title)) 為 page list。
 			// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
-			action = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL, action ];
+			action = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL,
+					action ];
 		}
-		action[1] = wiki_API.query.title_param(action[1], true, options && options.is_id);
+		action[1] = wiki_API.query.title_param(action[1], true, options
+				&& options.is_id);
 
 		// -----------------------------
-
 
 		action[1] = 'query&prop=redirects&rdlimit=max&' + action[1];
 		if (!action[0])
@@ -6837,14 +7028,14 @@ function module_code(library_namespace) {
 		// 汲取出 parameters。
 		var parameters = library_namespace.null_Object();
 		if (default_parameters) {
-			for (var parameter_name in default_parameters) {
+			for ( var parameter_name in default_parameters) {
 				if (parameter_name in options) {
 					parameters[parameter_name] = options[parameter_name];
 				} else if (default_parameters[parameter_name]) {
 					// 表示此屬性為必須存在/指定的屬性。
 					return 'No property ' + parameter_name + ' specified';
 				}
-				
+
 			}
 		}
 
@@ -6863,7 +7054,8 @@ function module_code(library_namespace) {
 		} else if (page_data) {
 			parameters.pageid = page_data.pageid;
 		} else {
-			// library_namespace.err('draw_parameters No page specified: ' + options);
+			// library_namespace.err('draw_parameters No page specified: ' +
+			// options);
 			return 'No page specified';
 		}
 
@@ -6878,7 +7070,8 @@ function module_code(library_namespace) {
 		}
 		if (!token) {
 			// TODO: use session
-			// library_namespace.err('wiki_API.protect: No token specified: ' + options);
+			// library_namespace.err('wiki_API.protect: No token specified: ' +
+			// options);
 			return 'No ' + token_type + 'token specified';
 		}
 		parameters.token = token;
@@ -6887,7 +7080,7 @@ function module_code(library_namespace) {
 	}
 
 	// Change the protection level of a page.
-	wiki_API.protect = function (options, callback) {
+	wiki_API.protect = function(options, callback) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
 		var parameters = draw_parameters(options, {
 			// default_parameters
@@ -6907,11 +7100,13 @@ function module_code(library_namespace) {
 			callback(undefined, parameters);
 		}
 
+		var session = options[KEY_SESSION];
+
 		var action = 'action=protect',
 		//
-		API_URL = options[KEY_SESSION] && options[KEY_SESSION].API_URL;
+		API_URL = session && session.API_URL;
 		if (API_URL) {
-			action = [API_URL, action ];
+			action = [ API_URL, action ];
 		}
 
 		/**
@@ -6968,20 +7163,30 @@ function module_code(library_namespace) {
 		}
 
 		// https://www.mediawiki.org/w/api.php?action=help&modules=rollback
-		// If the last user who edited the page made multiple edits in a row, they will all be rolled back.
+		// If the last user who edited the page made multiple edits in a row,
+		// they will all be rolled back.
 		if (!parameters.user) {
 			// 抓最後的編輯者試試。
 			// 要用pageid的話，得採page_data，就必須保證兩者相同。
-			if (!parameters.title && page_data && parameters.pageid !== page_data.pageid) {
+			if (!parameters.title && page_data
+					&& parameters.pageid !== page_data.pageid) {
 				callback(undefined, 'parameters.pageid !== page_data.pageid');
 				return;
 			}
-			wiki_API.page(page_data || parameters.title, function(page_data, error) {
+			wiki_API.page(page_data || parameters.title, function(page_data,
+					error) {
 				if (error || !get_page_content.revision(page_data)
 				// 保證不會再持續執行。
 				|| !get_page_content.revision(page_data).user) {
-					// library_namespace.err('wiki_API.rollback: No user name specified!');
-					callback(undefined, 'No user name specified and I can not guess it!');
+					if (false) {
+						library_namespace.err(
+						//
+						'wiki_API.rollback: No user name specified!');
+					}
+
+					callback(undefined,
+					//
+					'No user name specified and I can not guess it!');
 					return;
 				}
 				wiki_API.rollback(options, callback);
@@ -6994,7 +7199,6 @@ function module_code(library_namespace) {
 		if (!('markbot' in parameters) && options.bot) {
 			parameters.markbot = options.bot;
 		}
-
 
 		var action = 'action=rollback';
 		if (session && session.API_URL) {
@@ -7013,8 +7217,8 @@ function module_code(library_namespace) {
 				callback(response, error);
 			} else {
 				// revid 回滾的版本ID。
-				// old_revid	被回滾的第一個（最新）修訂的修訂ID。
-				// last_revid	被回滾最後一個（最舊）版本的修訂ID。
+				// old_revid 被回滾的第一個（最新）修訂的修訂ID。
+				// last_revid 被回滾最後一個（最舊）版本的修訂ID。
 				// 如果回滾不會改變的頁面，沒有新修訂而成。在這種情況下，revid將等於old_revid。
 				callback(response.rollback);
 			}
@@ -7743,7 +7947,6 @@ function module_code(library_namespace) {
 		TODO
 	}
 
-
 	wiki_API.listen = add_listener;
 
 	// --------------------------------------------------------------------------------------------
@@ -7783,7 +7986,8 @@ function module_code(library_namespace) {
 			// console.log(options);
 			// console.log(options[KEY_SESSION]);
 			// throw options[KEY_SESSION].language;
-			project = language_to_project(options[KEY_SESSION] || options.project);
+			project = language_to_project(options[KEY_SESSION]
+					|| options.project);
 		}
 
 		// dump host: http "301 Moved Permanently" to https
@@ -8627,9 +8831,11 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			library_namespace.debug(operation.reget ? 'Dispose cache. Reget again.'
-			// ↑ operation.reget: 放棄 cache，重新取得資料。
-			: 'No valid cached data. Try to get data...', 3, 'wiki_API.cache');
+			library_namespace.debug(
+					operation.reget ? 'Dispose cache. Reget again.'
+					// ↑ operation.reget: 放棄 cache，重新取得資料。
+					: 'No valid cached data. Try to get data...', 3,
+					'wiki_API.cache');
 
 			/**
 			 * 寫入 cache 至檔案系統。
@@ -9473,8 +9679,12 @@ function module_code(library_namespace) {
 						}
 						if (page_data.ns !== 0) {
 							// 記事だけを編集する
-							return [ CeL.wiki.edit.cancel, '本作業僅處理條目命名空間或模板或category' ];
-							throw '非條目:[[' + page_data.title + ']]! 照理來說不應該出現有 ns !== 0 的情況。';
+							return [ CeL.wiki.edit.cancel,
+							//
+							'本作業僅處理條目命名空間或模板或category' ];
+							throw '非條目:[[' + page_data.title
+							//
+							+ ']]! 照理來說不應該出現有 ns !== 0 的情況。';
 						}
 
 						/** {Object}revision data. 修訂版本資料。 */
@@ -9500,8 +9710,9 @@ function module_code(library_namespace) {
 									+ page_data.pageid + ']]!');
 
 						if (!content) {
-							return [ CeL.wiki.edit.cancel, 'No contents: [['
-										+ title + ']]! 沒有頁面內容！' ];
+							return [ CeL.wiki.edit.cancel,
+							//
+							'No contents: [[' + title + ']]! 沒有頁面內容！' ];
 						}
 
 						// [[Wikipedia:快速删除方针]]
@@ -10514,7 +10725,8 @@ function module_code(library_namespace) {
 		if (typeof language === 'object' && language.API_URL) {
 			// treat language as session.
 			// assert: typeof language.API_URL === 'string'
-			language = language.API_URL.toLowerCase().match(/\/\/([a-z\-\d]{2,20})\.([a-z]+)/);
+			language = language.API_URL.toLowerCase().match(
+					/\/\/([a-z\-\d]{2,20})\.([a-z]+)/);
 			library_namespace.debug(language, 4, 'language_to_projects');
 			// TODO: error handling
 			language = language[1].replace(/-/g, '_')
