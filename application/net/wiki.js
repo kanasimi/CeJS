@@ -286,7 +286,9 @@ function module_code(library_namespace) {
 			API_URL = session.API_URL || wiki_API.API_URL;
 		}
 
-		if (API_URL && typeof API_URL === 'string') {
+		if (API_URL && typeof API_URL === 'string'
+		// && is_wiki_API(session)
+		) {
 			session.API_URL = api_URL(API_URL);
 			// is data session.
 			session.is_wikidata = /wikidata/i.test(API_URL);
@@ -4200,8 +4202,6 @@ function module_code(library_namespace) {
 		var _this = this;
 		function edit() {
 			// assert: get_page_content.is_page_data(title)
-			if (!options.summary)
-				options.summary = 'Copy from [[' + title.title + ']]';
 			var content_to_copy = get_page_content(title);
 			if (typeof options.processor === 'function') {
 				// options.processor(from content_to_copy, to content)
@@ -4213,10 +4213,14 @@ function module_code(library_namespace) {
 			//
 			= get_page_content(_this.last_page).trimRight())) {
 				content_to_copy = content + '\n' + content_to_copy;
+				options.summary = 'Append from [[' + title.title + ']].';
 			}
+			if (!options.summary) {
+				options.summary = 'Copy from [[' + title.title + ']].';
+			}
+			_this.actions.unshift(
 			// wiki.edit(page, options, callback)
-			_this.actions
-					.unshift([ 'edit', content_to_copy, options, callback ]);
+			[ 'edit', content_to_copy, options, callback ]);
 			_this.next();
 		}
 
@@ -4422,7 +4426,7 @@ function module_code(library_namespace) {
 			if (!get_URL_options) {
 				var session = options && (options[KEY_SESSION]
 				// 檢查若 options 本身即為 session。
-				|| is_wiki_API(options));
+				|| is_wiki_API(options) && options);
 				if (session) {
 					// assert: get_URL_options 為 session。
 					if (!session.get_URL_options) {
@@ -4474,7 +4478,7 @@ function module_code(library_namespace) {
 
 							var session = options && (options[KEY_SESSION]
 							// 檢查若 options 本身即為 session。
-							|| is_wiki_API(options));
+							|| is_wiki_API(options) && options);
 							if (session) {
 								session.running = false;
 							}
@@ -6053,6 +6057,7 @@ function module_code(library_namespace) {
 
 		library_namespace.debug('Try to get the ' + type + 'token ...', 1,
 				'wiki_API.prototype.get_token');
+		// console.log(this);
 		wiki_API.query([ session.API_URL,
 		// https://www.mediawiki.org/wiki/API:Tokens
 		// 'query&meta=tokens&type=csrf|login|watch'
@@ -6062,15 +6067,16 @@ function module_code(library_namespace) {
 			if (data && data.query && data.query.tokens) {
 				// 設定 tokens。
 				Object.assign(session.token, data.query.tokens);
-				library_namespace
-						.debug(type + 'token: '
-						//
-						+ session.token[type + 'token']
-						//
-						+ (session.token[type + 'token'] === '+\\'
-						//
-						? ' (login as anonymous!)' : ''), 1,
-								'wiki_API.prototype.token');
+				library_namespace.debug(
+				//
+				type + 'token: ' + session.token[type + 'token']
+				//
+				+ (session.token[type + 'token'] === '+\\'
+				//
+				? ' (login as anonymous!)' : ''),
+				//
+				1, 'wiki_API.prototype.token');
+				// console.log(this);
 				callback(session.token[type + 'token'] || session.token);
 				return;
 			}
