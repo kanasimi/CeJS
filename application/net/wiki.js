@@ -3641,6 +3641,7 @@ function module_code(library_namespace) {
 					if (result.edit.newrevid) {
 						// https://en.wikipedia.org/wiki/Help:Wiki_markup#Linking_to_old_revisions_of_pages.2C_diffs.2C_and_specific_history_pages
 						// https://zh.wikipedia.org/?diff=000
+						// cf. [[Special:Permalink/0|title]]
 						error = ' [[Special:Diff/' + result.edit.newrevid + '|'
 								+ gettext('finished') + ']]';
 						result = 'succeed';
@@ -7151,7 +7152,7 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
-	// rollback 僅能撤銷/回退最新版本之作者一系列所有編輯
+	// rollback 僅能快速撤銷/回退/還原某一頁面最新版本之作者(最後一位使用者)一系列所有編輯至另一作者的編輯
 	// The rollback revision will be marked as minor.
 	wiki_API.rollback = function(options, callback) {
 		var session = options[KEY_SESSION];
@@ -9705,7 +9706,7 @@ function module_code(library_namespace) {
 							// 記事だけを編集する
 							return [ CeL.wiki.edit.cancel,
 							//
-							'本作業僅處理條目命名空間或模板或category' ];
+							'本作業僅處理條目命名空間或模板或 Category' ];
 							throw '非條目:[[' + page_data.title
 							//
 							+ ']]! 照理來說不應該出現有 ns !== 0 的情況。';
