@@ -4735,8 +4735,8 @@ function module_code(library_namespace) {
 			}
 
 		} else if (library_namespace.is_Object(page_data)) {
-			if (page_data.pageid)
-				// 有 pageid 則使用之，以加速 search。
+			if (page_data.pageid > 0)
+				// 有正規之 pageid 則使用之，以加速 search。
 				pageid = page_data.pageid;
 			else
 				page_data = page_data.title;
@@ -5116,6 +5116,15 @@ function module_code(library_namespace) {
 					+ ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
 					page_list = page_list[0];
 					if (get_page_content.is_page_data(title)) {
+						// 去除掉可能造成誤判的錯誤標記 'missing'。
+						// 即使真有錯誤，也由page_list提供即可。
+						if ('missing' in title) {
+							delete title.missing;
+							// 去掉該由page_list提供的資料。因為下次呼叫時可能會被利用到。例如之前找不到頁面，.pageid被設成-1，下次呼叫被利用到就會出問題。
+							// ** 照理說這兩者都必定會出現在page_list。
+							// delete title.pageid;
+							// delete title.title;
+						}
 						// import data to original page_data. 盡可能多保留資訊。
 						page_list = Object.assign(title, page_list);
 					}
