@@ -1460,7 +1460,7 @@ function module_code(library_namespace) {
 				return token;
 			});
 
-			// 正規化 template name。
+			// 'Defaultsort' → 'DEFAULTSORT'
 			parameters.name = typeof parameters[0][0] === 'string'
 			// test if token is [[Help:Magic words]]
 			&& parameters[0][0].toUpperCase();
@@ -1468,6 +1468,8 @@ function module_code(library_namespace) {
 				// 此時以 parameters[0][1] 可獲得首 parameter。
 				parameters.is_magic_word = true;
 			} else {
+				// 正規化 template name。
+				// 'ab/cd' → 'Ab/cd'
 				parameters.name = normalize_page_name(parameters[0].toString());
 			}
 			parameters.parameters = _parameters;
@@ -2540,7 +2542,7 @@ function module_code(library_namespace) {
 		// 一般都會輸入 page_data: {"pageid":0,"ns":0,"title":""}
 		// : typeof page_data === 'string' ? page_data
 
-		// ('missing' in page_data): 此頁面已刪除。
+		// ('missing' in page_data): 此頁面不存在/已刪除。
 		// e.g., { ns: 0, title: 'title', missing: '' }
 		// TODO: 提供此頁面的刪除和移動日誌以便參考。
 		return page_data && ('missing' in page_data) ? undefined
@@ -4863,6 +4865,7 @@ function module_code(library_namespace) {
 					;
 
 				if (!prop || page_data && ('missing' in page_data)) {
+					// 此頁面不存在/已刪除。
 					callback(page_data);
 				} else {
 					library_namespace.debug('Get property: [' + prop + ']', 1,
@@ -4962,9 +4965,10 @@ function module_code(library_namespace) {
 		if (!action[0])
 			action = action[1];
 
-		if (false)
+		if (false) {
 			library_namespace.debug('get url token: ' + action, 0,
 					'wiki_API.page');
+		}
 
 		wiki_API.query(action, typeof callback === 'function'
 		//
@@ -5071,7 +5075,7 @@ function module_code(library_namespace) {
 
 					if (need_warn) {
 						library_namespace.warn('wiki_API.page: '
-						// 頁面不存在。Page does not exist. Deleted?
+						// 此頁面不存在/已刪除。Page does not exist. Deleted?
 						+ ('missing' in page ? 'Not exists' : 'No content')
 						//
 						+ ': ' + (page.title ? '[[' + page.title + ']]'
@@ -5115,6 +5119,9 @@ function module_code(library_namespace) {
 					//
 					+ ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
 					page_list = page_list[0];
+					if (Array.isArray(title) && title.length === 2) {
+						title = title[1];
+					}
 					if (get_page_content.is_page_data(title)) {
 						// 去除掉可能造成誤判的錯誤標記 'missing'。
 						// 即使真有錯誤，也由page_list提供即可。
@@ -5190,7 +5197,7 @@ function module_code(library_namespace) {
 	wiki_API.redirect_to = function(title, callback, options) {
 		wiki_API.page(title, function(page_data, error) {
 			if (!page_data || ('missing' in page_data) || error) {
-				// error?
+				// error? 此頁面不存在/已刪除。
 				callback(undefined, page_data, error);
 				return;
 			}
@@ -6986,7 +6993,7 @@ function module_code(library_namespace) {
 				pages.push(page);
 				// 僅處理第一頁。
 				if ('missing' in page)
-					// 頁面不存在。Page does not exist. Deleted?
+					// 此頁面不存在/已刪除。Page does not exist. Deleted?
 					library_namespace.warn(
 					//
 					'wiki_API.redirects: Not exists: '
@@ -9370,7 +9377,7 @@ function module_code(library_namespace) {
 		had : function(page_data) {
 			// page_data 為正規?
 			if (!page_data || ('missing' in page_data)) {
-				// error?
+				// error? 此頁面不存在/已刪除。
 				return 'missing';
 			}
 
@@ -9708,7 +9715,7 @@ function module_code(library_namespace) {
 
 					if (false) {
 						if (!page_data || ('missing' in page_data)) {
-							// error?
+							// error? 此頁面不存在/已刪除。
 							return [ CeL.wiki.edit.cancel, '條目已不存在或被刪除' ];
 						}
 						if (page_data.ns !== 0) {
@@ -11379,7 +11386,7 @@ function module_code(library_namespace) {
 			} else {
 				wikidata_entity(id, options.props, function(entity) {
 					if (entity && ('missing' in entity)) {
-						// TODO
+						// TODO 此頁面不存在/已刪除。
 					}
 					delete options.props;
 					delete options.languages;
