@@ -181,6 +181,9 @@ function module_code(library_namespace) {
 				&& ((value instanceof wiki_API) || value.API_URL && value.token);
 	}
 
+	// [ prefix, language ]
+	var PATTERN_URL_prefix = /^https?:\/\/([a-z\-\d]{2,20})\./i;
+
 	/**
 	 * 測試看看指定值是否為API語言以及頁面標題或者頁面。
 	 * 
@@ -192,24 +195,51 @@ function module_code(library_namespace) {
 	 *          {Object}page_data ]
 	 */
 	function is_api_and_title(value, type, ignore_api) {
-		return Array.isArray(value) && value.length === 2
-		// type === true: simple test, do not test more.
-		&& type === true
+		// console.trace(value);
 
-		// test [0]: {String}API_URL/language
-		|| (ignore_api && !value[0]
-		// 處理 [ {String}API_URL/language, {String}title or {Object}page_data ]
-		|| typeof value[0] === 'string' && (type === 'language'
+		if (!Array.isArray(value) || value.length !== 2) {
+			return false;
+		}
+
+		if (type) {
+			// type === true: simple test, do not test more.
+			return true;
+		}
+
+		var title = value[1];
+
+		// test title: {String}title or {Object}page_data or {Array}titles
+		if (!title || typeof title !== 'string' && !Array.isArray(title)
+		// 為了預防輸入的是問題頁面。
+		&& !get_page_content.is_page_data(title)) {
+			return false;
+		}
+
+		var API_URL = value[0];
+
+		// test API_URL: {String}API_URL/language
+		if (!API_URL) {
+			return !!ignore_api;
+		}
+
+		if (typeof API_URL !== 'string') {
+			return false;
+		}
+
 		// for property = [ {String}language, {String}title or {Array}titles ]
-		? /^[a-z]{2,3}$/i.test(value[0])
+		if (type === 'language') {
+			return /^[a-z]{2,3}$/i.test(API_URL);
+		}
+
+		// 處理 [ {String}API_URL/language, {String}title or {Object}page_data ]
+		var metched = PATTERN_URL_prefix.test(API_URL);
+		if (type === 'URL') {
+			return metched;
+		}
+
 		// for key = [ {String}language, {String}title or {Array}titles ]
 		// for id = [ {String}language/site, {String}title ]
-		: /^[a-z\-\d]{2,20}$/i.test(value[0]))
-
-		// test [1]: {String}title or {Object}page_data or {Array}titles
-		&& value[1] && (typeof value[1] === 'string' || Array.isArray(value[1])
-		// 為了預防輸入的是問題頁面。
-		|| get_page_content.is_page_data(value[1])));
+		return metched || /^[a-z\-\d]{2,20}$/i.test(API_URL);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -2271,7 +2301,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('Can not parse URL: [' + URL
 					+ ']. Not a wikipedia link?', 3, 'URL_to_wiki_link');
 			if (add_quote) {
-				if (/^https?:\/\//i.test(URL)) {
+				if (PATTERN_URL_prefix.test(URL)) {
 					// 當作正常外部連結 external link。
 					// e.g., 'http://a.b.c ABC'
 
@@ -4573,7 +4603,7 @@ function module_code(library_namespace) {
 									+ ']。', 1, 'wiki_API.query');
 					language = typeof action[0] === 'string'
 					// TODO: 似乎不能真的擷取到所需 language。
-					&& action[0].match(/^https?:\/\/([a-z\-\d]{2,20})\./);
+					&& action[0].match(PATTERN_URL_prefix);
 					language = language && language[1] || default_language;
 					// e.g., wiki_API.query: Get "ja" from
 					// ["https://ja.wikipedia.org/w/api.php?action=edit&format=json&utf8",{}]
