@@ -169,10 +169,47 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// 檢查若 value 為 session。
+	/**
+	 * 檢查若 value 為 session。
+	 * 
+	 * @param value
+	 * 
+	 * @returns {Boolean}value 為 session。
+	 */
 	function is_wiki_API(value) {
 		return value
 				&& ((value instanceof wiki_API) || value.API_URL && value.token);
+	}
+
+	/**
+	 * 測試看看指定值是否為API語言以及頁面標題或者頁面。
+	 * 
+	 * @param value
+	 * @param {Boolean}[type]
+	 * @param {Boolean}[ignore_api]
+	 * 
+	 * @returns {Boolean}value 為 [ {String}API_URL/language, {String}title or
+	 *          {Object}page_data ]
+	 */
+	function is_api_and_title(value, type, ignore_api) {
+		return Array.isArray(value) && value.length === 2
+		// type === true: simple test, do not test more.
+		&& type === true
+
+		// test [0]: {String}API_URL/language
+		|| (ignore_api && !value[0]
+		// 處理 [ {String}API_URL/language, {String}title or {Object}page_data ]
+		|| typeof value[0] === 'string' && (type === 'language'
+		// for property = [ {String}language, {String}title or {Array}titles ]
+		? /^[a-z]{2,3}$/i.test(value[0])
+		// for key = [ {String}language, {String}title or {Array}titles ]
+		// for id = [ {String}language/site, {String}title ]
+		: /^[a-z\-\d]{2,20}$/i.test(value[0]))
+
+		// test [1]: {String}title or {Object}page_data or {Array}titles
+		&& value[1] && (typeof value[1] === 'string' || Array.isArray(value[1])
+		// 為了預防輸入的是問題頁面。
+		|| get_page_content.is_page_data(value[1])));
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -4791,17 +4828,17 @@ function module_code(library_namespace) {
 
 	// TODO: copy from wiki_API.page()
 	function normalize_title_parameter(title, options) {
-		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!Array.isArray(title)
 		// 為了預防輸入的是問題頁面。
-		|| title.length !== 2 || typeof title[0] === 'object')
+		if (!is_api_and_title(title)) {
 			title = [ , title ];
+		}
 		title[1] = wiki_API.query.title_param(title[1], true, options
 				&& options.is_id);
 
-		if (options && options.redirects)
+		if (options && options.redirects) {
 			// 毋須 '&redirects=1'
 			title[1] += '&redirects';
+		}
 
 		return title;
 	}
@@ -4892,9 +4929,7 @@ function module_code(library_namespace) {
 		var action = Array.isArray(title) ? title.clone() : title;
 
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!Array.isArray(action)
-		// 為了預防輸入的是問題頁面。
-		|| action.length !== 2 || typeof action[0] === 'object') {
+		if (!is_api_and_title(action)) {
 			// assert: {Array}((action = title)) 為 page list。
 			// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
 			action = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL,
@@ -5119,7 +5154,7 @@ function module_code(library_namespace) {
 					//
 					+ ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
 					page_list = page_list[0];
-					if (Array.isArray(title) && title.length === 2) {
+					if (is_api_and_title(title, true)) {
 						title = title[1];
 					}
 					if (get_page_content.is_page_data(title)) {
@@ -5299,22 +5334,24 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.langlinks = function(title, callback, to_lang, options) {
 		var from_lang;
-		if (Array.isArray(title) && title.length === 2
-				&& (!title[0] || typeof title[0] === 'string'))
-			from_lang = title[0], title = title[1];
+		if (is_api_and_title(title, 'language', true)) {
+			from_lang = title[0];
+			title = title[1];
+		}
 		title = 'query&prop=langlinks&'
 				+ wiki_API.query.title_param(title, true, options
 						&& options.is_id);
-		if (to_lang)
+		if (to_lang) {
 			title += (to_lang > 0 || to_lang === 'max' ? '&lllimit='
 					: '&lllang=')
 					+ to_lang;
+		}
 		if (options && (options.limit > 0 || options.limit === 'max'))
 			title += '&lllimit=' + options.limit;
 		// console.log('ll title:' + title);
-		if (from_lang)
-			// llinlanguagecode 無效。
+		if (from_lang) {// llinlanguagecode 無效。
 			title = [ from_lang, title ];
+		}
 
 		wiki_API.query(title, typeof callback === 'function'
 		//
@@ -6930,9 +6967,7 @@ function module_code(library_namespace) {
 		var action = Array.isArray(title) ? title.clone() : title;
 
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!Array.isArray(action)
-		// 為了預防輸入的是問題頁面。
-		|| action.length !== 2 || typeof action[0] === 'object') {
+		if (!is_api_and_title(action)) {
 			// assert: {Array}((action = title)) 為 page list。
 			// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
 			action = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL,
@@ -9950,10 +9985,9 @@ function module_code(library_namespace) {
 	 */
 	function Flow_info(title, callback, options) {
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!Array.isArray(title)
-		// 為了預防輸入的是問題頁面。
-		|| title.length !== 2 || typeof title[0] === 'object')
+		if (!is_api_and_title(title)) {
 			title = [ , title ];
+		}
 		title[1] = wiki_API.query.title_param(title[1], true, options
 				&& options.is_id);
 
@@ -10085,10 +10119,9 @@ function module_code(library_namespace) {
 	 */
 	function Flow_page(title, callback, options) {
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!Array.isArray(title)
-		// 為了預防輸入的是問題頁面。
-		|| title.length !== 2 || typeof title[0] === 'object')
+		if (!is_api_and_title(title)) {
 			title = [ , title ];
+		}
 
 		var page_data;
 		if (get_page_content.is_page_data(title[1]))
@@ -11035,10 +11068,7 @@ function module_code(library_namespace) {
 			property = [ options.language || default_language, property ];
 		}
 
-		if (Array.isArray(property) && property.length === 2
-		// for property =
-		// [ {String}language, {String}title or {Array}titles ]
-		&& /^[a-z]{2,3}$/i.test(property[0])) {
+		if (is_api_and_title(property, 'language')) {
 			// TODO: property 可能是 [ language code, 'labels|aliases' ] 之類。
 			// property.join(':')
 			var property_title = property[0] + ':' + property[1];
@@ -11077,9 +11107,7 @@ function module_code(library_namespace) {
 			key = [ options.language || default_language, key ];
 
 		if (Array.isArray(key)) {
-			if (Array.isArray(key) && key.length === 2
-			// for key = [ {String}language, {String}title or {Array}titles ]
-			&& /^[a-z\-\d]{2,20}$/i.test(key[0])) {
+			if (is_api_and_title(key)) {
 				wikidata_search(key, function(id) {
 					if (id) {
 						library_namespace.debug(
@@ -11434,9 +11462,7 @@ function module_code(library_namespace) {
 			// e.g., 'Q1'
 			options.id = id;
 
-		} else if (Array.isArray(id) && id.length === 2
-		// for id = [ {String}language/site, {String}title ]
-		&& /^[a-z]{2,20}$/i.test(id[0])) {
+		} else if (is_api_and_title(id)) {
 			options.site = language_to_site(id[0]);
 			options.title = id[1];
 
