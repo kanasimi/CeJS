@@ -181,8 +181,18 @@ function module_code(library_namespace) {
 				&& ((value instanceof wiki_API) || value.API_URL && value.token);
 	}
 
-	// [ prefix, language ]
-	var PATTERN_URL_prefix = /^https?:\/\/([a-z\-\d]{2,20})\./i;
+	/**
+	 * 匹配以URL網址起始。
+	 * 
+	 * matched: [ prefix, 第一 domain name(e.g., language) ]
+	 * 
+	 * @type {RegExp}
+	 * 
+	 * @see PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL
+	 */
+	var PATTERN_URL_prefix = /^https?:\/\/([^.:\\\/]{1,20})\./i;
+	// ↓ 這會無法匹配中文域名。
+	// PATTERN_URL_prefix = /^https?:\/\/([a-z\-\d]{1,20})\./i;
 
 	/**
 	 * 測試看看指定值是否為API語言以及頁面標題或者頁面。
@@ -255,6 +265,8 @@ function module_code(library_namespace) {
 	 * matched: [ protocol + host name, protocol, host name, language / project ]
 	 * 
 	 * @type {RegExp}
+	 * 
+	 * @see PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL
 	 */
 	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z\-\d]{2,20})(?:\.[a-z]+)+)/i;
 
@@ -2268,6 +2280,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
+	 * @see PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
 	 */
 	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z\-\d]{2,20})\.(?:m\.)?wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
@@ -4603,8 +4616,8 @@ function module_code(library_namespace) {
 									+ ']。', 1, 'wiki_API.query');
 					language = typeof action[0] === 'string'
 					// TODO: 似乎不能真的擷取到所需 language。
-					&& action[0].match(PATTERN_URL_prefix);
-					language = language && language[1] || default_language;
+					&& action[0].match(PATTERN_wiki_project_URL);
+					language = language && language[3] || default_language;
 					// e.g., wiki_API.query: Get "ja" from
 					// ["https://ja.wikipedia.org/w/api.php?action=edit&format=json&utf8",{}]
 					library_namespace.debug('Get "' + language + '" from '
