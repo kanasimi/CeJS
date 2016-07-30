@@ -184,13 +184,13 @@ function module_code(library_namespace) {
 	/**
 	 * 匹配以URL網址起始。
 	 * 
-	 * matched: [ prefix, 第一 domain name(e.g., language) ]
+	 * matched: [ prefix ]
 	 * 
 	 * @type {RegExp}
 	 * 
 	 * @see PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL
 	 */
-	var PATTERN_URL_prefix = /^https?:\/\/([^.:\\\/]{1,20})\./i;
+	var PATTERN_URL_prefix = /^https?:\/\/[^.:\\\/]{1,20}\.[^.:\\\/]{1,20}/i;
 	// ↓ 這會無法匹配中文域名。
 	// PATTERN_URL_prefix = /^https?:\/\/([a-z\-\d]{1,20})\./i;
 
@@ -262,7 +262,8 @@ function module_code(library_namespace) {
 	/**
 	 * Wikimedia projects 的 URL match pattern 匹配模式。
 	 * 
-	 * matched: [ protocol + host name, protocol, host name, language / project ]
+	 * matched: [ protocol + host name, protocol, host name, 第一 domain name
+	 * (e.g., language code / project) ]
 	 * 
 	 * @type {RegExp}
 	 * 
@@ -2274,7 +2275,8 @@ function module_code(library_namespace) {
 	/**
 	 * Wikipedia:Wikimedia sister projects 之 URL 匹配模式。
 	 * 
-	 * matched: [ all, language code, title 條目名稱, section 章節, link說明 ]
+	 * matched: [ all, 第一 domain name (e.g., language code / project), title
+	 * 條目名稱, section 章節, link說明 ]
 	 * 
 	 * TODO: /wiki/條目#hash 說明
 	 * 
