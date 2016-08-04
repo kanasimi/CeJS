@@ -708,6 +708,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		onload = false;
 	}
 
+	var _URL = node_url.parse(URL);
 	if (options.agent) {
 		library_namespace.debug('使用'
 				+ (options.agent === true ? '新' : '自定義') + ' agent。', 6, 'get_URL_node');
@@ -717,7 +718,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		}
 	}
 
-	var request, _URL = node_url.parse(URL),
+	var request,
 	//
 	agent = options.agent || (_URL.protocol === 'https:' ? node_https_agent : node_http_agent),
 	//
