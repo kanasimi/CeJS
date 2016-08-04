@@ -850,8 +850,8 @@ function module_code(library_namespace) {
 			throw new Error('.toString() not exists for type [' + type + ']!');
 		}
 
-		// token.toString = wiki_toString[type];
-		Object.defineProperty(token, 'toString', wiki_toString[type]);
+		token.toString = wiki_toString[type];
+		// Object.defineProperty(token, 'toString', wiki_toString[type]);
 
 		if (false) {
 			var depth;
