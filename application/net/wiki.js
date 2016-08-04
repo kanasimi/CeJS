@@ -203,7 +203,7 @@ function module_code(library_namespace) {
 	 * 
 	 * "\0" 應該改成 include_mark。
 	 * 
-	 * matched: [ all, prefix, URL, protocol without ":", others ]
+	 * matched: [ all, prevoius, URL, protocol without ":", others ]
 	 * 
 	 * @type {RegExp}
 	 * 
@@ -846,9 +846,12 @@ function module_code(library_namespace) {
 			token.is_atom = true;
 		}
 		// check
-		if (false && !wiki_toString[type])
+		if (false && !wiki_toString[type]) {
 			throw new Error('.toString() not exists for type [' + type + ']!');
-		token.toString = wiki_toString[type];
+		}
+
+		// token.toString = wiki_toString[type];
+		Object.defineProperty(token, 'toString', wiki_toString[type]);
 
 		if (false) {
 			var depth;
@@ -2079,13 +2082,13 @@ function module_code(library_namespace) {
 		// @see [[w:en:Help:Link#Http: and https:]]
 
 		wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL, function(
-				all, prefix, URL) {
+				all, prevoius, URL) {
 			all = _set_wiki_type(URL, 'url');
 			// 須注意:此裸露 URL 之 type 與 external link 內之type相同！
 			// 因此需要測試 token.is_bare 以確定是否在 external link 內。
 			all.is_bare = true;
 			queue.push(all);
-			return prefix + include_mark + (queue.length - 1) + end_mark;
+			return prevoius + include_mark + (queue.length - 1) + end_mark;
 		});
 
 		// ↑ parse sequence finished
