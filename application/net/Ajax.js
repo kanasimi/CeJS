@@ -708,19 +708,19 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		onload = false;
 	}
 
-	var _URL = node_url.parse(URL);
-	if (options.agent) {
+	var _URL = node_url.parse(URL), agent = options.agent;
+	if (agent) {
 		library_namespace.debug('使用'
-				+ (options.agent === true ? '新' : '自定義') + ' agent。', 6, 'get_URL_node');
-		if (options.agent === true) {
+				+ (agent === true ? '新' : '自定義') + ' agent。', 6, 'get_URL_node');
+		if (agent === true) {
 			// use new agent
-			options.agent = _URL.protocol === 'https:' ? new node_https.Agent : new node_http.Agent;
+			agent = _URL.protocol === 'https:' ? new node_https.Agent : new node_http.Agent;
 		}
+	} else {
+		agent = _URL.protocol === 'https:' ? node_https_agent : node_http_agent;
 	}
 
 	var request,
-	//
-	agent = options.agent || (_URL.protocol === 'https:' ? node_https_agent : node_http_agent),
 	//
 	_onload = function(result) {
 		if (/^3/.test(result.statusCode) && result.headers.location
@@ -845,9 +845,10 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			'Content-Length' : post_data.length
 		});
 	}
-	if (options.method)
+	if (options.method) {
 		// e.g., 'HEAD'
 		_URL.method = options.method;
+	}
 
 	_URL.agent = agent;
 	if (agent.last_cookie) {
@@ -860,7 +861,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 						.join(';') : agent.last_cookie);
 		// console.log(_URL.headers.Cookie);
 	}
-	library_namespace.debug('set protocol ' + _URL.protocol, 3, 'get_URL_node');
+	library_namespace.debug('set protocol: ' + _URL.protocol, 3, 'get_URL_node');
 	// console.log(_URL.headers);
 	request = _URL.protocol === 'https:' ? node_https.request(_URL, _onload)
 			: node_http.request(_URL, _onload);
