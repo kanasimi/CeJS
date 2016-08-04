@@ -181,6 +181,21 @@ function module_code(library_namespace) {
 				&& ((value instanceof wiki_API) || value.API_URL && value.token);
 	}
 
+	var
+	/**
+	 * 匹配URL網址。
+	 * 
+	 * [http://...]<br />
+	 * {{|url=http://...}}
+	 * 
+	 * matched: [ URL ]
+	 * 
+	 * @type {RegExp}
+	 * 
+	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_prefix, PATTERN_WIKI_URL,
+	 *      PATTERN_wiki_project_URL, PATTERN_external_link_global
+	 */
+	PATTERN_URL_GLOBAL = /(?:https?:)?\/\/[^\s\|{}<>\[\]]+/ig,
 	/**
 	 * 匹配以URL網址起始。
 	 * 
@@ -188,11 +203,12 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
-	 * @see PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL
+	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_prefix, PATTERN_WIKI_URL,
+	 *      PATTERN_wiki_project_URL, PATTERN_external_link_global
 	 */
-	var PATTERN_URL_prefix = /^https?:\/\/[^.:\\\/]{1,20}\.[^.:\\\/]{1,20}/i;
+	PATTERN_URL_prefix = /^(?:https?:)?\/\/[^.:\\\/]{1,20}\.[^.:\\\/]{1,20}/i;
 	// ↓ 這會無法匹配中文域名。
-	// PATTERN_URL_prefix = /^https?:\/\/([a-z\-\d]{1,20})\./i;
+	// PATTERN_URL_prefix = /^(?:https?:)?\/\/([a-z\-\d]{1,20})\./i,
 
 	/**
 	 * 測試看看指定值是否為API語言以及頁面標題或者頁面。
@@ -267,7 +283,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
-	 * @see PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL
+	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_prefix, PATTERN_WIKI_URL,
+	 *      PATTERN_wiki_project_URL, PATTERN_external_link_global
 	 */
 	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z\-\d]{2,20})(?:\.[a-z]+)+)/i;
 
@@ -772,8 +789,8 @@ function module_code(library_namespace) {
 	var atom_type = {
 		namespace : true,
 		page_title : true,
-		external_link : true,
-		URL : true,
+		// external_link : true,
+		url : true,
 		style : true,
 		tag_single : true,
 		comment : true
@@ -802,8 +819,9 @@ function module_code(library_namespace) {
 		}
 		// assert: Array.isArray(token)
 		token.type = type;
-		if (type in atom_type)
+		if (type in atom_type) {
 			token.is_atom = true;
+		}
 		// check
 		if (false && !wiki_toString[type])
 			throw new Error('.toString() not exists for type [' + type + ']!');
@@ -882,6 +900,8 @@ function module_code(library_namespace) {
 
 	/** {Object}alias name of type */
 	page_parser.type_alias = {
+		wikilink : 'link',
+		weblink : 'external_link',
 		row : 'table_row',
 		tr : 'table_row',
 		// table_cell 包含 th + td，須自行判別！
@@ -947,8 +967,9 @@ function module_code(library_namespace) {
 			// normalize type
 			// assert: typeof type === 'string'
 			type = type.toLowerCase().replace(/\s/g, '_');
-			if (type in page_parser.type_alias)
+			if (type in page_parser.type_alias) {
 				type = page_parser.type_alias[type];
+			}
 		}
 
 		if (!this.parsed) {
@@ -992,6 +1013,8 @@ function module_code(library_namespace) {
 				// 但這可能性已經在 parse_wikitext() 中偵測並去除。
 				// && type !== 'comment'
 				&& (!max_depth || depth < max_depth)) {
+					token.parent = _this;
+					token.index = index;
 					traversal_tokens(token, depth + 1);
 				}
 			});
@@ -1036,7 +1059,7 @@ function module_code(library_namespace) {
 	// [[Category:]]
 	// {{Stub}}
 	/** {Array}default footer order */
-	var default_footer_order = 'transclusion|Coord,Coord Missing|Authority Control|Featured List,Featured Article,Good Article|Persondata|DEFAULTSORT|category|Stub'
+	var default_footer_order = 'transclusion|Coord,Coord Missing|Authority Control|Featured List,Featured Article,Good Article|Persondata|DEFAULTSORT,デフォルトソート|category|Stub'
 	//
 	.split('|').map(function(name) {
 		if (name.includes(','))
@@ -1208,6 +1231,20 @@ function module_code(library_namespace) {
 	var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
 	/** {RegExp}內部連結的匹配模式。 */
 	PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
+	/**
+	 * Wikimedia projects 的 external link 匹配模式。
+	 * 
+	 * matched: [ all external link wikitext, URL, delimiter, link name ]
+	 * 
+	 * 2016/2/23: 經測試，若為結尾 /$/ 不會 parse 成 external link。<br />
+	 * 2016/2/23: "[ http...]" 中間有空白不會被判別成 external link。
+	 * 
+	 * @type {RegExp}
+	 * 
+	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_prefix, PATTERN_WIKI_URL,
+	 *      PATTERN_wiki_project_URL, PATTERN_external_link_global
+	 */
+	PATTERN_external_link_global = /\[((?:https?:|ftp:)?\/\/[^\s\|{}<>\[\]\/][^\s\|{}<>\[\]]*)(?:(\s)([^\]]*))?\]/gi,
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
 	markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark';
 
@@ -1229,6 +1266,7 @@ function module_code(library_namespace) {
 		// [[:File:image.png]], [[wikt:en:Wiktionary:A]],
 		// [[:en:Template:Editnotices/Group/Wikipedia:Miscellany for deletion]]
 		// [[:en:Marvel vs. Capcom 3: Fate of Two Worlds]]
+		// [[w:en:Help:Link#Http: and https:]]
 		//
 		// 應當使用 [[w:zh:維基百科:編輯提示|編輯提示]] 而非 [[:zh:w:維基百科:編輯提示|編輯提示]]，
 		// 見 [[User:Cewbot/Stop]]。
@@ -1253,11 +1291,11 @@ function module_code(library_namespace) {
 		category : function() {
 			return '[[' + this.join('|') + ']]';
 		},
-		// 內部連結 wikilink / internal link
+		// 內部連結 (wikilink / internal link) + interwiki link
 		link : function() {
 			return '[[' + this.join('|') + ']]';
 		},
-		// 外部連結 external link
+		// 外部連結 external link, external web link
 		external_link : function() {
 			return '[' + this.join(this.delimiter || ' ') + ']';
 		},
@@ -1334,7 +1372,7 @@ function module_code(library_namespace) {
 		}
 	};
 
-	var Magic_words_hash = 'DISPLAYTITLE|DEFAULTSORT|CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
+	var Magic_words_hash = 'DISPLAYTITLE|DEFAULTSORT|デフォルトソート|CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
 			.split('|').to_hash();
 
 	/**
@@ -1469,7 +1507,10 @@ function module_code(library_namespace) {
 			// 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('{{'), prevoius,
 			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
-			_parameters = {};
+			// token.parameters[{String}key] = {String}value
+			_parameters = library_namespace.null_Object(),
+			// token.index_of[{String}key] = {Integer}index
+			parameter_index_of = library_namespace.null_Object();
 			if (index > 0) {
 				prevoius = '{{' + parameters.slice(0, index);
 				parameters = parameters.slice(index + '}}'.length);
@@ -1510,14 +1551,17 @@ function module_code(library_namespace) {
 						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
 						// parser 調用超過一個Template中參數的值，只有最後提供的值會被使用。
 						if (typeof _token === 'string') {
+							parameter_index_of[key] = _index;
 							_parameters[key] = value;
 						} else {
 							// assert: Array.isArray(token)
 							_token = token.clone();
 							_token[0] = value;
+							parameter_index_of[key] = _index;
 							_parameters[key] = _token;
 						}
 					} else {
+						parameter_index_of[index] = _index;
 						_parameters[index++]
 						// TODO: token 本身並未 .trim()
 						= typeof token === 'string' ? _token : token;
@@ -1534,6 +1578,7 @@ function module_code(library_namespace) {
 						library_namespace.err(token);
 					}
 					// TODO: token 本身並未 .trim()
+					parameter_index_of[index] = _index;
 					_parameters[index++] = token;
 				}
 
@@ -1553,6 +1598,7 @@ function module_code(library_namespace) {
 				parameters.name = normalize_page_name(parameters[0].toString());
 			}
 			parameters.parameters = _parameters;
+			parameters.index_of = parameter_index_of;
 
 			_set_wiki_type(parameters, 'transclusion');
 			queue.push(parameters);
@@ -1690,15 +1736,13 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// [http://... ...]
 		// TODO: [{{}} ...]
-		wikitext = wikitext.replace_till_stable(
-		// 2016/2/23: 經測試，若為結尾 /$/ 不會 parse 成 external link。
-		/\[((?:https?:|ftp:)?\/\/[^\/\s][^\]\s]+)(?:(\s)([^\]]*))?\]/gi,
+		wikitext = wikitext.replace_till_stable(PATTERN_external_link_global,
 		//
 		function(all, URL, delimiter, parameters) {
 			URL = [ URL.includes(include_mark)
 			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 			? parse_wikitext(URL, options, queue)
-			//
+			// 以 token[0].toString() 取得 URL。
 			: _set_wiki_type(URL, 'url') ];
 			if (delimiter) {
 				if (normalize)
@@ -2282,7 +2326,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
-	 * @see PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL
+	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_prefix, PATTERN_WIKI_URL,
+	 *      PATTERN_wiki_project_URL, PATTERN_external_link_global
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
 	 */
 	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z\-\d]{2,20})\.(?:m\.)?wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
