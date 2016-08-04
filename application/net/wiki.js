@@ -197,12 +197,13 @@ function module_code(library_namespace) {
 	 *      PATTERN_external_link_global
 	 */
 	PATTERN_URL_GLOBAL = /(?:https?:)?\/\/[^\s\|{}<>\[\]]+/ig,
+
 	/**
 	 * 匹配URL網址，僅用於 parse_wikitext()。
 	 * 
 	 * "\0" 應該改成 include_mark。
 	 * 
-	 * matched: [ URL, protocol without ":", others ]
+	 * matched: [ all, prefix, URL, protocol without ":", others ]
 	 * 
 	 * @type {RegExp}
 	 * 
@@ -210,7 +211,12 @@ function module_code(library_namespace) {
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	PATTERN_URL_WITH_PROTOCOL_GLOBAL = /(https?|s?ftp|telnet|ssh):\/\/([^\s\|{}<>\[\]\/\0][^\s\|{}<>\[\]\0]*)/ig,
+	PATTERN_URL_WITH_PROTOCOL_GLOBAL =
+	// 照理來說應該是這樣的。
+	/([^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|{}<>\[\]\/][^\0\s\|{}<>\[\]]*))/ig,
+	// MediaWiki實際上會parse的。
+	// /([^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|{}<>\[\]]+))/ig,
+
 	/**
 	 * 匹配以URL網址起始。
 	 * 
@@ -1752,6 +1758,7 @@ function module_code(library_namespace) {
 		});
 
 		// ----------------------------------------------------
+		// external link
 		// [http://... ...]
 		// TODO: [{{}} ...]
 		wikitext = wikitext.replace_till_stable(PATTERN_external_link_global,
@@ -2068,12 +2075,16 @@ function module_code(library_namespace) {
 		}
 
 		// ----------------------------------------------------
-		// parse plain URLs in wikitext
+		// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext
+		// @see [[w:en:Help:Link#Http: and https:]]
 		wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL, function(
-				URL, protocol, others) {
-			URL = _set_wiki_type(URL, 'url');
-			queue.push(URL);
-			return include_mark + (queue.length - 1) + end_mark;
+				all, prefix, URL) {
+			all = _set_wiki_type(URL, 'url');
+			// 須注意:此裸露 URL 之 type 與 external link 內之type相同！
+			// 因此需要測試 token.is_bare 以確定是否在 external link 內。
+			all.is_bare = true;
+			queue.push(all);
+			return prefix + include_mark + (queue.length - 1) + end_mark;
 		});
 
 		// ↑ parse sequence finished
