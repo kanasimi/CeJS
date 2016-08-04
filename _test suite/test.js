@@ -2404,11 +2404,14 @@ function test_wiki() {
 		wikitext = 't[http://a.b/ x[[l]]';
 		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'external link');
 		wikitext = '++\npp:http://h /p n\n++';
-		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'plain url');
-		assert([ '++\npp:~~ /p n\n++', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'plain url');
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'plain url #1');
+		assert([ '++\npp:~~ /p n\n++', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'plain url #2');
 		wikitext = 'http://http://h';
-		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'plain url');
-		assert([ '~~', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'plain url');
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'plain url #3');
+		assert([ '~~', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'plain url #4');
+		wikitext = 'http://http://h{{t}}http://s.r[g]ftp://p.q';
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'plain url #5');
+		assert([ '~~{{t}}~~[g]~~', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'plain url #6');
 		wikitext = 't<!--=';
 		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ]);
 		wikitext = 'a[[l]]b';

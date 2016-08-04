@@ -213,9 +213,9 @@ function module_code(library_namespace) {
 	 */
 	PATTERN_URL_WITH_PROTOCOL_GLOBAL =
 	// 照理來說應該是這樣的。
-	/([^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|{}<>\[\]\/][^\0\s\|{}<>\[\]]*))/ig,
+	/(^|[^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|{}<>\[\]\/][^\0\s\|{}<>\[\]]*))/ig,
 	// MediaWiki實際上會parse的。
-	// /([^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|{}<>\[\]]+))/ig,
+	// /(^|[^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|{}<>\[\]]+))/ig,
 
 	/**
 	 * 匹配以URL網址起始。
@@ -2077,6 +2077,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext
 		// @see [[w:en:Help:Link#Http: and https:]]
+
 		wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL, function(
 				all, prefix, URL) {
 			all = _set_wiki_type(URL, 'url');
