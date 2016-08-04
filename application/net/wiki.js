@@ -192,10 +192,25 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
-	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_prefix, PATTERN_WIKI_URL,
-	 *      PATTERN_wiki_project_URL, PATTERN_external_link_global
+	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_WITH_PROTOCOL_GLOBAL,
+	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
+	 *      PATTERN_external_link_global
 	 */
 	PATTERN_URL_GLOBAL = /(?:https?:)?\/\/[^\s\|{}<>\[\]]+/ig,
+	/**
+	 * 匹配URL網址，僅用於 parse_wikitext()。
+	 * 
+	 * "\0" 應該改成 include_mark。
+	 * 
+	 * matched: [ URL, protocol without ":", others ]
+	 * 
+	 * @type {RegExp}
+	 * 
+	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_WITH_PROTOCOL_GLOBAL,
+	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
+	 *      PATTERN_external_link_global
+	 */
+	PATTERN_URL_WITH_PROTOCOL_GLOBAL = /(https?|s?ftp|telnet|ssh):\/\/([^\s\|{}<>\[\]\/\0][^\s\|{}<>\[\]\0]*)/ig,
 	/**
 	 * 匹配以URL網址起始。
 	 * 
@@ -203,8 +218,9 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
-	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_prefix, PATTERN_WIKI_URL,
-	 *      PATTERN_wiki_project_URL, PATTERN_external_link_global
+	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_WITH_PROTOCOL_GLOBAL,
+	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
+	 *      PATTERN_external_link_global
 	 */
 	PATTERN_URL_prefix = /^(?:https?:)?\/\/[^.:\\\/]{1,20}\.[^.:\\\/]{1,20}/i;
 	// ↓ 這會無法匹配中文域名。
@@ -283,8 +299,9 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
-	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_prefix, PATTERN_WIKI_URL,
-	 *      PATTERN_wiki_project_URL, PATTERN_external_link_global
+	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_WITH_PROTOCOL_GLOBAL,
+	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
+	 *      PATTERN_external_link_global
 	 */
 	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z\-\d]{2,20})(?:\.[a-z]+)+)/i;
 
@@ -1241,8 +1258,9 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
-	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_prefix, PATTERN_WIKI_URL,
-	 *      PATTERN_wiki_project_URL, PATTERN_external_link_global
+	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_WITH_PROTOCOL_GLOBAL,
+	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
+	 *      PATTERN_external_link_global
 	 */
 	PATTERN_external_link_global = /\[((?:https?:|ftp:)?\/\/[^\s\|{}<>\[\]\/][^\s\|{}<>\[\]]*)(?:(\s)([^\]]*))?\]/gi,
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
@@ -2049,6 +2067,15 @@ function module_code(library_namespace) {
 			/\[\[([^\|\[\]{}]+)/g;
 		}
 
+		// ----------------------------------------------------
+		// parse plain URLs in wikitext
+		wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL, function(
+				URL, protocol, others) {
+			URL = _set_wiki_type(URL, 'url');
+			queue.push(URL);
+			return include_mark + (queue.length - 1) + end_mark;
+		});
+
 		// ↑ parse sequence finished
 		// ------------------------------------------------------------------------
 
@@ -2326,8 +2353,9 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {RegExp}
 	 * 
-	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_prefix, PATTERN_WIKI_URL,
-	 *      PATTERN_wiki_project_URL, PATTERN_external_link_global
+	 * @see PATTERN_URL_GLOBAL, PATTERN_URL_WITH_PROTOCOL_GLOBAL,
+	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
+	 *      PATTERN_external_link_global
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
 	 */
 	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z\-\d]{2,20})\.(?:m\.)?wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;

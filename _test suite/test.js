@@ -2402,7 +2402,13 @@ function test_wiki() {
 	error_count += CeL.test('CeL.wiki.parser', function(assert) {
 		var wikitext;
 		wikitext = 't[http://a.b/ x[[l]]';
-		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ]);
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'external link');
+		wikitext = '++\npp:http://h /p n\n++';
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'plain url');
+		assert([ '++\npp:~~ /p n\n++', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'plain url');
+		wikitext = 'http://http://h';
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'plain url');
+		assert([ '~~', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'plain url');
 		wikitext = 't<!--=';
 		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ]);
 		wikitext = 'a[[l]]b';
