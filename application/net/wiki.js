@@ -1446,8 +1446,9 @@ function module_code(library_namespace) {
 	 *      Parser.php: PHP parser that converts wiki markup to HTML.
 	 */
 	function parse_wikitext(wikitext, options, queue) {
-		if (!wikitext)
+		if (!wikitext) {
 			return wikitext;
+		}
 
 		function _set_wiki_type(token, type) {
 			// 這可能性已經在下面個別處理程序中偵測並去除。
@@ -1559,7 +1560,9 @@ function module_code(library_namespace) {
 				}
 
 				// 經過改變，需再進一步處理。
-				token = parse_wikitext(token, options, queue);
+				token = parse_wikitext(token, Object.assign({
+					inside_transclusion : true
+				}, options), queue);
 
 				var _token = token;
 				if (Array.isArray(_token)) {
@@ -2081,15 +2084,19 @@ function module_code(library_namespace) {
 		// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext
 		// @see [[w:en:Help:Link#Http: and https:]]
 
-		wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL, function(
-				all, prevoius, URL) {
-			all = _set_wiki_type(URL, 'url');
-			// 須注意:此裸露 URL 之 type 與 external link 內之type相同！
-			// 因此需要測試 token.is_bare 以確定是否在 external link 內。
-			all.is_bare = true;
-			queue.push(all);
-			return prevoius + include_mark + (queue.length - 1) + end_mark;
-		});
+		// 在 transclusion 中不會被當作 bare / plain URL。
+		if (!options || !options.inside_transclusion) {
+			wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL,
+			//
+			function(all, prevoius, URL) {
+				all = _set_wiki_type(URL, 'url');
+				// 須注意:此裸露 URL 之 type 與 external link 內之type相同！
+				// 因此需要測試 token.is_bare 以確定是否在 external link 內。
+				all.is_bare = true;
+				queue.push(all);
+				return prevoius + include_mark + (queue.length - 1) + end_mark;
+			});
+		}
 
 		// ↑ parse sequence finished
 		// ------------------------------------------------------------------------

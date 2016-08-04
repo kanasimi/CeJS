@@ -708,7 +708,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		onload = false;
 	}
 
-	var _URL = node_url.parse(URL), agent = options.agent;
+	var _URL = node_url.parse(URL),
+	// 不改到 options。
+	agent = options.agent;
 	if (agent) {
 		library_namespace.debug('使用'
 				+ (agent === true ? '新' : '自定義') + ' agent。', 6, 'get_URL_node');
