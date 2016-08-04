@@ -709,7 +709,12 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	}
 
 	if (options.agent) {
-		library_namespace.debug('使用自定義 agent。', 6, 'get_URL_node');
+		library_namespace.debug('使用'
+				+ (options.agent === true ? '新' : '自定義') + ' agent。', 6, 'get_URL_node');
+		if (options.agent === true) {
+			// use new agent
+			options.agent = _URL.protocol === 'https:' ? new node_https.Agent : new node_http.Agent;
+		}
 	}
 
 	var request, _URL = node_url.parse(URL),
