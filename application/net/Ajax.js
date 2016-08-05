@@ -790,12 +790,13 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 					switch (encoding && encoding.trim().toLowerCase()) {
 					case 'gzip':
 						library_namespace.debug('gunzip ' + data.length + ' bytes data ...', 2, 'get_URL_node');
-						// 不知為何，於此有時會出現 "TypeError: Object #<Object> has no method 'gunzipSync'"
+						// 可能因為呼叫到舊版library，於此有時會出現 "TypeError: Object #<Object> has no method 'gunzipSync'"
 						try {
 							data = node_zlib.gunzipSync(data);
 						} catch (e) {
 							// TODO: handle exception
 							console.log(e);
+							console.log(_URL);
 							console.log(node_zlib);
 							console.log(data);
 							console.trace('get_URL_node: Error: node_zlib.gunzipSync()');
