@@ -791,8 +791,8 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 							console.log(e);
 							console.log(node_zlib);
 							console.log(data);
-							console.trace(1);
-							throw 1;
+							console.trace('get_URL_node: Error: node_zlib.gunzipSync()');
+							throw e;
 						}
 						break;
 					case 'deflate':
