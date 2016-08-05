@@ -1126,6 +1126,8 @@ function get_intermediate_Array(data) {
  * 取得 text 中，head 與 foot 之間的字串。不包括 head 與 foot。<br />
  * 回傳 undefined 表示沒找到。只是回傳空字串表示其間為空字串。
  * 
+ * TODO: lastIndexOf()
+ * 
  * @example <code>
 
 // More examples: see /_test suite/test.js

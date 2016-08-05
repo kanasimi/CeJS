@@ -783,7 +783,17 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 					switch (encoding && encoding.trim().toLowerCase()) {
 					case 'gzip':
 						library_namespace.debug('gunzip ' + data.length + ' bytes data ...', 2, 'get_URL_node');
-						data = node_zlib.gunzipSync(data);
+						// 不知為何，於此有時會出現 "TypeError: Object #<Object> has no method 'gunzipSync'"
+						try {
+							data = node_zlib.gunzipSync(data);
+						} catch (e) {
+							// TODO: handle exception
+							console.log(e);
+							console.log(node_zlib);
+							console.log(data);
+							console.trace(1);
+							throw 1;
+						}
 						break;
 					case 'deflate':
 						library_namespace.debug('deflate data ' + data.length + ' bytes...', 2, 'get_URL_node');

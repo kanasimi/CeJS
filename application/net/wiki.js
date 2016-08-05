@@ -10699,6 +10699,7 @@ function module_code(library_namespace) {
 	 * @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#Claims_and_Statements
 	 *      https://www.mediawiki.org/wiki/Wikibase/API
 	 *      https://www.mediawiki.org/wiki/Wikibase/Indexing/RDF_Dump_Format#Value_representation
+	 *      https://www.wikidata.org/wiki/Special:ListDatatypes
 	 */
 	function wikidata_datavalue(value, callback, options) {
 		if (Array.isArray(value)) {
