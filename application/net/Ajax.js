@@ -724,6 +724,13 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 	var request,
 	//
+	onfail = typeof options.onfail === 'function' && options.onfail
+	|| function(error) {
+		console.error('get_URL_node: Get error when retrieving [' + URL + ']:');
+		// 這裡用太多並列處理，會造成 error.code "EMFILE"。
+		console.error(error);
+	},
+	//
 	_onload = function(result) {
 		if (/^3/.test(result.statusCode) && result.headers.location
 		//
@@ -792,7 +799,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 							console.log(node_zlib);
 							console.log(data);
 							console.trace('get_URL_node: Error: node_zlib.gunzipSync()');
-							throw e;
+							data = null;
+							onfail(e);
+							return;
 						}
 						break;
 					case 'deflate':
@@ -891,13 +900,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			+ (options.onfail ? 'user defined' : 'default handler'), 3,
 			'get_URL_node');
 
-	request.on('error', typeof options.onfail === 'function' ? options.onfail
-			: function(error) {
-				console.error('get_URL_node: Get error when retrieving [' + URL
-						+ ']:');
-				// 這裡用太多並列處理，會造成 error.code "EMFILE"。
-				console.error(error);
-			});
+	request.on('error', onfail);
 	// 遇到 "Unhandled 'error' event"，或許是 print 到 stdout 時出錯了，不一定是本函數的問題。
 }
 
