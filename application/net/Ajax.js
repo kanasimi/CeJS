@@ -729,6 +729,8 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		console.error('get_URL_node: Get error when retrieving [' + URL + ']:');
 		// 這裡用太多並列處理，會造成 error.code "EMFILE"。
 		console.error(error);
+		// 在出現錯誤時，將 onload 當作 callback。
+		onload(undefined, error);
 	},
 	//
 	_onload = function(result) {
