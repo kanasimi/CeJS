@@ -101,8 +101,8 @@ function module_code(library_namespace) {
 		get_URL(archive_org.API_URL + URL, function(data, error) {
 			if (library_namespace.is_debug(2)) {
 				library_namespace.debug(URL + ': '
-				//
-				+ (error ? 'Error: ' + error : 'OK'), 0, 'archive_org');
+						+ (error ? 'Error: ' + error : 'OK'), 0,
+						'archive_org_operator');
 				console.log(data);
 			}
 
@@ -110,7 +110,7 @@ function module_code(library_namespace) {
 			if (!error && data.status === 503) {
 				need_wait = archive_org.lag_interval;
 				library_namespace.debug('Get status ' + data.status
-						+ '. Try again.', 3, 'archive_org');
+						+ '. Try again.', 3, 'archive_org_operator');
 				to_wait();
 				return;
 			}
@@ -129,7 +129,7 @@ function module_code(library_namespace) {
 			}
 
 			if (!data.url.startsWith(archive_org.URL_prefix)) {
-				library_namespace.warn('archive_org: ' + URL
+				library_namespace.warn('archive_org_operator: ' + URL
 						+ ': archived URL does not starts with "'
 						+ archive_org.URL_prefix + '": ' + data.url + '.');
 			}
@@ -141,8 +141,8 @@ function module_code(library_namespace) {
 			&& URL !== (archived_url = archived_url.replace(/:\d+\//, '/'))
 			// 可能自動轉 https。
 			&& URL !== archived_url.replace('http://', 'https://')) {
-				library_namespace.warn('archive_org: [' + URL + '] != ['
-						+ data.archived_url + '].');
+				library_namespace.warn('archive_org_operator: [' + URL
+						+ '] != [' + data.archived_url + '].');
 			}
 
 			do_callback(data);
@@ -220,6 +220,12 @@ function module_code(library_namespace) {
 		library_namespace.debug('check external link of [' + URL + ']', 3,
 				'check_URL');
 
+		// normalized_URL
+		URL = check_URL.normalize_URL(URL);
+		if (!URL) {
+			return;
+		}
+
 		function do_callback(status, OK) {
 			if (!checked_URL) {
 				// register URL status
@@ -255,12 +261,20 @@ function module_code(library_namespace) {
 		}
 
 		get_URL(URL, function(data, error) {
-
 			if (error || typeof data !== 'object'
 					|| typeof data.responseText !== 'string') {
 				do_callback(error || 'check_URL: Unknown error');
+				return;
 
-			} else if (!status_is_OK(data.status)) {
+			}
+
+			if (options && typeof options.constent_processor === 'function') {
+				options.constent_processor(
+				//
+				data.responseText, URL, data.status);
+			}
+
+			if (!status_is_OK(data.status)) {
 				do_callback(data.status);
 
 			} else if (data.responseText.trim()
@@ -280,6 +294,35 @@ function module_code(library_namespace) {
 
 	/** {Object}check_URL.link_status[URL] = status/error */
 	check_URL.link_status = library_namespace.null_Object();
+
+	/**
+	 * normalize URL to check
+	 * 
+	 * @param {String}URL
+	 *            requested URL
+	 * 
+	 * @returns {String}normalized_URL
+	 */
+	check_URL.normalize_URL = function(URL) {
+		if (!URL) {
+			return URL;
+		}
+
+		URL = String(URL);
+		// URL = URL.toString();
+
+		URL = URL.replace(/#.*/g, '');
+
+		try {
+			URL = decodeURI(URL);
+		} catch (e) {
+		}
+
+		// 去掉 default port。
+		URL = URL.replace(/^([^\/]*\/\/[^\/:]+):80/, '$1');
+
+		return URL;
+	};
 
 	// --------------------------------------------------------------------------------------------
 
