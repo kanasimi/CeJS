@@ -22,7 +22,7 @@ http://www.webcitation.org/archive
 
 // 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
-	// module name. use CeL.net.archive
+	// module name.
 	name : 'application.net.archive',
 	// .includes() @ data.code.compatibility
 	// .between() @ data.native
@@ -86,9 +86,7 @@ function module_code(library_namespace) {
 			});
 		}
 
-		get_URL('http://archive.org/wayback/available?url=' + URL,
-		//
-		function(data) {
+		get_URL(archive_org.API_URL + URL, function(data) {
 			library_namespace.debug(URL + ':', 0, 'archive_org');
 			console.log(data);
 
@@ -184,6 +182,8 @@ function module_code(library_namespace) {
 
 	/** {Natural} 延遲 time in ms。 */
 	archive_org.lag_interval = 500;
+
+	archive_org.API_URL = 'http://archive.org/wayback/available?url=';
 
 	/** {String}URL prefix of cached snapshot. */
 	archive_org.URL_prefix = 'http://web.archive.org/web/';

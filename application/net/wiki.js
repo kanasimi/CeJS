@@ -4727,11 +4727,16 @@ function module_code(library_namespace) {
 				}
 			}
 
-			get_URL(action, function(XMLHttp) {
-				var status_code = XMLHttp.status,
-				//
-				response = XMLHttp.responseText;
-				if (/^[45]/.test(status_code)) {
+			get_URL(action, function(XMLHttp, error) {
+				var status_code, response;
+				if (error) {
+					status_code = error;
+				} else {
+					status_code = XMLHttp.status;
+					response = XMLHttp.responseText;
+				}
+
+				if (error || /^[45]/.test(status_code)) {
 					// e.g., 503, 413
 					if (get_URL_options
 							&& typeof get_URL_options.onfail === 'function') {
