@@ -6562,7 +6562,7 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * @param {Function}callback
-	 *            回調函數。 callback(title, error, result)
+	 *            回調函數。 callback(page_data, error, result)
 	 * @param {String}timestamp
 	 *            頁面時間戳記。 e.g., '2015-01-02T02:52:29Z'
 	 */
@@ -6609,7 +6609,7 @@ function module_code(library_namespace) {
 					// Permission denied
 					'wiki_API.edit: Denied to edit ['
 							+ get_page_title(page_data) + ']');
-					callback(get_page_title(page_data), 'denied');
+					callback(page_data, 'denied');
 
 				} else {
 					if (undo_count) {
@@ -6644,7 +6644,7 @@ function module_code(library_namespace) {
 		var action = !is_undo
 				&& wiki_API.edit.check_data(text, title, 'wiki_API.edit');
 		if (action) {
-			callback(get_page_title(title), action);
+			callback(title, action);
 			return;
 		}
 
@@ -6735,13 +6735,15 @@ function module_code(library_namespace) {
 				 */
 				library_namespace.warn('wiki_API.edit: Error to edit [['
 						+ get_page_title(title) + ']]: ' + error);
-			} else if (data.edit && ('nochange' in data.edit))
+			} else if (data.edit && ('nochange' in data.edit)) {
 				// 在極少的情況下，data.edit === undefined。
 				library_namespace.info('wiki_API.edit: ['
 						+ get_page_title(title) + ']: no change');
-			if (typeof callback === 'function')
+			}
+			if (typeof callback === 'function') {
 				// title.title === get_page_title(title)
-				callback(title.title, error, data);
+				callback(title, error, data);
+			}
 		}, options, session);
 	};
 
