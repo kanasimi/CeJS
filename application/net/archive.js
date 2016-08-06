@@ -43,6 +43,18 @@ function module_code(library_namespace) {
 	function archive_sites() {
 	}
 
+	/**
+	 * Check if the status is OK.
+	 * 
+	 * @param status
+	 *            status to check
+	 * 
+	 * @returns {Boolean}the status is OK.
+	 */
+	function status_is_OK(status) {
+		return status >= 200 && status < 300;
+	}
+
 	// --------------------------------------------------------------------------------------------
 
 	// archive_org_queue = [ [ URL, {Array}callback_list ] ]
@@ -61,7 +73,7 @@ function module_code(library_namespace) {
 
 		function to_wait() {
 			library_namespace.debug('Wait ' + need_wait + ' ms: [' + URL + ']',
-					0, 'archive_org');
+					3, 'archive_org');
 			setTimeout(function() {
 				archive_org_operator(checking_now);
 			}, need_wait);
@@ -86,21 +98,25 @@ function module_code(library_namespace) {
 			});
 		}
 
-		get_URL(archive_org.API_URL + URL, function(data) {
-			library_namespace.debug(URL + ':', 0, 'archive_org');
-			console.log(data);
+		get_URL(archive_org.API_URL + URL, function(data, error) {
+			if (library_namespace.is_debug(2)) {
+				library_namespace.debug(URL + ': '
+				//
+				+ (error ? 'Error: ' + error : 'OK'), 0, 'archive_org');
+				console.log(data);
+			}
 
 			// 短時間內call過多次(應間隔 .5 s?)將503?
-			if (data.status === 503) {
+			if (!error && data.status === 503) {
 				need_wait = archive_org.lag_interval;
 				library_namespace.debug('Get status ' + data.status
-						+ '. Try again.', 0, 'archive_org');
+						+ '. Try again.', 3, 'archive_org');
 				to_wait();
 				return;
 			}
 
-			if (data.status !== 200) {
-				do_callback(undefined, data.status || true);
+			if (error || !status_is_OK(data.status)) {
+				do_callback(undefined, error || data.status || true);
 				return;
 			}
 
@@ -133,12 +149,7 @@ function module_code(library_namespace) {
 
 		}, null, null, {
 			// use new agent
-			agent : true,
-			onfail : function(error) {
-				library_namespace.debug(URL + ': Error: ' + error, 0,
-						'archive_org');
-				do_callback(undefined, error);
-			}
+			agent : true
 		});
 	}
 
@@ -149,7 +160,7 @@ function module_code(library_namespace) {
 	 * archive.org 此 API 只能檢查是否有 snapshot，不能製造 snapshot。
 	 * 
 	 * @param {String}URL
-	 *            請求目的URL or options
+	 *            請求目的URL
 	 * @param {Function}[callback]
 	 *            回調函數。 callback({Object|Undefined}closest_snapshot_data,
 	 *            error);
@@ -161,7 +172,7 @@ function module_code(library_namespace) {
 	function archive_org(URL, callback, options) {
 		var cached_data = archive_org.cached[URL];
 		// 看能不能直接處理掉。
-		if (Array.isArray(cached_data)) {
+		if (cached_data && !cached_data.checking) {
 			library_namespace.debug('已登記 [' + URL + ']。直接處理掉。', 3,
 					'archive_org');
 			callback.apply(null, cached_data);
@@ -169,12 +180,14 @@ function module_code(library_namespace) {
 		}
 
 		// 登記 callback。
-		if (cached_data >= 0) {
-			archive_org_queue[cached_data][1].push(callback);
+		if (cached_data) {
+			cached_data[1].push(callback);
 		} else {
-			// 登記URL，表示正處理中。
-			archive_org.cached[URL] = archive_org_queue.length;
-			archive_org_queue.push([ URL, [ callback ] ]);
+			// 登記 URL，表示正處理中。
+			var checking_now = [ URL, [ callback ] ];
+			checking_now.checking = true;
+			archive_org.cached[URL] = checking_now;
+			archive_org_queue.push(checking_now);
 		}
 
 		archive_org_operator();
@@ -193,9 +206,90 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	/**
+	 * 檢查 URL 之 access 狀態。若不可得，則預先測試 archive sites 是否有 cached data。
+	 * 
+	 * @param {String}URL
+	 *            請求目的URL
+	 * @param {Function}[callback]
+	 *            回調函數。 callback(link_status, cached_data);
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 */
+	function check_URL(URL, callback, options) {
+		library_namespace.debug('check external link of [' + URL + ']', 3,
+				'check_URL');
+
+		function do_callback(status, OK) {
+			if (!checked_URL) {
+				// register URL status
+				check_URL.link_status[URL] = status;
+			}
+
+			if (OK) {
+				callback(status);
+
+			} else {
+				archive_org(URL, function(closest_snapshot_data, error) {
+					// 會先 check archive site 再註銷此 URL，
+					// 確保之後處理時已經有 archived data。
+					callback(status, closest_snapshot_data);
+				});
+			}
+		}
+
+		var checked_URL;
+		if (URL in check_URL.link_status) {
+			checked_URL = URL;
+		} else if ((checked_URL = URL.replace(':80/', '/')) in check_URL.link_status) {
+			// 去掉 port 80。
+			URL = checked_URL;
+		} else {
+			checked_URL = null;
+		}
+
+		if (checked_URL) {
+			checked_URL = check_URL.link_status[URL];
+			do_callback(checked_URL, status_is_OK(checked_URL));
+			return;
+		}
+
+		get_URL(URL, function(data, error) {
+
+			if (error || typeof data !== 'object'
+					|| typeof data.responseText !== 'string') {
+				do_callback(error || 'check_URL: Unknown error');
+
+			} else if (!status_is_OK(data.status)) {
+				do_callback(data.status);
+
+			} else if (data.responseText.trim()
+			//
+			|| (options && options.ignore_empty)) {
+				do_callback(data.status, true);
+
+			} else {
+				do_callback('check_URL: Contents is empty');
+			}
+
+		}, null, null, {
+			// use new agent
+			agent : true
+		});
+	}
+
+	/** {Object}check_URL.link_status[URL] = status/error */
+	check_URL.link_status = library_namespace.null_Object();
+
+	// --------------------------------------------------------------------------------------------
+
 	// export 導出.
 	Object.assign(archive_sites, {
-		archive_org : archive_org
+		status_is_OK : status_is_OK,
+
+		archive_org : archive_org,
+
+		check_URL : check_URL
 	});
 
 	return archive_sites;

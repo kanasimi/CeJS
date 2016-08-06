@@ -1069,8 +1069,9 @@ function module_code(library_namespace) {
 			if (Array.isArray(parsed) && parsed.type === 'text') {
 				this.pop();
 				Array.prototype.push.apply(this, parsed);
-			} else
+			} else {
 				this[0] = parsed;
+			}
 			this.parsed = true;
 		}
 		return this;
@@ -4730,6 +4731,7 @@ function module_code(library_namespace) {
 			get_URL(action, function(XMLHttp, error) {
 				var status_code, response;
 				if (error) {
+					// assert: !!XMLHttp === false
 					status_code = error;
 				} else {
 					status_code = XMLHttp.status;
