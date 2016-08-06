@@ -748,7 +748,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		// http://stackoverflow.com/questions/24667122/http-request-timeout-callback-in-node-js
 		// sometimes both timeout callback and error callback will be called (the error inside the error callback is ECONNRESET - connection reset)
 		// there is a possibilities that it fires on('response', function(response)) callback altogether
-		if (request) {
+		if (!request) {
 			return;
 		}
 		// 註銷登記。
