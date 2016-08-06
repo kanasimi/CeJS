@@ -664,10 +664,11 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	if (get_URL_node_connections > 99) {
 		library_namespace.debug('Waiting ' + get_URL_node_connections
 		// 避免同時開過多 connections 的機制。
-		+ '/' + get_URL_node_requests + ' connections: [' + URL + ']', 0, 'get_URL_node');
+		+ '/' + get_URL_node_requests + ' connections: [' + URL + ']', 3, 'get_URL_node');
+		var _arguments = arguments;
 		setTimeout(function() {
 			get_URL_node_requests--;
-			get_URL_node.apply(null, arguments);
+			get_URL_node.apply(null, _arguments);
 		}, 500);
 		return;
 	}
@@ -753,7 +754,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			return;
 		}
 
-		if (!options || !options.no_error_message) {
+		if (!options || !options.no_warning) {
 			console.error('get_URL_node: Get error when retrieving [' + URL + ']:');
 			// 這裡用太多並列處理，會造成 error.code "EMFILE"。
 			console.error(error);

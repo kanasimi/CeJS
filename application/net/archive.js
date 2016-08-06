@@ -150,7 +150,7 @@ function module_code(library_namespace) {
 		}, null, null, {
 			// use new agent
 			agent : true,
-			no_error_message : true
+			no_warning : true
 		});
 	}
 
@@ -296,7 +296,7 @@ function module_code(library_namespace) {
 		}, null, null, {
 			// use new agent
 			agent : true,
-			no_error_message : true
+			no_warning : true
 		});
 	}
 
