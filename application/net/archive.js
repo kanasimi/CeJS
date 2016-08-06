@@ -332,6 +332,11 @@ function module_code(library_namespace) {
 		// 去掉 default port。
 		URL = URL.replace(/^([^\/]*\/\/[^\/:]+):80/, '$1');
 
+		if (URL.startsWith('//')) {
+			// 自動加協定。
+			URL = 'http:' + URL;
+		}
+
 		return URL;
 	};
 
