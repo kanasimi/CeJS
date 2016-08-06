@@ -1572,7 +1572,7 @@ function module_code(library_namespace) {
 				if (typeof _token === 'string') {
 					_token = _token.trim();
 					// @see function parse_template()
-					var matched = _token.match(/^([^=]+)=(.*)$/);
+					var matched = _token.match(/^([^=]+)=([\s\S]*)$/);
 					if (matched) {
 						var key = matched[1].trimRight(),
 						//

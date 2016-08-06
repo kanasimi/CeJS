@@ -2412,6 +2412,10 @@ function test_wiki() {
 		wikitext = 'http://http://h{{t}}http://s.r[g]ftp://p.q';
 		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'plain url #5');
 		assert([ '~~{{t}}~~[g]~~', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'plain url #6');
+
+		wikitext = '1{{t|a=\nb\n}}{{p|b}}2';
+		assert([ 'b', CeL.wiki.parser(wikitext).parse()[1].parameters.a ], 'template .parameters');
+
 		wikitext = 't<!--=';
 		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ]);
 		wikitext = 'a[[l]]b';

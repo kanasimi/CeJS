@@ -830,7 +830,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 						try {
 							data = node_zlib.gunzipSync(data);
 						} catch (e) {
-							library_namespace.err('get_URL_node: Error: node_zlib.gunzipSync(): ' + e);
+							library_namespace.err('get_URL_node: Error: node_zlib.gunzipSync(): ' + e + ' [' + URL + ']');
 							if (false) {
 								console.log(e);
 								console.log(_URL);

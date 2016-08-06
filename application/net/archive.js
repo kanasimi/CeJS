@@ -135,14 +135,16 @@ function module_code(library_namespace) {
 			}
 
 			var archived_url = data.archived_url = data.url.slice(
-					archive_org.URL_prefix.length).between('/');
+					archive_org.URL_prefix.length).between('/')
+			// e.g., "/index.html?"
+			.replace(/\?$/, '');
 			if (URL !== archived_url
 			// 可能自動加 port。
 			&& URL !== (archived_url = archived_url.replace(/:\d+\//, '/'))
 			// 可能自動轉 https。
 			&& URL !== archived_url.replace('http://', 'https://')) {
-				library_namespace.warn('archive_org_operator: [' + URL
-						+ '] != [' + data.archived_url + '].');
+				library_namespace.warn('archive_org_operator: URL [' + URL
+						+ '] != archived [' + data.archived_url + '].');
 			}
 
 			do_callback(data);
@@ -301,7 +303,7 @@ function module_code(library_namespace) {
 		});
 	}
 
-	/** {Object}check_URL.link_status[URL] = status/error */
+	/** {Object}check_URL.link_status[normalized_URL] = status/error */
 	check_URL.link_status = library_namespace.null_Object();
 
 	/**
