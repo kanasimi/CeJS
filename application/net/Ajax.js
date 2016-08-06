@@ -742,14 +742,24 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	}
 
 	var request,
-	//
+	// assert: 必定從 onfail 或 _onload 作結，以確保會註銷登記。
 	onfail = function(error) {
 		// 註銷登記。
 		get_URL_node_requests--;
 		get_URL_node_connections--;
 
-		(typeof options.onfail === 'function' && options.onfail
-		|| get_URL_node.default_onfail)(error);
+		if (typeof options.onfail === 'function' && options.onfail) {
+			options.onfail(error);
+			return;
+		}
+
+		if (!options || !options.no_error_message) {
+			console.error('get_URL_node: Get error when retrieving [' + URL + ']:');
+			// 這裡用太多並列處理，會造成 error.code "EMFILE"。
+			console.error(error);
+		}
+		// 在出現錯誤時，將 onload 當作 callback。
+		onload(undefined, error);
 	},
 	//
 	_onload = function(result) {
@@ -936,16 +946,6 @@ function get_URL_node(URL, onload, charset, post_data, options) {
  * @type {String}
  */
 get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
-
-get_URL_node.default_onfail = function(error) {
-	if (!options || !options.no_error_message) {
-		console.error('get_URL_node: Get error when retrieving [' + URL + ']:');
-		// 這裡用太多並列處理，會造成 error.code "EMFILE"。
-		console.error(error);
-	}
-	// 在出現錯誤時，將 onload 當作 callback。
-	onload(undefined, error);
-};
 
 
 // setup/reset node agent.
