@@ -950,7 +950,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			+ (options.onfail ? 'user defined' : 'default handler'), 3,
 			'get_URL_node');
 
-	var timeout = options || get_URL_node.default_timeout;
+	var timeout = options.timeout || get_URL_node.default_timeout;
 	if (timeout > 0) {
 		request.setTimeout(timeout);
 		// method 2:
