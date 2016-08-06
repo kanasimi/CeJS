@@ -297,7 +297,7 @@ function get_URL(URL, onload, charset, post_data, options) {
 		// 若檔案不存在，會 throw。
 		XMLHttp.send(post_data || null);
 
-		if (!onload)
+		if (!onload) {
 			// XMLHttp.responseText	會把傳回值當字串用
 			// XMLHttp.responseXML	會把傳回值視為 XMLDocument 物件，而後可用 JavaScript DOM 相關函式處理
 			//	IE only(?):
@@ -306,11 +306,14 @@ function get_URL(URL, onload, charset, post_data, options) {
 			//				http://aspdotnet.cnblogs.com/archive/2005/11/30/287481.html
 			//	XMLHttp.responseStream	return AdoStream
 			return XMLHttp.responseText;
+		}
 
 	} catch (e) {
 		library_namespace.err(e);
 		if (typeof options.onfail === 'function') {
 			options.onfail(XMLHttp, e);
+		} else if (onload) {
+			onload(undefined, e);
 		}
 	}
 
@@ -634,6 +637,8 @@ function merge_cookie(agent, cookie) {
 }
 
 
+var get_URL_node_connections = 0, get_URL_node_requests = 0;
+
 /**
  * 讀取 URL via node http/https。<br />
  * assert: arguments 必須與 get_URL() 相容！
@@ -655,6 +660,20 @@ function merge_cookie(agent, cookie) {
  * @since 2015/1/13 23:23:38
  */
 function get_URL_node(URL, onload, charset, post_data, options) {
+	get_URL_node_requests++;
+	if (get_URL_node_connections > 99) {
+		library_namespace.debug('Waiting ' + get_URL_node_connections
+		// 避免同時開過多 connections 的機制。
+		+ '/' + get_URL_node_requests + ' connections: [' + URL + ']', 0, 'get_URL_node');
+		setTimeout(function() {
+			get_URL_node_requests--;
+			get_URL_node.apply(null, arguments);
+		}, 500);
+		return;
+	}
+	// 進入 request 程序
+	get_URL_node_connections++;
+
 	// 前導作業。
 	if (library_namespace.is_Object(charset)) {
 		post_data = charset;
@@ -724,16 +743,19 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 	var request,
 	//
-	onfail = typeof options.onfail === 'function' && options.onfail
-	|| function(error) {
-		console.error('get_URL_node: Get error when retrieving [' + URL + ']:');
-		// 這裡用太多並列處理，會造成 error.code "EMFILE"。
-		console.error(error);
-		// 在出現錯誤時，將 onload 當作 callback。
-		onload(undefined, error);
+	onfail = function(error) {
+		// 註銷登記。
+		get_URL_node_requests--;
+		get_URL_node_connections--;
+
+		(typeof options.onfail === 'function' && options.onfail
+		|| get_URL_node.default_onfail)(error);
 	},
 	//
 	_onload = function(result) {
+		// 註銷登記。
+		get_URL_node_requests--;
+		get_URL_node_connections--;
 		if (/^3/.test(result.statusCode) && result.headers.location
 		//
 		&& !options.no_redirect) {
@@ -914,6 +936,16 @@ function get_URL_node(URL, onload, charset, post_data, options) {
  * @type {String}
  */
 get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
+
+get_URL_node.default_onfail = function(error) {
+	if (!options || !options.no_error_message) {
+		console.error('get_URL_node: Get error when retrieving [' + URL + ']:');
+		// 這裡用太多並列處理，會造成 error.code "EMFILE"。
+		console.error(error);
+	}
+	// 在出現錯誤時，將 onload 當作 callback。
+	onload(undefined, error);
+};
 
 
 // setup/reset node agent.

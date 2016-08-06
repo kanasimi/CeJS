@@ -149,7 +149,8 @@ function module_code(library_namespace) {
 
 		}, null, null, {
 			// use new agent
-			agent : true
+			agent : true,
+			no_error_message : true
 		});
 	}
 
@@ -205,6 +206,12 @@ function module_code(library_namespace) {
 	archive_org.cached = library_namespace.null_Object();
 
 	// --------------------------------------------------------------------------------------------
+
+	if (false) {
+		var dns = require('dns');
+		// 短時間內 request 過多 host names 會造成 Tool Labs 常常 getaddrinfo ENOTFOUND。
+		dns.setServers(dns.getServers().append([ '8.8.8.8', '8.8.4.4' ]));
+	}
 
 	/**
 	 * 檢查 URL 之 access 狀態。若不可得，則預先測試 archive sites 是否有 cached data。
@@ -288,7 +295,8 @@ function module_code(library_namespace) {
 
 		}, null, null, {
 			// use new agent
-			agent : true
+			agent : true,
+			no_error_message : true
 		});
 	}
 

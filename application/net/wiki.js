@@ -196,7 +196,7 @@ function module_code(library_namespace) {
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	PATTERN_URL_GLOBAL = /(?:https?:)?\/\/[^\s\|{}<>\[\]]+/ig,
+	PATTERN_URL_GLOBAL = /(?:https?:)?\/\/[^\s\|<>\[\]{}]+/ig,
 
 	/**
 	 * 匹配URL網址，僅用於 parse_wikitext()。
@@ -213,9 +213,9 @@ function module_code(library_namespace) {
 	 */
 	PATTERN_URL_WITH_PROTOCOL_GLOBAL =
 	// 照理來說應該是這樣的。
-	/(^|[^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|{}<>\[\]\/][^\0\s\|{}<>\[\]]*))/ig,
+	/(^|[^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|<>\[\]{}\/][^\0\s\|<>\[\]{}]*))/ig,
 	// MediaWiki實際上會parse的。
-	// /(^|[^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|{}<>\[\]]+))/ig,
+	// /(^|[^a-z\d_])((https?|s?ftp|telnet|ssh):\/\/([^\0\s\|<>\[\]{}]+))/ig,
 
 	/**
 	 * 匹配以URL網址起始。
@@ -1272,7 +1272,7 @@ function module_code(library_namespace) {
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	PATTERN_external_link_global = /\[((?:https?:|ftp:)?\/\/[^\s\|{}<>\[\]\/][^\s\|{}<>\[\]]*)(?:(\s)([^\]]*))?\]/gi,
+	PATTERN_external_link_global = /\[((?:https?:|ftp:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:(\s)([^\]]*))?\]/gi,
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
 	markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark';
 
