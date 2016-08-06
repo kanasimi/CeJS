@@ -16,9 +16,7 @@ http://www.webcitation.org/archive
  * @see https://en.wikipedia.org/wiki/Archive_site
  */
 
-// More examples: see /_test suite/test.js
 'use strict';
-// 'use asm';
 
 // --------------------------------------------------------------------------------------------
 
@@ -41,6 +39,9 @@ function module_code(library_namespace) {
 
 	// requiring
 	var get_URL = this.r('get_URL');
+
+	function archive_sites() {
+	}
 
 	// --------------------------------------------------------------------------------------------
 
@@ -193,9 +194,9 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// export 導出.
-	Object.assign(_, {
+	Object.assign(archive_sites, {
 		archive_org : archive_org
 	});
 
-	return _;
+	return archive_sites;
 }
