@@ -252,8 +252,8 @@ function get_URL(URL, onload, charset, post_data, options) {
 		if (options.timeout > 0 && !onload) {
 			XMLHttp.timeout = options.timeout;
 			if (typeof options.onfail === 'function')
-				XMLHttp.ontimeout = function() {
-					options.onfail(XMLHttp);
+				XMLHttp.ontimeout = function(e) {
+					options.onfail(e || 'Timeout');
 				};
 		}
 		// TODO: 處理有 onload 下之 timeout
@@ -536,7 +536,7 @@ deprecated_get_URL.HandleStateChange=function(e,URL,handle_function){	//	e: obje
    }
   }else if(new Date-(m?m.start:deprecated_get_URL.startTime)>deprecated_get_URL.timeout)
    //	timeout & timeout function	http://www.stylusstudio.com/xmldev/199912/post40380.html
-   e=new Error(deprecated_get_URL.timeoutCode,'Timeout!');//_oXMLH.abort();
+   e=new Error(deprecated_get_URL.timeoutCode,'Timeout');//_oXMLH.abort();
  //alert(URL+'\n'+_t+'\n'+e+'\n'+_oXMLH.readyState+'\n'+handle_function);
  if(e){handle_function(e,0,_oXMLH,URL);deprecated_get_URL.doing--;deprecated_get_URL.clean(URL);}//handle_function.apply(e,URL);
 };
@@ -743,18 +743,29 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	}
 
 	var request,
-	// assert: 必定從 onfail 或 _onload 作結，以確保會註銷登記。
-	onfail = function(error) {
+	// assert: 必定從 _onfail 或 _onload 作結，以確保會註銷登記。
+	unregister = function() {
+		// http://stackoverflow.com/questions/24667122/http-request-timeout-callback-in-node-js
+		// sometimes both timeout callback and error callback will be called (the error inside the error callback is ECONNRESET - connection reset)
+		// there is a possibilities that it fires on('response', function(response)) callback altogether
+		if (request) {
+			return;
+		}
 		// 註銷登記。
+		request = null;
 		get_URL_node_requests--;
 		get_URL_node_connections--;
+	},
+	// on failed
+	_onfail = function(error) {
+		unregister();
 
 		if (typeof options.onfail === 'function' && options.onfail) {
 			options.onfail(error);
 			return;
 		}
 
-		if (!options || !options.no_warning) {
+		if (!options.no_warning) {
 			console.error('get_URL_node: Get error when retrieving [' + URL + ']:');
 			// 這裡用太多並列處理，會造成 error.code "EMFILE"。
 			console.error(error);
@@ -762,11 +773,10 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		// 在出現錯誤時，將 onload 當作 callback。
 		onload(undefined, error);
 	},
-	//
+	// on success
 	_onload = function(result) {
-		// 註銷登記。
-		get_URL_node_requests--;
-		get_URL_node_connections--;
+		unregister();
+
 		if (/^3/.test(result.statusCode) && result.headers.location
 		//
 		&& !options.no_redirect) {
@@ -784,7 +794,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		if (options.onfail || /^2/.test(result.statusCode)) {
 			library_namespace.debug('STATUS: ' + result.statusCode, 2,
 					'get_URL_node');
-		} else if (!options || !options.no_warning) {
+		} else if (!options.no_warning) {
 			library_namespace.warn('get_URL_node: [' + URL + ']: status ' + result.statusCode);
 		}
 
@@ -840,7 +850,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 							}
 							// free
 							data = null;
-							onfail(e);
+							_onfail(e);
 							return;
 						}
 						break;
@@ -940,7 +950,29 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			+ (options.onfail ? 'user defined' : 'default handler'), 3,
 			'get_URL_node');
 
-	request.on('error', onfail);
+	var timeout = options || get_URL_node.default_timeout;
+	if (timeout > 0) {
+		request.setTimeout(timeout);
+		// method 2:
+		// setTimeout(function name() {request.end();}, timeout);
+	}
+	// https://nodejs.org/api/http.html#http_request_settimeout_timeout_callback
+	// http://stackoverflow.com/questions/14727115/whats-the-difference-between-req-settimeout-socket-settimeout
+	request.on('timeout', function(e) {
+		// 可能已被註銷。
+		if (request) {
+			try {
+				// http://hylom.net/node-http-request-get-and-timeout
+				// timeoutイベントは発生しているものの、イベント発生後も引き続きレスポンスを待ち続けている
+				request.abort();
+			} catch (e) {
+				// TODO: handle exception
+			}
+			_onfail(e || 'Timeout');
+		}
+	});
+
+	request.on('error', _onfail);
 	// 遇到 "Unhandled 'error' event"，或許是 print 到 stdout 時出錯了，不一定是本函數的問題。
 }
 
@@ -951,6 +983,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
  * @type {String}
  */
 get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
+
+// 2 min
+get_URL_node.default_timeout = 2 * 60 * 1000;
 
 get_URL_node.get_status = function(item) {
 	var status = {
