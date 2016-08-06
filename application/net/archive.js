@@ -161,7 +161,7 @@ function module_code(library_namespace) {
 	 * archive.org 此 API 只能檢查是否有 snapshot，不能製造 snapshot。
 	 * 
 	 * @param {String}URL
-	 *            請求目的URL
+	 *            欲請求之目的 URL
 	 * @param {Function}[callback]
 	 *            回調函數。 callback({Object|Undefined}closest_snapshot_data,
 	 *            error);
@@ -217,21 +217,22 @@ function module_code(library_namespace) {
 	 * 檢查 URL 之 access 狀態。若不可得，則預先測試 archive sites 是否有 cached data。
 	 * 
 	 * @param {String}URL
-	 *            請求目的URL
+	 *            欲請求之目的 URL
 	 * @param {Function}[callback]
 	 *            回調函數。 callback(link_status, cached_data);
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
 	function check_URL(URL, callback, options) {
-		library_namespace.debug('check external link of [' + URL + ']', 3,
-				'check_URL');
-
 		// normalized_URL
 		URL = check_URL.normalize_URL(URL);
-		if (!URL) {
+		if (!URL || !/^([a-z]+:)?\/\//i.test(URL)
+				|| URL.startsWith(archive_org.URL_prefix)) {
+			library_namespace.warn('check_URL: Can not check [' + URL + ']');
 			return;
 		}
+
+		library_namespace.debug('check [' + URL + ']', 3, 'check_URL');
 
 		function do_callback(status, OK) {
 			if (!checked_URL) {
@@ -307,7 +308,7 @@ function module_code(library_namespace) {
 	 * normalize URL to check
 	 * 
 	 * @param {String}URL
-	 *            requested URL
+	 *            欲請求之目的 URL. requested URL
 	 * 
 	 * @returns {String}normalized_URL
 	 */

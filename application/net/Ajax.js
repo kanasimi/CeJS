@@ -155,7 +155,7 @@ document_head = library_namespace.is_WWW(true) && (document.head || document.get
  * 讀取 URL via XMLHttpRequest。
  * 
  * @param {String|Object}URL
- *            請求目的URL or options
+ *            欲請求之目的 URL or options
  * @param {Function}[onload]
  *            callback when successful loaded
  * @param {String}[charset]
@@ -644,7 +644,7 @@ var get_URL_node_connections = 0, get_URL_node_requests = 0;
  * assert: arguments 必須與 get_URL() 相容！
  * 
  * @param {String|Object}URL
- *            請求目的URL or options
+ *            欲請求之目的 URL or options
  * @param {Function}[onload]
  *            callback when successful loaded. For failure handling, using option.onfail(error);
  * @param {String}[charset]
@@ -664,7 +664,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	if (get_URL_node_connections > 99) {
 		library_namespace.debug('Waiting ' + get_URL_node_connections
 		// 避免同時開過多 connections 的機制。
-		+ '/' + get_URL_node_requests + ' connections: [' + URL + ']', 3, 'get_URL_node');
+		+ '/' + get_URL_node_requests + ' connections: ' + JSON.stringify(URL), 3, 'get_URL_node');
 		var _arguments = arguments;
 		setTimeout(function() {
 			get_URL_node_requests--;
@@ -784,7 +784,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		if (options.onfail || /^2/.test(result.statusCode)) {
 			library_namespace.debug('STATUS: ' + result.statusCode, 2,
 					'get_URL_node');
-		} else {
+		} else if (!options || !options.no_warning) {
 			library_namespace.warn('get_URL_node: [' + URL + ']: status ' + result.statusCode);
 		}
 
@@ -826,15 +826,19 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 					case 'gzip':
 						library_namespace.debug('gunzip ' + data.length + ' bytes data ...', 2, 'get_URL_node');
 						// 可能因為呼叫到舊版library，於此有時會出現 "TypeError: Object #<Object> has no method 'gunzipSync'"
+						// 有時會有 Error: unexpected end of file
 						try {
 							data = node_zlib.gunzipSync(data);
 						} catch (e) {
-							// TODO: handle exception
-							console.log(e);
-							console.log(_URL);
-							console.log(node_zlib);
-							console.log(data);
-							console.trace('get_URL_node: Error: node_zlib.gunzipSync()');
+							library_namespace.err('get_URL_node: Error: node_zlib.gunzipSync(): ' + e);
+							if (false) {
+								console.log(e);
+								console.log(_URL);
+								console.log(node_zlib);
+								console.log(data);
+								console.trace('get_URL_node: Error: node_zlib.gunzipSync()');
+							}
+							// free
 							data = null;
 							onfail(e);
 							return;
@@ -948,6 +952,14 @@ function get_URL_node(URL, onload, charset, post_data, options) {
  */
 get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
 
+get_URL_node.get_status = function(item) {
+	var status = {
+		connections : get_URL_node_connections,
+		requests : get_URL_node_requests
+	};
+	return item ? status[item] : status;
+};
+
 
 // setup/reset node agent.
 function setup_node(type, options) {
@@ -1031,7 +1043,7 @@ application.net.wiki wiki_API.cache() CeL.wiki.cache()
  * TODO: 以 HEAD 檢測，若有新版本則不採用 cache。
  * 
  * @param {String|Object}URL
- *            請求目的URL or options
+ *            欲請求之目的 URL or options
  * @param {Function}[onload]
  *            callback when successful loaded. onload(data)
  * @param {Object}[options]
