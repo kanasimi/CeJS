@@ -891,14 +891,17 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 					}
 				}
 
+				// 設定寫入目標。
 				if (options.write_to_directory) {
 					var file_path = options.write_to_directory + '/'
 					//
 					+ URL.replace(/#.*/g, '').replace(/[\\\/:*?"<>|]/g, '_');
-					library_namespace.info('Write ' + buffer.length + ' B to [' + file_path + ']: ' + URL);
+					if (!options.no_warning) {
+						library_namespace.info('Write ' + data.length + ' B to [' + file_path + ']: ' + URL);
+					}
 					try {
 						var fd = node_fs.openSync(file_path, 'w');
-						node_fs.writeSync(fd, buffer, 0, buffer.length, null);
+						node_fs.writeSync(fd, data, 0, data.length, null);
 						node_fs.closeSync(fd);
 					} catch (e) {
 						console.error(e);

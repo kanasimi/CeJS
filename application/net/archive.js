@@ -62,43 +62,47 @@ function module_code(library_namespace) {
 	// running now. token. 表示是否正執行中。
 	archive_org_running;
 
-	function archive_org_operator(checking_now) {
-		if (archive_org_running && !checking_now) {
+	function archive_org_operator() {
+		// 已有其他 thread 執行中。
+		if (archive_org_running
+		// 已無任務。
+		|| archive_org_queue.length === 0) {
 			return;
 		}
 
-		if (!checking_now) {
-			archive_org_running = checking_now = archive_org_queue.shift();
-		}
+		// -------------------
+		// 確認已經等夠時間了。
+
+		var need_wait = archive_org.lag_interval
+				- (Date.now() - archive_org_last_call);
 
 		function to_wait() {
 			library_namespace.debug('Wait ' + need_wait + ' ms: [' + URL + ']',
 					3, 'archive_org');
 			setTimeout(function() {
-				archive_org_operator(checking_now);
+				archive_org_operator();
 			}, need_wait);
 		}
 
-		var need_wait = archive_org.lag_interval
-				- (Date.now() - archive_org_last_call);
 		if (need_wait > 0) {
 			to_wait();
 			return;
 		}
 		archive_org_last_call = Date.now();
 
-		var URL = checking_now[0];
-		function do_callback(data, error) {
-			// 若正執行者，必須負責執行完註銷掉 archive_org_running。
-			archive_org_running = null;
-			// 登記 result。
-			archive_org.cached[URL] = [ data, error ];
-			checking_now[1].forEach(function(callback) {
-				callback.apply(null, arguments);
-			});
-		}
+		// -------------------
+
+		archive_org_running = true;
+
+		// [ URL, {Array}callback_list ]
+		var checking_now = archive_org_queue.shift(),
+		//
+		URL = checking_now[0];
 
 		get_URL(archive_org.API_URL + URL, function(data, error) {
+			// 若正執行者，必須負責執行完註銷掉 archive_org_running。
+			archive_org_running = false;
+
 			if (library_namespace.is_debug(2)) {
 				library_namespace.debug(URL + ': '
 						+ (error ? 'Error: ' + error : 'OK'), 0,
@@ -108,11 +112,29 @@ function module_code(library_namespace) {
 
 			// 短時間內call過多次(應間隔 .5 s?)將503?
 			if (!error && data.status === 503) {
+				// rollback
+				archive_org_queue.unshift(checking_now);
 				need_wait = archive_org.lag_interval;
 				library_namespace.debug('Get status ' + data.status
 						+ '. Try again.', 3, 'archive_org_operator');
 				to_wait();
 				return;
+			}
+
+			function do_callback(data, error) {
+				library_namespace.debug(URL + ': 登記 result: ' + [ data, error ]
+						+ '。', 2, 'archive_org_operator');
+				archive_org.cached[URL] = [ data, error ];
+
+				// 執行callback
+				checking_now[1].forEach(function(callback) {
+					callback.apply(null, arguments);
+				});
+
+				// 執行其他剩下的。
+				if (archive_org_queue.length > 0) {
+					archive_org_operator();
+				}
 			}
 
 			if (error || !status_is_OK(data.status)) {
@@ -152,10 +174,7 @@ function module_code(library_namespace) {
 		}, null, null, {
 			// use new agent
 			agent : true,
-			no_warning : true,
-			headers : {
-				'User-Agent' : archive_sites.default_user_agent
-			}
+			no_warning : true
 		});
 	}
 
@@ -189,7 +208,8 @@ function module_code(library_namespace) {
 		if (cached_data) {
 			cached_data[1].push(callback);
 		} else {
-			// 登記 URL，表示正處理中。
+			library_namespace.debug('登記 URL [' + URL + ']，表示正處理中。', 3,
+					'archive_org');
 			var checking_now = [ URL, [ callback ] ];
 			checking_now.checking = true;
 			archive_org.cached[URL] = checking_now;
