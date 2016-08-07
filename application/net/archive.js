@@ -273,6 +273,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		options = library_namespace.setup_options(options);
 		get_URL(URL, function(data, error) {
 			if (error || typeof data !== 'object'
 					|| typeof data.responseText !== 'string') {
@@ -281,8 +282,7 @@ function module_code(library_namespace) {
 
 			}
 
-			if (false && options
-					&& typeof options.constent_processor === 'function') {
+			if (false && typeof options.constent_processor === 'function') {
 				options.constent_processor(
 				// (contains, URL, status)
 				data.responseText, URL, data.status);
@@ -291,9 +291,7 @@ function module_code(library_namespace) {
 			if (!status_is_OK(data.status)) {
 				do_callback(data.status);
 
-			} else if (data.responseText.trim()
-			//
-			|| (options && options.ignore_empty)) {
+			} else if (options.ignore_empty || data.responseText.trim()) {
 				do_callback(data.status, true);
 
 			} else {
@@ -301,7 +299,8 @@ function module_code(library_namespace) {
 			}
 
 		}, null, null, {
-			constent_processor : options && options.constent_processor,
+			constent_processor : options.constent_processor,
+			write_to_directory : options.write_to_directory,
 			// use new agent
 			agent : true,
 			no_warning : true,

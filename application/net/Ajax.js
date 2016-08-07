@@ -891,11 +891,21 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 					}
 				}
 
-				if (typeof options.constent_processor === 'function') {
-					if (false) {
-						var file_name = URL.replace(/#.*/g, '').replace(
-								/[\\\/:*?"<>|]/g, '_');
+				if (options.write_to_directory) {
+					var file_path = options.write_to_directory + '/'
+					//
+					+ URL.replace(/#.*/g, '').replace(/[\\\/:*?"<>|]/g, '_');
+					library_namespace.info('Write ' + buffer.length + ' B to [' + file_path + ']: ' + URL);
+					try {
+						var fd = node_fs.openSync(file_path, 'w');
+						node_fs.writeSync(fd, buffer, 0, buffer.length, null);
+						node_fs.closeSync(fd);
+					} catch (e) {
+						console.error(e);
 					}
+				}
+
+				if (typeof options.constent_processor === 'function') {
 					options.constent_processor(
 					// ({Buffer}contains, URL, status)
 					data, URL, result.statusCode);
