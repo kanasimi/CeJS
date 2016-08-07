@@ -638,7 +638,8 @@ function merge_cookie(agent, cookie) {
 
 
 //正處理中之 connections
-var get_URL_node_connection_Set = new Set;
+// var get_URL_node_connection_Set = new Set;
+
 // 正處理中之 connections
 var get_URL_node_connections = 0,
 // 所有 requests
@@ -660,8 +661,8 @@ get_URL_node_requests = 0;
  * @param {Object}[options]
  *            附加參數/設定選擇性/特殊功能與選項
  * 
- * @see http://nodejs.org/api/http.html#http_http_request_options_callback
- *      http://nodejs.org/api/https.html#https_https_request_options_callback
+ * @see https://nodejs.org/api/http.html#http_http_request_options_callback
+ *      https://nodejs.org/api/https.html#https_https_request_options_callback
  * 
  * @since 2015/1/13 23:23:38
  */
@@ -724,7 +725,13 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	}
 
 	// assert: 自此開始不會改變 URL，也不會中途 exit 本函數。
-	get_URL_node_connection_Set.add(URL);
+	if (false) {
+		if (get_URL_node_connection_Set.has(URL)) {
+			library_namespace.warn('get_URL_node: Already has [' + URL + ']. 同時間重複請求？');
+		} else {
+			get_URL_node_connection_Set.add(URL);
+		}
+	}
 
 	if (post_data) {
 		post_data = get_URL.param_to_String(post_data);
@@ -767,8 +774,8 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		request = null;
 		get_URL_node_requests--;
 		get_URL_node_connections--;
-		if (!get_URL_node_connection_Set['delete'](URL)) {
-			library_namespace.warn('get_URL_node: URL not exists in Set: ' + URL);
+		if (false && !get_URL_node_connection_Set['delete'](URL)) {
+			library_namespace.warn('get_URL_node: URL not exists in Set: [' + URL + ']. 之前同時間重複請求？');
 		}
 	},
 	// on failed
@@ -862,6 +869,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 								console.log(node_zlib);
 								console.log(data);
 								console.trace('get_URL_node: Error: node_zlib.gunzipSync()');
+								console.error(e.stack);
 							}
 							// free
 							data = null;
@@ -1006,7 +1014,7 @@ get_URL_node.default_timeout = 2 * 60 * 1000;
 get_URL_node.get_status = function(item) {
 	var status = {
 		connections : get_URL_node_connections,
-		connection_list : Array.from(get_URL_node_connection_Set),
+		// connection_list : Array.from(get_URL_node_connection_Set),
 		requests : get_URL_node_requests
 	};
 	return item ? status[item] : status;
