@@ -637,7 +637,13 @@ function merge_cookie(agent, cookie) {
 }
 
 
-var get_URL_node_connections = 0, get_URL_node_requests = 0;
+//正處理中之 connections
+var get_URL_node_connection_Set = new Set;
+// 正處理中之 connections
+var get_URL_node_connections = 0,
+// 所有 requests
+get_URL_node_requests = 0;
+
 
 /**
  * 讀取 URL via node http/https。<br />
@@ -693,11 +699,13 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	// https://developer.mozilla.org/en-US/docs/Web/API/URL
 	// [ origin + pathname, search, hash ]
 	// hrer = [].join('')
-	if (Array.isArray(URL))
+	if (Array.isArray(URL)) {
 		URL = get_URL.add_param(URL[0], URL[1], URL[2]);
+	}
 
-	if (options.search || options.hash)
+	if (options.search || options.hash) {
 		URL = get_URL.add_param(URL, options.search, options.hash);
+	}
 
 	library_namespace.debug('URL: (' + (typeof URL) + ') [' + URL + ']', 1,
 			'get_URL_node');
@@ -715,8 +723,12 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		}
 	}
 
-	if (post_data)
+	// assert: 自此開始不會改變 URL，也不會中途 exit 本函數。
+	get_URL_node_connection_Set.add(URL);
+
+	if (post_data) {
 		post_data = get_URL.param_to_String(post_data);
+	}
 
 	if (!onload && typeof options.onchange === 'function') {
 		onload = function() {
@@ -755,6 +767,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		request = null;
 		get_URL_node_requests--;
 		get_URL_node_connections--;
+		if (!get_URL_node_connection_Set['delete'](URL)) {
+			library_namespace.warn('get_URL_node: URL not exists in Set: ' + URL);
+		}
 	},
 	// on failed
 	_onfail = function(error) {
@@ -944,12 +959,6 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		request.write(post_data);
 	}
 
-	request.end();
-
-	library_namespace.debug('set onerror: '
-			+ (options.onfail ? 'user defined' : 'default handler'), 3,
-			'get_URL_node');
-
 	var timeout = options.timeout || get_URL_node.default_timeout;
 	if (timeout > 0) {
 		request.setTimeout(timeout);
@@ -972,8 +981,15 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		}
 	});
 
+
+	library_namespace.debug('set onerror: '
+			+ (options.onfail ? 'user defined' : 'default handler'), 3,
+			'get_URL_node');
+
 	request.on('error', _onfail);
 	// 遇到 "Unhandled 'error' event"，或許是 print 到 stdout 時出錯了，不一定是本函數的問題。
+
+	request.end();
 }
 
 /**
@@ -990,6 +1006,7 @@ get_URL_node.default_timeout = 2 * 60 * 1000;
 get_URL_node.get_status = function(item) {
 	var status = {
 		connections : get_URL_node_connections,
+		connection_list : Array.from(get_URL_node_connection_Set),
 		requests : get_URL_node_requests
 	};
 	return item ? status[item] : status;

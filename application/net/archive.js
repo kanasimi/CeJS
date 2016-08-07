@@ -136,8 +136,8 @@ function module_code(library_namespace) {
 
 			var archived_url = data.archived_url = data.url.slice(
 					archive_org.URL_prefix.length).between('/')
-			// e.g., "/index.html?"
-			.replace(/\?$/, '');
+			// e.g., "/index.html#", "/index.html?"
+			.replace(/#(.*)$/, '').replace(/\?$/, '');
 			if (URL !== archived_url
 			// 可能自動加 port。
 			&& URL !== (archived_url = archived_url.replace(/:\d+\//, '/'))
