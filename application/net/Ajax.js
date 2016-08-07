@@ -799,15 +799,17 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	_onload = function(result) {
 		unregister();
 
-		if (/^3/.test(result.statusCode) && result.headers.location
+		if (/^3/.test(result.statusCode)
+		//
+		&& result.headers.location && result.headers.location !== URL
 		//
 		&& !options.no_redirect) {
 			// e.g., 301
 			// 不動到原來的 options。
 			options = Object.clone(options);
 			options.URL = result.headers.location;
-			library_namespace.debug('Redirecting to [' + result.statusCode
-					+ ']', 1, 'get_URL_node');
+			library_namespace.debug(result.statusCode
+					+ ' Redirecting to [' + options.URL + '] ← [' + URL + ']', 1, 'get_URL_node');
 			get_URL_node(options, onload, charset, post_data);
 			return;
 		}
@@ -845,6 +847,15 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 				// console.log('No more data in response.');
 				// it is faster to provide the length explicitly.
 				data = Buffer.concat(data, length);
+				if (options && typeof options.constent_processor === 'function') {
+					if (false) {
+						var file_name = URL.replace(/#.*/g, '').replace(
+								/[\\\/:*?"<>|]/g, '_');
+					}
+					options.constent_processor(
+					// (contains, URL, status)
+					data, URL, result.statusCode);
+				}
 
 				var encoding = result.headers['content-encoding'];
 				// https://nodejs.org/docs/latest/api/zlib.html
@@ -970,8 +981,13 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	var timeout = options.timeout || get_URL_node.default_timeout;
 	if (timeout > 0) {
 		request.setTimeout(timeout);
-		// method 2:
-		// setTimeout(function name() {request.end();}, timeout);
+		if (0) {
+			library_namespace.debug('add timeout method 2: [' + URL + ']', 0, 'get_URL_node');
+			setTimeout(function() {
+				library_namespace.info('get_URL_node: timeout (' + timeout + ' ms): [' + URL + ']');
+				request && request.end();
+			}, timeout);
+		}
 	}
 	// https://nodejs.org/api/http.html#http_request_settimeout_timeout_callback
 	// http://stackoverflow.com/questions/14727115/whats-the-difference-between-req-settimeout-socket-settimeout

@@ -152,7 +152,10 @@ function module_code(library_namespace) {
 		}, null, null, {
 			// use new agent
 			agent : true,
-			no_warning : true
+			no_warning : true,
+			headers : {
+				'User-Agent' : archive_sites.default_user_agent
+			}
 		});
 	}
 
@@ -278,9 +281,10 @@ function module_code(library_namespace) {
 
 			}
 
-			if (options && typeof options.constent_processor === 'function') {
+			if (false && options
+					&& typeof options.constent_processor === 'function') {
 				options.constent_processor(
-				//
+				// (contains, URL, status)
 				data.responseText, URL, data.status);
 			}
 
@@ -297,9 +301,13 @@ function module_code(library_namespace) {
 			}
 
 		}, null, null, {
+			constent_processor : options && typeof options.constent_processor,
 			// use new agent
 			agent : true,
-			no_warning : true
+			no_warning : true,
+			headers : {
+				'User-Agent' : archive_sites.default_user_agent
+			}
 		});
 	}
 
@@ -344,6 +352,8 @@ function module_code(library_namespace) {
 
 	// export 導出.
 	Object.assign(archive_sites, {
+		// 為了模擬一般情況下的 access，因此設定 user agent，避免特殊待遇。
+		default_user_agent : 'Mozilla/5.0 (Windows NT 6.3)',
 		status_is_OK : status_is_OK,
 
 		archive_org : archive_org,
