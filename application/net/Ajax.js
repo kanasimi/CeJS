@@ -777,6 +777,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		finished = true;
 		get_URL_node_requests--;
 		get_URL_node_connections--;
+		if (timeout_id) {
+			clearTimeout(timeout_id);
+		}
 		if (false && !get_URL_node_connection_Set['delete'](URL)) {
 			library_namespace.warn('get_URL_node: URL not exists in Set: [' + URL + ']. 之前同時間重複請求？');
 		}
@@ -1004,22 +1007,21 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		request.write(post_data);
 	}
 
-	var timeout = options.timeout || get_URL_node.default_timeout;
+	var timeout = options.timeout || get_URL_node.default_timeout, timeout_id;
 	if (timeout > 0) {
+		// 此方法似乎不能確實於時間到時截斷。
 		request.setTimeout(timeout);
-		if (0) {
-			library_namespace.debug('add timeout ' + timeout + ' ms by method 2: [' + URL + ']', 2, 'get_URL_node');
-			setTimeout(function() {
-				// 可能已被註銷。
-				if (!finished) {
-					if (!options.no_warning) {
-						library_namespace.info('get_URL_node: timeout (' + timeout + ' ms): [' + URL + ']');
-					}
-					//request.end();
-					request.abort();
+		library_namespace.debug('add timeout ' + timeout + ' ms by method 2: [' + URL + ']', 2, 'get_URL_node');
+		timeout_id = setTimeout(function() {
+			// 可能已被註銷。
+			if (!finished) {
+				if (!options.no_warning) {
+					library_namespace.info('get_URL_node: timeout (' + timeout + ' ms): [' + URL + ']');
 				}
-			}, timeout);
-		}
+				//request.end();
+				request.abort();
+			}
+		}, timeout);
 	}
 	// https://nodejs.org/api/http.html#http_request_settimeout_timeout_callback
 	// http://stackoverflow.com/questions/14727115/whats-the-difference-between-req-settimeout-socket-settimeout
@@ -1056,8 +1058,8 @@ function get_URL_node(URL, onload, charset, post_data, options) {
  */
 get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
 
-// 2 min
-get_URL_node.default_timeout = 2 * 60 * 1000;
+// 20 min
+get_URL_node.default_timeout = 20 * 60 * 1000;
 get_URL_node.connects_limit = 100;
 
 get_URL_node.get_status = function(item) {
