@@ -668,7 +668,7 @@ get_URL_node_requests = 0;
  */
 function get_URL_node(URL, onload, charset, post_data, options) {
 	get_URL_node_requests++;
-	if (get_URL_node_connections > 99) {
+	if (get_URL_node_connections >= get_URL_node.connects_limit) {
 		library_namespace.debug('Waiting ' + get_URL_node_connections
 		// 避免同時開過多 connections 的機制。
 		+ '/' + get_URL_node_requests + ' connections: ' + JSON.stringify(URL), 3, 'get_URL_node');
@@ -761,20 +761,20 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		agent = _URL.protocol === 'https:' ? node_https_agent : node_http_agent;
 	}
 
-	var request,
+	var request, finished,
 	// assert: 必定從 _onfail 或 _onload 作結，以確保會註銷登記。
 	unregister = function() {
 		if (false) {
-			library_namespace.info('unregister [' + URL + ']' + (request ? '' : ': had done!'));
+			library_namespace.info('unregister [' + URL + ']' + (finished ? ': had done!' : '') + ' ' + get_URL_node_requests + ' requests left.');
 		}
 		// http://stackoverflow.com/questions/24667122/http-request-timeout-callback-in-node-js
 		// sometimes both timeout callback and error callback will be called (the error inside the error callback is ECONNRESET - connection reset)
 		// there is a possibilities that it fires on('response', function(response)) callback altogether
-		if (!request) {
+		if (finished) {
 			return;
 		}
 		// 註銷登記。
-		request = null;
+		finished = true;
 		get_URL_node_requests--;
 		get_URL_node_connections--;
 		if (false && !get_URL_node_connection_Set['delete'](URL)) {
@@ -795,8 +795,8 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			// 這裡用太多並列處理，會造成 error.code "EMFILE"。
 			console.error(error);
 		}
-		// 在出現錯誤時，將 onload 當作 callback。
-		onload(undefined, error);
+		// 在出現錯誤時，將 onload 當作 callback。並要確保 {Object}response
+		onload(library_namespace.null_Object(), error);
 	},
 	// on success
 	_onload = function(result) {
@@ -833,6 +833,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 		// listener must be a function
 		if (typeof onload === 'function') {
+			library_namespace.debug('[' + URL + '] loading...', 3, 'get_URL_node');
 			/** {Array} [ {Buffer}, {Buffer}, ... ] */
 			var data = [], length = 0;
 			result.on('data', function(chunk) {
@@ -999,10 +1000,16 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	if (timeout > 0) {
 		request.setTimeout(timeout);
 		if (0) {
-			library_namespace.debug('add timeout ' + timeout + ' ms by method 2: [' + URL + ']', 0, 'get_URL_node');
+			library_namespace.debug('add timeout ' + timeout + ' ms by method 2: [' + URL + ']', 2, 'get_URL_node');
 			setTimeout(function() {
-				library_namespace.info('get_URL_node: timeout (' + timeout + ' ms): [' + URL + ']');
-				request && request.end();
+				// 可能已被註銷。
+				if (!finished) {
+					if (!options.no_warning) {
+						library_namespace.info('get_URL_node: timeout (' + timeout + ' ms): [' + URL + ']');
+					}
+					//request.end();
+					request.abort();
+				}
 			}, timeout);
 		}
 	}
@@ -1010,7 +1017,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	// http://stackoverflow.com/questions/14727115/whats-the-difference-between-req-settimeout-socket-settimeout
 	request.on('timeout', function(e) {
 		// 可能已被註銷。
-		if (request) {
+		if (!finished) {
 			try {
 				// http://hylom.net/node-http-request-get-and-timeout
 				// timeoutイベントは発生しているものの、イベント発生後も引き続きレスポンスを待ち続けている
@@ -1043,6 +1050,7 @@ get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
 
 // 2 min
 get_URL_node.default_timeout = 2 * 60 * 1000;
+get_URL_node.connects_limit = 800;
 
 get_URL_node.get_status = function(item) {
 	var status = {

@@ -78,7 +78,7 @@ function module_code(library_namespace) {
 
 		function to_wait() {
 			library_namespace.debug('Wait ' + need_wait + ' ms: [' + URL + ']',
-					3, 'archive_org');
+					3, 'archive_org_operator');
 			setTimeout(function() {
 				archive_org_operator();
 			}, need_wait);
@@ -98,6 +98,10 @@ function module_code(library_namespace) {
 		var checking_now = archive_org_queue.shift(),
 		//
 		URL = checking_now[0];
+
+		library_namespace.debug('Process [' + URL + '], '
+				+ archive_org_queue.length + ' left.', 3,
+				'archive_org_operator');
 
 		get_URL(archive_org.API_URL + URL, function(data, error) {
 			// 若正執行者，必須負責執行完註銷掉 archive_org_running。
@@ -295,8 +299,7 @@ function module_code(library_namespace) {
 
 		options = library_namespace.setup_options(options);
 		get_URL(URL, function(data, error) {
-			if (error || typeof data !== 'object'
-					|| typeof data.responseText !== 'string') {
+			if (error || typeof data.responseText !== 'string') {
 				do_callback(error || 'check_URL: Unknown error');
 				return;
 
