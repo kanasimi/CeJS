@@ -849,15 +849,6 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 				// console.log('No more data in response: ' + URL);
 				// it is faster to provide the length explicitly.
 				data = Buffer.concat(data, length);
-				if (typeof options.constent_processor === 'function') {
-					if (false) {
-						var file_name = URL.replace(/#.*/g, '').replace(
-								/[\\\/:*?"<>|]/g, '_');
-					}
-					options.constent_processor(
-					// (contains, URL, status)
-					data, URL, result.statusCode);
-				}
 
 				var encoding = result.headers['content-encoding'];
 				// https://nodejs.org/docs/latest/api/zlib.html
@@ -898,6 +889,16 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 						library_namespace.warn('get_URL_node: Unknown encoding: [' + encoding + ']');
 						break;
 					}
+				}
+
+				if (typeof options.constent_processor === 'function') {
+					if (false) {
+						var file_name = URL.replace(/#.*/g, '').replace(
+								/[\\\/:*?"<>|]/g, '_');
+					}
+					options.constent_processor(
+					// ({Buffer}contains, URL, status)
+					data, URL, result.statusCode);
 				}
 
 				// 設定 charset = 'binary' 的話，將回傳 Buffer。
@@ -985,7 +986,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	if (timeout > 0) {
 		request.setTimeout(timeout);
 		if (0) {
-			library_namespace.debug('add timeout method 2: [' + URL + ']', 0, 'get_URL_node');
+			library_namespace.debug('add timeout ' + timeout + ' ms by method 2: [' + URL + ']', 0, 'get_URL_node');
 			setTimeout(function() {
 				library_namespace.info('get_URL_node: timeout (' + timeout + ' ms): [' + URL + ']');
 				request && request.end();
