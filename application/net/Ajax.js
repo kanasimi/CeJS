@@ -800,6 +800,8 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	},
 	// on success
 	_onload = function(result) {
+		unregister();
+
 		if (/^3/.test(result.statusCode)
 		//
 		&& result.headers.location && result.headers.location !== URL
@@ -846,7 +848,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			});
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			result.on('end', function() {
-				unregister();
+				// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
+				//unregister();
+
 				// console.log('No more data in response: ' + URL);
 				// it is faster to provide the length explicitly.
 				data = Buffer.concat(data, length);
@@ -894,17 +898,20 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 				// 設定寫入目標。
 				if (options.write_to_directory) {
-					var file_path = options.write_to_directory + '/'
+					var file_path = (options.write_to_directory + '/'
 					//
-					+ URL.replace(/#.*/g, '').replace(/[\\\/:*?"<>|]/g, '_');
+					+ URL.replace(/#.*/g, '').replace(/[\\\/:*?"<>|]/g, '_'))
+					// 避免 Error: ENAMETOOLONG: name too long
+					.slice(0, 256);
 					if (!options.no_warning) {
-						library_namespace.info('Write ' + data.length + ' B to [' + file_path + ']: ' + URL);
+						library_namespace.info('get_URL_node: Write ' + data.length + ' B to [' + file_path + ']: ' + URL);
 					}
 					try {
 						var fd = node_fs.openSync(file_path, 'w');
 						node_fs.writeSync(fd, data, 0, data.length, null);
 						node_fs.closeSync(fd);
 					} catch (e) {
+						library_namespace.err('get_URL_node: Error to write ' + data.length + ' B to [' + file_path + ']: ' + URL);
 						console.error(e);
 					}
 				}
@@ -940,7 +947,8 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 				// node_fs.appendFileSync('get_URL_node.data', '\n');
 			});
 		} else {
-			unregister();
+			// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
+			//unregister();
 			library_namespace.debug('got [' + URL
 					+ '], but there is no listener!', 1, 'get_URL_node');
 			// console.log(result);
@@ -1050,7 +1058,7 @@ get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
 
 // 2 min
 get_URL_node.default_timeout = 2 * 60 * 1000;
-get_URL_node.connects_limit = 800;
+get_URL_node.connects_limit = 100;
 
 get_URL_node.get_status = function(item) {
 	var status = {
