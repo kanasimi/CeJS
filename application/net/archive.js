@@ -301,7 +301,7 @@ function module_code(library_namespace) {
 			}
 
 		}, null, null, {
-			constent_processor : options && typeof options.constent_processor,
+			constent_processor : options && options.constent_processor,
 			// use new agent
 			agent : true,
 			no_warning : true,

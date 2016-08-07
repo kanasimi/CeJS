@@ -764,6 +764,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	var request,
 	// assert: 必定從 _onfail 或 _onload 作結，以確保會註銷登記。
 	unregister = function() {
+		if (false) {
+			library_namespace.info('unregister [' + URL + ']' + (request ? '' : ': had done!'));
+		}
 		// http://stackoverflow.com/questions/24667122/http-request-timeout-callback-in-node-js
 		// sometimes both timeout callback and error callback will be called (the error inside the error callback is ECONNRESET - connection reset)
 		// there is a possibilities that it fires on('response', function(response)) callback altogether
@@ -797,8 +800,6 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	},
 	// on success
 	_onload = function(result) {
-		unregister();
-
 		if (/^3/.test(result.statusCode)
 		//
 		&& result.headers.location && result.headers.location !== URL
@@ -844,10 +845,11 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			});
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			result.on('end', function() {
-				// console.log('No more data in response.');
+				unregister();
+				// console.log('No more data in response: ' + URL);
 				// it is faster to provide the length explicitly.
 				data = Buffer.concat(data, length);
-				if (options && typeof options.constent_processor === 'function') {
+				if (typeof options.constent_processor === 'function') {
 					if (false) {
 						var file_name = URL.replace(/#.*/g, '').replace(
 								/[\\\/:*?"<>|]/g, '_');
@@ -923,6 +925,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 				// node_fs.appendFileSync('get_URL_node.data', '\n');
 			});
 		} else {
+			unregister();
 			library_namespace.debug('got [' + URL
 					+ '], but there is no listener!', 1, 'get_URL_node');
 			// console.log(result);
