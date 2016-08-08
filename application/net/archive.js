@@ -238,7 +238,8 @@ function module_code(library_namespace) {
 
 	if (false) {
 		var dns = require('dns');
-		// 短時間內 request 過多 host names 會造成 Tool Labs 常常 getaddrinfo ENOTFOUND。
+		// 短時間內 request 過多 host names 會造成 Tool Labs 常常 DNS error，
+		// getaddrinfo ENOTFOUND。
 		dns.setServers(dns.getServers().append([ '8.8.8.8', '8.8.4.4' ]));
 	}
 

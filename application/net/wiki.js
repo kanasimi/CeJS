@@ -196,7 +196,7 @@ function module_code(library_namespace) {
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	PATTERN_URL_GLOBAL = /(?:https?:)?\/\/[^\s\|<>\[\]{}]+/ig,
+	PATTERN_URL_GLOBAL = /(?:https?:)?\/\/(?:[^\s\|<>\[\]{}]+|{[^{}]*})+/ig,
 
 	/**
 	 * 匹配URL網址，僅用於 parse_wikitext()。
@@ -2759,6 +2759,20 @@ function module_code(library_namespace) {
 		// treat as page data. Try to get page contents: page.revisions[0]['*']
 		// 一般說來應該是由新排到舊，[0] 為最新的版本。
 		&& page_data.revisions && page_data.revisions[0];
+	};
+
+	// CeL.wiki.content_of.edit_time(page_data) ===
+	// new Date(page_data.revisions[0].timestamp)
+	// TODO: page_data.edit_time(revision_NO)
+	// return {Date}最後編輯時間
+	get_page_content.edit_time = function(page_data, revision_NO) {
+		var timestamp = library_namespace.is_Object(page_data)
+				&& page_data.revisions;
+		if (timestamp
+				&& (timestamp = timestamp[revision_NO || 0] || timestamp[0])
+				&& (timestamp = timestamp.timestamp)) {
+			return new Date(timestamp);
+		}
 	};
 
 	/**
