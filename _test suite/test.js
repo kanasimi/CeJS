@@ -1683,16 +1683,19 @@ function test_date() {
 	CeL.run('data.date');
 
   	error_count += CeL.test('parse date', [
-		[[0,new Date('May 5 2022')-'May 5 2022'.to_Date()],'無法 parse 的值'],
-		[[0,new Date('May 5 2022 UTC+09:00')-'May 5 2022'.to_Date({zone:'UTC+9'})],'無法 parse 的值+TZ@options'],
-		[[0,new Date('May 5 2022 UTC+09:00')-'May 5 2022 UTC+09:00'.to_Date()],'無法 parse 的值+TZ'],
+		[[0,new Date('May 5 2022')-'May 5 2022'.to_Date()], '.to_Date(): 無法 parse 的值'],
+		[[0,new Date('May 5 2022 UTC+09:00')-'May 5 2022'.to_Date({zone:'UTC+9'})], '.to_Date(): 無法 parse 的值+TZ@options'],
+		[[0,new Date('May 5 2022 UTC+09:00')-'May 5 2022 UTC+09:00'.to_Date()], '.to_Date(): 無法 parse 的值+TZ'],
 
-		[[0,new Date('2022/5/5')-'2022/5/5'.to_Date()],'理應可 parse 的值'],
-		[[0,new Date('2022/5/5 UTC+09:00')-'2022/5/5'.to_Date({zone:'UTC+9'})],'理應可 parse 的值+TZ @ options'],
-		[[0,new Date('2022/5/5 UTC+09:00')-'2022/5/5 UTC+9'.to_Date()],'理應可 parse 的值+TZ'],
+		[[0,new Date('2022/5/5')-'2022/5/5'.to_Date()], '.to_Date(): 理應可 parse 的值'],
+		[[0,new Date('2022/5/5 UTC+09:00')-'2022/5/5'.to_Date({zone:'UTC+9'})], '.to_Date(): 理應可 parse 的值+TZ @ options'],
+		[[0,new Date('2022/5/5 UTC+09:00')-'2022/5/5 UTC+9'.to_Date()], '.to_Date(): 理應可 parse 的值+TZ'],
 
-		[[0,new Date('2022/5/5 UTC')-'2022/5/5 UTC'.to_Date()],'理應可 parse 的值'],
-		[[0,'2022/5/5'.to_Date({zone:0})-'2022/5/5 UTC'.to_Date()],'理應可 parse 的值'],
+		[[0,new Date('2022/5/5 UTC')-'2022/5/5 UTC'.to_Date()], '.to_Date(): 理應可 parse 的值'],
+		[[0,'2022/5/5'.to_Date({zone:0})-'2022/5/5 UTC'.to_Date()], '.to_Date(): 理應可 parse 的值'],
+
+		[[0,new Date('1234/5/6') - '1234年5月6日'.to_Date(/(\d+)年(\d+)月(\d+)日/)], '.to_Date(): 自訂 pattern'],
+		[[0,new Date('1234/5/6') - '5/6/1234'.to_Date({pattern:/(\d+)\/(\d+)\/(\d+)/,pattern_matched:[3,1,2]})], '.to_Date(): 自訂 pattern'],
   	]);
 
 

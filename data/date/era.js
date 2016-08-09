@@ -1897,11 +1897,12 @@ if (typeof CeL === 'function')
 						// 可能是本紀年自己的，可能是從其他參照紀年獲得的。
 						if (to_era[property] !== value
 								&& important_properties[property]) {
-							library_namespace.err([
+							library_namespace.warn([
 									'copy_important_properties: ',
-									'紀年 [' + to_era, '] 原有重要屬性 ',
-									to_era[property], ' 與參照紀年 [' + from_era,
-									'] 之重要屬性 ', value, ' 不同！' ]);
+									'紀年 [' + to_era,
+									'] 原有重要屬性 [' + property + '] 為"',
+									to_era[property], '"，與所參照紀年 [' + from_era,
+									'] 之屬性值"', value, '" 不同！' ]);
 						}
 						continue;
 					}
@@ -7342,9 +7343,8 @@ if (typeof CeL === 'function')
 
 					tmp = date.shift();
 					if (tmp && tmp.size > 1)
-						library_namespace.warn(
-						//
-						'caculate_node_era: 共取得 ' + tmp.size + ' 個可能的紀年名稱！');
+						library_namespace.warn('caculate_node_era: [' + era
+								+ ']: 共取得 ' + tmp.size + ' 個可能的紀年名稱！');
 					else
 						tmp = null;
 

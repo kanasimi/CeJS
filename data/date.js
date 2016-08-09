@@ -610,8 +610,13 @@ function String_to_Date(date_string, options) {
 
 	var tmp, minute_offset;
 
-	// 前置處理。
-	if (!library_namespace.is_Object(options)) {
+	if (library_namespace.is_RegExp(options)) {
+		// 將 options 當作 pattern。
+		options = {
+			pattern : options
+		};
+	} else if (!library_namespace.is_Object(options)) {
+		// 前置處理。
 		tmp = options;
 		options = library_namespace.null_Object();
 		if (tmp)
@@ -623,6 +628,20 @@ function String_to_Date(date_string, options) {
 			else
 				// 判斷是否為正規 format。
 				options.format = tmp;
+	}
+
+	if (library_namespace.is_RegExp(options.pattern)
+	//
+	&& (tmp = date_string.match(options.pattern))) {
+		// 依照 matched 匹配的來正規化/設定年月日。
+		// e.g., new Date('1234/5/6') === '1234年5月6日'.to_Date(/(\d+)年(\d+)月(\d+)日/)
+		// === '5/6/1234'.to_Date({pattern:/(\d+)\/(\d+)\/(\d+)/,pattern_matched:[3,1,2]})
+		minute_offset = Array.isArray(options.pattern_matched) ? options.pattern_matched : [ 1, 2, 3 ];
+		date_string = minute_offset.map(function(processor) {
+			return typeof processor === 'function' ? processor(matched) : tmp[processor];
+		}).join(
+		// 長度3時當作年月日，否則當作自訂處理。
+		minute_offset.length === 3 ? '/' : '');
 	}
 
 	// 設定指定 time zone 之 offset in minutes.
