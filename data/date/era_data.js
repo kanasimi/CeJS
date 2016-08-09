@@ -565,8 +565,7 @@ CeL.era.pass_on = {
 		'/惠文君|-337~||精=年|君主名=嬴駟|生=前356年|卒=前311年|在位=前337年~前311年',
 		'/惠文王|-324~||精=年|君主名=嬴駟|君主=秦惠王|生=前356年|卒=前311年|在位=前337年~前311年|注=改侯年為王年',
 		'/武王|-310~||精=年|生=前329年 (《史记·卷六·秦始皇本纪》：悼武王生十九年而立。)|卒=前307年|在位=前310年~前307年|注=秦武王二年十一月己酉朔，年始寅正',
-		// http://www.bsm.org.cn/show_article.php?id=2372
-		'/=|-309/2/9~|2/=47m|疑|準=年|據=許名瑲:青川郝家坪秦牘《田律》曆日考釋|注=以漢傳古《顓頊曆》為基礎，進其月朔餘分470，所得曆日合于牘文“十一月己酉朔”。',
+		'/=|-309/2/9~|2/=47m|疑|準=年|據=[http://www.bsm.org.cn/show_article.php?id=2372 許名瑲:青川郝家坪秦牘《田律》曆日考釋]|注=以漢傳古《顓頊曆》為基礎，進其月朔餘分470，所得曆日合于牘文“十一月己酉朔”。',
 		'/=|-308/1/29~|3/=:CE|精=年',
 		'/昭襄王|-306~||君主=秦昭王|君主名=嬴則;嬴稷|精=年|生=前325年|卒=前251年|注=秦昭襄王，簡稱秦昭王。',
 		'/孝文王|-250~||君主名=嬴柱|精=年|生=前302年 (《史记·卷六·秦始皇本纪》：孝文王生五十三年而立。)|卒=前250年11月14日|在位=前250年11月12日~前250年11月14日',
@@ -634,7 +633,7 @@ CeL.era.pass_on = {
 		'/河平|-28/2/22~|59m 505 3psm47m|注=汉宣帝地节改元事发微: 成帝建始五年三月因“河决東郡，流漂二州，校尉王延世塞輒平”，下詔改元，張文謂建始五年簡最晚見于是年四月',
 		'/陽朔|-24/2/8~-20/7/20|59m 4g4j579 3qsc47o',
 		'/鴻嘉|-20/2/23~-16/8/4|47o 59m 4mg859h 47o|注=汉宣帝地节改元事发微: 元年4~5月改元',
-		'/永始|-16/2/9~-12/9/18|47o 4ok542y 591 3qtt|注=汉宣帝地节改元事发微: 元年5~6月改元，七月之後永始|注=陳來瘋: 陳久金《敦煌居延漢簡中的曆譜》相關考証 http://blog.sina.com.cn/s/blog_a2e8e3c60102y7hz.html 據《中國簡牘集成》（敦煌文藝出版社，2001年）第9冊頁38「永始二年五月乙酉朔丙午」、頁75「永始二年六月甲申」及第10冊頁25「永始二年七月癸丑朔庚辰」來推算，漢成帝永始二年應為閏五月，陳的閏四月說顯然有誤。',
+		'/永始|-16/2/9~-12/9/18|47o 4ok542y 591 3qtt|注=汉宣帝地节改元事发微: 元年5~6月改元，七月之後永始|據=[http://blog.sina.com.cn/s/blog_a2e8e3c60102y7hz.html 陳來瘋: 陳久金《敦煌居延漢簡中的曆譜》相關考証]|注=據《中國簡牘集成》（敦煌文藝出版社，2001年）第9冊頁38「永始二年五月乙酉朔丙午」、頁75「永始二年六月甲申」及第10冊頁25「永始二年七月癸丑朔庚辰」來推算，漢成帝永始二年應為閏五月，陳的閏四月說顯然有誤。',
 		'/元延|-12/1/26~-8/6/8|3qtt47p 3mmy46i 59l|注=汉宣帝地节改元事发微: 元年6~7月改元',
 		'/綏和|-8/2/11~|59l 3qug|注=二年四月漢哀帝即位沿用|注=汉宣帝地节改元事发微: 元年4月改元|注=陳來瘋: 陳久金《敦煌居延漢簡中的曆譜》相關考証: 《天象》為綏和二年閏七月。未找到相關竹簡朔日',
 		'/哀帝/建平|-6/2/19~-1/3/23|47p 46i 4oir59m 3quk579|君主名=劉欣|生=前27年|卒=元壽2年9月|在位=改订西汉新莽纪年表：綏和2年4月~元壽2年9月|注=二年六月改元太初元將，同年八月又改回建平二年|注=汉宣帝地节改元事发微: 簡牘最晚建平六年正月',
@@ -1946,50 +1945,55 @@ CeL.era.pass_on = {
 (CeL.era.pass_on.countries.日本 = [
 		// Japan: 中國農曆日期和韓國農曆日期也不一致。日本從1685年開始，就自行編製農曆，一直到明治六年。
 
-		'旧暦|593/2/7~2071/1/30|593/=59m 3quh579 47m 4ojp59m 579 3qs147o 4oka42y 59h 3qtz47p 42y 4of759l 3quj505 47e 4oiw59m 505 3ql147m 59m 4g4i591 3qsa47p 3oq 4o1359h 47p 39zo46i 4ofg59m 47p 3pso47e 59m 3qud579 47e 4ojm59m 4mgb59h 47o 4ok742y 59h 3qtv47p 3mn047e 59l 3quh505 47e 4oit59m 505 3qkx47m 4oka3oq 591 3qs747p 3oq 4o0z59h 3quj47p 46i 4ofd59m 47p 3psm47e 59m 3qua579 3ql647o 59m 4mg7591 47o 4ok442y 4o1859l 47p 3mmw46i 59l 3qv9505 46i 4oiq59l 4mu44h0 5es 3t6v52s 506 3pt04zu 5s9 3z4h4i0 4t943u1 3p1 31li3me 576 55425sh 408b4ia 3u2 3a93439 42u 4nys59g 5uq 408x4i4 3rd550q 46t 3mmu47e 5d0 4uqb4a0 4pln3px 3fu 4g4n579 47e 4sgz5e9 49w 4ppd3q1 38ex42y 591 3x3p4gy 5ea 3t4z4aa 3b6247u 42y 4o145r9 4h0 4t505ed 33x83hw 50a 4f3e4zu 5s9 3swm4i8 5ew 4ihf3p0 4mh7592 56y 55485eq 44x 3bid5ew 59x 380h3o6 4o0p59e 5t0 3tz95as 48a 3a1v4vp 3d1747e 5e0 57d35uw 5as 3ret50q 505 3qkx4ei 4sh65e9 4a8 4pom5at 3n0 4mg258z 3yos4gy 5ea 3t534ac 449 3mn842y 59h 3fpt4h0 43ux5es 52s 3qzb3fe 4zu 42ar5s9 3xng4i0 4mg 4ihj3p0 57e 4m7958y 5s9 400h4i9 3ep53u1 3p1 37x342t 58y 55b75uq 40984ic 48a 3mw84z9 46g 5dp05dw 5us 40aq5as 3rca50q 46l 3mly47d 4h0 4upv5go 4ja43p0 50a 4g4o578 5s8 5elg4lt 3vt 3b1e3px 38ey42y 591 3qs749u 5ea 3rcz48i 3b1n47p 46i 4oft3t0 5us 4pl15es 48k 3npd505 3psq47e 5s9 3swm4aw 5bc 4gwj3os 4mho3o5 58y 55bc5e9 4b5 3bj93u2 3ot 37wy42t 4nyy59g 5gi 3txi4b8 48a 3mw44z9 3prw47d 5ac 4uq05go 5as 4gnp3fu 505 3psh47e 4shn3tf 3hl 3b1j3px 3my 4mgz591 3sd84gy 5ea 3t534aa 449 3mmt42y 59h 3z2p4h0 4t555es 4ac 3qyv506 46i 54835s9 3z8c4i9 3u0 4ihk3p0 57a 4fv958y 5sh 400i4i9 3ep648i 3p1 380n42t 58y 55c35uq 40985as 48a 3mw8505 46i 4oet5dw 5us 40aq5as 4gnu3oq 505 3ql34ga 5e1 3swj4a1 3b4s3q1 3oq 4mg9591 4gi 4so55ea 4aa 3b4y449 3mmy46i 5np 3z2u4h0 5es 3t504ac 3qz0506 46i 54895s9 4h4 4t515ew 52s 4g8y57a 4fve58y 5sh 400m4i9 3u1 33xg3p1 39lo42t 590 55c95uq 4ia 3rd148a 439 3mmp46i 4oga5dw 5us 4pl35as 50q 4fc3505 3ql847e 5e1 3swo4a1 3px 32513oq 579 3qkx4gi 4sp65ea 4aa 3b53449 42y 4o105np 3z304h0 5es 3t6w52s 44a 3mna4zu 5r9 3z4i4i0 4t963u0 52s 4g9j3mi 577 3qk347l 4i9 3eoh3u1 3a953p1 3oa 4mg5590 5ua 40824ia 3rd648a 439 3mmv46i 59g 57b75uw 5as 3rcx50q 4g4p579 47e 4sdh5e1 4a0 4poy3q1 32563oq 579 3qs74gi 5e9 3t444aa 3b5847u 42z 39h546d 4gy 4sp15es 4ac 3nsy50a 3mp64zv 46h 3z4m4i0 5ew 4ih059w 4g9o3mi 577 3ql547l 4i9 3eol3u1 3p1 380i3oq 4o2259g 5ua 40874ic 48a 3a90445 3mn046i 59h 3st54a0 5as 3rd250q 505 3psi47e 4si25e1 4a0 4pp33qh 3ho 4g4k579 3wws4gi 5e9 3t484b6 3q1 3a1y431 3o5 4nyq4gy 4t3e5gk 4b8 3nt350a 431 3mic47d 4h0 4t4x5go 4ih559w 50a 4f52577 47d 400i4i9 3eq2489 3p1 380n3oq 591 3qs349u 4i9 3rcx48a 3a95445 42y 4o125d1 49w 4pky5as 3rm252k 505 3pzr47e 5e1 3swk4a0 4q3g3qh 3os 4g5l591 576 4sh15e9 4b5 3bj73qh 3a2y431 3o5 4nyv59e 5eq 3txg4b8 48a 3mox46l 3mjd47d 59g 4upx5go 53o 3rcz50a 4g5m579 47d 4pav4lt 3vs 4plg3px 38f042y 591 3qsa49u 4lt 3sxy48i 3px 39zm42y 4o225d1 4h0 4pl35b8 48k 3npg505 3pss47e 5s9 3z9k4aw 5bc 4ihi3os 506 4fv758y 558q47l 4b5 3bjb3u1 3p1 37x142t 58y 55c15gi 3txl4b8 48a 3mw646l 46h 4oeq59g 4uru4a0 5as 3rk750q 505 3psk47d 5e1 3g9e4a0 4pll3px 3my 4mg6591 49e 4so25e9 3t564aa 3q1 3a6v42y 59h 3yok4h0 5ec 3t4x4ac 3nt5506 46i 54865s9 4h4 4t4z5ew 4iiy438 506 4g2f58y 5s9 400k4i9 3u1 3a8x3p1 37x542t 58y 55c55uq 4b6 3epv48a 3mx6505 46i 4opz5ac 5us 40as5as 50q 3mw1505 3psq47e 5e1 3swm4a0 5as 4gnn3oq 4mh6591 4gi 4so75e9 4aa 3b51449 3oq 4o0x59h 3z2y4h0 5es 3t524ac 47u 3mn746i 548b5s9 4h4 4t933u0 52s 4g9157a 4zu 55415sh 40214i9 3u1 3a923p1 3mi 4mdu58y 55fu49u 4ia 3eq048a 439 3mms46i 59g 57b55us 40ax5as 50q 4c6e505 47e 4of65e1 3sy24a0 5ax 32543oq 56d 3ql14gi 5e9 3swx4aa 3b61449 42y 4o135np 4gy 4soz5es 3t574ac 47u 3mnc46i 5r9 3z4k4i0 5ew 3t6q52s 4g9m3mi 4zv 3qjq5sh 4i0 4t8z3u1 3a973p1 3oa 4mg8590 5ua 40844ia 48a 3a8y439 3mmy46i 59g 57ba5us 5as 3rcz50q 4g4r505 47e 4rl55e1 4a0 4plh3q1 3fw 4g4h579 3ql64gi 5e9 3sx24aa 3q1 3a1f42z 39gr5r9 4gy 4sp35es 4ac 3nt147u 431 3mi946d 3z624i0 5ew 3t6u59w 50a 4f4z577 3qjw5sh 4i8 4t943u1 3p1 31p13oq 579 3qkh5ua 408b4ia 48a 3a93439 42y 4o0z59h 49u 408x5as 3rd450q 505 3psl47e 5dx 3ssx4a0 4pp53q1 3ho 4g4n579 47e 4sgz5e9 3t4b4b6 3q1 3a20431 3o5 4nys4gy 5ea 3txe4b8 3nt647u 431 3mie46h 4h0 4t4z5go 4ih859w 50a 4f54577 47d 400k4i9 3u0 4osy3p1 31p63oq 591 3qrr5ua 4i9 3eoz48a 3a97445 42y 4o155d1 49u 4pj95as 48i 3noh505 3psq47e 5e1 3st24a0 5bc 4gwk3ho 4g5o579 4ei 4sh45e9 4b5 3bj93qh 3ot 37wy3o5 4nyy59e 5eq 3txi4b8 48a 3mp0431 3mik47d 59g 4uq05go 53o 3rd150a 579 3qkz4gi 5e9 3swh4aa 3b5444a 3ot 37w542t 4gi 4soy5es 3t6x4ac 47u 3mp44yz 46d 3z4k4i0 5ew 3t6p52s 4g9k3fe 4zv 3qjp5s9 4i0 4t8y3u1 3a963p1 3mi 4mg7591 49e 40844ia 48a 3a8x439 3mmx46i 59h 3sr949w 5as 3rcz50s 4c6j505 46i 4rl35e1 4a0 4pok5ax 32583os 579 4fve4gi 5e9 3sx24aa 3q1 38gy3ot 39h742t 4gy 4sp35es 4ac 3b5w47u 3mp84yz 46d 4oex4i0 5ew 3t6u59w 50a 4f4z505 3qkc47l 4i9 3eon3u1 3p1 31p13oq 579 3qkx49e 4pii4ia 48a 3a92439 42y 4o0y59h 3srf49w 5as 3rlz50s 4wm 3mms47e 5dx 3ssx4a0 4q3c3qh 3fw 4g5y3md 56y 55425e9 3twr4b6 3qi 3a20431 3o6 4nys59e 5ea 3txd4b8 3eq047u 431 3mja46h 59g 55s35go 3tzf5as 50q 4fc7579 47e 4pb85e9 3vs 4pld3px 323d3oq 579 3ql149e 5e9 3sx04a2 3px 38eq42y 4o135d1 4gy 4sp15es 4ac 3nsz506 3mmw4zu 5s5 3z4l4aw 5bc 4ihg3hw 4g623me 56y 55465sh 4b5 3bj93u2 3p1 37wz3o6 4nyv59e 5sy 3txh4b8 48a 3a90439 3mn046h 59g 57d25uw 5as 3rd150q 4z9 3psj47e 4sh45e9 4a0 4plh3px 3fu 4g4k579 47m 4sgy5e9 3t464aa 3q2 38f942y 591 3yoi4gy 4sp35es 4ac 3nt1506 46j 3mhw5s9 4h0 4t4y5ew 4ihi3hx 3fe 4f3956y 5s9 3z834i9 3ep33u2 3p1 380m42e 58y 55c45uq 4ia 3epu48a 3a93439 42y 4o115d0 5us 40ar5as 3rd450q 505 3psm47e 5e1 3swk4a0 5aw 4gpf3my 4g4n591 4eq 4so55e9 4a9 3b503q2 3a0842z 3o5 3yom4h0 5es 3t504ac 3nt650a 4yz 3mhy5s9 4h0 4t515ew 52s 4g9f3fe 4f3c576 5s9 400l4i9 3u1 33xg3p1 3mi 4mg258z 3qrr5uq 4ia 3epx48a 439 3knn42y 4ofd5dx 49w 4pl15as 48a 3mw4505 46i 4of65e1 3swm4a0 5aw 4gph3n0 579 3qkz4gi 4sob5e9 4aa 3b523q2 3ot 37w542d 4gi 4soy5es 3t6v4ac 44a 3mp14yz 46d 3z4j4h4 4t545ew 52s 4g9i3fe 4zx 3pro47d 4i0 4t8z3u1 3a933p1 3mi 4mg5591 47m 40844ia|參照用|注=和暦(邦暦):旧暦+新暦。和暦(わごよみ)は、明治5年12月2日以前は旧暦、明治6年1月1日以降は新暦です。',
+		'日本書紀|-660/2/18~|-660/=46i 59l 3qub505 3psr47m 59m 4g4o579 47m 4ok43oq 579 3qs147p 39zu42y 59h 3que47p 42y 4of659m 3quj579 47e 4ojs59m 579 3ql047o 4okc42y 591 3qu147p 42y 4o1359l 47p 3mmr46i 4oiz59m 505 3pso47m 59m 4g4l579 47m 4ok13oq 4mg959h 47p 39zq42y 59h 3qub47p 3mn047e 59m 3qug505 47e 4ojo59m 505 3qkx47o 4oka3oq 591 3qty47p 3oq 4o0y59l 3quj47p 46i 4oiw59m 47p 3psk47m 59m 3qu9579 3qsa47o 59m 4mg759h 47o 4ok342y 4off59l 47p 3mmw47e 59l 3qud505 47e 4oip59m 4g4p591 47m 4ok63oq 591 3qs347p 39zw46i 59h 3qug47p 46i 4of859m 47p 3psh47e 4oju59m 579 3qs647o 59m 4mg259h 3qu447p 42y 4ofd59l 47p 3mmt47e 59l 3qu9505 3ql647m 59m 4g4n591 47m 4ok33oq 4o1759h 47p 39zs46i 59h 3qud47p 46i 4of559m 3quh579 47e 4ojq59m 579 3qkz47o 4okc42y 591 3qu047p 42y 4o1059l 47p 3mmp46i 4oiy59m 505 3psm47m 59m 4g4j579 3qsc47p 3oq 4mg959h 47p 39zp42y 59h 3qu947p 3mmy47e 59m 3quf505 47e 4ojn59m 4g4r591 47o 4ok83oq 591 3qtx47p 3oq 4o0y59l 3qui47p 46i 4oiu59m 47p 3psj47m 4ojw59m 579 3qs847o 59m 4mg559h 47p 39zm42y 4ofe59m 47p 3mmu47e 59m 3qub505 3ql847o 59m 4g4p591 47o 4ok53oq 591 3qtt47p 39zu46i 59l 3quf47p 46i 4oir59m 3quj579 47m 4ojs59m 579 3qs547o 59m 4mg259h 3qu247p 42y 4ofa59l 47p 3mms47e 4oj059m 505 3ql447m 59m 4g4l591 47m 4ok23oq 4o1659h 47p 39zq46i 59h 3qub47p 3pss47e 59m 3quh579 47e 4ojp59m 579 3qkx47o 4oka42y 591 3qtz47p 42y 4o0z59l 3quj505 46i 4oiw59m 505 3psm47m 59m 4g4i579 3qsa47p 3oq 4mg759h 47p 39zo42y 4ofg59m 47p 3pso47e 59m 3qud579 47e 4ojm59m 4mgb591 47o 4ok742y 591 3qtv47p 3mn046i 59l 3quh505 46i 4oit59m 505 3psh47m 4oka3oq 579 3qs747p 3oq 4mg359h 3quj47p 42y 4ofd59m 47p 3mmu47e 59m 3qua505 3ql647o 59m 4g4n591 47o 4ok43oq 4o1859l 47p 39zs46i 59l 3qud47p 46i 4oiq59m 3quj579 47m 4ojr59m 579 3qs347o 4okc42y 59h 3qu147p 42y 4of959l 47p 3mmp47e 4oiz59m 505 3ql447m 59m 4g4k591 3qsc47p 3oq 4o1559h 47p 39zq46i 59h 3qua47p 3psq47e 59m 3quf579 47m 4ojo59m 4mgc59h 47o 4ok842y 59h 3qtx47p 42y 4of659l 3quj505 47e 4oiv59m 505 3qkz47m 4okc3oq 591 3qs947p 3oq 4o1159h 47p 39zm46i 4off59m 47p 3pso47e 59m 3quc579 3ql847o 59m 4mg9591 47o 4ok642y 591 3qtu47p 3mmy46i 59l 3quf505 46i 4ois59m 4g4s579 47m 4ok93oq 579 3qs547p 3oq 4mg259h 3quj47p 42y 4ofb59m 47p 3mms47e 59m 3qu9505 3ql547o 59m 4g4l591 47o 4ok23oq 4o1759l 47p 39zs46i 59l 3quc47p 3pss47m 59m 3quh579 47m 4ojq59m 579 3qs247p 39zu42y 59h 3quf47p 42y 4of859m 47p 3mmp47e 4ojt59m 505 3ql147o 59m 4g4j591 3qu347p 3oq 4o1359l 47p 39zo46i 59l 3qu947p 3psp47m 59m 3qud579 47m 4ojm59m 4mgb59h 47o 4ok842y 59h 3qtw47p 3mn047e 59l 3quh505 47e 4oiu59m 505 3qky47m 4oka3oq 591 3qs747p 3oq 4o1059h 47p 39zl46i 4ofd59m 47p 3psm47e 59m 3qub579 3ql747o 59m 4mg7591 47o 4ok442y 591 3qtt47p 3mmy46i 59l 3que505 46i 4oiq59m 4g4r579 47m 4ok83oq 579 3qs447n 39zw42y 59h 3quh47p 46i 4ofa59m 47p 3psi47e 4oju59m 579 3ql447o 59m 4mg5591 47o 4ok142y 4o1559l 47p 3mmu46i 59l 3qub505 3psr47m 59m 4g4n579 47m 4ok43oq 579 3qs147p 39zu42y 59h 3que47p 42y 4of659m 3quj505 47e 4ojs59m 505 3ql047o 4okc3oq 591 3qu147p 3oq 4o1259l 47p 39zn46i 4oiz59m 47p 3pso47m 59m 3qud579 47m 4ojl59m 4mg959h 47o 4ok642y 59h 3qtv47p 3mmz47e 59l 3quf505 47e 4ois59m 505 3qkx47m 4oka3oq 591 3qs647p 3oq 4o0y59h 3quj47p 46i 4ofc59m 47p 3psk47m 59m 3qu9579 3qsa47o 59m 4mg759h 47o 4ok342y 4off59l 47p 3mmw47e 59l 3qud505 47e 4oip59m 4g4p591 47m 4ok63oq 591 3qs347p 39zv46i 59h 3quf47p 46i 4of859m 47p 3psh47e 4oju59m 579 3ql247o 59m 4mg2591 3qu447p 42y 4o1459l 47p 3mms46i 59l 3qu9505 3psq47m 59m 4g4n579 47m 4ok33oq 4mgb59h 47p 39zs42y 59h 3qud47p 42y 4of559m 3quh505 47e 4ojq59m 505 3qkz47o 4okc3oq 591 3qu047p 3oq 4o1059l 47p 39zm46i 4oiy59m 47p 3psm47m 59m 3qub579 3qsc47p 3oq 4mg859h 47p 39zo42y 59h 3qu947p 3mmy47e 59m 3quf505 47e 4ojn59m 4g4r591 47o 4ok83oq 591 3qtx47p 3oq 4o0x59l 3quh47p 46i 4oiu59m 47p 3psj47m 4ojw59m 579 3qs847o 59m 4mg559h 47o 4ok242y 4ofe59l 47p 3mmu47e 59l 3qub505 3ql847m 59m 4g4o591 47m 4ok53oq 591 3qs147p 39zu46i 59h 3quf47p 46i 4of759m 3quj579 47e 4ojs59m 579 3ql147o 59m 4mg1591 3qu147p 42y 4o1359l 47p 3mms46i 4oj059m 505 3pso47m 59m 4g4l579 47m 4ok23oq 4mga59h 47p 39zq46i 59h 3qub47p 3pss47e 59m 3quh579 47e 4ojp59m 579 3qkx47o 4oka42y 591 3qtz47p 42y 4o0z59l 3quj505 46i 4oiw59m 505 3psl47m 59m 4g4h579 3qsa47p 3oq 4mg759h 47p 39zo42y 4ofg59m 47p 3mmw47e 59m 3qud505 47e 4ojm59m 4g4q591 47o 4ok63oq 591 3qtv47p 39zw46i 59l 3quh47p 46i 4oit59m 47p 3psh47m 4oju59m 579 3qs747o 59m 4mg359h 3qu447p 42y 4ofd59l 47p 3mmu47e 59l 3qua505 3ql647m 59m 4g4n591 47m 4ok43oq 4o1859h 47p 39zs46i 59h 3qud47p 42y 4of659m 3qui505 47e 4ojq59m 505 3qkz47o 4okc42y 591 3qu147p 42y 4o1159l 47p 3mmp46i 4oiz59m 505 3psn47m 59m 4g4j579 3qsc47p 3oq 4mg959h 47p 39zp42y 59h 3qu947p 3mmy47e 59m 3quf505 47e 4ojo59m 4g4s591 47o 4ok83oq 591 3qtx47p 3oq 4o0y59l 3qui47p 46i 4oiu59m 47p 3psj47m 4ojw59m 579 3qs947p 3oq 4mg559h 47p 39zm42y 4off59m 47p 3mmv47e 59m 3qub505 3ql847o 59m 4g4p591 47o 4ok53oq 591 3qtt47p 39zu46i 59l 3quf47p 46i 4ois59m 3quk579 47m 4ojs59m 579 3qs547o 59m 4mg259h 3qu247p 42y 4ofa59l 47p 3mms47e 4oj059m 505 3ql447m 59m 4g4l591 47o 4ok23oq 4o1759l 47p 39zr46i 59l 3qub47p 3pss47m|傳說|參照用|注=base: 日本書紀暦日原典 (内田正男)',
+		// 旧暦 1947閏月: HuTime != こよみのページ.
+		// http://www.hutime.jp/basicdata/calendar/calendars/OldJapanese.html
+		// HuTime: 神宮司廳 『神宮暦』（小暦）
+		// （昭和24年～）昭和22年は、新暦4月21日同日に朔（13時19分）、中気（穀雨）（7時40分）があります。通常、朔と中気が同日の場合は時刻の前後にかかわらず新たな朔望月に中気が入れられるため、2月、閏2月の順で、新暦4月21日からの朔望月は3月となります。しかしながら、この年は例外的に中気（穀雨）を前の朔望月に入れ、2月、3月の順で、新暦4月21日からの朔望月を閏3月としています（大暦、小暦とも同じ）。通常とは異なりますが、『神宮暦』の表記に従います。
+		'旧暦|593/2/7~2071/1/30|593/=59m 3quh579 47m 4ojp59m 579 3qs147o 4oka42y 59h 3qtz47p 42y 4of759l 3quj505 47e 4oiw59m 505 3ql147m 59m 4g4i591 3qsa47p 3oq 4o1359h 47p 39zo46i 4ofg59m 47p 3pso47e 59m 3qud579 47e 4ojm59m 4mgb59h 47o 4ok742y 59h 3qtv47p 3mn047e 59l 3quh505 47e 4oit59m 505 3qkx47m 4oka3oq 591 3qs747p 3oq 4o0z59h 3quj47p 46i 4ofd59m 47p 3psm47e 59m 3qua579 3ql647o 59m 4mg7591 47o 4ok442y 4o1859l 47p 3mmw46i 59l 3qv9505 46i 4oiq59l 4mu44h0 5es 3t6v52s 506 3pt04zu 5s9 3z4h4i0 4t943u1 3p1 31li3me 576 55425sh 408b4ia 3u2 3a93439 42u 4nys59g 5uq 408x4i4 3rd550q 46t 3mmu47e 5d0 4uqb4a0 4pln3px 3fu 4g4n579 47e 4sgz5e9 49w 4ppd3q1 38ex42y 591 3x3p4gy 5ea 3t4z4aa 3b6247u 42y 4o145r9 4h0 4t505ed 33x83hw 50a 4f3e4zu 5s9 3z864i8 5ew 4ihf3p0 4mh7592 56y 55485eq 44x 3bid5ew 59x 380h3o6 4o0p59e 5t0 3tz95as 48a 3a1v4vp 3d1747e 5e0 57d35uw 5as 3ret50q 505 3qkx4ei 4sh65e9 4a8 4pom5at 3n0 4mg258z 3yos4gy 5ea 3t534ac 449 3mn842y 59h 3fpt4h0 43ux5es 52s 3qzb3fe 4zu 42ar5s9 3xng4i0 4mg 4ihj3p0 57e 4m7958y 5s9 400h4i9 3ep53u1 3p1 37x342t 58y 55b75uq 40984ic 48a 3mw84z9 46g 5dp05dw 5us 40aq5as 3rca50q 46l 3mly47d 4h0 4upv5go 4ja43p0 50a 4g4o578 5s8 5elg4lt 3vt 3b1e3px 38ey42y 591 3qs749u 5ea 3rcz48i 3b1n47p 46i 4oft3t0 5us 4pl15es 48k 3npd505 3psq47e 5s9 3swm4aw 5bc 4gwj3os 4mho3o5 58y 55bc5e9 4b5 3bj93u2 3ot 37wy42t 4nyy59g 5gi 3txi4b8 48a 3mw44z9 3prw47d 5ac 4uq05go 5as 4gnp3fu 505 3psh47e 4shn3tf 3hl 3b1j3px 3my 4mgz591 3sd84gy 5ea 3t534aa 449 3mmt42y 59h 3z2p4h0 4t555es 4ac 3qyv506 46i 54835s9 3z8c4i9 3u0 4ihk3p0 57a 4fv958y 5sh 400i4i9 3ep648i 3p1 380n42t 58y 55c35uq 40985as 48a 3mw8505 46i 4oet5dw 5us 40aq5as 4gnu3oq 505 3ql34ga 5e1 3swj4a1 3b4s3q1 3oq 4mg9591 4gi 4so55ea 4aa 3b4y449 3mmy46i 5np 3z2u4h0 5es 3t504ac 3qz0506 46i 54895s9 4h4 4t515ew 52s 4g8y57a 4fve58y 5sh 400m4i9 3u1 33xg3p1 39lo42t 590 55c95uq 4ia 3rd148a 439 3mmp46i 4oga5dw 5us 4pl35as 50q 4fc3505 3ql847e 5e1 3swo4a1 3px 32513oq 579 3qkx4gi 4sp65ea 4aa 3b53449 42y 4o105np 3z304h0 5es 3t6w52s 44a 3mna4zu 5r9 3z4i4i0 4t963u0 52s 4g9j3mi 577 3qk347l 4i9 3eoh3u1 3a953p1 3oa 4mg5590 5ua 40824ia 3rd648a 439 3mmv46i 59g 57b75uw 5as 3rcx50q 4g4p579 47e 4sdh5e1 4a0 4poy3q1 32563oq 579 3qs74gi 5e9 3t444aa 3b5847u 42z 39h546d 4gy 4sp15es 4ac 3nsy50a 3mp64zv 46h 3z4m4i0 5ew 4ih059w 4g9o3mi 577 3ql547l 4i9 3eol3u1 3p1 380i3oq 4o2259g 5ua 40874ic 48a 3a90445 3mn046i 59h 3st54a0 5as 3rd250q 505 3psi47e 4si25e1 4a0 4pp33qh 3ho 4g4k579 3wws4gi 5e9 3t484b6 3q1 3a1y431 3o5 4nyq4gy 4t3e5gk 4b8 3nt350a 431 3mic47d 4h0 4t4x5go 4ih559w 50a 4f52577 47d 400i4i9 3eq2489 3p1 380n3oq 591 3qs349u 4i9 3rcx48a 3a95445 42y 4o125d1 49w 4pky5as 3rm252k 505 3pzr47e 5e1 3swk4a0 4q3g3qh 3os 4g5l591 576 4sh15e9 4b5 3bj73qh 3a2y431 3o5 4nyv59e 5eq 3txg4b8 48a 3mox46l 3mjd47d 59g 4upx5go 53o 3rcz50a 4g5m579 47d 4pav4lt 3vs 4plg3px 38f042y 591 3qsa49u 4lt 3sxy48i 3px 39zm42y 4o225d1 4h0 4pl35b8 48k 3npg505 3pss47e 5s9 3z9k4aw 5bc 4ihi3os 506 4fv758y 558q47l 4b5 3bjb3u1 3p1 37x142t 58y 55c15gi 3txl4b8 48a 3mw646l 46h 4oeq59g 4uru4a0 5as 3rk750q 505 3psk47d 5e1 3g9e4a0 4pll3px 3my 4mg6591 49e 4so25e9 3t564aa 3q1 3a6v42y 59h 3yok4h0 5ec 3t4x4ac 3nt5506 46i 54865s9 4h4 4t4z5ew 4iiy438 506 4g2f58y 5s9 400k4i9 3u1 3a8x3p1 37x542t 58y 55c55uq 4b6 3epv48a 3mx6505 46i 4opz5ac 5us 40as5as 50q 3mw1505 3psq47e 5e1 3swm4a0 5as 4gnn3oq 4mh6591 4gi 4so75e9 4aa 3b51449 3oq 4o0x59h 3z2y4h0 5es 3t524ac 47u 3mn746i 548b5s9 4h4 4t933u0 52s 4g9157a 4zu 55415sh 40214i9 3u1 3a923p1 3mi 4mdu58y 55fu49u 4ia 3eq048a 439 3mms46i 59g 57b55us 40ax5as 50q 4c6e505 47e 4of65e1 3sy24a0 5ax 32543oq 56d 3ql14gi 5e9 3swx4aa 3b61449 42y 4o135np 4gy 4soz5es 3t574ac 47u 3mnc46i 5r9 3z4k4i0 5ew 3t6q52s 4g9m3mi 4zv 3qjq5sh 4i0 4t8z3u1 3a973p1 3oa 4mg8590 5ua 40844ia 48a 3a8y439 3mmy46i 59g 57ba5us 5as 3rcz50q 4g4r505 47e 4rl55e1 4a0 4plh3q1 3fw 4g4h579 3ql64gi 5e9 3sx24aa 3q1 3a1f42z 39gr5r9 4gy 4sp35es 4ac 3nt147u 431 3mi946d 3z624i0 5ew 3t6u59w 50a 4f4z577 3qjw5sh 4i8 4t943u1 3p1 31p13oq 579 3qkh5ua 408b4ia 48a 3a93439 42y 4o0z59h 49u 408x5as 3rd450q 505 3psl47e 5dx 3ssx4a0 4pp53q1 3ho 4g4n579 47e 4sgz5e9 3t4b4b6 3q1 3a20431 3o5 4nys4gy 5ea 3txe4b8 3nt647u 431 3mie46h 4h0 4t4z5go 4ih859w 50a 4f54577 47d 400k4i9 3u0 4osy3p1 31p63oq 591 3qrr5ua 4i9 3eoz48a 3a97445 42y 4o155d1 49u 4pj95as 48i 3noh505 3psq47e 5e1 3st24a0 5bc 4gwk3ho 4g5o579 4ei 4sh45e9 4b5 3bj93qh 3ot 37wy3o5 4nyy59e 5eq 3txi4b8 48a 3mp0431 3mik47d 59g 4uq05go 53o 3rd150a 579 3qkz4gi 5e9 3swh4aa 3b5444a 3ot 37w542t 4gi 4soy5es 3t6x4ac 47u 3mp44yz 46d 3z4k4i0 5ew 3t6p52s 4g9k3fe 4zv 3qjp5s9 4i0 4t8y3u1 3a963p1 3mi 4mg7591 49e 40844ia 48a 3a8x439 3mmx46i 59h 3sr949w 5as 3rcz50s 4c6j505 46i 4rl35e1 4a0 4pok5ax 32583os 579 4fve4gi 5e9 3sx24aa 3q1 38gy3ot 39h742t 4gy 4sp35es 4ac 3b5w47u 3mp84yz 46d 4oex4i0 5ew 3t6u59w 50a 4f4z505 3qkc47l 4i9 3eon3u1 3p1 31p13oq 579 3qkx49e 4pii4ia 48a 3a92439 42y 4o0y59h 3srf49w 5as 3rlz50s 4wm 3mms47e 5dx 3ssx4a0 4q3c3qh 3fw 4g5y3md 56y 55425e9 3twr4b6 3qi 3a20431 3o6 4nys59e 5ea 3txd4b8 3eq047u 431 3mja46h 59g 55s35go 3tzf5as 50q 4fc7579 47e 4pb85e9 3vs 4pld3px 323d3oq 579 3ql149e 5e9 3sx04a2 3px 38eq42y 4o135d1 4gy 4sp15es 4ac 3nsz506 3mmw4zu 5s5 3z4l4aw 5bc 4ihg3hw 4g623me 56y 55465sh 4b5 3bj93u2 3p1 37wz3o6 4nyv59e 5sy 3txh4b8 48a 3a90439 3mn046h 59g 57d25uw 5as 3rd150q 4z9 3psj47e 4sh45e9 4a0 4plh3px 3fu 4g4k579 47m 4sgy5e9 3t464aa 3q2 38f942y 591 3yoi4gy 4sp35es 4ac 3nt1506 46j 3mhw5s9 4h0 4t4y5ew 4ihi3hx 3fe 4f3956y 5s9 3z834i9 3ep33u2 3p1 380m42e 58y 55c45uq 4ia 3epv48a 3a93439 42y 4o115d0 5us 40ar5as 3rd450q 505 3psm47e 5e1 3swk4a0 5aw 4gpf3my 4g4n591 4eq 4so55e9 4a9 3b503q2 3a0842z 3o5 3yom4h0 5es 3t504ac 3nt650a 4yz 3mhy5s9 4h0 4t515ew 52s 4g9f3fe 4f3c576 5s9 400l4i9 3u1 33xg3p1 3mi 4mg258z 3qrr5uq 4ia 3epx48a 439 3knn42y 4ofd5dx 49w 4pl15as 48a 3mw4505 46i 4of65e1 3swm4a0 5aw 4gph3n0 579 3qkz4gi 4sob5e9 4aa 3b523q2 3ot 37w542d 4gi 4soy5es 3t6v4ac 44a 3mp14yz 46d 3z4j4h4 4t545ew 52s 4g9i3fe 4zx 3pro47d 4i0 4t8z3u1 3a933p1 3mi 4mg5591 47m 40844ia|參照用|注=和暦(邦暦):旧暦+新暦。和暦(わごよみ)は、明治5年12月2日以前は旧暦、明治6年1月1日以降は新暦です。|注=base: 日本暦日原典 (内田正男)',
 
 		// 日本史時代区分表
 
 		// http://www.kunaicho.go.jp/ryobo/successive_list.html
 
-		'縄文時代/神武天皇|-660~||読み=じんむてんのう|諡=神武天皇|疑',
-		'/綏靖天皇|-581~||読み=すいぜいてんのう|諡=綏靖天皇|疑',
-		'/安寧天皇|-548~||読み=あんねいてんのう|疑',
-		'/懿德天皇|-510~||読み=いとくてんのう|諡=懿徳天皇|疑',
-		'/孝昭天皇|-475~||読み=こうしょうてんのう|疑',
-		'/孝安天皇|-392~||読み=こうあんてんのう|疑',
-		'弥生時代/孝靈天皇|-290~||読み=こうれいてんのう|諡=孝霊天皇|疑',
-		'/孝元天皇|-214~||読み=こうげんてんのう|疑',
-		'/開化天皇|-157~||読み=かいかてんのう|疑',
-		'/崇神天皇|-97~||読み=すじんてんのう|諡=崇神天皇|疑',
-		'/垂仁天皇|-29~||読み=すいにんてんのう|疑',
-		'/景行天皇|71~||読み=けいこうてんのう|疑',
-		'/成務天皇|131~||読み=せいむてんのう|疑',
-		'/仲哀天皇|192~||読み=ちゅうあいてんのう|疑',
-		'/神功皇后|201~||読み=じんぐうこうごう|諡=神功皇后|疑|注=神功皇后摂政(じんぐうこうごうせっしょう)',
-		'古墳時代/應神天皇|270~||読み=おうじんてんのう|諡=応神天皇;應神天皇|疑',
-		'/仁德天皇|313~||読み=にんとくてんのう;仁徳天皇|疑',
-		'/履中天皇|400~||読み=りちゅうてんのう|疑',
-		'/反正天皇|406~||読み=はんぜいてんのう|疑',
-		'/允恭天皇|412~||読み=いんぎょうてんのう|疑',
-		'/安康天皇|454~||読み=あんこうてんのう|疑',
-		'/雄略天皇|457~||読み=ゆうりゃくてんのう|疑',
-		'/清寧天皇|480~||読み=せいねいてんのう|諡=淸寧天皇|疑',
-		'/顯宗天皇|485~||読み=けんぞうてんのう|諡=顕宗天皇|疑',
-		'/仁賢天皇|488~||読み=にんけんてんのう|疑',
-		'/武烈天皇|499~||読み=ぶれつてんのう|疑',
+		'縄文時代/神武天皇|-660/2/18~|:日本書紀|読み=じんむてんのう|諡=神武天皇|注=辛酉年春正月庚辰朔。天皇即帝位於橿原宮。...七十有六年春三月甲午朔甲辰。天皇崩于橿原宮。',
+		'/綏靖天皇|-581/2/16~|:日本書紀|読み=すいぜいてんのう|諡=綏靖天皇',
+		'/安寧天皇|-548/2/10~|:日本書紀|読み=あんねいてんのう',
+		'/懿德天皇|-510/2/11~|:日本書紀|読み=いとくてんのう|諡=懿徳天皇',
+		'/孝昭天皇|-475/2/13~|:日本書紀|読み=こうしょうてんのう',
+		'/孝安天皇|-392/1/27~|:日本書紀|読み=こうあんてんのう',
+		'弥生時代/孝靈天皇|-290/2/8~|:日本書紀|読み=こうれいてんのう|諡=孝霊天皇',
+		'/孝元天皇|-214/2/8~|:日本書紀|読み=こうげんてんのう',
+		'/開化天皇|-157/2/8~|:日本書紀|読み=かいかてんのう',
+		'/崇神天皇|-97/2/5~|:日本書紀|読み=すじんてんのう|諡=崇神天皇',
+		'/垂仁天皇|-29/2/3~|:日本書紀|読み=すいにんてんのう',
+		'/景行天皇|71/2/18~|:日本書紀|読み=けいこうてんのう',
+		'/成務天皇|131/2/15~|:日本書紀|読み=せいむてんのう',
+		'/仲哀天皇|192/2/1~|:日本書紀|読み=ちゅうあいてんのう',
+		'/神功皇后|201/1/22~|:日本書紀|読み=じんぐうこうごう|諡=神功皇后|注=神功皇后摂政(じんぐうこうごうせっしょう)',
+		'古墳時代/應神天皇|270/2/8~|:日本書紀|読み=おうじんてんのう|諡=応神天皇;應神天皇',
+		'/仁德天皇|313/2/12~|:日本書紀|読み=にんとくてんのう;仁徳天皇',
+		'/履中天皇|400/2/11~|:日本書紀|読み=りちゅうてんのう',
+		'/反正天皇|406/2/4~|:日本書紀|読み=はんぜいてんのう',
+		'/允恭天皇|412/1/30~|:日本書紀|読み=いんぎょうてんのう',
+		'/安康天皇|454/2/14~|:日本書紀|読み=あんこうてんのう',
+		'/雄略天皇|457/2/10~|:日本書紀|読み=ゆうりゃくてんのう',
+		'/清寧天皇|480/1/28~|:日本書紀|読み=せいねいてんのう|諡=淸寧天皇',
+		'/顯宗天皇|485/2/1~|:日本書紀|読み=けんぞうてんのう|諡=顕宗天皇',
+		'/仁賢天皇|488/1/29~|:日本書紀|読み=にんけんてんのう',
+		'/武烈天皇|499/1/28~|:日本書紀|読み=ぶれつてんのう',
 
 		// <a
 		// href="https://ja.wikipedia.org/wiki/%E5%9B%BD%E5%8F%B7#.E6.97.A5.E6.9C.AC.E3.81.AE.E5.9B.BD.E5.8F.B7"
 		// accessdate="2013/4/1 23:41">日本の国号</a>
-		'/繼體天皇|507~||読み=けいたいてんのう|諡=継体天皇|精=年|國號=日本国',
-		'/安閑天皇|532~||精=年',
-		'/宣化天皇|536~||精=年',
-		'/欽明天皇|540~||精=年',
-		'/敏達天皇|572~||精=年|諡=敏達天皇',
-		'/用明天皇|586~||精=年',
-		'/崇峻天皇|588~||精=年',
-		'飛鳥時代/崇峻天皇|592~|5/=:CE|精=年',
+		'/繼體天皇|507/1/29~|:日本書紀|読み=けいたいてんのう|諡=継体天皇|國號=日本国',
+		'/安閑天皇|532/1/23~|:日本書紀',
+		'/宣化天皇|536/2/8~|:日本書紀',
+		'/欽明天皇|540/1/25~|:日本書紀',
+		'/敏達天皇|572/1/31~|:日本書紀|諡=敏達天皇',
+		'/用明天皇|586/1/25~|:日本書紀',
+		'/崇峻天皇|588/2/3~|:日本書紀',
+		'飛鳥時代/崇峻天皇|592/2/18~|5/=:日本書紀|注=飛鳥時代は崇峻天皇5年（592年）から和銅3年（710年）の118年間にかけて飛鳥に宮・都が置かれていた時代を指す。',
 
 		'/推古天皇|旧暦593~|:旧暦|注=在位：593/1/15~628/4/15',
 		'/舒明天皇|旧暦629~|:旧暦|注=在位：629/2/2~641/11/17',
@@ -2021,11 +2025,13 @@ CeL.era.pass_on = {
 		'/淳仁天皇/=|758/9/7~|2/=:旧暦',
 		'/稱德天皇/=|764/11/6~|8/=:旧暦|諡=称徳天皇',
 		'/天平神護|765/2/1~|:旧暦',
-		'/神護景雲|767/9/13~|:旧暦',
+		// HuTime != 上綱秀治
+		'/神護景雲|767/9/13~|:旧暦|注=一説神護景雲二年四月乙亥朔。(上綱秀治)|注=除上綱秀治の月の大小、[http://miko.org/~uraki/kuon/furu/text/syokki/syokki29.htm#skk29_02 新編 續日本紀 卷廿九　稱德天皇 高野天皇] "夏四月,乙亥朔戊寅"；餘皆為甲戌朔。如: [http://www.j-texts.com/jodai/shokuall.html 昭和15年朝日新聞社発行『増補　六国史』]；[http://dl.ndl.go.jp/info:ndljp/pid/991092 経済雑誌社 編	国史大系. 第２巻　続日本紀(1897-1901)]。',
 		'/光仁天皇/寶龜|770/10/23~|:旧暦|元号=宝亀',
 		'/天應|781/1/30~|:旧暦|元号=天応',
 		'/桓武天皇/=|781/4/30~|:旧暦|注=在位:781/4/30-806/4/9',
-		'/延暦|782/9/30~|:旧暦',
+		// HuTime != 上綱秀治
+		'/延暦|782/9/30~|:旧暦|注=一説桓武天皇延暦十三年五月癸酉朔。(HuTime)|注=[http://www.j-texts.com/chuko/koukiall.html 『日本後紀』朝日新聞本]\n《卷二逸文（『類聚國史』七三五月五日）延暦十三年（七九四）五月丁丑【六】》○五月丁丑。停馬射。以發大軍也。宴侍臣賜禄。\n《卷二逸文（『類聚國史』一六五烏）延暦十三年（七九四）五月乙未【廿四】》○乙未。甲斐國獻白烏二。\n《卷二逸文（『日本紀略』）延暦十三年（七九四）五月己亥【廿七】》○己亥。皇太子妃諱帶子、忽有病。移木蓮子院、頓逝。|注=[http://miko.org/~uraki/kuon/furu/text/kouki/kouki02.htm#kou02_05 新編 日本後紀卷第二　桓武天皇　日本根子皇統彌照天皇《逸文》]\n五月,壬申朔丁丑,停馬射.以發大軍也.宴侍臣,賜祿. 類聚國史73五月五日',
 
 		'平安前期/=/=|794/11/19~|13/=:旧暦|時期=平安時代|注=十三年十月廿三日。天皇自南京、遷北京。',
 		'/平城天皇/=|806/4/9~|25/=:旧暦|注=在位:806/4/9-809/5/18',

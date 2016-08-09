@@ -1882,7 +1882,36 @@ if (typeof CeL === 'function')
 				|| key && era.正統.includes(key));
 			}
 
-			// 初始化/parse 紀年之月分日數 data。
+			var important_properties = {
+				'精' : true,
+				'準' : true
+			};
+			// 複製當前參照紀年之重要屬性至本紀年。
+			function copy_important_properties(from_era, to_era) {
+				for ( var property in important_properties) {
+					if (!(property in from_era)) {
+						continue;
+					}
+					var value = from_era[property];
+					if (property in to_era) {
+						// 可能是本紀年自己的，可能是從其他參照紀年獲得的。
+						if (to_era[property] !== value
+								&& important_properties[property]) {
+							library_namespace.err([
+									'copy_important_properties: ',
+									'紀年 [' + to_era, '] 原有重要屬性 ',
+									to_era[property], ' 與參照紀年 [' + from_era,
+									'] 之重要屬性 ', value, ' 不同！' ]);
+						}
+						continue;
+					}
+					library_namespace.debug([ '複製當前參照紀年之重要屬性 [', property,
+							'] = ', value ], 1, 'copy_important_properties');
+					to_era[property] = value;
+				}
+			}
+
+			// parse_era() 之後，初始化/parse 紀年之月分日數 data。
 			// initialize era date.
 			function initialize_era_date() {
 				// IE 需要 .getTime()：IE8 以 new Date(Date object) 會得到 NaN！
@@ -2351,6 +2380,8 @@ if (typeof CeL === 'function')
 										is_正統(era, 曆法) ? '<em>[' + 曆法
 												+ '] 正統</em> ' : '',
 										era.toString(WITH_PERIOD) ]);
+
+							copy_important_properties(era, this);
 
 							if (false
 							// && options.check_overleap
@@ -5085,12 +5116,13 @@ if (typeof CeL === 'function')
 						if (!附加屬性)
 							附加屬性 = library_namespace.null_Object();
 						i.forEach(function(pair) {
+							pair = pair.trim();
 							if (j = pair.match(
-							//		
-							/^\s*([^=]+)\s*=\s*([^\s].*)\s*$/))
-								add_attribute(附加屬性, j[1], j[2]);
+							// 允許 "\n"
+							/^([^=]+)=([\s\S]+)$/))
+								add_attribute(附加屬性, j[1].trim(), j[2].trim());
 							else if (/^[^\s,.;]+$/.test(pair))
-								// 預設將屬性定為 true。
+								// 當作屬性名稱，預設將屬性定為 true。
 								add_attribute(附加屬性, pair, true);
 							else
 								library_namespace.warn(

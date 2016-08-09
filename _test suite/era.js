@@ -1890,11 +1890,26 @@ function translate_era(era) {
 			});
 			if (0 < index)
 				output.push(' ' + (index + 1));
-			if (note)
+			if (note) {
+				note = note
+						.replace(/\n/g, '<br />')
+						.replace(
+								// @see PATTERN_URL_WITH_PROTOCOL_GLOBAL @
+								// CeL.application.net.wiki
+								/\[((?:https?|ftp):\/\/(?:[^\0\s\|<>\[\]{}\/][^\0\s\|<>\[\]{}]*)) ([^\[\]]+)\]/ig,
+								function(all, URL, text) {
+									return '<a href="' + URL
+											+ '" target="_blank">'
+											+ text.trim() + '</a>';
+								});
+				if (add_node) {
+					note = add_node(note);
+				}
 				output.push(': ', {
-					span : CeL.era.to_HTML(add_node && add_node(note) || note),
+					span : CeL.era.to_HTML(note),
 					C : 'note'
 				});
+			}
 		}
 
 		if (date[key] || add_node === true) {
@@ -2000,109 +2015,113 @@ function translate_era(era) {
 					target : '_self',
 					onclick : click_title_as_era
 				};
-
-			// 還需要更改 ((sign_note.copy_attributes))!
-			add_注('曆法', '採用曆法', function(曆法) {
-				return {
-					a : 曆法,
-					href : '#',
-					title : 曆法,
-					onclick : add_calendar_column
-				};
-			});
-			add_注('據', '出典');
-
-			// 君主資料
-			add_注('君主名', null, add_注_link);
-			if (date.ruler) {
-				add_注('君主', '君主名', add_注_link);
-				add_注('ruler', '君主名', add_注_link);
-			}
-			add_注('表字');
-			add_注('君主號', null, add_注_link);
-			add_注('諱', {
-				a : {
-					T : '諱'
-				},
-				href : 'https://zh.wikipedia.org/wiki/%E5%90%8D%E8%AB%B1'
-			}, add_注_link);
-			if (Array.isArray(date.name) && date.name[1]
-					&& date.name[1].includes('天皇'))
-				// append name.
-				if (Array.isArray(date.諡))
-					// 不動到原 data。
-					(date.諡 = date.諡.slice()).unshift(date.name[1]);
-				else
-					date.諡 = date.諡 ? [ date.name[1], date.諡 ]
-							: [ date.name[1] ];
-			add_注('諡', {
-				a : {
-					T : '諡'
-				},
-				href : 'https://zh.wikipedia.org/wiki/%E8%AB%A1'
-			}, add_注_link);
-			add_注('廟號', {
-				a : {
-					T : '廟號'
-				},
-				href : 'https://zh.wikipedia.org/wiki/%E5%BB%9F%E8%99%9F'
-			});
-			add_注('生', '出生', function(note) {
-				return {
-					a : note,
-					title : '共存紀年:' + note,
-					href : '#',
-					onclick : click_title_as_era,
-					C : 'note'
-				};
-			});
-			add_注('卒', '逝世', function(note) {
-				return {
-					a : note,
-					title : '共存紀年:' + note,
-					href : '#',
-					onclick : click_title_as_era,
-					C : 'note'
-				};
-			});
-			add_注('在位', null, function(note) {
-				return {
-					a : note,
-					href : '#',
-					title : note,
-					onclick : click_title_as_era
-				};
-			});
-
-			add_注('注');
-
-			if (Array.isArray(date.name))
-				add_注('紀年線圖', {
-					a : {
-						T : '展示線圖'
-					},
-					D : {
-						hierarchy : date.name.slice().reverse().slice(0, -1)
-								.join('/')
-					},
-					href : '#',
-					onclick : draw_era.click_Period,
-					S : 'cursor:pointer;background-color:#ffa;color:#a26;'
-				}, true);
-
-			if (date.準 || date.精) {
-				if (!Array.isArray(output))
-					output = [ output ];
-				output.unshift({
-					em : [ '此輸出值', 準確程度_MESSAGE[date.準] || '僅約略準確至'
-					//
-					+ (date.準 || date.精)
-					//
-					+ (/^\d+[年月日]$/.test(date.準 || date.精) ? '前後' : ''),
-							'，僅供參考： ' ]
-				});
-			}
 		}
+
+		// -----------------------------
+		// 顯示其他與本紀年相關的註解與屬性。
+
+		// 還需要更改 ((sign_note.copy_attributes))!
+		add_注('曆法', '採用曆法', function(曆法) {
+			return {
+				a : 曆法,
+				href : '#',
+				title : 曆法,
+				onclick : add_calendar_column
+			};
+		});
+		add_注('據', '出典');
+
+		// 君主資料
+		add_注('君主名', null, add_注_link);
+		if (date.ruler) {
+			add_注('君主', '君主名', add_注_link);
+			add_注('ruler', '君主名', add_注_link);
+		}
+		add_注('表字');
+		add_注('君主號', null, add_注_link);
+		add_注('諱', {
+			a : {
+				T : '諱'
+			},
+			href : 'https://zh.wikipedia.org/wiki/%E5%90%8D%E8%AB%B1'
+		}, add_注_link);
+		if (Array.isArray(date.name) && date.name[1]
+				&& date.name[1].includes('天皇'))
+			// append name.
+			if (Array.isArray(date.諡))
+				// 不動到原 data。
+				(date.諡 = date.諡.slice()).unshift(date.name[1]);
+			else
+				date.諡 = date.諡 ? [ date.name[1], date.諡 ] : [ date.name[1] ];
+		add_注('諡', {
+			a : {
+				T : '諡'
+			},
+			href : 'https://zh.wikipedia.org/wiki/%E8%AB%A1'
+		}, add_注_link);
+		add_注('廟號', {
+			a : {
+				T : '廟號'
+			},
+			href : 'https://zh.wikipedia.org/wiki/%E5%BB%9F%E8%99%9F'
+		});
+		add_注('生', '出生', function(note) {
+			return {
+				a : note,
+				title : '共存紀年:' + note,
+				href : '#',
+				onclick : click_title_as_era,
+				C : 'note'
+			};
+		});
+		add_注('卒', '逝世', function(note) {
+			return {
+				a : note,
+				title : '共存紀年:' + note,
+				href : '#',
+				onclick : click_title_as_era,
+				C : 'note'
+			};
+		});
+		add_注('在位', null, function(note) {
+			return {
+				a : note,
+				href : '#',
+				title : note,
+				onclick : click_title_as_era
+			};
+		});
+
+		add_注('注');
+
+		if (Array.isArray(date.name))
+			add_注('紀年線圖', {
+				a : {
+					T : '展示線圖'
+				},
+				D : {
+					hierarchy : date.name.slice().reverse().slice(0, -1).join(
+							'/')
+				},
+				href : '#',
+				onclick : draw_era.click_Period,
+				S : 'cursor:pointer;background-color:#ffa;color:#a26;'
+			}, true);
+
+		if (date.準 || date.精) {
+			if (!Array.isArray(output))
+				output = [ output ];
+			output.unshift({
+				em : [ '此輸出值', 準確程度_MESSAGE[date.準] || '僅約略準確至'
+				//
+				+ (date.準 || date.精)
+				//
+				+ (/^\d+[年月日]$/.test(date.準 || date.精) ? '前後' : ''),
+						'，僅供參考非已確認之實曆： ' ]
+			});
+		}
+
+		// -----------------------------
 
 		CeL.remove_all_child('era_output');
 		CeL.new_node(output, 'era_output');

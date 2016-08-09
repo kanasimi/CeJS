@@ -3765,7 +3765,7 @@ function module_code(library_namespace) {
 		if (each[1]) {
 			Object.assign(options, each[1]);
 		}
-		// 採用 {{tlx|template_name}} 時，[[Special:最近更改]]頁面無法自動解析成 link。
+		// 採用 {{tlx|template_name}} 時，[[Special:RecentChanges]]頁面無法自動解析成 link。
 		options.summary = (callback = config.summary)
 		// 是為 Robot 運作。
 		? /bot/i.test(callback) ? callback
@@ -7094,7 +7094,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 取得所有 redirect 到 [[title]] 之 pages。<br />
-	 * 可以 [[Special:链入页面]] 確認。
+	 * 可以 [[Special:Whatlinkshere]] 確認。
 	 * 
 	 * @param {String}title
 	 *            頁面名。

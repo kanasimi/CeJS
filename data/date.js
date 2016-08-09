@@ -169,8 +169,10 @@ CeL.Julian_day.to_YMD(-1363,true)
  * If type of date is Date, we'll treat date as local date.<br />
  * 因為得出的是 UTC+0 12:0 之 JDN，UTC+0 0:0 之 JD = JDN - .5。 
  * 
+ * JDN = Math.round(JD);
+ * 
  * @param {String|Date|Number}date
- *            date or date value
+ *            {Date}date or date value
  * @param {Boolean}type
  *            calendar type. true: Gregorian, false: Julian, 'CE': Common Era
  * @param {Boolean}no_year_0
