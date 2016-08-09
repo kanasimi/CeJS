@@ -1883,10 +1883,13 @@ if (typeof CeL === 'function')
 			}
 
 			var important_properties = {
-				'精' : true,
-				'準' : true
+				精 : true,
+				準 : true,
+				曆法 : true
 			};
 			// 複製當前參照紀年之重要屬性至本紀年。
+			// 注意: 由於這會在 initialize_era_date()，產生曆譜時才會執行，
+			// 因此像是展示線圖時並不具有這些屬性。若紀年本身沒設定非準確屬性，則會當作準確紀年來顯示。
 			function copy_important_properties(from_era, to_era) {
 				for ( var property in important_properties) {
 					if (!(property in from_era)) {

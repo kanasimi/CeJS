@@ -269,14 +269,16 @@ function pin_text(gettext) {
  *            是否重繪文字式年曆。
  * @param {Boolean}to_remove
  *            是否為刪除，而非添加。
+ * @param {Boolean}no_warning
+ *            無此欄位時不警告。例如當設定採用曆法屬性，若是無此曆法則忽略之。
  * 
  * @returns {Boolean}false
  */
-function add_calendar_column(name, no_jump, to_remove) {
+function add_calendar_column(name, no_jump, to_remove, no_warning) {
 	if (Array.isArray(name)) {
 		if (name.length > 1) {
 			name.forEach(function(column) {
-				add_calendar_column(column, true, to_remove);
+				add_calendar_column(column, true, to_remove, no_warning);
 			});
 			// 此時未判斷是否有更動。
 			if (!no_jump)
@@ -311,8 +313,9 @@ function add_calendar_column(name, no_jump, to_remove) {
 			selected_columns[column] = true;
 		if (!no_jump)
 			translate_era();
-	} else
+	} else if (!no_warning) {
 		CeL.warn('add_calendar_column: Unkonwn column: [' + name + ']');
+	}
 
 	return false;
 }
@@ -1960,7 +1963,8 @@ function translate_era(era) {
 
 		output = date.曆法;
 		if (output && !(output in had_inputted)) {
-			add_calendar_column(output, true);
+			add_calendar_column(output.includes(';') ? output.split(';')
+					: output, true, false, true);
 			had_inputted[output] = true;
 		}
 
