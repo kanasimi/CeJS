@@ -4,7 +4,8 @@
  * @memo <code>
 
  TODO:
- 視覺化互動式史地資訊平台:整合 GIS
+ 視覺化互動式史地資訊平台:整合 GIS + 視覺化年表 (e.g., HuTime)
+ 當年年度/每月資訊
 
  圖層 layer:
  +重大地震
@@ -324,7 +325,7 @@ function remove_calendar_column(name, no_jump) {
 	return add_calendar_column.call(this, name, no_jump, true);
 }
 
-// 文字式年曆。
+// 文字式年曆。 text_calendar
 function show_calendar(era_name) {
 	var start = new Date, era_caption,
 	// 為了不更動到原先的 default_column。作 deep clone.
@@ -408,15 +409,16 @@ function show_calendar(era_name) {
 	}
 	hidden_column.pop();
 
-	if (main_date)
-		if (main_date.日 == 1 && !era_name.includes('日'))
+	if (main_date) {
+		main_date_value = new Date(main_date.getTime());
+		// 轉換成本地子夜時間值。
+		main_date_value.setHours(0, 0, 0, 0);
+		main_date_value = main_date_value.getTime();
+		if (false && main_date.日 === 1 && !era_name.includes('日'))
+			// 僅輸入紀元名稱時，不特別標示符合之欄位。
+			// 但為了提醒實際轉換出的結果為何者，還是強制標示。
 			main_date_value = null;
-		else {
-			main_date_value = new Date(main_date.getTime());
-			// 轉換成本地子夜時間值。
-			main_date_value.setHours(0, 0, 0, 0);
-			main_date_value = main_date_value.getTime();
-		}
+	}
 
 	// 遍歷
 	function add_traversal(name, is_next) {
@@ -3281,7 +3283,10 @@ function affairs() {
 					+ (is_solar ? 'SEsaros/SEsaros' : 'LEsaros/LEsaros')
 					//
 					+ eclipse_info.saros[1].pad(3) + '.html'
-				}, is_solar && eclipse_info.type !== 'partial' ? [ ' (', {
+				},
+				// 2016/8/10 17:37:17
+				// NASA未提供日偏食或月食之map。但是本工具之判斷尚不準確。此時得靠前面之"@NASA"連結取得進一部資訊。
+				is_solar && eclipse_info.type !== 'partial' ? [ ' (', {
 					a : {
 						T : 'path'
 					},
@@ -4055,8 +4060,8 @@ function affairs() {
 				'儀鳳暦'),
 
 		// --------------------------------------------------------------------
-		// 列具曆注, calendar notes
-		曆注 : '具注曆譜/曆書之補充注釋，常與風水運勢、吉凶宜忌相關。',
+		// 列具曆注, 具注曆譜, calendar notes
+		曆注 : '具注曆日/曆書之補充注釋，常與風水運勢、吉凶宜忌相關。',
 		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
 		// TODO: 八節、二至啟閉四節、伏臘、八魁、天李、入官忌、日忌和歸忌
 		// see 欽定協紀辨方書

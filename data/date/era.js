@@ -129,6 +129,11 @@ if (typeof CeL === 'function')
 
 			// 工具函數。
 			function generate_pattern(pattern_source, delete_干支, flag) {
+				if (library_namespace.is_RegExp(pattern_source)) {
+					if (flag === undefined && ('flags' in pattern_source))
+						flag = pattern_source.flags;
+					pattern_source = pattern_source.source;
+				}
 				pattern_source = pattern_source
 				// 數字
 				.replace(/數/g, '(?:[' + library_namespace
@@ -327,7 +332,7 @@ if (typeof CeL === 'function')
 			// TODO: 闰月
 			MONTH_NAME_PATTERN = /^(閏)?([正元]|[01]?\d)月?$/,
 
-			干支_PATTERN = generate_pattern('^干支$'),
+			干支_PATTERN = generate_pattern(/^干支$/),
 
 			// 年分名稱。
 			年_SOURCE = /([前\-−‐]?\d{1,4}|干支|前?數{1,4}|元)[\/.\-年]\s*/.source,
@@ -346,7 +351,7 @@ if (typeof CeL === 'function')
 			// see: numeralize_time()
 			時刻_PATTERN = generate_pattern(
 			// '(?:[早晚夜])'+
-			/(支)(?:時?\s*([初正])([初一二三123])刻|時)/.source),
+			/(支)(?:時?\s*([初正])([初一二三123])刻|時)/),
 
 			// should matched: 月|年/|/日|月/日|/月/日|年/月/|年/月/日
 			// ^(年?/)?月/日|年/|/日|月$
@@ -365,7 +370,9 @@ if (typeof CeL === 'function')
 			// 取得/保存後置資訊。
 			後置_SOURCE = '(.*?)$',
 
-			單數字_PATTERN = generate_pattern('^數$'),
+			// NOT: 測試是否全為數字，單純只有數字用。
+			// 測試是否為單一中文數字字元。
+			單數字_PATTERN = generate_pattern(/^數$/),
 
 			// 當前的 ERA_DATE_PATTERN 必須指明所求年/月/日，無法僅省略日。
 			// 否則遇到'吳大帝太元元年1月1日'之類的無法處理。
@@ -4997,7 +5004,7 @@ if (typeof CeL === 'function')
 					// 從最後搜尋起。
 					// 從後端開始搜尋較容易一開始就取得最少的候選者，能少做點處理，較有效率。
 					// 因為採用 /().*?$/ 的方法不一定能 match 到所需（按順序）的 key，只好放棄
-					// /.*?$/。
+					// /().*?$/。
 					era_search_pattern = new RegExp('(?:'
 							+ era_key_list.join('|')
 							// escape.
@@ -6096,7 +6103,8 @@ if (typeof CeL === 'function')
 					var matched, 年, 月, 日, 偵測集 = [],
 					// 正規化數字。
 					numeralized = normalize_number(date = date.trim()),
-					//
+					// 對每一個((偵測集))的字串，從後方開始一個個找到剛好符合紀元名稱的部分。
+					// 會更改到((偵測集))
 					search_era = function search_era() {
 						// 通常後方的條件會比較精細。
 						while (偵測集.length > 0) {
@@ -6105,14 +6113,21 @@ if (typeof CeL === 'function')
 								if (matched = slice.match(era_search_pattern)) {
 									if (0 < matched.index)
 										偵測集.push(
-										// 放回尚未處理的部分。
+										// 放回前面尚未處理的部分。
 										slice.slice(0, matched.index));
-									if (slice = slice.slice(
-									//
-									matched.index + matched[0].length))
-										偵測集.push(slice);
+									if (false) {
+										if (slice = slice.slice(
+										// 放回後面尚未處理的部分:
+										// 由於從後面找，保證了後面的不存在可符合的部分，因此現在用不到。
+										matched.index + matched[0].length))
+											偵測集.push(slice);
+									}
 									return matched;
 								}
+								// 自後頭一個一個剔除，以找到剛好符合的部分。
+								// 因為era_search_pattern會符合以紀元名稱結尾。
+								// TODO:
+								// 使era_search_pattern匹配出現在中間的紀元名稱，不必一個個回退。
 								slice = slice.slice(0, -1);
 							}
 						}
@@ -6167,21 +6182,22 @@ if (typeof CeL === 'function')
 									&& !isNaN(library_namespace
 											.stem_branch_index(年)))
 								日 = 年, 年 = null;
-							else if (!月 && !日
-							//
-							&& (tmp[1] || tmp[5])
-							//
-							&& 單數字_PATTERN.test(年))
-								// e.g., 百濟多婁王, 四条天皇天福, 四条天皇文暦, 後一条天皇長元.
-								// 但須考量 "元至正十七"
-								年 = '';
-							else if (!月 && !日 && tmp[5]
-							// 修正僅有年分時出現之問題。
-							// e.g., '五千六百七十八', '前五千六百七十八'
-							&& !isNaN(numeralize_date_name(tmp[5])))
-								年 += tmp[5], tmp[5] = '';
+							else if (!月 && !日) {
+								if ((tmp[1] || tmp[5])
+								// 此處((年))應該是年號中間的文字，只是被篩選到了。
+								&& 單數字_PATTERN.test(年)) {
+									// e.g., 百濟多婁王, 四条天皇天福, 四条天皇文暦, 後一条天皇長元.
+									// 但須考量(剔除) "元至正十七"
+									年 = '';
+								} else if (tmp[5]
+								// 修正僅有年分時出現之問題。
+								// e.g., '五千六百七十八', '前五千六百七十八'
+								&& !isNaN(numeralize_date_name(tmp[5])))
+									年 += tmp[5], tmp[5] = '';
+							}
+
 							// 預防萬一，將 date 資料偵測一次。
-							// 不用 numeralized，預防有些紀年名稱包含可數字化資料。
+							// 不用 numeralized，預防有些紀年名稱包含可被數字化的資料。
 							偵測集.push(date, null);
 						}
 
@@ -6211,7 +6227,7 @@ if (typeof CeL === 'function')
 
 					// 首先確定紀年。
 					if (偵測集.length > 0) {
-						// tmp2 自此當作時間偵測集。
+						// backup(.clone): tmp2 自此當作時間偵測集。
 						tmp2 = 偵測集.slice();
 
 						if (!era_search_pattern)
@@ -6224,21 +6240,26 @@ if (typeof CeL === 'function')
 							if (search_era()
 									&& (tmp = get_intersection(matched[0]))
 									&& tmp.size > 1) {
-								// backup: 為了預防使用別名，因此部一開始就設定 no_expand。
+								// backup(.clone): 為了預防使用別名，因此不一開始就設定 no_expand。
 								date = 偵測集.slice();
 								// 進一步篩選，緊縮符合範圍。
-								while (紀年_list.size > 1 && search_era())
+								while (紀年_list.size > 1 && search_era()) {
+									if (年 && tmp2[1] === null
+									// 檢查((年))是否為紀年名稱之一部份。
+									// 須考量(剔除) "文化14"
+									&& matched[0].includes(年))
+										// 表示((年))應該為紀年名稱之一部份。這樣就不應該設定((年))了。
+										年 = '';
 									get_intersection(matched[0]);
+								}
 								if (紀年_list.size > 1) {
 									// 依舊有超過一個候選，則設定別擴大解釋。
-									// revert
+									// revert, 重新 parse 一次。
 									偵測集 = date;
 									while (紀年_list.size > 1 && search_era())
-										// 已經有太多了，因此設定 no_expand。
+										// 已經有太多匹配的了，因此設定 no_expand。
 										get_intersection(matched[0], true);
 								}
-								if (tmp2[1] === null && 偵測集[1] !== null)
-									年 = '';
 							}
 							// "後一条天皇長元" 需要檢測到 (while ..) 這一項。
 						} while ((!紀年_list || 紀年_list.size === 0)
@@ -7532,9 +7553,9 @@ if (typeof CeL === 'function')
 			// 辨識史籍(historical book)紀年用之 pattern。
 			var 史籍紀年_PATTERN, ERA_ONLY_PATTERN,
 			//
-			朔干支_PATTERN = generate_pattern('(朔<\\/span>)(干支)()', false, 'g'),
+			朔干支_PATTERN = generate_pattern(/(朔<\/span>)(干支)()/, false, 'g'),
 			// 十二地支時辰. e.g., 光緒十九年八月初二日丑刻
-			時干支_PATTERN = generate_pattern('(支)[時刻]', false, 'g'),
+			時干支_PATTERN = generate_pattern(/(支)[時刻]/, false, 'g'),
 			// see era_text_to_HTML.build_pattern()
 			REPLACED_data_era = '$1<span data-era="~">$2</span>$3';
 
