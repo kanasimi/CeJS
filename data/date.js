@@ -2395,8 +2395,10 @@ function age_of(start, end, options) {
 			diff = difference.to_fixed(1) + 'Y';
 		if (options && options.歲) {
 			// 計算年齡(虛歲)幾歲。
+			difference = end.getFullYear() - start.getFullYear()
 			// + 1: 一出生即虛歲一歲(YO, years old, "Y/O.")。之後過年長一歲。
-			difference = end.getFullYear() - start.getFullYear() + 1;
+			// else: 計算周歲（又稱實歲、足歲）幾歲。
+			+ (options.歲 === '虛' ? 1 : 0);
 			if (start - age_of.get_new_year(start.getFullYear()) < 0)
 				difference++;
 			if (end - age_of.get_new_year(end.getFullYear()) < 0)
