@@ -2037,7 +2037,7 @@ function translate_era(era) {
 		});
 		add_注('據', '出典');
 
-		// 君主資料
+		// 君主名號
 		add_注('君主名', null, add_注_link);
 		if (date.ruler) {
 			add_注('君主', '君主名', add_注_link);
@@ -2071,6 +2071,10 @@ function translate_era(era) {
 			},
 			href : 'https://zh.wikipedia.org/wiki/%E5%BB%9F%E8%99%9F'
 		});
+		// for 琉球國
+		add_注('童名');
+		add_注('神號');
+		// 君主資料
 		add_注('生', '出生', function(note) {
 			return {
 				a : note,
@@ -3996,11 +4000,11 @@ function affairs() {
 		// https://zh.wikipedia.org/wiki/%E9%98%B4%E9%98%B3%E5%8E%86
 		東亞陰陽曆 : [
 				'East Asian lunisolar calendar. 中國、日本、朝鮮歷代計算日期的方法。計算得出，不一定是實暦。',
-				[ '夏、商、西周觀象授時，本工具於這些曆法採用天文演算，較耗時間。實際天象可參照「', {
+				[ '夏、商、西周觀象授時，本工具於這些曆法採用天文演算，較耗時間。',{b:['實際天象可選用上方「', {
 					T : '天文節氣'
 				}, '」、「', {
 					T : '月相'
-				}, '」欄。「', {
+				}, '」欄。']},'「', {
 					T : '月相'
 				}, '」欄並附注可能之日月食。' ] ],
 
