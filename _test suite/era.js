@@ -1288,16 +1288,19 @@ function draw_era(hierarchy) {
 	if (Array.isArray(periods) && periods.length > 0) {
 		var start_time = periods.start, ratio = periods.end;
 
-		if (periods.生 && periods.卒) {
+		if (periods.生 || periods.卒) {
 			if (draw_era.options.adapt_lifetime) {
 				// 若君主在世時段於本 period 之外，則擴張範圍。
-				start_time = Math.min(start_time - 0, draw_era
-						.get_date(periods.生[0]) - 0);
-				ratio = Math
-						.max(ratio - 0, draw_era.get_date(periods.卒[0]) - 0);
+				// 最起碼紀年的部分都得要顯現，其他只要有生或卒紀錄，就嘗試擴張。
+				if (periods.生)
+					start_time = Math.min(start_time - 0, draw_era
+							.get_date(periods.生[0]) - 0);
+				if (periods.卒)
+					ratio = Math.max(ratio - 0,
+							draw_era.get_date(periods.卒[0]) - 0);
 			}
 			// 以 tag 顯示君主生卒標記。
-			if (!periods.added) {
+			if (!periods.added && periods.生 && periods.卒) {
 				periods.added = true;
 				add_tag(periods.生[0] + '－' + periods.卒[0], period_hierarchy,
 						'君主生卒', true, {
