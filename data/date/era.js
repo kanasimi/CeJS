@@ -342,7 +342,7 @@ function module_code(library_namespace) {
 	干支_PATTERN = generate_pattern(/^干支$/),
 
 	年_SOURCE =
-	// 年分名稱。允許"嘉慶十八年癸酉"之類。
+	// 年分名稱。允許"嘉慶十八年癸酉"之類表"嘉慶十八年癸酉歲"。
 	/([前\-−‐]?\d{1,4}|干支|前?數{1,4}|元)[\/.\-年]\s*(?:干支\s*)?/
 	//
 	.source,
