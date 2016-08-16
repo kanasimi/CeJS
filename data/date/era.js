@@ -343,7 +343,7 @@ function module_code(library_namespace) {
 
 	年_SOURCE =
 	// 年分名稱。允許"嘉慶十八年癸酉"之類表"嘉慶十八年癸酉歲"。
-	/([前\-−‐]?\d{1,4}|干支|前?數{1,4}|元)[\/.\-年]\s*(?:干支\s*)?/
+	/([前\-−‐]?\d{1,4}|干支|前?數{1,4}|元)[\/.\-年]\s*(?:(?:歲次)?干支\s*)?/
 	//
 	.source,
 	// 月分名稱。
@@ -4941,19 +4941,20 @@ function module_code(library_namespace) {
 	function add_attribute(object, key, value, shift) {
 		if (key in object) {
 			// 有衝突。
-			var v = object[key];
-			if (Array.isArray(v)) {
+			var values = object[key];
+			if (Array.isArray(values)) {
 				// 不重複設定。
-				if (!v.includes(value))
+				if (!values.includes(value))
 					if (shift)
-						v.shift(value);
+						values.shift(value);
 					else
-						v.push(value);
-			} else if (v !== value)
-				object[key] = shift ? [ value, v ] : [ v, value ];
-		} else
+						values.push(value);
+			} else if (values !== value)
+				object[key] = shift ? [ value, values ] : [ values, value ];
+		} else {
 			// 一般情況。
 			object[key] = value;
+		}
 	}
 
 	function parse_month_name(月名, 月名_Array) {
