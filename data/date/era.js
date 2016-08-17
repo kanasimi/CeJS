@@ -150,14 +150,15 @@ function module_code(library_namespace) {
 		.replace(/數/g, '(?:[' + library_namespace
 		// "有": e.g., 十有二月。
 		.positional_Chinese_numerals_digits + '百千]|[十廿卅]有?)');
-		if (delete_干支)
+		if (delete_干支) {
 			pattern_source = pattern_source.replace(/干支\|/g, '');
-		else
+		} else {
 			pattern_source = pattern_source
 			// 天干
 			.replace(/干/g, '[' + library_namespace.STEM_LIST + ']')
 			// 地支
 			.replace(/支/g, '[' + library_namespace.BRANCH_LIST + ']');
+		}
 		return new RegExp(pattern_source, flag || '');
 	}
 
@@ -376,7 +377,7 @@ function module_code(library_namespace) {
 	國_PATTERN = /^(.*[^民])國$/,
 
 	// [ , 名稱 ]
-	名稱加稱號_PATTERN = /^(.{2,})天皇$/,
+	名稱加稱號_PATTERN = /^(.{2,})(?:天皇|皇后)$/,
 
 	// 取得/保存前置資訊。
 	前置_SOURCE = '^(.*?)',
@@ -7504,12 +7505,12 @@ function module_code(library_namespace) {
 	era_text_to_HTML.build_pattern = function() {
 		var 紀年 = [];
 		create_era_search_pattern().forEach(function(key) {
-			var matched = key.match(/^(.+)天皇$/);
+			var matched = key.match(/^(.+)(?:天皇|皇后)$/);
 			if (matched)
 				紀年.push(matched[1]);
 		});
 		ERA_ONLY_PATTERN = new RegExp('([^>])((?:' + 紀年.join('|')
-				+ ')天皇)([^<])', 'g');
+				+ ')(?:天皇|皇后))([^<])', 'g');
 
 		// (紀年)?年(月(日)?)?|(月)?日|月
 		紀年 = create_era_search_pattern().join('|')
