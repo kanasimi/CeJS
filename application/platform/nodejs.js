@@ -64,6 +64,7 @@ if (typeof CeL === 'function')
 					else
 						callback();
 
+				// 2016/8/18 20:5:5	可採用 fs.ReadStream.prototype.bytesRead
 				var source_stream = node_fs.createReadStream(source),
 				//
 				target_stream = node_fs.createWriteStream(target);
