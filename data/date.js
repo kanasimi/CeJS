@@ -555,6 +555,26 @@ Excel_date.Mac = function(date) {
 };
 
 
+// ----------------------------------------------------------------------------
+
+// 2016/8/22 22:1:51
+
+// https://msdn.microsoft.com/en-us/library/system.datetime.tofiletime.aspx
+// (long) DateTime.ToFileTime Method ()
+// A Windows file time is a 64-bit value that represents the number of 100-nanosecond intervals that have elapsed since 12:00 midnight, January 1, 1601 A.D. (C.E.) Coordinated Universal Time (UTC). Windows uses a file time to record when an application creates, accesses, or writes to a file.
+VS_file_time.epoch = Date.parse('1601-01-01T00:00:00Z');
+
+// https://msdn.microsoft.com/en-us/library/system.datetime.fromfiletime.aspx
+// DateTime.FromFileTime Method (Int64)
+// Converts the specified Windows file time to an equivalent local time.
+function VS_file_time(file_time, return_Date) {
+	var date_value = VS_file_time.epoch + file_time / (1e-3 / (1e-9 * 100));
+	return return_Date ? new Date(date_value) : date_value;
+}
+
+
+_.VS_file_time = VS_file_time;
+
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 

@@ -1234,9 +1234,12 @@ add_tag.data_file = {
 	'臺灣地震' : [ 'resource/quake.js', '臺灣地震年表',
 			'http://921kb.sinica.edu.tw/history/quake_history.html' ],
 
-	'古籍異象' : [ 'resource/abnormal.js', '中國古籍異象',
+	'古籍異象' : [
+			'resource/abnormal.js',
+			'中國古籍異象',
 			'http://sciencehistory.twbbs.org/?p=982',
-			'因資料數量龐大，載入與處理速度緩慢，請稍作等待。' ]
+			'因資料數量龐大，載入與處理速度緩慢，請稍作等待。\n'
+					+ '本資料檔源於徐勝一教授 國科會1996年計畫成果(重整中國歷史時期之氣候資料之「歷史氣候編年檔」)' ]
 };
 
 // ---------------------------------------------------------------------//

@@ -2761,17 +2761,17 @@ function module_code(library_namespace) {
 		&& page_data.revisions && page_data.revisions[0];
 	};
 
-	// CeL.wiki.content_of.edit_time(page_data) ===
-	// new Date(page_data.revisions[0].timestamp)
-	// TODO: page_data.edit_time(revision_NO)
+	// CeL.wiki.content_of.edit_time(page_data) -
+	// new Date(page_data.revisions[0].timestamp) === 0
+	// TODO: page_data.edit_time(revision_NO, return_value)
 	// return {Date}最後編輯時間。更正確地說，首個 revision 的 timestamp。
-	get_page_content.edit_time = function(page_data, revision_NO) {
+	get_page_content.edit_time = function(page_data, revision_NO, return_value) {
 		var timestamp = library_namespace.is_Object(page_data)
 				&& page_data.revisions;
 		if (timestamp
 				&& (timestamp = timestamp[revision_NO || 0] || timestamp[0])
 				&& (timestamp = timestamp.timestamp)) {
-			return new Date(timestamp);
+			return return_value ? Date.parse(timestamp) : new Date(timestamp);
 		}
 	};
 
@@ -5012,9 +5012,11 @@ function module_code(library_namespace) {
 		});
 		// wiki.last_page
 
-		// for "Date of page creation" 頁面建立日期 @ Edit history 編輯歷史 @ 頁面資訊 &action=info
+		// for "Date of page creation" 頁面建立日期 @ Edit history 編輯歷史 @ 頁面資訊
+		// &action=info
 		wiki.page('巴黎協議', function(page_data) {
-			console.log(CeL.wiki.content_of.edit_time(page_data).format('%Y/%m/%d'));
+			console.log(CeL.wiki.content_of.edit_time(page_data).format(
+					'%Y/%m/%d'));
 		}, {
 			rvdir : 'newer',
 			rvprop : 'timestamp'
