@@ -2405,19 +2405,19 @@ function test_wiki() {
 	error_count += CeL.test('CeL.wiki.parser', function(assert) {
 		var wikitext;
 		wikitext = 't[http://a.b/ x[[l]]';
-		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'external link');
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'wiki.parse: external link');
 		wikitext = '++\npp:http://h /p n\n++';
-		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'plain url #1');
-		assert([ '++\npp:~~ /p n\n++', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'plain url #2');
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'wiki.parse: plain url #1');
+		assert([ '++\npp:~~ /p n\n++', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'wiki.parse: plain url #2');
 		wikitext = 'http://http://h';
-		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'plain url #3');
-		assert([ '~~', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'plain url #4');
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'wiki.parse: plain url #3');
+		assert([ '~~', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'wiki.parse: plain url #4');
 		wikitext = 'http://http://h{{t}}http://s.r[g]ftp://p.q';
-		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'plain url #5');
-		assert([ '~~{{t}}~~[g]~~', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'plain url #6');
+		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ], 'wiki.parse: plain url #5');
+		assert([ '~~{{t}}~~[g]~~', CeL.wiki.parser(wikitext).each('url', function(token){return '~~';}, true).toString() ], 'wiki.parse: plain url #6');
 
 		wikitext = '1{{t|a=\nb\n}}{{p|b}}2';
-		assert([ 'b', CeL.wiki.parser(wikitext).parse()[1].parameters.a ], 'template .parameters');
+		assert([ 'b', CeL.wiki.parser(wikitext).parse()[1].parameters.a ], 'wiki.parse: template .parameters');
 
 		wikitext = 't<!--=';
 		assert([ wikitext, CeL.wiki.parse(wikitext).toString() ]);
@@ -2441,6 +2441,23 @@ function test_wiki() {
 		// assert([ 'text', CeL.wiki.parse('[[Category:]]').type ]);
 		assert([ 'link', CeL.wiki.parse('[[Category]]').type ]);
 		// CeL.wiki.parser('[[Category:a]]').each('category', function(token) {console.log(token);});0;
+
+		wikitext = '1<br>2';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML single tag #1');
+		assert([ 'br', CeL.wiki.parser(wikitext).parse()[1].tag ], 'wiki.parse: HTML single tag #2');
+		wikitext = '1<br clear="all">2';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML single tag #3');
+		assert([ ' clear="all"', CeL.wiki.parser(wikitext).parse()[1][0] ], 'wiki.parse: HTML single tag #4');
+
+		wikitext = '1<b>a</b>2';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML tag #1');
+		assert([ 'b', CeL.wiki.parser(wikitext).parse()[1].tag ], 'wiki.parse: HTML tag #2');
+		wikitext = '1<b style="color:#000" >{{a}}{{c}}</b>2';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML tag #3');
+		assert([ 'b', CeL.wiki.parser(wikitext).parse()[1].tag ], 'wiki.parse: HTML tag #4');
+		assert([ ' style="color:#000" ', CeL.wiki.parser(wikitext).parse()[1][0] ], 'wiki.parse: HTML tag #5');
+		assert([ 'tag_inner', CeL.wiki.parser(wikitext).parse()[1][1].type ], 'wiki.parse: HTML tag #6');
+		assert([ '1<b style="color:#000" ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function(token, parent, index){return '';}, true).toString() ], 'wiki.parse: HTML tag #7');
 	});
 
 	return;

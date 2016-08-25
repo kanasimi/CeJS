@@ -953,6 +953,8 @@ function module_code(library_namespace) {
 	/**
 	 * 對所有指定類型 type，皆執行特定作業 processor。
 	 * 
+	 * TODO: 可中途跳出。
+	 * 
 	 * @param {String}[type]
 	 *            欲搜尋之類型。 e.g., 'template'. see ((wiki_toString)).<br />
 	 *            未指定: 處理所有節點。
@@ -1375,13 +1377,20 @@ function module_code(library_namespace) {
 		},
 		// [[Help:Wiki markup]], HTML tags
 		tag : function() {
-			// this: [ attributes, inner nodes ].tag
+			// this: [ {String}attributes, {Array}inner nodes ].tag
+			// 欲取得 .tagName，請用 this.tag.toLowerCase();
+			// 欲取得 .inner nodes，請用 this[1];
+			// 欲取得 .innerHTML，請用 this[1].toString();
 			return '<' + this.tag + (this[0] || '') + '>'
-					+ this.slice(1).join('') + '</'
+					+ this[1] + '</'
 					+ (this.end_tag || this.tag) + '>';
 		},
+		tag_inner : function() {
+			return this.join('');
+		},
 		tag_single : function() {
-			// this: [ attributes ].tag
+			// this: [ {String}attributes ].tag
+			// 欲取得 .tagName，請用 this.tag.toLowerCase();
 			return '<' + this.tag + this.join('') + '>';
 		},
 		// comments: <!-- ... -->
@@ -1848,7 +1857,7 @@ function module_code(library_namespace) {
 		// HTML tags that must be closed.
 		// <pre>...</pre>, <code>int f()</code>
 		wikitext = wikitext.replace_till_stable(PATTERN_TAG, function(all, tag,
-				attribute, inner, end_tag) {
+				attributes, inner, end_tag) {
 			// 在章節標題、表格 td/th 或 template parameter 結束時，
 			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
 			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
@@ -1865,7 +1874,7 @@ function module_code(library_namespace) {
 				// length of </end_tag>
 				- end_tag.length - 3);
 				tag = matched[1];
-				attribute = matched[2];
+				attributes = matched[2];
 				inner = matched[3];
 			} else {
 				prevoius = '';
@@ -1874,15 +1883,18 @@ function module_code(library_namespace) {
 					'parse_wikitext.tag');
 
 			// 經過改變，需再進一步處理。
-			all = parse_wikitext(inner, options, queue);
-			if (all.type !== 'text')
-				all = [ all ];
-			if (normalize)
+			inner = _set_wiki_type(parse_wikitext(inner, options, queue), 'tag_inner');
+			all = [ attributes && parse_wikitext(attributes, options, queue) || '', inner ];
+
+			if (normalize) {
 				tag = tag.toLowerCase();
-			else if (tag !== end_tag)
+			} else if (tag !== end_tag) {
 				all.end_tag = end_tag;
+			}
 			all.tag = tag;
-			all.unshift(parse_wikitext(attribute, options, queue));
+			// {String}Element.tagName
+			// all.tagName = tag.toLowerCase();
+
 			_set_wiki_type(all, 'tag');
 			queue.push(all);
 			return prevoius + include_mark + (queue.length - 1) + end_mark;
@@ -1893,24 +1905,29 @@ function module_code(library_namespace) {
 		// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
 		wikitext = wikitext.replace_till_stable(
 		// HTML tags that may not be closed
-		/<(nowiki|references|ref|[bh]r|li|d[td]|center)(\s[^<>]*|\/)?>/gi,
+		/<(nowiki|references|ref|br|hr|li|dt|dd|center)(\s[^<>]*|\/)?>/gi,
 		//
-		function(all, tag, attribute) {
-			if (attribute) {
+		function(all, tag, attributes) {
+			if (attributes) {
 				if (normalize)
-					attribute = attribute.replace(/[\s\/]*$/, ' /');
+					attributes = attributes.replace(/[\s\/]*$/, ' /');
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				all = parse_wikitext(attribute, options, queue);
+				all = parse_wikitext(attributes, options, queue);
 				if (all.type !== 'text')
 					all = [ all ];
-			} else
-				// use '' as attribute in case the .join() in .toString()
-				// doesn't
-				// work.
+			} else {
+				// use '' as attributes in case
+				// the .join() in .toString() doesn't work.
 				all = [ '' ];
-			if (normalize)
+			}
+
+			if (normalize) {
 				tag = tag.toLowerCase();
+			}
 			all.tag = tag;
+			// {String}Element.tagName
+			// all.tagName = tag.toLowerCase();
+
 			_set_wiki_type(all, 'tag_single');
 			queue.push(all);
 			return include_mark + (queue.length - 1) + end_mark;
