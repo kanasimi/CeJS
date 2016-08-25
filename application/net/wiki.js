@@ -1274,9 +1274,14 @@ function module_code(library_namespace) {
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	PATTERN_external_link_global = /\[((?:https?:|ftp:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:(\s)([^\]]*))?\]/gi,
+	PATTERN_external_link_global = /\[((?:https?:|ftp:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:(\s)([^\]]*))?\]/ig,
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
-	markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark';
+	markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|math|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark',
+	// MediaWiki可接受的HTML標籤. NO b|span|sub|sup|li|dt|dd|center|small
+	// self-closing: void elements + foreign elements
+	// https://www.w3.org/TR/html5/syntax.html#void-elements
+	// @see [[phab:T134423]]
+	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr';
 
 	/**
 	 * .toString() of wiki elements<br />
@@ -1852,7 +1857,7 @@ function module_code(library_namespace) {
 		// 不採用 global variable，預防 multitasking 並行處理。
 		/** {RegExp}HTML tag 的匹配模式。 */
 		var PATTERN_TAG = new RegExp('<(' + markup_tags
-				+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'gi');
+				+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig');
 
 		// HTML tags that must be closed.
 		// <pre>...</pre>, <code>int f()</code>
@@ -1903,11 +1908,11 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// single tags. e.g., <hr />
 		// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
-		wikitext = wikitext.replace_till_stable(
-		// HTML tags that may not be closed
-		/<(nowiki|references|ref|br|hr|li|dt|dd|center)(\s[^<>]*|\/)?>/gi,
-		//
-		function(all, tag, attributes) {
+
+		var PATTERN_TAG_VOID = new RegExp('<(' + self_close_tags + ')(\\s*\\/|\\s[^<>]*)?>', 'ig');
+
+		// assert: 有 end tag 的皆已處理完畢，到這邊的是已經沒有 end tag 的。
+		wikitext = wikitext.replace_till_stable(PATTERN_TAG_VOID, function(all, tag, attributes) {
 			if (attributes) {
 				if (normalize)
 					attributes = attributes.replace(/[\s\/]*$/, ' /');
@@ -2188,7 +2193,7 @@ function module_code(library_namespace) {
 		template_name = normalize_name_pattern(template_name, true, true);
 		var matched = template_name
 		// 模板起始。
-		? new RegExp(/{{[\s\n]*/.source + template_name + '\\s*[|}]', 'gi')
+		? new RegExp(/{{[\s\n]*/.source + template_name + '\\s*[|}]', 'ig')
 				: new RegExp(TEMPLATE_NAME_PATTERN.source, 'g');
 		library_namespace.debug('Use pattern: ' + matched, 3, 'parse_template');
 		// template_name : start token
@@ -2540,7 +2545,7 @@ function module_code(library_namespace) {
 				if (typeof pattern === 'string') {
 					if (matched === 'template')
 						pattern = new RegExp('{{ *(?:' + pattern
-								+ ')(?:}}|[^a-z].*?}})', 'gi');
+								+ ')(?:}}|[^a-z].*?}})', 'ig');
 				}
 			}
 		}

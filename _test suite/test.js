@@ -2446,8 +2446,9 @@ function test_wiki() {
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML single tag #1');
 		assert([ 'br', CeL.wiki.parser(wikitext).parse()[1].tag ], 'wiki.parse: HTML single tag #2');
 		wikitext = '1<br clear="all">2';
-		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML single tag #3');
-		assert([ ' clear="all"', CeL.wiki.parser(wikitext).parse()[1][0] ], 'wiki.parse: HTML single tag #4');
+		assert([ 'tag_single', CeL.wiki.parser(wikitext).parse()[1].type ], 'wiki.parse: HTML single tag #3');
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML single tag #4');
+		assert([ ' clear="all"', CeL.wiki.parser(wikitext).parse()[1][0] ], 'wiki.parse: HTML single tag #5');
 
 		wikitext = '1<b>a</b>2';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML tag #1');
