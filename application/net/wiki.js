@@ -1386,8 +1386,7 @@ function module_code(library_namespace) {
 			// 欲取得 .tagName，請用 this.tag.toLowerCase();
 			// 欲取得 .inner nodes，請用 this[1];
 			// 欲取得 .innerHTML，請用 this[1].toString();
-			return '<' + this.tag + (this[0] || '') + '>'
-					+ this[1] + '</'
+			return '<' + this.tag + (this[0] || '') + '>' + this[1] + '</'
 					+ (this.end_tag || this.tag) + '>';
 		},
 		tag_inner : function() {
@@ -1888,8 +1887,11 @@ function module_code(library_namespace) {
 					'parse_wikitext.tag');
 
 			// 經過改變，需再進一步處理。
-			inner = _set_wiki_type(parse_wikitext(inner, options, queue), 'tag_inner');
-			all = [ attributes && parse_wikitext(attributes, options, queue) || '', inner ];
+			inner = _set_wiki_type(parse_wikitext(inner, options, queue),
+					'tag_inner');
+			all = [
+					attributes ? parse_wikitext(attributes, options, queue)
+							: '', inner ];
 
 			if (normalize) {
 				tag = tag.toLowerCase();
@@ -1909,10 +1911,12 @@ function module_code(library_namespace) {
 		// single tags. e.g., <hr />
 		// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
 
-		var PATTERN_TAG_VOID = new RegExp('<(' + self_close_tags + ')(\\s*\\/|\\s[^<>]*)?>', 'ig');
+		var PATTERN_TAG_VOID = new RegExp('<(' + self_close_tags
+				+ ')(\\s*\\/|\\s[^<>]*)?>', 'ig');
 
 		// assert: 有 end tag 的皆已處理完畢，到這邊的是已經沒有 end tag 的。
-		wikitext = wikitext.replace_till_stable(PATTERN_TAG_VOID, function(all, tag, attributes) {
+		wikitext = wikitext.replace_till_stable(PATTERN_TAG_VOID, function(all,
+				tag, attributes) {
 			if (attributes) {
 				if (normalize)
 					attributes = attributes.replace(/[\s\/]*$/, ' /');
@@ -5660,6 +5664,30 @@ function module_code(library_namespace) {
 			});
 		}
 		return langs;
+	};
+
+	// ------------------------------------------------------------------------
+
+	if (false) {
+		CeL.wiki.convert('中国', function(text) {
+			text === "中國";
+		});
+	}
+
+	// 繁簡轉換
+	wiki_API.convert = function(text, callback, uselang) {
+		// 由於用 [[link]] 也不會自動 redirect，因此直接轉換即可。
+		wiki_API.query([ api_URL('zh'),
+		// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=languages&utf8=1
+		'action=parse&contentmodel=wikitext&uselang=' + (uselang || 'zh-hant')
+		// prop=text|links
+		+ '&prop=text&text=' + encodeURIComponent(text) ], function(data) {
+			data = data.parse;
+			text = data.text['*']
+			// 去掉 MediaWiki parser 解析器所自行添加的 token。
+			.trim().replace(/^<p>/, '').replace(/<\/p>$/, '');
+			callback(text);
+		});
 	};
 
 	// ------------------------------------------------------------------------
