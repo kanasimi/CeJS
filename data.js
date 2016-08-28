@@ -748,7 +748,6 @@ remove_duplicate_characters = remove_duplicate_characters;
 
 //-----------------------------------------------------------------------------
 
-
 /**
  * 產生將數字轉為 K, M, G 等數量級(order of magnitude)表示方式的轉換器。<br />
  * 原理:先設好各 symbol 使用之下限，比完大小後使用此 symbol。<br />
@@ -831,7 +830,7 @@ function set_order_prefix(symbol, base, index_of_1, intervening) {
 
 		var l = 0, r = length, i;
 		// 直接用比的。 inline binary search.
-		//while (l < (i = Math.floor((l + r) / 2))) {
+		// while (l < (i = Math.floor((l + r) / 2))) {
 		while (l < (i = (l + r) >> 1)) {
 			library_namespace.debug('compare: ' + number + ', [' + i + ']'
 					+ value[i], 3, 'set_order_prefix');
@@ -845,9 +844,8 @@ function set_order_prefix(symbol, base, index_of_1, intervening) {
 				+ symbol[i], 2, 'set_order_prefix');
 
 		l = number / value[i];
-		return to_fixed.call(l,
-				isNaN(digits) || digits < 0 ? (r = Math.floor(l)) < 10 ? 2
-						: r < 100 ? 1 : 0 : digits)
+		return to_fixed.call(l, isNaN(digits) || digits < 0 ? (r = Math
+				.floor(l)) < 10 ? 2 : r < 100 ? 1 : 0 : digits)
 				+ symbol[i];
 	});
 };

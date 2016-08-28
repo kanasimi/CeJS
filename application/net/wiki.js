@@ -742,11 +742,12 @@ function module_code(library_namespace) {
 	PATTERN_file_prefix = new RegExp('^ *(?:: *)?(?:' + PATTERN_file_prefix
 			+ ') *: *([^\| ][^\| ]*)', 'i');
 
+	// TODO: Category 本身可不分大小寫。
 	var
-	// [ all category, category name, sort order ]
-	PATTERN_category = /\[\[ *(?:Category|分類|分类) *: *([^\[\]\|]+)(?:\|([^\[\]]*))?\]\]/ig,
+	// [ all category text, category name, sort order ]
+	PATTERN_category = /\[\[ *(?:Category|category|CATEGORY|分類|分类|カテゴリ) *: *([^\|\[\]]+)(?:\|\s*([^\|\[\]]*))?\]\][\r\n]*/g,
 	/** {RegExp}分類的匹配模式 for parser。 [all,name] */
-	PATTERN_category_prefix = /^ *(?:Category|分類|分类) *: *([^\[\]\|]+)/i;
+	PATTERN_category_prefix = /^ *(?:Category|category|CATEGORY|分類|分类|カテゴリ) *: *([^\|\[\]]+)/;
 
 	// ------------------------------------------------------------------------
 
@@ -1277,7 +1278,8 @@ function module_code(library_namespace) {
 	PATTERN_external_link_global = /\[((?:https?:|ftp:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:(\s)([^\]]*))?\]/ig,
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
 	markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|math|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark',
-	// MediaWiki可接受的HTML標籤. NO b|span|sub|sup|li|dt|dd|center|small
+	// MediaWiki可接受的 HTML void elements 標籤. NO b|span|sub|sup|li|dt|dd|center|small
+	// 包含可使用，亦可不使用 self-closing 的 tags。
 	// self-closing: void elements + foreign elements
 	// https://www.w3.org/TR/html5/syntax.html#void-elements
 	// @see [[phab:T134423]]
@@ -1872,7 +1874,7 @@ function module_code(library_namespace) {
 			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
 			var matched = inner.match(new RegExp(
 			//
-			'<(' + tag + ')(\\s[^<>]*)?>([\s\S]*?)$', 'i')), prevoius;
+			'<(' + tag + ')(\\s[^<>]*)?>([\\s\\S]*?)$', 'i')), prevoius;
 			if (matched) {
 				prevoius = all.slice(0, -matched[0].length
 				// length of </end_tag>
@@ -1887,8 +1889,10 @@ function module_code(library_namespace) {
 					'parse_wikitext.tag');
 
 			// 經過改變，需再進一步處理。
-			inner = _set_wiki_type(parse_wikitext(inner, options, queue),
-					'tag_inner');
+			inner = parse_wikitext(inner, options, queue);
+			// [ ... ]: 在 inner 為 Template 之類時，不應直接在上面設定 type=tag_inner，
+			// 以免破壞應有之格式！但仍需要設定 type=tag_inner，因此多層包覆。
+			inner = _set_wiki_type([ inner || '' ], 'tag_inner');
 			all = [
 					attributes ? parse_wikitext(attributes, options, queue)
 							: '', inner ];
@@ -1911,12 +1915,7 @@ function module_code(library_namespace) {
 		// single tags. e.g., <hr />
 		// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
 
-		var PATTERN_TAG_VOID = new RegExp('<(' + self_close_tags
-				+ ')(\\s*\\/|\\s[^<>]*)?>', 'ig');
-
-		// assert: 有 end tag 的皆已處理完畢，到這邊的是已經沒有 end tag 的。
-		wikitext = wikitext.replace_till_stable(PATTERN_TAG_VOID, function(all,
-				tag, attributes) {
+		function parse_single_tag(all, tag, attributes) {
 			if (attributes) {
 				if (normalize)
 					attributes = attributes.replace(/[\s\/]*$/, ' /');
@@ -1940,7 +1939,17 @@ function module_code(library_namespace) {
 			_set_wiki_type(all, 'tag_single');
 			queue.push(all);
 			return include_mark + (queue.length - 1) + end_mark;
-		});
+		}
+
+		var PATTERN_TAG_VOID = new RegExp('<(' + self_close_tags
+				+ ')(\\s[^<>]*)?>', 'ig');
+
+		// assert: 有 end tag 的皆已處理完畢，到這邊的是已經沒有 end tag 的。
+		wikitext = wikitext.replace_till_stable(PATTERN_TAG_VOID, parse_single_tag);
+		// 處理有明確標示為 simgle tag 的。
+		if (false) {
+			wikitext = wikitext.replace_till_stable(/<([a-z]+)(\s[^<>]*\/)?>/ig, parse_single_tag);
+		}
 
 		// ----------------------------------------------------
 		// table: \n{| ... \n|}
@@ -2328,7 +2337,7 @@ function module_code(library_namespace) {
 	 */
 	var PATTERN_user =
 	// "\/": e.g., [[user talk:user_name/Flow]]
-	/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?|利用者(?:‐会話)?|사용자(?:토론)?)\s*:\s*([^\|\]\/]+)/i;
+	/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?|利用者(?:‐会話)?|사용자(?:토론)?)\s*:\s*([^#\|\[\]\/]+)/i;
 
 	/**
 	 * parse user name. 解析使用者/用戶對話頁面資訊。
