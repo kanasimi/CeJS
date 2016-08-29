@@ -1890,8 +1890,9 @@ function module_code(library_namespace) {
 
 			// 經過改變，需再進一步處理。
 			inner = parse_wikitext(inner, options, queue);
-			// [ ... ]: 在 inner 為 Template 之類時，不應直接在上面設定 type=tag_inner，
-			// 以免破壞應有之格式！但仍需要設定 type=tag_inner，因此多層包覆。
+			// [ ... ]: 在 inner 為 Template 之類時，
+			// 不應直接在上面設定 type=tag_inner，以免破壞應有之格式！
+			// 但仍需要設定 type=tag_inner 以應 for_each_token 之需，因此多層包覆。
 			inner = _set_wiki_type([ inner || '' ], 'tag_inner');
 			all = [
 					attributes ? parse_wikitext(attributes, options, queue)
