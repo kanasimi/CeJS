@@ -236,8 +236,10 @@ function module_code(library_namespace) {
 	 * 測試看看指定值是否為API語言以及頁面標題或者頁面。
 	 * 
 	 * @param value
-	 * @param {Boolean}[type]
-	 * @param {Boolean}[ignore_api]
+	 * @param {Boolean|String}[type]
+	 *            test type: true('simple'), 'language', 'URL'
+	 * @param {Boolean|String}[ignore_api]
+	 *            ignore API, 'set': set API
 	 * 
 	 * @returns {Boolean}value 為 [ {String}API_URL/language, {String}title or
 	 *          {Object}page_data ]
@@ -267,6 +269,13 @@ function module_code(library_namespace) {
 
 		// test API_URL: {String}API_URL/language
 		if (!API_URL) {
+			if (typeof ignore_api === 'object') {
+				// assert: {Array}((action = title)) 為 page list。
+				// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
+				// ignore_api 當作原函數之 options。
+				return !!(value[0] = ignore_api[KEY_SESSION]
+						&& ignore_api[KEY_SESSION].API_URL);
+			}
 			return !!ignore_api;
 		}
 
@@ -1278,7 +1287,8 @@ function module_code(library_namespace) {
 	PATTERN_external_link_global = /\[((?:https?:|ftp:)?\/\/[^\s\|<>\[\]{}\/][^\s\|<>\[\]{}]*)(?:(\s)([^\]]*))?\]/ig,
 	/** {String}以"|"分開之 wiki tag name。 [[Help:Wiki markup]], HTML tags. 不包含 <a>！ */
 	markup_tags = 'nowiki|references|ref|includeonly|noinclude|onlyinclude|math|syntaxhighlight|br|hr|bdi|b|del|ins|i|u|font|big|small|sub|sup|h[1-6]|cite|code|em|strike|strong|s|tt|var|div|center|blockquote|[oud]l|table|caption|pre|ruby|r[tbp]|p|span|abbr|dfn|kbd|samp|data|time|mark',
-	// MediaWiki可接受的 HTML void elements 標籤. NO b|span|sub|sup|li|dt|dd|center|small
+	// MediaWiki可接受的 HTML void elements 標籤.
+	// NO b|span|sub|sup|li|dt|dd|center|small
 	// 包含可使用，亦可不使用 self-closing 的 tags。
 	// self-closing: void elements + foreign elements
 	// https://www.w3.org/TR/html5/syntax.html#void-elements
@@ -1946,10 +1956,13 @@ function module_code(library_namespace) {
 				+ ')(\\s[^<>]*)?>', 'ig');
 
 		// assert: 有 end tag 的皆已處理完畢，到這邊的是已經沒有 end tag 的。
-		wikitext = wikitext.replace_till_stable(PATTERN_TAG_VOID, parse_single_tag);
+		wikitext = wikitext.replace_till_stable(PATTERN_TAG_VOID,
+				parse_single_tag);
 		// 處理有明確標示為 simgle tag 的。
+		// 但 MediaWiki 現在會將 <b /> 轉成 <b>，因此不再處理這部分。
 		if (false) {
-			wikitext = wikitext.replace_till_stable(/<([a-z]+)(\s[^<>]*\/)?>/ig, parse_single_tag);
+			wikitext = wikitext.replace_till_stable(
+					/<([a-z]+)(\s[^<>]*\/)?>/ig, parse_single_tag);
 		}
 
 		// ----------------------------------------------------
@@ -2793,7 +2806,7 @@ function module_code(library_namespace) {
 	get_page_content.revision = function(page_data) {
 		return library_namespace.is_Object(page_data)
 		// treat as page data. Try to get page contents: page.revisions[0]['*']
-		// 一般說來應該是由新排到舊，[0] 為最新的版本。
+		// 一般說來應該是由新排到舊，[0] 為最新的版本 last revision。
 		&& page_data.revisions && page_data.revisions[0];
 	};
 
@@ -5051,11 +5064,19 @@ function module_code(library_namespace) {
 		// for "Date of page creation" 頁面建立日期 @ Edit history 編輯歷史 @ 頁面資訊
 		// &action=info
 		wiki.page('巴黎協議', function(page_data) {
-			console.log(CeL.wiki.content_of.edit_time(page_data).format(
-					'%Y/%m/%d'));
+			// e.g., '2015-12-17T12:10:18.000Z'
+			console.log(CeL.wiki.content_of.edit_time(page_data));
 		}, {
 			rvdir : 'newer',
-			rvprop : 'timestamp'
+			rvprop : 'timestamp',
+			rvlimit : 1
+		});
+
+		wiki.page('巴黎協議', function(page_data) {
+			// {Date}page_data.creation_Date
+			console.log(page_data);
+		}, {
+			get_creation_date : 1
 		});
 	}
 
@@ -5092,6 +5113,41 @@ function module_code(library_namespace) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
 
+		console.log('title: ' + JSON.stringify(title));
+		if (options.get_creation_Date) {
+			// 警告:僅適用於單一頁面。
+			wiki_API.page(title, function(page_data) {
+				// e.g., '2015-12-17T12:10:18.000Z'
+				// page_data.revisions[0].timestamp;
+
+				page_data.creation_Date
+				// CeL.wiki.content_of.edit_time(page_data)
+				= get_page_content.edit_time(page_data);
+				if (typeof options.get_creation_Date === 'function') {
+					options.get_creation_Date(page_data.creation_Date,
+							page_data);
+				}
+				if (false) {
+					console.log(page_data.creation_Date.format('%Y/%m/%d'));
+				}
+
+				delete options.get_creation_Date;
+				// 去掉僅有timestamp，由舊至新的.revisions。
+				delete page_data.revisions;
+				if (options.query_props || options.prop) {
+					wiki_API.page(title, callback, options);
+				} else {
+					callback(page_data);
+				}
+
+			}, {
+				rvdir : 'newer',
+				rvprop : 'timestamp',
+				rvlimit : 1
+			});
+			return;
+		}
+
 		if (options.query_props) {
 			var query_props = options.query_props, page_data,
 			//
@@ -5120,15 +5176,16 @@ function module_code(library_namespace) {
 			};
 
 			delete options.query_props;
-			if (typeof query_props === 'string')
+			if (typeof query_props === 'string') {
 				query_props = query_props.split('|');
+			}
 			if (Array.isArray(query_props)) {
 				if (!options.no_content)
 					query_props.push('revisions');
 				get_properties();
 			} else {
 				library_namespace.err('wiki_API.page: Invalid .query_props!');
-				throw 'Invalid .query_props';
+				throw 'wiki_API.page: Invalid .query_props';
 			}
 			return;
 		}
@@ -5136,9 +5193,12 @@ function module_code(library_namespace) {
 		var action = Array.isArray(title) ? title.clone() : title;
 
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!is_api_and_title(action)) {
-			// assert: {Array}((action = title)) 為 page list。
-			// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
+		if (!is_api_and_title(action, false, options)
+		// 若是未設定，則將在wiki_API.query()補設定。
+		&& action[0]) {
+			library_namespace.err('wiki_API.page: Invalid title! [' + title
+					+ ']');
+			throw 'wiki_API.page: Invalid title';
 			action = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL,
 					action ];
 		}
