@@ -5076,7 +5076,7 @@ function module_code(library_namespace) {
 			// {Date}page_data.creation_Date
 			console.log(page_data);
 		}, {
-			get_creation_date : 1
+			get_creation_Date : true
 		});
 	}
 
@@ -5134,6 +5134,8 @@ function module_code(library_namespace) {
 				delete options.get_creation_Date;
 				// 去掉僅有timestamp，由舊至新的.revisions。
 				delete page_data.revisions;
+				// 若有需要順便取得頁面內容，需要手動設定如:
+				// {get_creation_Date:true,prop:'revisions'}
 				if (options.query_props || options.prop) {
 					wiki_API.page(title, callback, options);
 				} else {
