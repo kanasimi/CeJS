@@ -2461,17 +2461,19 @@ function test_wiki() {
 		assert([ '1<b style="color:#000" ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function(token, parent, index){return '';}, true).toString() ], 'wiki.parse: HTML tag #7');
 	});
 
-	set_running('wiki');
 
-	var wiki = new CeL.wiki(null, null, 'en');
-	wiki.page('Wikipedia:Sandbox', function(page_data) {
-		// {Date}page_data.creation_Date
-		assert([ '2002-12-20T21:50:14.000Z', page_data.creation_Date.toISOString() ], 'get_creation_Date: [[Wikipedia:Sandbox]]');
-		finish_test('wiki');
-	}, {
-		get_creation_Date : true
+	error_count += CeL.test('CeL.wiki: asynchronous functions', function(assert) {
+		set_running('wiki');
+
+		var wiki = new CeL.wiki(null, null, 'en');
+		wiki.page('Wikipedia:Sandbox', function(page_data) {
+			// {Date}page_data.creation_Date
+			assert([ '2002-12-20T21:50:14.000Z', page_data.creation_Date.toISOString() ], 'get_creation_Date: [[Wikipedia:Sandbox]]');
+			finish_test('wiki');
+		}, {
+			get_creation_Date : true
+		});
 	});
-
 
 	return;
 

@@ -5113,7 +5113,7 @@ function module_code(library_namespace) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
 
-		console.log('title: ' + JSON.stringify(title));
+		// console.log('title: ' + JSON.stringify(title));
 		if (options.get_creation_Date) {
 			// 警告:僅適用於單一頁面。
 			wiki_API.page(title, function(page_data) {
