@@ -1586,6 +1586,7 @@ if (!CeL.Log) {
 
 		if (options) {
 			if (typeof options === 'function') {
+				// console.log('Set callback: ' + options);
 				options = {
 					callback : options
 				};
@@ -1682,8 +1683,11 @@ if (!CeL.Log) {
 		// --------------------------------
 		// report.
 		function report() {
-			var messages = test_name ? [ CeL.to_SGR([ 'Test [', 'fg=cyan', test_name,
-					'-fg', ']: ' ]) ] : [];
+			var messages = test_name ? [ CeL.to_SGR([ 'Test '
+				// asynchronous operations
+				+ (assert_proxy.asynchronous ? 'asynchronous ' : '')
+				+ '[', 'fg=cyan', test_name, '-fg', ']: ' ]) ] : [];
+
 			function join() {
 				if (recorder.ignored.length > 0)
 					messages.push(CeL.to_SGR([ ', ' + recorder.ignored.length + ' ',
@@ -1702,13 +1706,22 @@ if (!CeL.Log) {
 				return messages.join('');
 			}
 
-			if (recorder.failed.length === 0 && recorder.fatal.length === 0) {
+			var error_count = recorder.failed.length + recorder.fatal.length;
+			if (options && typeof options.callback === 'function') {
+				// 確保 callback 會在本函數之後執行。
+				// 因為已 callback，自此後不應改變 recorder，否則不會被 callback 處理。
+				setTimeout(function() {
+					options.callback(recorder, error_count, test_name);
+				}, 0);
+			}
+
+			if (error_count === 0) {
 				// all passed. 測試通過。
 				messages.push(CeL.to_SGR([ 'All ' + recorder.passed.length + ' ',
 						'fg=green', 'passed', '-fg' ]));
 
 				log_front_end_info(join());
-				return 0;
+				return error_count;
 			}
 
 			// not all passed.
@@ -1733,11 +1746,6 @@ if (!CeL.Log) {
 				log_controller[3](join());
 			}
 
-			var error_count = recorder.failed.length + recorder.fatal.length;
-			if (options && typeof options.callback === 'function') {
-				options.callback(recorder, error_count, test_name);
-			}
-
 			return error_count;
 		}
 
@@ -1754,7 +1762,8 @@ if (!CeL.Log) {
 			var tests_left = CeL.null_Object(), tests_count = 0;
 			// assert: typeof conditions === 'function'
 			conditions(assert_proxy, function setup_test(test_name) {
-				assert_proxy.pending = true;
+				// need wait (pending)
+				assert_proxy.asynchronous = true;
 				tests_count++;
 				if (test_name) {
 					if (test_name in tests_left) {
@@ -1774,7 +1783,7 @@ if (!CeL.Log) {
 			});
 		}
 
-		if (!assert_proxy.pending) {
+		if (!assert_proxy.asynchronous) {
 			// waiting
 			return report();
 		}

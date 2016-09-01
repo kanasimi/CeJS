@@ -2490,6 +2490,7 @@ function test_wiki() {
 		}, 'en');
 
 	}, function(recorder, _error_count, test_name) {
+		// console.log('CeL.wiki: asynchronous functions: ' + _error_count + ' errors');
 		error_count += _error_count;
 		finish_test('CeL.wiki: asynchronous functions');
 	});
@@ -2855,7 +2856,7 @@ function finish_test(type) {
 
 	if (error_count === 0) {
 		node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。', '-fg;-bg',
-		//
+		// Takes ? ms
 		' Takes ' + (new Date - test_start) + ' ms.' ]);
 		// normal done.
 		return;
