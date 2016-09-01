@@ -2465,28 +2465,33 @@ function test_wiki() {
 	});
 
 
-	error_count += CeL.test('CeL.wiki: asynchronous functions', function(assert) {
+	setup_test('CeL.wiki: asynchronous functions');
+	CeL.test('CeL.wiki: asynchronous functions', function(assert, _setup_test, _finish_test) {
 		var wiki = new CeL.wiki(null, null, 'en');
-		set_test('wiki: get_creation_Date');
+		_setup_test('wiki: get_creation_Date');
 		wiki.page('Wikipedia:Sandbox', function(page_data) {
 			// {Date}page_data.creation_Date
 			assert([ '2002-12-20T21:50:14.000Z', page_data.creation_Date.toISOString() ], 'get_creation_Date: [[Wikipedia:Sandbox]]');
-			finish_test('wiki: get_creation_Date');
+			_finish_test('wiki: get_creation_Date');
 		}, {
 			get_creation_Date : true
 		});
 
-		set_test('wiki: CeL.wiki.convert()');
+		_setup_test('wiki: CeL.wiki.convert()');
 		CeL.wiki.convert('中国', function(text) {
 			assert([ '中國', text ], 'wiki: [[Wikipedia:Sandbox]]');
-			finish_test('wiki: CeL.wiki.convert()');
+			_finish_test('wiki: CeL.wiki.convert()');
 		});
 
-		set_test('wiki: CeL.wiki.langlinks()');
+		_setup_test('wiki: CeL.wiki.langlinks()');
 		CeL.wiki.langlinks('語言', function(title) {
 			assert([ 'Language', title ], 'wiki: CeL.wiki.langlinks()');
-			finish_test('wiki: CeL.wiki.langlinks()');
+			_finish_test('wiki: CeL.wiki.langlinks()');
 		}, 'en');
+
+	}, function(recorder, _error_count, test_name) {
+		error_count += _error_count;
+		finish_test('CeL.wiki: asynchronous functions');
 	});
 
 	return;
@@ -2664,7 +2669,7 @@ function test_era() {
 		return;
 	}
 
-	set_test('era');
+	setup_test('era');
 	CeL.set_debug(0);
 	// 判斷是否已載入曆數資料。
 	if (!CeL.era.loaded) {
@@ -2829,12 +2834,14 @@ function node_info(messages) {
 }
 
 
-function set_test(type) {
+// return has error
+function setup_test(type) {
 	if (type && !still_running[type]) {
 		still_running[type] = true;
 		++still_running.left_count;
-		return true;
+		return false;
 	}
+	return true;
 }
 
 function finish_test(type) {
@@ -2856,10 +2863,11 @@ function finish_test(type) {
 
 	CeL.gettext.conversion['error'] = [ 'no %n', '1 %n', '%d %ns' ];
 	node_info([ 'CeJS: ', 'fg=red;bg=white', CeL.gettext('All %error@1 occurred.', error_count), '-fg;-bg' ]);
-	if (error_count > 0)
+	if (error_count > 0) {
 		setTimeout(function() {
 			throw new Error(CeL.gettext('All %error@1.', error_count));
 		}, 0);
+	}
 }
 
 function do_test() {

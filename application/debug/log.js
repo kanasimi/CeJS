@@ -1557,7 +1557,7 @@ if (!CeL.Log) {
 	 * @param {Array|Function}conditions
 	 *            condition list passed to assert(): [ [ condition / test value,
 	 *            options ], [], ... ].<br />
-	 *            允許 {Function}condition(assert) 
+	 *            允許 {Function}condition(assert, test_handler)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項。 {<br />
 	 *            {String}name: test name 此次測試名稱。<br />
@@ -1585,7 +1585,7 @@ if (!CeL.Log) {
 		default_options;
 
 		if (options) {
-			if (typeof callback === 'function') {
+			if (typeof options === 'function') {
 				options = {
 					callback : options
 				};
@@ -1682,9 +1682,6 @@ if (!CeL.Log) {
 		// --------------------------------
 		// report.
 		function report() {
-			if (options && typeof options.callback === 'function')
-				options.callback(recorder, test_name);
-
 			var messages = test_name ? [ CeL.to_SGR([ 'Test [', 'fg=cyan', test_name,
 					'-fg', ']: ' ]) ] : [];
 			function join() {
@@ -1736,7 +1733,12 @@ if (!CeL.Log) {
 				log_controller[3](join());
 			}
 
-			return recorder.failed.length + recorder.fatal.length;
+			var error_count = recorder.failed.length + recorder.fatal.length;
+			if (options && typeof options.callback === 'function') {
+				options.callback(recorder, error_count, test_name);
+			}
+
+			return error_count;
 		}
 
 		assert_proxy.report = report;
@@ -1749,13 +1751,33 @@ if (!CeL.Log) {
 		if (Array.isArray(conditions)) {
 			conditions.forEach(handler);
 		} else {
+			var tests_left = CeL.null_Object(), tests_count = 0;
 			// assert: typeof conditions === 'function'
-			conditions(assert_proxy);
+			conditions(assert_proxy, function setup_test(test_name) {
+				assert_proxy.pending = true;
+				tests_count++;
+				if (test_name) {
+					if (test_name in tests_left) {
+						// 已登記過。
+						return true;
+					}
+					tests_left[test_name] = true;
+				}
+			}, function finish_test(test_name) {
+				tests_count--;
+				delete tests_left[test_name];
+				if (tests_count === 0
+				// && CeL.is_empty_Object(tests_left)
+				) {
+					report();
+				}
+			});
 		}
 
-		if (!assert_proxy.pending)
+		if (!assert_proxy.pending) {
 			// waiting
 			return report();
+		}
 	}
 
 
