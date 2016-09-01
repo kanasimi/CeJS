@@ -66,6 +66,9 @@ function test_base() {
 		assert(CeL.is_Object(CeL.setup_options()), 'CeL.setup_options()');
 		assert(CeL.is_Object(CeL.new_options()), 'CeL.new_options()');
 
+		assert(CeL.is_empty_Object({}), 'CeL.is_Object({})');
+		assert(!CeL.is_empty_Object({a:1}), 'CeL.is_Object({})');
+
 		var options = { a:2, b:'abc', c:function(a,b){return a>b;} };
 		assert([options, CeL.setup_options(options)], 'CeL.setup_options(options)===options #1');
 		assert([JSON.stringify(options), JSON.stringify(CeL.setup_options(options))], 'CeL.setup_options(options)===options #2');
@@ -2463,15 +2466,20 @@ function test_wiki() {
 
 
 	error_count += CeL.test('CeL.wiki: asynchronous functions', function(assert) {
-		set_running('wiki');
-
 		var wiki = new CeL.wiki(null, null, 'en');
+		set_test('wiki: get_creation_Date');
 		wiki.page('Wikipedia:Sandbox', function(page_data) {
 			// {Date}page_data.creation_Date
 			assert([ '2002-12-20T21:50:14.000Z', page_data.creation_Date.toISOString() ], 'get_creation_Date: [[Wikipedia:Sandbox]]');
-			finish_test('wiki');
+			finish_test('wiki: get_creation_Date');
 		}, {
 			get_creation_Date : true
+		});
+
+		set_test('wiki: CeL.wiki.convert()');
+		CeL.wiki.convert('中国', function(text) {
+			assert([ '中國', text ], 'get_creation_Date: [[Wikipedia:Sandbox]]');
+			finish_test('wiki: CeL.wiki.convert()');
 		});
 	});
 
@@ -2650,7 +2658,7 @@ function test_era() {
 		return;
 	}
 
-	set_running('era');
+	set_test('era');
 	CeL.set_debug(0);
 	// 判斷是否已載入曆數資料。
 	if (!CeL.era.loaded) {
@@ -2815,7 +2823,7 @@ function node_info(messages) {
 }
 
 
-function set_running(type) {
+function set_test(type) {
 	if (type && !still_running[type]) {
 		still_running[type] = true;
 		++still_running.left_count;

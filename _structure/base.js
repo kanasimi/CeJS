@@ -925,6 +925,15 @@ function (global) {
 			return get_object_type(v) === '[object Object]';
 		};
 
+	_// JSDT:_module_
+	.
+	is_empty_Object = function is_empty_Object(value) {
+		for (var key in value) {
+			return false;
+		}
+		return true;
+	};
+
 	_.is_RegExp = _.type_tester('RegExp');
 
 	// Object.getPrototypeOf

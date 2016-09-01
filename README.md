@@ -83,7 +83,7 @@ See [compatibility.js](https://github.com/kanasimi/CeJS/blob/master/data/code/co
 ## Contact
 Contact us at [Google+](https://plus.google.com/101633590909790225455) or [github](https://github.com/kanasimi/CeJS/issues).
 
-(This document is written by [GitHub Flavored Markdown](https://help.github.com/articles/github-flavored-markdown).)
+(This document is written by [GitHub Flavored Markdown](https://help.github.com/categories/writing-on-github/).)
 
 [![logo](http://lyrics.meicho.com.tw/logo.png)](http://lyrics.meicho.com.tw/)
 
