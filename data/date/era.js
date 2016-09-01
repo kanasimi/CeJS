@@ -5049,7 +5049,7 @@ function module_code(library_namespace) {
 					else
 						library_namespace.warn(
 						//
-						'無法解析屬性值[' + pair + ']！');
+						'pre_parse_紀年資料: 無法解析屬性值[' + pair + ']！');
 				});
 
 				era_data.length = 3;

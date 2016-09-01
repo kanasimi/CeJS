@@ -2478,9 +2478,15 @@ function test_wiki() {
 
 		set_test('wiki: CeL.wiki.convert()');
 		CeL.wiki.convert('中国', function(text) {
-			assert([ '中國', text ], 'get_creation_Date: [[Wikipedia:Sandbox]]');
+			assert([ '中國', text ], 'wiki: [[Wikipedia:Sandbox]]');
 			finish_test('wiki: CeL.wiki.convert()');
 		});
+
+		set_test('wiki: CeL.wiki.langlinks()');
+		CeL.wiki.langlinks('語言', function(title) {
+			assert([ 'Language', title ], 'wiki: CeL.wiki.langlinks()');
+			finish_test('wiki: CeL.wiki.langlinks()');
+		}, 'en');
 	});
 
 	return;
