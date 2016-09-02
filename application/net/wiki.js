@@ -247,6 +247,10 @@ function module_code(library_namespace) {
 	function is_api_and_title(value, type, ignore_api) {
 		// console.trace(value);
 
+		function add_API_URL() {
+			// TODO
+		}
+
 		if (!Array.isArray(value)) {
 			return false;
 		}
@@ -263,7 +267,7 @@ function module_code(library_namespace) {
 			return false;
 		}
 
-		if (type) {
+		if (type === true) {
 			// type === true: simple test, do not test more.
 			return true;
 		}
@@ -5204,7 +5208,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var action = Array.isArray(title) ? title.clone() : title;
+		var action = Array.isArray(title) ? title.clone() : [ , title ];
 
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (!is_api_and_title(action, false, options)
@@ -5213,8 +5217,6 @@ function module_code(library_namespace) {
 			library_namespace.err('wiki_API.page: Invalid title! [' + title
 					+ ']');
 			throw 'wiki_API.page: Invalid title';
-			action = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL,
-					action ];
 		}
 		action[1] = wiki_API.query.title_param(action[1], true, options
 				&& options.is_id);
@@ -7277,14 +7279,15 @@ function module_code(library_namespace) {
 
 		// -----------------------------
 		// copy from wiki_API.page()
-		var action = Array.isArray(title) ? title.clone() : title;
+		var action = Array.isArray(title) ? title.clone() : [ , title ];
 
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!is_api_and_title(action)) {
-			// assert: {Array}((action = title)) 為 page list。
-			// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
-			action = [ options[KEY_SESSION] && options[KEY_SESSION].API_URL,
-					action ];
+		if (!is_api_and_title(action, false, options)
+		// 若是未設定，則將在wiki_API.query()補設定。
+		&& action[0]) {
+			library_namespace.err('wiki_API.page: Invalid title! [' + title
+					+ ']');
+			throw 'wiki_API.page: Invalid title';
 		}
 		action[1] = wiki_API.query.title_param(action[1], true, options
 				&& options.is_id);
