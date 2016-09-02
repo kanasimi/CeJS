@@ -144,6 +144,7 @@ ONE_時辰_LENGTH_VALUE = new Date(0, 0, 0, 2) - new Date(0, 0, 0, 0);
 
 /*
 
+
 for(var JD=0,d;JD<4e6;JD++){d=CeL.Julian_day.to_YMD(JD);if(JD!==CeL.Julian_day.from_YMD(d[0],d[1],d[2]))throw JD;}
 // Array [ 6239, 5, 27 ]
 

@@ -271,7 +271,7 @@ function pin_text(gettext) {
  * @param {Boolean}to_remove
  *            是否為刪除，而非添加。
  * @param {Boolean}no_warning
- *            無此欄位時不警告。例如當設定採用曆法屬性，若是無此曆法則忽略之。
+ *            無此欄位時不警告。例如當設定"採用曆法"屬性，若是無此曆法則忽略之。
  * 
  * @returns {Boolean}false
  */
@@ -543,14 +543,15 @@ function show_calendar(era_name) {
 		} : _.apply(null, conversion);
 
 		conversion = fields[1].split('/');
-		if (conversion.length > 1)
+		if (conversion.length > 1) {
 			紀年名_pattern = '%1/%2/%3';
-		else if (conversion[0] < 0) {
+		} else if (conversion[0] < 0) {
 			// 轉正。
 			conversion[0] = -conversion[0];
 			紀年名_pattern = '%1 BCE';
-		} else
+		} else {
 			紀年名_pattern = '%1 CE';
+		}
 		conversion.unshift(_(紀年名_pattern));
 		if (show_calendar.convert_field) {
 			// 太耗資源。

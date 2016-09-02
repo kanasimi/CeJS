@@ -581,16 +581,17 @@ div.box {
 	<div id="language"></div>
 
 	<div id="input_panel">
-		<span data-gettext="取得紀年"></span>
+		<span data-gettext="紀年"
+			title="Convert an era name to the specified format"></span>
 		<!-- https://www.google.com/intl/en/chrome/demos/speech.html -->
 		<input id="era_input" title="來源紀年與日期" type="text" speech="Text"
 			continue="true" nospeechtimeout="60000"
 			x-webkit-speech="x-webkit-speech"
 			x-webkit-grammar="builtin:translate" lang="cmn-Hant-TW" /> <span
-			data-gettext="之"></span> <span id="format_type_bar"></span> <br />
+			data-gettext="輸出格式"></span> <span id="format_type_bar"></span> <br />
 		<!-- http://www.fileformat.info/info/emoji/list.htm -->
 		<!-- ⌚ ⌛ ⏰ ⏱ ⏲   -->
-		📅 <span data-gettext="輸出格式:"></span> <input id="output_format"
+		📅 <span data-gettext="自訂輸出格式"></span> <input id="output_format"
 			title="輸出格式" /> <a href="#"
 			onclick="output_numeral=output_numeral==='Chinese'?'':'Chinese';this.className=output_numeral==='Chinese'?'selected':'unselected';translate_era();return false;"
 			data-gettext="中文數字" title="輸出中文數字"></a> <a href="#" id="translate"

@@ -3919,7 +3919,7 @@ function module_code(library_namespace) {
 				// {Array}result = [ main error code, sub ]
 				? result.join('_') in log_item ? result.join('_') : result[0]
 						: result]) {
-					error = gettext('%1 elapsed, %2 %3',
+					error = gettext('%1 elapsed, %3 at %2',
 					// 紀錄使用時間, 歷時, 費時, elapsed time
 					messages.last.age(new Date), (messages.last = new Date)
 					//

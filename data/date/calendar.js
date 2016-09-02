@@ -11,7 +11,7 @@
  * @since 2014/4/12 15:37:56
  */
 
-// http://www.funaba.org/calendar-conversion
+// https://www.funaba.org/cc
 // http://www.fourmilab.ch/documents/calendar/
 // http://the-light.com/cal/converter/
 // http://keith-wood.name/calendars.html
