@@ -232,6 +232,26 @@ function module_code(library_namespace) {
 	// ↓ 這會無法匹配中文域名。
 	// PATTERN_URL_prefix = /^(?:https?:)?\/\/([a-z\-\d]{1,20})\./i,
 
+	// 嘗試從 options 取得 API_URL。
+	function API_URL_of_options(options) {
+		if (!options) {
+			return;
+		}
+		return options.API_URL
+		// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
+		|| options[KEY_SESSION] && options[KEY_SESSION].API_URL;
+	}
+
+	function get_data_API_URL(options, default_API_URL) {
+		if (!options) {
+			return;
+		}
+		var session = options[KEY_SESSION];
+		return session && session.data_session && session.data_session.API_URL
+		//
+		API_URL_of_options(options) || default_API_URL || wikidata_API_URL;
+	}
+
 	/**
 	 * 測試看看指定值是否為API語言以及頁面標題或者頁面。
 	 * 
@@ -247,24 +267,11 @@ function module_code(library_namespace) {
 	function is_api_and_title(value, type, ignore_api) {
 		// console.trace(value);
 
-		function add_API_URL() {
-			// TODO
-		}
 
-		if (!Array.isArray(value)) {
-			return false;
-		}
-
-		if (value.length !== 2) {
-			if (typeof ignore_api === 'object') {
-				// assert: {Array}value 為 page list。
-				value = [ ignore_api[KEY_SESSION]
-				// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
-				// ignore_api 當作原函數之 options。
-				&& ignore_api[KEY_SESSION].API_URL, value ];
-				return !!value[0];
-			}
-			return false;
+		if (!Array.isArray(value) || value.length !== 2) {
+			// assert: {Array}value 為 page list。
+			// 此時不能改變傳入之 value 本身，因此僅測試是否有 API_URL。
+			return API_URL_of_options(ignore_api);
 		}
 
 		if (type === true) {
@@ -287,10 +294,9 @@ function module_code(library_namespace) {
 		if (!API_URL) {
 			if (typeof ignore_api === 'object') {
 				// assert: value[1] 為 page list。
-				return !!(value[0] = ignore_api[KEY_SESSION]
 				// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
 				// ignore_api 當作原函數之 options。
-				&& ignore_api[KEY_SESSION].API_URL);
+				return !!(value[0] = API_URL_of_options(ignore_api));
 			}
 			return !!ignore_api;
 		}
@@ -3529,6 +3535,7 @@ function module_code(library_namespace) {
 
 			// needless: 會從 get_data_API_URL(options) 取得 API_URL。
 			if (false && !Array.isArray(next[1])) {
+				// get_data_API_URL(this)
 				next[1] = [ this.data_session.API_URL, next[1] ];
 			}
 
@@ -10741,10 +10748,7 @@ function module_code(library_namespace) {
 
 		key = key.trim();
 		var action = [
-				options.API_URL
-				//
-				|| options[KEY_SESSION] && options[KEY_SESSION].API_URL
-						|| wikidata_API_URL,
+				API_URL_of_options(options) || wikidata_API_URL,
 				// search. e.g.,
 				// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
 				'wbsearchentities&search=' + encodeURIComponent(key)
@@ -11281,18 +11285,6 @@ function module_code(library_namespace) {
 
 	// wikidata_search_cache[{String}"性質"] = {String}"P31";
 	var wikidata_search_cache = library_namespace.null_Object();
-
-	function get_data_API_URL(options, default_API_URL) {
-		if (!options) {
-			return;
-		}
-		var session = options[KEY_SESSION];
-		if (session) {
-			return session.data_session ? session.data_session.API_URL
-					: session.API_URL;
-		}
-		return options.API_URL || default_API_URL || wikidata_API_URL;
-	}
 
 	/**
 	 * 取得特定實體的特定屬性值。
