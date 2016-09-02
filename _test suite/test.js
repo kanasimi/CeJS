@@ -2857,7 +2857,7 @@ function finish_test(type) {
 	if (error_count === 0) {
 		node_info([ 'CeJS: ', 'fg=green;bg=white', 'All tests passed. 測試全部通過。', '-fg;-bg',
 		// Takes ? ms
-		' Takes ' + (new Date - test_start) + ' ms.' ]);
+		' Takes ' + (new Date - test_start) / 1000 + ' s.' ]);
 		// normal done.
 		return;
 	}

@@ -247,7 +247,19 @@ function module_code(library_namespace) {
 	function is_api_and_title(value, type, ignore_api) {
 		// console.trace(value);
 
-		if (!Array.isArray(value) || value.length !== 2) {
+		if (!Array.isArray(value)) {
+			return false;
+		}
+
+		if (value.length !== 2) {
+			if (typeof ignore_api === 'object') {
+				// assert: {Array}value 為 page list。
+				value = [ ignore_api[KEY_SESSION]
+				// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
+				// ignore_api 當作原函數之 options。
+				&& ignore_api[KEY_SESSION].API_URL, value ];
+				return !!value[0];
+			}
 			return false;
 		}
 
@@ -270,11 +282,11 @@ function module_code(library_namespace) {
 		// test API_URL: {String}API_URL/language
 		if (!API_URL) {
 			if (typeof ignore_api === 'object') {
-				// assert: {Array}((action = title)) 為 page list。
+				// assert: value[1] 為 page list。
+				return !!(value[0] = ignore_api[KEY_SESSION]
 				// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
 				// ignore_api 當作原函數之 options。
-				return !!(value[0] = ignore_api[KEY_SESSION]
-						&& ignore_api[KEY_SESSION].API_URL);
+				&& ignore_api[KEY_SESSION].API_URL);
 			}
 			return !!ignore_api;
 		}
