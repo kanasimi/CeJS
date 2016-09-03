@@ -267,7 +267,6 @@ function module_code(library_namespace) {
 	function is_api_and_title(value, type, ignore_api) {
 		// console.trace(value);
 
-
 		if (!Array.isArray(value) || value.length !== 2) {
 			// 若有必要設定，應使用 normalize_title_parameter(title, options)。
 			// 此時不能改變傳入之 value 本身，亦不能僅測試是否有 API_URL。
@@ -282,9 +281,12 @@ function module_code(library_namespace) {
 		var title = value[1];
 
 		// test title: {String}title or {Object}page_data or {Array}titles
-		if (!title || typeof title !== 'string' && !Array.isArray(title)
+		if (!title || typeof title !== 'string'
+		// value[1] 為 titles (page list)。
+		&& !Array.isArray(title)
 		// 為了預防輸入的是問題頁面。
 		&& !get_page_content.is_page_data(title)) {
+			library_namespace.debug('輸入的是問題頁面title', 2, 'is_api_and_title');
 			return false;
 		}
 
@@ -293,16 +295,26 @@ function module_code(library_namespace) {
 		// test API_URL: {String}API_URL/language
 		if (!API_URL) {
 			if (typeof ignore_api === 'object') {
-				// assert: value[1] 為 page list。
-				// 此時嘗試從 options[KEY_SESSION] 取得 API_URL。
+				library_namespace.debug('嘗試從 options[KEY_SESSION] 取得 API_URL。',
+						2, 'is_api_and_title');
+				// console.log(ignore_api);
+				// console.log(API_URL_of_options(ignore_api));
+
 				// ignore_api 當作原函數之 options。
-				return !!(value[0] = API_URL_of_options(ignore_api));
+				API_URL = API_URL_of_options(ignore_api);
+				if (API_URL) {
+					value[0] = API_URL;
+				}
+				// 接下來繼續檢查 API_URL。
+			} else {
+				return !!ignore_api;
 			}
-			return !!ignore_api;
 		}
 
 		if (typeof API_URL !== 'string') {
-			return false;
+			// 若是未設定 action[0]，則將在wiki_API.query()補設定。
+			// 因此若為 undefined || null，此處先不回傳錯誤。
+			return !API_URL;
 		}
 
 		// for property = [ {String}language, {String}title or {Array}titles ]
@@ -324,18 +336,16 @@ function module_code(library_namespace) {
 	// setup [ {String}API_URL, title ]
 	// @see api_URL
 	function normalize_title_parameter(title, options) {
-		// 為了預防輸入的是問題頁面。
-
-		var action = is_api_and_title(title, true) ? title.clone() : [ , title ];
+		var action = is_api_and_title(title, true) ? title.clone()
+				: [ , title ];
 		if (!is_api_and_title(action, false, options)) {
-			library_namespace.warn('normalize_title_parameter: Invalid title! [' + title
-					+ ']');
+			library_namespace.warn(
+			//
+			'normalize_title_parameter: Invalid title! [' + title + ']');
 			return;
 		}
 
-
-		// 處理 [ {String}API_URL, {String}title or {Object}page_data or {Array}為page list ]
-		// 若是未設定 action[0]，則亦將在wiki_API.query()補設定。
+		// 處理 [ {String}API_URL, title ]
 		action[1] = wiki_API.query.title_param(action[1], true, options
 				&& options.is_id);
 
@@ -10732,15 +10742,14 @@ function module_code(library_namespace) {
 			options.language = key[0], key = key[1];
 
 		key = key.trim();
-		var action = [
-				API_URL_of_options(options) || wikidata_API_URL,
-				// search. e.g.,
-				// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
-				'wbsearchentities&search=' + encodeURIComponent(key)
-				//
-				+ '&language=' + (options.language || default_language)
-				//
-				+ '&limit=' + (options.limit || 'max') ];
+		var action = [ API_URL_of_options(options) || wikidata_API_URL,
+		// search. e.g.,
+		// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
+		'wbsearchentities&search=' + encodeURIComponent(key)
+		//
+		+ '&language=' + (options.language || default_language)
+		//
+		+ '&limit=' + (options.limit || 'max') ];
 
 		if (options.type)
 			action[1] += '&type=' + options.type;
