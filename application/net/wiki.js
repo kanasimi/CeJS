@@ -269,9 +269,9 @@ function module_code(library_namespace) {
 
 
 		if (!Array.isArray(value) || value.length !== 2) {
-			// assert: {Array}value 為 page list。
-			// 此時不能改變傳入之 value 本身，因此僅測試是否有 API_URL。
-			return API_URL_of_options(ignore_api);
+			// 若有必要設定，應使用 normalize_title_parameter(title, options)。
+			// 此時不能改變傳入之 value 本身，亦不能僅測試是否有 API_URL。
+			return false;
 		}
 
 		if (type === true) {
@@ -319,6 +319,32 @@ function module_code(library_namespace) {
 		// for key = [ {String}language, {String}title or {Array}titles ]
 		// for id = [ {String}language/site, {String}title ]
 		return metched || /^[a-z\-\d]{2,20}$/i.test(API_URL);
+	}
+
+	// setup [ {String}API_URL, title ]
+	// @see api_URL
+	function normalize_title_parameter(title, options) {
+		// 為了預防輸入的是問題頁面。
+
+		var action = is_api_and_title(title, true) ? title.clone() : [ , title ];
+		if (!is_api_and_title(action, false, options)) {
+			library_namespace.warn('normalize_title_parameter: Invalid title! [' + title
+					+ ']');
+			return;
+		}
+
+
+		// 處理 [ {String}API_URL, {String}title or {Object}page_data or {Array}為page list ]
+		// 若是未設定 action[0]，則亦將在wiki_API.query()補設定。
+		action[1] = wiki_API.query.title_param(action[1], true, options
+				&& options.is_id);
+
+		if (options && options.redirects) {
+			// 毋須 '&redirects=1'
+			action[1] += '&redirects';
+		}
+
+		return action;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -5059,23 +5085,6 @@ function module_code(library_namespace) {
 		return page_data;
 	};
 
-	// TODO: copy from wiki_API.page()
-	function normalize_title_parameter(title, options) {
-		// 為了預防輸入的是問題頁面。
-		if (!is_api_and_title(title)) {
-			title = [ , title ];
-		}
-		title[1] = wiki_API.query.title_param(title[1], true, options
-				&& options.is_id);
-
-		if (options && options.redirects) {
-			// 毋須 '&redirects=1'
-			title[1] += '&redirects';
-		}
-
-		return title;
-	}
-
 	// ------------------------------------------------------------------------
 
 	if (false) {
@@ -5215,22 +5224,10 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var action = Array.isArray(title) ? title.clone() : [ , title ];
+		var action = normalize_title_parameter(title, options);
 
-		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!is_api_and_title(action, false, options)
-		// 若是未設定，則將在wiki_API.query()補設定。
-		&& action[0]) {
-			library_namespace.err('wiki_API.page: Invalid title! [' + title
-					+ ']');
-			throw 'wiki_API.page: Invalid title';
-		}
-		action[1] = wiki_API.query.title_param(action[1], true, options
-				&& options.is_id);
-
-		if (options.redirects) {
-			// 毋須 '&redirects=1'
-			action[1] += '&redirects';
+		if (!action) {
+			throw 'wiki_API.page: Invalid title: [' + title + ']';
 		}
 
 		var get_content;
@@ -5721,8 +5718,9 @@ function module_code(library_namespace) {
 	};
 
 	wiki_API.langlinks.parse = function(langlinks, to_lang) {
-		if (langlinks && Array.isArray(langlinks.langlinks))
+		if (langlinks && Array.isArray(langlinks.langlinks)) {
 			langlinks = langlinks.langlinks;
+		}
 
 		if (!Array.isArray(langlinks)) {
 			if (library_namespace.is_debug()) {
@@ -6779,9 +6777,7 @@ function module_code(library_namespace) {
 				}
 			}
 
-			wiki_API.page(
-			//
-			Array.isArray(title) ? title.clone() : title, function(page_data) {
+			wiki_API.page(title, function(page_data) {
 				if (options && (!options.ignore_denial && wiki_API.edit
 				//
 				.denied(page_data, options.bot_id, options.notification))) {
@@ -7284,22 +7280,11 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// -----------------------------
-		// copy from wiki_API.page()
-		var action = Array.isArray(title) ? title.clone() : [ , title ];
+		var action = normalize_title_parameter(title, options);
 
-		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!is_api_and_title(action, false, options)
-		// 若是未設定，則將在wiki_API.query()補設定。
-		&& action[0]) {
-			library_namespace.err('wiki_API.page: Invalid title! [' + title
-					+ ']');
-			throw 'wiki_API.page: Invalid title';
+		if (!action) {
+			throw 'wiki_API.redirects: Invalid title: [' + title + ']';
 		}
-		action[1] = wiki_API.query.title_param(action[1], true, options
-				&& options.is_id);
-
-		// -----------------------------
 
 		action[1] = 'query&prop=redirects&rdlimit=max&' + action[1];
 		if (!action[0])
