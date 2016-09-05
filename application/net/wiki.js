@@ -336,8 +336,9 @@ function module_code(library_namespace) {
 	// setup [ {String}API_URL, title ]
 	// @see api_URL
 	function normalize_title_parameter(title, options) {
-		var action = is_api_and_title(title, true) ? title.clone()
-				: [ , title ];
+		var action = is_api_and_title(title, true)
+		// 不改變原 title。
+		? title.clone() : [ , title ];
 		if (!is_api_and_title(action, false, options)) {
 			library_namespace.warn(
 			//
@@ -2161,7 +2162,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// parse_wikitext.section_title
 		wikitext = wikitext.replace_till_stable(
-		//
+		// @see PATTERN_section
 		/\n(=+)(.+)\1(\s*)\n/g, function(all, prefix, parameters, postfix) {
 			if (normalize)
 				parameters = parameters.trim();
@@ -2690,6 +2691,11 @@ function module_code(library_namespace) {
 	 * @see 文章的開頭部分[[WP:LEAD|導言章節]] (lead section, introduction)
 	 */
 	function lead_text(wikitext) {
+		var page_data;
+		if (get_page_content.is_page_data(wikitext)) {
+			page_data = wikitext;
+			wikitext = get_page_content(page_data);
+		}
 		if (!wikitext || typeof wikitext !== 'string') {
 			return wikitext;
 		}
@@ -2717,7 +2723,77 @@ function module_code(library_namespace) {
 			+ wikitext.slice(index_end + 2);
 		}
 
+		if (page_data) {
+			page_data.lead_text = lead_text;
+		}
+
 		return wikitext.trim();
+	}
+
+	// get {Array}section list
+	function sections(wikitext) {
+		var page_data;
+		if (get_page_content.is_page_data(wikitext)) {
+			page_data = wikitext;
+			wikitext = get_page_content(page_data);
+		}
+		if (!wikitext || typeof wikitext !== 'string') {
+			return;
+		}
+
+		var section_list = [], index = 0, last_index = 0, section_title,
+		// [ all title, "=", section title ]
+		PATTERN_section = /\n(={1,2})([^=]+)\1\s*\n/g;
+
+		section_list.toString = function() {
+			return this.join('');
+		};
+		// index hash
+		section_list.index = library_namespace.null_Object();
+
+		while (true) {
+			var matched = PATTERN_section.exec(wikitext),
+			//
+			section_text = matched ? wikitext.slice(last_index,
+					PATTERN_section.index) : wikitext.slice(last_index);
+
+			if (section_title
+			// 重複 section title 僅取首個。
+			&& !(section_title in section_list)) {
+				if (!(section_title >= 0)) {
+					// section_list[{String}section title] = {String}wikitext
+					section_list[section_title] = section_text;
+				}
+
+				// 不採用 section_list.length，預防 section_title 可能是 number。
+				// section_list.index[{String}section title] = {Number}index
+				section_list.index[section_title] = index;
+			}
+
+			// 不採用 section_list.push(section_text);，預防 section_title 可能是 number。
+			// section_list[{Number}index] = {String}wikitext
+			section_list[index++] = section_text;
+
+			if (matched) {
+				// 紀錄下一段會用到的資料。
+
+				// +1 === '\n'.length: skip '\n'
+				// 使每個 section_text 以 "=" 開頭。
+				last_index = PATTERN_section.index + 1;
+
+				// 不會 reduce '\t'
+				section_title = matched[2].trim().replace(/ {2,}/g, ' ');
+			} else {
+				break;
+			}
+		}
+
+		if (page_data) {
+			page_data.sections = section_list;
+			// page_data.lead_text = lead_text(section_list[0]);
+		}
+
+		return section_list;
 	}
 
 	// ------------------------------------------------------------------------
@@ -5235,7 +5311,6 @@ function module_code(library_namespace) {
 		}
 
 		var action = normalize_title_parameter(title, options);
-
 		if (!action) {
 			throw 'wiki_API.page: Invalid title: [' + title + ']';
 		}
@@ -7291,7 +7366,6 @@ function module_code(library_namespace) {
 		}
 
 		var action = normalize_title_parameter(title, options);
-
 		if (!action) {
 			throw 'wiki_API.redirects: Invalid title: [' + title + ']';
 		}
@@ -10302,22 +10376,16 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
 	function Flow_info(title, callback, options) {
-		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
-		if (!is_api_and_title(title)) {
-			title = [ , title ];
+		var action = normalize_title_parameter(title, options);
+		if (!action) {
+			throw 'Flow_info: Invalid title: [' + title + ']';
 		}
-		title[1] = wiki_API.query.title_param(title[1], true, options
-				&& options.is_id);
 
-		if (options && options.redirects)
-			// 毋須 '&redirects=1'
-			title[1] += '&redirects';
+		action[1] = 'query&prop=flowinfo&' + action[1];
+		if (!action[0])
+			action = action[1];
 
-		title[1] = 'query&prop=flowinfo&' + title[1];
-		if (!title[0])
-			title = title[1];
-
-		wiki_API.query(title, typeof callback === 'function'
+		wiki_API.query(action, typeof callback === 'function'
 		//
 		&& function(data) {
 			if (library_namespace.is_debug(2)
@@ -12441,6 +12509,7 @@ function module_code(library_namespace) {
 
 		file_pattern : file_pattern,
 		lead_text : lead_text,
+		sections : sections,
 
 		parse : parse_wikitext,
 		parser : page_parser,
