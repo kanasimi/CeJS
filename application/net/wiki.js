@@ -425,10 +425,12 @@ function module_code(library_namespace) {
 
 		var matched = project.match(PATTERN_wiki_project_URL);
 		if (matched) {
+			// 先測試是否為自訂 API。
+			return /\.php$/i.test(project) ? project
 			// e.g., 'http://zh.wikipedia.org/'
 			// e.g., 'https://www.mediawiki.org/w/api.php'
 			// e.g., 'https://www.mediawiki.org/wiki/'
-			return (matched[1] || api_URL.default_protocol || 'https:') + '//'
+			: (matched[1] || api_URL.default_protocol || 'https:') + '//'
 					+ matched[2] + '/w/api.php';
 		}
 
@@ -2235,6 +2237,7 @@ function module_code(library_namespace) {
 					+ ' to node [' + wikitext + ']', 3, 'parse_wikitext');
 			wikitext[KEY_DEPTH] = depth_of_children - 1;
 		}
+
 		return wikitext;
 	}
 
@@ -2382,20 +2385,33 @@ function module_code(library_namespace) {
 	 * parse date string to {Date}
 	 * 
 	 * @param {String}wikitext
-	 *            wikitext to parse
+	 *            date text to parse.
 	 * 
 	 * @returns {Date}date of the date string
 	 */
-	function parse_date_zh(wikitext) {
+	function parse_date_zh(wikitext, get_timevalue) {
+		if (!wikitext) {
+			return;
+		}
+
 		// $dateFormats, 'Y年n月j日 (D) H:i'
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hans.php
-		return wikitext && wikitext
-		// 去掉年分前之雜項。
-		.replace(/.+(\d{4}年)/, '$1')
-		// 去掉星期與其後之雜項。
-		.replace(/日\s*\([^()]+\)/, '日 ')
-		// Warning: need data.date.
-		.to_Date();
+		// e.g., "2016年8月1日 (一) 00:00 (UTC)"
+		// [, Y, m, d, time ]
+		var PATTERN_date_zh = /(\d{4})年(1?\d)月([1-3]?\d)日 \(.\)( \d{1,2}:\d{1,2} \([A-Z]{3}\))/g,
+		// <s>去掉</s>skip年分前之雜項。
+		// <s>去掉</s>skip星期與其後之雜項。
+		matched, date_list = [];
+
+		while (matched = PATTERN_date_zh.exec(wikitext)) {
+			// Warning: .to_Date() need data.date.
+			var date = matched[1] + '/' + matched[2] + '/' + matched[3]
+					+ matched[4];
+			date = get_timevalue ? Date.parse(date) : new Date(date);
+			date_list.push(date);
+		}
+
+		return date_list.length > 1 ? date_list : date_list[0];
 	}
 
 	/**
@@ -2730,8 +2746,9 @@ function module_code(library_namespace) {
 		return wikitext.trim();
 	}
 
+	// 將 wikitext 拆解為各 section list
 	// get {Array}section list
-	function sections(wikitext) {
+	function get_sections(wikitext) {
 		var page_data;
 		if (get_page_content.is_page_data(wikitext)) {
 			page_data = wikitext;
@@ -2743,31 +2760,48 @@ function module_code(library_namespace) {
 
 		var section_list = [], index = 0, last_index = 0, section_title,
 		// [ all title, "=", section title ]
-		PATTERN_section = /\n(={1,2})([^=]+)\1\s*\n/g;
+		PATTERN_section = /\n(={1,2})([^=\n]+)\1\s*\n/g;
 
 		section_list.toString = function() {
 			return this.join('');
 		};
+		section_list.title = [];
 		// index hash
 		section_list.index = library_namespace.null_Object();
 
 		while (true) {
 			var matched = PATTERN_section.exec(wikitext),
+			// +1 === '\n'.length: skip '\n'
+			// 使每個 section_text 以 "=" 開頭。
+			next_index = matched && matched.index + 1,
 			//
-			section_text = matched ? wikitext.slice(last_index,
-					PATTERN_section.index) : wikitext.slice(last_index);
+			section_text = matched ? wikitext.slice(last_index, next_index)
+					: wikitext.slice(last_index);
 
-			if (section_title
-			// 重複 section title 僅取首個。
-			&& !(section_title in section_list)) {
-				if (!(section_title >= 0)) {
-					// section_list[{String}section title] = {String}wikitext
-					section_list[section_title] = section_text;
+			library_namespace.debug('next_index: ' + next_index + '/'
+					+ wikitext.length, 3, 'get_sections');
+			// console.log(matched);
+			// console.log(PATTERN_section);
+
+			if (section_title) {
+				// section_list.title[{Number}index] = {String}section title
+				section_list.title[index] = section_title;
+				if (section_title in section_list) {
+					library_namespace.debug('重複 section title ['
+							+ section_title + '] 將僅取首個 section text。', 2,
+							'get_sections');
+
+				} else {
+					if (!(section_title >= 0)) {
+						// section_list[{String}section title] =
+						// {String}wikitext
+						section_list[section_title] = section_text;
+					}
+
+					// 不採用 section_list.length，預防 section_title 可能是 number。
+					// section_list.index[{String}section title] = {Number}index
+					section_list.index[section_title] = index;
 				}
-
-				// 不採用 section_list.length，預防 section_title 可能是 number。
-				// section_list.index[{String}section title] = {Number}index
-				section_list.index[section_title] = index;
 			}
 
 			// 不採用 section_list.push(section_text);，預防 section_title 可能是 number。
@@ -2777,12 +2811,11 @@ function module_code(library_namespace) {
 			if (matched) {
 				// 紀錄下一段會用到的資料。
 
-				// +1 === '\n'.length: skip '\n'
-				// 使每個 section_text 以 "=" 開頭。
-				last_index = PATTERN_section.index + 1;
+				last_index = next_index;
 
 				// 不會 reduce '\t'
-				section_title = matched[2].trim().replace(/ {2,}/g, ' ');
+				section_title = matched[2].trim().replace(/ {2,}/g, ' ')
+						.replace(/<\/?[a-z][^<>]*>/g, '');
 			} else {
 				break;
 			}
@@ -2793,6 +2826,12 @@ function module_code(library_namespace) {
 			// page_data.lead_text = lead_text(section_list[0]);
 		}
 
+		// 檢核。
+		if (false && wikitext !== section_list.toString()) {
+			// debug 用. check parser, test if parser working properly.
+			throw new Error('get_sections: Parser error'
+					+ (page_data ? ': [[' + page_data.title + ']]' : ''));
+		}
 		return section_list;
 	}
 
@@ -12509,7 +12548,7 @@ function module_code(library_namespace) {
 
 		file_pattern : file_pattern,
 		lead_text : lead_text,
-		sections : sections,
+		sections : get_sections,
 
 		parse : parse_wikitext,
 		parser : page_parser,
