@@ -333,6 +333,7 @@ function module_code(library_namespace) {
 		return metched || /^[a-z\-\d]{2,20}$/i.test(API_URL);
 	}
 
+	// 規範化 title_parameter
 	// setup [ {String}API_URL, title ]
 	// @see api_URL
 	function normalize_title_parameter(title, options) {
@@ -1354,7 +1355,12 @@ function module_code(library_namespace) {
 	// self-closing: void elements + foreign elements
 	// https://www.w3.org/TR/html5/syntax.html#void-elements
 	// @see [[phab:T134423]]
-	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr';
+	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr',
+	// 在其內部的wikitext不會被parse。
+	no_parse_tags = {
+		pre : true,
+		nowiki : true
+	};
 
 	/**
 	 * .toString() of wiki elements<br />
@@ -1729,6 +1735,9 @@ function module_code(library_namespace) {
 		// parse 範圍基本上由小到大。
 		// e.g., transclusion 不能包括 table，因此在 table 前。
 
+		// 得先處理完有開闔的標示法，之後才是單一標示。
+		// e.g., "<pre>\n==t==\nw\n</pre>" 不應解析出 section_title。
+
 		// 可順便作正規化/維護清理/修正明顯破壞/修正維基語法/維基化，
 		// 例如修復章節標題 (section title, 節タイトル) 前後 level 不一，
 		// table "|-" 未起新行等。
@@ -1930,16 +1939,21 @@ function module_code(library_namespace) {
 		/** {RegExp}HTML tag 的匹配模式。 */
 		var PATTERN_TAG = new RegExp('<(' + markup_tags
 				+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig');
+		// console.log(PATTERN_TAG);
+		// console.log(wikitext);
 
 		// HTML tags that must be closed.
 		// <pre>...</pre>, <code>int f()</code>
 		wikitext = wikitext.replace_till_stable(PATTERN_TAG, function(all, tag,
 				attributes, inner, end_tag) {
+			var no_parse_tag = tag.toLowerCase() in no_parse_tags;
 			// 在章節標題、表格 td/th 或 template parameter 結束時，
 			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
 			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
-			if (/\n(?:[=|!]|\|})|[|!]{2}/.test(inner)) {
-				// 此時視為一般 text，當作未匹配 match 成功。
+			if (!no_parse_tag && /\n(?:[=|!]|\|})|[|!]{2}/.test(inner)) {
+				library_namespace.debug('表格 td/th 或 template parameter 中，'
+						+ '此時視為一般 text，當作未匹配 match HTML tag 成功。', 4,
+						'parse_wikitext.tag');
 				return all;
 			}
 			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
@@ -1959,8 +1973,16 @@ function module_code(library_namespace) {
 			library_namespace.debug(prevoius + ' + <' + tag + '>', 4,
 					'parse_wikitext.tag');
 
-			// 經過改變，需再進一步處理。
-			inner = parse_wikitext(inner, options, queue);
+			// 若為 <pre> 之內，則不再變換。
+			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
+			// 則會顯示出內部<pre>，並取內部</pre>為外部<pre>之結尾。
+			// 因此應避免 <pre> 內有 <pre>。
+			if (!no_parse_tag) {
+				// 經過改變，需再進一步處理。
+				library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
+						'parse_wikitext.tag');
+				inner = parse_wikitext(inner, options, queue);
+			}
 			// [ ... ]: 在 inner 為 Template 之類時，
 			// 不應直接在上面設定 type=tag_inner，以免破壞應有之格式！
 			// 但仍需要設定 type=tag_inner 以應 for_each_token 之需，因此多層包覆。
@@ -2751,6 +2773,7 @@ function module_code(library_namespace) {
 		return wikitext.trim();
 	}
 
+	// 規範化章節標題
 	function normalize_section_title(section_title) {
 		// TODO: {{}}, [[]]
 		// 不會 reduce '\t'
@@ -2783,13 +2806,16 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var section_list = [], index = 0, last_index = 0, section_title,
+		var section_list = [], index = 0, last_index = 0,
+		// 章節標題
+		section_title,
 		// [ all title, "=", section title ]
 		PATTERN_section = /\n(={1,2})([^=\n]+)\1\s*\n/g;
 
 		section_list.toString = function() {
 			return this.join('');
 		};
+		// 章節標題list
 		section_list.title = [];
 		// index hash
 		section_list.index = library_namespace.null_Object();
@@ -2802,6 +2828,11 @@ function module_code(library_namespace) {
 			//
 			section_text = matched ? wikitext.slice(last_index, next_index)
 					: wikitext.slice(last_index);
+
+			if (false) {
+				// 去掉章節標題。
+				section_text.replace(/^==[^=\n]+==\n+/, '');
+			}
 
 			library_namespace.debug('next_index: ' + next_index + '/'
 					+ wikitext.length, 3, 'get_sections');

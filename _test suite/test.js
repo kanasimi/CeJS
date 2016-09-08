@@ -2462,6 +2462,17 @@ function test_wiki() {
 		assert([ ' style="color:#000" ', CeL.wiki.parser(wikitext).parse()[1][0] ], 'wiki.parse: HTML tag #5');
 		assert([ 'tag_inner', CeL.wiki.parser(wikitext).parse()[1][1].type ], 'wiki.parse: HTML tag #6');
 		assert([ '1<b style="color:#000" ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function(token, parent, index){return '';}, true).toString() ], 'wiki.parse: HTML tag #7');
+
+		wikitext = '1<pre class="c">\n==t==\nw\n</pre>2';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML tag pre #1');
+		assert([ '<pre class="c">\n==t==\nw\n</pre>', CeL.wiki.parser(wikitext).parse()[1].toString() ], 'wiki.parse: HTML tag pre #2');
+		assert([ ' class="c"', CeL.wiki.parser(wikitext).parse()[1][0].toString() ], 'wiki.parse: HTML tag pre #3');
+		assert([ '\n==t==\nw\n', CeL.wiki.parser(wikitext).parse()[1][1].toString() ], 'wiki.parse: HTML tag pre #4');
+		wikitext = '1<nowiki>\n==t==\nw\n</nowiki>2';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: nowiki #1');
+		assert([ '<nowiki>\n==t==\nw\n</nowiki>', CeL.wiki.parser(wikitext).parse()[1].toString() ], 'wiki.parse: nowiki #2');
+		assert([ '', CeL.wiki.parser(wikitext).parse()[1][0].toString() ], 'wiki.parse: nowiki #3');
+		assert([ '\n==t==\nw\n', CeL.wiki.parser(wikitext).parse()[1][1].toString() ], 'wiki.parse: nowiki #4');
 	});
 
 
