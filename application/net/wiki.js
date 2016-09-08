@@ -2389,7 +2389,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Date}date of the date string
 	 */
-	function parse_date_zh(wikitext, get_timevalue) {
+	function parse_date_zh(wikitext, get_timevalue, get_all_list) {
 		if (!wikitext) {
 			return;
 		}
@@ -2409,9 +2409,14 @@ function module_code(library_namespace) {
 					+ matched[4];
 			date = get_timevalue ? Date.parse(date) : new Date(date);
 			date_list.push(date);
+			if (!get_all_list) {
+				return date;
+			}
 		}
 
-		return date_list.length > 1 ? date_list : date_list[0];
+		if (get_all_list) {
+			return date_list;
+		}
 	}
 
 	/**
@@ -2746,6 +2751,26 @@ function module_code(library_namespace) {
 		return wikitext.trim();
 	}
 
+	function normalize_section_title(section_title) {
+		// TODO: {{}}, [[]]
+		// 不會 reduce '\t'
+		return section_title.trim().replace(/ {2,}/g, ' ').replace(
+				/<\/?[a-z][^<>]*>/g, '');
+	}
+
+	/**
+	 * <code>
+
+	CeL.wiki.sections(page_data);
+	page_data.sections.forEach(for_sections, page_data.sections);
+
+	CeL.wiki.sections(page_data)
+	//
+	.forEach(for_sections, page_data.sections);
+
+	 * </code>
+	 */
+
 	// 將 wikitext 拆解為各 section list
 	// get {Array}section list
 	function get_sections(wikitext) {
@@ -2813,9 +2838,8 @@ function module_code(library_namespace) {
 
 				last_index = next_index;
 
-				// 不會 reduce '\t'
-				section_title = matched[2].trim().replace(/ {2,}/g, ' ')
-						.replace(/<\/?[a-z][^<>]*>/g, '');
+				section_title = matched[2].trim();
+				// section_title = normalize_section_title(section_title);
 			} else {
 				break;
 			}
@@ -4417,7 +4441,7 @@ function module_code(library_namespace) {
 				options = {
 					// new section. append 章節/段落 after all, at bottom.
 					section : 'new',
-					// 章節標題
+					// 章節標題。
 					sectiontitle : '['
 							+ (new Date).format(config.date_format
 									|| this.date_format) + ']' + count_summary,
