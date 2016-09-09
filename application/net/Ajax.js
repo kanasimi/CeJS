@@ -1004,6 +1004,8 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		// console.log(post_data);
 		library_namespace.debug('set post data: length ' + post_data.length, 3,
 				'get_URL_node');
+		library_namespace.debug('set post data: ' + post_data, 6,
+				'get_URL_node');
 		request.write(post_data);
 	}
 

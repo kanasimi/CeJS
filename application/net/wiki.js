@@ -234,6 +234,8 @@ function module_code(library_namespace) {
 
 	// 嘗試從 options 取得 API_URL。
 	function API_URL_of_options(options) {
+		// library_namespace.debug('options:', 0, 'API_URL_of_options');
+		// console.log(options);
 		if (!options) {
 			return;
 		}
@@ -243,13 +245,15 @@ function module_code(library_namespace) {
 	}
 
 	function get_data_API_URL(options, default_API_URL) {
+		// library_namespace.debug('options:', 0, 'get_data_API_URL');
+		// console.log(options);
 		if (!options) {
 			return;
 		}
 		var session = options[KEY_SESSION];
 		return session && session.data_session && session.data_session.API_URL
 		//
-		API_URL_of_options(options) || default_API_URL || wikidata_API_URL;
+		|| API_URL_of_options(options) || default_API_URL || wikidata_API_URL;
 	}
 
 	/**
@@ -1050,6 +1054,17 @@ function module_code(library_namespace) {
 			max_depth = modify_this, modify_this = processor, processor = type,
 					type = undefined;
 		}
+
+		var options;
+		// for_each_token(type, processor, options)
+		if (max_depth === undefined && typeof modify_this === 'object') {
+			options = modify_this;
+			modify_this = options.modify;
+			max_depth = options.max_depth;
+		} else {
+			options = library_namespace.null_Object();
+		}
+
 		if (typeof modify_this === 'number' && modify_this > 0
 				&& max_depth === undefined) {
 			// for_each_token(type, processor, max_depth)
@@ -1057,7 +1072,7 @@ function module_code(library_namespace) {
 			max_depth = modify_this, modify_this = undefined;
 		}
 
-		if (type) {
+		if (type || type === '') {
 			if (typeof type !== 'string') {
 				library_namespace.warn(
 				//
@@ -1072,6 +1087,18 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// options.slice: range index: {Number}start index
+		// || {Array}[ {Number}start index, {Number}end index ]
+		var slice = options.slice;
+		// console.log(slice);
+		if (slice >= 0) {
+			slice = [ slice, ];
+		} else if (slice && (!Array.isArray(slice) || slice.length > 2)) {
+			library_namespace.warn('for_each_token: Invalid slice: '
+					+ JSON.stringify(slice));
+			slice = undefined;
+		}
+
 		if (!this.parsed) {
 			// 因為本函數為 CeL.wiki.parser(content) 最常使用者，
 			// 因此放在這少一道 .parse() 工序。
@@ -1081,6 +1108,10 @@ function module_code(library_namespace) {
 		// 遍歷 tokens
 		function traversal_tokens(_this, depth) {
 			_this.forEach(function(token, index) {
+				if (slice && depth === 0) {
+					if (index < slice[0] || slice[1] <= index)
+						return;
+				}
 				// console.log('token depth ' + depth + '/' + max_depth + ':');
 				// console.log(token);
 
@@ -1453,6 +1484,8 @@ function module_code(library_namespace) {
 			return '-{' + this.join('|') + '}-';
 		},
 		// section title
+		// show all section titles:
+		// wiki.last_page.parsed.each('section_title',function(token){console.log(token.slice().join('').trim());},false);0;
 		section_title : function() {
 			var level = '='.repeat(this.level);
 			return level
@@ -2188,13 +2221,17 @@ function module_code(library_namespace) {
 		wikitext = wikitext.replace_till_stable(
 		// @see PATTERN_section
 		/\n(=+)(.+)\1(\s*)\n/g, function(all, prefix, parameters, postfix) {
+			/** {String}section title in wikitext */
+			var section_title = parameters.trim();
 			if (normalize)
-				parameters = parameters.trim();
+				parameters = section_title;
 			// 經過改變，需再進一步處理。
 			parameters = parse_wikitext(parameters, options, queue);
 			if (parameters.type !== 'text')
 				parameters = [ parameters ];
 			parameters = _set_wiki_type(parameters, 'section_title');
+			/** {String}section title in wikitext */
+			parameters.title = section_title;
 			if (postfix && !normalize)
 				parameters.postfix = postfix;
 			parameters.level = prefix.length;
@@ -2794,9 +2831,10 @@ function module_code(library_namespace) {
 	 * </code>
 	 */
 
+	// @deprecated: 無法處理 '<pre class="c">\n==t==\nw\n</pre>'
 	// 將 wikitext 拆解為各 section list
 	// get {Array}section list
-	function get_sections(wikitext) {
+	function deprecated_get_sections(wikitext) {
 		var page_data;
 		if (get_page_content.is_page_data(wikitext)) {
 			page_data = wikitext;
@@ -3178,6 +3216,12 @@ function module_code(library_namespace) {
 					session : this
 				}, next[3]));
 			}
+			break;
+
+		case 'parse':
+			// e.g., wiki.page('title').parse();
+			// next[1] : options
+			page_parser(this.last_page, next[1]);
 			break;
 
 		case 'redirect_to':
@@ -3831,7 +3875,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,redirect_to,check,copy_from,edit,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -6595,7 +6639,7 @@ function module_code(library_namespace) {
 	wiki_API.prototype.get_token = function(callback, type) {
 		// assert: this (session) 已登入成功， callback 已設定好。
 		if (!type) {
-			// default_type
+			// default_type: csrf (cross-site request forgery) token
 			type = 'csrf';
 		}
 		// TODO: for {Array}type
@@ -11519,6 +11563,10 @@ function module_code(library_namespace) {
 		}
 
 		var API_URL = get_data_API_URL(options);
+		if (false) {
+			console.log('wikidata_entity: get_data_API_URL API_URL : '
+					+ API_URL);
+		}
 
 		// ----------------------------
 		// convert property: title to id
@@ -11669,11 +11717,13 @@ function module_code(library_namespace) {
 				// 對於多種屬性，不特別取之。
 				props = null;
 		}
-		if (options.languages)
+		if (options.languages) {
 			// retrieve languages, language to callback. 僅擷取這些語言。
 			action[1] += '&languages=' + options.languages;
+		}
 
-		// console.log(action);
+		// console.log('wikidata_entity: API_URL: ' + API_URL);
+		// console.log('wikidata_entity: action: ' + action);
 		// console.log(arguments);
 		// TODO:
 		wiki_API.query(action, function(data) {
@@ -11856,9 +11906,10 @@ function module_code(library_namespace) {
 			options = null;
 		}
 
-		if (!library_namespace.is_Object(options))
+		if (!library_namespace.is_Object(options)) {
 			// 前置處理。
 			options = library_namespace.null_Object();
+		}
 
 		if (!id && !options['new']) {
 			callback(undefined, {
@@ -11891,8 +11942,10 @@ function module_code(library_namespace) {
 			}
 		}
 
+		var entity;
 		if (is_entity(id)) {
 			// 輸入 id 為實體項目 entity
+			entity = id;
 			if (!options.baserevid) {
 				// 檢測編輯衝突用。
 				options.baserevid = id.lastrevid;
@@ -11941,11 +11994,6 @@ function module_code(library_namespace) {
 			delete options[KEY_SESSION];
 		}
 
-		// TODO: 創建Wikibase陳述。
-		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
-		// TODO: 創建實體項目重定向。
-		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
-
 		// edit實體項目entity
 		action = [
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
@@ -11954,13 +12002,24 @@ function module_code(library_namespace) {
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！
 		delete options.API_URL;
 
+		// TODO: 可拆解成 wbsetlabel, wbsetaliases, wbsetsitelink,
+		// wbcreateclaim, wbsetclaim, wbsetreference
+		// TODO: 創建Wikibase陳述。
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
+		// TODO: 創建實體項目重定向。
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
+
+		if (data.claims) {
+			;
+		}
+
 		options.data = JSON.stringify(data);
 
 		// the token should be sent as the last parameter.
 		options.token = library_namespace.is_Object(token) ? token.csrftoken
 				: token;
 
-		wiki_API.query(action, function(data) {
+		wiki_API.query(action, function handle_result(data) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
@@ -12386,6 +12445,65 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// set properties
+	function wikidata_create_claim(entity, property, value, options, callback) {
+		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
+		options = library_namespace.new_options(options);
+
+		var session;
+		if ('session' in options) {
+			session = options[KEY_SESSION];
+			if (session && session.data_session) {
+				session = session.data_session;
+			}
+			delete options[KEY_SESSION];
+		}
+
+		var POST_data = {
+			entity : entity,
+			property : property,
+			snaktype : options.snaktype || value === undefined ? 'novalue'
+					: 'value',
+			value : JSON.stringify(value)
+		},
+		//
+		action = [ get_data_API_URL(options), 'wbcreateclaim' ];
+
+		if (options.summary) {
+			POST_data.summary = options.summary;
+		}
+		if (options.bot) {
+			POST_data.bot = 1;
+		}
+
+		// the token should be sent as the last parameter.
+		var token = options.token || session && session.token;
+		// console.log(token);
+		POST_data.token = library_namespace.is_Object(token) ? token.csrftoken
+				: token;
+		console.log('wikidata_create_claim: POST_data: '
+				+ get_URL.param_to_String(POST_data));
+		console.log(POST_data);
+
+		wiki_API.query(action, function(data) {
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.err('wikidata_create_claim: ['
+				//
+				+ error.code + '] ' + error.info);
+				callback(undefined, error);
+				return;
+			}
+
+			// data =
+			// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
+			callback(data);
+		}, POST_data, session);
+	}
+
+	// ------------------------------------------------------------------------
+
 	/**
 	 * 合併自 wikidata 的 entity。
 	 * 
@@ -12603,7 +12721,7 @@ function module_code(library_namespace) {
 
 		file_pattern : file_pattern,
 		lead_text : lead_text,
-		sections : get_sections,
+		// sections : get_sections,
 
 		parse : parse_wikitext,
 		parser : page_parser,
@@ -12633,6 +12751,8 @@ function module_code(library_namespace) {
 		data : wikidata_entity,
 		edit_data : wikidata_edit,
 		merge_data : wikidata_merge,
+		// wikidata_create_claim : wikidata_create_claim,
+		//
 		wdq : wikidata_query,
 		SPARQL : wikidata_SPARQL
 	});
