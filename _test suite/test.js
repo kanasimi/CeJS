@@ -2490,15 +2490,59 @@ function test_wiki() {
 
 		_setup_test('wiki: CeL.wiki.convert()');
 		CeL.wiki.convert('中国', function(text) {
-			assert([ '中國', text ], 'wiki: [[Wikipedia:Sandbox]]');
-			_finish_test('wiki: CeL.wiki.convert()');
+			var test_name = 'wiki: CeL.wiki.convert()';
+			assert([ '中國', text ], test_name);
+			_finish_test(test_name);
 		});
 
 		_setup_test('wiki: CeL.wiki.langlinks()');
 		CeL.wiki.langlinks('語言', function(title) {
-			assert([ 'Language', title ], 'wiki: CeL.wiki.langlinks()');
-			_finish_test('wiki: CeL.wiki.langlinks()');
+			var test_name = 'wiki: CeL.wiki.langlinks()';
+			assert([ 'Language', title ], test_name);
+			_finish_test(test_name);
 		}, 'en');
+
+		_setup_test('wiki: CeL.wiki.data.search()');
+		CeL.wiki.data.search('宇宙', function(entity) {
+			var test_name = 'wiki: CeL.wiki.data.search()';
+			assert([ 'Q1', entity[0] ], test_name);
+			_finish_test(test_name);
+		}, {get_id:true});
+
+		_setup_test('wiki: CeL.wiki.data.search() limit=1');
+		CeL.wiki.data.search('宇宙', function(entity) {
+			var test_name = 'wiki: CeL.wiki.data.search() limit=1';
+			assert([ 'Q1', entity ], test_name);
+			_finish_test(test_name);
+		}, {get_id:true, limit:1});
+
+		_setup_test('wiki: CeL.wiki.data.search() property');
+		CeL.wiki.data.search('形狀', function(entity) {
+			var test_name = 'wiki: CeL.wiki.data.search() property';
+			assert([ 'P1419', entity ], test_name);
+			_finish_test(test_name);
+		}, {get_id:true, type:'property'});
+
+		_setup_test('wiki: CeL.wiki.data.search().use_cache');
+		CeL.wiki.data.search.use_cache('兄弟', function(entity) {
+			var test_name = 'wiki: CeL.wiki.data.search().use_cache';
+			assert([ 'P7', entity ], test_name);
+			_finish_test(test_name);
+		});
+
+		_setup_test('wiki: CeL.wiki.data()');
+		CeL.wiki.data('宇宙', '形狀', function(entity) {
+			var test_name = 'wiki: CeL.wiki.data()';
+			assert([ '宇宙的形狀', entity ], test_name);
+			_finish_test(test_name);
+		});
+
+		_setup_test('wiki: CeL.wiki.data()');
+		CeL.wiki.data('宇宙', '形狀', function(entity) {
+			var test_name = 'wiki: CeL.wiki.data()';
+			assert([ '宇宙的形狀', entity ], test_name);
+			_finish_test(test_name);
+		});
 
 	}, function(recorder, _error_count, test_name) {
 		// console.log('CeL.wiki: asynchronous functions: ' + _error_count + ' errors');

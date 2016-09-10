@@ -10917,7 +10917,7 @@ function module_code(library_namespace) {
 
 	CeL.wiki.data.search('宇宙', function(entity) {result=entity;console.log(entity[0]==='Q1');}, {get_id:true});
 	CeL.wiki.data.search('宇宙', function(entity) {result=entity;console.log(entity==='Q1');}, {get_id:true, limit:1});
-	CeL.wiki.data.search('形狀', function(entity) {result=entity;console.log(entity==='P1419');}, {get_id:true,type:'property'});
+	CeL.wiki.data.search('形狀', function(entity) {result=entity;console.log(entity==='P1419');}, {get_id:true, type:'property'});
 
 	</code>
 	 * 
@@ -11047,7 +11047,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (options && !options.get_id) {
+		if (!options || !options.get_id) {
 			// default options passed to wikidata_search()
 			options = {
 				API_URL : get_data_API_URL(options),
@@ -11564,6 +11564,7 @@ function module_code(library_namespace) {
 	CeL.wiki.data('艾薩克·牛頓', '出生日期', function(entity) {result=entity;console.log(''+entity==='1643年1月4日,1642年12月25日');})
 
 	// 實體項目值的鏈接數據界面 (無法篩選所要資料，傳輸量較大。)
+	// 非即時資料!
 	CeL.get_URL('https://www.wikidata.org/wiki/Special:EntityData/Q1.json',function(r){r=JSON.parse(r.responseText);console.log(r.entities.Q1.labels.zh.value)})
 
 	// ------------------------------------------------------------------------
