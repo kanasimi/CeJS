@@ -421,7 +421,7 @@ if (typeof CeL === 'function')
 			})();
 
 			// 經緯度
-			// [ latitude 緯度, longitude 經度 ]
+			// [ {Number}latitude 緯度, {Number}longitude 經度 ]
 			function parse_coordinates(coordinates) {
 				var latitude, longitude,
 				// e.g., '25.032969, 121.565418'

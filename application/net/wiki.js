@@ -10922,7 +10922,7 @@ function module_code(library_namespace) {
 	</code>
 	 * 
 	 * @param {String}key
-	 *            要搜尋的關鍵字。
+	 *            要搜尋的關鍵字。item/property title.
 	 * @param {Function}[callback]
 	 *            回調函數。 callback({Array}entity list or {Object}entity or
 	 *            {String}entity id, error)
@@ -10930,22 +10930,23 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
 	function wikidata_search(key, callback, options) {
-
 		if (typeof options === 'function')
 			options = {
 				filter : options
 			};
-		else if (typeof options === 'string')
+		else if (typeof options === 'string') {
 			options = {
 				language : options
 			};
-		else
+		} else {
 			// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 			options = library_namespace.new_options(options);
+		}
 
-		if (Array.isArray(key))
+		if (Array.isArray(key)) {
 			// for [ {String}language, {String}key ]
 			options.language = key[0], key = key[1];
+		}
 
 		key = key.trim();
 		var action = [ API_URL_of_options(options) || wikidata_API_URL,
@@ -11022,6 +11023,60 @@ function module_code(library_namespace) {
 			callback(list);
 		}, null, options);
 	}
+
+	// wikidata_search_cache[{String}"zh:性質"] = {String}"P31";
+	var wikidata_search_cache = library_namespace.null_Object();
+
+	// wrapper function of wikidata_search().
+	wikidata_search.use_cache = function(key, callback, options) {
+		if (!options || !options.force) {
+			// TODO: key 可能是 [ language code, 'labels|aliases' ] 之類。
+			if (is_api_and_title(key, 'language')) {
+				// property.join(':')
+				var language_and_key = key[0] + ':' + key[1];
+				if (wikidata_search_cache[language_and_key]) {
+					library_namespace.debug('has cache: [' + language_and_key
+							+ '] → ' + wikidata_search_cache[language_and_key],
+							4, 'wikidata_search.use_cache');
+					key = wikidata_search_cache[language_and_key];
+				}
+			}
+
+			if (/^[PQ]\d{1,10}$/.test(key)) {
+				return key;
+			}
+		}
+
+		if (options && !options.get_id) {
+			// default options passed to wikidata_search()
+			options = {
+				API_URL : get_data_API_URL(options),
+				// 通常 property 才值得使用 cache。
+				type : 'property',
+				get_id : true,
+				limit : 1
+			};
+		}
+
+		wikidata_search(key, function(id, error) {
+			if (!id) {
+				library_namespace
+						.err('wikidata_search.use_cache: Nothing found: ['
+								+ key + ']');
+
+			} else if (typeof id === 'string' && /^[PQ]\d{1,10}$/.test(id)) {
+				library_namespace.debug('cache '
+				// 搜尋此類型的實體。 預設值：item
+				+ (options && options.type || 'item')
+				//
+				+ ' ' + id + ' ← [' + language_and_key + ']', 1,
+						'wikidata_search.use_cache');
+				wikidata_search_cache[key] = id;
+			}
+
+			callback(id, error);
+		}, options);
+	};
 
 	// ------------------------------------------------------------------------
 
@@ -11483,9 +11538,6 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// wikidata_search_cache[{String}"性質"] = {String}"P31";
-	var wikidata_search_cache = library_namespace.null_Object();
-
 	/**
 	 * 取得特定實體的特定屬性值。
 	 * 
@@ -11583,29 +11635,12 @@ function module_code(library_namespace) {
 
 		if (is_api_and_title(property, 'language')) {
 			// TODO: property 可能是 [ language code, 'labels|aliases' ] 之類。
-			// property.join(':')
-			var property_title = property[0] + ':' + property[1];
-			if (property_title in wikidata_search_cache) {
-				library_namespace.debug('has cache: [' + property_title + ']',
-						4, 'wikidata_entity');
-				property = wikidata_search_cache[property_title];
-
-			} else {
-				wikidata_search(property, function(id) {
-					library_namespace.debug(
-					//
-					'property ' + id + ' ← [' + property_title + ']', 1,
-							'wikidata_entity');
-					// cache
-					wikidata_search_cache[property_title] = id;
-					wikidata_entity(key, id, callback, options);
-				}, {
-					API_URL : API_URL,
-					type : 'property',
-					get_id : true,
-					limit : 1
-				});
-				// Waiting for conversion
+			property = wikidata_search.use_cache(property, function(id, error) {
+				wikidata_entity(key, id, callback, options);
+			}, options);
+			if (!property) {
+				// assert: property === undefined
+				// Waiting for conversion.
 				return;
 			}
 		}
@@ -11663,7 +11698,7 @@ function module_code(library_namespace) {
 					get_id : true,
 					limit : 1
 				});
-				// Waiting for conversion
+				// Waiting for conversion.
 				return;
 			}
 			key = key.map(function(id) {
@@ -11860,6 +11895,40 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// P143 (導入自, imported from) for bot, P248 (載於, stated in) for humans
+	// + 來源網址 (P854) reference URL
+	// + 檢索日期 (P813) retrieved date
+
+	// @see wikidata_search_cache
+	// wikidata_datatype_cache[31] = {String}datatype of P31;
+	var wikidata_datatype_cache = library_namespace.null_Object();
+
+	function wikidata_datatype(property, callback, options) {
+		if (is_api_and_title(property, 'language')) {
+			property = wikidata_search.use_cache(property, function(id, error) {
+				wikidata_datatype(id, callback, options);
+			}, options);
+			if (!property) {
+				// assert: property === undefined
+				// Waiting for conversion.
+				return;
+			}
+		}
+
+		if (!/^P\d{1,5}$/.test(property)) {
+			callback(undefined, 'wikidata_datatype: Invalid property: ['
+					+ property + ']');
+			return;
+		}
+
+		var datatype = wikidata_datatype_cache[property];
+		if (!datatype) {
+			;
+		}
+	}
+
+	// ------------------------------------------------------------------------
+
 	/**
 	 * Creates or modifies Wikibase entity. 創建或編輯Wikidata實體。
 	 * 
@@ -12002,6 +12071,33 @@ function module_code(library_namespace) {
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！
 		delete options.API_URL;
 
+		function do_edit() {
+			options.data = JSON.stringify(data);
+
+			// the token should be sent as the last parameter.
+			options.token = library_namespace.is_Object(token) ? token.csrftoken
+					: token;
+
+			wiki_API.query(action, function handle_result(data) {
+				var error = data && data.error;
+				// 檢查伺服器回應是否有錯誤資訊。
+				if (error) {
+					library_namespace.err(
+					// e.g., 數據庫被禁止寫入以進行維護，所以您目前將無法保存您所作的編輯
+					// Mediawiki is in read-only mode during maintenance
+					'wikidata_edit: ' + (options.id ? options.id + ': ' : '')
+					// [readonly] The wiki is currently in read-only mode
+					+ '[' + error.code + '] ' + error.info);
+					callback(undefined, error);
+					return;
+				}
+
+				if (data.entity)
+					data = data.entity;
+				callback(data);
+			}, options, session);
+		}
+
 		// TODO: 可拆解成 wbsetlabel, wbsetaliases, wbsetsitelink,
 		// wbcreateclaim, wbsetclaim, wbsetreference
 		// TODO: 創建Wikibase陳述。
@@ -12009,35 +12105,52 @@ function module_code(library_namespace) {
 		// TODO: 創建實體項目重定向。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
 
-		if (data.claims) {
-			;
+		if (typeof data.claims === 'object') {
+			// delete: {P1:undefined}
+			// snaktype novalue 無數值: {P1:null}
+			// snaktype somevalue 未知數值: {P1:CeL.wiki.edit_data.somevalue}
+			// snaktype value: {P1:...}
+
+			// https://www.wikidata.org/w/api.php?action=help&modules=wbparsevalue
+			// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=P3088&props=datatype
+			// +claims:P1793
+			//
+			// url: {P856:"https://url"}, {P1896:"https://url"}
+			// monolingualtext: {P1448:"text"} ← 自動判別language,
+			// monolingualtext: {P1448:"text",language:"zh-tw"}
+			// string: {P1353:"text"}
+			// quantity: {P1114:0}
+			// external-id: {P212:'id'}
+			// math: {P2534:'1+2'}
+			// commonsMedia: {P18:'file.svg'}
+			//
+			// time: {P585:new Date} date.precision=1
+			// wikibase-item: {P1629:Q1}
+			// wikibase-property: {P1687:P1}
+			// globe-coordinate 經緯度:
+			// {P625: [ {Number}latitude 緯度, {Number}longitude 經度 ]}
+
+			// reference:
+			//
+
+			var claims = Object.clone(data.claims), reference_properties;
+			if (Array.isArray(claims)) {
+				// e.g., claims:[{P1:'',language:'zh'},{P2:'',reference:{}}]
+				;
+			} else {
+				// e.g., claims:{P1:'',P2:'',language:'zh',reference:{}}
+				// assert: library_namespace.is_Object(data.claims)
+				reference_properties = claims;
+			}
 		}
 
-		options.data = JSON.stringify(data);
-
-		// the token should be sent as the last parameter.
-		options.token = library_namespace.is_Object(token) ? token.csrftoken
-				: token;
-
-		wiki_API.query(action, function handle_result(data) {
-			var error = data && data.error;
-			// 檢查伺服器回應是否有錯誤資訊。
-			if (error) {
-				library_namespace.err(
-				// e.g., 數據庫被禁止寫入以進行維護，所以您目前將無法保存您所作的編輯
-				// Mediawiki is in read-only mode during maintenance
-				'wikidata_edit: ' + (options.id ? options.id + ': ' : '')
-				// [readonly] The wiki is currently in read-only mode
-				+ '[' + error.code + '] ' + error.info);
-				callback(undefined, error);
-				return;
-			}
-
-			if (data.entity)
-				data = data.entity;
-			callback(data);
-		}, options, session);
+		do_edit();
 	}
+
+	// snaktype somevalue 未知數值 unknown
+	wikidata_edit.somevalue = {
+		unknown : true
+	};
 
 	/**
 	 * 取得指定實體，指定語言的所有 labels 與 aliases 值之列表。
