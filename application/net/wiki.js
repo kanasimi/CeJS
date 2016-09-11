@@ -8193,7 +8193,7 @@ function module_code(library_namespace) {
 			 * for the right syntax to use near ''user__db'' at line 1]
 			 */
 			var SQL = {
-				// placeholder
+				// placeholder 佔位符
 				// 避免 error.code === 'ER_DB_CREATE_EXISTS'
 				sql : 'CREATE DATABASE IF NOT EXISTS ?',
 				values : [ dbname ]
@@ -11154,7 +11154,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns 轉成JavaScript的值。
 	 * 
-	 * @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#Claims_and_Statements
+	 * @see https://www.mediawiki.org/wiki/Wikibase/API#wbformatvalue
+	 *      https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#Claims_and_Statements
 	 *      https://www.mediawiki.org/wiki/Wikibase/API
 	 *      https://www.mediawiki.org/wiki/Wikibase/Indexing/RDF_Dump_Format#Value_representation
 	 *      https://www.wikidata.org/wiki/Special:ListDatatypes
@@ -12006,6 +12007,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// 會直接修改 POST_data。
+	// @see https://www.mediawiki.org/wiki/Wikibase/API#wbparsevalue
 	function normalize_claim_value(value, POST_data, options) {
 		// delete: {P1:CeL.wiki.edit_data.remove_all}
 		// delete: {P1:value,remove:true}
@@ -12014,14 +12016,20 @@ function module_code(library_namespace) {
 		// snaktype value: {P1:...}
 
 		if (value === null) {
-			if (POST_data)
-				POST_data.snaktype = 'novalue', POST_data.value = '';
+			if (POST_data) {
+				POST_data.snaktype = 'novalue';
+				// 不直接刪掉，因為此 .value 為 placeholder 佔位符。
+				POST_data.value = '';
+			}
 			return '';
 		}
 
 		if (value === wikidata_edit.somevalue) {
-			if (POST_data)
-				POST_data.snaktype = 'somevalue', POST_data.value = '';
+			if (POST_data) {
+				POST_data.snaktype = 'somevalue';
+				// 不直接刪掉，因為此 .value 為 placeholder 佔位符。
+				POST_data.value = '';
+			}
 			return '';
 		}
 
@@ -12304,19 +12312,65 @@ function module_code(library_namespace) {
 		// the token should be sent as the last parameter.
 		POST_data.token = token;
 
-		function shift_to_next() {
-			library_namespace.debug(claim_index + '/' + claims.length, 3,
-					'shift_to_next');
-			if (claim_index === 0) {
-				claims.shift();
-			} else {
-				// assert: claim_index>0
-				claims.splice(claim_index, 1);
+		var set_reference = function(GUID, references, callback) {
+			var reference_POST_data = library_namespace.null_Object();
+			for ( var property_key in references) {
+				var property_id = wikidata_search.use_cache([
+						references.language || this_claim.language
+								|| reference_properties.language
+								|| default_language, property_key ],
+				// callback
+				function(id, error) {
+					if (!id) {
+						throw 'set_reference: Invalid property: ['
+								+ property_key + ']';
+					}
+					TODO;
+				}, options);
+				if (!property_id) {
+					// assert: property_id === undefined
+					// Waiting for conversion.
+					return;
+				}
 			}
-			set_next_claim();
-		}
 
-		function set_next_claim() {
+			var reference_POST_data = {
+				statement : GUID,
+				snaks : references
+			};
+
+			for ( var property_id in references) {
+				var value = references[property_id];
+				references[property_id] = [];
+			}
+
+			if (options.reference_index >= 0) {
+				reference_POST_data.index = options.reference_index;
+			}
+			if (options.bot) {
+				reference_POST_data.bot = 1;
+			}
+			if (options.summary) {
+				reference_POST_data.summary = options.summary;
+			}
+			// TODO: baserevid, 但這需要每次重新取得 revid。
+
+			wiki_API.query([ claim_action[0], 'wbsetreference' ],
+			// https://www.wikidata.org/w/api.php?action=help&modules=wbsetreference
+			function(data) {
+				var error = data && data.error;
+				// 檢查伺服器回應是否有錯誤資訊。
+				if (error) {
+					library_namespace.err('set_reference: [' + error.code
+							+ '] ' + error.info);
+				}
+				// data =
+				//
+				callback();
+			}, reference_POST_data, session);
+		},
+		//
+		set_next_claim = function() {
 			if (claim_index === claims.length) {
 				// done. 已處理完所有能處理的。
 				callback();
@@ -12403,8 +12457,13 @@ function module_code(library_namespace) {
 					library_namespace.debug('Skip ' + property_id + '['
 							+ duplicate_index + '] 已有此值 [' + value + ']。', 1,
 							'set_next_claim');
-					// TODO: 依舊處理 references。
-					shift_to_next();
+					// 依舊處理 references。
+					if (this_claim.references) {
+						set_reference(property_id[duplicate_index].id,
+								this_claim.references, shift_to_next);
+					} else {
+						shift_to_next();
+					}
 				}
 				return;
 			}
@@ -12436,22 +12495,31 @@ function module_code(library_namespace) {
 					claim_index++;
 					set_next_claim();
 
-				} else {
+				} else if (this_claim.references) {
 					// data =
 					// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
 
-					// TODO: claim.references
-					if (claim.reference) {
-						TODO;
-						var GUID = data.claim.id;
-						set_reference(GUID, references, shift_to_next);
-						return;
-					}
+					set_reference(data.claim.id, this_claim.references,
+							shift_to_next);
+				} else {
 					shift_to_next();
 				}
 
 			}, POST_data, session);
-		}
+		},
+		//
+		shift_to_next = function() {
+			library_namespace.debug(claim_index + '/' + claims.length, 3,
+					'shift_to_next');
+			// 排掉能處理且已經處理完畢的claim。
+			if (claim_index === 0) {
+				claims.shift();
+			} else {
+				// assert: claim_index>0
+				claims.splice(claim_index, 1);
+			}
+			set_next_claim();
+		};
 
 		// console.log(claims);
 		set_next_claim();
@@ -12508,6 +12576,7 @@ function module_code(library_namespace) {
 				references : {
 					臺灣物種名錄物種編號 : 123456,
 					導入自 : 'zhwiki',
+					載於 : '臺灣物種名錄物種',
 					來源網址 : 'https://www.wikidata.org/',
 					檢索日期 : new Date
 				}
