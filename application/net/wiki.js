@@ -323,7 +323,10 @@ function module_code(library_namespace) {
 
 		// for property = [ {String}language, {String}title or {Array}titles ]
 		if (type === 'language') {
-			return /^[a-z]{2,3}$/i.test(API_URL);
+			// e.g., 'zh-classical', 'zh-min-nan'
+			// @see
+			// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
+			return /^[a-z\-]{2,20}$/i.test(API_URL);
 		}
 
 		// 處理 [ {String}API_URL/language, {String}title or {Object}page_data ]
@@ -10930,6 +10933,10 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
 	function wikidata_search(key, callback, options) {
+		if (!key) {
+			callback(undefined, 'wikidata_search: No key assigned.');
+			return;
+		}
 		if (typeof options === 'function')
 			options = {
 				filter : options
@@ -10948,6 +10955,7 @@ function module_code(library_namespace) {
 			options.language = key[0], key = key[1];
 		}
 
+		// console.log('key: ' + key);
 		key = key.trim();
 		var action = [ API_URL_of_options(options) || wikidata_API_URL,
 		// search. e.g.,
@@ -11029,17 +11037,31 @@ function module_code(library_namespace) {
 
 	// wrapper function of wikidata_search().
 	wikidata_search.use_cache = function(key, callback, options) {
+		var language_and_key;
+		if (typeof key !== 'string') {
+			if (is_api_and_title(key, 'language')) {
+				// key.join(':')
+				language_and_key = key[0] + ':' + key[1];
+			} else {
+				// 避免若是未match is_api_and_title(key, 'language')，
+				// 可能導致 infinite loop!
+				callback(undefined, 'wikidata_search.use_cache: Invalid key: ['
+						+ key + ']');
+				return;
+			}
+		}
+		library_namespace.debug('search '
+				+ (language_and_key || JSON.stringify(key)) + ' ('
+				+ is_api_and_title(key, 'language') + ')', 4,
+				'wikidata_search.use_cache');
+
 		if (!options || !options.force) {
 			// TODO: key 可能是 [ language code, 'labels|aliases' ] 之類。
-			if (is_api_and_title(key, 'language')) {
-				// property.join(':')
-				var language_and_key = key[0] + ':' + key[1];
-				if (wikidata_search_cache[language_and_key]) {
-					library_namespace.debug('has cache: [' + language_and_key
-							+ '] → ' + wikidata_search_cache[language_and_key],
-							4, 'wikidata_search.use_cache');
-					key = wikidata_search_cache[language_and_key];
-				}
+			if (language_and_key && wikidata_search_cache[language_and_key]) {
+				library_namespace.debug('has cache: [' + language_and_key
+						+ '] → ' + wikidata_search_cache[language_and_key], 4,
+						'wikidata_search.use_cache');
+				key = wikidata_search_cache[language_and_key];
 			}
 
 			if (/^[PQ]\d{1,10}$/.test(key)) {
@@ -11059,6 +11081,7 @@ function module_code(library_namespace) {
 		}
 
 		wikidata_search(key, function(id, error) {
+			// console.log(language_and_key + ': ' + id);
 			if (!id) {
 				library_namespace
 						.err('wikidata_search.use_cache: Nothing found: ['
@@ -11071,7 +11094,7 @@ function module_code(library_namespace) {
 				//
 				+ ' ' + id + ' ← [' + language_and_key + ']', 1,
 						'wikidata_search.use_cache');
-				wikidata_search_cache[key] = id;
+				wikidata_search_cache[language_and_key] = id;
 			}
 
 			callback(id, error);
@@ -11623,7 +11646,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 		// convert property: title to id
-		if (typeof property === 'string' && !/^P\d{1,10}$/.test(property)) {
+		if (typeof property === 'string' && !/^P\d{1,5}$/.test(property)) {
 			if (library_namespace.is_debug(2)
 					&& /^(?:(?:info|sitelinks|sitelinks\/urls|aliases|labels|descriptions|claims|datatype)\|)+$/
 							.test(property + '|'))
@@ -11634,6 +11657,7 @@ function module_code(library_namespace) {
 			property = [ options.language || default_language, property ];
 		}
 
+		// console.log('property: ' + property);
 		if (is_api_and_title(property, 'language')) {
 			// TODO: property 可能是 [ language code, 'labels|aliases' ] 之類。
 			property = wikidata_search.use_cache(property, function(id, error) {
@@ -11648,12 +11672,13 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 		// convert key: title to id
-		if (typeof key === 'number')
+		if (typeof key === 'number') {
 			key = [ key ];
-		else if (typeof key === 'string'
-				&& !/^[PQ]\d{1,10}(\|[PQ]\d{1,10})*$/.test(key))
+		} else if (typeof key === 'string'
+				&& !/^[PQ]\d{1,10}(\|[PQ]\d{1,10})*$/.test(key)) {
 			/** {String}setup language of key and property name. 僅在需要 search 時使用。 */
 			key = [ options.language || default_language, key ];
+		}
 
 		if (Array.isArray(key)) {
 			if (is_api_and_title(key)) {
@@ -11805,7 +11830,7 @@ function module_code(library_namespace) {
 				}
 			}
 
-			if (property = data) {
+			if (property && data) {
 				property = data.claims
 				//
 				? data.claims[property] : data[property];
@@ -11923,12 +11948,189 @@ function module_code(library_namespace) {
 		}
 
 		var datatype = wikidata_datatype_cache[property];
-		if (!datatype) {
-			;
+		if (datatype) {
+			callback(datatype);
+			return;
 		}
+
+		var action = [ get_data_API_URL(options),
+		// https://www.wikidata.org/w/api.php?action=wbgetentities&props=datatype&ids=P7
+		'wbgetentities&props=datatype&ids=' + property ];
+		wiki_API.query(action, function(data) {
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.err('wikidata_datatype: ['
+				//
+				+ error.code + '] ' + error.info);
+				callback(undefined, error);
+				return;
+			}
+
+			// data =
+			// {"entities":{"P7":{"type":"property","datatype":"wikibase-item","id":"P7"}},"success":1}
+			// data.entities[property].datatype
+			if (!(data = data.entities) || !(data = data[property])) {
+				callback(undefined, 'Invalid/Unknown return for [' + property
+						+ ']');
+				return;
+			}
+
+			callback(data.datatype);
+		}, null, options);
 	}
 
 	// ------------------------------------------------------------------------
+
+	function normalize_claim_value(value, POST_data, options) {
+		// delete: {P1:undefined}
+		// snaktype novalue 無數值: {P1:null}
+		// snaktype somevalue 未知數值:
+		// {P1:CeL.wiki.edit_data.somevalue}
+		// snaktype value: {P1:...}
+
+		if (value === null) {
+			if (POST_data)
+				POST_data.snaktype = 'novalue', POST_data.value = '';
+			return '';
+		}
+
+		if (value === wikidata_edit.somevalue) {
+			if (POST_data)
+				POST_data.snaktype = 'somevalue', POST_data.value = '';
+			return '';
+		}
+
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbparsevalue
+		// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=P3088&props=datatype
+		// +claims:P1793
+		//
+		// url: {P856:"https://url"}, {P1896:"https://url"}
+		// monolingualtext: {P1448:"text"} ← 自動判別language,
+		// monolingualtext: {P1448:"text",language:"zh-tw"}
+		// string: {P1353:"text"}
+		// external-id: {P212:'id'}
+		// math: {P2534:'1+2'}
+		// commonsMedia: {P18:'file.svg'}
+		//
+		// quantity: {P1114:0}
+		// time: {P585:new Date} date.precision=1
+		// wikibase-item: {P1629:Q1}
+		// wikibase-property: {P1687:P1}
+		// globe-coordinate 經緯度:
+		// {P625: [ {Number}latitude 緯度, {Number}longitude 經度 ]}
+
+		if (typeof value === 'number') {
+			// quantity: {P1114:0}
+			value = {
+				amount : value,
+				unit : 1,
+				upperBound : value,
+				lowerBound : value
+			};
+		} else if (Array.isArray(value)
+				&& (value.length === 2 || value.length === 3)) {
+			// globe-coordinate 經緯度:
+			// {P625: [ {Number}latitude 緯度, {Number}longitude 經度 ]}
+			value = {
+				latitude : value[0],
+				longitude : value[1],
+				altitude : value[3] || null,
+				precision : 0.000001,
+				globe : 'http://www.wikidata.org/entity/Q2'
+			};
+		} else if (library_namespace.is_Date(value)) {
+			// time: {P585:new Date} date.precision=1
+			value = {
+				time : value.toISOString(),
+				timezone : 0,
+				precision : 11,
+				calendarmodel : 'http://www.wikidata.org/entity/Q1985727'
+			};
+		} else {
+			// assert: typeof value === 'string'
+			value = String(value);
+			var matched = value.match(/^([PQ])(\d{1,10})$/i);
+			if (matched) {
+				// wikibase-item: {P1629:Q1}
+				// wikibase-property: {P1687:P1}
+				value = {
+					'entity-type' : /^[Qq]$/.test(matched[1]) ? 'item'
+							: 'property',
+					'numeric-id' : matched[2]
+				};
+			} else if (options && options.language) {
+				// monolingualtext: {P1448:"text",language:"zh-tw"}
+				value = {
+					text : value,
+					language : options.language
+				};
+			}
+		}
+
+		if (POST_data) {
+			POST_data.snaktype = 'value';
+			POST_data.value = typeof value === 'string' ? value : JSON
+					.stringify(value);
+		}
+		return value;
+	}
+
+	var entity_properties = {
+		pageid : 1,
+		ns : 0,
+		title : 'Q1',
+		lastrevid : 1,
+		modified : '2000-01-01T00:00:00Z',
+		type : 'item',
+		id : 'Q1',
+		labels : [],
+		descriptions : [],
+		aliases : [],
+		claims : [],
+		sitelinks : []
+	},
+	//
+	claim_properties = {
+		// mainsnak : {},
+		// snaktype : '',
+		// datavalue : {},
+		// id : '',
+		type : '',
+		rank : '',
+		language : '',
+		references : []
+	};
+
+	if (false) {
+		wiki.data('Q13406268', function(data) {
+			result = data;
+		}).edit_data(function(entity) {
+			return {
+				生物俗名 : '維基數據沙盒2',
+				language : 'zh-tw'
+			};
+		}, {
+			bot : 1,
+			summary : 'bot test: edit property'
+		});
+
+		// TODO
+		wiki.data('Q13406268', function(data) {
+			result = data;
+		}).edit_data(function(entity) {
+			return {
+				生物俗名 : '維基數據沙盒2',
+				language : 'zh-tw',
+				reference : {
+					導入自 : 'zhwiki'
+				}
+			};
+		}, {
+			bot : 1,
+			summary : 'bot test: edit property'
+		});
+	}
 
 	/**
 	 * Creates or modifies Wikibase entity. 創建或編輯Wikidata實體。
@@ -11967,7 +12169,6 @@ function module_code(library_namespace) {
 	 *      from (P143) also reference URL (P854) with the value of the full URL
 	 *      and either retrieved (P813) or include the version id of the source
 	 *      page in the full URL.
-	 * 
 	 */
 	function wikidata_edit(id, data, token, options, callback) {
 		if (typeof options === 'function' && !callback) {
@@ -12072,12 +12273,15 @@ function module_code(library_namespace) {
 		// 還存在此項可能會被匯入 query 中。但須注意刪掉後未來將不能再被利用！
 		delete options.API_URL;
 
+		if (library_namespace.is_Object(token)) {
+			token = token.csrftoken;
+		}
+
 		function do_edit() {
 			options.data = JSON.stringify(data);
 
 			// the token should be sent as the last parameter.
-			options.token = library_namespace.is_Object(token) ? token.csrftoken
-					: token;
+			options.token = token;
 
 			wiki_API.query(action, function handle_result(data) {
 				var error = data && data.error;
@@ -12097,6 +12301,21 @@ function module_code(library_namespace) {
 					data = data.entity;
 				callback(data);
 			}, options, session);
+		}
+
+		// normalize data
+
+		if (!data.claims) {
+			data.claims = library_namespace.null_Object();
+			for ( var key in data) {
+				if (!(key in entity_properties)) {
+					data.claims[key] = data[key];
+					delete data[key];
+				}
+			}
+		}
+		if (library_namespace.is_empty_object(data.claims)) {
+			delete data.claims;
 		}
 
 		// TODO: 可拆解成 wbsetlabel, wbsetaliases, wbsetsitelink,
@@ -12120,11 +12339,11 @@ function module_code(library_namespace) {
 			// monolingualtext: {P1448:"text"} ← 自動判別language,
 			// monolingualtext: {P1448:"text",language:"zh-tw"}
 			// string: {P1353:"text"}
-			// quantity: {P1114:0}
 			// external-id: {P212:'id'}
 			// math: {P2534:'1+2'}
 			// commonsMedia: {P18:'file.svg'}
 			//
+			// quantity: {P1114:0}
 			// time: {P585:new Date} date.precision=1
 			// wikibase-item: {P1629:Q1}
 			// wikibase-property: {P1687:P1}
@@ -12135,14 +12354,134 @@ function module_code(library_namespace) {
 			//
 
 			var claims = Object.clone(data.claims), reference_properties;
-			if (Array.isArray(claims)) {
-				// e.g., claims:[{P1:'',language:'zh'},{P2:'',reference:{}}]
-				;
-			} else {
+
+			if (library_namespace.is_Object(claims)) {
 				// e.g., claims:{P1:'',P2:'',language:'zh',reference:{}}
 				// assert: library_namespace.is_Object(data.claims)
 				reference_properties = claims;
+				claims = [];
+				for ( var key in reference_properties) {
+					if (!(key in claim_properties)) {
+						var claim = {};
+						claim[key] = reference_properties[key];
+						delete reference_properties[key];
+						claims.push(claim);
+					}
+				}
+			} else {
+				reference_properties = library_namespace.null_Object();
 			}
+			// console.log(reference_properties);
+
+			if (Array.isArray(claims)) {
+				// e.g., claims:[{P1:'',language:'zh'},{P2:'',reference:{}}]
+
+				var POST_data = {
+					entity : options.id,
+					// placeholder 佔位符
+					property : null,
+					snaktype : null,
+					value : null,
+				},
+				//
+				claim_action = [ get_data_API_URL(options), 'wbcreateclaim' ],
+				// process to what index of {Array}claims
+				claim_index = 0;
+
+				if (options.bot) {
+					POST_data.bot = 1;
+				}
+				if (options.summary) {
+					POST_data.summary = options.summary;
+				}
+				// the token should be sent as the last parameter.
+				POST_data.token = token;
+
+				function set_next_claim() {
+					if (claim_index === claims.length) {
+						do_edit();
+						return;
+					}
+
+					var this_claim = claims[claim_index], property_id;
+					for ( var key in this_claim) {
+						if (!(key in claim_properties)) {
+							property_id = key;
+							break;
+						}
+					}
+					// console.log(property_id);
+
+					if (false) {
+						wikidata_datatype(property_id, function(datatype) {
+						}, session);
+					}
+
+					var value = this_claim[property_id],
+					//
+					_id = wikidata_search.use_cache([ this_claim.language
+					//
+					|| reference_properties.language || default_language,
+							property_id ], function(id, error) {
+						if (!id) {
+							throw 'set_next_claim: Invalid property: ['
+									+ property_id + ']';
+						}
+						claims[claim_index] = library_namespace.null_Object();
+						// 將已轉換之 id 置於首位。
+						claims[claim_index][id] = value;
+						delete this_claim[property_id];
+						Object.assign(claims[claim_index], this_claim);
+						set_next_claim();
+					}, options);
+					if (!_id) {
+						// assert: property === undefined
+						// Waiting for conversion.
+						return;
+					}
+
+					property_id = _id;
+					POST_data.property = property_id;
+
+					// TODO: 檢測是否已有此值。
+
+					normalize_claim_value(value, POST_data, {
+						language : this_claim.language
+								|| reference_properties.language
+					});
+
+					// console.log(POST_data);
+
+					wiki_API.query(claim_action, function(data) {
+						var error = data && data.error;
+						// 檢查伺服器回應是否有錯誤資訊。
+						if (error) {
+							library_namespace
+									.err('wikidata_edit.create_claim: ['
+											+ error.code + '] ' + error.info);
+							claim_index++;
+						} else {
+							claims.shift();
+							// data =
+							// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
+
+							// TODO: claim.reference
+							var id = data.claim.id;
+							;
+						}
+
+						set_next_claim();
+
+					}, POST_data, session);
+				}
+
+				// console.log(claims);
+				set_next_claim();
+				return;
+			}
+
+			library_namespace.err('wikidata_edit: Invalid claims: '
+					+ JSON.stringify(claims));
 		}
 
 		do_edit();
@@ -12583,11 +12922,11 @@ function module_code(library_namespace) {
 		//
 		action = [ get_data_API_URL(options), 'wbcreateclaim' ];
 
-		if (options.summary) {
-			POST_data.summary = options.summary;
-		}
 		if (options.bot) {
 			POST_data.bot = 1;
+		}
+		if (options.summary) {
+			POST_data.summary = options.summary;
 		}
 
 		// the token should be sent as the last parameter.

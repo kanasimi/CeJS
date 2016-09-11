@@ -927,11 +927,14 @@ function (global) {
 
 	_// JSDT:_module_
 	.
-	is_empty_Object = function is_empty_Object(value) {
-		for (var key in value) {
-			return false;
+	is_empty_object = function is_empty_object(value) {
+		if (typeof value === 'object') {
+			for (var key in value) {
+				return false;
+			}
+			return true;
 		}
-		return true;
+		// return undefined: not object.
 	};
 
 	_.is_RegExp = _.type_tester('RegExp');

@@ -1776,7 +1776,7 @@ if (!CeL.Log) {
 				tests_count--;
 				delete tests_left[test_name];
 				if (tests_count === 0
-				// && CeL.is_empty_Object(tests_left)
+				// && CeL.is_empty_object(tests_left)
 				) {
 					report();
 				}

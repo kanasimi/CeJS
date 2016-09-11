@@ -66,8 +66,8 @@ function test_base() {
 		assert(CeL.is_Object(CeL.setup_options()), 'CeL.setup_options()');
 		assert(CeL.is_Object(CeL.new_options()), 'CeL.new_options()');
 
-		assert(CeL.is_empty_Object({}), 'CeL.is_Object({})');
-		assert(!CeL.is_empty_Object({a:1}), 'CeL.is_Object({})');
+		assert(CeL.is_empty_object({}), 'CeL.is_Object({})');
+		assert(!CeL.is_empty_object({a:1}), 'CeL.is_Object({})');
 
 		var options = { a:2, b:'abc', c:function(a,b){return a>b;} };
 		assert([options, CeL.setup_options(options)], 'CeL.setup_options(options)===options #1');
@@ -2503,9 +2503,9 @@ function test_wiki() {
 		}, 'en');
 
 		_setup_test('wiki: CeL.wiki.data.search()');
-		CeL.wiki.data.search('宇宙', function(entity) {
+		CeL.wiki.data.search('宇宙', function(data) {
 			var test_name = 'wiki: CeL.wiki.data.search()';
-			assert([ 'Q1', entity[0] ], test_name);
+			assert([ 'Q1', data[0] ], test_name);
 			_finish_test(test_name);
 		}, {get_id:true});
 
@@ -2517,30 +2517,23 @@ function test_wiki() {
 		}, {get_id:true, limit:1});
 
 		_setup_test('wiki: CeL.wiki.data.search() property');
-		CeL.wiki.data.search('形狀', function(entity) {
+		CeL.wiki.data.search('形狀', function(id) {
 			var test_name = 'wiki: CeL.wiki.data.search() property';
-			assert([ 'P1419', entity ], test_name);
+			assert([ 'P1419', id ], test_name);
 			_finish_test(test_name);
 		}, {get_id:true, type:'property'});
 
 		_setup_test('wiki: CeL.wiki.data.search().use_cache');
-		CeL.wiki.data.search.use_cache('兄弟', function(entity) {
+		CeL.wiki.data.search.use_cache('兄弟', function(id) {
 			var test_name = 'wiki: CeL.wiki.data.search().use_cache';
-			assert([ 'P7', entity ], test_name);
+			assert([ 'P7', id ], test_name);
 			_finish_test(test_name);
 		});
 
 		_setup_test('wiki: CeL.wiki.data()');
-		CeL.wiki.data('宇宙', '形狀', function(entity) {
+		CeL.wiki.data('宇宙', '形狀', function(data) {
 			var test_name = 'wiki: CeL.wiki.data()';
-			assert([ '宇宙的形狀', entity ], test_name);
-			_finish_test(test_name);
-		});
-
-		_setup_test('wiki: CeL.wiki.data()');
-		CeL.wiki.data('宇宙', '形狀', function(entity) {
-			var test_name = 'wiki: CeL.wiki.data()';
-			assert([ '宇宙的形狀', entity ], test_name);
+			assert([ '宇宙的形狀', data ], test_name);
 			_finish_test(test_name);
 		});
 
