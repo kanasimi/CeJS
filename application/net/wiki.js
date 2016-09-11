@@ -11160,10 +11160,23 @@ function module_code(library_namespace) {
 	 *      https://www.wikidata.org/wiki/Special:ListDatatypes
 	 */
 	function wikidata_datavalue(value, callback, options) {
+		if (options && options.multi && !Array.isArray(value)) {
+			delete options.multi;
+			if (typeof callback === 'function') {
+				wikidata_datavalue(value, function() {
+					callback([ value ]);
+				}, options);
+			}
+			value = [ wikidata_datavalue(value, undefined, options) ];
+			return value;
+		}
+
 		if (Array.isArray(value)) {
 			if (value.length > 1) {
 				// TODO: array + ('numeric-id' in value)
-				value = value.map(wikidata_datavalue);
+				value = value.map(function(v) {
+					return wikidata_datavalue(v, undefined, options);
+				});
 				if (typeof callback === 'function')
 					callback(value);
 				return value;
@@ -11196,6 +11209,16 @@ function module_code(library_namespace) {
 		// TODO: value.qualifiers, value['qualifiers-order']
 		// TODO: value.references
 		value = value.mainsnak || value;
+		if (value) {
+			// 與 normalize_claim_value() 須同步!
+			if (value.snaktype === 'novalue') {
+				return null;
+			}
+			if (value.snaktype === 'somevalue') {
+				return wikidata_edit.somevalue;
+			}
+		}
+		// assert: value.snaktype === 'value'
 		value = value.datavalue || value;
 
 		var type = value.type;
@@ -12123,7 +12146,10 @@ function module_code(library_namespace) {
 				生物俗名 : '維基數據沙盒2',
 				language : 'zh-tw',
 				reference : {
-					導入自 : 'zhwiki'
+					臺灣物種名錄物種編號 : 123456,
+					導入自 : 'zhwiki',
+					來源網址 : 'https://www.wikidata.org/',
+					檢索日期 : new Date
 				}
 			};
 		}, {
@@ -12397,7 +12423,7 @@ function module_code(library_namespace) {
 				// the token should be sent as the last parameter.
 				POST_data.token = token;
 
-				function set_next_claim() {
+				var set_next_claim = function() {
 					if (claim_index === claims.length) {
 						do_edit();
 						return;
@@ -12440,10 +12466,25 @@ function module_code(library_namespace) {
 						return;
 					}
 
+					if (entity && entity.claims && entity.claims[_id]
+					// 檢測是否已有此值。
+					&& wikidata_datavalue(entity.claims[_id], undefined, {
+						multi : true
+					}).includes(value)) {
+						// TODO: 依舊處理 reference。
+						library_namespace.debug('Skip ' + _id + ' [' + value
+								+ ']: 已有此值。', 2, 'wikidata_edit.create_claim');
+						if (claim_index === 0) {
+							claims.shift();
+						} else {
+							// assert: claim_index>0
+							claims.splice(claim_index, 1);
+						}
+						set_next_claim();
+					}
+
 					property_id = _id;
 					POST_data.property = property_id;
-
-					// TODO: 檢測是否已有此值。
 
 					normalize_claim_value(value, POST_data, {
 						language : this_claim.language
@@ -12461,7 +12502,12 @@ function module_code(library_namespace) {
 											+ error.code + '] ' + error.info);
 							claim_index++;
 						} else {
-							claims.shift();
+							if (claim_index === 0) {
+								claims.shift();
+							} else {
+								// assert: claim_index>0
+								claims.splice(claim_index, 1);
+							}
 							// data =
 							// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
 
