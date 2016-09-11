@@ -12007,10 +12007,10 @@ function module_code(library_namespace) {
 
 	// 會直接修改 POST_data。
 	function normalize_claim_value(value, POST_data, options) {
-		// delete: {P1:undefined}
+		// delete: {P1:CeL.wiki.edit_data.remove_all}
+		// delete: {P1:value,remove:true}
 		// snaktype novalue 無數值: {P1:null}
-		// snaktype somevalue 未知數值:
-		// {P1:CeL.wiki.edit_data.somevalue}
+		// snaktype somevalue 未知數值: {P1:CeL.wiki.edit_data.somevalue}
 		// snaktype value: {P1:...}
 
 		if (value === null) {
@@ -12128,8 +12128,63 @@ function module_code(library_namespace) {
 		type : '',
 		rank : '',
 		language : '',
+		// 警告:此屬性應置於個別claim中。
+		remove : true,
 		references : []
 	};
+
+	/**
+	 * remove/delete/刪除 property/claim
+	 * 
+	 * @inner only for set_claim()
+	 */
+	function remove_claim(property_list, callback, options, API_URL, session,
+			index) {
+		if (index === wikidata_edit.remove_all) {
+			// delete one by one
+			index = property_list.length;
+			function remove_next() {
+				if (index-- > 0) {
+					remove_claim(property_list, remove_next, options, API_URL,
+							session, index);
+				} else {
+					callback();
+				}
+			}
+			remove_next();
+			return;
+		}
+
+		library_namespace.debug('delete property_list[' + index + ']', 1,
+				'remove_claim');
+		var POST_data = {
+			claim : property_list[index].id
+		};
+
+		if (options.bot) {
+			POST_data.bot = 1;
+		}
+		if (options.summary) {
+			POST_data.summary = options.summary;
+		}
+		// TODO: baserevid, 但這需要每次重新取得 revid。
+
+		// the token should be sent as the last parameter.
+		POST_data.token = options.token;
+
+		wiki_API.query([ API_URL, 'wbremoveclaims' ], function(data) {
+			// console.log(data);
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.err('remove_claim: [' + error.code + '] '
+						+ error.info);
+			}
+			// data =
+			// {pageinfo:{lastrevid:1},success:1,claims:['Q1$123-ABC']}
+			callback(data);
+		}, POST_data, session);
+	}
 
 	/**
 	 * edit property/claim
@@ -12165,7 +12220,8 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// delete: {P1:undefined}
+		// delete: {P1:CeL.wiki.edit_data.remove_all}
+		// delete: {P1:value,remove:true}
 		// snaktype novalue 無數值: {P1:null}
 		// snaktype somevalue 未知數值: {P1:CeL.wiki.edit_data.somevalue}
 		// snaktype value: {P1:...}
@@ -12223,6 +12279,7 @@ function module_code(library_namespace) {
 		}
 
 		// e.g., claims:[{P1:'',language:'zh'},{P2:'',references:{}}]
+		data.claims = claims;
 
 		var POST_data = {
 			entity : options.id,
@@ -12246,6 +12303,18 @@ function module_code(library_namespace) {
 
 		// the token should be sent as the last parameter.
 		POST_data.token = token;
+
+		function shift_to_next() {
+			library_namespace.debug(claim_index + '/' + claims.length, 3,
+					'shift_to_next');
+			if (claim_index === 0) {
+				claims.shift();
+			} else {
+				// assert: claim_index>0
+				claims.splice(claim_index, 1);
+			}
+			set_next_claim();
+		}
 
 		function set_next_claim() {
 			if (claim_index === claims.length) {
@@ -12294,21 +12363,59 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (entity && entity.claims && entity.claims[property_id]
-			// 檢測是否已有此值。
-			&& wikidata_datavalue(entity.claims[property_id], undefined, {
-				multi : true
-			}).includes(value)) {
-				// TODO: 依舊處理 references。
-				library_namespace.debug('Skip ' + property_id + ' [' + value
-						+ ']: 已有此值。', 2, 'set_claim');
-				if (claim_index === 0) {
-					claims.shift();
+			var property_list = entity && entity.claims
+					&& entity.claims[property_id];
+
+			if (value === wikidata_edit.remove_all) {
+				if (property_list) {
+					// delete: {P1:CeL.wiki.edit_data.remove_all}
+					library_namespace.debug('delete ' + property_id
+							+ ' one by one', 1, 'set_next_claim');
+					remove_claim(property_list, shift_to_next, POST_data,
+							claim_action[0], session, value);
 				} else {
-					// assert: claim_index>0
-					claims.splice(claim_index, 1);
+					library_namespace.debug('Skip ' + property_id + ' ['
+							+ value + ']: 無此id，無法刪除。', 1, 'set_next_claim');
+					shift_to_next();
 				}
-				set_next_claim();
+				return;
+			}
+
+			// 檢測是否已有此值。
+			var duplicate_index = property_list
+			//
+			&& wikidata_datavalue(property_list, undefined, {
+				multi : true
+			})
+			// 若有必要刪除，從最後一個相符的刪除起。
+			.lastIndexOf(value);
+			// console.log(property_list);
+			// console.log(duplicate_index);
+
+			if (property_list && duplicate_index !== NOT_FOUND) {
+				if (this_claim.remove || reference_properties.remove) {
+					// delete: {P1:value,remove:true}
+					library_namespace.debug('delete ' + property_id + '['
+							+ duplicate_index + ']', 1, 'set_next_claim');
+					remove_claim(property_list, shift_to_next, POST_data,
+							claim_action[0], session, duplicate_index);
+				} else {
+					library_namespace.debug('Skip ' + property_id + '['
+							+ duplicate_index + '] 已有此值 [' + value + ']。', 1,
+							'set_next_claim');
+					// TODO: 依舊處理 references。
+					shift_to_next();
+				}
+				return;
+			}
+
+			if (this_claim.remove || reference_properties.remove) {
+				// delete
+				if (property_list) {
+					library_namespace.debug('Skip ' + property_id + ' ['
+							+ value + ']: 無此值，無法刪除。', 1, 'set_next_claim');
+				}
+				shift_to_next();
 				return;
 			}
 
@@ -12324,16 +12431,12 @@ function module_code(library_namespace) {
 				var error = data && data.error;
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
-					library_namespace.err('set_claim: [' + error.code + '] '
-							+ error.info);
+					library_namespace.err('set_next_claim: [' + error.code
+							+ '] ' + error.info);
 					claim_index++;
+					set_next_claim();
+
 				} else {
-					if (claim_index === 0) {
-						claims.shift();
-					} else {
-						// assert: claim_index>0
-						claims.splice(claim_index, 1);
-					}
 					// data =
 					// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
 
@@ -12341,12 +12444,11 @@ function module_code(library_namespace) {
 					if (claim.reference) {
 						TODO;
 						var GUID = data.claim.id;
-						set_reference(GUID, references);
+						set_reference(GUID, references, shift_to_next);
 						return;
 					}
+					shift_to_next();
 				}
-
-				set_next_claim();
 
 			}, POST_data, session);
 		}
@@ -12356,7 +12458,8 @@ function module_code(library_namespace) {
 	}
 
 	if (false) {
-		wiki.data('Q13406268', function(data) {
+		// add property/claim to Q13406268
+		wiki.data('維基數據沙盒2', function(data) {
 			result = data;
 		}).edit_data(function(entity) {
 			return {
@@ -12368,8 +12471,35 @@ function module_code(library_namespace) {
 			summary : 'bot test: edit property'
 		});
 
+		// delete property/claim (all 生物俗名)
+		wiki.data('維基數據沙盒2', function(data) {
+			result = data;
+		}).edit_data(function(entity) {
+			return {
+				生物俗名 : CeL.wiki.edit_data.remove_all,
+				language : 'zh-tw'
+			};
+		}, {
+			bot : 1,
+			summary : 'bot test: edit property'
+		});
+
+		// delete property/claim (生物俗名=維基數據沙盒2)
+		wiki.data('維基數據沙盒2', function(data) {
+			result = data;
+		}).edit_data(function(entity) {
+			return {
+				生物俗名 : '維基數據沙盒2',
+				language : 'zh-tw',
+				remove : true
+			};
+		}, {
+			bot : 1,
+			summary : 'bot test: edit property'
+		});
+
 		// TODO
-		wiki.data('Q13406268', function(data) {
+		wiki.data('維基數據沙盒2', function(data) {
 			result = data;
 		}).edit_data(function(entity) {
 			return {
@@ -12536,6 +12666,7 @@ function module_code(library_namespace) {
 		function do_edit() {
 			// data 會在 set_claim() 被修改，因此不能提前設定。
 			options.data = JSON.stringify(data);
+			// console.log(options.data);
 
 			// the token should be sent as the last parameter.
 			options.token = token;
@@ -12563,9 +12694,15 @@ function module_code(library_namespace) {
 		set_claim(data, token, do_edit, options, session, entity);
 	}
 
+	// CeL.wiki.edit_data.somevalue
 	// snaktype somevalue 未知數值 unknown
 	wikidata_edit.somevalue = {
 		unknown : true
+	};
+
+	// CeL.wiki.edit_data.remove_all
+	wikidata_edit.remove_all = {
+		remove_all : true
 	};
 
 	/**
