@@ -12064,9 +12064,9 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 		// 處理單一項目
-		var snaktype, datavalue_type;
-
-		function normalized() {
+		var snaktype, datavalue_type,
+		//
+		normalized = function() {
 			var normalized_data = {
 				snaktype : snaktype || 'value'
 			};
@@ -12086,7 +12086,7 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(normalized_data));
 			// console.log(normalized_data);
 			return normalized_data;
-		}
+		};
 
 		// delete: {P1:CeL.wiki.edit_data.remove_all}
 		// delete: {P1:value,remove:true}
@@ -12414,8 +12414,11 @@ function module_code(library_namespace) {
 		// the token should be sent as the last parameter.
 		POST_data.token = token;
 
-		var set_reference = function(GUID, references, callback) {
-			var reference_POST_data = library_namespace.null_Object();
+		// references: {Pid:value}
+		var set_reference = function(GUID, this_claim, callback) {
+			var references = this_claim.references,
+			//
+			reference_POST_data = library_namespace.null_Object();
 			for ( var property_key in references) {
 				var property_id = wikidata_search.use_cache([
 						references.language || this_claim.language
@@ -12438,7 +12441,7 @@ function module_code(library_namespace) {
 
 			var reference_POST_data = {
 				statement : GUID,
-				snaks : references
+				snaks : normalize_wikidata_value(references)
 			};
 
 			for ( var property_id in references) {
@@ -12562,7 +12565,7 @@ function module_code(library_namespace) {
 					// 依舊處理 references。
 					if (this_claim.references) {
 						set_reference(property_id[duplicate_index].id,
-								this_claim.references, shift_to_next);
+								this_claim, shift_to_next);
 					} else {
 						shift_to_next();
 					}
@@ -12612,8 +12615,7 @@ function module_code(library_namespace) {
 					// data =
 					// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
 
-					set_reference(data.claim.id, this_claim.references,
-							shift_to_next);
+					set_reference(data.claim.id, this_claim, shift_to_next);
 				} else {
 					shift_to_next();
 				}
