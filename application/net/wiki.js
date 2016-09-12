@@ -12064,9 +12064,9 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 		// 處理單一項目
-		var snaktype, datavalue_type,
-		//
-		normalized = function() {
+		var snaktype, datavalue_type;
+
+		function normalized() {
 			var normalized_data = {
 				snaktype : snaktype || 'value'
 			};
@@ -12086,7 +12086,7 @@ function module_code(library_namespace) {
 			// console.log(JSON.stringify(normalized_data));
 			// console.log(normalized_data);
 			return normalized_data;
-		};
+		}
 
 		// delete: {P1:CeL.wiki.edit_data.remove_all}
 		// delete: {P1:value,remove:true}
@@ -12277,16 +12277,17 @@ function module_code(library_namespace) {
 			index) {
 		if (index === wikidata_edit.remove_all) {
 			// delete one by one
-			index = property_list.length;
-			function remove_next() {
+			index = property_list.length,
+			//
+			remove_next_claim = function() {
 				if (index-- > 0) {
-					remove_claim(property_list, remove_next, options, API_URL,
-							session, index);
+					remove_claim(property_list, remove_next_claim, options,
+							API_URL, session, index);
 				} else {
 					callback();
 				}
-			}
-			remove_next();
+			};
+			remove_next_claim();
 			return;
 		}
 
