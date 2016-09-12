@@ -11033,7 +11033,16 @@ function module_code(library_namespace) {
 	}
 
 	// wikidata_search_cache[{String}"zh:性質"] = {String}"P31";
-	var wikidata_search_cache = library_namespace.null_Object();
+	var wikidata_search_cache = {
+	// 載於, 出典, source of claim
+	// 'en:stated in' : 'P248',
+	// 導入自, source
+	// 'en:imported from' : 'P143',
+	// 來源網址, website
+	// 'en:reference URL' : 'P854',
+	// 檢索日期
+	// 'en:retrieved' : 'P813'
+	};
 
 	// wrapper function of wikidata_search().
 	wikidata_search.use_cache = function(key, callback, options) {
@@ -11211,7 +11220,7 @@ function module_code(library_namespace) {
 		// TODO: value.references
 		value = value.mainsnak || value;
 		if (value) {
-			// 與 normalize_claim_value() 須同步!
+			// 與 normalize_wikidata_value() 須同步!
 			if (value.snaktype === 'novalue') {
 				return null;
 			}
@@ -12006,9 +12015,79 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// 會直接修改 POST_data。
-	// @see https://www.mediawiki.org/wiki/Wikibase/API#wbparsevalue
-	function normalize_claim_value(value, POST_data, options) {
+	/**
+	 * 盡可能模擬 wikidata (wikibase) 之 JSON 資料結構。
+	 * 
+	 * TODO: callback
+	 * 
+	 * @param value
+	 *            要解析的值
+	 * @param {String}[datatype]
+	 *            資料型別
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns {Object}wikidata (wikibase) 之 JSON 資料結構。
+	 * 
+	 * @see https://www.wikidata.org/w/api.php?action=help&modules=wbparsevalue
+	 *      https://www.mediawiki.org/wiki/Wikibase/API#wbparsevalue
+	 */
+	function normalize_wikidata_value(value, datatype, options) {
+		if (typeof options === 'string' && /^P\d{1,5}$/i.test(options)) {
+			options = {
+				property : options
+			};
+		} else if (typeof options === 'string'
+				&& /^[a-z\-]{2,20}$/i.test(options)) {
+			options = {
+				language : options
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
+
+		var is_multi = 'multi' in options ? options.multi
+		// auto-detect: guess if is multi
+		: Array.isArray(value)
+		//
+		&& (value.length !== 2 || value.length !== 3
+		//
+		|| typeof value[0] !== 'number' || typeof value[1] !== 'number');
+		if (is_multi) {
+			if (!Array.isArray(value)) {
+				value = [ value ];
+			}
+			return value.map(function(v) {
+				return normalize_wikidata_value(v, options, datatype);
+			});
+		}
+
+		// --------------------------------------
+		// 處理單一項目
+		var snaktype, datavalue_type;
+
+		function normalized() {
+			var normalized_data = {
+				snaktype : snaktype || 'value'
+			};
+			if (options.property) {
+				normalized_data.property = options.property;
+			}
+			if (options.hash) {
+				normalized_data.hash = options.hash;
+			}
+			if (datatype) {
+				normalized_data.datavalue = {
+					value : value,
+					type : datavalue_type
+				};
+				normalized_data.datatype = datatype;
+			}
+			// console.log(JSON.stringify(normalized_data));
+			// console.log(normalized_data);
+			return normalized_data;
+		}
+
 		// delete: {P1:CeL.wiki.edit_data.remove_all}
 		// delete: {P1:value,remove:true}
 		// snaktype novalue 無數值: {P1:null}
@@ -12016,96 +12095,144 @@ function module_code(library_namespace) {
 		// snaktype value: {P1:...}
 
 		if (value === null) {
-			if (POST_data) {
-				POST_data.snaktype = 'novalue';
-				// 不直接刪掉，因為此 .value 為 placeholder 佔位符。
-				POST_data.value = '';
-			}
-			return '';
+			snaktype = 'novalue';
+			return normalized();
 		}
 
 		if (value === wikidata_edit.somevalue) {
-			if (POST_data) {
-				POST_data.snaktype = 'somevalue';
-				// 不直接刪掉，因為此 .value 為 placeholder 佔位符。
-				POST_data.value = '';
-			}
-			return '';
+			snaktype = 'somevalue';
+			return normalized();
 		}
 
-		// https://www.wikidata.org/w/api.php?action=help&modules=wbparsevalue
-		// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=P3088&props=datatype
-		// +claims:P1793
-		//
-		// url: {P856:"https://url"}, {P1896:"https://url"}
-		// monolingualtext: {P1448:"text"} ← 自動判別language,
-		// monolingualtext: {P1448:"text",language:"zh-tw"}
-		// string: {P1353:"text"}
-		// external-id: {P212:'id'}
-		// math: {P2534:'1+2'}
-		// commonsMedia: {P18:'file.svg'}
-		//
-		// quantity: {P1114:0}
-		// time: {P585:new Date} date.precision=1
-		// wikibase-item: {P1629:Q1}
-		// wikibase-property: {P1687:P1}
-		// globe-coordinate 經緯度:
-		// {P625: [ {Number}latitude 緯度, {Number}longitude 經度 ]}
+		// --------------------------------------
+		// 處理一般賦值
 
-		if (typeof value === 'number') {
+		if (!datatype) {
+			// auto-detect: guess datatype
+
+			// https://www.wikidata.org/w/api.php?action=help&modules=wbparsevalue
+			// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=P3088&props=datatype
+			// +claims:P1793
+			//
+			// url: {P856:"https://url"}, {P1896:"https://url"}
+			// monolingualtext: {P1448:"text"} ← 自動判別language,
+			// monolingualtext: {P1448:"text",language:"zh-tw"}
+			// string: {P1353:"text"}
+			// external-id: {P212:'id'}
+			// math: {P2534:'1+2'}
+			// commonsMedia: {P18:'file.svg'}
+			//
 			// quantity: {P1114:0}
-			value = {
-				amount : value,
-				unit : 1,
-				upperBound : value,
-				lowerBound : value
-			};
-		} else if (Array.isArray(value)
-				&& (value.length === 2 || value.length === 3)) {
+			// time: {P585:new Date} date.precision=1
+			// wikibase-item: {P1629:Q1}
+			// wikibase-property: {P1687:P1}
 			// globe-coordinate 經緯度:
 			// {P625: [ {Number}latitude 緯度, {Number}longitude 經度 ]}
+
+			if (typeof value === 'number') {
+				datatype = 'quantity';
+			} else if (Array.isArray(value)
+					&& (value.length === 2 || value.length === 3)) {
+				datatype = 'globe-coordinate';
+			} else if (library_namespace.is_Date(value)) {
+				datatype = 'time';
+			} else {
+				value = String(value);
+				var matched = value.match(/^([PQ])(\d{1,10})$/i);
+				if (matched) {
+					datatype = /^[Qq]$/.test(matched[1]) ? 'wikibase-item'
+							: 'wikibase-property';
+				} else if ('language' in options) {
+					datatype = 'monolingualtext';
+				} else if (/^(?:https?|ftp):\/\//i.test(value)) {
+					datatype = 'url';
+				} else if (/\.(?:jpg|png|svg)$/i.test(value)) {
+					datatype = 'commonsMedia';
+				} else {
+					// TODO: other types: external-id, math
+					datatype = 'string';
+				}
+			}
+			// console.log('guess datatype: ' + datatype + ', value: ' + value);
+		}
+
+		// --------------------------------------
+		// 依據各種不同的datatype生成結構化資料。
+
+		switch (datatype) {
+		case 'globe-coordinate':
+			datavalue_type = 'globecoordinate';
 			value = {
 				latitude : value[0],
 				longitude : value[1],
-				altitude : value[3] || null,
-				precision : 0.000001,
-				globe : 'http://www.wikidata.org/entity/Q2'
+				altitude : typeof value[2] === 'number' ? value[2] : null,
+				precision : options.precision || 0.000001,
+				globe : options.globe || 'http://www.wikidata.org/entity/Q2'
 			};
-		} else if (library_namespace.is_Date(value)) {
-			// time: {P585:new Date} date.precision=1
+			break;
+
+		case 'monolingualtext':
+			datavalue_type = datatype;
+			value = {
+				text : value,
+				language : options.language || guess_language(value)
+			};
+			// console.log('use language: ' + value.language);
+			break;
+
+		case 'quantity':
+			datavalue_type = datatype;
+			value = {
+				amount : value,
+				// e.g., 'http://www.wikidata.org/entity/Q857027'
+				unit : options.unit || 1,
+				upperBound : typeof options.upperBound === 'number' ? options.upperBound
+						: value,
+				lowerBound : typeof options.lowerBound === 'number' ? options.lowerBound
+						: value
+			};
+			break;
+
+		case 'time':
+			datavalue_type = datatype;
 			value = {
 				time : value.toISOString(),
-				timezone : 0,
-				precision : 11,
-				calendarmodel : 'http://www.wikidata.org/entity/Q1985727'
+				timezone : options.timezone || 0,
+				precision : options.precision || 11,
+				calendarmodel : options.calendarmodel
+						|| 'http://www.wikidata.org/entity/Q1985727'
 			};
-		} else {
-			// assert: typeof value === 'string'
-			value = String(value);
+			break;
+
+		case 'wikibase-item':
+		case 'wikibase-property':
+			datavalue_type = 'wikibase-entityid';
 			var matched = value.match(/^([PQ])(\d{1,10})$/i);
-			if (matched) {
-				// wikibase-item: {P1629:Q1}
-				// wikibase-property: {P1687:P1}
-				value = {
-					'entity-type' : /^[Qq]$/.test(matched[1]) ? 'item'
-							: 'property',
-					'numeric-id' : matched[2]
-				};
-			} else if (options && options.language) {
-				// monolingualtext: {P1448:"text",language:"zh-tw"}
-				value = {
-					text : value,
-					language : options.language
-				};
-			}
+			value = {
+				'entity-type' : datatype === 'wikibase-item' ? 'item'
+						: 'property',
+				'numeric-id' : matched[2],
+				id : value
+			};
+			break;
+
+		case 'commonsMedia':
+		case 'url':
+		case 'external-id':
+		case 'math':
+		case 'string':
+			datavalue_type = 'string';
+			// value = value;
+			break;
+
+		default:
+			library_namespace
+					.err('normalize_wikidata_value: Unknown datatype ['
+							+ datatype + '] and value [' + value + ']');
+			return;
 		}
 
-		if (POST_data) {
-			POST_data.snaktype = 'value';
-			POST_data.value = typeof value === 'string' ? value : JSON
-					.stringify(value);
-		}
-		return value;
+		return normalized();
 	}
 
 	/**
@@ -12227,31 +12354,6 @@ function module_code(library_namespace) {
 			callback();
 			return;
 		}
-
-		// delete: {P1:CeL.wiki.edit_data.remove_all}
-		// delete: {P1:value,remove:true}
-		// snaktype novalue 無數值: {P1:null}
-		// snaktype somevalue 未知數值: {P1:CeL.wiki.edit_data.somevalue}
-		// snaktype value: {P1:...}
-
-		// https://www.wikidata.org/w/api.php?action=help&modules=wbparsevalue
-		// https://www.wikidata.org/w/api.php?action=wbgetentities&ids=P3088&props=datatype
-		// +claims:P1793
-		//
-		// url: {P856:"https://url"}, {P1896:"https://url"}
-		// monolingualtext: {P1448:"text"} ← 自動判別language,
-		// monolingualtext: {P1448:"text",language:"zh-tw"}
-		// string: {P1353:"text"}
-		// external-id: {P212:'id'}
-		// math: {P2534:'1+2'}
-		// commonsMedia: {P18:'file.svg'}
-		//
-		// quantity: {P1114:0}
-		// time: {P585:new Date} date.precision=1
-		// wikibase-item: {P1629:Q1}
-		// wikibase-property: {P1687:P1}
-		// globe-coordinate 經緯度:
-		// {P625: [ {Number}latitude 緯度, {Number}longitude 經度 ]}
 
 		// references:
 		//
@@ -12480,9 +12582,20 @@ function module_code(library_namespace) {
 
 			POST_data.property = property_id;
 
-			normalize_claim_value(value, POST_data, {
-				language : this_claim.language || reference_properties.language
+			var language = this_claim.language || reference_properties.language;
+			value = normalize_wikidata_value(value, null, language && {
+				language : language
 			});
+			// 照datavalue修改 POST_data。
+			POST_data.snaktype = value.snaktype;
+			if (POST_data.snaktype === 'value') {
+				value = value.datavalue.value;
+				POST_data.value = typeof value === 'string' ? value : JSON
+						.stringify(value);
+			} else {
+				// 不直接刪掉 POST_data.value，因為此值為 placeholder 佔位符。
+				POST_data.value = '';
+			}
 
 			// console.log(POST_data);
 
@@ -12764,7 +12877,7 @@ function module_code(library_namespace) {
 	}
 
 	// CeL.wiki.edit_data.somevalue
-	// snaktype somevalue 未知數值 unknown
+	// snaktype somevalue 未知數值 unknown value
 	wikidata_edit.somevalue = {
 		unknown : true
 	};
