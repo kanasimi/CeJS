@@ -11103,7 +11103,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (!options) {
+		if (!options || library_namespace.is_empty_object(options)) {
 			// default options passed to wikidata_search()
 			options = {
 				API_URL : get_data_API_URL(options),
