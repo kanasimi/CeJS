@@ -11066,6 +11066,7 @@ function module_code(library_namespace) {
 				//
 				cache_next_key = function() {
 					if (index === key.length) {
+						// done.
 						return key.map(function(k) {
 							return wikidata_search_cache[language + ':' + k];
 						});
@@ -11112,9 +11113,13 @@ function module_code(library_namespace) {
 				limit : 1
 			};
 		} else if (!options.get_id) {
-			library_namespace.err('當把名稱[' + language_and_key
-					+ ']轉換成id時，應設定 options.get_id', 4,
-					'wikidata_search.use_cache');
+			library_namespace.warn('wikidata_search.use_cache: 當把名稱['
+					+ language_and_key
+					+ ']轉換成id時，應設定 options.get_id。 options: '
+					+ JSON.stringify(options));
+			options = Object.assign({
+				get_id : true
+			}, options);
 		}
 
 		wikidata_search(key, function(id, error) {
@@ -12360,8 +12365,6 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback({Array}property list, error)
 	 * @param {Object}[exists_property_hash]
 	 *            已經存在的屬性雜湊。可以由 wikidata API 取得。
-	 * 
-	 * @returns {Array}property list
 	 */
 	function normalize_wikidata_properties(properties, callback,
 			exists_property_hash) {
@@ -12398,7 +12401,7 @@ function module_code(library_namespace) {
 					.err('normalize_wikidata_properties: Invalid properties: '
 							+ JSON.stringify(properties));
 
-			callback();
+			callback(properties);
 			return;
 		}
 
@@ -12457,15 +12460,37 @@ function module_code(library_namespace) {
 				}
 			});
 
-			properties.forEach(function(property_data) {
+			var index = 0,
+			//
+			normalize_next_value = function() {
+				if (index === properties.length) {
+					callback(properties);
+					// done
+					return;
+				}
+
+				var property_data = properties[index++];
+				if (property_data.remove) {
+					normalize_next_value();
+				}
 				var value = property_data[property_data.property];
+				if (value === undefined || value === wikidata_edit.remove_all) {
+					normalize_next_value();
+				}
+				// get datatype of each property →
 				normalize_wikidata_value(value, Object.assign({
 					// multi : false,
-					callback : function() {
-						;
+					callback : function(value) {
+						// normalize property data value →
+						// property_data[property_data.property] = value;
+
+						// 去掉殼 →
+						properties[index - 1] = value;
+						normalize_next_value();
 					}
 				}, options));
-			});
+			};
+			normalize_next_value();
 
 		}, Object.assign({
 			language : additional_properties.language || default_language
