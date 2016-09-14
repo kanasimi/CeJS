@@ -11074,14 +11074,12 @@ function module_code(library_namespace) {
 						}));
 						return;
 					}
-					var id = wikidata_search.use_cache(key[index++],
-							cache_next_key, Object.assign(library_namespace
-									.null_Object(),
+					wikidata_search.use_cache(key[index++], cache_next_key,
+							Object.assign(library_namespace.null_Object(),
 									wikidata_search.use_cache.default_options,
-									options));
-					if (id) {
-						cache_next_key();
-					}
+									{
+										must_callback : true
+									}, options));
 				};
 				cache_next_key();
 				return;
@@ -11108,7 +11106,13 @@ function module_code(library_namespace) {
 			}
 
 			if (/^[PQ]\d{1,10}$/.test(key)) {
-				return key;
+				if (options && options.must_callback) {
+					callback(key);
+					return;
+				} else {
+					// 只在有 cache 時才即刻回傳。
+					return key;
+				}
 			}
 		}
 
@@ -12115,9 +12119,13 @@ function module_code(library_namespace) {
 			if (!Array.isArray(value)) {
 				value = [ value ];
 			}
-			return value.map(function(v) {
+			value = value.map(function(v) {
 				return normalize_wikidata_value(v, options, datatype);
 			});
+			if (typeof options.callback === 'function') {
+				callback(value);
+			}
+			return value;
 		}
 
 		// --------------------------------------
@@ -12134,7 +12142,8 @@ function module_code(library_namespace) {
 						normalize_wikidata_value(id, datatype, options);
 					}, Object.assign(library_namespace.null_Object(),
 							wikidata_search.use_cache.default_options, {
-								type : matched[1]
+								type : matched[1],
+								must_callback : true
 							}, options));
 				} else {
 					normalize_wikidata_value(value, datatype, options);
@@ -12169,9 +12178,8 @@ function module_code(library_namespace) {
 			// console.log(normalized_data);
 			if (typeof options.callback === 'function') {
 				options.callback(normalized_data);
-			} else {
-				return normalized_data;
 			}
+			return normalized_data;
 		}
 
 		// delete: {P1:CeL.wiki.edit_data.remove_all}
@@ -13021,14 +13029,15 @@ function module_code(library_namespace) {
 			// 照datavalue修改 POST_data。
 			POST_data.snaktype = property_data.snaktype;
 			if (POST_data.snaktype === 'value') {
-				property_data = property_data.datavalue.value;
-				POST_data.value = typeof property_data === 'string' ? property_data
-						: JSON.stringify(property_data);
+				var value = property_data.datavalue.value;
+				POST_data.value = typeof value === 'string' ? value : JSON
+						.stringify(value);
 			} else {
 				// 不直接刪掉 POST_data.value，因為此值為 placeholder 佔位符。
 				POST_data.value = '';
 			}
 
+			// console.log(JSON.stringify(POST_data));
 			// console.log(POST_data);
 
 			wiki_API.query(claim_action, function(data) {
@@ -13084,6 +13093,7 @@ function module_code(library_namespace) {
 
 			// 每個 claim 參照用設定: 設定每個屬性的時候將參照的設定，包含如 .language 等。
 			additional_properties = claims.additional;
+			// console.log(JSON.stringify(claims));
 			// console.log(claims);
 			set_next_claim();
 		}, entity && entity.claims
@@ -13132,7 +13142,6 @@ function module_code(library_namespace) {
 			summary : 'bot test: edit property'
 		});
 
-		// TODO
 		wiki.data('維基數據沙盒2', function(data) {
 			result = data;
 		}).edit_data(function(entity) {
