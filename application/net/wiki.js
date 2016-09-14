@@ -12127,7 +12127,18 @@ function module_code(library_namespace) {
 				&& (!('get_type' in options) || options.get_type)) {
 			// 先確定指定 property 之 datatype。
 			wikidata_datatype(options.property, function(datatype) {
-				normalize_wikidata_value(value, datatype, options);
+				var matched = datatype.match(/^wikibase-(item|property)$/);
+				if (matched && !/^[PQ]\d{1,10}$/.test(value)) {
+					// 將屬性名稱轉換成 id。
+					wikidata_search.use_cache(value, function(id, error) {
+						normalize_wikidata_value(id, datatype, options);
+					}, Object.assign(library_namespace.null_Object(),
+							wikidata_search.use_cache.default_options, {
+								type : matched[1]
+							}, options));
+				} else {
+					normalize_wikidata_value(value, datatype, options);
+				}
 			}, options);
 			return;
 		}
@@ -12238,8 +12249,8 @@ function module_code(library_namespace) {
 		case 'globe-coordinate':
 			datavalue_type = 'globecoordinate';
 			value = {
-				latitude : value[0],
-				longitude : value[1],
+				latitude : +value[0],
+				longitude : +value[1],
 				altitude : typeof value[2] === 'number' ? value[2] : null,
 				precision : options.precision || 0.000001,
 				globe : options.globe || 'http://www.wikidata.org/entity/Q2'
@@ -12258,22 +12269,38 @@ function module_code(library_namespace) {
 		case 'quantity':
 			datavalue_type = datatype;
 			value = {
-				amount : value,
+				amount : String(value),
 				// e.g., 'http://www.wikidata.org/entity/Q857027'
-				unit : options.unit || 1,
-				upperBound : typeof options.upperBound === 'number' ? options.upperBound
-						: value,
-				lowerBound : typeof options.lowerBound === 'number' ? options.lowerBound
-						: value
+				unit : String(options.unit || 1),
+				upperBound : String(typeof options.upperBound === 'number' ? options.upperBound
+						: value),
+				lowerBound : String(typeof options.lowerBound === 'number' ? options.lowerBound
+						: value)
 			};
 			break;
 
 		case 'time':
 			datavalue_type = datatype;
+			if (!library_namespace.is_Date(value)) {
+				value = new Date(value);
+			}
+			// 11: day
+			var precision = options.precision || 11;
+			if (precision === 11) {
+				// 當 precision=11 (day) 時，時分秒必須設置為 0!
+				value.setUTCHours(0, 0, 0, 0);
+			}
 			value = {
-				time : value.toISOString(),
+				// Data value corrupt: $timestamp must resemble ISO 8601, given
+				time : value.toISOString()
+				// '2000-01-01T00:00:00.000Z' → '2000-01-01T00:00:00Z'
+				.replace(/\.\d{3}Z$/, 'Z')
+				// '2000-01-01T00:00:00Z' → '+2000-01-01T00:00:00Z'
+				.replace(/^(\d{4}-)/, '+$1'),
 				timezone : options.timezone || 0,
-				precision : options.precision || 11,
+				before : options.before || 0,
+				after : options.after || 0,
+				precision : precision,
 				calendarmodel : options.calendarmodel
 						|| 'http://www.wikidata.org/entity/Q1985727'
 			};
@@ -12283,10 +12310,14 @@ function module_code(library_namespace) {
 		case 'wikibase-property':
 			datavalue_type = 'wikibase-entityid';
 			var matched = value.match(/^([PQ])(\d{1,10})$/i);
+			if (!matched) {
+				throw 'normalize_wikidata_value: Illegal ' + datatype + ': '
+						+ value;
+			}
 			value = {
 				'entity-type' : datatype === 'wikibase-item' ? 'item'
 						: 'property',
-				'numeric-id' : matched[2],
+				'numeric-id' : matched[2] | 0,
 				// 在設定時，id這項可省略。
 				id : value
 			};
@@ -12298,7 +12329,8 @@ function module_code(library_namespace) {
 		case 'math':
 		case 'string':
 			datavalue_type = 'string';
-			// value = value;
+			// Data value corrupt: Can only construct StringValue from strings
+			value = String(value);
 			break;
 
 		default:
@@ -12352,7 +12384,7 @@ function module_code(library_namespace) {
 	// [{載於:'宇宙'},{導入自:'zhwiki'},{來源網址:undefined},{臺灣物種名錄物種編號:123,remove:true}]
 	// + additional_properties={language:'zh',references:{...}}
 	// + exists_property_hash
-	// * additional_properties.references當作每個properties的參照
+	// * {Object|Array}additional_properties.references 當作每個 properties 的參照。
 	// * 若某項有 .mainsnak 或 .snaktype 則當作輸入了全套完整的資料，不處理此項。
 	//
 	// {Array}可接受的原始輸入形式之3
@@ -12647,13 +12679,17 @@ function module_code(library_namespace) {
 						return true;
 					}
 
-					library_namespace.debug('Skip ' + property_id
-							+ ': 已存在相同值 [' + value + ']。'
-							+ (property_data.references
-							//
-							? '但依舊處理其 references 設定。' : ''), 1,
+					// * {Object|Array}additional_properties.references
+					// 當作每個 properties 的參照。
+					var references = 'references' in property_data
+					//
+					? property_data.references
+							: additional_properties.references;
+					library_namespace.debug('Skip ' + property_id + '['
+							+ duplicate_index + ']: 此屬性已存在相同值 [' + value + ']。'
+							+ (references ? '但依舊處理其 references 設定。' : ''), 1,
 							'normalize_wikidata_properties');
-					if (property_data.references) {
+					if (typeof references === 'object') {
 						// delete property_data.value;
 						property_data.exists_index = duplicate_index;
 						return true;
@@ -12696,12 +12732,23 @@ function module_code(library_namespace) {
 
 						// 去掉殼 →
 						properties[index - 1] = normalized_value;
-						if (property_data.exists_index) {
-							// 複製需要用到的屬性。
+						// 複製/搬移需要用到的屬性。
+						if (property_data.exists_index >= 0) {
 							normalized_value.exists_index
-							//																	
+							//
 							= property_data.exists_index;
 						}
+
+						// * {Object|Array}additional_properties.references
+						// 當作每個 properties 的參照。
+						var references = 'references' in property_data
+						//
+						? property_data.references
+								: additional_properties.references;
+						if (typeof references === 'object') {
+							normalized_value.references = references;
+						}
+
 						normalize_next_value();
 					},
 					property : property_data.property
@@ -12777,6 +12824,83 @@ function module_code(library_namespace) {
 	}
 
 	/**
+	 * references: {Pid:value}
+	 * 
+	 * @inner only for set_claim()
+	 */
+	function set_reference(GUID, property_data, callback, options, API_URL,
+			session, exists_references) {
+
+		normalize_wikidata_properties(property_data.references, function(
+				references) {
+			if (!Array.isArray(references)) {
+				if (references) {
+					library_namespace.err('set_claim: Invalid references: '
+							+ JSON.stringify(references));
+				} else {
+					// assert: 本次沒有要設定 claim 的資料。
+				}
+				callback();
+				return;
+			}
+
+			// e.g., references:[{P1:'',language:'zh'},{P2:'',references:{}}]
+			property_data.references = references;
+
+			// console.log(references);
+
+			// console.log(JSON.stringify(property_data.references));
+			// console.log(property_data.references);
+
+			var references = library_namespace.null_Object();
+			property_data.references.forEach(function(reference_data) {
+				references[reference_data.property] = [ reference_data ];
+			});
+
+			// console.log(JSON.stringify(references));
+			// console.log(references);
+			var additional_properties, POST_data = {
+				statement : GUID,
+				snaks : JSON.stringify(references)
+			};
+
+			if (options.reference_index >= 0) {
+				POST_data.index = options.reference_index;
+			}
+
+			if (options.bot) {
+				POST_data.bot = 1;
+			}
+			if (options.summary) {
+				POST_data.summary = options.summary;
+			}
+			// TODO: baserevid, 但這需要每次重新取得 revid。
+
+			// the token should be sent as the last parameter.
+			POST_data.token = options.token;
+
+			wiki_API.query([ API_URL, 'wbsetreference' ],
+			// https://www.wikidata.org/w/api.php?action=help&modules=wbsetreference
+			function(data) {
+				// console.log(data);
+				// console.log(JSON.stringify(data));
+				var error = data && data.error;
+				// 檢查伺服器回應是否有錯誤資訊。
+				if (error) {
+					library_namespace.err('set_reference: [' + error.code
+							+ '] ' + error.info);
+				}
+				// data =
+				// {"pageinfo":{"lastrevid":1},"success":1,"reference":{"hash":"123abc..","snaks":{...},"snaks-order":[]}}
+				callback(data, error);
+			}, POST_data, session);
+
+		}, exists_references
+		// 確保會設定 .remove / .exists_index = duplicate_index。
+		|| library_namespace.null_Object());
+	}
+
+	/**
 	 * edit property/claim
 	 * 
 	 * @inner only for wikidata_edit()
@@ -12831,71 +12955,7 @@ function module_code(library_namespace) {
 		// the token should be sent as the last parameter.
 		POST_data.token = token;
 
-		// references: {Pid:value}
-		var set_reference = function(GUID, property_data, callback) {
-			var references = property_data.references,
-			//
-			reference_POST_data = library_namespace.null_Object();
-			for ( var property_key in references) {
-				var property_id = wikidata_search.use_cache([
-						references.language || property_data.language
-								|| additional_properties.language
-								|| default_language, property_key ],
-				// callback
-				function(id, error) {
-					if (!id) {
-						throw 'set_reference: Invalid property: ['
-								+ property_key + ']';
-					}
-					TODO;
-				}, Object.assign({
-					language : additional_properties.language
-							|| default_language
-				}, wikidata_search.use_cache.default_options, options));
-				if (!property_id) {
-					// assert: property_id === undefined
-					// Waiting for conversion.
-					return;
-				}
-			}
-
-			var reference_POST_data = {
-				statement : GUID,
-				snaks : normalize_wikidata_value(references)
-			};
-
-			for ( var property_id in references) {
-				var value = references[property_id];
-				references[property_id] = [];
-			}
-
-			if (options.reference_index >= 0) {
-				reference_POST_data.index = options.reference_index;
-			}
-			if (options.bot) {
-				reference_POST_data.bot = 1;
-			}
-			if (options.summary) {
-				reference_POST_data.summary = options.summary;
-			}
-			// TODO: baserevid, 但這需要每次重新取得 revid。
-
-			wiki_API.query([ claim_action[0], 'wbsetreference' ],
-			// https://www.wikidata.org/w/api.php?action=help&modules=wbsetreference
-			function(data) {
-				var error = data && data.error;
-				// 檢查伺服器回應是否有錯誤資訊。
-				if (error) {
-					library_namespace.err('set_reference: [' + error.code
-							+ '] ' + error.info);
-				}
-				// data =
-				//
-				callback();
-			}, reference_POST_data, session);
-		},
-		//
-		set_next_claim = function() {
+		var set_next_claim = function() {
 			var claims = data.claims;
 			library_namespace.debug('claims: ' + JSON.stringify(claims), 3,
 					'set_next_claim');
@@ -12939,17 +12999,21 @@ function module_code(library_namespace) {
 			}
 
 			if (property_data.exists_index >= 0) {
-				if (property_data.references) {
-					library_namespace.debug('Skip ' + property_id + '['
-							+ property_data.exists_index + '] 已存在相同值 ['
-							+ property_data + ']，但依舊處理其 references 設定。', 1,
-							'set_next_claim');
-					set_reference(
-							exists_property_list[property_data.exists_index].id,
-							property_data, shift_to_next);
-				} else {
-					shift_to_next();
+				library_namespace.debug('Skip ' + property_id + '['
+						+ property_data.exists_index + '] 此屬性已存在相同值 ['
+						+ wikidata_datavalue(property_data)
+						+ ']，但依舊處理其 references 設定。', 1, 'set_next_claim');
+				if (!property_data.references) {
+					throw 'set_next_claim: No references found!';
 				}
+				var references = entity.claims[property_id][property_data.exists_index].references;
+				set_reference(
+						exists_property_list[property_data.exists_index].id,
+						property_data, shift_to_next, POST_data,
+						claim_action[0], session,
+						// should use .references[*].snaks
+						references && references[0].snaks);
+
 				return;
 			}
 
@@ -12980,7 +13044,8 @@ function module_code(library_namespace) {
 					// data =
 					// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
 
-					set_reference(data.claim.id, property_data, shift_to_next);
+					set_reference(data.claim.id, property_data, shift_to_next,
+							POST_data, claim_action[0], session);
 				} else {
 					shift_to_next();
 				}
