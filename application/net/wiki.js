@@ -1110,11 +1110,7 @@ function module_code(library_namespace) {
 
 		// 遍歷 tokens
 		function traversal_tokens(_this, depth) {
-			_this.forEach(function(token, index) {
-				if (slice && depth === 0) {
-					if (index < slice[0] || slice[1] <= index)
-						return;
-				}
+			function for_token(token, index) {
 				// console.log('token depth ' + depth + '/' + max_depth + ':');
 				// console.log(token);
 
@@ -1151,7 +1147,17 @@ function module_code(library_namespace) {
 					token.index = index;
 					traversal_tokens(token, depth + 1);
 				}
-			});
+			}
+
+			if (slice && depth === 0) {
+				// 若有 slice，則以更快的方法遍歷 tokens。
+				for (var index = slice[0] | 0, boundary = slice[1] >= 0 ? Math
+						.min(slice[1] | 0, _this.length) : _this.length; index < boundary; index++) {
+					for_token(_this[index], index);
+				}
+			} else {
+				_this.forEach(for_token);
+			}
 		}
 
 		traversal_tokens(this, 0);
@@ -1488,7 +1494,9 @@ function module_code(library_namespace) {
 		},
 		// section title
 		// show all section titles:
-		// wiki.last_page.parsed.each('section_title',function(token){console.log(token.slice().join('').trim());},false);0;
+		// parser=CeL.wiki.parser(page_data);parser.each('section_title',function(token,index){console.log('['+index+']'+token.title);},false,1);
+		// @see for_each_token()
+		// parser.each('text',function(token){},{slice:[1,2]});
 		section_title : function() {
 			var level = '='.repeat(this.level);
 			return level
@@ -2224,17 +2232,16 @@ function module_code(library_namespace) {
 		wikitext = wikitext.replace_till_stable(
 		// @see PATTERN_section
 		/\n(=+)(.+)\1(\s*)\n/g, function(all, prefix, parameters, postfix) {
-			/** {String}section title in wikitext */
-			var section_title = parameters.trim();
 			if (normalize)
-				parameters = section_title;
+				parameters = parameters.trim();
 			// 經過改變，需再進一步處理。
 			parameters = parse_wikitext(parameters, options, queue);
 			if (parameters.type !== 'text')
 				parameters = [ parameters ];
 			parameters = _set_wiki_type(parameters, 'section_title');
+			// 因為尚未resolve_escaped()，直接使用未parse_wikitext()者會包含未解碼之code!
 			/** {String}section title in wikitext */
-			parameters.title = section_title;
+			parameters.title = parameters.toString().trim();
 			if (postfix && !normalize)
 				parameters.postfix = postfix;
 			parameters.level = prefix.length;
@@ -2834,9 +2841,12 @@ function module_code(library_namespace) {
 	 * </code>
 	 */
 
-	// @deprecated: 無法處理 '<pre class="c">\n==t==\nw\n</pre>'
 	// 將 wikitext 拆解為各 section list
 	// get {Array}section list
+	//
+	// @deprecated: 無法處理 '<pre class="c">\n==t==\nw\n</pre>'
+	// use below instead:
+	// CeL.wiki.parser(page_data).each('section_title',function(token,index){console.log('['+index+']'+token.title);},false,1);
 	function deprecated_get_sections(wikitext) {
 		var page_data;
 		if (get_page_content.is_page_data(wikitext)) {
@@ -13150,7 +13160,8 @@ function module_code(library_namespace) {
 				language : 'zh-tw',
 				references : {
 					臺灣物種名錄物種編號 : 123456,
-					導入自 : 'zhwiki',
+					// [[d:Special:AbuseFilter/54]]
+					// 導入自 : 'zhwiki',
 					載於 : '臺灣物種名錄物種',
 					來源網址 : 'https://www.wikidata.org/',
 					檢索日期 : new Date
