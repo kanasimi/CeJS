@@ -991,7 +991,7 @@ function module_code(library_namespace) {
 		}
 		// copy prototype methods
 		Object.assign(wikitext, page_prototype);
-		set_wiki_type(wikitext, 'text');
+		set_wiki_type(wikitext, 'plain');
 		return wikitext;
 	}
 
@@ -1013,6 +1013,8 @@ function module_code(library_namespace) {
 		th : 'table_cell',
 		td : 'table_cell',
 		template : 'transclusion',
+		// wikitext, 'text': plain text
+		text : 'plain',
 		'' : 'plain'
 	};
 
@@ -1180,7 +1182,7 @@ function module_code(library_namespace) {
 			// assert: this = [ {String} ]
 			var parsed = parse_wikitext(this[0], options);
 			// library_namespace.log(parsed);
-			if (Array.isArray(parsed) && parsed.type === 'text') {
+			if (Array.isArray(parsed) && parsed.type === 'plain') {
 				this.pop();
 				Array.prototype.push.apply(this, parsed);
 			} else {
@@ -1354,7 +1356,7 @@ function module_code(library_namespace) {
 			});
 
 			if (result.length > 1) {
-				set_wiki_type(result, 'text');
+				set_wiki_type(result, 'plain');
 			} else {
 				result = result[0];
 			}
@@ -1496,11 +1498,11 @@ function module_code(library_namespace) {
 		// show all section titles:
 		// parser=CeL.wiki.parser(page_data);parser.each('section_title',function(token,index){console.log('['+index+']'+token.title);},false,1);
 		// @see for_each_token()
-		// parser.each('text',function(token){},{slice:[1,2]});
+		// parser.each('plain',function(token){},{slice:[1,2]});
 		section_title : function() {
 			var level = '='.repeat(this.level);
 			return level
-			// this.join(''): 必須與 text 相同。見 parse_wikitext.title。
+			// this.join(''): 必須與 wikitext 相同。見 parse_wikitext.title。
 			+ this.join('') + level + (this.postfix || '');
 		},
 		// [[Help:Wiki markup]], HTML tags
@@ -1531,7 +1533,7 @@ function module_code(library_namespace) {
 			return this.join('\n');
 		},
 		// plain text 或尚未 parse 的 wikitext.
-		text : function() {
+		plain : function() {
 			return this.join('');
 		}
 	};
@@ -2060,7 +2062,7 @@ function module_code(library_namespace) {
 				}
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 				all = parse_wikitext(attributes, options, queue);
-				if (all.type !== 'text')
+				if (all.type !== 'plain')
 					all = [ all ];
 			} else {
 				// use '' as attributes in case
@@ -2160,7 +2162,7 @@ function module_code(library_namespace) {
 						else {
 							// 經過改變，需再進一步處理。
 							cell = parse_wikitext(matched[1], options, queue);
-							if (cell.type !== 'text')
+							if (cell.type !== 'plain')
 								// {String} or other elements
 								cell = [ cell ];
 						}
@@ -2238,7 +2240,7 @@ function module_code(library_namespace) {
 			}
 			// 經過改變，需再進一步處理。
 			parameters = parse_wikitext(parameters, options, queue);
-			if (parameters.type !== 'text')
+			if (parameters.type !== 'plain')
 				parameters = [ parameters ];
 			parameters = _set_wiki_type(parameters, 'section_title');
 			// 因為尚未resolve_escaped()，直接使用未parse_wikitext()者會包含未解碼之code!
@@ -2468,7 +2470,7 @@ function module_code(library_namespace) {
 
 		// $dateFormats, 'Y年n月j日 (D) H:i'
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hans.php
-		// e.g., "2016年8月1日 (一) 00:00 (UTC)"
+		// e.g., "2016年8月1日 (一) 00:00 (UTC)", "2016年8月1日 (一) 00:00 (CST)"
 		// [, Y, m, d, time ]
 		var PATTERN_date_zh = /(\d{4})年(1?\d)月([1-3]?\d)日 \(.\)( \d{1,2}:\d{1,2} \([A-Z]{3}\))/g,
 		// <s>去掉</s>skip年分前之雜項。
@@ -10937,6 +10939,13 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	function normalize_wikidata_key(key) {
+		if (typeof key !== 'string') {
+			throw 'normalize_wikidata_key: typeof key is NOT string!';
+		}
+		return key.replace(/_/g, ' ').trim();
+	}
+
 	/**
 	 * 搜索標籤包含特定關鍵字(label=key)的項目。
 	 * 
@@ -10982,7 +10991,7 @@ function module_code(library_namespace) {
 		}
 
 		// console.log('key: ' + key);
-		key = key.trim();
+		key = normalize_wikidata_key(key);
 		var action = [ API_URL_of_options(options) || wikidata_API_URL,
 		// search. e.g.,
 		// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
@@ -11024,7 +11033,7 @@ function module_code(library_namespace) {
 					// 自此結果能得到的資訊有限。
 					// label: 'Universe'
 					// match: { type: 'label', language: 'zh', text: '宇宙' }
-					if (key === item.match.text)
+					if (item.match && key === item.match.text)
 						return true;
 				});
 			}
@@ -11081,9 +11090,11 @@ function module_code(library_namespace) {
 		// 須與 wikidata_search() 相同!
 		language = options && options.language || default_language;
 		if (typeof key === 'string') {
+			key = normalize_wikidata_key(key);
 			language_and_key = language + ':' + key;
 		} else if (Array.isArray(key)) {
 			if (is_api_and_title(key, 'language')) {
+				key[1] = normalize_wikidata_key(key[1]);
 				// key.join(':')
 				language_and_key = key[0] + ':' + key[1];
 			} else {
@@ -11096,6 +11107,7 @@ function module_code(library_namespace) {
 					if (index === key.length) {
 						// done.
 						callback(key.map(function(k) {
+							k = normalize_wikidata_key(k);
 							return wikidata_search_cache[language + ':' + k];
 						}));
 						return;
@@ -12509,7 +12521,7 @@ function module_code(library_namespace) {
 		// demands 對應的 property
 		property_corresponding = [];
 
-		// 將屬性名稱 property key 存在 .property
+		// 將屬性名稱 property key 儲存在 .property
 		properties.forEach(function(property_data) {
 			// * 若某項有 .mainsnak 或 .snaktype 則當作輸入了全套完整的資料，不處理此項。
 			if (property_data.mainsnak || property_data.snaktype) {
@@ -12518,7 +12530,6 @@ function module_code(library_namespace) {
 			}
 
 			if (!property_data.property) {
-				var property_key;
 				for ( var key in property_data) {
 					if (property_data.property ? /^[PQ]\d{1,10}$/.test(key)
 							: !(key in claim_properties)) {
