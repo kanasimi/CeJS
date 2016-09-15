@@ -2823,7 +2823,7 @@ function module_code(library_namespace) {
 		return wikitext.trim();
 	}
 
-	// 規範化章節標題
+	// 規範化話題/議題/章節標題
 	function normalize_section_title(section_title, callback) {
 		// 不會 reduce '\t'
 		return section_title.replace(/ {2,}/g, ' ').replace(
