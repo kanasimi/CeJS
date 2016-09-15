@@ -1916,9 +1916,9 @@ function module_code(library_namespace) {
 			// 以 token[0].toString() 取得 URL。
 			: _set_wiki_type(URL, 'url') ];
 			if (delimiter) {
-				if (normalize)
+				if (normalize) {
 					parameters = parameters.trim();
-				else {
+				} else {
 					// 紀錄 delimiter，否則 .toString() 時 .join() 後會與原先不同。
 					if (delimiter !== ' ')
 						URL.delimiter = delimiter;
@@ -2055,8 +2055,9 @@ function module_code(library_namespace) {
 
 		function parse_single_tag(all, tag, attributes) {
 			if (attributes) {
-				if (normalize)
+				if (normalize) {
 					attributes = attributes.replace(/[\s\/]*$/, ' /');
+				}
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 				all = parse_wikitext(attributes, options, queue);
 				if (all.type !== 'text')
@@ -2232,14 +2233,16 @@ function module_code(library_namespace) {
 		wikitext = wikitext.replace_till_stable(
 		// @see PATTERN_section
 		/\n(=+)(.+)\1(\s*)\n/g, function(all, prefix, parameters, postfix) {
-			if (normalize)
+			if (normalize) {
 				parameters = parameters.trim();
+			}
 			// 經過改變，需再進一步處理。
 			parameters = parse_wikitext(parameters, options, queue);
 			if (parameters.type !== 'text')
 				parameters = [ parameters ];
 			parameters = _set_wiki_type(parameters, 'section_title');
 			// 因為尚未resolve_escaped()，直接使用未parse_wikitext()者會包含未解碼之code!
+			// @see norma
 			/** {String}section title in wikitext */
 			parameters.title = parameters.toString().trim();
 			if (postfix && !normalize)
@@ -2821,11 +2824,24 @@ function module_code(library_namespace) {
 	}
 
 	// 規範化章節標題
-	function normalize_section_title(section_title) {
-		// TODO: {{}}, [[]]
+	function normalize_section_title(section_title, callback) {
 		// 不會 reduce '\t'
-		return section_title.trim().replace(/ {2,}/g, ' ').replace(
-				/<\/?[a-z][^<>]*>/g, '');
+		return section_title.replace(/ {2,}/g, ' ').replace(
+				/<\/?[a-z][^<>]*>/g, '')
+		// escape wikilink
+		.replace(/\[\[:?([^\[\]]+)\]\]/g, function(all, inner) {
+			return inner.replace(/^[^\|]+\|/, '');
+		})
+		// escape external link
+		// .replace(/\[https?:\/\/[^ ]+ ([^\]]+)\]/ig, '$1')
+
+		// TODO: 這邊僅處理常用模板。正式應該用 parse。
+		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
+		.replace(/{{[Tt]l\s*\|([^{}]*)}}/g, '{{$1}}')
+		// escape control characters
+		.replace(/[{}\|]/g, function(character) {
+			return '&#' + character.charCodeAt(0) + ';';
+		}).trim();
 	}
 
 	/**
@@ -13999,6 +14015,7 @@ function module_code(library_namespace) {
 		content_of : get_page_content,
 		normalize_title : normalize_page_name,
 		normalize_title_pattern : normalize_name_pattern,
+		normalize_section_title : normalize_section_title,
 		get_hash : list_to_hash,
 		uniq_list : unique_list,
 
