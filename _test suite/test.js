@@ -2459,7 +2459,7 @@ function test_wiki() {
 		wikitext = '1<b style="color:#000" >{{a}}{{c}}</b>2';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML tag #3');
 		assert([ 'b', CeL.wiki.parser(wikitext).parse()[1].tag ], 'wiki.parse: HTML tag #4');
-		assert([ ' style="color:#000" ', CeL.wiki.parser(wikitext).parse()[1][0] ], 'wiki.parse: HTML tag #5');
+		assert([ ' style="color:#000" ', String(CeL.wiki.parser(wikitext).parse()[1][0]) ], 'wiki.parse: HTML tag #5: tag attributes');
 		assert([ 'tag_inner', CeL.wiki.parser(wikitext).parse()[1][1].type ], 'wiki.parse: HTML tag #6');
 		assert([ '1<b style="color:#000" ></b>2', CeL.wiki.parser(wikitext).each('tag_inner', function(token, parent, index){return '';}, true).toString() ], 'wiki.parse: HTML tag #7');
 
