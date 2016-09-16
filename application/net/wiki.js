@@ -1329,6 +1329,7 @@ function module_code(library_namespace) {
 	function resolve_escaped(queue, include_mark, end_mark) {
 		library_namespace.debug('queue: ' + queue.join('\n--- '), 4,
 				'resolve_escaped');
+		// console.log('resolve_escaped: '+JSON.stringify(queue));
 		queue.forEach(function(item, index) {
 			library_namespace.debug([ 'item', index, item ], 4,
 					'resolve_escaped');
@@ -1341,8 +1342,9 @@ function module_code(library_namespace) {
 
 			item.split(include_mark).forEach(function(token, index) {
 				if (index === 0) {
-					if (token)
+					if (token) {
 						result.push(token);
+					}
 					return;
 				}
 				index = token.indexOf(end_mark);
@@ -1356,6 +1358,7 @@ function module_code(library_namespace) {
 			});
 
 			if (result.length > 1) {
+				// console.log(result);
 				set_wiki_type(result, 'plain');
 			} else {
 				result = result[0];
@@ -1365,6 +1368,7 @@ function module_code(library_namespace) {
 			}
 			queue[index] = result;
 		});
+		// console.log('resolve_escaped end: '+JSON.stringify(queue));
 	}
 
 	// 經測試發現 {{...}} 名稱中不可有 [{}<>\[\]]
@@ -1513,6 +1517,9 @@ function module_code(library_namespace) {
 			// 欲取得 .innerHTML，請用 this[1].toString();
 			return '<' + this.tag + (this[0] || '') + '>' + this[1] + '</'
 					+ (this.end_tag || this.tag) + '>';
+		},
+		tag_attributes : function() {
+			return this.join('');
 		},
 		tag_inner : function() {
 			return this.join('');
@@ -1992,6 +1999,8 @@ function module_code(library_namespace) {
 		// <pre>...</pre>, <code>int f()</code>
 		wikitext = wikitext.replace_till_stable(PATTERN_TAG, function(all, tag,
 				attributes, inner, end_tag) {
+			// console.log('queue start:');
+			// console.log(queue);
 			var no_parse_tag = tag.toLowerCase() in no_parse_tags;
 			// 在章節標題、表格 td/th 或 template parameter 結束時，
 			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
@@ -2029,13 +2038,14 @@ function module_code(library_namespace) {
 						'parse_wikitext.tag');
 				inner = parse_wikitext(inner, options, queue);
 			}
+			attributes
+			// TODO: parse attributes
+			= _set_wiki_type(attributes || '', 'tag_attributes');
 			// [ ... ]: 在 inner 為 Template 之類時，
 			// 不應直接在上面設定 type=tag_inner，以免破壞應有之格式！
-			// 但仍需要設定 type=tag_inner 以應 for_each_token 之需，因此多層包覆。
+			// 但仍需要設定 type=tag_inner 以應 for_each_token 之需，因此多層[]包覆。
 			inner = _set_wiki_type([ inner || '' ], 'tag_inner');
-			all = [
-					attributes ? parse_wikitext(attributes, options, queue)
-							: '', inner ];
+			all = [ attributes, inner ];
 
 			if (normalize) {
 				tag = tag.toLowerCase();
@@ -2048,6 +2058,8 @@ function module_code(library_namespace) {
 
 			_set_wiki_type(all, 'tag');
 			queue.push(all);
+			// console.log('queue end:');
+			// console.log(queue);
 			return prevoius + include_mark + (queue.length - 1) + end_mark;
 		});
 
@@ -2162,9 +2174,10 @@ function module_code(library_namespace) {
 						else {
 							// 經過改變，需再進一步處理。
 							cell = parse_wikitext(matched[1], options, queue);
-							if (cell.type !== 'plain')
+							if (cell.type !== 'plain') {
 								// {String} or other elements
 								cell = [ cell ];
+							}
 						}
 						_set_wiki_type(cell, 'table_cell');
 
@@ -2240,8 +2253,9 @@ function module_code(library_namespace) {
 			}
 			// 經過改變，需再進一步處理。
 			parameters = parse_wikitext(parameters, options, queue);
-			if (parameters.type !== 'plain')
+			if (parameters.type !== 'plain') {
 				parameters = [ parameters ];
+			}
 			parameters = _set_wiki_type(parameters, 'section_title');
 			// 因為尚未resolve_escaped()，直接使用未parse_wikitext()者會包含未解碼之code!
 			// @see norma
@@ -2303,6 +2317,7 @@ function module_code(library_namespace) {
 		}
 
 		queue.push(wikitext);
+		// console.log(queue);
 		resolve_escaped(queue, include_mark, end_mark);
 
 		wikitext = queue[queue.length - 1];
@@ -2464,8 +2479,13 @@ function module_code(library_namespace) {
 	 * @returns {Date}date of the date string
 	 */
 	function parse_date_zh(wikitext, get_timevalue, get_all_list) {
+		var date_list;
+		if (get_all_list) {
+			// 若設定 get_all_list，須保證回傳 {Array}。
+			date_list = [];
+		}
 		if (!wikitext) {
-			return;
+			return date_list;
 		}
 
 		// $dateFormats, 'Y年n月j日 (D) H:i'
@@ -2475,22 +2495,20 @@ function module_code(library_namespace) {
 		var PATTERN_date_zh = /(\d{4})年(1?\d)月([1-3]?\d)日 \(.\)( \d{1,2}:\d{1,2} \([A-Z]{3}\))/g,
 		// <s>去掉</s>skip年分前之雜項。
 		// <s>去掉</s>skip星期與其後之雜項。
-		matched, date_list = [];
+		matched;
 
 		while (matched = PATTERN_date_zh.exec(wikitext)) {
 			// Warning: .to_Date() need data.date.
 			var date = matched[1] + '/' + matched[2] + '/' + matched[3]
 					+ matched[4];
 			date = get_timevalue ? Date.parse(date) : new Date(date);
-			date_list.push(date);
 			if (!get_all_list) {
 				return date;
 			}
+			date_list.push(date);
 		}
 
-		if (get_all_list) {
-			return date_list;
-		}
+		return date_list;
 	}
 
 	/**
