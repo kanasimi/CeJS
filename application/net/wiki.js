@@ -3851,7 +3851,7 @@ function module_code(library_namespace) {
 				// [KEY_SESSION]
 				session : this.data_session
 			}, next[3]),
-			//
+			// callback
 			function(data, error) {
 				_this.last_data = data || {
 					last_data : _this.last_data,
@@ -11849,6 +11849,8 @@ function module_code(library_namespace) {
 					}
 
 					// 可能為重定向頁面？
+					// 例如要求 "A of B" 而無此項，
+					// 但 [[en:A of B]]→[[en:A]] 且存在 "A"，則會回傳本"A"項。
 					wiki_API.page(key.clone(), function(page_data) {
 						var content = get_page_content(page_data),
 						// 測試檢查是否為重定向頁面。
@@ -13204,7 +13206,10 @@ function module_code(library_namespace) {
 		// the token should be sent as the last parameter.
 		POST_data.token = token;
 
-		var set_next_claim = function() {
+		// 即使已存在相同屬性值，依然添增/處理其 references 設定。
+		var force_add_references = options.force_add_references,
+		//
+		set_next_claim = function() {
 			var claims = data.claims;
 			library_namespace.debug('claims: ' + JSON.stringify(claims), 3,
 					'set_next_claim');
@@ -13253,18 +13258,26 @@ function module_code(library_namespace) {
 			if (property_data.exists_index >= 0) {
 				library_namespace.debug('Skip ' + property_id + '['
 						+ property_data.exists_index + '] 此屬性已存在相同值 ['
-						+ wikidata_datavalue(property_data)
-						+ ']，但依舊處理其 references 設定。', 1, 'set_next_claim');
-				if (!property_data.references) {
-					throw 'set_next_claim: No references found!';
+						+ wikidata_datavalue(property_data) + ']'
+						+ (force_add_references ? '，但依舊處理其 references 設定' : '')
+						+ '。', 1, 'set_next_claim');
+				if (force_add_references) {
+					if (!property_data.references) {
+						throw 'set_next_claim: No references found!';
+					}
+					var exists_references = entity.claims[property_id][property_data.exists_index].references;
+					set_reference(
+							exists_property_list[property_data.exists_index].id,
+							property_data, shift_to_next, POST_data,
+							claim_action[0], session,
+							// should use .references[*].snaks
+							exists_references && exists_references[0].snaks);
+
+				} else {
+					// default: 跳過已存在相同屬性值之 references 設定。
+					// 因為此時 references 可能為好幾組設定，不容易分割排除重複 references，結果造成重複輸入。
+					shift_to_next();
 				}
-				var references = entity.claims[property_id][property_data.exists_index].references;
-				set_reference(
-						exists_property_list[property_data.exists_index].id,
-						property_data, shift_to_next, POST_data,
-						claim_action[0], session,
-						// should use .references[*].snaks
-						references && references[0].snaks);
 
 				return;
 			}
