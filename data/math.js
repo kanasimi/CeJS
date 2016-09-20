@@ -1251,7 +1251,7 @@ function prime(index, limit) {
 				if (limit && limit <= last_prime_tested)
 					break;
 			}
-			library_namespace.debug('last prime tested = ' + last_prime_tested);
+			library_namespace.debug('last prime tested = ' + last_prime_tested, 2, 'prime');
 		}
 	}
 

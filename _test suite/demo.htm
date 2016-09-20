@@ -66,6 +66,11 @@ body {
 	background-color:#fdd;
 }
 
+.Chinese_numeral{
+	color:#26f;
+	background-color:#eef;
+	font-family:"標楷體",DFKai-SB,\006a19\006977\009ad4;
+}
 /*]]>*/</style>
 
 <title>CeL test suite / demo (examples) 功能範例展示</title>
@@ -357,7 +362,12 @@ function start_count(restart) {
 		else {
 			SVG_object.show(0);
 			if (/^\s*\d+\s*(?:,\s*\d+\s*)*$/.test(expression)) {
+				// 短除法 因數分解
 				CeL.draw_short_division(expression.split(/\s*,\s*/), [ 'panel_for_math', 2 ]);
+				CeL.new_node({
+					div : [ CeL.to_Chinese_numeral(expression), {br:null}, CeL.to_Chinese_numeral(expression, true) ],
+					C : 'Chinese_numeral'
+				}, 'panel_for_math');
 			}
 		}
 	}
