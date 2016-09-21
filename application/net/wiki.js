@@ -12151,7 +12151,9 @@ function module_code(library_namespace) {
 
 	// auto-detect if are multiple values
 	function is_multi_wikidata_value(value, options) {
-		return 'multi' in options ? options.multi
+		return value === wikidata_edit.remove_all ? false
+		//
+		: 'multi' in options ? options.multi
 		// auto-detect: guess if is multi
 		: Array.isArray(value)
 		//
@@ -12461,7 +12463,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * @inner only for set_claim()
+	 * @inner only for set_claims()
 	 */
 	var entity_properties = {
 		pageid : 1,
@@ -12482,7 +12484,7 @@ function module_code(library_namespace) {
 	/**
 	 * 放置不應該成為 key 的一些屬性名稱
 	 * 
-	 * @inner only for set_claim()
+	 * @inner only for set_claims()
 	 */
 	claim_properties = {
 		// mainsnak : {},
@@ -12659,11 +12661,13 @@ function module_code(library_namespace) {
 				if (key in claim_properties) {
 					additional_properties[key] = value;
 				} else if (key !== KEY_property_options) {
-					var is_multi = 'multi' in additional_properties
+					var is_multi = value !== wikidata_edit.remove_all
+					//
+					&& ('multi' in additional_properties
 					//
 					? additional_properties.multi
 					//
-					: is_multi_wikidata_value(value, property);
+					: is_multi_wikidata_value(value, property));
 					if (is_multi) {
 						// set multiple values
 						(Array.isArray(value) ? value : [ value ])
@@ -13019,20 +13023,23 @@ function module_code(library_namespace) {
 
 	}
 
+	// ----------------------------------------------------
+
 	/**
 	 * references: {Pid:value}
 	 * 
-	 * @inner only for set_claim()
+	 * @inner only for set_claims()
 	 */
-	function set_reference(GUID, property_data, callback, options, API_URL,
+	function set_references(GUID, property_data, callback, options, API_URL,
 			session, exists_references) {
 
 		normalize_wikidata_properties(property_data.references, function(
 				references) {
 			if (!Array.isArray(references)) {
 				if (references) {
-					library_namespace.err('set_claim: Invalid references: '
-							+ JSON.stringify(references));
+					library_namespace
+							.err('set_references: Invalid references: '
+									+ JSON.stringify(references));
 				} else {
 					// assert: 本次沒有要設定 claim 的資料。
 				}
@@ -13083,8 +13090,8 @@ function module_code(library_namespace) {
 				var error = data && data.error;
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
-					// e.g., set_reference: [failed-save] Edit conflict.
-					library_namespace.err('set_reference: [' + error.code
+					// e.g., set_references: [failed-save] Edit conflict.
+					library_namespace.err('set_references: [' + error.code
 							+ '] ' + error.info);
 				}
 				// data =
@@ -13098,18 +13105,18 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * remove/delete/刪除 property/claim
+	 * remove/delete/刪除 property/claims
 	 * 
-	 * @inner only for set_claim()
+	 * @inner only for set_claims()
 	 */
-	function remove_claim(exists_property_list, callback, options, API_URL,
+	function remove_claims(exists_property_list, callback, options, API_URL,
 			session, index) {
 		if (index === wikidata_edit.remove_all) {
 			// delete one by one
 			index = exists_property_list.length;
 			var remove_next_claim = function() {
 				if (index-- > 0) {
-					remove_claim(exists_property_list, remove_next_claim,
+					remove_claims(exists_property_list, remove_next_claim,
 							options, API_URL, session, index);
 				} else {
 					callback();
@@ -13121,7 +13128,7 @@ function module_code(library_namespace) {
 
 		library_namespace.debug('delete exists_property_list[' + index + ']: '
 				+ JSON.stringify(exists_property_list[index]), 1,
-				'remove_claim');
+				'remove_claims');
 		var POST_data = {
 			claim : exists_property_list[index].id
 		};
@@ -13142,7 +13149,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('remove_claim: [' + error.code + '] '
+				library_namespace.err('remove_claims: [' + error.code + '] '
 						+ error.info);
 			}
 			// data =
@@ -13152,18 +13159,18 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * edit property/claim
+	 * edit property/claims
 	 * 
 	 * @inner only for wikidata_edit()
 	 */
-	function set_claim(data, token, callback, options, session, entity) {
+	function set_claims(data, token, callback, options, session, entity) {
 		library_namespace.debug('normalize data: ' + JSON.stringify(data), 3,
-				'set_claim');
+				'set_claims');
 
 		if (!data.claims) {
 			library_namespace.debug(
 					'把所有不是正規屬性的當作是 claims property key，搬到 data.claims。'
-							+ '正規屬性留在原處。', 5, 'set_claim');
+							+ '正規屬性留在原處。', 5, 'set_claims');
 			data.claims = library_namespace.null_Object();
 			for ( var key in data) {
 				if (!(key in entity_properties)) {
@@ -13176,13 +13183,6 @@ function module_code(library_namespace) {
 			delete data.claims;
 		}
 
-		// TODO: 可拆解成 wbsetlabel, wbsetaliases, wbsetsitelink,
-		// wbcreateclaim, wbsetclaim, wbsetreference
-		// TODO: 創建Wikibase陳述。
-		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
-		// TODO: 創建實體項目重定向。
-		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
-
 		var POST_data = {
 			entity : options.id,
 			// placeholder 佔位符
@@ -13190,10 +13190,13 @@ function module_code(library_namespace) {
 			snaktype : null,
 			value : null,
 		},
-		// action to set properties
+		// action to set properties. 創建Wikibase陳述。
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateclaim
 		claim_action = [ get_data_API_URL(options), 'wbcreateclaim' ],
 		// process to what index of {Array}claims
 		claim_index = 0;
+
+		// TODO: 可拆解成 wbsetclaim
 
 		if (options.bot) {
 			POST_data.bot = 1;
@@ -13232,7 +13235,7 @@ function module_code(library_namespace) {
 				library_namespace.debug(
 						'delete ' + property_id + ' one by one', 1,
 						'set_next_claim');
-				remove_claim(exists_property_list, shift_to_next, POST_data,
+				remove_claims(exists_property_list, shift_to_next, POST_data,
 						claim_action[0], session, property_data.remove);
 				return;
 			}
@@ -13243,7 +13246,7 @@ function module_code(library_namespace) {
 				// delete: {P1:value,remove:true}
 				library_namespace.debug('delete ' + property_id + '['
 						+ property_data.remove + ']', 1, 'set_next_claim');
-				remove_claim(exists_property_list, shift_to_next, POST_data,
+				remove_claims(exists_property_list, shift_to_next, POST_data,
 						claim_action[0], session, property_data.remove);
 				return;
 			}
@@ -13266,7 +13269,7 @@ function module_code(library_namespace) {
 						throw 'set_next_claim: No references found!';
 					}
 					var exists_references = entity.claims[property_id][property_data.exists_index].references;
-					set_reference(
+					set_references(
 							exists_property_list[property_data.exists_index].id,
 							property_data, shift_to_next, POST_data,
 							claim_action[0], session,
@@ -13275,7 +13278,7 @@ function module_code(library_namespace) {
 
 				} else {
 					// default: 跳過已存在相同屬性值之 references 設定。
-					// 因為此時 references 可能為好幾組設定，不容易分割排除重複 references，結果造成重複輸入。
+					// 因為此時 references 可能為好幾組設定，不容易分割排除重複 references，結果將會造成重複輸入。
 					shift_to_next();
 				}
 
@@ -13315,7 +13318,7 @@ function module_code(library_namespace) {
 					// data =
 					// {"pageinfo":{"lastrevid":00},"success":1,"claim":{"mainsnak":{"snaktype":"value","property":"P1","datavalue":{"value":{"text":"name","language":"zh"},"type":"monolingualtext"},"datatype":"monolingualtext"},"type":"statement","id":"Q1$1-2-3","rank":"normal"}}
 
-					set_reference(data.claim.id, property_data, shift_to_next,
+					set_references(data.claim.id, property_data, shift_to_next,
 							POST_data, claim_action[0], session);
 
 				} else {
@@ -13343,7 +13346,7 @@ function module_code(library_namespace) {
 		normalize_wikidata_properties(data.claims, function(claims) {
 			if (!Array.isArray(claims)) {
 				if (claims) {
-					library_namespace.err('set_claim: Invalid claims: '
+					library_namespace.err('set_claims: Invalid claims: '
 							+ JSON.stringify(claims));
 				} else {
 					// assert: 本次沒有要設定 claim 的資料。
@@ -13424,6 +13427,130 @@ function module_code(library_namespace) {
 			summary : 'bot test: edit property'
 		});
 	}
+
+	// ----------------------------------------------------
+
+	// adjust 調整 labels to aliases
+	function adjust_labels(data) {
+		var data_labels = data.labels;
+		if (library_namespace.is_Object(data_labels)) {
+			// assert: 調整 {Object}data.labels。
+			// for
+			// {en:[{value:label,language:language_code},{value:label,language:language_code},...]}
+			var labels = [];
+			for ( var language in data_labels) {
+				var label = data_labels[language];
+				if (Array.isArray(label)) {
+					label.forEach(function(l) {
+						// assert: {Object}l
+						labels.push(l);
+					});
+				} else {
+					// assert: {Object}label
+					labels.push(label);
+				}
+			}
+			data_labels = labels;
+
+		} else if (!Array.isArray(data_labels)) {
+			// error?
+			return;
+		}
+
+		// for
+		// [{value:label,language:language_code},{value:label,language:language_code},...]
+		var labels = library_namespace.null_Object(),
+		// 先指定的為主labels，其他多的labels放到aliases。
+		aliases = data.aliases || library_namespace.null_Object(),
+		// reconstruct labels
+		errors = data_labels.filter(function(label) {
+			if (!label || !label.language || !label.value) {
+				return true;
+			}
+			if (!labels[label.language]
+			//
+			|| ('remove' in labels[label.language])) {
+				labels[label.language] = label;
+				return;
+			}
+
+			// 先指定的為主labels，其他多的labels放到aliases。
+			if (aliases[label.language]) {
+				// assert: Array.isArray(aliases[label.language])
+				aliases[label.language].push(label);
+			} else {
+				aliases[label.language] = [ label ];
+			}
+		});
+
+		// 去除空的設定
+		if (library_namespace.is_empty_object(labels)) {
+			delete data.labels;
+		} else {
+			data.labels = labels;
+		}
+
+		if (library_namespace.is_empty_object(aliases)) {
+			delete data.aliases;
+		} else {
+			data.aliases = aliases;
+		}
+	}
+
+	/**
+	 * edit labels
+	 * 
+	 * @inner only for wikidata_edit()
+	 */
+	function set_labels(data, token, callback, options, session, entity) {
+		if (!data.labels) {
+			callback();
+			return;
+		}
+
+		adjust_labels(data);
+
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetlabel
+		TODO;
+	}
+
+	/**
+	 * edit aliases
+	 * 
+	 * @inner only for wikidata_edit()
+	 */
+	function set_aliases(data, token, callback, options, session, entity) {
+		if (data.aliases)
+			;
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetaliases
+		TODO;
+	}
+
+	/**
+	 * edit descriptions
+	 * 
+	 * @inner only for wikidata_edit()
+	 */
+	function set_descriptions(data, token, callback, options, session, entity) {
+		if (data.descriptions)
+			;
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetdescription
+		TODO;
+	}
+
+	/**
+	 * edit sitelinks
+	 * 
+	 * @inner only for wikidata_edit()
+	 */
+	function set_sitelinks(data, token, callback, options, session, entity) {
+		if (data.sitelinks)
+			;
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetsitelink
+		TODO;
+	}
+
+	// ----------------------------------------------------
 
 	/**
 	 * Creates or modifies Wikibase entity. 創建或編輯Wikidata實體。
@@ -13571,7 +13698,7 @@ function module_code(library_namespace) {
 		}
 
 		function do_edit() {
-			// data 會在 set_claim() 被修改，因此不能提前設定。
+			// data 會在 set_claims() 被修改，因此不能提前設定。
 			options.data = JSON.stringify(data);
 			// console.log(options.data);
 
@@ -13598,7 +13725,8 @@ function module_code(library_namespace) {
 			}, options, session);
 		}
 
-		if (Array.isArray(data)) {
+		if (false && Array.isArray(data)) {
+			// TODO: 按照內容分類。
 			library_namespace
 					.warn('wikidata_edit: Treat {Array}data as {claims:data}!');
 			data = {
@@ -13606,7 +13734,13 @@ function module_code(library_namespace) {
 			};
 		}
 
-		set_claim(data, token, do_edit, options, session, entity);
+		// TODO: 可拆解成 wbsetlabel, wbsetaliases, wbsetsitelink
+		// TODO: 創建實體項目重定向。
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
+
+		// TODO: data.labels={language_code:label,...}
+
+		set_claims(data, token, do_edit, options, session, entity);
 	}
 
 	// CeL.wiki.edit_data.somevalue
