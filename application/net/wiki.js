@@ -12581,9 +12581,11 @@ function module_code(library_namespace) {
 			properties = [ properties ];
 
 		} else if (!Array.isArray(properties)) {
-			library_namespace
-					.err('normalize_wikidata_properties: Invalid properties: '
-							+ JSON.stringify(properties));
+			if (properties) {
+				library_namespace
+						.err('normalize_wikidata_properties: Invalid properties: '
+								+ JSON.stringify(properties));
+			}
 
 			callback(properties);
 			return;
@@ -13221,6 +13223,11 @@ function module_code(library_namespace) {
 			if (claim_index === claims.length) {
 				library_namespace.debug('done. 已處理完所有能處理的。 callback();', 2,
 						'set_next_claim');
+				// 去除空的設定。
+				if (library_namespace.is_empty_object(data.claims)) {
+					delete data.claims;
+				}
+
 				// console.log('' + callback);
 				callback();
 				return;
@@ -13464,12 +13471,14 @@ function module_code(library_namespace) {
 		aliases = data.aliases || library_namespace.null_Object(),
 		// reconstruct labels
 		errors = data_labels.filter(function(label) {
-			if (!label || !label.language || !label.value) {
+			if (!label || !label.language || !label.value
+					&& !('remove' in label)) {
 				return true;
 			}
-			if (!labels[label.language]
+			if (!labels[label.language] || !labels[label.language].value
 			//
 			|| ('remove' in labels[label.language])) {
+				// 設定成為新的值。
 				labels[label.language] = label;
 				return;
 			}
@@ -13483,7 +13492,7 @@ function module_code(library_namespace) {
 			}
 		});
 
-		// 去除空的設定
+		// 去除空的設定。
 		if (library_namespace.is_empty_object(labels)) {
 			delete data.labels;
 		} else {
@@ -13510,8 +13519,101 @@ function module_code(library_namespace) {
 
 		adjust_labels(data);
 
+		var data_labels = data.labels;
+		if (!library_namespace.is_Object(data_labels)) {
+			library_namespace.err('set_labels: Invalid labels: '
+					+ JSON.stringify(data_labels));
+			callback();
+			return;
+		}
+
+		var labels_to_set = [];
+		for ( var language in data_labels) {
+			var label = data_labels[language];
+			if (!library_namespace.is_Object(label)) {
+				library_namespace.err('set_labels: Invalid label: '
+						+ JSON.stringify(label));
+				continue;
+			}
+
+			labels_to_set.push(label);
+		}
+
+		if (labels_to_set.length === 0) {
+			callback();
+			return;
+		}
+
+		var POST_data = {
+			id : options.id,
+			language : '',
+			value : ''
+		};
+
+		if (options.bot) {
+			POST_data.bot = 1;
+		}
+		if (options.summary) {
+			POST_data.summary = options.summary;
+		}
+		// TODO: baserevid, 但這需要每次重新取得 revid。
+
+		// the token should be sent as the last parameter.
+		POST_data.token = token;
+
+		var index = 0,
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetlabel
-		TODO;
+		action = [ get_data_API_URL(options), 'wbsetlabel' ];
+
+		function set_next_labels() {
+			if (index === labels_to_set.length) {
+				library_namespace.debug('done. 已處理完所有能處理的。 callback();', 2,
+						'set_next_labels');
+				// 去除空的設定。
+				if (library_namespace.is_empty_object(data.labels)) {
+					delete data.labels;
+				}
+
+				callback();
+				return;
+			}
+
+			var label = labels_to_set[index++];
+			// assert: 這不會更改POST_data原有keys之順序。
+			// Object.assign(POST_data, label);
+
+			POST_data.language = label.language;
+			// wbsetlabel 處理 value='' 時會視同 remove。
+			POST_data.value = 'remove' in label ? ''
+			// assert: typeof label.value === 'string' or 'number'
+			: label.value;
+
+			// 設定單一 Wikibase 實體的標籤。
+			wiki_API.query(action, function(data) {
+				var error = data && data.error;
+				// 檢查伺服器回應是否有錯誤資訊。
+				if (error) {
+					/**
+					 * e.g., <code>
+					 * 
+					 * </code>
+					 */
+					library_namespace.err('set_next_labels: [' + error.code
+							+ '] ' + error.info);
+				} else {
+					// successful done.
+					delete data_labels[label.language];
+				}
+
+				set_next_labels();
+
+			}, POST_data, session);
+		}
+
+		set_next_labels();
+
+		// TODO: set sitelinks
+		// TODO: 可拆解成 wbsetaliases, wbsetsitelink
 	}
 
 	/**
@@ -13535,18 +13637,6 @@ function module_code(library_namespace) {
 		if (data.descriptions)
 			;
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetdescription
-		TODO;
-	}
-
-	/**
-	 * edit sitelinks
-	 * 
-	 * @inner only for wikidata_edit()
-	 */
-	function set_sitelinks(data, token, callback, options, session, entity) {
-		if (data.sitelinks)
-			;
-		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetsitelink
 		TODO;
 	}
 
@@ -13697,10 +13787,14 @@ function module_code(library_namespace) {
 			token = token.csrftoken;
 		}
 
-		function do_edit() {
+		function do_wbeditentity() {
 			// data 會在 set_claims() 被修改，因此不能提前設定。
 			options.data = JSON.stringify(data);
-			// console.log(options.data);
+			if (library_namespace.is_debug(2)) {
+				library_namespace.debug('options.data: ' + options.data, 1,
+						'do_wbeditentity');
+				console.log(data);
+			}
 
 			// the token should be sent as the last parameter.
 			options.token = token;
@@ -13734,13 +13828,14 @@ function module_code(library_namespace) {
 			};
 		}
 
-		// TODO: 可拆解成 wbsetlabel, wbsetaliases, wbsetsitelink
 		// TODO: 創建實體項目重定向。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
 
 		// TODO: data.labels={language_code:label,...}
 
-		set_claims(data, token, do_edit, options, session, entity);
+		set_claims(data, token, function() {
+			set_labels(data, token, do_wbeditentity, options, session, entity);
+		}, options, session, entity);
 	}
 
 	// CeL.wiki.edit_data.somevalue
