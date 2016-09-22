@@ -12466,6 +12466,7 @@ function module_code(library_namespace) {
 	 * @inner only for set_claims()
 	 */
 	var entity_properties = {
+		// 值的部分為單純表達意思用的內容結構，可以其他的值代替。
 		pageid : 1,
 		ns : 0,
 		title : 'Q1',
@@ -12487,6 +12488,7 @@ function module_code(library_namespace) {
 	 * @inner only for set_claims()
 	 */
 	claim_properties = {
+		// 值的部分為單純表達意思用的內容結構，可以其他的值代替。
 		// mainsnak : {},
 		// snaktype : '',
 		// datavalue : {},
@@ -13437,44 +13439,103 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// TODO:
+	// data.labels + data.aliases:
+	// {language_code:[label,{value:label,language:language_code,remove:''},...],...}
+	// or will auto-guess language 未指定語言者將會自動猜測:
+	// [label,{value:label,language:language_code,remove:''},{value:label,remove:''}]
+	// or
+	// [ [language_code,label], [language_code,label], ... ]
+	//
+	// 正規化 →
+	// {language_code:[label_1,label_2,...],...}
+	//
+	// 去掉重複的標籤 →
+	// {language_code:[label_1,label_2,...],...}
+	// + .remove: {language_code:[label_1,label_2,...],...}
+	//
+	// → data.labels = {language_code:{value:label,language:language_code},...}
+	// + data.aliases =
+	// {language_code:[{value:label,language:language_code}],...}
+
 	// adjust 調整 labels to aliases
-	function adjust_labels(data) {
-		var data_labels = data.labels;
-		if (library_namespace.is_Object(data_labels)) {
+	// @see wikidata_edit.add_labels
+	function normalize_labels_aliases(data, entity, options) {
+		var label_data = data.labels;
+		if (typeof label_data === 'string') {
+			label_data = [ label_data ];
+		}
+
+		if (library_namespace.is_Object(label_data)) {
 			// assert: 調整 {Object}data.labels。
 			// for
 			// {en:[{value:label,language:language_code},{value:label,language:language_code},...]}
 			var labels = [];
-			for ( var language in data_labels) {
-				var label = data_labels[language];
+			for ( var language in label_data) {
+				var label = label_data[language];
 				if (Array.isArray(label)) {
 					label.forEach(function(l) {
 						// assert: {Object}l
-						labels.push(l);
+						labels.push({
+							language : language,
+							value : l
+						});
 					});
 				} else {
 					// assert: {Object}label
 					labels.push(label);
 				}
 			}
-			data_labels = labels;
+			label_data = labels;
 
-		} else if (!Array.isArray(data_labels)) {
-			// error?
+		} else if (!Array.isArray(label_data)) {
+			if (label_data !== undefined) {
+				// error?
+			}
 			return;
 		}
 
+		// assert: {Array}label_data = [label,label,...]
+
 		// for
 		// [{value:label,language:language_code},{value:label,language:language_code},...]
+
+		// 正規化 →
+		// labels = {language_code:[label_1,label_2,...],...}
 		var labels = library_namespace.null_Object(),
 		// 先指定的為主labels，其他多的labels放到aliases。
 		aliases = data.aliases || library_namespace.null_Object(),
 		// reconstruct labels
-		errors = data_labels.filter(function(label) {
-			if (!label || !label.language || !label.value
-					&& !('remove' in label)) {
+		error_list = label_data.filter(function(label) {
+			if (!label) {
+				// Skip null label.
+				return;
+			}
+
+			if (typeof label === 'string') {
+				label = {
+					language : options.language || guess_language(label),
+					value : label
+				};
+			} else if (is_api_and_title(label, 'language')) {
+				label = {
+					language : label[0] || guess_language(label[1]),
+					value : label[1]
+				};
+			} else if (!label.language
+			//
+			|| !label.value && !('remove' in label)) {
+				// Invalid label?
 				return true;
 			}
+
+			if (!(label.language in labels) && entity && entity.labels
+					&& entity.labels[label.language]) {
+				labels[label.language]
+				// 不佚失原label。
+				= entity.labels[label.language].value;
+			}
+
 			if (!labels[label.language] || !labels[label.language].value
 			//
 			|| ('remove' in labels[label.language])) {
@@ -13504,6 +13565,8 @@ function module_code(library_namespace) {
 		} else {
 			data.aliases = aliases;
 		}
+
+		// return error_list;
 	}
 
 	/**
@@ -13513,11 +13576,12 @@ function module_code(library_namespace) {
 	 */
 	function set_labels(data, token, callback, options, session, entity) {
 		if (!data.labels) {
+			// Nothing to set
 			callback();
 			return;
 		}
 
-		adjust_labels(data);
+		normalize_labels_aliases(data, entity, options);
 
 		var data_labels = data.labels;
 		if (!library_namespace.is_Object(data_labels)) {
@@ -13622,10 +13686,121 @@ function module_code(library_namespace) {
 	 * @inner only for wikidata_edit()
 	 */
 	function set_aliases(data, token, callback, options, session, entity) {
-		if (data.aliases)
-			;
+		if (!data.aliases) {
+			// Nothing to set
+			callback();
+			return;
+		}
+
+		// console.log(data.aliases);
+
+		var data_aliases = data.aliases;
+		if (!library_namespace.is_Object(data_aliases)) {
+			library_namespace.err('set_aliases: Invalid aliases: '
+					+ JSON.stringify(data_aliases));
+			callback();
+			return;
+		}
+
+		var aliases_queue = [];
+		for ( var language in data_aliases) {
+			var alias_list = data_aliases[language];
+			if (!Array.isArray(alias_list)) {
+				library_namespace.err('set_aliases: Invalid aliases: '
+						+ JSON.stringify(alias_list));
+				continue;
+			}
+
+			var aliases_to_add = [], aliases_to_remove = [];
+			alias_list.forEach(function(alias) {
+				if ('remove' in alias) {
+					if (alias.value) {
+						aliases_to_remove.push(alias.value);
+					} else {
+						library_namespace
+								.err('set_aliases: No value to value for '
+										+ language);
+					}
+				} else {
+					aliases_to_add.push(alias.value);
+				}
+			});
+			if (aliases_to_add.length > 0 || aliases_to_remove > 0) {
+				aliases_queue.push([ language, aliases_to_add,
+						aliases_to_remove ]);
+			}
+		}
+
+		if (aliases_queue.length === 0) {
+			callback();
+			return;
+		}
+
+		// console.log(aliases_queue);
+
+		var POST_data = {
+			id : options.id,
+			language : '',
+			// set : '',
+			add : '',
+			remove : ''
+		};
+
+		if (options.bot) {
+			POST_data.bot = 1;
+		}
+		if (options.summary) {
+			POST_data.summary = options.summary;
+		}
+		// TODO: baserevid, 但這需要每次重新取得 revid。
+
+		// the token should be sent as the last parameter.
+		POST_data.token = token;
+
+		var
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetaliases
-		TODO;
+		action = [ get_data_API_URL(options), 'wbsetaliases' ];
+
+		function set_next_aliases() {
+			if (aliases_queue.length === 0) {
+				library_namespace.debug('done. 已處理完所有能處理的。 callback();', 2,
+						'set_next_aliases');
+				// 有錯誤也已經提醒。
+				delete data.aliases;
+
+				callback();
+				return;
+			}
+
+			var aliases_data = aliases_queue.pop();
+			// assert: 這不會更改POST_data原有keys之順序。
+
+			POST_data.language = aliases_data[0];
+			POST_data.add = aliases_data[1].join('|');
+			POST_data.remove = aliases_data[2].join('|');
+
+			// 設定單一 Wikibase 實體的標籤。
+			wiki_API.query(action, function(data) {
+				var error = data && data.error;
+				// 檢查伺服器回應是否有錯誤資訊。
+				if (error) {
+					/**
+					 * e.g., <code>
+					 * 
+					 * </code>
+					 */
+					library_namespace.err('set_next_aliases: [' + error.code
+							+ '] ' + error.info);
+				} else {
+					// successful done.
+				}
+
+				set_next_aliases();
+
+			}, POST_data, session);
+		}
+
+		set_next_aliases();
 	}
 
 	/**
@@ -13834,19 +14009,24 @@ function module_code(library_namespace) {
 		// TODO: data.labels={language_code:label,...}
 
 		set_claims(data, token, function() {
-			set_labels(data, token, do_wbeditentity, options, session, entity);
+			set_labels(data, token, function() {
+				set_aliases(data, token, do_wbeditentity, options, session,
+						entity);
+			}, options, session, entity);
 		}, options, session, entity);
 	}
 
 	// CeL.wiki.edit_data.somevalue
 	// snaktype somevalue 未知數值 unknown value
 	wikidata_edit.somevalue = {
-		unknown : true
+		// 單純表達意思用的內容結構，可以其他的值代替。
+		unknown_value : true
 	};
 
 	// CeL.wiki.edit_data.remove_all
 	// 注意: 不可為 index!
 	wikidata_edit.remove_all = {
+		// 單純表達意思用的內容結構，可以其他的值代替。
 		remove_all : true
 	};
 
@@ -14479,7 +14659,10 @@ function module_code(library_namespace) {
 		parser : page_parser,
 
 		/** constant 中途跳出作業用。 */
-		quit_operation : {},
+		quit_operation : {
+			// 單純表達意思用的內容結構，可以其他的值代替。
+			quit : true
+		},
 
 		is_page_data : get_page_content.is_page_data,
 		is_entity : is_entity,
