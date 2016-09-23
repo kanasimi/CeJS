@@ -10931,8 +10931,9 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (session.data_session && API_URL & !force)
+		if (session.data_session && API_URL & !force) {
 			return;
+		}
 
 		if (session.data_session) {
 			// 直接清空佇列。
@@ -10952,6 +10953,8 @@ function module_code(library_namespace) {
 		password || session.token.lgpassword,
 		// API_URL: host
 		typeof API_URL === 'string' && api_URL(API_URL) || wikidata_API_URL);
+		// 宿主 host session
+		session.data_session.host = session;
 		session.data_session.run(callback);
 	}
 
@@ -13482,8 +13485,12 @@ function module_code(library_namespace) {
 						});
 					});
 				} else {
-					// assert: {Object}label
-					labels.push(label);
+					labels.push(typeof label === 'string' ? {
+						language : language,
+						value : label
+					}
+					// assert: {Object}label || [language,label]
+					: label);
 				}
 			}
 			label_data = labels;
@@ -13507,7 +13514,7 @@ function module_code(library_namespace) {
 		aliases = data.aliases || library_namespace.null_Object(),
 		// reconstruct labels
 		error_list = label_data.filter(function(label) {
-			if (!label) {
+			if (!label && label !== '') {
 				// Skip null label.
 				return;
 			}
@@ -13525,7 +13532,8 @@ function module_code(library_namespace) {
 			} else if (!label.language
 			//
 			|| !label.value && !('remove' in label)) {
-				// Invalid label?
+				library_namespace.err('set_labels: Invalid label: '
+						+ JSON.stringify(label));
 				return true;
 			}
 
@@ -13677,7 +13685,7 @@ function module_code(library_namespace) {
 		set_next_labels();
 
 		// TODO: set sitelinks
-		// TODO: 可拆解成 wbsetaliases, wbsetsitelink
+		// TODO: 可拆解成 wbsetsitelink
 	}
 
 	/**
@@ -13809,10 +13817,158 @@ function module_code(library_namespace) {
 	 * @inner only for wikidata_edit()
 	 */
 	function set_descriptions(data, token, callback, options, session, entity) {
-		if (data.descriptions)
-			;
+		if (!data.descriptions) {
+			// Nothing to set
+			callback();
+			return;
+		}
+
+		// console.log(data.descriptions);
+
+		var data_descriptions = data.descriptions;
+		if (typeof data_descriptions === 'string') {
+			data_descriptions = [ data_descriptions ];
+		}
+
+		if (library_namespace.is_Object(data_descriptions)) {
+			// assert: 調整 {Object}data.descriptions。
+			// for
+			// {en:[{value:label,language:language_code},{value:label,language:language_code},...]}
+			var descriptions = [];
+			for ( var language in data_descriptions) {
+				var description = data_descriptions[language];
+				if (Array.isArray(description)) {
+					description.forEach(function(d) {
+						// assert: {Object}d
+						descriptions.push({
+							language : language,
+							value : d
+						});
+					});
+				} else {
+					descriptions.push(typeof description === 'string' ? {
+						language : language,
+						value : description
+					}
+					// assert: {Object}description || [language,description]
+					: description);
+				}
+			}
+			data_descriptions = descriptions;
+
+		} else if (!Array.isArray(data_descriptions)) {
+			if (data_descriptions !== undefined) {
+				// error?
+			}
+			return;
+		}
+
+		// 正規化 →
+		// descriptions = {language_code:description,...}
+		var descriptions = library_namespace.null_Object(),
+		//
+		d_language = session.language || session.host.language
+				|| default_language,
+		// reconstruct labels
+		error_list = data_descriptions.filter(function(description) {
+			var language;
+			if (typeof description === 'string') {
+				language = options.language || guess_language(description)
+						|| d_language;
+			} else if (is_api_and_title(description, 'language')) {
+				language = description[0] || guess_language(description[1])
+						|| d_language;
+				description = description[1];
+			} else if (!description || !description.language
+			//
+			|| !description.value && !('remove' in description)) {
+				library_namespace
+						.err('set_descriptions: Invalid descriptions: '
+								+ JSON.stringify(description));
+				return true;
+			} else {
+				language = description.language || options.language
+						|| guess_language(description.value) || d_language;
+				if ('remove' in description) {
+					description = '';
+				} else {
+					description = description.value;
+				}
+			}
+
+			// 設定成為新的值。
+			descriptions[language] = description || '';
+		});
+
+		// 去除空的設定。
+		if (library_namespace.is_empty_object(descriptions)) {
+			delete data.descriptions;
+			callback();
+			return;
+		}
+
+		// console.log(descriptions);
+
+		var POST_data = {
+			id : options.id,
+			language : '',
+			value : ''
+		};
+
+		if (options.bot) {
+			POST_data.bot = 1;
+		}
+		if (options.summary) {
+			POST_data.summary = options.summary;
+		}
+		// TODO: baserevid, 但這需要每次重新取得 revid。
+
+		// the token should be sent as the last parameter.
+		POST_data.token = token;
+
+		var description_keys = Object.keys(descriptions),
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetdescription
-		TODO;
+		action = [ get_data_API_URL(options), 'wbsetdescription' ];
+
+		function set_next_descriptions() {
+			if (description_keys.length === 0) {
+				library_namespace.debug('done. 已處理完所有能處理的。 callback();', 2,
+						'set_next_descriptions');
+				// 有錯誤也已經提醒。
+				delete data.descriptions;
+
+				callback();
+				return;
+			}
+
+			var language = description_keys.pop();
+			// assert: 這不會更改POST_data原有keys之順序。
+
+			POST_data.language = language;
+			POST_data.value = descriptions[language];
+
+			// 設定單一 Wikibase 實體的標籤。
+			wiki_API.query(action, function(data) {
+				var error = data && data.error;
+				// 檢查伺服器回應是否有錯誤資訊。
+				if (error) {
+					/**
+					 * e.g., <code>
+					 * 
+					 * </code>
+					 */
+					library_namespace.err('set_next_descriptions: ['
+							+ error.code + '] ' + error.info);
+				} else {
+					// successful done.
+				}
+
+				set_next_descriptions();
+
+			}, POST_data, session);
+		}
+
+		set_next_descriptions();
 	}
 
 	// ----------------------------------------------------
@@ -14008,10 +14164,14 @@ function module_code(library_namespace) {
 
 		// TODO: data.labels={language_code:label,...}
 
+		// TODO: 避免 callback hell: using ES7 async/await?
+		// TODO: 用更簡單的方法統合這幾個函數。
 		set_claims(data, token, function() {
 			set_labels(data, token, function() {
-				set_aliases(data, token, do_wbeditentity, options, session,
-						entity);
+				set_aliases(data, token, function() {
+					set_descriptions(data, token, do_wbeditentity, options,
+							session, entity);
+				}, options, session, entity);
 			}, options, session, entity);
 		}, options, session, entity);
 	}
