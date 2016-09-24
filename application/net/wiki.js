@@ -271,7 +271,9 @@ function module_code(library_namespace) {
 	function is_api_and_title(value, type, ignore_api) {
 		// console.trace(value);
 
-		if (!Array.isArray(value) || value.length !== 2) {
+		if (!Array.isArray(value) || value.length !== 2
+		//
+		|| get_page_content.is_page_data(value[0])) {
 			// 若有必要設定，應使用 normalize_title_parameter(title, options)。
 			// 此時不能改變傳入之 value 本身，亦不能僅測試是否有 API_URL。
 			return false;
