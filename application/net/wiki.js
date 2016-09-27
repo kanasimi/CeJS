@@ -11989,6 +11989,9 @@ function module_code(library_namespace) {
 					data = data[0];
 					if (props && (props in data)) {
 						data = data[props];
+					} else {
+						// assert: 'value' is NOT in data
+						data.value = wikidata_entity_value;
 					}
 				}
 			}
@@ -12005,6 +12008,51 @@ function module_code(library_namespace) {
 			}
 		}, null, options);
 	}
+
+	function wikidata_entity_value(property, options, callback) {
+		if (library_namespace.is_Object(property)) {
+			if (callback) {
+				;
+			}
+			// TODO: for callback
+			for ( var key in property) {
+				var _options = property[key];
+				if (typeof _options === 'string'
+						&& /^[a-z\-]{2,20}$/i.test(_options)) {
+					_options = Object.assign({
+						language : _options
+					}, options);
+				} else {
+					_options = options;
+				}
+				property[key] = wikidata_entity_value(key, _options);
+			}
+			return property;
+		}
+
+		var value, language = options.language || default_language, matched = typeof property === 'string'
+				&& property.match(/^P(\d+)$/i);
+
+		if (matched) {
+			property = +matched[1];
+		}
+
+		if (property === 'label') {
+			value = this.labels[language];
+		} else if (property === 'alias') {
+			value = this.aliases[language];
+		} else if (property === 'sitelink') {
+			value = this.sitelinks[language];
+		} else if (typeof property === 'number') {
+			value = this.claims['P' + property];
+		} else {
+			;
+		}
+
+		return wikidata_datavalue(value, callback, options);
+	}
+
+	// ------------------------------------------------------------------------
 
 	// is Q4167410: Wikimedia disambiguation page 維基媒體消歧義頁
 	// CeL.wiki.data.is_DAB(entity)
