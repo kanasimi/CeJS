@@ -2030,11 +2030,15 @@ function module_code(library_namespace) {
 			library_namespace.debug(prevoius + ' + <' + tag + '>', 4,
 					'parse_wikitext.tag');
 
+			// 2016/9/28 9:7:7
+			// 因為no_parse_tag內部可能已解析成其他的單元，因此還是必須parse_wikitext()。
+			// e.g., '<nowiki>-{ }-</nowiki>'
+			//
 			// 若為 <pre> 之內，則不再變換。
 			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
 			// 則會顯示出內部<pre>，並取內部</pre>為外部<pre>之結尾。
 			// 因此應避免 <pre> 內有 <pre>。
-			if (!no_parse_tag) {
+			if (true || !no_parse_tag) {
 				// 經過改變，需再進一步處理。
 				library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
 						'parse_wikitext.tag');
