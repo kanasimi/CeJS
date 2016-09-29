@@ -352,7 +352,8 @@ function module_code(library_namespace) {
 		if (!is_api_and_title(action, false, options)) {
 			library_namespace.warn(
 			//
-			'normalize_title_parameter: Invalid title! [' + title + ']');
+			'normalize_title_parameter: Invalid title! '
+					+ get_page_title_link(title));
 			return;
 		}
 
@@ -637,9 +638,8 @@ function module_code(library_namespace) {
 				return title;
 		}
 		var matched = title.match(get_namespace.pattern);
-		library_namespace.debug(
-		//
-		'Test [[' + title + ']], get [' + matched + '] using pattern '
+		library_namespace.debug('Test ' + get_page_title_link(title)
+				+ ', get [' + matched + '] using pattern '
 				+ get_namespace.pattern, 4, 'remove_namespace');
 		if (matched)
 			return (matched ? matched[2] : title).trim();
@@ -3002,9 +3002,12 @@ function module_code(library_namespace) {
 	function get_page_title(page_data) {
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
 		if (Array.isArray(page_data)) {
-			if (get_page_content.is_page_data(page_data[0]))
+			if (get_page_content.is_page_data(page_data[0])) {
 				// assert: page_data = [ page data, page data, ... ]
 				return page_data.map(get_page_title);
+			}
+			if (is_api_and_title(page_data)) {
+			}
 			// assert: page_data =
 			// [ {String}API_URL, {String}title || {Object}page_data ]
 			return get_page_title(page_data[1]);
@@ -3013,9 +3016,10 @@ function module_code(library_namespace) {
 		if (library_namespace.is_Object(page_data)) {
 			var title = page_data.title;
 			// 檢測一般頁面
-			if (title)
+			if (title) {
 				// should use get_page_content.is_page_data(page_data)
 				return title;
+			}
 
 			// for flow page
 			// page_data.header: 在 Flow_page() 中設定。
@@ -3033,6 +3037,33 @@ function module_code(library_namespace) {
 		// e.g., (typeof page_data === 'string')
 		// e.g., page_data === undefined
 		return page_data;
+	}
+
+	function get_page_title_link(page_data, session) {
+		var is_category, title;
+
+		// is_api_and_title(page_data)
+		if (get_page_content.is_page_data(page_data)) {
+			is_category = page_data.ns === get_namespace.hash.category;
+			title = page_data.title;
+		} else {
+			if (Array.isArray(page_data)) {
+				title = page_data[1];
+			} else {
+				// assert: typeof page_data === 'string'
+				title = page_data;
+			}
+			title = get_page_title(title);
+			is_category = PATTERN_category_prefix.test(title);
+		}
+
+		if (session) {
+			// e.g., [[:zh:w:...]]
+			TODO;
+		} else if (is_category) {
+			title = ':' + title;
+		}
+		return title ? '[[' + title + ']]' : '';
 	}
 
 	/**
@@ -3961,7 +3992,7 @@ function module_code(library_namespace) {
 		// assert: 為規範過之 title，如採用 File: 而非 Image:, 檔案:。
 		if (title && /^(?:Category|File):/.test(title))
 			title = ':' + title;
-		this.push('* ' + (title ? '[[' + title + ']]: ' : '') + message);
+		this.push('* ' + get_page_title_link(title) + message);
 	}
 
 	function reset_messages() {
@@ -4785,10 +4816,12 @@ function module_code(library_namespace) {
 			//
 			= get_page_content(_this.last_page).trimRight())) {
 				content_to_copy = content + '\n' + content_to_copy;
-				options.summary = 'Append from [[' + title.title + ']].';
+				options.summary = 'Append from ' + get_page_title_link(title)
+						+ '.';
 			}
 			if (!options.summary) {
-				options.summary = 'Copy from [[' + title.title + ']].';
+				options.summary = 'Copy from ' + get_page_title_link(title)
+						+ '.';
 			}
 			_this.actions.unshift(
 			// wiki.edit(page, options, callback)
@@ -5505,7 +5538,7 @@ function module_code(library_namespace) {
 
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
-			throw 'wiki_API.page: Invalid title: [' + title + ']';
+			throw 'wiki_API.page: Invalid title: ' + get_page_title_link(title);
 		}
 
 		var get_content;
@@ -5838,9 +5871,9 @@ function module_code(library_namespace) {
 						//
 						+ redirect_data.tofragment;
 					}
-					library_namespace.debug('[[' + title
+					library_namespace.debug(get_page_title_link(title)
 					// →
-					+ ']] redirected to section [[' + redirect_data.to + '#'
+					+ ' redirected to section [[' + redirect_data.to + '#'
 							+ redirect_data.tofragment + ']]!', 1,
 							'wiki_API.redirect_to');
 					callback(redirect_data, page_data);
@@ -6177,7 +6210,8 @@ function module_code(library_namespace) {
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
 	function get_list(type, title, callback, options) {
-		library_namespace.debug(type + (title ? ' [[' + title + ']]' : '')
+		library_namespace.debug(type
+				+ (title ? ' ' + get_page_title_link(title) : '')
 				+ ', callback: ' + callback, 3, 'get_list');
 
 		var options,
@@ -6295,7 +6329,8 @@ function module_code(library_namespace) {
 		}
 
 		if (continue_from = options[continue_from]) {
-			library_namespace.debug(type + (title ? ' [[' + title + ']]' : '')
+			library_namespace.debug(type
+					+ (title ? ' ' + get_page_title_link(title) : '')
 					+ ': start from ' + continue_from, 2, 'get_list');
 		}
 
@@ -6654,7 +6689,8 @@ function module_code(library_namespace) {
 		options[KEY_SESSION][options.type](target, function(pages, titles,
 				title) {
 			library_namespace.debug('Get ' + pages.length + ' ' + options.type
-					+ ' pages of [[' + title + ']]', 2, 'wiki_API.list');
+					+ ' pages of ' + get_page_title_link(title), 2,
+					'wiki_API.list');
 			if (typeof options.callback === 'function') {
 				// options.callback() 為取得每一階段清單時所會被執行的函數。
 				// 注意: arguments 與 get_list() 之 callback 連動。
@@ -6926,7 +6962,7 @@ function module_code(library_namespace) {
 			title = wiki_API.check_stop.title(options.token);
 		}
 
-		library_namespace.debug('檢查緊急停止頁面 [[' + title + ']]', 1,
+		library_namespace.debug('檢查緊急停止頁面 ' + get_page_title_link(title), 1,
 				'wiki_API.check_stop');
 
 		var session = options[KEY_SESSION] || this;
@@ -6969,8 +7005,8 @@ function module_code(library_namespace) {
 				'wiki_API.check_stop: 採用 pattern: ' + PATTERN);
 				stopped = PATTERN.test(content, page_data);
 				if (stopped) {
-					library_namespace
-							.warn('緊急停止頁面[[' + title + ']]有留言要停止編輯作業！');
+					library_namespace.warn('緊急停止頁面 '
+							+ get_page_title_link(title) + ' 有留言要停止編輯作業！');
 				}
 			}
 
@@ -7110,8 +7146,8 @@ function module_code(library_namespace) {
 			// 設定寫入目標。一般為 debug、test 測試期間用。
 			// e.g., write_to:'Wikipedia:沙盒',
 			title = options.write_to;
-			library_namespace.debug('依 options.write_to 寫入至 [[' + title + ']]',
-					1, 'wiki_API.edit');
+			library_namespace.debug('依 options.write_to 寫入至 '
+					+ get_page_title_link(title), 1, 'wiki_API.edit');
 		}
 
 		// 造出可 modify 的 options。
@@ -7256,21 +7292,14 @@ function module_code(library_namespace) {
 		}
 
 		if (action) {
-			var page_data = get_page_content.is_page_data(title);
-			title = get_page_title(title);
-			var is_category = page_data ? page_data.ns === get_namespace.hash.category
-					: PATTERN_category_prefix.test(title);
-			if (is_category) {
-				title = ':' + title;
-			}
 			if (action[1] !== 'skip') {
 				// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
 				library_namespace.warn((caller || 'wiki_API.edit.check_data')
-						+ ': [[' + title + ']]: '
+						+ ': ' + get_page_title_link(title) + ': '
 						+ (action[1] || gettext('No reason provided')));
 			} else {
-				library_namespace.debug('Skip [[' + title + ']]', 2, caller
-						|| 'wiki_API.edit.check_data');
+				library_namespace.debug('Skip ' + get_page_title_link(title),
+						2, caller || 'wiki_API.edit.check_data');
 			}
 			return action[0];
 		}
@@ -7565,7 +7594,8 @@ function module_code(library_namespace) {
 
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
-			throw 'wiki_API.redirects: Invalid title: [' + title + ']';
+			throw 'wiki_API.redirects: Invalid title: '
+					+ get_page_title_link(title);
 		}
 
 		action[1] = 'query&prop=redirects&rdlimit=max&' + action[1];
@@ -10017,15 +10047,16 @@ function module_code(library_namespace) {
 
 			// console.log(CeL.wiki.content_of(page_data));
 
-			library_namespace.debug('[[' + title + ']] revid ' + revid, 4,
-					'revision_cacher.had');
+			library_namespace.debug(get_page_title_link(title) + ' revid '
+					+ revid, 4, 'revision_cacher.had');
 			if (title in this.cached) {
 				var this_data = this[this.KEY_DATA], setup_new = this_data !== this.cached,
 				//
 				cached = this.cached[title], cached_revid = this.id_only ? cached
 						: cached[this.KEY_ID];
-				library_namespace.debug('[[' + title + ']] cached revid '
-						+ cached_revid, 4, 'revision_cacher.had');
+				library_namespace.debug(get_page_title_link(title)
+						+ ' cached revid ' + cached_revid, 4,
+						'revision_cacher.had');
 				if (cached_revid === revid) {
 					if (setup_new) {
 						// copy old data.
@@ -10035,8 +10066,8 @@ function module_code(library_namespace) {
 					// this.skipped++;
 					this.continuous_skip++;
 					library_namespace.debug('Skip ' + this.continuous_skip
-							+ ': [[' + title + ']] revid ' + revid, 2,
-							'revision_cacher.had');
+							+ ': ' + get_page_title_link(title) + ' revid '
+							+ revid, 2, 'revision_cacher.had');
 					return true;
 				}
 				// assert: cached_revid < revid
@@ -10576,7 +10607,7 @@ function module_code(library_namespace) {
 	function Flow_info(title, callback, options) {
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
-			throw 'Flow_info: Invalid title: [' + title + ']';
+			throw 'Flow_info: Invalid title: ' + get_page_title_link(title);
 		}
 
 		action[1] = 'query&prop=flowinfo&' + action[1];
