@@ -2033,16 +2033,16 @@ function module_code(library_namespace) {
 			// 2016/9/28 9:7:7
 			// 因為no_parse_tag內部可能已解析成其他的單元，因此還是必須parse_wikitext()。
 			// e.g., '<nowiki>-{ }-</nowiki>'
-			//
+			// 經過改變，需再進一步處理。
+			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
+					'parse_wikitext.tag');
+			inner = parse_wikitext(inner, options, queue);
 			// 若為 <pre> 之內，則不再變換。
 			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
 			// 則會顯示出內部<pre>，並取內部</pre>為外部<pre>之結尾。
 			// 因此應避免 <pre> 內有 <pre>。
-			if (true || !no_parse_tag) {
-				// 經過改變，需再進一步處理。
-				library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
-						'parse_wikitext.tag');
-				inner = parse_wikitext(inner, options, queue);
+			if (false && !no_parse_tag) {
+				inner = inner.toString();
 			}
 			attributes
 			// TODO: parse attributes
@@ -7256,12 +7256,17 @@ function module_code(library_namespace) {
 		}
 
 		if (action) {
+			var page_data = get_page_content.is_page_data(title);
 			title = get_page_title(title);
+			var is_category = page_data ? page_data.ns === get_namespace.hash.category
+					: PATTERN_category_prefix.test(title);
+			if (is_category) {
+				title = ':' + title;
+			}
 			if (action[1] !== 'skip') {
 				// 被 skip/pass 的話，連警告都不顯現，當作正常狀況。
 				library_namespace.warn((caller || 'wiki_API.edit.check_data')
-				//
-				+ ': [[' + title + ']]: '
+						+ ': [[' + title + ']]: '
 						+ (action[1] || gettext('No reason provided')));
 			} else {
 				library_namespace.debug('Skip [[' + title + ']]', 2, caller
