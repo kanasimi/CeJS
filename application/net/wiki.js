@@ -11066,7 +11066,9 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
 		'wbsearchentities&search=' + encodeURIComponent(key)
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
-		+ '&language=' + (options.language || default_language)
+		+ '&language=' + (options.language
+		//
+		|| wikidata_get_site(options, true) || default_language)
 		//
 		+ '&limit=' + (options.limit || 'max') ];
 
@@ -11157,7 +11159,7 @@ function module_code(library_namespace) {
 		// 或改成 wikidata_search_cache={item:{},property:{}}。
 		var language_and_key,
 		// 須與 wikidata_search() 相同!
-		language = options && options.language || default_language;
+		language = wikidata_get_site(options, true) || default_language;
 		if (typeof key === 'string') {
 			key = normalize_wikidata_key(key);
 			language_and_key = language + ':' + key;
@@ -11190,11 +11192,12 @@ function module_code(library_namespace) {
 					// console.log(options);
 					// console.trace(1);
 					wikidata_search.use_cache(key[index++], cache_next_key,
-							Object.assign(library_namespace.null_Object(),
-									wikidata_search.use_cache.default_options,
-									{
-										must_callback : true
-									}, options));
+					//
+					Object.assign(library_namespace.null_Object(),
+					//
+					wikidata_search.use_cache.default_options, {
+						must_callback : true
+					}, options));
 				};
 				cache_next_key();
 				return;
@@ -11243,14 +11246,15 @@ function module_code(library_namespace) {
 			}, options);
 		}
 
+		// console.log(arguments);
 		wikidata_search(key, function(id, error) {
 			// console.log(language_and_key + ': ' + id);
 			if (!id) {
 				library_namespace
 						.err('wikidata_search.use_cache: Nothing found: ['
 								+ language_and_key + ']');
-				console.log(options);
-				throw 1;
+				// console.log(options);
+				// console.trace('wikidata_search.use_cache: Nothing found');
 
 			} else if (typeof id === 'string' && /^[PQ]\d{1,10}$/.test(id)) {
 				library_namespace.debug('cache '
@@ -11525,11 +11529,11 @@ function module_code(library_namespace) {
 				// default: get label 標籤標題
 				: function(entity) {
 					entity = entity.labels || entity;
-					entity = entity[options && options.language
+					entity = entity[wikidata_get_site(options, true)
 							|| default_language]
 							|| entity;
 					callback('value' in entity ? entity.value : entity);
-				}, options && options.language);
+				}, wikidata_get_site(options, true));
 			}
 			return value;
 		}
@@ -11643,8 +11647,8 @@ function module_code(library_namespace) {
 	 */
 	function language_to_site(language) {
 		// 正規化。
-		language = language ? String(language).trim().toLowerCase()
-				: default_language;
+		language = language && typeof language !== 'object' ? String(language)
+				.trim().toLowerCase() : default_language;
 
 		if (language.startsWith('category')) {
 			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
@@ -11676,13 +11680,14 @@ function module_code(library_namespace) {
 	 * 
 	 * @inner
 	 */
-	function wikidata_get_site(options) {
-		var session = options[KEY_SESSION], language;
+	function wikidata_get_site(options, get_language) {
+		var session = options && options[KEY_SESSION], language;
 		if (session) {
 			// 注意:在取得 page 後，中途更改過 API_URL 的話，這邊會取得錯誤的資訊！
-			if (session.language) {
-				language = session.language;
-			} else {
+			language = session.language || session.host
+					&& session.host.language;
+			// console.log(session.host);
+			if (!language) {
 				var API_URL = session.host && session.host.API_URL
 						|| session.API_URL;
 				if (language = API_URL.match(PATTERN_wiki_project_URL)) {
@@ -11696,7 +11701,7 @@ function module_code(library_namespace) {
 					+ language_to_site(language || options), 3,
 					'wikidata_get_site');
 		}
-		return language_to_site(language || options);
+		return get_language ? language : language_to_site(language || options);
 	}
 
 	/**
@@ -11861,7 +11866,8 @@ function module_code(library_namespace) {
 				//
 				'wikidata_entity: 您或許該採用 options.props = ' + property);
 			/** {String}setup language of key and property name. 僅在需要 search 時使用。 */
-			property = [ options.language || default_language, property ];
+			property = [ wikidata_get_site(options, true) || default_language,
+					property ];
 		}
 
 		// console.log('property: ' + property);
@@ -11884,7 +11890,7 @@ function module_code(library_namespace) {
 		} else if (typeof key === 'string'
 				&& !/^[PQ]\d{1,10}(\|[PQ]\d{1,10})*$/.test(key)) {
 			/** {String}setup language of key and property name. 僅在需要 search 時使用。 */
-			key = [ options.language || default_language, key ];
+			key = [ wikidata_get_site(options, true) || default_language, key ];
 		}
 
 		if (Array.isArray(key)) {
@@ -11965,7 +11971,8 @@ function module_code(library_namespace) {
 		// 以允許自行設定 {title:title,language:language}。
 		if (key.title) {
 			action = 'sites='
-					+ (key.language && language_to_site(key.language) || wikidata_get_site(options))
+					+ (key.site || key.language
+							&& language_to_site(key.language) || wikidata_get_site(options))
 					+ '&titles=' + encodeURIComponent(key.title);
 		} else {
 			action = 'ids=' + key;
@@ -11975,23 +11982,28 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
 		action = [ API_URL, 'wbgetentities&' + action ];
 
-		if (property && !options.props)
+		if (property && !('props' in options)) {
 			options.props = 'claims';
+		}
 		var props = options.props;
 		if (Array.isArray(props)) {
 			props = props.join('|');
 		}
-		if (props) {
+		// 可接受 "props=" (空 props)。
+		if (props || props === '') {
 			// retrieve properties. 僅擷取這些屬性。
 			action[1] += '&props=' + props;
-			if (props.includes('|'))
+			if (props.includes('|')) {
 				// 對於多種屬性，不特別取之。
 				props = null;
+			}
 		}
 		if (options.languages) {
 			// retrieve languages, language to callback. 僅擷取這些語言。
 			action[1] += '&languages=' + options.languages;
 		}
+		// console.log(options);
+		// console.log(action);
 
 		// console.log('wikidata_entity: API_URL: ' + API_URL);
 		// console.log('wikidata_entity: action: ' + action);
@@ -12038,7 +12050,9 @@ function module_code(library_namespace) {
 						data = data[props];
 					} else {
 						// assert: 'value' is NOT in data
-						data.value = wikidata_entity_value;
+						Object.defineProperty(data, 'value', {
+							value : wikidata_entity_value
+						});
 					}
 				}
 			}
@@ -12077,7 +12091,8 @@ function module_code(library_namespace) {
 			return property;
 		}
 
-		var value, language = options.language || default_language, matched = typeof property === 'string'
+		var value, language = wikidata_get_site(options, true)
+				|| default_language, matched = typeof property === 'string'
 				&& property.match(/^P(\d+)$/i);
 
 		if (matched) {
@@ -12299,6 +12314,7 @@ function module_code(library_namespace) {
 		}
 
 		var is_multi = is_multi_wikidata_value(value, options);
+		// console.trace('is_multi: ' + is_multi + ', value: ' + value);
 		if (is_multi) {
 			if (!Array.isArray(value)) {
 				value = [ value ];
@@ -12480,7 +12496,8 @@ function module_code(library_namespace) {
 			datavalue_type = datatype;
 			value = {
 				text : value,
-				language : options.language || guess_language(value)
+				language : wikidata_get_site(options, true)
+						|| guess_language(value)
 			};
 			// console.log('use language: ' + value.language);
 			break;
@@ -12528,6 +12545,7 @@ function module_code(library_namespace) {
 		case 'wikibase-item':
 		case 'wikibase-property':
 			datavalue_type = 'wikibase-entityid';
+			// console.log(value);
 			var matched = value.match(/^([PQ])(\d{1,10})$/i);
 			if (!matched) {
 				throw 'normalize_wikidata_value: Illegal ' + datatype + ': '
@@ -12671,6 +12689,10 @@ function module_code(library_namespace) {
 	 */
 	function normalize_wikidata_properties(properties, callback,
 			exists_property_hash, options) {
+		// console.log(properties);
+		// console.log(options);
+		// console.trace('normalize_wikidata_properties');
+
 		library_namespace.debug('normalize properties: '
 				+ JSON.stringify(properties), 3,
 				'normalize_wikidata_properties');
@@ -12698,8 +12720,11 @@ function module_code(library_namespace) {
 		// 索求、需要轉換的屬性名稱 property key
 		var demands = [],
 		// demands 對應的 property
-		property_corresponding = [];
+		property_corresponding = [],
+		//
+		options_language = wikidata_get_site(options, true);
 
+		// console.log(options_language);
 		// console.log('-'.repeat(20));
 		// console.log(properties);
 
@@ -12730,7 +12755,10 @@ function module_code(library_namespace) {
 				if (!/^[PQ]\d{1,10}$/.test(property_key)) {
 					// 有些設定在建構property_data時尚存留於((property))，這時得要自其中取出。
 					var language = property.language || additional_properties
-							&& additional_properties.language;
+							&& additional_properties.language
+							|| options_language;
+					// console.log(language);
+					// throw language;
 					demands.push(language ? [ language, property_key ]
 							: property_key);
 					property_corresponding.push(property_data);
@@ -12806,7 +12834,6 @@ function module_code(library_namespace) {
 
 		// console.log('-'.repeat(60));
 		// console.log(properties);
-		// throw 1;
 
 		// free
 		old_properties = null;
@@ -12858,7 +12885,9 @@ function module_code(library_namespace) {
 					//
 					=== 'function') {
 						console.log(property_data[KEY_property_options]);
-						throw 1;
+						throw new Error(
+						//		
+						'wikidata_search.use_cache: .remove is function');
 					}
 					property_data.remove
 					// copy configuration.
@@ -13058,19 +13087,30 @@ function module_code(library_namespace) {
 				// get datatype of each property →
 				var language = property_data.language
 						|| property_data[KEY_property_options]
-						&& property_data[KEY_property_options].language,
+						&& property_data[KEY_property_options].language
+						|| options_language,
 				//
 				_options = Object.assign({
 					// multi : false,
 					callback : function(normalized_value) {
-						if (normalized_value.datatype === NOT_FOUND) {
+						if (Array.isArray(normalized_value)
+								|| normalized_value.datatype === NOT_FOUND) {
 							// 將無法轉換的放在 .error。
 							if (properties.error) {
 								properties.error.push(property_data);
 							} else {
 								properties.error = [ property_data ];
 							}
+
+							if (Array.isArray(normalized_value)) {
+								library_namespace.err(
+								//
+								'normalize_next_value: 得到多個值而非單一值: [' + value
+										+ '] → '
+										+ JSON.stringify(normalized_value));
+							}
 							// 因為之前應該已經顯示過錯誤訊息，因此這邊直接放棄作業，排除此property。
+
 							properties.splice(--index, 1);
 							normalize_next_value();
 							return;
@@ -13083,6 +13123,8 @@ function module_code(library_namespace) {
 							= normalized_value;
 						}
 
+						// console.log('-'.repeat(60));
+						// console.log(normalized_value);
 						// 去掉殼 →
 						properties[index - 1] = normalized_value;
 						// 複製/搬移需要用到的屬性。
@@ -13114,7 +13156,11 @@ function module_code(library_namespace) {
 					_options.language = language;
 				}
 
+				// console.log('-'.repeat(60));
+				// console.log(property_data);
 				var value = property_value(property_data);
+				// console.log('-'.repeat(60));
+				// console.log(value);
 				// console.log(_options);
 				normalize_wikidata_value(value, property_data.datatype,
 						_options);
@@ -13205,7 +13251,12 @@ function module_code(library_namespace) {
 
 		}, exists_references
 		// 確保會設定 .remove / .exists_index = duplicate_index。
-		|| library_namespace.null_Object());
+		|| library_namespace.null_Object(),
+		//
+		Object.assign({
+			// [KEY_SESSION]
+			session : session
+		}));
 	}
 
 	/**
@@ -13288,7 +13339,7 @@ function module_code(library_namespace) {
 		}
 
 		var POST_data = {
-			entity : options.id,
+			entity : options.id || entity && entity.id,
 			// placeholder 佔位符
 			property : null,
 			snaktype : null,
@@ -13299,6 +13350,32 @@ function module_code(library_namespace) {
 		claim_action = [ get_data_API_URL(options), 'wbcreateclaim' ],
 		// process to what index of {Array}claims
 		claim_index = 0;
+
+		if (!POST_data.entity) {
+			// console.log(options);
+			if (!options.title) {
+				throw new Error('set_claims: No entity id specified!');
+			}
+
+			// 取得 id
+			wikidata_entity({
+				site : options.site,
+				title : decodeURIComponent(options.title)
+			}, function(entity) {
+				console.log(entity);
+				options = Object.assign({
+					id : entity.id
+				}, options);
+				delete options.site;
+				delete options.title;
+				set_claims(data, token, callback,
+				//
+				options, session, entity);
+			}, {
+				props : ''
+			});
+			return;
+		}
 
 		// TODO: 可拆解成 wbsetclaim
 
@@ -13472,7 +13549,12 @@ function module_code(library_namespace) {
 			set_next_claim();
 		}, entity && entity.claims
 		// 確保會設定 .remove / .exists_index = duplicate_index。
-		|| library_namespace.null_Object());
+		|| library_namespace.null_Object(),
+		//
+		Object.assign({
+			// [KEY_SESSION]
+			session : session
+		}));
 	}
 
 	if (false) {
@@ -13618,7 +13700,8 @@ function module_code(library_namespace) {
 
 			if (typeof label === 'string') {
 				label = {
-					language : options.language || guess_language(label),
+					language : wikidata_get_site(options, true)
+							|| guess_language(label),
 					value : label
 				};
 			} else if (is_api_and_title(label, 'language')) {
@@ -13970,8 +14053,8 @@ function module_code(library_namespace) {
 		error_list = data_descriptions.filter(function(description) {
 			var language;
 			if (typeof description === 'string') {
-				language = options.language || guess_language(description)
-						|| d_language;
+				language = wikidata_get_site(options, true)
+						|| guess_language(description) || d_language;
 			} else if (is_api_and_title(description, 'language')) {
 				language = description[0] || guess_language(description[1])
 						|| d_language;
@@ -13984,7 +14067,8 @@ function module_code(library_namespace) {
 								+ JSON.stringify(description));
 				return true;
 			} else {
-				language = description.language || options.language
+				language = description.language
+						|| wikidata_get_site(options, true)
 						|| guess_language(description.value) || d_language;
 				if ('remove' in description) {
 					description = '';
