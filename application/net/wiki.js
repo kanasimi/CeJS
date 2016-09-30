@@ -1696,6 +1696,8 @@ function module_code(library_namespace) {
 			library_namespace.debug(prevoius + ' + ' + parameters, 4,
 					'parse_wikitext.transclusion');
 
+			// TODO: 像是 <b>|p=</b> 會被分割成不同 parameters，
+			// 但 <nowiki>|p=</nowiki>, <math>|p=</math> 不會被分割！
 			index = 1;
 			parameters = parameters.split('|').map(function(token, _index) {
 				if (_index === 0
@@ -3063,6 +3065,7 @@ function module_code(library_namespace) {
 		} else if (is_category) {
 			title = ':' + title;
 		}
+		// TODO: for template, use {{title}}
 		return title ? '[[' + title + ']]' : '';
 	}
 
@@ -5972,9 +5975,9 @@ function module_code(library_namespace) {
 				// status 503 時，data 可能為 string 之類。
 				&& ('batchcomplete' in data)) {
 					// assert: data.batchcomplete === ''
-					library_namespace.debug(
+					library_namespace.debug(get_page_title_link(title)
 					//
-					'[' + title + ']: Done.', 1, 'wiki_API.langlinks');
+					+ ': Done.', 1, 'wiki_API.langlinks');
 				} else {
 					library_namespace.warn(
 					//
@@ -6487,8 +6490,8 @@ function module_code(library_namespace) {
 					data.forEach(add_page);
 				}
 
-				library_namespace.debug('[' + title + ']: ' + titles.length
-						+ ' page(s)', 2, 'get_list');
+				library_namespace.debug(get_page_title_link(title) + ': '
+						+ titles.length + ' page(s)', 2, 'get_list');
 				// 注意: arguments 與 get_list() 之 callback 連動。
 				// 2016/6/22 change API 應用程式介面變更:
 				// (title, titles, pages) → (pages, titles, title)
@@ -11674,15 +11677,18 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function wikidata_get_site(options) {
-		var language = options[KEY_SESSION];
-		if (language) {
+		var session = options[KEY_SESSION], language;
+		if (session) {
 			// 注意:在取得 page 後，中途更改過 API_URL 的話，這邊會取得錯誤的資訊！
-			if (language.language) {
-				language = language.language;
-			} else if (language = language.API_URL
-					.match(PATTERN_wiki_project_URL)) {
-				// 去掉 '.org' 之類。
-				language = language[3];
+			if (session.language) {
+				language = session.language;
+			} else {
+				var API_URL = session.host && session.host.API_URL
+						|| session.API_URL;
+				if (language = API_URL.match(PATTERN_wiki_project_URL)) {
+					// 去掉 '.org' 之類。
+					language = language[3];
+				}
 			}
 		}
 		if (false) {
@@ -11966,6 +11972,7 @@ function module_code(library_namespace) {
 		}
 		library_namespace.debug('action: [' + action + ']', 2,
 				'wikidata_entity');
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
 		action = [ API_URL, 'wbgetentities&' + action ];
 
 		if (property && !options.props)
