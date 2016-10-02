@@ -746,7 +746,8 @@ if (typeof CeL === 'function')
 							controller.stop();
 						}
 					}, '，或者', {
-						a : '不再忽略錯誤',
+						// 忽略錯誤
+						a : '不再提醒錯誤',
 						href : '#',
 						onclick : function() {
 							delete options.skip_error;

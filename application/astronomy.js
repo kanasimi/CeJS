@@ -2911,13 +2911,13 @@ if (typeof CeL === 'function')
 				(angle = SOLAR_TERMS_NAME.indexOf(index)))
 					index = angle, type = 0;
 
-				if (type === 1)
+				if (type === 1) {
 					angle = (index | 0) * TURN_TO_DEGREES
 							/ EQUINOX_SOLSTICE_COUNT;
-				else {
-					if (!index)
+				} else {
+					if (!index) {
 						angle = 0;
-					else if (isNaN(angle = index) && (NOT_FOUND ===
+					} else if (isNaN(angle = index) && (NOT_FOUND ===
 					//
 					(angle = SOLAR_TERMS_NAME.indexOf(index)))) {
 						library_namespace.err(

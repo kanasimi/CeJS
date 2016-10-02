@@ -2411,6 +2411,64 @@ var local_coordinates;
 // ---------------------------------------------------------------------//
 
 /**
+ * 
+ * @param date
+ * @param JD
+ * @param 節氣序
+ * @param 起算干支序
+ * @param [LIST]
+ * 
+ * @returns {Array}[干支輪序,干支起算之序]
+ */
+function 節氣後第幾輪干支(date, JD, 節氣序, 起算干支序, LIST) {
+	if (typeof 節氣序 === 'string') {
+		節氣序 = CeL.astronomy.SOLAR_TERMS.indexOf(節氣序);
+	}
+	if (!(節氣序 >= 0)) {
+		return;
+	}
+
+	if (!JD) {
+		JD = CeL.Date_to_JD(date.offseted_value());
+	}
+
+	// -Math.floor(d) === Math.ceil(-d)
+	var 節氣後經過日數 = date.getFullYear();
+	// 冬至(18)之後節氣，應算前一年之節氣。
+	if (節氣序 >= 18) {
+		--節氣後經過日數;
+	}
+	節氣後經過日數 = Math.ceil(JD - CeL.solar_term_JD(節氣後經過日數, 節氣序));
+	if (節氣後經過日數 < 0) {
+		return;
+	}
+
+	if (typeof 起算干支序 === 'string') {
+		if (!LIST) {
+			LIST = CeL.date.STEM_LIST.includes(起算干支序) ? CeL.date.STEM_LIST
+					: CeL.date.BRANCH_LIST;
+		}
+		起算干支序 = LIST.indexOf(起算干支序);
+	}
+	if (!(起算干支序 >= 0)) {
+		return;
+	}
+
+	var 干支起算之序 = (CeL.date.stem_branch_index(date) - 起算干支序).mod(LIST.length),
+	//
+	干支輪序 = 節氣後經過日數 - 干支起算之序;
+	if (false && 干支輪序 < 0) {
+		return;
+	}
+
+	干支輪序 = Math.floor(干支輪序 / LIST.length);
+
+	return [ 干支輪序, 干支起算之序, 節氣後經過日數 ];
+}
+
+// ---------------------------------------------------------------------//
+
+/**
  * 若非在行用/適用期間，則淡化顯示之。
  * 
  * @param {Date}date
@@ -3094,7 +3152,7 @@ function affairs() {
 			R : '節氣 + 交節時刻(@當地時間)或七十二候。計算得出，非實曆。於 2015 CE 之誤差約前後一分鐘。\n'
 			//
 			+ '節氣之後每五日一候，非採用 360/72 = 5° 一候。\n'
-			//
+			// 合稱四立的立春、立夏、立秋、立冬，四立與二分二至稱為 「分至啟閉」，亦稱為八節
 			+ '二十四節氣 / 二分點 (春分秋分) 和二至點 (夏至冬至) / 七十二候 (物候)',
 			href : 'https://zh.wikipedia.org/wiki/%E8%8A%82%E6%B0%94'
 		}, function(date) {
@@ -4100,13 +4158,14 @@ function affairs() {
 		// 列具曆注, 具注曆譜, calendar notes
 		曆注 : '具注曆日/曆書之補充注釋，常與風水運勢、吉凶宜忌相關。',
 		// TODO: 農民曆, 暦注計算 http://koyomi8.com/sub/rekicyuu.htm
-		// TODO: 八節、二至啟閉四節、伏臘、八魁、天李、入官忌、日忌和歸忌
+		// TODO: 八魁、天李、入官忌、日忌和歸忌
+		// 後漢書註 蘇竟楊厚列傳 「八魁」注稱:「春三月己巳、丁丑,夏三月甲申、壬辰,秋三月己亥、丁未,冬三月甲寅、壬戌,爲八魁。」
 		// see 欽定協紀辨方書
 		// http://www.cfarmcale2100.com.tw/
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/calendar_j.html#zassetsu
 		// http://www.asahi-net.or.jp/~ax2s-kmtn/ref/astrology_j.html
 
-		// 納音 12直 27宿 7曜 節気/72候/没滅日 大小歳/凶会 下段 雑注 日遊 節月
+		// 没滅日 大小歳/凶会 下段 雑注 日遊 節月
 		// http://www.wagoyomi.info/guchu.cgi
 
 		月干支 : [ {
@@ -4231,6 +4290,69 @@ function affairs() {
 				span : 建除,
 				S : 'color:#f24;font-weight:bold;'
 			} : 建除;
+		} ],
+
+		伏臘 : [ {
+			a : {
+				T : '伏臘'
+			},
+			R : '中曆曆注。伏臘日: 三伏日+臘日\n《說文》：「冬至後三戌臘祭百神。」 非來源於佛教之臘八節！\n'
+			//
+			+ '尹灣漢墓簡牘論考: 秦漢之前無伏臘。秦漢時伏臘尚無固定規則，此處所列僅供參考。或在漢成帝鴻嘉年間已成曆例。',
+			href : 'https://zh.wikipedia.org/wiki/%E4%B8%89%E4%BC%8F'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
+
+			var JD = CeL.Date_to_JD(date.offseted_value()),
+			//
+			solar_term = CeL.solar_term_of_JD(JD, {
+				days : true
+			}), 干支輪序;
+
+			if (7 <= solar_term[1] && solar_term[1] <= 10) {
+				// 三伏天: solar_term[1] @ 小暑(7)~處暑(10)
+				// 入伏=初伏第一天 @ 小暑(7)
+				// 中伏第一天 @ 小暑(7)~大暑(8)
+				// 末伏第一天 @ 立秋(9)
+				// 出伏
+
+				if (9 <= solar_term[1]
+				//
+				&& (干支輪序 = 節氣後第幾輪干支(date, JD, 9, '庚'))) {
+					if (干支輪序[0] === 0) {
+						return '末伏';
+					}
+					if (干支輪序[0] === 1 && 干支輪序[1] === 0) {
+						// 出伏，即伏天結束。
+						return '出伏';
+					}
+					if (!(干支輪序[0] < 0)) {
+						return;
+					}
+				}
+				// 夏至(6)
+				干支輪序 = 節氣後第幾輪干支(date, JD, 6, '庚');
+				if (!干支輪序 || !(2 <= 干支輪序[0])) {
+					return;
+				}
+				if (干支輪序[0] === 2) {
+					return 干支輪序[1] === 0 ? '入伏' : '初伏';
+				}
+				// 中伏可能為10天或20天。
+				return '中伏';
+			}
+
+			if (solar_term[1] === 19 || solar_term[1] === 20) {
+				// 臘日: solar_term[1] @ 小寒(19) or 大寒(20)
+				// 冬至(18)後第三個戌日爲臘日
+				干支輪序 = 節氣後第幾輪干支(date, JD, 18, '戌');
+				// return 干支輪序 && 干支輪序.join(', ')
+				if (干支輪序 && 干支輪序[0] === 2 && 干支輪序[1] === 0) {
+					return '臘日';
+				}
+				return;
+			}
 		} ],
 
 		反支 : [ {
@@ -4358,6 +4480,7 @@ function affairs() {
 			return /* !date.準 && */!date.精 && CeL.era.二十八宿(date);
 		} ],
 
+		// 27宿
 		二十七宿 : [ {
 			a : {
 				T : '二十七宿'
