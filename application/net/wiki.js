@@ -3773,6 +3773,9 @@ function module_code(library_namespace) {
 				if (this.last_data && (!(KEY_CORRESPOND_PAGE in this.last_data)
 				// 若是this.last_data與this.last_page連動，必須先確認是否沒變更過this.last_page，才能當作cache、跳過重新擷取entity之作業。
 				|| (this.last_page === this.last_data[KEY_CORRESPOND_PAGE]))) {
+					library_namespace.debug('Use cached data: [['
+							+ this.last_page.id + ']]', 1,
+							'wiki_API.prototype.next.data');
 					next[1](this.last_data);
 					break;
 				} else {
@@ -3842,7 +3845,10 @@ function module_code(library_namespace) {
 					}
 
 					// next = [ 'edit_data', data, options[, callback] ]
-					if (this.last_data) {
+					if (this.last_data
+							&& (!(KEY_CORRESPOND_PAGE in this.last_data)
+							// 若是this.last_data與this.last_page連動，必須先確認是否沒變更過this.last_page，才能當作cache、跳過重新擷取entity之作業。
+							|| (this.last_page === this.last_data[KEY_CORRESPOND_PAGE]))) {
 						if (!is_entity(this.last_data)) {
 							next[3] && next[3].call(this, undefined, {
 								code : 'no_last_data',
@@ -3857,6 +3863,9 @@ function module_code(library_namespace) {
 							this.next();
 							break;
 						}
+						library_namespace.debug('Use cached data: [['
+								+ this.last_page.id + ']]', 1,
+								'wiki_API.prototype.next.edit_data');
 						// shift arguments
 						next.splice(1, 0, this.last_data);
 
