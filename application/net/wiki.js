@@ -3770,7 +3770,9 @@ function module_code(library_namespace) {
 
 			if (typeof next[1] === 'function') {
 				// 直接輸入 callback。
-				if (this.last_data) {
+				if (this.last_data && (!(KEY_CORRESPOND_PAGE in this.last_data)
+				// 若是this.last_data與this.last_page連動，必須先確認是否沒變更過this.last_page，才能當作cache、跳過重新擷取entity之作業。
+				|| (this.last_page === this.last_data[KEY_CORRESPOND_PAGE]))) {
 					next[1](this.last_data);
 					break;
 				} else {
@@ -11773,6 +11775,12 @@ function module_code(library_namespace) {
 		}
 	}
 
+	// 以下兩者必須不可能為 entity / property 之屬性。
+	// 相關/對應頁面。
+	var KEY_CORRESPOND_PAGE = 'page',
+	// 用來取得 entity value 之函數。
+	KEY_get_entity_value = 'value';
+
 	/**
 	 * 取得特定實體的特定屬性值。
 	 * 
@@ -12049,8 +12057,12 @@ function module_code(library_namespace) {
 					if (props && (props in data)) {
 						data = data[props];
 					} else {
-						// assert: 'value' is NOT in data
-						Object.defineProperty(data, 'value', {
+						if (get_page_content.is_page_data(key)) {
+							// 對應頁面。
+							data[KEY_CORRESPOND_PAGE] = key;
+						}
+						// assert: KEY_get_entity_value is NOT in data
+						Object.defineProperty(data, KEY_get_entity_value, {
 							value : wikidata_entity_value
 						});
 					}
