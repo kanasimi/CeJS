@@ -4076,7 +4076,7 @@ function module_code(library_namespace) {
 		write_to : '',
 		/** {String}運作記錄存放頁面。 */
 		log_to : 'User:Robot/log/%4Y%2m%2d',
-		/** {String}編輯摘要。總結報告。reason.「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」 */
+		/** {String}編輯摘要。總結報告。編輯理由。reason.「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」 */
 		summary : ''
 	});
 
@@ -13882,40 +13882,81 @@ function module_code(library_namespace) {
 
 		// console.log(data.aliases);
 
-		var data_aliases = data.aliases;
-		if (!library_namespace.is_Object(data_aliases)) {
+		var data_aliases = data.aliases, aliases_queue;
+		if (Array.isArray(data_aliases)) {
+			aliases_queue = data_aliases;
+			data_aliases = library_namespace.null_Object();
+			aliases_queue.forEach(function(alias) {
+				// 判別 language。
+				var value = alias && alias.value, language = alias.language
+						|| options.language || guess_language(value);
+				if (language in data_aliases) {
+					data_aliases[language].push(alias);
+				} else {
+					data_aliases[language] = [ alias ];
+				}
+			});
+
+		} else if (!library_namespace.is_Object(data_aliases)) {
 			library_namespace.err('set_aliases: Invalid aliases: '
 					+ JSON.stringify(data_aliases));
 			callback();
 			return;
 		}
 
-		var aliases_queue = [];
+		aliases_queue = [];
 		for ( var language in data_aliases) {
 			var alias_list = data_aliases[language];
 			if (!Array.isArray(alias_list)) {
-				library_namespace.err('set_aliases: Invalid aliases: '
-						+ JSON.stringify(alias_list));
+				if (alias_list === wikidata_edit.remove_all) {
+					// 表示 set。
+					aliases_queue.push([ language, [] ]);
+				} else if (alias_list && typeof alias_list === 'string') {
+					// 表示 set。
+					aliases_queue.push([ language, [ alias_list ] ]);
+				} else {
+					library_namespace.err('set_aliases: Invalid aliases: '
+							+ JSON.stringify(alias_list));
+				}
 				continue;
 			}
 
 			var aliases_to_add = [], aliases_to_remove = [];
 			alias_list.forEach(function(alias) {
+				if (!alias) {
+					// 跳過沒東西的。
+					return;
+				}
 				if ('remove' in alias) {
-					if (alias.value) {
-						aliases_to_remove.push(alias.value);
+					if (alias.remove === wikidata_edit.remove_all) {
+						// 表示 set。這將會忽略所有remove。
+						aliases_to_remove = undefined;
+					} else if ('value' in alias) {
+						if (aliases_to_remove) {
+							aliases_to_remove.push(alias.value);
+						}
 					} else {
 						library_namespace
 								.err('set_aliases: No value to value for '
 										+ language);
 					}
+				} else if ('set' in alias) {
+					// 表示 set。這將會忽略所有remove。
+					aliases_to_remove = undefined;
+					aliases_to_add = [ alias.value ];
+					// 警告:當使用 wbeditentity，並列多個未設定 .add 之 alias 時，
+					// 只會加入最後一個。但這邊將會全部加入，因此行為不同！
+				} else if (alias.value === wikidata_edit.remove_all) {
+					// 表示 set。這將會忽略所有remove。
+					aliases_to_remove = undefined;
 				} else {
 					aliases_to_add.push(alias.value);
 				}
 			});
+
 			if (aliases_to_add.length > 0 || aliases_to_remove > 0) {
-				aliases_queue.push([ language, aliases_to_add,
-						aliases_to_remove ]);
+				aliases_queue.push([ language, aliases_to_add.uniq(),
+						aliases_to_remove && aliases_to_remove.uniq() ]);
 			}
 		}
 
@@ -13928,10 +13969,10 @@ function module_code(library_namespace) {
 
 		var POST_data = {
 			id : options.id,
-			language : '',
-			// set : '',
-			add : '',
-			remove : ''
+			language : ''
+		// set : '',
+		// add : '',
+		// remove : ''
 		};
 
 		if (options.bot) {
@@ -13941,9 +13982,6 @@ function module_code(library_namespace) {
 			POST_data.summary = options.summary;
 		}
 		// TODO: baserevid, 但這需要每次重新取得 revid。
-
-		// the token should be sent as the last parameter.
-		POST_data.token = token;
 
 		var
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsetaliases
@@ -13964,8 +14002,19 @@ function module_code(library_namespace) {
 			// assert: 這不會更改POST_data原有keys之順序。
 
 			POST_data.language = aliases_data[0];
-			POST_data.add = aliases_data[1].join('|');
-			POST_data.remove = aliases_data[2].join('|');
+			if (aliases_data[2]) {
+				delete POST_data.set;
+				POST_data.add = aliases_data[1].join('|');
+				POST_data.remove = aliases_data[2].join('|');
+			} else {
+				delete POST_data.add;
+				delete POST_data.remove;
+				POST_data.set = aliases_data[1].join('|');
+			}
+
+			// the token should be sent as the last parameter.
+			delete POST_data.token;
+			POST_data.token = token;
 
 			// 設定單一 Wikibase 實體的標籤。
 			wiki_API.query(action, function(data) {
@@ -14571,8 +14620,9 @@ function module_code(library_namespace) {
 			value : label,
 			add : 1
 		};
-		if (add_to_list)
+		if (add_to_list) {
 			add_to_list.push(label);
+		}
 		return label;
 	};
 
