@@ -3270,12 +3270,14 @@ function module_code(library_namespace) {
 			if (get_page_content.is_page_data(next[1])
 			// 必須有頁面內容，要不可能僅有資訊。有時可能已經擷取過卻發生錯誤而沒有頁面內容，此時依然會再擷取一次。
 			&& get_page_content.has_content(next[1])) {
-				library_namespace.debug('採用所輸入之 [' + next[1].title
-						+ '] 作為 this.last_page。', 2, 'wiki_API.prototype.next');
+				library_namespace.debug('採用所輸入之 '
+						+ get_page_title_link(next[1]) + ' 作為 this.last_page。',
+						2, 'wiki_API.prototype.next');
 				this.last_page = next[1];
-				if (typeof next[2] === 'function')
+				if (typeof next[2] === 'function') {
 					// next[1] : callback
 					next[2].call(this, next[1]);
+				}
 				this.next();
 			} else if (typeof next[1] === 'function') {
 				// this.page(callback): callback(last_page)
@@ -3515,7 +3517,7 @@ function module_code(library_namespace) {
 						// this.last_page.title, this.last_page);
 						// 需要同時改變 wiki_API.edit！
 						// next[2]: options to edit_topic()
-						// .call(options,): 使(回傳要編輯資料的)設定值函數能即時變更 options。
+						// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 						next[1] = next[1].call(next[2], this.last_page);
 					}
 					edit_topic([ this.API_URL, this.last_page ],
@@ -3559,7 +3561,7 @@ function module_code(library_namespace) {
 					// this.last_page.title, this.last_page);
 					// 需要同時改變 wiki_API.edit！
 					// next[2]: options to edit_topic()
-					// .call(options,): 使(回傳要編輯資料的)設定值函數能即時變更 options。
+					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 					next[1] = next[1].call(next[2], this.last_page);
 				}
 				if (next[2] && next[2].skip_nochange
@@ -3870,6 +3872,7 @@ function module_code(library_namespace) {
 						next.splice(1, 0, this.last_data);
 
 					} else if (this.last_page) {
+						// e.g., edit_data({Function}data)
 						next.splice(1, 0, this.last_page);
 
 					} else {
@@ -7137,7 +7140,7 @@ function module_code(library_namespace) {
 					typeof text === 'function' &&
 					// or: text(get_page_content(page_data),
 					// page_data.title, page_data)
-					// .call(options,): 使(回傳要編輯資料的)設定值函數能即時變更 options。
+					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 					text.call(options, page_data), token, options, callback,
 							timestamp);
 				}
@@ -9384,7 +9387,10 @@ function module_code(library_namespace) {
 						this_operation.list = data;
 					}
 					if (data) {
-						this_operation.last_data = data;
+						library_namespace.debug('設定 .last_data_got: '
+								+ (data && JSON.stringify(data).slice(0, 180))
+								+ '...', 3, 'wiki_API.cache.next_operator');
+						this_operation.last_data_got = data;
 					}
 					// default options === _this: 傳遞於各 operator 間的 ((this))。
 					wiki_API.cache(this_operation, next_operator, _this);
@@ -9419,11 +9425,11 @@ function module_code(library_namespace) {
 
 		var file_name = operation.file_name,
 		/** 前一次之回傳 data。每次產出的 data。 */
-		last_data = operation.last_data;
+		last_data_got = operation.last_data_got;
 
 		if (typeof file_name === 'function') {
 			// @see wiki_API.cache.title_only
-			file_name = file_name.call(_this, last_data, operation);
+			file_name = file_name.call(_this, last_data_got, operation);
 		}
 
 		var
@@ -9443,7 +9449,7 @@ function module_code(library_namespace) {
 			// 基本上，設定 this.* 應該在 operation.operator() 中，而不是在 operation.list() 中。
 			if (typeof list === 'function')
 				// TODO: 允許非同步方法。
-				list = list.call(_this, last_data, operation);
+				list = list.call(_this, last_data_got, operation);
 
 			if (!operation.postfix)
 				if (type === 'file')
@@ -9519,7 +9525,7 @@ function module_code(library_namespace) {
 			 * 結束作業。
 			 */
 			function finish_work(data) {
-				last_data = data;
+				last_data_got = data;
 				if (operator)
 					operator.call(_this, data, operation);
 				if (typeof callback === 'function')
@@ -9625,7 +9631,7 @@ function module_code(library_namespace) {
 			}
 
 			if (typeof list === 'function' && type !== 'callback') {
-				list = list.call(_this, last_data, operation);
+				list = list.call(_this, last_data_got, operation);
 			}
 			if (list === wiki_API.cache.abort) {
 				library_namespace
@@ -9714,7 +9720,7 @@ function module_code(library_namespace) {
 				if (typeof list !== 'function') {
 					library_namespace
 							.warn('wiki_API.cache: list is not function!');
-					callback(last_data);
+					callback(last_data_got);
 					break;
 				}
 				// 手動取得資料。使用 list=function(callback){callback(list);}
@@ -9723,7 +9729,7 @@ function module_code(library_namespace) {
 							+ 'manually get data and then callback(list).');
 					if (typeof list === 'function') {
 						// assert: (typeof list === 'function') 必須自己回 call！
-						list.call(_this, callback, last_data, operation);
+						list.call(_this, callback, last_data_got, operation);
 					}
 				};
 				break;
@@ -9881,10 +9887,10 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Function}
 	 */
-	wiki_API.cache.title_only = function(last_data, operation) {
+	wiki_API.cache.title_only = function(last_data_got, operation) {
 		var list = operation.list;
 		if (typeof list === 'function') {
-			operation.list = list = list.call(this, last_data, operation);
+			operation.list = list = list.call(this, last_data_got, operation);
 		}
 		return operation.type + '/' + remove_namespace(list);
 	};
@@ -12067,7 +12073,9 @@ function module_code(library_namespace) {
 						data = data[props];
 					} else {
 						if (get_page_content.is_page_data(key)) {
-							// 對應頁面。
+							library_namespace.debug(data.id + ' 對應頁面: '
+									+ get_page_title_link(key), 1,
+									'wikidata_entity');
 							data[KEY_CORRESPOND_PAGE] = key;
 						}
 						// assert: KEY_get_entity_value is NOT in data
@@ -14287,7 +14295,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('餵給(回傳要編輯資料的)設定值函數 ' + id.id + ' ('
 						+ (get_entity_label(id) || get_entity_link(id)) + ')。',
 						2, 'wikidata_edit');
-				// .call(options,): 使(回傳要編輯資料的)設定值函數能即時變更 options。
+				// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 				data = data.call(options, id);
 
 			} else {
@@ -14297,9 +14305,11 @@ function module_code(library_namespace) {
 					}
 					delete options.props;
 					delete options.languages;
-					wikidata_edit(id,
-					// .call(options,): 使(回傳要編輯資料的)設定值函數能即時變更 options。
-					data.call(options, entity), token, options, callback);
+					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
+					data = data.call(options, is_entity(entity) ? entity
+					// error?
+					: undefined);
+					wikidata_edit(id, data, token, options, callback);
 				}, options);
 				return;
 			}
@@ -14395,8 +14405,9 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				if (data.entity)
+				if (data.entity) {
 					data = data.entity;
+				}
 				callback(data);
 			}, options, session);
 		}
