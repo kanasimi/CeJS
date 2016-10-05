@@ -3847,29 +3847,32 @@ function module_code(library_namespace) {
 					}
 
 					// next = [ 'edit_data', data, options[, callback] ]
+
 					if (this.last_data
+							&& !this.last_data.error
 							&& (!(KEY_CORRESPOND_PAGE in this.last_data)
 							// 若是this.last_data與this.last_page連動，必須先確認是否沒變更過this.last_page，才能當作cache、跳過重新擷取entity之作業。
 							|| (this.last_page === this.last_data[KEY_CORRESPOND_PAGE]))) {
-						if (!is_entity(this.last_data)) {
-							next[3] && next[3].call(this, undefined, {
-								code : 'no_last_data',
-								message : '前一次之wikidata實體取得失敗: ['
-								// 例如提供的 foreign title 錯誤，
-								+ (this.last_data.key
-								// 或是 foreign title 為 redirected。
-								|| (this.last_data.site
-								// 抑或者存在 foreign title 頁面，但沒有 wikidata entity。
-								+ ':' + this.last_data.title)) + ']'
-							});
-							this.next();
-							break;
-						}
 						library_namespace.debug('Use cached data: [['
 								+ this.last_page.id + ']]', 1,
 								'wiki_API.prototype.next.edit_data');
 						// shift arguments
 						next.splice(1, 0, this.last_data);
+
+					} else if (this.last_data && this.last_data.error
+							&& this.last_data.key === this.last_page) {
+						next[3] && next[3].call(this, undefined, {
+							code : 'last_data_failed',
+							message : '前一次之wikidata實體取得失敗: ['
+							// 例如提供的 foreign title 錯誤，
+							+ (this.last_data.key
+							// 或是 foreign title 為 redirected。
+							|| (this.last_data.site
+							// 抑或者存在 foreign title 頁面，但沒有 wikidata entity。
+							+ ':' + this.last_data.title)) + ']'
+						});
+						this.next();
+						break;
 
 					} else if (this.last_page) {
 						// e.g., edit_data({Function}data)
@@ -3907,14 +3910,20 @@ function module_code(library_namespace) {
 			}, next[3]),
 			// callback
 			function(data, error) {
+				if (false && data && !is_entity(data)) {
+					console.trace(data);
+					throw 'data is NOT entity';
+				}
 				_this.last_data = data || {
+					// 有發生錯誤:設定 error log Object。
 					last_data : _this.last_data,
 					key : next[1],
 					error : error
 				};
 				// next[4] : callback
-				if (typeof next[4] === 'function')
+				if (typeof next[4] === 'function') {
 					next[4].call(this, data, error);
+				}
 				_this.next();
 			});
 			break;
@@ -7277,7 +7286,7 @@ function module_code(library_namespace) {
 	 * @param {String}caller
 	 *            caller to show.
 	 * 
-	 * @returns
+	 * @returns error: 非undefined表示((data))為有問題的資料。
 	 */
 	wiki_API.edit.check_data = function(data, title, caller) {
 		var action;
@@ -14328,7 +14337,7 @@ function module_code(library_namespace) {
 
 		var action = wiki_API.edit.check_data(data, id, 'wikidata_edit');
 		if (action) {
-			callback(id, action);
+			callback(undefined, action);
 			return;
 		}
 
