@@ -11203,7 +11203,7 @@ function module_code(library_namespace) {
 					library_namespace.debug(index + '/' + key.length, 3,
 							'wikidata_search.use_cache.cache_next_key');
 					if (index === key.length) {
-						// done.
+						// done. callback(id_list)
 						callback(key.map(function(k) {
 							if (is_api_and_title(k, 'language')) {
 								return wikidata_search_cache[k[0] + ':'
@@ -11802,7 +11802,7 @@ function module_code(library_namespace) {
 	// 以下兩者必須不可能為 entity / property 之屬性。
 	// 相關/對應頁面。
 	var KEY_CORRESPOND_PAGE = 'page',
-	// 用來取得 entity value 之函數。
+	// 用來取得 entity value 之屬性名。 函數 : wikidata_entity_value
 	KEY_get_entity_value = 'value';
 
 	/**
@@ -12145,8 +12145,13 @@ function module_code(library_namespace) {
 			value = this.sitelinks[language];
 		} else if (typeof property === 'number') {
 			value = this.claims['P' + property];
+		} else if (value = wikidata_search.use_cache(property, options)) {
+			value = this.claims[value];
 		} else {
-			;
+			library_namespace
+					.err('wikidata_entity_value: Can not deal with property ['
+							+ property + ']');
+			return;
 		}
 
 		return wikidata_datavalue(value, callback, options);
