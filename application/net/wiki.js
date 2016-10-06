@@ -12124,7 +12124,7 @@ function module_code(library_namespace) {
 				} else {
 					_options = options;
 				}
-				property[key] = wikidata_entity_value(key, _options);
+				property[key] = wikidata_entity_value.call(this, key, _options);
 			}
 			return property;
 		}
@@ -12138,15 +12138,15 @@ function module_code(library_namespace) {
 		}
 
 		if (property === 'label') {
-			value = this.labels[language];
+			value = this.labels && this.labels[language];
 		} else if (property === 'alias') {
-			value = this.aliases[language];
+			value = this.aliases && this.aliases[language];
 		} else if (property === 'sitelink') {
-			value = this.sitelinks[language];
+			value = this.sitelinks && this.sitelinks[language];
 		} else if (typeof property === 'number') {
-			value = this.claims['P' + property];
+			value = this.claims && this.claims['P' + property];
 		} else if (value = wikidata_search.use_cache(property, options)) {
-			value = this.claims[value];
+			value = this.claims && this.claims[value];
 		} else {
 			library_namespace
 					.err('wikidata_entity_value: Can not deal with property ['
