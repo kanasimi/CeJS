@@ -1693,7 +1693,8 @@ function module_code(library_namespace) {
 			} else {
 				prevoius = '';
 			}
-			library_namespace.debug(prevoius + ' + ' + parameters, 4,
+			library_namespace.debug(
+					'[' + prevoius + '] + [' + parameters + ']', 4,
 					'parse_wikitext.transclusion');
 
 			// TODO: 像是 <b>|p=</b> 會被分割成不同 parameters，
@@ -1715,9 +1716,11 @@ function module_code(library_namespace) {
 				}, options), queue);
 
 				var _token = token;
+				// console.log(_token);
 				if (Array.isArray(_token)) {
 					_token = _token[0];
 				}
+				// console.log(JSON.stringify(_token));
 				if (typeof _token === 'string') {
 					_token = _token.trim();
 					// @see function parse_template()
@@ -1730,12 +1733,26 @@ function module_code(library_namespace) {
 						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
 						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
 						// parser 調用超過一個Template中參數的值，只有最後提供的值會被使用。
-						if (typeof _token === 'string') {
+						if (typeof token === 'string') {
 							parameter_index_of[key] = _index;
 							_parameters[key] = value;
 						} else {
 							// assert: Array.isArray(token)
-							_token = token.clone();
+							if (false) {
+								_token = token.clone();
+								// copy properties
+								Object.keys(token).forEach(function(p) {
+									if (!(p >= 0)) {
+										_token[p] = token[p];
+									}
+								});
+							}
+							_token = [];
+							// copy properties
+							Object.keys(token).forEach(function(p) {
+								_token[p] = token[p];
+							});
+
 							_token[0] = value;
 							parameter_index_of[key] = _index;
 							_parameters[key] = _token;
@@ -1756,6 +1773,7 @@ function module_code(library_namespace) {
 						//
 						+ token + ']');
 						library_namespace.err(token);
+						// console.log(_token);
 					}
 					// TODO: token 本身並未 .trim()
 					parameter_index_of[index] = _index;
@@ -2038,6 +2056,9 @@ function module_code(library_namespace) {
 			// 經過改變，需再進一步處理。
 			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
 					'parse_wikitext.tag');
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
+			attributes = parse_wikitext(attributes, options, queue);
 			inner = parse_wikitext(inner, options, queue);
 			// 若為 <pre> 之內，則不再變換。
 			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
@@ -13815,6 +13836,7 @@ function module_code(library_namespace) {
 		normalize_labels_aliases(data, entity, options);
 
 		var data_labels = data.labels;
+		// e.g., data.labels={language_code:label,language_code:[labels],...}
 		if (!library_namespace.is_Object(data_labels)) {
 			library_namespace.err('set_labels: Invalid labels: '
 					+ JSON.stringify(data_labels));
@@ -14264,7 +14286,7 @@ function module_code(library_namespace) {
 	 *            id to modify or entity you want to create.<br />
 	 *            item/property 將會創建實體。
 	 * @param {Object|Function}data
-	 *            used as the data source to modify. 要編輯（更改或創建）的資料。<br />
+	 *            used as the data source to modify. 要編輯（更改或創建）的資料。可能被更改！<br />
 	 *            {Object}data or {Function}data(entity)
 	 * @param {Object}token
 	 *            login 資訊，包含“csrf”令牌/密鑰。
@@ -14437,8 +14459,6 @@ function module_code(library_namespace) {
 
 		// TODO: 創建實體項目重定向。
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbcreateredirect
-
-		// TODO: data.labels={language_code:label,...}
 
 		// TODO: 避免 callback hell: using ES7 async/await?
 		// TODO: 用更簡單的方法統合這幾個函數。
