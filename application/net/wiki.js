@@ -3868,15 +3868,18 @@ function module_code(library_namespace) {
 
 			// wikidata_entity(key, property, callback, options)
 			wikidata_entity(next[1], next[2], function(data, error) {
-				// entity data
 				// 就算發生錯誤，依然設定一個 dummy，預防 edit_data 時引用可能非所欲的 this.last_page。
 				_this.last_data = data || {
 					key : next[1],
 					error : error
 				};
+				library_namespace.debug('設定 entity data: '
+						+ JSON.stringify(_this.last_data), 3,
+						'wiki_API.prototype.next.data');
 				// next[3] : callback
-				if (typeof next[3] === 'function')
+				if (typeof next[3] === 'function') {
 					next[3].call(this, data, error);
+				}
 				_this.next();
 			},
 			// next[4] : options
@@ -3899,7 +3902,8 @@ function module_code(library_namespace) {
 			if (typeof next[1] === 'function'
 			//
 			|| library_namespace.is_Object(next[1]) && !is_entity(next[1])) {
-				// 未設定/不設定 id，第一個 next[1] 即為 data。
+				library_namespace.debug('未設定/不設定 id，第一個 next[1] 即為 data。', 6,
+						'wiki_API.prototype.next.edit_data');
 				// next = [ 'edit_data', data[, options, callback] ]
 				if (library_namespace.is_Object(next[2]) && next[2]['new']) {
 					// create item/property
@@ -3915,6 +3919,9 @@ function module_code(library_namespace) {
 
 					// next = [ 'edit_data', data, options[, callback] ]
 
+					library_namespace.debug('this.last_data: '
+							+ JSON.stringify(this.last_data), 6,
+							'wiki_API.prototype.next.edit_data');
 					if (this.last_data
 							&& !this.last_data.error
 							&& (!(KEY_CORRESPOND_PAGE in this.last_data)
@@ -3942,6 +3949,10 @@ function module_code(library_namespace) {
 						break;
 
 					} else if (this.last_page) {
+						library_namespace.debug('自 .last_page '
+								+ get_page_title_link(this.last_page)
+								+ '取得特定實體。', 6,
+								'wiki_API.prototype.next.edit_data');
 						// e.g., edit_data({Function}data)
 						next.splice(1, 0, this.last_page);
 
@@ -5331,6 +5342,9 @@ function module_code(library_namespace) {
 
 				if (typeof callback === 'function') {
 					callback(response);
+				} else {
+					library_namespace
+							.err('wiki_API.query: No {Function}callback!');
 				}
 
 			}, undefined, post_data, get_URL_options);
@@ -14388,10 +14402,18 @@ function module_code(library_namespace) {
 				data = data.call(options, id);
 
 			} else {
-				wikidata_entity(id, options.props, function(entity) {
-					if (entity && ('missing' in entity)) {
-						// TODO 此頁面不存在/已刪除。
+				library_namespace.debug('Get id: ' + JSON.stringify(id), 3,
+						'wikidata_edit');
+				wikidata_entity(id, options.props, function(entity, error) {
+					if (error) {
+						callback(undefined, error);
+						return;
 					}
+					if (!entity || ('missing' in entity)) {
+						// TODO: e.g., 此頁面不存在/已刪除。
+						// return;
+					}
+
 					delete options.props;
 					delete options.languages;
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
@@ -14473,7 +14495,7 @@ function module_code(library_namespace) {
 			}
 			// data 會在 set_claims() 被修改，因此不能提前設定。
 			options.data = JSON.stringify(data);
-			if (library_namespace.is_debug(0)) {
+			if (library_namespace.is_debug(2)) {
 				library_namespace.debug('options.data: ' + options.data, 0,
 						'wikidata_edit.do_wbeditentity');
 				console.log(data);
@@ -14486,12 +14508,6 @@ function module_code(library_namespace) {
 				var error = data && data.error;
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
-					console.log('options:');
-					console.log(options);
-					console.log('data:');
-					console.log(data);
-					console.log('error:');
-					console.log(error);
 					library_namespace.err(
 					// e.g., 數據庫被禁止寫入以進行維護，所以您目前將無法保存您所作的編輯
 					// Mediawiki is in read-only mode during maintenance
