@@ -374,7 +374,7 @@ function module_code(library_namespace) {
 	// (wikipedia|wikibooks|wikinews|wikiquote|wikisource|wikiversity|wikivoyage|wikidata|wikimediafoundation|wiktionary|mediawiki)
 
 	// e.g., [[s:]], [[zh-classical:]], [[zh-min-nan:]], [[test2:]]
-	// @see [[:en:Help:Interwiki linking#Project titles and shortcuts]],
+	// @see [[m:Help:Interwiki linking#Project titles and shortcuts]],
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
 	var PATTERN_PROJECT_CODE = /^[a-z][a-z\-\d]{0,12}$/;
@@ -705,9 +705,9 @@ function module_code(library_namespace) {
 					.trimLeft();
 			if (index === page_name.length - 1
 			// @see PATTERN_PROJECT_CODE
-			|| !(use_underline ? /^[a-z][a-z\-\d]{0,12}$/i
+			|| !(use_underline ? /^[a-z][a-z\-\d_]{0,12}$/i
 			//
-			: /^[a-z][a-z\-\d]{0,12}$/i).test(section.trimRight())) {
+			: /^[a-z][a-z\-\d ]{0,12}$/i).test(section.trimRight())) {
 				// page title: 將首個字母轉成大寫。
 				page_name[index] = upper_case_initial(section);
 				return true;
@@ -1428,7 +1428,7 @@ function module_code(library_namespace) {
 		// internal/interwiki link : language links : category links, file,
 		// subst,
 		// ... : title
-		// e.g., [[m:en:Help:Parser function]], [[m:Help:Interwiki_linking]],
+		// e.g., [[m:en:Help:Parser function]], [[m:Help:Interwiki linking]],
 		// [[:File:image.png]], [[wikt:en:Wiktionary:A]],
 		// [[:en:Template:Editnotices/Group/Wikipedia:Miscellany for deletion]]
 		// [[:en:Marvel vs. Capcom 3: Fate of Two Worlds]]
