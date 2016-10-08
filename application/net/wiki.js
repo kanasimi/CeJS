@@ -3517,8 +3517,9 @@ function module_code(library_namespace) {
 				library_namespace
 						.warn('wiki_API.prototype.next: No page in the queue. You must run .page() first!');
 				// next[3] : callback
-				if (typeof next[3] === 'function')
+				if (typeof next[3] === 'function') {
 					next[3].call(_this, undefined, 'no page');
+				}
 				this.next();
 
 			} else if (!('stopped' in this)) {
@@ -3848,6 +3849,7 @@ function module_code(library_namespace) {
 					next[1](this.last_data);
 					break;
 				} else {
+					// delete this.last_data;
 					if (!this.last_page) {
 						next[1].call(this, undefined, {
 							code : 'no_id',
@@ -3866,6 +3868,10 @@ function module_code(library_namespace) {
 				next.splice(2, 0, null);
 			}
 
+			// 自輸入項目設定 .last_page
+			if (get_page_content.is_page_data(next[1])) {
+				this.last_page = next[1];
+			}
 			// wikidata_entity(key, property, callback, options)
 			wikidata_entity(next[1], next[2], function(data, error) {
 				// 就算發生錯誤，依然設定一個 dummy，預防 edit_data 時引用可能非所欲的 this.last_page。
@@ -3903,7 +3909,7 @@ function module_code(library_namespace) {
 			//
 			|| library_namespace.is_Object(next[1]) && !is_entity(next[1])) {
 				library_namespace.debug('未設定/不設定 id，第一個 next[1] 即為 data。', 6,
-						'wiki_API.prototype.next.edit_data');
+						'wiki_API.next.edit_data');
 				// next = [ 'edit_data', data[, options, callback] ]
 				if (library_namespace.is_Object(next[2]) && next[2]['new']) {
 					// create item/property
@@ -3921,7 +3927,7 @@ function module_code(library_namespace) {
 
 					library_namespace.debug('this.last_data: '
 							+ JSON.stringify(this.last_data), 6,
-							'wiki_API.prototype.next.edit_data');
+							'wiki_API.next.edit_data');
 					if (this.last_data
 							&& !this.last_data.error
 							&& (!(KEY_CORRESPOND_PAGE in this.last_data)
@@ -3929,12 +3935,14 @@ function module_code(library_namespace) {
 							|| (this.last_page === this.last_data[KEY_CORRESPOND_PAGE]))) {
 						library_namespace.debug('Use cached data: [['
 								+ this.last_page.id + ']]', 1,
-								'wiki_API.prototype.next.edit_data');
+								'wiki_API.next.edit_data');
 						// shift arguments
 						next.splice(1, 0, this.last_data);
 
 					} else if (this.last_data && this.last_data.error
 							&& this.last_data.key === this.last_page) {
+						library_namespace.debug('前一次之wikidata實體取得失敗', 6,
+								'wiki_API.next.edit_data');
 						next[3] && next[3].call(this, undefined, {
 							code : 'last_data_failed',
 							message : '前一次之wikidata實體取得失敗: ['
@@ -3951,8 +3959,7 @@ function module_code(library_namespace) {
 					} else if (this.last_page) {
 						library_namespace.debug('自 .last_page '
 								+ get_page_title_link(this.last_page)
-								+ '取得特定實體。', 6,
-								'wiki_API.prototype.next.edit_data');
+								+ ' 取得特定實體。', 6, 'wiki_API.next.edit_data');
 						// e.g., edit_data({Function}data)
 						next.splice(1, 0, this.last_page);
 
@@ -3979,6 +3986,10 @@ function module_code(library_namespace) {
 				next.splice(3, 0, null);
 			}
 
+			// 自輸入項目設定 .last_page
+			if (get_page_content.is_page_data(next[1])) {
+				this.last_page = next[1];
+			}
 			// wikidata_edit(id, data, token, options, callback)
 			wikidata_edit(next[1], next[2], this.data_session.token,
 			// next[3] : options
@@ -4031,8 +4042,9 @@ function module_code(library_namespace) {
 			function(data, error) {
 				// 此 wbmergeitems 之回傳 data 不包含 item 資訊。
 				// next[4] : callback
-				if (typeof next[4] === 'function')
+				if (typeof next[4] === 'function') {
 					next[4].call(this, data, error);
+				}
 				_this.next();
 			});
 			break;
@@ -14402,13 +14414,17 @@ function module_code(library_namespace) {
 				data = data.call(options, id);
 
 			} else {
-				library_namespace.debug('Get id: ' + JSON.stringify(id), 3,
+				library_namespace.debug('Get id from ' + JSON.stringify(id), 3,
 						'wikidata_edit');
 				wikidata_entity(id, options.props, function(entity, error) {
 					if (error) {
+						library_namespace.debug('Get error '
+								+ JSON.stringify(error), 3, 'wikidata_edit');
 						callback(undefined, error);
 						return;
 					}
+					library_namespace.debug('Get entity '
+							+ JSON.stringify(entity), 3, 'wikidata_edit');
 					if (!entity || ('missing' in entity)) {
 						// TODO: e.g., 此頁面不存在/已刪除。
 						// return;
