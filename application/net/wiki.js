@@ -462,8 +462,40 @@ function module_code(library_namespace) {
 		commons : true,
 		species : true,
 		incubator : true,
-		wikitech : true
+		phabricator : true,
+		wikitech : true,
+
+		releases : true
 	}
+	// shortcut
+	api_URL.alias = {
+		// project with language prefix
+		// project: language.*.org
+		w : 'wikipedia',
+		n : 'wikinews',
+		b : 'wikibooks',
+		q : 'wikiquote',
+		s : 'wikisource',
+		v : 'wikiversity',
+		voy : 'wikivoyage',
+		wikt : 'wiktionary',
+
+		// project: *.wikimedia.org
+		m : 'meta',
+		// 這一項會自動判別語言。
+		metawikipedia : 'meta',
+		c : 'commons',
+		wikispecies : 'species',
+		phab : 'phabricator',
+		download : 'releases',
+
+		// project: www.*.org
+		d : 'wikidata',
+		mw : 'mediawiki',
+		wmf : 'wikimedia',
+
+		betawikiversity : 'beta.wikiversity'
+	};
 	// project with language prefix
 	api_URL.project = {
 		wikipedia : true,
@@ -475,7 +507,6 @@ function module_code(library_namespace) {
 		wikivoyage : true,
 		wiktionary : true
 	};
-	api_URL.alias = {};
 
 	/**
 	 * setup API URL.
@@ -5591,6 +5622,8 @@ function module_code(library_namespace) {
 
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
+			library_namespace.err('wiki_API.page: Invalid title: '
+					+ JSON.stringify(title));
 			throw 'wiki_API.page: Invalid title: ' + get_page_title_link(title);
 		}
 
