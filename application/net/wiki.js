@@ -2634,7 +2634,7 @@ function module_code(library_namespace) {
 	 *      https://en.wikipedia.org/wiki/Help:Redirect
 	 *      https://phabricator.wikimedia.org/T68974
 	 */
-	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|넘겨주기)\s*(?::\s*)?\[\[([^\[\]{}|]+)(?:\|[^\[\]{}]+)?\]\]/i;
+	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|転送|넘겨주기)\s*(?::\s*)?\[\[([^\[\]{}|]+)(?:\|[^\[\]{}]+)?\]\]/i;
 
 	/**
 	 * parse redirect page. 解析重定向資訊。 若 wikitext 重定向到其他頁面，則回傳其{String}頁面名:
@@ -14469,11 +14469,13 @@ function module_code(library_namespace) {
 		}
 
 		function do_wbeditentity() {
+			if (library_namespace.is_empty_object(data)) {
+			}
 			// data 會在 set_claims() 被修改，因此不能提前設定。
 			options.data = JSON.stringify(data);
-			if (library_namespace.is_debug(2)) {
-				library_namespace.debug('options.data: ' + options.data, 1,
-						'do_wbeditentity');
+			if (library_namespace.is_debug(0)) {
+				library_namespace.debug('options.data: ' + options.data, 0,
+						'wikidata_edit.do_wbeditentity');
 				console.log(data);
 			}
 
@@ -14484,10 +14486,18 @@ function module_code(library_namespace) {
 				var error = data && data.error;
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
+					console.log('options:');
+					console.log(options);
+					console.log('data:');
+					console.log(data);
+					console.log('error:');
+					console.log(error);
 					library_namespace.err(
 					// e.g., 數據庫被禁止寫入以進行維護，所以您目前將無法保存您所作的編輯
 					// Mediawiki is in read-only mode during maintenance
-					'wikidata_edit: ' + (options.id ? options.id + ': ' : '')
+					'wikidata_edit.do_wbeditentity: '
+					//
+					+ (options.id ? options.id + ': ' : '')
 					// [readonly] The wiki is currently in read-only mode
 					+ '[' + error.code + '] ' + error.info);
 					callback(undefined, error);
@@ -14504,7 +14514,7 @@ function module_code(library_namespace) {
 		if (false && Array.isArray(data)) {
 			// TODO: 按照內容分類。
 			library_namespace
-					.warn('wikidata_edit: Treat {Array}data as {claims:data}!');
+					.warn('wikidata_edit.do_wbeditentity: Treat {Array}data as {claims:data}!');
 			data = {
 				claims : data
 			};
