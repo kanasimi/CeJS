@@ -373,11 +373,12 @@ function module_code(library_namespace) {
 	// server:
 	// (wikipedia|wikibooks|wikinews|wikiquote|wikisource|wikiversity|wikivoyage|wikidata|wikimediafoundation|wiktionary|mediawiki)
 
-	// e.g., [[s:]], [[zh-classical:]], [[zh-min-nan:]], [[test2:]]
+	// e.g., [[s:]], [[zh-classical:]], [[zh-min-nan:]], [[test2:]],
+	// [[metawikipedia:]], [[betawikiversity:]]
 	// @see [[m:Help:Interwiki linking#Project titles and shortcuts]],
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
-	var PATTERN_PROJECT_CODE = /^[a-z][a-z\-\d]{0,12}$/;
+	var PATTERN_PROJECT_CODE = /^[a-z][a-z\-\d]{0,14}$/;
 
 	/**
 	 * Wikimedia projects 的 URL match pattern 匹配模式。
@@ -392,7 +393,7 @@ function module_code(library_namespace) {
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z][a-z\-\d]{0,12})(?:\.[a-z]+)+)/i;
+	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z][a-z\-\d]{0,14})(?:\.[a-z]+)+)/i;
 
 	/**
 	 * Get the API URL of specified project.
@@ -435,7 +436,7 @@ function module_code(library_namespace) {
 			}
 		}
 		// @see PATTERN_PROJECT_CODE
-		if (/^[a-z][a-z\-\d]{0,12}\.[a-z]+$/i.test(project))
+		if (/^[a-z][a-z\-\d]{0,14}\.[a-z]+$/i.test(project))
 			// e.g., 'en.wikisource', 'en.wiktionary'
 			project += '.org';
 
@@ -705,9 +706,9 @@ function module_code(library_namespace) {
 					.trimLeft();
 			if (index === page_name.length - 1
 			// @see PATTERN_PROJECT_CODE
-			|| !(use_underline ? /^[a-z][a-z\-\d_]{0,12}$/i
+			|| !(use_underline ? /^[a-z][a-z\-\d_]{0,14}$/i
 			//
-			: /^[a-z][a-z\-\d ]{0,12}$/i).test(section.trimRight())) {
+			: /^[a-z][a-z\-\d ]{0,14}$/i).test(section.trimRight())) {
 				// page title: 將首個字母轉成大寫。
 				page_name[index] = upper_case_initial(section);
 				return true;
@@ -2636,7 +2637,7 @@ function module_code(library_namespace) {
 	 *      PATTERN_external_link_global
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
 	 */
-	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z][a-z\-\d]{0,12})\.(?:m\.)?wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
+	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z][a-z\-\d]{0,14})\.(?:m\.)?wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
 
 	/**
 	 * Convert URL to wiki link.
@@ -5022,7 +5023,7 @@ function module_code(library_namespace) {
 			var HOST;
 			action[0] = action[0].replace(
 			// @see PATTERN_PROJECT_CODE
-			/^https?:\/\/([a-z][a-z\-\d]{0,12}\.wikipedia\.org)\//,
+			/^https?:\/\/([a-z][a-z\-\d]{0,14}\.wikipedia\.org)\//,
 			//
 			function(all, host) {
 				HOST = host;
@@ -11662,7 +11663,7 @@ function module_code(library_namespace) {
 			// assert: typeof language.API_URL === 'string'
 			language = language.API_URL.toLowerCase().match(
 			// @see PATTERN_PROJECT_CODE
-			/\/\/([a-z][a-z\-\d]{0,12})\.([a-z]+)/);
+			/\/\/([a-z][a-z\-\d]{0,14})\.([a-z]+)/);
 			library_namespace.debug(language, 4, 'language_to_projects');
 			// TODO: error handling
 			language = language[1].replace(/-/g, '_')
