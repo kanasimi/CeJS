@@ -468,6 +468,8 @@ function module_code(library_namespace) {
 		releases : true
 	}
 	// shortcut
+	// @see [[m:Help:Interwiki linking#Project titles and shortcuts]],
+	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	api_URL.alias = {
 		// project with language prefix
 		// project: language.*.org
@@ -5624,6 +5626,8 @@ function module_code(library_namespace) {
 		if (!action) {
 			library_namespace.err('wiki_API.page: Invalid title: '
 					+ JSON.stringify(title));
+			callback(undefined, 'Invalid title: ' + get_page_title_link(title));
+			return;
 			throw 'wiki_API.page: Invalid title: ' + get_page_title_link(title);
 		}
 
