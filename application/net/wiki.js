@@ -325,7 +325,7 @@ function module_code(library_namespace) {
 
 		// for property = [ {String}language, {String}title or {Array}titles ]
 		if (type === 'language') {
-			return PATTERN_PROJECT_CODE.test(API_URL);
+			return PATTERN_PROJECT_CODE_i.test(API_URL);
 		}
 
 		// 處理 [ {String}API_URL/language, {String}title or {Object}page_data ]
@@ -336,7 +336,7 @@ function module_code(library_namespace) {
 
 		// for key = [ {String}language, {String}title or {Array}titles ]
 		// for id = [ {String}language/site, {String}title ]
-		return metched || PATTERN_PROJECT_CODE.test(API_URL);
+		return metched || PATTERN_PROJECT_CODE_i.test(API_URL);
 	}
 
 	// 規範化 title_parameter
@@ -378,7 +378,9 @@ function module_code(library_namespace) {
 	// @see [[m:Help:Interwiki linking#Project titles and shortcuts]],
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
-	var PATTERN_PROJECT_CODE = /^[a-z][a-z\-\d]{0,14}$/;
+	var PATTERN_PROJECT_CODE = /^[a-z][a-z\-\d]{0,14}$/,
+	//
+	PATTERN_PROJECT_CODE_i = new RegExp(PATTERN_PROJECT_CODE.source, 'i');
 
 	/**
 	 * Wikimedia projects 的 URL match pattern 匹配模式。
@@ -414,14 +416,15 @@ function module_code(library_namespace) {
 		}
 
 		project = String(project);
-		if (project in api_URL.alias) {
-			project = api_URL.alias[project];
+		var lower_case = project.toLowerCase();
+		if (lower_case in api_URL.alias) {
+			project = api_URL.alias[lower_case];
 		}
-		// PATTERN_PROJECT_CODE.test(undefined) === true
-		if (PATTERN_PROJECT_CODE.test(project)) {
-			if (project in api_URL.wikimedia) {
+		// PATTERN_PROJECT_CODE_i.test(undefined) === true
+		if (PATTERN_PROJECT_CODE_i.test(project)) {
+			if (lower_case in api_URL.wikimedia) {
 				project += '.wikimedia';
-			} else if (project in api_URL.project) {
+			} else if (lower_case in api_URL.project) {
 				// (default_language || 'www') + '.' + project
 				project = default_language + '.' + project;
 			} else if (/wik/i.test(project)) {
@@ -436,9 +439,10 @@ function module_code(library_namespace) {
 			}
 		}
 		// @see PATTERN_PROJECT_CODE
-		if (/^[a-z][a-z\-\d]{0,14}\.[a-z]+$/i.test(project))
+		if (/^[a-z][a-z\-\d]{0,14}\.[a-z]+$/i.test(project)) {
 			// e.g., 'en.wikisource', 'en.wiktionary'
 			project += '.org';
+		}
 
 		var matched = project.match(PATTERN_wiki_project_URL);
 		if (matched) {
@@ -456,6 +460,7 @@ function module_code(library_namespace) {
 		return wiki_API.API_URL;
 	}
 
+	// the key MUST in lower case!
 	// @see https://www.wikimedia.org/
 	api_URL.wikimedia = {
 		meta : true,
@@ -468,6 +473,7 @@ function module_code(library_namespace) {
 		releases : true
 	}
 	// shortcut
+	// the key MUST in lower case!
 	// @see [[m:Help:Interwiki linking#Project titles and shortcuts]],
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	api_URL.alias = {
@@ -499,6 +505,7 @@ function module_code(library_namespace) {
 		betawikiversity : 'beta.wikiversity'
 	};
 	// project with language prefix
+	// the key MUST in lower case!
 	api_URL.project = {
 		wikipedia : true,
 		wikibooks : true,
@@ -557,7 +564,7 @@ function module_code(library_namespace) {
 
 	// @see set_default_language()
 	function setup_API_language(session, language_code) {
-		if (PATTERN_PROJECT_CODE.test(language_code)
+		if (PATTERN_PROJECT_CODE_i.test(language_code)
 		// 不包括 test2.wikipedia.org 之類。
 		&& !/test|wiki/i.test(language_code)) {
 			session.language
@@ -8041,7 +8048,7 @@ function module_code(library_namespace) {
 	 */
 	function set_default_language(language) {
 		if (typeof language !== 'string'
-				|| !PATTERN_PROJECT_CODE.test(language)) {
+				|| !PATTERN_PROJECT_CODE_i.test(language)) {
 			if (language)
 				library_namespace.warn(
 				//
@@ -11077,7 +11084,7 @@ function module_code(library_namespace) {
 		}
 
 		if (typeof API_URL === 'string' && !/wikidata/i.test(API_URL)
-				&& !PATTERN_PROJECT_CODE.test(API_URL)) {
+				&& !PATTERN_PROJECT_CODE_i.test(API_URL)) {
 			// e.g., 'test' → 'test.wikidata'
 			API_URL += '.wikidata';
 		}
@@ -12184,9 +12191,9 @@ function module_code(library_namespace) {
 			for ( var key in property) {
 				var _options = property[key];
 				if (typeof _options === 'string'
-						&& PATTERN_PROJECT_CODE.test(_options)) {
+						&& PATTERN_PROJECT_CODE_i.test(_options)) {
 					_options = Object.assign({
-						language : _options
+						language : _options.toLowerCase()
 					}, options);
 				} else {
 					_options = options;
@@ -12415,9 +12422,9 @@ function module_code(library_namespace) {
 				property : options
 			};
 		} else if (typeof options === 'string'
-				&& PATTERN_PROJECT_CODE.test(options)) {
+				&& PATTERN_PROJECT_CODE_i.test(options)) {
 			options = {
-				language : options
+				language : options.toLowerCase()
 			};
 		} else {
 			options = library_namespace.setup_options(options);
