@@ -3868,7 +3868,8 @@ function module_code(library_namespace) {
 				next.splice(2, 0, null);
 			}
 
-			// 自輸入項目設定 .last_page
+			// 因為前面利用cache時會檢查KEY_CORRESPOND_PAGE，且KEY_CORRESPOND_PAGE只會設定在page_data，
+			// 因此這邊自屬於page_data之輸入項目設定 .last_page
 			if (get_page_content.is_page_data(next[1])) {
 				this.last_page = next[1];
 			}
@@ -3986,7 +3987,8 @@ function module_code(library_namespace) {
 				next.splice(3, 0, null);
 			}
 
-			// 自輸入項目設定 .last_page
+			// 因為前面利用cache時會檢查KEY_CORRESPOND_PAGE，且KEY_CORRESPOND_PAGE只會設定在page_data，
+			// 因此這邊自屬於page_data之輸入項目設定 .last_page
 			if (get_page_content.is_page_data(next[1])) {
 				this.last_page = next[1];
 			}
