@@ -2339,7 +2339,7 @@ function test_astronomy() {
 
 
 function test_wiki() {
-	// Set default language. 改變預設之語言。
+	// Set default language. 改變預設之語言。 e.g., 'zh'
 	CeL.wiki.set_language('zh');
 
 	error_count += CeL.test('wiki: regular functions', [
@@ -2368,7 +2368,9 @@ function test_wiki() {
 				CeL.wiki.plain_text("'''MS 明朝''' ('''MS Mincho''') 及 '''MS P明朝''' ('''MS PMincho''')") ] ],
 		[ [ '洗腳風俗及儀式', CeL.wiki.plain_text("洗腳風俗及儀式<small>（英文）</small>") ] ],
 		[ [ '節目列表', CeL.wiki.plain_text("節目列表 {{En icon}}") ] ],
-		[ [ "It's good", CeL.wiki.plain_text("''It's good''") ] ]
+		[ [ "It's good", CeL.wiki.plain_text("''It's good''") ] ],
+		[ [ "alb", CeL.wiki.plain_text("a[[l]]b") ] ],
+		[ [ "a l b", CeL.wiki.plain_text("a [[l]] b") ] ]
 
 	]);
 

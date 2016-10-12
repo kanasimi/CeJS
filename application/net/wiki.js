@@ -703,7 +703,13 @@ function module_code(library_namespace) {
 		.replace(/<\!--[\s\S]*?-->/g, '').replace(/<\/?[a-z][^>]*>/g, '')
 		// e.g., "{{En icon}}"
 		.replace(/{{[a-z\s]+}}/ig, '')
-		// "<small>（英文）</small>"
+		// e.g., "[[link]]" → "link"
+		.replace(PATTERN_wikilink, function($0, $1) {
+			var index = $1.indexOf('|');
+			return index === NOT_FOUND ? $1 : $1.slice(index + 1);
+		})
+		// e.g., "ABC (英文)" → "ABC "
+		// e.g., "ABC （英文）" → "ABC "
 		.replace(/[(（][英中日德法西義韓諺俄独原][語语國国]?文?[名字]?[）)]/g, '')
 		// e.g., "'''''title'''''" → " title "
 		// .remove_head_tail(): function remove_head_tail() @ CeL.data.native
@@ -1451,6 +1457,8 @@ function module_code(library_namespace) {
 	var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
 	/** {RegExp}內部連結的匹配模式。 */
 	PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
+	/** {RegExp}內部連結的匹配模式v2。 */
+	PATTERN_wikilink = /\[\[([^\[\]][\s\S]*?)\]\]/g,
 	/**
 	 * Wikimedia projects 的 external link 匹配模式。
 	 * 
@@ -1957,7 +1965,7 @@ function module_code(library_namespace) {
 		// [[~:~|~]], [[~:~:~|~]]
 		wikitext = wikitext.replace_till_stable(
 		// or use ((PATTERN_link))
-		/\[\[([^\[\]][\s\S]*?)\]\]/g, function(all, parameters) {
+		PATTERN_wikilink, function(all, parameters) {
 			if (normalize)
 				parameters = parameters.trim();
 			// 自 end_mark 向前回溯。
