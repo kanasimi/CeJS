@@ -695,6 +695,10 @@ function module_code(library_namespace) {
 	// wikitext to plain text
 	// CeL.wiki.plain_text(wikitext)
 	function to_plain_text(wikitext) {
+		if (!wikitext || !(wikitext = wikitext.trim())) {
+			// 一般 template 中之 parameter 常有設定空值的狀況，因此首先篩選以加快速度。
+			return wikitext;
+		}
 		// TODO: "《茶花女》维基百科词条'''(法语)'''"
 		wikitext = wikitext
 		// 去除註解 comments。
