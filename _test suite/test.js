@@ -2361,6 +2361,17 @@ function test_wiki() {
 
 	]);
 
+	error_count += CeL.test('wiki: CeL.wiki.plain_text() basic test', [
+		[ [ 'エアポート快特', CeL.wiki.plain_text('<font lang="ja">エアポート快特</font>') ] ],
+		[ [ "卡斯蒂利亞王后 凱瑟琳", CeL.wiki.plain_text("卡斯蒂利亞王后'''凱瑟琳'''") ] ],
+		[ [ "MS 明朝 (MS Mincho) 及 MS P明朝 (MS PMincho)",
+				CeL.wiki.plain_text("'''MS 明朝''' ('''MS Mincho''') 及 '''MS P明朝''' ('''MS PMincho''')") ] ],
+		[ [ '洗腳風俗及儀式', CeL.wiki.plain_text("洗腳風俗及儀式<small>（英文）</small>") ] ],
+		[ [ '節目列表', CeL.wiki.plain_text("節目列表 {{En icon}}") ] ],
+		[ [ "It's good", CeL.wiki.plain_text("''It's good''") ] ]
+
+	]);
+
 	error_count += CeL.test('wiki: file_pattern & parse_template', [
 		[[ '!![[File:abc d.svg]]@@', '!![[File : Abc_d.png]]@@'
 		//

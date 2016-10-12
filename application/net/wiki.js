@@ -691,6 +691,32 @@ function module_code(library_namespace) {
 	}
 
 	// ------------------------------------------------------------------------
+
+	// wikitext to plain text
+	// CeL.wiki.plain_text(wikitext)
+	function to_plain_text(wikitext) {
+		// TODO: "《茶花女》维基百科词条'''(法语)'''"
+		wikitext = wikitext
+		// 去除註解 comments。
+		// e.g., "親会社<!-- リダイレクト先の「[[子会社]]」は、[[:en:Subsidiary]] とリンク -->"
+		// "ロイ・トーマス<!-- 曖昧さ回避ページ -->"
+		.replace(/<\!--[\s\S]*?-->/g, '').replace(/<\/?[a-z][^>]*>/g, '')
+		// e.g., "{{En icon}}"
+		.replace(/{{[a-z\s]+}}/ig, '')
+		// "<small>（英文）</small>"
+		.replace(/[(（][英中日德法西義韓諺俄独原][語语國国]?文?[名字]?[）)]/g, '')
+		// e.g., "'''''title'''''" → " title "
+		// .remove_head_tail(): function remove_head_tail() @ CeL.data.native
+		.remove_head_tail("'''", 0, ' ').remove_head_tail("''", 0, ' ')
+		// 有時因為原先的文本有誤，還是會有 ''' 之類的東西留下來。
+		.replace(/'{2,}/g, ' ').trim()
+		//
+		.replace(/\s{2,}/g, ' ').replace(/[(（] /g, '(').replace(/ [）)]/g, ')');
+
+		return wikitext;
+	}
+
+	// ------------------------------------------------------------------------
 	// 創建 match pattern 相關函數。
 
 	/**
@@ -1781,6 +1807,7 @@ function module_code(library_namespace) {
 						if (typeof token === 'string') {
 							parameter_index_of[key] = _index;
 							_parameters[key] = value;
+
 						} else {
 							// assert: Array.isArray(token)
 							if (false) {
@@ -1792,8 +1819,10 @@ function module_code(library_namespace) {
 									}
 								});
 							}
+							// assert: Array.isArray(token)
+							// 因此代表value的_token也採用相同的type。
 							_token = [];
-							// copy properties
+							// copy properties, including .toString().
 							Object.keys(token).forEach(function(p) {
 								_token[p] = token[p];
 							});
@@ -15208,6 +15237,8 @@ function module_code(library_namespace) {
 		file_pattern : file_pattern,
 		lead_text : lead_text,
 		// sections : get_sections,
+
+		plain_text : to_plain_text,
 
 		parse : parse_wikitext,
 		parser : page_parser,
