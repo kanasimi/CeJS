@@ -720,7 +720,7 @@ function module_code(library_namespace) {
 		.remove_head_tail("'''", 0, ' ').remove_head_tail("''", 0, ' ')
 		// 有時因為原先的文本有誤，還是會有 ''' 之類的東西留下來。
 		.replace(/'{2,}/g, ' ').trim()
-		//
+		// 此處之 space 應為中間之空白。
 		.replace(/\s{2,}/g, ' ').replace(/[(（] /g, '(').replace(/ [）)]/g, ')');
 
 		return wikitext;
