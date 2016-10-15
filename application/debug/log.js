@@ -1617,17 +1617,18 @@ if (!CeL.Log) {
 		};
 
 		function handler(condition_arguments) {
-			if (!condition_arguments)
+			if (!condition_arguments) {
 				// skip this one.
 				return;
+			}
 
 			recorder.all.push(condition_arguments);
 
 			var result;
 			try {
-				if (typeof condition_arguments === 'function')
+				if (typeof condition_arguments === 'function') {
 					result = condition_arguments(assert_proxy);
-				else {
+				} else {
 					// assert: Array.isArray(condition_arguments) or arguments
 					var options = condition_arguments[1],
 					//
@@ -1731,10 +1732,11 @@ if (!CeL.Log) {
 			if (recorder.failed.length + recorder.passed.length !== recorder.all.length)
 				messages.push('/' + recorder.all.length);
 			messages.push(CeL.to_SGR([ ' ', 'fg=red', 'failed', '-fg' ]));
-			if (recorder.fatal.length > 0)
+			if (recorder.fatal.length > 0) {
 				// fatal exception error 致命錯誤
 				messages.push(CeL.to_SGR([ ', ' + recorder.fatal.length + ' ',
 						'fg=red;bg=white', 'fatal', '-fg;-bg' ]));
+			}
 
 			// 不採用 log_controller，在 console 會出現奇怪的著色。
 			// e.g., @ Travis CI
@@ -1759,9 +1761,19 @@ if (!CeL.Log) {
 		if (Array.isArray(conditions)) {
 			conditions.forEach(handler);
 		} else {
-			var tests_left = CeL.null_Object(), tests_count = 0;
+			var tests_left = CeL.null_Object(), tests_count = 0,
 			// assert: typeof conditions === 'function'
-			conditions(assert_proxy, function setup_test(test_name) {
+			finish_test = function(test_name) {
+				tests_count--;
+				delete tests_left[test_name];
+				if (tests_count === 0
+				// && CeL.is_empty_object(tests_left)
+				) {
+					report();
+				}
+			};
+
+			conditions(assert_proxy, function setup_test(test_name, test_function) {
 				// need wait (pending)
 				assert_proxy.asynchronous = true;
 				tests_count++;
@@ -1772,15 +1784,16 @@ if (!CeL.Log) {
 					}
 					tests_left[test_name] = true;
 				}
-			}, function finish_test(test_name) {
-				tests_count--;
-				delete tests_left[test_name];
-				if (tests_count === 0
-				// && CeL.is_empty_object(tests_left)
-				) {
-					report();
+				if (typeof test_function === 'function') {
+					try {
+						test_function(finish_test);
+					} catch (e) {
+						recorder.fatal.push(test_name);
+					}
+					finish_test(test_name);
 				}
-			});
+
+			}, finish_test);
 		}
 
 		if (!assert_proxy.asynchronous) {

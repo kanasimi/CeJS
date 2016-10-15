@@ -2504,7 +2504,7 @@ function test_wiki() {
 		_setup_test('wiki: get_creation_Date');
 		wiki.page('Wikipedia:Sandbox', function(page_data) {
 			// {Date}page_data.creation_Date
-			assert([ '2002-12-20T21:50:14.000Z', page_data.creation_Date.toISOString() ], 'get_creation_Date: [[Wikipedia:Sandbox]]');
+			assert([ '2002-12-20T21:50:14.000Z', page_data && page_data.creation_Date.toISOString() ], 'get_creation_Date: [[Wikipedia:Sandbox]]');
 			_finish_test('wiki: get_creation_Date');
 		}, {
 			get_creation_Date : true
