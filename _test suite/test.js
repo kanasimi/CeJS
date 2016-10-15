@@ -2527,7 +2527,7 @@ function test_wiki() {
 		_setup_test('wiki: CeL.wiki.data.search()');
 		CeL.wiki.data.search('宇宙', function(data) {
 			var test_name = 'wiki: CeL.wiki.data.search()';
-			assert([ 'Q1', data[0] ], test_name);
+			assert([ 'Q1', data && data[0] ], test_name);
 			_finish_test(test_name);
 		}, {get_id:true});
 
