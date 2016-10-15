@@ -5630,7 +5630,13 @@ function module_code(library_namespace) {
 		// console.log('title: ' + JSON.stringify(title));
 		if (options.get_creation_Date) {
 			// 警告:僅適用於單一頁面。
-			wiki_API.page(title, function(page_data) {
+			wiki_API.page(title, function(page_data, error) {
+				if (error || !page_data || ('missing' in page_data)) {
+					// error? 此頁面不存在/已刪除。
+					callback(page_data, error);
+					return;
+				}
+
 				// e.g., '2015-12-17T12:10:18.000Z'
 				// page_data.revisions[0].timestamp;
 
@@ -6009,7 +6015,7 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.redirect_to = function(title, callback, options) {
 		wiki_API.page(title, function(page_data, error) {
-			if (!page_data || ('missing' in page_data) || error) {
+			if (error || !page_data || ('missing' in page_data)) {
 				// error? 此頁面不存在/已刪除。
 				callback(undefined, page_data, error);
 				return;
