@@ -11265,8 +11265,10 @@ function module_code(library_namespace) {
 		if (options['continue'] > 0)
 			action[1] += '&continue=' + options['continue'];
 
-		wiki_API.query(action, function(data) {
-			var error = data && data.error;
+		wiki_API.query(action, function(data, error) {
+			if (!error) {
+				error = data ? data.error : 'No data get';
+			}
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				library_namespace.err('wikidata_search: ['
