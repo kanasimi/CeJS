@@ -3301,6 +3301,26 @@ function module_code(library_namespace) {
 		return revision && !!revision['*'];
 	};
 
+	// ------------------------------------------------------------------------
+
+	// check if session.last_data is usable, 非過期資料。
+	function last_data_is_usable(session) {
+		if (session.last_data && !session.last_data.error
+		// 若是session.last_data與session.last_page連動，必須先確認是否沒變更過session.last_page，才能當作cache、跳過重新擷取entity之作業。
+		&& (!(KEY_CORRESPOND_PAGE in session.last_data)
+		// assert:
+		// get_page_content.is_page_data(session.last_data[KEY_CORRESPOND_PAGE])
+		|| session.last_page === session.last_data[KEY_CORRESPOND_PAGE])) {
+			library_namespace.debug('Use cached data: [['
+			//
+			+ (KEY_CORRESPOND_PAGE in session.last_data
+			//
+			? session.last_page.id : session.last_data.id) + ']]', 1,
+					'last_data_is_usable');
+			return true;
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// instance 相關函數。
 
@@ -3881,12 +3901,7 @@ function module_code(library_namespace) {
 
 			if (typeof next[1] === 'function') {
 				// 直接輸入 callback。
-				if (this.last_data && (!(KEY_CORRESPOND_PAGE in this.last_data)
-				// 若是this.last_data與this.last_page連動，必須先確認是否沒變更過this.last_page，才能當作cache、跳過重新擷取entity之作業。
-				|| (this.last_page === this.last_data[KEY_CORRESPOND_PAGE]))) {
-					library_namespace.debug('Use cached data: [['
-							+ this.last_page.id + ']]', 1,
-							'wiki_API.prototype.next.data');
+				if (last_data_is_usable(this)) {
 					next[1](this.last_data);
 					break;
 				} else {
@@ -3970,14 +3985,7 @@ function module_code(library_namespace) {
 					library_namespace.debug('this.last_data: '
 							+ JSON.stringify(this.last_data), 6,
 							'wiki_API.next.edit_data');
-					if (this.last_data
-							&& !this.last_data.error
-							&& (!(KEY_CORRESPOND_PAGE in this.last_data)
-							// 若是this.last_data與this.last_page連動，必須先確認是否沒變更過this.last_page，才能當作cache、跳過重新擷取entity之作業。
-							|| (this.last_page === this.last_data[KEY_CORRESPOND_PAGE]))) {
-						library_namespace.debug('Use cached data: [['
-								+ this.last_page.id + ']]', 1,
-								'wiki_API.next.edit_data');
+					if (last_data_is_usable(this)) {
 						// shift arguments
 						next.splice(1, 0, this.last_data);
 
@@ -7471,8 +7479,8 @@ function module_code(library_namespace) {
 		}
 	};
 
-	/**
-	 * 處理編輯衝突用。 to detect edit conflicts.
+	/***************************************************************************
+	 * / * 處理編輯衝突用。 to detect edit conflicts.
 	 * 
 	 * 注意: 會改變 options! Warning: will modify options！
 	 * 
@@ -7490,7 +7498,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Object}options
 	 * 
-	 * @see https://www.mediawiki.org/wiki/API:Edit
+	 * @see https://www.mediawiki.org/wiki/API:Edit /
 	 */
 	wiki_API.edit.set_stamp = function(options, timestamp) {
 		if (get_page_content.is_page_data(timestamp)
@@ -11518,7 +11526,7 @@ function module_code(library_namespace) {
 		}
 
 		if (Array.isArray(value)) {
-			if (value.length > 1) {
+			if (options && options.multi || value.length > 1) {
 				if (options && options.multi) {
 					// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 					options = library_namespace.new_options(options);
@@ -11528,8 +11536,9 @@ function module_code(library_namespace) {
 				value = value.map(function(v) {
 					return wikidata_datavalue(v, undefined, options);
 				});
-				if (typeof callback === 'function')
+				if (typeof callback === 'function') {
 					callback(value);
+				}
 				return value;
 			}
 			value = value[0];
@@ -12732,7 +12741,7 @@ function module_code(library_namespace) {
 		case 'wikibase-property':
 			datavalue_type = 'wikibase-entityid';
 			// console.log(value);
-			var matched = value.match(/^([PQ])(\d{1,10})$/i);
+			var matched = value && value.match(/^([PQ])(\d{1,10})$/i);
 			if (!matched) {
 				throw 'normalize_wikidata_value: Illegal ' + datatype + ': '
 						+ value;
@@ -14699,14 +14708,20 @@ function module_code(library_namespace) {
 		return list;
 	}
 
-	// common characters. 不能用來判別語言的泛用符號/字元。應該是英語也能接受的符號。
-	// Øω…～Ⅱ“”·
+	// common characters.
+	// FULLWIDTH full width form characters 全形 ØωⅡ
+	var PATTERN_common_characters_FW = /[\s\-ー・·．˙•，、。？！；：“”‘’「」『』（）－—…《》〈〉【】〖〗〔〕～←→↔⇐⇒⇔]+/g,
 	// [[:en:Chùa Báo Quốc]]
 	// {{tsl|ja|オメガクインテット|*ω*Quintet}}
 	// {{tsl|en|Tamara de Lempicka|Tamara Łempicka}}
 	// {{link-en|Željko Ivanek|Zeljko Ivanek}}
-	/** {RegExp}常用字母的匹配模式。 */
-	var PATTERN_common_characters = /[\s\d_,.:;'"!()\-+\&<>\\\/\?–`@#$%^&*=~×☆★♪♫♬♩○●©®℗™℠]+/g,
+	/** {RegExp}常用字母的匹配模式。應該是英語也能接受的符號。 */
+	PATTERN_common_characters = /[\s\d_,.:;'"!()\-+\&<>\\\/\?–`@#$%^&*=~×☆★♪♫♬♩○●©®℗™℠]+/g,
+	// 不能用來判別語言、不能表達意義的泛用符號/字元。無關緊要（不造成主要意義）的字元。
+	PATTERN_only_common_characters = new RegExp('^['
+			+ PATTERN_common_characters.source.slice(1, -2)
+			//
+			+ PATTERN_common_characters_FW.source.slice(1, -2) + ']*$'),
 	// non-Chinese / non-CJK: 必須置於所有非中日韓語言之後測試!!
 	// 2E80-2EFF 中日韓漢字部首補充 CJK Radicals Supplement
 	/** {RegExp}非漢文化字母的匹配模式。 */
@@ -14837,7 +14852,7 @@ function module_code(library_namespace) {
 	function key_of_label(label) {
 		return label && String(label)
 		// 去掉無關緊要（不造成主要意義）的字元。 ja:"・", "ー"
-		.replace(/[\s\-ー・·．˙•]+/g, '').toLowerCase()
+		.replace(PATTERN_common_characters_FW, '').toLowerCase()
 		// 去掉複數。 TODO: 此法過於簡略。
 		.replace(/s$/, '')
 		// 保證回傳 {String}。 TODO: {Number}0
@@ -15242,6 +15257,7 @@ function module_code(library_namespace) {
 		LTR_SCRIPTS : LTR_SCRIPTS,
 		PATTERN_LTR : PATTERN_LTR,
 		PATTERN_common_characters : PATTERN_common_characters,
+		PATTERN_only_common_characters : PATTERN_only_common_characters,
 
 		namespace : get_namespace,
 		remove_namespace : remove_namespace,
