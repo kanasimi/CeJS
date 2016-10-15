@@ -6263,7 +6263,11 @@ function module_code(library_namespace) {
 		// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=languages&utf8=1
 		'action=parse&contentmodel=wikitext&uselang=' + (uselang || 'zh-hant')
 		// prop=text|links
-		+ '&prop=text&text=' + encodeURIComponent(text) ], function(data) {
+		+ '&prop=text&text=' + encodeURIComponent(text) ], function(data, error) {
+			if (error || !data) {
+				callback('', error);
+				return;
+			}
 			data = data.parse;
 			text = data.text['*']
 			// 去掉 MediaWiki parser 解析器所自行添加的 token。
