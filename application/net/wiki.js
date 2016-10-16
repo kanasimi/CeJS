@@ -60,9 +60,11 @@ typeof CeL === 'function' && CeL.run({
 	// optional 選用: .show_value() @ CeL.interact.DOM, CeL.application.debug
 	// optional 選用: CeL.wiki.cache(): CeL.application.platform.nodejs.fs_mkdir()
 	// optional 選用: CeL.wiki.traversal(): CeL.application.platform.nodejs
-	// optional 選用 : wiki_API.work(), gettext():
+	// optional 選用: wiki_API.work(), gettext():
 	// CeL.application.platform.nodejs.gettext()
-	+ '|application.net.Ajax.get_URL|data.date.',
+	+ '|application.net.Ajax.get_URL'
+	// CeL.date.String_to_Date(), Julian_day(): CeL.data.date
+	+ '|data.date.',
 	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
 	code : module_code,
 	// 設定不匯出的子函式。
@@ -2613,7 +2615,8 @@ function module_code(library_namespace) {
 		matched;
 
 		while (matched = PATTERN_date_zh.exec(wikitext)) {
-			// Warning: .to_Date() need data.date.
+			// Warning:
+			// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()比parse_date_zh()功能大多了。
 			var date = matched[1] + '/' + matched[2] + '/' + matched[3]
 					+ matched[4];
 			date = get_timevalue ? Date.parse(date) : new Date(date);
@@ -11292,8 +11295,13 @@ function module_code(library_namespace) {
 					// 自此結果能得到的資訊有限。
 					// label: 'Universe'
 					// match: { type: 'label', language: 'zh', text: '宇宙' }
-					if (item.match && key === item.match.text)
+					if (item.match && key === item.match.text
+					// 通常不會希望取得維基百科消歧義頁。
+					// @see 'Wikimedia disambiguation page' @
+					// [[d:MediaWiki:Gadget-autoEdit.js]]
+					&& !/disambiguation|消歧義|消歧義|曖昧さ回避/.test(item.description)) {
 						return true;
+					}
 				});
 			}
 
@@ -11339,15 +11347,21 @@ function module_code(library_namespace) {
 	// 'en:reference URL' : 'P854',
 	// 檢索日期
 	// 'en:retrieved' : 'P813'
-	};
+	},
+	// entity (Q\d+) 用。
+	// 可考量加入 .type (item|property) 為 key 的一部分，
+	// 或改成 wikidata_search_cache={item:{},property:{}}。
+	wikidata_search_cache_entity = library_namespace.null_Object();
 
 	// wrapper function of wikidata_search().
 	wikidata_search.use_cache = function(key, callback, options) {
-		// 可考量加入 .type (item|property) 為 key 的一部分，
-		// 或改成 wikidata_search_cache={item:{},property:{}}。
 		var language_and_key,
 		// 須與 wikidata_search() 相同!
-		language = wikidata_get_site(options, true) || default_language;
+		language = wikidata_get_site(options, true) || default_language,
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
+		cacher = options
+				&& options.type !== wikidata_search.use_cache.default_options.type ? wikidata_search_cache_entity
+				: wikidata_search_cache;
 		if (typeof key === 'string') {
 			key = normalize_wikidata_key(key);
 			language_and_key = language + ':' + key;
@@ -11368,12 +11382,12 @@ function module_code(library_namespace) {
 						// done. callback(id_list)
 						callback(key.map(function(k) {
 							if (is_api_and_title(k, 'language')) {
-								return wikidata_search_cache[k[0] + ':'
+								return cacher[k[0] + ':'
 								//
 								+ normalize_wikidata_key(k[1])];
 							}
 							k = normalize_wikidata_key(k);
-							return wikidata_search_cache[language + ':' + k];
+							return cacher[language + ':' + k];
 						}));
 						return;
 					}
@@ -11405,11 +11419,10 @@ function module_code(library_namespace) {
 		if ((!options || !options.force)
 		// TODO: key 可能是 [ language code, labels|aliases ] 之類。
 		// &&language_and_key
-		&& (language_and_key in wikidata_search_cache)) {
+		&& (language_and_key in cacher)) {
 			library_namespace.debug('has cache: [' + language_and_key + '] → '
-					+ wikidata_search_cache[language_and_key], 4,
-					'wikidata_search.use_cache');
-			key = wikidata_search_cache[language_and_key];
+					+ cacher[language_and_key], 4, 'wikidata_search.use_cache');
+			key = cacher[language_and_key];
 
 			if (/^[PQ]\d{1,10}$/.test(key)) {
 			}
@@ -11453,7 +11466,7 @@ function module_code(library_namespace) {
 						'wikidata_search.use_cache');
 			}
 			// 即使有錯誤，依然做 cache 紀錄，避免重複偵測操作。
-			wikidata_search_cache[language_and_key] = id;
+			cacher[language_and_key] = id;
 
 			callback(id, error);
 		}, options);
@@ -11463,6 +11476,8 @@ function module_code(library_namespace) {
 	wikidata_search.use_cache.default_options = {
 		API_URL : get_data_API_URL(options),
 		// 通常 property 才值得使用 cache。
+		// entity 可採用 'item'
+		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
 		type : 'property',
 		// limit : 1,
 		get_id : true
@@ -11731,6 +11746,52 @@ function module_code(library_namespace) {
 				+ ']，請修改本函數。');
 		return value;
 	}
+
+	// 取得value在property_list中的index。相當於 property_list.indexOf(value)
+	// type=-1: list.lastIndexOf(value), type=1: list.includes(value),
+	// other type: list.indexOf(value)
+	wikidata_datavalue.get_index = function(property_list, value, type) {
+		function to_comparable(value) {
+			if (Array.isArray(value) && value.JD) {
+				// e.g., new Date('2000-1-1 UTC+0')
+				var date = new Date(value.join('-') + ' UTC+0');
+				if (isNaN(date.getTime())) {
+					library_namespace
+							.err('wikidata_datavalue.get_index: Invalid Date: '
+									+ value);
+				}
+				value = date;
+			}
+			// e.g., library_namespace.is_Date(value)
+			return typeof value === 'object' ? JSON.stringify(value) : value;
+		}
+
+		property_list = wikidata_datavalue(property_list, undefined, {
+			multi : true
+		}).map(to_comparable);
+
+		value = to_comparable(value && value.datavalue ? wikidata_datavalue(value)
+				: value);
+
+		if (!isNaN(value) && property_list.every(function(v) {
+			return typeof v === 'number';
+		})) {
+			value = +value;
+		}
+
+		// console.log([ value, property_list ]);
+
+		if (type === 0) {
+			return [ property_list, value ];
+		}
+		if (type === 1) {
+			return property_list.includes(value);
+		}
+		if (type === -1) {
+			return property_list.lastIndexOf(value);
+		}
+		return property_list.indexOf(value);
+	};
 
 	// ------------------------------------------------------------------------
 
@@ -12486,6 +12547,23 @@ function module_code(library_namespace) {
 		|| typeof value[0] !== 'number' || typeof value[1] !== 'number');
 	}
 
+	// https://github.com/DataValues/Number/blob/master/src/DataValues/DecimalValue.php#L43
+	// const QUANTITY_VALUE_PATTERN = '/^[-+]([1-9]\d*|\d)(\.\d+)?\z/';
+
+	// return quantity acceptable by wikidata API ({String}with sign)
+	// https://www.wikidata.org/wiki/Help:Statements#Quantitative_values
+	// https://phabricator.wikimedia.org/T119226
+	function wikidata_quantity(value, unit) {
+		// assert: typeof value === 'number'
+		value = +value;
+		// TODO: 極大極小值。
+		// 負數已經自動加上 "-"
+		return value < 0 ? String(value) : '+' + value;
+	}
+
+	// 精確至日。
+	var PRECISION_DAY = 11;
+
 	/**
 	 * 盡可能模擬 wikidata (wikibase) 之 JSON 資料結構。
 	 * 
@@ -12568,7 +12646,8 @@ function module_code(library_namespace) {
 					wikidata_search.use_cache(value, function(id, error) {
 						normalize_wikidata_value(
 						//
-						id, datatype, options, to_pass);
+						id || 'Nothing found: [' + value + ']', datatype,
+								options, to_pass);
 					}, Object.assign(library_namespace.null_Object(),
 							wikidata_search.use_cache.default_options, {
 								type : matched[1],
@@ -12717,40 +12796,53 @@ function module_code(library_namespace) {
 
 		case 'quantity':
 			datavalue_type = datatype;
+			var unit = options.unit || 1;
+			value = wikidata_quantity(value);
 			value = {
-				amount : String(value),
+				amount : value,
 				// e.g., 'http://www.wikidata.org/entity/Q857027'
-				unit : String(options.unit || 1),
-				upperBound : String(typeof options.upperBound === 'number' ? options.upperBound
-						: value),
-				lowerBound : String(typeof options.lowerBound === 'number' ? options.lowerBound
-						: value)
+				unit : String(unit),
+				upperBound : typeof options.upperBound === 'number' ? wikidata_quantity(options.upperBound)
+						: value,
+				lowerBound : typeof options.lowerBound === 'number' ? wikidata_quantity(options.lowerBound)
+						: value
 			};
 			break;
 
 		case 'time':
 			datavalue_type = datatype;
+			var precision = options.precision;
 			// 規範日期。
 			if (!library_namespace.is_Date(value)) {
+				var date_value;
 				// TODO: 解析各種日期格式。
-				error = Date.parse(value);
-				if (isNaN(error)) {
+				if (value && isNaN(date_value = Date.parse(value))) {
+					// Warning:
+					// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()比parse_date_zh()功能大多了。
+					date_value = library_namespace.String_to_Date(value, {
+						zone : 0
+					});
+					date_value = date_value ? date_value.getTime()
+							: parse_date_zh(value, true) || NaN;
+				}
+				if (isNaN(date_value)) {
 					error = 'Invalid Date: [' + value + ']';
 				} else {
-					value = new Date(error);
-					error = undefined;
+					// TODO: 按照date_value設定.precision。
+					value = new Date(date_value);
 				}
 			} else if (isNaN(value.getTime())) {
 				error = 'Invalid Date';
 			}
 
-			// 11: day
-			var precision = options.precision || 11;
+			if (isNaN(precision)) {
+				precision = PRECISION_DAY;
+			}
 			if (error) {
 				value = String(value);
 			} else {
-				if (precision === 11) {
-					// 當 precision=11 (day) 時，時分秒必須設置為 0!
+				if (precision === PRECISION_DAY) {
+					// 當 precision=PRECISION_DAY 時，時分秒*必須*設置為 0!
 					value.setUTCHours(0, 0, 0, 0);
 				}
 				value = value.toISOString();
@@ -13221,13 +13313,9 @@ function module_code(library_namespace) {
 						}
 
 						// 直接檢測已有的 index，設定於 property_data.remove。
-						var duplicate_index =
-						//
-						wikidata_datavalue(exists_property_list, undefined, {
-							multi : true
-						})
 						// 若有必要刪除，從最後一個相符的刪除起。
-						.lastIndexOf(value);
+						var duplicate_index = wikidata_datavalue.get_index(
+								exists_property_list, value, -1);
 						// console.log(exists_property_list);
 						// console.log(duplicate_index);
 
@@ -13256,19 +13344,12 @@ function module_code(library_namespace) {
 
 					// 檢測是否已有此值。
 					if (false) {
-						console.log(value);
-						console.log(wikidata_datavalue(exists_property_list,
-								undefined, {
-									multi : true
-								}));
+						console.log(wikidata_datavalue.get_index(
+								exists_property_list, value, 0));
 					}
-					var duplicate_index =
-					//
-					wikidata_datavalue(exists_property_list, undefined, {
-						multi : true
-					})
 					// 若有必要設定 references，從首個相符的設定起。
-					.indexOf(value);
+					var duplicate_index = wikidata_datavalue.get_index(
+							exists_property_list, value);
 					if (duplicate_index === NOT_FOUND) {
 						return true;
 					}
@@ -13323,10 +13404,12 @@ function module_code(library_namespace) {
 				_options = Object.assign({
 					// multi : false,
 					callback : function(normalized_value) {
-						if (Array.isArray(normalized_value) && options.aoto_select) {
+						if (Array.isArray(normalized_value)
+								&& options.aoto_select) {
 							// 採用首個可用的，最有可能是目標的。
 							normalized_value.some(function(value) {
-								if (value && !value.error && value.datatype !== NOT_FOUND) {
+								if (value && !value.error
+										&& value.datatype !== NOT_FOUND) {
 									normalized_value = value;
 									return true;
 								}
@@ -13357,6 +13440,36 @@ function module_code(library_namespace) {
 							}
 							// 因為之前應該已經顯示過錯誤訊息，因此這邊直接放棄作業，排除此property。
 
+							properties.splice(--index, 1);
+							normalize_next_value();
+							return;
+						}
+
+						if (false) {
+							console.log('-'.repeat(60));
+							console.log(normalized_value);
+							console.log(property_data.property + ': '
+							//
+							+ JSON.stringify(exists_property_hash
+							//
+							[property_data.property]));
+						}
+						if (exists_property_hash[property_data.property]
+						// 二次篩選:因為已經轉換/取得了 entity id，可以再次做確認。
+						&& (normalized_value.datatype === 'wikibase-item'
+						// and 已經轉換了 date time
+						|| normalized_value.datatype === 'time')
+						//
+						&& wikidata_datavalue.get_index(
+						//
+						exists_property_hash[property_data.property],
+						//
+						normalized_value, 1)) {
+							library_namespace.debug('Skip exists value: '
+									+ value + ' ('
+									+ wikidata_datavalue(normalized_value)
+									+ ')', 1, 'normalize_next_value');
+							// TODO: 依舊增添references
 							properties.splice(--index, 1);
 							normalize_next_value();
 							return;
@@ -13741,6 +13854,8 @@ function module_code(library_namespace) {
 					 */
 					library_namespace.err('set_next_claim: [' + error.code
 							+ '] ' + error.info);
+					library_namespace.warn('data to write: '
+							+ JSON.stringify(POST_data));
 					// console.log(claim_index);
 					// console.log(claims);
 					claim_index++;
@@ -14635,6 +14750,8 @@ function module_code(library_namespace) {
 					+ (options.id ? options.id + ': ' : '')
 					// [readonly] The wiki is currently in read-only mode
 					+ '[' + error.code + '] ' + error.info);
+					library_namespace.warn('data to write: '
+							+ JSON.stringify(options));
 					callback(undefined, error);
 					return;
 				}

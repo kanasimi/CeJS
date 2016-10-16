@@ -644,15 +644,17 @@ function String_to_Date(date_string, options) {
 		// 前置處理。
 		tmp = options;
 		options = library_namespace.null_Object();
-		if (tmp)
-			if (tmp in String_to_Date.parser)
+		if (tmp) {
+			if (tmp in String_to_Date.parser) {
 				options.parser = String_to_Date.parser[tmp];
-			else if ((tmp in String_to_Date.zone)
-					|| !isNaN(tmp))
+			} else if ((tmp in String_to_Date.zone)
+					|| !isNaN(tmp)) {
 				options.zone = tmp;
-			else
+			} else {
 				// 判斷是否為正規 format。
 				options.format = tmp;
+			}
+		}
 	}
 
 	if (library_namespace.is_RegExp(options.pattern)
@@ -674,12 +676,14 @@ function String_to_Date(date_string, options) {
 	library_namespace.debug('設定 time zone / offset hours: '
 			+ tmp, 2);
 	// TODO: for Daylight Saving Time (DST) time zones, etc.
-	if (tmp in String_to_Date.zone)
+	if (tmp in String_to_Date.zone) {
 		tmp = String_to_Date.zone[tmp];
-	if (library_namespace.is_Function(tmp))
+	}
+	if (library_namespace.is_Function(tmp)) {
 		tmp = tmp();
+	}
 	if (typeof tmp !== 'string'
-		|| isNaN(minute_offset = get_minute_offset(tmp)))
+		|| isNaN(minute_offset = get_minute_offset(tmp))) {
 		minute_offset =
 			// 測試純數字小時。
 			-12 <= tmp && tmp <= 14 ? 60 * tmp
@@ -687,6 +691,7 @@ function String_to_Date(date_string, options) {
 					: isNaN(tmp)
 					//
 					? DEFAULT_TIME_ZONE : +tmp;
+	}
 	library_namespace.debug(
 			'最終設定 offset '
 			+ (minute_offset === DEFAULT_TIME_ZONE
