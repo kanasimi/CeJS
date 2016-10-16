@@ -6263,17 +6263,18 @@ function module_code(library_namespace) {
 		// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=languages&utf8=1
 		'action=parse&contentmodel=wikitext&uselang=' + (uselang || 'zh-hant')
 		// prop=text|links
-		+ '&prop=text&text=' + encodeURIComponent(text) ], function(data, error) {
-			if (error || !data) {
-				callback('', error);
-				return;
-			}
-			data = data.parse;
-			text = data.text['*']
-			// 去掉 MediaWiki parser 解析器所自行添加的 token。
-			.trim().replace(/^<p>/, '').replace(/<\/p>$/, '');
-			callback(text);
-		});
+		+ '&prop=text&text=' + encodeURIComponent(text) ],
+				function(data, error) {
+					if (error || !data) {
+						callback('', error);
+						return;
+					}
+					data = data.parse;
+					text = data.text['*']
+					// 去掉 MediaWiki parser 解析器所自行添加的 token。
+					.trim().replace(/^<p>/, '').replace(/<\/p>$/, '');
+					callback(text);
+				});
 	};
 
 	// ------------------------------------------------------------------------
@@ -7489,8 +7490,8 @@ function module_code(library_namespace) {
 		}
 	};
 
-	/***************************************************************************
-	 * / * 處理編輯衝突用。 to detect edit conflicts.
+	/**
+	 * 處理編輯衝突用。 to detect edit conflicts.
 	 * 
 	 * 注意: 會改變 options! Warning: will modify options！
 	 * 
@@ -7508,7 +7509,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Object}options
 	 * 
-	 * @see https://www.mediawiki.org/wiki/API:Edit /
+	 * @see https://www.mediawiki.org/wiki/API:Edit
 	 */
 	wiki_API.edit.set_stamp = function(options, timestamp) {
 		if (get_page_content.is_page_data(timestamp)
@@ -7831,7 +7832,7 @@ function module_code(library_namespace) {
 				var page = data[pageid];
 				pages.push(page);
 				// 僅處理第一頁。
-				if ('missing' in page)
+				if ('missing' in page) {
 					// 此頁面不存在/已刪除。Page does not exist. Deleted?
 					library_namespace.warn(
 					//
@@ -7840,6 +7841,7 @@ function module_code(library_namespace) {
 					+ (page.title ? '[[' + page.title + ']]'
 					//
 					: ' id ' + page.pageid));
+				}
 				break;
 			}
 
@@ -12125,7 +12127,7 @@ function module_code(library_namespace) {
 						library_namespace.err(
 						//
 						'wikidata_entity: Wikidata 不存在 [[:' + key.join(':')
-								+ ']] 之數據，' + (content ? '但' : '且不')
+								+ ']] 之數據，' + (content ? '但' : '且無法取得/不')
 								+ '存在此 Wikipedia 頁面。無法處理此 Wikidata 數據要求。');
 						callback(undefined, 'no_key');
 					});
@@ -12554,7 +12556,7 @@ function module_code(library_namespace) {
 		if (!datatype && options.property
 				&& typeof options.callback === 'function'
 				&& (!('get_type' in options) || options.get_type)) {
-			// 先確認指定 property 之 datatype。
+			// 先取得/確認指定 property 之 datatype。
 			wikidata_datatype(options.property, function(datatype) {
 				var matched = datatype
 						&& datatype.match(/^wikibase-(item|property)$/);
@@ -12582,7 +12584,7 @@ function module_code(library_namespace) {
 
 		// --------------------------------------
 		// 處理單一項目
-		var snaktype, datavalue_type;
+		var snaktype, datavalue_type, error;
 
 		function normalized() {
 			var normalized_data = {
@@ -12600,6 +12602,10 @@ function module_code(library_namespace) {
 					type : datavalue_type
 				};
 				normalized_data.datatype = datatype;
+			}
+			if (error) {
+				library_namespace.err(error);
+				normalized_data.error = error;
 			}
 
 			// console.log(JSON.stringify(normalized_data));
@@ -12724,18 +12730,34 @@ function module_code(library_namespace) {
 
 		case 'time':
 			datavalue_type = datatype;
+			// 規範日期。
 			if (!library_namespace.is_Date(value)) {
-				value = new Date(value);
+				// TODO: 解析各種日期格式。
+				error = Date.parse(value);
+				if (isNaN(error)) {
+					error = 'Invalid Date: [' + value + ']';
+				} else {
+					value = new Date(error);
+					error = undefined;
+				}
+			} else if (isNaN(value.getTime())) {
+				error = 'Invalid Date';
 			}
+
 			// 11: day
 			var precision = options.precision || 11;
-			if (precision === 11) {
-				// 當 precision=11 (day) 時，時分秒必須設置為 0!
-				value.setUTCHours(0, 0, 0, 0);
+			if (error) {
+				value = String(value);
+			} else {
+				if (precision === 11) {
+					// 當 precision=11 (day) 時，時分秒必須設置為 0!
+					value.setUTCHours(0, 0, 0, 0);
+				}
+				value = value.toISOString();
 			}
 			value = {
 				// Data value corrupt: $timestamp must resemble ISO 8601, given
-				time : value.toISOString()
+				time : value
 				// '2000-01-01T00:00:00.000Z' → '2000-01-01T00:00:00Z'
 				.replace(/\.\d{3}Z$/, 'Z')
 				// '2000-01-01T00:00:00Z' → '+2000-01-01T00:00:00Z'
@@ -12745,7 +12767,8 @@ function module_code(library_namespace) {
 				after : options.after || 0,
 				precision : precision,
 				calendarmodel : options.calendarmodel
-						|| 'http://www.wikidata.org/entity/Q1985727'
+				// proleptic Gregorian calendar:
+				|| 'http://www.wikidata.org/entity/Q1985727'
 			};
 			break;
 
@@ -12754,17 +12777,18 @@ function module_code(library_namespace) {
 			datavalue_type = 'wikibase-entityid';
 			// console.log(value);
 			var matched = value && value.match(/^([PQ])(\d{1,10})$/i);
-			if (!matched) {
-				throw 'normalize_wikidata_value: Illegal ' + datatype + ': '
+			if (matched) {
+				value = {
+					'entity-type' : datatype === 'wikibase-item' ? 'item'
+							: 'property',
+					'numeric-id' : matched[2] | 0,
+					// 在設定時，id這項可省略。
+					id : value
+				};
+			} else {
+				error = 'normalize_wikidata_value: Illegal ' + datatype + ': '
 						+ value;
 			}
-			value = {
-				'entity-type' : datatype === 'wikibase-item' ? 'item'
-						: 'property',
-				'numeric-id' : matched[2] | 0,
-				// 在設定時，id這項可省略。
-				id : value
-			};
 			break;
 
 		case 'commonsMedia':
@@ -12778,9 +12802,8 @@ function module_code(library_namespace) {
 			break;
 
 		default:
-			library_namespace
-					.err('normalize_wikidata_value: Unknown datatype ['
-							+ datatype + '] and value [' + value + ']');
+			error = 'normalize_wikidata_value: Unknown datatype [' + datatype
+					+ '] and value [' + value + ']';
 			return;
 		}
 
@@ -13300,7 +13323,18 @@ function module_code(library_namespace) {
 				_options = Object.assign({
 					// multi : false,
 					callback : function(normalized_value) {
+						if (Array.isArray(normalized_value) && options.aoto_select) {
+							// 採用首個可用的，最有可能是目標的。
+							normalized_value.some(function(value) {
+								if (value && !value.error && value.datatype !== NOT_FOUND) {
+									normalized_value = value;
+									return true;
+								}
+							});
+						}
+
 						if (Array.isArray(normalized_value)
+								|| normalized_value.error
 								|| normalized_value.datatype === NOT_FOUND) {
 							// 將無法轉換的放在 .error。
 							if (properties.error) {
@@ -13315,6 +13349,11 @@ function module_code(library_namespace) {
 								'normalize_next_value: 得到多個值而非單一值: [' + value
 										+ '] → '
 										+ JSON.stringify(normalized_value));
+
+							} else if (false && normalized_value.error) {
+								// 之前應該已經在normalize_wikidata_value()顯示過錯誤訊息
+								library_namespace.err('normalize_next_value: '
+										+ normalized_value.error);
 							}
 							// 因為之前應該已經顯示過錯誤訊息，因此這邊直接放棄作業，排除此property。
 
