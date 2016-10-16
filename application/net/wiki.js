@@ -11359,12 +11359,15 @@ function module_code(library_namespace) {
 		// 須與 wikidata_search() 相同!
 		language = wikidata_get_site(options, true) || default_language,
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
-		cacher = options
-				&& options.type !== wikidata_search.use_cache.default_options.type ? wikidata_search_cache_entity
+		cached_hash = options && options.type && options.type !==
+		// default_options.type: 'property'
+		wikidata_search.use_cache.default_options.type ? wikidata_search_cache_entity
 				: wikidata_search_cache;
+
 		if (typeof key === 'string') {
 			key = normalize_wikidata_key(key);
 			language_and_key = language + ':' + key;
+
 		} else if (Array.isArray(key)) {
 			if (is_api_and_title(key, 'language')) {
 				// key.join(':')
@@ -11377,17 +11380,17 @@ function module_code(library_namespace) {
 				//
 				cache_next_key = function() {
 					library_namespace.debug(index + '/' + key.length, 3,
-							'wikidata_search.use_cache.cache_next_key');
+							'use_cache.cache_next_key');
 					if (index === key.length) {
 						// done. callback(id_list)
 						callback(key.map(function(k) {
 							if (is_api_and_title(k, 'language')) {
-								return cacher[k[0] + ':'
+								return cached_hash[k[0] + ':'
 								//
 								+ normalize_wikidata_key(k[1])];
 							}
 							k = normalize_wikidata_key(k);
-							return cacher[language + ':' + k];
+							return cached_hash[language + ':' + k];
 						}));
 						return;
 					}
@@ -11404,6 +11407,7 @@ function module_code(library_namespace) {
 				cache_next_key();
 				return;
 			}
+
 		} else {
 			// 避免若是未match is_api_and_title(key, 'language')，
 			// 可能導致 infinite loop!
@@ -11419,10 +11423,11 @@ function module_code(library_namespace) {
 		if ((!options || !options.force)
 		// TODO: key 可能是 [ language code, labels|aliases ] 之類。
 		// &&language_and_key
-		&& (language_and_key in cacher)) {
+		&& (language_and_key in cached_hash)) {
 			library_namespace.debug('has cache: [' + language_and_key + '] → '
-					+ cacher[language_and_key], 4, 'wikidata_search.use_cache');
-			key = cacher[language_and_key];
+					+ cached_hash[language_and_key], 4,
+					'wikidata_search.use_cache');
+			key = cached_hash[language_and_key];
 
 			if (/^[PQ]\d{1,10}$/.test(key)) {
 			}
@@ -11466,7 +11471,7 @@ function module_code(library_namespace) {
 						'wikidata_search.use_cache');
 			}
 			// 即使有錯誤，依然做 cache 紀錄，避免重複偵測操作。
-			cacher[language_and_key] = id;
+			cached_hash[language_and_key] = id;
 
 			callback(id, error);
 		}, options);
