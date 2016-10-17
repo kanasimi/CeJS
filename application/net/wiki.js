@@ -4723,6 +4723,11 @@ function module_code(library_namespace) {
 							count_summary = done + '/' + pages.length + '//';
 					}
 
+					if (work_continue && work_continue < target.length) {
+						count_summary += work_continue + ' ('
+						// 紀錄整體進度
+						+ (100 * work_continue / target.length | 0) + '%)/';
+					}
 					count_summary += target.length;
 
 					count_summary = ': '
