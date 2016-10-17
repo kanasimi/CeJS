@@ -205,7 +205,7 @@ function module_code(library_namespace) {
 	 * 
 	 * "\0" 應該改成 include_mark。
 	 * 
-	 * matched: [ all, prevoius, URL, protocol without ":", others ]
+	 * matched: [ all, previous, URL, protocol without ":", others ]
 	 * 
 	 * @type {RegExp}
 	 * 
@@ -905,12 +905,12 @@ function module_code(library_namespace) {
 	PATTERN_file_prefix = new RegExp('^ *(?:: *)?(?:' + PATTERN_file_prefix
 			+ ') *: *([^\| ][^\| ]*)', 'i');
 
-	// TODO: Category 本身可不分大小寫。
+	// "Category" 本身可不分大小寫。
 	var
 	// [ all category text, category name, sort order ]
-	PATTERN_category = /\[\[ *(?:Category|category|CATEGORY|分類|分类|カテゴリ) *: *([^\|\[\]]+)(?:\|\s*([^\|\[\]]*))?\]\][\r\n]*/g,
+	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ) *: *([^\|\[\]]+)(?:\s*\|\s*([^\|\[\]]*))?\]\][\r\n]*/ig,
 	/** {RegExp}分類的匹配模式 for parser。 [all,name] */
-	PATTERN_category_prefix = /^ *(?:Category|category|CATEGORY|分類|分类|カテゴリ) *: *([^\|\[\]]+)/;
+	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ) *: *([^\|\[\]]+)/i;
 
 	// ------------------------------------------------------------------------
 
@@ -1766,20 +1766,23 @@ function module_code(library_namespace) {
 		var PATTERN_for_transclusion = /{{([^{}][\s\S]*?)}}/g;
 		function parse_transclusion(all, parameters) {
 			// 自 end_mark 向前回溯。
-			var index = parameters.lastIndexOf('{{'), prevoius,
+			var index = parameters.lastIndexOf('{{'),
+			// 在先的，在前的，前面的； preceding
+			// (previous 反義詞 following, preceding 反義詞 exceeds)
+			previous,
 			// 因為可能有 "length=1.1" 之類的設定，因此不能採用 Array。
 			// token.parameters[{String}key] = {String}value
 			_parameters = library_namespace.null_Object(),
 			// token.index_of[{String}key] = {Integer}index
 			parameter_index_of = library_namespace.null_Object();
 			if (index > 0) {
-				prevoius = '{{' + parameters.slice(0, index);
+				previous = '{{' + parameters.slice(0, index);
 				parameters = parameters.slice(index + '}}'.length);
 			} else {
-				prevoius = '';
+				previous = '';
 			}
 			library_namespace.debug(
-					'[' + prevoius + '] + [' + parameters + ']', 4,
+					'[' + previous + '] + [' + parameters + ']', 4,
 					'parse_wikitext.transclusion');
 
 			// TODO: 像是 <b>|p=</b> 會被分割成不同 parameters，
@@ -1889,7 +1892,7 @@ function module_code(library_namespace) {
 			_set_wiki_type(parameters, 'transclusion');
 			queue.push(parameters);
 			// TODO: parameters.parameters = []
-			return prevoius + include_mark + (queue.length - 1) + end_mark;
+			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
 		// ------------------------------------------------------------------------
@@ -1946,14 +1949,14 @@ function module_code(library_namespace) {
 		wikitext = wikitext.replace_till_stable(/-{(.+?)}-/g, function(all,
 				parameters) {
 			// 自 end_mark 向前回溯。
-			var index = parameters.lastIndexOf('-{'), prevoius;
+			var index = parameters.lastIndexOf('-{'), previous;
 			if (index > 0) {
-				prevoius = '-{' + parameters.slice(0, index);
+				previous = '-{' + parameters.slice(0, index);
 				parameters = parameters.slice(index + '}-'.length);
 			} else {
-				prevoius = '';
+				previous = '';
 			}
-			library_namespace.debug(prevoius + ' + ' + parameters, 4,
+			library_namespace.debug(previous + ' + ' + parameters, 4,
 					'parse_wikitext.convert');
 
 			parameters = parameters.split('|').map(function(token, index) {
@@ -1962,7 +1965,7 @@ function module_code(library_namespace) {
 			});
 			_set_wiki_type(parameters, 'convert');
 			queue.push(parameters);
-			return prevoius + include_mark + (queue.length - 1) + end_mark;
+			return previous + include_mark + (queue.length - 1) + end_mark;
 		});
 
 		// ----------------------------------------------------
@@ -1975,14 +1978,14 @@ function module_code(library_namespace) {
 			if (normalize)
 				parameters = parameters.trim();
 			// 自 end_mark 向前回溯。
-			var index = parameters.lastIndexOf('[['), prevoius;
+			var index = parameters.lastIndexOf('[['), previous;
 			if (index > 0) {
-				prevoius = '[[' + parameters.slice(0, index);
+				previous = '[[' + parameters.slice(0, index);
 				parameters = parameters.slice(index + ']]'.length);
 			} else {
-				prevoius = '';
+				previous = '';
 			}
-			library_namespace.debug(prevoius + ' + ' + parameters, 4,
+			library_namespace.debug(previous + ' + ' + parameters, 4,
 					'parse_wikitext.link');
 
 			if (parameters.includes('{{')) {
@@ -2019,7 +2022,7 @@ function module_code(library_namespace) {
 			_set_wiki_type(parameters, file_matched ? 'file'
 					: category_matched ? 'category' : 'link');
 			queue.push(parameters);
-			return prevoius + include_mark + (queue.length - 1) + end_mark;
+			return previous + include_mark + (queue.length - 1) + end_mark;
 		});
 
 		// ----------------------------------------------------
@@ -2060,14 +2063,14 @@ function module_code(library_namespace) {
 		//
 		/{{{([^{}][\s\S]*?)}}}/g, function(all, parameters) {
 			// 自 end_mark 向前回溯。
-			var index = parameters.lastIndexOf('{{{'), prevoius;
+			var index = parameters.lastIndexOf('{{{'), previous;
 			if (index > 0) {
-				prevoius = '{{{' + parameters.slice(0, index);
+				previous = '{{{' + parameters.slice(0, index);
 				parameters = parameters.slice(index + '}}}'.length);
 			} else {
-				prevoius = '';
+				previous = '';
 			}
-			library_namespace.debug(prevoius + ' + ' + parameters, 4,
+			library_namespace.debug(previous + ' + ' + parameters, 4,
 					'parse_wikitext.parameter');
 
 			parameters = parameters.split('|').map(function(token, index) {
@@ -2083,7 +2086,7 @@ function module_code(library_namespace) {
 			});
 			_set_wiki_type(parameters, 'parameter');
 			queue.push(parameters);
-			return prevoius + include_mark + (queue.length - 1) + end_mark;
+			return previous + include_mark + (queue.length - 1) + end_mark;
 		});
 
 		// ----------------------------------------------------
@@ -2124,18 +2127,18 @@ function module_code(library_namespace) {
 			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
 			var matched = inner.match(new RegExp(
 			//
-			'<(' + tag + ')(\\s[^<>]*)?>([\\s\\S]*?)$', 'i')), prevoius;
+			'<(' + tag + ')(\\s[^<>]*)?>([\\s\\S]*?)$', 'i')), previous;
 			if (matched) {
-				prevoius = all.slice(0, -matched[0].length
+				previous = all.slice(0, -matched[0].length
 				// length of </end_tag>
 				- end_tag.length - 3);
 				tag = matched[1];
 				attributes = matched[2];
 				inner = matched[3];
 			} else {
-				prevoius = '';
+				previous = '';
 			}
-			library_namespace.debug(prevoius + ' + <' + tag + '>', 4,
+			library_namespace.debug(previous + ' + <' + tag + '>', 4,
 					'parse_wikitext.tag');
 
 			// 2016/9/28 9:7:7
@@ -2177,7 +2180,7 @@ function module_code(library_namespace) {
 			queue.push(all);
 			// console.log('queue end:');
 			// console.log(queue);
-			return prevoius + include_mark + (queue.length - 1) + end_mark;
+			return previous + include_mark + (queue.length - 1) + end_mark;
 		});
 
 		// ----------------------------------------------------
@@ -2364,7 +2367,7 @@ function module_code(library_namespace) {
 		// parse_wikitext.section_title
 		wikitext = wikitext.replace_till_stable(
 		// @see PATTERN_section
-		/\n(=+)(.+)\1(\s*)\n/g, function(all, prefix, parameters, postfix) {
+		/\n(=+)(.+)\1(\s*)\n/g, function(all, previous, parameters, postfix) {
 			if (normalize) {
 				parameters = parameters.trim();
 			}
@@ -2380,7 +2383,7 @@ function module_code(library_namespace) {
 			parameters.title = parameters.toString().trim();
 			if (postfix && !normalize)
 				parameters.postfix = postfix;
-			parameters.level = prefix.length;
+			parameters.level = previous.length;
 			queue.push(parameters);
 			// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
 			return '\n' + include_mark + (queue.length - 1) + end_mark + '\n';
@@ -2404,13 +2407,13 @@ function module_code(library_namespace) {
 		if (!options || !options.inside_transclusion) {
 			wikitext = wikitext.replace(PATTERN_URL_WITH_PROTOCOL_GLOBAL,
 			//
-			function(all, prevoius, URL) {
+			function(all, previous, URL) {
 				all = _set_wiki_type(URL, 'url');
 				// 須注意:此裸露 URL 之 type 與 external link 內之type相同！
 				// 因此需要測試 token.is_bare 以確定是否在 external link 內。
 				all.is_bare = true;
 				queue.push(all);
-				return prevoius + include_mark + (queue.length - 1) + end_mark;
+				return previous + include_mark + (queue.length - 1) + end_mark;
 			});
 		}
 
@@ -4162,7 +4165,7 @@ function module_code(library_namespace) {
 		// assert: 為規範過之 title，如採用 File: 而非 Image:, 檔案:。
 		if (title && /^(?:Category|File):/.test(title))
 			title = ':' + title;
-		this.push('* ' + get_page_title_link(title) + message);
+		this.push('* ' + get_page_title_link(title) + ' ' + message);
 	}
 
 	function reset_messages() {
@@ -4407,6 +4410,7 @@ function module_code(library_namespace) {
 					error = 'no "result.edit'
 							+ (result.edit ? '.newrevid".' : '.');
 					result = [ 'error', 'token lost?' ];
+
 				} else {
 					// 成功完成。
 					done++;
@@ -12396,13 +12400,15 @@ function module_code(library_namespace) {
 	function is_DAB(entity, callback) {
 		var property = entity && entity.claims && entity.claims.P31;
 		if (property && wikidata_datavalue(property) === 'Q4167410') {
-			if (callback)
+			if (callback) {
 				callback(true, entity);
-			else
+			} else {
 				return true;
+			}
 		}
-		if (!callback)
+		if (!callback) {
 			return;
+		}
 
 		// wikidata 的 item 或 Q4167410 需要手動加入，非自動連結。
 		// 因此不能光靠 Q4167410 準確判定是否為消歧義頁。其他屬性相同。
@@ -12585,6 +12591,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://www.wikidata.org/w/api.php?action=help&modules=wbparsevalue
 	 *      https://www.mediawiki.org/wiki/Wikibase/API#wbparsevalue
+	 *      https://phabricator.wikimedia.org/T112140
 	 */
 	function normalize_wikidata_value(value, datatype, options, to_pass) {
 		if (library_namespace.is_Object(datatype) && options === undefined) {
