@@ -4724,11 +4724,14 @@ function module_code(library_namespace) {
 					}
 
 					if (work_continue && work_continue < target.length) {
-						count_summary += work_continue + ' ('
+						count_summary += ' '
+						//
+						+ work_continue + '/' + target.length + ' ('
 						// 紀錄整體進度
-						+ (100 * work_continue / target.length | 0) + '%)/';
+						+ (100 * work_continue / target.length | 0) + '%)';
+					} else {
+						count_summary += target.length;
 					}
-					count_summary += target.length;
 
 					count_summary = ': '
 							+ gettext('%1 pages done', count_summary);
@@ -10607,6 +10610,7 @@ function module_code(library_namespace) {
 							library_namespace.warn('* No title: [['
 									+ page_data.pageid + ']]!');
 
+						// typeof content !== 'string'
 						if (!content) {
 							return [ CeL.wiki.edit.cancel,
 							//
