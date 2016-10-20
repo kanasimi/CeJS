@@ -5949,9 +5949,11 @@ function module_code(library_namespace) {
 			if (!options.multi) {
 				if (page_list.length <= 1) {
 					// e.g., pages: { '1850031': [Object] }
-					library_namespace.debug('只取得單頁面 [[' + page_list
+					library_namespace.debug('只取得單頁面 '
 					//
-					+ ']]，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
+					+ get_page_title_link(page_list)
+					//
+					+ '，將回傳此頁面內容，而非 Array。', 2, 'wiki_API.page');
 					page_list = page_list[0];
 					if (is_api_and_title(title, true)) {
 						title = title[1];
