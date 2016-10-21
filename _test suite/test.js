@@ -332,7 +332,7 @@ function test_native() {
 			list.push(term.toString());
 		}
 		// alert(list.join('|'));
-		CeL.assert([ 'title1|title2|title3|title4|title5', list.join('|') ], 'set_intermediate');
+		assert([ 'title1|title2|title3|title4|title5', list.join('|') ], 'set_intermediate');
 	});
 
 	if (false) {
