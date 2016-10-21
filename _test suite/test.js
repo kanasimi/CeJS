@@ -323,6 +323,18 @@ function test_native() {
 		[[ '0123456789123456789'.between(null, '345'), '012' ]],
 	]);
 
+	error_count += CeL.test('檢驗 set_intermediate()', function(assert) {
+		var html = '<p></p><h2>title1</h2>abc<h2>title2</h2>\nABC<h2>title3</h2>ABC\n<h2>title4</h2>\nABC\n<h2>title5</h2>',
+		// 項目
+		terms = html.set_intermediate('<h2>', '</h2>'), term, list = [];
+		// 
+		while (term = terms.next()) {
+			list.push(term.toString());
+		}
+		// alert(list.join('|'));
+		CeL.assert([ 'title1|title2|title3|title4|title5', list.join('|') ], 'set_intermediate');
+	});
+
 	if (false) {
 		// TODO
 		var a = new SubUint32Array(8, 7, 4), b = new Uint32Array(4);
