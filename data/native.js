@@ -1181,13 +1181,19 @@ _.get_intermediate = get_intermediate;
 
 var data = html.set_intermediate('>', '<'), text;
 
-text = data.find().find().find().toString();
+text = data.search().search().search().toString();
 
 while (data.next()) {
 	text = data.toString();
 }
 
-while (typeof (text = data.find()) === 'string') {
+// method 1:
+while (term = terms.next()) {
+	term.toString();
+}
+
+// method 2:
+while (typeof (text = data.search()) === 'string') {
 	;
 }
 
@@ -1202,7 +1208,9 @@ function next_intermediate(index) {
 		}
 	}
 }
-function find_intermediate(index) {
+// find out next
+// 為避免 overwrite Array.prototype.find()，因此改名為 search。
+function search_intermediate(index) {
 	this.next();
 	return this;
 }
@@ -1215,7 +1223,7 @@ function intermediate_between() {
 function set_intermediate(head, foot) {
 	var data = [ this, head, foot ];
 	data.next = next_intermediate;
-	data.find = find_intermediate;
+	data.search = search_intermediate;
 	data.toString = intermediate_result;
 	//data.between = intermediate_between;
 	return data;
