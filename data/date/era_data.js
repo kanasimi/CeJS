@@ -3684,6 +3684,7 @@ CeL.era.pass_on = {
 // ---------------------------------------------------------------------//
 // Egypt
 // https://en.wikipedia.org/wiki/Ancient_Egypt
+// https://en.wikipedia.org/wiki/List_of_pharaohs
 
 /**
  * A Chronological Survey of Precisely Dated Demotic and Abnormal Hieratic

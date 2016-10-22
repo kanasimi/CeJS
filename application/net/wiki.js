@@ -52,9 +52,9 @@ https://meta.wikimedia.org/wiki/Research:Page_view
 typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki',
-	// .includes() @ data.code.compatibility
-	// .between() @ data.native
-	// .append() @ data.native
+	// .includes() @ CeL.data.code.compatibility
+	// .between() @ CeL.data.native
+	// .append() @ CeL.data.native
 	require : 'data.code.compatibility.|data.native.'
 	// (new Date).format('%4Y%2m%2d'), (new Date).format() @ CeL.data.date
 	// optional 選用: .show_value() @ CeL.interact.DOM, CeL.application.debug
@@ -65,10 +65,12 @@ typeof CeL === 'function' && CeL.run({
 	+ '|application.net.Ajax.get_URL'
 	// CeL.date.String_to_Date(), Julian_day(): CeL.data.date
 	+ '|data.date.',
-	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
-	code : module_code,
+
 	// 設定不匯出的子函式。
-	no_extend : '*'
+	no_extend : '*',
+
+	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
+	code : module_code
 });
 
 function module_code(library_namespace) {
