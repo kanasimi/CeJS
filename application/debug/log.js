@@ -1378,9 +1378,9 @@ if (!CeL.Log) {
 				condition.original = condition[0];
 		} else {
 			// 有 options.type 將忽略 options.expect 以及 condition[1]!!
-			if (type)
+			if (type) {
 				condition = [ condition ];
-			else {
+			} else {
 				condition = [ condition,
 				// default expected value: true
 				'expect' in options ? options.expect : true ];
@@ -1442,8 +1442,9 @@ if (!CeL.Log) {
 				exactly = equal = Math.abs(1 - +condition[0] / +condition[1]) <= equal;
 			} else {
 				exactly = equal = Object.is(condition[0], condition[1]);
-				if (!exactly)
+				if (!exactly) {
 					equal = condition[0] == condition[1];
+				}
 			}
 		}
 
@@ -1479,18 +1480,19 @@ if (!CeL.Log) {
 			if (!error_message) {
 				error_message = [ test_name,
 				// if fault, message: 失敗時所要呈現訊息。
-				CeL.to_SGR([ ' ', 'fg=red', 'failed', '-fg', ' ' ]) ];
-				if (type)
+				CeL.to_SGR([ ' ', 'fg=red', 'failed', '-fg', ': ' ]) ];
+				if (type) {
 					error_message.push('type of ' + quote(condition) + ' is not ('
 							+ type + ')');
-				else {
+				} else {
 					if (('original' in condition)
 							&& condition[0] !== condition.original) {
 						var original = '' + condition.original;
 						if (typeof condition.original === 'function') {
 							var matched = original.match(CeL.PATTERN_function);
-							if (matched)
+							if (matched) {
 								original = matched[1];
+							}
 						}
 						error_message.push(quote(original) + '→');
 					}
@@ -1499,8 +1501,9 @@ if (!CeL.Log) {
 					+ ' !== ' + quote(condition[1], true));
 				}
 
-				if (equal)
+				if (equal) {
 					error_message.push('，但 "==" 之關係成立。');
+				}
 
 				error_message = error_message.join('');
 			}
@@ -1519,13 +1522,14 @@ if (!CeL.Log) {
 
 		if (!options.hide_OK && CeL.is_debug()) {
 			var passed_message = options.OK;
-			if (!passed_message)
+			if (!passed_message) {
 				passed_message = [
 						test_name,
 						//
 						CeL.to_SGR([ ' ', 'fg=green', 'passed', '-fg', ' ' ]),
 						//
 						quote(condition[0], true) ].join('');
+			}
 			CeL.debug(passed_message, 1,
 			// caller: see: CeL.debug
 			has_caller && CeL.get_function_name(arguments.callee.caller));

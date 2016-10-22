@@ -1755,14 +1755,20 @@ function test_date() {
 
 	error_count += CeL.test('CeL.Julian_day', function(assert) {
 		for (var JD = 4e6; JD > -1364; JD--) {
-			// Julian calendar, NG: -1402
+			// Julian calendar, first NG: -1402
 			var date = CeL.Julian_day.to_YMD(JD);
-			assert([ JD, CeL.Julian_day.from_YMD(date[0], date[1], date[2]) ], 'Julian calendar: JD ' + JD);
+			// assert([ JD, CeL.Julian_day.from_YMD(date[0], date[1], date[2]) ], 'Julian calendar: JD ' + JD);
+			if (JD !== CeL.Julian_day.from_YMD(date[0], date[1], date[2])) {
+				throw 'Julian calendar: JD ' + JD;
+			}
 			// 4e6: [ 6239, 5, 27 ]
 
-			// Gregorian calendar, NG: -1364
+			// Gregorian calendar, first NG: -1364
 			date = CeL.Julian_day.to_YMD(JD, true);
-			assert([ JD, CeL.Julian_day.from_YMD(date[0], date[1], date[2], true) ], 'Gregorian calendar: JD ' + JD);
+			// assert([ JD, CeL.Julian_day.from_YMD(date[0], date[1], date[2], true) ], 'Gregorian calendar: JD ' + JD);
+			if (JD !== CeL.Julian_day.from_YMD(date[0], date[1], date[2], true)) {
+				throw 'Gregorian calendar: JD ' + JD;
+			}
 			// 4e6: [ 6239, 7, 11 ]
 		}
 
