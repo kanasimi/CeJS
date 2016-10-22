@@ -1753,6 +1753,27 @@ function test_date() {
 		assert(['2001年08月07日',tmp.to_Date('CST').format({format:'%Y年%2m月%2d日',offset:8*60})]);
 	});
 
+	error_count += CeL.test('Julian_day', function(assert) {
+		for (var JD = -4e6, d; JD < 4e6; JD++) {
+			// Julian calendar
+			var date = CeL.Julian_day.to_YMD(JD);
+			assert([ JD, CeL.Julian_day.from_YMD(date[0], date[1], date[2]) ], 'JD ' + JD);
+			// Gregorian calendar
+			date = CeL.Julian_day.to_YMD(JD, true);
+			assert([ JD, CeL.Julian_day.from_YMD(d[0], d[1], d[2], true) ], 'JD ' + JD);
+		}
+
+		// -1402
+		CeL.Julian_day.to_YMD(-1401);
+		// Array [ -4716, 3, 1 ]
+		// Array [ 6239, 5, 27 ]
+
+		// -1364
+		CeL.Julian_day.to_YMD(-1363, true);
+		// Array [ -4716, 3, 1 ]
+		// Array [ 6239, 7, 11 ]
+	});
+
 	CeL.run('data.date');
 
 	error_count += CeL.test('Julian date', function(assert) {

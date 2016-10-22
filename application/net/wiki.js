@@ -52,6 +52,7 @@ https://meta.wikimedia.org/wiki/Research:Page_view
 typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.wiki',
+
 	// .includes() @ CeL.data.code.compatibility
 	// .between() @ CeL.data.native
 	// .append() @ CeL.data.native

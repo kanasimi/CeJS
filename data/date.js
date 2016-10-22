@@ -7,10 +7,13 @@
 'use strict';
 // 'use asm';
 
+// More examples: see /_test suite/test.js
+
 // --------------------------------------------------------------------------------------------
 
 // 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
+	// module name
 	name : 'data.date',
 	// includes() @ CeL.data.code.compatibility.
 	require : 'data.code.compatibility.'
@@ -125,7 +128,7 @@ function module_code(library_namespace) {
 	}
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
-	// 常數計算。
+	// basic constants. 定義基本常數。
 
 	/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
 	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
@@ -138,44 +141,6 @@ function module_code(library_namespace) {
 	// for Julian date. 期能不使用內建 Date 以快速計算日期。
 	// @see https://en.wikipedia.org/wiki/Julian_day#Calculation
 	// 適用範圍: 4717/3/1 BCE 0:0 之後。
-
-	if (false) {
-		for (var JD = 0, d; JD < 4e6; JD++) {
-			d = CeL.Julian_day.to_YMD(JD);
-			if (JD !== CeL.Julian_day.from_YMD(d[0], d[1], d[2])) {
-				throw JD;
-			}
-		}
-		// Array [ 6239, 5, 27 ]
-
-		for (var JD = 0, d; JD > -4e6; JD--) {
-			d = CeL.Julian_day.to_YMD(JD);
-			if (JD !== CeL.Julian_day.from_YMD(d[0], d[1], d[2])) {
-				throw JD;
-			}
-		}
-		// -1402
-		CeL.Julian_day.to_YMD(-1401)
-		// Array [ -4716, 3, 1 ]
-
-		for (var JD = 0, d; JD < 4e6; JD++) {
-			d = CeL.Julian_day.to_YMD(JD, true);
-			if (JD !== CeL.Julian_day.from_YMD(d[0], d[1], d[2], true)) {
-				throw JD;
-			}
-		}
-		// Array [ 6239, 7, 11 ]
-
-		for (var JD = 0, d; JD > -4e6; JD--) {
-			d = CeL.Julian_day.to_YMD(JD, true);
-			if (JD !== CeL.Julian_day.from_YMD(d[0], d[1], d[2], true)) {
-				throw JD;
-			}
-		}
-		// -1364
-		CeL.Julian_day.to_YMD(-1363, true)
-		// Array [ -4716, 3, 1 ]
-	}
 
 	/**
 	 * Get Julian day number (JDN) of date.<br />
@@ -293,8 +258,8 @@ function module_code(library_namespace) {
 		}
 		if (type === 'CE') {
 			type = year > 1582
-			// Julian calendar（儒略曆）1582年10月4日的下一日為 Gregorian
-			// calendar（格里高利曆）1582年10月15日。
+			// Julian calendar（儒略曆）1582年10月4日的下一日為
+			// Gregorian calendar（格里高利曆）1582年10月15日。
 			|| year == 1582 && (month > 10 || month == 10 && date >= 15);
 		}
 
