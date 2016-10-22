@@ -1760,7 +1760,7 @@ function test_date() {
 			assert([ JD, CeL.Julian_day.from_YMD(date[0], date[1], date[2]) ], 'JD ' + JD);
 			// Gregorian calendar
 			date = CeL.Julian_day.to_YMD(JD, true);
-			assert([ JD, CeL.Julian_day.from_YMD(d[0], d[1], d[2], true) ], 'JD ' + JD);
+			assert([ JD, CeL.Julian_day.from_YMD(date[0], date[1], date[2], true) ], 'JD ' + JD);
 		}
 
 		// -1402

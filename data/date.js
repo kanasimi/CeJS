@@ -1216,12 +1216,6 @@ function module_code(library_namespace) {
 	 * TODO:<br />
 	 * 各 locale 有不同 format 與 time zone offset.
 	 * 
-	 * @example <code>
-
-	 // More examples: see /_test suite/test.js
-
-	 * </code>
-	 * 
 	 * @param {Date}date_value
 	 *            要轉換的 date, TODO? 值過小時當作時間, <0 轉成當下時間.
 	 * @param {Object|String|Function}options
@@ -2094,7 +2088,7 @@ function module_code(library_namespace) {
 	_.JD_to_Date = JD_to_Date;
 
 	// ---------------------------------------------------------------------------//
-	// 常數計算。
+	// basic constants. 定義基本常數。
 
 	// for Julian Date (JD), Julian Day Number (JDN).
 	// Julian Date: 由公元前4713年1月1日，協調世界時中午12時開始所經過的天數。
