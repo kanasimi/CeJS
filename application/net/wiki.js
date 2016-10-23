@@ -7002,8 +7002,9 @@ function module_code(library_namespace) {
 	// {zhwikiSession,centralauth_User,centralauth_Token,centralauth_Session,wikidatawikiSession,wikidatawikiUserID,wikidatawikiUserName}
 	wiki_API.login = function(name, password, options) {
 		function _next() {
-			if (typeof callback === 'function')
+			if (typeof callback === 'function') {
 				callback(session.token.lgname);
+			}
 			library_namespace.debug('已登入 [' + session.token.lgname
 					+ ']。自動執行 .next()，處理餘下的工作。', 1, 'wiki_API.login');
 			// popup 'login'.
@@ -7051,11 +7052,12 @@ function module_code(library_namespace) {
 			session = options[KEY_SESSION];
 			callback = options.callback;
 		} else {
-			if (typeof options === 'function')
+			if (typeof options === 'function') {
 				callback = options;
-			// treat as API_URL
-			else if (typeof options === 'string')
+			} else if (typeof options === 'string') {
+				// treat options as API_URL
 				API_URL = options;
+			}
 			// 前置處理。
 			options = library_namespace.null_Object();
 		}
@@ -7066,18 +7068,20 @@ function module_code(library_namespace) {
 		}
 
 		// copy configurations
-		if (options.preserve_password)
+		if (options.preserve_password) {
 			session.preserve_password = options.preserve_password;
+		}
 
 		if (!('login_mark' in options) || options.login_mark) {
 			// hack: 這表示正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。
 			// @see wiki_API.prototype.next
-			if (options.login_mark)
+			if (options.login_mark) {
 				// 將 'login' 置於工作佇列最前頭。
 				session.actions.unshift([ 'login' ]);
-			else
+			} else {
 				// default: 依順序將 'login' 置於最末端。
 				session.actions.push([ 'login' ]);
+			}
 		}
 		if (session.API_URL) {
 			library_namespace.debug('API URL: [' + session.API_URL + ']。', 3,
@@ -7124,6 +7128,21 @@ function module_code(library_namespace) {
 	/** {Array}欲 copy 至 session.token 之 keys。 */
 	wiki_API.login.copy_keys = 'lguserid,lgtoken,cookieprefix,sessionid'
 			.split(',');
+
+	// ------------------------------------------------------------------------
+
+	wiki_API.logout = function(session, callback) {
+		var API_URL = typeof session === 'string' ? session
+				: API_URL_of_options(session);
+		wiki_API.query([ API_URL, 'logout' ], function(data) {
+			// data: {}
+			// console.log(data);
+			delete session.token;
+			if (typeof callback === 'function') {
+				callback.call(session, data);
+			}
+		});
+	};
 
 	// ------------------------------------------------------------------------
 
@@ -7244,19 +7263,6 @@ function module_code(library_namespace) {
 	 * @type {RegExp}
 	 */
 	wiki_API.check_stop.pattern = /\n=([^\n]+)=\n/;
-
-	// ------------------------------------------------------------------------
-
-	wiki_API.logout = function(session, callback) {
-		var API_URL = typeof session === 'string' ? session
-				: API_URL_of_options(session);
-		wiki_API.query([ API_URL, 'logout' ], function(data) {
-			// console.log(data);
-			if (typeof callback === 'function') {
-				callback.call(session, data);
-			}
-		});
-	};
 
 	// ------------------------------------------------------------------------
 

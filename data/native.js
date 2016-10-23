@@ -2893,7 +2893,6 @@ set_method(String.prototype, {
 	pad : set_bind(pad, true),
 	toRegExp : set_bind(String_to_RegExp, true),
 	toTitleCase : toTitleCase,
-	upper_initial : set_bind(upper_case_initial),
 	between : function(head, foot, index, return_data) {
 		// 確保可用 string.between().between() 的方法來作簡易篩選。
 		/*
