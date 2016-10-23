@@ -1729,7 +1729,9 @@ function test_date() {
 		[[ 'year', '2543年'.to_Date().precision ], '.to_Date(): precision #7'],
 		[[ 'decade', '1930年代'.to_Date().precision ], '.to_Date(): precision #8'],
 		[[ 'century', '20世紀'.to_Date().precision ], '.to_Date(): precision #9'],
-		[[ 'millennium', '4千紀'.to_Date().precision ], '.to_Date(): precision #10'],
+		[[ 'century', '5百年'.to_Date().precision ], '.to_Date(): precision #10'],
+		[[ 'millennium', '4千紀'.to_Date().precision ], '.to_Date(): precision #11'],
+		[[ 'millennium', '2千年'.to_Date().precision ], '.to_Date(): precision #12'],
  	]);
 
 

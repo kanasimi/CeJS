@@ -2293,20 +2293,21 @@ function module_code(library_namespace) {
 						// <b>有可能</b>是此月最後一天就算通過。
 						&& (date_name[0] === 小月 + 1
 						//
-						|| date_name[0] === 大月 + 1)))
+						|| date_name[0] === 大月 + 1))) {
 							月序.push([ era, days, date_index ]);
 
-						else if (tmp || library_namespace.is_debug(3))
+						} else if (tmp || library_namespace.is_debug(3)) {
 							library_namespace.debug([ '前後紀元之接續月日名不同！' + this,
 									' ', date_name.slice().reverse().join('/'),
 									' != ', era.toString(), ' ',
 									tmp ? tmp.reverse().join('/') : '(null)' ],
 									2, 'initialize_era_date');
+						}
 					}
 
 					// 僅存在月名稱不同，但日名稱相同，或可銜接之紀元列表。
 					if (年序.length === 0) {
-						if (月序.length === 0)
+						if (月序.length === 0) {
 							// 因為本函數中應初始化本紀年曆數，否則之後的運算皆會出問題；
 							// 因此若無法初始化，則 throw。
 							throw new Error(
@@ -2320,6 +2321,7 @@ function module_code(library_namespace) {
 							+ ']，中間存在有未能尋得曆數之時間段！'
 							//
 							: '已遍歷所有 [' + 曆法 + ']紀年，至結尾無可供參照之紀年！'));
+						}
 						年序 = 月序;
 					}
 

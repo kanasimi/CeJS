@@ -760,13 +760,13 @@ function module_code(library_namespace) {
 			.split(',');
 	(function() {
 		// e.g., for '公元前720年2月22日'
-		var start_pattern = '^[^\\d前\\-−‐:.]*', mid_pattern = '(?:\\s+',
+		var start_pattern = '^[^\\d:\\-−‐前.]*', mid_pattern = '(?:\\s+',
 		// e.g., for '1616年2月壬午', '7時'
 		end_pattern = ')?[^\\d日時]*$',
 
 		// pattern of date. 當今會準確使用的時間，
 		// 為 -47xx BCE (Julian day 0) 至 2xxx CE。
-		date_pattern = /(?:([前\-−‐]?(?:[0-4]?\d{3}|\d{1,3}))[\/.\-年 ])?\s*([01]?\d)(?:[\/.\-月 ]\s*([0-3]?\d)日?)?/.source,
+		date_pattern = /(?:([\-−‐前]?(?:[0-4]?\d{3}|\d{1,3}))[\/.\-年 ])?\s*([01]?\d)(?:[\/.\-月 ]\s*([0-3]?\d)日?)?/.source,
 		// pattern of time.
 		time_pattern = /([0-2]?\d)[:時时]\s*(?:([0-5]?\d)[:分]?\s*(?:([0-5]?\d)(?:\.(\d+))?)?)?秒?\s*(?:([PA])M)?/i.source;
 
@@ -784,7 +784,7 @@ function module_code(library_namespace) {
 	// U+2212 '−': minus sign
 	// 為了 calendar 測試，年分需要能 parse 0–9999。
 	// [ all, .*年, \d+, [百千] ]
-	var PATTERN_YEAR_ONLY = /^[^\d\/\-−‐:日月年前]*(\d{3,4}|([前\-−‐]?\d{1,4})([百千]?)年|[前\-−‐]\d{1,4})[^\d\/\-:日月年前]*$/,
+	var PATTERN_YEAR_ONLY = /^[^\d\/:\-−‐前日月年]*(\d{3,4}|([\-−‐前]?\d{1,4})([百千]?)年|[\-−‐前]\d{1,4})[^\d\/:\-−‐前日月年]*$/,
 	//
 	PATTERN_BCE = /(?:^|[^a-z.])B\.?C\.?E?(?:[^a-z.]|$)/i, time_boundary = new Date(
 			0, 0, 1);
@@ -848,7 +848,7 @@ function module_code(library_namespace) {
 					// 注意：這邊不會檢查如"2016年代"之合理性（應當為"2010年代"）
 					: date_string.includes('年代') ? 'decade' : 'year';
 			date_string = (matched[2] || matched[1])
-					.replace(/^[前\-−‐]/, '-000');
+					.replace(/^[−‐前]/, '-000');
 			if (period_end) {
 				if (matched[3]) {
 					// 將於後面才作位數處理。
@@ -872,10 +872,10 @@ function module_code(library_namespace) {
 				// 轉換到正確的年份。
 				* (precision === 'century' ? 100 : 1000);
 				// 作位數處理。
-				if (!date_string) {
-					date_string = '000';
-				} else if (Math.abs(date_string) < 1000) {
+				if (0 < date_string && date_string < 1000) {
 					date_string = '0' + date_string;
+				} else if (date_string === 0) {
+					date_string = '000';
 				}
 			}
 			// 添加月份以利parse。
