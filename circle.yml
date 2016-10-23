@@ -3,11 +3,9 @@
 # https://discuss.circleci.com/t/testing-multiple-versions-of-node/542
 #machine:
 #  node:
-#    # Wikimedia Tool Labs: v0.10.25
 #    version: 0.10.25
-#    version: 4
-#    version: 6
 
 dependencies:
   pre:
-    - case $CIRCLE_NODE_INDEX in 0) NODE_VERSION=4 ;; 1) NODE_VERSION=5 ;; 2) NODE_VERSION=6 ;; esac; nvm install $NODE_VERSION && nvm alias default $NODE_VERSION
+    # Wikimedia Tool Labs: v0.10.25
+    - case $CIRCLE_NODE_INDEX in 0) NODE_VERSION=0.10.25 ;; 1) NODE_VERSION=4 ;; 2) NODE_VERSION=6 ;; esac; nvm install $NODE_VERSION && nvm alias default $NODE_VERSION

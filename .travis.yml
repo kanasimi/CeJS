@@ -11,7 +11,8 @@ node_js:
 #  - "0.11"
 
 # Wikimedia Tool Labs: v0.10.25
-  - "0.10.25"
+# Travis CI gets "CERT_UNTRUSTED" on 0.10.25 after 2016/10/15. Stop the node.js version temporarily.
+#  - "0.10.25"
 
 #  - "0.12"
   - "4"
