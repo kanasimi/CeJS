@@ -735,17 +735,26 @@ function module_code(library_namespace) {
 	// 創建 match pattern 相關函數。
 
 	/**
-	 * 將第一個字母轉成大寫。
+	 * 將第一個字母轉成大寫。<br />
+	 * 因為 wiki 僅僅將首字母大寫，中間的字不會被改變，因此不採用 toTitleCase() @ CeL.data.native。
 	 * 
 	 * cf. {{lcfirst:}}
 	 * 
-	 * @param {String}word
+	 * @param {String}words
 	 *            要轉換的文字。
 	 * 
 	 * @returns {String}轉換過的文字。
 	 */
-	function upper_case_initial(word) {
-		return word.charAt(0).toUpperCase() + word.slice(1);
+	function upper_case_initial(words) {
+		words = String(words).trim();
+
+		// method 1
+		return words.charAt(0).toUpperCase() + words.slice(1);
+
+		// method 2
+		return words.replace(/^[^\s]/g, function(initial_char) {
+			return initial_char.toUpperCase();
+		});
 	}
 
 	/**
@@ -3858,24 +3867,18 @@ function module_code(library_namespace) {
 
 		case 'logout':
 			// 結束
-			wiki_API.logout(function() {
-				if (typeof next[1] === 'function')
-					next[1].call(_this);
-				_this.next();
-			},
-			// next[2] : options
-			Object.assign({
-				// [KEY_SESSION]
-				session : this
-			}, next[2]));
+			// next[1] : callback
+			wiki_API.logout(this /* session */, next[1]);
 			break;
 
 		case 'set_URL':
+			// next[1] : callback
 			setup_API_URL(this /* session */, next[1]);
 			this.next();
 			break;
 
 		case 'set_language':
+			// next[1] : callback
 			setup_API_language(this /* session */, next[1]);
 			this.next();
 			break;
@@ -3886,6 +3889,7 @@ function module_code(library_namespace) {
 			setup_data_session(this /* session */,
 			// 確保 data_session login 了才執行下一步。
 			function() {
+				// next[1] : callback
 				if (typeof next[1] === 'function')
 					next[1].call(_this);
 				_this.next();
@@ -3893,6 +3897,7 @@ function module_code(library_namespace) {
 			break;
 
 		case 'run':
+			// next[1] : callback
 			if (typeof next[1] === 'function')
 				next[1].call(this, next[2]);
 			this.next();
@@ -7239,6 +7244,19 @@ function module_code(library_namespace) {
 	 * @type {RegExp}
 	 */
 	wiki_API.check_stop.pattern = /\n=([^\n]+)=\n/;
+
+	// ------------------------------------------------------------------------
+
+	wiki_API.logout = function(session, callback) {
+		var API_URL = typeof session === 'string' ? session
+				: API_URL_of_options(session);
+		wiki_API.query([ API_URL, 'logout' ], function(data) {
+			// console.log(data);
+			if (typeof callback === 'function') {
+				callback.call(session, data);
+			}
+		});
+	};
 
 	// ------------------------------------------------------------------------
 

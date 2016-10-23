@@ -388,6 +388,10 @@ function test_native() {
 	]);
 
 	error_count += CeL.test('data.native misc', function(assert) {
+		assert([ 'Abc Def', 'abc def'.toTitleCase() ], 'toTitleCase() #1');
+		assert([ 'Abc DefG', 'abc defG'.toTitleCase() ], 'toTitleCase() #2');
+		assert([ 'Abc Defg', 'abc defG'.toTitleCase(true) ], 'toTitleCase() #3');
+
 		// 找最後一個匹配的 index。
 		// @see above: '處理搜尋 {RegExp} 的情況'
 		assert([ 2, 'aaa'.split('').first_matched(/a/, true) ], 'first_matched(get_last_matched) 0');

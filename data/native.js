@@ -2599,7 +2599,16 @@ _.merge_sequence = merge_unduplicated_sequence;
 // Capitalize the first letter of string
 // also use CSS: text-transform:capitalize;
 // @see Camel_to_underscore() @ data.code
+/**
+ * 轉成標題用之格式。基本上即將每個字的第一個字母轉成大寫。
+ * 
+ * @param {Boolean}to_lower_first
+ *            將要轉換的文字先全部轉換成小寫。
+ * 
+ * @returns {String}標題用之格式文字。
+ */
 function toTitleCase(to_lower_first) {
+	// 要轉換的文字。
 	var title = this.trim();
 	if (to_lower_first)
 		title = title.toLowerCase();
@@ -2646,6 +2655,8 @@ toTitleCase
 	.add_exception('at,by,down,for,from,in,into,like,near,of,off,on,onto,over,past,to,upon,with,and,but,or,yet,for,nor,so,as,if,once,than,that,till,when,to,a,an,the');
 toTitleCase
 	.add_exception('id,tv,i,ii,iii,iv,v,vi,vii,viii,ix,x,xi,xii,xiii', true);
+
+
 
 
 
@@ -2882,6 +2893,7 @@ set_method(String.prototype, {
 	pad : set_bind(pad, true),
 	toRegExp : set_bind(String_to_RegExp, true),
 	toTitleCase : toTitleCase,
+	upper_initial : set_bind(upper_case_initial),
 	between : function(head, foot, index, return_data) {
 		// 確保可用 string.between().between() 的方法來作簡易篩選。
 		/*

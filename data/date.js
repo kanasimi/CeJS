@@ -847,8 +847,7 @@ function module_code(library_namespace) {
 					: matched[3] === '千' ? 'millennium'
 					// 注意：這邊不會檢查如"2016年代"之合理性（應當為"2010年代"）
 					: date_string.includes('年代') ? 'decade' : 'year';
-			date_string = (matched[2] || matched[1])
-					.replace(/^[−‐前]/, '-000');
+			date_string = (matched[2] || matched[1]).replace(/^[−‐前]/, '-000');
 			if (period_end) {
 				if (matched[3]) {
 					// 將於後面才作位數處理。
