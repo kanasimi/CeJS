@@ -15,7 +15,9 @@ node_js:
 # https://thequietinnovator.com/2015/10/11/how-to-fix-nodejs-cert_untrusted-issues/
 #  - "0.10.25"
   - "0.10"
-  - "0.11"
+
+# 2016/10/23: Travis CI failed on node.js 0.11
+#  - "0.11"
 
 #  - "0.12"
   - "4"
