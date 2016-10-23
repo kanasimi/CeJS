@@ -1697,7 +1697,7 @@ function test_XML() {
 function test_date() {
 	CeL.run('data.date');
 
-  	error_count += CeL.test('parse date', [
+ 	error_count += CeL.test('parse date', [
 		[[0,new Date('May 5 2022')-'May 5 2022'.to_Date()], '.to_Date(): 無法 parse 的值'],
 		[[0,new Date('May 5 2022 UTC+09:00')-'May 5 2022'.to_Date({zone:'UTC+9'})], '.to_Date(): 無法 parse 的值+TZ@options'],
 		[[0,new Date('May 5 2022 UTC+09:00')-'May 5 2022 UTC+09:00'.to_Date()], '.to_Date(): 無法 parse 的值+TZ'],
@@ -1711,11 +1711,22 @@ function test_date() {
 
 		[[0,new Date('1234/5/6') - '1234年5月6日'.to_Date(/(\d+)年(\d+)月(\d+)日/)], '.to_Date(): 自訂 pattern'],
 		[[0,new Date('1234/5/6') - '5/6/1234'.to_Date({pattern:/(\d+)\/(\d+)\/(\d+)/,pattern_matched:[3,1,2]})], '.to_Date(): 自訂 pattern'],
-  	]);
+
+		[[ 'microsecond', '2543年2月1日 1:2:3.45'.to_Date().precision ], '.to_Date(): precision #1'],
+		[[ 'second', '2543年2月1日 1:2:3'.to_Date().precision ], '.to_Date(): precision #2'],
+		[[ 'minute', '2543年2月1日 1:2'.to_Date().precision ], '.to_Date(): precision #3'],
+		[[ 'hour', '2543年2月1日5時'.to_Date().precision ], '.to_Date(): precision #4'],
+		[[ 'day', '2543年2月1日'.to_Date().precision ], '.to_Date(): precision #5'],
+		[[ 'month', '2543年2月'.to_Date().precision ], '.to_Date(): precision #6'],
+		[[ 'year', '2543年'.to_Date().precision ], '.to_Date(): precision #7'],
+		[[ 'decade', '1930年代'.to_Date().precision ], '.to_Date(): precision #8'],
+		//[[ 'century', '20世紀'.to_Date().precision ], '.to_Date(): precision #9'],
+		//[[ 'millennium', '6千紀'.to_Date().precision ], '.to_Date(): precision #10'],
+ 	]);
 
 
 	var tmp;
-  	error_count += CeL.test('to_Date(CE)', [
+ 	error_count += CeL.test('to_Date(CE)', [
 		[["1582/10/15 0:0:0.000",'1582/10/5'.to_Date({parser : 'CE', no_year_0 : false}).format()]],
 
 		[["1582/10/15 0:0:0.000",'1582/10/5'.to_Date({parser : 'CE', no_year_0 : false}).format()]],

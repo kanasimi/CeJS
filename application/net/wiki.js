@@ -11509,11 +11509,17 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * {Array}時間精度單位。
+	 * {Array}時間精度(精密度)單位。
+	 * 
+	 * 注意：須配合 index_precision @ CeL.data.date！
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Wikibase/DataModel/JSON#time
 	 */
-	var time_unit = '十億年,億年,千萬年,百萬年,十萬年,萬年,千紀,世紀,年代,年,月,日,時,分,秒,毫秒,微秒,納秒'
+	var time_unit = 'gigayear,100 megayear,10 megayear,megayear,100 kiloyear,10 kiloyear,millennium,century,decade,year,month,day,hour,minute,second,microsecond'
+			.split(','),
+	// 精確至日: 11。
+	INDEX_OF_PRECISION = time_unit.to_hash();
+	time_unit.zh = '十億年,億年,千萬年,百萬年,十萬年,萬年,千紀,世紀,年代,年,月,日,時,分,秒,毫秒,微秒,納秒'
 			.split(',');
 
 	/**
@@ -11701,7 +11707,7 @@ function module_code(library_namespace) {
 				year = +matched[0];
 				var power = Math.pow(10, 9 - precision);
 				matched = [ year / power | 0 ];
-				matched.unit = [ time_unit[precision] ];
+				matched.unit = [ time_unit.zh[precision] ];
 				matched.power = power;
 
 			} else {
@@ -11716,7 +11722,7 @@ function module_code(library_namespace) {
 					return +value;
 				});
 				year = matched[0];
-				matched.unit = time_unit.slice(9, precision + 1);
+				matched.unit = time_unit.zh.slice(9, precision + 1);
 			}
 
 			// proleptic Gregorian calendar:
@@ -12586,9 +12592,6 @@ function module_code(library_namespace) {
 		return value < 0 ? String(value) : '+' + value;
 	}
 
-	// 精確至日。
-	var PRECISION_DAY = 11;
-
 	/**
 	 * 盡可能模擬 wikidata (wikibase) 之 JSON 資料結構。
 	 * 
@@ -12848,8 +12851,16 @@ function module_code(library_namespace) {
 					date_value = library_namespace.String_to_Date(value, {
 						zone : 0
 					});
-					date_value = date_value ? date_value.getTime()
-							: parse_date_zh(value, true) || NaN;
+					if (date_value) {
+						if (('precision' in date_value)
+						//
+						&& (date_value.precision in INDEX_OF_PRECISION)) {
+							precision = INDEX_OF_PRECISION[date_value.precision];
+						}
+						date_value = date_value.getTime();
+					} else {
+						date_value = parse_date_zh(value, true) || NaN;
+					}
 				}
 				if (isNaN(date_value)) {
 					error = 'Invalid Date: [' + value + ']';
@@ -12862,13 +12873,13 @@ function module_code(library_namespace) {
 			}
 
 			if (isNaN(precision)) {
-				precision = PRECISION_DAY;
+				precision = INDEX_OF_PRECISION.day;
 			}
 			if (error) {
 				value = String(value);
 			} else {
-				if (precision === PRECISION_DAY) {
-					// 當 precision=PRECISION_DAY 時，時分秒*必須*設置為 0!
+				if (precision === INDEX_OF_PRECISION.day) {
+					// 當 precision=INDEX_OF_PRECISION.day 時，時分秒*必須*設置為 0!
 					value.setUTCHours(0, 0, 0, 0);
 				}
 				value = value.toISOString();

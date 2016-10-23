@@ -754,7 +754,9 @@ function module_code(library_namespace) {
 	 */
 	String_to_Date.no_year_0 = Date_to_String.no_year_0 = true;
 
-	var stem_branch_date_pattern;
+	var stem_branch_date_pattern,
+	// 精密度: 千紀,世紀,年代,年,月,日,時,分,秒,毫秒
+	index_precision = 'millennium,century,decade,year,month,day,hour,minute,second,microsecond'.split(',');
 	(function() {
 		// e.g., for '公元前720年2月22日'
 		var start_pattern = '^[^\\d前\\-−‐:.]*', mid_pattern = '(?:\\s+',
@@ -812,14 +814,16 @@ function module_code(library_namespace) {
 			options = library_namespace.null_Object();
 		}
 
-		var date_data, period_end = options.period_end,
+		var date_data,
+		// 精密度
+		precision, period_end = options.period_end,
 		// matched string
 		matched,
 		//
 		no_year_0 = 'no_year_0' in options ? options.no_year_0
 				: String_to_Date.no_year_0;
 
-		date_string = date_string.trim();
+		date_string = date_string.trim().replace(/千[紀纪]/g, '千年');
 		if (isNaN(minute_offset)) {
 			if (isNaN(minute_offset = get_minute_offset(date_string))) {
 				minute_offset = String_to_Date.default_offset;
@@ -829,12 +833,16 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// TODO: 世紀
+
 		if (matched = date_string
 				.match(
 				// U+2212 '−': minus sign
 				// 為了 calendar 測試，年分需要能 parse 0–9999。
 				/^[^\d\/\-:日月年前]*(\d{3,4}|([前\-−‐]?\d{1,4})年|[前\-−‐]\d{1,4})[^\d\/\-:日月年前]*$/)) {
 			// 僅有 xxx/1xxx/2xxx 年(year) 時。
+			// 注意：這邊不會檢查如"2016年代"之合理性（應當為"2010年代"）
+			precision = date_string.includes('年代') ? 'decade' : 'year';
 			date_string = (matched[2] || matched[1]).replace(/^[前−]/, '-000');
 			if (period_end) {
 				matched = date_string.includes('00');
@@ -879,6 +887,19 @@ function module_code(library_namespace) {
 			library_namespace.debug('無法 parse: [' + date_string + ']', 2,
 					'String_to_Date_default_parser');
 			return;
+		}
+
+		if (!precision) {
+			// 這邊僅處理年以下的單位。
+			date_data.some(function(value, index) {
+				if (!value) {
+					// value should be undefined.
+					if (index > 0) {
+						precision = index_precision[index + 2];
+					}
+					return true;
+				}
+			});
 		}
 
 		// ----------------------------------------------------
@@ -978,10 +999,11 @@ function module_code(library_namespace) {
 					date_data[2], +date_data[3] || 0, tmp, +date_data[5] || 0,
 					+date_data[6] || 0);
 		}
-		if (false)
+		if (false) {
 			// 設定時間後才設定 time zone。
 			date_value.setMinutes((+date_data[4] || 0)
 					+ String_to_Date.default_offset - (+minute_offset || 0));
+		}
 
 		// 測試僅輸入時刻的情況。e.g., '7時'
 		if (options.near && date_value.getFullYear() === 0
@@ -999,6 +1021,9 @@ function module_code(library_namespace) {
 			}
 		}
 
+		if (precision) {
+			date_value.precision = precision;
+		}
 		return date_value;
 	}
 

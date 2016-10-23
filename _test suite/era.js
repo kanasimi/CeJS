@@ -3612,7 +3612,7 @@ function affairs() {
 			a : {
 				T : '伊斯蘭曆'
 			},
-			R : 'Tabular Islamic calendar\n日落後為隔日。',
+			R : 'Tabular Islamic calendar\n日落後為伊斯蘭曆隔日。',
 			href : 'http://en.wikipedia.org/wiki/Tabular_Islamic_calendar'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Tabular({
@@ -4297,7 +4297,7 @@ function affairs() {
 			a : {
 				T : '伏臘'
 			},
-			R : '中曆曆注。伏臘日: 三伏日+臘日\n《說文》：「冬至後三戌臘祭百神。」 非來源於佛教之臘八節！\n'
+			R : '中曆曆注。伏臘日: 三伏日+臘日+起源自佛教之臘八節\n'
 			//
 			+ '尹灣漢墓簡牘論考: 秦漢之前無伏臘。秦漢時伏臘尚無固定規則，此處所列僅供參考。或在漢成帝鴻嘉年間已成曆例。'
 			//
@@ -4352,9 +4352,18 @@ function affairs() {
 				干支輪序 = 節氣後第幾輪干支(date, JD, 18, '戌');
 				// return 干支輪序 && 干支輪序.join(', ')
 				if (干支輪序 && 干支輪序[0] === 2 && 干支輪序[1] === 0) {
-					return '臘日';
+					return {
+						T : '臘日',
+						R : '《說文‧肉部》：「臘，冬至後三戌臘祭百神。」非起源自佛教之臘八節！'
+					};
 				}
-				return;
+			}
+
+			if (date.國家 === '中國' && date.月 === 12 && date.日 === 8) {
+				return {
+					T : '臘八節',
+					R : '起源自佛教之臘八節'
+				};
 			}
 		} ],
 
