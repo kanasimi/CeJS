@@ -756,7 +756,8 @@ function module_code(library_namespace) {
 
 	var stem_branch_date_pattern,
 	// 精密度: 千紀,世紀,年代,年,月,日,時,分,秒,毫秒
-	index_precision = 'millennium,century,decade,year,month,day,hour,minute,second,microsecond'.split(',');
+	index_precision = 'millennium,century,decade,year,month,day,hour,minute,second,microsecond'
+			.split(',');
 	(function() {
 		// e.g., for '公元前720年2月22日'
 		var start_pattern = '^[^\\d前\\-−‐:.]*', mid_pattern = '(?:\\s+',
@@ -780,7 +781,12 @@ function module_code(library_namespace) {
 		stem_branch_date_pattern = date_pattern;
 	})();
 
-	var BCE_PATTERN = /(?:^|[^a-z.])B\.?C\.?E?(?:[^a-z.]|$)/i, time_boundary = new Date(
+	// U+2212 '−': minus sign
+	// 為了 calendar 測試，年分需要能 parse 0–9999。
+	// [ all, .*年, \d+, [百千] ]
+	var PATTERN_YEAR_ONLY = /^[^\d\/\-−‐:日月年前]*(\d{3,4}|([前\-−‐]?\d{1,4})([百千]?)年|[前\-−‐]\d{1,4})[^\d\/\-:日月年前]*$/,
+	//
+	PATTERN_BCE = /(?:^|[^a-z.])B\.?C\.?E?(?:[^a-z.]|$)/i, time_boundary = new Date(
 			0, 0, 1);
 	time_boundary.setFullYear(0);
 	time_boundary = time_boundary.getTime();
@@ -823,7 +829,9 @@ function module_code(library_namespace) {
 		no_year_0 = 'no_year_0' in options ? options.no_year_0
 				: String_to_Date.no_year_0;
 
-		date_string = date_string.trim().replace(/千[紀纪]/g, '千年');
+		date_string = date_string.trim()
+		// 注意:"紀"會轉換成結束時間。
+		.replace(/世[紀纪]/g, '百年').replace(/千[紀纪]/g, '千年');
 		if (isNaN(minute_offset)) {
 			if (isNaN(minute_offset = get_minute_offset(date_string))) {
 				minute_offset = String_to_Date.default_offset;
@@ -833,29 +841,44 @@ function module_code(library_namespace) {
 			}
 		}
 
-		// TODO: 世紀
-
-		if (matched = date_string
-				.match(
-				// U+2212 '−': minus sign
-				// 為了 calendar 測試，年分需要能 parse 0–9999。
-				/^[^\d\/\-:日月年前]*(\d{3,4}|([前\-−‐]?\d{1,4})年|[前\-−‐]\d{1,4})[^\d\/\-:日月年前]*$/)) {
+		if (matched = date_string.match(PATTERN_YEAR_ONLY)) {
 			// 僅有 xxx/1xxx/2xxx 年(year) 時。
-			// 注意：這邊不會檢查如"2016年代"之合理性（應當為"2010年代"）
-			precision = date_string.includes('年代') ? 'decade' : 'year';
-			date_string = (matched[2] || matched[1]).replace(/^[前−]/, '-000');
+			precision = matched[3] === '百' ? 'century'
+					: matched[3] === '千' ? 'millennium'
+					// 注意：這邊不會檢查如"2016年代"之合理性（應當為"2010年代"）
+					: date_string.includes('年代') ? 'decade' : 'year';
+			date_string = (matched[2] || matched[1])
+					.replace(/^[前\-−‐]/, '-000');
 			if (period_end) {
-				matched = date_string.includes('00');
-				if (!++date_string) {
-					// 預防 前1年 → 0年。
-					date_string = no_year_0 ? '0001' : '0000';
-				} else if (matched
-						&& (date_string = '00' + date_string).length < 4) {
-					date_string = '0' + date_string;
+				if (matched[3]) {
+					// 將於後面才作位數處理。
+					++date_string;
+				} else {
+					// 作位數處理。
+					matched = date_string.includes('00');
+					if (!++date_string) {
+						// 預防 前1年 → 0年。
+						date_string = no_year_0 ? '0001' : '0000';
+					} else if (matched
+							&& (date_string = '00' + date_string).length < 4) {
+						date_string = '0' + date_string;
+					}
 				}
 				// 已處理過 period_end，因此除去此 flag。
 				period_end = false;
 			}
+			if (matched[3]) {
+				date_string = date_string
+				// 轉換到正確的年份。
+				* (precision === 'century' ? 100 : 1000);
+				// 作位數處理。
+				if (!date_string) {
+					date_string = '000';
+				} else if (Math.abs(date_string) < 1000) {
+					date_string = '0' + date_string;
+				}
+			}
+			// 添加月份以利parse。
 			date_string += '/1';
 		} else {
 			// 依照中文之習慣，日期 + 時間中間可不加空格。
@@ -922,7 +945,7 @@ function module_code(library_namespace) {
 			year = -date_data[0].slice(1);
 		}
 		// fix browser Date.parse() bug for BCE date.
-		else if (year > 0 && BCE_PATTERN.test(date_string)) {
+		else if (year > 0 && PATTERN_BCE.test(date_string)) {
 			year = -year;
 			if (!('no_year_0' in options)) {
 				// default: no year 0
