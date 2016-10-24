@@ -3057,9 +3057,9 @@ function affairs() {
 			href : 'http://support.microsoft.com/kb/214094',
 			S : 'font-size:.8em;'
 		}, function(date) {
-			return (date = CeL.date.Excel_date(date))
+			return (date = date.to_Excel())
 			//
-			&& (date | 0) || CeL.Excel_date.error_value;
+			&& (date | 0) || CeL.Excel_Date.error_value;
 		} ],
 
 		Excel_Mac : [ {
@@ -3070,9 +3070,9 @@ function affairs() {
 			href : 'http://support.microsoft.com/kb/214094',
 			S : 'font-size:.8em;'
 		}, function(date) {
-			return (date = CeL.date.Excel_date.Mac(date))
+			return (date = date.to_Excel(true))
 			//
-			&& (date | 0) || CeL.Excel_date.error_value;
+			&& (date | 0) || CeL.Excel_Date.error_value;
 		} ],
 
 		君主年歲 : [ {

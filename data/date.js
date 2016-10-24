@@ -520,26 +520,36 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
-	var Excel_1900_epoch = Date.parse('1900/1/0'), Excel_1904_epoch = Date
-			.parse('1904/1/0');
+	// The 1900 Date System
+	// 序列值 1 代表 1/1/1900 12:00:00 a.m。
+	// 數字 32331.06 代表日期和時間 7/7/1988年 1:26:24 a.m。
+	var Excel_1900_epoch = Date.parse('1900/1/1') - ONE_DAY_LENGTH_VALUE,
+	// The 1904 Date System
+	// 依預設，Excel for Mac 使用 1904 日期系統，而 Excel for Windows 使用 1900 日期系統。這表示當您在
+	// Excel for Mac 中輸入序列值 1 並將其格式化為日期，Excel 會將其顯示為 1/2/1904 12:00 a.m。Excel
+	// for Windows 則會將序列值 1 顯示為 1/1/1900 12:00 a.m。
+	// Date.parse('1904/1/2') - ONE_DAY_LENGTH_VALUE
+	Excel_1904_epoch = Date.parse('1904/1/1');
 
-	// http://support.microsoft.com/kb/214094
-	// Excel for Mac uses the 1904 date system and
-	// Excel for Windows uses the 1900 date system.
-	function Excel_date(date) {
-		date = date - Excel_1900_epoch;
-		return date >= 0 ?
-		// 0: 1900/1/0
-		// https://en.wikipedia.org/wiki/Year_1900_problem
-		// 60: 1900/2/29 (nonexistent date)
-		// 61: 1900/3/1
-		(date /= ONE_DAY_LENGTH_VALUE) < 60 ? date : date + 1
-		//
-		: NaN;
+	function Excel_Date(date_value, is_Mac, get_value) {
+		// 0會被轉成 1900/1/0，已經不正常。
+		if (date_value >= 1) {
+			// 這邊採用與 function Date_to_Excel() 相對應的判別式。
+			if (!is_Mac && !(date_value < 60)) {
+				date_value--;
+			}
+			date_value = (is_Mac ? Excel_1904_epoch : Excel_1900_epoch)
+					+ ONE_DAY_LENGTH_VALUE * date_value;
+		} else {
+			date_value = NaN;
+		}
+		return get_value ? date_value : new Date(date_value);
 	}
 
+	_.Excel_Date = Excel_Date;
+
 	if (false) {
-		Excel_date.error_value = {
+		Excel_Date.error_value = {
 			valueOf : function() {
 				return NaN;
 			},
@@ -548,20 +558,31 @@ function module_code(library_namespace) {
 			}
 		};
 	}
-	Excel_date.error_value = '#VALUE!';
-
-	_.Excel_date = Excel_date;
+	// Excel 2010 會將錯誤值顯示為'#VALUE!'，但負數或過大值則會以'#'填滿格子(e.g., "#########")。
+	Excel_Date.error_value = '#VALUE!';
 
 	if (false) {
-		(date = CeL.date.Excel_date.Mac(date)) && date.toFixed(2)
-				|| CeL.Excel_date.error_value;
+		// to show Excel date
+		(date = date.to_Excel()) && date.toFixed(2)
+				|| CeL.Excel_Date.error_value;
 	}
-	Excel_date.Mac = function(date) {
-		date = date - Excel_1904_epoch;
-		return date >= 0 ?
-		//
-		date / ONE_DAY_LENGTH_VALUE : NaN;
-	};
+
+	// http://support.microsoft.com/kb/214094
+	// Excel for Mac uses the 1904 date system and
+	// Excel for Windows uses the 1900 date system.
+	function Date_to_Excel(date, is_Mac) {
+		date = date.getTime() - (is_Mac ? Excel_1904_epoch : Excel_1900_epoch);
+		return date >= 1 ?
+		// Excel 有 1900/2/29 (60)，但現實中沒有這天。因此一般轉換時，不應出現60之值。
+		// Mac 系統以 1904 CE 起始，迴避了這個問題。
+		// 0: 1900/1/0
+		// https://en.wikipedia.org/wiki/Year_1900_problem
+		// 60: 1900/2/29 (nonexistent date)
+		// 61: 1900/3/1
+		(date /= ONE_DAY_LENGTH_VALUE) < 60 || is_Mac ? date : date + 1
+		// or use Excel_Date.error_value
+		: NaN;
+	}
 
 	// ----------------------------------------------------------------------------
 
@@ -3018,6 +3039,8 @@ function module_code(library_namespace) {
 	});
 
 	library_namespace.set_method(Date.prototype, {
+		to_Excel : set_bind(Date_to_Excel),
+
 		age : set_bind(age_of, true),
 		format : set_bind(Date_to_String)
 	});

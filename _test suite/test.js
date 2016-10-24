@@ -274,6 +274,8 @@ function test_compatibility() {
 	]);
 
 	error_count += CeL.test('compatibility', [
+		[[ NaN, NaN ], 'Object.is(NaN,NaN)'],
+
 		[[/./ig.flags, 'gi'], '/./ig.flags'],
 		[[5, Math.hypot(3, 4)], 'normal positive Math.hypot'],
 		[[5, Math.hypot(-3, -4)], 'negative Math.hypot'],
@@ -1736,6 +1738,17 @@ function test_date() {
 		[[ 'century', '5百年'.to_Date().precision ], '.to_Date(): precision #10'],
 		[[ 'millennium', '4千紀'.to_Date().precision ], '.to_Date(): precision #11'],
 		[[ 'millennium', '2千年'.to_Date().precision ], '.to_Date(): precision #12'],
+
+		// http://support.microsoft.com/kb/214094
+		[[ 1, (new Date('1/1/1900')).to_Excel() ], 'date.to_Excel()=1'],
+		[[ 32331.06, (new Date('7/7/1988 1:26:24')).to_Excel() ], 'date.to_Excel()'],
+		[[ 35981, (new Date('July 5, 1998')).to_Excel() ], 'date.to_Excel()'],
+		[[ 34519, (new Date('July 4, 1994')).to_Excel() ], 'date.to_Excel()'],
+		[[ 1, (new Date('1/2/1904')).to_Excel(true) ], 'date.to_Excel(Mac)=1'],
+		// https://support.microsoft.com/en-us/kb/214330
+		[[ 34519, (new Date('July 5, 1998')).to_Excel(true) ], 'date.to_Excel(Mac)'],
+		[[ 35981, (new Date('July 6, 2002')).to_Excel(true) ], 'date.to_Excel(Mac)'],
+		[[ NaN, (new Date('1/1/1800')).to_Excel() ], 'date.to_Excel()=NaN'],
  	]);
 
 

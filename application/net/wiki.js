@@ -12873,6 +12873,7 @@ function module_code(library_namespace) {
 					// Warning:
 					// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()比parse_date_zh()功能大多了。
 					date_value = library_namespace.String_to_Date(value, {
+						// 都必須當作UTC+0，否則被轉換成UTC+0時會出現偏差。
 						zone : 0
 					});
 					if (date_value) {
