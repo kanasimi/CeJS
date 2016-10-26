@@ -937,13 +937,15 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 					'BODY: ' + data, 1, 'get_URL_node');
 				// 模擬 XMLHttp。
 				onload({
+					// for debug
+					//url : _URL,
+					// 因為可能 redirecting 過，這邊列出的才是最終 URL。
+					URL : URL,
 					// node_agent : agent,
 					// {Number}result.statusCode
 					// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
 					status : result.statusCode,
 					responseText : data
-					// for debug
-					//URL : _URL
 				});
 				// free
 				data = null;
