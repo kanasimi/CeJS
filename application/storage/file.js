@@ -171,7 +171,7 @@ guess_path_separator = function(path) {
 			count = m.length, candidate = path_separator_candidates[i];
 	}
 
-	return candidate;
+	return candidate || library_namespace.env.path_separator;
 };
 
 

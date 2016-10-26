@@ -1386,9 +1386,11 @@ OS='UNIX'; // unknown
 		 * @name CeL.env.OS
 		 * @type {String}
 		 */
-		env.OS = OS = OS_type || OS ||
+		env.OS = OS = OS_type || OS
+				//
+				|| typeof process === 'object' && process.platform
 				// 假如未設定則由 path 判斷。
-				(_.get_script_full_name().indexOf('\\') !== -1 ? 'Windows' : 'UNIX');
+				|| (_.get_script_full_name().indexOf('\\') !== -1 ? 'Windows' : 'UNIX');
 
 		/**
 		 * 文件預設 line separator / NewLine / line delimiter。<br />
@@ -1398,7 +1400,9 @@ OS='UNIX'; // unknown
 		 * @type {String}
 		 */
 		env.line_separator =
-				OS === 'UNIX' ? '\n' : OS === 'Mac' ? '\r' : '\r\n';
+				OS === 'UNIX' ? '\n' : OS === 'Mac' ? '\r'
+				// e.g., 'win32'
+				: '\r\n';
 
 		/**
 		 * file system 預設 path separator。<br />

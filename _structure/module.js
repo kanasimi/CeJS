@@ -909,7 +909,7 @@ if (false) {
 	 */
 	get_script_base_path = function (JSFN) {
 		//alert('JSFN: '+JSFN);
-		if (!JSFN)
+		if (!JSFN) {
 			return (_.is_WWW() ?
 					// unescape(window.location.pathname)
 					unescape(window.location.href)
@@ -917,6 +917,7 @@ if (false) {
 					//	用在把檔案拉到此檔上時不方便
 					//: typeof WshShell === 'object' ? WshShell.CurrentDirectory
 					: '').replace(/[^\\\/]+$/, '');
+		}
 
 		//	We don't use is_Object or so.
 		//	通常會傳入的，都是已經驗證過的值，不會出現需要特殊認證的情況。
@@ -1157,11 +1158,12 @@ if (false) {
 	 */
 	split_module_name = function (module_name) {
 		//_.debug('[' + module_name + ']→[' + module_name.replace(/\.\.+|\\\\+|\/\/+/g, '.').split(/\.|\\|\/|::/) + ']');
-		if (typeof module_name === 'string')
+		if (typeof module_name === 'string') {
 			module_name = module_name
 				//.replace(/\.\.+|\\\\+|\/\/+/g, '.')
 				.replace(/[\\\/]+/g, '.')
 				.split(/[.\\\/]|::/);
+		}
 
 		if (Array.isArray(module_name) && module_name.length) {
 			//	去除 library name。
