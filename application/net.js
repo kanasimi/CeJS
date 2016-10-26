@@ -42,6 +42,31 @@ _// JSDT:_module_
 var NOT_FOUND = ''.indexOf('_');
 
 
+
+
+/**
+ * get full path.
+ */
+function get_full_URL(relative_path, base_URL) {
+	if (/([a-z\d]+:)\/\//.test(relative_path)) {
+		// e.g., "https://host.name/"
+		return relative_path;
+	}
+	if (relative_path.startsWith('/')) {
+		// e.g., "/path/to/file"
+		var matched = base_URL.match(/([a-z\d]+:)\/\/[^\/]+/);
+		if (matched) {
+			return matched[0] + relative_path;
+		}
+	}
+	// e.g., "relative/path/to/file"
+	return base_URL.replace(/[^\/]+$/, '') + relative_path;
+}
+
+_.get_full_URL = get_full_URL;
+
+
+
 //gethost[generateCode.dLK]='Sleep';
 /*
 	** @deprecated 改用 getNetInfo()

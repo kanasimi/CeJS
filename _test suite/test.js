@@ -138,7 +138,7 @@ function test_compatibility() {
 
 		s.add(4);
 		if (v.next().value !== 4)
-			CeL.err('test_compatibility: iterator 無法反映 Set 之更動！但此項為平台問題，將不被視作 fatal error。');
+			CeL.err('test_compatibility: iterator 無法反映 Set 之更動！但此項為執行平台問題，將不被視作 fatal error。');
 		assert(v.next().done, 'set.values().done');
 
 		e = a.entries();
@@ -1700,6 +1700,22 @@ function test_XML() {
 //============================================================================================================================================================
 
 
+function test_net() {
+  	error_count += CeL.test('get_full_URL', [
+		[[ 'https://host.name/root/sub/path/to/file.htm', CeL.get_full_URL('path/to/file.htm', 'https://host.name/root/sub/CGI.pl') ], 'get_full_URL() #1'],
+		[[ 'https://host.name/root/sub/path/to/file.htm', CeL.get_full_URL('path/to/file.htm', 'https://host.name/root/sub/') ], 'get_full_URL() #2'],
+		[[ 'https://host.name/path/to/file.htm', CeL.get_full_URL('/path/to/file.htm', 'https://host.name/root/sub/CGI.pl') ], 'get_full_URL() #3'],
+		[[ 'https://host.name/path/to/file.htm', CeL.get_full_URL('/path/to/file.htm', 'https://host.name/root/sub/') ], 'get_full_URL() #4'],
+		[[ 'https://host1.name.org/path/to/file.htm', CeL.get_full_URL('https://host1.name.org/path/to/file.htm', 'https://host.name/root/sub/CGI.pl') ], 'get_full_URL() #5'],
+		[[ 'https://host1.name.org/path/to/file.htm', CeL.get_full_URL('https://host1.name.org/path/to/file.htm', 'https://host.name/root/sub/') ], 'get_full_URL() #6'],
+	]);
+}
+
+
+
+//============================================================================================================================================================
+
+
 function test_date() {
 	CeL.run('data.date');
 
@@ -3056,6 +3072,8 @@ function do_test() {
 	'data.XML', test_XML,
 	//
 	'data.numeral', test_numeral,
+	//
+	'application.net', test_net,
 	//
 	'application.astronomy', test_astronomy,
 	//
