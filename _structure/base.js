@@ -1392,6 +1392,8 @@ OS='UNIX'; // unknown
 				// 假如未設定則由 path 判斷。
 				|| (_.get_script_full_name().indexOf('\\') !== -1 ? 'Windows' : 'UNIX');
 
+		var is_UNIX = env.OS === 'UNIX' || env.OS.toLowerCase() === 'linux';
+
 		/**
 		 * 文件預設 line separator / NewLine / line delimiter。<br />
 		 * in VB: vbCrLf
@@ -1400,7 +1402,7 @@ OS='UNIX'; // unknown
 		 * @type {String}
 		 */
 		env.line_separator =
-				OS === 'UNIX' ? '\n' : OS === 'Mac' ? '\r'
+				is_UNIX ? '\n' : OS === 'Mac' ? '\r'
 				// e.g., 'win32'
 				: '\r\n';
 
@@ -1412,7 +1414,7 @@ OS='UNIX'; // unknown
 		 * @type {String}
 		 */
 		env.path_separator =
-				OS === 'UNIX' ? '/' : '\\';
+				is_UNIX ? '/' : '\\';
 
 		/**
 		 * library 之外部檔案 (external source files) 放置地。 純目錄名，不加目錄分隔。

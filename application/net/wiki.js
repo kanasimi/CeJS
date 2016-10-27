@@ -8263,11 +8263,12 @@ function module_code(library_namespace) {
 	SQL_config;
 
 	if (home_directory
-			&& (home_directory = home_directory.replace(/[\\\/]$/, ''))) {
+			&& (home_directory = home_directory.replace(/[\\\/]$/, '').trim())) {
 		user_name = home_directory.match(/[^\\\/]+$/);
 		user_name = user_name ? user_name[0] : undefined;
-		if (user_name)
+		if (user_name) {
 			wiki_API.user_name = user_name;
+		}
 		home_directory += library_namespace.env.path_separator;
 	}
 
