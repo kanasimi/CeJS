@@ -12975,7 +12975,8 @@ function module_code(library_namespace) {
 		case 'wikibase-property':
 			datavalue_type = 'wikibase-entityid';
 			// console.log(value);
-			var matched = value && value.match(/^([PQ])(\d{1,10})$/i);
+			var matched = typeof value === 'string'
+					&& value.match(/^([PQ])(\d{1,10})$/i);
 			if (matched) {
 				value = {
 					'entity-type' : datatype === 'wikibase-item' ? 'item'
@@ -12986,7 +12987,7 @@ function module_code(library_namespace) {
 				};
 			} else {
 				error = 'normalize_wikidata_value: Illegal ' + datatype + ': '
-						+ value;
+						+ JSON.stringify(value);
 			}
 			break;
 
@@ -13002,7 +13003,7 @@ function module_code(library_namespace) {
 
 		default:
 			error = 'normalize_wikidata_value: Unknown datatype [' + datatype
-					+ '] and value [' + value + ']';
+					+ '] and value [' + JSON.stringify(value) + ']';
 			return;
 		}
 
