@@ -5930,8 +5930,16 @@ function module_code(library_namespace) {
 					node_fs.writeFile(page_cache_prefix + page.title + '.json',
 					/**
 					 * 寫入cache。
+					 * 
+					 * 2016/10/28 21:44:8 Node.js v7.0.0 <code>
+					DeprecationWarning: Calling an asynchronous function without callback is deprecated.
+					</code>
 					 */
-					JSON.stringify(pages), wiki_API.encoding);
+					JSON.stringify(pages), wiki_API.encoding, function() {
+						library_namespace.debug(
+						// 因為此動作一般說來不會影響到後續操作，因此採用同時執行。
+						'Write to cache file: done.', 1, 'wiki_API.page');
+					});
 				}
 
 				page_list.push(page);
@@ -10260,7 +10268,11 @@ function module_code(library_namespace) {
 		write : function(cache_file_path) {
 			// node_fs.writeFileSync()
 			node_fs.writeFile(cache_file_path || this.file, JSON
-					.stringify(this[this.KEY_DATA]), this.encoding);
+					.stringify(this[this.KEY_DATA]), this.encoding, function() {
+				// 因為此動作一般說來不會影響到後續操作，因此採用同時執行。
+				library_namespace.debug('Write to cache file: done.', 1,
+						'revision_cacher.write');
+			});
 		},
 
 		// 注意: 若未 return true，則表示 page_data 為正規且 cache 中沒有，或較 cache 新的頁面資料。
