@@ -9463,7 +9463,7 @@ function module_code(library_namespace) {
 	 */
 
 	if (false) {
-		// example
+		// examples
 
 		CeL.wiki.cache({
 			type : 'page',
@@ -11396,10 +11396,18 @@ function module_code(library_namespace) {
 	// 或改成 wikidata_search_cache={item:{},property:{}}。
 	wikidata_search_cache_entity = library_namespace.null_Object();
 
+	wikidata_search.add_cache = function(key, id, language, is_entity) {
+		cached_hash = is_entity ? wikidata_search_cache_entity
+				: wikidata_search_cache;
+		language = wikidata_get_site(language, true) || default_language;
+		cached_hash[language + ':' + key] = id;
+	};
+
 	// wrapper function of wikidata_search().
 	wikidata_search.use_cache = function(key, callback, options) {
 		var language_and_key,
 		// 須與 wikidata_search() 相同!
+		// TODO: 可以 guess_language(key) 猜測語言。
 		language = wikidata_get_site(options, true) || default_language,
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
 		cached_hash = options && options.type && options.type !==
@@ -13982,6 +13990,8 @@ function module_code(library_namespace) {
 	}
 
 	if (false) {
+		// examples
+
 		// add property/claim to Q13406268
 		wiki.data('維基數據沙盒2', function(data) {
 			result = data;
