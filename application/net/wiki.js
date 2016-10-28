@@ -384,7 +384,8 @@ function module_code(library_namespace) {
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
 	var PATTERN_PROJECT_CODE = /^[a-z][a-z\-\d]{0,14}$/,
-	//
+	// 須亦能匹配 site key:
+	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
 	PATTERN_PROJECT_CODE_i = new RegExp(PATTERN_PROJECT_CODE.source, 'i');
 
 	/**
@@ -8302,7 +8303,7 @@ function module_code(library_namespace) {
 			this.host = language;
 			// delete this.database;
 
-		} else if (language.includes('wiki')) {
+		} else if (is_wikidata_site(language)) {
 			this.host = language + '.labsdb';
 			/**
 			 * The database names themselves consist of the mediawiki project
@@ -11247,6 +11248,11 @@ function module_code(library_namespace) {
 		return key.replace(/_/g, ' ').trim();
 	}
 
+	function is_wikidata_site(site_or_language) {
+		// assert: 有包含'wiki'的全都是site。
+		return site_or_language.includes('wiki');
+	}
+
 	/**
 	 * 搜索標籤包含特定關鍵字(label=key)的項目。
 	 * 
@@ -11286,9 +11292,28 @@ function module_code(library_namespace) {
 			options = library_namespace.new_options(options);
 		}
 
-		if (Array.isArray(key)) {
+		var language = options.language;
+		if (is_api_and_title(key, 'language')) {
+			if (is_wikidata_site(key[0])) {
+				wikidata_entity(key, function(entity, error) {
+					// console.log(entity);
+					var id = !error && entity && entity.id;
+					if (!id && options.with_search) {
+						key = key.clone();
+						if (key[0] = key[0].replace(/wiki.*$/, '')) {
+							wikidata_search(key, callback, options);
+							return;
+						}
+					}
+					callback(id, error);
+				}, {
+					props : ''
+				});
+				return;
+			}
 			// for [ {String}language, {String}key ]
-			options.language = key[0], key = key[1];
+			language = key[0];
+			key = key[1];
 		}
 
 		// console.log('key: ' + key);
@@ -11298,7 +11323,7 @@ function module_code(library_namespace) {
 		// https://www.wikidata.org/w/api.php?action=wbsearchentities&search=abc&language=en&utf8=1
 		'wbsearchentities&search=' + encodeURIComponent(key)
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
-		+ '&language=' + (options.language
+		+ '&language=' + (language
 		//
 		|| wikidata_get_site(options, true) || default_language)
 		//
@@ -11530,7 +11555,6 @@ function module_code(library_namespace) {
 
 	// default options passed to wikidata_search()
 	wikidata_search.use_cache.default_options = {
-		API_URL : get_data_API_URL(options),
 		// 通常 property 才值得使用 cache。
 		// entity 可採用 'item'
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
@@ -12216,61 +12240,73 @@ function module_code(library_namespace) {
 
 		if (Array.isArray(key)) {
 			if (is_api_and_title(key)) {
-				wikidata_search(key, function(id) {
-					if (id) {
-						library_namespace.debug(
-						//
-						'entity ' + id + ' ← [[:' + key.join(':') + ']]', 1,
-								'wikidata_entity');
-						wikidata_entity(id, property, callback, options);
-						return;
-					}
+				if (is_wikidata_site(key[0])) {
+					key = {
+						site : key[0],
+						title : key[1]
+					};
 
-					// 可能為重定向頁面？
-					// 例如要求 "A of B" 而無此項，
-					// 但 [[en:A of B]]→[[en:A]] 且存在 "A"，則會回傳本"A"項。
-					wiki_API.page(key.clone(), function(page_data) {
-						var content = get_page_content(page_data),
-						// 測試檢查是否為重定向頁面。
-						redirect = parse_redirect(content);
-						if (redirect) {
-							library_namespace.info(
+				} else {
+					wikidata_search(key, function(id) {
+						if (id) {
+							library_namespace.debug(
 							//
-							'wikidata_entity: 處理重定向頁面: [[:' + key.join(':')
-									+ ']] → [[:' + key[0] + ':' + redirect
-									+ ']]。');
-							wikidata_entity([ key[0],
-							// normalize_page_name():
-							// 此 API 無法自動轉換首字大小寫之類！因此需要自行正規化。
-							normalize_page_name(redirect) ], property,
-									callback, options);
+							'entity ' + id + ' ← [[:' + key.join(':') + ']]',
+									1, 'wikidata_entity');
+							wikidata_entity(id, property, callback, options);
 							return;
 						}
 
-						library_namespace.err(
-						//
-						'wikidata_entity: Wikidata 不存在 [[:' + key.join(':')
-								+ ']] 之數據，' + (content ? '但' : '且無法取得/不')
-								+ '存在此 Wikipedia 頁面。無法處理此 Wikidata 數據要求。');
-						callback(undefined, 'no_key');
-					});
+						// 可能為重定向頁面？
+						// 例如要求 "A of B" 而無此項，
+						// 但 [[en:A of B]]→[[en:A]] 且存在 "A"，則會回傳本"A"項。
+						wiki_API.page(key.clone(), function(page_data) {
+							var content = get_page_content(page_data),
+							// 測試檢查是否為重定向頁面。
+							redirect = parse_redirect(content);
+							if (redirect) {
+								library_namespace.info(
+								//
+								'wikidata_entity: 處理重定向頁面: [[:' + key.join(':')
+										+ ']] → [[:' + key[0] + ':' + redirect
+										+ ']]。');
+								wikidata_entity([ key[0],
+								// normalize_page_name():
+								// 此 API 無法自動轉換首字大小寫之類！因此需要自行正規化。
+								normalize_page_name(redirect) ], property,
+										callback, options);
+								return;
+							}
 
-				}, {
-					API_URL : API_URL,
-					get_id : true,
-					limit : 1
-				});
-				// Waiting for conversion.
-				return;
+							library_namespace.err(
+							//
+							'wikidata_entity: Wikidata 不存在 [[:' + key.join(':')
+									+ ']] 之數據，' + (content ? '但' : '且無法取得/不')
+									+ '存在此 Wikipedia 頁面。無法處理此 Wikidata 數據要求。');
+							callback(undefined, 'no_key');
+						});
+
+					}, {
+						API_URL : API_URL,
+						get_id : true,
+						limit : 1
+					});
+					// Waiting for conversion.
+					return;
+				}
+
+			} else {
+				key = key.map(function(id) {
+					if (/^[PQ]\d{1,10}$/.test(id))
+						return id;
+					if (library_namespace.is_digits(id))
+						return 'Q' + id;
+					library_namespace.warn(
+					//
+					'wikidata_entity: Invalid id: ' + id);
+					return '';
+				}).join('|');
 			}
-			key = key.map(function(id) {
-				if (/^[PQ]\d{1,10}$/.test(id))
-					return id;
-				if (library_namespace.is_digits(id))
-					return 'Q' + id;
-				library_namespace.warn('wikidata_entity: Invalid id: ' + id);
-				return '';
-			}).join('|');
 		}
 
 		// ----------------------------
@@ -13791,8 +13827,8 @@ function module_code(library_namespace) {
 			wikidata_entity({
 				site : options.site,
 				title : decodeURIComponent(options.title)
-			}, function(entity) {
-				console.log(entity);
+			}, function(entity, error) {
+				// console.log(entity);
 				options = Object.assign({
 					id : entity.id
 				}, options);
