@@ -12868,6 +12868,24 @@ function module_code(library_namespace) {
 		}
 
 		// --------------------------------------
+
+		if (typeof value === 'object' && value.snaktype && value.datatype) {
+			// 若 value 已經是完整的 wikidata object，則直接回傳之。
+			if (datatype !== value.datatype) {
+				library_namespace.err(
+				// 所指定的與 value 的不同。
+				'normalize_wikidata_value: The datatype of the value ['
+						+ value.datatype + '] is different from specified: ['
+						+ datatype + ']');
+			}
+
+			if (typeof options.callback === 'function') {
+				options.callback(value, to_pass);
+			}
+			return value;
+		}
+
+		// --------------------------------------
 		// 依據各種不同的datatype生成結構化資料。
 
 		switch (datatype) {
@@ -13536,9 +13554,9 @@ function module_code(library_namespace) {
 
 							if (Array.isArray(normalized_value)) {
 								library_namespace.err(
-								//
-								'normalize_next_value: 得到多個值而非單一值: [' + value
-										+ '] → '
+								// 得到多個值而非單一值
+								'normalize_next_value: get multiple values instead of just one value: ['
+										+ value + '] → '
 										+ JSON.stringify(normalized_value));
 
 							} else if (false && normalized_value.error) {
