@@ -3665,7 +3665,7 @@ if (typeof CeL === 'function')
 
 		// public interface of check_and_run.
 		Object.assign(check_and_run.prototype, {
-			// 警告：由於 set_options 之故，
+			// TODO: 警告：由於 set_options 之故，
 			// 在 module code 的 scope 內，options 已被定義，而非 undefined!
 			// 一般會得到 options={timeout: 20000}
 			set_options : check_and_run_set_options,

@@ -11410,8 +11410,9 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (Array.isArray(list.length > 1)) {
-				list = Array.prototype.concat.apply([], list);
+			if (Array.isArray(list.length) && list.length > 1) {
+				// clone list
+				list = list.clone();
 			} else {
 				list = list[0];
 			}
@@ -14882,7 +14883,15 @@ function module_code(library_namespace) {
 		}
 
 		function do_wbeditentity() {
+			for ( var key in data) {
+				if (Array.isArray(data[key]) ? data[key].length === 0
+						: library_namespace.is_empty_object(data[key])) {
+					delete data[key];
+				}
+			}
 			if (library_namespace.is_empty_object(data)) {
+				callback(data);
+				return;
 			}
 			// data 會在 set_claims() 被修改，因此不能提前設定。
 			options.data = JSON.stringify(data);
