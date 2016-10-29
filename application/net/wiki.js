@@ -11486,11 +11486,10 @@ function module_code(library_namespace) {
 					// console.trace(1);
 					wikidata_search.use_cache(key[index++], cache_next_key,
 					//
-					Object.assign(library_namespace.null_Object(),
-					//
-					wikidata_search.use_cache.default_options, {
+					Object.assign({
+						API_URL : get_data_API_URL(options),
 						must_callback : true
-					}, options));
+					}, wikidata_search.use_cache.default_options, options));
 				};
 				cache_next_key();
 				return;
@@ -11529,7 +11528,9 @@ function module_code(library_namespace) {
 		}
 
 		if (!options || library_namespace.is_empty_object(options)) {
-			options = wikidata_search.use_cache.default_options;
+			options = Object.assign({
+				API_URL : get_data_API_URL(options)
+			}, wikidata_search.use_cache.default_options);
 		} else if (!options.get_id) {
 			library_namespace.warn('wikidata_search.use_cache: 當把實體名稱 ['
 					+ language_and_key
@@ -11567,6 +11568,8 @@ function module_code(library_namespace) {
 
 	// default options passed to wikidata_search()
 	wikidata_search.use_cache.default_options = {
+		// options.API_URL 應在個別操作內設定。
+
 		// 通常 property 才值得使用 cache。
 		// entity 可採用 'item'
 		// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
@@ -12589,8 +12592,9 @@ function module_code(library_namespace) {
 		if (is_api_and_title(property, 'language')) {
 			property = wikidata_search.use_cache(property, function(id, error) {
 				wikidata_datatype(id, callback, options);
-			}, Object.assign(library_namespace.null_Object(),
-					wikidata_search.use_cache.default_options, options));
+			}, Object.assign({
+				API_URL : get_data_API_URL(options)
+			}, wikidata_search.use_cache.default_options, options));
 			if (!property) {
 				// assert: property === undefined
 				// Waiting for conversion.
@@ -12758,11 +12762,11 @@ function module_code(library_namespace) {
 						//
 						id || 'Nothing found: [' + value + ']', datatype,
 								options, to_pass);
-					}, Object.assign(library_namespace.null_Object(),
-							wikidata_search.use_cache.default_options, {
-								type : matched[1],
-								must_callback : true
-							}, options));
+					}, Object.assign({
+						API_URL : get_data_API_URL(options),
+						type : matched[1],
+						must_callback : true
+					}, wikidata_search.use_cache.default_options, options));
 				} else {
 					normalize_wikidata_value(value, datatype || NOT_FOUND,
 							options, to_pass);
@@ -13665,8 +13669,9 @@ function module_code(library_namespace) {
 
 			normalize_next_value();
 
-		}, Object.assign(library_namespace.null_Object(),
-				wikidata_search.use_cache.default_options, options));
+		}, Object.assign({
+			API_URL : get_data_API_URL(options)
+		}, wikidata_search.use_cache.default_options, options));
 
 	}
 
