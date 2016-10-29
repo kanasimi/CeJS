@@ -13876,20 +13876,27 @@ function module_code(library_namespace) {
 			wikidata_entity({
 				site : options.site,
 				title : decodeURIComponent(options.title)
-			}, function(entity, error) {
-				// console.log(entity);
+			}, function(_entity, error) {
+				// console.log(_entity);
 				options = Object.assign({
-					id : entity.id
+					id : _entity.id
 				}, options);
 				delete options.site;
 				delete options.title;
 				set_claims(data, token, callback,
 				//
-				options, session, entity);
-			}, {
+				options, session, entity && entity.claims ? entity : _entity);
+			},
+			// 若是未輸入entity，那就取得entity內容以幫助檢查是否已存在相同屬性值。
+			entity && entity.claims ? {
 				props : ''
-			});
+			} : null);
 			return;
+		}
+
+		if (!entity || !entity.claims) {
+			library_namespace
+					.debug('未輸入entity以供檢查是否已存在相同屬性值。', 1, 'set_claims');
 		}
 
 		// TODO: 可拆解成 wbsetclaim
