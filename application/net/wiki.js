@@ -255,10 +255,20 @@ function module_code(library_namespace) {
 		if (!options) {
 			return;
 		}
-		var session = options[KEY_SESSION];
-		return session && session.data_session && session.data_session.API_URL
-		//
-		|| API_URL_of_options(options) || default_API_URL || wikidata_API_URL;
+
+		var session = options[KEY_SESSION], API_URL;
+		if (is_wiki_API(session)) {
+			if (session.data_session) {
+				API_URL = session.data_session.API_URL;
+			}
+			if (!API_URL && session.is_wikidata) {
+				API_URL = session.API_URL;
+			}
+		} else {
+			API_URL = API_URL_of_options(options);
+		}
+
+		return API_URL || default_API_URL || wikidata_API_URL;
 	}
 
 	/**
@@ -11487,7 +11497,7 @@ function module_code(library_namespace) {
 					wikidata_search.use_cache(key[index++], cache_next_key,
 					//
 					Object.assign({
-						API_URL : get_data_API_URL(options),
+						// 警告:.default_options中設定must_callback=false會造成程序不callback而中途跳出!
 						must_callback : true
 					}, wikidata_search.use_cache.default_options, options));
 				};
@@ -11528,9 +11538,8 @@ function module_code(library_namespace) {
 		}
 
 		if (!options || library_namespace.is_empty_object(options)) {
-			options = Object.assign({
-				API_URL : get_data_API_URL(options)
-			}, wikidata_search.use_cache.default_options);
+			options = Object.assign(library_namespace.null_Object(),
+					wikidata_search.use_cache.default_options);
 		} else if (!options.get_id) {
 			library_namespace.warn('wikidata_search.use_cache: 當把實體名稱 ['
 					+ language_and_key
@@ -11568,7 +11577,7 @@ function module_code(library_namespace) {
 
 	// default options passed to wikidata_search()
 	wikidata_search.use_cache.default_options = {
-		// options.API_URL 應在個別操作內設定。
+		// 若有必要用上 options.API_URL，應在個別操作內設定。
 
 		// 通常 property 才值得使用 cache。
 		// entity 可採用 'item'
@@ -12592,9 +12601,8 @@ function module_code(library_namespace) {
 		if (is_api_and_title(property, 'language')) {
 			property = wikidata_search.use_cache(property, function(id, error) {
 				wikidata_datatype(id, callback, options);
-			}, Object.assign({
-				API_URL : get_data_API_URL(options)
-			}, wikidata_search.use_cache.default_options, options));
+			}, Object.assign(library_namespace.null_Object(),
+					wikidata_search.use_cache.default_options, options));
 			if (!property) {
 				// assert: property === undefined
 				// Waiting for conversion.
@@ -12763,8 +12771,8 @@ function module_code(library_namespace) {
 						id || 'Nothing found: [' + value + ']', datatype,
 								options, to_pass);
 					}, Object.assign({
-						API_URL : get_data_API_URL(options),
 						type : matched[1],
+						// 警告:.default_options中設定must_callback=false會造成程序不callback而中途跳出!
 						must_callback : true
 					}, wikidata_search.use_cache.default_options, options));
 				} else {
@@ -13669,9 +13677,8 @@ function module_code(library_namespace) {
 
 			normalize_next_value();
 
-		}, Object.assign({
-			API_URL : get_data_API_URL(options)
-		}, wikidata_search.use_cache.default_options, options));
+		}, Object.assign(library_namespace.null_Object(),
+				wikidata_search.use_cache.default_options, options));
 
 	}
 
