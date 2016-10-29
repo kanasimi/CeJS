@@ -11500,9 +11500,10 @@ function module_code(library_namespace) {
 					//
 					Object.assign({
 						API_URL : get_data_API_URL(options),
-						// 警告:.default_options中設定must_callback=false會造成程序不callback而中途跳出!
+					}, wikidata_search.use_cache.default_options, {
+						// 警告:若是設定must_callback=false，會造成程序不callback而中途跳出!
 						must_callback : true
-					}, wikidata_search.use_cache.default_options, options));
+					}, options));
 				};
 				cache_next_key();
 				return;
@@ -11541,8 +11542,7 @@ function module_code(library_namespace) {
 		}
 
 		if (!options || library_namespace.is_empty_object(options)) {
-			options = Object.assign(library_namespace.null_Object(),
-					wikidata_search.use_cache.default_options);
+			options = Object.clone(wikidata_search.use_cache.default_options);
 		} else if (!options.get_id) {
 			library_namespace.warn('wikidata_search.use_cache: 當把實體名稱 ['
 					+ language_and_key
@@ -12773,11 +12773,13 @@ function module_code(library_namespace) {
 						//
 						id || 'Nothing found: [' + value + ']', datatype,
 								options, to_pass);
-					}, Object.assign({
+					}, Object.assign(library_namespace.null_Object(),
+					// 因wikidata_search.use_cache.default_options包含.type設定，必須將特殊type設定放在匯入default_options後!
+					wikidata_search.use_cache.default_options, {
 						type : matched[1],
-						// 警告:.default_options中設定must_callback=false會造成程序不callback而中途跳出!
+						// 警告:若是設定must_callback=false，會造成程序不callback而中途跳出!
 						must_callback : true
-					}, wikidata_search.use_cache.default_options, options));
+					}, options));
 				} else {
 					normalize_wikidata_value(value, datatype || NOT_FOUND,
 							options, to_pass);
