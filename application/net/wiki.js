@@ -252,22 +252,23 @@ function module_code(library_namespace) {
 	function get_data_API_URL(options, default_API_URL) {
 		// library_namespace.debug('options:', 0, 'get_data_API_URL');
 		// console.log(options);
-		if (!options) {
-			return;
+
+		var API_URL;
+		if (options) {
+			var session = options[KEY_SESSION];
+			if (is_wiki_API(session)) {
+				if (session.data_session) {
+					API_URL = session.data_session.API_URL;
+				}
+				if (!API_URL && session.is_wikidata) {
+					API_URL = session.API_URL;
+				}
+			} else {
+				API_URL = API_URL_of_options(options);
+			}
 		}
 
-		var session = options[KEY_SESSION], API_URL;
-		if (is_wiki_API(session)) {
-			if (session.data_session) {
-				API_URL = session.data_session.API_URL;
-			}
-			if (!API_URL && session.is_wikidata) {
-				API_URL = session.API_URL;
-			}
-		} else {
-			API_URL = API_URL_of_options(options);
-		}
-
+		// console.trace(API_URL);
 		return API_URL || default_API_URL || wikidata_API_URL;
 	}
 
@@ -11320,7 +11321,8 @@ function module_code(library_namespace) {
 				wikidata_entity(key, function(entity, error) {
 					// console.log(entity);
 					var id = !error && entity && entity.id;
-					if (!id && options.with_search) {
+					// 預設找不到 sitelink 會作搜尋。
+					if (!id && !options.no_search) {
 						key = key.clone();
 						if (key[0] = key[0].replace(/wiki.*$/, '')) {
 							wikidata_search(key, callback, options);
@@ -11497,6 +11499,7 @@ function module_code(library_namespace) {
 					wikidata_search.use_cache(key[index++], cache_next_key,
 					//
 					Object.assign({
+						API_URL : get_data_API_URL(options),
 						// 警告:.default_options中設定must_callback=false會造成程序不callback而中途跳出!
 						must_callback : true
 					}, wikidata_search.use_cache.default_options, options));
