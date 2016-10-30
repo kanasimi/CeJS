@@ -3836,14 +3836,17 @@ Bangla_Date.test = new_tester(Date_to_Bangla, Bangla_Date, {
 function Date_to_Thai(date, month, year, weekday) {
 	if (library_namespace.is_Date(date)) {
 		weekday = date.getDay();
-		year = 543 + date.getFullYear();
 		month = date.getMonth();
+		// http://www.wat.austhai.biz/Home/thai-calendar
+		// http://www.myhora.com/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99/
+		year = 543 + date.getFullYear();
 		date = date.getDate();
-	} else if (month > 0)
+	} else if (month > 0) {
 		// month start from 0.
 		month--;
-	else
+	} else {
 		month = null;
+	}
 
 	date = [
 			(weekday = Date_to_Thai.weekday_name[weekday]) ? 'วัน' + weekday

@@ -11465,6 +11465,19 @@ function module_code(library_namespace) {
 		wikidata_search.use_cache.default_options.type ? wikidata_search_cache_entity
 				: wikidata_search_cache;
 
+		// console.log(key);
+		if (library_namespace.is_Object(key)) {
+			// convert language+value object
+			if (key.language && ('value' in key)) {
+				// e.g., {language:'ja',value:'日本'}
+				key = [ key.language, key.value ];
+			} else if ((language_and_key = Object.keys(key)).length === 1
+			// e.g., {ja:'日本'}
+			&& (language_and_key = language_and_key[0])) {
+				key = [ language_and_key, key[language_and_key] ];
+			}
+		}
+
 		if (typeof key === 'string') {
 			key = normalize_wikidata_key(key);
 			language_and_key = language + ':' + key;
@@ -11513,8 +11526,10 @@ function module_code(library_namespace) {
 		} else {
 			// 避免若是未match is_api_and_title(key, 'language')，
 			// 可能導致 infinite loop!
-			callback(undefined, 'wikidata_search.use_cache: Invalid key: ['
-					+ key + ']');
+			key = 'wikidata_search.use_cache: Invalid key: ['
+					+ key + ']';
+			// console.warn(key);
+			callback(undefined, key);
 			return;
 		}
 		library_namespace.debug('search '
@@ -12669,7 +12684,7 @@ function module_code(library_namespace) {
 		: 'multi' in options ? options.multi
 		// auto-detect: guess if is multi
 		: Array.isArray(value)
-		//
+		// 去除經緯度+高度的情形。
 		&& (value.length !== 2 || value.length !== 3
 		//
 		|| typeof value[0] !== 'number' || typeof value[1] !== 'number');
@@ -13267,10 +13282,25 @@ function module_code(library_namespace) {
 			// 把應該用做參照用設定的移到 property[KEY_property_options]，
 			// 其他的屬性值搬到新的 properties。
 			for ( var key in property) {
-				var value = property[key];
+				var value = property[key], language;
 				if (key in claim_properties) {
 					additional_properties[key] = value;
+
 				} else if (key !== KEY_property_options) {
+					if (library_namespace.is_Object(value)) {
+						// convert language+value object
+						if (value.language && ('value' in value)) {
+							// e.g., {language:'ja',value:'日本'}
+							value = [ value.language, value.value ];
+						} else if ((language = Object.keys(value)).length === 1
+						// e.g., {ja:'日本'}
+						&& (language = language[0])) {
+							value = [ language, value[language] ];
+						}
+					}
+
+					// console.log(value);
+
 					var is_multi = value !== wikidata_edit.remove_all
 					//
 					&& ('multi' in additional_properties
@@ -13279,6 +13309,20 @@ function module_code(library_namespace) {
 					//
 					: is_multi_wikidata_value(value, property));
 					if (is_multi) {
+						// e.g., [ 'jawiki', ['日本', '米国'] ]
+						if (is_api_and_title(value, 'language')
+						// [ 'jawiki', '日本' ] 可能會混淆。
+						&& Array.isArray(value[1])) {
+							value = value[1].map(function(v) {
+								// return [ value[0], v ];
+								return {
+									language : value[0],
+									value : v
+								};
+							});
+						}
+						// console.log(value);
+
 						// set multiple values
 						(Array.isArray(value) ? value : [ value ])
 						//

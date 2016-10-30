@@ -4719,6 +4719,12 @@ function affairs() {
 					S : 'font-size:.8em;'
 				},
 				function(date) {
+					if (date.精 || date.準) {
+						return THAI_Year_numbering(date);
+					}
+					return CeL.Date_to_Thai(date);
+
+					// @deprecated
 					var numeral = THAI_Year_numbering(date), tmp = numeral
 							.split('/');
 					if (!date.精 && !date.準 && tmp.length === 3)
