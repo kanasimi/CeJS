@@ -24,23 +24,27 @@ if (false) {
 	"use strict";
 
 	// ----------------------------------------------------------------------------
-	// Load CeJS library. For node.js loading. Copy/modified from "/_for include/node.loader.js".
+	// Load CeJS library. For node.js loading.
+	// Copy/modified from "/_for include/node.loader.js".
+	'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS|..'
 	// 載入泛用（非特殊目的使用）之功能。
-	'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS'
-	//
 	.split('|').some(function(path) {
+		if (path.charAt(0) === '#') {
+			// path is a comment
+			return;
+		}
 		try {
-			// accessSync() maybe throw
-			if (path.charAt(0) !== '#' && require('fs').accessSync(path) >= 0) {
-				var loader = '/_for include/node.loader.js';
-				require(path + (path.indexOf('/') !== -1 ? loader
-				//
-				: loader.replace(/\//g, '\\')));
-				return true;
-			}
+			// accessSync()  throws if any accessibility checks fail, and does nothing otherwise.
+			require('fs').accessSync(path);
+			var loader = '/_for include/node.loader.js';
+			require(path + (path.indexOf('/') !== -1 ? loader
+			//
+			: loader.replace(/\//g, '\\')));
+			return true;
 		} catch (e) {
 		}
 	});
+
 	// ----------------------------------------------------------------------------
 
 	// Load module.
