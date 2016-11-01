@@ -5,21 +5,33 @@
 
 // ----------------------------------------------------------------------------
 // For node.js loading. Copy from /node.loader.js/.
-// ¸ü¤Jªx¥Î¡]«D¯S®í¥Øªº¨Ï¥Î¡^¤§¥\¯à¡C
-'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS'
-//
-.split('|')
-//
-.some(function(path) {
-	if (path.charAt(0) !== '#' && require('fs').existsSync(path)) {
+
+
+// ----------------------------------------------------------------------------
+// Load CeJS library. For node.js loading.
+// Copy/modified from "/_for include/node.loader.js".
+'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS|../..'
+// è¼‰å…¥æ³›ç”¨ï¼ˆéç‰¹æ®Šç›®çš„ä½¿ç”¨ï¼‰ä¹‹åŠŸèƒ½ã€‚
+.split('|').some(function(path) {
+	if (path.charAt(0) === '#') {
+		// path is a comment
+		return;
+	}
+	try {
+		// accessSync()  throws if any accessibility checks fail, and does nothing otherwise.
+		require('fs').accessSync(path);
 		var loader = '/_for include/node.loader.js';
-		require(path
+		require(path + (path.indexOf('/') !== -1 ? loader
 		//
-		+ (path.indexOf('/') !== -1 ? loader : loader.replace(/\//g, '\\')));
+		: loader.replace(/\//g, '\\')));
 		return true;
+	} catch (e) {
 	}
 });
+
 // ----------------------------------------------------------------------------
+
+// Load module.
 
 CeL.run([ 'interact.DOM', 'application.debug' ]);
 

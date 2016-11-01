@@ -19,14 +19,14 @@ if (false) {
 	// example to include
 
 	// Copy this section in front of the script. Path list from /path.txt/.
-	// @see node.demo.js
+	// @see _test suite/misc/node.demo.js
 
 	"use strict";
 
 	// ----------------------------------------------------------------------------
 	// Load CeJS library. For node.js loading.
 	// Copy/modified from "/_for include/node.loader.js".
-	'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS|..'
+	'D:\\USB\\cgi-bin\\lib\\JS|C:\\USB\\cgi-bin\\lib\\JS|H:\\cgi-bin\\lib\\JS|/home/kanashimi/www/cgi-bin/lib/JS|../..'
 	// 載入泛用（非特殊目的使用）之功能。
 	.split('|').some(function(path) {
 		if (path.charAt(0) === '#') {
