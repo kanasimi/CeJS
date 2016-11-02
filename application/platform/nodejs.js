@@ -259,6 +259,24 @@ if (typeof CeL === 'function')
 			}
 			_.fs_read = fs_readFileSync;
 
+			// 取得 .json 檔案內容，並回傳 {Object} 或錯誤時回傳 undefined。
+			function get_JSON_file(file_path, options) {
+				if (!/\.[^.\\\.]+$/i.test(file_path)
+				// auto add filename extension
+				&& (!options || !options.no_add_extension)) {
+					file_path += '.json';
+				}
+				var json = fs_readFileSync(file_path, options);
+				try {
+					if (json && (json = json.toString())) {
+						return JSON.parse(json);
+					}
+				} catch (e) {
+					// SyntaxError: Invalid JSON
+				}
+			}
+			_.get_JSON = get_JSON_file;
+
 			/**
 			 * fs.writeFileSync() without throw.
 			 * 
@@ -277,6 +295,12 @@ if (typeof CeL === 'function')
 			 */
 			function fs_writeFileSync(file_path, data, options) {
 				try {
+					if (library_namespace.is_Object(data)
+					//
+					&& /.json$/i.test(file_path)) {
+						// 自動將資料轉成 string。
+						data = JSON.stringify(data);
+					}
 					node_fs.writeFileSync(file_path, data, options);
 				} catch (e) {
 					return e;

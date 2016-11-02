@@ -34,7 +34,7 @@ if (false) {
 			return;
 		}
 		try {
-			// accessSync()  throws if any accessibility checks fail, and does nothing otherwise.
+			// accessSync() throws if any accessibility checks fail, and does nothing otherwise.
 			require('fs').accessSync(path);
 			var loader = '/_for include/node.loader.js';
 			require(path + (path.indexOf('/') !== -1 ? loader
@@ -46,8 +46,10 @@ if (false) {
 	});
 
 	// ----------------------------------------------------------------------------
-
 	// Load module.
+
+	// CeL.env.no_catch = true;
+	// CeL.set_debug(2);
 	CeL.run([ 'data.code.compatibility' ]);
 }
 
