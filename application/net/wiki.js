@@ -11526,8 +11526,7 @@ function module_code(library_namespace) {
 		} else {
 			// 避免若是未match is_api_and_title(key, 'language')，
 			// 可能導致 infinite loop!
-			key = 'wikidata_search.use_cache: Invalid key: ['
-					+ key + ']';
+			key = 'wikidata_search.use_cache: Invalid key: [' + key + ']';
 			// console.warn(key);
 			callback(undefined, key);
 			return;

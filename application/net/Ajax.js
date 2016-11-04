@@ -786,6 +786,10 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	},
 	// on failed
 	_onfail = function(error) {
+		if (finished) {
+			// 預防 timeout 時重複執行。
+			return;
+		}
 		unregister();
 
 		if (typeof options.onfail === 'function' && options.onfail) {
@@ -803,6 +807,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	},
 	// on success
 	_onload = function(result) {
+		if (finished) {
+			return;
+		}
 		unregister();
 
 		if (/^3/.test(result.statusCode)

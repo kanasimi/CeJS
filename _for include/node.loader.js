@@ -13,7 +13,7 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Shells
  */
 
-"use strict";
+'use strict';
 
 if (false) {
 	// example to include
@@ -42,6 +42,7 @@ if (false) {
 			: loader.replace(/\//g, '\\')));
 			return true;
 		} catch (e) {
+			// try next path
 		}
 	});
 

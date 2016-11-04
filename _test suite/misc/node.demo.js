@@ -26,6 +26,7 @@
 		: loader.replace(/\//g, '\\')));
 		return true;
 	} catch (e) {
+		// try next path
 	}
 });
 
