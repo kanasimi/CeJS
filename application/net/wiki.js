@@ -4712,7 +4712,9 @@ function module_code(library_namespace) {
 							//
 							page_data.title, '-fg', ']]' ]);
 						// 以 each() 的回傳作為要改變成什麼內容。
-						var content = each(page_data, messages, work_options);
+						// 注意: this === work_options
+						// @see wiki_API.edit()
+						var content = each.call(this, page_data, messages);
 						if (messages.quit_operation) {
 							clear_work();
 						}
