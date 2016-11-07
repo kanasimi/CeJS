@@ -763,6 +763,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 	var request, finished,
 	// assert: 必定從 _onfail 或 _onload 作結，以確保會註銷登記。
+	// 本函數unregister()應該放在所有本執行緒會執行到onload的程式碼中。
 	unregister = function() {
 		if (false) {
 			library_namespace.info('unregister [' + URL + ']' + (finished ? ': had done!' : '') + ' ' + get_URL_node_requests + ' requests left.');
@@ -771,13 +772,15 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		// sometimes both timeout callback and error callback will be called (the error inside the error callback is ECONNRESET - connection reset)
 		// there is a possibilities that it fires on('response', function(response)) callback altogether
 		if (finished) {
-			return;
+			return true;
 		}
 		// 註銷登記。
 		finished = true;
 		get_URL_node_requests--;
 		get_URL_node_connections--;
 		if (timeout_id) {
+			library_namespace.debug('clear timeout ' + (timeout / 1000) + 's [' + URL + ']', 3, 'get_URL_node');
+			// console.trace('clear timeout ' + URL);
 			clearTimeout(timeout_id);
 		}
 		if (false && !get_URL_node_connection_Set['delete'](URL)) {
@@ -786,13 +789,12 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	},
 	// on failed
 	_onfail = function(error) {
-		if (finished) {
+		if (unregister()) {
 			// 預防 timeout 時重複執行。
 			return;
 		}
-		unregister();
 
-		if (typeof options.onfail === 'function' && options.onfail) {
+		if (typeof options.onfail === 'function') {
 			options.onfail(error);
 			return;
 		}
@@ -807,16 +809,26 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	},
 	// on success
 	_onload = function(result) {
+		// 在這邊不過剛開始從伺服器得到資料，因此還不可執行unregister()，否則依然可能遇到timeout。
 		if (finished) {
 			return;
 		}
-		unregister();
 
 		if (/^3/.test(result.statusCode)
 		//
 		&& result.headers.location && result.headers.location !== URL
 		//
 		&& !options.no_redirect) {
+			if (unregister()) {
+				// 預防 timeout 時重複執行。
+				return;
+			}
+
+			try {
+				request.abort();
+			} catch (e) {
+			}
+
 			// e.g., 301
 			// 不動到原來的 options。
 			options = Object.clone(options);
@@ -829,7 +841,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 		// 在有 options.onfail 時僅 .debug()。但這並沒啥條理...
 		if (options.onfail || /^2/.test(result.statusCode)) {
-			library_namespace.debug('STATUS: ' + result.statusCode, 2,
+			library_namespace.debug('STATUS: ' + result.statusCode + ' ' + URL, 2,
 					'get_URL_node');
 		} else if (!options.no_warning) {
 			library_namespace.warn('get_URL_node: [' + URL + ']: status ' + result.statusCode);
@@ -844,127 +856,137 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		// 2016/4/9 9:9:7	藉由 delete wiki_API.use_Varnish 似可解決。
 
 		// listener must be a function
-		if (typeof onload === 'function') {
-			library_namespace.debug('[' + URL + '] loading...', 3, 'get_URL_node');
-			/** {Array} [ {Buffer}, {Buffer}, ... ] */
-			var data = [], length = 0;
-			result.on('data', function(chunk) {
-				// {Buffer}chunk
-				length += chunk.length;
-				library_namespace.debug('receive BODY.length: ' + chunk.length + '/' + length,
-						3, 'get_URL_node');
-				data.push(chunk);
-				// node_fs.appendFileSync('get_URL_node.data', chunk);
-			});
-			// https://iojs.org/api/http.html#http_http_request_options_callback
-			result.on('end', function() {
-				// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
-				//unregister();
-
-				// console.log('No more data in response: ' + URL);
-				// it is faster to provide the length explicitly.
-				data = Buffer.concat(data, length);
-
-				var encoding = result.headers['content-encoding'];
-				// https://nodejs.org/docs/latest/api/zlib.html
-				// https://gist.github.com/narqo/5265413
-				// https://github.com/request/request/blob/master/request.js
-				// http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression
-				// http://nickfishman.com/post/49533681471/nodejs-http-requests-with-gzip-deflate-compression
-				if (encoding) {
-					library_namespace.debug('content-encoding: ' + encoding, 5, 'get_URL_node');
-					switch (encoding && encoding.trim().toLowerCase()) {
-					case 'gzip':
-						library_namespace.debug('gunzip ' + data.length + ' bytes data ...', 2, 'get_URL_node');
-						// 可能因為呼叫到舊版library，於此有時會出現 "TypeError: Object #<Object> has no method 'gunzipSync'"
-						// 有時會有 Error: unexpected end of file
-						try {
-							data = node_zlib.gunzipSync(data);
-						} catch (e) {
-							library_namespace.err('get_URL_node: Error: node_zlib.gunzipSync(): ' + e + ' [' + URL + ']');
-							if (false) {
-								console.log(e);
-								console.log(_URL);
-								console.log(node_zlib);
-								console.log(data);
-								console.trace('get_URL_node: Error: node_zlib.gunzipSync()');
-								console.error(e.stack);
-							}
-							// free
-							data = null;
-							_onfail(e);
-							return;
-						}
-						break;
-					case 'deflate':
-						library_namespace.debug('deflate data ' + data.length + ' bytes...', 2, 'get_URL_node');
-						data = node_zlib.deflateSync(data);
-						break;
-					default:
-						library_namespace.warn('get_URL_node: Unknown encoding: [' + encoding + ']');
-						break;
-					}
-				}
-
-				// 設定寫入目標。
-				if (options.write_to_directory) {
-					var file_path = (options.write_to_directory + '/'
-					//
-					+ URL.replace(/#.*/g, '').replace(/[\\\/:*?"<>|]/g, '_'))
-					// 避免 Error: ENAMETOOLONG: name too long
-					.slice(0, 256);
-					if (!options.no_warning) {
-						library_namespace.info('get_URL_node: Write ' + data.length + ' B to [' + file_path + ']: ' + URL);
-					}
-					try {
-						var fd = node_fs.openSync(file_path, 'w');
-						node_fs.writeSync(fd, data, 0, data.length, null);
-						node_fs.closeSync(fd);
-					} catch (e) {
-						library_namespace.err('get_URL_node: Error to write ' + data.length + ' B to [' + file_path + ']: ' + URL);
-						console.error(e);
-					}
-				}
-
-				if (typeof options.constent_processor === 'function') {
-					options.constent_processor(
-					// ({Buffer}contains, URL, status)
-					data, URL, result.statusCode);
-				}
-
-				// 設定 charset = 'binary' 的話，將回傳 Buffer。
-				if (charset !== 'binary') {
-					// 未設定 charset 的話，default charset: UTF-8.
-					data = data.toString(charset || 'utf8');
-				}
-
-				if (library_namespace.is_debug(4))
-					library_namespace.debug(
-					//
-					'BODY: ' + data, 1, 'get_URL_node');
-				// 模擬 XMLHttp。
-				onload({
-					// for debug
-					//url : _URL,
-					// 因為可能 redirecting 過，這邊列出的才是最終 URL。
-					URL : URL,
-					// node_agent : agent,
-					// {Number}result.statusCode
-					// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
-					status : result.statusCode,
-					responseText : data
-				});
-				// free
-				data = null;
-				// node_fs.appendFileSync('get_URL_node.data', '\n');
-			});
-		} else {
-			// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
-			//unregister();
+		if (typeof onload !== 'function') {
+			// 照理unregister()應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
+			unregister();
 			library_namespace.debug('got [' + URL
 					+ '], but there is no listener!', 1, 'get_URL_node');
 			// console.log(result);
+			return;
 		}
+
+		library_namespace.debug('[' + URL + '] loading...', 3, 'get_URL_node');
+		/** {Array} [ {Buffer}, {Buffer}, ... ] */
+		var data = [], length = 0;
+		result.on('data', function(chunk) {
+			// {Buffer}chunk
+			length += chunk.length;
+			library_namespace.debug('receive BODY.length: ' + chunk.length + '/' + length + ': ' + URL,
+					4, 'get_URL_node');
+			data.push(chunk);
+			// node_fs.appendFileSync('get_URL_node.data', chunk);
+		});
+
+		// https://iojs.org/api/http.html#http_http_request_options_callback
+		result.on('end', function() {
+			library_namespace.debug('end(): ' + URL, 2, 'get_URL_node');
+			if (unregister()) {
+				// 預防 timeout 時重複執行。
+				return;
+			}
+
+			// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
+			//unregister();
+
+			// console.log('No more data in response: ' + URL);
+			// it is faster to provide the length explicitly.
+			data = Buffer.concat(data, length);
+
+			var encoding = result.headers['content-encoding'];
+			// https://nodejs.org/docs/latest/api/zlib.html
+			// https://gist.github.com/narqo/5265413
+			// https://github.com/request/request/blob/master/request.js
+			// http://stackoverflow.com/questions/8880741/node-js-easy-http-requests-with-gzip-deflate-compression
+			// http://nickfishman.com/post/49533681471/nodejs-http-requests-with-gzip-deflate-compression
+			if (encoding) {
+				library_namespace.debug('content-encoding: ' + encoding, 5, 'get_URL_node');
+				switch (encoding && encoding.trim().toLowerCase()) {
+				case 'gzip':
+					library_namespace.debug('gunzip ' + data.length + ' bytes data ...', 2, 'get_URL_node');
+					// 可能因為呼叫到舊版library，於此有時會出現 "TypeError: Object #<Object> has no method 'gunzipSync'"
+					// 有時會有 Error: unexpected end of file
+					try {
+						data = node_zlib.gunzipSync(data);
+					} catch (e) {
+						library_namespace.err('get_URL_node: Error: node_zlib.gunzipSync(): ' + e + ' [' + URL + ']');
+						if (false) {
+							console.log(e);
+							console.log(_URL);
+							console.log(node_zlib);
+							console.log(data);
+							console.trace('get_URL_node: Error: node_zlib.gunzipSync()');
+							console.error(e.stack);
+						}
+						// free
+						data = null;
+						_onfail(e);
+						return;
+					}
+					break;
+				case 'deflate':
+					library_namespace.debug('deflate data ' + data.length + ' bytes...', 2, 'get_URL_node');
+					data = node_zlib.deflateSync(data);
+					break;
+				default:
+					library_namespace.warn('get_URL_node: Unknown encoding: [' + encoding + ']');
+					break;
+				}
+			}
+
+			// 設定寫入目標。
+			// TODO: 確保資料完整，例如檢查結尾碼。
+			if (options.write_to_directory) {
+				var file_path = (options.write_to_directory + '/'
+				//
+				+ URL.replace(/#.*/g, '').replace(/[\\\/:*?"<>|]/g, '_'))
+				// 避免 Error: ENAMETOOLONG: name too long
+				.slice(0, 256);
+				if (!options.no_warning) {
+					library_namespace.info('get_URL_node: Write ' + data.length + ' B to [' + file_path + ']: ' + URL);
+				}
+				try {
+					var fd = node_fs.openSync(file_path, 'w');
+					node_fs.writeSync(fd, data, 0, data.length, null);
+					node_fs.closeSync(fd);
+				} catch (e) {
+					library_namespace.err('get_URL_node: Error to write ' + data.length + ' B to [' + file_path + ']: ' + URL);
+					console.error(e);
+				}
+			}
+
+			if (typeof options.constent_processor === 'function') {
+				options.constent_processor(
+				// ({Buffer}contains, URL, status)
+				data, URL, result.statusCode);
+			}
+
+			// 設定 charset = 'binary' 的話，將回傳 Buffer。
+			if (charset !== 'binary') {
+				// 未設定 charset 的話，default charset: UTF-8.
+				data = data.toString(charset || 'utf8');
+			}
+
+			if (library_namespace.is_debug(4))
+				library_namespace.debug(
+				//
+				'BODY: ' + data, 1, 'get_URL_node');
+			// 模擬 XMLHttp。
+			onload({
+				// for debug
+				//url : _URL,
+				// 因為可能 redirecting 過，這邊列出的才是最終 URL。
+				URL : URL,
+				// node_agent : agent,
+				// {Number}result.statusCode
+				// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
+				status : result.statusCode,
+				responseText : data
+			});
+			// free
+			data = null;
+			// node_fs.appendFileSync('get_URL_node.data', '\n');
+		});
+
 	};
 
 	_URL.headers = Object.assign({
@@ -1018,38 +1040,57 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		request.write(post_data);
 	}
 
-	var timeout = options.timeout || get_URL_node.default_timeout, timeout_id;
-	if (timeout > 0) {
-		// 此方法似乎不能確實於時間到時截斷。
-		request.setTimeout(timeout);
-		library_namespace.debug('add timeout ' + timeout + ' ms by method 2: [' + URL + ']', 2, 'get_URL_node');
-		timeout_id = setTimeout(function() {
-			// 可能已被註銷。
-			if (!finished) {
-				if (!options.no_warning) {
-					library_namespace.info('get_URL_node: timeout (' + timeout + ' ms): [' + URL + ']');
-				}
-				//request.end();
-				request.abort();
-			}
-		}, timeout);
-	}
-	// https://nodejs.org/api/http.html#http_request_settimeout_timeout_callback
-	// http://stackoverflow.com/questions/14727115/whats-the-difference-between-req-settimeout-socket-settimeout
-	request.on('timeout', function(e) {
+	var timeout = options.timeout || get_URL_node.default_timeout, timeout_id,
+	//
+	_ontimeout = function(e) {
 		// 可能已被註銷。
-		if (!finished) {
-			try {
-				// http://hylom.net/node-http-request-get-and-timeout
-				// timeoutイベントは発生しているものの、イベント発生後も引き続きレスポンスを待ち続けている
-				request.abort();
-			} catch (e) {
-				// TODO: handle exception
-			}
-			_onfail(e || 'Timeout');
+		if (finished) {
+			return;
 		}
-	});
 
+		try {
+			// http://hylom.net/node-http-request-get-and-timeout
+			// timeoutイベントは発生しているものの、イベント発生後も引き続きレスポンスを待ち続けている
+			//request.end();
+			request.abort();
+		} catch (e) {
+			// TODO: handle exception
+		}
+		if (!options.no_warning) {
+			library_namespace.info('get_URL_node: timeout ' + (timeout / 1000) + 's [' + URL + ']');
+		}
+		if (!e) {
+			e = new Error('Timeout (' + timeout + 'ms): ' + URL);
+			// e.name = 'TIMEOUT';
+		}
+
+		if (options.timeout_retry > 0) {
+			// 連線逾期時重新再取得一次。
+			library_namespace.log('get_URL_node: Retry [' + URL + '] (' + options.timeout_retry + ')');
+			// 不動到原來的 options。
+			options = Object.clone(options);
+			options.timeout_retry--;
+			options.URL = URL;
+			get_URL_node(options, onload, charset, post_data);
+			return;
+		}
+
+		_onfail(e);
+	};
+
+	if (timeout > 0) {
+		// setTimeout method 1
+		// 此方法似乎不能確實於時間到時截斷。或許因為正在 handshaking?
+		request.setTimeout(timeout);
+		// https://nodejs.org/api/http.html#http_request_settimeout_timeout_callback
+		// http://stackoverflow.com/questions/14727115/whats-the-difference-between-req-settimeout-socket-settimeout
+		request.on('timeout', _ontimeout);
+
+		// setTimeout method 2
+		// {Object}timeout_id @ node.js
+		timeout_id = setTimeout(_ontimeout, timeout);
+		library_namespace.debug('add timeout ' + (timeout / 1000) + 's [' + URL + ']', 2, 'get_URL_node');
+	}
 
 	library_namespace.debug('set onerror: '
 			+ (options.onfail ? 'user defined' : 'default handler'), 3,
@@ -1101,7 +1142,15 @@ function setup_node(type, options) {
 	if (type !== undefined) {
 		if (typeof type === 'string')
 			type = /^https/i.test(type);
-		return type ? new node_https.Agent(options) : new node_http.Agent(options);
+		var agent = type ? new node_https.Agent(options) : new node_http.Agent(options);
+		if (options && options.as_default) {
+			if (type) {
+				node_https_agent = agent;
+			} else {
+				node_http_agent = agent;
+			}
+		}
+		return agent;
 	}
 
 	node_http_agent = new node_http.Agent;

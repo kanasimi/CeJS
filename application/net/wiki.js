@@ -7375,6 +7375,7 @@ function module_code(library_namespace) {
 					// or: text(get_page_content(page_data),
 					// page_data.title, page_data)
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
+					// 注意: 更改此介面需同時修改 wiki_API.prototype.work 中 'edit' 之介面。
 					text.call(options, page_data), token, options, callback,
 							timestamp);
 				}
