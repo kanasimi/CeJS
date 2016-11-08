@@ -805,8 +805,12 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			console.error(error);
 		}
 		// 在出現錯誤時，將 onload 當作 callback。並要確保 {Object}response
-		onload(library_namespace.null_Object(), error);
-	},
+		// 因此應該要先檢查errorc再處理response
+		onload({
+			URL : URL,
+			status : status_code
+		}, error);
+	}, status_code,
 	// on success
 	_onload = function(result) {
 		// 在這邊不過剛開始從伺服器得到資料，因此還不可執行unregister()，否則依然可能遇到timeout。
@@ -839,12 +843,13 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			return;
 		}
 
+		status_code = result.statusCode;
 		// 在有 options.onfail 時僅 .debug()。但這並沒啥條理...
-		if (options.onfail || /^2/.test(result.statusCode)) {
-			library_namespace.debug('STATUS: ' + result.statusCode + ' ' + URL, 2,
+		if (options.onfail || /^2/.test(status_code)) {
+			library_namespace.debug('STATUS: ' + status_code + ' ' + URL, 2,
 					'get_URL_node');
 		} else if (!options.no_warning) {
-			library_namespace.warn('get_URL_node: [' + URL + ']: status ' + result.statusCode);
+			library_namespace.warn('get_URL_node: [' + URL + ']: status ' + status_code);
 		}
 
 		library_namespace.debug('HEADERS: ' + JSON.stringify(result.headers),
