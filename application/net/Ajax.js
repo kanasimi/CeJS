@@ -805,7 +805,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			console.error(error);
 		}
 		// 在出現錯誤時，將 onload 當作 callback。並要確保 {Object}response
-		// 因此應該要先檢查errorc再處理response
+		// 因此應該要先檢查error再處理response
 		onload({
 			URL : URL,
 			status : status_code
@@ -1066,7 +1066,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		}
 		if (!e) {
 			e = new Error('Timeout (' + timeout + 'ms): ' + URL);
-			// e.name = 'TIMEOUT';
+			e.code = 'TIMEOUT';
 		}
 
 		if (options.timeout_retry > 0) {
