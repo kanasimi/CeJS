@@ -15645,8 +15645,8 @@ function module_code(library_namespace) {
 
 	/** {String}API URL of PetScan. */
 	var wikidata_PetScan_API_URL = 'https://petscan.wmflabs.org/',
-	//
-	PetScan_parameters = 'sparql'.split(',');
+	// 常用 parameters。
+	PetScan_parameters = 'combination,sparql'.split(',');
 
 	/**
 	 * PetScan can generate lists of Wikipedia (and related projects) pages or
@@ -15701,6 +15701,7 @@ function module_code(library_namespace) {
 			wikidata_label_language : language,
 			categories : Array.isArray(categories)
 			// List of categories, one per line without "category:" part.
+			// 此時應設定 combination:union/subset
 			? categories.join('\n') : categories,
 			project : options.project || 'wikipedia',
 			// 確保輸出為需要的格式。
