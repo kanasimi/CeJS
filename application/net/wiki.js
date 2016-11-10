@@ -15699,7 +15699,9 @@ function module_code(library_namespace) {
 		_options = {
 			language : language,
 			wikidata_label_language : language,
-			categories : categories,
+			categories : Array.isArray(categories)
+			// List of categories, one per line without "category:" part.
+			? categories.join('\n') : categories,
 			project : options.project || 'wikipedia',
 			// 確保輸出為需要的格式。
 			format : 'wiki',
