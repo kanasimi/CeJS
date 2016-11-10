@@ -2027,6 +2027,7 @@ function module_code(library_namespace) {
 			// test [[Category:name|order]]
 			category_matched = !file_matched
 					&& parameters.match(PATTERN_category_prefix);
+			// TODO: [[title#section]] 將不會分割，而保留 "title#section"。
 			parameters = parameters.split('|').map(function(token, index) {
 				return index === 0
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
@@ -15624,12 +15625,129 @@ function module_code(library_namespace) {
 		var action = [ options && options.API_URL || wikidata_SPARQL_API_URL,
 				'?query=', encodeURIComponent(query), '&format=json' ];
 
-		get_URL(action.join(''), function(data) {
+		get_URL(action.join(''), function(data, error) {
+			if (error) {
+				callback(undefined, error);
+				return;
+			}
 			data = JSON.parse(data.responseText);
 			var items = data.results;
 			if (!items || !Array.isArray(items = items.bindings)) {
 				callback(data);
 				return;
+			}
+			callback(items);
+		});
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	/** {String}API URL of PetScan. */
+	var wikidata_PetScan_API_URL = 'https://petscan.wmflabs.org/',
+	//
+	PetScan_parameters = 'sparql'.split(',');
+
+	/**
+	 * PetScan can generate lists of Wikipedia (and related projects) pages or
+	 * Wikidata items that match certain criteria, such as all pages in a
+	 * certain category, or all items with a certain property.
+	 * 
+	 * @example<code>
+
+	// [[:Category:日本のポップ歌手]]直下の記事のうちWikidataにおいて性別(P21)が女性(Q6581072)となっているもの
+	CeL.wiki.petscan('日本のポップ歌手',function(items){result=items;console.log(items);},{language:'ja',sparql:'SELECT ?item WHERE { ?item wdt:P21 wd:Q6581072 }'})
+
+	 </code>
+	 * 
+	 * @param {String}categories
+	 *            List of categories, one per line without "category:" part.
+	 * @param {Function}[callback]
+	 *            回調函數。 callback({Array}[{Object}item])
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 */
+	function petscan(categories, callback, options) {
+		var _options;
+		if (options) {
+			if (typeof options === 'string') {
+				options = {
+					language : options
+				};
+			} else {
+				_options = options;
+			}
+		} else {
+			options = library_namespace.null_Object();
+		}
+
+		var language = options.language || default_language, parameters;
+		if (is_api_and_title(categories, 'language')) {
+			language = categories[0];
+			categories = categories[1];
+		}
+
+		if (_options) {
+			parameters = library_namespace.null_Object();
+			PetScan_parameters.forEach(function(parameter) {
+				if (parameter in options) {
+					parameters[parameter] = options[parameter];
+				}
+			});
+			Object.assign(parameters, options.parameters);
+		}
+		_options = {
+			language : language,
+			wikidata_label_language : language,
+			categories : categories,
+			project : options.project || 'wikipedia',
+			// 確保輸出為需要的格式。
+			format : 'wiki',
+			doit : 'D'
+		};
+		if (parameters) {
+			Object.assign(parameters, _options);
+		} else {
+			parameters = _options;
+		}
+
+		get_URL((options.API_URL || wikidata_PetScan_API_URL) + '?'
+				+ get_URL.param_to_String(parameters), function(data, error) {
+			if (error) {
+				callback(undefined, error);
+				return;
+			}
+			data = data.responseText;
+			var items = [], matched,
+			/**
+			 * <code>
+			!Title !! Page ID !! Namespace !! Size (bytes) !! Last change !! Wikidata
+			| [[Q234598|宇多田ヒカル]] || 228187 || 0 || 49939 || 20161028033707
+			→ format form PetScan format=json
+			{"id":228187,"len":49939,"namespace":0,"title":"Q234598","touched":"20161028033707"},
+			 </code>
+			 */
+			PATTERN =
+			// [ all, title, sitelink, misc ]
+			/\n\|\s*\[\[([^\[\]\|]+)\|([^\[\]]*)\]\]\s*\|\|([^\n]+)/g;
+			while (matched = PATTERN.exec(data)) {
+				var misc = matched[3].split(/\s*\|\|\s*/),
+				//
+				item = {
+					id : +misc[0],
+					len : +misc[2],
+					namespace : +misc[1],
+					title : matched[1],
+					touched : misc[3]
+				};
+				if (matched[2]) {
+					item.sitelink = matched[2];
+				}
+				if (misc[4]
+				//
+				&& (matched = misc[4].match(/\[\[:d:([^\[\]\|]+)/))) {
+					item.wikidata = matched[1];
+				}
+				items.push(item);
 			}
 			callback(items);
 		});
@@ -15689,7 +15807,8 @@ function module_code(library_namespace) {
 		merge_data : wikidata_merge,
 		//
 		wdq : wikidata_query,
-		SPARQL : wikidata_SPARQL
+		SPARQL : wikidata_SPARQL,
+		petscan : petscan
 	});
 
 	return wiki_API;
