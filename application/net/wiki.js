@@ -4713,9 +4713,10 @@ function module_code(library_namespace) {
 							//
 							page_data.title, '-fg', ']]' ]);
 						// 以 each() 的回傳作為要改變成什麼內容。
+						var content = each.call(
 						// 注意: this === work_options
 						// @see wiki_API.edit()
-						var content = each.call(this, page_data, messages);
+						this, page_data, messages, config);
 						if (messages.quit_operation) {
 							clear_work();
 						}
@@ -4876,7 +4877,7 @@ function module_code(library_namespace) {
 				// .after() → .last()
 				// 改變適合之函數名。
 				if (typeof config.last === 'function') {
-					this.run(config.last);
+					this.run(config.last.bind(options));
 				}
 
 				this.run(function() {
