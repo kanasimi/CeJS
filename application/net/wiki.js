@@ -931,8 +931,8 @@ function module_code(library_namespace) {
 
 	// "Category" 本身可不分大小寫。
 	var
-	// [ all category text, category name, sort order ]
-	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ) *: *([^\|\[\]]+)(?:\s*\|\s*([^\|\[\]]*))?\]\][\r\n]*/ig,
+	// [ all_category_text, category_name, sort_order, post_space ]
+	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ) *: *([^\|\[\]]+)(?:\s*\|\s*([^\|\[\]]*))?\]\](\s*\n?)/ig,
 	/** {RegExp}分類的匹配模式 for parser。 [all,name] */
 	PATTERN_category_prefix = /^ *(?:Category|分類|分类|カテゴリ) *: *([^\|\[\]]+)/i;
 
@@ -4783,7 +4783,9 @@ function module_code(library_namespace) {
 					}
 					if (log_item.title && config.summary) {
 						// unescape
-						messages.unshift(config.summary.replace(/</g, '&lt;'));
+						messages.unshift(config.summary.replace(/</g, '&lt;')
+						// 避免 log page 添加 Category。
+						.replace(/\[\[\s*(Category|分類|分类|カテゴリ)\s*:/ig, '[[:$1:'));
 					}
 				}
 
@@ -15744,6 +15746,7 @@ function module_code(library_namespace) {
 					touched : misc[3]
 				};
 				if (matched[2]) {
+					// Maybe it's label...
 					item.sitelink = matched[2];
 				}
 				if (misc[4]
