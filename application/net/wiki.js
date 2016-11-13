@@ -4539,7 +4539,10 @@ function module_code(library_namespace) {
 							: this)
 					// pages: 後續檢索用索引值之暫存值。
 					&& (pages = pages.show_next())) {
-				messages.add(this.continue_key + ': ' + pages);
+				if (!config.continue_session || pages !== '{}') {
+					// 當有 .continue_session 時，其實用不到 log page 之 continue_key。
+					messages.add(this.continue_key + ': ' + pages);
+				}
 			}
 
 			if (!no_message) {
