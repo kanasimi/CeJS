@@ -602,6 +602,8 @@ function module_code(library_namespace) {
 	/**
 	 * get NO of namespace
 	 * 
+	 * TODO: ',Template,Category', ';Template;Category', '|Template|Category'
+	 * 
 	 * @param {String}namespace
 	 *            namespace
 	 * 
@@ -3419,6 +3421,52 @@ function module_code(library_namespace) {
 
 		// 若需改變，需同步更改 wiki_API.prototype.next.methods
 		switch (type) {
+
+		// ------------------------------------------------
+		// setup options
+
+		case 'set_URL':
+			// next[1] : callback
+			setup_API_URL(this /* session */, next[1]);
+			this.next();
+			break;
+
+		case 'set_language':
+			// next[1] : callback
+			setup_API_language(this /* session */, next[1]);
+			this.next();
+			break;
+
+		case 'set_data':
+			// 設定 this.data_session。
+			// setup_data_session(session, callback, API_URL, password, force)
+			setup_data_session(this /* session */,
+			// 確保 data_session login 了才執行下一步。
+			function() {
+				// next[1] : callback
+				if (typeof next[1] === 'function')
+					next[1].call(_this);
+				_this.next();
+			}, next[2], next[3], next[4]);
+			break;
+
+		// ------------------------------------------------
+		// account
+
+		case 'login':
+			library_namespace.debug(
+					'正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。', 2,
+					'wiki_API.prototype.next');
+
+		case 'logout':
+			// 結束
+			// next[1] : callback
+			wiki_API.logout(this /* session */, next[1]);
+			break;
+
+		// ------------------------------------------------
+		// page access
+
 		case 'page':
 			// this.page(page data, callback, options);
 			if (library_namespace.is_Object(next[2]) && !next[3])
@@ -3826,97 +3874,28 @@ function module_code(library_namespace) {
 			}
 			break;
 
-		// ------------------------------------------------
-		// administrator functions
+		case 'cache':
+			// wiki.cache(operation, callback, _this);
+			wiki_API.cache(next[1], next[2],
+			// next[3]: options to wiki_API.cache()
+			Object.assign({
+				// default options === this
 
-		case 'protect':
-			// wiki.page(title).protect(options, callback)
-		case 'rollback':
-			// wiki.page(title).rollback(options, callback)
+				// including File, Template, Category
+				// namespace : '0|6|10|14',
 
-			if (typeof next[1] === 'function') {
-				next[2] = next[1];
-				next[1] = undefined;
-			}
-			if (!next[1]) {
-				// initialize options
-				next[1] = library_namespace.null_Object();
-			}
-			// 保護/回退
-			if (this.stopped && !next[1].skip_stopped) {
-				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄 '
-				//
-				+ type + '[['
-				//
-				+ (next[1].title || next[1].pageid || this.last_page
-				//
-				&& this.last_page.title) + ']]！');
-				// next[2] : callback
-				if (typeof next[2] === 'function')
-					next[2].call(this, next[1], '已停止作業');
-				this.next();
+				// title_prefix : 'Template:',
 
-			} else {
-				next[1][KEY_SESSION] = this;
-				wiki_API[type](next[1], function(result, error) {
-					// next[2] : callback
-					if (typeof next[2] === 'function')
-						next[2].call(_this, result, error);
-					_this.next();
-				});
-			}
+				// cache path prefix
+				// prefix : base_directory,
+
+				// [KEY_SESSION]
+				session : this
+			}, next[3]));
 			break;
 
 		// ------------------------------------------------
-
-		case 'login':
-			library_namespace.debug(
-					'正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。', 2,
-					'wiki_API.prototype.next');
-		case 'wait':
-			// rollback
-			this.actions.unshift(next);
-			break;
-
-		case 'logout':
-			// 結束
-			// next[1] : callback
-			wiki_API.logout(this /* session */, next[1]);
-			break;
-
-		case 'set_URL':
-			// next[1] : callback
-			setup_API_URL(this /* session */, next[1]);
-			this.next();
-			break;
-
-		case 'set_language':
-			// next[1] : callback
-			setup_API_language(this /* session */, next[1]);
-			this.next();
-			break;
-
-		case 'set_data':
-			// 設定 this.data_session。
-			// setup_data_session(session, callback, API_URL, password, force)
-			setup_data_session(this /* session */,
-			// 確保 data_session login 了才執行下一步。
-			function() {
-				// next[1] : callback
-				if (typeof next[1] === 'function')
-					next[1].call(_this);
-				_this.next();
-			}, next[2], next[3], next[4]);
-			break;
-
-		case 'run':
-			// next[1] : callback
-			if (typeof next[1] === 'function')
-				next[1].call(this, next[2]);
-			this.next();
-			break;
-
-		// ------------------------------------------------
+		// Wikidata access
 
 		case 'data':
 			if (!('data_session' in this)) {
@@ -4140,6 +4119,62 @@ function module_code(library_namespace) {
 			break;
 
 		// ------------------------------------------------
+		// administrator functions
+
+		case 'protect':
+			// wiki.page(title).protect(options, callback)
+		case 'rollback':
+			// wiki.page(title).rollback(options, callback)
+
+			if (typeof next[1] === 'function') {
+				next[2] = next[1];
+				next[1] = undefined;
+			}
+			if (!next[1]) {
+				// initialize options
+				next[1] = library_namespace.null_Object();
+			}
+			// 保護/回退
+			if (this.stopped && !next[1].skip_stopped) {
+				library_namespace.warn('wiki_API.prototype.next: 已停止作業，放棄 '
+				//
+				+ type + '[['
+				//
+				+ (next[1].title || next[1].pageid || this.last_page
+				//
+				&& this.last_page.title) + ']]！');
+				// next[2] : callback
+				if (typeof next[2] === 'function')
+					next[2].call(this, next[1], '已停止作業');
+				this.next();
+
+			} else {
+				next[1][KEY_SESSION] = this;
+				wiki_API[type](next[1], function(result, error) {
+					// next[2] : callback
+					if (typeof next[2] === 'function')
+						next[2].call(_this, result, error);
+					_this.next();
+				});
+			}
+			break;
+
+		// ------------------------------------------------
+		// 流程控制
+
+		case 'wait':
+			// rollback
+			this.actions.unshift(next);
+			break;
+
+		case 'run':
+			// next[1] : callback
+			if (typeof next[1] === 'function')
+				next[1].call(this, next[2]);
+			this.next();
+			break;
+
+		// ------------------------------------------------
 
 		default:
 			library_namespace.warn('Unknown operation: [' + next.join() + ']');
@@ -4155,7 +4190,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,search,cache,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -4787,8 +4822,9 @@ function module_code(library_namespace) {
 					if (log_item.title && config.summary) {
 						// unescape
 						messages.unshift(config.summary.replace(/</g, '&lt;')
-						// 避免 log page 添加 Category。
-						.replace(/\[\[\s*(Category|分類|分类|カテゴリ)\s*:/ig, '[[:$1:'));
+								// 避免 log page 添加 Category。
+								.replace(/\[\[\s*(Category|分類|分类|カテゴリ)\s*:/ig,
+										'[[:$1:'));
 					}
 				}
 
@@ -9641,6 +9677,23 @@ function module_code(library_namespace) {
 				}
 
 			} else if (typeof callback === 'function') {
+				if (false && Array.isArray(data)) {
+					// TODO: adapt to {Object}operation
+					library_namespace.log('wiki_API.cache: Get ' + data.length
+							+ ' page(s).');
+					// 自訂list
+					// data = [ '' ];
+					if (_this.limit >= 0) {
+						// 設定此初始值，可跳過之前已經處理過的。
+						data = data.slice(0 * _this.limit, 1 * _this.limit);
+					}
+					library_namespace.debug(data.slice(0, 8).map(
+					//
+					function(page_data) {
+						return get_page_title(page_data);
+					}).join('\n') + '\n...');
+				}
+
 				// last 收尾
 				callback.call(_this, data);
 			}
@@ -9964,7 +10017,7 @@ function module_code(library_namespace) {
 				if (typeof list !== 'function') {
 					library_namespace
 							.warn('wiki_API.cache: list is not function!');
-					callback(last_data_got);
+					callback.call(_this, last_data_got);
 					break;
 				}
 				// 手動取得資料。使用 list=function(callback){callback(list);}
@@ -9991,7 +10044,7 @@ function module_code(library_namespace) {
 							//
 							'wiki_API.cache: Error get file [' + file_path
 									+ ']: ' + error);
-						callback(data);
+						callback.call(_this, data);
 					});
 				};
 				break;
