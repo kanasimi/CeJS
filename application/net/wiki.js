@@ -5101,7 +5101,7 @@ function module_code(library_namespace) {
 		}
 
 		return this;
-	}
+	};
 
 	// --------------------------------------------------------------------------------------------
 	// 以下皆泛用，無須 wiki_API instance。
@@ -7010,6 +7010,7 @@ function module_code(library_namespace) {
 		}
 		// TODO: for {Array}type
 		var session = this, token = session.token;
+		// 有時可能沒有 session.token !
 		if (!options.force && token[type + 'token']) {
 			// 已存有此 token。
 			callback(token[type + 'token']);
@@ -7081,6 +7082,7 @@ function module_code(library_namespace) {
 			// 注意: 在 mass edit 時會 lose token (badtoken)，需要保存 password。
 			if (!session.preserve_password) {
 				// 捨棄 password。
+				// 有時可能沒有 session.token !
 				delete session.token.lgpassword;
 			}
 
@@ -7176,6 +7178,7 @@ function module_code(library_namespace) {
 			// 'query&meta=tokens&type=login'
 			'login' ], function(data) {
 				if (data && data.login && data.login.result === 'NeedToken') {
+					// 有時可能沒有 session.token !
 					token.lgtoken = session.token.lgtoken = data.login.token;
 					wiki_API.query([ session.API_URL, 'login' ], _done, token,
 							session);
