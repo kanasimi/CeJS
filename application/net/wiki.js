@@ -3457,6 +3457,9 @@ function module_code(library_namespace) {
 			library_namespace.debug(
 					'正 log in 中，當 login 後，會自動執行 .next()，處理餘下的工作。', 2,
 					'wiki_API.prototype.next');
+			// rollback
+			this.actions.unshift(next);
+			break;
 
 		case 'logout':
 			// 結束
@@ -4190,7 +4193,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,search,cache,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,cache,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -7010,7 +7013,6 @@ function module_code(library_namespace) {
 		}
 		// TODO: for {Array}type
 		var session = this, token = session.token;
-		// 有時可能沒有 session.token !
 		if (!options.force && token[type + 'token']) {
 			// 已存有此 token。
 			callback(token[type + 'token']);
@@ -7082,7 +7084,6 @@ function module_code(library_namespace) {
 			// 注意: 在 mass edit 時會 lose token (badtoken)，需要保存 password。
 			if (!session.preserve_password) {
 				// 捨棄 password。
-				// 有時可能沒有 session.token !
 				delete session.token.lgpassword;
 			}
 
@@ -7178,7 +7179,6 @@ function module_code(library_namespace) {
 			// 'query&meta=tokens&type=login'
 			'login' ], function(data) {
 				if (data && data.login && data.login.result === 'NeedToken') {
-					// 有時可能沒有 session.token !
 					token.lgtoken = session.token.lgtoken = data.login.token;
 					wiki_API.query([ session.API_URL, 'login' ], _done, token,
 							session);
