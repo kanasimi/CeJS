@@ -34,6 +34,8 @@ https://tools.wmflabs.org/pageviews
 https://wikitech.wikimedia.org/wiki/Analytics/Data/Pagecounts-raw
 https://meta.wikimedia.org/wiki/Research:Page_view
 
+WikiData Remote editor
+http://tools.wmflabs.org/widar/
 
 </code>
  * 
@@ -12419,7 +12421,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------
 
-		if (!key) {
+		if (!key || library_namespace.is_empty_object(key)) {
 			library_namespace.err('wikidata_entity: 未設定欲取得之特定實體id。');
 			callback(undefined, 'no_key');
 			return;

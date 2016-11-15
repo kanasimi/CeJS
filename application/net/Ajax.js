@@ -1226,13 +1226,27 @@ application.net.wiki wiki_API.cache() CeL.wiki.cache()
  *            附加參數/設定特殊功能與選項
  */
 function get_URL_cache_node(URL, onload, options) {
-	// 前置處理。
-	if (!library_namespace.is_Object(options))
+	if (typeof options === 'string') {
+		options = {
+			file_name : options
+		};
+	} else if (!library_namespace.is_Object(options)) {
+		// 前置處理。
 		options = library_namespace.null_Object();
+	}
 
 	var file_name = options.file_name,
 	/** {String}file encoding for fs of node.js. */
 	encoding = options.encoding || get_URL_cache_node.encoding;
+
+	if (!file_name && (file_name = URL.match(/[^\/]+$/))) {
+		// 自URL取得檔名。
+		file_name = file_name[0];
+	}
+	if (!file_name) {
+		onload(undefined, new Error('No file name setted.'));
+		return;
+	}
 
 	node_fs.readFile(file_name, encoding, function(
 			error, data) {
