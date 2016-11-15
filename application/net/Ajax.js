@@ -1276,7 +1276,7 @@ function get_URL_cache_node(URL, onload, options) {
 				library_namespace.debug('Cache data: '
 						+ (data && JSON.stringify(data).slice(0, 190)) + '...',
 						3, 'get_URL_cache_node');
-				node_fs.writeFile(file_name, data, encoding);
+				node_fs.writeFileSync(file_name, data, encoding);
 			}
 			onload(data);
 		}, options.charset, options.post_data);
