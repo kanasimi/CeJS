@@ -1227,7 +1227,10 @@ application.net.wiki wiki_API.cache() CeL.wiki.cache()
  */
 function get_URL_cache_node(URL, onload, options) {
 	if (typeof options === 'string') {
-		options = {
+		// auto-detecting
+		options = /\.[a-z\d]+$/.test(options) ? {
+			encoding : options
+		} : {
 			file_name : options
 		};
 	} else if (!library_namespace.is_Object(options)) {
@@ -1250,16 +1253,18 @@ function get_URL_cache_node(URL, onload, options) {
 
 	node_fs.readFile(file_name, encoding, function(
 			error, data) {
-		if (!error) {
-			library_namespace.debug('Using cached data.', 3, 'get_URL_cache_node');
-			library_namespace.debug('Cached data: [' + data.slice(0, 200)
-					+ ']...', 5, 'get_URL_cache_node');
-			onload(data);
-			return;
-		}
+		if (!options.reget) {
+			if (!error) {
+				library_namespace.debug('Using cached data.', 3, 'get_URL_cache_node');
+				library_namespace.debug('Cached data: [' + data.slice(0, 200)
+						+ ']...', 5, 'get_URL_cache_node');
+				onload(data);
+				return;
+			}
 
-		library_namespace.debug('No valid cached data. Try to get data...', 3,
-				'get_URL_cache_node');
+			library_namespace.debug('No valid cached data. Try to get data...', 3,
+					'get_URL_cache_node');
+		}
 
 		_.get_URL(URL, function(XMLHttp) {
 			data = XMLHttp.responseText;
