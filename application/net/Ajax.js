@@ -1229,9 +1229,9 @@ function get_URL_cache_node(URL, onload, options) {
 	if (typeof options === 'string') {
 		// auto-detecting
 		options = /\.[a-z\d]+$/.test(options) ? {
-			encoding : options
-		} : {
 			file_name : options
+		} : {
+			encoding : options
 		};
 	} else if (!library_namespace.is_Object(options)) {
 		// 前置處理。

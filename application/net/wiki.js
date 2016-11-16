@@ -604,23 +604,42 @@ function module_code(library_namespace) {
 	/**
 	 * get NO of namespace
 	 * 
-	 * TODO: ',Template,Category', ';Template;Category', '|Template|Category'
-	 * 
 	 * @param {String}namespace
 	 *            namespace
 	 * 
 	 * @returns {ℕ⁰:Natural+0}namespace NO.
 	 */
 	function get_namespace(namespace) {
-		if (typeof namespace === 'string'
-				&& ((namespace = namespace.toLowerCase()) in get_namespace.hash))
-			return get_namespace.hash[namespace];
+		if (typeof namespace === 'string') {
+			var list = [];
+			namespace.toLowerCase()
+			// for ',Template,Category', ';Template;Category',
+			// '|Template|Category'
+			.split(/[,;|]/).forEach(function(n) {
+				if (!n) {
+					list.push(0);
+				}
+				if (!isNaN(n)) {
+					list.push(n);
+				}
+				if (n in get_namespace.hash) {
+					list.push(get_namespace.hash[n]);
+				}
+				library_namespace.warn(
+				//
+				'get_namespace: Invalid namespace: [' + n + ']');
+			});
+			return list.sort().uniq().join('|');
+		}
+
 		if (isNaN(namespace)) {
-			if (namespace)
+			if (namespace) {
 				library_namespace.warn('get_namespace: Invalid namespace: ['
 						+ namespace + ']');
+			}
 			return namespace;
 		}
+
 		return namespace | 0;
 	}
 
@@ -3413,13 +3432,16 @@ function module_code(library_namespace) {
 			type = 'list';
 		}
 
-		if (library_namespace.is_debug(2))
-			library_namespace.debug('處理 '
-					+ (this.token.lgname ? this.token.lgname + ' ' : '') + '['
-					+ next.map(function(arg) {
-						// for function
-						return String(arg).slice(0, 80);
-					}) + ']', 1, 'wiki_API.prototype.next');
+		if (library_namespace.is_debug(2)) {
+			library_namespace.debug(
+			//
+			'處理 ' + (this.token.lgname ? this.token.lgname + ' ' : '') + '['
+			//
+			+ next.map(function(arg) {
+				// for function
+				return String(arg).slice(0, 80);
+			}) + ']', 1, 'wiki_API.prototype.next');
+		}
 
 		// 若需改變，需同步更改 wiki_API.prototype.next.methods
 		switch (type) {
@@ -3634,7 +3656,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('以 .check_stop() 檢查與設定是否須停止編輯作業。', 1,
 						'wiki_API.prototype.next');
 				library_namespace
-						.debug('Using options to check_stop(): '
+						.debug('Using options to call check_stop(): '
 								+ JSON.stringify(next[1]), 2,
 								'wiki_API.prototype.next');
 				next[1].token = this.token;
@@ -3680,7 +3702,7 @@ function module_code(library_namespace) {
 				this.next();
 
 			} else if (this.last_page.is_Flow) {
-				// next[2]: options to edit_topic()
+				// next[2]: options to call edit_topic()
 				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 				if (next[2].section !== 'new') {
 					library_namespace
@@ -3729,7 +3751,7 @@ function module_code(library_namespace) {
 						// next[1] = next[1](get_page_content(this.last_page),
 						// this.last_page.title, this.last_page);
 						// 需要同時改變 wiki_API.edit！
-						// next[2]: options to edit_topic()
+						// next[2]: options to call edit_topic()
 						// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 						next[1] = next[1].call(next[2], this.last_page);
 					}
@@ -3741,7 +3763,7 @@ function module_code(library_namespace) {
 					next[1].replace(/[\s\n\-]*~~~~[\s\n\-]*$/, ''),
 					//
 					this.token,
-					// next[2]: options to edit_topic()
+					// next[2]: options to call edit_topic()
 					Object.assign({
 						// [KEY_SESSION]
 						session : this
@@ -3773,7 +3795,7 @@ function module_code(library_namespace) {
 					// next[1] = next[1](get_page_content(this.last_page),
 					// this.last_page.title, this.last_page);
 					// 需要同時改變 wiki_API.edit！
-					// next[2]: options to edit_topic()
+					// next[2]: options to call edit_topic()
 					// .call(options,): 使(回傳要編輯資料的)設定值函數能以this即時變更 options。
 					next[1] = next[1].call(next[2], this.last_page);
 				}
@@ -3790,7 +3812,7 @@ function module_code(library_namespace) {
 					wiki_API.edit([ this.API_URL, this.last_page ],
 					// 因為已有 contents，直接餵給轉換函式。
 					next[1], this.token,
-					// next[2]: options to edit()
+					// next[2]: options to call wiki_API.edit()
 					Object.assign({
 						// [KEY_SESSION]
 						session : this
@@ -3882,7 +3904,7 @@ function module_code(library_namespace) {
 		case 'cache':
 			// wiki.cache(operation, callback, _this);
 			wiki_API.cache(next[1], next[2],
-			// next[3]: options to wiki_API.cache()
+			// next[3]: options to call wiki_API.cache()
 			Object.assign({
 				// default options === this
 
@@ -3896,7 +3918,14 @@ function module_code(library_namespace) {
 
 				// [KEY_SESSION]
 				session : this
-			}, next[3]));
+			}, next[3], {
+				// overwrite callback()
+				callback : function() {
+					if (typeof next[3].callback === 'function')
+						next[3].callback.call(_this, arguments);
+					_this.next();
+				}
+			}));
 			break;
 
 		// ------------------------------------------------
@@ -6520,11 +6549,13 @@ function module_code(library_namespace) {
 				option : namespace
 			};
 		}
-		if (options.namespace && isNaN(options.namespace)
-		// 檢查 options.namespace。
-		&& isNaN(options.namespace = get_namespace(options.namespace))) {
-			// namespace 並非為正規 namespace。
-			delete options.namespace;
+		if (options.namespace) {
+			// 檢查 options.namespace。
+			options.namespace = get_namespace(options.namespace);
+			if (options.namespace === undefined) {
+				// namespace 並非為正規 namespace。
+				delete options.namespace;
+			}
 		}
 
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
@@ -6925,8 +6956,8 @@ function module_code(library_namespace) {
 				Array.prototype.push.apply(args, arguments);
 				try {
 					library_namespace.debug('add action: '
-							+ args.join('<br />\n'), 3, 'wiki_API.prototype.'
-							+ method);
+							+ args.map(JSON.stringify).join('<br />\n'), 3,
+							'wiki_API.prototype.' + method);
 				} catch (e) {
 					// TODO: handle exception
 				}
