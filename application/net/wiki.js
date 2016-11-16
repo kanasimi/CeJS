@@ -3902,8 +3902,21 @@ function module_code(library_namespace) {
 			break;
 
 		case 'cache':
+			if (!next[3] && typeof next[2] === 'object') {
+				// 未設定/不設定 callback
+				// shift arguments
+				next[3] = next[2];
+				next[2] = undefined;
+			}
+
 			// wiki.cache(operation, callback, _this);
-			wiki_API.cache(next[1], next[2],
+			wiki_API.cache(next[1], function() {
+				// overwrite callback() to run this.next();
+				// next[2] : callback
+				if (typeof next[2] === 'function')
+					next[2].call(_this, arguments);
+				_this.next();
+			},
 			// next[3]: options to call wiki_API.cache()
 			Object.assign({
 				// default options === this
@@ -3918,14 +3931,7 @@ function module_code(library_namespace) {
 
 				// [KEY_SESSION]
 				session : this
-			}, next[3], {
-				// overwrite callback()
-				callback : function() {
-					if (typeof next[3].callback === 'function')
-						next[3].callback.call(_this, arguments);
-					_this.next();
-				}
-			}));
+			}, next[3]));
 			break;
 
 		// ------------------------------------------------
