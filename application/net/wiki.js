@@ -3902,19 +3902,23 @@ function module_code(library_namespace) {
 			break;
 
 		case 'cache':
-			if (!next[3] && typeof next[2] === 'object') {
+			if (library_namespace.is_Object(next[2]) && !next[3]) {
 				// 未設定/不設定 callback
 				// shift arguments
 				next[3] = next[2];
 				next[2] = undefined;
 			}
 
+			// 因為wiki_API.cache(list)會使用到wiki_API.prototype[method]；
+			// 因此需要重新設定，否則若可能在測試得到錯誤的數值。
+			// 例如this.running = true，但是實際上已經不會再執行了。
+			this.running = 0 < this.actions.length;
 			// wiki.cache(operation, callback, _this);
 			wiki_API.cache(next[1], function() {
 				// overwrite callback() to run this.next();
 				// next[2] : callback
 				if (typeof next[2] === 'function')
-					next[2].call(_this, arguments);
+					next[2].apply(this, arguments);
 				_this.next();
 			},
 			// next[3]: options to call wiki_API.cache()
@@ -9672,6 +9676,7 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.cache = function(operation, callback, _this) {
 		if (library_namespace.is_Object(callback) && !_this) {
+			// 未設定/不設定 callback
 			// shift arguments.
 			_this = callback;
 			callback = undefined;
@@ -9975,6 +9980,7 @@ function module_code(library_namespace) {
 			if (list === wiki_API.cache.abort) {
 				library_namespace
 						.debug('Abort operation.', 1, 'wiki_API.cache');
+				finish_work();
 				return;
 			}
 
