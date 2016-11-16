@@ -618,19 +618,15 @@ function module_code(library_namespace) {
 			.split(/[,;|]/).forEach(function(n) {
 				if (!n) {
 					list.push(0);
-					return;
-				}
-				if (!isNaN(n)) {
+				} else if (!isNaN(n)) {
 					list.push(n);
-					return;
-				}
-				if (n in get_namespace.hash) {
+				} else if (n in get_namespace.hash) {
 					list.push(get_namespace.hash[n]);
-					return;
+				} else {
+					library_namespace.warn(
+					//
+					'get_namespace: Invalid namespace: [' + n + '] @ list ' + namespace);
 				}
-				library_namespace.warn(
-				//
-				'get_namespace: Invalid namespace: [' + n + '] @ list ' + namespace);
 			});
 			return list.sort().uniq().join('|');
 		}
@@ -3897,7 +3893,9 @@ function module_code(library_namespace) {
 							if (typeof next[3] === 'function')
 								next[3].call(_this, title, error, result);
 							// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
-							delete _this.last_page.revisions;
+							if (_this.last_page) {
+								delete _this.last_page.revisions;
+							}
 							_this.next();
 						}
 					});
