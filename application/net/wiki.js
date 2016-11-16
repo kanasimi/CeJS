@@ -3909,10 +3909,6 @@ function module_code(library_namespace) {
 				next[2] = undefined;
 			}
 
-			// 因為wiki_API.cache(list)會使用到wiki_API.prototype[method]；
-			// 因此需要重新設定，否則若可能在測試得到錯誤的數值。
-			// 例如this.running = true，但是實際上已經不會再執行了。
-			this.running = 0 < this.actions.length;
 			// wiki.cache(operation, callback, _this);
 			wiki_API.cache(next[1], function() {
 				// overwrite callback() to run this.next();
@@ -6972,7 +6968,11 @@ function module_code(library_namespace) {
 					// TODO: handle exception
 				}
 				this.actions.push(args);
-				if (!this.running) {
+				if (!this.running
+				// 當只剩下剛剛.push()進的operation時，表示已經不會再執行，則還是實行this.next()。
+				// TODO: 若是.next()正執行之其他操作也會執行this.next()，可能造成重複執行的結果!
+				// 不應該僅以this.running判定，因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
+				|| this.actions.length === 1) {
 					this.next();
 				}
 				return this;
