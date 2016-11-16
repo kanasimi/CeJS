@@ -618,16 +618,19 @@ function module_code(library_namespace) {
 			.split(/[,;|]/).forEach(function(n) {
 				if (!n) {
 					list.push(0);
+					return;
 				}
 				if (!isNaN(n)) {
 					list.push(n);
+					return;
 				}
 				if (n in get_namespace.hash) {
 					list.push(get_namespace.hash[n]);
+					return;
 				}
 				library_namespace.warn(
 				//
-				'get_namespace: Invalid namespace: [' + n + ']');
+				'get_namespace: Invalid namespace: [' + n + '] @ list ' + namespace);
 			});
 			return list.sort().uniq().join('|');
 		}
@@ -6968,10 +6971,11 @@ function module_code(library_namespace) {
 					// TODO: handle exception
 				}
 				this.actions.push(args);
+				// 不應該僅以this.running判定，因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
 				if (!this.running
 				// 當只剩下剛剛.push()進的operation時，表示已經不會再執行，則還是實行this.next()。
-				// TODO: 若是.next()正執行之其他操作也會執行this.next()，可能造成重複執行的結果!
-				// 不應該僅以this.running判定，因為可能在.next()中呼叫本函數，這時雖然this.running===true，但已經不會再執行。
+				// TODO: 若是其他執行序會操作this.actions、主動執行this.next()，
+				// 或.next()正執行之其他操作會執行this.next()，可能造成重複執行的結果！
 				|| this.actions.length === 1) {
 					this.next();
 				}
