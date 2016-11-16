@@ -558,7 +558,9 @@ function module_code(library_namespace) {
 			session.API_URL = api_URL(API_URL);
 			// is data session.
 			session.is_wikidata = /wikidata/i.test(API_URL);
+			// remove cache
 			delete session.last_page;
+			delete session.last_data;
 			// force to login again: see wiki_API.login
 			// 據測試，不同 project 間之 token 不能通用。
 			delete session.token.csrftoken;
@@ -625,7 +627,9 @@ function module_code(library_namespace) {
 				} else {
 					library_namespace.warn(
 					//
-					'get_namespace: Invalid namespace: [' + n + '] @ list ' + namespace);
+					'get_namespace: Invalid namespace: ['
+					//
+					+ n + '] @ list ' + namespace);
 				}
 			});
 			return list.sort().uniq().join('|');
@@ -3892,10 +3896,9 @@ function module_code(library_namespace) {
 							// next[3] : callback
 							if (typeof next[3] === 'function')
 								next[3].call(_this, title, error, result);
+							// assert: 應該有_this.last_page。
 							// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
-							if (_this.last_page) {
-								delete _this.last_page.revisions;
-							}
+							delete _this.last_page.revisions;
 							_this.next();
 						}
 					});
@@ -3913,6 +3916,7 @@ function module_code(library_namespace) {
 			// 因為wiki_API.cache(list)會使用到wiki_API.prototype[method]；
 			// 因此需要重新設定，否則若可能在測試得到錯誤的數值。
 			// 例如this.running = true，但是實際上已經不會再執行了。
+			// TODO: 這可能會有bug。
 			this.running = 0 < this.actions.length;
 
 			// wiki.cache(operation, callback, _this);
@@ -3978,7 +3982,9 @@ function module_code(library_namespace) {
 
 			// 因為前面利用cache時會檢查KEY_CORRESPOND_PAGE，且KEY_CORRESPOND_PAGE只會設定在page_data，
 			// 因此這邊自屬於page_data之輸入項目設定 .last_page
-			if (get_page_content.is_page_data(next[1])) {
+			if (get_page_content.is_page_data(next[1])
+			// 預防把 wikidata entity 拿來當作 input 了。
+			&& !is_entity(next[1])) {
 				this.last_page = next[1];
 			}
 			// wikidata_entity(key, property, callback, options)
@@ -4037,19 +4043,23 @@ function module_code(library_namespace) {
 					library_namespace.debug('this.last_data: '
 							+ JSON.stringify(this.last_data), 6,
 							'wiki_API.next.edit_data');
+					library_namespace.debug('this.last_page: '
+							+ JSON.stringify(this.last_page), 6,
+							'wiki_API.next.edit_data');
 					if (last_data_is_usable(this)) {
 						// shift arguments
 						next.splice(1, 0, this.last_data);
 
 					} else if (this.last_data && this.last_data.error
-							&& this.last_data.key === this.last_page) {
+					// @see last_data_is_usable(session)
+					&& this.last_page === this.last_data[KEY_CORRESPOND_PAGE]) {
 						library_namespace.debug('前一次之wikidata實體取得失敗', 6,
 								'wiki_API.next.edit_data');
 						next[3] && next[3].call(this, undefined, {
 							code : 'last_data_failed',
 							message : '前一次之wikidata實體取得失敗: ['
 							// 例如提供的 foreign title 錯誤，
-							+ (this.last_data.key
+							+ (this.last_data[KEY_CORRESPOND_PAGE]
 							// 或是 foreign title 為 redirected。
 							|| (this.last_data.site
 							// 抑或者存在 foreign title 頁面，但沒有 wikidata entity。
@@ -4090,7 +4100,9 @@ function module_code(library_namespace) {
 
 			// 因為前面利用cache時會檢查KEY_CORRESPOND_PAGE，且KEY_CORRESPOND_PAGE只會設定在page_data，
 			// 因此這邊自屬於page_data之輸入項目設定 .last_page
-			if (get_page_content.is_page_data(next[1])) {
+			if (get_page_content.is_page_data(next[1])
+			// 預防把 wikidata entity 拿來當作 input 了。
+			&& !is_entity(next[1])) {
 				this.last_page = next[1];
 			}
 			// wikidata_edit(id, data, token, options, callback)
@@ -11303,15 +11315,21 @@ function module_code(library_namespace) {
 	/**
 	 * 測試 value 是否為實體項目 wikidata entity / wikibase-item.
 	 * 
+	 * is_wikidata_page()
+	 * 
 	 * @param value
 	 *            要測試的值。
+	 * @param {Boolean}[strict]
+	 *            嚴格檢測。
 	 * 
 	 * @returns {Boolean}value 為實體項目。
 	 */
-	function is_entity(value) {
+	function is_entity(value, strict) {
 		return library_namespace.is_Object(value)
 		// {String}id: Q\d+ 或 P\d+。
-		&& value.id && library_namespace.is_Object(value.labels);
+		&& (strict ? /^[PQ]\d{1,10}$/.test(value.id) : value.id)
+		//
+		&& library_namespace.is_Object(value.labels);
 	}
 
 	/**
