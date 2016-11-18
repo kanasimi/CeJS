@@ -956,6 +956,7 @@ function module_code(library_namespace) {
 			+ ') *: *([^\| ][^\| ]*)', 'i');
 
 	// "Category" 本身可不分大小寫。
+	// 分類名稱重複時，排序索引以後出現者為主。
 	var
 	// [ all_category_text, category_name, sort_order, post_space ]
 	PATTERN_category = /\[\[ *(?:Category|分類|分类|カテゴリ) *: *([^\|\[\]]+)(?:\s*\|\s*([^\|\[\]]*))?\]\](\s*\n?)/ig,
@@ -1813,6 +1814,7 @@ function module_code(library_namespace) {
 		// parse functions
 
 		// or use ((PATTERN_transclusion))
+		// PATTERN_template
 		var PATTERN_for_transclusion = /{{([^{}][\s\S]*?)}}/g;
 		function parse_transclusion(all, parameters) {
 			// 自 end_mark 向前回溯。
@@ -4632,8 +4634,10 @@ function module_code(library_namespace) {
 							: this)
 					// pages: 後續檢索用索引值之暫存值。
 					&& (pages = pages.show_next())) {
-				if (!config.continue_session || pages !== '{}') {
-					// 當有 .continue_session 時，其實用不到 log page 之 continue_key。
+				// 當有 .continue_session 時，其實用不到 log page 之 continue_key。
+				if (!config.continue_session
+				// e.g., 後続の索引: {"continue":"-||"}
+				|| !/^[{}\-\|]+$/.test(pages)) {
 					messages.add(this.continue_key + ': ' + pages);
 				}
 			}
@@ -4879,10 +4883,11 @@ function module_code(library_namespace) {
 					}
 					if (log_item.title && config.summary) {
 						// unescape
-						messages.unshift(config.summary.replace(/</g, '&lt;')
-								// 避免 log page 添加 Category。
-								.replace(/\[\[\s*(Category|分類|分类|カテゴリ)\s*:/ig,
-										'[[:$1:'));
+						messages.unshift(
+						// 避免 log page 添加 Category。
+						config.summary.replace(/</g, '&lt;').replace(
+						// @see PATTERN_category @ CeL.wiki
+						/\[\[\s*(Category|分類|分类|カテゴリ)\s*:/ig, '[[:$1:'));
 					}
 				}
 
