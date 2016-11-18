@@ -4635,9 +4635,9 @@ function module_code(library_namespace) {
 					// pages: 後續檢索用索引值之暫存值。
 					&& (pages = pages.show_next())) {
 				// 當有 .continue_session 時，其實用不到 log page 之 continue_key。
-				if (!config.continue_session
+				if (!config.continue_session || pages !== '{}'
 				// e.g., 後続の索引: {"continue":"-||"}
-				|| !/^[{}\-\|]+$/.test(pages)) {
+				&& !/^{"[^"]+":"[\-|]*"}$/.test(pages)) {
 					messages.add(this.continue_key + ': ' + pages);
 				}
 			}
