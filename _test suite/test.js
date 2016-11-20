@@ -2604,8 +2604,18 @@ function test_wiki() {
 
 		_setup_test('wiki: CeL.wiki.convert()');
 		CeL.wiki.convert('中国', function(text) {
-			var test_name = 'wiki: CeL.wiki.convert()';
+			var test_name = 'wiki: CeL.wiki.convert() #1';
 			assert([ '中國', text ], test_name);
+			_finish_test(test_name);
+		});
+		CeL.wiki.convert(' <!-- 中国', function(text) {
+			var test_name = 'wiki: CeL.wiki.convert() #2';
+			assert([ ' <!-- 中國', text ], test_name);
+			_finish_test(test_name);
+		});
+		CeL.wiki.convert(' <!-- 中国 -->  ', function(text) {
+			var test_name = 'wiki: CeL.wiki.convert() #3';
+			assert([ ' <!-- 中國 -->  ', text ], test_name);
 			_finish_test(test_name);
 		});
 
