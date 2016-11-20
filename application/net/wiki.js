@@ -4635,9 +4635,11 @@ function module_code(library_namespace) {
 					// pages: 後續檢索用索引值之暫存值。
 					&& (pages = pages.show_next())) {
 				// 當有 .continue_session 時，其實用不到 log page 之 continue_key。
-				if (!config.continue_session || pages !== '{}'
+				if (!config.continue_session
+				// 忽略表示完結的紀錄，避免每個工作階段都顯示相同訊息。
+				|| pages !== '{}'
 				// e.g., 後続の索引: {"continue":"-||"}
-				&& !/^{"[^"]+":"[\-|]*"}$/.test(pages)) {
+				&& !/^{"[^"]+":"[\-|]{0,9}"}$/.test(pages)) {
 					messages.add(this.continue_key + ': ' + pages);
 				}
 			}
@@ -6423,9 +6425,9 @@ function module_code(library_namespace) {
 						return;
 					}
 					data = data.parse;
-					text = data.text['*']
-					// 去掉 MediaWiki parser 解析器所自行添加的 token。
-					.trim().replace(/^<p>/, '').replace(/<\/p>$/, '');
+					text = data.text['*'].replace(/^\s*<p>/, '')
+					// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
+					.replace(/<\/p>\s*<!--[\s\S]*?-->\s*$/, '');
 					callback(text);
 				});
 	};
@@ -11598,6 +11600,12 @@ function module_code(library_namespace) {
 
 	// wrapper function of wikidata_search().
 	wikidata_search.use_cache = function(key, callback, options) {
+		if (!options && library_namespace.is_Object(callback)) {
+			// shift arguments.
+			options = callback;
+			callback = undefined;
+		}
+
 		var language_and_key,
 		// 須與 wikidata_search() 相同!
 		// TODO: 可以 guess_language(key) 猜測語言。

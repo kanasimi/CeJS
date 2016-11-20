@@ -32,7 +32,6 @@ _// JSDT:_module_
 };
 
 
-
 /*	國際標準書號check	2004/11/22 20:
 	http://zh.wikipedia.org/wiki/ISBN
 	http://www.hkpl.gov.hk/tc_chi/books_reg/books_reg_n13d/books_reg_n13d.html
@@ -52,8 +51,14 @@ checksum：1+6+5+2(mod 10)
 modulus & weight(模數與權數)：ISBN等, 1*9+6*8+5*7+2*6(mod p)
 
 */
-function checkISBN10(code) {
-	if (!/^\d{9}[\dxX]?$/.test(code = ('' + code).replace(/[-\s]/g, '')))
+// normalize ISBN
+function normalize_ISBN(code) {
+	return ('' + code).replace(/[-\s]/g, '').replace(/^ISBN/i, '');
+}
+_.normalize_ISBN = normalize_ISBN;
+
+function check_ISBN_10(code) {
+	if (!/^\d{9}[\dxX]?$/.test(code = normalize_ISBN(code)))
 		return;
 	// c:check digit
 	var i = 0, c = 0;
@@ -65,51 +70,82 @@ function checkISBN10(code) {
 	return code.length == 9 ? code + c : c === (i = code.charAt(9))
 			|| c === 'X' && i === 'x';
 }
+_.ISBN_10 = check_ISBN_10;
+
 //	2006/11/8 19:09
-function checkISBN13(code) {
-	if (!/^\d{12,13}$/.test(code = ('' + code).replace(/[-\s]/g, '')))
+function check_ISBN_13(code) {
+	if (!/^\d{12,13}$/.test(code = normalize_ISBN(code)))
 		return;
 	var i = 1, c = 0; // c:check digit
 	for (; i < 12; i += 2)
 		c += Math.floor(code.charAt(i));
 	for (c *= 3, i = 0; i < 12; i += 2)
 		c += Math.floor(code.charAt(i));
-	c = (220 - c) % 10; //	220:大於(1*6+3*6)，%10==0即可。
-	return code.length == 12 ? code + c : c == code
+	// 220:大於(1*6+3*6)，%10==0即可。
+	c = (220 - c) % 10;
+	return code.length === 12 ? code + c : c == code
 			.charAt(12);
 }
+_.ISBN_13 = check_ISBN_13;
+
+// CeL.data.check.ISBN()
+function check_ISBN(ISBN) {
+	ISBN = normalize_ISBN(ISBN);
+	return ISBN.length === 13 ? check_ISBN_13(ISBN)
+	//
+	: ISBN.length === 10 && check_ISBN_10(ISBN);
+}
+_.ISBN = check_ISBN;
 
 /*	臺灣地區國民身份證代字 Identity Card No. check	2004/11/22 22:31
 	輸入身份證號碼可test是否正確，若輸入不完全的（僅缺檢查碼），則會輸出完全碼
-var checkTWIDC='ABCDEFGHJKLMNPQRSTUVXYWZIO',checkTWIDCity='臺北市,臺中市,基隆市,臺南市,高雄市,臺北縣,宜蘭縣,桃園縣,新竹縣,苗栗縣,臺中縣,南投縣,彰化縣,雲林縣,嘉義縣,臺南縣,高雄縣,屏東縣,花蓮縣,臺東縣,澎湖縣,陽明山,,,嘉義市,新竹市'.split(',');	//	checkTWIDCity:代號表
+var check_TWIDC='ABCDEFGHJKLMNPQRSTUVXYWZIO',check_TWID_City='臺北市,臺中市,基隆市,臺南市,高雄市,臺北縣,宜蘭縣,桃園縣,新竹縣,苗栗縣,臺中縣,南投縣,彰化縣,雲林縣,嘉義縣,臺南縣,高雄縣,屏東縣,花蓮縣,臺東縣,澎湖縣,陽明山,,,嘉義市,新竹市'.split(',');	//	check_TWID_City:代號表
 */
-function checkTWID(ID,city,sex){	//	提供city/sex時ID只需要輸入流水號
- ID=('' + ID).replace(/ /g,'').toUpperCase();
- if(sex)ID=(sex=sex=='男'?1:sex=='女'?2:sex)+ID;
- var i,c;	//	check digit
- if(city&&(i=(c=checkTWIDCity.join(',')).indexOf(''+city))!=-1)
-  i=c.slice(0,i),city=i.length-i.replace(/,/g,'').length;
- if(isNaN(city))city=checkTWIDC.indexOf(ID.charAt(0));else ID=checkTWIDC.charAt(city)+ID;
- if(!/^[A-Z][12]\d{7,8}$/.test(ID))return;
- if(!sex)sex=ID.charAt(1)==1?'男':'女';
+function check_TWID(ID, city, sex) {
+	// 提供city/sex時ID只需要輸入流水號
+	ID = ('' + ID).replace(/ /g, '').toUpperCase();
+	if (sex)
+		ID = (sex = sex == '男' ? 1 : sex == '女' ? 2 : sex) + ID;
+	var i,
+	// check digit
+	c;
+	if (city && (i = (c = check_TWID_City.join(',')).indexOf('' + city)) != -1)
+		i = c.slice(0, i), city = i.length - i.replace(/,/g, '').length;
+	if (isNaN(city))
+		city = check_TWIDC.indexOf(ID.charAt(0));
+	else
+		ID = check_TWIDC.charAt(city) + ID;
+	if (!/^[A-Z][12]\d{7,8}$/.test(ID))
+		return;
+	if (!sex)
+		sex = ID.charAt(1) == 1 ? '男' : '女';
 
+	// old:網路上流傳的演算法, slow
+	if (false) {
+		c = '' + (10 + city), c = 9 * c.charAt(1) + parseInt(c.charAt(0));
+		for (i = 1; i < 9; i++)
+			c += (9 - i) * ID.charAt(i);
+		c %= 10;
+		if (ID.length == 10 && parseInt(ID.charAt(9)) + c != 10)
+			return null;
+		if (ID.length == 9)
+			ID += 10 - c;
+	}
 
-/*	old:網路上流傳的演算法,slow
- c=''+(10+city),c=9*c.charAt(1)+parseInt(c.charAt(0));
- for(i=1;i<9;i++)c+=(9-i)*ID.charAt(i);
- c%=10;
- if(ID.length==10&&parseInt(ID.charAt(9))+c!=10)return null;
- if(ID.length==9)ID+=10-c;
-*/
+	for (i = 1, c = city, c += 9 - (c - c % 10) / 10; i < 9;)
+		c += ID.charAt(i++) * i;
+	c %= 10;
+	if (ID.length == 10) {
+		if (ID.charAt(9) != c)
+			return null;
+	} else if (ID.length == 9)
+		ID += c;
 
- for(i=1,c=city,c+=9-(c-c%10)/10;i<9;)c+=ID.charAt(i++)*i;
- c%=10;
- if(ID.length==10){if(ID.charAt(9)!=c)return null;}else if(ID.length==9)ID+=c;
-
- return [ID,checkTWIDCity[city],sex,c];
+	return [ ID, check_TWID_City[city], sex, c ];
 }
+
 //	check only, no correct.
-function checkTWIDNo(ID) {
+function check_TWID_No(ID) {
     var i = 1, c = 'ABCDEFGHJKLMNPQRSTUVXYWZIO'.indexOf(ID.charAt(0).toUpperCase());
     for (c += 9 - (c - c % 10) / 10; i < 9;)
         c += ID.charAt(i++) * i;
