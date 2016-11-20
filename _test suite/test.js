@@ -2608,16 +2608,16 @@ function test_wiki() {
 			assert([ '中國', text ], test_name);
 			_finish_test(test_name);
 		});
-		CeL.wiki.convert(' <!-- 中国', function(text) {
+		CeL.wiki.convert('  </nowiki><!-- 简体 & " \' &lt;<nowiki> ', function(text) {
 			var test_name = 'wiki: CeL.wiki.convert() #2';
-			assert([ ' <!-- 中國', text ], test_name);
+			assert([ '  </nowiki><!-- 簡體 & " \' &lt;<nowiki> ', text ], test_name);
 			_finish_test(test_name);
 		});
-		CeL.wiki.convert(' <!-- 中国 -->  ', function(text) {
+		CeL.wiki.convert(' <!-- 轉換 --> &amp; < >-{華}-<nowiki>-{華}-</nowiki>  ', function(text) {
 			var test_name = 'wiki: CeL.wiki.convert() #3';
-			assert([ ' <!-- 中國 -->  ', text ], test_name);
+			assert([ ' <!-- 转换 --> &amp; < >-{华}-<nowiki>-{华}-</nowiki>  ', text ], test_name);
 			_finish_test(test_name);
-		});
+		}, 'zh-cn');
 
 		_setup_test('wiki: CeL.wiki.langlinks()');
 		CeL.wiki.langlinks('語言', function(title) {

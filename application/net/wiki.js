@@ -6417,14 +6417,25 @@ function module_code(library_namespace) {
 			callback('');
 			return;
 		}
+
+		// 作基本的 escape。不能用encodeURIComponent()，這樣會把中文也一同 escape 掉。
+		// 多一層 encoding，避免 MediaWiki parser 解析HTML。
+		//text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		text = escape(text)
+		// recover Chinese words
+		.replace(/%u[\dA-F]{4}/g, function($0) {
+			return unescape($0);
+		});
+
+		// assert: '!' === encodeURIComponent('!')
+		text = '!' + text + '!';
+
 		// 由於用 [[link]] 也不會自動 redirect，因此直接轉換即可。
 		wiki_API.query([ api_URL('zh'),
 		// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=languages&utf8=1
 		'action=parse&contentmodel=wikitext&uselang=' + (uselang || 'zh-hant')
 		// prop=text|links
-		+ '&prop=text&text='
-		// 多一層 encoding，避免 MediaWiki parser 解析HTML。
-		+ encodeURIComponent(encodeURIComponent(text)) ],
+		+ '&prop=text&text=' + encodeURIComponent(text) ],
 				function(data, error) {
 					if (error || !data) {
 						callback('', error);
@@ -6434,10 +6445,12 @@ function module_code(library_namespace) {
 					text = data.text['*']
 					// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
 					.replace(/<!--[\s\S]*?-->/g, '')
-					//
-					.replace(/^\s*<p>/, '').replace(/<\/p>\s*$/, '');
+					// 去掉前後包覆。 e.g., <p> or <pre>
+					.replace(/![^!]*$/, '').replace(/^[^!]*!/, '');
 					try {
-						callback(decodeURIComponent(text));
+						// recover
+						text = unescape(text);
+						callback(text);
 					} catch (e) {
 						callback(undefined, e);
 					}
