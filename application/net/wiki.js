@@ -6150,6 +6150,9 @@ function module_code(library_namespace) {
 	/**
 	 * 取得頁面之重定向資料（重新導向至哪一頁）。
 	 * 
+	 * TODO:
+	 * https://www.mediawiki.org/w/api.php?action=help&modules=searchtranslations
+	 * 
 	 * @example <code>
 
 	CeL.wiki.redirect_to('史記', function(redirect_data, page_data) {
@@ -6418,43 +6421,40 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// 作基本的 escape。不能用encodeURIComponent()，這樣會把中文也一同 escape 掉。
-		// 多一層 encoding，避免 MediaWiki parser 解析HTML。
-		//text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		// 作基本的 escape。不能用 encodeURIComponent()，這樣會把中文也一同 escape 掉。
+		// 多一層 encoding，避免 MediaWiki parser 解析 HTML。
 		text = escape(text)
-		// recover Chinese words
-		.replace(/%u[\dA-F]{4}/g, function($0) {
-			return unescape($0);
-		});
+		// recover special characters (e.g., Chinese words) by unescape()
+		.replace(/%u[\dA-F]{4}/g, unescape);
+		// assert: 此時 text 不應包含任何可被 MediaWiki parser 解析的語法。
 
 		// assert: '!' === encodeURIComponent('!')
-		text = '!' + text + '!';
+		text = '!' + encodeURIComponent(text) + '!';
 
 		// 由於用 [[link]] 也不會自動 redirect，因此直接轉換即可。
 		wiki_API.query([ api_URL('zh'),
 		// https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=languages&utf8=1
 		'action=parse&contentmodel=wikitext&uselang=' + (uselang || 'zh-hant')
 		// prop=text|links
-		+ '&prop=text&text=' + encodeURIComponent(text) ],
-				function(data, error) {
-					if (error || !data) {
-						callback('', error);
-						return;
-					}
-					data = data.parse;
-					text = data.text['*']
-					// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
-					.replace(/<!--[\s\S]*?-->/g, '')
-					// 去掉前後包覆。 e.g., <p> or <pre>
-					.replace(/![^!]*$/, '').replace(/^[^!]*!/, '');
-					try {
-						// recover
-						text = unescape(text);
-						callback(text);
-					} catch (e) {
-						callback(undefined, e);
-					}
-				});
+		+ '&prop=text&text=' + text ], function(data, error) {
+			if (error || !data) {
+				callback('', error);
+				return;
+			}
+			data = data.parse;
+			text = data.text['*']
+			// 去掉 MediaWiki parser 解析器所自行添加的 token 與註解。
+			.replace(/<!--[\s\S]*?-->/g, '')
+			// 去掉前後包覆。 e.g., <p> or <pre>
+			.replace(/![^!]*$/, '').replace(/^[^!]*!/, '');
+			try {
+				// recover special characters
+				text = unescape(text);
+				callback(text);
+			} catch (e) {
+				callback(undefined, e);
+			}
+		});
 	};
 
 	// ------------------------------------------------------------------------

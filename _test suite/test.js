@@ -394,6 +394,19 @@ function test_native() {
 		assert([ 'Abc DefG', 'abc defG'.toTitleCase() ], 'toTitleCase() #2');
 		assert([ 'Abc Defg', 'abc defG'.toTitleCase(true) ], 'toTitleCase() #3');
 
+		assert([ '', [].uniq().join('|') ], '.uniq() #1');
+		assert([ '5|4|9|6|2|a|55', [5,4,9,6,2,4,6,'a',5,55,2,5,'a'].uniq().join('|') ], '.uniq() #2');
+		assert([ '5|4|9|6|2|a|55|2', [5,4,9,6,'2',4,6,'a',5,55,2,5,'a'].uniq().join('|') ], '.uniq() #3');
+		assert([ '5|4|9|6|2|aa|a', '5,4,9,6,2,4,6,5,aa,9,a'.split(',').uniq().join('|') ], '.uniq() #4');
+		assert([ false, [].cardinal_1() ], '.cardinal_1() #1');
+		assert([ true, [1].cardinal_1() ], '.cardinal_1() #2');
+		assert([ true, [undefined].cardinal_1() ], '.cardinal_1() #3');
+		assert([ true, [false].cardinal_1() ], '.cardinal_1() #4');
+		assert([ true, [2,2,2,2].cardinal_1() ], '.cardinal_1() #5');
+		assert([ false, [2,3,2,2,2].cardinal_1() ], '.cardinal_1() #6');
+		assert([ false, [3,2,2,2,2].cardinal_1() ], '.cardinal_1() #7');
+		assert([ false, [2,'2',2,2,2,2].cardinal_1() ], '.cardinal_1() #8');
+
 		// 找最後一個匹配的 index。
 		// @see above: '處理搜尋 {RegExp} 的情況'
 		assert([ 2, 'aaa'.split('').first_matched(/a/, true) ], 'first_matched(get_last_matched) 0');

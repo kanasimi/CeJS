@@ -1397,11 +1397,7 @@ var type_index = {
 	boolean : 2,
 	'undefined' : 3
 };
-/**
- * 去掉已排序，或最起碼將相同元素集在一起之 Array 中重複的 items。<br />
- * 應能確保順序不變。
- */
-function unique_Array(sorted) {
+function deprecated_unique_Array(sorted) {
 	var array = [];
 
 	if (sorted) {
@@ -3007,7 +3003,27 @@ set_method(Array.prototype, {
 	frequency : array_frequency,
 	//clone: Array.prototype.slice,
 	append: append_to_Array,
-	uniq: unique_Array,
+	/**
+	 * 去掉已排序，或最起碼將相同元素集在一起之 Array 中重複的 items。
+	 * 
+	 * 應能確保順序不變。
+	 */
+	uniq: function unique_Array() {
+		return Array.from(new Set(this));
+	},
+	// Check if there is only one single value in the array
+	// 集合中包含不重複的元素的個數=1
+	cardinal_1: function cardinal_1() {
+		var setted, value;
+		value = this.every(function(element) {
+			if (setted) {
+				return element === value;
+			}
+			value = element;
+			return setted = true;
+		});
+		return !!(setted && value);
+	},
 	// Array.prototype.search_sorted
 	search_sorted: set_bind(search_sorted_Array, true),
 	// Array.prototype.first_matched
