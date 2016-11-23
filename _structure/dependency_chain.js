@@ -222,6 +222,9 @@ if (typeof CeL === 'function')
 
 		// Array.from()
 		function from(items, mapfn, thisArg) {
+			if (typeof items === 'undefined' || items === null) {
+				throw new Error('Cannot convert undefined or null to object');
+			}
 			var array, i, iterator = items && !Array.isArray(items)
 			// 測試是否有 iterator。
 			&& (
@@ -230,9 +233,10 @@ if (typeof CeL === 'function')
 			//
 			: (items.entries ? 'entries' : items.values && 'values'));
 
-			if (!iterator && typeof items.next === 'function')
+			if (!iterator && typeof items.next === 'function') {
 				// items itself is an iterator.
 				iterator = items;
+			}
 
 			if (iterator) {
 				array = [];
