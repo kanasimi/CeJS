@@ -3114,5 +3114,5 @@ function do_test() {
 }
 
 CeL.env.no_catch = true;
-//CeL.set_debug(3);
+CeL.set_debug(3);
 CeL.run([ 'application.debug', 'application.debug.log' ], do_test);
