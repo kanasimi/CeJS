@@ -487,8 +487,8 @@ if (typeof CeL === 'function')
 			 * @returns {Array} [ text, style ]
 			 */
 			function SGR_parse(styled_text, options) {
-				console.log('to_RegExp_pattern: ' + typeof to_RegExp_pattern);
-				console.log('to_RegExp_pattern: ' + to_RegExp_pattern);
+				// console.log('to_RegExp_pattern: ' + typeof to_RegExp_pattern);
+				// console.log('to_RegExp_pattern: ' + to_RegExp_pattern);
 				var text_now = '', style = [], matched, lastIndex = 0,
 				// 
 				pattern = new RegExp(to_RegExp_pattern(options.CSI

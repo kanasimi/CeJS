@@ -1668,13 +1668,14 @@ function module_code(library_namespace) {
 		return parseFloat(v || 0);
 	}
 
-	// 增添單位
 	if (false) {
-		var addDenominationSet = {};
-		addDenominationSet.a = ',,,,'.split(',');
-		function addDenomination(a, b) {
-
-		}
+		var addDenominationSet = {
+			a : ',,,,'.split(',')
+		},
+		// 增添單位
+		addDenomination = function addDenomination(a, b) {
+			TODO;
+		};
 	}
 
 	/**
