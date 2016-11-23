@@ -3090,7 +3090,7 @@ function module_code(library_namespace) {
 			var setted, value;
 			value = this.every(function(element) {
 				if (setted) {
-					return element === value;
+					return Object.is(element, value);
 				}
 				value = element;
 				return setted = true;

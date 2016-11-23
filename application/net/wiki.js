@@ -632,7 +632,7 @@ function module_code(library_namespace) {
 					+ n + '] @ list ' + namespace);
 				}
 			});
-			return list.sort().unique(true).join('|');
+			return list.sort().unique_sorted().join('|');
 		}
 
 		if (isNaN(namespace)) {
@@ -15299,7 +15299,7 @@ function module_code(library_namespace) {
 		en : /^[a-z]+$/i,
 
 		// [[西班牙語字母]]
-		// 'áéíñóúü'.toLowerCase().split('').sort().unique(true).join('')
+		// 'áéíñóúü'.toLowerCase().split('').sort().unique_sorted().join('')
 		es : /^[a-záéíñóúü]+$/i,
 		// [[:en:French orthography]]
 		// http://character-code.com/french-html-codes.php
@@ -15521,7 +15521,7 @@ function module_code(library_namespace) {
 			// 確保 "title" 在 "title (type)" 之前。
 			.sort()
 			// 避免要添加的 label_data 本身即有重複。
-			.unique(true)
+			.unique_sorted()
 			// 處理各 label。
 			.forEach(function(label) {
 				if (!label || typeof label !== 'string') {
