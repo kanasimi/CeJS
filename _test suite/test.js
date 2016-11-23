@@ -398,8 +398,9 @@ function test_native() {
 		assert([ '5|4|9|6|2|a|55', [5,4,9,6,2,4,6,'a',5,55,2,5,'a'].unique().join('|') ], '.unique() #2');
 		assert([ '5|4|9|6|2|a|55|2', [5,4,9,6,'2',4,6,'a',5,55,2,5,'a'].unique().join('|') ], '.unique() #3');
 		assert([ '5|4|9|6|2|aa|a', '5,4,9,6,2,4,6,5,aa,9,a'.split(',').unique().join('|') ], '.unique() #4');
+		assert([ '4|3|NaN|2|5', [4,3,NaN,2,5,4,NaN,2,5].unique().join('|') ], '.unique() #5');
 		assert([ '3|4|6|7|8|9|56|79|a34|a6', '3,4,6,7,7,8,9,9,9,56,56,79,79,a34,a34,a6'.split(',').unique_sorted().join('|') ], '.unique_sorted() #1');
-		assert([ '2|3|4|5', [3,4,2,2,5,4,3].split(',').sort().unique_sorted().join('|') ], '.unique_sorted() #2');
+		assert([ '2|3|4|5', [3,4,2,2,5,4,3].sort().unique_sorted().join('|') ], '.unique_sorted() #2');
 		assert([ false, [].cardinal_1() ], '.cardinal_1() #1');
 		assert([ true, [1].cardinal_1() ], '.cardinal_1() #2');
 		assert([ true, [undefined,undefined,undefined].cardinal_1() ], '.cardinal_1() #3');
