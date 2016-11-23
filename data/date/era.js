@@ -6292,7 +6292,7 @@ function module_code(library_namespace) {
 						era = era.toString()))
 							tmp.push(era);
 					});
-					// tmp = Array.from(紀年_list).uniq()
+					// tmp = Array.from(紀年_list).unique()
 					if (tmp.length > 1)
 						// 有超過1個紀年。
 						if (options.pick)

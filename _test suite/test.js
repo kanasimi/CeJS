@@ -394,10 +394,11 @@ function test_native() {
 		assert([ 'Abc DefG', 'abc defG'.toTitleCase() ], 'toTitleCase() #2');
 		assert([ 'Abc Defg', 'abc defG'.toTitleCase(true) ], 'toTitleCase() #3');
 
-		assert([ '', [].uniq().join('|') ], '.uniq() #1');
-		assert([ '5|4|9|6|2|a|55', [5,4,9,6,2,4,6,'a',5,55,2,5,'a'].uniq().join('|') ], '.uniq() #2');
-		assert([ '5|4|9|6|2|a|55|2', [5,4,9,6,'2',4,6,'a',5,55,2,5,'a'].uniq().join('|') ], '.uniq() #3');
-		assert([ '5|4|9|6|2|aa|a', '5,4,9,6,2,4,6,5,aa,9,a'.split(',').uniq().join('|') ], '.uniq() #4');
+		assert([ '', [].unique().join('|') ], '.unique() #1');
+		assert([ '5|4|9|6|2|a|55', [5,4,9,6,2,4,6,'a',5,55,2,5,'a'].unique().join('|') ], '.unique() #2');
+		assert([ '5|4|9|6|2|a|55|2', [5,4,9,6,'2',4,6,'a',5,55,2,5,'a'].unique().join('|') ], '.unique() #3');
+		assert([ '5|4|9|6|2|aa|a', '5,4,9,6,2,4,6,5,aa,9,a'.split(',').unique().join('|') ], '.unique() #4');
+		assert([ '3,4,6,7,8,9,56,79,a34,a6', '3,4,6,7,7,8,9,9,9,56,56,79,79,a34,a34,a6'.split(',').unique(true).join('|') ], '.unique(true) #1');
 		assert([ false, [].cardinal_1() ], '.cardinal_1() #1');
 		assert([ true, [1].cardinal_1() ], '.cardinal_1() #2');
 		assert([ true, [undefined,undefined,undefined].cardinal_1() ], '.cardinal_1() #3');

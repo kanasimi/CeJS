@@ -632,7 +632,7 @@ function module_code(library_namespace) {
 					+ n + '] @ list ' + namespace);
 				}
 			});
-			return list.sort().uniq().join('|');
+			return list.sort().unique(true).join('|');
 		}
 
 		if (isNaN(namespace)) {
@@ -990,7 +990,7 @@ function module_code(library_namespace) {
 
 	/**
 	 * 去掉 page data list 中重複的 items。<br />
-	 * cf. Array.prototype.uniq @ data.native
+	 * cf. Array.prototype.unique @ data.native
 	 * 
 	 * @param {Array}page_data_list
 	 *            list of page_data.
@@ -10341,7 +10341,7 @@ function module_code(library_namespace) {
 
 			function onfail() {
 				// 確保沒有因特殊錯誤產生的漏網之魚。
-				titles.uniq().forEach(processed_data.remove, processed_data);
+				titles.unique().forEach(processed_data.remove, processed_data);
 			}
 
 			// Finally: Write to cache file.
@@ -14701,8 +14701,8 @@ function module_code(library_namespace) {
 			});
 
 			if (aliases_to_add.length > 0 || aliases_to_remove > 0) {
-				aliases_queue.push([ language, aliases_to_add.uniq(),
-						aliases_to_remove && aliases_to_remove.uniq() ]);
+				aliases_queue.push([ language, aliases_to_add.unique(),
+						aliases_to_remove && aliases_to_remove.unique() ]);
 			}
 		}
 
@@ -15299,7 +15299,7 @@ function module_code(library_namespace) {
 		en : /^[a-z]+$/i,
 
 		// [[西班牙語字母]]
-		// 'áéíñóúü'.toLowerCase().split('').sort().uniq().join('')
+		// 'áéíñóúü'.toLowerCase().split('').sort().unique(true).join('')
 		es : /^[a-záéíñóúü]+$/i,
 		// [[:en:French orthography]]
 		// http://character-code.com/french-html-codes.php
@@ -15521,7 +15521,7 @@ function module_code(library_namespace) {
 			// 確保 "title" 在 "title (type)" 之前。
 			.sort()
 			// 避免要添加的 label_data 本身即有重複。
-			.uniq()
+			.unique(true)
 			// 處理各 label。
 			.forEach(function(label) {
 				if (!label || typeof label !== 'string') {
@@ -15541,7 +15541,7 @@ function module_code(library_namespace) {
 				|| label_without_type
 				// 當已有 "title" 時，不添加 "title (type)"。
 				&& (include_label(alias, label_without_type)
-				// assert: !new_alias.includes(label)，已被 .uniq() 除去。
+				// assert: !new_alias.includes(label)，已被 .unique() 除去。
 				|| new_alias && include_label(new_alias, label_without_type))) {
 					// Skip. 已有此 label 或等價之 label。
 					return;
@@ -15967,7 +15967,7 @@ function module_code(library_namespace) {
 		normalize_title_pattern : normalize_name_pattern,
 		normalize_section_title : normalize_section_title,
 		get_hash : list_to_hash,
-		uniq_list : unique_list,
+		unique_list : unique_list,
 
 		parse_dump_xml : parse_dump_xml,
 		traversal : traversal_pages,

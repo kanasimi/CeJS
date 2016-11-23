@@ -20,7 +20,7 @@ typeof CeL === 'function' && CeL.run({
 	// require : '',
 
 	// 設定不匯出的子函式。
-	no_extend : '*',
+	// no_extend : '*',
 
 	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
 	code : module_code
@@ -716,7 +716,6 @@ function module_code(library_namespace) {
 			// TODO: handle exception
 		}
 	}
-	;
 
 	_// JSDT:_module_
 	.renew_RegExp_flag = renew_RegExp_flag;
@@ -1399,10 +1398,10 @@ function module_code(library_namespace) {
 		};
 	})();
 	'.'.test_valueOf();
-	String.prototype.test_valueOf = undefined;
 	try {
 		delete String.prototype.test_valueOf;
 	} catch (e) {
+		String.prototype.test_valueOf = undefined;
 	}
 
 	_.set_bind = need_valueOf ? set_bind_valueOf : set_bind;
@@ -1433,6 +1432,7 @@ function module_code(library_namespace) {
 		return array;
 	}
 
+	// -------------------------------------------
 	var type_index = {
 		string : 0,
 		number : 1,
@@ -1470,6 +1470,7 @@ function module_code(library_namespace) {
 
 		return array;
 	}
+	// -------------------------------------------
 
 	// @see cardinal_1()
 	function unique_sorted_Array() {
@@ -3071,13 +3072,13 @@ function module_code(library_namespace) {
 		frequency : array_frequency,
 		// clone: Array.prototype.slice,
 		append : append_to_Array,
-		sorted : unique_sorted_Array,
+		unique_sorted : unique_sorted_Array,
 		/**
 		 * 去掉已排序，或最起碼將相同元素集在一起之 Array 中重複的 items。
 		 * 
 		 * 應能確保順序不變。
 		 */
-		uniq : function unique_Array(sorted) {
+		unique : function unique_Array(sorted) {
 			if (sorted) {
 				return this.unique_sorted();
 			}
