@@ -400,12 +400,13 @@ function test_native() {
 		assert([ '5|4|9|6|2|aa|a', '5,4,9,6,2,4,6,5,aa,9,a'.split(',').uniq().join('|') ], '.uniq() #4');
 		assert([ false, [].cardinal_1() ], '.cardinal_1() #1');
 		assert([ true, [1].cardinal_1() ], '.cardinal_1() #2');
-		assert([ true, [undefined].cardinal_1() ], '.cardinal_1() #3');
-		assert([ true, [false].cardinal_1() ], '.cardinal_1() #4');
-		assert([ true, [2,2,2,2].cardinal_1() ], '.cardinal_1() #5');
-		assert([ false, [2,3,2,2,2].cardinal_1() ], '.cardinal_1() #6');
-		assert([ false, [3,2,2,2,2].cardinal_1() ], '.cardinal_1() #7');
-		assert([ false, [2,'2',2,2,2,2].cardinal_1() ], '.cardinal_1() #8');
+		assert([ true, [undefined,undefined,undefined].cardinal_1() ], '.cardinal_1() #3');
+		assert([ true, [false,false,false].cardinal_1() ], '.cardinal_1() #4');
+		assert([ true, [NaN,NaN].cardinal_1() ], '.cardinal_1() #5');
+		assert([ true, [2,2,2,2].cardinal_1() ], '.cardinal_1() #6');
+		assert([ false, [2,3,2,2,2].cardina,NaNl_1() ], '.cardinal_1() #7');
+		assert([ false, [3,2,2,2,2].cardinal_1() ], '.cardinal_1() #8');
+		assert([ false, [2,'2',2,2,2,2].cardinal_1() ], '.cardinal_1() #9');
 
 		// 找最後一個匹配的 index。
 		// @see above: '處理搜尋 {RegExp} 的情況'
