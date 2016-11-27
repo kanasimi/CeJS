@@ -15,6 +15,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.platform.nodejs',
 
+	// 設定不匯出的子函式。
+	// no_extend : '*',
+
 	// 為了方便格式化程式碼，因此將 module 函式主體另外抽出。
 	code : module_code
 });
@@ -50,6 +53,7 @@ function module_code(library_namespace) {
 	_// JSDT:_module_
 	.prototype = {};
 
+	/** node.js file system module */
 	var node_fs = require('fs');
 
 	function copy_attributes(source, target) {

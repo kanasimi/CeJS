@@ -5555,7 +5555,7 @@ function module_code(library_namespace) {
 							.err('wiki_API.query: No {Function}callback!');
 				}
 
-			}, undefined, post_data, get_URL_options);
+			}, null, post_data, get_URL_options);
 		}
 	};
 
@@ -9128,10 +9128,12 @@ function module_code(library_namespace) {
 		callback = function(data) { console.log(data); };
 		latest = '20160305';
 		project = 'enwiki';
-		//dump_directory = '~/dumps/';
+		// directory to restore dump files.
+		// 指定 dump file 放置的 directory。
+		// e.g., '/shared/cache/', '/shared/dumps/', '~/dumps/'
 		// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Developing#Using_the_shared_Pywikibot_files_.28recommended_setup.29
 		// /shared/: shared files
-		dump_directory = '/shared/dumps/'
+		dump_directory = '/shared/cache/'
 		filename = project + '-' + latest + '-pages-articles-multistream-index.txt';
 		</code>
 		 */
@@ -10626,7 +10628,10 @@ function module_code(library_namespace) {
 				// last : config.last,
 
 				// directory to restore dump files.
-				// e.g., '/shared/dumps/', '~/dumps/'
+				// 指定 dump file 放置的 directory。
+				// e.g., '/shared/cache/', '/shared/dumps/', '~/dumps/'
+				// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Developing#Using_the_shared_Pywikibot_files_.28recommended_setup.29
+				// /shared/: shared files
 				directory : config.dump_directory
 			});
 			return;
@@ -10871,7 +10876,7 @@ function module_code(library_namespace) {
 
 				}, {
 					session : config[KEY_SESSION],
-					// 指定 dump file 放置的 directory。
+					// directory to restore dump files.
 					directory : config.dump_directory,
 					// options.first(filename) of read_dump()
 					first : function(xml_filename) {

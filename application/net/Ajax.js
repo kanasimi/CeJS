@@ -1045,6 +1045,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		request.write(post_data);
 	}
 
+	/** {Natural}timeout in ms for get URL. */
 	var timeout = options.timeout || get_URL_node.default_timeout, timeout_id,
 	//
 	_ontimeout = function(e) {
@@ -1297,6 +1298,8 @@ if (library_namespace.platform.nodejs) {
 }
 
 //---------------------------------------------------------------------//
+
+// export 導出.
 
 return (
 	_// JSDT:_module_
