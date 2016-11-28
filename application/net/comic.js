@@ -7,12 +7,12 @@
 
 流程:
 
-# 取得伺服器列表
-# 解析設定檔，判別所要下載的作品列表。 start_operation(), get_work_list()
-# 解析 作品名稱 → 作品id get_work()
-# 取得作品的章節資料 get_work_data()
-# 取得每一個章節的各個影像內容資料 get_chapter_data()
-# 取得各個章節的每一個影像內容 get_images()
+// 取得伺服器列表
+// 解析設定檔，判別所要下載的作品列表。 start_operation(), get_work_list()
+// 解析 作品名稱 → 作品id get_work()
+// 取得作品的章節資料 get_work_data()
+// 取得每一個章節的各個影像內容資料 get_chapter_data()
+// 取得各個章節的每一個影像內容 get_images()
 
 </code>
  * 
@@ -94,9 +94,9 @@ function module_code(library_namespace) {
 			// start_time : Date.now(),
 			agent : agent,
 			timeout : Comic_site.timeout,
-			headers : {
+			headers : Object.assign({
 				'User-Agent' : this.user_agent
-			}
+			}, this.headers)
 		};
 	}
 
@@ -108,10 +108,10 @@ function module_code(library_namespace) {
 	Comic_site.timeout = 30 * 1000;
 
 	Comic_site.prototype = {
-		main_directory : library_namespace.platform.nodejs ? process.mainModule.filename
+		main_directory : library_namespace.platform.nodejs
+				&& process.mainModule ? process.mainModule.filename
 				.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '')
-				+ '/'
-				: './',
+				+ '/' : './',
 		// base_URL : '',
 		// 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)',
@@ -228,7 +228,7 @@ function module_code(library_namespace) {
 			if (id_list.length === 1) {
 				id_list = id_list[0];
 			} else {
-				library_namespace.err('[' + work_title + ']: Get '
+				library_namespace.warn('[' + work_title + ']: Get '
 				//
 				+ id_list.length + ' works: ' + JSON.stringify(id_data));
 				if (id_list.every(function(id) {
@@ -243,7 +243,7 @@ function module_code(library_namespace) {
 					id_list = id;
 				})) {
 					// failed
-					library_namespace.warn('未找到與[' + work_title + ']相符者。');
+					library_namespace.err('未找到與[' + work_title + ']相符者。');
 					callback && callback();
 					return;
 				}
@@ -469,7 +469,7 @@ function module_code(library_namespace) {
 				}
 				return;
 			}
-			get_chapter_data(work_data, chapter, callback);
+			_this.get_chapter_data(work_data, chapter, callback);
 		}
 	}
 

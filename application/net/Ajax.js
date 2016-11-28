@@ -836,7 +836,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			// e.g., 301
 			// 不動到原來的 options。
 			options = Object.clone(options);
-			options.URL = result.headers.location;
+			options.URL = node_url.resolve(URL, result.headers.location);
 			library_namespace.debug(result.statusCode
 					+ ' Redirecting to [' + options.URL + '] ← [' + URL + ']', 1, 'get_URL_node');
 			get_URL_node(options, onload, charset, post_data);
@@ -1032,7 +1032,9 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		// console.log(_URL.headers.Cookie);
 	}
 	library_namespace.debug('set protocol: ' + _URL.protocol, 3, 'get_URL_node');
-	// console.log(_URL.headers);
+	if (library_namespace.is_debug(6)) {
+		console.log(_URL.headers);
+	}
 	request = _URL.protocol === 'https:' ? node_https.request(_URL, _onload)
 			: node_http.request(_URL, _onload);
 
