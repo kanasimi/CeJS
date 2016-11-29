@@ -119,7 +119,7 @@ function module_code(library_namespace) {
 		MAX_EOI_ERROR : Math.min(3, Comic_site.MAX_ERROR),
 		// 應改成最小容許圖案檔案大小。
 		MIN_LENGTH : 80,
-		MESSAGE_RE_DOWNLOAD : '下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或不再持續後，重新執行以接續下載。',
+		MESSAGE_RE_DOWNLOAD : '下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
 		// allow .jpg without EOI mark.
 		allow_EOI_error : true,
 		// e.g., '2-1.jpg' → '2-1 bad.jpg'
@@ -141,14 +141,17 @@ function module_code(library_namespace) {
 		// prepare work directory.
 		library_namespace.fs_mkdir(this.main_directory);
 
-		if (work_id.startsWith('l=')) {
-			// e.g.,
-			// node qq_comic.js l=qq.txt
-			// @see http://ac.qq.com/Rank/comicRank/type/pgv
-			var work_list = (library_namespace.fs_read(work_id
-					.slice('l='.length)) || '').toString().replace(
-					/\/\*[\s\S]*?\*\//g, '').replace(/(?:^|\n)#[^\n]*/g, '')
-					.trim().split('\n');
+		// e.g.,
+		// node qq_comic.js l=qq_comic.txt
+		// node qq_comic.js qq_comic.txt
+		// @see http://ac.qq.com/Rank/comicRank/type/pgv
+		if (work_id.startsWith('l=') || node_fs.existsSync(work_id)) {
+			if (work_id.startsWith('l=')) {
+				work_id = work_id.slice('l='.length);
+			}
+			var work_list = (library_namespace.fs_read(work_id) || '')
+					.toString().replace(/\/\*[\s\S]*?\*\//g, '').replace(
+							/(?:^|\n)#[^\n]*/g, '').trim().split('\n');
 			this.get_work_list(work_list);
 		} else {
 			// e.g.,
@@ -200,8 +203,10 @@ function module_code(library_namespace) {
 
 		function finish() {
 			search_result = search_result[work_title];
-			if (_this.id_of_search_result) {
-				search_result = _this.id_of_search_result(search_result);
+			var p = _this.id_of_search_result;
+			if (p) {
+				search_result = typeof p === 'function' ? p(search_result)
+						: search_result ? search_result[p] : search_result;
 			}
 			_this.get_work_data(search_result, callback);
 		}
@@ -232,9 +237,12 @@ function module_code(library_namespace) {
 				//
 				+ id_list.length + ' works: ' + JSON.stringify(id_data));
 				if (id_list.every(function(id) {
-					var title = id_data[id];
-					if (_this.title_of_search_result) {
-						title = _this.title_of_search_result(title);
+					var title = CeL.is_Object(id) ? id : id_data[id],
+					//
+					p = _this.title_of_search_result;
+					if (p) {
+						title = typeof p === 'function' ? p(title)
+								: title ? title[p] : title;
 					}
 					// 找看看是否有完全相同的title。
 					if (title !== work_title) {
@@ -276,11 +284,11 @@ function module_code(library_namespace) {
 			if (!html) {
 				library_namespace.err('Failed to get work data of ' + work_id);
 				if (error_count > 4) {
-					throw MESSAGE_RE_DOWNLOAD;
+					throw _this.MESSAGE_RE_DOWNLOAD;
 				}
 				error_count = (error_count | 0) + 1;
 				library_namespace.log('Retry ' + error_count + '...');
-				this.get_work_data(work_id, callback, error_count);
+				_this.get_work_data(work_id, callback, error_count);
 				return;
 			}
 
@@ -292,6 +300,7 @@ function module_code(library_namespace) {
 				chapter : 1
 			};
 
+			// .title: 必要屬性：須配合網站平台更改。
 			process.title = '下載' + work_data.title;
 			work_data.directory_name = library_namespace
 					.to_file_name(work_data.id + ' ' + work_data.title);
@@ -305,6 +314,7 @@ function module_code(library_namespace) {
 			library_namespace.fs_write(matched + work_data.directory_name
 					+ '.htm', html);
 
+			// .status 選擇性屬性：須配合網站平台更改。
 			if (work_data.status === '已完结') {
 				library_namespace.fs_write(work_data.directory
 				//
@@ -378,7 +388,7 @@ function module_code(library_namespace) {
 					library_namespace.err('Failed to get chapter data of '
 							+ work_data.directory + chapter);
 					if (get_data.error_count > _this.MAX_ERROR) {
-						throw MESSAGE_RE_DOWNLOAD;
+						throw _this.MESSAGE_RE_DOWNLOAD;
 					}
 					get_data.error_count = (get_data.error_count | 0) + 1;
 					library_namespace.log('Retry ' + get_data.error_count
@@ -387,8 +397,12 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				var chapter_data = _this.parse_chapter_data(html, work_data);
-				if (!chapter_data || !(left = chapter_data.image_count) >= 1) {
+				var chapter_data = _this.parse_chapter_data(html, work_data, get_label);
+				if (!chapter_data || !(image_list = chapter_data.image_list)
+				//
+				|| !((left = chapter_data.image_count) >= 1)
+				//
+				&& !((left = image_list.length) >= 1)) {
 					library_namespace.debug(work_data.directory_name + ' #'
 							+ chapter + '/' + work_data.chapter_count
 							+ ': No image get.');
@@ -398,6 +412,13 @@ function module_code(library_namespace) {
 					return;
 				}
 				// console.log(chapter_data);
+				if (left !== image_list.length) {
+					library_namespace.err('所登記的圖形數量' + left + '與有資料的圖形數量'
+							+ image_list.length + '不同!');
+					if (left > image_list.length) {
+						left = image_list.length;
+					}
+				}
 
 				chapter_label = chapter_data.title;
 				chapter_label = chapter.pad(4) + (chapter_label ? ' '
@@ -417,7 +438,6 @@ function module_code(library_namespace) {
 				// 例如需要收費的章節。
 				+ (chapter_data.limited ? ' (limited)' : ''));
 
-				image_list = chapter_data.image_list;
 				// console.log(image_list);
 				// TODO: 當某 chapter 檔案過多，將一次 request 過多 connects 而造成問題。
 				image_list.forEach(function(image_data, index) {
@@ -427,11 +447,31 @@ function module_code(library_namespace) {
 					// file_path
 					image_data.file = chapter_directory + work_data.id + '-'
 							+ chapter + '-' + (index + 1).pad(3) + '.jpg';
-					_this.get_images(image_data, check_if_done);
+					// default: 同時下載本章節中所有圖像。
+					if (!_this.one_by_one) {
+						_this.get_images(image_data, check_if_done);
+					}
 				});
 				library_namespace.debug(chapter_label + ': 已派發完工作，開始等待。', 3,
 						'get_data');
 				waiting = true;
+				if (!_this.one_by_one) {
+					return;
+				}
+				// TODO: 循序逐個一個個下載。 download one by one
+				image_list.index = 0;
+				var next_1 = function(first) {
+					if (!first) {
+						++image_list.index;
+						check_if_done();
+					}
+					process.stdout.write(image_list.index + '/'
+							+ image_list.length + '...\r');
+					if (image_list.index < image_list.length) {
+						_this.get_images(image_list[image_list.index], next_1);
+					}
+				};
+				next_1(true);
 			}, null, null, _this.get_URL_options);
 		}
 		get_data();
@@ -441,8 +481,8 @@ function module_code(library_namespace) {
 			process.stdout.write(left + ' left...\r');
 			library_namespace.debug(chapter_label + ': ' + left + ' left', 3,
 					'check_if_done');
-			// 須注意若是最後一張圖get_images()直接 return 了，此時尚未設定 waiting，因此此處不可以 waiting
-			// 判斷！
+			// 須注意若是最後一張圖get_images()直接 return 了，
+			// 此時尚未設定 waiting，因此此處不可以 waiting 判斷！
 			if (left > 0) {
 				// 還有尚未取得的檔案。
 				if (waiting && left < 2) {
@@ -491,10 +531,15 @@ function module_code(library_namespace) {
 			image_data.file_length = [];
 		}
 
-		var _this = this;
-		get_URL(image_data.url, function(XMLHttp) {
+		var _this = this, url = image_data.url;
+		if (url.startsWith('/')) {
+			url = this.base_URL + url.slice(1);
+		}
+		get_URL(url, function(XMLHttp) {
 			var contents = XMLHttp.responseText, has_EOI;
-			if (contents && contents.length > _this.MIN_LENGTH) {
+			if (contents && contents.length > _this.MIN_LENGTH
+			//
+			&& (XMLHttp.status / 100 | 0) === 2) {
 				image_data.file_length.push(contents.length);
 				// check End Of Image of .jpeg
 				// http://stackoverflow.com/questions/4585527/detect-eof-for-jpg-images
@@ -502,7 +547,7 @@ function module_code(library_namespace) {
 				// When you get to FFD9 you're at the end of the stream.
 				&& contents[contents.length - 1] === 217;
 
-				if (has_EOI || allow_EOI_error
+				if (has_EOI || _this.allow_EOI_error
 				//
 				&& image_data.file_length.length > _this.MAX_EOI_ERROR
 				// 若是每次都得到相同的檔案長度，那就當作來源檔案本來就有問題。
@@ -510,7 +555,7 @@ function module_code(library_namespace) {
 					// 過了。
 					if (has_EOI === false) {
 						library_namespace.warn('Do not has EOI: '
-								+ image_data.file + '\n← ' + image_data.url);
+								+ image_data.file + '\n← ' + url);
 						image_data.file
 						//
 						= _this.EOI_error_path(image_data.file);
@@ -525,13 +570,13 @@ function module_code(library_namespace) {
 
 			// 有錯誤。
 			library_namespace.err((has_EOI === false ? 'Do not has EOI: '
-					: 'Failed to get ')
-					+ image_data.url + '\n→ ' + image_data.file);
-			library_namespace.err('Failed to get ' + image_data.url + '\n→ '
+					: XMLHttp.status + ': Failed to get ')
+					+ url + '\n→ ' + image_data.file);
+			library_namespace.err('Failed to get ' + url + '\n→ '
 					+ image_data.file);
 			if (image_data.error_count > _this.MAX_ERROR) {
-				// throw new Error(MESSAGE_RE_DOWNLOAD);
-				library_namespace.log(MESSAGE_RE_DOWNLOAD);
+				// throw new Error(_this.MESSAGE_RE_DOWNLOAD);
+				library_namespace.log(_this.MESSAGE_RE_DOWNLOAD);
 				process.exit(1);
 			}
 
