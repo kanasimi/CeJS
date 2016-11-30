@@ -7,12 +7,12 @@
 
 流程:
 
-// 取得伺服器列表
-// 解析設定檔，判別所要下載的作品列表。 start_operation(), get_work_list()
+// 取得伺服器列表。 start_operation()
+// 解析設定檔，判別所要下載的作品列表。 parse_work_id(), get_work_list()
 // 解析 作品名稱 → 作品id get_work()
-// 取得作品的章節資料 get_work_data()
-// 取得每一個章節的各個影像內容資料 get_chapter_data()
-// 取得各個章節的每一個影像內容 get_images()
+// 取得作品的章節資料。 get_work_data()
+// 取得每一個章節的各個影像內容資料。 get_chapter_data()
+// 取得各個章節的每一個影像內容。 get_images()
 
 </code>
  * 
@@ -122,12 +122,15 @@ function module_code(library_namespace) {
 		MESSAGE_RE_DOWNLOAD : '下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
 		// allow .jpg without EOI mark.
 		allow_EOI_error : true,
+		//
+		skip_error : true,
 		// e.g., '2-1.jpg' → '2-1 bad.jpg'
 		EOI_error_postfix : ' bad',
 		// 加上有錯誤檔案之註記。
 		EOI_error_path : EOI_error_path,
 
 		start : start_operation,
+		parse_work_id : parse_work_id,
 		get_work_list : get_work_list,
 		get_work : get_work,
 		get_work_data : get_work_data,
@@ -141,6 +144,41 @@ function module_code(library_namespace) {
 		// prepare work directory.
 		library_namespace.fs_mkdir(this.main_directory);
 
+		if (!this.server_URL) {
+			this.parse_work_id(work_id);
+			return;
+		}
+
+		var _this = this,
+		// host_file
+		server_file = this.main_directory + 'servers.json';
+
+		if (this.use_server_cache
+		// host_list
+		&& (this.server_list = library_namespace.get_JSON(server_file))) {
+			// use cache of host list
+			this.parse_work_id(work_id);
+			return;
+		}
+
+		// 取得伺服器列表。
+		get_URL(typeof this.server_URL === 'function' ? this.server_URL()
+				: this.server_URL, function(XMLHttp) {
+			var html = XMLHttp.responseText;
+			_this.server_list = _this.parse_server_list(html)
+			// 確保有東西。
+			.filter(function(server) {
+				return !!server;
+			}).unique();
+			library_namespace.log('Get ' + _this.server_list.length
+					+ ' servers: ' + _this.server_list);
+			library_namespace.fs_write(server_file, JSON
+					.stringify(_this.server_list));
+			_this.parse_work_id(work_id);
+		}, null, null, this.get_URL_options);
+	}
+
+	function parse_work_id(work_id) {
 		// e.g.,
 		// node qq_comic.js l=qq_comic.txt
 		// node qq_comic.js qq_comic.txt
@@ -237,7 +275,8 @@ function module_code(library_namespace) {
 				//
 				+ id_list.length + ' works: ' + JSON.stringify(id_data));
 				if (id_list.every(function(id) {
-					var title = CeL.is_Object(id) ? id : id_data[id],
+					var title = library_namespace.is_Object(id) ? id
+							: id_data[id],
 					//
 					p = _this.title_of_search_result;
 					if (p) {
@@ -335,7 +374,9 @@ function module_code(library_namespace) {
 					}
 				}
 				matched = matched.last_download.chapter;
-				if (matched > 1) {
+				if (matched > 1
+				// recheck:從頭檢測所有作品之所有章節。
+				&& !_this.recheck) {
 					// 起始下載的start_chapter章节
 					work_data.last_download.chapter = matched;
 				}
@@ -397,7 +438,9 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				var chapter_data = _this.parse_chapter_data(html, work_data, get_label);
+				var chapter_data = _this.parse_chapter_data(html, work_data,
+						get_label);
+				// console.log(JSON.stringify(chapter_data));
 				if (!chapter_data || !(image_list = chapter_data.image_list)
 				//
 				|| !((left = chapter_data.image_count) >= 1)
@@ -513,8 +556,10 @@ function module_code(library_namespace) {
 		}
 	}
 
-	function EOI_error_path(path) {
-		return path.replace(/(\.[^.]*)$/, this.EOI_error_postfix + '$1');
+	function EOI_error_path(path, XMLHttp) {
+		return path.replace(/(\.[^.]*)$/, this.EOI_error_postfix
+		// + (XMLHttp && XMLHttp.status ? ' ' + XMLHttp.status : '')
+		+ '$1');
 	}
 
 	function get_images(image_data, callback) {
@@ -527,41 +572,68 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		var _this = this, url = image_data.url, server = this.server_list;
+		if (server) {
+			server = server[server.length * Math.random() | 0];
+			if (!server.includes('://')) {
+				server = 'http://' + server;
+			}
+			url = server + url;
+		} else if (url.startsWith('/')) {
+			url = this.base_URL + url.slice(1);
+		}
+
 		if (!image_data.file_length) {
 			image_data.file_length = [];
 		}
 
-		var _this = this, url = image_data.url;
-		if (url.startsWith('/')) {
-			url = this.base_URL + url.slice(1);
-		}
 		get_URL(url, function(XMLHttp) {
-			var contents = XMLHttp.responseText, has_EOI;
-			if (contents && contents.length > _this.MIN_LENGTH
+			var contents = XMLHttp.responseText,
 			//
-			&& (XMLHttp.status / 100 | 0) === 2) {
-				image_data.file_length.push(contents.length);
+			has_error = !contents || !(contents.length > _this.MIN_LENGTH)
+					|| (XMLHttp.status / 100 | 0) !== 2, has_EOI;
+			if (!has_error) {
 				// check End Of Image of .jpeg
 				// http://stackoverflow.com/questions/4585527/detect-eof-for-jpg-images
 				has_EOI = contents[contents.length - 2] === 255
 				// When you get to FFD9 you're at the end of the stream.
 				&& contents[contents.length - 1] === 217;
-
-				if (has_EOI || _this.allow_EOI_error
+			}
+			if (!has_error || _this.skip_error
+					&& image_data.error_count === _this.MAX_ERROR) {
+				if (!has_error) {
+					image_data.file_length
+					//
+					.push(contents ? contents.length : 0);
+				}
+				if (has_EOI || _this.skip_error || _this.allow_EOI_error
 				//
 				&& image_data.file_length.length > _this.MAX_EOI_ERROR
 				// 若是每次都得到相同的檔案長度，那就當作來源檔案本來就有問題。
 				&& image_data.file_length.cardinal_1()) {
 					// 過了。
-					if (has_EOI === false) {
-						library_namespace.warn('Do not has EOI: '
-								+ image_data.file + '\n← ' + url);
-						image_data.file
+					if (has_error || has_EOI === false) {
+						image_data.file = _this.EOI_error_path(image_data.file,
+								XMLHttp);
+						library_namespace.warn(
 						//
-						= _this.EOI_error_path(image_data.file);
+						(has_error ? 'Force saving bad image'
+						//
+						+ (XMLHttp.status ? ' (' + XMLHttp.status + ')' : '')
+						//
+						+ ': ' : 'Do not has EOI: ')
+						//
+						+ image_data.file + '\n← ' + url);
+						if (!contents
+						// 404之類，就算有內容，也不過是錯誤訊息頁面。
+						|| (XMLHttp.status / 100 | 0) === 4) {
+							contents = '';
+						}
 					}
 
-					library_namespace.fs_write(image_data.file, contents);
+					library_namespace
+					//
+					.fs_write(image_data.file, contents);
 					image_data.done = true;
 					callback && callback();
 					return;
@@ -570,7 +642,10 @@ function module_code(library_namespace) {
 
 			// 有錯誤。
 			library_namespace.err((has_EOI === false ? 'Do not has EOI: '
-					: XMLHttp.status + ': Failed to get ')
+			//
+			: (XMLHttp.status ? XMLHttp.status + ' ' : '')
+			//
+			+ '(' + (contents ? contents.length : 0) + ' B): Failed to get ')
 					+ url + '\n→ ' + image_data.file);
 			library_namespace.err('Failed to get ' + url + '\n→ '
 					+ image_data.file);

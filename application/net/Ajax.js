@@ -1035,8 +1035,15 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 	if (library_namespace.is_debug(6)) {
 		console.log(_URL.headers);
 	}
-	request = _URL.protocol === 'https:' ? node_https.request(_URL, _onload)
-			: node_http.request(_URL, _onload);
+	try {
+		request = _URL.protocol === 'https:' ? node_https.request(_URL, _onload)
+				: node_http.request(_URL, _onload);
+	} catch (e) {
+		// e.g., _http_client.js:52
+		// throw new TypeError('Request path contains unescaped characters');
+		_onfail(e);
+		return;
+	}
 
 	if (post_data) {
 		// console.log(post_data);
