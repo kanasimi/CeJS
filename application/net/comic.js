@@ -131,6 +131,9 @@ function module_code(library_namespace) {
 
 		start : start_operation,
 		parse_work_id : parse_work_id,
+		is_work_id : function(work_id) {
+			return work_id > 0;
+		},
 		get_work_list : get_work_list,
 		get_work : get_work,
 		get_work_data : get_work_data,
@@ -179,19 +182,25 @@ function module_code(library_namespace) {
 	}
 
 	function parse_work_id(work_id) {
-		// e.g.,
-		// node qq_comic.js l=qq_comic.txt
-		// node qq_comic.js qq_comic.txt
-		// @see http://ac.qq.com/Rank/comicRank/type/pgv
+		work_id = String(work_id);
+
 		if (work_id.startsWith('l=') || node_fs.existsSync(work_id)) {
+			// e.g.,
+			// node qq_comic.js l=qq_comic.txt
+			// node qq_comic.js qq_comic.txt
+			// @see http://ac.qq.com/Rank/comicRank/type/pgv
 			if (work_id.startsWith('l=')) {
 				work_id = work_id.slice('l='.length);
 			}
 			var work_list = (library_namespace.fs_read(work_id) || '')
 					.toString().replace(/\/\*[\s\S]*?\*\//g, '').replace(
-							/(?:^|\n)#[^\n]*/g, '').trim().split('\n');
+							/\/\/[^\n]*/g, '')
+					// 去掉BOM (byte order mark)
+					.trim().replace(/(?:^|\n)#[^\n]*/g, '').trim().split(
+							/[\r\n]+/);
 			this.get_work_list(work_list);
-		} else {
+
+		} else if (work_id) {
 			// e.g.,
 			// node qq_comic.js 12345
 			// node qq_comic.js ABC
@@ -200,7 +209,20 @@ function module_code(library_namespace) {
 	}
 
 	function get_work_list(work_list) {
-		var _this = this, next_index = 0, work_count = 0;
+		// console.log(work_list);
+		var _this = this, next_index = 0,
+		// 真正處理的作品數。
+		work_count = 0;
+
+		function insert_id(id_list) {
+			if (Array.isArray(id_list)) {
+				// 插入list。
+				id_list.forEach(function(id, index) {
+					work_list.splice(next_index + index, 0, id);
+				});
+			}
+			get_next_work();
+		}
 
 		function get_next_work() {
 			if (next_index === work_list.length) {
@@ -208,17 +230,27 @@ function module_code(library_namespace) {
 						+ ' works done.');
 				return;
 			}
+
 			var work_title = work_list[next_index++].trim();
-			if (work_title) {
+			if (!work_title) {
+				// 直接進入下一個work_title。
+				get_next_work();
+
+			} else if (_this.convert_id
+			// convert special work id: function(callback, type)
+			// 警告: 需要自行呼叫 callback(id_list);
+			&& typeof _this.convert_id[work_title] === 'function') {
+				_this.convert_id[work_title].call(_this, insert_id, work_title);
+
+			} else {
 				work_count++;
 				library_namespace.log('Download ' + work_count
 						+ (work_count === next_index ? '' : '/' + next_index)
 						+ '/' + work_list.length + ': ' + work_title);
 				_this.get_work(work_title, get_next_work);
-			} else {
-				get_next_work();
 			}
 		}
+
 		get_next_work();
 	}
 
@@ -226,7 +258,7 @@ function module_code(library_namespace) {
 
 	function get_work(work_title, callback) {
 		// 先取得 work id
-		if (work_title > 0) {
+		if (this.is_work_id(work_title)) {
 			// is work id
 			this.get_work_data(work_title, callback);
 			return;
