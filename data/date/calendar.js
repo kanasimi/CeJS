@@ -3859,12 +3859,15 @@ function Date_to_Thai(date, month, year, weekday) {
 			(weekday = Date_to_Thai.weekday_name[weekday]) ? 'วัน' + weekday
 					: '', date || '', Date_to_Thai.month_name[month] || '',
 			year || '' ];
-	if (date[0] && (date[1] || date[2] || date[3]))
+	if (date[0] && (date[1] || date[2] || date[3])) {
 		date[0] += 'ที่';
+	}
 
-	if (!date[2] && !isNaN(date[3]))
+	if (!date[2] && !isNaN(date[3])) {
 		// year only?
+		// add 佛滅紀元 พุทธศักราช
 		date[3] = 'พ.ศ. ' + date[3];
+	}
 
 	year = [];
 	date.forEach(function(n) {

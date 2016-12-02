@@ -417,7 +417,8 @@ function module_code(library_namespace) {
 			}
 
 			if (!matched[3]) {
-				this[matched[2]] = undefined;
+				// e.g., "script.js force": force=true
+				this[matched[2]] = true;
 				return;
 			}
 

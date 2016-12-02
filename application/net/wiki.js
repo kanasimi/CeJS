@@ -4421,6 +4421,8 @@ function module_code(library_namespace) {
 			minor : 1,
 			// 標記此編輯為機器人編輯。[[WP:AL|機器人對其他使用者對話頁的小修改將不會觸發新訊息提示]]。
 			bot : 1,
+			// [[Special:tags]]
+			// tags : 'bot|test',
 			// 設定寫入目標。一般為 debug、test 測試期間用。
 			write_to : '',
 			// 採用 skip_nochange 可以跳過實際 edit 的動作。
@@ -11852,6 +11854,11 @@ function module_code(library_namespace) {
 	 *      https://www.wikidata.org/wiki/Special:ListDatatypes
 	 */
 	function wikidata_datavalue(value, callback, options) {
+		if (library_namespace.is_Object(callback) && !options) {
+			// shift arguments.
+			options = callback;
+			callback = undefined;
+		}
 		if (options && options.multi && !Array.isArray(value)) {
 			delete options.multi;
 			if (typeof callback === 'function') {
