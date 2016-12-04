@@ -28,7 +28,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 
 ### Installation
 First, go to [nodejs.org](https://nodejs.org/), download the runtime environment and install the node.js package.
-請先安裝 [nodejs.org](https://nodejs.org/)。
+請先安裝 [node.js](https://nodejs.org/)。
 
 Then, install the CeJS library:
 接著安裝 CeJS library:
@@ -49,7 +49,7 @@ require('cejs');
 // CeL.run( 'module.name', function callback() { /* ... */ } );
 CeL.run([ 'data.math', 'application.debug.log' ]);
 
-// Running code.
+// Running codes.
 CeL.assert(CeL.GCD(48, 64) === 16);
 CeL.assert([ "2³⋅13⋅80611⋅82217",
 		CeL.factorize(689269837048).toString() ], 'factorize');
