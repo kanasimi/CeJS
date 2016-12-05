@@ -24,7 +24,7 @@
  * @since 2016/11/27 19:7:2 模組化。
  */
 
-// More examples: see qq_comic.js
+// More examples: see 各漫畫網站工具檔.js
 'use strict';
 // 'use asm';
 
@@ -60,7 +60,9 @@ function module_code(library_namespace) {
 	// requiring
 	var get_URL = this.r('get_URL'),
 	/** node.js file system module */
-	node_fs = library_namespace.platform.nodejs && require('fs');
+	node_fs = library_namespace.platform.nodejs && require('fs'),
+	// @see CeL.application.net.wiki
+	PATTERN_non_CJK = /^[\u0000-\u2E7F]*$/i;
 
 	/**
 	 * null module constructor
@@ -128,6 +130,7 @@ function module_code(library_namespace) {
 		EOI_error_postfix : ' bad',
 		// 加上有錯誤檔案之註記。
 		EOI_error_path : EOI_error_path,
+		image_path_to_url : image_path_to_url,
 
 		start : start_operation,
 		parse_work_id : parse_work_id,
@@ -181,13 +184,15 @@ function module_code(library_namespace) {
 		}, null, null, this.get_URL_options);
 	}
 
+	// ----------------------------------------------------------------------------
+
 	function parse_work_id(work_id) {
 		work_id = String(work_id);
 
 		if (work_id.startsWith('l=') || node_fs.existsSync(work_id)) {
 			// e.g.,
-			// node qq_comic.js l=qq_comic.txt
-			// node qq_comic.js qq_comic.txt
+			// node 各漫畫網站工具檔.js l=各漫畫網站工具檔.txt
+			// node 各漫畫網站工具檔.js 各漫畫網站工具檔.txt
 			// @see http://ac.qq.com/Rank/comicRank/type/pgv
 			if (work_id.startsWith('l=')) {
 				work_id = work_id.slice('l='.length);
@@ -202,8 +207,8 @@ function module_code(library_namespace) {
 
 		} else if (work_id) {
 			// e.g.,
-			// node qq_comic.js 12345
-			// node qq_comic.js ABC
+			// node 各漫畫網站工具檔.js 12345
+			// node 各漫畫網站工具檔.js ABC
 			this.get_work(work_id);
 		}
 	}
@@ -271,7 +276,11 @@ function module_code(library_namespace) {
 		search_result = library_namespace.get_JSON(search_result_file)
 				|| library_namespace.null_Object();
 
-		function finish() {
+		function finish(no_cache) {
+			if (!no_cache) {
+				// write cache
+				library_namespace.fs_write(search_result_file, search_result);
+			}
 			search_result = search_result[work_title];
 			var p = _this.id_of_search_result;
 			if (p) {
@@ -282,15 +291,29 @@ function module_code(library_namespace) {
 		}
 
 		if (search_result[work_title = work_title.trim()]) {
-			library_namespace.log('Find cache: ' + work_title + '→'
+			library_namespace.log('Find cache: ' + work_title + ' → '
 					+ JSON.stringify(search_result[work_title]));
-			finish();
+			finish(true);
 			return;
 		}
 
-		get_URL(typeof this.search_URL === 'function' ? this
-				.search_URL(work_title) : this.search_URL
-				+ encodeURIComponent(work_title), function(XMLHttp) {
+		var url = this.search_URL;
+		if (!url || typeof this.parse_search_result !== 'function') {
+			throw '請手動設定/輸入 [' + work_title + '] 之 id 於 ' + search_result_file;
+		}
+		if (typeof url === 'function') {
+			// url = url.call(this, work_title);
+			url = this.search_URL(work_title);
+		} else {
+			// assert: typeof url==='string'
+			if (!url.includes('://')) {
+				url = this.base_URL + url;
+			}
+			url = url + encodeURIComponent(
+			// e.g., 找不到"隔离带 2"，須找"隔离带"。
+			work_title.replace(/\s+\d+$/, ''));
+		}
+		get_URL(url, function(XMLHttp) {
 			// this.parse_search_result() returns:
 			// [ id_list, 與id_list相對應之{Array}或{Object} ]
 			// e.g., [ [id,id,...], [title,title,...] ]
@@ -298,34 +321,35 @@ function module_code(library_namespace) {
 			// e.g., [ [id,id,...], {id:data,id:data,...} ]
 			var id_data = _this.parse_search_result(XMLHttp.responseText),
 			// {Array}id_list = [id,id,...]
-			id_list = id_data[0];
+			id_list = id_data[0] || [];
+			// console.log(id_data);
 			id_data = id_data[1];
-			if (id_list.length === 1) {
-				id_list = id_list[0];
-			} else {
+			if (id_list.length !== 1) {
 				library_namespace.warn('[' + work_title + ']: Get '
 				//
 				+ id_list.length + ' works: ' + JSON.stringify(id_data));
-				if (id_list.every(function(id) {
-					var title = library_namespace.is_Object(id) ? id
-							: id_data[id],
-					//
-					p = _this.title_of_search_result;
-					if (p) {
-						title = typeof p === 'function' ? p(title)
-								: title ? title[p] : title;
-					}
-					// 找看看是否有完全相同的title。
-					if (title !== work_title) {
-						return true;
-					}
-					id_list = id;
-				})) {
-					// failed
-					library_namespace.err('未找到與[' + work_title + ']相符者。');
-					callback && callback();
-					return;
+			}
+
+			if (id_list.every(function(id, index) {
+				var title = library_namespace.is_Object(id) ? id
+				//
+				: id_data[Array.isArray(id_data) && isNaN(id) ? index : id],
+				//
+				p = _this.title_of_search_result;
+				if (p) {
+					title = typeof p === 'function' ? p(title)
+							: title ? title[p] : title;
 				}
+				// 找看看是否有完全相同的title。
+				if (title !== work_title) {
+					return true;
+				}
+				id_list = id;
+			})) {
+				// failed
+				library_namespace.err('未找到與[' + work_title + ']相符者。');
+				callback && callback();
+				return;
 			}
 
 			// 已確認僅找到唯一id。
@@ -333,9 +357,13 @@ function module_code(library_namespace) {
 			search_result[work_title] = typeof id_data === 'object'
 			// {Array}或{Object}
 			? id_data : id_list;
-			// write cache
-			library_namespace.fs_write(search_result_file, search_result);
-			finish();
+			if (typeof _this.post_get_work_id === 'function') {
+				// post_get_work_id :
+				// function(callback, work_title, search_result) {}
+				_this.post_get_work_id(finish, work_title, search_result);
+			} else {
+				finish();
+			}
 
 		}, null, null, this.get_URL_options);
 	}
@@ -364,6 +392,13 @@ function module_code(library_namespace) {
 			}
 
 			var work_data = _this.parse_work_data(html, get_label);
+			// 基本檢測。
+			// .title: 必要屬性：須配合網站平台更改。
+			if (PATTERN_non_CJK.test(work_data.title)
+					&& PATTERN_non_CJK.test(work_id)) {
+				library_namespace.err('Did not set work title: ' + work_id);
+			}
+
 			// 自動添加之作業用屬性：
 			work_data.id = work_id;
 			work_data.last_download = {
@@ -371,7 +406,6 @@ function module_code(library_namespace) {
 				chapter : 1
 			};
 
-			// .title: 必要屬性：須配合網站平台更改。
 			process.title = '下載' + work_data.title;
 			work_data.directory_name = library_namespace
 					.to_file_name(work_data.id + ' ' + work_data.title);
@@ -588,6 +622,13 @@ function module_code(library_namespace) {
 		}
 	}
 
+	function image_path_to_url(path, server) {
+		if (!server.includes('://')) {
+			server = 'http://' + server;
+		}
+		return server + path;
+	}
+
 	function EOI_error_path(path, XMLHttp) {
 		return path.replace(/(\.[^.]*)$/, this.EOI_error_postfix
 		// + (XMLHttp && XMLHttp.status ? ' ' + XMLHttp.status : '')
@@ -607,10 +648,7 @@ function module_code(library_namespace) {
 		var _this = this, url = image_data.url, server = this.server_list;
 		if (server) {
 			server = server[server.length * Math.random() | 0];
-			if (!server.includes('://')) {
-				server = 'http://' + server;
-			}
-			url = server + url;
+			url = this.image_path_to_url(url, server, image_data);
 		} else if (url.startsWith('/')) {
 			url = this.base_URL + url.slice(1);
 		}

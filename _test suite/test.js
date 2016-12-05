@@ -2665,9 +2665,9 @@ function test_wiki() {
 		}, {get_id:true, type:'property'});
 
 		_setup_test('wiki: CeL.wiki.data.search().use_cache');
-		CeL.wiki.data.search.use_cache('兄弟', function(id) {
+		CeL.wiki.data.search.use_cache('視訊', function(id) {
 			var test_name = 'wiki: CeL.wiki.data.search().use_cache';
-			assert([ 'P7', id ], test_name);
+			assert([ 'P10', id ], test_name);
 			_finish_test(test_name);
 		});
 
