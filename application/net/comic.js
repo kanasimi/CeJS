@@ -84,6 +84,13 @@ function module_code(library_namespace) {
 
 	function Comic_site(configurations) {
 		Object.assign(this, configurations);
+		if (!this.id) {
+			this.id = this.main_directory.replace(/[\\\/]+$/, '');
+		}
+		if (!configurations.MESSAGE_RE_DOWNLOAD) {
+			this.MESSAGE_RE_DOWNLOAD = this.id + ': '
+					+ this.MESSAGE_RE_DOWNLOAD;
+		}
 
 		// 初始化 agent。
 		// create and keep a new agent. 維持一個獨立的 agent。
@@ -97,7 +104,8 @@ function module_code(library_namespace) {
 			agent : agent,
 			timeout : Comic_site.timeout,
 			headers : Object.assign({
-				'User-Agent' : this.user_agent
+				'User-Agent' : this.user_agent,
+				Referer : this.base_URL
 			}, this.headers)
 		};
 	}
@@ -119,8 +127,8 @@ function module_code(library_namespace) {
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)',
 		MAX_ERROR : Comic_site.MAX_ERROR,
 		MAX_EOI_ERROR : Math.min(3, Comic_site.MAX_ERROR),
-		// 應改成最小容許圖案檔案大小。
-		MIN_LENGTH : 80,
+		// 應改成最小容許圖案檔案大小 (bytes)。
+		MIN_LENGTH : 6e3,
 		MESSAGE_RE_DOWNLOAD : '下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
 		// allow .jpg without EOI mark.
 		allow_EOI_error : true,
@@ -130,13 +138,18 @@ function module_code(library_namespace) {
 		EOI_error_postfix : ' bad',
 		// 加上有錯誤檔案之註記。
 		EOI_error_path : EOI_error_path,
-		image_path_to_url : image_path_to_url,
 
-		start : start_operation,
-		parse_work_id : parse_work_id,
+		image_path_to_url : image_path_to_url,
 		is_work_id : function(work_id) {
 			return work_id > 0;
 		},
+		is_finished : function(work_data) {
+			return work_data.status === '已完结';
+		},
+		pre_get_chapter_data : pre_get_chapter_data,
+
+		start : start_operation,
+		parse_work_id : parse_work_id,
 		get_work_list : get_work_list,
 		get_work : get_work,
 		get_work_data : get_work_data,
@@ -147,6 +160,11 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function start_operation(work_id) {
+		if (!work_id) {
+			library_namespace.log(this.id + ': 沒有輸入 work_id!');
+			return;
+		}
+		library_namespace.log(this.id + ': Strating ' + work_id);
 		// prepare work directory.
 		library_namespace.fs_mkdir(this.main_directory);
 
@@ -197,12 +215,11 @@ function module_code(library_namespace) {
 			if (work_id.startsWith('l=')) {
 				work_id = work_id.slice('l='.length);
 			}
-			var work_list = (library_namespace.fs_read(work_id) || '')
-					.toString().replace(/\/\*[\s\S]*?\*\//g, '').replace(
-							/\/\/[^\n]*/g, '')
-					// 去掉BOM (byte order mark)
-					.trim().replace(/(?:^|\n)#[^\n]*/g, '').trim().split(
-							/[\r\n]+/);
+			var work_list = (library_namespace.fs_read(work_id).toString() || '')
+			//
+			.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+			// 去掉BOM (byte order mark)
+			.trim().replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/);
 			this.get_work_list(work_list);
 
 		} else if (work_id) {
@@ -369,15 +386,15 @@ function module_code(library_namespace) {
 	}
 
 	function get_label(html) {
-		return library_namespace.HTML_to_Unicode(html.replace(/<[^<>]+>/g, ''));
+		return library_namespace.HTML_to_Unicode(html.replace(/<[^<>]+>/g, ''))
+				.trim();
 	}
 
 	function get_work_data(work_id, callback, error_count) {
-		var _this = this;
-		get_URL(typeof this.work_URL === 'function' ? this.work_URL(work_id)
-				: this.work_URL + encodeURIComponent(work_id),
-		//
-		function(XMLHttp) {
+		var _this = this, work_URL = typeof this.work_URL === 'function' ? this
+				.work_URL(work_id) : this.work_URL
+				+ encodeURIComponent(work_id);
+		get_URL(work_URL, function(XMLHttp) {
 			// console.log(XMLHttp);
 			var html = XMLHttp.responseText;
 			if (!html) {
@@ -420,7 +437,7 @@ function module_code(library_namespace) {
 					+ '.htm', html);
 
 			// .status 選擇性屬性：須配合網站平台更改。
-			if (work_data.status === '已完结') {
+			if (_this.is_finished(work_data)) {
 				library_namespace.fs_write(work_data.directory
 				//
 				+ 'finished.txt', work_data.status);
@@ -453,21 +470,28 @@ function module_code(library_namespace) {
 			work_data.chapter_count = 0;
 			_this.get_chapter_count(work_data, html);
 			if (work_data.chapter_count >= 1) {
-				library_namespace.log(work_data.id
+				var message = [ work_data.id, ' ', work_data.title,
 				//
-				+ ' ' + work_data.title + ': '
+				': ', typeof _this.pre_chapter_URL === 'function'
 				//
-				+ work_data.chapter_count + ' chapters.'
+				? 'Unknown' : work_data.chapter_count, ' chapters.',
 				//
-				+ (work_data.status ? ' ' + work_data.status : '')
+				work_data.status ? ' ' + work_data.status : '',
 				//
-				+ (work_data.last_download.chapter > 1 ? ' 自章節編號第 '
+				work_data.last_download.chapter > 1 ? ' 自章節編號第 '
 				//
-				+ work_data.last_download.chapter + ' 接續下載。' : ''));
+				+ work_data.last_download.chapter + ' 接續下載。' : '' ].join('');
+				if (_this.is_finished(work_data)) {
+					// 針對特殊狀況提醒。
+					library_namespace.info(message);
+				} else {
+					library_namespace.log(message);
+				}
 				library_namespace.fs_mkdir(work_data.directory);
 				library_namespace.fs_write(work_data.data_file, work_data);
-				// 開始下載
-				_this.get_chapter_data(work_data,
+				_this.get_URL_options.headers.Referer = work_URL;
+				// 開始下載chapter。
+				_this.pre_get_chapter_data(work_data,
 						work_data.last_download.chapter, callback);
 				return;
 			}
@@ -478,6 +502,19 @@ function module_code(library_namespace) {
 	}
 
 	// ----------------------------------------------------------------------------
+
+	function pre_get_chapter_data(work_data, chapter, callback) {
+		var _this = this;
+		function next() {
+			_this.get_chapter_data(work_data, chapter, callback);
+		}
+		if (typeof this.pre_chapter_URL === 'function') {
+			// 在this.chapter_URL()之前執行this.pre_chapter_URL()，主要在取得chapter_URL之資料。
+			this.pre_chapter_URL(work_data, chapter, next);
+		} else {
+			next();
+		}
+	}
 
 	function get_chapter_data(work_data, chapter, callback) {
 		var _this = this, left, image_list, waiting, chapter_label,
@@ -541,11 +578,21 @@ function module_code(library_namespace) {
 				library_namespace.fs_write(chapter_directory
 						+ work_data.directory_name + '-' + chapter_label
 						+ '.htm', html);
-				library_namespace.log(chapter + '/' + work_data.chapter_count
+				var message = [ chapter,
 				//
-				+ ' [' + chapter_label + '] ' + left + ' images.'
+				typeof _this.pre_chapter_URL === 'function' ? ''
+				//
+				: '/' + work_data.chapter_count,
+				//
+				' [', chapter_label, '] ', left, ' images.',
 				// 例如需要收費的章節。
-				+ (chapter_data.limited ? ' (limited)' : ''));
+				chapter_data.limited ? ' (limited)' : '' ].join('');
+				if (chapter_data.limited) {
+					// 針對特殊狀況提醒。
+					library_namespace.info(message);
+				} else {
+					library_namespace.log(message);
+				}
 
 				// console.log(image_list);
 				// TODO: 當某 chapter 檔案過多，將一次 request 過多 connects 而造成問題。
@@ -557,6 +604,7 @@ function module_code(library_namespace) {
 					image_data.file = chapter_directory + work_data.id + '-'
 							+ chapter + '-' + (index + 1).pad(3) + '.jpg';
 					// default: 同時下載本章節中所有圖像。
+					// .one_by_one: 循序逐個一個個下載。 download one by one
 					if (!_this.one_by_one) {
 						_this.get_images(image_data, check_if_done);
 					}
@@ -567,7 +615,8 @@ function module_code(library_namespace) {
 				if (!_this.one_by_one) {
 					return;
 				}
-				// TODO: 循序逐個一個個下載。 download one by one
+
+				_this.get_URL_options.headers.Referer = chapter_URL;
 				image_list.index = 0;
 				var next_1 = function(first) {
 					if (!first) {
@@ -618,12 +667,13 @@ function module_code(library_namespace) {
 				}
 				return;
 			}
-			_this.get_chapter_data(work_data, chapter, callback);
+			_this.pre_get_chapter_data(work_data, chapter, callback);
 		}
 	}
 
 	function image_path_to_url(path, server) {
 		if (!server.includes('://')) {
+			// this.get_URL_options.headers.Host = server;
 			server = 'http://' + server;
 		}
 		return server + path;
@@ -657,6 +707,10 @@ function module_code(library_namespace) {
 			image_data.file_length = [];
 		}
 
+		if (!PATTERN_non_CJK.test(url)) {
+			library_namespace.warn('Need encodeURI: ' + url);
+			// url = encodeURI(url);
+		}
 		get_URL(url, function(XMLHttp) {
 			var contents = XMLHttp.responseText,
 			//

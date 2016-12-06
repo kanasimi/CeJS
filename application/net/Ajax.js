@@ -852,8 +852,8 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 			library_namespace.warn('get_URL_node: [' + URL + ']: status ' + status_code);
 		}
 
-		library_namespace.debug('HEADERS: ' + JSON.stringify(result.headers),
-				4, 'get_URL_node');
+		library_namespace.debug('result HEADERS: ' + JSON.stringify(result.headers),
+				4, 'get_URL_node._onload');
 
 		merge_cookie(agent, result.headers['set-cookie']);
 		// 為預防字元編碼破碎，因此不能設定 result.setEncoding()？
@@ -1113,6 +1113,22 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 
 	request.on('error', _onfail);
 	// 遇到 "Unhandled 'error' event"，或許是 print 到 stdout 時出錯了，不一定是本函數的問題。
+
+	// debug error: socket parse error
+	// CloudFlare 遇到 HPE_INVALID_CONSTANT，可能是因為需要 encodeURI(url)。
+	if (false && library_namespace.is_debug(6)) {
+		request.on('socket', function(socket) {
+			if (socket.parser) {
+				socket.parser._execute = socket.parser.execute;
+				socket.parser.execute = function(d) {
+					console.log(d.toString());
+					socket.parser._execute(d);
+				};
+			}
+			// console.log('-----------------------------------');
+			// console.log(socket.parser.execute);
+		});
+	}
 
 	request.end();
 }
