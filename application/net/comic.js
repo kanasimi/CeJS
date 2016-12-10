@@ -131,14 +131,21 @@ function module_code(library_namespace) {
 		MIN_LENGTH : 6e3,
 		MESSAGE_RE_DOWNLOAD : '下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
 		// allow .jpg without EOI mark.
-		allow_EOI_error : true,
+		// allow_EOI_error : true,
 		//
-		skip_error : true,
+		// 當圖像檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。
+		// skip_error : true,
+		//
+		// 若已經存在壞掉的圖片，就不再嘗試下載圖片。default:false
+		// skip_existed_bad_file : true,
+		//
 		// e.g., '2-1.jpg' → '2-1 bad.jpg'
 		EOI_error_postfix : ' bad',
 		// 加上有錯誤檔案之註記。
 		EOI_error_path : EOI_error_path,
 
+		// recheck:從頭檢測所有作品之所有章節與所有圖片。default:false
+		// recheck : true,
 		image_path_to_url : image_path_to_url,
 		is_work_id : function(work_id) {
 			return work_id > 0;
@@ -457,9 +464,7 @@ function module_code(library_namespace) {
 					}
 				}
 				matched = matched.last_download.chapter;
-				if (matched > 1
-				// recheck:從頭檢測所有作品之所有章節。
-				&& !_this.recheck) {
+				if (matched > 1 && !_this.recheck) {
 					// 起始下載的start_chapter章节
 					work_data.last_download.chapter = matched;
 				}
@@ -509,7 +514,7 @@ function module_code(library_namespace) {
 			_this.get_chapter_data(work_data, chapter, callback);
 		}
 		if (typeof this.pre_chapter_URL === 'function') {
-			// 在this.chapter_URL()之前執行this.pre_chapter_URL()，主要在取得chapter_URL之資料。
+			// 在this.chapter_URL()之前執行this.pre_chapter_URL()，主要用途在取得chapter_URL之資料。
 			this.pre_chapter_URL(work_data, chapter, next);
 		} else {
 			next();
@@ -687,9 +692,9 @@ function module_code(library_namespace) {
 
 	function get_images(image_data, callback) {
 		// console.log(image_data);
-		if (node_fs.existsSync(image_data.file)
+		if (node_fs.existsSync(image_data.file) || !this.skip_existed_bad_file
 		// 檢查是否已具有server上本身就已經出錯的檔案。
-		|| node_fs.existsSync(this.EOI_error_path(image_data.file))) {
+		&& node_fs.existsSync(this.EOI_error_path(image_data.file))) {
 			image_data.done = true;
 			callback && callback();
 			return;
@@ -755,9 +760,18 @@ function module_code(library_namespace) {
 						}
 					}
 
-					library_namespace
-					//
-					.fs_write(image_data.file, contents);
+					var need_write;
+					try {
+						need_write = contents.length
+						// 得到更大的檔案，寫入更大的檔案。
+						> node_fs.statSync(image_data.file).size;
+					} catch (e) {
+						// bad file not exist
+						need_write = true;
+					}
+					if (need_write) {
+						library_namespace.fs_write(image_data.file, contents);
+					}
 					image_data.done = true;
 					callback && callback();
 					return;
