@@ -396,6 +396,7 @@ function module_code(library_namespace) {
 	// @see [[m:Help:Interwiki linking#Project titles and shortcuts]],
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
+	// TODO: 應配合 get_namespace.pattern 排除 'Talk', 'User', 'Help', ...
 	var PATTERN_PROJECT_CODE = /^[a-z][a-z\-\d]{0,14}$/,
 	// 須亦能匹配 site key:
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
@@ -587,7 +588,9 @@ function module_code(library_namespace) {
 	function setup_API_language(session, language_code) {
 		if (PATTERN_PROJECT_CODE_i.test(language_code)
 		// 不包括 test2.wikipedia.org 之類。
-		&& !/test|wiki/i.test(language_code)) {
+		&& !/test|wiki/i.test(language_code)
+		// 排除 'Talk', 'User', 'Help', ...
+		&& !get_namespace.pattern.test(language_code)) {
 			session.language
 			//
 			= language_code = language_code.toLowerCase();
@@ -3166,7 +3169,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {String|Undefined}title of page, maybe undefined.
 	 * 
-	 * @seealso wiki_API.query.title_param()
+	 * @see wiki_API.query.id_of_page
+	 * @see wiki_API.query.title_param()
 	 */
 	function get_page_title(page_data) {
 		// 處理 [ {String}API_URL, {String}title or {Object}page_data ]
@@ -3196,40 +3200,55 @@ function module_code(library_namespace) {
 			title =
 			// page_data.is_Flow &&
 			(page_data.header || page_data).revision;
-			if (title && (title = title.articleTitle))
+			if (title && (title = title.articleTitle)) {
 				// e.g., "Wikipedia talk:Flow tests"
 				return title;
+			}
 
 			return undefined;
 		}
 
-		// e.g., (typeof page_data === 'string')
-		// e.g., page_data === undefined
+		if (typeof page_data === 'string') {
+			// 例外處理: ':zh:title' → 'zh:title'
+			page_data = page_data.replace(/^:+/, '')
+		} else {
+			// e.g., page_data === undefined
+		}
+
 		return page_data;
 	}
 
+	// get the wikilink of page_data.
+	// 'title'→'[[title]]'
+	// 'zh:title'→'[[:zh:title]]'
+	// 'n:title'→'[[:n:title]]'
+	// 'Category:category'→'[[:Category:category]]'
 	function get_page_title_link(page_data, session) {
-		var is_category, title;
+		var title,
+		// e.g., is_category
+		need_escape, project_prefixed;
 
 		// is_api_and_title(page_data)
 		if (get_page_content.is_page_data(page_data)) {
-			is_category = page_data.ns === get_namespace.hash.category;
+			need_escape = page_data.ns === get_namespace.hash.category;
 			title = page_data.title;
 		} else {
-			if (Array.isArray(page_data)) {
-				title = page_data[1];
-			} else {
-				// assert: typeof page_data === 'string'
-				title = page_data;
-			}
-			title = get_page_title(title);
-			is_category = PATTERN_category_prefix.test(title);
+			// 通常應該: is_api_and_title(page_data) || typeof page_data === 'string'
+			title = get_page_title(page_data);
+			// e.g., 'zh:title'
+			// TODO: 排除 'Talk', 'User', 'Help', ...
+			project_prefixed = PATTERN_PROJECT_CODE_i.test(title)
+			// 排除 'Talk', 'User', 'Help', ...
+			&& !get_namespace.pattern.test(title);
+			need_escape = PATTERN_category_prefix.test(title) || project_prefixed;
 		}
 
-		if (session) {
-			// e.g., [[:zh:w:...]]
-			TODO;
-		} else if (is_category) {
+		if (session && !project_prefixed) {
+			// e.g., [[:zh:w:title]]
+			title = session.language + ':' + title;
+			need_escape = true;
+		}
+		if (need_escape) {
 			title = ':' + title;
 		}
 		// TODO: for template, use {{title}}
@@ -5698,6 +5717,8 @@ function module_code(library_namespace) {
 	 *            page data got from wiki API.
 	 * @param {Boolean}[title_only]
 	 *            get title only
+	 * 
+	 * @see get_page_title
 	 */
 	wiki_API.query.id_of_page = function(page_data, title_only) {
 		if (Array.isArray(page_data))
@@ -15974,6 +15995,7 @@ function module_code(library_namespace) {
 		is_entity : is_entity,
 
 		title_of : get_page_title,
+		title_link_of : get_page_title_link,
 		content_of : get_page_content,
 		normalize_title : normalize_page_name,
 		normalize_title_pattern : normalize_name_pattern,

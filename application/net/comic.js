@@ -130,10 +130,10 @@ function module_code(library_namespace) {
 		// 應改成最小容許圖案檔案大小 (bytes)。
 		MIN_LENGTH : 6e3,
 		MESSAGE_RE_DOWNLOAD : '下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
-		// allow .jpg without EOI mark.
+		// allow .jpg without EOI mark. default:false
 		// allow_EOI_error : true,
 		//
-		// 當圖像檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。
+		// 當圖像檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。default:false
 		// skip_error : true,
 		//
 		// 若已經存在壞掉的圖片，就不再嘗試下載圖片。default:false
@@ -255,7 +255,7 @@ function module_code(library_namespace) {
 
 		function get_next_work() {
 			if (next_index === work_list.length) {
-				library_namespace.log('All ' + work_list.length
+				library_namespace.log(_this.id + 'All ' + work_list.length
 						+ ' works done.');
 				return;
 			}
@@ -397,6 +397,15 @@ function module_code(library_namespace) {
 				.trim();
 	}
 
+	function exact_work_data(work_data, html, PATTERN_work_data) {
+		var matched;
+		// [ all, key, value ]
+		while (matched = PATTERN_work_data.exec(html)) {
+			matched[1] = get_label(matched[1]).replace(/[:：\s]+$/, '');
+			work_data[matched[1]] = get_label(matched[2]);
+		}
+	}
+
 	function get_work_data(work_id, callback, error_count) {
 		var _this = this, work_URL = typeof this.work_URL === 'function' ? this
 				.work_URL(work_id) : this.work_URL
@@ -415,7 +424,8 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			var work_data = _this.parse_work_data(html, get_label);
+			var work_data = _this.parse_work_data(html, get_label,
+					exact_work_data);
 			// 基本檢測。
 			// .title: 必要屬性：須配合網站平台更改。
 			if (PATTERN_non_CJK.test(work_data.title)
@@ -735,11 +745,11 @@ function module_code(library_namespace) {
 					//
 					.push(contents ? contents.length : 0);
 				}
-				if (has_EOI || _this.skip_error || _this.allow_EOI_error
+				if (has_EOI || image_data.file_length.cardinal_1()
+				// ↑ 若是每次都得到相同的檔案長度，那就當作來源檔案本來就有問題。
+				&& (_this.skip_error || _this.allow_EOI_error
 				//
-				&& image_data.file_length.length > _this.MAX_EOI_ERROR
-				// 若是每次都得到相同的檔案長度，那就當作來源檔案本來就有問題。
-				&& image_data.file_length.cardinal_1()) {
+				&& image_data.file_length.length > _this.MAX_EOI_ERROR)) {
 					// 過了。
 					if (has_error || has_EOI === false) {
 						image_data.file = _this.EOI_error_path(image_data.file,
