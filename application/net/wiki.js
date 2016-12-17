@@ -3242,18 +3242,21 @@ function module_code(library_namespace) {
 		if (get_page_content.is_page_data(page_data)) {
 			need_escape = page_data.ns === get_namespace.hash.category;
 			title = page_data.title;
-		} else {
-			// 通常應該:
+		} else if (title = get_page_title(page_data)) {
+			// ↑ 通常應該:
 			// is_api_and_title(page_data) || typeof page_data === 'string'
 			// @see normalize_page_name()
-			title = get_page_title(page_data).replace(/^[\s:]+/, '');
+			title = title.replace(/^[\s:]+/, '');
+
 			// e.g., 'zh:title'
 			// @see PATTERN_PROJECT_CODE_i
-			project_prefixed = /^[a-z]{2}[a-z\-\d]{0,14}:/i.test(title)
+			project_prefixed = /^ *[a-z]{2}[a-z\-\d]{0,14} *:/i.test(title)
 			// 排除 'Talk', 'User', 'Help', 'File', ...
 			&& !get_namespace.pattern.test(title);
+			// escape 具有特殊作用的 title。
 			need_escape = PATTERN_category_prefix.test(title)
-					|| PATTERN_file_prefix.test(title) || project_prefixed;
+			// 應允許非規範過之 title，如採用 File: 與 Image:, 檔案:。
+			|| PATTERN_file_prefix.test(title) || project_prefixed;
 		}
 
 		if (!title) {
@@ -4313,14 +4316,6 @@ function module_code(library_namespace) {
 	 *            message title.
 	 */
 	function add_message(message, title) {
-		if (false) {
-			// 已在get_page_title_link(title)處理。
-			title = get_page_title(title);
-			// escape 具有特殊作用的 title。
-			// assert: 為規範過之 title，如採用 File: 而非 Image:, 檔案:。
-			if (title && /^(?:Category|File):/.test(title))
-				title = ':' + title;
-		}
 		title = get_page_title_link(title);
 		this.push('* ' + (title ? title + ' ' : '') + message);
 	}
