@@ -3245,13 +3245,15 @@ function module_code(library_namespace) {
 		} else {
 			// 通常應該:
 			// is_api_and_title(page_data) || typeof page_data === 'string'
-			title = get_page_title(page_data);
+			// @see normalize_page_name()
+			title = get_page_title(page_data).replace(/^[\s:]+/, '');
 			// e.g., 'zh:title'
-			project_prefixed = PATTERN_PROJECT_CODE_i.test(title)
+			// @see PATTERN_PROJECT_CODE_i
+			project_prefixed = /^[a-z]{2}[a-z\-\d]{0,14}:/i.test(title)
 			// 排除 'Talk', 'User', 'Help', 'File', ...
 			&& !get_namespace.pattern.test(title);
 			need_escape = PATTERN_category_prefix.test(title)
-					|| project_prefixed;
+					|| PATTERN_file_prefix.test(title) || project_prefixed;
 		}
 
 		if (!title) {
