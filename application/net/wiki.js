@@ -37,6 +37,13 @@ https://meta.wikimedia.org/wiki/Research:Page_view
 WikiData Remote editor
 http://tools.wmflabs.org/widar/
 
+
+get user infomation:
+https://www.mediawiki.org/w/api.php?action=help&modules=query%2Busers
+https://zh.wikipedia.org/w/api.php?action=query&format=json&list=users&usprop=blockinfo|groups|implicitgroups|rights|editcount|registration|emailable|gender|centralids|cancreate&usattachedwiki=zhwiki&ususers=username|username
+https://www.mediawiki.org/w/api.php?action=help&modules=query%2Busercontribs
+https://zh.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&uclimit=1&ucdir=newer&ucprop=ids%7Ctitle%7Ctimestamp%7Ccomment%7Cparsedcomment%7Csize%7Csizediff%7Cflags%7Ctags&ucuser=username
+
 </code>
  * 
  * @since 2015/1/1
@@ -2667,8 +2674,8 @@ function module_code(library_namespace) {
 		// $dateFormats, 'Y年n月j日 (D) H:i'
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hans.php
 		// e.g., "2016年8月1日 (一) 00:00 (UTC)", "2016年8月1日 (一) 00:00 (CST)"
-		// [, Y, m, d, time ]
-		var PATTERN_date_zh = /(\d{4})年(1?\d)月([1-3]?\d)日 \(.\)( \d{1,2}:\d{1,2} \([A-Z]{3}\))/g,
+		// [, Y, m, d, time(hh:mm), timezone ]
+		var PATTERN_date_zh = /(\d{4})年(1?\d)月([1-3]?\d)日 \(.\)( \d{1,2}:\d{1,2})(?: \(([A-Z]{3})\))?/g,
 		// <s>去掉</s>skip年分前之雜項。
 		// <s>去掉</s>skip星期與其後之雜項。
 		matched;
@@ -2677,7 +2684,8 @@ function module_code(library_namespace) {
 			// Warning:
 			// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()比parse_date_zh()功能大多了。
 			var date = matched[1] + '/' + matched[2] + '/' + matched[3]
-					+ matched[4];
+					+ matched[4] + ' ' + (matched[5] || 'UTC+8');
+			// console.log(date);
 			date = get_timevalue ? Date.parse(date) : new Date(date);
 			if (!get_all_list) {
 				return date;
