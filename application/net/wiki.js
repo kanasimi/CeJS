@@ -403,7 +403,7 @@ function module_code(library_namespace) {
 	// @see [[m:Help:Interwiki linking#Project titles and shortcuts]],
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
-	// TODO: 應配合 get_namespace.pattern 排除 'Talk', 'User', 'Help', ...
+	// 警告: 應配合 get_namespace.pattern 排除 'Talk', 'User', 'Help', 'File', ...
 	var PATTERN_PROJECT_CODE = /^[a-z][a-z\-\d]{0,14}$/,
 	// 須亦能匹配 site key:
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
@@ -596,7 +596,7 @@ function module_code(library_namespace) {
 		if (PATTERN_PROJECT_CODE_i.test(language_code)
 		// 不包括 test2.wikipedia.org 之類。
 		&& !/test|wiki/i.test(language_code)
-		// 排除 'Talk', 'User', 'Help', ...
+		// 排除 'Talk', 'User', 'Help', 'File', ...
 		&& !get_namespace.pattern.test(language_code)) {
 			session.language
 			//
@@ -3243,17 +3243,21 @@ function module_code(library_namespace) {
 			need_escape = page_data.ns === get_namespace.hash.category;
 			title = page_data.title;
 		} else {
-			// 通常應該: is_api_and_title(page_data) || typeof page_data === 'string'
+			// 通常應該:
+			// is_api_and_title(page_data) || typeof page_data === 'string'
 			title = get_page_title(page_data);
 			// e.g., 'zh:title'
-			// TODO: 排除 'Talk', 'User', 'Help', ...
 			project_prefixed = PATTERN_PROJECT_CODE_i.test(title)
-			// 排除 'Talk', 'User', 'Help', ...
+			// 排除 'Talk', 'User', 'Help', 'File', ...
 			&& !get_namespace.pattern.test(title);
-			need_escape = PATTERN_category_prefix.test(title) || project_prefixed;
+			need_escape = PATTERN_category_prefix.test(title)
+					|| project_prefixed;
 		}
 
-		if (session && !project_prefixed) {
+		if (!title) {
+			return '';
+		}
+		if (session && session.language && !project_prefixed) {
 			// e.g., [[:zh:w:title]]
 			title = session.language + ':' + title;
 			need_escape = true;
@@ -3262,7 +3266,7 @@ function module_code(library_namespace) {
 			title = ':' + title;
 		}
 		// TODO: for template, use {{title}}
-		return title ? '[[' + title + ']]' : '';
+		return '[[' + title + ']]';
 	}
 
 	/**
@@ -3562,7 +3566,7 @@ function module_code(library_namespace) {
 					// assert: 當錯誤發生，例如頁面不存在，依然需要模擬出 page_data。
 					// 如此才能執行 .page().edit()。
 					_this.last_page
-					// 正常情況。確保this.last_page為單頁面。
+					// 正常情況。確保this.last_page為單頁面。需要使用callback以取得result。
 					= Array.isArray(page_data) ? page_data[0] : page_data;
 					// next[2] : callback
 					if (typeof next[2] === 'function')
@@ -3585,9 +3589,10 @@ function module_code(library_namespace) {
 
 		case 'redirect_to':
 			// this.redirect_to(page data, callback, options);
-			if (library_namespace.is_Object(next[2]) && !next[3])
+			if (library_namespace.is_Object(next[2]) && !next[3]) {
 				// 直接輸入 options，未輸入 callback。
 				next.splice(2, 0, null);
+			}
 
 			// this.redirect_to(title, callback, options)
 			// next[1] : title
@@ -3597,8 +3602,9 @@ function module_code(library_namespace) {
 					this.API_URL, next[1] ], function(redirect_data, page_data,
 					error) {
 				// next[2] : callback
-				if (typeof next[2] === 'function')
+				if (typeof next[2] === 'function') {
 					next[2].call(_this, redirect_data, page_data, error);
+				}
 				_this.next();
 			},
 			// next[3] : options
@@ -4305,12 +4311,16 @@ function module_code(library_namespace) {
 	 *            message title.
 	 */
 	function add_message(message, title) {
-		title = get_page_title(title);
-		// escape 具有特殊作用的 title。
-		// assert: 為規範過之 title，如採用 File: 而非 Image:, 檔案:。
-		if (title && /^(?:Category|File):/.test(title))
-			title = ':' + title;
-		this.push('* ' + get_page_title_link(title) + ' ' + message);
+		if (false) {
+			// 已在get_page_title_link(title)處理。
+			title = get_page_title(title);
+			// escape 具有特殊作用的 title。
+			// assert: 為規範過之 title，如採用 File: 而非 Image:, 檔案:。
+			if (title && /^(?:Category|File):/.test(title))
+				title = ':' + title;
+		}
+		title = get_page_title_link(title);
+		this.push('* ' + (title ? title + ' ' : '') + message);
 	}
 
 	function reset_messages() {
@@ -5946,13 +5956,16 @@ function module_code(library_namespace) {
 
 		// 自動搜尋/轉換繁簡標題。
 		if (!('converttitles' in options)) {
-			options.converttitles = wikidata_get_site(options, true) || default_language;
-			if (!wiki_API.page.auto_converttitles.includes(options.converttitles)) {
+			options.converttitles = wikidata_get_site(options, true)
+					|| default_language;
+			if (!wiki_API.page.auto_converttitles
+					.includes(options.converttitles)) {
 				delete options.converttitles;
 			}
 		}
 		if (options.converttitles) {
-			action[1] = 'converttitles=' + options.converttitles + '&' + action[1];
+			action[1] = 'converttitles=' + options.converttitles + '&'
+					+ action[1];
 		}
 
 		// Which properties to get for the queried pages
@@ -5984,8 +5997,9 @@ function module_code(library_namespace) {
 		&& function(data) {
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
-			&& library_namespace.show_value)
+			&& library_namespace.show_value) {
 				library_namespace.show_value(data, 'wiki_API.page: data');
+			}
 
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
@@ -6066,6 +6080,17 @@ function module_code(library_namespace) {
 
 			}
 
+			var convert_from;
+			if (data.query.converted) {
+				page_list.converted = data.query.converted;
+				if (Array.isArray(data.query.converted)) {
+					convert_from = library_namespace.null_Object();
+					data.query.converted.forEach(function(item) {
+						convert_from[item.to] = item.from;
+					});
+				}
+			}
+
 			var pages = data.query.pages;
 			// 其他 .prop 本來就不會有內容。
 			var need_warn = get_content;
@@ -6108,6 +6133,10 @@ function module_code(library_namespace) {
 					});
 				}
 
+				// 可以利用 page_data.convert_from 來判別標題是否已經過繁簡轉換。
+				if (convert_from && convert_from[page.title]) {
+					page.convert_from = convert_from[page.title];
+				}
 				page_list.push(page);
 			}
 
@@ -6191,7 +6220,8 @@ function module_code(library_namespace) {
 	wiki_API.page.rvprop = 'content|timestamp';
 
 	// @see https://www.mediawiki.org/w/api.php?action=help&modules=query
-	wiki_API.page.auto_converttitles = 'zh,gan,iu,kk,ku,shi,sr,tg,uz'.split(',');
+	wiki_API.page.auto_converttitles = 'zh,gan,iu,kk,ku,shi,sr,tg,uz'
+			.split(',');
 
 	// ------------------------------------------------------------------------
 
@@ -16029,6 +16059,7 @@ function module_code(library_namespace) {
 		is_entity : is_entity,
 
 		title_of : get_page_title,
+		// CeL.wiki.title_link_of() 常用於 summary 或 log/debug message。
 		title_link_of : get_page_title_link,
 		content_of : get_page_content,
 		normalize_title : normalize_page_name,
