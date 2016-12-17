@@ -3220,7 +3220,7 @@ function module_code(library_namespace) {
 
 		if (typeof page_data === 'string') {
 			// 例外處理: ':zh:title' → 'zh:title'
-			page_data = page_data.replace(/^:+/, '')
+			page_data = page_data.replace(/^[\s:]+/, '')
 		} else {
 			// e.g., page_data === undefined
 		}
@@ -3242,9 +3242,10 @@ function module_code(library_namespace) {
 		if (get_page_content.is_page_data(page_data)) {
 			need_escape = page_data.ns === get_namespace.hash.category;
 			title = page_data.title;
-		} else if (title = get_page_title(page_data)) {
-			// ↑ 通常應該:
-			// is_api_and_title(page_data) || typeof page_data === 'string'
+		} else if ((title = get_page_title(page_data))
+		// 通常應該:
+		// is_api_and_title(page_data) || typeof page_data === 'string'
+		&& typeof title === 'string') {
 			// @see normalize_page_name()
 			title = title.replace(/^[\s:]+/, '');
 
@@ -4316,8 +4317,19 @@ function module_code(library_namespace) {
 	 *            message title.
 	 */
 	function add_message(message, title) {
-		title = get_page_title_link(title);
-		this.push('* ' + (title ? title + ' ' : '') + message);
+		if (typeof message !== 'string') {
+			message = message && String(message) || '';
+		}
+		if (message.startsWith('\n')) {
+			message = message.slice(1).trim();
+		} else if (message = message.trim()) {
+			message = '* '
+					+ (title && (title = get_page_title_link(title)) ? title
+							+ ' ' : '') + message;
+		}
+		if (message) {
+			this.push(message);
+		}
 	}
 
 	function reset_messages() {
