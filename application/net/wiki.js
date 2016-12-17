@@ -10690,7 +10690,7 @@ function module_code(library_namespace) {
 		/** {Array}id/title list */
 		var id_list, rev_list,
 		//
-		use_language = wikidata_get_site(options, true)
+		use_language = wikidata_get_site(config, true)
 		// else use default_language
 		|| default_language,
 		/** {Object}用在 wiki_API.cache 之 configuration。 */
