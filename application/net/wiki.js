@@ -42,7 +42,7 @@ get user infomation:
 https://www.mediawiki.org/w/api.php?action=help&modules=query%2Busers
 https://zh.wikipedia.org/w/api.php?action=query&format=json&list=users&usprop=blockinfo|groups|implicitgroups|rights|editcount|registration|emailable|gender|centralids|cancreate&usattachedwiki=zhwiki&ususers=username|username
 https://www.mediawiki.org/w/api.php?action=help&modules=query%2Busercontribs
-https://zh.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&uclimit=1&ucdir=newer&ucprop=ids%7Ctitle%7Ctimestamp%7Ccomment%7Cparsedcomment%7Csize%7Csizediff%7Cflags%7Ctags&ucuser=username
+https://zh.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&uclimit=1&ucdir=newer&ucprop=ids|title|timestamp|comment|parsedcomment|size|sizediff|flags|tags&ucuser=username
 
 </code>
  * 
@@ -2674,6 +2674,8 @@ function module_code(library_namespace) {
 		// $dateFormats, 'Y年n月j日 (D) H:i'
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hans.php
 		// e.g., "2016年8月1日 (一) 00:00 (UTC)", "2016年8月1日 (一) 00:00 (CST)"
+		// {{unsigned|user|2016年10月18日 (二) 00:04‎ }}
+		// {{unsigned|1=user=user|2=2016年10月17日 (一) 23:45‎ }}
 		// [, Y, m, d, time(hh:mm), timezone ]
 		var PATTERN_date_zh = /(\d{4})年(1?\d)月([1-3]?\d)日 \(.\)( \d{1,2}:\d{1,2})(?: \(([A-Z]{3})\))?/g,
 		// <s>去掉</s>skip年分前之雜項。
@@ -5942,6 +5944,17 @@ function module_code(library_namespace) {
 			action[1] = 'rvdir=' + options.rvdir + '&' + action[1];
 		}
 
+		// 自動搜尋/轉換繁簡標題。
+		if (!('converttitles' in options)) {
+			options.converttitles = wikidata_get_site(options, true) || default_language;
+			if (!wiki_API.page.auto_converttitles.includes(options.converttitles)) {
+				delete options.converttitles;
+			}
+		}
+		if (options.converttitles) {
+			action[1] = 'converttitles=' + options.converttitles + '&' + action[1];
+		}
+
 		// Which properties to get for the queried pages
 		// 輸入 prop:'' 或再加上 redirects:1 可以僅僅確認頁面是否存在，以及頁面的正規標題。
 		if (options.prop) {
@@ -5957,8 +5970,9 @@ function module_code(library_namespace) {
 
 		action[1] = 'query&' + action[1];
 
-		if (!action[0])
+		if (!action[0]) {
 			action = action[1];
+		}
 
 		if (false) {
 			library_namespace.debug('get url token: ' + action, 0,
@@ -6175,6 +6189,9 @@ function module_code(library_namespace) {
 	// default properties of revisions
 	// timestamp 是為了 wiki_API.edit 檢查用。
 	wiki_API.page.rvprop = 'content|timestamp';
+
+	// @see https://www.mediawiki.org/w/api.php?action=help&modules=query
+	wiki_API.page.auto_converttitles = 'zh,gan,iu,kk,ku,shi,sr,tg,uz'.split(',');
 
 	// ------------------------------------------------------------------------
 
@@ -7083,10 +7100,12 @@ function module_code(library_namespace) {
 			options = library_namespace.null_Object();
 
 		if (!options.initialized) {
-			if (!options[KEY_SESSION])
+			if (!options[KEY_SESSION]) {
 				options[KEY_SESSION] = new wiki_API;
-			if (!options.type)
+			}
+			if (!options.type) {
 				options.type = wiki_API.list.default_type;
+			}
 			options.initialized = true;
 		}
 
@@ -10671,9 +10690,7 @@ function module_code(library_namespace) {
 		/** {Array}id/title list */
 		var id_list, rev_list,
 		//
-		use_language = config.language
-		// use session.language
-		|| config[KEY_SESSION] && config[KEY_SESSION].language
+		use_language = wikidata_get_site(options, true)
 		// else use default_language
 		|| default_language,
 		/** {Object}用在 wiki_API.cache 之 configuration。 */
@@ -11921,8 +11938,7 @@ function module_code(library_namespace) {
 		if (is_entity(value)) {
 			// get label of entity
 			value = value.labels;
-			var language = options && options[KEY_SESSION]
-					&& options[KEY_SESSION].language;
+			var language = wikidata_get_site(options, true);
 			language = language && value[language] || value[default_language]
 			// 最起碼選個國際通用的。
 			|| value.en;
@@ -12198,6 +12214,8 @@ function module_code(library_namespace) {
 	 *            語言代碼。
 	 * 
 	 * @returns {String}Wikidata site name / Wikimedia project name。
+	 * 
+	 * @see wikidata_get_site()
 	 */
 	function language_to_project(language) {
 		if (typeof language === 'object' && language.API_URL) {
@@ -12206,12 +12224,12 @@ function module_code(library_namespace) {
 			language = language.API_URL.toLowerCase().match(
 			// @see PATTERN_PROJECT_CODE
 			/\/\/([a-z][a-z\-\d]{0,14})\.([a-z]+)/);
-			library_namespace.debug(language, 4, 'language_to_projects');
+			library_namespace.debug(language, 4, 'language_to_project');
 			// TODO: error handling
 			language = language[1].replace(/-/g, '_')
 			// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
 			+ (language[2] === 'wikipedia' ? 'wiki' : language[2]);
-			library_namespace.debug(language, 3, 'language_to_projects');
+			library_namespace.debug(language, 3, 'language_to_project');
 			return language;
 		}
 
@@ -12273,17 +12291,25 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
+	 * @param {Boolean}get_language
+	 *            get language instead of site
 	 * 
 	 * @return {String}wikidata API 所須之 site parameter。
+	 * 
+	 * @see language_to_project()
 	 * 
 	 * @inner
 	 */
 	function wikidata_get_site(options, get_language) {
-		var session = options && options[KEY_SESSION], language;
+		var session = options && options[KEY_SESSION],
+		// options.language 較 session 的設定優先。
+		language = options && options.language;
 		if (session) {
-			// 注意:在取得 page 後，中途更改過 API_URL 的話，這邊會取得錯誤的資訊！
-			language = session.language || session.host
-					&& session.host.language;
+			if (!language) {
+				// 注意:在取得 page 後，中途更改過 API_URL 的話，這邊會取得錯誤的資訊！
+				language = session.language || session.host
+						&& session.host.language;
+			}
 			// console.log(session.host);
 			if (!language) {
 				var API_URL = session.host && session.host.API_URL
