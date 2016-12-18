@@ -3567,7 +3567,7 @@ function module_code(library_namespace) {
 				// next[1] : title
 				// next[3] : options
 				// [ {String}API_URL, {String}title or {Object}page_data ]
-				wiki_API.page(Array.isArray(next[1]) ? next[1] : [
+				wiki_API.page(is_api_and_title(next[1]) ? next[1] : [
 						this.API_URL, next[1] ], function(page_data, error) {
 					// assert: 當錯誤發生，例如頁面不存在，依然需要模擬出 page_data。
 					// 如此才能執行 .page().edit()。
@@ -3604,7 +3604,7 @@ function module_code(library_namespace) {
 			// next[1] : title
 			// next[3] : options
 			// [ {String}API_URL, {String}title or {Object}page_data ]
-			wiki_API.redirect_to(Array.isArray(next[1]) ? next[1] : [
+			wiki_API.redirect_to(is_api_and_title(next[1]) ? next[1] : [
 					this.API_URL, next[1] ], function(redirect_data, page_data,
 					error) {
 				// next[2] : callback
