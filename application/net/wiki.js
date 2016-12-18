@@ -4311,6 +4311,8 @@ function module_code(library_namespace) {
 	/**
 	 * 規範 log 之格式。(for wiki_API.prototype.work)
 	 * 
+	 * 若有必要跳過格式化的訊息，應該自行調用 message.push()。
+	 * 
 	 * @param {String}message
 	 *            message
 	 * @param {String}[title]
@@ -4320,15 +4322,10 @@ function module_code(library_namespace) {
 		if (typeof message !== 'string') {
 			message = message && String(message) || '';
 		}
-		if (message.startsWith('\n')) {
-			message = message.slice(1).trim();
-		} else if (message = message.trim()) {
-			message = '* '
+		if (message = message.trim()) {
+			this.push('* '
 					+ (title && (title = get_page_title_link(title)) ? title
-							+ ' ' : '') + message;
-		}
-		if (message) {
-			this.push(message);
+							+ ' ' : '') + message);
 		}
 	}
 
