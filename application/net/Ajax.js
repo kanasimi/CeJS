@@ -1294,14 +1294,21 @@ function get_URL_cache_node(URL, onload, options) {
 
 		_.get_URL(URL, function(XMLHttp) {
 			data = XMLHttp.responseText;
+			if (!data) {
+				library_namespace.err('get_URL_cache_node.cache: Error to get data: ['
+						+ URL + '].');
+			}
 			// 資料事後處理程序 (post-processor):
 			// 將以 .postprocessor() 的回傳作為要處理的資料。
-			if (typeof options.postprocessor === 'function')
+			if (typeof options.postprocessor === 'function') {
 				data = options.postprocessor(data);
+			}
 			/**
 			 * 寫入cache。
+			 * 
+			 * 若出現錯誤，則不寫入cache。
 			 */
-			if (/[^\\\/]$/.test(file_name)) {
+			if (data && /[^\\\/]$/.test(file_name)) {
 				library_namespace.info('get_URL_cache_node.cache: Write cache data to ['
 						+ file_name + '].');
 				library_namespace.debug('Cache data: '
