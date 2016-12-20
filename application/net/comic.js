@@ -738,6 +738,8 @@ function module_code(library_namespace) {
 				// When you get to FFD9 you're at the end of the stream.
 				&& contents[contents.length - 1] === 217;
 			}
+			// console.log(_this.skip_error + ',' + _this.MAX_ERROR);
+			// console.log('error count: '  + image_data.error_count);
 			if (!has_error || _this.skip_error
 					&& image_data.error_count === _this.MAX_ERROR) {
 				if (!has_error) {
@@ -745,7 +747,12 @@ function module_code(library_namespace) {
 					//
 					.push(contents ? contents.length : 0);
 				}
-				if (has_EOI || image_data.file_length.cardinal_1()
+				// console.log(image_data.file_length);
+				if (has_EOI || _this.skip_error
+				// skip error 的話，就算沒有取得過檔案，依然 pass。
+				&& image_data.file_length.length === 0
+				//
+				|| image_data.file_length.cardinal_1()
 				// ↑ 若是每次都得到相同的檔案長度，那就當作來源檔案本來就有問題。
 				&& (_this.skip_error || _this.allow_EOI_error
 				//
@@ -797,9 +804,10 @@ function module_code(library_namespace) {
 					+ url + '\n→ ' + image_data.file);
 			library_namespace.err('Failed to get ' + url + '\n→ '
 					+ image_data.file);
-			if (image_data.error_count > _this.MAX_ERROR) {
+			if (image_data.error_count === _this.MAX_ERROR) {
 				// throw new Error(_this.MESSAGE_RE_DOWNLOAD);
 				library_namespace.log(_this.MESSAGE_RE_DOWNLOAD);
+				// console.log('error count: '  + image_data.error_count);
 				process.exit(1);
 			}
 
