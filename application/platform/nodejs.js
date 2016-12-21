@@ -57,8 +57,8 @@ function module_code(library_namespace) {
 	var node_fs = require('fs');
 
 	function copy_attributes(source, target) {
-		var stat = node_fs.statSync(source);
-		node_fs.utimesSync(target, stat.atime, stat.mtime);
+		var file_status = node_fs.statSync(source);
+		node_fs.utimesSync(target, file_status.atime, file_status.mtime);
 	}
 	_.copy_attributes = copy_attributes;
 
@@ -215,9 +215,9 @@ function module_code(library_namespace) {
 			 * information about the link, while stat() returns information
 			 * about the file the link references.
 			 */
-			var stat = node_fs.lstatSync(path);
+			var fso_status = node_fs.lstatSync(path);
 			// https://nodejs.org/api/fs.html#fs_class_fs_stats
-			if (!stat.isDirectory()) {
+			if (!fso_status.isDirectory()) {
 				// delete file, link, ...
 				node_fs.unlinkSync(path);
 				return r();
@@ -354,7 +354,7 @@ function module_code(library_namespace) {
 		require('./_for include/node.loader.js');
 		CeL.run('application.platform.nodejs');
 
-		CeL.traverse_file_system('.', function(path, stat, is_directory) {
+		CeL.traverse_file_system('.', function(path, fso_status, is_directory) {
 			console.log(path);
 		}, /\.js$/);
 	}
@@ -362,33 +362,51 @@ function module_code(library_namespace) {
 	// https://github.com/coolaj86/node-walk
 	// https://github.com/oleics/node-filewalker/blob/master/lib/filewalker.js
 	function traverse_file_system(path, handler, filter) {
-		var list = node_fs.readdirSync(path);
-		path += '/';
-		list.forEach(function(name) {
+		var list;
+		try {
+			list = node_fs.readdirSync(path);
+		} catch (e) {
+			library_namespace.debug('Not exists: ' + path);
+			return;
+		}
+		if (!/[\\\/]$/.test(path)) {
+			path += path_separator;
+		}
+
+		list.forEach(function(fso_name) {
 			try {
-				var full_path = path + name, stat = node_fs
-						.lstatSync(full_path);
+				var full_path = path + fso_name,
 				// https://nodejs.org/api/fs.html#fs_class_fs_stats
-				if (!stat.isDirectory()) {
-					if (!filter || filter.test(full_path))
-						handler(full_path, stat);
-					return;
+				fso_status = node_fs.lstatSync(full_path),
+				// else: e.g., is file
+				is_directory = fso_status.isDirectory();
+
+				// 設定額外的屬性以供利用。
+				fso_status.name = fso_name;
+				fso_status.directory = path;
+
+				// Depth-first search (DFS)
+				if (is_directory) {
+					traverse_file_system(full_path, handler, filter);
 				}
 
-				traverse_file_system(full_path, handler, filter);
-				if (!filter || filter.test(full_path))
-					handler(full_path, stat, true);
+				if (!filter || filter.test(full_path)) {
+					handler(full_path, fso_status, is_directory);
+				}
 
 			} catch (e) {
 				// https://nodejs.org/api/errors.html
-				if (e.code === 'EPERM')
+				if (e.code === 'EPERM') {
 					// TODO: .chmodSync(path, 666) @ Windows??
 					;
-				if (e.code === 'EBUSY')
+				}
+				if (e.code === 'EBUSY') {
 					// TODO
 					;
-				if (e.code !== 'ENOENT')
+				}
+				if (e.code !== 'ENOENT') {
 					;
+				}
 			}
 		});
 	}
