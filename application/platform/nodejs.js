@@ -136,8 +136,9 @@ function module_code(library_namespace) {
 	function create_directory(directories, mode) {
 		// var node_fs = require('fs');
 		var error = 0;
-		if (typeof directories === 'string')
+		if (typeof directories === 'string') {
 			directories = [ directories ];
+		}
 		directories.forEach(function(directory_name) {
 			try {
 				node_fs.accessSync(directory_name, node_fs.F_OK
@@ -145,10 +146,16 @@ function module_code(library_namespace) {
 				| node_fs.R_OK | node_fs.W_OK | node_fs.X_OK);
 			} catch (e) {
 				try {
-					if (isNaN(mode))
+					if (library_namespace.platform.is_Windows()
+							&& directory_name.endsWith('.')) {
+						library_namespace
+								.warn('以點 "." 作為結尾的目錄名稱，將導致沒有辦法刪除或者複製: '
+										+ directory_name);
+					}
+					if (isNaN(mode)) {
 						mode = parseInt('700', 8)
-						//
-						| (parseInt('777', 8) ^ process.umask());
+								| (parseInt('777', 8) ^ process.umask());
+					}
 					node_fs.mkdirSync(directory_name, mode);
 				} catch (e) {
 					if (e.code !== 'EEXIST')
@@ -361,8 +368,31 @@ function module_code(library_namespace) {
 
 	// https://github.com/coolaj86/node-walk
 	// https://github.com/oleics/node-filewalker/blob/master/lib/filewalker.js
-	function traverse_file_system(path, handler, filter) {
-		var list;
+	function traverse_file_system(path, handler, options, depth) {
+		// 前置處理。
+		if (library_namespace.is_RegExp(options)) {
+			options = {
+				filter : options
+			};
+		} else if (!library_namespace.is_Object(options)) {
+			options = library_namespace.null_Object();
+		}
+
+		if (isNaN(depth)) {
+			depth = Infinity;
+		} else if (!(depth >= 1)) {
+			depth = options.depth;
+		}
+		depth |= 0;
+		if (!(depth-- >= 1)) {
+			// depth === 1: 僅到本層為止。
+			return;
+		}
+
+		var filter = library_namespace.is_RegExp(options.filter)
+				&& options.filter,
+		//
+		list;
 		try {
 			list = node_fs.readdirSync(path);
 		} catch (e) {
@@ -372,6 +402,8 @@ function module_code(library_namespace) {
 		if (!/[\\\/]$/.test(path)) {
 			path += path_separator;
 		}
+
+		// console.log([ depth, filter ]);
 
 		list.forEach(function(fso_name) {
 			try {
@@ -387,10 +419,10 @@ function module_code(library_namespace) {
 
 				// Depth-first search (DFS)
 				if (is_directory) {
-					traverse_file_system(full_path, handler, filter);
+					traverse_file_system(full_path, handler, options, depth);
 				}
 
-				if (!filter || filter.test(full_path)) {
+				if (!filter || filter.test(fso_name)) {
 					handler(full_path, fso_status, is_directory);
 				}
 

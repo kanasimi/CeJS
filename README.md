@@ -10,8 +10,8 @@ http://stackshare.io/continuous-integration
 -->
 
 # [Colorless echo](http://lyrics.meicho.com.tw/) JavaScript kit
-This is a JavaScript module framework that is simple to use.
-本計畫希望能建立一個能簡單上手的 JavaScript 模組架構。
+The project aims to develop a JavaScript module framework that is simple to use with some interesting features.
+本計畫希望能建立一個能簡單上手的 JavaScript 模組架構。<!-- toolkit -->
 
 ## Web page usage 
 ``` HTML
@@ -35,6 +35,7 @@ Then, install the CeJS library:
 ``` sh
 $ npm install cejs
 ```
+（鑒於更新頻繁，有些功能可能最新版本才具備；建議直接到 GitHub 下載最新版本壓縮檔，解開後配置。）
 
 ### Execution
 Let's try it:

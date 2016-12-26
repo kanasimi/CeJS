@@ -2654,12 +2654,14 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------
 
 	/**
-	 * parse date string to {Date}
+	 * parse date string / 時間戳記 to {Date}
 	 * 
 	 * @param {String}wikitext
 	 *            date text to parse.
 	 * 
 	 * @returns {Date}date of the date string
+	 * 
+	 * @see [[en:Wikipedia:Signatures]], "~~~~~"
 	 */
 	function parse_date_zh(wikitext, get_timevalue, get_all_list) {
 		var date_list;
@@ -3724,7 +3726,14 @@ function module_code(library_namespace) {
 			break;
 
 		case 'edit':
-			// wiki.edit(page, options, callback)
+			// wiki.edit(page contents, options, callback)
+			if (typeof next[2] === 'string') {
+				// wiki.edit(page contents, summary, callback)
+				next[2] = {
+					summary : next[2]
+				};
+			}
+
 			// TODO: {String|RegExp|Array}filter
 			if (!this.last_page) {
 				library_namespace
@@ -3752,7 +3761,7 @@ function module_code(library_namespace) {
 				// .section: 章節編號。 0 代表最上層章節，new 代表新章節。
 				if (next[2].section !== 'new') {
 					library_namespace
-							.warn('wiki_API.prototype.next: The page to edit is Flow. I can not edit directly.');
+							.warn('wiki_API.prototype.next: The page to edit is Flow. I can not edit it directly.');
 					// next[3] : callback
 					if (typeof next[3] === 'function')
 						next[3].call(this, this.last_page.title, 'is Flow');
@@ -4580,7 +4589,7 @@ function module_code(library_namespace) {
 					if (result.edit.newrevid) {
 						// https://en.wikipedia.org/wiki/Help:Wiki_markup#Linking_to_old_revisions_of_pages.2C_diffs.2C_and_specific_history_pages
 						// https://zh.wikipedia.org/?diff=000
-						// cf. [[Special:Permalink/0|title]]
+						// cf. [[Special:Permalink/0|title]], [[Special:Diff/prev/0]]
 						error = ' [[Special:Diff/' + result.edit.newrevid + '|'
 								+ gettext('finished') + ']]';
 						result = 'succeed';
@@ -8566,6 +8575,7 @@ function module_code(library_namespace) {
 			this.host = language + 'wiki.labsdb';
 			this.database = language + 'wiki_p';
 		}
+		// console.log(this);
 	}
 
 	/**
@@ -8701,9 +8711,12 @@ function module_code(library_namespace) {
 	 *          TODO: https://github.com/sidorares/node-mysql2
 	 */
 	function run_SQL(SQL, callback, config) {
-		if (!config && !(config = SQL_config))
+		if (!config && !(config = SQL_config)) {
 			return;
+		}
 
+		library_namespace.debug(SQL, 2, 'run_SQL');
+		// console.log(JSON.stringify(config));
 		var connection = mysql.createConnection(config);
 		connection.connect();
 		connection.query(SQL, callback);
@@ -10364,7 +10377,9 @@ function module_code(library_namespace) {
 	 * 則將直接中斷離開 operation，不執行 callback。<br />
 	 * 此時須由 operation.list() 自行處理 callback。
 	 */
-	wiki_API.cache.abort = library_namespace.null_Object();
+	wiki_API.cache.abort = {
+		cache : 'abort'
+	};
 	/**
 	 * 只取檔名，僅用在 operation.each_file_name。<br />
 	 * <code>{
@@ -10736,6 +10751,9 @@ function module_code(library_namespace) {
 			// all_pages.*.json 存有當前語言維基百科當前所有的頁面id以及最新版本 (*:當前語言)
 			|| traversal_pages.list_file + '.' + use_language + '.json',
 			operator : function(list) {
+				if (!Array.isArray(list)) {
+					throw 'No list get!';
+				}
 				if (list.length === 3
 						&& JSON.stringify(list[0]) === JSON
 								.stringify(traversal_pages.id_mark)) {
@@ -16005,25 +16023,25 @@ function module_code(library_namespace) {
 			 </code>
 			 */
 			PATTERN =
-			// [ all, title, sitelink, misc ]
+			// [ all, title, sitelink, miscellaneous ]
 			/\n\|\s*\[\[([^\[\]\|]+)\|([^\[\]]*)\]\]\s*\|\|([^\n]+)/g;
 			while (matched = PATTERN.exec(data)) {
-				var misc = matched[3].split(/\s*\|\|\s*/),
+				var miscellaneous = matched[3].split(/\s*\|\|\s*/),
 				//
 				item = {
-					id : +misc[0],
-					len : +misc[2],
-					namespace : +misc[1],
+					id : +miscellaneous[0],
+					len : +miscellaneous[2],
+					namespace : +miscellaneous[1],
 					title : matched[1],
-					touched : misc[3]
+					touched : miscellaneous[3]
 				};
 				if (matched[2]) {
 					// Maybe it's label...
 					item.sitelink = matched[2];
 				}
-				if (misc[4]
+				if ((matched = miscellaneous[4])
 				//
-				&& (matched = misc[4].match(/\[\[:d:([^\[\]\|]+)/))) {
+				&& (matched = matched.match(/\[\[:d:([^\[\]\|]+)/))) {
 					item.wikidata = matched[1];
 				}
 				items.push(item);

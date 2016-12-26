@@ -62,7 +62,9 @@ function module_code(library_namespace) {
 	/** node.js file system module */
 	node_fs = library_namespace.platform.nodejs && require('fs'),
 	// @see CeL.application.net.wiki
-	PATTERN_non_CJK = /^[\u0000-\u2E7F]*$/i;
+	PATTERN_non_CJK = /^[\u0000-\u2E7F]*$/i,
+	//
+	path_separator = library_namespace.env.path_separator;
 
 	/**
 	 * null module constructor
@@ -118,10 +120,11 @@ function module_code(library_namespace) {
 	Comic_site.timeout = 30 * 1000;
 
 	Comic_site.prototype = {
-		main_directory : library_namespace.platform.nodejs
+		main_directory : (library_namespace.platform.nodejs
 				&& process.mainModule ? process.mainModule.filename
-				.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '')
-				+ '/' : './',
+				.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '') : '.')
+				// main_directory 必須以 path separator 作結。
+				+ path_separator,
 		// base_URL : '',
 		// 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)',
@@ -143,6 +146,9 @@ function module_code(library_namespace) {
 		EOI_error_postfix : ' bad',
 		// 加上有錯誤檔案之註記。
 		EOI_error_path : EOI_error_path,
+
+		// default start chapter index
+		start_chapter : 1,
 
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。default:false
 		// recheck : true,
@@ -255,7 +261,7 @@ function module_code(library_namespace) {
 
 		function get_next_work() {
 			if (next_index === work_list.length) {
-				library_namespace.log(_this.id + 'All ' + work_list.length
+				library_namespace.log(_this.id + ': All ' + work_list.length
 						+ ' works done.');
 				return;
 			}
@@ -415,11 +421,12 @@ function module_code(library_namespace) {
 			var html = XMLHttp.responseText;
 			if (!html) {
 				library_namespace.err('Failed to get work data of ' + work_id);
-				if (error_count > 4) {
+				if (error_count > _this.MAX_ERROR) {
 					throw _this.MESSAGE_RE_DOWNLOAD;
 				}
 				error_count = (error_count | 0) + 1;
-				library_namespace.log('Retry ' + error_count + '...');
+				library_namespace.log('Retry ' + error_count + '/'
+						+ _this.MAX_ERROR + '...');
 				_this.get_work_data(work_id, callback, error_count);
 				return;
 			}
@@ -437,14 +444,14 @@ function module_code(library_namespace) {
 			work_data.id = work_id;
 			work_data.last_download = {
 				date : (new Date).toISOString(),
-				chapter : 1
+				chapter : _this.start_chapter
 			};
 
 			process.title = '下載' + work_data.title;
 			work_data.directory_name = library_namespace
 					.to_file_name(work_data.id + ' ' + work_data.title);
 			work_data.directory = _this.main_directory
-					+ work_data.directory_name + '/';
+					+ work_data.directory_name + path_separator;
 			work_data.data_file = work_data.directory
 					+ work_data.directory_name + '.json';
 
@@ -484,6 +491,11 @@ function module_code(library_namespace) {
 			// 指的為平台所給的id編號，並非"回"、"話"！且可能會跳號！
 			work_data.chapter_count = 0;
 			_this.get_chapter_count(work_data, html);
+			if (_this.recheck) {
+				// _this.get_chapter_count() 中
+				// 可能重新設定過 work_data.last_download.chapter。
+				work_data.last_download.chapter = _this.start_chapter;
+			}
 			if (work_data.chapter_count >= 1) {
 				var message = [ work_data.id, ' ', work_data.title,
 				//
@@ -550,8 +562,8 @@ function module_code(library_namespace) {
 						throw _this.MESSAGE_RE_DOWNLOAD;
 					}
 					get_data.error_count = (get_data.error_count | 0) + 1;
-					library_namespace.log('Retry ' + get_data.error_count
-							+ '...');
+					library_namespace.log('Retry ' + get_data.error_count + '/'
+							+ _this.MAX_ERROR + '...');
 					get_data();
 					return;
 				}
@@ -588,7 +600,8 @@ function module_code(library_namespace) {
 				//
 				library_namespace.HTML_to_Unicode(chapter_label)) : '');
 				var chapter_directory = work_data.directory + chapter_label
-						+ '/';
+				// 若是以 "." 結尾，在 Windows 7 中會出現問題，無法移動或刪除。
+				.replace(/\.$/, '._') + path_separator;
 				library_namespace.fs_mkdir(chapter_directory);
 				library_namespace.fs_write(chapter_directory
 						+ work_data.directory_name + '-' + chapter_label
@@ -739,7 +752,7 @@ function module_code(library_namespace) {
 				&& contents[contents.length - 1] === 217;
 			}
 			// console.log(_this.skip_error + ',' + _this.MAX_ERROR);
-			// console.log('error count: '  + image_data.error_count);
+			// console.log('error count: ' + image_data.error_count);
 			if (!has_error || _this.skip_error
 					&& image_data.error_count === _this.MAX_ERROR) {
 				if (!has_error) {
@@ -807,12 +820,13 @@ function module_code(library_namespace) {
 			if (image_data.error_count === _this.MAX_ERROR) {
 				// throw new Error(_this.MESSAGE_RE_DOWNLOAD);
 				library_namespace.log(_this.MESSAGE_RE_DOWNLOAD);
-				// console.log('error count: '  + image_data.error_count);
+				// console.log('error count: ' + image_data.error_count);
 				process.exit(1);
 			}
 
 			image_data.error_count = (image_data.error_count | 0) + 1;
-			library_namespace.log('Retry ' + image_data.error_count + '...');
+			library_namespace.log('Retry ' + image_data.error_count + '/'
+					+ _this.MAX_ERROR + '...');
 			_this.get_images(image_data, callback);
 
 		}, 'binary', null, this.get_URL_options);
