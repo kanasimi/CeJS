@@ -3,7 +3,7 @@
  * 
  * @fileoverview 本檔案包含了批量下載漫畫的函式庫。
  * 
- * TODO:<code>
+ * <code>
 
 流程:
 
@@ -13,6 +13,13 @@
 // 取得作品的章節資料。 get_work_data()
 // 取得每一個章節的各個影像內容資料。 get_chapter_data()
 // 取得各個章節的每一個影像內容。 get_images()
+
+
+TODO:
+下載完畢後自動產生壓縮檔+自動刪除原始圖檔
+預設介面語言繁體中文+...
+在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
+
 
 </code>
  * 
@@ -114,17 +121,20 @@ function module_code(library_namespace) {
 
 	_.site = Comic_site;
 
-	/** {Natural}同一檔案錯誤超過此數量則跳出。 */
+	/** {Natural}下載失敗重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
 	Comic_site.MAX_ERROR = 4;
-	/** {Natural}timeout in ms for get_URL() */
+	/** {Natural}timeout in ms for get_URL() 逾時ms數 */
 	Comic_site.timeout = 30 * 1000;
 
 	Comic_site.prototype = {
+		// 圖片檔+紀錄檔下載位置
 		main_directory : (library_namespace.platform.nodejs
 				&& process.mainModule ? process.mainModule.filename
 				.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '') : '.')
 				// main_directory 必須以 path separator 作結。
 				+ path_separator,
+		// 錯誤紀錄檔
+		error_log_file : 'error_files.txt',
 		// base_URL : '',
 		// 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)',
@@ -149,6 +159,8 @@ function module_code(library_namespace) {
 
 		// default start chapter index
 		start_chapter : 1,
+		// 是否保留chapter page
+		preserve_chapter_page : true,
 
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。default:false
 		// recheck : true,
@@ -481,7 +493,7 @@ function module_code(library_namespace) {
 					}
 				}
 				matched = matched.last_download.chapter;
-				if (matched > 1 && !_this.recheck) {
+				if (matched > _this.start_chapter && !_this.recheck) {
 					// 起始下載的start_chapter章节
 					work_data.last_download.chapter = matched;
 				}
@@ -505,7 +517,7 @@ function module_code(library_namespace) {
 				//
 				work_data.status ? ' ' + work_data.status : '',
 				//
-				work_data.last_download.chapter > 1 ? ' 自章節編號第 '
+				work_data.last_download.chapter > _this.start_chapter ? ' 自章節編號第 '
 				//
 				+ work_data.last_download.chapter + ' 接續下載。' : '' ].join('');
 				if (_this.is_finished(work_data)) {
@@ -594,6 +606,7 @@ function module_code(library_namespace) {
 				}
 
 				chapter_label = chapter_data.title;
+				// 檔名NO的基本長度（不足補零）
 				chapter_label = chapter.pad(4) + (chapter_label ? ' '
 				//
 				+ library_namespace.to_file_name(
@@ -603,9 +616,11 @@ function module_code(library_namespace) {
 				// 若是以 "." 結尾，在 Windows 7 中會出現問題，無法移動或刪除。
 				.replace(/\.$/, '._') + path_separator;
 				library_namespace.fs_mkdir(chapter_directory);
-				library_namespace.fs_write(chapter_directory
-						+ work_data.directory_name + '-' + chapter_label
-						+ '.htm', html);
+				if (_this.preserve_chapter_page) {
+					library_namespace.fs_write(chapter_directory
+							+ work_data.directory_name + '-' + chapter_label
+							+ '.htm', html);
+				}
 				var message = [ chapter,
 				//
 				typeof _this.pre_chapter_URL === 'function' ? ''
@@ -685,6 +700,21 @@ function module_code(library_namespace) {
 			// assert: left===0
 
 			// 已下載完本chapter
+
+			// 記錄下載錯誤的檔案
+			var error_files = [];
+			image_list.forEach(function(image_data, index) {
+				if (image_data.has_error) {
+					error_files.push(image_data.file + '	' + image_data.parsed_url);
+				}
+			});
+
+			if (error_files.length > 0) {
+				error_files.push('');
+				// 產生錯誤紀錄檔。
+				node_fs.appendFileSync(_this.main_directory + _this.error_log_file, error_files.join('\n'));
+			}
+
 			work_data.last_download.chapter = chapter;
 			// 紀錄已下載完之chapter
 			library_namespace.fs_write(work_data.data_file, work_data);
@@ -730,15 +760,16 @@ function module_code(library_namespace) {
 		} else if (url.startsWith('/')) {
 			url = this.base_URL + url.slice(1);
 		}
+		image_data.parsed_url = url;
+		if (!PATTERN_non_CJK.test(url)) {
+			library_namespace.warn('Need encodeURI: ' + url);
+			// url = encodeURI(url);
+		}
 
 		if (!image_data.file_length) {
 			image_data.file_length = [];
 		}
 
-		if (!PATTERN_non_CJK.test(url)) {
-			library_namespace.warn('Need encodeURI: ' + url);
-			// url = encodeURI(url);
-		}
 		get_URL(url, function(XMLHttp) {
 			var contents = XMLHttp.responseText,
 			//
@@ -774,6 +805,7 @@ function module_code(library_namespace) {
 					if (has_error || has_EOI === false) {
 						image_data.file = _this.EOI_error_path(image_data.file,
 								XMLHttp);
+						image_data.has_error = true;
 						library_namespace.warn(
 						//
 						(has_error ? 'Force saving bad image'
@@ -818,6 +850,7 @@ function module_code(library_namespace) {
 			library_namespace.err('Failed to get ' + url + '\n→ '
 					+ image_data.file);
 			if (image_data.error_count === _this.MAX_ERROR) {
+				image_data.has_error = true;
 				// throw new Error(_this.MESSAGE_RE_DOWNLOAD);
 				library_namespace.log(_this.MESSAGE_RE_DOWNLOAD);
 				// console.log('error count: ' + image_data.error_count);

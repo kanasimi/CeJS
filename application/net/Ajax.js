@@ -165,6 +165,8 @@ document_head = library_namespace.is_WWW(true) && (document.head || document.get
  * @param {Object}[options]
  *            附加參數/設定選擇性/特殊功能與選項
  * 
+ * TODO: 代理伺服器 proxy sever
+ * 
  * @see
  * https://developer.mozilla.org/zh-TW/docs/DOM/XMLHttpRequest
  * http://msdn.microsoft.com/en-us/library/ie/ms535874.aspx
@@ -256,7 +258,7 @@ function get_URL(URL, onload, charset, post_data, options) {
 					options.onfail(e || 'Timeout');
 				};
 		}
-		// TODO: 處理有 onload 下之 timeout
+		// TODO: 處理有 onload 下之 timeout 逾時ms數
 		//	Ajax 程式應該考慮到 server 沒有回應時之處置
 
 		if (library_namespace.is_Object(options.head)
@@ -1054,7 +1056,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		request.write(post_data);
 	}
 
-	/** {Natural}timeout in ms for get URL. */
+	/** {Natural}timeout in ms for get URL. 逾時ms數 */
 	var timeout = options.timeout || get_URL_node.default_timeout, timeout_id,
 	//
 	_ontimeout = function(e) {
@@ -1141,7 +1143,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
  */
 get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
 
-// 20 min
+// 逾時ms數: 20 min
 get_URL_node.default_timeout = 20 * 60 * 1000;
 get_URL_node.connects_limit = 100;
 

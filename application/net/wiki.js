@@ -4589,7 +4589,8 @@ function module_code(library_namespace) {
 					if (result.edit.newrevid) {
 						// https://en.wikipedia.org/wiki/Help:Wiki_markup#Linking_to_old_revisions_of_pages.2C_diffs.2C_and_specific_history_pages
 						// https://zh.wikipedia.org/?diff=000
-						// cf. [[Special:Permalink/0|title]], [[Special:Diff/prev/0]]
+						// cf. [[Special:Permalink/0|title]],
+						// [[Special:Diff/prev/0]]
 						error = ' [[Special:Diff/' + result.edit.newrevid + '|'
 								+ gettext('finished') + ']]';
 						result = 'succeed';
