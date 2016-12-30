@@ -53,7 +53,9 @@ typeof CeL === 'function' && CeL.run({
 	// for CeL.env.arg_hash, CeL.fs_mkdir()
 	+ '|application.platform.nodejs.'
 	// for HTML_to_Unicode()
-	+ '|interact.DOM.',
+	+ '|interact.DOM.'
+	// for Date.prototype.format()
+	+ '|data.date.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -142,7 +144,8 @@ function module_code(library_namespace) {
 		MAX_EOI_ERROR : Math.min(3, Comic_site.MAX_ERROR),
 		// 應改成最小容許圖案檔案大小 (bytes)。
 		MIN_LENGTH : 6e3,
-		MESSAGE_RE_DOWNLOAD : '下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
+		// 仙人拍鼓有時錯，跤步踏差啥人無？ 客語 神仙打鼓有時錯，腳步踏差麼人無
+		MESSAGE_RE_DOWNLOAD : '神仙打鼓有時錯，腳步踏差誰人無。下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
 		// allow .jpg without EOI mark. default:false
 		// allow_EOI_error : true,
 		//
@@ -186,7 +189,7 @@ function module_code(library_namespace) {
 
 	function start_operation(work_id) {
 		if (!work_id) {
-			library_namespace.log(this.id + ': 沒有輸入 work_id!');
+			library_namespace.log(this.id + ': 沒有輸入 work_id！');
 			return;
 		}
 		library_namespace.log(this.id + ': Strating ' + work_id);
@@ -509,17 +512,33 @@ function module_code(library_namespace) {
 				work_data.last_download.chapter = _this.start_chapter;
 			}
 			if (work_data.chapter_count >= 1) {
-				var message = [ work_data.id, ' ', work_data.title,
-				//
-				': ', typeof _this.pre_chapter_URL === 'function'
-				//
-				? 'Unknown' : work_data.chapter_count, ' chapters.',
-				//
-				work_data.status ? ' ' + work_data.status : '',
-				//
-				work_data.last_download.chapter > _this.start_chapter ? ' 自章節編號第 '
-				//
-				+ work_data.last_download.chapter + ' 接續下載。' : '' ].join('');
+				if (work_data.last_download.chapter > work_data.chapter_count) {
+					var move_to = work_data.directory
+					// 先搬移原目錄。
+					.replace(/[\\\/]+$/, '.' + (new Date).format('%4Y%2m%2d'));
+					// 常出現在 2manhua。
+					library_namespace.warn('章節數量比起始下載章節編號還少，或許因為章節有經過重整。將把\n'
+							+ work_data.directory + '\n→\n' + move_to
+							+ '\n，而後重新下載！');
+					// TODO: 成壓縮檔。
+					library_namespace.fs_move(work_data.directory, move_to);
+					work_data.last_download.chapter = _this.start_chapter;
+				}
+				var message = [
+						work_data.id,
+						' ',
+						work_data.title,
+						': ',
+						work_data.chapter_count >= 0
+						// assert: if chapter count unknown, typeof
+						// _this.pre_chapter_URL === 'function'
+						? work_data.chapter_count : 'Unknown',
+						' chapters.',
+						work_data.status ? ' ' + work_data.status : '',
+						work_data.last_download.chapter > _this.start_chapter
+						//
+						? ' 自章節編號第 ' + work_data.last_download.chapter
+								+ ' 接續下載。' : '' ].join('');
 				if (_this.is_finished(work_data)) {
 					// 針對特殊狀況提醒。
 					library_namespace.info(message);
@@ -599,7 +618,7 @@ function module_code(library_namespace) {
 				// console.log(chapter_data);
 				if (left !== image_list.length) {
 					library_namespace.err('所登記的圖形數量' + left + '與有資料的圖形數量'
-							+ image_list.length + '不同!');
+							+ image_list.length + '不同！');
 					if (left > image_list.length) {
 						left = image_list.length;
 					}
@@ -702,17 +721,22 @@ function module_code(library_namespace) {
 			// 已下載完本chapter
 
 			// 記錄下載錯誤的檔案
-			var error_files = [];
-			image_list.forEach(function(image_data, index) {
-				if (image_data.has_error) {
-					error_files.push(image_data.file + '	' + image_data.parsed_url);
-				}
-			});
+			if (_this.error_log_file && Array.isArray(image_list)) {
+				var error_files = [];
+				image_list.forEach(function(image_data, index) {
+					if (image_data.has_error) {
+						error_files.push(image_data.file + '	'
+								+ image_data.parsed_url);
+					}
+				});
 
-			if (error_files.length > 0) {
-				error_files.push('');
-				// 產生錯誤紀錄檔。
-				node_fs.appendFileSync(_this.main_directory + _this.error_log_file, error_files.join('\n'));
+				if (error_files.length > 0) {
+					error_files.push('');
+					node_fs.appendFileSync(_this.main_directory
+							+ _this.error_log_file,
+					// 產生錯誤紀錄檔。
+					error_files.join(library_namespace.env.line_separator));
+				}
 			}
 
 			work_data.last_download.chapter = chapter;
@@ -745,7 +769,7 @@ function module_code(library_namespace) {
 
 	function get_images(image_data, callback) {
 		// console.log(image_data);
-		if (node_fs.existsSync(image_data.file) || !this.skip_existed_bad_file
+		if (node_fs.existsSync(image_data.file) || this.skip_existed_bad_file
 		// 檢查是否已具有server上本身就已經出錯的檔案。
 		&& node_fs.existsSync(this.EOI_error_path(image_data.file))) {
 			image_data.done = true;

@@ -339,16 +339,16 @@ function module_code(library_namespace) {
 	/**
 	 * move file, fs.renameSync() without throw.
 	 * 
-	 * @param {String}old_path
+	 * @param {String}move_from_path
 	 *            old file path.
-	 * @param {String}new_path
+	 * @param {String}move_to_path
 	 *            new file path.
 	 * 
 	 * @returns error
 	 */
-	function fs_renameSync(old_path, new_path) {
+	function fs_renameSync(move_from_path, move_to_path) {
 		try {
-			node_fs.renameSync(old_path, new_path);
+			node_fs.renameSync(move_from_path, move_to_path);
 		} catch (e) {
 			return e;
 		}
