@@ -516,7 +516,7 @@ function module_code(library_namespace) {
 					var move_to = work_data.directory
 					// 先搬移原目錄。
 					.replace(/[\\\/]+$/, '.' + (new Date).format('%4Y%2m%2d'));
-					// 常出現在 2manhua。
+					// 常出現在 manhuatai, 2manhua。
 					library_namespace.warn('章節數量比起始下載章節編號還少，或許因為章節有經過重整。將把\n'
 							+ work_data.directory + '\n→\n' + move_to
 							+ '\n，而後重新下載！');
@@ -720,7 +720,9 @@ function module_code(library_namespace) {
 
 			// 已下載完本chapter
 
-			// 記錄下載錯誤的檔案
+			// 記錄下載錯誤的檔案。
+			// TODO: add timestamp, work/chapter/NO, {Array}error code
+			// TODO: 若錯誤次數少於限度，則從頭擷取work。
 			if (_this.error_log_file && Array.isArray(image_list)) {
 				var error_files = [];
 				image_list.forEach(function(image_data, index) {
@@ -826,9 +828,9 @@ function module_code(library_namespace) {
 				//
 				&& image_data.file_length.length > _this.MAX_EOI_ERROR)) {
 					// 過了。
+					var bad_file_path = _this.EOI_error_path(image_data.file, XMLHttp);
 					if (has_error || has_EOI === false) {
-						image_data.file = _this.EOI_error_path(image_data.file,
-								XMLHttp);
+						image_data.file = bad_file_path;
 						image_data.has_error = true;
 						library_namespace.warn(
 						//
@@ -844,19 +846,23 @@ function module_code(library_namespace) {
 						|| (XMLHttp.status / 100 | 0) === 4) {
 							contents = '';
 						}
+					} else if (node_fs.existsSync(bad_file_path)) {
+						library_namespace.info('存在損壞的舊檔，將將之刪除：' + bad_file_path);
+						library_namespace.fs_remove(bad_file_path);
 					}
 
-					var need_write;
+					var old_file_status;
 					try {
-						need_write = contents.length
-						// 得到更大的檔案，寫入更大的檔案。
-						> node_fs.statSync(image_data.file).size;
+						old_file_status = node_fs.statSync(image_data.file);
 					} catch (e) {
-						// bad file not exist
-						need_write = true;
+						// old/bad file not exist
 					}
-					if (need_write) {
+					if (!old_file_status
+						// 得到更大的檔案，寫入更大的檔案。
+						|| old_file_status.size < contents.length) {
 						library_namespace.fs_write(image_data.file, contents);
+					} else if (old_file_status) {
+						library_namespace.log('存在較大的舊檔，將不覆蓋：' + image_data.file);
 					}
 					image_data.done = true;
 					callback && callback();

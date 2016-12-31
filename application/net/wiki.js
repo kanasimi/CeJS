@@ -8685,7 +8685,7 @@ function module_code(library_namespace) {
 				// The production replicas.
 				// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#The_databases
 				// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database
-				// 此資料庫僅為正式上線版之刪節副本。資料並非最新版本(但誤差多於數分內)，也不完全，
+				// Wikimedia Tool Labs 上之資料庫僅為正式上線版之刪節副本。資料並非最新版本(但誤差多於數分內)，也不完全，
 				// <s>甚至可能為其他 users 竄改過</s>。
 				+ 'replica.my.cnf');
 			}

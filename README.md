@@ -46,7 +46,7 @@ $ node
 // Load CeJS library.
 require('cejs');
 
-// Load module.
+// Load modules.
 // CeL.run( 'module.name', function callback() { /* ... */ } );
 CeL.run([ 'data.math', 'application.debug.log' ]);
 
@@ -57,7 +57,7 @@ CeL.assert([ "2³⋅13⋅80611⋅82217",
 ```
 
 ## Features and examples
-For further introduction, please see [wiki](https://github.com/kanasimi/CeJS/wiki).
+For further introduction, please see the [wiki](https://github.com/kanasimi/CeJS/wiki).
 進一步介紹請參閱本計畫之 [wiki](https://github.com/kanasimi/CeJS/wiki)。
 
 ### 中西曆轉換

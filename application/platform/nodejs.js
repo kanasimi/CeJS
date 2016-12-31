@@ -56,9 +56,25 @@ function module_code(library_namespace) {
 	/** node.js file system module */
 	var node_fs = require('fs');
 
+	// TODO: 規範化
+	function fs_status(file_path) {
+		var file_status;
+		try {
+			return node_fs.statSync(file_path);
+		} catch (e) {
+			return e;
+		}
+	}
+	// _.fs_status = fs_status;
+
 	function copy_attributes(source, target) {
-		var file_status = node_fs.statSync(source);
-		node_fs.utimesSync(target, file_status.atime, file_status.mtime);
+		var file_status;
+		try {
+			file_status = node_fs.statSync(source);
+			node_fs.utimesSync(target, file_status.atime, file_status.mtime);
+		} catch (e) {
+			return e;
+		}
 	}
 	_.copy_attributes = copy_attributes;
 
@@ -212,8 +228,9 @@ function module_code(library_namespace) {
 			return error || undefined;
 		};
 
-		if (Array.isArray(path))
+		if (Array.isArray(path)) {
 			return r(remove_fso_list(path));
+		}
 
 		try {
 			/**
@@ -241,18 +258,22 @@ function module_code(library_namespace) {
 
 		} catch (e) {
 			// https://nodejs.org/api/errors.html
-			if (e.code === 'EPERM')
+			if (e.code === 'EPERM') {
 				// TODO: .chmodSync(path, 666) @ Windows??
 				;
-			if (e.code === 'EBUSY')
+			}
+			if (e.code === 'EBUSY') {
 				// TODO
 				;
-			if (e.code !== 'ENOENT')
+			}
+			if (e.code !== 'ENOENT') {
 				return r(e);
+			}
 		}
 
 		return r();
 	}
+	// _.fs_delete
 	_.fs_remove = remove_fso;
 
 	/**
