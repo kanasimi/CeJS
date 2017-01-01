@@ -7987,6 +7987,60 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	//arguments: the same as .edit
+	// file path/url
+	wiki_API.upload = function(file_path, token, options, callback) {
+		//https://commons.wikimedia.org/w/api.php?action=help&modules=upload
+		var action, post_data = {
+			text:undefined,
+			license:undefined,
+			filekey:undefined,
+			comment:undefined,
+			ignorewarnings:undefined,
+			stash:undefined,
+			async:undefined,
+			asyncdownload:undefined,
+			leavemessage:undefined,
+			statuskey:undefined,
+			checkstatus:undefined,
+
+			filename:undefined,
+			filesize:undefined,
+			chunk:undefined,
+			offset:undefined
+		};
+
+		options = library_namespace.setup_options(options);
+		for (action in post_data) {
+			if (action in options) {
+				post_data[action] = options[action];
+			} else {
+				delete post_data[action];
+			}
+		}
+		post_data.token = token;
+
+		var session;
+		if ('session' in options) {
+			session = options[KEY_SESSION];
+			// delete options[KEY_SESSION];
+		}
+
+		if (!post_data.filename) {
+			;
+		}
+
+
+		action = 'upload';
+
+		wiki_API.query(action, function(data, error) {
+			console.error(error);
+			console.log(data);
+		}, post_data, options);
+	};
+
+	// ------------------------------------------------------------------------
+
 	/**
 	 * full text search<br />
 	 * search wikitext: using prefix "insource:". e.g.,
@@ -15881,6 +15935,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('Get ' + items.length
 						+ ' items, more than 50.', 2, 'wikidata_query');
 				var session = options && options[KEY_SESSION];
+				// session && session.data(items, callback, options);
 				if (session && !session.data_session) {
 					// 得先登入。
 					session.set_data(function() {
@@ -15930,6 +15985,7 @@ function module_code(library_namespace) {
 				callback(data);
 				return;
 			}
+			// 正常情況
 			callback(items);
 		});
 	}

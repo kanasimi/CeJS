@@ -490,7 +490,7 @@ function module_code(library_namespace) {
 						work_data[key] = matched[key];
 					} else if (typeof work_data[key] !== 'object'
 							&& work_data[key] !== matched[key]) {
-						library_namespace.log(key + ': ' + matched[key]
+						library_namespace.info(key + ': ' + matched[key]
 						// 對比兩者。
 						+ '\n→ ' + work_data[key]);
 					}
@@ -847,7 +847,7 @@ function module_code(library_namespace) {
 							contents = '';
 						}
 					} else if (node_fs.existsSync(bad_file_path)) {
-						library_namespace.info('存在損壞的舊檔，將將之刪除：' + bad_file_path);
+						library_namespace.info('將刪除損壞的舊檔：' + bad_file_path);
 						library_namespace.fs_remove(bad_file_path);
 					}
 
