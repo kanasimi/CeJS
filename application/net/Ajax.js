@@ -1014,7 +1014,7 @@ function get_URL_node(URL, onload, charset, post_data, options) {
 		Object.assign(_URL.headers, {
 			'Content-Type' : 'application/x-www-form-urlencoded',
 			// prevent HTTP 411 錯誤 – 需要內容長度頭 (411 Length Required)
-			'Content-Length' : post_data.length
+			'Content-Length' : charset ? Buffer.byteLength(post_data, charset) : post_data.length
 		});
 	}
 	if (options.method) {
@@ -1249,7 +1249,7 @@ application.net.wiki wiki_API.cache() CeL.wiki.cache()
  * @param {String|Object}URL
  *            欲請求之目的 URL or options
  * @param {Function}[onload]
- *            callback when successful loaded. onload(data)
+ *            callback when successful loaded. onload(data, error/is_cached)
  * @param {Object}[options]
  *            附加參數/設定特殊功能與選項
  */
@@ -1286,7 +1286,8 @@ function get_URL_cache_node(URL, onload, options) {
 				library_namespace.debug('Using cached data.', 3, 'get_URL_cache_node');
 				library_namespace.debug('Cached data: [' + data.slice(0, 200)
 						+ ']...', 5, 'get_URL_cache_node');
-				onload(data);
+				// TODO: use cached_status
+				onload(data, true);
 				return;
 			}
 
@@ -1299,7 +1300,10 @@ function get_URL_cache_node(URL, onload, options) {
 			if (!data) {
 				library_namespace.err('get_URL_cache_node.cache: Error to get data: ['
 						+ URL + '].');
+				onload(undefined, XMLHttp.error);
+				return;
 			}
+
 			// 資料事後處理程序 (post-processor):
 			// 將以 .postprocessor() 的回傳作為要處理的資料。
 			if (typeof options.postprocessor === 'function') {

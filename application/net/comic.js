@@ -861,7 +861,7 @@ function module_code(library_namespace) {
 						// 得到更大的檔案，寫入更大的檔案。
 						|| old_file_status.size < contents.length) {
 						library_namespace.fs_write(image_data.file, contents);
-					} else if (old_file_status) {
+					} else if (old_file_status && old_file_status.size > contents.length) {
 						library_namespace.log('存在較大的舊檔，將不覆蓋：' + image_data.file);
 					}
 					image_data.done = true;

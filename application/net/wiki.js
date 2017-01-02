@@ -7990,7 +7990,7 @@ function module_code(library_namespace) {
 	//arguments: the same as .edit
 	// file path/url
 	wiki_API.upload = function(file_path, token, options, callback) {
-		//https://commons.wikimedia.org/w/api.php?action=help&modules=upload
+		// https://commons.wikimedia.org/w/api.php?action=help&modules=upload
 		var action, post_data = {
 			text:undefined,
 			license:undefined,
@@ -8026,16 +8026,39 @@ function module_code(library_namespace) {
 			// delete options[KEY_SESSION];
 		}
 
-		if (!post_data.filename) {
+		// One of the parameters "filekey", "file" and "url" is required.
+		if (file_path.includes('://')) {
+			post_data.url = file_path;
+			// The "filename" parameter must be set.
+			if (!post_data.filename) {
+				post_data.filename = file_path.match(/[\\\/]*$/)[0];
+			}
+			// Uploads by URL are not allowed from this domain.
+			// 自動先下載到本地再上傳。
+		} else {
+			// file: 必須使用 multipart/form-data 以檔案上傳的方式傳送。
+			//https://www.npmjs.com/package/form-data
+			//https://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
+			//https://tools.ietf.org/html/rfc7578
+			//https://tools.ietf.org/html/rfc2046#section-5.1
+			//The "multipart" boundary delimiters and header fields are always represented as 7bit US-ASCII
+			//https://tools.ietf.org/html/rfc2049#appendix-A
 			;
 		}
 
 
 		action = 'upload';
+		if(session&&session.API_URL) {
+			action = [session.API_URL, action];
+		}
 
 		wiki_API.query(action, function(data, error) {
-			console.error(error);
+			if (error || (error = data.error)) {
+				console.error(error);
+				callback && callback(undefined, error);
+			}
 			console.log(data);
+			callback && callback(data);
 		}, post_data, options);
 	};
 
