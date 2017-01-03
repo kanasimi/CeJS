@@ -7987,27 +7987,27 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	//arguments: the same as .edit
+	// arguments: the same as .edit
 	// file path/url
 	wiki_API.upload = function(file_path, token, options, callback) {
 		// https://commons.wikimedia.org/w/api.php?action=help&modules=upload
 		var action, post_data = {
-			text:undefined,
-			license:undefined,
-			filekey:undefined,
-			comment:undefined,
-			ignorewarnings:undefined,
-			stash:undefined,
-			async:undefined,
-			asyncdownload:undefined,
-			leavemessage:undefined,
-			statuskey:undefined,
-			checkstatus:undefined,
+			text : undefined,
+			license : undefined,
+			filekey : undefined,
+			comment : undefined,
+			ignorewarnings : undefined,
+			stash : undefined,
+			async : undefined,
+			asyncdownload : undefined,
+			leavemessage : undefined,
+			statuskey : undefined,
+			checkstatus : undefined,
 
-			filename:undefined,
-			filesize:undefined,
-			chunk:undefined,
-			offset:undefined
+			filename : undefined,
+			filesize : undefined,
+			chunk : undefined,
+			offset : undefined
 		};
 
 		options = library_namespace.setup_options(options);
@@ -8037,19 +8037,19 @@ function module_code(library_namespace) {
 			// 自動先下載到本地再上傳。
 		} else {
 			// file: 必須使用 multipart/form-data 以檔案上傳的方式傳送。
-			//https://www.npmjs.com/package/form-data
-			//https://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
-			//https://tools.ietf.org/html/rfc7578
-			//https://tools.ietf.org/html/rfc2046#section-5.1
-			//The "multipart" boundary delimiters and header fields are always represented as 7bit US-ASCII
-			//https://tools.ietf.org/html/rfc2049#appendix-A
+			// https://www.npmjs.com/package/form-data
+			// https://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
+			// https://tools.ietf.org/html/rfc7578
+			// https://tools.ietf.org/html/rfc2046#section-5.1
+			// The "multipart" boundary delimiters and header fields are always
+			// represented as 7bit US-ASCII
+			// https://tools.ietf.org/html/rfc2049#appendix-A
 			;
 		}
 
-
 		action = 'upload';
-		if(session&&session.API_URL) {
-			action = [session.API_URL, action];
+		if (session && session.API_URL) {
+			action = [ session.API_URL, action ];
 		}
 
 		wiki_API.query(action, function(data, error) {
@@ -8762,7 +8762,8 @@ function module_code(library_namespace) {
 				// The production replicas.
 				// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs#The_databases
 				// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Database
-				// Wikimedia Tool Labs 上之資料庫僅為正式上線版之刪節副本。資料並非最新版本(但誤差多於數分內)，也不完全，
+				// Wikimedia Tool Labs
+				// 上之資料庫僅為正式上線版之刪節副本。資料並非最新版本(但誤差多於數分內)，也不完全，
 				// <s>甚至可能為其他 users 竄改過</s>。
 				+ 'replica.my.cnf');
 			}

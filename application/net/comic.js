@@ -828,7 +828,8 @@ function module_code(library_namespace) {
 				//
 				&& image_data.file_length.length > _this.MAX_EOI_ERROR)) {
 					// 過了。
-					var bad_file_path = _this.EOI_error_path(image_data.file, XMLHttp);
+					var bad_file_path = _this.EOI_error_path(image_data.file,
+							XMLHttp);
 					if (has_error || has_EOI === false) {
 						image_data.file = bad_file_path;
 						image_data.has_error = true;
@@ -858,11 +859,13 @@ function module_code(library_namespace) {
 						// old/bad file not exist
 					}
 					if (!old_file_status
-						// 得到更大的檔案，寫入更大的檔案。
-						|| old_file_status.size < contents.length) {
+					// 得到更大的檔案，寫入更大的檔案。
+					|| old_file_status.size < contents.length) {
 						library_namespace.fs_write(image_data.file, contents);
-					} else if (old_file_status && old_file_status.size > contents.length) {
-						library_namespace.log('存在較大的舊檔，將不覆蓋：' + image_data.file);
+					} else if (old_file_status
+							&& old_file_status.size > contents.length) {
+						library_namespace
+								.log('存在較大的舊檔，將不覆蓋：' + image_data.file);
 					}
 					image_data.done = true;
 					callback && callback();

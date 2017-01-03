@@ -973,6 +973,7 @@ function module_code(library_namespace) {
 	};
 
 	set_method(String, {
+		next_between : next_between,
 		covers : String_covers,
 		similarity : similarity_coefficient
 	});
@@ -1179,33 +1180,33 @@ function module_code(library_namespace) {
 	 * @since 2014/7/26 11:28:18
 	 */
 	function get_intermediate(text, head, foot, index, return_data) {
-		if (return_data)
-			// [ last index, head 與 foot 之間的字串 ]
-			return_data = [ NOT_FOUND, ];
-
 		if (text
 		// = String(text)
 		) {
 			// start index of intermediate.
-			if (!head)
+			if (!head) {
 				index = 0;
-			else if ((index = text.indexOf(head, index | 0)) !== NOT_FOUND)
+			} else if ((index = text.indexOf(head, index | 0)) !== NOT_FOUND) {
 				index += head.length;
+			}
 			library_namespace.debug('head index: ' + index, 4);
 
-			if (index !== NOT_FOUND
-					&& (!foot || (foot = text.indexOf(foot, index)) !== NOT_FOUND)) {
-				head = foot ? text.slice(index, foot) : index ? text
+			if (index !== NOT_FOUND && (!foot || (foot = foot.last
+			// 可以用 {tail:'foot'} 來從結尾搜尋。from tail
+			? text.lastIndexOf(foot.tail)
+			// 正常:從頭搜尋。
+			: text.indexOf(foot, index)) !== NOT_FOUND)) {
+				head = foot ? text.slice(index, foot) : index > 0 ? text
 						.slice(index) : text;
-				if (return_data)
-					return_data = [ foot || text.length, head ];
-				else
-					return head;
+				return return_data ?
+				// [ last index, head 與 foot 之間的字串 ]
+				[ foot || text.length, head ] : head;
 			}
 		}
 
-		if (return_data)
-			return return_data;
+		if (return_data) {
+			return [ NOT_FOUND, ];
+		}
 	}
 
 	_.get_intermediate = get_intermediate;
@@ -1213,7 +1214,7 @@ function module_code(library_namespace) {
 	/**
 	 * <code>
 
-	var data = html.set_intermediate('>', '<'), text;
+	var data = html.all_between('>', '<'), text;
 
 	text = data.search().search().search().toString();
 
@@ -1256,13 +1257,36 @@ function module_code(library_namespace) {
 	function intermediate_between() {
 		return String.prototype.between.apply(this.toString(), arguments);
 	}
-	function set_intermediate(head, foot) {
-		var data = [ this, head, foot ];
+	// 2017/1/3 13:48:21:
+	// set_intermediate()→all_between()
+	// WARNING: WARNING: 請盡可能採用String.next_between()，勿使用all_between()。
+	function all_between(head, foot, index) {
+		var data = [ this, head, foot, index | 0 ];
 		data.next = next_intermediate;
 		data.search = search_intermediate;
 		data.toString = intermediate_result;
 		// data.between = intermediate_between;
 		return data;
+	}
+
+	// 採用String.prototype.indexOf()以增進速度，超越RegExp.prototype.exec()。
+	// @see /_test suite/test.js
+	function next_between(text, head, foot, index) {
+		index |= 0;
+		var head_length = head.length, foot_length = foot.length;
+		return function get_next() {
+			if (index === -1 || (index = text.indexOf(head, index)) === -1) {
+				return;
+			}
+			var i = text.indexOf(foot, index += head_length);
+			if (i === -1) {
+				index = -1;
+				return;
+			}
+			var t = text.slice(index, i);
+			index = i + foot_length;
+			return t;
+		};
 	}
 
 	// ---------------------------------------------------------------------//
@@ -2961,7 +2985,8 @@ function module_code(library_namespace) {
 			//
 			return_data) || '';
 		},
-		set_intermediate : set_intermediate,
+		// WARNING: 請盡可能採用String.next_between()，勿使用all_between()。
+		all_between : all_between,
 
 		edit_distance : set_bind(Levenshtein_distance)
 	});
