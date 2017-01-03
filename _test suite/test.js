@@ -323,7 +323,7 @@ function test_native() {
 		[[ CeL.get_intermediate('0123456789123456789', '54'), undefined ]],
 		[[ '0123456789123456789'.between('567'), '89123456789' ]],
 		[[ '0123456789123456789'.between(null, '345'), '012' ]],
-		[[ '[[1,2],[3,4]]'.between('[', {tail:']'}), '[1,2],[3,4]' ]],
+		[[ '[[1,2],[3,4]]'.between('[', {tail:']'}), '[1,2],[3,4]' ], '可以用 {tail:"~"} 來從結尾搜尋。from tail'],
 	]);
 
 	error_count += CeL.test('檢驗 all_between(), String.next_between()', function(assert) {

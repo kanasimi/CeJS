@@ -1191,7 +1191,7 @@ function module_code(library_namespace) {
 			}
 			library_namespace.debug('head index: ' + index, 4);
 
-			if (index !== NOT_FOUND && (!foot || (foot = foot.last
+			if (index !== NOT_FOUND && (!foot || (foot = foot.tail
 			// 可以用 {tail:'foot'} 來從結尾搜尋。from tail
 			? text.lastIndexOf(foot.tail)
 			// 正常:從頭搜尋。
