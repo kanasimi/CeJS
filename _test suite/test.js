@@ -326,39 +326,30 @@ function test_native() {
 		[[ '[[1,2],[3,4]]'.between('[', {tail:']'}), '[1,2],[3,4]' ], '可以用 {tail:"~"} 來從結尾搜尋。from tail'],
 	]);
 
-	error_count += CeL.test('檢驗 all_between(), String.next_between()', function(assert) {
+	error_count += CeL.test('檢驗 all_between()', function(assert) {
 		var html = '<p></p><h2>title1</h2>abc<h2>title2</h2>\nABC<h2>title3</h2>ABC\n<h2>title4</h2>\nABC\n<h2>title5</h2>',
-		// matched 項目
-		matched = html.all_between('<h2>', '</h2>'), list = [];
+		// matched token
+		get_next_between = html.all_between('<h2>', '</h2>'), list = [], text;
 		// 
-		while (matched.next()) {
-			list.push(matched.toString());
+		while ((text = get_next_between()) !== undefined) {
+			list.push(text);
 		}
 		// alert(list.join('|'));
 		assert([ 'title1|title2|title3|title4|title5', list.join('|') ], 'all_between');
 
-		// ----------------------------
+		// ------------------------------------------------
 
 		/**
 		 * <code>
 		2017/1/3 7:20:16
 		RegExp.exec vs. String.indexOf
 		https://jsperf.com/exec-vs-match-vs-test-vs-search/5
-		WARNING: 請盡可能採用String.next_between()，勿使用all_between()。
 		</code>
 		 */
 
 		function test_all_between(html) {
-			var list = [], matched = html.all_between(' href="', '"');
-			while (matched.next()) {
-				list.push(matched.toString());
-			}
-			return list;
-		}
-
-		function test_next_between(html) {
-			var list = [], get_next = String.next_between(html, ' href="', '"'), text;
-			while (text = get_next()) {
+			var get_next_between = html.all_between(' href="', '"'), list = [], text;
+			while ((text = get_next_between()) !== undefined) {
 				list.push(text);
 			}
 			return list;
@@ -366,6 +357,7 @@ function test_native() {
 
 		function test_exec(html) {
 			var list = [], pattern = / href="([^"]+)"/g;
+			// pattern = / href="(.*?)"/g;
 			while (matched = pattern.exec(html)) {
 				list.push(matched[1]);
 			}
@@ -380,7 +372,6 @@ function test_native() {
 		html = html.join('\n');
 
 		assert([ test_exec(html).join(','), test_all_between(html).join(',') ], 'test_all_between');
-		assert([ test_exec(html).join(','), test_next_between(html).join(',') ], 'test_next_between');
 
 		return;
 
@@ -388,19 +379,13 @@ function test_native() {
 		for (var i = 0; i < 200; i++)
 			test_all_between(html);
 		console.timeEnd('test_all_between');
-		// test_all_between: 30298.03ms
-
-		console.time('test_next_between');
-		for (var i = 0; i < 200; i++)
-			test_next_between(html);
-		console.timeEnd('test_next_between');
-		// test_next_between: 1462.82ms
+		// test_all_between: 2614.73ms
 
 		console.time('test_exec');
 		for (var i = 0; i < 200; i++)
 			test_exec(html);
 		console.timeEnd('test_exec');
-		// test_exec: 5244.31ms
+		// test_exec: 4351.75ms
 	});
 
 	if (false) {

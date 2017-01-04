@@ -973,7 +973,6 @@ function module_code(library_namespace) {
 	};
 
 	set_method(String, {
-		next_between : next_between,
 		covers : String_covers,
 		similarity : similarity_coefficient
 	});
@@ -1259,8 +1258,9 @@ function module_code(library_namespace) {
 	}
 	// 2017/1/3 13:48:21:
 	// set_intermediate()→all_between()
-	// WARNING: WARNING: 請盡可能採用String.next_between()，勿使用all_between()。
-	function all_between(head, foot, index) {
+	// WARNING: 請盡可能採用all_between()，勿使用deprecated_all_between()。
+	// 要用此函數，不如直接採用RegExp.prototype.exec()比較快。
+	function deprecated_all_between(head, foot, index) {
 		var data = [ this, head, foot, index | 0 ];
 		data.next = next_intermediate;
 		data.search = search_intermediate;
@@ -1269,24 +1269,41 @@ function module_code(library_namespace) {
 		return data;
 	}
 
+	/**
+	 * <code>
+
+	var get_next_between = html.all_between('>', '<'), text;
+
+	while ((text = get_next_between()) !== undefined) {
+		text;
+	}
+
+	</code>
+	 */
+
 	// 採用String.prototype.indexOf()以增進速度，超越RegExp.prototype.exec()。
 	// @see /_test suite/test.js
-	function next_between(text, head, foot, index) {
+	function all_between(head, foot, index) {
 		index |= 0;
-		var head_length = head.length, foot_length = foot.length;
-		return function get_next() {
-			if (index === -1 || (index = text.indexOf(head, index)) === -1) {
-				return;
+		// assert: head && foot
+		// && typeof head === 'string' && typeof foot === 'string'
+		var text = this, head_length = head.length, foot_length = foot.length;
+
+		function get_next_between() {
+			if (index !== NOT_FOUND
+					&& (index = text.indexOf(head, index)) !== NOT_FOUND) {
+				var left_index = text.indexOf(foot, index += head_length);
+				if (left_index !== NOT_FOUND) {
+					var token = text.slice(index, left_index);
+					index = left_index + foot_length;
+					return token;
+				}
+				index = NOT_FOUND;
 			}
-			var i = text.indexOf(foot, index += head_length);
-			if (i === -1) {
-				index = -1;
-				return;
-			}
-			var t = text.slice(index, i);
-			index = i + foot_length;
-			return t;
-		};
+			// return undefined;
+		}
+
+		return get_next_between;
 	}
 
 	// ---------------------------------------------------------------------//
@@ -2985,7 +3002,6 @@ function module_code(library_namespace) {
 			//
 			return_data) || '';
 		},
-		// WARNING: 請盡可能採用String.next_between()，勿使用all_between()。
 		all_between : all_between,
 
 		edit_distance : set_bind(Levenshtein_distance)

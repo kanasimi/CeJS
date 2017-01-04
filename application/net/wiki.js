@@ -5324,9 +5324,10 @@ function module_code(library_namespace) {
 		//
 		: [ action[2] ? action[0] + action[2] : action[0],
 				library_namespace.null_Object() ];
-		if (!action[1].format)
+		if (!action[1].format) {
 			// 加上 "&utf8", "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
-			action[0] = get_URL.add_param(action[0], 'format=json&utf8');
+			action[0] = get_URL.add_parameter(action[0], 'format=json&utf8');
+		}
 
 		// 一般情況下會重新導向至 https。
 		// 若在 Tool Labs 中，則視為在同一機房內，不採加密。如此亦可加快傳輸速度。
@@ -6833,7 +6834,8 @@ function module_code(library_namespace) {
 			if (typeof options.parameters === 'string') {
 				title[1] += '&' + options.parameters;
 			} else if (library_namespace.is_Object(options.parameters)) {
-				title[1] += '&' + get_URL.param_to_String(options.parameters);
+				title[1] += '&'
+						+ get_URL.parameters_to_String(options.parameters);
 			} else {
 				library_namespace.debug('無法處理之 options.parameters: ['
 						+ options.parameters + ']', 1, 'get_list');
@@ -8034,17 +8036,10 @@ function module_code(library_namespace) {
 				post_data.filename = file_path.match(/[\\\/]*$/)[0];
 			}
 			// Uploads by URL are not allowed from this domain.
-			// 自動先下載到本地再上傳。
+			// 自動先下載fetch再上傳。
 		} else {
 			// file: 必須使用 multipart/form-data 以檔案上傳的方式傳送。
-			// https://www.npmjs.com/package/form-data
-			// https://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
-			// https://tools.ietf.org/html/rfc7578
-			// https://tools.ietf.org/html/rfc2046#section-5.1
-			// The "multipart" boundary delimiters and header fields are always
-			// represented as 7bit US-ASCII
-			// https://tools.ietf.org/html/rfc2049#appendix-A
-			;
+			options.form_data = true;
 		}
 
 		action = 'upload';
@@ -8087,11 +8082,11 @@ function module_code(library_namespace) {
 		var API_URL;
 		if (Array.isArray(key))
 			API_URL = key[0], key = key[1];
-		wiki_API.query([ API_URL,
-				'query&list=search&' + get_URL.param_to_String(Object.assign({
-					srsearch : key
-				}, wiki_API.search.default_parameters, options)) ], function(
-				data) {
+		wiki_API.query([ API_URL, 'query&list=search&'
+		//
+		+ get_URL.parameters_to_String(Object.assign({
+			srsearch : key
+		}, wiki_API.search.default_parameters, options)) ], function(data) {
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value)
@@ -16088,7 +16083,8 @@ function module_code(library_namespace) {
 		}
 
 		get_URL((options.API_URL || wikidata_PetScan_API_URL) + '?'
-				+ get_URL.param_to_String(parameters), function(data, error) {
+				+ get_URL.parameters_to_String(parameters), function(data,
+				error) {
 			if (error) {
 				callback(undefined, error);
 				return;
