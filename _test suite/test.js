@@ -356,7 +356,7 @@ function test_native() {
 		}
 
 		function test_exec(html) {
-			var list = [], pattern = / href="([^"]+)"/g;
+			var list = [], matched, pattern = / href="([^"]+)"/g;
 			// pattern = / href="(.*?)"/g;
 			while (matched = pattern.exec(html)) {
 				list.push(matched[1]);
