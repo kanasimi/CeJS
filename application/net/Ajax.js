@@ -438,15 +438,20 @@ function module_code(library_namespace) {
 	/**
 	 * <code>
 
-	{type:'jpg',image:['fn1.jpg'].type='file'}
+	// "file": keyword for "Content-Disposition: file;"
+	{type:'jpg',image:{file:'fn1.jpg'}}
 
-	{type:'jpg',image:['fn1.jpg'].type='image/jpeg'}
+	// will fetch url first.
+	{type:'jpg',image:{url:'http://host/'}}
 
-	{type:'jpg',images:['fn1.jpg','fn2.jpg'].type='file'}
+	{type:'jpg',image:{file:'fn1.jpg',type:'image/jpeg'}}
 
-	{type:'jpg',images:['fn1.jpg','fn2.jpg'].type='file',docs:['fn1.txt','fn2.txt'].type='file'}
+	// Array: use "Content-Type: multipart/mixed;"
+	{type:'jpg',images:{file:['fn1.jpg','fn2.jpg']}}
 
-	{type:'jpg',images:[['fn1.jpg'].type='image/jpeg',['fn1.txt'].type='text/plain']}
+	{type:'jpg',images:{file:['fn1.jpg','fn2.jpg']},docs:{file:['fn1.txt','fn2.txt']}}
+
+	{type:'jpg',images:[{file:'fn1.jpg',type:'image/jpeg'},{file:'fn1.txt',type:'text/plain'}]}
 
 	</code>
 	 */
@@ -456,6 +461,36 @@ function module_code(library_namespace) {
 		var boundary = this.boundary;
 		return boundary + this.join(boundary) + boundary;
 	}
+
+	// 選出 data_Array 不包含之 string
+	function give_boundary(data_Array) {
+		while (true) {
+			var boundary = (Number.MAX_SAFE_INTEGER * Math.random())
+					.toString(10 + 26);
+			for (var i = 1; i < boundary.length / 2 | 0; i++) {
+				var slice = boundary.slice(0, i);
+				if (boundary.lastIndexOf(slice) > 0) {
+					boundary = null;
+					break;
+				}
+			}
+			// assert: boundary 不自包含，例如 'aa'自包含'a'，'asas'自包含'as'
+			if (boundary) {
+				if (data_Array.every(function(item) {
+					return item.includes(boundary);
+				})) {
+					return boundary;
+				}
+			}
+		}
+	}
+
+	// 常用 MIME types
+	var common_MIME_types = {
+		jpg : 'image/jpeg',
+		// lst : 'text/plain',
+		txt : 'text/plain'
+	};
 
 	// https://github.com/form-data/form-data/blob/master/lib/form_data.js
 	// https://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
@@ -468,66 +503,106 @@ function module_code(library_namespace) {
 	function to_form_data(parameters, callback) {
 		parameters = get_URL.parse_parameters(parameters);
 
-		function parse_value(value, key, callback, parent_data, MIME_type) {
-			if (!Array.isArray(value)) {
-				if (!MIME_type) {
-					// 非檔案，屬於普通的表單資料
-					if (!key) {
-						throw 'No key for value: ' + value;
-					}
-					parent_data.psuh([
-							'Content-Disposition: form-data; name="' + key
-									+ '"', '', value, '' ].join('\n'));
-				}
-				var file_path = value;
-				if (file_path.includes('://')) {
-					// fetch URL
-					_.get_URL(file_path, function(XMLHttp, error) {
-						if (error) {
-							library_namespace
-									.err('to_form_data: Error to get data: ['
-											+ URL + '].');
-							// Skip this one.
-							callback();
-							return;
-						}
+		function get_file_object(value, callback, key, slice) {
+			var is_url, MIME_type;
+			if (typeof value === 'string') {
+				is_url = value.includes('://');
 
-						XMLHttp.responseText;
-						// TODO
+			} else
+			// else: assert: library_namespace.is_Object(value)
+			if (is_url = value.url) {
+				value = is_url;
+				// is_url = true;
+			} else {
+				// .type: MIME type
+				MIME_type = value.type;
+				// value: file_path
+				value = value.file;
+			}
 
-						parse_value(value, key, callback, parent_data,
-								MIME_type);
-					});
-					return;
-				}
+			if (!is_url) {
 				// read file contents
-				if (MIME_type === 'file') {
+				var content = library_namespace.get_file(value);
+				// value: file path → file name
+				value = value.match(/[^\\\/]*$/)[0];
+				if (!MIME_type) {
+					// 由 file extension 判別。
+					MIME_type = value.match(/[a-z\d\-]*$/)[0].toLowerCase();
+					MIME_type = common_MIME_types[MIME_type]
 					// png → image/png
-					MIME_type = 'image/'
-							+ file_path.match(/[a-z\d\-]*$/)[0].toLowerCase();
+					|| 'image/' + MIME_type;
 				}
-				value = [
-						'Content-Disposition: file; filename="' + file_path
-								+ '"', 'Content-Type: ' + MIME_type, '' ];
-				parent_data.push(value);
+				(slice || root_data).push('Content-Disposition: '
+						+ (slice ? 'file' : 'form-data; name="' + key + '"')
+						+ '; filename="' + value + '"\nContent-Type: '
+						+ MIME_type + '\n\n' + content);
+				callback();
 				return;
 			}
 
-			var data = [];
-			// .type: MIME type
-			MIME_type = value.type;
-			;
+			// fetch URL
+			_.get_URL(value, function(XMLHttp, error) {
+				if (error) {
+					library_namespace.err('to_form_data: Error to get data: ['
+							+ URL + '].');
+					// Skip this one.
+					callback();
+					return;
+				}
+
+				// value: url → file name
+				value = value.replace(/[?#].*$/, '')
+						.match(/([^\\\/]*)[\\\/]?$/)[1];
+				(slice || root_data).push('Content-Disposition: '
+						+ (slice ? 'file' : 'form-data; name="' + key + '"')
+						+ '; filename="' + value + '"\nContent-Type: '
+						+ XMLHttp.type + '\n\n' + XMLHttp.responseText);
+				callback();
+			});
 		}
 
 		var root_data = [], keys = Object.keys(parameters), index = 0;
 		data.toString = form_data_toString;
+		// 因為在遇到fetch url時需要等待，因此採用async。
 		function process_next() {
 			if (index === keys.length) {
+				root_data.boundary = give_boundary(root_data);
 				callback(root_data);
-			} else {
-				var key = keys[index++];
-				parse_value(parameters[key], key, process_next, root_data);
+				return;
 			}
+
+			var key = keys[index++], value = parameters[key];
+			if (Array.isArray(value)) {
+				// assert: is files/urls
+				var slice = [], item_index = 0;
+				function next_item() {
+					if (item_index === value.length) {
+						var boundary = give_boundary(slice);
+						root_data.push('Content-Disposition: form-data; name="'
+						//
+						+ key + '"\n\nContent-Type: multipart/mixed; boundary='
+								+ boundary + '\n\n' + boundary
+								+ slice.join(boundary) + boundary);
+						process_next();
+					} else {
+						get_file_object(value[item_index++], next_item,/* key */
+						undefined, slice);
+					}
+				}
+				next_item();
+			}
+
+			if (library_namespace.is_Object(value)) {
+				// assert: is file/url
+				get_file_object(value, process_next, key);
+			}
+
+			// 非檔案，屬於普通的表單資料。
+			if (!key) {
+				throw 'No key for value: ' + value;
+			}
+			root_data.push('Content-Disposition: form-data; name="' + key
+					+ '"\n\n' + value);
 		}
 		process_next();
 		return root_data;
@@ -1012,6 +1087,15 @@ function module_code(library_namespace) {
 		}
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
+
+		if (options.form_data && !options.form_data_generated) {
+			get_URL.to_form_data(post_data, function(data) {
+				options.form_data_generated = data;
+				get_URL_node(URL, onload, charset, post_data, options);
+			});
+			return;
+		}
+
 		if (library_namespace.is_Object(URL) && URL.URL) {
 			Object.assign(options, URL);
 			onload = options.onload || onload;
@@ -1208,7 +1292,7 @@ function module_code(library_namespace) {
 			result_Object.type = result.headers['content-type']
 			// charset: XMLHttp.charset
 			.replace(/;(.*)$/, function($0, $1) {
-				var matched = $1.match(/charset=([^;]+)/i);
+				var matched = $1.match(/[; ]charset=([^;]+)/i);
 				if (matched) {
 					result_Object.charset = matched[1].trim();
 				}
@@ -1379,9 +1463,8 @@ function module_code(library_namespace) {
 
 		if (post_data) {
 			_URL.method = 'POST';
-			var form_data = options.form_data;
+			var form_data = options.form_data_generated;
 			if (form_data) {
-				form_data = get_URL.to_form_data(post_data);
 				post_data = form_data.toString();
 				// boundary 存入→ form_data
 				form_data = form_data.boundary;

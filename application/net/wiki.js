@@ -8029,7 +8029,7 @@ function module_code(library_namespace) {
 		}
 
 		// One of the parameters "filekey", "file" and "url" is required.
-		if (file_path.includes('://')) {
+		if (false && file_path.includes('://')) {
 			post_data.url = file_path;
 			// The "filename" parameter must be set.
 			if (!post_data.filename) {
@@ -8040,6 +8040,11 @@ function module_code(library_namespace) {
 		} else {
 			// file: 必須使用 multipart/form-data 以檔案上傳的方式傳送。
 			options.form_data = true;
+			post_data.file = file_path.includes('://') ? {
+				url : file_path
+			} : {
+				file : file_path
+			};
 		}
 
 		action = 'upload';
