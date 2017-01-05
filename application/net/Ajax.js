@@ -438,9 +438,15 @@ function module_code(library_namespace) {
 	/**
 	 * <code>
 
-	{type:'jpg',files:['fn1.jpg'].type='file'}
-	→ data:
-	[]	{type:'jpg',files:['fn1.jpg'].type='file'}
+	{type:'jpg',image:['fn1.jpg'].type='file'}
+
+	{type:'jpg',image:['fn1.jpg'].type='image/jpeg'}
+
+	{type:'jpg',images:['fn1.jpg','fn2.jpg'].type='file'}
+
+	{type:'jpg',images:['fn1.jpg','fn2.jpg'].type='file',docs:['fn1.txt','fn2.txt'].type='file'}
+
+	{type:'jpg',images:[['fn1.jpg'].type='image/jpeg',['fn1.txt'].type='text/plain']}
 
 	</code>
 	 */
@@ -458,21 +464,41 @@ function module_code(library_namespace) {
 	// The "multipart" boundary delimiters and header fields are always
 	// represented as 7bit US-ASCII
 	// https://tools.ietf.org/html/rfc2049#appendix-A
+	// http://stackoverflow.com/questions/4238809/example-of-multipart-form-data
 	function to_form_data(parameters, callback) {
 		parameters = get_URL.parse_parameters(parameters);
 
-		function parse_value(value, key, _data, MIME_type) {
+		function parse_value(value, key, callback, parent_data, MIME_type) {
 			if (!Array.isArray(value)) {
 				if (!MIME_type) {
 					// 非檔案，屬於普通的表單資料
-					return [
+					if (!key) {
+						throw 'No key for value: ' + value;
+					}
+					parent_data.psuh([
 							'Content-Disposition: form-data; name="' + key
-									+ '"', '', value, '' ].join('\n');
+									+ '"', '', value, '' ].join('\n'));
 				}
 				var file_path = value;
 				if (file_path.includes('://')) {
 					// fetch URL
-					TODO;
+					_.get_URL(file_path, function(XMLHttp, error) {
+						if (error) {
+							library_namespace
+									.err('to_form_data: Error to get data: ['
+											+ URL + '].');
+							// Skip this one.
+							callback();
+							return;
+						}
+
+						XMLHttp.responseText;
+						// TODO
+
+						parse_value(value, key, callback, parent_data,
+								MIME_type);
+					});
+					return;
 				}
 				// read file contents
 				if (MIME_type === 'file') {
@@ -483,7 +509,7 @@ function module_code(library_namespace) {
 				value = [
 						'Content-Disposition: file; filename="' + file_path
 								+ '"', 'Content-Type: ' + MIME_type, '' ];
-				_data.push(value);
+				parent_data.push(value);
 				return;
 			}
 
@@ -499,7 +525,8 @@ function module_code(library_namespace) {
 			if (index === keys.length) {
 				callback(root_data);
 			} else {
-				parse_value(value, key, root_data);
+				var key = keys[index++];
+				parse_value(parameters[key], key, process_next, root_data);
 			}
 		}
 		process_next();
@@ -1062,6 +1089,14 @@ function module_code(library_namespace) {
 		}
 
 		var request, finished,
+		// result_Object模擬 XMLHttp。
+		result_Object = {
+			// node_agent : agent,
+			// for debug
+			// url : _URL,
+			// 因為可能 redirecting 過，這邊列出的才是最終 URL。
+			URL : URL
+		},
 		// assert: 必定從 _onfail 或 _onload 作結，以確保會註銷登記。
 		// 本函數unregister()應該放在所有本執行緒會執行到onload的程式碼中。
 		unregister = function() {
@@ -1118,11 +1153,8 @@ function module_code(library_namespace) {
 			}
 			// 在出現錯誤時，將 onload 當作 callback。並要確保 {Object}response
 			// 因此應該要先檢查error再處理response
-			onload({
-				URL : URL,
-				status : status_code
-			}, error);
-		}, status_code,
+			onload(result_Object, error);
+		},
 		// on success
 		_onload = function(result) {
 			// 在這邊不過剛開始從伺服器得到資料，因此還不可執行unregister()，否則依然可能遇到timeout。
@@ -1155,19 +1187,33 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			status_code = result.statusCode;
+			// {Number}result.statusCode
+			// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
+			result_Object.status = result.statusCode;
 			// 在有 options.onfail 時僅 .debug()。但這並沒啥條理...
-			if (options.onfail || /^2/.test(status_code)) {
-				library_namespace.debug('STATUS: ' + status_code + ' ' + URL,
-						2, 'get_URL_node');
+			if (options.onfail || /^2/.test(result.statusCode)) {
+				library_namespace.debug('STATUS: ' + result.statusCode + ' '
+						+ URL, 2, 'get_URL_node');
 			} else if (!options.no_warning) {
 				library_namespace.warn('get_URL_node: [' + URL + ']: status '
-						+ status_code);
+						+ result.statusCode);
 			}
 
 			library_namespace
 					.debug('result HEADERS: ' + JSON.stringify(result.headers),
 							4, 'get_URL_node._onload');
+			// XMLHttp.headers['content-type']==='text/html; charset=utf-8'
+			result_Object.headers = result.headers;
+			// MIME type: XMLHttp.type
+			result_Object.type = result.headers['content-type']
+			// charset: XMLHttp.charset
+			.replace(/;(.*)$/, function($0, $1) {
+				var matched = $1.match(/charset=([^;]+)/i);
+				if (matched) {
+					result_Object.charset = matched[1].trim();
+				}
+				return '';
+			}).trim();
 
 			merge_cookie(agent, result.headers['set-cookie']);
 			// 為預防字元編碼破碎，因此不能設定 result.setEncoding()？
@@ -1308,18 +1354,9 @@ function module_code(library_namespace) {
 					library_namespace.debug(
 					//
 					'BODY: ' + data, 1, 'get_URL_node');
-				// 模擬 XMLHttp。
-				onload({
-					// for debug
-					// url : _URL,
-					// 因為可能 redirecting 過，這邊列出的才是最終 URL。
-					URL : URL,
-					// node_agent : agent,
-					// {Number}result.statusCode
-					// https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/status
-					status : result.statusCode,
-					responseText : data
-				});
+				// result_Object模擬 XMLHttp。
+				result_Object.responseText = data;
+				onload(result_Object);
 				// free
 				data = null;
 				// node_fs.appendFileSync('get_URL_node.data', '\n');
@@ -1642,17 +1679,17 @@ function module_code(library_namespace) {
 						'get_URL_cache_node');
 			}
 
-			_.get_URL(URL, function(XMLHttp) {
-				data = XMLHttp.responseText;
-				if (!data) {
+			_.get_URL(URL, function(XMLHttp, error) {
+				if (error) {
 					library_namespace.err(
 					//
 					'get_URL_cache_node.cache: Error to get data: [' + URL
 							+ '].');
-					onload(undefined, XMLHttp.error);
+					onload(undefined, error);
 					return;
 				}
 
+				data = XMLHttp.responseText;
 				// 資料事後處理程序 (post-processor):
 				// 將以 .postprocessor() 的回傳作為要處理的資料。
 				if (typeof options.postprocessor === 'function') {
