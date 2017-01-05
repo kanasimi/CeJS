@@ -501,8 +501,6 @@ function module_code(library_namespace) {
 	// https://tools.ietf.org/html/rfc2049#appendix-A
 	// http://stackoverflow.com/questions/4238809/example-of-multipart-form-data
 	function to_form_data(parameters, callback) {
-		parameters = get_URL.parse_parameters(parameters);
-
 		function get_file_object(value, callback, key, slice) {
 			var is_url, MIME_type;
 			if (typeof value === 'string') {
@@ -561,10 +559,11 @@ function module_code(library_namespace) {
 			});
 		}
 
-		var root_data = [], keys = Object.keys(parameters), index = 0;
-		data.toString = form_data_toString;
+		parameters = get_URL.parse_parameters(parameters);
+
+		var root_data = [], keys = Object.keys(parameters), index = 0,
 		// 因為在遇到fetch url時需要等待，因此採用async。
-		function process_next() {
+		process_next = function() {
 			if (index === keys.length) {
 				root_data.boundary = give_boundary(root_data);
 				callback(root_data);
@@ -603,8 +602,10 @@ function module_code(library_namespace) {
 			}
 			root_data.push('Content-Disposition: form-data; name="' + key
 					+ '"\n\n' + value);
-		}
+		};
+		data.toString = form_data_toString;
 		process_next();
+
 		return root_data;
 	}
 
