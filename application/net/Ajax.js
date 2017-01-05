@@ -561,9 +561,10 @@ function module_code(library_namespace) {
 
 		parameters = get_URL.parse_parameters(parameters);
 
-		var root_data = [], keys = Object.keys(parameters), index = 0,
+		var root_data = [], keys = Object.keys(parameters), index = 0;
+		data.toString = form_data_toString;
 		// 因為在遇到fetch url時需要等待，因此採用async。
-		process_next = function() {
+		function process_next() {
 			if (index === keys.length) {
 				root_data.boundary = give_boundary(root_data);
 				callback(root_data);
@@ -573,8 +574,9 @@ function module_code(library_namespace) {
 			var key = keys[index++], value = parameters[key];
 			if (Array.isArray(value)) {
 				// assert: is files/urls
-				var slice = [], item_index = 0;
-				function next_item() {
+				var slice = [], item_index = 0,
+				//
+				next_item = function() {
 					if (item_index === value.length) {
 						var boundary = give_boundary(slice);
 						root_data.push('Content-Disposition: form-data; name="'
@@ -602,8 +604,7 @@ function module_code(library_namespace) {
 			}
 			root_data.push('Content-Disposition: form-data; name="' + key
 					+ '"\n\n' + value);
-		};
-		data.toString = form_data_toString;
+		}
 		process_next();
 
 		return root_data;
