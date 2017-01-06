@@ -1,0 +1,5 @@
+# configurations for Jekyll
+# http://jekyllrb.com/docs/configuration/#global-configuration
+# https://help.github.com/articles/files-that-start-with-an-underscore-are-missing/
+safe: true
+include: ["_test suite", "_structure"]

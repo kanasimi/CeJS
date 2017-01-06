@@ -459,6 +459,7 @@ function module_code(library_namespace) {
 	function form_data_toString(is_slice) {
 		// 決定 boundary
 		var boundary = '--' + this.boundary;
+		// TODO: use '\r\n'
 		return boundary + '\n' + this.join('\n' + boundary + '\n') + '\n' + boundary + (is_slice ? '' : '--');
 	}
 
@@ -491,7 +492,7 @@ function module_code(library_namespace) {
 
 	// 常用 MIME types
 	var common_MIME_types = {
-		jpg : 'image/jpeg',
+		// jpg : 'image/jpeg',
 		// svg : 'image/svg+xml',
 		// lst : 'text/plain',
 		txt : 'text/plain'
@@ -523,17 +524,21 @@ function module_code(library_namespace) {
 				value = value.file;
 			}
 
+			// TODO: use stream
+
 			function push_and_callback(MIME_type, content) {
 				(slice || root_data).push('Content-Disposition: '
 						+ (slice ? 'file' : 'form-data; name="' + key + '"')
 						+ '; filename="' + value + '"\nContent-Type: '
-						+ MIME_type + '\n\n' + content);
+						+ MIME_type + '\n\n'
+						// Buffer.from(content, 'binary')
+						+ content);
 				callback();
 			}
 
 			if (!is_url) {
 				// read file contents
-				var content = library_namespace.get_file(value);
+				var content = library_namespace.get_file(value/*, 'binary'*/);
 				// value: file path → file name
 				value = value.match(/[^\\\/]*$/)[0];
 				if (!MIME_type) {
@@ -1700,14 +1705,16 @@ function module_code(library_namespace) {
 	/** {Object|Function}fs in node.js */
 	var node_fs;
 	try {
-		if (library_namespace.platform.nodejs)
+		if (library_namespace.platform.nodejs) {
 			// @see https://nodejs.org/api/fs.html
 			node_fs = require('fs');
-		if (typeof node_fs.readFile !== 'function')
+		}
+		if (typeof node_fs.readFile !== 'function') {
 			throw true;
+		}
 	} catch (e) {
 		library_namespace.debug('無 node.js 之 fs，因此不具備 node 之檔案操作功能。');
-		if (false)
+		if (false) {
 			// enumerate for get_URL_cache_node
 			// 模擬 node.js 之 fs，以達成最起碼的效果（即無 cache 功能的情況）。
 			node_fs = {
@@ -1716,6 +1723,7 @@ function module_code(library_namespace) {
 				},
 				writeFile : library_namespace.null_function
 			};
+		}
 	}
 
 	/**
