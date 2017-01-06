@@ -4547,6 +4547,7 @@ function module_code(library_namespace) {
 		// each 現在轉作為對每一頁面執行之工作。
 		each = each[0];
 		if (!callback) {
+			// TODO: [[ja:Special:Diff/62546431|有時最後一筆記錄可能會漏失掉]]
 			callback = no_message ? library_namespace.null_function
 			// default logger.
 			: function(title, error, result) {
@@ -5396,6 +5397,8 @@ function module_code(library_namespace) {
 			});
 
 		} else {
+			//console.log('-'.repeat(79));
+			//console.log(options);
 			var get_URL_options = options && options.get_URL_options;
 			// @see function setup_API_URL(session, API_URL)
 			if (!get_URL_options) {
@@ -5411,8 +5414,13 @@ function module_code(library_namespace) {
 						setup_API_URL(session, true);
 					}
 					get_URL_options = session.get_URL_options;
-
 				}
+			}
+			if (options.form_data) {
+				// @see wiki_API.upload
+				library_namespace.debug('Set form_data', 6);
+				// throw 'Set form_data';
+				get_URL_options.form_data = options.form_data;
 			}
 
 			if (false) {
@@ -8012,7 +8020,7 @@ function module_code(library_namespace) {
 			offset : undefined
 		};
 
-		options = library_namespace.setup_options(options);
+		options = library_namespace.new_options(options);
 		for (action in post_data) {
 			if (action in options) {
 				post_data[action] = options[action];
@@ -8045,6 +8053,11 @@ function module_code(library_namespace) {
 			} : {
 				file : file_path
 			};
+		}
+
+		if (!post_data.filename) {
+			// file path → file name
+			post_data.filename = file_path.match(/[^\\\/]*$/)[0];
 		}
 
 		action = 'upload';

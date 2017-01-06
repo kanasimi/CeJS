@@ -456,17 +456,19 @@ function module_code(library_namespace) {
 	</code>
 	 */
 
-	function form_data_toString() {
+	function form_data_toString(is_slice) {
 		// 決定 boundary
-		var boundary = this.boundary;
-		return boundary + this.join(boundary) + boundary;
+		var boundary = '--' + this.boundary;
+		return boundary + '\n' + this.join('\n' + boundary + '\n') + '\n' + boundary + (is_slice ? '' : '--');
 	}
 
 	// 選出 data_Array 不包含之 string
 	function give_boundary(data_Array) {
-		while (true) {
+		var retry = 0;
+		while (retry++ < 8) {
 			var boundary = (Number.MAX_SAFE_INTEGER * Math.random())
 					.toString(10 + 26);
+			// console.log('test boundary: [' + boundary + ']');
 			for (var i = 1; i < boundary.length / 2 | 0; i++) {
 				var slice = boundary.slice(0, i);
 				if (boundary.lastIndexOf(slice) > 0) {
@@ -477,12 +479,14 @@ function module_code(library_namespace) {
 			// assert: boundary 不自包含，例如 'aa'自包含'a'，'asas'自包含'as'
 			if (boundary) {
 				if (data_Array.every(function(item) {
-					return item.includes(boundary);
+					return !item.includes(boundary);
 				})) {
+					data_Array.boundary = boundary;
 					return boundary;
 				}
 			}
 		}
+		throw 'give_boundary: Retry too many times!';
 	}
 
 	// 常用 MIME types
@@ -551,6 +555,8 @@ function module_code(library_namespace) {
 				// value: url → file name
 				value = value.replace(/[?#].*$/, '')
 						.match(/([^\\\/]*)[\\\/]?$/)[1];
+				// console.log('-'.repeat(79));
+				// console.log(value);
 				(slice || root_data).push('Content-Disposition: '
 						+ (slice ? 'file' : 'form-data; name="' + key + '"')
 						+ '; filename="' + value + '"\nContent-Type: '
@@ -562,40 +568,49 @@ function module_code(library_namespace) {
 		parameters = get_URL.parse_parameters(parameters);
 
 		var root_data = [], keys = Object.keys(parameters), index = 0;
-		data.toString = form_data_toString;
+		root_data.toString = form_data_toString;
+		// console.log('-'.repeat(79));
+		// console.log(keys);
 		// 因為在遇到fetch url時需要等待，因此採用async。
 		function process_next() {
+			// console.log('-'.repeat(60));
+			// console.log(index + '/' + keys.length);
 			if (index === keys.length) {
-				root_data.boundary = give_boundary(root_data);
+				give_boundary(root_data);
+				// console.log('-'.repeat(79));
+				// console.log(JSON.stringify(root_data));
 				callback(root_data);
 				return;
 			}
 
 			var key = keys[index++], value = parameters[key];
+			// console.log(key + ': ' + JSON.stringify(value));
 			if (Array.isArray(value)) {
 				// assert: is files/urls
 				var slice = [], item_index = 0,
 				//
 				next_item = function() {
 					if (item_index === value.length) {
-						var boundary = give_boundary(slice);
+						give_boundary(slice);
 						root_data.push('Content-Disposition: form-data; name="'
 						//
 						+ key + '"\n\nContent-Type: multipart/mixed; boundary='
-								+ boundary + '\n\n' + boundary
-								+ slice.join(boundary) + boundary);
+								+ slice.boundary + '\n\n'
+								+ form_data_toString.call(slice, true));
 						process_next();
 					} else {
 						get_file_object(value[item_index++], next_item,/* key */
 						undefined, slice);
 					}
-				}
+				};
 				next_item();
+				return;
 			}
 
 			if (library_namespace.is_Object(value)) {
 				// assert: is file/url
 				get_file_object(value, process_next, key);
+				return;
 			}
 
 			// 非檔案，屬於普通的表單資料。
@@ -604,6 +619,7 @@ function module_code(library_namespace) {
 			}
 			root_data.push('Content-Disposition: form-data; name="' + key
 					+ '"\n\n' + value);
+			process_next();
 		}
 		process_next();
 
@@ -1090,8 +1106,14 @@ function module_code(library_namespace) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
 
+		// console.log('-'.repeat(79));
+		// console.log(JSON.stringify(options));
+		// console.log(options.form_data);
 		if (options.form_data && !options.form_data_generated) {
 			get_URL.to_form_data(post_data, function(data) {
+				// console.log(data.toString().slice(0,800));
+				// console.log('>> ' + data.toString().slice(-200));
+				// throw 3;
 				options.form_data_generated = data;
 				get_URL_node(URL, onload, charset, post_data, options);
 			});
