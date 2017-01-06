@@ -5416,7 +5416,7 @@ function module_code(library_namespace) {
 					get_URL_options = session.get_URL_options;
 				}
 			}
-			if (options.form_data) {
+			if (options && options.form_data) {
 				// @see wiki_API.upload
 				library_namespace.debug('Set form_data', 6);
 				// throw 'Set form_data';
@@ -8057,7 +8057,10 @@ function module_code(library_namespace) {
 
 		if (!post_data.filename) {
 			// file path → file name
-			post_data.filename = file_path.match(/[^\\\/]*$/)[0];
+			post_data.filename = file_path.match(/[^\\\/]*$/)[0]
+			// {result:'Warning',warnings:{badfilename:''}}
+			.replace(/#/g, '-');
+			// https://www.mediawiki.org/wiki/Manual:$wgFileExtensions
 		}
 
 		action = 'upload';

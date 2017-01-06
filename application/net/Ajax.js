@@ -492,6 +492,7 @@ function module_code(library_namespace) {
 	// 常用 MIME types
 	var common_MIME_types = {
 		jpg : 'image/jpeg',
+		// svg : 'image/svg+xml',
 		// lst : 'text/plain',
 		txt : 'text/plain'
 	};
@@ -522,6 +523,14 @@ function module_code(library_namespace) {
 				value = value.file;
 			}
 
+			function push_and_callback(MIME_type, content) {
+				(slice || root_data).push('Content-Disposition: '
+						+ (slice ? 'file' : 'form-data; name="' + key + '"')
+						+ '; filename="' + value + '"\nContent-Type: '
+						+ MIME_type + '\n\n' + content);
+				callback();
+			}
+
 			if (!is_url) {
 				// read file contents
 				var content = library_namespace.get_file(value);
@@ -534,11 +543,7 @@ function module_code(library_namespace) {
 					// png → image/png
 					|| 'image/' + MIME_type;
 				}
-				(slice || root_data).push('Content-Disposition: '
-						+ (slice ? 'file' : 'form-data; name="' + key + '"')
-						+ '; filename="' + value + '"\nContent-Type: '
-						+ MIME_type + '\n\n' + content);
-				callback();
+				push_and_callback(MIME_type, content);
 				return;
 			}
 
@@ -557,11 +562,7 @@ function module_code(library_namespace) {
 						.match(/([^\\\/]*)[\\\/]?$/)[1];
 				// console.log('-'.repeat(79));
 				// console.log(value);
-				(slice || root_data).push('Content-Disposition: '
-						+ (slice ? 'file' : 'form-data; name="' + key + '"')
-						+ '; filename="' + value + '"\nContent-Type: '
-						+ XMLHttp.type + '\n\n' + XMLHttp.responseText);
-				callback();
+				push_and_callback(XMLHttp.type, XMLHttp.responseText);
 			});
 		}
 
