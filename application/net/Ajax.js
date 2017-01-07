@@ -242,8 +242,9 @@ function module_code(library_namespace) {
 					'get_URL');
 		}
 
-		if (post_data)
+		if (post_data && !options.form_data) {
 			post_data = get_URL.parameters_to_String(post_data);
+		}
 
 		if (!onload && typeof options.onchange === 'function') {
 			onload = function() {
@@ -435,6 +436,19 @@ function module_code(library_namespace) {
 		return URL;
 	}
 
+	get_URL.parameters_to_String = parameters_to_String;
+	get_URL.parse_parameters = parse_parameters;
+	get_URL.add_parameter = add_parameter;
+	_.get_URL = get_URL;
+
+	// TODO: 處理 multi requests
+	function get_URLs() {
+	}
+
+	// ----------------------------------------------------
+
+	var is_nodejs = library_namespace.platform.nodejs;
+
 	/**
 	 * <code>
 
@@ -447,27 +461,74 @@ function module_code(library_namespace) {
 	{type:'jpg',image:{file:'fn1.jpg',type:'image/jpeg'}}
 
 	// Array: use "Content-Type: multipart/mixed;"
-	{type:'jpg',images:{file:['fn1.jpg','fn2.jpg']}}
+	{type:'jpg',images:[{file:'fn1.jpg'},{file:'fn2.jpg'}]}
 
-	{type:'jpg',images:{file:['fn1.jpg','fn2.jpg']},docs:{file:['fn1.txt','fn2.txt']}}
+	{type:'jpg',images:[{file:'fn1.jpg'},{file:'fn2.jpg'}],docs:[{file:'fn1.txt'},{file:'fn2.txt'}]}
 
 	{type:'jpg',images:[{file:'fn1.jpg',type:'image/jpeg'},{file:'fn1.txt',type:'text/plain'}]}
 
 	</code>
 	 */
 
-	function form_data_toString(is_slice) {
-		// 決定 boundary
-		var boundary = '--' + this.boundary;
-		// TODO: use '\r\n'
-		return boundary + '\n' + this.join('\n' + boundary + '\n') + '\n' + boundary + (is_slice ? '' : '--');
+	// should be CRLF
+	// @see https://tools.ietf.org/html/rfc7578#section-4.1
+	var form_data_new_line = '\r\n';
+
+	function form_data_to_Array(is_slice) {
+		if (this.generated) {
+			return this.generated;
+		}
+
+		var boundary = '--' + this.boundary + form_data_new_line,
+		// generated raw post data
+		generated = this.generated = [ boundary ], content_length = boundary.length;
+		boundary = form_data_new_line + boundary;
+		this.forEach(function(chunk, index) {
+			if (Array.isArray(chunk)) {
+				// chunk = chunk.to_Array(true);
+				if (!chunk.content_length) {
+					console.log(chunk);
+					throw 3;
+				}
+				content_length += chunk.content_length;
+			} else {
+				// chunk: {String} or {Buffer}
+				content_length += chunk.length;
+			}
+			generated.push(chunk);
+			if (index < this.length - 1) {
+				generated.push(boundary);
+				content_length += boundary.length;
+			}
+		}, this);
+
+		if (!(content_length > 0)) {
+			console.log(this);
+			throw 2;
+		}
+
+		boundary = form_data_new_line + '--' + this.boundary;
+		if (!is_slice) {
+			boundary += '--';
+		}
+		generated.push(boundary);
+		content_length += boundary.length;
+
+		generated.content_length = content_length;
+		return generated;
 	}
 
-	// 選出 data_Array 不包含之 string
+	// 選出 data.generated 不包含之 string
 	function give_boundary(data_Array) {
-		var retry = 0;
-		while (retry++ < 8) {
-			var boundary = (Number.MAX_SAFE_INTEGER * Math.random())
+		function not_includes_in(item) {
+			return Array.isArray(item) ? item.every(not_includes_in)
+			// item: {String} or {Buffer}
+			: !item.includes(boundary);
+		}
+
+		var boundary, retry_count = 0;
+		while (retry_count++ < 8) {
+			boundary = (Number.MAX_SAFE_INTEGER * Math.random())
 					.toString(10 + 26);
 			// console.log('test boundary: [' + boundary + ']');
 			for (var i = 1; i < boundary.length / 2 | 0; i++) {
@@ -479,9 +540,7 @@ function module_code(library_namespace) {
 			}
 			// assert: boundary 不自包含，例如 'aa'自包含'a'，'asas'自包含'as'
 			if (boundary) {
-				if (data_Array.every(function(item) {
-					return !item.includes(boundary);
-				})) {
+				if (not_includes_in(data_Array)) {
 					data_Array.boundary = boundary;
 					return boundary;
 				}
@@ -490,8 +549,11 @@ function module_code(library_namespace) {
 		throw 'give_boundary: Retry too many times!';
 	}
 
+	var to_form_data_generated = {
+		form_data_generated : true
+	},
 	// 常用 MIME types
-	var common_MIME_types = {
+	common_MIME_types = {
 		// jpg : 'image/jpeg',
 		// svg : 'image/svg+xml',
 		// lst : 'text/plain',
@@ -524,21 +586,39 @@ function module_code(library_namespace) {
 				value = value.file;
 			}
 
-			// TODO: use stream
-
 			function push_and_callback(MIME_type, content) {
-				(slice || root_data).push('Content-Disposition: '
+				var headers = 'Content-Disposition: '
 						+ (slice ? 'file' : 'form-data; name="' + key + '"')
-						+ '; filename="' + value + '"\nContent-Type: '
-						+ MIME_type + '\n\n'
-						// Buffer.from(content, 'binary')
-						+ content);
+						+ '; filename="' + value + '"' + form_data_new_line
+						+ 'Content-Type: ' + MIME_type + form_data_new_line
+						+ form_data_new_line,
+				//
+				chunk = [ headers, content ];
+				chunk.content_length = headers.length + content.length;
+				// TODO: use stream
+				(slice || root_data).push(chunk);
 				callback();
 			}
 
 			if (!is_url) {
+				var content;
 				// read file contents
-				var content = library_namespace.get_file(value/*, 'binary'*/);
+				if (is_nodejs) {
+					try {
+						// get {Buffer}
+						content = fs.readFileSync(value);
+					} catch (e) {
+						library_namespace
+								.err('to_form_data: Error to get file: ['
+										+ value + '].');
+						// Skip this one.
+						callback();
+						return;
+					}
+				} else {
+					content = library_namespace
+							.get_file(value/* , 'binary' */);
+				}
 				// value: file path → file name
 				value = value.match(/[^\\\/]*$/)[0];
 				if (!MIME_type) {
@@ -552,10 +632,11 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			// fetch URL
+			library_namespace.debug('fetch URL [' + value + ']', 1,
+					'to_form_data');
 			_.get_URL(value, function(XMLHttp, error) {
 				if (error) {
-					library_namespace.err('to_form_data: Error to get data: ['
+					library_namespace.err('to_form_data: Error to get URL: ['
 							+ URL + '].');
 					// Skip this one.
 					callback();
@@ -567,14 +648,17 @@ function module_code(library_namespace) {
 						.match(/([^\\\/]*)[\\\/]?$/)[1];
 				// console.log('-'.repeat(79));
 				// console.log(value);
+				library_namespace.debug('fetch URL [' + value + ']: '
+						+ XMLHttp.responseText.length + ' bytes', 1,
+						'to_form_data');
 				push_and_callback(XMLHttp.type, XMLHttp.responseText);
-			});
+			}, 'binary');
 		}
 
 		parameters = get_URL.parse_parameters(parameters);
 
 		var root_data = [], keys = Object.keys(parameters), index = 0;
-		root_data.toString = form_data_toString;
+		root_data.to_Array = form_data_to_Array;
 		// console.log('-'.repeat(79));
 		// console.log(keys);
 		// 因為在遇到fetch url時需要等待，因此採用async。
@@ -582,9 +666,19 @@ function module_code(library_namespace) {
 			// console.log('-'.repeat(60));
 			// console.log(index + '/' + keys.length);
 			if (index === keys.length) {
+				// 決定 boundary
 				give_boundary(root_data);
-				// console.log('-'.repeat(79));
-				// console.log(JSON.stringify(root_data));
+				// WARNING: 先結束作業: 生成 .to_Array()，
+				// 才能得到 root_data.to_Array().content_length。
+				root_data.to_Array();
+				if (0) {
+					console.log('-'.repeat(79));
+					console.log(root_data);
+					console.log('-'.repeat(79));
+					console.log(root_data.to_Array().content_length);
+					console.log(root_data.to_Array().join(''));
+					throw 5;
+				}
 				callback(root_data);
 				return;
 			}
@@ -598,11 +692,15 @@ function module_code(library_namespace) {
 				next_item = function() {
 					if (item_index === value.length) {
 						give_boundary(slice);
-						root_data.push('Content-Disposition: form-data; name="'
-						//
-						+ key + '"\n\nContent-Type: multipart/mixed; boundary='
-								+ slice.boundary + '\n\n'
-								+ form_data_toString.call(slice, true));
+						var headers = 'Content-Disposition: form-data; name="'
+								+ key + '"' + form_data_new_line
+								+ 'Content-Type: multipart/mixed; boundary='
+								+ slice.boundary + form_data_new_line
+								+ form_data_new_line;
+						slice = form_data_to_Array.call(slice, true);
+						slice.unshift(headers);
+						slice.content_length += headers.length;
+						root_data.push(slice);
 						process_next();
 					} else {
 						get_file_object(value[item_index++], next_item,/* key */
@@ -623,8 +721,8 @@ function module_code(library_namespace) {
 			if (!key) {
 				throw 'No key for value: ' + value;
 			}
-			root_data.push('Content-Disposition: form-data; name="' + key
-					+ '"\n\n' + value);
+			root_data.push('Content-Disposition: form-data; name="' + key + '"'
+					+ form_data_new_line + form_data_new_line + value);
 			process_next();
 		}
 		process_next();
@@ -632,16 +730,7 @@ function module_code(library_namespace) {
 		return root_data;
 	}
 
-	get_URL.parameters_to_String = parameters_to_String;
-	get_URL.parse_parameters = parse_parameters;
-	get_URL.add_parameter = add_parameter;
-	get_URL.to_form_data = to_form_data;
-
-	_.get_URL = get_URL;
-
-	// TODO: 處理 multi requests
-	function get_URLs() {
-	}
+	_.to_form_data = to_form_data;
 
 	// ---------------------------------------------------------------------//
 
@@ -1115,13 +1204,13 @@ function module_code(library_namespace) {
 		// console.log('-'.repeat(79));
 		// console.log(JSON.stringify(options));
 		// console.log(options.form_data);
-		if (options.form_data && !options.form_data_generated) {
-			get_URL.to_form_data(post_data, function(data) {
+		if (options.form_data && options.form_data !== to_form_data_generated) {
+			to_form_data(post_data, function(data) {
 				// console.log(data.toString().slice(0,800));
 				// console.log('>> ' + data.toString().slice(-200));
 				// throw 3;
-				options.form_data_generated = data;
-				get_URL_node(URL, onload, charset, post_data, options);
+				options.form_data = to_form_data_generated;
+				get_URL_node(URL, onload, charset, data, options);
 			});
 			return;
 		}
@@ -1172,7 +1261,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (post_data) {
+		if (post_data && !options.form_data) {
 			post_data = get_URL.parameters_to_String(post_data);
 		}
 
@@ -1493,19 +1582,25 @@ function module_code(library_namespace) {
 
 		if (post_data) {
 			_URL.method = 'POST';
-			var form_data = options.form_data_generated;
-			if (form_data) {
-				post_data = form_data.toString();
-				// boundary 存入→ form_data
-				form_data = form_data.boundary;
+			if (0 && options.form_data) {
+				console.log('-'.repeat(79));
+				console.log(post_data.to_Array().content_length);
+				console.log(post_data);
+				throw 1;
 			}
 			Object.assign(_URL.headers, {
-				'Content-Type' : form_data ? 'multipart/form-data; boundary='
-						+ form_data : 'application/x-www-form-urlencoded',
+				'Content-Type' : options.form_data
+				//
+				? 'multipart/form-data; boundary='
+				// boundary 存入→ post_data.boundary
+				+ post_data.boundary : 'application/x-www-form-urlencoded',
 				// prevent HTTP 411 錯誤 – 需要內容長度頭 (411 Length Required)
+				'Content-Length' : options.form_data
+				//
+				? post_data.to_Array().content_length
 				// NG: post_data.length
-				'Content-Length' : charset ? Buffer.byteLength(post_data,
-						charset) : Buffer.byteLength(post_data)
+				: charset ? Buffer.byteLength(post_data, charset) : Buffer
+						.byteLength(post_data)
 			});
 		}
 		if (options.method) {
@@ -1544,12 +1639,26 @@ function module_code(library_namespace) {
 
 		if (post_data) {
 			// console.log(post_data);
-			library_namespace.debug(
-					'set post data: length ' + post_data.length, 3,
-					'get_URL_node');
-			library_namespace.debug('set post data: ' + post_data, 6,
-					'get_URL_node');
-			request.write(post_data);
+			if (options.form_data) {
+				(function write_to_request(data) {
+					if (Array.isArray(data)) {
+						data.forEach(function(chunk) {
+							write_to_request(chunk);
+						})
+					} else {
+						request.write(data);
+					}
+				})(post_data.to_Array());
+			} else if (typeof post_data === 'string') {
+				library_namespace.debug('set post data: length '
+						+ post_data.length, 3, 'get_URL_node');
+				library_namespace.debug('set post data: ' + post_data, 6,
+						'get_URL_node');
+				request.write(post_data);
+			} else {
+				library_namespace.error('Invalid POST data: '
+						+ JSON.stringify(post_data));
+			}
 		}
 
 		/** {Natural}timeout in ms for get URL. 逾時ms數 */
@@ -1642,7 +1751,7 @@ function module_code(library_namespace) {
 	 */
 	get_URL_node.default_user_agent = 'CeJS/2.0 (https://github.com/kanasimi/CeJS)';
 
-	// 逾時ms數: 20 min
+	// 逾時ms數: 20 minutes
 	get_URL_node.default_timeout = 20 * 60 * 1000;
 	get_URL_node.connects_limit = 100;
 
@@ -1657,7 +1766,7 @@ function module_code(library_namespace) {
 
 	// setup/reset node agent.
 	function setup_node(type, options) {
-		if (!library_namespace.platform.nodejs)
+		if (!is_nodejs)
 			return;
 
 		if (_.get_URL !== get_URL_node) {
@@ -1705,7 +1814,7 @@ function module_code(library_namespace) {
 	/** {Object|Function}fs in node.js */
 	var node_fs;
 	try {
-		if (library_namespace.platform.nodejs) {
+		if (is_nodejs) {
 			// @see https://nodejs.org/api/fs.html
 			node_fs = require('fs');
 		}
@@ -1799,7 +1908,7 @@ function module_code(library_namespace) {
 				if (error) {
 					library_namespace.err(
 					//
-					'get_URL_cache_node.cache: Error to get data: [' + URL
+					'get_URL_cache_node.cache: Error to get URL: [' + URL
 							+ '].');
 					onload(undefined, error);
 					return;
@@ -1834,7 +1943,7 @@ function module_code(library_namespace) {
 	/** {String}預設 file encoding for fs of node.js。 */
 	get_URL_cache_node.encoding = 'utf8';
 
-	if (library_namespace.platform.nodejs) {
+	if (is_nodejs) {
 		_.get_URL_cache = get_URL_cache_node;
 	}
 
