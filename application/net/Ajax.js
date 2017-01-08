@@ -628,7 +628,7 @@ function module_code(library_namespace) {
 				value = value.match(/[^\\\/]*$/)[0];
 				if (!MIME_type) {
 					// 由 file extension 判別。
-					MIME_type = value.match(/[a-z\d\-]*$/)[0].toLowerCase();
+					MIME_type = value.match(/[a-z\d\-]*$/i)[0].toLowerCase();
 					MIME_type = common_MIME_types[MIME_type]
 					// png → image/png
 					|| 'image/' + MIME_type;
@@ -1877,7 +1877,7 @@ function module_code(library_namespace) {
 	function get_URL_cache_node(URL, onload, options) {
 		if (typeof options === 'string') {
 			// auto-detecting
-			options = /\.[a-z\d]+$/.test(options) ? {
+			options = /\.[a-z\d\-]+$/i.test(options) ? {
 				file_name : options
 			} : {
 				encoding : options

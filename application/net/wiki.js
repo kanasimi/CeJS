@@ -244,7 +244,7 @@ function module_code(library_namespace) {
 	 */
 	PATTERN_URL_prefix = /^(?:https?:)?\/\/[^.:\\\/]+\.[^.:\\\/]+/i;
 	// ↓ 這會無法匹配中文域名。
-	// PATTERN_URL_prefix = /^(?:https?:)?\/\/([a-z\-\d]{1,20})\./i,
+	// PATTERN_URL_prefix = /^(?:https?:)?\/\/([a-z\d\-]{1,20})\./i,
 
 	// 嘗試從 options 取得 API_URL。
 	function API_URL_of_options(options) {
@@ -404,7 +404,7 @@ function module_code(library_namespace) {
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
 	// 警告: 應配合 get_namespace.pattern 排除 'Talk', 'User', 'Help', 'File', ...
-	var PATTERN_PROJECT_CODE = /^[a-z][a-z\-\d]{0,14}$/,
+	var PATTERN_PROJECT_CODE = /^[a-z][a-z\d\-]{0,14}$/,
 	// 須亦能匹配 site key:
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
 	PATTERN_PROJECT_CODE_i = new RegExp(PATTERN_PROJECT_CODE.source, 'i');
@@ -422,7 +422,7 @@ function module_code(library_namespace) {
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z][a-z\-\d]{0,14})(?:\.[a-z]+)+)/i;
+	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z][a-z\d\-]{0,14})(?:\.[a-z]+)+)/i;
 
 	/**
 	 * Get the API URL of specified project.
@@ -466,7 +466,7 @@ function module_code(library_namespace) {
 			}
 		}
 		// @see PATTERN_PROJECT_CODE
-		if (/^[a-z][a-z\-\d]{0,14}\.[a-z]+$/i.test(project)) {
+		if (/^[a-z][a-z\d\-]{0,14}\.[a-z]+$/i.test(project)) {
 			// e.g., 'en.wikisource', 'en.wiktionary'
 			project += '.org';
 		}
@@ -844,9 +844,9 @@ function module_code(library_namespace) {
 					.trimLeft();
 			if (index === page_name.length - 1
 			// @see PATTERN_PROJECT_CODE
-			|| !(use_underline ? /^[a-z][a-z\-\d_]{0,14}$/i
+			|| !(use_underline ? /^[a-z][a-z\d\-_]{0,14}$/i
 			//
-			: /^[a-z][a-z\-\d ]{0,14}$/i).test(section.trimRight())) {
+			: /^[a-z][a-z\d\- ]{0,14}$/i).test(section.trimRight())) {
 				// page title: 將首個字母轉成大寫。
 				page_name[index] = upper_case_initial(section);
 				return true;
@@ -2792,7 +2792,7 @@ function module_code(library_namespace) {
 	 *      PATTERN_external_link_global
 	 * @see https://en.wikipedia.org/wiki/Wikipedia:Wikimedia_sister_projects
 	 */
-	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z][a-z\-\d]{0,14})\.(?:m\.)?wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
+	var PATTERN_WIKI_URL = /^(?:https?:)?\/\/([a-z][a-z\d\-]{0,14})\.(?:m\.)?wikipedia\.org\/(?:(?:wiki|zh-[a-z]{2,4})\/|w\/index\.php\?(?:uselang=zh-[a-z]{2}&)?title=)([^ #]+)(#[^ ]*)?( .+)?$/i;
 
 	/**
 	 * Convert URL to wiki link.
@@ -3253,7 +3253,7 @@ function module_code(library_namespace) {
 
 			// e.g., 'zh:title'
 			// @see PATTERN_PROJECT_CODE_i
-			project_prefixed = /^ *[a-z]{2}[a-z\-\d]{0,14} *:/i.test(title)
+			project_prefixed = /^ *[a-z]{2}[a-z\d\-]{0,14} *:/i.test(title)
 			// 排除 'Talk', 'User', 'Help', 'File', ...
 			&& !get_namespace.pattern.test(title);
 			// escape 具有特殊作用的 title。
@@ -3879,9 +3879,11 @@ function module_code(library_namespace) {
 						// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
 						: !result.edit : result === '') {
 							// Invalid token
-							library_namespace.warn('wiki_API.prototype.next: '
+							library_namespace.warn(
 							//
-							+ 'It seems we lost the token. 似乎丟失了 token。');
+							'wiki_API.prototype.next: ' + _this.language
+							//
+							+ ': It seems we lost the token. 似乎丟失了 token。');
 							if (!library_namespace.platform.nodejs) {
 								library_namespace
 										.err('wiki_API.prototype.next: '
@@ -3972,10 +3974,10 @@ function module_code(library_namespace) {
 			Object.assign({
 				// [KEY_SESSION]
 				session : this
-			}, next[2]), function(result) {
+			}, next[2]), function(result, error) {
 				// next[3] : callback
 				if (typeof next[3] === 'function')
-					next[3].call(_this, result);
+					next[3].call(_this, result, error);
 				_this.next();
 			});
 			break;
@@ -5195,7 +5197,7 @@ function module_code(library_namespace) {
 			session : this
 		}, options);
 
-		var _this = this;
+		var _this = this, copy_from_wiki;
 		function edit() {
 			// assert: get_page_content.is_page_data(title)
 			var content_to_copy = get_page_content(title);
@@ -5204,17 +5206,23 @@ function module_code(library_namespace) {
 				content_to_copy = options.processor(title,
 						get_page_content(_this.last_page));
 			}
+			if (!content_to_copy) {
+				library_namespace
+						.warn('wiki_API_prototype_copy_from: Nothing to copy!');
+				_this.next();
+			}
+
 			var content;
 			if (options.append && (content
 			//
 			= get_page_content(_this.last_page).trimRight())) {
 				content_to_copy = content + '\n' + content_to_copy;
-				options.summary = 'Append from ' + get_page_title_link(title)
-						+ '.';
+				options.summary = 'Append from '
+						+ get_page_title_link(title, copy_from_wiki) + '.';
 			}
 			if (!options.summary) {
-				options.summary = 'Copy from ' + get_page_title_link(title)
-						+ '.';
+				options.summary = 'Copy from '
+						+ get_page_title_link(title, copy_from_wiki) + '.';
 			}
 			_this.actions.unshift(
 			// wiki.edit(page, options, callback)
@@ -5224,8 +5232,23 @@ function module_code(library_namespace) {
 
 		if (is_wiki_API(title)) {
 			// from page 為另一 wiki_API
-			// wiki.page().copy_from(wiki)
-			title = title.last_page;
+			copy_from_wiki = title;
+			// wiki.page('title').copy_from(wiki)
+			title = copy_from_wiki.last_page;
+			if (!title) {
+				// wiki.page('title').copy_from(wiki);
+				library_namespace.debug('先擷取同名title: '
+						+ get_page_title_link(this.last_page, copy_from_wiki));
+				// TODO: create interwiki link
+				copy_from_wiki.page(get_page_title(this.last_page), function(
+						page_data) {
+					library_namespace.debug('Continue coping page');
+					// console.log(copy_from_wiki.last_page);
+					wiki_API_prototype_copy_from.call(_this, copy_from_wiki,
+							options, callback);
+				});
+				return;
+			}
 		}
 
 		if (get_page_content.is_page_data(title)) {
@@ -5364,7 +5387,7 @@ function module_code(library_namespace) {
 			var HOST;
 			action[0] = action[0].replace(
 			// @see PATTERN_PROJECT_CODE
-			/^https?:\/\/([a-z][a-z\-\d]{0,14}\.wikipedia\.org)\//,
+			/^https?:\/\/([a-z][a-z\d\-]{0,14}\.wikipedia\.org)\//,
 			//
 			function(all, host) {
 				HOST = host;
@@ -5443,6 +5466,7 @@ function module_code(library_namespace) {
 				// @see wiki_API.upload()
 				library_namespace.debug('Set form_data', 6);
 				// throw 'Set form_data';
+				// options.form_data會被當作傳入to_form_data()之options。
 				get_URL_options.form_data = options.form_data;
 			}
 
@@ -8083,7 +8107,10 @@ function module_code(library_namespace) {
 		} else {
 			// 自動先下載fetch再上傳。
 			// file: 必須使用 multipart/form-data 以檔案上傳的方式傳送。
-			options.form_data = true;
+			if (!options.form_data) {
+				// options.form_data會被當作傳入to_form_data()之options。
+				options.form_data = true;
+			}
 			post_data.file = file_path.includes('://') ? {
 				url : file_path
 			} : {
@@ -8105,12 +8132,15 @@ function module_code(library_namespace) {
 		}
 
 		wiki_API.query(action, function(data, error) {
-			if (error || (error = data.error)
+			if (error || !data || (error = data.error)
 			// {upload:{result:'Warning',warnings:{exists:'file_name',nochange:{}},filekey:'',sessionkey:''}}
 			// {upload:{result:'Success',filename:'',imageinfo:{}}}
-			|| !data || !(data = data.upload) || data.result !== 'Success') {
+			|| !(data = data.upload) || data.result !== 'Success') {
 				// console.error(error);
-				callback && callback(undefined, error || 'No result got');
+				callback
+						&& callback(data, error || data && data.result
+								|| 'Error on uploading');
+				return;
 			}
 
 			// console.log(data);
@@ -10112,7 +10142,7 @@ function module_code(library_namespace) {
 
 		if (file_name) {
 			if (!('postfix' in operation) && !('postfix' in _this)
-					&& /\.[a-z\-\d]+$/.test(file_name)) {
+					&& /\.[a-z\d\-]+$/i.test(file_name)) {
 				// 若已設定 filename extension，則不自動添加。
 				operation.postfix = '';
 			}
@@ -12412,7 +12442,7 @@ function module_code(library_namespace) {
 			// assert: typeof language.API_URL === 'string'
 			language = language.API_URL.toLowerCase().match(
 			// @see PATTERN_PROJECT_CODE
-			/\/\/([a-z][a-z\-\d]{0,14})\.([a-z]+)/);
+			/\/\/([a-z][a-z\d\-]{0,14})\.([a-z]+)/);
 			library_namespace.debug(language, 4, 'language_to_project');
 			// TODO: error handling
 			language = language[1].replace(/-/g, '_')

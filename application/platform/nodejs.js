@@ -57,15 +57,20 @@ function module_code(library_namespace) {
 	var node_fs = require('fs');
 
 	// TODO: 規範化
-	function fs_status(file_path) {
+	function fs_status(file_path, only_status) {
 		var file_status;
 		try {
 			return node_fs.statSync(file_path);
 		} catch (e) {
-			return e;
+			if (!only_status) {
+				return e;
+			}
 		}
 	}
-	// _.fs_status = fs_status;
+	_.fs_status = fs_status;
+	_.fs_exists = function fs_exists(file_path) {
+		return !!fs_status(file_path, true);
+	};
 
 	function copy_attributes(source, target) {
 		var file_status;
