@@ -568,7 +568,7 @@ function module_code(library_namespace) {
 	// represented as 7bit US-ASCII
 	// https://tools.ietf.org/html/rfc2049#appendix-A
 	// http://stackoverflow.com/questions/4238809/example-of-multipart-form-data
-	function to_form_data(parameters, callback) {
+	function to_form_data(parameters, callback, options) {
 		function get_file_object(value, callback, key, slice) {
 			var is_url, MIME_type;
 			if (typeof value === 'string') {
@@ -594,6 +594,7 @@ function module_code(library_namespace) {
 						+ form_data_new_line,
 				//
 				chunk = [ headers, content ];
+				// 手動設定 Content-Length。
 				chunk.content_length = headers.length + content.length;
 				// TODO: use stream
 				(slice || root_data).push(chunk);
@@ -616,8 +617,12 @@ function module_code(library_namespace) {
 						return;
 					}
 				} else {
+					// node.js 之下此方法不能處理 binary data。
 					content = library_namespace
 							.get_file(value/* , 'binary' */);
+				}
+				if (options && options.file_post_processor) {
+					options.file_post_processor(value, content);
 				}
 				// value: file path → file name
 				value = value.match(/[^\\\/]*$/)[0];
@@ -635,6 +640,9 @@ function module_code(library_namespace) {
 			library_namespace.debug('fetch URL [' + value + ']', 1,
 					'to_form_data');
 			_.get_URL(value, function(XMLHttp, error) {
+				if (options && options.url_post_processor) {
+					options.url_post_processor(value, XMLHttp, error);
+				}
 				if (error) {
 					library_namespace.err('to_form_data: Error to get URL: ['
 							+ URL + '].');
@@ -721,8 +729,14 @@ function module_code(library_namespace) {
 			if (!key) {
 				throw 'No key for value: ' + value;
 			}
-			root_data.push('Content-Disposition: form-data; name="' + key + '"'
-					+ form_data_new_line + form_data_new_line + value);
+			// @see function push_and_callback(MIME_type, content)
+			var headers = 'Content-Disposition: form-data; name="' + key + '"'
+					+ form_data_new_line + form_data_new_line,
+			//
+			chunk = [ headers, value ];
+			// 手動設定 Content-Length。
+			chunk.content_length = headers.length + value.length;
+			root_data.push(chunk);
 			process_next();
 		}
 		process_next();
@@ -736,54 +750,54 @@ function module_code(library_namespace) {
 
 	/**
 	 * <code>
-	讀取URL by XMLHttpRequest
-	http://jck11.pixnet.net/blog/post/11630232
-
+		讀取URL by XMLHttpRequest
+		http://jck11.pixnet.net/blog/post/11630232
+	
 	 * 若有多行程或為各URL設定個別XMLHttp之必要，請在一開始便設定deprecated_get_URL.multi_request，並且別再更改。
 	 ** 在此情況下，單一URL仍只能有單一個request!
 	 ** 設定 handle_function 須注意程式在等待回應時若無執行其他程式碼將自動中止！
-	可設定：
-	while(deprecated_get_URL.doing)WScript.Sleep(1);	//||timeout
-
+		可設定：
+		while(deprecated_get_URL.doing)WScript.Sleep(1);	//||timeout
+	
 	arguments f:{
-	URL:'',	//	The same origin policy prevents document or script loaded from one origin, from getting or setting properties from a of a document from a different origin.(http://www.mozilla.org/projects/security/components/jssec.html#sameorigin)
-	enc:'UTF-8',	//	charset: big5, euc-jp,..
-	fn:(handle_function),	//	onLoad:function(){},
-	method:'GET',	//	POST,..
-	sendDoc:'text send in POST,..'
-	async:ture/false,	//	true if want to asynchronous(非同期), false if synchronous(同期的,會直到readyState==4才return)	http://jpspan.sourceforge.net/wiki/doku.php?id=javascript:xmlhttprequest:behaviour
-	user:'userName',
-	passwd:'****',	//	password
-
+		URL:'',	//	The same origin policy prevents document or script loaded from one origin, from getting or setting properties from a of a document from a different origin.(http://www.mozilla.org/projects/security/components/jssec.html#sameorigin)
+		enc:'UTF-8',	//	charset: big5, euc-jp,..
+		fn:(handle_function),	//	onLoad:function(){},
+		method:'GET',	//	POST,..
+		sendDoc:'text send in POST,..'
+		async:ture/false,	//	true if want to asynchronous(非同期), false if synchronous(同期的,會直到readyState==4才return)	http://jpspan.sourceforge.net/wiki/doku.php?id=javascript:xmlhttprequest:behaviour
+		user:'userName',
+		passwd:'****',	//	password
+	
 	//TODO:
-	parameters:'~=~&~=~', // {a:1,b:2}
-	header:{contentType:'text/xml'},
-	contentType:'text/xml',
-	run:true/false,	//	do eval
-	update:DOMDocument,	//	use onLoad/onFailed to 加工 return text. onFailed(){throw;} will abort change.
-	interval:\d,
-	decay:\d,	//	wait decay*interval when no change
-	maxInterval::\d,
-	//insertion:top/bottom,..
-	onFailed:function(error){this.status;},	//	onFailed.apply(XMLHttp,[XMLHttp.status])
-	onStateChange:function(){},
+		parameters:'~=~&~=~', // {a:1,b:2}
+		header:{contentType:'text/xml'},
+		contentType:'text/xml',
+		run:true/false,	//	do eval
+		update:DOMDocument,	//	use onLoad/onFailed to 加工 return text. onFailed(){throw;} will abort change.
+		interval:\d,
+		decay:\d,	//	wait decay*interval when no change
+		maxInterval::\d,
+		//insertion:top/bottom,..
+		onFailed:function(error){this.status;},	//	onFailed.apply(XMLHttp,[XMLHttp.status])
+		onStateChange:function(){},
 	}
-
-
+	
+	
 	handle_function:
 	自行處理	typeof handle_function=='function':
 	function handle_function(error){..}
 	代為處理	handle_function=[d_func,0: responseText,1: responseXML]:
 	responseXML:	http://msdn2.microsoft.com/en-us/library/ms757878.aspx
 	function d_func(content,head[,XMLHttp,URL]){
-	if(head){
-	//	content,head各為XMLHttp.responseText內容及XMLHttp.getAllResponseHeaders()，其他皆可由XMLHttp取得。
-	}else{
-	//	content為error
-	}
+		if(head){
+			//	content,head各為XMLHttp.responseText內容及XMLHttp.getAllResponseHeaders()，其他皆可由XMLHttp取得。
+		}else{
+			//	content為error
+		}
 	}
 	e.g., the simplest: [function(c,h){h&&alert(c);}]
-
+	
 	)
 	</code>
 	 */
@@ -1211,7 +1225,7 @@ function module_code(library_namespace) {
 				// throw 3;
 				options.form_data = to_form_data_generated;
 				get_URL_node(URL, onload, charset, data, options);
-			});
+			}, options.form_data);
 			return;
 		}
 

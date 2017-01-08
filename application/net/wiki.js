@@ -3957,6 +3957,29 @@ function module_code(library_namespace) {
 			}
 			break;
 
+		case 'upload':
+			if (next[2]) {
+				if (typeof next[2] === 'string') {
+					next[2] = {
+						comment : next[2]
+					};
+				}
+			}
+
+			// wiki.upload(file_path, options, callback)
+			wiki_API.upload(next[1], this.token.csrftoken,
+			// next[2]: options to call wiki_API.edit()
+			Object.assign({
+				// [KEY_SESSION]
+				session : this
+			}, next[2]), function(result) {
+				// next[3] : callback
+				if (typeof next[3] === 'function')
+					next[3].call(_this, result);
+				_this.next();
+			});
+			break;
+
 		case 'cache':
 			if (library_namespace.is_Object(next[2]) && !next[3]) {
 				// 未設定/不設定 callback
@@ -4300,7 +4323,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,cache,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,upload,cache,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -5417,7 +5440,7 @@ function module_code(library_namespace) {
 				}
 			}
 			if (options && options.form_data) {
-				// @see wiki_API.upload
+				// @see wiki_API.upload()
 				library_namespace.debug('Set form_data', 6);
 				// throw 'Set form_data';
 				get_URL_options.form_data = options.form_data;
@@ -8001,26 +8024,39 @@ function module_code(library_namespace) {
 	// file path/url
 	wiki_API.upload = function(file_path, token, options, callback) {
 		// https://commons.wikimedia.org/w/api.php?action=help&modules=upload
+		// https://www.mediawiki.org/wiki/API:Upload
 		var action, post_data = {
 			text : undefined,
-			license : undefined,
-			filekey : undefined,
+			// 備註
 			comment : undefined,
+			// must be set to reupload
 			ignorewarnings : undefined,
+			tags : undefined,
 			stash : undefined,
 			async : undefined,
-			asyncdownload : undefined,
-			leavemessage : undefined,
-			statuskey : undefined,
 			checkstatus : undefined,
 
-			filename : undefined,
+			// Upload the file in pieces
 			filesize : undefined,
+			// leavemessage : undefined,
 			chunk : undefined,
-			offset : undefined
+			offset : undefined,
+			// Complete an earlier upload
+			filekey : undefined,
+
+			url : undefined,
+			asyncdownload : undefined,
+			// statuskey : undefined,
+
+			filename : undefined
 		};
 
 		options = library_namespace.new_options(options);
+		if (options.summary) {
+			// 錯置?
+			// options.comment = options.summary;
+		}
+		// TODO: check {{Information|permission=license}}
 		for (action in post_data) {
 			if (action in options) {
 				post_data[action] = options[action];
@@ -8044,8 +8080,8 @@ function module_code(library_namespace) {
 				post_data.filename = file_path.match(/[\\\/]*$/)[0];
 			}
 			// Uploads by URL are not allowed from this domain.
-			// 自動先下載fetch再上傳。
 		} else {
+			// 自動先下載fetch再上傳。
 			// file: 必須使用 multipart/form-data 以檔案上傳的方式傳送。
 			options.form_data = true;
 			post_data.file = file_path.includes('://') ? {
@@ -8069,11 +8105,15 @@ function module_code(library_namespace) {
 		}
 
 		wiki_API.query(action, function(data, error) {
-			if (error || (error = data.error)) {
-				console.error(error);
-				callback && callback(undefined, error);
+			if (error || (error = data.error)
+			// {upload:{result:'Warning',warnings:{exists:'file_name',nochange:{}},filekey:'',sessionkey:''}}
+			// {upload:{result:'Success',filename:'',imageinfo:{}}}
+			|| !data || !(data = data.upload) || data.result !== 'Success') {
+				// console.error(error);
+				callback && callback(undefined, error || 'No result got');
 			}
-			console.log(data);
+
+			// console.log(data);
 			callback && callback(data);
 		}, post_data, options);
 	};
