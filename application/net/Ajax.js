@@ -589,11 +589,12 @@ function module_code(library_namespace) {
 			function push_and_callback(MIME_type, content) {
 				var headers = 'Content-Disposition: '
 						+ (slice ? 'file' : 'form-data; name="' + key + '"')
-						+ '; filename="' + value + '"' + form_data_new_line
-						+ 'Content-Type: ' + MIME_type + form_data_new_line
-						+ form_data_new_line,
-				//
-				chunk = [ headers, content ];
+						+ '; filename="' + value + '"' + form_data_new_line;
+				if (MIME_type) {
+					headers += 'Content-Type: ' + MIME_type + form_data_new_line;
+				}
+				headers += form_data_new_line;
+				var chunk = [ headers, content ];
 				// 手動設定 Content-Length。
 				chunk.content_length = headers.length + content.length;
 				// TODO: use stream
@@ -1421,16 +1422,19 @@ function module_code(library_namespace) {
 							4, 'get_URL_node._onload');
 			// XMLHttp.headers['content-type']==='text/html; charset=utf-8'
 			result_Object.headers = result.headers;
-			// MIME type: XMLHttp.type
-			result_Object.type = result.headers['content-type']
-			// charset: XMLHttp.charset
-			.replace(/;(.*)$/, function($0, $1) {
-				var matched = $1.match(/[; ]charset=([^;]+)/i);
-				if (matched) {
-					result_Object.charset = matched[1].trim();
-				}
-				return '';
-			}).trim();
+			// 在503之類的情況下。可能沒"Content-Type: "。
+			if (result.headers['content-type']) {
+				// MIME type: XMLHttp.type
+				result_Object.type = result.headers['content-type']
+				// charset: XMLHttp.charset
+				.replace(/;(.*)$/, function($0, $1) {
+					var matched = $1.match(/[; ]charset=([^;]+)/i);
+					if (matched) {
+						result_Object.charset = matched[1].trim();
+					}
+					return '';
+				}).trim();
+			}
 
 			merge_cookie(agent, result.headers['set-cookie']);
 			// 為預防字元編碼破碎，因此不能設定 result.setEncoding()？
