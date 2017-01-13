@@ -599,8 +599,14 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				var chapter_data = _this.parse_chapter_data(html, work_data,
-						get_label);
+				var chapter_data;
+				try {
+					chapter_data = _this.parse_chapter_data(html, work_data,
+							get_label);
+				} catch (e) {
+					library_namespace.err('chapter url: ' + chapter_URL);
+					throw e;
+				}
 				// console.log(JSON.stringify(chapter_data));
 				if (!chapter_data || !(image_list = chapter_data.image_list)
 				//

@@ -591,7 +591,8 @@ function module_code(library_namespace) {
 						+ (slice ? 'file' : 'form-data; name="' + key + '"')
 						+ '; filename="' + value + '"' + form_data_new_line;
 				if (MIME_type) {
-					headers += 'Content-Type: ' + MIME_type + form_data_new_line;
+					headers += 'Content-Type: ' + MIME_type
+							+ form_data_new_line;
 				}
 				headers += form_data_new_line;
 				var chunk = [ headers, content ];
@@ -1422,7 +1423,7 @@ function module_code(library_namespace) {
 							4, 'get_URL_node._onload');
 			// XMLHttp.headers['content-type']==='text/html; charset=utf-8'
 			result_Object.headers = result.headers;
-			// 在503之類的情況下。可能沒"Content-Type: "。
+			// 在503之類的情況下。可能沒"Content-Type:"。這時result將無.type。
 			if (result.headers['content-type']) {
 				// MIME type: XMLHttp.type
 				result_Object.type = result.headers['content-type']

@@ -373,8 +373,8 @@ function module_code(library_namespace) {
 		c.Close();
 
 		for (; i < u.length; i++)
-			r.push((c = u.charCodeAt(i)) < 128 ? u.charAt(i) : '%'
-					+ toASCIIcode(c, -1).toString(16).toUpperCase());
+			r.push((c = u.charCodeAt(i)) < 0x80 ? u.charAt(i) : '%'
+					+ toASCIIcode(c, -1).toString(0x10).toUpperCase());
 
 		return r.join('').replace(/ /g, '+');
 	}
@@ -1097,8 +1097,11 @@ function module_code(library_namespace) {
 		PATTERN_char = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
 		split_by_code_point = function() {
 			return PATTERN_char.test(this)
-			//
+			// [[en:Surrogate mechanism]]
 			? this.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|./g) : this.split('');
+			// show HEX:
+			// .map(function(char){return
+			// char.codePointAt(0).toString(0x10).toUpperCase();});
 		};
 	}
 
@@ -1822,9 +1825,9 @@ function module_code(library_namespace) {
 		// 轉換控制字符
 		.replace(/([\0-\37\x7f\xff])/g, function($0, $1) {
 			var c = $1.charCodeAt(0);
-			return c < 64 ? '\\' + c.toString(8) : '\\x'
+			return c < 8 * 8 ? '\\' + c.toString(8) : '\\x'
 			//
-			+ (c < 16 ? '0' : '') + c.toString(16);
+			+ (c < 0x10 ? '0' : '') + c.toString(0x10);
 		})
 		// .replace(/([\u00000100-\uffffffff])/g, function($0, $1) {})
 		;
