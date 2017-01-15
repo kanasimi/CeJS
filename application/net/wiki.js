@@ -12938,7 +12938,16 @@ function module_code(library_namespace) {
 	}
 
 	function wikidata_entity_value(property, options, callback) {
+		if (Array.isArray(property)) {
+			// e.g., entity.value(['property','property'])
+			var property_list = property;
+			property = library_namespace.null_Object();
+			property_list.forEach(function(key) {
+				property[key] = null;
+			});
+		}
 		if (library_namespace.is_Object(property)) {
+			// e.g., entity.value({'property':'language'})
 			if (callback) {
 				;
 			}
