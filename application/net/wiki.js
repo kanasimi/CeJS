@@ -16012,7 +16012,7 @@ function module_code(library_namespace) {
 	 * @param {String}query
 	 *            查詢語句。
 	 * @param {Function}[callback]
-	 *            回調函數。 callback(轉成JavaScript的值. e.g., {Array}list)
+	 *            回調函數。 callback(轉成JavaScript的值. e.g., {Array}list, error)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 */
@@ -16043,10 +16043,14 @@ function module_code(library_namespace) {
 		}
 
 		get_URL(action.join(''), function(data) {
-			data = JSON.parse(data.responseText);
-			var items = data.items;
+			var items;
+			// error handling
+			try {
+				items = JSON.parse(data.responseText).items;
+			} catch (e) {
+			}
 			if (!items || options && options.get_id) {
-				callback(data.status);
+				callback(undefined, data && data.status || 'Failed to get ' + query);
 				return;
 			}
 			if (items.length > 50) {
