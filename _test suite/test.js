@@ -2576,6 +2576,10 @@ function test_wiki() {
 		[[ '[http://a.b.c/]', CeL.wiki.parse.wiki_URL('http://a.b.c/', true) ], 'URL_to_wiki_link' ],
 		[[ '[http://a.b.c/ def ghi]', CeL.wiki.parse.wiki_URL('http://a.b.c/ def ghi', true) ], 'URL_to_wiki_link' ],
 
+		[[ 'param_1=abc|p2=123', CeL.wiki.template_text({param_1:'abc',p2:123}) ], 'to_template_wikitext #1' ],
+		[[ '{{pp|p1=pqr|p 2=234}}', CeL.wiki.template_text({p1:'pqr','p 2':234},'pp') ], 'to_template_wikitext #2' ],
+		[[ '{{pp|1|w|4}}', CeL.wiki.template_text([1,'w',4],'p') ], 'to_template_wikitext #2' ],
+
 	]);
 
 	error_count += CeL.test('CeL.wiki.parser', function(assert) {

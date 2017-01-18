@@ -1025,6 +1025,33 @@ function module_code(library_namespace) {
 		return array;
 	}
 
+	// 2017/1/18 18:46:2
+	// TODO: escape special characters
+	function to_template_wikitext(parameters, options) {
+		var keys = Object.keys(parameters), template_name, is_continue = true;
+		if (options) {
+			if (typeof options === 'string') {
+				template_name = options;
+			} else {
+				template_name = options.name;
+			}
+		}
+
+		var wikitext = keys.map(function(key) {
+			if (is_continue && (is_continue = library_namespace.is_digits(key))) {
+				return parameters[key];
+			}
+			return key + '=' + parameters[key];
+		});
+		if (template_name) {
+			wikitext = '{{' + template_name + '|' + wikitext.join('|') + '}}';
+		} else if (!options || !options.get_list) {
+			wikitext = wikitext.join('|');
+		}
+		return wikitext;
+	}
+
+
 	// --------------------------------------------------------------------------------------------
 	// parse wikitext.
 
@@ -16250,6 +16277,8 @@ function module_code(library_namespace) {
 		// sections : get_sections,
 
 		plain_text : to_plain_text,
+
+		template_text : to_template_wikitext,
 
 		parse : parse_wikitext,
 		parser : page_parser,
