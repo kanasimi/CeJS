@@ -11,22 +11,24 @@
  以各種編碼轉換original_map.txt
 
 
- encoding.map.json包含兩種map:
- [to_single={
- start_char_code_in_hex:[start of second byte, 'map']
- },
- to_multi={
- start_char_code_in_hex:'map join by ,'
- }]
+ encoding.map.json規格書:包含map:
+ {
+ //to single byte:
+ start_char_code_in_hex:[start of second byte, 'map', 'split string']
+ //to 2 bytes
+ start_char_code_in_hex:[start of second byte, 'map', 'split string']
+ }
 
  e.g.,
- [{'A180':[0x80,'~~~~~~']}]
- [{'A180':[0x80,'~~~~~~']},{'A4B3':'~,~'}]
+ // split by .chars()
+ {'A180':[0x80,'~~~~~~'],'A4B3':'##'}
+ // .split('')
+ {'A180':[0x80,'~~~~~~', ''],'A4B3':['#,#',',']}
 
  to_multi的不能跨越to_single的範圍。
  e.g.,
- [{'A1FF':[0xFF,'~~~~~~']},{'A2FF':'1,2','A4B3':'~'}]
- 'A2FF','A4B3': 不在'A1FF'範圍內。
+ {'A1FF':[0xFF,'abcde'],'A2FF':'12','A4B3':'~'}
+ 'A2FF','A4B3': 不在'A1FF'範圍內: A1FF:a, A2FF:b, A3FF:c, ...
  實作將直接以+1的方式配入 convert_map 中，因此A2FF之第二組"2"將被配入A300!
 
 

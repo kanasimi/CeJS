@@ -2578,7 +2578,7 @@ function test_wiki() {
 
 		[[ 'param_1=abc|p2=123', CeL.wiki.template_text({param_1:'abc',p2:123}) ], 'to_template_wikitext #1' ],
 		[[ '{{pp|p1=pqr|p 2=234}}', CeL.wiki.template_text({p1:'pqr','p 2':234},'pp') ], 'to_template_wikitext #2' ],
-		[[ '{{pp|1|w|4}}', CeL.wiki.template_text([1,'w',4],'p') ], 'to_template_wikitext #2' ],
+		[[ '{{p|1|w|4}}', CeL.wiki.template_text([1,'w',4],'p') ], 'to_template_wikitext #3' ],
 
 	]);
 
