@@ -1025,6 +1025,14 @@ function module_code(library_namespace) {
 		return array;
 	}
 
+	function to_template_wikitext_toString_slice(separater) {
+		return this.join(separater || '|');
+	}
+
+	function to_template_wikitext_toString(separater) {
+		return '{{' + this.join(separater || '|') + '}}';
+	}
+
 	// 2017/1/18 18:46:2
 	// TODO: escape special characters
 	function to_template_wikitext(parameters, options) {
@@ -1044,11 +1052,14 @@ function module_code(library_namespace) {
 			return key + '=' + parameters[key];
 		});
 		if (template_name) {
-			wikitext = '{{' + template_name + '|' + wikitext.join('|') + '}}';
-		} else if (!options || !options.get_list) {
-			wikitext = wikitext.join('|');
+			wikitext.unshift(template_name); '{{' + template_name + '|' + wikitext.join('|') + '}}';
+			wikitext.toString = to_template_wikitext_toString;
+		} else {
+			wikitext.toString = to_template_wikitext_toString_slice;
 		}
-		return wikitext;
+		return options && options.to_Array ? wikitext
+		//
+		: wikitext.toString(options && options.separator);
 	}
 
 
@@ -8116,6 +8127,12 @@ function module_code(library_namespace) {
 			}
 		}
 		post_data.token = token;
+		if (library_namespace.is_Object(post_data.text)) {
+			post_data.text = to_template_wikitext(post_data.text, {
+				name : 'Information',
+				separator : '\n|'
+			});
+		}
 
 		var session;
 		if ('session' in options) {
