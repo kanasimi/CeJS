@@ -1046,13 +1046,15 @@ function module_code(library_namespace) {
 		}
 
 		var wikitext = keys.map(function(key) {
-			if (is_continue && (is_continue = library_namespace.is_digits(key))) {
+			if (is_continue
+			//
+			&& (is_continue = library_namespace.is_digits(key))) {
 				return parameters[key];
 			}
 			return key + '=' + parameters[key];
 		});
 		if (template_name) {
-			wikitext.unshift(template_name); '{{' + template_name + '|' + wikitext.join('|') + '}}';
+			wikitext.unshift(template_name);
 			wikitext.toString = to_template_wikitext_toString;
 		} else {
 			wikitext.toString = to_template_wikitext_toString_slice;
@@ -1061,7 +1063,6 @@ function module_code(library_namespace) {
 		//
 		: wikitext.toString(options && options.separator);
 	}
-
 
 	// --------------------------------------------------------------------------------------------
 	// parse wikitext.
@@ -8128,7 +8129,9 @@ function module_code(library_namespace) {
 		}
 		post_data.token = token;
 		if (library_namespace.is_Object(post_data.text)) {
-			post_data.text = to_template_wikitext(post_data.text, {
+			post_data.text = '== {{int:filedesc}} ==\n'
+			// 將 .text 當作文件資訊。
+			+ to_template_wikitext(post_data.text, {
 				name : 'Information',
 				separator : '\n|'
 			});
@@ -16094,7 +16097,8 @@ function module_code(library_namespace) {
 			} catch (e) {
 			}
 			if (!items || options && options.get_id) {
-				callback(undefined, data && data.status || 'Failed to get ' + query);
+				callback(undefined, data && data.status || 'Failed to get '
+						+ query);
 				return;
 			}
 			if (items.length > 50) {

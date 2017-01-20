@@ -672,7 +672,7 @@ function module_code(library_namespace) {
 					image_data.file = chapter_directory + work_data.id + '-'
 							+ chapter + '-' + (index + 1).pad(3) + '.jpg';
 					// default: 同時下載本章節中所有圖像。
-					// .one_by_one: 循序逐個一個個下載。 download one by one
+					// .one_by_one: 循序逐個、一個個下載圖像。 download one by one
 					if (!_this.one_by_one) {
 						_this.get_images(image_data, check_if_done);
 					}
