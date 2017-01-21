@@ -25,8 +25,8 @@
  start_char_code_in_hex:[start of second byte, 'map'],
  // convert single code to single string
  start_char_code_in_hex:['map', 0],
- // 從start_char_code_in_hex開始持續，共count個字元，unicode與原編碼都有一對一對應，自char開始。
- start_char_code_in_hex:['char', {Natural}count],
+ // 這邊的count表示中間有count個字元，分別是自char開始，unicode編碼之後的序列。
+ start_char_code_in_hex:['char', {Natural}count, 'char', {Natural}count],
  }
 
  e.g.,
@@ -41,6 +41,8 @@
  'A2FF','A4B3': 不在'A1FF'範圍內: A1FF:a, A2FF:b, A3FF:c, ...
  實作將直接以+1的方式配入 convert_map 中，因此A2FF之第二組"2"將被配入A300!
 
+
+ @see https://github.com/ashtuchkin/iconv-lite/tree/master/encodings/tables
 
  */
 
@@ -68,21 +70,22 @@ padding_character = '\t',
 original_map_file = 'original_map.txt';
 
 console.assert(padding_character.length === 1);
-console.assert(8 <= padding_character.charCodeAt(0)
+console.assert(padding_character === '\t'
+		|| 0x20 <= padding_character.charCodeAt(0)
 		&& padding_character.charCodeAt(0) < 0x40 && padding_character !== '?'
 		&& padding_character !== ' ');
 
 // generate_original_map();
 
-// parse_converted('Big5.txt');
-// parse_converted('EUC-JP.txt');
-// parse_converted('GBK.txt');
-// parse_converted('Shift_JIS.txt');
+// parse_converted_file('Big5.txt');
+// parse_converted_file('EUC-JP.txt');
+// parse_converted_file('GBK.txt');
+// parse_converted_file('Shift_JIS.txt');
 
 // array_vs_charAt();
 
 if (process.argv[2]) {
-	parse_converted(process.argv[2]);
+	parse_converted_file(process.argv[2]);
 } else {
 	generate_original_map();
 }
@@ -152,22 +155,48 @@ function to_hex(char) {
 // --------------------------------------------------------------------------------------
 
 // TODO: 將如padding_character,start_char_code_2之類的設定儲存在original_map_file中。
-function parse_converted(file_path) {
-	var code_lines = node_fs.readFileSync(file_path, 'utf8')
-	// remove BOM
-	.trimLeft().split(new_line), last_char_code = start_char_code_1 - 1, last_char_count = end_char_code
-			- start_char_code_2 + 1, line = code_lines[code_lines.length - 1];
-	if (line.replace(/\r$/, '') === '') {
-		code_lines.pop();
-	}
-	if (code_lines.length === end_char_code - start_char_code_1 + 1) {
-		CeL.log(file_path + ': ' + code_lines.length + ' lines');
-	} else {
-		CeL.warn(file_path + ': ' + code_lines.length + ' lines (should be '
-				+ (end_char_code - start_char_code_1 + 1) + ')');
+function parse_converted_file(file_path_list) {
+	var convert_map = CeL.null_Object();
+
+	if (!Array.isArray(file_path_list)) {
+		file_path_list = [ file_path_list ];
 	}
 
-	var convert_map = CeL.null_Object(), last_map_key, last_key, last_convert_to;
+	file_path_list.forEach(function(file_path) {
+		var code_lines = node_fs.readFileSync(file_path, 'utf8')
+		// remove BOM
+		.trimLeft().split(new_line), line = code_lines[code_lines.length - 1];
+		if (line.replace(/\r$/, '') === '') {
+			code_lines.pop();
+		}
+		if (code_lines.length === end_char_code - start_char_code_1 + 1) {
+			CeL.log(file_path + ': ' + code_lines.length + ' lines');
+		} else {
+			CeL.warn(file_path + ': ' + code_lines.length
+					+ ' lines (should be '
+					+ (end_char_code - start_char_code_1 + 1) + ')');
+		}
+
+		parse_converted_data(code_lines, convert_map);
+	});
+
+	var result_data = [];
+	// result_data = JSON.stringify(convert_map);
+	Object.keys(convert_map).sort().forEach(function(key) {
+		result_data.push((/^\d/.test(key) ? '"' + key + '"' : key)
+		//
+		+ ':' + JSON.stringify(convert_map[key]));
+	});
+	result_data = "typeof CeL==='function'&&CeL.encoding.add_map({\n"
+			+ result_data.join(',\n') + '\n})';
+
+	node_fs.writeFileSync(file_path_list[0].replace(/\..+/g, '.map'),
+			result_data);
+}
+
+function parse_converted_data(code_lines, convert_map) {
+	var last_map_key, last_key, last_convert_to, last_char_code = start_char_code_1 - 1, last_char_count = end_char_code
+			- start_char_code_2 + 1;
 	function add_map(hex_key, convert_to, single) {
 		if (last_map_key) {
 			if (hex_key
@@ -186,17 +215,53 @@ function parse_converted(file_path) {
 
 			// map_key未接續。先登記last_map_key。
 			if (last_map_key) {
-				var first_char_code = last_convert_to[0].charCodeAt(0);
-				if (last_convert_to.length > 1
-						&& last_convert_to.every(function(char, index) {
-							return char.length === 1
-									&& char.charCodeAt(0) === index
-											+ first_char_code;
-						})) {
-					last_convert_to = [ last_convert_to[0],
-							last_convert_to.length ];
-				} else {
-					last_convert_to = last_convert_to.join('');
+				// 做點簡易壓縮。
+				var buffer = '', lastest_char_code, _last_convert_to = [ '' ];
+				function add_slice() {
+					if (buffer.length === 0) {
+						return;
+					}
+					// 結算連續的區段。
+					// 3: 要採用 ["char",count]的方法，應該要夠長才有效益。
+					if (buffer.length > 3) {
+						_last_convert_to.push(buffer.length);
+					} else {
+						_last_convert_to
+						//
+						[_last_convert_to.length - 1] += buffer;
+					}
+					buffer = '';
+				}
+				last_convert_to.forEach(function(char) {
+					if (char.length === 1 && char.charCodeAt(0)
+					//
+					=== lastest_char_code + buffer.length + 1) {
+						buffer += char;
+					} else {
+						// char與之前的沒有連續。
+						add_slice();
+						if (typeof _last_convert_to
+						//
+						[_last_convert_to.length - 1] === 'string') {
+							_last_convert_to
+							//
+							[_last_convert_to.length - 1] += char;
+						} else {
+							_last_convert_to.push(char);
+						}
+						// console.log([ buffer, char, lastest_char_code ]);
+						lastest_char_code = char.charCodeAt(0);
+					}
+				});
+				add_slice();
+				last_convert_to = last_convert_to.length > _last_convert_to.length ? _last_convert_to.length === 1 ? _last_convert_to[0]
+						: _last_convert_to
+						: last_convert_to.join('');
+
+				if (last_map_key in convert_map) {
+					CeL.warn('Duplicate byte ' + last_map_key + ': '
+					//
+					+ convert_map[last_map_key] + '→' + last_convert_to);
 				}
 				convert_map[last_map_key] = last_convert_to;
 			}
@@ -227,7 +292,7 @@ function parse_converted(file_path) {
 		}
 		last_char_code = char_code_1;
 		// CeL.log(new RegExp('\\' + padding_character + '+'));
-		// 雙字元/多位元組之第一/首位元
+		// 雙字元(2バイト符号化文字集合)/多位元組之第一/首位元
 		var hex_char_1 = matched[1],
 		//
 		char_list = matched[2]
@@ -293,9 +358,6 @@ function parse_converted(file_path) {
 
 	// 登記last_map_key。
 	add_map();
-
-	node_fs.writeFileSync(file_path.replace(/\..+/g, '.map'), JSON
-			.stringify(convert_map));
 }
 
 // --------------------------------------------------------------------------------------
