@@ -1,4 +1,4 @@
-﻿// node generate.js
+﻿// node generate_map.js
 
 /*
 
@@ -46,6 +46,16 @@
 
  */
 
+/*
+
+ // [[EUC-JP]], [[EUC-JIS-2004]]
+ // 0x8Fに続く2バイト文字1文字分 (0xA1から0xFEまでの2バイト) は、JIS X 0213の第2面の文字である。
+ node generate_map.js 8F
+ node generate_map.js EUC-JP.txt EUC-JP.8F.txt
+
+
+ */
+
 'use strict';
 
 // Load CeJS library and modules.
@@ -56,24 +66,33 @@ CeL.run([
 // for string.chars()
 'data.native' ]);
 
-/** node.js file system module */
-var node_fs = require('fs'), new_line = '\n', HEX_BASE = 0x10,
-// 1バイト目
-start_char_code_1 = 0x80 - 2, end_char_code = 0x100 - 1,
-// 2バイト目: 起始必須跳過 \n, \t。
-start_char_code_2 = 0x20,
-// REPLACEMENT CHARACTER U+FFFD
-UNKNOWN_CHARACTER = '�',
-// 這應該是個轉換前後不會變化，且不會被納入其他字元組中的字元。
-padding_character = '\t',
+var BYTE_BASE = 0x100, original_map_file = 'original_map.txt',
 //
-original_map_file = 'original_map.txt';
+default_config = {
+	// 1バイト目: 一般從0x80起。
+	start_char_code_1 : 0x80 - 2,
+	// 2バイト目: 起始必須跳過 new_line, padding_character。
+	start_char_code_2 : 0x20,
+	// assert: new_line map to new_line, 不可使用 '\r'
+	new_line : '\n',
+	// 這應該是個轉換前後不會變化，且不會被納入其他字元組中的字元。
+	padding_character : '\t',
+	end_char_code : BYTE_BASE - 1
+},
 
-console.assert(padding_character.length === 1);
-console.assert(padding_character === '\t'
-		|| 0x20 <= padding_character.charCodeAt(0)
-		&& padding_character.charCodeAt(0) < 0x40 && padding_character !== '?'
-		&& padding_character !== ' ');
+general_encoding = 'utf8',
+
+/** node.js file system module */
+node_fs = require('fs'),
+// REPLACEMENT CHARACTER U+FFFD
+UNKNOWN_CHARACTER = '�', HEX_BASE = 0x10;
+
+console.assert(default_config.padding_character.length === 1);
+console.assert(default_config.padding_character === '\t'
+		|| 0x20 <= default_config.padding_character.charCodeAt(0)
+		&& default_config.padding_character.charCodeAt(0) < 0x40
+		&& default_config.padding_character !== '?'
+		&& default_config.padding_character !== ' ');
 
 // generate_original_map();
 
@@ -82,17 +101,73 @@ console.assert(padding_character === '\t'
 // parse_converted_file('GBK.txt');
 // parse_converted_file('Shift_JIS.txt');
 
+// 效能測試。
 // array_vs_charAt();
 
-if (process.argv[2]) {
-	parse_converted_file(process.argv[2]);
-} else {
-	generate_original_map();
+(function() {
+	var file_list = process.argv[2];
+	if (!file_list || /^[A-F\d]{0,2}$/i.test(file_list)) {
+		generate_original_map(file_list);
+		return;
+	}
+
+	file_list = [ file_list ];
+	for (var index = 3; index < process.argv.length; index++) {
+		if (process.argv[index])
+			file_list.push(process.argv[index]);
+	}
+	parse_converted_file(file_list);
+})();
+
+// --------------------------------------------------------------------------------------
+
+function generate_original_map(high_byte_hex) {
+	var file_descriptor, char_buffer = Object.clone(default_config), new_line_Buffer = Buffer
+			.from(default_config.new_line);
+	if (high_byte_hex) {
+		high_byte_hex = high_byte_hex.toUpperCase();
+		char_buffer.high_byte_hex = high_byte_hex;
+		file_descriptor = original_map_file.replace(/(\.[^.]+)$/, '.'
+				+ high_byte_hex + '$1');
+	} else {
+		file_descriptor = original_map_file;
+	}
+	file_descriptor = node_fs.openSync(file_descriptor, 'w');
+
+	// 寫入設定。
+	char_buffer = JSON.stringify(char_buffer) + default_config.new_line
+			+ '-'.repeat(80) + default_config.new_line;
+	node_fs.writeSync(file_descriptor, Buffer.from(char_buffer));
+
+	// 添加" "是為了預防有4bytes的字元組。若有6bytes,8bytes的字元組則須再加。
+	// 最後的 +1 是為了確保能 .split(new RegExp('\\' + default_config.padding_character +
+	// '+'))
+	char_buffer = Buffer.from(default_config.padding_character.repeat(4 + 1));
+	if (high_byte_hex) {
+		char_buffer[0] = parseInt(high_byte_hex, HEX_BASE);
+		high_byte_hex = 1;
+	} else {
+		high_byte_hex = 0;
+	}
+
+	for (var char_code_1 = default_config.start_char_code_1; char_code_1 <= default_config.end_char_code; char_code_1++) {
+		node_fs.writeSync(file_descriptor, Buffer.from(to_hex(char_code_1)
+				+ ':'));
+		char_buffer[high_byte_hex] = char_code_1;
+		for (var char_code_2 = default_config.start_char_code_2; char_code_2 <= default_config.end_char_code; char_code_2++) {
+			char_buffer[high_byte_hex + 1] = char_code_2;
+			node_fs.writeSync(file_descriptor, char_buffer);
+		}
+		node_fs.writeSync(file_descriptor, new_line_Buffer);
+	}
+	node_fs.closeSync(file_descriptor);
 }
 
 // --------------------------------------------------------------------------------------
 
 /**
+ * 效能測試。
+ * 
  * @see http://jsperf.com/charat-vs-array/7
  *      http://stackoverflow.com/questions/5943726/string-charatx-or-stringx
  *      https://www.sitepoint.com/javascript-fast-string-concatenation/
@@ -163,40 +238,67 @@ function parse_converted_file(file_path_list) {
 	}
 
 	file_path_list.forEach(function(file_path) {
-		var code_lines = node_fs.readFileSync(file_path, 'utf8')
+		var code_lines = node_fs.readFileSync(file_path, general_encoding)
 		// remove BOM
-		.trimLeft().split(new_line), line = code_lines[code_lines.length - 1];
+		.trimLeft().split(default_config.new_line),
+		//
+		line = code_lines[code_lines.length - 1],
+		//
+		config = Object.clone(default_config);
 		if (line.replace(/\r$/, '') === '') {
 			code_lines.pop();
 		}
-		if (code_lines.length === end_char_code - start_char_code_1 + 1) {
+		// 取得設定。
+		if (code_lines[0].startsWith('{')) {
+			Object.assign(config, JSON.parse(code_lines.shift()));
+		}
+		// 去掉註解與分隔線。
+		while (code_lines.length > 0 && (!code_lines[0]
+		//
+		|| code_lines[0].startsWith('#') || /^[-=\s]*$/.test(code_lines[0]))) {
+			code_lines.shift();
+		}
+		if (code_lines.length === 0) {
+			CeL.err(file_path + ': Nothing get.');
+			return;
+		}
+
+		if (code_lines.length ===
+		//
+		config.end_char_code - config.start_char_code_1 + 1) {
 			CeL.log(file_path + ': ' + code_lines.length + ' lines');
 		} else {
 			CeL.warn(file_path + ': ' + code_lines.length
 					+ ' lines (should be '
-					+ (end_char_code - start_char_code_1 + 1) + ')');
+					+ (config.end_char_code - config.start_char_code_1 + 1)
+					+ ')');
 		}
 
-		parse_converted_data(code_lines, convert_map);
+		parse_converted_data(code_lines, convert_map, config);
 	});
 
 	var result_data = [];
 	// result_data = JSON.stringify(convert_map);
 	Object.keys(convert_map).sort().forEach(function(key) {
-		result_data.push((/^\d/.test(key) ? '"' + key + '"' : key)
+		result_data.push((/^\d/.test(key) ? '_' + key : key)
 		//
 		+ ':' + JSON.stringify(convert_map[key]));
 	});
-	result_data = "typeof CeL==='function'&&CeL.encoding.add_map({\n"
+	result_data = '// Auto generated by ' + CeL.get_script_name()
+			+ "\ntypeof CeL==='function'&&CeL.encoding.add_map({\n"
 			+ result_data.join(',\n') + '\n})';
 
-	node_fs.writeFileSync(file_path_list[0].replace(/\..+/g, '.map'),
+	node_fs.writeFileSync(file_path_list[0].replace(/\..+/g, '.js'),
 			result_data);
 }
 
-function parse_converted_data(code_lines, convert_map) {
-	var last_map_key, last_key, last_convert_to, last_char_code = start_char_code_1 - 1, last_char_count = end_char_code
-			- start_char_code_2 + 1;
+function parse_converted_data(code_lines, convert_map, config) {
+	var last_map_key, last_key, last_convert_to,
+	//
+	last_char_code = config.start_char_code_1 - 1,
+	//
+	last_char_count = config.end_char_code - config.start_char_code_2 + 1;
+
 	function add_map(hex_key, convert_to, single) {
 		if (last_map_key) {
 			if (hex_key
@@ -206,8 +308,8 @@ function parse_converted_data(code_lines, convert_map) {
 							&& (parseInt(hex_key, HEX_BASE)
 									- parseInt(last_key, HEX_BASE) === 1)
 					// hex_key為首個byte。
-					|| hex_key.charCodeAt(0) % 0x100 === parseInt(last_map_key
-							.slice(-2), HEX_BASE))) {
+					|| hex_key.charCodeAt(0) % BYTE_BASE === parseInt(
+							last_map_key.slice(-2), HEX_BASE))) {
 				last_convert_to.push(convert_to);
 				last_key = hex_key;
 				return;
@@ -258,6 +360,9 @@ function parse_converted_data(code_lines, convert_map) {
 						: _last_convert_to
 						: last_convert_to.join('');
 
+				if (config.high_byte_hex) {
+					last_map_key = config.high_byte_hex + last_map_key;
+				}
 				if (last_map_key in convert_map) {
 					CeL.warn('Duplicate byte ' + last_map_key + ': '
 					//
@@ -276,6 +381,8 @@ function parse_converted_data(code_lines, convert_map) {
 		last_convert_to = [ convert_to ];
 	}
 
+	// ---------------------------------
+
 	code_lines.forEach(function(line) {
 		var matched = line.replace(/\r$/, '')
 		//
@@ -285,18 +392,18 @@ function parse_converted_data(code_lines, convert_map) {
 			// console.log(line);
 			return;
 		}
-		// {Integer}char_code_1
+		/** {Integer}雙字元(2バイト符号化文字集合)首位元/多位元組除high_byte_hex之外的第一位元 */
 		var char_code_1 = parseInt(matched[1], HEX_BASE);
 		if (char_code_1 !== last_char_code + 1) {
 			CeL.log(last_char_code + '→' + char_code_1);
 		}
 		last_char_code = char_code_1;
-		// CeL.log(new RegExp('\\' + padding_character + '+'));
-		// 雙字元(2バイト符号化文字集合)/多位元組之第一/首位元
+		// CeL.log(new RegExp('\\' + config.padding_character + '+'));
+		/** {String}[HEX]雙字元(2バイト符号化文字集合)首位元/多位元組除high_byte_hex之外的第一位元 */
 		var hex_char_1 = matched[1],
 		//
-		char_list = matched[2]
-				.split(new RegExp('\\' + padding_character + '+')),
+		char_list = matched[2].split(new RegExp('\\' + config.padding_character
+				+ '+')),
 		//
 		char_tmp = char_list.pop();
 		if (char_tmp) {
@@ -310,11 +417,13 @@ function parse_converted_data(code_lines, convert_map) {
 			last_char_count = char_list.length;
 		}
 
-		char_tmp = char_list[0].chars()[0];
-		if (char_tmp && char_tmp !== UNKNOWN_CHARACTER
-				&& char_list.every(function(char, index) {
-					return char_tmp === char.chars()[0];
-				})) {
+		if (!config.high_byte_hex
+		// 檢測此排是否皆相同。對high_byte_hex，此檢測之結果應該在更簡單之時已設定過，因此跳過此項。
+		&& (char_tmp = char_list[0].chars()[0]) !== UNKNOWN_CHARACTER
+		//
+		&& char_list.every(function(char, index) {
+			return char_tmp === char.chars()[0];
+		})) {
 			if (hex_char_1 === to_hex(char_tmp)[0]) {
 				// 轉換到相同字元了。
 				return;
@@ -329,55 +438,39 @@ function parse_converted_data(code_lines, convert_map) {
 
 		char_list.forEach(function(char, index) {
 			if (char.startsWith(UNKNOWN_CHARACTER)) {
-				// 不能轉換。
+				// 不能轉換此char。
 				return;
 			}
 			// 因為有[[en:Surrogate mechanism]]，不可用(char.length!==1)
 			if (char.chars().length !== 1) {
 				// assert: (char.codePointAt(0) !== char_code_1)
 
-				if (char.chars()[1].codePointAt(0) >= 0x0300 &&
-				// [[en:Combining character#Unicode ranges]]
-				char.chars()[1].codePointAt(0) <= 0x036F) {
-					add_map(hex_char_1 + to_hex(index + start_char_code_2),
-							char, true);
+				var code_point_2 = char.chars()[1].codePointAt(0);
+				if (code_point_2 >= 0x0300 &&
+				// 檢測是否為[[en:Combining character#Unicode ranges]]
+				code_point_2 <= 0x036F) {
+					add_map(hex_char_1
+							+ to_hex(index + config.start_char_code_2), char,
+					// 對組合字符，需要以separator或一個個列出以對應，否則會解析錯誤。
+					true);
 					return;
 				}
 
-				CeL.warn(hex_char_1 + to_hex(index + start_char_code_2)
+				CeL.warn(hex_char_1 + to_hex(index + config.start_char_code_2)
 				//
 				+ '[' + index + ']: ' + JSON.stringify(char)
-				// + ' ' + char.length + ' (' + to_hex(char) + ')'
+				// + ' ' + char.length + ' (' + to_hex(char) +
+				// ')'
 				+ ' (' + to_hex(char) + ') will be skipped.');
 				return;
 			}
-			// 雙字元轉換:
-			add_map(hex_char_1 + to_hex(index + start_char_code_2), char);
+			// 轉換至雙字元/多字元:
+			add_map(hex_char_1
+			//
+			+ to_hex(index + config.start_char_code_2), char);
 		});
 	});
 
 	// 登記last_map_key。
 	add_map();
-}
-
-// --------------------------------------------------------------------------------------
-
-function generate_original_map() {
-	var file_descriptor = node_fs.openSync(original_map_file, 'w'),
-	// 添加" "是為了預防有4bytes的字元組。若有6bytes,8bytes的字元組則須再加。
-	// 最後的 " " 是為了能 .split(new RegExp('\\' + padding_character + '+'))
-	char_buffer = Buffer.from(padding_character.repeat(4 + 1)),
-	//
-	new_line_Buffer = Buffer.from(new_line);
-	for (var char_code_1 = start_char_code_1; char_code_1 <= end_char_code; char_code_1++) {
-		node_fs.writeSync(file_descriptor, Buffer.from(to_hex(char_code_1)
-				+ ':'));
-		char_buffer[0] = char_code_1;
-		for (var char_code_2 = start_char_code_2; char_code_2 <= end_char_code; char_code_2++) {
-			char_buffer[1] = char_code_2;
-			node_fs.writeSync(file_descriptor, char_buffer);
-		}
-		node_fs.writeSync(file_descriptor, new_line_Buffer);
-	}
-	node_fs.closeSync(file_descriptor);
 }
