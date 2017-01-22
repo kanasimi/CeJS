@@ -1078,7 +1078,7 @@ function module_code(library_namespace) {
 	// if ('unicode' in RegExp.prototype) {}
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp
 
-	var PATTERN_surrogate, PATTERN_char, PATTERN_char_with_combined;
+	var PATTERN_char, PATTERN_char_with_combined, split_by_code_point;
 	try {
 		// tested @ Edge/12.10240
 		PATTERN_char = new RegExp(/[\s\S]/.source, 'ug');
@@ -1087,27 +1087,34 @@ function module_code(library_namespace) {
 		PATTERN_char_with_combined = new RegExp(
 				/[\s\S][\u0300-\u036F\uFE20-\uFE2F\u20D0-\u20FF\u1DC0-\u1DFF\u1AB0-\u1AFF]*/.source,
 				'ug');
+
+		/**
+		 * 對於可能出現 surrogate pairs 的字串，應當以此來取代 .split('')！<br />
+		 * handling of surrogate pairs / code points
+		 * 
+		 * TODO: 利用.split('')增進效率。
+		 * 
+		 * @see https://en.wikipedia.org/wiki/UTF-16#Code_points_U.2B10000_to_U.2B10FFFF
+		 *      http://teppeis.hatenablog.com/entry/2014/01/surrogate-pair-in-javascript
+		 */
+		split_by_code_point = function(with_combined) {
+			return this.match(with_combined ? PATTERN_char_with_combined
+					: PATTERN_char);
+			// show HEX:
+			// .map(function(char){return
+			// char.codePointAt(0).toString(0x10).toUpperCase();});
+		};
 	} catch (e) {
-		PATTERN_surrogate = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
+		// 舊版。
+		var PATTERN_surrogate = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
 		PATTERN_char = /[\uD800-\uDBFF][\uDC00-\uDFFF]|[\s\S]/g;
 		PATTERN_char_with_combined = /(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|[\s\S])[\u0300-\u036F\uFE20-\uFE2F\u20D0-\u20FF\u1DC0-\u1DFF\u1AB0-\u1AFF]*/g;
-	}
-
-	/**
-	 * 對於可能出現 surrogate pairs 的字串，應當以此來取代 .split('')！<br />
-	 * handling of surrogate pairs / code points
-	 * 
-	 * @see https://en.wikipedia.org/wiki/UTF-16#Code_points_U.2B10000_to_U.2B10FFFF
-	 *      http://teppeis.hatenablog.com/entry/2014/01/surrogate-pair-in-javascript
-	 */
-	function split_by_code_point(with_combined) {
-		return with_combined || PATTERN_surrogate
-				&& PATTERN_surrogate.test(this) ? this
-				.match(with_combined ? PATTERN_char_with_combined
-						: PATTERN_char) : this.split('');
-		// show HEX:
-		// .map(function(char){return
-		// char.codePointAt(0).toString(0x10).toUpperCase();});
+		split_by_code_point = function(with_combined) {
+			return with_combined || !PATTERN_surrogate
+					|| PATTERN_surrogate.test(this) ? this
+					.match(with_combined ? PATTERN_char_with_combined
+							: PATTERN_char) : this.split('');
+		};
 	}
 
 	// String.prototype.codePoints()
