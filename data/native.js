@@ -1078,7 +1078,21 @@ function module_code(library_namespace) {
 	// if ('unicode' in RegExp.prototype) {}
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp
 
-	var split_by_code_point, PATTERN_char;
+	var PATTERN_surrogate, PATTERN_char, PATTERN_char_with_combined;
+	try {
+		// tested @ Edge/12.10240
+		PATTERN_char = new RegExp(/[\s\S]/.source, 'ug');
+		// 注意:因為/./u會切分[[en:Combining character#Unicode ranges]]，
+		// 因此對組合字符，得要另外處理。
+		PATTERN_char_with_combined = new RegExp(
+				/[\s\S][\u0300-\u036F\uFE20-\uFE2F\u20D0-\u20FF\u1DC0-\u1DFF\u1AB0-\u1AFF]*/.source,
+				'ug');
+	} catch (e) {
+		PATTERN_surrogate = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
+		PATTERN_char = /[\uD800-\uDBFF][\uDC00-\uDFFF]|[\s\S]/g;
+		PATTERN_char_with_combined = /(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|[\s\S])[\u0300-\u036F\uFE20-\uFE2F\u20D0-\u20FF\u1DC0-\u1DFF\u1AB0-\u1AFF]*/g;
+	}
+
 	/**
 	 * 對於可能出現 surrogate pairs 的字串，應當以此來取代 .split('')！<br />
 	 * handling of surrogate pairs / code points
@@ -1086,26 +1100,17 @@ function module_code(library_namespace) {
 	 * @see https://en.wikipedia.org/wiki/UTF-16#Code_points_U.2B10000_to_U.2B10FFFF
 	 *      http://teppeis.hatenablog.com/entry/2014/01/surrogate-pair-in-javascript
 	 */
-	try {
-		// tested @ Edge/12.10240
-		PATTERN_char = new RegExp('.', 'ug');
-		split_by_code_point = function() {
-			return this.match(PATTERN_char);
-		};
-
-	} catch (e) {
-		PATTERN_char = /[\uD800-\uDBFF][\uDC00-\uDFFF]/;
-		split_by_code_point = function() {
-			return PATTERN_char.test(this)
-			// [[en:Surrogate mechanism]]
-			? this.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|./g) : this.split('');
-			// show HEX:
-			// .map(function(char){return
-			// char.codePointAt(0).toString(0x10).toUpperCase();});
-		};
+	function split_by_code_point(with_combined) {
+		return with_combined || PATTERN_surrogate
+				&& PATTERN_surrogate.test(this) ? this
+				.match(with_combined ? PATTERN_char_with_combined
+						: PATTERN_char) : this.split('');
+		// show HEX:
+		// .map(function(char){return
+		// char.codePointAt(0).toString(0x10).toUpperCase();});
 	}
 
-	// String..prototype.codePoints()
+	// String.prototype.codePoints()
 	// http://docs.oracle.com/javase/8/docs/api/java/lang/CharSequence.html#codePoints--
 	function codePoints() {
 		return split_by_code_point.call(this)

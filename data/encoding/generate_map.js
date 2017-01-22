@@ -1,6 +1,4 @@
-﻿// node generate_map.js
-
-/*
+﻿/*
 
 
  2017/1/11 16:15:36
@@ -30,7 +28,7 @@
  }
 
  e.g.,
- // split by .chars()
+ // split by .chars(true)
  {'A180':[0x80,'~~~~~~'],'A4B3':'##'}
  // .split('')
  {'A180':[0x80,'~~~~~~', ''],'A4B3':['#,#',',']}
@@ -48,11 +46,20 @@
 
 /*
 
- // [[EUC-JP]], [[EUC-JIS-2004]]
+ // [[zh:大五碼]]
+ node generate_map.js
+ node generate_map.js Big5.txt
+
+ // [[zh:国家标准代码]]
+ node generate_map.js GBK.txt
+
+ // [[ja:EUC-JP]], [[ja:EUC-JIS-2004]]
  // 0x8Fに続く2バイト文字1文字分 (0xA1から0xFEまでの2バイト) は、JIS X 0213の第2面の文字である。
  node generate_map.js 8F
  node generate_map.js EUC-JP.txt EUC-JP.8F.txt
 
+ // [[ja:Shift_JIS]]
+ node generate_map.js Shift_JIS.txt
 
  */
 
@@ -69,9 +76,9 @@ CeL.run([
 var BYTE_BASE = 0x100, original_map_file = 'original_map.txt',
 //
 default_config = {
-	// 1バイト目: 一般從0x80起。
+	// 雙位元組字元集 高位字節 1バイト目: 一般從0x80起。
 	start_char_code_1 : 0x80 - 2,
-	// 2バイト目: 起始必須跳過 new_line, padding_character。
+	// 雙位元組字元集 低位字節 2バイト目: 起始必須跳過 new_line, padding_character。
 	start_char_code_2 : 0x20,
 	// assert: new_line map to new_line, 不可使用 '\r'
 	new_line : '\n',
@@ -94,17 +101,10 @@ console.assert(default_config.padding_character === '\t'
 		&& default_config.padding_character !== '?'
 		&& default_config.padding_character !== ' ');
 
-// generate_original_map();
-
-// parse_converted_file('Big5.txt');
-// parse_converted_file('EUC-JP.txt');
-// parse_converted_file('GBK.txt');
-// parse_converted_file('Shift_JIS.txt');
-
 // 效能測試。
 // array_vs_charAt();
 
-(function() {
+(function main() {
 	var file_list = process.argv[2];
 	if (!file_list || /^[A-F\d]{0,2}$/i.test(file_list)) {
 		generate_original_map(file_list);
@@ -134,14 +134,14 @@ function generate_original_map(high_byte_hex) {
 	}
 	file_descriptor = node_fs.openSync(file_descriptor, 'w');
 
-	// 寫入設定。
+	// 寫入設定。將如padding_character,start_char_code_2之類的設定儲存在original_map_file中。
 	char_buffer = JSON.stringify(char_buffer) + default_config.new_line
 			+ '-'.repeat(80) + default_config.new_line;
 	node_fs.writeSync(file_descriptor, Buffer.from(char_buffer));
 
 	// 添加" "是為了預防有4bytes的字元組。若有6bytes,8bytes的字元組則須再加。
-	// 最後的 +1 是為了確保能 .split(new RegExp('\\' + default_config.padding_character +
-	// '+'))
+	// 最後的 +1 是為了確保能
+	// .split(new RegExp('\\' + config.padding_character + '+'))
 	char_buffer = Buffer.from(default_config.padding_character.repeat(4 + 1));
 	if (high_byte_hex) {
 		char_buffer[0] = parseInt(high_byte_hex, HEX_BASE);
@@ -229,7 +229,6 @@ function to_hex(char) {
 
 // --------------------------------------------------------------------------------------
 
-// TODO: 將如padding_character,start_char_code_2之類的設定儲存在original_map_file中。
 function parse_converted_file(file_path_list) {
 	var convert_map = CeL.null_Object();
 
@@ -277,9 +276,33 @@ function parse_converted_file(file_path_list) {
 		parse_converted_data(code_lines, convert_map, config);
 	});
 
-	var result_data = [];
+	var map_keys = Object.keys(convert_map).sort(), result_data,
+	// 開始有mapping的高位元code
+	first_high_byte = parseInt(map_keys[0].slice(0, 2), HEX_BASE);
+	if (map_keys[0].length === 2) {
+		result_data = convert_map[map_keys[0]];
+		first_high_byte += typeof result_data === 'string' ? result_data
+				.chars(true).length - 1 : result_data.char_length;
+		map_keys.shift();
+	}
+
+	if (general_encoding !== 'utf8'
+	// 處理和 7-bit ASCII 保持一致，一般固定不會被轉換編碼的部分。
+	|| first_high_byte === 0) {
+		result_data = [];
+	} else {
+		// normal convert, start from \u0000
+		result_data = '"\\0"';
+		if (first_high_byte > 1) {
+			result_data = '[' + result_data + ',' + (first_high_byte - 1) + ']';
+		} else if (first_high_byte !== 1) {
+			throw 'Invalid byte: ' + Object.keys(convert_map).sort()[0];
+		}
+		result_data = [ '_00:' + result_data ];
+	}
+
 	// result_data = JSON.stringify(convert_map);
-	Object.keys(convert_map).sort().forEach(function(key) {
+	map_keys.forEach(function(key) {
 		result_data.push((/^\d/.test(key) ? '_' + key : key)
 		//
 		+ ':' + JSON.stringify(convert_map[key]));
@@ -324,7 +347,7 @@ function parse_converted_data(code_lines, convert_map, config) {
 						return;
 					}
 					// 結算連續的區段。
-					// 3: 要採用 ["char",count]的方法，應該要夠長才有效益。
+					// 3:要採用["char",count]的方法，應該要夠長才有效益。
 					if (buffer.length > 3) {
 						_last_convert_to.push(buffer.length);
 					} else {
@@ -356,9 +379,13 @@ function parse_converted_data(code_lines, convert_map, config) {
 					}
 				});
 				add_slice();
-				last_convert_to = last_convert_to.length > _last_convert_to.length ? _last_convert_to.length === 1 ? _last_convert_to[0]
-						: _last_convert_to
-						: last_convert_to.join('');
+				if (last_convert_to.length > _last_convert_to.length) {
+					_last_convert_to.char_length = last_convert_to.length;
+					last_convert_to = _last_convert_to.length === 1 ? _last_convert_to[0]
+							: _last_convert_to;
+				} else {
+					last_convert_to = last_convert_to.join('');
+				}
 
 				if (config.high_byte_hex) {
 					last_map_key = config.high_byte_hex + last_map_key;
@@ -419,17 +446,24 @@ function parse_converted_data(code_lines, convert_map, config) {
 
 		if (!config.high_byte_hex
 		// 檢測此排是否皆相同。對high_byte_hex，此檢測之結果應該在更簡單之時已設定過，因此跳過此項。
-		&& (char_tmp = char_list[0].chars()[0]) !== UNKNOWN_CHARACTER
+		&& (char_tmp = char_list[0].chars(true)[0]) !== UNKNOWN_CHARACTER
 		//
 		&& char_list.every(function(char, index) {
-			return char_tmp === char.chars()[0];
+			return char_tmp === char.chars(true)[0];
 		})) {
+			if (hex_char_1 === 'A0'
+			// \u0020
+			&& char_tmp === ' ') {
+				// 對應不換行空格 non-breaking space。e.g., EUC-JP
+				char_tmp = '\u00A0';
+			}
 			if (hex_char_1 === to_hex(char_tmp)[0]) {
-				// 轉換到相同字元了。
+				// 轉換到相同字元了。因為採白名單表列，因此仍須登記。
+				add_map(hex_char_1, char_tmp);
 				return;
 			}
 			if (char_tmp.codePointAt(0) !== char_code_1) {
-				CeL.log('單字元轉換: [' + hex_char_1 + '] → [' + char_tmp + '] ('
+				CeL.log('特殊單字元轉換: [' + hex_char_1 + '] → [' + char_tmp + '] ('
 						+ to_hex(char_tmp) + ')');
 			}
 			add_map(hex_char_1, char_tmp);
@@ -441,26 +475,21 @@ function parse_converted_data(code_lines, convert_map, config) {
 				// 不能轉換此char。
 				return;
 			}
-			// 因為有[[en:Surrogate mechanism]]，不可用(char.length!==1)
-			if (char.chars().length !== 1) {
+			// 因為有[[en:Surrogate mechanism]],
+			// [[en:Combining character#Unicode ranges]]，不可用(char.length!==1)
+			if (char.chars(true).length !== 1) {
 				// assert: (char.codePointAt(0) !== char_code_1)
 
-				var code_point_2 = char.chars()[1].codePointAt(0);
-				if (code_point_2 >= 0x0300 &&
-				// 檢測是否為[[en:Combining character#Unicode ranges]]
-				code_point_2 <= 0x036F) {
-					add_map(hex_char_1
-							+ to_hex(index + config.start_char_code_2), char,
-					// 對組合字符，需要以separator或一個個列出以對應，否則會解析錯誤。
-					true);
-					return;
+				if (hex_char_1 === 'A0'
+				// \u0020
+				&& char.charAt(0) === ' ') {
+					// 對應不換行空格 non-breaking space。e.g., GBK
 				}
 
 				CeL.warn(hex_char_1 + to_hex(index + config.start_char_code_2)
 				//
 				+ '[' + index + ']: ' + JSON.stringify(char)
-				// + ' ' + char.length + ' (' + to_hex(char) +
-				// ')'
+				// + ' ' + char.length + ' (' + to_hex(char) + ')'
 				+ ' (' + to_hex(char) + ') will be skipped.');
 				return;
 			}
