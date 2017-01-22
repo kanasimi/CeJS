@@ -495,8 +495,8 @@ function test_native() {
 		assert([ 9, 'Levenshtein distance'.edit_distance('edit distance') ], 'edit_distance() #2');
 		assert([ 7, 'spell check'.edit_distance('Spell Check Tool') ], 'edit_distance() #3');
 
-		assert([ 'a,\u0300,\uD801\uDC01,\u0301,\n,字,\uD801\uDC04,\u0304', 'a\u0300\uD801\uDC01\u0301\n字\uD801\uDC04\u0304'.chars().join(',') ], 'split_by_code_point() #1');
-		assert([ 'a\u0300,\uD801\uDC01\u0301,\n,字,\uD801\uDC04\u0304', 'a\u0300\uD801\uDC01\u0301\n字\uD801\uDC04\u0304'.chars(true).join(',') ], 'split_by_code_point() #1');
+		assert([ 'a\u0300,\uD801\uDC01\u0301,\n,字,\uD801\uDC04\u0304', 'a\u0300\uD801\uDC01\u0301\n字\uD801\uDC04\u0304'.chars().join(',') ], 'split_by_code_point() #1');
+		assert([ 'a,\u0300,\uD801\uDC01,\u0301,\n,字,\uD801\uDC04,\u0304', 'a\u0300\uD801\uDC01\u0301\n字\uD801\uDC04\u0304'.chars(true).join(',') ], 'split_by_code_point() #2');
 	});
 
 }
