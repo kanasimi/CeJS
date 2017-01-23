@@ -1581,6 +1581,7 @@ function module_code(library_namespace) {
 				}
 
 				// 設定 charset = 'binary' 的話，將回傳 Buffer。
+				result_Object.buffer = data;
 				if (charset !== 'binary') {
 					// 未設定 charset 的話，default charset: UTF-8.
 					data = data.toString(charset || 'utf8');

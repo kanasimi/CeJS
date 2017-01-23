@@ -842,7 +842,8 @@ function module_code(library_namespace) {
 	// 萬用字元 RegExp source, ReadOnly
 	wildcard_to_RegExp.w_chars = '*?\\[\\]';
 
-	function wildcard_to_RegExp(p, f) { // pattern, flag
+	// (pattern, flag)
+	function wildcard_to_RegExp(p, f) {
 
 		if (library_namespace.is_RegExp(p))
 			return p;
@@ -1228,6 +1229,7 @@ function module_code(library_namespace) {
 	/**
 	 * <code>
 
+	// 推薦 use .all_between(), 見下一段例
 	var data = html.all_between('>', '<'), text;
 
 	text = data.search().search().search().toString();
@@ -1287,6 +1289,7 @@ function module_code(library_namespace) {
 	/**
 	 * <code>
 
+	// 推薦用法
 	var get_next_between = html.all_between('>', '<'), text;
 
 	while ((text = get_next_between()) !== undefined) {

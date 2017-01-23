@@ -227,7 +227,7 @@ function module_code(library_namespace) {
 			}).unique();
 			library_namespace.log('Get ' + _this.server_list.length
 					+ ' servers: ' + _this.server_list);
-			library_namespace.fs_write(server_file, JSON
+			node_fs.writeFileSync(server_file, JSON
 					.stringify(_this.server_list));
 			_this.parse_work_id(work_id);
 		}, this.charset, null, this.get_URL_options);
@@ -327,7 +327,8 @@ function module_code(library_namespace) {
 		function finish(no_cache) {
 			if (!no_cache) {
 				// write cache
-				library_namespace.fs_write(search_result_file, search_result);
+				node_fs.writeFileSync(search_result_file, JSON
+						.stringify(search_result));
 			}
 			search_result = search_result[work_title];
 			var p = _this.id_of_search_result;
@@ -368,7 +369,7 @@ function module_code(library_namespace) {
 		}
 		get_URL(url, function(XMLHttp) {
 			// this.parse_search_result() returns:
-			// [ id_list, 與id_list相對應之{Array}或{Object} ]
+			// [ {Array}id_list, 與id_list相對應之{Array}或{Object} ]
 			// e.g., [ [id,id,...], [title,title,...] ]
 			// e.g., [ [id,id,...], [data,data,...] ]
 			// e.g., [ [id,id,...], {id:data,id:data,...} ]
@@ -386,7 +387,9 @@ function module_code(library_namespace) {
 			if (id_list.every(function(id, index) {
 				var title = library_namespace.is_Object(id) ? id
 				//
-				: id_data[Array.isArray(id_data) && isNaN(id) ? index : id],
+				: id_data[Array.isArray(id_data) && isNaN(id) ? index : id]
+				//
+				|| Array.isArray(id_data) && id_data[index],
 				//
 				p = _this.title_of_search_result;
 				if (p) {
@@ -480,12 +483,12 @@ function module_code(library_namespace) {
 
 			var matched = _this.main_directory + 'cache/';
 			library_namespace.fs_mkdir(matched);
-			library_namespace.fs_write(matched + work_data.directory_name
-					+ '.htm', html);
+			node_fs.writeFileSync(matched + work_data.directory_name + '.htm',
+					html);
 
 			// .status 選擇性屬性：須配合網站平台更改。
 			if (_this.is_finished(work_data)) {
-				library_namespace.fs_write(work_data.directory
+				node_fs.writeFileSync(work_data.directory
 				//
 				+ 'finished.txt', work_data.status);
 			}
@@ -554,7 +557,8 @@ function module_code(library_namespace) {
 					library_namespace.log(message);
 				}
 				library_namespace.fs_mkdir(work_data.directory);
-				library_namespace.fs_write(work_data.data_file, work_data);
+				node_fs.writeFileSync(work_data.data_file, JSON
+						.stringify(work_data));
 				_this.get_URL_options.headers.Referer = work_URL;
 				// 開始下載chapter。
 				_this.pre_get_chapter_data(work_data,
@@ -591,7 +595,8 @@ function module_code(library_namespace) {
 		process.title = chapter + ' @ ' + work_data.title;
 
 		function get_data() {
-			process.stdout.write('Get data of chapter ' + chapter + '...\r');
+			process.stdout.write('Get data of chapter ' + chapter + '/'
+					+ work_data.chapter_count + '...\r');
 			get_URL(chapter_URL, function(XMLHttp) {
 				var html = XMLHttp.responseText;
 				if (!html) {
@@ -610,7 +615,7 @@ function module_code(library_namespace) {
 				var chapter_data;
 				try {
 					chapter_data = _this.parse_chapter_data(html, work_data,
-							get_label);
+							get_label, chapter);
 				} catch (e) {
 					library_namespace.err('chapter url: ' + chapter_URL);
 					throw e;
@@ -624,6 +629,13 @@ function module_code(library_namespace) {
 					library_namespace.debug(work_data.directory_name + ' #'
 							+ chapter + '/' + work_data.chapter_count
 							+ ': No image get.');
+					// 依然儲存cache。例如小說網站，只有章節文字內容，沒有圖檔。
+					if (_this.preserve_chapter_page) {
+						node_fs.writeFileSync(work_data.directory
+								+ work_data.directory_name + ' '
+								+ chapter.pad(3) + '.htm', XMLHttp.buffer);
+					}
+
 					// 模擬已經下載完最後一張圖。
 					left = 1;
 					check_if_done();
@@ -650,9 +662,9 @@ function module_code(library_namespace) {
 				.replace(/\.$/, '._') + path_separator;
 				library_namespace.fs_mkdir(chapter_directory);
 				if (_this.preserve_chapter_page) {
-					library_namespace.fs_write(chapter_directory
+					node_fs.writeFileSync(chapter_directory
 							+ work_data.directory_name + '-' + chapter_label
-							+ '.htm', html);
+							+ '.htm', XMLHttp.buffer);
 				}
 				var message = [ chapter,
 				//
@@ -757,7 +769,8 @@ function module_code(library_namespace) {
 
 			work_data.last_download.chapter = chapter;
 			// 紀錄已下載完之chapter
-			library_namespace.fs_write(work_data.data_file, work_data);
+			node_fs.writeFileSync(work_data.data_file, JSON
+					.stringify(work_data));
 			if (++chapter > work_data.chapter_count) {
 				library_namespace.log(work_data.directory_name + ' done.');
 				if (typeof callback === 'function') {
@@ -875,7 +888,7 @@ function module_code(library_namespace) {
 					if (!old_file_status
 					// 得到更大的檔案，寫入更大的檔案。
 					|| old_file_status.size < contents.length) {
-						library_namespace.fs_write(image_data.file, contents);
+						node_fs.writeFileSync(image_data.file, contents);
 					} else if (old_file_status
 							&& old_file_status.size > contents.length) {
 						library_namespace
