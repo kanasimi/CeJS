@@ -84,6 +84,8 @@ function module_code(library_namespace) {
 	/** {String}REPLACEMENT CHARACTER U+FFFD */
 	UNKNOWN_CHARACTER = '�';
 
+	// _.map_set = map_set;
+
 	function normalize_encoding_name(encoding) {
 		encoding = String(encoding).trim();
 		return code_of_alias[encoding.toLowerCase().replace(/[-_ ]+/g, '')]

@@ -62,8 +62,6 @@ NOT_FOUND = ''.indexOf('_');
 /*
  * TODO:
 
-String.prototype.codePointAt(position)
-String.fromCodePoint(...codePoints)
 Object.create(O [ , Properties ])
 
 http://www.comsharp.com/GetKnowledge/zh-CN/It_News_K875.aspx
@@ -1251,6 +1249,36 @@ function endsWith(searchString, endPosition) {
 }
 
 
+// String.prototype.codePointAt(position)
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/codePointAt
+function codePointAt(index) {
+	var _1 = this.charCodeAt(index), _2;
+	if (index + 1 < this.length
+	// check high surrogate
+	&& _1 >= 0xD800 && _1 <= 0xDBFF
+	// check low surrogate
+	&& (_2 = this.charCodeAt(index + 1)) >= 0xDC00 && _2 <= 0xDFFF) {
+		return (_1 - 0xD800) * 0x400 + _2 - 0xDC00 + 0x10000;
+	}
+	return _1;
+}
+
+
+// String.fromCodePoint(...codePoints)
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/fromCodePoint
+function fromCodePoint() {
+	var result = '';
+	for (var index = 0, length = arguments.length; index < length; index++) {
+		var char_code = arguments[index] | 0;
+		if (char_code < 0x10000) {
+			result += String.fromCharCode(char_code);
+		} else {
+			char_code -= 0x10000;
+			result += String.fromCharCode((char_code >> 10) + 0xD800, (char_code % 0x400) + 0xDC00);
+		}
+	}
+	return result;
+}
 
 set_method(String.prototype, {
 	repeat : repeat,
@@ -1262,9 +1290,13 @@ set_method(String.prototype, {
 		return this.indexOf(searchString, position) !== NOT_FOUND;
 	},
 	startsWith : startsWith,
-	endsWith : endsWith
+	endsWith : endsWith,
+	codePointAt : codePointAt
 });
 
+set_method(String, {
+	fromCodePoint : fromCodePoint
+});
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // Date.*
@@ -1624,46 +1656,12 @@ json.separator = ' ';
 // --------------------------------------------
 // for old node.js
 
-function Buffer_from_array(array) {
-	var buffer = new Buffer(array.length);
-	array.forEach(function(element, index) {
-		buffer[index] = element | 0;
-	});
-	return buffer;
-}
-
-function Buffer_from_hex(hex) {
-	var matched, PATTERN_pair = /[\s\S]{2}/ig, array = [];
-	while (matched = PATTERN_pair.exec(hex)) {
-		if (!/^[\dA-F]{2}$/i.test(matched[0])) {
-			throw new Error('Invalid hex string');
-		}
-		array.push(parseInt(matched[0], 0x10));
-	}
-	return Buffer_from_array(array);
-}
-
-function Buffer_from(source, encoding) {
-	if (!source && source !== 0) {
-		return new Buffer(0);
-	}
-
-	if (Array.isArray(source)) {
-		return Buffer_from_array(source);
-	}
-
-	if (typeof source === 'string' && encoding
-			&& String(encoding).toLowerCase() === 'hex') {
-		return Buffer_from_hex(source);
-	}
-
-	throw 'This is a cutted version of Buffer.from and do not support full function.';
-}
-
 if (library_namespace.platform.nodejs) {
 	if (!Buffer.from) {
 		// e.g., node.js v0.10.25
-		Buffer.from = Buffer_from;
+		Buffer.from = function Buffer_from(source, encoding) {
+			return new Buffer(source, encoding);
+		};
 	}
 }
 
