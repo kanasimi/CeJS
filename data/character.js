@@ -61,7 +61,7 @@ function module_code(library_namespace) {
 		return result.join('');
 	}
 
-	// -------------------------------------------------------------------------
+	// =============================================================================================
 	// character encoding 字元編碼
 
 	var
@@ -270,7 +270,7 @@ function module_code(library_namespace) {
 
 	_.load = load_code_map;
 
-	// ---------------------------------------------------------------
+	// ===============================================================
 
 	// String.prototype.encode()
 	function String_to_code(encoding, options) {
@@ -280,7 +280,9 @@ function module_code(library_namespace) {
 		var buffer = Buffer.allocUnsafe(this.length * 4), index = 0,
 		// main_encode_map[Unicode character]
 		// = {ℕ⁰:Natural+0}code of specified coding
-		main_encode_map = encode_map_set[encoding];
+		main_encode_map = encode_map_set[encoding],
+		//
+		start_byte_code = map_set[encoding].start_byte_code;
 
 		if (!main_encode_map) {
 			throw new Error('Unknown encoding: ' + encoding
@@ -290,9 +292,15 @@ function module_code(library_namespace) {
 
 		// TODO: 對於不是以character分割，以及雙/多位元卻是0x0000的情況需要特別處理（這裡會被當作0x00而非0x0000）!
 		this.chars(true).forEach(function(character) {
-			var code = (main_encode_map[character]
+			var code = character.charCodeAt(0);
+			if (code < start_byte_code) {
+				buffer[index++] = code;
+				return;
+			}
+
+			var _i = code = (main_encode_map[character]
 			//
-			|| UNKNOWN_CHARACTER_CODE) | 0, _i = code, end = index;
+			|| UNKNOWN_CHARACTER_CODE) | 0, end = index;
 			// 8: 0x100=2^8
 			while ((_i >>= 8) > 0) {
 				end++;
@@ -312,7 +320,7 @@ function module_code(library_namespace) {
 		return buffer.slice(0, index);
 	}
 
-	// ---------------------------------------------------------------
+	// ===============================================================
 
 	if (library_namespace.platform.nodejs) {
 		// Buffer.prototype.to_UTF8;
@@ -476,6 +484,7 @@ function module_code(library_namespace) {
 			}
 		}
 	})();
+
 	function encode_URI_component(string, encoding) {
 		if (!encoding) {
 			return encodeURIComponent(string);
@@ -485,9 +494,11 @@ function module_code(library_namespace) {
 		string.encode(encoding).forEach(function(byte) {
 			encoded += byte in encode_URI_component_base_map
 			//
-			? encode_URI_component_base_map[byte] : '%' + byte.toString(0x10);
+			? encode_URI_component_base_map[byte]
+			//
+			: '%' + byte.toString(0x10).toUpperCase();
 		});
-		return encoded.toUpperCase();
+		return encoded;
 	}
 
 	_.encode_URI_component = encode_URI_component;
@@ -506,14 +517,17 @@ function module_code(library_namespace) {
 		while (matched = PATTERN.exec(encoded)) {
 			if (matched[1]) {
 				buffer.push(parseInt(matched[1], 0x10));
-			} else if ((code = matched[0].charCodeAt(0)) < 0x100) {
+			} else if ((matched = matched[0]) === '+') {
+				// "+"→" "
+				buffer.push(0x20);
+			} else if ((code = matched.charCodeAt(0)) < 0x100) {
 				buffer.push(code);
 			} else {
 				if (buffer.length > 0) {
 					string += code_array_to_String.call(buffer, encoding);
 					buffer.length = 0;
 				}
-				string += matched[0];
+				string += matched;
 			}
 		}
 
@@ -524,6 +538,8 @@ function module_code(library_namespace) {
 	}
 
 	_.decode_URI_component = decode_URI_component;
+
+	// ---------------------------------------------------------------
 
 	return (_// JSDT:_module_
 	);

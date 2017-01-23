@@ -2089,7 +2089,7 @@ function test_character() {
 	var test_name = 'character encoding 文字/字元編碼: ';
 	setup_test(test_name);
 	CeL.character.load(['Big-5','GB2312','EUCJP','Shift JIS'], function() {
-		var text = '2017年 good 小説書籍を読む';
+		var text = '2017年 good 世界中の書籍を';
 		error_count += CeL.test(test_name + 'Big5', [
 			[[ '作輩', Buffer.from('A740BDFA', 'hex').toString('Big-5') ], 'Big5 #1'],
 			[[ text, text.encode('Big5').toString('Big5') ], 'Big5 #2'],
