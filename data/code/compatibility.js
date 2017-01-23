@@ -1663,6 +1663,11 @@ if (library_namespace.platform.nodejs) {
 			return new Buffer(source, encoding);
 		};
 	}
+	if (!Buffer.allocUnsafe) {
+		Buffer.allocUnsafe = function Buffer_allocUnsafe(size) {
+			return new Buffer(size);
+		};
+	}
 }
 
 
