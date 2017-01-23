@@ -276,8 +276,8 @@ function module_code(library_namespace) {
 	function String_to_code(encoding, options) {
 		encoding = normalize_encoding_name(encoding);
 
-		// 4: 保險用，幾乎都夠用，卻不能保證。
-		var buffer = Buffer.allocUnsafe(this.length * 4), index = 0,
+		// 4: 保險用，幾乎都夠用，卻仍舊不能保證。
+		var buffer = Buffer.allocUnsafe(4 * this.length), index = 0,
 		// main_encode_map[Unicode character]
 		// = {ℕ⁰:Natural+0}code of specified coding
 		main_encode_map = encode_map_set[encoding],

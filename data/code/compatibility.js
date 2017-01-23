@@ -1657,16 +1657,18 @@ json.separator = ' ';
 // for old node.js
 
 if (library_namespace.platform.nodejs) {
+	function Buffer_from(source, encoding) {
+		return new Buffer(source, encoding);
+	}
 	if (!Buffer.from) {
 		// e.g., node.js v0.10.25
-		Buffer.from = function Buffer_from(source, encoding) {
-			return new Buffer(source, encoding);
-		};
+		Buffer.from = Buffer_from
 	}
 	if (!Buffer.allocUnsafe) {
-		Buffer.allocUnsafe = function Buffer_allocUnsafe(size) {
-			return new Buffer(size);
-		};
+		Buffer.allocUnsafe = Buffer_from;
+	}
+	if (!Buffer.prototype.forEach) {
+		Buffer.prototype.forEach = Array.prototype.forEach;
 	}
 }
 
