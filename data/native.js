@@ -1110,7 +1110,7 @@ function module_code(library_namespace) {
 		PATTERN_char = /[\uD800-\uDBFF][\uDC00-\uDFFF]|[\s\S]/g;
 		PATTERN_char_with_combined = /(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|[\s\S])[\u0300-\u036F\uFE20-\uFE2F\u20D0-\u20FF\u1DC0-\u1DFF\u1AB0-\u1AFF]*/g;
 		split_by_code_point = function(with_combined) {
-			return with_combined || !PATTERN_surrogate
+			return with_combined // || !PATTERN_surrogate
 					|| PATTERN_surrogate.test(this) ? this
 					.match(with_combined ? PATTERN_char_with_combined
 							: PATTERN_char) : this.split('');
