@@ -1,6 +1,6 @@
 /**
  * @name CeL function for character encoding
- * @fileoverview 本檔案包含了文字/字元編碼用的 functions。
+ * @fileoverview 本檔案包含了文字/字元編碼用的 functions。文字コード変換ライブラリ
  * 
  * @example <code>
  * CeL.run('data.character',function(){
@@ -76,13 +76,20 @@ function module_code(library_namespace) {
 		// 因為以實用性為主，因此全部導向到擴張至最大的最新字碼。
 		gb2312 : 'GBK',
 		eucjp : 'EUC-JP',
-		shiftjis : 'Shift_JIS'
+		shiftjis : 'Shift_JIS',
+		sjis : 'Shift_JIS'
 	},
-	// encoding config hash. map_set[encoding_name]
+	// coding map / config hash for decoding specified coding to Unicode.
+	// map_set[encoding_name]
 	// = [ config, [1 byte map], [2 byte map], [3 byte map], [4 byte map] ]
 	map_set = library_namespace.null_Object(),
-	/** {String}REPLACEMENT CHARACTER U+FFFD */
-	UNKNOWN_CHARACTER = '�';
+	// encoding Unicode to specified coding
+	// encode_map_set[encoding_name]
+	// = {Unicode_char:char_code}
+	encode_map_set = library_namespace.null_Object(),
+	/** {String}REPLACEMENT CHARACTER U+FFFD, '?' in old IE */
+	UNKNOWN_CHARACTER = '�', UNKNOWN_CHARACTER_CODE = UNKNOWN_CHARACTER
+			.codePointAt(0);
 
 	// _.map_set = map_set;
 
@@ -134,6 +141,7 @@ function module_code(library_namespace) {
 	/**
 	 * 
 	 * @param {String}code_name
+	 *            encoding name
 	 * @param {Object}map_data
 	 */
 	function add_code_map(code_name, map_data) {
@@ -143,7 +151,11 @@ function module_code(library_namespace) {
 			code_of_alias[encoding] = code_name;
 		}
 
-		var code_map = map_set[encoding] = [], config = code_map;
+		var code_map = map_set[encoding] = [], config = code_map,
+		// main_encode_map[Unicode character]
+		// = {ℕ⁰:Natural+0}code of specified coding
+		main_encode_map = encode_map_set[encoding]
+				|| (encode_map_set[encoding] = library_namespace.null_Object());
 		// console.log(Object.keys(map_data));
 		for ( var key in map_data) {
 			var char_list = map_data[key], matched = key
@@ -167,6 +179,8 @@ function module_code(library_namespace) {
 
 			if (typeof char_list === 'string') {
 				char_list.chars(true).forEach(function(character) {
+					// register
+					main_encode_map[character] = char_code;
 					main_map[char_code++] = character;
 				});
 				continue;
@@ -197,6 +211,8 @@ function module_code(library_namespace) {
 				if (typeof slice === 'string') {
 					char_list = slice.chars(true);
 					char_list.forEach(function(character) {
+						// register
+						main_encode_map[character] = char_code;
 						main_map[char_code++] = character;
 					});
 					last_char_code = char_list[char_list.length - 1]
@@ -212,8 +228,10 @@ function module_code(library_namespace) {
 				// console.log([last_char_code, slice]);
 				var end = last_char_code + slice;
 				while (last_char_code < end) {
-					main_map[char_code++] = String
-							.fromCodePoint(++last_char_code);
+					// register
+					var character = String.fromCodePoint(++last_char_code);
+					main_encode_map[character] = char_code;
+					main_map[char_code++] = character;
 				}
 			});
 		}
@@ -254,12 +272,44 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------
 
-	// TODO
-	// encode()
-	function String_to_code(encoding) {
+	// String.prototype.encode()
+	function String_to_code(encoding, options) {
 		encoding = normalize_encoding_name(encoding);
 
-		;
+		// 4: 保險用，幾乎都夠用，卻不能保證。
+		var buffer = Buffer.allocUnsafe(this.length * 4), index = 0,
+		// main_encode_map[Unicode character]
+		// = {ℕ⁰:Natural+0}code of specified coding
+		main_encode_map = encode_map_set[encoding];
+
+		if (!main_encode_map) {
+			throw new Error('Unknown encoding: ' + encoding
+					+ '. You may need to ' + module_name + '.load("' + encoding
+					+ '") first?');
+		}
+
+		// TODO: 對於不是以character分割，以及雙/多位元卻是0x0000的情況需要特別處理（這裡會被當作0x00而非0x0000）!
+		this.chars(true).forEach(function(character) {
+			var code = (main_encode_map[character]
+			//
+			|| UNKNOWN_CHARACTER_CODE) | 0, _i = code, end = index;
+			// 8: 0x100=2^8
+			while ((_i >>= 8) > 0) {
+				end++;
+			}
+			_i = end;
+			while (true) {
+				buffer[_i] = code % 0x100;
+				if (--_i < index) {
+					break;
+				}
+				code >>= 8;
+			}
+			index = end + 1;
+		});
+
+		// assert: buffer.length >= index
+		return buffer.slice(0, index);
 	}
 
 	// ---------------------------------------------------------------
@@ -269,6 +319,7 @@ function module_code(library_namespace) {
 		// Buffer.prototype.to_Big5;
 		// Buffer.prototype.to_EUC_JP;
 
+		// cache original Buffer.prototype.toString
 		Buffer.prototype.native_toString = Buffer.prototype.toString;
 		/** @deprecated */
 		Buffer.prototype.toString = function deprecated_Buffer_toString(
@@ -288,15 +339,17 @@ function module_code(library_namespace) {
 			}
 		};
 
-		Buffer.prototype.toString = function Buffer_toString(encoding) {
+		Buffer.prototype.toString = function Buffer_toString(encoding, options) {
 			try {
 				return this.native_toString(encoding);
 			} catch (e) {
 			}
 
 			// 有錯誤直接丟出去。
-			return code_array_to_String.call(this, encoding);
+			return code_array_to_String.call(this, encoding, options);
 		};
+
+		// TODO: use StringDecoder
 	}
 
 	if (false) {
@@ -304,11 +357,13 @@ function module_code(library_namespace) {
 		CeL.character.load('Big-5', function() {
 			console.assert('作輩' === Buffer.from('A740BDFA', 'hex').toString(
 					'Big-5'));
+			var text = '做基本檢測。';
+			console.assert(text === text.encode('Big_5').toString('Big 5'));
 		});
 	}
 
 	// assert: this = [ byte_code, byte_code, ... ]
-	function code_array_to_String(encoding) {
+	function code_array_to_String(encoding, options) {
 		// check if we can convert the encoding.
 		encoding = normalize_encoding_name(encoding);
 		var code_map = map_set[encoding];
@@ -319,10 +374,12 @@ function module_code(library_namespace) {
 		}
 		// console.log(code_map);
 
-		var start_byte_code = code_map.start_byte_code,
+		var code_index = 0,
 		// converted result
-		converted = '', reminder = 0, code_index = 0;
-		for (var byte_index = 0, length = this.length; byte_index < length; byte_index++) {
+		converted = '';
+		for (var start_byte_code = code_map.start_byte_code, reminder = 0, max_byte = code_map.length,
+		// main loop to decode to default inner encoding (Unicode).
+		byte_index = 0, length = this.length; byte_index < length; byte_index++) {
 			if (code_index === 0) {
 				reminder = this[byte_index];
 				if (reminder < start_byte_code) {
@@ -333,7 +390,7 @@ function module_code(library_namespace) {
 				reminder = reminder * 0x100 + this[byte_index];
 			}
 
-			if (++code_index === code_map.length) {
+			if (++code_index === max_byte) {
 				// 自這次搜尋開始，無法找到能mapping的character。
 				converted += UNKNOWN_CHARACTER;
 				// rollback至自這次搜尋開始後的下一個byte。
@@ -344,12 +401,15 @@ function module_code(library_namespace) {
 			}
 
 			var map_single = code_map[code_index];
-			library_namespace.debug('Test ' + code_index + ' bytes: '
-					+ reminder.toString(HEX_BASE), 6, 'code_array_to_String');
-			if (map_single) {
-				library_namespace
-						.debug(map_single.slice(Math.max(0, reminder - 9),
-								reminder + 9), 9, 'code_array_to_String');
+			if (false) {
+				library_namespace.debug('Test ' + code_index + ' bytes: '
+						+ reminder.toString(HEX_BASE), 6,
+						'code_array_to_String');
+				if (map_single) {
+					library_namespace.debug(map_single.slice(Math.max(0,
+							reminder - 9), reminder + 9), 9,
+							'code_array_to_String');
+				}
 			}
 			if (map_single && (reminder in map_single)) {
 				// find
@@ -368,20 +428,20 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------
 
-	function Array_to_String(encoding) {
+	function Array_to_String(encoding, options) {
 		var array = this.map(function(byte, index) {
 			// 做基本檢測。
 			if (typeof byte === 'string' && byte.length === 1) {
 				byte = byte.charCodeAt(0);
 			}
-			if (typeof byte === 'number' && 0 <= byte && bute < 0x100
+			if (typeof byte === 'number' && 0 <= byte && byte < 0x100
 					&& (byte | 0 === byte)) {
 				return byte;
 			}
 			throw new Error('Invalid byte: [' + index + '] ' + byte);
 		});
 
-		return code_array_to_String.call(array, encoding);
+		return code_array_to_String.call(array, encoding, options);
 	}
 
 	library_namespace.set_method(Array.prototype, {
@@ -390,12 +450,80 @@ function module_code(library_namespace) {
 
 	library_namespace.set_method(String.prototype, {
 		encode : String_to_code,
-		// e.g., ''
-		decode : function decode_as_byte_String(encoding) {
+		// assert: /^[\x00-\xFF]*$/i.test(this)
+		decode : function decode_as_byte_String(encoding, options) {
+			if (false && !/^[\x00-\xFF]*$/i.test(this)) {
+				throw new Error('Invalid byte: [' + index + '] ' + byte);
+			}
 			// use Array_to_String()
-			return this.split('').decode(encoding);
+			return this.split('').decode(encoding, options);
 		}
 	});
+
+	// ---------------------------------------------------------------
+
+	/**
+	 * @see https://www.w3.org/TR/html5/forms.html#url-encoded-form-data
+	 */
+	var encode_URI_component_base_map = [];
+	// " "→"+"
+	encode_URI_component_base_map[0x20] = '+';
+	(function() {
+		for (var code = 0x2A; code < 0x7A; code++) {
+			var char = String.fromCharCode(code);
+			if (/^[*\-._0-9A-Za-z]$/.test(char)) {
+				encode_URI_component_base_map[code] = char;
+			}
+		}
+	})();
+	function encode_URI_component(string, encoding) {
+		if (!encoding) {
+			return encodeURIComponent(string);
+		}
+		encoding = normalize_encoding_name(encoding);
+		var encoded = '';
+		string.encode(encoding).forEach(function(byte) {
+			encoded += byte in encode_URI_component_base_map
+			//
+			? encode_URI_component_base_map[byte] : '%' + byte.toString(0x10);
+		});
+		return encoded.toUpperCase();
+	}
+
+	_.encode_URI_component = encode_URI_component;
+
+	/**
+	 * @see http://qiita.com/weal/items/3b3ddfb8157047119554
+	 *      http://polygon-planet-log.blogspot.tw/2012/04/javascript.html
+	 */
+	function decode_URI_component(encoded, encoding) {
+		if (!encoding) {
+			return decodeURIComponent(encoded);
+		}
+		encoding = normalize_encoding_name(encoding);
+
+		var string = '', buffer = [], PATTERN = /%([\dA-F]{2})|[\s\S]/ig, matched, code;
+		while (matched = PATTERN.exec(encoded)) {
+			if (matched[1]) {
+				buffer.push(parseInt(matched[1], 0x10));
+			} else if ((code = matched[0].charCodeAt(0)) < 0x100) {
+				buffer.push(code);
+			} else {
+				if (buffer.length > 0) {
+					string += code_array_to_String.call(buffer, encoding);
+					buffer.length = 0;
+				}
+				string += matched[0];
+			}
+		}
+
+		if (buffer.length > 0) {
+			string += code_array_to_String.call(buffer, encoding);
+		}
+		return string;
+	}
+
+	_.decode_URI_component = decode_URI_component;
 
 	return (_// JSDT:_module_
 	);

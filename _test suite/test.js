@@ -2089,17 +2089,25 @@ function test_character() {
 	var test_name = 'character encoding 文字/字元編碼: ';
 	setup_test(test_name);
 	CeL.character.load(['Big-5','GB2312','EUCJP','Shift JIS'], function() {
+		var text = '2017年 good 小説書籍を読む';
 		error_count += CeL.test(test_name + 'Big5', [
 			[[ '作輩', Buffer.from('A740BDFA', 'hex').toString('Big-5') ], 'Big5 #1'],
+			[[ text, text.encode('Big5').toString('Big5') ], 'Big5 #2'],
 		]);
 		error_count += CeL.test(test_name + 'GBK', [
 			[[ '労鰷', Buffer.from('84BAF69C', 'hex').toString('GB2312') ], 'GBK #1'],
+			[[ text, text.encode('GBK').toString('GBK') ], 'GBK #2'],
 		]);
 		error_count += CeL.test(test_name + 'EUC-JP', [
 			[[ '駈鮎鮏ﾆ', Buffer.from('B6EFB0BEFCE68EC6', 'hex').toString('EUCJP') ], 'EUC-JP #1'],
+			[[ text, text.encode('EUC-JP').toString('EUC-JP') ], 'EUC-JP #2'],
 		]);
 		error_count += CeL.test(test_name + 'Shift_JIS', [
 			[[ '嫋ﾕ錵', Buffer.from('9B5DD5E845', 'hex').toString('ShiftJIS') ], 'Shift_JIS #1'],
+			[[ text, text.encode('Shift_JIS').toString('Shift_JIS') ], 'Shift_JIS #2'],
+		]);
+		error_count += CeL.test(test_name + 'encode_URI_component', [
+			[[ text, CeL.decode_URI_component(CeL.encode_URI_component(text, 'Shift_JIS'), 'Shift_JIS') ], 'encode_URI_component #1'],
 		]);
 		finish_test(test_name);
 	});
