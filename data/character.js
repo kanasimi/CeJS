@@ -300,8 +300,8 @@ function module_code(library_namespace) {
 	if (false) {
 		CeL.run('data.character');
 		CeL.character.load('Big-5', function() {
-			console.assert('作' === Buffer.from([ 0xA7, 0x40 ])
-					.toString('Big-5'));
+			console.assert('作輩' === Buffer.from('A740BDFA', 'hex').toString(
+					'Big-5'));
 		});
 	}
 

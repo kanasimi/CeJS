@@ -506,47 +506,6 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 
-	function Buffer_from_array(array) {
-		var buffer = new Buffer(array.length);
-		array.forEach(function(element, index) {
-			buffer[index] = element | 0;
-		});
-		return buffer;
-	}
-
-	function Buffer_from_hex(hex) {
-		var matched, PATTERN_pair = /[\s\S]{2}/ig, array = [];
-		while (matched = PATTERN_pair.exec(hex)) {
-			if (!/^[\dA-F]{2}$/i.test(matched[0])) {
-				throw new Error('Invalid hex string');
-			}
-			array.push(parseInt(matched[0], 0x10));
-		}
-		return Buffer_from_array(array);
-	}
-
-	if (!Buffer.from) {
-		// e.g., node.js v0.10.25
-		Buffer.from = function Buffer_from(source, encoding) {
-			if (!source && source !== 0) {
-				return new Buffer(0);
-			}
-
-			if (Array.isArray(source)) {
-				return Buffer_from_array(source);
-			}
-
-			if (typeof source === 'string' && encoding
-					&& String(encoding).toLowerCase() === 'hex') {
-				return Buffer_from_hex(source);
-			}
-
-			throw 'This is a cutted version of Buffer.from and do not support full function.';
-		};
-	}
-
-	// --------------------------------------------
-
 	// TODO:
 	// Buffer.prototype.indexOf()
 	// https://github.com/nodejs/node/blob/master/lib/buffer.js#L578

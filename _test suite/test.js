@@ -2090,7 +2090,7 @@ function test_character() {
 	setup_test(test_name);
 	CeL.character.load(['Big-5','GB2312','EUCJP','Shift JIS'], function() {
 		error_count += CeL.test(test_name + 'Big5', [
-			[[ '作', Buffer.from('A740', 'hex').toString('Big-5') ], 'Big5 #1'],
+			[[ '作輩', Buffer.from('A740BDFA', 'hex').toString('Big-5') ], 'Big5 #1'],
 		]);
 		error_count += CeL.test(test_name + 'GBK', [
 			[[ '労鰷', Buffer.from('84BAF69C', 'hex').toString('GB2312') ], 'GBK #1'],
