@@ -2088,9 +2088,18 @@ function test_date() {
 function test_character() {
 	var test_name = 'character encoding 文字/字元編碼: ';
 	setup_test(test_name);
-	CeL.character.load(['Big-5'], function() {
+	CeL.character.load(['Big-5','GB2312','EUCJP','Shift JIS'], function() {
 		error_count += CeL.test(test_name + 'Big5', [
-			[[ '作', Buffer.from([ 0xA7, 0x40 ]).toString('Big-5') ], 'Big5 #1'],
+			[[ '作', Buffer.from('A740', 'hex').toString('Big-5') ], 'Big5 #1'],
+		]);
+		error_count += CeL.test(test_name + 'GBK', [
+			[[ '労鰷', Buffer.from('84BAF69C', 'hex').toString('GB2312') ], 'GBK #1'],
+		]);
+		error_count += CeL.test(test_name + 'EUC-JP', [
+			[[ '駈鮎鮏ﾆ', Buffer.from('B6EFB0BEFCE68EC6', 'hex').toString('EUCJP') ], 'EUC-JP #1'],
+		]);
+		error_count += CeL.test(test_name + 'Shift_JIS', [
+			[[ '嫋ﾕ錵', Buffer.from('9B5DD5E845', 'hex').toString('ShiftJIS') ], 'Shift_JIS #1'],
 		]);
 		finish_test(test_name);
 	});

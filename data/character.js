@@ -73,6 +73,8 @@ function module_code(library_namespace) {
 	code_of_alias = {
 		big5 : 'Big5',
 		gbk : 'GBK',
+		// 因為以實用性為主，因此全部導向到擴張至最大的最新字碼。
+		gb2312 : 'GBK',
 		eucjp : 'EUC-JP',
 		shiftjis : 'Shift_JIS'
 	},
@@ -267,7 +269,8 @@ function module_code(library_namespace) {
 
 		Buffer.prototype.native_toString = Buffer.prototype.toString;
 		/** @deprecated */
-		function deprecated_Buffer_toString(encoding) {
+		Buffer.prototype.toString = function deprecated_Buffer_toString(
+				encoding) {
 			var endoding_error;
 			try {
 				return this.native_toString(encoding);
@@ -281,7 +284,7 @@ function module_code(library_namespace) {
 				// throw e;
 				throw endoding_error;
 			}
-		}
+		};
 
 		Buffer.prototype.toString = function Buffer_toString(encoding) {
 			try {
