@@ -23,7 +23,18 @@ typeof CeL === 'function' && CeL.run({
 
 function module_code(library_namespace) {
 
-	// no requiring
+	// 本函式將使用之 encodeURIComponent()
+	var encode_URI_component = function(string, encoding) {
+		if (library_namespace.character) {
+			library_namespace.debug('採用 ' + library_namespace.Class
+			// 有則用之。 use CeL.data.character.encode_URI_component()
+			+ '.character.encode_URI_component', 1, library_namespace.Class
+					+ 'application.net.Ajax');
+			return (encode_URI_component = library_namespace.character.encode_URI_component)
+					(string, encoding);
+		}
+		return encodeURIComponent(string);
+	};
 
 	/**
 	 * null module constructor
@@ -66,7 +77,7 @@ function module_code(library_namespace) {
 	 * @param {String}page_url
 	 *            page url
 	 * @param {String}[charset]
-	 *            character encoding. e.g., 'UTF-8', big5, euc-jp, ...
+	 *            character encoding of HTML. e.g., 'UTF-8', big5, euc-jp, ...
 	 * @param POST_text
 	 *            POST text
 	 * 
@@ -164,7 +175,7 @@ function module_code(library_namespace) {
 	 * @param {Function}[onload]
 	 *            callback when successful loaded
 	 * @param {String}[charset]
-	 *            character encoding. e.g., 'UTF-8', big5, euc-jp, ...
+	 *            character encoding of HTML. e.g., 'UTF-8', big5, euc-jp, ...
 	 * @param {String|Object}[post_data]
 	 *            text data to send when method is POST
 	 * @param {Object}[options]
@@ -195,11 +206,12 @@ function module_code(library_namespace) {
 		// [ origin + pathname, search, hash ]
 		// hrer = [].join('')
 		if (Array.isArray(URL)) {
-			URL = get_URL.add_parameter(URL[0], URL[1], URL[2]);
+			URL = get_URL.add_parameter(URL[0], URL[1], URL[2], charset);
 		}
 
 		if (options.search || options.hash) {
-			URL = get_URL.add_parameter(URL, options.search, options.hash);
+			URL = get_URL.add_parameter(URL, options.search, options.hash,
+					charset);
 		}
 
 		library_namespace.debug('URL: (' + (typeof URL) + ') [' + URL + ']', 3,
@@ -243,7 +255,7 @@ function module_code(library_namespace) {
 		}
 
 		if (post_data && !options.form_data) {
-			post_data = get_URL.parameters_to_String(post_data);
+			post_data = get_URL.parameters_to_String(post_data, charset);
 		}
 
 		if (!onload && typeof options.onchange === 'function') {
@@ -345,12 +357,12 @@ function module_code(library_namespace) {
 
 	// {Object}parameter hash to String
 	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
-	function parameters_to_String(parameters) {
+	function parameters_to_String(parameters, charset) {
 		if (!library_namespace.is_Object(parameters)) {
 			if (typeof parameters !== 'string') {
-				// 可能無法處理
 				library_namespace.debug(
-						'非字串之 parameters: [' + parameters + ']', 1,
+				// 可能無法處理
+				'非字串之 parameters: [' + parameters + ']', 1,
 						'get_URL.parameters_to_String');
 			}
 			// '' + parameters
@@ -362,9 +374,9 @@ function module_code(library_namespace) {
 				'parameters_to_String');
 		Object.keys(parameters).forEach(function(key) {
 			library_namespace.debug(key, 5, 'parameters_to_String.forEach');
-			array.push(encodeURIComponent(key) + '='
+			array.push(encode_URI_component(key, charset) + '='
 			//
-			+ encodeURIComponent(String(parameters[key])));
+			+ encode_URI_component(String(parameters[key]), charset));
 		});
 		library_namespace.debug(array.length + ' parameters:<br />\n'
 		//
@@ -411,10 +423,10 @@ function module_code(library_namespace) {
 		return hash;
 	}
 
-	function add_parameter(URL, search, hash) {
+	function add_parameter(URL, search, hash, charset) {
 		if (search || hash) {
 			URL = URL.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
-			if (search = get_URL.parameters_to_String(search)) {
+			if (search = get_URL.parameters_to_String(search, charset)) {
 				if (search.startsWith('?')) {
 					if (URL[2])
 						search = URL[2] + '&' + search.slice(1);
@@ -423,7 +435,7 @@ function module_code(library_namespace) {
 			} else
 				search = URL[2] || '';
 
-			if (hash = get_URL.parameters_to_String(hash)) {
+			if (hash = get_URL.parameters_to_String(hash, charset)) {
 				if (!hash.startsWith('#'))
 					hash = '#' + hash;
 				hash = (URL[3] || '') + hash;
@@ -1181,7 +1193,7 @@ function module_code(library_namespace) {
 	 *            callback when successful loaded. For failure handling, using
 	 *            option.onfail(error);
 	 * @param {String}[charset]
-	 *            character encoding. e.g., 'UTF-8', big5, euc-jp,..
+	 *            character encoding of HTML. e.g., 'UTF-8', big5, euc-jp,..
 	 * @param {String|Object}[post_data]
 	 *            text data to send when method is POST
 	 * @param {Object}[options]
@@ -1221,6 +1233,7 @@ function module_code(library_namespace) {
 		// console.log(JSON.stringify(options));
 		// console.log(options.form_data);
 		if (options.form_data && options.form_data !== to_form_data_generated) {
+			// TODO: charset for post_data
 			to_form_data(post_data, function(data) {
 				// console.log(data.toString().slice(0,800));
 				// console.log('>> ' + data.toString().slice(-200));
@@ -1243,11 +1256,12 @@ function module_code(library_namespace) {
 		// [ origin + pathname, search, hash ]
 		// hrer = [].join('')
 		if (Array.isArray(URL)) {
-			URL = get_URL.add_parameter(URL[0], URL[1], URL[2]);
+			URL = get_URL.add_parameter(URL[0], URL[1], URL[2], charset);
 		}
 
 		if (options.search || options.hash) {
-			URL = get_URL.add_parameter(URL, options.search, options.hash);
+			URL = get_URL.add_parameter(URL, options.search, options.hash,
+					charset);
 		}
 
 		library_namespace.debug('URL: (' + (typeof URL) + ') [' + URL + ']', 1,
@@ -1278,7 +1292,7 @@ function module_code(library_namespace) {
 		}
 
 		if (post_data && !options.form_data) {
-			post_data = get_URL.parameters_to_String(post_data);
+			post_data = get_URL.parameters_to_String(post_data, charset);
 		}
 
 		if (!onload && typeof options.onchange === 'function') {

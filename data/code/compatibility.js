@@ -1656,10 +1656,11 @@ json.separator = ' ';
 // --------------------------------------------
 // for old node.js
 
+function Buffer_from(source, encoding) {
+	return new Buffer(source, encoding);
+}
+
 if (library_namespace.platform.nodejs) {
-	function Buffer_from(source, encoding) {
-		return new Buffer(source, encoding);
-	}
 	if (!Buffer.from) {
 		// e.g., node.js v0.10.25
 		Buffer.from = Buffer_from

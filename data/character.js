@@ -489,6 +489,7 @@ function module_code(library_namespace) {
 		if (!encoding) {
 			return encodeURIComponent(string);
 		}
+		// charset
 		encoding = normalize_encoding_name(encoding);
 		var encoded = '';
 		string.encode(encoding).forEach(function(byte) {
@@ -511,6 +512,7 @@ function module_code(library_namespace) {
 		if (!encoding) {
 			return decodeURIComponent(encoded);
 		}
+		// charset
 		encoding = normalize_encoding_name(encoding);
 
 		var string = '', buffer = [], PATTERN = /%([\dA-F]{2})|[\s\S]/ig, matched, code;

@@ -137,7 +137,10 @@ function module_code(library_namespace) {
 				+ path_separator,
 		// 錯誤紀錄檔
 		error_log_file : 'error_files.txt',
+
 		// base_URL : '',
+		// charset : 'GBK',
+
 		// 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)',
 		MAX_ERROR : Comic_site.MAX_ERROR,
@@ -227,7 +230,7 @@ function module_code(library_namespace) {
 			library_namespace.fs_write(server_file, JSON
 					.stringify(_this.server_list));
 			_this.parse_work_id(work_id);
-		}, null, null, this.get_URL_options);
+		}, this.charset, null, this.get_URL_options);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -342,14 +345,19 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var url = this.search_URL;
+		var url = this.search_URL, post_data;
 		if (!url || typeof this.parse_search_result !== 'function') {
 			throw '請手動設定/輸入 [' + work_title + '] 之 id 於 ' + search_result_file;
 		}
 		if (typeof url === 'function') {
 			// url = url.call(this, work_title);
 			url = this.search_URL(work_title);
+			if (Array.isArray(url)) {
+				post_data = url[1];
+				url = url[0];
+			}
 		} else {
+			// default:
 			// assert: typeof url==='string'
 			if (!url.includes('://')) {
 				url = this.base_URL + url;
@@ -410,7 +418,7 @@ function module_code(library_namespace) {
 				finish();
 			}
 
-		}, null, null, this.get_URL_options);
+		}, this.charset, post_data, this.get_URL_options);
 	}
 
 	function get_label(html) {
@@ -556,7 +564,7 @@ function module_code(library_namespace) {
 			library_namespace.err((work_data.title || work_id)
 					+ ': Can not get chapter count!');
 			callback && callback();
-		}, null, null, this.get_URL_options);
+		}, this.charset, null, this.get_URL_options);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -698,7 +706,7 @@ function module_code(library_namespace) {
 					}
 				};
 				next_1(true);
-			}, null, null, _this.get_URL_options);
+			}, _this.charset, null, _this.get_URL_options);
 		}
 		get_data();
 
