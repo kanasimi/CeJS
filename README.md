@@ -25,6 +25,9 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 ```
 
 ## Node.js usage
+<!-- NodeICO badges -->
+[![NPM](https://nodei.co/npm/cejs.png)](https://nodei.co/npm/cejs/)
+[![NPM](https://nodei.co/npm-dl/cejs.png)](https://nodei.co/npm/cejs/)
 
 ### Installation
 First, go to [nodejs.org](https://nodejs.org/), download the runtime environment and install the node.js package.
