@@ -2085,6 +2085,22 @@ function test_date() {
 //============================================================================================================================================================
 
 
+function test_character() {
+	var test_name = 'character encoding 文字/字元編碼: ';
+	setup_test(test_name);
+	CeL.character.load(['Big-5'], function() {
+		error_count += CeL.test(test_name + 'Big5', [
+			[[ '作', Buffer.from([ 0xA7, 0x40 ]).toString('Big-5') ], 'Big5 #1'],
+		]);
+		finish_test(test_name);
+	});
+}
+
+
+
+//============================================================================================================================================================
+
+
 function test_encoding() {
 	error_count += CeL.test('ロマ字↔仮名', [
 		[[ 'わたし', CeL.to_kana('watasi') ], 'convert romaji to kana. ロマ字→仮名.'],
@@ -3138,6 +3154,8 @@ function do_test() {
 	'data.native', test_native,
 	//
 	'data.date', test_date,
+	//
+	'data.character', test_character,
 	//
 	'application.locale.encoding', test_encoding,
 	//

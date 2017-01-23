@@ -1,9 +1,9 @@
 /**
- * @name CeL function for encoding
- * @fileoverview 本檔案包含了 encoding 用的 functions。包含 character encoding 字元編碼。
+ * @name CeL function for character encoding
+ * @fileoverview 本檔案包含了文字/字元編碼用的 functions。
  * 
  * @example <code>
- * CeL.run('data.encoding',function(){
+ * CeL.run('data.character',function(){
  * 	// ..
  * });
  * </code>
@@ -20,7 +20,7 @@
 
 typeof CeL === 'function' && CeL.run({
 	// module name
-	name : 'data.encoding',
+	name : 'data.character',
 
 	// for String.prototype.chars()
 	require : 'data.native.',
@@ -95,15 +95,15 @@ function module_code(library_namespace) {
 	{
 		// to single byte / 2 or multi bytes set, continuous, split by /./u:
 		start_char_code_in_hex:'map',
-		// ** deplicated: to single byte / 2 bytes set, continuous, .split('split string'):
+		// ** deprecated: to single byte / 2 bytes set, continuous, .split('split string'):
 		start_char_code_in_hex:['map', 'split string'],
-		// ** deplicated: 2 bytes set, .split('split string'):
+		// ** deprecated: 2 bytes set, .split('split string'):
 		start_char_code_in_hex:[start of second byte, 'map', 'split string'],
-		// ** deplicated: .split(''):
+		// ** deprecated: .split(''):
 		start_char_code_in_hex:[start of second byte, 'map', ''],
-		// ** deplicated: split by /./u:
+		// ** deprecated: split by /./u:
 		start_char_code_in_hex:[start of second byte, 'map'],
-		// ** deplicated: convert single code to single string
+		// ** deprecated: convert single code to single string
 		start_char_code_in_hex:['map', 0],
 		// 這邊的count表示中間有count個字元，分別是自char開始，unicode編碼之後的序列。
 		start_char_code_in_hex:['char', {Natural}count, 'char', {Natural}count],
@@ -120,8 +120,6 @@ function module_code(library_namespace) {
 	{'A1FF':[0xFF,'abcde'],'A2FF':'12','A4B3':'~'}
 	'A2FF','A4B3': 不在'A1FF'範圍內: A1FF:a, A2FF:b, A3FF:c, ...
 	實作將直接以+1的方式配入 convert_map 中，因此A2FF之第二組"2"將被配入A300!
-
-
 
 	</code>
 	 * 
@@ -144,9 +142,9 @@ function module_code(library_namespace) {
 		var code_map = map_set[encoding] = [], config = code_map;
 		// console.log(Object.keys(map_data));
 		for ( var key in map_data) {
-			// console.log(key);
 			var char_list = map_data[key], matched = key
-					.match(/^_?([a-f\d]{2,})$/i);
+					.match(/^_?([\dA-F]+)$/i);
+			// console.log([ key, matched, char_list ]);
 			if (!matched) {
 				// console.log(key);
 				// config?
@@ -219,25 +217,45 @@ function module_code(library_namespace) {
 
 	_.add_map = add_code_map;
 
-	function load_code_map(encoding, callback) {
-		encoding = normalize_encoding_name(encoding);
-		if (encoding in map_set) {
+	function load_code_map(encoding_list, callback) {
+		if (!Array.isArray(encoding_list)) {
+			encoding_list = [ encoding_list ];
+		}
+
+		encoding_list = encoding_list.map(normalize_encoding_name);
+
+		// resource need to load
+		var resource_path_list = [];
+
+		encoding_list.forEach(function(encoding) {
+			if (!(encoding in map_set)) {
+				resource_path_list.push(library_namespace.get_module_path(
+						module_name, encoding + '.js'));
+			}
+		})
+
+		if (resource_path_list.length === 0) {
 			callback && callback();
 			return true;
 		}
-		library_namespace.debug(library_namespace.get_module_path(module_name,
-				encoding + '.js'), 1, 'load_code_map');
-		library_namespace.run(library_namespace.get_module_path(module_name,
-				encoding + '.js'), callback);
+
+		if (resource_path_list.length === 1) {
+			resource_path_list = resource_path_list[0];
+		}
+		library_namespace.debug(resource_path_list, 1, 'load_code_map');
+		library_namespace.run(resource_path_list, callback);
 	}
 
 	_.load = load_code_map;
 
 	// ---------------------------------------------------------------
 
+	// TODO
 	// encode()
 	function String_to_code(encoding) {
 		encoding = normalize_encoding_name(encoding);
+
+		;
 	}
 
 	// ---------------------------------------------------------------
@@ -248,7 +266,8 @@ function module_code(library_namespace) {
 		// Buffer.prototype.to_EUC_JP;
 
 		Buffer.prototype.native_toString = Buffer.prototype.toString;
-		Buffer.prototype.toString = function Buffer_toString(encoding) {
+		/** @deprecated */
+		function deprecated_Buffer_toString(encoding) {
 			var endoding_error;
 			try {
 				return this.native_toString(encoding);
@@ -259,14 +278,25 @@ function module_code(library_namespace) {
 			try {
 				return code_array_to_String.call(this, encoding);
 			} catch (e) {
+				// throw e;
 				throw endoding_error;
 			}
+		}
+
+		Buffer.prototype.toString = function Buffer_toString(encoding) {
+			try {
+				return this.native_toString(encoding);
+			} catch (e) {
+			}
+
+			// 有錯誤直接丟出去。
+			return code_array_to_String.call(this, encoding);
 		};
 	}
 
 	if (false) {
-		CeL.run('data.encoding');
-		CeL.encoding.load('Big-5', function() {
+		CeL.run('data.character');
+		CeL.character.load('Big-5', function() {
 			console.assert('作' === Buffer.from([ 0xA7, 0x40 ])
 					.toString('Big-5'));
 		});
@@ -278,7 +308,9 @@ function module_code(library_namespace) {
 		encoding = normalize_encoding_name(encoding);
 		var code_map = map_set[encoding];
 		if (!code_map) {
-			throw new Error('Unknown encoding: ' + encoding);
+			throw new Error('Unknown encoding: ' + encoding
+					+ '. You may need to ' + module_name + '.load("' + encoding
+					+ '") first?');
 		}
 		// console.log(code_map);
 
@@ -331,10 +363,34 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------
 
-	// decode()
-	function array_to_String(encoding) {
-		;
+	function Array_to_String(encoding) {
+		var array = this.map(function(byte, index) {
+			// 做基本檢測。
+			if (typeof byte === 'string' && byte.length === 1) {
+				byte = byte.charCodeAt(0);
+			}
+			if (typeof byte === 'number' && 0 <= byte && bute < 0x100
+					&& (byte | 0 === byte)) {
+				return byte;
+			}
+			throw new Error('Invalid byte: [' + index + '] ' + byte);
+		});
+
+		return code_array_to_String.call(array, encoding);
 	}
+
+	library_namespace.set_method(Array.prototype, {
+		decode : Array_to_String
+	});
+
+	library_namespace.set_method(String.prototype, {
+		encode : String_to_code,
+		// e.g., ''
+		decode : function decode_as_byte_String(encoding) {
+			// use Array_to_String()
+			return this.split('').decode(encoding);
+		}
+	});
 
 	return (_// JSDT:_module_
 	);
