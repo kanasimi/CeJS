@@ -496,7 +496,7 @@ function module_code(library_namespace) {
 			return node.join('');
 		}
 
-		return n || n === 0 ? String(nodes) : nodes;
+		return name || name === 0 ? String(nodes) : nodes;
 	}
 
 	/**
