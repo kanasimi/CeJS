@@ -136,6 +136,7 @@ open_format = {
 
 
 var WshShell = new_COM("WScript.Shell"),
+/** {String}path separator. e.g., '/', '\' */
 path_separator = library_namespace.env.path_separator,
 path_separator_pattern = library_namespace.env.path_separator_pattern,
 line_separator = library_namespace.env.line_separator,

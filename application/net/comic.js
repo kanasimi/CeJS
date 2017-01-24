@@ -324,6 +324,13 @@ function module_code(library_namespace) {
 		search_result = library_namespace.get_JSON(search_result_file)
 				|| library_namespace.null_Object();
 
+		function finish_up(work_data) {
+			if (typeof _this.finish_up === 'function') {
+				_this.finish_up(work_data);
+			}
+			callback && callback(work_data);
+		}
+
 		function finish(no_cache) {
 			if (!no_cache) {
 				// write cache
@@ -336,7 +343,7 @@ function module_code(library_namespace) {
 				search_result = typeof p === 'function' ? p(search_result)
 						: search_result ? search_result[p] : search_result;
 			}
-			_this.get_work_data(search_result, callback);
+			_this.get_work_data(search_result, finish_up);
 		}
 
 		if (search_result[work_title = work_title.trim()]) {
@@ -404,7 +411,7 @@ function module_code(library_namespace) {
 			})) {
 				// failed
 				library_namespace.err('未找到與[' + work_title + ']相符者。');
-				callback && callback();
+				finish_up();
 				return;
 			}
 
@@ -569,7 +576,7 @@ function module_code(library_namespace) {
 			}
 			library_namespace.err((work_data.title || work_id)
 					+ ': Can not get chapter count!');
-			callback && callback();
+			callback && callback(work_data);
 		}, this.charset, null, this.get_URL_options);
 	}
 
