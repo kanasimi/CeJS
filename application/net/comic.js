@@ -1,7 +1,7 @@
 ﻿/**
- * @name CeL function for downloading comics.
+ * @name CeL function for downloading online works (novels, comics).
  * 
- * @fileoverview 本檔案包含了批量下載漫畫的函式庫。
+ * @fileoverview 本檔案包含了批量下載線上作品（小說、漫畫）的函式庫。
  * 
  * <code>
 

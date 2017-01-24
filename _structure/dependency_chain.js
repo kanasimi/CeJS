@@ -1727,7 +1727,14 @@ if (typeof CeL === 'function')
 		 * @returns {controller}declaration
 		 */
 		function parse_require(declaration) {
-			var code_required = declaration.require;
+			/** {Array|String}dependency list */
+			var code_required = typeof declaration.require === 'function'
+			// WARNING: {Function}declaration.require必須能獨立執行，不能有其他依賴。
+			// 並且在單次執行中，重複call時必須回傳相同的結果。
+			// 一般來說，應該是為了依照執行環境includes相同API之不同實作時使用。
+			// e.g.,
+			// .write_file()在不同platform有不同實作方法，但對caller應該只需要includes同一library。
+			? declaration.require(library_namespace) : declaration.require;
 
 			if (false) {
 				// TODO: 自 declaration.code 擷取出 requires。
@@ -2028,9 +2035,11 @@ if (typeof CeL === 'function')
 							'load_named');
 
 					var initializator, error_Object;
-					if (library_namespace.env.no_catch)
+					if (library_namespace.env.no_catch) {
+						// {Function}declaration.code:
+						// function module_code(library_namespace) {}
 						initializator = declaration.code(library_namespace);
-					else
+					} else {
 						try {
 							// 真正執行 module 初始設定函式 / class template。
 							// 因為 module 常會用到 library，因此將之當作 argument。
@@ -2041,6 +2050,7 @@ if (typeof CeL === 'function')
 									+ '] 之初始設定函式執行失敗！');
 							library_namespace.err(e);
 						}
+					}
 
 					if (Array.isArray(initializator)) {
 						library_namespace.debug('初始設定函式回傳 Array，先轉成 Object。',

@@ -51,7 +51,7 @@ new_COM = typeof WScript === 'object' ? function(id) {
 	return WScript.CreateObject(id);
 } : typeof ActiveXObject === 'function' ? function(id) {
 	return new ActiveXObject(id);
-} : typeof Server === 'object' && function(id) {
+} : typeof Server === 'object' && Server.CreateObject && function(id) {
 	return Server.CreateObject(id);
 };
 

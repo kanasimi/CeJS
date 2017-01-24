@@ -40,7 +40,7 @@ function module_code(library_namespace) {
 	/**
 	 * null module constructor
 	 * 
-	 * @class web 的 functions
+	 * @class Node.js 的 functions
 	 */
 	var _// JSDT:_module_
 	= function() {
@@ -60,7 +60,7 @@ function module_code(library_namespace) {
 	function fs_status(file_path, only_status) {
 		var file_status;
 		try {
-			return node_fs.statSync(file_path);
+			return node_fs.lstatSync(file_path);
 		} catch (e) {
 			if (!only_status) {
 				return e;
@@ -68,8 +68,16 @@ function module_code(library_namespace) {
 		}
 	}
 	_.fs_status = fs_status;
-	_.fs_exists = function fs_exists(file_path) {
-		return !!fs_status(file_path, true);
+
+	_.file_exists = function file_exists(file_path) {
+		var fso_status = fs_status(file_path, true);
+		return fso_status
+				&& (fso_status.isFile() || fso_status.isSymbolicLink());
+	};
+
+	_.directory_exists = function directory_exists(directory_path) {
+		var fso_status = fs_status(file_path, true);
+		return fso_status && fso_status.isDirectory();
 	};
 
 	function copy_attributes(source, target) {
@@ -204,8 +212,9 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function remove_fso_list(list, parent) {
-		if (parent && !/[\\\/]$/.test(parent))
+		if (parent && !/[\\\/]$/.test(parent)) {
 			parent += path_separator;
+		}
 
 		var error;
 		list.some(function(fso_name) {
@@ -372,7 +381,14 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns error
 	 */
-	function fs_renameSync(move_from_path, move_to_path) {
+	function fs_renameSync(move_from_path, move_to_path, base_path) {
+		if (base_path) {
+			if (!/[\\\/]$/.test(base_path)) {
+				base_path += path_separator;
+			}
+			move_from_path = base_path + move_from_path;
+			move_to_path = base_path + move_to_path;
+		}
 		try {
 			node_fs.renameSync(move_from_path, move_to_path);
 		} catch (e) {
