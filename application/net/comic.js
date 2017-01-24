@@ -488,6 +488,8 @@ function module_code(library_namespace) {
 
 			// .status 選擇性屬性：須配合網站平台更改。
 			if (_this.is_finished(work_data)) {
+				// 預防(work_data.directory)不存在。
+				library_namespace.fs_mkdir(work_data.directory);
 				node_fs.writeFileSync(work_data.directory
 				//
 				+ 'finished.txt', work_data.status);

@@ -4,6 +4,11 @@
 	"version" : "2.0.20170123",
 	"description" : "A JavaScript module framework that is simple to use.",
 	"main" : "index.js",
+	"dependencies" : {},
+	"devDependencies" : {},
+	"engines" : {
+		"node" : ">=0.10"
+	},
 	"scripts" : {
 		"test" : "node \"_test suite/test.js\""
 	},
@@ -12,8 +17,9 @@
 		"url" : "git+https://github.com/kanasimi/CeJS.git"
 	},
 	"keywords" : [ "arbitrary-precision", "arithmetic", "numerals",
-			"Chinese era", "calendar" ],
+			"Chinese era", "calendar", "character encoding" ],
 	"author" : "vimunci",
+	"contributors" : "vimunci",
 	"license" : "BSD-3-Clause",
 	"bugs" : {
 		"url" : "https://github.com/kanasimi/CeJS/issues"
