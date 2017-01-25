@@ -13,7 +13,7 @@
 // 取得作品的章節資料。 get_work_data()
 // 取得每一個章節的各個影像內容資料。 get_chapter_data()
 // 取得各個章節的每一個影像內容。 get_images()
-
+// finish_up()
 
 TODO:
 下載完畢後自動產生壓縮檔+自動刪除原始圖檔
@@ -467,9 +467,11 @@ function module_code(library_namespace) {
 			var work_data = _this.parse_work_data(html, get_label,
 					exact_work_data);
 			// 基本檢測。
-			// .title: 必要屬性：須配合網站平台更改。
 			if (PATTERN_non_CJK.test(work_data.title)
-					&& PATTERN_non_CJK.test(work_id)) {
+			// .title: 必要屬性：須配合網站平台更改。
+			&& PATTERN_non_CJK.test(work_id)
+			// e.g., "THE NEW GATE"
+			&& !/[a-z]+ [a-z\d]/.test(work_id)) {
 				library_namespace.err('Did not set work title: ' + work_id);
 			}
 
@@ -479,6 +481,8 @@ function module_code(library_namespace) {
 				date : (new Date).toISOString(),
 				chapter : _this.start_chapter
 			};
+			// source URL
+			work_data.url = work_URL;
 
 			process.title = '下載' + work_data.title;
 			work_data.directory_name = library_namespace

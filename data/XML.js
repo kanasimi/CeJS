@@ -291,13 +291,19 @@ function module_code(library_namespace) {
 	 * @returns {Array|Object|String} XML nodes
 	 */
 	function XML_to_JSON(XML, options) {
-		// 前置處理。
-		if (!library_namespace.is_Object(options))
-			options = library_namespace.null_Object();
+		if (!XML) {
+			return XML;
+		}
 
-		if (!options.preserve_declaration)
+		// 前置處理。
+		if (!library_namespace.is_Object(options)) {
+			options = library_namespace.null_Object();
+		}
+
+		if (!options.preserve_declaration) {
 			// 去除起首之 declaration。
 			XML = XML.replace(PATTERN_XML_declaration, '');
+		}
 
 		var nodes = [ XML ],
 		//

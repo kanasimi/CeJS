@@ -76,8 +76,9 @@ function module_code(library_namespace) {
 	CeL.storage.copy_file(copy_from_path, copy_to_path)
 
 	CeL.storage.directory_exists(directory_path)
-	// get files, sub-directory of the directory
+	// get files, sub-directory of the directory.
 	CeL.storage.read_directory(directory_path)
+	// CeL.storage.directory_is_empty(directory_path)
 	// alias: mkdir
 	CeL.storage.create_directory(directory_path / directory_path_list)
 	// alias: delete
@@ -96,7 +97,7 @@ function module_code(library_namespace) {
 	var storage_module;
 
 	if (library_namespace.platform.nodejs) {
-		storage_module = library_namespace.platform.nodejs;
+		storage_module = library_namespace.application.platform.nodejs;
 
 		_.fso_status = storage_module.fs_status;
 
@@ -112,7 +113,7 @@ function module_code(library_namespace) {
 
 		_.create_directory = storage_module.fs_mkdir;
 
-		_.storage.traverse_file_system = storage_module.traverse_file_system;
+		_.traverse_file_system = storage_module.traverse_file_system;
 
 	} else if (this.has_ActiveX) {
 		storage_module = library_namespace.application.OS.Windows.file;
