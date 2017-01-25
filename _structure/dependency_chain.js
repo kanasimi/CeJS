@@ -3803,7 +3803,9 @@ if (typeof CeL === 'function')
 		library_namespace.get_module_path = get_module_path;
 
 		// node 4 does not has Array.prototype.includes.
-		if (has_Set && Array.prototype.includes) {
+		if (has_Set && Array.prototype.includes
+		// node 6.2.2 does not has Object.values(), Object.entries()
+		Object.entries) {
 			library_namespace
 					.debug('已經有近代的 Set，跳過 shim、相容性 test 專用的 functions。');
 			get_named('data.code.compatibility', true).included = true;

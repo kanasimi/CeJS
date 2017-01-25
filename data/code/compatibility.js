@@ -4,8 +4,11 @@
  * @fileoverview
  * 本檔案包含了 new ECMAScript standard 標準已規定，但先前版本未具備的內建物件功能；以及相容性 test 專用的 functions。<br />
  * ES6 shim / polyfill<br />
- * 部分標準功能已經包含於 ce.js。<br />
- * 注意: 本檔案可能會被省略執行，因此不應有標準之外的設定，應將之放置於 data.native。<br />
+ * 部分標準功能已經包含於 ce.js。
+ * 
+ * @see see _structure/dependency_chain.js
+ * 
+ * 注意: 本檔案可能會被省略執行，因此不應有標準之外的設定，應將之放置於 data.native。
  * 
  * More examples: see /_test suite/test.js
  * 
@@ -223,7 +226,7 @@ function hasOwnProperty(key) {
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
 // 可用來防止 .prototype 帶來之 properties。e.g., @ IE
 // cf. Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性 (enumerable or non-enumerable)
-function keys(object) {
+function Object_keys(object) {
 	var key, keys = [], prototype;
 
 	try {
@@ -262,6 +265,43 @@ function getOwnPropertyDescriptor(object, property) {
 			writable : true
 		};
 }
+
+
+// https://tc39.github.io/ecma262/#sec-object.values
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
+// http://www.2ality.com/2015/11/stage3-object-entries.html
+// Object.values()
+function Object_values(object) {
+	var values = [];
+	for (var keys = Object.keys(object), index = 0, length = keys.length; index < length; index++) {
+		values.push(object[keys[index]]);
+	}
+	return values;
+
+	return Object.keys(object)
+	//
+	.map(function(key) {
+		return object[key];
+	});
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
+// Object.entries()
+function Object_entries(object) {
+	var entries = [];
+	for (var keys = Object.keys(object), index = 0, length = keys.length; index < length; index++) {
+		var key = keys[index];
+		entries.push([ key, object[key] ]);
+	}
+	return entries;
+
+	return Object.keys(object)
+	//
+	.map(function(key) {
+		return [ key, object[key] ];
+	});
+}
+
 
 set_method(Object, {
 	// 鎖定物件。
@@ -309,9 +349,11 @@ set_method(Object, {
 	// Object.getOwnPropertyDescriptor()
 	getOwnPropertyDescriptor : getOwnPropertyDescriptor,
 	// Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性 (enumerable or non-enumerable)
-	getOwnPropertyNames : keys,
+	getOwnPropertyNames : Object_keys,
 	// Object.keys(): get Object keys, 列出對象中所有可以枚舉的屬性 (enumerable only)
-	keys : keys
+	keys : Object_keys,
+	values : Object_values,
+	entries : Object_entries
 });
 
 
@@ -1684,5 +1726,4 @@ return (
 }
 
 
-});
-
+});

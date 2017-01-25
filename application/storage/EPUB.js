@@ -41,8 +41,13 @@ typeof CeL === 'function' && CeL.run({
 	// application.storage.format.EPUB
 	name : 'application.storage.EPUB',
 
+	require :
+	// Object.entries()
+	'data.code.compatibility.'
 	// JSON.to_XML()
-	require : 'data.XML.|application.storage.',
+	+ '|data.XML.'
+	// write_file(), read_file()
+	+ '|application.storage.',
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
