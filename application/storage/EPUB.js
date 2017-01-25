@@ -147,6 +147,16 @@ function module_code(library_namespace) {
 
 	Ebook.date_to_String = date_to_String;
 
+	/**
+	 * 必須先確認沒有衝突
+	 * 
+	 * @inner
+	 */
+	function add_manifest_item(item) {
+		this.chapter_index_of_id[item.id] = this.chapters.length;
+		this.chapters.push(item);
+	}
+
 	// {JSON}raw_data
 	function set_raw_data(raw_data, options) {
 		// console.log(JSON.stringify(raw_data));
@@ -203,6 +213,9 @@ function module_code(library_namespace) {
 		// {Array}raw_data.package[2].spine
 
 		raw_data.package[0].metadata.forEach(function(data) {
+			if (!library_namespace.is_Object(data)) {
+				return;
+			}
 			for ( var key in data) {
 				break;
 			}
@@ -216,33 +229,59 @@ function module_code(library_namespace) {
 		index_of_id = library_namespace.null_Object();
 
 		resources.forEach(function(resource, index) {
-			if (resource.id) {
-				index_of_id[resource.id] = index;
+			var id = resource.id;
+			if (id) {
+				if (id in index_of_id) {
+					;
+				} else {
+					index_of_id[id] = index;
+				}
 			}
 		});
 
+		// reset
+		// 這兩者必須同時維護
 		this.chapters = [];
+		// id to resources index, index_of_id
+		// this.chapter_index_of_id[id]
+		// = {ℕ⁰:Natural+0}index (of item) of this.chapters
+		this.chapter_index_of_id = library_namespace.null_Object();
 
-		// rebuild by the sort of <spine>
+		// rebuild by the order of <spine>
 		chapters.forEach(function(chapter) {
 			var index = index_of_id[chapter.idref];
 			if (!(index >= 0)) {
-				throw new Error('Invalid id: ' + chapter.idref);
+				throw new Error('id of <spine> not found in <manifest>: ['
+						+ chapter.idref + ']');
 			}
-			this.chapters.push(resources[index]);
-			delete resources[index];
-		}, this);
-
-		// e.g., .css, images. 不包含 chapters
-		this.resources = resources.filter(function(resource) {
-			if (resource && resource.properties === 'nav') {
+			if (!(index in resources)) {
+				library_namespace
+						.warn('spine之中包含了重複的id，將跳過之: ' + chapter.idref);
+				return;
+			}
+			chapter = resources[index];
+			if (chapter.properties === 'nav') {
 				// Exactly one item must be declared as the EPUB Navigation
 				// Document using the nav property.
 				// 濾掉 toc nav。
-				this.TOC = resource;
-				return false;
+				this.TOC = chapter;
+			} else {
+				this.chapters.push(chapter);
 			}
+			// 已處理完。
+			delete resources[index];
+		}, this);
+
+		// e.g., .css, images. 不包含 xhtml chapters
+		this.resources = resources.filter(function(resource) {
 			return !!resource;
+		}, this);
+
+		library_namespace.debug('重建 this.chapter_index_of_id...');
+		this.chapters.forEach(function(chapter, index) {
+			if (chapter.id) {
+				this.chapter_index_of_id[chapter.id] = index;
+			}
 		}, this);
 	}
 
@@ -349,7 +388,7 @@ function module_code(library_namespace) {
 				'media-type' : "application/xhtml+xml"
 			};
 
-		} else {
+		} else if (library_namespace.is_Object(data)) {
 			item = {
 				item : null,
 				id : data.id || data.title,
@@ -358,6 +397,8 @@ function module_code(library_namespace) {
 						|| data.title && (data.title + '.xhtml'),
 				'media-type' : "application/xhtml+xml"
 			};
+		} else {
+			throw new Error('Invalid data to: ' + data);
 		}
 
 		// 採用能從id復原成title之演算法。
@@ -380,10 +421,29 @@ function module_code(library_namespace) {
 	NOT_FOUND = ''.indexOf('_');
 
 	function index_of_chapter(title) {
+		// console.log(this.chapters);
+		if (title in this.chapter_index_of_id) {
+			// title 為 id
+			return this.chapter_index_of_id[title];
+		}
+		var encoded = encode_identifier(title);
+		if (encoded in this.chapter_index_of_id) {
+			// title 為 title
+			return this.chapter_index_of_id[encoded];
+		}
+
+		// 剩下的可能為 href
+		if (!/\.x?html?$/i.test(title)) {
+			return NOT_FOUND;
+		}
+
 		for (var chapters = this.chapters, index = 0, length = chapters.length; index < length; index++) {
 			var item = chapters[index];
-			if (title === item.id || title === decode_identifier(item.id)
-					|| title === item.href) {
+			// console.log('> ' + title);
+			// console.log(item);
+			if (
+			// title === item.id || title === decode_identifier(item.id) ||
+			title === item.href) {
 				return index;
 			}
 		}
@@ -391,18 +451,32 @@ function module_code(library_namespace) {
 		return NOT_FOUND;
 	}
 
+	function is_the_same_item(item1, item2) {
+		return item1 && item2 && item1.id === item2.id
+				&& item1.href === item2.href;
+	}
+
 	function add_chapter(data, contents) {
 		if (!data) {
 			return;
 		}
 
-		// 若是已存在此chapter則先移除。
-		remove_chapter.call(this, data);
-		if (library_namespace.is_Object(data) && data.href) {
-			remove_chapter.call(this, data.href);
+		var item = normalize_item(data);
+
+		if (is_the_same_item(item, this.TOC)
+				// 若是已存在相同資源(.id + .href)則直接跳過。
+				|| (item.id in this.chapter_index_of_id)
+				//
+				&& is_the_same_item(item,
+						this.chapters[this.chapter_index_of_id[item.id]])) {
+			library_namespace.log('已經有相同的篇章，將不覆寫: '
+					+ decode_identifier(item.id));
+			return;
 		}
 
-		var item = normalize_item(data);
+		// 若是已存在此chapter則先移除。
+		remove_chapter.call(this, item.id);
+		// TODO: 檢測是否存在相同資源(.href)並做警告。
 
 		if (contents) {
 			// 需要先準備好目錄結構。
@@ -420,22 +494,42 @@ function module_code(library_namespace) {
 			item.properties = 'nav';
 			this.TOC = item;
 		} else {
-			this.chapters.push(item);
+			add_manifest_item.call(this, item);
 		}
+	}
+
+	function remove_chapter_by_index(index) {
+		if (!(index >= 0)) {
+			return;
+		}
+		var item = this.chapters.splice(index, 1);
+		library_namespace.remove_file(this.path.text + item.href);
+		return item;
 	}
 
 	function remove_chapter(title) {
 		if (!title) {
 			return;
 		}
-		if (typeof title === 'object') {
-			title = title.id || title.title;
-		}
-		var index = index_of_chapter.call(this, title);
-		if (index !== NOT_FOUND) {
-			var item = this.chapters.splice(index, 1);
-			library_namespace.remove_file(this.path.text + item.href);
-			return item;
+
+		if (library_namespace.is_Object(title)) {
+			if (title.id in this.chapter_index_of_id) {
+				return remove_chapter_by_index.call(this,
+						this.chapter_index_of_id[title.id]);
+			}
+			if (title.title && (title = encode_identifier(title.title))
+			//
+			&& (title in this.chapter_index_of_id)) {
+				return remove_chapter_by_index.call(this,
+						this.chapter_index_of_id[title]);
+			}
+			// Nothing found.
+
+		} else if (title in this.chapter_index_of_id
+		//
+		|| (title = encode_identifier(title)) in this.chapter_index_of_id) {
+			return remove_chapter_by_index.call(this,
+					this.chapter_index_of_id[title]);
 		}
 	}
 
@@ -488,6 +582,7 @@ function module_code(library_namespace) {
 			}, TOC_html);
 		}
 		chapters.unshift(this.TOC);
+		// console.log(this.resources.concat(chapters));
 		this.raw_data.package[1].manifest = this.resources.concat(chapters)
 		// 再做一次檢查，預防被外部touch過。
 		.map(normalize_item);
