@@ -341,7 +341,7 @@ function module_code(library_namespace) {
 				hex = '0' + hex;
 			}
 			// return hex.replace(/([\s\S]{2})/g, '_$1');
-			return '_%' + hex;
+			return '%' + hex;
 		}).replace(/%/g, '_');
 	}
 
@@ -350,10 +350,13 @@ function module_code(library_namespace) {
 		try {
 			return decodeURIComponent(identifier);
 		} catch (e) {
-			library_namespace.err('Can not decode: [' + identifier + ']');
+			library_namespace.err('decode_identifier: Can not decode: ['
+					+ identifier + ']');
 			throw e;
 		}
 	}
+
+	// assert: decode_identifier(encode_identifier("_!~*'()"))==="_!~*'()"
 
 	function is_manifest_item(value) {
 		if (!library_namespace.is_Object(value)) {

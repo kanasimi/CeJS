@@ -470,10 +470,11 @@ function module_code(library_namespace) {
 			// 基本檢測。
 			if (PATTERN_non_CJK.test(work_data.title)
 			// e.g., "THE NEW GATE"
-			&& !/[a-z]+ [a-z\d]/.test(work_data.title)
+			&& !/[a-z]+ [a-z\d]/i.test(work_data.title)
 			// .title: 必要屬性：須配合網站平台更改。
 			&& PATTERN_non_CJK.test(work_id)) {
-				library_namespace.err('Did not set work title: ' + work_id);
+				library_namespace.err('Did not set work title: ' + work_id
+						+ ' (' + work_data.title + ')');
 			}
 
 			// 自動添加之作業用屬性：
