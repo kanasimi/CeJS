@@ -144,6 +144,7 @@ function module_code(library_namespace) {
 
 	// {JSON}raw_data
 	function set_raw_data(raw_data, options) {
+		// console.log(JSON.stringify(raw_data));
 		this.raw_data = raw_data = raw_data || {
 			package : [ {
 				// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-opf-dcmes-required
@@ -201,6 +202,7 @@ function module_code(library_namespace) {
 				break;
 			}
 			// TODO: 將其他屬性納入<meta property="..."></meta>。
+			// console.log(key.replace(metadata_prefix, '') + '=' + data);
 			this.metadata[key.replace(metadata_prefix, '')] = data;
 		}, this);
 
@@ -233,9 +235,9 @@ function module_code(library_namespace) {
 				// Document using the nav property.
 				// 濾掉 toc nav。
 				this.TOC = resource;
-				return;
+				return false;
 			}
-			return resource;
+			return !!resource;
 		}, this);
 	}
 
@@ -300,8 +302,13 @@ function module_code(library_namespace) {
 	}
 
 	function decode_identifier(identifier) {
-		return decodeURIComponent(identifier.slice(id_prefix.length).replace(
-				/_/g, '%'));
+		identifier = identifier.slice(id_prefix.length).replace(/_/g, '%');
+		try {
+			return decodeURIComponent(identifier);
+		} catch (e) {
+			library_namespace.err('Can not decode: [' + identifier + ']');
+			throw e;
+		}
 	}
 
 	function is_manifest_item(value) {
@@ -363,7 +370,33 @@ function module_code(library_namespace) {
 		return item;
 	}
 
+	var
+	/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
+	NOT_FOUND = ''.indexOf('_');
+
+	function index_of_chapter(title) {
+		for (var chapters = this.chapters, index = 0, length = chapters.length; index < length; index++) {
+			var item = chapters[index];
+			if (title === item.id || title === decode_identifier(item.id)
+					|| title === item.href) {
+				return index;
+			}
+		}
+
+		return NOT_FOUND;
+	}
+
 	function add_chapter(data, contents) {
+		if (!data) {
+			return;
+		}
+
+		// 若是已存在此chapter則先移除。
+		remove_chapter.call(this, data);
+		if (library_namespace.is_Object(data) && data.href) {
+			remove_chapter.call(this, data.href);
+		}
+
 		var item = normalize_item(data);
 
 		if (contents) {
@@ -387,17 +420,17 @@ function module_code(library_namespace) {
 	}
 
 	function remove_chapter(title) {
-		// TODO: test
-		var index;
-		if (this.chapters.some(function(item, i) {
-			if (id === item.id || id === decode_identifier(item.id)
-					|| id === item.href) {
-				library_namespace.remove_file(this.path.text + item.href);
-				index = i;
-				return true;
-			}
-		}, this)) {
-			return this.chapters.splice(index, 1);
+		if (!title) {
+			return;
+		}
+		if (typeof title === 'object') {
+			title = title.id || title.title;
+		}
+		var index = index_of_chapter.call(this, title);
+		if (index !== NOT_FOUND) {
+			var item = this.chapters.splice(index, 1);
+			library_namespace.remove_file(this.path.text + item.href);
+			return item;
 		}
 	}
 
@@ -451,7 +484,7 @@ function module_code(library_namespace) {
 		}
 		chapters.unshift(this.TOC);
 		this.raw_data.package[1].manifest = this.resources.concat(chapters)
-		// 預防被外部touch過。
+		// 再做一次檢查，預防被外部touch過。
 		.map(normalize_item);
 		this.raw_data.package[2].spine = chapters.filter(function(chapter) {
 			return !!chapter.id;

@@ -270,13 +270,14 @@ function module_code(library_namespace) {
 
 	// text declaration of XML.
 	var PATTERN_XML_declaration = /^\s*<\?xml(?:\s[^<>?]*)?\?>\s*/,
-	// 無 end-tag 之 node (empty-element tag) pattern
+	// XML 之 tag name 應允許 ":"。
+	// 無 end-tag 之 node (empty-element tag) pattern。
 	// http://www.w3.org/TR/REC-xml/#sec-starttags
-	// [ , tag, attributes ]
-	PATTERN_EMPTY = /<([^\0-\-:->\s]+)(\s[^<>]*?)?\/>/,
+	// [ , tag name, attributes ]
+	PATTERN_EMPTY = /<([^\0-\-;->\s]+)(\s[^<>]*?)?\/>/,
 	// end-tag 之 pattern
 	// [ , last children, tag name ]
-	PATTERN_END = /^([\S\s]*?)<\/([^\0-\-:->\s]+)\s*>/;
+	PATTERN_END = /^([\S\s]*?)<\/([^\0-\-;->\s]+)\s*>/;
 
 	/**
 	 * parse XML to JSON.

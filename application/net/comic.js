@@ -346,6 +346,7 @@ function module_code(library_namespace) {
 			_this.get_work_data(search_result, finish_up);
 		}
 
+		// assert: work_title前後不應包含space
 		if (search_result[work_title = work_title.trim()]) {
 			library_namespace.log('Find cache: ' + work_title + ' → '
 					+ JSON.stringify(search_result[work_title]));
@@ -404,7 +405,7 @@ function module_code(library_namespace) {
 							: title ? title[p] : title;
 				}
 				// 找看看是否有完全相同的title。
-				if (title !== work_title) {
+				if (title.trim() !== work_title) {
 					return true;
 				}
 				id_list = id;
@@ -468,10 +469,10 @@ function module_code(library_namespace) {
 					exact_work_data);
 			// 基本檢測。
 			if (PATTERN_non_CJK.test(work_data.title)
-			// .title: 必要屬性：須配合網站平台更改。
-			&& PATTERN_non_CJK.test(work_id)
 			// e.g., "THE NEW GATE"
-			&& !/[a-z]+ [a-z\d]/.test(work_id)) {
+			&& !/[a-z]+ [a-z\d]/.test(work_data.title)
+			// .title: 必要屬性：須配合網站平台更改。
+			&& PATTERN_non_CJK.test(work_id)) {
 				library_namespace.err('Did not set work title: ' + work_id);
 			}
 

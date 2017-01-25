@@ -1761,9 +1761,13 @@ function test_CSV() {
 function test_XML() {
   	error_count += CeL.test('XML', [
 		[[
+			JSON.stringify(JSON.from_XML('<n:t1 a1="a1"><ns:c1 /><c2 /></n:t1>')),
+			JSON.stringify({"n:t1":[{"ns:c1":null},{"c2":null}],"a1":"a1"})
+		], 'XML to JSON #1'],
+		[[
 			JSON.stringify(JSON.from_XML('<?xml version="1.0" encoding="UTF-8"?><root><t1 a1="a1"><c1 a2="a2"></c1><c2 a3="a3"/><c3 /></t1></root>',{numeralize:true})),
 			JSON.stringify({"root":{"t1":[{"c1":null,"a2":"a2"},{"c2":null,"a3":"a3"},{"c3":null}],"a1":"a1"}})
-		], 'XML to JSON #1'],
+		], 'XML to JSON #2'],
 
 		[[
 			'<a b="34">12</a>',
@@ -1773,6 +1777,10 @@ function test_XML() {
 			'<a b="34">23<r><t>e</t></r></a>',
 			JSON.to_XML({a:[2,3,{r:{t:'e'}}],b:34})
 		], 'JSON to XML #2'],
+		[[
+			'<n:t t="b">4<ns:k />5</n:t>',
+			JSON.to_XML({"n:t":[4,{"ns:k":null},5],t:'b'})
+		], 'JSON to XML #3'],
 	]);
 }
 
