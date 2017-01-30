@@ -1,7 +1,7 @@
 /**
  * @name CeL function for storage.
- * @fileoverview 載入在不同執行環境與平台皆可使用的檔案操作功能公用API。
- * @since
+ * @fileoverview 載入在不同執行環境與平台皆可使用的檔案操作功能公用API，以統一使用介面。
+ * @since 2017/1/27
  */
 
 'use strict';
@@ -11,7 +11,6 @@
 
 // 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
-	// TODO: 使用此名稱，在 include 時可能沖到原先的 CeL.platform!!
 	// module name
 	name : 'application.storage',
 
@@ -37,8 +36,11 @@ function detect_require() {
 			|| typeof Server === 'object' && Server.CreateObject;
 
 	if (this.has_ActiveX) {
+		// TODO: application.OS.Windows.archive.
 		return 'application.OS.Windows.file.';
 	}
+
+	throw new Error('It seems I am running on a unknown OS.');
 }
 
 function module_code(library_namespace) {
@@ -99,7 +101,12 @@ function module_code(library_namespace) {
 	if (library_namespace.platform.nodejs) {
 		storage_module = library_namespace.application.platform.nodejs;
 
+		/** node.js file system module */
+		var node_fs = require('fs');
+
 		_.fso_status = storage_module.fs_status;
+		_.file_exists = storage_module.file_exists;
+		_.directory_exists = storage_module.directory_exists;
 
 		_.read_file = storage_module.fs_read;
 
@@ -109,7 +116,18 @@ function module_code(library_namespace) {
 
 		_.remove_file = _.remove_directory = storage_module.fs_remove;
 
+		_.move_directory = _.move_file =
+		//
 		_.move_fso = storage_module.fs_move;
+
+		_.read_directory = function(directory_path, options) {
+			try {
+				return node_fs.readdirSync(directory_path, options);
+			} catch (e) {
+				library_namespace.debug('Error to read directory: '
+						+ directory_path);
+			}
+		};
 
 		_.create_directory = storage_module.fs_mkdir;
 

@@ -15,7 +15,6 @@ typeof CeL === 'function' && CeL.run({
 	// application.storage.format.EPUB
 	name : 'data.XML',
 
-	// JSON.to_XML()
 	require : '',
 
 	// 設定不匯出的子函式。
@@ -301,6 +300,7 @@ function module_code(library_namespace) {
 			options = library_namespace.null_Object();
 		}
 
+		// console.log(XML);
 		if (!options.preserve_declaration) {
 			// 去除起首之 declaration。
 			XML = XML.replace(PATTERN_XML_declaration, '');
@@ -310,10 +310,11 @@ function module_code(library_namespace) {
 		//
 		numeralize = options.numeralize;
 
-		if (numeralize && typeof numeralize !== 'function')
+		if (numeralize && typeof numeralize !== 'function') {
 			numeralize = function(string) {
 				return isNaN(string) ? string : +string;
 			};
+		}
 
 		for (var index = 0, matched; index < nodes.length; index++) {
 			if (typeof nodes[index] !== 'string')
@@ -477,10 +478,11 @@ function module_code(library_namespace) {
 	 * @returns {String}XML
 	 */
 	function to_XML(nodes, options) {
-		if (Array.isArray(nodes))
+		if (Array.isArray(nodes)) {
 			return nodes.map(function(node) {
 				return to_XML(node, options);
-			}).join('');
+			}).join(options && options.separator || '');
+		}
 
 		if (typeof nodes === 'object') {
 			var node = [], tag, name;
@@ -500,7 +502,7 @@ function module_code(library_namespace) {
 			node.push(name || name === '' ? '>' + name + '</' + tag + '>'
 			// e.g., name = null, undefined
 			: ' />');
-			return node.join('');
+			return node.join(options && options.separator || '');
 		}
 
 		return name || name === 0 ? String(nodes) : nodes;
@@ -513,16 +515,18 @@ function module_code(library_namespace) {
 	 *            node list
 	 * @param {Object}[options]
 	 *            options<br />
-	 *            {Boolean}options.no_declaration: 是否加上起首之 declaration。
+	 *            {Boolean}options.declaration: 是否加上起首之 declaration。<br />
+	 *            deprecated: options.no_declaration
 	 * 
 	 * @returns {String}XML
 	 */
 	function JSON_to_XML(nodes, options) {
 		var XML = to_XML(nodes, options);
 
-		if (options && (options === true || !options.no_declaration)) {
+		if (options && (options === true || options.declaration)) {
 			// 加上起首之 declaration。
-			XML = '<?xml version="1.0" encoding="UTF-8"?>' + XML;
+			XML = '<?xml version="1.0" encoding="UTF-8"?>'
+					+ (options && options.separator || '') + XML;
 		}
 
 		return XML;

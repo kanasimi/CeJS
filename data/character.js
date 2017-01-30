@@ -347,6 +347,7 @@ function module_code(library_namespace) {
 			}
 		};
 
+		// 把 Buffer 物件的內容當作是 encoding 編碼，並解析成 {String}UTF-8 string。
 		Buffer.prototype.toString = function Buffer_toString(encoding, options) {
 			try {
 				return this.native_toString(encoding);

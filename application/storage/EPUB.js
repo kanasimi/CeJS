@@ -4,23 +4,25 @@
  * 
  * @example<code>
 
- var ebook = new CeL.EPUB(directory);
+
+ var ebook = new CeL.EPUB(package_base_directory);
  // initialize
 
  // append chapter
  ebook.add({title:,file:,media:},{String}text);
- // {Array}ebook.chapters
- ebook.chapters.splice(0,1,{title:,file:,media:[]});
+ // {Array}ebook.chapters. 每次手動改變.chapters，最後必須執行.arrange()整理。
+ ebook.chapters.splice(0,1,{title:,file:,media:[]});ebook.arrange();
  ebook.flush(): write TOC, contents
  ebook.check(): 確認檔案都在
 
  {String}ebook.directory.book
- {String}ebook.directory.text / .xhtml
- {String}ebook.directory.style / .css
- {String}ebook.directory.media / .jpg, .png, .mp3
+ {String}ebook.directory.text + .xhtml
+ {String}ebook.directory.style + .css
+ {String}ebook.directory.media + .jpg, .png, .mp3
 
 
-依照檢核結果修改以符合標準:
+依照檢核結果修改以符合標準: EpubCheck
+https://github.com/IDPF/epubcheck
 java -jar epubcheck.jar *.epub
 
  </code>
@@ -44,8 +46,12 @@ typeof CeL === 'function' && CeL.run({
 	require :
 	// Object.entries()
 	'data.code.compatibility.'
+	// MIME_of()
+	+ '|application.net.MIME.'
 	// JSON.to_XML()
 	+ '|data.XML.'
+	// get_URL_cache()
+	// + '|application.net.Ajax.'
 	// write_file(), read_file()
 	+ '|application.storage.',
 
@@ -58,48 +64,159 @@ typeof CeL === 'function' && CeL.run({
 
 function module_code(library_namespace) {
 
-	/** {String}path separator. e.g., '/', '\' */
-	var path_separator = library_namespace.env.path_separator,
-	// Open eBook Publication Structure (OEBPS)
-	// @see [[Open eBook]]
-	boot_directory_name = 'EPUB',
+	var
+	// http://www.idpf.org/epub/31/spec/epub-ocf.html#sec-container-metainf
+	// All OCF Abstract Containers must include a directory called META-INF
+	// in their Root Directory.
+	// e.g., META-INF/container.xml
+	container_directory_name = 'META-INF', container_file_name = 'container.xml',
 	// 前置碼
 	metadata_prefix = 'dc:',
-	// [[manifest file]] container.xml
-	default_container_xml = JSON.to_XML({
-		container : {
-			rootfiles : {
-				rootfile : null,
-				'full-path' : boot_directory_name + '/' + 'content.opf',
-				'media-type' : "application/oebps-package+xml"
+	// key for additional information / configuration data
+	KEY_DATA = 'item data',
+
+	/** {String}path separator. e.g., '/', '\' */
+	path_separator = library_namespace.env.path_separator;
+
+	function setup_container(base_directory) {
+		// read container file: [[manifest file]] container.xml
+		this.container = library_namespace
+				.read_file((base_directory || this.path.root)
+						+ container_directory_name + path_separator
+						+ container_file_name);
+
+		var rootfile_path = (this.root_directory_name
+		//
+		? this.root_directory_name + '/' : '') + this.package_document_name;
+		if (this.container
+				&& (this.container = JSON.from_XML(this.container.toString()))) {
+			// parse container
+			var rootfile = this.container.container.rootfiles;
+			if (Array.isArray(rootfile)) {
+				library_namespace.err('本函式庫尚不支援多 rootfile (.opf)!');
+				rootfile = rootfile.filter(function(root_file) {
+					return /\.opf$/i.test(root_file['full-path']);
+				})[0] || rootfile[0];
 			}
-		},
-		version : "1.0",
-		xmlns : "urn:oasis:names:tc:opendocument:xmlns:container"
-	}, true);
+
+			if (false) {
+				var matched = rootfile['full-path']
+						.match(/^(?:(.*)[\\\/])?([^\\\/]+)$/);
+				if (matched) {
+					// console.log(matched);
+					if (this.root_directory_name !== matched[1]) {
+						library_namespace.info('root_directory_name: '
+								+ matched[1] + '→' + this.root_directory_name);
+					}
+					this.root_directory_name = matched[1] || '';
+					if (this.package_document_name !== matched[2]) {
+						library_namespace
+								.info('package_document_name: ' + matched[2]
+										+ '→' + this.package_document_name);
+					}
+					this.package_document_name = matched[2];
+				} else {
+					library_namespace.info('rootfile path: '
+							+ rootfile['full-path'] + '→' + rootfile_path);
+				}
+			}
+
+			if (rootfile['full-path'] !== rootfile_path) {
+				library_namespace.info('rootfile path: '
+						+ rootfile['full-path'] + '→' + rootfile_path);
+				// TODO: remove directories+files
+				;
+				rootfile['full-path'] = rootfile_path;
+			}
+
+		} else {
+			// default container
+			this.container = {
+				container : {
+					rootfiles : {
+						rootfile : null,
+						'full-path' : rootfile_path,
+						'media-type' : "application/oebps-package+xml"
+					}
+				},
+				version : "1.0",
+				xmlns : "urn:oasis:names:tc:opendocument:xmlns:container"
+			};
+		}
+	}
 
 	function Ebook(base_directory, options) {
 		options = library_namespace.setup_options(options);
 		if (!/[\\\/]$/.test(base_directory)) {
 			base_directory += path_separator;
 		}
-		var boot_directory = base_directory + boot_directory_name
-				+ path_separator;
+
+		if ('root_directory_name' in options) {
+			this.root_directory_name = options.root_directory_name || '';
+		}
+		if (options.package_document_name) {
+			this.package_document_name = options.package_document_name;
+		}
+
+		this.setup_container(base_directory);
+
+		if (options.id_prefix) {
+			if (/^[a-z][a-z\d]*$/i.test(options.id_prefix)) {
+				this.id_prefix = options.id_prefix;
+			} else {
+				throw new Error('Invalid id prefix: ' + options.id_prefix);
+			}
+		}
+
+		if (!this.root_directory_name) {
+			library_namespace
+					.warn('The root directory is directly under the base directory!');
+		}
+
+		var root_directory = base_directory
+				+ (this.root_directory_name ? this.root_directory_name
+						+ path_separator : '');
+		this.directory = Object.assign({
+			// 'text'
+			text : '',
+			style : 'style',
+			media : 'media'
+		}, options.directory);
+		// 注意: 為了方便使用，這邊的 this.directory 都必須添加 url 用的 path separator: '/'。
+		for ( var d in this.directory) {
+			var _d = this.directory[d];
+			if (_d)
+				this.directory[d] = (PATTERN_NEED_ENCODE_FILE_NAME.test(_d) ? encode_identifier(
+						_d, this)
+						: _d).replace(/[\\\/]*$/, path_separator);
+		}
+		// absolute directory path
 		this.path = {
 			// container
 			root : base_directory,
-			book : boot_directory,
-			text : boot_directory// + 'text' + path_separator
-			,
-			style : boot_directory + 'style' + path_separator,
-			media : boot_directory + 'media' + path_separator
+			book : root_directory,
+			text : root_directory + this.directory.text,
+			style : root_directory + this.directory.style,
+			media : root_directory + this.directory.media,
 		};
+		// 注意: 為了方便使用，這邊的 this.directory 都必須添加 url 用的 path separator: '/'。
+		for ( var d in this.directory) {
+			this.directory[d] = './'
+					+ this.directory[d].replace(/[\\\/]+$/, '/');
+		}
 
 		this.metadata = library_namespace.null_Object();
 
-		var raw_data = library_namespace
-		// book data
-		.read_file(this.path.book + 'content.opf');
+		var raw_data;
+		if (options.start_over) {
+			// start over: 重新創建, 不使用舊的.opf資料
+			// TODO: remove directories+files
+			;
+		} else {
+			raw_data = !options.start_over && library_namespace
+			// book data
+			.read_file(this.path.book + this.package_document_name);
+		}
 		this.set_raw_data(raw_data && JSON.from_XML(raw_data.toString()),
 				options);
 	}
@@ -117,22 +234,19 @@ function module_code(library_namespace) {
 		 */
 		'application/epub+zip');
 
-		// http://www.idpf.org/epub/31/spec/epub-ocf.html#sec-container-metainf
-		// All OCF Abstract Containers must include a directory called META-INF
-		// in their Root Directory.
-		directory = this.path.root + 'META-INF' + path_separator;
+		directory = this.path.root + container_directory_name + path_separator;
 		library_namespace.create_directory(directory);
-		library_namespace.write_file(directory + 'container.xml',
-				default_container_xml);
+		library_namespace.write_file(directory + container_file_name,
+		//
+		JSON.to_XML(this.container, this.to_XML_options));
 
-		directory = this.path.book;
-		library_namespace.create_directory(directory);
-		'text,style,media'.split(',').forEach(function(type) {
-			var _d = this.path[type];
-			if (_d && _d !== directory) {
-				library_namespace.create_directory(_d);
+		Object.values(this.path)
+		// 從root排到sub-directory，預防create_directory時parent-directory尚未創建。
+		.sort().forEach(function(directory) {
+			if (directory && !library_namespace.directory_exists(directory)) {
+				library_namespace.create_directory(directory);
 			}
-		}, this);
+		});
 
 		this.initializated = true;
 	}
@@ -152,9 +266,33 @@ function module_code(library_namespace) {
 	 * 
 	 * @inner
 	 */
-	function add_manifest_item(item) {
-		this.chapter_index_of_id[item.id] = this.chapters.length;
-		this.chapters.push(item);
+	function add_manifest_item(item, is_resource) {
+		if (is_resource || detect_file_type(item.href) !== 'text') {
+			this.resource_index_of_id[item.id] = this.resources.length;
+			this.resources.push(item);
+		} else {
+			this.chapter_index_of_id[item.id] = this.chapters.length;
+			this.chapters.push(item);
+		}
+	}
+
+	function rebuild_index_of_id(rebuild_resources, force) {
+		var list = rebuild_resources ? this.resources : this.chapters, index_of_id = rebuild_resources ? this.resource_index_of_id
+				: this.chapter_index_of_id;
+
+		if (!force
+		// TODO: detect change
+		&& list.old_length === list.length) {
+			return;
+		}
+
+		library_namespace.debug('重建 index_of_id...');
+		list.forEach(function(item, index) {
+			if (item.id) {
+				index_of_id[item.id] = index;
+			}
+		});
+		list.old_length = list.length;
 	}
 
 	// {JSON}raw_data
@@ -202,17 +340,42 @@ function module_code(library_namespace) {
 			} ],
 			// determine version.
 			// http://www.idpf.org/epub/31/spec/
+			// EpubCheck 尚不支援 3.1
 			version : "3.0",
 			xmlns : "http://www.idpf.org/2007/opf",
 			// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-package-metadata-identifiers
 			'unique-identifier' : options.id_type || 'workid'
 		};
 
-		// {Array}raw_data.package[0].metadata
-		// {Array}raw_data.package[1].manifest
-		// {Array}raw_data.package[2].spine
+		// console.log(JSON.stringify(raw_data));
 
-		raw_data.package[0].metadata.forEach(function(data) {
+		this.raw_data_ptr = library_namespace.null_Object();
+		var resources = [];
+		raw_data.package.forEach(function(node) {
+			if (typeof node === 'string' && !node.trim()) {
+				return;
+			}
+			resources.push(node);
+			if (!library_namespace.is_Object(node)) {
+				return;
+			}
+			// {Array}raw_data.package[0].metadata
+			// {Array}raw_data.package[1].manifest
+			// {Array}raw_data.package[2].spine
+			if (Array.isArray(node.metadata)) {
+				this.raw_data_ptr.metadata = node.metadata;
+			} else if (Array.isArray(node.manifest)) {
+				this.raw_data_ptr.manifest = node.manifest;
+			} else if (Array.isArray(node.spine)) {
+				this.raw_data_ptr.spine = node.spine;
+			}
+		}, this);
+
+		// 整理，去掉冗餘。
+		raw_data.package.clear();
+		Array.prototype.push.apply(raw_data.package, resources);
+
+		this.raw_data_ptr.metadata.forEach(function(data) {
 			if (!library_namespace.is_Object(data)) {
 				return;
 			}
@@ -224,11 +387,27 @@ function module_code(library_namespace) {
 			this.metadata[key.replace(metadata_prefix, '')] = data;
 		}, this);
 
-		var resources = raw_data.package[1].manifest, chapters = raw_data.package[2].spine,
+		resources = this.raw_data_ptr.manifest;
+		var chapters = this.raw_data_ptr.spine,
 		// id to resources index
 		index_of_id = library_namespace.null_Object();
 
 		resources.forEach(function(resource, index) {
+			if (typeof resource === 'string') {
+				var matched = resource.match(/<!--\s*({.+})\s*-->/);
+				if (matched
+				//
+				&& library_namespace.is_Object(resources[--index])) {
+					try {
+						// 以非正規方法存取資訊。
+						resources[index][KEY_DATA] = JSON.parse(matched[1]);
+					} catch (e) {
+						// TODO: handle exception
+					}
+				}
+				return;
+			}
+
 			var id = resource.id;
 			if (id) {
 				if (id in index_of_id) {
@@ -246,9 +425,14 @@ function module_code(library_namespace) {
 		// this.chapter_index_of_id[id]
 		// = {ℕ⁰:Natural+0}index (of item) of this.chapters
 		this.chapter_index_of_id = library_namespace.null_Object();
+		this.resource_index_of_id = library_namespace.null_Object();
 
 		// rebuild by the order of <spine>
+		// console.log(chapters);
 		chapters.forEach(function(chapter) {
+			if (!library_namespace.is_Object(chapter)) {
+				return;
+			}
 			var index = index_of_id[chapter.idref];
 			if (!(index >= 0)) {
 				throw new Error('id of <spine> not found in <manifest>: ['
@@ -274,15 +458,11 @@ function module_code(library_namespace) {
 
 		// e.g., .css, images. 不包含 xhtml chapters
 		this.resources = resources.filter(function(resource) {
-			return !!resource;
+			return library_namespace.is_Object(resource);
 		}, this);
 
-		library_namespace.debug('重建 this.chapter_index_of_id...');
-		this.chapters.forEach(function(chapter, index) {
-			if (chapter.id) {
-				this.chapter_index_of_id[chapter.id] = index;
-			}
-		}, this);
+		// rebuild_index_of_id.call(this);
+		// rebuild_index_of_id.call(this, true);
 	}
 
 	function to_meta_information_key(key) {
@@ -309,8 +489,32 @@ function module_code(library_namespace) {
 		data[key] = value;
 	}
 
-	// 應該用[A-Za-z]起始，但光單一字母不容易辨識。
-	var id_prefix = 'i';
+	// http://idpf.org/forum/topic-715
+	// https://wiki.mobileread.com/wiki/Ebook_Covers#OPF_entries
+	// http://www.idpf.org/epub/301/spec/epub-publications.html#sec-item-property-values
+	// TODO:
+	// <item id="cover" href="cover.xhtml" media-type="application/xhtml+xml" />
+	function set_cover_image(item_data, contents) {
+		if (!item_data) {
+			return;
+		}
+		if (typeof item_data === 'string' && item_data.includes('://')) {
+			item_data = {
+				url : item_data,
+				file : library_namespace.main_MIME_type_of(item_data)
+						&& item_data.match(/[^\\\/]+$/i)[0] || 'cover.jpg'
+			};
+		}
+		var item = normalize_item(item_data, this);
+		// <item id="cover-image" href="cover.jpg" media-type="image/jpeg" />
+		item.id = 'cover-image';
+		item.properties = "cover-image";
+
+		// TODO: <meta name="cover" content="cover-image" />
+		return this.add(item, contents);
+	}
+
+	var PATTERN_NEED_ENCODE_ID = /^[^a-z]|[^a-z\d\-]/i, PATTERN_NEED_ENCODE_FILE_NAME = /[^a-z\d\-.]/i;
 
 	/**
 	 * encode to XML identifier.
@@ -330,9 +534,17 @@ function module_code(library_namespace) {
 	 * encodeURIComponent escapes all characters except the following:
 	 * alphabetic, decimal digits, - _ . ! ~ * ' ( )
 	 */
-	function encode_identifier(string) {
+	function encode_identifier(string, _this) {
+		if (typeof string !== 'string') {
+			throw new Error('Invalid id to encode: ' + JSON.stringify(string));
+		}
+
+		if (!string) {
+			return '';
+		}
+
 		// 皆加上id_prefix，之後的便以接續字元看待，不必多作處理。
-		return id_prefix + encodeURIComponent(string)
+		return _this.id_prefix + encodeURIComponent(string)
 		// escape other invalid characters
 		// 把"_"用來做hex辨識符。
 		.replace(/[_!~*'()]/g, function($0) {
@@ -345,8 +557,9 @@ function module_code(library_namespace) {
 		}).replace(/%/g, '_');
 	}
 
-	function decode_identifier(identifier) {
-		identifier = identifier.slice(id_prefix.length).replace(/_/g, '%');
+	function decode_identifier(identifier, _this) {
+		identifier = identifier.slice(_this.id_prefix.length)
+				.replace(/_/g, '%');
 		try {
 			return decodeURIComponent(identifier);
 		} catch (e) {
@@ -356,7 +569,8 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// assert: decode_identifier(encode_identifier("_!~*'()"))==="_!~*'()"
+	// assert: "_!~*'()" ===
+	// decode_identifier(encode_identifier("_!~*'()", this), this)
 
 	function is_manifest_item(value) {
 		if (!library_namespace.is_Object(value)) {
@@ -365,56 +579,135 @@ function module_code(library_namespace) {
 
 		for ( var key in value) {
 			return key === 'item' && value.item === null
-			// && value.id && value.href
-			;
+			// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-item-elem
+			&& value.id && value.href && value['media-type'];
 		}
 		return false;
 	}
 
-	function normalize_item(data) {
-		if (is_manifest_item(data)) {
-			return data;
+	// file path → file name
+	function get_file_name_of_url(url) {
+		return (url && String(url) || '').match(/[^\\\/]*$/)[0];
+	}
+
+	// file name or url
+	// return value must in this.path and this.directory
+	function detect_file_type(file_name) {
+		if (/\.x?html?$/i.test(file_name)) {
+			return 'text';
+		}
+		if (/\.css$/i.test(file_name)) {
+			return 'style';
 		}
 
-		var item;
-		if (typeof data === 'string') {
-			var title = data;
-			if (/\.x?html?$/i.test(title)) {
-				title = title.replace(/\.x?html?$/i, '');
-			} else {
-				data += '.xhtml';
+		var main_type = library_namespace.main_MIME_type_of(file_name);
+		if (main_type === 'text') {
+			return 'text';
+		}
+		if (main_type === 'image' || main_type === 'audio'
+				|| main_type === 'video') {
+			return 'media';
+		}
+
+		throw new Error('Can not determine the type of [' + file_name + ']');
+	}
+
+	function normalize_item(item_data, _this, strict) {
+		if (is_manifest_item(item_data)) {
+			if (strict && ([ KEY_DATA ] in item_data)) {
+				item_data = Object.clone(item_data);
+				// item[KEY_DATA] 必須在 write_chapters() 時去除掉。
+				delete item_data[KEY_DATA];
 			}
-			item = {
-				item : null,
-				id : title,
-				href : data,
-				'media-type' : "application/xhtml+xml"
-			};
-
-		} else if (library_namespace.is_Object(data)) {
-			item = {
-				item : null,
-				id : data.id || data.title,
-				href : data.file
-						|| (data.href || data.url || '').match(/[^\\\/]*$/)[0]
-						|| data.title && (data.title + '.xhtml'),
-				'media-type' : "application/xhtml+xml"
-			};
-		} else {
-			throw new Error('Invalid data to: ' + data);
+			return item_data;
 		}
 
-		// 採用能從id復原成title之演算法。
-		// 未失真的title = decode_identifier(item.id)
-		item.id = encode_identifier(item.id);
+		if (typeof item_data === 'string') {
+			// 為URL做箝制處理。
+			if (item_data.includes('://')) {
+				item_data = {
+					url : item_data
+				};
+			} else if (library_namespace.MIME_of(item_data)) {
+				if (/[\\\/]/.test(item_data)) {
+					item_data = {
+						href : item_data
+					};
+				} else {
+					item_data = {
+						file : item_data
+					};
+				}
+			} else {
+				item_data = {
+					title : item_data
+				};
+			}
+		}
 
-		// escape: 不可使用中文日文名稱。
-		item.href = encode_identifier(item.href)
-		// 截斷trim主檔名，限制在 80字元。
-		// WARNING: assert: 截斷後的主檔名不會重複，否則會被覆蓋!
-		.replace(/^(.*)(\.[^.]+)$/, function(all, main, extension) {
-			return main.slice(0, 80 - extension.length) + extension;
+		var id, href;
+		if (library_namespace.is_Object(item_data)) {
+			id = item_data.id || item_data.title;
+			href = item_data.href;
+			if (!href
+					&& (href = get_file_name_of_url(item_data.file
+							|| item_data.url))) {
+				// 自行決定合適的path+檔名。 e.g., "media/1.png"
+				href = _this.directory[detect_file_type(href)] + href;
+			}
+		}
+
+		if (!id) {
+			if (!href) {
+				library_namespace.err('Invalid item data: '
+						+ JSON.stringify(item_data));
+				return;
+			}
+
+			// 對檔案，以href(path+檔名)作為id。
+			// 去掉 file name extension 當作id。
+			id = href.replace(/\.[a-z\d\-]+$/i, '').replace(
+					_this.directory[detect_file_type(href)], '');
+
+		} else if (!href) {
+			// default: xhtml file
+			href = _this.directory.text + id + '.xhtml';
+		}
+
+		href = href.replace(/[^\\\/]+$/, function(file_name) {
+			// EpubCheck 不可使用/不接受中文日文檔名。
+			if (PATTERN_NEED_ENCODE_FILE_NAME.test(file_name)) {
+				// need encode
+				file_name = encode_identifier(file_name, _this);
+			}
+
+			// 截斷trim主檔名，限制在 80字元。
+			// WARNING: assert: 截斷後的主檔名不會重複，否則會被覆蓋!
+			return file_name.replace(/^(.*)(\.[^.]+)$/, function(all, main,
+					extension) {
+				return main.slice(0, 80 - extension.length) + extension;
+			})
 		});
+
+		var item = {
+			item : null,
+			// escape: 不可使用中文日文名稱。
+			// 採用能從id復原成title之演算法。
+			// 未失真的title = decode_identifier(item.id, _this)
+			id : PATTERN_NEED_ENCODE_ID.test(id) ? encode_identifier(id, _this)
+					: id,
+			// e.g., "media/1.png"
+			href : href,
+			'media-type' : item_data['media-type'] || item_data.type
+					|| library_namespace.MIME_of(href)
+		};
+
+		if (!strict) {
+			if (!item_data.url && href.includes('://')) {
+				item_data.url = href;
+			}
+			item[KEY_DATA] = item_data;
+		}
 
 		return item;
 	}
@@ -424,12 +717,14 @@ function module_code(library_namespace) {
 	NOT_FOUND = ''.indexOf('_');
 
 	function index_of_chapter(title) {
+		rebuild_index_of_id.call(this);
+
 		// console.log(this.chapters);
 		if (title in this.chapter_index_of_id) {
 			// title 為 id
 			return this.chapter_index_of_id[title];
 		}
-		var encoded = encode_identifier(title);
+		var encoded = encode_identifier(title, this);
 		if (encoded in this.chapter_index_of_id) {
 			// title 為 title
 			return this.chapter_index_of_id[encoded];
@@ -445,7 +740,8 @@ function module_code(library_namespace) {
 			// console.log('> ' + title);
 			// console.log(item);
 			if (
-			// title === item.id || title === decode_identifier(item.id) ||
+			// title === item.id || title === decode_identifier(item.id, this)
+			// ||
 			title === item.href) {
 				return index;
 			}
@@ -459,21 +755,132 @@ function module_code(library_namespace) {
 				&& item1.href === item2.href;
 	}
 
-	function add_chapter(data, contents) {
-		if (!data) {
+	// item data / config
+	function add_chapter(item_data, contents) {
+		if (!item_data) {
 			return;
 		}
 
-		var item = normalize_item(data);
+		if (Array.isArray(item_data)) {
+			if (contents) {
+				throw new Error('設定多個檔案為相同的內容：' + item_data);
+			}
+			return item_data.map(function(_item_data) {
+				return add_chapter.call(this, _item_data);
+			}, this);
+		}
 
-		if (is_the_same_item(item, this.TOC)
-				// 若是已存在相同資源(.id + .href)則直接跳過。
-				|| (item.id in this.chapter_index_of_id)
+		var item = normalize_item(item_data, this);
+		item_data = item[KEY_DATA] || library_namespace.null_Object();
+		// assert: library_namespace.is_Object(item_data)
+		// console.log(item_data);
+		// console.log(item);
+
+		rebuild_index_of_id.call(this);
+		rebuild_index_of_id.call(this, true);
+
+		// 有contents的話，採用contents做為內容。並從item.href擷取出檔名。
+		if (!contents && item_data.url) {
+			// 沒contents的一律當作resource。
+			var resource_href_hash = library_namespace.null_Object();
+			if (this.resources.some(function(resource) {
+				if (resource[KEY_DATA]
+						&& resource[KEY_DATA].url === item_data.url) {
+					var message = '已經有相同的資源檔 ' + resource[KEY_DATA].url;
+					if (item_data.href
+					// 有手動設定.href
+					&& item_data.href !== resource.href) {
+						library_namespace.err(message
+								+ '\n但 .href 不同，您必須手動修正: ' + resource.href
+								+ '→' + item_data.href);
+					} else {
+						library_namespace.log(message);
+					}
+					// 回傳重複的resource。
+					item = resource;
+					return true;
+				}
+				resource_href_hash[resource.href] = resource;
+			})) {
+				return item;
+			}
+
+			// 避免衝突，檢測是不是有不同URL，相同檔名存在。
+			while (item.href in resource_href_hash) {
+				item.href = item.href.replace(
+				// 必須是encode_identifier()之後不會變化的檔名。
+				/(?:-(\d+))?(\.[a-z\d\-]+)?$/, function(all, NO, ext_part) {
+					return '-' + ((NO | 0) + 1) + (ext_part || '');
+				});
+			}
+
+			if (item_data.href && item_data.href !== item.href) {
+				// 有手動設定.href
+				library_namespace.err('add_chapter: 儲存檔名改變，您需要自行修正原參照文件中之檔名:\n'
+						+ item_data.href + ' →\n' + item.href);
+			}
+
+			// 避免衝突，檢測是不是有不同id，相同id存在。
+			while ((item.id in this.resource_index_of_id)
+					|| (item.id in this.chapter_index_of_id)) {
+				item.id = item.id.replace(
+				// 必須是encode_identifier()之後不會變化的檔名。
+				/(?:-(\d+))?(\.[a-z\d\-]+)?$/, function(all, NO, ext_part) {
+					return '-' + ((NO | 0) + 1) + (ext_part || '');
+				});
+			}
+
+			if (item_data.id && item_data.id !== item.id) {
+				// 有手動設定.href
+				library_namespace.err('add_chapter: id改變，您需要自行修正原參照文件中之檔名:\n'
+						+ item_data.id + ' →\n' + item.id);
+			}
+
+			// 先登記預防重複登記 (placeholder)。
+			add_manifest_item.call(this, item, true);
+
+			// 自網路取得url。
+			library_namespace.log('add_chapter: get URL: ' + item_data.url);
+
+			// assert: CeL.application.net.Ajax included
+			library_namespace.get_URL_cache(item_data.url, function(contents,
+					error, XMLHttp) {
+				// save MIME type
+				item_data.type = XMLHttp.type;
+
+				library_namespace.log('add_chapter: URL got: ['
+						+ item_data.type + '] ' + item_data.url + '\n→ '
+						+ item.href);
+
+				// item_data.write_file = false;
+				// this.add(item_data, contents);
+			}.bind(this), {
+				file_name : this.path[detect_file_type(item.href)]
+						+ get_file_name_of_url(item.href),
+				encoding : undefined,
+				charset : (detect_file_type(item_data.file
 				//
-				&& is_the_same_item(item,
-						this.chapters[this.chapter_index_of_id[item.id]])) {
-			library_namespace.log('已經有相同的篇章，將不覆寫: '
-					+ decode_identifier(item.id));
+				|| item.href) || detect_file_type(item_data.url)) === 'text'
+						&& item_data.charset || 'binary',
+				get_URL_options : item_data.get_URL_options
+			});
+			return item;
+		}
+
+		if (!item_data.force && (is_the_same_item(item, this.TOC)
+		// 若是已存在相同資源(.id + .href)則直接跳過。
+		|| (item.id in this.chapter_index_of_id) && is_the_same_item(item,
+		//
+		this.chapters[this.chapter_index_of_id[item.id]]))
+		//
+		|| (item.id in this.resource_index_of_id) && is_the_same_item(item,
+		//
+		this.resources[this.resource_index_of_id[item.id]])) {
+			library_namespace.debug('已經有相同的篇章，將不覆寫: '
+			//
+			+ (item[KEY_DATA] && item[KEY_DATA].file
+			//
+			|| decode_identifier(item.id, this)), 2);
 			return;
 		}
 
@@ -482,23 +889,82 @@ function module_code(library_namespace) {
 		// TODO: 檢測是否存在相同資源(.href)並做警告。
 
 		if (contents) {
+			if (library_namespace.is_Object(contents)) {
+				var html = [ '<?xml version="1.0" encoding="UTF-8"?>',
+				// https://www.w3.org/QA/2002/04/valid-dtd-list.html
+				// https://cweiske.de/tagebuch/xhtml-entities.htm
+				// '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"',
+				// ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
+				'<!DOCTYPE html>',
+				//
+				'<html xmlns="http://www.w3.org/1999/xhtml">', '<head>',
+				// https://developer.mozilla.org/zh-TW/docs/Web_%E9%96%8B%E7%99%BC/Historical_artifacts_to_avoid
+				// <meta http-equiv="Content-Type"
+				// content="text/html; charset=UTF-8" />
+				'<meta charset="UTF-8" />' ];
+				html.push('<title>', contents.title + ' - '
+						+ contents.sub_title, '</title>', '</head><body>',
+				// + '<div style="float:right">' + contents.chapter + '</div>'
+				'<h2>', contents.title, '</h2>',
+				//
+				'<h3>', contents.sub_title, '</h3>',
+				//
+				'<div class="date">', library_namespace.is_Date(item_data.date)
+				//
+				? item_data.date.format('%Y-%2m-%2d') : item_data.date,
+				//
+				'</div>',
+				//
+				'<div class="text">', contents.text, '</div></body></html>');
+				contents = html.join('\n');
+			}
+
 			// 需要先準備好目錄結構。
 			if (!this.initializated) {
 				this.initialize();
 			}
 
+			if (detect_file_type(item.href) === 'text') {
+				contents = contents.replace(/(<img ([^>]+)>)(\s*<\/img>)?/g,
+				// 改正明顯錯誤。
+				function(all, opening_tag, inner) {
+					inner = inner.trim();
+					if (inner.endsWith(' \/')) {
+						return opening_tag;
+					}
+					return '<img ' + inner + ' \/>';
+				})
+				// [[non-breaking space]]
+				// EpubCheck 不認識 HTML character entity，
+				// 但卻又不允許 <!DOCTYPE html> 加入其他宣告。
+				.replace(/&nbsp;/g, '&#160;')
+				// '\f': 無效的 XML字元
+				// e.g., http://www.alphapolis.co.jp/content/sentence/213451/
+				.replace(/\x0c/g, '')
+				//
+				.replace(/&([^#a-z])/ig, '&amp;$1');
+
+				// TODO: 若有<ruby>，將無法檢測過。
+			}
+
 			library_namespace.debug('Write ' + contents.length + ' chars to ['
 					+ this.path.text + item.href + ']');
-			library_namespace.write_file(this.path.text + item.href, contents);
+			if (item_data.write_file !== false) {
+				library_namespace.write_file(this.path.text + item.href,
+						contents);
+			} else {
+				library_namespace.debug('未自動寫入 file，您需要自己完成這動作。');
+			}
 		}
 
-		if (data.TOC) {
+		if (item_data.TOC) {
 			// EPUB Navigation Document
 			item.properties = 'nav';
 			this.TOC = item;
 		} else {
 			add_manifest_item.call(this, item);
 		}
+		return item;
 	}
 
 	function remove_chapter_by_index(index) {
@@ -515,12 +981,14 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		rebuild_index_of_id.call(this);
+
 		if (library_namespace.is_Object(title)) {
 			if (title.id in this.chapter_index_of_id) {
 				return remove_chapter_by_index.call(this,
 						this.chapter_index_of_id[title.id]);
 			}
-			if (title.title && (title = encode_identifier(title.title))
+			if (title.title && (title = encode_identifier(title.title, this))
 			//
 			&& (title in this.chapter_index_of_id)) {
 				return remove_chapter_by_index.call(this,
@@ -530,10 +998,80 @@ function module_code(library_namespace) {
 
 		} else if (title in this.chapter_index_of_id
 		//
-		|| (title = encode_identifier(title)) in this.chapter_index_of_id) {
+		|| (title = encode_identifier(title, this)) in this.chapter_index_of_id) {
 			return remove_chapter_by_index.call(this,
 					this.chapter_index_of_id[title]);
 		}
+	}
+
+	// 自動生成目錄。
+	function generate_TOC() {
+		var TOC_html = [ '<?xml version="1.0" encoding="UTF-8"?>',
+		// https://www.w3.org/QA/2002/04/valid-dtd-list.html
+		// https://cweiske.de/tagebuch/xhtml-entities.htm
+		// '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"',
+		// ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
+		'<!DOCTYPE html>',
+		//
+		'<html xmlns="http://www.w3.org/1999/xhtml"',
+		//
+		' xmlns:epub="http://www.idpf.org/2007/ops">', '<head></head>',
+		//
+		'<body>',
+		//
+		'<h1>', this.metadata.title[metadata_prefix + 'title'], '</h1>' ];
+
+		this.resources.some(function(resource) {
+			if (resource.properties = "cover-image") {
+				TOC_html.push(JSON.to_XML({
+					img : null,
+					alt : "cover-image",
+					title : resource.data && resource.data.url
+					//
+					|| resource.href,
+					src : resource.href
+				}));
+				return true;
+			}
+		});
+
+		TOC_html.push(
+		// 作品資訊
+		'<h2>', 'Work information', '</h2>', '<div id="work_data">');
+		Object.entries(this.metadata).forEach(function(data) {
+			var key = data[0];
+			TOC_html.push('<dl><dt>' + key + '</dt><dd>'
+			//
+			+ data[1][to_meta_information_key(key)] + '</dd></dl>');
+		});
+
+		TOC_html.push('</div>',
+		// The toc nav element must occur exactly once in an EPUB
+		// Navigation Document.
+		'<nav epub:type="toc" id="toc">',
+		// 作品目錄 目次
+		'<h2>', 'Table of contents', '</h2>', '<ol>');
+
+		this.chapters.map(function(chapter) {
+			var data = chapter[KEY_DATA]
+			//
+			|| library_namespace.null_Object();
+			TOC_html.push([ '<li><a href="' + chapter.href + '">',
+			//
+			(data.title
+			// 未失真的title = decode_identifier(item.id, this)
+			|| decode_identifier(chapter.id, this)),
+			//
+			(data.date
+			//
+			? data.date.format(' <small>(%Y-%2m-%2d)</small>') : ''),
+			//
+			'</a>', '</li>' ].join(''));
+		}, this);
+
+		TOC_html.push('</ol>', '</nav>', '</body></html>');
+
+		return TOC_html.join('\n');
 	}
 
 	function write_chapters() {
@@ -541,89 +1079,164 @@ function module_code(library_namespace) {
 			this.initialize();
 		}
 
+		this.raw_data_ptr.metadata.clear();
+		this.raw_data_ptr.metadata.push(Object.values(this.metadata));
+
+		// console.log(chapters);
+		if (!this.TOC) {
+			this.add({
+				title : 'TOC',
+				TOC : true
+			}, this.generate_TOC());
+		}
+
+		var chapters = this.chapters.clone();
+		// add TOC as the first chapter.
+		chapters.unshift(this.TOC);
+		// console.log(this.resources.concat(chapters));
+
 		// {Array}raw_data.package[0].metadata
 		// {Array}raw_data.package[1].manifest
 		// {Array}raw_data.package[2].spine
 
-		this.raw_data.package[0].metadata = Object.values(this.metadata);
-
-		var chapters = this.chapters.clone();
-		if (!this.TOC) {
-			// 自動生成目錄。
-
-			var TOC_html = [ '<?xml version="1.0" encoding="UTF-8"?>',
-					'<!DOCTYPE html>',
-					'<html xmlns="http://www.w3.org/1999/xhtml"',
-					' xmlns:epub="http://www.idpf.org/2007/ops">',
-					'<head></head><body>',
+		// rebuild package. 但不能動到定義，因此不直接 =[]，採用.push()。
+		this.raw_data_ptr.manifest.clear();
+		this.resources.concat(chapters).forEach(function(resource) {
+			this.raw_data_ptr.manifest.push(
+			// 再做一次檢查，預防被外部touch過。
+			normalize_item(resource, this, true));
+			if (resource[KEY_DATA]) {
+				var info = library_namespace.null_Object(), setted;
+				// preserve additional properties
+				'url,file,type,date'.split(',')
+				//
+				.forEach(function(name) {
+					if (resource[KEY_DATA][name]) {
+						setted = true;
+						info[name] = resource[KEY_DATA][name];
+					}
+				});
+				if (setted) {
+					this.raw_data_ptr.manifest.push('<!-- '
 					//
-					'<h1>', this.metadata.title[metadata_prefix + 'title'],
-					'</h1>',
-					//
-					'<h2>Work information</h2>', '<div id="work_data">',
-					Object.entries(this.metadata).map(function(data) {
-						var key = data[0];
-						return '<dl><dt>' + key + '</dt><dd>'
-						//
-						+ data[1][to_meta_information_key(key)] + '</dd></dl>';
-					}).join(''), '</div>',
-					// The toc nav element must occur exactly once in an
-					// EPUB
-					// Navigation Document.
-					'<nav epub:type="toc" id="toc">',
-					//
-					'<h2>Table of contents</h2>', '<ol>',
-					chapters.map(function(chapter) {
-						return '<li><a href="' + chapter.href + '">'
-						// 未失真的title = decode_identifier(item.id)
-						+ decode_identifier(chapter.id) + '</a></li>';
-					}).join(''), '</ol>', '</nav>', '</body></html>' ].join('');
+					+ JSON.stringify(info) + ' -->');
+				}
+			}
+		}, this);
 
-			this.add({
-				title : 'TOC',
-				TOC : true
-			}, TOC_html);
-		}
-		chapters.unshift(this.TOC);
-		// console.log(this.resources.concat(chapters));
-		this.raw_data.package[1].manifest = this.resources.concat(chapters)
-		// 再做一次檢查，預防被外部touch過。
-		.map(normalize_item);
-		this.raw_data.package[2].spine = chapters.filter(function(chapter) {
+		this.raw_data_ptr.spine.clear();
+		this.raw_data_ptr.spine.push(chapters.filter(function(chapter) {
 			return !!chapter.id;
 		}).map(function(chapter) {
 			return {
 				itemref : null,
 				idref : chapter.id
 			};
-		});
+		}))
 
-		library_namespace.write_file(this.path.book + 'content.opf', JSON
-				.to_XML(this.raw_data, true));
+		library_namespace.write_file(this.path.book
+				+ this.package_document_name,
+		//
+		JSON.to_XML(this.raw_data, this.to_XML_options));
 	}
 
-	// package
-	function archive_to_ZIP() {
+	// package 打包 bale packing
+	function archive_to_ZIP(target_directory, target_file_name, remove) {
 		this.flush();
 
-		// TODO
-		TODO;
-
-		// archive mimetype
-		// archive others
-		// .zip → .epub
-
 		// remove empty directories
+		Object.keys(this.path).sort()
+		// 刪除目錄時，應該從深層目錄開始。
+		.reverse().forEach(function(name) {
+			var directory = this.path[name],
+			//
+			fso_list = library_namespace.read_directory(directory);
+			if (!fso_list || fso_list.length === 0) {
+				library_namespace.debug(
+				//
+				'remove empty directory: ' + directory);
+				library_namespace.remove_directory(directory);
+			}
+		}, this);
+
+		library_namespace.debug('bale packing: Not Yet Implemented.');
+
+		// TODO: use application.OS.execute instead
+		/** node.js: run OS command */
+		var execSync = require('child_process').execSync;
+
+		// 注意: 這需要先安裝7z.exe程式
+		library_namespace.write_file(this.path.root + 'create.bat', [
+		// @see create_ebook.bat
+		'SET P7Z="C:\\Program Files\\7-Zip\\7z.exe"',
+				'SET BOOKNAME=' + 'book.epub',
+				// store mimetype
+				'%P7Z% a -tzip -mx=0 %BOOKNAME% mimetype',
+				'%P7Z% rn %BOOKNAME% mimetype !imetype',
+				// archive others
+				'%P7Z% a -tzip -mx=9 -r %BOOKNAME% META-INF EPUB',
+				'%P7Z% rn %BOOKNAME% !imetype mimetype' ].join('\r\n'));
+		var command = 'cd /d "' + this.path.root + '" && ' + 'create.bat';
+		execSync(command);
+
+		if (!/[\\\/]$/.test(target_directory)) {
+			target_directory += path_separator;
+		}
+
+		if (!target_file_name) {
+			target_file_name = this.path.root.match(/([^\\\/]+)[\\\/]$/)[1];
+		}
+
+		if (!target_file_name.includes('.')) {
+			target_file_name += '.epub';
+		}
+
+		// book.epub → *.epub
+		library_namespace.move_file(this.path.root + 'book.epub',
+				target_directory + target_file_name);
+
+		if (remove) {
+			// the operatoin failed
+			library_namespace.remove_directory(this.path.root);
+		}
 	}
 
 	Ebook.prototype = {
+		// default root directory name
+		// Open eBook Publication Structure (OEBPS)
+		// @see [[Open eBook]]
+		// http://www.idpf.org/epub/31/spec/epub-ocf.html#gloss-ocf-root-directory
+		root_directory_name : 'EPUB',
+		// http://www.idpf.org/epub/31/spec/epub-spec.html#gloss-package-document
+		// e.g., EPUB/content.opf
+		package_document_name : 'content.opf',
+
+		to_XML_options : {
+			declaration : true,
+			separator : '\n'
+		},
+
+		// 應該用[A-Za-z]起始，但光單一字母不容易辨識。
+		id_prefix : 'i',
+
+		setup_container : setup_container,
 		initialize : initialize,
 		set_raw_data : set_raw_data,
 		set : set_meta_information,
+		// book.set_cover(url)
+		// book.set_cover({url:'url',file:'file_name'})
+		// book.set_cover(file_name, contents)
+		set_cover : set_cover_image,
+		arrange : function() {
+			rebuild_index_of_id.call(this, false, true);
+			rebuild_index_of_id.call(this, true, true);
+		},
 		add : add_chapter,
 		remove : remove_chapter,
+
+		generate_TOC : generate_TOC,
 		flush : write_chapters,
-		archive : archive_to_ZIP
+		pack : archive_to_ZIP
 	};
 
 	return Ebook;

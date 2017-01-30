@@ -3,6 +3,9 @@
  * @name	CeL file function for Windows
  * @fileoverview
  * 本檔案包含了 Windows 的檔案/文件管理 functions。
+ * 
+ * use 'application.storage' instead
+ * 
  * @since	2009/12/1
  */
 

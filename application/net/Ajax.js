@@ -14,6 +14,9 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.net.Ajax',
 
+	// MIME_of()
+	require : 'application.net.MIME.',
+
 	// 設定不匯出的子函式。
 	// no_extend : '*',
 
@@ -77,7 +80,8 @@ function module_code(library_namespace) {
 	 * @param {String}page_url
 	 *            page url
 	 * @param {String}[charset]
-	 *            character encoding of HTML. e.g., 'UTF-8', big5, euc-jp, ...
+	 *            character encoding of HTML web page. e.g., 'UTF-8', big5,
+	 *            euc-jp, ...
 	 * @param POST_text
 	 *            POST text
 	 * 
@@ -175,7 +179,8 @@ function module_code(library_namespace) {
 	 * @param {Function}[onload]
 	 *            callback when successful loaded
 	 * @param {String}[charset]
-	 *            character encoding of HTML. e.g., 'UTF-8', big5, euc-jp, ...
+	 *            character encoding of HTML web page. e.g., 'UTF-8', big5,
+	 *            euc-jp, ...
 	 * @param {String|Object}[post_data]
 	 *            text data to send when method is POST
 	 * @param {Object}[options]
@@ -563,13 +568,6 @@ function module_code(library_namespace) {
 
 	var to_form_data_generated = {
 		form_data_generated : true
-	},
-	// 常用 MIME types
-	common_MIME_types = {
-		// jpg : 'image/jpeg',
-		// svg : 'image/svg+xml',
-		// lst : 'text/plain',
-		txt : 'text/plain'
 	};
 
 	// https://github.com/form-data/form-data/blob/master/lib/form_data.js
@@ -641,11 +639,7 @@ function module_code(library_namespace) {
 				// value: file path → file name
 				value = value.match(/[^\\\/]*$/)[0];
 				if (!MIME_type) {
-					// 由 file extension 判別。
-					MIME_type = value.match(/[a-z\d\-]*$/i)[0].toLowerCase();
-					MIME_type = common_MIME_types[MIME_type]
-					// png → image/png
-					|| 'image/' + MIME_type;
+					MIME_type = library_namespace.MIME_of(value);
 				}
 				push_and_callback(MIME_type, content);
 				return;
@@ -1193,7 +1187,8 @@ function module_code(library_namespace) {
 	 *            callback when successful loaded. For failure handling, using
 	 *            option.onfail(error);
 	 * @param {String}[charset]
-	 *            character encoding of HTML. e.g., 'UTF-8', big5, euc-jp,..
+	 *            character encoding of HTML web page. e.g., 'UTF-8', big5,
+	 *            euc-jp,..
 	 * @param {String|Object}[post_data]
 	 *            text data to send when method is POST
 	 * @param {Object}[options]
@@ -1439,7 +1434,7 @@ function module_code(library_namespace) {
 			result_Object.headers = result.headers;
 			// 在503之類的情況下。可能沒"Content-Type:"。這時result將無.type。
 			if (result.headers['content-type']) {
-				// MIME type: XMLHttp.type
+				// MIME type, media-type: XMLHttp.type
 				result_Object.type = result.headers['content-type']
 				// charset: XMLHttp.charset
 				.replace(/;(.*)$/, function($0, $1) {
@@ -1909,7 +1904,8 @@ function module_code(library_namespace) {
 
 		var file_name = options.file_name,
 		/** {String}file encoding for fs of node.js. */
-		encoding = options.encoding || get_URL_cache_node.encoding;
+		encoding = 'encoding' in options ? options.encoding
+				: get_URL_cache_node.encoding;
 
 		if (!file_name && (file_name = URL.match(/[^\/]+$/))) {
 			// 自URL取得檔名。
@@ -1944,15 +1940,16 @@ function module_code(library_namespace) {
 					//
 					'get_URL_cache_node.cache: Error to get URL: [' + URL
 							+ '].');
-					onload(undefined, error);
+					onload(undefined, error, XMLHttp);
 					return;
 				}
 
-				data = XMLHttp.responseText;
+				// .buffer: node only.
+				data = !encoding && XMLHttp.buffer || XMLHttp.responseText;
 				// 資料事後處理程序 (post-processor):
 				// 將以 .postprocessor() 的回傳作為要處理的資料。
 				if (typeof options.postprocessor === 'function') {
-					data = options.postprocessor(data);
+					data = options.postprocessor(data, XMLHttp);
 				}
 				/**
 				 * 寫入cache。
@@ -1969,8 +1966,11 @@ function module_code(library_namespace) {
 							+ '...', 3, 'get_URL_cache_node');
 					node_fs.writeFileSync(file_name, data, encoding);
 				}
-				onload(data);
-			}, options.charset, options.post_data);
+				onload(data, undefined, XMLHttp);
+			},
+			// character encoding of HTML web page
+			// is different from the file we want to save to
+			options.charset, options.post_data, options.get_URL_options);
 		});
 	}
 

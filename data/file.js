@@ -16,7 +16,8 @@ if (typeof CeL === 'function')
 		code : function(library_namespace) {
 
 			// requiring.
-			var new_COM = this.r('new_COM'), Serial_execute = this.r('Serial_execute');
+			var new_COM = this.r('new_COM'), Serial_execute = this
+					.r('Serial_execute');
 
 			// ---------------------------------------------------------------------//
 			// 基本宣告與定義。
@@ -1335,8 +1336,7 @@ if (typeof CeL === 'function')
 				if (options) {
 					if (!options.no_set_order) {
 						this.order = order;
-						if (comparator === 'function'
-								&& !options.no_set_sort)
+						if (comparator === 'function' && !options.no_set_sort)
 							this.comparator = comparator;
 					}
 

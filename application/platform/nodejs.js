@@ -1,6 +1,9 @@
 /**
  * @name CeL function for Node.js
  * @fileoverview 本檔案包含了 Node.js 專用的 functions。
+ * 
+ * use 'application.storage' instead
+ * 
  * @since
  */
 
@@ -76,7 +79,7 @@ function module_code(library_namespace) {
 	};
 
 	_.directory_exists = function directory_exists(directory_path) {
-		var fso_status = fs_status(file_path, true);
+		var fso_status = fs_status(directory_path, true);
 		return fso_status && fso_status.isDirectory();
 	};
 

@@ -1287,6 +1287,12 @@ function module_code(library_namespace) {
 	}
 
 	/**
+	 * TODO:<br />
+	 * rename to .find_between, return {Iterator}
+	 * 
+	 * @see http://jsrocks.org/cn/2015/09/javascript-iterables-and-iterators/
+	 *      http://es6.ruanyifeng.com/#docs/symbol
+	 * 
 	 * <code>
 
 	// 推薦用法
@@ -2979,6 +2985,15 @@ function module_code(library_namespace) {
 		return 2 * count / (bigrams_1.length + bigrams_2.length);
 	}
 
+	function Array_truncate(length) {
+		length = Math.max(0, length | 0);
+		// This is faster than ((this.length = 0))
+		while (this.length > length) {
+			this.pop();
+		}
+		return this;
+	}
+
 	// ------------------------------------
 
 	set_method(String.prototype, {
@@ -3162,15 +3177,10 @@ function module_code(library_namespace) {
 		// Array.prototype.first_matched
 		first_matched : set_bind(first_matched, true),
 
-		// empty the array. 清空 array
+		truncate : Array_truncate,
+		// empty the array. 清空 array. truncate
 		// Array.prototype.clear()
-		clear : function(length) {
-			length = Math.max(0, length | 0);
-			// This is faster than ((this.length = 0))
-			while (this.length > length)
-				this.pop();
-			return this;
-		}
+		clear : Array_truncate
 	});
 
 	// ---------------------------------------------------------------------//
