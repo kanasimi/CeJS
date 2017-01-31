@@ -668,7 +668,7 @@ function module_code(library_namespace) {
 			//
 			+ (typeof _this.pre_chapter_URL === 'function' ? ''
 			//
-			'/' + work_data.chapter_count) + '...\r');
+			: '/' + work_data.chapter_count) + '...\r');
 
 			// default: 置於 work_data.directory 下
 			var chapter_file_name = work_data.directory
