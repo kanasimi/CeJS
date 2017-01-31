@@ -621,6 +621,8 @@ function module_code(library_namespace) {
 				} else {
 					library_namespace.log(message);
 				}
+				library_namespace.debug('Create work_data.directory: '
+						+ work_data.directory);
 				library_namespace.fs_mkdir(work_data.directory);
 				node_fs.writeFileSync(work_data.data_file, JSON
 						.stringify(work_data));
@@ -662,8 +664,11 @@ function module_code(library_namespace) {
 		process.title = chapter + ' @ ' + work_data.title;
 
 		function get_data() {
-			process.stdout.write('Get data of chapter ' + chapter + '/'
-					+ work_data.chapter_count + '...\r');
+			process.stdout.write('Get data of chapter ' + chapter
+			//
+			+ (typeof _this.pre_chapter_URL === 'function' ? ''
+			//
+			'/' + work_data.chapter_count) + '...\r');
 
 			// default: 置於 work_data.directory 下
 			var chapter_file_name = work_data.directory

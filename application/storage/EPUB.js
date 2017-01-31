@@ -222,11 +222,17 @@ function module_code(library_namespace) {
 	}
 
 	// 先準備好目錄結構。
-	function initialize() {
+	function initialize(force) {
+		if (this.initializated && !force) {
+			return;
+		}
+
+		library_namespace.create_directory(Object.values(this.path)
+		// 從root排到sub-directory，預防create_directory時parent-directory尚未創建。
+		.sort());
+
 		// create structure
-		var directory = this.path.root;
-		library_namespace.create_directory(directory);
-		library_namespace.write_file(directory + 'mimetype',
+		library_namespace.write_file(this.path.root + 'mimetype',
 		/**
 		 * The mimetype file must be an ASCII file that contains the string
 		 * application/epub+zip. It must be unencrypted, and the first file in
@@ -234,19 +240,12 @@ function module_code(library_namespace) {
 		 */
 		'application/epub+zip');
 
-		directory = this.path.root + container_directory_name + path_separator;
+		var directory = this.path.root + container_directory_name
+				+ path_separator;
 		library_namespace.create_directory(directory);
 		library_namespace.write_file(directory + container_file_name,
 		//
 		JSON.to_XML(this.container, this.to_XML_options));
-
-		Object.values(this.path)
-		// 從root排到sub-directory，預防create_directory時parent-directory尚未創建。
-		.sort().forEach(function(directory) {
-			if (directory && !library_namespace.directory_exists(directory)) {
-				library_namespace.create_directory(directory);
-			}
-		});
 
 		this.initializated = true;
 	}
@@ -499,10 +498,16 @@ function module_code(library_namespace) {
 			return;
 		}
 		if (typeof item_data === 'string' && item_data.includes('://')) {
+			var matched;
 			item_data = {
 				url : item_data,
 				file : library_namespace.main_MIME_type_of(item_data)
-						&& item_data.match(/[^\\\/]+$/i)[0] || 'cover.jpg'
+				//
+				&& item_data.match(/[^\\\/]+$/i)[0]
+				//
+				|| 'cover.' + (item_data.type && (matched = item_data.type
+				//
+				.match(/^image\/([a-z\d]+)$/)) ? matched[1] : 'jpg')
 			};
 		}
 		var item = normalize_item(item_data, this);
@@ -839,6 +844,9 @@ function module_code(library_namespace) {
 			// 先登記預防重複登記 (placeholder)。
 			add_manifest_item.call(this, item, true);
 
+			// 需要先準備好目錄結構。
+			this.initialize();
+
 			// 自網路取得url。
 			library_namespace.log('add_chapter: get URL: ' + item_data.url);
 
@@ -920,9 +928,7 @@ function module_code(library_namespace) {
 			}
 
 			// 需要先準備好目錄結構。
-			if (!this.initializated) {
-				this.initialize();
-			}
+			this.initialize();
 
 			if (detect_file_type(item.href) === 'text') {
 				contents = contents.replace(/(<img ([^>]+)>)(\s*<\/img>)?/g,
@@ -1075,9 +1081,7 @@ function module_code(library_namespace) {
 	}
 
 	function write_chapters() {
-		if (!this.initializated) {
-			this.initialize();
-		}
+		this.initialize();
 
 		this.raw_data_ptr.metadata.clear();
 		this.raw_data_ptr.metadata.push(Object.values(this.metadata));

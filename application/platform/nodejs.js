@@ -167,13 +167,15 @@ function module_code(library_namespace) {
 	 */
 	function create_directory(directories, mode) {
 		// var node_fs = require('fs');
-		var error = 0;
+		var error = [];
 		if (typeof directories === 'string') {
 			directories = [ directories ];
 		}
 		directories.forEach(function(directory_name) {
 			try {
-				node_fs.accessSync(directory_name, node_fs.F_OK
+				directory_name
+				//
+				&& node_fs.accessSync(directory_name, node_fs.F_OK
 				//
 				| node_fs.R_OK | node_fs.W_OK | node_fs.X_OK);
 			} catch (e) {
@@ -192,6 +194,8 @@ function module_code(library_namespace) {
 				} catch (e) {
 					if (e.code !== 'EEXIST')
 						;
+					library_namespace.debug('Error to create ' + directory_name
+							+ ': ' + e, 1, 'create_directory');
 					error++;
 				}
 			}
@@ -236,7 +240,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://github.com/isaacs/rimraf/blob/master/rimraf.js
 	 */
-	function remove_fso(path, callback) {
+	function remove_fso(path, callback, force) {
 		var r = typeof callback === 'function' ? function(error) {
 			callback(error);
 			// normalize
