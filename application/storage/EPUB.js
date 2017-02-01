@@ -910,20 +910,34 @@ function module_code(library_namespace) {
 				// <meta http-equiv="Content-Type"
 				// content="text/html; charset=UTF-8" />
 				'<meta charset="UTF-8" />' ];
-				html.push('<title>', contents.title + ' - '
-						+ contents.sub_title, '</title>', '</head><body>',
-				// + '<div style="float:right">' + contents.chapter + '</div>'
-				'<h2>', contents.title, '</h2>',
+
+				html.push('<title>', [ contents.title, contents.sub_title ]
 				//
-				'<h3>', contents.sub_title, '</h3>',
-				//
-				'<div class="date">', library_namespace.is_Date(item_data.date)
+				.filter(function(title) {
+					return !!title;
+				}).join(' - '), '</title>', '</head><body>');
+
+				if (contents.title) {
+					html.push('<h2>', contents.title, '</h2>');
+				}
+				if (contents.sub_title) {
+					html.push('<h3>', contents.sub_title, '</h3>');
+				}
+				html.push('<div class="date">', library_namespace
+						.is_Date(item_data.date)
 				//
 				? item_data.date.format('%Y-%2m-%2d') : item_data.date,
 				//
-				'</div>',
-				//
-				'<div class="text">', contents.text, '</div></body></html>');
+				'</div>');
+
+				if (false) {
+					html.push('<div style="float:right">', contents.chapter,
+							'</div>');
+				}
+
+				html.push('<div class="text">', contents.text,
+						'</div></body></html>');
+
 				contents = html.join('\n');
 			}
 

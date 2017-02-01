@@ -294,7 +294,7 @@ function module_code(library_namespace) {
 
 		return r();
 	}
-	// _.fs_delete
+	// _.fs_delete, _.fs_rmdir
 	_.fs_remove = remove_fso;
 
 	/**
