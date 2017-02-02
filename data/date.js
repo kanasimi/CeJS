@@ -781,7 +781,9 @@ function module_code(library_namespace) {
 			.split(',');
 	(function() {
 		// e.g., for '公元前720年2月22日'
-		var start_pattern = '^[^\\d:\\-−‐前.]*', mid_pattern = '(?:\\s+',
+		var start_pattern = '^[^\\d:\\-−‐前.]*',
+		// with weekday 星期
+		mid_pattern = '(?:\\s*\\(?[日月火水木金土一二三四五六]\\)?)?(?:\\s+',
 		// e.g., for '1616年2月壬午', '7時'
 		end_pattern = ')?[^\\d日時]*$',
 

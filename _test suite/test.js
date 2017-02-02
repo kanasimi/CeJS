@@ -1816,6 +1816,7 @@ function test_date() {
 		[[0,new Date('2022/5/5')-'2022/5/5'.to_Date()], '.to_Date(): 理應可 parse 的值'],
 		[[0,new Date('2022/5/5 UTC+09:00')-'2022/5/5'.to_Date({zone:'UTC+9'})], '.to_Date(): 理應可 parse 的值+TZ @ options'],
 		[[0,new Date('2022/5/5 UTC+09:00')-'2022/5/5 UTC+9'.to_Date()], '.to_Date(): 理應可 parse 的值+TZ'],
+		[[0,new Date('2016-11-21T08:00:00')-'2016年11月21日(金) 08:00'.to_Date({zone:0})], '.to_Date(): 理應可 parse 的值+星期'],
 
 		[[0,new Date('2022/5/5 UTC')-'2022/5/5 UTC'.to_Date()], '.to_Date(): 理應可 parse 的值'],
 		[[0,'2022/5/5'.to_Date({zone:0})-'2022/5/5 UTC'.to_Date()], '.to_Date(): 理應可 parse 的值'],

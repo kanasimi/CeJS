@@ -162,6 +162,9 @@ function module_code(library_namespace) {
 		EOI_error_postfix : ' bad',
 		// 加上有錯誤檔案之註記。
 		EOI_error_path : EOI_error_path,
+		// cache directory below this.main_directory
+		// MUST append path_separator!
+		cache_directory_name : 'cache' + path_separator,
 
 		// default start chapter index
 		start_chapter : 1,
@@ -182,7 +185,9 @@ function module_code(library_namespace) {
 		},
 		is_finished : function(work_data) {
 			// e.g., 连载中, 連載中
-			return work_data.status === '已完结';
+			return /已完[結结]/.test(work_data.status)
+			//
+			|| /^完[結结]$/.test(work_data.status);
 		},
 		pre_get_chapter_data : pre_get_chapter_data,
 
@@ -516,8 +521,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			work_data = _this.parse_work_data(html, get_label,
-					exact_work_data);
+			work_data = _this.parse_work_data(html, get_label, exact_work_data);
 			if (!work_data.title) {
 				work_data.title = work_title;
 			}
@@ -548,10 +552,12 @@ function module_code(library_namespace) {
 			work_data.data_file = work_data.directory
 					+ work_data.directory_name + '.json';
 
-			var matched = _this.main_directory + 'cache/';
-			library_namespace.fs_mkdir(matched);
-			node_fs.writeFileSync(matched + work_data.directory_name + '.htm',
-					html);
+			// 先寫入作品資料cache。
+			var directory = _this.main_directory + _this.cache_directory_name;
+			library_namespace.fs_mkdir(directory);
+			// .data.htm
+			node_fs.writeFileSync(
+					directory + work_data.directory_name + '.htm', html);
 
 			// .status 選擇性屬性：須配合網站平台更改。
 			if (_this.is_finished(work_data)) {
@@ -562,7 +568,7 @@ function module_code(library_namespace) {
 				+ 'finished.txt', work_data.status);
 			}
 
-			matched = library_namespace.get_JSON(work_data.data_file);
+			var matched = library_namespace.get_JSON(work_data.data_file);
 			if (matched) {
 				// 基本上以新資料為準，除非無法取得新資料，才改用舊資料。
 				for ( var key in matched) {
@@ -585,7 +591,7 @@ function module_code(library_namespace) {
 			if (_this.chapter_list_URL) {
 				work_URL = _this.full_URL(_this.chapter_list_URL, work_id);
 				get_URL(work_URL, process_chapter_list_data, _this.charset,
-						null, this.get_URL_options);
+						null, _this.get_URL_options);
 			} else {
 				process_chapter_list_data(XMLHttp);
 			}
@@ -614,16 +620,30 @@ function module_code(library_namespace) {
 				work_data.last_download.chapter = _this.start_chapter;
 			}
 			if (work_data.chapter_count >= 1) {
+				if (_this.chapter_list_URL) {
+					node_fs.writeFileSync(_this.main_directory
+					//
+					+ _this.cache_directory_name + work_data.directory_name
+					// .TOC.htm
+					+ '.list.htm', html);
+				}
+
 				if (work_data.last_download.chapter > work_data.chapter_count) {
-					var move_to = work_data.directory
-					// 先搬移原目錄。
-					.replace(/[\\\/]+$/, '.' + (new Date).format('%4Y%2m%2d'));
-					// 常出現在 manhuatai, 2manhua。
-					library_namespace.warn('章節數量比起始下載章節編號還少，或許因為章節有經過重整。將把\n'
-							+ work_data.directory + '\n→\n' + move_to
-							+ '\n，而後重新下載！');
-					// TODO: 成壓縮檔。
-					library_namespace.fs_move(work_data.directory, move_to);
+					library_namespace.warn('章節數量 ' + work_data.chapter_count + ' 比起始下載章節編號 ' + work_data.last_download.chapter + ' 還少，或許因為章節有經過重整。');
+					if (_this.move_when_chapter_count_error) {
+						var move_to = work_data.directory
+						// 先搬移原目錄。
+						.replace(/[\\\/]+$/, '.' + (new Date).format('%4Y%2m%2d'));
+						// 常出現在 manhuatai, 2manhua。
+						library_namespace.warn('將先備分舊內容、移動目錄，而後重新下載！\n'
+								+ work_data.directory + '\n→\n' + move_to);
+						// TODO: 成壓縮檔。
+						library_namespace.fs_move(work_data.directory, move_to);
+						// re-create work_data.directory
+						library_namespace.fs_mkdir(work_data.directory);
+					} else {
+						library_namespace.info('將從頭檢查、重新下載。');
+					}
 					work_data.last_download.chapter = _this.start_chapter;
 				}
 				var message = [

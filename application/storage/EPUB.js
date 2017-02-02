@@ -485,6 +485,21 @@ function module_code(library_namespace) {
 		if (value === undefined) {
 			return data[key];
 		}
+
+		if (typeof value === 'string') {
+			if (value.includes('://')) {
+				// 處理/escape URL。
+				// && → &amp;&
+				value = value.replace_till_stable(/&&/g, '&amp;&')
+				// &xxx= → &amp;xxx=
+				.replace(/&(.*?)([^a-z\d]|$)/g, function (all, mid, end) {
+					if (end === ';') {
+						return all;
+					}
+					return '&amp;' + mid + end;
+				});
+			}
+		}
 		data[key] = value;
 	}
 
@@ -760,6 +775,47 @@ function module_code(library_namespace) {
 				&& item1.href === item2.href;
 	}
 
+	// 正規化XHTML書籍章節內容。
+	function normailize_contents(contents) {
+		contents = contents.replace(/\r/g, '')
+		// .replace(/<br \/>\n/g, '\n')
+		// .replace(/\n/g, '\r\n')
+
+		//
+		.replace(/<hr *>/ig, '<hr />')
+		// <BR> → <br />
+		.replace(/<br *>/ig, '<br />')
+		// .trim(), remove head/tail <BR>
+		.replace(/^(<br *\/>|[\s\n]+)+|(<br *\/>|[\s\n]+)+$/ig, '')
+		//
+		.replace(/(<img ([^>]+)>)(\s*<\/img>)?/g,
+		// 改正明顯錯誤。
+		function(all, opening_tag, inner) {
+			inner = inner.trim();
+			if (inner.endsWith(' \/')) {
+				return opening_tag;
+			}
+			return '<img ' + inner + ' \/>';
+		})
+
+		// e.g., id="text" → id="text"
+		// .replace(/ ([a-z]+)=([a-z]+)/g, ' $1="$2"')
+
+		// [[non-breaking space]]
+		// EpubCheck 不認識 HTML character entity，
+		// 但卻又不允許 <!DOCTYPE html> 加入其他宣告。
+		.replace(/&nbsp;/g, '&#160;')
+		// '\f': 無效的 XML字元
+		// e.g., http://www.alphapolis.co.jp/content/sentence/213451/
+		.replace(/\x0c/g, '')
+		//
+		.replace(/&([^#a-z])/ig, '&amp;$1');
+
+		// TODO: 若有<ruby>，將無法檢測過。
+
+		return contents;
+	}
+
 	// item data / config
 	function add_chapter(item_data, contents) {
 		if (!item_data) {
@@ -897,7 +953,10 @@ function module_code(library_namespace) {
 		// TODO: 檢測是否存在相同資源(.href)並做警告。
 
 		if (contents) {
-			if (library_namespace.is_Object(contents)) {
+			if (detect_file_type(item.href) !== 'text') {
+				;
+
+			} else if (library_namespace.is_Object(contents)) {
 				var html = [ '<?xml version="1.0" encoding="UTF-8"?>',
 				// https://www.w3.org/QA/2002/04/valid-dtd-list.html
 				// https://cweiske.de/tagebuch/xhtml-entities.htm
@@ -923,49 +982,39 @@ function module_code(library_namespace) {
 				if (contents.sub_title) {
 					html.push('<h3>', contents.sub_title, '</h3>');
 				}
-				html.push('<div class="date">', library_namespace
-						.is_Date(item_data.date)
-				//
-				? item_data.date.format('%Y-%2m-%2d') : item_data.date,
-				//
-				'</div>');
+
+				if (item_data.date) {
+					var date_list = item_data.date;
+					date_list = (Array.isArray(date_list) ? date_list
+							: [ date_list ]).map(function(date) {
+						return library_namespace.is_Date(date)
+						//
+						? date.format('%Y-%2m-%2d') : date;
+					}).filter(function(date) {
+						return !!date;
+					}).join(', ');
+					if (date_list) {
+						html.push('<div class="date">', date_list, '</div>');
+					}
+				}
 
 				if (false) {
 					html.push('<div style="float:right">', contents.chapter,
 							'</div>');
 				}
 
-				html.push('<div class="text">', contents.text,
-						'</div></body></html>');
+				html.push('<div class="text">',
+						normailize_contents(contents.text), '</div>',
+						'</body>', '</html>');
 
-				contents = html.join('\n');
+				contents = html.join(this.to_XML_options.separator);
+
+			} else {
+				contents = normailize_contents(contents);
 			}
 
 			// 需要先準備好目錄結構。
 			this.initialize();
-
-			if (detect_file_type(item.href) === 'text') {
-				contents = contents.replace(/(<img ([^>]+)>)(\s*<\/img>)?/g,
-				// 改正明顯錯誤。
-				function(all, opening_tag, inner) {
-					inner = inner.trim();
-					if (inner.endsWith(' \/')) {
-						return opening_tag;
-					}
-					return '<img ' + inner + ' \/>';
-				})
-				// [[non-breaking space]]
-				// EpubCheck 不認識 HTML character entity，
-				// 但卻又不允許 <!DOCTYPE html> 加入其他宣告。
-				.replace(/&nbsp;/g, '&#160;')
-				// '\f': 無效的 XML字元
-				// e.g., http://www.alphapolis.co.jp/content/sentence/213451/
-				.replace(/\x0c/g, '')
-				//
-				.replace(/&([^#a-z])/ig, '&amp;$1');
-
-				// TODO: 若有<ruby>，將無法檢測過。
-			}
 
 			library_namespace.debug('Write ' + contents.length + ' chars to ['
 					+ this.path.text + item.href + ']');
@@ -1075,23 +1124,26 @@ function module_code(library_namespace) {
 		this.chapters.map(function(chapter) {
 			var data = chapter[KEY_DATA]
 			//
-			|| library_namespace.null_Object();
-			TOC_html.push([ '<li><a href="' + chapter.href + '">',
+			|| library_namespace.null_Object(),
 			//
-			(data.title
+			date = Array.isArray(data.date) ? data.date[0] : data.date;
+
+			date = library_namespace.is_Date(date)
+			//
+			? date.format(' <small>(%Y-%2m-%2d)</small>') : date || '';
+
+			TOC_html.push([ '<li>', '<a href="' + chapter.href + '">',
+			//
+			data.title
 			// 未失真的title = decode_identifier(item.id, this)
-			|| decode_identifier(chapter.id, this)),
+			|| decode_identifier(chapter.id, this),
 			//
-			(data.date
-			//
-			? data.date.format(' <small>(%Y-%2m-%2d)</small>') : ''),
-			//
-			'</a>', '</li>' ].join(''));
+			date, '</a>', '</li>' ].join(''));
 		}, this);
 
-		TOC_html.push('</ol>', '</nav>', '</body></html>');
+		TOC_html.push('</ol>', '</nav>', '</body>', '</html>');
 
-		return TOC_html.join('\n');
+		return TOC_html.join(this.to_XML_options.separator);
 	}
 
 	function write_chapters() {
