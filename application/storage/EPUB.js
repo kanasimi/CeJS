@@ -926,7 +926,9 @@ function module_code(library_namespace) {
 			library_namespace.get_URL_cache(item_data.url, function(contents,
 					error, XMLHttp) {
 				// save MIME type
-				item_data.type = XMLHttp.type;
+				if (XMLHttp && XMLHttp.type) {
+					item_data.type = XMLHttp.type;
+				}
 
 				library_namespace.log('add_chapter: URL got: ['
 						+ item_data.type + '] ' + item_data.url + '\n→ '
@@ -1133,27 +1135,29 @@ function module_code(library_namespace) {
 		TOC_html.push(
 		// 作品資訊
 		'<h2>', 'Work information', '</h2>', '<div id="work_data">', '<dl>');
-		function add_data(data) {
+		Object.entries(this.metadata).forEach(function(data) {
 			var key = data[0];
 			TOC_html.push('<dt>', key, '</dt>', '<dd>',
 			//
 			data[1][to_meta_information_key(key)], '</dd>');
-		}
-		Object.entries(this.metadata).forEach(add_data);
+		});
 		// 字數計算
-		add_data([ 'word count', this.chapters.reduce(function(word_count, chapter) {
-			var this_word_count = chapter[KEY_DATA].word_count;
+		var total_word_count = 0;
+		this.chapters.forEach(function(chapter) {
+			var this_word_count = chapter[KEY_DATA] && chapter[KEY_DATA].word_count;
 			if (this_word_count > 0) {
-				word_count += this_word_count;
+				total_word_count += this_word_count;
 			}
-			return word_count;
-		}, 0) ]);
-		TOC_html.push('</dl>');
+		});
+		if (total_word_count > 0) {
+			TOC_html.push('<dt>', 'word count', '</dt>', '<dd>',
+					total_word_count, '</dd>');
+		}
+		TOC_html.push('</dl>', '</div>');
 
-		TOC_html.push('</dl>', '</div>',
 		// The toc nav element must occur exactly once in an EPUB
 		// Navigation Document.
-		'<nav epub:type="toc" id="toc">',
+		TOC_html.push('<nav epub:type="toc" id="toc">',
 		// 作品目錄 目次
 		'<h2>', 'Table of contents', '</h2>', '<ol>');
 

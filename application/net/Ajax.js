@@ -1940,6 +1940,7 @@ function module_code(library_namespace) {
 					//
 					'get_URL_cache_node.cache: Error to get URL: [' + URL
 							+ '].');
+					// WARNING: XMLHttp 僅在重新取得URL時提供。
 					onload(undefined, error, XMLHttp);
 					return;
 				}
