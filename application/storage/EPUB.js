@@ -46,8 +46,10 @@ typeof CeL === 'function' && CeL.run({
 	require :
 	// Object.entries()
 	'data.code.compatibility.'
-	// MIME_of()
+	// .MIME_of()
 	+ '|application.net.MIME.'
+	// .count_word()
+	+ '|data.'
 	// JSON.to_XML()
 	+ '|data.XML.'
 	// get_URL_cache()
@@ -296,6 +298,7 @@ function module_code(library_namespace) {
 
 	// {JSON}raw_data
 	function set_raw_data(raw_data, options) {
+		options = library_namespace.setup_options(options);
 		// console.log(JSON.stringify(raw_data));
 		this.raw_data = raw_data = raw_data || {
 			package : [ {
@@ -345,6 +348,11 @@ function module_code(library_namespace) {
 			// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-package-metadata-identifiers
 			'unique-identifier' : options.id_type || 'workid'
 		};
+
+		if (false && options.language) {
+			// http://epubzone.org/news/epub-3-and-global-language-support
+			this.raw_data['xml:lang'] = options.language;
+		}
 
 		// console.log(JSON.stringify(raw_data));
 
@@ -492,7 +500,7 @@ function module_code(library_namespace) {
 				// && → &amp;&
 				value = value.replace_till_stable(/&&/g, '&amp;&')
 				// &xxx= → &amp;xxx=
-				.replace(/&(.*?)([^a-z\d]|$)/g, function (all, mid, end) {
+				.replace(/&(.*?)([^a-z\d]|$)/g, function(all, mid, end) {
 					if (end === ';') {
 						return all;
 					}
@@ -777,6 +785,7 @@ function module_code(library_namespace) {
 
 	// 正規化XHTML書籍章節內容。
 	function normailize_contents(contents) {
+		library_namespace.debug('正規化XHTML書籍章節內容: ' + contents, 6);
 		contents = contents.replace(/\r/g, '')
 		// .replace(/<br \/>\n/g, '\n')
 		// .replace(/\n/g, '\r\n')
@@ -786,7 +795,10 @@ function module_code(library_namespace) {
 		// <BR> → <br />
 		.replace(/<br *>/ig, '<br />')
 		// .trim(), remove head/tail <BR>
-		.replace(/^(<br *\/>|[\s\n]+)+|(<br *\/>|[\s\n]+)+$/ig, '')
+		.replace(/^(?:<br *\/>|[\s\n])+/ig, '')
+		// 這會卡住:
+		// .replace(/(?:<br *\/>|[\s\n]+)+$/ig, '')
+		.replace(/(?:<br *\/>|[\s\n])+$/ig, '')
 		//
 		.replace(/(<img ([^>]+)>)(\s*<\/img>)?/g,
 		// 改正明顯錯誤。
@@ -797,6 +809,11 @@ function module_code(library_namespace) {
 			}
 			return '<img ' + inner + ' \/>';
 		})
+
+		// 2017/2/2 15:1:26
+		// 標準可以沒 <rb>。若有<rb>，反而無法通過 EpubCheck 檢測。
+		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
+		.replace(/<\/?rb\s*>/g, '')
 
 		// e.g., id="text" → id="text"
 		// .replace(/ ([a-z]+)=([a-z]+)/g, ' $1="$2"')
@@ -811,8 +828,7 @@ function module_code(library_namespace) {
 		//
 		.replace(/&([^#a-z])/ig, '&amp;$1');
 
-		// TODO: 若有<ruby>，將無法檢測過。
-
+		library_namespace.debug('正規化後: ' + contents, 6);
 		return contents;
 	}
 
@@ -931,16 +947,20 @@ function module_code(library_namespace) {
 			return item;
 		}
 
-		if (!item_data.force && (is_the_same_item(item, this.TOC)
+		// 有contents時除非指定.use_cache，否則不會用cache。
+		// 無contents時除非指定.force，否會保留cache。
+		if ((contents ? item_data.use_cache : !item_data.force)
 		// 若是已存在相同資源(.id + .href)則直接跳過。
+		&& (is_the_same_item(item, this.TOC)
+		//
 		|| (item.id in this.chapter_index_of_id) && is_the_same_item(item,
 		//
-		this.chapters[this.chapter_index_of_id[item.id]]))
+		this.chapters[this.chapter_index_of_id[item.id]])
 		//
 		|| (item.id in this.resource_index_of_id) && is_the_same_item(item,
 		//
-		this.resources[this.resource_index_of_id[item.id]])) {
-			library_namespace.debug('已經有相同的篇章，將不覆寫: '
+		this.resources[this.resource_index_of_id[item.id]]))) {
+			library_namespace.debug('已經有相同的篇章或資源檔，將不覆寫: '
 			//
 			+ (item[KEY_DATA] && item[KEY_DATA].file
 			//
@@ -948,15 +968,16 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// 若是已存在此chapter則先移除。
+		library_namespace.debug('若是已存在此chapter則先移除: ' + item.id, 3);
 		remove_chapter.call(this, item.id);
 		// TODO: 檢測是否存在相同資源(.href)並做警告。
 
 		if (contents) {
 			if (detect_file_type(item.href) !== 'text') {
-				;
+				// assert: item, contents 為 resource。
 
 			} else if (library_namespace.is_Object(contents)) {
+				library_namespace.debug(contents, 6);
 				var html = [ '<?xml version="1.0" encoding="UTF-8"?>',
 				// https://www.w3.org/QA/2002/04/valid-dtd-list.html
 				// https://cweiske.de/tagebuch/xhtml-entities.htm
@@ -1013,6 +1034,10 @@ function module_code(library_namespace) {
 				contents = normailize_contents(contents);
 			}
 
+			if (!item_data.word_count) {
+				item_data.word_count = library_namespace.count_word(contents, 1 + 2);
+			}
+
 			// 需要先準備好目錄結構。
 			this.initialize();
 
@@ -1022,7 +1047,7 @@ function module_code(library_namespace) {
 				library_namespace.write_file(this.path.text + item.href,
 						contents);
 			} else {
-				library_namespace.debug('未自動寫入 file，您需要自己完成這動作。');
+				library_namespace.debug('僅設定 item data，未自動寫入 file，您需要自己完成這動作。');
 			}
 		}
 
@@ -1031,6 +1056,7 @@ function module_code(library_namespace) {
 			item.properties = 'nav';
 			this.TOC = item;
 		} else {
+			// chapter or resource
 			add_manifest_item.call(this, item);
 		}
 		return item;
@@ -1106,15 +1132,25 @@ function module_code(library_namespace) {
 
 		TOC_html.push(
 		// 作品資訊
-		'<h2>', 'Work information', '</h2>', '<div id="work_data">');
-		Object.entries(this.metadata).forEach(function(data) {
+		'<h2>', 'Work information', '</h2>', '<div id="work_data">', '<dl>');
+		function add_data(data) {
 			var key = data[0];
-			TOC_html.push('<dl><dt>' + key + '</dt><dd>'
+			TOC_html.push('<dt>', key, '</dt>', '<dd>',
 			//
-			+ data[1][to_meta_information_key(key)] + '</dd></dl>');
-		});
+			data[1][to_meta_information_key(key)], '</dd>');
+		}
+		Object.entries(this.metadata).forEach(add_data);
+		// 字數計算
+		add_data([ 'word count', this.chapters.reduce(function(word_count, chapter) {
+			var this_word_count = chapter[KEY_DATA].word_count;
+			if (this_word_count > 0) {
+				word_count += this_word_count;
+			}
+			return word_count;
+		}, 0) ]);
+		TOC_html.push('</dl>');
 
-		TOC_html.push('</div>',
+		TOC_html.push('</dl>', '</div>',
 		// The toc nav element must occur exactly once in an EPUB
 		// Navigation Document.
 		'<nav epub:type="toc" id="toc">',
@@ -1178,7 +1214,7 @@ function module_code(library_namespace) {
 			if (resource[KEY_DATA]) {
 				var info = library_namespace.null_Object(), setted;
 				// preserve additional properties
-				'url,file,type,date'.split(',')
+				'url,file,type,date,word_count'.split(',')
 				//
 				.forEach(function(name) {
 					if (resource[KEY_DATA][name]) {
@@ -1247,7 +1283,12 @@ function module_code(library_namespace) {
 				'%P7Z% a -tzip -mx=9 -r %BOOKNAME% META-INF EPUB',
 				'%P7Z% rn %BOOKNAME% !imetype mimetype' ].join('\r\n'));
 		var command = 'cd /d "' + this.path.root + '" && ' + 'create.bat';
-		execSync(command);
+		try {
+			execSync(command);
+		} catch (e) {
+			library_namespace.err(e);
+			return;
+		}
 
 		if (!/[\\\/]$/.test(target_directory)) {
 			target_directory += path_separator;

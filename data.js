@@ -318,9 +318,9 @@ char_frequency=function (text) {
 
 /*	
 flag:
-	(flag&1)==0	表情符號等不算一個字
-	(flag&1)==1	連表情符號等也算一個字
-	(flag&2)==1	將 HTML tag 全部消掉
+	(flag&1)==0	HTML tag, 表情符號等不算一個字
+	(flag&1)==1	將 HTML tag 全部消掉
+	(flag&2)==1	連表情符號等也算一個字
 
 可讀性/適讀性
 http://en.wikipedia.org/wiki/Flesch-Kincaid_Readability_Test
@@ -343,7 +343,7 @@ _// JSDT:_module_
  * @_memberOf _module_
  */
 count_word = function(text, flag) {
-	var is_HTML = flag & 2;
+	var is_HTML = flag & 1;
 
 	//	is HTML object
 	if (typeof text === 'object')
@@ -361,7 +361,7 @@ count_word = function(text, flag) {
 				.replace(/<!--([\s\S]*?)-->/g, '')
 				.replace(/<[\s\n]*\/?[\s\n]*[a-z][^<>]*>/gi, '');
 
-	if (flag & 1)
+	if (flag & 2)
 		//	連表情符號或 '（~。），' / 破折號　'——' /　刪節號 '……' 等標點符號也算一個字
 		text = text.replace(/[\+\-–*\\\/?!,;.<>{}\[\]@#$%^&_|"'~`—…、，；。！？：()（）「」『』“”‘’]{2,}/g, ';');
 

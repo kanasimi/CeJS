@@ -4289,6 +4289,8 @@ if(repop){
   }
 
   try{
+   // 標準可以沒 <rb>。
+   // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ruby
    oPos.innerHTML='<ruby><rb>'+oPos.innerHTML+'<\/rb><rp>'
 	//	半形與全形的括弧
 	+(oTxt?window.navigator.userAgent.indexOf("Opera")>=0||/^[a-z\d\s_,.;"'\[\]{}+\-*\/]*$/i.test(oTxt)?'(<\/rp><rt>'+oTxt+'<\/rt><rp>)':'（<\/rp><rt>'+oTxt+'<\/rt><rp>）':'<\/rp><rt><\/rt><rp>')

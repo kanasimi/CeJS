@@ -601,6 +601,15 @@ function test_console() {
 function test_locale() {
 
 	//	##i18n (Internationalization) / l10n (Localization)
+	error_count += CeL.test('將 domain 別名正規化，轉為正規/標準名稱。', [
+		[['cmn-Hant-TW', CeL.gettext.to_standard('zh')], 'gettext.to_standard(zh)'],
+		[['cmn-Hant-TW', CeL.gettext.to_standard('tw')], 'gettext.to_standard(tw)'],
+		[['cmn-Hant-TW', CeL.gettext.to_standard('zh-TW')], 'gettext.to_standard(zh-TW)'],
+		[['cmn-Hans-CN', CeL.gettext.to_standard('cn')], 'gettext.to_standard(cn)'],
+		[['cmn-Hans-CN', CeL.gettext.to_standard('zh-cn')], 'gettext.to_standard(zh-cn)'],
+		[['ja-JP', CeL.gettext.to_standard('ja')], 'gettext.to_standard(ja)'],
+		[['ja-JP', CeL.gettext.to_standard('jp')], 'gettext.to_standard(jp)'],
+	]);
 
 	//	###usage 2014/2/5
 
@@ -732,10 +741,10 @@ function test_locale() {
 
 function test_numeral() {
 	error_count += CeL.test('中文數字 basic', [
-		[['一百兆〇八億〇八百', CeL.to_Chinese_numeral(100000800000800)],'小寫中文數字'],
-		[['捌兆肆仟陸佰柒拾貳億捌仟柒佰參拾捌萬玖仟零肆拾柒', CeL.to_Chinese_numeral(8467287389047,true)],'大寫中文數字'],
-		[['新臺幣肆萬參拾伍圓參角肆分貳文參', CeL.to_TWD(40035.3423)],'貨幣/currency test'],
-		[[8467287389047, CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(8467287389047,true))],'中文數字'],
+		[['一百兆〇八億〇八百', CeL.to_Chinese_numeral(100000800000800)], '小寫中文數字'],
+		[['捌兆肆仟陸佰柒拾貳億捌仟柒佰參拾捌萬玖仟零肆拾柒', CeL.to_Chinese_numeral(8467287389047,true)], '大寫中文數字'],
+		[['新臺幣肆萬參拾伍圓參角肆分貳文參', CeL.to_TWD(40035.3423)], '貨幣/currency test'],
+		[[8467287389047, CeL.from_Chinese_numeral(CeL.to_Chinese_numeral(8467287389047,true))], '中文數字'],
 	]);
 	// 此步驟頗費時。
 	if (test_level) {

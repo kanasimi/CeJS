@@ -786,6 +786,36 @@ gettext.to_standard = function(alias) {
 	}
 };
 
+
+function detect_HTML_language(HTML) {
+	// e.g., <html lang="ja">
+	var matched = HTML.match(/<html ([^<>]+)>/);
+	if (matched && (matched = matched[1].match(/lang=(?:"([^"]+)"|([^\s<>]+))/i))) {
+		return gettext.to_standard(matched[1] || matched[2]);
+	}
+
+	matched = HTML.match(/<meta [^<>]+?content=(?:"([^"]+)"|([^\s<>]+))/i);
+	if (matched && (matched = (matched[1] || matched[2]).match(/charset=([^;]+)/))) {
+		// TODO: combine CeL.data.character
+		matched = matched[1];
+		matched = {
+			big5 : 'cmn-Hant-TW',
+			gbk : 'cmn-Hans-CN',
+			gb2312 : 'cmn-Hans-CN',
+			eucjp : 'ja-JP',
+			shiftjis : 'ja-JP',
+			sjis : 'ja-JP'
+		}[matched.toLowerCase().replace(/[\s\-]/g, '')] || matched;
+		return gettext.to_standard(matched);
+	}
+
+	// Can't determine what language the html used.
+}
+
+_.detect_HTML_language = detect_HTML_language;
+
+
+
 // ------------------------------------
 //	DOM 操作。
 

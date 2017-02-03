@@ -10,7 +10,8 @@
 // 取得伺服器列表。 start_operation()
 // 解析設定檔，判別所要下載的作品列表。 parse_work_id(), get_work_list()
 // 解析 作品名稱 → 作品id get_work()
-// 取得作品的章節資料。 get_work_data()
+// 取得作品資訊與各章節資料。 get_work_data()
+// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。 get_work_data()
 // 取得每一個章節的各個影像內容資料。 get_chapter_data()
 // 取得各個章節的每一個影像內容。 get_images()
 // finish_up()
@@ -190,6 +191,8 @@ function module_code(library_namespace) {
 			|| /^完[結结]$/.test(work_data.status);
 		},
 		pre_get_chapter_data : pre_get_chapter_data,
+		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。
+		// chapter_list_URL : '',
 
 		start : start_operation,
 		parse_work_id : parse_work_id,
@@ -629,11 +632,14 @@ function module_code(library_namespace) {
 				}
 
 				if (work_data.last_download.chapter > work_data.chapter_count) {
-					library_namespace.warn('章節數量 ' + work_data.chapter_count + ' 比起始下載章節編號 ' + work_data.last_download.chapter + ' 還少，或許因為章節有經過重整。');
+					library_namespace.warn('章節數量 ' + work_data.chapter_count
+							+ ' 比起始下載章節編號 ' + work_data.last_download.chapter
+							+ ' 還少，或許因為章節有經過重整。');
 					if (_this.move_when_chapter_count_error) {
 						var move_to = work_data.directory
 						// 先搬移原目錄。
-						.replace(/[\\\/]+$/, '.' + (new Date).format('%4Y%2m%2d'));
+						.replace(/[\\\/]+$/, '.'
+								+ (new Date).format('%4Y%2m%2d'));
 						// 常出現在 manhuatai, 2manhua。
 						library_namespace.warn('將先備分舊內容、移動目錄，而後重新下載！\n'
 								+ work_data.directory + '\n→\n' + move_to);
@@ -734,6 +740,11 @@ function module_code(library_namespace) {
 					get_data.error_count = (get_data.error_count | 0) + 1;
 					library_namespace.log('Retry ' + get_data.error_count + '/'
 							+ _this.MAX_ERROR + '...');
+					if (!_this.reget_chapter) {
+						library_namespace
+								.warn('因cache file壞了(例如為空)，將重新取得chapter_URL，設定.reget_chapter。');
+						_this.reget_chapter = true;
+					}
 					get_data();
 					return;
 				}
@@ -858,7 +869,7 @@ function module_code(library_namespace) {
 				library_namespace.get_URL_cache(chapter_URL, function(data) {
 					process_chapter_data({
 						buffer : data,
-						responseText : data.toString(_this.charset)
+						responseText : data && data.toString(_this.charset)
 					});
 				}, {
 					file_name : chapter_file_name,
