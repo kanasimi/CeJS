@@ -563,6 +563,7 @@ function module_code(library_namespace) {
 					directory + work_data.directory_name + '.htm', html);
 
 			// .status 選擇性屬性：須配合網站平台更改。
+			// ja:種別,状態
 			if (_this.is_finished(work_data)) {
 				// 預防(work_data.directory)不存在。
 				library_namespace.fs_mkdir(work_data.directory);

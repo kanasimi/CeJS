@@ -97,17 +97,20 @@ function module_code(library_namespace) {
 	function fs_copy(source, target, callback, overwrite) {
 		if (!callback)
 			callback = function(error) {
-				// library_namespace.log(source + '\n->\n' +
-				// target);
-				if (error)
+				if (false) {
+					library_namespace.log(source + '\n->\n' + target);
+				}
+				if (error) {
 					library_namespace.error(error);
+				}
 			};
 
 		if (node_fs.existsSync(target))
-			if (overwrite)
+			if (overwrite) {
 				node_fs.unlinkSync(path);
-			else
+			} else {
 				callback();
+			}
 
 		// 2016/8/18 20:5:5 可採用 fs.ReadStream.prototype.bytesRead
 		var source_stream = node_fs.createReadStream(source),
@@ -128,10 +131,11 @@ function module_code(library_namespace) {
 	// returns undefined if successful
 	function fs_copySync(source, target, overwrite) {
 		if (node_fs.existsSync(target))
-			if (overwrite)
+			if (overwrite) {
 				node_fs.unlinkSync(target);
-			else
+			} else {
 				return new Error('Target file exists: [' + target + ']!');
+			}
 
 		var buffer_length = 1 * 1024 * 1024,
 		//
@@ -241,7 +245,12 @@ function module_code(library_namespace) {
 	 * @see https://github.com/isaacs/rimraf/blob/master/rimraf.js
 	 */
 	function remove_fso(path, callback, force) {
-		var r = typeof callback === 'function' ? function(error) {
+		if (typeof callback === 'boolean' && force === undefined) {
+			// shift arguments.
+			force = callback;
+			callback = undefined;
+		}
+		var to_return = typeof callback === 'function' ? function(error) {
 			callback(error);
 			// normalize
 			return error || undefined;
@@ -250,7 +259,7 @@ function module_code(library_namespace) {
 		};
 
 		if (Array.isArray(path)) {
-			return r(remove_fso_list(path));
+			return to_return(remove_fso_list(path));
 		}
 
 		try {
@@ -265,14 +274,15 @@ function module_code(library_namespace) {
 			if (!fso_status.isDirectory()) {
 				// delete file, link, ...
 				node_fs.unlinkSync(path);
-				return r();
+				return to_return();
 			}
 
 			var error
 			//
 			= remove_fso_list(node_fs.readdirSync(path), path);
-			if (error)
-				return r(error);
+			if (error) {
+				return to_return(error);
+			}
 
 			// delete directory itself.
 			node_fs.rmdirSync(path);
@@ -288,11 +298,11 @@ function module_code(library_namespace) {
 				;
 			}
 			if (e.code !== 'ENOENT') {
-				return r(e);
+				return to_return(e);
 			}
 		}
 
-		return r();
+		return to_return();
 	}
 	// _.fs_delete, _.fs_rmdir
 	_.fs_remove = remove_fso;
@@ -312,8 +322,9 @@ function module_code(library_namespace) {
 		try {
 			return node_fs.readFileSync(file_path, options);
 		} catch (e) {
-			if (library_namespace.is_debug())
+			if (library_namespace.is_debug()) {
 				library_namespace.err(e);
+			}
 			// return e;
 		}
 	}

@@ -1544,10 +1544,11 @@ function module_code(library_namespace) {
 					}
 				}
 
-				// 設定寫入目標。
 				// TODO: 確保資料完整，例如檢查結尾碼。
-				if (options.write_to_directory) {
-					var file_path = (options.write_to_directory + '/'
+				if (options.write_to || options.write_to_directory) {
+					var file_path = options.write_to
+					// save to: 設定寫入目標。
+					|| (options.write_to_directory + '/'
 					//
 					+ URL.replace(/#.*/g, '').replace(/[\\\/:*?"<>|]/g, '_'))
 					// 避免 Error: ENAMETOOLONG: name too long

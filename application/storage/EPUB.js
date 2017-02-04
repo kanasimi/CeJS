@@ -1007,6 +1007,7 @@ function module_code(library_namespace) {
 				}
 
 				if (item_data.date) {
+					// 掲載日/掲載開始日, 最新投稿/最終投稿日
 					var date_list = item_data.date;
 					date_list = (Array.isArray(date_list) ? date_list
 							: [ date_list ]).map(function(date) {
@@ -1037,7 +1038,8 @@ function module_code(library_namespace) {
 			}
 
 			if (!item_data.word_count) {
-				item_data.word_count = library_namespace.count_word(contents, 1 + 2);
+				item_data.word_count = library_namespace.count_word(contents,
+						1 + 2);
 			}
 
 			// 需要先準備好目錄結構。
@@ -1141,17 +1143,23 @@ function module_code(library_namespace) {
 			//
 			data[1][to_meta_information_key(key)], '</dd>');
 		});
-		// 字數計算
+		// 字數計算, 合計文字数
 		var total_word_count = 0;
 		this.chapters.forEach(function(chapter) {
-			var this_word_count = chapter[KEY_DATA] && chapter[KEY_DATA].word_count;
+			var this_word_count = chapter[KEY_DATA]
+					&& chapter[KEY_DATA].word_count;
 			if (this_word_count > 0) {
 				total_word_count += this_word_count;
 			}
 		});
 		if (total_word_count > 0) {
 			TOC_html.push('<dt>', 'word count', '</dt>', '<dd>',
-					total_word_count, '</dd>');
+			//
+			total_word_count + ' words / '
+			//
+			+ this.chapters.length + ' chapters ≈ '
+			// 平均文字数
+			+ Math.round(total_word_count / this.chapters.length), '</dd>');
 		}
 		TOC_html.push('</dl>', '</div>');
 
@@ -1312,7 +1320,10 @@ function module_code(library_namespace) {
 
 		if (remove) {
 			// the operatoin failed
-			library_namespace.remove_directory(this.path.root);
+			var error = library_namespace.remove_directory(this.path.root);
+			if (error) {
+				library_namespace.err(error);
+			}
 		}
 	}
 
