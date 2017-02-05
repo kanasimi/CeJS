@@ -1452,10 +1452,12 @@ function module_code(library_namespace) {
 			// 2016/4/9 9:9:7 藉由 delete wiki_API.use_Varnish 似可解決。
 
 			// listener must be a function
-			if (typeof onload !== 'function') {
+			if (typeof onload !== 'function'
+			//
+			&& !options.write_to && !options.write_to_directory) {
 				// 照理unregister()應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
 				unregister();
-				library_namespace.debug('got [' + URL
+				library_namespace.warn('got [' + URL
 						+ '], but there is no listener!', 1, 'get_URL_node');
 				// console.log(result);
 				return;
@@ -1545,6 +1547,7 @@ function module_code(library_namespace) {
 				}
 
 				// TODO: 確保資料完整，例如檢查結尾碼。
+				// .save_to
 				if (options.write_to || options.write_to_directory) {
 					var file_path = options.write_to
 					// save to: 設定寫入目標。
@@ -1589,7 +1592,7 @@ function module_code(library_namespace) {
 					'BODY: ' + data, 1, 'get_URL_node');
 				// result_Object模擬 XMLHttp。
 				result_Object.responseText = data;
-				onload(result_Object);
+				onload && onload(result_Object);
 				// free
 				data = null;
 				// node_fs.appendFileSync('get_URL_node.data', '\n');

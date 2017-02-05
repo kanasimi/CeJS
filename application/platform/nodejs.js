@@ -229,7 +229,7 @@ function module_code(library_namespace) {
 
 		var error;
 		list.some(function(fso_name) {
-			// recurse
+			// recurse, iterative method
 			return error = remove_fso(parent ? parent + fso_name : fso_name);
 		});
 		return error;
@@ -250,6 +250,7 @@ function module_code(library_namespace) {
 			force = callback;
 			callback = undefined;
 		}
+
 		var to_return = typeof callback === 'function' ? function(error) {
 			callback(error);
 			// normalize
@@ -272,18 +273,24 @@ function module_code(library_namespace) {
 			var fso_status = node_fs.lstatSync(path);
 			// https://nodejs.org/api/fs.html#fs_class_fs_stats
 			if (!fso_status.isDirectory()) {
+				library_namespace
+						.debug('Remove file: ' + path, 1, 'remove_fso');
 				// delete file, link, ...
 				node_fs.unlinkSync(path);
 				return to_return();
 			}
 
+			library_namespace.debug('recurse remove sub-fso of ' + path, 2,
+					'remove_fso');
 			var error
-			//
+			// recurse, iterative method
 			= remove_fso_list(node_fs.readdirSync(path), path);
 			if (error) {
 				return to_return(error);
 			}
 
+			library_namespace.debug('Remove directory: ' + path, 1,
+					'remove_fso');
 			// delete directory itself.
 			node_fs.rmdirSync(path);
 

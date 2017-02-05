@@ -169,7 +169,7 @@ function module_code(library_namespace) {
 
 		// default start chapter index
 		start_chapter : 1,
-		// 重新取得每個章節內容chapter_page。
+		// 是否重新取得每個章節內容chapter_page。
 		// 警告: reget_chapter=false僅適用於小說之類不取得圖片的情形，
 		// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL取得名稱的於目錄中。
 		reget_chapter : true,
@@ -179,6 +179,7 @@ function module_code(library_namespace) {
 
 		full_URL : full_URL_of_path,
 		// recheck: 從頭檢測所有作品之所有章節與所有圖片。default:false
+		// 'changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。
 		// recheck : true,
 		image_path_to_url : image_path_to_url,
 		is_work_id : function(work_id) {
@@ -586,8 +587,8 @@ function module_code(library_namespace) {
 					}
 				}
 				matched = matched.last_download.chapter;
-				if (matched > _this.start_chapter && !_this.recheck) {
-					// 起始下載的start_chapter章节
+				if (matched > _this.start_chapter) {
+					// 將開始/接續下載的start_chapter章节
 					work_data.last_download.chapter = matched;
 				}
 			}
@@ -618,79 +619,116 @@ function module_code(library_namespace) {
 			_this.get_chapter_count(work_data, html
 			// , get_label
 			);
-			if (_this.recheck) {
-				// _this.get_chapter_count() 中
-				// 可能重新設定過 work_data.last_download.chapter。
-				work_data.last_download.chapter = _this.start_chapter;
-			}
-			if (work_data.chapter_count >= 1) {
-				if (_this.chapter_list_URL) {
-					node_fs.writeFileSync(_this.main_directory
-					//
-					+ _this.cache_directory_name + work_data.directory_name
-					// .TOC.htm
-					+ '.list.htm', html);
-				}
 
-				if (work_data.last_download.chapter > work_data.chapter_count) {
-					library_namespace.warn('章節數量 ' + work_data.chapter_count
-							+ ' 比起始下載章節編號 ' + work_data.last_download.chapter
-							+ ' 還少，或許因為章節有經過重整。');
-					if (_this.move_when_chapter_count_error) {
-						var move_to = work_data.directory
-						// 先搬移原目錄。
-						.replace(/[\\\/]+$/, '.'
-								+ (new Date).format('%4Y%2m%2d'));
-						// 常出現在 manhuatai, 2manhua。
-						library_namespace.warn('將先備分舊內容、移動目錄，而後重新下載！\n'
-								+ work_data.directory + '\n→\n' + move_to);
-						// TODO: 成壓縮檔。
-						library_namespace.fs_move(work_data.directory, move_to);
-						// re-create work_data.directory
-						library_namespace.fs_mkdir(work_data.directory);
-					} else {
-						library_namespace.info('將從頭檢查、重新下載。');
-					}
-					work_data.last_download.chapter = _this.start_chapter;
-				}
-				var message = [
-						work_data.id,
-						' ',
-						work_data.title,
-						': ',
-						work_data.chapter_count >= 0
-						// assert: if chapter count unknown, typeof
-						// _this.pre_chapter_URL === 'function'
-						? work_data.chapter_count : 'Unknown',
-						' chapters.',
-						work_data.status ? ' ' + work_data.status : '',
-						work_data.last_download.chapter > _this.start_chapter
-						//
-						? ' 自章節編號第 ' + work_data.last_download.chapter
-								+ ' 接續下載。' : '' ].join('');
-				if (_this.is_finished(work_data)) {
-					// 針對特殊狀況提醒。
-					library_namespace.info(message);
-				} else {
-					library_namespace.log(message);
-				}
-
-				node_fs.writeFileSync(work_data.data_file, JSON
-						.stringify(work_data));
-
-				_this.get_URL_options.headers.Referer = work_URL;
-				// 開始下載chapter。
-				_this.pre_get_chapter_data(work_data,
-						work_data.last_download.chapter, callback);
+			if (!(work_data.chapter_count >= 1)) {
+				// 無任何章節可供下載。刪掉前面預建的目錄。
+				library_namespace.fs_remove(work_data.directory);
+				library_namespace.err(work_id
+						+ (work_data.title ? ' ' + work_data.title : '')
+						+ ': Can not get chapter count!');
+				callback && callback(work_data);
 				return;
 			}
 
-			// 刪掉前面預建的目錄。
-			library_namespace.fs_remove(work_data.directory);
-			library_namespace.err(work_id
-					+ (work_data.title ? ' ' + work_data.title : '')
-					+ ': Can not get chapter count!');
-			callback && callback(work_data);
+			if (_this.chapter_list_URL) {
+				node_fs.writeFileSync(_this.main_directory
+				//
+				+ _this.cache_directory_name + work_data.directory_name
+				// .TOC.htm
+				+ '.list.htm', html);
+			}
+
+			if (_this.recheck
+			// _this.get_chapter_count() 中
+			// 可能重新設定過 work_data.last_download.chapter。
+			&& work_data.last_download.chapter !== _this.start_chapter) {
+				if (_this.recheck !== 'changed') {
+					if (!_this.reget_chapter) {
+						library_namespace
+								.warn('既然設定了 .recheck，則將 .reget_chapter 設定為 ['
+										+ _this.reget_chapter
+										+ '] 將無作用！將自動將 .reget_chapter 轉為 true。');
+						_this.reget_chapter = true;
+					}
+
+				} else if (work_data.last_download.chapter !== work_data.chapter_count
+				// TODO: check .last_update
+				) {
+					library_namespace.info('因章節數量有變化，將重新下載/檢查所有章節內容: '
+							+ work_data.last_download.chapter + '→'
+							+ work_data.chapter_count);
+					work_data.reget_chapter = true;
+				} else {
+					library_namespace.log('章節數量無變化，皆為 '
+							+ work_data.chapter_count
+							+ '，將僅利用 cache，不重新下載所有章節內容。');
+					// 採用依變更判定時，預設不重新擷取。
+					if (!('reget_chapter' in _this)) {
+						work_data.reget_chapter = false;
+					}
+					// 即使是這一種，還是得要從頭check cache並生成資料(如.epub)。
+				}
+
+				// 無論是哪一種，都得要從頭check並生成資料。
+				work_data.last_download.chapter = _this.start_chapter;
+			}
+
+			if (!('reget_chapter' in work_data)) {
+				// .reget_chapter 為每個作品可能不同之屬性，非全站點共用屬性。
+				work_data.reget_chapter = typeof _this.reget_chapter === 'function' ? _this
+						.reget_chapter(work_data)
+						: _this.reget_chapter;
+			}
+
+			if (work_data.last_download.chapter > work_data.chapter_count) {
+				library_namespace.warn('章節數量 ' + work_data.chapter_count
+						+ ' 比將開始/接續之下載章節編號 ' + work_data.last_download.chapter
+						+ ' 還少，或許因為章節有經過重整。');
+				if (_this.move_when_chapter_count_error) {
+					var move_to = work_data.directory
+					// 先搬移原目錄。
+					.replace(/[\\\/]+$/, '.' + (new Date).format('%4Y%2m%2d'));
+					// 常出現在 manhuatai, 2manhua。
+					library_namespace.warn('將先備分舊內容、移動目錄，而後重新下載！\n'
+							+ work_data.directory + '\n→\n' + move_to);
+					// TODO: 成壓縮檔。
+					library_namespace.fs_move(work_data.directory, move_to);
+					// re-create work_data.directory
+					library_namespace.fs_mkdir(work_data.directory);
+				} else {
+					library_namespace.info('將從頭檢查、重新下載。');
+				}
+				work_data.last_download.chapter = _this.start_chapter;
+			}
+			var message = [
+					work_data.id,
+					' ',
+					work_data.title,
+					': ',
+					work_data.chapter_count >= 0
+					// assert: if chapter count unknown, typeof
+					// _this.pre_chapter_URL === 'function'
+					? work_data.chapter_count : 'Unknown',
+					' chapters.',
+					work_data.status ? ' ' + work_data.status : '',
+					work_data.last_download.chapter > _this.start_chapter
+					//
+					? ' 自章節編號第 ' + work_data.last_download.chapter + ' 接續下載。'
+							: '' ].join('');
+			if (_this.is_finished(work_data)) {
+				// 針對特殊狀況提醒。
+				library_namespace.info(message);
+			} else {
+				library_namespace.log(message);
+			}
+
+			node_fs.writeFileSync(work_data.data_file, JSON
+					.stringify(work_data));
+
+			_this.get_URL_options.headers.Referer = work_URL;
+			// 開始下載chapter。
+			_this.pre_get_chapter_data(work_data,
+					work_data.last_download.chapter, callback);
 		}
 
 	}
@@ -741,10 +779,10 @@ function module_code(library_namespace) {
 					get_data.error_count = (get_data.error_count | 0) + 1;
 					library_namespace.log('Retry ' + get_data.error_count + '/'
 							+ _this.MAX_ERROR + '...');
-					if (!_this.reget_chapter) {
+					if (!work_data.reget_chapter) {
 						library_namespace
 								.warn('因cache file壞了(例如為空)，將重新取得chapter_URL，設定.reget_chapter。');
-						_this.reget_chapter = true;
+						work_data.reget_chapter = true;
 					}
 					get_data();
 					return;
@@ -769,7 +807,7 @@ function module_code(library_namespace) {
 							+ chapter + '/' + work_data.chapter_count
 							+ ': No image get.');
 					// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
-					if (_this.reget_chapter && _this.preserve_chapter_page) {
+					if (work_data.reget_chapter && _this.preserve_chapter_page) {
 						node_fs.writeFileSync(
 						// 依然儲存cache。例如小說網站，只有章節文字內容，沒有圖檔。
 						chapter_file_name, XMLHttp.buffer);
@@ -801,7 +839,7 @@ function module_code(library_namespace) {
 				.replace(/\.$/, '._') + path_separator;
 				library_namespace.fs_mkdir(chapter_directory);
 				// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
-				if (_this.reget_chapter && _this.preserve_chapter_page) {
+				if (work_data.reget_chapter && _this.preserve_chapter_page) {
 					node_fs.writeFileSync(chapter_directory
 							+ work_data.directory_name + '-' + chapter_label
 							+ '.htm', XMLHttp.buffer);
@@ -860,7 +898,7 @@ function module_code(library_namespace) {
 				next_1(true);
 			}
 
-			if (_this.reget_chapter) {
+			if (work_data.reget_chapter) {
 				get_URL(chapter_URL, process_chapter_data, _this.charset, null,
 						_this.get_URL_options);
 

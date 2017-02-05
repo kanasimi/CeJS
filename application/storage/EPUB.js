@@ -25,6 +25,14 @@
 https://github.com/IDPF/epubcheck
 java -jar epubcheck.jar *.epub
 
+
+TODO:
+the NCX
+http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm
+
+スタイル設定
+
+
  </code>
  * 
  * @since 2017/1/24 11:55:51
@@ -55,7 +63,10 @@ typeof CeL === 'function' && CeL.run({
 	// get_URL_cache()
 	// + '|application.net.Ajax.'
 	// write_file(), read_file()
-	+ '|application.storage.',
+	+ '|application.storage.'
+	// .to_file_name()
+	// + '|application.net.'
+	,
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -268,7 +279,7 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function add_manifest_item(item, is_resource) {
-		if (is_resource || detect_file_type(item.href) !== 'text') {
+		if (typeof is_resource === 'boolean' ? is_resource : detect_file_type(item.href) !== 'text') {
 			this.resource_index_of_id[item.id] = this.resources.length;
 			this.resources.push(item);
 		} else {
@@ -349,8 +360,9 @@ function module_code(library_namespace) {
 			'unique-identifier' : options.id_type || 'workid'
 		};
 
-		if (false && options.language) {
-			// http://epubzone.org/news/epub-3-and-global-language-support
+		// http://epubzone.org/news/epub-3-and-global-language-support
+		if (options.language) {
+			// 似乎不用加也沒問題。
 			this.raw_data['xml:lang'] = options.language;
 		}
 
@@ -511,6 +523,7 @@ function module_code(library_namespace) {
 		data[key] = value;
 	}
 
+	// 表紙設定
 	// http://idpf.org/forum/topic-715
 	// https://wiki.mobileread.com/wiki/Ebook_Covers#OPF_entries
 	// http://www.idpf.org/epub/301/spec/epub-publications.html#sec-item-property-values
@@ -668,10 +681,13 @@ function module_code(library_namespace) {
 				}
 			} else {
 				item_data = {
+					// タイトル
 					title : item_data
 				};
 			}
 		}
+
+		// item_data.file = library_namespace.to_file_name(item_data.file);
 
 		var id, href;
 		if (library_namespace.is_Object(item_data)) {
@@ -799,8 +815,8 @@ function module_code(library_namespace) {
 		// 這會卡住:
 		// .replace(/(?:<br *\/>|[\s\n]+)+$/ig, '')
 		.replace(/(?:<br *\/>|[\s\n])+$/ig, '')
-		//
-		.replace(/(<img ([^>]+)>)(\s*<\/img>)?/g,
+		// for ALL <img>
+		.replace(/(<img ([^<>]+)>)(\s*<\/img>)?/ig,
 		// 改正明顯錯誤。
 		function(all, opening_tag, inner) {
 			inner = inner.trim();
@@ -916,15 +932,17 @@ function module_code(library_namespace) {
 			// 先登記預防重複登記 (placeholder)。
 			add_manifest_item.call(this, item, true);
 
-			// 需要先準備好目錄結構。
+			// 需要先準備好目錄結構以存入media file。
 			this.initialize();
 
 			// 自網路取得url。
 			library_namespace.log('add_chapter: get URL: ' + item_data.url);
+			item_data.downloaded = false;
 
 			// assert: CeL.application.net.Ajax included
 			library_namespace.get_URL_cache(item_data.url, function(contents,
 					error, XMLHttp) {
+				item_data.downloaded = true;
 				// save MIME type
 				if (XMLHttp && XMLHttp.type) {
 					item_data.type = XMLHttp.type;
@@ -973,6 +991,52 @@ function module_code(library_namespace) {
 		library_namespace.debug('若是已存在此chapter則先移除: ' + item.id, 3);
 		remove_chapter.call(this, item.id);
 		// TODO: 檢測是否存在相同資源(.href)並做警告。
+
+		var _this = this;
+		function check_text(contents) {
+			contents = normailize_contents(contents);
+
+			if (item_data.internalize_media) {
+				// include images / 內含 media, 將外部media內部化
+				var links = [];
+				contents = contents.replace(/ (src|href)="([^"]+)"/g, function(
+						all, name, url) {
+					// [ all, path, file_name ]
+					var matched = url.match(/^([\s\S]*\/)([^\/]+)$/);
+					if (!matched) {
+						return all;
+					}
+					var href = _this.directory.media + matched[2];
+					links.push({
+						url : url,
+						href : href
+					});
+					return matched ? ' title="' + url + '" ' + name + '="'
+							+ href + '"' : all;
+				});
+
+				contents = contents.replace(/<a ([^<>]+)>([^<>]+)<\/a>/g,
+				// <a href="*.png">挿絵</a> → <img alt="挿絵" src="*.png" />
+				function(all, attributes, innerHTML) {
+					if (!attributes.includes('href="')) {
+						return all;
+					}
+					return '<img '
+							+ (attributes.includes('alt="') ? '' : 'alt="'
+									+ innerHTML + '" ')
+							+ attributes.replace(/(^|\s)href="/ig, ' src="')
+							// <img> 中不能使用 name=""
+							.replace(/(^|\s)name=[^\s]+/ig, '').trim() + ' />';
+				});
+
+				if (links.length > 0) {
+					// console.log(links.unique());
+					_this.add(links.unique());
+				}
+			}
+
+			return contents;
+		}
 
 		if (contents) {
 			if (detect_file_type(item.href) !== 'text') {
@@ -1027,14 +1091,13 @@ function module_code(library_namespace) {
 							'</div>');
 				}
 
-				html.push('<div class="text">',
-						normailize_contents(contents.text), '</div>',
-						'</body>', '</html>');
+				html.push('<div class="text">', check_text(contents.text),
+						'</div>', '</body>', '</html>');
 
 				contents = html.join(this.to_XML_options.separator);
 
 			} else {
-				contents = normailize_contents(contents);
+				contents = check_text(contents);
 			}
 
 			if (!item_data.word_count) {
@@ -1194,7 +1257,8 @@ function module_code(library_namespace) {
 		return TOC_html.join(this.to_XML_options.separator);
 	}
 
-	function write_chapters() {
+	function write_chapters(callback) {
+		// TODO: 對media過多者，可能到此尚未下載完。
 		this.initialize();
 
 		this.raw_data_ptr.metadata.clear();
@@ -1259,7 +1323,34 @@ function module_code(library_namespace) {
 	}
 
 	// package 打包 bale packing
-	function archive_to_ZIP(target_directory, target_file_name, remove) {
+	function archive_to_ZIP(target_file, remove) {
+		// check arguments
+		if (Array.isArray(target_file) && target_file.length === 2) {
+			// [ target_directory, target_file_name ]
+			var target_directory = target_file[0];
+			target_file = target_file[1];
+
+			if (!target_directory) {
+				target_directory = this.path.root;
+			} else if (!/[\\\/]$/.test(target_directory)) {
+				target_directory += path_separator;
+			}
+
+			if (!target_file) {
+				target_file = this.path.root.match(/([^\\\/]+)[\\\/]$/)[1];
+			}
+
+			// target_file = library_namespace.to_file_name(target_file);
+
+			target_file = target_directory + target_file;
+		}
+		// assert: typeof target_file === 'string'
+
+		if (!/\.[^\\\/.]+$/.test(target_file)) {
+			// add file extension
+			target_file += '.epub';
+		}
+
 		this.flush();
 
 		// remove empty directories
@@ -1302,23 +1393,12 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (!/[\\\/]$/.test(target_directory)) {
-			target_directory += path_separator;
-		}
-
-		if (!target_file_name) {
-			target_file_name = this.path.root.match(/([^\\\/]+)[\\\/]$/)[1];
-		}
-
-		if (!target_file_name.includes('.')) {
-			target_file_name += '.epub';
-		}
-
 		// book.epub → *.epub
-		library_namespace.move_file(this.path.root + 'book.epub',
-				target_directory + target_file_name);
+		library_namespace.move_file(this.path.root + 'book.epub', target_file);
 
 		if (remove) {
+			// TODO: 留下/重複利用media。
+			// rd /s /q this.path.root
 			// the operatoin failed
 			var error = library_namespace.remove_directory(this.path.root);
 			if (error) {
