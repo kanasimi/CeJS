@@ -177,6 +177,9 @@ function module_code(library_namespace) {
 		// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
 		preserve_chapter_page : true,
 
+		// 若需要留下/重複利用media如images，請勿remove。
+		// remove_ebook_directory : true,
+
 		full_URL : full_URL_of_path,
 		// recheck: 從頭檢測所有作品之所有章節與所有圖片。default:false
 		// 'changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。
@@ -654,9 +657,16 @@ function module_code(library_namespace) {
 				} else if (work_data.last_download.chapter !== work_data.chapter_count
 				// TODO: check .last_update
 				) {
-					library_namespace.info('因章節數量有變化，將重新下載/檢查所有章節內容: '
-							+ work_data.last_download.chapter + '→'
-							+ work_data.chapter_count);
+					library_namespace
+							.info('因章節數量有變化，將重新下載/檢查所有章節內容: '
+									+ work_data.last_download.chapter
+									+ '→'
+									+ work_data.chapter_count
+									+ ' ('
+									+ (work_data.chapter_count > work_data.last_download.chapter ? '+'
+											: '')
+									+ (work_data.chapter_count - work_data.last_download.chapter)
+									+ ')');
 					work_data.reget_chapter = true;
 				} else {
 					library_namespace.log('章節數量無變化，皆為 '

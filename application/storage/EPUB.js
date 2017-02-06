@@ -218,6 +218,10 @@ function module_code(library_namespace) {
 					+ this.directory[d].replace(/[\\\/]+$/, '/');
 		}
 
+		// The resources downloading now.
+		// @see add_chapter()
+		this.downloading = library_namespace.null_Object();
+
 		this.metadata = library_namespace.null_Object();
 
 		var raw_data;
@@ -279,7 +283,8 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function add_manifest_item(item, is_resource) {
-		if (typeof is_resource === 'boolean' ? is_resource : detect_file_type(item.href) !== 'text') {
+		if (typeof is_resource === 'boolean' ? is_resource
+				: detect_file_type(item.href) !== 'text') {
 			this.resource_index_of_id[item.id] = this.resources.length;
 			this.resources.push(item);
 		} else {
@@ -863,7 +868,7 @@ function module_code(library_namespace) {
 			}, this);
 		}
 
-		var item = normalize_item(item_data, this);
+		var _this = this, item = normalize_item(item_data, this);
 		item_data = item[KEY_DATA] || library_namespace.null_Object();
 		// assert: library_namespace.is_Object(item_data)
 		// console.log(item_data);
@@ -932,20 +937,26 @@ function module_code(library_namespace) {
 			// 先登記預防重複登記 (placeholder)。
 			add_manifest_item.call(this, item, true);
 
+			item_data.file_path = this.path[detect_file_type(item.href)]
+					+ get_file_name_of_url(item.href)
+			this.downloading[item_data.file_path] = item_data;
+
 			// 需要先準備好目錄結構以存入media file。
 			this.initialize();
 
 			// 自網路取得url。
 			library_namespace.log('add_chapter: get URL: ' + item_data.url);
-			item_data.downloaded = false;
 
 			// assert: CeL.application.net.Ajax included
 			library_namespace.get_URL_cache(item_data.url, function(contents,
 					error, XMLHttp) {
-				item_data.downloaded = true;
 				// save MIME type
 				if (XMLHttp && XMLHttp.type) {
 					item_data.type = XMLHttp.type;
+				}
+				if (/text/i.test(item_data.type)) {
+					library_namespace.err('Not media type: [' + item_data.type
+							+ '] ' + item_data.url);
 				}
 
 				library_namespace.log('add_chapter: URL got: ['
@@ -953,10 +964,19 @@ function module_code(library_namespace) {
 						+ item.href);
 
 				// item_data.write_file = false;
-				// this.add(item_data, contents);
-			}.bind(this), {
-				file_name : this.path[detect_file_type(item.href)]
-						+ get_file_name_of_url(item.href),
+				// _this.add(item_data, contents);
+
+				// 註銷登記。
+				delete _this.downloading[item_data.file_path];
+				if (_this.on_all_downloaded
+				//
+				&& library_namespace.is_empty_object(_this.downloading)) {
+					_this.on_all_downloaded();
+					// 註銷登記。
+					delete _this.on_all_downloaded;
+				}
+			}, {
+				file_name : item_data.file_path,
 				encoding : undefined,
 				charset : (detect_file_type(item_data.file
 				//
@@ -968,7 +988,7 @@ function module_code(library_namespace) {
 		}
 
 		// 有contents時除非指定.use_cache，否則不會用cache。
-		// 無contents時除非指定.force，否會保留cache。
+		// 無contents時除非指定.force(這通常發生於呼叫端會自行寫入檔案的情況)，否會保留cache。
 		if ((contents ? item_data.use_cache : !item_data.force)
 		// 若是已存在相同資源(.id + .href)則直接跳過。
 		&& (is_the_same_item(item, this.TOC)
@@ -992,7 +1012,6 @@ function module_code(library_namespace) {
 		remove_chapter.call(this, item.id);
 		// TODO: 檢測是否存在相同資源(.href)並做警告。
 
-		var _this = this;
 		function check_text(contents) {
 			contents = normailize_contents(contents);
 
@@ -1000,10 +1019,11 @@ function module_code(library_namespace) {
 				// include images / 內含 media, 將外部media內部化
 				var links = [];
 				contents = contents.replace(/ (src|href)="([^"]+)"/g, function(
-						all, name, url) {
-					// [ all, path, file_name ]
-					var matched = url.match(/^([\s\S]*\/)([^\/]+)$/);
-					if (!matched) {
+						all, attribute_name, url) {
+					// [ url, path, file_name, is_directory ]
+					var matched = url.match(/^([\s\S]*\/)([^\/]+)(\/)?$/);
+					if (!matched || matched[3] && attribute_name !== 'src') {
+						library_namespace.log('Skip resource: ' + url);
 						return all;
 					}
 					var href = _this.directory.media + matched[2];
@@ -1011,8 +1031,8 @@ function module_code(library_namespace) {
 						url : url,
 						href : href
 					});
-					return matched ? ' title="' + url + '" ' + name + '="'
-							+ href + '"' : all;
+					return matched ? ' title="' + url + '" ' + attribute_name
+							+ '="' + href + '"' : all;
 				});
 
 				contents = contents.replace(/<a ([^<>]+)>([^<>]+)<\/a>/g,
@@ -1025,13 +1045,15 @@ function module_code(library_namespace) {
 							+ (attributes.includes('alt="') ? '' : 'alt="'
 									+ innerHTML + '" ')
 							+ attributes.replace(/(^|\s)href="/ig, ' src="')
-							// <img> 中不能使用 name=""
-							.replace(/(^|\s)name=[^\s]+/ig, '').trim() + ' />';
+							// <img> 中不能使用 name="" 之類
+							.replace(/(?:^|\s)(?:name|border)=[^\s]+/ig, '')
+									.trim() + ' />';
 				});
 
 				if (links.length > 0) {
 					// console.log(links.unique());
-					_this.add(links.unique());
+					// TODO: unique links
+					_this.add(links);
 				}
 			}
 
@@ -1258,7 +1280,14 @@ function module_code(library_namespace) {
 	}
 
 	function write_chapters(callback) {
-		// TODO: 對media過多者，可能到此尚未下載完。
+		// 對media過多者，可能到此尚未下載完。
+		if (!library_namespace.is_empty_object(this.downloading)) {
+			// 註冊callback
+			this.on_all_downloaded = write_chapters.bind(this, callback);
+			library_namespace.debug('Waiting for all resources loaded...');
+			return;
+		}
+
 		this.initialize();
 
 		this.raw_data_ptr.metadata.clear();
@@ -1320,6 +1349,8 @@ function module_code(library_namespace) {
 				+ this.package_document_name,
 		//
 		JSON.to_XML(this.raw_data, this.to_XML_options));
+
+		callback && callback();
 	}
 
 	// package 打包 bale packing
@@ -1351,7 +1382,7 @@ function module_code(library_namespace) {
 			target_file += '.epub';
 		}
 
-		this.flush();
+		// this.flush();
 
 		// remove empty directories
 		Object.keys(this.path).sort()
@@ -1374,8 +1405,9 @@ function module_code(library_namespace) {
 		/** node.js: run OS command */
 		var execSync = require('child_process').execSync;
 
+		var command_file_name = 'create.bat';
 		// 注意: 這需要先安裝7z.exe程式
-		library_namespace.write_file(this.path.root + 'create.bat', [
+		library_namespace.write_file(this.path.root + command_file_name, [
 		// @see create_ebook.bat
 		'SET P7Z="C:\\Program Files\\7-Zip\\7z.exe"',
 				'SET BOOKNAME=' + 'book.epub',
@@ -1385,7 +1417,7 @@ function module_code(library_namespace) {
 				// archive others
 				'%P7Z% a -tzip -mx=9 -r %BOOKNAME% META-INF EPUB',
 				'%P7Z% rn %BOOKNAME% !imetype mimetype' ].join('\r\n'));
-		var command = 'cd /d "' + this.path.root + '" && ' + 'create.bat';
+		var command = 'cd /d "' + this.path.root + '" && ' + command_file_name;
 		try {
 			execSync(command);
 		} catch (e) {
@@ -1396,14 +1428,19 @@ function module_code(library_namespace) {
 		// book.epub → *.epub
 		library_namespace.move_file(this.path.root + 'book.epub', target_file);
 
+		// 若需要留下/重複利用media如images，請勿remove。
 		if (remove) {
-			// TODO: 留下/重複利用media。
 			// rd /s /q this.path.root
-			// the operatoin failed
+			// 這會刪除整個目錄，包括未被index的檔案。
 			var error = library_namespace.remove_directory(this.path.root);
 			if (error) {
+				// the operatoin failed
 				library_namespace.err(error);
 			}
+		} else {
+			// 最起碼 command_file_name 已經不需要存在。
+			library_namespace.remove_directory(this.path.root
+					+ command_file_name);
 		}
 	}
 
@@ -1442,7 +1479,13 @@ function module_code(library_namespace) {
 
 		generate_TOC : generate_TOC,
 		flush : write_chapters,
-		pack : archive_to_ZIP
+		archive : archive_to_ZIP,
+		pack : function(target_file, remove, callback) {
+			this.flush(function() {
+				this.archive(target_file, remove);
+				callback && callback();
+			}.bind(this));
+		}
 	};
 
 	return Ebook;

@@ -788,7 +788,7 @@ gettext.to_standard = function(alias) {
 
 
 function detect_HTML_language(HTML) {
-	// e.g., <html lang="ja">
+	// e.g., <html xml:lang="ja" lang="ja">
 	var matched = HTML.match(/<html ([^<>]+)>/);
 	if (matched && (matched = matched[1].match(/lang=(?:"([^"]+)"|([^\s<>]+))/i))) {
 		return gettext.to_standard(matched[1] || matched[2]);
