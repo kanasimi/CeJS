@@ -177,6 +177,7 @@ function module_code(library_namespace) {
 		// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
 		preserve_chapter_page : true,
 
+		pack_ebook : pack_ebook,
 		// 若需要留下/重複利用media如images，請勿remove。
 		// remove_ebook_directory : true,
 
@@ -191,7 +192,7 @@ function module_code(library_namespace) {
 		is_finished : function(work_data) {
 			// e.g., 连载中, 連載中
 			return /已完[結结]/.test(work_data.status)
-			//
+			// 完結済
 			|| /^完[結结]$/.test(work_data.status);
 		},
 		pre_get_chapter_data : pre_get_chapter_data,
@@ -669,13 +670,15 @@ function module_code(library_namespace) {
 									+ ')');
 					work_data.reget_chapter = true;
 				} else {
-					library_namespace.log('章節數量無變化，皆為 '
-							+ work_data.chapter_count
-							+ '，將僅利用 cache，不重新下載所有章節內容。');
 					// 採用依變更判定時，預設不重新擷取。
-					if (!('reget_chapter' in _this)) {
+					// 不可用 ('reget_chapter' in _this)，會取得 .prototype 的屬性。
+					if (!_this.hasOwnProperty('reget_chapter')) {
 						work_data.reget_chapter = false;
 					}
+					library_namespace.log('章節數量無變化，皆為 '
+							+ work_data.chapter_count
+							+ (work_data.reget_chapter ? '，但已設定下載所有章節內容。'
+									: '，將僅利用 cache，不重新下載所有章節內容。'));
 					// 即使是這一種，還是得要從頭check cache並生成資料(如.epub)。
 				}
 
@@ -1132,6 +1135,30 @@ function module_code(library_namespace) {
 			_this.get_images(image_data, callback);
 
 		}, 'binary', null, this.get_URL_options);
+	}
+
+	// --------------------------------------------------------------------------------------------
+
+	// 須配合 CeL.application.storage.EPUB
+	function pack_ebook(work_data) {
+		if (!work_data || !work_data.ebook) {
+			return;
+		}
+
+		// e.g., "(一般小説) [author] title [site 20170101].id.epub"
+		var file_name = '(一般小説) [' + work_data.author + '] '
+		//
+		+ work_data.title + ' [' + work_data.site_name + ' '
+		//
+		+ work_data.last_update.to_Date({
+			zone : 9
+		}).format('%Y%2m%2d') + '].' + work_data.id + '.epub';
+
+		// this: this_site
+		work_data.ebook.pack([ this.main_directory,
+		//
+		library_namespace.to_file_name(file_name) ],
+				this.remove_ebook_directory);
 	}
 
 	// --------------------------------------------------------------------------------------------

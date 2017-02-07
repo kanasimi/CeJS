@@ -655,7 +655,9 @@ function module_code(library_namespace) {
 			return 'media';
 		}
 
-		throw new Error('Can not determine the type of [' + file_name + ']');
+		// 可能僅是在測試是否可以偵測得出 type
+		library_namespace.debug('Can not determine the type of [' + file_name
+				+ ']');
 	}
 
 	function normalize_item(item_data, _this, strict) {
@@ -937,7 +939,8 @@ function module_code(library_namespace) {
 			// 先登記預防重複登記 (placeholder)。
 			add_manifest_item.call(this, item, true);
 
-			item_data.file_path = this.path[detect_file_type(item.href)]
+			item_data.file_path = this.path[detect_file_type(item.href)
+					|| 'media']
 					+ get_file_name_of_url(item.href)
 			this.downloading[item_data.file_path] = item_data;
 
@@ -1319,7 +1322,7 @@ function module_code(library_namespace) {
 			if (resource[KEY_DATA]) {
 				var info = library_namespace.null_Object(), setted;
 				// preserve additional properties
-				'url,file,type,date,word_count'.split(',')
+				'meta,url,file,type,date,word_count'.split(',')
 				//
 				.forEach(function(name) {
 					if (resource[KEY_DATA][name]) {
@@ -1405,12 +1408,13 @@ function module_code(library_namespace) {
 		/** node.js: run OS command */
 		var execSync = require('child_process').execSync;
 
-		var command_file_name = 'create.bat';
+		var command_file_name = 'create.bat', ebook_file_name = 'book.epub';
+		library_namespace.remove_file(this.path.root + ebook_file_name);
 		// 注意: 這需要先安裝7z.exe程式
 		library_namespace.write_file(this.path.root + command_file_name, [
 		// @see create_ebook.bat
 		'SET P7Z="C:\\Program Files\\7-Zip\\7z.exe"',
-				'SET BOOKNAME=' + 'book.epub',
+				'SET BOOKNAME="' + ebook_file_name + '"',
 				// store mimetype
 				'%P7Z% a -tzip -mx=0 %BOOKNAME% mimetype',
 				'%P7Z% rn %BOOKNAME% mimetype !imetype',
@@ -1426,7 +1430,12 @@ function module_code(library_namespace) {
 		}
 
 		// book.epub → *.epub
-		library_namespace.move_file(this.path.root + 'book.epub', target_file);
+		var error = library_namespace.move_file(this.path.root
+				+ ebook_file_name, target_file);
+		if (error) {
+			// the operatoin failed
+			library_namespace.err(error);
+		}
 
 		// 若需要留下/重複利用media如images，請勿remove。
 		if (remove) {
@@ -1439,8 +1448,7 @@ function module_code(library_namespace) {
 			}
 		} else {
 			// 最起碼 command_file_name 已經不需要存在。
-			library_namespace.remove_directory(this.path.root
-					+ command_file_name);
+			library_namespace.remove_file(this.path.root + command_file_name);
 		}
 	}
 
