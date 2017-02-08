@@ -180,6 +180,8 @@ function module_code(library_namespace) {
 		pack_ebook : pack_ebook,
 		// 若需要留下/重複利用media如images，請勿remove。
 		// remove_ebook_directory : true,
+		// 章節數量無變化時依舊利用 cache 重建資料(如ebook)
+		// regenerate : true
 
 		full_URL : full_URL_of_path,
 		// recheck: 從頭檢測所有作品之所有章節與所有圖片。default:false
@@ -505,6 +507,7 @@ function module_code(library_namespace) {
 			work_title = work_id.title;
 			work_id = work_id.id;
 		}
+		process.title = '下載' + work_title + ' - 資訊';
 
 		var _this = this, work_URL = this.full_URL(this.work_URL, work_id), work_data;
 
@@ -552,7 +555,7 @@ function module_code(library_namespace) {
 			// source URL
 			work_data.url = work_URL;
 
-			process.title = '下載' + work_data.title;
+			process.title = '下載' + work_data.title + ' - 目次';
 			work_data.directory_name = library_namespace
 					.to_file_name(work_data.id + ' ' + work_data.title);
 			work_data.directory = _this.main_directory
@@ -675,11 +678,14 @@ function module_code(library_namespace) {
 					if (!_this.hasOwnProperty('reget_chapter')) {
 						work_data.reget_chapter = false;
 					}
-					library_namespace.log('章節數量無變化，皆為 '
-							+ work_data.chapter_count
-							+ (work_data.reget_chapter ? '，但已設定下載所有章節內容。'
-									: '，將僅利用 cache，不重新下載所有章節內容。'));
-					// 即使是這一種，還是得要從頭check cache並生成資料(如.epub)。
+					library_namespace
+							.log('章節數量無變化，皆為 '
+									+ work_data.chapter_count
+									+ '，'
+									+ (work_data.reget_chapter ? '但已設定下載所有章節內容。'
+											: _this.regenerate ? '將僅利用 cache 重建資料(如ebook)，不重新下載所有章節內容。'
+													: '將跳過本作品不處理。'));
+					// 即使是這一種，還是得要從頭 check cache 並生成資料(如.epub)。
 				}
 
 				// 無論是哪一種，都得要從頭check並生成資料。
@@ -713,6 +719,20 @@ function module_code(library_namespace) {
 				}
 				work_data.last_download.chapter = _this.start_chapter;
 			}
+
+			node_fs.writeFileSync(work_data.data_file, JSON
+					.stringify(work_data));
+
+			if (!work_data.reget_chapter && !_this.regenerate) {
+				library_namespace.log('將跳過本作品不處理。');
+				// 最終廢棄動作，防止執行 work_data.ebook.pack()。
+				delete work_data.ebook;
+				if (typeof callback === 'function') {
+					callback(work_data);
+				}
+				return;
+			}
+
 			var message = [
 					work_data.id,
 					' ',
@@ -734,9 +754,6 @@ function module_code(library_namespace) {
 			} else {
 				library_namespace.log(message);
 			}
-
-			node_fs.writeFileSync(work_data.data_file, JSON
-					.stringify(work_data));
 
 			_this.get_URL_options.headers.Referer = work_URL;
 			// 開始下載chapter。
@@ -1140,19 +1157,26 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// 須配合 CeL.application.storage.EPUB
-	function pack_ebook(work_data) {
+	function pack_ebook(work_data, file_name) {
 		if (!work_data || !work_data.ebook) {
 			return;
 		}
 
-		// e.g., "(一般小説) [author] title [site 20170101].id.epub"
-		var file_name = '(一般小説) [' + work_data.author + '] '
-		//
-		+ work_data.title + ' [' + work_data.site_name + ' '
-		//
-		+ work_data.last_update.to_Date({
-			zone : 9
-		}).format('%Y%2m%2d') + '].' + work_data.id + '.epub';
+		process.title = '打包 epub: ' + work_data.title;
+		if (!file_name) {
+			var date = work_data.last_update;
+			if (!library_namespace.is_Date(date)) {
+				// assert: typeof date === 'string
+				date = date.to_Date({
+					zone : 9
+				});
+			}
+			file_name =
+			// e.g., "(一般小説) [author] title [site 20170101].id.epub"
+			[ '(一般小説) [', work_data.author, '] ', work_data.title, ' [',
+					work_data.site_name, ' ', date.format('%Y%2m%2d'), '].',
+					work_data.id, '.epub' ].join('');
+		}
 
 		// this: this_site
 		work_data.ebook.pack([ this.main_directory,

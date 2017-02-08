@@ -277,22 +277,6 @@ function module_code(library_namespace) {
 
 	Ebook.date_to_String = date_to_String;
 
-	/**
-	 * 必須先確認沒有衝突
-	 * 
-	 * @inner
-	 */
-	function add_manifest_item(item, is_resource) {
-		if (typeof is_resource === 'boolean' ? is_resource
-				: detect_file_type(item.href) !== 'text') {
-			this.resource_index_of_id[item.id] = this.resources.length;
-			this.resources.push(item);
-		} else {
-			this.chapter_index_of_id[item.id] = this.chapters.length;
-			this.chapters.push(item);
-		}
-	}
-
 	function rebuild_index_of_id(rebuild_resources, force) {
 		var list = rebuild_resources ? this.resources : this.chapters, index_of_id = rebuild_resources ? this.resource_index_of_id
 				: this.chapter_index_of_id;
@@ -526,6 +510,38 @@ function module_code(library_namespace) {
 			}
 		}
 		data[key] = value;
+	}
+
+	/**
+	 * 必須先確認沒有衝突
+	 * 
+	 * @inner
+	 */
+	function add_manifest_item(item, is_resource) {
+		if (typeof is_resource === 'boolean' ? is_resource
+				: detect_file_type(item.href) !== 'text') {
+			// 檢測是否存在相同資源(.href)並做警告。
+			if (item.id in this.resource_index_of_id) {
+				var index = this.resource_index_of_id[item.id];
+				// 留著resource
+				// remove_chapter.call(this, index, true, true);
+				this.resources[index] = item;
+			} else {
+				this.resource_index_of_id[item.id] = this.resources.length;
+				this.resources.push(item);
+			}
+
+		} else {
+			// 檢測是否存在相同資源(.href)並做警告。
+			if (item.id in this.chapter_index_of_id) {
+				var index = this.chapter_index_of_id[item.id];
+				// remove_chapter.call(this, index, true);
+				this.chapters[index] = item;
+			} else {
+				this.chapter_index_of_id[item.id] = this.chapters.length;
+				this.chapters.push(item);
+			}
+		}
 	}
 
 	// 表紙設定
@@ -770,19 +786,30 @@ function module_code(library_namespace) {
 	function index_of_chapter(title) {
 		rebuild_index_of_id.call(this);
 
-		// console.log(this.chapters);
-		if (title in this.chapter_index_of_id) {
+		var chapter_index_of_id = this.chapter_index_of_id;
+		if (library_namespace.is_Object(title)) {
+			if (title.id === this.TOC.id) {
+				return 'TOC';
+			}
+
+			if (title.id in chapter_index_of_id) {
+				return chapter_index_of_id[title];
+			}
+			title = title.title;
+		} else if (title in chapter_index_of_id) {
 			// title 為 id
-			return this.chapter_index_of_id[title];
-		}
-		var encoded = encode_identifier(title, this);
-		if (encoded in this.chapter_index_of_id) {
-			// title 為 title
-			return this.chapter_index_of_id[encoded];
+			return chapter_index_of_id[title];
 		}
 
-		// 剩下的可能為 href
-		if (!/\.x?html?$/i.test(title)) {
+		var encoded = encode_identifier(title, this);
+
+		if (encoded in chapter_index_of_id) {
+			// title 為 title
+			return chapter_index_of_id[encoded];
+		}
+
+		// 剩下的可能為 href, url
+		if (false && !/\.x?html?$/i.test(title)) {
 			return NOT_FOUND;
 		}
 
@@ -793,11 +820,13 @@ function module_code(library_namespace) {
 			if (
 			// title === item.id || title === decode_identifier(item.id, this)
 			// ||
-			title === item.href) {
+			title === item.href || item[KEY_DATA]
+					&& title === item[KEY_DATA].url) {
 				return index;
 			}
 		}
 
+		// Nothing found.
 		return NOT_FOUND;
 	}
 
@@ -1011,10 +1040,6 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		library_namespace.debug('若是已存在此chapter則先移除: ' + item.id, 3);
-		remove_chapter.call(this, item.id);
-		// TODO: 檢測是否存在相同資源(.href)並做警告。
-
 		function check_text(contents) {
 			contents = normailize_contents(contents);
 
@@ -1144,51 +1169,45 @@ function module_code(library_namespace) {
 		}
 
 		if (item_data.TOC) {
+			library_namespace.debug('若是已存在此chapter則先移除: ' + item.id, 3);
+			remove_chapter.call(this, item.id);
+
 			// EPUB Navigation Document
 			item.properties = 'nav';
 			this.TOC = item;
+
 		} else {
+			if (this.TOC && this.TOC.id === item.id) {
+				// @see remove_chapter()
+				library_namespace.remove_file(this.path.text + this.TOC.href);
+				delete this.TOC;
+			} else {
+				// remove_chapter.call(this, item, true);
+			}
+
 			// chapter or resource
-			add_manifest_item.call(this, item);
+			add_manifest_item.call(this, item, false);
 		}
 		return item;
 	}
 
-	function remove_chapter_by_index(index) {
-		if (!(index >= 0)) {
-			return;
+	function remove_chapter(title, preserve_data, is_resource) {
+		// TODO: is_resource
+
+		var index;
+		if (title >= 0) {
+			index = title;
+		} else {
+			index = index_of_chapter.call(this, title);
+			if (!(index >= 0)) {
+				return;
+			}
 		}
-		var item = this.chapters.splice(index, 1);
+
+		var item = preserve_data ? this.chapters[index] : this.chapters.splice(
+				index, 1);
 		library_namespace.remove_file(this.path.text + item.href);
-		return item;
-	}
-
-	function remove_chapter(title) {
-		if (!title) {
-			return;
-		}
-
-		rebuild_index_of_id.call(this);
-
-		if (library_namespace.is_Object(title)) {
-			if (title.id in this.chapter_index_of_id) {
-				return remove_chapter_by_index.call(this,
-						this.chapter_index_of_id[title.id]);
-			}
-			if (title.title && (title = encode_identifier(title.title, this))
-			//
-			&& (title in this.chapter_index_of_id)) {
-				return remove_chapter_by_index.call(this,
-						this.chapter_index_of_id[title]);
-			}
-			// Nothing found.
-
-		} else if (title in this.chapter_index_of_id
-		//
-		|| (title = encode_identifier(title, this)) in this.chapter_index_of_id) {
-			return remove_chapter_by_index.call(this,
-					this.chapter_index_of_id[title]);
-		}
+		return [ index, item ];
 	}
 
 	// 自動生成目錄。
@@ -1213,7 +1232,7 @@ function module_code(library_namespace) {
 				TOC_html.push(JSON.to_XML({
 					img : null,
 					alt : "cover-image",
-					title : resource.data && resource.data.url
+					title : resource[KEY_DATA] && resource[KEY_DATA].url
 					//
 					|| resource.href,
 					src : resource.href
@@ -1321,10 +1340,7 @@ function module_code(library_namespace) {
 			normalize_item(resource, this, true));
 			if (resource[KEY_DATA]) {
 				var info = library_namespace.null_Object(), setted;
-				// preserve additional properties
-				'meta,url,file,type,date,word_count'.split(',')
-				//
-				.forEach(function(name) {
+				this.preserve_attributes.forEach(function(name) {
 					if (resource[KEY_DATA][name]) {
 						setted = true;
 						info[name] = resource[KEY_DATA][name];
@@ -1356,7 +1372,7 @@ function module_code(library_namespace) {
 		callback && callback();
 	}
 
-	// package 打包 bale packing
+	// package, bale packing 打包 epub
 	function archive_to_ZIP(target_file, remove) {
 		// check arguments
 		if (Array.isArray(target_file) && target_file.length === 2) {
@@ -1488,6 +1504,8 @@ function module_code(library_namespace) {
 		generate_TOC : generate_TOC,
 		flush : write_chapters,
 		archive : archive_to_ZIP,
+		// preserve additional properties
+		preserve_attributes : 'meta,url,file,type,date,word_count'.split(','),
 		pack : function(target_file, remove, callback) {
 			this.flush(function() {
 				this.archive(target_file, remove);
