@@ -787,6 +787,21 @@ gettext.to_standard = function(alias) {
 };
 
 
+var time_zone_of = {
+	'ja-JP' : 9,
+	'cmn-Hans-CN' : 8,
+	'cmn-Hant-TW' : 8
+};
+
+// @see String_to_Date.zone @ CeL.data.date
+function time_zone_of_language(language) {
+	return language in time_zone_of ? time_zone_of[language]
+	: time_zone_of[gettext.to_standard(language)];
+}
+
+_.time_zone_of_language = time_zone_of_language;
+
+
 function detect_HTML_language(HTML) {
 	// e.g., <html xml:lang="ja" lang="ja">
 	var matched = HTML.match(/<html ([^<>]+)>/);

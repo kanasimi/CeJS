@@ -225,12 +225,12 @@ function module_code(library_namespace) {
 		this.metadata = library_namespace.null_Object();
 
 		var raw_data;
-		if (options.start_over) {
-			// start over: 重新創建, 不使用舊的.opf資料
+		if (options.rebuild) {
+			// rebuild: 重新創建, 不使用舊的.opf資料. start over, re-create
 			// TODO: remove directories+files
 			;
 		} else {
-			raw_data = !options.start_over && library_namespace
+			raw_data = library_namespace
 			// book data
 			.read_file(this.path.book + this.package_document_name);
 		}
@@ -1044,7 +1044,7 @@ function module_code(library_namespace) {
 			contents = normailize_contents(contents);
 
 			if (item_data.internalize_media) {
-				// include images / 內含 media, 將外部media內部化
+				// include images / 自動載入內含資源, 將外部media內部化
 				var links = [];
 				contents = contents.replace(/ (src|href)="([^"]+)"/g, function(
 						all, attribute_name, url) {

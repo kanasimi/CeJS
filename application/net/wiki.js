@@ -3902,7 +3902,7 @@ function module_code(library_namespace) {
 					if (typeof next[3] === 'function')
 						next[3].call(this, this.last_page.title, 'nochange');
 					this.next();
-				} else
+				} else {
 					wiki_API.edit([ this.API_URL, this.last_page ],
 					// 因為已有 contents，直接餵給轉換函式。
 					next[1], this.token,
@@ -3995,6 +3995,7 @@ function module_code(library_namespace) {
 							_this.next();
 						}
 					});
+				}
 			}
 			break;
 
@@ -5491,6 +5492,17 @@ function module_code(library_namespace) {
 				// 檢查若 options 本身即為 session。
 				|| is_wiki_API(options) && options);
 				if (session) {
+					if (post_data
+					//
+					&& (!post_data.token || post_data.token === BLANK_TOKEN)
+					// 防止未登錄編輯
+					&& session.token
+					//
+					&& (session.token.lgpassword || session.preserve_password)) {
+						library_namespace.err('未登錄編輯？');
+						throw new Error('未登錄編輯？');
+					}
+
 					// assert: get_URL_options 為 session。
 					if (!session.get_URL_options) {
 						library_namespace.debug(
@@ -7291,6 +7303,9 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// 未登錄/anonymous時的token
+	var BLANK_TOKEN = '+\\';
+
 	// get token
 	// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Btokens
 	wiki_API.prototype.get_token = function(callback, type) {
@@ -7323,7 +7338,7 @@ function module_code(library_namespace) {
 				//
 				type + 'token: ' + session.token[type + 'token']
 				//
-				+ (session.token[type + 'token'] === '+\\'
+				+ (session.token[type + 'token'] === BLANK_TOKEN
 				//
 				? ' (login as anonymous!)' : ''),
 				//

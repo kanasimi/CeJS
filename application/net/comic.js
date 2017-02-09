@@ -46,6 +46,7 @@ typeof CeL === 'function' && CeL.run({
 	// .includes() @ CeL.data.code.compatibility
 	// .between() @ CeL.data.native
 	// .append() @ CeL.data.native
+	// .pad() @ CeL.data.native
 	require : 'data.code.compatibility.|data.native.'
 	// for CeL.to_file_name()
 	+ '|application.net.'
@@ -56,7 +57,10 @@ typeof CeL === 'function' && CeL.run({
 	// for HTML_to_Unicode()
 	+ '|interact.DOM.'
 	// for Date.prototype.format()
-	+ '|data.date.',
+	+ '|data.date.'
+	// for .detect_HTML_language(), .time_zone_of_language()
+	// + '|application.locale.'
+	,
 
 	// 設定不匯出的子函式。
 	no_extend : '*',
@@ -177,6 +181,12 @@ function module_code(library_namespace) {
 		// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
 		preserve_chapter_page : true,
 
+		// for CeL.application.storage.EPUB
+		// auto_create_ebook, automatic create ebook
+		// MUST includes CeL.application.locale!
+		// need_create_ebook : true,
+		KEY_EBOOK : 'ebook',
+		add_ebook_chapter : add_ebook_chapter,
 		pack_ebook : pack_ebook,
 		// 若需要留下/重複利用media如images，請勿remove。
 		// remove_ebook_directory : true,
@@ -365,6 +375,9 @@ function module_code(library_namespace) {
 				|| library_namespace.null_Object();
 
 		function finish_up(work_data) {
+			if (_this.need_create_ebook) {
+				_this.pack_ebook(work_data);
+			}
 			if (typeof _this.finish_up === 'function') {
 				_this.finish_up(work_data);
 			}
@@ -414,7 +427,9 @@ function module_code(library_namespace) {
 			// TODO: .replace(/%t/g, work_title)
 			url = this.full_URL(url) + encodeURIComponent(
 			// e.g., 找不到"隔离带 2"，須找"隔离带"。
-			work_title.replace(/\s+\d{1,2}$/, ''));
+			work_title.replace(/\s+\d{1,2}$/, '')
+			// e.g., "Knight's & Magic" @ 小説を読もう！ || 小説検索
+			.replace(/&/g, ''));
 		}
 		get_URL(url, function(XMLHttp) {
 			// this.parse_search_result() returns:
@@ -538,8 +553,8 @@ function module_code(library_namespace) {
 			}
 			// 基本檢測。
 			if (PATTERN_non_CJK.test(work_data.title)
-			// e.g., "THE NEW GATE"
-			&& !/[a-z]+ [a-z\d]/i.test(work_data.title)
+			// e.g., "THE NEW GATE", "Knight's & Magic"
+			&& !/[a-z]+ [a-z\d&]/i.test(work_data.title)
 			// .title: 必要屬性：須配合網站平台更改。
 			&& PATTERN_non_CJK.test(work_id)) {
 				library_namespace.err('Did not set work title: ' + work_id
@@ -618,10 +633,27 @@ function module_code(library_namespace) {
 			work_data.chapter_count = 0;
 
 			// 注意: 這時可能尚未建立 work_data.directory。
-			// 但this.get_chapter_count()若用到work_data.ebook.set_cover()，則會造成沒有建立基礎目錄的錯誤。
+			// 但this.get_chapter_count()若用到work_data[this.KEY_EBOOK].set_cover()，則會造成沒有建立基礎目錄的錯誤。
 			library_namespace.debug('Create work_data.directory: '
 					+ work_data.directory);
 			library_namespace.fs_mkdir(work_data.directory);
+
+			if (true || _this.need_create_ebook) {
+				// 提供給 this.get_chapter_count() 使用。
+				// e.g., 'ja-JP'
+				if (!('language' in work_data)) {
+					work_data.language
+					// CeL.application.locale.detect_HTML_language()
+					= library_namespace.detect_HTML_language(html);
+				}
+				if (!('time_zone' in work_data)) {
+					// e.g., 9
+					work_data.time_zone
+					// CeL.application.locale.time_zone_of_language
+					= library_namespace
+							.time_zone_of_language(work_data.language);
+				}
+			}
 
 			_this.get_chapter_count(work_data, html
 			// , get_label
@@ -724,13 +756,28 @@ function module_code(library_namespace) {
 					.stringify(work_data));
 
 			if (!work_data.reget_chapter && !_this.regenerate) {
-				library_namespace.log('將跳過本作品不處理。');
-				// 最終廢棄動作，防止執行 work_data.ebook.pack()。
-				delete work_data.ebook;
+				// 跳過本作品不處理。
+				library_namespace.log('Skip ' + work_data.id + ' '
+						+ work_data.title);
+				// 最終廢棄動作，防止執行 work_data[this.KEY_EBOOK].pack()。
+				delete work_data[_this.KEY_EBOOK];
 				if (typeof callback === 'function') {
 					callback(work_data);
 				}
 				return;
+			}
+
+			if (_this.need_create_ebook) {
+				var last_update_Date = work_data.last_update;
+				if (!library_namespace.is_Date(last_update_Date)) {
+					// assert: typeof last_update_Date === 'string'
+					last_update_Date = last_update_Date.to_Date({
+						zone : work_data.time_zone
+					});
+				}
+				// 注意：不使用 cache。
+				work_data.last_update_Date = last_update_Date;
+				create_ebook.call(_this, work_data);
 			}
 
 			var message = [
@@ -1155,31 +1202,87 @@ function module_code(library_namespace) {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// 本段功能須配合 CeL.application.storage.EPUB 並且做好事前設定。
+	// 可參照 https://github.com/kanasimi/comic
 
-	// 須配合 CeL.application.storage.EPUB
+	function create_ebook(work_data) {
+		// CeL.application.storage.EPUB
+		var ebook = new library_namespace.EPUB(work_data.directory
+				+ work_data.directory_name, {
+			// rebuild: 重新創建, 不使用舊的.opf資料. start over, re-create
+			rebuild : this.rebuild_ebook,
+			// 小説ID
+			identifier : work_data.id,
+			title : work_data.title,
+			language : work_data.language || this.language
+		});
+
+		ebook.time_zone = work_data.time_zone || this.time_zone;
+
+		// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-opf-dcmes-optional
+		ebook.set({
+			// 作者名
+			creator : work_data.author,
+			// 出版時間 the publication date of the EPUB Publication.
+			date : library_namespace.EPUB
+					.date_to_String(work_data.last_update_Date),
+			// ジャンル, タグ, キーワード
+			subject : work_data.genre || work_data.status,
+			// あらすじ
+			description : get_label(work_data.description
+			// .description 中不可存在 tag。
+			.replace(/\n*<br[^<>]+>\n*/ig, '\n')),
+			publisher : work_data.site_name + ' (' + this.base_URL + ')',
+			// source URL
+			source : work_data.url
+		});
+
+		if (work_data.image) {
+			ebook.set_cover(work_data.image);
+		}
+
+		return work_data[this.KEY_EBOOK] = ebook;
+	}
+
+	function add_ebook_chapter(work_data, chapter, data) {
+		var file_title = chapter.pad(3) + ' '
+				+ (data.title ? data.title + ' - ' : '') + data.sub_title,
+		//
+		item = work_data[this.KEY_EBOOK].add({
+			title : file_title,
+			// include images / 自動載入內含資源, 將外部media內部化
+			internalize_media : true,
+			file : library_namespace.to_file_name(file_title + '.xhtml'),
+			date : work_data.chapter_list[chapter - 1].date
+		}, {
+			// part_title
+			title : data.title,
+			// chapter_title
+			sub_title : data.sub_title,
+			text : data.text
+		});
+
+		return item;
+	}
+
 	function pack_ebook(work_data, file_name) {
-		if (!work_data || !work_data.ebook) {
+		var ebook = work_data && work_data[this.KEY_EBOOK];
+		if (!ebook) {
 			return;
 		}
 
 		process.title = '打包 epub: ' + work_data.title;
 		if (!file_name) {
-			var date = work_data.last_update;
-			if (!library_namespace.is_Date(date)) {
-				// assert: typeof date === 'string
-				date = date.to_Date({
-					zone : 9
-				});
-			}
 			file_name =
 			// e.g., "(一般小説) [author] title [site 20170101].id.epub"
 			[ '(一般小説) [', work_data.author, '] ', work_data.title, ' [',
-					work_data.site_name, ' ', date.format('%Y%2m%2d'), '].',
+					work_data.site_name, ' ',
+					work_data.last_update_Date.format('%Y%2m%2d'), '].',
 					work_data.id, '.epub' ].join('');
 		}
 
 		// this: this_site
-		work_data.ebook.pack([ this.main_directory,
+		ebook.pack([ this.main_directory,
 		//
 		library_namespace.to_file_name(file_name) ],
 				this.remove_ebook_directory);

@@ -609,6 +609,9 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
+	// ISO 8601
+	var PATTERN_ISO_DATE = /^-?\d{4,8}-[01]\d-[0-3]\d(T[012]\d:[0-5]\d:[0-6]\d(\.\d{3})?(Z|[+\-][012]\d:\d{2}))?$/;
+
 	/**
 	 * convert the string to Date object.
 	 * 
@@ -653,10 +656,17 @@ function module_code(library_namespace) {
 			return date_string;
 		}
 
+		date_string = date_string.trim();
 		if (!date_string) {
 			// this.toString();
 			// date_string = this.valueOf();
 			return;
+		}
+
+		if (PATTERN_ISO_DATE.test(date_string)) {
+			// 對於有明確指定之 UTC date 如 .toISOString() 之產出或 ISO 8601，
+			// 應當不管 time zone 如何設定，直接回傳。
+			return new Date(date_string);
 		}
 
 		var tmp, minute_offset;
