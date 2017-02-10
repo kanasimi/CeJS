@@ -768,6 +768,12 @@ function module_code(library_namespace) {
 			'media-type' : item_data['media-type'] || item_data.type
 					|| library_namespace.MIME_of(href)
 		};
+		if (library_namespace.is_debug()
+		// ↑ 可能是placeholder，因此僅作debug。
+		&& !/^[a-z]+\/[a-z\d+]+$/.test(item['media-type'])) {
+			library_namespace.warn('Invalid or did not set media-type: '
+					+ JSON.stringify(item));
+		}
 
 		if (!strict) {
 			if (!item_data.url && href.includes('://')) {
@@ -965,43 +971,50 @@ function module_code(library_namespace) {
 						+ item_data.id + ' →\n' + item.id);
 			}
 
+			if (!item_data.type) {
+				// 先猜一個，等待會取得資源後再用XMLHttp.type設定。
+				// item_data.type = library_namespace.MIME_of('jpg');
+			}
 			// 先登記預防重複登記 (placeholder)。
 			add_manifest_item.call(this, item, true);
 
 			item_data.file_path = this.path[detect_file_type(item.href)
 					|| 'media']
-					+ get_file_name_of_url(item.href)
+					+ get_file_name_of_url(item.href);
+			// 自動添加.downloading登記。
 			this.downloading[item_data.file_path] = item_data;
 
 			// 需要先準備好目錄結構以存入media file。
 			this.initialize();
 
 			// 自網路取得url。
-			library_namespace.log('add_chapter: get URL: ' + item_data.url);
+			library_namespace.log('add_chapter: fetch URL: ' + item_data.url);
 
 			// assert: CeL.application.net.Ajax included
 			library_namespace.get_URL_cache(item_data.url, function(contents,
 					error, XMLHttp) {
 				// save MIME type
 				if (XMLHttp && XMLHttp.type) {
-					item_data.type = XMLHttp.type;
+					// 這邊已經不能用 item_data.type。
+					item['media-type'] = XMLHttp.type;
 				}
+
+				// 基本檢測。
 				if (/text/i.test(item_data.type)) {
 					library_namespace.err('Not media type: [' + item_data.type
 							+ '] ' + item_data.url);
 				}
 
-				library_namespace.log('add_chapter: URL got: ['
-						+ item_data.type + '] ' + item_data.url + '\n→ '
+				library_namespace.log('add_chapter: got resource : ['
+						+ item['media-type'] + '] ' + item_data.url + '\n→ '
 						+ item.href);
 
 				// item_data.write_file = false;
-				// _this.add(item_data, contents);
 
-				// 註銷登記。
+				// 註銷.downloading登記。
 				delete _this.downloading[item_data.file_path];
 				if (_this.on_all_downloaded
-				//
+				// 在事後檢查.on_all_downloaded，看是不是有callback。
 				&& library_namespace.is_empty_object(_this.downloading)) {
 					_this.on_all_downloaded();
 					// 註銷登記。
@@ -1033,10 +1046,7 @@ function module_code(library_namespace) {
 		//
 		this.resources[this.resource_index_of_id[item.id]]))) {
 			library_namespace.debug('已經有相同的篇章或資源檔，將不覆寫: '
-			//
-			+ (item[KEY_DATA] && item[KEY_DATA].file
-			//
-			|| decode_identifier(item.id, this)), 2);
+					+ (item_data.file || decode_identifier(item.id, this)), 2);
 			return;
 		}
 
@@ -1051,7 +1061,8 @@ function module_code(library_namespace) {
 					// [ url, path, file_name, is_directory ]
 					var matched = url.match(/^([\s\S]*\/)([^\/]+)(\/)?$/);
 					if (!matched || matched[3] && attribute_name !== 'src') {
-						library_namespace.log('Skip resource: ' + url);
+						library_namespace.log('Skip resource: ' + url
+								+ '\n of ' + item_data.file);
 						return all;
 					}
 					var href = _this.directory.media + matched[2];
@@ -1063,7 +1074,7 @@ function module_code(library_namespace) {
 							+ '="' + href + '"' : all;
 				});
 
-				contents = contents.replace(/<a ([^<>]+)>([^<>]+)<\/a>/g,
+				contents = contents.replace(/<a ([^<>]+)>([^<>]+)<\/a>/ig,
 				// <a href="*.png">挿絵</a> → <img alt="挿絵" src="*.png" />
 				function(all, attributes, innerHTML) {
 					if (!attributes.includes('href="')) {
@@ -1073,9 +1084,14 @@ function module_code(library_namespace) {
 							+ (attributes.includes('alt="') ? '' : 'alt="'
 									+ innerHTML + '" ')
 							+ attributes.replace(/(^|\s)href="/ig, ' src="')
-							// <img> 中不能使用 name="" 之類
-							.replace(/(?:^|\s)(?:name|border)=[^\s]+/ig, '')
 									.trim() + ' />';
+				});
+
+				contents = contents.replace(/<img ([^<>]+)>/ig, function(tag,
+						attributes) {
+					return '<img ' + attributes.replace(
+					// <img> 中不能使用 name="" 之類
+					/(?:^|\s)(?:name|border)=[^\s]+/ig, '').trim() + '>';
 				});
 
 				if (links.length > 0) {
@@ -1304,6 +1320,12 @@ function module_code(library_namespace) {
 	function write_chapters(callback) {
 		// 對media過多者，可能到此尚未下載完。
 		if (!library_namespace.is_empty_object(this.downloading)) {
+			if (this.on_all_downloaded) {
+				library_namespace.warn(
+				// 棄置
+				'There is already callback .on_all_downloaded exists! I will discard it: '
+						+ this.on_all_downloaded);
+			}
 			// 註冊callback
 			this.on_all_downloaded = write_chapters.bind(this, callback);
 			library_namespace.debug('Waiting for all resources loaded...');

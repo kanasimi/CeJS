@@ -1245,10 +1245,20 @@ function module_code(library_namespace) {
 	}
 
 	function add_ebook_chapter(work_data, chapter, data) {
+		var ebook = work_data && work_data[this.KEY_EBOOK];
+		if (!ebook) {
+			return;
+		}
+
+		if (Array.isArray(data.title)) {
+			data.title = data.title.join(' - ');
+		}
+		// assert: !data.title || typeof data.title === 'string'
+
 		var file_title = chapter.pad(3) + ' '
 				+ (data.title ? data.title + ' - ' : '') + data.sub_title,
 		//
-		item = work_data[this.KEY_EBOOK].add({
+		item = ebook.add({
 			title : file_title,
 			// include images / 自動載入內含資源, 將外部media內部化
 			internalize_media : true,
@@ -1256,9 +1266,9 @@ function module_code(library_namespace) {
 			date : work_data.chapter_list[chapter - 1].date
 		}, {
 			// part_title
-			title : data.title,
+			title : get_label(data.title || ''),
 			// chapter_title
-			sub_title : data.sub_title,
+			sub_title : get_label(data.sub_title),
 			text : data.text
 		});
 
