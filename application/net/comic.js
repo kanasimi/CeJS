@@ -53,7 +53,7 @@ typeof CeL === 'function' && CeL.run({
 	//
 	+ '|application.net.Ajax.get_URL'
 	// for CeL.env.arg_hash, CeL.fs_mkdir()
-	+ '|application.platform.nodejs.'
+	+ '|application.platform.nodejs.|application.storage.'
 	// for HTML_to_Unicode()
 	+ '|interact.DOM.'
 	// for Date.prototype.format()
@@ -571,10 +571,15 @@ function module_code(library_namespace) {
 			work_data.url = work_URL;
 
 			process.title = '下載' + work_data.title + ' - 目次';
-			work_data.directory_name = library_namespace
-					.to_file_name(work_data.id + ' ' + work_data.title);
-			work_data.directory = _this.main_directory
-					+ work_data.directory_name + path_separator;
+			work_data.directory_name = library_namespace.to_file_name(
+			// 允許自訂作品目錄名。
+			work_data.directory_name || work_data.id + ' ' + work_data.title);
+			// 允許自訂作品目錄，但須自行escape並添加path_separator。
+			// @see qq.js
+			if (!work_data.directory) {
+				work_data.directory = _this.main_directory
+						+ work_data.directory_name + path_separator;
+			}
 			work_data.data_file = work_data.directory
 					+ work_data.directory_name + '.json';
 
@@ -627,6 +632,11 @@ function module_code(library_namespace) {
 		// get 目次
 		function process_chapter_list_data(XMLHttp) {
 			var html = XMLHttp.responseText;
+			if (!html) {
+				var message = this.id + ': Can not get chapter list page!';
+				library_namespace.err(message);
+				throw message;
+			}
 
 			// reset chapter_count. 此處 chapter (章節)
 			// 指的為平台所給的id編號，並非"回"、"話"！且可能會跳號！
@@ -655,9 +665,17 @@ function module_code(library_namespace) {
 				}
 			}
 
-			_this.get_chapter_count(work_data, html
-			// , get_label
-			);
+			try {
+				_this.get_chapter_count(work_data, html
+				// , get_label
+				);
+			} catch (e) {
+				library_namespace.err(this.id
+						+ ': .get_chapter_count() throw error');
+				throw e;
+				callback && callback(work_data);
+				return;
+			}
 
 			if (!(work_data.chapter_count >= 1)) {
 				// 無任何章節可供下載。刪掉前面預建的目錄。
@@ -1001,8 +1019,8 @@ function module_code(library_namespace) {
 			--left;
 			if (Array.isArray(image_list) && image_list.length > 1) {
 				process.stdout.write(left + ' left...\r');
-				library_namespace.debug(chapter_label + ': ' + left + ' left', 3,
-						'check_if_done');
+				library_namespace.debug(chapter_label + ': ' + left + ' left',
+						3, 'check_if_done');
 			}
 			// 須注意若是最後一張圖get_images()直接 return 了，
 			// 此時尚未設定 waiting，因此此處不可以 waiting 判斷！
