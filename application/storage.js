@@ -104,7 +104,9 @@ function module_code(library_namespace) {
 		/** node.js file system module */
 		var node_fs = require('fs');
 
-		_.fso_status = storage_module.fs_status;
+		// 警告: 此函數之API尚未規範。
+		// _.fso_status = storage_module.fs_status;
+
 		_.file_exists = storage_module.file_exists;
 		_.directory_exists = storage_module.directory_exists;
 

@@ -191,7 +191,7 @@ function module_code(library_namespace) {
 		// 若需要留下/重複利用media如images，請勿remove。
 		// remove_ebook_directory : true,
 		// 章節數量無變化時依舊利用 cache 重建資料(如ebook)
-		// regenerate : true
+		// regenerate : true,
 
 		full_URL : full_URL_of_path,
 		// recheck: 從頭檢測所有作品之所有章節與所有圖片。default:false
@@ -999,9 +999,11 @@ function module_code(library_namespace) {
 
 		function check_if_done() {
 			--left;
-			process.stdout.write(left + ' left...\r');
-			library_namespace.debug(chapter_label + ': ' + left + ' left', 3,
-					'check_if_done');
+			if (Array.isArray(image_list) && image_list.length > 1) {
+				process.stdout.write(left + ' left...\r');
+				library_namespace.debug(chapter_label + ': ' + left + ' left', 3,
+						'check_if_done');
+			}
 			// 須注意若是最後一張圖get_images()直接 return 了，
 			// 此時尚未設定 waiting，因此此處不可以 waiting 判斷！
 			if (left > 0) {
@@ -1206,11 +1208,34 @@ function module_code(library_namespace) {
 	// 可參照 https://github.com/kanasimi/comic
 
 	function create_ebook(work_data) {
+		if (!this.site_id) {
+			this.base_URL.match(/\/\/([^\/]+)/)[1].toLowerCase().split('.')
+			//
+			.reverse().some(function(token, index) {
+				if (index === 0) {
+					// 頂級域名
+					return false;
+				}
+				if (token !== 'www') {
+					this.site_id = token;
+				}
+				if (token.length > 3 || index > 1) {
+					// e.g., www.[id].co.jp
+					return true;
+				}
+			}, this);
+			if (!this.site_id) {
+				library_namespace.err('Can not detect .site_id from '
+						+ this.base_URL);
+			}
+		}
+
 		// CeL.application.storage.EPUB
 		var ebook = new library_namespace.EPUB(work_data.directory
 				+ work_data.directory_name, {
 			// rebuild: 重新創建, 不使用舊的.opf資料. start over, re-create
 			rebuild : this.rebuild_ebook,
+			id_type : this.site_id,
 			// 小説ID
 			identifier : work_data.id,
 			title : work_data.title,
@@ -1275,7 +1300,99 @@ function module_code(library_namespace) {
 		return item;
 	}
 
+	var PATTERN_epub_file = /^\(一般小説\) \[([^\[\]]+)\] ([^\[\]]+) \[(.*?) (\d{8})\]\.(.+)\.epub$/;
+	function parse_epub_name(file_name) {
+		var matched = file_name.match(PATTERN_epub_file);
+		if (matched) {
+			return {
+				file_name : file_name,
+				author : matched[1],
+				title : matched[2],
+				// titles : matched[2].trim().split(' - '),
+				site_name : matched[3],
+				// e.g., "20170101"
+				date : matched[4],
+				// book id in this site
+				id : matched[5]
+			};
+		}
+	}
+
+	function get_file_status(file_name, directory) {
+		var status = node_fs.lstatSync((directory || '') + file_name);
+		status.name = file_name;
+		return status;
+	}
+
+	// remove duplicate title ebooks.
+	// 封存舊的ebooks.
+	function remove_duplicate_ebooks(only_id) {
+		if (!this.ebook_archive_directory) {
+			this.ebook_archive_directory = this.main_directory + 'archive'
+					+ path_separator;
+		}
+
+		var last_id, last_file,
+		//
+		ebooks;
+
+		if (only_id && (last_file = parse_epub_name(only_id))) {
+			only_id = last_file.id;
+		}
+
+		ebooks = library_namespace.read_directory(this.main_directory)
+		// assert: 依id舊至新排列
+		.sort().map(parse_epub_name).forEach(function(data) {
+			if (!data
+			// 僅針對 only_id
+			|| only_id && data.id !== only_id) {
+				return;
+			}
+			if (!last_id || last_id !== data.id) {
+				last_id = data.id;
+				last_file = data.file_name;
+				return;
+			}
+
+			var this_file = get_file_status(data.file_name,
+			//
+			this.main_directory);
+			if (typeof last_file === 'string') {
+				last_file = get_file_status(last_file, this.main_directory);
+			}
+
+			if (this_file.size >= last_file.size) {
+				library_namespace.create_directory(
+				//
+				this.ebook_archive_directory);
+				library_namespace.log(this.main_directory + last_file.name
+				// 新檔比較大。刪舊檔或將之移至archive。
+				+ '\n→ ' + this.ebook_archive_directory + last_file.name);
+				library_namespace.move_file(
+				//
+				this.main_directory + last_file.name,
+				//
+				this.ebook_archive_directory + last_file.name);
+			} else if (this.milestone_extension) {
+				last_file = this.main_directory + last_file.name;
+				var extension = (typeof this.milestone_extension === 'string'
+				//
+				? this.milestone_extension : '.milestone') + '$1';
+				library_namespace.log(last_file
+				// 舊檔比較大!!將之標註成里程碑紀念/紀錄。
+				+ '\n→ ' + last_file.replace(/(.[a-z\d\-]+)$/i, extension));
+				library_namespace.move_file(last_file,
+				//
+				+last_file.replace(/(.[a-z\d\-]+)$/i, extension));
+			}
+
+			last_file = this_file;
+		}, this);
+	}
+
 	function pack_ebook(work_data, file_name) {
+		// remove_duplicate_ebooks.call(this);
+
 		var ebook = work_data && work_data[this.KEY_EBOOK];
 		if (!ebook) {
 			return;
@@ -1289,13 +1406,17 @@ function module_code(library_namespace) {
 					work_data.site_name, ' ',
 					work_data.last_update_Date.format('%Y%2m%2d'), '].',
 					work_data.id, '.epub' ].join('');
+			// assert: PATTERN_epub_file.test(file_name) === true
 		}
+		library_namespace.debug('打包 epub: ' + file_name);
 
 		// this: this_site
 		ebook.pack([ this.main_directory,
 		//
 		library_namespace.to_file_name(file_name) ],
 				this.remove_ebook_directory);
+
+		remove_duplicate_ebooks.call(this, file_name);
 	}
 
 	// --------------------------------------------------------------------------------------------

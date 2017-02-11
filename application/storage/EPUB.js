@@ -299,55 +299,66 @@ function module_code(library_namespace) {
 	// {JSON}raw_data
 	function set_raw_data(raw_data, options) {
 		options = library_namespace.setup_options(options);
+
 		// console.log(JSON.stringify(raw_data));
-		this.raw_data = raw_data = raw_data || {
-			package : [ {
-				// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-opf-dcmes-required
-				metadata : [ {
-					'dc:identifier' : options.identifier
-					//
-					|| options.id || new Date().toISOString(),
-					id : options.id_type || 'workid'
+		if (!raw_data) {
+			if (!options.id_type) {
+				options.id_type = 'workid';
+			}
+			// assert: typeof options.id_type === 'string'
+			raw_data = {
+				package : [ {
+					// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-opf-dcmes-required
+					metadata : [ {
+						'dc:identifier' : options.identifier
+						//
+						|| options.id || new Date().toISOString(),
+						// 給calibre用
+						// 'opf:scheme' : options.id_type.toUpperCase(),
+						id : options.id_type,
+					}, {
+						'dc:title' : options.title || ''
+					}, {
+						'dc:language' : options.language || 'en'
+					}, {
+						// 最後更動。 出版時間應用dc:date。
+						meta : date_to_String(),
+						property : "dcterms:modified"
+					} ],
+					'xmlns:dc' : 'http://purl.org/dc/elements/1.1/'
 				}, {
-					'dc:title' : options.title || ''
+					manifest : [ {
+						item : null,
+						id : 'style',
+						href : '.css',
+						// https://idpf.github.io/epub-cmt/v3/
+						// e.g., 'image/jpeg'
+						'media-type' : "text/css"
+					}, {
+						item : null,
+						id : 'c1',
+						href : '.xhtml',
+						'media-type' : "application/xhtml+xml"
+					} ] && []
 				}, {
-					'dc:language' : options.language || 'en'
-				}, {
-					// 最後更動。 出版時間應用dc:date。
-					meta : date_to_String(),
-					property : "dcterms:modified"
+					// represent the default reading order
+					// of the given Rendition.
+					spine : [ {
+						itemref : null,
+						idref : 'id'
+					} ] && []
 				} ],
-				'xmlns:dc' : 'http://purl.org/dc/elements/1.1/'
-			}, {
-				manifest : [ {
-					item : null,
-					id : 'style',
-					href : '.css',
-					// https://idpf.github.io/epub-cmt/v3/
-					// e.g., 'image/jpeg'
-					'media-type' : "text/css"
-				}, {
-					item : null,
-					id : 'c1',
-					href : '.xhtml',
-					'media-type' : "application/xhtml+xml"
-				} ] && []
-			}, {
-				// represent the default reading order of the given
-				// Rendition.
-				spine : [ {
-					itemref : null,
-					idref : 'id'
-				} ] && []
-			} ],
-			// determine version.
-			// http://www.idpf.org/epub/31/spec/
-			// EpubCheck 尚不支援 3.1
-			version : "3.0",
-			xmlns : "http://www.idpf.org/2007/opf",
-			// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-package-metadata-identifiers
-			'unique-identifier' : options.id_type || 'workid'
-		};
+				// determine version.
+				// http://www.idpf.org/epub/31/spec/
+				// EpubCheck 尚不支援 3.1
+				version : "3.0",
+				xmlns : "http://www.idpf.org/2007/opf",
+				// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-package-metadata-identifiers
+				// e.g., "AMAZON_JP", "MOBI-ASIN"
+				'unique-identifier' : options.id_type
+			};
+		}
+		this.raw_data = raw_data;
 
 		// http://epubzone.org/news/epub-3-and-global-language-support
 		if (options.language) {
