@@ -633,7 +633,7 @@ function module_code(library_namespace) {
 		function process_chapter_list_data(XMLHttp) {
 			var html = XMLHttp.responseText;
 			if (!html) {
-				var message = this.id + ': Can not get chapter list page!';
+				var message = _this.id + ': Can not get chapter list page!';
 				library_namespace.err(message);
 				throw message;
 			}
@@ -837,7 +837,13 @@ function module_code(library_namespace) {
 		}
 		if (typeof this.pre_chapter_URL === 'function') {
 			// 在this.chapter_URL()之前執行this.pre_chapter_URL()，主要用途在取得chapter_URL之資料。
-			this.pre_chapter_URL(work_data, chapter, next);
+			try {
+				this.pre_chapter_URL(work_data, chapter, next);
+			} catch (e) {
+				library_namespace.err(_this.id + ': ' + work_data.title
+						+ ': Error on chapter ' + chapter);
+				throw e;
+			}
 		} else {
 			next();
 		}
@@ -888,7 +894,7 @@ function module_code(library_namespace) {
 					chapter_data = _this.parse_chapter_data(html, work_data,
 							get_label, chapter);
 				} catch (e) {
-					library_namespace.err('Error on chapter url: '
+					library_namespace.err(_this.id + ': Error on chapter url: '
 							+ chapter_URL);
 					throw e;
 				}
