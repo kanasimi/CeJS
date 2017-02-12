@@ -349,14 +349,16 @@ function gettext(text_id) {
 	}
 
 	var arg = arguments, length = arg.length,
-	//
-	domain_name = gettext_domain_name,
+	// this: 本次轉換之特殊設定。
+	domain_name = this && this.domain_name || gettext_domain_name,
 	// 在不明環境，如 node.js 中執行時，((gettext_texts[domain_name])) 可能為 undefined。
-	domain = gettext_texts[domain_name] || library_namespace.null_Object(),
+	domain = this && this.domain || gettext_texts[domain_name] || library_namespace.null_Object(),
 	//
 	text = ''
 			+ (convert(library_namespace.is_Object(text_id) ? text_id[domain_name]
 					: text_id));
+
+	library_namespace.debug('Use domain_name: ' + domain_name, 6);
 
 	if (length <= 1)
 		return text;
@@ -400,15 +402,16 @@ function gettext(text_id) {
 				if (domain_used) {
 					// 避免 %0 形成 infinite loop。
 					var origin_domain = domain, origin_domain_name = domain_name;
-					// 臨時改變 domain。
+					library_namespace.debug('臨時改變 domain: ' + domain_name + '→' + domain_specified, 6);
 					domain_name = domain_specified;
 					domain = domain_used;
 					conversion = convert(arg[NO], domain_specified);
-					// 回存。
+					library_namespace.debug('回存/回復 domain: ' + domain_name + '→' + origin_domain_name, 6);
 					domain_name = origin_domain_name;
 					domain = origin_domain;
-				} else
+				} else {
 					conversion = convert(arg[NO]);
+				}
 			}
 
 			if (format)
@@ -438,6 +441,27 @@ function gettext(text_id) {
 }
 
 
+// 不改變預設domain，直接取得特定domain的轉換過的文字。
+// 警告：需要確保系統相應 domain resource 已載入並設定好。
+gettext.in_domain = function(domain_name, text_id) {
+	var options = typeof domain_name === 'string' ? {
+		domain_name : gettext.to_standard(domain_name)
+	} : {
+		domain : domain
+	};
+
+	if (false && Array.isArray(text_id)) {
+		return gettext.apply(options, text_id);
+	}
+
+	if (arguments.length <= 2) {
+		return gettext.call(options, text_id);
+	}
+
+	var arg = Array.prototype.slice.call(arguments);
+	arg.shift();
+	return gettext.apply(options, arg);
+};
 
 /**
  * 檢查指定資源是否已載入，若已完成，則執行 callback 序列。
@@ -548,8 +572,7 @@ gettext.get_domain_name = function() {
 	return gettext_domain_name;
 };
 gettext.is_domain_name = function(domain_name) {
-	return gettext_domain_name === gettext
-	.to_standard(domain_name);
+	return gettext_domain_name === gettext.to_standard(domain_name);
 };
 /**
  * 取得/設定當前使用之 domain。
@@ -985,6 +1008,7 @@ gettext.create_menu = create_domain_menu;
 // 數字系統。numeral system.
 // 英文的基數
 gettext.numeral = function(attribute, domain_name) {
+	library_namespace.debug('數字: ' + attribute + '@' + domain_name, 6);
 	switch (domain_name || gettext_domain_name) {
 	case 'Chinese':
 		return to_Chinese_numeral(attribute);

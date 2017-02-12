@@ -609,6 +609,7 @@ function test_locale() {
 		[['cmn-Hans-CN', CeL.gettext.to_standard('zh-cn')], 'gettext.to_standard(zh-cn)'],
 		[['ja-JP', CeL.gettext.to_standard('ja')], 'gettext.to_standard(ja)'],
 		[['ja-JP', CeL.gettext.to_standard('jp')], 'gettext.to_standard(jp)'],
+		[['日本語', CeL.gettext.get_alias('jp')], 'gettext.get_alias(jp)'],
 	]);
 
 	//	###usage 2014/2/5
@@ -669,7 +670,10 @@ function test_locale() {
 
 	//	###basic test
 	CeL.gettext.use_domain('zh-TW', function() {
-		;
+		CeL.gettext.use_domain('en', function() {
+			assert([ 'Loading...', CeL.gettext('Loading...') ]);
+			assert([ '載入中…', CeL.gettext.in_domain('TW', 'Loading...') ], '不改變預設domain，直接取得特定domain的轉換過的文字。');
+		}, true);
 	}, true);
 
 	//	設定欲轉換的文字格式。

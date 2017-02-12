@@ -1272,10 +1272,14 @@ function module_code(library_namespace) {
 		// 作品資訊
 		'<h2>', 'Work information', '</h2>', '<div id="work_data">', '<dl>');
 		Object.entries(this.metadata).forEach(function(data) {
-			var key = data[0];
-			TOC_html.push('<dt>', key, '</dt>', '<dd>',
-			//
-			data[1][to_meta_information_key(key)], '</dd>');
+			var key = data[0], value = data[1][to_meta_information_key(key)];
+			if (key === 'language') {
+				value = library_namespace.gettext.get_alias(value) || value;
+			} else if (library_namespace.is_Date(value)) {
+				// e.g., key: meta, date
+				value = value.toLocaleTimeString();
+			}
+			TOC_html.push('<dt>', key, '</dt>', '<dd>', value, '</dd>');
 		});
 		// 字數計算, 合計文字数
 		var total_word_count = 0;
