@@ -665,16 +665,18 @@ function test_locale() {
 			assert([ '3 entries loaded.', CeL.gettext('已載入 %1 筆資料。', 3) ]);
 			//CeL.info('單數複數形式 (plural) test OK.');
 		}, true);
+
+		CeL.gettext.use_domain('zh-TW', function() {
+			CeL.gettext.use_domain('en', function() {
+				assert([ 'Loading...', CeL.gettext('Loading...') ]);
+				assert([ '載入中…', CeL.gettext.in_domain('TW', 'Loading...') ], '不改變預設domain，直接取得特定domain的轉換過的文字。');
+			}, true);
+		}, true);
 	});
 
 
 	//	###basic test
-	CeL.gettext.use_domain('zh-TW', function() {
-		CeL.gettext.use_domain('en', function() {
-			assert([ 'Loading...', CeL.gettext('Loading...') ]);
-			assert([ '載入中…', CeL.gettext.in_domain('TW', 'Loading...') ], '不改變預設domain，直接取得特定domain的轉換過的文字。');
-		}, true);
-	}, true);
+	CeL.gettext.use_domain('zh-TW', true);
 
 	//	設定欲轉換的文字格式。
 	error_count += CeL.test('設定欲轉換的文字格式。', function(assert) {
