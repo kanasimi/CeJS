@@ -1432,12 +1432,11 @@ function module_code(library_namespace) {
 					work_data.id, '.epub' ].join('');
 			// assert: PATTERN_epub_file.test(file_name) === true
 		}
+		file_name = library_namespace.to_file_name(file_name);
 		library_namespace.debug('打包 epub: ' + file_name);
 
 		// this: this_site
-		ebook.pack([ this.main_directory,
-		//
-		library_namespace.to_file_name(file_name) ],
+		ebook.pack([ this.main_directory, file_name ],
 				this.remove_ebook_directory);
 
 		remove_duplicate_ebooks.call(this, file_name);

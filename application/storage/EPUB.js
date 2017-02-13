@@ -64,8 +64,10 @@ typeof CeL === 'function' && CeL.run({
 	// + '|application.net.Ajax.'
 	// write_file(), read_file()
 	+ '|application.storage.'
-	// .to_file_name()
+	// for .to_file_name()
 	// + '|application.net.'
+	// for .gettext
+	// + '|application.locale.'
 	,
 
 	// 設定不匯出的子函式。
@@ -83,7 +85,7 @@ function module_code(library_namespace) {
 	// in their Root Directory.
 	// e.g., META-INF/container.xml
 	container_directory_name = 'META-INF', container_file_name = 'container.xml',
-	// 前置碼
+	// 前置碼, 前綴
 	metadata_prefix = 'dc:',
 	// key for additional information / configuration data
 	KEY_DATA = 'item data',
@@ -362,6 +364,10 @@ function module_code(library_namespace) {
 
 		// http://epubzone.org/news/epub-3-and-global-language-support
 		if (options.language) {
+			if (library_namespace.gettext) {
+				library_namespace.debug('Load language ' + options.language);
+				library_namespace.gettext.load_domain(options.language);
+			}
 			// 似乎不用加也沒問題。
 			this.raw_data['xml:lang'] = options.language;
 		}
@@ -1239,7 +1245,20 @@ function module_code(library_namespace) {
 
 	// 自動生成目錄。
 	function generate_TOC() {
-		var TOC_html = [ '<?xml version="1.0" encoding="UTF-8"?>',
+		if (this.metadata.language) {
+			library_namespace.debug('Use language ' + JSON.stringify(
+			//
+			this.metadata.language[to_meta_information_key('language')]));
+		}
+		var _ = this.metadata.language && library_namespace.gettext
+		//
+		? library_namespace.gettext.in_domain.bind(null,
+				this.metadata.language[to_meta_information_key('language')])
+				: function(text_id) {
+					return text_id;
+				},
+		//
+		TOC_html = [ '<?xml version="1.0" encoding="UTF-8"?>',
 		// https://www.w3.org/QA/2002/04/valid-dtd-list.html
 		// https://cweiske.de/tagebuch/xhtml-entities.htm
 		// '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"',
@@ -1269,17 +1288,23 @@ function module_code(library_namespace) {
 		});
 
 		TOC_html.push(
-		// 作品資訊
-		'<h2>', 'Work information', '</h2>', '<div id="work_data">', '<dl>');
+		// 作品資訊, 小説情報, 電子書籍紹介, 作品情報, book information
+		'<h2>', _('Work information'), '</h2>', '<div id="work_data">', '<dl>');
 		Object.entries(this.metadata).forEach(function(data) {
 			var key = data[0], value = data[1][to_meta_information_key(key)];
 			if (key === 'language') {
-				value = library_namespace.gettext.get_alias(value) || value;
+				value = library_namespace.gettext
+				//
+				&& library_namespace.gettext.get_alias(value) || value;
+			} else if (key === 'source') {
+				if (/^https?:\/\/[^\s]+$/.test(value)) {
+					value = '<a href="' + value + '">' + value + '</a>';
+				}
 			} else if (library_namespace.is_Date(value)) {
 				// e.g., key: meta, date
 				value = value.toLocaleTimeString();
 			}
-			TOC_html.push('<dt>', key, '</dt>', '<dd>', value, '</dd>');
+			TOC_html.push('<dt>', _(key), '</dt>', '<dd>', value, '</dd>');
 		});
 		// 字數計算, 合計文字数
 		var total_word_count = 0;
@@ -1291,7 +1316,7 @@ function module_code(library_namespace) {
 			}
 		});
 		if (total_word_count > 0) {
-			TOC_html.push('<dt>', 'word count', '</dt>', '<dd>',
+			TOC_html.push('<dt>', _('word count'), '</dt>', '<dd>',
 			//
 			total_word_count + ' words / '
 			//
@@ -1304,8 +1329,8 @@ function module_code(library_namespace) {
 		// The toc nav element must occur exactly once in an EPUB
 		// Navigation Document.
 		TOC_html.push('<nav epub:type="toc" id="toc">',
-		// 作品目錄 目次
-		'<h2>', 'Table of contents', '</h2>', '<ol>');
+		// 作品目錄 目次 Table of contents
+		'<h2>', _('Contents'), '</h2>', '<ol>');
 
 		this.chapters.map(function(chapter) {
 			var data = chapter[KEY_DATA]

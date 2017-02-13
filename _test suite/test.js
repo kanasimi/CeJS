@@ -665,7 +665,10 @@ function test_locale() {
 			assert([ '3 entries loaded.', CeL.gettext('已載入 %1 筆資料。', 3) ]);
 			//CeL.info('單數複數形式 (plural) test OK.');
 		}, true);
+	});
 
+
+	error_count += CeL.test('直接取得特定domain的文字。', function(assert) {
 		CeL.gettext.use_domain('zh-TW', function() {
 			CeL.gettext.use_domain('en', function() {
 				assert([ 'Loading...', CeL.gettext('Loading...') ]);
@@ -677,6 +680,9 @@ function test_locale() {
 
 	//	###basic test
 	CeL.gettext.use_domain('zh-TW', true);
+	CeL.gettext.use_domain('zh-TW', function() {
+		// callback
+	}, true);
 
 	//	設定欲轉換的文字格式。
 	error_count += CeL.test('設定欲轉換的文字格式。', function(assert) {

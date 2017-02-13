@@ -447,7 +447,7 @@ gettext.in_domain = function(domain_name, text_id) {
 	var options = typeof domain_name === 'string' ? {
 		domain_name : gettext.to_standard(domain_name)
 	} : {
-		domain : domain
+		domain : domain_name
 	};
 
 	if (false && Array.isArray(text_id)) {
@@ -574,98 +574,132 @@ gettext.get_domain_name = function() {
 gettext.is_domain_name = function(domain_name) {
 	return gettext_domain_name === gettext.to_standard(domain_name);
 };
+
+// force: 若 domain name 已經載入過，則再度載入。
+function load_domain(domain_name, callback, force) {
+	if (!domain_name || !(domain_name = gettext.to_standard(domain_name))) {
+		// using the default domain name.
+		domain_name = gettext.default_domain;
+	}
+
+	if (!domain_name || domain_name === gettext_domain_name && !force) {
+		callback && callback(domain_name);
+		return;
+	}
+
+	if (!(domain_name in gettext_texts)) {
+		// initialization
+		gettext_texts[domain_name] = library_namespace.null_Object();
+	}
+
+	var need_to_load = [];
+	// TODO: use <a href="http://en.wikipedia.org/wiki/JSONP"
+	// accessdate="2012/9/14 23:50">JSONP</a>
+	if (!gettext_check_resource(domain_name, 1)) {
+		library_namespace.debug('準備載入系統相應 domain resource。', 2, 'gettext');
+		need_to_load.push(library_namespace.get_module_path(module_name,
+				'resource/' + domain_name + '.js'), function() {
+			library_namespace.debug('Resource of module included.', 2,
+					'gettext');
+			gettext_check_resource(domain_name, 1, true);
+		});
+	}
+
+	if (typeof gettext_location === 'string'
+	//
+	&& !gettext_check_resource(domain_name, 2)) {
+		library_namespace.debug('準備載入 user 指定 domain resource，如語系檔。', 2,
+				'gettext');
+		// TODO: .json
+		need_to_load.push(
+				typeof gettext_location === 'string' ? gettext_location
+						+ domain_name + '.js'
+						: gettext_location(domain_name), function() {
+					library_namespace
+							.debug('User-defined resource included.', 2,
+									'gettext');
+					gettext_check_resource(domain_name, 2, true);
+				});
+	}
+
+	if (need_to_load.length > 0) {
+		library_namespace.run(need_to_load, callback && function() {
+			library_namespace.debug('Running callback...', 2, 'gettext');
+			callback && callback(domain_name);
+		});
+	} else {
+		library_namespace.debug('Nothing to load.');
+		gettext_check_resource(domain_name, 2, true);
+	}
+}
+
+gettext.load_domain = load_domain;
+
 /**
  * 取得/設定當前使用之 domain。
  * 
  * @param {String}[domain_name]
  *            設定當前使用之 domain name。
  * @param {Function}[callback]
- *            回撥函式。
+ *            回撥函式。 callback(domain_name)
  * @param {Boolean}[force]
- *            強制載入 flag。即使不存在此 domain，亦設定之。
+ *            強制載入 flag。即使尚未載入此 domain，亦設定之並自動載入。但是若 domain name 已經載入過，則不會再度載入。
  * 
- * @returns 當前使用之 domain。
+ * @returns {Object}當前使用之 domain。
  */
-gettext.use_domain = function use_domain(domain_name, callback, force) {
-	if (typeof callback !== 'function')
+function use_domain(domain_name, callback, force) {
+	if (typeof callback !== 'function') {
 		if (arguments.length === 2) {
 			// shift 掉 callback。
 			force = callback;
 			callback = undefined;
-		} else
+		} else {
 			callback = null;
+		}
+	}
 
-	if (domain_name
-			// 查驗 domain_name 是否已載入。
-			&& (domain_name in gettext_texts || (domain_name = gettext
-					.to_standard(domain_name)
-					|| domain_name) in gettext_texts)
-			&& domain_name !== gettext_domain_name || force) {
+	// 查驗 domain_name 是否已載入。
+	var is_loaded = domain_name in gettext_texts;
+	if (!is_loaded) {
+		is_loaded = gettext.to_standard(domain_name);
+		if (is_loaded) {
+			is_loaded = (domain_name = is_loaded) in gettext_texts;
+		}
+	}
 
-		if (!domain_name)
-			// using the default domain name.
-			domain_name = gettext.default_domain;
-		else if (library_namespace.is_WWW()
-				&& library_namespace.is_included('interact.DOM'))
+	if (is_loaded) {
+		gettext_domain_name = domain_name;
+		library_namespace.debug('直接設定 user domain resource。', 2, 'gettext.use_domain');
+		gettext_check_resource(domain_name, 2, true);
+		callback && callback(domain_name);
+
+	} else if (force && domain_name) {
+		if (library_namespace.is_WWW()
+				&& library_namespace.is_included('interact.DOM')) {
 			// 顯示使用 domain name 之訊息：此時執行，仍無法改採新 domain 顯示訊息。
 			library_namespace.debug({
 				T : [ '%3載入/使用 [%2] (%1) 領域/語系。', domain_name,
 						gettext.get_alias(domain_name),
 						(domain_name === gettext_domain_name ? '強制重複' : '') ]
-			}, 1, 'gettext');
-		else
+			}, 1, 'gettext.use_domain');
+		} else {
 			library_namespace.debug(
-			//
+			// re-load
 			(domain_name === gettext_domain_name ? 'FORCE ' : '')
 			//
-			+ 'Using domain/locale [' + gettext.get_alias(domain_name) + '] ('
-					+ domain_name + ').', 1, 'gettext');
+			+ 'Loading/Using domain/locale [' + gettext.get_alias(domain_name) + '] ('
+					+ domain_name + ').', 1, 'gettext.use_domain');
+		}
 
-		gettext_domain_name = domain_name;
 		if (!(domain_name in gettext_texts)) {
+			// 為確保回傳的是最終的domain，先初始化。
 			gettext_texts[domain_name] = library_namespace.null_Object();
 		}
 
-		var need_to_load = [];
-		// TODO: use <a href="http://en.wikipedia.org/wiki/JSONP"
-		// accessdate="2012/9/14 23:50">JSONP</a>
-		if (!gettext_check_resource(domain_name, 1)) {
-			library_namespace.debug('準備載入系統相應 domain resource。', 2, 'gettext');
-			need_to_load.push(library_namespace.get_module_path(module_name,
-					'resource/' + domain_name + '.js'), function() {
-				library_namespace.debug('Resource of module included.', 2,
-						'gettext');
-				gettext_check_resource(domain_name, 1, true);
-			});
-		}
-
-		if (typeof gettext_location === 'string'
-		//
-		&& !gettext_check_resource(domain_name, 2)) {
-			library_namespace.debug('準備載入 user 指定 domain resource，如語系檔。', 2,
-					'gettext');
-			// TODO: .json
-			need_to_load.push(
-					typeof gettext_location === 'string' ? gettext_location
-							+ domain_name + '.js'
-							: gettext_location(domain_name), function() {
-						library_namespace
-								.debug('User-defined resource included.', 2,
-										'gettext');
-						gettext_check_resource(domain_name, 2, true);
-					});
-		}
-
-		if (need_to_load.length > 0)
-			library_namespace.run(need_to_load, callback && function() {
-				library_namespace.debug('Running callback...', 2, 'gettext');
-				callback(domain_name);
-			});
-		else {
-			library_namespace.debug('直接設定 user domain resource。', 2, 'gettext');
-			gettext_check_resource(domain_name, 2, true);
+		load_domain(domain_name, function() {
+			gettext_domain_name = domain_name;
 			callback && callback(domain_name);
-		}
+		});
 
 	} else {
 		if (domain_name) {
@@ -681,7 +715,9 @@ gettext.use_domain = function use_domain(domain_name, callback, force) {
 	}
 
 	return gettext_texts[domain_name];
-};
+}
+
+gettext.use_domain = use_domain;
 
 
 /**
