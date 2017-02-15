@@ -1321,7 +1321,7 @@ function module_code(library_namespace) {
 			if (index !== NOT_FOUND
 					&& (index = text.indexOf(head, index)) !== NOT_FOUND) {
 				var left_index = text.indexOf(foot, index += head_length);
-				if (left_index === NOT_FOUND) {
+				if (left_index !== NOT_FOUND) {
 					var token = text.slice(index, left_index);
 					// +foot_length: search next starts from end of foot
 					index = left_index + foot_length;
