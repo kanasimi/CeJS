@@ -327,16 +327,16 @@ function test_native() {
 		[[ '[[1,2],[3,4]]'.between('[', {tail:']'}), '[1,2],[3,4]' ], '可以用 {tail:"~"} 來從結尾搜尋。from tail'],
 	]);
 
-	error_count += CeL.test('檢驗 all_between()', function(assert) {
+	error_count += CeL.test('檢驗 find_between()', function(assert) {
 		var html = '<p></p><h2>title1</h2>abc<h2>title2</h2>\nABC<h2>title3</h2>ABC\n<h2>title4</h2>\nABC\n<h2>title5</h2>',
 		// matched token
-		get_next_between = html.all_between('<h2>', '</h2>'), list = [], text;
+		get_next_between = html.find_between('<h2>', '</h2>'), list = [], text;
 		// 
 		while ((text = get_next_between()) !== undefined) {
 			list.push(text);
 		}
 		// alert(list.join('|'));
-		assert([ 'title1|title2|title3|title4|title5', list.join('|') ], 'all_between');
+		assert([ 'title1|title2|title3|title4|title5', list.join('|') ], 'find_between');
 
 		// ------------------------------------------------
 
@@ -348,8 +348,8 @@ function test_native() {
 		</code>
 		 */
 
-		function test_all_between(html) {
-			var get_next_between = html.all_between(' href="', '"'), list = [], text;
+		function test_find_between(html) {
+			var get_next_between = html.find_between(' href="', '"'), list = [], text;
 			while ((text = get_next_between()) !== undefined) {
 				list.push(text);
 			}
@@ -372,15 +372,15 @@ function test_native() {
 		}
 		html = html.join('\n');
 
-		assert([ test_exec(html).join(','), test_all_between(html).join(',') ], 'test_all_between');
+		assert([ test_exec(html).join(','), test_find_between(html).join(',') ], 'test_find_between');
 
 		return;
 
-		console.time('test_all_between');
+		console.time('test_find_between');
 		for (var i = 0; i < 200; i++)
-			test_all_between(html);
-		console.timeEnd('test_all_between');
-		// test_all_between: 2614.73ms
+			test_find_between(html);
+		console.timeEnd('test_find_between');
+		// test_find_between: 2614.73ms
 
 		console.time('test_exec');
 		for (var i = 0; i < 200; i++)

@@ -1229,8 +1229,8 @@ function module_code(library_namespace) {
 	/**
 	 * <code>
 
-	// 推薦 use .all_between(), 見下一段例
-	var data = html.all_between('>', '<'), text;
+	// 推薦 use .find_between(), 見下一段例
+	var data = html.find_between('>', '<'), text;
 
 	text = data.search().search().search().toString();
 
@@ -1273,11 +1273,11 @@ function module_code(library_namespace) {
 	function intermediate_between() {
 		return String.prototype.between.apply(this.toString(), arguments);
 	}
-	// 2017/1/3 13:48:21:
-	// set_intermediate()→all_between()
-	// WARNING: 請盡可能採用all_between()，勿使用deprecated_all_between()。
+	// 2017/1/3 13:48:21 API change:
+	// set_intermediate()→find_between()
+	// WARNING: 請盡可能採用find_between()，勿使用deprecated_find_between()。
 	// 要用此函數，不如直接採用RegExp.prototype.exec()比較快。
-	function deprecated_all_between(head, foot, index) {
+	function deprecated_find_between(head, foot, index) {
 		var data = [ this, head, foot, index | 0 ];
 		data.next = next_intermediate;
 		data.search = search_intermediate;
@@ -1287,8 +1287,11 @@ function module_code(library_namespace) {
 	}
 
 	/**
+	 * 2017/1/3 13:48:21 API change: rename to .find_between<br />
+	 * all_between()→find_between()
+	 * 
 	 * TODO:<br />
-	 * rename to .find_between, return {Iterator}
+	 * return {Iterator} of all between
 	 * 
 	 * @see http://jsrocks.org/cn/2015/09/javascript-iterables-and-iterators/
 	 *      http://es6.ruanyifeng.com/#docs/symbol
@@ -1296,7 +1299,7 @@ function module_code(library_namespace) {
 	 * <code>
 
 	// 推薦用法
-	var get_next_between = html.all_between('>', '<'), text;
+	var get_next_between = html.find_between('>', '<'), text;
 
 	while ((text = get_next_between()) !== undefined) {
 		text;
@@ -1307,7 +1310,7 @@ function module_code(library_namespace) {
 
 	// 採用String.prototype.indexOf()以增進速度，超越RegExp.prototype.exec()。
 	// @see /_test suite/test.js
-	function all_between(head, foot, index) {
+	function find_between(head, foot, index) {
 		index |= 0;
 		// assert: head && foot
 		// && typeof head === 'string' && typeof foot === 'string'
@@ -1328,6 +1331,10 @@ function module_code(library_namespace) {
 		}
 
 		return get_next_between;
+	}
+
+	function all_between(head, foot, index) {
+		;
 	}
 
 	// ---------------------------------------------------------------------//
@@ -3035,7 +3042,7 @@ function module_code(library_namespace) {
 			//
 			return_data) || '';
 		},
-		all_between : all_between,
+		find_between : find_between,
 
 		edit_distance : set_bind(Levenshtein_distance)
 	});
