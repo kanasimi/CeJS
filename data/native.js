@@ -1322,14 +1322,13 @@ function module_code(library_namespace) {
 					&& (index = text.indexOf(head, index)) !== NOT_FOUND) {
 				var left_index = text.indexOf(foot, index += head_length);
 				if (left_index === NOT_FOUND) {
-					// 接下來皆無foot，則即使再存有head亦無效。
-					index = NOT_FOUND;
-					break;
+					var token = text.slice(index, left_index);
+					// +foot_length: search next starts from end of foot
+					index = left_index + foot_length;
+					return token;
 				}
-				var token = text.slice(index, left_index);
-				// +foot_length: search next starts from end of foot
-				index = left_index + foot_length;
-				return token;
+				// 接下來皆無foot，則即使再存有head亦無效。
+				index = NOT_FOUND;
 			}
 			// return undefined;
 		}
