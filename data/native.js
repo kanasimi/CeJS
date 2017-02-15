@@ -1287,7 +1287,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 2017/1/3 13:48:21 API change: rename to .find_between<br />
+	 * 2017/2/15 16:5:0 API change: rename to .find_between<br />
 	 * all_between()→find_between()
 	 * 
 	 * TODO:<br />
@@ -1311,8 +1311,9 @@ function module_code(library_namespace) {
 	// 採用String.prototype.indexOf()以增進速度，超越RegExp.prototype.exec()。
 	// @see /_test suite/test.js
 	function find_between(head, foot, index) {
+		// start index
 		index |= 0;
-		// assert: head && foot
+		// assert: !!head && !!foot
 		// && typeof head === 'string' && typeof foot === 'string'
 		var text = this, head_length = head.length, foot_length = foot.length;
 
@@ -1320,12 +1321,15 @@ function module_code(library_namespace) {
 			if (index !== NOT_FOUND
 					&& (index = text.indexOf(head, index)) !== NOT_FOUND) {
 				var left_index = text.indexOf(foot, index += head_length);
-				if (left_index !== NOT_FOUND) {
-					var token = text.slice(index, left_index);
-					index = left_index + foot_length;
-					return token;
+				if (left_index === NOT_FOUND) {
+					// 接下來皆無foot，則即使再存有head亦無效。
+					index = NOT_FOUND;
+					break;
 				}
-				index = NOT_FOUND;
+				var token = text.slice(index, left_index);
+				// +foot_length: search next starts from end of foot
+				index = left_index + foot_length;
+				return token;
 			}
 			// return undefined;
 		}
@@ -1333,8 +1337,54 @@ function module_code(library_namespace) {
 		return get_next_between;
 	}
 
+	// return {Array}all matched
 	function all_between(head, foot, index) {
-		;
+		// start index
+		index |= 0;
+		// assert: !!head && !!foot
+		// && typeof head === 'string' && typeof foot === 'string'
+		var matched = [], head_length = head.length, foot_length = foot.length;
+
+		while (index !== NOT_FOUND
+				&& (index = this.indexOf(head, index)) !== NOT_FOUND) {
+			var left_index = this.indexOf(foot, index += head_length);
+			if (left_index === NOT_FOUND) {
+				// 接下來皆無foot，則即使再存有head亦無效。
+				break;
+			}
+			matched.push(this.slice(index, left_index));
+			// +foot_length: search next starts from end of foot
+			index = left_index + foot_length;
+		}
+
+		return matched;
+	}
+
+	function each_between(head, foot, callback, thisArg, index) {
+		// this.all_between(head, foot, index).forEach(callback, thisArg);
+
+		// start index
+		index |= 0;
+		// assert: !!head && !!foot
+		// && typeof head === 'string' && typeof foot === 'string'
+		var head_length = head.length, foot_length = foot.length;
+
+		if (!thisArg) {
+			thisArg = this;
+		}
+
+		while (index !== NOT_FOUND
+				&& (index = this.indexOf(head, index)) !== NOT_FOUND) {
+			var left_index = this.indexOf(foot, index += head_length);
+			if (left_index === NOT_FOUND) {
+				// 接下來皆無foot，則即使再存有head亦無效。
+				break;
+			}
+			callback.call(thisArg, this.slice(index, left_index), index,
+					left_index);
+			// +foot_length: search next starts from end of foot
+			index = left_index + foot_length;
+		}
 	}
 
 	// ---------------------------------------------------------------------//
@@ -3043,6 +3093,8 @@ function module_code(library_namespace) {
 			return_data) || '';
 		},
 		find_between : find_between,
+		all_between : all_between,
+		each_between : each_between,
 
 		edit_distance : set_bind(Levenshtein_distance)
 	});

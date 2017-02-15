@@ -325,6 +325,8 @@ function test_native() {
 		[[ '0123456789123456789'.between('567'), '89123456789' ]],
 		[[ '0123456789123456789'.between(null, '345'), '012' ]],
 		[[ '[[1,2],[3,4]]'.between('[', {tail:']'}), '[1,2],[3,4]' ], '可以用 {tail:"~"} 來從結尾搜尋。from tail'],
+
+		[[ '124|523', '1<b>124</b>42<b>523</b>'.all_between('<b>', '</b>').join('|'), '.all_between()' ]],
 	]);
 
 	error_count += CeL.test('檢驗 find_between()', function(assert) {
@@ -337,6 +339,15 @@ function test_native() {
 		}
 		// alert(list.join('|'));
 		assert([ 'title1|title2|title3|title4|title5', list.join('|') ], 'find_between');
+
+		// ------------------------------------------------
+
+		list = [];
+		html.each_between('<h2>', '</h2>', function(token) {
+			list.push('>' + token);
+		});
+
+		assert([ '>title1|>title2|>title3|>title4|>title5', list.join('|') ], 'each_between');
 
 		// ------------------------------------------------
 
