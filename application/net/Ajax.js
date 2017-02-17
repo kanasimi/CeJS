@@ -1642,6 +1642,7 @@ function module_code(library_namespace) {
 		}
 
 		_URL.agent = agent;
+		// console.log(agent.last_cookie);
 		if (agent.last_cookie) {
 			library_namespace.debug('Set cookie: '
 					+ JSON.stringify(agent.last_cookie), 3, 'get_URL_node');

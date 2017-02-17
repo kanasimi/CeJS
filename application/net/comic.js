@@ -101,7 +101,28 @@ function module_code(library_namespace) {
 	function Comic_site(configurations) {
 		Object.assign(this, configurations);
 		if (!this.id) {
-			this.id = this.main_directory.replace(/[\\\/]+$/, '');
+			// this.id 之後將提供給 this.site_id 使用。
+			this.id = this.main_directory.replace(/\.*[\\\/]+$/, '')
+			//
+			|| this.base_URL.match(/\/\/([^\/]+)/)[1].toLowerCase().split('.')
+			//
+			.reverse().some(function(token, index) {
+				if (index === 0) {
+					// 頂級域名
+					return false;
+				}
+				if (token !== 'www') {
+					this.id = token;
+				}
+				if (token.length > 3 || index > 1) {
+					// e.g., www.[id].co.jp
+					return true;
+				}
+			}, this);
+			if (!this.id) {
+				library_namespace.err('Can not detect .id from '
+						+ this.base_URL);
+			}
 		}
 		if (!configurations.MESSAGE_RE_DOWNLOAD) {
 			this.MESSAGE_RE_DOWNLOAD = this.id + ': '
@@ -143,6 +164,8 @@ function module_code(library_namespace) {
 		// 錯誤紀錄檔
 		error_log_file : 'error_files.txt',
 
+		// id : '',
+		// site_id : '',
 		// base_URL : '',
 		// charset : 'GBK',
 
@@ -1233,25 +1256,7 @@ function module_code(library_namespace) {
 
 	function create_ebook(work_data) {
 		if (!this.site_id) {
-			this.base_URL.match(/\/\/([^\/]+)/)[1].toLowerCase().split('.')
-			//
-			.reverse().some(function(token, index) {
-				if (index === 0) {
-					// 頂級域名
-					return false;
-				}
-				if (token !== 'www') {
-					this.site_id = token;
-				}
-				if (token.length > 3 || index > 1) {
-					// e.g., www.[id].co.jp
-					return true;
-				}
-			}, this);
-			if (!this.site_id) {
-				library_namespace.err('Can not detect .site_id from '
-						+ this.base_URL);
-			}
+			this.site_id = this.id;
 		}
 
 		// CeL.application.storage.EPUB
@@ -1433,6 +1438,7 @@ function module_code(library_namespace) {
 			// assert: PATTERN_epub_file.test(file_name) === true
 		}
 		file_name = library_namespace.to_file_name(file_name);
+		// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
 		library_namespace.debug('打包 epub: ' + file_name);
 
 		// this: this_site

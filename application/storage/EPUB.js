@@ -1500,12 +1500,15 @@ function module_code(library_namespace) {
 				'%P7Z% a -tzip -mx=9 -r %BOOKNAME% META-INF EPUB',
 				'%P7Z% rn %BOOKNAME% !imetype mimetype' ].join('\r\n'));
 		var command = 'cd /d "' + this.path.root + '" && ' + command_file_name;
+		// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
+		library_namespace.debug('create ebook by 7z: ' + ebook_file_name);
 		try {
 			execSync(command);
 		} catch (e) {
 			library_namespace.err(e);
 			return;
 		}
+		library_namespace.debug('create ebook by 7z: ' + ebook_file_name + ': Done.');
 
 		// book.epub → *.epub
 		var error = library_namespace.move_file(this.path.root
