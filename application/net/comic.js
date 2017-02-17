@@ -119,7 +119,9 @@ function module_code(library_namespace) {
 					return true;
 				}
 			}, this);
-			if (!this.id) {
+			if (this.id) {
+				this.id = this.id.match(/[^\\\/]+$/)[0];
+			} else {
 				library_namespace.err('Can not detect .id from '
 						+ this.base_URL);
 			}

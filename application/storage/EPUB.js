@@ -315,9 +315,9 @@ function module_code(library_namespace) {
 						'dc:identifier' : options.identifier
 						//
 						|| options.id || new Date().toISOString(),
-						// 給calibre用
-						// 'opf:scheme' : options.id_type.toUpperCase(),
 						id : options.id_type,
+						// ** 以下非必要，僅供calibre使用。
+						'opf:scheme' : options.id_type.toUpperCase()
 					}, {
 						'dc:title' : options.title || ''
 					}, {
@@ -327,7 +327,14 @@ function module_code(library_namespace) {
 						meta : date_to_String(),
 						property : "dcterms:modified"
 					} ],
-					'xmlns:dc' : 'http://purl.org/dc/elements/1.1/'
+					'xmlns:dc' : "http://purl.org/dc/elements/1.1/",
+					// ** 以下非必要，僅供calibre使用。
+					'xmlns:opf' : "http://www.idpf.org/2007/opf",
+					'xmlns:dcterms' : "http://purl.org/dc/terms/",
+					'xmlns:xsi' : "http://www.w3.org/2001/XMLSchema-instance",
+					'xmlns:calibre' :
+					// raw_data.package[0]['xmlns:calibre']
+					"http://calibre.kovidgoyal.net/2009/metadata"
 				}, {
 					manifest : [ {
 						item : null,
@@ -1508,7 +1515,8 @@ function module_code(library_namespace) {
 			library_namespace.err(e);
 			return;
 		}
-		library_namespace.debug('create ebook by 7z: ' + ebook_file_name + ': Done.');
+		library_namespace.debug('create ebook by 7z: ' + ebook_file_name
+				+ ': Done.');
 
 		// book.epub → *.epub
 		var error = library_namespace.move_file(this.path.root
