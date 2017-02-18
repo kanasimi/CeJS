@@ -632,7 +632,7 @@ function module_code(library_namespace) {
 					list.push(0);
 				} else if (!isNaN(n)) {
 					list.push(n);
-				} else if (n in get_namespace.hash) {
+				} else if ((n = n.replace(/\s+/g, '_')) in get_namespace.hash) {
 					list.push(get_namespace.hash[n]);
 				} else {
 					library_namespace.warn(
@@ -9258,7 +9258,7 @@ function module_code(library_namespace) {
 	 * Convert MediaWiki database timestamp to ISO 8601 format.<br />
 	 * UTC: 'yyyymmddhhmmss' → 'yyyy-mm-ddThh:mm:ss'
 	 * 
-	 * @param {String}timestamp
+	 * @param {String|Buffer}timestamp
 	 *            MediaWiki database timestamp
 	 * 
 	 * @returns {String}ISO 8601 Data elements and interchange formats
@@ -9266,19 +9266,22 @@ function module_code(library_namespace) {
 	 * @see https://www.mediawiki.org/wiki/Manual:Timestamp
 	 */
 	function SQL_timestamp_to_ISO(timestamp) {
-		if (!timestamp)
+		if (!timestamp) {
 			// ''?
 			return;
+		}
+		// timestamp可能為{Buffer}
 		timestamp = timestamp.toString('utf8').chunk(2);
-		if (timestamp.length === 7)
+		if (timestamp.length !== 7) {
 			// 'NULL'?
 			return;
+		}
 
 		return timestamp[0] + timestamp[1]
 		//
 		+ '-' + timestamp[2] + '-' + timestamp[3]
 		//
-		+ 'T' + timestamp[4] + ':' + timestamp[5] + ':' + timestamp[6];
+		+ 'T' + timestamp[4] + ':' + timestamp[5] + ':' + timestamp[6] + 'Z';
 	}
 
 	/**
@@ -9286,7 +9289,7 @@ function module_code(library_namespace) {
 	 * 
 	 * <code>
 	   // get title list
-	   CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, 0, 20);
+	   CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, {namespace:0, limit:20});
 	   </code>
 	 * 
 	 * TODO: filter
@@ -9295,11 +9298,13 @@ function module_code(library_namespace) {
 	 *            回調函數。 callback({Array}page title 頁面標題 list)
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項.
+	 * 
+	 * @see https://www.mediawiki.org/wiki/Manual:Recentchanges_table
 	 */
 	function get_recent(callback, options) {
 		options = library_namespace.setup_options(options);
 		/** {Integer}namespace NO. */
-		var namespace = options.namespace,
+		var namespace = options.namespace && get_namespace(options.namespace),
 		/** {ℕ⁰:Natural+0}limit count. */
 		limit = options.limit,
 		//
@@ -9313,28 +9318,42 @@ function module_code(library_namespace) {
 				+ (library_namespace.is_digits(limit) ? limit : 10);
 
 		run_SQL(SQL, function(error, rows, fields) {
-			if (error)
+			if (error) {
 				callback();
-			else {
-				rows = rows.map(function(row) {
-					return {
-						// page id
-						id : row.rc_cur_id,
+			} else {
+				var result = [];
+				rows.forEach(function(row) {
+					if (!(row.rc_user > 0) && !(rc_type < 5)) {
+						// On wikis using Wikibase the results will otherwise be
+						// meaningless.
+						return;
+					}
+					result.push({
+						// links to the page_id key in the page table
+						page_id : row.rc_cur_id,
 						namespace : row.rc_namespace,
+						// 這邊的title未加上namespace prefix!
 						title : row.rc_title.toString('utf8'),
-						//
-						user : row.rc_user,
+						// 0 for anonymous edits
+						user_id : row.rc_user,
+						// text of the username for the user that made the
+						// change, or the IP address if the change was made by
+						// an unregistered user. Corresponds to rev_user_text
+						user : row.rc_user_text.toString('utf8'),
 						is_new : !!row.rc_new,
 						length : row.rc_new_len,
-						old_len : row.rc_old_len,
+						old_length : row.rc_old_len,
+						// Corresponds to rev_timestamp
 						// use new Date(.timestamp)
-						timestamp : SQL_timestamp_to_ISO(row.rc_timestamp
-								.toString('utf8')),
-						//
-						oldid : row.rc_this_oldid,
-					};
+						timestamp : SQL_timestamp_to_ISO(row.rc_timestamp),
+						// Links to the rev_id key of the new page revision
+						// (after the edit occurs) in the revision table.
+						rev_id : row.rc_this_oldid,
+						comment : rc_comment.toString('utf8'),
+						row : row
+					});
 				});
-				callback(rows);
+				callback(result);
 			}
 		},
 		// SQL config
