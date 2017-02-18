@@ -1267,10 +1267,13 @@ function module_code(library_namespace) {
 			// rebuild: 重新創建, 不使用舊的.opf資料. start over, re-create
 			rebuild : this.rebuild_ebook,
 			id_type : this.site_id,
+			// 以下為 epub <metadata> 必備之元素。
 			// 小説ID
 			identifier : work_data.id,
 			title : work_data.title,
-			language : work_data.language || this.language
+			language : work_data.language || this.language,
+			// 作品內容最後編輯時間。
+			modified : work_data.last_update_Date
 		});
 
 		ebook.time_zone = work_data.time_zone || this.time_zone;
@@ -1279,9 +1282,6 @@ function module_code(library_namespace) {
 		ebook.set({
 			// 作者名
 			creator : work_data.author,
-			// 出版時間 the publication date of the EPUB Publication.
-			date : library_namespace.EPUB
-					.date_to_String(work_data.last_update_Date),
 			// ジャンル, タグ, キーワード
 			subject : work_data.genre || work_data.status,
 			// あらすじ

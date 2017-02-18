@@ -39,6 +39,7 @@ http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm
  * @see [[en:file format]], [[document]], [[e-book]], [[EPUB]], [[Open eBook]]
  *      http://www.idpf.org/epub/31/spec/epub-packages.html
  *      http://epubzone.org/news/epub-3-validation http://validator.idpf.org/
+ *      http://imagedrive.github.io/spec/epub30-publications.xhtml
  */
 
 'use strict';
@@ -85,13 +86,17 @@ function module_code(library_namespace) {
 	// in their Root Directory.
 	// e.g., META-INF/container.xml
 	container_directory_name = 'META-INF', container_file_name = 'container.xml',
-	// 前置碼, 前綴
+	// Dublin Core Metadata Element Set 前置碼, 前綴
+	// http://dublincore.org/documents/dces/
 	metadata_prefix = 'dc:',
 	// key for additional information / configuration data
 	KEY_DATA = 'item data',
 
 	/** {String}path separator. e.g., '/', '\' */
 	path_separator = library_namespace.env.path_separator;
+
+	// -------------------------------------------------------------------------
+	// setup相關函式。
 
 	function setup_container(base_directory) {
 		// read container file: [[manifest file]] container.xml
@@ -224,6 +229,17 @@ function module_code(library_namespace) {
 		// @see add_chapter()
 		this.downloading = library_namespace.null_Object();
 
+		/**
+		 * <code>
+		 * this.metadata = {
+		 * 	'dc:tagname' : [ {Object} ],
+		 * 	meta : { [property] : [ {Object} ] },
+		 * 	link : { href : {Object} }
+		 * }
+		 * </code>
+		 * 
+		 * @see set_meta_information()
+		 */
 		this.metadata = library_namespace.null_Object();
 
 		var raw_data;
@@ -308,6 +324,8 @@ function module_code(library_namespace) {
 				options.id_type = 'workid';
 			}
 			// assert: typeof options.id_type === 'string'
+
+			// 這邊必須符合 JSON.from_XML() 獲得的格式。
 			raw_data = {
 				package : [ {
 					// http://www.idpf.org/epub/31/spec/epub-packages.html#sec-opf-dcmes-required
@@ -316,22 +334,30 @@ function module_code(library_namespace) {
 						//
 						|| options.id || new Date().toISOString(),
 						id : options.id_type,
-						// ** 以下非必要，僅供calibre使用。
-						'opf:scheme' : options.id_type.toUpperCase()
+					// ** 以下非必要，例如供calibre使用。
+					// http://www.idpf.org/epub/31/spec/epub-packages.html#attrdef-identifier-scheme
+					// 'opf:scheme' : options.id_type
 					}, {
 						'dc:title' : options.title || ''
 					}, {
 						'dc:language' : options.language || 'en'
 					}, {
-						// 最後更動。 出版時間應用dc:date。
-						meta : date_to_String(),
+						// epub發行時間應用dc:date。
+						// the publication date of the EPUB Publication.
+						'dc:date' : date_to_String()
+					}, {
+						// 作品內容最後編輯時間。應該在new Ebook()後自行變更此值至稍早作品最後更動的時間。
+						meta : date_to_String(options.modified),
+						// Date on which the resource was changed.
+						// http://dublincore.org/documents/dcmi-terms/#terms-modified
 						property : "dcterms:modified"
 					} ],
 					'xmlns:dc' : "http://purl.org/dc/elements/1.1/",
-					// ** 以下非必要，僅供calibre使用。
+					// ** 以下非必要，例如供calibre使用。
 					'xmlns:opf' : "http://www.idpf.org/2007/opf",
 					'xmlns:dcterms' : "http://purl.org/dc/terms/",
 					'xmlns:xsi' : "http://www.w3.org/2001/XMLSchema-instance",
+					// ** 以下非必要，僅供calibre使用。
 					'xmlns:calibre' :
 					// raw_data.package[0]['xmlns:calibre']
 					"http://calibre.kovidgoyal.net/2009/metadata"
@@ -407,17 +433,9 @@ function module_code(library_namespace) {
 		raw_data.package.clear();
 		Array.prototype.push.apply(raw_data.package, resources);
 
-		this.raw_data_ptr.metadata.forEach(function(data) {
-			if (!library_namespace.is_Object(data)) {
-				return;
-			}
-			for ( var key in data) {
-				break;
-			}
-			// TODO: 將其他屬性納入<meta property="..."></meta>。
-			// console.log(key.replace(metadata_prefix, '') + '=' + data);
-			this.metadata[key.replace(metadata_prefix, '')] = data;
-		}, this);
+		set_meta_information.call(this, this.raw_data_ptr.metadata);
+		// console.log(JSON.stringify(this.metadata));
+		// console.log(this.metadata);
 
 		resources = this.raw_data_ptr.manifest;
 		var chapters = this.raw_data_ptr.spine,
@@ -497,31 +515,98 @@ function module_code(library_namespace) {
 		// rebuild_index_of_id.call(this, true);
 	}
 
-	function to_meta_information_key(key) {
-		return key === 'meta' || key === 'link' ? key : metadata_prefix + key;
+	// -------------------------------------------------------------------------
+	// 設定 information 相關函式。
+
+	// to_meta_information_key
+	function to_meta_information_tag_name(tag_name) {
+		return tag_name === 'meta' || tag_name === 'link'
+				|| tag_name.startsWith(metadata_prefix) ? tag_name
+				: metadata_prefix + tag_name;
 	}
 
-	function set_meta_information(key, value) {
-		if (library_namespace.is_Object(key) && value === undefined) {
-			Object.entries(key).forEach(function(pair) {
+	/**
+	 * Setup the meta information of the ebook.
+	 * 
+	 * @param {String}tag_name
+	 *            tag name (key) to setup.
+	 * @param {Object|String}value
+	 *            Set to the value.
+	 * 
+	 * @returns the value of the tag
+	 */
+	function set_meta_information(tag_name, value) {
+		if (library_namespace.is_Object(tag_name) && value === undefined) {
+			/**
+			 * @example <code>
+
+			ebook.set({
+				// 作者名
+				creator : 'author',
+				// 作品內容最後編輯時間。
+				meta : {
+					meta : last_update_Date,
+					property : "dcterms:modified"
+				},
+				subject : [ genre ].concat(keywords)
+			});
+
+			 * </code>
+			 */
+			Object.entries(tag_name).forEach(function(pair) {
+				// 以能在一次設定中多次設定不同的<meta>
+				if (pair[0].startsWith('meta:')) {
+					pair[0] = 'meta';
+				}
 				set_meta_information.call(this, pair[0], pair[1]);
 			}, this);
 			return;
 		}
 
-		key = key.replace(metadata_prefix, '');
-		var data = this.metadata[key]
-		// 若已經有此key則直接設定。
-		|| (this.metadata[key] = library_namespace.null_Object());
+		if (Array.isArray(tag_name) && value === undefined) {
+			/**
+			 * @example <code>
 
-		key = to_meta_information_key(key);
-		if (value === undefined) {
-			return data[key];
+			ebook.set([
+				{'dc:identifier':'~',id:'~'},
+				{'dc:title':'~'},
+				{'dc:language':'ja'},
+			]);
+
+			 * </code>
+			 */
+			tag_name.forEach(function(element) {
+				if (!library_namespace.is_Object(element)) {
+					return;
+				}
+				for ( var tag_name in element) {
+					set_meta_information.call(this, tag_name, element);
+					break;
+				}
+			}, this);
+			return;
 		}
 
+		/**
+		 * @example <code>
+
+		ebook.set('title', '~');
+		ebook.set('date', new Date);
+		ebook.set('subject', ['~','~']);
+
+		ebook.set('dc:title', {'dc:title':'~'});
+
+		 * </code>
+		 */
+
+		// normalize tag name
+		tag_name = to_meta_information_tag_name(tag_name);
+
+		// normalize value
 		if (typeof value === 'string') {
 			if (value.includes('://')) {
-				// 處理/escape URL。
+				// 正規化 URL。處理/escape URL。
+				// e.g., <dc:source>
 				// && → &amp;&
 				value = value.replace_till_stable(/&&/g, '&amp;&')
 				// &xxx= → &amp;xxx=
@@ -533,8 +618,96 @@ function module_code(library_namespace) {
 				});
 			}
 		}
-		data[key] = value;
+		if (value !== undefined) {
+			if (!library_namespace.is_Object(value)) {
+				var element = library_namespace.null_Object();
+				// 將value當作childNode
+				element[tag_name] = value;
+				value = element;
+			}
+			library_namespace.debug(tag_name + '=' + JSON.stringify(value), 6);
+		}
+
+		var container = this.metadata,
+		// required attribute
+		required;
+		if (tag_name === 'meta') {
+			// 無.property時以.name作為key
+			// e.g., <meta name="calibre:series" content="~" />
+			required = value && value.property ? 'property' : 'name';
+		} else if (tag_name === 'link') {
+			required = 'href';
+		}
+
+		function set_value() {
+			if (!container.some(function(element, index) {
+				if (element[tag_name] === value[tag_name]) {
+					library_namespace.debug('Duplicate element: '
+							+ JSON.stringify(element), 3);
+					// 以新的取代舊的。
+					container[index] = value;
+					return true;
+				}
+			})) {
+				container.push(value);
+			}
+		}
+
+		/**
+		 * <code>
+		 * this.metadata = {
+		 * 	'dc:tagname' : [ {Object} ],
+		 * 	meta : { [property] : [ {Object} ] },
+		 * 	link : { href : {Object} }
+		 * }
+		 * </code>
+		 */
+		if (required) {
+			// 若已經有此key則沿用舊container直接設定。
+			container = container[tag_name]
+					|| (container[tag_name] = library_namespace.null_Object());
+			if (value === undefined) {
+				// get container object
+				return container.map(function(element) {
+					return element[tag_name] || element.content;
+				});
+			}
+			// set object
+			if (!value[required]) {
+				throw new Error('Invalid metadata value: '
+				//
+				+ JSON.stringify(value));
+			}
+			if (tag_name === 'link') {
+				// required === 'href'
+				// 相同 href 應當僅 includes 一次
+				container[value[required]] = value;
+			} else {
+				// 將其他屬性納入<meta property="..."></meta>。
+				// assert: tag_name === 'meta'
+				container = container[value[required]]
+						|| (container[value[required]] = []);
+				set_value();
+			}
+
+		} else {
+			// assert: tag_name.startsWith(metadata_prefix)
+			container = container[tag_name] || (container[tag_name] = []);
+			if (value === undefined) {
+				// get container object
+				return container.map(function(element) {
+					return element[tag_name];
+				});
+			}
+			// set object
+			set_value();
+		}
+
+		return value;
 	}
+
+	// -------------------------------------------------------------------------
+	// 編輯chapter相關函式。
 
 	/**
 	 * 必須先確認沒有衝突
@@ -1250,20 +1423,22 @@ function module_code(library_namespace) {
 		return [ index, item ];
 	}
 
+	// -------------------------------------------------------------------------
+	// 打包相關函式。
+
 	// 自動生成目錄。
 	function generate_TOC() {
-		if (this.metadata.language) {
-			library_namespace.debug('Use language ' + JSON.stringify(
-			//
-			this.metadata.language[to_meta_information_key('language')]));
+		var language = set_meta_information.call(this, 'language');
+		if (language && (language = language[0])) {
+			library_namespace.debug('Use language ' + language);
 		}
-		var _ = this.metadata.language && library_namespace.gettext
-		//
-		? library_namespace.gettext.in_domain.bind(null,
-				this.metadata.language[to_meta_information_key('language')])
-				: function(text_id) {
-					return text_id;
-				},
+
+		var _ = language && library_namespace.gettext
+		// @see application/locale/resource/locale.txt
+		? library_namespace.gettext.in_domain.bind(null, language) : function(
+				text_id) {
+			return text_id;
+		},
 		//
 		TOC_html = [ '<?xml version="1.0" encoding="UTF-8"?>',
 		// https://www.w3.org/QA/2002/04/valid-dtd-list.html
@@ -1277,8 +1452,8 @@ function module_code(library_namespace) {
 		' xmlns:epub="http://www.idpf.org/2007/ops">', '<head></head>',
 		//
 		'<body>',
-		//
-		'<h1>', this.metadata.title[metadata_prefix + 'title'], '</h1>' ];
+		// 一般說來，title應該只有一個。
+		'<h1>', set_meta_information.call(this, 'title').join(', '), '</h1>' ];
 
 		this.resources.some(function(resource) {
 			if (resource.properties = "cover-image") {
@@ -1297,22 +1472,71 @@ function module_code(library_namespace) {
 		TOC_html.push(
 		// 作品資訊, 小説情報, 電子書籍紹介, 作品情報, book information
 		'<h2>', _('Work information'), '</h2>', '<div id="work_data">', '<dl>');
-		Object.entries(this.metadata).forEach(function(data) {
-			var key = data[0], value = data[1][to_meta_information_key(key)];
-			if (key === 'language') {
-				value = library_namespace.gettext
-				//
-				&& library_namespace.gettext.get_alias(value) || value;
-			} else if (key === 'source') {
-				if (/^https?:\/\/[^\s]+$/.test(value)) {
-					value = '<a href="' + value + '">' + value + '</a>';
+
+		/**
+		 * <code>
+		 * this.metadata = {
+		 * 	'dc:tagname' : [ {Object} ],
+		 * 	meta : { [property] : [ {Object} ] },
+		 * 	link : { href : {Object} }
+		 * }
+		 * </code>
+		 */
+		function add_information(data) {
+			var key = data[0].replace(metadata_prefix, ''),
+			// data = [ tag_name or property, element list ]
+			values = data[1].map(function(element) {
+				var value = element[data[0]]
+				// for <meta>, data[0] is property
+				|| element.meta || element.content;
+				if (library_namespace.is_Date(value)) {
+					// e.g., dcterms:modified, <dc:date>
+					// value = date_to_String(value);
+					value = value.toLocaleTimeString();
 				}
-			} else if (library_namespace.is_Date(value)) {
-				// e.g., key: meta, date
-				value = value.toLocaleTimeString();
+				return value;
+			});
+
+			if (key === 'language') {
+				if (library_namespace.gettext) {
+					values = values.map(function(value) {
+						return library_namespace.gettext.get_alias(value);
+					});
+				}
+			} else if (key === 'source') {
+				if (library_namespace.gettext) {
+					values = values.map(function(value) {
+						if (/^https?:\/\/[^\s]+$/.test(value)) {
+							value = '<a href="' + value + '">'
+							//
+							+ value + '</a>';
+						}
+						return value;
+					});
+				}
 			}
-			TOC_html.push('<dt>', _(key), '</dt>', '<dd>', value, '</dd>');
+
+			TOC_html.push('<dt>', _(key), '</dt>',
+			//
+			'<dd>', values.join(', '), '</dd>');
+		}
+
+		Object.entries(this.metadata).forEach(function(data) {
+			if (data[0] === 'meta' || data[0] === 'link') {
+				// 待會處理。
+				return;
+			}
+
+			// data = [ tag_name, element list ]
+			add_information(data);
 		});
+
+		if (library_namespace.is_Object(this.metadata.meta)) {
+			Object.entries(this.metadata.meta).forEach(add_information);
+		}
+
+		// Skip this.metadata.link
+
 		// 字數計算, 合計文字数
 		var total_word_count = 0;
 		this.chapters.forEach(function(chapter) {
@@ -1379,13 +1603,66 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		'identifier,title,language,dcterms:modified'.split(',')
+		// little check
+		.forEach(function(item) {
+			var is_meta = item.includes(':'),
+			//
+			container = this.metadata[
+			//
+			is_meta ? 'meta' : to_meta_information_tag_name(item)];
+			if (is_meta) {
+				container = container[item];
+			}
+			if (!container || !(container.length >= 1)) {
+				library_namespace.warn('Lost ' + item);
+			}
+		}, this);
+
 		this.initialize();
 
+		var meta = this.metadata.meta, link = this.metadata.link;
+		// sort: 將meta,link至於末尾。
+		delete this.metadata.meta;
+		delete this.metadata.link;
+		this.metadata.meta = meta;
+		this.metadata.link = link;
+		/**
+		 * <code>
+		 * this.metadata = {
+		 * 	'dc:tagname' : [ {Object} ],
+		 * 	meta : { [property] : [ {Object} ] },
+		 * 	link : { href : {Object} }
+		 * }
+		 * </code>
+		 */
 		this.raw_data_ptr.metadata.clear();
-		this.raw_data_ptr.metadata.push(Object.values(this.metadata));
+		Object.entries(this.metadata).forEach(function(data) {
+			if (data[0] === 'meta' || data[0] === 'link') {
+				// 待會處理。
+				return;
+			}
+
+			// TODO: 正規化{Object}data[1]，如值中有 {Date}。
+			this.raw_data_ptr.metadata.append(data[1]);
+		}, this);
+
+		if (library_namespace.is_Object(this.metadata.meta)) {
+			Object.values(this.metadata.meta).forEach(function(list) {
+				// element list
+				// TODO: 正規化{Object}data[1]，如值中有 {Date}。
+				this.raw_data_ptr.metadata.append(list);
+			}, this);
+		}
+
+		if (library_namespace.is_Object(this.metadata.link)) {
+			this.raw_data_ptr.metadata.push(Object.values(this.metadata.link));
+		}
 
 		// console.log(chapters);
-		if (!this.TOC) {
+		if (!this.TOC
+		// TODO: check the TOC file exists.
+		) {
 			this.add({
 				title : 'TOC',
 				TOC : true

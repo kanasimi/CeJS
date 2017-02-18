@@ -17,6 +17,8 @@
 	"application.storage.EPUB: generate_TOC()"	"description"	"Message of ebook in TOC file."	"簡介"		"description"	"あらすじ"		
 	"application.storage.EPUB: generate_TOC()"	"publisher"	"Message of ebook in TOC file."	"發布者"		"publisher"	"発行者"		
 	"application.storage.EPUB: generate_TOC()"	"source"	"Message of ebook in TOC file."	"來源"		"source"	"出典"		
+	"application.storage.EPUB: generate_TOC()"	"dcterms:modified"	"Message of ebook in TOC file."	"作品最後編輯時間"		"Last modified date of work"	"作品の最終更新日時"		
+	"application.storage.EPUB: generate_TOC()"	"calibre:series"	"Message of ebook in TOC file."	"叢書"		"Series"	"シリーズ"		
 	"application.storage.EPUB: generate_TOC()"	"word count"	"Message of ebook in TOC file."	"字數"		"word count"	"文字数"		
 	"interact.integrate.SVG"	"number"	"Name of type/object"	"數字"		"number"	"数字"		
 	"interact.integrate.SVG"	"function"	"Name of type/object"	"函數"	"函式"	"function"	"関数"		
