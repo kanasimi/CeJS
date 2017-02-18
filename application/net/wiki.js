@@ -9349,7 +9349,7 @@ function module_code(library_namespace) {
 						// Links to the rev_id key of the new page revision
 						// (after the edit occurs) in the revision table.
 						rev_id : row.rc_this_oldid,
-						comment : rc_comment.toString('utf8'),
+						comment : row.rc_comment.toString('utf8'),
 						row : row
 					});
 				});
