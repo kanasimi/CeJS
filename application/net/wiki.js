@@ -706,13 +706,17 @@ function module_code(library_namespace) {
 		topic : 2600
 	};
 
+	get_namespace.name_of_NO = [];
+
 	/**
 	 * build ((get_namespace.pattern))
 	 */
 	(function() {
 		var source = [];
-		for ( var namespace in get_namespace.hash)
+		for ( var namespace in get_namespace.hash) {
+			get_namespace.name_of_NO[get_namespace.hash[namespace]] = namespace;
 			source.push(namespace);
+		}
 		// [ , namespace, title ]
 		get_namespace.pattern = new RegExp('^(['
 				+ source.join('|').replace(/_/g, '[ _]') + ']):(.+)$', 'i');
@@ -9320,41 +9324,52 @@ function module_code(library_namespace) {
 		run_SQL(SQL, function(error, rows, fields) {
 			if (error) {
 				callback();
-			} else {
-				var result = [];
-				rows.forEach(function(row) {
-					if (!(row.rc_user > 0) && !(rc_type < 5)) {
-						// On wikis using Wikibase the results will otherwise be
-						// meaningless.
-						return;
-					}
-					result.push({
-						// links to the page_id key in the page table
-						page_id : row.rc_cur_id,
-						namespace : row.rc_namespace,
-						// 這邊的title未加上namespace prefix!
-						title : row.rc_title.toString('utf8'),
-						// 0 for anonymous edits
-						user_id : row.rc_user,
-						// text of the username for the user that made the
-						// change, or the IP address if the change was made by
-						// an unregistered user. Corresponds to rev_user_text
-						user : row.rc_user_text.toString('utf8'),
-						is_new : !!row.rc_new,
-						length : row.rc_new_len,
-						old_length : row.rc_old_len,
-						// Corresponds to rev_timestamp
-						// use new Date(.timestamp)
-						timestamp : SQL_timestamp_to_ISO(row.rc_timestamp),
-						// Links to the rev_id key of the new page revision
-						// (after the edit occurs) in the revision table.
-						rev_id : row.rc_this_oldid,
-						comment : row.rc_comment.toString('utf8'),
-						row : row
-					});
-				});
-				callback(result);
+				return;
 			}
+
+			var result = [];
+			rows.forEach(function(row) {
+				if (!(row.rc_user > 0) && !(rc_type < 5)) {
+					// On wikis using Wikibase the results will otherwise be
+					// meaningless.
+					return;
+				}
+				var namespace_text
+				//
+				= get_namespace.name_of_NO[row.rc_namespace];
+				if (namespace_text) {
+					namespace_text = upper_case_initial(namespace_text) + ':';
+				}
+				result.push({
+					// links to the page_id key in the page table
+					// 0: 可能為flow. 此時title為主頁面名，非topic。由.rc_params可獲得相關資訊。
+					page_id : row.rc_cur_id,
+					namespace : row.rc_namespace,
+					// .rc_title未加上namespace prefix!
+					title : (namespace_text
+					// @see normalize_page_name()
+					+ row.rc_title.toString('utf8')).replace(/_/g, ' '),
+					// 0 for anonymous edits
+					user_id : row.rc_user,
+					// text of the username for the user that made the
+					// change, or the IP address if the change was made by
+					// an unregistered user. Corresponds to rev_user_text
+					user : row.rc_user_text.toString('utf8'),
+					is_new : !!row.rc_new,
+					is_flow : row.rc_source.toString('utf8') === 'flow',
+					length : row.rc_new_len,
+					old_length : row.rc_old_len,
+					// Corresponds to rev_timestamp
+					// use new Date(.timestamp)
+					timestamp : SQL_timestamp_to_ISO(row.rc_timestamp),
+					// Links to the rev_id key of the new page revision
+					// (after the edit occurs) in the revision table.
+					rev_id : row.rc_this_oldid,
+					comment : row.rc_comment.toString('utf8'),
+					row : row
+				});
+			});
+			callback(result);
 		},
 		// SQL config
 		options.config);
