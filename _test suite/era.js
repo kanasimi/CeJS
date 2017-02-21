@@ -112,7 +112,7 @@ function initializer() {
 		// 當 include 程式碼，執行時不 catch error 以作防範。
 		CeL.env.no_catch = true;
 	else
-		queue.push('http://apis.google.com/js/plusone.js');
+		queue.push('https://apis.google.com/js/plusone.js');
 
 	// console.info('Start loading..');
 	// 因為載入時間較長，使用此功能可降低反應倦怠感，改善體驗。

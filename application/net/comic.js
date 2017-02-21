@@ -32,7 +32,7 @@ TODO:
  * @since 2016/11/27 19:7:2 模組化。
  */
 
-// More examples: see 各漫畫網站工具檔.js
+// More examples: see 各網站工具檔.js: https://github.com/kanasimi/comic
 'use strict';
 // 'use asm';
 
@@ -446,6 +446,7 @@ function module_code(library_namespace) {
 				post_data = url[1];
 				url = url[0];
 			}
+			url = this.full_URL(url);
 		} else {
 			// default:
 			// assert: typeof url==='string'
