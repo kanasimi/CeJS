@@ -3052,6 +3052,24 @@ function module_code(library_namespace) {
 
 	// ------------------------------------
 
+	// 傳回字串於等寬字型monospaced font的寬度。螢幕對齊用。
+	// 對fullwidth全形字元, width應算2
+	// http://hyperrate.com/topic-view-thread.php?tid=3322
+	// TODO: 警告:本函數尚未完善
+	// @see http://unicode.org/Public/UNIDATA/EastAsianWidth.txt
+	function display_width(string, font) {
+		// 須注意:不同的字型對不同字元的規範可能不同!如'→'可能為2或1
+
+		// @see [[en:Arrow (symbol)]]
+		string = String(string).replace(/[\u2190-\u21FF]/g, '  ');
+
+		// @see http://www.allenkuo.com/genericArticle/view1299.aspx
+		// @see [[zh:全形和半形]]
+		return string.replace(/[\u3000-\uFF5E]/g, '  ').length;
+	}
+
+	// ------------------------------------
+
 	set_method(String.prototype, {
 		covers : function(string) {
 			return this.length >= string.length
@@ -3095,7 +3113,9 @@ function module_code(library_namespace) {
 		all_between : all_between,
 		each_between : each_between,
 
-		edit_distance : set_bind(Levenshtein_distance)
+		edit_distance : set_bind(Levenshtein_distance),
+
+		display_width : set_bind(display_width)
 	});
 
 	set_method(Number.prototype, {

@@ -44,10 +44,12 @@ typeof CeL === 'function' && CeL.run({
 	name : 'application.net.comic',
 
 	// .includes() @ CeL.data.code.compatibility
+	require : 'data.code.compatibility.'
 	// .between() @ CeL.data.native
 	// .append() @ CeL.data.native
 	// .pad() @ CeL.data.native
-	require : 'data.code.compatibility.|data.native.'
+	// .display_width() @ CeL.data.native
+	+ '|data.native.'
 	// for CeL.to_file_name()
 	+ '|application.net.'
 	//
@@ -634,9 +636,13 @@ function module_code(library_namespace) {
 						work_data[key] = matched[key];
 					} else if (typeof work_data[key] !== 'object'
 							&& work_data[key] !== matched[key]) {
-						library_namespace.info(key + ': ' + matched[key]
+						var line_1_prefix = key + ':', line_2_prefix = '→',
+						// 螢幕對齊用。
+						pad = line_1_prefix.display_width()
+								- (line_2_prefix.display_width() - line_2_prefix.length);
+						library_namespace.info(line_1_prefix + matched[key]
 						// 對比兩者。
-						+ '\n→ ' + work_data[key]);
+						+ '\n' + line_2_prefix.pad(pad) + work_data[key]);
 					}
 				}
 				matched = matched.last_download.chapter;
@@ -738,9 +744,9 @@ function module_code(library_namespace) {
 					if (!_this.reget_chapter) {
 						if (_this.hasOwnProperty('reget_chapter')) {
 							library_namespace
-								.warn('既然設定了 .recheck，則將 .reget_chapter 設定為 ['
-										+ _this.reget_chapter
-										+ '] 將無作用！將自動將 .reget_chapter 轉為 true。');
+									.warn('既然設定了 .recheck，則將 .reget_chapter 設定為 ['
+											+ _this.reget_chapter
+											+ '] 將無作用！將自動將 .reget_chapter 轉為 true。');
 						}
 						_this.reget_chapter = true;
 					}
@@ -762,6 +768,7 @@ function module_code(library_namespace) {
 									+ ')');
 					// 重新下載
 					work_data.reget_chapter = true;
+					// work_data.regenerate = true;
 					work_data.last_download.chapter = _this.start_chapter;
 
 				} else {
@@ -839,6 +846,13 @@ function module_code(library_namespace) {
 				}
 				// 注意：不使用 cache。
 				work_data.last_update_Date = last_update_Date;
+
+				if (!_this.hasOwnProperty('rebuild_ebook')) {
+					// rebuild: 重新創建, 不使用舊的.opf資料. start over, re-create
+					work_data.rebuild_ebook = work_data.reget_chapter
+							|| work_data.regenerate;
+				}
+
 				create_ebook.call(_this, work_data);
 			}
 
@@ -895,7 +909,7 @@ function module_code(library_namespace) {
 
 	function get_chapter_data(work_data, chapter, callback) {
 		var _this = this, left, image_list, waiting, chapter_label,
-		//
+		// een_width(key + ':') - (display_width(
 		chapter_URL = this.chapter_URL(work_data, chapter);
 		chapter_URL = this.full_URL(chapter_URL);
 		library_namespace.debug(work_data.id + ' ' + work_data.title + ' #'
@@ -1284,7 +1298,7 @@ function module_code(library_namespace) {
 		var ebook = new library_namespace.EPUB(work_data.directory
 				+ work_data.directory_name, {
 			// rebuild: 重新創建, 不使用舊的.opf資料. start over, re-create
-			rebuild : this.rebuild_ebook,
+			rebuild : work_data.rebuild_ebook,
 			id_type : this.site_id,
 			// 以下為 epub <metadata> 必備之元素。
 			// 小説ID
