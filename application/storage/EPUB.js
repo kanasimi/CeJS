@@ -246,7 +246,8 @@ function module_code(library_namespace) {
 		if (options.rebuild) {
 			// rebuild: 重新創建, 不使用舊的.opf資料. start over, re-create
 			// TODO: remove directories+files
-			;
+			// this.use_cache = false;
+			this.rebuild = true;
 		} else {
 			raw_data = library_namespace
 			// book data
@@ -1175,8 +1176,14 @@ function module_code(library_namespace) {
 			// 先登記預防重複登記 (placeholder)。
 			add_manifest_item.call(this, item, true);
 
-			item_data.file_path = this.path[detect_file_type(item.href)
-					|| 'media']
+			// 先給個預設的media-type。
+			item['media-type'] = library_namespace
+					.main_MIME_type_of(item_data.url);
+
+			var file_type = detect_file_type(item_data.file || item.href)
+					|| detect_file_type(item_data.url);
+
+			item_data.file_path = this.path[file_type || 'media']
 					+ get_file_name_of_url(item.href);
 			// 自動添加.downloading登記。
 			this.downloading[item_data.file_path] = item_data;
@@ -1192,8 +1199,19 @@ function module_code(library_namespace) {
 					error, XMLHttp) {
 				// save MIME type
 				if (XMLHttp && XMLHttp.type) {
+					if (item['media-type']
+					// 需要連接網站的重要原因之一是為了取得 media-type。
+					&& item['media-type'] !== XMLHttp.type) {
+						library_namespace.err('從網站得到的 media-type ['
+								+ XMLHttp.type + '] 與從副檔名所得到的 media-type ['
+								+ item['media-type'] + '] 不同!');
+					}
 					// 這邊已經不能用 item_data.type。
 					item['media-type'] = XMLHttp.type;
+
+				} else if (!item['media-type']) {
+					library_namespace.err('Did not got media-type of media: ['
+							+ item_data.url + ']');
 				}
 
 				// 基本檢測。
@@ -1219,11 +1237,13 @@ function module_code(library_namespace) {
 				}
 			}, {
 				file_name : item_data.file_path,
+				// rebuild時不會讀取content.opf，因此若無法判別media-type時則需要reget。
+				// 須注意有沒有同名但不同內容之檔案。
+				reget : this.rebuild && !item['media-type'],
 				encoding : undefined,
-				charset : (detect_file_type(item_data.file
+				charset : file_type === 'text' && item_data.charset
 				//
-				|| item.href) || detect_file_type(item_data.url)) === 'text'
-						&& item_data.charset || 'binary',
+				|| 'binary',
 				get_URL_options : item_data.get_URL_options
 			});
 			return item;

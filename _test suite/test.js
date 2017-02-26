@@ -509,6 +509,10 @@ function test_native() {
 
 		assert([ 'a,\u0300,\uD801\uDC01,\u0301,\n,字,\uD801\uDC04,\u0304', 'a\u0300\uD801\uDC01\u0301\n字\uD801\uDC04\u0304'.chars().join(',') ], 'split_by_code_point() #1');
 		assert([ 'a\u0300,\uD801\uDC01\u0301,\n,字,\uD801\uDC04\u0304', 'a\u0300\uD801\uDC01\u0301\n字\uD801\uDC04\u0304'.chars(true).join(',') ], 'split_by_code_point() #2');
+
+		assert([ 'abc123!@#'.length, 'abc123!@#'.display_width() ], 'display_width() #1');
+		assert([ '黑白字翻訳翻译写'.length * 2, '黑白字翻訳翻译写'.display_width() ], 'display_width() #2');
+		assert([ '_<>Pf'.length + '石墨대한민국'.length * 2, '_<石墨>P대한민국f'.display_width() ], 'display_width() #3');
 	});
 
 }
