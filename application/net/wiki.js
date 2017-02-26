@@ -761,7 +761,9 @@ function module_code(library_namespace) {
 		// 去除註解 comments。
 		// e.g., "親会社<!-- リダイレクト先の「[[子会社]]」は、[[:en:Subsidiary]] とリンク -->"
 		// "ロイ・トーマス<!-- 曖昧さ回避ページ -->"
-		.replace(/<\!--[\s\S]*?-->/g, '').replace(/<\/?[a-z][^>]*>/g, '')
+		.replace(/<\!--[\s\S]*?-->/g, '')
+		// 沒先處理的話，也會去除 <br />
+		.replace(/<br(?:\s[^<>]*)?>/ig, '\n').replace(/<\/?[a-z][^>]*>/g, '')
 		// e.g., "{{En icon}}"
 		.replace(/{{[a-z\s]+}}/ig, '')
 		// e.g., "[[link]]" → "link"
@@ -778,7 +780,12 @@ function module_code(library_namespace) {
 		// 有時因為原先的文本有誤，還是會有 ''' 之類的東西留下來。
 		.replace(/'{2,}/g, ' ').trim()
 		// 此處之 space 應為中間之空白。
-		.replace(/\s{2,}/g, ' ').replace(/[(（] /g, '(').replace(/ [）)]/g, ')');
+		.replace(/\s{2,}/g, function(space) {
+			// trim tail
+			return space.replace(/[^\n]{2,}/g, ' ')
+			// 避免連\n都被刪掉。
+			.replace(/[^\n]+\n/g, '\n').replace(/\n{3,}/g, '\n\n');
+		}).replace(/[(（] /g, '(').replace(/ [）)]/g, ')');
 
 		return wikitext;
 	}
