@@ -756,7 +756,7 @@ function module_code(library_namespace) {
 			var matched;
 			item_data = {
 				url : item_data,
-				file : library_namespace.main_MIME_type_of(item_data)
+				file : library_namespace.MIME_of(item_data)
 				//
 				&& item_data.match(/[^\\\/]+$/i)[0]
 				//
@@ -1177,8 +1177,7 @@ function module_code(library_namespace) {
 			add_manifest_item.call(this, item, true);
 
 			// 先給個預設的media-type。
-			item['media-type'] = library_namespace
-					.main_MIME_type_of(item_data.url);
+			item['media-type'] = library_namespace.MIME_of(item_data.url);
 
 			var file_type = detect_file_type(item_data.file || item.href)
 					|| detect_file_type(item_data.url);
