@@ -951,6 +951,14 @@ function test_math() {
 		assert([CeL.perfect_numbers(40,-1).join(), '1,2,3,4,5,7,8,9,10,11,13,14,15,16,17,19,21,22,23,25,26,27,29,31,32,33,34,35,37,38,39'], 'Deficient numbers: numbers n such that sigma(n) < 2n.');
 		assert([CeL.perfect_numbers(99,1).join(), '12,18,20,24,30,36,40,42,48,54,56,60,66,70,72,78,80,84,88,90,96'], 'Abundant numbers (sum of divisors of n exceeds 2n).');
 
+		assert([1, CeL.Catalan_number(1)], 'Catalan number 1');
+		assert([2, CeL.Catalan_number(2)], 'Catalan number 2');
+		assert([42, CeL.Catalan_number(5)], 'Catalan number 5');
+		assert([477638700, CeL.Catalan_number(18)], 'Catalan number 18');
+		assert([1, CeL.Catalan_number(0)], 'Catalan number 0');
+		CeL.Catalan_number_list.length = 1;
+		assert([129644790, CeL.Catalan_number(17)], 'Catalan number 17');
+
 
 		// ---------------------------------------------------------------------//
 

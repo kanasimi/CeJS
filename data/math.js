@@ -1042,6 +1042,33 @@ function Pythagorean_list(limit) {
 _.Pythagorean_list = Pythagorean_list;
 
 
+
+//---------------------------------------------------------------------//
+
+// Catalan_number[0] = 1
+var Catalan_number_list = [1];
+
+// Catalan numbers
+// @see https://en.wikipedia.org/wiki/Catalan_number
+function Catalan_number(NO) {
+	if (NO < Catalan_number_list.length) {
+		// use cache
+		return Catalan_number_list[NO];
+	}
+
+	var n = Catalan_number_list.length - 1,
+	//
+	this_Catalan_number = Catalan_number_list[n];
+	for (; n < NO; n++) {
+		this_Catalan_number = this_Catalan_number * (4 * n + 2) / (n + 2); 
+		Catalan_number_list.push(this_Catalan_number);
+	}
+	return this_Catalan_number;
+}
+
+_.Catalan_number_list = Catalan_number_list;
+_.Catalan_number = Catalan_number;
+
 // ---------------------------------------------------------------------//
 
 /** {Array}Collatz_conjecture_steps[number] = steps. cache 以加快速度。 */
