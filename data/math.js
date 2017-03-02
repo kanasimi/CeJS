@@ -944,21 +944,107 @@ var square_ending = library_namespace.null_Object();
 	square_ending[n] = null;
 });
 
-// 完全平方數, a square number or perfect square. TODO: use 牛頓法
+// Squarity testing
+// 檢測 ({Natural}number) 是否為完全平方數
+// a square number or perfect square. TODO: use 牛頓法
 // is square number, n²
 function is_square(number) {
-	if (!((number % 100) in square_ending))
+	// 快速判定 possible_square(number)
+	// https://www.johndcook.com/blog/2008/11/17/fast-way-to-test-whether-a-number-is-a-square/
+	// 0x0213 = parseInt('1111110111101100', 2).toString(0x10)
+	if (0xFDEC & (1 << (number & 0xF))) {
 		return false;
+	}
+	// TRUE only if number % 16 === 0, 1, 4, 9
+	// %16 有4個: http://oeis.org/A023105
+
+	if (!((number % 100) in square_ending)) {
+		return false;
+	}
+
 
 	number = Math.sqrt(number);
 	return number === (number | 0) && number;
 
 	// another method
+	// https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+	// https://gmplib.org/manual/Perfect-Square-Algorithm.html
 	var sqrt = floor_sqrt(number);
 	return sqrt * sqrt === number && sqrt;
 }
 
 _.is_square = is_square;
+
+
+
+// 檢測 ({Natural}f1 * {Natural}f2) 是否為完全平方數
+function product_is_square(f1, f2) {
+	if (f1 === f2) {
+		return true;
+		// e.g., r * p^2, r * p^2
+	}
+
+	// e.g., p^2 * r, q^2 * r
+	var product = f1 * f2;
+	if (product <= Number.MAX_SAFE_INTEGER) {
+		return is_square(product);
+	}
+
+	// 除法不比較快。
+	if (f1 > f2) {
+		// swap
+		var tmp = f1;
+		f1 = f2;
+		f2 = tmp;
+	}
+	// assert: f1 < f2
+	if (f2 % f1 === 0) {
+		// e.g., r, r * p^2
+		return is_square(f2 / f1);
+	}
+
+	if (is_square(f1)) {
+		// e.g., p^2, q^2
+		return is_square(f2);
+	}
+	if (is_square(f2)) {
+		return false;
+	}
+
+	for (var index = 0, length = Math.min(10, primes.length); index < length; index++) {
+		var p = primes[index], p2 = p * p;
+		tmp = false;
+		while (f1 % p2 === 0) {
+			f1 /= p2;
+			tmp = true;
+		}
+		while (f2 % p2 === 0) {
+			f2 /= p2;
+			tmp = true;
+		}
+		if (f1 % p === 0) {
+			while (f1 % p === 0 && f2 % p === 0) {
+				f1 /= p;
+				f2 /= p;
+				tmp = true;
+			}
+		}
+		if (tmp) {
+			product = f1 * f2;
+			if (product <= Number.MAX_SAFE_INTEGER) {
+				return is_square(product);
+			}
+		}
+	}
+
+	// 找GCD。較慢，但沒辦法。
+	var gcd = GCD(f1, f2);
+	return is_square(f1 / gcd) && is_square(f2 / gcd);
+}
+
+_.product_is_square = product_is_square;
+
+
 
 /*
 
