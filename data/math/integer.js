@@ -968,6 +968,7 @@ if (typeof CeL === 'function')
 			}
 
 			// get the ratio of (length) th convergent of continued fraction.
+			// 取得連分數序列(sequence)至第(length)個逼近的比例值
 			// modified from data.math.continued_fraction
 			// TODO: {Integer|Array}partial_numerator, {Boolean}get_coefficients, to quadratic
 			function convergent_of(sequence, length, base, partial_numerator, get_coefficients) {
