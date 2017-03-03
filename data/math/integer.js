@@ -1051,9 +1051,21 @@ if (typeof CeL === 'function')
 			// ---------------------------------------------------------------------//
 
 			// 因 clone 頗為常用，作特殊處置以增進效率。
-			function clone(target_Integer, include_cache) {
-				if (!is_Integer(target_Integer))
+			function clone(convert_to_Number_if_possible, target_Integer, include_cache) {
+				if (convert_to_Number_if_possible === true) {
+					var value = this.valueOf();
+					if (value <= Number.MAX_SAFE_INTEGER) {
+						return value;
+					}
+
+				} else if (typeof convert_to_Number_if_possible !== 'boolean' && include_cache === undefined) {
+					// shift arguments
+					include_cache = target_Integer;
+					target_Integer = convert_to_Number_if_possible;
+				}
+				if (!is_Integer(target_Integer)) {
 					target_Integer = new_instance();
+				}
 
 				[KEY_BASE, KEY_NEGATIVE, KEY_TYPE in this ? KEY_TYPE : KEY_EXPONENT].forEach(function (key) {
 					if (key in this)

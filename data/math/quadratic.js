@@ -249,10 +249,14 @@ if (typeof CeL === 'function')
 				TODO;
 			}
 
-			// Get NO solutions of Pell's equation: x^2 + d y^2 = n (n=+1 || -1).
+			// Get the first to NO-th solutions of Pell's equation: x^2 - d y^2 = n (n=+1 or -1).
 			// https://en.wikipedia.org/wiki/Pell%27s_equation
 			// Rosen, Kenneth H. (2005). Elementary Number Theory and its Applications (5th edition). Boston: Pearson Addison-Wesley. pp. 542-545.
-			function solve_Pell(d, n, NO) {
+			function solve_Pell(d, n, NO, return_Integer) {
+				if (!(d >= 1) || !(d | 0 === d)) {
+					// 錯誤參數
+					throw 'Invalid parameter: ' + d;
+				}
 				if (typeof n !== 'number')
 					n = 1;
 				else if (n !== 1 && n !== -1)
@@ -260,6 +264,10 @@ if (typeof CeL === 'function')
 				var cf = (new Quadratic(d)).to_continued_fraction(),
 				//
 				period = cf.pop(), solutions = [];
+				if (!period) {
+					// e.g., d is a perfect square integer
+					return n === 1 && [1, 0];
+				}
 				Array.prototype.push.apply(cf, period);
 				if (period.length % 2 === 0) {
 					if (n !== 1)
@@ -274,13 +282,13 @@ if (typeof CeL === 'function')
 					NO = n === 1 ? 2 : 1;
 				// [1, 0]: trivial solution
 				n = n === 1 ? [new Integer(1), new Integer(0)] : [cf[0].clone(), cf[1].clone()];
-				solutions.push([n[0].clone(), n[1].clone()]);
+				solutions.push([n[0].clone(!return_Integer), n[1].clone(!return_Integer)]);
 
 				while (--NO) {
 					period = n[0].clone();
 					n[0].multiply(cf[0]).add(n[1].clone().multiply(d).multiply(cf[1]));
 					n[1].multiply(cf[0]).add(period.multiply(cf[1]));
-					solutions.push([n[0].clone(), n[1].clone()]);
+					solutions.push([n[0].clone(!return_Integer), n[1].clone(!return_Integer)]);
 				}
 
 				return solutions;
@@ -302,7 +310,7 @@ if (typeof CeL === 'function')
 			// ---------------------------------------------------------------------//
 
 			// 因 clone 頗為常用，作特殊處置以增進效率。
-			function clone() {
+			function clone(convert_to_Number_if_possible) {
 				var quadratic = new Quadratic;
 				[KEY_RADICAND, KEY_MULTIPLIER, KEY_INTEGER, KEY_DENOMINATOR].forEach(function (key) {
 					if (key in this)

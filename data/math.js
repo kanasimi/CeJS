@@ -298,6 +298,9 @@ continued_fraction = function(sequence, max_no) {
 // https://en.wikipedia.org/wiki/Square_root#As_periodic_continued_fractions
 // https://en.wikipedia.org/wiki/Generalized_continued_fraction#Roots_of_positive_numbers
 function quadratic_to_continued_fraction(r, m, i, D) {
+	if (r < 0) {
+		throw 'The root is negative!';
+	}
 	if (!i)
 		i = 0;
 	if (!D)
@@ -345,11 +348,11 @@ function quadratic_to_continued_fraction(r, m, i, D) {
 }
 _.quadratic_to_continued_fraction = quadratic_to_continued_fraction;
 
-// get the first solution of Pell's equation: x^2 + d y^2 = 1 or -1.
+// get the first solution of Pell's equation: x^2 - d y^2 = 1 or -1.
 // https://en.wikipedia.org/wiki/Pell%27s_equation
 // Rosen, Kenneth H. (2005). Elementary Number Theory and its Applications (5th
 // edition). Boston: Pearson Addison-Wesley. pp. 542-545.
-function solve_Pell(d, is_m1) {
+function solve_Pell(d, n, NO) {
 	// TODO
 	// use CeL.data.math.quadratic.solve_Pell instead
 	;
