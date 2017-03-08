@@ -1,7 +1,7 @@
 /**
  * @name framework loader for node.js.
  * 
- * @fileoverview Example to include CeL (CeJS) in node.js. node.js 下之 CeL 簡易加載器。本檔僅包含運用 node.loader.js 的最精簡程式碼。
+ * @fileoverview Example to include CeL (CeJS) in node.js. node.js 下之 CeL 簡易加載器。本檔僅包括含入並運用 node.loader.js 的最精簡程式碼。
  * 
  * usage: see 
  */

@@ -46,17 +46,17 @@ $ npm install cejs
 Since the frequent updates of the code, some features may work at the latest version only; it's recommended download the latest version at GitHub, and then configure.
 
 #### To set the loader as a split file:
-# Copy the loader file, [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the target directory and set to read-only.
-# Set the path list to search the library base to <code>_CeL.path.txt</code> (CeL_path_file), one per line.
-# to use in a script file:
+1. Copy the loader file, [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the target directory and set to read-only.
+2. Set the path list to search the library base to <code>_CeL.path.txt</code> (CeL_path_file), one per line.
+3. to use in a script file:
 ``` JavaScript
 //global.use_cejs_mudule = true;
 require('./_CeL.loader.nodejs.js');
 ```
 
 #### To set the loader inside a single script file:
-# Copy all codes of [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the front of the script.
-# Set the CeL_path_list to the paths to search the library base, split by '|'. See also [node.demo.js](https://github.com/kanasimi/CeJS/blob/master/_test%20suite/misc/node.demo.js).
+1. Copy all codes of [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the front of the script.
+2. Set the CeL_path_list to the paths to search the library base, split by '|'. See also [node.demo.js](https://github.com/kanasimi/CeJS/blob/master/_test%20suite/misc/node.demo.js).
 
 
 ### Execution
