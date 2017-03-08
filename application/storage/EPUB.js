@@ -1325,6 +1325,7 @@ function module_code(library_namespace) {
 				// assert: item, contents 為 resource。
 
 			} else if (library_namespace.is_Object(contents)) {
+				// 預設自動生成。
 				library_namespace.debug(contents, 6);
 				var html = [ '<?xml version="1.0" encoding="UTF-8"?>',
 				// https://www.w3.org/QA/2002/04/valid-dtd-list.html
@@ -1373,7 +1374,14 @@ function module_code(library_namespace) {
 							'</div>');
 				}
 
-				html.push('<div class="text">', check_text(contents.text),
+				contents = check_text(contents.text);
+				if (!item_data.word_count) {
+					item_data.word_count = library_namespace.count_word(contents,
+							1 + 2);
+				}
+				// 加入字數統計標示。
+				html.push('<div class="word_count">', item_data.word_count,
+							'</div>', '<div class="text">', contents,
 						'</div>', '</body>', '</html>');
 
 				contents = html.join(this.to_XML_options.separator);
@@ -1382,6 +1390,7 @@ function module_code(library_namespace) {
 				contents = check_text(contents);
 			}
 
+			// 應允許文字敘述式 word count。
 			if (!item_data.word_count) {
 				item_data.word_count = library_namespace.count_word(contents,
 						1 + 2);

@@ -1,23 +1,10 @@
-// Example to include CeL (CeJS) in node.js. node.js 下之 CeL 簡易加載器。
-
-/*
-
-To set the loader as split files:
-# Copy this file to the target directory and set to read-only.
-# Set the path list to search the library base to (CeL_path_file), one per line.
-# to use in script file: <code>
-//global.use_cejs_mudule = true;
-require('./_CeL.loader.nodejs.js');
-</code>
-
-
-To set the loader in a single script file:
-# Copy all codes below to the front of the script.
-# Set the CeL_path_list to the paths to search the library base, split by '|'.
-@see _test suite/misc/node.demo.js
-
-
-*/
+/**
+ * @name framework loader for node.js.
+ * 
+ * @fileoverview Example to include CeL (CeJS) in node.js. node.js 下之 CeL 簡易加載器。本檔僅包含運用 node.loader.js 的最精簡程式碼。
+ * 
+ * usage: see 
+ */
 
 typeof CeL !== 'function' && (function() {
 	"use strict";
