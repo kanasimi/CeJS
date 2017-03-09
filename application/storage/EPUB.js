@@ -1380,7 +1380,7 @@ function module_code(library_namespace) {
 							1 + 2);
 				}
 				// 加入字數統計標示。
-				html.push('<div class="word_count">', item_data.word_count,
+				html.push('<div class="word_count">', _('%1 words', item_data.word_count),
 							'</div>', '<div class="text">', contents,
 						'</div>', '</body>', '</html>');
 
@@ -1577,9 +1577,9 @@ function module_code(library_namespace) {
 		if (total_word_count > 0) {
 			TOC_html.push('<dt>', _('word count'), '</dt>', '<dd>',
 			//
-			total_word_count + ' words / '
+			_('%1 words', total_word_count) + ' / '
 			//
-			+ this.chapters.length + ' chapters ≈ '
+			+ _('%1 chapters', this.chapters.length) + ' ≈ '
 			// 平均文字数
 			+ Math.round(total_word_count / this.chapters.length), '</dd>');
 		}
