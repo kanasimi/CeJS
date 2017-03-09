@@ -1923,7 +1923,9 @@ function module_code(library_namespace) {
 
 		node_fs.readFile(file_name, encoding, function(error, data) {
 			if (!options.reget) {
-				if (!error) {
+				if (!error
+				// 若是容許空內容，應該特別指定。
+				&& (data || options.allow_empty)) {
 					library_namespace.debug('Using cached data.', 3,
 							'get_URL_cache_node');
 					library_namespace.debug('Cached data: ['
@@ -1935,7 +1937,7 @@ function module_code(library_namespace) {
 				}
 
 				library_namespace.debug(
-						'No valid cached data. Try to get data...', 3,
+						'No valid cached data. Try to get data (again)...', 3,
 						'get_URL_cache_node');
 			}
 

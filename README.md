@@ -26,11 +26,12 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 ```
 
 ## Node.js usage
+
+### Installation via npm
 <!-- NodeICO badges -->
 [![NPM](https://nodei.co/npm/cejs.png)](https://nodei.co/npm/cejs/)
 [![NPM](https://nodei.co/npm-dl/cejs.png)](https://nodei.co/npm/cejs/)
 
-### Installation via npm
 First, go to [nodejs.org](https://nodejs.org/), download the runtime environment and install the node.js package.
 請先安裝 [node.js](https://nodejs.org/)。
 
@@ -45,16 +46,17 @@ $ npm install cejs
 
 Since the frequent updates of the code, some features may work at the latest version only; it's recommended download the latest version at GitHub, and then configure.
 
-#### To set the loader as a split file:
-1. Copy the loader file, [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the target directory and set to read-only.
-2. Set the path list to search the library base to <code>_CeL.path.txt</code> (CeL_path_file), one per line.
-3. to use in a script file:
+#### To setup the loader as a split file:
+1. Copy the loader file, [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the target directory (e.g., the same as the script file) and set to read-only.
+2. Create the CeL_path_file, [_CeL.path.txt](https://github.com/kanasimi/CeJS/blob/master/_for%20include/_CeL.path.sample.txt) in the same directory.
+3. Set the path list to search the library base: Write to the CeL_path_file, one path per line.
+4. to use in a script file:
 ``` JavaScript
 //global.use_cejs_mudule = true;
 require('./_CeL.loader.nodejs.js');
 ```
 
-#### To set the loader inside a single script file:
+#### To setup the loader inside a single script file:
 1. Copy all codes of [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the front of the script.
 2. Set the CeL_path_list to the paths to search the library base, split by '|'. See also [node.demo.js](https://github.com/kanasimi/CeJS/blob/master/_test%20suite/misc/node.demo.js).
 
