@@ -1001,6 +1001,9 @@ function product_is_square(f1, f2) {
 		f1 = f2;
 		f2 = tmp;
 	}
+	if (f2 > Number.MAX_SAFE_INTEGER) {
+		library_namespace.err('The number ' + f2 + ' is NOT a safe number!');
+	}
 	// assert: f1 < f2
 	if (f2 % f1 === 0) {
 		// e.g., r, r * p^2

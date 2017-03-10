@@ -911,10 +911,16 @@ function test_math() {
 		assert([ p.digits().join(','), '2,0,3,7,4,3,4,5' ], '.digits()');
 		assert([ CeL.data.math.floor_sqrt(p * p), p ], 'floor_sqrt(p^2)');
 		assert([ CeL.data.math.floor_sqrt(p * p - 1), p - 1 ], 'floor_sqrt(p^2-1)');
+
 		assert(!!CeL.data.math.is_square(p * p), 'is_square(p^2)');
 		assert(!CeL.data.math.is_square(p * p - 1), 'is_square(p^2-1)');
-		assert(CeL.data.math.product_is_square(43798467257*23*23*4, 43798467257*4), 'product_is_square #1');
-		assert(!CeL.data.math.product_is_square(43798467257*23*23*4, 43798467257*4-1), 'product_is_square #2');
+		assert(!!CeL.data.math.product_is_square(66472571449*23*23*4, 66472571449*4), 'product_is_square #1');
+		assert(!CeL.data.math.product_is_square(66472571449*23*23*4, 66472571449*4-1), 'product_is_square #2');
+		assert(!CeL.data.math.product_is_square(4137299*177534289, 4137299*177534289+1), 'product_is_square #3');
+		assert(!CeL.data.math.product_is_square(4137299*177534289, (4137299+1)*177534289), 'product_is_square #4');
+		assert(!!CeL.data.math.product_is_square(639846*63532*63532, 639846*6342*6342), 'product_is_square #5');
+		assert(!!CeL.data.math.product_is_square(1237*1237*1076858357, 1249*1249*1076858357), 'product_is_square #6');
+
 		assert([ p.digit_length(), String(p).length ], 'count digits of integer: ('+p+').digit_length()');
 		assert([ p.digit_sum(), p.digits().sum() ], 'count digits of integer: ('+p+').digit_sum()');
 		assert([ CeL.data.math.ceil_log(p), String(p).length ], 'ceil_log('+p+')');
