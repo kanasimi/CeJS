@@ -49,7 +49,7 @@ Since the frequent updates of the code, some features may work at the latest ver
 #### To setup the loader as a split file:
 1. Copy the loader file, [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the target directory (e.g., the same as the script file) and set to read-only.
 2. Create the CeL_path_file, [_CeL.path.txt](https://github.com/kanasimi/CeJS/blob/master/_for%20include/_CeL.path.sample.txt) in the same directory.
-3. Set the path list to search the library base: Write to the CeL_path_file, one path per line.
+3. Set the path list to search the library base: Write to the CeL_path_file (<code>_CeL.path.txt</code>), one path per line.
 4. to use in a script file:
 ``` JavaScript
 //global.use_cejs_mudule = true;

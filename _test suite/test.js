@@ -913,6 +913,8 @@ function test_math() {
 		assert([ CeL.data.math.floor_sqrt(p * p - 1), p - 1 ], 'floor_sqrt(p^2-1)');
 		assert(!!CeL.data.math.is_square(p * p), 'is_square(p^2)');
 		assert(!CeL.data.math.is_square(p * p - 1), 'is_square(p^2-1)');
+		assert(CeL.data.math.product_is_square(43798467257*23*23*4, 43798467257*4), 'product_is_square #1');
+		assert(!CeL.data.math.product_is_square(43798467257*23*23*4, 43798467257*4-1), 'product_is_square #2');
 		assert([ p.digit_length(), String(p).length ], 'count digits of integer: ('+p+').digit_length()');
 		assert([ p.digit_sum(), p.digits().sum() ], 'count digits of integer: ('+p+').digit_sum()');
 		assert([ CeL.data.math.ceil_log(p), String(p).length ], 'ceil_log('+p+')');

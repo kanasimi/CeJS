@@ -1,9 +1,10 @@
 /**
  * @name framework loader for node.js.
  * 
- * @fileoverview Example to include CeL (CeJS) in node.js. node.js 下之 CeL 簡易加載器。本檔僅包括含入並運用 node.loader.js 的最精簡程式碼。
+ * @fileoverview Example to include CeL (CeJS) in node.js. node.js 下之 CeL
+ *               簡易加載器。本檔僅包括含入並運用 node.loader.js 的最精簡程式碼。
  * 
- * usage: see ../README.md
+ * usage: See ../README.md
  */
 
 typeof CeL !== 'function' && (function() {
@@ -13,7 +14,11 @@ typeof CeL !== 'function' && (function() {
 	//
 	CeL_path_list = node_fs.readFileSync(CeL_path_file);
 	if (!CeL_path_list || !(CeL_path_list = CeL_path_list.toString())) {
-		console.error('Please set the absolute path list of CeL library in the file [' + CeL_path_file + ']!');
+		console.error(
+		//
+		'Please set the absolute path list of CeL library in the file ['
+		//
+		+ CeL_path_file + ']!');
 		return;
 	}
 
@@ -28,7 +33,8 @@ typeof CeL !== 'function' && (function() {
 			return;
 		}
 		try {
-			// accessSync() throws if any accessibility checks fail, and does nothing otherwise.
+			// accessSync() throws if any accessibility checks fail, and does
+			// nothing otherwise.
 			node_fs.accessSync(path);
 			var loader = '/_for include/node.loader.js';
 			require(path + (path.indexOf('/') !== -1 ? loader
@@ -41,9 +47,9 @@ typeof CeL !== 'function' && (function() {
 	});
 
 	// If no latest version found, try to use cejs module instead.
+	if (typeof use_cejs_mudule === 'boolean'
 	// Set "global.use_cejs_mudule = true;" if you need to do so anyway.
-	if (typeof use_cejs_mudule === 'boolean' && use_cejs_mudule
-	&& typeof CeL !== 'function') {
+	&& use_cejs_mudule && typeof CeL !== 'function') {
 		try {
 			require('cejs');
 			console.log('Load cejs module, require("cejs") instead!');
@@ -69,4 +75,4 @@ typeof CeL !== 'function' && (function() {
 // CeL.env.no_catch = true;
 // CeL.set_debug(2);
 
-//CeL.run([ 'data.code.compatibility' ]);
+// CeL.run([ 'data.code.compatibility' ]);

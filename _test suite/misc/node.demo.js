@@ -6,7 +6,6 @@
 // ----------------------------------------------------------------------------
 // For node.js loading. Copy from /node.loader.js/.
 
-
 // ----------------------------------------------------------------------------
 // Load CeJS library. For node.js loading.
 // Copy/modified from "/_for include/node.loader.js".
@@ -18,7 +17,8 @@
 		return;
 	}
 	try {
-		// accessSync() throws if any accessibility checks fail, and does nothing otherwise.
+		// accessSync() throws if any accessibility checks fail, and does
+		// nothing otherwise.
 		require('fs').accessSync(path);
 		var loader = '/_for include/node.loader.js';
 		require(path + (path.indexOf('/') !== -1 ? loader

@@ -1327,7 +1327,9 @@ function module_code(library_namespace) {
 			} else if (library_namespace.is_Object(contents)) {
 				// 預設自動生成。
 				library_namespace.debug(contents, 6);
-				var html = [ '<?xml version="1.0" encoding="UTF-8"?>',
+				var _ = setup_gettext.call(this),
+				//
+				html = [ '<?xml version="1.0" encoding="UTF-8"?>',
 				// https://www.w3.org/QA/2002/04/valid-dtd-list.html
 				// https://cweiske.de/tagebuch/xhtml-entities.htm
 				// '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"',
@@ -1365,6 +1367,7 @@ function module_code(library_namespace) {
 						return !!date;
 					}).join(', ');
 					if (date_list) {
+						// 加入本章節之最後修訂日期標示。
 						html.push('<div class="date">', date_list, '</div>');
 					}
 				}
@@ -1376,13 +1379,14 @@ function module_code(library_namespace) {
 
 				contents = check_text(contents.text);
 				if (!item_data.word_count) {
-					item_data.word_count = library_namespace.count_word(contents,
-							1 + 2);
+					item_data.word_count = library_namespace.count_word(
+							contents, 1 + 2);
 				}
-				// 加入字數統計標示。
-				html.push('<div class="word_count">', _('%1 words', item_data.word_count),
-							'</div>', '<div class="text">', contents,
-						'</div>', '</body>', '</html>');
+				html.push('<div class="word_count">',
+				// 加入本章節之字數統計標示。
+				_('%1 words', item_data.word_count), '</div>',
+				// 加入本章節之內容。
+				'<div class="text">', contents, '</div>', '</body>', '</html>');
 
 				contents = html.join(this.to_XML_options.separator);
 
@@ -1454,8 +1458,7 @@ function module_code(library_namespace) {
 	// -------------------------------------------------------------------------
 	// 打包相關函式。
 
-	// 自動生成目錄。
-	function generate_TOC() {
+	function setup_gettext() {
 		var language = set_meta_information.call(this, 'language');
 		if (language && (language = language[0])) {
 			library_namespace.debug('Use language ' + language);
@@ -1464,9 +1467,16 @@ function module_code(library_namespace) {
 		var _ = language && library_namespace.gettext
 		// @see application/locale/resource/locale.txt
 		? library_namespace.gettext.in_domain.bind(null, language) : function(
-				text_id) {
-			return text_id;
-		},
+				text_id, _1) {
+			return text_id.replace(/%1/g, _1);
+		};
+
+		return _;
+	}
+
+	// 自動生成目錄。
+	function generate_TOC() {
+		var _ = setup_gettext.call(this),
 		//
 		TOC_html = [ '<?xml version="1.0" encoding="UTF-8"?>',
 		// https://www.w3.org/QA/2002/04/valid-dtd-list.html
@@ -1565,8 +1575,9 @@ function module_code(library_namespace) {
 
 		// Skip this.metadata.link
 
+		var _ = setup_gettext.call(this),
 		// 字數計算, 合計文字数
-		var total_word_count = 0;
+		total_word_count = 0;
 		this.chapters.forEach(function(chapter) {
 			var this_word_count = chapter[KEY_DATA]
 					&& chapter[KEY_DATA].word_count;
