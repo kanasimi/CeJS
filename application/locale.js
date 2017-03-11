@@ -444,7 +444,9 @@ function gettext(text_id) {
 // 不改變預設domain，直接取得特定domain的轉換過的文字。
 // 警告：需要確保系統相應 domain resource 已載入並設定好。
 gettext.in_domain = function(domain_name, text_id) {
-	var options = typeof domain_name === 'string' ? {
+	var options = typeof domain_name === 'object' ? domain_name
+	//
+	: typeof domain_name === 'string' ? {
 		domain_name : gettext.to_standard(domain_name)
 	} : {
 		domain : domain_name
@@ -455,6 +457,7 @@ gettext.in_domain = function(domain_name, text_id) {
 	}
 
 	if (arguments.length <= 2) {
+		// 沒有多餘的參數設定(e.g., %1, %2)。
 		return gettext.call(options, text_id);
 	}
 

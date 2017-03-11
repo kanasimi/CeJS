@@ -713,7 +713,7 @@ function module_code(library_namespace) {
 				// , get_label
 				);
 			} catch (e) {
-				library_namespace.err(this.id
+				library_namespace.err(_this.id
 						+ ': .get_chapter_count() throw error');
 				throw e;
 				callback && callback(work_data);

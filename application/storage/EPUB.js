@@ -1464,7 +1464,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('Use language ' + language);
 		}
 
-		var _ = language && library_namespace.gettext
+		var _ = library_namespace.gettext
 		// @see application/locale/resource/locale.txt
 		? library_namespace.gettext.in_domain.bind(null, language) : function(
 				text_id, _1) {
