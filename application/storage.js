@@ -83,8 +83,8 @@ function module_code(library_namespace) {
 	// CeL.storage.directory_is_empty(directory_path)
 	// alias: mkdir
 	CeL.storage.create_directory(directory_path / directory_path_list)
-	// alias: delete
-	CeL.storage.remove_directory(directory_path / directory_path_list, force)
+	// alias: delete.
+	CeL.storage.remove_directory(directory_path / directory_path_list, recurse)
 	// alias: rename
 	CeL.storage.move_directory(move_from_path, move_to_path)
 	CeL.storage.copy_directory(copy_from_path, copy_to_path)
@@ -116,7 +116,10 @@ function module_code(library_namespace) {
 
 		_.copy_file = storage_module.fs_copySync;
 
-		_.remove_file = _.remove_directory = storage_module.fs_remove;
+		_.remove_file = function(path, force) {
+			storage_module.fs_remove(path, false, force);
+		};
+		_.remove_directory = storage_module.fs_remove;
 
 		_.move_directory = _.move_file =
 		//

@@ -128,6 +128,7 @@ function module_code(library_namespace) {
 						+ this.base_URL);
 			}
 		}
+		process.title = 'Starting ' + this.id;
 		if (!configurations.MESSAGE_RE_DOWNLOAD) {
 			this.MESSAGE_RE_DOWNLOAD = this.id + ': '
 					+ this.MESSAGE_RE_DOWNLOAD;
@@ -159,6 +160,8 @@ function module_code(library_namespace) {
 	Comic_site.timeout = 30 * 1000;
 
 	Comic_site.prototype = {
+		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.comic中Comic_site.prototype內的母comments，並以其為主體。
+
 		// 圖片檔+紀錄檔下載位置
 		main_directory : (library_namespace.platform.nodejs
 				&& process.mainModule ? process.mainModule.filename
@@ -221,9 +224,12 @@ function module_code(library_namespace) {
 		// regenerate : true,
 
 		full_URL : full_URL_of_path,
-		// recheck: 從頭檢測所有作品之所有章節與所有圖片。default:false
-		// 'changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。
+		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
+		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。
 		// recheck : true,
+		// 當無法取得chapter資料時，直接嘗試下一章節。在手動+監視下recheck時可併用此項。default:false
+		// skip_chapter_data_error : true,
+
 		image_path_to_url : image_path_to_url,
 		is_work_id : function(work_id) {
 			return work_id > 0;
@@ -550,7 +556,7 @@ function module_code(library_namespace) {
 			work_title = work_id.title;
 			work_id = work_id.id;
 		}
-		process.title = '下載' + work_title + ' - 資訊';
+		process.title = '下載' + work_title + ' - 資訊 @ ' + this.id;
 
 		var _this = this, work_URL = this.full_URL(this.work_URL, work_id), work_data;
 
@@ -575,7 +581,16 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			work_data = _this.parse_work_data(html, get_label, exact_work_data);
+			try {
+				work_data = _this.parse_work_data(html, get_label, exact_work_data);
+			} catch(e) {
+				library_namespace.err(work_title + ': ' + e);
+				callback && callback({
+					title : work_title
+				});
+				return;
+			}
+
 			if (!work_data.title) {
 				work_data.title = work_title;
 			}
@@ -598,7 +613,7 @@ function module_code(library_namespace) {
 			// source URL
 			work_data.url = work_URL;
 
-			process.title = '下載' + work_data.title + ' - 目次';
+			process.title = '下載' + work_data.title + ' - 目次 @ ' + _this.id;
 			work_data.directory_name = library_namespace.to_file_name(
 			// 允許自訂作品目錄名。
 			work_data.directory_name || work_data.id + ' ' + work_data.title);
@@ -728,12 +743,14 @@ function module_code(library_namespace) {
 			}
 
 			if (!(work_data.chapter_count >= 1)) {
-				// 無任何章節可供下載。刪掉前面預建的目錄。
-				// TODO: 必須先確認裡面是空的。
-				// library_namespace.fs_remove(work_data.directory);
 				library_namespace.err(work_id
 						+ (work_data.title ? ' ' + work_data.title : '')
 						+ ': Can not get chapter count!');
+
+				// 無任何章節可供下載。刪掉前面預建的目錄。
+				// 注意：僅能刪除本次操作所添加/改變的檔案。因此必須先確認裡面是空的。不能使用(library_namespace.fs_remove(work_data.directory,,true);)。
+				library_namespace.fs_remove(work_data.directory);
+
 				callback && callback(work_data);
 				return;
 			}
@@ -908,7 +925,7 @@ function module_code(library_namespace) {
 		chapter_URL = this.full_URL(chapter_URL);
 		library_namespace.debug(work_data.id + ' ' + work_data.title + ' #'
 				+ chapter + '/' + work_data.chapter_count + ': ' + chapter_URL);
-		process.title = chapter + ' @ ' + work_data.title;
+		process.title = chapter + ' @ ' + work_data.title + ' @ ' + this.id;
 
 		function get_data() {
 			process.stdout.write('Get data of chapter ' + chapter
@@ -927,6 +944,12 @@ function module_code(library_namespace) {
 					library_namespace.err('Failed to get chapter data of '
 							+ work_data.directory + chapter);
 					if (get_data.error_count > _this.MAX_ERROR) {
+						if (_this.skip_chapter_data_error) {
+							// Skip this chapter if do not throw
+							library_namespace.warn('Skip ' + work_data.title + ' #' + chapter + ' and continue next.');
+							check_if_done();
+							return;
+						}
 						throw _this.MESSAGE_RE_DOWNLOAD;
 					}
 					get_data.error_count = (get_data.error_count | 0) + 1;
@@ -1103,20 +1126,22 @@ function module_code(library_namespace) {
 			// TODO: add timestamp, work/chapter/NO, {Array}error code
 			// TODO: 若錯誤次數少於限度，則從頭擷取work。
 			if (_this.error_log_file && Array.isArray(image_list)) {
-				var error_files = [];
+				var error_file_logs = [],
+				// timestamp_prefix
+				log_prefix = (new Date).format('%4Y%2m%2d') + '	';
 				image_list.forEach(function(image_data, index) {
 					if (image_data.has_error) {
-						error_files.push(image_data.file + '	'
+						error_file_logs.push(log_prefix + image_data.file + '	'
 								+ image_data.parsed_url);
 					}
 				});
 
-				if (error_files.length > 0) {
-					error_files.push('');
+				if (error_file_logs.length > 0) {
+					error_file_logs.push('');
 					node_fs.appendFileSync(_this.main_directory
 							+ _this.error_log_file,
 					// 產生錯誤紀錄檔。
-					error_files.join(library_namespace.env.line_separator));
+					error_file_logs.join(library_namespace.env.line_separator));
 				}
 			}
 
@@ -1137,6 +1162,10 @@ function module_code(library_namespace) {
 	}
 
 	function image_path_to_url(path, server) {
+		if (path.includes('://')) {
+			return path;
+		}
+
 		if (!server.includes('://')) {
 			// this.get_URL_options.headers.Host = server;
 			server = 'http://' + server;
@@ -1218,9 +1247,9 @@ function module_code(library_namespace) {
 						//
 						(has_error ? 'Force saving bad image'
 						//
-						+ (XMLHttp.status ? ' (' + XMLHttp.status + ')' : '')
+						+ (XMLHttp.status ? ' (status ' + XMLHttp.status + ')' : '')
 						//
-						+ ': ' : 'Do not has EOI: ')
+						+ ' '+contents.length+' bytes: ' : 'Do not has EOI: ')
 						//
 						+ image_data.file + '\n← ' + url);
 						if (!contents
@@ -1246,7 +1275,7 @@ function module_code(library_namespace) {
 					} else if (old_file_status
 							&& old_file_status.size > contents.length) {
 						library_namespace
-								.log('存在較大的舊檔，將不覆蓋：' + image_data.file);
+								.log('存在較大的舊檔 ('+old_file_status.size +'>'+ contents.length+')，將不覆蓋：' + image_data.file);
 					}
 					image_data.done = true;
 					callback && callback();
@@ -1469,7 +1498,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		process.title = '打包 epub: ' + work_data.title;
+		process.title = '打包 epub: ' + work_data.title + ' @ ' + this.id;
 		if (!file_name) {
 			file_name =
 			// e.g., "(一般小説) [author] title [site 20170101].id.epub"

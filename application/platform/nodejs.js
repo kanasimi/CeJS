@@ -222,7 +222,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @inner
 	 */
-	function remove_fso_list(list, parent) {
+	function remove_fso_list(list, parent, recurse) {
 		if (parent && !/[\\\/]$/.test(parent)) {
 			parent += path_separator;
 		}
@@ -230,37 +230,28 @@ function module_code(library_namespace) {
 		var error;
 		list.some(function(fso_name) {
 			// recurse, iterative method
-			return error = remove_fso(parent ? parent + fso_name : fso_name);
+			return error = remove_fso(parent ? parent + fso_name : fso_name, recurse);
 		});
 		return error;
 	}
 
 	/**
 	 * remove file / directory recursively.<br />
-	 * TODO: 有時操作來不及，會出現錯誤，需要 flush disk cache。
+	 * 若有需要先刪除之子檔案列表，需要把母directory置於Array最末尾。
+	 * 
+	 * 注意：改變API時需要順便修訂CeL.application.storage中的remove_file。
+	 * 
+	 * TODO: 有時操作來不及，會出現錯誤，需要 flush disk cache。<br />
+	 * TODO: 處理強制刪除force，例如無視唯讀屬性。<br />
 	 * 
 	 * @param {String|Array}path
 	 *            file / directory name
 	 * 
 	 * @see https://github.com/isaacs/rimraf/blob/master/rimraf.js
 	 */
-	function remove_fso(path, callback, force) {
-		if (typeof callback === 'boolean' && force === undefined) {
-			// shift arguments.
-			force = callback;
-			callback = undefined;
-		}
-
-		var to_return = typeof callback === 'function' ? function(error) {
-			callback(error);
-			// normalize
-			return error || undefined;
-		} : function(error) {
-			return error || undefined;
-		};
-
+	function remove_fso(path, recurse, force) {
 		if (Array.isArray(path)) {
-			return to_return(remove_fso_list(path));
+			return remove_fso_list(path);
 		}
 
 		try {
@@ -277,16 +268,19 @@ function module_code(library_namespace) {
 						.debug('Remove file: ' + path, 1, 'remove_fso');
 				// delete file, link, ...
 				node_fs.unlinkSync(path);
-				return to_return();
+				return;
 			}
 
-			library_namespace.debug('recurse remove sub-fso of ' + path, 2,
-					'remove_fso');
-			var error
-			// recurse, iterative method
-			= remove_fso_list(node_fs.readdirSync(path), path);
-			if (error) {
-				return to_return(error);
+			// 設定recurse時才會recurse操作。
+			if (recurse) {
+				library_namespace.debug('recurse remove sub-fso of ' + path, 2,
+						'remove_fso');
+				var error
+				// recurse, iterative method
+				= remove_fso_list(node_fs.readdirSync(path), path, recurse);
+				if (error) {
+					return error;
+				}
 			}
 
 			library_namespace.debug('Remove directory: ' + path, 1,
@@ -304,12 +298,16 @@ function module_code(library_namespace) {
 				// TODO
 				;
 			}
+			if (e.code === 'ENOTEMPTY') {
+				// TODO: 可能有其他原因不能刪除子物件？
+				;
+			}
 			if (e.code !== 'ENOENT') {
-				return to_return(e);
+				return e;
 			}
 		}
 
-		return to_return();
+		return;
 	}
 	// _.fs_delete, _.fs_rmdir
 	_.fs_remove = remove_fso;
