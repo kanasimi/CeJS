@@ -261,6 +261,7 @@ if (typeof CeL === 'function')
 					n = 1;
 				else if (n !== 1 && n !== -1)
 					return;
+				library_namespace.debug("Solve Pell's equation: x^2 - " + (-d) + ' y^2 = ' + n);
 				var cf = (new Quadratic(d)).to_continued_fraction(),
 				//
 				period = cf.pop(), solutions = [];

@@ -582,8 +582,9 @@ function module_code(library_namespace) {
 			}
 
 			try {
-				work_data = _this.parse_work_data(html, get_label, exact_work_data);
-			} catch(e) {
+				work_data = _this.parse_work_data(html, get_label,
+						exact_work_data);
+			} catch (e) {
 				library_namespace.err(work_title + ': ' + e);
 				callback && callback({
 					title : work_title
@@ -946,7 +947,8 @@ function module_code(library_namespace) {
 					if (get_data.error_count > _this.MAX_ERROR) {
 						if (_this.skip_chapter_data_error) {
 							// Skip this chapter if do not throw
-							library_namespace.warn('Skip ' + work_data.title + ' #' + chapter + ' and continue next.');
+							library_namespace.warn('Skip ' + work_data.title
+									+ ' #' + chapter + ' and continue next.');
 							check_if_done();
 							return;
 						}
@@ -1243,15 +1245,14 @@ function module_code(library_namespace) {
 					if (has_error || has_EOI === false) {
 						image_data.file = bad_file_path;
 						image_data.has_error = true;
-						library_namespace.warn(
-						//
-						(has_error ? 'Force saving bad image'
-						//
-						+ (XMLHttp.status ? ' (status ' + XMLHttp.status + ')' : '')
-						//
-						+ ' '+contents.length+' bytes: ' : 'Do not has EOI: ')
-						//
-						+ image_data.file + '\n← ' + url);
+						library_namespace.warn((has_error ? 'Force saving '
+								+ (contents ? 'bad' : 'empty')
+								+ ' image'
+								+ (XMLHttp.status ? ' (status '
+										+ XMLHttp.status + ')' : '')
+								+ (contents ? ' ' + contents.length + ' bytes'
+										: '') + ': ' : 'Do not has EOI: ')
+								+ image_data.file + '\n← ' + url);
 						if (!contents
 						// 404之類，就算有內容，也不過是錯誤訊息頁面。
 						|| (XMLHttp.status / 100 | 0) === 4) {
@@ -1274,8 +1275,9 @@ function module_code(library_namespace) {
 						node_fs.writeFileSync(image_data.file, contents);
 					} else if (old_file_status
 							&& old_file_status.size > contents.length) {
-						library_namespace
-								.log('存在較大的舊檔 ('+old_file_status.size +'>'+ contents.length+')，將不覆蓋：' + image_data.file);
+						library_namespace.log('存在較大的舊檔 ('
+								+ old_file_status.size + '>' + contents.length
+								+ ')，將不覆蓋：' + image_data.file);
 					}
 					image_data.done = true;
 					callback && callback();

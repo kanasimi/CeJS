@@ -230,7 +230,8 @@ function module_code(library_namespace) {
 		var error;
 		list.some(function(fso_name) {
 			// recurse, iterative method
-			return error = remove_fso(parent ? parent + fso_name : fso_name, recurse);
+			return error = remove_fso(parent ? parent + fso_name : fso_name,
+					recurse);
 		});
 		return error;
 	}

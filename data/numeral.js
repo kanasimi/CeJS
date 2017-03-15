@@ -1011,7 +1011,8 @@ if (typeof CeL === 'function')
 					Telugu : '౦౧౨౩౪౫౬౭౮౯',
 					// 藏文數字
 					Tibetan : '༠༡༢༣༤༥༦༧༨༩',
-					// 泰文數字
+					// 泰文數字 th:ตัวเลขไทย
+					// https://th.wikipedia.org/wiki/%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B9%80%E0%B8%A5%E0%B8%82%E0%B9%84%E0%B8%97%E0%B8%A2
 					Thai : '๐๑๒๓๔๕๖๗๘๙',
 					Vai : '꘠꘡꘢꘣꘤꘥꘦꘧꘨꘩'
 				};
