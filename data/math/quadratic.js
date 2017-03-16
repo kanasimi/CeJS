@@ -252,7 +252,7 @@ if (typeof CeL === 'function')
 			// Get the first to NO-th solutions of Pell's equation: x^2 - d y^2 = n (n=+1 or -1).
 			// https://en.wikipedia.org/wiki/Pell%27s_equation
 			// Rosen, Kenneth H. (2005). Elementary Number Theory and its Applications (5th edition). Boston: Pearson Addison-Wesley. pp. 542-545.
-			function solve_Pell(d, n, NO, return_Integer) {
+			function solve_Pell(d, n, limit, return_Integer) {
 				if (!(d >= 1) || !(d | 0 === d)) {
 					// 錯誤參數
 					throw 'Invalid parameter: ' + d;
@@ -279,13 +279,19 @@ if (typeof CeL === 'function')
 					Array.prototype.push.apply(cf, period);
 				cf.pop();
 				cf = Integer.convergent_of(cf);
-				if (NO === undefined)
-					NO = n === 1 ? 2 : 1;
+				if (limit !== undefined && !(limit > 0) && typeof limit !== 'function') {
+					library_namespace.err('Invalid limit: ' + limit);
+					limit = undefined;
+				}
+				if (limit === undefined) {
+					limit = n === 1 ? 2 : 1;
+				}
 				// [1, 0]: trivial solution
 				n = n === 1 ? [new Integer(1), new Integer(0)] : [cf[0].clone(), cf[1].clone()];
 				solutions.push([n[0].clone(!return_Integer), n[1].clone(!return_Integer)]);
 
-				while (--NO) {
+				// limit() return true if 到達界限 / reach the limit / out of valid range.
+				while (limit > 0 ? --limit : !limit(n[0].clone(!return_Integer))) {
 					period = n[0].clone();
 					n[0].multiply(cf[0]).add(n[1].clone().multiply(d).multiply(cf[1]));
 					n[1].multiply(cf[0]).add(period.multiply(cf[1]));

@@ -1320,11 +1320,11 @@ function module_code(library_namespace) {
 		function get_next_between() {
 			if (index !== NOT_FOUND
 					&& (index = text.indexOf(head, index)) !== NOT_FOUND) {
-				var left_index = text.indexOf(foot, index += head_length);
-				if (left_index !== NOT_FOUND) {
-					var token = text.slice(index, left_index);
+				var foot_index = text.indexOf(foot, index += head_length);
+				if (foot_index !== NOT_FOUND) {
+					var token = text.slice(index, foot_index);
 					// +foot_length: search next starts from end of foot
-					index = left_index + foot_length;
+					index = foot_index + foot_length;
 					return token;
 				}
 				// 接下來皆無foot，則即使再存有head亦無效。
@@ -1346,19 +1346,20 @@ function module_code(library_namespace) {
 
 		while (index !== NOT_FOUND
 				&& (index = this.indexOf(head, index)) !== NOT_FOUND) {
-			var left_index = this.indexOf(foot, index += head_length);
-			if (left_index === NOT_FOUND) {
+			var foot_index = this.indexOf(foot, index += head_length);
+			if (foot_index === NOT_FOUND) {
 				// 接下來皆無foot，則即使再存有head亦無效。
 				break;
 			}
-			matched.push(this.slice(index, left_index));
+			matched.push(this.slice(index, foot_index));
 			// +foot_length: search next starts from end of foot
-			index = left_index + foot_length;
+			index = foot_index + foot_length;
 		}
 
 		return matched;
 	}
 
+	// callback(token, index, foot_index);
 	function each_between(head, foot, callback, thisArg, index) {
 		// this.all_between(head, foot, index).forEach(callback, thisArg);
 
@@ -1374,15 +1375,15 @@ function module_code(library_namespace) {
 
 		while (index !== NOT_FOUND
 				&& (index = this.indexOf(head, index)) !== NOT_FOUND) {
-			var left_index = this.indexOf(foot, index += head_length);
-			if (left_index === NOT_FOUND) {
+			var foot_index = this.indexOf(foot, index += head_length);
+			if (foot_index === NOT_FOUND) {
 				// 接下來皆無foot，則即使再存有head亦無效。
 				break;
 			}
-			callback.call(thisArg, this.slice(index, left_index), index,
-					left_index);
+			callback.call(thisArg, this.slice(index, foot_index), index,
+					foot_index);
 			// +foot_length: search next starts from end of foot
-			index = left_index + foot_length;
+			index = foot_index + foot_length;
 		}
 	}
 
