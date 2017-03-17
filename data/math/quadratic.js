@@ -252,6 +252,7 @@ if (typeof CeL === 'function')
 			// Get the first to NO-th solutions of Pell's equation: x^2 - d y^2 = n (n=+1 or -1).
 			// https://en.wikipedia.org/wiki/Pell%27s_equation
 			// Rosen, Kenneth H. (2005). Elementary Number Theory and its Applications (5th edition). Boston: Pearson Addison-Wesley. pp. 542-545.
+			// TODO: [[en:chakravala method]]
 			function solve_Pell(d, n, limit, return_Integer) {
 				if (!(d >= 1) || !(d | 0 === d)) {
 					// 錯誤參數
@@ -265,7 +266,7 @@ if (typeof CeL === 'function')
 				var cf = (new Quadratic(d)).to_continued_fraction(),
 				//
 				period = cf.pop(), solutions = [];
-				if (!period) {
+				if (!Array.isArray(period)) {
 					// e.g., d is a perfect square integer
 					return n === 1 && [1, 0];
 				}
