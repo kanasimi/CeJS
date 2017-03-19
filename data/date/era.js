@@ -4789,7 +4789,8 @@ function module_code(library_namespace) {
 							.split(''));
 				} else if (month_data.length > j) {
 					library_namespace.warn('pack_era: 紀年 [' + 紀年名稱 + '] '
-							+ year_now + '年：月分資料過長！');
+							+ year_now + '年：月分資料過長！ (' + month_data.length
+							+ '>' + j + ') month_data: ' + month_data);
 				}
 
 				if (library_namespace.is_debug(2))
@@ -4806,7 +4807,9 @@ function module_code(library_namespace) {
 
 				if (month_data.length > YEAR_CHUNK_SIZE)
 					library_namespace.warn('pack_era: 紀年 [' + 紀年名稱 + '] '
-							+ year_now + '年：月分資料過長！');
+							+ year_now + '年：月分資料過長！ (' + month_data.length
+							+ '>' + YEAR_CHUNK_SIZE + ') month_data: '
+							+ month_data);
 				else if (month_data.length < YEAR_CHUNK_SIZE
 				// 非尾
 				&& i < 年度月分資料.length - 1) {
@@ -4815,7 +4818,9 @@ function module_code(library_namespace) {
 					&& i > 0)
 						// 非首非尾
 						library_namespace.warn('pack_era:紀年 [' + 紀年名稱 + '] '
-								+ year_now + '年：月分資料過短！');
+								+ year_now + '年：月分資料過短！ (' + month_data.length
+								+ '<' + YEAR_CHUNK_SIZE + ') month_data: '
+								+ month_data);
 					// 注意：閏月之 index 是 padding 前之資料。
 					month_data += PACKED_YEAR_CHUNK_PADDING.slice(0,
 							YEAR_CHUNK_SIZE - month_data.length);

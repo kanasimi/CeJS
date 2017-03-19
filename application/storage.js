@@ -71,6 +71,7 @@ function module_code(library_namespace) {
 	CeL.storage.file_exists(file_path)
 	CeL.storage.read_file(file_path, character_encoding = 'UTF-8')
 	CeL.storage.write_file(file_path, contents, character_encoding = 'UTF-8')
+	CeL.storage.append_file(file_path, contents, character_encoding = 'UTF-8')
 	// alias: delete
 	CeL.storage.remove_file(file_path / directory_path_list)
 	// alias: rename

@@ -253,6 +253,8 @@ if (typeof CeL === 'function')
 			// https://en.wikipedia.org/wiki/Pell%27s_equation
 			// Rosen, Kenneth H. (2005). Elementary Number Theory and its Applications (5th edition). Boston: Pearson Addison-Wesley. pp. 542-545.
 			// TODO: [[en:chakravala method]]
+			// TODO: https://www.alpertron.com.ar/METHODS.HTM Solve the equation: a x2 + b xy + c y2 + dx + ey + f = 0 圓錐曲線/二元二次方程
+			// [[en:Conic_section#General Cartesian form]]
 			function solve_Pell(d, n, limit, return_Integer) {
 				if (!(d >= 1) || !(d | 0 === d)) {
 					// 錯誤參數
@@ -264,10 +266,11 @@ if (typeof CeL === 'function')
 					return;
 				library_namespace.debug("Solve Pell's equation: x^2 - " + (-d) + ' y^2 = ' + n);
 				var cf = (new Quadratic(d)).to_continued_fraction(),
-				//
+				// 漸進連分數表示
 				period = cf.pop(), solutions = [];
 				if (!Array.isArray(period)) {
 					// e.g., d is a perfect square integer
+					// 若 d 是完全平方數，則這個方程式只有平凡解
 					return n === 1 && [1, 0];
 				}
 				Array.prototype.push.apply(cf, period);
