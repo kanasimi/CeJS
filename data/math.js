@@ -2803,6 +2803,11 @@ _.find_maxima = function(equation, min, max, options) {
 // 裝載問題
 // http://codex.wiki/post/117994-555
 
+// 正整數拆分/數字拆解演算法：將數字拆分成最大元素不大於 max 的組合
+// http://www.nowamagic.net/algorithm/algorithm_IntegerDivisionDynamicProgramming.php
+// https://openhome.cc/Gossip/AlgorithmGossip/SeparateNumber.htm
+// https://en.wikipedia.org/wiki/Knapsack_problem
+
 /**
  * Get the count of integer partitions. 整數分拆: 將正整數 sum 拆分，表達成一些正整數的和。
  * 
@@ -2916,6 +2921,7 @@ function integer_partitions(sum, part_count, summands) {
 }
 
 _.integer_partitions = integer_partitions;
+
 
 
 // ------------------------------------------------------------------------------------------------------//
@@ -3823,6 +3829,8 @@ CeL.for_combination(6,3,function(s){console.log(s);},true)
 
 */
 
+// 自 elements 中提取出 select 個元素的組合方法。
+// 共 C(elements, select) = elements! / select! / (elements-select)! 種組合數量。
 // next_combination
 // select ((select)) elements, ((select))-selection
 function for_combination(elements, select, handler, descending) {

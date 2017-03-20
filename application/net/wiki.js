@@ -3268,6 +3268,7 @@ function module_code(library_namespace) {
 				+ node.index + ',' + node.type, 3);
 				node.forEach(function(row) {
 					row = row.filter(function(cell) {
+						// 不計入style
 						return cell.type !== 'style';
 					}).map(function(cell) {
 						// return cell.toString().replace(/^[\n\|]+/, '');
@@ -3292,6 +3293,8 @@ function module_code(library_namespace) {
 			library_namespace.fs_write(options.file, library_namespace
 					.to_CSV_String(array));
 		}
+
+		return array;
 	};
 
 	// ------------------------------------------------------------------------
