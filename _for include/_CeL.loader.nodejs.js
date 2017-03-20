@@ -29,7 +29,7 @@ typeof CeL !== 'function' && (function() {
 	// 載入泛用（非特殊目的使用）之功能。
 	.some(function(path) {
 		if (path.charAt(0) === '#') {
-			// path is a comment
+			// path is comments
 			return;
 		}
 		try {
@@ -51,6 +51,7 @@ typeof CeL !== 'function' && (function() {
 	// Set "global.use_cejs_mudule = true;" if you need to do so anyway.
 	&& use_cejs_mudule && typeof CeL !== 'function') {
 		try {
+			// 若有CeJS則用之。
 			require('cejs');
 			console.log('Load cejs module, require("cejs") instead!');
 			return;

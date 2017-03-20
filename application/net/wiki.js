@@ -3220,6 +3220,83 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
+	 * 把表格型列表轉為陣列。
+	 * 
+	 * @param {Object}page_data
+	 *            page data got from wiki API.
+	 * @param {Object}options
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @example<code>
+
+	wiki.page('List of monarchs of Thailand', function(page_data) {
+		CeL.wiki.list_to_array(page_data, 'monarchs of Thailand.txt');
+	});
+
+	</code>
+	 */
+	wiki_API.list_to_array = function(page_data, options) {
+		if (typeof options === 'string') {
+			options = {
+				file : options
+			};
+		}
+
+		var heads = [], array = [];
+
+		page_parser(page_data).parse()
+		// 僅取第一層。
+		.forEach(function(node) {
+			if (node.type === 'section_title') {
+				if (false) {
+					library_namespace.debug(node.length + ','
+					//
+					+ node.index + ',' + node.level, 3);
+					return;
+				}
+				// 從 section title 紀錄標題。
+				var title = node[0];
+				if (title.type === 'link')
+					title = title[0][0];
+				// console.log(title.toString());
+				heads.truncate(node.level);
+				heads[node.level] = title.toString();
+
+			} else if (node.type === 'table') {
+				library_namespace.debug(node.length + ','
+				//
+				+ node.index + ',' + node.type, 3);
+				node.forEach(function(row) {
+					row = row.filter(function(cell) {
+						return cell.type !== 'style';
+					}).map(function(cell) {
+						// return cell.toString().replace(/^[\n\|]+/, '');
+						cell = cell.pop();
+						return cell && cell.type !== 'style'
+						//
+						&& cell.toString()
+						//
+						.replace(/^[\|\s]+/, '').trim() || '';
+					});
+					if (row.length > 0) {
+						row.unshift(heads[2] || '', heads[3] || '');
+						array.push(row);
+					}
+				});
+			}
+		});
+
+		// output file. e.g., page_data.title + '.csv.txt'
+		// MUST: CeL.run(['application.platform.nodejs','data.CSV']);
+		if (options && options.file && library_namespace.to_CSV_String) {
+			library_namespace.fs_write(options.file, library_namespace
+					.to_CSV_String(array));
+		}
+	};
+
+	// ------------------------------------------------------------------------
+
+	/**
 	 * get title of page.
 	 * 
 	 * @example <code>
