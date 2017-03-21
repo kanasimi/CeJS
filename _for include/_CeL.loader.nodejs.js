@@ -26,7 +26,7 @@ typeof CeL !== 'function' && (function() {
 	// Load CeJS library. For node.js loading.
 	// Copy/modified from "/_for include/_CeL.loader.nodejs.js".
 	CeL_path_list.split(CeL_path_list.includes('\n') ? /\r?\n/ : '|')
-	// 載入泛用（非特殊目的使用）之功能。
+	// 載入CeJS基礎泛用之功能。（如非特殊目的使用的載入功能）
 	.some(function(path) {
 		if (path.charAt(0) === '#') {
 			// path is comments

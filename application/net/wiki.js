@@ -3220,12 +3220,14 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * 把表格型列表轉為陣列。
+	 * 把表格型列表頁面轉為原生陣列。
 	 * 
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns {Array}陣列資料。
 	 * 
 	 * @example<code>
 
@@ -3236,6 +3238,10 @@ function module_code(library_namespace) {
 	</code>
 	 */
 	wiki_API.list_to_array = function(page_data, options) {
+		if (!get_page_content.is_page_data(page_data)) {
+			library_namespace.err('Invalid page data!');
+			return;
+		}
 		if (typeof options === 'string') {
 			options = {
 				file : options
@@ -3256,8 +3262,9 @@ function module_code(library_namespace) {
 				}
 				// 從 section title 紀錄標題。
 				var title = node[0];
-				if (title.type === 'link')
+				if (title.type === 'link') {
 					title = title[0][0];
+				}
 				// console.log(title.toString());
 				heads.truncate(node.level);
 				heads[node.level] = title.toString();
@@ -3272,10 +3279,15 @@ function module_code(library_namespace) {
 						return cell.type !== 'style';
 					}).map(function(cell) {
 						// return cell.toString().replace(/^[\n\|]+/, '');
-						cell = cell.pop();
-						return cell && cell.type !== 'style'
-						//
-						&& cell.toString()
+						if (cell[0].type === 'style') {
+							// 去掉style
+							// 注意: 本函式操作時不可更動到原資料。
+							var toString = cell.toString;
+							cell = cell.clone();
+							cell.shift();
+							cell.toString = toString;
+						}
+						return cell && cell.toString()
 						//
 						.replace(/^[\|\s]+/, '').trim() || '';
 					});
@@ -9033,6 +9045,11 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		// treat config as language.
+		if (typeof config === 'string') {
+			config = new_SQL_config(config);
+		}
+
 		library_namespace.debug(SQL, 2, 'run_SQL');
 		// console.log(JSON.stringify(config));
 		var connection = mysql.createConnection(config);
@@ -9393,20 +9410,28 @@ function module_code(library_namespace) {
 	 * @see https://www.mediawiki.org/wiki/Manual:Recentchanges_table
 	 */
 	function get_recent(callback, options) {
-		options = library_namespace.setup_options(options);
+		if (options && (typeof options === 'string')) {
+			options = {
+				// treat options as language
+				language : options
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
 		/** {Integer}namespace NO. */
 		var namespace = options.namespace && get_namespace(options.namespace),
 		/** {ℕ⁰:Natural+0}limit count. */
 		limit = options.limit,
 		//
-		SQL = 'SELECT * FROM `recentchanges` WHERE `rc_bot`=0'
+		SQL = options.SQL || ('SELECT * FROM `recentchanges` WHERE `rc_bot`=0'
 		// https://www.mediawiki.org/wiki/Manual:Recentchanges_table
 		+ (library_namespace.is_digits(namespace)
 		//
 		? ' AND `rc_namespace`=' + namespace : '')
 		// new → old, may contain duplicate title.
 		+ ' ORDER BY `rc_timestamp` DESC LIMIT '
-				+ (library_namespace.is_digits(limit) ? limit : 10);
+		//
+		+ (library_namespace.is_digits(limit) ? limit : 10));
 
 		run_SQL(SQL, function(error, rows, fields) {
 			if (error) {
@@ -9459,7 +9484,7 @@ function module_code(library_namespace) {
 			callback(result);
 		},
 		// SQL config
-		options.config);
+		options.config || options.language);
 	}
 
 	if (SQL_config) {
@@ -9479,11 +9504,16 @@ function module_code(library_namespace) {
 		//
 		|| library_namespace.is_RegExp(options)) {
 			options = {
-				title_filter : options
+				// language : '',
+				// title_filter
+				title : options
 			};
 		}
 
-		TODO
+		// TODO: need test
+		setInterval(function() {
+			get_recent(listener, options);
+		}, options.interval || 60 * 1000);
 	}
 
 	wiki_API.listen = add_listener;
