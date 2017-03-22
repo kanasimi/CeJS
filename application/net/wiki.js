@@ -3226,6 +3226,8 @@ function module_code(library_namespace) {
 	/**
 	 * 把表格型列表頁面轉為原生陣列。
 	 * 
+	 * TODO: 按標題統合內容。
+	 * 
 	 * @param {Object}page_data
 	 *            page data got from wiki API.
 	 * @param {Object}options
@@ -3252,7 +3254,9 @@ function module_code(library_namespace) {
 			};
 		}
 
-		var heads = [], array = [];
+		var heads = [], array = [],
+		// handler
+		processor = options && options.row_processor;
 
 		page_parser(page_data).parse()
 		// 僅取第一層。
@@ -3271,7 +3275,7 @@ function module_code(library_namespace) {
 				}
 				// console.log(title.toString());
 				heads.truncate(node.level);
-				heads[node.level] = title.toString();
+				heads[node.level] = title.toString().trim();
 
 			} else if (node.type === 'table') {
 				library_namespace.debug(node.length + ','
@@ -3301,6 +3305,17 @@ function module_code(library_namespace) {
 								// -1: 不算入自身。
 								append_cells = append_cells[1] - 1;
 							}
+
+							var matched = cell[0].toString()
+							// 檢測要增加的null cells
+							.match(/[^a-z\d_]rowspan=(?:"\s*)?(\d{1,2})/i);
+
+							if (matched && matched[1] > 1) {
+								library_namespace.err(
+								// TODO
+								'We can not deal with rowspan yet.');
+							}
+
 							// 去掉style
 							// 注意: 本函式操作時不可更動到原資料。
 							var toString = cell.toString;
@@ -3321,6 +3336,9 @@ function module_code(library_namespace) {
 							cells.unshift('', '');
 						} else {
 							cells.unshift(heads[2] || '', heads[3] || '');
+						}
+						if (processor) {
+							cells = processor(cells);
 						}
 						array.push(cells);
 					}

@@ -2952,6 +2952,71 @@ CeL.era.pass_on = {
 ]).minute_offset = 7 * 60;
 
 // ---------------------------------------------------------------------//
+// 泰國君主列表, monarchs of Thailand
+
+(CeL.era.pass_on.countries.ไทย = [
+
+		'อาณาจักรสุโขทัย/ราชวงศ์พระร่วง/พ่อขุนศรีอินทราทิตย์|1238~||疑|準=年|君主=พ่อขุนบางกลางหาว;Pho Khun Sri Indraditya;Pho Khun Bang Klang Hao|生=1188|關係=First King of Sukhothai Ally with Pha Mueang defeating the Khmer.',
+		'/พ่อขุนบานเมือง|1270~||疑|準=年|君主=Pho Khun Ban Mueang|關係=Son of Sri Indraditya',
+		'/พ่อขุนรามคำแหงมหาราช|1279~||疑|準=年|君主=พ่อขุนรามราช;Pho Khun Ram Khamhaeng the Great the Great;Pho Khun Ram Racha|生=1237|關係=Younger brother of Ban Muang;Son of Sri Indraditya',
+		'/พระยาเลอไทย|1298~||疑|準=年|君主=Phaya Loethai|關係=Son of Ram Khamhaeng',
+		'/พระยางั่วนำถม|1323~||疑|準=年|君主=Phaya Nguanamthom|關係=Cousin of Lerthai;Son of Ban Muang',
+		'/พระมหาธรรมราชาที่ 1|1347~||疑|準=年|君主=ลิไทย;Phaya Lithai;Phra Maha Thammaracha I|關係=Cousin of Nguanamthom;Son of Lerthai',
+		'/พระมหาธรรมราชาที่ 2|1368~||疑|準=年|君主=ลือไทย;Phaya Mahathammaracha II;Phra Maha Thammaracha II|關係=Son of Lithai',
+		'/พระมหาธรรมราชาที่ 3|1400~||疑|準=年|君主=ไสลือไทย;Phaya Saileuthai;Phra Maha Thammaracha III|關係=Son of Leuthai',
+		'/พระมหาธรรมราชาที่ 4|1419~1438||疑|準=年|君主=บรมปาล;Phaya Borommapan;Phra Maha Thammaracha IV|關係=Son of Saileuthai',
+		'อาณาจักรอยุธยา/ราชวงศ์อู่ทอง/สมเด็จพระรามาธิบดีที่ 1|1350~||疑|準=年|君主=พระเจ้าอู่ทอง;Somdet Phra Chao Uthong;Somdet Phra Ramathibodi I|生=1314|關係=First King of Ayutthaya',
+		'/สมเด็จพระราเมศวร|1369~||疑|準=年|君主=Somdet Phra Ramesuan;king of Ayutthaya|生=1339|卒=1395|關係=Son of Uthong',
+		'/ราชวงศ์สุพรรณภูมิ/สมเด็จพระบรมราชาธิราชที่ 1|1370~||疑|準=年|君主=ขุนหลวงพะงั่ว;Somdet Phra Borommarachathirat I;Khun Luang Pha Ngua|關係=Husband of Uthong\'s older sister;Usurper;Former Lord of Suphanburi',
+		'/สมเด็จพระเจ้าทองลัน|1388~||疑|準=年|君主=เจ้าทองจันทร์;Somdet Phra Chao Thong Lan;Chao Thong Chan|關係=Son of Borommarachathirat I',
+		'/ราชวงศ์อู่ทอง/สมเด็จพระราเมศวร|1388~||疑|準=年|君主=Somdet Phra Ramesuan;king of Ayutthaya|生=1339|關係=Former King reclaiming the throne;Son of Uthong',
+		'/สมเด็จพระรามราชาธิราช|1395~||疑|準=年|君主=Somdet Phra Rama Ratchathirat|生=1356|關係=Son of Ramesuan',
+		'/ราชวงศ์สุพรรณภูมิ/สมเด็จพระอินทราชา|1409~||疑|準=年|君主=เจ้านครอินทร์;Somdet Phra Intharacha;king of Ayutthaya;Phra Chao Nakhon In|生=1359|關係=Nephew of Borommarachathirat I;Former Lord of Suphanburi, offered crown',
+		'/สมเด็จพระบรมราชาธิราชที่ 2|1424~||疑|準=年|君主=เจ้าสามพระยา;Somdet Phra Borommarachathirat II;Chao Sam Phraya|關係=Son of Intha Racha I',
+		'/สมเด็จพระบรมไตรโลกนาถ|1448~||疑|準=年|君主=Somdet Phra Boromma Trailokanat|生=1431|關係=Son of Borommarachathirat II',
+		'/สมเด็จพระบรมราชาธิราชที่ 3|1488~||疑|準=年|君主=Somdet Phra Borommarachathirat III;Intha Racha II|關係=Son of Trailokanat',
+		'/สมเด็จพระรามาธิบดีที่ 2|1491~||疑|準=年|君主=Somdet Phra Ramathibodi II;Phra Chetthathirat I|生=1473|關係=Younger brother of Borommarachathirat III;Son of Trailokanat',
+		'/สมเด็จพระบรมราชาธิราชที่ 4|1529~||疑|準=年|君主=หน่อพุทธางกูร;Somdet Phra Borommarachathirat IV;Somdet Phra Borommaracha Nor Buddhankoon;Phra Athitawongse|關係=Son of Ramathibodi II',
+		'/พระรัษฎาธิราช|1533~||疑|準=年|君主=Phra Ratsadathirat|生=1529|關係=Son of Borommarachathirat IV;Child King, reign under regency',
+		'/สมเด็จพระไชยราชาธิราช|1533~||疑|準=年|君主=Somdet Phra Chairacha;Somdet Phra Chairacha Thirat;Phra Chai|關係=Uncle of Ratsadathirat;Son of Ramathibodi II;Usurper',
+		'/พระยอดฟ้า|1546~||疑|準=年|君主=พระแก้วฟ้า;Phra Yodfa;Phra Keowfa|生=1535|關係=Son of Chairacha',
+		'/ขุนวรวงศาธิราช|1548/11/11~||疑|準=年|君主=Khun Worawongsathirat;Khun Chinnarat;Bun Si|關係=Usurper monarch, not accepted by some historians',
+		'/สมเด็จพระมหาจักรพรรดิ|1548~||疑|準=年|君主=พระเจ้าช้างเผือก;Somdet Phra Maha Chakkraphat;Phra Chao Chang Pueak|生=1509|關係=Son of Ramathibodi II;Younger brother of Borommarachathirat IV and Chairacha;Seized the throne from usurper;Became a monk at Pegu (1564-1568)',
+		'/สมเด็จพระมหินทราธิราช|1564~||疑|準=年|君主=Somdet Phra Mahinthrathirat|生=1539|關係=Son of Maha Chakkrapat and Queen Suriyothai',
+		'/ราชวงศ์สุโขทัย/สมเด็จพระมหาธรรมราชาธิราช|1569~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 1;สมเด็จพระมหาธรรมราชาธิราช;Somdet Phra Mahathammarachathirat;king of Ayutthaya;Somdet Phra Sanphet I|生=1517|關係=Former Lord of Phitsanulok;Installed as vassal of Bayinnaung of Burma, declared independence in 1584',
+		'/สมเด็จพระนเรศวรมหาราช|1590/7/29~1605/4/7||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 2;สมเด็จพระนเรศวรมหาราช;Somdet Phra Naresuan the Great;Somdet Phra Sanphet II;Phra Naret|生=1555/4/25|關係=Son of Maha  Thamaracha Declaring Idependant from Burmese during the reign of Bayinnaung\'s Son',
+		'/สมเด็จพระเอกาทศรถ|1605/4/25~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 3;สมเด็จพระเอกาทศรถ;Somdet Phra Ekathotsarot;Somdet Phra Sanphet III|生=1557|關係=Brother of Naresuan;Son of Maha Thammarachathirat',
+		'/พระศรีเสาวภาคย์|1620~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 4;สมเด็จพระศรีเสาวภาคย์;Somdet Phra Si Saowaphak;Somdet Phra Sanphet IV|關係=Son of Ekathotsarot',
+		'/สมเด็จพระเจ้าทรงธรรม|1620~1628/12/12||疑|準=年|君主=สมเด็จพระบรมราชาที่ 1;สมเด็จพระเจ้าทรงธรรม;Somdet Phra Songtham;Somdet Phra Borommaracha I|生=1590|關係=Son of "Ekathotsarot", invited to take the throne after leaving the Sangha',
+		'/สมเด็จพระเชษฐาธิราช|1628~1629||疑|準=年|君主=สมเด็จพระบรมราชาที่ 2;สมเด็จพระเชษฐาธิราช;Somdet Phra Chettha;Somdet Phra Borommaracha II|生=1613|關係=Son of Songtham',
+		'/พระอาทิตยวงศ์|1629~1629||疑|準=年|君主=สมเด็จพระอาทิตยวงศ์;Phra Athittayawong|生=1618|關係=Younger brother of Chetthathirat II;Son of Songtham',
+		'/ราชวงศ์ปราสาททอง/สมเด็จพระเจ้าปราสาททอง|1629~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 5;สมเด็จพระเจ้าปราสาททอง;Somdet Phra Chao Prasat Thong;Somdet Phra Sanphet V|生=1599|關係=Usurper, formerly the Kalahom;Rumored to be a son of Ekathotsarot',
+		'/สมเด็จเจ้าฟ้าไชย|1656~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 6;สมเด็จเจ้าฟ้าไชย;Somdet Chao Fa Chai;Somdet Phra Sanphet VI|關係=Son of Prasat Thong',
+		'/สมเด็จพระศรีสุธรรมราชา|1656/6~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 7;สมเด็จพระศรีสุธรรมราชา;Somdet Phra Si Suthammaracha;Somdet Phra Sanphet VII|關係=Usurper, Uncle of Chao Fa Chai;Younger brother of Prasat Thong',
+		'/สมเด็จพระนารายณ์มหาราช|1656/10/26~1688/7/11||疑|準=年|君主=สมเด็จพระรามาธิบดีที่ 3;สมเด็จพระนารายณ์มหาราช;Somdet Phra Narai the Great;Somdet Phra Ramathibodi III|生=1633/2/16|關係=Usurper, nephew of Si Suthammaracha;Son of Prasat Thong;Half-brother of Chao Fa Chai',
+		'/ราชวงศ์บ้านพลูหลวง/สมเด็จพระเพทราชา|1688~||疑|準=年|君主=Somdet Phra Phetracha|生=1632|關係=Usurper, cousin of Narai;Former commander of the Royal Elephant Corps',
+		'/สมเด็จพระสรรเพชญ์ที่ 8|1703~||疑|準=年|君主=สมเด็จพระสุริเยนทราธิบดี;พระเจ้าเสือ;Somdet Phra Suriyenthrathibodi;Somdet Phra Sanphet VIII;Phra Chao Suea|關係=Rumored to be a son of Narai',
+		'/สมเด็จพระสรรเพชญ์ที่ 9|1709~||疑|準=年|君主=สมเด็จพระเจ้าอยู่หัวท้ายสระ;Somdet Phra Chao Yu Hua Thai Sa;Somdet Phra Sanphet IX|生=1679|關係=Son of Suriyenthrathibodi',
+		'/สมเด็จพระเจ้าอยู่หัวบรมโกศ|1733~||疑|準=年|君主=สมเด็จพระบรมราชาธิราชที่ 3;สมเด็จพระเจ้าอยู่หัวบรมโกศ;Somdet Phra Chao Yu Hua Boromakot|生=1680|關係=Brother of Thai Sa, Former Front Palace;Son of Suriyenthrathibodi',
+		'/สมเด็จพระเจ้าอุทุมพร|1758~||疑|準=年|君主=สมเด็จพระบรมราชาธิราชที่ 4;สมเด็จพระเจ้าอุทุมพร / ขุนหลวงหาวัด;Somdet Phra Chao Uthumphon;Somdet Phra Ramathibodi IV;Khun Luang Hawat|卒=1796|關係=Son of Boromakot',
+		'/สมเด็จพระที่นั่งสุริยาศน์อัมรินทร์|1758~1767/4/7||疑|準=年|君主=สมเด็จพระบรมราชาที่ 3;สมเด็จพระที่นั่งสุริยาศน์อัมรินทร์ / พระเจ้าเอกทัศ;Somdet Phra Chao Ekkathat;Somdet Phra Chao Yu Hua Phra Thinang Suriyat Amarin;Somdet Phra Borommaracha III|卒=1767/4/17|關係=Brother of Uthumphon;Usurper, Former Front Palace;Son of Boromakot',
+		'อาณาจักรธนบุรี/ราชวงศ์ธนบุรี/สมเด็จพระเจ้ากรุงธนบุรี|1767/11/6~||疑|準=年|君主=鄭昭;鄭信;สมเด็จพระบรมราชาที่ 4;สมเด็จพระเจ้าตากสินมหาราช;Somdet Phra Chao Taksin the Great;Phra Chao Krung Thonburi;Somdet Phra Borommaracha IV|生=1734/4/17|卒=1782/4/7|關係=Only King of Thonburi',
+		'อาณาจักรรัตนโกสินทร์/ราชวงศ์จักรี/พระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช|1782/4/6~||疑|準=年|國名=ประเทศไทย;ราชอาณาจักรสยาม;ราชอาณาจักรไทย|君主=รัชกาลที่ 1;Phrabat Somdet Phra Ramathibodi Sri Sinthra;Maha Chakri Borommanat;Phra Rama I;the Great;Rama I|生=1737/3/20|關係=First King of Rattanakosin',
+		'/พระบาทสมเด็จพระพุทธเลิศหล้านภาลัย|1809/9/7~||疑|準=年|君主=รัชกาลที่ 2;Phrabat Somdet Phra Ramathibodi Sri Sinthra;Maha Itsarasunthon;Phra Rama II of Siam;Rama II|生=1767/2/24|關係=Son of Rama I and Queen Amarindra',
+		'/พระบาทสมเด็จพระนั่งเกล้าเจ้าอยู่หัว|1824/7/21~||疑|準=年|君主=พระมหาเจษฎาราชเจ้า;รัชกาลที่ 3;Phrabat Somdet Phra Ramathibodi Sri Sinthra;Maha Rama III;Phra Nang Klao Chao Yu Hua;Rama III;Phra Maha Chetsadarat Chao|生=1788/3/31|關係=Son of Rama II and Princess Consort Sri Sulalai',
+		'/พระบาทสมเด็จพระจอมเกล้าเจ้าอยู่หัว|1851/4/2~||疑|準=年|君主=รัชกาลที่ 4;Phrabat Somdet Phra Paramenthra;Maha Mongkut;Phra Chom Klao Chao Yu Hua;Rama IV|生=1804/10/18|關係=Half-brother of Rama III;Son of Rama II and Queen Sri Suriyendra',
+		'/พระบาทสมเด็จพระจุลจอมเกล้าเจ้าอยู่หัว|1868/10/1~||疑|準=年|君主=พระปิยมหาราช;รัชกาลที่ 5;Phrabat Somdet Phra Paraminthra;Maha Chulalongkorn;Phra Chula Chom Klao Chao Yu Hua;the Great;Rama V;Phra Piya Maharat|生=1853/9/20|關係=Son of Rama IV and Queen Debsirindra;Under Regency of Si Suriyawongse from 1868-1873',
+		'/พระบาทสมเด็จพระมงกุฎเกล้าเจ้าอยู่หัว|1910/10/23~||疑|準=年|君主=พระมหาธีรราชเจ้า;รัชกาลที่ 6;Phrabat Somdet Phra Paramenthra;Maha Vajiravudh;Phra Mongkut Klao Chao Yu Hua;Rama VI;Phra Maha Thirarachachao|生=1881/1/1|關係=Son of Rama V and Queen Saovabha Phongsri',
+		'/พระบาทสมเด็จพระปกเกล้าเจ้าอยู่หัว|1925/11/25~||疑|準=年|君主=รัชกาลที่ 7;Phrabat Somdet Phra Paraminthra;Maha Prajadhipok;Phra Pok Klao Chao Yu Hua;Rama VII|生=1893/11/8|卒=1941/5/30|關係=Younger brother of Rama VI;Son of Rama V and Queen Saovabha Phongsri',
+		'/พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล|1935/3/2~||疑|準=年|君主=พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล พระอัฐมรามาธิบดินทร;พระอัฐมรามาธิบดินทร;รัชกาลที่ 8;Phrabat Somdet Phra Paramenthra;Maha Ananda Mahidol;Phra Atthama Ramathibodin;Rama VIII|生=2025/9/20|關係=Nephew of Rama VII;Grandson of Rama V by Mahidol Adulyadej;Under Regency from 1935-1946',
+		'/พระบาทสมเด็จพระปรมินทรมหาภูมิพลอดุลยเดช|1946/6/9~||疑|準=年|君主=สมเด็จพระภัทรมหาราช;รัชกาลที่ 9;Phrabat Somdet Phra Paraminthra;Maha Bhumibol Adulyadej;the Great;Rama IX;Somdet Phra Phatthara Maharat|生=2027/12/5|關係=Younger brother of Rama VIII;Grandson of Rama V by Mahidol Adulyadej',
+		'/สมเด็จพระเจ้าอยู่หัวมหาวชิราลงกรณ บดินทรเทพยวรางกูร|2016/10/13~'
+				+ CeL.era.pass_on.last_day
+				+ '||疑|準=年|君主=รัชกาลที่ 10;Somdet Phra Chao Yu Hua;Maha Vajiralongkorn;Bodindradebayavarangkun;Rama X|生=1952/7/28|關係=Only son of Rama IX and Queen Sirikit;2nd child of Rama IX'
+
+]).minute_offset = 7 * 60;
+
+// ---------------------------------------------------------------------//
 // 印度年表, ancient India
 
 (CeL.era.pass_on.countries.India = [
