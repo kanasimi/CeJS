@@ -2346,7 +2346,7 @@ function module_code(library_namespace) {
 		// 因此先處理 {{Template}} 再處理 table。
 		// {|表示表格開始，|}表示表格結束。
 		wikitext = wikitext.replace_till_stable(
-		//
+		// [[Help:Table]]
 		/\n{\|([\s\S]*?)\n\|}/g, function(all, parameters) {
 			// 經測試，table 不會向前回溯。
 			// 處理表格標題。
@@ -2392,7 +2392,9 @@ function module_code(library_namespace) {
 						matched[2] = matched[2].slice(0, -1);
 						PATTERN_CELL.lastIndex--;
 					}
-					if (row || /[<>]/.test(token)) {
+					// "|-" 應當緊接著 style，可以是否設定過 row 判斷。
+					// 但若這段有 /[<>]/ 則當作是內容。
+					if (row || /[<>]/.test(matched[1])) {
 						var cell = matched[1].match(/^([^|]+)(\|[\s\S]*)$/);
 						if (cell)
 							cell = [ cell[1].includes(include_mark)
@@ -2412,10 +2414,12 @@ function module_code(library_namespace) {
 								cell = [ cell ];
 							}
 						}
+
 						_set_wiki_type(cell, 'table_cell');
 
 						if (delimiter) {
 							cell.delimiter = delimiter;
+							// is_header
 							cell.is_head = delimiter.startsWith('\n')
 							// TODO: .is_head, .table_type 擇一。
 							? delimiter.endsWith('!') : row.is_head;
@@ -3274,12 +3278,29 @@ function module_code(library_namespace) {
 				//
 				+ node.index + ',' + node.type, 3);
 				node.forEach(function(row) {
-					row = row.filter(function(cell) {
-						// 不計入style
-						return cell.type !== 'style';
-					}).map(function(cell) {
+					var cells = [], is_head;
+					row.forEach(function(cell) {
+						if (cell.type === 'style') {
+							// 不計入style
+							return;
+						}
 						// return cell.toString().replace(/^[\n\|]+/, '');
+
+						if (cell.is_head) {
+							// 將以本列最後一個 cell 之 type 判定本列是否算作標題列。
+							// 亦可用 row.is_head
+							is_head = cell.is_head;
+						}
+
+						var append_cells;
 						if (cell[0].type === 'style') {
+							append_cells = cell[0].toString()
+							// 檢測要增加的null cells
+							.match(/[^a-z\d_]colspan=(?:"\s*)?(\d{1,2})/i);
+							if (append_cells) {
+								// -1: 不算入自身。
+								append_cells = append_cells[1] - 1;
+							}
 							// 去掉style
 							// 注意: 本函式操作時不可更動到原資料。
 							var toString = cell.toString;
@@ -3287,23 +3308,38 @@ function module_code(library_namespace) {
 							cell.shift();
 							cell.toString = toString;
 						}
-						return cell && cell.toString()
+						cells.push(cell && cell.toString()
 						//
-						.replace(/^[\|\s]+/, '').trim() || '';
+						.replace(/^[\|\s]+/, '').trim() || '');
+						if (append_cells > 0) {
+							cells.append(new Array(append_cells).fill(''));
+						}
 					});
-					if (row.length > 0) {
-						row.unshift(heads[2] || '', heads[3] || '');
-						array.push(row);
+					if (cells.length > 0) {
+						if (is_head) {
+							// 對於 table head，不加入 section title 資訊。
+							cells.unshift('', '');
+						} else {
+							cells.unshift(heads[2] || '', heads[3] || '');
+						}
+						array.push(cells);
 					}
 				});
 			}
 		});
 
 		// output file. e.g., page_data.title + '.csv.txt'
-		// MUST: CeL.run(['application.platform.nodejs','data.CSV']);
-		if (options && options.file && library_namespace.to_CSV_String) {
-			library_namespace.fs_write(options.file, library_namespace
-					.to_CSV_String(array));
+		if (options && options.file) {
+			if (library_namespace.fs_write && library_namespace.to_CSV_String) {
+				library_namespace.fs_write(options.file,
+				// 存成 .txt，並用 "\t" 分隔，可方便 Excel 匯入。
+				library_namespace.to_CSV_String(array, {
+					field_delimiter : '\t'
+				}));
+			} else {
+				library_namespace
+						.err("Must includes frrst: CeL.run(['application.platform.nodejs', 'data.CSV']);");
+			}
 		}
 
 		return array;
