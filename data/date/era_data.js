@@ -2956,7 +2956,7 @@ CeL.era.pass_on = {
 
 (CeL.era.pass_on.countries.ไทย = [
 
-		'อาณาจักรสุโขทัย/ราชวงศ์พระร่วง/พ่อขุนศรีอินทราทิตย์|1238~||疑|準=年|君主=พ่อขุนบางกลางหาว;Pho Khun Sri Indraditya;Pho Khun Bang Klang Hao|生=1188|關係=First King of Sukhothai Ally with Pha Mueang defeating the Khmer.',
+		'ราชวงศ์พระร่วง/พ่อขุนศรีอินทราทิตย์|1238~||疑|準=年|時期=อาณาจักรสุโขทัย|君主=พ่อขุนบางกลางหาว;Pho Khun Sri Indraditya;Pho Khun Bang Klang Hao|生=1188|關係=First King of Sukhothai Ally with Pha Mueang defeating the Khmer.',
 		'/พ่อขุนบานเมือง|1270~||疑|準=年|君主=Pho Khun Ban Mueang|關係=Son of Sri Indraditya',
 		'/พ่อขุนรามคำแหงมหาราช|1279~||疑|準=年|君主=พ่อขุนรามราช;Pho Khun Ram Khamhaeng the Great the Great;Pho Khun Ram Racha|生=1237|關係=Younger brother of Ban Muang;Son of Sri Indraditya',
 		'/พระยาเลอไทย|1298~||疑|準=年|君主=Phaya Loethai|關係=Son of Ram Khamhaeng',
@@ -2965,168 +2965,59 @@ CeL.era.pass_on = {
 		'/พระมหาธรรมราชาที่ 2|1368~||疑|準=年|君主=ลือไทย;Phaya Mahathammaracha II;Phra Maha Thammaracha II|關係=Son of Lithai',
 		'/พระมหาธรรมราชาที่ 3|1400~||疑|準=年|君主=ไสลือไทย;Phaya Saileuthai;Phra Maha Thammaracha III|關係=Son of Leuthai',
 		'/พระมหาธรรมราชาที่ 4|1419~1438||疑|準=年|君主=บรมปาล;Phaya Borommapan;Phra Maha Thammaracha IV|關係=Son of Saileuthai',
-		'อาณาจักรอยุธยา/ราชวงศ์อู่ทอง/สมเด็จพระรามาธิบดีที่ 1|1350~||疑|準=年|君主=พระเจ้าอู่ทอง;Somdet Phra Chao Uthong;Somdet Phra Ramathibodi I|生=1314|關係=First King of Ayutthaya',
+
+		'ราชวงศ์อู่ทอง/สมเด็จพระรามาธิบดีที่ 1|1350~||疑|準=年|時期=อาณาจักรอยุธยา|君主=พระเจ้าอู่ทอง;Somdet Phra Chao Uthong;Somdet Phra Ramathibodi I|生=1314|關係=First King of Ayutthaya',
 		'/สมเด็จพระราเมศวร|1369~||疑|準=年|君主=Somdet Phra Ramesuan;king of Ayutthaya|生=1339|卒=1395|關係=Son of Uthong',
-		'/ราชวงศ์สุพรรณภูมิ/สมเด็จพระบรมราชาธิราชที่ 1|1370~||疑|準=年|君主=ขุนหลวงพะงั่ว;Somdet Phra Borommarachathirat I;Khun Luang Pha Ngua|關係=Husband of Uthong\'s older sister;Usurper;Former Lord of Suphanburi',
-		'/สมเด็จพระเจ้าทองลัน|1388~||疑|準=年|君主=เจ้าทองจันทร์;Somdet Phra Chao Thong Lan;Chao Thong Chan|關係=Son of Borommarachathirat I',
-		'/ราชวงศ์อู่ทอง/สมเด็จพระราเมศวร|1388~||疑|準=年|君主=Somdet Phra Ramesuan;king of Ayutthaya|生=1339|關係=Former King reclaiming the throne;Son of Uthong',
+		'ราชวงศ์สุพรรณภูมิ/สมเด็จพระบรมราชาธิราชที่ 1|1370~||疑|準=年|時期=อาณาจักรอยุธยา|君主=ขุนหลวงพะงั่ว;Somdet Phra Borommarachathirat I;Khun Luang Pha Ngua|關係=Husband of Uthong\'s older sister;Usurper;Former Lord of Suphanburi',
+		'/สมเด็จพระเจ้าทองลัน|1388~1388||疑|準=年|君主=เจ้าทองจันทร์;Somdet Phra Chao Thong Lan;Chao Thong Chan|關係=Son of Borommarachathirat I',
+		'ราชวงศ์อู่ทอง/สมเด็จพระราเมศวร|1388~||疑|準=年|時期=อาณาจักรอยุธยา|君主=Somdet Phra Ramesuan;king of Ayutthaya|生=1339|關係=Former King reclaiming the throne;Son of Uthong',
 		'/สมเด็จพระรามราชาธิราช|1395~||疑|準=年|君主=Somdet Phra Rama Ratchathirat|生=1356|關係=Son of Ramesuan',
-		'/ราชวงศ์สุพรรณภูมิ/สมเด็จพระอินทราชา|1409~||疑|準=年|君主=เจ้านครอินทร์;Somdet Phra Intharacha;king of Ayutthaya;Phra Chao Nakhon In|生=1359|關係=Nephew of Borommarachathirat I;Former Lord of Suphanburi, offered crown',
+		'ราชวงศ์สุพรรณภูมิ/สมเด็จพระอินทราชา|1409~||疑|準=年|時期=อาณาจักรอยุธยา|君主=เจ้านครอินทร์;Somdet Phra Intharacha;king of Ayutthaya;Phra Chao Nakhon In|生=1359|關係=Nephew of Borommarachathirat I;Former Lord of Suphanburi, offered crown',
 		'/สมเด็จพระบรมราชาธิราชที่ 2|1424~||疑|準=年|君主=เจ้าสามพระยา;Somdet Phra Borommarachathirat II;Chao Sam Phraya|關係=Son of Intha Racha I',
 		'/สมเด็จพระบรมไตรโลกนาถ|1448~||疑|準=年|君主=Somdet Phra Boromma Trailokanat|生=1431|關係=Son of Borommarachathirat II',
 		'/สมเด็จพระบรมราชาธิราชที่ 3|1488~||疑|準=年|君主=Somdet Phra Borommarachathirat III;Intha Racha II|關係=Son of Trailokanat',
 		'/สมเด็จพระรามาธิบดีที่ 2|1491~||疑|準=年|君主=Somdet Phra Ramathibodi II;Phra Chetthathirat I|生=1473|關係=Younger brother of Borommarachathirat III;Son of Trailokanat',
 		'/สมเด็จพระบรมราชาธิราชที่ 4|1529~||疑|準=年|君主=หน่อพุทธางกูร;Somdet Phra Borommarachathirat IV;Somdet Phra Borommaracha Nor Buddhankoon;Phra Athitawongse|關係=Son of Ramathibodi II',
-		'/พระรัษฎาธิราช|1533~||疑|準=年|君主=Phra Ratsadathirat|生=1529|關係=Son of Borommarachathirat IV;Child King, reign under regency',
+		'/พระรัษฎาธิราช|1533~1533||疑|準=年|君主=Phra Ratsadathirat|生=1529|關係=Son of Borommarachathirat IV;Child King, reign under regency',
 		'/สมเด็จพระไชยราชาธิราช|1533~||疑|準=年|君主=Somdet Phra Chairacha;Somdet Phra Chairacha Thirat;Phra Chai|關係=Uncle of Ratsadathirat;Son of Ramathibodi II;Usurper',
 		'/พระยอดฟ้า|1546~||疑|準=年|君主=พระแก้วฟ้า;Phra Yodfa;Phra Keowfa|生=1535|關係=Son of Chairacha',
 		'/ขุนวรวงศาธิราช|1548/11/11~||疑|準=年|君主=Khun Worawongsathirat;Khun Chinnarat;Bun Si|關係=Usurper monarch, not accepted by some historians',
-		'/สมเด็จพระมหาจักรพรรดิ|1548~||疑|準=年|君主=พระเจ้าช้างเผือก;Somdet Phra Maha Chakkraphat;Phra Chao Chang Pueak|生=1509|關係=Son of Ramathibodi II;Younger brother of Borommarachathirat IV and Chairacha;Seized the throne from usurper;Became a monk at Pegu (1564-1568)',
+		'/สมเด็จพระมหาจักรพรรดิ|1548/12/22~||疑|準=年|君主=พระเจ้าช้างเผือก;Somdet Phra Maha Chakkraphat;Phra Chao Chang Pueak|生=1509|關係=Son of Ramathibodi II;Younger brother of Borommarachathirat IV and Chairacha;Seized the throne from usurper;Became a monk at Pegu (1564-1568)',
 		'/สมเด็จพระมหินทราธิราช|1564~||疑|準=年|君主=Somdet Phra Mahinthrathirat|生=1539|關係=Son of Maha Chakkrapat and Queen Suriyothai',
-		'/ราชวงศ์สุโขทัย/สมเด็จพระมหาธรรมราชาธิราช|1569~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 1;สมเด็จพระมหาธรรมราชาธิราช;Somdet Phra Mahathammarachathirat;king of Ayutthaya;Somdet Phra Sanphet I|生=1517|關係=Former Lord of Phitsanulok;Installed as vassal of Bayinnaung of Burma, declared independence in 1584',
+		'ราชวงศ์สุโขทัย/สมเด็จพระมหาธรรมราชาธิราช|1569~||疑|準=年|時期=อาณาจักรอยุธยา|君主=สมเด็จพระสรรเพชญ์ที่ 1;สมเด็จพระมหาธรรมราชาธิราช;Somdet Phra Mahathammarachathirat;king of Ayutthaya;Somdet Phra Sanphet I|生=1517|關係=Former Lord of Phitsanulok;Installed as vassal of Bayinnaung of Burma, declared independence in 1584',
 		'/สมเด็จพระนเรศวรมหาราช|1590/7/29~1605/4/7||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 2;สมเด็จพระนเรศวรมหาราช;Somdet Phra Naresuan the Great;Somdet Phra Sanphet II;Phra Naret|生=1555/4/25|關係=Son of Maha  Thamaracha Declaring Idependant from Burmese during the reign of Bayinnaung\'s Son',
 		'/สมเด็จพระเอกาทศรถ|1605/4/25~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 3;สมเด็จพระเอกาทศรถ;Somdet Phra Ekathotsarot;Somdet Phra Sanphet III|生=1557|關係=Brother of Naresuan;Son of Maha Thammarachathirat',
-		'/พระศรีเสาวภาคย์|1620~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 4;สมเด็จพระศรีเสาวภาคย์;Somdet Phra Si Saowaphak;Somdet Phra Sanphet IV|關係=Son of Ekathotsarot',
-		'/สมเด็จพระเจ้าทรงธรรม|1620~1628/12/12||疑|準=年|君主=สมเด็จพระบรมราชาที่ 1;สมเด็จพระเจ้าทรงธรรม;Somdet Phra Songtham;Somdet Phra Borommaracha I|生=1590|關係=Son of "Ekathotsarot", invited to take the throne after leaving the Sangha',
-		'/สมเด็จพระเชษฐาธิราช|1628~1629||疑|準=年|君主=สมเด็จพระบรมราชาที่ 2;สมเด็จพระเชษฐาธิราช;Somdet Phra Chettha;Somdet Phra Borommaracha II|生=1613|關係=Son of Songtham',
+		'/พระศรีเสาวภาคย์|1610~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 4;สมเด็จพระศรีเสาวภาคย์;Somdet Phra Si Saowaphak;Somdet Phra Sanphet IV|關係=Son of Ekathotsarot',
+		'/สมเด็จพระเจ้าทรงธรรม|1611~||疑|準=年|君主=สมเด็จพระบรมราชาที่ 1;สมเด็จพระเจ้าทรงธรรม;Somdet Phra Songtham;Somdet Phra Borommaracha I|生=1590|關係=Son of "Ekathotsarot", invited to take the throne after leaving the Sangha',
+		'/สมเด็จพระเชษฐาธิราช|1628/12/12~1629||疑|準=年|君主=สมเด็จพระบรมราชาที่ 2;สมเด็จพระเชษฐาธิราช;Somdet Phra Chettha;Somdet Phra Borommaracha II|生=1613|關係=Son of Songtham',
 		'/พระอาทิตยวงศ์|1629~1629||疑|準=年|君主=สมเด็จพระอาทิตยวงศ์;Phra Athittayawong|生=1618|關係=Younger brother of Chetthathirat II;Son of Songtham',
-		'/ราชวงศ์ปราสาททอง/สมเด็จพระเจ้าปราสาททอง|1629~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 5;สมเด็จพระเจ้าปราสาททอง;Somdet Phra Chao Prasat Thong;Somdet Phra Sanphet V|生=1599|關係=Usurper, formerly the Kalahom;Rumored to be a son of Ekathotsarot',
+		'ราชวงศ์ปราสาททอง/สมเด็จพระเจ้าปราสาททอง|1629~||疑|準=年|時期=อาณาจักรอยุธยา|君主=สมเด็จพระสรรเพชญ์ที่ 5;สมเด็จพระเจ้าปราสาททอง;Somdet Phra Chao Prasat Thong;Somdet Phra Sanphet V|生=1599|關係=Usurper, formerly the Kalahom;Rumored to be a son of Ekathotsarot',
 		'/สมเด็จเจ้าฟ้าไชย|1656~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 6;สมเด็จเจ้าฟ้าไชย;Somdet Chao Fa Chai;Somdet Phra Sanphet VI|關係=Son of Prasat Thong',
 		'/สมเด็จพระศรีสุธรรมราชา|1656/6~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 7;สมเด็จพระศรีสุธรรมราชา;Somdet Phra Si Suthammaracha;Somdet Phra Sanphet VII|關係=Usurper, Uncle of Chao Fa Chai;Younger brother of Prasat Thong',
-		'/สมเด็จพระนารายณ์มหาราช|1656/10/26~1688/7/11||疑|準=年|君主=สมเด็จพระรามาธิบดีที่ 3;สมเด็จพระนารายณ์มหาราช;Somdet Phra Narai the Great;Somdet Phra Ramathibodi III|生=1633/2/16|關係=Usurper, nephew of Si Suthammaracha;Son of Prasat Thong;Half-brother of Chao Fa Chai',
-		'/ราชวงศ์บ้านพลูหลวง/สมเด็จพระเพทราชา|1688~||疑|準=年|君主=Somdet Phra Phetracha|生=1632|關係=Usurper, cousin of Narai;Former commander of the Royal Elephant Corps',
-		'/สมเด็จพระสรรเพชญ์ที่ 8|1703~||疑|準=年|君主=สมเด็จพระสุริเยนทราธิบดี;พระเจ้าเสือ;Somdet Phra Suriyenthrathibodi;Somdet Phra Sanphet VIII;Phra Chao Suea|關係=Rumored to be a son of Narai',
+		'/สมเด็จพระนารายณ์มหาราช|1656/10/26~1688||疑|準=年|君主=สมเด็จพระรามาธิบดีที่ 3;สมเด็จพระนารายณ์มหาราช;Somdet Phra Narai the Great;Somdet Phra Ramathibodi III|生=1633/2/16|關係=Usurper, nephew of Si Suthammaracha;Son of Prasat Thong;Half-brother of Chao Fa Chai',
+		'ราชวงศ์บ้านพลูหลวง/สมเด็จพระเพทราชา|1688/7/11~||疑|準=年|時期=อาณาจักรอยุธยา|君主=Somdet Phra Phetracha|生=1632|關係=Usurper, cousin of Narai;Former commander of the Royal Elephant Corps',
+		'/สมเด็จพระสรรเพชญ์ที่ 8|1703/2~||疑|準=年|君主=สมเด็จพระสุริเยนทราธิบดี;พระเจ้าเสือ;Somdet Phra Suriyenthrathibodi;Somdet Phra Sanphet VIII;Phra Chao Suea|關係=Rumored to be a son of Narai',
 		'/สมเด็จพระสรรเพชญ์ที่ 9|1709~||疑|準=年|君主=สมเด็จพระเจ้าอยู่หัวท้ายสระ;Somdet Phra Chao Yu Hua Thai Sa;Somdet Phra Sanphet IX|生=1679|關係=Son of Suriyenthrathibodi',
 		'/สมเด็จพระเจ้าอยู่หัวบรมโกศ|1733~||疑|準=年|君主=สมเด็จพระบรมราชาธิราชที่ 3;สมเด็จพระเจ้าอยู่หัวบรมโกศ;Somdet Phra Chao Yu Hua Boromakot|生=1680|關係=Brother of Thai Sa, Former Front Palace;Son of Suriyenthrathibodi',
-		'/สมเด็จพระเจ้าอุทุมพร|1758~||疑|準=年|君主=สมเด็จพระบรมราชาธิราชที่ 4;สมเด็จพระเจ้าอุทุมพร / ขุนหลวงหาวัด;Somdet Phra Chao Uthumphon;Somdet Phra Ramathibodi IV;Khun Luang Hawat|卒=1796|關係=Son of Boromakot',
+		'/สมเด็จพระเจ้าอุทุมพร|1758~1758||疑|準=年|君主=สมเด็จพระบรมราชาธิราชที่ 4;สมเด็จพระเจ้าอุทุมพร / ขุนหลวงหาวัด;Somdet Phra Chao Uthumphon;Somdet Phra Ramathibodi IV;Khun Luang Hawat|卒=1796|關係=Son of Boromakot',
 		'/สมเด็จพระที่นั่งสุริยาศน์อัมรินทร์|1758~1767/4/7||疑|準=年|君主=สมเด็จพระบรมราชาที่ 3;สมเด็จพระที่นั่งสุริยาศน์อัมรินทร์ / พระเจ้าเอกทัศ;Somdet Phra Chao Ekkathat;Somdet Phra Chao Yu Hua Phra Thinang Suriyat Amarin;Somdet Phra Borommaracha III|卒=1767/4/17|關係=Brother of Uthumphon;Usurper, Former Front Palace;Son of Boromakot',
-		'อาณาจักรธนบุรี/ราชวงศ์ธนบุรี/สมเด็จพระเจ้ากรุงธนบุรี|1767/11/6~||疑|準=年|君主=鄭昭;鄭信;สมเด็จพระบรมราชาที่ 4;สมเด็จพระเจ้าตากสินมหาราช;Somdet Phra Chao Taksin the Great;Phra Chao Krung Thonburi;Somdet Phra Borommaracha IV|生=1734/4/17|卒=1782/4/7|關係=Only King of Thonburi',
-		'อาณาจักรรัตนโกสินทร์/ราชวงศ์จักรี/พระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช|1782/4/6~||疑|準=年|國名=ประเทศไทย;ราชอาณาจักรสยาม;ราชอาณาจักรไทย|君主=รัชกาลที่ 1;Phrabat Somdet Phra Ramathibodi Sri Sinthra;Maha Chakri Borommanat;Phra Rama I;the Great;Rama I|生=1737/3/20|關係=First King of Rattanakosin',
-		'/พระบาทสมเด็จพระพุทธเลิศหล้านภาลัย|1809/9/7~||疑|準=年|君主=รัชกาลที่ 2;Phrabat Somdet Phra Ramathibodi Sri Sinthra;Maha Itsarasunthon;Phra Rama II of Siam;Rama II|生=1767/2/24|關係=Son of Rama I and Queen Amarindra',
-		'/พระบาทสมเด็จพระนั่งเกล้าเจ้าอยู่หัว|1824/7/21~||疑|準=年|君主=พระมหาเจษฎาราชเจ้า;รัชกาลที่ 3;Phrabat Somdet Phra Ramathibodi Sri Sinthra;Maha Rama III;Phra Nang Klao Chao Yu Hua;Rama III;Phra Maha Chetsadarat Chao|生=1788/3/31|關係=Son of Rama II and Princess Consort Sri Sulalai',
-		'/พระบาทสมเด็จพระจอมเกล้าเจ้าอยู่หัว|1851/4/2~||疑|準=年|君主=รัชกาลที่ 4;Phrabat Somdet Phra Paramenthra;Maha Mongkut;Phra Chom Klao Chao Yu Hua;Rama IV|生=1804/10/18|關係=Half-brother of Rama III;Son of Rama II and Queen Sri Suriyendra',
-		'/พระบาทสมเด็จพระจุลจอมเกล้าเจ้าอยู่หัว|1868/10/1~||疑|準=年|君主=พระปิยมหาราช;รัชกาลที่ 5;Phrabat Somdet Phra Paraminthra;Maha Chulalongkorn;Phra Chula Chom Klao Chao Yu Hua;the Great;Rama V;Phra Piya Maharat|生=1853/9/20|關係=Son of Rama IV and Queen Debsirindra;Under Regency of Si Suriyawongse from 1868-1873',
-		'/พระบาทสมเด็จพระมงกุฎเกล้าเจ้าอยู่หัว|1910/10/23~||疑|準=年|君主=พระมหาธีรราชเจ้า;รัชกาลที่ 6;Phrabat Somdet Phra Paramenthra;Maha Vajiravudh;Phra Mongkut Klao Chao Yu Hua;Rama VI;Phra Maha Thirarachachao|生=1881/1/1|關係=Son of Rama V and Queen Saovabha Phongsri',
-		'/พระบาทสมเด็จพระปกเกล้าเจ้าอยู่หัว|1925/11/25~||疑|準=年|君主=รัชกาลที่ 7;Phrabat Somdet Phra Paraminthra;Maha Prajadhipok;Phra Pok Klao Chao Yu Hua;Rama VII|生=1893/11/8|卒=1941/5/30|關係=Younger brother of Rama VI;Son of Rama V and Queen Saovabha Phongsri',
-		'/พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล|1935/3/2~||疑|準=年|君主=พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล พระอัฐมรามาธิบดินทร;พระอัฐมรามาธิบดินทร;รัชกาลที่ 8;Phrabat Somdet Phra Paramenthra;Maha Ananda Mahidol;Phra Atthama Ramathibodin;Rama VIII|生=2025/9/20|關係=Nephew of Rama VII;Grandson of Rama V by Mahidol Adulyadej;Under Regency from 1935-1946',
-		'/พระบาทสมเด็จพระปรมินทรมหาภูมิพลอดุลยเดช|1946/6/9~||疑|準=年|君主=สมเด็จพระภัทรมหาราช;รัชกาลที่ 9;Phrabat Somdet Phra Paraminthra;Maha Bhumibol Adulyadej;the Great;Rama IX;Somdet Phra Phatthara Maharat|生=2027/12/5|關係=Younger brother of Rama VIII;Grandson of Rama V by Mahidol Adulyadej',
+
+		'ราชวงศ์ธนบุรี/สมเด็จพระเจ้ากรุงธนบุรี|1767/11/6~||疑|準=年|時期=อาณาจักรธนบุรี|君主=鄭昭;鄭信;สมเด็จพระบรมราชาที่ 4;สมเด็จพระเจ้าตากสินมหาราช;Somdet Phra Chao Taksin the Great;Phra Chao Krung Thonburi;Somdet Phra Borommaracha IV|生=1734/4/17|卒=1782/4/7|關係=Only King of Thonburi',
+
+		'ราชวงศ์จักรี/พระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช|1782/4/6~||疑|準=年|時期=อาณาจักรรัตนโกสินทร์|國名=ประเทศไทย;ราชอาณาจักรสยาม;ราชอาณาจักรไทย|君主=รัชกาลที่ 1;Maha Chakri Borommanat;Phra Rama I;the Great;Rama I|生=1737/3/20|關係=First King of Rattanakosin',
+		'/พระบาทสมเด็จพระพุทธเลิศหล้านภาลัย|1809/9/7~||疑|準=年|君主=รัชกาลที่ 2;Maha Itsarasunthon;Phra Rama II of Siam;Rama II|生=1767/2/24|關係=Son of Rama I and Queen Amarindra',
+		'/พระบาทสมเด็จพระนั่งเกล้าเจ้าอยู่หัว|1824/7/21~||疑|準=年|君主=พระมหาเจษฎาราชเจ้า;รัชกาลที่ 3;Maha Rama III;Phra Nang Klao Chao Yu Hua;Rama III;Phra Maha Chetsadarat Chao|生=1788/3/31|關係=Son of Rama II and Princess Consort Sri Sulalai',
+		'/พระบาทสมเด็จพระจอมเกล้าเจ้าอยู่หัว|1851/4/2~||疑|準=年|君主=รัชกาลที่ 4;Maha Mongkut;Phra Chom Klao Chao Yu Hua;Rama IV|生=1804/10/18|關係=Half-brother of Rama III;Son of Rama II and Queen Sri Suriyendra',
+		'/พระบาทสมเด็จพระจุลจอมเกล้าเจ้าอยู่หัว|1868/10/1~||疑|準=年|君主=พระปิยมหาราช;รัชกาลที่ 5;Maha Chulalongkorn;Phra Chula Chom Klao Chao Yu Hua;the Great;Rama V;Phra Piya Maharat|生=1853/9/20|關係=Son of Rama IV and Queen Debsirindra;Under Regency of Si Suriyawongse from 1868-1873',
+		'/พระบาทสมเด็จพระมงกุฎเกล้าเจ้าอยู่หัว|1910/10/23~||疑|準=年|君主=พระมหาธีรราชเจ้า;รัชกาลที่ 6;Maha Vajiravudh;Phra Mongkut Klao Chao Yu Hua;Rama VI;Phra Maha Thirarachachao|生=1881/1/1|關係=Son of Rama V and Queen Saovabha Phongsri',
+		'/พระบาทสมเด็จพระปกเกล้าเจ้าอยู่หัว|1925/11/25~||疑|準=年|君主=รัชกาลที่ 7;Maha Prajadhipok;Phra Pok Klao Chao Yu Hua;Rama VII|生=1893/11/8|卒=1941/5/30|關係=Younger brother of Rama VI;Son of Rama V and Queen Saovabha Phongsri',
+		'/พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล|1935/3/2~||疑|準=年|君主=พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล พระอัฐมรามาธิบดินทร;พระอัฐมรามาธิบดินทร;รัชกาลที่ 8;Maha Ananda Mahidol;Phra Atthama Ramathibodin;Rama VIII|生=2025/9/20|關係=Nephew of Rama VII;Grandson of Rama V by Mahidol Adulyadej;Under Regency from 1935-1946',
+		'/พระบาทสมเด็จพระปรมินทรมหาภูมิพลอดุลยเดช|1946/6/9~||疑|準=年|君主=สมเด็จพระภัทรมหาราช;รัชกาลที่ 9;Maha Bhumibol Adulyadej;the Great;Rama IX;Somdet Phra Phatthara Maharat|生=2027/12/5|關係=Younger brother of Rama VIII;Grandson of Rama V by Mahidol Adulyadej',
 		'/สมเด็จพระเจ้าอยู่หัวมหาวชิราลงกรณ บดินทรเทพยวรางกูร|2016/10/13~'
 				+ CeL.era.pass_on.last_day
 				+ '||疑|準=年|君主=รัชกาลที่ 10;Somdet Phra Chao Yu Hua;Maha Vajiralongkorn;Bodindradebayavarangkun;Rama X|生=1952/7/28|關係=Only son of Rama IX and Queen Sirikit;2nd child of Rama IX'
 
 ]).minute_offset = 7 * 60;
-
-// ---------------------------------------------------------------------//
-// 印度年表, ancient India
-
-(CeL.era.pass_on.countries.India = [
-
-		// मगध (Magadha empire)
-		// https://en.wikipedia.org/wiki/Magadha
-
-		// Haryanka dynasty (c. 600 – 413 BC) 訶黎王朝
-		// Bhattiya
-		'Haryanka/बिम्बिसारः|-544~|:CE|疑|準=年|生=558|卒=491|時期=मगध|君主名=Bimbisara;頻毗娑羅',
-		'/Ajātasattu|-492~-460|:CE|疑|準=年|君主名=Ajātaśatru;Ajatasatru',
-		// Udayabhadra
-		// Anuruddha
-		// Munda
-		// Nagadasaka
-
-		// Shishunaga dynasty (413–345 BC) 幼龍王朝
-		'Shishunaga/Shishunaga|-413~|:CE|疑|準=年|時期=मगध|君主名=Shusunaga',
-		'/Kakavarna Kalashoka|-395~|:CE|疑|準=年',
-		'/Mahanandin|-367~-345|:CE|疑|準=年',
-
-		// Nanda Dynasty (345–321 BCE) 難陀王朝
-		'Nanda/महापद्मानन्द|-400~|:CE|疑|準=年|時期=मगध|君主名=Mahapadma Nanda',
-		// Pandhuka
-		// Panghupati
-		// Bhutapala
-		// Rashtrapala
-		// Govishanaka
-		// Dashasidkhaka
-		// Kaivarta
-		'/धनानन्द|-329~|:CE|疑|準=年|君主名=Dhana Nanda',
-
-		// 波斯人與希臘人的入侵
-
-		// Maurya Empire, Mauryan Empire, 孔雀王朝
-		// https://en.wikipedia.org/wiki/Maurya_Empire
-		// https://en.wikipedia.org/wiki/List_of_Mauryan_rulers
-		'मौर्यसाम्राज्यम्/चन्द्रगुप्त मौर्य|-322~|:CE|疑|準=年|君主名=Chandragupta Maurya;旃陀羅笈多（月護王）',
-		'/Bindusara|-298~-272|:CE|疑|準=年|君主名=Bindusara Maurya;賓頭娑羅',
-		'/अशोक मौर्य|-269~|:CE|疑|準=年|君主名=Ashoka Maurya;阿育王（無憂王）',
-		'/Dasaratha|-232~|:CE|疑|準=年|君主名=Dasaratha Maurya',
-		'/Samprati|-224~|:CE|疑|準=年|君主名=Samprati Maurya',
-		'/Salisuka|-215~|:CE|疑|準=年|君主名=Salisuka Maurya;Śāliśuka',
-		'/Devavarman|-202~|:CE|疑|準=年|君主名=Devavarman Maurya',
-		'/Satadhanvan|-195~|:CE|疑|準=年|君主名=Satadhanvan Maurya',
-		'/बृहद्रथ मौर्य|-187~-180|:CE|疑|準=年|君主名=Brihadratha Maurya;Ashoka Bindusara Maurya',
-
-		// https://en.wikipedia.org/wiki/Indo-Greek_Kingdom#List_of_the_Indo-Greek_kings_and_their_territories
-		// The Indo-Greek Kingdom or Graeco-Indian Kingdom
-		// https://en.wikipedia.org/wiki/Timeline_of_Indo-Greek_kingdoms
-		'ګندارا‎/Ἀπολλόδοτος Α΄ ὁ Σωτήρ|-180~-160|:CE|疑|準=年|君主名=Apollodotus I;Apollodotus I Soter;महरजस अपलदतस त्रतरस|朝代=Gandhāra;Gandhara|時期=Indo-Greek',
-		// TODO
-		'Punjab/Στράτων B΄ ὁ Σωτήρ|-25~-10|:CE|疑|準=年|君主名=Strátōn B΄ ho Sotḗr;Strato II;Strato II "Soter"|時期=Indo-Greek',
-
-		// The Śuṅga Empire (Sanskrit: शुंग राजवंश) or Shunga Empire 巽伽王朝
-		// https://en.wikipedia.org/wiki/%C5%9Au%E1%B9%85ga_Empire
-		'शुंग राजवंश/Puṣyamitra Śuṅga|-185~|:CE|疑|準=年|君主名=Pushyamitra Sunga',
-		'/अग्निमित्र|-149~|:CE|疑|準=年|君主名=Agnimitra',
-		'/Vasujyetha|-141~|:CE|疑|準=年',
-		'/Vasumitra|-131~|:CE|疑|準=年|君主名=Sumitra',
-		'/Andhraka|-124~|:CE|疑|準=年',
-		'/Pulindaka|-122~-119|:CE|疑|準=年',
-		// Ghosha
-		// Vajramitra
-		'/Bhagabhadra|-110~|:CE|疑|準=年|注=circa 110 BCE',
-		'/Devabhuti|-83~-73|:CE|疑|準=年',
-
-		// The Kanva or Kanvayana Dynasty is a Brahmin Dynasty replaced the
-		// Sunga dynasty in Magadha
-		// 甘婆王朝/甘華王朝
-		// https://en.wikipedia.org/wiki/Kanva_dynasty
-		'Kanva/Vasudeva|-75~|:CE|疑|準=年',
-		'/Bhumimitra|-66~|:CE|疑|準=年',
-		'/Narayana|-52~|:CE|疑|準=年',
-		'/Susharman|-40~-30|:CE|疑|準=年',
-
-		/**
-		 * The Mahameghavahana dynasty (Oriya: ମହାମେଘବାହନ; Mahā-Mēgha-Bāhana, c.
-		 * 250s BC to 400s AD) was an ancient ruling dynasty of Kalinga after
-		 * the decline of the Maurya Empire.
-		 * 
-		 * @see https://en.wikipedia.org/wiki/Mahameghavahana_dynasty
-		 */
-		'ମହାମେଘବାହନ/ଖାରବେଳ|-193~-170|:CE|疑|準=年|朝代=Mahāmēghabāhana;Maha-Meghavahana;Mahameghavahana|君主名=ଖାରେବଳ;खारवेल;Khārabēḷa;Khāravēla;Kharavela|注=the third and greatest emperor of the Mahameghavahana dynasty of Kalinga (present-day Odisha).',
-
-		// The Gupta Empire (Sanskrit: गुप्तसाम्राज्य, Gupta Sāmrājya) was an
-		// ancient Indian empire
-		// https://en.wikipedia.org/wiki/Gupta_Empire
-		'गुप्तसाम्राज्य/Śri Gupta|240~|:CE|疑|準=年|朝代=गुप्ता राजवंश;Gupta;笈多王朝',
-		'/Ghatotkacha|280~|:CE|疑|準=年',
-		'/Chandragupta|320~|:CE|疑|準=年|君主名=Chandragupta I',
-		'/Samudragupta|335~|:CE|疑|準=年',
-		'/चन्द्रगुप्त विक्रमादित्य|375~|:CE|疑|準=年|君主名=Chandragupta II',
-		'/Kumaragupta I|415~|:CE|疑|準=年|君主名=Shakraditya;Mahendraditya',
-		'/स्कन्दगुप्त|455~|:CE|疑|準=年|君主名=Skandagupta',
-		'/पुरुगुप्त|467~|:CE|疑|準=年|君主名=Purugupta',
-		'/कुमारगुप्त द्वितीय|473~|:CE|疑|準=年|君主名=Kumaragupta II',
-		'/बुधगुप्त|476~|:CE|疑|準=年|君主名=Budhagupta',
-		'/Narasimhagupta|495~|:CE|疑|準=年|君主名=Narasimhagupta Baladitya|注=495 – ? CE',
-		// 510: 隨便選
-		'/Kumaragupta III|510~|:CE|疑|準=年|注=? – 540 CE',
-		'/विष्णुगुप्त|540~|:CE|疑|準=年|君主名=Vishnugupta',
-		'/वैन्यगुप्त|550~|:CE|疑|準=年|君主名=Vainyagupta',
-		// 552: 隨便選
-		'/Bhanugupta|552~|:CE|疑|準=年',
-		// 553: 隨便選
-		'/Shashankgupta|553~554|:CE|疑|準=年|注=554 : The Gupta dynasty ends when the last emperor Shashakgupta dies.',
-
-// IST (UTC+05:30)
-]).minute_offset = 5.5 * 60;
 
 // ---------------------------------------------------------------------//
 // 緬甸, Myanmar / Burma
@@ -3501,40 +3392,116 @@ CeL.era.pass_on = {
 ]).minute_offset = 6.5 * 60;
 
 // ---------------------------------------------------------------------//
-// 瑪雅文明, pre-Columbian Maya civilization
-// https://en.wikipedia.org/wiki/Category:Maya_rulers
+// 印度年表, ancient India
 
-(CeL.era.pass_on.countries.Maya = [
-		// http://www.mesoweb.com/palenque/resources/rulers/rulers_table.html
-		// http://research.famsi.org/whos_who/pm_index.php
-		// http://www.criscenzo.com/jaguarsun/dynasty.html
-		// https://en.wikipedia.org/wiki/Palenque
+(CeL.era.pass_on.countries.India = [
 
-		// Birth - Accession - Period-ending - Death
-		"Palenque/K'uk' B'ahlam I|Maya:8.19.15.3.4 1 K'an 2 K'ayab'~|:CE|君主名=Bahlum-K'uk';Quetzal;Kuk|生=Maya:8.18.0.13.6 5 Kimi 14 K'ayab'",
-		'/"Casper"|Maya:8.19.19.11.17 2 Kab\'an 10 Xul~|:CE|君主名=11 Rabbit;Manatee|生=Maya:8.19.6.8.8 11 Lamat 6 Xul',
-		"/B'utz'aj Sak Chiik|Maya:9.2.12.6.18 3 Etz'nab' 11 Xul~|:CE|君主名=Butz'ah Sak Chik;Manik;Sak-Chik|生=Maya:9.1.4.5.0 12 Ahaw 13 Sak",
-		"/Ahkal Mo' Nahb' I|Maya:9.3.6.7.17 5 Kab'an 0 Sotz'~|:CE|君主名=Akul Anab;Chaacal;Cauac-Uinal;Chaac|生=Maya:9.1.10.0.0 5 Ahaw 3 Sek|卒=Maya:9.4.10.4.17 5 Kab'an 5 Mak",
-		"/K'an Joy Chitam I|Maya:9.4.14.10.4 5 K'an 12 K'ayab'~|:CE|君主名=K'an Hoy Chitam;K'an Hok' Chitam;Kan-Xul;Hok|生=Maya:9.2.15.3.8 12 Lamat 6 Wo|卒=Maya:9.6.11.0.16 7 Kib' 4 K'ayab'",
-		"/Ahkal Mo' Nahb' II|Maya:9.6.11.5.1 1 Imix 4 Sip~|:CE|君主名=Akul Anab;Chaacal;Chaac;Cauac-Uinal|生=Maya:9.4.9.0.4 7 K'an 17 Mol|卒=Maya:9.6.16.10.7 9 Manik' 5 Yaxk'in",
-		"/Kan B'ahlam I|Maya:9.6.18.5.12 10 Eb' 0 Wo~|:CE|君主名=Chan-Bahlum;Bahlum|生=Maya:9.4.10.1.5 11 Chikchan 13 Ch'en|卒=Maya:9.7.9.5.5 11 Chikchan 3 K'ayab'",
-		"/Lady Yohl Ik'nal|Maya:9.7.10.3.8 9 Lamat 1 Muwan~|:CE|君主名=Ix Yohl Ik'nal;Lady Olnal;Lady Kan-Ik;Lady Ik;Lady K'anal-Ik'al|卒=Maya:9.8.11.6.12 2 Eb' 0 Mak",
-		"/Aj Ne' Yohl Mat|Maya:9.8.11.9.10 8 Ok 18 Muwan~|:CE|君主名=Ajen Yohl Mat;Ah Neh Yohl Mat;Ah Ne Ohl Mat;Ah Lawal Mat;Aahc-Kan;Ah K'an;Ac-Kan|卒=Maya:9.8.19.4.6 2 Kimi 14 Mol",
-		"/Muwaan Mat|Maya:9.8.19.7.18 9 Etz'nab' 6 Keh~|:CE",
-		"/K'inich Janahb' Pakal|Maya:9.9.2.4.8 5 Lamat 1 Mol~|:CE|君主名=Pacal;Hanab Pakal;Pacal II;Pacal the Great;Lord Shield Pacal;Subject A;Sunshield;Sun-Shield;Lady 8 Flower|生=Maya:9.8.9.13.0 8 Ahaw 13 Pop|卒=Maya:9.12.11.5.18 6 Etz'nab' 11 Yax",
-		// heir designation 9.10.8.9.3 9 Ak'b'al 6 Xul
-		"/K'inich Kan B'ahlam II|Maya:9.12.11.12.10 8 Ok 3 K'ayab'~|:CE|君主名=Chan Bahlum|生=Maya:9.10.2.6.6 2 Kimi 19 Sotz'|卒=Maya:9.13.10.1.5 6 Chikchan 3 Pop",
-		// captured 9.13.19.13.3 13 Ak'b'al 16 Yax
-		// dedicates Palace House A-D 9.14.8.14.15 9 Men 3 Yax
-		"/K'inich K'an Joy Chitam II|Maya:9.13.10.6.8 5 Lamat 6 Xul~|:CE|君主名=K'an Hoy Chitam;K'an Hok' Chitam;Kan-Xul;Subject B;Hok';Xul;K'an-Hok-Xul|生=Maya:9.10.11.17.0 11 Ahaw 8 Mac",
-		"/K'inich Ahkal Mo' Nahb' III|Maya:9.14.10.4.2 9 Ik' 5 K'ayab'~|:CE|君主名=Akul Anab;Chaacal;Lord Chaac;Subject C|生=Maya:9.12.6.5.8 3 Lamat 6 Sak|卒=Post 9.15.5.0.0 10 Ahaw 8 Ch'en",
-		// invests K'an Tok official 9.15.10.10.13 8 B'en 16 Kumk'u
-		"/K'inich Janahb' Pakal II|742/1/23~|:CE|疑|君主名=U Pakal K'inich Janahb' Pakal",
-		// first katun anniversary 9.17.13.0.7 7 Manik' 0 Pax
-		"/K'inich K'uk' B'ahlam II|Maya:9.16.13.0.7 9 Manik' 15 Wo~|:CE|君主名=Kuk",
-		"/Wak Kimi Janahb' Pakal|Maya:9.18.9.4.4 7 K'an 17 Muwan~9.18.10.4.4|疑|:CE|君主名=Wak Kimi Hanab Pakal;6 Kimi Pakal;Cimi-Pacal"
+		// मगध (Magadha empire)
+		// https://en.wikipedia.org/wiki/Magadha
 
-]).minute_offset = -6 * 60;
+		// Haryanka dynasty (c. 600 – 413 BC) 訶黎王朝
+		// Bhattiya
+		'Haryanka/बिम्बिसारः|-544~|:CE|疑|準=年|生=558|卒=491|時期=मगध|君主名=Bimbisara;頻毗娑羅',
+		'/Ajātasattu|-492~-460|:CE|疑|準=年|君主名=Ajātaśatru;Ajatasatru',
+		// Udayabhadra
+		// Anuruddha
+		// Munda
+		// Nagadasaka
+
+		// Shishunaga dynasty (413–345 BC) 幼龍王朝
+		'Shishunaga/Shishunaga|-413~|:CE|疑|準=年|時期=मगध|君主名=Shusunaga',
+		'/Kakavarna Kalashoka|-395~|:CE|疑|準=年',
+		'/Mahanandin|-367~-345|:CE|疑|準=年',
+
+		// Nanda Dynasty (345–321 BCE) 難陀王朝
+		'Nanda/महापद्मानन्द|-400~|:CE|疑|準=年|時期=मगध|君主名=Mahapadma Nanda',
+		// Pandhuka
+		// Panghupati
+		// Bhutapala
+		// Rashtrapala
+		// Govishanaka
+		// Dashasidkhaka
+		// Kaivarta
+		'/धनानन्द|-329~|:CE|疑|準=年|君主名=Dhana Nanda',
+
+		// 波斯人與希臘人的入侵
+
+		// Maurya Empire, Mauryan Empire, 孔雀王朝
+		// https://en.wikipedia.org/wiki/Maurya_Empire
+		// https://en.wikipedia.org/wiki/List_of_Mauryan_rulers
+		'मौर्यसाम्राज्यम्/चन्द्रगुप्त मौर्य|-322~|:CE|疑|準=年|君主名=Chandragupta Maurya;旃陀羅笈多（月護王）',
+		'/Bindusara|-298~-272|:CE|疑|準=年|君主名=Bindusara Maurya;賓頭娑羅',
+		'/अशोक मौर्य|-269~|:CE|疑|準=年|君主名=Ashoka Maurya;阿育王（無憂王）',
+		'/Dasaratha|-232~|:CE|疑|準=年|君主名=Dasaratha Maurya',
+		'/Samprati|-224~|:CE|疑|準=年|君主名=Samprati Maurya',
+		'/Salisuka|-215~|:CE|疑|準=年|君主名=Salisuka Maurya;Śāliśuka',
+		'/Devavarman|-202~|:CE|疑|準=年|君主名=Devavarman Maurya',
+		'/Satadhanvan|-195~|:CE|疑|準=年|君主名=Satadhanvan Maurya',
+		'/बृहद्रथ मौर्य|-187~-180|:CE|疑|準=年|君主名=Brihadratha Maurya;Ashoka Bindusara Maurya',
+
+		// https://en.wikipedia.org/wiki/Indo-Greek_Kingdom#List_of_the_Indo-Greek_kings_and_their_territories
+		// The Indo-Greek Kingdom or Graeco-Indian Kingdom
+		// https://en.wikipedia.org/wiki/Timeline_of_Indo-Greek_kingdoms
+		'ګندارا‎/Ἀπολλόδοτος Α΄ ὁ Σωτήρ|-180~-160|:CE|疑|準=年|君主名=Apollodotus I;Apollodotus I Soter;महरजस अपलदतस त्रतरस|朝代=Gandhāra;Gandhara|時期=Indo-Greek',
+		// TODO
+		'Punjab/Στράτων B΄ ὁ Σωτήρ|-25~-10|:CE|疑|準=年|君主名=Strátōn B΄ ho Sotḗr;Strato II;Strato II "Soter"|時期=Indo-Greek',
+
+		// The Śuṅga Empire (Sanskrit: शुंग राजवंश) or Shunga Empire 巽伽王朝
+		// https://en.wikipedia.org/wiki/%C5%9Au%E1%B9%85ga_Empire
+		'शुंग राजवंश/Puṣyamitra Śuṅga|-185~|:CE|疑|準=年|君主名=Pushyamitra Sunga',
+		'/अग्निमित्र|-149~|:CE|疑|準=年|君主名=Agnimitra',
+		'/Vasujyetha|-141~|:CE|疑|準=年',
+		'/Vasumitra|-131~|:CE|疑|準=年|君主名=Sumitra',
+		'/Andhraka|-124~|:CE|疑|準=年',
+		'/Pulindaka|-122~-119|:CE|疑|準=年',
+		// Ghosha
+		// Vajramitra
+		'/Bhagabhadra|-110~|:CE|疑|準=年|注=circa 110 BCE',
+		'/Devabhuti|-83~-73|:CE|疑|準=年',
+
+		// The Kanva or Kanvayana Dynasty is a Brahmin Dynasty replaced the
+		// Sunga dynasty in Magadha
+		// 甘婆王朝/甘華王朝
+		// https://en.wikipedia.org/wiki/Kanva_dynasty
+		'Kanva/Vasudeva|-75~|:CE|疑|準=年',
+		'/Bhumimitra|-66~|:CE|疑|準=年',
+		'/Narayana|-52~|:CE|疑|準=年',
+		'/Susharman|-40~-30|:CE|疑|準=年',
+
+		/**
+		 * The Mahameghavahana dynasty (Oriya: ମହାମେଘବାହନ; Mahā-Mēgha-Bāhana, c.
+		 * 250s BC to 400s AD) was an ancient ruling dynasty of Kalinga after
+		 * the decline of the Maurya Empire.
+		 * 
+		 * @see https://en.wikipedia.org/wiki/Mahameghavahana_dynasty
+		 */
+		'ମହାମେଘବାହନ/ଖାରବେଳ|-193~-170|:CE|疑|準=年|朝代=Mahāmēghabāhana;Maha-Meghavahana;Mahameghavahana|君主名=ଖାରେବଳ;खारवेल;Khārabēḷa;Khāravēla;Kharavela|注=the third and greatest emperor of the Mahameghavahana dynasty of Kalinga (present-day Odisha).',
+
+		// The Gupta Empire (Sanskrit: गुप्तसाम्राज्य, Gupta Sāmrājya) was an
+		// ancient Indian empire
+		// https://en.wikipedia.org/wiki/Gupta_Empire
+		'गुप्तसाम्राज्य/Śri Gupta|240~|:CE|疑|準=年|朝代=गुप्ता राजवंश;Gupta;笈多王朝',
+		'/Ghatotkacha|280~|:CE|疑|準=年',
+		'/Chandragupta|320~|:CE|疑|準=年|君主名=Chandragupta I',
+		'/Samudragupta|335~|:CE|疑|準=年',
+		'/चन्द्रगुप्त विक्रमादित्य|375~|:CE|疑|準=年|君主名=Chandragupta II',
+		'/Kumaragupta I|415~|:CE|疑|準=年|君主名=Shakraditya;Mahendraditya',
+		'/स्कन्दगुप्त|455~|:CE|疑|準=年|君主名=Skandagupta',
+		'/पुरुगुप्त|467~|:CE|疑|準=年|君主名=Purugupta',
+		'/कुमारगुप्त द्वितीय|473~|:CE|疑|準=年|君主名=Kumaragupta II',
+		'/बुधगुप्त|476~|:CE|疑|準=年|君主名=Budhagupta',
+		'/Narasimhagupta|495~|:CE|疑|準=年|君主名=Narasimhagupta Baladitya|注=495 – ? CE',
+		// 510: 隨便選
+		'/Kumaragupta III|510~|:CE|疑|準=年|注=? – 540 CE',
+		'/विष्णुगुप्त|540~|:CE|疑|準=年|君主名=Vishnugupta',
+		'/वैन्यगुप्त|550~|:CE|疑|準=年|君主名=Vainyagupta',
+		// 552: 隨便選
+		'/Bhanugupta|552~|:CE|疑|準=年',
+		// 553: 隨便選
+		'/Shashankgupta|553~554|:CE|疑|準=年|注=554 : The Gupta dynasty ends when the last emperor Shashakgupta dies.',
+
+// IST (UTC+05:30)
+]).minute_offset = 5.5 * 60;
 
 // ---------------------------------------------------------------------//
 // Mesopotamian
@@ -3938,6 +3905,42 @@ CeL.era.pass_on = {
 		'Diocletian era|Egyptian:305~306|23/=:Egyptian|疑|準=年|注=殉道時期 (The Era of the Martyrs, 殉教紀元) 沿用古埃及曆，並於亞歷山大科普特正教會行用至今；請參照之。'
 
 ]).minute_offset = 2 * 60;
+
+// ---------------------------------------------------------------------//
+// 瑪雅文明, pre-Columbian Maya civilization
+// https://en.wikipedia.org/wiki/Category:Maya_rulers
+
+(CeL.era.pass_on.countries.Maya = [
+		// http://www.mesoweb.com/palenque/resources/rulers/rulers_table.html
+		// http://research.famsi.org/whos_who/pm_index.php
+		// http://www.criscenzo.com/jaguarsun/dynasty.html
+		// https://en.wikipedia.org/wiki/Palenque
+
+		// Birth - Accession - Period-ending - Death
+		"Palenque/K'uk' B'ahlam I|Maya:8.19.15.3.4 1 K'an 2 K'ayab'~|:CE|君主名=Bahlum-K'uk';Quetzal;Kuk|生=Maya:8.18.0.13.6 5 Kimi 14 K'ayab'",
+		'/"Casper"|Maya:8.19.19.11.17 2 Kab\'an 10 Xul~|:CE|君主名=11 Rabbit;Manatee|生=Maya:8.19.6.8.8 11 Lamat 6 Xul',
+		"/B'utz'aj Sak Chiik|Maya:9.2.12.6.18 3 Etz'nab' 11 Xul~|:CE|君主名=Butz'ah Sak Chik;Manik;Sak-Chik|生=Maya:9.1.4.5.0 12 Ahaw 13 Sak",
+		"/Ahkal Mo' Nahb' I|Maya:9.3.6.7.17 5 Kab'an 0 Sotz'~|:CE|君主名=Akul Anab;Chaacal;Cauac-Uinal;Chaac|生=Maya:9.1.10.0.0 5 Ahaw 3 Sek|卒=Maya:9.4.10.4.17 5 Kab'an 5 Mak",
+		"/K'an Joy Chitam I|Maya:9.4.14.10.4 5 K'an 12 K'ayab'~|:CE|君主名=K'an Hoy Chitam;K'an Hok' Chitam;Kan-Xul;Hok|生=Maya:9.2.15.3.8 12 Lamat 6 Wo|卒=Maya:9.6.11.0.16 7 Kib' 4 K'ayab'",
+		"/Ahkal Mo' Nahb' II|Maya:9.6.11.5.1 1 Imix 4 Sip~|:CE|君主名=Akul Anab;Chaacal;Chaac;Cauac-Uinal|生=Maya:9.4.9.0.4 7 K'an 17 Mol|卒=Maya:9.6.16.10.7 9 Manik' 5 Yaxk'in",
+		"/Kan B'ahlam I|Maya:9.6.18.5.12 10 Eb' 0 Wo~|:CE|君主名=Chan-Bahlum;Bahlum|生=Maya:9.4.10.1.5 11 Chikchan 13 Ch'en|卒=Maya:9.7.9.5.5 11 Chikchan 3 K'ayab'",
+		"/Lady Yohl Ik'nal|Maya:9.7.10.3.8 9 Lamat 1 Muwan~|:CE|君主名=Ix Yohl Ik'nal;Lady Olnal;Lady Kan-Ik;Lady Ik;Lady K'anal-Ik'al|卒=Maya:9.8.11.6.12 2 Eb' 0 Mak",
+		"/Aj Ne' Yohl Mat|Maya:9.8.11.9.10 8 Ok 18 Muwan~|:CE|君主名=Ajen Yohl Mat;Ah Neh Yohl Mat;Ah Ne Ohl Mat;Ah Lawal Mat;Aahc-Kan;Ah K'an;Ac-Kan|卒=Maya:9.8.19.4.6 2 Kimi 14 Mol",
+		"/Muwaan Mat|Maya:9.8.19.7.18 9 Etz'nab' 6 Keh~|:CE",
+		"/K'inich Janahb' Pakal|Maya:9.9.2.4.8 5 Lamat 1 Mol~|:CE|君主名=Pacal;Hanab Pakal;Pacal II;Pacal the Great;Lord Shield Pacal;Subject A;Sunshield;Sun-Shield;Lady 8 Flower|生=Maya:9.8.9.13.0 8 Ahaw 13 Pop|卒=Maya:9.12.11.5.18 6 Etz'nab' 11 Yax",
+		// heir designation 9.10.8.9.3 9 Ak'b'al 6 Xul
+		"/K'inich Kan B'ahlam II|Maya:9.12.11.12.10 8 Ok 3 K'ayab'~|:CE|君主名=Chan Bahlum|生=Maya:9.10.2.6.6 2 Kimi 19 Sotz'|卒=Maya:9.13.10.1.5 6 Chikchan 3 Pop",
+		// captured 9.13.19.13.3 13 Ak'b'al 16 Yax
+		// dedicates Palace House A-D 9.14.8.14.15 9 Men 3 Yax
+		"/K'inich K'an Joy Chitam II|Maya:9.13.10.6.8 5 Lamat 6 Xul~|:CE|君主名=K'an Hoy Chitam;K'an Hok' Chitam;Kan-Xul;Subject B;Hok';Xul;K'an-Hok-Xul|生=Maya:9.10.11.17.0 11 Ahaw 8 Mac",
+		"/K'inich Ahkal Mo' Nahb' III|Maya:9.14.10.4.2 9 Ik' 5 K'ayab'~|:CE|君主名=Akul Anab;Chaacal;Lord Chaac;Subject C|生=Maya:9.12.6.5.8 3 Lamat 6 Sak|卒=Post 9.15.5.0.0 10 Ahaw 8 Ch'en",
+		// invests K'an Tok official 9.15.10.10.13 8 B'en 16 Kumk'u
+		"/K'inich Janahb' Pakal II|742/1/23~|:CE|疑|君主名=U Pakal K'inich Janahb' Pakal",
+		// first katun anniversary 9.17.13.0.7 7 Manik' 0 Pax
+		"/K'inich K'uk' B'ahlam II|Maya:9.16.13.0.7 9 Manik' 15 Wo~|:CE|君主名=Kuk",
+		"/Wak Kimi Janahb' Pakal|Maya:9.18.9.4.4 7 K'an 17 Muwan~9.18.10.4.4|疑|:CE|君主名=Wak Kimi Hanab Pakal;6 Kimi Pakal;Cimi-Pacal"
+
+]).minute_offset = -6 * 60;
 
 // ---------------------------------------------------------------------//
 

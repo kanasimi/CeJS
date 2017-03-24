@@ -3307,7 +3307,7 @@ function module_code(library_namespace) {
 							}
 
 							var matched = cell[0].toString()
-							// 檢測要增加的null cells
+							//
 							.match(/[^a-z\d_]rowspan=(?:"\s*)?(\d{1,2})/i);
 
 							if (matched && matched[1] > 1) {

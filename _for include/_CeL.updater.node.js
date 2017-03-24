@@ -56,7 +56,7 @@ function try_path_file() {
 
 		try {
 			// 到path的上一層。
-			process.chdir(path.replace(/[^\\\/][\\\/]?$/, ''));
+			process.chdir(path.replace(/[^\\\/]+[\\\/]?$/, ''));
 			console.info('Use base path: ' + path);
 			return true;
 		} catch (e) {
