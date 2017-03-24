@@ -217,8 +217,8 @@ function Year_numbering(year_shift, year_only, has_year_0, reverse) {
 	}
 }
 
-// const
-var PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"]/i,
+// const, include [[en:Thai (Unicode block)]]
+var PATTERN_NOT_ALL_ALPHABET = /[^a-z\s\d\-,'"\u0E00-\u0E7F]/i,
 //
 CE_name = '公元', CE_PATTERN = new RegExp('^' + CE_name + '[前-]?\\d'), pin_column,
 // 可選用的文字式年曆欄位。
@@ -229,13 +229,14 @@ selected_columns = {
 // 依特定國家自動增加這些欄。
 auto_add_column = {
 	中國 : [ 'Year naming/歲次', '曆注/月干支', '曆注/日干支' ],
-	Maya : [ 'calendar/Long_Count', 'calendar/Tzolkin', 'calendar/Haab' ],
-	India : [ 'calendar/Hindu' ],
 	'မြန်မာ' : [ 'Gregorian reform/Great Britain', 'calendar/Myanmar' ],
+	'ไทย' : [ 'Year numbering/Thai_Buddhist' ],
+	India : [ 'calendar/Hindu' ],
 	Mesopotamian : [ 'calendar/Hebrew' ],
 	Egypt : [ 'calendar/Egyptian'
 	// , 'calendar/Coptic'
-	]
+	],
+	Maya : [ 'calendar/Long_Count', 'calendar/Tzolkin', 'calendar/Haab' ]
 },
 // 可選用的文字式年曆 title = { id : [th, function (date) {} ] }
 calendar_columns, calendar_column_alias,
@@ -792,7 +793,8 @@ function set_SVG_text_properties(recover) {
 			CeL.remove_all_child('era_graph_target');
 		else {
 			var name_showed = this.title.match(CeL.era.PERIOD_PATTERN);
-			name_showed = name_showed ? '[' + name_showed[1] + ']' : this.title;
+			name_showed = name_showed ? '[' + _(name_showed[1]) + ']'
+					: _(this.title);
 
 			CeL.set_text('era_graph_target', name_showed);
 			// 在 Firefox/36.0 中，或許因字體改變，造成 onmouseover 會執行兩次。
@@ -1632,7 +1634,9 @@ draw_era.draw_navigation = function(hierarchy, last_is_Era, count_layers) {
 			period_hierarchy += (period_hierarchy ? era_name_classifier : '')
 					+ name;
 			var name_showed = name.match(CeL.era.PERIOD_PATTERN);
-			name_showed = name_showed ? '[' + name_showed[1] + ']' : name;
+			name_showed = name_showed ? '[' + _(name_showed[1]) + ']'
+			//
+			: _(name);
 
 			navigation_list.push(' » ', last_is_Era
 					&& index === hierarchy.length - 1 ? {
@@ -1697,12 +1701,12 @@ draw_era.click_navigation_date = function() {
 };
 
 draw_era.click_Era = function() {
-	var hierarchy = this.dataset.hierarchy.split(era_name_classifier);
+	var hierarchy = this.dataset.hierarchy.split(era_name_classifier)
 	// 去除"時期"如 "period:~"
 	// e.g., 處理太平天囯時，因為其屬大清時期，惟另有大清政權，因此若未去除時期，將無法解析"大清太平天囯"。
-	hierarchy.forEach(function(name, index) {
-		if (CeL.era.PERIOD_PATTERN.test(name))
-			hierarchy[index] = '';
+	.filter(function(name) {
+		// 若有 '' 將導致空的索引。不如直接去除。
+		return name && !CeL.era.PERIOD_PATTERN.test(name);
 	});
 	var era = CeL.era(hierarchy.join('' /* or use ' ' */));
 	draw_era.draw_navigation(hierarchy, true);
@@ -1886,7 +1890,8 @@ function add_contemporary(era, output_numeral) {
 var 國家_code = {
 	中國 : 'zh',
 	English : 'en',
-	日本 : 'ja'
+	日本 : 'ja',
+	ไทย : 'th',
 // 不列其他國家，如越南尚應以中文 Wikipedia 為主，因其過去紀年原名採用漢字。
 // 直到當地 Wikipedia 全面加入紀年使用當時之原名，且資料較中文 Wikipedia 周全時，再行轉換。
 };
@@ -4714,22 +4719,27 @@ function affairs() {
 					a : {
 						T : '泰國佛曆'
 					},
-					R : 'ปฏิทินสุริยคติไทย: 泰國陽曆/泰國官方之佛曆年 = 公曆年 + 543',
+					R : 'ปฏิทินสุริยคติไทย: 泰國陽曆\n'
+					//
+					+ '1941/1/1 CE (พ.ศ. 2484) 起，泰國官方之佛曆年 = 公曆年 + 543',
 					href : 'https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2',
 					S : 'font-size:.8em;'
 				},
 				function(date) {
-					if (date.精 || date.準) {
+					if (false && (date.精 || date.準)) {
 						return THAI_Year_numbering(date);
 					}
-					return CeL.Date_to_Thai(date);
+					return CeL.Date_to_Thai(date, {
+						format : 'serial'
+					}).join('/') + '; ' + CeL.Date_to_Thai(date);
 
 					// @deprecated
 					var numeral = THAI_Year_numbering(date), tmp = numeral
 							.split('/');
 					if (!date.精 && !date.準 && tmp.length === 3)
-						numeral = CeL.Date_to_Thai(tmp[2], tmp[1], tmp[0], date
-								.getDay());
+						numeral = CeL.Date_to_Thai(tmp[2], tmp[1], tmp[0], {
+							weekday : date.getDay()
+						});
 					return numeral;
 				} ],
 

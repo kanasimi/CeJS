@@ -1406,8 +1406,8 @@ function module_code(library_namespace) {
 			this[property] = properties[property];
 	}
 
-	// ": "Casper"
-	var NEED_SPLIT_CHARS = 'a-zA-Z\\d\'"',
+	// ": "Casper", include [[en:Thai (Unicode block)]]
+	var NEED_SPLIT_CHARS = /a-zA-Z\d\-,'"\u0E00-\u0E7F/.source,
 	//
 	NEED_SPLIT_PREFIX = new RegExp(
 	//
@@ -2237,53 +2237,48 @@ function module_code(library_namespace) {
 
 						tmp = null;
 						if (calendar_data.length === 0
-								// test: 後紀元無法轉換此 date。
-								|| (date_index = era
-								// [ 歲序, 月序, 日序 | 0 ]
-								.Date_to_date_index(start_time))
-								// days === 0: 恰好銜接且無重疊者。無縫接軌。毋須檢測。
-								&& (days === 0 || (date_name[0]
-								// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
-								=== (tmp = era.日名(
-								// 月日名連續性檢測。
-								// 檢測前後紀元之接續日、月名稱相同。是否為同一月內同一日。
-								// 主要指本紀元結束時間 (this.end)
-								// 在兩紀元中之月日名：
-								// 從 this.end 開始複製可以最節省資源，不用再重複複製重疊部分。
-								date_index[2], date_index[1], date_index[0]))[0]
-										|| !date_name[0]
-								// 檢測月名是否相同。
-								? !date_name[1] || date_name[1] === tmp[1]
-								// 測試月名稱可否銜接。
-								: (!date_name[1]
-								// 因為 era.end 不一定於 this 範圍內，可能剛好在邊界上，
-								// 因此須作特殊處理。
-								|| date_name[1] + 1 === tmp[1]
-								// 測試是否為跨年。
-								|| (tmp[1] === START_MONTH
-								//
-								&& (date_name[1]
-								//
-								=== LUNISOLAR_MONTH_COUNT
-								//
-								|| date_name[1]
-								//
-								=== LEAP_MONTH_PREFIX
-								//
-								+ LUNISOLAR_MONTH_COUNT)))
-								// 測試日名稱可否銜接。是否為年內換月。
-								// era 的 date index 為首日。
-								&& tmp[0] === START_DATE
-								// 確認 date name 為此月最後一天的後一天。
-								// 這邊採用的是不嚴謹的測試:
-								// 只要 date name <b>有可能</b>是此月最後一天就算通過。
-								&& (date_name[0] === 小月 + 1
-								//
-								|| date_name[0] === 大月 + 1))))
+						// test: 後紀元無法轉換此 date。
+						|| (date_index = era
+						// [ 歲序, 月序, 日序 | 0 ]
+						.Date_to_date_index(start_time))
+						// days === 0: 恰好銜接且無重疊者。無縫接軌。毋須檢測。
+						&& (days === 0 || (date_name[0]
+						// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
+						=== (tmp = era.日名(date_index[2],
+						// 月日名連續性檢測。
+						// 檢測前後紀元之接續日、月名稱相同。是否為同一月內同一日。
+						// 主要指本紀元結束時間 (this.end)
+						// 在兩紀元中之月日名：
+						// 從 this.end 開始複製可以最節省資源，不用再重複複製重疊部分。
+						date_index[1], date_index[0]))[0] || !date_name[0]
+						// 檢測月名是否相同。
+						? !date_name[1] || date_name[1] === tmp[1]
+						// 測試月名稱可否銜接。
+						: (!date_name[1]
+						// 因為 era.end 不一定於 this 範圍內，可能剛好在邊界上，
+						// 因此須作特殊處理。
+						|| date_name[1] + 1 === tmp[1]
+						// 測試是否為跨年。
+						|| (tmp[1] === START_MONTH
+						//
+						&& (date_name[1] === LUNISOLAR_MONTH_COUNT
+						//
+						|| date_name[1] === LEAP_MONTH_PREFIX
+						//
+						+ LUNISOLAR_MONTH_COUNT)))
+						// 測試日名稱可否銜接。是否為年內換月。
+						// era 的 date index 為首日。
+						&& tmp[0] === START_DATE
+						// 確認 date name 為此月最後一天的後一天。
+						// 這邊採用的是不嚴謹的測試:
+						// 只要 date name <b>有可能</b>是此月最後一天就算通過。
+						&& (date_name[0] === 小月 + 1
+						//
+						|| date_name[0] === 大月 + 1)))) {
 							// 通過檢驗。
 							年序.push([ era, days, date_index ]);
 
-						else if (tmp && (date_name[0] === tmp[0]
+						} else if (tmp && (date_name[0] === tmp[0]
 						//
 						|| tmp[0] === START_DATE
 						// 確認 date name
@@ -5118,11 +5113,11 @@ function module_code(library_namespace) {
 
 					// 紀年 = [ 朝代, 君主(帝王), 紀年 ]
 					// 配合 (紀年名稱索引值)
-					if (紀年.length === 1 && 紀年[0])
+					if (紀年.length === 1 && 紀年[0]) {
 						// 朝代兼紀年：紀年=朝代
 						前一紀年名稱 = [ 紀年[2] = 紀年[0] ];
 
-					else {
+					} else {
 						if (!紀年[0] && (tmp = 前一紀年名稱.length) > 0) {
 							// 填補 inherited 繼承值/預設值。
 							// 得允許前一位有紀年，後一位無；以及相反的情況。
@@ -5178,6 +5173,23 @@ function module_code(library_namespace) {
 					// assert: 至此
 					// 前一紀年名稱 = [ 朝代, 君主(帝王), 紀年 ]
 					// 紀年 = [ 紀年, 君主(帝王), 朝代, 國家 ]
+
+					tmp = false;
+					if (/\d$/.test(紀年[0])) {
+						tmp = '紀年名稱 [' + 紀年[0] + ']';
+					} else if (/\d$/.test(紀年[1])) {
+						tmp = '君主名稱 [' + 紀年[1] + ']';
+					}
+					if (tmp) {
+						tmp = 'parse_era: ' + tmp
+						//
+						+ ' 以阿拉伯數字做結尾，請改成原生語言之數字表示法，或如羅馬數字之結尾。'
+						//
+						+ '本函式庫以阿拉伯數字標示年分，因此阿拉伯數字結尾之名稱將與年分混淆。';
+						// 注意: 這邊的警告在載入後會被清空。
+						library_namespace.warn(tmp);
+						// throw new Error(tmp);
+					}
 
 					library_namespace.debug(
 					//
@@ -6533,7 +6545,8 @@ function module_code(library_namespace) {
 
 		if (tmp = add_contemporary(date, 指定紀年, options)) {
 			// 取得真正使用之紀年。
-			紀年 = tmp.紀年;
+			// 但若可判別(指定紀年)，則以其為主。e.g., CeL.era('泰國陰曆2302/2/1')
+			紀年 = 指定紀年 || tmp.紀年;
 
 			if (options.range && tmp.length > 0) {
 				if (!Array.isArray(偵測集 = options.range))
@@ -6779,7 +6792,7 @@ function module_code(library_namespace) {
 
 				if (library_namespace.is_debug())
 					library_namespace.info([ 'add_period: ', {
-						T : [ '跳過 [%1]：本[%2]僅供參照用。', o, 'period' ]
+						T : [ '跳過 [%1]：本[%2]僅供參照用。', o.toString(), 'period' ]
 					} ]);
 			});
 		}
@@ -7064,7 +7077,7 @@ function module_code(library_namespace) {
 		era_list.forEach(function(era) {
 			if (era.參照用 && !options.含參照用) {
 				library_namespace.info([ 'get_dates: ', {
-					T : [ '跳過 [%1]：本[%2]僅供參照用。', era, '紀年' ]
+					T : [ '跳過 [%1]：本[%2]僅供參照用。', era.toString(), '紀年' ]
 				} ]);
 				return;
 			}

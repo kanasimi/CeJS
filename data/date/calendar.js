@@ -23,8 +23,6 @@ TODO:
 https://en.wikipedia.org/wiki/Vikram_Samvat
 the official calendar of Nepal
 
-https://en.wikipedia.org/wiki/Thai_solar_calendar
-
 */
 
 
@@ -3836,23 +3834,60 @@ Bangla_Date.test = new_tester(Date_to_Bangla, Bangla_Date, {
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 /**
- * 長曆: 泰國佛曆
+ * 長曆: 1941/1/1 CE (พ.ศ. 2484) 起的泰國佛曆元旦是每年(CE) 1/1。
+ * 1889/4/1 (พ.ศ. 2432)  起泰國元旦是每年(CE) 4/1。這之前泰國元旦是每年陰曆五月初五，應落在 CE:3,4月。
+ * @see https://en.wikipedia.org/wiki/Thai_solar_calendar
  * @see https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2
  * @see https://th.wikipedia.org/wiki/%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B9%88%E0%B8%AD%E0%B8%A2:%E0%B9%80%E0%B8%AB%E0%B8%95%E0%B8%B8%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%93%E0%B9%8C%E0%B8%9B%E0%B8%B1%E0%B8%88%E0%B8%88%E0%B8%B8%E0%B8%9A%E0%B8%B1%E0%B8%99
  */
-function Date_to_Thai(date, month, year, weekday) {
+
+var Thai_lunar, Thai_epochal_year = -543 | 0;
+
+function Date_to_Thai(date, month, year, options) {
+	if (typeof month === 'object') {
+		options = month;
+	} else {
+		options = library_namespace.null_Object();
+	}
+	var _Date, weekday = options.weekday;
+	// normalize date
 	if (library_namespace.is_Date(date)) {
+		_Date = date;
 		weekday = date.getDay();
-		month = date.getMonth();
+		// month start from 0.
+		month = date.getMonth() + 1;
 		// http://www.wat.austhai.biz/Home/thai-calendar
 		// http://www.myhora.com/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99/
-		year = 543 + date.getFullYear();
+		year = date.getFullYear();
 		date = date.getDate();
-	} else if (month > 0) {
-		// month start from 0.
-		month--;
+	}
+
+	var use_Thai_lunar = (year < 1889 || year === 1889 && month < 4)
+	//
+	&& (Thai_lunar || (Thai_lunar = library_namespace.era('ปฏิทินจันทรคติไทย', {
+		get_era : true
+	})));
+	if (use_Thai_lunar
+	//
+	&& (use_Thai_lunar = Thai_lunar.Date_to_date_index(_Date || new Date(year, month - 1, date)))) {
+		// @see 光緒15年3月
+		return Thai_lunar.日名(use_Thai_lunar[2], use_Thai_lunar[1], use_Thai_lunar[0]).reverse();
+
+	} else if (year < 1941) {
+		//@see 中曆1939年11月, 中曆1940年2月, 中曆1940年12月
+		if (month < 4) {
+			month += 9;
+			year -= Thai_epochal_year + 1;
+		} else {
+			month -= 3;
+			year -= Thai_epochal_year;
+		}
 	} else {
-		month = null;
+		year -= Thai_epochal_year;
+	}
+
+	if (options.format === 'serial') {
+		return [ year, month, date ];
 	}
 
 	date = [
@@ -3878,7 +3913,7 @@ function Date_to_Thai(date, month, year, weekday) {
 }
 
 // start from 0.
-Date_to_Thai.month_name = 'มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม'
+Date_to_Thai.month_name = '|มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม'
 		.split('|');
 
 // 0: Sunday.
