@@ -1402,7 +1402,7 @@ function module_code(library_namespace) {
 		return item;
 	}
 
-	var PATTERN_epub_file = /^\(一般小説\) \[([^\[\]]+)\] ([^\[\]]+) \[(.*?) (\d{8})\]\.(.+)\.epub$/;
+	var PATTERN_epub_file = /^\(一般小説\) \[([^\[\]]+)\] ([^\[\]]+) \[(.*?) (\d{8})(?: (\d{1,4})話)?\]\.(.+)\.epub$/i;
 	function parse_epub_name(file_name) {
 		var matched = file_name.match(PATTERN_epub_file);
 		if (matched) {
@@ -1414,8 +1414,9 @@ function module_code(library_namespace) {
 				site_name : matched[3],
 				// e.g., "20170101"
 				date : matched[4],
+				chapter_count : matched[5],
 				// book id in this site
-				id : matched[5]
+				id : matched[6]
 			};
 		}
 	}
@@ -1503,10 +1504,13 @@ function module_code(library_namespace) {
 		process.title = '打包 epub: ' + work_data.title + ' @ ' + this.id;
 		if (!file_name) {
 			file_name =
-			// e.g., "(一般小説) [author] title [site 20170101].id.epub"
+			// e.g., "(一般小説) [author] title [site 20170101 1話].id.epub"
 			[ '(一般小説) [', work_data.author, '] ', work_data.title, ' [',
 					work_data.site_name, ' ',
-					work_data.last_update_Date.format('%Y%2m%2d'), '].',
+					work_data.last_update_Date.format('%Y%2m%2d'),
+					work_data.chapter_count >= 1
+					//
+					? ' ' + work_data.chapter_count + '話' : '', '].',
 					work_data.id, '.epub' ].join('');
 			// assert: PATTERN_epub_file.test(file_name) === true
 		}

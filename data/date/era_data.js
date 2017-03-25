@@ -1609,7 +1609,7 @@ CeL.era.pass_on = {
 		'/乾亨|979/11/23~|11=35u 55c35uq 40984g0',
 		// http://bbs.nongli.net/dispbbs_2_47386_3_4.html
 		// 西元994年，即統和十二年開始使用賈俊的大明曆，在萬年曆中也是西元994年，即統和十二年開始反應
-		'/聖宗/統和|983/7/13~|6=384 48a 3mw8505 46i 4oet5dw 5us 40aq5as 4gnu3my 505 3ql347d 5e1 3swk4a1 3b573px 3oq 4mg9591 4gi 4so55ea 4aa 3b4y449 39ze|諡=文武大孝宣皇帝|君主名=耶律隆緒|生=972年1月16日 (根据《辽史》记载，辽圣宗耶律隆绪生于辽景宗保宁三年农历十二月二十七日（己丑日），用万年历换算为公历则是972年1月16日。)|卒=1031年6月25日|在位=982年10月14日~1031年6月25日',
+		'/聖宗/統和|983/7/13~|6=384 48a 3mw8505 46i 4oet5dw 5us 40aq5as 4gnu3my 505 3ql347d 5e1 3swk4a1 3b573px 3oq 4mg9591 4gi 4so55ea 4aa 3b4y449 39ze|諡=文武大孝宣皇帝|君主名=耶律隆緒|生=972年1月16日 (根据《辽史》记载，辽圣宗耶律隆绪生于辽景宗保宁三年农历十二月二十七日（己丑日），用万年历换算为公历则是972年1月16日。)|卒=1031年6月25日|在位=982年10月14日~1031年6月25日|注=談古籍整理中過度依賴傳統歷譜的問題: 《遼史·聖宗紀》稱統和三年閏九月壬申朔',
 		'/開泰|1012/12/16~|11=35t 46i 5np 3z2v4h0 5es 3t504ac 3nt8504',
 		'/太平|1021/12/7~|11=35u 4yy 54895s9 4h4 4t913u0 52s 4g9f3me 4xs',
 		'/興宗/景福|1031/6/23~|6=2uze58w|諡=神聖孝章皇帝|君主名=耶律宗真|生=1016年4月3日 (根据《辽史》记载，辽兴宗耶律宗真生于辽圣宗开泰五年农历二月二十三日（戊戌日），用万年历换算为公历则是1016年4月3日。 )|卒=1055年8月28日|在位=1031年6月25日~1055年8月28日',
@@ -1619,7 +1619,7 @@ CeL.era.pass_on = {
 		'/大康|1075/1/19~|39gk5np 3z304h0 5es 3t6w52s 47u 3mna4zu',
 		'/大安|1085/1/29~|5r9 3z4i4i0 4t983u0 52s 4g9k3mi 56y 5544',
 		'/壽昌|1095/2/8~|5sh 4i9 3eoi3u1 3a953p1 35s|注=《遼史·曆象志》溯源: 陳大任修《遼史》時可能避“昌”字諱，改“壽昌”爲“壽隆”',
-		'/天祚帝/乾統|1101/3/2~|2=3oa 4mee58y 5ua 3twj4ic 3rd648a 439 3mmw|君主名=耶律延禧|表字=延寧|生=1075年6月5日 (根据《辽史》记载，辽天祚帝耶律延禧生于辽道宗大康元年农历闰四月十九日（庚戌日），用万年历换算为公历则是1075年6月5日。 )|卒=6月1128年/1156年 (存爭議) (1128年（或1156年）)|在位=1101年2月12日~1125年3月26日',
+		'/天祚帝/乾統|1101/3/2~|2=3oa 4mee58y 5ua 3twj4ic 3rd648a 439 3mmw|君主名=耶律延禧|表字=延寧|生=1075年6月5日 (根据《辽史》记载，辽天祚帝耶律延禧生于辽道宗大康元年农历闰四月十九日（庚戌日），用万年历换算为公历则是1075年6月5日。 )|卒=6月1128年/1156年 (存爭議) (1128年（或1156年）)|在位=1101年2月12日~1125年3月26日|注=談古籍整理中過度依賴傳統歷譜的問題: 遼乾統五年閏二月己巳朔',
 		'/天慶|1111/2/10~|46i 59g 57b85uw 5as 3rcx50q 4g4p579 47e',
 		'/保大|1121/1/21~1125/4/5|4sdh5e1 4a0 4poz35s|注=保大五年二月二十日天祚帝在應州被為金人完顏婁室等所俘',
 
@@ -2319,7 +2319,7 @@ CeL.era.pass_on = {
 		'/正平|1347/1/20~|:旧暦|注=『七巻冊子』は同年4月、『南朝編年記略』・『南朝公卿補任』は7月24日（8月11日）、『続史愚抄』などは7月4日（7月22日）とするが、全て誤りである。',
 		'/長慶天皇/=|1368/3/29~|23/=:旧暦|注=在位：正平23年/応安元年（1368年） 3月（鴨脚本『皇代記』による。ただし、日付の記録を欠いているため、3月11日（1368/3/29）の後村上天皇崩御を受けてのものか、あるいはそれに先だって行われた譲位によるものか、確認しがたい。おそらく前者であろう。しかし、近世の南朝系図は何によってか、3月9日（1368/3/27）受禅としているものが多いようである。）-弘和3年/永徳3年（1383年）冬。',
 		'/建徳|1370/8/16~|:旧暦|注=『南朝編年記略』･『南朝公卿補任』によるが、鴨脚本『皇代記』は同年4月22日（5月17日）とし、『伊勢之巻』は1月21日（2月17日）とする。また、村田正志は、『大徳寺文書』にある建徳元年2月5日（1370/3/3）付の畠田売券を根拠として、当日以前に改元が行われたと指摘するが、この類の文書では恣意的に日付を遡及して記す場合もしばしばあったことを勘案しておく必要があろう（服部英雄 「未来年号考」 『古文書研究』第20号 吉川弘文館、1983年2月）。',
-		'/文中|1372/4/26~|:旧暦|注=建徳3年4月某日（ユリウス暦1372年5月某日）改元、災異によるか。正確な改元日については、史料を欠くために明確にし難い。史料上の初出は、『金剛寺文書』にある文中元年4月28日（1372/5/31）付の長慶天皇綸旨であり、これ以前に改元が行われたことは確実視される。したがって、『南朝編年記略』･『続史愚抄』等が同年10月4日（10月30日）とするのは誤り。『七巻冊子』のみは3月22日（4月26日）とし、森本角蔵の著作『日本年号大観』もこの説を採るが、他に所見がないために確証を得ない。',
+		'/文中|1372/4/26~|:旧暦|疑|注=建徳3年4月某日（ユリウス暦1372年5月某日）改元、災異によるか。正確な改元日については、史料を欠くために明確にし難い。史料上の初出は、『金剛寺文書』にある文中元年4月28日（1372/5/31）付の長慶天皇綸旨であり、これ以前に改元が行われたことは確実視される。したがって、『南朝編年記略』･『続史愚抄』等が同年10月4日（10月30日）とするのは誤り。『七巻冊子』のみは3月22日（4月26日）とし、森本角蔵の著作『日本年号大観』もこの説を採るが、他に所見がないために確証を得ない。',
 		'/天授|1375/6/26~|:旧暦|注=『南朝編年記略』・『南朝公卿補任』によるが、『七巻冊子』は同年2月上旬とする。',
 		'/弘和|1381/3/6~|:旧暦|注= 『南朝公卿補任』･『続史愚抄』等によるが、『南朝編年記略』は同年2月14日（3月10日）とする。なお、史料上の初出は、『金剛寺文書』『河合寺文書』にある弘和元年6月21日（1381/7/13）付の長慶天皇綸旨である。',
 		'/後龜山天皇/=|1383/11~|3/=:旧暦|諡=後亀山天皇|注=在位：弘和3年/永徳3年（1383年）冬-元中9年/明徳3年閏10月5日（1392/11/19）',
@@ -2956,7 +2956,8 @@ CeL.era.pass_on = {
 
 (CeL.era.pass_on.countries.ไทย = [
 		// 泰國陰曆
-		'ปฏิทินจันทรคติไทย|1756/12/21~2042/1/21|2300/2=3oq 4ofc58q 4ofc59m 59m 4ofc58q 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc59m 59m 4ofc59m 4ofc58q 58q 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 59m 4ofc58q 4qo|參照用|紀年=泰國陰曆;จันทรคติ;ปฏิทินจันทรคติ|注=此處之年份僅為與公元年份約略參考用！僅月份與日期較可資參考。詳見說明。',
+		// https://www.myhora.com/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99/
+		'ปฏิทินจันทรคติไทย|1756/12/21~2042/1/21|2300/2=3oq 4ofc58q 4ofc59m 59m 4ofc58q 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc59m 59m 4ofc59m 4ofc58q 58q 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 59m 4ofc58q 4qo|參照用|紀年=泰國陰曆;จันทรคติ;ปฏิทินจันทรคติ|閏月名=雙|注=此處之年份僅為與公元年份約略參考用！僅月份與日期較可資參考。詳見說明。',
 
 		// [[en:List of monarchs of Thailand]]
 		// [[th:รายพระนามพระมหากษัตริย์ไทย]]
@@ -3003,23 +3004,24 @@ CeL.era.pass_on = {
 		'/สมเด็จพระสรรเพชญ์ที่ ๘|1703/2~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 8;สมเด็จพระสุริเยนทราธิบดี;พระเจ้าเสือ;Somdet Phra Suriyenthrathibodi;Somdet Phra Sanphet VIII;Phra Chao Suea|關係=Rumored to be a son of Narai',
 		'/สมเด็จพระสรรเพชญ์ที่ ๙|1709~||疑|準=年|君主=สมเด็จพระสรรเพชญ์ที่ 9;สมเด็จพระที่นั่งท้ายสระ;สมเด็จพระเจ้าอยู่หัวท้ายสระ;พระเจ้าท้ายสระ;พระเจ้าภูมินทราชา;Somdet Phra Chao Yu Hua Thai Sa;Somdet Phra Sanphet IX|生=1679|關係=Son of Suriyenthrathibodi',
 		'/สมเด็จพระเจ้าอยู่หัวบรมโกศ|1733~||疑|準=年|君主=สมเด็จพระบรมราชาธิราชที่ 3;สมเด็จพระเจ้าอยู่หัวบรมโกศ;Somdet Phra Chao Yu Hua Boromakot|生=1680|關係=Brother of Thai Sa, Former Front Palace;Son of Suriyenthrathibodi',
-		'/สมเด็จพระเจ้าอุทุมพร|1758~1758||疑|準=年|君主=สมเด็จพระบรมราชาธิราชที่ 4;สมเด็จพระเจ้าอุทุมพร / ขุนหลวงหาวัด;Somdet Phra Chao Uthumphon;Somdet Phra Ramathibodi IV;Khun Luang Hawat|卒=1796|關係=Son of Boromakot',
-		'/สมเด็จพระที่นั่งสุริยาศน์อัมรินทร์|1758~1767/4/7||疑|準=年|君主=สมเด็จพระบรมราชาที่ 3;สมเด็จพระที่นั่งสุริยาศน์อัมรินทร์ / พระเจ้าเอกทัศ;Somdet Phra Chao Ekkathat;Somdet Phra Chao Yu Hua Phra Thinang Suriyat Amarin;Somdet Phra Borommaracha III|卒=1767/4/17|關係=Brother of Uthumphon;Usurper, Former Front Palace;Son of Boromakot',
+		// 自此後之日期必須參照泰國佛曆，而非表列日期！
+		'/สมเด็จพระเจ้าอุทุมพร|1758~1758||疑|君主=สมเด็จพระบรมราชาธิราชที่ 4;สมเด็จพระเจ้าอุทุมพร / ขุนหลวงหาวัด;Somdet Phra Chao Uthumphon;Somdet Phra Ramathibodi IV;Khun Luang Hawat|卒=1796|關係=Son of Boromakot',
+		'/สมเด็จพระที่นั่งสุริยาศน์อัมรินทร์|1758~1767/4/7||疑|君主=สมเด็จพระบรมราชาที่ 3;สมเด็จพระที่นั่งสุริยาศน์อัมรินทร์ / พระเจ้าเอกทัศ;Somdet Phra Chao Ekkathat;Somdet Phra Chao Yu Hua Phra Thinang Suriyat Amarin;Somdet Phra Borommaracha III|卒=1767/4/17|關係=Brother of Uthumphon;Usurper, Former Front Palace;Son of Boromakot',
 
-		'ราชวงศ์ธนบุรี/สมเด็จพระเจ้ากรุงธนบุรี|1767/11/6~||疑|準=年|時期=อาณาจักรธนบุรี|君主=鄭昭;鄭信;สมเด็จพระบรมราชาที่ 4;สมเด็จพระเจ้าตากสินมหาราช;Somdet Phra Chao Taksin the Great;Phra Chao Krung Thonburi;Somdet Phra Borommaracha IV|生=1734/4/17|卒=1782/4/7|關係=Only King of Thonburi',
+		'ราชวงศ์ธนบุรี/สมเด็จพระเจ้ากรุงธนบุรี|1767/11/6~||疑|時期=อาณาจักรธนบุรี|君主名=鄭昭;鄭信|君主=สมเด็จพระบรมราชาที่ 4;สมเด็จพระเจ้าตากสินมหาราช;Somdet Phra Chao Taksin the Great;Phra Chao Krung Thonburi;Somdet Phra Borommaracha IV|生=1734/4/17|卒=1782/4/7|關係=Only King of Thonburi',
 
-		'ราชวงศ์จักรี/พระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช|1782/4/6~||疑|準=年|時期=อาณาจักรรัตนโกสินทร์|國名=ประเทศไทย;ราชอาณาจักรสยาม;ราชอาณาจักรไทย|君主=พระพุทธยอดฟ้าจุฬาโลก;รัชกาลที่ 1;Maha Chakri Borommanat;Phra Rama I;the Great;Rama I|生=1737/3/20|關係=First King of Rattanakosin',
-		'/พระบาทสมเด็จพระพุทธเลิศหล้านภาลัย|1809/9/7~||疑|準=年|君主=พระพุทธเลิศหล้านภาลัย;รัชกาลที่ 2;Maha Itsarasunthon;Phra Rama II of Siam;Rama II|生=1767/2/24|關係=Son of Rama I and Queen Amarindra',
-		'/พระบาทสมเด็จพระนั่งเกล้าเจ้าอยู่หัว|1824/7/21~||疑|準=年|君主=นั่งเกล้า;พระมหาเจษฎาราชเจ้า;รัชกาลที่ 3;Maha Rama III;Phra Nang Klao Chao Yu Hua;Rama III;Phra Maha Chetsadarat Chao|生=1788/3/31|關係=Son of Rama II and Princess Consort Sri Sulalai',
-		'/พระบาทสมเด็จพระจอมเกล้าเจ้าอยู่หัว|1851/4/2~||疑|準=年|君主=มงกุฎ;รัชกาลที่ 4;Maha Mongkut;Phra Chom Klao Chao Yu Hua;Rama IV|生=1804/10/18|關係=Half-brother of Rama III;Son of Rama II and Queen Sri Suriyendra',
-		'/พระบาทสมเด็จพระจุลจอมเกล้าเจ้าอยู่หัว|1868/10/1~||疑|準=年|君主=จุฬาลงกรณ์;พระปิยมหาราช;รัชกาลที่ 5;Maha Chulalongkorn;Phra Chula Chom Klao Chao Yu Hua;the Great;Rama V;Phra Piya Maharat|生=1853/9/20|關係=Son of Rama IV and Queen Debsirindra;Under Regency of Si Suriyawongse from 1868-1873',
-		'/พระบาทสมเด็จพระมงกุฎเกล้าเจ้าอยู่หัว|1910/10/23~||疑|準=年|君主=วชิราวุธ;พระมหาธีรราชเจ้า;รัชกาลที่ 6;Maha Vajiravudh;Phra Mongkut Klao Chao Yu Hua;Rama VI;Phra Maha Thirarachachao|生=1881/1/1|關係=Son of Rama V and Queen Saovabha Phongsri',
-		'/พระบาทสมเด็จพระปกเกล้าเจ้าอยู่หัว|1925/11/25~||疑|準=年|君主=ประชาธิปก;รัชกาลที่ 7;Maha Prajadhipok;Phra Pok Klao Chao Yu Hua;Rama VII|生=1893/11/8|卒=1941/5/30|關係=Younger brother of Rama VI;Son of Rama V and Queen Saovabha Phongsri',
-		'/พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล|1935/3/2~||疑|準=年|君主=อานันทมหิดล;พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล พระอัฐมรามาธิบดินทร;พระอัฐมรามาธิบดินทร;รัชกาลที่ 8;Maha Ananda Mahidol;Phra Atthama Ramathibodin;Rama VIII|生=2025/9/20|關係=Nephew of Rama VII;Grandson of Rama V by Mahidol Adulyadej;Under Regency from 1935-1946',
-		'/พระบาทสมเด็จพระปรมินทรมหาภูมิพลอดุลยเดช|1946/6/9~||疑|準=年|君主=ภูมิพลอดุลยเดช;สมเด็จพระภัทรมหาราช;รัชกาลที่ 9;Maha Bhumibol Adulyadej;the Great;Rama IX;Somdet Phra Phatthara Maharat|生=2027/12/5|關係=Younger brother of Rama VIII;Grandson of Rama V by Mahidol Adulyadej',
+		'ราชวงศ์จักรี/พระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช|1782/4/6~||疑|時期=อาณาจักรรัตนโกสินทร์|國名=ประเทศไทย;ราชอาณาจักรสยาม;ราชอาณาจักรไทย|君主=พระพุทธยอดฟ้าจุฬาโลก;รัชกาลที่ 1;Maha Chakri Borommanat;Phra Rama I;the Great;Rama I|生=1737/3/20|卒=1809/9/7|關係=First King of Rattanakosin',
+		'/พระบาทสมเด็จพระพุทธเลิศหล้านภาลัย|1809/9/7~||疑|君主=พระพุทธเลิศหล้านภาลัย;รัชกาลที่ 2;Maha Itsarasunthon;Phra Rama II of Siam;Rama II|生=1767/2/24|卒=1824/7/21|關係=Son of Rama I and Queen Amarindra',
+		'/พระบาทสมเด็จพระนั่งเกล้าเจ้าอยู่หัว|1824/7/21~||疑|君主=นั่งเกล้า;พระมหาเจษฎาราชเจ้า;รัชกาลที่ 3;Maha Rama III;Phra Nang Klao Chao Yu Hua;Rama III;Phra Maha Chetsadarat Chao|生=1788/3/31|卒=1851/4/2|關係=Son of Rama II and Princess Consort Sri Sulalai',
+		'/พระบาทสมเด็จพระจอมเกล้าเจ้าอยู่หัว|1851/4/2~||疑|君主=มงกุฎ;รัชกาลที่ 4;Maha Mongkut;Phra Chom Klao Chao Yu Hua;Rama IV|生=1804/10/18|卒=1868/10/1|關係=Half-brother of Rama III;Son of Rama II and Queen Sri Suriyendra',
+		'/พระบาทสมเด็จพระจุลจอมเกล้าเจ้าอยู่หัว|1868/10/1~||疑|君主=จุฬาลงกรณ์;พระปิยมหาราช;รัชกาลที่ 5;Maha Chulalongkorn;Phra Chula Chom Klao Chao Yu Hua;the Great;Rama V;Phra Piya Maharat|生=1853/9/20|卒=1910/10/23|關係=Son of Rama IV and Queen Debsirindra;Under Regency of Si Suriyawongse from 1868-1873',
+		'/พระบาทสมเด็จพระมงกุฎเกล้าเจ้าอยู่หัว|1910/10/23~||疑|君主=วชิราวุธ;พระมหาธีรราชเจ้า;รัชกาลที่ 6;Maha Vajiravudh;Phra Mongkut Klao Chao Yu Hua;Rama VI;Phra Maha Thirarachachao|生=1881/1/1|卒=1925/11/25|關係=Son of Rama V and Queen Saovabha Phongsri',
+		'/พระบาทสมเด็จพระปกเกล้าเจ้าอยู่หัว|1925/11/25~||疑|君主=ประชาธิปก;รัชกาลที่ 7;Maha Prajadhipok;Phra Pok Klao Chao Yu Hua;Rama VII|生=1893/11/8|卒=1941/5/30|關係=Younger brother of Rama VI;Son of Rama V and Queen Saovabha Phongsri',
+		'/พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล|1935/3/2~|:Thai|疑|君主=อานันทมหิดล;พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล พระอัฐมรามาธิบดินทร;พระอัฐมรามาธิบดินทร;รัชกาลที่ 8;Maha Ananda Mahidol;Phra Atthama Ramathibodin;Rama VIII|生=1925/9/20|卒=1946/6/9|關係=Nephew of Rama VII;Grandson of Rama V by Mahidol Adulyadej;Under Regency from 1935-1946',
+		'/พระบาทสมเด็จพระปรมินทรมหาภูมิพลอดุลยเดช|1946/6/9~|:CE|君主=ภูมิพลอดุลยเดช;สมเด็จพระภัทรมหาราช;รัชกาลที่ 9;Maha Bhumibol Adulyadej;the Great;Rama IX;Somdet Phra Phatthara Maharat|生=1927/12/5|卒=2016/10/13|關係=Younger brother of Rama VIII;Grandson of Rama V by Mahidol Adulyadej',
 		'/สมเด็จพระเจ้าอยู่หัวมหาวชิราลงกรณ บดินทรเทพยวรางกูร|2016/10/13~'
 				+ CeL.era.pass_on.last_day
-				+ '||疑|準=年|君主=มหาวชิราลงกรณ;รัชกาลที่ 10;Somdet Phra Chao Yu Hua;Maha Vajiralongkorn;Bodindradebayavarangkun;Rama X|生=1952/7/28|關係=Only son of Rama IX and Queen Sirikit;2nd child of Rama IX'
+				+ '|:CE|君主=มหาวชิราลงกรณ;รัชกาลที่ 10;Somdet Phra Chao Yu Hua;Maha Vajiralongkorn;Bodindradebayavarangkun;Rama X|生=1952/7/28|關係=Only son of Rama IX and Queen Sirikit;2nd child of Rama IX'
 
 ]).minute_offset = 7 * 60;
 

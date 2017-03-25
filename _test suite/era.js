@@ -230,7 +230,7 @@ selected_columns = {
 auto_add_column = {
 	中國 : [ 'Year naming/歲次', '曆注/月干支', '曆注/日干支' ],
 	'မြန်မာ' : [ 'Gregorian reform/Great Britain', 'calendar/Myanmar' ],
-	'ไทย' : [ 'Year numbering/Thai_Buddhist' ],
+	'ไทย' : [ 'Year numbering/Thai_Buddhist', 'calendar/Dai' ],
 	India : [ 'calendar/Hindu' ],
 	Mesopotamian : [ 'calendar/Hebrew' ],
 	Egypt : [ 'calendar/Egyptian'
@@ -582,10 +582,22 @@ function show_calendar(era_name) {
 
 		// 增加此欄: 添加各個欄位。
 		for (tmp in selected_columns) {
-			if (conversion = calendar_columns[tmp])
-				list.push({
-					td : conversion[1](date) || ''
-				});
+			if (conversion = calendar_columns[tmp]) {
+				tmp = conversion[1](date) || '';
+				if (tmp && tmp.S) {
+					// 將 style 如 background-color 轉到 td 上。
+					conversion = {
+						td : tmp,
+						S : tmp.S
+					};
+					delete tmp.S;
+				} else {
+					conversion = {
+						td : tmp
+					};
+				}
+				list.push(conversion);
+			}
 		}
 
 		// 處理改朝換代巡覽。
@@ -2846,7 +2858,7 @@ function affairs() {
 	// for 皇紀.
 	kyuureki, Koki_year_offset = 660, Koki_year = Year_numbering(Koki_year_offset),
 	// for 泰國佛曆
-	THAI_Year_numbering = Year_numbering(543),
+	// THAI_Year_numbering = Year_numbering(543),
 	//
 	Gregorian_reform = new Date(1582, 10 - 1, 15), Revised_Julian_reform = new Date(
 			1923, 10 - 1, 14);
@@ -4714,34 +4726,40 @@ function affairs() {
 
 				} ],
 
-		Thai_Buddhist : [
-				{
-					a : {
-						T : '泰國佛曆'
-					},
-					R : 'ปฏิทินสุริยคติไทย: 泰國陽曆\n'
-					//
-					+ '1941/1/1 CE (พ.ศ. 2484) 起，泰國官方之佛曆年 = 公曆年 + 543',
-					href : 'https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2',
-					S : 'font-size:.8em;'
-				},
-				function(date) {
-					if (false && (date.精 || date.準)) {
-						return THAI_Year_numbering(date);
-					}
-					return CeL.Date_to_Thai(date, {
-						format : 'serial'
-					}).join('/') + '; ' + CeL.Date_to_Thai(date);
+		Thai_Buddhist : [ {
+			a : {
+				T : '泰國佛曆'
+			},
+			R : '以佛曆紀年(佛滅紀元)之泰國曆',
+			href : 'https://th.wikipedia.org/wiki/ปฏิทินไทย'
+		}, function(date) {
+			if (date.精 || date.準) {
+				var year = date.getFullYear() + 543;
+				return 'พ.ศ. ' + (year - 1) + '–' + year;
+			}
+			var numeral = CeL.Date_to_Thai(date, {
+				format : 'serial'
+			}), 生肖 = numeral.生肖 ? ' ' + numeral.生肖 + '年' : '';
+			return numeral.準 ? {
+				T : 'พ.ศ. ' + numeral[0] + 生肖,
+				S : 'color:#888'
+			} : {
+				T : numeral.join('/') + '; ' + CeL.Date_to_Thai(date) + 生肖
+				//
+				+ (numeral.holidays ? '; ' + numeral.holidays.join(', ') : ''),
+				S : 'color:#000;background-color:'
+				//
+				+ CeL.Date_to_Thai.weekday_bgcolor[date.getDay()]
+			};
 
-					// @deprecated
-					var numeral = THAI_Year_numbering(date), tmp = numeral
-							.split('/');
-					if (!date.精 && !date.準 && tmp.length === 3)
-						numeral = CeL.Date_to_Thai(tmp[2], tmp[1], tmp[0], {
-							weekday : date.getDay()
-						});
-					return numeral;
-				} ],
+			// @deprecated
+			var numeral = THAI_Year_numbering(date), tmp = numeral.split('/');
+			if (!date.精 && !date.準 && tmp.length === 3)
+				numeral = CeL.Date_to_Thai(tmp[2], tmp[1], tmp[0], {
+					weekday : date.getDay()
+				});
+			return numeral;
+		} ],
 
 		AUC : [ {
 			a : {

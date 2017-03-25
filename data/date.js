@@ -1481,8 +1481,7 @@ function module_code(library_namespace) {
 				// 來取得另一 conversion 之結果。
 				var v = $2 in original_Date ? original_Date[$2]
 				// original_Date[$2] 為物件本身之特殊屬性，應當排在泛用函數 conversion[$2] 之前。
-				: typeof (v = conversion[$2]) === 'function' ? v.call(
-						conversion, date_value, options)
+				: typeof (v = conversion[$2]) === 'function' ? conversion[$2](date_value, options)
 				//
 				: v in original_Date ? original_Date[v]
 				// 將之當作 format。

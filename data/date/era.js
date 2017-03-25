@@ -1308,7 +1308,7 @@ function module_code(library_namespace) {
 					) {
 						if (閏月名)
 							// 正規化閏月名。
-							initial_month = initial_month.replace(this.閏月名,
+							initial_month = initial_month.replace(閏月名,
 									LEAP_MONTH_PREFIX);
 						if (initial_month === LEAP_MONTH_PREFIX)
 							initial_month += leap_month_index;
@@ -2773,10 +2773,11 @@ function module_code(library_namespace) {
 				//
 				ordinal = to_String(start_time);
 
+				if (isNaN(ordinal[0])
 				// 檢測
-				if (isNaN(ordinal[0] |= 0) || date_name[1]
-						&& date_name[1] !== ordinal[1] || date_name[2]
-						&& date_name[2] !== ordinal[2])
+				|| date_name[1] && date_name[1] !== ordinal[1]
+				//
+				|| date_name[2] && date_name[2] !== ordinal[2])
 					library_namespace.warn('initialize_era_date: 紀年 [' + this
 							+ '] 起訖時間所設定的紀年<b>開始時間</b> [' + ordinal.join('/')
 							+ ']，與從曆數資料取得的 [' + date_name.join('/') + '] 不同！');
@@ -2854,6 +2855,10 @@ function module_code(library_namespace) {
 					// date 設為 START_DATE，為每個月初的遍歷作準備。
 					ordinal[2] = START_DATE;
 
+					if (!String_to_Date.parser[曆法]) {
+						library_namespace.err('未設定好 String_to_Date.parser['
+								+ 曆法 + ']!');
+					}
 					曆法 = String_to_Date.parser[曆法];
 					// TODO: 這方法太沒效率。
 					while (time < this_end) {
@@ -3177,9 +3182,9 @@ function module_code(library_namespace) {
 		// ---------------------------------------
 		// 出廠前檢測。
 		year_start_time = year_start_time[year_start_time.length - 1];
-		if (year_start_time === this_end)
+		if (year_start_time === this_end) {
 			;
-		else if (紀年曆數 && this_end < year_start_time) {
+		} else if (紀年曆數 && this_end < year_start_time) {
 			// 可能是為了壓縮而被填補滿了。
 			days = new Date(this_end);
 			// assert: 取前一天則必須為紀年起始後（紀年範圍內），與最後一日期間內；

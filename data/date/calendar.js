@@ -3837,6 +3837,7 @@ Bangla_Date.test = new_tester(Date_to_Bangla, Bangla_Date, {
  * 長曆: 1941/1/1 CE (พ.ศ. 2484) 起的泰國佛曆元旦是每年(CE) 1/1。
  * 1889/4/1 (พ.ศ. 2432)  起泰國元旦是每年(CE) 4/1。這之前泰國元旦是每年陰曆五月初五，應落在 CE:3,4月。
  * @see https://en.wikipedia.org/wiki/Thai_solar_calendar
+ * @see https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B9%84%E0%B8%97%E0%B8%A2
  * @see https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B8%AA%E0%B8%B8%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%84%E0%B8%95%E0%B8%B4%E0%B9%84%E0%B8%97%E0%B8%A2
  * @see https://th.wikipedia.org/wiki/%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B9%88%E0%B8%AD%E0%B8%A2:%E0%B9%80%E0%B8%AB%E0%B8%95%E0%B8%B8%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%93%E0%B9%8C%E0%B8%9B%E0%B8%B1%E0%B8%88%E0%B8%88%E0%B8%B8%E0%B8%9A%E0%B8%B1%E0%B8%99
  */
@@ -3864,64 +3865,158 @@ function Date_to_Thai(date, month, year, options) {
 
 	var use_Thai_lunar = (year < 1889 || year === 1889 && month < 4)
 	//
-	&& (Thai_lunar || (Thai_lunar = library_namespace.era('ปฏิทินจันทรคติไทย', {
-		get_era : true
-	})));
-	if (use_Thai_lunar
+	&& (Thai_lunar || (Thai_lunar = library_namespace.era(
 	//
-	&& (use_Thai_lunar = Thai_lunar.Date_to_date_index(_Date || new Date(year, month - 1, date)))) {
+	'ปฏิทินจันทรคติไทย', {
+		get_era : true
+	}))), 準, holidays = [];
+	if (use_Thai_lunar) {
+		if ((_Date || (_Date = new Date(year, month - 1, date)))
+				- Thai_lunar.start < 0)
+			準 = '年';
+	} else if (year < 1889) {
+		準 = '年';
+	}
+	if (use_Thai_lunar && !準
+	//
+	&& (use_Thai_lunar = Thai_lunar.Date_to_date_index(_Date))) {
 		// @see 光緒15年3月
-		return Thai_lunar.日名(use_Thai_lunar[2], use_Thai_lunar[1], use_Thai_lunar[0]).reverse();
+		date = Thai_lunar.日名(use_Thai_lunar[2], use_Thai_lunar[1],
+				use_Thai_lunar[0]);
+		year = date[2];
+		month = date[1];
+		date = date[0];
+		if (month < 5 || month === 5 && date < 5) {
+			// 這之前泰國元旦是每年陰曆五月初五，應落在 CE:3,4月。
+			year--;
+		} else if (month === 5 && date === 5) {
+			// 新年
+			holidays.push('วันขึ้นปีใหม่');
+		}
 
 	} else if (year < 1941) {
-		//@see 中曆1939年11月, 中曆1940年2月, 中曆1940年12月
+		// @see 中曆1939年11月, 中曆1940年2月, 中曆1940年12月
+		// 月份不動，按照公元的排。
 		if (month < 4) {
-			month += 9;
 			year -= Thai_epochal_year + 1;
 		} else {
-			month -= 3;
+			if (year >= 1889 && month === 4 && date === 1) {
+				holidays.push('วันขึ้นปีใหม่');
+			}
 			year -= Thai_epochal_year;
 		}
+
 	} else {
+		// 1941/1/1 CE (พ.ศ. 2484) 起
 		year -= Thai_epochal_year;
+		if (month === 1 && date === 1) {
+			// 1941/1/1 CE (พ.ศ. 2484) 起的泰國佛曆元旦是每年(CE) 1/1。
+			holidays.push('วันขึ้นปีใหม่');
+		} else if (month === 4 && 13 <=date && date <= 15) {
+			// 潑水節
+			holidays.push('สงกรานต์');
+		} 
 	}
 
 	if (options.format === 'serial') {
-		return [ year, month, date ];
+		date = [ year, month, date ];
+		if (use_Thai_lunar) {
+			date.is_lunar = true;
+		}
+		if (準) {
+			date.準 = 準;
+		}
+		if (year > 0) {
+			date.生肖 = library_namespace.十二生肖_LIST[(year + 5).mod(12)];
+		}
+		if (holidays.length > 0) {
+			date.holidays = holidays;
+		}
+		return date;
 	}
 
-	date = [
-			(weekday = Date_to_Thai.weekday_name[weekday]) ? 'วัน' + weekday
-					: '', date || '', Date_to_Thai.month_name[month] || '',
-			year || '' ];
-	if (date[0] && (date[1] || date[2] || date[3])) {
-		date[0] += 'ที่';
+	if (use_Thai_lunar) {
+		// https://th.wikipedia.org/wiki/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99%E0%B9%84%E0%B8%97%E0%B9%80%E0%B8%94%E0%B8%B4%E0%B8%A1
+		date = [
+				date > 0 ? (date > 15 ? 'วันขึ้น' : 'วันแรม')
+						+ library_namespace.to_Thai_numeral(date % 15) : '',
+				month === '雙8' ? 'เดือนแปดหลัง(๘-๘)'
+				// ↑ 'เดือนแปดหลัง' = เดือน แปด หลัง or "เดือน 8 หลัง"
+				// or "๘๘" or "๘-๘" or "กำลังสร้าง เดือน ๘"
+				: (month = Date_to_Thai.lunar_month_name[month]) ? 'เดือน'
+						+ month + '('
+						+ library_namespace.to_Thai_numeral(month) + ')' : '',
+				year > 0 ? 'ปี' + Date_to_Thai.year_name[(year + 5).mod(12)]
+						: '' ];
+		// date.unshift('ตรงกับ');
+
+	} else {
+		date = [
+				(weekday = Date_to_Thai.weekday_name[weekday]) ? 'วัน'
+						+ weekday : '', date || '',
+				Date_to_Thai.month_name[month] || '', year || '' ];
+
+		if (date[0] && (date[1] || date[2] || date[3])) {
+			date[0] += 'ที่';
+		}
+
+		if (!date[2] && !isNaN(date[3])) {
+			// year only?
+			// add 佛滅紀元 พุทธศักราช
+			date[3] = 'พ.ศ. ' + date[3];
+		}
 	}
 
-	if (!date[2] && !isNaN(date[3])) {
-		// year only?
-		// add 佛滅紀元 พุทธศักราช
-		date[3] = 'พ.ศ. ' + date[3];
-	}
-
-	year = [];
-	date.forEach(function(n) {
-		if (n)
-			year.push(n);
-	});
-	return year.join(' ');
+	return date.filter(function(n) {
+		return n;
+	}).join(' ');
 }
 
-// start from 0.
+
+// ปีนักษัตร
+Date_to_Thai.year_name = 'ชวด|ฉลู|ขาล|เถาะ|มะโรง|มะเส็ง|มะเมีย|มะแม|วอก|ระกา|จอ|กุน'
+	.split('|');
+
+// start from 1.
 Date_to_Thai.month_name = '|มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม'
-		.split('|');
+	.split('|');
+Date_to_Thai.lunar_month_name = '|อ้าย|ยี่|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|สิบ|สิบเอ็ด|สิบสอง'
+	.split('|');
 
 // 0: Sunday.
 Date_to_Thai.weekday_name = 'อาทิตย์|จันทร์|อังคาร|พุธ|พฤหัสบดี|ศุกร์|เสาร์'
 		.split('|');
 
+Date_to_Thai.weekday_color = 'red|yellow|pink|green|orange|blue|purple'.split('|');
+Date_to_Thai.weekday_bgcolor = 'red|yellow|pink|#0d0|orange|#88f|#d0d'.split('|');
 
 _.Date_to_Thai = Date_to_Thai;
+
+// -------------------------------------
+
+//e.g., new Date(1935,3,4).format({parser:'Thai'})
+//e.g., new Date(1935,3,4).format('Thai')
+function Thai_parser(date_value, format, locale, options) {
+	var Thai_date = Date_to_Thai(date_value, {
+		format : 'serial'
+	});
+	return library_namespace.parse_escape(format || Thai_parser.default_format, function(s) {
+		return s.replace(/%([Ymd])/g, function(all, s) {
+			s = Thai_parser.convertor[s];
+			return typeof s === 'function' ? s(date_value) : Thai_date[s] || all;
+		});
+	});
+};
+
+Thai_parser.default_format = '%Y/%m/%d';
+Thai_parser.convertor = {
+		Y :	0,
+		m :	1,
+		d :	2
+};
+
+// 註冊parser以供泰國君主使用。
+library_namespace.Date_to_String.parser.Thai = Thai_parser;
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
