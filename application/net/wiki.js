@@ -9104,11 +9104,15 @@ function module_code(library_namespace) {
 			config = new_SQL_config(config);
 		}
 
-		library_namespace.debug(SQL, 2, 'run_SQL');
+		library_namespace.debug(String(SQL), 2, 'run_SQL');
 		// console.log(JSON.stringify(config));
 		var connection = mysql.createConnection(config);
 		connection.connect();
-		connection.query(SQL, callback);
+		if (Array.isArray(SQL)) {
+			connection.query(SQL[0], SQL[1], callback);
+		} else {
+			connection.query(SQL, callback);
+		}
 		connection.end();
 	}
 
@@ -9446,12 +9450,43 @@ function module_code(library_namespace) {
 		+ 'T' + timestamp[4] + ':' + timestamp[5] + ':' + timestamp[6] + 'Z';
 	}
 
+	function generate_SQL_WHERE(condition, field_prefix) {
+		var condition_array = [], value_array = [];
+
+		for (var name in condition) {
+			var value = condition[name];
+			if (!/^[a-z_]+$/.test(name)) {
+				throw 'Invalid field name: ' + name;
+			}
+			if (!name.startsWith(field_prefix)) {
+				name = field_prefix + name;
+			}
+			var matched = value.match(/^([=<>])([\s\S]+)/);
+			if (matched) {
+				// TODO: for other operators
+				// @see https://mariadb.com/kb/en/mariadb/select/
+				name += matched[0] + '?';
+				// DO NOT quote the value yourself!!
+				value = matched[1];
+			} else {
+				name += '=?';
+			}
+			condition_array.push(name);
+			value_array.push(value);
+		}
+
+		// for ' OR '
+		return [ ' WHERE ' + condition_array.join(' AND '), value_array ];
+	}
+
+	// ----------------------------------------------------
+
 	/**
 	 * Get page title 頁面標題 list of [[Special:RecentChanges]] 最近更改.
 	 * 
 	 * <code>
 	   // get title list
-	   CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, {namespace:0, limit:20});
+	   CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, {language:'ja', namespace:0, limit:20});
 	   </code>
 	 * 
 	 * TODO: filter
@@ -9463,7 +9498,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @see https://www.mediawiki.org/wiki/Manual:Recentchanges_table
 	 */
-	function get_recent(callback, options) {
+	function get_recent_via_databases(callback, options) {
 		if (options && (typeof options === 'string')) {
 			options = {
 				// treat options as language
@@ -9472,20 +9507,24 @@ function module_code(library_namespace) {
 		} else {
 			options = library_namespace.setup_options(options);
 		}
-		/** {Integer}namespace NO. */
-		var namespace = options.namespace && get_namespace(options.namespace),
-		/** {ℕ⁰:Natural+0}limit count. */
-		limit = options.limit,
-		//
-		SQL = options.SQL || ('SELECT * FROM `recentchanges` WHERE `rc_bot`=0'
-		// https://www.mediawiki.org/wiki/Manual:Recentchanges_table
-		+ (library_namespace.is_digits(namespace)
-		//
-		? ' AND `rc_namespace`=' + namespace : '')
-		// new → old, may contain duplicate title.
-		+ ' ORDER BY `rc_timestamp` DESC LIMIT '
-		//
-		+ (library_namespace.is_digits(limit) ? limit : 10));
+
+		var SQL = options.SQL;
+		if (!SQL) {
+			SQL = generate_SQL_WHERE(Object.assign({
+				bot : 0,
+				/** {Integer|String}namespace NO. */
+				namespace : options.namespace && +get_namespace(options.namespace) || 0
+			},
+			// options.condition: 自訂篩選條件。
+			options.condition), 'rc_');
+
+			SQL[0] = 'SELECT * FROM `recentchanges`' + SQL[0]
+			// new → old, may contain duplicate title.
+			+ ' ORDER BY `rc_timestamp` DESC LIMIT '
+			/** {ℕ⁰:Natural+0}limit count. */
+			// default: 10 records
+			+ (options.limit > 0 ? options.limit : 10);
+		}
 
 		run_SQL(SQL, function(error, rows, fields) {
 			if (error) {
@@ -9495,7 +9534,7 @@ function module_code(library_namespace) {
 
 			var result = [];
 			rows.forEach(function(row) {
-				if (!(row.rc_user > 0) && !(rc_type < 5)) {
+				if (!(row.rc_user > 0) && !(row.rc_type < 5)) {
 					// On wikis using Wikibase the results will otherwise be
 					// meaningless.
 					return;
@@ -9522,15 +9561,22 @@ function module_code(library_namespace) {
 					// an unregistered user. Corresponds to rev_user_text
 					user : row.rc_user_text.toString('utf8'),
 					is_new : !!row.rc_new,
+					// is_bot : !!row.rc_bot,
+					// is_minor : !!row.rc_minor,
 					is_flow : row.rc_source.toString('utf8') === 'flow',
 					length : row.rc_new_len,
-					old_length : row.rc_old_len,
+					// old_length : row.rc_old_len,
+					// patrolled : row.rc_patrolled,
+					// deleted : row.rc_deleted,
+
 					// Corresponds to rev_timestamp
 					// use new Date(.timestamp)
 					timestamp : SQL_timestamp_to_ISO(row.rc_timestamp),
+
 					// Links to the rev_id key of the new page revision
 					// (after the edit occurs) in the revision table.
 					rev_id : row.rc_this_oldid,
+					// rev_id : row.rev_parent_id,
 					comment : row.rc_comment.toString('utf8'),
 					row : row
 				});
@@ -9541,9 +9587,14 @@ function module_code(library_namespace) {
 		options.config || options.language);
 	}
 
-	if (SQL_config) {
-		wiki_API.recent = get_recent;
+	function get_recent_via_API(callback, options) {
+		// TODO: use https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
+		throw 'NYI';
 	}
+
+	wiki_API.recent_via_API = get_recent_via_API;
+	// 讓 wiki_API.recent 採用較有效率的實現方式。
+	wiki_API.recent = SQL_config ? get_recent_via_databases : get_recent_via_API;
 
 	// ----------------------------------------------------
 
@@ -9565,8 +9616,9 @@ function module_code(library_namespace) {
 		}
 
 		// TODO: need test
+		var last_chacked_rev_id = options.last_id;
 		setInterval(function() {
-			get_recent(listener, options);
+			wiki_API.recent(listener, options);
 		}, options.interval || 60 * 1000);
 	}
 
