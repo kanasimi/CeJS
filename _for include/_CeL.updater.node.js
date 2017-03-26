@@ -16,14 +16,33 @@ node _CeL.updater.node.js
 // --------------------------------------------------------------------------------------------
 // 設定區。
 
+var p7z_path = [ '7z', '"C:\\Program Files\\7-Zip\\7z.exe"' ],
 // const 下載之後將壓縮檔存成這個檔名。
-var target_file = 'CeJS-master.zip';
+target_file = 'CeJS-master.zip';
 
 // --------------------------------------------------------------------------------------------
 
 // const
-var https = require('https'), node_fs = require('fs'), write_stream = node_fs
-		.createWriteStream(target_file), child_process = require('child_process');
+var https = require('https'), node_fs = require('fs'), child_process = require('child_process');
+
+// Check 7z
+if (!Array.isArray(p7z_path)) {
+	p7z_path = [ p7z_path ];
+}
+if (!p7z_path.some(function(path) {
+	// mute stderr
+	var stderr = process.stderr.write;
+	process.stderr.write = function() {};
+	try {
+		child_process.execSync(path + ' -h', 'ignore');
+	} catch(e) {
+		path = null;
+	}
+	process.stderr.write = stderr;
+	return path && (p7z_path = path);
+})) {
+	throw 'Please set up the p7z_path first!';
+}
 
 try_path_file();
 
@@ -31,6 +50,15 @@ try_path_file();
 // process.chdir('D:\\');
 
 // --------------------------------------------------------------------------------------------
+
+try {
+	// 清理戰場。
+	node_fs.unlinkSync(target_file);
+} catch (e) {
+}
+
+// 先確認/轉到目標目錄，才能 open file。
+var write_stream = node_fs.createWriteStream(target_file);
 
 function try_path_file() {
 	// modify from _CeL.loader.nodejs.js
@@ -69,18 +97,26 @@ function try_path_file() {
 var sum_size = 0;
 
 function on_response(response) {
+	response.pipe(write_stream);
 	response.on('data', function(data) {
 		sum_size += data.length;
 		process.stdout.write(target_file + ': ' + sum_size + ' bytes...\r');
-		write_stream.write(data);
 	});
 	response.on('end', function(e) {
+		// flush data
+		write_stream.end();
+		// release file handler
+		write_stream.close();
 		console.log(target_file + ': ' + sum_size
 				+ ' bytes done. Extracting files to ' + process.cwd() + '...');
-		write_stream.end();
 		// 解開 GitHub 最新版本壓縮檔案。
-		child_process.exec('"C:\\Program Files\\7-Zip\\7z.exe" x -y "'
-				+ target_file + '"');
+		child_process.execSync(p7z_path + ' t "' + target_file + '" && '
+				+ p7z_path + ' x -y "' + target_file + '"', {
+			// pass I/O to the child process
+			// https://nodejs.org/api/child_process.html#child_process_options_stdio
+			stdio : 'inherit'
+		});
+		// throw 'Some error occurred! Bad archive?';
 	});
 }
 
