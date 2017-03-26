@@ -199,6 +199,7 @@ function module_code(library_namespace) {
 	gettext_date = library_namespace.gettext.date,
 
 	// 專門供搜尋各特殊紀年使用。
+	// @see create_era_search_pattern()
 	era_search_pattern, era_key_list,
 
 	// search_index[ {String}key : 朝代、君主(帝王)、帝王紀年、年號紀年、國家 ]
@@ -783,6 +784,43 @@ function module_code(library_namespace) {
 		}
 
 		return eras;
+	}
+
+	// 為取得單一 era。否則應用 to_era_Date()。
+	function get_era(name) {
+		if (name instanceof Era) {
+			return name;
+		}
+
+		var list = search_index[name];
+		if (!list) {
+			return;
+		}
+
+		if (Array.isArray(list)) {
+			// assert: list = [ {Set}, {String}alias ]
+			if (list.length === 1) {
+				list = list[0];
+			} else if (list.length === 2 && library_namespace.is_Set(list[0])
+					&& list[0].size === 0) {
+				return get_era(list[1]);
+			} else {
+				return;
+			}
+		}
+
+		var era;
+		if (library_namespace.is_Set(list)) {
+			if (list.size !== 1)
+				return;
+			list.forEach(function(_era) {
+				era = _era;
+			});
+		} else {
+			// list is {Era}
+			era = list;
+		}
+		return era;
 	}
 
 	// 登錄 key，使 search_index[key] 可以找到 era。
@@ -5090,471 +5128,465 @@ function module_code(library_namespace) {
 		// String_to_Date.default_offset
 		;
 
-		era_data_array
-				.forEach(function(era_data, index) {
+		function for_era_data(era_data, index) {
 
-					if (!(era_data = pre_parse_紀年資料(index)))
-						return;
+			if (!(era_data = pre_parse_紀年資料(index)))
+				return;
 
-					var tmp, i, j, k,
-					// 紀年:紀年名稱
-					紀年 = era_data[0], 起訖 = era_data[1], 曆數 = era_data[2],
-					//
-					附加屬性 = era_data[3];
+			var tmp, i, j, k,
+			// 紀年:紀年名稱
+			紀年 = era_data[0], 起訖 = era_data[1],
+			//
+			曆數 = era_data[2], 附加屬性 = era_data[3];
 
-					// 至此已定出 (紀年), (起訖), (曆數), (其他附加屬性)，接下來作進一步解析。
+			// 至此已定出 (紀年), (起訖), (曆數), (其他附加屬性)，接下來作進一步解析。
 
-					if (紀年 && !Array.isArray(紀年))
-						紀年 = String(紀年).split(pack_era.era_name_classifier);
-					if (!紀年 || 紀年.length === 0) {
-						library_namespace.err('parse_era: 無法判別紀年 [' + index
-								+ '] 之名稱資訊！');
-						return;
+			if (紀年 && !Array.isArray(紀年))
+				紀年 = String(紀年).split(pack_era.era_name_classifier);
+			if (!紀年 || 紀年.length === 0) {
+				library_namespace.err('parse_era: 無法判別紀年 [' + index
+						+ '] 之名稱資訊！');
+				return;
+			}
+
+			library_namespace.debug(
+			//
+			'前期準備：正規化紀年 [' + 紀年 + '] 之名稱資訊。', 2);
+
+			// 紀年 = [ 朝代, 君主(帝王), 紀年 ]
+			// 配合 (紀年名稱索引值)
+			if (紀年.length === 1 && 紀年[0]) {
+				// 朝代兼紀年：紀年=朝代
+				前一紀年名稱 = [ 紀年[2] = 紀年[0] ];
+
+			} else {
+				if (!紀年[0] && (tmp = 前一紀年名稱.length) > 0) {
+					// 填補 inherited 繼承值/預設值。
+					// 得允許前一位有紀年，後一位無；以及相反的情況。
+					紀年.shift();
+					tmp -= 紀年.length;
+					// 3 = 最大紀年名稱資料長度 = 紀年名稱索引值.國家
+					Array.prototype.unshift.apply(紀年, 前一紀年名稱.slice(0,
+							tmp > 1 ? tmp : 1));
+				}
+				紀年.forEach(function(name, index) {
+					if (name === parse_era.inherit) {
+						if (!前一紀年名稱[index])
+							library_namespace.err('parse_era: 前一紀年 [' + 前一紀年名稱
+									+ '] 並未設定 index [' + index + ']！');
+						紀年[index] = 前一紀年名稱[index] || '';
 					}
+				});
 
-					library_namespace.debug(
-					//
-					'前期準備：正規化紀年 [' + 紀年 + '] 之名稱資訊。', 2);
+				// do clone
+				前一紀年名稱 = 紀年.slice();
+				if (紀年[1] && !紀年[2])
+					// 朝代/君主(帝王)：紀年=君主(帝王)
+					紀年[2] = 紀年[1];
+			}
 
-					// 紀年 = [ 朝代, 君主(帝王), 紀年 ]
-					// 配合 (紀年名稱索引值)
-					if (紀年.length === 1 && 紀年[0]) {
-						// 朝代兼紀年：紀年=朝代
-						前一紀年名稱 = [ 紀年[2] = 紀年[0] ];
+			// 處理如周諸侯國之類。
+			tmp = 紀年[0].match(國_PATTERN);
+			// 例如:
+			// 魯國/昭公 → 魯國/魯昭公
+			// 秦國/秦王政 → 秦國/秦王政 (no change)
+			if (tmp && !紀年[1].includes('國') && !紀年[1].includes(tmp = tmp[1])) {
+				// add_attribute(附加屬性, '君主', tmp[1] + 紀年[1]);
 
-					} else {
-						if (!紀年[0] && (tmp = 前一紀年名稱.length) > 0) {
-							// 填補 inherited 繼承值/預設值。
-							// 得允許前一位有紀年，後一位無；以及相反的情況。
-							紀年.shift();
-							tmp -= 紀年.length;
-							// 3 = 最大紀年名稱資料長度 = 紀年名稱索引值.國家
-							Array.prototype.unshift.apply(紀年, 前一紀年名稱.slice(0,
-									tmp > 1 ? tmp : 1));
-						}
-						紀年.forEach(function(name, index) {
-							if (name === parse_era.inherit) {
-								if (!前一紀年名稱[index])
-									library_namespace.err('parse_era: 前一紀年 ['
-											+ 前一紀年名稱 + '] 並未設定 index [' + index
-											+ ']！');
-								紀年[index] = 前一紀年名稱[index] || '';
-							}
+				// 直接改才能得到效果。
+				紀年[1] = tmp + 紀年[1];
+			}
+
+			紀年.reverse();
+
+			if (國家) {
+				if (!紀年[3])
+					紀年[3] = 國家;
+
+				tmp = 紀年[0].match(名稱加稱號_PATTERN);
+				if (tmp) {
+					// 為了parse不包括"天皇"，如 "推古９年" 的情況。
+					紀年.push(tmp[1]);
+				}
+			}
+
+			// assert: 至此
+			// 前一紀年名稱 = [ 朝代, 君主(帝王), 紀年 ]
+			// 紀年 = [ 紀年, 君主(帝王), 朝代, 國家 ]
+
+			tmp = false;
+			if (/\d$/.test(紀年[0])) {
+				tmp = '紀年名稱 [' + 紀年[0] + ']';
+			} else if (/\d$/.test(紀年[1])) {
+				tmp = '君主名稱 [' + 紀年[1] + ']';
+			}
+			if (tmp) {
+				tmp = 'parse_era: ' + tmp
+				//
+				+ ' 以阿拉伯數字做結尾，請改成原生語言之數字表示法，或如羅馬數字之結尾。'
+				//
+				+ '本函式庫以阿拉伯數字標示年分，因此阿拉伯數字結尾之名稱將與年分混淆。';
+				// 注意: 這邊的警告在載入後會被清空。
+				library_namespace.warn(tmp);
+				// throw new Error(tmp);
+			}
+
+			library_namespace.debug(
+			//
+			'前期準備：正規化紀年 [' + 紀年 + '] 起訖日期。', 2);
+
+			if (!(起訖 = parse_duration(起訖, 紀年)))
+				if (options.extract_only)
+					起訖 = [ new Date(0), new Date(0) ];
+				else {
+					library_namespace.err('parse_era: 跳過起訖日期錯誤的紀年資料！');
+					return;
+				}
+
+			if (!起訖[0])
+				if (index > 0)
+					// 本一個紀年的起始日期接續上一個紀年。
+					起訖[0] = era_data_array[index - 1].end;
+				else if (options.extract_only)
+					起訖[0] = new Date(0);
+				else {
+					library_namespace.err('parse_era: 沒有上一紀年以資參考！');
+					return;
+				}
+
+			起訖[0] = normalize_date(起訖[0], 起訖[2], false, true);
+			if (!起訖[0])
+				throw new Error('parse_era: 未能 parse 起始日期: [' + 紀年 + ']！');
+
+			if (起訖[1])
+				// tmp 於此將設成是否取終點。
+				tmp = true;
+			else if ((tmp = pre_parse_紀年資料(index + 1))
+			// 下一個紀年的起始日期接續本紀年，因此先分解下一個紀年。
+			// assert: tmp[1](起訖) is String
+			&& (tmp = parse_duration(tmp[1], tmp[0])) && tmp[0]) {
+				起訖[1] = tmp[0];
+				起訖[2] = tmp[2];
+				// 既然直接採下一個紀年的起始日期，就不需要取終點了。
+				tmp = false;
+			} else if (options.extract_only)
+				起訖[1] = new Date(0);
+			else {
+				library_namespace.err('parse_era: 無法求得紀年[' + 紀年 + ']之結束時間！');
+				return;
+			}
+
+			if (持續日數_PATTERN.test(起訖[1])) {
+				// 訖時間 "+d" : 持續日數
+				tmp = +起訖[1];
+				(起訖[1] = normalize_date(起訖[0], 起訖[2], true, true)).setDate(tmp);
+
+			} else
+				// 訖時間 "–y/m/d"
+				起訖[1] = normalize_date(起訖[1], 起訖[2], tmp, true);
+
+			tmp = {
+				// 紀年名稱資訊（範疇小→大）
+				// [ 紀年, 君主(帝王), 朝代, 國家, 其他搜尋 keys ]
+				name : 紀年,
+
+				// {Date}起 標準時間(如UTC+8),開始時間.
+				start : 起訖[0],
+				// {Date}訖 標準時間(如UTC+8), 結束時間.
+				end : 起訖[1],
+
+				// 共存紀年/同時存在紀年 []:
+				// 在本紀年開始時尚未結束的紀年 list,
+				contemporary : [],
+
+				// 年分起始 Date value (搜尋用) [ 1年, 2年, .. ],
+				// year_tart:[],
+
+				// 曆數/歷譜資料:
+				// 各月分資料 [ [1年之月分資料], [2年之月分資料], .. ],
+				// 這邊還不先作處理。
+				calendar : 曆數
+
+			// { 其他附加屬性 : .. }
+			};
+
+			// 處理 time zone / time offset (UTC offset by minutes)
+			if (!isNaN(minute_offset)) {
+				// 注意:這邊不設定真正的 date value，使得所得出的值為「把本地當作紀元所使用的當地」所得出之值。
+				tmp[MINUTE_OFFSET_KEY] = minute_offset;
+				// set_minute_offset(起訖[0], minute_offset, true);
+				// set_minute_offset(起訖[1], minute_offset, true);
+			}
+
+			// assert: 至此
+			// 起訖 = [ 起 Date, 訖 Date, parser ]
+
+			last_era_data = new Era(tmp);
+
+			library_namespace.debug('add period [' + 紀年 + ']。', 2);
+
+			i = 紀年名稱索引值.國家;
+			k = undefined;
+			tmp = period_root;
+			// [ , 君主, 朝代, 國家 ]
+			var period_attribute_hierarchy = [];
+			for (var start = 起訖[0].getTime(),
+			//
+			end = 起訖[1].getTime();;) {
+				// 若本 era 之時間範圍於原 period 外，
+				// 則擴張 period 之時間範圍以包含本 era。
+				if (!(tmp.start <= start))
+					tmp.start = start;
+				if (!(end <= tmp.end))
+					tmp.end = end;
+
+				if (!(j = 紀年[i]) || i <= 0) {
+					if (j || (j = k)) {
+						if (!tmp.era)
+							tmp.era = library_namespace.null_Object();
+						add_attribute(tmp.era, j, last_era_data);
+						if (library_namespace.is_debug()
+								&& Array.isArray(tmp.era[j]))
+							library_namespace.warn(
+							//
+							'add_attribute: 存在相同朝代、名稱重複之紀年 '
+									+ tmp.era[j].length + ' 個: '
+									+ last_era_data);
+					}
+					break;
+				}
+
+				k = j;
+				if (!(j in tmp.sub))
+					tmp.add_sub(start, end, j);
+
+				period_attribute_hierarchy[i--]
+				// move to sub-period.
+				= (tmp = tmp.sub[j]).attributes;
+			}
+
+			library_namespace.debug('設定紀年[' + 紀年 + ']之搜尋用 index。', 2);
+
+			紀年.forEach(function(era_token) {
+				add_to_era_by_key(era_token, last_era_data);
+			});
+
+			library_namespace.debug(
+			//
+			'正規化紀年 [' + 紀年 + '] 之其他屬性。', 2);
+
+			for (i in 附加屬性) {
+				j = 附加屬性[i];
+				if (i in Period_屬性歸屬) {
+					i = Period_屬性歸屬[tmp = i];
+					// now: tmp = name,
+					// i = Period_屬性歸屬 index of name
+					// e.g., tmp = 君主名, i = 1
+
+					// 解開屬性值。
+					// j = 'a;b' → k = [ 'a', 'b' ]
+					if (Array.isArray(j)) {
+						k = [];
+						j.forEach(function(name) {
+							Array_push(k, name
+							//
+							.split(pack_era.era_name_separator));
 						});
-
-						// do clone
-						前一紀年名稱 = 紀年.slice();
-						if (紀年[1] && !紀年[2])
-							// 朝代/君主(帝王)：紀年=君主(帝王)
-							紀年[2] = 紀年[1];
-					}
-
-					// 處理如周諸侯國之類。
-					tmp = 紀年[0].match(國_PATTERN);
-					// 例如:
-					// 魯國/昭公 → 魯國/魯昭公
-					// 秦國/秦王政 → 秦國/秦王政 (no change)
-					if (tmp && !紀年[1].includes('國')
-							&& !紀年[1].includes(tmp = tmp[1])) {
-						// add_attribute(附加屬性, '君主', tmp[1] + 紀年[1]);
-
-						// 直接改才能得到效果。
-						紀年[1] = tmp + 紀年[1];
-					}
-
-					紀年.reverse();
-
-					if (國家) {
-						if (!紀年[3])
-							紀年[3] = 國家;
-
-						tmp = 紀年[0].match(名稱加稱號_PATTERN);
-						if (tmp) {
-							// 為了parse不包括"天皇"，如 "推古９年" 的情況。
-							紀年.push(tmp[1]);
-						}
-					}
-
-					// assert: 至此
-					// 前一紀年名稱 = [ 朝代, 君主(帝王), 紀年 ]
-					// 紀年 = [ 紀年, 君主(帝王), 朝代, 國家 ]
-
-					tmp = false;
-					if (/\d$/.test(紀年[0])) {
-						tmp = '紀年名稱 [' + 紀年[0] + ']';
-					} else if (/\d$/.test(紀年[1])) {
-						tmp = '君主名稱 [' + 紀年[1] + ']';
-					}
-					if (tmp) {
-						tmp = 'parse_era: ' + tmp
-						//
-						+ ' 以阿拉伯數字做結尾，請改成原生語言之數字表示法，或如羅馬數字之結尾。'
-						//
-						+ '本函式庫以阿拉伯數字標示年分，因此阿拉伯數字結尾之名稱將與年分混淆。';
-						// 注意: 這邊的警告在載入後會被清空。
-						library_namespace.warn(tmp);
-						// throw new Error(tmp);
-					}
-
-					library_namespace.debug(
-					//
-					'前期準備：正規化紀年 [' + 紀年 + '] 起訖日期。', 2);
-
-					if (!(起訖 = parse_duration(起訖, 紀年)))
-						if (options.extract_only)
-							起訖 = [ new Date(0), new Date(0) ];
-						else {
-							library_namespace.err('parse_era: 跳過起訖日期錯誤的紀年資料！');
-							return;
-						}
-
-					if (!起訖[0])
-						if (index > 0)
-							// 本一個紀年的起始日期接續上一個紀年。
-							起訖[0] = era_data_array[index - 1].end;
-						else if (options.extract_only)
-							起訖[0] = new Date(0);
-						else {
-							library_namespace.err('parse_era: 沒有上一紀年以資參考！');
-							return;
-						}
-
-					起訖[0] = normalize_date(起訖[0], 起訖[2], false, true);
-					if (!起訖[0])
-						throw new Error('parse_era: 未能 parse 起始日期: [' + 紀年
-								+ ']！');
-
-					if (起訖[1])
-						// tmp 於此將設成是否取終點。
-						tmp = true;
-					else if ((tmp = pre_parse_紀年資料(index + 1))
-					// 下一個紀年的起始日期接續本紀年，因此先分解下一個紀年。
-					// assert: tmp[1](起訖) is String
-					&& (tmp = parse_duration(tmp[1], tmp[0])) && tmp[0]) {
-						起訖[1] = tmp[0];
-						起訖[2] = tmp[2];
-						// 既然直接採下一個紀年的起始日期，就不需要取終點了。
-						tmp = false;
-					} else if (options.extract_only)
-						起訖[1] = new Date(0);
-					else {
-						library_namespace.err('parse_era: 無法求得紀年[' + 紀年
-								+ ']之結束時間！');
-						return;
-					}
-
-					if (持續日數_PATTERN.test(起訖[1])) {
-						// 訖時間 "+d" : 持續日數
-						tmp = +起訖[1];
-						(起訖[1] = normalize_date(起訖[0], 起訖[2], true, true))
-								.setDate(tmp);
 
 					} else
-						// 訖時間 "–y/m/d"
-						起訖[1] = normalize_date(起訖[1], 起訖[2], tmp, true);
+						k = j.split(pack_era.era_name_separator);
 
-					tmp = {
-						// 紀年名稱資訊（範疇小→大）
-						// [ 紀年, 君主(帝王), 朝代, 國家, 其他搜尋 keys ]
-						name : 紀年,
+					// 將屬性值搬移至 period_root 之 tree 中。
+					// i === 0，即紀元本身時，毋須搬移。
+					// 使用者測試資料時，可能導致 j 為 undefined。
+					if (0 < i && (j = period_attribute_hierarchy[i])) {
+						// j: attributes of hierarchy[i]
+						// assert: Object.isObject(j)
+						if (tmp in j)
+							// 解決重複設定、多重設定問題。
+							// assert: Array.isArray(j[tmp])
+							Array_push(j[tmp], k);
+						else
+							j[tmp] = k;
 
-						// {Date}起 標準時間(如UTC+8),開始時間.
-						start : 起訖[0],
-						// {Date}訖 標準時間(如UTC+8), 結束時間.
-						end : 起訖[1],
-
-						// 共存紀年/同時存在紀年 []:
-						// 在本紀年開始時尚未結束的紀年 list,
-						contemporary : [],
-
-						// 年分起始 Date value (搜尋用) [ 1年, 2年, .. ],
-						// year_tart:[],
-
-						// 曆數/歷譜資料:
-						// 各月分資料 [ [1年之月分資料], [2年之月分資料], .. ],
-						// 這邊還不先作處理。
-						calendar : 曆數
-
-					// { 其他附加屬性 : .. }
-					};
-
-					// 處理 time zone / time offset (UTC offset by minutes)
-					if (!isNaN(minute_offset)) {
-						// 注意:這邊不設定真正的 date value，使得所得出的值為「把本地當作紀元所使用的當地」所得出之值。
-						tmp[MINUTE_OFFSET_KEY] = minute_offset;
-						// set_minute_offset(起訖[0], minute_offset, true);
-						// set_minute_offset(起訖[1], minute_offset, true);
+						// 僅將(留下)君主、紀元年號相關的附加屬性供查閱，其他較高階的朝代、國家等則省略之。
+						// 恐還需要更改 ((sign_note.copy_attributes))!
+						if (Period_屬性歸屬[tmp] <= Period_屬性歸屬.君主)
+							add_attribute(last_era_data, tmp, j[tmp]);
+						// 實際效用:將此屬性搬移、設定到 period_root 之 tree 中。
+						delete 附加屬性[tmp];
 					}
 
-					// assert: 至此
-					// 起訖 = [ 起 Date, 訖 Date, parser ]
-
-					last_era_data = new Era(tmp);
-
-					library_namespace.debug('add period [' + 紀年 + ']。', 2);
-
-					i = 紀年名稱索引值.國家;
-					k = undefined;
-					tmp = period_root;
-					// [ , 君主, 朝代, 國家 ]
-					var period_attribute_hierarchy = [];
-					for (var start = 起訖[0].getTime(),
-					//
-					end = 起訖[1].getTime();;) {
-						// 若本 era 之時間範圍於原 period 外，
-						// 則擴張 period 之時間範圍以包含本 era。
-						if (!(tmp.start <= start))
-							tmp.start = start;
-						if (!(end <= tmp.end))
-							tmp.end = end;
-
-						if (!(j = 紀年[i]) || i <= 0) {
-							if (j || (j = k)) {
-								if (!tmp.era)
-									tmp.era = library_namespace.null_Object();
-								add_attribute(tmp.era, j, last_era_data);
-								if (library_namespace.is_debug()
-										&& Array.isArray(tmp.era[j]))
-									library_namespace.warn(
-									//
-									'add_attribute: 存在相同朝代、名稱重複之紀年 '
-											+ tmp.era[j].length + ' 個: '
-											+ last_era_data);
-							}
-							break;
-						}
-
-						k = j;
-						if (!(j in tmp.sub))
-							tmp.add_sub(start, end, j);
-
-						period_attribute_hierarchy[i--]
-						// move to sub-period.
-						= (tmp = tmp.sub[j]).attributes;
-					}
-
-					library_namespace.debug('設定紀年[' + 紀年 + ']之搜尋用 index。', 2);
-
-					紀年.forEach(function(era_token) {
-						add_to_era_by_key(era_token, last_era_data);
-					});
-
-					library_namespace.debug(
-					//
-					'正規化紀年 [' + 紀年 + '] 之其他屬性。', 2);
-
-					for (i in 附加屬性) {
-						j = 附加屬性[i];
-						if (i in Period_屬性歸屬) {
-							i = Period_屬性歸屬[tmp = i];
-							// now: tmp = name,
-							// i = Period_屬性歸屬 index of name
-							// e.g., tmp = 君主名, i = 1
-
-							// 解開屬性值。
-							// j = 'a;b' → k = [ 'a', 'b' ]
-							if (Array.isArray(j)) {
-								k = [];
-								j.forEach(function(name) {
-									Array_push(k, name
-									//
-									.split(pack_era.era_name_separator));
-								});
-
-							} else
-								k = j.split(pack_era.era_name_separator);
-
-							// 將屬性值搬移至 period_root 之 tree 中。
-							// i === 0，即紀元本身時，毋須搬移。
-							// 使用者測試資料時，可能導致 j 為 undefined。
-							if (0 < i && (j = period_attribute_hierarchy[i])) {
-								// j: attributes of hierarchy[i]
-								// assert: Object.isObject(j)
-								if (tmp in j)
-									// 解決重複設定、多重設定問題。
-									// assert: Array.isArray(j[tmp])
-									Array_push(j[tmp], k);
-								else
-									j[tmp] = k;
-
-								// 僅將(留下)君主、紀元年號相關的附加屬性供查閱，其他較高階的朝代、國家等則省略之。
-								// 恐還需要更改 ((sign_note.copy_attributes))!
-								if (Period_屬性歸屬[tmp] <= Period_屬性歸屬.君主)
-									add_attribute(last_era_data, tmp, j[tmp]);
-								// 實際效用:將此屬性搬移、設定到 period_root 之 tree 中。
-								delete 附加屬性[tmp];
-							}
-
-							if (tmp in 紀年名稱索引值) {
-								library_namespace.debug(
-								// 設定所有屬性值之 search index。
-								'設定紀年[' + 紀年 + ']之次要搜尋用 index ['
-								// 例如: 元太祖→大蒙古國太祖
-								+ tmp + '] (level ' + i + ')。', 2);
-								k.forEach(function(name) {
-									if (name
-									//
-									&& !紀年.includes(name)) {
-										add_to_era_by_key(name,
-										// 對 i 不為 0–2 的情況，將 last_era_data 直接加進去。
-										i >= 0 ? 紀年[i] : last_era_data);
-
-										// 實際效用:除了既定的((紀年名稱索引值))外，
-										// ((紀年)) 都被拿來放屬性索引值。
-										// TODO:
-										// 對其他同性質的亦能加入此屬性。
-										// 例如設定
-										// "朝代=曹魏"
-										// 則所有曹魏紀年皆能加入此屬性，
-										// 如此則不須每個紀年皆個別設定。
-										if (i === 0)
-											// ((紀年)) === last_era_data.name
-											紀年.push(name);
-									}
-								});
-							}
-
-						} else if (i === '月名' || i === MONTH_NAME_KEY) {
-							if (j = parse_month_name(j,
-									last_era_data[MONTH_NAME_KEY]))
-								last_era_data[MONTH_NAME_KEY] = j;
-						} else
-							add_attribute(last_era_data, i, j);
-					}
-
-					// 處理 accuracy/準度/誤差/正確度。
-					if (!last_era_data.準)
-						for (i in 準確程度_ENUM)
-							if (last_era_data[i]) {
-								last_era_data.準 = i;
-								break;
-							}
-					// check 準度。
-					if (i = last_era_data.準) {
-						if (!/^\d*[年月日]$/.test(i) && !(i in 準確程度_ENUM))
-							library_namespace.warn('parse_era: 未支援紀年[' + 紀年
-									+ ']所指定之準確度：[' + i + ']');
-						if (!last_era_data.calendar && !last_era_data.精)
-							last_era_data.精 = '年';
-					}
-
-					// 處理 precision/精度準度/精密度準確度。
-					// cf. https://en.wikipedia.org/wiki/Module:Wikidata
-					i = last_era_data.精;
-					if (i === '年') {
-						if (!last_era_data.calendar)
-							last_era_data.calendar
-							// 自動指定個常用的曆法。
-							= ':' + standard_time_parser;
-						last_era_data.大月 = CE_MONTH_DAYS;
-
-					} else {
-						if (i && i !== '月' && i !== '日')
-							library_namespace.warn('parse_era: 未支援紀年[' + 紀年
-									+ ']所指定之精密度：[' + i + ']');
-
-						if (('歲首' in last_era_data)
-						// 此處之"歲首"指每年開始之月序數，當前農曆為1。秦曆始於10。
-						// 惟曆法上之"歲首"指每歲起算點(之月序數)。當前農曆之"歲"指冬至月首至冬至月首之間，"年"指正月首(1月1日)至正月首之間，故歲首為11月1日夜半(子夜時刻)。
-						&& (i = last_era_data.歲首 | 0) !== START_MONTH
-						//
-						&& 0 < i && i <= LUNISOLAR_MONTH_COUNT)
-							last_era_data.歲首序 = i - START_MONTH;
-
-						if (!(0 < (last_era_data.大月 |= 0))
-								|| last_era_data.大月 === 大月)
-							delete last_era_data.大月;
-					}
-
-					if (last_era_data.參照用) {
+					if (tmp in 紀年名稱索引值) {
 						library_namespace.debug(
-						//
-						'為使後來的操作能利用此新加入紀年 [' + last_era_data
-						//
-						+ ']，重新設定 era_search_pattern。', 3);
-						era_search_pattern = null;
-					}
+						// 設定所有屬性值之 search index。
+						'設定紀年[' + 紀年 + ']之次要搜尋用 index ['
+						// 例如: 元太祖→大蒙古國太祖
+						+ tmp + '] (level ' + i + ')。', 2);
+						k.forEach(function(name) {
+							if (name
+							//
+							&& !紀年.includes(name)) {
+								add_to_era_by_key(name,
+								// 對 i 不為 0–2 的情況，將 last_era_data 直接加進去。
+								i >= 0 ? 紀年[i] : last_era_data);
 
-					if (options.extract_only)
-						return;
-
-					i = era_list.length;
-					if (i === 0) {
-						era_list.push(last_era_data);
-						return;
-					}
-
-					var start = 起訖[0],
-					//
-					contemporary = last_era_data.contemporary;
-
-					// 紀年E 插入演算：
-					// 依紀年開始時間，以 binary search 找到插入點 index。
-					i -= 4;
-					// 因為輸入資料通常按照時間順序，
-					// 因此可以先檢查最後幾筆資料，以加快速度。
-					if (i < 9)
-						i = 0;
-					else if (start < era_list[i].start)
-						i = era_list.search_sorted(last_era_data, {
-							comparator : compare_start_date,
-							found : true,
-							start : 0
+								// 實際效用:除了既定的((紀年名稱索引值))外，
+								// ((紀年)) 都被拿來放屬性索引值。
+								// TODO:
+								// 對其他同性質的亦能加入此屬性。
+								// 例如設定
+								// "朝代=曹魏"
+								// 則所有曹魏紀年皆能加入此屬性，
+								// 如此則不須每個紀年皆個別設定。
+								if (i === 0)
+									// ((紀年)) === last_era_data.name
+									紀年.push(name);
+							}
 						});
-
-					while (i < era_list.length && era_list[i].start <= start)
-						// 預防本紀年實為開始時間最早者，
-						// 因此在這邊才處理是否該插入在下一 index。
-
-						// 因為 .search_sorted(, {found : true})
-						// 會回傳 <= 的值，
-						// 因此應插入在下一 index。
-
-						// 這方法還會跳過相同時間的。
-						i++;
-
-					// 以 Array.prototype.splice(插入點 index, 0, 紀年) 插入紀年E，
-					// 使本紀年E 之 index 為 (插入點 index)。
-					era_list.splice(i, 0, last_era_data);
-
-					// 向後處理"共存紀年" list：
-					// 依紀年開始時間，
-					// 將所有紀年E 之後(其開始時間 >= 紀年E 開始時間)，
-					// 所有開始時間在其結束時間前的紀年，
-					// 插入紀年E 於"共存紀年" list。
-					for (k = 起訖[1],
-					// 從本紀年E 之下個紀年起。
-					j = i + 1; j < era_list.length; j++)
-						if ((tmp = era_list[j]).start < k) {
-							(tmp = tmp.contemporary).push(last_era_data);
-							if (tmp.length > 1)
-								// 不能保證依照 紀年開始時間 時序，應該插入在最後。
-								tmp.sort(compare_start_date);
-						} else
-							break;
-
-					// 處理同時開始之"共存紀年" list：
-					j = [];
-					while (i > 0 && (tmp = era_list[--i]).start === start) {
-						// 同時開始。
-						j.unshift(tmp);
-						tmp.contemporary.push(last_era_data);
 					}
 
-					// 向前處理"共存紀年" list：
-					// 檢查前一紀年，
-					// 與其"在本紀年開始時尚未結束的紀年 list"，
-					// 找出所有(其結束時間 period_end > 紀年E 開始時間)之紀年，
-					// 將之插入紀年E 之"共存紀年" list。
-					tmp = era_list[i];
-					tmp.contemporary.concat(tmp).forEach(function(era) {
-						if (era.end > start)
-							contemporary.push(era);
-					});
-					// 為了按照 紀年開始時間 順序排列。
-					if (j.length > 0)
-						Array_push(contemporary, j);
+				} else if (i === '月名' || i === MONTH_NAME_KEY) {
+					if (j = parse_month_name(j, last_era_data[MONTH_NAME_KEY]))
+						last_era_data[MONTH_NAME_KEY] = j;
+				} else
+					add_attribute(last_era_data, i, j);
+			}
+
+			// 處理 accuracy/準度/誤差/正確度。
+			if (!last_era_data.準)
+				for (i in 準確程度_ENUM)
+					if (last_era_data[i]) {
+						last_era_data.準 = i;
+						break;
+					}
+			// check 準度。
+			if (i = last_era_data.準) {
+				if (!/^\d*[年月日]$/.test(i) && !(i in 準確程度_ENUM))
+					library_namespace.warn('parse_era: 未支援紀年[' + 紀年
+							+ ']所指定之準確度：[' + i + ']');
+				if (!last_era_data.calendar && !last_era_data.精)
+					last_era_data.精 = '年';
+			}
+
+			// 處理 precision/精度準度/精密度準確度。
+			// cf. https://en.wikipedia.org/wiki/Module:Wikidata
+			i = last_era_data.精;
+			if (i === '年') {
+				if (!last_era_data.calendar)
+					last_era_data.calendar
+					// 自動指定個常用的曆法。
+					= ':' + standard_time_parser;
+				last_era_data.大月 = CE_MONTH_DAYS;
+
+			} else {
+				if (i && i !== '月' && i !== '日')
+					library_namespace.warn('parse_era: 未支援紀年[' + 紀年
+							+ ']所指定之精密度：[' + i + ']');
+
+				if (('歲首' in last_era_data)
+				// 此處之"歲首"指每年開始之月序數，當前農曆為1。秦曆始於10。
+				// 惟曆法上之"歲首"指每歲起算點(之月序數)。當前農曆之"歲"指冬至月首至冬至月首之間，"年"指正月首(1月1日)至正月首之間，故歲首為11月1日夜半(子夜時刻)。
+				&& (i = last_era_data.歲首 | 0) !== START_MONTH
+				//
+				&& 0 < i && i <= LUNISOLAR_MONTH_COUNT)
+					last_era_data.歲首序 = i - START_MONTH;
+
+				if (!(0 < (last_era_data.大月 |= 0)) || last_era_data.大月 === 大月)
+					delete last_era_data.大月;
+			}
+
+			if (last_era_data.參照用) {
+				library_namespace.debug(
+				//
+				'為使後來的操作能利用此新加入紀年 [' + last_era_data
+				//
+				+ ']，重新設定 era_search_pattern。', 3);
+				era_search_pattern = null;
+			}
+
+			if (options.extract_only)
+				return;
+
+			i = era_list.length;
+			if (i === 0) {
+				era_list.push(last_era_data);
+				return;
+			}
+
+			var start = 起訖[0],
+			//
+			contemporary = last_era_data.contemporary;
+
+			// 紀年E 插入演算：
+			// 依紀年開始時間，以 binary search 找到插入點 index。
+			i -= 4;
+			// 因為輸入資料通常按照時間順序，
+			// 因此可以先檢查最後幾筆資料，以加快速度。
+			if (i < 9)
+				i = 0;
+			else if (start < era_list[i].start)
+				i = era_list.search_sorted(last_era_data, {
+					comparator : compare_start_date,
+					found : true,
+					start : 0
 				});
+
+			while (i < era_list.length && era_list[i].start <= start)
+				// 預防本紀年實為開始時間最早者，
+				// 因此在這邊才處理是否該插入在下一 index。
+
+				// 因為 .search_sorted(, {found : true})
+				// 會回傳 <= 的值，
+				// 因此應插入在下一 index。
+
+				// 這方法還會跳過相同時間的。
+				i++;
+
+			// 以 Array.prototype.splice(插入點 index, 0, 紀年) 插入紀年E，
+			// 使本紀年E 之 index 為 (插入點 index)。
+			era_list.splice(i, 0, last_era_data);
+
+			// 向後處理"共存紀年" list：
+			// 依紀年開始時間，
+			// 將所有紀年E 之後(其開始時間 >= 紀年E 開始時間)，
+			// 所有開始時間在其結束時間前的紀年，
+			// 插入紀年E 於"共存紀年" list。
+			for (k = 起訖[1],
+			// 從本紀年E 之下個紀年起。
+			j = i + 1; j < era_list.length; j++)
+				if ((tmp = era_list[j]).start < k) {
+					(tmp = tmp.contemporary).push(last_era_data);
+					if (tmp.length > 1)
+						// 不能保證依照 紀年開始時間 時序，應該插入在最後。
+						tmp.sort(compare_start_date);
+				} else
+					break;
+
+			// 處理同時開始之"共存紀年" list：
+			j = [];
+			while (i > 0 && (tmp = era_list[--i]).start === start) {
+				// 同時開始。
+				j.unshift(tmp);
+				tmp.contemporary.push(last_era_data);
+			}
+
+			// 向前處理"共存紀年" list：
+			// 檢查前一紀年，
+			// 與其"在本紀年開始時尚未結束的紀年 list"，
+			// 找出所有(其結束時間 period_end > 紀年E 開始時間)之紀年，
+			// 將之插入紀年E 之"共存紀年" list。
+			tmp = era_list[i];
+			tmp.contemporary.concat(tmp).forEach(function(era) {
+				if (era.end > start)
+					contemporary.push(era);
+			});
+			// 為了按照 紀年開始時間 順序排列。
+			if (j.length > 0)
+				Array_push(contemporary, j);
+		}
+
+		era_data_array.forEach(for_era_data);
 
 		if (last_era_data) {
 			if (options.extract_only) {
@@ -7080,7 +7112,8 @@ function module_code(library_namespace) {
 		// 年曆。
 
 		era_list.forEach(function(era) {
-			if (era.參照用 && !options.含參照用) {
+			if (era.參照用 && !options.含參照用
+					&& !get_dates.no_limit_era.includes(era)) {
 				library_namespace.info([ 'get_dates: ', {
 					T : [ '跳過 [%1]：本[%2]僅供參照用。', era.toString(), '紀年' ]
 				} ]);
@@ -7095,7 +7128,7 @@ function module_code(library_namespace) {
 			i = 0, l = year_start.length - 1;
 
 			if (l > get_dates.ERA_YEAR_LIMIT
-			//	
+			//
 			&& !get_dates.no_limit_era.includes(era))
 				library_namespace.warn([
 				//
@@ -7105,15 +7138,12 @@ function module_code(library_namespace) {
 				//
 				+ concat_era_name([ era, '1年' ]) + '")，或', {
 					a : {
+						// Cancel the restriction
 						T : '取消限制'
 					},
 					href : '#',
 					onclick : function() {
-						if (!get_dates.no_limit_era.includes(era))
-							get_dates.no_limit_era.push(era);
-						library_namespace.info(
-						//
-						'已取消 [' + era + '] 之限制。請注意有些操作將極度費時！');
+						get_dates.set_restriction(era, false);
 						return false;
 					}
 				}, '。' ]);
@@ -7141,6 +7171,40 @@ function module_code(library_namespace) {
 	get_dates.no_limit_era = [];
 	// 預設月曆之年數。
 	get_dates.DEFAULT_YEARS = 10;
+
+	// 可取消限制，強制顯示 allow display/showing, disable restriction
+	// CeL.era.dates.set_restriction('泰國陰曆', false)
+	get_dates.set_restriction = function(era, enable_restriction) {
+		if (typeof era === 'string') {
+			var _era = get_era(era);
+			if (!_era) {
+				library_namespace.warn('set_restriction: Invalid era key: '
+						+ era);
+				return;
+			}
+			era = _era;
+		}
+
+		var index = get_dates.no_limit_era.indexOf(era);
+		if (typeof enable_restriction !== 'boolean') {
+			return index === NOT_FOUND;
+		}
+
+		if (enable_restriction) {
+			if (index !== NOT_FOUND) {
+				get_dates.no_limit_era.splice(index, 1);
+				library_namespace.info('已回復 [' + era + '] 之限制。');
+			}
+			return true;
+
+		} else if (index === NOT_FOUND) {
+			get_dates.no_limit_era.push(era);
+			library_namespace.info(
+			//
+			'已取消 [' + era + '] 之限制。請注意有些操作將極度費時！');
+			return false;
+		}
+	};
 
 	// ---------------------------------------------------------------------//
 

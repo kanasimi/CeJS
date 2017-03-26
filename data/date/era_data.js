@@ -2955,7 +2955,7 @@ CeL.era.pass_on = {
 // 泰國君主列表
 
 (CeL.era.pass_on.countries.ไทย = [
-		// 泰國陰曆
+		// 泰國陰陽曆: 依照這邊的設定，新年（換年分）大致比公元提早一兩個月。但實際應晚五個月，每年陰陽曆5/5新年。
 		// https://www.myhora.com/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99/
 		'ปฏิทินจันทรคติไทย|1756/12/21~2042/1/21|2300/2=3oq 4ofc58q 4ofc59m 59m 4ofc58q 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc59m 59m 4ofc59m 4ofc58q 58q 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 59m 4ofc58q 4qo|參照用|紀年=泰國陰曆;จันทรคติ;ปฏิทินจันทรคติ|閏月名=雙|注=此處之年份僅為與公元年份約略參考用！僅月份與日期較可資參考。詳見說明。',
 
@@ -3017,7 +3017,7 @@ CeL.era.pass_on = {
 		'/พระบาทสมเด็จพระจุลจอมเกล้าเจ้าอยู่หัว|1868/10/1~||疑|君主=จุฬาลงกรณ์;พระปิยมหาราช;รัชกาลที่ 5;Maha Chulalongkorn;Phra Chula Chom Klao Chao Yu Hua;the Great;Rama V;Phra Piya Maharat|生=1853/9/20|卒=1910/10/23|關係=Son of Rama IV and Queen Debsirindra;Under Regency of Si Suriyawongse from 1868-1873',
 		'/พระบาทสมเด็จพระมงกุฎเกล้าเจ้าอยู่หัว|1910/10/23~||疑|君主=วชิราวุธ;พระมหาธีรราชเจ้า;รัชกาลที่ 6;Maha Vajiravudh;Phra Mongkut Klao Chao Yu Hua;Rama VI;Phra Maha Thirarachachao|生=1881/1/1|卒=1925/11/25|關係=Son of Rama V and Queen Saovabha Phongsri',
 		'/พระบาทสมเด็จพระปกเกล้าเจ้าอยู่หัว|1925/11/25~||疑|君主=ประชาธิปก;รัชกาลที่ 7;Maha Prajadhipok;Phra Pok Klao Chao Yu Hua;Rama VII|生=1893/11/8|卒=1941/5/30|關係=Younger brother of Rama VI;Son of Rama V and Queen Saovabha Phongsri',
-		'/พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล|1935/3/2~|:Thai|疑|君主=อานันทมหิดล;พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล พระอัฐมรามาธิบดินทร;พระอัฐมรามาธิบดินทร;รัชกาลที่ 8;Maha Ananda Mahidol;Phra Atthama Ramathibodin;Rama VIII|生=1925/9/20|卒=1946/6/9|關係=Nephew of Rama VII;Grandson of Rama V by Mahidol Adulyadej;Under Regency from 1935-1946',
+		'/พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล|1935/3/2~||疑|君主=อานันทมหิดล;พระบาทสมเด็จพระปรเมนทรมหาอานันทมหิดล พระอัฐมรามาธิบดินทร;พระอัฐมรามาธิบดินทร;รัชกาลที่ 8;Maha Ananda Mahidol;Phra Atthama Ramathibodin;Rama VIII|生=1925/9/20|卒=1946/6/9|關係=Nephew of Rama VII;Grandson of Rama V by Mahidol Adulyadej;Under Regency from 1935-1946',
 		'/พระบาทสมเด็จพระปรมินทรมหาภูมิพลอดุลยเดช|1946/6/9~|:CE|君主=ภูมิพลอดุลยเดช;สมเด็จพระภัทรมหาราช;รัชกาลที่ 9;Maha Bhumibol Adulyadej;the Great;Rama IX;Somdet Phra Phatthara Maharat|生=1927/12/5|卒=2016/10/13|關係=Younger brother of Rama VIII;Grandson of Rama V by Mahidol Adulyadej',
 		'/สมเด็จพระเจ้าอยู่หัวมหาวชิราลงกรณ บดินทรเทพยวรางกูร|2016/10/13~'
 				+ CeL.era.pass_on.last_day

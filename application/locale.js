@@ -982,6 +982,10 @@ gettext.adapt_domain = function(language) {
 
 	gettext.use_domain(language, function() {
 		library_namespace.debug(language + ' loaded.');
+		try {
+			// 設置頁面語系。
+			document.getElementsByTagName('html')[0].setAttribute('lang', language);
+		} catch (e) {}
 		gettext.translate_nodes();
 		create_domain_menu.onchange.forEach(function(handler) {
 			handler();

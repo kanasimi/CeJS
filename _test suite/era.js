@@ -1239,12 +1239,9 @@ add_tag.parse.draw_limit = 400;
 
 // 登錄預設可 include 之資料圖層
 add_tag.data_file = {
-	'中國皇帝生卒' : [
-			'resource/emperor.js',
-			// 資料來源 title, URL, memo
-			'中國皇帝壽命列表',
-			'https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E7%9A%87%E5%B8%9D%E5%AF%BF%E5%91%BD%E5%88%97%E8%A1%A8',
-			'僅列到年份，尚不夠精確。' ],
+	'中國皇帝生卒' : [ 'resource/emperor.js',
+	// 資料來源 title, URL, memo
+	'中國皇帝壽命列表', 'https://zh.wikipedia.org/wiki/中国皇帝寿命列表', '僅列到年份，尚不夠精確。' ],
 
 	// 臺灣歷史地震時間軸視覺化（英文：Visulation）
 	'臺灣地震' : [ 'resource/quake.js', '臺灣地震年表',
@@ -2086,15 +2083,16 @@ function translate_era(era) {
 				date.諡 = date.諡 ? [ date.name[1], date.諡 ] : [ date.name[1] ];
 		add_注('諡', {
 			a : {
+				// 諡號
 				T : '諡'
 			},
-			href : 'https://zh.wikipedia.org/wiki/%E8%AB%A1'
+			href : 'https://zh.wikipedia.org/wiki/谥号'
 		}, add_注_link);
 		add_注('廟號', {
 			a : {
 				T : '廟號'
 			},
-			href : 'https://zh.wikipedia.org/wiki/%E5%BB%9F%E8%99%9F'
+			href : 'https://zh.wikipedia.org/wiki/庙号'
 		});
 		// for 琉球國
 		add_注('童名');
@@ -3172,7 +3170,7 @@ function affairs() {
 			+ '節氣之後每五日一候，非採用 360/72 = 5° 一候。\n'
 			// 合稱四立的立春、立夏、立秋、立冬，四立與二分二至稱為 「分至啟閉」，亦稱為八節
 			+ '二十四節氣 / 二分點 (春分秋分) 和二至點 (夏至冬至) / 七十二候 (物候)',
-			href : 'https://zh.wikipedia.org/wiki/%E8%8A%82%E6%B0%94'
+			href : 'https://zh.wikipedia.org/wiki/节气'
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return;
@@ -3192,7 +3190,7 @@ function affairs() {
 				T : '節氣經過日數'
 			},
 			R : '天文節氣 經過日數',
-			href : 'https://zh.wikipedia.org/wiki/%E8%8A%82%E6%B0%94',
+			href : 'https://zh.wikipedia.org/wiki/节气',
 			S : 'font-size:.8em;'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -3206,33 +3204,32 @@ function affairs() {
 			return CeL.SOLAR_TERMS[date[1]] + ' ' + date[2];
 		} ],
 
-		sun_apparent : [
-				{
-					a : {
-						// Sun's apparent position
-						// apparent longitude of the Sun
-						T : "Sun's apparent longitude"
-					},
-					R : '紀元使用當地、當日零時，太陽的視黃經。\n'
-					//
-					+ 'the apparent geocentric celestial longitude of the Sun.'
-					//
-					+ '\nUsing VSOP87D.ear.',
-					href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
-				},
-				function(date) {
-					if (/* date.準 || */date.精)
-						return;
+		sun_apparent : [ {
+			a : {
+				// Sun's apparent position
+				// apparent longitude of the Sun
+				T : "Sun's apparent longitude"
+			},
+			R : '紀元使用當地、當日零時，太陽的視黃經。\n'
+			//
+			+ 'the apparent geocentric celestial longitude of the Sun.'
+			//
+			+ '\nUsing VSOP87D.ear.',
+			href : 'https://en.wikipedia.org/wiki/Apparent_longitude'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
 
-					var JD = CeL.TT(new Date(date.offseted_value()));
-					return {
-						span : CeL.format_degrees(
-								CeL.solar_coordinates(JD).apparent, 0)
-						// &nbsp;
-						.replace(/ /g, CeL.DOM.NBSP),
-						C : 'monospaced'
-					};
-				} ],
+			var JD = CeL.TT(new Date(date.offseted_value()));
+			return {
+				span : CeL.format_degrees(
+				//
+				CeL.solar_coordinates(JD).apparent, 0)
+				// &nbsp;
+				.replace(/ /g, CeL.DOM.NBSP),
+				C : 'monospaced'
+			};
+		} ],
 
 		moon_longitude : [ {
 			a : {
@@ -3304,9 +3301,7 @@ function affairs() {
 			+ 'the apparent geocentric celestial longitude: Moon - Sun.'
 			//
 			+ '\nUsing VSOP87D.ear and LEA-406.',
-			href : 'https://zh.wikipedia.org/wiki/'
-			//
-			+ '%E8%A1%9D_%28%E5%A4%A9%E9%AB%94%E4%BD%8D%E7%BD%AE%29'
+			href : 'https://zh.wikipedia.org/wiki/衝_(天體位置)'
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return;
@@ -3332,7 +3327,7 @@ function affairs() {
 			R : 'lunar phase, 天文月相附加可能的日月食資訊。計算得出之紀元使用當地、當日零時月相，非實曆。'
 			//
 			+ '\nUsing VSOP87D.ear and LEA-406.',
-			href : 'https://zh.wikipedia.org/wiki/%E6%9C%88%E7%9B%B8'
+			href : 'https://zh.wikipedia.org/wiki/月相'
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return;
@@ -3571,59 +3566,51 @@ function affairs() {
 		// 各國曆法 Historical calendar
 		calendar : '計算日期的方法。計算得出，不一定是實暦。',
 
-		Gregorian : [
-				{
-					a : {
-						T : 'Gregorian calendar'
-					},
-					R : 'proleptic Gregorian calendar WITH year 0. Adopted in 1582/10/15 CE.'
-							//
-							+ '\n包含0年的外推格里曆',
-					href : 'https://en.wikipedia.org/wiki/'
+		Gregorian : [ {
+			a : {
+				T : 'Gregorian calendar'
+			},
+			R : 'proleptic Gregorian calendar WITH year 0.'
+			//
+			+ ' Adopted in 1582/10/15 CE.\n包含0年的外推格里曆',
+			href : 'https://en.wikipedia.org/wiki/'
+			//
+			+ 'Proleptic_Gregorian_calendar',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return adapt_by(date, date.format('%Y/%m/%d'), Gregorian_reform);
+		} ],
 
-					+ 'Proleptic_Gregorian_calendar',
-					S : 'font-size:.8em;'
-				},
-				function(date) {
-					return adapt_by(date, date.format('%Y/%m/%d'),
-							Gregorian_reform);
-				} ],
+		Julian : [ {
+			a : {
+				T : 'Julian calendar'
+			},
+			R : 'proleptic Julian calendar WITHOUT year 0,'
+			//
+			+ ' used before 1582/10/15 CE.\n不包含0年的外推儒略曆',
+			href : 'https://en.wikipedia.org/wiki/Proleptic_Julian_calendar',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return adapt_by(date, date.format({
+				parser : 'Julian',
+				format : date.精 === '年' ? '%Y年' : '%Y/%m/%d'
+			}), null, Gregorian_reform);
+		} ],
 
-		Julian : [
-				{
-					a : {
-						T : 'Julian calendar'
-					},
-					R : 'proleptic Julian calendar WITHOUT year 0, used before 1582/10/15 CE.'
-							//
-							+ '\n不包含0年的外推儒略曆',
-					href : 'https://en.wikipedia.org/wiki/Proleptic_Julian_calendar',
-					S : 'font-size:.8em;'
-				}, function(date) {
-					return adapt_by(date, date.format({
-						parser : 'Julian',
-						format : date.精 === '年' ? '%Y年' : '%Y/%m/%d'
-					}), null, Gregorian_reform);
-				} ],
-
-		Revised_Julian : [
-				{
-					a : {
-						T : 'Revised Julian calendar'
-					},
-					R : 'proleptic Revised Julian calendar WITHOUT year 0. Adopted in 1923/10/14 CE.'
-							//
-							+ '\n不包含0年的外推儒略改革曆',
-					href : 'https://en.wikipedia.org/wiki/Revised_Julian_calendar',
-					S : 'font-size:.8em;'
-				},
-				function(date) {
-					return adapt_by(date, date.精 === '年' ? date
-							.to_Revised_Julian({
-								format : 'serial'
-							})[0] : date.to_Revised_Julian().join('/'),
-							Revised_Julian_reform);
-				} ],
+		Revised_Julian : [ {
+			a : {
+				T : 'Revised Julian calendar'
+			},
+			R : 'proleptic Revised Julian calendar WITHOUT year 0.'
+			//
+			+ ' Adopted in 1923/10/14 CE.\n不包含0年的外推儒略改革曆',
+			href : 'https://en.wikipedia.org/wiki/Revised_Julian_calendar',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return adapt_by(date, date.精 === '年' ? date.to_Revised_Julian({
+				format : 'serial'
+			})[0] : date.to_Revised_Julian().join('/'), Revised_Julian_reform);
+		} ],
 
 		Tabular : [ {
 			a : {
@@ -3648,13 +3635,7 @@ function affairs() {
 				T : 'گاه‌شماری هجری خورشیدی'
 			},
 			R : 'Solar Hijri calendar / 現代伊朗曆/阿富汗曆(陽曆) / ヒジュラ太陽暦/アフガン暦/ジャラリ暦',
-			href : 'https://fa.wikipedia.org/wiki/'
-			//
-			+ '%DA%AF%D8%A7%D9%87%E2%80%8C%D8%B4%D9%85%D8%A7%D8%B1%DB%8C'
-			//
-			+ '_%D9%87%D8%AC%D8%B1%DB%8C'
-			//
-			+ '_%D8%AE%D9%88%D8%B1%D8%B4%DB%8C%D8%AF%DB%8C'
+			href : 'https://fa.wikipedia.org/wiki/گاه‌شماری_هجری_خورشیدی'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Solar_Hijri({
 				format : 'serial'
@@ -3683,57 +3664,58 @@ function affairs() {
 			}).slice(0, 3).join('/') + ' BS; ' + date.to_Bangla();
 		} ],
 
-		Hebrew : [
-				{
-					a : {
-						T : '希伯來曆'
-					},
-					R : 'Hebrew calendar, 猶太曆\n日落後為隔日。\na Jewish "day" begins and ends at shkiah (sunset)',
-					href : 'https://he.wikipedia.org/wiki/%D7%94%D7%9C%D7%95%D7%97_%D7%94%D7%A2%D7%91%D7%A8%D7%99'
-				}, function(date) {
-					return date.精 === '年' ? date.to_Hebrew({
-						format : 'serial'
-					})[0] + '年' : date.to_Hebrew({
-						format : 'serial'
-					}).slice(0, 3).join('/') + '; ' + date.to_Hebrew();
-				} ],
+		Hebrew : [ {
+			a : {
+				T : '希伯來曆'
+			},
+			R : 'Hebrew calendar, 猶太曆\n日落後為隔日。'
+			//
+			+ '\na Jewish "day" begins and ends at shkiah (sunset)',
+			href : 'https://he.wikipedia.org/wiki/הלוח_העברי'
+		}, function(date) {
+			return date.精 === '年' ? date.to_Hebrew({
+				format : 'serial'
+			})[0] + '年' : date.to_Hebrew({
+				format : 'serial'
+			}).slice(0, 3).join('/') + '; ' + date.to_Hebrew();
+		} ],
 
-		Long_Count : [
-				{
-					a : {
-						T : '長紀曆'
-					},
-					R : 'Mesoamerican Long Count calendar / 中美洲馬雅長紀曆',
-					href : 'https://en.wikipedia.org/wiki/Mesoamerican_Long_Count_calendar'
-				},
-				function(date) {
-					return CeL.Maya_Date.to_Long_Count(date)
-							+ (date.精 === '年' ? '–' : '');
-				} ],
+		Long_Count : [ {
+			a : {
+				T : '長紀曆'
+			},
+			R : 'Mesoamerican Long Count calendar / 中美洲馬雅長紀曆',
+			href : 'https://en.wikipedia.org/wiki/'
+			//
+			+ 'Mesoamerican_Long_Count_calendar'
+		}, function(date) {
+			return CeL.Maya_Date.to_Long_Count(date)
+			//
+			+ (date.精 === '年' ? '–' : '');
+		} ],
 
 		// TODO: 馬雅 Short Count
 		// https://en.wikipedia.org/wiki/Maya_calendar#Short_Count
 
-		Tzolkin : [
-				{
-					a : {
-						T : "Maya Tzolk'in"
-					},
-					R : "中美洲馬雅 Tzolk'in 曆",
-					href : 'https://en.wikipedia.org/wiki/Tzolk%27in',
-					S : 'font-size:.8em;'
-				},
-				function(date) {
-					return CeL.Maya_Date.to_Tzolkin(date)
-							+ (date.精 === '年' ? '–' : '');
-				} ],
+		Tzolkin : [ {
+			a : {
+				T : "Maya Tzolk'in"
+			},
+			R : "中美洲馬雅 Tzolk'in 曆",
+			href : "https://en.wikipedia.org/wiki/Tzolk'in",
+			S : 'font-size:.8em;'
+		}, function(date) {
+			return CeL.Maya_Date.to_Tzolkin(date)
+			//
+			+ (date.精 === '年' ? '–' : '');
+		} ],
 
 		Haab : [ {
 			a : {
 				T : "Maya Haab'"
 			},
 			R : "中美洲馬雅 Haab' 曆",
-			href : 'https://en.wikipedia.org/wiki/Haab%27',
+			href : "https://en.wikipedia.org/wiki/Haab'",
 			S : 'font-size:.8em;'
 		}, function(date) {
 			return CeL.Maya_Date.to_Haab(date) + (date.精 === '年' ? '–' : '');
@@ -3746,7 +3728,7 @@ function affairs() {
 			R : '西雙版納傣曆紀元始於公元638年3月22日，可轉換之範圍於傣曆714年（1352/3/28–）至3190年期間內。\n'
 			//
 			+ '傣曆有0年。非精確時，可能有最多前後2年的誤差。',
-			href : 'http://zh.wikipedia.org/wiki/%E5%82%A3%E6%9B%86'
+			href : 'https://zh.wikipedia.org/wiki/傣曆'
 		}, function(date) {
 			var dai;
 			return date - CeL.Dai_Date.epoch < 0
@@ -3828,7 +3810,7 @@ function affairs() {
 			+ '若公元12月27日對彝曆1月1日，則自公元12月27日約凌晨3點起跨入彝曆1月1日。\n' +
 			//
 			'過年日於曆算法中，古稱「歲餘日」。',
-			href : 'http://zh.wikipedia.org/wiki/%E5%BD%9D%E6%9B%86'
+			href : 'https://zh.wikipedia.org/wiki/彝曆'
 		}, function(date) {
 			var yi;
 			// 超出可轉換之範圍。
@@ -3912,7 +3894,7 @@ function affairs() {
 			R : '佛紀，1911–。佛曆年 = 公曆年 + 543，若過佛誕日（印度曆二月初八，農曆四月初八。）再加1年。\n'
 			//
 			+ '有採用0年。非精確時，可能有最多前後一年的誤差。',
-			href : 'https://zh.wikipedia.org/wiki/%E4%BD%9B%E6%9B%86'
+			href : 'https://zh.wikipedia.org/wiki/佛曆'
 		}, function(date) {
 			var year = date.getFullYear() | 0;
 			if (year < 1911) {
@@ -3960,8 +3942,8 @@ function affairs() {
 				T : 'گاه‌شماری بهائی'
 			},
 			R : "Bahá'í / Badí‘ calendar, 巴哈伊曆",
-			// https://fa.wikipedia.org/wiki/%DA%AF%D8%A7%D9%87%E2%80%8C%D8%B4%D9%85%D8%A7%D8%B1%DB%8C_%D8%A8%D9%87%D8%A7%D8%A6%DB%8C
-			href : "https://en.wikipedia.org/wiki/Bah%C3%A1'%C3%AD_calendar"
+			// https://fa.wikipedia.org/wiki/گاه‌شماری_بهائی
+			href : "https://en.wikipedia.org/wiki/Bahá'í_calendar"
 		}, function(date) {
 			return date.精 === '年' ? date.to_Bahai({
 				format : 'serial'
@@ -4007,13 +3989,7 @@ function affairs() {
 			R : 'year / month / date, weekday\n'
 			//
 			+ 'Armenian calendar, 教會亞美尼亞曆法, Հայկական եկեղեցական տոմար',
-			href : 'https://hy.wikipedia.org/wiki/'
-			//
-			+ '%D5%80%D5%A1%D5%B5%D5%AF%D5%A1%D5%AF%D5%A1%D5%B6'
-			//
-			+ '_%D5%A5%D5%AF%D5%A5%D5%B2%D5%A5%D6%81%D5%A1%D5%AF%D5%A1%D5%B6'
-			//
-			+ '_%D5%BF%D5%B8%D5%B4%D5%A1%D6%80'
+			href : 'https://hy.wikipedia.org/wiki/Հայկական_եկեղեցական_տոմար'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Armenian({
 				format : 'serial'
@@ -4093,7 +4069,7 @@ function affairs() {
 			+ '每年第一天都從法國秋分日開始。法國共和曆行用期間 1792/9/22–1805/12/31，'
 			//
 			+ '後來巴黎公社 1871/5/6–23 曾一度短暫恢復使用。',
-			href : 'https://fr.wikipedia.org/wiki/Calendrier_r%C3%A9publicain'
+			href : 'https://fr.wikipedia.org/wiki/Calendrier_républicain'
 		}, function(date) {
 			return date.精 === '年' ? date.to_Republican({
 				format : 'serial'
@@ -4104,18 +4080,20 @@ function affairs() {
 
 		// --------------------------------------------------------------------
 		// 中國傳統曆法 Chinese calendar, 太陰太陽暦
-		// https://zh.wikipedia.org/wiki/%E9%98%B4%E9%98%B3%E5%8E%86
-		東亞陰陽曆 : [
-				'East Asian lunisolar calendar. 中國、日本、朝鮮歷代計算日期的方法。計算得出，不一定是實暦。',
-				[ '夏、商、西周觀象授時，本工具於這些曆法採用天文演算，較耗時間。', {
-					b : [ '實際天象可選用上方「', {
-						T : '天文節氣'
-					}, '」、「', {
-						T : '月相'
-					}, '」欄。' ]
-				}, '「', {
-					T : '月相'
-				}, '」欄並附注可能之日月食。' ] ],
+		// https://zh.wikipedia.org/wiki/阴阳历
+		東亞陰陽曆 : [ 'East Asian lunisolar calendar. '
+		//
+		+ '中國、日本、朝鮮歷代計算日期的方法。計算得出，不一定是實暦。',
+		//
+		[ '夏、商、西周觀象授時，本工具於這些曆法採用天文演算，較耗時間。', {
+			b : [ '實際天象可選用上方「', {
+				T : '天文節氣'
+			}, '」、「', {
+				T : '月相'
+			}, '」欄。' ]
+		}, '「', {
+			T : '月相'
+		}, '」欄並附注可能之日月食。' ] ],
 
 		夏曆 : [ {
 			a : {
@@ -4126,7 +4104,7 @@ function affairs() {
 			+ '\n當前使用之農曆/陰曆/夏曆/黃曆曆法. 計算速度較慢！'
 			//
 			+ '\n以定氣定朔無中置閏規則計算得出之紀元使用當地、當日零時之傳統定朔曆法（陰陽曆），非實曆。預設歲首為建寅。',
-			href : 'http://zh.wikipedia.org/wiki/%E8%BE%B2%E6%9B%86'
+			href : 'https://zh.wikipedia.org/wiki/農曆'
 		}, add_陰陽暦() ],
 
 		殷曆 : [ {
@@ -4134,7 +4112,7 @@ function affairs() {
 				T : '殷曆'
 			},
 			R : '以定氣定朔無中置閏規則計算得出，非實曆。殷曆預設歲首為建丑。計算速度較慢！',
-			href : 'https://zh.wikipedia.org/wiki/%E5%8F%A4%E5%85%AD%E6%AD%B7'
+			href : 'https://zh.wikipedia.org/wiki/古六歷'
 		}, add_陰陽暦('丑') ],
 
 		周曆 : [ {
@@ -4142,7 +4120,7 @@ function affairs() {
 				T : '周曆'
 			},
 			R : '以定氣定朔無中置閏規則計算得出，非實曆。周曆預設歲首為建子。計算速度較慢！',
-			href : 'https://zh.wikipedia.org/wiki/%E5%8F%A4%E5%85%AD%E6%AD%B7'
+			href : 'https://zh.wikipedia.org/wiki/古六歷'
 		}, add_陰陽暦('子') ],
 
 		// 黃帝曆 : add_曆法('黃帝曆', '非黃帝紀元'),
@@ -4193,7 +4171,7 @@ function affairs() {
 			R : '月干支/大小月。此為推算所得，於部分非寅正起始之年分可能有誤！'
 			//
 			+ '\n警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
-			href : 'https://zh.wikipedia.org/wiki/%E5%B9%B2%E6%94%AF',
+			href : 'https://zh.wikipedia.org/wiki/干支',
 			S : 'font-size:.7em;'
 		}, function(date) {
 			return (date.月干支 || '') + (date.大小月 || '');
@@ -4205,7 +4183,7 @@ function affairs() {
 					T : '日干支'
 				},
 				R : '警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
-				href : 'https://zh.wikipedia.org/wiki/%E5%B9%B2%E6%94%AF',
+				href : 'https://zh.wikipedia.org/wiki/干支',
 				S : 'font-size:.7em;'
 			} : {
 				T : '朔日',
@@ -4258,7 +4236,7 @@ function affairs() {
 				T : '納音'
 			},
 			R : '六十甲子納音、納音五行。中曆曆注、日本の暦注の一つ。',
-			href : 'https://zh.wikipedia.org/wiki/%E7%B4%8D%E9%9F%B3'
+			href : 'https://zh.wikipedia.org/wiki/納音'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.納音(date);
 		} ],
@@ -4284,9 +4262,7 @@ function affairs() {
 			+ '\n建除十二神(十二值位/十二值星/通勝十二建)、血忌等，都被歸入神煞體系。'
 			//
 			+ '\n交節採天文節氣，非實曆。',
-			href : 'https://zh.wikipedia.org/wiki/'
-			//
-			+ '%E5%BB%BA%E9%99%A4%E5%8D%81%E4%BA%8C%E7%A5%9E',
+			href : 'https://zh.wikipedia.org/wiki/建除十二神',
 			S : 'font-size:.8em;'
 		}, function(date) {
 			if (/* date.準 || */date.精)
@@ -4319,7 +4295,7 @@ function affairs() {
 			+ '尹灣漢墓簡牘論考: 秦漢之前無伏臘。秦漢時伏臘尚無固定規則，此處所列僅供參考。或在漢成帝鴻嘉年間已成曆例。'
 			//
 			+ '\n交節採天文節氣，非實曆。',
-			href : 'https://zh.wikipedia.org/wiki/%E4%B8%89%E4%BC%8F'
+			href : 'https://zh.wikipedia.org/wiki/三伏'
 		}, function(date) {
 			if (/* date.準 || */date.精)
 				return;
@@ -4416,7 +4392,8 @@ function affairs() {
 				T : '孟仲季月'
 			},
 			R : '孟仲季之月名別稱, 孟仲季+春夏秋冬',
-			href : 'https://zh.wikipedia.org/wiki/%E5%8D%81%E4%BA%8C%E5%BE%8B',
+			// #音律與曆法的配合
+			href : 'https://zh.wikipedia.org/wiki/十二律',
 			S : 'font-size:.8em;'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.孟仲季(date);
@@ -4427,7 +4404,7 @@ function affairs() {
 				T : '十二月律'
 			},
 			R : '十二月律',
-			href : 'https://zh.wikipedia.org/wiki/%E5%8D%81%E4%BA%8C%E5%BE%8B',
+			href : 'https://zh.wikipedia.org/wiki/十二律',
 			S : 'font-size:.8em;'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.月律(date);
@@ -4438,10 +4415,8 @@ function affairs() {
 				T : '月の別名'
 			},
 			R : '各月の別名',
-			href : 'https://ja.wikipedia.org/wiki/'
-			//
-			+ '%E6%97%A5%E6%9C%AC%E3%81%AE%E6%9A%A6'
-			//
+			href : 'https://ja.wikipedia.org/wiki/日本の暦'
+			// #各月の別名
 			+ '#.E5.90.84.E6.9C.88.E3.81.AE.E5.88.A5.E5.90.8D',
 			S : 'font-size:.8em;'
 		}, function(date) {
@@ -4455,7 +4430,7 @@ function affairs() {
 			R : '日本の暦注の一つ。\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之六曜值可能是錯誤的！'
 			//
 			+ '\n六輝（ろっき）や宿曜（すくよう）ともいうが、これは七曜との混同を避けるために、明治以後に作られた名称である。',
-			href : 'https://ja.wikipedia.org/wiki/%E5%85%AD%E6%9B%9C',
+			href : 'https://ja.wikipedia.org/wiki/六曜',
 			S : 'font-size:.8em;'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.六曜(date);
@@ -4466,7 +4441,7 @@ function affairs() {
 				T : '七曜'
 			},
 			R : '中曆曆注、日本の暦注の一つ。',
-			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5',
+			href : 'https://ja.wikipedia.org/wiki/曜日',
 			S : 'font-size:.8em;'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.七曜(date);
@@ -4478,7 +4453,7 @@ function affairs() {
 				T : '曜日'
 			},
 			R : '日本の暦注の一つ, Japanese names of week day',
-			href : 'https://ja.wikipedia.org/wiki/%E6%9B%9C%E6%97%A5'
+			href : 'https://ja.wikipedia.org/wiki/曜日'
 		}, function(date) {
 			var 七曜 = /* !date.準 && */!date.精 && CeL.era.七曜(date);
 			return 七曜 && {
@@ -4501,9 +4476,7 @@ function affairs() {
 			R : '中曆曆注、日本の暦注の一つ。又稱二十八舍或二十八星。'
 			//
 			+ '28 Mansions, 28 asterisms.',
-			href : 'https://zh.wikipedia.org/wiki/'
-			//
-			+ '%E4%BA%8C%E5%8D%81%E5%85%AB%E5%AE%BF',
+			href : 'https://zh.wikipedia.org/wiki/二十八宿',
 			S : 'font-size:.8em;'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.二十八宿(date);
@@ -4517,9 +4490,7 @@ function affairs() {
 			R : '日本の暦注の一つ\n警告：僅適用於日本之旧暦與紀年！對其他國家之紀年，此處之值可能是錯誤的！'
 			//
 			+ '27 Mansions, 27 asterisms.',
-			href : 'https://ja.wikipedia.org/wiki/'
-			//
-			+ '%E4%BA%8C%E5%8D%81%E4%B8%83%E5%AE%BF',
+			href : 'https://ja.wikipedia.org/wiki/二十七宿',
 			S : 'font-size:.8em;'
 		}, function(date) {
 			return /* !date.準 && */!date.精 && CeL.era.二十七宿(date);
@@ -4582,35 +4553,33 @@ function affairs() {
 			},
 			R : '二十年一運，每年以立春交節時刻為界，立春後才改「運」。玄空飛星一派風水三元九運，又名「洛書運」。',
 			// http://www.hokming.com/fengshui-edit-threeyuennineyun.htm
-			href : 'http://www.twwiki.com/wiki/'
-			//
-			+ '%E4%B8%89%E5%85%83%E4%B9%9D%E9%81%8B',
+			href : 'http://www.twwiki.com/wiki/三元九運',
 			S : 'font-size:.8em;'
 		}, function(date) {
 			return CeL.era.三元九運(date);
 		} ],
 
-		astrological : [
-				{
-					a : {
-						T : 'zodiac sign'
-					},
-					R : 'Astrological signs, Western zodiac signs',
-					href : 'https://en.wikipedia.org/wiki/Astrological_sign#Western_zodiac_signs',
-					S : 'font-size:.8em;'
-				},
-				function(date) {
-					if (/* date.準 || */date.精)
-						return;
+		astrological : [ {
+			a : {
+				T : 'zodiac sign'
+			},
+			R : 'Astrological signs, Western zodiac signs',
+			href : 'https://en.wikipedia.org/wiki/'
+			//
+			+ 'Astrological_sign#Western_zodiac_signs',
+			S : 'font-size:.8em;'
+		}, function(date) {
+			if (/* date.準 || */date.精)
+				return;
 
-					var JD = CeL.Date_to_JD(date.offseted_value());
+			var JD = CeL.Date_to_JD(date.offseted_value());
 
-					// +1: 只要當天達到此角度，即算做此宮。
-					var index = CeL.solar_coordinates(JD + 1).apparent / 30 | 0;
-					return [ ZODIAC_SYMBOLS[index], CeL.DOM.NBSP, {
-						T : ZODIAC_SIGNS[index]
-					} ];
-				} ],
+			// +1: 只要當天達到此角度，即算做此宮。
+			var index = CeL.solar_coordinates(JD + 1).apparent / 30 | 0;
+			return [ ZODIAC_SYMBOLS[index], CeL.DOM.NBSP, {
+				T : ZODIAC_SIGNS[index]
+			} ];
+		} ],
 
 		// --------------------------------------------------------------------
 		// 紀年法/紀年方法。 Cyclic year, year recording/representation method
@@ -4623,7 +4592,7 @@ function affairs() {
 			R : '年干支/干支紀年'
 			//
 			+ '\n警告：僅適用於中曆、日本之旧暦與紀年！對其他紀年，此處之值可能是錯誤的！',
-			href : 'https://zh.wikipedia.org/wiki/%E5%B9%B2%E6%94%AF'
+			href : 'https://zh.wikipedia.org/wiki/干支'
 		}, function(date) {
 			return date.歲次;
 		} ],
@@ -4633,21 +4602,22 @@ function affairs() {
 				T : '生肖'
 			},
 			R : '十二生肖紀年，屬相',
-			href : 'https://zh.wikipedia.org/wiki/%E7%94%9F%E8%82%96'
+			href : 'https://zh.wikipedia.org/wiki/生肖'
 		}, function(date) {
 			return CeL.era.生肖(date);
 		} ],
 
-		五行 : [
-				{
-					a : {
-						T : '五行'
-					},
-					R : '陰陽五行紀年',
-					href : 'http://zh.wikipedia.org/wiki/%E4%BA%94%E8%A1%8C#.E4.BA.94.E8.A1.8C.E4.B8.8E.E5.B9.B2.E6.94.AF.E8.A1.A8'
-				}, function(date) {
-					return CeL.era.五行(date);
-				} ],
+		五行 : [ {
+			a : {
+				T : '五行'
+			},
+			R : '陰陽五行紀年',
+			href : 'https://zh.wikipedia.org/wiki/五行'
+			// #五行與干支表
+			+ '#.E4.BA.94.E8.A1.8C.E4.B8.8E.E5.B9.B2.E6.94.AF.E8.A1.A8'
+		}, function(date) {
+			return CeL.era.五行(date);
+		} ],
 
 		繞迥 : [ {
 			a : {
@@ -4656,7 +4626,7 @@ function affairs() {
 			R : '藏曆(時輪曆)紀年法，繞迥（藏文：རབ་བྱུང༌།，藏語拼音：rabqung，威利：rab-byung）\n'
 			//
 			+ '又稱勝生周。第一繞迥自公元1027年開始。\n此處採公曆改年而非藏曆，可能有最多前後一年的誤差。',
-			href : 'https://zh.wikipedia.org/wiki/%E7%BB%95%E8%BF%A5'
+			href : 'https://zh.wikipedia.org/wiki/绕迥'
 		}, function(date) {
 			return CeL.era.繞迥(date);
 		} ],
@@ -4665,23 +4635,21 @@ function affairs() {
 		// 編年法/編年方法。
 		'Year numbering' : '以不重複數字計算年份的方法',
 
-		Minguo : [
-				{
-					a : {
-						T : '民國'
-					},
-					R : '民國紀年',
-					href : 'http://zh.wikipedia.org/wiki/%E6%B0%91%E5%9C%8B%E7%B4%80%E5%B9%B4'
-				}, Year_numbering(-1911) ],
+		Minguo : [ {
+			a : {
+				T : '民國'
+			},
+			R : '民國紀年',
+			href : 'https://zh.wikipedia.org/wiki/民國紀年'
+		}, Year_numbering(-1911) ],
 
-		Dangi : [
-				{
-					a : {
-						T : '단군기원'
-					},
-					R : '단군기원(檀君紀元) 또는 단기(檀紀)',
-					href : 'https://ko.wikipedia.org/wiki/%EB%8B%A8%EA%B5%B0%EA%B8%B0%EC%9B%90'
-				}, Year_numbering(2333) ],
+		Dangi : [ {
+			a : {
+				T : '단군기원'
+			},
+			R : '단군기원(檀君紀元) 또는 단기(檀紀)',
+			href : 'https://ko.wikipedia.org/wiki/단군기원'
+		}, Year_numbering(2333) ],
 
 		// TODO: 黃帝紀元應以農曆為主!
 		// 1912年1月1日，中華民國臨時政府成立，臨時大總統孫中山當日就通電：「中華民國改用陽曆，以黃帝紀元四千六百零九年十一月十三日為中華民國元年元旦。」
@@ -4691,7 +4659,7 @@ function affairs() {
 						T : '黃帝紀元'
 					},
 					R : '依據中華民國建國時官方認定的黃帝紀元，清末辛亥年（孔子紀元2462年，西元1911年）為黃帝紀元4609年，民國元年為黃帝紀元4610年。黃帝紀元比孔子紀元早2147年，比西元早2698年。',
-					href : 'http://zh.wikipedia.org/wiki/%E9%BB%84%E5%B8%9D%E7%BA%AA%E5%85%83',
+					href : 'https://zh.wikipedia.org/wiki/黄帝纪元',
 					S : 'font-size:.8em;'
 				}, Year_numbering(2698) ],
 
@@ -4701,7 +4669,7 @@ function affairs() {
 						T : '皇紀'
 					},
 					R : '神武天皇即位紀元（じんむてんのうそくいきげん）。略称は皇紀（こうき）という。外にも、皇暦（すめらこよみ、こうれき）、神武暦（じんむれき）、神武紀元（じんむきげん）、日紀（にっき）などともいう。\n神武天皇即位紀元の元年は、キリスト紀元（西暦）前660年である。日本では明治6年（1873年）を紀元2533年と定め公式に使用した。',
-					href : 'https://ja.wikipedia.org/wiki/%E7%A5%9E%E6%AD%A6%E5%A4%A9%E7%9A%87%E5%8D%B3%E4%BD%8D%E7%B4%80%E5%85%83'
+					href : 'https://ja.wikipedia.org/wiki/神武天皇即位紀元'
 				},
 				function(date) {
 					if (!kyuureki) {
@@ -4787,14 +4755,15 @@ function affairs() {
 			href : 'https://en.wikipedia.org/wiki/Before_Present'
 		}, Year_numbering(1950, true, true, true) ],
 
-		HE : [
-				{
-					a : {
-						T : 'Holocene calendar'
-					},
-					R : 'Holocene calendar, 全新世紀年或人類紀年。在公曆年數上多加 10000。有採用0年。 1 BCE = 10000 HE',
-					href : 'https://en.wikipedia.org/wiki/Holocene_calendar'
-				}, Year_numbering(10000) ]
+		HE : [ {
+			a : {
+				T : 'Holocene calendar'
+			},
+			R : 'Holocene calendar, 全新世紀年或人類紀年。'
+			//
+			+ '在公曆年數上多加 10000。有採用0年。 1 BCE = 10000 HE',
+			href : 'https://en.wikipedia.org/wiki/Holocene_calendar'
+		}, Year_numbering(10000) ]
 
 	};
 
