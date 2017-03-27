@@ -9473,11 +9473,11 @@ function module_code(library_namespace) {
 				// TODO: for other operators
 				// @see https://mariadb.com/kb/en/mariadb/select/
 				// https://mariadb.com/kb/en/mariadb/functions-and-operators/
-				&& value.match(/^([<>!]?=|[<>]|<=>|IN |IS )([\s\S]+)/);
+				&& value.match(/^([<>!]?=|[<>]|<=>|IN |IS )([\s\S]+)$/);
 				if (matched) {
-					name += matched[0] + '?';
+					name += matched[1] + '?';
 					// DO NOT quote the value yourself!!
-					value = matched[1];
+					value = matched[2];
 				} else {
 					name += '=?';
 				}
@@ -9545,7 +9545,7 @@ function module_code(library_namespace) {
 			// 筆數限制。就算隨意輸入，強制最多只能這麼多筆資料。
 			, 1e3)
 			// default records to get
-			: 100);
+			: options.where ? 1e4 : 100);
 		}
 
 		run_SQL(SQL, function(error, rows, fields) {

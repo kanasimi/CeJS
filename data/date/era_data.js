@@ -3402,25 +3402,26 @@ CeL.era.pass_on = {
 
 (CeL.era.pass_on.countries.India = [
 
-		// मगध (Magadha empire)
+		// मगध (Magadha empire, c. 1200 BCE–322 BCE)
 		// https://en.wikipedia.org/wiki/Magadha
+		// 摩揭陀王國
 
-		// Haryanka dynasty (c. 600 – 413 BC) 訶黎王朝
+		// Haryanka dynasty (Middle of 6th century BCE–413 BCE) 訶黎王朝
 		// Bhattiya
-		'Haryanka/बिम्बिसारः|-544~|:CE|疑|準=年|生=558|卒=491|時期=मगध|君主名=Bimbisara;頻毗娑羅',
-		'/Ajātasattu|-492~-460|:CE|疑|準=年|君主名=Ajātaśatru;Ajatasatru',
-		// Udayabhadra
+		'Haryanka/Bimbisara|-544~||疑|準=年|生=558|卒=491|時期=मगध|君主名=頻毗娑羅',
+		'/Ajātasattu|-492~||疑|準=年|君主名=Ajātaśatru;Ajatasatru',
+		'/Udayin|-460~-440||疑|準=年|君主名=Udayabhadra',
 		// Anuruddha
 		// Munda
-		// Nagadasaka
+		'/Nagadasaka|-437~||疑|準=年|君主名=Nāgadāsaka',
 
-		// Shishunaga dynasty (413–345 BC) 幼龍王朝
-		'Shishunaga/Shishunaga|-413~|:CE|疑|準=年|時期=मगध|君主名=Shusunaga',
-		'/Kakavarna Kalashoka|-395~|:CE|疑|準=年',
-		'/Mahanandin|-367~-345|:CE|疑|準=年',
+		// Shishunaga dynasty (413–345 BCE) 童龍王朝;幼龍王朝
+		'Shishunaga/Shishunaga|-413~||疑|準=年|時期=मगध|君主名=Shusunaga',
+		'/Kakavarna Kalashoka|-395~||疑|準=年',
+		'/Mahanandin|-367~||疑|準=年',
 
 		// Nanda Dynasty (345–321 BCE) 難陀王朝
-		'Nanda/महापद्मानन्द|-400~|:CE|疑|準=年|時期=मगध|君主名=Mahapadma Nanda',
+		'Nanda/Mahapadma Nanda|-345~||疑|準=年|時期=मगध|君主名=摩訶帕德摩·難陀;大紅蓮·難陀',
 		// Pandhuka
 		// Panghupati
 		// Bhutapala
@@ -3428,51 +3429,53 @@ CeL.era.pass_on = {
 		// Govishanaka
 		// Dashasidkhaka
 		// Kaivarta
-		'/धनानन्द|-329~|:CE|疑|準=年|君主名=Dhana Nanda',
+		'/धनानन्द|-329~||疑|準=年|君主名=Dhana Nanda',
 
-		// 波斯人與希臘人的入侵
+		// 波斯人與希臘人的入侵。摩訶帕德摩死後﹐馬其頓帝國亞歷山大大帝攻入印度河平原。
 
 		// Maurya Empire, Mauryan Empire, 孔雀王朝
+		// 常用語言 梵文
 		// https://en.wikipedia.org/wiki/Maurya_Empire
 		// https://en.wikipedia.org/wiki/List_of_Mauryan_rulers
-		'मौर्यसाम्राज्यम्/चन्द्रगुप्त मौर्य|-322~|:CE|疑|準=年|君主名=Chandragupta Maurya;旃陀羅笈多（月護王）',
-		'/Bindusara|-298~-272|:CE|疑|準=年|君主名=Bindusara Maurya;賓頭娑羅',
-		'/अशोक मौर्य|-269~|:CE|疑|準=年|君主名=Ashoka Maurya;阿育王（無憂王）',
-		'/Dasaratha|-232~|:CE|疑|準=年|君主名=Dasaratha Maurya',
-		'/Samprati|-224~|:CE|疑|準=年|君主名=Samprati Maurya',
-		'/Salisuka|-215~|:CE|疑|準=年|君主名=Salisuka Maurya;Śāliśuka',
-		'/Devavarman|-202~|:CE|疑|準=年|君主名=Devavarman Maurya',
-		'/Satadhanvan|-195~|:CE|疑|準=年|君主名=Satadhanvan Maurya',
-		'/बृहद्रथ मौर्य|-187~-180|:CE|疑|準=年|君主名=Brihadratha Maurya;Ashoka Bindusara Maurya',
+		'Maurya/Candragupta Maurya|-324~||疑|準=年|朝代=मौर्यसाम्राज्यम्|君主名=Chandragupta Maurya;旃陀羅笈多;月護王',
+		'/Bindusara|-297~-273||疑|準=年|君主名=Bindusara Maurya;賓頭娑羅',
+		'/Ashoka|-268~||疑|準=年|君主名=अशोक;Ashoka Maurya;Aśoka;阿育王;無憂王',
+		'/Dasharatha|-232~||疑|準=年|君主名=Dasharatha Maurya',
+		'/Samprati|-224~||疑|準=年|君主名=Samprati Maurya',
+		'/Shalishuka|-215~||疑|準=年|君主名=Shalishuka Maurya;Śāliśuka',
+		'/Devavarman|-202~||疑|準=年|君主名=Devavarman Maurya;Devadharman',
+		'/Satadhanvan|-195~||疑|準=年|君主名=Satadhanvan Maurya;Shatadhanvan;Shatadhanus',
+		'/Bṛhadratha Maurya|-187~-180||疑|準=年|君主名=Brihadratha Maurya',
 
 		// https://en.wikipedia.org/wiki/Indo-Greek_Kingdom#List_of_the_Indo-Greek_kings_and_their_territories
 		// The Indo-Greek Kingdom or Graeco-Indian Kingdom
 		// https://en.wikipedia.org/wiki/Timeline_of_Indo-Greek_kingdoms
-		'ګندارا‎/Ἀπολλόδοτος Α΄ ὁ Σωτήρ|-180~-160|:CE|疑|準=年|君主名=Apollodotus I;Apollodotus I Soter;महरजस अपलदतस त्रतरस|朝代=Gandhāra;Gandhara|時期=Indo-Greek',
+		'ګندارا‎/Ἀπολλόδοτος Α΄ ὁ Σωτήρ|-180~-160||疑|準=年|君主名=Apollodotus I;Apollodotus I Soter;महरजस अपलदतस त्रतरस|朝代=Gandhāra;Gandhara|時期=Indo-Greek',
 		// TODO
-		'Punjab/Στράτων B΄ ὁ Σωτήρ|-25~-10|:CE|疑|準=年|君主名=Strátōn B΄ ho Sotḗr;Strato II;Strato II "Soter"|時期=Indo-Greek',
+		'Punjab/Στράτων B΄ ὁ Σωτήρ|-25~-10||疑|準=年|君主名=Strátōn B΄ ho Sotḗr;Strato II;Strato II "Soter"|時期=Indo-Greek',
 
-		// The Śuṅga Empire (Sanskrit: शुंग राजवंश) or Shunga Empire 巽伽王朝
-		// https://en.wikipedia.org/wiki/%C5%9Au%E1%B9%85ga_Empire
-		'शुंग राजवंश/Puṣyamitra Śuṅga|-185~|:CE|疑|準=年|君主名=Pushyamitra Sunga',
-		'/अग्निमित्र|-149~|:CE|疑|準=年|君主名=Agnimitra',
-		'/Vasujyetha|-141~|:CE|疑|準=年',
-		'/Vasumitra|-131~|:CE|疑|準=年|君主名=Sumitra',
-		'/Andhraka|-124~|:CE|疑|準=年',
-		'/Pulindaka|-122~-119|:CE|疑|準=年',
-		// Ghosha
-		// Vajramitra
-		'/Bhagabhadra|-110~|:CE|疑|準=年|注=circa 110 BCE',
-		'/Devabhuti|-83~-73|:CE|疑|準=年',
+		// The Śuṅga Empire (Sanskrit: शुङ्ग) 巽伽王朝
+		// https://en.wikipedia.org/wiki/Shunga_Empire#List_of_Shunga_Emperors
+		// https://sa.wikipedia.org/wiki/शुङ्गवंशः
+		'Shunga/Puṣyamitra Śuṅga|-185~||疑|準=年|朝代=शुङ्ग;शुङ्गवंशः|君主名=Pushyamitra Shunga;पुष्यमित्रः शुङ्गः',
+		'/Agnimitra|-149~||疑|準=年|君主名=अग्निमित्र;अग्निमित्रः',
+		'/Vasujyeshtha|-141~||疑|準=年|君主名=वसुज्येष्ठः',
+		'/Vasumitra|-131~||疑|準=年|君主名=Sumitra;वसुमित्रः',
+		'/Andhraka|-124~||疑|準=年|君主名=अन्ध्रकः',
+		'/Pulindaka|-122~-119||疑|準=年|君主名=पुलिन्दकः',
+		// Ghosha घोषः शुङ्गः
+		// Vajramitra वज्रमित्रः
+		'/Bhagabhadra|-110~||疑|準=年|君主名=भागभद्रः|注=c. 110 BCE',
+		'/Devabhuti|-83~-73||疑|準=年|君主名=देवभूतिः',
 
 		// The Kanva or Kanvayana Dynasty is a Brahmin Dynasty replaced the
 		// Sunga dynasty in Magadha
 		// 甘婆王朝/甘華王朝
-		// https://en.wikipedia.org/wiki/Kanva_dynasty
-		'Kanva/Vasudeva|-75~|:CE|疑|準=年',
-		'/Bhumimitra|-66~|:CE|疑|準=年',
-		'/Narayana|-52~|:CE|疑|準=年',
-		'/Susharman|-40~-30|:CE|疑|準=年',
+		// https://en.wikipedia.org/wiki/Kanva_dynasty#Rulers
+		'Kanva/Vasudeva|-75~||疑|準=年|朝代=काण्ववंशः|君主名=Vasudeva Kanva;वसुदेवः',
+		'/Bhumimitra|-66~||疑|準=年|君主名=भूमिमित्रः',
+		'/Narayana|-52~||疑|準=年|君主名=नारायणः',
+		'/Susharman|-40~-30||疑|準=年|君主名=सुशर्मन्',
 
 		/**
 		 * The Mahameghavahana dynasty (Oriya: ମହାମେଘବାହନ; Mahā-Mēgha-Bāhana, c.
@@ -3481,30 +3484,36 @@ CeL.era.pass_on = {
 		 * 
 		 * @see https://en.wikipedia.org/wiki/Mahameghavahana_dynasty
 		 */
-		'ମହାମେଘବାହନ/ଖାରବେଳ|-193~-170|:CE|疑|準=年|朝代=Mahāmēghabāhana;Maha-Meghavahana;Mahameghavahana|君主名=ଖାରେବଳ;खारवेल;Khārabēḷa;Khāravēla;Kharavela|注=the third and greatest emperor of the Mahameghavahana dynasty of Kalinga (present-day Odisha).',
+		/**
+		 * <code>Reign	c. first or second century BCE
+		'ମହାମେଘବାହନ/ଖାରବେଳ|-193~-170||疑|準=年|朝代=Mahāmēghabāhana;Maha-Meghavahana;Mahameghavahana|君主名=ଖାରେବଳ;खारवेल;Khārabēḷa;Khāravēla;Kharavela|注=the third and greatest emperor of the Mahameghavahana dynasty of Kalinga (present-day Odisha).',
+		</code>
+		 */
 
-		// The Gupta Empire (Sanskrit: गुप्तसाम्राज्य, Gupta Sāmrājya) was an
+		// The Gupta Empire (Sanskrit: गुप्तसाम्राज्यम्, Gupta Sāmrājya) was an
 		// ancient Indian empire
 		// https://en.wikipedia.org/wiki/Gupta_Empire
-		'गुप्तसाम्राज्य/Śri Gupta|240~|:CE|疑|準=年|朝代=गुप्ता राजवंश;Gupta;笈多王朝',
-		'/Ghatotkacha|280~|:CE|疑|準=年',
-		'/Chandragupta|320~|:CE|疑|準=年|君主名=Chandragupta I',
-		'/Samudragupta|335~|:CE|疑|準=年',
-		'/चन्द्रगुप्त विक्रमादित्य|375~|:CE|疑|準=年|君主名=Chandragupta II',
-		'/Kumaragupta I|415~|:CE|疑|準=年|君主名=Shakraditya;Mahendraditya',
-		'/स्कन्दगुप्त|455~|:CE|疑|準=年|君主名=Skandagupta',
-		'/पुरुगुप्त|467~|:CE|疑|準=年|君主名=Purugupta',
-		'/कुमारगुप्त द्वितीय|473~|:CE|疑|準=年|君主名=Kumaragupta II',
-		'/बुधगुप्त|476~|:CE|疑|準=年|君主名=Budhagupta',
-		'/Narasimhagupta|495~|:CE|疑|準=年|君主名=Narasimhagupta Baladitya|注=495 – ? CE',
-		// 510: 隨便選
-		'/Kumaragupta III|510~|:CE|疑|準=年|注=? – 540 CE',
-		'/विष्णुगुप्त|540~|:CE|疑|準=年|君主名=Vishnugupta',
-		'/वैन्यगुप्त|550~|:CE|疑|準=年|君主名=Vainyagupta',
-		// 552: 隨便選
-		'/Bhanugupta|552~|:CE|疑|準=年',
-		// 553: 隨便選
-		'/Shashankgupta|553~554|:CE|疑|準=年|注=554 : The Gupta dynasty ends when the last emperor Shashakgupta dies.',
+		// https://en.wikipedia.org/wiki/Template:Gupta_Empire_Infobox
+		'Gupta/Śri Gupta|240~||疑|準=年|朝代=गुप्तसाम्राज्यम्|朝代=गुप्ता राजवंश;Gupta;笈多王朝|君主名=Sri Gupta;श्रीगुप्तः',
+		'/Ghatotkacha|280~||疑|準=年|君主名=घटोत्कचः',
+		// https://en.wikipedia.org/wiki/Gupta_era
+		// Gupta era: begins from 318-319 CE
+		'/Chandragupta I|320~||疑|準=年|君主名=旃陀羅·笈多一世;चन्द्रगुप्तःI',
+		'/Samudragupta|336~||疑|準=年|君主名=Mahārājādhirāja;समुद्रगुप्तः',
+		'/Ramagupta|380~380||疑|準=年|君主名=रामगुप्तः',
+		'/Chandragupta II|380~||疑|準=年|君主名=Chandragupta Vikramaditya;चन्द्रगुप्तविक्रमादित्यः',
+		'/Kumaragupta I|415~||疑|準=年|君主名=Shakraditya;कुमारगुप्तःI',
+		'/Skandagupta|455~||疑|準=年|君主名=स्कन्दगुप्तः',
+		'/Purugupta|467~||疑|準=年|君主名=पुरुगुप्त;पुरुगुप्तः',
+		'/Kumaragupta II|473~||疑|準=年|君主名=कुमारगुप्त द्वितीय;कुमारगुप्तःII',
+		'/Budhagupta|476~||疑|準=年|君主名=बुधगुप्त;बुधगुप्तः',
+		'/Narasimhagupta|495~||疑|準=年|君主名=Narasimhagupta Baladitya;नरसिंहगुप्तः|注=495 – ? CE',
+		// 505: 隨便選, 495~510
+		'/Vainyagupta|505~||疑|準=年|君主名=वैन्यगुप्त;वैण्यगुप्तः|注=c. ? – c. 507 CE',
+		// 510: 隨便選, 507~510
+		'/Bhanugupta|510~||疑|準=年|君主名=नुगुप्तः|注=c. 510 – c. ? CE',
+		'/Kumaragupta III|530~||疑|準=年|君主名=कुमारगुप्तःIII|注=? – 540 CE',
+		'/Vishnugupta|540~550||疑|準=年|君主名=विष्णुगुप्त;विष्णुगुप्तः',
 
 // IST (UTC+05:30)
 ]).minute_offset = 5.5 * 60;
