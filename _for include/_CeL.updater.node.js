@@ -32,10 +32,11 @@ if (!Array.isArray(p7z_path)) {
 if (!p7z_path.some(function(path) {
 	// mute stderr
 	var stderr = process.stderr.write;
-	process.stderr.write = function() {};
+	process.stderr.write = function() {
+	};
 	try {
 		child_process.execSync(path + ' -h', 'ignore');
-	} catch(e) {
+	} catch (e) {
 		path = null;
 	}
 	process.stderr.write = stderr;
@@ -124,5 +125,7 @@ function on_response(response) {
 https.get('https://codeload.github.com/kanasimi/CeJS/zip/master', on_response)
 //
 .on('error', function(e) {
-	console.error(e);
+	// network error?
+	// console.error(e);
+	throw e;
 });

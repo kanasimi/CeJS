@@ -9453,30 +9453,48 @@ function module_code(library_namespace) {
 	function generate_SQL_WHERE(condition, field_prefix) {
 		var condition_array = [], value_array = [];
 
-		for (var name in condition) {
-			var value = condition[name];
-			if (!/^[a-z_]+$/.test(name)) {
-				throw 'Invalid field name: ' + name;
-			}
-			if (!name.startsWith(field_prefix)) {
-				name = field_prefix + name;
-			}
-			var matched = value.match(/^([=<>])([\s\S]+)/);
-			if (matched) {
+		if (typeof condition === 'string') {
+			;
+
+		} else if (Array.isArray(condition)) {
+			// TODO: for ' OR '
+			condition = condition.join(' AND ');
+
+		} else if (library_namespace.is_Object(condition)) {
+			for ( var name in condition) {
+				var value = condition[name];
+				if (!/^[a-z_]+$/.test(name)) {
+					throw 'Invalid field name: ' + name;
+				}
+				if (!name.startsWith(field_prefix)) {
+					name = field_prefix + name;
+				}
+				var matched = typeof value === 'string'
 				// TODO: for other operators
 				// @see https://mariadb.com/kb/en/mariadb/select/
-				name += matched[0] + '?';
-				// DO NOT quote the value yourself!!
-				value = matched[1];
-			} else {
-				name += '=?';
+				// https://mariadb.com/kb/en/mariadb/functions-and-operators/
+				&& value.match(/^([<>!]?=|[<>]|<=>|IN |IS )([\s\S]+)/);
+				if (matched) {
+					name += matched[0] + '?';
+					// DO NOT quote the value yourself!!
+					value = matched[1];
+				} else {
+					name += '=?';
+				}
+				condition_array.push(name);
+				value_array.push(value);
 			}
-			condition_array.push(name);
-			value_array.push(value);
+
+			// TODO: for ' OR '
+			condition = condition_array.join(' AND ');
+
+		} else {
+			library_namespace.err('Invalid condition: '
+					+ JSON.stringify(condition));
+			return;
 		}
 
-		// for ' OR '
-		return [ ' WHERE ' + condition_array.join(' AND '), value_array ];
+		return [ ' WHERE ' + condition, value_array ];
 	}
 
 	// ----------------------------------------------------
@@ -9513,17 +9531,21 @@ function module_code(library_namespace) {
 			SQL = generate_SQL_WHERE(Object.assign({
 				bot : 0,
 				/** {Integer|String}namespace NO. */
-				namespace : options.namespace && +get_namespace(options.namespace) || 0
+				namespace : options.namespace
+						&& +get_namespace(options.namespace) || 0
 			},
-			// options.condition: 自訂篩選條件。
-			options.condition), 'rc_');
+			// {String|Array|Object}options.where: 自訂篩選條件。
+			options.where), 'rc_');
 
 			SQL[0] = 'SELECT * FROM `recentchanges`' + SQL[0]
 			// new → old, may contain duplicate title.
-			+ ' ORDER BY `rc_timestamp` DESC LIMIT '
+			+ ' ORDER BY `rc_timestamp` DESC LIMIT ' + (
 			/** {ℕ⁰:Natural+0}limit count. */
-			// default: 10 records
-			+ (options.limit > 0 ? options.limit : 10);
+			options.limit > 0 ? Math.min(options.limit
+			// 筆數限制。就算隨意輸入，強制最多只能這麼多筆資料。
+			, 1e3)
+			// default records to get
+			: 100);
 		}
 
 		run_SQL(SQL, function(error, rows, fields) {
@@ -9588,13 +9610,15 @@ function module_code(library_namespace) {
 	}
 
 	function get_recent_via_API(callback, options) {
-		// TODO: use https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
+		// TODO: use
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
 		throw 'NYI';
 	}
 
 	wiki_API.recent_via_API = get_recent_via_API;
 	// 讓 wiki_API.recent 採用較有效率的實現方式。
-	wiki_API.recent = SQL_config ? get_recent_via_databases : get_recent_via_API;
+	wiki_API.recent = SQL_config ? get_recent_via_databases
+			: get_recent_via_API;
 
 	// ----------------------------------------------------
 
