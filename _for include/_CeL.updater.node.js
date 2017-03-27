@@ -53,7 +53,7 @@ try_path_file();
 // --------------------------------------------------------------------------------------------
 
 try {
-	// 清理戰場。
+	// 清理戰場。 TODO: backup
 	node_fs.unlinkSync(target_file);
 } catch (e) {
 }
@@ -103,21 +103,12 @@ function on_response(response) {
 		sum_size += data.length;
 		process.stdout.write(target_file + ': ' + sum_size + ' bytes...\r');
 	});
+
 	response.on('end', function(e) {
 		// flush data
 		write_stream.end();
 		// release file handler
 		write_stream.close();
-		console.log(target_file + ': ' + sum_size
-				+ ' bytes done. Extracting files to ' + process.cwd() + '...');
-		// 解開 GitHub 最新版本壓縮檔案。
-		child_process.execSync(p7z_path + ' t "' + target_file + '" && '
-				+ p7z_path + ' x -y "' + target_file + '"', {
-			// pass I/O to the child process
-			// https://nodejs.org/api/child_process.html#child_process_options_stdio
-			stdio : 'inherit'
-		});
-		// throw 'Some error occurred! Bad archive?';
 	});
 }
 
@@ -128,4 +119,26 @@ https.get('https://codeload.github.com/kanasimi/CeJS/zip/master', on_response)
 	// network error?
 	// console.error(e);
 	throw e;
+});
+
+// ---------------------------
+
+write_stream.on('close', function() {
+	console.log(target_file + ': ' + sum_size
+			+ ' bytes done. Extracting files to ' + process.cwd() + '...');
+
+	// check file size
+	var file_size = node_fs.statSync(target_file).size;
+	if (file_size !== sum_size) {
+		throw 'The file size ' + file_size + ' is not ' + sum_size + '!';
+	}
+
+	child_process.execSync(p7z_path + ' t "' + target_file + '" && '
+	// 解開 GitHub 最新版本壓縮檔案。
+	+ p7z_path + ' x -y "' + target_file + '"', {
+		// pass I/O to the child process
+		// https://nodejs.org/api/child_process.html#child_process_options_stdio
+		stdio : 'inherit'
+	});
+	// throw 'Some error occurred! Bad archive?';
 });
