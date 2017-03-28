@@ -9632,6 +9632,7 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------
 
 	// 注意: 會改變 options！
+	// 注意: options之屬性名不可與wiki_API.recent衝突！
 	function add_listener(listener, options) {
 		if (!options) {
 			options = library_namespace.null_Object();
@@ -9655,10 +9656,12 @@ function module_code(library_namespace) {
 		where = where.where || (where.where = library_namespace.null_Object());
 
 		function receive() {
+			var now = Date.now();
 			if (library_namespace.is_Date(options.timestamp
 			// default: search from NOW
 			|| (options.timestamp = new Date))) {
-				options.timestamp = options.timestamp.format('%4Y%2m%2d%2H%2M%2S');
+				options.timestamp = options.timestamp
+						.format('%4Y%2m%2d%2H%2M%2S');
 			}
 			where.timestamp = '>=' + options.timestamp;
 			where.this_oldid = '>' + (options.rev_id | 0);
@@ -9673,6 +9676,12 @@ function module_code(library_namespace) {
 					// .reverse(): old to new.
 					rows.reverse();
 
+					// TODO: options.with_content
+					if (options.with_content) {
+						;
+					}
+
+					// 除非設定 options.input_Array，否則單筆單筆輸入。
 					if (options.input_Array) {
 						exit = listener.call(options, rows.reverse());
 					} else {
@@ -9681,14 +9690,18 @@ function module_code(library_namespace) {
 
 				} else if (options.even_empty) {
 					// default: skip empty, 除非設定 options.even_empty.
-					exit = listener.call(options, options.input_Array && rows : {
+					exit = listener.call(options, options.input_Array ? rows
+					// 模擬rows單筆之結構。
+					: {
 						row : library_namespace.null_Object()
 					});
 				}
 
+				// if listener() return true, the operation will be stopped.
 				if (!exit) {
-					// if listener() return true, the operation will be stopped.
-					setTimeout(receive, options.interval || 60 * 1000);
+					setTimeout(receive, (options.interval || 500)
+					// 減去已消耗時間，達到更準確的時間間隔控制。
+					- (Date.now() - now));
 				}
 
 			}, options.SQL_options);
