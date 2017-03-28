@@ -16,7 +16,9 @@ node _CeL.updater.node.js
 // --------------------------------------------------------------------------------------------
 // 設定區。
 
-var p7z_path = [ '7z', '7za', '"C:\\Program Files\\7-Zip\\7z.exe"' ],
+var p7zip_path = [ '7z',
+// e.g., install p7zip package via yum
+'7za', '"C:\\Program Files\\7-Zip\\7z.exe"' ],
 // const 下載之後將壓縮檔存成這個檔名。
 target_file = 'CeJS-master.zip';
 
@@ -26,10 +28,10 @@ target_file = 'CeJS-master.zip';
 var https = require('https'), node_fs = require('fs'), child_process = require('child_process');
 
 // Check 7z
-if (!Array.isArray(p7z_path)) {
-	p7z_path = [ p7z_path ];
+if (!Array.isArray(p7zip_path)) {
+	p7zip_path = [ p7zip_path ];
 }
-if (!p7z_path.some(function(path) {
+if (!p7zip_path.some(function(path) {
 	// mute stderr
 	var stderr = process.stderr.write;
 	process.stderr.write = function() {
@@ -40,9 +42,9 @@ if (!p7z_path.some(function(path) {
 		path = null;
 	}
 	process.stderr.write = stderr;
-	return path && (p7z_path = path);
+	return path && (p7zip_path = path);
 })) {
-	throw 'Please set up the p7z_path first!';
+	throw 'Please set up the p7zip_path first!';
 }
 
 try_path_file();
@@ -138,9 +140,9 @@ write_stream.on('close', function() {
 				+ '! Please try to run again.';
 	}
 
-	child_process.execSync(p7z_path + ' t "' + target_file + '" && '
+	child_process.execSync(p7zip_path + ' t "' + target_file + '" && '
 	// 解開 GitHub 最新版本壓縮檔案。
-	+ p7z_path + ' x -y "' + target_file + '"', {
+	+ p7zip_path + ' x -y "' + target_file + '"', {
 		// pass I/O to the child process
 		// https://nodejs.org/api/child_process.html#child_process_options_stdio
 		stdio : 'inherit'

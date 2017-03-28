@@ -9650,18 +9650,24 @@ function module_code(library_namespace) {
 
 		// TODO: need test
 		// search from:
-		var this_oldid = options.rev_id, timestamp = options.timestamp,
+		var this_oldid = options.rev_id | 0, timestamp = options.timestamp
+				|| new Date().format('%4Y%2m%2d%2H%2M%2S'),
 		//
 		interval_id = setInterval(function() {
-			wiki_API.recent(function(row) {
+			wiki_API.recent(function(rows) {
+				if (rows.length === 0) {
+					return;
+				}
+
 				// 紀錄本次處理到哪。
-				this_oldid = row.row.rc_this_oldid;
-				timestamp = row.row.rc_timestamp.toString();
-				listener() && clearInterval(interval_id);
+				this_oldid = rows[0].row.rc_this_oldid;
+				timestamp = rows[0].row.rc_timestamp.toString();
+				listener(rows) && clearInterval(interval_id);
+
 			}, Object.assign({
 				where : {
-					timestamp : '>=20170327142110',
-					this_oldid : '>'+43769148
+					timestamp : '>=' + timestamp,
+					this_oldid : '>' + this_oldid
 				}
 			}, options.SQL_options));
 		}, options.interval || 60 * 1000);
