@@ -44,6 +44,15 @@ https://zh.wikipedia.org/w/api.php?action=query&format=json&list=users&usprop=bl
 https://www.mediawiki.org/w/api.php?action=help&modules=query%2Busercontribs
 https://zh.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&uclimit=1&ucdir=newer&ucprop=ids|title|timestamp|comment|parsedcomment|size|sizediff|flags|tags&ucuser=username
 
+
+// ---------------------------------------------------------
+// importScript('User:cewbot/*.js');
+
+// https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.loader
+mw.loader.load('https://kanasimi.github.io/CeJS/ce.js')
+CeL.run('application.net.wiki');
+CeL.wiki.page('Wikipedia:機器人',function(page_data){console.log(page_data);},{redirects:true,section:0})
+
 </code>
  * 
  * @since 2015/1/1
@@ -9615,7 +9624,7 @@ function module_code(library_namespace) {
 			callback(result);
 		},
 		// SQL config
-		options.config || options.language);
+		options.config || options.language || options[KEY_SESSION] && options[KEY_SESSION].language);
 	}
 
 	function get_recent_via_API(callback, options) {
@@ -9656,7 +9665,7 @@ function module_code(library_namespace) {
 		where = where.where || (where.where = library_namespace.null_Object());
 
 		function receive() {
-			var now = Date.now();
+			var receive_time = Date.now();
 			if (library_namespace.is_Date(options.timestamp
 			// default: search from NOW
 			|| (options.timestamp = new Date))) {
@@ -9677,7 +9686,9 @@ function module_code(library_namespace) {
 					rows.reverse();
 
 					// TODO: options.with_content
-					if (options.with_content) {
+					if (options.with_content || options.with_diff) {
+						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
+						// rvdiffto=prev
 						;
 					}
 
@@ -9701,7 +9712,7 @@ function module_code(library_namespace) {
 				if (!exit) {
 					setTimeout(receive, (options.interval || 500)
 					// 減去已消耗時間，達到更準確的時間間隔控制。
-					- (Date.now() - now));
+					- (Date.now() - receive_time));
 				}
 
 			}, options.SQL_options);
