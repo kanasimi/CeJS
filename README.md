@@ -32,7 +32,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 [![NPM](https://nodei.co/npm/cejs.png)](https://nodei.co/npm/cejs/)
 [![NPM](https://nodei.co/npm-dl/cejs.png)](https://nodei.co/npm/cejs/)
 
-First, go to [nodejs.org](https://nodejs.org/), download the runtime environment and install the node.js package.
+First, go to [nodejs.org](https://nodejs.org/), download the runtime environment and [install the node.js package](https://nodejs.org/en/download/package-manager/).
 請先安裝 [node.js](https://nodejs.org/)。
 
 Then, install the CeJS library:
@@ -45,7 +45,21 @@ $ npm install cejs
 鑒於更新頻繁，有些功能可能最新版本才具備；建議直接到 GitHub 下載最新版本壓縮檔，解開後配置。
 
 Since the frequent updates of the code, some features may work at the latest version only; it's recommended download the latest version at GitHub, and then configure.
-See [_CeL.updater.node.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.updater.node.js) for automatic updating.
+
+#### Using a setup script:
+1. Install node.js, wget/curl and [7-Zip](https://en.wikipedia.org/wiki/7-Zip). e.g.,
+``` bash
+yum -y install nodejs wget p7zip
+```
+2. fetch CeJS updater script. e.g.,
+``` bash
+cd /tmp
+mkdir CeJS && cd CeJS
+wget https://github.com/kanasimi/CeJS/raw/master/_for%20include/_CeL.updater.node.js
+# This script will download + extract CeJS at ./CeJS-master.
+node _CeL.updater.node.js
+```
+3. See [_CeL.updater.node.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.updater.node.js) for automatic updating configuration.
 
 #### To setup the loader as a split file:
 1. Copy the loader file, [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the target directory (e.g., the same as the script file).

@@ -16,7 +16,7 @@ node _CeL.updater.node.js
 // --------------------------------------------------------------------------------------------
 // 設定區。
 
-var p7z_path = [ '7z', '"C:\\Program Files\\7-Zip\\7z.exe"' ],
+var p7z_path = [ '7z', '7za', '"C:\\Program Files\\7-Zip\\7z.exe"' ],
 // const 下載之後將壓縮檔存成這個檔名。
 target_file = 'CeJS-master.zip';
 
@@ -95,16 +95,20 @@ function try_path_file() {
 }
 
 // 已經取得的檔案大小
-var sum_size = 0;
+var sum_size = 0, buffer_array = [];
 
 function on_response(response) {
-	response.pipe(write_stream);
+	// 採用這種方法容易漏失資料。 @ node.js v7.7.3
+	// response.pipe(write_stream);
+
 	response.on('data', function(data) {
 		sum_size += data.length;
+		buffer_array.push(data);
 		process.stdout.write(target_file + ': ' + sum_size + ' bytes...\r');
 	});
 
 	response.on('end', function(e) {
+		write_stream.write(Buffer.concat(buffer_array, sum_size));
 		// flush data
 		write_stream.end();
 		// release file handler
@@ -130,7 +134,8 @@ write_stream.on('close', function() {
 	// check file size
 	var file_size = node_fs.statSync(target_file).size;
 	if (file_size !== sum_size) {
-		throw 'The file size ' + file_size + ' is not ' + sum_size + '!';
+		throw 'The file size ' + file_size + ' is not ' + sum_size
+				+ '! Please try to run again.';
 	}
 
 	child_process.execSync(p7z_path + ' t "' + target_file + '" && '

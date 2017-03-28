@@ -9478,6 +9478,12 @@ function module_code(library_namespace) {
 					name += matched[1] + '?';
 					// DO NOT quote the value yourself!!
 					value = matched[2];
+					// Number.MAX_SAFE_INTEGER starts from 9.
+					if (/^[+\-]?[1-9]\d{0,15}$/.test(value)
+					// ↑ 15 = String(Number.MAX_SAFE_INTEGER).length-1
+					&& +value <= Number.MAX_SAFE_INTEGER) {
+						value = +value;
+					}
 				} else {
 					name += '=?';
 				}
@@ -9505,6 +9511,8 @@ function module_code(library_namespace) {
 	 * <code>
 	   // get title list
 	   CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, {language:'ja', namespace:0, limit:20});
+	   // 應並用 timestamp + this_oldid
+	   CeL.wiki.recent(function(rows){r=rows;console.log(rows.map(function(row){return [row.title,row.rev_id,row.row.rc_timestamp.toString()];}));}, {where:{timestamp:'>=20170327143435',this_oldid:'>'+43772537}});
 	   </code>
 	 * 
 	 * TODO: filter
@@ -9539,6 +9547,7 @@ function module_code(library_namespace) {
 
 			SQL[0] = 'SELECT * FROM `recentchanges`' + SQL[0]
 			// new → old, may contain duplicate title.
+			// or rc_this_oldid, but too slow (no index).
 			+ ' ORDER BY `rc_timestamp` DESC LIMIT ' + (
 			/** {ℕ⁰:Natural+0}limit count. */
 			options.limit > 0 ? Math.min(options.limit
@@ -9640,9 +9649,21 @@ function module_code(library_namespace) {
 		}
 
 		// TODO: need test
-		var last_chacked_rev_id = options.last_id;
-		setInterval(function() {
-			wiki_API.recent(listener, options);
+		// search from:
+		var this_oldid = options.rev_id, timestamp = options.timestamp,
+		//
+		interval_id = setInterval(function() {
+			wiki_API.recent(function(row) {
+				// 紀錄本次處理到哪。
+				this_oldid = row.row.rc_this_oldid;
+				timestamp = row.row.rc_timestamp.toString();
+				listener() && clearInterval(interval_id);
+			}, Object.assign({
+				where : {
+					timestamp : '>=20170327142110',
+					this_oldid : '>'+43769148
+				}
+			}, options.SQL_options));
 		}, options.interval || 60 * 1000);
 	}
 
