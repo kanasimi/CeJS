@@ -9512,7 +9512,7 @@ function module_code(library_namespace) {
 	   // get title list
 	   CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, {language:'ja', namespace:0, limit:20});
 	   // 應並用 timestamp + this_oldid
-	   CeL.wiki.recent(function(rows){r=rows;console.log(rows.map(function(row){return [row.title,row.rev_id,row.row.rc_timestamp.toString()];}));}, {where:{timestamp:'>=20170327143435',this_oldid:'>'+43772537}});
+	   CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return [row.title,row.rev_id,row.row.rc_timestamp.toString()];}));}, {where:{timestamp:'>=20170327143435',this_oldid:'>'+43772537}});
 	   </code>
 	 * 
 	 * TODO: filter
@@ -9631,6 +9631,7 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// 注意: 會改變 options！
 	function add_listener(listener, options) {
 		if (!options) {
 			options = library_namespace.null_Object();
@@ -9648,29 +9649,52 @@ function module_code(library_namespace) {
 			};
 		}
 
-		// TODO: need test
-		// search from:
-		var this_oldid = options.rev_id | 0, timestamp = options.timestamp
-				|| new Date().format('%4Y%2m%2d%2H%2M%2S'),
+		var where = options.SQL_options
 		//
-		interval_id = setInterval(function() {
+		|| (options.SQL_options = library_namespace.null_Object());
+		where = where.where || (where.where = library_namespace.null_Object());
+
+		function receive() {
+			if (library_namespace.is_Date(options.timestamp
+			// default: search from NOW
+			|| (options.timestamp = new Date))) {
+				options.timestamp = options.timestamp.format('%4Y%2m%2d%2H%2M%2S');
+			}
+			where.timestamp = '>=' + options.timestamp;
+			where.this_oldid = '>' + (options.rev_id | 0);
+
 			wiki_API.recent(function(rows) {
-				if (rows.length === 0) {
-					return;
+				var exit;
+				if (rows.length > 0) {
+					var row = rows[0].row;
+					// 紀錄本次處理到哪。
+					options.rev_id = row.rc_this_oldid;
+					options.timestamp = row.rc_timestamp.toString();
+					// .reverse(): old to new.
+					rows.reverse();
+
+					if (options.input_Array) {
+						exit = listener.call(options, rows.reverse());
+					} else {
+						exit = rows.some(listener, options);
+					}
+
+				} else if (options.even_empty) {
+					// default: skip empty, 除非設定 options.even_empty.
+					exit = listener.call(options, options.input_Array && rows : {
+						row : library_namespace.null_Object()
+					});
 				}
 
-				// 紀錄本次處理到哪。
-				this_oldid = rows[0].row.rc_this_oldid;
-				timestamp = rows[0].row.rc_timestamp.toString();
-				listener(rows) && clearInterval(interval_id);
-
-			}, Object.assign({
-				where : {
-					timestamp : '>=' + timestamp,
-					this_oldid : '>' + this_oldid
+				if (!exit) {
+					// if listener() return true, the operation will be stopped.
+					setTimeout(receive, options.interval || 60 * 1000);
 				}
-			}, options.SQL_options));
-		}, options.interval || 60 * 1000);
+
+			}, options.SQL_options);
+		}
+
+		receive();
 	}
 
 	wiki_API.listen = add_listener;
