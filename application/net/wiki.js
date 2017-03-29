@@ -9624,7 +9624,8 @@ function module_code(library_namespace) {
 			callback(result);
 		},
 		// SQL config
-		options.config || options.language || options[KEY_SESSION] && options[KEY_SESSION].language);
+		options.config || options.language || options[KEY_SESSION]
+				&& options[KEY_SESSION].language);
 	}
 
 	function get_recent_via_API(callback, options) {
@@ -9659,12 +9660,39 @@ function module_code(library_namespace) {
 			};
 		}
 
-		var where = options.SQL_options
+		if (!(options.limit > 0)) {
+			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
+			options.rvlimit = 500;
+		}
+
+		var session = options[KEY_SESSION],
+		//
+		where = options.SQL_options
 		//
 		|| (options.SQL_options = library_namespace.null_Object());
 		where = where.where || (where.where = library_namespace.null_Object());
 
+		if (options.with_content && !session) {
+			// 先設定一個以方便操作。
+			session = new wiki_API(null, null, options.language);
+		}
+
+		// 紀錄/標記本次處理到哪。
+		function set_mark(row) {
+			if (row >= 0) {
+				row = rows[row].row;
+			}
+			options.rev_id = row.rc_this_oldid;
+			options.timestamp = row.rc_timestamp.toString();
+		}
+
 		function receive() {
+			function receive_next() {
+				setTimeout(receive, (options.interval || 500)
+				// 減去已消耗時間，達到更準確的時間間隔控制。
+				- (Date.now() - receive_time));
+			}
+
 			var receive_time = Date.now();
 			if (library_namespace.is_Date(options.timestamp
 			// default: search from NOW
@@ -9678,18 +9706,45 @@ function module_code(library_namespace) {
 			wiki_API.recent(function(rows) {
 				var exit;
 				if (rows.length > 0) {
-					var row = rows[0].row;
-					// 紀錄本次處理到哪。
-					options.rev_id = row.rc_this_oldid;
-					options.timestamp = row.rc_timestamp.toString();
+					set_mark(0);
 					// .reverse(): old to new.
 					rows.reverse();
 
-					// TODO: options.with_content
-					if (options.with_content || options.with_diff) {
+					if (options.with_diff) {
 						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
-						// rvdiffto=prev
-						;
+						// rvdiffto=prev 已經parsed，因此仍須自行解析。
+						TODO;
+					}
+
+					if (options.with_content) {
+						// TODO: 考慮所傳回之內容過大，i.e. 回傳超過 limit (12 MB)，被截斷之情形。
+						if (rows.length > options.rvlimit) {
+							set_mark(options.rvlimit);
+							rows = rows.slice(0, options.rvlimit);
+						}
+						session.page(rows.maps(function(row) {
+							return row.page_id;
+						}), function(page_list) {
+							// 配對。
+							var page_id_hash = library_namespace.null_Object();
+							page_list.forEach(function(page_data, index) {
+								page_id_hash[page_data.id] = page_data;
+							});
+							exit = rows.some(function(row, index) {
+								row.page_data = page_id_hash[row.page_id];
+								listener.call(options, row, index, rows);
+							});
+							// free memory
+							page_id_hash = page_list = null;
+							if (!exit) {
+								receive_next();
+							}
+
+						}, {
+							is_id : true,
+							multi : true
+						});
+						return;
 					}
 
 					// 除非設定 options.input_Array，否則單筆單筆輸入。
@@ -9710,9 +9765,7 @@ function module_code(library_namespace) {
 
 				// if listener() return true, the operation will be stopped.
 				if (!exit) {
-					setTimeout(receive, (options.interval || 500)
-					// 減去已消耗時間，達到更準確的時間間隔控制。
-					- (Date.now() - receive_time));
+					receive_next();
 				}
 
 			}, options.SQL_options);
