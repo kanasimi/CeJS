@@ -9677,15 +9677,6 @@ function module_code(library_namespace) {
 			session = new wiki_API(null, null, options.language);
 		}
 
-		// 紀錄/標記本次處理到哪。
-		function set_mark(row) {
-			if (row >= 0) {
-				row = rows[row].row;
-			}
-			options.rev_id = row.rc_this_oldid;
-			options.timestamp = row.rc_timestamp.toString();
-		}
-
 		function receive() {
 			function receive_next() {
 				setTimeout(receive, (options.interval || 500)
@@ -9704,9 +9695,18 @@ function module_code(library_namespace) {
 			where.this_oldid = '>' + (options.rev_id | 0);
 
 			wiki_API.recent(function(rows) {
+				// 紀錄/標記本次處理到哪。
+				function mark_up(row) {
+					if (row >= 0) {
+						row = rows[row].row;
+					}
+					options.rev_id = row.rc_this_oldid;
+					options.timestamp = row.rc_timestamp.toString();
+				}
+
 				var exit;
 				if (rows.length > 0) {
-					set_mark(0);
+					mark_up(0);
 					// .reverse(): old to new.
 					rows.reverse();
 
@@ -9716,12 +9716,14 @@ function module_code(library_namespace) {
 						TODO;
 					}
 
+					// use options.with_content as the options of wiki.page()
 					if (options.with_content) {
 						// TODO: 考慮所傳回之內容過大，i.e. 回傳超過 limit (12 MB)，被截斷之情形。
 						if (rows.length > options.rvlimit) {
-							set_mark(options.rvlimit);
+							mark_up(options.rvlimit);
 							rows = rows.slice(0, options.rvlimit);
 						}
+
 						session.page(rows.maps(function(row) {
 							return row.page_id;
 						}), function(page_list) {
@@ -9740,10 +9742,10 @@ function module_code(library_namespace) {
 								receive_next();
 							}
 
-						}, {
+						}, Object.assign({
 							is_id : true,
 							multi : true
-						});
+						}, options.with_content));
 						return;
 					}
 
