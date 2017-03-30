@@ -2771,6 +2771,66 @@ function module_code(library_namespace) {
 
 	_.merge_sequence = merge_unduplicated_sequence;
 
+	// ------------------------------------
+
+	/**
+	 * 依照順序從 index 至 last 執行 for_each。
+	 * 
+	 * @param {Function}for_each
+	 *            run for_each(run_next, index) for every elements.
+	 * @param {Integer|Array}last
+	 *            last index or {Array}list
+	 * @param {Integer|Array}[index]
+	 *            start index or [start index, last index].<br />
+	 *            default: starts from 0.
+	 * @param {Function}[callback]
+	 *            Will run after all elements executed
+	 * @param {Object}[_this]
+	 *            passed to for_each
+	 * 
+	 * @see CeL.data.code.thread
+	 */
+	function run_serial_asynchronous(for_each, last, index, callback, _this) {
+		var list;
+		// initialization
+		if (Array.isArray(last)) {
+			list = last;
+			last = Infinity;
+		}
+		if (typeof index === 'function') {
+			// shift arguments.
+			_this = callback;
+			callback = index;
+			index = 0;
+		} else if (Array.isArray(index)) {
+			last = index[1];
+			index = index[0];
+		} else {
+			// default: starts from 0.
+			index |= 0;
+		}
+
+		// main loop
+		function run_next() {
+			if (index > last
+			// 預留可變動 list 的空間。
+			|| list && index === list.length) {
+				// done.
+				typeof callback === 'function' && callback.call(_this);
+				return;
+			}
+
+			library_namespace.debug(index + '/' + last, 3,
+					'run_serial_asynchronous');
+			for_each.call(_this, run_next, list ? list[index] : index, index,
+					list);
+			index++;
+		}
+		run_next();
+	}
+
+	_.run_serial = run_serial_asynchronous;
+
 	// ---------------------------------------------------------------------//
 
 	// https://en.wikipedia.org/wiki/Letter_case#Headings_and_publication_titles
@@ -3255,6 +3315,10 @@ function module_code(library_namespace) {
 		search_sorted : set_bind(search_sorted_Array, true),
 		// Array.prototype.first_matched
 		first_matched : set_bind(first_matched, true),
+
+		run_async : function run_asynchronous(for_each, callback, _this) {
+			run_serial_asynchronous(for_each, this, callback, _this);
+		},
 
 		truncate : Array_truncate,
 		// empty the array. 清空 array. truncate

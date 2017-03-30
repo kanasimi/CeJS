@@ -1754,7 +1754,7 @@ function module_code(library_namespace) {
 		//
 		JSON.to_XML(this.raw_data, this.to_XML_options));
 
-		callback && callback();
+		typeof callback === 'function' && callback();
 	}
 
 	// package, bale packing 打包 epub
@@ -1898,7 +1898,7 @@ function module_code(library_namespace) {
 		pack : function(target_file, remove, callback) {
 			this.flush(function() {
 				this.archive(target_file, remove);
-				callback && callback();
+				typeof callback === 'function' && callback();
 			}.bind(this));
 		}
 	};

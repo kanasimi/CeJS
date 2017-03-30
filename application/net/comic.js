@@ -346,48 +346,47 @@ function module_code(library_namespace) {
 
 	function get_work_list(work_list) {
 		// console.log(work_list);
-		var _this = this, next_index = 0,
 		// 真正處理的作品數。
-		work_count = 0;
+		var work_count = 0;
 
-		function insert_id(id_list) {
-			if (Array.isArray(id_list)) {
-				// 插入list。
-				id_list.forEach(function(id, index) {
-					work_list.splice(next_index + index, 0, id);
-				});
-			}
-			get_next_work();
-		}
-
-		function get_next_work() {
-			if (next_index === work_list.length) {
-				library_namespace.log(_this.id + ': All ' + work_list.length
-						+ ' works done.');
-				return;
+		work_list.run_async(function for_each_title(callback, work_title,
+				this_index) {
+			function insert_id(id_list) {
+				if (Array.isArray(id_list)) {
+					// 插入list。
+					id_list.forEach(function(id, index) {
+						work_list.splice(this_index + index, 0, id);
+					});
+				}
+				callback();
 			}
 
-			var work_title = work_list[next_index++].trim();
+			// convert to next index
+			this_index++;
+			work_title = work_title.trim();
 			if (!work_title) {
-				// 直接進入下一個work_title。
-				get_next_work();
+				// 直接進入下一個 work_title。
+				callback();
 
-			} else if (_this.convert_id
+			} else if (this.convert_id
 			// convert special work id: function(callback, type)
 			// 警告: 需要自行呼叫 callback(id_list);
-			&& typeof _this.convert_id[work_title] === 'function') {
-				_this.convert_id[work_title].call(_this, insert_id, work_title);
+			&& typeof this.convert_id[work_title] === 'function') {
+				// 提供異序(asynchronously,不同時)使用。
+				this.convert_id[work_title].call(this, insert_id, work_title);
 
 			} else {
 				work_count++;
 				library_namespace.log('Download ' + work_count
-						+ (work_count === next_index ? '' : '/' + next_index)
+						+ (work_count === this_index ? '' : '/' + this_index)
 						+ '/' + work_list.length + ': ' + work_title);
-				_this.get_work(work_title, get_next_work);
+				this.get_work(work_title, callback);
 			}
-		}
 
-		get_next_work();
+		}, function() {
+			library_namespace.log(this.id + ': All ' + work_list.length
+					+ ' works done.');
+		}, this);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -414,7 +413,7 @@ function module_code(library_namespace) {
 			if (typeof _this.finish_up === 'function') {
 				_this.finish_up(work_data);
 			}
-			callback && callback(work_data);
+			typeof callback === 'function' && callback(work_data);
 		}
 
 		function finish(no_cache) {
@@ -586,7 +585,7 @@ function module_code(library_namespace) {
 						exact_work_data);
 			} catch (e) {
 				library_namespace.err(work_title + ': ' + e);
-				callback && callback({
+				typeof callback === 'function' && callback({
 					title : work_title
 				});
 				return;
@@ -732,7 +731,7 @@ function module_code(library_namespace) {
 				library_namespace.err(_this.id
 						+ ': .get_chapter_count() throw error');
 				throw e;
-				callback && callback(work_data);
+				typeof callback === 'function' && callback(work_data);
 				return;
 			}
 			// 之前已設定 work_data.chapter_count=0
@@ -752,7 +751,7 @@ function module_code(library_namespace) {
 				// 注意：僅能刪除本次操作所添加/改變的檔案。因此必須先確認裡面是空的。不能使用(library_namespace.fs_remove(work_data.directory,,true);)。
 				library_namespace.fs_remove(work_data.directory);
 
-				callback && callback(work_data);
+				typeof callback === 'function' && callback(work_data);
 				return;
 			}
 
@@ -1187,7 +1186,7 @@ function module_code(library_namespace) {
 		// 檢查是否已具有server上本身就已經出錯的檔案。
 		&& node_fs.existsSync(this.EOI_error_path(image_data.file))) {
 			image_data.done = true;
-			callback && callback();
+			typeof callback === 'function' && callback();
 			return;
 		}
 
@@ -1280,7 +1279,7 @@ function module_code(library_namespace) {
 								+ ')，將不覆蓋：' + image_data.file);
 					}
 					image_data.done = true;
-					callback && callback();
+					typeof callback === 'function' && callback();
 					return;
 				}
 			}

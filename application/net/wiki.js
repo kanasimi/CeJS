@@ -5730,7 +5730,8 @@ function module_code(library_namespace) {
 								session.running = false;
 							}
 						}
-						callback && callback(undefined, error);
+						typeof callback === 'function'
+								&& callback(undefined, error);
 					}
 				}, get_URL_options);
 			}
@@ -8372,7 +8373,7 @@ function module_code(library_namespace) {
 			}
 
 			// console.log(data);
-			callback && callback(data);
+			typeof callback === 'function' && callback(data);
 		}, post_data, options);
 	};
 
@@ -9724,13 +9725,13 @@ function module_code(library_namespace) {
 							rows = rows.slice(0, options.rvlimit);
 						}
 
-						session.page(rows.maps(function(row) {
+						session.page(rows.map(function(row) {
 							return row.page_id;
 						}), function(page_list) {
 							// 配對。
 							var page_id_hash = library_namespace.null_Object();
 							page_list.forEach(function(page_data, index) {
-								page_id_hash[page_data.id] = page_data;
+								page_id_hash[page_data.pageid] = page_data;
 							});
 							exit = rows.some(function(row, index) {
 								row.page_data = page_id_hash[row.page_id];
