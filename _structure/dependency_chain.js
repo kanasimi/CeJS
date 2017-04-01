@@ -2923,6 +2923,9 @@ if (typeof CeL === 'function')
 			 */
 			finish : function(name_space, waiting) {
 				// in this scope, this === declaration;
+
+				// 若 return waiting 表示需要等待，例如 asynchronous。
+				// 這時*必須*在完成操作最後自行呼叫 waiting() 以喚醒剩下的作業！
 				return waiting;
 			},
 			/**

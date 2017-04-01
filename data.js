@@ -1507,7 +1507,8 @@ _.pair = Pair;
 // UTF-8 char and bytes.
 
 /**
- * 計算指定 UTF-8 char code 之 bytes。<br />
+ * 計算指定 UTF-8 char code 之 bytes。
+ * 
  * TODO:<br />
  * 加快速度。
  * 
@@ -1524,6 +1525,9 @@ function bytes_of_UTF8_char_code(code) {
 
 /**
  * 計算指定 UTF-8 text 之 bytes。
+ * 
+ * TODO:<br />
+ * use Buffer.byteLength
  * 
  * @param {String}text
  *            指定之 UTF-8 text。

@@ -586,7 +586,7 @@ function load_domain(domain_name, callback, force) {
 	}
 
 	if (!domain_name || domain_name === gettext_domain_name && !force) {
-		callback && callback(domain_name);
+		typeof callback === 'function' && callback(domain_name);
 		return;
 	}
 
@@ -626,9 +626,9 @@ function load_domain(domain_name, callback, force) {
 	}
 
 	if (need_to_load.length > 0) {
-		library_namespace.run(need_to_load, callback && function() {
+		library_namespace.run(need_to_load, typeof callback === 'function' && function() {
 			library_namespace.debug('Running callback...', 2, 'gettext');
-			callback && callback(domain_name);
+			callback(domain_name);
 		});
 	} else {
 		library_namespace.debug('Nothing to load.');
@@ -674,7 +674,7 @@ function use_domain(domain_name, callback, force) {
 		gettext_domain_name = domain_name;
 		library_namespace.debug('直接設定 user domain resource。', 2, 'gettext.use_domain');
 		gettext_check_resource(domain_name, 2, true);
-		callback && callback(domain_name);
+		typeof callback === 'function' && callback(domain_name);
 
 	} else if (force && domain_name) {
 		if (library_namespace.is_WWW()
@@ -701,7 +701,7 @@ function use_domain(domain_name, callback, force) {
 
 		load_domain(domain_name, function() {
 			gettext_domain_name = domain_name;
-			callback && callback(domain_name);
+			typeof callback === 'function' && callback(domain_name);
 		});
 
 	} else {
@@ -710,11 +710,11 @@ function use_domain(domain_name, callback, force) {
 				library_namespace.warn('所指定之 domain [' + domain_name
 						+ '] 尚未載入，若有必要請使用強制載入 flag。');
 
-		} else if (callback && library_namespace.is_debug())
+		} else if (typeof callback === 'function' && library_namespace.is_debug())
 			library_namespace.warn('無法判別 domain，卻設定有 callback。');
 
 		// 無論如何還是執行 callback。
-		callback && callback(domain_name);
+		typeof callback === 'function' && callback(domain_name);
 	}
 
 	return gettext_texts[domain_name];
@@ -977,7 +977,7 @@ gettext.DOM_id_key = gettext_DOM_id = 'gettext';
 gettext.DOM_separator = '|';
 
 
-gettext.adapt_domain = function(language) {
+gettext.adapt_domain = function(language, callback) {
 	library_namespace.debug('Loading ' + language + ' ...');
 
 	gettext.use_domain(language, function() {
@@ -990,6 +990,7 @@ gettext.adapt_domain = function(language) {
 		create_domain_menu.onchange.forEach(function(handler) {
 			handler();
 		});
+		typeof callback === 'function' && callback(language);
 	}, true);
 
 	// 可能用於 element 中，直接用 return gettext.adapt_domain() 即可。
@@ -1514,8 +1515,9 @@ if (library_namespace.is_WWW()
 		|| navigator.browserLanguage || navigator.systemLanguage))) {
 	// initialization 時，gettext 可能還沒 loaded。因此設在 post action。e.g., @ HTA.
 	this.finish = function(name_space, waiting) {
-		gettext.use_domain(gettext.default_domain,
-				waiting, true);
+		gettext.use_domain(gettext.default_domain, function() {
+			gettext.adapt_domain(gettext.default_domain, waiting);
+		}, true);
 		return waiting;
 	};
 }

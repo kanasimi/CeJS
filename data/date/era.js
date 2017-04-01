@@ -375,7 +375,8 @@ function module_code(library_namespace) {
 	//
 	,
 
-	國_PATTERN = /^(.*[^民])國$/,
+	// e.g., 滿洲帝國, 中華民國
+	國_PATTERN = /^(.*[^民帝])國$/,
 
 	// [ , 名稱 ]
 	名稱加稱號_PATTERN = /^(.{2,})(?:天皇|皇后)$/,
