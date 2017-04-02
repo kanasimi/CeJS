@@ -55,7 +55,7 @@ yum -y install nodejs wget p7zip
 ``` bash
 cd /tmp
 mkdir CeJS && cd CeJS
-wget https://github.com/kanasimi/CeJS/raw/master/_for%20include/_CeL.updater.node.js
+wget "https://github.com/kanasimi/CeJS/raw/master/_for%20include/_CeL.updater.node.js"
 # This script will download + extract CeJS library at ./CeJS-master.
 node _CeL.updater.node.js
 ```

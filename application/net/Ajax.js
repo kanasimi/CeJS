@@ -1563,7 +1563,8 @@ function module_code(library_namespace) {
 					}
 					try {
 						var fd = node_fs.openSync(file_path, 'w');
-						// TODO: use response.pipe(write_stream); see _CeL.updater.node.js
+						// TODO: use response.pipe(write_stream);
+						// @see _CeL.updater.node.js
 						node_fs.writeSync(fd, data, 0, data.length, null);
 						node_fs.closeSync(fd);
 					} catch (e) {
