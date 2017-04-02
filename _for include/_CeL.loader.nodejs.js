@@ -29,20 +29,30 @@ typeof CeL !== 'function' && (function() {
 	// Copy/modified from "/_for include/_CeL.loader.nodejs.js".
 
 	function check_path(path) {
-		if (path.charAt(0) === '#') {
+		if (!path || path.charAt(0) === '#') {
 			// path is comments
 			return;
 		}
+		// console.error('Try path: ' + path);
 		try {
-			// accessSync() throws if any accessibility checks fail, and does
-			// nothing otherwise.
-			node_fs.accessSync(path);
+			// old node.js has no method 'accessSync'.
+			// accessSync added in: v0.11.15
+			if (node_fs.accessSync) {
+				// accessSync() throws if any accessibility checks fail,
+				// and does nothing otherwise.
+				node_fs.accessSync(path);
+			} else if (!node_fs.existsSync(path)) {
+				throw 'ENOENT';
+			}
 			var loader = '/_for include/node.loader.js';
-			require(path + (path.indexOf('/') !== -1 ? loader
+			loader = path + (path.indexOf('/') !== -1 ? loader
 			//
-			: loader.replace(/\//g, '\\')));
+			: loader.replace(/\//g, '\\'));
+			// console.error('Try loader path: ' + loader);
+			require(loader);
 			return true;
 		} catch (e) {
+			// console.error(e);
 			// try next path
 		}
 		if (full_root && !/^(?:\/|[A-Z]:\\)/i.test(path)) {
