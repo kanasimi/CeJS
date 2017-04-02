@@ -10,8 +10,9 @@
 typeof CeL !== 'function' && (function() {
 	"use strict";
 
+	var full_root = module.filename && module.filename.replace(/[^\\\/]+$/, ''),
 	// WARNING: CeL_path_file should be an absolute path in some environment.
-	var CeL_path_file = (module.filename || './').replace(/[^\\\/]+$/) + '_CeL.path.txt',
+	CeL_path_file = (full_root || './') + '_CeL.path.txt',
 	//
 	node_fs = require('fs'), CeL_path_list = node_fs.readFileSync(CeL_path_file);
 	if (!CeL_path_list || !(CeL_path_list = CeL_path_list.toString())) {
@@ -26,9 +27,8 @@ typeof CeL !== 'function' && (function() {
 	// ----------------------------------------------------------------------------
 	// Load CeJS library. For node.js loading.
 	// Copy/modified from "/_for include/_CeL.loader.nodejs.js".
-	CeL_path_list.split(CeL_path_list.indexOf('\n') === -1 ? '|' : /\r?\n/)
-	// 載入CeJS基礎泛用之功能。（如非特殊目的使用的載入功能）
-	.some(function(path) {
+
+	function check_path(path) {
 		if (path.charAt(0) === '#') {
 			// path is comments
 			return;
@@ -45,7 +45,14 @@ typeof CeL !== 'function' && (function() {
 		} catch (e) {
 			// try next path
 		}
-	});
+		if (full_root && !/^(?:\/|[A-Z]:\\)/i.test(path)) {
+			check_path(full_root + path);
+		}
+	}
+
+	CeL_path_list.split(CeL_path_list.indexOf('\n') === -1 ? '|' : /\r?\n/)
+	// 載入CeJS基礎泛用之功能。（如非特殊目的使用的載入功能）
+	.some(check_path);
 
 	// If no latest version found, try to use cejs module instead.
 	if (typeof use_cejs_mudule === 'boolean'
