@@ -2833,6 +2833,41 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 
+	// https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
+	// 2017/4/5 10:0:36
+	function LCS_length(from, to, type) {
+		if (typeof from === 'string')
+			from = from.split('');
+		if (typeof to === 'string')
+			to = to.split('');
+
+		var trace_Array = [], from_length = from.length, result_array = typeof Uint16Array === 'function' ? new Uint16Array(
+				from_length)
+				: new Array(from_length).fill(0);
+
+		for (var to_index = 0, to_length = to.length; to_index < to_length; to_index++) {
+			for (var to_element = to[to_index], last_from = 0 | 0, from_index = 0; from_index < from_length; from_index++) {
+				// @see LCS function
+				if (to_element === from[from_index]) {
+					result_array[from_index] = ++last_from | 0;
+				} else if (result_array[from_index] < last_from) {
+					result_array[from_index] = last_from | 0;
+				} else {
+					last_from = result_array[from_index] | 0;
+				}
+			}
+
+			trace_Array.push(typeof Uint16Array === 'function' ? new Uint16Array(
+					result_array) : result_array.slice());
+		}
+
+		return trace_Array;
+	}
+
+	// LCS_length('AGCAT', 'GAC');
+
+	// ---------------------------------------------------------------------//
+
 	// https://en.wikipedia.org/wiki/Letter_case#Headings_and_publication_titles
 	// http://adminsecret.monster.com/training/articles/358-what-to-capitalize-in-a-title
 	// http://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript

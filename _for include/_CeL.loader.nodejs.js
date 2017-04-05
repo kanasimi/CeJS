@@ -10,11 +10,15 @@
 typeof CeL !== 'function' && (function() {
 	"use strict";
 
-	var full_root = module.filename && module.filename.replace(/[^\\\/]+$/, ''),
+	var full_root = module.filename
+	//
+	&& module.filename.replace(/[^\\\/]+$/, ''),
 	// WARNING: CeL_path_file should be an absolute path in some environment.
 	CeL_path_file = (full_root || './') + '_CeL.path.txt',
 	//
-	node_fs = require('fs'), CeL_path_list = node_fs.readFileSync(CeL_path_file);
+	node_fs = require('fs'),
+	//
+	CeL_path_list = node_fs.readFileSync(CeL_path_file);
 	if (!CeL_path_list || !(CeL_path_list = CeL_path_list.toString())) {
 		console.error(
 		//
@@ -55,6 +59,7 @@ typeof CeL !== 'function' && (function() {
 			// console.error(e);
 			// try next path
 		}
+		// Try the file below loader for relative path.
 		if (full_root && !/^(?:\/|[A-Z]:\\)/i.test(path)) {
 			check_path(full_root + path);
 		}
