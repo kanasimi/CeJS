@@ -2857,8 +2857,9 @@ function module_code(library_namespace) {
 				}
 			}
 
-			trace_Array.push(typeof Uint16Array === 'function' ? new Uint16Array(
-					result_array) : result_array.slice());
+			trace_Array
+					.push(typeof Uint16Array === 'function' ? new Uint16Array(
+							result_array) : result_array.slice());
 		}
 
 		return trace_Array;
@@ -2866,8 +2867,118 @@ function module_code(library_namespace) {
 
 	// LCS_length('AGCAT', 'GAC');
 
-	// ---------------------------------------------------------------------//
+	// ------------------------------------
 
+	// https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
+	// https://github.com/GerHobbelt/google-diff-match-patch
+	function LCS_trace_Array(from, to) {
+		if (typeof from === 'string')
+			from = from.split('');
+		if (typeof to === 'string')
+			to = to.split('');
+
+		var from_length = from.length, to_length = to.length, trace_Array = typeof Uint16Array === 'function' ? new Uint16Array(
+				from_length * to_length)
+				: new Array(from_length * to_length);
+
+		for (var to_index = 0, trace_index = 0, last_trace_index = trace_index
+				- from_length; to_index < to_length; to_index++) {
+			for (var to_element = to[to_index], from_index = 0; from_index < from_length; from_index++, trace_index++, last_trace_index++) {
+				// @see LCS function
+				if (to_element === from[from_index]) {
+					trace_Array[trace_index] = last_trace_index > 0 ? trace_Array[last_trace_index - 1] + 1
+							: 1;
+				} else {
+					trace_Array[trace_index] = from_index > 0 ? trace_Array[trace_index - 1]
+							: 0;
+					if (last_trace_index >= 0
+							&& trace_Array[trace_index] < trace_Array[last_trace_index]) {
+						trace_Array[trace_index] = trace_Array[last_trace_index];
+					}
+				}
+			}
+		}
+
+		return trace_Array;
+	}
+
+	function get_LCS(from, to, from_index, to_index, trace_Array) {
+		if (typeof from === 'string')
+			from = from.split('');
+		if (typeof to === 'string')
+			to = to.split('');
+
+		var from_length = from.length;
+
+		if (isNaN(from_index))
+			from_index = from_length - 1;
+		if (isNaN(to_index))
+			to_index = to.length - 1;
+
+		if (!trace_Array) {
+			trace_Array = LCS_trace_Array(from, to);
+			// console.log(trace_Array);
+		}
+
+		var result_Array = [];
+		// backtrack subroutine
+		function backtrack(from_index, to_index) {
+			// console.log([ from_index, to_index ]);
+			if (from_index >= 0 && to_index >= 0
+					&& from[from_index] === to[to_index]) {
+				result_Array.unshift(from[from_index]);
+				backtrack(from_index - 1, to_index - 1);
+
+			} else if (from_index === 0) {
+				// 預防 trace_Array[trace_index - 1] 取到範圍外的值。
+				backtrack(from_index, to_index - 1);
+
+			} else {
+				var trace_index = to_index * from_length + from_index;
+				// console.log('trace_index: ' + trace_index);
+				if (trace_index > 0) {
+					// trace_Array[trace_index]
+					// = max( trace_Array[trace_index - 1], [上面一階])
+					if (false) {
+						console.log('trace: ' + trace_Array[trace_index - 1]
+								+ ' -> ' + trace_Array[trace_index]);
+					}
+					if (trace_Array[trace_index] === trace_Array[trace_index - 1]) {
+						backtrack(from_index - 1, to_index);
+
+					} else {
+						// the same as (to_index === 0)
+						backtrack(from_index, to_index - 1);
+					}
+				}
+			}
+		}
+
+		backtrack(from_index, to_index);
+		return result_Array;
+	}
+
+	/**
+	 * @example <code>
+
+	// [ 'a', 'b', 'c' ]
+	console.log(get_LCS('a1b2c3', '1a2b3c'));
+	// abc.txt
+	console.log(get_LCS('a b c.txt', 'abc(1).txt').join(''));
+	// a_.
+	console.log(get_LCS('a_b.', 'ab_.').join(''));
+	// ab
+	console.log(get_LCS('ab12', 'abc').join(''));
+	// all: abc
+	console.log(get_LCS('abc123', 'abcd').join(''));
+	console.log(get_LCS('abcd', 'abc123').join(''));
+	console.log(get_LCS('123abc', 'abcd').join(''));
+	console.log(get_LCS('abcd', '123abc').join(''));
+
+	</code>
+	 */
+
+	// ---------------------------------------------------------------------//
 	// https://en.wikipedia.org/wiki/Letter_case#Headings_and_publication_titles
 	// http://adminsecret.monster.com/training/articles/358-what-to-capitalize-in-a-title
 	// http://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
