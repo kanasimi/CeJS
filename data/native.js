@@ -1398,73 +1398,6 @@ function module_code(library_namespace) {
 		no_string_index = true;
 	}
 
-	// Levenshtein distance (edit distance)
-	// @see
-	// https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_two_matrix_rows
-	// http://www.codeproject.com/Articles/13525/Fast-memory-efficient-Levenshtein-algorithm
-	// http://locutus.io/php/strings/levenshtein/
-	// https://github.com/component/levenshtein/blob/master/index.js
-	// https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance
-	// http://jsperf.com/levenshtein-distance-2
-	function Levenshtein_distance(string_1, string_2) {
-		var length_1 = string_1 && string_1.length || 0, length_2 = string_2
-				&& string_2.length || 0;
-		// degenerate cases
-		if (length_1 === 0) {
-			return length_2;
-		}
-		if (length_2 === 0) {
-			return length_1;
-		}
-		if (length_1 === length_2 && string_1 === string_2) {
-			return 0;
-		}
-
-		if (no_string_index) {
-			// for IE 6, or use .charAt()
-			string_1 = string_1.split('');
-			string_2 = string_2.split('');
-		}
-
-		// create two work vectors of integer distances
-		var vector_1 = new Array(length_2 + 1), i = 0;
-		// initialize vector_1 (the previous row of distances)
-		// this row is A[0][i]: edit distance for an empty string_1
-		// the distance is just the number of characters to delete from string_2
-		for (; i <= length_2; i++) {
-			vector_1[i] = i;
-		}
-
-		for (i = 0; i < length_1; i++) {
-			// calculate vector_2 (current row distances) from the previous row
-			// vector_1
-
-			// use formula to fill in the rest of the row
-			for (var j = 0,
-			// first element of vector_2 is A[i+1][0]
-			// edit distance is delete (i+1) chars from string_1 to match empty
-			// string_2
-			last_vector_2 = i + 1, vector_2 = [ last_vector_2 ]; j < length_2; j++) {
-				last_vector_2 = Math.min(
-				// The cell immediately above + 1
-				last_vector_2 + 1,
-				// The cell immediately to the left + 1
-				vector_1[j + 1] + 1,
-				// The cell diagonally above and to the left plus the cost
-				vector_1[j] + (/* cost */string_1[i] === string_2[j] ? 0 : 1));
-				vector_2.push(last_vector_2);
-			}
-
-			// copy vector_2 (current row) to vector_1 (previous row) for next
-			// iteration
-			vector_1 = vector_2;
-		}
-
-		return vector_2[length_2];
-	}
-
-	_.edit_distance = Levenshtein_distance;
-
 	// =====================================================================================================================
 
 	function set_bind(handler, need_meny_arg) {
@@ -2833,6 +2766,75 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 
+	// Levenshtein distance (edit distance)
+	// @see
+	// https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_two_matrix_rows
+	// http://www.codeproject.com/Articles/13525/Fast-memory-efficient-Levenshtein-algorithm
+	// http://locutus.io/php/strings/levenshtein/
+	// https://github.com/component/levenshtein/blob/master/index.js
+	// https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance
+	// http://jsperf.com/levenshtein-distance-2
+	function Levenshtein_distance(string_1, string_2) {
+		if (no_string_index) {
+			// for IE 6, or use .charAt()
+			string_1 = string_1.split('');
+			string_2 = string_2.split('');
+		}
+
+		var length_1 = string_1 && string_1.length || 0, length_2 = string_2
+				&& string_2.length || 0;
+		// degenerate cases
+		if (length_1 === 0) {
+			return length_2;
+		}
+		if (length_2 === 0) {
+			return length_1;
+		}
+		if (length_1 === length_2 && string_1 === string_2) {
+			return 0;
+		}
+
+		// create two work vectors of integer distances
+		var vector_1 = new Array(length_2 + 1), i = 0;
+		// initialize vector_1 (the previous row of distances)
+		// this row is A[0][i]: edit distance for an empty string_1
+		// the distance is just the number of characters to delete from string_2
+		for (; i <= length_2; i++) {
+			vector_1[i] = i;
+		}
+
+		for (i = 0; i < length_1; i++) {
+			// calculate vector_2 (current row distances) from the previous row
+			// vector_1
+
+			// use formula to fill in the rest of the row
+			for (var j = 0,
+			// first element of vector_2 is A[i+1][0]
+			// edit distance is delete (i+1) chars from string_1 to match empty
+			// string_2
+			last_vector_2 = i + 1, vector_2 = [ last_vector_2 ]; j < length_2; j++) {
+				last_vector_2 = Math.min(
+				// The cell immediately above + 1
+				last_vector_2 + 1,
+				// The cell immediately to the left + 1
+				vector_1[j + 1] + 1,
+				// The cell diagonally above and to the left plus the cost
+				vector_1[j] + (/* cost */string_1[i] === string_2[j] ? 0 : 1));
+				vector_2.push(last_vector_2);
+			}
+
+			// copy vector_2 (current row) to vector_1 (previous row) for next
+			// iteration
+			vector_1 = vector_2;
+		}
+
+		return vector_2[length_2];
+	}
+
+	_.edit_distance = Levenshtein_distance;
+
+	// ------------------------------------
+
 	// https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
 	// 2017/4/5 10:0:36
 	function LCS_length(from, to, type) {
@@ -2859,7 +2861,7 @@ function module_code(library_namespace) {
 
 			trace_Array
 					.push(typeof Uint16Array === 'function' ? new Uint16Array(
-							result_array) : result_array.slice());
+							result_array) : result_array.clone());
 		}
 
 		return trace_Array;
@@ -2869,8 +2871,14 @@ function module_code(library_namespace) {
 
 	// ------------------------------------
 
-	// https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
-	// https://github.com/GerHobbelt/google-diff-match-patch
+	/**
+	 * 
+	 * @param {Array}from
+	 * @param {Array}to
+	 * @returns {Array}
+	 * @see https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
+	 *      https://github.com/GerHobbelt/google-diff-match-patch
+	 */
 	function LCS_trace_Array(from, to) {
 		if (typeof from === 'string')
 			from = from.split('');
@@ -2886,7 +2894,9 @@ function module_code(library_namespace) {
 			for (var to_element = to[to_index], from_index = 0; from_index < from_length; from_index++, trace_index++, last_trace_index++) {
 				// @see LCS function
 				if (to_element === from[from_index]) {
-					trace_Array[trace_index] = last_trace_index > 0 ? trace_Array[last_trace_index - 1] + 1
+					trace_Array[trace_index] =
+					// 這條件也保證了 last_trace_index>0
+					from_index > 0 && to_index > 0 ? trace_Array[last_trace_index - 1] + 1
 							: 1;
 				} else {
 					trace_Array[trace_index] = from_index > 0 ? trace_Array[trace_index - 1]
@@ -2899,63 +2909,94 @@ function module_code(library_namespace) {
 			}
 		}
 
+		if (false) {
+			for (var to_index = 0; to_index < to_length; to_index++) {
+				console.log(trace_Array.slice(to_index * from_length,
+						(to_index + 1) * from_length).join('	'));
+			}
+		}
 		return trace_Array;
 	}
 
-	function get_LCS(from, to, from_index, to_index, trace_Array) {
+	/**
+	 * 
+	 * @param {Array}from
+	 * @param {Array}to
+	 * @param {Boolean}get_all
+	 * @returns {Array}
+	 */
+	function get_LCS(from, to, get_all) {
 		if (typeof from === 'string')
 			from = from.split('');
 		if (typeof to === 'string')
 			to = to.split('');
 
-		var from_length = from.length;
+		var from_length = from.length, from_index = from_length - 1, to_index = to.length - 1, trace_Array = LCS_trace_Array(
+				from, to);
 
-		if (isNaN(from_index))
-			from_index = from_length - 1;
-		if (isNaN(to_index))
-			to_index = to.length - 1;
-
-		if (!trace_Array) {
-			trace_Array = LCS_trace_Array(from, to);
-			// console.log(trace_Array);
-		}
-
-		var result_Array = [];
 		// backtrack subroutine
-		function backtrack(from_index, to_index) {
+		function backtrack(from_index, to_index, all_list) {
 			// console.log([ from_index, to_index ]);
-			if (from_index >= 0 && to_index >= 0
-					&& from[from_index] === to[to_index]) {
-				result_Array.unshift(from[from_index]);
-				backtrack(from_index - 1, to_index - 1);
+			if (from_index < 0 || to_index < 0) {
+				return;
+			}
 
-			} else if (from_index === 0) {
-				// 預防 trace_Array[trace_index - 1] 取到範圍外的值。
-				backtrack(from_index, to_index - 1);
+			if (from[from_index] === to[to_index]) {
+				if (get_all) {
+					all_list.forEach(function(result_Array) {
+						result_Array.unshift(from[from_index]);
+					});
+				} else {
+					all_list[0].unshift(from[from_index]);
+				}
+				backtrack(from_index - 1, to_index - 1, all_list);
+				return;
+
+			}
+
+			var trace_index;
+			if (from_index > 0
+			// ↑ 預防 trace_Array[trace_index - 1] 取到範圍外的值。
+			&& (trace_index = to_index * from_length + from_index) > 0
+			// trace_Array[trace_index]
+			// = max( trace_Array[trace_index - 1], [上面一階])
+			&& trace_Array[trace_index] === trace_Array[trace_index - 1]) {
+				if (false) {
+					console.log('trace_index: ' + trace_index);
+					console.log('trace: ' + trace_Array[trace_index - 1]
+							+ ' → ' + trace_Array[trace_index]);
+				}
+
+				var _all_list;
+				if (get_all
+						// 保證 to_index > 0
+						&& trace_index >= from_length
+						&& trace_Array[trace_index] === trace_Array[trace_index
+								- from_length]) {
+					// console.log(trace_Array[trace_index] + ': ' + all_list);
+					_all_list = all_list.map(function(result_Array) {
+						return result_Array.clone();
+					});
+					backtrack(from_index, to_index - 1, _all_list);
+				}
+
+				// 檢測前一個
+				backtrack(from_index - 1, to_index, all_list);
+
+				if (get_all) {
+					// console.log([ 'merge:', all_list, _all_list ]);
+					Array.prototype.push.apply(all_list, _all_list);
+				}
 
 			} else {
-				var trace_index = to_index * from_length + from_index;
-				// console.log('trace_index: ' + trace_index);
-				if (trace_index > 0) {
-					// trace_Array[trace_index]
-					// = max( trace_Array[trace_index - 1], [上面一階])
-					if (false) {
-						console.log('trace: ' + trace_Array[trace_index - 1]
-								+ ' -> ' + trace_Array[trace_index]);
-					}
-					if (trace_Array[trace_index] === trace_Array[trace_index - 1]) {
-						backtrack(from_index - 1, to_index);
-
-					} else {
-						// the same as (to_index === 0)
-						backtrack(from_index, to_index - 1);
-					}
-				}
+				// 檢測上一排
+				backtrack(from_index, to_index - 1, all_list);
 			}
 		}
 
-		backtrack(from_index, to_index);
-		return result_Array;
+		var all_list = [ [] ];
+		backtrack(from_index, to_index, all_list);
+		return get_all ? all_list.uniq() : all_list[0];
 	}
 
 	/**
@@ -2974,6 +3015,12 @@ function module_code(library_namespace) {
 	console.log(get_LCS('abcd', 'abc123').join(''));
 	console.log(get_LCS('123abc', 'abcd').join(''));
 	console.log(get_LCS('abcd', '123abc').join(''));
+
+	//
+	console.log(get_LCS('abc123', '123abc').join(''));
+	console.log(get_LCS('abc123', '123abc', true).map(function(a) {
+		return a.join('');
+	}));
 
 	</code>
 	 */
