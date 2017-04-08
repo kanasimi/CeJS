@@ -2867,6 +2867,8 @@ function module_code(library_namespace) {
 		return trace_Array;
 	}
 
+	_.LCS_length = LCS_length;
+
 	// LCS_length('AGCAT', 'GAC');
 
 	// ------------------------------------
@@ -2875,11 +2877,13 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {Array}from
 	 * @param {Array}to
+	 * 
 	 * @returns {Array}
+	 * 
 	 * @see https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
 	 *      https://github.com/GerHobbelt/google-diff-match-patch
 	 */
-	function LCS_trace_Array(from, to) {
+	function LCS_trace_array(from, to) {
 		if (typeof from === 'string')
 			from = from.split('');
 		if (typeof to === 'string')
@@ -2895,7 +2899,7 @@ function module_code(library_namespace) {
 				// @see LCS function
 				if (to_element === from[from_index]) {
 					trace_Array[trace_index] =
-					// 這條件也保證了 last_trace_index>0
+					// 這條件也保證了 last_trace_index > 0
 					from_index > 0 && to_index > 0 ? trace_Array[last_trace_index - 1] + 1
 							: 1;
 				} else {
@@ -2912,7 +2916,7 @@ function module_code(library_namespace) {
 		if (false) {
 			for (var to_index = 0; to_index < to_length; to_index++) {
 				console.log(trace_Array.slice(to_index * from_length,
-						(to_index + 1) * from_length).join('	'));
+						(to_index + 1) * from_length).join('\t'));
 			}
 		}
 		return trace_Array;
@@ -2922,17 +2926,42 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {Array}from
 	 * @param {Array}to
-	 * @param {Boolean}get_all
+	 * @param {String}type
+	 * 
 	 * @returns {Array}
 	 */
-	function get_LCS(from, to, get_all) {
-		if (typeof from === 'string')
-			from = from.split('');
-		if (typeof to === 'string')
-			to = to.split('');
+	function LCS(from, to, options) {
+		// 前置作業。
+		options = library_namespace.setup_options(options);
 
-		var from_length = from.length, from_index = from_length - 1, to_index = to.length - 1, trace_Array = LCS_trace_Array(
-				from, to);
+		var is_String = 0;
+		if (typeof from === 'string') {
+			is_String++;
+			from = from.split('');
+		}
+		if (typeof to === 'string') {
+			is_String++;
+			to = to.split('');
+		}
+
+		var from_length = from.length, from_index = from_length - 1, to_index = to.length - 1, trace_Array = LCS_trace_array(
+				from, to),
+		// 獨特/獨有的 exclusive 元素列表。
+		diff_list = [], from_unique, to_unique,
+		// flags
+		get_all = !!options.all, get_index = options.index || get_all, get_diff = !!(options.diff || options.with_diff), diff_only = get_diff
+				&& !get_all && !options.with_diff;
+
+		// ---------------------------------------
+
+		function unique(list) {
+			return list.map(function(result_Array) {
+				// assert: .join() 與 .split() 採用的是 result_Array 不包含的字串。
+				return result_Array.join('\0');
+			}).unique().map(function(result_Array) {
+				return result_Array.split('\0');
+			});
+		}
 
 		// backtrack subroutine
 		function backtrack(from_index, to_index, all_list) {
@@ -2942,16 +2971,27 @@ function module_code(library_namespace) {
 			}
 
 			if (from[from_index] === to[to_index]) {
-				if (get_all) {
-					all_list.forEach(function(result_Array) {
-						result_Array.unshift(from[from_index]);
-					});
-				} else {
-					all_list[0].unshift(from[from_index]);
+				// 此元素為 LCS 之一部分。
+				if (!diff_only) {
+					// get_index = 1: from_index, 2: to_index
+					var common = get_index ? get_index === 2 ? to_index
+							: from_index : from[from_index];
+					if (get_all) {
+						all_list.forEach(function(result_Array) {
+							result_Array.unshift(common);
+						});
+					} else {
+						all_list[0].unshift(common);
+					}
 				}
 				backtrack(from_index - 1, to_index - 1, all_list);
+				if (get_diff && (from_unique || to_unique)) {
+					diff_list.push(to_unique ? [ from_unique, to_unique ]
+							: [ from_unique ]);
+					// reset
+					from_unique = to_unique = undefined;
+				}
 				return;
-
 			}
 
 			var trace_index;
@@ -2969,10 +3009,10 @@ function module_code(library_namespace) {
 
 				var _all_list;
 				if (get_all
-						// 保證 to_index > 0
-						&& trace_index >= from_length
-						&& trace_Array[trace_index] === trace_Array[trace_index
-								- from_length]) {
+				// 如此亦保證 to_index > 0
+				&& trace_index >= from_length && trace_Array[trace_index]
+				//
+				=== trace_Array[trace_index - from_length]) {
 					// console.log(trace_Array[trace_index] + ': ' + all_list);
 					_all_list = all_list.map(function(result_Array) {
 						return result_Array.clone();
@@ -2980,47 +3020,126 @@ function module_code(library_namespace) {
 					backtrack(from_index, to_index - 1, _all_list);
 				}
 
-				// 檢測前一個
+				// 檢測前一個。
 				backtrack(from_index - 1, to_index, all_list);
+				if (get_diff) {
+					if (from_unique) {
+						from_unique[1] = from_index;
+					} else {
+						from_unique = [ from_index ];
+					}
+				}
 
 				if (get_all) {
 					// console.log([ 'merge:', all_list, _all_list ]);
-					Array.prototype.push.apply(all_list, _all_list);
+					all_list = unique(all_list.append(_all_list));
 				}
 
 			} else {
-				// 檢測上一排
+				// 檢測上一排。
 				backtrack(from_index, to_index - 1, all_list);
+				if (get_diff) {
+					if (to_unique) {
+						to_unique.push(to_index);
+					} else {
+						to_unique = [ to_index ];
+					}
+				}
 			}
 		}
 
+		// ---------------------------------------
+
 		var all_list = [ [] ];
+
+		// 主要作業。
 		backtrack(from_index, to_index, all_list);
-		return get_all ? all_list.uniq() : all_list[0];
+
+		// 以下為後續處理。
+		if (get_all) {
+			all_list = unique(all_list);
+		}
+
+		if (is_String || !get_index) {
+			all_list = all_list
+			// index → 元素
+			.map(function(result_Array) {
+				if (get_index) {
+					result_Array = result_Array.map(function(index) {
+						return get_index === 2 ? to[index] : from[index];
+					});
+				}
+				return is_String
+				// 特別指定 options.index 時，即使輸入{String}亦保持index，不轉換為{String}。
+				&& !options.index ? result_Array.join('') : result_Array;
+			});
+		}
+
+		// diff_list
+		// = [ [from_unique, to_unique], [from_unique, to_unique], ... ]
+		// 若僅有 from_unique 或 to_unique 則另一方會是 undefined。
+		// 兩者皆有則表示為變更 modify
+		// _unique = [ start_line ] or [ start_line, end_line ]
+		if (get_diff && !diff_only) {
+			// 應為 is_String
+			if (is_String) {
+				// 為了能設定 .diff。
+				// assert: diff_list 設定在 all_list[0] 上，
+				// 且不因前面 unique(all_list) 而改變。
+				all_list[0] = new String(all_list[0]);
+			}
+			all_list[0].diff = diff_list;
+		}
+
+		if (get_all) {
+			return all_list;
+		}
+
+		if (!options.diff_line) {
+			diff_list = diff_list.map(function(pair) {
+				return pair.map(function(_unique, index) {
+					if (!_unique) {
+						return;
+					}
+					var _this = index === 0 ? from : to;
+					if (_unique.length === 1) {
+						return _this[_unique[0]];
+					}
+					return _this.slice(_unique[0], _unique[1] + 1);
+				});
+			});
+		}
+		return diff_only ? diff_list : all_list[0];
 	}
+
+	LCS.trace_array = LCS_trace_array;
+	_.LCS = LCS;
 
 	/**
 	 * @example <code>
 
-	// [ 'a', 'b', 'c' ]
-	console.log(get_LCS('a1b2c3', '1a2b3c'));
+	// 'abc
+	CeL.LCS('a1b2c3', '1a2b3c');
 	// abc.txt
-	console.log(get_LCS('a b c.txt', 'abc(1).txt').join(''));
+	CeL.LCS('a b c.txt', 'abc(1).txt');
 	// a_.
-	console.log(get_LCS('a_b.', 'ab_.').join(''));
+	CeL.LCS('a_b.', 'ab_.');
 	// ab
-	console.log(get_LCS('ab12', 'abc').join(''));
+	CeL.LCS('ab12', 'abc');
 	// all: abc
-	console.log(get_LCS('abc123', 'abcd').join(''));
-	console.log(get_LCS('abcd', 'abc123').join(''));
-	console.log(get_LCS('123abc', 'abcd').join(''));
-	console.log(get_LCS('abcd', '123abc').join(''));
+	CeL.LCS('abc123', 'abcd');
+	CeL.LCS('abcd', 'abc123');
+	CeL.LCS('123abc', 'abcd');
+	CeL.LCS('abcd', '123abc');
 
 	//
-	console.log(get_LCS('abc123', '123abc').join(''));
-	console.log(get_LCS('abc123', '123abc', true).map(function(a) {
-		return a.join('');
-	}));
+	CeL.LCS('abc123', '123abc');
+	CeL.LCS('abc123', '123abc', 'all');
+
+	//
+	CeL.LCS('ab1d', 'abrcd');
+	CeL.LCS('ab1d', 'abrcd', 'diff');
+	CeL.LCS('ab1d', 'abrcd', 'with_diff');
 
 	</code>
 	 */

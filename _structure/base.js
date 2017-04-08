@@ -490,11 +490,22 @@ function (global) {
 	 * @since 2016/3/13 13:58:9
 	 */
 	function setup_options(options) {
+		if (typeof options === 'string') {
+			// e.g., 'bot' → {bot:true}
+			// e.g., 'bot|minor' → {bot:true,minor:true}
+			var _options = null_Object(), i = 0;
+			for (options = options.split('|'); i < options.length; i++) {
+				if (options[i]) {
+					_options[options[i]] = true;
+				}
+			}
+			return _options;
+		}
 		return options || Object.assign(null_Object(), options);
 	}
 	/**
 	 * setup options. 前置處理 / clone options，避免修改或覆蓋附加參數。<br />
-	 * 重新造出可被更改的選項。當會更改到options時，再使用此函數。
+	 * 重新造出可被更改的選項。當會更改到 options 時，再使用此函數。
 	 * 
 	 * @example<code>
 	   //	// 前導作業/前置處理。
