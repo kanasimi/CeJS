@@ -96,6 +96,12 @@ http://astro.kasi.re.kr/Life/Knowledge/solar2lunar/convert_daily_l2s.php
 公元1492年以後改為從9月1日開始。1699年12月15日彼得一世下令採用儒略曆（舊曆），將「Byzantine calendar」7208年12月31日之次日改為1700年1月1日。儒略曆每年平均為365.25日，比回歸年長11分14秒。這一微小誤差導致每128年節氣日期提前1天。1582年，教皇格列高利十三世實行曆法改革，將當年春分由舊曆3月11日，將日期後移10天。並規定新曆除能用400整除的世紀年（如1600年，2000年）置閨外，其他世紀年（如1700年、1800年、1900年）不置閨。從而使新曆每400年較舊曆少3天。曆法改革造成了舊曆和新曆在日期上的差距。18世紀舊曆日期比新曆日期早11天，19世紀早12天，20世紀早13天。1918年1月26日，蘇俄政府宣佈停止使用舊曆，採用新曆（即公曆）。
 
 
+
+https://fr.wikipedia.org/wiki/Liste_des_monarques_de_France
+https://en.wikipedia.org/wiki/Unicode_subscripts_and_superscripts
+Clovis Iᵉʳ
+ˢᵗ
+
  </code>
  * @since 2013/2/13 12:45:44
  */

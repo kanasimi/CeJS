@@ -12610,7 +12610,8 @@ function module_code(library_namespace) {
 		}
 
 		if (Array.isArray(value)) {
-			if (options && options.multi || value.length > 1) {
+			if (options && options.multi || value.length > 1
+					&& (!options || !options.single)) {
 				if (options && options.multi) {
 					// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 					options = library_namespace.new_options(options);
@@ -12625,7 +12626,26 @@ function module_code(library_namespace) {
 				}
 				return value;
 			}
-			value = value[0];
+
+			// 選擇推薦值/最佳等級。
+			var first;
+			if (value.every(function(v) {
+				if (!v) {
+					return true;
+				}
+				if (v.rank !== 'preferred') {
+					if (!first) {
+						first = v;
+					}
+					return true;
+				}
+				// TODO: check v.mainsnak.datavalue.value.language
+				value = v;
+				// return false;
+			})) {
+				// 沒有推薦值，選擇首個非空的值。
+				value = first;
+			}
 		}
 
 		if (is_entity(value)) {

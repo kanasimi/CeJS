@@ -942,7 +942,6 @@ function module_code(library_namespace) {
 
 		// string_1 = string_1.replace(/\s+/g, ' ');
 
-		// .split('')
 		string_1 = string_1.chars();
 		string_2 = string_2.chars();
 
@@ -1073,6 +1072,18 @@ function module_code(library_namespace) {
 			result.push(this.substr(index, size));
 
 		return result;
+	}
+
+	// ---------------------------------------------------------------------//
+
+	var no_string_index;
+	// for IE 6. Or use .chars(), .split(''), .charAt()
+	try {
+		no_string_index = '01';
+		no_string_index = !(no_string_index[1] === '1');
+	} catch (e) {
+		// e.g., IE 6
+		no_string_index = true;
 	}
 
 	// To test if RegExp.prototype has unicode flag:
@@ -1385,17 +1396,6 @@ function module_code(library_namespace) {
 			// +foot_length: search next starts from end of foot
 			index = foot_index + foot_length;
 		}
-	}
-
-	// ---------------------------------------------------------------------//
-
-	var no_string_index;
-	try {
-		no_string_index = '01';
-		no_string_index = !(no_string_index[1] === '1');
-	} catch (e) {
-		// e.g., IE 6
-		no_string_index = true;
 	}
 
 	// =====================================================================================================================
@@ -2775,11 +2775,8 @@ function module_code(library_namespace) {
 	// https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance
 	// http://jsperf.com/levenshtein-distance-2
 	function Levenshtein_distance(string_1, string_2) {
-		if (no_string_index) {
-			// for IE 6, or use .charAt()
-			string_1 = string_1.split('');
-			string_2 = string_2.split('');
-		}
+		string_1 = string_1.chars();
+		string_2 = string_2.chars();
 
 		var length_1 = string_1 && string_1.length || 0, length_2 = string_2
 				&& string_2.length || 0;
@@ -2839,9 +2836,9 @@ function module_code(library_namespace) {
 	// 2017/4/5 10:0:36
 	function LCS_length(from, to, type) {
 		if (typeof from === 'string')
-			from = from.split('');
+			from = from.chars();
 		if (typeof to === 'string')
-			to = to.split('');
+			to = to.chars();
 
 		var trace_Array = [], from_length = from.length, result_array = typeof Uint16Array === 'function' ? new Uint16Array(
 				from_length)
@@ -2884,11 +2881,6 @@ function module_code(library_namespace) {
 	 *      https://github.com/GerHobbelt/google-diff-match-patch
 	 */
 	function LCS_trace_array(from, to) {
-		if (typeof from === 'string')
-			from = from.split('');
-		if (typeof to === 'string')
-			to = to.split('');
-
 		var from_length = from.length, to_length = to.length, trace_Array = typeof Uint16Array === 'function' ? new Uint16Array(
 				from_length * to_length)
 				: new Array(from_length * to_length);
@@ -2924,24 +2916,32 @@ function module_code(library_namespace) {
 
 	/**
 	 * 
-	 * @param {Array}from
-	 * @param {Array}to
-	 * @param {String}type
+	 * @param {Array|String}from
+	 *            from text
+	 * @param {Array|String}to
+	 *            to text
+	 * @param {Object|String}options
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
-	 * @returns {Array}
+	 * @returns {Array|String}
 	 */
 	function LCS(from, to, options) {
 		// 前置作業。
 		options = library_namespace.setup_options(options);
 
-		var is_String = 0;
+		var is_String = typeof from === 'string' && typeof to === 'string',
+		// options.line : 強制採用行模式，連輸入{String|Array}都會以'\n'結合。
+		line_mode = 'line' in options ? options.line : is_String
+				&& (from.includes('\n') || to.includes('\n')),
+		//
+		separator = options.separator || (line_mode ? '\n' : '');
+		library_namespace.debug('separator: ' + JSON.stringify(separator)
+				+ (line_mode ? '，採用行模式' : ''), 3);
 		if (typeof from === 'string') {
-			is_String++;
-			from = from.split('');
+			from = separator ? from.split(separator) : from.chars();
 		}
 		if (typeof to === 'string') {
-			is_String++;
-			to = to.split('');
+			to = separator ? to.split(separator) : to.chars();
 		}
 
 		var from_length = from.length, from_index = from_length - 1, to_index = to.length - 1, trace_Array = LCS_trace_array(
@@ -2953,6 +2953,7 @@ function module_code(library_namespace) {
 				&& !get_all && !options.with_diff;
 
 		// ---------------------------------------
+		// 工具函數。
 
 		function unique(list) {
 			return list.map(function(result_Array) {
@@ -3069,9 +3070,9 @@ function module_code(library_namespace) {
 						return get_index === 2 ? to[index] : from[index];
 					});
 				}
-				return is_String
+				return is_String && !options.index
 				// 特別指定 options.index 時，即使輸入{String}亦保持index，不轉換為{String}。
-				&& !options.index ? result_Array.join('') : result_Array;
+				? result_Array.join(separator) : result_Array;
 			});
 		}
 

@@ -48,17 +48,21 @@ Since the frequent updates of the code, some features may work at the latest ver
 
 #### Using a setup script:
 1. Install node.js, wget/curl and [7-Zip](https://en.wikipedia.org/wiki/7-Zip). e.g.,
-``` bash
-yum -y install nodejs wget p7zip
-```
+
+   ``` bash
+   yum -y install nodejs wget p7zip
+   ```
+
 2. fetch CeJS updater script. e.g.,
-``` bash
-cd /tmp
-mkdir CeJS && cd CeJS
-wget "https://github.com/kanasimi/CeJS/raw/master/_for%20include/_CeL.updater.node.js"
-# This script will download + extract CeJS library at ./CeJS-master.
-node _CeL.updater.node.js
-```
+
+   ``` bash
+   cd /tmp
+   mkdir CeJS && cd CeJS
+   wget "https://github.com/kanasimi/CeJS/raw/master/_for%20include/_CeL.updater.node.js"
+   # This script will download + extract CeJS library at ./CeJS-master.
+   node _CeL.updater.node.js
+   ```
+
 3. See [_CeL.updater.node.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.updater.node.js) for automatic updating configuration.
 
 #### To setup the loader as a split file:
@@ -67,10 +71,11 @@ node _CeL.updater.node.js
 3. Create the CeL_path_file, [_CeL.path.txt](https://github.com/kanasimi/CeJS/blob/master/_for%20include/_CeL.path.sample.txt) in the same directory.
 4. Set the path list to search the library base: Write to the CeL_path_file (<code>_CeL.path.txt</code>), one path per line.
 5. to use in a script file:
-``` JavaScript
-//global.use_cejs_mudule = true;
-require('./_CeL.loader.nodejs.js');
-```
+
+   ``` JavaScript
+   //global.use_cejs_mudule = true;
+   require('./_CeL.loader.nodejs.js');
+   ```
 
 #### To setup the loader inside a single script file:
 1. Copy all codes of [_CeL.loader.nodejs.js](https://github.com/kanasimi/CeJS/tree/master/_for%20include/_CeL.loader.nodejs.js) to the front of the script.

@@ -20,7 +20,7 @@ TODO:
 下載完畢後自動產生壓縮檔+自動刪除原始圖檔
 預設介面語言繁體中文+...
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
-
+parse 圖像
 
 </code>
  * 
@@ -85,7 +85,7 @@ function module_code(library_namespace) {
 	/**
 	 * null module constructor
 	 * 
-	 * @class web Ajax 的 functions
+	 * @class module 的 functions
 	 */
 	var _// JSDT:_module_
 	= function() {
@@ -245,6 +245,7 @@ function module_code(library_namespace) {
 		// chapter_list_URL : '',
 
 		start : start_operation,
+		set_server_list : set_server_list,
 		parse_work_id : parse_work_id,
 		get_work_list : get_work_list,
 		get_work : get_work,
@@ -254,6 +255,35 @@ function module_code(library_namespace) {
 	};
 
 	// --------------------------------------------------------------------------------------------
+
+	function set_server_list(server_URL, callback, show_log) {
+		var _this = this,
+		// host_file
+		server_file = this.main_directory + 'servers.json';
+
+		if (typeof server_URL === 'function') {
+			server_URL = server_URL.call(this);
+		}
+
+		// 取得伺服器列表。
+		get_URL(server_URL, function(XMLHttp) {
+			var html = XMLHttp.responseText;
+			_this.server_list = _this.parse_server_list(html)
+			// 確保有東西。
+			.filter(function(server) {
+				return !!server;
+			}).unique();
+			if (show_log) {
+				library_namespace.log('Get ' + _this.server_list.length
+						+ ' servers from [' + server_URL + ']: '
+						+ _this.server_list);
+			}
+			node_fs.writeFileSync(server_file, JSON
+					.stringify(_this.server_list));
+
+			typeof callback === 'function' && callback();
+		}, this.charset, null, this.get_URL_options);
+	}
 
 	function start_operation(work_id) {
 		if (!work_id) {
@@ -277,25 +307,13 @@ function module_code(library_namespace) {
 		// host_list
 		&& (this.server_list = library_namespace.get_JSON(server_file))) {
 			// use cache of host list
-			this.parse_work_id(work_id);
+			typeof callback === 'function' && callback();
 			return;
 		}
 
-		// 取得伺服器列表。
-		get_URL(typeof this.server_URL === 'function' ? this.server_URL()
-				: this.server_URL, function(XMLHttp) {
-			var html = XMLHttp.responseText;
-			_this.server_list = _this.parse_server_list(html)
-			// 確保有東西。
-			.filter(function(server) {
-				return !!server;
-			}).unique();
-			library_namespace.log('Get ' + _this.server_list.length
-					+ ' servers: ' + _this.server_list);
-			node_fs.writeFileSync(server_file, JSON
-					.stringify(_this.server_list));
+		this.set_server_list(this.server_URL, function() {
 			_this.parse_work_id(work_id);
-		}, this.charset, null, this.get_URL_options);
+		}, true);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -938,6 +956,79 @@ function module_code(library_namespace) {
 			var chapter_file_name = work_data.directory
 					+ work_data.directory_name + ' ' + chapter.pad(3) + '.htm';
 
+			function process_images(chapter_data, XMLHttp) {
+				chapter_label = chapter_data.title;
+				// 檔名NO的基本長度（不足補零）
+				chapter_label = chapter.pad(4) + (chapter_label ? ' '
+				//
+				+ library_namespace.to_file_name(
+				//
+				library_namespace.HTML_to_Unicode(chapter_label)) : '');
+				var chapter_directory = work_data.directory + chapter_label
+				// 若是以 "." 結尾，在 Windows 7 中會出現問題，無法移動或刪除。
+				.replace(/\.$/, '._') + path_separator;
+				library_namespace.fs_mkdir(chapter_directory);
+				// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
+				if (work_data.reget_chapter && _this.preserve_chapter_page) {
+					node_fs.writeFileSync(chapter_directory
+							+ work_data.directory_name + '-' + chapter_label
+							+ '.htm', XMLHttp.buffer);
+				}
+				var message = [ chapter,
+				//
+				typeof _this.pre_chapter_URL === 'function' ? ''
+				//
+				: '/' + work_data.chapter_count,
+				//
+				' [', chapter_label, '] ', left, ' images.',
+				// 例如需要收費的章節。
+				chapter_data.limited ? ' (limited)' : '' ].join('');
+				if (chapter_data.limited) {
+					// 針對特殊狀況提醒。
+					library_namespace.info(message);
+				} else {
+					library_namespace.log(message);
+				}
+
+				// console.log(image_list);
+				// TODO: 當某 chapter 檔案過多，將一次 request 過多 connects 而造成問題。
+				image_list.forEach(function(image_data, index) {
+					// http://stackoverflow.com/questions/245840/rename-files-in-sub-directories
+					// for /r %x in (*.jfif) do ren "%x" *.jpg
+
+					// file_path
+					image_data.file = chapter_directory + work_data.id + '-'
+							+ chapter + '-' + (index + 1).pad(3) + '.jpg';
+					// default: 同時下載本章節中所有圖像。
+					// .one_by_one: 循序逐個、一個個下載圖像。 download one by one
+					if (!_this.one_by_one) {
+						_this.get_images(image_data, check_if_done);
+					}
+				});
+				library_namespace.debug(chapter_label + ': 已派發完工作，開始等待。', 3,
+						'get_data');
+				waiting = true;
+				if (!_this.one_by_one) {
+					return;
+				}
+
+				_this.get_URL_options.headers.Referer = chapter_URL;
+				image_list.index = 0;
+				var get_next_image = function(first) {
+					if (!first) {
+						++image_list.index;
+						check_if_done();
+					}
+					process.stdout.write(image_list.index + '/'
+							+ image_list.length + '...\r');
+					if (image_list.index < image_list.length) {
+						_this.get_images(image_list[image_list.index],
+								get_next_image);
+					}
+				};
+				get_next_image(true);
+			}
+
 			function process_chapter_data(XMLHttp) {
 				var html = XMLHttp.responseText;
 				if (!html) {
@@ -1004,86 +1095,38 @@ function module_code(library_namespace) {
 					}
 				}
 
-				chapter_label = chapter_data.title;
-				// 檔名NO的基本長度（不足補零）
-				chapter_label = chapter.pad(4) + (chapter_label ? ' '
-				//
-				+ library_namespace.to_file_name(
-				//
-				library_namespace.HTML_to_Unicode(chapter_label)) : '');
-				var chapter_directory = work_data.directory + chapter_label
-				// 若是以 "." 結尾，在 Windows 7 中會出現問題，無法移動或刪除。
-				.replace(/\.$/, '._') + path_separator;
-				library_namespace.fs_mkdir(chapter_directory);
-				// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
-				if (work_data.reget_chapter && _this.preserve_chapter_page) {
-					node_fs.writeFileSync(chapter_directory
-							+ work_data.directory_name + '-' + chapter_label
-							+ '.htm', XMLHttp.buffer);
-				}
-				var message = [ chapter,
-				//
-				typeof _this.pre_chapter_URL === 'function' ? ''
-				//
-				: '/' + work_data.chapter_count,
-				//
-				' [', chapter_label, '] ', left, ' images.',
-				// 例如需要收費的章節。
-				chapter_data.limited ? ' (limited)' : '' ].join('');
-				if (chapter_data.limited) {
-					// 針對特殊狀況提醒。
-					library_namespace.info(message);
+				if (typeof _this.pre_get_images === 'function') {
+					_this.pre_get_images(XMLHttp, work_data, chapter_data,
+					// pre_get_images:function(XMLHttp,work_data,chapter_data,callback){;callback();},
+					function() {
+						process_images(chapter_data, XMLHttp);
+					});
 				} else {
-					library_namespace.log(message);
+					process_images(chapter_data, XMLHttp);
 				}
+			}
 
-				// console.log(image_list);
-				// TODO: 當某 chapter 檔案過多，將一次 request 過多 connects 而造成問題。
-				image_list.forEach(function(image_data, index) {
-					// http://stackoverflow.com/questions/245840/rename-files-in-sub-directories
-					// for /r %x in (*.jfif) do ren "%x" *.jpg
-
-					// file_path
-					image_data.file = chapter_directory + work_data.id + '-'
-							+ chapter + '-' + (index + 1).pad(3) + '.jpg';
-					// default: 同時下載本章節中所有圖像。
-					// .one_by_one: 循序逐個、一個個下載圖像。 download one by one
-					if (!_this.one_by_one) {
-						_this.get_images(image_data, check_if_done);
-					}
-				});
-				library_namespace.debug(chapter_label + ': 已派發完工作，開始等待。', 3,
-						'get_data');
-				waiting = true;
-				if (!_this.one_by_one) {
-					return;
+			function pre_parse_chapter_data(XMLHttp) {
+				if (typeof _this.pre_parse_chapter_data === 'function') {
+					_this.pre_parse_chapter_data(XMLHttp, work_data, chapter,
+					// pre_parse_chapter_data:function(XMLHttp,work_data,chapter,callback){;callback();},
+					function() {
+						process_chapter_data(XMLHttp);
+					});
+				} else {
+					process_chapter_data(XMLHttp);
 				}
-
-				_this.get_URL_options.headers.Referer = chapter_URL;
-				image_list.index = 0;
-				var next_1 = function(first) {
-					if (!first) {
-						++image_list.index;
-						check_if_done();
-					}
-					process.stdout.write(image_list.index + '/'
-							+ image_list.length + '...\r');
-					if (image_list.index < image_list.length) {
-						_this.get_images(image_list[image_list.index], next_1);
-					}
-				};
-				next_1(true);
 			}
 
 			if (work_data.reget_chapter) {
-				get_URL(chapter_URL, process_chapter_data, _this.charset, null,
-						_this.get_URL_options);
+				get_URL(chapter_URL, pre_parse_chapter_data, _this.charset,
+						null, _this.get_URL_options);
 
 			} else {
 				// 警告: reget_chapter=false僅適用於小說之類不取得圖片的情形，
 				// 因為若有圖片（parse_chapter_data()會回傳chapter_data.image_list），將把chapter_page寫入僅能從chapter_URL取得名稱的於目錄中。
 				library_namespace.get_URL_cache(chapter_URL, function(data) {
-					process_chapter_data({
+					pre_parse_chapter_data({
 						buffer : data,
 						responseText : data && data.toString(_this.charset)
 					});
@@ -1209,7 +1252,8 @@ function module_code(library_namespace) {
 
 		get_URL(url, function(XMLHttp) {
 			var contents = XMLHttp.responseText,
-			//
+			// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
+			// 因此當圖像檔案過小，即使偵測到以 End Of Image mark 作結，依然有壞檔疑慮。
 			has_error = !contents || !(contents.length > _this.MIN_LENGTH)
 					|| (XMLHttp.status / 100 | 0) !== 2, has_EOI;
 			if (!has_error) {
@@ -1238,7 +1282,7 @@ function module_code(library_namespace) {
 				&& (_this.skip_error || _this.allow_EOI_error
 				//
 				&& image_data.file_length.length > _this.MAX_EOI_ERROR)) {
-					// 過了。
+					// pass, 過關了。
 					var bad_file_path = _this.EOI_error_path(image_data.file,
 							XMLHttp);
 					if (has_error || has_EOI === false) {
