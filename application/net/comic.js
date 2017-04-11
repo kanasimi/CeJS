@@ -56,6 +56,8 @@ typeof CeL === 'function' && CeL.run({
 	+ '|application.net.Ajax.get_URL'
 	// for CeL.env.arg_hash, CeL.fs_mkdir()
 	+ '|application.platform.nodejs.|application.storage.'
+	// for CeL.storage.file.file_type()
+	+ '|application.storage.file.'
 	// for HTML_to_Unicode()
 	+ '|interact.DOM.'
 	// for Date.prototype.format()
@@ -256,14 +258,19 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	function set_server_list(server_URL, callback, show_log) {
-		var _this = this,
-		// host_file
-		server_file = this.main_directory + 'servers.json';
+	function set_server_list(server_URL, callback, server_file) {
+		if (Array.isArray(server_URL)) {
+			// 直接設定。
+			this.server_list = server_URL;
+			typeof callback === 'function' && callback();
+			return;
+		}
 
 		if (typeof server_URL === 'function') {
 			server_URL = server_URL.call(this);
 		}
+
+		var _this = this;
 
 		// 取得伺服器列表。
 		get_URL(server_URL, function(XMLHttp) {
@@ -273,13 +280,13 @@ function module_code(library_namespace) {
 			.filter(function(server) {
 				return !!server;
 			}).unique();
-			if (show_log) {
-				library_namespace.log('Get ' + _this.server_list.length
-						+ ' servers from [' + server_URL + ']: '
-						+ _this.server_list);
+			library_namespace.log('Get ' + _this.server_list.length
+					+ ' servers from [' + server_URL + ']: '
+					+ _this.server_list);
+			if (server_file) {
+				node_fs.writeFileSync(server_file, JSON
+						.stringify(_this.server_list));
 			}
-			node_fs.writeFileSync(server_file, JSON
-					.stringify(_this.server_list));
 
 			typeof callback === 'function' && callback();
 		}, this.charset, null, this.get_URL_options);
@@ -313,7 +320,7 @@ function module_code(library_namespace) {
 
 		this.set_server_list(this.server_URL, function() {
 			_this.parse_work_id(work_id);
-		}, true);
+		}, server_file);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -1255,13 +1262,24 @@ function module_code(library_namespace) {
 			// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
 			// 因此當圖像檔案過小，即使偵測到以 End Of Image mark 作結，依然有壞檔疑慮。
 			has_error = !contents || !(contents.length > _this.MIN_LENGTH)
-					|| (XMLHttp.status / 100 | 0) !== 2, has_EOI;
+					|| (XMLHttp.status / 100 | 0) !== 2, file_type, has_EOI;
 			if (!has_error) {
-				// check End Of Image of .jpeg
-				// http://stackoverflow.com/questions/4585527/detect-eof-for-jpg-images
-				has_EOI = contents[contents.length - 2] === 255
-				// When you get to FFD9 you're at the end of the stream.
-				&& contents[contents.length - 1] === 217;
+				file_type = library_namespace.file_type(contents);
+				has_error = !file_type || file_type.type !== 'jpg'
+						&& file_type.type !== 'png';
+				if (has_EOI = file_type && !file_type.damaged) {
+					if (has_error) {
+						library_namespace.warn('The file type ['
+								+ file_type.type + '] is not image!\n'
+								+ image_data.file);
+					} else if (!image_data.file.endsWith('.'
+							+ file_type.extension)) {
+						// 依照所驗證的檔案格式改變副檔名。
+						// e.g. .png
+						image_data.file = image_data.file.replace(/[^.]+$/,
+								file_type.extension);
+					}
+				}
 			}
 			// console.log(_this.skip_error + ',' + _this.MAX_ERROR);
 			// console.log('error count: ' + image_data.error_count);

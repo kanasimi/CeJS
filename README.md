@@ -27,6 +27,27 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 
 ## Node.js usage
 
+### Node.js lazy installation 懶人配置法
+不囉嗦，已經做過的步驟可以跳過：
+1. 請先安裝 [node.js](https://nodejs.org/) 與 [7-Zip](https://en.wikipedia.org/wiki/7-Zip)
+2. 下載安裝檔 [_CeL.updater.node.js](https://raw.githubusercontent.com/kanasimi/CeJS/master/_for%20include/_CeL.updater.node.js)
+3. 進到安裝檔所在的目錄，在命令行界面下執行：
+
+   ``` cmd
+   > node _CeL.updater.node.js
+   ```
+
+4. CeJS 程式庫應該已經解壓縮，並且放在安裝檔所在目錄的 CeJS-master 目錄下，可以開始試用：
+
+   ``` cmd
+   PATH> node
+   > require('./CeJS-master/_for include/node.loader.js');
+   > CeL.run('data.math');
+   > CeL.GCD(4, 6);
+   ```
+
+5. 每次要取得最新程式庫時，重新執行一次安裝檔。
+
 ### Installation via npm
 <!-- NodeICO badges -->
 [![NPM](https://nodei.co/npm/cejs.png)](https://nodei.co/npm/cejs/)
@@ -42,7 +63,7 @@ $ npm install cejs
 ```
 
 ### Installation via GitHub latest version
-鑒於更新頻繁，有些功能可能最新版本才具備；建議直接到 GitHub 下載最新版本壓縮檔，解開後配置。
+鑒於更新頻繁，有些功能可能最新版本才具備；若是執行了採用新功能的程式，將會發生嚴重錯誤。因此強烈建議直接到 GitHub 下載最新版本壓縮檔，解開後配置。
 
 Since the frequent updates of the code, some features may work at the latest version only; it's recommended download the latest version at GitHub, and then configure.
 
