@@ -703,24 +703,30 @@ function module_code(library_namespace) {
 
 	// Magic_number[type]={Object}data
 	var Magic_number = {
+		gif : {
+			// Header: GIF89a
+			magic : '47 49 46 38 39 61',
+			// end of image data + GIF file terminator
+			eof : '00 3B',
+			min_size : 800
+		},
 		// PNG圖像
 		// https://www.w3.org/TR/PNG/#11IEND
 		// https://en.wikipedia.org/wiki/PNG
 		// https://en.wikipedia.org/wiki/APNG
 		png : {
 			// IHDR數據塊:
-			magic : '89 50 4e 47 0d 0a 1a 0a',
+			magic : '89 50 4E 47 0D 0A 1A 0A',
 			// IEND數據塊:
-			// 00 00 00 00 49 45 4E 44 AE 42 60 82
 			// http://blog.xuite.net/tzeng015/twblog/113272013-5.2.3+分析PNG圖像文件結構（6）
 			eof : '00 00 00 00 49 45 4E 44 AE 42 60 82',
-			min_size : 20
+			min_size : 100
 		},
 		jpg : {
-			magic : 'ff d8 ff',
+			magic : 'FF D8 FF',
 			// check EOI, End Of Image mark of .jpeg
 			// http://stackoverflow.com/questions/4585527/detect-eof-for-jpg-images
-			eof : 'FFD9',
+			eof : 'FF D9',
 			min_size : 6e3
 		}
 	},
@@ -770,7 +776,7 @@ function module_code(library_namespace) {
 	});
 
 	/**
-	 * 驗證檔案格式。
+	 * detect / 驗證檔案格式。
 	 * 
 	 * @param {Buffer}file_contents
 	 *            file contents

@@ -2964,10 +2964,54 @@ function module_code(library_namespace) {
 			});
 		}
 
+		function add_to_diff_list() {
+			if (!get_diff || (!from_unique && !to_unique)) {
+				return;
+			}
+
+			if (from_unique && from_unique[0] === from_unique[1])
+				from_unique.pop();
+			if (to_unique && to_unique[0] === to_unique[1])
+				to_unique.pop();
+			diff_list.unshift(to_unique ? [ from_unique, to_unique ]
+					: [ from_unique ]);
+			// reset
+			from_unique = to_unique = undefined;
+		}
+
 		// backtrack subroutine
 		function backtrack(from_index, to_index, all_list) {
-			// console.log([ from_index, to_index ]);
+			library_namespace.debug(String([ from_index, to_index ]), 3);
+			library_namespace.debug(
+					String([ from_unique, to_unique, diff_list ]), 6);
 			if (from_index < 0 || to_index < 0) {
+				library_namespace.debug('→ '
+						+ JSON.stringify([ from_index, to_index,
+								from_unique, to_unique ]), 3);
+				if (from_index === 0 && to_index === -1) {
+					// 因為 from_index === 0 時不會處理到 from_unique，
+					// 只好補處理。
+					// e.g., CeL.LCS('a0', 'b0', 'diff')
+					if (from_unique) {
+						from_unique[0] = 0;
+					} else {
+						from_unique = [ 0 ];
+					}
+				} else if (from_index === -1 && to_index === 0) {
+					// 因為 to_index === 0 時不會處理到 to_unique，
+					// 只好補處理。
+					// e.g., CeL.LCS('a1b2', '1a2b', 'diff');
+					if (to_unique) {
+						to_unique[0] = 0;
+					} else {
+						to_unique = [ 0 ];
+					}
+				} else {
+					// assert: rom_index === -1 && to_index === -1
+					// starts from the same element,
+					// from[0] === to[0]
+				}
+				add_to_diff_list();
 				return;
 			}
 
@@ -2985,13 +3029,8 @@ function module_code(library_namespace) {
 						all_list[0].unshift(common);
 					}
 				}
+				add_to_diff_list();
 				backtrack(from_index - 1, to_index - 1, all_list);
-				if (get_diff && (from_unique || to_unique)) {
-					diff_list.push(to_unique ? [ from_unique, to_unique ]
-							: [ from_unique ]);
-					// reset
-					from_unique = to_unique = undefined;
-				}
 				return;
 			}
 
@@ -3003,9 +3042,10 @@ function module_code(library_namespace) {
 			// = max( trace_Array[trace_index - 1], [上面一階])
 			&& trace_Array[trace_index] === trace_Array[trace_index - 1]) {
 				if (false) {
-					console.log('trace_index: ' + trace_index);
-					console.log('trace: ' + trace_Array[trace_index - 1]
-							+ ' → ' + trace_Array[trace_index]);
+					library_namespace.debug('trace_index: ' + trace_index, 3);
+					library_namespace.debug('trace: '
+							+ trace_Array[trace_index - 1] + ' → '
+							+ trace_Array[trace_index], 3);
 				}
 
 				var _all_list;
@@ -3014,38 +3054,46 @@ function module_code(library_namespace) {
 				&& trace_index >= from_length && trace_Array[trace_index]
 				//
 				=== trace_Array[trace_index - from_length]) {
-					// console.log(trace_Array[trace_index] + ': ' + all_list);
+					library_namespace.debug(trace_Array[trace_index] + ': '
+							+ all_list, 3);
 					_all_list = all_list.map(function(result_Array) {
 						return result_Array.clone();
 					});
 					backtrack(from_index, to_index - 1, _all_list);
 				}
 
-				// 檢測前一個。
-				backtrack(from_index - 1, to_index, all_list);
+				library_namespace
+						.debug('檢測前一個。 ' + [ from_index, to_index ], 3);
 				if (get_diff) {
 					if (from_unique) {
-						from_unique[1] = from_index;
+						from_unique[0] = from_index;
 					} else {
-						from_unique = [ from_index ];
+						from_unique = [ from_index, from_index ];
 					}
+					library_namespace.debug('from_index: '
+							+ [ from_index, JSON.stringify(from_unique) ], 3);
 				}
+				backtrack(from_index - 1, to_index, all_list);
 
 				if (get_all) {
-					// console.log([ 'merge:', all_list, _all_list ]);
+					library_namespace.debug(
+							'merge: ' + [ all_list, _all_list ], 3);
 					all_list = unique(all_list.append(_all_list));
 				}
 
 			} else {
-				// 檢測上一排。
-				backtrack(from_index, to_index - 1, all_list);
+				library_namespace
+						.debug('檢測上一排。 ' + [ from_index, to_index ], 3);
 				if (get_diff) {
 					if (to_unique) {
-						to_unique.push(to_index);
+						to_unique[0] = to_index;
 					} else {
-						to_unique = [ to_index ];
+						to_unique = [ to_index, to_index ];
 					}
+					library_namespace.debug('to_index: '
+							+ [ to_index, JSON.stringify(to_unique) ], 3);
 				}
+				backtrack(from_index, to_index - 1, all_list);
 			}
 		}
 
@@ -3120,7 +3168,7 @@ function module_code(library_namespace) {
 	 * @example <code>
 
 	// 'abc
-	CeL.LCS('a1b2c3', '1a2b3c');
+	CeL.LCS('a1b2c3', '1a2b3c', 'with_diff');
 	// abc.txt
 	CeL.LCS('a b c.txt', 'abc(1).txt');
 	// a_.
@@ -3141,6 +3189,15 @@ function module_code(library_namespace) {
 	CeL.LCS('ab1d', 'abrcd');
 	CeL.LCS('ab1d', 'abrcd', 'diff');
 	CeL.LCS('ab1d', 'abrcd', 'with_diff');
+
+	// TODO
+	CeL.LCS('abc123', 'def123', 'diff');
+	CeL.LCS('a0', 'b0', 'diff');
+	CeL.LCS('a0_', 'b0*', 'diff');
+
+	CeL.LCS('123abc', '123def', 'diff');
+	CeL.LCS('0a', '0b', 'diff');
+	CeL.LCS('0a1', '0b1', 'diff');
 
 	</code>
 	 */

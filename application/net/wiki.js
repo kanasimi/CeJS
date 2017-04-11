@@ -9715,6 +9715,7 @@ function module_code(library_namespace) {
 						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 						// rvdiffto=prev 已經parsed，因此仍須自行解析。
 						TODO;
+						return;
 					}
 
 					// use options.with_content as the options of wiki.page()
@@ -9744,6 +9745,8 @@ function module_code(library_namespace) {
 							}
 
 						}, Object.assign({
+							// rvdiffto : 'prev',
+							// rvcontentformat : 'text/javascript',
 							is_id : true,
 							multi : true
 						}, options.with_content));

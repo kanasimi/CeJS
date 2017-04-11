@@ -34,7 +34,7 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 3. 進到安裝檔所在的目錄，在命令行界面下執行：
 
    ``` cmd
-   > node _CeL.updater.node.js
+   PATH> node _CeL.updater.node.js
    ```
 
 4. CeJS 程式庫應該已經解壓縮，並且放在安裝檔所在目錄的 CeJS-master 目錄下，可以開始試用：
