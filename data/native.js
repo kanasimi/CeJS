@@ -2905,7 +2905,8 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (false) {
+		if (library_namespace.is_debug(3)) {
+			console.log(from.join('\t') + '\n' + '-'.repeat(40));
 			for (var to_index = 0; to_index < to_length; to_index++) {
 				console.log(trace_Array.slice(to_index * from_length,
 						(to_index + 1) * from_length).join('\t'));
@@ -2966,8 +2967,12 @@ function module_code(library_namespace) {
 
 		function add_to_diff_list() {
 			if (!get_diff || (!from_unique && !to_unique)) {
+				// assert: 連續相同元素時
 				return;
 			}
+
+			library_namespace.debug(JSON.stringify([ from_index, to_index,
+							from_unique, to_unique ]), 3, 'add_to_diff_list');
 
 			if (from_unique && from_unique[0] === from_unique[1])
 				from_unique.pop();
@@ -2988,23 +2993,24 @@ function module_code(library_namespace) {
 				library_namespace.debug('→ '
 						+ JSON.stringify([ from_index, to_index,
 								from_unique, to_unique ]), 3);
-				if (from_index === 0 && to_index === -1) {
-					// 因為 from_index === 0 時不會處理到 from_unique，
+				if (to_index === -1) {
+					// 因為 *,0→*(-1),-1 時不會處理到 from_unique，
 					// 只好補處理。
 					// e.g., CeL.LCS('a0', 'b0', 'diff')
+					// e.g., CeL.LCS('a0', '0b', 'diff')
 					if (from_unique) {
-						from_unique[0] = 0;
+						// from_unique[0] = 0;
 					} else {
-						from_unique = [ 0 ];
+						from_unique = [ 0, from_index ];
 					}
-				} else if (from_index === -1 && to_index === 0) {
-					// 因為 to_index === 0 時不會處理到 to_unique，
+				} else if (from_index === -1) {
+					// 因為 0,*→-1,*(-1) 時不會處理到 to_unique，
 					// 只好補處理。
-					// e.g., CeL.LCS('a1b2', '1a2b', 'diff');
+					// e.g., CeL.LCS('a1b2', '1a2b', 'diff')
 					if (to_unique) {
-						to_unique[0] = 0;
+						// to_unique[0] = 0;
 					} else {
-						to_unique = [ 0 ];
+						to_unique = [ 0, to_index ];
 					}
 				} else {
 					// assert: rom_index === -1 && to_index === -1
@@ -3017,6 +3023,7 @@ function module_code(library_namespace) {
 
 			if (from[from_index] === to[to_index]) {
 				// 此元素為 LCS 之一部分。
+				library_namespace.debug('相同元素 @ '+[from_index,to_index]+': ' + from[from_index], 3);
 				if (!diff_only) {
 					// get_index = 1: from_index, 2: to_index
 					var common = get_index ? get_index === 2 ? to_index
@@ -3198,6 +3205,7 @@ function module_code(library_namespace) {
 	CeL.LCS('123abc', '123def', 'diff');
 	CeL.LCS('0a', '0b', 'diff');
 	CeL.LCS('0a1', '0b1', 'diff');
+	CeL.LCS('0a', 'b00', 'diff');
 
 	</code>
 	 */
