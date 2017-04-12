@@ -503,16 +503,43 @@ function test_native() {
 		// OBject 可能重排。
 		assert([JSON.stringify({'1e3':0,'5':1,'66':2}), JSON.stringify(['1e3',5,66].to_hash())], 'Array.prototype.to_hash()');
 
-		assert([ 17, 'correction systems'.edit_distance('spell checkers, correction system') ], 'edit_distance() #1');
-		assert([ 9, 'Levenshtein distance'.edit_distance('edit distance') ], 'edit_distance() #2');
-		assert([ 7, 'spell check'.edit_distance('Spell Check Tool') ], 'edit_distance() #3');
-
 		assert([ 'a,\u0300,\uD801\uDC01,\u0301,\n,字,\uD801\uDC04,\u0304', 'a\u0300\uD801\uDC01\u0301\n字\uD801\uDC04\u0304'.chars().join(',') ], 'split_by_code_point() #1');
 		assert([ 'a\u0300,\uD801\uDC01\u0301,\n,字,\uD801\uDC04\u0304', 'a\u0300\uD801\uDC01\u0301\n字\uD801\uDC04\u0304'.chars(true).join(',') ], 'split_by_code_point() #2');
 
 		assert([ 'abc123!@#'.length, 'abc123!@#'.display_width() ], 'display_width() #1');
 		assert([ '黑白字翻訳翻译写'.length * 2, '黑白字翻訳翻译写'.display_width() ], 'display_width() #2');
 		assert([ '_<>Pf'.length + '石墨대한민국'.length * 2, '_<石墨>P대한민국f'.display_width() ], 'display_width() #3');
+	});
+
+	error_count += CeL.test('LCS', function(assert) {
+		assert([ 17, 'correction systems'.edit_distance('spell checkers, correction system') ], 'edit_distance() #1');
+		assert([ 9, 'Levenshtein distance'.edit_distance('edit distance') ], 'edit_distance() #2');
+		assert([ 7, 'spell check'.edit_distance('Spell Check Tool') ], 'edit_distance() #3');
+
+		assert([ 'abcd', CeL.LCS('a1b2c3d', '1a2b3c4d') ], 'LCS()');
+		assert([ 'abcd', String(CeL.LCS('a1b2c3d', '1a2b3c4d', 'with_diff')) ], 'LCS()');
+		assert(CeL.LCS('a1b2c3d', '1a2b3c4d', 'with_diff').diff.join(';').includes(',1;1,2;2,3;3,4'), 'LCS()');
+		assert(CeL.LCS('a1b2c3d', '1a2b3c4d', 'diff').join(';').includes(',1;1,2;2,3;3,4'), 'LCS()');
+
+		assert([ 'abc', CeL.LCS('a1b2c3', '1a2b3c') ], 'LCS()');
+		assert([ 'abc.txt', CeL.LCS('a b c.txt', 'abc(1).txt') ], 'LCS()');
+		assert([ 'a_.', CeL.LCS('a_b.', 'ab_.') ], 'LCS()');
+		assert([ 'ab', CeL.LCS('ab12', 'abc') ], 'LCS()');
+		assert([ 'abc', CeL.LCS('abc123', 'abcd') ], 'LCS()');
+		assert([ 'abc', CeL.LCS('abcd', 'abc123') ], 'LCS()');
+		assert([ 'abc', CeL.LCS('123abc', 'abcd') ], 'LCS()');
+		assert([ 'abc', CeL.LCS('abcd', '123abc') ], 'LCS()');
+		assert([ 'abc', CeL.LCS('abc123', '123abc') ], 'LCS()');
+		assert([ 'abc,123', CeL.LCS('abc123', '123abc', 'all').join() ], 'LCS()');
+		assert([ 'abd', CeL.LCS('ab1d', 'abrcd') ], 'LCS()');
+		assert([ '1,rc', CeL.LCS('ab1d', 'abrcd', 'diff').join(';') ], 'LCS()');
+		assert([ 'abc,def', CeL.LCS('abc123', 'def123', 'diff').join(';') ], 'LCS()');
+		assert([ 'a,b', CeL.LCS('a0', 'b0', 'diff').join(';') ], 'LCS()');
+		assert([ 'a,b;_,*', CeL.LCS('a0_', 'b0*', 'diff').join(';') ], 'LCS()');
+		assert([ 'abc,def', CeL.LCS('123abc', '123def', 'diff').join(';') ], 'LCS()');
+		assert([ 'a,b', CeL.LCS('0a', '0b', 'diff').join(';') ], 'LCS()');
+		assert([ 'a,b', CeL.LCS('0a1', '0b1', 'diff').join(';') ], 'LCS()');
+		assert([ ',b0;a', CeL.LCS('0a', 'b00', 'diff').join(';') ], 'LCS()');
 	});
 
 }

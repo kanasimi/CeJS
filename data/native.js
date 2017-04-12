@@ -2906,10 +2906,13 @@ function module_code(library_namespace) {
 		}
 
 		if (library_namespace.is_debug(3)) {
-			console.log(from.join('\t') + '\n' + '-'.repeat(40));
+			library_namespace.debug('to\\f\t' + from.join('\t') + '\n'
+					+ '-'.repeat(8 * (from.length + 1)));
 			for (var to_index = 0; to_index < to_length; to_index++) {
-				console.log(trace_Array.slice(to_index * from_length,
-						(to_index + 1) * from_length).join('\t'));
+				library_namespace.debug(to[to_index]
+						+ '\t'
+						+ trace_Array.slice(to_index * from_length,
+								(to_index + 1) * from_length).join('\t'));
 			}
 		}
 		return trace_Array;
@@ -2930,9 +2933,9 @@ function module_code(library_namespace) {
 		// 前置作業。
 		options = library_namespace.setup_options(options);
 
-		var is_String = typeof from === 'string' && typeof to === 'string',
+		var use_String = typeof from === 'string' && typeof to === 'string',
 		// options.line : 強制採用行模式，連輸入{String|Array}都會以'\n'結合。
-		line_mode = 'line' in options ? options.line : is_String
+		line_mode = 'line' in options ? options.line : use_String
 				&& (from.includes('\n') || to.includes('\n')),
 		//
 		separator = options.separator || (line_mode ? '\n' : '');
@@ -2965,6 +2968,26 @@ function module_code(library_namespace) {
 			});
 		}
 
+		function normalize_unique(_unique, is_to) {
+			if (!Array.isArray(_unique)) {
+				// return '';
+				return;
+			}
+
+			if (options.diff_line) {
+				return _unique;
+			}
+
+			var _this = is_to ? to : from;
+			if (_unique[0] === _unique[1]) {
+				return _this[_unique[0]];
+			}
+
+			_unique = _this.slice(_unique[0], _unique[1] + 1);
+
+			return use_String ? _unique.join(separator) : _unique;
+		}
+
 		function add_to_diff_list() {
 			if (!get_diff || (!from_unique && !to_unique)) {
 				// assert: 連續相同元素時
@@ -2972,14 +2995,11 @@ function module_code(library_namespace) {
 			}
 
 			library_namespace.debug(JSON.stringify([ from_index, to_index,
-							from_unique, to_unique ]), 3, 'add_to_diff_list');
+					from_unique, to_unique ]), 3, 'add_to_diff_list');
 
-			if (from_unique && from_unique[0] === from_unique[1])
-				from_unique.pop();
-			if (to_unique && to_unique[0] === to_unique[1])
-				to_unique.pop();
-			diff_list.unshift(to_unique ? [ from_unique, to_unique ]
-					: [ from_unique ]);
+			from_unique = normalize_unique(from_unique);
+			diff_list.unshift(to_unique ? [ from_unique,
+					normalize_unique(to_unique, true) ] : [ from_unique ]);
 			// reset
 			from_unique = to_unique = undefined;
 		}
@@ -2991,31 +3011,38 @@ function module_code(library_namespace) {
 					String([ from_unique, to_unique, diff_list ]), 6);
 			if (from_index < 0 || to_index < 0) {
 				library_namespace.debug('→ '
-						+ JSON.stringify([ from_index, to_index,
-								from_unique, to_unique ]), 3);
-				if (to_index === -1) {
-					// 因為 *,0→*(-1),-1 時不會處理到 from_unique，
-					// 只好補處理。
-					// e.g., CeL.LCS('a0', 'b0', 'diff')
-					// e.g., CeL.LCS('a0', '0b', 'diff')
+						+ JSON.stringify([ from_index, to_index, from_unique,
+								to_unique ]), 3);
+				if (from_index === -1 && to_index === -1) {
+					// assert: from_index === -1 && to_index === -1
+					library_namespace.debug(
+							'LCS starts from the first element of each list, '
+									+ JSON.stringify([ from_index, to_index,
+											from[0], to[0] ]), 3);
+				} else if (to_index === -1) {
+					library_namespace.debug('因為 ' + from_index + ',0→('
+							+ from_index + '|' + (from_index - 1)
+							+ '),-1 時不會處理到 from_unique，只好補處理。', 3);
 					if (from_unique) {
-						// from_unique[0] = 0;
+						// e.g., CeL.LCS('abc123', 'def123', 'diff')
+						from_unique[0] = 0;
 					} else {
+						// e.g., CeL.LCS('a0', 'b0', 'diff')
+						// e.g., CeL.LCS('a0', '0b', 'diff')
 						from_unique = [ 0, from_index ];
 					}
 				} else if (from_index === -1) {
-					// 因為 0,*→-1,*(-1) 時不會處理到 to_unique，
-					// 只好補處理。
-					// e.g., CeL.LCS('a1b2', '1a2b', 'diff')
+					library_namespace.debug('因為 0,' + to_index + ',0→-1,('
+							+ to_index + '|' + (to_index - 1)
+							+ ') 時不會處理到 to_unique，只好補處理。', 3);
 					if (to_unique) {
-						// to_unique[0] = 0;
+						to_unique[0] = 0;
 					} else {
+						// e.g., CeL.LCS('a1b2', '1a2b', 'diff')
 						to_unique = [ 0, to_index ];
 					}
 				} else {
-					// assert: rom_index === -1 && to_index === -1
-					// starts from the same element,
-					// from[0] === to[0]
+					library_namespace.warn('Invalid situation!');
 				}
 				add_to_diff_list();
 				return;
@@ -3023,7 +3050,8 @@ function module_code(library_namespace) {
 
 			if (from[from_index] === to[to_index]) {
 				// 此元素為 LCS 之一部分。
-				library_namespace.debug('相同元素 @ '+[from_index,to_index]+': ' + from[from_index], 3);
+				library_namespace.debug('相同元素 @ ' + [ from_index, to_index ]
+						+ ': ' + from[from_index], 3);
 				if (!diff_only) {
 					// get_index = 1: from_index, 2: to_index
 					var common = get_index ? get_index === 2 ? to_index
@@ -3116,7 +3144,7 @@ function module_code(library_namespace) {
 			all_list = unique(all_list);
 		}
 
-		if (is_String || !get_index) {
+		if (use_String || !get_index) {
 			all_list = all_list
 			// index → 元素
 			.map(function(result_Array) {
@@ -3125,7 +3153,7 @@ function module_code(library_namespace) {
 						return get_index === 2 ? to[index] : from[index];
 					});
 				}
-				return is_String && !options.index
+				return use_String && !options.index
 				// 特別指定 options.index 時，即使輸入{String}亦保持index，不轉換為{String}。
 				? result_Array.join(separator) : result_Array;
 			});
@@ -3137,8 +3165,8 @@ function module_code(library_namespace) {
 		// 兩者皆有則表示為變更 modify
 		// _unique = [ start_line ] or [ start_line, end_line ]
 		if (get_diff && !diff_only) {
-			// 應為 is_String
-			if (is_String) {
+			// 應為 use_String
+			if (use_String) {
 				// 為了能設定 .diff。
 				// assert: diff_list 設定在 all_list[0] 上，
 				// 且不因前面 unique(all_list) 而改變。
@@ -3147,68 +3175,11 @@ function module_code(library_namespace) {
 			all_list[0].diff = diff_list;
 		}
 
-		if (get_all) {
-			return all_list;
-		}
-
-		if (!options.diff_line) {
-			diff_list = diff_list.map(function(pair) {
-				return pair.map(function(_unique, index) {
-					if (!_unique) {
-						return;
-					}
-					var _this = index === 0 ? from : to;
-					if (_unique.length === 1) {
-						return _this[_unique[0]];
-					}
-					return _this.slice(_unique[0], _unique[1] + 1);
-				});
-			});
-		}
-		return diff_only ? diff_list : all_list[0];
+		return get_all ? all_list : diff_only ? diff_list : all_list[0];
 	}
 
 	LCS.trace_array = LCS_trace_array;
 	_.LCS = LCS;
-
-	/**
-	 * @example <code>
-
-	// 'abc
-	CeL.LCS('a1b2c3', '1a2b3c', 'with_diff');
-	// abc.txt
-	CeL.LCS('a b c.txt', 'abc(1).txt');
-	// a_.
-	CeL.LCS('a_b.', 'ab_.');
-	// ab
-	CeL.LCS('ab12', 'abc');
-	// all: abc
-	CeL.LCS('abc123', 'abcd');
-	CeL.LCS('abcd', 'abc123');
-	CeL.LCS('123abc', 'abcd');
-	CeL.LCS('abcd', '123abc');
-
-	//
-	CeL.LCS('abc123', '123abc');
-	CeL.LCS('abc123', '123abc', 'all');
-
-	//
-	CeL.LCS('ab1d', 'abrcd');
-	CeL.LCS('ab1d', 'abrcd', 'diff');
-	CeL.LCS('ab1d', 'abrcd', 'with_diff');
-
-	// TODO
-	CeL.LCS('abc123', 'def123', 'diff');
-	CeL.LCS('a0', 'b0', 'diff');
-	CeL.LCS('a0_', 'b0*', 'diff');
-
-	CeL.LCS('123abc', '123def', 'diff');
-	CeL.LCS('0a', '0b', 'diff');
-	CeL.LCS('0a1', '0b1', 'diff');
-	CeL.LCS('0a', 'b00', 'diff');
-
-	</code>
-	 */
 
 	// ---------------------------------------------------------------------//
 	// https://en.wikipedia.org/wiki/Letter_case#Headings_and_publication_titles
