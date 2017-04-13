@@ -1,5 +1,8 @@
 ﻿# Paths to search the library base, one path per line.
 # This file is private.
-./CeJS-master
-../
 /path/to/library_root
+
+# Node.js lazy installation
+./CeJS-master
+# running under /_for include/
+..

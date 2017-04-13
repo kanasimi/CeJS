@@ -2832,69 +2832,59 @@ function module_code(library_namespace) {
 
 	// ------------------------------------
 
-	// https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
-	// 2017/4/5 10:0:36
-	function LCS_length(from, to, type) {
-		if (typeof from === 'string')
-			from = from.chars();
-		if (typeof to === 'string')
-			to = to.chars();
-
-		var trace_Array = [], from_length = from.length, result_array = typeof Uint16Array === 'function' ? new Uint16Array(
-				from_length)
-				: new Array(from_length).fill(0);
-
-		for (var to_index = 0, to_length = to.length; to_index < to_length; to_index++) {
-			for (var to_element = to[to_index], last_from = 0 | 0, from_index = 0; from_index < from_length; from_index++) {
-				// @see LCS function
-				if (to_element === from[from_index]) {
-					result_array[from_index] = ++last_from | 0;
-				} else if (result_array[from_index] < last_from) {
-					result_array[from_index] = last_from | 0;
-				} else {
-					last_from = result_array[from_index] | 0;
-				}
-			}
-
-			trace_Array
-					.push(typeof Uint16Array === 'function' ? new Uint16Array(
-							result_array) : result_array.clone());
-		}
-
-		return trace_Array;
-	}
-
-	_.LCS_length = LCS_length;
-
-	// LCS_length('AGCAT', 'GAC');
-
-	// ------------------------------------
-
 	/**
+	 * Get LCS length / trace array
 	 * 
 	 * @param {Array}from
 	 * @param {Array}to
 	 * 
 	 * @returns {Array}
 	 * 
+	 * @since 2017/4/5 10:0:36
+	 * 
 	 * @see https://en.wikipedia.org/wiki/Longest_common_subsequence_problem
 	 *      https://github.com/GerHobbelt/google-diff-match-patch
 	 */
-	function LCS_trace_array(from, to) {
-		var from_length = from.length, to_length = to.length, trace_Array = typeof Uint16Array === 'function' ? new Uint16Array(
-				from_length * to_length)
-				: new Array(from_length * to_length);
+	function LCS_length(from, to, get_trace_array) {
+		if (typeof from === 'string')
+			from = from.chars();
+		if (typeof to === 'string')
+			to = to.chars();
+		// assert: Array.isArray(from) && Array.isArray(from)
 
+		var get_length_only = !get_trace_array,
+		//
+		from_length = from.length, to_length = to.length,
+		//
+		trace_Array = from_length * (get_length_only ? 2 : to_length);
+		trace_Array = typeof Uint16Array === 'function' ? new Uint16Array(
+				trace_Array) : new Array(trace_Array).fill(0);
+
+		// loop of ↓
 		for (var to_index = 0, trace_index = 0, last_trace_index = trace_index
 				- from_length; to_index < to_length; to_index++) {
+			if (get_length_only) {
+				if (to_index % 2 === 0) {
+					last_trace_index = 0;
+					// assert: 已經 = from_length
+					// trace_index = from_length;
+				} else {
+					// assert: 已經 = from_length
+					// last_trace_index = from_length;
+					trace_index = 0;
+				}
+			}
+			// loop of →
 			for (var to_element = to[to_index], from_index = 0; from_index < from_length; from_index++, trace_index++, last_trace_index++) {
 				// @see LCS function
 				if (to_element === from[from_index]) {
+					// to[to_index] === from[from_index]
 					trace_Array[trace_index] =
 					// 這條件也保證了 last_trace_index > 0
 					from_index > 0 && to_index > 0 ? trace_Array[last_trace_index - 1] + 1
 							: 1;
 				} else {
+					// to[to_index] !== from[from_index]
 					trace_Array[trace_index] = from_index > 0 ? trace_Array[trace_index - 1]
 							: 0;
 					if (last_trace_index >= 0
@@ -2905,20 +2895,28 @@ function module_code(library_namespace) {
 			}
 		}
 
+		if (get_length_only) {
+			return trace_Array[trace_index - 1];
+		}
+
 		if (library_namespace.is_debug(3)) {
 			library_namespace.debug('to\\f\t' + from.join('\t') + '\n'
-					+ '-'.repeat(8 * (from.length + 1)));
+					+ '-'.repeat(8 * (from.length + 2)));
 			for (var to_index = 0; to_index < to_length; to_index++) {
 				library_namespace.debug(to[to_index]
 						+ '\t'
 						+ trace_Array.slice(to_index * from_length,
 								(to_index + 1) * from_length).join('\t'));
 			}
+			library_namespace.debug('-'.repeat(8 * (from.length + 3)));
 		}
 		return trace_Array;
 	}
 
+	_.LCS_length = LCS_length;
+
 	/**
+	 * Get LCS / diff
 	 * 
 	 * @param {Array|String}from
 	 *            from text
@@ -2947,9 +2945,10 @@ function module_code(library_namespace) {
 		if (typeof to === 'string') {
 			to = separator ? to.split(separator) : to.chars();
 		}
+		// assert: Array.isArray(from) && Array.isArray(from)
 
-		var from_length = from.length, from_index = from_length - 1, to_index = to.length - 1, trace_Array = LCS_trace_array(
-				from, to),
+		var from_length = from.length, from_index = from_length - 1, to_index = to.length - 1, trace_Array = LCS_length(
+				from, to, true),
 		// 獨特/獨有的 exclusive 元素列表。
 		diff_list = [], from_unique, to_unique,
 		// flags
@@ -3178,7 +3177,6 @@ function module_code(library_namespace) {
 		return get_all ? all_list : diff_only ? diff_list : all_list[0];
 	}
 
-	LCS.trace_array = LCS_trace_array;
 	_.LCS = LCS;
 
 	// ---------------------------------------------------------------------//

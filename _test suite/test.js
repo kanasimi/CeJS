@@ -521,8 +521,9 @@ function test_native() {
 		assert(CeL.LCS('a1b2c3d', '1a2b3c4d', 'with_diff').diff.join(';').includes(',1;1,2;2,3;3,4'), 'LCS()');
 		assert(CeL.LCS('a1b2c3d', '1a2b3c4d', 'diff').join(';').includes(',1;1,2;2,3;3,4'), 'LCS()');
 
+		assert([ 'AC'.length, CeL.LCS_length('AGCAT', 'GAC') ], 'LCS_length()');
 		assert([ 'abc', CeL.LCS('a1b2c3', '1a2b3c') ], 'LCS()');
-		// assert([ 'abc'.length, CeL.LCS_length('a1b2c3', '1a2b3c') ], 'LCS_length()');
+		assert([ 'abc'.length, CeL.LCS_length('a1b2c3', '1a2b3c') ], 'LCS_length()');
 		assert([ 'abc.txt', CeL.LCS('a b c.txt', 'abc(1).txt') ], 'LCS()');
 		assert([ 'a_.', CeL.LCS('a_b.', 'ab_.') ], 'LCS()');
 		assert([ 'ab', CeL.LCS('ab12', 'abc') ], 'LCS()');
@@ -531,7 +532,7 @@ function test_native() {
 		assert([ 'abc', CeL.LCS('123abc', 'abcd') ], 'LCS()');
 		assert([ 'abc', CeL.LCS('abcd', '123abc') ], 'LCS()');
 		assert([ 'abc', CeL.LCS('abc123', '123abc') ], 'LCS()');
-		// assert([ 'abc'.length, CeL.LCS_length('abc123', '123abc') ], 'LCS_length()');
+		assert([ 'abc'.length, CeL.LCS_length('abc123', '123abc') ], 'LCS_length()');
 		assert([ 'abc,123', CeL.LCS('abc123', '123abc', 'all').join() ], 'LCS()');
 		assert([ 'abd', CeL.LCS('ab1d', 'abrcd') ], 'LCS()');
 		assert([ '1,rc', CeL.LCS('ab1d', 'abrcd', 'diff').join(';') ], 'LCS()');
