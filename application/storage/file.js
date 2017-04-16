@@ -16,8 +16,10 @@ typeof CeL === 'function' && CeL.run({
 	// module name
 	name : 'application.storage.file',
 
+	// Math.log2()
+	require : 'data.code.compatibility.'
 	// .chunk()
-	require : 'data.native.'
+	+ '|data.native.'
 	// MIME_of()
 	// +'|application.net.MIME.'
 	,
@@ -727,7 +729,7 @@ function module_code(library_namespace) {
 			// check EOI, End Of Image mark of .jpeg
 			// http://stackoverflow.com/questions/4585527/detect-eof-for-jpg-images
 			eof : 'FF D9',
-			min_size : 6e3
+			min_size : 3e3
 		}
 	},
 	// Magic_number_data[byte count]=[{Natural}Magic_number:{Object}data]

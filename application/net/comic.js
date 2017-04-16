@@ -48,7 +48,7 @@ typeof CeL === 'function' && CeL.run({
 	// .between() @ CeL.data.native
 	// .append() @ CeL.data.native
 	// .pad() @ CeL.data.native
-	// .display_width() @ CeL.data.native
+	// display_align() @ CeL.data.native
 	+ '|data.native.'
 	// for CeL.to_file_name()
 	+ '|application.net.'
@@ -538,8 +538,10 @@ function module_code(library_namespace) {
 					return;
 				}
 				non_space_matched = non_space_matched[0];
-				library_namespace.warn('Use title:\n' + work_title + '→\n'
-						+ non_space_matched[1] + '');
+				library_namespace.warn(library_namespace.display_align({
+					'Use title:' : work_title,
+					'→' : non_space_matched[1]
+				}));
 				work_title = non_space_matched[1];
 				id_list = non_space_matched[0];
 			}
@@ -677,22 +679,11 @@ function module_code(library_namespace) {
 
 					} else if (typeof work_data[key] !== 'object'
 							&& work_data[key] !== matched[key]) {
-						var line_1_prefix = key + ':', line_2_prefix = '→';
-
-						if (matched[key].includes('\n')
-								|| work_data[key].includes('\n')) {
-							line_1_prefix += '\n';
-							line_2_prefix += '\n';
-						} else {
-							// 螢幕對齊用。
-							line_2_prefix = line_2_prefix
-									.pad(line_1_prefix.display_width()
-											- (line_2_prefix.display_width() - line_2_prefix.length));
-						}
-
-						library_namespace.info(line_1_prefix + matched[key]
-						// 對比兩者。
-						+ '\n' + line_2_prefix + work_data[key]);
+						var display_pair = CeL.null_Object();
+						display_pair[key + ':'] = matched[key];
+						display_pair['→'] = work_data[key];
+						library_namespace.info(library_namespace
+								.display_align(display_pair));
 					}
 				}
 				matched = matched.last_download.chapter;
@@ -1351,10 +1342,11 @@ function module_code(library_namespace) {
 			//
 			: (XMLHttp.status ? XMLHttp.status + ' ' : '')
 			//
-			+ '(' + (contents ? contents.length : 0) + ' B): Failed to get ')
-					+ url + '\n→ ' + image_data.file);
-			library_namespace.err('Failed to get ' + url + '\n→ '
-					+ image_data.file);
+			+ '(' + (!contents ? 'No contents got' : contents.length + ' B'
+			//
+			+ (contents.length > _this.MIN_LENGTH ? '' : ', too small'))
+			//
+			+ '): Failed to get ') + url + '\n→ ' + image_data.file);
 			if (image_data.error_count === _this.MAX_ERROR) {
 				image_data.has_error = true;
 				// throw new Error(_this.MESSAGE_RE_DOWNLOAD);

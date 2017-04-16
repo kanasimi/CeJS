@@ -3476,6 +3476,33 @@ function module_code(library_namespace) {
 		return string.replace(/[\u3000-\uFF5E]/g, '  ').length;
 	}
 
+	var MAX_DISPLAY_WIDTH = 200;
+	// CLI螢幕顯示對齊用。e.g., 對比兩者。
+	// left justification, to line up in correct
+	function display_align(pair, options) {
+		var key_display_width = [], display_lines = [];
+		for ( var key in pair) {
+			if (pair[key].length > MAX_DISPLAY_WIDTH
+					|| String(pair[key]).includes('\n')) {
+				for ( var key in pair) {
+					display_lines.push(key.trim() + '\n' + pair[key]);
+				}
+				return display_lines.join('\n');
+			}
+			key_display_width.push(display_width(key));
+		}
+
+		var max_key_display_width = Math.max.apply(null, key_display_width);
+		for ( var key in pair) {
+			display_lines.push(key.pad(key.length + max_key_display_width
+			// assert: display_width(' ') === 1
+			- key_display_width.shift()) + pair[key]);
+		}
+		return display_lines.join('\n');
+	}
+
+	_.display_align = display_align;
+
 	// ------------------------------------
 
 	set_method(String.prototype, {
