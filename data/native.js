@@ -94,22 +94,22 @@ function module_code(library_namespace) {
 	 * @param {String}string
 	 *            基底 string。
 	 * @param {Integer}length
-	 *            補滿至長 length。
-	 * @param {String}character
-	 *            以 character 補滿。
-	 * @param {Boolean}from_right
-	 *            補滿方向。基本為 5 → ' 5'，設定 from_right 時，為 5 → '5 '。
+	 *            補滿至長 length (maxLength)。
+	 * @param {String}fillString
+	 *            以 fillString 補滿。
+	 * @param {Boolean}from_start
+	 *            補滿方向。基本為 5 → ' 5'，設定 from_start 時，為 5 → '5 '。
 	 * 
 	 * @since 2012/3/25 19:46:42
 	 * 
 	 * @returns {String} padding 過後之 string
 	 */
-	function pad(string, length, character, from_right) {
+	function pad(string, length, fillString, from_start) {
 		// 為負數作特殊處理。
 		// e.g., pad(-9, 3) === '-09'
 		if (typeof string === 'number' && string < 0
 		//
-		&& !from_right && (!character || character == '0'))
+		&& !from_start && (!fillString || fillString == '0'))
 			return '-' + pad(-string, length - 1, '0');
 
 		string = String(string);
@@ -117,12 +117,12 @@ function module_code(library_namespace) {
 		// 差距。
 		var gap = length - string.length;
 		if (gap > 0) {
-			// library_namespace.debug(gap + ' [' + character + ']');
-			if (!character || typeof character !== 'string')
-				character = typeof character === 'number' ? String(character)
+			// library_namespace.debug(gap + ' [' + fillString + ']');
+			if (!fillString || typeof fillString !== 'string')
+				fillString = typeof fillString === 'number' ? String(fillString)
 						: string === '' || isNaN(string) ? ' ' : '0';
 
-			var l = character.length,
+			var l = fillString.length,
 			/**
 			 * TODO: binary extend.<br />
 			 * .join() is too slow.
@@ -130,18 +130,18 @@ function module_code(library_namespace) {
 			fill = new Array(l > 1 ? Math.ceil(gap / l) : gap);
 			// library_namespace.debug('fill.length = ' + fill.length);
 
-			if (from_right) {
+			if (from_start) {
 				fill[0] = string;
 				fill.length++;
-				string = fill.join(character);
+				string = fill.join(fillString);
 				if (string.length > length)
 					string = string.slice(0, length);
 			} else if (l > 1) {
 				fill.length++;
-				string = fill.join(character).slice(0, gap) + string;
+				string = fill.join(fillString).slice(0, gap) + string;
 			} else {
 				fill.push(string);
-				string = fill.join(character);
+				string = fill.join(fillString);
 			}
 		}
 		return string;
@@ -2755,9 +2755,10 @@ function module_code(library_namespace) {
 
 			library_namespace.debug(index + '/' + last, 3,
 					'run_serial_asynchronous');
-			for_each.call(_this, run_next, list ? list[index] : index, index,
-					list);
-			index++;
+			// 先增加 index，預防 callback 直接 call run_next()。
+			var _index = index++;
+			for_each.call(_this, run_next, list ? list[_index] : _index,
+					_index, list);
 		}
 		run_next();
 	}
@@ -3494,6 +3495,7 @@ function module_code(library_namespace) {
 
 		var max_key_display_width = Math.max.apply(null, key_display_width);
 		for ( var key in pair) {
+			// 可能沒有 key.padStart()!
 			display_lines.push(key.pad(key.length + max_key_display_width
 			// assert: display_width(' ') === 1
 			- key_display_width.shift()) + pair[key]);

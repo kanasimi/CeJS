@@ -1253,16 +1253,45 @@ function trim() {
 	.replace(/[\s\n]+$|^[\s\n]+/g, '');
 }
 
-// String.prototype.trimRight()
-function trimRight() {
-	return String(this).replace(/[\s\n]+$/g, '');
+
+// String.prototype.trimStart()
+var trimStart = String.prototype.trimLeft
+|| function trimStart() {
+	return String(this).replace(/^[\s\n]+/, '');
+};
+
+// String.prototype.trimEnd()
+var trimEnd = String.prototype.trimRight
+|| function trimEnd() {
+	return String(this).replace(/[\s\n]+$/, '');
+};
+
+// ---------------------------------------------------------------------------
+// http://tc39.github.io/proposal-string-pad-start-end/
+// https://github.com/tc39/proposal-string-pad-start-end
+function pad_String(maxLength, fillString) {
+	if (!(this.length < maxLength)) {
+		return '';
+	}
+	if (fillString === undefined) {
+		fillString = ' ';
+	} else if (!(fillString = String(fillString))) {
+		return '';
+	}
+
+	maxLength -= this.length;
+	if (fillString.length === maxLength) {
+		return fillString;
+	}
+
+	if (fillString.length < maxLength) {
+		fillString = fillString.repeat(Math.ceil(maxLength / fillString.length));
+	}
+	return fillString.slice(0, maxLength);
 }
 
-//String.prototype.trimLeft()
-function trimLeft() {
-	return String(this).replace(/^[\s\n]+/g, '');
-}
 
+// ---------------------------------------------------------------------------
 
 // String.prototype.startsWith()
 function startsWith(searchString, position) {
@@ -1325,8 +1354,16 @@ function fromCodePoint() {
 set_method(String.prototype, {
 	repeat : repeat,
 	trim : trim,
-	trimRight : trimRight,
-	trimLeft : trimLeft,
+	trimStart : trimStart,
+	trimEnd : trimEnd,
+	// String.prototype.padStart()
+	padStart : function padStart() {
+		return pad_String.call(this, maxLength, fillString) + this;
+	},
+	// String.prototype.padEnd()
+	padEnd : function padEnd() {
+		return this + pad_String.call(this, maxLength, fillString);
+	},
 	// String.prototype.includes()
 	includes : function includes(searchString, position) {
 		return this.indexOf(searchString, position) !== NOT_FOUND;

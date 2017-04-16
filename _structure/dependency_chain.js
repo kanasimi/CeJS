@@ -3812,6 +3812,10 @@ if (typeof CeL === 'function')
 			library_namespace
 					.debug('已經有近代的 Set，跳過 shim、相容性 test 專用的 functions。');
 			get_named('data.code.compatibility', true).included = true;
+		} else if (!String.prototype.trimEnd) {
+			String.prototype.trimStart = String.prototype.trimLeft;
+			String.prototype.trimEnd = String.prototype.trimRight;
+			// TODO: .padStart(), .padEnd()
 		}
 
 		/**

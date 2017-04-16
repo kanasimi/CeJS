@@ -207,7 +207,7 @@ function parse_converted_file(file_path_list) {
 	file_path_list.forEach(function(file_path) {
 		var code_lines = node_fs.readFileSync(file_path, general_encoding)
 		// remove BOM
-		.trimLeft().split(default_config.new_line),
+		.trimStart().split(default_config.new_line),
 		//
 		line = code_lines[code_lines.length - 1],
 		//

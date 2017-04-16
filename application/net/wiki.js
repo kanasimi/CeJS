@@ -850,7 +850,7 @@ function module_code(library_namespace) {
 		if (!page_name || typeof page_name !== 'string')
 			return page_name;
 
-		page_name = page_name.trimRight().replace(/^[\s:]+/, '');
+		page_name = page_name.trimEnd().replace(/^[\s:]+/, '');
 
 		page_name = use_underline
 		// ' ' → '_': 在 URL 上可更簡潔。
@@ -861,12 +861,12 @@ function module_code(library_namespace) {
 
 		page_name.some(function(section, index) {
 			section = use_underline ? section.replace(/^[\s_]+/, '') : section
-					.trimLeft();
+					.trimStart();
 			if (index === page_name.length - 1
 			// @see PATTERN_PROJECT_CODE
 			|| !(use_underline ? /^[a-z][a-z\d\-_]{0,14}$/i
 			//
-			: /^[a-z][a-z\d\- ]{0,14}$/i).test(section.trimRight())) {
+			: /^[a-z][a-z\d\- ]{0,14}$/i).test(section.trimEnd())) {
 				// page title: 將首個字母轉成大寫。
 				page_name[index] = upper_case_initial(section);
 				return true;
@@ -874,9 +874,9 @@ function module_code(library_namespace) {
 
 			if ((use_underline ? section : section.replace(/ /g, '_'))
 			//
-			.trimRight().toLowerCase() in get_namespace.hash) {
+			.trimEnd().toLowerCase() in get_namespace.hash) {
 				// Wikipedia namespace
-				section = section.trimRight().toLowerCase();
+				section = section.trimEnd().toLowerCase();
 				if (!use_underline) {
 					section = section.replace(/_/g, ' ');
 				}
@@ -889,7 +889,7 @@ function module_code(library_namespace) {
 
 			} else {
 				section = use_underline ? section.replace(/[\s_]+$/, '')
-						: section.trimRight();
+						: section.trimEnd();
 				section = section.toLowerCase();
 				if (section.length > 1) {
 					// lang code
@@ -1935,9 +1935,9 @@ function module_code(library_namespace) {
 					// @see function parse_template()
 					var matched = _token.match(/^([^=]+)=([\s\S]*)$/);
 					if (matched) {
-						var key = matched[1].trimRight(),
+						var key = matched[1].trimEnd(),
 						//
-						value = matched[2].trimLeft();
+						value = matched[2].trimStart();
 
 						// 若參數名重複: @see [[Category:調用重複模板參數的頁面]]
 						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
@@ -2791,7 +2791,7 @@ function module_code(library_namespace) {
 	function parse_user(wikitext, full_link) {
 		var matched = wikitext && wikitext.match(PATTERN_user);
 		if (matched) {
-			matched = full_link ? matched[0].trimRight() + ']]' : matched[1]
+			matched = full_link ? matched[0].trimEnd() + ']]' : matched[1]
 					.trim();
 			return matched;
 		}
@@ -5421,7 +5421,7 @@ function module_code(library_namespace) {
 			var content;
 			if (options.append && (content
 			//
-			= get_page_content(_this.last_page).trimRight())) {
+			= get_page_content(_this.last_page).trimEnd())) {
 				content_to_copy = content + '\n' + content_to_copy;
 				options.summary = 'Append from '
 						+ get_page_title_link(title, copy_from_wiki) + '.';

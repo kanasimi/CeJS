@@ -237,7 +237,7 @@ function module_code(library_namespace) {
 			return work_id > 0;
 		},
 		is_finished : function(work_data) {
-			// e.g., 连载中, 連載中
+			// e.g., 连载中, 連載中, 已完结
 			return /已完[結结]/.test(work_data.status)
 			// 完結済
 			|| /^完[結结]$/.test(work_data.status);
@@ -377,11 +377,10 @@ function module_code(library_namespace) {
 		work_list.run_async(function for_each_title(callback, work_title,
 				this_index) {
 			function insert_id(id_list) {
-				if (Array.isArray(id_list)) {
+				if (Array.isArray(id_list) && id_list.length > 0) {
 					// 插入list。
-					id_list.forEach(function(id, index) {
-						work_list.splice(this_index + index, 0, id);
-					});
+					id_list.unshift(this_index + index, 0);
+					Array.prototype.splice.apply(work_list, id_list);
 				}
 				callback();
 			}
@@ -507,7 +506,8 @@ function module_code(library_namespace) {
 				+ id_list.length + ' works: ' + JSON.stringify(id_data));
 			}
 
-			var non_space_matched = [];
+			// 近似的標題。
+			var approximate_title = [];
 			if (id_list.every(function(id, index) {
 				var title = library_namespace.is_Object(id) ? id
 				//
@@ -523,27 +523,28 @@ function module_code(library_namespace) {
 				title = title.trim();
 				// 找看看是否有完全相同的title。
 				if (title !== work_title) {
-					if (title.replace(/\s/g, '') === work_title.replace(/\s/g,
-							'')) {
-						non_space_matched.push([ id, title ]);
+					if (title.includes(work_title) || title.replace(/\s/g, '')
+					//
+					=== work_title.replace(/\s/g, '')) {
+						approximate_title.push([ id, title ]);
 					}
 					return true;
 				}
 				id_list = id;
 			})) {
-				if (non_space_matched.length !== 1) {
+				if (approximate_title.length !== 1) {
 					// failed
 					library_namespace.err('未找到與[' + work_title + ']相符者。');
 					finish_up();
 					return;
 				}
-				non_space_matched = non_space_matched[0];
+				approximate_title = approximate_title[0];
 				library_namespace.warn(library_namespace.display_align({
 					'Use title:' : work_title,
-					'→' : non_space_matched[1]
+					'→' : approximate_title[1]
 				}));
-				work_title = non_space_matched[1];
-				id_list = non_space_matched[0];
+				work_title = approximate_title[1];
+				id_list = approximate_title[0];
 			}
 
 			// 已確認僅找到唯一id。
@@ -1342,7 +1343,7 @@ function module_code(library_namespace) {
 			//
 			: (XMLHttp.status ? XMLHttp.status + ' ' : '')
 			//
-			+ '(' + (!contents ? 'No contents got' : contents.length + ' B'
+			+ '(' + (!contents ? 'No contents' : contents.length + ' B'
 			//
 			+ (contents.length > _this.MIN_LENGTH ? '' : ', too small'))
 			//
