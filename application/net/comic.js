@@ -379,7 +379,7 @@ function module_code(library_namespace) {
 			function insert_id(id_list) {
 				if (Array.isArray(id_list) && id_list.length > 0) {
 					// 插入list。
-					id_list.unshift(this_index + index, 0);
+					id_list.unshift(this_index, 0);
 					Array.prototype.splice.apply(work_list, id_list);
 				}
 				callback();

@@ -18,7 +18,7 @@ node _CeL.updater.node.js
 
 var p7zip_path = [ '7z',
 // e.g., install p7zip package via yum
-'7za', '"C:\\Program Files\\7-Zip\\7z.exe"' ],
+'7za', 'unzip', '"C:\\Program Files\\7-Zip\\7z.exe"' ],
 // const 下載之後將壓縮檔存成這個檔名。
 target_file = 'CeJS-master.zip';
 
@@ -140,9 +140,19 @@ write_stream.on('close', function() {
 				+ '! Please try to run again.';
 	}
 
-	child_process.execSync(p7zip_path + ' t "' + target_file + '" && '
-	// 解開 GitHub 最新版本壓縮檔案。
-	+ p7zip_path + ' x -y "' + target_file + '"', {
+	var command;
+	target_file = '"' + target_file + '"';
+	if (p7zip_path.includes('unzip')) {
+		command = p7zip_path + ' -t ' + target_file + ' && '
+		// 解開 GitHub 最新版本壓縮檔案 by unzip。
+		+ p7zip_path + ' -x -o ' + target_file;
+	} else {
+		command = p7zip_path + ' t ' + target_file + ' && '
+		// 解開 GitHub 最新版本壓縮檔案 by 7z。
+		+ p7zip_path + ' x -y ' + target_file;
+	}
+
+	child_process.execSync(command, {
 		// pass I/O to the child process
 		// https://nodejs.org/api/child_process.html#child_process_options_stdio
 		stdio : 'inherit'
