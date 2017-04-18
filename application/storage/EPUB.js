@@ -113,7 +113,7 @@ function module_code(library_namespace) {
 			// parse container
 			var rootfile = this.container.container.rootfiles;
 			if (Array.isArray(rootfile)) {
-				library_namespace.err('本函式庫尚不支援多 rootfile (.opf)!');
+				library_namespace.error('本函式庫尚不支援多 rootfile (.opf)!');
 				rootfile = rootfile.filter(function(root_file) {
 					return /\.opf$/i.test(root_file['full-path']);
 				})[0] || rootfile[0];
@@ -823,7 +823,7 @@ function module_code(library_namespace) {
 		try {
 			return decodeURIComponent(identifier);
 		} catch (e) {
-			library_namespace.err('decode_identifier: Can not decode: ['
+			library_namespace.error('decode_identifier: Can not decode: ['
 					+ identifier + ']');
 			throw e;
 		}
@@ -924,7 +924,7 @@ function module_code(library_namespace) {
 
 		if (!id) {
 			if (!href) {
-				library_namespace.err('Invalid item data: '
+				library_namespace.error('Invalid item data: '
 						+ JSON.stringify(item_data));
 				return;
 			}
@@ -1123,7 +1123,7 @@ function module_code(library_namespace) {
 					if (item_data.href
 					// 有手動設定.href
 					&& item_data.href !== resource.href) {
-						library_namespace.err(message
+						library_namespace.error(message
 								+ '\n但 .href 不同，您必須手動修正: ' + resource.href
 								+ '→' + item_data.href);
 					} else {
@@ -1149,7 +1149,7 @@ function module_code(library_namespace) {
 
 			if (item_data.href && item_data.href !== item.href) {
 				// 有手動設定.href
-				library_namespace.err('add_chapter: 儲存檔名改變，您需要自行修正原參照文件中之檔名:\n'
+				library_namespace.error('add_chapter: 儲存檔名改變，您需要自行修正原參照文件中之檔名:\n'
 						+ item_data.href + ' →\n' + item.href);
 			}
 
@@ -1165,7 +1165,7 @@ function module_code(library_namespace) {
 
 			if (item_data.id && item_data.id !== item.id) {
 				// 有手動設定.href
-				library_namespace.err('add_chapter: id改變，您需要自行修正原參照文件中之檔名:\n'
+				library_namespace.error('add_chapter: id改變，您需要自行修正原參照文件中之檔名:\n'
 						+ item_data.id + ' →\n' + item.id);
 			}
 
@@ -1201,7 +1201,7 @@ function module_code(library_namespace) {
 					if (item['media-type']
 					// 需要連接網站的重要原因之一是為了取得 media-type。
 					&& item['media-type'] !== XMLHttp.type) {
-						library_namespace.err('從網站得到的 media-type ['
+						library_namespace.error('從網站得到的 media-type ['
 								+ XMLHttp.type + '] 與從副檔名所得到的 media-type ['
 								+ item['media-type'] + '] 不同!');
 					}
@@ -1209,13 +1209,13 @@ function module_code(library_namespace) {
 					item['media-type'] = XMLHttp.type;
 
 				} else if (!item['media-type']) {
-					library_namespace.err('Did not got media-type of media: ['
+					library_namespace.error('Did not got media-type of media: ['
 							+ item_data.url + ']');
 				}
 
 				// 基本檢測。
 				if (/text/i.test(item_data.type)) {
-					library_namespace.err('Not media type: [' + item_data.type
+					library_namespace.error('Not media type: [' + item_data.type
 							+ '] ' + item_data.url);
 				}
 
@@ -1828,7 +1828,7 @@ function module_code(library_namespace) {
 		try {
 			execSync(command);
 		} catch (e) {
-			library_namespace.err(e);
+			library_namespace.error(e);
 			return;
 		}
 		library_namespace.debug('create ebook by 7z: ' + ebook_file_name
@@ -1839,7 +1839,7 @@ function module_code(library_namespace) {
 				+ ebook_file_name, target_file);
 		if (error) {
 			// the operatoin failed
-			library_namespace.err(error);
+			library_namespace.error(error);
 		}
 
 		// 若需要留下/重複利用media如images，請勿remove。
@@ -1849,7 +1849,7 @@ function module_code(library_namespace) {
 			var error = library_namespace.remove_directory(this.path.root);
 			if (error) {
 				// the operatoin failed
-				library_namespace.err(error);
+				library_namespace.error(error);
 			}
 		} else {
 			// 最起碼 command_file_name 已經不需要存在。

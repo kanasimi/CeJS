@@ -349,7 +349,7 @@ if (typeof CeL === 'function')
 
 					//	[ full , sign, integer part 整數部分, sign of fractional part 小數部分, numerator, denominator ]
 					if (matched[3] === '-' && matched[1] !== '-')
-						library_namespace.err('assignment: Invalid number sign!');
+						library_namespace.error('assignment: Invalid number sign!');
 
 					this[KEY_DENOMINATOR] = tmp = new Integer(matched[5], base, DEFAULT_BASE);
 					this[KEY_NUMERATOR] = numerator = new Integer(matched[4], base, DEFAULT_BASE);
@@ -407,7 +407,7 @@ if (typeof CeL === 'function')
 				} else {
 					delete this[KEY_DENOMINATOR];
 					if ((this[KEY_NUMERATOR] = numerator = new Integer(tmp = numerator, base, DEFAULT_BASE)).isNaN())
-						library_namespace.err('assignment: Invalid number: [' + tmp + '].');
+						library_namespace.error('assignment: Invalid number: [' + tmp + '].');
 
 						// 確保不使用 exponent，使 exponent 為 0。
 					else if ((tmp = numerator.get_exponent()) > 0)

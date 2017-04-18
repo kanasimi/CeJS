@@ -71,7 +71,7 @@ location創建該對象得網絡服務器名稱。
 		this.app = new ActiveXObject("InternetExplorer.Application");
 	} catch (e) {
 		library_namespace
-			.err('IEA: No InternetExplorer.Application object created!');
+			.error('IEA: No InternetExplorer.Application object created!');
 	}
 	if (!this.app)
 		return;
@@ -640,7 +640,7 @@ function new_IEA(new_1) {
 		if (IEA_instance.OK(true))
 			IEA.instance = IEA_instance;
 		else {
-			library_namespace.err('Error to use IEA!');
+			library_namespace.error('Error to use IEA!');
 			IEA_instance = null;
 		}
 
@@ -658,7 +658,7 @@ function get_HTML(url) {
 			return data;
 
 		} catch (e) {
-			library_namespace.err('get_HTML: Error to directly access, will try IEA futher:<br />'
+			library_namespace.error('get_HTML: Error to directly access, will try IEA futher:<br />'
 					+ url);
 			get_HTML.no_directly = true;
 		}

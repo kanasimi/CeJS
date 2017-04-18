@@ -216,12 +216,12 @@ function uncompress(archive, eTo, flag) {
 
 function parse_7z_data(status, log, error) {
 	if (error && library_namespace.is_debug())
-		library_namespace.err(error);
+		library_namespace.error(error);
 
 	var message = log.match(/\nError:\s+(?:[A-Za-z]:)?[^:\n]+: ([^\n]+)/);
 	if (message) {
 		if (library_namespace.is_debug())
-			library_namespace.err(message[1]);
+			library_namespace.error(message[1]);
 		this.callback.call(this['this'], this.path, new Error(message[1]));
 		return;
 	}
@@ -321,7 +321,7 @@ function parse_7z_data(status, log, error) {
 
 //List archive file.
 //read file list of .7z archive
-//callback(status, log, err)
+//callback(status, log, error)
 function archive_data(path, callback, options) {
 	if (path && typeof callback === 'function') {
 		// 前置處理。

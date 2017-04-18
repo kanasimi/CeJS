@@ -1002,7 +1002,7 @@ function product_is_square(f1, f2) {
 		f2 = tmp;
 	}
 	if (f2 > Number.MAX_SAFE_INTEGER) {
-		library_namespace.err('The number ' + f2 + ' is NOT a safe number!');
+		library_namespace.error('The number ' + f2 + ' is NOT a safe number!');
 	}
 	// assert: f1 < f2
 	if (f2 % f1 === 0) {
@@ -3018,7 +3018,7 @@ from : function(number, base, diminished) {
 	// TODO: not good, need to optimize
 	if (value > this.bits)
 		// throw 'overflow';
-		library_namespace.err('complement.from: overflow: ' + value);
+		library_namespace.error('complement.from: overflow: ' + value);
 
 	if (typeof diminished === 'undefined')
 		// illegal setup
@@ -3040,7 +3040,7 @@ from : function(number, base, diminished) {
 	tmp = Math.pow(base, this.bits - 1);
 	if (value >= tmp * base)
 		// throw 'overflow';
-		library_namespace.err('complement.from: overflow: ' + value);
+		library_namespace.error('complement.from: overflow: ' + value);
 
 	// library_namespace.debug('compare ' + value + ',' + tmp);
 	if (value < tmp)
@@ -3073,7 +3073,7 @@ to : function(base, diminished) {
 	var value = this.value, tmp = Math.pow(base, this.bits - 1);
 	if (value > tmp || value === tmp && (diminished || !this.sign))
 		// throw 'overflow';
-		library_namespace.err('complement.to: overflow: ' + (this.sign ? '-' : '+') + value);
+		library_namespace.error('complement.to: overflow: ' + (this.sign ? '-' : '+') + value);
 
 	if (this.sign){
 		tmp *= base;

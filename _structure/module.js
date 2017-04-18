@@ -750,7 +750,7 @@ if (false) {
 
 			if (_.is_debug(2)) {
 				_.warn(_.Class + '.get_file: Loading [' + path + '] failed!');
-				_.err(e);
+				_.error(e);
 			}
 
 			//e.object = o;	//	[XPCWrappedNative_NoHelper] Cannot modify properties of a WrappedNative @ firefox
@@ -823,7 +823,7 @@ if (false) {
 				return eval_parse(text, filter);
 			} catch (e) {
 				if (_.is_debug(2))
-					_.err('eval_parse: SyntaxError: [' + text + ']');
+					_.error('eval_parse: SyntaxError: [' + text + ']');
 				// throw e;
 				return;
 			}
@@ -846,7 +846,7 @@ if (false) {
 				_.parse_JSON = JSON.parse;
 			else
 				// 未正確作動。
-				_.err('It seems the JSON.parse() does not work properly');
+				_.error('It seems the JSON.parse() does not work properly');
 		})();
 
 
@@ -982,8 +982,8 @@ if (false) {
 						env.script_config = config;
 				}
 			} catch (e) {
-				_.err('setup_extension: Invalid configuration: [' + node.outerHTML + ']');
-				_.err(e);
+				_.error('setup_extension: Invalid configuration: [' + node.outerHTML + ']');
+				_.error(e);
 			}
 
 			env.main_script = env.main_script.replace(new RegExp('\\'

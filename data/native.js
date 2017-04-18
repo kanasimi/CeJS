@@ -1449,7 +1449,7 @@ function module_code(library_namespace) {
 				if (this && typeof this.valueOf() === 'string')
 					need_valueOf = true;
 				else
-					library_namespace.err('set_bind: 無法判別是否該使用 .valueOf()！');
+					library_namespace.error('set_bind: 無法判別是否該使用 .valueOf()！');
 		};
 	})();
 	'.'.test_valueOf();
@@ -2411,7 +2411,7 @@ function module_code(library_namespace) {
 			// 處理搜尋 {RegExp} 的情況: 此時回傳最後一個匹配的 index。欲找首次出現，請用 first_matched()。
 			if (value.global) {
 				library_namespace
-						.err('search_sorted_Array: 當匹配時，不應採用 .global！ ' + value);
+						.error('search_sorted_Array: 當匹配時，不應採用 .global！ ' + value);
 			}
 			if (!options) {
 				options = library_namespace.null_Object();
@@ -2537,7 +2537,7 @@ function module_code(library_namespace) {
 		//
 		last_mismatched_index = 0;
 		if (is_RegExp && pattern.global) {
-			library_namespace.err('first_matched: 當匹配時，不應採用 .global！ '
+			library_namespace.error('first_matched: 當匹配時，不應採用 .global！ '
 					+ pattern);
 		}
 

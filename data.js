@@ -540,8 +540,8 @@ set_Object_value = function(obj, value, type, mode) {
 		//	因為沒想到其他方法可存取Global的object，只好使用eval..可以試試obj=set_Object_value(0,..){this=new Aaaray/Object}
 		return library_namespace.eval_code(e);
 	} catch (e) {
-		library_namespace.err('Error @ ' + obj);
-		library_namespace.err(e);
+		library_namespace.error('Error @ ' + obj);
+		library_namespace.error(e);
 		return;
 	}
 };
@@ -1403,7 +1403,7 @@ library_namespace.set_method(Pair.prototype, {
 								: new RegExp(key, flag);
 					} catch (e) {
 						// Error key?
-						library_namespace.err('Pair.select: key ' + (reg || '[' + key + ']')
+						library_namespace.error('Pair.select: key ' + (reg || '[' + key + ']')
 								+ ': ' + e.message);
 					}
 					return reg.test(target) && value;
@@ -1444,7 +1444,7 @@ library_namespace.set_method(Pair.prototype, {
 				text = text.replace(reg, value);
 			} catch (e) {
 				// Error key?
-				library_namespace.err('Pair.convert: ' + (reg || '[' + key + ']')
+				library_namespace.error('Pair.convert: ' + (reg || '[' + key + ']')
 						+ ' → [' + value + ']: ' + e.message);
 			}
 		});
@@ -1619,7 +1619,7 @@ function parse_bencode(data, status, is_ASCII) {
 	function make_end() {
 		// assert: object_now === queue.pop()
 		if ((tmp = object_now) !== queue.pop()) {
-			library_namespace.err('Bad data structure!');
+			library_namespace.error('Bad data structure!');
 			// assert: queue.length === 0
 			if (queue !== object_now)
 				// 回存。
@@ -1646,14 +1646,14 @@ function parse_bencode(data, status, is_ASCII) {
 		PATTERN_controller.lastIndex = index;
 		if (!(tmp = PATTERN_controller.exec(data))) {
 			if (index < data.length)
-				library_namespace.err('Last data skipped! (' + data.slice(index) + ')');
+				library_namespace.error('Last data skipped! (' + data.slice(index) + ')');
 			break;
 		}
 
 		if (tmp[1]) {
 			index += tmp[1].length;
 			// control char should be next char.
-			library_namespace.err('Some data skipped! (' + tmp[1] + ')');
+			library_namespace.error('Some data skipped! (' + tmp[1] + ')');
 		}
 
 		switch (tmp[2]) {
@@ -1679,16 +1679,16 @@ function parse_bencode(data, status, is_ASCII) {
 			if (tmp && tmp[2] === 'e') {
 				// 確定為 /i\d+e/
 				if (!tmp[1])
-					library_namespace.err('No integer specified ("ie" instead of /i\d+e/)!');
+					library_namespace.error('No integer specified ("ie" instead of /i\d+e/)!');
 				else if (PATTERN_integer.lastIndex !== index + tmp[0].length)
-					library_namespace.err('Some integer data skipped! ('
+					library_namespace.error('Some integer data skipped! ('
 							+ data.slice(index, PATTERN_integer.lastIndex
 									- tmp[0].length) + ')');
 				object_now.push(parseInt(tmp[1]));
 				index = PATTERN_integer.lastIndex;
 			} else {
 				// fatal error
-				library_namespace.err('Bad integer format! Exit parse!');
+				library_namespace.error('Bad integer format! Exit parse!');
 				index = data.length;
 			}
 			break;
@@ -1700,15 +1700,15 @@ function parse_bencode(data, status, is_ASCII) {
 			if (tmp && tmp[2] === ':') {
 				// 確定為 /\d+:/
 				if (!tmp[1] || !(tmp[1] | 0))
-					library_namespace.err('No string length specified! (' + tmp[1] + ')');
+					library_namespace.error('No string length specified! (' + tmp[1] + ')');
 				else if (PATTERN_string_length.lastIndex !== index
 						+ tmp[0].length)
-					library_namespace.err('Some string data skipped! ('
+					library_namespace.error('Some string data skipped! ('
 							+ data.slice(index, PATTERN_string_length.lastIndex
 									- tmp[0].length) + ')');
 				if ((index = PATTERN_string_length.lastIndex)
 						+ (tmp = tmp[1] | 0) > data.length)
-					library_namespace.err(
+					library_namespace.error(
 					//
 					'The end of string is beyond the end of data! (ask '
 					//
@@ -1728,7 +1728,7 @@ function parse_bencode(data, status, is_ASCII) {
 				}
 			} else {
 				// fatal error
-				library_namespace.err('Bad string format! Exit parse!');
+				library_namespace.error('Bad string format! Exit parse!');
 				index = data.length;
 			}
 		}
@@ -1772,7 +1772,7 @@ function parse_torrent(path, name_only) {
 	// JScript 下，XMLHttpRequest 會將檔案當作 UTF-8 讀取。
 	var data = library_namespace.get_file(path), status = library_namespace.null_Object();
 	if (!data || data.charAt(0) !== 'd') {
-		library_namespace.err((data ? 'Illegal' : 'Can not get') + ' torrent data of ['
+		library_namespace.error((data ? 'Illegal' : 'Can not get') + ' torrent data of ['
 				+ path + ']!');
 		return;
 	}

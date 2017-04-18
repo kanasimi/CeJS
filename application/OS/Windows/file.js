@@ -676,7 +676,7 @@ change_attributes = function(F, A) {
 			F.Attributes = A;
 		} catch (e) {
 			//popErr(e);
-			library_namespace.err(e);
+			library_namespace.error(e);
 			//	70：防寫（沒有使用權限）
 			return 70 == (e.number & 0xFFFF) ? -8 : -9;
 		}
@@ -1408,7 +1408,7 @@ function open_file(file_path, format, IO_mode) {
 			// ASPの場合, Err.Number=-2147221005表不支援.
 			file_stream = new_COM("ADODB.Stream");
 		} catch (e) {
-			library_namespace.err(e);
+			library_namespace.error(e);
 			return e;
 		}
 
@@ -1430,7 +1430,7 @@ function open_file(file_path, format, IO_mode) {
 				 * @see HKEY_CLASSES_ROOT\MIME\Database\Charset
 				 */
 				library_namespace.debug('Illegal file format to open: (' + typeof format + ') [' + format + ']', 1, 'open_file');
-				library_namespace.err(e);
+				library_namespace.error(e);
 				reset();
 				return e;
 			}
@@ -1454,7 +1454,7 @@ function open_file(file_path, format, IO_mode) {
 				file_stream.LoadFromFile(file_path);
 			} catch (e) {
 				library_namespace.debug('ADO Stream error.', 1, 'open_file');
-				library_namespace.err(e);
+				library_namespace.error(e);
 				reset();
 				return e;
 			}
@@ -1482,7 +1482,7 @@ function open_file(file_path, format, IO_mode) {
 							|| format == _.open_format.TristateFalse ? format
 							: _.open_format.TristateUseDefault);
 		} catch (e) {
-			library_namespace.err(e);
+			library_namespace.error(e);
 			reset();
 			return e;
 		}
@@ -1780,7 +1780,7 @@ iconv = function(text, toCode, encodeFunction) {
 
 	var ADO_Stream = open_file(0, toCode);
 	if (library_namespace.is_type(ADO_Stream, 'Error')) {
-		library_namespace.err('error occurred: ' + ADO_Stream.message);
+		library_namespace.error('error occurred: ' + ADO_Stream.message);
 		return text;
 	}
 
@@ -2616,7 +2616,7 @@ function cacher(cache_file, options) {
  */
 function cacher_log(new_path) {
 	if (!library_namespace.write_file) {
-		library_namespace.err('Can not write log!');
+		library_namespace.error('Can not write log!');
 		return false;
 	}
 

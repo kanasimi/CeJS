@@ -356,7 +356,7 @@ function start_count(restart) {
 					f(m[1], m[3], SVG_object);
 				SVG_object.show(1);
 			} catch (e) {
-				CeL.err(e);
+				CeL.error(e);
 				SVG_object.show(0);
 			}
 		else {
@@ -414,7 +414,7 @@ function start_count(restart) {
 
 				if (t)
 					CeL.log('error @ ' + i + '/' + times + '(use ' + (new Date - t) + 'ms)');
-				CeL.err(e);
+				CeL.error(e);
 			}
 		}
 	}
@@ -431,7 +431,7 @@ function start_count(restart) {
 					.toLowerCase(), CeL.get_element('base1').value);
 			CeL.log('換底: '+v.toString(3) + '<span class="down">10</span> → ' + v.to_base(CeL.get_element('base2').value).replace(/_([^\(]+)/,'_<i style="text-decoration:overline">$1</i>')+'<span class="down">'+CeL.get_element('base2').value+'</span>');
 		} catch (e) {
-			CeL.err(e);
+			CeL.error(e);
 		}
 		return false;
 	}
@@ -703,7 +703,7 @@ function start_count(restart) {
 					CeL.get_element('h_data').value = Hamming.decode(CeL
 							.get_element('h_code').value);
 				} catch (e) {
-					CeL.err(e);
+					CeL.error(e);
 				}
 				return false;
 			};
@@ -713,7 +713,7 @@ function start_count(restart) {
 					CeL.get_element('h_code').value = Hamming.encode(CeL
 							.get_element('h_data').value);
 				} catch (e) {
-					CeL.err(e);
+					CeL.error(e);
 				}
 				return false;
 			};
@@ -915,7 +915,7 @@ function start_count(restart) {
 
 								} catch (e) {
 									CeL.warn('Initialization failed!');
-									CeL.err(e);
+									CeL.error(e);
 								}
 
 								if(!isNaN(CeL.log.max_length))

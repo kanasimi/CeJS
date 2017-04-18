@@ -800,7 +800,7 @@ function (global) {
 						// get Class by function name
 						type = get_Class;
 			} catch (e) {
-				this.err(this.Class + '.is_type: Fault to get ths class name of value!');
+				this.error(this.Class + '.is_type: Fault to get ths class name of value!');
 			}
 
 		if (type !== 'object')
@@ -810,7 +810,7 @@ function (global) {
 		try {
 			get_Class = get_object_type(value);
 		} catch (e) {
-			this.err(this.Class + '.is_type: Fault to get object type of value!');
+			this.error(this.Class + '.is_type: Fault to get object type of value!');
 			get_Class = '';
 		}
 
@@ -2012,7 +2012,7 @@ OS='UNIX'; // unknown
 		info : 'cyan',
 		// warning
 		warn : 'yellow',
-		err : 'red;bg=white'
+		error : 'red;bg=white'
 	};
 
 
@@ -2078,7 +2078,8 @@ OS='UNIX'; // unknown
 	   </code>
 	 */
 	function setup_log(type) {
-		var _type = type === 'err' ? 'error' : type;
+		// 將 CeL[type] 轉成 console[_type]。
+		var _type = type;
 		if (!console[_type])
 			// e.g., 不見得在所有平台上都有 console.info() 。
 			return;
@@ -2148,7 +2149,7 @@ OS='UNIX'; // unknown
 		}
 
 	} else {
-		_.err = _.warn = _.log = function (message) {
+		_.error = _.warn = _.log = function (message) {
 			/**
 			 * 請注意:<br />
 			 * _.log.buffer === this.log.buffer !== log.buffer<br />
@@ -2188,11 +2189,11 @@ OS='UNIX'; // unknown
 		 * 
 		 * @inner
 		 */
-		// _.debug.buffer = _.err.buffer = _.warn.buffer =
+		// _.debug.buffer = _.error.buffer = _.warn.buffer =
 		_.log.buffer = [];
 
 
-		// _.debug.max_length = _.err.max_length = _.warn.max_length =
+		// _.debug.max_length = _.error.max_length = _.warn.max_length =
 		_.log.max_length = 0;
 		// if(!isNaN(CeL.log.max_length)) CeL.log.max_length = 20;
 
@@ -2205,7 +2206,7 @@ OS='UNIX'; // unknown
 			return message;
 		};
 
-		// _.debug.function_to_call = _.err.function_to_call =
+		// _.debug.function_to_call = _.error.function_to_call =
 		// _.warn.function_to_call =
 
 		_.log.function_to_call =
@@ -2230,7 +2231,7 @@ OS='UNIX'; // unknown
 	_.debug_console = function debug_console() {};
 	_.debug_console.log = _.log;
 	_.debug_console.warn = _.warn;
-	_.debug_console.err = _.err;
+	_.debug_console.error = _.error;
 	_.debug_console.debug = _.debug;
 
 	// ---------------------------------------------------------------------//

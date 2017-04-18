@@ -175,7 +175,7 @@ function get_WScript_object(HTML_only) {
 				//	Run-Time Error '429' OLE Automation Server Can't Create Object
 				//	把 HTA 當作 HTML?
 				throw e;
-			library_namespace.err(e);
+			library_namespace.error(e);
 		}
 		//library_namespace.debug(typeof FSO, 1, 'get_WScript_object');
 	} else

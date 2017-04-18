@@ -226,7 +226,7 @@ function parse_converted_file(file_path_list) {
 			code_lines.shift();
 		}
 		if (code_lines.length === 0) {
-			CeL.err(file_path + ': Nothing get.');
+			CeL.error(file_path + ': Nothing get.');
 			return;
 		}
 
@@ -421,7 +421,7 @@ function parse_converted_data(code_lines, convert_map, config) {
 		char_tmp = char_list.pop();
 		if (char_tmp) {
 			// separator
-			CeL.err(hex_char_1 + ': 應以分隔符號結尾，但去掉最後一個時非空: '
+			CeL.error(hex_char_1 + ': 應以分隔符號結尾，但去掉最後一個時非空: '
 					+ JSON.stringify(char_tmp));
 		}
 		if (last_char_count !== char_list.length) {

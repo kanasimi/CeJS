@@ -126,7 +126,7 @@ function module_code(library_namespace) {
 			if (this.id) {
 				this.id = this.id.match(/[^\\\/]+$/)[0];
 			} else {
-				library_namespace.err('Can not detect .id from '
+				library_namespace.error('Can not detect .id from '
 						+ this.base_URL);
 			}
 		}
@@ -534,7 +534,7 @@ function module_code(library_namespace) {
 			})) {
 				if (approximate_title.length !== 1) {
 					// failed
-					library_namespace.err('未找到與[' + work_title + ']相符者。');
+					library_namespace.error('未找到與[' + work_title + ']相符者。');
 					finish_up();
 					return;
 				}
@@ -594,7 +594,7 @@ function module_code(library_namespace) {
 			// console.log(XMLHttp);
 			var html = XMLHttp.responseText;
 			if (!html) {
-				library_namespace.err('Failed to get work data of ' + work_id);
+				library_namespace.error('Failed to get work data of ' + work_id);
 				if (error_count > _this.MAX_ERROR) {
 					throw _this.MESSAGE_RE_DOWNLOAD;
 				}
@@ -612,7 +612,7 @@ function module_code(library_namespace) {
 				work_data = _this.parse_work_data(html, get_label,
 						exact_work_data);
 			} catch (e) {
-				library_namespace.err(work_title + ': ' + e);
+				library_namespace.error(work_title + ': ' + e);
 				typeof callback === 'function' && callback({
 					title : work_title
 				});
@@ -628,7 +628,7 @@ function module_code(library_namespace) {
 			&& !/[a-z]+ [a-z\d&]/i.test(work_data.title)
 			// .title: 必要屬性：須配合網站平台更改。
 			&& PATTERN_non_CJK.test(work_id)) {
-				library_namespace.err('Did not set work title: ' + work_id
+				library_namespace.error('Did not set work title: ' + work_id
 						+ ' (' + work_data.title + ')');
 			}
 
@@ -697,7 +697,9 @@ function module_code(library_namespace) {
 			if (_this.chapter_list_URL) {
 				work_URL = _this.full_URL(_this.chapter_list_URL, work_id);
 				get_URL(work_URL, process_chapter_list_data, _this.charset,
-						null, _this.get_URL_options);
+						null, Object.assign({
+							error_retry : 4
+						}, _this.get_URL_options));
 			} else {
 				process_chapter_list_data(XMLHttp);
 			}
@@ -708,7 +710,7 @@ function module_code(library_namespace) {
 			var html = XMLHttp.responseText;
 			if (!html) {
 				var message = _this.id + ': Can not get chapter list page!';
-				library_namespace.err(message);
+				library_namespace.error(message);
 				throw message;
 			}
 
@@ -745,7 +747,7 @@ function module_code(library_namespace) {
 				// , get_label
 				);
 			} catch (e) {
-				library_namespace.err(_this.id
+				library_namespace.error(_this.id
 						+ ': .get_chapter_count() throw error');
 				throw e;
 				typeof callback === 'function' && callback(work_data);
@@ -760,7 +762,7 @@ function module_code(library_namespace) {
 			}
 
 			if (!(work_data.chapter_count >= 1)) {
-				library_namespace.err(work_id
+				library_namespace.error(work_id
 						+ (work_data.title ? ' ' + work_data.title : '')
 						+ ': Can not get chapter count!');
 
@@ -926,7 +928,7 @@ function module_code(library_namespace) {
 			try {
 				this.pre_chapter_URL(work_data, chapter, next);
 			} catch (e) {
-				library_namespace.err(_this.id + ': ' + work_data.title
+				library_namespace.error(_this.id + ': ' + work_data.title
 						+ ': Error on chapter ' + chapter);
 				throw e;
 			}
@@ -1031,7 +1033,7 @@ function module_code(library_namespace) {
 			function process_chapter_data(XMLHttp) {
 				var html = XMLHttp.responseText;
 				if (!html) {
-					library_namespace.err('Failed to get chapter data of '
+					library_namespace.error('Failed to get chapter data of '
 							+ work_data.directory + chapter);
 					if (get_data.error_count > _this.MAX_ERROR) {
 						if (_this.skip_chapter_data_error) {
@@ -1060,7 +1062,7 @@ function module_code(library_namespace) {
 					chapter_data = _this.parse_chapter_data(html, work_data,
 							get_label, chapter);
 				} catch (e) {
-					library_namespace.err(_this.id + ': Error on chapter url: '
+					library_namespace.error(_this.id + ': Error on chapter url: '
 							+ chapter_URL);
 					throw e;
 				}
@@ -1087,7 +1089,7 @@ function module_code(library_namespace) {
 				}
 				// console.log(chapter_data);
 				if (left !== image_list.length) {
-					library_namespace.err('所登記的圖形數量' + left + '與有資料的圖形數量'
+					library_namespace.error('所登記的圖形數量' + left + '與有資料的圖形數量'
 							+ image_list.length + '不同！');
 					if (left > image_list.length) {
 						left = image_list.length;
@@ -1339,7 +1341,7 @@ function module_code(library_namespace) {
 			}
 
 			// 有錯誤。
-			library_namespace.err((has_EOI === false ? 'Do not has EOI: '
+			library_namespace.error((has_EOI === false ? 'Do not has EOI: '
 			//
 			: (XMLHttp.status ? XMLHttp.status + ' ' : '')
 			//

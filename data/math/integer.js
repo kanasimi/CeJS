@@ -212,7 +212,7 @@ if (typeof CeL === 'function')
 				if (operator in OP_SET)
 					OP_SET[operator].call(target, operand, flag);
 				else
-					library_namespace.err('operate: Invalid operator [' + operator + ']!');
+					library_namespace.error('operate: Invalid operator [' + operator + ']!');
 
 				return target;
 			}
@@ -240,9 +240,9 @@ if (typeof CeL === 'function')
 				var digits = library_namespace.null_Object();
 				base.forEach(function (digit, index) {
 					if (digit.length !== 1)
-						library_namespace.err('digit_cache: Invalid digit: [' + digit + '].');
+						library_namespace.error('digit_cache: Invalid digit: [' + digit + '].');
 					else if (digit in digits)
-						library_namespace.err('Digit already exists: [' + digit + '] = ' + digits[digit]);
+						library_namespace.error('Digit already exists: [' + digit + '] = ' + digits[digit]);
 					else
 						digits[digit] = index;
 				});
@@ -374,7 +374,7 @@ if (typeof CeL === 'function')
 						MAX_BASE = b;
 					} else if (MAX_BASE < b)
 						// 一般說來，TypedArray 不可能存放超過 Number.MAX_SAFE_INTEGER 之整數值，因此不應該執行到這！
-						library_namespace.err('所使用之 array type 能存放超過最大可安全計算整數 Number.MAX_SAFE_INTEGER 之值，恐造成錯誤計算結果！');
+						library_namespace.error('所使用之 array type 能存放超過最大可安全計算整數 Number.MAX_SAFE_INTEGER 之值，恐造成錯誤計算結果！');
 				}
 
 				// 決定可用的 .push() 等 array 工具函數。
@@ -841,7 +841,7 @@ if (typeof CeL === 'function')
 			function factorial(integer) {
 				if ((integer !== integer | 0) || !Number.isSafeInteger(integer)
 						|| !(integer >= 0)) {
-					library_namespace.err('factorial: invalid number: '
+					library_namespace.error('factorial: invalid number: '
 							+ integer);
 					return NaN;
 				}
@@ -897,7 +897,7 @@ if (typeof CeL === 'function')
 			function permutation(n, k, precision) {
 				if ((n !== n | 0) || !Number.isSafeInteger(n)
 						|| !(n >= 0)) {
-					library_namespace.err('permutation: invalid number: '
+					library_namespace.error('permutation: invalid number: '
 							+ n);
 					return NaN;
 				}
@@ -908,7 +908,7 @@ if (typeof CeL === 'function')
 					return factorial_cache[0];
 				k = n - (k | 0);
 				if (!(0 <= k && k < n)) {
-					library_namespace.err('permutation: invalid number: '
+					library_namespace.error('permutation: invalid number: '
 							+ k);
 					return NaN;
 				}
@@ -1135,7 +1135,7 @@ if (typeof CeL === 'function')
 					if (Array.isArray(base)) {
 						base.forEach(function (digit) {
 							if (digit.length !== 1)
-								library_namespace.err('assignment: Invalid digit of base: [' + digit + '].');
+								library_namespace.error('assignment: Invalid digit of base: [' + digit + '].');
 						});
 						base = base.join('');
 					}
@@ -1147,7 +1147,7 @@ if (typeof CeL === 'function')
 						//base is number
 						: !valid_radix(base)) {
 						if (base)
-							library_namespace.err('assignment: Invalid base: [' + base + ']');
+							library_namespace.error('assignment: Invalid base: [' + base + ']');
 						base = undefined;
 					}
 
@@ -1209,7 +1209,7 @@ if (typeof CeL === 'function')
 
 
 					else {
-						library_namespace.err('assignment: Invalid number string: [' + number + '].');
+						library_namespace.error('assignment: Invalid number string: [' + number + '].');
 						number = NaN;
 					}
 
@@ -1225,7 +1225,7 @@ if (typeof CeL === 'function')
 							if (digit in digits)
 								number[index] = digits[digit];
 							else
-								library_namespace.err('assignment: Invalid number digit: [' + digit + '].');
+								library_namespace.error('assignment: Invalid number digit: [' + digit + '].');
 						});
 						if (!to_base && count_exponent(DEFAULT_BASE, base))
 							to_base = DEFAULT_BASE;
@@ -1355,7 +1355,7 @@ if (typeof CeL === 'function')
 										//直接展開指數。
 										number.expand_exponent();
 									else {
-										library_namespace.err('assignment: Unable to convert from base ' + base + ' to base ' + to_base + ' with exponent ' + number[KEY_EXPONENT] + ' without loss of significance.');
+										library_namespace.error('assignment: Unable to convert from base ' + base + ' to base ' + to_base + ' with exponent ' + number[KEY_EXPONENT] + ' without loss of significance.');
 										//計算 fraction。
 										index = -number[KEY_EXPONENT];
 										for (var fraction_base = ZERO_EXPONENT; fraction_base && index;)
@@ -1402,7 +1402,7 @@ if (typeof CeL === 'function')
 					// ---------------------------------------
 				} else {
 					if (typeof number !== 'number') {
-						library_namespace.err('assignment: Invalid value to assignment: [' + number + '].');
+						library_namespace.error('assignment: Invalid value to assignment: [' + number + '].');
 						number = NaN;
 					}
 
@@ -1572,7 +1572,7 @@ if (typeof CeL === 'function')
 
 				var base = target_Integer[KEY_BASE], carry = 0, length = this.length, index = 0, digit;
 				if (!Number.isSafeInteger(base))
-					library_namespace.err('for_each_digit: Invalid base: [' + base + '].');
+					library_namespace.error('for_each_digit: Invalid base: [' + base + '].');
 
 				for (; index < length || carry !== 0 ; index++, target_shift++)
 					// 當 index >= length，僅作進位處理。
@@ -1601,7 +1601,7 @@ if (typeof CeL === 'function')
 				trim_0(target_Integer);
 
 				if (carry)
-					library_namespace.err('for_each_digit: carry [' + carry + '] left.');
+					library_namespace.error('for_each_digit: carry [' + carry + '] left.');
 				return carry;
 			}
 
@@ -2046,7 +2046,7 @@ if (typeof CeL === 'function')
 							//未能整除。
 							if (++r > limit) {
 								// TODO: 盡量取得可得位數。
-								library_namespace.err('precise_divide: The period of repeating decimal is too long (large than ' + limit + ')!');
+								library_namespace.error('precise_divide: The period of repeating decimal is too long (large than ' + limit + ')!');
 								return;
 							}
 							//remainder + 1 <= d
@@ -2058,7 +2058,7 @@ if (typeof CeL === 'function')
 							//未能整除。
 							if (++r > limit) {
 								// TODO: 盡量取得可得位數。
-								library_namespace.err('precise_divide: The period of repeating decimal is too long (large than ' + limit + ')!');
+								library_namespace.error('precise_divide: The period of repeating decimal is too long (large than ' + limit + ')!');
 								return;
 							}
 							shift_digits(remainder, -1, true);
@@ -2935,7 +2935,7 @@ if (typeof CeL === 'function')
 					return math_factorize(integer, radix);
 
 				if ((KEY_TYPE in this) || this[KEY_EXPONENT] < 0) {
-					library_namespace.err('factorize: Invalid integer: [' + this.toString() + '].');
+					library_namespace.error('factorize: Invalid integer: [' + this.toString() + '].');
 					return;
 				}
 
@@ -3274,7 +3274,7 @@ if (typeof CeL === 'function')
 				if (base) {
 					base = new Integer(quotient = base, null, this[KEY_BASE]);
 					if (base[KEY_TYPE] || !(base.compare(ZERO_EXPONENT) > 0)) {
-						library_namespace.err('log: Invalid base: [' + quotient + '].');
+						library_namespace.error('log: Invalid base: [' + quotient + '].');
 						return NaN;
 					}
 
@@ -3346,7 +3346,7 @@ if (typeof CeL === 'function')
 
 				var integer_part = exponent.valueOf() | 0, error_digits = 2, _precision = (precision || 2 * DECIMAL_BASE_LENGTH) + error_digits;
 				if (!Number.isSafeInteger(integer_part)) {
-					library_namespace.err('power: Invalid exponent: [' + exponent + '] (exponent too large, overflowed / underflowed).');
+					library_namespace.error('power: Invalid exponent: [' + exponent + '] (exponent too large, overflowed / underflowed).');
 					return this.assignment(this.compare(1) < 0 ? 0 : Infinity);
 				}
 

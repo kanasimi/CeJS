@@ -2290,7 +2290,7 @@ if (typeof CeL === 'function')
 				terms.forEach(function(term_name) {
 					var coefficients = [], subterms = object_terms[term_name];
 					if (!subterms) {
-						library_namespace.err('VSOP87: Invalid term name: ['
+						library_namespace.error('VSOP87: Invalid term name: ['
 								+ term_name + ']');
 						return;
 					}
@@ -2920,7 +2920,7 @@ if (typeof CeL === 'function')
 					} else if (isNaN(angle = index) && (NOT_FOUND ===
 					//
 					(angle = SOLAR_TERMS_NAME.indexOf(index)))) {
-						library_namespace.err(
+						library_namespace.error(
 						//
 						'solar_term_JD: Invalid solar term [' + index + ']!');
 						return;
@@ -3165,7 +3165,7 @@ if (typeof CeL === 'function')
 				var term_index = typeof term === 'string' ? SOLAR_TERMS_NAME
 						.indexOf(term) : term;
 				if (!SOLAR_TERMS_NAME[term_index]) {
-					library_namespace.err(
+					library_namespace.error(
 					//
 					'solar_term_calendar: Invalid term: [' + term + ']');
 					return;
@@ -3490,7 +3490,7 @@ if (typeof CeL === 'function')
 					}
 					if (!subterms) {
 						if (warn_term)
-							library_namespace.err(
+							library_namespace.error(
 							//
 							'LEA406: Invalid term name: [' + term
 									+ ']. You may need to load it first.');
@@ -6008,7 +6008,7 @@ if (typeof CeL === 'function')
 					}
 					朔日.閏 = 閏;
 				} else if (朔日.length !== 12)
-					library_namespace.err(年 + '年有' + 朔日.length + '個月!');
+					library_namespace.error(年 + '年有' + 朔日.length + '個月!');
 
 				// [ {Number}朔日JD, 朔日JD, ... ].閏 = {Boolean};
 				return 朔日;
@@ -6150,7 +6150,7 @@ if (typeof CeL === 'function')
 				if (閏 <= 歲首)
 					if (朔日.閏)
 						// 這將造成無法阻絕一年內可能有兩閏月，以及一年僅有11個月的可能。
-						library_namespace.err(年 + '年有兩個閏月!!');
+						library_namespace.error(年 + '年有兩個閏月!!');
 					else
 						朔日.閏 = 閏 + 朔日.length;
 

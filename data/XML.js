@@ -438,7 +438,7 @@ function module_code(library_namespace) {
 					// else: 再往前找。
 				}
 				if (false && i < 0) {
-					library_namespace.err('parse error: ' + nodes[i]);
+					library_namespace.error('parse error: ' + nodes[i]);
 				}
 			}
 		}

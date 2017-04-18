@@ -696,7 +696,7 @@ convert_MathML.process = function(text, order, queue) {
 				var expression = operator[1]($0, $1, $2, $3);
 				if (!expression) {
 					library_namespace
-							.err("convert_MathML.process: Can not parse: '"
+							.error("convert_MathML.process: Can not parse: '"
 									+ $0 + "'");
 					return $0;
 				}
@@ -886,7 +886,7 @@ convert_MathML.parse_scalar = function(text, no_MathML) {
 	// \u2E80-\u30000: Unihan variable
 	!/^[a-zA-Z\u0370-\u03ff∞ℵ\u2E80-\u30000][a-zA-Z\u0370-\u03ff∞ℵ\u2E80-\u30000\d]*$/
 					.test(text))
-		library_namespace.err("convert_MathML.parse_scalar: Can not parse: '"
+		library_namespace.error("convert_MathML.parse_scalar: Can not parse: '"
 				+ text + "'");
 
 	// 純識別元。e.g., "x"

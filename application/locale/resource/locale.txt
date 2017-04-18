@@ -32,7 +32,7 @@
 	"interact.integrate.SVG"	"Illegal %1: [%2]"	"Used as error message."	"有問題（無效或不合理）的%1：[%2]"		"Illegal %1: [%2]"	"不正な%1：[%2]"		
 	"application.debug.log"	"debug level"	"Used as debugging message."	"偵錯層級"	"调试级别"	"debug level"	"デバッグレベル"		
 	"application.debug.log"	"fatal"	"Used as debugging message."	"致命"		"fatal"	"致命的エラー"		
-	"application.debug.log"	"err"	"Used as debugging message."	"錯誤"		"err"	"エラー"		
+	"application.debug.log"	"error"	"Used as debugging message."	"錯誤"		"error"	"エラー"		
 	"application.debug.log"	"warn"	"Used as debugging message."	"警告"		"warn"	"警告"		
 	"application.debug.log"	"em"	"Used as debugging message."	"重要"		"em"	"重要"		
 	"application.debug.log"	"info"	"Used as debugging message."	"訊息"	"信息"	"info"	"情報"		

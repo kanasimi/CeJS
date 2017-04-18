@@ -242,7 +242,7 @@ function guess_encoding(file_path, is_HTML, options) {
 			try {
 				ADO_Stream.Charset = enc in guess_encoding.OS_alias ? guess_encoding.OS_alias[enc] : enc;
 			} catch (e) {
-				library_namespace.err('ADO Stream DO NOT support encoding [' + enc + ']!', 1, 'guess_encoding');
+				library_namespace.error('ADO Stream DO NOT support encoding [' + enc + ']!', 1, 'guess_encoding');
 			}
 
 			t = reading_length ? ADO_Stream.ReadText(reading_length)

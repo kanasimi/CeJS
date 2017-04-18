@@ -1400,7 +1400,7 @@ if (typeof CeL === 'function')
 					if (isNaN(e)) {
 						library_namespace.warn('dependency_chain.independent: '
 								+ e.message);
-						library_namespace.err(e);
+						library_namespace.error(e);
 					}
 				}
 
@@ -1465,7 +1465,7 @@ if (typeof CeL === 'function')
 				library_namespace.value_of(name.replace(/\.[^.]+$/, '')),
 						arguments);
 			} catch (e) {
-				library_namespace.err(e);
+				library_namespace.error(e);
 			}
 			if (!method) {
 				library_namespace.warn('load_later: 無法演算 [' + name + ']！');
@@ -1481,7 +1481,7 @@ if (typeof CeL === 'function')
 					return method.apply(null, arguments);
 			} catch (e) {
 				if (library_namespace.is_debug())
-					library_namespace.err(e);
+					library_namespace.error(e);
 			}
 
 			if (library_namespace.is_debug())
@@ -1508,7 +1508,7 @@ if (typeof CeL === 'function')
 							arguments[3], arguments[4]);
 				}
 			} catch (e) {
-				library_namespace.err(e);
+				library_namespace.error(e);
 			}
 
 			library_namespace.warn('load_later: 無法執行 [' + name
@@ -1921,7 +1921,7 @@ if (typeof CeL === 'function')
 			declaration = id && named_code[id];
 			if (!id || !is_controller(declaration)) {
 				// 內部 bug？
-				library_namespace.err('load_named: 沒有 [' + id + '] 的資料！');
+				library_namespace.error('load_named: 沒有 [' + id + '] 的資料！');
 				return PROCESSED;
 			}
 
@@ -1992,7 +1992,7 @@ if (typeof CeL === 'function')
 									// callback 需要 waiting。
 									need_waiting.push(callback);
 							} catch (e) {
-								library_namespace.err('執行 [' + id + '] 之 '
+								library_namespace.error('執行 [' + id + '] 之 '
 										+ name + ' 時發生錯誤！ ' + e.message);
 								library_namespace.debug('<code>'
 										+ ('' + callback).replace(/</g, '&lt;')
@@ -2046,9 +2046,9 @@ if (typeof CeL === 'function')
 							initializator = declaration.code(library_namespace);
 						} catch (e) {
 							error_Object = e;
-							library_namespace.err('load_named: [' + id
+							library_namespace.error('load_named: [' + id
 									+ '] 之初始設定函式執行失敗！');
-							library_namespace.err(e);
+							library_namespace.error(e);
 						}
 					}
 
@@ -2273,7 +2273,7 @@ if (typeof CeL === 'function')
 
 					} else {
 						if (!error_Object)
-							library_namespace.err(error_Object = new Error(
+							library_namespace.error(error_Object = new Error(
 									'load_named: [' + id
 											+ '] 之初始設定函式執行成功，但回傳無法處理之值：['
 											+ initializator + ']！'));
@@ -2401,7 +2401,7 @@ if (typeof CeL === 'function')
 								if (library_namespace
 										.is_type(e, 'DOMException')
 										&& e.code === 1012) {
-									library_namespace.err(
+									library_namespace.error(
 									//
 									'load_named:\n' + e.message + '\n'
 									//
@@ -2421,7 +2421,7 @@ if (typeof CeL === 'function')
 										&& ('' + e.message)
 												.indexOf('NS_ERROR_FILE_NOT_FOUND') !== NOT_FOUND) {
 									if (library_namespace.is_debug())
-										library_namespace.err(
+										library_namespace.error(
 										//
 										'load_named: 檔案可能不存在或存取被拒？\n['
 										//
@@ -2435,7 +2435,7 @@ if (typeof CeL === 'function')
 										//
 										: '\n' + e.message));
 								} else if (library_namespace.is_debug())
-									library_namespace.err(
+									library_namespace.error(
 									//
 									'load_named: Cannot load [<a href="'
 									//
@@ -2749,7 +2749,7 @@ if (typeof CeL === 'function')
 							} catch (e) {
 								if (typeof e !== 'number') {
 									declaration.callback['delete'](caller);
-									library_namespace.err(e);
+									library_namespace.error(e);
 								}
 								use_write = true;
 							}
@@ -3269,7 +3269,7 @@ if (typeof CeL === 'function')
 		 */
 		function use_function(extend_to, no_strict) {
 			if (!is_controller(this)) {
-				library_namespace.err('No "this" binded!');
+				library_namespace.error('No "this" binded!');
 				return '';
 			}
 
@@ -3572,7 +3572,7 @@ if (typeof CeL === 'function')
 							// TODO: 可否加點 arguments?
 							item();
 						} catch (e) {
-							library_namespace.err(
+							library_namespace.error(
 							//
 							'check_and_run.run: Error to run function: '
 									+ e.message);
@@ -3860,7 +3860,7 @@ if (typeof CeL === 'function')
 				}
 				if (library_namespace.is_Function(parent))
 					return parent;
-				library_namespace.err('inherit: 無法判別出合理之 parent[' + i + ']！');
+				library_namespace.error('inherit: 無法判別出合理之 parent[' + i + ']！');
 			}
 
 			if (!normalize())

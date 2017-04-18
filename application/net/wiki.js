@@ -491,7 +491,7 @@ function module_code(library_namespace) {
 					+ matched[2] + '/w/api.php';
 		}
 
-		library_namespace.err('api_URL: Unknown project: [' + project
+		library_namespace.error('api_URL: Unknown project: [' + project
 				+ ']! Using default API URL.');
 		return wiki_API.API_URL;
 	}
@@ -1979,12 +1979,12 @@ function module_code(library_namespace) {
 				} else {
 					// e.g., {{t|[http://... ...]}}
 					if (library_namespace.is_debug(3)) {
-						library_namespace.err(
+						library_namespace.error(
 						//
 						'parse_wikitext.transclusion: Can not parse ['
 						//
 						+ token + ']');
-						library_namespace.err(token);
+						library_namespace.error(token);
 						// console.log(_token);
 					}
 					// TODO: token 本身並未 .trim()
@@ -3254,7 +3254,7 @@ function module_code(library_namespace) {
 	 */
 	wiki_API.list_to_array = function(page_data, options) {
 		if (!get_page_content.is_page_data(page_data)) {
-			library_namespace.err('Invalid page data!');
+			library_namespace.error('Invalid page data!');
 			return;
 		}
 		if (typeof options === 'string') {
@@ -3320,7 +3320,7 @@ function module_code(library_namespace) {
 							.match(/[^a-z\d_]rowspan=(?:"\s*)?(\d{1,2})/i);
 
 							if (matched && matched[1] > 1) {
-								library_namespace.err(
+								library_namespace.error(
 								// TODO
 								'We can not deal with rowspan yet.');
 							}
@@ -3365,7 +3365,7 @@ function module_code(library_namespace) {
 				}));
 			} else {
 				library_namespace
-						.err("Must includes frrst: CeL.run(['application.platform.nodejs', 'data.CSV']);");
+						.error("Must includes frrst: CeL.run(['application.platform.nodejs', 'data.CSV']);");
 			}
 		}
 
@@ -4091,14 +4091,14 @@ function module_code(library_namespace) {
 							+ ': It seems we lost the token. 似乎丟失了 token。');
 							if (!library_namespace.platform.nodejs) {
 								library_namespace
-										.err('wiki_API.prototype.next: '
+										.error('wiki_API.prototype.next: '
 												+ 'Not using nod.js!');
 								return;
 							}
 							// 下面的 workaround 僅適用於 node.js。
 							if (!_this.token.lgpassword) {
 								library_namespace
-										.err('wiki_API.prototype.next: '
+										.error('wiki_API.prototype.next: '
 												+ 'No password preserved!');
 								// 死馬當活馬醫，仍然嘗試重新取得 token...沒有密碼無效。
 								return;
@@ -4741,7 +4741,7 @@ function module_code(library_namespace) {
 		} else if (Array.isArray(config.each)) {
 			each = config;
 		} else {
-			library_namespace.err(
+			library_namespace.error(
 			//
 			'wiki_API.work: Invalid function for each page!');
 		}
@@ -4808,7 +4808,7 @@ function module_code(library_namespace) {
 					}
 				} else if (!result.edit) {
 					// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
-					library_namespace.err('wiki_API.work: 無 result.edit'
+					library_namespace.error('wiki_API.work: 無 result.edit'
 							+ (result.edit ? '.newrevid' : '')
 							+ '！可能是 token lost！');
 					error = 'no "result.edit'
@@ -4833,7 +4833,7 @@ function module_code(library_namespace) {
 						result = 'nochange';
 					} else {
 						// 有時無 result.edit.newrevid。
-						library_namespace.err('無 result.edit.newrevid');
+						library_namespace.error('無 result.edit.newrevid');
 						error = gettext('finished');
 						result = 'succeed';
 					}
@@ -5013,7 +5013,7 @@ function module_code(library_namespace) {
 					pages = pages.slice(0, effect_length);
 
 				} else {
-					library_namespace.err('wiki_API.work: 回傳內容過長而被截斷！');
+					library_namespace.error('wiki_API.work: 回傳內容過長而被截斷！');
 				}
 			}
 
@@ -5025,7 +5025,7 @@ function module_code(library_namespace) {
 					// -pages.length: 先回溯到 pages 開頭之 index。
 					work_continue -= pages.length - pages.OK_length;
 				} else {
-					library_namespace.err('wiki_API.work: 回傳內容超過限度而被截斷！');
+					library_namespace.error('wiki_API.work: 回傳內容超過限度而被截斷！');
 				}
 
 				library_namespace.debug('一次取得大量頁面時，回傳內容超過限度而被截斷。將回退 '
@@ -5508,7 +5508,7 @@ function module_code(library_namespace) {
 		if (typeof action === 'string')
 			action = [ , action ];
 		else if (!Array.isArray(action))
-			library_namespace.err('wiki_API.query: Invalid action: [' + action
+			library_namespace.error('wiki_API.query: Invalid action: [' + action
 					+ ']');
 		library_namespace.debug('api URL: (' + (typeof action[0]) + ') ['
 				+ action[0] + '] → [' + api_URL(action[0]) + ']', 3,
@@ -5627,7 +5627,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('wiki_API.query: ['
+				library_namespace.error('wiki_API.query: ['
 				//
 				+ error.code + '] ' + error.info);
 			}
@@ -5665,7 +5665,7 @@ function module_code(library_namespace) {
 					&& session.token
 					//
 					&& (session.token.lgpassword || session.preserve_password)) {
-						library_namespace.err('未登錄編輯？');
+						library_namespace.error('未登錄編輯？');
 						throw new Error('未登錄編輯？');
 					}
 
@@ -5860,11 +5860,11 @@ function module_code(library_namespace) {
 							// https://phabricator.wikimedia.org/T134094
 							// 不一定總是有效。
 
-							library_namespace.err(
+							library_namespace.error(
 							//
 							'wiki_API.query: Invalid content: ['
 									+ String(response).slice(0, 40000) + ']');
-							library_namespace.err(e);
+							library_namespace.error(e);
 						}
 
 						// error handling
@@ -5883,7 +5883,7 @@ function module_code(library_namespace) {
 					callback(response);
 				} else {
 					library_namespace
-							.err('wiki_API.query: No {Function}callback!');
+							.error('wiki_API.query: No {Function}callback!');
 				}
 
 			}, null, post_data, get_URL_options);
@@ -6006,7 +6006,7 @@ function module_code(library_namespace) {
 
 		} else if (!page_data) {
 			library_namespace
-					.err('wiki_API.query.title_param: Invalid title: ['
+					.error('wiki_API.query.title_param: Invalid title: ['
 							+ page_data + ']');
 			// console.warn(page_data);
 		}
@@ -6040,7 +6040,7 @@ function module_code(library_namespace) {
 			return !title_only && page_data.pageid || page_data.title;
 
 		if (!page_data)
-			library_namespace.err('wiki_API.query.id_of_page: Invalid title: ['
+			library_namespace.error('wiki_API.query.id_of_page: Invalid title: ['
 					+ page_data + ']');
 		return page_data;
 	};
@@ -6184,7 +6184,7 @@ function module_code(library_namespace) {
 					query_props.push('revisions');
 				get_properties();
 			} else {
-				library_namespace.err('wiki_API.page: Invalid .query_props!');
+				library_namespace.error('wiki_API.page: Invalid .query_props!');
 				throw 'wiki_API.page: Invalid .query_props';
 			}
 			return;
@@ -6192,7 +6192,7 @@ function module_code(library_namespace) {
 
 		var action = normalize_title_parameter(title, options);
 		if (!action) {
-			library_namespace.err('wiki_API.page: Invalid title: '
+			library_namespace.error('wiki_API.page: Invalid title: '
 					+ JSON.stringify(title));
 			callback(undefined, 'Invalid title: ' + get_page_title_link(title));
 			return;
@@ -6294,7 +6294,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('wiki_API.page: ['
+				library_namespace.error('wiki_API.page: ['
 				//
 				+ error.code + '] ' + error.info);
 				/**
@@ -7120,7 +7120,7 @@ function module_code(library_namespace) {
 		// console.log('get_list: title: ' + title);
 
 		if (typeof callback !== 'function') {
-			library_namespace.err('callback is NOT function! callback: ['
+			library_namespace.error('callback is NOT function! callback: ['
 					+ callback + ']');
 			library_namespace.debug('可能是想要當作 wiki instance，卻未設定好，直接呼叫了 '
 			// TODO: use module_name
@@ -7212,7 +7212,7 @@ function module_code(library_namespace) {
 			}
 
 			if (!data || !data.query) {
-				library_namespace.err('get_list: Unknown response: ['
+				library_namespace.error('get_list: Unknown response: ['
 						+ (typeof data === 'object'
 								&& typeof JSON !== 'undefined' ? JSON
 								.stringify(data) : data) + ']');
@@ -7251,7 +7251,7 @@ function module_code(library_namespace) {
 					}
 					return;
 				}
-				library_namespace.err('get_list: No page got!');
+				library_namespace.error('get_list: No page got!');
 			}
 		}, null, options);
 	}
@@ -7515,7 +7515,7 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			library_namespace.err(
+			library_namespace.error(
 			//
 			'wiki_API.prototype.token: Unknown response: ['
 			//
@@ -7572,7 +7572,7 @@ function module_code(library_namespace) {
 					 * {"login":{"result":"Failed","reason":"Incorrect password entered.\nPlease try again."}}
 					 * </code>
 					 */
-					library_namespace.err('wiki_API.login: login ['
+					library_namespace.error('wiki_API.login: login ['
 							+ session.token.lgname + '] failed! ['
 							+ data.result + '] ' + data.reason);
 					if (data.result !== 'Failed' || data.result !== 'NeedToken') {
@@ -7654,8 +7654,8 @@ function module_code(library_namespace) {
 							session);
 				} else {
 					library_namespace
-							.err('wiki_API.login: 無法 login！ Abort! Response:');
-					library_namespace.err(data);
+							.error('wiki_API.login: 無法 login！ Abort! Response:');
+					library_namespace.error(data);
 				}
 			}, token, session);
 		}, null, session);
@@ -8492,7 +8492,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err(
+				library_namespace.error(
 				//
 				'wiki_API.redirects: [' + error.code + '] ' + error.info);
 				/**
@@ -8633,7 +8633,7 @@ function module_code(library_namespace) {
 		} else if (page_data) {
 			parameters.pageid = page_data.pageid;
 		} else {
-			// library_namespace.err('draw_parameters No page specified: ' +
+			// library_namespace.error('draw_parameters No page specified: ' +
 			// options);
 			return 'No page specified';
 		}
@@ -8649,7 +8649,7 @@ function module_code(library_namespace) {
 		}
 		if (!token) {
 			// TODO: use session
-			// library_namespace.err('wiki_API.protect: No token specified: ' +
+			// library_namespace.error('wiki_API.protect: No token specified: ' +
 			// options);
 			return 'No ' + token_type + 'token specified';
 		}
@@ -8758,7 +8758,7 @@ function module_code(library_namespace) {
 				// 保證不會再持續執行。
 				|| !get_page_content.revision(page_data).user) {
 					if (false) {
-						library_namespace.err(
+						library_namespace.error(
 						//
 						'wiki_API.rollback: No user name specified!');
 					}
@@ -8931,7 +8931,7 @@ function module_code(library_namespace) {
 			return;
 		}
 		if (typeof language !== 'string') {
-			library_namespace.err(
+			library_namespace.error(
 			//
 			'set_SQL_config_language: Invalid language: [' + language + ']');
 			return;
@@ -9034,7 +9034,7 @@ function module_code(library_namespace) {
 		try {
 			config = library_namespace.get_file(file_name);
 		} catch (e) {
-			library_namespace.err(
+			library_namespace.error(
 			//
 			'parse_SQL_config: Can not read config file [ ' + file_name + ']!');
 			return;
@@ -9398,7 +9398,7 @@ function module_code(library_namespace) {
 			// 預防 PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR
 			_this.connection.query(SQL, function(error, rows, fields) {
 				if (error || !Array.isArray(rows)) {
-					library_namespace.err(error);
+					library_namespace.error(error);
 					rows = null;
 				} else {
 					rows = rows.map(function(row) {
@@ -9505,7 +9505,7 @@ function module_code(library_namespace) {
 			condition = condition_array.join(' AND ');
 
 		} else {
-			library_namespace.err('Invalid condition: '
+			library_namespace.error('Invalid condition: '
 					+ JSON.stringify(condition));
 			return;
 		}
@@ -9906,7 +9906,7 @@ function module_code(library_namespace) {
 			//
 			+ directory + filename + '"', function(error, stdout, stderr) {
 				if (error) {
-					library_namespace.err(error);
+					library_namespace.error(error);
 				} else {
 					library_namespace.log(
 					//
@@ -10001,7 +10001,7 @@ function module_code(library_namespace) {
 
 		child.on('close', function(error_code) {
 			if (error_code) {
-				library_namespace.err('get_latest_dump: Error code '
+				library_namespace.error('get_latest_dump: Error code '
 						+ error_code);
 				// 有時最新版本可能 dump 到一半，正等待中。
 				if (options.previous) {
@@ -10067,7 +10067,7 @@ function module_code(library_namespace) {
 		// || xml.indexOf('<model>wikitext</model>') === NOT_FOUND
 		) {
 			// 有 end_mark '</page>' 卻沒有 '<revision>'
-			library_namespace.err('parse_dump_xml: Bad data:\n'
+			library_namespace.error('parse_dump_xml: Bad data:\n'
 					+ xml.slice(0, index));
 			return;
 		}
@@ -10217,7 +10217,7 @@ function module_code(library_namespace) {
 		file_stream.setEncoding(encoding);
 
 		file_stream.on('error', options.onerror || function(error) {
-			library_namespace.err('read_dump: Error occurred: ' + error);
+			library_namespace.error('read_dump: Error occurred: ' + error);
 		});
 
 		/**
@@ -10271,7 +10271,7 @@ function module_code(library_namespace) {
 			// [ start position of file, length in bytes ]
 			page_anchor = [ bytes + start_pos, page_bytes ];
 			if (false && anchor && (pageid in anchor))
-				library_namespace.err('parse_buffer: Duplicated page id: '
+				library_namespace.error('parse_buffer: Duplicated page id: '
 						+ pageid);
 			if (anchor)
 				anchor[pageid] = page_anchor;
@@ -10338,7 +10338,7 @@ function module_code(library_namespace) {
 
 			// 頁面大小系統上限 2,048 KB = 2 MB。
 			if (buffer.length > 3e6) {
-				library_namespace.err(
+				library_namespace.error(
 				//
 				'read_dump: buffer too long (' + buffer.length
 						+ ' characters)! Paused! 有太多無法處理的 buffer，可能是格式錯誤？');
@@ -10734,10 +10734,10 @@ function module_code(library_namespace) {
 							try {
 								write();
 							} catch (e) {
-								library_namespace.err(
+								library_namespace.error(
 								//
 								'wiki_API.cache: Error to write cache data!');
-								library_namespace.err(e);
+								library_namespace.error(e);
 							}
 						}
 					}
@@ -10884,7 +10884,7 @@ function module_code(library_namespace) {
 					node_fs.readFile(file_path, operation.encoding, function(
 							error, data) {
 						if (error)
-							library_namespace.err(
+							library_namespace.error(
 							//
 							'wiki_API.cache: Error get file [' + file_path
 									+ ']: ' + error);
@@ -11272,7 +11272,7 @@ function module_code(library_namespace) {
 			if (!revid && (!(revid = get_page_content.revision(page_data))
 			/** {Natural}所取得之版本編號。 */
 			|| !(revid = revid.revid))) {
-				library_namespace.err(
+				library_namespace.error(
 				// 照理來說，會來到這裡的都應該是經過 .had() 確認，因此不該出現此情況。
 				'revision_cacher.data_of: No revision id (.revid): ('
 						+ (typeof page_data) + ') '
@@ -11434,7 +11434,7 @@ function module_code(library_namespace) {
 				: all_revision_SQL.replace(/page_id/g, 'page_title'), function(
 						error, rows, fields) {
 					if (error) {
-						library_namespace.err(error);
+						library_namespace.error(error);
 						config.no_database = error;
 					} else {
 						library_namespace.log('traversal_pages: All '
@@ -11630,7 +11630,7 @@ function module_code(library_namespace) {
 						} catch (e) {
 							// 若不存在 dump_directory，則會在此出錯。
 							if (e.code === 'ENOENT') {
-								library_namespace.err('traversal_pages: '
+								library_namespace.error('traversal_pages: '
 										+ 'You may need to create '
 										+ 'the dump directory yourself!');
 							}
@@ -11797,7 +11797,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('Flow_info: ['
+				library_namespace.error('Flow_info: ['
 				//
 				+ error.code + '] ' + error.info);
 				/**
@@ -11943,7 +11943,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err(
+				library_namespace.error(
 				//
 				'Flow_page: [' + error.code + '] ' + error.info);
 				callback(page_data);
@@ -11955,7 +11955,7 @@ function module_code(library_namespace) {
 			if (!(data = data.flow)
 			//
 			|| !(data = data['view-' + view]) || data.status !== 'ok') {
-				library_namespace.err(
+				library_namespace.error(
 				//
 				'Flow_page: Error status [' + (data && data.status) + ']');
 				callback(page_data);
@@ -12046,7 +12046,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('edit_topic: ['
+				library_namespace.error('edit_topic: ['
 				//
 				+ error.code + '] ' + error.info);
 			} else if (!(data = data.flow)
@@ -12057,7 +12057,7 @@ function module_code(library_namespace) {
 				error = 'edit_topic: Error status ['
 				//
 				+ (data && data.status) + ']';
-				library_namespace.err(error);
+				library_namespace.error(error);
 			}
 
 			if (typeof callback === 'function')
@@ -12182,7 +12182,7 @@ function module_code(library_namespace) {
 
 	function normalize_wikidata_key(key) {
 		if (typeof key !== 'string') {
-			library_namespace.err('normalize_wikidata_key: key: '
+			library_namespace.error('normalize_wikidata_key: key: '
 					+ JSON.stringify(key));
 			// console.trace(key);
 			throw 'normalize_wikidata_key: typeof key is NOT string!';
@@ -12287,7 +12287,7 @@ function module_code(library_namespace) {
 			}
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('wikidata_search: ['
+				library_namespace.error('wikidata_search: ['
 				//
 				+ error.code + '] ' + error.info);
 				callback(undefined, error);
@@ -12498,7 +12498,7 @@ function module_code(library_namespace) {
 			// console.log(language_and_key + ': ' + id);
 			if (!id) {
 				library_namespace
-						.err('wikidata_search.use_cache: Nothing found: ['
+						.error('wikidata_search.use_cache: Nothing found: ['
 								+ language_and_key + ']');
 				// console.log(options);
 				// console.trace('wikidata_search.use_cache: Nothing found');
@@ -12834,7 +12834,7 @@ function module_code(library_namespace) {
 				var date = new Date(value.join('-') + ' UTC+0');
 				if (isNaN(date.getTime())) {
 					library_namespace
-							.err('wikidata_datavalue.get_index: Invalid Date: '
+							.error('wikidata_datavalue.get_index: Invalid Date: '
 									+ value);
 				}
 				value = date;
@@ -13279,7 +13279,7 @@ function module_code(library_namespace) {
 								return;
 							}
 
-							library_namespace.err(
+							library_namespace.error(
 							//
 							'wikidata_entity: Wikidata 不存在 [[:' + key.join(':')
 									+ ']] 之數據，' + (content ? '但' : '且無法取得/不')
@@ -13313,7 +13313,7 @@ function module_code(library_namespace) {
 		// ----------------------------
 
 		if (!key || library_namespace.is_empty_object(key)) {
-			library_namespace.err('wikidata_entity: 未設定欲取得之特定實體id。');
+			library_namespace.error('wikidata_entity: 未設定欲取得之特定實體id。');
 			callback(undefined, 'no_key');
 			return;
 		}
@@ -13372,7 +13372,7 @@ function module_code(library_namespace) {
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
 				if (error.code === 'param-missing') {
-					library_namespace.err(
+					library_namespace.error(
 					/**
 					 * 可能是錯把 "category" 之類當作 sites name??
 					 * 
@@ -13383,7 +13383,7 @@ function module_code(library_namespace) {
 					'wikidata_entity: 未設定欲取得之特定實體id。請確定您的要求，尤其是 sites 存在: '
 							+ decodeURI(action[0]));
 				} else {
-					library_namespace.err('wikidata_entity: ['
+					library_namespace.error('wikidata_entity: ['
 					//
 					+ error.code + '] ' + error.info);
 				}
@@ -13484,7 +13484,7 @@ function module_code(library_namespace) {
 			value = this.claims && this.claims[value];
 		} else {
 			library_namespace
-					.err('wikidata_entity_value: Can not deal with property ['
+					.error('wikidata_entity_value: Can not deal with property ['
 							+ property + ']');
 			return;
 		}
@@ -13618,7 +13618,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('wikidata_datatype: ['
+				library_namespace.error('wikidata_datatype: ['
 				//
 				+ error.code + '] ' + error.info);
 				callback(undefined, error);
@@ -13793,7 +13793,7 @@ function module_code(library_namespace) {
 				normalized_data.datatype = datatype;
 			}
 			if (error) {
-				library_namespace.err(error);
+				library_namespace.error(error);
 				normalized_data.error = error;
 			}
 
@@ -13884,7 +13884,7 @@ function module_code(library_namespace) {
 		if (typeof value === 'object' && value.snaktype && value.datatype) {
 			// 若 value 已經是完整的 wikidata object，則直接回傳之。
 			if (datatype !== value.datatype) {
-				library_namespace.err(
+				library_namespace.error(
 				// 所指定的與 value 的不同。
 				'normalize_wikidata_value: The datatype of the value ['
 						+ value.datatype + '] is different from specified: ['
@@ -14167,7 +14167,7 @@ function module_code(library_namespace) {
 		} else if (!Array.isArray(properties)) {
 			if (properties) {
 				library_namespace
-						.err('normalize_wikidata_properties: Invalid properties: '
+						.error('normalize_wikidata_properties: Invalid properties: '
 								+ JSON.stringify(properties));
 			}
 
@@ -14353,7 +14353,7 @@ function module_code(library_namespace) {
 					}
 					property_data.property = id;
 				} else {
-					library_namespace.err(
+					library_namespace.error(
 					//
 					'normalize_wikidata_properties: Invalid property key: '
 							+ JSON.stringify(property_data));
@@ -14594,7 +14594,7 @@ function module_code(library_namespace) {
 							}
 
 							if (Array.isArray(normalized_value)) {
-								library_namespace.err(
+								library_namespace.error(
 								// 得到多個值而非單一值
 								'normalize_next_value: get multiple values instead of just one value: ['
 										+ value + '] → '
@@ -14602,7 +14602,7 @@ function module_code(library_namespace) {
 
 							} else if (false && normalized_value.error) {
 								// 之前應該已經在normalize_wikidata_value()顯示過錯誤訊息
-								library_namespace.err('normalize_next_value: '
+								library_namespace.error('normalize_next_value: '
 										+ normalized_value.error);
 							}
 							// 因為之前應該已經顯示過錯誤訊息，因此這邊直接放棄作業，排除此property。
@@ -14714,7 +14714,7 @@ function module_code(library_namespace) {
 			if (!Array.isArray(references)) {
 				if (references) {
 					library_namespace
-							.err('set_references: Invalid references: '
+							.error('set_references: Invalid references: '
 									+ JSON.stringify(references));
 				} else {
 					// assert: 本次沒有要設定 claim 的資料。
@@ -14767,7 +14767,7 @@ function module_code(library_namespace) {
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
 					// e.g., set_references: [failed-save] Edit conflict.
-					library_namespace.err('set_references: [' + error.code
+					library_namespace.error('set_references: [' + error.code
 							+ '] ' + error.info);
 				}
 				// data =
@@ -14830,7 +14830,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('remove_claims: [' + error.code + '] '
+				library_namespace.error('remove_claims: [' + error.code + '] '
 						+ error.info);
 			}
 			// data =
@@ -14971,7 +14971,7 @@ function module_code(library_namespace) {
 			}
 
 			if (property_data.remove) {
-				library_namespace.err('set_next_claim: Invalid .remove ['
+				library_namespace.error('set_next_claim: Invalid .remove ['
 						+ property_data.remove + '].');
 				shift_to_next();
 				return;
@@ -15026,7 +15026,7 @@ function module_code(library_namespace) {
 					 * set_next_claim: [invalid-entity-id] Invalid entity ID. (The serialization "読み仮名" is not recognized by the configured id builders)
 					 * </code>
 					 */
-					library_namespace.err('set_next_claim: [' + error.code
+					library_namespace.error('set_next_claim: [' + error.code
 							+ '] ' + error.info);
 					library_namespace.warn('data to write: '
 							+ JSON.stringify(POST_data));
@@ -15067,7 +15067,7 @@ function module_code(library_namespace) {
 		normalize_wikidata_properties(data.claims, function(claims) {
 			if (!Array.isArray(claims)) {
 				if (claims) {
-					library_namespace.err('set_claims: Invalid claims: '
+					library_namespace.error('set_claims: Invalid claims: '
 							+ JSON.stringify(claims));
 				} else {
 					// assert: 本次沒有要設定 claim 的資料。
@@ -15249,7 +15249,7 @@ function module_code(library_namespace) {
 			} else if (!label.language
 			//
 			|| !label.value && !('remove' in label)) {
-				library_namespace.err('set_labels: Invalid label: '
+				library_namespace.error('set_labels: Invalid label: '
 						+ JSON.stringify(label));
 				return true;
 			}
@@ -15311,7 +15311,7 @@ function module_code(library_namespace) {
 		var data_labels = data.labels;
 		// e.g., data.labels={language_code:label,language_code:[labels],...}
 		if (!library_namespace.is_Object(data_labels)) {
-			library_namespace.err('set_labels: Invalid labels: '
+			library_namespace.error('set_labels: Invalid labels: '
 					+ JSON.stringify(data_labels));
 			callback();
 			return;
@@ -15321,7 +15321,7 @@ function module_code(library_namespace) {
 		for ( var language in data_labels) {
 			var label = data_labels[language];
 			if (!library_namespace.is_Object(label)) {
-				library_namespace.err('set_labels: Invalid label: '
+				library_namespace.error('set_labels: Invalid label: '
 						+ JSON.stringify(label));
 				continue;
 			}
@@ -15388,7 +15388,7 @@ function module_code(library_namespace) {
 					 * 
 					 * </code>
 					 */
-					library_namespace.err('set_next_labels: [' + error.code
+					library_namespace.error('set_next_labels: [' + error.code
 							+ '] ' + error.info);
 				} else {
 					// successful done.
@@ -15436,7 +15436,7 @@ function module_code(library_namespace) {
 			});
 
 		} else if (!library_namespace.is_Object(data_aliases)) {
-			library_namespace.err('set_aliases: Invalid aliases: '
+			library_namespace.error('set_aliases: Invalid aliases: '
 					+ JSON.stringify(data_aliases));
 			callback();
 			return;
@@ -15453,7 +15453,7 @@ function module_code(library_namespace) {
 					// 表示 set。
 					aliases_queue.push([ language, [ alias_list ] ]);
 				} else {
-					library_namespace.err('set_aliases: Invalid aliases: '
+					library_namespace.error('set_aliases: Invalid aliases: '
 							+ JSON.stringify(alias_list));
 				}
 				continue;
@@ -15475,7 +15475,7 @@ function module_code(library_namespace) {
 						}
 					} else {
 						library_namespace
-								.err('set_aliases: No value to value for '
+								.error('set_aliases: No value to value for '
 										+ language);
 					}
 				} else if ('set' in alias) {
@@ -15564,7 +15564,7 @@ function module_code(library_namespace) {
 					 * 
 					 * </code>
 					 */
-					library_namespace.err('set_next_aliases: [' + error.code
+					library_namespace.error('set_next_aliases: [' + error.code
 							+ '] ' + error.info);
 				} else {
 					// successful done.
@@ -15650,7 +15650,7 @@ function module_code(library_namespace) {
 			//
 			|| !description.value && !('remove' in description)) {
 				library_namespace
-						.err('set_descriptions: Invalid descriptions: '
+						.error('set_descriptions: Invalid descriptions: '
 								+ JSON.stringify(description));
 				return true;
 			} else {
@@ -15725,7 +15725,7 @@ function module_code(library_namespace) {
 					 * 
 					 * </code>
 					 */
-					library_namespace.err('set_next_descriptions: ['
+					library_namespace.error('set_next_descriptions: ['
 							+ error.code + '] ' + error.info);
 				} else {
 					// successful done.
@@ -15926,7 +15926,7 @@ function module_code(library_namespace) {
 				var error = data && data.error;
 				// 檢查伺服器回應是否有錯誤資訊。
 				if (error) {
-					library_namespace.err(
+					library_namespace.error(
 					// e.g., 數據庫被禁止寫入以進行維護，所以您目前將無法保存您所作的編輯
 					// Mediawiki is in read-only mode during maintenance
 					'wikidata_edit.do_wbeditentity: '
@@ -16464,7 +16464,7 @@ function module_code(library_namespace) {
 			var error = data && data.error;
 			// 檢查伺服器回應是否有錯誤資訊。
 			if (error) {
-				library_namespace.err('wikidata_merge: ['
+				library_namespace.error('wikidata_merge: ['
 				// [failed-modify] Attempted modification of the item failed.
 				// (Conflicting descriptions for language zh)
 				+ error.code + '] ' + error.info);

@@ -1108,7 +1108,7 @@ add_tag.load = function(id, callback) {
 	var data = add_tag.data_file[id];
 
 	if (!data) {
-		CeL.err('未設定之資料圖層: [' + id + ']');
+		CeL.error('未設定之資料圖層: [' + id + ']');
 		return 'ERROR';
 	}
 	if (callback && (typeof callback !== 'function'))
@@ -2691,7 +2691,7 @@ function affairs() {
 	var SVG_width = SVG_object.offsetWidth, SVG_height = SVG_object.offsetHeight;
 	CeL.debug('SVG: ' + SVG_width + '×' + SVG_height);
 	if (SVG_width < SVG_min_width || SVG_height < SVG_min_height) {
-		CeL.err('當前視窗過小。將採用螢幕之大小，請將視窗放到最大。');
+		CeL.error('當前視窗過小。將採用螢幕之大小，請將視窗放到最大。');
 		if (SVG_width < SVG_min_width)
 			SVG_width = Math.max((screen.availWidth || screen.width)
 					- SVG_padding, SVG_min_width);
@@ -2719,7 +2719,7 @@ function affairs() {
 		CeL.toggle_display('data_layer', false);
 		if (is_IE11)
 			// 多按幾次就會 hang 住。
-			CeL.err('IE 11 尚無法使用線圖。請考慮使用 Chrome 或 Firefox 等網頁瀏覽器。');
+			CeL.error('IE 11 尚無法使用線圖。請考慮使用 Chrome 或 Firefox 等網頁瀏覽器。');
 		CeL.warn(no_SVG_message);
 	}
 

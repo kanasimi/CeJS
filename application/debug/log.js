@@ -27,7 +27,7 @@ emergency/urgent situation alert
 /*	to include:
 	include code_for_including
 	<div id="debug_panel"></div>
-	var SL=new Debug.log('debug_panel'),sl=function(){SL.log.apply(SL,arguments);},err=function(){SL.err.apply(SL,arguments);},warn=function(){SL.warn.apply(SL,arguments);};
+	var SL=new Debug.log('debug_panel'),sl=function(){SL.log.apply(SL,arguments);},error=function(){SL.error.apply(SL,arguments);},warn=function(){SL.warn.apply(SL,arguments);};
 
 	http://www.comsharp.com/GetKnowledge/zh-CN/TeamBlogTimothyPage_K742.aspx
 
@@ -184,7 +184,7 @@ do_save_log = function(m, id, force) {
 				f.Write(_p.sbuf.join(_t.save_line_separator)), _p.sbuf = [],
 						_p.sbufL = 0, _t.error_message = 0;
 		} catch (e) {
-			// err(e);
+			// error(e);
 			_t.error_message = e;
 		}
 	else if (m)
@@ -297,10 +297,10 @@ _// JSDT:_tmp;_module_
 			 */
 			warn : 'debug_warn',
 			/**
-			 * @_description	當呼叫 {@link _module_.prototype.err} 時使用的 className
-			 * @_name	_module_.prototype.className_set.err
+			 * @_description	當呼叫 {@link _module_.prototype.error} 時使用的 className
+			 * @_name	_module_.prototype.className_set.error
 			 */
-			err : 'debug_err',
+			error : 'debug_error',
 			/**
 			 * @_description	當顯示時間時使用的 className
 			 * @_name	_module_.prototype.className_set.time
@@ -326,10 +326,10 @@ _// JSDT:_tmp;_module_
 		 */
 		warn : '',
 		/**
-		 * @_description	表示當呼叫 {@link _module_.prototype.err}, 是錯誤 error message 時使用的 prefix
-		 * @_name	_module_.prototype.message_prefix.err
+		 * @_description	表示當呼叫 {@link _module_.prototype.error}, 是錯誤 error message 時使用的 prefix
+		 * @_name	_module_.prototype.message_prefix.error
 		 */
-		err : '<em>!! Error !!</em> '
+		error : '<em>!! Error !!</em> '
 	};
 	/**
 	 * log 時 warning/error message 之 prefix。
@@ -551,7 +551,7 @@ _// JSDT:_module_
  * @_example
  * 
  * //	status logger
- * var SL=new _module_('log'),sl=SL[1],warn=SL[2],err=SL[3];
+ * var SL=new _module_('log'),sl=SL[1],warn=SL[2],error=SL[3];
  * sl(msg);
  * sl(msg,clear);
  * 
@@ -583,7 +583,7 @@ extend = function(obj, className_set) {
 	}, function() {
 		log_controller.warn.apply(log_controller, arguments);
 	}, function() {
-		log_controller.err.apply(log_controller, arguments);
+		log_controller.error.apply(log_controller, arguments);
 	} ];
 
 };
@@ -801,19 +801,19 @@ warn : function(m, clean) {
 
 /**
  * deal with error message
- * @_name	_module_.prototype.err
+ * @_name	_module_.prototype.error
  */
-err : function err(e, clean) {
+error : function error(e, clean) {
 	var caller = '';
 	if (has_caller) {
-		caller = '' + err.caller;
-		if (caller.indexOf('.err.apply(') !== -1)
+		caller = '' + error.caller;
+		if (caller.indexOf('.error.apply(') !== -1)
 			// ** 判斷 call from _.extend. TODO: 應該避免!
 			caller = caller.caller;
 	}
 
 	this.log(Array.isArray(e) || library_namespace.is_Object(e) ? e : _
-			.get_error_message(e, this.save_line_separator, caller), clean, 'err');
+			.get_error_message(e, this.save_line_separator, caller), clean, 'error');
 },
 
 
@@ -993,7 +993,7 @@ if (!CeL.Log) {
 		 * error / fault
 		 * U+2620 SKULL AND CROSSBONES
 		 */
-		err : '☠',
+		error : '☠',
 		/*
 		 * U+2139 INFORMATION SOURCE
 		 * http://en.wiktionary.org/wiki/%E2%84%B9
@@ -1109,7 +1109,7 @@ if (!CeL.Log) {
 			info : 'information',
 			em : 'emphasis',
 			warn : 'warning',
-			err : 'error'
+			error : 'error'
 	};
 	for (i in l) {
 		controller.push(' ', {
@@ -1182,13 +1182,13 @@ if (!CeL.Log) {
 						: new Error(error_to_throw || 'Fatal error');
 			} catch (e) {
 				// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Error/Stack
-				CeL.err(e.stack ? message
+				CeL.error(e.stack ? message
 						+ '<br />stack:<div class="debug_stack">'
 						+ (typeof e.stack === 'string' ? e.stack.replace(/\n/g,
 								'<br />') : e.stack) + '</div>' : message);
 			}
 		else
-			CeL.err(message);
+			CeL.error(message);
 
 		if (typeof error_to_throw === 'undefined')
 			// 預設會 throw message.
@@ -1748,7 +1748,7 @@ if (!CeL.Log) {
 				// CeL.warn(join());
 				log_controller[2](join());
 			} else {
-				// CeL.err(join());
+				// CeL.error(join());
 				log_controller[3](join());
 			}
 
@@ -1816,7 +1816,7 @@ if (!CeL.Log) {
 		Object.assign(CeL, {
 			log : log_controller[1],
 			warn : log_controller[2],
-			err : log_controller[3],
+			error : log_controller[3],
 
 			info : log_front_end_info,
 
@@ -1830,16 +1830,12 @@ if (!CeL.Log) {
 			CeL.Log.log.call(CeL.Log, message, clean, 'em');
 		},
 
-		error : function log_front_end_error() {
-			//	使用 .apply() 預防 override.
-			CeL.err.apply(CeL, arguments);
-		},
-
 		//	致命錯誤。
 		fatal : log_front_end_fatal,
 
 		//	增加 debug 訊息。
 		trace : function log_front_end_trace() {
+			//	使用 .apply() 預防 override。
 			//	trace: the least serious
 			CeL.debug.apply(CeL, arguments);
 		},

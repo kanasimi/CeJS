@@ -1301,7 +1301,7 @@ function module_code(library_namespace) {
 		// assert: initial_month && typeof initial_month === 'string'
 
 		if (calendar_data.length === 0) {
-			library_namespace.err(
+			library_namespace.error(
 			//
 			'extract_calendar_slice: 無法辨識日數資料 [' + calendar_data_String + ']！');
 			return [ date_name, calendar_data_String ];
@@ -1328,7 +1328,7 @@ function module_code(library_namespace) {
 								-LEAP_MONTH_PADDING.length);
 
 						if (leap_month_index_list) {
-							library_namespace.err(
+							library_namespace.error(
 							//		
 							'extract_calendar_slice: 本年有超過1個閏月！');
 							leap_month_index_list.unshift(leap_month_index);
@@ -1359,7 +1359,7 @@ function module_code(library_namespace) {
 									|| leap_month_index < initial_month[2]) {
 								if (initial_month[1]) {
 									if (initial_month[2] != leap_month_index)
-										library_namespace.err(
+										library_namespace.error(
 										//
 										'extract_calendar_slice: 起始閏月次['
 												+ initial_month[2]
@@ -1554,7 +1554,7 @@ function module_code(library_namespace) {
 			if (isNaN(歲名)) {
 				// 可能只是 to_era_Date() 在作測試，看是否能成功解析。
 				if (library_namespace.is_debug())
-					library_namespace.err(
+					library_namespace.error(
 					//
 					'year_name_to_index: 紀年 [' + this + '] '
 					//
@@ -1759,7 +1759,7 @@ function module_code(library_namespace) {
 						// 可能是孝徳天皇之類，期間過短，又嘗試
 						// get_month_branch_index()
 						// 的。
-						library_namespace.err('shift_month: 已至 [' + this
+						library_namespace.error('shift_month: 已至 [' + this
 								+ '] 曆數結尾，無可資利用之月分資料！');
 					差距月數 = NaN;
 					歲序--;
@@ -1775,7 +1775,7 @@ function module_code(library_namespace) {
 			while (月序 < 0) {
 				if (--歲序 < 0) {
 					if (library_namespace.is_debug())
-						library_namespace.err('shift_month: 已至 [' + this
+						library_namespace.error('shift_month: 已至 [' + this
 								+ '] 曆數起頭，無可資利用之月分資料！');
 					差距月數 = NaN;
 					歲序 = 0;
@@ -1985,7 +1985,7 @@ function module_code(library_namespace) {
 		// ---------------------------------------
 
 		if (!紀年曆數 || typeof 紀年曆數 !== 'string') {
-			library_namespace.err('initialize_era_date: 無法辨識曆數資料！');
+			library_namespace.error('initialize_era_date: 無法辨識曆數資料！');
 			return;
 		}
 
@@ -2481,7 +2481,7 @@ function module_code(library_namespace) {
 							if (tmp && tmp !==
 							//
 							calendar_data[START_DATE_KEY])
-								library_namespace.err([
+								library_namespace.error([
 										'initialize_era_date: ', '紀年 [' + this,
 										'] 於曆數所設定之起始日名 ', tmp,
 										' 與從參照紀年 [' + era, '] 得到的日次 ',
@@ -2823,7 +2823,7 @@ function module_code(library_namespace) {
 
 				// 不可設為 START_DATE。
 				if (isNaN(ordinal[2] |= 0)) {
-					library_namespace.err('initialize_era_date: 紀年 [' + this
+					library_namespace.error('initialize_era_date: 紀年 [' + this
 							+ '] 無法順利轉換日期 [' + ordinal.join('/') + ']！');
 					return;
 				}
@@ -2895,7 +2895,7 @@ function module_code(library_namespace) {
 					ordinal[2] = START_DATE;
 
 					if (!String_to_Date.parser[曆法]) {
-						library_namespace.err('未設定好 String_to_Date.parser['
+						library_namespace.error('未設定好 String_to_Date.parser['
 								+ 曆法 + ']!');
 					}
 					曆法 = String_to_Date.parser[曆法];
@@ -2917,7 +2917,7 @@ function module_code(library_namespace) {
 							standard_time_format));
 						日數 = (next_time - time) / ONE_DAY_LENGTH_VALUE;
 						if (!(日數 > 0) && 日數 !== (日數 | 0)) {
-							library_namespace.err(
+							library_namespace.error(
 							// 可能是時區問題?
 							'initialize_era_date: 紀年 [' + this + '] 無法順利轉換日期 ['
 									+ ordinal.join('/') + ']: 錯誤日數！');
@@ -2934,7 +2934,7 @@ function module_code(library_namespace) {
 								++time[0];
 							time[1] = START_MONTH;
 							if (time.join('/') !== ordinal.join('/')) {
-								library_namespace.err(
+								library_namespace.error(
 								//
 								'initialize_era_date: 紀年 [' + this
 										+ '] 無法順利轉換日期！[' + time.join('/')
@@ -2996,7 +2996,7 @@ function module_code(library_namespace) {
 							.trim())
 							// 接受 0日，是為了如 Myanmar 需要調整月名的情況。
 							|| (date_data |= 0) <= 0) {
-						library_namespace.err('initialize_era_date: 無法辨識日數資料 ['
+						library_namespace.error('initialize_era_date: 無法辨識日數資料 ['
 								+ calendar_data + '] 中的 [' + date_data + ']！');
 						return;
 					}
@@ -3332,7 +3332,7 @@ function module_code(library_namespace) {
 			if (false)
 				while (isNaN(this.月名(月序[0], 月序[1])))
 					if (!this.shift_month(1, 月序)) {
-						library_namespace.err(
+						library_namespace.error(
 						//
 						'get_month_branch_index: 無法取得月次（數字化月分名稱）！');
 						return;
@@ -3505,7 +3505,7 @@ function module_code(library_namespace) {
 			月序 += library_namespace.SEXAGENARY_CYCLE_LENGTH;
 		if (月序 >= LUNISOLAR_MONTH_COUNT) {
 
-			library_namespace.err('get_month_branch_index: '
+			library_namespace.error('get_month_branch_index: '
 			//
 			+ this.歲名(歲序) + '年並無此月干支 [' + 月干支 + ']！');
 
@@ -3576,7 +3576,7 @@ function module_code(library_namespace) {
 				// 檢查此年之此月是否為此干支。
 				if (year_index !== month_index[1]) {
 					if (!isNaN(year_index))
-						library_namespace.err('date_name_to_Date: '
+						library_namespace.error('date_name_to_Date: '
 								+ this.歲名(year_index) + '年並無此月干支 [' + 月 + ']！');
 					// 直接設定歲序。
 					year_index = month_index[1];
@@ -3667,7 +3667,7 @@ function module_code(library_namespace) {
 
 			// 可能只是 to_era_Date() 在作測試，看是否能成功解析。
 			if (library_namespace.is_debug())
-				library_namespace.err([ 'Date_to_date_index: 日期[',
+				library_namespace.error([ 'Date_to_date_index: 日期[',
 						date.format(standard_time_format), '] 並不在紀年 [' + this,
 						'] 時段內！' ]);
 			return;
@@ -4126,7 +4126,7 @@ function module_code(library_namespace) {
 		// [ 歲序, 月序, 日序 | 0 ]
 		date_index = this.Date_to_date_index(date);
 		if (!date_index) {
-			library_namespace.err('sign_note: 加注日期於紀年 [' + this + '] 範圍外！');
+			library_namespace.error('sign_note: 加注日期於紀年 [' + this + '] 範圍外！');
 		} else {
 			// 欲使用 date_index，應該考慮採 (date.年, date.月, date.日)。
 			// 因為日期可能不是從1月1日開始。
@@ -4314,7 +4314,7 @@ function module_code(library_namespace) {
 			return date;
 		}
 
-		library_namespace.err('parse_duration: 無法判別 [' + era + '] 之起訖時間！');
+		library_namespace.error('parse_duration: 無法判別 [' + era + '] 之起訖時間！');
 		// return date;
 	}
 
@@ -4373,7 +4373,7 @@ function module_code(library_namespace) {
 				if (!(era_Set instanceof Set)
 				// 確定 parser 為唯一且原生的 era key。
 				|| era_Set.size !== 1) {
-					library_namespace.err(
+					library_namespace.error(
 					//
 					'normalize_date: 無法確認 parser：共有 ' + era_Set.size + ' 個 ['
 							+ parser + ']！');
@@ -4438,7 +4438,7 @@ function module_code(library_namespace) {
 				return date.format(DATE_NAME_FORMAT);
 		}
 
-		library_namespace.err('normalize_date: 無法解析 [' + date + ']！');
+		library_namespace.error('normalize_date: 無法解析 [' + date + ']！');
 	}
 
 	/**
@@ -4497,7 +4497,7 @@ function module_code(library_namespace) {
 				if (!library_namespace.is_Object(
 				//
 				era = pre_parse(era))) {
-					library_namespace.err('pack_era: 跳過資料結構錯誤的紀年資料！');
+					library_namespace.error('pack_era: 跳過資料結構錯誤的紀年資料！');
 					return;
 				}
 
@@ -4518,7 +4518,7 @@ function module_code(library_namespace) {
 				// 簡併起訖日期。
 				// 起訖 : [ 起, 訖, parser ]
 				if (!(this_era = parse_duration(era.起訖, this_era))) {
-					library_namespace.err('pack_era(Array): 跳過起訖日期錯誤的紀年資料！');
+					library_namespace.error('pack_era(Array): 跳過起訖日期錯誤的紀年資料！');
 					return;
 				}
 				// 回存。
@@ -4582,7 +4582,7 @@ function module_code(library_namespace) {
 		if (!library_namespace.is_Object(
 		//
 		plain_era_data = pre_parse(plain_era_data))) {
-			library_namespace.err('pack_era: 無法判別紀年資料！');
+			library_namespace.error('pack_era: 無法判別紀年資料！');
 			return plain_era_data;
 		}
 
@@ -4629,7 +4629,7 @@ function module_code(library_namespace) {
 		}
 
 		if (!Array.isArray(年度月分資料) || !年度月分資料[0]) {
-			library_namespace.err('pack_era: 未設定年度月分資料！');
+			library_namespace.error('pack_era: 未設定年度月分資料！');
 			return;
 		}
 
@@ -4640,7 +4640,7 @@ function module_code(library_namespace) {
 			//
 			.replace(pack_era.era_name_符號結尾, '');
 		if (!紀年名稱 || typeof 紀年名稱 !== 'string') {
-			library_namespace.err(
+			library_namespace.error(
 			//
 			'pack_era: 無法判別紀年名稱: [' + 紀年名稱 + ']');
 			return;
@@ -4663,7 +4663,7 @@ function module_code(library_namespace) {
 						日數 = 日數.split('=');
 
 					if (!Array.isArray(日數) || 日數.length !== 2) {
-						library_namespace.err(
+						library_namespace.error(
 						//
 						'pack_era: 無法辨識日數資料 [' + year_data[j] + ']！');
 						month_data = null;
@@ -4745,7 +4745,7 @@ function module_code(library_namespace) {
 								}
 
 							} else if (leap_month_index_base_2) {
-								library_namespace.err(
+								library_namespace.error(
 								//
 								'pack_era: 本年有超過1個閏月！');
 								month_data = null;
@@ -4937,7 +4937,7 @@ function module_code(library_namespace) {
 			if ('minute_offset' in date) {
 				// 已設定過。
 				if (date.minute_offset !== minute_offset)
-					library_namespace.err('set_minute_offset: 之前已將 ' + date
+					library_namespace.error('set_minute_offset: 之前已將 ' + date
 							+ ' 設定成 ' + date.minute_offset + ' 分鐘，現在又欲設定成 '
 							+ minute_offset + ' 分鐘！');
 				return;
@@ -5065,7 +5065,7 @@ function module_code(library_namespace) {
 			}
 
 			if (!Array.isArray(era_data) || era_data.length < 2) {
-				library_namespace.err('parse_era.pre_parse_紀年資料: 無法判別紀年 ['
+				library_namespace.error('parse_era.pre_parse_紀年資料: 無法判別紀年 ['
 						+ index + '] 之資料！');
 				return;
 			}
@@ -5145,7 +5145,7 @@ function module_code(library_namespace) {
 			if (紀年 && !Array.isArray(紀年))
 				紀年 = String(紀年).split(pack_era.era_name_classifier);
 			if (!紀年 || 紀年.length === 0) {
-				library_namespace.err('parse_era: 無法判別紀年 [' + index
+				library_namespace.error('parse_era: 無法判別紀年 [' + index
 						+ '] 之名稱資訊！');
 				return;
 			}
@@ -5173,7 +5173,7 @@ function module_code(library_namespace) {
 				紀年.forEach(function(name, index) {
 					if (name === parse_era.inherit) {
 						if (!前一紀年名稱[index])
-							library_namespace.err('parse_era: 前一紀年 [' + 前一紀年名稱
+							library_namespace.error('parse_era: 前一紀年 [' + 前一紀年名稱
 									+ '] 並未設定 index [' + index + ']！');
 						紀年[index] = 前一紀年名稱[index] || '';
 					}
@@ -5240,7 +5240,7 @@ function module_code(library_namespace) {
 				if (options.extract_only)
 					起訖 = [ new Date(0), new Date(0) ];
 				else {
-					library_namespace.err('parse_era: 跳過起訖日期錯誤的紀年資料！');
+					library_namespace.error('parse_era: 跳過起訖日期錯誤的紀年資料！');
 					return;
 				}
 
@@ -5251,7 +5251,7 @@ function module_code(library_namespace) {
 				else if (options.extract_only)
 					起訖[0] = new Date(0);
 				else {
-					library_namespace.err('parse_era: 沒有上一紀年以資參考！');
+					library_namespace.error('parse_era: 沒有上一紀年以資參考！');
 					return;
 				}
 
@@ -5273,7 +5273,7 @@ function module_code(library_namespace) {
 			} else if (options.extract_only)
 				起訖[1] = new Date(0);
 			else {
-				library_namespace.err('parse_era: 無法求得紀年[' + 紀年 + ']之結束時間！');
+				library_namespace.error('parse_era: 無法求得紀年[' + 紀年 + ']之結束時間！');
 				return;
 			}
 
@@ -6558,7 +6558,7 @@ function module_code(library_namespace) {
 			date = new Date(指定紀年.start.getTime());
 
 		if (!is_Date(date) || isNaN(date.getTime())) {
-			library_namespace.err('to_era_Date: 無法判別紀年 ['
+			library_namespace.error('to_era_Date: 無法判別紀年 ['
 			// numeralized
 			+ arguments[0] + '] 之時間或名稱資訊！');
 			return;

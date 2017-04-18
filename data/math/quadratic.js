@@ -284,7 +284,7 @@ if (typeof CeL === 'function')
 				cf.pop();
 				cf = Integer.convergent_of(cf);
 				if (limit !== undefined && !(limit > 0) && typeof limit !== 'function') {
-					library_namespace.err('Invalid limit: ' + limit);
+					library_namespace.error('Invalid limit: ' + limit);
 					limit = undefined;
 				}
 				if (limit === undefined) {

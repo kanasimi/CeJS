@@ -188,7 +188,7 @@ function module_code(library_namespace) {
 
 			if (!Array.isArray(char_list)) {
 				library_namespace
-						.err('Not Array: ' + JSON.stringify(char_list));
+						.error('Not Array: ' + JSON.stringify(char_list));
 				throw new Error('Invalid character code map: ' + code_name
 						+ '.' + base_byte_code);
 			}

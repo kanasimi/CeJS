@@ -185,7 +185,7 @@ function module_code(library_namespace) {
 
 			// throw new Error('Julian_day: Can not parse [' + date + ']');
 			if (library_namespace.is_debug(2)) {
-				library_namespace.err('Julian_day: 無法解析 [' + date + ']！');
+				library_namespace.error('Julian_day: 無法解析 [' + date + ']！');
 			}
 			return;
 		}

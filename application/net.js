@@ -472,7 +472,7 @@ URI_accessor.test_module = function (module_name) {
 		get_WScript_object().WshShell.Run(module_name, 0, true);
 	} catch (e) {
 		// 若不存在此執行檔案，將 throw。
-		library_namespace.err(e);
+		library_namespace.error(e);
 		return (e.number & 0xFFFF) === 2 ? NO_EXECUTABLE_FILE : e;
 	}
 	library_namespace.debug('test module: [' + module_name + ']: OK.', 1, 'URI_accessor.test_module');
@@ -778,7 +778,7 @@ URI_accessor.default_getter = function (setting, command_array, apply_command) {
 				// http://users.ugent.be/~bpuype/wget/
 				result = NO_EXECUTABLE_FILE;
 			else {
-				library_namespace.err(e);
+				library_namespace.error(e);
 				result = e;
 			}
 		}
@@ -972,7 +972,7 @@ function get_video(video_url, download_to, options) {
 								//title = result.match(/<title\s+type='text'>([^<]+)<\/title>/),
 								title = result.match(/<meta name="title" content="([^"]+)">/);
 								if (!title) {
-									library_namespace.err('Error to get playlist [' + playlist_id + ']: ' + result + '.');
+									library_namespace.error('Error to get playlist [' + playlist_id + ']: ' + result + '.');
 									continue;
 								}
 								// 因為 escape 會多出不必要符號，因此不 escape。
@@ -989,7 +989,7 @@ function get_video(video_url, download_to, options) {
 											download_to += title + library_namespace.env.path_separator;
 										} else {
 											library_namespace.warn('Create directory [' + download_to + title + '] error:');
-											library_namespace.err(e);
+											library_namespace.error(e);
 										}
 									}
 									try {
@@ -1063,7 +1063,7 @@ function get_video(video_url, download_to, options) {
 								t = t < 60 ? t.toFixed(2) + ' seconds' : (t / 60).toFixed(2) + ' minutes';
 								t = [{ b: setting('title'), S: 'color:#f80;' }, ' ', result ? 'error ' + result : 'OK', ' @ ', t];
 								if (result)
-									library_namespace.err(t);
+									library_namespace.error(t);
 								else
 									library_namespace.log(t);
 							};
@@ -1097,9 +1097,9 @@ function get_video(video_url, download_to, options) {
 
 		} catch (e) {
 			error_count++;
-			library_namespace.err(file_message
+			library_namespace.error(file_message
 					+ (video_info ? ' [' + video_info.title + ']:' : ' error:'));
-			library_namespace.err(e);
+			library_namespace.error(e);
 		}
 	}
 
@@ -1147,7 +1147,7 @@ get_video.get_information = function get_video_information(video_hash, download_
 		param = parse_URI.parse_search(html);
 
 		if ('errorcode' in param) {
-			library_namespace.err('[' + video_hash + ']: ' + param.errorcode + ' ' + param.reason);
+			library_namespace.error('[' + video_hash + ']: ' + param.errorcode + ' ' + param.reason);
 			return;
 		}
 
@@ -1283,7 +1283,7 @@ get_video.get_information = function get_video_information(video_hash, download_
 						library_namespace.debug('parse signature: →(' + s.length + ')[' + s + ']', 2, 'get_information.parse_signature');
 					});
 				} else if(!param_url.url[0].includes('&signature='))
-					library_namespace.err('未發現 signature (signature or sig or s)！');
+					library_namespace.error('未發現 signature (signature or sig or s)！');
 			}
 
 			tmp = param_url.itag;

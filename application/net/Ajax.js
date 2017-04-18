@@ -350,7 +350,7 @@ function module_code(library_namespace) {
 			}
 
 		} catch (e) {
-			library_namespace.err(e);
+			library_namespace.error(e);
 			if (typeof options.onfail === 'function') {
 				options.onfail(XMLHttp, e);
 			} else if (onload) {
@@ -622,7 +622,7 @@ function module_code(library_namespace) {
 						content = fs.readFileSync(value);
 					} catch (e) {
 						library_namespace
-								.err('to_form_data: Error to get file: ['
+								.error('to_form_data: Error to get file: ['
 										+ value + '].');
 						// Skip this one.
 						callback();
@@ -652,7 +652,7 @@ function module_code(library_namespace) {
 					options.url_post_processor(value, XMLHttp, error);
 				}
 				if (error) {
-					library_namespace.err('to_form_data: Error to get URL: ['
+					library_namespace.error('to_form_data: Error to get URL: ['
 							+ URL + '].');
 					// Skip this one.
 					callback();
@@ -1185,7 +1185,7 @@ function module_code(library_namespace) {
 	 *            欲請求之目的 URL or options
 	 * @param {Function}[onload]
 	 *            callback when successful loaded. For failure handling, using
-	 *            option.onfail(error);
+	 *            options.onfail(error);
 	 * @param {String}[charset]
 	 *            character encoding of HTML web page. e.g., 'UTF-8', big5,
 	 *            euc-jp,..
@@ -1368,6 +1368,28 @@ function module_code(library_namespace) {
 				return;
 			}
 
+			if (options.error_retry >= 1
+					&& !(options.error_retry <= options.error_count)) {
+				// 連線逾期/失敗時重新再取得一次。
+				if (!options.get_URL_cloned) {
+					// 不動到原來的 options。
+					options = Object.clone(options);
+					options.get_URL_cloned = true;
+				}
+				if (options.error_count >= 1) {
+					options.error_count++;
+				} else {
+					options.error_count = 1;
+				}
+				options.URL = URL;
+				// Failed to get [' + URL + '].
+				library_namespace.log('get_URL_node: Retry '
+						+ options.error_count + '/' + options.error_retry
+						+ ': ' + error);
+				get_URL_node(options, onload, charset, post_data);
+				return;
+			}
+
 			if (typeof options.onfail === 'function') {
 				options.onfail(error);
 				return;
@@ -1381,7 +1403,7 @@ function module_code(library_namespace) {
 			}
 			// 在出現錯誤時，將 onload 當作 callback。並要確保 {Object}response
 			// 因此應該要先檢查error再處理response
-			onload(result_Object, error);
+			typeof onload === 'function' && onload(result_Object, error);
 		},
 		// on success
 		_onload = function(result) {
@@ -1406,8 +1428,11 @@ function module_code(library_namespace) {
 				}
 
 				// e.g., 301
-				// 不動到原來的 options。
-				options = Object.clone(options);
+				if (!options.get_URL_cloned) {
+					// 不動到原來的 options。
+					options = Object.clone(options);
+					options.get_URL_cloned = true;
+				}
 				options.URL = node_url.resolve(URL, result.headers.location);
 				library_namespace.debug(result.statusCode + ' Redirecting to ['
 						+ options.URL + '] ← [' + URL + ']', 1, 'get_URL_node');
@@ -1491,6 +1516,32 @@ function module_code(library_namespace) {
 				// it is faster to provide the length explicitly.
 				data = Buffer.concat(data, length);
 
+				// 基本檢測。
+				if (options.verify) {
+					// test: invalid content type
+					if (typeof options.verify === 'function') {
+						if (!options.verify(data)) {
+							_onfail('INVALID');
+							return;
+						}
+					} else {
+						// assert: CeL.application.storage.file included
+						// e.g., options.verify === 'png'
+						var file_type = library_namespace.file_type(data,
+								options.verify);
+						if (file_type.verified === false) {
+							_onfail('Invalid ' + options.verify);
+							return;
+						}
+					}
+				} else if (data.length === 0) {
+					// 若是容許空內容，應該特別指定options.allow_empty。
+					if (!options.allow_empty) {
+						_onfail('EMPTY');
+						return;
+					}
+				}
+
 				var encoding = result.headers['content-encoding'];
 				// https://nodejs.org/docs/latest/api/zlib.html
 				// https://gist.github.com/narqo/5265413
@@ -1513,7 +1564,7 @@ function module_code(library_namespace) {
 						try {
 							data = node_zlib.gunzipSync(data);
 						} catch (e) {
-							library_namespace.err(
+							library_namespace.error(
 							//
 							'get_URL_node: Error: node_zlib.gunzipSync(): ' + e
 									+ ' [' + URL + ']');
@@ -1568,7 +1619,7 @@ function module_code(library_namespace) {
 						node_fs.writeSync(fd, data, 0, data.length, null);
 						node_fs.closeSync(fd);
 					} catch (e) {
-						library_namespace.err('get_URL_node: Error to write '
+						library_namespace.error('get_URL_node: Error to write '
 								+ data.length + ' B to [' + file_path + ']: '
 								+ URL);
 						console.error(e);
@@ -1594,7 +1645,9 @@ function module_code(library_namespace) {
 					'BODY: ' + data, 1, 'get_URL_node');
 				// result_Object模擬 XMLHttp。
 				result_Object.responseText = data;
-				onload && onload(result_Object);
+				if (typeof onload === 'function') {
+					onload(result_Object, !data && !options.allow_empty);
+				}
 				// free
 				data = null;
 				// node_fs.appendFileSync('get_URL_node.data', '\n');
@@ -1711,7 +1764,7 @@ function module_code(library_namespace) {
 				// timeoutイベントは発生しているものの、イベント発生後も引き続きレスポンスを待ち続けている
 				// request.end();
 				request.abort();
-			} catch (e) {
+			} catch (err) {
 				// TODO: handle exception
 			}
 			if (!options.no_warning) {
@@ -1721,18 +1774,6 @@ function module_code(library_namespace) {
 			if (!e) {
 				e = new Error('Timeout (' + timeout + 'ms): ' + URL);
 				e.code = 'TIMEOUT';
-			}
-
-			if (options.timeout_retry > 0) {
-				// 連線逾期時重新再取得一次。
-				library_namespace.log('get_URL_node: Retry [' + URL + '] ('
-						+ options.timeout_retry + ')');
-				// 不動到原來的 options。
-				options = Object.clone(options);
-				options.timeout_retry--;
-				options.URL = URL;
-				get_URL_node(options, onload, charset, post_data);
-				return;
 			}
 
 			_onfail(e);
@@ -1926,7 +1967,7 @@ function module_code(library_namespace) {
 		node_fs.readFile(file_name, encoding, function(error, data) {
 			if (!options.reget) {
 				if (!error
-				// 若是容許空內容，應該特別指定。
+				// 若是容許空內容，應該特別指定options.allow_empty。
 				&& (data || options.allow_empty)) {
 					library_namespace.debug('Using cached data.', 3,
 							'get_URL_cache_node');
@@ -1945,7 +1986,7 @@ function module_code(library_namespace) {
 
 			_.get_URL(URL, function(XMLHttp, error) {
 				if (error) {
-					library_namespace.err(
+					library_namespace.error(
 					//
 					'get_URL_cache_node.cache: Error to get URL: [' + URL
 							+ '].');

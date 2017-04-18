@@ -226,7 +226,7 @@ function module_code(library_namespace) {
 							url : matched[1]
 						});
 					} else {
-						library_namespace.err('No image got: ' + url);
+						library_namespace.error('No image got: ' + url);
 					}
 				});
 			});

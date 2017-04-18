@@ -839,7 +839,7 @@ if (typeof CeL === 'function')
 			// @see http://www.grammarbook.com/numbers/numbers.asp
 			function to_English_numeral(number) {
 				if (number != Math.floor(number)) {
-					library_namespace.err('Can not conver [' + number + ']!');
+					library_namespace.error('Can not conver [' + number + ']!');
 				}
 
 				number = Math.floor(number);
@@ -880,7 +880,7 @@ if (typeof CeL === 'function')
 				if (typeof digit_set !== 'string' || 10 !==
 				//
 				(digits = digit_set.chars()).length) {
-					library_namespace.err('Invalid digits of [' + name + ']: ('
+					library_namespace.error('Invalid digits of [' + name + ']: ('
 							+ digits.length + ') [' + digit_set + ']');
 					return;
 				}
@@ -1099,7 +1099,7 @@ if (typeof CeL === 'function')
 				// index += 2: assert: 2個一組為十進位。
 				for (var index = 0; left > 0; index += 2) {
 					if (index >= apostrophus) {
-						library_namespace.err(
+						library_namespace.error(
 						// OUT OF RANGE: number ≥ 1000000
 						'The number is too large to be expressed in Roman numerals: '
 								+ number);

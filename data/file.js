@@ -352,7 +352,7 @@ if (typeof CeL === 'function')
 						if (library_namespace.is_debug(3)) {
 							library_namespace.warn('fill_data: 擷取資訊 [' + name
 									+ '] 時發生錯誤！');
-							library_namespace.err(e);
+							library_namespace.error(e);
 						}
 					}
 				// return count;
@@ -444,7 +444,7 @@ if (typeof CeL === 'function')
 						type = fso.SubFolders ? FOLDER : FILE;
 					}
 				} catch (e) {
-					library_namespace.err(e);
+					library_namespace.error(e);
 				}
 
 				if (typeof fso !== 'object' || !(path = fso.Path)) {
@@ -475,7 +475,7 @@ if (typeof CeL === 'function')
 							is_file : type !== FOLDER
 						});
 					} catch (e) {
-						library_namespace.err(e);
+						library_namespace.error(e);
 					}
 
 				base = this.get(path, type);
@@ -562,7 +562,7 @@ if (typeof CeL === 'function')
 												is_file : true
 											});
 										} catch (e) {
-											library_namespace.err(e);
+											library_namespace.error(e);
 										}
 								}
 							}
@@ -609,7 +609,7 @@ if (typeof CeL === 'function')
 												is_file : false
 											});
 										} catch (e) {
-											library_namespace.err(e);
+											library_namespace.error(e);
 										}
 
 									if (depth < options.depth)
@@ -781,7 +781,7 @@ if (typeof CeL === 'function')
 				CeL.warn(message);
 
 				if (error_Object)
-					library_namespace.err(error_Object);
+					library_namespace.error(error_Object);
 
 				if (!skip_error) {
 					controller.stop();
@@ -1415,7 +1415,7 @@ if (typeof CeL === 'function')
 					ext2 = get_file_extension(target);
 					if (ext1 !== ext2) {
 						has_error = 1;
-						library_namespace.err('副檔名不同! [' + ext1 + ']→[' + ext2
+						library_namespace.error('副檔名不同! [' + ext1 + ']→[' + ext2
 								+ ']');
 					}
 
@@ -1427,7 +1427,7 @@ if (typeof CeL === 'function')
 								/ FSO.GetFile(path).Size;
 						if (ratio > 8) {
 							has_error = 2;
-							library_namespace.err('目標檔案 [' + target_file
+							library_namespace.error('目標檔案 [' + target_file
 									+ '] 已存在，且檔案大小差異太大！');
 						} else {
 							library_namespace.warn('目標檔案 [' + target_file

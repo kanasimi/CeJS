@@ -329,7 +329,7 @@ function module_code(library_namespace) {
 			return node_fs.readFileSync(file_path, options);
 		} catch (e) {
 			if (library_namespace.is_debug()) {
-				library_namespace.err(e);
+				library_namespace.error(e);
 			}
 			// return e;
 		}

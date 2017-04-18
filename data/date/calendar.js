@@ -754,7 +754,7 @@ Hebrew_Date.month_serial = function(month_name, is_leap_year) {
 			return Hebrew_month_serial[month_name];
 	}
 
-	library_namespace.err('Hebrew_Date.month_serial: Unknown month name: '
+	library_namespace.error('Hebrew_Date.month_serial: Unknown month name: '
 			+ month_name);
 	return month_name;
 };
@@ -789,7 +789,7 @@ Hebrew_Date.month_index = function(month, is_leap_year) {
 			month += is_leap_year ? 13 : 12;
 
 	if (Number.isNaN(month))
-		library_namespace.err('Hebrew_Date.month_index: Unknown month: '
+		library_namespace.error('Hebrew_Date.month_index: Unknown month: '
 				+ month);
 	return month;
 };
@@ -6073,7 +6073,7 @@ function Yi_Date(year, month, date) {
 		year++;
 
 	if (month !== (month | 0) || !(0 < month && month < 12)) {
-		library_namespace.err('Invalid month: ' + month
+		library_namespace.error('Invalid month: ' + month
 				+ ' Should be 1–10. 11 for leap year.');
 		return new Date(NaN);
 	}

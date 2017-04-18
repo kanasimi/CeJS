@@ -667,7 +667,7 @@ replace_HTML = function(o, html) {
 		the innerText and innerHTML properties of the table and tr objects are read-only.
 		*/
 		library_namespace.warn('replace_HTML() error!');
-		library_namespace.err(e);
+		library_namespace.error(e);
 	}
 
 	// Since we just removed the old element from the DOM, return a reference to the new element, which can be used to restore variable references.
@@ -1014,7 +1014,7 @@ fill_form = function fill_form(pair, config) {
 				if(library_namespace.is_debug()) {
 					library_namespace.warn('fill_form.fire_event: Error to run ['
 						+ name + '].' + event_id + ': ' + node[event_id]);
-					library_namespace.err(e);
+					library_namespace.error(e);
 				}
 			}
 		}
@@ -1415,7 +1415,7 @@ function new_node(nodes, layer, ns) {
 			node = tag;
 
 		else if (typeof tag !== 'string') {
-			library_namespace.err('new_node: Error creating tag: [' + (typeof tag) + '][' + tag + ']');
+			library_namespace.error('new_node: Error creating tag: [' + (typeof tag) + '][' + tag + ']');
 			return;
 
 		} else {
@@ -1445,7 +1445,7 @@ function new_node(nodes, layer, ns) {
 							: nodes[tag];
 			} catch (_e) {
 				node = null;
-				library_namespace.err('new_node: Error create tag: [' + tag + ']');
+				library_namespace.error('new_node: Error create tag: [' + tag + ']');
 				return;
 			}
 		}
@@ -1468,8 +1468,8 @@ function new_node(nodes, layer, ns) {
 					else
 						node.setAttribute(n, v);
 				} catch (e) {
-					library_namespace.err('new_node: Error to set attribute [' + n + '] = [' + v + '] of ' + node.outerHTML.replace(/</g, '&gt;') + ':');
-					library_namespace.err(e);
+					library_namespace.error('new_node: Error to set attribute [' + n + '] = [' + v + '] of ' + node.outerHTML.replace(/</g, '&gt;') + ':');
+					library_namespace.error(e);
 					node.appendChild(new_node({
 						em : '(new_node: Error to set attribute [' + n + '])'
 					}));
@@ -1717,8 +1717,8 @@ function new_node(nodes, layer, ns) {
 				try {
 					for_each(n, layer, parent);
 				} catch (e) {
-					library_namespace.err(e);
-					library_namespace.err('new_node: handle function execution error for node Array['+i+'/'+l+']!<br />' + for_each);
+					library_namespace.error(e);
+					library_namespace.error('new_node: handle function execution error for node Array['+i+'/'+l+']!<br />' + for_each);
 				}
 			*/
 		}
@@ -1732,8 +1732,8 @@ function new_node(nodes, layer, ns) {
 			try {
 				for_each(node, layer, parent);
 			} catch (e) {
-				library_namespace.err(e);
-				library_namespace.err('new_node: handle function execution error!<br />' + for_each);
+				library_namespace.error(e);
+				library_namespace.error('new_node: handle function execution error!<br />' + for_each);
 			}
 
 		//	設定 childNodes.
@@ -1799,7 +1799,7 @@ new_node.handler = [
 						// e.g., <math> @ IE8: 對方法或內容存取發出非預期的呼叫。
 						// [object HTMLUnknownElement]
 						library_namespace.warn('new_node.handler[2]: error: .appendChild(document.createTextNode('+n+'))');
-						library_namespace.err(e);
+						library_namespace.error(e);
 					}
 				} else {
 					// this may throw error: -2146827687 未知的執行階段錯誤
@@ -1821,7 +1821,7 @@ new_node.handler = [
 					// e.g., <math> @ IE8: 對方法或內容存取發出非預期的呼叫。
 					// [object HTMLUnknownElement]
 					library_namespace.warn('new_node.handler[2]: error: .appendChild('+n+')');
-					library_namespace.err(e);
+					library_namespace.error(e);
 				}
 				/*
 				if (t === l.innerHTML)
@@ -2181,7 +2181,7 @@ function select_node(selector, base_space, options) {
 			}
 			library_namespace.debug('測試是否為 ELEMENT_NODE 或 DOCUMENT_NODE。', 3, 'select_node');
 			if (!_.is_ELEMENT_NODE(tmp_node) && !_.is_DOCUMENT_NODE(tmp_node)) {
-				library_namespace.err('select_node: 基準 node.nodeType = ' + tmp_node.nodeType + ', '
+				library_namespace.error('select_node: 基準 node.nodeType = ' + tmp_node.nodeType + ', '
 						+ (_.is_ELEMENT_NODE(tmp_node) ? '' : '非 ELEMENT_NODE, ')
 						+ (_.is_DOCUMENT_NODE(tmp_node) ? '' : '非 DOCUMENT_NODE, ') + 'exit!');
 				//show_node(tmp_node);
@@ -2221,7 +2221,7 @@ function select_node(selector, base_space, options) {
 			case '.':
 				//	TODO: class name
 				if (identifier && !tmp_node.querySelectorAll) {
-					//library_namespace.err('select_node: unknown selector: 尚未實現 class name！ [' + part.join('<em>|</em>') + ']');
+					//library_namespace.error('select_node: unknown selector: 尚未實現 class name！ [' + part.join('<em>|</em>') + ']');
 					if ((tmp_node = find_class(identifier, tmp_node, tag_name)) && tmp_node.length === 1) {
 						library_namespace.debug('選取單一個 ' + tag_name + '.' + identifier + '。', 3, 'select_node');
 						tmp_node = tmp_node[0];
@@ -2244,7 +2244,7 @@ function select_node(selector, base_space, options) {
 							tmp_node.getElementsByTagName(tag_name)
 							: base_space.getElementsByTagName(tag_name);
 				} else {
-					library_namespace.err('select_node: unknown selector: 尚未實現之功能！ [' + part.join('<em>|</em>') + ']');
+					library_namespace.error('select_node: unknown selector: 尚未實現之功能！ [' + part.join('<em>|</em>') + ']');
 					return tmp_node;
 				}
 			}
@@ -2263,7 +2263,7 @@ function select_node(selector, base_space, options) {
 		library_namespace.warn('select_node(' + selector + '): ' + (
 				//	@IE9: Error null: 5007 [TypeError] (facility code 10): 無法取得屬性 'getElementsByName' 的值: 物件為 null 或未經定義.
 				(e.number & 0xFFFF) === 5007 ? "The base node isn't YET READY?" : 'error!'));
-		library_namespace.err(e);
+		library_namespace.error(e);
 	}
 }
 
@@ -2604,7 +2604,7 @@ function Array_from_table(table_element, options) {
 		if (table_element.getElementsByTagName) {
 			table_element = table_element.getElementsByTagName('table');
 			if (table_element.length !== 1) {
-				library_namespace.err('table element 之個數不恰好為一！');
+				library_namespace.error('table element 之個數不恰好為一！');
 				return;
 			}
 			if(library_namespace.is_debug())
@@ -4774,7 +4774,7 @@ get_style = function(element, name, not_computed) {
 				value = 1;
 		} catch (e) {
 			library_namespace.warn('get_style(name: ' + name + ') error!');
-			library_namespace.err(e);
+			library_namespace.error(e);
 		}
 
 	//	IE 5-8
@@ -6701,7 +6701,7 @@ reduce_HTML.file = function (FP, enc) {
 	//sl('reduce_HTML [' + FP + ']');
 	var t = simpleRead(FP, enc || simpleFileAutodetectEncode), l;
 	if (!t) {
-		err('Open [' + FP + '] failed.');
+		error('Open [' + FP + '] failed.');
 		return;
 	}
 
@@ -7306,7 +7306,7 @@ function parse_frame(document_node) {
 							//	application.debug.show_value first
 							if(library_namespace.show_value)
 								// Error null: 462 [Error] (facility code 10): 遠端伺服器不存在或無法使用
-								try{library_namespace.show_value(this, this.id || this.name);}catch(e){library_namespace.err(e);}
+								try{library_namespace.show_value(this, this.id || this.name);}catch(e){library_namespace.error(e);}
 							else {
 								library_namespace.warn('Need to include application.debug first! Trying now...');
 								library_namespace.run('application.debug');
@@ -7348,7 +7348,7 @@ function parse_frame(document_node) {
 		else if(library_namespace.is_debug())
 			library_namespace.warn('No frameset detected.');
 	} catch (e) {
-		library_namespace.err(e);
+		library_namespace.error(e);
 	}
 }
 
