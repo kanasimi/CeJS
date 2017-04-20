@@ -729,6 +729,8 @@ function module_code(library_namespace) {
 			// check EOI, End Of Image mark of .jpeg
 			// http://stackoverflow.com/questions/4585527/detect-eof-for-jpg-images
 			eof : 'FF D9',
+			// other file extensions
+			extension : [ 'jpeg' ],
 			min_size : 3e3
 		}
 	},
@@ -746,7 +748,18 @@ function module_code(library_namespace) {
 		// 檔案格式。
 		magic_data.type = type = type[0];
 		// 副檔名。
-		magic_data.extension = type;
+		// TODO: 大小寫。
+		if (magic_data.extension) {
+			if (!Array.isArray(magic_data.extension)) {
+				magic_data.extension = [ magic_data.extension ];
+			}
+			if (!magic_data.extension.includes(type)) {
+				magic_data.extension.unshift(type);
+			}
+		} else {
+			magic_data.extension = [ type ];
+		}
+
 		magic_data.magic = magic_data.magic.replace(/[ ,]+/g, '');
 		var magic_byte_count = magic_data.magic_byte_count
 		//
@@ -821,7 +834,7 @@ function module_code(library_namespace) {
 		var result = {
 			type : magic_data.type,
 			// 副檔名。
-			extension : magic_data.extension,
+			extension : magic_data.extension[0],
 			too_small : file_contents.length < magic_data.min_size
 		};
 		if (magic_data.reversed_eof_bytes) {

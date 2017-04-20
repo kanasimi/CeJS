@@ -46,12 +46,17 @@ https://zh.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&uc
 
 
 // ---------------------------------------------------------
-// importScript('User:cewbot/*.js');
 
 // https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.loader
 mw.loader.load('https://kanasimi.github.io/CeJS/ce.js')
 CeL.run('application.net.wiki');
 CeL.wiki.page('Wikipedia:機器人',function(page_data){console.log(page_data);},{redirects:true,section:0})
+
+// wikibits從2013年就棄用
+// https://www.mediawiki.org/wiki/ResourceLoader/Legacy_JavaScript#wikibits.js
+// NG: importScript('User:cewbot/*.js');
+
+你可以在維基媒體的wiki網站URL最後增加?safemode=1來關閉你個人的CSS和JavaScript。範例：https://zh.wikipedia.org/wiki/文學?safemode=1。上面一行意思是你可以測試是否是你的使用者腳本或套件造成問題，而不必解除安裝。
 
 </code>
  * 
@@ -4557,13 +4562,15 @@ function module_code(library_namespace) {
 	 *            message
 	 * @param {String}[title]
 	 *            message title.
+	 * @param {Boolean}[use_ordered_list]
+	 *            use ordered list.
 	 */
-	function add_message(message, title) {
+	function add_message(message, title, use_ordered_list) {
 		if (typeof message !== 'string') {
 			message = message && String(message) || '';
 		}
 		if (message = message.trim()) {
-			this.push('* '
+			this.push((use_ordered_list ? '# ' : '* ')
 					+ (title && (title = get_page_title_link(title)) ? title
 							+ ' ' : '') + message);
 		}
@@ -4851,7 +4858,8 @@ function module_code(library_namespace) {
 					//
 					.format(config.date_format || this.date_format), error);
 
-					messages.add(error, title);
+					// 對各個條目的紀錄加入計數。
+					messages.add(error, title, true);
 				}
 			};
 		}
@@ -5508,8 +5516,8 @@ function module_code(library_namespace) {
 		if (typeof action === 'string')
 			action = [ , action ];
 		else if (!Array.isArray(action))
-			library_namespace.error('wiki_API.query: Invalid action: [' + action
-					+ ']');
+			library_namespace.error('wiki_API.query: Invalid action: ['
+					+ action + ']');
 		library_namespace.debug('api URL: (' + (typeof action[0]) + ') ['
 				+ action[0] + '] → [' + api_URL(action[0]) + ']', 3,
 				'wiki_API.query');
@@ -6040,8 +6048,9 @@ function module_code(library_namespace) {
 			return !title_only && page_data.pageid || page_data.title;
 
 		if (!page_data)
-			library_namespace.error('wiki_API.query.id_of_page: Invalid title: ['
-					+ page_data + ']');
+			library_namespace
+					.error('wiki_API.query.id_of_page: Invalid title: ['
+							+ page_data + ']');
 		return page_data;
 	};
 
@@ -7653,8 +7662,9 @@ function module_code(library_namespace) {
 					wiki_API.query([ session.API_URL, 'login' ], _done, token,
 							session);
 				} else {
-					library_namespace
-							.error('wiki_API.login: 無法 login！ Abort! Response:');
+					library_namespace.error(
+					//		
+					'wiki_API.login: 無法 login！ Abort! Response:');
 					library_namespace.error(data);
 				}
 			}, token, session);
@@ -8649,8 +8659,11 @@ function module_code(library_namespace) {
 		}
 		if (!token) {
 			// TODO: use session
-			// library_namespace.error('wiki_API.protect: No token specified: ' +
-			// options);
+			if (false) {
+				library_namespace
+						.error('wiki_API.protect: No token specified: '
+								+ options);
+			}
 			return 'No ' + token_type + 'token specified';
 		}
 		parameters.token = token;
@@ -14602,8 +14615,9 @@ function module_code(library_namespace) {
 
 							} else if (false && normalized_value.error) {
 								// 之前應該已經在normalize_wikidata_value()顯示過錯誤訊息
-								library_namespace.error('normalize_next_value: '
-										+ normalized_value.error);
+								library_namespace
+										.error('normalize_next_value: '
+												+ normalized_value.error);
 							}
 							// 因為之前應該已經顯示過錯誤訊息，因此這邊直接放棄作業，排除此property。
 
