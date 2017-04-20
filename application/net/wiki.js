@@ -4937,6 +4937,8 @@ function module_code(library_namespace) {
 				|| pages !== '{}'
 				// e.g., 後続の索引: {"continue":"-||"}
 				&& !/^{"[^"]+":"[\-|]{0,9}"}$/.test(pages)) {
+					 console.log(this.continue_key + ':');
+					 console.log(pages);
 					messages.add(this.continue_key + ': ' + pages);
 				}
 			}
@@ -5124,7 +5126,8 @@ function module_code(library_namespace) {
 				}
 			}, this);
 
-			this.run(function() {
+			// TODO: 不應用 .run(finish_up)，而應在 callback 中呼叫 finish_up()。
+			this.run(function finish_up() {
 				if (!no_message) {
 					library_namespace.debug('收尾。', 1, 'wiki_API.work');
 					var count_summary;
