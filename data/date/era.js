@@ -1301,106 +1301,100 @@ function module_code(library_namespace) {
 		// assert: initial_month && typeof initial_month === 'string'
 
 		if (calendar_data.length === 0) {
-			library_namespace.error(
-			//
-			'extract_calendar_slice: 無法辨識日數資料 [' + calendar_data_String + ']！');
+			library_namespace.error('extract_calendar_slice: 無法辨識日數資料 ['
+					+ calendar_data_String + ']！');
 			return [ date_name, calendar_data_String ];
 		}
 
-		calendar_data
-				.forEach(function(year_data) {
-					year_data = parseInt(year_data, PACK_RADIX).toString(
-							RADIX_2).slice(1);
+		calendar_data.forEach(function(year_data) {
+			year_data = parseInt(year_data, PACK_RADIX).toString(RADIX_2)
+					.slice(1);
 
-					var year_data_Array = [],
+			var year_data_Array = [],
+			//
+			leap_month_index, leap_month_index_list;
+
+			// LUNISOLAR_MONTH_COUNT 個月 + 1個閏月。
+			while (year_data.length > LUNISOLAR_MONTH_COUNT + 1) {
+				// 閏月的部分以 4
+				// (LEAP_MONTH_PADDING.length)
+				// 個二進位數字指示。
+				leap_month_index = parseInt(
+				//
+				year_data.slice(-LEAP_MONTH_PADDING.length), RADIX_2);
+				year_data = year_data.slice(0, -LEAP_MONTH_PADDING.length);
+
+				if (leap_month_index_list) {
+					library_namespace
+							.error('extract_calendar_slice: 本年有超過1個閏月！');
+					leap_month_index_list.unshift(leap_month_index);
+				} else
+					leap_month_index_list = [ leap_month_index ];
+			}
+
+			leap_month_index
+			// assert: 由小至大。
+			= leap_month_index_list
+			// 僅取最小的 1個閏月。
+			&& leap_month_index_list.sort()[0];
+
+			if (initial_month
+			// && initial_month != START_MONTH
+			) {
+				if (閏月名)
+					// 正規化閏月名。
+					initial_month = initial_month.replace(閏月名,
+							LEAP_MONTH_PREFIX);
+				if (initial_month === LEAP_MONTH_PREFIX)
+					initial_month += leap_month_index;
+
+				if (initial_month = initial_month.match(MONTH_NAME_PATTERN)) {
+
+					if (initial_month[1]
 					//
-					leap_month_index, leap_month_index_list;
-
-					// LUNISOLAR_MONTH_COUNT 個月 + 1個閏月。
-					while (year_data.length > LUNISOLAR_MONTH_COUNT + 1) {
-						// 閏月的部分以 4
-						// (LEAP_MONTH_PADDING.length)
-						// 個二進位數字指示。
-						leap_month_index = parseInt(
-						//
-						year_data.slice(-LEAP_MONTH_PADDING.length), RADIX_2);
-						year_data = year_data.slice(0,
-								-LEAP_MONTH_PADDING.length);
-
-						if (leap_month_index_list) {
-							library_namespace.error(
-							//		
-							'extract_calendar_slice: 本年有超過1個閏月！');
-							leap_month_index_list.unshift(leap_month_index);
-						} else
-							leap_month_index_list = [ leap_month_index ];
-					}
-
-					leap_month_index
-					// assert: 由小至大。
-					= leap_month_index_list
-					// 僅取最小的 1個閏月。
-					&& leap_month_index_list.sort()[0];
-
-					if (initial_month
-					// && initial_month != START_MONTH
-					) {
-						if (閏月名)
-							// 正規化閏月名。
-							initial_month = initial_month.replace(閏月名,
-									LEAP_MONTH_PREFIX);
-						if (initial_month === LEAP_MONTH_PREFIX)
-							initial_month += leap_month_index;
-
-						if (initial_month = initial_month
-								.match(MONTH_NAME_PATTERN)) {
-
-							if (initial_month[1]
-									|| leap_month_index < initial_month[2]) {
-								if (initial_month[1]) {
-									if (initial_month[2] != leap_month_index)
-										library_namespace.error(
-										//
-										'extract_calendar_slice: 起始閏月次['
+					|| leap_month_index < initial_month[2]) {
+						if (initial_month[1]) {
+							if (initial_month[2] != leap_month_index)
+								library_namespace
+										.error('extract_calendar_slice: 起始閏月次['
 												+ initial_month[2]
 												+ '] != 日數資料定義之閏月次['
 												+ leap_month_index + ']！');
-									// 由於已經在起頭設定閏月或之後起始，
-									// 因此再加上閏月的指示詞，會造成重複。
-									leap_month_index = null;
-								}
-
-								// 閏月或之後起始，須多截1個。
-								initial_month[2]++;
-							}
-
-							initial_month = initial_month[2] - START_MONTH;
-
-							if (!(0 <= (leap_month_index -= initial_month)))
-								leap_month_index = null;
-
-							// 若有起始月分，則會 truncate 到起始月分。
-							// 注意：閏月之 index 是 padding 前之資料。
-							year_data = year_data.slice(initial_month);
-
-							// 僅能使用一次。
-							initial_month = null;
+							// 由於已經在起頭設定閏月或之後起始，
+							// 因此再加上閏月的指示詞，會造成重複。
+							leap_month_index = null;
 						}
+
+						// 閏月或之後起始，須多截1個。
+						initial_month[2]++;
 					}
-					year_data = year_data.split('');
 
-					year_data.forEach(function(month_days) {
-						year_data_Array.push(
-						//
-						(leap_month_index === year_data_Array.length
-						//
-						? LEAP_MONTH_PREFIX + '=' : '')
-								+ MONTH_DAYS[month_days]);
-					});
+					initial_month = initial_month[2] - START_MONTH;
 
-					calendar_data_Array.push(year_data_Array
-							.join(pack_era.month_separator));
-				});
+					if (!(0 <= (leap_month_index -= initial_month)))
+						leap_month_index = null;
+
+					// 若有起始月分，則會 truncate 到起始月分。
+					// 注意：閏月之 index 是 padding 前之資料。
+					year_data = year_data.slice(initial_month);
+
+					// 僅能使用一次。
+					initial_month = null;
+				}
+			}
+			year_data = year_data.split('');
+
+			year_data.forEach(function(month_days) {
+				year_data_Array.push(
+				//
+				(leap_month_index === year_data_Array.length
+				//
+				? LEAP_MONTH_PREFIX + '=' : '') + MONTH_DAYS[month_days]);
+			});
+
+			calendar_data_Array.push(year_data_Array
+					.join(pack_era.month_separator));
+		});
 
 		return [ date_name, calendar_data_Array.join(pack_era.year_separator) ];
 	}
@@ -2996,8 +2990,10 @@ function module_code(library_namespace) {
 							.trim())
 							// 接受 0日，是為了如 Myanmar 需要調整月名的情況。
 							|| (date_data |= 0) <= 0) {
-						library_namespace.error('initialize_era_date: 無法辨識日數資料 ['
-								+ calendar_data + '] 中的 [' + date_data + ']！');
+						library_namespace
+								.error('initialize_era_date: 無法辨識日數資料 ['
+										+ calendar_data + '] 中的 [' + date_data
+										+ ']！');
 						return;
 					}
 
@@ -5170,14 +5166,16 @@ function module_code(library_namespace) {
 					Array.prototype.unshift.apply(紀年, 前一紀年名稱.slice(0,
 							tmp > 1 ? tmp : 1));
 				}
-				紀年.forEach(function(name, index) {
-					if (name === parse_era.inherit) {
-						if (!前一紀年名稱[index])
-							library_namespace.error('parse_era: 前一紀年 [' + 前一紀年名稱
-									+ '] 並未設定 index [' + index + ']！');
-						紀年[index] = 前一紀年名稱[index] || '';
-					}
-				});
+				紀年
+						.forEach(function(name, index) {
+							if (name === parse_era.inherit) {
+								if (!前一紀年名稱[index])
+									library_namespace.error('parse_era: 前一紀年 ['
+											+ 前一紀年名稱 + '] 並未設定 index [' + index
+											+ ']！');
+								紀年[index] = 前一紀年名稱[index] || '';
+							}
+						});
 
 				// do clone
 				前一紀年名稱 = 紀年.slice();

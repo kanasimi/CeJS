@@ -594,7 +594,8 @@ function module_code(library_namespace) {
 			// console.log(XMLHttp);
 			var html = XMLHttp.responseText;
 			if (!html) {
-				library_namespace.error('Failed to get work data of ' + work_id);
+				library_namespace
+						.error('Failed to get work data of ' + work_id);
 				if (error_count > _this.MAX_ERROR) {
 					throw _this.MESSAGE_RE_DOWNLOAD;
 				}
@@ -1062,8 +1063,8 @@ function module_code(library_namespace) {
 					chapter_data = _this.parse_chapter_data(html, work_data,
 							get_label, chapter);
 				} catch (e) {
-					library_namespace.error(_this.id + ': Error on chapter url: '
-							+ chapter_URL);
+					library_namespace.error(_this.id
+							+ ': Error on chapter url: ' + chapter_URL);
 					throw e;
 				}
 				// console.log(JSON.stringify(chapter_data));

@@ -1970,7 +1970,9 @@ CeL.era.pass_on = {
 		'/邓小平|1978/12/18~|:CE|生=1904年8月22日|卒=1997年2月19日在北京病逝|君主名=邓先圣;邓希贤|據=Wikipedia|注=中国共产党第十一届中央委员会第三次全体会议，简称中共十一届三中全会，於1978年12月18日至12月22日在北京举行。',
 		'/江泽民|1997/3/27~|:CE|生=1926年8月17日',
 		'/胡锦涛|2002/11/15~|:CE|生=1942年12月25|注=江泽民等人在中共十六大上退出中央政治局和中央委员会，2002年11月让位给由新任总书记胡锦涛率领年轻的“第四代”领导集体。不过，江泽民依然在发挥影响力，并直到2004年底才辞去中央军委主席，交出军权。',
-		'/习近平|2012/11/15~' + CeL.era.pass_on.last_day + '|:CE|生=1953年6月15日|注=2012年11月中共十八屆一中全會上當選中國共產黨中央委員會總書記及中國共產黨中央軍事委員會主席。中共第十七屆和第十八屆中央政治局常務委員會委員、第十七屆中央書記處書記。2013年3月第十二屆全國人民代表大會第一次全體會議上當選中華人民共和國主席及中華人民共和國中央軍事委員會主席。'
+		'/习近平|2012/11/15~'
+				+ CeL.era.pass_on.last_day
+				+ '|:CE|生=1953年6月15日|注=2012年11月中共十八屆一中全會上當選中國共產黨中央委員會總書記及中國共產黨中央軍事委員會主席。中共第十七屆和第十八屆中央政治局常務委員會委員、第十七屆中央書記處書記。2013年3月第十二屆全國人民代表大會第一次全體會議上當選中華人民共和國主席及中華人民共和國中央軍事委員會主席。'
 
 ]).minute_offset = 8 * 60;
 
@@ -2974,6 +2976,7 @@ CeL.era.pass_on = {
 (CeL.era.pass_on.countries.ไทย = [
 		// 泰國陰陽曆: 依照這邊的設定，新年（換年分）大致比公元提早一兩個月。但實際應晚五個月，每年陰陽曆5/5新年。
 		// https://www.myhora.com/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99/
+		// 除了拉瑪九世之後，泰國佛曆與公元的新年同步之外，之前的王以陰陽曆為主。因為技術性原因，現在還沒有辦法僅僅以曆數資料配合函式庫，來表現出正確的年分。因此泰國佛曆必須以本紀年工具的所列出的日期，才能與達到與資料來源相同的表達。
 		'ปฏิทินจันทรคติไทย|1756/12/21~2042/1/21|2300/2=3oq 4ofc58q 4ofc59m 59m 4ofc58q 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 59m 4ofc58q 4ofc59m 59m 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 4ofc59m 58q 4ofc59m 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 4ofc59m 58q 4ofc59m 58q 4ofc59m 4ofc59m 59m 4ofc58q 59m 4ofc59m 59m 4ofc59m 4ofc58q 58q 4ofc59m 59m 4ofc59m 4ofc58q 59m 4ofc58q 59m 4ofc59m 59m 4ofc58q 4qo|參照用|紀年=泰國陰曆;จันทรคติ;ปฏิทินจันทรคติ|閏月名=雙|注=此處之年份僅為與公元年份約略參考用！僅月份與日期較可資參考。詳見說明。',
 
 		// [[en:List of monarchs of Thailand]]
