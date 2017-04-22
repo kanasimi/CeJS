@@ -1,7 +1,7 @@
 ﻿/**
  * @name CeL function for downloading online works (novels, comics).
  * 
- * @fileoverview 本檔案包含了批量下載線上作品（小說、漫畫）的函式庫。
+ * @fileoverview 本檔案包含了批量下載線上作品（小說、漫畫）的函式庫。 WWW work crawler.
  * 
  * <code>
 
@@ -218,6 +218,7 @@ function module_code(library_namespace) {
 		// MUST includes CeL.application.locale!
 		// need_create_ebook : true,
 		KEY_EBOOK : 'ebook',
+		milestone_extension : true,
 		add_ebook_chapter : add_ebook_chapter,
 		pack_ebook : pack_ebook,
 		// 若需要留下/重複利用media如images，請勿remove。
@@ -1485,69 +1486,102 @@ function module_code(library_namespace) {
 	}
 
 	// remove duplicate title ebooks.
-	// 封存舊的ebooks.
+	// 封存舊的ebooks，移除較小的舊檔案。
 	function remove_duplicate_ebooks(only_id) {
 		if (!this.ebook_archive_directory) {
 			this.ebook_archive_directory = this.main_directory + 'archive'
 					+ path_separator;
 		}
 
-		var last_id, last_file,
-		//
-		ebooks;
-
-		if (only_id && (last_file = parse_epub_name(only_id))) {
-			only_id = last_file.id;
+		var _only_id;
+		if (only_id && (_only_id = parse_epub_name(only_id))) {
+			only_id = _only_id.id;
 		}
 
-		ebooks = library_namespace.read_directory(this.main_directory)
-		// assert: 依id舊至新排列
-		.sort().map(parse_epub_name).forEach(function(data) {
-			if (!data
-			// 僅針對 only_id
-			|| only_id && data.id !== only_id) {
-				return;
-			}
-			if (!last_id || last_id !== data.id) {
-				last_id = data.id;
-				last_file = data.file_name;
-				return;
-			}
+		var _this = this;
 
-			var this_file = get_file_status(data.file_name,
+		function for_each_old_ebook(directory, for_old_smaller, for_else_old) {
+			var last_id, last_file,
 			//
-			this.main_directory);
-			if (typeof last_file === 'string') {
-				last_file = get_file_status(last_file, this.main_directory);
-			}
+			ebooks = library_namespace.read_directory(directory)
+			// assert: 依id舊至新排列
+			.sort().map(parse_epub_name);
 
-			if (this_file.size >= last_file.size) {
-				library_namespace.create_directory(
-				//
-				this.ebook_archive_directory);
-				library_namespace.log(this.main_directory + last_file.name
-				// 新檔比較大。刪舊檔或將之移至archive。
-				+ '\n→ ' + this.ebook_archive_directory + last_file.name);
-				library_namespace.move_file(
-				//
-				this.main_directory + last_file.name,
-				//
-				this.ebook_archive_directory + last_file.name);
-			} else if (this.milestone_extension) {
-				last_file = this.main_directory + last_file.name;
-				var extension = (typeof this.milestone_extension === 'string'
-				//
-				? this.milestone_extension : '.milestone') + '$1';
-				library_namespace.log(last_file
-				// 舊檔比較大!!將之標註成里程碑紀念/紀錄。
-				+ '\n→ ' + last_file.replace(/(.[a-z\d\-]+)$/i, extension));
-				library_namespace.move_file(last_file,
-				//
-				+last_file.replace(/(.[a-z\d\-]+)$/i, extension));
-			}
+			ebooks.forEach(function(data) {
+				if (!data
+				// 僅針對 only_id。
+				|| only_id && data.id !== only_id) {
+					return;
+				}
+				if (!last_id || last_id !== data.id) {
+					last_id = data.id;
+					last_file = data.file_name;
+					return;
+				}
 
-			last_file = this_file;
-		}, this);
+				var this_file = get_file_status(
+				//
+				data.file_name, directory);
+				if (typeof last_file === 'string') {
+					last_file = get_file_status(
+					//
+					last_file, directory);
+				}
+				// assert: this_file, last_file are all {Object}(file status)
+
+				if (this_file.size >= last_file.size) {
+					for_old_smaller(last_file, this_file);
+				} else if (for_else_old) {
+					for_else_old(last_file, this_file);
+				}
+
+				last_file = this_file;
+			});
+		}
+
+		// 封存較小的ebooks舊檔案。
+		for_each_old_ebook(this.main_directory, function(last_file) {
+			library_namespace.create_directory(
+			// 先創建封存用目錄。
+			_this.ebook_archive_directory);
+			last_file = last_file.name;
+			library_namespace.log(_this.main_directory + last_file
+			// 新檔比較大。刪舊檔或將之移至archive。
+			+ '\n→ ' + _this.ebook_archive_directory + last_file);
+			library_namespace.move_file(
+			//
+			_this.main_directory + last_file,
+			//
+			_this.ebook_archive_directory + last_file);
+
+		}, this.milestone_extension && function(last_file) {
+			last_file = _this.main_directory + last_file.name;
+			var extension = (typeof _this.milestone_extension === 'string'
+			// allow .milestone_extension = true
+			? _this.milestone_extension : '.milestone') + '$1';
+			library_namespace.log(last_file
+			// 舊檔比較大!!將之標註成里程碑紀念/紀錄。
+			+ '\n→ ' + last_file.replace(/(.[a-z\d\-]+)$/i, extension));
+			library_namespace.move_file(last_file,
+			//
+			+last_file.replace(/(.[a-z\d\-]+)$/i, extension));
+		});
+
+		// 移除.ebook_archive_directory中，較小的ebooks舊檔案。
+		// 僅留存最新的一個ebooks舊檔案。
+		for_each_old_ebook(this.ebook_archive_directory, function(last_file,
+				this_file) {
+			library_namespace.info('◆ Remove ' + last_file.name + ' ('
+			// 新檔比較大。刪舊檔。
+			+ this_file.size + ' = ' + last_file.size + '+'
+			// https://en.wikipedia.org/wiki/Religious_and_political_symbols_in_Unicode
+			+ (this_file.size - last_file.size) + '):\n✘ '
+			// ✞ Memorial cross, Celtic cross
+			+ _this.ebook_archive_directory + last_file.name);
+			library_namespace.remove_file(
+			//
+			_this.ebook_archive_directory + last_file.name);
+		});
 	}
 
 	function pack_ebook(work_data, file_name) {

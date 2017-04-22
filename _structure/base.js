@@ -2360,9 +2360,12 @@ OS='UNIX'; // unknown
 	// 因為 set_method() 會用到 is_debug()，因此須先確保 is_debug() 已 loaded。
 
 	// ^\s*: JScript 6-9 native object 需要這個。
-	// console.log() @ node.js: "function () {..}"
+	// console.log() @ node.js: "function () {...}"
 	// TODO: see ((function_name_pattern)) above
-	var native_pattern = /^\s*function\s(\w*)\s*\(\s*\)\s*{\s*\[native code\]\s*}\s*$/;
+	// @see https://tc39.github.io/Function-prototype-toString-revision/#prod-NativeFunction
+	// [ all, IdentifierName ]
+	// 舊的 JS environment 無法取得 FormalParameters。
+	var native_pattern = /^\s*function\s+(\w*)\s*\([^()]*\)\s*{\s*\[native code\]\s*}\s*$/;
 
 	_.is_native_Function = function(variable) {
 		return typeof variable === 'function'

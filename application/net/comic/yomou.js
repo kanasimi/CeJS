@@ -174,9 +174,9 @@ function module_code(library_namespace) {
 		},
 		parse_chapter_data : function(html, work_data, get_label, chapter) {
 			// 檢測所取得內容的章節編號是否相符。
-			var text = get_label(html.between('<div id="novel_no">', '/')) | 0;
-			if (chapter !== text
-					&& (!work_data.status.includes('短編') || text !== 0)) {
+			var text = get_label(html.between('<div id="novel_no">', '/'));
+			if (chapter != text
+					&& (!work_data.status.includes('短編') || text != 0)) {
 				throw new Error('Different chapter: Should be ' + chapter
 						+ ', get ' + text + ' inside contents.');
 			}
