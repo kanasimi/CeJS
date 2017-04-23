@@ -44,7 +44,8 @@ if (!p7zip_path.some(function(path) {
 	process.stderr.write = stderr;
 	return path && (p7zip_path = path);
 })) {
-	throw 'Please set up the p7zip_path first!';
+	console.error('Please set up the p7zip_path first!');
+	p7zip_path = null;
 }
 
 try_path_file();
@@ -97,7 +98,7 @@ function try_path_file() {
 }
 
 // 已經取得的檔案大小
-var sum_size = 0, buffer_array = [];
+var sum_size = 0, buffer_array = [], start_time = Date.now();
 
 function on_response(response) {
 	// 採用這種方法容易漏失資料。 @ node.js v7.7.3
@@ -106,7 +107,9 @@ function on_response(response) {
 	response.on('data', function(data) {
 		sum_size += data.length;
 		buffer_array.push(data);
-		process.stdout.write(target_file + ': ' + sum_size + ' bytes...\r');
+		process.stdout.write(target_file + ': ' + sum_size + ' bytes ('
+				+ (sum_size / 1.024 / (Date.now() - start_time)).toFixed(2)
+				+ ' KiB/s)...\r');
 	});
 
 	response.on('end', function(e) {
@@ -138,6 +141,10 @@ write_stream.on('close', function() {
 	if (file_size !== sum_size) {
 		throw 'The file size ' + file_size + ' is not ' + sum_size
 				+ '! Please try to run again.';
+	}
+
+	if (!p7zip_path) {
+		throw 'Please extract the archive file manually! ' + target_file;
 	}
 
 	var command;

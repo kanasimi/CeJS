@@ -1487,7 +1487,7 @@ function module_code(library_namespace) {
 
 	// remove duplicate title ebooks.
 	// 封存舊的ebooks，移除較小的舊檔案。
-	function remove_duplicate_ebooks(only_id) {
+	function remove_old_ebooks(only_id) {
 		if (!this.ebook_archive_directory) {
 			this.ebook_archive_directory = this.main_directory + 'archive'
 					+ path_separator;
@@ -1567,17 +1567,17 @@ function module_code(library_namespace) {
 			+last_file.replace(/(.[a-z\d\-]+)$/i, extension));
 		});
 
-		// 移除.ebook_archive_directory中，較小的ebooks舊檔案。
+		// ✘ 移除.ebook_archive_directory中，較小的ebooks舊檔案。
 		// 僅留存最新的一個ebooks舊檔案。
 		for_each_old_ebook(this.ebook_archive_directory, function(last_file,
 				this_file) {
-			library_namespace.info('◆ Remove ' + last_file.name + ' ('
+			library_namespace.info('remove_old_ebooks: '
 			// 新檔比較大。刪舊檔。
-			+ this_file.size + ' = ' + last_file.size + '+'
+			+ _this.ebook_archive_directory + last_file.name + ' ('
 			// https://en.wikipedia.org/wiki/Religious_and_political_symbols_in_Unicode
-			+ (this_file.size - last_file.size) + '):\n✘ '
+			+ this_file.size + ' = ' + last_file.size + '+'
 			// ✞ Memorial cross, Celtic cross
-			+ _this.ebook_archive_directory + last_file.name);
+			+ (this_file.size - last_file.size) + ')');
 			library_namespace.remove_file(
 			//
 			_this.ebook_archive_directory + last_file.name);
@@ -1585,7 +1585,7 @@ function module_code(library_namespace) {
 	}
 
 	function pack_ebook(work_data, file_name) {
-		// remove_duplicate_ebooks.call(this);
+		// remove_old_ebooks.call(this);
 
 		var ebook = work_data && work_data[this.KEY_EBOOK];
 		if (!ebook) {
@@ -1613,7 +1613,7 @@ function module_code(library_namespace) {
 		ebook.pack([ this.main_directory, file_name ],
 				this.remove_ebook_directory);
 
-		remove_duplicate_ebooks.call(this, file_name);
+		remove_old_ebooks.call(this, file_name);
 	}
 
 	// --------------------------------------------------------------------------------------------
