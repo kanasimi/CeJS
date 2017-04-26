@@ -32,7 +32,7 @@ parse 圖像
  * @since 2016/11/27 19:7:2 模組化。
  */
 
-// More examples: see 各網站工具檔.js: https://github.com/kanasimi/comic
+// More examples: see 各網站工具檔.js: https://github.com/kanasimi/work_crawler
 'use strict';
 // 'use asm';
 
@@ -41,7 +41,7 @@ parse 圖像
 // 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
 	// module name
-	name : 'application.net.comic',
+	name : 'application.net.work_crawler',
 
 	// .includes() @ CeL.data.code.compatibility
 	require : 'data.code.compatibility.'
@@ -84,25 +84,9 @@ function module_code(library_namespace) {
 	//
 	path_separator = library_namespace.env.path_separator;
 
-	/**
-	 * null module constructor
-	 * 
-	 * @class module 的 functions
-	 */
-	var _// JSDT:_module_
-	= function() {
-		// null module constructor
-	};
-
-	/**
-	 * for JSDT: 有 prototype 才會將之當作 Class
-	 */
-	_// JSDT:_module_
-	.prototype = {};
-
 	// --------------------------------------------------------------------------------------------
 
-	function Comic_site(configurations) {
+	function Work_crawler(configurations) {
 		Object.assign(this, configurations);
 		if (!this.id) {
 			// this.id 之後將提供給 this.site_id 使用。
@@ -146,7 +130,7 @@ function module_code(library_namespace) {
 		this.get_URL_options = {
 			// start_time : Date.now(),
 			agent : agent,
-			timeout : Comic_site.timeout,
+			timeout : Work_crawler.timeout,
 			headers : Object.assign({
 				'User-Agent' : this.user_agent,
 				Referer : this.base_URL
@@ -154,15 +138,13 @@ function module_code(library_namespace) {
 		};
 	}
 
-	_.site = Comic_site;
-
 	/** {Natural}下載失敗重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
-	Comic_site.MAX_ERROR = 4;
+	Work_crawler.MAX_ERROR = 4;
 	/** {Natural}timeout in ms for get_URL() 逾時ms數 */
-	Comic_site.timeout = 30 * 1000;
+	Work_crawler.timeout = 30 * 1000;
 
-	Comic_site.prototype = {
-		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.comic中Comic_site.prototype內的母comments，並以其為主體。
+	Work_crawler.prototype = {
+		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
 		// 圖片檔+紀錄檔下載位置
 		main_directory : (library_namespace.platform.nodejs
@@ -180,8 +162,8 @@ function module_code(library_namespace) {
 
 		// 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)',
-		MAX_ERROR : Comic_site.MAX_ERROR,
-		MAX_EOI_ERROR : Math.min(3, Comic_site.MAX_ERROR),
+		MAX_ERROR : Work_crawler.MAX_ERROR,
+		MAX_EOI_ERROR : Math.min(3, Work_crawler.MAX_ERROR),
 		// 應改成最小容許圖案檔案大小 (bytes)。
 		MIN_LENGTH : 6e3,
 		// 仙人拍鼓有時錯，跤步踏差啥人無？ 客語 神仙打鼓有時錯，腳步踏差麼人無
@@ -189,7 +171,7 @@ function module_code(library_namespace) {
 		// allow .jpg without EOI mark. default:false
 		// allow_EOI_error : true,
 		//
-		// 當圖像檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。default:false
+		// 忽略/跳過圖像錯誤:當圖像檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。default:false
 		// skip_error : true,
 		//
 		// 若已經存在壞掉的圖片，就不再嘗試下載圖片。default:false
@@ -1357,6 +1339,9 @@ function module_code(library_namespace) {
 				// throw new Error(_this.MESSAGE_RE_DOWNLOAD);
 				library_namespace.log(_this.MESSAGE_RE_DOWNLOAD);
 				// console.log('error count: ' + image_data.error_count);
+				if (!_this.skip_error) {
+					library_namespace.info('您可以設定 .skip_error 來忽略圖像錯誤。');
+				}
 				process.exit(1);
 			}
 
@@ -1370,7 +1355,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 	// 本段功能須配合 CeL.application.storage.EPUB 並且做好事前設定。
-	// 可參照 https://github.com/kanasimi/comic
+	// 可參照 https://github.com/kanasimi/work_crawler
 
 	function create_ebook(work_data) {
 		if (!this.site_id) {
@@ -1620,6 +1605,5 @@ function module_code(library_namespace) {
 
 	// export 導出.
 
-	return (_// JSDT:_module_
-	);
+	return Work_crawler;
 }

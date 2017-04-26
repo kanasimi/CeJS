@@ -18,8 +18,9 @@ CeL.yomou().start(work_id);
  * @since 2017/2/22 0:18:34 模組化。
  */
 
-
-// More examples: see https://github.com/kanasimi/comic/blob/master/yomou.js https://github.com/kanasimi/comic/blob/master/noc.js
+// More examples:
+// @see https://github.com/kanasimi/work_crawler/blob/master/yomou.js
+// @see https://github.com/kanasimi/work_crawler/blob/master/noc.js
 'use strict';
 
 // --------------------------------------------------------------------------------------------
@@ -27,9 +28,9 @@ CeL.yomou().start(work_id);
 // 不採用 if 陳述式，可以避免 Eclipse JSDoc 與 format 多縮排一層。
 typeof CeL === 'function' && CeL.run({
 	// module name
-	name : 'application.net.comic.yomou',
+	name : 'application.net.work_crawler.yomou',
 
-	require : 'application.net.comic.'
+	require : 'application.net.work_crawler.'
 	//
 	+ '|application.storage.EPUB.'
 	// for CeL.to_file_name()
@@ -70,7 +71,8 @@ function module_code(library_namespace) {
 			// {Array}id_list = [id,id,...]
 			id_list = [];
 			html.each_between('<div class="novel_h">', '</a>', function(text) {
-				id_list.push(text.between(' href="' + this.novel_base_URL, '/"'));
+				id_list.push(text
+						.between(' href="' + this.novel_base_URL, '/"'));
 				id_data.push(get_label(text.between('/">')));
 			}, this);
 			return [ id_list, id_data ];
@@ -78,9 +80,8 @@ function module_code(library_namespace) {
 
 		// 取得作品的章節資料。 get_work_data()
 		work_URL : function(work_id) {
-			return this.novel_base_URL
-			//
-			+ 'novelview/infotop/ncode/' + work_id + '/';
+			return this.novel_base_URL + 'novelview/infotop/ncode/' + work_id
+					+ '/';
 		},
 		parse_work_data : function(html, get_label) {
 			var work_data = library_namespace.null_Object();
@@ -100,8 +101,9 @@ function module_code(library_namespace) {
 				// e.g., 连载中, 連載中
 				// <span id="noveltype">完結済</span>全1部
 				// <span id="noveltype_notend">連載中</span>全1部
-				status : [ html.between('<span id="noveltype', '<').between('>') ]
-						.append(work_data.ジャンル ? work_data.ジャンル.split(/\s+/) : '')
+				status : [ html.between('<span id="noveltype', '<')
+						.between('>') ].append(
+						work_data.ジャンル ? work_data.ジャンル.split(/\s+/) : '')
 						.append(work_data.キーワード.split(/\s+/)),
 				author : work_data.作者名,
 				last_update : work_data.最終話掲載日 || work_data.掲載日,
@@ -124,7 +126,9 @@ function module_code(library_namespace) {
 			work_data.chapter_list = [];
 			html.between('<div class="index_box">', '<div id="novel_footer">')
 			//
-			.each_between('<dl class="novel_sublist2">', '</dl>', function(text) {
+			.each_between('<dl class="novel_sublist2">', '</dl>',
+			//
+			function(text) {
 				var matched = text.match(
 				// [ , href, inner ]
 				/ href="\/[^\/]+\/([^ "<>]+)[^<>]*>(.+?)<\/a>/);
@@ -135,7 +139,9 @@ function module_code(library_namespace) {
 				var chapter_data = {
 					url : matched[1].replace(/^\.\//, ''),
 					// 掲載日
-					date : [ text.match(/>\s*(2\d{3}[年\/][^"<>]+?)</)[1].to_Date({
+					date : [ text.match(/>\s*(2\d{3}[年\/][^"<>]+?)</)[1]
+					//
+					.to_Date({
 						zone : work_data.time_zone
 					}) ],
 					title : matched[2]
@@ -256,8 +262,10 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	function syosetu(configuration) {
-		configuration = configuration ? Object.assign(library_namespace.null_Object(), default_configuration, configuration) : default_configuration;
-		return new library_namespace.comic.site(configuration);
+		configuration = configuration ? Object.assign(library_namespace
+				.null_Object(), default_configuration, configuration)
+				: default_configuration;
+		return new library_namespace.work_crawler(configuration);
 	}
 
 	return syosetu;
