@@ -223,7 +223,7 @@ function module_code(library_namespace) {
 			// e.g., 连载中, 連載中, 已完结
 			return /已完[結结]/.test(work_data.status)
 			// 完結済
-			|| /^完[結结]$/.test(work_data.status);
+			|| /^完[結结]済?$/.test(work_data.status);
 		},
 		pre_get_chapter_data : pre_get_chapter_data,
 		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。

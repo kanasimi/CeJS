@@ -1586,9 +1586,9 @@ function module_code(library_namespace) {
 	// 模板名#後的內容會忽略。
 	/** {RegExp}模板的匹配模式。 */
 	var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
-	/** {RegExp}內部連結的匹配模式。 */
+	/** {RegExp}wikilink內部連結的匹配模式。 */
 	PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
-	/** {RegExp}內部連結的匹配模式v2。 */
+	/** {RegExp}wikilink內部連結的匹配模式v2。 */
 	PATTERN_wikilink = /\[\[([^\[\]][\s\S]*?)\]\]/g,
 	/**
 	 * Wikimedia projects 的 external link 匹配模式。

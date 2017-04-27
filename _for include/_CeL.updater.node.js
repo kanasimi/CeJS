@@ -77,6 +77,7 @@ function check_update() {
 	}
 
 	// 取得 GitHub 最新版本infomation。
+	console.log('Get the infomation of latest version of CeJS...');
 	node_https.get({
 		// https://api.github.com/repos/kanasimi/CeJS/commits/master
 		host : 'api.github.com',

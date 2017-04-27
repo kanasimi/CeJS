@@ -2710,7 +2710,7 @@ function module_code(library_namespace) {
 	 * 依照順序從 index 至 last 執行 for_each。
 	 * 
 	 * @param {Function}for_each
-	 *            run for_each(run_next, index) for every elements.
+	 *            run for_each(run_next, item, index, list) for every elements.
 	 * @param {Integer|Array}last
 	 *            last index or {Array}list
 	 * @param {Integer|Array}[index]

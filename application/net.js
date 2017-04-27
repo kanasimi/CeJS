@@ -977,6 +977,8 @@ function get_video(video_url, download_to, options) {
 								}
 								// 因為 escape 會多出不必要符號，因此不 escape。
 								if (title = URI_accessor.regularize_file_name(HTML_to_Unicode(title[1]), false)) {
+									// remove / - YouTube$/
+									title = title.replace(/\s*-\s*YouTube$/g, '');
 									try {
 										library_namespace.debug('準備好 sub-directory。 Try to create directory [' + download_to + title + ']', 3);
 										FSO.CreateFolder(download_to + title);
