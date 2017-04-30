@@ -366,22 +366,29 @@ count_word = function(text, flag) {
 		text = text.replace(/[\+\-–*\\\/?!,;.<>{}\[\]@#$%^&_|"'~`—…、，；。！？：()（）「」『』“”‘’]{2,}/g, ';');
 
 	return text
-			//	去掉注解用的括弧、書名號、專名號、印刷符號等
-			.replace(/[()（）《》〈〉＊＃]+/g, '')
-			//	將整組物理量值加計量單位略縮成單一字母。
-			//	The general rule of the International Bureau of Weights and Measures (BIPM) is that the numerical value always precedes the unit, and a space is always used to separate the unit from the number, e.g., "23 °C" (not "23°C" or "23° C").
-			//	<a href="http://en.wikipedia.org/wiki/ISO_31-0#Expressions" accessdate="2012/7/28 0:42">ISO 31-0</a>,
-			//	<a href="http://lamar.colostate.edu/~hillger/faq.html#spacing" accessdate="2012/7/28 0:42">FAQ: Frequently Asked Questions about the metric system</a>.
-			.replace(/\d*\.?\d+\s*[a-zA-Z°]+(\s*\/\s*(\d*\.?\d+\s*)?[a-zA-Z°]+)?/g, '0')
-			//	將英文、數字、單位等改成單一字母。[.]: 縮寫。[\/]: m/s 之類。
-			//	http://en.wikibooks.org/wiki/Unicode/Character_reference/0000-0FFF
-			//	http://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%88%97%E8%A1%A8
-			.replace(/[\wÀ-ÖØ-öø-ȳ\-–'.]{2,}/g, 'w')
-			//	date/time or number
-			.replace(/[\d:+\-–\.\/,]{2,}/g, '0')
-			//	再去掉*全部*空白
-			.replace(/[\s\n]+/g, '')
-			.length;
+	//	去掉注解用的括弧、書名號、專名號、印刷符號等
+	.replace(/[()（）《》〈〉＊＃]+/g, '')
+
+	// 將數字改成單一字母。
+	.replace(/\d*\.?\d+([^.]|$)/g, '0$1')
+	//	將整組物理量值加計量單位略縮成單一字母。
+	//	The general rule of the International Bureau of Weights and Measures (BIPM) is that the numerical value always precedes the unit, and a space is always used to separate the unit from the number, e.g., "23 °C" (not "23°C" or "23° C").
+	//	<a href="http://en.wikipedia.org/wiki/ISO_31-0#Expressions" accessdate="2012/7/28 0:42">ISO 31-0</a>,
+	//	<a href="http://lamar.colostate.edu/~hillger/faq.html#spacing" accessdate="2012/7/28 0:42">FAQ: Frequently Asked Questions about the metric system</a>.
+	.replace(/\d+\s*[a-zA-Z°]+(\s*\/\s*(\d+\s*)?[a-zA-Z°]+)?/g, '0')
+	//	長度過長時，極耗時間。e.g., ...\d{500000}...
+	//.replace(/\d*\.?\d+\s*[a-zA-Z°]+(\s*\/\s*(\d*\.?\d+\s*)?[a-zA-Z°]+)?/g, '0')
+
+	//	將英文、數字、單位等改成單一字母。[.]: 縮寫。[\/]: m/s 之類。
+	//	http://en.wikibooks.org/wiki/Unicode/Character_reference/0000-0FFF
+	//	http://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%88%97%E8%A1%A8
+	.replace(/[\wÀ-ÖØ-öø-ȳ\-–'.]{2,}/g, 'w')
+	//	date/time or number
+	.replace(/[\d:+\-–\.\/,]{2,}/g, '0')
+	//	再去掉*全部*空白
+	.replace(/[\s\n]+/g, '')
+	// return text.length;
+	.length;
 };
 
 

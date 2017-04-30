@@ -1378,6 +1378,10 @@ function module_code(library_namespace) {
 				}
 
 				contents = check_text(contents.text);
+				if (contents.length > 5e5) {
+					// 這長度到這邊往往已經耗費數十秒。
+					library_namespace.debug('contents length: ' + contents.length + '...');
+				}
 				if (!item_data.word_count) {
 					item_data.word_count = library_namespace.count_word(
 							contents, 1 + 2);

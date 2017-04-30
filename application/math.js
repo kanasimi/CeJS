@@ -75,17 +75,19 @@ function draw_short_division(naturals, layer, GCD_only) {
 	var i, length = naturals.length | 0, divisor, cell_width_em = 2,
 	//
 	natural_Array = [];
-	for (i = 0; i < length; i++)
-		if ((divisor = naturals[i] | 0) > 0) {
+	for (i = 0; i < length; i++) {
+		divisor = +naturals[i];
+		if (0 < divisor && divisor < Number.MAX_SAFE_INTEGER) {
 			natural_Array.push(divisor);
 			if (cell_width_em < String(divisor).length * .6)
 				cell_width_em = Math.ceil(String(divisor).length * .6);
 		}
+	}
 	length = (naturals = Array.prototype.slice.call(natural_Array)).length | 0;
 
 	var block = [], count = 0,
 		//
-		_GCD = library_namespace.GCD(natural_Array) | 0,
+		_GCD = library_namespace.GCD(natural_Array),
 		//
 		GCD = library_namespace.factorize(_GCD);
 
@@ -102,7 +104,7 @@ function draw_short_division(naturals, layer, GCD_only) {
 				if (length !== 1 || natural_Array[0] !== divisor) {
 					block.push(draw_short_division.add_line(natural_Array, cell_width_em, divisor, count++, true));
 					for (i = 0; i < length; i++)
-						natural_Array[i] = natural_Array[i] / divisor | 0;
+						natural_Array[i] = natural_Array[i] / divisor;
 				}
 		}
 	}
@@ -114,11 +116,11 @@ function draw_short_division(naturals, layer, GCD_only) {
 		var LCM = natural_Array[0];
 		for (i = 1; i < length; i++)
 			if (natural_Array[i] > 1 && (GCD = library_namespace.GCD(LCM, natural_Array[i])) > 1) {
-				divisor = library_namespace.first_factor(GCD) | 0;
+				divisor = +library_namespace.first_factor(GCD);
 				block.push(draw_short_division.add_line(natural_Array, cell_width_em, divisor, count++));
 				for (i = 0; i < length; i++)
 					if (natural_Array[i] % divisor === 0)
-						natural_Array[i] = natural_Array[i] / divisor | 0;
+						natural_Array[i] = natural_Array[i] / divisor;
 				break;
 			}
 	} while (GCD > 1);

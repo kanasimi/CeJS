@@ -132,6 +132,7 @@ function module_code(library_namespace) {
 	// site: e.g., 'zhwiki'
 	//
 	// https://en.wikipedia.org/wiki/Help:Interwikimedia_links
+	// https://zh.wikipedia.org/wiki/Special:GoToInterwiki/testwiki:
 	// link prefix: e.g., 'zh:n:' for zh.wikinews
 	//
 	// https://dumps.wikimedia.org/backup-index.html
@@ -781,10 +782,14 @@ function module_code(library_namespace) {
 		// e.g., "{{En icon}}"
 		.replace(/{{[a-z\s]+}}/ig, '')
 		// e.g., "[[link]]" → "link"
-		.replace(PATTERN_wikilink, function($0, $1) {
-			var index = $1.indexOf('|');
-			return index === NOT_FOUND ? $1 : $1.slice(index + 1);
-		})
+		// 警告：應處理 "[[ [[link]] ]]" → "[[ link ]]" 之特殊情況
+		// 警告：應處理 "[[text | [[ link ]] ]]", "[[ link | a[1] ]]" 之特殊情況
+		.replace(
+				PATTERN_wikilink_g,
+				function(all_link, page_section, page_name, section_title,
+						displayed_text) {
+					return displayed_text || page_section;
+				})
 		// e.g., "ABC (英文)" → "ABC "
 		// e.g., "ABC （英文）" → "ABC "
 		.replace(/[(（][英中日德法西義韓諺俄独原][語语國国]?文?[名字]?[）)]/g, '')
@@ -1588,8 +1593,10 @@ function module_code(library_namespace) {
 	var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
 	/** {RegExp}wikilink內部連結的匹配模式。 */
 	PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
-	/** {RegExp}wikilink內部連結的匹配模式v2。 */
-	PATTERN_wikilink = /\[\[([^\[\]][\s\S]*?)\]\]/g,
+	/** {RegExp}wikilink內部連結的匹配模式v2，[all_link,page_section,page_name,section_title,displayed_text]。頁面標題不可包含無效的字元：[\n\[\]{}]，經測試anchor亦不可包含[\n\[\]{}] */
+	PATTERN_wikilink = /\[\[(([^\[\]{}\n\|#]+)(#[^\[\]{}\n\|]*)?|#[^\[\]{}\n\|]+)(?:\|([^\n]+?))?\]\]/,
+	//
+	PATTERN_wikilink_g = new RegExp(PATTERN_wikilink.source, 'g'),
 	/**
 	 * Wikimedia projects 的 external link 匹配模式。
 	 * 
@@ -1657,15 +1664,21 @@ function module_code(library_namespace) {
 		},
 		// link 的變體。但可採用 .name 取得 file name。
 		file : function() {
-			return '[[' + this.join('|') + ']]';
+			return '[[' + this[0] + this[1]
+			//
+			+ (this.length > 2 ? '|' + this[2] : '') + ']]';
 		},
 		// link 的變體。但可採用 .name 取得 category name。
 		category : function() {
-			return '[[' + this.join('|') + ']]';
+			return '[[' + this[0] + this[1]
+			//
+			+ (this.length > 2 ? '|' + this[2] : '') + ']]';
 		},
 		// 內部連結 (wikilink / internal link) + interwiki link
 		link : function() {
-			return '[[' + this.join('|') + ']]';
+			return '[[' + this[0] + this[1]
+			//
+			+ (this.length > 2 ? '|' + this[2] : '') + ']]';
 		},
 		// 外部連結 external link, external web link
 		external_link : function() {
@@ -1710,7 +1723,7 @@ function module_code(library_namespace) {
 		convert : function() {
 			return '-{' + this.join('|') + '}-';
 		},
-		// section title
+		// section title / section name
 		// show all section titles:
 		// parser=CeL.wiki.parser(page_data);parser.each('section_title',function(token,index){console.log('['+index+']'+token.title);},false,1);
 		// @see for_each_token()
@@ -2100,45 +2113,76 @@ function module_code(library_namespace) {
 		// [[~:~|~]], [[~:~:~|~]]
 		wikitext = wikitext.replace_till_stable(
 		// or use ((PATTERN_link))
-		PATTERN_wikilink, function(all, parameters) {
-			if (normalize)
-				parameters = parameters.trim();
+		PATTERN_wikilink_g, function(all_link, page_section, page_name,
+				section_title, displayed_text) {
 			// 自 end_mark 向前回溯。
-			var index = parameters.lastIndexOf('[['), previous;
-			if (index > 0) {
-				previous = '[[' + parameters.slice(0, index);
-				parameters = parameters.slice(index + ']]'.length);
+			var previous;
+			if (displayed_text && displayed_text.includes('[[')) {
+				var index = all_link.lastIndexOf('[[');
+				previous = all_link.slice(0, index);
+				all_link = all_link.slice(index);
+				if (index = all_link.match(PATTERN_wikilink)) {
+					page_section = index[1];
+					page_name = index[2];
+					section_title = index[3];
+					displayed_text = index[4];
+				} else {
+					// revert
+					all_link = previous + all_link;
+					previous = '';
+				}
 			} else {
 				previous = '';
 			}
-			library_namespace.debug(previous + ' + ' + parameters, 4,
+			library_namespace.debug(previous + ' + ' + all_link, 4,
 					'parse_wikitext.link');
-
-			if (parameters.includes('{{')) {
-				// <s>fix</s> workaround for "[[Image:a.svg|b{{c|d[[e]]f}}|g]]"
-				// TODO: 其實本函數應該 rewrite，
-				// 採用 while(!done){wikitext = wikitext.replace(...);...}
-				parameters = parameters.replace_till_stable(
-				//
-				PATTERN_for_transclusion, parse_transclusion);
-				library_namespace.debug(parameters, 4, 'parse_wikitext.link');
+			if (page_section.includes(include_mark)) {
+				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+				all_link = parse_wikitext([ all_link.slice('[['.length,
+						-']]'.length) ], options, queue);
+				all_link.unshift('[[');
+				all_link.push(']]');
+				_set_wiki_type(all_link, 'plain');
+				queue.push(parameters);
+				return previous + include_mark + (queue.length - 1) + end_mark;
 			}
 
-			// test [[file:name|...|...]]
-			var file_matched = parameters.match(PATTERN_file_prefix),
-			// test [[Category:name|order]]
-			category_matched = !file_matched
-					&& parameters.match(PATTERN_category_prefix);
-			// TODO: [[title#section]] 將不會分割，而保留 "title#section"。
-			parameters = parameters.split('|').map(function(token, index) {
-				return index === 0
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				&& !token.includes(include_mark) ? _set_wiki_type(
+			var file_matched, category_matched;
+			if (!page_name) {
+				// assert: [[#section_title]]
+				page_name = '';
+				section_title = page_section;
+			} else {
+				if (!section_title) {
+					section_title = '';
+				}
+				if (normalize) {
+					page_name = page_name.trim();
+				}
+				// test [[file:name|...|...]]
+				file_matched = page_name.match(PATTERN_file_prefix);
+				if (!file_matched) {
+					category_matched = page_name
+					// test [[Category:name|order]]
+					.match(PATTERN_category_prefix);
+				}
+				page_name = _set_wiki_type(
 				// TODO: normalize 對 [[文章名稱 : 次名稱]] 可能出現問題。
-				token.split(normalize ? /\s*:\s*/ : ':'), 'namespace')
-				// 經過改變，需再進一步處理。
-				: parse_wikitext(token, options, queue);
-			});
+				page_name.split(normalize ? /\s*:\s*/ : ':'), 'namespace');
+			}
+			if (normalize) {
+				// assert: section_title && section_title.startsWith('#')
+				section_title = section_title.trim();
+			}
+
+			var parameters = [ page_name, section_title ];
+
+			// assert: 'a'.match(/(b)?/)[1]===undefined
+			if (typeof displayed_text === 'string') {
+				parameters.push(
+				// 需再進一步處理 {{}}, -{}- 之類。
+				parse_wikitext(displayed_text, options, queue));
+			}
 			if (file_matched) {
 				// File name
 				parameters.name = normalize_page_name(file_matched[1]);
@@ -2148,6 +2192,8 @@ function module_code(library_namespace) {
 			}
 			_set_wiki_type(parameters, file_matched ? 'file'
 					: category_matched ? 'category' : 'link');
+			// [ page_name, section_title, displayed_text without '|' ]
+			// section_title && section_title.startsWith('#')
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		});
@@ -2527,7 +2573,7 @@ function module_code(library_namespace) {
 			matched = pattern.exec(wikitext);
 			end_index = wikitext.indexOf('}}', pattern.lastIndex);
 
-			/\[\[([^\|\[\]{}]+)/g;
+			/\[\[([^\[\]\|{}]+)/g;
 		}
 
 		// ----------------------------------------------------
@@ -2817,7 +2863,7 @@ function module_code(library_namespace) {
 	 *      https://en.wikipedia.org/wiki/Help:Redirect
 	 *      https://phabricator.wikimedia.org/T68974
 	 */
-	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|転送|넘겨주기)\s*(?::\s*)?\[\[([^\[\]{}|]+)(?:\|[^\[\]{}]+)?\]\]/i;
+	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|転送|넘겨주기)\s*(?::\s*)?\[\[([^\[\]{}\n\|]+)(?:\|[^\[\]{}]+?)?\]\]/i;
 
 	/**
 	 * parse redirect page. 解析重定向資訊。 若 wikitext 重定向到其他頁面，則回傳其{String}頁面名:
@@ -3107,7 +3153,7 @@ function module_code(library_namespace) {
 		return section_title.replace(/ {2,}/g, ' ').replace(
 				/<\/?[a-z][^<>]*>/g, '')
 		// escape wikilink
-		.replace(/\[\[:?([^\[\]]+)\]\]/g, function(all, inner) {
+		.replace(/\[\[:?([^\[\]\n]+)\]\]/g, function(all, inner) {
 			return inner.replace(/^[^\|]+\|/, '');
 		})
 		// escape external link
@@ -4162,7 +4208,9 @@ function module_code(library_namespace) {
 								next[3].call(_this, title, error, result);
 							// assert: 應該有_this.last_page。
 							// 因為已經更動過內容，為了預防會取得舊的錯誤資料，因此將之刪除。但留下標題資訊。
-							delete _this.last_page.revisions;
+							if (_this.last_page) {
+								delete _this.last_page.revisions;
+							}
 							_this.next();
 						}
 					});
@@ -4932,13 +4980,15 @@ function module_code(library_namespace) {
 					// pages: 後續檢索用索引值之暫存值。
 					&& (pages = pages.show_next())) {
 				// 當有 .continue_session 時，其實用不到 log page 之 continue_key。
-				if (!config.continue_session
+				if (!config.continue_session && !this
 				// 忽略表示完結的紀錄，避免每個工作階段都顯示相同訊息。
 				|| pages !== '{}'
 				// e.g., 後続の索引: {"continue":"-||"}
 				&& !/^{"[^"]+":"[\-|]{0,9}"}$/.test(pages)) {
-					 console.log(this.continue_key + ':');
-					 console.log(pages);
+					// console.log(config);
+					// console.log(options);
+					// console.log(this.continue_key + ':' +
+					// JSON.stringify(pages));
 					messages.add(this.continue_key + ': ' + pages);
 				}
 			}
@@ -5051,7 +5101,9 @@ function module_code(library_namespace) {
 
 			library_namespace.debug('for each page: 主要機制是把工作全部推入 queue。', 2,
 					'wiki_API.work');
-			pages.forEach(function(page, index) {
+			// cf. ((done))
+			var pages_left = 0;
+			pages.forEach(function for_each_page(page, index) {
 				if (library_namespace.is_debug(2)
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
@@ -5062,33 +5114,35 @@ function module_code(library_namespace) {
 					return;
 				}
 
-				var _this = this;
-
 				function clear_work() {
 					// 警告: 直接清空 .actions 不安全！
-					// _this.actions.clear();
+					// this.actions.clear();
 					work_continue = target.length;
 
 					var next;
-					while (next = _this.actions[0]) {
+					while (next = this.actions[0]) {
 						next = next[0];
 						if (next === 'page' || next === 'edit')
-							_this.actions.shift();
+							this.actions.shift();
 						else
 							break;
 					}
 					library_namespace.debug('清空 actions queue: 剩下'
-							+ _this.actions.length + ' actions。', 1,
+							+ this.actions.length + ' actions。', 1,
 							'wiki_API.work');
 				}
 
+				pages_left++;
 				if (config.no_edit) {
 					// 不作編輯作業。
 					// 取得頁面內容。
 					this.page(page, function(page_data) {
-						each(page_data, messages);
+						each.call(this, page_data, messages, config);
 						if (messages.quit_operation) {
-							clear_work();
+							clear_work.call(this);
+						}
+						if (--pages_left === 0) {
+							finish_up.call(this);
 						}
 					},
 					// e.g., page_options:{rvprop:'ids|content|timestamp'}
@@ -5119,15 +5173,26 @@ function module_code(library_namespace) {
 						// @see wiki_API.edit()
 						this, page_data, messages, config);
 						if (messages.quit_operation) {
-							clear_work();
+							clear_work.call(this);
 						}
 						return content;
-					}, work_options, callback);
+					}, work_options, function() {
+						callback();
+						if (--pages_left === 0) {
+							finish_up.call(this);
+						}
+					});
 				}
 			}, this);
 
-			// TODO: 不應用 .run(finish_up)，而應在 callback 中呼叫 finish_up()。
-			this.run(function finish_up() {
+			// 警告：不可省略，只為避免clear_work()誤刪！
+			this.run(function() {
+				library_namespace.debug('工作配給完畢，等待 callback 結束，準備收尾。', 3,
+						'wiki_API.work');
+			});
+
+			// 不應用 .run(finish_up)，而應在 callback 中呼叫 finish_up()。
+			function finish_up() {
 				if (!no_message) {
 					library_namespace.debug('收尾。', 1, 'wiki_API.work');
 					var count_summary;
@@ -5291,7 +5356,7 @@ function module_code(library_namespace) {
 					// 已完成作業
 					+ (config.summary ? ' [' + config.summary + ']' : '。'));
 				});
-			});
+			}
 
 		}).bind(this);
 
@@ -6982,10 +7047,10 @@ function module_code(library_namespace) {
 		} else if (!library_namespace.is_Object(options)) {
 			options = {
 				// original option
-				option : namespace
+				namespace : options
 			};
 		}
-		if (options.namespace) {
+		if ('namespace' in options) {
 			// 檢查 options.namespace。
 			options.namespace = get_namespace(options.namespace);
 			if (options.namespace === undefined) {
@@ -7344,6 +7409,8 @@ function module_code(library_namespace) {
 			return title_parameter.replace(/^&cmtitle=/, '&cmtitle=Category:');
 		} ],
 
+		recentchanges : 'rc',
+
 		// 'type name' : [ 'abbreviation 縮寫 / prefix', 'parameter' ]
 		// ** 可一次處理多個標題，但可能較耗資源、較慢。
 
@@ -7391,6 +7458,10 @@ function module_code(library_namespace) {
 				// assert: 不可改動 method @ IE！
 				var args = [ method ];
 				Array.prototype.push.apply(args, arguments);
+				if (method === 'recentchanges') {
+					// insert title
+					args.splice(1, 0, '');
+				}
 				try {
 					library_namespace.debug('add action: '
 							+ args.map(JSON.stringify).join('<br />\n'), 3,
@@ -9724,22 +9795,45 @@ function module_code(library_namespace) {
 				var exit;
 				if (rows.length > 0) {
 					mark_up(0);
-					// .reverse(): old to new.
+					// .reverse(): 轉成 old to new.
 					rows.reverse();
 
 					if (options.with_diff) {
 						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 						// rvdiffto=prev 已經parsed，因此仍須自行解析。
-						TODO;
+						// TODO: test
+						rows.run_async(function(run_next, row, index, list) {
+							session.page(row.page_id, function(page_data) {
+								if (!exit) {
+									page_data.diff
+									//
+									= page_data.revisions[0]['*'].diff_with(
+									//
+									page_data.revisions[1]['*'] || '');
+									row.page_data = page_data;
+									exit = listener.call(options, row, index,
+											rows);
+								}
+								run_next();
+							}, Object.assign({
+								is_id : true,
+								rvlimit : 2
+							}, options.with_diff));
+						}, function() {
+							if (!exit) {
+								receive_next();
+							}
+						});
 						return;
 					}
 
 					// use options.with_content as the options of wiki.page()
 					if (options.with_content) {
 						// TODO: 考慮所傳回之內容過大，i.e. 回傳超過 limit (12 MB)，被截斷之情形。
-						if (rows.length > options.rvlimit) {
-							mark_up(options.rvlimit);
-							rows = rows.slice(0, options.rvlimit);
+						if (rows.length > options.max_page) {
+							// 直接截斷，僅處理到 .max_page。
+							mark_up(options.max_page);
+							rows = rows.slice(0, options.max_page);
 						}
 
 						session.page(rows.map(function(row) {
@@ -9771,7 +9865,7 @@ function module_code(library_namespace) {
 
 					// 除非設定 options.input_Array，否則單筆單筆輸入。
 					if (options.input_Array) {
-						exit = listener.call(options, rows.reverse());
+						exit = listener.call(options, rows);
 					} else {
 						exit = rows.some(listener, options);
 					}
@@ -16720,7 +16814,8 @@ function module_code(library_namespace) {
 			 */
 			PATTERN =
 			// [ all, title, sitelink, miscellaneous ]
-			/\n\|\s*\[\[([^\[\]\|]+)\|([^\[\]]*)\]\]\s*\|\|([^\n]+)/g;
+			// TODO: use PATTERN_wikilink
+			/\n\|\s*\[\[([^\[\]{}\n\|]+)\|([^\[\]\n]*?)\]\]\s*\|\|([^\n]+)/g;
 			while (matched = PATTERN.exec(data)) {
 				var miscellaneous = matched[3].split(/\s*\|\|\s*/),
 				//

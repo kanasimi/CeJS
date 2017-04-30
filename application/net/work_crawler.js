@@ -220,10 +220,13 @@ function module_code(library_namespace) {
 			return work_id > 0;
 		},
 		is_finished : function(work_data) {
+			return work_data.status
 			// e.g., 连载中, 連載中, 已完结
-			return /已完[結结]/.test(work_data.status)
-			// 完結済
-			|| /^完[結结]済?$/.test(work_data.status);
+			&& (/已完[結结]/.test(work_data.status)
+			// 
+			|| /^完[結结]$/.test(work_data.status)
+			//
+			|| work_data.status.includes('完結済'));
 		},
 		pre_get_chapter_data : pre_get_chapter_data,
 		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。
@@ -341,7 +344,9 @@ function module_code(library_namespace) {
 			//
 			.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
 			// 去掉BOM (byte order mark)
-			.trim().replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/);
+			.trim()
+			// TODO: 處理title中包含"#"的作品
+			.replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/);
 			this.get_work_list(work_list);
 
 		} else if (work_id) {
@@ -414,7 +419,9 @@ function module_code(library_namespace) {
 				|| library_namespace.null_Object();
 
 		function finish_up(work_data) {
-			if (_this.need_create_ebook && work_data.chapter_count >= 1) {
+			if (_this.need_create_ebook
+			// 未找到時沒有 work_data。
+			&& work_data && work_data.chapter_count >= 1) {
 				_this.pack_ebook(work_data);
 			}
 			if (typeof _this.finish_up === 'function') {
@@ -610,6 +617,8 @@ function module_code(library_namespace) {
 			if (PATTERN_non_CJK.test(work_data.title)
 			// e.g., "THE NEW GATE", "Knight's & Magic"
 			&& !/[a-z]+ [a-z\d&]/i.test(work_data.title)
+			// e.g., "Eje(c)t"
+			&& !/[()]/.test(work_data.title)
 			// .title: 必要屬性：須配合網站平台更改。
 			&& PATTERN_non_CJK.test(work_id)) {
 				library_namespace.error('Did not set work title: ' + work_id
@@ -647,6 +656,16 @@ function module_code(library_namespace) {
 
 			// .status 選擇性屬性：須配合網站平台更改。
 			// ja:種別,状態
+			if (Array.isArray(work_data.status)) {
+				// e.g., ジャンル
+				work_data.status = work_data.status.filter(function(item) {
+					return !!item;
+				})
+				// .sort()
+				.join(', ');
+			}
+			// assert: typeof work_data.status === 'string'
+
 			if (_this.is_finished(work_data)) {
 				// 預防(work_data.directory)不存在。
 				library_namespace.fs_mkdir(work_data.directory);
@@ -654,6 +673,7 @@ function module_code(library_namespace) {
 				//
 				+ 'finished.txt', work_data.status);
 			}
+			// TODO: skip finished + no update works
 
 			var matched = library_namespace.get_JSON(work_data.data_file);
 			if (matched) {
@@ -856,8 +876,10 @@ function module_code(library_namespace) {
 			// 還必須已經下載到最新章節。
 			&& work_data.last_download.chapter === work_data.chapter_count) {
 				// 跳過本作品不處理。
-				library_namespace.log('Skip ' + work_data.id + ' '
-						+ work_data.title);
+				library_namespace.log('Skip '
+						+ work_data.id
+						+ (work_data.author ? ' [' + work_data.author + ']'
+								: '') + ' ' + work_data.title);
 				// 最終廢棄動作，防止執行 work_data[this.KEY_EBOOK].pack()。
 				delete work_data[_this.KEY_EBOOK];
 				if (typeof callback === 'function') {
@@ -872,6 +894,7 @@ function module_code(library_namespace) {
 
 			var message = [
 					work_data.id,
+					work_data.author ? ' [' + work_data.author + ']' : '',
 					' ',
 					work_data.title,
 					': ',
@@ -1042,6 +1065,31 @@ function module_code(library_namespace) {
 				}
 
 				var chapter_data;
+				if (_this.check_chapter_NO) {
+					chapter_data = Array.isArray(_this.check_chapter_NO)
+					// 檢測所取得內容的章節編號是否相符。
+					? html.between(_this.check_chapter_NO[0],
+							_this.check_chapter_NO[1])
+					// {Function}return chapter NO is OK
+					: _this.check_chapter_NO(html);
+					var chapter_NO = null;
+					if (typeof chapter_data !== 'boolean') {
+						chapter_NO = get_label(chapter_data);
+						chapter_data = chapter_NO == chapter
+						// for yomou only
+						|| chapter_NO === '0' && work_data.status
+								&& work_data.status.includes('短編')
+					}
+					if (!chapter_data) {
+						throw new Error(_this.id
+								+ ': Bad chapter NO: Should be '
+								+ chapter
+								+ (chapter_NO === null ? '' : ', but get '
+										+ JSON.stringify(chapter_NO))
+								+ ' inside contents.');
+					}
+				}
+
 				try {
 					chapter_data = _this.parse_chapter_data(html, work_data,
 							get_label, chapter);
@@ -1340,7 +1388,8 @@ function module_code(library_namespace) {
 				library_namespace.log(_this.MESSAGE_RE_DOWNLOAD);
 				// console.log('error count: ' + image_data.error_count);
 				if (!_this.skip_error) {
-					library_namespace.info('您可以設定 .skip_error 來忽略圖像錯誤。');
+					library_namespace
+							.info('若錯誤持續發生，您可以設定 .skip_error 來忽略圖像錯誤。');
 				}
 				process.exit(1);
 			}

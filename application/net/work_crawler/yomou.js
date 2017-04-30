@@ -111,10 +111,6 @@ function module_code(library_namespace) {
 				site_name : this.site_name
 			}, work_data);
 
-			work_data.status = work_data.status.filter(function(item) {
-				return !!item;
-			}).join(',');
-
 			return work_data;
 		},
 		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。
@@ -178,21 +174,17 @@ function module_code(library_namespace) {
 			}
 			return this.chapter_list_URL(work_data.id) + url;
 		},
+		// 檢測所取得內容的章節編號是否相符。
+		check_chapter_NO : [ '<div id="novel_no">', '/' ],
 		parse_chapter_data : function(html, work_data, get_label, chapter) {
-			// 檢測所取得內容的章節編號是否相符。
-			var text = get_label(html.between('<div id="novel_no">', '/'));
-			if (chapter != text
-					&& (!work_data.status.includes('短編') || text != 0)) {
-				throw new Error('Different chapter: Should be ' + chapter
-						+ ', get ' + text + ' inside contents.');
-			}
-
-			text = html.between('<div id="novel_color">',
-					'</div><!--novel_color-->');
 			var
 			/** {Number}未發現之index。 const: 基本上與程式碼設計合一，僅表示名義，不可更改。(=== -1) */
-			NOT_FOUND = ''.indexOf('_');
-			var index = text.indexOf('<div id="novel_p"');
+			NOT_FOUND = ''.indexOf('_'),
+			//
+			text = html.between('<div id="novel_color">',
+					'</div><!--novel_color-->'),
+			//
+			index = text.indexOf('<div id="novel_p"'),
 			if (index === NOT_FOUND
 			//
 			&& (index = text.indexOf('<div id="novel_honbun"')) === NOT_FOUND) {

@@ -107,7 +107,7 @@ function check_update() {
 			} else {
 				console.info('Update: ' + (have_version
 				//
-				? have_version + ' → ' : 'to ') + latest_version);
+				? have_version + '\n     → ' : 'to ') + latest_version);
 				do_update(latest_version);
 			}
 		});

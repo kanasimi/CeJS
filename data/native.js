@@ -3551,6 +3551,9 @@ function module_code(library_namespace) {
 		each_between : each_between,
 
 		edit_distance : set_bind(Levenshtein_distance),
+		diff_with : function(to) {
+			return LCS(this, to, 'diff');
+		},
 
 		display_width : set_bind(display_width)
 	});
@@ -3691,6 +3694,10 @@ function module_code(library_namespace) {
 		search_sorted : set_bind(search_sorted_Array, true),
 		// Array.prototype.first_matched
 		first_matched : set_bind(first_matched, true),
+
+		diff_with : function(to) {
+			return LCS(this, to, 'diff');
+		},
 
 		run_async : function run_asynchronous(for_each, callback, _this) {
 			run_serial_asynchronous(for_each, this, callback, _this);
