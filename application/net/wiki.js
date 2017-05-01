@@ -331,7 +331,11 @@ function module_code(library_namespace) {
 		// value[1] 為 titles (page list)。
 		&& !Array.isArray(title)
 		// 為了預防輸入的是問題頁面。
-		&& !get_page_content.is_page_data(title)) {
+		&& !get_page_content.is_page_data(title)
+		// 處理 is_id。
+		&& (!(title > 0)
+		// 注意：這情況下即使是{Natural}page_id 也會pass!
+		|| typeof ignore_api !== 'object' || !ignore_api.is_id)) {
 			library_namespace.debug('輸入的是問題頁面title', 2, 'is_api_and_title');
 			return false;
 		}
@@ -9764,7 +9768,8 @@ function module_code(library_namespace) {
 		//
 		&& (options.with_diff || options.with_content)) {
 			// 先設定一個以方便操作。
-			session = new wiki_API(null, null, options.language);
+			session = new wiki_API(null, null, options.language
+					|| default_language);
 		}
 
 		function receive() {
