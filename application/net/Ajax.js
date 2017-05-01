@@ -1395,7 +1395,9 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			if (!options.no_warning) {
+			if (!options.no_warning
+			// 應已在 _ontimeout 出過警告訊息。
+			&& error.code !== 'TIMEOUT') {
 				console.error('get_URL_node: Get error when retrieving [' + URL
 						+ ']:');
 				// 這裡用太多並列處理，會造成 error.code "EMFILE"。

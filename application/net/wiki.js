@@ -9816,7 +9816,9 @@ function module_code(library_namespace) {
 									//
 									= page_data.revisions[0]['*'].diff_with(
 									//
-									page_data.revisions[1]['*'] || '');
+									page_data.revisions[1]
+											&& page_data.revisions[1]['*']
+											|| '');
 									row.page_data = page_data;
 									exit = listener.call(options, row, index,
 											rows);

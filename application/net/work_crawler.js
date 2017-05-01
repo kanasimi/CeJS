@@ -210,7 +210,7 @@ function module_code(library_namespace) {
 
 		full_URL : full_URL_of_path,
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
-		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。
+		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。否則只會自上次下載過的章節接續下載。
 		// recheck : true,
 		// 當無法取得chapter資料時，直接嘗試下一章節。在手動+監視下recheck時可併用此項。default:false
 		// skip_chapter_data_error : true,
@@ -702,7 +702,7 @@ function module_code(library_namespace) {
 				work_URL = _this.full_URL(_this.chapter_list_URL, work_id);
 				get_URL(work_URL, process_chapter_list_data, _this.charset,
 						null, Object.assign({
-							error_retry : 4
+							error_retry : _this.MAX_ERROR
 						}, _this.get_URL_options));
 			} else {
 				process_chapter_list_data(XMLHttp);
