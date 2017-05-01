@@ -1077,7 +1077,7 @@ function module_code(library_namespace) {
 						chapter_NO = get_label(chapter_data);
 						chapter_data = chapter_NO == chapter
 						// for yomou only
-						|| chapter_NO === '0' && work_data.status
+						|| chapter_NO === '' && work_data.status
 								&& work_data.status.includes('短編')
 					}
 					if (!chapter_data) {

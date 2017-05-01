@@ -184,7 +184,7 @@ function module_code(library_namespace) {
 			text = html.between('<div id="novel_color">',
 					'</div><!--novel_color-->'),
 			//
-			index = text.indexOf('<div id="novel_p"'),
+			index = text.indexOf('<div id="novel_p"');
 			if (index === NOT_FOUND
 			//
 			&& (index = text.indexOf('<div id="novel_honbun"')) === NOT_FOUND) {

@@ -9760,7 +9760,9 @@ function module_code(library_namespace) {
 		|| (options.SQL_options = library_namespace.null_Object());
 		where = where.where || (where.where = library_namespace.null_Object());
 
-		if (options.with_content && !session) {
+		if (!session
+		//
+		&& (options.with_diff || options.with_content)) {
 			// 先設定一個以方便操作。
 			session = new wiki_API(null, null, options.language);
 		}
