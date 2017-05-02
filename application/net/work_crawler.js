@@ -485,9 +485,13 @@ function module_code(library_namespace) {
 			// e.g., [ [id,id,...], [data,data,...] ]
 			// e.g., [ [id,id,...], {id:data,id:data,...} ]
 			var id_data = _this.parse_search_result(XMLHttp.responseText,
-					get_label),
+					get_label);
+			// e.g., {id:data,id:data,...}
+			if (library_namespace.is_Object(id_data)) {
+				id_data = [ Object.keys(id_data), id_data ];
+			}
 			// {Array}id_list = [id,id,...]
-			id_list = id_data[0] || [];
+			var id_list = id_data[0] || [];
 			// console.log(id_data);
 			id_data = id_data[1];
 			if (id_list.length !== 1) {
@@ -1126,6 +1130,15 @@ function module_code(library_namespace) {
 					if (left > image_list.length) {
 						left = image_list.length;
 					}
+				}
+
+				// 自動填補。
+				if (!chapter_data.title
+						&& Array.isArray(work_data.chapter_list)
+						//
+						&& library_namespace
+								.is_Object(work_data.chapter_list[chapter - 1])) {
+					chapter_data.title = work_data.chapter_list[chapter - 1].title;
 				}
 
 				if (typeof _this.pre_get_images === 'function') {

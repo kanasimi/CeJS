@@ -1111,7 +1111,8 @@ function module_code(library_namespace) {
 		 */
 		split_by_code_point = function(with_combined) {
 			return this.match(with_combined ? PATTERN_char_with_combined
-					: PATTERN_char);
+					: PATTERN_char)
+					|| [];
 			// show HEX:
 			// .map(function(char){return
 			// char.codePointAt(0).toString(0x10).toUpperCase();});
@@ -1125,7 +1126,8 @@ function module_code(library_namespace) {
 			return with_combined // || !PATTERN_surrogate
 					|| PATTERN_surrogate.test(this) ? this
 					.match(with_combined ? PATTERN_char_with_combined
-							: PATTERN_char) : this.split('');
+							: PATTERN_char)
+					|| [] : this.split('');
 		};
 	}
 
@@ -2411,7 +2413,8 @@ function module_code(library_namespace) {
 			// 處理搜尋 {RegExp} 的情況: 此時回傳最後一個匹配的 index。欲找首次出現，請用 first_matched()。
 			if (value.global) {
 				library_namespace
-						.error('search_sorted_Array: 當匹配時，不應採用 .global！ ' + value);
+						.error('search_sorted_Array: 當匹配時，不應採用 .global！ '
+								+ value);
 			}
 			if (!options) {
 				options = library_namespace.null_Object();
@@ -2988,7 +2991,7 @@ function module_code(library_namespace) {
 			return use_String ? _unique.join(separator) : _unique;
 		}
 
-		function add_to_diff_list() {
+		function add_to_diff_list(from_index, to_index) {
 			if (!get_diff || (!from_unique && !to_unique)) {
 				// assert: 連續相同元素時
 				return;
@@ -2997,9 +3000,16 @@ function module_code(library_namespace) {
 			library_namespace.debug(JSON.stringify([ from_index, to_index,
 					from_unique, to_unique ]), 3, 'add_to_diff_list');
 
-			from_unique = normalize_unique(from_unique);
-			diff_list.unshift(to_unique ? [ from_unique,
-					normalize_unique(to_unique, true) ] : [ from_unique ]);
+			var result = [ normalize_unique(from_unique) ];
+			if (to_unique) {
+				result.push(normalize_unique(to_unique, true));
+			}
+			// result.index = [ from_index, to_index ];
+			// _index = undefined || [ start index, to index ]
+			result.index = [ from_unique, to_unique ];
+			// 上一個相同的index。這在最初的部分可能不準確!
+			result.last_index = [ from_index, to_index ];
+			diff_list.unshift(result);
 			// reset
 			from_unique = to_unique = undefined;
 		}
@@ -3044,7 +3054,7 @@ function module_code(library_namespace) {
 				} else {
 					library_namespace.warn('Invalid situation!');
 				}
-				add_to_diff_list();
+				add_to_diff_list(from_index, to_index);
 				return;
 			}
 
@@ -3064,7 +3074,7 @@ function module_code(library_namespace) {
 						all_list[0].unshift(common);
 					}
 				}
-				add_to_diff_list();
+				add_to_diff_list(from_index, to_index);
 				backtrack(from_index - 1, to_index - 1, all_list);
 				return;
 			}
@@ -3552,7 +3562,7 @@ function module_code(library_namespace) {
 
 		edit_distance : set_bind(Levenshtein_distance),
 		diff_with : function(to) {
-			return LCS(this, to, 'diff');
+			return LCS(this, to || '', 'diff');
 		},
 
 		display_width : set_bind(display_width)

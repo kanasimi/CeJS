@@ -336,7 +336,8 @@ function module_code(library_namespace) {
 		&& (!(title > 0)
 		// 注意：這情況下即使是{Natural}page_id 也會pass!
 		|| typeof ignore_api !== 'object' || !ignore_api.is_id)) {
-			library_namespace.debug('輸入的是問題頁面title', 2, 'is_api_and_title');
+			library_namespace.debug('輸入的是問題頁面title: ' + title, 2,
+					'is_api_and_title');
 			return false;
 		}
 
@@ -7413,6 +7414,7 @@ function module_code(library_namespace) {
 			return title_parameter.replace(/^&cmtitle=/, '&cmtitle=Category:');
 		} ],
 
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
 		recentchanges : 'rc',
 
 		// 'type name' : [ 'abbreviation 縮寫 / prefix', 'parameter' ]
@@ -8708,7 +8710,9 @@ function module_code(library_namespace) {
 
 		var session = options[KEY_SESSION],
 		// 都先從 options 取值，再從 session 取值。
-		page_data = options.page_data || session && session.last_page;
+		page_data =
+		// options.page_data ||
+		options.pageid && options || session && session.last_page;
 
 		// assert: 有parameters, e.g., {Object}parameters
 		// 可能沒有 session, page_data
@@ -8822,7 +8826,9 @@ function module_code(library_namespace) {
 		}
 
 		// 都先從 options 取值，再從 session 取值。
-		var page_data = options.page_data || session && session.last_page;
+		var page_data =
+		// options.page_data ||
+		options.pageid && options || session && session.last_page;
 
 		// assert: 有parameters, e.g., {Object}parameters
 		// 可能沒有 session, page_data
@@ -9606,6 +9612,10 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// https://www.mediawiki.org/wiki/API:RecentChanges
+	// const
+	var ENUM_rc_type = 'edit,new,move,log,move over redirect,external,categorize';
+
 	/**
 	 * Get page title 頁面標題 list of [[Special:RecentChanges]] 最近更改.
 	 * 
@@ -9677,39 +9687,55 @@ function module_code(library_namespace) {
 				if (namespace_text) {
 					namespace_text = upper_case_initial(namespace_text) + ':';
 				}
+				// 基本上API盡可能與recentchanges一致。
 				result.push({
-					// links to the page_id key in the page table
-					// 0: 可能為flow. 此時title為主頁面名，非topic。由.rc_params可獲得相關資訊。
-					page_id : row.rc_cur_id,
-					namespace : row.rc_namespace,
+					type : ENUM_rc_type[row.rc_type],
+					// namespace
+					ns : row.rc_namespace,
 					// .rc_title未加上namespace prefix!
 					title : (namespace_text
 					// @see normalize_page_name()
-					+ row.rc_title.toString('utf8')).replace(/_/g, ' '),
-					// 0 for anonymous edits
-					user_id : row.rc_user,
+					+ row.rc_title.toString()).replace(/_/g, ' '),
+					// links to the page_id key in the page table
+					// 0: 可能為flow. 此時title為主頁面名，非topic。由.rc_params可獲得相關資訊。
+					pageid : row.rc_cur_id,
+					// rev_id
+					// Links to the rev_id key of the new page revision
+					// (after the edit occurs) in the revision table.
+					revid : row.rc_this_oldid,
+					old_revid : row.rc_last_oldid,
+					rcid : row.rc_id,
 					// text of the username for the user that made the
 					// change, or the IP address if the change was made by
 					// an unregistered user. Corresponds to rev_user_text
-					user : row.rc_user_text.toString('utf8'),
-					is_new : !!row.rc_new,
-					// is_bot : !!row.rc_bot,
-					// is_minor : !!row.rc_minor,
-					is_flow : row.rc_source.toString('utf8') === 'flow',
-					length : row.rc_new_len,
-					// old_length : row.rc_old_len,
-					// patrolled : row.rc_patrolled,
-					// deleted : row.rc_deleted,
-
+					user : row.rc_user_text.toString(),
+					// 0 for anonymous edits
+					userid : row.rc_user,
+					// old_length
+					oldlen : row.rc_old_len,
+					// new length
+					newlen : row.rc_new_len,
 					// Corresponds to rev_timestamp
 					// use new Date(.timestamp)
 					timestamp : SQL_timestamp_to_ISO(row.rc_timestamp),
+					comment : row.rc_comment.toString(),
+					// parsedcomment : TODO,
+					logid : row.rc_logid,
+					// TODO
+					logtype : row.rc_log_type,
+					logaction : row.rc_log_action.toString(),
+					// logparams: TODO: should be {Object}, e.g., {userid:0}
+					logparams : row.rc_params.toString(),
+					// tags: ["TODO"],
 
-					// Links to the rev_id key of the new page revision
-					// (after the edit occurs) in the revision table.
-					rev_id : row.rc_this_oldid,
-					// rev_id : row.rev_parent_id,
-					comment : row.rc_comment.toString('utf8'),
+					// 以下為recentchanges之外，本函數額外加入。
+					is_new : !!row.rc_new,
+					// is_bot : !!row.rc_bot,
+					// is_minor : !!row.rc_minor,
+					is_flow : row.rc_source.toString() === 'flow',
+					// patrolled : row.rc_patrolled,
+					// deleted : row.rc_deleted,
+
 					row : row
 				});
 			});
@@ -9721,13 +9747,21 @@ function module_code(library_namespace) {
 	}
 
 	function get_recent_via_API(callback, options) {
-		// TODO: use
-		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
-		throw 'NYI';
+		var session = options && options[KEY_SESSION];
+		if (!session) {
+			// 先設定一個以方便操作。
+			session = new wiki_API(null, null, options.language
+					|| default_language);
+		}
+		session.recentchanges(function(rows) {
+			// {Array}rows
+			callback(rows);
+		}, options);
 	}
 
+	// 一定會提供的功能。
 	wiki_API.recent_via_API = get_recent_via_API;
-	// 讓 wiki_API.recent 採用較有效率的實現方式。
+	// 可能會因環境而不同的功能。讓 wiki_API.recent 採用較有效率的實現方式。
 	wiki_API.recent = SQL_config ? get_recent_via_databases
 			: get_recent_via_API;
 
@@ -9787,17 +9821,17 @@ function module_code(library_namespace) {
 						.format('%4Y%2m%2d%2H%2M%2S');
 			}
 			where.timestamp = '>=' + options.timestamp;
-			where.this_oldid = '>' + (options.rev_id | 0);
+			where.this_oldid = '>' + (options.revid | 0);
 
 			wiki_API.recent(function(rows) {
 				// 紀錄/標記本次處理到哪。
-				function mark_up(row) {
+				var mark_up = SQL_config ? function(row) {
 					if (row >= 0) {
 						row = rows[row].row;
 					}
-					options.rev_id = row.rc_this_oldid;
+					options.revid = row.rc_this_oldid;
 					options.timestamp = row.rc_timestamp.toString();
-				}
+				} : library_namespace.null_function;
 
 				var exit;
 				if (rows.length > 0) {
@@ -9810,16 +9844,17 @@ function module_code(library_namespace) {
 						// rvdiffto=prev 已經parsed，因此仍須自行解析。
 						// TODO: test
 						rows.run_async(function(run_next, row, index, list) {
-							session.page(row.page_id, function(page_data) {
+							session.page(row.pageid, function(page_data) {
 								if (!exit) {
-									page_data.diff
+									Object.assign(row, page_data);
+									row.diff
 									//
-									= page_data.revisions[0]['*'].diff_with(
+									= (page_data.revisions.length === 1
+									// assert: (row.is_new ||
+									// page_data.revisions.length > 1)
+									? '' : page_data.revisions[1]['*'])
 									//
-									page_data.revisions[1]
-											&& page_data.revisions[1]['*']
-											|| '');
-									row.page_data = page_data;
+									.diff_with(page_data.revisions[0]['*']);
 									exit = listener.call(options, row, index,
 											rows);
 								}
@@ -9846,7 +9881,7 @@ function module_code(library_namespace) {
 						}
 
 						session.page(rows.map(function(row) {
-							return row.page_id;
+							return row.pageid;
 						}), function(page_list) {
 							// 配對。
 							var page_id_hash = library_namespace.null_Object();
@@ -9854,7 +9889,7 @@ function module_code(library_namespace) {
 								page_id_hash[page_data.pageid] = page_data;
 							});
 							exit = rows.some(function(row, index) {
-								row.page_data = page_id_hash[row.page_id];
+								Object.assign(row, page_id_hash[row.pageid]);
 								listener.call(options, row, index, rows);
 							});
 							// free memory
@@ -9893,7 +9928,7 @@ function module_code(library_namespace) {
 					receive_next();
 				}
 
-			}, options.SQL_options);
+			}, SQL_config ? options.SQL_options : options);
 		}
 
 		receive();
