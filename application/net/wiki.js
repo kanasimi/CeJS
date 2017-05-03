@@ -7029,9 +7029,9 @@ function module_code(library_namespace) {
 				+ (title ? ' ' + get_page_title_link(title) : '')
 				+ ', callback: ' + callback, 3, 'get_list');
 
-		var options,
+		var parameter, title_preprocessor,
 		/** {String} 前置字首。 */
-		prefix = get_list.type[type], parameter, title_preprocessor;
+		prefix = get_list.type[type];
 		library_namespace.debug('parameters: ' + JSON.stringify(prefix), 3,
 				'get_list');
 		if (Array.isArray(prefix)) {
@@ -7196,6 +7196,8 @@ function module_code(library_namespace) {
 						+ options.parameters + ']', 1, 'get_list');
 			}
 		}
+
+		// TODO: 直接以是不是 .startsWith(prefix) 來判定是不是該加入 parameters。
 
 		if (!title[0])
 			title = title[1];
@@ -9833,17 +9835,35 @@ function module_code(library_namespace) {
 					options.timestamp = row.rc_timestamp.toString();
 				} : library_namespace.null_function;
 
+				// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
+
 				var exit;
 				if (rows.length > 0) {
-					mark_up(0);
-					// .reverse(): 轉成 old to new.
-					rows.reverse();
+					library_namespace.debug('Get ' + rows.length
+							+ ' recent pages:\n' + rows.map(function(row) {
+								return row.revid;
+							}), 2, 'add_listener');
+					if (SQL_config) {
+						mark_up(0);
+						// .reverse(): 轉成 old to new.
+						rows.reverse();
+					}
 
 					if (options.with_diff) {
 						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 						// rvdiffto=prev 已經parsed，因此仍須自行解析。
 						// TODO: test
+						// 因為採用.run_async(.page())，因此約一秒會跑一頁面。
 						rows.run_async(function(run_next, row, index, list) {
+							// console.log(row);
+							if (!row.pageid) {
+								run_next();
+								return;
+							}
+							library_namespace.debug(
+							//
+							'Get page: ' + index + '/' + rows.length, 2,
+									'add_listener.with_diff');
 							session.page(row.pageid, function(page_data) {
 								if (!exit) {
 									Object.assign(row, page_data);
@@ -9861,10 +9881,14 @@ function module_code(library_namespace) {
 								run_next();
 							}, Object.assign({
 								is_id : true,
+								// 僅取最近的兩個版本作 diff
 								rvlimit : 2
 							}, options.with_diff));
 						}, function() {
 							if (!exit) {
+								library_namespace.debug(
+										'Get next recent pages', 2,
+										'add_listener.with_diff');
 								receive_next();
 							}
 						});
@@ -9928,7 +9952,11 @@ function module_code(library_namespace) {
 					receive_next();
 				}
 
-			}, SQL_config ? options.SQL_options : options);
+			}, SQL_config ? options.SQL_options : Object.assign({
+				parameters : {
+					rcdir : 'newer'
+				}
+			}, options));
 		}
 
 		receive();

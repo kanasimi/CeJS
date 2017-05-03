@@ -1188,6 +1188,7 @@ function module_code(library_namespace) {
 
 		function check_if_done() {
 			--left;
+			// console.log('check_if_done: left: ' + left);
 			if (Array.isArray(image_list) && image_list.length > 1) {
 				process.stdout.write(left + ' left...\r');
 				library_namespace.debug(chapter_label + ': ' + left + ' left',
@@ -1297,6 +1298,7 @@ function module_code(library_namespace) {
 		}
 
 		get_URL(url, function(XMLHttp) {
+			// console.log(XMLHttp);
 			var contents = XMLHttp.responseText,
 			// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
 			// 因此當圖像檔案過小，即使偵測到以 End Of Image mark 作結，依然有壞檔疑慮。

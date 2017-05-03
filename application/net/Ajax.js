@@ -1506,10 +1506,6 @@ function module_code(library_namespace) {
 			// https://iojs.org/api/http.html#http_http_request_options_callback
 			result.on('end', function() {
 				library_namespace.debug('end(): ' + URL, 2, 'get_URL_node');
-				if (unregister()) {
-					// 預防 timeout 時重複執行。
-					return;
-				}
 
 				// 照理應該放這邊，但如此速度過慢。因此改放在 _onload 一開始。
 				// unregister();
@@ -1598,6 +1594,14 @@ function module_code(library_namespace) {
 						break;
 					}
 				}
+
+				if (unregister()) {
+					// 預防 timeout 時重複執行。
+					return;
+				}
+
+				// assert: 執行至此表示成功取得資料、沒有錯誤，
+				// 開始正常運作至結尾，不會再有中途 return。
 
 				// TODO: 確保資料完整，例如檢查結尾碼。
 				// .save_to
