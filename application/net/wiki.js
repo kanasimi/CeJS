@@ -5648,7 +5648,7 @@ function module_code(library_namespace) {
 		}
 
 		// additional parameters
-		if (options.additional && !action[2]) {
+		if (!action[2] && options && options.additional) {
 			action[2] = options.additional;
 		}
 
@@ -6604,7 +6604,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// @see wiki_API.protect
-	wiki_API.protected = function has_protection(page_data) {
+	wiki_API.is_protected = function has_protection(page_data) {
 		var protection_list = page_data.protection || page_data;
 		if (!Array.isArray(protection_list)) {
 			return;
@@ -8777,7 +8777,7 @@ function module_code(library_namespace) {
 		return parameters;
 	}
 
-	// @see wiki_API.protected
+	// @see wiki_API.is_protected
 	// Change the protection level of a page.
 	wiki_API.protect = function(options, callback) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
