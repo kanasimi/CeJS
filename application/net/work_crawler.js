@@ -1307,7 +1307,7 @@ function module_code(library_namespace) {
 			if (!has_error) {
 				file_type = library_namespace.file_type(contents);
 				has_error = !file_type || file_type.type !== 'jpg'
-						&& file_type.type !== 'png';
+						&& file_type.type !== 'png' && file_type.type !== 'gif';
 				if (has_EOI = file_type && !file_type.damaged) {
 					if (has_error) {
 						library_namespace.warn('The file type ['

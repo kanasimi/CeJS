@@ -5647,6 +5647,11 @@ function module_code(library_namespace) {
 					'wiki_API.query');
 		}
 
+		// additional parameters
+		if (options.additional && !action[2]) {
+			action[2] = options.additional;
+		}
+
 		// https://www.mediawiki.org/wiki/API:Data_formats
 		// 因不在 white-list 中，無法使用 CORS。
 		action[0] += '?' + action[1];
@@ -5654,10 +5659,11 @@ function module_code(library_namespace) {
 		// →
 		// [ {String}URL, {Object}other parameters ]
 		action = library_namespace.is_Object(action[2]) ? [ action[0],
-				action[2] ]
+				action[2] ] : [
+		// assert: action[2] && {String}action[2]
+		action[2] ? action[0] + (action[2].startsWith('&') ? '' : '&')
 		//
-		: [ action[2] ? action[0] + action[2] : action[0],
-				library_namespace.null_Object() ];
+		+ action[2] : action[0], library_namespace.null_Object() ];
 		if (!action[1].format) {
 			// 加上 "&utf8", "&utf8=1" 可能會導致把某些 link 中 URL 編碼也給 unescape 的情況！
 			action[0] = get_URL.add_parameter(action[0], 'format=json&utf8');
@@ -6594,6 +6600,22 @@ function module_code(library_namespace) {
 	// @see https://www.mediawiki.org/w/api.php?action=help&modules=query
 	wiki_API.page.auto_converttitles = 'zh,gan,iu,kk,ku,shi,sr,tg,uz'
 			.split(',');
+
+	// ------------------------------------------------------------------------
+
+	// @see wiki_API.protect
+	wiki_API.protected = function has_protection(page_data) {
+		var protection_list = page_data.protection || page_data;
+		if (!Array.isArray(protection_list)) {
+			return;
+		}
+
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Binfo
+		// https://www.mediawiki.org/wiki/API:Info#inprop.3Dprotection
+		return protection_list.some(function(protection) {
+			return protection.type === 'edit' && protection.level === 'sysop';
+		});
+	};
 
 	// ------------------------------------------------------------------------
 
@@ -8755,6 +8777,7 @@ function module_code(library_namespace) {
 		return parameters;
 	}
 
+	// @see wiki_API.protected
 	// Change the protection level of a page.
 	wiki_API.protect = function(options, callback) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=protect

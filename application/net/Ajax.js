@@ -1169,6 +1169,8 @@ function module_code(library_namespace) {
 		return agent.last_cookie;
 	}
 
+	_.merge_cookie = merge_cookie;
+
 	// 正處理中之 connections
 	// var get_URL_node_connection_Set = new Set;
 
@@ -1515,6 +1517,7 @@ function module_code(library_namespace) {
 				data = Buffer.concat(data, length);
 
 				// 基本檢測。
+
 				if (options.verify) {
 					// test: invalid content type
 					if (typeof options.verify === 'function') {
@@ -1651,6 +1654,15 @@ function module_code(library_namespace) {
 					'BODY: ' + data, 1, 'get_URL_node');
 				// result_Object模擬 XMLHttp。
 				result_Object.responseText = data;
+
+				if (typeof options.check_reget === 'function'
+				// check_reget(XMLHttp)
+				&& options.check_reget(result_Object, options)) {
+					options.URL = URL;
+					get_URL_node(options, onload, charset, post_data);
+					return;
+				}
+
 				if (typeof onload === 'function') {
 					onload(result_Object, !data && !options.allow_empty);
 				}
