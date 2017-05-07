@@ -6603,7 +6603,26 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// @see wiki_API.protect
+	/**
+	 * 檢查頁面是否被保護。
+	 * 
+	 * 採用如:
+	 * @example <code>
+
+	wiki.page(title, function(page_data) {
+		console.log(CeL.wiki.is_protected(page_data));
+	}, {
+		prop : 'revisions|info',
+		// rvprop : 'ids|timestamp',
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Binfo
+		// https://www.mediawiki.org/wiki/API:Info#inprop.3Dprotection
+		additional : 'inprop=protection'
+	});
+
+	 </code>
+	 * 
+	 * @see wiki_API.protect
+	 */
 	wiki_API.is_protected = function has_protection(page_data) {
 		var protection_list = page_data.protection || page_data;
 		if (!Array.isArray(protection_list)) {
@@ -7081,7 +7100,8 @@ function module_code(library_namespace) {
 			// 檢查 options.namespace。
 			options.namespace = get_namespace(options.namespace);
 			if (options.namespace === undefined) {
-				// namespace 並非為正規 namespace。
+				library_namespace
+						.warn('get_list: options.namespace 並非為正規 namespace！將被忽略！');
 				delete options.namespace;
 			}
 		}

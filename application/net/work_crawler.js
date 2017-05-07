@@ -140,13 +140,13 @@ function module_code(library_namespace) {
 
 	/** {Natural}下載失敗重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
 	Work_crawler.MAX_ERROR = 4;
-	/** {Natural}timeout in ms for get_URL() 逾時ms數 */
+	/** {Natural}timeout in ms for get_URL() 逾時ms數。若逾時時間太小（如10秒），下載大檔案容易失敗。 */
 	Work_crawler.timeout = 30 * 1000;
 
 	Work_crawler.prototype = {
 		// 所有的子檔案要修訂註解說明時，應該都要順便更改在CeL.application.net.work_crawler中Work_crawler.prototype內的母comments，並以其為主體。
 
-		// 圖片檔+紀錄檔下載位置
+		// 儲存路徑。圖片檔+紀錄檔下載位置。
 		main_directory : (library_namespace.platform.nodejs
 				&& process.mainModule ? process.mainModule.filename
 				.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '') : '.')
@@ -171,7 +171,7 @@ function module_code(library_namespace) {
 		// allow .jpg without EOI mark. default:false
 		// allow_EOI_error : true,
 		//
-		// 忽略/跳過圖像錯誤:當圖像檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。default:false
+		// 圖像檔案下載失敗處理方式：忽略/跳過圖像錯誤。當圖像檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。default:false
 		// skip_error : true,
 		//
 		// 若已經存在壞掉的圖片，就不再嘗試下載圖片。default:false
@@ -226,7 +226,9 @@ function module_code(library_namespace) {
 			// 
 			|| /^完[結结]$/.test(work_data.status)
 			//
-			|| work_data.status.includes('完結済'));
+			|| work_data.status.includes('完結済')
+			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
+			|| work_data.status.includes('(完結)'));
 		},
 		pre_get_chapter_data : pre_get_chapter_data,
 		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。
@@ -258,7 +260,7 @@ function module_code(library_namespace) {
 
 		var _this = this;
 
-		// 取得伺服器列表。
+		// 取得圖庫伺服器列表。
 		get_URL(server_URL, function(XMLHttp) {
 			var html = XMLHttp.responseText;
 			_this.server_list = _this.parse_server_list(html)
@@ -640,7 +642,7 @@ function module_code(library_namespace) {
 
 			process.title = '下載' + work_data.title + ' - 目次 @ ' + _this.id;
 			work_data.directory_name = library_namespace.to_file_name(
-			// 允許自訂作品目錄名。
+			// 允許自訂作品目錄名/命名資料夾。
 			work_data.directory_name || work_data.id + ' ' + work_data.title);
 			// 允許自訂作品目錄，但須自行escape並添加path_separator。
 			// @see qq.js
@@ -1307,7 +1309,8 @@ function module_code(library_namespace) {
 			if (!has_error) {
 				file_type = library_namespace.file_type(contents);
 				has_error = !file_type || file_type.type !== 'jpg'
-						&& file_type.type !== 'png' && file_type.type !== 'gif';
+				// 抓取到非JPG圖片
+				&& file_type.type !== 'png' && file_type.type !== 'gif';
 				if (has_EOI = file_type && !file_type.damaged) {
 					if (has_error) {
 						library_namespace.warn('The file type ['
@@ -1387,7 +1390,7 @@ function module_code(library_namespace) {
 				}
 			}
 
-			// 有錯誤。
+			// 有錯誤。下載錯誤時報錯。
 			library_namespace.error((has_EOI === false ? 'Do not has EOI: '
 			//
 			: (XMLHttp.status ? XMLHttp.status + ' ' : '')

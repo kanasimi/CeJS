@@ -12,7 +12,7 @@ http://stackshare.io/continuous-integration
 
 # [Colorless echo](http://lyrics.meicho.com.tw/) JavaScript kit
 The project aims to develop a JavaScript module framework that is simple to use with some interesting features.
-本計畫希望能建立一個能簡單上手的 JavaScript 模組架構。<!-- toolkit -->
+本計畫希望能建立一個能簡單上手的 JavaScript 程式庫架構。<!-- toolkit -->
 
 ## Web page usage 
 ``` HTML
@@ -34,13 +34,13 @@ CeL.run( 'module.name', function callback() { /* ... */ } );
 3. 進到安裝檔所在的目錄，在命令行界面下執行：
 
    ``` cmd
-   PATH> node _CeL.updater.node.js
+   PROMPT> node _CeL.updater.node.js
    ```
 
 4. CeJS 程式庫應該已經解壓縮，並且放在安裝檔所在目錄的 CeJS-master 目錄下，可以開始試用：
 
    ``` cmd
-   PATH> node
+   PROMPT> node
    > require('./CeJS-master/_for include/node.loader.js');
    > CeL.run('data.math');
    > CeL.GCD(4, 6);
@@ -142,20 +142,20 @@ Live demo: [紀年轉換工具](http://lyrics.meicho.com.tw/lib/JS/_test%20suite
 ### ES6 shim
 See [compatibility.js](https://github.com/kanasimi/CeJS/blob/master/data/code/compatibility.js) and [native.js](https://github.com/kanasimi/CeJS/blob/master/data/native.js).
 
-## Demo
+## Demo 線上示範
 * The [live demo page](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/demo.htm) usually takes 10 to 20 seconds to load.
 * 由於頻寬不足，加上載入時須做初始化，本功能示範頁面在載入時得稍微等一下。
 [![live demo page](https://lh3.googleusercontent.com/mnxTEY5szTdGeYdUWjC4Pw18CwzJ4EkflaIA42lsBMQRXGthF8rBHbFSKIZ5LjokCQthIQOnxxmH8_eke4oD3Yr-kU1YzUPzOEINiBwdiCHhazHQVYdYRii4oc966DUmE-MV_B_o8j2Ko1XJ-X7Ro4K-xHA6rGY11Q7WIv3Qne-4Q9tfmgYkgysaYOBxUtsZIOrpKghFCfTXsnjVGVhsiCjc9pyT-x3udMZ-RBs6hF8AxFAprU5WX5utht69g9w6d2inJlLHuImvIHuL1dLNCU9PBHWbleOyRkEs_fUrou5-aqpaxYo07W_cfwmYsGQUVU1_g4eQNydlKMNOUAcuQm21sop7qT-j9LKrTPkGh4fbCi8Fw99PA9GsCMX_KK6PX1HKgnoBzCJDjPFjjQthhx3FCXLGuSZmhYp5Y2FN-Atm1MBQMgtigpLixZ52pQD6UIObrC0Mw33fGmhfe9nfnjDtVvjoXbvNaoZ2ZyKrQ-7peMaExoVRLKtUY_ZN2EwHPfVjBAFFZVKPwCg3hKK5ERM69cSrWUSkfdWlHp7_yIQ74wReMgDtu_bpvqF0D8SffAQu=w506-h297-no)](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/demo.htm)
-* [GitHub Pages](https://kanasimi.github.io/CeJS/)
+* [GitHub Pages](https://kanasimi.github.io/CeJS/) 在線演示。
 
 ## Requirements and dependencies
 * 本 library 須使用新一點的瀏覽器/執行環境。
 * 本 library 將使用到 global 變數 ```CeL```。
 
-## Concepts
+## Concepts 模組概念
 詳細請參閱[概念介紹頁](http://lyrics.meicho.com.tw/game/game.pl?seg=CeJS)。
 
-## Contact
+## Contact 聯絡我們
 Contact us at [Google+](https://plus.google.com/101633590909790225455) or [github](https://github.com/kanasimi/CeJS/issues).
 
 (This document is written by [GitHub Flavored Markdown](https://help.github.com/categories/writing-on-github/).)
