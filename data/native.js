@@ -3190,6 +3190,65 @@ function module_code(library_namespace) {
 
 	_.LCS = LCS;
 
+	function diff_with_Array(to, options) {
+		function append(array, item) {
+			if (item) {
+				if (Array.isArray(item)) {
+					array.append(item.filter(function(i) {
+						return !!i;
+					}));
+				} else {
+					array.push(item);
+				}
+			}
+		}
+
+		var diff = LCS(this, to, 'diff'),
+		//
+		from_added = [], to_added = [];
+		// 經過重排後，已經無法回溯至原先資料。
+		diff.forEach(function(pair) {
+			append(from_added, pair[0]);
+			append(to_added, pair[1]);
+		});
+
+		// 檢查是否有被移到前方的，確保回傳的真正是unique的。在只有少量增加時較有效率。
+		from_added = from_added.filter(function(item) {
+			// assert: {String}item
+			var index = to_added.indexOf(item);
+			if (index !== NOT_FOUND) {
+				to_added.splice(index, 1);
+				return false;
+			}
+
+			// todo: use LCS() again
+			for (index = 0; index < to_added.length; index++) {
+				// 若item極短，可能會很容易被匹配到而大亂。
+				var to_item = to_added[index];
+				if (to_item.length < 2 * item.length) {
+					var i = to_item.indexOf(item);
+					if (i !== NOT_FOUND) {
+						to_added[index] = to_item.slice(0, i)
+								+ to_item.slice(i + item.length);
+						return false;
+					}
+				}
+			}
+
+			return true;
+		});
+
+		if (from_added.length === 0) {
+			from_added = undefined;
+		}
+		return [ from_added, to_added ];
+	}
+
+	function diff_with_String(to, options) {
+		return diff_with_Array.call(this.split('\n'), Array.isArray(to) ? to
+				: to ? to.split('\n') : [], options);
+	}
+
 	// ---------------------------------------------------------------------//
 	// https://en.wikipedia.org/wiki/Letter_case#Headings_and_publication_titles
 	// http://adminsecret.monster.com/training/articles/358-what-to-capitalize-in-a-title
@@ -3561,9 +3620,7 @@ function module_code(library_namespace) {
 		each_between : each_between,
 
 		edit_distance : set_bind(Levenshtein_distance),
-		diff_with : function(to) {
-			return LCS(this, to || '', 'diff');
-		},
+		diff_with : diff_with_String,
 
 		display_width : set_bind(display_width)
 	});
@@ -3705,9 +3762,7 @@ function module_code(library_namespace) {
 		// Array.prototype.first_matched
 		first_matched : set_bind(first_matched, true),
 
-		diff_with : function(to) {
-			return LCS(this, to, 'diff');
-		},
+		diff_with : diff_with_Array,
 
 		run_async : function run_asynchronous(for_each, callback, _this) {
 			run_serial_asynchronous(for_each, this, callback, _this);
