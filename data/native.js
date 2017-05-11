@@ -3273,7 +3273,11 @@ function module_code(library_namespace) {
 			var diff = from_item.diff_with(max_LCS_data[2], {
 				trace_Array : max_LCS_data[1]
 			});
-			to_added[max_LCS_data[0]] = diff[1];
+			if (diff[1]) {
+				to_added[max_LCS_data[0]] = diff[1];
+			} else {
+				to_added.splice(max_LCS_data[0], 1);
+			}
 			from_added[from_index] = diff[0];
 		});
 
