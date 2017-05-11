@@ -500,8 +500,9 @@ function test_native() {
 		assert(["aa", "aa[[bb[[cc]]dd]]".remove_head_tail("[[", "]]")], 'string.remove_head_tail() #4');
 		assert(['[df [h [r]r] [ew] g]', '<df <h <r>r> <ew> g>'.replace_till_stable(/<([^<>]+)*>/, '[$1]')], 'string.replace_till_stable() #1');
 		assert(['[a]', '{{a1{{b2}}c3}}'.replace_till_stable(/{{([^{}])[^{}]*}}/, '[$1]')], 'string.replace_till_stable() #2');
-		// OBject 可能重排。
-		assert([JSON.stringify({'1e3':0,'5':1,'66':2}), JSON.stringify(['1e3',5,66].to_hash())], 'Array.prototype.to_hash()');
+		// Object 可能重排。
+		assert([JSON.stringify({'1e3':0,'5':1,'66':2}), JSON.stringify(['1e3',5,66].to_hash())], 'Array.prototype.to_hash() #1');
+		assert([JSON.stringify({" aa":1,"b ":3,"e\n":4}), JSON.stringify([,' aa',,'b ','e\n'].to_hash())], 'Array.prototype.to_hash() #2');
 
 		assert([ 'a,\u0300,\uD801\uDC01,\u0301,\n,字,\uD801\uDC04,\u0304', 'a\u0300\uD801\uDC01\u0301\n字\uD801\uDC04\u0304'.chars().join(',') ], 'split_by_code_point() #1');
 		assert([ 'a\u0300,\uD801\uDC01\u0301,\n,字,\uD801\uDC04\u0304', 'a\u0300\uD801\uDC01\u0301\n字\uD801\uDC04\u0304'.chars(true).join(',') ], 'split_by_code_point() #2');
@@ -512,7 +513,7 @@ function test_native() {
 		assert([ 'Title:title\n    →1234', CeL.display_align({'Title:':'title','→':1234}) ], 'display_align() #1');
 	});
 
-	error_count += CeL.test('LCS', function(assert) {
+	error_count += CeL.test('edit distance & LCS', function(assert) {
 		assert([ 17, 'correction systems'.edit_distance('spell checkers, correction system') ], 'edit_distance() #1');
 		assert([ 9, 'Levenshtein distance'.edit_distance('edit distance') ], 'edit_distance() #2');
 		assert([ 7, 'spell check'.edit_distance('Spell Check Tool') ], 'edit_distance() #3');

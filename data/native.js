@@ -2914,6 +2914,8 @@ function module_code(library_namespace) {
 			}
 			library_namespace.debug('-'.repeat(8 * (from.length + 3)));
 		}
+
+		// trace_Array.LCS_length = trace_Array[trace_index - 1];
 		return trace_Array;
 	}
 
@@ -2951,8 +2953,8 @@ function module_code(library_namespace) {
 		}
 		// assert: Array.isArray(from) && Array.isArray(from)
 
-		var from_length = from.length, from_index = from_length - 1, to_index = to.length - 1, trace_Array = LCS_length(
-				from, to, true),
+		var from_length = from.length, from_index = from_length - 1, to_index = to.length - 1, trace_Array = options.trace_Array
+				|| LCS_length(from, to, true),
 		// 獨特/獨有的 exclusive 元素列表。
 		diff_list = [], from_unique, to_unique,
 		// flags
@@ -2971,7 +2973,7 @@ function module_code(library_namespace) {
 			});
 		}
 
-		function normalize_unique(_unique, is_to) {
+		function normalize_unique(_unique, _this) {
 			if (!Array.isArray(_unique)) {
 				// return '';
 				return;
@@ -2981,12 +2983,17 @@ function module_code(library_namespace) {
 				return _unique;
 			}
 
-			var _this = is_to ? to : from;
-			if (_unique[0] === _unique[1]) {
-				return _this[_unique[0]];
+			var index = _unique[0];
+			if (index === _unique[1]) {
+				if (_unique === from_unique) {
+					from_unique = index;
+				} else {
+					to_unique = index;
+				}
+				return _this[index];
 			}
 
-			_unique = _this.slice(_unique[0], _unique[1] + 1);
+			_unique = _this.slice(index, _unique[1] + 1);
 
 			return use_String ? _unique.join(separator) : _unique;
 		}
@@ -3000,14 +3007,15 @@ function module_code(library_namespace) {
 			library_namespace.debug(JSON.stringify([ from_index, to_index,
 					from_unique, to_unique ]), 3, 'add_to_diff_list');
 
-			var result = [ normalize_unique(from_unique) ];
+			var result = [ normalize_unique(from_unique, from) ];
 			if (to_unique) {
-				result.push(normalize_unique(to_unique, true));
+				result.push(normalize_unique(to_unique, to));
 			}
 			// result.index = [ from_index, to_index ];
 			// _index = undefined || [ start index, to index ]
 			result.index = [ from_unique, to_unique ];
-			// 上一個相同的index。這在最初的部分可能不準確!
+			// 上一個相同的index。
+			// 警告:這在_unique最初的一個index可能不準確!
 			result.last_index = [ from_index, to_index ];
 			diff_list.unshift(result);
 			// reset
@@ -3191,57 +3199,93 @@ function module_code(library_namespace) {
 	_.LCS = LCS;
 
 	function diff_with_Array(to, options) {
-		function append(array, item) {
+		function append(array, item, item_index) {
 			if (item) {
+				if (Array.isArray(item_index)) {
+					item_index = item_index[0];
+				}
 				if (Array.isArray(item)) {
-					array.append(item.filter(function(i) {
-						return !!i;
+					array.append(item.filter(function(i, index) {
+						if (i) {
+							array.index.push(item_index + index);
+							return true;
+						}
 					}));
 				} else {
+					array.index.push(item_index);
 					array.push(item);
 				}
 			}
 		}
 
-		var diff = LCS(this, to, 'diff'),
-		//
-		from_added = [], to_added = [];
-		// 經過重排後，已經無法回溯至原先資料。
+		var diff = LCS(this, to, Object.assign({
+			diff : true
+		}, options)), from_added = [], to_added = [],
+		// 避免經過重排後，已經無法回溯至原先資料。
+		from_added_index = from_added.index = [], move_to = library_namespace
+				.null_Object();
+		to_added.index = [];
+
+		// TODO: diff其中有undefined
+
 		diff.forEach(function(pair) {
-			append(from_added, pair[0]);
-			append(to_added, pair[1]);
+			append(from_added, pair[0], pair.index[0]);
+			append(to_added, pair[1], pair.index[1]);
 		});
 
 		// 檢查是否有被移到前方的，確保回傳的真正是unique的。在只有少量增加時較有效率。
-		from_added = from_added.filter(function(item) {
+		from_added = from_added.filter(function(from_item, from_index) {
 			// assert: {String}item
-			var index = to_added.indexOf(item);
+			var index = to_added.indexOf(from_item);
+			// 去掉完全相同的行。
 			if (index !== NOT_FOUND) {
+				move_to[from_added.index[from_index]] = to_added.index[index];
+				from_added.index.splice(from_index, 1);
+				to_added.index.splice(index, 1);
 				to_added.splice(index, 1);
 				return false;
 			}
 
-			// todo: use LCS() again
-			for (index = 0; index < to_added.length; index++) {
-				// 若item極短，可能會很容易被匹配到而大亂。
-				var to_item = to_added[index];
-				if (to_item.length < 2 * item.length) {
-					var i = to_item.indexOf(item);
-					if (i !== NOT_FOUND) {
-						to_added[index] = to_item.slice(0, i)
-								+ to_item.slice(i + item.length);
-						return false;
-					}
+			from_item = from_item.chars();
+			// use LCS() again
+			var max_LCS_length = 0,
+			// ↑ = Math.max(20, from_item.length / 2 | 0)
+			max_LCS_data;
+			to_added.forEach(function(to_item, to_index) {
+				// assert: from_item, to_item 皆無 "\n"
+				// console.log(to_item);
+				if (typeof to_item === 'string') {
+					to_item = to_item.chars();
 				}
+				var trace_Array = LCS_length(from_item, to_item, true),
+				// const
+				this_LCS_length = trace_Array[trace_Array.length - 1];
+				if (max_LCS_length < this_LCS_length) {
+					max_LCS_length = this_LCS_length;
+					max_LCS_data = [ to_index, trace_Array, to_item ];
+				}
+			});
+
+			if (!max_LCS_data) {
+				return true;
 			}
 
+			var diff = from_item.diff_with(max_LCS_data[2], {
+				trace_Array : max_LCS_data[1]
+			});
+			from_added[from_index] = diff[0];
+			to_added[max_LCS_data[0]] = diff[1];
 			return true;
 		});
+
+		from_added.index = from_added_index;
 
 		if (from_added.length === 0) {
 			from_added = undefined;
 		}
-		return [ from_added, to_added ];
+		from_added = [ from_added, to_added ];
+		from_added.moved = move_to;
+		return from_added;
 	}
 
 	function diff_with_String(to, options) {
