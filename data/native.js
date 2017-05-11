@@ -3282,8 +3282,23 @@ function module_code(library_namespace) {
 
 		if (from_added.length === 0) {
 			from_added = undefined;
+		} else {
+			// 將item轉為{String}
+			from_added = from_added.map(function(line) {
+				return Array.isArray(line) ? line.join('') : line;
+			});
 		}
-		from_added = [ from_added, to_added ];
+
+		from_added = [ from_added ];
+
+		if (to_added.length > 0) {
+			// 將item轉為{String}
+			to_added = to_added.map(function(line) {
+				return Array.isArray(line) ? line.join('') : line;
+			});
+			from_added.push(to_added);
+		}
+
 		from_added.moved = move_to;
 		return from_added;
 	}
