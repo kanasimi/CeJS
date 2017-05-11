@@ -3234,16 +3234,16 @@ function module_code(library_namespace) {
 		});
 
 		// 檢查是否有被移到前方的，確保回傳的真正是unique的。在只有少量增加時較有效率。
-		from_added = from_added.filter(function(from_item, from_index) {
+		from_added.forEach(function(from_item, from_index) {
 			// assert: {String}item
 			var index = to_added.indexOf(from_item);
 			// 去掉完全相同的行。
 			if (index !== NOT_FOUND) {
 				move_to[from_added.index[from_index]] = to_added.index[index];
-				from_added.index.splice(from_index, 1);
 				to_added.index.splice(index, 1);
 				to_added.splice(index, 1);
-				return false;
+				from_added.index.splice(from_index, 1);
+				from_added[from_index] = false;
 			}
 
 			from_item = from_item.chars();
@@ -3267,17 +3267,19 @@ function module_code(library_namespace) {
 			});
 
 			if (!max_LCS_data) {
-				return true;
+				return;
 			}
 
 			var diff = from_item.diff_with(max_LCS_data[2], {
 				trace_Array : max_LCS_data[1]
 			});
-			from_added[from_index] = diff[0];
 			to_added[max_LCS_data[0]] = diff[1];
-			return true;
+			from_added[from_index] = diff[0];
 		});
 
+		from_added = from_added.filter(function(item) {
+			return !!item;
+		});
 		from_added.index = from_added_index;
 
 		if (from_added.length === 0) {
