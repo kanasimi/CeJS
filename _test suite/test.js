@@ -544,6 +544,8 @@ function test_native() {
 		assert([ 'a,b', CeL.LCS('0a', '0b', 'diff').join(';') ], 'LCS()');
 		assert([ 'a,b', CeL.LCS('0a1', '0b1', 'diff').join(';') ], 'LCS()');
 		assert([ ',b0;a', CeL.LCS('0a', 'b00', 'diff').join(';') ], 'LCS()');
+
+		assert([ 'ccdd,ffee', 'aabb\nbbcc\nccdd'.diff_with('bbcc\nffee\naabb').join(',') ], '.diff_with()');
 	});
 
 }
