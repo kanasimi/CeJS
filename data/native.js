@@ -3198,6 +3198,7 @@ function module_code(library_namespace) {
 
 	_.LCS = LCS;
 
+	// unfinished
 	function diff_with_Array(to, options) {
 		function append(array, item, item_index) {
 			if (item) {
@@ -3233,8 +3234,7 @@ function module_code(library_namespace) {
 			append(to_added, pair[1], pair.index[1]);
 		});
 
-		// 檢查是否有被移到前方的，確保回傳的真正是unique的。在只有少量增加時較有效率。
-		from_added.forEach(function(from_item, from_index) {
+		function scan_list(from_item, from_index) {
 			// assert: {String}item
 			var index = to_added.indexOf(from_item);
 			// 去掉完全相同的行。
@@ -3244,9 +3244,12 @@ function module_code(library_namespace) {
 				to_added.splice(index, 1);
 				from_added.index.splice(from_index, 1);
 				from_added[from_index] = false;
+				return;
 			}
 
-			from_item = from_item.chars();
+			if (typeof from_item === 'string') {
+				from_item = from_item.chars();
+			}
 			// use LCS() again
 			var max_LCS_length = 0,
 			// ↑ = Math.max(20, from_item.length / 2 | 0)
@@ -3278,33 +3281,37 @@ function module_code(library_namespace) {
 			} else {
 				to_added.splice(max_LCS_data[0], 1);
 			}
-			from_added[from_index] = diff[0];
-		});
+			from_added[from_index] = from_item = diff[0];
+			if (from_item) {
+				// 經過變更之後，可能需要再掃描一次。
+				scan_list(from_item, from_index);
+			}
+		}
+		// 檢查是否有被移到前方的，確保回傳的真正是unique的。在只有少量增加時較有效率。
+		from_added.forEach(scan_list);
 
 		from_added = from_added.filter(function(item) {
 			return !!item;
 		});
-		from_added.index = from_added_index;
 
 		if (from_added.length === 0) {
-			from_added = undefined;
+			from_added = [];
 		} else {
 			// 將item轉為{String}
-			from_added = from_added.map(function(line) {
+			from_added = [ from_added.map(function(line) {
 				return Array.isArray(line) ? line.join('') : line;
-			});
+			}) ];
 		}
-
-		from_added = [ from_added ];
 
 		if (to_added.length > 0) {
 			// 將item轉為{String}
 			to_added = to_added.map(function(line) {
 				return Array.isArray(line) ? line.join('') : line;
 			});
-			from_added.push(to_added);
+			from_added[1] = to_added;
 		}
 
+		from_added.index = from_added_index;
 		from_added.moved = move_to;
 		return from_added;
 	}

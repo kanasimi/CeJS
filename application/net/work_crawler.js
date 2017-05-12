@@ -165,13 +165,14 @@ function module_code(library_namespace) {
 		MAX_ERROR : Work_crawler.MAX_ERROR,
 		MAX_EOI_ERROR : Math.min(3, Work_crawler.MAX_ERROR),
 		// 應改成最小容許圖案檔案大小 (bytes)。
-		MIN_LENGTH : 6e3,
+		MIN_LENGTH : 4e3,
 		// 仙人拍鼓有時錯，跤步踏差啥人無？ 客語 神仙打鼓有時錯，腳步踏差麼人無
 		MESSAGE_RE_DOWNLOAD : '神仙打鼓有時錯，腳步踏差誰人無。下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
-		// allow .jpg without EOI mark. default:false
+		// 當圖像不存在EOI，或是被偵測出非圖像時，依舊強制儲存檔案。
+		// allow image without EOI mark. default:false
 		// allow_EOI_error : true,
 		//
-		// 圖像檔案下載失敗處理方式：忽略/跳過圖像錯誤。當圖像檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。default:false
+		// 圖像檔案下載失敗處理方式：忽略/跳過圖像錯誤。當404圖像不存在、檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。default:false
 		// skip_error : true,
 		//
 		// 若已經存在壞掉的圖片，就不再嘗試下載圖片。default:false
@@ -214,6 +215,14 @@ function module_code(library_namespace) {
 		// recheck : true,
 		// 當無法取得chapter資料時，直接嘗試下一章節。在手動+監視下recheck時可併用此項。default:false
 		// skip_chapter_data_error : true,
+
+		image_types : {
+			jpg : true,
+			// 抓取到非JPG圖片
+			gif : true,
+			png : true,
+			bmp : true
+		},
 
 		image_path_to_url : image_path_to_url,
 		is_work_id : function(work_id) {
@@ -802,7 +811,7 @@ function module_code(library_namespace) {
 							library_namespace
 									.warn('既然設定了 .recheck，則將 .reget_chapter 設定為 ['
 											+ _this.reget_chapter
-											+ '] 將無作用！將自動將 .reget_chapter 轉為 true。');
+											+ '] 將無作用！自動把 .reget_chapter 轉為 true。');
 						}
 						_this.reget_chapter = true;
 					}
@@ -838,8 +847,8 @@ function module_code(library_namespace) {
 									+ work_data.chapter_count
 									+ '，'
 									+ (work_data.reget_chapter ? '但已設定下載所有章節內容。'
-											: _this.regenerate ? '將僅利用 cache 重建資料(如ebook)，不重新下載所有章節內容。'
-													: '將跳過本作品不處理。'));
+											: _this.regenerate ? '僅利用 cache 重建資料(如ebook)，不重新下載所有章節內容。'
+													: '跳過本作品不處理。'));
 					if (work_data.reget_chapter || _this.regenerate) {
 						// 即使是這一種，還是得要從頭 check cache 並生成資料(如.epub)。
 						work_data.last_download.chapter = _this.start_chapter;
@@ -1305,19 +1314,18 @@ function module_code(library_namespace) {
 			// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
 			// 因此當圖像檔案過小，即使偵測到以 End Of Image mark 作結，依然有壞檔疑慮。
 			has_error = !contents || !(contents.length > _this.MIN_LENGTH)
-					|| (XMLHttp.status / 100 | 0) !== 2, file_type, has_EOI;
+					|| (XMLHttp.status / 100 | 0) !== 2, verified_image;
 			if (!has_error) {
-				file_type = library_namespace.file_type(contents);
-				has_error = !file_type || file_type.type !== 'jpg'
-				// 抓取到非JPG圖片
-				&& file_type.type !== 'png' && file_type.type !== 'gif';
-				if (has_EOI = file_type && !file_type.damaged) {
-					if (has_error) {
+				image_data.file_length.push(contents.length);
+				var file_type = library_namespace.file_type(contents);
+				verified_image = file_type && !file_type.damaged;
+				if (verified_image) {
+					if (!(file_type.type in _this.image_types)) {
 						library_namespace.warn('The file type ['
 								+ file_type.type + '] is not image!\n'
 								+ image_data.file);
-					} else if (!image_data.file.endsWith('.'
-							+ file_type.extension)) {
+					}
+					if (!image_data.file.endsWith('.' + file_type.extension)) {
 						// 依照所驗證的檔案格式改變副檔名。
 						// e.g. .png
 						image_data.file = image_data.file.replace(/[^.]+$/,
@@ -1325,18 +1333,25 @@ function module_code(library_namespace) {
 					}
 				}
 			}
-			// console.log(_this.skip_error + ',' + _this.MAX_ERROR);
-			// console.log('error count: ' + image_data.error_count);
-			if (!has_error || _this.skip_error
-					&& image_data.error_count === _this.MAX_ERROR) {
-				if (!has_error) {
-					image_data.file_length
-					//
-					.push(contents ? contents.length : 0);
-				}
+			// verified_image===true 則必然(!!has_error===false)
+			// has_error表示下載過程發生錯誤，光是檔案損毀，不會被當作has_error!
+			// has_error則必然(!!verified_image===false)
+
+			if (false) {
+				console.log(_this.skip_error + ',' + _this.MAX_ERROR + ','
+						+ has_error);
+				console.log('error count: ' + image_data.error_count);
+			}
+			if (verified_image || _this.skip_error
+			// 有出問題的話，最起碼都需retry足夠次數。
+			&& image_data.error_count === _this.MAX_ERROR
+			//
+			|| _this.allow_EOI_error
+			//
+			&& image_data.file_length.length > _this.MAX_EOI_ERROR) {
 				// console.log(image_data.file_length);
-				if (has_EOI || _this.skip_error
-				// skip error 的話，就算沒有取得過檔案，依然 pass。
+				if (verified_image || _this.skip_error
+				// skip error 的話，就算沒有取得過檔案(如404圖像不存在)，依然 pass。
 				&& image_data.file_length.length === 0
 				//
 				|| image_data.file_length.cardinal_1()
@@ -1347,24 +1362,27 @@ function module_code(library_namespace) {
 					// pass, 過關了。
 					var bad_file_path = _this.EOI_error_path(image_data.file,
 							XMLHttp);
-					if (has_error || has_EOI === false) {
+					if (has_error || verified_image === false) {
 						image_data.file = bad_file_path;
 						image_data.has_error = true;
-						library_namespace.warn((has_error ? 'Force saving '
-								+ (contents ? 'bad' : 'empty')
-								+ ' image'
+						library_namespace.warn('Force saving '
+								+ (has_error ? (contents ? 'bad' : 'empty')
+										+ ' file (as image)'
+								// assert: (!!verified_image===false)
+								// 圖檔損壞: e.g., Do not has EOI
+								: 'bad image')
 								+ (XMLHttp.status ? ' (status '
 										+ XMLHttp.status + ')' : '')
 								+ (contents ? ' ' + contents.length + ' bytes'
-										: '') + ': ' : 'Do not has EOI: ')
-								+ image_data.file + '\n← ' + url);
+										: '') + ': ' + image_data.file + '\n← '
+								+ url);
 						if (!contents
 						// 404之類，就算有內容，也不過是錯誤訊息頁面。
 						|| (XMLHttp.status / 100 | 0) === 4) {
 							contents = '';
 						}
 					} else if (node_fs.existsSync(bad_file_path)) {
-						library_namespace.info('將刪除損壞的舊檔：' + bad_file_path);
+						library_namespace.info('刪除損壞的舊檔：' + bad_file_path);
 						library_namespace.fs_remove(bad_file_path);
 					}
 
@@ -1391,7 +1409,9 @@ function module_code(library_namespace) {
 			}
 
 			// 有錯誤。下載錯誤時報錯。
-			library_namespace.error((has_EOI === false ? 'Do not has EOI: '
+			library_namespace.error(
+			//
+			(verified_image === false ? 'Do not has EOI: '
 			//
 			: (XMLHttp.status ? XMLHttp.status + ' ' : '')
 			//
@@ -1404,7 +1424,8 @@ function module_code(library_namespace) {
 				image_data.has_error = true;
 				// throw new Error(_this.MESSAGE_RE_DOWNLOAD);
 				library_namespace.log(_this.MESSAGE_RE_DOWNLOAD);
-				// console.log('error count: ' + image_data.error_count);
+				// console.log('error count: ' +
+				// image_data.error_count);
 				if (!_this.skip_error) {
 					library_namespace
 							.info('若錯誤持續發生，您可以設定 .skip_error 來忽略圖像錯誤。');

@@ -9908,16 +9908,18 @@ function module_code(library_namespace) {
 							'Get page: ' + index + '/' + rows.length, 2,
 									'add_listener.with_diff');
 							session.page(row.pageid, function(page_data) {
-								if (!exit) {
+								if (!exit && page_data) {
 									Object.assign(row, page_data);
-									row.diff
-									//
-									= (page_data.revisions.length === 1
-									// assert: (row.is_new ||
-									// page_data.revisions.length > 1)
-									? '' : page_data.revisions[1]['*'])
-									//
-									.diff_with(page_data.revisions[0]['*']);
+									if (page_data.revisions) {
+										row.diff
+										//
+										= (page_data.revisions.length === 1
+										// assert: (row.is_new ||
+										// page_data.revisions.length > 1)
+										? '' : page_data.revisions[1]['*'])
+										//
+										.diff_with(page_data.revisions[0]['*']);
+									}
 									exit = listener.call(options, row, index,
 											rows);
 								}

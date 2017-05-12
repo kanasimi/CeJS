@@ -1018,13 +1018,13 @@ function add_tag(period, data, group, register_only, options) {
 	}
 	target = draw_era.tags[target];
 	if (target[period])
-		if (options.rename_duplicate) {
+		if (options && options.rename_duplicate) {
 			for (var i = 0, n;;)
 				if (!target[n = period + '#' + ++i]) {
 					period = n;
 					break;
 				}
-		} else if (typeof options.for_duplicate === 'function')
+		} else if (options && typeof options.for_duplicate === 'function')
 			arg_passed = options.for_duplicate(target[period], arg_passed);
 		else {
 			CeL.warn('add_tag: 已經有此時段存在！將跳過之，不會以新的覆蓋舊的。 '
