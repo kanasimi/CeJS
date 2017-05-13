@@ -791,9 +791,9 @@ function module_code(library_namespace) {
 		// 警告：應處理 "[[text | [[ link ]] ]]", "[[ link | a[1] ]]" 之特殊情況
 		.replace(
 				PATTERN_wikilink_g,
-				function(all_link, page_section, page_name, section_title,
+				function(all_link, page_and_section, page_name, section_title,
 						displayed_text) {
-					return displayed_text || page_section;
+					return displayed_text || page_and_section;
 				})
 		// e.g., "ABC (英文)" → "ABC "
 		// e.g., "ABC （英文）" → "ABC "
@@ -1598,7 +1598,7 @@ function module_code(library_namespace) {
 	var PATTERN_transclusion = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)(?:#[^\|{}]*)?((?:\|[^<>\[\]]*)*?)}}/g,
 	/** {RegExp}wikilink內部連結的匹配模式。 */
 	PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
-	/** {RegExp}wikilink內部連結的匹配模式v2，[all_link,page_section,page_name,section_title,displayed_text]。頁面標題不可包含無效的字元：[\n\[\]{}]，經測試anchor亦不可包含[\n\[\]{}] */
+	/** {RegExp}wikilink內部連結的匹配模式v2，[all_link,page_and_section,page_name,section_title,displayed_text]。頁面標題不可包含無效的字元：[\n\[\]{}]，經測試anchor亦不可包含[\n\[\]{}] */
 	PATTERN_wikilink = /\[\[(([^\[\]{}\n\|#]+)(#[^\[\]{}\n\|]*)?|#[^\[\]{}\n\|]+)(?:\|([^\n]+?))?\]\]/,
 	//
 	PATTERN_wikilink_g = new RegExp(PATTERN_wikilink.source, 'g'),
@@ -1661,6 +1661,15 @@ function module_code(library_namespace) {
 		// [[: en : abc ]] is OK, as "en : abc".
 		// [[ :en:abc]] is NOT OK.
 		namespace : function() {
+			if (this.oddly) {
+				return this.map(
+						// 可能有 [[title{{=}}<!-- comments -->]]
+						function(token, index) {
+							return index > 0 && typeof token === 'string' ? ':'
+									+ token : token;
+						}).join('');
+			}
+			// assert: typeof (every elements of this) === 'string'
 			return this.join(':');
 		},
 		// page title, template name
@@ -2118,7 +2127,7 @@ function module_code(library_namespace) {
 		// [[~:~|~]], [[~:~:~|~]]
 		wikitext = wikitext.replace_till_stable(
 		// or use ((PATTERN_link))
-		PATTERN_wikilink_g, function(all_link, page_section, page_name,
+		PATTERN_wikilink_g, function(all_link, page_and_section, page_name,
 				section_title, displayed_text) {
 			// 自 end_mark 向前回溯。
 			var previous;
@@ -2127,7 +2136,7 @@ function module_code(library_namespace) {
 				previous = all_link.slice(0, index);
 				all_link = all_link.slice(index);
 				if (index = all_link.match(PATTERN_wikilink)) {
-					page_section = index[1];
+					page_and_section = index[1];
 					page_name = index[2];
 					section_title = index[3];
 					displayed_text = index[4];
@@ -2141,14 +2150,18 @@ function module_code(library_namespace) {
 			}
 			library_namespace.debug(previous + ' + ' + all_link, 4,
 					'parse_wikitext.link');
-			if (page_section.includes(include_mark)) {
+			if (false && page_and_section.includes(include_mark)) {
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				all_link = parse_wikitext([ all_link.slice('[['.length,
-						-']]'.length) ], options, queue);
+				// assert: all_link === "[[...]]"
+				all_link = parse_wikitext(all_link.slice('[['.length,
+						-']]'.length), options, queue);
+				// TODO: 處理 [[:en<!--comments-->:link{{=}}<!--comments-->]] ===
+				// [[:en:link]]
+				;
 				all_link.unshift('[[');
 				all_link.push(']]');
 				_set_wiki_type(all_link, 'plain');
-				queue.push(parameters);
+				queue.push(all_link);
 				return previous + include_mark + (queue.length - 1) + end_mark;
 			}
 
@@ -2156,7 +2169,7 @@ function module_code(library_namespace) {
 			if (!page_name) {
 				// assert: [[#section_title]]
 				page_name = '';
-				section_title = page_section;
+				section_title = page_and_section;
 			} else {
 				if (!section_title) {
 					section_title = '';
@@ -2171,9 +2184,15 @@ function module_code(library_namespace) {
 					// test [[Category:name|order]]
 					.match(PATTERN_category_prefix);
 				}
-				page_name = _set_wiki_type(
-				// TODO: normalize 對 [[文章名稱 : 次名稱]] 可能出現問題。
-				page_name.split(normalize ? /\s*:\s*/ : ':'), 'namespace');
+				if (page_name.includes(include_mark)) {
+					// 預防有特殊 elements 置入其中。
+					page_name = parse_wikitext(page_name, options, queue);
+					page_name.oddly = true;
+				} else {
+					// TODO: normalize 對 [[文章名稱 : 次名稱]] 可能出現問題。
+					page_name = page_name.split(normalize ? /\s*:\s*/ : ':');
+				}
+				page_name = _set_wiki_type(page_name, 'namespace');
 			}
 			if (normalize) {
 				// assert: section_title && section_title.startsWith('#')
@@ -6607,6 +6626,7 @@ function module_code(library_namespace) {
 	 * 檢查頁面是否被保護。
 	 * 
 	 * 採用如:
+	 * 
 	 * @example <code>
 
 	wiki.page(title, function(page_data) {
@@ -9721,7 +9741,11 @@ function module_code(library_namespace) {
 
 			var result = [];
 			rows.forEach(function(row) {
-				if (!(row.rc_user > 0) && !(row.rc_type < 5)) {
+				if (!(row.rc_user > 0) && !(row.rc_type < 5)
+				//
+				&& (!('rc_type' in options)
+				//
+				|| options.rc_type !== ENUM_rc_type[row.rc_type])) {
 					// On wikis using Wikibase the results will otherwise be
 					// meaningless.
 					return;
@@ -9851,6 +9875,25 @@ function module_code(library_namespace) {
 					|| default_language);
 		}
 
+		var recent_options = SQL_config ? options.SQL_options : Object.assign({
+			parameters : {
+				rcdir : 'newer',
+				rctype : 'edit'
+			}
+		}, options);
+
+		if (options.type) {
+			if (SQL_config) {
+				if (!recent_options) {
+					recent_options = library_namespace.null_Object();
+				}
+				recent_options.type = options.type;
+			} else {
+				recent_options.parameters.rctype = options.type;
+			}
+			// TODO: other options
+		}
+
 		function receive() {
 			function receive_next() {
 				setTimeout(receive, (options.interval || 500)
@@ -9910,15 +9953,13 @@ function module_code(library_namespace) {
 							session.page(row.pageid, function(page_data) {
 								if (!exit && page_data) {
 									Object.assign(row, page_data);
-									if (page_data.revisions) {
-										row.diff
-										//
-										= (page_data.revisions.length === 1
+									var revisions = page_data.revisions;
+									if (revisions) {
+										row.diff = (revisions.length === 1
 										// assert: (row.is_new ||
-										// page_data.revisions.length > 1)
-										? '' : page_data.revisions[1]['*'])
-										//
-										.diff_with(page_data.revisions[0]['*']);
+										// revisions.length > 1)
+										? '' : revisions[1]['*'])
+												.diff_with(revisions[0]['*']);
 									}
 									exit = listener.call(options, row, index,
 											rows);
@@ -9997,11 +10038,7 @@ function module_code(library_namespace) {
 					receive_next();
 				}
 
-			}, SQL_config ? options.SQL_options : Object.assign({
-				parameters : {
-					rcdir : 'newer'
-				}
-			}, options));
+			}, recent_options);
 		}
 
 		receive();
