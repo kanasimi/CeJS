@@ -1661,16 +1661,7 @@ function module_code(library_namespace) {
 		// [[: en : abc ]] is OK, as "en : abc".
 		// [[ :en:abc]] is NOT OK.
 		namespace : function() {
-			if (this.oddly) {
-				return this.map(
-						// 可能有 [[title{{=}}<!-- comments -->]]
-						function(token, index) {
-							return index > 0 && typeof token === 'string' ? ':'
-									+ token : token;
-						}).join('');
-			}
-			// assert: typeof (every elements of this) === 'string'
-			return this.join(':');
+			return this.join(this.oddly ? '' : ':');
 		},
 		// page title, template name
 		page_title : function() {
@@ -2150,20 +2141,6 @@ function module_code(library_namespace) {
 			}
 			library_namespace.debug(previous + ' + ' + all_link, 4,
 					'parse_wikitext.link');
-			if (false && page_and_section.includes(include_mark)) {
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				// assert: all_link === "[[...]]"
-				all_link = parse_wikitext(all_link.slice('[['.length,
-						-']]'.length), options, queue);
-				// TODO: 處理 [[:en<!--comments-->:link{{=}}<!--comments-->]] ===
-				// [[:en:link]]
-				;
-				all_link.unshift('[[');
-				all_link.push(']]');
-				_set_wiki_type(all_link, 'plain');
-				queue.push(all_link);
-				return previous + include_mark + (queue.length - 1) + end_mark;
-			}
 
 			var file_matched, category_matched;
 			if (!page_name) {
@@ -2185,7 +2162,7 @@ function module_code(library_namespace) {
 					.match(PATTERN_category_prefix);
 				}
 				if (page_name.includes(include_mark)) {
-					// 預防有特殊 elements 置入其中。
+					// 預防有特殊 elements 置入link其中。
 					page_name = parse_wikitext(page_name, options, queue);
 					page_name.oddly = true;
 				} else {
@@ -9894,6 +9871,10 @@ function module_code(library_namespace) {
 			// TODO: other options
 		}
 
+		if (options.with_diff && !options.with_diff.diff && !options.with_diff.with_diff) {
+			options.with_diff.diff = true;
+		}
+
 		function receive() {
 			function receive_next() {
 				setTimeout(receive, (options.interval || 500)
@@ -9935,7 +9916,7 @@ function module_code(library_namespace) {
 						rows.reverse();
 					}
 
-					if (options.with_diff) {
+					if (options.with_diff || options.with_content >= 2) {
 						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 						// rvdiffto=prev 已經parsed，因此仍須自行解析。
 						// TODO: test
@@ -9954,12 +9935,24 @@ function module_code(library_namespace) {
 								if (!exit && page_data) {
 									Object.assign(row, page_data);
 									var revisions = page_data.revisions;
-									if (revisions) {
-										row.diff = (revisions.length === 1
-										// assert: (row.is_new ||
-										// revisions.length > 1)
-										? '' : revisions[1]['*'])
-												.diff_with(revisions[0]['*']);
+									if (options.with_diff && revisions) {
+										if (options.with_diff.LCS) {
+											row.diff = library_namespace.LCS(
+													revisions.length === 1
+													// assert: (row.is_new ||
+													// revisions.length > 1)
+													? '' : revisions[1]['*'],
+													revisions[0]['*'],
+													options.with_diff);
+										} else {
+											row.diff = (revisions.length === 1
+											// assert: (row.is_new ||
+											// revisions.length > 1)
+											? '' : revisions[1]['*'])
+													.diff_with(
+															revisions[0]['*'],
+															options.with_diff);
+										}
 									}
 									exit = listener.call(options, row, index,
 											rows);
@@ -9967,8 +9960,9 @@ function module_code(library_namespace) {
 								run_next();
 							}, Object.assign({
 								is_id : true,
+								rvlimit : options.with_content >= 2
 								// 僅取最近的兩個版本作 diff
-								rvlimit : 2
+								? options.with_content : 2
 							}, options.with_diff));
 						}, function() {
 							if (!exit) {

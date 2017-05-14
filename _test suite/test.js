@@ -2804,6 +2804,26 @@ function test_wiki() {
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
 		wikitext = 'a[[abc|s{{=}} -{ab}-]]b';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = 'a [[b<!-- c -->]]d';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = 'a [[:en:b<!-- c -->]] d';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = 'a [[b{{=}}<!-- c -->]]d';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = 'a [[:en:b{{=}}<!-- c -->]] d';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = 'a [[<!-- c -->b{{=}}]]d';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = 'a [[<!-- c -->:en:b{{=}}]]d';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = 'a [[:<!-- c -->en:b{{=}}]] d';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = 'a [[:en:<!-- c -->b{{=}}]] d';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = 'a [[:en<!-- c -->:b{{=}}]] d';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = 'a \n==[[:en<!--comments-->:link{{=}}<!--comments-->]] ==\n d';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
 
 		wikitext = '1<br>2';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML single tag #1');

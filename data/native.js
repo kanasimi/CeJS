@@ -2958,8 +2958,13 @@ function module_code(library_namespace) {
 		// 獨特/獨有的 exclusive 元素列表。
 		diff_list = [], from_unique, to_unique,
 		// flags
-		get_all = !!options.all, get_index = options.index || get_all, get_diff = !!(options.diff || options.with_diff), diff_only = get_diff
-				&& !get_all && !options.with_diff;
+		get_all = !!options.all,
+		// get index instead of contents
+		get_index = options.index || get_all,
+		// get diff as well
+		get_diff = !!(options.diff || options.with_diff),
+		// get diff ONLY
+		diff_only = get_diff && !get_all && !options.with_diff;
 
 		// ---------------------------------------
 		// 工具函數。
@@ -3152,6 +3157,7 @@ function module_code(library_namespace) {
 
 		// ---------------------------------------
 
+		// 取得所有 LCS，而不僅是其中之一。
 		var all_list = [ [] ];
 
 		// 主要作業。
@@ -3159,6 +3165,7 @@ function module_code(library_namespace) {
 
 		// 以下為後續處理。
 		if (get_all) {
+			//去掉重複的 LCS。
 			all_list = unique(all_list);
 		}
 
@@ -3193,7 +3200,18 @@ function module_code(library_namespace) {
 			all_list[0].diff = diff_list;
 		}
 
-		return get_all ? all_list : diff_only ? diff_list : all_list[0];
+		if (!get_all) {
+			all_list = diff_only ? diff_list : all_list[0];
+		}
+		if (options.with_list) {
+			if (typeof all_list !== 'object') {
+				all_list = new String(all_list);
+			}
+			all_list.from = from;
+			all_list.to = to;
+		}
+
+		return all_list;
 	}
 
 	_.LCS = LCS;

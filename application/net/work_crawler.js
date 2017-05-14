@@ -1177,7 +1177,9 @@ function module_code(library_namespace) {
 
 			if (work_data.reget_chapter) {
 				get_URL(chapter_URL, pre_parse_chapter_data, _this.charset,
-						null, _this.get_URL_options);
+						null, Object.assign({
+							error_retry : _this.MAX_ERROR
+						}, _this.get_URL_options));
 
 			} else {
 				// 警告: reget_chapter=false僅適用於小說之類不取得圖片的情形，
