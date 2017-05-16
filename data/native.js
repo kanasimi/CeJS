@@ -2859,7 +2859,7 @@ function module_code(library_namespace) {
 		var get_length_only = !get_trace_array,
 		//
 		from_length = from.length, to_length = to.length,
-		//
+		// TODO: 當文件有過多行時的處置方式。
 		trace_Array = from_length * (get_length_only ? 2 : to_length);
 		trace_Array = typeof Uint16Array === 'function' ? new Uint16Array(
 				trace_Array) : new Array(trace_Array).fill(0);

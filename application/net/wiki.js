@@ -411,6 +411,22 @@ function module_code(library_namespace) {
 		return action;
 	}
 
+	// append additional parameters of MediaWiki API.
+	function add_parameters(action, options) {
+		if (!options.parameters) {
+			return;
+		}
+
+		if (typeof options.parameters === 'string') {
+			action[1] += '&' + options.parameters;
+		} else if (library_namespace.is_Object(options.parameters)) {
+			action[1] += '&' + get_URL.parameters_to_String(options.parameters);
+		} else {
+			library_namespace.debug('無法處理之 options.parameters: ['
+					+ options.parameters + ']', 1, 'add_parameters');
+		}
+	}
+
 	// --------------------------------------------------------------------------------------------
 	// 工具函數。
 
@@ -2818,7 +2834,9 @@ function module_code(library_namespace) {
 	/**
 	 * 使用者/用戶對話頁面所符合的匹配模式。
 	 * 
-	 * matched: [ all, "user name" ]
+	 * matched: [ all, " user name " ]
+	 * 
+	 * user_name = matched[1].trim()
 	 * 
 	 * @type {RegExp}
 	 * 
@@ -2827,7 +2845,8 @@ function module_code(library_namespace) {
 	 */
 	var PATTERN_user =
 	// "\/": e.g., [[user talk:user_name/Flow]]
-	/\[\[\s*(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?|利用者(?:‐会話)?|사용자(?:토론)?)\s*:\s*([^#\|\[\]\/]+)/i;
+	// 大小寫無差，但NG: "\n\t"
+	/\[\[ *(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?|利用者(?:‐会話)?|사용자(?:토론)?) *: *([^#\|\[\]\/]+)/i;
 
 	/**
 	 * parse user name. 解析使用者/用戶對話頁面資訊。
@@ -6355,6 +6374,8 @@ function module_code(library_namespace) {
 			action[1] = 'prop=' + options.prop + '&' + action[1];
 		}
 
+		add_parameters(action, options);
+
 		action[1] = 'query&' + action[1];
 
 		if (!action[0]) {
@@ -7223,18 +7244,7 @@ function module_code(library_namespace) {
 		//
 		? '&' + prefix + 'namespace=' + options.namespace : '');
 
-		// additional parameters.
-		if (options.parameters) {
-			if (typeof options.parameters === 'string') {
-				title[1] += '&' + options.parameters;
-			} else if (library_namespace.is_Object(options.parameters)) {
-				title[1] += '&'
-						+ get_URL.parameters_to_String(options.parameters);
-			} else {
-				library_namespace.debug('無法處理之 options.parameters: ['
-						+ options.parameters + ']', 1, 'get_list');
-			}
-		}
+		add_parameters(title, options);
 
 		// TODO: 直接以是不是 .startsWith(prefix) 來判定是不是該加入 parameters。
 
@@ -9852,12 +9862,31 @@ function module_code(library_namespace) {
 					|| default_language);
 		}
 
-		var recent_options = SQL_config ? options.SQL_options : Object.assign({
-			parameters : {
-				rcdir : 'newer',
-				rctype : 'edit'
+		var get_recent = SQL_config && !options.parameters, recent_options;
+		if (get_recent) {
+			recent_options = options.SQL_options;
+		} else {
+			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
+			recent_options = {
+				// List newest first (default).
+				// Note: rcstart has to be later than rcend.
+				// rcdir : 'older',
+
+				// new Date().toISOString()
+				// rcstart : 'now',
+				rctype : 'edit|new'
+			};
+			if (options.parameters) {
+				// 警告:這會更動options!
+				Object.assign(options.parameters, recent_options);
+				recent_options = options;
+			} else {
+				recent_options = Object.assign({
+					parameters : recent_options
+				}, options);
 			}
-		}, options);
+		}
+		get_recent = get_recent ? get_recent_via_databases : get_recent_via_API;
 
 		if (options.type) {
 			if (SQL_config) {
@@ -9871,9 +9900,26 @@ function module_code(library_namespace) {
 			// TODO: other options
 		}
 
-		if (options.with_diff && !options.with_diff.diff && !options.with_diff.with_diff) {
+		if (options.with_diff && !options.with_diff.diff
+				&& !options.with_diff.with_diff) {
 			options.with_diff.diff = true;
 		}
+
+		var
+		// default: search from NOW
+		// assert: {Date}last_query_time start time
+		last_query_time = options.start || new Date,
+		//
+		last_query_revid = options.revid | 0,
+		// 紀錄/標記本次處理到哪。
+		// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
+		mark_up = SQL_config ? function(row) {
+			if (row >= 0) {
+				row = rows[row].row;
+			}
+			last_query_revid = row.rc_this_oldid;
+			// last_query_time = row.rc_timestamp.toString();
+		} : library_namespace.null_function;
 
 		function receive() {
 			function receive_next() {
@@ -9883,38 +9929,43 @@ function module_code(library_namespace) {
 			}
 
 			var receive_time = Date.now();
-			if (library_namespace.is_Date(options.timestamp
-			// default: search from NOW
-			|| (options.timestamp = new Date))) {
-				options.timestamp = options.timestamp
-						.format('%4Y%2m%2d%2H%2M%2S');
+			if (SQL_config) {
+				where.timestamp = '>=' + last_query_time
+				// MediaWiki format
+				.format('%4Y%2m%2d%2H%2M%2S');
+				where.this_oldid = '>' + last_query_revid;
+			} else {
+				recent_options.parameters.rcend = last_query_time.toISOString();
+				last_query_time = new Date;
 			}
-			where.timestamp = '>=' + options.timestamp;
-			where.this_oldid = '>' + (options.revid | 0);
 
-			wiki_API.recent(function(rows) {
-				// 紀錄/標記本次處理到哪。
-				var mark_up = SQL_config ? function(row) {
-					if (row >= 0) {
-						row = rows[row].row;
+			get_recent(function(rows) {
+				// console.log(recent_options);
+
+				if (!SQL_config) {
+					while (rows.length > 0
+					// 去除掉重複的紀錄。
+					&& rows[rows.length - 1].revid <= last_query_revid) {
+						rows.pop();
 					}
-					options.revid = row.rc_this_oldid;
-					options.timestamp = row.rc_timestamp.toString();
-				} : library_namespace.null_function;
-
-				// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
+				}
 
 				var exit;
 				if (rows.length > 0) {
+					if (SQL_config) {
+						mark_up(0);
+					} else {
+						last_query_revid = rows[0].revid;
+						// 不撤銷的話，每次都會從這裡開始。
+						// delete recent_options.parameters.rcstart;
+					}
+					// .reverse(): 轉成 old to new.
+					rows.reverse();
+
 					library_namespace.debug('Get ' + rows.length
 							+ ' recent pages:\n' + rows.map(function(row) {
 								return row.revid;
 							}), 2, 'add_listener');
-					if (SQL_config) {
-						mark_up(0);
-						// .reverse(): 轉成 old to new.
-						rows.reverse();
-					}
 
 					if (options.with_diff || options.with_content >= 2) {
 						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
@@ -9931,11 +9982,35 @@ function module_code(library_namespace) {
 							//
 							'Get page: ' + index + '/' + rows.length, 2,
 									'add_listener.with_diff');
+
+							var page_options = {
+								// 這裡的rvstartid指的是新→舊
+								rvstartid : row.revid
+							};
+							// or: row.old_revid >= 0
+							if (row.old_revid > 0) {
+								page_options.rvendid = row.old_revid;
+							}
+
+							page_options = Object.assign({
+								is_id : true,
+								rvlimit : options.with_content >= 2
+								// 僅取最近的兩個版本作 diff
+								? options.with_content : 2,
+								// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
+								parameters : page_options,
+								rvprop
+								// e.g., minor:'',anon:''/* e.g., IP user */,
+								// bot flag: ('bot' in row)
+								: 'ids|content|timestamp|user|flags|size'
+							}, options.with_diff);
+
 							session.page(row.pageid, function(page_data) {
 								if (!exit && page_data) {
 									Object.assign(row, page_data);
 									var revisions = page_data.revisions;
-									if (options.with_diff && revisions) {
+									if (options.with_diff && revisions
+											&& revisions.length >= 1) {
 										if (options.with_diff.LCS) {
 											row.diff = library_namespace.LCS(
 													revisions.length === 1
@@ -9958,12 +10033,8 @@ function module_code(library_namespace) {
 											rows);
 								}
 								run_next();
-							}, Object.assign({
-								is_id : true,
-								rvlimit : options.with_content >= 2
-								// 僅取最近的兩個版本作 diff
-								? options.with_content : 2
-							}, options.with_diff));
+							}, page_options);
+
 						}, function() {
 							if (!exit) {
 								library_namespace.debug(
