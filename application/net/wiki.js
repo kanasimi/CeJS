@@ -5197,7 +5197,7 @@ function module_code(library_namespace) {
 						}
 						return content;
 					}, work_options, function() {
-						callback();
+						callback.apply(this, arguments);
 						if (--pages_left === 0) {
 							finish_up.call(this);
 						}
