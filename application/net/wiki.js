@@ -856,6 +856,8 @@ function module_code(library_namespace) {
 		});
 	}
 
+	wiki_API.upper_case_initial = upper_case_initial;
+
 	/**
 	 * 規範/正規化頁面名稱 page name。
 	 * 
@@ -5197,6 +5199,7 @@ function module_code(library_namespace) {
 						}
 						return content;
 					}, work_options, function() {
+						// function(title, error, result)
 						callback.apply(this, arguments);
 						if (--pages_left === 0) {
 							finish_up.call(this);
@@ -9908,7 +9911,8 @@ function module_code(library_namespace) {
 		var
 		// default: search from NOW
 		// assert: {Date}last_query_time start time
-		last_query_time = options.start || new Date,
+		last_query_time = library_namespace.is_Date(options.start)
+				&& !isNaN(options.start.getTime()) ? options.start : new Date,
 		//
 		last_query_revid = options.revid | 0,
 		// 紀錄/標記本次處理到哪。
@@ -9918,7 +9922,7 @@ function module_code(library_namespace) {
 				row = rows[row].row;
 			}
 			last_query_revid = row.rc_this_oldid;
-			// last_query_time = row.rc_timestamp.toString();
+			last_query_time = row.rc_timestamp.toString();
 		} : library_namespace.null_function;
 
 		function receive() {
@@ -9929,6 +9933,9 @@ function module_code(library_namespace) {
 			}
 
 			var receive_time = Date.now();
+			library_namespace.debug('Get recent change from '
+					+ last_query_time.toISOString(), 1, 'add_listener.receive');
+
 			if (SQL_config) {
 				where.timestamp = '>=' + last_query_time
 				// MediaWiki format
