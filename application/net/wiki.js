@@ -2852,8 +2852,8 @@ function module_code(library_namespace) {
 	//
 	PATTERN_user_contributions_link = /\[\[(?:Special|特別) *: *(?:Contributions|使用者貢獻|用戶貢獻|用户贡献|投稿記録)\/([^#\|\[\]\/]+)/i,
 	//
-	PATTERN_user_link_all = new RegExp(PATTERN_user_link, 'ig'), PATTERN_user_contributions_link_all = new RegExp(
-			PATTERN_user_contributions_link, 'ig');
+	PATTERN_user_link_all = new RegExp(PATTERN_user_link.source, 'ig'), PATTERN_user_contributions_link_all = new RegExp(
+			PATTERN_user_contributions_link.source, 'ig');
 
 	/**
 	 * parse user name. 解析使用者/用戶對話頁面資訊。
@@ -7590,8 +7590,7 @@ function module_code(library_namespace) {
 		} ]
 	};
 
-	//(function wiki_API_prototype_methods() {
-	(function() {
+	(function wiki_API_prototype_methods() {
 		// 登記 methods。
 		var methods = wiki_API.prototype.next.methods;
 
