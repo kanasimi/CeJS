@@ -2845,30 +2845,107 @@ function module_code(library_namespace) {
 	 * @see https://zh.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|statistics&utf8
 	 *      https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hant.php
 	 */
-	var PATTERN_user =
+	var PATTERN_user_link =
 	// "\/": e.g., [[user talk:user_name/Flow]]
 	// 大小寫無差，但NG: "\n\t"
-	/\[\[ *(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?|利用者(?:‐会話)?|사용자(?:토론)?) *: *([^#\|\[\]\/]+)/i;
+	/\[\[ *(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?|利用者(?:‐会話)?|사용자(?:토론)?) *: *([^#\|\[\]\/]+)/i,
+	//
+	PATTERN_user_contributions_link = /\[\[(?:Special|特別) *: *(?:Contributions|使用者貢獻|用戶貢獻|用户贡献|投稿記録)\/([^#\|\[\]\/]+)/i,
+	//
+	PATTERN_user_link_all = new RegExp(PATTERN_user_link, 'ig'), PATTERN_user_contributions_link_all = new RegExp(
+			PATTERN_user_contributions_link, 'ig');
 
 	/**
 	 * parse user name. 解析使用者/用戶對話頁面資訊。
 	 * 
 	 * @param {String}wikitext
 	 *            wikitext to parse
-	 * @param {Boolean}full_link
+	 * @param {String}user_name
+	 *            測試是否為此 user name。注意:這只會檢查第一個符合的連結。若有多個連結，應該採用parse.user.all!
+	 * @param {Boolean}to_full_link
 	 *            get a full link
 	 * 
 	 * @returns {String}user name / full link
+	 * @returns {Boolean}has the user name
 	 * @returns {Undefined}Not a user link.
 	 */
-	function parse_user(wikitext, full_link) {
-		var matched = wikitext && wikitext.match(PATTERN_user);
-		if (matched) {
-			matched = full_link ? matched[0].trimEnd() + ']]' : matched[1]
-					.trim();
-			return matched;
+	function parse_user(wikitext, user_name, to_full_link) {
+		if (!wikitext) {
+			return;
 		}
+
+		var matched = wikitext.match(PATTERN_user_link), via_contributions;
+		if (!matched) {
+			matched = wikitext.match(PATTERN_user_contributions_link);
+			if (!matched) {
+				return;
+			}
+			via_contributions = true;
+		}
+
+		if (typeof user_name === 'boolean') {
+			to_full_link = user_name;
+			user_name = undefined;
+		}
+		if (user_name) {
+			user_name = upper_case_initial(user_name);
+			if (user_name !== upper_case_initial(matched[1].trim())) {
+				return false;
+			}
+			if (!to_full_link) {
+				return true;
+			}
+		}
+
+		return to_full_link ? via_contributions ? '[[User:' + matched[1] + ']]'
+				: matched[0].trimEnd() + ']]' : matched[1].trim();
 	}
+
+	/**
+	 * parse all user name. 解析所有使用者/用戶對話頁面資訊。
+	 * 
+	 * @param {String}wikitext
+	 *            wikitext to parse/check
+	 * @param {String}user_name
+	 *            測試是否有此 user name
+	 * 
+	 * @returns {Boolean}has the user name
+	 * @returns {Array}user name list
+	 */
+	function parse_all_user(wikitext, user_name) {
+		if (!wikitext) {
+			return;
+		}
+
+		var matched, user_hash = library_namespace.null_Object(),
+		//
+		check_pattern = function(PATTERN_all) {
+			// reset PATTERN
+			PATTERN_all.lastIndex = 0;
+			while (matched = PATTERN_all.exec(wikitext)) {
+				var name = upper_case_initial(matched[1].trim());
+				if (user_name) {
+					if (user_name === name) {
+						return true;
+					}
+					continue;
+				}
+				user_hash[name] = true;
+			}
+		}
+
+		if (user_name) {
+			user_name = upper_case_initial(user_name);
+			return check_pattern(PATTERN_user_link_all)
+					|| check_pattern(PATTERN_user_contributions_link_all);
+		}
+
+		check_pattern(PATTERN_user_link_all);
+		check_pattern(PATTERN_user_contributions_link_all);
+		return Object.keys(user_hash);
+	}
+
+	parse_user.all = parse_all_user;
 
 	//
 	/**
@@ -4302,6 +4379,18 @@ function module_code(library_namespace) {
 			}, next[3]));
 			break;
 
+		case 'listen':
+			// 因為接下來的操作會呼叫 this.next() 本身，
+			// 因此必須把正在執行的標記特消掉。
+			this.running = false;
+			add_listener(next[1],
+			// next[2]: options to call wiki_API.listen()
+			Object.assign({
+				// [KEY_SESSION]
+				session : this
+			}, next[2]));
+			break;
+
 		// ------------------------------------------------
 		// Wikidata access
 
@@ -4606,7 +4695,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,upload,cache,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,upload,cache,listen,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -6508,7 +6597,7 @@ function module_code(library_namespace) {
 					if (need_warn) {
 						library_namespace.warn('wiki_API.page: '
 						// 此頁面不存在/已刪除。Page does not exist. Deleted?
-						+ ('missing' in page ? 'Not exists' : 'No content')
+						+ ('missing' in page ? 'Not exists' : 'No contents')
 						//
 						+ ': ' + (page.title ? '[[' + page.title + ']]'
 						//
@@ -7285,7 +7374,7 @@ function module_code(library_namespace) {
 			// 取得列表後，設定/紀錄新的後續檢索用索引值。
 			// https://www.mediawiki.org/wiki/API:Query#Backwards_compatibility_of_continue
 			// {Object}next_index: 後續檢索用索引值。
-			next_index = data['continue'] || data['query-continue'];
+			next_index = data && (data['continue'] || data['query-continue']);
 			if (!continue_session) {
 				continue_session = options[KEY_SESSION];
 				// assert: continue_session &&
@@ -7322,7 +7411,7 @@ function module_code(library_namespace) {
 					library_namespace.show_value(next_index,
 							'get_list: get the continue value');
 
-			} else if (('batchcomplete' in data) && continue_session) {
+			} else if (data && ('batchcomplete' in data) && continue_session) {
 				// ↑ check "batchcomplete"
 				var keyword_continue = get_list.type[type];
 				if (keyword_continue) {
@@ -7352,6 +7441,7 @@ function module_code(library_namespace) {
 						+ (typeof data === 'object'
 								&& typeof JSON !== 'undefined' ? JSON
 								.stringify(data) : data) + ']');
+				callback(pages, titles, title);
 
 			} else if (data.query[type]) {
 				// 一般情況。
@@ -7500,7 +7590,7 @@ function module_code(library_namespace) {
 		} ]
 	};
 
-	(function() {
+	(function wiki_API_prototype_methods() {
 		// 登記 methods。
 		var methods = wiki_API.prototype.next.methods;
 
@@ -7539,6 +7629,9 @@ function module_code(library_namespace) {
 				// || this.actions.length === 1
 				) {
 					this.next();
+				} else {
+					library_namespace.debug('正在執行中，直接跳出。', 6,
+							'wiki_API.prototype.' + method);
 				}
 				return this;
 			};
@@ -9828,6 +9921,7 @@ function module_code(library_namespace) {
 
 	// 注意: 會改變 options！
 	// 注意: options之屬性名不可與wiki_API.recent衝突！
+	// TODO: delay
 	function add_listener(listener, options) {
 		if (!options) {
 			options = library_namespace.null_Object();
@@ -9856,6 +9950,7 @@ function module_code(library_namespace) {
 		//
 		|| (options.SQL_options = library_namespace.null_Object());
 		where = where.where || (where.where = library_namespace.null_Object());
+		// console.log(session);
 
 		if (!session
 		//
@@ -9991,7 +10086,9 @@ function module_code(library_namespace) {
 									'add_listener.with_diff');
 
 							var page_options = {
-								// 這裡的rvstartid指的是新→舊
+								// 這裡的rvstartid指的是新→舊。
+								// 偶爾有可能出現: [badid_rvstartid] No revision was
+								// found for parameter "rvstartid".
 								rvstartid : row.revid
 							};
 							// or: row.old_revid >= 0

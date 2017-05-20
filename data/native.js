@@ -3354,6 +3354,8 @@ function module_code(library_namespace) {
 	 *            將要轉換的文字先全部轉換成小寫。
 	 * 
 	 * @returns {String}標題用之格式文字。
+	 * 
+	 * @see function upper_case_initial(words) @ CeL.application.net.wiki
 	 */
 	function toTitleCase(to_lower_first) {
 		// 要轉換的文字。
