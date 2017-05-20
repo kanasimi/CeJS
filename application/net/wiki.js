@@ -7590,7 +7590,8 @@ function module_code(library_namespace) {
 		} ]
 	};
 
-	(function wiki_API_prototype_methods() {
+	//(function wiki_API_prototype_methods() {
+	(function() {
 		// 登記 methods。
 		var methods = wiki_API.prototype.next.methods;
 
