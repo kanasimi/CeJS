@@ -2860,9 +2860,10 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}wikitext
 	 *            wikitext to parse
-	 * @param {String}user_name
-	 *            測試是否為此 user name。注意:這只會檢查第一個符合的連結。若有多個連結，應該採用parse.user.all!
-	 * @param {Boolean}to_full_link
+	 * @param {String}[user_name]
+	 *            測試是否為此 user name。
+	 *            注意:這只會檢查第一個符合的連結。若一行中有多個連結，應該採用CeL.wiki.parse.user.all()!
+	 * @param {Boolean}[to_full_link]
 	 *            get a full link
 	 * 
 	 * @returns {String}user name / full link
@@ -2902,19 +2903,19 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * parse all user name. 解析所有使用者/用戶對話頁面資訊。
+	 * parse all user name. 解析所有使用者/用戶對話頁面資訊。 CeL.wiki.parse.user.all()
 	 * 
 	 * @param {String}wikitext
 	 *            wikitext to parse/check
-	 * @param {String}user_name
+	 * @param {String}[user_name]
 	 *            測試是否有此 user name
 	 * 
 	 * @returns {Boolean}has the user name
-	 * @returns {Array}user name list
+	 * @returns {Array}normalized user name list
 	 */
 	function parse_all_user(wikitext, user_name) {
 		if (!wikitext) {
-			return;
+			return user_name ? false : [];
 		}
 
 		var matched, user_hash = library_namespace.null_Object(),
@@ -2934,8 +2935,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (user_name) {
-			user_name = upper_case_initial(user_name);
+		if (user_name && (user_name = upper_case_initial(user_name))) {
 			return check_pattern(PATTERN_user_link_all)
 					|| check_pattern(PATTERN_user_contributions_link_all);
 		}
@@ -9969,6 +9969,9 @@ function module_code(library_namespace) {
 				// List newest first (default).
 				// Note: rcstart has to be later than rcend.
 				// rcdir : 'older',
+				rcdir : 'newer',
+
+				// rctoponly : 1,
 
 				// new Date().toISOString()
 				// rcstart : 'now',
@@ -10028,8 +10031,14 @@ function module_code(library_namespace) {
 			}
 
 			var receive_time = Date.now();
-			library_namespace.debug('Get recent change from '
-					+ last_query_time.toISOString(), 1, 'add_listener.receive');
+			library_namespace
+					.debug(
+							'Get recent change from '
+									+ (library_namespace
+											.is_Date(last_query_time) ? last_query_time
+											.toISOString()
+											: last_query_time), 1,
+							'add_listener.receive');
 
 			if (SQL_config) {
 				where.timestamp = '>=' + last_query_time
@@ -10037,12 +10046,17 @@ function module_code(library_namespace) {
 				.format('%4Y%2m%2d%2H%2M%2S');
 				where.this_oldid = '>' + last_query_revid;
 			} else {
-				recent_options.parameters.rcend = last_query_time.toISOString();
-				last_query_time = new Date;
+				// rcend
+				recent_options.parameters.rcstart = library_namespace
+						.is_Date(last_query_time) ? last_query_time
+						.toISOString() : last_query_time;
 			}
 
 			get_recent(function(rows) {
-				// console.log(recent_options);
+				if (false) {
+					console.log(recent_options.parameters
+							|| recent_options.SQL_options);
+				}
 
 				if (!SQL_config) {
 					while (rows.length > 0
@@ -10056,13 +10070,16 @@ function module_code(library_namespace) {
 				if (rows.length > 0) {
 					if (SQL_config) {
 						mark_up(0);
+						// .reverse(): 轉成 old to new.
+						rows.reverse();
 					} else {
 						last_query_revid = rows[0].revid;
+						if (false && rows[0].timestamp) {
+							last_query_time = rows[0].timestamp;
+						}
 						// 不撤銷的話，每次都會從這裡開始。
 						// delete recent_options.parameters.rcstart;
 					}
-					// .reverse(): 轉成 old to new.
-					rows.reverse();
 
 					library_namespace.debug('Get ' + rows.length
 							+ ' recent pages:\n' + rows.map(function(row) {
@@ -10113,15 +10130,23 @@ function module_code(library_namespace) {
 								if (!exit && page_data) {
 									Object.assign(row, page_data);
 									var revisions = page_data.revisions;
-									if (options.with_diff && revisions
-											&& revisions.length >= 1) {
+									// console.log(revisions);
+									if (revisions && revisions.length >= 1
+									//
+									&& revisions[0] && revisions[0].timestamp) {
+										last_query_time
+										//
+										= revisions[0].timestamp;
+									}
+									if (revisions && revisions.length >= 1
+											&& options.with_diff) {
 										if (options.with_diff.LCS) {
 											row.diff = library_namespace.LCS(
-													revisions.length === 1
+													revisions.length >= 2
 													// assert: (row.is_new ||
 													// revisions.length > 1)
-													? '' : revisions[1]['*'],
-													revisions[0]['*'],
+													&& revisions[1]['*'] || '',
+													revisions[0]['*'] || '',
 													options.with_diff);
 										} else {
 											row.diff = (revisions.length === 1
@@ -10133,8 +10158,10 @@ function module_code(library_namespace) {
 															options.with_diff);
 										}
 									}
-									exit = listener.call(options, row, index,
-											rows);
+									if (exit = listener.call(options, row,
+											index, rows)) {
+										last_query_time = new Date;
+									}
 								}
 								run_next();
 							}, page_options);
