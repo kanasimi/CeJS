@@ -2947,9 +2947,13 @@ function module_code(library_namespace) {
 				+ (line_mode ? '，採用行模式' : ''), 3);
 		if (typeof from === 'string') {
 			from = separator ? from.split(separator) : from.chars();
+		} else if (!from) {
+			from = [];
 		}
 		if (typeof to === 'string') {
 			to = separator ? to.split(separator) : to.chars();
+		} else if (!to) {
+			to = [];
 		}
 		// assert: Array.isArray(from) && Array.isArray(from)
 
@@ -3237,7 +3241,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		var diff = LCS(this, to, Object.assign({
+		var diff = LCS(this || [], to || [], Object.assign({
 			diff : true
 		}, options)), from_added = [], to_added = [],
 		// 避免經過重排後，已經無法回溯至原先資料。
@@ -3335,8 +3339,8 @@ function module_code(library_namespace) {
 	}
 
 	function diff_with_String(to, options) {
-		return diff_with_Array.call(this.split('\n'), Array.isArray(to) ? to
-				: to ? to.split('\n') : [], options);
+		return diff_with_Array.call((this || '').split('\n'), Array.isArray(to) ? to
+				: (to || '').split('\n'), options);
 	}
 
 	// ---------------------------------------------------------------------//

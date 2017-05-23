@@ -10006,7 +10006,7 @@ function module_code(library_namespace) {
 			options.with_diff.diff = true;
 		}
 
-		var
+		var interval = options.interval || 500,
 		// default: search from NOW
 		// assert: {Date}last_query_time start time
 		last_query_time = library_namespace.is_Date(options.start)
@@ -10025,20 +10025,23 @@ function module_code(library_namespace) {
 
 		function receive() {
 			function receive_next() {
-				setTimeout(receive, (options.interval || 500)
+				var now = Date.now();
+				library_namespace.debug((now - Date.parse(last_query_time))
+						+ ' ms', 3, 'receive_next');
+				setTimeout(receive,
+				//
+				now - Date.parse(last_query_time) < interval ? interval
 				// 減去已消耗時間，達到更準確的時間間隔控制。
-				- (Date.now() - receive_time));
+				- (now - receive_time) : 0);
 			}
 
 			var receive_time = Date.now();
-			library_namespace
-					.debug(
-							'Get recent change from '
-									+ (library_namespace
-											.is_Date(last_query_time) ? last_query_time
-											.toISOString()
-											: last_query_time), 1,
-							'add_listener.receive');
+			library_namespace.debug('Get recent change from '
+			//
+			+ (library_namespace.is_Date(last_query_time)
+			//
+			? last_query_time.toISOString() : last_query_time), 1,
+					'add_listener.receive');
 
 			if (SQL_config) {
 				where.timestamp = '>=' + last_query_time
@@ -10145,8 +10148,8 @@ function module_code(library_namespace) {
 													revisions.length >= 2
 													// assert: (row.is_new ||
 													// revisions.length > 1)
-													&& revisions[1]['*'] || '',
-													revisions[0]['*'] || '',
+													&& revisions[1]['*'],
+													revisions[0]['*'],
 													options.with_diff);
 										} else {
 											row.diff = (revisions.length === 1
