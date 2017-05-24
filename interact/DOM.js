@@ -7005,9 +7005,10 @@ if (is_Safari) {
 			&& is_Safari.indexOf('chromium') === -1;
 
 	// Warning: 未完善。
-	// https://developer.mozilla.org/en-US/docs/Web/CSS/position#Browser_compatibility
 	// Firefox (Gecko): 32.0~
-	CSS_position_sticky = is_Safari || /Firefox\/(?:[4-9]\d|3[2-9])/.test(navigator.userAgent);
+	CSS_position_sticky = is_Safari || /Firefox\/(?:[4-9]\d|3[2-9])/.test(navigator.userAgent)
+	// https://developer.mozilla.org/en-US/docs/Web/CSS/position#Browser_compatibility
+	|| /Chrome\/(?:[6-9]\d|5[6-9])/.test(navigator.userAgent);
 }
 
 /**
@@ -7207,15 +7208,18 @@ function auto_TOC(content_node, level, force) {
 					C : auto_TOC.CSS_prefix + 'list'
 				} ];
 
+		var class_name = auto_TOC.CSS_prefix
+		// 若是不具有此屬性，則明確指定不使用此屬性；預防有瀏覽器雖然已實現此屬性，但是並沒有被本函式庫偵測出來。
+		+ (CSS_position_sticky ? 'box' : 'box_no_sticky');
 		if (node = get_element(id)) {
 			_.remove_all_child(node);
-			set_class(node, auto_TOC.CSS_prefix + 'box');
+			set_class(node, class_name);
 			new_node(list_array, node);
 		} else {
 			node = new_node({
 				div : list_array,
 				id : id,
-				C : auto_TOC.CSS_prefix + 'box'
+				C : class_name
 			}, [ content_node, 1 ]);
 		}
 
