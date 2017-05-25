@@ -9960,7 +9960,11 @@ function module_code(library_namespace) {
 					|| default_language);
 		}
 
-		var use_SQL = SQL_config && !options.parameters, recent_options,
+		var use_SQL = SQL_config
+		// use SQL as possibile
+		&& (options.use_SQL || !options.parameters
+		// 只設定了rcprop
+		|| Object.keys(options.parameters).join('') === 'rcprop'), recent_options,
 		//
 		get_recent = use_SQL ? get_recent_via_databases : get_recent_via_API;
 		if (use_SQL) {
@@ -10021,7 +10025,7 @@ function module_code(library_namespace) {
 				row = rows[row].row;
 			}
 			last_query_revid = row.rc_this_oldid;
-			last_query_time = row.rc_timestamp.toString();
+			last_query_time = new Date(row.rc_timestamp.toString());
 		} : library_namespace.null_function;
 
 		function receive() {
@@ -10045,6 +10049,11 @@ function module_code(library_namespace) {
 					'add_listener.receive');
 
 			if (use_SQL) {
+				if (!library_namespace.is_Date(last_query_time)) {
+					// assert: !!(last_query_time)
+					// 可能來自"設定成已經取得的最新一個編輯rev。"
+					last_query_time = new Date(last_query_time);
+				}
 				where.timestamp = '>=' + last_query_time
 				// MediaWiki format
 				.format('%4Y%2m%2d%2H%2M%2S');
@@ -10139,7 +10148,7 @@ function module_code(library_namespace) {
 									//
 									&& revisions[0] && revisions[0].timestamp) {
 										last_query_time
-										//
+										// 設定成已經取得的最新一個編輯rev。
 										= revisions[0].timestamp;
 									}
 									if (revisions && revisions.length >= 1
