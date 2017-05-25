@@ -9960,8 +9960,10 @@ function module_code(library_namespace) {
 					|| default_language);
 		}
 
-		var get_recent = SQL_config && !options.parameters, recent_options;
-		if (get_recent) {
+		var use_SQL = SQL_config && !options.parameters, recent_options,
+		//
+		get_recent = use_SQL ? get_recent_via_databases : get_recent_via_API;
+		if (use_SQL) {
 			recent_options = options.SQL_options;
 		} else {
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
@@ -9987,10 +9989,9 @@ function module_code(library_namespace) {
 				}, options);
 			}
 		}
-		get_recent = get_recent ? get_recent_via_databases : get_recent_via_API;
 
 		if (options.type) {
-			if (SQL_config) {
+			if (use_SQL) {
 				if (!recent_options) {
 					recent_options = library_namespace.null_Object();
 				}
@@ -10015,7 +10016,7 @@ function module_code(library_namespace) {
 		last_query_revid = options.revid | 0,
 		// 紀錄/標記本次處理到哪。
 		// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
-		mark_up = SQL_config ? function(rows, row) {
+		mark_up = use_SQL ? function(rows, row) {
 			if (row >= 0) {
 				row = rows[row].row;
 			}
@@ -10043,7 +10044,7 @@ function module_code(library_namespace) {
 			? last_query_time.toISOString() : last_query_time), 1,
 					'add_listener.receive');
 
-			if (SQL_config) {
+			if (use_SQL) {
 				where.timestamp = '>=' + last_query_time
 				// MediaWiki format
 				.format('%4Y%2m%2d%2H%2M%2S');
@@ -10061,7 +10062,7 @@ function module_code(library_namespace) {
 							|| recent_options.SQL_options);
 				}
 
-				if (!SQL_config) {
+				if (!use_SQL) {
 					while (rows.length > 0
 					// 去除掉重複的紀錄。
 					&& rows[rows.length - 1].revid <= last_query_revid) {
@@ -10071,7 +10072,7 @@ function module_code(library_namespace) {
 
 				var exit;
 				if (rows.length > 0) {
-					if (SQL_config) {
+					if (use_SQL) {
 						mark_up(rows, 0);
 						// .reverse(): 轉成 old to new.
 						rows.reverse();
