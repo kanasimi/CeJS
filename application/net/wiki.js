@@ -10015,7 +10015,7 @@ function module_code(library_namespace) {
 		last_query_revid = options.revid | 0,
 		// 紀錄/標記本次處理到哪。
 		// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
-		mark_up = SQL_config ? function(row) {
+		mark_up = SQL_config ? function(rows, row) {
 			if (row >= 0) {
 				row = rows[row].row;
 			}
@@ -10072,7 +10072,7 @@ function module_code(library_namespace) {
 				var exit;
 				if (rows.length > 0) {
 					if (SQL_config) {
-						mark_up(0);
+						mark_up(rows, 0);
 						// .reverse(): 轉成 old to new.
 						rows.reverse();
 					} else {
@@ -10185,7 +10185,7 @@ function module_code(library_namespace) {
 						// TODO: 考慮所傳回之內容過大，i.e. 回傳超過 limit (12 MB)，被截斷之情形。
 						if (rows.length > options.max_page) {
 							// 直接截斷，僅處理到 .max_page。
-							mark_up(options.max_page);
+							mark_up(rows, options.max_page);
 							rows = rows.slice(0, options.max_page);
 						}
 
@@ -11149,7 +11149,9 @@ function module_code(library_namespace) {
 					try {
 						data = JSON.parse(data);
 					} catch (e) {
+						library_namespace.error(
 						// error. e.g., "undefined"
+						'wiki_API.cache: Can not parse as JSON: ' + data);
 						// 注意: 若中途 abort，此時可能需要手動刪除大小為 0 的 cache file！
 						data = undefined;
 					}
