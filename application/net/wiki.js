@@ -11142,11 +11142,19 @@ function module_code(library_namespace) {
 			? _this.accept_empty_data : !use_JSON))) {
 				library_namespace.debug('Using cached data.', 3,
 						'wiki_API.cache');
-				library_namespace.debug('Cached data: [' + data.slice(0, 200)
-						+ ']...', 5, 'wiki_API.cache');
-				finish_work(use_JSON ? data ? JSON.parse(data)
-				// error? 注意: 若中途 abort，此時可能需要手動刪除大小為 0 的 cache file！
-				: undefined : data);
+				library_namespace.debug('Cached data: ['
+						+ (data && data.slice(0, 200)) + ']...', 5,
+						'wiki_API.cache');
+				if (use_JSON && data) {
+					try {
+						data = JSON.parse(data);
+					} catch (e) {
+						// error. e.g., "undefined"
+						// 注意: 若中途 abort，此時可能需要手動刪除大小為 0 的 cache file！
+						data = undefined;
+					}
+				}
+				finish_work(data);
 				return;
 			}
 
