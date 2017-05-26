@@ -343,7 +343,11 @@ function module_code(library_namespace) {
 	function parse_work_id(work_id) {
 		work_id = String(work_id);
 
-		if (work_id.startsWith('l=') || node_fs.existsSync(work_id)) {
+		if (this.convert_id && typeof this.convert_id[work_id] === 'function') {
+			// 因為 convert_id[work_id]() 可能回傳 list，因此需要以 get_work_list() 特別處理。
+			this.get_work_list([ work_id ]);
+
+		} else if (work_id.startsWith('l=') || node_fs.existsSync(work_id)) {
 			// e.g.,
 			// node 各漫畫網站工具檔.js l=各漫畫網站工具檔.txt
 			// node 各漫畫網站工具檔.js 各漫畫網站工具檔.txt
@@ -373,6 +377,7 @@ function module_code(library_namespace) {
 		// 真正處理的作品數。
 		var work_count = 0;
 
+		// assert: Array.isArray(work_list)
 		work_list.run_async(function for_each_title(callback, work_title,
 				this_index) {
 			function insert_id(id_list) {
@@ -396,6 +401,7 @@ function module_code(library_namespace) {
 			// 警告: 需要自行呼叫 callback(id_list);
 			&& typeof this.convert_id[work_title] === 'function') {
 				// 提供異序(asynchronously,不同時)使用。
+				library_namespace.debug('Using convert_id[' + work_title + ']', 3);
 				this.convert_id[work_title].call(this, insert_id, work_title);
 
 			} else {
@@ -406,7 +412,7 @@ function module_code(library_namespace) {
 				this.get_work(work_title, callback);
 			}
 
-		}, function() {
+		}, function all_work_done() {
 			library_namespace.log(this.id + ': All ' + work_list.length
 					+ ' works done.');
 		}, this);
