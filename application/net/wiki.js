@@ -9961,7 +9961,7 @@ function module_code(library_namespace) {
 		}
 
 		var use_SQL = SQL_config
-		// use SQL as possibile
+		// options.use_SQL: 明確指定 use SQL. use SQL as possibile
 		&& (options.use_SQL || !options.parameters
 		// 只設定了rcprop
 		|| Object.keys(options.parameters).join('') === 'rcprop'), recent_options,
@@ -10020,12 +10020,19 @@ function module_code(library_namespace) {
 		last_query_revid = options.revid | 0,
 		// 紀錄/標記本次處理到哪。
 		// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
-		mark_up = use_SQL ? function(rows, row) {
-			if (row >= 0) {
-				row = rows[row].row;
-			}
+		mark_up = use_SQL ? function(rows, row_NO) {
+			var row = row_NO >= 0 ? rows[row].row : row_NO;
 			last_query_revid = row.rc_this_oldid;
-			last_query_time = new Date(row.rc_timestamp.toString());
+			var timestamp = row.rc_timestamp.toString();
+			if (timestamp) {
+				last_query_time = new Date(timestamp);
+			} else {
+				library_namespace
+						.error('add_listener.mark_up: Invalid time value: '
+								+ timestamp);
+				// set to next one.
+				mark_up(rows, row_NO + 1);
+			}
 		} : library_namespace.null_function;
 
 		function receive() {

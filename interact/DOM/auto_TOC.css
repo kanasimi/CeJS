@@ -23,14 +23,13 @@ CSS for CeL.interact.DOM.auto_TOC().
 	z-index: 20;
 	/* for float */
 	margin-right: .5em;
-	/* https://developer.mozilla.org/en-US/docs/Web/CSS/position */
-	position: -webkit-sticky;
-	position: sticky;
 	top: -.2em;
 }
 
-.TOC_box_no_sticky {
-	position: static;
+.TOC_box {
+	/* https://developer.mozilla.org/en-US/docs/Web/CSS/position */
+	position: -webkit-sticky;
+	position: sticky;
 }
 
 .TOC_control, .TOC_position_control {

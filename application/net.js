@@ -3,7 +3,7 @@
  * @name	CeL function for net
  * @fileoverview
  * 本檔案包含了處理網路傳輸相關功能的 functions。
- * @since	
+ * @since
  */
 
 
@@ -164,20 +164,20 @@ URI, IRI, XRI
 */
 /**
  * Parses URI.
- * 
+ *
  * @example <code>
  * alert(parse_URI('ftp://user:cgh@dr.fxgv.sfdg:4231/3452/dgh.rar?fg=23#hhh').hostname);
  * </code>
- * 
+ *
  * @param {String}URI
  *            URI to parse
- * 
+ *
  * @return parsed object
- * 
+ *
  * @since 2010/4/13 23:53:14 from parseURI+parseURL
- * 
+ *
  * @_memberOf _module_
- * 
+ *
  * @see RFC 1738, RFC 2396, RFC 3986, Uniform Resource Identifier (URI): Generic
  *      Syntax, http://tools.ietf.org/html/rfc3987,
  *      http://flanders.co.nz/2009/11/08/a-good-url-regular-expression-repost/,
@@ -347,14 +347,14 @@ parse_URI = parse_URI;
 
 /**
  * 正規化 file name，排除會導致error的字元。
- * 
+ *
  * @param {String}file_name
  *            file name
  * @param {Boolean}do_escape
  *            是否作 escape
- * 
+ *
  * @returns {String}正規化 file name
- * 
+ *
  * @see data.is_matched.string_pre_handler(),
  *      application.storage.file.get_file_name()
  * @since 2012/10/13 13:31:21
@@ -415,14 +415,14 @@ to_file_name = to_file_name;
 var
 /**
  * 取得副檔名。
- * 
+ *
  * @type {RegExp}
  */
 PATTERN_extension = /\.([a-z\d\-]+)$/i,
 /**
  * 一般字元，非特殊字元之 folder 名。<br />
  * [...]{1,512}<br />
- * 
+ *
  * @type {RegExp}
  */
 PATTERN_ordinary_folder_name = /^[a-z\d ~!@#$%^&()-_+={}[],.]+[\\\/]$/i,
@@ -580,6 +580,7 @@ XMLHTTP組件在處理包含Location頭的302消息時太智能了，直接跳�
 
 TODO:
 先知道 file size
+use $PATH
 
 */
 URI_accessor.module = {
@@ -825,16 +826,16 @@ URI_accessor = URI_accessor;
 
 /**
  * get URI / URI 取得器.
- * 
+ *
  * @example <code>
  * get_URI('http://lyrics.meicho.com.tw/game/index.htm');
  * </code>
- * 
+ *
  * @param {String}URI
  *            URI to get
  * @param {String}[save_to]
  *            path save to
- * 
+ *
  * @returns error
  */
 function get_URI(URI, save_to, setting) {
@@ -872,33 +873,33 @@ get_URI = get_URI;
  * 下載影片檔案與播放清單。<br />
  * <br />
  * ** 會改變 options!
- * 
+ *
  * TODO:<br />
  * multi task<br />
  * add video description (#eow-description)<br />
- * 
+ *
  * @example <code>
  * get_video('http://www.youtube.com/watch?v=22YrMRav6dU', '.');
  * get_video('http://www.youtube.com/playlist?list=PLCE7553F6ED018907', '.');
  * </code>
- * 
+ *
  * @param {String|Array}video_url
  * @param {String|Boolean}download_to
  *            download to what directory.<br />
  *            false: no download, get video information only.
- * 
+ *
  * @returns {Array} video information
- * 
+ *
  * @since 2009/10/18-19 22:09:49	main<br />
  *        2009/10/20 22:40:33	to function<br />
  *        2012/3/31 21:19:52	refactoring 重構. get more data of video.
- * 
+ *
  * @see <a href="http://kej.tw/flvretriever/youtube.php" accessdate="2012/3/31 17:10">Kej's FLV Retriever</a>,
  *      <a href="http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/10404/youtube-blocked-httpyoutubecomgetvideo" accessdate="2012/3/31 21:20">Youtube blocked http://youtube.com/get_video | LongTail Video | Home of the JW Player</a>,
  *      <a href="http://userscripts.org/scripts/review/109103" accessdate="2012/3/31 21:21" title="Source for &quot;Download YouTube Videos as MP4 (Patch)&quot; - Userscripts.org">Source for &quot;Download YouTube Videos as MP4 (Patch)&quot; - Userscripts.org</a>,
  *      <a href="http://tubewall.googlecode.com/svn-history/r2/trunk/demo/get_video_info.txt" accessdate="2012/3/31 21:21" title="猜测get_video_info返回参数的含义">猜測get_video_info返回參數的含義</a>,
  *      <a href="https://developers.google.com/youtube/2.0/developers_guide_protocol_playlists" accessdate="2012/3/31 22:5">API v2.0 – Playlists - YouTube &mdash; Google Developers</a>
- *      
+ *
  */
 function get_video(video_url, download_to, options) {
 	library_namespace.debug(video_url, 2, 'get_video');
@@ -1374,7 +1375,7 @@ function FindProxyForURL(url, host) {	//	url: 完整的URL字串, host: 在 URL�
 	//dnsDomainIs(lch,"holyseal.net") || dnsDomainIs(lch,".fuzzy2.com") ? "PROXY 211.22.213.114:8000; DIRECT":	//	可再插入第二、三順位的proxy
 	/*
 	http://www.cybersyndrome.net/
-	
+
 	http://www.publicproxyservers.com/page1.html
 	curl --connect-timeout 5 -x 219.163.8.163:3128 http://www.getchu.com/ | grep Getchu.com
 	curl --connect-timeout 5 -x 64.34.113.100:80 http://www.getchu.com/ | grep Getchu.com
@@ -1511,4 +1512,3 @@ return (
 
 
 });
-
