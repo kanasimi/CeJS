@@ -401,7 +401,8 @@ function module_code(library_namespace) {
 			// 警告: 需要自行呼叫 callback(id_list);
 			&& typeof this.convert_id[work_title] === 'function') {
 				// 提供異序(asynchronously,不同時)使用。
-				library_namespace.debug('Using convert_id[' + work_title + ']', 3);
+				library_namespace.debug('Using convert_id[' + work_title + ']',
+						3, 'get_work_list');
 				this.convert_id[work_title].call(this, insert_id, work_title);
 
 			} else {

@@ -10021,7 +10021,7 @@ function module_code(library_namespace) {
 		// 紀錄/標記本次處理到哪。
 		// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
 		mark_up = use_SQL ? function(rows, row_NO) {
-			var row = row_NO >= 0 ? rows[row].row : row_NO;
+			var row = row_NO >= 0 ? rows[row_NO].row : row_NO;
 			last_query_revid = row.rc_this_oldid;
 			var timestamp = row.rc_timestamp.toString();
 			if (timestamp) {
