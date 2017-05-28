@@ -2,7 +2,7 @@
  * @name CeL data for era calendar.
  * @fileoverview 本檔案包含了東亞傳統曆法/中國傳統曆法 (traditional civil
  *               calendar)，農曆、夏曆、陰曆的各紀年期間曆數資料。
- * 
+ *
  * @summary <code>
 
 TODO:
@@ -96,9 +96,10 @@ http://astro.kasi.re.kr/Life/Knowledge/solar2lunar/convert_daily_l2s.php
 公元1492年以後改為從9月1日開始。1699年12月15日彼得一世下令採用儒略曆（舊曆），將「Byzantine calendar」7208年12月31日之次日改為1700年1月1日。儒略曆每年平均為365.25日，比回歸年長11分14秒。這一微小誤差導致每128年節氣日期提前1天。1582年，教皇格列高利十三世實行曆法改革，將當年春分由舊曆3月11日，將日期後移10天。並規定新曆除能用400整除的世紀年（如1600年，2000年）置閨外，其他世紀年（如1700年、1800年、1900年）不置閨。從而使新曆每400年較舊曆少3天。曆法改革造成了舊曆和新曆在日期上的差距。18世紀舊曆日期比新曆日期早11天，19世紀早12天，20世紀早13天。1918年1月26日，蘇俄政府宣佈停止使用舊曆，採用新曆（即公曆）。
 
 
-
+法國君主列表
 https://fr.wikipedia.org/wiki/Liste_des_monarques_de_France
 https://en.wikipedia.org/wiki/Unicode_subscripts_and_superscripts
+https://github.com/gtoubiana/acte
 Clovis Iᵉʳ
 ˢᵗ
 
@@ -288,7 +289,7 @@ CeL.era.pass_on = {
 
 		/**
 		 * 曲循經傳曆日
-		 * 
+		 *
 		 * @see https://zh.wikipedia.org/wiki/%E9%B2%81%E5%9B%BD
 		 * @seealso 杜預《春秋長曆》，原書已佚，今本是清四庫館臣從《永樂大典》中輯出的，附於杜預《春秋釋例》之後。按此書主要以《乾度曆》推算朔閏，凡與經傳不符者則附以作者考證
 		 */
@@ -3497,7 +3498,7 @@ CeL.era.pass_on = {
 		 * The Mahameghavahana dynasty (Oriya: ମହାମେଘବାହନ; Mahā-Mēgha-Bāhana, c.
 		 * 250s BC to 400s AD) was an ancient ruling dynasty of Kalinga after
 		 * the decline of the Maurya Empire.
-		 * 
+		 *
 		 * @see https://en.wikipedia.org/wiki/Mahameghavahana_dynasty
 		 */
 		/**
@@ -3652,36 +3653,36 @@ CeL.era.pass_on = {
 
 		/**
 		 * 塞琉古紀元，是一套塞琉古帝國以及之後受希臘化文明影響的古代國家所採用的紀年方式。
-		 * 
+		 *
 		 * The Seleucid era or Anno Graecorum (literally "year of the Greeks" or
 		 * "Greek year"), sometimes denoted "AG", was a system of numbering
 		 * years in use by the Seleucid Empire and other countries among the
 		 * ancient Hellenistic civilizations.
-		 * 
+		 *
 		 * The natives of the empire used the Babylonian calendar, in which the
 		 * new year falls on 1 Nisanu (3 April in 311 BC)
-		 * 
+		 *
 		 * The Macedonian court adopted the Babylonian calendar (substituting
 		 * the Macedonian month names ) but reckoned the new year to be in the
 		 * autumn (the exact date is unknown).
-		 * 
+		 *
 		 * @see https://en.wikipedia.org/wiki/Seleucid_era
 		 */
 		/**
 		 * 古代馬其頓曆 The Macedonian calendar was in essence the Babylonian calendar
 		 * with the substitution of Macedonian names for the Babylonian ones.
-		 * 
+		 *
 		 * Under the Seleucid Empire, the Macedonians adopted the Seleucid era.
 		 * The year beginning on the 1st of Dios during what we call October 312
 		 * BCE was declared to be the year one of the Seleucid era.
-		 * 
+		 *
 		 * @see https://en.wikipedia.org/wiki/Ancient_Macedonian_calendar
 		 */
 		/**
 		 * His return to Babylon was afterwards officially regarded as the
 		 * beginning of the Seleucid Empire and that year as the first of the
 		 * Seleucid era.
-		 * 
+		 *
 		 * @see https://en.wikipedia.org/wiki/Seleucus_I_Nicator
 		 */
 		/**
@@ -3694,7 +3695,7 @@ CeL.era.pass_on = {
 		 * and finally, when in the 19th year of Darius the beginning of the
 		 * year coincided with spring equinox, to the 19-year cycle” (1985, p.
 		 * 747).
-		 * 
+		 *
 		 * Alex­ander probably used the Macedonian calendar, but the Achaemenid
 		 * system seems not to have been abolished. In the time of Seleucus I
 		 * (321-281 B.C.) the Babylonian calendar was adopted, but the original
@@ -3704,7 +3705,7 @@ CeL.era.pass_on = {
 		 * from material discovered at Nisa (2nd-1st century B.C.) and Avroman
 		 * (1st cent. a.d.) that the Zoroastrian solar calendar (see below) was
 		 * also used.
-		 * 
+		 *
 		 * @see http://www.iranicaonline.org/articles/calendars
 		 */
 		'Seleucid era|Babylonian-311~76/3/24|:Babylonian|疑|準=年',
@@ -3752,7 +3753,7 @@ CeL.era.pass_on = {
 /**
  * A Chronological Survey of Precisely Dated Demotic and Abnormal Hieratic
  * Sources, Version 1.0 (February 2007)
- * 
+ *
  * @see http://www.trismegistos.org/top.php
  */
 
@@ -3926,7 +3927,7 @@ CeL.era.pass_on = {
 		/**
 		 * The Era of the Martyrs (Latin: anno martyrum or AM), also known as
 		 * the Diocletian era (Latin: anno Diocletiani)
-		 * 
+		 *
 		 * @see https://en.wikipedia.org/wiki/Era_of_Martyrs
 		 */
 
