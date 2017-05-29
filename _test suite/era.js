@@ -1026,7 +1026,7 @@ function add_tag(period, data, group, register_only, options) {
 				}
 		} else if (options && typeof options.for_duplicate === 'function')
 			arg_passed = options.for_duplicate(target[period], arg_passed);
-		else {
+		else if (CeL.is_debug()) {
 			CeL.warn('add_tag: 已經有此時段存在！將跳過之，不會以新的覆蓋舊的。 '
 					+ (group ? '[' + group + ']' : '') + '[' + period + ']');
 			return;
@@ -1540,7 +1540,7 @@ function draw_era(hierarchy) {
 
 	// -----------------------------
 
-	// 額外圖資。
+	// 繪製額外圖資。
 	if (CeL.is_Object(draw_era.tags)) {
 		periods = [];
 		for ( var group in draw_era.tags) {
@@ -1582,9 +1582,9 @@ function draw_era(hierarchy) {
 			CeL.new_node(periods, 'data_layer_menu');
 		}
 		CeL.toggle_display('data_layer_menu', period_hierarchy);
-	} else
+	} else {
 		CeL.debug('No group found.', 2);
-
+	}
 }
 
 draw_era.options = {
@@ -1610,12 +1610,11 @@ draw_era.get_date = function(date, period_end) {
 // click and change the option of this.title
 draw_era.change_option = function() {
 	var option = this.title.replace(/\s[\s\S]*/, ''), setted = draw_era.options[option];
+	// reset option status
 	CeL.set_class(this, 'setted', {
 		remove : setted
 	});
-	draw_era.options[option]
-	//
-	= !setted;
+	draw_era.options[option] = !setted;
 	draw_era.redraw();
 	return false;
 };
@@ -1905,6 +1904,9 @@ var 國家_code = {
 // 直到當地 Wikipedia 全面加入紀年使用當時之原名，且資料較中文 Wikipedia 周全時，再行轉換。
 };
 
+/** {Boolean}標記當下正在處理的紀年。 */
+translate_era.draw_recent_era = true;
+
 function translate_era(era) {
 
 	// add 文字式年曆注解
@@ -1921,8 +1923,8 @@ function translate_era(era) {
 				note = note
 						.replace(/\n/g, '<br />')
 						.replace(
-								// @see PATTERN_URL_WITH_PROTOCOL_GLOBAL @
-								// CeL.application.net.wiki
+								// @see PATTERN_URL_WITH_PROTOCOL_GLOBAL
+								// @ CeL.application.net.wiki
 								/\[((?:https?|ftp):\/\/(?:[^\0\s\|<>\[\]{}\/][^\0\s\|<>\[\]{}]*)) ([^\[\]]+)\]/ig,
 								function(all, URL, text) {
 									return '<a href="' + URL
@@ -1969,6 +1971,9 @@ function translate_era(era) {
 	var output, date;
 	if (('era_graph' in select_panels) && CeL.parse_period.PATTERN.test(era))
 		return add_tag(era);
+
+	if (translate_era.draw_recent_era)
+		add_tag(era);
 
 	// 前置處理。
 
@@ -2178,6 +2183,9 @@ function translate_era(era) {
 
 // ---------------------------------------------------------------------//
 
+/**
+ * 當點擊網頁元素(this)時，將此元素的標題(this.title)當作紀年名稱來處理。
+ */
 function click_title_as_era() {
 	var era = String(this.title), matched = era.split(':');
 	if (matched && matched.length === 2
@@ -2731,13 +2739,27 @@ function affairs() {
 		CeL.new_node([ {
 			T : '紀年線圖選項：'
 		}, {
+			T : '標記正處理的紀年',
+			R : 'Markup current era. 標記當下正在處理的紀年。',
+			onclick : function() {
+				var setted = translate_era.draw_recent_era;
+				// reset option status
+				CeL.set_class(this, 'setted', {
+					remove : setted
+				});
+				translate_era.draw_recent_era = !setted;
+				draw_era.redraw();
+				return false;
+			},
+			C : 'option' + (translate_era.draw_recent_era ? ' setted' : '')
+		}, {
 			T : '合併歷史時期',
-			title : 'merge_periods\ne.g., 三國兩晉南北朝, 五代十國',
+			R : 'merge_periods\ne.g., 三國兩晉南北朝, 五代十國',
 			onclick : draw_era.change_option,
 			C : 'option' + (draw_era.options.merge_periods ? ' setted' : '')
 		}, {
 			T : '擴張範圍至君主在世時段',
-			title : 'adapt_lifetime',
+			R : 'adapt_lifetime',
 			onclick : draw_era.change_option,
 			C : 'option' + (draw_era.options.adapt_lifetime ? ' setted' : '')
 		} ], 'era_graph_options');

@@ -1,318 +1,319 @@
-"hide"	"scope"	"message"	"note"	"繁體中文"	"简体中文"	"English"	"日本語"	"한국어"	"Русский"
-	"system"	"Loading..."	"Loading message."	"載入中…"		"Loading..."	"読み込み中…"		
-	"system"	"Load failed"	"Loading message."	"載入失敗"		"Load failed"	"読み込みに失敗しました"		
-	"system"	"Loading %1%..."	"Loading message. e.g., Loading 20%..."	"已載入 %1%…"		"Loading %1%..."			
-	"system"	"Initializing..."	"Loading message."	"初始化中…"		"Initializing..."	"初期化中…"		
-	"interact.DOM: auto_TOC()"	"Contents of [%1]"	"Table of contents message. e.g., Contents of [title]"	"[%1] 的目錄"		"Contents of [%1]"	"[%1] の目次"		
-	"interact.DOM: auto_TOC(), application.storage.EPUB: generate_TOC()"	"Contents"	"Table of contents message of web page and ebook."	"目錄"		"Contents"	"目次"		
-	"interact.DOM: auto_TOC()"	"↑Back to TOC"	"Table of contents message."	"↑回到目錄"		"↑Back to TOC"	"↑目次へ"		
-	"interact.DOM: auto_TOC()"	"expand"	"show/hide table of contents(顯示/隱藏, 表示/隠す)"	"展開"		"expand"	"展開する"		
-	"interact.DOM: auto_TOC()"	"collapse"	"show/hide table of contents(顯示/隱藏, 表示/隠す)"	"收合"		"collapse"	"折り畳む"		
-	"application.storage.EPUB: generate_TOC()"	"Work information"	"Message of ebook, book information."	"作品資訊"		"Work information"	"作品情報"		
-	"application.storage.EPUB: generate_TOC()"	"identifier"	"Message of ebook in TOC file."	"識別符"		"identifier"	"識別子"		
-	"application.storage.EPUB: generate_TOC()"	"title"	"Message of ebook in TOC file."	"標題"		"title"	"表題"		
-	"application.storage.EPUB: generate_TOC()"	"language"	"Message of ebook in TOC file."	"語言"		"language"	"言語"	"언어"	
-	"application.storage.EPUB: generate_TOC()"	"creator"	"Message of ebook in TOC file."	"作者"		"creator"	"作者"		
-	"application.storage.EPUB: generate_TOC()"	"subject"	"Message of ebook in TOC file."	"議題"		"subject"	"ジャンル"		
-	"application.storage.EPUB: generate_TOC()"	"description"	"Message of ebook in TOC file."	"簡介"		"description"	"あらすじ"		
-	"application.storage.EPUB: generate_TOC()"	"publisher"	"Message of ebook in TOC file."	"發布者"		"publisher"	"発行者"		
-	"application.storage.EPUB: generate_TOC()"	"source"	"Message of ebook in TOC file."	"來源"		"source"	"出典"		
-	"application.storage.EPUB: generate_TOC()"	"dcterms:modified"	"Message of ebook in TOC file."	"作品最後編輯時間"		"Last modified date of work"	"作品の最終更新日時"		
-	"application.storage.EPUB: generate_TOC()"	"calibre:series"	"Message of ebook in TOC file."	"叢書"		"Series"	"シリーズ"		
-	"application.storage.EPUB: generate_TOC()"	"word count"	"Message of ebook in TOC file."	"字數"		"word count"	"文字数"		
-	"application.storage.EPUB: generate_TOC()"	"%1 words"	"Message of ebook in TOC file."	"%1字"		"%1 words"	"%1文字"		
-	"application.storage.EPUB: generate_TOC()"	"%1 chapters"	"Message of ebook in TOC file."	"%1章"		"%1 chapters"	"%1話"		
-	"interact.integrate.SVG"	"number"	"Name of type/object"	"數字"		"number"	"数字"		
-	"interact.integrate.SVG"	"function"	"Name of type/object"	"函數"	"函式"	"function"	"関数"		
-	"interact.integrate.SVG, application.storage.EPUB: generate_TOC()"	"date"	"Name of type/object"	"日期"		"date"	"日付"		
-	"interact.integrate.SVG"	"time"	"Name of type/object"	"時間"		"time"	"時間"		
-	"interact.integrate.SVG"	"module"	"Name of type/object"	"模組"	"模块"	"module"	"モジュール"		
-	"interact.integrate.SVG"	"constructor"	"Name of type/object"	"建構式"		"constructor"	"コンストラクタ"		
-"H"	"interact.integrate.SVG"	"class"	"Name of type/object"	"類別"	"类"	"class"			
-	"interact.integrate.SVG"	"Illegal %1: [%2]"	"Used as error message."	"有問題（無效或不合理）的%1：[%2]"		"Illegal %1: [%2]"	"不正な%1：[%2]"		
-	"application.debug.log"	"debug level"	"Used as debugging message."	"偵錯層級"	"调试级别"	"debug level"	"デバッグレベル"		
-	"application.debug.log"	"fatal"	"Used as debugging message."	"致命"		"fatal"	"致命的エラー"		
-	"application.debug.log"	"error"	"Used as debugging message."	"錯誤"		"error"	"エラー"		
-	"application.debug.log"	"warn"	"Used as debugging message."	"警告"		"warn"	"警告"		
-	"application.debug.log"	"em"	"Used as debugging message."	"重要"		"em"	"重要"		
-	"application.debug.log"	"info"	"Used as debugging message."	"訊息"	"信息"	"info"	"情報"		
-	"application.debug.log"	"log"	"Used as debugging message."	"記錄"		"log"	"ログ"		
-	"application.debug.log"	"debug"	"Used as debugging message."	"偵錯"	"调试"	"debug"	"デバッグ"		
-	"application.debug.log"	"trace"	"Used as debugging message."	"追蹤"	"跟踪"	"trace"	"トレース"		
-"H"	"application.debug.log"	"passed"	"Used as debugging message."	"通過"		"passed"	"パス"		
-	"application.locale.gettext"	"Language"	"Label used when selecting language."	"語言"		"Language"	"言語"	"언어"	
-	"application.locale.gettext"	"所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。"	"Used as debugging message when selecting language."	"所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。"		"Specified domain [%1] is not yet loaded. You may need to set the FORCE flag."	"指定されたドメインがまだロードされていません。必要があるなら、強制ロードフラグを設定して下さい。"		
-	"application.locale.gettext"	"使用 [%2] (%1) 領域/語系。"	"Used as debugging message when selecting language."	"使用 [%2] (%1) 領域/語系。"		"Using domain/locale [%2] (%1)."	"ドメイン/言語 [%2] (%1) を使用します。"		
-	"application.net.wiki"	"%1 elapsed, %3 at %2"	"Used as log message. e.g., 2 s elapsed, finished at 20010101T0000"	"隔 %1，%2 %3"		"%1 elapsed, %3 at %2"	"%1 後、%2 %3"		
-	"application.net.wiki"	"no change"	"Used as log message."	"無改變"		"no change"	"無変更"		
-	"application.net.wiki"	"finished"	"Used as log message."	"完成"		"finished"	"完成"		
-	"application.net.wiki"	"finished: %1"	"Used as log message."	"結束：%1"		"finished: %1"	"終了：%1"		
-	"application.net.wiki"	"First, use %1 to get %2 pages."	"Used as log message. Showing elapsed time. e.g., First, use 2 s to get 20 pages."	"首先使用 %1 以取得 %2 個頁面內容。"		"First, use %1 to get %2 pages."	"まずは %1 かかって、%2ページを取得する。"		
-	"application.net.wiki"	"%1 pages done"	"Used as log message at task report page title and section title."	"完成 %1 條目"		"%1 pages done"	"%1 本の記事処理済み"		
-	"application.net.wiki"	", %1%2 pages no change"	"Used as log message at report."	"，%1%2條目未作變更"		", %1%2 pages no change"	"。%1%2本の記事変更なし"		
-	"application.net.wiki"	"all "	"Used as log message at report."	"所有 "		"all "	"全 "		
-	"application.net.wiki"	", %1 elapsed."	"Used as log message at report."	"，前後總共 %1。"		", %1 elapsed."	"。経過時間 %1。"		
-	"application.net.wiki"	"'''Stopped''', give up editing."	"Used as log message at report."	"'''已停止作業'''，放棄編輯。"		"'''Stopped''', give up editing."	"編集を'''中止した'''。"		
-	"application.net.wiki"	"Nothing change."	"Used as log message at report."	"全無變更。"		"Nothing change."	"全て変更なし。"		
-	"application.net.wiki"	"Continue key"	"Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]"	"後續索引"		"Continue key"	"後続の索引"		
-	"application.net.wiki"	"Abandon change"	"Used as log message."	"放棄編輯頁面"		"Abandon change"	"編集を放棄した"		
-	"application.net.wiki"	"No reason provided"	"Used as log message."	"未描述原因"		"No reason provided"	"説明がありません"		
-	"application.net.wiki"	"Content is empty"	"Used as log message."	"內容被清空"		"Content is empty"	"内容はクリアされます"		
-	"application.net.wiki"	"Content is not settled"	"Used as log message."	"未設定編輯內容"		"Content is not settled"	"内容が設定されていません"		
-	"data.date.era: get_dates()"	"無紀年名稱作 [%1]！"	"Used as debugging message when selecting language."	"無紀年名稱作 [%1]！"		"Can't find era named [%1]!"	"[%1] という紀年法が見当たりません！"		
-	"data.date.era"	"跳過 [%1]：本[%2]僅供參照用。"	"Used as debugging message when selecting language."	"跳過 [%1]：本[%2]僅供參照用。"		"Skip [%1]: The period is for reference purpose only."	"[%1] を抜かします：この period は参考用だけです。"		
-	"data.date.era: title"	"紀年轉換工具"	"Name of Era Calendar Converter tool."	"紀年轉換工具"		"Era Calendar Converter"	"紀年変換ツール"		
-	"data.date.era: title"	"紀年 %1"	"Message to show an era name."	"紀年 %1"		"Era %1"	"紀年 %1"		
-	"data.date.era: system"	"訊息提示與紀錄欄"	"Panel name"	"訊息提示與紀錄欄"		"Log Console"	"メッセージや情報の記録帳"		
-	"data.date.era: system"	"已載入 %1 筆資料。"	"Used as log message."	"已載入 %1 筆資料。"		"function (domain_name, arg) { return '%1 ' + (1 < arg[1] ? 'entries' : 'entry') + ' loaded.'; }"	"%1 件のデータを読み込みました。"		
-	"data.date.era: system"	"請注意：本欄僅供開發人員使用。"	"Used as warning message."	"請注意：本欄僅供開發人員使用。"		"WARNING: Only for developers."	"開発者向け機能なので、ご使用の際はお気をつけください。"		
-	"data.date.era: system"	"約%1年"	"Message to show an date."	"約%1年"		"c. %1"			
-	"data.date.era_data: 國家 country"	"中國"	"Country name."	"中國"		"China"	"中国"		
-	"data.date.era_data: 國家 country"	"日本"	"Country name."	"日本"		"Japan"	"日本"		
-	"data.date.era_data: 國家 country"	"한국"	"Country name."	"韓國"		"Korea"	"朝鮮"	"한국"	
-	"data.date.era_data: 國家 country"	"琉球"	"Kingdom name. 沖縄県, Okinawan"	"琉球"		"Ryukyu"	"琉球"		
-	"data.date.era_data: 國家 country"	"Việt Nam"	"Country name."	"越南"		"Vietnam"	"ベトナム"		
-	"data.date.era_data: 紀年資料"	"Bắc thuộc"	"Country name."	"北屬時期"		"Chinese domination of Vietnam"	"北属期"		
-	"data.date.era_data: 紀年資料"	"Thời kỳ độc lập"	"Country name."	"獨立時期"		"Late dynastic epoch"	"独立王朝時代"		
-	"data.date.era_data: 國家 country"	"ไทย"	"Country name."	"泰國"		"Thailand"	"タイ"		
-	"data.date.era_data: 紀年資料"	"อาณาจักรสุโขทัย"	"Country name."	"素可泰王國"		"Sukhothai Kingdom"	"スコータイ王朝"		
-	"data.date.era_data: 紀年資料"	"ราชวงศ์พระร่วง"	"Country name."	"帕鑾王朝"		"Phra Ruang dynasty"	"プラ・ルワン王朝"		
-	"data.date.era_data: 紀年資料"	"อาณาจักรอยุธยา"	"Country name."	"大城王國"		"Ayutthaya Kingdom"	"アユタヤ王朝"		
-	"data.date.era_data: 紀年資料"	"อาณาจักรธนบุรี"	"Country name."	"吞武里王國"		"Thonburi Kingdom"	"トンブリー王朝"		
-	"data.date.era_data: 紀年資料"	"ราชวงศ์ธนบุรี"	"Country name."	"吞武里王朝"		"Thonburi dynasty"	"トンブリー王朝"		
-	"data.date.era_data: 紀年資料"	"สมเด็จพระเจ้ากรุงธนบุรี"	"Country name."	"鄭信"		"Taksin"	"タークシン"		
-	"data.date.era_data: 紀年資料"	"อาณาจักรรัตนโกสินทร์"	"Country name."	"拉達那哥欣王國"		"Rattanakosin Kingdom"	"ラタナコーシン王朝"		
-	"data.date.era_data: 紀年資料"	"ราชวงศ์จักรี"	"Country name."	"卻克里王朝"		"Chakri dynasty"	"チャクリー王朝"		
-	"data.date.era_data: 國家 country"	"India"	"ancient India"	"印度"		"India"	"インド"		
-	"data.date.era_data: 國家 country"	"မြန်မာ"	"Country name."	"緬甸"		"Myanmar"	"ビルマ"		
-	"data.date.era_data: 國家 country"	"မြန်မာပြည်"	"Country name."	"緬甸聯邦共和國"		"Republic of the Union of Myanmar"	"ミャンマー連邦共和国"		
-	"data.date.era_data: 紀年資料"	"Pagan"	"Country name."	"蒲甘"		"Pagan"	"バガン"		
-	"data.date.era_data: 紀年資料"	"Toungoo"	"Country name."	"東吁"		"Toungoo"	"タウングー"		
-	"data.date.era_data: 紀年資料"	"ကုန်းဘောင်ခေတ်"	"Country name."	"貢榜"		"Konbaung"	"コンバウン"		
-	"data.date.era_data: 國家 country"	"Maya"	"Country name."	"瑪雅"		"Maya"	"マヤ"		
-	"data.date.era_data: 紀年資料"	"Palenque"	"Country name."	"帕倫克"		"Palenque"	"パレンケ"		
-	"data.date.era_data: 國家 country"	"Mesopotamian"	"Name of ancient Mesopotamian civilization"	"美索不達米亞文明"		"Mesopotamian"	"メソポタミア文明"		
-	"data.date.era_data: 紀年資料"	"Babylonian calendar"	"Calendar of ancient civilization"	"巴比倫尼亞曆"		"Babylonian calendar"	"バビロニア暦"		
-	"data.date.era_data: 國家 country"	"Babylon"	"ancient civilization name"	"巴比倫"		"Babylon"	"バビロン"		
-	"data.date.era_data: 國家 country"	"Babylonian Dynasty of E"	"ancient civilization name"	"巴比倫第九王朝"		"Babylonian Dynasty of E"	"バビロンE王朝"		
-	"data.date.era_data: 國家 country"	"Neo-Babylonian"	"ancient civilization name"	"新巴比倫"		"Neo-Babylonian"	"新バビロニア"		
-	"data.date.era_data: 國家 country"	"Neo-Assyrian"	"ancient civilization name"	"新亞述"		"Neo-Assyrian"	"新アッシリア"		
-	"data.date.era_data: 國家 country"	"Persia"	"ancient civilization name"	"波斯"		"Persia"	"ペルシア"		
-	"data.date.era_data: 國家 country"	"Μακεδονία"	"Name of [[:en:Macedonia (ancient kingdom)]], Μακεδονικό βασίλειο"	"馬其頓"		"Macedon"	"マケドニア"		
-	"data.date.era_data: 國家 country"	"Σελευκιδών"	"Name of [[:en:Seleucid Empire]]"	"塞琉古"		"Seleucid"	"セレウコス"		
-	"data.date.era: input_panel"	"Convert an era name to the specified format"	"Used as alert message."	"轉換紀年成指定之格式"		"Convert an era name to the specified format"			
-	"data.date.era: input_panel"	"紀年"	"Label for input."	"紀年"		"Era name"			
-	"data.date.era: input_panel"	"輸出格式"	"Label for input."	"輸出格式"		"Output format"	"出力形式"		
-	"data.date.era: input_panel"	"自訂輸出格式"	"Label for input."	"自訂輸出格式"		"Customize output format"	"特殊な出力形式"		
-"H"	"data.date.era: input_panel"	"取得紀年"	"Label for input."	"取得紀年"		"Get"	"暦日"		
-"H"	"data.date.era: input_panel"	"之"	"Label for input."	"之"		"'s"	"の"		
-	"data.date.era: input_panel"	"中文數字"	"Label for input."	"中文數字"		"To Chinese numerals"	"漢数字"		
-	"data.date.era: note_botton_layer"	"測試範例"	"Panel name"	"測試範例"		"EXAMPLE"	"入力例"		
-	"data.date.era: note_botton_layer"	"輸入紀錄"	"Panel name"	"輸入紀錄"	"输入履历"	"RECORD"	"入力記録"		
-	"data.date.era: note_botton_layer"	"使用說明"	"Panel name"	"使用說明"		"CONCEPT"	"ご利用方法"		
-	"data.date.era: note_botton_layer"	"紀年線圖"	"Panel name"	"紀年線圖"		"TIMELINE"	"時間軸"		
-	"data.date.era: note_botton_layer + 文字式年曆"	"曆譜"	"Panel name"	"曆譜"		"CALENDAR TABLE"	"暦日表"		
-	"data.date.era: note_botton_layer"	"設定"	"Panel name"	"設定"		"CONFIGURATION"	"設定"		
-	"data.date.era: note_botton_layer"	"批次轉換"	"Panel name when doing batch converting."	"批次轉換"		"BATCH"	"一括変換"		
-	"data.date.era: note_botton_layer"	"標注文本"	"Panel name for tagging old text."	"標注文本"		"TAGGING"	"古文書標注"		
-	"data.date.era: note_botton_layer"	"曆數處理"	"Panel name"	"曆數處理"		"DEVELOPMENT"	"開発ツール"		
-	"data.date.era: note_botton_layer"	"問題回報"	"Panel name"	"問題回報"		"FEEDBACK"	"問題報告"		
-	"data.date.era: 文字式年曆"	"無可供列出之曆譜！"	"Used as log message."	"無可供列出之曆譜！"		"No calendar to list!"	"ご提供できる情報がありません。"		
-	"data.date.era: 文字式年曆"	"嘗試加注年分"	"Used as log message."	"嘗試加注年分"		"Append year numbering"	"年分を追加する"		
-	"data.date.era: 文字式年曆"	"年譜"	"Label for calendar."	"年譜"		"calendar date"	"年暦譜"		
-	"data.date.era: 文字式年曆"	"共有 %1 個時段紀錄"	"Used as log message."	"共有 %1 個時段紀錄"		"%1 records"	"%1 件"		
-	"data.date.era: 文字式年曆"	"共有 %1 個年段紀錄"	"Used as log message."	"共有 %1 個年段紀錄"		"%1 years"	"%1 件"		
-"H"	"data.date.era: 文字式年曆 朝代紀年日期"	"%1 %2年%3月%4日"	"Date format."	"%1 %2年%3月%4日"		"%1 %2/%3/%4"	"%1 %2年%3月%4日"		
-"H"	"data.date.era: 文字式年曆 朝代紀年日期"	"%1%2年%3月%4日"	"Date format."	"%1%2年%3月%4日"		"%1 %2/%3/%4"	"%1%2年%3月%4日"		
-"H"	"data.date.era: 文字式年曆 朝代紀年日期"	"%1 %2年"	"Date format."	"%1 %2年"		"%1 year %2"	"%1 %2年"		
-"H"	"data.date.era: 文字式年曆 朝代紀年日期"	"%1%2年"	"Date format. e.g., 2001/5/3. Common Era: Y/m/d"	"%1%2年"		"%1 year %2"	"%1%2年"		
-	"data.date.era: 文字式年曆 朝代紀年日期"	"%1/%2/%3"	"Date format. e.g., 2001/5/3. Common Era: Y/m/d"	"%1/%2/%3"		"%1/%2/%3"			
-	"data.date.era: 文字式年曆 朝代紀年日期"	"%1 BCE"	"Date format."	"前%1年"		"%1 BCE"	"前%1年"		
-	"data.date.era: 文字式年曆 朝代紀年日期"	"%1 CE"	"Date format."	"%1年"		"%1 CE"	"%1年"		
-	"data.date.era: 文字式年曆注解"	"年號"	"Label for calendar."	"年號"		"Era date"	"元号"		
-	"data.date.era: 文字式年曆注解"	"採用曆法"	"Label for calendar."	"採用曆法"		"Calendar used"	"使用されていた暦"		
-	"data.date.era: 文字式年曆注解"	"出典"	"Label for calendar."	"出典"		"Reference"	"出典"		
-	"data.date.era: 文字式年曆注解"	"注"	"Label for calendar."	"注"		"Note"	"注釈"		
-	"data.date.era: 文字式年曆注解"	"展示線圖"	"Label for calendar."	"展示線圖"		"Showing timeline"	"時間軸を見る"		
-	"data.date.era: 文字式年曆注解/君主資料"	"君主名"	"Label for calendar: Personal name, Full name"	"君主姓名"		"Personal name"	"帝王の御名"		
-	"data.date.era: 文字式年曆注解/君主資料"	"表字"	"Label for calendar."	"表字"		"Courtesy name"	"字（あざな）"		
-	"data.date.era: 文字式年曆注解/君主資料"	"君主號"	"Label for calendar: Pseudonym, pen name"	"別號"		"Art name"	"号（ごう）"		
-	"data.date.era: 文字式年曆注解/君主資料"	"諱"	"Label for calendar."	"名諱"		"True name"	"諱（いみな）"		
-	"data.date.era: 文字式年曆注解/君主資料"	"諡"	"Label for calendar: Posthumous name of Japanese Emperor, Emperor of Japan"	"諡"		"Posthumous name"	"諡号"		
-	"data.date.era: 文字式年曆注解/君主資料"	"廟號"	"Label for calendar."	"廟號"		"Temple name"	"廟号"		
-	"data.date.era: 文字式年曆注解/君主資料"	"出生"	"Label for calendar: Birth of ruler"	"出生"		"Born"	"誕生"		
-	"data.date.era: 文字式年曆注解/君主資料"	"逝世"	"Label for calendar: Death of ruler"	"逝世"		"Died"	"崩御"		
-	"data.date.era: 文字式年曆注解/君主資料"	"在位"	"Label for calendar."	"在位"		"Reign"	"在位期間"		
-	"data.date.era: 文字式年曆注解/君主資料"	"加冕"	"Label for calendar."	"加冕"		"Coronation"	"戴冠"		
-	"data.date.era: 文字式年曆注解/君主資料"	"父親"	"Label for calendar."	"父親"		"Father"	"父親"		
-	"data.date.era: 文字式年曆注解/君主資料"	"母親"	"Label for calendar."	"母親"		"Mother"	"母親"		
-	"data.date.era: 文字式年曆注解/君主資料"	"前任"	"Label for calendar."	"前任"		"Predecessor"	"先代"		
-	"data.date.era: 文字式年曆注解/君主資料"	"繼任"	"Label for calendar."	"繼任"		"Successor"	"次代"		
-	"data.date.era: 文字式年曆注解/君主資料"	"配偶"	"Label for calendar."	"配偶"		"Spouse"	"配偶者"		
-	"data.date.era: 文字式年曆欄位"	"前綴"	"Label for calendar options panel."	"前綴"		"prefix"	"接頭辞"		
-	"data.date.era: 文字式年曆欄位"	"增加此欄"	"Label for calendar options panel."	"增加此欄"		"Add the column"	"この列を追加する"		
-	"data.date.era: 文字式年曆欄位"	"除去此欄"	"Label for calendar options panel."	"除去此欄"		"Remove the column"	"この列を削除する"		
-	"data.date.era: 文字式年曆欄位"	"全不選"	"Label for calendar options panel."	"全不選"		"Remove ALL"	"全ての列を削除する"		
-	"data.date.era: 文字式年曆欄位"	"Pin"	"Label for calendar options panel."	"釘選"		"Pin"	"ピン"		
-	"data.date.era: 文字式年曆欄位"	"Unpin"	"Label for calendar options panel."	"拔起"		"Unpin"	"外す"		
-	"data.date.era: 文字式年曆欄位"	"分類"	"Label for calendar option."	"分類"		"Group"	"分類"		
-	"data.date.era: 文字式年曆欄位"	"曆注"	"Calendar notes, Calendar comments"	"曆注"		"Calendar note"	"暦注"		
-	"data.date.era: 可選用的文字式年曆欄位"	"星期"	"Label for calendar option."	"星期"		"Week-day"	"曜日"		
-	"data.date.era: 可選用的文字式年曆欄位"	"Gregorian calendar"	"Label for calendar option."	"格里曆"		"Gregorian calendar"	"グレゴリオ暦"		
-	"data.date.era: 可選用的文字式年曆欄位"	"Julian calendar"	"Label for calendar option."	"儒略曆"		"Julian calendar"	"ユリウス暦"		
-	"data.date.era: 可選用的文字式年曆欄位"	"JD"	"Label for calendar option."	"儒略日"		"JD"	"ユリウス日"		
-	"data.date.era: 可選用的文字式年曆欄位"	"Julian Date"	"Label for calendar option."	"儒略日"		"Julian Date"	"ユリウス日"		
-	"data.date.era: 可選用的文字式年曆欄位"	"JDN"	"Label for calendar option."	"儒略日數"		"JDN"	"ユリウス通日"		
-	"data.date.era: 可選用的文字式年曆欄位"	"Julian Day Number"	"Label for calendar option."	"儒略日數"		"Julian Day Number"	"ユリウス通日"		
-	"data.date.era: 可選用的文字式年曆欄位"	"年日期"	"Label for calendar option."	"年日期"		"Ordinal date"	"年日付"		
-	"data.date.era: 可選用的文字式年曆欄位"	"週日期"	"Label for calendar option."	"週日期"		"Week date"	"週日付"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類"	"astronomy"	"Label for astronomical calculations"	"天文"		"astronomy"	"天文"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類"	"calendar"	"Label for calendar option."	"曆法"		"calendar"	"暦法"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類"	"東亞陰陽曆"	"Label for East Asian lunisolar calendar"	"東亞陰陽曆"		"East Asian calendar"	"中華圏の太陰太陽暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類"	"Year naming"	"Label for calendar option."	"紀年法"		"Year naming"	"紀年法"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類"	"Year numbering"	"Label for calendar option."	"編年法"		"Year numbering"	"編年方法"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類"	"Gregorian reform"	"Label for calendar option."	"公曆改曆"		"Adoption of the Gregorian calendar"	"グレゴリオ改暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類"	"Before Present"	"Label for calendar option."	"距今"		"Before Present"	"何年前"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類"	"Holocene calendar"	"Label for calendar option."	"全新世紀年"		"Holocene calendar"	"人類紀元"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類"	"Unix time"	"Label for calendar option."	"Unix時間"		"Unix time"	"Unix時間"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"general precession"	"Label for calendar option."	"綜合歲差"		"general precession"	"一般歳差"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"天文節氣"	"Label for calendar option."	"天文節氣"		"solar term (calculated)"	"天文節気"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"Sun's apparent longitude"	"Label for calendar option."	"太陽視黃經"		"Sun's apparent longitude"	"太陽視黄経"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"節氣經過日數"	"Label for calendar option."	"節氣經過日數"		"solar term ages"	"節気からの経過日数"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"Data will be presented at next calculation."	"Data will be loaded soon. Data is not yet loaded. Data will be loaded as soon as it becomes available."	"資料將於下次演算時呈現。"		"Data will be presented at next calculation."	"資料は次の計算で表示します。"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"Moon longitude"	"Moon's apparent longitude"	"月亮視黃經"		"Moon longitude"	"月視黄経"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"Moon latitude"	"Moon's apparent latitude"	"月亮視黃緯"		"Moon latitude"	"月視黄緯"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"月日視黃經差"	"Label for calendar option."	"月日視黃經差"		"apparent longitude: Moon - Sun"	"月日視黄経差"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"月相"	"Label for calendar option."	"月相"		"lunar phase"	"月相"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"saros %1"	"Label for calendar."	"沙羅序列%1"		"saros %1"	"サロス系列%1"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"solar eclipse"	"Label for calendar."	"日食"		"solar eclipse"	"日食"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"lunar eclipse"	"Label for calendar."	"月食"		"lunar eclipse"	"月食"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"total solar eclipse"	"Label for calendar."	"日全食"		"total solar eclipse"	"皆既日食"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"annular solar eclipse"	"Label for calendar."	"日環食"		"annular solar eclipse"	"金環日食"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"hybrid solar eclipse"	"Label for calendar."	"全環食"		"hybrid solar eclipse"	"金環皆既日食"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"partial solar eclipse"	"Label for calendar."	"日偏食"		"partial solar eclipse"	"部分日食"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"total lunar eclipse"	"Label for calendar."	"月全食"		"total lunar eclipse"	"皆既月食"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"partial lunar eclipse"	"Label for calendar."	"月偏食"		"partial lunar eclipse"	"部分月食"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"penumbral lunar eclipse"	"Label for calendar."	"半影月食"		"penumbral lunar eclipse"	"半影食"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"朔"	"Label for calendar."	"朔"		"new moon"	"新月"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"上弦"	"Label for calendar."	"上弦"		"first quarter"	"上弦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"望"	"Label for calendar."	"望"		"full moon"	"満月"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"下弦"	"Label for calendar."	"下弦"		"last quarter"	"下弦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"晦日"	"Label for calendar."	"晦日"		"new moon eve"	"晦日"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"日出日落"	"Label for calendar."	"日出日落"		"sunrise / sunset"	"日の出入り"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"曙暮光"	"Label for calendar."	"曙暮光"		"twilight"	"夜明・日暮"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"月出月落"	"Label for calendar."	"月出月落"		"moonrise / moonset"	"月の出入り"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"lower culmination"	"Label for calendar."	"下中天"		"lower culmination"	"極下正中"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"sunrise"	"Label for calendar."	"日出"		"sunrise"	"日の出"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"moonrise"	"Label for calendar."	"月升"		"moonrise"	"月の出"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"upper culmination"	"Label for calendar."	"上中天"		"upper culmination"	"極上正中 (南中時)"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"sunset"	"Label for calendar."	"日落"		"sunset"	"日の入り"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"moonset"	"Label for calendar."	"月降"		"moonset"	"月の入り"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"astronomical twilight begin"	"Label for calendar."	"天文曙光"		"astronomical twilight begin"	"天文薄明の始まり"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"nautical twilight begin"	"Label for calendar."	"航海曙光"		"nautical twilight begin"	"航海薄明の始まり"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"civil twilight begin"	"Label for calendar."	"民用曙光"		"civil twilight begin"	"市民薄明の始まり"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"astronomical twilight end"	"Label for calendar."	"天文暮光"		"astronomical twilight end"	"天文薄明の終わり"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"nautical twilight end"	"Label for calendar."	"航海暮光"		"nautical twilight end"	"航海薄明の終わり"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"civil twilight end"	"Label for calendar."	"民用暮光"		"civil twilight end"	"市民薄明の終わり"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算"	"夏曆"	"Label for calendar: traditional Chinese lunisolar calendar"	"夏曆"		"Chinese lunisolar"	"旧暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"Revised Julian calendar"	"Label for calendar."	"儒略改革曆"		"Revised Julian calendar"	"修正ユリウス暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"伊斯蘭曆"	"Label for calendar."	"伊斯蘭曆"		"Islamic calendar"	"ヒジュラ暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"گاه‌شماری هجری خورشیدی"	"Label for calendar."	"現代伊朗曆"		"Modern Iranian calendar"	"イラン太陽暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"希伯來曆"	"Label for calendar."	"希伯來曆"		"Hebrew calendar"	"ユダヤ暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"長紀曆"	"Label for calendar: The Mesoamerican Long Count calendar"	"長紀曆"		"Long Count"	"マヤ長期暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"Maya Tzolk'in"	"Label for calendar."			"Maya Tzolk'in"	"マヤ神聖暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"Maya Haab'"	"Label for calendar."			"Maya Haab'"	"マヤ文化暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"傣曆"	"Label for calendar."	"傣曆"		"Dai calendar"	"タイ暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"မြန်မာ ပြက္ခဒိန်"	"Label for calendar: [[:en:Burmese calendar]]"	"緬曆"		"Myanmar calendar"	"ビルマ暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"彝曆"	"Label for calendar."	"彝曆"		"Yi calendar"	"彝暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"हिन्दू पंचांग"	"Label for calendar."	"印度曆"		"Hindu calendar"	"ヒンドゥー暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"भारतीय राष्ट्रीय पंचांग"	"Label for calendar."	"印度國定曆"		"Indian national calendar"	"インド国定暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"Bangla calendar"	"Label for calendar."	"現行孟加拉曆"		"revised Bengali calendar"	"改訂ベンガル暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"佛曆"	"Label for calendar: [[:en:Buddhist calendar]]."	"佛曆"		"Chinese Buddhist"	"仏暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"گاه‌شماری بهائی"	"Label for calendar: [[:en:Bahá'í calendar]], تقویم بهائی"	"巴哈伊曆"		"Bahá'í calendar"	"バハイ暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"ਨਾਨਕਸ਼ਾਹੀ"	"Label for calendar: [[:en:Nanakshahi calendar]], ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ"	"錫克教曆"		"Nanakshahi calendar"	"新シク暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"科普特曆"	"Label for calendar option."	"科普特曆"		"Coptic calendar"	"コプト暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"衣索比亞曆"	"Label for calendar option."	"衣索比亞曆"		"Ethiopian calendar"	"エチオピア暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"教會亞美尼亞曆"	"Label for calendar option."	"教會亞美尼亞曆"		"Armenian calendar"	"古アルメニア暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"Byzantine calendar"	"Label for calendar option."	"拜占庭曆"		"Byzantine calendar"	"ビザンティン暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"古埃及曆"	"Label for calendar option."	"古埃及曆"		"Egyptian calendar"	"古エジプト暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法"	"Calendrier républicain"	"Label for calendar option."	"法國共和曆"		"French Republican Calendar"	"フランス革命暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注"	"月干支"	"Label for calendar option."	"月干支"		"month of the sexagenary cycle"	"月の干支"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注"	"日干支"	"Label for calendar option."	"日干支"		"day of the sexagenary cycle"	"日の干支"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注"	"明清節氣"	"Label for calendar option."	"明清節氣"		"solar term (Chinese)"	"明清の節気"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注"	"建除"	"Label for calendar option: [[:zh:建除十二神]]."	"建除"		"Jianchu"	"十二直"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注"	"月の別名"	"Label for calendar option: Traditional Japanese month name"	"月令別名"		"Japanese month name"	"月の別名"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注"	"六曜"	"Label for calendar option: [[:en:Japanese calendar#Rokuyō]]."	"六曜"		"6 Luminaries"	"六曜"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注"	"七曜"	"Label for calendar option: Seven Luminaries, [[:ja:七曜]]"	"七曜"		"7 Luminaries"	"七曜"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注"	"曜日"	"Label for calendar option."	"日語星期"		"Week-day (Japanese)"	"曜日"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注"	"二十八宿"	"Label for calendar option."	"二十八宿"		"28 Mansions"	"二十八宿"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注"	"二十七宿"	"Label for calendar option."	"二十七宿"		"27 Mansions"	"二十七宿"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"zodiac sign"	"Astrological signs, Western zodiac signs"	"黃道十二宮"		"zodiac sign"	"十二宮"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Aries"	"Label for calendar."	"白羊宮"		"Aries"	"白羊宮  (おひつじ座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Taurus"	"Label for calendar."	"金牛宮"		"Taurus"	"金牛宮  (おうし座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Gemini"	"Label for calendar."	"雙子宮"		"Gemini"	"双児宮  (ふたご座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Cancer"	"Label for calendar."	"巨蟹宮"		"Cancer"	"巨蟹宮  (かに座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Leo"	"Label for calendar."	"獅子宮"		"Leo"	"獅子宮  (しし座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Virgo"	"Label for calendar."	"處女宮"		"Virgo"	"処女宮  (おとめ座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Libra"	"Label for calendar."	"天秤宮"		"Libra"	"天秤宮  (てんびん座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Scorpio"	"Label for calendar."	"天蠍宮"		"Scorpio"	"天蝎宮  (さそり座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Sagittarius"	"Label for calendar."	"人馬宮"		"Sagittarius"	"人馬宮  (いて座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Capricorn"	"Label for calendar."	"摩羯宮"		"Capricorn"	"磨羯宮  (やぎ座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Aquarius"	"Label for calendar."	"水瓶宮"		"Aquarius"	"宝瓶宮  (みずがめ座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological"	"Pisces"	"Label for calendar."	"雙魚宮"		"Pisces"	"双魚宮  (うお座 )"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 紀年法"	"歲次"	"Label for calendar: Solar year name for [[:en:Chinese calendar#Solar year and solar term]]"	"歲次"		"year of the sexagenary cycle"	"年の干支"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 紀年法"	"生肖"	"Label for calendar option."	"生肖"		"Chinese zodiac"	"十二支"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 紀年法"	"五行"	"Label for calendar option."	"五行"		"Wu Xing"	"五行"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法"	"民國"	"Label for calendar option."	"民國"		"Minguo"	"民国"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法"	"단군기원"	"Label for calendar option."	"檀紀"		"Dangi"	"檀君紀元"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法"	"黃帝紀元"	"Label for calendar option."	"黃帝紀元"		"Huangdi"	"黄帝紀元"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法"	"皇紀"	"Label for calendar option."	"皇紀"		"Japanese imperial year"	"皇紀"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法"	"泰國佛曆"	"Label for calendar option."	"泰國佛曆"		"Thai Buddhist"	"タイ仏暦"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法"	"羅馬建城"	"Label for calendar option."	"羅馬建城"		"Ab urbe condita"	"ローマ建国紀元"		
-	"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法"	"Seleucid era"	"Label for calendar option."	"塞琉古紀元"		"Seleucid era"	"セレウコス紀元"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Italy"	"Label for calendar option."	"義大利"	"意大利"	"Italy"	"イタリア"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Spain"	"Label for calendar option."	"西班牙"		"Spain"	"スペイン"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Portugal"	"Label for calendar option."	"葡萄牙"		"Portugal"	"ポルトガル"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Poland"	"Label for calendar option."	"波蘭"		"Poland"	"ポーランド"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"France"	"Label for calendar option."	"法國"		"France"	"フランス"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Luxembourg"	"Label for calendar option."	"盧森堡"		"Luxembourg"	"ルクセンブルク"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Netherlands"	"Label for calendar option."	"荷蘭"		"Netherlands"	"オランダ"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Bavaria"	"Label for calendar option."	"巴伐利亞"		"Bavaria"	"バイエルン"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Austria"	"Label for calendar option."	"奧地利"		"Austria"	"オーストリア"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Switzerland"	"Label for calendar option."	"瑞士"		"Switzerland"	"スイス"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Hungary"	"Label for calendar option."	"匈牙利"		"Hungary"	"ハンガリー"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Germany"	"Label for calendar option."	"德國"		"Germany"	"ドイツ"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Norway"	"Label for calendar option."	"挪威"		"Norway"	"ノルウェー"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Denmark"	"Label for calendar option."	"丹麥"		"Denmark"	"デンマーク"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Great Britain"	"Label for calendar option: Kingdom of Great Britain."	"英國"		"Great Britain"	"イギリス"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Sweden"	"Label for calendar option."	"瑞典"		"Sweden"	"スウェーデン"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Finland"	"Label for calendar option."	"芬蘭"		"Finland"	"フィンランド"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Bulgaria"	"Label for calendar option."	"保加利亞"		"Bulgaria"	"ブルガリア"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Soviet Union"	"Label for calendar option: USSR, U.S.S.R."	"蘇聯"		"Soviet Union"	"ソ連"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Serbia"	"Label for calendar option."	"塞爾維亞"		"Serbia"	"セルビア"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Romania"	"Label for calendar option."	"羅馬尼亞"		"Romania"	"ルーマニア"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Greece"	"Label for calendar option."	"希臘"		"Greece"	"ギリシャ"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Turkey"	"Label for calendar option."	"土耳其"		"Turkey"	"トルコ"		
-	"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆"	"Egypt"	"Label for calendar option."	"埃及"		"Egypt"	"エジプト"		
-	"data.date.era: 輸出格式"	"公元日期"	"Label for calendar."	"公元日期"		"Date of Common Era"	"西暦日付"		
-	"data.date.era: 輸出格式"	"朝代紀年日期"	"Label for calendar."	"朝代紀年日期"		"Date of calendar era"	"紀年/元号暦日"		
-	"data.date.era: 輸出格式+可選用的文字式年曆欄位"	"共存紀年"	"contemporary dates"	"共存紀年"		"Contemporary Period"	"共存の紀年"		
-	"data.date.era: 可選用的文字式年曆欄位"	"同國共存紀年"	"the same country"	"同國共存紀年"		"Contemporary Period (same country)"	"共存の同国紀年"		
-	"data.date.era: 輸出格式"	"年月日干支"	"Months in Sexagenary Cycle"	"年月日干支"		"Stem-branches"	"年・月・日の干支"		
-	"data.date.era: 輸出格式"	"四柱八字"	"Label for [[:en:Four Pillars of Destiny]]"	"四柱八字"		"Four Pillars"	"四柱"		
-	"data.date.era: 文字式年曆"	"公元"	"Label for calendar."	"公元"		"Common Era"	"西暦"		
-	"data.date.era: 紀年線圖"	"導覽列："	"Label for calendar."	"導覽列："		"Navigation: "	"ナビゲーション バー："		
-	"data.date.era: 紀年線圖"	"所有國家"	"Label for calendar."	"所有國家"		"All Countries"	"全ての国家"		
-	"data.date.era: 紀年線圖"	"難辨識時段："	"Label for calendar."	"難辨識時段："		"Unobvious periods: "	"見づらい紀年："		
-	"data.date.era: 紀年線圖選項"	"紀年線圖選項："	"Label for calendar."	"紀年線圖選項："		"Options of timeline:"	"時間軸の設定："		
-	"data.date.era: 紀年線圖選項"	"合併歷史時期"	"Label for calendar."	"合併歷史時期"		"Combine historical periods"	"時代区分を結合する"		
-	"data.date.era: 紀年線圖選項"	"擴張範圍至君主在世時段"	"Label for calendar."	"擴張範圍至君主在世時段"		"Adapt lifetime of rulers"	"君主の生存期間まで拡大する"		
-	"data.date.era: 設定/地理座標"	"地理座標："	"Option label to caculate date-time."	"地理座標："		"Coordinates: "	"地理座標："		
-	"data.date.era: 設定/地理座標"	"時區："	"Option label to caculate date-time."	"時區："		"Timezone: "	"標準時："		
-	"data.date.era: 設定/地理座標"	"經度："	"Option label to caculate date-time."	"經度："		"Latitude: "	"経度："		
-	"data.date.era: 設定/地理座標"	"緯度："	"Option label to caculate date-time."	"緯度："		"Longitude: "	"緯度："		
-	"data.date.era: 設定/地理座標"	"著名地點："	"Option label to caculate date-time."	"著名地點："		"Famous Places: "	"有名な都市："		
-	"data.date.era: 設定/資料圖層"	"資料圖層"	"Label for calendar data layer."	"資料圖層"		"Data Layer"	"情報レイヤ"		
-	"data.date.era: 設定/資料圖層"	"請選擇所欲載入之資料圖層。"	"Message for calendar data layer."	"請選擇所欲載入之資料圖層。"		"Please select the layer you want to load."	"お求めになる情報レイヤを選んでください。"		
-	"data.date.era: 資料圖層"	"general"	"Label for calendar data layer."	"通用"		"general"	"全般"		
-	"data.date.era: 資料圖層+文字式年曆"	"出典"	"Label for calendar data layer: Data source"	"出典"		"Data source"	"典拠"		
+"hide","scope","message","note","繁體中文","简体中文","English","日本語","한국어","Русский"
+,"system","Loading...","Loading message.","載入中…",,"Loading...","読み込み中…",,
+,"system","Load failed","Loading message.","載入失敗",,"Load failed","読み込みに失敗しました",,
+,"system","Loading %1%...","Loading message. e.g., Loading 20%...","已載入 %1%…",,"Loading %1%...",,,
+,"system","Initializing...","Loading message.","初始化中…",,"Initializing...","初期化中…",,
+,"interact.DOM: auto_TOC()","Contents of [%1]","Table of contents message. e.g., Contents of [title]","[%1] 的目錄",,"Contents of [%1]","[%1] の目次",,
+,"interact.DOM: auto_TOC(), application.storage.EPUB: generate_TOC()","Contents","Table of contents message of web page and ebook.","目錄",,"Contents","目次",,
+,"interact.DOM: auto_TOC()","↑Back to TOC","Table of contents message.","↑回到目錄",,"↑Back to TOC","↑目次へ",,
+,"interact.DOM: auto_TOC()","expand","show/hide table of contents(顯示/隱藏, 表示/隠す)","展開",,"expand","展開する",,
+,"interact.DOM: auto_TOC()","collapse","show/hide table of contents(顯示/隱藏, 表示/隠す)","收合",,"collapse","折り畳む",,
+,"application.storage.EPUB: generate_TOC()","Work information","Message of ebook, book information.","作品資訊",,"Work information","作品情報",,
+,"application.storage.EPUB: generate_TOC()","identifier","Message of ebook in TOC file.","識別符",,"identifier","識別子",,
+,"application.storage.EPUB: generate_TOC()","title","Message of ebook in TOC file.","標題",,"title","表題",,
+,"application.storage.EPUB: generate_TOC()","language","Message of ebook in TOC file.","語言",,"language","言語","언어",
+,"application.storage.EPUB: generate_TOC()","creator","Message of ebook in TOC file.","作者",,"creator","作者",,
+,"application.storage.EPUB: generate_TOC()","subject","Message of ebook in TOC file.","議題",,"subject","ジャンル",,
+,"application.storage.EPUB: generate_TOC()","description","Message of ebook in TOC file.","簡介",,"description","あらすじ",,
+,"application.storage.EPUB: generate_TOC()","publisher","Message of ebook in TOC file.","發布者",,"publisher","発行者",,
+,"application.storage.EPUB: generate_TOC()","source","Message of ebook in TOC file.","來源",,"source","出典",,
+,"application.storage.EPUB: generate_TOC()","dcterms:modified","Message of ebook in TOC file.","作品最後編輯時間",,"Last modified date of work","作品の最終更新日時",,
+,"application.storage.EPUB: generate_TOC()","calibre:series","Message of ebook in TOC file.","叢書",,"Series","シリーズ",,
+,"application.storage.EPUB: generate_TOC()","word count","Message of ebook in TOC file.","字數",,"word count","文字数",,
+,"application.storage.EPUB: generate_TOC()","%1 words","Message of ebook in TOC file.","%1字",,"%1 words","%1文字",,
+,"application.storage.EPUB: generate_TOC()","%1 chapters","Message of ebook in TOC file.","%1章",,"%1 chapters","%1話",,
+,"interact.integrate.SVG","number","Name of type/object","數字",,"number","数字",,
+,"interact.integrate.SVG","function","Name of type/object","函數","函式","function","関数",,
+,"interact.integrate.SVG, application.storage.EPUB: generate_TOC()","date","Name of type/object","日期",,"date","日付",,
+,"interact.integrate.SVG","time","Name of type/object","時間",,"time","時間",,
+,"interact.integrate.SVG","module","Name of type/object","模組","模块","module","モジュール",,
+,"interact.integrate.SVG","constructor","Name of type/object","建構式",,"constructor","コンストラクタ",,
+"H","interact.integrate.SVG","class","Name of type/object","類別","类","class",,,
+,"interact.integrate.SVG","Illegal %1: [%2]","Used as error message.","有問題（無效或不合理）的%1：[%2]",,"Illegal %1: [%2]","不正な%1：[%2]",,
+,"application.debug.log","debug level","Used as debugging message.","偵錯層級","调试级别","debug level","デバッグレベル",,
+,"application.debug.log","fatal","Used as debugging message.","致命",,"fatal","致命的エラー",,
+,"application.debug.log","error","Used as debugging message.","錯誤",,"error","エラー",,
+,"application.debug.log","warn","Used as debugging message.","警告",,"warn","警告",,
+,"application.debug.log","em","Used as debugging message.","重要",,"em","重要",,
+,"application.debug.log","info","Used as debugging message.","訊息","信息","info","情報",,
+,"application.debug.log","log","Used as debugging message.","記錄",,"log","ログ",,
+,"application.debug.log","debug","Used as debugging message.","偵錯","调试","debug","デバッグ",,
+,"application.debug.log","trace","Used as debugging message.","追蹤","跟踪","trace","トレース",,
+"H","application.debug.log","passed","Used as debugging message.","通過",,"passed","パス",,
+,"application.locale.gettext","Language","Label used when selecting language.","語言",,"Language","言語","언어",
+,"application.locale.gettext","所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。","Used as debugging message when selecting language.","所指定之 domain [%1] 尚未載入，若有必要請使用強制載入 flag。",,"Specified domain [%1] is not yet loaded. You may need to set the FORCE flag.","指定されたドメインがまだロードされていません。必要があるなら、強制ロードフラグを設定して下さい。",,
+,"application.locale.gettext","使用 [%2] (%1) 領域/語系。","Used as debugging message when selecting language.","使用 [%2] (%1) 領域/語系。",,"Using domain/locale [%2] (%1).","ドメイン/言語 [%2] (%1) を使用します。",,
+,"application.net.wiki","%1 elapsed, %3 at %2","Used as log message. e.g., 2 s elapsed, finished at 20010101T0000","隔 %1，%2 %3",,"%1 elapsed, %3 at %2","%1 後、%2 %3",,
+,"application.net.wiki","no change","Used as log message.","無改變",,"no change","無変更",,
+,"application.net.wiki","finished","Used as log message.","完成",,"finished","完成",,
+,"application.net.wiki","finished: %1","Used as log message.","結束：%1",,"finished: %1","終了：%1",,
+,"application.net.wiki","First, use %1 to get %2 pages.","Used as log message. Showing elapsed time. e.g., First, use 2 s to get 20 pages.","首先使用 %1 以取得 %2 個頁面內容。",,"First, use %1 to get %2 pages.","まずは %1 かかって、%2ページを取得する。",,
+,"application.net.wiki","%1 pages done","Used as log message at task report page title and section title.","完成 %1 條目",,"%1 pages done","%1 本の記事処理済み",,
+,"application.net.wiki",", %1%2 pages no change","Used as log message at report.","，%1%2條目未作變更",,", %1%2 pages no change","。%1%2本の記事変更なし",,
+,"application.net.wiki","all ","Used as log message at report.","所有 ",,"all ","全 ",,
+,"application.net.wiki",", %1 elapsed.","Used as log message at report.","，前後總共 %1。",,", %1 elapsed.","。経過時間 %1。",,
+,"application.net.wiki","'''Stopped''', give up editing.","Used as log message at report.","'''已停止作業'''，放棄編輯。",,"'''Stopped''', give up editing.","編集を'''中止した'''。",,
+,"application.net.wiki","Nothing change.","Used as log message at report.","全無變更。",,"Nothing change.","全て変更なし。",,
+,"application.net.wiki","Continue key","Label name for Follow-up Index when [[mw:API:Query#Continuing_queries|Continuing MediaWiki action API queries]]","後續索引",,"Continue key","後続の索引",,
+,"application.net.wiki","Abandon change","Used as log message.","放棄編輯頁面",,"Abandon change","編集を放棄した",,
+,"application.net.wiki","No reason provided","Used as log message.","未描述原因",,"No reason provided","説明がありません",,
+,"application.net.wiki","Content is empty","Used as log message.","內容被清空",,"Content is empty","内容はクリアされます",,
+,"application.net.wiki","Content is not settled","Used as log message.","未設定編輯內容",,"Content is not settled","内容が設定されていません",,
+,"data.date.era: get_dates()","無紀年名稱作 [%1]！","Used as debugging message when selecting language.","無紀年名稱作 [%1]！",,"Can't find era named [%1]!","[%1] という紀年法が見当たりません！",,
+,"data.date.era","跳過 [%1]：本[%2]僅供參照用。","Used as debugging message when selecting language.","跳過 [%1]：本[%2]僅供參照用。",,"Skip [%1]: The period is for reference purpose only.","[%1] を抜かします：この period は参考用だけです。",,
+,"data.date.era: title","紀年轉換工具","Name of Era Calendar Converter tool.","紀年轉換工具",,"Era Calendar Converter","紀年変換ツール",,
+,"data.date.era: title","紀年 %1","Message to show an era name.","紀年 %1",,"Era %1","紀年 %1",,
+,"data.date.era: system","訊息提示與紀錄欄","Panel name","訊息提示與紀錄欄",,"Log Console","メッセージや情報の記録帳",,
+,"data.date.era: system","已載入 %1 筆資料。","Used as log message.","已載入 %1 筆資料。",,"function (domain_name, arg) { return '%1 ' + (1 < arg[1] ? 'entries' : 'entry') + ' loaded.'; }","%1 件のデータを読み込みました。",,
+,"data.date.era: system","請注意：本欄僅供開發人員使用。","Used as warning message.","請注意：本欄僅供開發人員使用。",,"WARNING: Only for developers.","開発者向け機能なので、ご使用の際はお気をつけください。",,
+,"data.date.era: system","約%1年","Message to show an date.","約%1年",,"c. %1",,,
+,"data.date.era_data: 國家 country","中國","Country name.","中國",,"China","中国",,
+,"data.date.era_data: 國家 country","日本","Country name.","日本",,"Japan","日本",,
+,"data.date.era_data: 國家 country","한국","Country name.","韓國",,"Korea","朝鮮","한국",
+,"data.date.era_data: 國家 country","琉球","Kingdom name. 沖縄県, Okinawan","琉球",,"Ryukyu","琉球",,
+,"data.date.era_data: 國家 country","Việt Nam","Country name.","越南",,"Vietnam","ベトナム",,
+,"data.date.era_data: 紀年資料","Bắc thuộc","Country name.","北屬時期",,"Chinese domination of Vietnam","北属期",,
+,"data.date.era_data: 紀年資料","Thời kỳ độc lập","Country name.","獨立時期",,"Late dynastic epoch","独立王朝時代",,
+,"data.date.era_data: 國家 country","ไทย","Country name.","泰國",,"Thailand","タイ",,
+,"data.date.era_data: 紀年資料","อาณาจักรสุโขทัย","Country name.","素可泰王國",,"Sukhothai Kingdom","スコータイ王朝",,
+,"data.date.era_data: 紀年資料","ราชวงศ์พระร่วง","Country name.","帕鑾王朝",,"Phra Ruang dynasty","プラ・ルワン王朝",,
+,"data.date.era_data: 紀年資料","อาณาจักรอยุธยา","Country name.","大城王國",,"Ayutthaya Kingdom","アユタヤ王朝",,
+,"data.date.era_data: 紀年資料","อาณาจักรธนบุรี","Country name.","吞武里王國",,"Thonburi Kingdom","トンブリー王朝",,
+,"data.date.era_data: 紀年資料","ราชวงศ์ธนบุรี","Country name.","吞武里王朝",,"Thonburi dynasty","トンブリー王朝",,
+,"data.date.era_data: 紀年資料","สมเด็จพระเจ้ากรุงธนบุรี","Country name.","鄭信",,"Taksin","タークシン",,
+,"data.date.era_data: 紀年資料","อาณาจักรรัตนโกสินทร์","Country name.","拉達那哥欣王國",,"Rattanakosin Kingdom","ラタナコーシン王朝",,
+,"data.date.era_data: 紀年資料","ราชวงศ์จักรี","Country name.","卻克里王朝",,"Chakri dynasty","チャクリー王朝",,
+,"data.date.era_data: 國家 country","India","ancient India","印度",,"India","インド",,
+,"data.date.era_data: 國家 country","မြန်မာ","Country name.","緬甸",,"Myanmar","ビルマ",,
+,"data.date.era_data: 國家 country","မြန်မာပြည်","Country name.","緬甸聯邦共和國",,"Republic of the Union of Myanmar","ミャンマー連邦共和国",,
+,"data.date.era_data: 紀年資料","Pagan","Country name.","蒲甘",,"Pagan","バガン",,
+,"data.date.era_data: 紀年資料","Toungoo","Country name.","東吁",,"Toungoo","タウングー",,
+,"data.date.era_data: 紀年資料","ကုန်းဘောင်ခေတ်","Country name.","貢榜",,"Konbaung","コンバウン",,
+,"data.date.era_data: 國家 country","Maya","Country name.","瑪雅",,"Maya","マヤ",,
+,"data.date.era_data: 紀年資料","Palenque","Country name.","帕倫克",,"Palenque","パレンケ",,
+,"data.date.era_data: 國家 country","Mesopotamian","Name of ancient Mesopotamian civilization","美索不達米亞文明",,"Mesopotamian","メソポタミア文明",,
+,"data.date.era_data: 紀年資料","Babylonian calendar","Calendar of ancient civilization","巴比倫尼亞曆",,"Babylonian calendar","バビロニア暦",,
+,"data.date.era_data: 國家 country","Babylon","ancient civilization name","巴比倫",,"Babylon","バビロン",,
+,"data.date.era_data: 國家 country","Babylonian Dynasty of E","ancient civilization name","巴比倫第九王朝",,"Babylonian Dynasty of E","バビロンE王朝",,
+,"data.date.era_data: 國家 country","Neo-Babylonian","ancient civilization name","新巴比倫",,"Neo-Babylonian","新バビロニア",,
+,"data.date.era_data: 國家 country","Neo-Assyrian","ancient civilization name","新亞述",,"Neo-Assyrian","新アッシリア",,
+,"data.date.era_data: 國家 country","Persia","ancient civilization name","波斯",,"Persia","ペルシア",,
+,"data.date.era_data: 國家 country","Μακεδονία","Name of [[:en:Macedonia (ancient kingdom)]], Μακεδονικό βασίλειο","馬其頓",,"Macedon","マケドニア",,
+,"data.date.era_data: 國家 country","Σελευκιδών","Name of [[:en:Seleucid Empire]]","塞琉古",,"Seleucid","セレウコス",,
+,"data.date.era: input_panel","Convert an era name to the specified format","Used as alert message.","轉換紀年成指定之格式",,"Convert an era name to the specified format",,,
+,"data.date.era: input_panel","紀年","Label for input.","紀年",,"Era name",,,
+,"data.date.era: input_panel","輸出格式","Label for input.","輸出格式",,"Output format","出力形式",,
+,"data.date.era: input_panel","自訂輸出格式","Label for input.","自訂輸出格式",,"Customize output format","特殊な出力形式",,
+"H","data.date.era: input_panel","取得紀年","Label for input.","取得紀年",,"Get","暦日",,
+"H","data.date.era: input_panel","之","Label for input.","之",,"'s","の",,
+,"data.date.era: input_panel","中文數字","Label for input.","中文數字",,"To Chinese numerals","漢数字",,
+,"data.date.era: note_botton_layer","測試範例","Panel name","測試範例",,"EXAMPLE","入力例",,
+,"data.date.era: note_botton_layer","輸入紀錄","Panel name","輸入紀錄","输入履历","RECORD","入力記録",,
+,"data.date.era: note_botton_layer","使用說明","Panel name","使用說明",,"CONCEPT","ご利用方法",,
+,"data.date.era: note_botton_layer","紀年線圖","Panel name","紀年線圖",,"TIMELINE","時間軸",,
+,"data.date.era: note_botton_layer + 文字式年曆","曆譜","Panel name","曆譜",,"CALENDAR TABLE","暦日表",,
+,"data.date.era: note_botton_layer","設定","Panel name","設定",,"CONFIGURATION","設定",,
+,"data.date.era: note_botton_layer","批次轉換","Panel name when doing batch converting.","批次轉換",,"BATCH","一括変換",,
+,"data.date.era: note_botton_layer","標注文本","Panel name for tagging old text.","標注文本",,"TAGGING","古文書標注",,
+,"data.date.era: note_botton_layer","曆數處理","Panel name","曆數處理",,"DEVELOPMENT","開発ツール",,
+,"data.date.era: note_botton_layer","問題回報","Panel name","問題回報",,"FEEDBACK","問題報告",,
+,"data.date.era: 文字式年曆","無可供列出之曆譜！","Used as log message.","無可供列出之曆譜！",,"No calendar to list!","ご提供できる情報がありません。",,
+,"data.date.era: 文字式年曆","嘗試加注年分","Used as log message.","嘗試加注年分",,"Append year numbering","年分を追加する",,
+,"data.date.era: 文字式年曆","年譜","Label for calendar.","年譜",,"calendar date","年暦譜",,
+,"data.date.era: 文字式年曆","共有 %1 個時段紀錄","Used as log message.","共有 %1 個時段紀錄",,"%1 records","%1 件",,
+,"data.date.era: 文字式年曆","共有 %1 個年段紀錄","Used as log message.","共有 %1 個年段紀錄",,"%1 years","%1 件",,
+"H","data.date.era: 文字式年曆 朝代紀年日期","%1 %2年%3月%4日","Date format.","%1 %2年%3月%4日",,"%1 %2/%3/%4","%1 %2年%3月%4日",,
+"H","data.date.era: 文字式年曆 朝代紀年日期","%1%2年%3月%4日","Date format.","%1%2年%3月%4日",,"%1 %2/%3/%4","%1%2年%3月%4日",,
+"H","data.date.era: 文字式年曆 朝代紀年日期","%1 %2年","Date format.","%1 %2年",,"%1 year %2","%1 %2年",,
+"H","data.date.era: 文字式年曆 朝代紀年日期","%1%2年","Date format. e.g., 2001/5/3. Common Era: Y/m/d","%1%2年",,"%1 year %2","%1%2年",,
+,"data.date.era: 文字式年曆 朝代紀年日期","%1/%2/%3","Date format. e.g., 2001/5/3. Common Era: Y/m/d","%1/%2/%3",,"%1/%2/%3",,,
+,"data.date.era: 文字式年曆 朝代紀年日期","%1 BCE","Date format.","前%1年",,"%1 BCE","前%1年",,
+,"data.date.era: 文字式年曆 朝代紀年日期","%1 CE","Date format.","%1年",,"%1 CE","%1年",,
+,"data.date.era: 文字式年曆注解","年號","Label for calendar.","年號",,"Era date","元号",,
+,"data.date.era: 文字式年曆注解","採用曆法","Label for calendar.","採用曆法",,"Calendar used","使用されていた暦",,
+,"data.date.era: 文字式年曆注解","出典","Label for calendar.","出典",,"Reference","出典",,
+,"data.date.era: 文字式年曆注解","注","Label for calendar.","注",,"Note","注釈",,
+,"data.date.era: 文字式年曆注解","展示線圖","Label for calendar.","展示線圖",,"Showing timeline","時間軸を見る",,
+,"data.date.era: 文字式年曆注解/君主資料","君主名","Label for calendar: Personal name, Full name","君主姓名",,"Personal name","帝王の御名",,
+,"data.date.era: 文字式年曆注解/君主資料","表字","Label for calendar.","表字",,"Courtesy name","字（あざな）",,
+,"data.date.era: 文字式年曆注解/君主資料","君主號","Label for calendar: Pseudonym, pen name","別號",,"Art name","号（ごう）",,
+,"data.date.era: 文字式年曆注解/君主資料","諱","Label for calendar.","名諱",,"True name","諱（いみな）",,
+,"data.date.era: 文字式年曆注解/君主資料","諡","Label for calendar: Posthumous name of Japanese Emperor, Emperor of Japan","諡",,"Posthumous name","諡号",,
+,"data.date.era: 文字式年曆注解/君主資料","廟號","Label for calendar.","廟號",,"Temple name","廟号",,
+,"data.date.era: 文字式年曆注解/君主資料","出生","Label for calendar: Birth of ruler","出生",,"Born","誕生",,
+,"data.date.era: 文字式年曆注解/君主資料","逝世","Label for calendar: Death of ruler","逝世",,"Died","崩御",,
+,"data.date.era: 文字式年曆注解/君主資料","在位","Label for calendar.","在位",,"Reign","在位期間",,
+,"data.date.era: 文字式年曆注解/君主資料","加冕","Label for calendar.","加冕",,"Coronation","戴冠",,
+,"data.date.era: 文字式年曆注解/君主資料","父親","Label for calendar.","父親",,"Father","父親",,
+,"data.date.era: 文字式年曆注解/君主資料","母親","Label for calendar.","母親",,"Mother","母親",,
+,"data.date.era: 文字式年曆注解/君主資料","前任","Label for calendar.","前任",,"Predecessor","先代",,
+,"data.date.era: 文字式年曆注解/君主資料","繼任","Label for calendar.","繼任",,"Successor","次代",,
+,"data.date.era: 文字式年曆注解/君主資料","配偶","Label for calendar.","配偶",,"Spouse","配偶者",,
+,"data.date.era: 文字式年曆欄位","前綴","Label for calendar options panel.","前綴",,"prefix","接頭辞",,
+,"data.date.era: 文字式年曆欄位","增加此欄","Label for calendar options panel.","增加此欄",,"Add the column","この列を追加する",,
+,"data.date.era: 文字式年曆欄位","除去此欄","Label for calendar options panel.","除去此欄",,"Remove the column","この列を削除する",,
+,"data.date.era: 文字式年曆欄位","全不選","Label for calendar options panel.","全不選",,"Remove ALL","全ての列を削除する",,
+,"data.date.era: 文字式年曆欄位","Pin","Label for calendar options panel.","釘選",,"Pin","ピン",,
+,"data.date.era: 文字式年曆欄位","Unpin","Label for calendar options panel.","拔起",,"Unpin","外す",,
+,"data.date.era: 文字式年曆欄位","分類","Label for calendar option.","分類",,"Group","分類",,
+,"data.date.era: 文字式年曆欄位","曆注","Calendar notes, Calendar comments","曆注",,"Calendar note","暦注",,
+,"data.date.era: 可選用的文字式年曆欄位","星期","Label for calendar option.","星期",,"Week-day","曜日",,
+,"data.date.era: 可選用的文字式年曆欄位","Gregorian calendar","Label for calendar option.","格里曆",,"Gregorian calendar","グレゴリオ暦",,
+,"data.date.era: 可選用的文字式年曆欄位","Julian calendar","Label for calendar option.","儒略曆",,"Julian calendar","ユリウス暦",,
+,"data.date.era: 可選用的文字式年曆欄位","JD","Label for calendar option.","儒略日",,"JD","ユリウス日",,
+,"data.date.era: 可選用的文字式年曆欄位","Julian Date","Label for calendar option.","儒略日",,"Julian Date","ユリウス日",,
+,"data.date.era: 可選用的文字式年曆欄位","JDN","Label for calendar option.","儒略日數",,"JDN","ユリウス通日",,
+,"data.date.era: 可選用的文字式年曆欄位","Julian Day Number","Label for calendar option.","儒略日數",,"Julian Day Number","ユリウス通日",,
+,"data.date.era: 可選用的文字式年曆欄位","年日期","Label for calendar option.","年日期",,"Ordinal date","年日付",,
+,"data.date.era: 可選用的文字式年曆欄位","週日期","Label for calendar option.","週日期",,"Week date","週日付",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類","astronomy","Label for astronomical calculations","天文",,"astronomy","天文",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類","calendar","Label for calendar option.","曆法",,"calendar","暦法",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類","東亞陰陽曆","Label for East Asian lunisolar calendar","東亞陰陽曆",,"East Asian calendar","中華圏の太陰太陽暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類","Year naming","Label for calendar option.","紀年法",,"Year naming","紀年法",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類","Year numbering","Label for calendar option.","編年法",,"Year numbering","編年方法",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類","Gregorian reform","Label for calendar option.","公曆改曆",,"Adoption of the Gregorian calendar","グレゴリオ改暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類","Before Present","Label for calendar option.","距今",,"Before Present","何年前",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類","Holocene calendar","Label for calendar option.","全新世紀年",,"Holocene calendar","人類紀元",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類","Unix time","Label for calendar option.","Unix時間",,"Unix time","Unix時間",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","general precession","Label for calendar option.","綜合歲差",,"general precession","一般歳差",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","天文節氣","Label for calendar option.","天文節氣",,"solar term (calculated)","天文節気",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","Sun's apparent longitude","Label for calendar option.","太陽視黃經",,"Sun's apparent longitude","太陽視黄経",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","節氣經過日數","Label for calendar option.","節氣經過日數",,"solar term ages","節気からの経過日数",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","Data will be presented at next calculation.","Data will be loaded soon. Data is not yet loaded. Data will be loaded as soon as it becomes available.","資料將於下次演算時呈現。",,"Data will be presented at next calculation.","資料は次の計算で表示します。",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","Moon longitude","Moon's apparent longitude","月亮視黃經",,"Moon longitude","月視黄経",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","Moon latitude","Moon's apparent latitude","月亮視黃緯",,"Moon latitude","月視黄緯",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","月日視黃經差","Label for calendar option.","月日視黃經差",,"apparent longitude: Moon - Sun","月日視黄経差",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","月相","Label for calendar option.","月相",,"lunar phase","月相",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","saros %1","Label for calendar.","沙羅序列%1",,"saros %1","サロス系列%1",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","solar eclipse","Label for calendar.","日食",,"solar eclipse","日食",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","lunar eclipse","Label for calendar.","月食",,"lunar eclipse","月食",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","total solar eclipse","Label for calendar.","日全食",,"total solar eclipse","皆既日食",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","annular solar eclipse","Label for calendar.","日環食",,"annular solar eclipse","金環日食",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","hybrid solar eclipse","Label for calendar.","全環食",,"hybrid solar eclipse","金環皆既日食",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","partial solar eclipse","Label for calendar.","日偏食",,"partial solar eclipse","部分日食",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","total lunar eclipse","Label for calendar.","月全食",,"total lunar eclipse","皆既月食",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","partial lunar eclipse","Label for calendar.","月偏食",,"partial lunar eclipse","部分月食",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","penumbral lunar eclipse","Label for calendar.","半影月食",,"penumbral lunar eclipse","半影食",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","朔","Label for calendar.","朔",,"new moon","新月",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","上弦","Label for calendar.","上弦",,"first quarter","上弦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","望","Label for calendar.","望",,"full moon","満月",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","下弦","Label for calendar.","下弦",,"last quarter","下弦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","晦日","Label for calendar.","晦日",,"new moon eve","晦日",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","日出日落","Label for calendar.","日出日落",,"sunrise / sunset","日の出入り",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","曙暮光","Label for calendar.","曙暮光",,"twilight","夜明・日暮",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","月出月落","Label for calendar.","月出月落",,"moonrise / moonset","月の出入り",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","lower culmination","Label for calendar.","下中天",,"lower culmination","極下正中",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","sunrise","Label for calendar.","日出",,"sunrise","日の出",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","moonrise","Label for calendar.","月升",,"moonrise","月の出",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","upper culmination","Label for calendar.","上中天",,"upper culmination","極上正中 (南中時)",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","sunset","Label for calendar.","日落",,"sunset","日の入り",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","moonset","Label for calendar.","月降",,"moonset","月の入り",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","astronomical twilight begin","Label for calendar.","天文曙光",,"astronomical twilight begin","天文薄明の始まり",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","nautical twilight begin","Label for calendar.","航海曙光",,"nautical twilight begin","航海薄明の始まり",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","civil twilight begin","Label for calendar.","民用曙光",,"civil twilight begin","市民薄明の始まり",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","astronomical twilight end","Label for calendar.","天文暮光",,"astronomical twilight end","天文薄明の終わり",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","nautical twilight end","Label for calendar.","航海暮光",,"nautical twilight end","航海薄明の終わり",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","civil twilight end","Label for calendar.","民用暮光",,"civil twilight end","市民薄明の終わり",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 天文計算","夏曆","Label for calendar: traditional Chinese lunisolar calendar","夏曆",,"Chinese lunisolar","旧暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","Revised Julian calendar","Label for calendar.","儒略改革曆",,"Revised Julian calendar","修正ユリウス暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","伊斯蘭曆","Label for calendar.","伊斯蘭曆",,"Islamic calendar","ヒジュラ暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","گاه‌شماری هجری خورشیدی","Label for calendar.","現代伊朗曆",,"Modern Iranian calendar","イラン太陽暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","希伯來曆","Label for calendar.","希伯來曆",,"Hebrew calendar","ユダヤ暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","長紀曆","Label for calendar: The Mesoamerican Long Count calendar","長紀曆",,"Long Count","マヤ長期暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","Maya Tzolk'in","Label for calendar.",,,"Maya Tzolk'in","マヤ神聖暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","Maya Haab'","Label for calendar.",,,"Maya Haab'","マヤ文化暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","傣曆","Label for calendar.","傣曆",,"Dai calendar","タイ暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","မြန်မာ ပြက္ခဒိန်","Label for calendar: [[:en:Burmese calendar]]","緬曆",,"Myanmar calendar","ビルマ暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","彝曆","Label for calendar.","彝曆",,"Yi calendar","彝暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","हिन्दू पंचांग","Label for calendar.","印度曆",,"Hindu calendar","ヒンドゥー暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","भारतीय राष्ट्रीय पंचांग","Label for calendar.","印度國定曆",,"Indian national calendar","インド国定暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","Bangla calendar","Label for calendar.","現行孟加拉曆",,"revised Bengali calendar","改訂ベンガル暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","佛曆","Label for calendar: [[:en:Buddhist calendar]].","佛曆",,"Chinese Buddhist","仏暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","گاه‌شماری بهائی","Label for calendar: [[:en:Bahá'í calendar]], تقویم بهائی","巴哈伊曆",,"Bahá'í calendar","バハイ暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","ਨਾਨਕਸ਼ਾਹੀ","Label for calendar: [[:en:Nanakshahi calendar]], ਨਾਨਕਸ਼ਾਹੀ ਕੈਲੰਡਰ","錫克教曆",,"Nanakshahi calendar","新シク暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","科普特曆","Label for calendar option.","科普特曆",,"Coptic calendar","コプト暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","衣索比亞曆","Label for calendar option.","衣索比亞曆",,"Ethiopian calendar","エチオピア暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","教會亞美尼亞曆","Label for calendar option.","教會亞美尼亞曆",,"Armenian calendar","古アルメニア暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","Byzantine calendar","Label for calendar option.","拜占庭曆",,"Byzantine calendar","ビザンティン暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","古埃及曆","Label for calendar option.","古埃及曆",,"Egyptian calendar","古エジプト暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆法","Calendrier républicain","Label for calendar option.","法國共和曆",,"French Republican Calendar","フランス革命暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注","月干支","Label for calendar option.","月干支",,"month of the sexagenary cycle","月の干支",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注","日干支","Label for calendar option.","日干支",,"day of the sexagenary cycle","日の干支",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注","明清節氣","Label for calendar option.","明清節氣",,"solar term (Chinese)","明清の節気",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注","建除","Label for calendar option: [[:zh:建除十二神]].","建除",,"Jianchu","十二直",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注","月の別名","Label for calendar option: Traditional Japanese month name","月令別名",,"Japanese month name","月の別名",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注","六曜","Label for calendar option: [[:en:Japanese calendar#Rokuyō]].","六曜",,"6 Luminaries","六曜",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注","七曜","Label for calendar option: Seven Luminaries, [[:ja:七曜]]","七曜",,"7 Luminaries","七曜",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注","曜日","Label for calendar option.","日語星期",,"Week-day (Japanese)","曜日",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注","二十八宿","Label for calendar option.","二十八宿",,"28 Mansions","二十八宿",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注","二十七宿","Label for calendar option.","二十七宿",,"27 Mansions","二十七宿",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","zodiac sign","Astrological signs, Western zodiac signs","黃道十二宮",,"zodiac sign","十二宮",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Aries","Label for calendar.","白羊宮",,"Aries","白羊宮  (おひつじ座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Taurus","Label for calendar.","金牛宮",,"Taurus","金牛宮  (おうし座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Gemini","Label for calendar.","雙子宮",,"Gemini","双児宮  (ふたご座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Cancer","Label for calendar.","巨蟹宮",,"Cancer","巨蟹宮  (かに座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Leo","Label for calendar.","獅子宮",,"Leo","獅子宮  (しし座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Virgo","Label for calendar.","處女宮",,"Virgo","処女宮  (おとめ座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Libra","Label for calendar.","天秤宮",,"Libra","天秤宮  (てんびん座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Scorpio","Label for calendar.","天蠍宮",,"Scorpio","天蝎宮  (さそり座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Sagittarius","Label for calendar.","人馬宮",,"Sagittarius","人馬宮  (いて座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Capricorn","Label for calendar.","摩羯宮",,"Capricorn","磨羯宮  (やぎ座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Aquarius","Label for calendar.","水瓶宮",,"Aquarius","宝瓶宮  (みずがめ座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 曆注: astrological","Pisces","Label for calendar.","雙魚宮",,"Pisces","双魚宮  (うお座 )",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 紀年法","歲次","Label for calendar: Solar year name for [[:en:Chinese calendar#Solar year and solar term]]","歲次",,"year of the sexagenary cycle","年の干支",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 紀年法","生肖","Label for calendar option.","生肖",,"Chinese zodiac","十二支",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 紀年法","五行","Label for calendar option.","五行",,"Wu Xing","五行",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法","民國","Label for calendar option.","民國",,"Minguo","民国",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法","단군기원","Label for calendar option.","檀紀",,"Dangi","檀君紀元",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法","黃帝紀元","Label for calendar option.","黃帝紀元",,"Huangdi","黄帝紀元",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法","皇紀","Label for calendar option.","皇紀",,"Japanese imperial year","皇紀",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法","泰國佛曆","Label for calendar option.","泰國佛曆",,"Thai Buddhist","タイ仏暦",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法","羅馬建城","Label for calendar option.","羅馬建城",,"Ab urbe condita","ローマ建国紀元",,
+,"data.date.era: 可選用的文字式年曆欄位: 分類: 編年法","Seleucid era","Label for calendar option.","塞琉古紀元",,"Seleucid era","セレウコス紀元",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Italy","Label for calendar option.","義大利","意大利","Italy","イタリア",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Spain","Label for calendar option.","西班牙",,"Spain","スペイン",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Portugal","Label for calendar option.","葡萄牙",,"Portugal","ポルトガル",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Poland","Label for calendar option.","波蘭",,"Poland","ポーランド",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","France","Label for calendar option.","法國",,"France","フランス",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Luxembourg","Label for calendar option.","盧森堡",,"Luxembourg","ルクセンブルク",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Netherlands","Label for calendar option.","荷蘭",,"Netherlands","オランダ",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Bavaria","Label for calendar option.","巴伐利亞",,"Bavaria","バイエルン",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Austria","Label for calendar option.","奧地利",,"Austria","オーストリア",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Switzerland","Label for calendar option.","瑞士",,"Switzerland","スイス",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Hungary","Label for calendar option.","匈牙利",,"Hungary","ハンガリー",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Germany","Label for calendar option.","德國",,"Germany","ドイツ",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Norway","Label for calendar option.","挪威",,"Norway","ノルウェー",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Denmark","Label for calendar option.","丹麥",,"Denmark","デンマーク",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Great Britain","Label for calendar option: Kingdom of Great Britain.","英國",,"Great Britain","イギリス",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Sweden","Label for calendar option.","瑞典",,"Sweden","スウェーデン",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Finland","Label for calendar option.","芬蘭",,"Finland","フィンランド",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Bulgaria","Label for calendar option.","保加利亞",,"Bulgaria","ブルガリア",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Soviet Union","Label for calendar option: USSR, U.S.S.R.","蘇聯",,"Soviet Union","ソ連",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Serbia","Label for calendar option.","塞爾維亞",,"Serbia","セルビア",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Romania","Label for calendar option.","羅馬尼亞",,"Romania","ルーマニア",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Greece","Label for calendar option.","希臘",,"Greece","ギリシャ",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Turkey","Label for calendar option.","土耳其",,"Turkey","トルコ",,
+,"data.date.era: region+可選用的文字式年曆欄位: 分類: 公曆改曆","Egypt","Label for calendar option.","埃及",,"Egypt","エジプト",,
+,"data.date.era: 輸出格式","公元日期","Label for calendar.","公元日期",,"Date of Common Era","西暦日付",,
+,"data.date.era: 輸出格式","朝代紀年日期","Label for calendar.","朝代紀年日期",,"Date of calendar era","紀年/元号暦日",,
+,"data.date.era: 輸出格式+可選用的文字式年曆欄位","共存紀年","contemporary dates","共存紀年",,"Contemporary Period","共存の紀年",,
+,"data.date.era: 可選用的文字式年曆欄位","同國共存紀年","the same country","同國共存紀年",,"Contemporary Period (same country)","共存の同国紀年",,
+,"data.date.era: 輸出格式","年月日干支","Months in Sexagenary Cycle","年月日干支",,"Stem-branches","年・月・日の干支",,
+,"data.date.era: 輸出格式","四柱八字","Label for [[:en:Four Pillars of Destiny]]","四柱八字",,"Four Pillars","四柱",,
+,"data.date.era: 文字式年曆","公元","Label for calendar.","公元",,"Common Era","西暦",,
+,"data.date.era: 紀年線圖","導覽列：","Label for calendar.","導覽列：",,"Navigation: ","ナビゲーション バー：",,
+,"data.date.era: 紀年線圖","所有國家","Label for calendar.","所有國家",,"All Countries","全ての国家",,
+,"data.date.era: 紀年線圖","難辨識時段：","Label for calendar.","難辨識時段：",,"Unobvious periods: ","見づらい紀年：",,
+,"data.date.era: 紀年線圖選項","紀年線圖選項：","Label for calendar. 選項","紀年線圖選項：",,"Options of timeline:","時間軸の設定：",,
+,"data.date.era: 紀年線圖選項","標記正處理的紀年","Label for calendar. 選項","標記正處理的紀年",,"Markup current era","紀年を表示する",,
+,"data.date.era: 紀年線圖選項","合併歷史時期","Label for calendar. 選項","合併歷史時期",,"Combine historical periods","時代区分を結合する",,
+,"data.date.era: 紀年線圖選項","擴張範圍至君主在世時段","Label for calendar. 選項","擴張範圍至君主在世時段",,"Adapt lifetime of rulers","君主の生存期間まで拡大する",,
+,"data.date.era: 設定/地理座標","地理座標：","Option label to caculate date-time.","地理座標：",,"Coordinates: ","地理座標：",,
+,"data.date.era: 設定/地理座標","時區：","Option label to caculate date-time.","時區：",,"Timezone: ","標準時：",,
+,"data.date.era: 設定/地理座標","經度：","Option label to caculate date-time.","經度：",,"Latitude: ","経度：",,
+,"data.date.era: 設定/地理座標","緯度：","Option label to caculate date-time.","緯度：",,"Longitude: ","緯度：",,
+,"data.date.era: 設定/地理座標","著名地點：","Option label to caculate date-time.","著名地點：",,"Famous Places: ","有名な都市：",,
+,"data.date.era: 設定/資料圖層","資料圖層","Label for calendar data layer.","資料圖層",,"Data Layer","情報レイヤ",,
+,"data.date.era: 設定/資料圖層","請選擇所欲載入之資料圖層。","Message for calendar data layer.","請選擇所欲載入之資料圖層。",,"Please select the layer you want to load.","お求めになる情報レイヤを選んでください。",,
+,"data.date.era: 資料圖層","general","Label for calendar data layer.","通用",,"general","全般",,
+,"data.date.era: 資料圖層+文字式年曆","出典","Label for calendar data layer: Data source","出典",,"Data source","典拠",,
