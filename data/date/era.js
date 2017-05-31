@@ -6,7 +6,8 @@
  * @since 2013/2/13 12:45:44
  * 
  * TODO:<br />
- * 歲時記事 幾龍治水、幾日得辛、幾牛耕地、幾姑把蠶、蠶食幾葉 http://mathematicsclass.blogspot.tw/2009/06/blog-post_17.html<br />
+ * 歲時記事 幾龍治水、幾日得辛、幾牛耕地、幾姑把蠶、蠶食幾葉
+ * http://mathematicsclass.blogspot.tw/2009/06/blog-post_17.html<br />
  * bug: 西漢武帝後元2年<br />
  * 太複雜了，效率不高，重構。<br />
  * 舊唐書/卷11 <span data-era="~">寶應元年</span>..<span data-era="~">二年</span>..<span
@@ -554,6 +555,8 @@ function module_code(library_namespace) {
 	// 十二生肖，或屬相。
 	// Chinese Zodiac
 	十二生肖_LIST = '鼠牛虎兔龍蛇馬羊猴雞狗豬'.split(''),
+	// Chinese Zodiac in Unicode, 表情符號/圖畫文字/象形字
+	十二生肖圖像文字_LIST = '🐁🐄🐅🐇🐉🐍🐎🐑🐒🐓🐕🐖'.chars(''),
 	// 陰陽五行
 	// The Wu Xing, (五行 wŭ xíng) also known as the Five
 	// Elements, Five
@@ -3726,10 +3729,12 @@ function module_code(library_namespace) {
 		: 日 > 10 ? 日 > 20 ? '下' : '中' : '上';
 	}
 
-	function note_生肖(date) {
-		return date.年干支序 >= 0
-		// 屬相
-		? 十二生肖_LIST[date.年干支序 % 十二生肖_LIST.length] : '';
+	function note_生肖(date, 圖像文字) {
+		if (date.年干支序 >= 0) {
+			var LIST = 圖像文字 ? 十二生肖圖像文字_LIST : 十二生肖_LIST;
+			return LIST[date.年干支序 % LIST.length];
+		}
+		return '';
 	}
 
 	function note_五行(date) {
@@ -4159,11 +4164,11 @@ function module_code(library_namespace) {
 
 				if (0 < +tmp[1]) {
 					// http://www.geocities.jp/mishimagoyomi/12choku/12choku.htm
-	
-				// var new_year_day = this.year_start[date_index[0]];
-			// TODO: 歲時記事
 
-				// 冬至の頃（旧暦11月）に北斗七星のひしゃくの柄の部分が真北（子）に向くため、この日を「建子」の月としました。そこで旧暦11月節（大雪）後の最初の子の日を「建」と定めました。
+					// var new_year_day = this.year_start[date_index[0]];
+					// TODO: 歲時記事
+
+					// 冬至の頃（旧暦11月）に北斗七星のひしゃくの柄の部分が真北（子）に向くため、この日を「建子」の月としました。そこで旧暦11月節（大雪）後の最初の子の日を「建」と定めました。
 
 					// 《通緯·孝經援神契》：「大雪後十五日，斗指子，為冬至，十一月中。陰極而陽始至，日南至，漸長至也。」
 					// 大雪後首子日，十二直為「建」。但12節重複前一日之十二直，因此須先計算12節。
@@ -4205,8 +4210,10 @@ function module_code(library_namespace) {
 				// 閏月或在閏月之後的 index，都得減一。
 				- (!tmp || date_index[1] < tmp ? 0 : 1));
 
-				// var new_year_day = this.year_start[date_index[0]],new_year_day_stem_branch_index;
-				// if (!this.calendar[0][START_KEY]||this.calendar[0][START_KEY]===START_MONTH){new_year_day_stem_branch_index=(library_namespace.to_stem_branch(new_year_day)+START_DATE-this.calendar[START_DATE_KEY]).mod(library_namespace.SEXAGENARY_CYCLE_LENGTH);}
+				// var new_year_day =
+				// this.year_start[date_index[0]],new_year_day_stem_branch_index;
+				// if
+				// (!this.calendar[0][START_KEY]||this.calendar[0][START_KEY]===START_MONTH){new_year_day_stem_branch_index=(library_namespace.to_stem_branch(new_year_day)+START_DATE-this.calendar[START_DATE_KEY]).mod(library_namespace.SEXAGENARY_CYCLE_LENGTH);}
 				// TODO: date.歲時記事=
 
 			}
@@ -7757,6 +7764,7 @@ function module_code(library_namespace) {
 
 	Object.assign(library_namespace, {
 		十二生肖_LIST : 十二生肖_LIST,
+		十二生肖圖像文字_LIST : 十二生肖圖像文字_LIST,
 		陰陽五行_LIST : 陰陽五行_LIST
 	});
 

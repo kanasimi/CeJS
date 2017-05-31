@@ -223,6 +223,7 @@ if (typeof CeL === 'function')
 			// ☾LAST QUARTER MOON
 			// 🌗LAST QUARTER MOON SYMBOL
 			// 🌘WANING CRESCENT MOON SYMBOL
+			// 🌚NEW MOON WITH FACE
 			/**
 			 * 各種月相: 新月、上弦月、滿月、下弦月。
 			 */

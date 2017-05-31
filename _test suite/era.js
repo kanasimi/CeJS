@@ -935,7 +935,7 @@ show_range.min_height = 3;
  * 可繪製特定時段，例如展現在世期間所占比例。
  * 
  * @example <code>
- * 
+ *
  add_tag('漢和帝劉肇（79年–106年2月13日）');
  add_tag('清德宗光緒六年三月十三日');
 
@@ -1625,7 +1625,7 @@ draw_era.tags = CeL.null_Object();
 
 draw_era.draw_navigation = function(hierarchy, last_is_Era, count_layers) {
 	var period_hierarchy = '',
-	// 
+	//
 	navigation_list = [ {
 		T : '導覽列：'
 	}, {
@@ -1895,7 +1895,10 @@ function add_contemporary(era, output_numeral) {
 	return o;
 }
 
-var 國家_code = {
+// 國旗
+var national_flags = {},
+// country codes
+國家_code = {
 	中國 : 'zh',
 	English : 'en',
 	日本 : 'ja',
@@ -2358,8 +2361,8 @@ initialize_thdl_solar_term = function() {
 	STARTS_FROM = 14, DIGITS = 4, MAX_DIGITS = 10 + 26,
 	//
 	last_date = null, start_year, result = [],
-	//
-	data = ',,,,,,,,,,,,,,,,,,,,1516-01-10,15,15,15;xohayhfyt;yx7pjq7ut;13mepi9aok;1mmes224b9;xohayhfyt;dhgfgfgggfgfgfffffeffeff;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9yt;gegffgffffgfffgffffgfdff;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xt;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes226ol;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;yukmozl05;yx7pjq7ut;13m8seg9xw;1mmes224b9;xr4dt80et;yxve4kklh;13m8seg9xx;xohayh6c5;xr4dt80et;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohb0cv85;yx7pjq7ut;13m8seg9xt;1mmer82a8l;xohb0cv85;yx7pjq7ut;ffgfggfgggfgdhffffefffef;1mmer7lff9;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfez4l;xohayhfyt;yx7pjq5hh;yxvhgfp75;13wxjfez4l;xohayh6hh;yx7pjq5hh;yxvhgfp75;13mephsfv9;xohaqzhg5;xr4dt80ht;f2aum04lt;13mephsfwl;xohayh6hh;xr4dt80et;yx7pr7ww5;13m8seg9xx;xohayh6hh;xr40hri1h;yx7pr7ww5;13m8seg9xw;1mmes226ol;xohb0cv85;yx7pjq7ut;13m8seg9xt;1mmer7lff9;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfj6tx;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfj6tx;xohayhfyt;yul02bio5;yv8rz2dsh;13mephsfv9;xohayh6hh;xr4dt80g5;yxve4kklt;13mephsfv9;xohayh6hh;xr4dt80g5;yx7pr7wwh;13m8t916q8;13m8sega39;xr40hri1h;yx7pr7ww5;13mephsfvl;xofton505;xohb0cv85;yx7pjq7ut;13m8seg9xw;1mmer83c5x;xohb0cv85;yx7pjq7ut;yxvhgfpsk;1mmer7i9n9;xohb0cv85;yx7pjq7ut;yxvhgfpsh;13wxjfj6tx;xohayhfyt;yx7pjq7ut;13m8seg9ch;13wxjfez4l;xohayhfyt;yx7pjq7ut;yxve4kklt;13mephsfv9;xohayh6hh;xr4dt80g5;yxdmuk2tt;13m8seg9xx;fffgfgggfggffdifefffefff;xr40hri2t;ffgfgfgggfggffffffefdhef;13m8seg9xx;xoftoixat;xohb0cv9h;yx7pjq7ut;13m8seg9xx;xofsuocut;xohb0cv85;yx7pjq7ut;13m8seg9xw;1mmer83cb9;xohb0cv8h;yx7pjq7ut;yxvhgfpsl;xofsu28et;xohayhfyt;yx7pjq7v5;13m8p2l5cl;xofsu289h;xohayhfyt;yx7pjq7ut;13m8p2l5cl;xofsu289h;xohayh6hh;yx7c89phh;13m8ov3fpw;1mmer7h7px;xofsuocut;yx7c89n45;yxvdx2vkk;1mm8u451sl;xofsuocut;ymoian3ut;yx7pjq7v5;1mm8u451sl;xofsu7i1h;yx7c89n45;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xr40fw2th;yx7pjq7v5;13m8seg9xx;xofsu6g45;xr40fw2th;yx7pjq7v5;13m8p2l5cl;xoffilq1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xp3h7ew45;xohayhfyt;yx7pjq7ut;13m8p2l5cl;xofsu289h;xoha4inth;yx7c89phh;13m8ov3gb8;1mm8u451sl;xofsuocut;yx7c89phh;yxvdx2vkk;1mm8u451sl;fffgfgdiggfgfgffefffefff;yx7c89n45;yx7pjq7v5;1mbq06iij9;xofsu7i1h;yx7c6e7ut;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xr40fw2th;yy1b0f1ht;13m8p2l5cl;xofsu6g4h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu28et;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu28et;xohayhfyt;yx7c89phh;13m8ov3gb9;xofsu289h;xofsuomc5;yx7c89phh;14sc0lllck;1mm8u451sl;xofsuocut;yx7c89phh;yx7pjq7v8;1mm8u451sl;xofsuocut;yx7c89n45;yx7pjq7v5;1mbq06iij9;xofsu7i1h;yx7c6e7ut;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2mgr9;xofsu28et;xohayhg05;yx7c89pht;13ll0p8hn9;xofsu28et;xofsuomdh;yx7c89pht;13melyfm8l;xo9vqq2hh;xofsuomc5;yx7c89phh;13m8ov3gb9;xo9vqq2c5;xofsuomc5;yx7c89phh;yx7pjq8gk;1mbvx9uogl;xofsuocut;yx7c89phh;yx7pjq7v8;1mbq06iij9;xofsu7i1h;xr40fw2th;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu6g45;xohayhg05;yx7c89pht;13wrispzkl;xo9if9k45;xofsuomdh;yx7c89pht;13m8ov3gb9;xo9vr6xat;xofsuomc5;yx7c89phh;13lkn6aa8l;xo9vqq2hh;xofsuomc5;yx7c89phh;yx7pjq8gk;1mbq06iij9;xofsuocut;yx7beaxc5;yx7pjq7v8;1mbq06iij9;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7c89pht;13m8p2l5cl;xofsu6g45;xofsuomdh;yx7c89pht;13m8ov3gb9;xo9vqq2hg;13wxjg1d8l;yx7c89pht;13ll0hqslx;xo9vqq2hh;xofsuomdh;yx7c89pht;13ll0hqslx;xo9vqq2hi;8qguh9mvp;yx7c89phh;yx7pjpwlw;1mbq06iij9;xofsuocut;yx7c89phh;yx7pjq8gk;1mbpwundxx;fffgfggfggfgffgfdfgfefff;xohayhidh;yx7pjq7v8;13m8p2l5cl;xofsu7hud;xohaymqf9;yx7c89pht;13m8p2l5cl;xofsu7i1h;xoftoneit;yx7c89pht;13m8p2l5cl;xo9vqvc45;xofsuomdh;yx7c89pht;13m8ov3dxx;xo9vqq2hh;xofsuomdh;yx7c89pht;13ll0hqslx;xo9vqq2hh;fffgfggfggfgfgfffef00000'
+	// 採用 "1516-01-10" 會被當作 UTC+0 解析。
+	data = ',,,,,,,,,,,,,,,,,,,,1516/1/10,15,15,15;xohayhfyt;yx7pjq7ut;13mepi9aok;1mmes224b9;xohayhfyt;dhgfgfgggfgfgfffffeffeff;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9yt;gegffgffffgfffgffffgfdff;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xt;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes226ol;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq8g5;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohayhfyt;yx7pjq7ut;13m8seg9xw;1mmes224b9;yukmozl05;yx7pjq7ut;13m8seg9xw;1mmes224b9;xr4dt80et;yxve4kklh;13m8seg9xx;xohayh6c5;xr4dt80et;yx7pjq7ut;13m8seg9xw;1mmes224b9;xohb0cv85;yx7pjq7ut;13m8seg9xt;1mmer82a8l;xohb0cv85;yx7pjq7ut;ffgfggfgggfgdhffffefffef;1mmer7lff9;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfez4l;xohayhfyt;yx7pjq5hh;yxvhgfp75;13wxjfez4l;xohayh6hh;yx7pjq5hh;yxvhgfp75;13mephsfv9;xohaqzhg5;xr4dt80ht;f2aum04lt;13mephsfwl;xohayh6hh;xr4dt80et;yx7pr7ww5;13m8seg9xx;xohayh6hh;xr40hri1h;yx7pr7ww5;13m8seg9xw;1mmes226ol;xohb0cv85;yx7pjq7ut;13m8seg9xt;1mmer7lff9;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfj6tx;xohb0cv85;yx7pjq7ut;yxvhgfp75;13wxjfj6tx;xohayhfyt;yul02bio5;yv8rz2dsh;13mephsfv9;xohayh6hh;xr4dt80g5;yxve4kklt;13mephsfv9;xohayh6hh;xr4dt80g5;yx7pr7wwh;13m8t916q8;13m8sega39;xr40hri1h;yx7pr7ww5;13mephsfvl;xofton505;xohb0cv85;yx7pjq7ut;13m8seg9xw;1mmer83c5x;xohb0cv85;yx7pjq7ut;yxvhgfpsk;1mmer7i9n9;xohb0cv85;yx7pjq7ut;yxvhgfpsh;13wxjfj6tx;xohayhfyt;yx7pjq7ut;13m8seg9ch;13wxjfez4l;xohayhfyt;yx7pjq7ut;yxve4kklt;13mephsfv9;xohayh6hh;xr4dt80g5;yxdmuk2tt;13m8seg9xx;fffgfgggfggffdifefffefff;xr40hri2t;ffgfgfgggfggffffffefdhef;13m8seg9xx;xoftoixat;xohb0cv9h;yx7pjq7ut;13m8seg9xx;xofsuocut;xohb0cv85;yx7pjq7ut;13m8seg9xw;1mmer83cb9;xohb0cv8h;yx7pjq7ut;yxvhgfpsl;xofsu28et;xohayhfyt;yx7pjq7v5;13m8p2l5cl;xofsu289h;xohayhfyt;yx7pjq7ut;13m8p2l5cl;xofsu289h;xohayh6hh;yx7c89phh;13m8ov3fpw;1mmer7h7px;xofsuocut;yx7c89n45;yxvdx2vkk;1mm8u451sl;xofsuocut;ymoian3ut;yx7pjq7v5;1mm8u451sl;xofsu7i1h;yx7c89n45;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xr40fw2th;yx7pjq7v5;13m8seg9xx;xofsu6g45;xr40fw2th;yx7pjq7v5;13m8p2l5cl;xoffilq1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xp3h7ew45;xohayhfyt;yx7pjq7ut;13m8p2l5cl;xofsu289h;xoha4inth;yx7c89phh;13m8ov3gb8;1mm8u451sl;xofsuocut;yx7c89phh;yxvdx2vkk;1mm8u451sl;fffgfgdiggfgfgffefffefff;yx7c89n45;yx7pjq7v5;1mbq06iij9;xofsu7i1h;yx7c6e7ut;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xr40fw2th;yy1b0f1ht;13m8p2l5cl;xofsu6g4h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu28et;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu28et;xohayhfyt;yx7c89phh;13m8ov3gb9;xofsu289h;xofsuomc5;yx7c89phh;14sc0lllck;1mm8u451sl;xofsuocut;yx7c89phh;yx7pjq7v8;1mm8u451sl;xofsuocut;yx7c89n45;yx7pjq7v5;1mbq06iij9;xofsu7i1h;yx7c6e7ut;yx7pjq7v5;13m8seg9xx;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2mgr9;xofsu28et;xohayhg05;yx7c89pht;13ll0p8hn9;xofsu28et;xofsuomdh;yx7c89pht;13melyfm8l;xo9vqq2hh;xofsuomc5;yx7c89phh;13m8ov3gb9;xo9vqq2c5;xofsuomc5;yx7c89phh;yx7pjq8gk;1mbvx9uogl;xofsuocut;yx7c89phh;yx7pjq7v8;1mbq06iij9;xofsu7i1h;xr40fw2th;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu6g45;xohayhg05;yx7c89pht;13wrispzkl;xo9if9k45;xofsuomdh;yx7c89pht;13m8ov3gb9;xo9vr6xat;xofsuomc5;yx7c89phh;13lkn6aa8l;xo9vqq2hh;xofsuomc5;yx7c89phh;yx7pjq8gk;1mbq06iij9;xofsuocut;yx7beaxc5;yx7pjq7v8;1mbq06iij9;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7pjq7v5;13m8p2l5cl;xofsu7i1h;xohayhg05;yx7c89pht;13m8p2l5cl;xofsu6g45;xofsuomdh;yx7c89pht;13m8ov3gb9;xo9vqq2hg;13wxjg1d8l;yx7c89pht;13ll0hqslx;xo9vqq2hh;xofsuomdh;yx7c89pht;13ll0hqslx;xo9vqq2hi;8qguh9mvp;yx7c89phh;yx7pjpwlw;1mbq06iij9;xofsuocut;yx7c89phh;yx7pjq8gk;1mbpwundxx;fffgfggfggfgffgfdfgfefff;xohayhidh;yx7pjq7v8;13m8p2l5cl;xofsu7hud;xohaymqf9;yx7c89pht;13m8p2l5cl;xofsu7i1h;xoftoneit;yx7c89pht;13m8p2l5cl;xo9vqvc45;xofsuomdh;yx7c89pht;13m8ov3dxx;xo9vqq2hh;xofsuomdh;yx7c89pht;13ll0hqslx;xo9vqq2hh;fffgfggfggfgfgfffef00000'
 			.split(';');
 
 	data.forEach(function(year_data, index) {
@@ -2868,6 +2871,14 @@ function affairs() {
 	// copy from data.date.
 	/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
 	ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+	// 添加文字版本圖像 in Unicode
+	LUNAR_PHASE_SYMBOL = {
+		朔 : '🌑',
+		上弦 : '🌓',
+		望 : '🌕',
+		下弦 : '🌗',
+		晦日 : '🌘'
+	},
 	//
 	建除_LIST = '建除滿平定執破危成收開閉'.split(''),
 	// https://github.com/zealotrush/ben_rime/blob/master/symbols.yaml
@@ -2903,7 +2914,7 @@ function affairs() {
 	method_nodes = [ 'Because using complete LEA-406' + CeL.LEA406.default_type
 	//
 	, ' to calculate the position of moon,'
-	//			
+	//
 	+ ' it often takes seconds to minutes to display.', {
 		br : null
 	}, '因為採用了完整的 LEA-406'
@@ -3365,6 +3376,8 @@ function affairs() {
 				//
 				eclipse_info = phase[2];
 				phase = [ {
+					span : LUNAR_PHASE_SYMBOL[phase[0]]
+				}, {
 					b : {
 						T : phase[0]
 					}
@@ -3439,11 +3452,13 @@ function affairs() {
 					? ' 食甚食分: ' + eclipse_info.magnitude.to_fixed(3) : '')
 				}, '?' ] : '' ];
 			} else if (phase)
-				phase = {
+				phase = [ {
+					span : LUNAR_PHASE_SYMBOL[phase]
+				}, {
 					b : {
 						T : phase
 					}
-				};
+				} ];
 			return phase;
 		} ],
 
@@ -4626,7 +4641,7 @@ function affairs() {
 			R : '十二生肖紀年，屬相',
 			href : 'https://zh.wikipedia.org/wiki/生肖'
 		}, function(date) {
-			return CeL.era.生肖(date);
+			return CeL.era.生肖(date, true) + CeL.era.生肖(date);
 		} ],
 
 		五行 : [ {
@@ -4794,7 +4809,7 @@ function affairs() {
 	o = null;
 	for (i in list) {
 		if (Array.isArray(list[i])
-		//		
+		//
 		&& typeof list[i][1] === 'function')
 			calendar_columns[calendar_column_alias[i] = o ? o + '/' + i : i] = list[i];
 		else
