@@ -91,7 +91,7 @@ function test_base() {
 		assert(o2 !== o1, 'CeL.new_options(options) #6');
 		assert([JSON.stringify(o2), JSON.stringify(o1)], 'CeL.new_options(options) #7');
 	});
-	
+
 	error_count += CeL.test('dependency_chain', function(assert) {
 		var dc = new CeL.dependency_chain;
 		dc.add(1, 2);
@@ -333,7 +333,7 @@ function test_native() {
 		var html = '<p></p><h2>title1</h2>abc<h2>title2</h2>\nABC<h2>title3</h2>ABC\n<h2>title4</h2>\nABC\n<h2>title5</h2>',
 		// matched token
 		get_next_between = html.find_between('<h2>', '</h2>'), list = [], text;
-		// 
+		//
 		while ((text = get_next_between()) !== undefined) {
 			list.push(text);
 		}
@@ -1902,7 +1902,7 @@ function test_date() {
 		[[0,new Date('2022/5/5')-'2022/5/5'.to_Date()], '.to_Date(): 理應可 parse 的值'],
 		[[0,new Date('2022/5/5 UTC+09:00')-'2022/5/5'.to_Date({zone:'UTC+9'})], '.to_Date(): 理應可 parse 的值+TZ @ options'],
 		[[0,new Date('2022/5/5 UTC+09:00')-'2022/5/5 UTC+9'.to_Date()], '.to_Date(): 理應可 parse 的值+TZ'],
-		[[0,new Date('2016-11-21T08:00:00')-'2016年11月21日(金) 08:00'.to_Date({zone:0})], '.to_Date(): 理應可 parse 的值+星期'],
+		[[0,new Date('2016-11-21T08:00:00Z')-'2016年11月21日(金) 08:00'.to_Date({zone:0})], '.to_Date(): 理應可 parse 的值+星期'],
 
 		[[0,new Date('2022/5/5 UTC')-'2022/5/5 UTC'.to_Date()], '.to_Date(): 理應可 parse 的值'],
 		[[0,'2022/5/5'.to_Date({zone:0})-'2022/5/5 UTC'.to_Date()], '.to_Date(): 理應可 parse 的值'],
@@ -3056,7 +3056,7 @@ function test_wiki() {
 	CeL.wiki.parser('{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}').parse().toString();
 
 	// More examples: see /_test suite/test.js
-	
+
 	// Flow support
 	CeL.wiki.Flow('Wikipedia_talk:Flow_tests', function(page_data) {
 		CeL.log(page_data.is_Flow === true);

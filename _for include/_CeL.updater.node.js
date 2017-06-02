@@ -1,13 +1,16 @@
 /**
  * @name 自動配置好最新版本 CeJS 的工具。
  * @fileoverview 將會自動取得並解開 GitHub 最新版本壓縮檔案。
- * 
+ *
  * @example<code>
 
 node _CeL.updater.node.js
 
+TODO:
+use Zlib
+
  </code>
- * 
+ *
  * @since 2017/3/13 14:39:41
  */
 
