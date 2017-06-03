@@ -2,7 +2,7 @@
  * @name CeL data for era calendar.
  * @fileoverview 本檔案包含了東亞傳統曆法/中國傳統曆法 (traditional civil
  *               calendar)，農曆、夏曆、陰曆的各紀年期間曆數資料。
- *
+ * 
  * @summary <code>
 
 TODO:
@@ -289,7 +289,7 @@ CeL.era.pass_on = {
 
 		/**
 		 * 曲循經傳曆日
-		 *
+		 * 
 		 * @see https://zh.wikipedia.org/wiki/%E9%B2%81%E5%9B%BD
 		 * @seealso 杜預《春秋長曆》，原書已佚，今本是清四庫館臣從《永樂大典》中輯出的，附於杜預《春秋釋例》之後。按此書主要以《乾度曆》推算朔閏，凡與經傳不符者則附以作者考證
 		 */
@@ -2474,7 +2474,8 @@ CeL.era.pass_on = {
 		// 旧字体: 1946年に制定した当用漢字で採用された新しい字体、すなわち新字体に対してそれ以前に慣用されていた字体を指す。
 		'/昭和天皇/昭和|1926/12/25~|:CE|元号=㍼|諡=迪宮|諱=裕仁|注=昭和改元の詔書（1926年〔大正15年〕12月25日）: 朕皇祖皇宗ノ威靈ニ賴リ大統ヲ承ケ萬機ヲ總フ茲ニ定制ニ遵ヒ元號ヲ建テ大正十五年十二月二十五日以後ヲ改メテ昭和元年ト爲ス（以下略）',
 		// 第125代天皇
-		'/明仁天皇/平成|1989/1/8~' + CeL.era.pass_on.last_day
+		'/明仁天皇/平成|1989/1/8~'
+				+ CeL.era.pass_on.last_day
 				+ '|:CE|元号=㍻|君主=今上天皇|諡=継宮|諱=明仁|注=「元号を改める政令」（昭和64年政令第1号）は新天皇の允裁（いんさい）を受けた後、官報号外によって公布され、翌1月8日から施行された。',
 
 		// 臺灣日治時期 武裝反抗日本對臺灣殖民統治發動起義而建立的政權
@@ -3498,7 +3499,7 @@ CeL.era.pass_on = {
 		 * The Mahameghavahana dynasty (Oriya: ମହାମେଘବାହନ; Mahā-Mēgha-Bāhana, c.
 		 * 250s BC to 400s AD) was an ancient ruling dynasty of Kalinga after
 		 * the decline of the Maurya Empire.
-		 *
+		 * 
 		 * @see https://en.wikipedia.org/wiki/Mahameghavahana_dynasty
 		 */
 		/**
@@ -3653,36 +3654,36 @@ CeL.era.pass_on = {
 
 		/**
 		 * 塞琉古紀元，是一套塞琉古帝國以及之後受希臘化文明影響的古代國家所採用的紀年方式。
-		 *
+		 * 
 		 * The Seleucid era or Anno Graecorum (literally "year of the Greeks" or
 		 * "Greek year"), sometimes denoted "AG", was a system of numbering
 		 * years in use by the Seleucid Empire and other countries among the
 		 * ancient Hellenistic civilizations.
-		 *
+		 * 
 		 * The natives of the empire used the Babylonian calendar, in which the
 		 * new year falls on 1 Nisanu (3 April in 311 BC)
-		 *
+		 * 
 		 * The Macedonian court adopted the Babylonian calendar (substituting
 		 * the Macedonian month names ) but reckoned the new year to be in the
 		 * autumn (the exact date is unknown).
-		 *
+		 * 
 		 * @see https://en.wikipedia.org/wiki/Seleucid_era
 		 */
 		/**
 		 * 古代馬其頓曆 The Macedonian calendar was in essence the Babylonian calendar
 		 * with the substitution of Macedonian names for the Babylonian ones.
-		 *
+		 * 
 		 * Under the Seleucid Empire, the Macedonians adopted the Seleucid era.
 		 * The year beginning on the 1st of Dios during what we call October 312
 		 * BCE was declared to be the year one of the Seleucid era.
-		 *
+		 * 
 		 * @see https://en.wikipedia.org/wiki/Ancient_Macedonian_calendar
 		 */
 		/**
 		 * His return to Babylon was afterwards officially regarded as the
 		 * beginning of the Seleucid Empire and that year as the first of the
 		 * Seleucid era.
-		 *
+		 * 
 		 * @see https://en.wikipedia.org/wiki/Seleucus_I_Nicator
 		 */
 		/**
@@ -3695,7 +3696,7 @@ CeL.era.pass_on = {
 		 * and finally, when in the 19th year of Darius the beginning of the
 		 * year coincided with spring equinox, to the 19-year cycle” (1985, p.
 		 * 747).
-		 *
+		 * 
 		 * Alex­ander probably used the Macedonian calendar, but the Achaemenid
 		 * system seems not to have been abolished. In the time of Seleucus I
 		 * (321-281 B.C.) the Babylonian calendar was adopted, but the original
@@ -3705,7 +3706,7 @@ CeL.era.pass_on = {
 		 * from material discovered at Nisa (2nd-1st century B.C.) and Avroman
 		 * (1st cent. a.d.) that the Zoroastrian solar calendar (see below) was
 		 * also used.
-		 *
+		 * 
 		 * @see http://www.iranicaonline.org/articles/calendars
 		 */
 		'Seleucid era|Babylonian-311~76/3/24|:Babylonian|疑|準=年',
@@ -3753,7 +3754,7 @@ CeL.era.pass_on = {
 /**
  * A Chronological Survey of Precisely Dated Demotic and Abnormal Hieratic
  * Sources, Version 1.0 (February 2007)
- *
+ * 
  * @see http://www.trismegistos.org/top.php
  */
 
@@ -3927,7 +3928,7 @@ CeL.era.pass_on = {
 		/**
 		 * The Era of the Martyrs (Latin: anno martyrum or AM), also known as
 		 * the Diocletian era (Latin: anno Diocletiani)
-		 *
+		 * 
 		 * @see https://en.wikipedia.org/wiki/Era_of_Martyrs
 		 */
 
@@ -3937,6 +3938,114 @@ CeL.era.pass_on = {
 		'Diocletian era|Egyptian:305~306|23/=:Egyptian|疑|準=年|注=殉道時期 (The Era of the Martyrs, 殉教紀元) 沿用古埃及曆，並於亞歷山大科普特正教會行用至今；請參照之。'
 
 ]).minute_offset = 2 * 60;
+
+// ---------------------------------------------------------------------//
+
+// https://fr.wikipedia.org/wiki/Liste_des_monarques_de_France
+// https://www.timetoast.com/timelines/les-monarques-de-france
+(CeL.era.pass_on.countries.France = [
+
+		'Mérovingiens/Clovis Ier|481/6/26~|:CE|朝代=Dynastie Mérovingienne;Merovingian dynasty',
+		// TODO: 資料還存有錯誤
+		'/Clodomir|511/11/27~|:CE',
+		'/Thierry Ier|524/6/25~|:CE|準=年',
+		'/Thibert Ier|534~|:CE|準=年',
+		'/Thibaut|548~555|:CE|準=年',
+		'/Childebert Ier|511~558/12/12|:CE|準=年',
+		'/Clotaire Ier|511~|:CE|準=年',
+		'/Caribert Ier|561/11/29~567/3/5|:CE',
+		'/Sigebert Ier|561~575/12|:CE',
+		'/Chilpéric Ier|561~584/9|:CE|準=年',
+		'/Gontran|561~592/3/28|:CE|準=年',
+		'/Childebert II|575~596/3|:CE|準=年',
+		'/Thibert II|595~612|:CE|準=年',
+		'/Thierry II|595~|:CE|準=年',
+		'/Sigebert II|613~613/10/10|:CE|準=年',
+		'/Clotaire II|584~629/10/18|:CE|準=年',
+		'/Dagobert Ier|623~639/1/19|:CE|準=年',
+		'/Caribert II|629~632/4/8|:CE|準=年',
+		'/Sigebert III|639~656/2/1|:CE|準=年',
+		'/Clovis II|639~657/10/31|:CE|準=年|ruler=Clovis II « le Fainéant »',
+		'/Childebert|656~662/10/18|:CE|準=年|ruler=Childebert « l\'Adopté »',
+		'/Clotaire III|657~673|:CE|準=年',
+		'/Childéric II|662~|:CE|準=年',
+		'/Thierry III|675~691|:CE|準=年',
+		'/Clovis III|675~|:CE|準=年',
+		'/Dagobert II|676~679/12/23|:CE|準=年',
+		'/Clovis IV|691~|:CE|準=年',
+		'/Childebert IV|695~|:CE|準=年|ruler=Childebert III',
+		'/Dagobert III|711~|:CE|準=年',
+		'/Chilpéric II|715~721|:CE|準=年',
+		'/Clotaire IV|717~719|:CE|準=年',
+		'/Thierry IV|721~737|:CE|準=年',
+
+		'/Interrègne de Childéric III|743~|:CE|準=年',
+
+		'Carolingiens/Pépin le Bref|751/11~|:CE|朝代=Dynastie Carolingienne|ruler=Pépin « le Bref »;Pépin III, dit le Bref',
+		'/Carloman Ier|768/9/24~771/12/4|:CE',
+		'/Charlemagne|768/9/24~|:CE|ruler=« Charles Ier le Grand »',
+		'/Louis Ier|814/1/28~|:CE|ruler=Louis Ier « le Pieux »;Louis Ier « le Débonnaire »',
+		'/Charles II|840/6/20~|:CE|ruler=Charles II « le Chauve »',
+		'/Louis II|877/10/6~|:CE|ruler=Louis II « le Bègue »',
+		'/Louis III|879/4/11~882/8/5|:CE',
+		'/Carloman II|879/4/11~884/12/6|:CE',
+		'/Charles|885/6~887/11|:CE|ruler=Charles « le Gros »',
+		'/Eudes|888/2/29~|:CE',
+		'/Charles III|898/1/1~|:CE|ruler=Charles III « le Simple »',
+		'/Robert Ier|922/6/29~|:CE',
+		'/Raoul|923/6/15~936/1/15|:CE|ruler=Raoul de Bourgogne',
+		'/Louis IV|936/9/19~|:CE',
+		'/Lothaire|954/9/10~|:CE|ruler=Lothaire (roi des Francs)',
+		'/Louis V|986/3/2~987/5/21|:CE|ruler=Louis V « le Fainéant »',
+
+		'Capétiens directs/Hugues Capet|987/6/3~|:CE',
+		'/Robert II|996/10/24~|:CE|ruler=Robert II « le Pieux »',
+		'/Henri Ier|1031/7/10~|:CE',
+		'/Philippe Ier|1060/8/4~|:CE',
+		'/Louis VI|1108/7/29~|:CE|ruler=Louis VI « le Gros »',
+		'/Louis VII|1137/8/1~|:CE|ruler=Louis VII « le Jeune »',
+		'/Philippe II|1180/9/18~|:CE|ruler=Philippe II « Auguste »',
+		'/Louis VIII|1223/7/14~|:CE|ruler=Louis VIII « le Lion »',
+		'/Louis IX|1226/11/8~|:CE|ruler=Louis IX « Saint Louis »',
+		'/Philippe III|1270/8/25~|:CE|ruler=Philippe III « le Hardi »',
+		'/Philippe IV|1285/10/5~|:CE|ruler=Philippe IV « le Bel »',
+		'/Louis X|1314/11/29~|:CE|ruler=Louis X « le Hutin »',
+		'/Jean Ier|1316/11/15~|:CE|ruler=Jean Ier « le Posthume »',
+		'/Philippe V|1316/11/19~|:CE|ruler=Philippe V « le Long »',
+		'/Charles IV|1322/1/3~1328/2/1|:CE|ruler=Charles IV « le Bel »',
+
+		'Valois/Philippe VI|1328/4/1~|:CE|朝代=Maison capétienne de Valois',
+		'/Jean II|1350/8/22~|:CE|ruler=Jean II « le Bon »',
+		'/Charles V|1364/4/8~|:CE|ruler=Charles V « le Sage »',
+		'/Charles VI|1380/9/16~|:CE|ruler=Charles VI « le Bien-Aimé »;Charles VI « le Fol »',
+		'/Charles VII|1422/10/22~|:CE|ruler=Charles VII « le Victorieux »;Charles VII « le Bien Servi »',
+		'/Louis XI|1461/7/22~|:CE|ruler=Louis XI « le Prudent »',
+		'/Charles VIII|1483/8/30~|:CE|ruler=Charles VIII « l\'Affable »',
+		'/Louis XII|1498/4/7~|:CE|ruler=Louis XII « le Père du Peuple »',
+		'/François Ier|1515/1/1~|:CE|ruler=François d\'Orléans;François Ier « le Père et Restaurateur des Lettres »',
+		'/Henri II|1547/3/31~|:CE',
+		'/François II|1559/7/10~|:CE',
+		'/Charles IX|1560/12/5~|:CE',
+		'/Henri III|1574/3/30~|:CE',
+
+		'Bourbon/Henri IV|1589/8/2~|:CE|ruler=Henri IV « le Grand »;Henri IV « le Vert-Galant »|朝代=Maison capétienne de Bourbon;Dynastie des Bourbons',
+		'/Louis XIII|1610/5/14~|:CE|ruler=Louis XIII « le Juste »',
+		'/Louis XIV|1643/5/14~|:CE|ruler=Louis XIV « le Grand »;Louis XIV « le Roi-Soleil »',
+		'/Louis XV|1715/9/1~|:CE|ruler=Louis XV « le Bien-Aimé »',
+		'/Louis XVI|1774/5/10~1792/8/10|:CE',
+
+		// Ere Bonaparte
+		'Bonaparte/Napoléon Ier|1804/5/18~|:CE',
+		// Ere des Bourbons
+		'Bourbons/Louis XVIII|1814/4/6~|:CE|ruler=Louis XVIII « le Désiré »',
+		'Bonaparte/Napoléon Ier|1815/3/20~1815/6/22|12/=:CE',
+		'Bourbons/Louis XVIII|1815/7/8~|:CE|ruler=Louis XVIII « le Désiré »',
+		'/Charles X|1824/9/16~1830/8/2|:CE',
+		// Ere Orléans
+		'Orléans/Louis-Philippe Ier|1830/8/9~1848/2/24|:CE|朝代=Quatrième maison d\'Orléans|ruler=Louis-Philippe Ier « le Roi-Citoyen »',
+		'Bonaparte/Napoléon III|1852/12/2~1870/9/4/|:CE'
+
+]).minute_offset = 1 * 60;
 
 // ---------------------------------------------------------------------//
 // 瑪雅文明, pre-Columbian Maya civilization

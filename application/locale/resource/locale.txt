@@ -316,4 +316,5 @@
 ,"data.date.era: 設定/資料圖層","資料圖層","Label for calendar data layer.","資料圖層",,"Data Layer","情報レイヤ",,
 ,"data.date.era: 設定/資料圖層","請選擇所欲載入之資料圖層。","Message for calendar data layer.","請選擇所欲載入之資料圖層。",,"Please select the layer you want to load.","お求めになる情報レイヤを選んでください。",,
 ,"data.date.era: 資料圖層","general","Label for calendar data layer.","通用",,"general","全般",,
+,"data.date.era: 資料圖層","君主生卒","the dates of birth and death for each monarch, Birth/Death of Monarch ","君主生卒",,"Lifetime of rulers","君主の生歿",,
 ,"data.date.era: 資料圖層+文字式年曆","出典","Label for calendar data layer: Data source","出典",,"Data source","典拠",,
