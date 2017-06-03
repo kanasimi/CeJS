@@ -1552,7 +1552,9 @@ function draw_era(hierarchy) {
 			periods.push({
 				b : [ group === draw_era.default_group ? [ '(', {
 					T : 'general'
-				}, ')' ] : group, {
+				}, ')' ] : {
+					T : group
+				}, {
 					span : add_tag.group_count[group] || '',
 					C : 'count'
 				} ],
@@ -2057,6 +2059,7 @@ function translate_era(era) {
 		// 顯示其他與本紀年相關的註解與屬性。
 
 		// 還需要更改 ((sign_note.copy_attributes))!
+		// 📅
 		add_注('曆法', '採用曆法', function(曆法) {
 			return {
 				a : 曆法,
@@ -2065,13 +2068,20 @@ function translate_era(era) {
 				onclick : add_calendar_column
 			};
 		});
-		add_注('據', '出典');
+		// 📚
+		add_注('據', [ '📜', {
+			T : '出典'
+		} ]);
 
 		// 君主名號
-		add_注('君主名', null, add_注_link);
+		// 名字徽章
+		var 君主姓名_label = [ '📛', {
+			T : '君主名'
+		} ];
+		add_注('君主名', 君主姓名_label, add_注_link);
 		if (date.ruler) {
-			add_注('君主', '君主名', add_注_link);
-			add_注('ruler', '君主名', add_注_link);
+			add_注('君主', 君主姓名_label, add_注_link);
+			add_注('ruler', 君主姓名_label, add_注_link);
 		}
 		add_注('表字');
 		add_注('君主號', null, add_注_link);
@@ -2106,7 +2116,9 @@ function translate_era(era) {
 		add_注('童名');
 		add_注('神號');
 		// 君主資料
-		add_注('生', '出生', function(note) {
+		add_注('生', [ '🎂', {
+			T : '出生'
+		} ], function(note) {
 			return {
 				a : note,
 				title : '共存紀年:' + note,
@@ -2115,7 +2127,9 @@ function translate_era(era) {
 				C : 'note'
 			};
 		});
-		add_注('卒', '逝世', function(note) {
+		add_注('卒', [ '⚰️', {
+			T : '逝世'
+		} ], function(note) {
 			return {
 				a : note,
 				title : '共存紀年:' + note,
@@ -2124,7 +2138,9 @@ function translate_era(era) {
 				C : 'note'
 			};
 		});
-		add_注('在位', null, function(note) {
+		add_注('在位', [ '👑', {
+			T : '在位'
+		} ], function(note) {
 			return {
 				a : note,
 				href : '#',
@@ -2133,7 +2149,10 @@ function translate_era(era) {
 			};
 		});
 
-		add_注('注');
+		// 📓
+		add_注('注', [ '📝', {
+			T : '注'
+		} ]);
 
 		if (Array.isArray(date.name))
 			add_注('紀年線圖', {
@@ -4426,14 +4445,19 @@ function affairs() {
 
 		孟仲季 : [ {
 			a : {
+				// 十二月律
 				T : '孟仲季月'
 			},
 			R : '孟仲季之月名別稱, 孟仲季+春夏秋冬',
-			// #音律與曆法的配合
-			href : 'https://zh.wikipedia.org/wiki/十二律',
+			href : 'https://zh.wikipedia.org/wiki/十二律#音律與曆法的配合',
 			S : 'font-size:.8em;'
 		}, function(date) {
-			return /* !date.準 && */!date.精 && CeL.era.孟仲季(date);
+			var 孟仲季 = /* !date.準 && */!date.精 && CeL.era.孟仲季(date);
+			if (孟仲季) {
+				return CeL.era.季(date, {
+					icon : true
+				}) + 孟仲季;
+			}
 		} ],
 
 		月律 : [ {

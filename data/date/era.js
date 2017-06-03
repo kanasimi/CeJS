@@ -356,7 +356,7 @@ function module_code(library_namespace) {
 	日_SOURCE = /\s*初?(\d{1,2}|數{1,3}|[^\s日朔晦望]{1,5})日?/.source,
 
 	// 四季, 四時
-	季_LIST = '春夏秋冬',
+	季_LIST = '春夏秋冬', 季_Unicode = '🌱☀🍂⛄',
 	// 季名稱。e.g., 春正月
 	季_SOURCE = '[' + 季_LIST + ']?王?',
 
@@ -611,6 +611,7 @@ function module_code(library_namespace) {
 	// 初始調整並規範基本常數。
 
 	季_LIST = 季_LIST.split('');
+	季_Unicode = 季_Unicode.chars('');
 	九星_LIST = 九星_LIST.split(',');
 
 	(function() {
@@ -3689,15 +3690,19 @@ function module_code(library_namespace) {
 		&& date.月干支.charAt(1) || '';
 	}
 
+	function get_季(月_index, get_icon) {
+		return 0 <= 月_index && (get_icon ? 季_Unicode : 季_LIST)[月_index / 3 | 0]
+				|| '';
+	}
+
 	// 僅適用於夏曆!
-	function note_季(date) {
+	function note_季(date, options) {
 		var 月 = date.月;
 		if (isNaN(月) && (月 = 月.match(MONTH_NAME_PATTERN)))
 			月 = 月[2];
 
-		return 0 <= (月 -= START_MONTH)
 		// 此非季節，而為「冬十月」之類用。
-		&& 季_LIST[月 / 3 | 0] || '';
+		return get_季(月 - START_MONTH, options && options.icon);
 	}
 
 	// 僅適用於夏曆!
@@ -3708,7 +3713,7 @@ function module_code(library_namespace) {
 
 		return 0 <= (月 -= START_MONTH)
 		// 此非季節，而為「冬十月」之類用。
-		&& (孟仲季_LIST[月 % 3] + 季_LIST[月 / 3 | 0]) || '';
+		&& (孟仲季_LIST[月 % 3] + get_季(月)) || '';
 	}
 
 	// 僅適用於夏曆!

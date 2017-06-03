@@ -1,8 +1,8 @@
 ﻿/**
  * @name CeL function for downloading online works (novels, comics).
- *
+ * 
  * @fileoverview 本檔案包含了批量下載線上作品（小說、漫畫）的函式庫。 WWW work crawler.
- *
+ * 
  * <code>
 
 流程:
@@ -23,9 +23,10 @@ TODO:
 parse 圖像
 
 </code>
- *
- * @see https://github.com/abcfy2/getComic, https://github.com/wellwind/8ComicDownloaderElectron
- *
+ * 
+ * @see https://github.com/abcfy2/getComic,
+ *      https://github.com/wellwind/8ComicDownloaderElectron
+ * 
  * @since 2016/10/30 21:40:6
  * @since 2016/11/1 23:15:16 正式運用：批量下載腾讯漫画 qq。
  * @since 2016/11/5 22:44:17 正式運用：批量下載漫画台 manhuatai。
@@ -1492,7 +1493,7 @@ function module_code(library_namespace) {
 		ebook.set({
 			// 作者名
 			creator : work_data.author,
-			// ジャンル, タグ, キーワード
+			// 🏷標籤, ジャンル, タグ, キーワード
 			subject : work_data.genre || work_data.status,
 			// あらすじ
 			description : get_label(work_data.description
