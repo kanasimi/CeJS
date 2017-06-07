@@ -3645,7 +3645,7 @@ function module_code(library_namespace) {
 	// http://hyperrate.com/topic-view-thread.php?tid=3322
 	// TODO: 警告:本函數尚未完善
 	// @see http://unicode.org/Public/UNIDATA/EastAsianWidth.txt
-	function display_width(string, font) {
+	function String_display_width(string, font) {
 		// 須注意:不同的字型對不同字元的規範可能不同!如'→'可能為2或1
 
 		// @see [[en:Arrow (symbol)]]
@@ -3656,27 +3656,36 @@ function module_code(library_namespace) {
 		return string.replace(/[\u3000-\uFF5E]/g, '  ').length;
 	}
 
-	var MAX_DISPLAY_WIDTH = 200;
+	var DEFAULT_DISPLAY_WIDTH = 80;
+	// 螢幕寬度多少字元。
+	function screen_display_width() {
+		return library_namespace.platform.nodejs ? process.stdout.columns
+				: DEFAULT_DISPLAY_WIDTH;
+	}
+
 	// CLI螢幕顯示對齊用。e.g., 對比兩者。
 	// left justification, to line up in correct
 	function display_align(pair, options) {
-		var key_display_width = [], display_lines = [];
+		var key_display_width = [], display_lines = []
+		//
+		use_display_width = options && options.display_width
+				|| screen_display_width();
 		for ( var key in pair) {
-			if (pair[key].length > MAX_DISPLAY_WIDTH
+			if (pair[key].length > use_display_width
 					|| String(pair[key]).includes('\n')) {
 				for ( var key in pair) {
 					display_lines.push(key.trim() + '\n' + pair[key]);
 				}
 				return display_lines.join('\n');
 			}
-			key_display_width.push(display_width(key));
+			key_display_width.push(String_display_width(key));
 		}
 
 		var max_key_display_width = Math.max.apply(null, key_display_width);
 		for ( var key in pair) {
 			// 可能沒有 key.padStart()!
 			display_lines.push(key.pad(key.length + max_key_display_width
-			// assert: display_width(' ') === 1
+			// assert: String_display_width(' ') === 1
 			- key_display_width.shift()) + pair[key]);
 		}
 		return display_lines.join('\n');
@@ -3732,7 +3741,7 @@ function module_code(library_namespace) {
 		edit_distance : set_bind(Levenshtein_distance),
 		diff_with : diff_with_String,
 
-		display_width : set_bind(display_width)
+		display_width : set_bind(String_display_width)
 	});
 
 	set_method(Number.prototype, {

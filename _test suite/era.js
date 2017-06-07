@@ -2138,6 +2138,8 @@ function translate_era(era) {
 				C : 'note'
 			};
 		});
+		// TODO: 終年/享年/享壽/壽命/年齡
+
 		add_注('在位', [ '👑', {
 			T : '在位'
 		} ], function(note) {
