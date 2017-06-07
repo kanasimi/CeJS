@@ -3666,7 +3666,7 @@ function module_code(library_namespace) {
 	// CLI螢幕顯示對齊用。e.g., 對比兩者。
 	// left justification, to line up in correct
 	function display_align(pair, options) {
-		var key_display_width = [], display_lines = []
+		var key_display_width = [], display_lines = [],
 		//
 		use_display_width = options && options.display_width
 				|| screen_display_width();
