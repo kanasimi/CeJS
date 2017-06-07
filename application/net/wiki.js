@@ -3383,7 +3383,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * 把表格型列表頁面轉為原生陣列。
+	 * 把表格型列表頁面轉為原生陣列。 wikitext table to array table, to table
 	 * 
 	 * TODO: 按標題統合內容。
 	 * 
@@ -3396,6 +3396,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @example<code>
 
+	CeL.run(['application.platform.nodejs', 'data.CSV']);
 	wiki.page('List of monarchs of Thailand', function(page_data) {
 		CeL.wiki.list_to_array(page_data, 'monarchs of Thailand.txt');
 	});
@@ -3514,8 +3515,9 @@ function module_code(library_namespace) {
 					field_delimiter : '\t'
 				}));
 			} else {
-				library_namespace
-						.error("Must includes frrst: CeL.run(['application.platform.nodejs', 'data.CSV']);");
+				library_namespace.error("Must includes frrst: "
+						+ library_namespace.Class
+						+ ".run(['application.platform.nodejs', 'data.CSV']);");
 			}
 		}
 
