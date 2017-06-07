@@ -3671,7 +3671,7 @@ function module_code(library_namespace) {
 		use_display_width = options && options.display_width
 				|| screen_display_width();
 		for ( var key in pair) {
-			if (pair[key].length > use_display_width
+			if ((pair[key].length > use_display_width)
 					|| String(pair[key]).includes('\n')) {
 				for ( var key in pair) {
 					display_lines.push(key.trim() + '\n' + pair[key]);
