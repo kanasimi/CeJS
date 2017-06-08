@@ -510,7 +510,7 @@ function test_native() {
 		assert([ 'abc123!@#'.length, 'abc123!@#'.display_width() ], 'display_width() #1');
 		assert([ '黑白字翻訳翻译写'.length * 2, '黑白字翻訳翻译写'.display_width() ], 'display_width() #2');
 		assert([ '_<>Pf'.length + '石墨대한민국'.length * 2, '_<石墨>P대한민국f'.display_width() ], 'display_width() #3');
-		assert([ 'Title:title\n    →1234', CeL.display_align({'Title:':'title','→':1234}) ], 'display_align() #1');
+		assert([ 'Title:title\n    →1234', CeL.display_align({'Title:':'title','→':1234}) ], 'display_align() #4');
 	});
 
 	error_count += CeL.test('edit distance & LCS', function(assert) {

@@ -3662,6 +3662,8 @@ function module_code(library_namespace) {
 		return library_namespace.platform.nodejs ? process.stdout.columns
 				: DEFAULT_DISPLAY_WIDTH;
 	}
+	console.log('screen_display_width:');
+	console.log(screen_display_width());
 
 	// CLI螢幕顯示對齊用。e.g., 對比兩者。
 	// left justification, to line up in correct
