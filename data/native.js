@@ -3659,11 +3659,11 @@ function module_code(library_namespace) {
 	var DEFAULT_DISPLAY_WIDTH = 80;
 	// 螢幕寬度多少字元。
 	function screen_display_width() {
-		return library_namespace.platform.nodejs ? process.stdout.columns
-				: DEFAULT_DISPLAY_WIDTH;
+		return library_namespace.platform.nodejs && process.stdout.columns
+		// process.stdout.columns 可能被設定為0。 e.g., at Travis CI
+		|| DEFAULT_DISPLAY_WIDTH;
 	}
-	console.log('screen_display_width:');
-	console.log(screen_display_width());
+	library_namespace.debug('screen_display_width: ' + screen_display_width());
 
 	// CLI螢幕顯示對齊用。e.g., 對比兩者。
 	// left justification, to line up in correct
@@ -3672,6 +3672,7 @@ function module_code(library_namespace) {
 		//
 		use_display_width = options && options.display_width
 				|| screen_display_width();
+		library_namespace.debug('display width: ' + use_display_width, 3);
 		for ( var key in pair) {
 			if ((pair[key].length > use_display_width)
 					|| String(pair[key]).includes('\n')) {
