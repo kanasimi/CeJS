@@ -3663,7 +3663,7 @@ function module_code(library_namespace) {
 		// process.stdout.columns 可能被設定為0。 e.g., at Travis CI
 		|| DEFAULT_DISPLAY_WIDTH;
 	}
-	library_namespace.debug('screen_display_width: ' + screen_display_width());
+	// library_namespace.debug('screen_display_width: ' + screen_display_width());
 
 	// CLI螢幕顯示對齊用。e.g., 對比兩者。
 	// left justification, to line up in correct
