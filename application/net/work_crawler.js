@@ -613,8 +613,8 @@ function module_code(library_namespace) {
 					throw _this.MESSAGE_RE_DOWNLOAD;
 				}
 				error_count = (error_count | 0) + 1;
-				library_namespace.log('process_work_data: Retry ' + error_count + '/'
-						+ _this.MAX_ERROR + '...');
+				library_namespace.log('process_work_data: Retry ' + error_count
+						+ '/' + _this.MAX_ERROR + '...');
 				_this.get_work_data({
 					id : work_id,
 					title : work_title
@@ -1076,8 +1076,9 @@ function module_code(library_namespace) {
 						throw _this.MESSAGE_RE_DOWNLOAD;
 					}
 					get_data.error_count = (get_data.error_count | 0) + 1;
-					library_namespace.log('process_chapter_data: Retry ' + get_data.error_count + '/'
-							+ _this.MAX_ERROR + '...');
+					library_namespace.log('process_chapter_data: Retry '
+							+ get_data.error_count + '/' + _this.MAX_ERROR
+							+ '...');
 					if (!work_data.reget_chapter) {
 						library_namespace
 								.warn('因cache file壞了(例如為空)，將重新取得chapter_URL，設定.reget_chapter。');
@@ -1444,8 +1445,8 @@ function module_code(library_namespace) {
 			}
 
 			image_data.error_count = (image_data.error_count | 0) + 1;
-			library_namespace.log('get_images: Retry ' + image_data.error_count + '/'
-					+ _this.MAX_ERROR + '...');
+			library_namespace.log('get_images: Retry ' + image_data.error_count
+					+ '/' + _this.MAX_ERROR + '...');
 			_this.get_images(image_data, callback);
 
 		}, 'binary', null, this.get_URL_options);

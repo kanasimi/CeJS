@@ -3032,6 +3032,9 @@ function module_code(library_namespace) {
 		}
 
 		// backtrack subroutine
+		// 可能造成:
+		// RangeError: Maximum call stack size exceeded
+		// TODO: 必須採用非遞迴呼叫(recursive call)版本
 		function backtrack(from_index, to_index, all_list) {
 			library_namespace.debug(String([ from_index, to_index ]), 3,
 					'LCS.backtrack');
@@ -3663,7 +3666,10 @@ function module_code(library_namespace) {
 		// process.stdout.columns 可能被設定為0。 e.g., at Travis CI
 		|| DEFAULT_DISPLAY_WIDTH;
 	}
-	// library_namespace.debug('screen_display_width: ' + screen_display_width());
+	if (false) {
+		library_namespace.debug('screen_display_width: '
+				+ screen_display_width());
+	}
 
 	// CLI螢幕顯示對齊用。e.g., 對比兩者。
 	// left justification, to line up in correct
