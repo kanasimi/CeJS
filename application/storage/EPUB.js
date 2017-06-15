@@ -1149,8 +1149,9 @@ function module_code(library_namespace) {
 
 			if (item_data.href && item_data.href !== item.href) {
 				// 有手動設定.href
-				library_namespace.error('add_chapter: 儲存檔名改變，您需要自行修正原參照文件中之檔名:\n'
-						+ item_data.href + ' →\n' + item.href);
+				library_namespace
+						.error('add_chapter: 儲存檔名改變，您需要自行修正原參照文件中之檔名:\n'
+								+ item_data.href + ' →\n' + item.href);
 			}
 
 			// 避免衝突，檢測是不是有不同id，相同id存在。
@@ -1209,14 +1210,15 @@ function module_code(library_namespace) {
 					item['media-type'] = XMLHttp.type;
 
 				} else if (!item['media-type']) {
-					library_namespace.error('Did not got media-type of media: ['
-							+ item_data.url + ']');
+					library_namespace
+							.error('Did not got media-type of media: ['
+									+ item_data.url + ']');
 				}
 
 				// 基本檢測。
 				if (/text/i.test(item_data.type)) {
-					library_namespace.error('Not media type: [' + item_data.type
-							+ '] ' + item_data.url);
+					library_namespace.error('Not media type: ['
+							+ item_data.type + '] ' + item_data.url);
 				}
 
 				library_namespace.log('add_chapter: got resource : ['
@@ -1380,7 +1382,8 @@ function module_code(library_namespace) {
 				contents = check_text(contents.text);
 				if (contents.length > 5e5) {
 					// 這長度到這邊往往已經耗費數十秒。
-					library_namespace.debug('contents length: ' + contents.length + '...');
+					library_namespace.debug('contents length: '
+							+ contents.length + '...');
 				}
 				if (!item_data.word_count) {
 					item_data.word_count = library_namespace.count_word(
@@ -1612,10 +1615,12 @@ function module_code(library_namespace) {
 			|| library_namespace.null_Object(),
 			//
 			date = Array.isArray(data.date) ? data.date[0] : data.date;
+			// console.log(data);
 
 			date = library_namespace.is_Date(date)
 			//
 			? date.format(' <small>(%Y-%2m-%2d)</small>') : date || '';
+			// console.log(date);
 
 			TOC_html.push([ '<li>', '<a href="' + chapter.href + '">',
 			//

@@ -121,22 +121,30 @@ function module_code(library_namespace) {
 					+ this.MESSAGE_RE_DOWNLOAD;
 		}
 
-		// 初始化 agent。
-		// create and keep a new agent. 維持一個獨立的 agent。
-		// 以不同 agent 應對不同 host。
-		var agent = library_namespace.application.net
-		//
-		.Ajax.setup_node_net(this.base_URL);
-		agent.keepAlive = true;
 		this.get_URL_options = {
 			// start_time : Date.now(),
-			agent : agent,
 			timeout : Work_crawler.timeout,
 			headers : Object.assign({
 				'User-Agent' : this.user_agent,
 				Referer : this.base_URL
 			}, this.headers)
 		};
+		this.default_agent = this.set_agent();
+	}
+
+	// 初始化 agent。
+	// create and keep a new agent. 維持一個獨立的 agent。
+	// 以不同 agent 應對不同 host。
+	function set_agent(URL) {
+		var agent;
+		if (URL
+		// restore
+		|| !(agent = this.default_agent)) {
+			agent = library_namespace.application.net.Ajax.setup_node_net(URL
+					|| this.base_URL);
+			agent.keepAlive = true;
+		}
+		return this.get_URL_options.agent = agent;
 	}
 
 	/** {Natural}下載失敗重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
@@ -230,20 +238,24 @@ function module_code(library_namespace) {
 			return work_id > 0;
 		},
 		is_finished : function(work_data) {
-			return work_data.status
+			var status = work_data.status;
+			return status
 			// e.g., 连载中, 連載中, 已完结
-			&& (/已完[結结]/.test(work_data.status)
+			&& (/已完[結结]/.test(status)
 			//
-			|| /^完[結结]$/.test(work_data.status)
+			|| /^完[結结]$/.test(status)
 			//
-			|| work_data.status.includes('完結済')
+			|| status.includes('完結済')
+			// e.g., http://www.23us.cc
+			|| status === '完成'
 			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
-			|| work_data.status.includes('(完結)'));
+			|| status.includes('(完結)'));
 		},
 		pre_get_chapter_data : pre_get_chapter_data,
 		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。
 		// chapter_list_URL : '',
 
+		set_agent : set_agent,
 		start : start_operation,
 		set_server_list : set_server_list,
 		parse_work_id : parse_work_id,
@@ -327,9 +339,13 @@ function module_code(library_namespace) {
 		if (typeof url === 'function') {
 			url = url.call(this, data);
 		} else if (data) {
-			url += encodeURIComponent(data);
+			if (url.URL) {
+				url.URL += encodeURIComponent(data);
+			} else {
+				url += encodeURIComponent(data);
+			}
 		}
-		if (!url.includes('://')) {
+		if (typeof url === 'string' && !url.includes('://')) {
 			if (url.startsWith('/')) {
 				if (url.startsWith('//')) {
 					return this.base_URL.match(/^(https?:)\/\//)[1] + url;
@@ -475,7 +491,7 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		var url = this.search_URL, post_data;
+		var url = this.search_URL, URL, post_data;
 		if (!url || typeof this.parse_search_result !== 'function') {
 			throw '請手動設定/輸入 [' + work_title + '] 之 id 於 ' + search_result_file;
 		}
@@ -491,13 +507,29 @@ function module_code(library_namespace) {
 			// default:
 			// assert: typeof url==='string'
 			// TODO: .replace(/%t/g, work_title)
-			url = this.full_URL(url) + encodeURIComponent(
+			url = this.full_URL(url);
+			URL = encodeURIComponent(
 			// e.g., 找不到"隔离带 2"，須找"隔离带"。
 			work_title.replace(/\s+\d{1,2}$/, '')
 			// e.g., "Knight's & Magic" @ 小説を読もう！ || 小説検索
 			.replace(/&/g, ''));
+			if (url.URL) {
+				url.URL += URL;
+			} else {
+				url += URL;
+			}
 		}
-		get_URL(url, function(XMLHttp) {
+
+		URL = url.URL || url;
+		// console.log(url);
+		this.set_agent(URL);
+		get_URL(URL, function(XMLHttp) {
+			_this.set_agent();
+			if (!XMLHttp.responseText) {
+				library_namespace.error(
+				//
+				'Nothing got for [' + work_title + ']');
+			}
 			// this.parse_search_result() returns:
 			// [ {Array}id_list, 與id_list相對應之{Array}或{Object} ]
 			// e.g., [ [id,id,...], [title,title,...] ]
@@ -573,12 +605,14 @@ function module_code(library_namespace) {
 				finish();
 			}
 
-		}, this.charset, post_data, this.get_URL_options);
+		}, url.charset || this.charset, post_data, this.get_URL_options);
 	}
 
 	function get_label(html) {
-		return library_namespace.HTML_to_Unicode(html.replace(/<[^<>]+>/g, ''))
-				.trim();
+		if (html) {
+			return library_namespace.HTML_to_Unicode(
+					html.replace(/<[^<>]+>/g, '')).trim();
+		}
 	}
 
 	function exact_work_data(work_data, html, PATTERN_work_data) {
@@ -722,7 +756,9 @@ function module_code(library_namespace) {
 			}
 
 			if (_this.chapter_list_URL) {
-				work_URL = _this.full_URL(_this.chapter_list_URL, work_id);
+				work_data.chapter_list_URL
+				// this.chapter_list_URL(work_id, work_data);
+				= work_URL = _this.full_URL(_this.chapter_list_URL, work_id);
 				get_URL(work_URL, process_chapter_list_data, _this.charset,
 						null, Object.assign({
 							error_retry : _this.MAX_ERROR
@@ -770,9 +806,7 @@ function module_code(library_namespace) {
 			}
 
 			try {
-				_this.get_chapter_count(work_data, html
-				// , get_label
-				);
+				_this.get_chapter_count(work_data, html, get_label);
 			} catch (e) {
 				library_namespace.error(_this.id
 						+ ': .get_chapter_count() throw error');
@@ -969,7 +1003,7 @@ function module_code(library_namespace) {
 
 	function get_chapter_data(work_data, chapter, callback) {
 		var _this = this, left, image_list, waiting, chapter_label,
-		// een_width(key + ':') - (display_width(
+		//
 		chapter_URL = this.chapter_URL(work_data, chapter);
 		chapter_URL = this.full_URL(chapter_URL);
 		library_namespace.debug(work_data.id + ' ' + work_data.title + ' #'
@@ -1461,7 +1495,8 @@ function module_code(library_namespace) {
 			this.site_id = this.id;
 		}
 
-		if (!library_namespace.is_Date(work_data.last_update_Date)) {
+		if (!library_namespace.is_Date(work_data.last_update_Date)
+				&& work_data.last_update) {
 			var last_update_Date = work_data.last_update;
 			// assert: typeof last_update_Date === 'string'
 			last_update_Date = last_update_Date.to_Date({
@@ -1518,13 +1553,21 @@ function module_code(library_namespace) {
 			return;
 		}
 
+		if (('title' in data) && !('sub_title' in data)) {
+			// throw '請將 parse_chapter_data() 中章節名稱設定在 sub_title 而非 title!';
+			// 當僅設定title時，將之當做章節名稱而非part名稱。
+			data.sub_title = data.title;
+			delete data.title;
+		}
+
 		if (Array.isArray(data.title)) {
 			data.title = data.title.join(' - ');
 		}
 		// assert: !data.title || typeof data.title === 'string'
 
 		var file_title = chapter.pad(3) + ' '
-				+ (data.title ? data.title + ' - ' : '') + data.sub_title,
+				+ (data.title ? data.title + ' - ' : '')
+				+ (data.sub_title || ''),
 		//
 		item = ebook.add({
 			title : file_title,
@@ -1537,7 +1580,7 @@ function module_code(library_namespace) {
 			// part_title
 			title : get_label(data.title || ''),
 			// chapter_title
-			sub_title : get_label(data.sub_title),
+			sub_title : get_label(data.sub_title || ''),
 			text : data.text
 		});
 
@@ -1587,11 +1630,18 @@ function module_code(library_namespace) {
 		function for_each_old_ebook(directory, for_old_smaller, for_else_old) {
 			var last_id, last_file,
 			//
-			ebooks = library_namespace.read_directory(directory)
-			// assert: 依id舊至新排列
-			.sort().map(parse_epub_name);
+			ebooks = library_namespace.read_directory(directory);
 
-			ebooks.forEach(function(data) {
+			if (!ebooks) {
+				// 不存在封存檔案的目錄 this.ebook_archive_directory。
+				return;
+			}
+
+			ebooks
+			// assert: 依id舊至新排列
+			.sort().map(parse_epub_name)
+			//
+			.forEach(function(data) {
 				if (!data
 				// 僅針對 only_id。
 				|| only_id && data.id !== only_id) {
