@@ -3673,30 +3673,36 @@ function module_code(library_namespace) {
 
 	// CLI螢幕顯示對齊用。e.g., 對比兩者。
 	// left justification, to line up in correct
-	function display_align(pair, options) {
+	function display_align(lines, options) {
 		var key_display_width = [], display_lines = [],
 		//
 		use_display_width = options && options.display_width
 				|| screen_display_width();
 		library_namespace.debug('display width: ' + use_display_width, 3);
-		for ( var key in pair) {
-			if ((pair[key].length > use_display_width)
-					|| String(pair[key]).includes('\n')) {
-				for ( var key in pair) {
-					display_lines.push(key.trim() + '\n' + pair[key]);
+		if (library_namespace.is_Object(lines)) {
+			// pairs/lines={key:value,key:value,...}
+			lines = Object.entries(lines);
+		}
+		lines.forEach(function(line) {
+			var key = line[0], value = line[1];
+			if ((value.length > use_display_width)
+					|| String(value).includes('\n')) {
+				for ( var key in lines) {
+					display_lines.push(key.trim() + '\n' + value);
 				}
 				return display_lines.join('\n');
 			}
 			key_display_width.push(String_display_width(key));
-		}
+		});
 
 		var max_key_display_width = Math.max.apply(null, key_display_width);
-		for ( var key in pair) {
+		lines.forEach(function(line) {
+			var key = line[0], value = line[1];
 			// 可能沒有 key.padStart()!
 			display_lines.push(key.pad(key.length + max_key_display_width
 			// assert: String_display_width(' ') === 1
-			- key_display_width.shift()) + pair[key]);
-		}
+			- key_display_width.shift()) + value);
+		});
 		return display_lines.join('\n');
 	}
 

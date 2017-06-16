@@ -193,6 +193,7 @@ do_save_log = function(m, id, force) {
 
 using_DOM_new_node = false,
 //	使 log 能用到 new_node 的功能。
+// @see function_placeholder() @ module.js
 new_node = function(o, layer) {
 	if (library_namespace.is_Function(library_namespace.new_node)) {
 		//alert('開始利用 library 之 new_node。');

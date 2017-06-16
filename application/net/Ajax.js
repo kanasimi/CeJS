@@ -26,13 +26,16 @@ typeof CeL === 'function' && CeL.run({
 
 function module_code(library_namespace) {
 
-	// 本函式將使用之 encodeURIComponent()
+	// 本函數亦使用於 CeL.application.net.work_crawler
+	// 本函式將使用之 encodeURIComponent()，包含對 charset 之處理。
+	// @see function_placeholder() @ module.js
 	var encode_URI_component = function(string, encoding) {
 		if (library_namespace.character) {
 			library_namespace.debug('採用 ' + library_namespace.Class
 			// 有則用之。 use CeL.data.character.encode_URI_component()
 			+ '.character.encode_URI_component', 1, library_namespace.Class
-					+ 'application.net.Ajax');
+			// module name
+			+ 'application.net.Ajax');
 			return (encode_URI_component = library_namespace.character.encode_URI_component)
 					(string, encoding);
 		}

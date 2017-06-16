@@ -187,8 +187,8 @@ function module_code(library_namespace) {
 			}
 
 			if (!Array.isArray(char_list)) {
-				library_namespace
-						.error('Not Array: ' + JSON.stringify(char_list));
+				library_namespace.error('Not Array: '
+						+ JSON.stringify(char_list));
 				throw new Error('Invalid character code map: ' + code_name
 						+ '.' + base_byte_code);
 			}
@@ -282,7 +282,8 @@ function module_code(library_namespace) {
 		// = {ℕ⁰:Natural+0}code of specified coding
 		main_encode_map = encode_map_set[encoding],
 		//
-		start_byte_code = map_set[encoding].start_byte_code;
+		start_byte_code = map_set[encoding]
+				&& map_set[encoding].start_byte_code;
 
 		if (!main_encode_map) {
 			throw new Error('Unknown encoding: ' + encoding
@@ -487,11 +488,13 @@ function module_code(library_namespace) {
 	})();
 
 	function encode_URI_component(string, encoding) {
-		if (!encoding) {
+		if (!encoding || /^UTF-?8$/i.test(encoding)) {
+			// fallback
 			return encodeURIComponent(string);
 		}
 		// charset
 		encoding = normalize_encoding_name(encoding);
+
 		var encoded = '';
 		string.encode(encoding).forEach(function(byte) {
 			encoded += byte in encode_URI_component_base_map
@@ -510,7 +513,8 @@ function module_code(library_namespace) {
 	 *      http://polygon-planet-log.blogspot.tw/2012/04/javascript.html
 	 */
 	function decode_URI_component(encoded, encoding) {
-		if (!encoding) {
+		if (!encoding || /^UTF-?8$/i.test(encoding)) {
+			// fallback
 			return decodeURIComponent(encoded);
 		}
 		// charset

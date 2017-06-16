@@ -12,7 +12,7 @@
 // 解析 作品名稱 → 作品id get_work()
 // 取得作品資訊與各章節資料。 get_work_data()
 // 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。 get_work_data()
-// 取得每一個章節的各個影像內容資料。 get_chapter_data()
+// 取得每一個章節的內容與各個影像資料。 get_chapter_data()
 // 取得各個章節的每一個影像內容。 get_images()
 // finish_up()
 
@@ -21,6 +21,7 @@ TODO:
 預設介面語言繁體中文+...
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
 parse 圖像
+從其他的資料來源尋找作品資訊
 
 </code>
  * 
@@ -242,12 +243,10 @@ function module_code(library_namespace) {
 			return status
 			// e.g., 连载中, 連載中, 已完结
 			&& (/已完[結结]/.test(status)
-			//
-			|| /^完[結结]$/.test(status)
+			// e.g., http://www.23us.cc
+			|| /^已?完[結结成]$/.test(status)
 			//
 			|| status.includes('完結済')
-			// e.g., http://www.23us.cc
-			|| status === '完成'
 			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
 			|| status.includes('(完結)'));
 		},
@@ -335,14 +334,31 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------------------------------
 
+	// modify from CeL.application.net.Ajax
+	// 本函式將使用之 encodeURIComponent()，包含對 charset 之處理。
+	// @see function_placeholder() @ module.js
+	var encode_URI_component = function(string, encoding) {
+		if (library_namespace.character) {
+			library_namespace.debug('採用 ' + library_namespace.Class
+			// 有則用之。 use CeL.data.character.encode_URI_component()
+			+ '.character.encode_URI_component', 1, library_namespace.Class
+			// module name
+			+ 'application.net.work_crawler');
+			return (encode_URI_component = library_namespace.character.encode_URI_component)
+					(string, encoding);
+		}
+		return encodeURIComponent(string);
+	};
+
 	function full_URL_of_path(url, data) {
 		if (typeof url === 'function') {
 			url = url.call(this, data);
 		} else if (data) {
+			data = encode_URI_component(data, url.charset || this.charset);
 			if (url.URL) {
-				url.URL += encodeURIComponent(data);
+				url.URL += data
 			} else {
-				url += encodeURIComponent(data);
+				url += data;
 			}
 		}
 		if (typeof url === 'string' && !url.includes('://')) {
@@ -505,14 +521,14 @@ function module_code(library_namespace) {
 			url = this.full_URL(url);
 		} else {
 			// default:
-			// assert: typeof url==='string'
+			// assert: typeof url==='string' || url==={URL:'',charset:''}
 			// TODO: .replace(/%t/g, work_title)
 			url = this.full_URL(url);
-			URL = encodeURIComponent(
+			URL = encode_URI_component(
 			// e.g., 找不到"隔离带 2"，須找"隔离带"。
 			work_title.replace(/\s+\d{1,2}$/, '')
 			// e.g., "Knight's & Magic" @ 小説を読もう！ || 小説検索
-			.replace(/&/g, ''));
+			.replace(/&/g, ''), url.charset || this.charset);
 			if (url.URL) {
 				url.URL += URL;
 			} else {
@@ -528,7 +544,9 @@ function module_code(library_namespace) {
 			if (!XMLHttp.responseText) {
 				library_namespace.error(
 				//
-				'Nothing got for [' + work_title + ']');
+				'get_work: Nothing got for searching [' + work_title + ']');
+				finish_up();
+				return;
 			}
 			// this.parse_search_result() returns:
 			// [ {Array}id_list, 與id_list相對應之{Array}或{Object} ]
@@ -688,7 +706,7 @@ function module_code(library_namespace) {
 				date : (new Date).toISOString(),
 				chapter : _this.start_chapter
 			};
-			// source URL
+			// source URL of work
 			work_data.url = work_URL;
 
 			process.title = '下載' + work_data.title + ' - 目次 @ ' + _this.id;
@@ -1135,10 +1153,13 @@ function module_code(library_namespace) {
 						chapter_NO = get_label(chapter_data);
 						chapter_data = chapter_NO == chapter
 						// for yomou only
-						|| chapter_NO === '' && work_data.status
+						|| (chapter_NO === '' || chapter_NO === undefined)
+								&& work_data.status
 								&& work_data.status.includes('短編')
 					}
 					if (!chapter_data) {
+						// library_namespace.warn(html);
+						library_namespace.warn(work_data.status);
 						throw new Error(_this.id
 								+ ': Bad chapter NO: Should be '
 								+ chapter
@@ -1615,11 +1636,6 @@ function module_code(library_namespace) {
 	// remove duplicate title ebooks.
 	// 封存舊的ebooks，移除較小的舊檔案。
 	function remove_old_ebooks(only_id) {
-		if (!this.ebook_archive_directory) {
-			this.ebook_archive_directory = this.main_directory + 'archive'
-					+ path_separator;
-		}
-
 		var _only_id;
 		if (only_id && (_only_id = parse_epub_name(only_id))) {
 			only_id = _only_id.id;
@@ -1627,13 +1643,26 @@ function module_code(library_namespace) {
 
 		var _this = this;
 
+		if (!this.ebook_archive_directory) {
+			this.ebook_archive_directory = this.main_directory + 'archive'
+					+ path_separator;
+			if (!library_namespace
+					.directory_exists(this.ebook_archive_directory)) {
+				library_namespace.create_directory(
+				// 先創建封存用目錄。
+				this.ebook_archive_directory);
+			}
+		}
+
 		function for_each_old_ebook(directory, for_old_smaller, for_else_old) {
 			var last_id, last_file,
 			//
 			ebooks = library_namespace.read_directory(directory);
 
 			if (!ebooks) {
-				// 不存在封存檔案的目錄 this.ebook_archive_directory。
+				// 照理來說應該已經創建出來了。
+				library_namespace.warn('不存在封存檔案用的目錄: '
+						+ _this.ebook_archive_directory);
 				return;
 			}
 
@@ -1675,9 +1704,6 @@ function module_code(library_namespace) {
 
 		// 封存較小的ebooks舊檔案。
 		for_each_old_ebook(this.main_directory, function(last_file) {
-			library_namespace.create_directory(
-			// 先創建封存用目錄。
-			_this.ebook_archive_directory);
 			last_file = last_file.name;
 			library_namespace.log(_this.main_directory + last_file
 			// 新檔比較大。刪舊檔或將之移至archive。

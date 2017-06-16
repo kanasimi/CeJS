@@ -1084,6 +1084,8 @@ function module_code(library_namespace) {
 		//
 		.replace(/&([^#a-z])/ig, '&amp;$1');
 
+		// contents = contents.replace(/<script[^<>]*>[^<>]*<\/script>/, '');
+
 		library_namespace.debug('正規化後: ' + contents, 6);
 		return contents;
 	}

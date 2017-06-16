@@ -257,6 +257,7 @@ function module_code(library_namespace) {
 		configuration = configuration ? Object.assign(library_namespace
 				.null_Object(), default_configuration, configuration)
 				: default_configuration;
+		// 每次呼叫皆創建一個新的實體。
 		return new library_namespace.work_crawler(configuration);
 	}
 

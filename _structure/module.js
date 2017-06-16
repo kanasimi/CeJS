@@ -207,6 +207,32 @@ if (false) {
 	});
 
 
+	//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+	/** @examples <code>
+
+	var some_function =  args  =>   some_operators  ;
+	var some_function = (args) => { some_operators };
+	some_function = CeL.function_placeholder(() => some_function = CeL.some_function || some_function, some_function);
+
+	var some_function = function(args) { some_operators; };
+	some_function = CeL.function_placeholder(function(){
+		return some_function = CeL.some_function || some_function;
+	}, some_function);
+
+	</code> */
+
+	function function_placeholder(setter, fallback) {
+		var full_version = setter();
+		if (full_version && full_version !== fallback && _.is_Function(full_version)) {
+			_.debug('採用完整功能版函數', 1, 'function_placeholder');
+		} else {
+			full_version = fallback;
+		}
+		return (full_version || fallback).apply(arguments);
+	}
+	_.function_placeholder = function_placeholder;
+
 	_// JSDT:_module_
 	.
 	/**
