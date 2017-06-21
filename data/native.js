@@ -1374,6 +1374,16 @@ function module_code(library_namespace) {
 
 	// callback(token, index, foot_index);
 	function each_between(head, foot, callback, thisArg, index) {
+		// for head: [head, foot]
+		if (Array.isArray(head) && typeof foot === 'function') {
+			// shift arguments.
+			index = thisArg;
+			thisArg = callback;
+			callback = foot;
+			foot = head[1];
+			head = head[0];
+		}
+
 		// this.all_between(head, foot, index).forEach(callback, thisArg);
 
 		// start index

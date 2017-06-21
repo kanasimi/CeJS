@@ -21,7 +21,10 @@ TODO:
 預設介面語言繁體中文+...
 在單一/全部任務完成後執行的外部檔+等待單一任務腳本執行的時間（秒數）
 parse 圖像
-從其他的資料來源尋找作品資訊
+自動搜尋不同的網站並選擇下載作品。
+從其他的資料來源網站尋找取得作品以及章節的資訊。
+檢核章節內容。
+proxy
 
 </code>
  * 
@@ -148,7 +151,7 @@ function module_code(library_namespace) {
 		return this.get_URL_options.agent = agent;
 	}
 
-	/** {Natural}下載失敗重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
+	/** {Natural}下載失敗時重新嘗試下載的次數。同一檔案錯誤超過此數量則跳出。 */
 	Work_crawler.MAX_ERROR = 4;
 	/** {Natural}timeout in ms for get_URL() 逾時ms數。若逾時時間太小（如10秒），下載大檔案容易失敗。 */
 	Work_crawler.timeout = 30 * 1000;
@@ -192,9 +195,12 @@ function module_code(library_namespace) {
 		EOI_error_postfix : ' bad',
 		// 加上有錯誤檔案之註記。
 		EOI_error_path : EOI_error_path,
-		// cache directory below this.main_directory
+		// cache directory below this.main_directory.
 		// MUST append path_separator!
 		cache_directory_name : 'cache' + path_separator,
+		// archive directory below this.main_directory for ebook. 封存舊電子書用的目錄。
+		// MUST append path_separator!
+		archive_directory_name : 'archive' + path_separator,
 
 		// default start chapter index
 		start_chapter : 1,
@@ -214,10 +220,14 @@ function module_code(library_namespace) {
 		milestone_extension : true,
 		add_ebook_chapter : add_ebook_chapter,
 		pack_ebook : pack_ebook,
-		// 若需要留下/重複利用media如images，請勿remove。
+		/** 若需要留下/重複利用media如images，請勿remove。 */
 		// remove_ebook_directory : true,
-		// 章節數量無變化時依舊利用 cache 重建資料(如ebook)
+		/** 章節數量無變化時依舊利用 cache 重建資料(如ebook) */
 		// regenerate : true,
+		/** 進一步處理書籍之章節內容。例如繁簡轉換、裁剪廣告。 */
+		contents_post_processor : function(contents) {
+			return contents;
+		} && null,
 
 		full_URL : full_URL_of_path,
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
@@ -1602,7 +1612,8 @@ function module_code(library_namespace) {
 			title : get_label(data.title || ''),
 			// chapter_title
 			sub_title : get_label(data.sub_title || ''),
-			text : data.text
+			text : data.text,
+			post_processor : this.contents_post_processor
 		});
 
 		return item;
@@ -1644,8 +1655,8 @@ function module_code(library_namespace) {
 		var _this = this;
 
 		if (!this.ebook_archive_directory) {
-			this.ebook_archive_directory = this.main_directory + 'archive'
-					+ path_separator;
+			this.ebook_archive_directory = this.main_directory
+					+ this.archive_directory_name;
 			if (!library_namespace
 					.directory_exists(this.ebook_archive_directory)) {
 				library_namespace.create_directory(
@@ -1660,7 +1671,7 @@ function module_code(library_namespace) {
 			ebooks = library_namespace.read_directory(directory);
 
 			if (!ebooks) {
-				// 照理來說應該已經創建出來了。
+				// 照理來說應該在之前已經創建出來了。
 				library_namespace.warn('不存在封存檔案用的目錄: '
 						+ _this.ebook_archive_directory);
 				return;

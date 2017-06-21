@@ -1223,7 +1223,7 @@ function module_code(library_namespace) {
 							+ item_data.type + '] ' + item_data.url);
 				}
 
-				library_namespace.log('add_chapter: got resource : ['
+				library_namespace.log('add_chapter: got resource: ['
 						+ item['media-type'] + '] ' + item_data.url + '\n→ '
 						+ item.href);
 
@@ -1381,7 +1381,12 @@ function module_code(library_namespace) {
 							'</div>');
 				}
 
+				var post_processor = contents.post_processor;
 				contents = check_text(contents.text);
+				if (typeof post_processor === 'function') {
+					// 進一步處理書籍之章節內容。例如繁簡轉換、裁剪廣告。
+					contents = post_processor(contents);
+				}
 				if (contents.length > 5e5) {
 					// 這長度到這邊往往已經耗費數十秒。
 					library_namespace.debug('contents length: '
@@ -1404,7 +1409,7 @@ function module_code(library_namespace) {
 			}
 
 			// 應允許文字敘述式 word count。
-			if (!item_data.word_count) {
+			if (!item_data.word_count && item_data.word_count !== 0) {
 				item_data.word_count = library_namespace.count_word(contents,
 						1 + 2);
 			}

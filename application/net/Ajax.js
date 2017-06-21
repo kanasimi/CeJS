@@ -1793,7 +1793,9 @@ function module_code(library_namespace) {
 						+ (timeout / 1000) + 's [' + URL + ']');
 			}
 			if (!e) {
-				e = new Error('Timeout (' + timeout + 'ms): ' + URL);
+				e = new Error('Timeout '
+						+ (timeout % 1000 === 0 ? timeout / 1000 + 's'
+								: timeout + 'ms') + ': ' + URL);
 				e.code = 'TIMEOUT';
 			}
 
