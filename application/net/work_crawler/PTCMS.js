@@ -77,7 +77,7 @@ function module_code(library_namespace) {
 		// 解析 作品名稱 → 作品id get_work()
 		// search_URL : '',
 
-		// for 百度站内搜索工具
+		// for 百度站内搜索工具。非百度搜索系統得要自己撰寫。
 		parse_search_result : function(html, get_label) {
 			var id_data = [],
 			// {Array}id_list = [id,id,...]

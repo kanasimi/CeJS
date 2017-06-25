@@ -7,7 +7,7 @@
 
 流程:
 
-// 取得伺服器列表。 start_operation()
+// 取得伺服器列表。 start_downloading()
 // 解析設定檔，判別所要下載的作品列表。 parse_work_id(), get_work_list()
 // 解析 作品名稱 → 作品id get_work()
 // 取得作品資訊與各章節資料。 get_work_data()
@@ -265,7 +265,8 @@ function module_code(library_namespace) {
 		// chapter_list_URL : '',
 
 		set_agent : set_agent,
-		start : start_operation,
+		data_of : start_get_data_of,
+		start : start_downloading,
 		set_server_list : set_server_list,
 		parse_work_id : parse_work_id,
 		get_work_list : get_work_list,
@@ -311,7 +312,8 @@ function module_code(library_namespace) {
 		}, this.charset, null, this.get_URL_options);
 	}
 
-	function start_operation(work_id) {
+	// front end #1: start downloading operation
+	function start_downloading(work_id, callback) {
 		if (!work_id) {
 			library_namespace.log(this.id + ': 沒有輸入 work_id！');
 			return;
@@ -321,7 +323,7 @@ function module_code(library_namespace) {
 		library_namespace.fs_mkdir(this.main_directory);
 
 		if (!this.server_URL) {
-			this.parse_work_id(work_id);
+			this.parse_work_id(work_id, callback);
 			return;
 		}
 
@@ -333,13 +335,44 @@ function module_code(library_namespace) {
 		// host_list
 		&& (this.server_list = library_namespace.get_JSON(server_file))) {
 			// use cache of host list
-			typeof callback === 'function' && callback();
+			this.parse_work_id(work_id, callback);
 			return;
 		}
 
 		this.set_server_list(this.server_URL, function() {
-			_this.parse_work_id(work_id);
+			_this.parse_work_id(work_id, callback);
 		}, server_file);
+	}
+
+	/**
+	 * front end #2: start get work information operation.
+	 * 
+	 * @param {String}work_title
+	 *            作品標題/作品名稱
+	 * @param {Function}callback
+	 *            callback function(work_data).
+	 * @param {Object}[options]
+	 *            附加參數/設定特殊功能與選項
+	 * 
+	 * @examples<code>
+
+	var work_crawler = new CeL.work_crawler(configurations);
+	work_crawler.data_of(work_id, function(work_data) {
+		console.log(work_data);
+	});
+
+	 * </code>
+	 */
+	function start_get_data_of(work_title, callback, options) {
+		function start_get_data_of_callback(work_data) {
+			typeof callback === 'function' && callback.call(this, work_data);
+		}
+		start_get_data_of_callback.options = Object.assign({
+			get_data_only : true
+		}, options);
+
+		// TODO: test
+		this.start(work_id, start_get_data_of_callback);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -383,12 +416,12 @@ function module_code(library_namespace) {
 		return url;
 	}
 
-	function parse_work_id(work_id) {
+	function parse_work_id(work_id, callback) {
 		work_id = String(work_id);
 
 		if (this.convert_id && typeof this.convert_id[work_id] === 'function') {
 			// 因為 convert_id[work_id]() 可能回傳 list，因此需要以 get_work_list() 特別處理。
-			this.get_work_list([ work_id ]);
+			this.get_work_list([ work_id ], callback);
 
 		} else if (work_id.startsWith('l=') || node_fs.existsSync(work_id)) {
 			// e.g.,
@@ -405,23 +438,23 @@ function module_code(library_namespace) {
 			.trim()
 			// TODO: 處理title中包含"#"的作品
 			.replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/);
-			this.get_work_list(work_list);
+			this.get_work_list(work_list, callback);
 
 		} else if (work_id) {
 			// e.g.,
 			// node 各漫畫網站工具檔.js 12345
 			// node 各漫畫網站工具檔.js ABC
-			this.get_work(work_id);
+			this.get_work(work_id, callback);
 		}
 	}
 
-	function get_work_list(work_list) {
+	function get_work_list(work_list, callback) {
 		// console.log(work_list);
 		// 真正處理的作品數。
 		var work_count = 0;
 
 		// assert: Array.isArray(work_list)
-		work_list.run_async(function for_each_title(callback, work_title,
+		work_list.run_async(function for_each_title(_callback, work_title,
 				this_index) {
 			function insert_id(id_list) {
 				if (Array.isArray(id_list) && id_list.length > 0) {
@@ -429,7 +462,7 @@ function module_code(library_namespace) {
 					id_list.unshift(this_index, 0);
 					Array.prototype.splice.apply(work_list, id_list);
 				}
-				callback();
+				_callback();
 			}
 
 			// convert to next index
@@ -437,11 +470,11 @@ function module_code(library_namespace) {
 			work_title = work_title.trim();
 			if (!work_title) {
 				// 直接進入下一個 work_title。
-				callback();
+				_callback();
 
 			} else if (this.convert_id
-			// convert special work id: function(callback, type)
-			// 警告: 需要自行呼叫 callback(id_list);
+			// convert special work id: function(_callback, type)
+			// 警告: 需要自行呼叫 _callback(id_list);
 			&& typeof this.convert_id[work_title] === 'function') {
 				// 提供異序(asynchronously,不同時)使用。
 				library_namespace.debug('Using convert_id[' + work_title + ']',
@@ -453,12 +486,13 @@ function module_code(library_namespace) {
 				library_namespace.log('Download ' + work_count
 						+ (work_count === this_index ? '' : '/' + this_index)
 						+ '/' + work_list.length + ': ' + work_title);
-				this.get_work(work_title, callback);
+				this.get_work(work_title, _callback);
 			}
 
 		}, function all_work_done() {
 			library_namespace.log(this.id + ': All ' + work_list.length
 					+ ' works done.');
+			typeof callback === 'function' && callback();
 		}, this);
 	}
 
@@ -479,6 +513,7 @@ function module_code(library_namespace) {
 		search_result = library_namespace.get_JSON(search_result_file)
 				|| library_namespace.null_Object();
 
+		// finish() → finish_up()
 		function finish_up(work_data) {
 			if (_this.need_create_ebook
 			// 未找到時沒有 work_data。
@@ -488,7 +523,11 @@ function module_code(library_namespace) {
 			if (typeof _this.finish_up === 'function') {
 				_this.finish_up(work_data);
 			}
-			typeof callback === 'function' && callback(work_data);
+			typeof callback === 'function' && callback.call(_this, work_data);
+		}
+		if (callback.options) {
+			// e.g., for .get_data_only
+			finish_up.options = callback.options;
 		}
 
 		function finish(no_cache) {
@@ -956,6 +995,14 @@ function module_code(library_namespace) {
 
 			node_fs.writeFileSync(work_data.data_file, JSON
 					.stringify(work_data));
+
+			if (typeof callback === 'function' && callback.options
+					&& callback.options.get_data_only) {
+				// 最終廢棄動作，防止執行 work_data[this.KEY_EBOOK].pack()。
+				delete work_data[_this.KEY_EBOOK];
+				callback(work_data);
+				return;
+			}
 
 			if (!work_data.reget_chapter && !_this.regenerate
 			// 還必須已經下載到最新章節。
