@@ -99,6 +99,7 @@ function module_code(library_namespace) {
 		// 取得作品的章節資料。 get_work_data()
 		// work_URL : function(work_id) { return work_id + '/'; },
 		parse_work_data : function(html, get_label) {
+			// console.log(html);
 			// 由 meta data 取得作品資訊。
 			var work_data = {
 				// 必要屬性：須配合網站平台更改。
@@ -125,7 +126,9 @@ function module_code(library_namespace) {
 				//
 				html.between('og:description" content="', '"')
 				// e.g., 630book
-				|| html.between('<div id="intro">', '</div>')),
+				|| html.between('<div id="intro">', '</div>'))
+				// 偶爾會有沒填上描述的書籍。
+				|| '',
 				language : 'cmn-Hans-CN',
 				site_name : get_label(
 				//

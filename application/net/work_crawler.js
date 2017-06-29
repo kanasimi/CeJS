@@ -525,7 +525,7 @@ function module_code(library_namespace) {
 			}
 			typeof callback === 'function' && callback.call(_this, work_data);
 		}
-		if (callback.options) {
+		if (callback && callback.options) {
 			// e.g., for .get_data_only
 			finish_up.options = callback.options;
 		}
@@ -568,24 +568,20 @@ function module_code(library_namespace) {
 				url = url[0];
 			}
 			url = this.full_URL(url);
+			URL = url.URL || url;
 		} else {
 			// default:
 			// assert: typeof url==='string' || url==={URL:'',charset:''}
 			// TODO: .replace(/%t/g, work_title)
 			url = this.full_URL(url);
-			URL = encode_URI_component(
+			// 對 {Object}url，不可動到 url。
+			URL = (url.URL || url) + encode_URI_component(
 			// e.g., 找不到"隔离带 2"，須找"隔离带"。
 			work_title.replace(/\s+\d{1,2}$/, '')
 			// e.g., "Knight's & Magic" @ 小説を読もう！ || 小説検索
 			.replace(/&/g, ''), url.charset || this.charset);
-			if (url.URL) {
-				url.URL += URL;
-			} else {
-				url += URL;
-			}
 		}
 
-		URL = url.URL || url;
 		// console.log(url);
 		this.set_agent(URL);
 		get_URL(URL, function(XMLHttp) {
@@ -700,6 +696,7 @@ function module_code(library_namespace) {
 		process.title = '下載' + work_title + ' - 資訊 @ ' + this.id;
 
 		var _this = this, work_URL = this.full_URL(this.work_URL, work_id), work_data;
+		library_namespace.debug('work_URL: ' + work_URL, 2, 'get_work_data');
 
 		get_URL(work_URL, process_work_data, this.charset, null,
 				this.get_URL_options);
