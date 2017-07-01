@@ -67,6 +67,8 @@ typeof CeL === 'function' && CeL.run({
 	+ '|interact.DOM.'
 	// for Date.prototype.format()
 	+ '|data.date.'
+	// CeL.character.load(), 僅在有需要設定this.charset時才需要載入。
+	+ '|data.character.'
 	// for .detect_HTML_language(), .time_zone_of_language()
 	// + '|application.locale.'
 	,
@@ -258,7 +260,9 @@ function module_code(library_namespace) {
 			//
 			|| status.includes('完結済')
 			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
-			|| status.includes('(完結)'));
+			|| status.includes('(完結)')
+			// http://book.qidian.com/
+			|| status.includes('完本'));
 		},
 		pre_get_chapter_data : pre_get_chapter_data,
 		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。
@@ -318,6 +322,15 @@ function module_code(library_namespace) {
 			library_namespace.log(this.id + ': 沒有輸入 work_id！');
 			return;
 		}
+
+		if (this.charset
+				&& !library_namespace.character.is_loaded(this.charset)) {
+			// 載入需要的字元編碼。
+			library_namespace.character.load(this.charset, start_downloading
+					.bind(this, work_id, callback));
+			return;
+		}
+
 		library_namespace.log(this.id + ': Strating ' + work_id);
 		// prepare work directory.
 		library_namespace.fs_mkdir(this.main_directory);

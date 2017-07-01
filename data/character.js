@@ -99,6 +99,12 @@ function module_code(library_namespace) {
 				|| encoding;
 	}
 
+	function encoding_is_loaded(encoding) {
+		return normalize_encoding_name(encoding) in map_set;
+	}
+
+	_.is_loaded = encoding_is_loaded;
+
 	/**
 	 * <code>
 

@@ -39,8 +39,6 @@ typeof CeL === 'function' && CeL.run({
 	name : 'application.net.work_crawler.PTCMS',
 
 	require : 'application.net.work_crawler.'
-	// CeL.character.load()
-	+ '|data.character.'
 	//
 	+ '|application.storage.EPUB.'
 	// for CeL.to_file_name()
@@ -226,10 +224,6 @@ function module_code(library_namespace) {
 		configuration = configuration ? Object.assign(library_namespace
 				.null_Object(), default_configuration, configuration)
 				: default_configuration;
-
-		if (configuration.charset) {
-			library_namespace.character.load(configuration.charset);
-		}
 
 		if (!configuration.search_URL && configuration.baidu_cse) {
 			// baidu cse id 百度站内搜索工具。
