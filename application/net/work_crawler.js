@@ -845,7 +845,7 @@ function module_code(library_namespace) {
 			}
 		}
 
-		// get 目次
+		// get 目次/完整目錄列表/章節列表
 		function process_chapter_list_data(XMLHttp) {
 			var html = XMLHttp.responseText;
 			if (!html) {
