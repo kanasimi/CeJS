@@ -1446,7 +1446,7 @@ function module_code(library_namespace) {
 			var contents = XMLHttp.responseText,
 			// 因為當前尚未能 parse 圖像，而 jpeg 檔案可能在檔案中間出現 End Of Image mark；
 			// 因此當圖像檔案過小，即使偵測到以 End Of Image mark 作結，依然有壞檔疑慮。
-			has_error = !contents || !(contents.length > _this.MIN_LENGTH)
+			has_error = !contents || !(contents.length >= _this.MIN_LENGTH)
 					|| (XMLHttp.status / 100 | 0) !== 2, verified_image;
 			if (!has_error) {
 				image_data.file_length.push(contents.length);
@@ -1550,7 +1550,7 @@ function module_code(library_namespace) {
 			//
 			+ '(' + (!contents ? 'No contents' : contents.length + ' B'
 			//
-			+ (contents.length > _this.MIN_LENGTH ? '' : ', too small'))
+			+ (contents.length >= _this.MIN_LENGTH ? '' : ', too small'))
 			//
 			+ '): Failed to get ') + url + '\n→ ' + image_data.file);
 			if (image_data.error_count === _this.MAX_ERROR) {
@@ -1562,6 +1562,12 @@ function module_code(library_namespace) {
 				if (!_this.skip_error) {
 					library_namespace
 							.info('若錯誤持續發生，您可以設定 .skip_error 來忽略圖像錯誤。');
+				}
+				if (!contents || contents.length < _this.MIN_LENGTH) {
+					library_namespace.warn('或許圖像是完整的，只是過小而未達標，例如幾乎為空白之圖像。'
+							+ '您可自行更改檔名，去掉錯誤檔名後綴'
+							+ JSON.stringify(_this.EOI_error_postfix)
+							+ '以跳過此錯誤。');
 				}
 				process.exit(1);
 			}

@@ -1467,6 +1467,12 @@ function module_code(library_namespace) {
 		search = strftime.search[locale]
 				|| strftime.search[strftime.null_domain];
 
+		// 也可以使用 options.zone 設定要轉換成的時區(timezone)。
+		if (isNaN(options.offset) && !isNaN(options.zone)) {
+			options.offset = options.zone * 60;
+		}
+		// library_namespace.debug('options.offset = ' + options.offset, 6);
+
 		// to this minute offset. UTC+8: 8 * 60 = +480
 		// or using options.minute_offset?
 		if (!isNaN(options.offset)) {
@@ -1481,7 +1487,8 @@ function module_code(library_namespace) {
 				// 來取得另一 conversion 之結果。
 				var v = $2 in original_Date ? original_Date[$2]
 				// original_Date[$2] 為物件本身之特殊屬性，應當排在泛用函數 conversion[$2] 之前。
-				: typeof (v = conversion[$2]) === 'function' ? conversion[$2](date_value, options)
+				: typeof (v = conversion[$2]) === 'function' ? conversion[$2](
+						date_value, options)
 				//
 				: v in original_Date ? original_Date[v]
 				// 將之當作 format。
