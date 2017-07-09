@@ -2653,7 +2653,7 @@ function module_code(library_namespace) {
 	var TEMPLATE_NAME_PATTERN = /{{[\s\n]*([^\s\n#\|{}<>\[\]][^#\|{}<>\[\]]*)[|}]/,
 	//
 	TEMPLATE_START_PATTERN = new RegExp(TEMPLATE_NAME_PATTERN.source.replace(
-			/\[[^[]+$/, ''), 'g'),
+			/\[[^\[]+$/, ''), 'g'),
 	/** {RegExp}內部連結 PATTERN */
 	LINK_NAME_PATTERN = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)(\||\]\])/;
 
@@ -3189,6 +3189,33 @@ function module_code(library_namespace) {
 
 		every : parse_every
 	});
+
+	// ------------------------------------------------------------------------
+
+	// CeL.wiki.HTML_to_wikitext(HTML)
+	// TODO: 應該 parse HTML。
+	function HTML_to_wikitext(HTML) {
+		return HTML
+		//
+		.replace(/<\/i><i>/g, '').replace(/<\/b><b>/g, '').replace(
+				/<\/strong><strong>/g, '')
+		//
+		.replace(/<i>(.+?)<\/i>/g, "''$1''").replace(/<b>(.+?)<\/b>/g,
+				"'''$1'''").replace(/<strong>(.+?)<\/strong>/g, "'''$1'''")
+		//
+		.replace_till_stable(/<span(?: [^<>]*)?>([^<>]*?)<\/span>/g, "$1")
+		//
+		.replace(/<a ([^<>]+)>(.+?)<\/a>/g,
+		//
+		function(all, attributes, innerHTML) {
+			var href = attributes.match(/href="([^"]+)"/);
+			return '[' + (href ? href[1] : '#') + ' ' + innerHTML + ']';
+		})
+		//
+		.replace(/<p>(.+?)<\/p>\n*/g, '$1\n\n').replace(/<p \/>\n*/g, '\n\n')
+		//
+		.replace(/\r?\n/g, '\n').replace(/\n{3,}/g, '\n\n');
+	}
 
 	// ------------------------------------------------------------------------
 
@@ -8099,7 +8126,7 @@ function module_code(library_namespace) {
 
 			wiki_API.page(title, function(page_data) {
 				if (options && (!options.ignore_denial && wiki_API.edit
-				//
+				// TODO: 每經過固定時間，或者編輯特定次數之後，就再檢查一次。
 				.denied(page_data, options.bot_id, options.notification))) {
 					library_namespace.warn(
 					// Permission denied
@@ -9056,7 +9083,7 @@ function module_code(library_namespace) {
 	// 目前的修訂，不可隱藏。
 	// This is the current revision. It cannot be hidden.
 	wiki_API.hide = function(options, callback) {
-		TODO
+		TODO;
 	};
 
 	// ========================================================================
@@ -11263,7 +11290,16 @@ function module_code(library_namespace) {
 			}
 
 			if (typeof list === 'function' && type !== 'callback') {
+				library_namespace.debug('Call .list()', 3, 'wiki_API.cache');
 				list = list.call(_this, last_data_got, operation);
+				// 對於 .list() 為 asynchronous 函數的處理。
+				if (list === wiki_API.cache.abort) {
+					library_namespace.debug('It seems the .list()'
+							+ ' is an asynchronous function.' + ' I will exit'
+							+ ' and wait for the .list() finished.', 3,
+							'wiki_API.cache');
+					return;
+				}
 			}
 			if (list === wiki_API.cache.abort) {
 				library_namespace
@@ -11885,8 +11921,12 @@ function module_code(library_namespace) {
 			// all_pages.*.json 存有當前語言維基百科當前所有的頁面id以及最新版本 (*:當前語言)
 			|| traversal_pages.list_file + '.' + use_language + '.json',
 			operator : function(list) {
+				if (wmflabs && !config.no_database) {
+					// assert: list === undefined
+					return;
+				}
 				if (!Array.isArray(list)) {
-					throw 'No list get!';
+					throw 'traversal_pages: No list get!';
 				}
 				if (list.length === 3
 						&& JSON.stringify(list[0]) === JSON
@@ -17247,6 +17287,7 @@ function module_code(library_namespace) {
 
 		parse : parse_wikitext,
 		parser : page_parser,
+		HTML_to_wikitext : HTML_to_wikitext,
 
 		/** constant 中途跳出作業用。 */
 		quit_operation : {

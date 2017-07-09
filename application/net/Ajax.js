@@ -1521,6 +1521,13 @@ function module_code(library_namespace) {
 
 				// 基本檢測。
 
+				if (!/^2/.test(result.statusCode) && options.error_retry >= 1
+				// 例如當遇到404或502時，再多嘗試一下。
+				&& !(options.error_retry <= options.error_count)) {
+					_onfail('BAD STATUS');
+					return;
+				}
+
 				if (options.verify) {
 					// test: invalid content type
 					if (typeof options.verify === 'function') {
