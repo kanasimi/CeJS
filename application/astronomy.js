@@ -385,12 +385,15 @@ if (typeof CeL === 'function')
 			/**
 			 * Constant of aberration (arcseconds). κ 光行差常數
 			 * 
+			 * 天文學中定義周年光行差常數（簡稱光行差常數）為κ=v/c，其中c是光速，v是地球繞太陽公轉的平均速度
+			 * 
 			 * Astronomical Almanac 2011:<br />
 			 * Constant of aberration at epoch J2000.0:<br />
 			 * kappa = 20.49551″
 			 * 
 			 * @type {Number}
 			 * 
+			 * @see https://zh.wikipedia.org/wiki/%E5%85%89%E8%A1%8C%E5%B7%AE
 			 */
 			ABERRATION_κ = 20.49551;
 

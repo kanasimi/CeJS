@@ -10388,6 +10388,18 @@ function module_code(library_namespace) {
 		</code>
 		 */
 
+		// 若是目標目錄不存在則嘗試創建之。
+		try {
+			node_fs.statSync(directory);
+		} catch (e) {
+			library_namespace.info('get_latest_dump: 存放 dump file 的目錄['
+					+ directory + ']不存在，嘗試創建之。');
+			node_fs.mkdirSync(directory, parseInt('777', 8));
+			node_fs.writeFileSync(directory
+					+ '_FEEL_FREE_TO_REMOVE_THIS_DIRECTORY_ANYTIME', '');
+			// 若是沒有辦法創建目錄，那就直接throw。
+		}
+
 		var data_file_OK;
 		try {
 			// check if file exists

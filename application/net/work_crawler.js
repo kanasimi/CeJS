@@ -367,7 +367,7 @@ function module_code(library_namespace) {
 	 * @param {Object}[options]
 	 *            附加參數/設定特殊功能與選項
 	 * 
-	 * @examples<code>
+	 * @examples <code>
 
 	var work_crawler = new CeL.work_crawler(configurations);
 	work_crawler.data_of(work_id, function(work_data) {
@@ -464,10 +464,10 @@ function module_code(library_namespace) {
 	function get_work_list(work_list, callback) {
 		// console.log(work_list);
 		// 真正處理的作品數。
-		var work_count = 0;
+		var work_count = 0, all_work_status = library_namespace.null_Object();
 
 		// assert: Array.isArray(work_list)
-		work_list.run_async(function for_each_title(_callback, work_title,
+		work_list.run_async(function for_each_title(get_next_work, work_title,
 				this_index) {
 			function insert_id(id_list) {
 				if (Array.isArray(id_list) && id_list.length > 0) {
@@ -475,7 +475,7 @@ function module_code(library_namespace) {
 					id_list.unshift(this_index, 0);
 					Array.prototype.splice.apply(work_list, id_list);
 				}
-				_callback();
+				get_next_work();
 			}
 
 			// convert to next index
@@ -483,11 +483,11 @@ function module_code(library_namespace) {
 			work_title = work_title.trim();
 			if (!work_title) {
 				// 直接進入下一個 work_title。
-				_callback();
+				get_next_work();
 
 			} else if (this.convert_id
-			// convert special work id: function(_callback, type)
-			// 警告: 需要自行呼叫 _callback(id_list);
+			// convert special work id: function(get_next_work, type)
+			// 警告: 需要自行呼叫 get_next_work(id_list);
 			&& typeof this.convert_id[work_title] === 'function') {
 				// 提供異序(asynchronously,不同時)使用。
 				library_namespace.debug('Using convert_id[' + work_title + ']',
@@ -499,17 +499,63 @@ function module_code(library_namespace) {
 				library_namespace.log('Download ' + work_count
 						+ (work_count === this_index ? '' : '/' + this_index)
 						+ '/' + work_list.length + ': ' + work_title);
-				this.get_work(work_title, _callback);
+				this.get_work(work_title, function(work_data) {
+					var work_status = set_work_status(work_data);
+					if (work_status) {
+						all_work_status[
+						//
+						work_data.title || work_title] = work_status;
+					}
+					get_next_work();
+				});
 			}
 
 		}, function all_work_done() {
 			library_namespace.log(this.id + ': All ' + work_list.length
 					+ ' works done.');
-			typeof callback === 'function' && callback();
+			var work_status_titles = Object.keys(all_work_status);
+			if (work_status_titles.length > 0) {
+				// 產生報告檔。
+				library_namespace.info(this.id + ': '
+						+ work_status_titles.length + ' notes:');
+				var reports = [ '<html>', '<head>', '<style>',
+						'table{border-collapse:collapse}',
+						'table,th,td{border:1px solid #55f;padding:.2em}',
+						'</style>', '</head>', '<body>', '<table>',
+						'<tr><th>title</th><th>status</th></tr>' ];
+				work_status_titles.forEach(function(work_title) {
+					var work_status = all_work_status[work_title];
+					if (Array.isArray(work_status))
+						work_status = work_status.join(', ');
+					library_namespace.info(work_title + ': ' + work_status);
+					reports.push('<tr><td>' + work_title + '</td><td>'
+							+ work_status + '</td></tr>');
+				});
+				reports.push('</table>', '</body></html>');
+				try {
+					node_fs.writeFileSync(this.main_directory + 'report.htm',
+							reports.join('\n'));
+				} catch (e) {
+					// TODO: handle exception
+				}
+
+			} else {
+				all_work_status = undefined;
+			}
+			typeof callback === 'function' && callback(all_work_status);
 		}, this);
 	}
 
 	// ----------------------------------------------------------------------------
+
+	function set_work_status(work_data, status) {
+		if (status) {
+			if (!work_data.process_status)
+				work_data.process_status = [];
+			work_data.process_status.push(status);
+		}
+		return work_data.process_status;
+	}
 
 	function get_work(work_title, callback) {
 		// 先取得 work id
@@ -532,6 +578,10 @@ function module_code(library_namespace) {
 			// 未找到時沒有 work_data。
 			&& work_data && work_data.chapter_count >= 1) {
 				_this.pack_ebook(work_data);
+			}
+			if (!work_data) {
+				work_data = library_namespace.null_Object();
+				set_work_status(work_data, 'Not found');
 			}
 			if (typeof _this.finish_up === 'function') {
 				_this.finish_up(work_data);
@@ -806,6 +856,7 @@ function module_code(library_namespace) {
 				node_fs.writeFileSync(work_data.directory
 				//
 				+ 'finished.txt', work_data.status);
+				set_work_status(work_data, 'finished');
 			}
 			// TODO: skip finished + no update works
 
@@ -1377,6 +1428,8 @@ function module_code(library_namespace) {
 							+ _this.error_log_file,
 					// 產生錯誤紀錄檔。
 					error_file_logs.join(library_namespace.env.line_separator));
+					set_work_status(work_data, error_file_logs.length
+							+ ' images download error');
 				}
 			}
 
@@ -1566,7 +1619,8 @@ function module_code(library_namespace) {
 				// 檔案有驗證過，只是太小時，應該不是 false。
 				&& verified_image !== false) {
 					library_namespace.warn('或許圖像是完整的，只是過小而未達標，例如幾乎為空白之圖像。'
-							+ '您可自行更改檔名，去掉錯誤檔名後綴'
+							+ '您可先設定 .skip_error 來忽略圖像錯誤，'
+							+ '待取得檔案後，自行更改檔名，去掉錯誤檔名後綴'
 							+ JSON.stringify(_this.EOI_error_postfix)
 							+ '以跳過此錯誤。');
 				}
