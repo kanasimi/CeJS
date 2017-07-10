@@ -11174,6 +11174,8 @@ function module_code(library_namespace) {
 			 * 結束作業。
 			 */
 			function finish_work(data) {
+				library_namespace.debug('finish work', 3,
+						'wiki_API.cache.finish_work');
 				last_data_got = data;
 				if (operator)
 					operator.call(_this, data, operation);
@@ -11880,8 +11882,9 @@ function module_code(library_namespace) {
 		}
 
 		if (config.use_dump) {
-			// use dump only
-			// 僅僅使用 dump，不採用 API 取得最新頁面內容。
+			library_namespace.debug(
+					'use dump only: 僅僅使用 dump，不採用 API 取得最新頁面內容。', 1,
+					'traversal_pages');
 			// @see process_dump.js
 			if (config.use_dump === true) {
 				// 這邊的 ((true)) 僅表示要使用，並採用預設值；不代表設定 dump file path。
@@ -11921,10 +11924,6 @@ function module_code(library_namespace) {
 			// all_pages.*.json 存有當前語言維基百科當前所有的頁面id以及最新版本 (*:當前語言)
 			|| traversal_pages.list_file + '.' + use_language + '.json',
 			operator : function(list) {
-				if (wmflabs && !config.no_database) {
-					// assert: list === undefined
-					return;
-				}
 				if (!Array.isArray(list)) {
 					throw 'traversal_pages: No list get!';
 				}
@@ -11947,7 +11946,7 @@ function module_code(library_namespace) {
 		};
 
 		if (Array.isArray(config.list)) {
-			library_namespace.debug('採用輸入之 list，length ' + config.list.length
+			library_namespace.debug('採用輸入之 list，列表長度 ' + config.list.length
 					+ '。', 1, 'traversal_pages');
 			cache_config.list = config.list;
 
@@ -11983,6 +11982,7 @@ function module_code(library_namespace) {
 								rev_list ];
 						// config.is_id = is_id;
 					}
+					// 因為已經取得所有列表，重新呼叫traversal_pages()。
 					traversal_pages(config, callback);
 				}, config && config.SQL_config
 				// 光從 use_language 無法獲得如 wikinews 之資訊。

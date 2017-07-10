@@ -1557,13 +1557,14 @@ function module_code(library_namespace) {
 				image_data.has_error = true;
 				// throw new Error(_this.MESSAGE_RE_DOWNLOAD);
 				library_namespace.log(_this.MESSAGE_RE_DOWNLOAD);
-				// console.log('error count: ' +
-				// image_data.error_count);
+				// console.log('error count: ' + image_data.error_count);
 				if (!_this.skip_error) {
 					library_namespace
 							.info('若錯誤持續發生，您可以設定 .skip_error 來忽略圖像錯誤。');
 				}
-				if (!contents || contents.length < _this.MIN_LENGTH) {
+				if (contents && contents.length < _this.MIN_LENGTH
+				// 檔案有驗證過，只是太小時，應該不是 false。
+				&& verified_image !== false) {
 					library_namespace.warn('或許圖像是完整的，只是過小而未達標，例如幾乎為空白之圖像。'
 							+ '您可自行更改檔名，去掉錯誤檔名後綴'
 							+ JSON.stringify(_this.EOI_error_postfix)
