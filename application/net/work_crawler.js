@@ -502,9 +502,11 @@ function module_code(library_namespace) {
 				this.get_work(work_title, function(work_data) {
 					var work_status = set_work_status(work_data);
 					if (work_status) {
-						all_work_status[
-						//
-						work_data.title || work_title] = work_status;
+						// assert: typeof work_status === 'object'
+						if (work_data.id)
+							work_status.id = work_data.id;
+						work_status.title = work_data.title || work_title;
+						all_work_status[work_status.title] = work_status;
 					}
 					get_next_work();
 				});
@@ -515,26 +517,48 @@ function module_code(library_namespace) {
 					+ ' works done.');
 			var work_status_titles = Object.keys(all_work_status);
 			if (work_status_titles.length > 0) {
-				// 產生報告檔。
-				library_namespace.info(this.id + ': '
-						+ work_status_titles.length + ' notes:');
-				var reports = [ '<html>', '<head>', '<style>',
+				try {
+					node_fs.writeFileSync(this.main_directory + 'report.json',
+					//
+					JSON.stringify({
+						date : (new Date).toISOString(),
+						status : all_work_status
+					}));
+				} catch (e) {
+					// TODO: handle exception
+				}
+				var report_file = this.main_directory + 'report.htm',
+				// 產生網頁形式的報告檔。
+				reports = [ '<html>', '<head>', '<style>',
 						'table{border-collapse:collapse}',
 						'table,th,td{border:1px solid #55f;padding:.2em}',
-						'</style>', '</head>', '<body>', '<table>',
-						'<tr><th>title</th><th>status</th></tr>' ];
-				work_status_titles.forEach(function(work_title) {
+						'</style>', '</head>', '<body>',
+						'<h2>' + this.id + '</h2>', '<table>',
+						'<tr><th>#</th><th>id</th>',
+						'<th>title</th><th>status</th></tr>' ];
+				library_namespace.info(this.id + ': '
+				//
+				+ work_status_titles.length + ' notes: ' + report_file);
+				work_status_titles.forEach(function(work_title, index) {
 					var work_status = all_work_status[work_title];
-					if (Array.isArray(work_status))
-						work_status = work_status.join(', ');
-					library_namespace.info(work_title + ': ' + work_status);
-					reports.push('<tr><td>' + work_title + '</td><td>'
-							+ work_status + '</td></tr>');
+					library_namespace.info(work_title
+							+ ': '
+							+ (Array.isArray(work_status) ? work_status
+									.join(', ') : work_status));
+					reports.push('<tr><td>'
+							+ (index + 1)
+							+ '</td><td>'
+							+ (work_status.id || '')
+							+ '</td><td>'
+							+ work_status.title
+							+ '</td><td>'
+							+ (Array.isArray(work_status) ? work_status
+									.join('<br />') : work_status)
+							+ '</td></tr>');
 				});
 				reports.push('</table>', '</body></html>');
 				try {
-					node_fs.writeFileSync(this.main_directory + 'report.htm',
-							reports.join('\n'));
+					node_fs.writeFileSync(report_file, reports.join('\r\n'));
 				} catch (e) {
 					// TODO: handle exception
 				}
@@ -557,6 +581,17 @@ function module_code(library_namespace) {
 		return work_data.process_status;
 	}
 
+	// cache / save work data file
+	function save_work_data_file(work_data) {
+		if (work_data.data_file)
+			try {
+				node_fs.writeFileSync(work_data.data_file, JSON
+						.stringify(work_data));
+			} catch (e) {
+				// TODO: handle exception
+			}
+	}
+
 	function get_work(work_title, callback) {
 		// 先取得 work id
 		if (this.is_work_id(work_title)) {
@@ -574,14 +609,21 @@ function module_code(library_namespace) {
 
 		// finish() → finish_up()
 		function finish_up(work_data) {
-			if (_this.need_create_ebook
-			// 未找到時沒有 work_data。
-			&& work_data && work_data.chapter_count >= 1) {
-				_this.pack_ebook(work_data);
-			}
-			if (!work_data) {
+			if (work_data && work_data.title) {
+				// 最後紀錄。
+				save_work_data_file(work_data);
+				if (_this.need_create_ebook
+				// 未找到時沒有 work_data。
+				&& work_data.chapter_count >= 1) {
+					_this.pack_ebook(work_data);
+				}
+			} else if (work_data && work_data.titles) {
+				// @see ((approximate_title))
+				set_work_status(work_data, 'found ' + work_data.titles
+						+ ' titles: ' + work_data.titles);
+			} else {
 				work_data = library_namespace.null_Object();
-				set_work_status(work_data, 'Not found');
+				set_work_status(work_data, 'not found');
 			}
 			if (typeof _this.finish_up === 'function') {
 				_this.finish_up(work_data);
@@ -704,9 +746,14 @@ function module_code(library_namespace) {
 				id_list = id;
 			})) {
 				if (approximate_title.length !== 1) {
-					// failed
-					library_namespace.error('未找到與[' + work_title + ']相符者。');
-					finish_up();
+					library_namespace.error(
+					// failed: not only one
+					(approximate_title.length === 0 ? '未找到' : '找到'
+							+ approximate_title.length + '個')
+							+ '與[' + work_title + ']相符者。');
+					finish_up(approximate_title.length > 0 && {
+						titles : approximate_title
+					});
 					return;
 				}
 				approximate_title = approximate_title[0];
@@ -777,6 +824,7 @@ function module_code(library_namespace) {
 				library_namespace.log('process_work_data: Retry ' + error_count
 						+ '/' + _this.MAX_ERROR + '...');
 				_this.get_work_data({
+					// 书号
 					id : work_id,
 					title : work_title
 				}, callback, error_count);
@@ -857,6 +905,10 @@ function module_code(library_namespace) {
 				//
 				+ 'finished.txt', work_data.status);
 				set_work_status(work_data, 'finished');
+				if (work_data.last_saved) {
+					set_work_status(work_data, 'last saved: '
+							+ work_data.last_saved);
+				}
 			}
 			// TODO: skip finished + no update works
 
@@ -1054,8 +1106,7 @@ function module_code(library_namespace) {
 				work_data.last_download.chapter = _this.start_chapter;
 			}
 
-			node_fs.writeFileSync(work_data.data_file, JSON
-					.stringify(work_data));
+			save_work_data_file(work_data);
 
 			if (typeof callback === 'function' && callback.options
 					&& callback.options.get_data_only) {
@@ -1187,6 +1238,10 @@ function module_code(library_namespace) {
 				if (chapter_data.limited) {
 					// 針對特殊狀況提醒。
 					library_namespace.info(message);
+					if (!work_data.some_limited) {
+						work_data.some_limited = true;
+						set_work_status(work_data, 'limited');
+					}
 				} else {
 					library_namespace.log(message);
 				}
@@ -1428,15 +1483,16 @@ function module_code(library_namespace) {
 							+ _this.error_log_file,
 					// 產生錯誤紀錄檔。
 					error_file_logs.join(library_namespace.env.line_separator));
-					set_work_status(work_data, error_file_logs.length
-							+ ' images download error');
+					set_work_status(work_data, chapter_label + ': '
+							+ error_file_logs.length + ' images download error');
 				}
 			}
 
 			work_data.last_download.chapter = chapter;
-			// 紀錄已下載完之chapter
-			node_fs.writeFileSync(work_data.data_file, JSON
-					.stringify(work_data));
+			// 最後成功下載章節或者圖片日期。
+			work_data.last_saved = (new Date).toISOString();
+			// 紀錄已下載完之 chapter。
+			save_work_data_file(work_data);
 			if (++chapter > work_data.chapter_count) {
 				library_namespace.log(work_data.directory_name + ': '
 						+ work_data.chapter_count + ' chapters done.');

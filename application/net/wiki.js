@@ -3200,19 +3200,22 @@ function module_code(library_namespace) {
 		.replace(/<\/i><i>/g, '').replace(/<\/b><b>/g, '').replace(
 				/<\/strong><strong>/g, '')
 		//
-		.replace(/<i>(.+?)<\/i>/g, "''$1''").replace(/<b>(.+?)<\/b>/g,
-				"'''$1'''").replace(/<strong>(.+?)<\/strong>/g, "'''$1'''")
+		.replace(/<i>([\s\S]+?)<\/i>/g, "''$1''").replace(
+				/<b>([\s\S]+?)<\/b>/g, "'''$1'''").replace(
+				/<strong>([\s\S]+?)<\/strong>/g, "'''$1'''")
 		//
 		.replace_till_stable(/<span(?: [^<>]*)?>([^<>]*?)<\/span>/g, "$1")
 		//
-		.replace(/<a ([^<>]+)>(.+?)<\/a>/g,
+		.replace(/<a ([^<>]+)>([\s\S]+?)<\/a>/g,
 		//
 		function(all, attributes, innerHTML) {
 			var href = attributes.match(/href="([^"]+)"/);
 			return '[' + (href ? href[1] : '#') + ' ' + innerHTML + ']';
 		})
 		//
-		.replace(/<p>(.+?)<\/p>\n*/g, '$1\n\n').replace(/<p \/>\n*/g, '\n\n')
+		.replace(/<br(?: [^<>]*)?>\n*/ig, '\n').replace(/<p ?\/>\n*/ig, '\n\n')
+		//
+		.replace(/<p>([\s\S]+?)<\/p>\n*/g, '$1\n\n')
 		//
 		.replace(/\r?\n/g, '\n').replace(/\n{3,}/g, '\n\n');
 	}
@@ -5001,13 +5004,13 @@ function module_code(library_namespace) {
 						result = [ 'error', error ];
 						error = gettext('finished: %1', error);
 					}
-				} else if (!result.edit) {
+				} else if (!result || !result.edit) {
 					// 有時 result 可能會是 ""，或者無 result.edit。這通常代表 token lost。
 					library_namespace.error('wiki_API.work: 無 result.edit'
-							+ (result.edit ? '.newrevid' : '')
+							+ (result && result.edit ? '.newrevid' : '')
 							+ '！可能是 token lost！');
 					error = 'no "result.edit'
-							+ (result.edit ? '.newrevid".' : '.');
+							+ (result && result.edit ? '.newrevid".' : '.');
 					result = [ 'error', 'token lost?' ];
 
 				} else {
@@ -10066,17 +10069,18 @@ function module_code(library_namespace) {
 
 		function receive() {
 			function receive_next() {
-				var now = Date.now();
-				library_namespace.debug((now - Date.parse(last_query_time))
-						+ ' ms', 3, 'receive_next');
+				var real_interval_ms = Date.now() - receive_time;
+				library_namespace.debug('interval from receive() starts: '
+						+ real_interval_ms + ' ms (' + Date.now() + ' - '
+						+ receive_time + ')', 3, 'receive_next');
 				setTimeout(receive,
-				//
-				now - Date.parse(last_query_time) < interval ? interval
 				// 減去已消耗時間，達到更準確的時間間隔控制。
-				- (now - receive_time) : 0);
+				Math.max(interval - real_interval_ms, 0));
 			}
 
+			// 上一次執行receive()的時間
 			var receive_time = Date.now();
+
 			library_namespace.debug('Get recent change from '
 			//
 			+ (library_namespace.is_Date(last_query_time)
@@ -10107,12 +10111,67 @@ function module_code(library_namespace) {
 							|| recent_options.SQL_options);
 				}
 
-				if (!use_SQL) {
-					while (rows.length > 0
-					// 去除掉重複的紀錄。
-					&& rows[rows.length - 1].revid <= last_query_revid) {
-						rows.pop();
+				if (false) {
+					console.log('last_query_revid: ' + last_query_revid);
+					console.log(rows.map(function(row) {
+						return row.revid;
+					}));
+				}
+				// 去除之前已經處理過的頁面。
+				if (!use_SQL && rows.length > 0) {
+					// 判別新舊順序。
+					if (rows.length > 1 && rows[0].revid > rows[1].revid) {
+						last_query_time = rows[0].timestamp;
+						// e.g., use SQL
+						while (rows.length > 0
+						// 去除掉重複的紀錄。因為是從新的排列到舊的，因此從結尾開始去除。
+						&& rows[rows.length - 1].revid <= last_query_revid) {
+							rows.pop();
+						}
+					} else {
+						last_query_time = rows[rows.length - 1].timestamp;
+						// e.g., use API
+						while (rows.length > 0
+						// 去除掉重複的紀錄。因為是從舊的排列到新的，因此從起頭開始去除。
+						&& rows[0].revid <= last_query_revid) {
+							rows.shift();
+						}
 					}
+				}
+				if (false) {
+					console.log('去除掉重複的紀錄之後:');
+					console.log(rows.map(function(row) {
+						return row.revid;
+					}));
+				}
+
+				if (options.filter && rows.length > 0) {
+					// TODO: 把篩選功能放到get_recent()，減少資料處理的成本。
+					rows = rows.filter(
+					// 篩選函數。
+					typeof options.filter === 'function' ? options.filter
+					// 篩選標題。
+					: library_namespace.is_RegExp(options.filter)
+					// 篩選PATTERN
+					? function(row) {
+						return row.title && options.filter.test(row.title);
+					} : function(row) {
+						if (false)
+							console.log([ row.title, options.filter,
+									normalize_page_name(options.filter) ]);
+						return row.title
+						// 區分大小寫
+						&& (row.title.includes(options.filter)
+						//
+						|| row.title.startsWith(
+						//
+						normalize_page_name(options.filter)));
+					});
+					library_namespace.debug('Get ' + rows.length
+							+ ' recent pages after filter:\n'
+							+ rows.map(function(row) {
+								return row.revid;
+							}), 2, 'add_listener');
 				}
 
 				var exit;
@@ -10237,13 +10296,31 @@ function module_code(library_namespace) {
 
 						session.page(rows.map(function(row) {
 							return row.pageid;
-						}), function(page_list) {
+						}), function(page_list, error) {
+							if (error || !Array.isArray(page_list)) {
+								// e.g., 還原編輯
+								// wiki_API.page: Unknown response:
+								// [{"batchcomplete":""}]
+								if (error !== 'Unknown response')
+									library_namespace.error(error
+											|| 'add_listener: No page got!');
+								receive_next();
+								return;
+							}
+
 							// 配對。
 							var page_id_hash = library_namespace.null_Object();
 							page_list.forEach(function(page_data, index) {
 								page_id_hash[page_data.pageid] = page_data;
 							});
 							exit = rows.some(function(row, index) {
+								if (false) {
+									console.log('-'.repeat(40));
+									console.log(JSON.stringify(row));
+									console.log(JSON.stringify(
+									//
+									page_id_hash[row.pageid]));
+								}
 								Object.assign(row, page_id_hash[row.pageid]);
 								listener.call(options, row, index, rows);
 							});
