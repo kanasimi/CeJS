@@ -9978,7 +9978,7 @@ function module_code(library_namespace) {
 		}
 
 		var session = options[KEY_SESSION],
-		//
+		// @see .SQL_config
 		where = options.SQL_options
 		//
 		|| (options.SQL_options = library_namespace.null_Object());
@@ -10002,6 +10002,9 @@ function module_code(library_namespace) {
 		get_recent = use_SQL ? get_recent_via_databases : get_recent_via_API;
 		if (use_SQL) {
 			recent_options = options.SQL_options;
+			if (options[KEY_SESSION])
+				// pass API config
+				recent_options[KEY_SESSION] = options[KEY_SESSION];
 		} else {
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
 			recent_options = {
@@ -10055,7 +10058,7 @@ function module_code(library_namespace) {
 		// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
 		mark_up = use_SQL ? function(rows, row_NO) {
 			var row = row_NO >= 0 ? rows[row_NO].row : row_NO;
-			// console.log('mark_up: ' + JSON.stringify(row));
+			// library_namespace.log('mark_up: ' + JSON.stringify(row));
 			// row.revid
 			last_query_revid = row.rc_last_oldid;
 			var timestamp = row.rc_timestamp.toString();
@@ -10110,13 +10113,14 @@ function module_code(library_namespace) {
 
 			get_recent(function(rows) {
 				if (false) {
-					console.log(recent_options.parameters
+					library_namespace.log(recent_options.parameters
 							|| recent_options.SQL_options);
 				}
 
 				if (false) {
-					console.log('last_query_revid: ' + last_query_revid);
-					console.log(rows.map(function(row) {
+					library_namespace.log('last_query_revid: '
+							+ last_query_revid);
+					library_namespace.log(rows.map(function(row) {
 						return row.revid;
 					}));
 				}
@@ -10144,7 +10148,7 @@ function module_code(library_namespace) {
 					}
 					// 預設全部都處理完，因此先登記。假如僅處理其中的一部分，屆時再特別登記。
 					if (false) {
-						console.log('The lastest record: '
+						library_namespace.log('The lastest record: '
 								+ JSON.stringify(last_query_time));
 					}
 					// TODO: use mark_up()
@@ -10152,8 +10156,8 @@ function module_code(library_namespace) {
 					last_query_time = last_query_time.timestamp;
 				}
 				if (false) {
-					console.log('去除掉重複的紀錄之後:');
-					console.log(rows.map(function(row) {
+					library_namespace.log('去除掉重複的紀錄之後:');
+					library_namespace.log(rows.map(function(row) {
 						return row.revid;
 					}));
 				}
@@ -10170,7 +10174,7 @@ function module_code(library_namespace) {
 						return row.title && options.filter.test(row.title);
 					} : function(row) {
 						if (false)
-							console.log([ row.title, options.filter,
+							library_namespace.log([ row.title, options.filter,
 									normalize_page_name(options.filter) ]);
 						return row.title
 						// 區分大小寫
