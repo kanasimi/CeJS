@@ -9953,6 +9953,7 @@ function module_code(library_namespace) {
 
 	// 注意: 會改變 options！
 	// 注意: options之屬性名不可與wiki_API.recent衝突！
+	// 警告: 同時間只能有一隻程式在跑，否則可能會造成混亂！
 	// TODO: delay
 	function add_listener(listener, options) {
 		if (!options) {
@@ -10048,13 +10049,15 @@ function module_code(library_namespace) {
 		// assert: {Date}last_query_time start time
 		last_query_time = library_namespace.is_Date(options.start)
 				&& !isNaN(options.start.getTime()) ? options.start : new Date,
-		//
+		// TODO: 僅僅採用last_query_revid做控制，不需要偵測是否有重複。
 		last_query_revid = options.revid | 0,
 		// 紀錄/標記本次處理到哪。
 		// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
 		mark_up = use_SQL ? function(rows, row_NO) {
 			var row = row_NO >= 0 ? rows[row_NO].row : row_NO;
-			last_query_revid = row.rc_this_oldid;
+			// console.log('mark_up: ' + JSON.stringify(row));
+			// row.revid
+			last_query_revid = row.rc_last_oldid;
 			var timestamp = row.rc_timestamp.toString();
 			if (timestamp) {
 				last_query_time = new Date(timestamp);
@@ -10072,7 +10075,7 @@ function module_code(library_namespace) {
 				var real_interval_ms = Date.now() - receive_time;
 				library_namespace.debug('interval from receive() starts: '
 						+ real_interval_ms + ' ms (' + Date.now() + ' - '
-						+ receive_time + ')', 3 - 3, 'receive_next');
+						+ receive_time + ')', 3, 'receive_next');
 				setTimeout(receive,
 				// 減去已消耗時間，達到更準確的時間間隔控制。
 				Math.max(interval - real_interval_ms, 0));
@@ -10085,7 +10088,7 @@ function module_code(library_namespace) {
 			//
 			+ (library_namespace.is_Date(last_query_time)
 			//
-			? last_query_time.toISOString() : last_query_time), 1 - 1,
+			? last_query_time.toISOString() : last_query_time), 1,
 					'add_listener.receive');
 
 			if (use_SQL) {
@@ -10111,17 +10114,18 @@ function module_code(library_namespace) {
 							|| recent_options.SQL_options);
 				}
 
-				if (1) {
+				if (false) {
 					console.log('last_query_revid: ' + last_query_revid);
 					console.log(rows.map(function(row) {
 						return row.revid;
 					}));
 				}
 				// 去除之前已經處理過的頁面。
-				if (!use_SQL && rows.length > 0) {
+				if (rows.length > 0) {
 					// 判別新舊順序。
 					if (rows.length > 1 && rows[0].revid > rows[1].revid) {
-						last_query_time = rows[0].timestamp;
+						// cache the lastest record
+						last_query_time = rows[0];
 						// e.g., use SQL
 						while (rows.length > 0
 						// 去除掉重複的紀錄。因為是從新的排列到舊的，因此從結尾開始去除。
@@ -10129,7 +10133,8 @@ function module_code(library_namespace) {
 							rows.pop();
 						}
 					} else {
-						last_query_time = rows[rows.length - 1].timestamp;
+						// cache the lastest record
+						last_query_time = rows[rows.length - 1];
 						// e.g., use API
 						while (rows.length > 0
 						// 去除掉重複的紀錄。因為是從舊的排列到新的，因此從起頭開始去除。
@@ -10137,8 +10142,16 @@ function module_code(library_namespace) {
 							rows.shift();
 						}
 					}
+					// 預設全部都處理完，因此先登記。假如僅處理其中的一部分，屆時再特別登記。
+					if (false) {
+						console.log('The lastest record: '
+								+ JSON.stringify(last_query_time));
+					}
+					// TODO: use mark_up()
+					last_query_revid = last_query_time.revid;
+					last_query_time = last_query_time.timestamp;
 				}
-				if (1) {
+				if (false) {
 					console.log('去除掉重複的紀錄之後:');
 					console.log(rows.map(function(row) {
 						return row.revid;
@@ -10181,7 +10194,6 @@ function module_code(library_namespace) {
 						// .reverse(): 轉成 old to new.
 						rows.reverse();
 					} else {
-						last_query_revid = rows[0].revid;
 						if (false && rows[0].timestamp) {
 							last_query_time = rows[0].timestamp;
 						}
@@ -10245,6 +10257,8 @@ function module_code(library_namespace) {
 										last_query_time
 										// 設定成已經取得的最新一個編輯rev。
 										= revisions[0].timestamp;
+										// last_query_revid =
+										// revisions[0].revid;
 									}
 									if (revisions && revisions.length >= 1
 											&& options.with_diff) {
