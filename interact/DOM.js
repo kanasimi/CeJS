@@ -6464,7 +6464,7 @@ HTML_to_Unicode = function(HTML, only_digital) {
 	if (!only_digital) {
 		// HTML Entities (HTML character entity)
 		t = t.replace(/&([a-z]{2,8});/ig, function(entity, name) {
-			return name in HTML_Entities ? HTML_Entities[name] : entity;
+			return (name in HTML_Entities) ? HTML_Entities[name] : entity;
 		});
 	}
 

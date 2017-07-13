@@ -10072,7 +10072,7 @@ function module_code(library_namespace) {
 				var real_interval_ms = Date.now() - receive_time;
 				library_namespace.debug('interval from receive() starts: '
 						+ real_interval_ms + ' ms (' + Date.now() + ' - '
-						+ receive_time + ')', 3, 'receive_next');
+						+ receive_time + ')', 3 - 3, 'receive_next');
 				setTimeout(receive,
 				// 減去已消耗時間，達到更準確的時間間隔控制。
 				Math.max(interval - real_interval_ms, 0));
@@ -10085,7 +10085,7 @@ function module_code(library_namespace) {
 			//
 			+ (library_namespace.is_Date(last_query_time)
 			//
-			? last_query_time.toISOString() : last_query_time), 1,
+			? last_query_time.toISOString() : last_query_time), 1 - 1,
 					'add_listener.receive');
 
 			if (use_SQL) {
@@ -10111,7 +10111,7 @@ function module_code(library_namespace) {
 							|| recent_options.SQL_options);
 				}
 
-				if (false) {
+				if (1) {
 					console.log('last_query_revid: ' + last_query_revid);
 					console.log(rows.map(function(row) {
 						return row.revid;
@@ -10138,7 +10138,7 @@ function module_code(library_namespace) {
 						}
 					}
 				}
-				if (false) {
+				if (1) {
 					console.log('去除掉重複的紀錄之後:');
 					console.log(rows.map(function(row) {
 						return row.revid;
