@@ -659,26 +659,30 @@ function module_code(library_namespace) {
 	 */
 	function get_namespace(namespace) {
 		if (typeof namespace === 'string') {
-			var list = [];
-			namespace.toLowerCase()
+			namespace = namespace.toLowerCase()
 			// for ',Template,Category', ';Template;Category',
 			// '|Template|Category'
-			.split(/[,;|]/).forEach(function(n) {
+			.split(/[,;|]/).map(function(n) {
 				if (!n) {
-					list.push(0);
-				} else if (!isNaN(n)) {
-					list.push(n);
-				} else if ((n = n.replace(/\s+/g, '_')) in get_namespace.hash) {
-					list.push(get_namespace.hash[n]);
-				} else {
-					library_namespace.warn(
-					//
-					'get_namespace: Invalid namespace: ['
-					//
-					+ n + '] @ list ' + namespace);
+					return 0;
 				}
+				if (!isNaN(n)) {
+					return n;
+				}
+				// 'user:cewbot' → 'user'
+				var _n = n.replace(/:.*$/, '').replace(/\s+/g, '_').trim();
+				if (_n in get_namespace.hash) {
+					return get_namespace.hash[_n];
+				}
+				library_namespace.warn(
+				//
+				'get_namespace: Invalid namespace: ['
+				//
+				+ n + '] @ list ' + namespace);
+				return 0;
 			});
-			return list.sort().unique_sorted().join('|');
+			return namespace.length === 1 ? list[0] || 0 : list.join('|');
+			// list.sort().unique_sorted().join('|');
 		}
 
 		if (isNaN(namespace)) {
@@ -713,8 +717,11 @@ function module_code(library_namespace) {
 		// 使用者頁面
 		user : 2,
 		user_talk : 3,
-		// project
+		// the project namespace for matters about the project
+		project : 4,
 		wikipedia : 4,
+		// https://en.wikinews.org/wiki/Help:Namespace
+		wikinews : 4,
 		wikipedia_talk : 5,
 		// image
 		file : 6,
@@ -9753,6 +9760,10 @@ function module_code(library_namespace) {
 		} else if (library_namespace.is_Object(condition)) {
 			for ( var name in condition) {
 				var value = condition[name];
+				if (value === undefined) {
+					// 跳過這一筆設定。
+					continue;
+				}
 				if (!/^[a-z_]+$/.test(name)) {
 					throw 'Invalid field name: ' + name;
 				}
@@ -9830,14 +9841,15 @@ function module_code(library_namespace) {
 
 		var SQL = options.SQL;
 		if (!SQL) {
-			SQL = generate_SQL_WHERE(Object.assign({
+			SQL = Object.assign({
 				bot : 0,
 				/** {Integer|String}namespace NO. */
 				namespace : options.namespace
 						&& +get_namespace(options.namespace) || 0
 			},
 			// {String|Array|Object}options.where: 自訂篩選條件。
-			options.where), 'rc_');
+			options.where);
+			SQL = generate_SQL_WHERE(SQL, 'rc_');
 
 			SQL[0] = 'SELECT * FROM `recentchanges`' + SQL[0]
 			// new → old, may contain duplicate title.
@@ -10037,6 +10049,22 @@ function module_code(library_namespace) {
 				recent_options = Object.assign({
 					parameters : recent_options
 				}, options);
+			}
+		}
+
+		if (typeof options.filter === 'string' && !('namespace' in options)) {
+			// treat options.filter as page title
+			// 從filter取得namespace
+			options.namespace = get_namespace(options.filter);
+		}
+		if ('namespace' in options) {
+			// 指定namespace為((undefined))才能夠取得所有的namespace，否則預設只有主要namespace(=0)的文件。
+			if (use_SQL) {
+				recent_options.namespace = options.namespace === undefined ? undefined
+						: get_namespace(options.namespace);
+			} else {
+				if (options.namespace !== undefined)
+					recent_options.parameters.rcnamespace = get_namespace(options.namespace);
 			}
 		}
 
