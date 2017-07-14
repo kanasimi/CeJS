@@ -1356,9 +1356,15 @@ function module_code(library_namespace) {
 				|| !((left = chapter_data.image_count) >= 1)
 				//
 				&& !((left = image_list.length) >= 1)) {
-					library_namespace.debug(work_data.directory_name + ' #'
-							+ chapter + '/' + work_data.chapter_count
-							+ ': No image get.');
+					if (!_this.need_create_ebook
+					// 雖然是漫畫，但是本章節沒有獲取到任何圖片。
+					&& (!chapter_data || !chapter_data.limited)) {
+						library_namespace.debug(work_data.directory_name + ' #'
+								+ chapter + '/' + work_data.chapter_count
+								+ ': No image get.');
+						set_work_status(work_data, '#' + chapter
+								+ ': no image get.');
+					}
 					// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
 					if (work_data.reget_chapter && _this.preserve_chapter_page) {
 						node_fs.writeFileSync(

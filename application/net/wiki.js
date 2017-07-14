@@ -787,7 +787,7 @@ function module_code(library_namespace) {
 
 	// wikitext to plain text
 	// CeL.wiki.plain_text(wikitext)
-	function to_plain_text(wikitext) {
+	function wikitext_to_plain_text(wikitext) {
 		if (!wikitext || !(wikitext = wikitext.trim())) {
 			// 一般 template 中之 parameter 常有設定空值的狀況，因此首先篩選以加快速度。
 			return wikitext;
@@ -9382,6 +9382,7 @@ function module_code(library_namespace) {
 	 *          TODO: https://github.com/sidorares/node-mysql2
 	 */
 	function run_SQL(SQL, callback, config) {
+		library_namespace.debug(JSON.stringify(config), 3, 'run_SQL');
 		if (!config && !(config = SQL_config)) {
 			return;
 		}
@@ -9391,7 +9392,7 @@ function module_code(library_namespace) {
 			config = new_SQL_config(config);
 		}
 
-		library_namespace.debug(String(SQL), 2, 'run_SQL');
+		library_namespace.debug(String(SQL), 3, 'run_SQL');
 		// console.log(JSON.stringify(config));
 		var connection = mysql.createConnection(config);
 		connection.connect();
@@ -9848,6 +9849,13 @@ function module_code(library_namespace) {
 			: options.where ? 1e4 : 100);
 		}
 
+		if (false) {
+			console.log([ options.config, options.language,
+					options[KEY_SESSION] && options[KEY_SESSION].language ]);
+			console.log(options[KEY_SESSION]);
+			throw 1;
+		}
+
 		run_SQL(SQL, function(error, rows, fields) {
 			if (error) {
 				callback();
@@ -9926,8 +9934,7 @@ function module_code(library_namespace) {
 			callback(result);
 		},
 		// SQL config
-		options.config || options.language || options[KEY_SESSION]
-				&& options[KEY_SESSION].language);
+		options.config || options.language || options[KEY_SESSION]);
 	}
 
 	function get_recent_via_API(callback, options) {
@@ -10002,9 +10009,10 @@ function module_code(library_namespace) {
 		get_recent = use_SQL ? get_recent_via_databases : get_recent_via_API;
 		if (use_SQL) {
 			recent_options = options.SQL_options;
-			if (options[KEY_SESSION])
+			if (options[KEY_SESSION]) {
 				// pass API config
 				recent_options[KEY_SESSION] = options[KEY_SESSION];
+			}
 		} else {
 			// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brecentchanges
 			recent_options = {
@@ -10032,9 +10040,6 @@ function module_code(library_namespace) {
 
 		if (options.type) {
 			if (use_SQL) {
-				if (!recent_options) {
-					recent_options = library_namespace.null_Object();
-				}
 				recent_options.type = options.type;
 			} else {
 				recent_options.parameters.rctype = options.type;
@@ -10072,6 +10077,12 @@ function module_code(library_namespace) {
 				mark_up(rows, row_NO + 1);
 			}
 		} : library_namespace.null_function;
+
+		if (false) {
+			library_namespace.debug('recent_options: '
+			// TypeError: Converting circular structure to JSON
+			+ JSON.stringify(recent_options), 1, 'add_listener');
+		}
 
 		function receive() {
 			function receive_next() {
@@ -17388,7 +17399,7 @@ function module_code(library_namespace) {
 		lead_text : lead_text,
 		// sections : get_sections,
 
-		plain_text : to_plain_text,
+		plain_text : wikitext_to_plain_text,
 
 		template_text : to_template_wikitext,
 
