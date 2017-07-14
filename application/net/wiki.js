@@ -681,8 +681,9 @@ function module_code(library_namespace) {
 				+ n + '] @ list ' + namespace);
 				return 0;
 			});
-			return namespace.length === 1 ? list[0] || 0 : list.join('|');
-			// list.sort().unique_sorted().join('|');
+			return namespace.length === 1 ? namespace[0] || 0 : namespace
+					.join('|');
+			// namespace.sort().unique_sorted().join('|');
 		}
 
 		if (isNaN(namespace)) {
@@ -10096,7 +10097,7 @@ function module_code(library_namespace) {
 			// library_namespace.log('mark_up: ' + JSON.stringify(row));
 			// row.revid
 			last_query_revid = row.rc_last_oldid;
-			var timestamp = row.rc_timestamp.toString();
+			var timestamp = SQL_timestamp_to_ISO(row.rc_timestamp);
 			if (timestamp) {
 				last_query_time = new Date(timestamp);
 			} else {
@@ -10129,10 +10130,9 @@ function module_code(library_namespace) {
 			var receive_time = Date.now();
 
 			library_namespace.debug('Get recent change from '
-			//
-			+ (library_namespace.is_Date(last_query_time)
-			//
-			? last_query_time.toISOString() : last_query_time), 1,
+					+ (library_namespace.is_Date(last_query_time)
+							&& last_query_time.getTime() ? last_query_time
+							.toISOString() : last_query_time), 1,
 					'add_listener.receive');
 
 			if (use_SQL) {
