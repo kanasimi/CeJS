@@ -9216,11 +9216,11 @@ function module_code(library_namespace) {
 
 		// 正規化。
 		language = language.trim().toLowerCase()
-		// 'zhwiki' → 'zh'
-		.replace(/wiki$/, '');
 		// TODO: 'zh.news'
 		// 警告: this.language 可能包含 'zhwikinews' 之類。
-		this.language = language;
+		this.language = language
+		// 'zhwiki' → 'zh'
+		.replace(/wik[a-z]+$/, '');
 
 		if (language === 'meta') {
 			// @see /usr/bin/sql
@@ -9242,6 +9242,7 @@ function module_code(library_namespace) {
 			 */
 			this.database = language + '_p';
 		} else {
+			// e.g., 'zh'
 			this.host = language + 'wiki.labsdb';
 			this.database = language + 'wiki_p';
 		}
@@ -9382,13 +9383,14 @@ function module_code(library_namespace) {
 	 *          TODO: https://github.com/sidorares/node-mysql2
 	 */
 	function run_SQL(SQL, callback, config) {
-		library_namespace.debug(JSON.stringify(config), 3, 'run_SQL');
+		// TypeError: Converting circular structure to JSON
+		// library_namespace.debug(JSON.stringify(config), 3, 'run_SQL');
 		if (!config && !(config = SQL_config)) {
 			return;
 		}
 
 		// treat config as language.
-		if (typeof config === 'string') {
+		if (typeof config === 'string' || is_wiki_API(config)) {
 			config = new_SQL_config(config);
 		}
 
@@ -12841,8 +12843,11 @@ function module_code(library_namespace) {
 	}
 
 	function is_wikidata_site(site_or_language) {
-		// assert: 有包含'wiki'的全都是site。
-		return site_or_language.includes('wiki');
+		// TODO: 不是有包含'wiki'的全都是site。
+		library_namespace.debug('Test ' + site_or_language, 3,
+				'is_wikidata_site');
+		return /^[a-z_\d]{2,20}?(?:wiki(?:[a-z]{4,7})?|wiktionary)$/
+				.test(site_or_language);
 	}
 
 	/**
