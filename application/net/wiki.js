@@ -1160,10 +1160,14 @@ function module_code(library_namespace) {
 	 * @see wiki_toString
 	 */
 	function set_wiki_type(token, type, parent) {
+		// console.trace(token);
 		if (typeof token === 'string') {
 			token = [ token ];
 		} else if (!Array.isArray(token)) {
 			library_namespace.warn('set_wiki_type: The token is not Array!');
+		} else if (token.type && token.type !== 'plain') {
+			// 預防token本來就已經有設定類型。
+			token = [ token ];
 		}
 		// assert: Array.isArray(token)
 		token.type = type;
@@ -2455,6 +2459,9 @@ function module_code(library_namespace) {
 			});
 			// 添加新行由一個豎線和連字符 "|-" 組成。
 			parameters = parameters.split('\n|-').map(function(token, index) {
+				library_namespace.debug('parse table_row / row style: '
+				//
+				+ JSON.stringify(token), 5, 'parse_wikitext.table');
 				if (index === 0
 				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 				&& !token.includes(include_mark)
@@ -2463,8 +2470,12 @@ function module_code(library_namespace) {
 					// table style / format modifier (not displayed)
 					// 'table_style'
 					// "\n|-" 後面的 string
-					return _set_wiki_type(token, 'style');
+					token = _set_wiki_type(token, 'style');
+					if (false && index === 0)
+						token = _set_wiki_type(token, 'table_row');
+					return token;
 				}
+
 				var row, matched, delimiter,
 				// 分隔 <td>, <th>
 				// [ all, inner, delimiter ]
@@ -2472,6 +2483,10 @@ function module_code(library_namespace) {
 				// "\n|| t" === "\n| t"
 				PATTERN_CELL = /([\s\S]*?)(\n(?:\|\|?|!)|\|\||!!|$)/g;
 				while (matched = PATTERN_CELL.exec(token)) {
+					library_namespace.debug('parse table_cell: '
+					//
+					+ JSON.stringify(matched), 5, 'parse_wikitext.table');
+					// console.log(matched);
 					if (matched[2].length === 3 && matched[2].charAt(2)
 					// e.g., "\n||| t"
 					=== token.charAt(PATTERN_CELL.lastIndex)) {
@@ -2483,7 +2498,7 @@ function module_code(library_namespace) {
 					// 但若這段有 /[<>]/ 則當作是內容。
 					if (row || /[<>]/.test(matched[1])) {
 						var cell = matched[1].match(/^([^|]+)(\|[\s\S]*)$/);
-						if (cell)
+						if (cell) {
 							cell = [ cell[1].includes(include_mark)
 							// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 							? parse_wikitext(cell[1], options, queue)
@@ -2493,7 +2508,7 @@ function module_code(library_namespace) {
 							'style'),
 							//
 							parse_wikitext(cell[2], options, queue) ];
-						else {
+						} else {
 							// 經過改變，需再進一步處理。
 							cell = parse_wikitext(matched[1], options, queue);
 							if (cell.type !== 'plain') {
@@ -2520,25 +2535,27 @@ function module_code(library_namespace) {
 
 					} else {
 						// assert: matched.index === 0
-						row = [ matched[1].includes(include_mark)
+						cell = matched[1].includes(include_mark)
 						// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
 						? parse_wikitext(matched[1], options, queue)
 						//
 						: _set_wiki_type(matched[1],
 						// row style / format modifier (not displayed)
-						'style') ];
+						'style');
+						row = [ cell ];
 					}
 
 					// matched[2] 屬於下一 cell。
 					delimiter = matched[2];
-					if (!delimiter)
+					if (!delimiter) {
 						// assert: /$/, no separater, ended.
 						break;
+					}
 
 					// assert: !!delimiter === true, and is the first time
 					// matched.
 					if (!('is_head' in row)
-					// 初始設定本行之 type。
+					// 初始設定本行之 type: <th> or <td>。
 					&& !(row.is_head = delimiter.includes('!'))) {
 						// 經測試，當此行非 table head 時，會省略 '!!' 不匹配。
 						// 但 '\n!' 仍有作用。
@@ -4586,7 +4603,7 @@ function module_code(library_namespace) {
 			}
 
 			// 因為前面利用cache時會檢查KEY_CORRESPOND_PAGE，且KEY_CORRESPOND_PAGE只會設定在page_data，
-			// 因此這邊自屬於page_data之輸入項目設定 .last_page
+			// / / 因此這邊自屬於page_data之輸入項目設定 .last_page
 			if (get_page_content.is_page_data(next[1])
 			// 預防把 wikidata entity 拿來當作 input 了。
 			&& !is_entity(next[1])) {
@@ -10120,7 +10137,7 @@ function module_code(library_namespace) {
 				var real_interval_ms = Date.now() - receive_time;
 				library_namespace.debug('interval from receive() starts: '
 						+ real_interval_ms + ' ms (' + Date.now() + ' - '
-						+ receive_time + ')', 3, 'receive_next');
+						+ receive_time + ')', 3 - 3, 'receive_next');
 				setTimeout(receive,
 				// 減去已消耗時間，達到更準確的時間間隔控制。
 				Math.max(interval - real_interval_ms, 0));
@@ -10132,7 +10149,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('Get recent change from '
 					+ (library_namespace.is_Date(last_query_time)
 							&& last_query_time.getTime() ? last_query_time
-							.toISOString() : last_query_time), 1,
+							.toISOString() : last_query_time), 1 - 1,
 					'add_listener.receive');
 
 			if (use_SQL) {
@@ -10158,7 +10175,7 @@ function module_code(library_namespace) {
 							|| recent_options.SQL_options);
 				}
 
-				if (false) {
+				if (1) {
 					library_namespace.log('last_query_revid: '
 							+ last_query_revid);
 					library_namespace.log(rows.map(function(row) {
@@ -10196,7 +10213,7 @@ function module_code(library_namespace) {
 					last_query_revid = last_query_time.revid;
 					last_query_time = last_query_time.timestamp;
 				}
-				if (false) {
+				if (1) {
 					library_namespace.log('去除掉重複的紀錄之後:');
 					library_namespace.log(rows.map(function(row) {
 						return row.revid;

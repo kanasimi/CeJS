@@ -185,10 +185,11 @@ function module_code(library_namespace) {
 		MESSAGE_RE_DOWNLOAD : '神仙打鼓有時錯，腳步踏差誰人無。下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
 		// 當圖像不存在EOI，或是被偵測出非圖像時，依舊強制儲存檔案。
 		// allow image without EOI mark. default:false
-		// allow_EOI_error : true,
-		//
+		allow_EOI_error : library_namespace.env.arg_hash
+				&& library_namespace.env.arg_hash.allow_EOI_error,
 		// 圖像檔案下載失敗處理方式：忽略/跳過圖像錯誤。當404圖像不存在、檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。default:false
-		// skip_error : true,
+		skip_error : library_namespace.env.arg_hash
+				&& library_namespace.env.arg_hash.skip_error,
 		//
 		// 若已經存在壞掉的圖片，就不再嘗試下載圖片。default:false
 		// skip_existed_bad_file : true,
@@ -234,7 +235,8 @@ function module_code(library_namespace) {
 		full_URL : full_URL_of_path,
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
 		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。否則只會自上次下載過的章節接續下載。
-		// recheck : true,
+		recheck : library_namespace.env.arg_hash
+				&& library_namespace.env.arg_hash.recheck,
 		// 當無法取得chapter資料時，直接嘗試下一章節。在手動+監視下recheck時可併用此項。default:false
 		// skip_chapter_data_error : true,
 
@@ -453,7 +455,9 @@ function module_code(library_namespace) {
 			.replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/);
 			this.get_work_list(work_list, callback);
 
-		} else if (work_id) {
+		} else if (work_id
+		// 跳過來自命令列參數的手動設定。
+		&& !/^(?:allow_EOI_error|skip_error|recheck)=/.test(work_id)) {
 			// e.g.,
 			// node 各漫畫網站工具檔.js 12345
 			// node 各漫畫網站工具檔.js ABC
@@ -622,8 +626,11 @@ function module_code(library_namespace) {
 				set_work_status(work_data, 'found ' + work_data.titles
 						+ ' titles: ' + work_data.titles);
 			} else {
+				var status = work_data;
 				work_data = library_namespace.null_Object();
-				set_work_status(work_data, 'not found');
+				set_work_status(work_data,
+						status && typeof status === 'string' ? status
+								: 'not found');
 			}
 			if (typeof _this.finish_up === 'function') {
 				_this.finish_up(work_data);
@@ -695,7 +702,7 @@ function module_code(library_namespace) {
 				library_namespace.error(
 				//
 				'get_work: Nothing got for searching [' + work_title + ']');
-				finish_up();
+				finish_up('Nothing got for searching');
 				return;
 			}
 			// this.parse_search_result() returns:
@@ -703,8 +710,18 @@ function module_code(library_namespace) {
 			// e.g., [ [id,id,...], [title,title,...] ]
 			// e.g., [ [id,id,...], [data,data,...] ]
 			// e.g., [ [id,id,...], {id:data,id:data,...} ]
-			var id_data = _this.parse_search_result(XMLHttp.responseText,
-					get_label);
+			var id_data;
+			try {
+				id_data = _this.parse_search_result(XMLHttp.responseText,
+						get_label);
+			} catch (e) {
+				console.trace(e);
+				library_namespace
+						.error('get_work.parse_search_result: 無法解析搜尋作品['
+								+ work_title + ']之結果！');
+				finish_up('無法解析搜尋作品之結果');
+				return;
+			}
 			// e.g., {id:data,id:data,...}
 			if (library_namespace.is_Object(id_data)) {
 				id_data = [ Object.keys(id_data), id_data ];
@@ -1023,10 +1040,13 @@ function module_code(library_namespace) {
 				+ '.list.htm', html);
 			}
 
+			var chapter_added = work_data.chapter_count
+					- work_data.last_download.chapter;
 			if (_this.recheck
 			// _this.get_chapter_count() 中
 			// 可能重新設定過 work_data.last_download.chapter。
 			&& work_data.last_download.chapter !== _this.start_chapter) {
+				// midified
 				if (_this.recheck !== 'changed') {
 					if (!_this.reget_chapter) {
 						if (_this.hasOwnProperty('reget_chapter')) {
@@ -1040,7 +1060,9 @@ function module_code(library_namespace) {
 					// 無論是哪一種，既然是recheck則都得要從頭check並生成資料。
 					work_data.last_download.chapter = _this.start_chapter;
 
-				} else if (work_data.last_download.chapter !== work_data.chapter_count
+				} else if (_this.recheck > 0 ? chapter_added < 0
+				// 這可避免太過經常更新。
+				|| chapter_added >= _this.recheck : chapter_added !== 0
 				// TODO: check .last_update
 				) {
 					library_namespace
@@ -1675,13 +1697,13 @@ function module_code(library_namespace) {
 				// console.log('error count: ' + image_data.error_count);
 				if (!_this.skip_error) {
 					library_namespace
-							.info('若錯誤持續發生，您可以設定 .skip_error 來忽略圖像錯誤。');
+							.info('若錯誤持續發生，您可以設定 .skip_error=true 來忽略圖像錯誤。');
 				}
 				if (contents && contents.length < _this.MIN_LENGTH
 				// 檔案有驗證過，只是太小時，應該不是 false。
 				&& verified_image !== false) {
 					library_namespace.warn('或許圖像是完整的，只是過小而未達標，例如幾乎為空白之圖像。'
-							+ '您可先設定 .skip_error 來忽略圖像錯誤，'
+							+ '您可先設定 .skip_error=true 來忽略圖像錯誤，'
 							+ '待取得檔案後，自行更改檔名，去掉錯誤檔名後綴'
 							+ JSON.stringify(_this.EOI_error_postfix)
 							+ '以跳過此錯誤。');

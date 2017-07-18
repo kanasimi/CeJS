@@ -2824,6 +2824,14 @@ function test_wiki() {
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
 		wikitext = 'a \n==[[:en<!--comments-->:link{{=}}<!--comments-->]] ==\n d';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = '{|\n|-\n|[[{{t}}]]\n|}';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = '{|\n|-\n|[[{{t}}]]<!-- c -->\n|}';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = '{|\n!|t\n|-\n|[[{{t|p}}]]\n|}';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = 'a\n{|\n!|t\n|-\n|t\n|[[{{t|p}}]]<!-- c -->\n|}\nb';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
 
 		wikitext = '1<br>2';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML single tag #1');

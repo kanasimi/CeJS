@@ -384,6 +384,8 @@ function to_file_name(file_name, do_escape) {
 	.replace(/[\\\/|?*]/g, function($0) {
 		return {
 			'\\' : '＼',
+			// Fraction slash '⁄'
+			// Division slash '∕'
 			'/' : '／',
 			'|' : '｜',
 			'?' : '？',
