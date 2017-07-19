@@ -915,19 +915,10 @@ function module_code(library_namespace) {
 			}
 			// assert: typeof work_data.status === 'string'
 
-			if (_this.is_finished(work_data)) {
-				// 預防(work_data.directory)不存在。
-				library_namespace.fs_mkdir(work_data.directory);
-				node_fs.writeFileSync(work_data.directory
-				//
-				+ 'finished.txt', work_data.status);
-				set_work_status(work_data, 'finished');
-				if (work_data.last_saved) {
-					set_work_status(work_data, 'last saved: '
-							+ work_data.last_saved);
-				}
+			if (false && _this.is_finished(work_data)) {
+				// 注意: 這時可能尚未建立 work_data.directory。
+				// TODO: skip finished + no update works
 			}
-			// TODO: skip finished + no update works
 
 			var matched = library_namespace.get_JSON(work_data.data_file);
 			if (matched) {
@@ -983,7 +974,26 @@ function module_code(library_namespace) {
 			// 但this.get_chapter_count()若用到work_data[this.KEY_EBOOK].set_cover()，則會造成沒有建立基礎目錄的錯誤。
 			library_namespace.debug('Create work_data.directory: '
 					+ work_data.directory);
+			// 預防(work_data.directory)不存在。
 			library_namespace.fs_mkdir(work_data.directory);
+
+			if (_this.is_finished(work_data)) {
+				if (false) {
+					node_fs.writeFileSync(work_data.directory
+					// 已經改成產生報告檔。
+					+ 'finished.txt', work_data.status);
+				}
+				set_work_status(work_data, 'finished');
+				if (work_data.last_update) {
+					set_work_status(work_data, 'last updated: '
+							+ work_data.last_update);
+				}
+				if (work_data.last_saved) {
+					set_work_status(work_data, 'last saved: '
+							+ work_data.last_saved);
+				}
+				// TODO: skip finished + no update works
+			}
 
 			if (true || _this.need_create_ebook) {
 				// 提供給 this.get_chapter_count() 使用。
