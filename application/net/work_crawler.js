@@ -1796,11 +1796,15 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		if (('title' in data) && !('sub_title' in data)) {
-			// throw '請將 parse_chapter_data() 中章節名稱設定在 sub_title 而非 title!';
-			// 當僅設定title時，將之當做章節名稱而非part名稱。
-			data.sub_title = data.title;
-			delete data.title;
+		if (!data.sub_title) {
+			if ('title' in data) {
+				// throw '請將 parse_chapter_data() 中章節名稱設定在 sub_title 而非 title!';
+				// 當僅設定title時，將之當做章節名稱而非part名稱。
+				data.sub_title = data.title;
+				delete data.title;
+			} else if (work_data[chapter - 1].title) {
+				data.sub_title = work_data[chapter - 1].title;
+			}
 		}
 
 		if (Array.isArray(data.title)) {
@@ -1820,9 +1824,9 @@ function module_code(library_namespace) {
 			// 警告：必須設定 work_data.chapter_list。
 			date : work_data.chapter_list[chapter - 1].date
 		}, {
-			// part_title
+			// part_title 卷
 			title : get_label(data.title || ''),
-			// chapter_title
+			// chapter_title 章
 			sub_title : get_label(data.sub_title || ''),
 			text : data.text,
 			post_processor : this.contents_post_processor

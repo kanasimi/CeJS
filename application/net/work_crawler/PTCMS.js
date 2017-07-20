@@ -202,10 +202,17 @@ function module_code(library_namespace) {
 			&& (!next_url.startsWith(work_data.base_url)
 			// 正規化規範連結。
 			|| next_chapter.url !== next_url.slice(work_data.base_url.length))) {
-				library_namespace.info(library_namespace.display_align([
-						[ 'chapter ' + chapter + ': ', next_chapter.url ],
-						[ '→ ', next_url ] ]));
-				next_chapter.url = next_url;
+				if (false) {
+					library_namespace.info(library_namespace.display_align([
+							[ 'chapter ' + chapter + ': ', next_chapter.url ],
+							[ '→ ', next_url ] ]));
+					next_chapter.url = next_url;
+				}
+				// insert a url
+				work_data.chapter_list.splice(chapter, 0, {
+					// title : '',
+					url : next_url
+				});
 			}
 			this.add_ebook_chapter(work_data, chapter, {
 				sub_title : get_label(html.between('<h1>', '</h1>')),

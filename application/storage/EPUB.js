@@ -1352,11 +1352,16 @@ function module_code(library_namespace) {
 					return !!title;
 				}).join(' - '), '</title>', '</head><body>');
 
+				// 卷標題
 				if (contents.title) {
 					html.push('<h2>', contents.title, '</h2>');
 				}
+				// 章標題
 				if (contents.sub_title) {
 					html.push('<h3>', contents.sub_title, '</h3>');
+				} else if (!contents.title) {
+					library_namespace.warn('add_chapter: 未設定標題: '
+							+ String(contents.text).slice(0, 200) + '...');
 				}
 
 				if (item_data.date) {
@@ -1402,12 +1407,15 @@ function module_code(library_namespace) {
 				// 加入本章節之內容。
 				'<div class="text">', contents, '</div>', '</body>', '</html>');
 
-				contents = html.join(this.to_XML_options.separator);
+				contents = contents.length > this.MIN_CONTENTS_LENGTH ? html
+						.join(this.to_XML_options.separator) : '';
 
 			} else {
 				contents = check_text(contents);
 			}
+		}
 
+		if (contents && contents.length >= this.MIN_CONTENTS_LENGTH) {
 			// 應允許文字敘述式 word count。
 			if (!item_data.word_count && item_data.word_count !== 0) {
 				item_data.word_count = library_namespace.count_word(contents,
@@ -1425,6 +1433,11 @@ function module_code(library_namespace) {
 			} else {
 				library_namespace.debug('僅設定 item data，未自動寫入 file，您需要自己完成這動作。');
 			}
+
+		} else if (!item_data.force) {
+			library_namespace.info('add_chapter: 跳過長度過短的內容: '
+					+ (item_data.file || decode_identifier(item.id, this)));
+			return;
 		}
 
 		if (item_data.TOC) {
@@ -1887,6 +1900,9 @@ function module_code(library_namespace) {
 			declaration : true,
 			separator : '\n'
 		},
+
+		// 預設所容許的最短內容長度。
+		MIN_CONTENTS_LENGTH : 4,
 
 		// 應該用[A-Za-z]起始，但光單一字母不容易辨識。
 		id_prefix : 'i',
