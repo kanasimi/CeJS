@@ -1435,7 +1435,9 @@ function module_code(library_namespace) {
 			}
 
 		} else if (!item_data.force) {
-			library_namespace.info('add_chapter: 跳過長度過短的內容: '
+			library_namespace.info('add_chapter: 跳過'
+					+ (contents ? '長度過短的內容 (' + contents.length + ' chars)'
+							: '空章節') + ': '
 					+ (item_data.file || decode_identifier(item.id, this)));
 			return;
 		}

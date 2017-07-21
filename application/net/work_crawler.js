@@ -127,6 +127,11 @@ function module_code(library_namespace) {
 					+ this.MESSAGE_RE_DOWNLOAD;
 		}
 
+		if (!(this.MIN_LENGTH >= 0)) {
+			// 設定預設可容許的最小圖像大小。
+			this.MIN_LENGTH = this.allow_EOI_error ? 4e3 : 1e3;
+		}
+
 		this.get_URL_options = {
 			// start_time : Date.now(),
 			timeout : Work_crawler.timeout,
@@ -177,14 +182,21 @@ function module_code(library_namespace) {
 
 		// 腾讯TT浏览器
 		user_agent : 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; TencentTraveler 4.0)',
+		// 可容許的錯誤次數。
 		MAX_ERROR : Work_crawler.MAX_ERROR,
+		// 可容許的 EOI (end of image) 錯誤次數。
 		MAX_EOI_ERROR : Math.min(3, Work_crawler.MAX_ERROR),
-		// 應改成最小容許圖案檔案大小 (bytes)。
-		MIN_LENGTH : 4e3,
+		// 最小容許圖案檔案大小 (bytes)。
+		// 對於極少出現錯誤的網站，可以設定一個比較小的數值，並且設定.allow_EOI_error=false。因為這類型的網站要不是無法取得檔案，要不就是能夠取得完整的檔案；要取得破損檔案，並且已通過EOI測試的機會比較少。
+		// MIN_LENGTH : 4e3,
+
+		// 可容許的最少字數
+		MIN_CHAPTER_LENGTH : 200,
+
 		// 仙人拍鼓有時錯，跤步踏差啥人無？ 客語 神仙打鼓有時錯，腳步踏差麼人無
 		MESSAGE_RE_DOWNLOAD : '神仙打鼓有時錯，腳步踏差誰人無。下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
-		// 當圖像不存在EOI，或是被偵測出非圖像時，依舊強制儲存檔案。
-		// allow image without EOI mark. default:false
+		// 當圖像不存在 EOI (end of image) 標記，或是被偵測出非圖像時，依舊強制儲存檔案。
+		// allow image without EOI (end of image) mark. default:false
 		allow_EOI_error : library_namespace.env.arg_hash
 				&& library_namespace.env.arg_hash.allow_EOI_error,
 		// 圖像檔案下載失敗處理方式：忽略/跳過圖像錯誤。當404圖像不存在、檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。default:false
@@ -256,9 +268,7 @@ function module_code(library_namespace) {
 			var status = work_data.status;
 			return status
 			// e.g., 连载中, 連載中, 已完结
-			&& (/已完[結结]/.test(status)
-			// e.g., http://www.23us.cc
-			|| /^已?完[結结成]$/.test(status)
+			&& (/(^|已)完[結结成]/.test(status)
 			//
 			|| status.includes('完結済')
 			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
@@ -536,8 +546,9 @@ function module_code(library_namespace) {
 				reports = [ '<html>', '<head>', '<style>',
 						'table{border-collapse:collapse}',
 						'table,th,td{border:1px solid #55f;padding:.2em}',
-						'</style>', '</head>', '<body>',
-						'<h2>' + this.id + '</h2>', '<table>',
+						'</style>', '</head>', '<body>', '<h2>',
+						'<a href="' + this.base_URL + '">',
+						this.site_name || this.id, '</a>', '</h2>', '<table>',
 						'<tr><th>#</th><th>id</th>',
 						'<th>title</th><th>status</th></tr>' ];
 				library_namespace.info(this.id + ': '
@@ -862,6 +873,11 @@ function module_code(library_namespace) {
 			if (!work_data.title) {
 				work_data.title = work_title;
 			}
+			if (work_data.site_name) {
+				_this.site_name = work_data.site_name;
+			} else if (_this.site_name) {
+				work_data.site_name = _this.site_name;
+			}
 			// 基本檢測。
 			if (PATTERN_non_CJK.test(work_data.title)
 			// e.g., "THE NEW GATE", "Knight's & Magic"
@@ -922,8 +938,17 @@ function module_code(library_namespace) {
 
 			var matched = library_namespace.get_JSON(work_data.data_file);
 			if (matched) {
+				// recall old work_data
 				// 基本上以新資料為準，除非無法取得新資料，才改用舊資料。
 				for ( var key in matched) {
+					if (key in {
+						// process_status : true,
+						last_download : true
+					}) {
+						// Skip cache data.
+						continue;
+					}
+
 					if (!work_data[key]) {
 						work_data[key] = matched[key];
 
@@ -989,8 +1014,13 @@ function module_code(library_namespace) {
 							+ work_data.last_update);
 				}
 				if (work_data.last_saved) {
-					set_work_status(work_data, 'last saved: '
-							+ work_data.last_saved);
+					set_work_status(
+							work_data,
+							'last saved: '
+									+ (library_namespace
+											.is_Date(work_data.last_saved) ? work_data.last_saved
+											.format('%Y/%m/%d')
+											: work_data.last_saved));
 				}
 				// TODO: skip finished + no update works
 			}
@@ -1802,8 +1832,8 @@ function module_code(library_namespace) {
 				// 當僅設定title時，將之當做章節名稱而非part名稱。
 				data.sub_title = data.title;
 				delete data.title;
-			} else if (work_data[chapter - 1].title) {
-				data.sub_title = work_data[chapter - 1].title;
+			} else if (work_data.chapter_list[chapter - 1].title) {
+				data.sub_title = work_data.chapter_list[chapter - 1].title;
 			}
 		}
 
@@ -1811,6 +1841,14 @@ function module_code(library_namespace) {
 			data.title = data.title.join(' - ');
 		}
 		// assert: !data.title || typeof data.title === 'string'
+
+		var text = (data.text || '')
+		// 正規化小說章節文字。
+		.replace(/(^|\n)(?:&nbsp;){4,}([^\s\n&])/g, '$1　　$2');
+		if (text.length < this.MIN_CHAPTER_LENGTH) {
+			set_work_status(work_data, '#' + chapter + ': 字數過少 (' + text.length
+					+ ')');
+		}
 
 		var file_title = chapter.pad(3) + ' '
 				+ (data.title ? data.title + ' - ' : '')
@@ -1828,7 +1866,7 @@ function module_code(library_namespace) {
 			title : get_label(data.title || ''),
 			// chapter_title 章
 			sub_title : get_label(data.sub_title || ''),
-			text : data.text,
+			text : text,
 			post_processor : this.contents_post_processor
 		});
 
