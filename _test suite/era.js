@@ -3808,7 +3808,9 @@ function affairs() {
 			},
 			R : '緬甸曆法. Myanmar calendar, Burmese calendar.\n'
 			//
-			+ '緬曆有0年。非精確時，可能有最多前後2日的誤差。',
+			+ '緬曆有0年。非精確時，可能有最多前後2日的誤差。\n'
+			//
+			+ '本工具所使用之演算法僅適用於緬曆0年至1500年。',
 			href : 'https://en.wikipedia.org/wiki/Burmese_calendar'
 		}, function(date) {
 			if (date.精 === '年')
@@ -3852,6 +3854,16 @@ function affairs() {
 					});
 				});
 				notes.pop();
+			}
+
+			// only for Myanmar year 2 to 1500
+			// https://github.com/yan9a/mcal/blob/master/mc_main_m.js
+			// BY:2,EY:1500
+			if (!(Myanmar_date[0] >= 2) || !(Myanmar_date[0] <= 1500)) {
+				result = {
+					span : result,
+					S : 'color:#888 !important'
+				};
 			}
 
 			return result;

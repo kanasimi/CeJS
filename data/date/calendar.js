@@ -2170,6 +2170,7 @@ _.Dai_Date = Dai_Date;
 // Cool Emerald(2015)
 // Cool Emerald: Algorithm, Program and Calculation of Myanmar Calendar
 // http://cool-emerald.blogspot.sg/2013/06/algorithm-program-and-calculation-of.html
+// "My algorithm is only designed for ME years >= 0"
 
 // Cool Emerald(2015/5)
 // https://plus.google.com/u/1/+YanNaingAye-Mdy/posts/1eMwo3CbrWZ
@@ -2243,13 +2244,16 @@ Myanmar_month_days = [],
 // = [ accumulated days of month 1 (Tagu), accumulated days of month 2, ... ]
 Myanmar_month_days_count = [],
 
+// @see https://github.com/yan9a/mcal/blob/master/mc.js
 // 1060: beginning of well-known (historical) Myanmar year
 // well-known exceptions
 Myanmar_adjust_watat = {
 	1201 : true,
 	1202 : false,
+
 	1263 : true,
 	1264 : false,
+
 	1344 : true,
 	1345 : false
 },
@@ -2260,8 +2264,10 @@ Myanmar_adjust_fullmoon = {
 	1150 : 1,
 	1172 : -1,
 	1207 : 1,
+
 	1234 : 1,
 	1261 : -1,
+
 	1377 : 1
 },
 // for fullmoon: Cool Emerald - Based on various evidence such as inscriptions, books, etc...
@@ -2270,6 +2276,7 @@ Myanmar_adjust_fullmoon = {
 Myanmar_adjust_CE = {
 	205 : 1,
 	246 : 1,
+	471 : 1,
 	572 : -1,
 	651 : 1,
 	653 : 2,
@@ -2277,6 +2284,7 @@ Myanmar_adjust_CE = {
 	672 : 1,
 	729 : 1,
 	767 : -1,
+
 	813 : -1,
 	849 : -1,
 	851 : -1,
@@ -2766,7 +2774,7 @@ function Date_to_Myanmar(date, options) {
 	 *
 	 * notes: {Array} all notes with Myanmar language
 	 *
-	 * @see http://cool-emerald.blogspot.tw/2013/12/myanmar-astrological-calendar-days.html
+	 * @see http://cool-emerald.blogspot.sg/2013/12/myanmar-astrological-calendar-days.html
 	 */
 	if (typeof weekday === 'number') {
 		var notes = [],
@@ -2798,7 +2806,7 @@ function Date_to_Myanmar(date, options) {
 
 					case 1:
 						// Thingyan start day. akya day. akya time:
-						tmp = 'သင်္ကြန်အကျ (Thingyan start, ' + (new Date(new_year_info.start_time))
+						tmp = 'သင်္ကြန်အကျ (Thingyan start at ' + (new Date(new_year_info.start_time))
 							.format({
 								parser : 'CE',
 								format : '%H:%M:%S'
@@ -2807,7 +2815,7 @@ function Date_to_Myanmar(date, options) {
 
 					case tmp - 1:
 						// Thingyan end day. atat day. atat time:
-						tmp = 'သင်္ကြန်အတက် (Thingyan end, ' + (new Date(new_year_info.end_time))
+						tmp = 'သင်္ကြန်အတက် (Thingyan end at ' + (new Date(new_year_info.end_time))
 							.format({
 								parser : 'CE',
 								format : '%H:%M:%S'

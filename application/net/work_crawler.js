@@ -279,6 +279,15 @@ function module_code(library_namespace) {
 		pre_get_chapter_data : pre_get_chapter_data,
 		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。
 		// chapter_list_URL : '',
+		// 當有設定work_data.chapter_list的時候的預設函數，由this.get_chapter_data()呼叫。
+		chapter_URL : function(work_data, chapter) {
+			// chapter starts from 1
+			// console.log(work_data.chapter_list);
+
+			// e.g., work_data.chapter_list = [ chapter_data,
+			// chapter_data={url:'',title:'',date:new Date}, ... ]
+			return work_data.chapter_list[chapter - 1].url;
+		},
 
 		set_agent : set_agent,
 		data_of : start_get_data_of,
@@ -318,7 +327,7 @@ function module_code(library_namespace) {
 			}).unique();
 			library_namespace.log('Get ' + _this.server_list.length
 					+ ' servers from [' + server_URL + ']: '
-					+ _this.server_list);
+					+ _this.server_list.join(', '));
 			if (server_file) {
 				node_fs.writeFileSync(server_file, JSON
 						.stringify(_this.server_list));
@@ -621,6 +630,9 @@ function module_code(library_namespace) {
 		// 檢查看看之前是否有取得過。
 		search_result = library_namespace.get_JSON(search_result_file)
 				|| library_namespace.null_Object();
+		library_namespace.debug('search result file: ' + search_result_file, 2,
+				'get_work');
+		// console.log(search_result);
 
 		// finish() → finish_up()
 		function finish_up(work_data) {
@@ -681,7 +693,10 @@ function module_code(library_namespace) {
 
 		var url = this.search_URL, URL, post_data;
 		if (!url || typeof this.parse_search_result !== 'function') {
-			throw '請手動設定/輸入 [' + work_title + '] 之 id 於 ' + search_result_file;
+			url = library_namespace.null_Object();
+			url[work_title] = '';
+			throw '請手動設定/輸入 [' + work_title + '] 之 id 於 ' + search_result_file
+					+ '\n (e.g., ' + JSON.stringify(url) + ')';
 		}
 		if (typeof url === 'function') {
 			// url = url.call(this, work_title);
@@ -806,7 +821,9 @@ function module_code(library_namespace) {
 				finish();
 			}
 
-		}, url.charset || this.charset, post_data, this.get_URL_options);
+		}, url.charset || this.charset, post_data, Object.assign({
+			error_retry : this.MAX_ERROR
+		}, this.get_URL_options));
 	}
 
 	function get_label(html) {
@@ -816,12 +833,26 @@ function module_code(library_namespace) {
 		}
 	}
 
-	function exact_work_data(work_data, html, PATTERN_work_data) {
+	function exact_work_data(work_data, html, PATTERN_work_data, overwrite) {
+		if (!PATTERN_work_data) {
+			PATTERN_work_data =
+			// 由 meta data 取得作品資訊。 e.g.,
+			// <meta property="og:title" content="《作品》" />
+			// <meta property="og:novel:author" content="作者" />
+			// <meta name="Keywords" content="~" />
+			/<meta\s+(?:property|name)=["'](?:[^<>"']+:)?([^<>"':]+)["']\s*content=["']([^<>"']+)/g;
+			html = html.between('<head', '</head>') || html;
+		}
+
 		var matched;
-		// [ all, key, value ]
+		// matched: [ all, key, value ]
 		while (matched = PATTERN_work_data.exec(html)) {
-			matched[1] = get_label(matched[1]).replace(/[:：\s]+$/, '');
-			work_data[matched[1]] = get_label(matched[2]);
+			var key = get_label(matched[1]).replace(/[:：\s]+$/, ''), value;
+			// default: do not overwrite
+			if (key && (overwrite || !work_data[key])
+					&& (value = get_label(matched[2]))) {
+				work_data[key] = value;
+			}
 		}
 	}
 
@@ -938,14 +969,15 @@ function module_code(library_namespace) {
 
 			var matched = library_namespace.get_JSON(work_data.data_file);
 			if (matched) {
+				var skip_cache = {
+					process_status : _this.recheck,
+					last_download : true
+				};
 				// recall old work_data
 				// 基本上以新資料為準，除非無法取得新資料，才改用舊資料。
 				for ( var key in matched) {
-					if (key in {
-						// process_status : true,
-						last_download : true
-					}) {
-						// Skip cache data.
+					if (skip_cache[key]) {
+						// Skip this cache data.
 						continue;
 					}
 
@@ -1054,6 +1086,8 @@ function module_code(library_namespace) {
 			// 之前已設定 work_data.chapter_count=0
 			if (!work_data.chapter_count
 			// work_data.chapter_list 為非正規之 chapter data list。
+			// e.g., work_data.chapter_list = [ chapter_data,
+			// chapter_data={url:'',title:'',date:new Date}, ... ]
 			&& Array.isArray(work_data.chapter_list)) {
 				// 自 work_data.chapter_list 計算章節數量。
 				work_data.chapter_count = work_data.chapter_list.length;

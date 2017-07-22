@@ -360,6 +360,8 @@ function module_code(library_namespace) {
 			}
 		} catch (e) {
 			// SyntaxError: Invalid JSON
+			if (library_namespace.is_debug())
+				library_namespace.error(e);
 		}
 	}
 	_.get_JSON = get_JSON_file;

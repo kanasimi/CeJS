@@ -96,7 +96,7 @@ function module_code(library_namespace) {
 
 		// 取得作品的章節資料。 get_work_data()
 		// work_URL : function(work_id) { return work_id + '/'; },
-		parse_work_data : function(html, get_label) {
+		parse_work_data : function(html, get_label, exact_work_data) {
 			// console.log(html);
 			// 由 meta data 取得作品資訊。
 			var work_data = {
@@ -136,6 +136,8 @@ function module_code(library_namespace) {
 				// e.g., 630book
 				|| html.between('<strong class="logo">', '</strong>'))
 			};
+			// 由 meta data 取得作品資訊。
+			exact_work_data(work_data, html);
 
 			if (/^\d{1,2}-\d{1,2}$/.test(work_data.last_update)) {
 				// e.g., 07-01 → 2017-07-01

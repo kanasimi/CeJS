@@ -66,7 +66,7 @@ typeof CeL !== 'function' && (function() {
 	}
 
 	CeL_path_list.split(CeL_path_list.indexOf('\n') === -1 ? '|' : /\r?\n/)
-	// 載入CeJS基礎泛用之功能。（如非特殊目的使用的載入功能）
+	// 載入CeJS基礎泛用之功能。（例如非特殊目的使用的載入功能）
 	.some(check_path);
 
 	// If no latest version found, try to use cejs module instead.

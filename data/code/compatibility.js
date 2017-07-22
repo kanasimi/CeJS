@@ -13,6 +13,7 @@
  * More examples: see /_test suite/test.js
  * 
  * @since	
+ * @see https://github.com/tc39/proposals
  * @see
  * <a href="http://msdn.microsoft.com/en-us/library/s4esdbwz%28v=VS.85%29.aspx" accessdate="2010/4/16 20:4">Version Information (Windows Scripting - JScript)</a>
  * http://espadrine.github.io/New-In-A-Spec/es2017/
@@ -127,6 +128,18 @@ function check_version(version) {
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // global object
+
+if (!library_namespace.env.global.global
+	//
+	&& library_namespace.env.global.global !== library_namespace.env.global) {
+	// Object.defineProperty() defined in base.js
+	Object.defineProperty(library_namespace.env.global, 'global', {
+		configurable: true,
+		enumerable: false,
+		value: library_namespace.env.global,
+		writable: false
+	});
+}
 
 
 set_method(library_namespace.env.global, {
@@ -826,6 +839,7 @@ set_method(Number, {
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // Math.*
+// https://rwaldron.github.io/proposal-math-extensions/
 
 
 //	32 bits

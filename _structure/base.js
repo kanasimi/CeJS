@@ -99,7 +99,7 @@ return {module_function_1,module_class_1};
 function (global) {
 
 	if (false)
-		if (typeof global !== 'function')
+		if (typeof global !== 'object' && typeof global !== 'function')
 			throw new Error('No global object specified!');
 
 	var
@@ -2362,7 +2362,8 @@ OS='UNIX'; // unknown
 	// ^\s*: JScript 6-9 native object 需要這個。
 	// console.log() @ node.js: "function () {...}"
 	// TODO: see ((function_name_pattern)) above
-	// @see https://tc39.github.io/Function-prototype-toString-revision/#prod-NativeFunction
+	// @see
+	// https://tc39.github.io/Function-prototype-toString-revision/#prod-NativeFunction
 	// [ all, IdentifierName ]
 	// 舊的 JS environment 無法取得 FormalParameters。
 	var native_pattern = /^\s*function\s+(\w*)\s*\([^()]*\)\s*{\s*\[native code\]\s*}\s*$/;
@@ -2666,7 +2667,6 @@ OS='UNIX'; // unknown
 		}
 	});
 
-
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// for software verification(驗證) and validation(驗收).
 
@@ -2717,13 +2717,17 @@ OS='UNIX'; // unknown
 
 }
 )(
+	// https://github.com/tc39/proposal-global
+	typeof self !== 'undefined' && self
 	// In strict mode, this inside globe functions is undefined.
 	// https://developer.mozilla.org/en/JavaScript/Strict_mode
-	typeof window !== 'undefined' && window ||
+	|| typeof window !== 'undefined' && window
+	// e.g., node.js
+	|| typeof global === 'object' && global && global.Array === Array && global
 	// http://nodejs.org/api/globals.html
 	// node.js requires this method to setup REALLY global various:
 	// require isn't actually a global but rather local to each module.
-	Function('return this')()
+	|| Function('return this')()
 )
 // ) // void(
 ;
