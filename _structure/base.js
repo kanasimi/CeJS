@@ -147,6 +147,7 @@ function (global) {
 
 	// define 'undefined'
 	try {
+		//  undefined === void 0
 		if (undefined !== undefined) {
 			throw 1;
 		}

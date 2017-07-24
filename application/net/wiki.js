@@ -6808,6 +6808,10 @@ function module_code(library_namespace) {
 	/**
 	 * 取得頁面之重定向資料（重新導向至哪一頁）。
 	 * 
+	 * 注意: 重定向僅代表一種強烈的關聯性，而不表示從屬關係(對於定向到章節的情況)或者等價關係。
+	 * 例如我們可能將[[有罪推定]]定向至[[無罪推定]]，然而雙方是完全相反的關係。
+	 * 只因為[[無罪推定]]是一種比較值得關注的特性，而[[有罪推定]]沒有特殊的性質(common)。因此我們只談[[無罪推定]]，不會特別拿[[有罪推定]]出來談。
+	 * 
 	 * TODO:
 	 * https://www.mediawiki.org/w/api.php?action=help&modules=searchtranslations
 	 * 

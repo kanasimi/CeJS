@@ -77,6 +77,7 @@ function module_code(library_namespace) {
 
 		// for 百度站内搜索工具。非百度搜索系統得要自己撰寫。
 		parse_search_result : function(html, get_label) {
+			// console.log(html);
 			var id_data = [],
 			// {Array}id_list = [id,id,...]
 			id_list = [], get_next_between = html.find_between(

@@ -428,13 +428,13 @@ function show_calendar(era_name) {
 			output.push({
 				tr : {
 					td : [
-					// setup icon
+					// setup icon ⏫⏬
 					is_next ? is_next === true ? {
-						span : '↓',
-						R : 'next'
+						span : '🔽',
+						R : '↓next'
 					} : is_next : {
-						span : '↑',
-						R : 'previous'
+						span : '🔼',
+						R : '↑previous'
 					}, ' ', {
 						a : name,
 						title : name,
@@ -636,7 +636,7 @@ function show_calendar(era_name) {
 	if (dates.next)
 		add_traversal(dates.next, true);
 
-	era_caption = era_caption ? [ {
+	era_caption = era_caption ? [ '📅', {
 		a : era_caption,
 		title : era_caption,
 		href : '#',
@@ -687,11 +687,17 @@ function show_calendar(era_name) {
 				R : 'Click to pin / unpin',
 				onclick : function() {
 					pin_column = !pin_column;
+					CeL.set_text('pin_icon', pin_column ? '🔒' : '🔓');
 					this.innerHTML = pin_text(true);
 				},
 				C : 'column_select_option_button'
 			}, {
-				T : '增加此欄',
+				span : [ {
+					span : '🔓',
+					id : 'pin_icon'
+				}, {
+					T : '增加此欄'
+				} ],
 				C : 'column_select_button',
 				onclick : function() {
 					if (CeL.toggle_display('column_to_select') === 'none') {
@@ -1939,7 +1945,10 @@ function translate_era(era) {
 				if (add_node) {
 					note = add_node(note);
 				}
-				output.push(': ', {
+				output.push(':', {
+					span : ' ',
+					C : 'note'
+				}, {
 					span : CeL.era.to_HTML(note),
 					C : 'note'
 				});
@@ -2158,9 +2167,9 @@ function translate_era(era) {
 
 		if (Array.isArray(date.name))
 			add_注('紀年線圖', {
-				a : {
+				a : [ '📊', {
 					T : '展示線圖'
-				},
+				} ],
 				D : {
 					hierarchy : date.name.slice().reverse().slice(0, -1).join(
 							'/')
@@ -2192,16 +2201,18 @@ function translate_era(era) {
 			onclick : parse_text.onclick
 		});
 
-		if (era && era !== last_input)
-			CeL.new_node({
-				div : {
-					a : last_input = era,
-					title : era,
-					href : '#',
-					target : '_self',
-					onclick : click_title_as_era
-				}
-			}, 'input_history');
+	}
+
+	if (era && era !== last_input) {
+		CeL.new_node({
+			div : [ date ? '✔️' : '❌', {
+				a : last_input = era,
+				title : era,
+				href : '#',
+				target : '_self',
+				onclick : click_title_as_era
+			} ]
+		}, 'input_history');
 	}
 }
 
@@ -2673,13 +2684,13 @@ function affairs() {
 			'漢和帝劉肇（79年–106年2月13日）' ];
 	i.forEach(function(era) {
 		list.push({
-			div : {
+			div : [ '✔️', {
 				a : era,
 				title : era,
 				href : '#',
 				target : '_self',
 				onclick : click_title_as_era
-			}
+			} ]
 		});
 		o.push(era.replace(/^[^:]+:/, ''));
 	});
@@ -2900,6 +2911,11 @@ function affairs() {
 		下弦 : '🌗',
 		晦日 : '🌘'
 	},
+	// "Apple Color Emoji","Segoe UI Emoji","NotoColorEmoji","Segoe UI
+	// Symbol","Android Emoji","EmojiSymbols"
+	sunrise_sunset_icons = ' 🌄☀️🌇'.chars().map(function(i) {
+		return i.trim();
+	}),
 	//
 	建除_LIST = '建除滿平定執破危成收開閉'.split(''),
 	// https://github.com/zealotrush/ben_rime/blob/master/symbols.yaml
@@ -3506,7 +3522,7 @@ function affairs() {
 						parser : 'CE',
 						format : '%Y/%m/%d %H:%M:%S',
 						offset : local_coordinates[2] * 60
-					}), ' ', {
+					}), ' ' + sunrise_sunset_icons[index], {
 						T : (index % 2 === 0 ? '' : 'sun')
 						//
 						+ CeL.rise_set.type_name[index]
@@ -4861,7 +4877,9 @@ function affairs() {
 	}
 
 	v = 'Gregorian reform';
-	calendar_columns[v] = [ '各地啓用格里曆之日期對照' ];
+	calendar_columns[v] = [
+			'各地啓用公曆之日期對照',
+			'各地啓用公曆(格里曆)之日期不同。 See <a href="https://en.wikipedia.org/wiki/Adoption_of_the_Gregorian_calendar" accessdate="2017/7/24 14:40" title="Adoption of the Gregorian calendar">adoption of the Gregorian Calendar</a>.' ];
 	for (i in CeL.Gregorian_reform_of.regions) {
 		o = function(date) {
 			return date.format({
@@ -4936,7 +4954,7 @@ function affairs() {
 
 	// 首都、國都或京（京師／城／都）
 	// https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD%E9%A6%96%E9%83%BD
-	var place_nodes = [ {
+	var place_nodes = [ '🗺️', {
 		// 常用地點
 		T : '著名地點：'
 	} ], place_list = {

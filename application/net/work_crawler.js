@@ -172,8 +172,6 @@ function module_code(library_namespace) {
 				.match(/[^\\\/]+$/)[0].replace(/\.js$/i, '') : '.')
 				// main_directory 必須以 path separator 作結。
 				+ path_separator,
-		// 錯誤紀錄檔
-		error_log_file : 'error_files.txt',
 
 		// id : '',
 		// site_id : '',
@@ -216,6 +214,18 @@ function module_code(library_namespace) {
 		// archive directory below this.main_directory for ebook. 封存舊電子書用的目錄。
 		// MUST append path_separator!
 		archive_directory_name : 'archive' + path_separator,
+		// log directory below this.main_directory
+		log_directory_name : 'log' + path_separator,
+		// 錯誤記錄檔案: 記錄無法下載的圖檔。
+		error_log_file : 'error_files.txt',
+		// 當從頭開始檢查時，會重新設定錯誤記錄檔案。此時會把舊的記錄檔改名成為這個檔案。
+		// 移動完之後這個值會被設定為空，以防被覆寫。
+		error_log_file_backup : 'error_files.'
+				+ (new Date).format('%Y%2m%2dT%2H%2M%2S') + '.txt',
+		// 記錄報告。
+		report_file : 'report.' + (new Date).format('%Y%2m%2dT%2H%2M%2S')
+				+ '.htm',
+		report_file_JSON : 'report.json',
 
 		// default start chapter index
 		start_chapter : 1,
@@ -540,17 +550,22 @@ function module_code(library_namespace) {
 					+ ' works done.');
 			var work_status_titles = Object.keys(all_work_status);
 			if (work_status_titles.length > 0) {
+				library_namespace.create_directory(
+				// 先創建記錄用目錄。
+				this.main_directory + this.log_directory_name);
 				try {
-					node_fs.writeFileSync(this.main_directory + 'report.json',
-					//
-					JSON.stringify({
-						date : (new Date).toISOString(),
-						status : all_work_status
-					}));
+					node_fs.writeFileSync(this.main_directory
+							+ this.log_directory_name + this.report_file_JSON,
+							JSON.stringify({
+								date : (new Date).toISOString(),
+								status : all_work_status
+							}));
 				} catch (e) {
 					// TODO: handle exception
 				}
-				var report_file = this.main_directory + 'report.htm',
+
+				var report_file = this.main_directory + this.log_directory_name
+						+ this.report_file,
 				// 產生網頁形式的報告檔。
 				reports = [ '<html>', '<head>', '<style>',
 						'table{border-collapse:collapse}',
@@ -646,8 +661,11 @@ function module_code(library_namespace) {
 				}
 			} else if (work_data && work_data.titles) {
 				// @see ((approximate_title))
-				set_work_status(work_data, 'found ' + work_data.titles
-						+ ' titles: ' + work_data.titles);
+				set_work_status(work_data, 'found search result: '
+						+ work_data.titles.length + ' titles: '
+						+ work_data.titles.map(function(item) {
+							return item[0] + ':' + item[1];
+						}).join('; '));
 			} else {
 				var status = work_data;
 				work_data = library_namespace.null_Object();
@@ -738,6 +756,7 @@ function module_code(library_namespace) {
 			// e.g., [ [id,id,...], {id:data,id:data,...} ]
 			var id_data;
 			try {
+				// console.log(XMLHttp.responseText);
 				id_data = _this.parse_search_result(XMLHttp.responseText,
 						get_label);
 			} catch (e) {
@@ -1114,6 +1133,7 @@ function module_code(library_namespace) {
 				+ '.list.htm', html);
 			}
 
+			// 章節的增加數量: 新-舊, 當前-上一次的
 			var chapter_added = work_data.chapter_count
 					- work_data.last_download.chapter;
 			if (_this.recheck
@@ -1506,9 +1526,7 @@ function module_code(library_namespace) {
 				if (typeof _this.pre_parse_chapter_data === 'function') {
 					_this.pre_parse_chapter_data(XMLHttp, work_data, chapter,
 					// pre_parse_chapter_data:function(XMLHttp,work_data,chapter,callback){;callback();},
-					function() {
-						process_chapter_data(XMLHttp);
-					});
+					process_chapter_data.bind(XMLHttp));
 				} else {
 					process_chapter_data(XMLHttp);
 				}
@@ -1581,8 +1599,24 @@ function module_code(library_namespace) {
 
 				if (error_file_logs.length > 0) {
 					error_file_logs.push('');
-					node_fs.appendFileSync(_this.main_directory
-							+ _this.error_log_file,
+					var log_directory = _this.main_directory
+							+ _this.log_directory_name,
+					//
+					error_log_file = log_directory + _this.error_log_file,
+					//
+					error_log_file_backup = _this.error_log_file_backup
+							&& log_directory + _this.error_log_file_backup;
+					library_namespace.create_directory(
+					// 先創建記錄用目錄。
+					log_directory);
+					if (_this.recheck && error_log_file_backup) {
+						// 當從頭開始檢查時，重新設定錯誤記錄檔案。
+						library_namespace.move_file(error_log_file,
+								error_log_file_backup);
+						// 移動完之後註銷檔案名稱以防被覆寫。
+						_this.error_log_file_backup = null;
+					}
+					node_fs.appendFileSync(error_log_file,
 					// 產生錯誤紀錄檔。
 					error_file_logs.join(library_namespace.env.line_separator));
 					set_work_status(work_data, chapter_label + ': '
@@ -1854,6 +1888,7 @@ function module_code(library_namespace) {
 		return work_data[this.KEY_EBOOK] = ebook;
 	}
 
+	// 通常應該會被parse_chapter_data()呼叫
 	function add_ebook_chapter(work_data, chapter, data) {
 		var ebook = work_data && work_data[this.KEY_EBOOK];
 		if (!ebook) {

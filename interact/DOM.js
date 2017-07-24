@@ -1520,7 +1520,8 @@ function new_node(nodes, layer, ns) {
 
 			if((n = 'T') in nodes) {
 				ignore[n] = null;
-				if (Array.isArray(n = nodes[n])) {
+				n = nodes[n];
+				if (Array.isArray(n)) {
 					dataset(node, gettext.DOM_id_key, n[0]);
 					for ( var i = 1; i < n.length; i++)
 						dataset(node, gettext.DOM_id_key + i, n[i]);
@@ -2746,6 +2747,9 @@ _// JSDT:_module_
 //	http://bravo9.com/journal/copying-into-the-clipboard-with-javascript-in-firefox-safari-ie-opera-292559a2-cc6c-4ebf-9724-d23e8bc5ad8a/
 //	http://code.google.com/p/zeroclipboard/
 Clipboard.set = function(text) {
+	// TODO: use:
+	// succeeded = document.execCommand('copy')
+
 	var clip;
 	if (clip = window.clipboardData) {
 		clip.clearData();

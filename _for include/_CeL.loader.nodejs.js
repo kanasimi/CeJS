@@ -82,9 +82,13 @@ typeof CeL !== 'function' && (function() {
 		} catch (e) {
 		}
 
-		console.error('Failed to load CeJS library!');
-		// No CeJS library.
-		throw '請先安裝 CeJS library:\nnpm install cejs';
+		console.error('Failed to load CeJS library!\n');
+		console.info('請先安裝 CeJS library:\nnpm install cejs\n\n'
+		//
+		+ 'Or you may trying the latest version:\n'
+		//
+		+ 'See https://github.com/kanasimi/CeJS');
+		throw 'No CeJS library';
 	}
 
 	if (typeof CeL !== 'function') {
