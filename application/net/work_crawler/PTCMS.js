@@ -59,6 +59,15 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	var PATTERN_url_for_baidu = /([\d_]+)(?:\.html|\/(?:index\.html)?)?$/;
+	if (library_namespace.is_debug()) {
+		[ 'http://www.host/123/', 'http://www.host/123/index.html',
+				'http://www.host/123.html' ].forEach(function(url) {
+			console.assert('123' === 'http://www.host/123/'
+					.match(PATTERN_url_for_baidu)[1]);
+		});
+	}
+
 	var default_configuration = {
 
 		// auto_create_ebook, automatic create ebook
@@ -86,12 +95,14 @@ function module_code(library_namespace) {
 			while ((text = get_next_between()) !== undefined) {
 				// console.log(text);
 				var matched = text.between(null, '"').match(
-						/([\d_]+)\/(?:index\.html)?$/);
+						PATTERN_url_for_baidu);
+				// console.log(matched);
 				id_list.push(matched[1]);
 				matched = text.match(/ title="([^"]+)"/);
 				id_data.push(get_label(matched[1]));
 			}
 
+			// console.log([ id_list, id_data ]);
 			return [ id_list, id_data ];
 		},
 

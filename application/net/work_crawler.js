@@ -784,18 +784,24 @@ function module_code(library_namespace) {
 			// 近似的標題。
 			var approximate_title = [];
 			if (id_list.every(function(id, index) {
-				var title = library_namespace.is_Object(id) ? id
-				//
-				: id_data[Array.isArray(id_data) && isNaN(id) ? index : id]
-				//
-				|| Array.isArray(id_data) && id_data[index],
-				//
-				p = _this.title_of_search_result;
+				// console.log(id);
+				var title;
+				if (library_namespace.is_Object(id)) {
+					title = id;
+				} else if (Array.isArray(id_data)
+						&& (id_list.length === id_data.length || isNaN(id))) {
+					title = id_data[index];
+				} else {
+					title = id_data[id] || id_data[index];
+				}
+
+				var p = _this.title_of_search_result;
 				if (p) {
 					title = typeof p === 'function' ? p(title)
 							: title ? title[p] : title;
 				}
 				title = title.trim();
+				// console.log([ 'compare', title, work_title ]);
 				// 找看看是否有完全相同的title。
 				if (title !== work_title) {
 					if (title.includes(work_title) || title.replace(/\s/g, '')
