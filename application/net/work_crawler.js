@@ -1917,9 +1917,14 @@ function module_code(library_namespace) {
 		}
 		// assert: !data.title || typeof data.title === 'string'
 
-		var text = (data.text || '')
+		var text = (data.text || ''), matched = (work_data.language || '')
+				.match(/^(ja|chs|cht)(?:[^a-z]|$)/);
 		// 正規化小說章節文字。
-		.replace(/(^|\n)(?:&nbsp;){4,}([^\s\n&])/g, '$1　　$2');
+		if (matched) {
+			// 中文每段落開頭空兩個字。日本語では行頭から一文字の字下げをする。
+			text = text.replace(/(^|\n)(?:&nbsp;){2,}(?:&nbsp;|\s)*([^\s\n&])/g,
+					matched[1] === 'ja' ? '$1　$2' : '$1　　$2');
+		}
 		if (text.length < this.MIN_CHAPTER_LENGTH) {
 			set_work_status(work_data, '#' + chapter + ': 字數過少 (' + text.length
 					+ ')');

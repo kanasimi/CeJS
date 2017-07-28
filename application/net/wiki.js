@@ -5636,6 +5636,7 @@ function module_code(library_namespace) {
 	// this_wiki.copy_from(wiki) 則呼叫時多半已經設定好 wiki，直接在本this_wiki中操作比較不會有同步性問題。
 	// 因為直接採wiki_API.prototype.copy_from()會造成.page().copy_from()時.page()尚未執行完，
 	// 這會使執行.copy_from()時尚未取得.last_page，因此只好另開function。
+	// @see [[Template:Copied]]
 	var wiki_API_prototype_copy_from = function(title, options, callback) {
 		if (typeof options === 'function') {
 			// shift arguments
