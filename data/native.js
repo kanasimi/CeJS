@@ -2967,8 +2967,9 @@ function module_code(library_namespace) {
 		}
 		// assert: Array.isArray(from) && Array.isArray(from)
 
-		var from_length = from.length, from_index = from_length - 1, to_index = to.length - 1, trace_Array = options.trace_Array
-				|| LCS_length(from, to, true),
+		var from_length = from.length, from_index = from_length - 1, to_index = to.length - 1,
+		// Completed LCS Table
+		trace_Array = options.trace_Array || LCS_length(from, to, true),
 		// 獨特/獨有的 exclusive 元素列表。
 		diff_list = [], from_unique, to_unique,
 		// flags
@@ -3042,142 +3043,152 @@ function module_code(library_namespace) {
 		}
 
 		// backtrack subroutine
-		// 可能造成:
-		// RangeError: Maximum call stack size exceeded
-		// TODO: 必須採用非遞迴呼叫(recursive call)版本
 		function backtrack(from_index, to_index, all_list) {
-			library_namespace.debug(String([ from_index, to_index ]), 3,
-					'LCS.backtrack');
-			library_namespace.debug(
-					String([ from_unique, to_unique, diff_list ]), 6,
-					'LCS.backtrack');
-			if (from_index < 0 || to_index < 0) {
-				library_namespace.debug('→ '
-						+ JSON.stringify([ from_index, to_index, from_unique,
-								to_unique ]), 3);
-				if (from_index === -1 && to_index === -1) {
-					// assert: from_index === -1 && to_index === -1
-					library_namespace.debug(
-							'LCS starts from the first element of each list, '
-									+ JSON.stringify([ from_index, to_index,
-											from[0], to[0] ]), 3,
-							'LCS.backtrack');
-				} else if (to_index === -1) {
-					library_namespace.debug('因為 ' + from_index + ',0→('
-							+ from_index + '|' + (from_index - 1)
-							+ '),-1 時不會處理到 from_unique，只好補處理。', 3,
-							'LCS.backtrack');
-					if (from_unique) {
-						// e.g., CeL.LCS('abc123', 'def123', 'diff')
-						from_unique[0] = 0;
+			// 因為函數 backtrack() 中會呼叫自己，可能出現：
+			// RangeError: Maximum call stack size exceeded
+			// 因此必須採用非遞迴呼叫(recursive call)版本。
+			while (true) {
+				library_namespace.debug(String([ from_index, to_index ]), 3,
+						'LCS.backtrack');
+				library_namespace.debug(String([ from_unique, to_unique,
+						diff_list ]), 6, 'LCS.backtrack');
+				if (from_index < 0 || to_index < 0) {
+					library_namespace.debug('→ '
+							+ JSON.stringify([ from_index, to_index,
+									from_unique, to_unique ]), 3);
+					if (from_index === -1 && to_index === -1) {
+						// assert: from_index === -1 && to_index === -1
+						library_namespace.debug(
+								'LCS starts from the first element of each list, '
+										+ JSON.stringify([ from_index,
+												to_index, from[0], to[0] ]), 3,
+								'LCS.backtrack');
+					} else if (to_index === -1) {
+						library_namespace.debug('因為 ' + from_index + ',0→('
+								+ from_index + '|' + (from_index - 1)
+								+ '),-1 時不會處理到 from_unique，只好補處理。', 3,
+								'LCS.backtrack');
+						if (from_unique) {
+							// e.g., CeL.LCS('abc123', 'def123', 'diff')
+							from_unique[0] = 0;
+						} else {
+							// e.g., CeL.LCS('a0', 'b0', 'diff')
+							// e.g., CeL.LCS('a0', '0b', 'diff')
+							from_unique = [ 0, from_index ];
+						}
+					} else if (from_index === -1) {
+						library_namespace.debug('因為 0,' + to_index + ',0→-1,('
+								+ to_index + '|' + (to_index - 1)
+								+ ') 時不會處理到 to_unique，只好補處理。', 3,
+								'LCS.backtrack');
+						if (to_unique) {
+							to_unique[0] = 0;
+						} else {
+							// e.g., CeL.LCS('a1b2', '1a2b', 'diff')
+							to_unique = [ 0, to_index ];
+						}
 					} else {
-						// e.g., CeL.LCS('a0', 'b0', 'diff')
-						// e.g., CeL.LCS('a0', '0b', 'diff')
-						from_unique = [ 0, from_index ];
+						library_namespace
+								.warn('LCS.backtrack: Invalid situation!');
 					}
-				} else if (from_index === -1) {
-					library_namespace.debug('因為 0,' + to_index + ',0→-1,('
-							+ to_index + '|' + (to_index - 1)
-							+ ') 時不會處理到 to_unique，只好補處理。', 3, 'LCS.backtrack');
-					if (to_unique) {
-						to_unique[0] = 0;
-					} else {
-						// e.g., CeL.LCS('a1b2', '1a2b', 'diff')
-						to_unique = [ 0, to_index ];
-					}
-				} else {
-					library_namespace.warn('LCS.backtrack: Invalid situation!');
+					add_to_diff_list(from_index, to_index);
+					return;
 				}
-				add_to_diff_list(from_index, to_index);
-				return;
-			}
 
-			if (from[from_index] === to[to_index]) {
-				// 此元素為 LCS 之一部分。
-				library_namespace.debug('相同元素 @ ' + [ from_index, to_index ]
-						+ ': ' + from[from_index], 3, 'LCS.backtrack');
-				if (!diff_only) {
-					// get_index = 1: from_index, 2: to_index
-					var common = get_index ? get_index === 2 ? to_index
-							: from_index : from[from_index];
-					if (get_all) {
-						all_list.forEach(function(result_Array) {
-							result_Array.unshift(common);
+				if (from[from_index] === to[to_index]) {
+					// 此元素為 LCS 之一部分。
+					library_namespace.debug('相同元素 @ '
+							+ [ from_index, to_index ] + ': '
+							+ from[from_index], 3, 'LCS.backtrack');
+					if (!diff_only) {
+						// get_index = 1: from_index, 2: to_index
+						var common = get_index ? get_index === 2 ? to_index
+								: from_index : from[from_index];
+						if (get_all) {
+							all_list.forEach(function(result_Array) {
+								result_Array.unshift(common);
+							});
+						} else {
+							all_list[0].unshift(common);
+						}
+					}
+					add_to_diff_list(from_index, to_index);
+
+					// 常常出現RangeError錯誤的地方...
+					// backtrack(from_index - 1, to_index - 1, all_list);
+					// return;
+
+					from_index--;
+					to_index--;
+					continue;
+				}
+
+				var trace_index;
+				if (from_index > 0
+				// ↑ 預防 trace_Array[trace_index - 1] 取到範圍外的值。
+				&& (trace_index = to_index * from_length + from_index) > 0
+				// trace_Array[trace_index]
+				// = max( trace_Array[trace_index - 1], [上面一階])
+				&& trace_Array[trace_index] === trace_Array[trace_index - 1]) {
+					if (false) {
+						library_namespace.debug('trace_index: ' + trace_index,
+								3, 'LCS.backtrack');
+						library_namespace.debug('trace: '
+								+ trace_Array[trace_index - 1] + ' → '
+								+ trace_Array[trace_index], 3);
+					}
+
+					var _all_list;
+					if (get_all
+					// 如此亦保證 to_index > 0
+					&& trace_index >= from_length && trace_Array[trace_index]
+					//
+					=== trace_Array[trace_index - from_length]) {
+						library_namespace.debug(trace_Array[trace_index] + ': '
+								+ all_list, 3, 'LCS.backtrack');
+						_all_list = all_list.map(function(result_Array) {
+							return result_Array.clone();
 						});
-					} else {
-						all_list[0].unshift(common);
+						backtrack(from_index, to_index - 1, _all_list);
 					}
-				}
-				add_to_diff_list(from_index, to_index);
-				// TODO: 因為函數 backtrack() 中會呼叫自己，可能出現：
-				// RangeError: Maximum call stack size exceeded
-				backtrack(from_index - 1, to_index - 1, all_list);
-				return;
-			}
 
-			var trace_index;
-			if (from_index > 0
-			// ↑ 預防 trace_Array[trace_index - 1] 取到範圍外的值。
-			&& (trace_index = to_index * from_length + from_index) > 0
-			// trace_Array[trace_index]
-			// = max( trace_Array[trace_index - 1], [上面一階])
-			&& trace_Array[trace_index] === trace_Array[trace_index - 1]) {
-				if (false) {
-					library_namespace.debug('trace_index: ' + trace_index, 3,
-							'LCS.backtrack');
-					library_namespace.debug('trace: '
-							+ trace_Array[trace_index - 1] + ' → '
-							+ trace_Array[trace_index], 3);
-				}
-
-				var _all_list;
-				if (get_all
-				// 如此亦保證 to_index > 0
-				&& trace_index >= from_length && trace_Array[trace_index]
-				//
-				=== trace_Array[trace_index - from_length]) {
-					library_namespace.debug(trace_Array[trace_index] + ': '
-							+ all_list, 3, 'LCS.backtrack');
-					_all_list = all_list.map(function(result_Array) {
-						return result_Array.clone();
-					});
-					backtrack(from_index, to_index - 1, _all_list);
-				}
-
-				library_namespace.debug('檢測前一個。 ' + [ from_index, to_index ],
-						3, 'LCS.backtrack');
-				if (get_diff) {
-					if (from_unique) {
-						from_unique[0] = from_index;
-					} else {
-						from_unique = [ from_index, from_index ];
+					library_namespace.debug('檢測前一個。 '
+							+ [ from_index, to_index ], 3, 'LCS.backtrack');
+					if (get_diff) {
+						if (from_unique) {
+							from_unique[0] = from_index;
+						} else {
+							from_unique = [ from_index, from_index ];
+						}
+						library_namespace.debug('from_index: '
+								+ [ from_index, JSON.stringify(from_unique) ],
+								3, 'LCS.backtrack');
 					}
-					library_namespace.debug('from_index: '
-							+ [ from_index, JSON.stringify(from_unique) ], 3,
-							'LCS.backtrack');
-				}
-				backtrack(from_index - 1, to_index, all_list);
+					backtrack(from_index - 1, to_index, all_list);
 
-				if (get_all) {
-					library_namespace.debug(
-							'merge: ' + [ all_list, _all_list ], 3);
-					all_list = unique(all_list.append(_all_list));
-				}
-
-			} else {
-				library_namespace.debug('檢測上一排。 ' + [ from_index, to_index ],
-						3, 'LCS.backtrack');
-				if (get_diff) {
-					if (to_unique) {
-						to_unique[0] = to_index;
-					} else {
-						to_unique = [ to_index, to_index ];
+					if (get_all) {
+						library_namespace.debug('merge: '
+								+ [ all_list, _all_list ], 3);
+						all_list = unique(all_list.append(_all_list));
 					}
-					library_namespace.debug('to_index: '
-							+ [ to_index, JSON.stringify(to_unique) ], 3,
-							'LCS.backtrack');
+					return;
+
+				} else {
+					library_namespace.debug('檢測上一排。 '
+							+ [ from_index, to_index ], 3, 'LCS.backtrack');
+					if (get_diff) {
+						if (to_unique) {
+							to_unique[0] = to_index;
+						} else {
+							to_unique = [ to_index, to_index ];
+						}
+						library_namespace.debug('to_index: '
+								+ [ to_index, JSON.stringify(to_unique) ], 3,
+								'LCS.backtrack');
+					}
+					// backtrack(from_index, to_index - 1, all_list);
+					to_index--;
 				}
-				backtrack(from_index, to_index - 1, all_list);
 			}
 		}
 
