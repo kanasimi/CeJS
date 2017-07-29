@@ -93,8 +93,28 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
+	// 命令列可以設定的選項。通常僅做測試微調用。
+	var import_arg_hash = {
+		main_directory : true,
+		user_agent : true,
+		MAX_ERROR : true,
+		allow_EOI_error : true,
+		skip_error : true,
+		skip_chapter_data_error : true,
+		recheck : true
+	};
+
 	function Work_crawler(configurations) {
 		Object.assign(this, configurations);
+		// 從命令列來的設定，優先等級比起作品預設設定更高。
+		if (library_namespace.env.arg_hash) {
+			for ( var key in import_arg_hash) {
+				if (key in library_namespace.env.arg_hash) {
+					this[key] = library_namespace.env.arg_hash[key];
+				}
+			}
+		}
+
 		if (!this.id) {
 			// this.id 之後將提供給 this.site_id 使用。
 			this.id = this.main_directory.replace(/\.*[\\\/]+$/, '')
@@ -195,11 +215,9 @@ function module_code(library_namespace) {
 		MESSAGE_RE_DOWNLOAD : '神仙打鼓有時錯，腳步踏差誰人無。下載出錯了，例如服務器暫時斷線、檔案闕失(404)。請確認排除錯誤或錯誤不再持續後，重新執行以接續下載。',
 		// 當圖像不存在 EOI (end of image) 標記，或是被偵測出非圖像時，依舊強制儲存檔案。
 		// allow image without EOI (end of image) mark. default:false
-		allow_EOI_error : library_namespace.env.arg_hash
-				&& library_namespace.env.arg_hash.allow_EOI_error,
+		// allow_EOI_error : true,
 		// 圖像檔案下載失敗處理方式：忽略/跳過圖像錯誤。當404圖像不存在、檔案過小，或是被偵測出非圖像(如不具有EOI)時，依舊強制儲存檔案。default:false
-		skip_error : library_namespace.env.arg_hash
-				&& library_namespace.env.arg_hash.skip_error,
+		// skip_error : true,
 		//
 		// 若已經存在壞掉的圖片，就不再嘗試下載圖片。default:false
 		// skip_existed_bad_file : true,
@@ -249,15 +267,14 @@ function module_code(library_namespace) {
 		// remove_ebook_directory : true,
 		/** 章節數量無變化時依舊利用 cache 重建資料(如ebook) */
 		// regenerate : true,
-		/** 進一步處理書籍之章節內容。例如繁簡轉換、裁剪廣告。 */
+		/** 進一步處理書籍之章節內容。例如繁簡轉換、錯別字修正、裁剪廣告。 */
 		contents_post_processor : function(contents, work_data) {
 		} && null,
 
 		full_URL : full_URL_of_path,
 		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
 		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。否則只會自上次下載過的章節接續下載。
-		recheck : library_namespace.env.arg_hash
-				&& library_namespace.env.arg_hash.recheck,
+		// recheck : true,
 		// 當無法取得chapter資料時，直接嘗試下一章節。在手動+監視下recheck時可併用此項。default:false
 		// skip_chapter_data_error : true,
 
