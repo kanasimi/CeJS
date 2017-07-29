@@ -250,8 +250,7 @@ function module_code(library_namespace) {
 		/** 章節數量無變化時依舊利用 cache 重建資料(如ebook) */
 		// regenerate : true,
 		/** 進一步處理書籍之章節內容。例如繁簡轉換、裁剪廣告。 */
-		contents_post_processor : function(contents) {
-			return contents;
+		contents_post_processor : function(contents, work_data) {
 		} && null,
 
 		full_URL : full_URL_of_path,
@@ -1917,20 +1916,13 @@ function module_code(library_namespace) {
 		}
 		// assert: !data.title || typeof data.title === 'string'
 
-		var text = (data.text || ''), matched = (work_data.language || '')
-				.match(/^(ja|chs|cht)(?:[^a-z]|$)/);
-		// 正規化小說章節文字。
-		if (matched) {
-			// 中文每段落開頭空兩個字。日本語では行頭から一文字の字下げをする。
-			text = text.replace(/(^|\n)(?:&nbsp;){2,}(?:&nbsp;|\s)*([^\s\n&])/g,
-					matched[1] === 'ja' ? '$1　$2' : '$1　　$2');
-		}
-		if (text.length < this.MIN_CHAPTER_LENGTH) {
-			set_work_status(work_data, '#' + chapter + ': 字數過少 (' + text.length
-					+ ')');
-		}
+		var language = work_data.language
+		// e.g., 'cmn-Hans-CN'
+		&& work_data.language.match(/^(ja|cmn)(?:$|[^a-z])/);
+		if (language)
+			language = language[1];
 
-		var file_title = chapter.pad(3) + ' '
+		var _this = this, file_title = chapter.pad(3) + ' '
 				+ (data.title ? data.title + ' - ' : '')
 				+ (data.sub_title || ''),
 		//
@@ -1946,8 +1938,34 @@ function module_code(library_namespace) {
 			title : get_label(data.title || ''),
 			// chapter_title 章
 			sub_title : get_label(data.sub_title || ''),
-			text : text,
-			post_processor : this.contents_post_processor
+			text : data.text,
+			post_processor : function(contents) {
+				// 正規化小說章節文字。
+				if (language === 'ja') {
+					contents = contents.replace(
+					// '&nbsp;' 已經被 normailize_contents() @CeL.EPUB 轉換為 '&#160;'
+					/(^|\n)(?:&#160;|\s){2,}([^\s\n&])/g,
+					// 日本語では行頭から一文字の字下げをする。
+					'$1　$2');
+				} else if (language) {
+					contents = contents.replace(
+					// assert: language: 中文
+					/(^|\n)(?:&#160;|\s){4,}([^\s\n&])/g,
+					// 中文每段落開頭空兩個字。
+					'$1　　$2');
+				}
+
+				if (typeof _this.contents_post_processor === 'function') {
+					contents = _this.contents_post_processor(contents,
+							work_data);
+				}
+
+				if (contents.length < _this.MIN_CHAPTER_LENGTH) {
+					set_work_status(work_data, '#' + chapter + ': 字數過少 ('
+							+ contents.length + ')');
+				}
+				return contents;
+			}
 		});
 
 		return item;

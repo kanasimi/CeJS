@@ -1390,6 +1390,7 @@ function module_code(library_namespace) {
 				contents = check_text(contents.text);
 				if (typeof post_processor === 'function') {
 					// 進一步處理書籍之章節內容。例如繁簡轉換、裁剪廣告。
+					// 因為這個函數可能有記錄功能，因此就算是空內容，也必須執行。
 					contents = post_processor(contents);
 				}
 				if (contents.length > 5e5) {
