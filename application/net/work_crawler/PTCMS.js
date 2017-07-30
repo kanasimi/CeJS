@@ -61,7 +61,7 @@ function module_code(library_namespace) {
 
 	var PATTERN_url_for_baidu = /([\d_]+)(?:\.html|\/(?:index\.html)?)?$/;
 	if (library_namespace.is_debug()) {
-		[ 'http://www.host/123/', 'http://www.host/123/index.html',
+		[ 'http://www.host/0/123/', 'http://www.host/123/index.html',
 				'http://www.host/123.html' ].forEach(function(url) {
 			console.assert('123' === 'http://www.host/123/'
 					.match(PATTERN_url_for_baidu)[1]);
@@ -77,7 +77,6 @@ function module_code(library_namespace) {
 		// 'changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。
 		recheck : 'changed',
 
-		// one_by_one : true,
 		// base_URL : 'http://www.*.com/',
 		// charset : 'gbk',
 
@@ -94,10 +93,12 @@ function module_code(library_namespace) {
 
 			while ((text = get_next_between()) !== undefined) {
 				// console.log(text);
+				// 從URL網址中解析出作品id。
 				var matched = text.between(null, '"').match(
 						PATTERN_url_for_baidu);
 				// console.log(matched);
 				id_list.push(matched[1]);
+				// 從URL網址中解析出作品title。
 				matched = text.match(/ title="([^"]+)"/);
 				id_data.push(get_label(matched[1]));
 			}
@@ -212,9 +213,11 @@ function module_code(library_namespace) {
 			&& (next_chapter.url !== (next_url = next_url[1]))
 			// 許多網站會把最新章節的下一頁設成章節列表，因此必須排除章節列表的網址。
 			&& next_url !== work_data.url
+			// && next_url !== './' && next_url !== 'index.html'
 			// 照理來說本陳述應該皆為真。
 			&& (!next_url.startsWith(work_data.base_url)
-			// 正規化規範連結。
+			// 檢查正規化規範連結之後是否與本章節相同。
+			// !next_url.endsWith(next_chapter.url)
 			|| next_chapter.url !== next_url.slice(work_data.base_url.length))) {
 				if (false) {
 					library_namespace.info(library_namespace.display_align([
@@ -233,13 +236,9 @@ function module_code(library_namespace) {
 				text : (html.between('<div id="content">', '</div>')
 				// e.g., 88dushu
 				|| html.between('<div class="yd_text2">', '</div>')).replace(
-						/<script[^<>]*>[^<>]*<\/script>/, '')
+						/<script[^<>]*>[^<>]*<\/script>/g, '')
 			});
-		},
-		/** 進一步處理書籍之章節內容。例如繁簡轉換、裁剪廣告。 */
-		contents_post_processor : function(contents) {
-			return contents;
-		} && null,
+		}
 	};
 
 	// --------------------------------------------------------------------------------------------

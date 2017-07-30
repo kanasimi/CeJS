@@ -515,6 +515,20 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 
+	var PATTERN_number_string = /^[+\-]?(?:\d{1,20}(?:\.\d{1,20})?|\.\d{1,20})$/,
+	// 在命令列設定這些值時，將會被轉換為所指定的值。
+	// 若是有必要將之當作字串值，必須特地加上引號。
+	arg_conversion = {
+		'true' : true,
+		'false' : false,
+
+		'Infinity' : Infinity,
+		'infinity' : Infinity,
+
+		'null' : null,
+		'undefined' : undefined
+	};
+
 	/**
 	 * command line arguments 指令列參數
 	 * 
@@ -530,7 +544,7 @@ function module_code(library_namespace) {
 				console.warn(
 				//
 				'platform.nodejs: Invalid argument: [' + arg + ']');
-				this[arg] = undefined;
+				this[arg] = true;
 				return;
 			}
 
@@ -540,7 +554,14 @@ function module_code(library_namespace) {
 				return;
 			}
 
-			this[matched[2]] = matched[4];
+			var value = matched[4];
+			this[matched[2]] = (value in arg_conversion)
+			// 若是有必要將之當作字串值，必須特地加上引號。
+			? arg_conversion[value]
+			// treat as number
+			: PATTERN_number_string.test(value) ? +value
+			//
+			: value;
 		}, library_namespace.env.arg_hash
 		// ↑ use ((CeL.env.arg_hash)) to get command line arguments
 		= library_namespace.null_Object());

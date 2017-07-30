@@ -1691,7 +1691,7 @@ function module_code(library_namespace) {
 		if (node_zlib.gunzipSync
 		// && node_zlib.deflateSync
 		) {
-			// 早期 node v0.10.25 無 zlib.gunzipSync。
+			// 早期 node v0.10.25 無 zlib.gunzipSync。Added in: v0.11.12
 			// 'gzip, deflate, *'
 			_URL.headers['Accept-Encoding'] = 'gzip,deflate';
 		}

@@ -3044,7 +3044,7 @@ function module_code(library_namespace) {
 
 		// backtrack subroutine
 		function backtrack(from_index, to_index, all_list) {
-			// 因為函數 backtrack() 中會呼叫自己，可能出現：
+			// 因為函數 backtrack() 中呼叫自己，可能出現：
 			// RangeError: Maximum call stack size exceeded
 			// 因此必須採用非遞迴呼叫(recursive call)版本。
 			while (true) {
@@ -3114,10 +3114,11 @@ function module_code(library_namespace) {
 					}
 					add_to_diff_list(from_index, to_index);
 
-					// 常常出現RangeError錯誤的地方...
+					// 常常出現 Maximum call stack size exceeded 錯誤的地方...
 					// backtrack(from_index - 1, to_index - 1, all_list);
 					// return;
 
+					// 採用 iteration
 					from_index--;
 					to_index--;
 					continue;
@@ -3186,7 +3187,10 @@ function module_code(library_namespace) {
 								+ [ to_index, JSON.stringify(to_unique) ], 3,
 								'LCS.backtrack');
 					}
+
 					// backtrack(from_index, to_index - 1, all_list);
+
+					// 採用 iteration
 					to_index--;
 				}
 			}

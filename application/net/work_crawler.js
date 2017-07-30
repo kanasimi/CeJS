@@ -94,6 +94,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// 命令列可以設定的選項。通常僅做測試微調用。
+	// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
 	var import_arg_hash = {
 		main_directory : true,
 		user_agent : true,
@@ -101,15 +102,21 @@ function module_code(library_namespace) {
 		allow_EOI_error : true,
 		skip_error : true,
 		skip_chapter_data_error : true,
+		one_by_one : true,
 		recheck : true
 	};
 
 	function Work_crawler(configurations) {
 		Object.assign(this, configurations);
-		// 從命令列來的設定，優先等級比起作品預設設定更高。
+		// 從命令列引數來的設定，優先等級比起作品預設設定更高。
 		if (library_namespace.env.arg_hash) {
 			for ( var key in import_arg_hash) {
 				if (key in library_namespace.env.arg_hash) {
+					library_namespace.log(library_namespace.display_align([
+					//
+					[ key + ': ', this[key] ],
+					//
+					[ '命令列 → ', library_namespace.env.arg_hash[key] ] ]));
 					this[key] = library_namespace.env.arg_hash[key];
 				}
 			}
@@ -208,7 +215,7 @@ function module_code(library_namespace) {
 		// 對於極少出現錯誤的網站，可以設定一個比較小的數值，並且設定.allow_EOI_error=false。因為這類型的網站要不是無法取得檔案，要不就是能夠取得完整的檔案；要取得破損檔案，並且已通過EOI測試的機會比較少。
 		// MIN_LENGTH : 4e3,
 
-		// 可容許的最少字數
+		// 預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CHAPTER_LENGTH : 200,
 
 		// 仙人拍鼓有時錯，跤步踏差啥人無？ 客語 神仙打鼓有時錯，腳步踏差麼人無
@@ -221,6 +228,10 @@ function module_code(library_namespace) {
 		//
 		// 若已經存在壞掉的圖片，就不再嘗試下載圖片。default:false
 		// skip_existed_bad_file : true,
+		//
+		// 循序逐個、一個個下載圖像。僅對漫畫有用，對小說無用。 Download images one by one.
+		// default: 同時下載本章節中所有圖像。 Download ALL images at the same time.
+		// one_by_one : true,
 		//
 		// e.g., '2-1.jpg' → '2-1 bad.jpg'
 		EOI_error_postfix : ' bad',
@@ -269,6 +280,7 @@ function module_code(library_namespace) {
 		// regenerate : true,
 		/** 進一步處理書籍之章節內容。例如繁簡轉換、錯別字修正、裁剪廣告。 */
 		contents_post_processor : function(contents, work_data) {
+			return contents;
 		} && null,
 
 		full_URL : full_URL_of_path,
@@ -293,7 +305,7 @@ function module_code(library_namespace) {
 		is_finished : function(work_data) {
 			var status = work_data.status;
 			return status
-			// e.g., 连载中, 連載中, 已完结
+			// e.g., 连载中, 連載中, 已完结, 已完成
 			&& (/(^|已)完[結结成]/.test(status)
 			//
 			|| status.includes('完結済')
@@ -736,6 +748,7 @@ function module_code(library_namespace) {
 			// url = url.call(this, work_title);
 			url = this.search_URL(work_title);
 			if (Array.isArray(url)) {
+				// use POST method
 				post_data = url[1];
 				url = url[0];
 			}
@@ -945,6 +958,7 @@ function module_code(library_namespace) {
 			if (!work_data.title) {
 				work_data.title = work_title;
 			}
+			// 從已設定的網站名稱挑選一個可用的。
 			if (work_data.site_name) {
 				_this.site_name = work_data.site_name;
 			} else if (_this.site_name) {
@@ -1027,11 +1041,9 @@ function module_code(library_namespace) {
 
 					} else if (typeof work_data[key] !== 'object'
 							&& work_data[key] !== matched[key]) {
-						var display_pair = CeL.null_Object();
-						display_pair[key + ':'] = matched[key];
-						display_pair['→'] = work_data[key];
 						library_namespace.info(library_namespace
-								.display_align(display_pair));
+								.display_align([ [ key + ':', matched[key] ],
+										[ '→', work_data[key] ] ]));
 					}
 				}
 				matched = matched.last_download.chapter;
@@ -1393,8 +1405,6 @@ function module_code(library_namespace) {
 					// file_path
 					image_data.file = chapter_directory + work_data.id + '-'
 							+ chapter + '-' + (index + 1).pad(3) + '.jpg';
-					// default: 同時下載本章節中所有圖像。
-					// .one_by_one: 循序逐個、一個個下載圖像。 download one by one
 					if (!_this.one_by_one) {
 						_this.get_images(image_data, check_if_done);
 					}
@@ -1910,6 +1920,13 @@ function module_code(library_namespace) {
 		return work_data[this.KEY_EBOOK] = ebook;
 	}
 
+	// 找出段落開頭。
+	// '&nbsp;' 已經被 normailize_contents() @CeL.EPUB 轉換為 '&#160;'
+	var PATTERN_PARAGRAPH_START_CMN = /(^|\n|<br[^<>]*>|<\/?p[^<>]*>)(?:&#160;|\s){4,}([^\s\n&])/ig,
+	//
+	PATTERN_PARAGRAPH_START_JP = new RegExp(PATTERN_PARAGRAPH_START_CMN.source
+			.replace('{4,}', '{2,}'), PATTERN_PARAGRAPH_START_CMN.flags);
+
 	// 通常應該會被parse_chapter_data()呼叫
 	function add_ebook_chapter(work_data, chapter, data) {
 		var ebook = work_data && work_data[this.KEY_EBOOK];
@@ -1949,7 +1966,11 @@ function module_code(library_namespace) {
 			internalize_media : true,
 			file : library_namespace.to_file_name(file_title + '.xhtml'),
 			// 警告：必須設定 work_data.chapter_list。
-			date : work_data.chapter_list[chapter - 1].date
+			date : work_data.chapter_list[chapter - 1].date,
+			// pass Referer, User-Agent
+			get_URL_options : Object.assign({
+				error_retry : this.MAX_ERROR
+			}, this.get_URL_options)
 		}, {
 			// part_title 卷
 			title : get_label(data.title || ''),
@@ -1959,15 +1980,12 @@ function module_code(library_namespace) {
 			post_processor : function(contents) {
 				// 正規化小說章節文字。
 				if (language === 'ja') {
-					contents = contents.replace(
-					// '&nbsp;' 已經被 normailize_contents() @CeL.EPUB 轉換為 '&#160;'
-					/(^|\n)(?:&#160;|\s){2,}([^\s\n&])/g,
+					contents = contents.replace(PATTERN_PARAGRAPH_START_JP,
 					// 日本語では行頭から一文字の字下げをする。
 					'$1　$2');
 				} else if (language) {
-					contents = contents.replace(
 					// assert: language: 中文
-					/(^|\n)(?:&#160;|\s){4,}([^\s\n&])/g,
+					contents = contents.replace(PATTERN_PARAGRAPH_START_CMN,
 					// 中文每段落開頭空兩個字。
 					'$1　　$2');
 				}

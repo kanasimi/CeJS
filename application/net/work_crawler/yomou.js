@@ -55,11 +55,10 @@ function module_code(library_namespace) {
 		// auto_create_ebook, automatic create ebook
 		// MUST includes CeL.application.locale!
 		need_create_ebook : true,
-		// recheck:從頭檢測所有作品之所有章節。
-		// 'changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。
+		// recheck:從頭檢測所有作品之所有章節與所有圖片。不會重新擷取圖片。對漫畫應該僅在偶爾需要從頭檢查時開啟此選項。default:false
+		// recheck='changed': 若是已變更，例如有新的章節，則重新下載/檢查所有章節內容。否則只會自上次下載過的章節接續下載。
 		recheck : 'changed',
 
-		// one_by_one : true,
 		site_name : '小説を読もう！',
 		base_URL : 'http://yomou.syosetu.com/',
 		novel_base_URL : 'http://ncode.syosetu.com/',
@@ -107,8 +106,7 @@ function module_code(library_namespace) {
 						.append(work_data.キーワード.split(/\s+/)),
 				author : work_data.作者名,
 				last_update : work_data.最終話掲載日 || work_data.掲載日,
-				description : work_data.あらすじ,
-				site_name : this.site_name
+				description : work_data.あらすじ
 			}, work_data);
 
 			return work_data;

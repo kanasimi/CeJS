@@ -1204,9 +1204,11 @@ function module_code(library_namespace) {
 					if (item['media-type']
 					// 需要連接網站的重要原因之一是為了取得 media-type。
 					&& item['media-type'] !== XMLHttp.type) {
-						library_namespace.error('從網站得到的 media-type ['
-								+ XMLHttp.type + '] 與從副檔名所得到的 media-type ['
-								+ item['media-type'] + '] 不同!');
+						library_namespace
+								.error('add_chapter: 從網路得到的 media-type ['
+										+ XMLHttp.type
+										+ '] 與從副檔名所得到的 media-type ['
+										+ item['media-type'] + '] 不同!');
 					}
 					// 這邊已經不能用 item_data.type。
 					item['media-type'] = XMLHttp.type;
@@ -1255,7 +1257,7 @@ function module_code(library_namespace) {
 		// 有contents時除非指定.use_cache，否則不會用cache。
 		// 無contents時除非指定.force(這通常發生於呼叫端會自行寫入檔案的情況)，否會保留cache。
 		if ((contents ? item_data.use_cache : !item_data.force)
-		// 若是已存在相同資源(.id + .href)則直接跳過。
+		// 若是已存在相同資源(.id + .href)則直接跳過。 need unique links
 		&& (is_the_same_item(item, this.TOC)
 		//
 		|| (item.id in this.chapter_index_of_id) && is_the_same_item(item,
@@ -1288,7 +1290,8 @@ function module_code(library_namespace) {
 					var href = _this.directory.media + matched[2];
 					links.push({
 						url : url,
-						href : href
+						href : href,
+						get_URL_options : item_data.get_URL_options
 					});
 					return matched ? ' title="' + url + '" ' + attribute_name
 							+ '="' + href + '"' : all;
@@ -1315,8 +1318,10 @@ function module_code(library_namespace) {
 				});
 
 				if (links.length > 0) {
-					// console.log(links.unique());
-					// TODO: unique links
+					links = links.unique();
+					// console.log(links);
+					// TODO: 這個過程可能使資源檔還沒下載完，整本書的章節就已經下載完了。
+					// 應該多加上對資源檔是否已完全下載完畢的檢查。
 					_this.add(links);
 				}
 			}
@@ -1904,7 +1909,7 @@ function module_code(library_namespace) {
 			separator : '\n'
 		},
 
-		// 預設所容許的最短內容長度。
+		// 預設所容許的章節最短內容字數。最少應該要容許一句話的長度。
 		MIN_CONTENTS_LENGTH : 4,
 
 		// 應該用[A-Za-z]起始，但光單一字母不容易辨識。
