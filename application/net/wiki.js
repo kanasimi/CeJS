@@ -3982,7 +3982,9 @@ function module_code(library_namespace) {
 				// next[3] : options
 				// [ {String}API_URL, {String}title or {Object}page_data ]
 				wiki_API.page(is_api_and_title(next[1]) ? next[1] : [
-						this.API_URL, next[1] ], function(page_data, error) {
+						this.API_URL, next[1] ],
+				//
+				function wiki_API_next_page_callback(page_data, error) {
 					// assert: 當錯誤發生，例如頁面不存在，依然需要模擬出 page_data。
 					// 如此才能執行 .page().edit()。
 					_this.last_page
@@ -4019,8 +4021,10 @@ function module_code(library_namespace) {
 			// next[3] : options
 			// [ {String}API_URL, {String}title or {Object}page_data ]
 			wiki_API.redirect_to(is_api_and_title(next[1]) ? next[1] : [
-					this.API_URL, next[1] ], function(redirect_data, page_data,
-					error) {
+					this.API_URL, next[1] ],
+			//
+			function wiki_API_next_redirect_to_callback(redirect_data,
+					page_data, error) {
 				// next[2] : callback
 				if (typeof next[2] === 'function') {
 					next[2].call(_this, redirect_data, page_data, error);
@@ -4038,8 +4042,9 @@ function module_code(library_namespace) {
 			// get_list(). e.g., 反向連結/連入頁面.
 			// next[1] : title
 			// 注意: arguments 與 get_list() 之 callback 連動。
-			wiki_API[list_type]([ this.API_URL, next[1] ], function(pages,
-					titles, title) {
+			wiki_API[list_type]([ this.API_URL, next[1] ],
+			//
+			function wiki_API_next_list_callback(pages, titles, title) {
 				// [ last_list ]
 				_this.last_titles = titles;
 				// [ page_data ]
@@ -4069,8 +4074,9 @@ function module_code(library_namespace) {
 			break;
 
 		case 'search':
-			wiki_API.search([ this.API_URL, next[1] ], function(key, pages,
-					hits) {
+			wiki_API.search([ this.API_URL, next[1] ],
+			//
+			function wiki_API_search_callback(key, pages, hits) {
 				// [ page_data ]
 				_this.last_pages = pages;
 				// 設定/紀錄後續檢索用索引值。
@@ -4157,7 +4163,8 @@ function module_code(library_namespace) {
 				this.next();
 
 			} else if (!('stopped' in this)) {
-				// rollback, check if need stop 緊急停止.
+				library_namespace.debug('rollback, check if need stop 緊急停止.',
+						2, 'wiki_API.prototype.next');
 				this.actions.unshift([ 'check' ], next);
 				this.next();
 			} else if (this.stopped && !next[2].skip_stopped) {
@@ -4270,7 +4277,8 @@ function module_code(library_namespace) {
 				// 採用 skip_nochange 可以跳過實際 edit 的動作。
 				&& next[1] === get_page_content(this.last_page)) {
 					library_namespace.debug('Skip [' + this.last_page.title
-							+ ']: The same contents.');
+							+ ']: The same contents.', 1,
+							'wiki_API.prototype.next');
 					// next[3] : callback
 					if (typeof next[3] === 'function')
 						next[3].call(this, this.last_page.title, 'nochange');
@@ -4283,7 +4291,8 @@ function module_code(library_namespace) {
 					Object.assign({
 						// [KEY_SESSION]
 						session : this
-					}, next[2]), function(title, error, result) {
+					}, next[2]), function wiki_API_next_edit_callback(title,
+							error, result) {
 						// 當運行過多次，就可能出現 token 不能用的情況。需要重新 get token。
 						if (result ? result.error
 						//
@@ -8201,6 +8210,7 @@ function module_code(library_namespace) {
 		var action = !is_undo
 				&& wiki_API.edit.check_data(text, title, 'wiki_API.edit');
 		if (action) {
+			library_namespace.debug('直接執行 callback。', 2, 'wiki_API.edit');
 			callback(title, action);
 			return;
 		}

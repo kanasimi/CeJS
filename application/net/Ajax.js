@@ -367,7 +367,7 @@ function module_code(library_namespace) {
 	// https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
 	function parameters_to_String(parameters, charset) {
 		if (!library_namespace.is_Object(parameters)) {
-			if (typeof parameters !== 'string') {
+			if (typeof parameters !== 'string' && parameters !== undefined) {
 				library_namespace.debug(
 				// 可能無法處理
 				'非字串之 parameters: [' + parameters + ']', 1,

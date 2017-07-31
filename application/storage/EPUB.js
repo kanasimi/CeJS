@@ -1409,6 +1409,7 @@ function module_code(library_namespace) {
 				}
 				html.push('<div class="word_count">',
 				// 加入本章節之字數統計標示。
+				// TODO: 從第一章到本章的文字總數。
 				_('%1 words', item_data.word_count), '</div>',
 				// 加入本章節之內容。
 				'<div class="text">', contents, '</div>', '</body>', '</html>');

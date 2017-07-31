@@ -335,6 +335,7 @@ function module_code(library_namespace) {
 		get_work_list : get_work_list,
 		get_work : get_work,
 		get_work_data : get_work_data,
+		save_work_data : save_work_data_file,
 		get_chapter_data : get_chapter_data,
 		get_images : get_images
 	};
@@ -648,15 +649,26 @@ function module_code(library_namespace) {
 		return work_data.process_status;
 	}
 
-	// cache / save work data file
+	// 儲存本次作業到現在的作品資訊到檔案。 cache / save work data file
 	function save_work_data_file(work_data) {
-		if (work_data.data_file)
-			try {
-				node_fs.writeFileSync(work_data.data_file, JSON
-						.stringify(work_data));
-			} catch (e) {
-				// TODO: handle exception
-			}
+		if (!work_data.data_file)
+			return;
+
+		var ebook = work_data[this.KEY_EBOOK];
+		// 為了預防 TypeError: Converting circular structure to JSON
+		// ebook 結構中可能會有 circular。
+		delete work_data[this.KEY_EBOOK];
+		try {
+			node_fs.writeFileSync(work_data.data_file, JSON
+					.stringify(work_data));
+		} catch (e) {
+			library_namespace
+					.error('save_work_data_file: Can not save work data of '
+							+ (work_data.title || work_data.id) + '!');
+			library_namespace.error(e);
+		}
+		// recover
+		work_data[this.KEY_EBOOK] = ebook;
 	}
 
 	function get_work(work_title, callback) {
@@ -681,7 +693,7 @@ function module_code(library_namespace) {
 		function finish_up(work_data) {
 			if (work_data && work_data.title) {
 				// 最後紀錄。
-				save_work_data_file(work_data);
+				_this.save_work_data(work_data);
 				if (_this.need_create_ebook
 				// 未找到時沒有 work_data。
 				&& work_data.chapter_count >= 1) {
@@ -1256,7 +1268,7 @@ function module_code(library_namespace) {
 				work_data.last_download.chapter = _this.start_chapter;
 			}
 
-			save_work_data_file(work_data);
+			_this.save_work_data(work_data);
 
 			if (typeof callback === 'function' && callback.options
 					&& callback.options.get_data_only) {
@@ -1660,7 +1672,7 @@ function module_code(library_namespace) {
 			// 最後成功下載章節或者圖片日期。
 			work_data.last_saved = (new Date).toISOString();
 			// 紀錄已下載完之 chapter。
-			save_work_data_file(work_data);
+			_this.save_work_data(work_data);
 			if (++chapter > work_data.chapter_count) {
 				library_namespace.log(work_data.directory_name + ': '
 						+ work_data.chapter_count + ' chapters done.');
@@ -1989,6 +2001,8 @@ function module_code(library_namespace) {
 					// 中文每段落開頭空兩個字。
 					'$1　　$2');
 				}
+
+				// TODO: 可去除一開始重複的章節標題。
 
 				if (typeof _this.contents_post_processor === 'function') {
 					contents = _this.contents_post_processor(contents,

@@ -383,15 +383,20 @@ function module_code(library_namespace) {
 	 * @returns error
 	 */
 	function fs_writeFileSync(file_path, data, options) {
+		if (library_namespace.is_Object(data)
+		// JSON.stringify() 放在 try 外面。這樣出現 circular structure 的時候才知道要處理。
+		&& /.json$/i.test(file_path)) {
+			// 自動將資料轉成 string。
+			data = JSON.stringify(data);
+		}
+
 		try {
-			if (library_namespace.is_Object(data)
-			//
-			&& /.json$/i.test(file_path)) {
-				// 自動將資料轉成 string。
-				data = JSON.stringify(data);
-			}
 			node_fs.writeFileSync(file_path, data, options);
 		} catch (e) {
+			if (library_namespace.is_debug()) {
+				library_namespace.error('fs_writeFileSync: Can not save data!');
+				library_namespace.error(e);
+			}
 			return e;
 		}
 	}
