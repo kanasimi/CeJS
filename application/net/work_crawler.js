@@ -1972,7 +1972,7 @@ function module_code(library_namespace) {
 				+ (data.title ? data.title + ' - ' : '')
 				+ (data.sub_title || ''),
 		//
-		item = ebook.add({
+		item_data = {
 			title : file_title,
 			// include images / 自動載入內含資源, 將外部media內部化
 			internalize_media : true,
@@ -1982,8 +1982,11 @@ function module_code(library_namespace) {
 			// pass Referer, User-Agent
 			get_URL_options : Object.assign({
 				error_retry : this.MAX_ERROR
-			}, this.get_URL_options)
-		}, {
+			}, this.get_URL_options),
+			words_so_far : work_data.words_so_far
+		},
+		//
+		item = ebook.add(item_data, {
 			// part_title 卷
 			title : get_label(data.title || ''),
 			// chapter_title 章
@@ -2016,6 +2019,11 @@ function module_code(library_namespace) {
 				return contents;
 			}
 		});
+
+		// 登記本作品到本章節總計的字數。
+		if (item && !item.error && item_data.word_count > 0)
+			work_data.words_so_far = (work_data.words_so_far || 0)
+					+ item_data.word_count;
 
 		return item;
 	}

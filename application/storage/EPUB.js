@@ -38,6 +38,7 @@ http://www.idpf.org/epub/20/spec/OPF_2.0.1_draft.htm
  * @since 2017/1/24 11:55:51
  * @see [[en:file format]], [[document]], [[e-book]], [[EPUB]], [[Open eBook]]
  *      http://www.idpf.org/epub/31/spec/epub-packages.html
+ *      https://www.w3.org/Submission/2017/SUBM-epub-packages-20170125/
  *      http://epubzone.org/news/epub-3-validation http://validator.idpf.org/
  *      http://imagedrive.github.io/spec/epub30-publications.xhtml
  */
@@ -1403,14 +1404,17 @@ function module_code(library_namespace) {
 					library_namespace.debug('contents length: '
 							+ contents.length + '...');
 				}
-				if (!item_data.word_count) {
+				if (!(item_data.word_count > 0)) {
 					item_data.word_count = library_namespace.count_word(
 							contents, 1 + 2);
 				}
 				html.push('<div class="word_count">',
 				// 加入本章節之字數統計標示。
-				// TODO: 從第一章到本章的文字總數。
-				_('%1 words', item_data.word_count), '</div>',
+				_('%1 words', item_data.word_count)
+				// 從第一章到本章的文字總數。
+				+ (item_data.words_so_far > 0 ? ', ' + _('%1 words',
+				// item_data.words_so_far: 本作品到前一個章節總計的字數。
+				item_data.words_so_far + item_data.word_count) : ''), '</div>',
 				// 加入本章節之內容。
 				'<div class="text">', contents, '</div>', '</body>', '</html>');
 
@@ -1446,7 +1450,8 @@ function module_code(library_namespace) {
 					+ (contents ? '長度過短的內容 (' + contents.length + ' chars)'
 							: '空章節') + ': '
 					+ (item_data.file || decode_identifier(item.id, this)));
-			return;
+			item.error = 'too short';
+			return item;
 		}
 
 		if (item_data.TOC) {
