@@ -3709,9 +3709,8 @@ function module_code(library_namespace) {
 			lines = Object.entries(lines);
 		}
 		lines.forEach(function(line) {
-			var key = line[0], value = line[1];
-			if ((value.length > use_display_width)
-					|| String(value).includes('\n')) {
+			var key = String(line[0]), value = String(line[1]);
+			if ((value.length > use_display_width) || value.includes('\n')) {
 				for ( var key in lines) {
 					display_lines.push(key.trim() + '\n' + value);
 				}
