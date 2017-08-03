@@ -359,10 +359,12 @@ set_method(Object, {
 		: value1 !== value1 && value2 !== value2;
 	},
 
+	// TODO: Object.getOwnPropertyDescriptors()
 	// Object.getOwnPropertyDescriptor()
 	getOwnPropertyDescriptor : getOwnPropertyDescriptor,
 	// Object.getOwnPropertyNames() 會列出對象中所有可枚舉以及不可枚舉的屬性 (enumerable or non-enumerable)
 	getOwnPropertyNames : Object_keys,
+
 	// Object.keys(): get Object keys, 列出對象中所有可以枚舉的屬性 (enumerable only)
 	keys : Object_keys,
 	values : Object_values,

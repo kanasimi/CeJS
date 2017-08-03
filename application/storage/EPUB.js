@@ -1358,13 +1358,19 @@ function module_code(library_namespace) {
 					return !!title;
 				}).join(' - '), '</title>', '</head><body>');
 
+				// 設定item_data.url可以在閱讀電子書時，直接點選標題就跳到網路上的來源。
+				var url_header = item_data.url
+						&& ('<a href="' + item_data.url + '">');
 				// 卷標題
 				if (contents.title) {
-					html.push('<h2>', contents.title, '</h2>');
+					html.push('<h2>', url_header ? url_header + contents.title
+							+ '</a>' : contents.title, '</h2>');
 				}
 				// 章標題
 				if (contents.sub_title) {
-					html.push('<h3>', contents.sub_title, '</h3>');
+					html.push('<h3>', url_header ? url_header
+							+ contents.sub_title + '</a>' : contents.sub_title,
+							'</h3>');
 				} else if (!contents.title) {
 					library_namespace.warn('add_chapter: 未設定標題: '
 							+ String(contents.text).slice(0, 200) + '...');
@@ -1449,7 +1455,8 @@ function module_code(library_namespace) {
 			library_namespace.info('add_chapter: 跳過'
 					+ (contents ? '長度過短的內容 (' + contents.length + ' chars)'
 							: '空章節') + ': '
-					+ (item_data.file || decode_identifier(item.id, this)));
+					+ (item_data.file || decode_identifier(item.id, this))
+					+ (item_data.url ? ' (' + item_data.url + ')' : ''));
 			item.error = 'too short';
 			return item;
 		}

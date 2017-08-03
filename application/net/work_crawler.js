@@ -116,7 +116,7 @@ function module_code(library_namespace) {
 					//
 					[ key + ': ', this[key] ],
 					//
-					[ '命令列 → ', library_namespace.env.arg_hash[key] ] ]));
+					[ '由命令列 → ', library_namespace.env.arg_hash[key] ] ]));
 					this[key] = library_namespace.env.arg_hash[key];
 				}
 			}
@@ -515,11 +515,19 @@ function module_code(library_namespace) {
 
 		} else if (work_id
 		// 跳過來自命令列參數的手動設定。
-		&& !/^(?:allow_EOI_error|skip_error|recheck)=/.test(work_id)) {
-			// e.g.,
-			// node 各漫畫網站工具檔.js 12345
-			// node 各漫畫網站工具檔.js ABC
-			this.get_work(work_id, callback);
+		&& !(work_id.match(/^[^=]*/)[0] in import_arg_hash)) {
+			if (false && this.need_create_ebook) {
+				this.get_work_list([ work_id ], callback);
+			} else {
+				// e.g.,
+				// node 各漫畫網站工具檔.js 12345
+				// node 各漫畫網站工具檔.js ABC
+				this.get_work(work_id, callback);
+			}
+		} else {
+			library_namespace.error('parse_work_id: Invalid work id: '
+					+ work_id);
+			typeof callback === 'function' && callback();
 		}
 	}
 
@@ -672,24 +680,9 @@ function module_code(library_namespace) {
 	}
 
 	function get_work(work_title, callback) {
-		// 先取得 work id
-		if (this.is_work_id(work_title)) {
-			// is work id
-			this.get_work_data(work_title, callback);
-			return;
-		}
+		var _this = this;
 
-		var _this = this, search_result_file = this.main_directory
-				+ 'search.json',
-		// search cache
-		// 檢查看看之前是否有取得過。
-		search_result = library_namespace.get_JSON(search_result_file)
-				|| library_namespace.null_Object();
-		library_namespace.debug('search result file: ' + search_result_file, 2,
-				'get_work');
-		// console.log(search_result);
-
-		// finish() → finish_up()
+		// 執行順序: finish() → finish_up()
 		function finish_up(work_data) {
 			if (work_data && work_data.title) {
 				// 最後紀錄。
@@ -740,6 +733,25 @@ function module_code(library_namespace) {
 				title : work_title
 			}, finish_up);
 		}
+
+		// --------------------------------------
+		// 先取得 work id
+		if (this.is_work_id(work_title)) {
+			// is work id
+			this.get_work_data(work_title, finish_up);
+			return;
+		}
+
+		// --------------------------------------
+
+		var search_result_file = this.main_directory + 'search.json',
+		// search cache
+		// 檢查看看之前是否有取得過。
+		search_result = library_namespace.get_JSON(search_result_file)
+				|| library_namespace.null_Object();
+		library_namespace.debug('search result file: ' + search_result_file, 2,
+				'get_work');
+		// console.log(search_result);
 
 		// assert: work_title前後不應包含space
 		if (search_result[work_title = work_title.trim()]) {
@@ -1106,14 +1118,16 @@ function module_code(library_namespace) {
 					+ 'finished.txt', work_data.status);
 				}
 				set_work_status(work_data, 'finished');
+				// cf. work_data.latest_chapter 最新章節,
+				// work_data.latest_chapter_url
 				if (work_data.last_update) {
-					set_work_status(work_data, 'last updated: '
+					set_work_status(work_data, 'last updated date: '
 							+ work_data.last_update);
 				}
 				if (work_data.last_saved) {
 					set_work_status(
 							work_data,
-							'last saved: '
+							'last saved date: '
 									+ (library_namespace
 											.is_Date(work_data.last_saved) ? work_data.last_saved
 											.format('%Y/%m/%d')
@@ -1979,6 +1993,8 @@ function module_code(library_namespace) {
 			file : library_namespace.to_file_name(file_title + '.xhtml'),
 			// 警告：必須設定 work_data.chapter_list。
 			date : work_data.chapter_list[chapter - 1].date,
+			// 設定item_data.url可以在閱讀電子書時，直接點選標題就跳到網路上的來源。
+			url : this.full_URL(this.chapter_URL(work_data, chapter)),
 			// pass Referer, User-Agent
 			get_URL_options : Object.assign({
 				error_retry : this.MAX_ERROR
