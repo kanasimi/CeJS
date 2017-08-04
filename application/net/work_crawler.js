@@ -265,6 +265,8 @@ function module_code(library_namespace) {
 		// 是否保留chapter page
 		// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
 		preserve_chapter_page : true,
+		// 是否保留 cache
+		// preserve_cache : true,
 
 		// for CeL.application.storage.EPUB
 		// auto_create_ebook, automatic create ebook
@@ -692,6 +694,13 @@ function module_code(library_namespace) {
 				&& work_data.chapter_count >= 1) {
 					_this.pack_ebook(work_data);
 				}
+				if (false && _this.need_create_ebook && !_this.preserve_cache) {
+					// 注意: 若是刪除ebook目錄，也會把media資源檔刪掉。
+					// 因此只能刪除造出來的HTML網頁檔案。
+					library_namespace.fs_remove(
+					// @see CeL.application.storage.EPUB
+					work_data[this.KEY_EBOOK].path.root, true);
+				}
 			} else if (work_data && work_data.titles) {
 				// @see ((approximate_title))
 				set_work_status(work_data, 'found search result: '
@@ -706,6 +715,7 @@ function module_code(library_namespace) {
 						status && typeof status === 'string' ? status
 								: 'not found');
 			}
+
 			if (typeof _this.finish_up === 'function') {
 				_this.finish_up(work_data);
 			}
@@ -715,6 +725,16 @@ function module_code(library_namespace) {
 			// e.g., for .get_data_only
 			finish_up.options = callback.options;
 		}
+
+		// --------------------------------------
+		// 先取得 work id
+		if (this.is_work_id(work_title)) {
+			// ((work_title)) is work id
+			this.get_work_data(work_title, finish_up);
+			return;
+		}
+
+		// --------------------------------------
 
 		function finish(no_cache) {
 			if (!no_cache) {
@@ -733,16 +753,6 @@ function module_code(library_namespace) {
 				title : work_title
 			}, finish_up);
 		}
-
-		// --------------------------------------
-		// 先取得 work id
-		if (this.is_work_id(work_title)) {
-			// is work id
-			this.get_work_data(work_title, finish_up);
-			return;
-		}
-
-		// --------------------------------------
 
 		var search_result_file = this.main_directory + 'search.json',
 		// search cache
@@ -793,6 +803,7 @@ function module_code(library_namespace) {
 
 		// console.log(url);
 		this.set_agent(URL);
+		// console.log(this.get_URL_options);
 		get_URL(URL, function(XMLHttp) {
 			_this.set_agent();
 			if (!XMLHttp.responseText) {

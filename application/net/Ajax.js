@@ -1321,6 +1321,11 @@ function module_code(library_namespace) {
 					: node_http_agent;
 		}
 
+		if (options.cookie && !agent.last_cookie) {
+			// reset cookie?
+			agent.last_cookie = options.cookie;
+		}
+
 		var request, finished,
 		// result_Object模擬 XMLHttp。
 		result_Object = {
@@ -1725,6 +1730,7 @@ function module_code(library_namespace) {
 		}
 
 		_URL.agent = agent;
+		// console.trace('agent.last_cookie:');
 		// console.log(agent.last_cookie);
 		if (agent.last_cookie) {
 			library_namespace.debug('Set cookie: '
