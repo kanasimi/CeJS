@@ -4334,6 +4334,9 @@ function module_code(library_namespace) {
 							}
 							// rollback
 							_this.actions.unshift(next);
+							// 重新登入以後，編輯頁面之前再取得一次頁面內容。
+							_this.actions.unshift([ 'page',
+									this.last_page.title ]);
 							// TODO: 在這即使 rollback 了 action，
 							// 還是可能出現丟失 this.last_page 的現象。
 							// e.g., @ 20160517.解消済み仮リンクをリンクに置き換える.js
