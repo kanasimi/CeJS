@@ -12,6 +12,8 @@ TODO
 將 module_name 改成 arguments
 http://threecups.org/?p=129
 
+http://cdnjs.com/
+
 listen language change event
 play board
 
@@ -147,7 +149,7 @@ function (global) {
 
 	// define 'undefined'
 	try {
-		//  undefined === void 0
+		// undefined === void 0
 		if (undefined !== undefined) {
 			throw 1;
 		}
@@ -2718,11 +2720,15 @@ OS='UNIX'; // unknown
 
 }
 )(
-	// https://github.com/tc39/proposal-global
-	typeof self !== 'undefined' && self
 	// In strict mode, this inside globe functions is undefined.
 	// https://developer.mozilla.org/en/JavaScript/Strict_mode
-	|| typeof window !== 'undefined' && window
+	typeof window !== 'undefined' && window
+
+	// https://github.com/tc39/proposal-global
+	// 由於在HTML Application環境中，self並不等於window，但是應該要用window，所以先跳過這一項。
+	// 因著HTA的問題，要採用也必須放在window之後。
+	// || typeof self !== 'undefined' && self
+
 	// e.g., node.js
 	|| typeof global === 'object' && global && global.Array === Array && global
 	// http://nodejs.org/api/globals.html

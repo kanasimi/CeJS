@@ -1118,17 +1118,35 @@ function module_code(library_namespace) {
 		// 有contents的話，採用contents做為內容。並從item.href擷取出檔名。
 		if (!contents && item_data.url) {
 			// 沒contents的一律當作resource。
-			var resource_href_hash = library_namespace.null_Object();
-			if (this.resources.some(function(resource) {
+			var resource_href_hash = library_namespace.null_Object(),
+			//
+			file_type = detect_file_type(item_data.file || item.href)
+					|| detect_file_type(item_data.url),
+			//
+			file_path = this.path[file_type || 'media']
+					+ get_file_name_of_url(item.href);
+			// item_data.reget_resource: 強制重新取得資源檔。
+			if (!item_data.reget_resource
+			// 必須存在資源檔。
+			&& library_namespace.file_exists(file_path)
+			// 假如 media-type 不同，就重新再取得一次檔案。
+			&& item['media-type'] === library_namespace.MIME_of(item_data.url)
+			//
+			&& this.resources.some(function(resource) {
 				if (resource[KEY_DATA]
-						&& resource[KEY_DATA].url === item_data.url) {
-					var message = '已經有相同的資源檔 ' + resource[KEY_DATA].url;
+				//
+				&& resource[KEY_DATA].url === item_data.url) {
+					var message = '已經有相同的資源檔 '
+					//
+					+ item['media-type'] + '] ' + resource[KEY_DATA].url;
 					if (item_data.href
 					// 有手動設定.href
 					&& item_data.href !== resource.href) {
 						library_namespace.error(message
-								+ '\n但 .href 不同，您必須手動修正: ' + resource.href
-								+ '→' + item_data.href);
+						//
+						+ '\n但 .href 不同，您必須手動修正: '
+						//
+						+ resource.href + '→' + item_data.href);
 					} else {
 						library_namespace.log(message);
 					}
@@ -1183,11 +1201,7 @@ function module_code(library_namespace) {
 			// 先給個預設的media-type。
 			item['media-type'] = library_namespace.MIME_of(item_data.url);
 
-			var file_type = detect_file_type(item_data.file || item.href)
-					|| detect_file_type(item_data.url);
-
-			item_data.file_path = this.path[file_type || 'media']
-					+ get_file_name_of_url(item.href);
+			item_data.file_path = file_path;
 			// 自動添加.downloading登記。
 			this.downloading[item_data.file_path] = item_data;
 
@@ -1445,6 +1459,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('Write ' + contents.length + ' chars to ['
 					+ this.path.text + item.href + ']');
 			if (item_data.write_file !== false) {
+				// 寫入檔案。
 				library_namespace.write_file(this.path.text + item.href,
 						contents);
 			} else {

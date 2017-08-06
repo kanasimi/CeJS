@@ -50,6 +50,7 @@ new_COM = typeof WScript === 'object' ? function(id) {
 	//	http://msdn.microsoft.com/en-us/library/xzysf6hc(v=vs.84).aspx
 	return WScript.CreateObject(id);
 } : typeof ActiveXObject === 'function' ? function(id) {
+	// e.g., in HTA
 	return new ActiveXObject(id);
 } : typeof Server === 'object' && Server.CreateObject && function(id) {
 	return Server.CreateObject(id);

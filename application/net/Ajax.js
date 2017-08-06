@@ -15,7 +15,9 @@ typeof CeL === 'function' && CeL.run({
 	name : 'application.net.Ajax',
 
 	// MIME_of()
-	require : 'application.net.MIME.',
+	require : 'application.net.MIME.'
+	// for CeL.to_file_name()
+	+ '|application.net.',
 
 	// 設定不匯出的子函式。
 	// no_extend : '*',
@@ -600,9 +602,12 @@ function module_code(library_namespace) {
 			}
 
 			function push_and_callback(MIME_type, content) {
+				// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition
 				var headers = 'Content-Disposition: '
 						+ (slice ? 'file' : 'form-data; name="' + key + '"')
-						+ '; filename="' + value + '"' + form_data_new_line;
+						+ '; filename="' + encodeURIComponent(value) + '"'
+						+ "; filename*=UTF-8''" + encodeURIComponent(value)
+						+ form_data_new_line;
 				if (MIME_type) {
 					headers += 'Content-Type: ' + MIME_type
 							+ form_data_new_line;
@@ -1311,6 +1316,12 @@ function module_code(library_namespace) {
 		if (agent) {
 			library_namespace.debug('使用' + (agent === true ? '新' : '自定義')
 					+ ' agent。', 6, 'get_URL_node');
+			if (agent !== true && agent.protocol !== _URL.protocol) {
+				library_namespace
+						.warn('get_URL_node: 自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
+								+ agent.protocol + ' !== ' + _URL.protocol);
+				agent = true;
+			}
 			if (agent === true) {
 				// use new agent
 				agent = _URL.protocol === 'https:' ? new node_https.Agent
@@ -1469,6 +1480,33 @@ function module_code(library_namespace) {
 							4, 'get_URL_node._onload');
 			// XMLHttp.headers['content-type']==='text/html; charset=utf-8'
 			result_Object.headers = result.headers;
+
+			// node.js會自動把headers轉成小寫。
+			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition
+			if (result.headers['content-disposition']) {
+				// 從Content-Disposition中抽取出檔名。
+				// ext-value = charset "'" [ language ] "'" value-chars
+				var matched = result.headers['content-disposition']
+						.match(/ filename\*\s*=\s*([^';]+)'([^';]*)'([^';]+)/);
+				if (matched) {
+					matched = matched[3];
+				} else if (matched = result.headers['content-disposition']
+						.match(/ filename\s*=\s*([^';]+)/)) {
+					matched = matched[1];
+				}
+				if (matched && (matched = matched.trim())) {
+					matched = (matched.match(/^"(.*)"$/)
+							|| matched.match(/^'(.*)'$/) || [ , matched ])[1];
+					try {
+						matched = decodeURIComponent(matched);
+					} catch (e) {
+						// TODO: handle exception
+					}
+					result_Object.filename = library_namespace
+							.to_file_name(matched);
+				}
+			}
+
 			// 在503之類的情況下。可能沒"Content-Type:"。這時result將無.type。
 			if (result.headers['content-type']) {
 				// MIME type, media-type: XMLHttp.type
@@ -1626,9 +1664,13 @@ function module_code(library_namespace) {
 				if (options.write_to || options.write_to_directory) {
 					var file_path = options.write_to
 					// save to: 設定寫入目標。
-					|| (options.write_to_directory + '/'
+					|| (options.write_to_directory
 					//
-					+ URL.replace(/#.*/g, '').replace(/[\\\/:*?"<>|]/g, '_'))
+					+ library_namespace.env.path_separator
+					//
+					+ library_namespace.to_file_name(
+					//
+					URL.replace(/#.*/g, '').replace(/[\\\/:*?"<>|]/g, '_')))
 					// 避免 Error: ENAMETOOLONG: name too long
 					.slice(0, 256);
 					if (!options.no_warning) {
@@ -1978,6 +2020,10 @@ function module_code(library_namespace) {
 			// auto-detecting
 			options = /\.[a-z\d\-]+$/i.test(options) ? {
 				file_name : options
+			} : /[\\\/]+$/i.test(options)
+			// || 也可以測試是不是目錄、此目錄是否存在。
+			? {
+				directory : options
 			} : {
 				encoding : options
 			};
@@ -2000,7 +2046,13 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		node_fs.readFile(file_name, encoding, function(error, data) {
+		if (options.directory) {
+			file_name = options.directory + file_name;
+		}
+
+		node_fs.readFile(file_name, encoding,
+		//
+		function(error, data) {
 			if (!options.reget) {
 				if (!error
 				// 若是容許空內容，應該特別指定options.allow_empty。
@@ -2037,6 +2089,21 @@ function module_code(library_namespace) {
 				// 將以 .postprocessor() 的回傳作為要處理的資料。
 				if (typeof options.postprocessor === 'function') {
 					data = options.postprocessor(data, XMLHttp);
+				}
+				if (XMLHttp.filename) {
+					if (false) {
+						console.log([ options.directory, options.file_name,
+								XMLHttp.filename ]);
+						console.log(XMLHttp.headers);
+					}
+					if (!options.file_name) {
+						file_name = (options.directory || '')
+						// 若是沒有特別設置檔名，則改採用header裡面的檔名。
+						+ XMLHttp.filename;
+					} else if (!options.file_name.endsWith(XMLHttp.filename)) {
+						library_namespace.info('get_URL_cache_node: '
+								+ XMLHttp.filename + ' → ' + options.file_name)
+					}
 				}
 				/**
 				 * 寫入cache。

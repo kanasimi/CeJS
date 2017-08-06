@@ -129,6 +129,7 @@ CeL.assert([ "2³⋅13⋅80611⋅82217",
 ## Features and examples
 For further introduction, please see the [wiki](https://github.com/kanasimi/CeJS/wiki).
 進一步介紹請參閱本計畫之 [wiki](https://github.com/kanasimi/CeJS/wiki)。
+<!-- TODO: screenshot data:image/png;base64, -->
 
 ### 中西曆轉換
 Live demo: [紀年轉換工具](http://lyrics.meicho.com.tw/lib/JS/_test%20suite/era.htm).

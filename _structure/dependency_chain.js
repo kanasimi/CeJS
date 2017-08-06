@@ -2513,19 +2513,21 @@ if (typeof CeL === 'function')
 										node = null;
 									}, 0);
 
-								try {
-									delete node.onload;
-								} catch (e) {
-									// error on IE5–9: Error: "Object
-									// doesn't support this action".
-									node.onload = null;
-								}
-								try {
-									delete node.onreadystatechange;
-								} catch (e) {
-									// error on IE5–9: Error: "Object
-									// doesn't support this action".
-									node.onreadystatechange = null;
+								if (node) {
+									try {
+										delete node.onload;
+									} catch (e) {
+										// error on IE5–9: Error: "Object
+										// doesn't support this action".
+										node.onload = null;
+									}
+									try {
+										delete node.onreadystatechange;
+									} catch (e) {
+										// error on IE5–9: Error: "Object
+										// doesn't support this action".
+										node.onreadystatechange = null;
+									}
 								}
 
 								// 有可能本次載入失敗，但之前已成功過；

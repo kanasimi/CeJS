@@ -59,7 +59,7 @@ typeof CeL === 'function' && CeL.run({
 	+ '|application.net.'
 	//
 	+ '|application.net.Ajax.get_URL'
-	// for CeL.env.arg_hash, CeL.fs_mkdir()
+	// for CeL.env.arg_hash, CeL.fs_read()
 	+ '|application.platform.nodejs.|application.storage.'
 	// for CeL.storage.file.file_type()
 	+ '|application.storage.file.'
@@ -93,24 +93,11 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// 命令列可以設定的選項。通常僅做測試微調用。
-	// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
-	var import_arg_hash = {
-		main_directory : true,
-		user_agent : true,
-		MAX_ERROR : true,
-		allow_EOI_error : true,
-		skip_error : true,
-		skip_chapter_data_error : true,
-		one_by_one : true,
-		recheck : true
-	};
-
 	function Work_crawler(configurations) {
 		Object.assign(this, configurations);
 		// 從命令列引數來的設定，優先等級比起作品預設設定更高。
 		if (library_namespace.env.arg_hash) {
-			for ( var key in import_arg_hash) {
+			for ( var key in this.import_arg_hash) {
 				if (key in library_namespace.env.arg_hash) {
 					library_namespace.log(library_namespace.display_align([
 					//
@@ -329,6 +316,19 @@ function module_code(library_namespace) {
 			return work_data.chapter_list[chapter - 1].url;
 		},
 
+		// 命令列可以設定的選項。通常僅做測試微調用。
+		// 以純量為主，例如邏輯真假、數字、字串。無法處理函數！
+		import_arg_hash : {
+			main_directory : true,
+			user_agent : true,
+			MAX_ERROR : true,
+			allow_EOI_error : true,
+			skip_error : true,
+			skip_chapter_data_error : true,
+			one_by_one : true,
+			recheck : true
+		},
+
 		set_agent : set_agent,
 		data_of : start_get_data_of,
 		start : start_downloading,
@@ -375,7 +375,9 @@ function module_code(library_namespace) {
 			}
 
 			typeof callback === 'function' && callback();
-		}, this.charset, null, this.get_URL_options);
+		}, this.charset, null, Object.assign({
+			error_retry : this.MAX_ERROR
+		}, this.get_URL_options));
 	}
 
 	// front end #1: start downloading operation
@@ -395,7 +397,7 @@ function module_code(library_namespace) {
 
 		library_namespace.log(this.id + ': Strating ' + work_id);
 		// prepare work directory.
-		library_namespace.fs_mkdir(this.main_directory);
+		library_namespace.create_directory(this.main_directory);
 
 		if (!this.server_URL) {
 			this.parse_work_id(work_id, callback);
@@ -517,7 +519,7 @@ function module_code(library_namespace) {
 
 		} else if (work_id
 		// 跳過來自命令列參數的手動設定。
-		&& !(work_id.match(/^[^=]*/)[0] in import_arg_hash)) {
+		&& !(work_id.match(/^[^=]*/)[0] in this.import_arg_hash)) {
 			if (false && this.need_create_ebook) {
 				this.get_work_list([ work_id ], callback);
 			} else {
@@ -663,6 +665,9 @@ function module_code(library_namespace) {
 	function save_work_data_file(work_data) {
 		if (!work_data.data_file)
 			return;
+
+		// 預防(work_data.directory)不存在。
+		library_namespace.create_directory(work_data.directory);
 
 		var ebook = work_data[this.KEY_EBOOK];
 		// 為了預防 TypeError: Converting circular structure to JSON
@@ -1035,7 +1040,7 @@ function module_code(library_namespace) {
 
 			// 先寫入作品資料cache。
 			var directory = _this.main_directory + _this.cache_directory_name;
-			library_namespace.fs_mkdir(directory);
+			library_namespace.create_directory(directory);
 			// .data.htm
 			node_fs.writeFileSync(
 					directory + work_data.directory_name + '.htm', html);
@@ -1120,7 +1125,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('Create work_data.directory: '
 					+ work_data.directory);
 			// 預防(work_data.directory)不存在。
-			library_namespace.fs_mkdir(work_data.directory);
+			library_namespace.create_directory(work_data.directory);
 
 			if (_this.is_finished(work_data)) {
 				if (false) {
@@ -1286,7 +1291,7 @@ function module_code(library_namespace) {
 					// TODO: 成壓縮檔。
 					library_namespace.fs_move(work_data.directory, move_to);
 					// re-create work_data.directory
-					library_namespace.fs_mkdir(work_data.directory);
+					library_namespace.create_directory(work_data.directory);
 				} else {
 					library_namespace.info('將從頭檢查、重新下載。');
 				}
@@ -1406,7 +1411,7 @@ function module_code(library_namespace) {
 				var chapter_directory = work_data.directory + chapter_label
 				// 若是以 "." 結尾，在 Windows 7 中會出現問題，無法移動或刪除。
 				.replace(/\.$/, '._') + path_separator;
-				library_namespace.fs_mkdir(chapter_directory);
+				library_namespace.create_directory(chapter_directory);
 				// 注意: 若是沒有reget_chapter，則preserve_chapter_page不應發生效用。
 				if (work_data.reget_chapter && _this.preserve_chapter_page) {
 					node_fs.writeFileSync(chapter_directory

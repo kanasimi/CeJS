@@ -75,6 +75,8 @@ library_namespace.set_method(String.prototype, {
 /**
  * 類似 sprintf，處理 escape sequence 字串之 function。
  * 
+ * TODO: http://numeraljs.com/
+ * 
  * @example <code>
  * 
  * </code>

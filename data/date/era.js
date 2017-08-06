@@ -7150,14 +7150,14 @@ function module_code(library_namespace) {
 
 			if (l > get_dates.ERA_YEAR_LIMIT
 			//
-			&& !get_dates.no_limit_era.includes(era))
+			&& !get_dates.no_limit_era.includes(era)) {
 				library_namespace.warn([
 				//
 				'get_dates: 跳過 [' + era + ']： 跨度過長，共有 '
 				//
 				+ l + '個年分！您可嘗試縮小範圍、加注年分 (如輸入 "'
 				//
-				+ concat_era_name([ era, '1年' ]) + '")，或', {
+				+ concat_era_name([ era, era.歲名(0) + '年' ]) + '")，或', {
 					a : {
 						// Cancel the restriction
 						T : '取消限制'
@@ -7168,7 +7168,7 @@ function module_code(library_namespace) {
 						return false;
 					}
 				}, '。' ]);
-			else
+			} else {
 				for (; i < l; i++) {
 					if (true || date_list.length < get_dates.LIMIT)
 						add_date(year_start[i], era);
@@ -7180,6 +7180,7 @@ function module_code(library_namespace) {
 						break;
 					}
 				}
+			}
 		});
 
 		return date_list;

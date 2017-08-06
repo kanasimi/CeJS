@@ -97,7 +97,7 @@ function gethost(host) {
 			IP = host, host = 0;
 	} else {
 		f = 'ipconfig.tmp.txt';
-		WshShell.Run(c + 'ipconfig > ' + (cmd ? '""' + f + '"" "' : p + f), 0, 1);	//	winipcfg
+		WshShell.Run(c + 'ipconfig > ' + (cmd ? '""' + f + '"" "' : p + f), 0, true);	//	winipcfg
 		if (t = simpleRead(f = p + f)) {
 			// TODO: use t.between()
 			if (i = t.indexOf('PPP adapter'), i != NOT_FOUND)
@@ -118,7 +118,7 @@ function gethost(host) {
 	if (!cmd)
 		return [host, IP];	//	Win98沒有nslookup
 	f = 'qDNS.tmp.txt';
-	WshShell.Run(c + 'nslookup ' + (cmd ? '""' + (IP || host) + '"" > ""' + f + '"" "' : (IP || host) + '>' + p + f), 0, 1);
+	WshShell.Run(c + 'nslookup ' + (cmd ? '""' + (IP || host) + '"" > ""' + f + '"" "' : (IP || host) + '>' + p + f), 0, true);
 	//try { WScript.Sleep(200); } catch (e) { }	//	/C:執行字串中所描述的指令然後結束指令視窗	(x)因為用/c，怕尚未執行完。
 	if ((t = simpleRead(f = p + f)) && t.match(/Server:/)
 		&& t.match(/Address:\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/)) {
@@ -755,7 +755,14 @@ URI_accessor.default_getter = function (setting, command_array, apply_command) {
 		library_namespace.debug('WshShell: [' + (typeof WshShell) + ']' + WshShell, 3, 'URI_accessor.default_getter.getter');
 
 		try {
-			if (result = WshShell.Run(command_array.join(''), typeof window_style === 'function' ? window_style() : window_style, true)) {
+			// WshShell.Run("cmd.exe /c set > env.txt", 1, true);
+			result = WshShell.Run(command_array.join(''),
+			// Window Style
+			1,
+			//typeof window_style === 'function' ? window_style() : window_style,
+			// true: 等調用的程序退出後再執行。
+			true);
+			if (result) {
 				//	result = EXIT CODE
 				this.lastest_errorno = result;
 				save_to = '[error] ' + save_to;
@@ -775,6 +782,7 @@ URI_accessor.default_getter = function (setting, command_array, apply_command) {
 					+ (result ? ', <em>error code ' + result + '</em>.' : ''));
 
 		} catch (e) {
+			// library_namespace.error(e);
 			if ((e.number & 0xFFFF) === 2)
 				// 若不存在此執行檔案，將 throw。
 				// '找不到執行檔: wget。您可能需要安裝此程式後再執行。'
@@ -1119,7 +1127,7 @@ get_video.getter_setting = {
 	additional_options: '--location',
 	// 2014/12/6 對於 "150 這部影片無法在您的國家/地區播放。"，需要是自己的影片，有 cookies 才行。
 	cookie : "",
-	cookie_file : 'youtube.cookie.txt',
+	cookie_file : './youtube.cookie.txt',
 	referer : 'http://www.youtube.com/'
 };
 
@@ -1128,18 +1136,23 @@ get_video.getter_setting = {
 //	get_video_info 是 Youtube API 的一部分。
 //	http://developer.nokia.com/Community/Wiki/How_to_parse_YouTube_API_response
 get_video.get_information = function get_video_information(video_hash, download_to) {
-	var html, matched, param, param_url, data = 'video.' + video_hash + '.info';
+	var html, matched, param, param_url, data = './video.' + video_hash + '.info';
 	if (!download_to)
 		download_to = '';
+
+	// library_namespace.set_debug(5);
+
 	// 2014/1/14 加上 sts 才能使下面 parse signature 正常作動。eurl 似乎沒必要。
 	// 2014/5/2 某些版權影片需要 eurl。
 	get_URI(encodeURI('http://www.youtube.com/get_video_info?eurl='
 		+ get_video.getter_setting.referer + '&sts=1586&video_id=' + video_hash), data, get_video.getter_setting);
+	// alert(WshShell.CurrentDirectory);
 
 	try {
 		html = library_namespace.get_file(data);
 	} catch (e) {
 		// TODO: handle exception
+		// library_namespace.error(e);
 	}
 	if (html) {
 		try {
@@ -1325,7 +1338,7 @@ get_video.get_information = function get_video_information(video_hash, download_
 
 	if (!library_namespace.is_Object(param)) {
 		//	預防連 data 都沒有的情況。可能須確認外部程式正常作動。
-		param = { reason: 'Can not parse data. Is the external program worked properly?' };
+		param = { reason: 'Can not parse data. Is the external program worked properly? e.g., ' + Object.keys(URI_accessor.module) + '\n Or you may need to check {$PATH}.' };
 	}
 	data = new Error('Can not get video information of ['
 			+ video_hash + ']: ' + (param.reason || 'Unknown error'));
