@@ -1446,6 +1446,19 @@ function module_code(library_namespace) {
 			}
 		}
 
+		var text;
+		if ((!contents || !(contents.length >= this.MIN_CONTENTS_LENGTH))
+		// 先嘗試讀入舊的資料。
+		&& (text = library_namespace.read_file(this.path.text + item.href))) {
+			contents = text;
+			// 取得純內容部分。
+			if (false) {
+				contents = text.between('<div class="text">', {
+					tail : '</div>'
+				});
+			}
+		}
+
 		if (contents && contents.length >= this.MIN_CONTENTS_LENGTH) {
 			// 應允許文字敘述式 word count。
 			if (!item_data.word_count && item_data.word_count !== 0) {
@@ -1453,17 +1466,24 @@ function module_code(library_namespace) {
 						1 + 2);
 			}
 
-			// 需要先準備好目錄結構。
-			this.initialize();
-
-			library_namespace.debug('Write ' + contents.length + ' chars to ['
-					+ this.path.text + item.href + ']');
-			if (item_data.write_file !== false) {
+			if (text) {
+				library_namespace.warn(
+				//
+				'add_chapter: 因為內容長度或短或者無內容，因此從舊的cache檔案中取得內容，'
+						+ contents.length + ' 字元: '
+						+ (item_data.file || decode_identifier(item.id, this))
+						+ (item_data.url ? ' (' + item_data.url + ')' : ''));
+			} else if (item_data.write_file !== false) {
+				library_namespace.debug('Write ' + contents.length
+						+ ' chars to [' + this.path.text + item.href + ']');
+				// 需要先準備好目錄結構。
+				this.initialize();
 				// 寫入檔案。
 				library_namespace.write_file(this.path.text + item.href,
 						contents);
-			} else {
-				library_namespace.debug('僅設定 item data，未自動寫入 file，您需要自己完成這動作。');
+			} else if (text) {
+				library_namespace.debug('僅設定 item data，未自動寫入 file ['
+						+ this.path.text + item.href + ']，您需要自己完成這動作。');
 			}
 
 		} else if (!item_data.force) {

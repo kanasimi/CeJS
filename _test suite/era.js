@@ -3032,6 +3032,20 @@ function affairs() {
 		}
 	}
 
+	function degree_layer(degree) {
+		return isNaN(degree) ? data_load_message : {
+			div : {
+				span : CeL.format_degrees(degree, 0)
+				// &nbsp;
+				.replace(/ /g, CeL.DOM.NBSP),
+				// degree % TURN_TO_DEGREES
+				R : degree % 360
+			},
+			C : 'monospaced',
+			S : 'text-align:right;'
+		};
+	}
+
 	// calendar_columns
 	list = {
 		week : [ {
@@ -3251,7 +3265,10 @@ function affairs() {
 				time : 2
 			});
 			return !date || date.includes('候') ? date : {
-				b : date
+				a : {
+					b : date
+				},
+				href : 'https://zh.wikipedia.org/wiki/' + date.slice(0, 2)
 			};
 		} ],
 
@@ -3291,14 +3308,7 @@ function affairs() {
 				return;
 
 			var JD = CeL.TT(new Date(date.offseted_value()));
-			return {
-				span : CeL.format_degrees(
-				//
-				CeL.solar_coordinates(JD).apparent, 0)
-				// &nbsp;
-				.replace(/ /g, CeL.DOM.NBSP),
-				C : 'monospaced'
-			};
+			return degree_layer(CeL.solar_coordinates(JD).apparent);
 		} ],
 
 		moon_longitude : [ {
@@ -3315,20 +3325,11 @@ function affairs() {
 			if (/* date.準 || */date.精)
 				return;
 
-			var JD = CeL.TT(new Date(date.offseted_value())),
-			//
-			V = CeL.lunar_coordinates(JD, {
-				degrees : true
-			}).V;
+			var JD = CeL.TT(new Date(date.offseted_value()));
 
-			return {
-				span : isNaN(V) ? data_load_message
-				//
-				: CeL.format_degrees(V, 0)
-				// &nbsp;
-				.replace(/ /g, CeL.DOM.NBSP),
-				C : 'monospaced'
-			};
+			return degree_layer(CeL.lunar_coordinates(JD, {
+				degrees : true
+			}).V);
 		} ],
 
 		moon_latitude : [ {
@@ -3345,20 +3346,11 @@ function affairs() {
 			if (/* date.準 || */date.精)
 				return;
 
-			var JD = CeL.TT(new Date(date.offseted_value())),
-			//
-			U = CeL.lunar_coordinates(JD, {
-				degrees : true
-			}).U;
+			var JD = CeL.TT(new Date(date.offseted_value()));
 
-			return {
-				span : isNaN(U) ? data_load_message
-				//
-				: CeL.format_degrees(U, 0)
-				// &nbsp;
-				.replace(/ /g, CeL.DOM.NBSP),
-				C : 'monospaced'
-			};
+			return degree_layer(CeL.lunar_coordinates(JD, {
+				degrees : true
+			}).U);
 		} ],
 
 		moon_sun : [ {
@@ -3376,18 +3368,9 @@ function affairs() {
 			if (/* date.準 || */date.精)
 				return;
 
-			var JD = CeL.TT(new Date(date.offseted_value())),
-			//
-			degrees = CeL.lunar_phase_angle_of_JD(JD);
+			var JD = CeL.TT(new Date(date.offseted_value()));
 
-			return {
-				span : isNaN(degrees) ? data_load_message
-				//
-				: CeL.format_degrees(degrees, 0)
-				// &nbsp;
-				.replace(/ /g, CeL.DOM.NBSP),
-				C : 'monospaced'
-			};
+			return degree_layer(CeL.lunar_phase_angle_of_JD(JD));
 		} ],
 
 		lunar_phase : [ {

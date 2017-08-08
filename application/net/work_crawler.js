@@ -683,7 +683,8 @@ function module_code(library_namespace) {
 			library_namespace.error(e);
 		}
 		// recover
-		work_data[this.KEY_EBOOK] = ebook;
+		if (ebook)
+			work_data[this.KEY_EBOOK] = ebook;
 	}
 
 	function get_work(work_title, callback) {

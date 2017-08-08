@@ -606,13 +606,16 @@ if (typeof CeL === 'function')
 				var value = Math.floor(degree),
 				//
 				show = '';
-				if (value) {
+				if (value > 0) {
+					degree -= value;
+					// 限制範圍在0至360度內。
+					value %= TURN_TO_DEGREES;
 					if (padding >= 0 && value < 100)
 						show = value > 9 ? ' ' : '  ';
 					show += value + '° ';
 				}
 
-				if (degree -= value) {
+				if (degree > 0) {
 					value = (degree *= 60) | 0;
 					if (value || show)
 						show += (padding && value < 10 ? ' ' : '')

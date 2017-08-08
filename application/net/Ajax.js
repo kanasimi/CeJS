@@ -1316,18 +1316,26 @@ function module_code(library_namespace) {
 		if (agent) {
 			library_namespace.debug('使用' + (agent === true ? '新' : '自定義')
 					+ ' agent。', 6, 'get_URL_node');
-			if (agent !== true && agent.protocol !== _URL.protocol) {
-				library_namespace
-						.warn('get_URL_node: 自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
-								+ agent.protocol + ' !== ' + _URL.protocol);
-				agent = true;
-			}
 			if (agent === true) {
 				// use new agent
 				agent = _URL.protocol === 'https:' ? new node_https.Agent
 						: new node_http.Agent;
+			} else if (agent.protocol
+			// agent.protocol 可能是 undefined。
+			&& agent.protocol !== _URL.protocol) {
+				library_namespace
+						.warn('get_URL_node: 自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
+								+ agent.protocol + ' !== ' + _URL.protocol);
+				// use new agent
+				agent = _URL.protocol === 'https:' ? new node_https.Agent
+						: new node_http.Agent;
+				if (options.agent.last_cookie) {
+					// 佈置原agent的設定。
+					agent.last_cookie = options.agent.last_cookie;
+				}
 			}
 		} else {
+			// 採用泛用的agent。
 			agent = _URL.protocol === 'https:' ? node_https_agent
 					: node_http_agent;
 		}
