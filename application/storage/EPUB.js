@@ -1135,8 +1135,11 @@ function module_code(library_namespace) {
 			&& this.resources.some(function(resource) {
 				if (resource[KEY_DATA]
 				//
-				&& resource[KEY_DATA].url === item_data.url) {
-					var message = '已經有相同的資源檔 '
+				&& resource[KEY_DATA].url === item_data.url
+				// TODO: reget resource
+				// && item['media-type'] && item['media-type'] !== 'undefined'
+				) {
+					var message = '已經有相同的資源檔 ['
 					//
 					+ item['media-type'] + '] ' + resource[KEY_DATA].url;
 					if (item_data.href
@@ -1469,8 +1472,8 @@ function module_code(library_namespace) {
 			if (text) {
 				library_namespace.warn(
 				//
-				'add_chapter: 因為內容長度或短或者無內容，因此從舊的cache檔案中取得內容，'
-						+ contents.length + ' 字元: '
+				'add_chapter: 因為內容長度或短或者無內容，因此從cache檔案中取得舊的內容('
+						+ contents.length + ' 字元):\n	'
 						+ (item_data.file || decode_identifier(item.id, this))
 						+ (item_data.url ? ' (' + item_data.url + ')' : ''));
 			} else if (item_data.write_file !== false) {
@@ -1489,7 +1492,7 @@ function module_code(library_namespace) {
 		} else if (!item_data.force) {
 			library_namespace.info('add_chapter: 跳過'
 					+ (contents ? '長度過短的內容 (' + contents.length + ' chars)'
-							: '空章節') + ': '
+							: '無內容/空章節') + ': '
 					+ (item_data.file || decode_identifier(item.id, this))
 					+ (item_data.url ? ' (' + item_data.url + ')' : ''));
 			item.error = 'too short';

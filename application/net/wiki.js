@@ -652,49 +652,56 @@ function module_code(library_namespace) {
 	/**
 	 * get NO of namespace
 	 * 
-	 * @param {String}namespace
+	 * @param {String|Integer}namespace
 	 *            namespace
 	 * 
-	 * @returns {ℕ⁰:Natural+0}namespace NO.
+	 * @returns {Integer|String|Undefined}namespace NO.
 	 */
 	function get_namespace(namespace) {
-		if (typeof namespace === 'string') {
-			namespace = namespace.toLowerCase()
-			// for ',Template,Category', ';Template;Category',
-			// '|Template|Category'
-			.split(/[,;|]/).map(function(n) {
-				if (!n) {
-					return 0;
-				}
-				if (!isNaN(n)) {
-					return n;
-				}
-				// 'user:cewbot' → 'user'
-				var _n = n.replace(/:.*$/, '').replace(/\s+/g, '_').trim();
-				if (_n in get_namespace.hash) {
-					return get_namespace.hash[_n];
-				}
-				library_namespace.warn(
-				//
-				'get_namespace: Invalid namespace: ['
-				//
-				+ n + '] @ list ' + namespace);
-				return 0;
-			});
-			return namespace.length === 1 ? namespace[0] || 0 : namespace
-					.join('|');
-			// namespace.sort().unique_sorted().join('|');
-		}
-
-		if (isNaN(namespace)) {
-			if (namespace) {
-				library_namespace.warn('get_namespace: Invalid namespace: ['
-						+ namespace + ']');
-			}
+		if (namespace == Math.floor(namespace)) {
+			// {Integer}namespace
 			return namespace;
 		}
 
-		return namespace | 0;
+		if (typeof namespace === 'string') {
+			var list = [];
+			namespace.toLowerCase()
+			// for ',Template,Category', ';Template;Category',
+			// '|Template|Category'
+			.split(/[,;|]/).forEach(function(n) {
+				// get namespace only. e.g., 'wikipedia:sandbox' → 'wikipedia'
+				var _n = n.replace(/:.*$/, '').trim().replace(/\s+/g, '_');
+				if (!_n) {
+					// _n === ''
+					list.push(0);
+					return;
+				}
+				if (!isNaN(_n)) {
+					// {Integer}_n
+					list.push(_n);
+					return;
+				}
+				if (_n in get_namespace.hash) {
+					list.push(get_namespace.hash[_n]);
+					return;
+				}
+				library_namespace.warn('get_namespace: Invalid namespace: ['
+				//
+				+ n + '] @ namespace list ' + namespace);
+			});
+			if (list.length === 0) {
+				return undefined;
+			}
+			// list.sort().unique_sorted().join('|');
+			list = list.unique();
+			return list.length === 1 ? list[0] : list.join('|');
+		}
+
+		if (namespace !== undefined) {
+			library_namespace.warn('get_namespace: Invalid namespace: ['
+					+ namespace + ']');
+		}
+		return undefined;
 	}
 
 	/**
@@ -789,6 +796,24 @@ function module_code(library_namespace) {
 				+ get_namespace.pattern, 4, 'remove_namespace');
 		if (matched)
 			return (matched ? matched[2] : title).trim();
+	}
+
+	function is_talk_namespace(namespace) {
+		var n;
+		if (typeof namespace === 'string') {
+			// treat ((namespace)) as page title
+			// get namespace only. e.g., 'wikipedia:sandbox' → 'wikipedia'
+			namespace = namespace.replace(/:.*$/, '');
+			if (isNaN(namespace) && !/^(?:[a-z _]+[_ ])?talk$/i.test(namespace))
+				return false;
+		}
+
+		n = get_namespace.name_of_NO[get_namespace(namespace)];
+		// {String|Undefined}n
+		return n
+		// ((namespace)) is valid namespace,
+		// {String}n is this normalized namespace
+		&& n.endsWith('talk');
 	}
 
 	// ------------------------------------------------------------------------
@@ -9877,12 +9902,18 @@ function module_code(library_namespace) {
 
 		var SQL = options.SQL;
 		if (!SQL) {
-			SQL = Object.assign({
-				bot : 0,
-				/** {Integer|String}namespace NO. */
-				namespace : options.namespace
-						&& +get_namespace(options.namespace) || 0
-			},
+			SQL = library_namespace.null_Object();
+			if (options.bot === 0 || options.bot === 1) {
+				// assert: 0 || 1
+				SQL.bot = options.bot;
+			}
+			// 不指定namespace，或者指定namespace為((undefined)): 取得所有的namespace。
+			/** {Integer|String}namespace NO. */
+			var namespace = get_namespace(options.namespace);
+			if (namespace !== undefined) {
+				SQL.namespace = namespace;
+			}
+			Object.assign(SQL,
 			// {String|Array|Object}options.where: 自訂篩選條件。
 			options.where);
 			SQL = generate_SQL_WHERE(SQL, 'rc_');
@@ -10088,19 +10119,13 @@ function module_code(library_namespace) {
 			}
 		}
 
-		if (typeof options.filter === 'string' && !('namespace' in options)) {
-			// treat options.filter as page title
-			// 從filter取得namespace
-			options.namespace = get_namespace(options.filter);
-		}
-		if ('namespace' in options) {
-			// 指定namespace為((undefined))才能夠取得所有的namespace，否則預設只有主要namespace(=0)的文件。
+		var namespace = get_namespace(options.namespace);
+		if (namespace !== undefined) {
+			// 不指定namespace，或者指定namespace為((undefined)): 取得所有的namespace。
 			if (use_SQL) {
-				recent_options.namespace = options.namespace === undefined ? undefined
-						: get_namespace(options.namespace);
+				recent_options.namespace = namespace;
 			} else {
-				if (options.namespace !== undefined)
-					recent_options.parameters.rcnamespace = get_namespace(options.namespace);
+				recent_options.parameters.rcnamespace = namespace;
 			}
 		}
 
@@ -10244,9 +10269,9 @@ function module_code(library_namespace) {
 							library_namespace.log([ row.title, options.filter,
 									normalize_page_name(options.filter) ]);
 						return row.title
-						// 區分大小寫
+						// treat options.filter as page title
 						&& (row.title.includes(options.filter)
-						//
+						// 區分大小寫
 						|| row.title.startsWith(
 						//
 						normalize_page_name(options.filter)));
@@ -17435,6 +17460,7 @@ function module_code(library_namespace) {
 
 		namespace : get_namespace,
 		remove_namespace : remove_namespace,
+		is_talk_namespace : is_talk_namespace,
 
 		file_pattern : file_pattern,
 		lead_text : lead_text,
