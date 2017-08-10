@@ -1473,7 +1473,7 @@ function module_code(library_namespace) {
 				library_namespace.warn(
 				//
 				'add_chapter: 因為內容長度或短或者無內容，因此從cache檔案中取得舊的內容('
-						+ contents.length + ' 字元):\n	'
+						+ contents.length + ' 字元):\n'
 						+ (item_data.file || decode_identifier(item.id, this))
 						+ (item_data.url ? ' (' + item_data.url + ')' : ''));
 			} else if (item_data.write_file !== false) {

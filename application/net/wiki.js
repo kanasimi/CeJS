@@ -8283,6 +8283,7 @@ function module_code(library_namespace) {
 			}, options);
 		}
 		if (library_namespace.is_Object(title)) {
+			// 將 {Object}page_data 最新版本的 timestamp 標記註記到 options 去。
 			wiki_API.edit.set_stamp(options, title);
 			if (title.pageid)
 				options.pageid = title.pageid;
@@ -8291,8 +8292,10 @@ function module_code(library_namespace) {
 		} else {
 			options.title = title;
 		}
-		if (timestamp)
+		if (timestamp) {
+			// 若是 timestamp 並非最新版，則會放棄編輯。
 			wiki_API.edit.set_stamp(options, timestamp);
+		}
 		// the token should be sent as the last parameter.
 		options.token = library_namespace.is_Object(token) ? token.csrftoken
 				: token;
