@@ -608,7 +608,10 @@ function module_code(library_namespace) {
 				var report_file = this.main_directory + this.log_directory_name
 						+ this.report_file,
 				// 產生網頁形式的報告檔。
-				reports = [ '<html>', '<head>', '<style>',
+				reports = [ '<html>', '<head>',
+				// http://mdn.beonex.com/en/Web_development/Historical_artifacts_to_avoid.html
+				// https://developer.mozilla.org/zh-TW/docs/Web_%E9%96%8B%E7%99%BC/Historical_artifacts_to_avoid
+				'<meta charset="UTF-8" />', '<style>',
 						'table{border-collapse:collapse}',
 						'table,th,td{border:1px solid #55f;padding:.2em}',
 						'</style>', '</head>', '<body>', '<h2>',

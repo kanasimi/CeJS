@@ -870,6 +870,8 @@ function module_code(library_namespace) {
 	 * 將第一個字母轉成大寫。<br />
 	 * 因為 wiki 僅僅將首字母大寫，中間的字不會被改變，因此不採用 toTitleCase() @ CeL.data.native。
 	 * 
+	 * 注意: 您實際需要的可能是 normalize_page_name()
+	 * 
 	 * cf. {{lcfirst:}}
 	 * 
 	 * @param {String}words
@@ -2899,7 +2901,7 @@ function module_code(library_namespace) {
 	// "\/": e.g., [[user talk:user_name/Flow]]
 	// 大小寫無差，但NG: "\n\t"
 	/\[\[ *(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?|利用者(?:‐会話)?|사용자(?:토론)?) *: *([^#\|\[\]\/]+)/i,
-	//
+	// matched: [ all, " user name " ]
 	PATTERN_user_contributions_link = /\[\[(?:Special|特別) *: *(?:Contributions|使用者貢獻|用戶貢獻|用户贡献|投稿記録)\/([^#\|\[\]\/]+)/i,
 	//
 	PATTERN_user_link_all = new RegExp(PATTERN_user_link.source, 'ig'), PATTERN_user_contributions_link_all = new RegExp(
@@ -2907,6 +2909,10 @@ function module_code(library_namespace) {
 
 	/**
 	 * parse user name. 解析使用者/用戶對話頁面資訊。
+	 * 
+	 * @example <code>
+	if (CeL.wiki.parse.user(CeL.wiki.title_link_of(title), user)) {}
+	 * </code>
 	 * 
 	 * @param {String}wikitext
 	 *            wikitext to parse
@@ -2939,8 +2945,8 @@ function module_code(library_namespace) {
 			user_name = undefined;
 		}
 		if (user_name) {
-			user_name = upper_case_initial(user_name);
-			if (user_name !== upper_case_initial(matched[1].trim())) {
+			user_name = normalize_page_name(user_name);
+			if (user_name !== normalize_page_name(matched[1])) {
 				return false;
 			}
 			if (!to_full_link) {
@@ -2948,6 +2954,7 @@ function module_code(library_namespace) {
 			}
 		}
 
+		// may use get_page_title_link()
 		return to_full_link ? via_contributions ? '[[User:' + matched[1] + ']]'
 				: matched[0].trimEnd() + ']]' : matched[1].trim();
 	}
@@ -2974,7 +2981,7 @@ function module_code(library_namespace) {
 			// reset PATTERN
 			PATTERN_all.lastIndex = 0;
 			while (matched = PATTERN_all.exec(wikitext)) {
-				var name = upper_case_initial(matched[1].trim());
+				var name = normalize_page_name(matched[1]);
 				if (user_name) {
 					if (user_name === name) {
 						return true;
@@ -2983,9 +2990,9 @@ function module_code(library_namespace) {
 				}
 				user_hash[name] = true;
 			}
-		}
+		};
 
-		if (user_name && (user_name = upper_case_initial(user_name))) {
+		if (user_name && (user_name = normalize_page_name(user_name))) {
 			return check_pattern(PATTERN_user_link_all)
 					|| check_pattern(PATTERN_user_contributions_link_all);
 		}
@@ -3098,6 +3105,7 @@ function module_code(library_namespace) {
 				} else {
 					// 當作正常內部連結 wikilink / internal link。
 					// e.g., 'ABC (disambiguation)|ABC'
+					// may use get_page_title_link()
 					URL = '[[' + URL + ']]';
 				}
 			}
@@ -3146,6 +3154,7 @@ function module_code(library_namespace) {
 			? '|' + title.replace(/\s*\([^()]+\)$/, '') : '');
 
 			if (add_quote) {
+				// may use get_page_title_link()
 				link = '[[' + link + ']]';
 			}
 
@@ -3306,6 +3315,7 @@ function module_code(library_namespace) {
 		while (matched = wikitext.match(/^[\s\n]*({{|\[\[)/)) {
 			// 注意: 此處的 {{ / [[ 可能為中間的 token，而非最前面的一個。但若是沒有中間的 token，則一定是第一個。
 			matched = matched[1];
+			// may use get_page_title_link()
 			var index_end = wikitext.indexOf(matched === '{{' ? '}}' : ']]');
 			if (index_end === NOT_FOUND) {
 				library_namespace.debug('有問題的 wikitext，例如有首 "' + matched
@@ -3455,7 +3465,8 @@ function module_code(library_namespace) {
 		if (false && wikitext !== section_list.toString()) {
 			// debug 用. check parser, test if parser working properly.
 			throw new Error('get_sections: Parser error'
-					+ (page_data ? ': [[' + page_data.title + ']]' : ''));
+			// may use get_page_title_link()
+			+ (page_data ? ': [[' + page_data.title + ']]' : ''));
 		}
 		return section_list;
 	}
@@ -3711,6 +3722,7 @@ function module_code(library_namespace) {
 			title = ':' + title;
 		}
 		// TODO: for template, use {{title}}
+		// may use get_page_title_link()
 		return '[[' + title + ']]';
 	}
 
@@ -3851,7 +3863,7 @@ function module_code(library_namespace) {
 			library_namespace.debug('Use cached data: [['
 			//
 			+ (KEY_CORRESPOND_PAGE in session.last_data
-			//
+			// may use get_page_title_link()
 			? session.last_page.id : session.last_data.id) + ']]', 1,
 					'last_data_is_usable');
 			return true;
@@ -4237,6 +4249,7 @@ function module_code(library_namespace) {
 					// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 					library_namespace
 							.warn('wiki_API.prototype.next: Denied to edit flow [['
+									// may use get_page_title_link()
 									+ this.last_page.title + ']]');
 					// next[3] : callback
 					if (typeof next[3] === 'function')
@@ -4283,7 +4296,8 @@ function module_code(library_namespace) {
 				// 在 multithreading 下可能因其他 threading 插入而造成問題，須注意！
 				library_namespace
 						.warn('wiki_API.prototype.next: Denied to edit [['
-								+ this.last_page.title + ']]');
+						// may use get_page_title_link()
+						+ this.last_page.title + ']]');
 				// next[3] : callback
 				if (typeof next[3] === 'function')
 					next[3].call(this, this.last_page.title, 'denied');
@@ -5084,7 +5098,8 @@ function module_code(library_namespace) {
 						// cf. [[Special:Permalink/0|title]],
 						// [[Special:Diff/prev/0]]
 						error = ' [[Special:Diff/' + result.edit.newrevid + '|'
-								+ gettext('finished') + ']]';
+						// may use get_page_title_link()
+						+ gettext('finished') + ']]';
 						result = 'succeed';
 					} else if ('nochange' in result.edit) {
 						// 經過 wiki 操作，發現為[[WP:NULLEDIT|無改變]]的。
@@ -6693,7 +6708,7 @@ function module_code(library_namespace) {
 						library_namespace.warn('wiki_API.page: '
 						// 此頁面不存在/已刪除。Page does not exist. Deleted?
 						+ ('missing' in page ? 'Not exists' : 'No contents')
-						//
+						// may use get_page_title_link()
 						+ ': ' + (page.title ? '[[' + page.title + ']]'
 						//
 						: 'id ' + page.pageid));
@@ -7077,7 +7092,8 @@ function module_code(library_namespace) {
 				//
 				'wiki_API.langlinks.parse: No langlinks exists?'
 						+ (langlinks && langlinks.title ? ' [['
-								+ langlinks.title + ']]' : ''));
+						// may use get_page_title_link()
+						+ langlinks.title + ']]' : ''));
 				if (library_namespace.is_debug(2)
 				// .show_value() @ interact.DOM, application.debug
 				&& library_namespace.show_value)
@@ -8871,7 +8887,7 @@ function module_code(library_namespace) {
 					library_namespace.warn(
 					//
 					'wiki_API.redirects: Not exists: '
-					//
+					// may use get_page_title_link()
 					+ (page.title ? '[[' + page.title + ']]'
 					//
 					: ' id ' + page.pageid));
@@ -10039,6 +10055,7 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// 監視最近更改的頁面。
 	// 注意: 會改變 options！
 	// 注意: options之屬性名不可與wiki_API.recent衝突！
 	// 警告: 同時間只能有一隻程式在跑，否則可能會造成混亂！
@@ -10157,6 +10174,7 @@ function module_code(library_namespace) {
 			+ JSON.stringify(recent_options), 1, 'add_listener');
 		}
 
+		// 取得頁面資料。
 		function receive() {
 			function receive_next() {
 				var real_interval_ms = Date.now() - receive_time;
@@ -10290,6 +10308,7 @@ function module_code(library_namespace) {
 								return row.revid;
 							}), 2, 'add_listener');
 
+					// 比較頁面修訂差異。
 					if (options.with_diff || options.with_content >= 2) {
 						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 						// rvdiffto=prev 已經parsed，因此仍須自行解析。
@@ -11682,6 +11701,7 @@ function module_code(library_namespace) {
 					wiki_API.list(title, function(pages) {
 						library_namespace.log(list_type
 						// allpages 不具有 title。
+						// may use get_page_title_link()
 						+ (title ? ' [[' + get_page_title(title) + ']]' : '')
 						//
 						+ ': ' + pages.length + ' page(s).');
@@ -12246,7 +12266,7 @@ function module_code(library_namespace) {
 						count + ' ('
 						//
 						+ (100 * position / file_size | 0) + '%): '
-						//
+						// may use get_page_title_link()
 						+ speed + ' [[' + page_data.title + ']]');
 					}
 

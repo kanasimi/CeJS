@@ -1573,7 +1573,9 @@ function module_code(library_namespace) {
 		//
 		'<html xmlns="http://www.w3.org/1999/xhtml"',
 		//
-		' xmlns:epub="http://www.idpf.org/2007/ops">', '<head></head>',
+		' xmlns:epub="http://www.idpf.org/2007/ops">',
+		//
+		'<head><meta charset="UTF-8" /></head>',
 		//
 		'<body>',
 		// 一般說來，title應該只有一個。
