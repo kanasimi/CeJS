@@ -1472,7 +1472,7 @@ function module_code(library_namespace) {
 			if (text) {
 				library_namespace.warn(
 				//
-				'add_chapter: 因為內容長度或短或者無內容，因此從cache檔案中取得舊的內容('
+				'add_chapter: 因為欲設定的內容長度過短或者無內容，因此從cache檔案中取得舊的內容('
 						+ contents.length + ' 字元):\n'
 						+ (item_data.file || decode_identifier(item.id, this))
 						+ (item_data.url ? ' (' + item_data.url + ')' : ''));

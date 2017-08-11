@@ -1113,12 +1113,12 @@ function module_code(library_namespace) {
 		return array;
 	}
 
-	function to_template_wikitext_toString_slice(separater) {
-		return this.join(separater || '|');
+	function to_template_wikitext_toString_slice(separator) {
+		return this.join(separator || '|');
 	}
 
-	function to_template_wikitext_toString(separater) {
-		return '{{' + this.join(separater || '|') + '}}';
+	function to_template_wikitext_toString(separator) {
+		return '{{' + this.join(separator || '|') + '}}';
 	}
 
 	// 2017/1/18 18:46:2
@@ -1825,6 +1825,12 @@ function module_code(library_namespace) {
 			// https://www.mediawiki.org/wiki/Markup_spec/BNF/Article
 			// NewLine = ? carriage return and line feed ? ;
 			return this.join('\n');
+		},
+		list : function() {
+			return this.list_type + this.join('\n' + this.list_type);
+		},
+		paragraph : function() {
+			return this.join('\n') + (this.separator || '');
 		},
 		// plain text 或尚未 parse 的 wikitext.
 		plain : function() {
@@ -2575,7 +2581,7 @@ function module_code(library_namespace) {
 					// matched[2] 屬於下一 cell。
 					delimiter = matched[2];
 					if (!delimiter) {
-						// assert: /$/, no separater, ended.
+						// assert: /$/, no separator, ended.
 						break;
 					}
 
@@ -2615,7 +2621,9 @@ function module_code(library_namespace) {
 		// parse_wikitext.section_title
 		wikitext = wikitext.replace_till_stable(
 		// @see PATTERN_section
-		/\n(=+)(.+)\1(\s*)\n/g, function(all, previous, parameters, postfix) {
+		/(^|\n)(=+)(.+)\2(\s*)(\n|$)/g, function(all, previous, section_level,
+				parameters, postfix, last) {
+			// console.log(JSON.stringify(all));
 			if (normalize) {
 				parameters = parameters.trim();
 			}
@@ -2631,10 +2639,11 @@ function module_code(library_namespace) {
 			parameters.title = parameters.toString().trim();
 			if (postfix && !normalize)
 				parameters.postfix = postfix;
-			parameters.level = previous.length;
+			parameters.level = section_level.length;
 			queue.push(parameters);
 			// 因為 "\n" 在 wikitext 中為重要標記，因此 restore 之。
-			return '\n' + include_mark + (queue.length - 1) + end_mark + '\n';
+			return previous + include_mark + (queue.length - 1) + end_mark
+					+ last;
 		});
 
 		if (false) {
@@ -2665,7 +2674,38 @@ function module_code(library_namespace) {
 			});
 		}
 
-		// ↑ parse sequence finished
+		// ----------------------------------------------------
+		// 處理 / parse list @ wikitext
+		// @see [[en:MOS:LIST]]
+		// 注意: 這裡僅處理明確指示列表的情況，無法處理以模板型式表現的列表。
+		// TODO: \n[;: ]
+		// TODO: \n*#a\n*#b
+
+		function handle_list(all) {
+			var previous, type;
+			if (all.charAt(0) === '\n') {
+				previous = '\n';
+				all = all.slice(1);
+			} else {
+				previous = '';
+			}
+			type = all.charAt(0);
+			all = all.slice(1);
+			all = all.split('\n' + type);
+			// 經過改變，需再進一步處理。
+			all = all.map(function(t) {
+				return parse_wikitext(t, options, queue);
+			});
+			all = _set_wiki_type(all, 'list');
+			all.list_type = type;
+			queue.push(all);
+			return previous + include_mark + (queue.length - 1) + end_mark;
+		}
+
+		wikitext = wikitext.replace(/(?:(?:^|\n)[*][^\n]*)+/g, handle_list);
+		wikitext = wikitext.replace(/(?:(?:^|\n)[#][^\n]*)+/g, handle_list);
+
+		// ↑ parse sequence finished *EXCEPT FOR* paragraph
 		// ------------------------------------------------------------------------
 
 		if (options && typeof options.postfix === 'function')
@@ -2684,11 +2724,59 @@ function module_code(library_namespace) {
 				initialized_fix[1] ? -initialized_fix[1].length : undefined);
 		}
 
+		// ----------------------------------------------------
+		// MUST be last: 處理段落 / parse paragraph @ wikitext
+
+		// [ all, text, separator ]
+		var PATTERN_paragraph = /([\s\S]*?)((?:\s*\n){2,}|$)/g;
+		if (options && options.parse_paragraph && /\n\s*\n/.test(wikitext)) {
+			// 警告: 解析段落的動作可能破壞文件的第一層結構，會使文件的第一層結構以段落為主。
+			wikitext = wikitext.replace(PATTERN_paragraph,
+			// assert: 這個 pattern 應該能夠完全分割 wikitext。
+			function(all, text, separator) {
+				if (!all) {
+					return '';
+				}
+				all = text.split('\n');
+				// console.log(all);
+				// 經過改變，需再進一步處理。
+				all = all.map(function(t) {
+					return parse_wikitext(t, options, queue);
+				});
+				// console.log(all);
+				all = _set_wiki_type(all, 'paragraph');
+				if (separator)
+					all.separator = separator;
+				// console.log('queue index: ' + queue.length);
+				queue.push(all);
+				return include_mark + (queue.length - 1) + end_mark;
+			});
+		}
+
 		queue.push(wikitext);
+		// console.log('='.repeat(80));
 		// console.log(queue);
 		resolve_escaped(queue, include_mark, end_mark);
 
 		wikitext = queue[queue.length - 1];
+
+		if (initialized_fix && (!options || !options.parse_paragraph)) {
+			// 純文字分段。僅切割第一層結構。
+			for (var index = 0; index < wikitext.length; index++) {
+				var text = wikitext[index];
+				if (typeof text === 'string' && /\n\s*\n/.test(text)) {
+					wikitext.splice(index, 1);
+					var matched;
+					while ((matched = PATTERN_paragraph.exec(text))
+							&& matched[0]) {
+						wikitext.splice(index++, 0, matched[0]);
+					}
+					// reset
+					PATTERN_paragraph.lastIndex = 0;
+				}
+			}
+		}
+
 		if (false) {
 			library_namespace.debug('set depth ' + (depth_of_children - 1)
 					+ ' to node [' + wikitext + ']', 3, 'parse_wikitext');
