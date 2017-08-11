@@ -10122,7 +10122,8 @@ function module_code(library_namespace) {
 				// rcdir : 'older',
 				rcdir : 'newer',
 
-				// rctoponly : 1,
+				// 僅取得最新版本。注意: 這可能跳過中間編輯的版本，造成有些修訂被忽略。
+				rctoponly : 1,
 
 				// new Date().toISOString()
 				// rcstart : 'now',
@@ -10136,6 +10137,16 @@ function module_code(library_namespace) {
 				recent_options = Object.assign({
 					parameters : recent_options
 				}, options);
+			}
+			if (recent_options.parameters.rcprop
+			// 為了之後設定 last_query_time，因此必須要加上timestamp這一項information。
+			&& !recent_options.parameters.rcprop.includes('timestamp')) {
+				if (Array.isArray(recent_options.parameters.rcprop))
+					recent_options.parameters.rcprop.push('timestamp');
+				else if (typeof recent_options.parameters.rcprop)
+					recent_options.parameters.rcprop += '|timestamp';
+				else
+					throw 'Unkonwn rcprop: ' + recent_options.parameters.rcprop;
 			}
 		}
 
@@ -10214,6 +10225,10 @@ function module_code(library_namespace) {
 				recent_options.parameters.rcstart = library_namespace
 						.is_Date(last_query_time) ? last_query_time
 						.toISOString() : last_query_time;
+				if (false) {
+					console.log('set rcstart: '
+							+ recent_options.parameters.rcstart);
+				}
 			}
 
 			get_recent(function(rows) {
@@ -10272,7 +10287,7 @@ function module_code(library_namespace) {
 							+ ' records left:');
 					library_namespace.log(rows.map(function(row) {
 						return row.revid;
-					}));
+					}).join(', '));
 				}
 
 				if (options.filter && rows.length > 0) {
@@ -10280,7 +10295,7 @@ function module_code(library_namespace) {
 					rows = rows.filter(
 					// 篩選函數。
 					typeof options.filter === 'function' ? options.filter
-					// 篩選標題。
+					// 篩選標題。警告:從API取得的標題不包括"/"之後的文字，因此最好還是等到之後listener處理的時候，才來對標題篩選。
 					: library_namespace.is_RegExp(options.filter)
 					// 篩選PATTERN
 					? function(row) {

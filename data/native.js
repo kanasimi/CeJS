@@ -404,8 +404,8 @@ function module_code(library_namespace) {
 		// 這種方法不完全，例如對 /^\s+|\s+$/g
 		.replace(/^([\^])/, '\\^').replace(/(\$)$/, '\\$');
 
-		return RegExp_flag ? new RegExp(pattern,
-				/^[igms]+$/i.test(RegExp_flag) ? RegExp_flag : '') : pattern;
+		return RegExp_flag === undefined ? pattern : new RegExp(pattern,
+				/^[igms]+$/i.test(RegExp_flag) ? RegExp_flag : '');
 	}
 	_// JSDT:_module_
 	.to_RegExp_pattern = to_RegExp_pattern;
