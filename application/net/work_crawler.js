@@ -487,6 +487,12 @@ function module_code(library_namespace) {
 					return this.base_URL.match(/^(https?:)\/\//)[1] + url;
 				}
 				url = url.replace(/^[\\\/]+/g, '');
+			} else {
+				// 去掉開頭的 "./"
+				url = url.replace(/^\.\//, '');
+			}
+			if (url.startsWith('.')) {
+				library_namespace.warn('full_URL_of_path: Invalid url: ' + url);
 			}
 			url = this.base_URL + url;
 		}
@@ -1068,8 +1074,10 @@ function module_code(library_namespace) {
 
 			var matched = library_namespace.get_JSON(work_data.data_file);
 			if (matched) {
+				// properties to reset
 				var skip_cache = {
 					process_status : _this.recheck,
+					words_so_far : true,
 					last_download : true
 				};
 				// recall old work_data
@@ -1080,7 +1088,7 @@ function module_code(library_namespace) {
 						continue;
 					}
 
-					if (!work_data[key]) {
+					if (!(key in work_data)) {
 						work_data[key] = matched[key];
 
 					} else if (typeof work_data[key] !== 'object'

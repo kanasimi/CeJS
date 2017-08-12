@@ -2996,9 +2996,11 @@ function module_code(library_namespace) {
 		function normalize_unique(_unique, _this) {
 			if (!Array.isArray(_unique)) {
 				// return '';
-				return;
+				// return;
+				return [];
 			}
 
+			// _unique = [ from index, to index ]
 			if (options.diff_line) {
 				return _unique;
 			}
@@ -3010,7 +3012,7 @@ function module_code(library_namespace) {
 				} else {
 					to_unique = index;
 				}
-				return _this[index];
+				// return _this[index];
 			}
 
 			_unique = _this.slice(index, _unique[1] + 1);
@@ -3027,17 +3029,18 @@ function module_code(library_namespace) {
 			library_namespace.debug(JSON.stringify([ from_index, to_index,
 					from_unique, to_unique ]), 3, 'add_to_diff_list');
 
-			var result = [ normalize_unique(from_unique, from) ];
-			if (to_unique) {
-				result.push(normalize_unique(to_unique, to));
+			var diff_pair = [ normalize_unique(from_unique, from),
+					normalize_unique(to_unique, to) ];
+			if (false && to_unique) {
+				diff_pair.push(normalize_unique(to_unique, to));
 			}
-			// result.index = [ from_index, to_index ];
-			// _index = undefined || [ start index, to index ]
-			result.index = [ from_unique, to_unique ];
-			// 上一個相同的index。
-			// 警告:這在_unique最初的一個index可能不準確!
-			result.last_index = [ from_index, to_index ];
-			diff_list.unshift(result);
+			// diff_pair.index = [ from_index, to_index ];
+			// _index = undefined || start index || [ start index, to index ]
+			diff_pair.index = [ from_unique || [], to_unique || [] ];
+			// .last_index: 上一個相同元素的 index。
+			// 警告: .last_index 在 _unique 最初的一個 index 可能不準確!
+			diff_pair.last_index = [ from_index, to_index ];
+			diff_list.unshift(diff_pair);
 			// reset
 			from_unique = to_unique = undefined;
 		}
@@ -3230,11 +3233,6 @@ function module_code(library_namespace) {
 			});
 		}
 
-		// diff_list
-		// = [ [from_unique, to_unique], [from_unique, to_unique], ... ]
-		// 若僅有 from_unique 或 to_unique 則另一方會是 undefined。
-		// 兩者皆有則表示為變更 modify
-		// _unique = [ start_line ] or [ start_line, end_line ]
 		if (get_diff && !diff_only) {
 			// 應為 use_String
 			if (use_String) {
@@ -3257,6 +3255,41 @@ function module_code(library_namespace) {
 			all_list.to = to;
 		}
 
+		/**
+		 * <code>
+
+		all_list = diff_only ? diff_list : all_list[0];
+
+		{Array}diff_list
+			= [ diff_pair 1, diff_pair 2, ...,
+			// need options.with_list
+			from: [ 'diff from source' ], to: [ 'diff to source' ]
+			]
+
+		{Array}diff_pair =
+			// 若僅有 from_diff_unique 或 to_diff_unique 則另一方會是 undefined。
+			// 兩者皆有則表示為變更/modify。
+			[ {Array}from_diff_unique, {Array}to_diff_unique,
+			$**deprecated** [ {Array|String|Undefined}from_diff_unique, {Array|String|Undefined}to_diff_unique,
+
+			// diff_pair.index = [ from_index, to_index ];
+			// _index = undefined || start index || [ start index, to index ]
+			index:
+				[ {Array}indexes of from, {Array}indexes of to ],
+				$**deprecated** [ {Integer|Array|Undefined}index of from, {Integer|Array|Undefined}index of to ],
+
+			// .last_index: 上一個相同元素的 index。
+			// 警告: .last_index 在 _unique 最初的一個 index 可能不準確!
+			last_index: [ {Integer}index of from, {Integer}index of to ]
+			]
+
+		{Array}from_diff_unique, to_diff_unique
+			= [ {String}diff_unique_line, {String}diff_unique_line, ...  ]
+			$**deprecated** or = {String}diff_unique_line
+			$**deprecated** or = undefined
+
+		</code>
+		 */
 		return all_list;
 	}
 

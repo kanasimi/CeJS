@@ -202,15 +202,18 @@ function module_code(library_namespace) {
 			return url.startsWith('/') ? url : work_data.base_url + url;
 		},
 		parse_chapter_data : function(html, work_data, get_label, chapter) {
+			var
 			// e.g., 下一章 →
-			var next_url = html.match(/ href="([^"]+.html)"[^<>]*>下一[章页]/),
+			next_url = html.match(/ href="([^"]+.html)"[^<>]*>下一[章页]/),
 			//
 			next_chapter = work_data.chapter_list[chapter];
 			// console.log(chapter + ': ' + next_url[1]);
 
-			if (next_url && next_chapter
+			if (next_chapter && next_url
+			// 去掉開頭的 "./"
+			&& (next_url = next_url[1].replace(/^\.\//, ''))
 			// 有些在目錄上面的章節連結到了錯誤的頁面，只能靠下一頁來取得正確頁面。
-			&& (next_chapter.url !== (next_url = next_url[1]))
+			&& (next_chapter.url !== next_url)
 			// 許多網站會把最新章節的下一頁設成章節列表，因此必須排除章節列表的網址。
 			&& next_url !== work_data.url
 			// && next_url !== './' && next_url !== 'index.html'

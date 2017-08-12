@@ -1253,7 +1253,8 @@ function module_code(library_namespace) {
 		} else if (get_page_content.is_page_data(wikitext)) {
 			// 可以用 "CeL.wiki.parser(page_data).parse();" 來設置 parser。
 			var page_data = wikitext;
-			page_data.parsed = wikitext = [ get_page_content(page_data) ];
+			page_data.parsed = wikitext = [ get_page_content(page_data,
+					options || 0) ];
 			wikitext.page = page_data;
 		} else if (!wikitext) {
 			library_namespace.warn('page_parser: No wikitext specified.');
@@ -1945,6 +1946,7 @@ function module_code(library_namespace) {
 
 		if (initialized_fix) {
 			// 初始化。
+			// console.log(wikitext);
 			wikitext = wikitext.replace(/\r\n/g, '\n').replace(
 			// 先 escape 掉會造成問題之 chars。
 			new RegExp(include_mark.replace(/([\s\S])/g, '\\$1'), 'g'),
@@ -2765,11 +2767,14 @@ function module_code(library_namespace) {
 			for (var index = 0; index < wikitext.length; index++) {
 				var text = wikitext[index];
 				if (typeof text === 'string' && /\n\s*\n/.test(text)) {
+					// 刪掉原先的文字。
 					wikitext.splice(index, 1);
 					var matched;
 					while ((matched = PATTERN_paragraph.exec(text))
 							&& matched[0]) {
-						wikitext.splice(index++, 0, matched[0]);
+						// text, separator 分開，在做diff的時候會更容易處理。
+						wikitext.splice(index, 0, matched[1], matched[2]);
+						index += 2;
 					}
 					// reset
 					PATTERN_paragraph.lastIndex = 0;
@@ -3837,7 +3842,7 @@ function module_code(library_namespace) {
 		// page_data.revision: 由 Flow_page() 取得。
 		var content = page_data &&
 		// page_data.is_Flow &&
-		(page_data[flow_view || 'header'] || page_data).revision;
+		(page_data[flow_view] || page_data['header'] || page_data).revision;
 		if (content && (content = content.content)) {
 			// page_data.revision.content.content
 			return content.content;
@@ -3855,7 +3860,7 @@ function module_code(library_namespace) {
 				// 警告：可能回傳 null or undefined，尚未規範。
 				return;
 			}
-			if (content.length > 1) {
+			if (content.length > 1 && !(flow_view >= 0)) {
 				// 有多個版本的情況：因為此狀況極少，不統一處理。
 				// 一般說來caller自己應該知道自己設定了rvlimit>1，因此此處不警告。
 				// 警告：但多版本的情況需要自行偵測是否回傳{Array}！
@@ -3863,7 +3868,8 @@ function module_code(library_namespace) {
 					return revision['*'];
 				});
 			}
-			return content[0]['*'];
+			content = content[flow_view | 0];
+			return content ? content['*'] : '';
 		}
 
 		// 一般都會輸入 page_data: {"pageid":0,"ns":0,"title":""}
@@ -10444,8 +10450,8 @@ function module_code(library_namespace) {
 
 							page_options = Object.assign({
 								is_id : true,
-								rvlimit : options.with_content >= 2
-								// 僅取最近的兩個版本作 diff
+								rvlimit : options.with_content >= 3
+								// default: 僅取最近的兩個版本作 diff
 								? options.with_content : 2,
 								// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 								parameters : page_options,
@@ -10456,44 +10462,97 @@ function module_code(library_namespace) {
 							}, options.with_diff);
 
 							session.page(row.pageid, function(page_data) {
-								if (!exit && page_data) {
-									Object.assign(row, page_data);
-									var revisions = page_data.revisions;
-									// console.log(revisions);
-									if (revisions && revisions.length >= 1
+								if (exit || !page_data) {
+									run_next();
+									return;
+								}
+
+								// merge page data
+								Object.assign(row, page_data);
+								var revisions = page_data.revisions;
+
+								// console.log(revisions);
+								if (revisions && revisions.length >= 1
+								//
+								&& revisions[0] && revisions[0].timestamp) {
+									last_query_time
+									// 設定成已經取得的最新一個編輯rev。
+									= revisions[0].timestamp;
+									// last_query_revid = revisions[0].revid;
+								}
+
+								// assert: (row.is_new || revisions.length > 1)
+								if (revisions && revisions.length >= 1
+										&& options.with_diff) {
+
+									var from = revisions.length === 1 ? ''
+									// select the last revision.
+									: revisions[revisions.length - 1]['*'],
 									//
-									&& revisions[0] && revisions[0].timestamp) {
-										last_query_time
-										// 設定成已經取得的最新一個編輯rev。
-										= revisions[0].timestamp;
-										// last_query_revid =
-										// revisions[0].revid;
-									}
-									if (revisions && revisions.length >= 1
-											&& options.with_diff) {
-										if (options.with_diff.LCS) {
-											row.diff = library_namespace.LCS(
-													revisions.length >= 2
-													// assert: (row.is_new ||
-													// revisions.length > 1)
-													&& revisions[1]['*'],
-													revisions[0]['*'],
-													options.with_diff);
-										} else {
-											row.diff = (revisions.length === 1
-											// assert: (row.is_new ||
-											// revisions.length > 1)
-											? '' : revisions[1]['*'])
-													.diff_with(
-															revisions[0]['*'],
-															options.with_diff);
+									to = revisions[0]['*'] || '';
+
+									if (!options.with_diff.line) {
+										from = page_parser(from).parse();
+										row.from_parsed = from;
+										// console.log(from);
+										from = from.map(function(token) {
+											return token.toString();
+										});
+
+										page_parser(row);
+										to = page_parser(row).parse();
+										to = to.map(function(token) {
+											return token.toString();
+										});
+
+										if (revisions.length > 1 &&
+										//
+										revisions[1]['*'] !== from.join('')) {
+											from = revisions.length === 1 ? ''
+											// select the last revision.
+											: revisions
+											//
+											[revisions.length - 1]['*'];
+											console.log(library_namespace.LCS(
+											//
+											from, parse_wikitext(from)
+													.toString(), 'diff'));
+											throw 'Parser error (from): ' +
+											// debug 用. check parser, test
+											// if parser working properly.
+											get_page_title_link(page_data);
+										}
+
+										if (revisions[0]['*'] !== to.join('')) {
+											console.log(revisions[0]['*']);
+											console.log(to);
+											to = revisions[0]['*'];
+											console.log(library_namespace.LCS(
+											//
+											to, parse_wikitext(to).toString(),
+													'diff'));
+											throw 'Parser error (to): ' +
+											// debug 用. check parser, test
+											// if parser working properly.
+											get_page_title_link(page_data);
 										}
 									}
-									if (exit = listener.call(options, row,
-											index, rows)) {
-										last_query_time = new Date;
+
+									if (options.with_diff.LCS) {
+										row.diff = library_namespace.LCS(from,
+												to, options.with_diff);
+
+									} else {
+										row.diff = from.diff_with(to,
+												options.with_diff);
 									}
 								}
+
+								if (exit = listener.call(options, row, index,
+										rows)) {
+									last_query_time = new Date;
+								}
+
 								run_next();
 							}, page_options);
 
