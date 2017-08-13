@@ -766,11 +766,12 @@ function module_code(library_namespace) {
 		var source = [];
 		for ( var namespace in get_namespace.hash) {
 			get_namespace.name_of_NO[get_namespace.hash[namespace]] = namespace;
-			source.push(namespace);
+			if (namespace)
+				source.push(namespace);
 		}
 		// [ , namespace, title ]
-		get_namespace.pattern = new RegExp('^(['
-				+ source.join('|').replace(/_/g, '[ _]') + ']):(.+)$', 'i');
+		get_namespace.pattern = new RegExp('^('
+				+ source.join('|').replace(/_/g, '[ _]') + '):(.+)$', 'i');
 	})();
 
 	/**
@@ -1458,7 +1459,8 @@ function module_code(library_namespace) {
 	function parse_page(options) {
 		if (!this.parsed) {
 			// assert: this = [ {String} ]
-			var parsed = parse_wikitext(this[0], options);
+			var parsed = parse_wikitext(this[0], Object.assign(
+					library_namespace.null_Object(), this.options, options));
 			// library_namespace.log(parsed);
 			if (Array.isArray(parsed) && parsed.type === 'plain') {
 				this.pop();
@@ -2697,6 +2699,12 @@ function module_code(library_namespace) {
 			// 經過改變，需再進一步處理。
 			all = all.map(function(t) {
 				return parse_wikitext(t, options, queue);
+
+				console.log(type + ': ' + JSON.stringify(t));
+				t = parse_wikitext(t, options, queue);
+				console.log(options);
+				// console.log(t);
+				return t;
 			});
 			all = _set_wiki_type(all, 'list');
 			all.list_type = type;
@@ -2704,8 +2712,16 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
-		wikitext = wikitext.replace(/(?:(?:^|\n)[*][^\n]*)+/g, handle_list);
-		wikitext = wikitext.replace(/(?:(?:^|\n)[#][^\n]*)+/g, handle_list);
+		if (initialized_fix && !queue) {
+			// 僅在第一層結構處理 list，否則會出現問題。
+			wikitext = wikitext.replace(/(?:(?:^|\n)[*][^\n]*)+/g, handle_list);
+			wikitext = wikitext.replace(/(?:(?:^|\n)[#][^\n]*)+/g, handle_list);
+			// TODO: 處理多層選單。
+			// * level 1
+			// ** level 2
+			// ** level 2
+			// * level 1
+		}
 
 		// ↑ parse sequence finished *EXCEPT FOR* paragraph
 		// ------------------------------------------------------------------------
@@ -2731,7 +2747,8 @@ function module_code(library_namespace) {
 
 		// [ all, text, separator ]
 		var PATTERN_paragraph = /([\s\S]*?)((?:\s*\n){2,}|$)/g;
-		if (options && options.parse_paragraph && /\n\s*\n/.test(wikitext)) {
+		if (initialized_fix && options && options.parse_paragraph
+				&& /\n\s*\n/.test(wikitext)) {
 			// 警告: 解析段落的動作可能破壞文件的第一層結構，會使文件的第一層結構以段落為主。
 			wikitext = wikitext.replace(PATTERN_paragraph,
 			// assert: 這個 pattern 應該能夠完全分割 wikitext。
@@ -2762,15 +2779,17 @@ function module_code(library_namespace) {
 
 		wikitext = queue[queue.length - 1];
 
-		if (initialized_fix && (!options || !options.parse_paragraph)) {
+		if (initialized_fix && (!options || !options.parse_paragraph)
+		// 若是解析模板，那麼添加任何的元素，都可能破壞轉換成字串後的結果。
+		// plain: 表示 wikitext 可能是一個頁面。最起碼是以 .join('') 轉換成字串的。
+		&& wikitext.type === 'plain') {
 			// 純文字分段。僅切割第一層結構。
 			for (var index = 0; index < wikitext.length; index++) {
-				var text = wikitext[index];
-				if (typeof text === 'string' && /\n\s*\n/.test(text)) {
-					// 刪掉原先的文字。
+				var token = wikitext[index], matched;
+				if (typeof token === 'string' && /\n\s*\n/.test(token)) {
+					// 刪掉原先的文字 token = wikitext[index]。
 					wikitext.splice(index, 1);
-					var matched;
-					while ((matched = PATTERN_paragraph.exec(text))
+					while ((matched = PATTERN_paragraph.exec(token))
 							&& matched[0]) {
 						// text, separator 分開，在做diff的時候會更容易處理。
 						wikitext.splice(index, 0, matched[1], matched[2]);
@@ -2778,6 +2797,14 @@ function module_code(library_namespace) {
 					}
 					// reset
 					PATTERN_paragraph.lastIndex = 0;
+
+				} else if (index > 0
+						&& typeof wikitext[index - 1] === 'string'
+						&& (matched = wikitext[index - 1]
+								.match(/^([\s\S]*[^\s\n])([\s\n]*\n)$/))) {
+					// text, separator 分開，在做diff的時候會更容易處理。
+					wikitext.splice(index - 1, 1, matched[1], matched[2]);
+					index++;
 				}
 			}
 		}
@@ -10506,17 +10533,15 @@ function module_code(library_namespace) {
 										});
 
 										if (revisions.length > 1 &&
+										// verify
+										revisions[revisions.length - 1]
 										//
-										revisions[1]['*'] !== from.join('')) {
-											from = revisions.length === 1 ? ''
-											// select the last revision.
-											: revisions
-											//
-											[revisions.length - 1]['*'];
+										['*'] !== from.join('')) {
 											console.log(library_namespace.LCS(
 											//
-											from, parse_wikitext(from)
-													.toString(), 'diff'));
+											revisions[revisions.length - 1]
+											//
+											['*'], from.join(''), 'diff'));
 											throw 'Parser error (from): ' +
 											// debug 用. check parser, test
 											// if parser working properly.

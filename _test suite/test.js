@@ -2660,6 +2660,9 @@ function test_wiki() {
 		[['Abc_def', CeL.wiki.normalize_title('abc def', true)], 'normalize_title #12'],
 		[['User_talk:Abc_def', CeL.wiki.normalize_title('user talk: abc def', true)], 'normalize_title #13'],
 
+		[['[[User:Adam/test]]', CeL.wiki.title_link_of('User:Adam/test')], 'title_link_of #1'],
+		[['Adam', CeL.wiki.parse.user('[[User:Adam/test]]')], 'parse.user #1'],
+		[[true, CeL.wiki.parse.user('[[User:Adam/test]]', 'adam')], 'parse.user #2'],
 	]);
 
 	error_count += CeL.test('wiki: CeL.wiki.plain_text() basic test', [
@@ -2870,6 +2873,9 @@ function test_wiki() {
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: {{=}} #3');
 		wikitext = '<b a="A">i</b>';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: {{=}} #4');
+
+		wikitext = 't\n**a[[L#{{t:p}}|l]]b\n**a[[L#{{t:p}}]]b\n';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: list #1');
 	});
 
 

@@ -3008,9 +3008,9 @@ function module_code(library_namespace) {
 			var index = _unique[0];
 			if (index === _unique[1]) {
 				if (_unique === from_unique) {
-					from_unique = index;
+					from_unique = [ index, index ];
 				} else {
-					to_unique = index;
+					to_unique = [ index, index ];
 				}
 				// return _this[index];
 			}
@@ -3035,13 +3035,13 @@ function module_code(library_namespace) {
 				diff_pair.push(normalize_unique(to_unique, to));
 			}
 			// diff_pair.index = [ from_index, to_index ];
-			// _index = undefined || start index || [ start index, to index ]
-			diff_pair.index = [ from_unique || [], to_unique || [] ];
-			// .last_index: 上一個相同元素的 index。
-			// 警告: .last_index 在 _unique 最初的一個 index 可能不準確!
+			// _index = [ start_index, end_index ]
+			diff_pair.index = [ from_unique, to_unique ];
+			// diff_pair.last_index: 上一個相同元素的 index。
+			// 警告: diff_pair.last_index 在 _unique 最初的一個 index 可能不準確!
 			diff_pair.last_index = [ from_index, to_index ];
 			diff_list.unshift(diff_pair);
-			// reset
+			// reset indexes.
 			from_unique = to_unique = undefined;
 		}
 
@@ -3071,7 +3071,7 @@ function module_code(library_namespace) {
 								+ from_index + '|' + (from_index - 1)
 								+ '),-1 時不會處理到 from_unique，只好補處理。', 3,
 								'LCS.backtrack');
-						if (from_unique) {
+						if (Array.isArray(from_unique)) {
 							// e.g., CeL.LCS('abc123', 'def123', 'diff')
 							from_unique[0] = 0;
 						} else {
@@ -3084,7 +3084,7 @@ function module_code(library_namespace) {
 								+ to_index + '|' + (to_index - 1)
 								+ ') 時不會處理到 to_unique，只好補處理。', 3,
 								'LCS.backtrack');
-						if (to_unique) {
+						if (Array.isArray(to_unique)) {
 							to_unique[0] = 0;
 						} else {
 							// e.g., CeL.LCS('a1b2', '1a2b', 'diff')
@@ -3159,7 +3159,7 @@ function module_code(library_namespace) {
 					library_namespace.debug('檢測前一個。 '
 							+ [ from_index, to_index ], 3, 'LCS.backtrack');
 					if (get_diff) {
-						if (from_unique) {
+						if (Array.isArray(from_unique)) {
 							from_unique[0] = from_index;
 						} else {
 							from_unique = [ from_index, from_index ];
@@ -3273,15 +3273,19 @@ function module_code(library_namespace) {
 			$**deprecated** [ {Array|String|Undefined}from_diff_unique, {Array|String|Undefined}to_diff_unique,
 
 			// diff_pair.index = [ from_index, to_index ];
-			// _index = undefined || start index || [ start index, to index ]
+			// _index = [ start_index, end_index ]
 			index:
-				[ {Array}indexes of from, {Array}indexes of to ],
-				$**deprecated** [ {Integer|Array|Undefined}index of from, {Integer|Array|Undefined}index of to ],
+				[ {Array}from_unique_indexes, {Array}to_unique_indexes ],
 
-			// .last_index: 上一個相同元素的 index。
-			// 警告: .last_index 在 _unique 最初的一個 index 可能不準確!
+			// diff_pair.last_index: 上一個相同元素的 index。
+			// 警告: diff_pair.last_index 在 _unique 最初的一個 index 可能不準確!
 			last_index: [ {Integer}index of from, {Integer}index of to ]
 			]
+
+		{Array|Undefined}from_unique_indexes, to_unique_indexes
+			= [ {Integer}start_index, {Integer}end_index ]
+			or = undefined (insert / delete only)
+			$**deprecated** or = {Integer}start index
 
 		{Array}from_diff_unique, to_diff_unique
 			= [ {String}diff_unique_line, {String}diff_unique_line, ...  ]
