@@ -554,10 +554,10 @@ LCM2 = function(number_array) {
  *            number 2
  * @returns [ GCD, m1, m2 ]: GCD = m1 * n1 + m2 * n2
  * 
- * @see Euclidean_division() @ data.math
+ * @see division_with_remainder() @ data.math
  * @since 2013/8/3 20:24:30
  */
-function Extended_Euclidean(n1, n2) {
+function extended_GCD(n1, n2) {
 	var remainder, quotient, use_g1 = false,
 	// 前一group [dividend 應乘的倍數, divisor 應乘的倍數]
 	m1g1 = 1, m2g1 = 0,
@@ -578,7 +578,8 @@ function Extended_Euclidean(n1, n2) {
 	return use_g1 ? [ n2, m1g1, m2g1 ] : [ n2, m1g2, m2g2 ];
 }
 
-_.EGCD = Extended_Euclidean;
+// extended GCD algorithm
+_.EGCD = extended_GCD;
 
 
 
@@ -596,11 +597,11 @@ _.EGCD = Extended_Euclidean;
  * @returns {Array} [ {Integer}quotient 商, {Number}remainder 餘數 ]
  * 
  * @see http://stackoverflow.com/questions/14997165/fastest-way-to-get-a-positive-modulo-in-c-c
- * @see Extended_Euclidean() @ data.math
+ * @see extended_GCD() @ data.math
  * 
  * @since 2015/10/31 10:4:45
  */
-function Euclidean_division(dividend, divisor, closest) {
+function division_with_remainder(dividend, divisor, closest) {
 	if (false)
 		return [ Math.floor(dividend / divisor),
 		// 轉正。保證餘數值非負數。
@@ -623,7 +624,8 @@ function Euclidean_division(dividend, divisor, closest) {
 	return [ Math.round((dividend - remainder) / divisor), remainder ];
 }
 
-_.division = Euclidean_division;
+// 帶餘數除法 division with remainder
+_.division = division_with_remainder;
 
 
 
@@ -803,7 +805,7 @@ _.closest_product = closest_product;
  * @since 2013/8/3 20:24:30
  */
 function modular_inverse(number, modulo) {
-	number = Extended_Euclidean(number, modulo);
+	number = extended_GCD(number, modulo);
 	if (number[0] === 1)
 		return (number = number[1]) < 0 ? number + modulo : number;
 }
@@ -3905,7 +3907,7 @@ library_namespace.set_method(String, {
 
 library_namespace.set_method(Number.prototype, {
 	// division, divided_by
-	divided : set_bind(Euclidean_division, true),
+	divided : set_bind(division_with_remainder, true),
 	floor_sqrt : set_bind(floor_sqrt),
 	ceil_log : set_bind(ceil_log),
 

@@ -726,10 +726,13 @@ function module_code(library_namespace) {
 		user : 2,
 		user_talk : 3,
 		// the project namespace for matters about the project
+		// Varies between wikis
 		project : 4,
 		wikipedia : 4,
 		// https://en.wikinews.org/wiki/Help:Namespace
 		wikinews : 4,
+		// Varies between wikis
+		project_talk : 5,
 		wikipedia_talk : 5,
 		// image
 		file : 6,
@@ -807,6 +810,10 @@ function module_code(library_namespace) {
 			namespace = namespace.replace(/:.*$/, '');
 			if (isNaN(namespace) && !/^(?:[a-z _]+[_ ])?talk$/i.test(namespace))
 				return false;
+		}
+
+		if (typeof namespace === 'number' || namespace > 0) {
+			return namespace % 2 === 1;
 		}
 
 		n = get_namespace.name_of_NO[get_namespace(namespace)];
@@ -2623,11 +2630,13 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// parse_wikitext.section_title
+
+		// pstfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
 		wikitext = wikitext.replace_till_stable(
 		// @see PATTERN_section
-		/(^|\n)(=+)(.+)\2(\s*)(\n|$)/g, function(all, previous, section_level,
-				parameters, postfix, last) {
-			// console.log(JSON.stringify(all));
+		/(^|\n)(=+)(.+)\2([ \t]*)(\n|$)/g, function(all, previous,
+				section_level, parameters, postfix, last) {
+			// console.log('==> ' + JSON.stringify(all));
 			if (normalize) {
 				parameters = parameters.trim();
 			}
@@ -2650,6 +2659,8 @@ function module_code(library_namespace) {
 					+ last;
 		});
 
+		// console.log('10: ' + JSON.stringify(wikitext));
+
 		if (false) {
 			// another method to parse.
 			wikitext = '{{temp|{{temp2|p{a}r{}}}}}';
@@ -2663,6 +2674,8 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// 處理 / parse bare / plain URLs in wikitext: https:// @ wikitext
 		// @see [[w:en:Help:Link#Http: and https:]]
+
+		// console.log('11: ' + JSON.stringify(wikitext));
 
 		// 在 transclusion 中不會被當作 bare / plain URL。
 		if (!options || !options.inside_transclusion) {
@@ -2712,24 +2725,31 @@ function module_code(library_namespace) {
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		}
 
+		// console.log('12: ' + JSON.stringify(wikitext));
+		// 僅在第一層結構處理 list，否則會出現問題。
 		if (initialized_fix && !queue) {
-			// 僅在第一層結構處理 list，否則會出現問題。
+			// console.log(wikitext);
 			wikitext = wikitext.replace(/(?:(?:^|\n)[*][^\n]*)+/g, handle_list);
 			wikitext = wikitext.replace(/(?:(?:^|\n)[#][^\n]*)+/g, handle_list);
+
 			// TODO: 處理多層選單。
 			// * level 1
 			// ** level 2
 			// ** level 2
 			// * level 1
+			// ** level 2
+			// ** level 2
 		}
 
 		// ↑ parse sequence finished *EXCEPT FOR* paragraph
 		// ------------------------------------------------------------------------
 
+		// console.log('13: ' + JSON.stringify(wikitext));
 		if (options && typeof options.postfix === 'function')
 			wikitext = options.postfix(wikitext, queue, include_mark, end_mark)
 					|| wikitext;
 
+		// console.log('14: ' + JSON.stringify(wikitext));
 		if (initialized_fix) {
 			// 去掉初始化時添加的 fix。
 			// 須預防有些為完結的標記，把所添加的部分吃掉了。此時不能直接 .slice()，
@@ -2745,6 +2765,7 @@ function module_code(library_namespace) {
 		// ----------------------------------------------------
 		// MUST be last: 處理段落 / parse paragraph @ wikitext
 
+		// console.log('15: ' + JSON.stringify(wikitext));
 		// [ all, text, separator ]
 		var PATTERN_paragraph = /([\s\S]*?)((?:\s*\n){2,}|$)/g;
 		if (initialized_fix && options && options.parse_paragraph
@@ -2772,39 +2793,79 @@ function module_code(library_namespace) {
 			});
 		}
 
+		// console.log('16: ' + JSON.stringify(wikitext));
 		queue.push(wikitext);
-		// console.log('='.repeat(80));
-		// console.log(queue);
+		if (false) {
+			console.log('='.repeat(80));
+			console.log(queue);
+			console.log(JSON.stringify(wikitext));
+		}
 		resolve_escaped(queue, include_mark, end_mark);
 
 		wikitext = queue[queue.length - 1];
+		// console.log(wikitext);
 
 		if (initialized_fix && (!options || !options.parse_paragraph)
 		// 若是解析模板，那麼添加任何的元素，都可能破壞轉換成字串後的結果。
 		// plain: 表示 wikitext 可能是一個頁面。最起碼是以 .join('') 轉換成字串的。
 		&& wikitext.type === 'plain') {
+			// console.log(wikitext);
 			// 純文字分段。僅切割第一層結構。
 			for (var index = 0; index < wikitext.length; index++) {
 				var token = wikitext[index], matched;
-				if (typeof token === 'string' && /\n\s*\n/.test(token)) {
+				// console.log('---> [' + index + '] ' + token);
+				if (typeof token === 'string') {
+					if (!/\n\s*\n/.test(token)) {
+						continue;
+					}
 					// 刪掉原先的文字 token = wikitext[index]。
 					wikitext.splice(index, 1);
+					// 從這裡開始，index 指的是要插入字串的位置。
 					while ((matched = PATTERN_paragraph.exec(token))
 							&& matched[0]) {
-						// text, separator 分開，在做diff的時候會更容易處理。
-						wikitext.splice(index, 0, matched[1], matched[2]);
-						index += 2;
+						// console.log('#1 ' + token);
+						// console.log(matched);
+						// text, separator 分開，在做 diff 的時候會更容易處理。
+						if (matched[1] && matched[2]) {
+							wikitext.splice(index, 0, matched[1], matched[2]);
+							index += 2;
+						} else {
+							// assert:
+							// case 1: matched[2] === '',
+							// matched[0] === matched[1]
+							// case 2: matched[1] === '',
+							// matched[0] === matched[2]
+							wikitext.splice(index++, 0, matched[0]);
+						}
 					}
-					// reset
+					// 回復 index 的位置。
+					index--;
+					// reset PATTERN index
 					PATTERN_paragraph.lastIndex = 0;
 
-				} else if (index > 0
-						&& typeof wikitext[index - 1] === 'string'
-						&& (matched = wikitext[index - 1]
-								.match(/^([\s\S]*[^\s\n])([\s\n]*\n)$/))) {
-					// text, separator 分開，在做diff的時候會更容易處理。
-					wikitext.splice(index - 1, 1, matched[1], matched[2]);
-					index++;
+				} else {
+					// assert: typeof wikitext[index] === 'object'
+					if (index > 0
+							&& typeof (token = wikitext[index - 1]) === 'string'
+							&& (matched = token
+									.match(/^([\s\S]*[^\s\n])([\s\n]*\n)$/))) {
+						// e.g., ["abc \n","{{t}}"] → ["abc"," \n","{{t}}"]
+						// console.log('#2 ' + token);
+						// console.log(matched);
+						// text, space 分開，在做 diff 的時候會更容易處理。
+						wikitext.splice(index - 1, 1, matched[1], matched[2]);
+						index++;
+					}
+					token = wikitext[index + 1];
+					// console.log('>>> ' + token);
+					if (typeof token === 'string'
+							&& (matched = token.match(/^(\n+)([^\n][\s\S]*?)$/))) {
+						// e.g., ["{{t}}","\nabc"] → ["{{t}}","\n","abc"]
+						// console.log('#3 ' + token);
+						// console.log(matched);
+						// text, space 分開，在做 diff 的時候會更容易處理。
+						wikitext.splice(index + 1, 1, matched[1], matched[2]);
+					}
 				}
 			}
 		}
@@ -3020,7 +3081,7 @@ function module_code(library_namespace) {
 	var PATTERN_user_link =
 	// "\/": e.g., [[user talk:user_name/Flow]]
 	// 大小寫無差，但NG: "\n\t"
-	/\[\[ *(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?|利用者(?:‐会話)?|사용자(?:토론)?) *: *([^#\|\[\]\/]+)/i,
+	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?|利用者(?:‐会話)?|사용자(?:토론)?) *: *([^#\|\[\]\/]+)/i,
 	// matched: [ all, " user name " ]
 	PATTERN_user_contributions_link = /\[\[(?:Special|特別) *: *(?:Contributions|使用者貢獻|用戶貢獻|用户贡献|投稿記録)\/([^#\|\[\]\/]+)/i,
 	//
@@ -3098,7 +3159,7 @@ function module_code(library_namespace) {
 		var matched, user_hash = library_namespace.null_Object(),
 		//
 		check_pattern = function(PATTERN_all) {
-			// reset PATTERN
+			// reset PATTERN index
 			PATTERN_all.lastIndex = 0;
 			while (matched = PATTERN_all.exec(wikitext)) {
 				var name = normalize_page_name(matched[1]);
@@ -3885,9 +3946,9 @@ function module_code(library_namespace) {
 				// invalid page data
 				// 就算 content.length === 0，本來就不該回傳東西。
 				// 警告：可能回傳 null or undefined，尚未規範。
-				return;
+				return '';
 			}
-			if (content.length > 1 && !(flow_view >= 0)) {
+			if (content.length > 1 && typeof flow_view !== 'number') {
 				// 有多個版本的情況：因為此狀況極少，不統一處理。
 				// 一般說來caller自己應該知道自己設定了rvlimit>1，因此此處不警告。
 				// 警告：但多版本的情況需要自行偵測是否回傳{Array}！
@@ -3895,8 +3956,12 @@ function module_code(library_namespace) {
 					return revision['*'];
 				});
 			}
+			if (content.length > 0 && flow_view < 0) {
+				// e.g., -1: select the oldest revision.
+				flow_view += content.length;
+			}
 			content = content[flow_view | 0];
-			return content ? content['*'] : '';
+			return content && content['*'] || '';
 		}
 
 		// 一般都會輸入 page_data: {"pageid":0,"ns":0,"title":""}
@@ -3936,11 +4001,11 @@ function module_code(library_namespace) {
 	};
 
 	// return {Object}main revision (.revisions[0])
-	get_page_content.revision = function(page_data) {
+	get_page_content.revision = function(page_data, NO) {
 		return library_namespace.is_Object(page_data)
 		// treat as page data. Try to get page contents: page.revisions[0]['*']
 		// 一般說來應該是由新排到舊，[0] 為最新的版本 last revision。
-		&& page_data.revisions && page_data.revisions[0];
+		&& page_data.revisions && page_data.revisions[NO || 0];
 	};
 
 	// CeL.wiki.content_of.edit_time(page_data) -
@@ -4481,6 +4546,10 @@ function module_code(library_namespace) {
 							}
 							library_namespace.info('wiki_API.prototype.next: '
 									+ 'Try to get token again. 嘗試重新取得 token。');
+							// rollback
+							_this.actions.unshift(
+							// 重新登入以後，編輯頁面之前再取得一次頁面內容。
+							[ 'page', this.last_page.title ], next);
 							// reset node agent.
 							// 應付 2016/1 MediaWiki 系統更新，
 							// 需要連 HTTP handler 都重換一個，重起 cookie。
@@ -4492,11 +4561,6 @@ function module_code(library_namespace) {
 								delete _this.token.lgtoken;
 								// library_namespace.set_debug(6);
 							}
-							// rollback
-							_this.actions.unshift(next);
-							// 重新登入以後，編輯頁面之前再取得一次頁面內容。
-							_this.actions.unshift([ 'page',
-									this.last_page.title ]);
 							// TODO: 在這即使 rollback 了 action，
 							// 還是可能出現丟失 this.last_page 的現象。
 							// e.g., @ 20160517.解消済み仮リンクをリンクに置き換える.js
@@ -10295,11 +10359,16 @@ function module_code(library_namespace) {
 			options.with_diff.diff = true;
 		}
 
+		// TODO: options.delay 等待n秒
+
 		var interval = options.interval || 500,
 		// default: search from NOW
 		// assert: {Date}last_query_time start time
 		last_query_time = library_namespace.is_Date(options.start)
-				&& !isNaN(options.start.getTime()) ? options.start : new Date,
+				&& !isNaN(options.start.getTime()) ? options.start
+		// treat as days back to 回溯這麼多天。
+		: options.start > 0 && options.start < 100 ? new Date(Date.now()
+				- options.start * 24 * 60 * 60 * 1000) : new Date,
 		// TODO: 僅僅採用last_query_revid做控制，不需要偵測是否有重複。
 		last_query_revid = options.revid | 0;
 
@@ -10512,10 +10581,11 @@ function module_code(library_namespace) {
 								if (revisions && revisions.length >= 1
 										&& options.with_diff) {
 
-									var from = revisions.length === 1 ? ''
-									// select the last revision.
-									: revisions[revisions.length - 1]['*'],
-									//
+									// get_page_content(row, -1);
+									var from = revisions.length > 1 &&
+									// select the oldest revision.
+									revisions[revisions.length - 1]['*'] || '',
+									// 解析頁面結構。
 									to = revisions[0]['*'] || '';
 
 									if (!options.with_diff.line) {
@@ -10523,32 +10593,31 @@ function module_code(library_namespace) {
 										row.from_parsed = from;
 										// console.log(from);
 										from = from.map(function(token) {
+											if (!token && (token !== ''
+											// 有時會出意外。
+											|| from.length !== 1)) {
+												console.log(row);
+												throw row.title;
+											}
 											return token.toString();
 										});
 
 										page_parser(row);
 										to = page_parser(row).parse();
 										to = to.map(function(token) {
+											if (!token && (token !== ''
+											//
+											|| to.length !== 1)) {
+												console.log(row);
+												throw row.title;
+											}
 											return token.toString();
 										});
 
-										if (revisions.length > 1 &&
 										// verify
-										revisions[revisions.length - 1]
-										//
-										['*'] !== from.join('')) {
-											console.log(library_namespace.LCS(
-											//
-											revisions[revisions.length - 1]
-											//
-											['*'], from.join(''), 'diff'));
-											throw 'Parser error (from): ' +
-											// debug 用. check parser, test
-											// if parser working properly.
-											get_page_title_link(page_data);
-										}
 
-										if (revisions[0]['*'] !== to.join('')) {
+										if ((revisions[0]['*'] || '') !== to
+												.join('')) {
 											console.log(revisions[0]['*']);
 											console.log(to);
 											to = revisions[0]['*'];
@@ -10557,6 +10626,22 @@ function module_code(library_namespace) {
 											to, parse_wikitext(to).toString(),
 													'diff'));
 											throw 'Parser error (to): ' +
+											// debug 用. check parser, test
+											// if parser working properly.
+											get_page_title_link(page_data);
+										}
+
+										if (revisions.length > 1 &&
+										//
+										(revisions[revisions.length - 1]
+										//
+										['*'] || '') !== from.join('')) {
+											console.log(library_namespace.LCS(
+											//
+											revisions[revisions.length - 1]
+											//
+											['*'], from.join(''), 'diff'));
+											throw 'Parser error (from): ' +
 											// debug 用. check parser, test
 											// if parser working properly.
 											get_page_title_link(page_data);
@@ -14421,6 +14506,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// is Q4167410: Wikimedia disambiguation page 維基媒體消歧義頁
+	// [[Special:链接到消歧义页的页面]]: 頁面內容含有 __DISAMBIG__ (或別名) 標籤會被作為消歧義頁面。
 	// CeL.wiki.data.is_DAB(entity)
 	function is_DAB(entity, callback) {
 		var property = entity && entity.claims && entity.claims.P31;

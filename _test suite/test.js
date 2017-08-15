@@ -2662,7 +2662,8 @@ function test_wiki() {
 
 		[['[[User:Adam/test]]', CeL.wiki.title_link_of('User:Adam/test')], 'title_link_of #1'],
 		[['Adam', CeL.wiki.parse.user('[[User:Adam/test]]')], 'parse.user #1'],
-		[[true, CeL.wiki.parse.user('[[User:Adam/test]]', 'adam')], 'parse.user #2'],
+		[['Adam', CeL.wiki.parse.user('[[en:User:Adam/test]]')], 'parse.user #2: 連接到其他維基媒體站點上的用戶頁面'],
+		[[true, CeL.wiki.parse.user('[[User:Adam/test]]', 'adam')], 'parse.user #3'],
 	]);
 
 	error_count += CeL.test('wiki: CeL.wiki.plain_text() basic test', [
@@ -2834,6 +2835,8 @@ function test_wiki() {
 		wikitext = '{|\n!|t\n|-\n|[[{{t|p}}]]\n|}';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
 		wikitext = 'a\n{|\n!|t\n|-\n|t\n|[[{{t|p}}]]<!-- c -->\n|}\nb';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = '==t1==\n== t2 ==';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
 
 		wikitext = '1<br>2';
