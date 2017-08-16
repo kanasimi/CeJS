@@ -321,11 +321,14 @@ function module_code(library_namespace) {
 		import_arg_hash : {
 			main_directory : true,
 			user_agent : true,
+			one_by_one : true,
+			// 容許錯誤用的相關操作設定。
 			MAX_ERROR : true,
 			allow_EOI_error : true,
 			skip_error : true,
 			skip_chapter_data_error : true,
-			one_by_one : true,
+			// 重新擷取用的相關操作設定。
+			regenerate : true,
 			reget_chapter : true,
 			recheck : true
 		},
@@ -1225,52 +1228,17 @@ function module_code(library_namespace) {
 			// 章節的增加數量: 新-舊, 當前-上一次的
 			var chapter_added = work_data.chapter_count
 					- work_data.last_download.chapter;
+
 			if (_this.recheck
 			// _this.get_chapter_count() 中
 			// 可能重新設定過 work_data.last_download.chapter。
 			&& work_data.last_download.chapter !== _this.start_chapter) {
-				library_namespace.debug('作品變更過 / midified');
-				if (_this.recheck === 'changed') {
-					// 採用依變更判定時，預設不重新擷取。
-					// 不可用 ('reget_chapter' in _this)，會取得 .prototype 的屬性。
-					if (!_this.hasOwnProperty('reget_chapter')) {
-						work_data.reget_chapter = false;
-					}
-					library_namespace
-							.log('章節數量無變化，皆為 '
-									+ work_data.chapter_count
-									+ '，'
-									+ (work_data.reget_chapter ? '但已設定下載所有章節內容。'
-											: _this.regenerate ? '僅利用 cache 重建資料(如ebook)，不重新下載所有章節內容。'
-													: '跳過本作品不處理。'));
-					if (work_data.reget_chapter || _this.regenerate) {
-						// 即使是這一種，還是得要從頭 check cache 並生成資料(如.epub)。
-						work_data.last_download.chapter = _this.start_chapter;
-					}
+				library_namespace.debug('已設定 this.recheck + 作品曾有內容 / 並非空作品');
 
-				} else if (typeof _this.recheck === 'number') {
-					if (_this.recheck > 0 ? chapter_added < 0
-					// 這可避免太過經常更新。
-					|| chapter_added >= _this.recheck : chapter_added !== 0
-					// TODO: check .last_update
-					) {
-						library_namespace
-								.info('因章節數量有變化，將重新下載/檢查所有章節內容: '
-										+ work_data.last_download.chapter
-										+ '→'
-										+ work_data.chapter_count
-										+ ' ('
-										+ (work_data.chapter_count > work_data.last_download.chapter ? '+'
-												: '')
-										+ (work_data.chapter_count - work_data.last_download.chapter)
-										+ ')');
-						// 重新下載
-						work_data.reget_chapter = true;
-						// work_data.regenerate = true;
-						work_data.last_download.chapter = _this.start_chapter;
-					}
-
-				} else {
+				if (_this.recheck !== 'changed'
+						&& typeof _this.recheck !== 'number') {
+					// 強制重新更新文件。
+					// _this.recheck should be true
 					if (typeof _this.recheck !== 'boolean') {
 						library_namespace.warn('Unknown .recheck: '
 								+ _this.recheck);
@@ -1278,19 +1246,66 @@ function module_code(library_namespace) {
 					if (!_this.reget_chapter) {
 						if (_this.hasOwnProperty('reget_chapter')) {
 							library_namespace
-									.warn('既然設定了 .recheck，則將 .reget_chapter 設定為 ['
+									.warn('既然設定了 .recheck，則把 .reget_chapter 設定為 ['
 											+ _this.reget_chapter
-											+ '] 將無作用！自動把 .reget_chapter 轉為 true。');
+											+ '] 將無作用！將自動把 .reget_chapter 轉為 true，明確指定 .reget_chapter 以重新取得章節內容。。');
 						}
 						_this.reget_chapter = true;
 					}
 					// 無論是哪一種，既然是recheck則都得要從頭check並生成資料。
-					work_data.last_download.chapter = _this.start_chapter;
 					work_data.reget_chapter = _this.reget_chapter;
-				}
+					work_data.last_download.chapter = _this.start_chapter;
 
-			} else if (_this.recheck && !work_data.reget_chapter) {
-				library_namespace.info('若是您需要重新取得章節內容，請明確指定 .reget_chapter。');
+				} else if ( // 依變更判定是否重新更新文件。
+				// for: {Natural}_this.recheck
+				_this.recheck > 0 ? chapter_added < 0
+				// .recheck 採用一個較大的數字可避免太過經常更新。
+				|| chapter_added >= _this.recheck
+				// assert: _this.recheck === 'changed'
+				: chapter_added !== 0
+				// TODO: check .last_update
+				) {
+					library_namespace.debug('作品變更過 / midified，且符合需要更新的條件。');
+					library_namespace
+							.info('因章節數量有變化，將重新下載/檢查所有章節內容: '
+									+ work_data.last_download.chapter
+									+ '→'
+									+ work_data.chapter_count
+									+ ' ('
+									+ (work_data.chapter_count > work_data.last_download.chapter ? '+'
+											: '')
+									+ (work_data.chapter_count - work_data.last_download.chapter)
+									+ ')');
+					// 重新下載。
+					work_data.reget_chapter = true;
+					// work_data.regenerate = true;
+					work_data.last_download.chapter = _this.start_chapter;
+
+				} else {
+					// 不可用 ('reget_chapter' in _this)，會取得 .prototype 的屬性。
+					if (!_this.hasOwnProperty('reget_chapter')) {
+						work_data.reget_chapter = false;
+					}
+					library_namespace
+							.log('章節數量'
+									+ (chapter_added === 0 ? '無變化，皆為 '
+											+ work_data.chapter_count : '變化過小('
+											+ chapter_added + ')因此不重新下載')
+									+ '，'
+									+ (work_data.reget_chapter ? '但已設定下載所有章節內容。'
+											: _this.regenerate ? '僅利用 cache 重建資料(如ebook)，不重新下載所有章節內容。'
+													: '跳過本作品不處理。'));
+
+					// 採用依變更判定時，預設不重新擷取。
+					if (!('reget_chapter' in _this)) {
+						work_data.reget_chapter = false;
+					}
+					if (work_data.reget_chapter || _this.regenerate) {
+						// 即使是這一種，還是得要從頭 check cache 並生成資料(如.epub)。
+						work_data.last_download.chapter = _this.start_chapter;
+					}
+
+				}
 			}
 
 			if (!('reget_chapter' in work_data)) {

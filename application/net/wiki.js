@@ -1666,7 +1666,7 @@ function module_code(library_namespace) {
 	/** {RegExp}wikilink內部連結的匹配模式。 */
 	PATTERN_link = /\[\[[\s\n]*([^\s\n\|{}<>\[\]][^\|{}<>\[\]]*)((?:\|[^\|{}<>\[\]]*)*)\]\]/g,
 	/** {RegExp}wikilink內部連結的匹配模式v2，[all_link,page_and_section,page_name,section_title,displayed_text]。頁面標題不可包含無效的字元：[\n\[\]{}]，經測試anchor亦不可包含[\n\[\]{}] */
-	PATTERN_wikilink = /\[\[(([^\[\]{}\n\|#]+)(#[^\[\]{}\n\|]*)?|#[^\[\]{}\n\|]+)(?:\|([^\n]+?))?\]\]/,
+	PATTERN_wikilink = /\[\[(([^\[\]{}\n\|#]+)(#(?:-{[^\[\]{}\n\|]+}-|[^\[\]{}\n\|]+)?)?|#[^\[\]{}\n\|]+)(?:\|([^\n]+?))?\]\]/,
 	//
 	PATTERN_wikilink_g = new RegExp(PATTERN_wikilink.source, 'g'),
 	/**
@@ -2247,7 +2247,12 @@ function module_code(library_namespace) {
 			}
 			if (normalize) {
 				// assert: section_title && section_title.startsWith('#')
-				section_title = section_title.trim();
+				section_title = section_title.trimEnd();
+			}
+			if (section_title) {
+				// 經過改變，需再進一步處理。
+				// e.g., '[[t#-{c}-]]'
+				section_title = parse_wikitext(section_title, options, queue);
 			}
 
 			var parameters = [ page_name, section_title ];
@@ -3537,6 +3542,11 @@ function module_code(library_namespace) {
 			return '&#' + character.charCodeAt(0) + ';';
 		}).trim();
 	}
+
+	// 採用連結的方法([[page.title#section_title|title]])可以免去需要自行解析標題的問題。
+	// also see [[H:MW]], {{anchorencode:章節標題}}, escapeId()
+	// https://phabricator.wikimedia.org/T152540
+	// https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
 
 	/**
 	 * <code>

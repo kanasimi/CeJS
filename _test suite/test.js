@@ -2838,6 +2838,12 @@ function test_wiki() {
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
 		wikitext = '==t1==\n== t2 ==';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = '[[t#-{c}-]]';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = '[[t#a-{c}-b]]';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = '==t==\n[[w:t/t#a-{c}-]] \n';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
 
 		wikitext = '1<br>2';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML single tag #1');
