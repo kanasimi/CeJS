@@ -3027,30 +3027,47 @@ function module_code(library_namespace) {
 	/**
 	 * parse date string / 時間戳記 to {Date}
 	 * 
+	 * @example <code>
+	date_list = CeL.wiki.parse.date(CeL.wiki.content_of(page_data), {
+		get_timevalue : true,
+		get_all_list : true
+	});
+	 * </code>
+	 * 
 	 * @param {String}wikitext
 	 *            date text to parse.
+	 * @param {Object}options
+	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @returns {Date}date of the date string
 	 * 
 	 * @see [[en:Wikipedia:Signatures]], "~~~~~"
 	 */
-	function parse_date_zh(wikitext, get_timevalue, get_all_list) {
+	function parse_date_zh(wikitext, options) {
+		if (options === true) {
+			options = {
+				get_timevalue : true
+			};
+		} else {
+			options = library_namespace.setup_options(options);
+		}
 		var date_list;
-		if (get_all_list) {
-			// 若設定 get_all_list，須保證回傳 {Array}。
+		if (options.get_all_list) {
+			// 若設定 options.get_all_list，須保證回傳 {Array}。
 			date_list = [];
 		}
 		if (!wikitext) {
 			return date_list;
 		}
 
+		// 日期的模式, should match "~~~~~".
 		// $dateFormats, 'Y年n月j日 (D) H:i'
 		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hans.php
 		// e.g., "2016年8月1日 (一) 00:00 (UTC)", "2016年8月1日 (一) 00:00 (CST)"
 		// {{unsigned|user|2016年10月18日 (二) 00:04‎ }}
 		// {{unsigned|1=user=user|2=2016年10月17日 (一) 23:45‎ }}
-		// [, Y, m, d, time(hh:mm), timezone ]
-		var PATTERN_date_zh = /(\d{4})年(1?\d)月([1-3]?\d)日 \(.\)( \d{1,2}:\d{1,2})(?: \(([A-Z]{3})\))?/g,
+		// [, Y, m, d, week, time(hh:mm), timezone ]
+		var PATTERN_date_zh = /([12]\d{3})年(1?\d)月([1-3]?\d)日 \([一二三四五六日]\)( \d{1,2}:\d{1,2})(?: \(([A-Z]{3})\))?/g,
 		// <s>去掉</s>skip年分前之雜項。
 		// <s>去掉</s>skip星期與其後之雜項。
 		matched;
@@ -3059,10 +3076,16 @@ function module_code(library_namespace) {
 			// Warning:
 			// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()比parse_date_zh()功能大多了。
 			var date = matched[1] + '/' + matched[2] + '/' + matched[3]
-					+ matched[4] + ' ' + (matched[5] || 'UTC+8');
+					+ matched[5] + ' ' + (matched[6] || 'UTC+8');
 			// console.log(date);
-			date = get_timevalue ? Date.parse(date) : new Date(date);
-			if (!get_all_list) {
+			date = Date.parse(date);
+			if (isNaN(date)) {
+				continue;
+			}
+			if (!options.get_timevalue) {
+				date = new Date(date);
+			}
+			if (!options.get_all_list) {
 				return date;
 			}
 			date_list.push(date);
@@ -3070,6 +3093,22 @@ function module_code(library_namespace) {
 
 		return date_list;
 	}
+
+	/**
+	 * 日期的格式, should the same as "~~~~~".
+	 * 
+	 * 時間戳跟標準簽名日期格式一樣，讓時間轉換的小工具起效用。
+	 * 
+	 * @example <code>
+	(new Date).format(CeL.wiki.parse.date.format);
+	 * </code>
+	 */
+	parse_date_zh.format = {
+		format : '%Y年%m月%d日 (%a) %2H:%2M (UTC)',
+		// use UTC
+		zone : 0,
+		locale : 'cmn-Hant-TW'
+	};
 
 	/**
 	 * 使用者/用戶對話頁面所符合的匹配模式。

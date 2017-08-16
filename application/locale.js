@@ -1261,21 +1261,23 @@ Japanese_week_name = '日月火水木金土'.split(''),
 English_week_name = 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(',');
 
 
-function week_name(ordinal, domain_name) {
+function week_name(ordinal, domain_name, full_name) {
 	// assert: ordinal: 0~6
 	switch (domain_name) {
 	case 'cmn-Hant-TW':
 	case 'cmn-Hans-CN':
 		// number to Chinese week name.
-		return '星期' + Chinese_week_name[ordinal];
+		// 星期/週/禮拜
+		return (full_name ? '星期' : '') + Chinese_week_name[ordinal];
 
 	case 'ja-JP':
-		return Japanese_week_name[ordinal] + '曜日';
+		return Japanese_week_name[ordinal] + (full_name ? '曜日' : '');
 
 	case 'en-US':
-		return English_week_name[ordinal];
+		return full_name ? English_week_name[ordinal] : English_week_name[ordinal].slice(0, 3);
 
 	default:
+		// unknown domain
 		return ordinal;
 	}
 }
@@ -1308,7 +1310,10 @@ library_namespace.set_method(gettext.date, {
 	year : year_name,
 	month : month_name,
 	date : date_name,
-	week : week_name
+	week : week_name,
+	full_week : function full_week_name(ordinal, domain_name) {
+		return week_name(ordinal, domain_name, true);
+	}
 });
 
 

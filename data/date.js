@@ -1729,6 +1729,8 @@ function module_code(library_namespace) {
 		}
 
 		if (to_ISO) {
+			// TODO: 在IS0 8601中星期以星期一開始
+			// 一年的首星期必須包含1月4日, 包含一年的首個星期四
 			year = year.pad(4);
 			week = 'W' + week.pad(2);
 		}
@@ -1752,41 +1754,61 @@ function module_code(library_namespace) {
 	// accessdate="2012/3/24 15:23">strftime [C++ Reference]</a>
 	// 除非必要，這邊不應用上 options.original_Date。
 	strftime.default_conversion = {
-		// 完整年份(非兩位數的數字，近十年應為四位數的數字，如2013)
+		// ----------------------------
+		// date
+
+		// 完整年份(非兩位數的數字，近十年應為四位數的數字，如2013) 以4位十進制數寫年份。
 		Y : function(date_value, options) {
 			return gettext_date.year(
 			// (options && options.original_Date || date_value)
 			date_value.getFullYear(), options.numeral || options.locale);
 		},
-		// 月分 (1-12)。
+		// 月分 (1-12)。 將月份寫作十進制數（範圍[01,12]）。
 		m : function(date_value, options) {
 			return gettext_date.month(1 +
 			// (options && options.original_Date || date_value)
 			date_value.getMonth(), options.locale);
 		},
-		// 月中的第幾天 (1-31)
+		// 月中的第幾天 (1-31) 以十進制數寫月的第幾日（範圍[01,31]）。
 		d : function(date_value, options) {
 			return gettext_date.date(
 			// (options && options.original_Date || date_value)
 			date_value.getDate(), options.locale);
 		},
 
-		// 星期 (0-6)
-		w : function(date_value, options) {
+		// ----------------------------
+		// week
+
+		// 2017/8/16 增加在地化的星期名稱表示法。之前曾經用過"%w"這個方式的，都需要改成"%A"。
+		// 寫縮略的星期日期名，例如Fri（本地環境依賴）。
+		a : function(date_value, options) {
 			return gettext_date.week(
 			// (options && options.original_Date || date_value)
 			date_value.getDay(), options.locale);
 		},
+		// 寫完整的星期日期名，例如Friday（本地環境依賴）。
+		A : function(date_value, options) {
+			return gettext_date.full_week(
+			// (options && options.original_Date || date_value)
+			date_value.getDay(), options.locale);
+		},
+		// 星期 (0-6) 以十進制數寫星期日期，其中星期日是0（範圍[0-6]）。
+		w : function(date_value, options) {
+			return date_value.getDay();
+		},
 
-		// 小時數 (0-23)
+		// ----------------------------
+		// time
+
+		// 小時數 (0-23) 以十進制數寫時，24小時制（範圍[00-23]）。
 		H : function(date_value, options) {
 			return date_value.getHours();
 		},
-		// 分鐘數 (0-59)
+		// 分鐘數 (0-59) 以十進制數寫分（範圍[00,59]）。
 		M : function(date_value, options) {
 			return date_value.getMinutes();
 		},
-		// 秒數 (0-59)
+		// 秒數 (0-59) 以十進制數寫秒（範圍[00,59]）。
 		S : function(date_value, options) {
 			return date_value.getSeconds();
 		},
@@ -1803,12 +1825,15 @@ function module_code(library_namespace) {
 			return ms > 99 ? ms : ms > 9 ? '0' + ms : ms >= 0 ? '00' + ms : ms;
 		},
 
-		// 年日數
+		// ----------------------------
+		// misc
+
+		// 年日數 以十進制數寫年的第幾日（範圍[001,366]）。
 		// (new Date).format('%4Y-%3o')
-		o : function(date_value, options) {
+		j : function(date_value, options) {
 			return ordinal_date(date_value);
 		},
-		// 週數
+		// 週數 以十進制數寫年的第幾個星期（星期一是星期的首日）（範圍[00,53]）。
 		W : function(date_value, options) {
 			return week_date(date_value)[1];
 		},

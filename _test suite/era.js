@@ -3060,7 +3060,7 @@ function affairs() {
 			if (/* !date.準 && */!date.精)
 				return {
 					span : date.format({
-						format : '%w',
+						format : '%A',
 						locale : _.get_domain_name()
 					}),
 					S : date.getDay() === 0 ? 'color:#f34'
@@ -3124,7 +3124,7 @@ function affairs() {
 		}, function(date) {
 			var year = date.getFullYear() | 0;
 			return date.精 === '年' ? _('%1年', year)
-			//
+			// TODO: use "%j"
 			: year.pad(4) + '-' + CeL.ordinal_date(date).pad(3);
 		} ],
 
@@ -3136,7 +3136,7 @@ function affairs() {
 			href : 'https://en.wikipedia.org/wiki/ISO_week_date'
 		}, function(date) {
 			return date.精 === '年' ? _('%1年', date.getFullYear())
-			//
+			// TODO: use "%W"
 			: CeL.week_date(date, true);
 		} ],
 
