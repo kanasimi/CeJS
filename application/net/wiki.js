@@ -10456,7 +10456,7 @@ function module_code(library_namespace) {
 		if (library_namespace.is_Date(options.start)) {
 			last_query_time = isNaN(options.start.getTime()) ? new Date
 					: options.start;
-		} else if (isNaN(last_query_time = Date.parse(options.start))) {
+		} else if (!isNaN(last_query_time = Date.parse(options.start))) {
 			last_query_time = new Date(last_query_time);
 		} else if ((last_query_time = library_namespace
 				.to_millisecond(options.start)) > 0) {
@@ -10469,9 +10469,9 @@ function module_code(library_namespace) {
 
 		library_namespace.info('add_listener: 開始監視 / scan '
 		//
-		+ (Date.now() - last_query_time > 100
+		+ (Date.now() - last_query_time > 100 ?
 		//
-		? library_namespace.age_of(last_query_time) + ' 前起' : '最近') + '更改的頁面。');
+		library_namespace.age_of(last_query_time) + ' 前開始' : '最近') + '更改的頁面。');
 
 		if (false) {
 			library_namespace.debug('recent_options: '

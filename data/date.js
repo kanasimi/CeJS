@@ -2593,6 +2593,8 @@ function module_code(library_namespace) {
 	 * 計算大略的時間間隔，以適當的單位簡略顯示。 count roughly duration, count date.<br />
 	 * CeL.age_of(new Date(0, 0, 0), new Date(0, 0, 0, 0, 0, 8)) === '8s'
 	 * 
+	 * TODO: locale
+	 * 
 	 * @param {Date|Number}start
 	 * @param {Date|Number}[end]
 	 * @param {Object}[options]
