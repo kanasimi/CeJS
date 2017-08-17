@@ -10444,7 +10444,7 @@ function module_code(library_namespace) {
 
 		var delay_ms = library_namespace.to_millisecond(options.delay),
 		//
-		interval = options.interval || 500,
+		interval = library_namespace.to_millisecond(options.interval) || 500,
 		// assert: {Date}last_query_time start time
 		last_query_time,
 		// TODO: 僅僅採用last_query_revid做控制，不需要偵測是否有重複。
