@@ -3273,6 +3273,10 @@ function module_code(library_namespace) {
 		if (matched) {
 			return matched[1].trim();
 		}
+		if (false && wikitext.includes('__STATICREDIRECT__')) {
+			library_namespace.debug('雖然特別指定了重定向頁面的 Magic word，但是並沒有發現重定向資訊。',
+					3, 'parse_redirect');
+		}
 	}
 
 	// ----------------------------------------------------
@@ -10430,20 +10434,44 @@ function module_code(library_namespace) {
 		}
 
 		// 注意:
-		// {Natural}options.start: 回溯日數。最多約可回溯30天。
+		// {String|Natural}options.start, options.delay:
+		// 將會用 CeL.date.to_millisecond() 來解析。
+		// 推薦用像是 "2days", "3min", "2d", "3m" 這樣子的方法來表現。
+		//
 		// {Date}options.start: 從這個時間點開始回溯。
-		// {Natural}options.delay > 0: 延遲等待秒數。
+		// {Natural}options.start: 回溯 millisecond 數。最多約可回溯30天。
+		// {Natural}options.delay > 0: 延遲等待 millisecond 數。
 
-		var interval = options.interval || 500,
-		// default: search from NOW
+		var delay_ms = library_namespace.to_millisecond(options.delay),
+		//
+		interval = options.interval || 500,
 		// assert: {Date}last_query_time start time
-		last_query_time = library_namespace.is_Date(options.start)
-				&& !isNaN(options.start.getTime()) ? options.start
-		// treat as days back to 回溯這麼多天。
-		: options.start > 0 && options.start < 100 ? new Date(Date.now()
-				- options.start * 24 * 60 * 60 * 1000) : new Date,
+		last_query_time,
 		// TODO: 僅僅採用last_query_revid做控制，不需要偵測是否有重複。
 		last_query_revid = options.revid | 0;
+
+		if (!(delay_ms > 0))
+			delay_ms = 0;
+
+		if (library_namespace.is_Date(options.start)) {
+			last_query_time = isNaN(options.start.getTime()) ? new Date
+					: options.start;
+		} else if (isNaN(last_query_time = Date.parse(options.start))) {
+			last_query_time = new Date(last_query_time);
+		} else if ((last_query_time = library_namespace
+				.to_millisecond(options.start)) > 0) {
+			// treat as time back to 回溯這麼多時間。
+			last_query_time = new Date(Date.now() - last_query_time);
+		} else {
+			// default: search from NOW
+			last_query_time = new Date;
+		}
+
+		library_namespace.info('add_listener: 開始監視 / scan '
+		//
+		+ (Date.now() - last_query_time > 100
+		//
+		? library_namespace.age_of(last_query_time) + ' 前起' : '最近') + '更改的頁面。');
 
 		if (false) {
 			library_namespace.debug('recent_options: '
@@ -10484,10 +10512,10 @@ function module_code(library_namespace) {
 				// MediaWiki format
 				.format('%4Y%2m%2d%2H%2M%2S');
 				where.this_oldid = '>' + last_query_revid;
-				if (options.delay > 0) {
+				if (delay_ms > 0) {
 					where[''] = 'rc_timestamp<='
 					// 截止期限。
-					+ new Date(Date.now() - options.delay * 1000)
+					+ new Date(Date.now() - delay_ms)
 					// MediaWiki format
 					.format('%4Y%2m%2d%2H%2M%2S');
 				}
@@ -10500,10 +10528,10 @@ function module_code(library_namespace) {
 					console.log('set rcstart: '
 							+ recent_options.parameters.rcstart);
 				}
-				if (options.delay > 0) {
+				if (delay_ms > 0) {
 					recent_options.parameters.rcend
 					// 截止期限。
-					= new Date(Date.now() - options.delay * 1000).toISOString();
+					= new Date(Date.now() - delay_ms).toISOString();
 				}
 			}
 

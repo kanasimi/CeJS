@@ -2587,6 +2587,7 @@ function module_code(library_namespace) {
 	}, strftime.default_conversion), 'cmn-Hant-TW');
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
+	// timevalue → {String}時間表達式
 
 	/**
 	 * 計算大略的時間間隔，以適當的單位簡略顯示。 count roughly duration, count date.<br />
@@ -2674,6 +2675,81 @@ function module_code(library_namespace) {
 	};
 
 	_.age_of = age_of;
+
+	// ------------------------------------------
+	// {String}時間表達式 → {Natural}timevalue in milliseconds
+
+	var PATTERN_ISO_8601_durations = /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/,
+	// 由小到大排列。
+	PATTERN_time_units = [ [ 'ms', 1 ], [ 's(?:ec)?', 1000 ],
+			[ 'm(?:in)?', 60 ], [ 'h(?:r|ours?)?', 60 ],
+			// T: for ISO 8601 Durations. e.g., 'P21DT3H'
+			[ 'd(?:ays?|T)?', 24 ] ];
+
+	(function() {
+		// [ all, amount ]
+		var ms = 1, template = /(\d+(?:\.\d+)?|\.\d+) ?UNIT(?:[^a-z]|$)/.source;
+		PATTERN_time_units = PATTERN_time_units.map(function(pair) {
+			return [ new RegExp(template.replace('UNIT', pair[0]), 'i'),
+					ms *= pair[1] ];
+		});
+	})();
+
+	// parser time interval to timevalue (get how many millisecond)
+	function time_interval_to_millisecond(interval) {
+		if (interval > 0) {
+			return +interval;
+		}
+
+		if (typeof interval !== 'string') {
+			return;
+		}
+
+		var timevalue = 0, has_matched, matched = interval
+				.match(PATTERN_ISO_8601_durations);
+		if (matched) {
+			if (+matched[1] || +matched[2]) {
+				throw 'We can not handle year / month: ' + interval;
+			}
+
+			// 這可以順便用來 parse:
+			// https://en.wikipedia.org/wiki/ISO_8601#Durations
+			// e.g., "P23DT23H"
+			interval = matched[0];
+
+		} else if (matched = interval
+		// e.g., "12:34", "12:34:56"
+		.match(/(?:^|\s)(\d{1,3}):(\d{1,2})(?::(\d{1,2}))?(?:\s|$)/)) {
+			interval = matched[1] + 'H' + matched[2] + 'M'
+					+ (matched[3] ? matched[3] + 'S' : '');
+		}
+
+		PATTERN_time_units.forEach(function(pair) {
+			matched = interval.match(pair[0]);
+			if (matched) {
+				has_matched = true;
+				timevalue += matched[1] * pair[1];
+			}
+		});
+
+		if (has_matched)
+			return timevalue;
+
+		matched = interval.split('/');
+		if (matched.length === 2) {
+			// https://en.wikipedia.org/wiki/ISO_8601#Time_intervals
+			matched = matched.map(function(time) {
+				return Date.parse(time);
+			});
+			if (!isNaN(matched[0]) && !isNaN(matched[1])) {
+				return matched[1] - matched[0];
+			}
+		}
+	}
+
+	_.to_millisecond = time_interval_to_millisecond;
+
+	// ------------------------------------------
 
 	// parse Durations
 	function parse_period(period) {

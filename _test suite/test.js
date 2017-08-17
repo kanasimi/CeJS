@@ -1941,6 +1941,19 @@ function test_date() {
 		[[ 34519, (new Date('July 5, 1998')).to_Excel(true) ], 'date.to_Excel(Mac)'],
 		[[ 35981, (new Date('July 6, 2002')).to_Excel(true) ], 'date.to_Excel(Mac)'],
 		[[ NaN, (new Date('1/1/1800')).to_Excel() ], 'date.to_Excel()=NaN'],
+
+		[[ 123, CeL.to_millisecond(123) ], 'time_interval_to_millisecond() #1'],
+		[[ 12300, CeL.to_millisecond('12.3s') ], 'time_interval_to_millisecond() #2'],
+		[[ 120000, CeL.to_millisecond('2 m') ], 'time_interval_to_millisecond() #3'],
+		[[ 3720000, CeL.to_millisecond('1 h 2 m') ], 'time_interval_to_millisecond() #4'],
+		[[ 103680000, CeL.to_millisecond('1.2 d') ], 'time_interval_to_millisecond() #5'],
+		[[ 103680000, CeL.to_millisecond('1d') + CeL.to_millisecond('.2day') ], 'time_interval_to_millisecond() #6'],
+		[[ 1825200000, CeL.to_millisecond('21 days, 3 hours') ], 'time_interval_to_millisecond() #7'],
+		[[ 1825200000, CeL.to_millisecond('P21DT3H') ], 'time_interval_to_millisecond() ISO 8601 Durations'],
+		[[ 20040000, CeL.to_millisecond('5h34m') ], 'time_interval_to_millisecond() #8'],
+		[[ 20040000, CeL.to_millisecond('5:34') ], 'time_interval_to_millisecond() #9'],
+		[[ 20067000, CeL.to_millisecond('5:34:27') ], 'time_interval_to_millisecond() #10'],
+
  	]);
 
 
