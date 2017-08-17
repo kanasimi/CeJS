@@ -3095,9 +3095,9 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 日期的格式, should the same as "~~~~~".
+	 * 日期的格式。時間戳跟標準簽名日期格式一樣，讓時間轉換的小工具起效用。
 	 * 
-	 * 時間戳跟標準簽名日期格式一樣，讓時間轉換的小工具起效用。
+	 * assert: the same as "~~~~~".
 	 * 
 	 * @example <code>
 	(new Date).format(CeL.wiki.parse.date.format);
@@ -3133,7 +3133,7 @@ function module_code(library_namespace) {
 			PATTERN_user_contributions_link.source, 'ig');
 
 	/**
-	 * parse user name. 解析使用者/用戶對話頁面資訊。
+	 * parse user name. 解析使用者/用戶對話頁面資訊。找出用戶頁、用戶討論頁、用戶貢獻頁的連結。
 	 * 
 	 * @example <code>
 	if (CeL.wiki.parse.user(CeL.wiki.title_link_of(title), user)) {}
@@ -3227,7 +3227,19 @@ function module_code(library_namespace) {
 		return Object.keys(user_hash);
 	}
 
+	// CeL.wiki.parse.user.all()
 	parse_user.all = parse_all_user;
+
+	// 由使用者名稱來檢測匿名使用者/未註冊用戶 [[WP:IP]]
+	function is_IP_user(user_name) {
+		// for IPv4
+		return /^[12]?\d{1,2}(?:\.[12]?\d{1,2}){3}$/.test(user_name)
+		// for IPv6
+		|| /^[\da-f]{1,4}(?::[\da-f]{1,4}){7}$/i.test(user_name);
+	}
+
+	// CeL.wiki.parse.user.is_IP()
+	parse_user.is_IP = is_IP_user;
 
 	//
 	/**
@@ -10078,6 +10090,15 @@ function module_code(library_namespace) {
 					// 跳過這一筆設定。
 					continue;
 				}
+				if (!name) {
+					// condition[''] = [ condition 1, condition 2, ...];
+					if (Array.isArray(value)) {
+						value_array.append(value);
+					} else {
+						value_array.push(value);
+					}
+					return;
+				}
 				if (!/^[a-z_]+$/.test(name)) {
 					throw 'Invalid field name: ' + name;
 				}
@@ -10408,7 +10429,10 @@ function module_code(library_namespace) {
 			options.with_diff.diff = true;
 		}
 
-		// TODO: options.delay 等待n秒
+		// 注意:
+		// {Natural}options.start: 回溯日數。最多約可回溯30天。
+		// {Date}options.start: 從這個時間點開始回溯。
+		// {Natural}options.delay > 0: 延遲等待秒數。
 
 		var interval = options.interval || 500,
 		// default: search from NOW
@@ -10449,6 +10473,7 @@ function module_code(library_namespace) {
 							.toISOString() : last_query_time), 1,
 					'add_listener.receive');
 
+			// 根據不同的實現方法採用不一樣的因應方式。
 			if (use_SQL) {
 				if (!library_namespace.is_Date(last_query_time)) {
 					// assert: !!(last_query_time)
@@ -10459,6 +10484,13 @@ function module_code(library_namespace) {
 				// MediaWiki format
 				.format('%4Y%2m%2d%2H%2M%2S');
 				where.this_oldid = '>' + last_query_revid;
+				if (options.delay > 0) {
+					where[''] = 'rc_timestamp<='
+					// 截止期限。
+					+ new Date(Date.now() - options.delay * 1000)
+					// MediaWiki format
+					.format('%4Y%2m%2d%2H%2M%2S');
+				}
 			} else {
 				// rcend
 				recent_options.parameters.rcstart = library_namespace
@@ -10467,6 +10499,11 @@ function module_code(library_namespace) {
 				if (false) {
 					console.log('set rcstart: '
 							+ recent_options.parameters.rcstart);
+				}
+				if (options.delay > 0) {
+					recent_options.parameters.rcend
+					// 截止期限。
+					= new Date(Date.now() - options.delay * 1000).toISOString();
 				}
 			}
 
@@ -10518,6 +10555,8 @@ function module_code(library_namespace) {
 					// 紀錄/標記本次處理到哪。
 					// 注意：type=edit會增加revid，其他type似乎會沿用上一個revid。
 					last_query_revid = last_query_time.revid;
+					// 確保 {Date}last_query_time
+					// last_query_time = new Date(last_query_time.timestamp);
 					last_query_time = last_query_time.timestamp;
 				}
 				if (0) {
@@ -10620,8 +10659,10 @@ function module_code(library_namespace) {
 								if (revisions && revisions.length >= 1
 								//
 								&& revisions[0] && revisions[0].timestamp) {
-									last_query_time
 									// 設定成已經取得的最新一個編輯rev。
+									last_query_time
+									// 確保 {Date}last_query_time
+									// = new Date(revisions[0].timestamp);
 									= revisions[0].timestamp;
 									// last_query_revid = revisions[0].revid;
 								}
