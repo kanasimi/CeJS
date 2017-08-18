@@ -3271,10 +3271,25 @@ function module_code(library_namespace) {
 	 * @returns {Undefined}Not a redirect page.
 	 */
 	function parse_redirect(wikitext) {
+		if (false) {
+			if (Array.isArray(wikitext)) {
+				throw '您可能取得了多個版本';
+				// 應該用:
+				// content = CeL.wiki.content_of(page_data, 0);
+				// 但是卻用成了:
+				// content = CeL.wiki.content_of(page_data);
+			}
+			if (!wikitext || typeof wikitext !== 'string') {
+				throw typeof wikitext
+				return;
+			}
+		}
+
 		var matched = wikitext && wikitext.match(PATTERN_redirect);
 		if (matched) {
 			return matched[1].trim();
 		}
+
 		if (false && wikitext.includes('__STATICREDIRECT__')) {
 			library_namespace.debug('雖然特別指定了重定向頁面的 Magic word，但是並沒有發現重定向資訊。',
 					3, 'parse_redirect');
@@ -3979,6 +3994,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @example <code>
 	   var content = CeL.wiki.content_of(page_data);
+	   // 當取得了多個版本:
+	   var content = CeL.wiki.content_of(page_data, 0);
 	 * </code>
 	 * 
 	 * @param {Object}page_data
@@ -4023,7 +4040,7 @@ function module_code(library_namespace) {
 					return revision['*'];
 				});
 			}
-			if (content.length > 0 && flow_view < 0) {
+			if (flow_view < 0) {
 				// e.g., -1: select the oldest revision.
 				flow_view += content.length;
 			}
@@ -5173,7 +5190,8 @@ function module_code(library_namespace) {
 		write_to : '',
 		/** {String}運作記錄存放頁面。 */
 		log_to : 'User:Robot/log/%4Y%2m%2d',
-		/** {String}編輯摘要。總結報告。編輯理由。reason.「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」 */
+		// 「新條目、修飾語句、修正筆誤、內容擴充、排版、內部鏈接、分類、消歧義、維基化」
+		/** {String}編輯摘要。總結報告。編輯理由。 edit reason. */
 		summary : ''
 	});
 
@@ -5725,6 +5743,7 @@ function module_code(library_namespace) {
 						// unescape
 						messages.unshift(
 						// 避免 log page 添加 Category。
+						// 在編輯摘要中加上使用者連結，似乎還不至於驚擾到使用者。因此還不用特別處理。
 						config.summary.replace(/</g, '&lt;').replace(
 						// @see PATTERN_category @ CeL.wiki
 						/\[\[\s*(Category|分類|分类|カテゴリ)\s*:/ig, '[[:$1:'));
@@ -10371,7 +10390,7 @@ function module_code(library_namespace) {
 		//
 		get_recent = use_SQL ? get_recent_via_databases : get_recent_via_API,
 		// 僅取得最新版本。注意: 這可能跳過中間編輯的版本，造成有些修訂被忽略。
-		latest_only = latest in options ? options.latest : true;
+		latest_only = 'latest' in options ? options.latest : true;
 		if (use_SQL) {
 			recent_options = options.SQL_options;
 			if (options[KEY_SESSION]) {
@@ -10444,7 +10463,7 @@ function module_code(library_namespace) {
 		// 推薦用像是 "2days", "3min", "2d", "3m" 這樣子的方法來表現。
 		//
 		// {Date}options.start: 從這個時間點開始回溯。
-		// {Natural}options.start: 回溯 millisecond 數。最多約可回溯30天。
+		// {Natural}options.start: 回溯 millisecond 數。
 		// {Natural}options.delay > 0: 延遲等待 millisecond 數。
 
 		var delay_ms = library_namespace.to_millisecond(options.delay),
@@ -10461,11 +10480,17 @@ function module_code(library_namespace) {
 		if (library_namespace.is_Date(options.start)) {
 			last_query_time = isNaN(options.start.getTime()) ? new Date
 					: options.start;
-		} else if (!isNaN(last_query_time = Date.parse(options.start))) {
+		} else if (options.start
+				&& !isNaN(last_query_time = Date.parse(options.start))) {
 			last_query_time = new Date(last_query_time);
 		} else if ((last_query_time = library_namespace
 				.to_millisecond(options.start)) > 0) {
 			// treat as time back to 回溯這麼多時間。
+			if (last_query_time > library_namespace.to_millisecond('31d')) {
+				library_namespace
+						.info('add_listener: 2017 CE 最多約可回溯30天。您所指定的時間 ['
+								+ options.start + '] 似乎過長了。');
+			}
 			last_query_time = new Date(Date.now() - last_query_time);
 		} else {
 			// default: search from NOW
@@ -10476,7 +10501,8 @@ function module_code(library_namespace) {
 		//
 		+ (Date.now() - last_query_time > 100 ?
 		//
-		library_namespace.age_of(last_query_time) + ' 前開始' : '最近') + '更改的頁面。');
+		library_namespace.age_of(last_query_time, Date.now()) + ' 前開始' : '最近')
+				+ '更改的頁面。');
 
 		if (false) {
 			library_namespace.debug('recent_options: '
@@ -12721,6 +12747,8 @@ function module_code(library_namespace) {
 						 * revision['*']
 						 */
 						content = CeL.wiki.content_of(page_data);
+						// 當取得了多個版本:
+						// content = CeL.wiki.content_of(page_data, 0);
 
 						// 似乎沒 !page_data.title 這種問題。
 						if (false && !page_data.title)

@@ -2587,7 +2587,7 @@ function module_code(library_namespace) {
 	}, strftime.default_conversion), 'cmn-Hant-TW');
 
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------//
-	// timevalue → {String}時間表達式
+	// timevalue → {String}日期及時間表達式
 
 	/**
 	 * 計算大略的時間間隔，以適當的單位簡略顯示。 count roughly duration, count date.<br />
@@ -2679,14 +2679,17 @@ function module_code(library_namespace) {
 	_.age_of = age_of;
 
 	// ------------------------------------------
-	// {String}時間表達式 → {Natural}timevalue in milliseconds
+	// {String}日期及時間表達式 → {Natural}timevalue in milliseconds
 
 	var PATTERN_ISO_8601_durations = /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/,
-	// 由小到大排列。
-	PATTERN_time_units = [ [ 'ms', 1 ], [ 's(?:ec)?', 1000 ],
-			[ 'm(?:in)?', 60 ], [ 'h(?:r|ours?)?', 60 ],
+	// 日期及時間 由小到大排列。
+	PATTERN_time_units = [ [ '(?:ms|milliseconds?|毫秒)', 1 ],
+			[ '(?:s(?:ec)?|秒)', 1000 ], [ '(?:m(?:in)?|分)', 60 ],
+			[ '(?:h(?:r|ours?)?|小?[時时])', 60 ],
 			// T: for ISO 8601 Durations. e.g., 'P21DT3H'
-			[ 'd(?:ays?|T)?', 24 ] ];
+			[ '(?:d(?:ays?|T)?|日)', 24 ],
+			// 僅僅給出約略大小。
+			[ '(?:mon(?:ths?)?|月)', 30 ], [ '(?:y(?:r|ears?)?|年)', 12 ] ];
 
 	(function() {
 		// [ all, amount ]
@@ -2710,7 +2713,7 @@ function module_code(library_namespace) {
 		var timevalue = 0, has_matched, matched = interval
 				.match(PATTERN_ISO_8601_durations);
 		if (matched) {
-			if (+matched[1] || +matched[2]) {
+			if (false && (+matched[1] || +matched[2])) {
 				throw 'We can not handle year / month: ' + interval;
 			}
 
