@@ -420,6 +420,8 @@ function module_code(library_namespace) {
 		if (typeof options.parameters === 'string') {
 			action[1] += '&' + options.parameters;
 		} else if (library_namespace.is_Object(options.parameters)) {
+			var parameters = library_namespace.null_Object();
+			// TODO: 篩選掉指定為false的
 			action[1] += '&' + get_URL.parameters_to_String(options.parameters);
 		} else {
 			library_namespace.debug('無法處理之 options.parameters: ['
@@ -10303,6 +10305,7 @@ function module_code(library_namespace) {
 			session = new wiki_API(null, null, options.language
 					|| default_language);
 		}
+		// use get_list()
 		session.recentchanges(function(rows) {
 			// {Array}rows
 			callback(rows);
@@ -10366,7 +10369,9 @@ function module_code(library_namespace) {
 		// 只設定了rcprop
 		|| Object.keys(options.parameters).join('') === 'rcprop'), recent_options,
 		//
-		get_recent = use_SQL ? get_recent_via_databases : get_recent_via_API;
+		get_recent = use_SQL ? get_recent_via_databases : get_recent_via_API,
+		// 僅取得最新版本。注意: 這可能跳過中間編輯的版本，造成有些修訂被忽略。
+		latest_only = latest in options ? options.latest : true;
 		if (use_SQL) {
 			recent_options = options.SQL_options;
 			if (options[KEY_SESSION]) {
@@ -10381,13 +10386,13 @@ function module_code(library_namespace) {
 				// rcdir : 'older',
 				rcdir : 'newer',
 
-				// 僅取得最新版本。注意: 這可能跳過中間編輯的版本，造成有些修訂被忽略。
-				rctoponly : 1,
-
 				// new Date().toISOString()
 				// rcstart : 'now',
 				rctype : 'edit|new'
 			};
+			if (latest_only) {
+				recent_options.rctoponly = 1;
+			}
 			if (options.parameters) {
 				// 警告:這會更動options!
 				Object.assign(options.parameters, recent_options);
@@ -10644,6 +10649,7 @@ function module_code(library_namespace) {
 								run_next();
 								return;
 							}
+
 							library_namespace.debug(
 							//
 							'Get page: ' + index + '/' + rows.length, 2,
@@ -10679,9 +10685,27 @@ function module_code(library_namespace) {
 									return;
 								}
 
+								var revisions = page_data.revisions;
+								if (latest_only && (!revisions[0]
+								// 確定是最新版本 revisions[0].revid。
+								|| revisions[0].revid !== row.revid)) {
+									library_namespace.log(
+									//
+									'add_listener.with_diff: '
+									//
+									+ get_page_title_link(row)
+									//
+									+ ': 從 recentchanges table 取得的版本 '
+									//
+									+ row.revid + ' 不同於從頁面內容取得的最新版本 '
+									//
+									+ revisions[0].revid + '，跳過這一項。');
+									run_next();
+									return;
+								}
+
 								// merge page data
 								Object.assign(row, page_data);
-								var revisions = page_data.revisions;
 
 								// console.log(revisions);
 								if (revisions && revisions.length >= 1

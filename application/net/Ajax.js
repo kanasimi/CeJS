@@ -385,7 +385,7 @@ function module_code(library_namespace) {
 		Object.keys(parameters).forEach(function(key) {
 			library_namespace.debug(key, 5, 'parameters_to_String.forEach');
 			array.push(encode_URI_component(key, charset) + '='
-			//
+			// TODO: for parameters[key] === undefined
 			+ encode_URI_component(String(parameters[key]), charset));
 		});
 		library_namespace.debug(array.length + ' parameters:<br />\n'
