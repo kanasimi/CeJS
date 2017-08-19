@@ -45,6 +45,10 @@ https://www.mediawiki.org/w/api.php?action=help&modules=query%2Busercontribs
 https://zh.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&uclimit=1&ucdir=newer&ucprop=ids|title|timestamp|comment|parsedcomment|size|sizediff|flags|tags&ucuser=username
 
 
+
+gadgets 小工具 [[Wikipedia:Tools]], [[Category:Wikipedia scripts]], [[mw:ResourceLoader/Core modules]]
+
+
 // ---------------------------------------------------------
 
 // https://doc.wikimedia.org/mediawiki-core/master/js/#!/api/mw.loader
@@ -451,7 +455,7 @@ function module_code(library_namespace) {
 	 * Wikimedia projects 的 URL match pattern 匹配模式。
 	 * 
 	 * matched: [ protocol + host name, protocol, host name, 第一 domain name
-	 * (e.g., language code / project) ]
+	 * (e.g., language code / project), 第二 domain name ]
 	 * 
 	 * @type {RegExp}
 	 * 
@@ -460,7 +464,7 @@ function module_code(library_namespace) {
 	 *      PATTERN_URL_prefix, PATTERN_WIKI_URL, PATTERN_wiki_project_URL,
 	 *      PATTERN_external_link_global
 	 */
-	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z][a-z\d\-]{0,14})(?:\.[a-z]+)+)/i;
+	var PATTERN_wiki_project_URL = /^(https?:)?(?:\/\/)?(([a-z][a-z\d\-]{0,14})\.([a-z]+)+(?:\.[a-z]+)+)/i;
 
 	/**
 	 * Get the API URL of specified project.
@@ -582,6 +586,11 @@ function module_code(library_namespace) {
 		wiktionary : true
 	};
 
+	api_URL.shortcut_of_project = library_namespace.null_Object();
+	Object.keys(api_URL.alias).forEach(function(shortcut) {
+		api_URL.shortcut_of_project[api_URL.alias[shortcut]] = shortcut;
+	});
+
 	/**
 	 * setup API URL.
 	 * 
@@ -602,8 +611,8 @@ function module_code(library_namespace) {
 		// && is_wiki_API(session)
 		) {
 			session.API_URL = api_URL(API_URL);
-			// is data session.
-			session.is_wikidata = /wikidata/i.test(API_URL);
+			// is data session. e.g., "test.wikidata.org"
+			session.is_wikidata = /\.wikidata\./i.test(API_URL);
 			// remove cache
 			delete session.last_page;
 			delete session.last_data;
@@ -626,6 +635,15 @@ function module_code(library_namespace) {
 					agent : agent
 				};
 			}
+
+		}
+
+		// TODO: 這只是簡陋的判別方法。
+		var matched = session.API_URL.match(PATTERN_wiki_project_URL);
+		if (matched
+				&& !/test|wiki/i.test(matched[3])
+				&& ((matched = matched[4].toLowerCase()) in api_URL.shortcut_of_project)) {
+			session.project = matched;
 		}
 	}
 
@@ -3069,7 +3087,7 @@ function module_code(library_namespace) {
 		// {{unsigned|user|2016年10月18日 (二) 00:04‎ }}
 		// {{unsigned|1=user=user|2=2016年10月17日 (一) 23:45‎ }}
 		// [, Y, m, d, week, time(hh:mm), timezone ]
-		var PATTERN_date_zh = /([12]\d{3})年(1?\d)月([1-3]?\d)日 \([一二三四五六日]\)( \d{1,2}:\d{1,2})(?: \(([A-Z]{3})\))?/g,
+		var PATTERN_date_zh = /([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \([一二三四五六日]\)( \d{1,2}:\d{1,2})(?: \(([A-Z]{3})\))?/g,
 		// <s>去掉</s>skip年分前之雜項。
 		// <s>去掉</s>skip星期與其後之雜項。
 		matched;
@@ -3328,6 +3346,8 @@ function module_code(library_namespace) {
 	 * TODO: 在 default_language 非 zh 使用 uselang, /zh-tw/條目 會有問題。 TODO: [[en
 	 * link]] → [[:en:en link]] TODO: use {{tsl}} or {{link-en}},
 	 * {{en:Template:Interlanguage link multi}}.
+	 * 
+	 * TODO: 與 get_page_title_link() 整合。
 	 * 
 	 * @param {String}URL
 	 *            URL text
@@ -3946,7 +3966,8 @@ function module_code(library_namespace) {
 	// 'zh:title'→'[[:zh:title]]'
 	// 'n:title'→'[[:n:title]]'
 	// 'Category:category'→'[[:Category:category]]'
-	function get_page_title_link(page_data, session) {
+	// TODO: 與 URL_to_wiki_link() 整合。
+	function get_page_title_link(page_data, session, display_text) {
 		var title,
 		// e.g., is_category
 		need_escape, project_prefixed;
@@ -3979,14 +4000,26 @@ function module_code(library_namespace) {
 		if (session && session.language && !project_prefixed) {
 			// e.g., [[:zh:w:title]]
 			title = session.language + ':' + title;
-			need_escape = true;
+			if (session.project
+					&& (session.project in api_URL.shortcut_of_project)) {
+				title = api_URL.shortcut_of_project[session.project] + ':'
+						+ title;
+			} else {
+				need_escape = true;
+			}
 		}
+
+		// TODO: [[s:zh:title]] instead of [[:zh:title]]
+
 		if (need_escape) {
 			title = ':' + title;
 		}
 		// TODO: for template, use {{title}}
 		// may use get_page_title_link()
-		return '[[' + title + ']]';
+		return '[['
+				+ title
+				+ (display_text && display_text !== title ? '|' + display_text
+						: '') + ']]';
 	}
 
 	/**
@@ -10343,7 +10376,6 @@ function module_code(library_namespace) {
 	// 注意: 會改變 options！
 	// 注意: options之屬性名不可與wiki_API.recent衝突！
 	// 警告: 同時間只能有一隻程式在跑，否則可能會造成混亂！
-	// TODO: delay
 	function add_listener(listener, options) {
 		if (!options) {
 			options = library_namespace.null_Object();
@@ -10464,7 +10496,7 @@ function module_code(library_namespace) {
 		//
 		// {Date}options.start: 從這個時間點開始回溯。
 		// {Natural}options.start: 回溯 millisecond 數。
-		// {Natural}options.delay > 0: 延遲等待 millisecond 數。
+		// {Natural}options.delay > 0: 延遲時間,等待 millisecond 數。
 
 		var delay_ms = library_namespace.to_millisecond(options.delay),
 		//

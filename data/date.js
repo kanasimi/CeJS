@@ -2684,10 +2684,10 @@ function module_code(library_namespace) {
 	var PATTERN_ISO_8601_durations = /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/,
 	// 日期及時間 由小到大排列。
 	PATTERN_time_units = [ [ '(?:ms|milliseconds?|毫秒)', 1 ],
-			[ '(?:s(?:ec)?|秒)', 1000 ], [ '(?:m(?:in)?|分)', 60 ],
+			[ '(?:s(?:ec)?|秒[鐘钟]?)', 1000 ], [ '(?:m(?:in)?|分[鐘钟]?)', 60 ],
 			[ '(?:h(?:r|ours?)?|小?[時时])', 60 ],
 			// T: for ISO 8601 Durations. e.g., 'P21DT3H'
-			[ '(?:d(?:ays?|T)?|日)', 24 ],
+			[ '(?:d(?:ays?|T)?|[日天])', 24 ],
 			// 僅僅給出約略大小。
 			[ '(?:mon(?:ths?)?|月)', 30 ], [ '(?:y(?:r|ears?)?|年)', 12 ] ];
 

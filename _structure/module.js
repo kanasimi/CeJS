@@ -955,6 +955,8 @@ if (false) {
 		var i = 0, node = document.getElementById(_.env.main_script_name),
 		// TODO: 若是有 id，則以 id 為主。
 		o = node ? [node] : _.get_tag_list('script'), l = o.length, j, base_path, index;
+		// console.log('-----------------------------------');
+		// console.log(o);
 
 		for (; i < l; i++)
 			try {
@@ -985,6 +987,7 @@ if (false) {
 		//	base_path || './'
 		return base_path || '';
 	};
+	// console.log(_.get_tag_list('script').map(function(n){return n.getAttribute('src')}));
 
 	//	TODO: modify the dirty hack.
 	var setup_extension = function (extension, node) {

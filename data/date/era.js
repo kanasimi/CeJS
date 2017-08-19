@@ -7310,6 +7310,7 @@ function module_code(library_namespace) {
 
 	// ---------------------------------------------------------------------//
 	// 網頁應用功能。
+	// warning: need CeL.interact.DOM
 
 	/**
 	 * 計算已具紀年標記之指定 node 之紀年值。

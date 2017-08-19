@@ -3712,6 +3712,11 @@ if (typeof CeL === 'function')
 		setup_library_base_path = function() {
 			if (!library_base_path) {
 				// 當執行程式為 library base (ce.js)，則採用本執行程式所附帶之整組 library；
+				if (false) {
+					console.log([ library_namespace.env.script_name,
+							library_namespace.env.main_script_name,
+							library_namespace.env.registry_path ]);
+				}
 				library_base_path = library_namespace.env.script_name !== library_namespace.env.main_script_name
 						// 否則先嘗試存放在 registry 中的 path。
 						&& library_namespace.env.registry_path
@@ -3751,6 +3756,7 @@ if (typeof CeL === 'function')
 							.warn('setup_library_base_path: Cannot detect the library base path!');
 			}
 
+			// console.log(library_base_path);
 			return library_base_path;
 		};
 
@@ -4045,7 +4051,9 @@ if (typeof CeL === 'function')
 			queue = library_initializer.queue;
 
 			// 已處理完畢，destroy & set free。
-			library_initializer = null;
+			library_initializer = function() {
+				library_namespace.log('library_initializer: 已處理完畢。');
+			};
 
 			// 處理積存工作。
 			// export .run().
@@ -4053,9 +4061,24 @@ if (typeof CeL === 'function')
 		};
 		library_initializer.queue = [];
 
-		if (!library_namespace.is_WWW() || document.readyState === "complete")
+		if (false) {
+			console.log('is_WWW: ' + library_namespace.is_WWW()
+					+ ', document.readyState: ' + document.readyState);
+			console.log(library_namespace.get_tag_list('script').map(
+					function(n) {
+						return n.getAttribute('src')
+					}));
+		}
+		// 需要確定還沒有 DOMContentLoaded
+		// https://stackoverflow.com/questions/9457891/how-to-detect-if-domcontentloaded-was-fired
+		if (!library_namespace.is_WWW() || document.readyState === "complete"
+				|| document.readyState === "loaded"
+				|| document.readyState === "interactive") {
 			library_initializer();
-		else {
+
+		} else {
+			// 先檢查插入的<script>元素，預防等檔案載入完之後，<script>已經被移除。
+			setup_library_base_path();
 			library_namespace.run = function pre_loader() {
 				if (!library_initializer)
 					// 已初始化。這是怕有人不用 .run()，而作了 cache。
@@ -4074,18 +4097,18 @@ if (typeof CeL === 'function')
 			 *      統一使用 DOM 規範的事件監聽方法（或 IE 專有事件綁定方法）為 IFRAME 標記綁定 onload
 			 *      事件處理函數。
 			 */
-			if (document.addEventListener)
+			if (document.addEventListener) {
 				// https://developer.mozilla.org/en/Gecko-Specific_DOM_Events
 				document.addEventListener("DOMContentLoaded",
 						library_initializer, false);
-			else if (window.attachEvent)
+			} else if (window.attachEvent) {
 				window.attachEvent("onload", library_initializer);
-			else {
+			} else {
 				library_namespace
-						.debug('No event listener! Using window.onload.');
-				if (!window.onload)
+						.warn('No event listener! Using window.onload.');
+				if (!window.onload) {
 					window.onload = library_initializer;
-				else
+				} else {
 					(function() {
 						var old_onload = window.onload;
 						window.onload = function() {
@@ -4093,6 +4116,7 @@ if (typeof CeL === 'function')
 							library_initializer();
 						};
 					})();
+				}
 			}
 		}
 
