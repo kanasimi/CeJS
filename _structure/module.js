@@ -975,7 +975,8 @@ if (false) {
 					if (setup_extension && JSFN === _.env.main_script_name)
 						setup_extension(j.slice(index + JSFN.length), node);
 
-					//	TODO: test 是否以 JSFN 作為結尾
+					//	TODO: test 是否以 JSFN 作為結尾。
+					// 注意: 依照現行的實作方法，用loader來載入JSFN時，必須以 JSFN 作為結尾。
 					base_path = j.slice(0, index);
 					break;
 				}

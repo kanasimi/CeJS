@@ -5036,8 +5036,16 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 		// administrator functions
 
+		case 'remove':
+			if (next[1] === 'remove')
+				// 正名。
+				next[1] === 'delete';
+		case 'delete':
+			// wiki.page(title).delete(options, callback)
+
 		case 'protect':
 			// wiki.page(title).protect(options, callback)
+
 		case 'rollback':
 			// wiki.page(title).rollback(options, callback)
 
@@ -5105,7 +5113,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,upload,cache,listen,search,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,upload,cache,listen,search,remove,delete,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -9323,6 +9331,53 @@ function module_code(library_namespace) {
 		return parameters;
 	}
 
+	// ----------------------------------------------------
+
+	// wiki_API.delete(): remove / delete a page.
+	wiki_API['delete'] = function(options, callback) {
+		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
+		var parameters = draw_parameters(options, {
+			reason : false,
+			tags : false,
+			watchlist : false,
+			oldimage : false,
+			watchlist : false
+		});
+		if (!library_namespace.is_Object(parameters)) {
+			// error occurred.
+			if (typeof callback === 'function')
+				callback(undefined, parameters);
+			return;
+		}
+
+		var session = options[KEY_SESSION];
+
+		var action = 'action=delete',
+		//
+		API_URL = session && session.API_URL;
+		if (API_URL) {
+			action = [ API_URL, action ];
+		}
+
+		/**
+		 * response: <code>
+		{"delete":{"title":"Title","reason":"content was: \"...\", and the only contributor was \"[[Special:Contributions/Cewbot|Cewbot]]\" ([[User talk:Cewbot|talk]])","logid":0000}}
+		{"error":{"code":"nosuchpageid","info":"There is no page with ID 0.","*":"See https://test.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1232"}
+		 * </code>
+		 */
+		wiki_API.query(action, function(response) {
+			// console.log(JSON.stringify(response));
+			var error = response && response.error;
+			if (error) {
+				callback(response, error);
+			} else {
+				callback(response.protect);
+			}
+		}, parameters, session);
+	};
+
+	// ----------------------------------------------------
+
 	// @see wiki_API.is_protected
 	// Change the protection level of a page.
 	wiki_API.protect = function(options, callback) {
@@ -9342,7 +9397,9 @@ function module_code(library_namespace) {
 		});
 		if (!library_namespace.is_Object(parameters)) {
 			// error occurred.
-			callback(undefined, parameters);
+			if (typeof callback === 'function')
+				callback(undefined, parameters);
+			return;
 		}
 
 		var session = options[KEY_SESSION];
@@ -9356,8 +9413,8 @@ function module_code(library_namespace) {
 
 		/**
 		 * response: <code>
-		   {"protect":{"title":"title","reason":"存檔保護作業","protections":[{"edit":"sysop","expiry":"infinite"},{"move":"sysop","expiry":"infinite"}]}}
-		   {"servedby":"mw1203","error":{"code":"nosuchpageid","info":"There is no page with ID 2006","*":"See https://zh.wikinews.org/w/api.php for API usage"}}
+		{"protect":{"title":"title","reason":"存檔保護作業","protections":[{"edit":"sysop","expiry":"infinite"},{"move":"sysop","expiry":"infinite"}]}}
+		{"servedby":"mw1203","error":{"code":"nosuchpageid","info":"There is no page with ID 2006","*":"See https://zh.wikinews.org/w/api.php for API usage"}}
 		 * </code>
 		 */
 		wiki_API.query(action, function(response) {
@@ -9393,7 +9450,9 @@ function module_code(library_namespace) {
 		}, 'rollback');
 		if (!library_namespace.is_Object(parameters)) {
 			// error occurred.
-			callback(undefined, parameters);
+			if (typeof callback === 'function')
+				callback(undefined, parameters);
+			return;
 		}
 
 		// 都先從 options 取值，再從 session 取值。
