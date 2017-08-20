@@ -1886,6 +1886,7 @@ function module_code(library_namespace) {
 					if (!old_file_status
 					// 得到更大的檔案，寫入更大的檔案。
 					|| old_file_status.size < contents.length) {
+						// TODO: 檢查舊的檔案是不是文字檔。例如有沒有包含HTML標籤。
 						node_fs.writeFileSync(image_data.file, contents);
 					} else if (old_file_status
 							&& old_file_status.size > contents.length) {

@@ -9280,6 +9280,7 @@ function module_code(library_namespace) {
 					parameters[parameter_name] = options[parameter_name];
 				} else if (default_parameters[parameter_name]) {
 					// 表示此屬性為必須存在/指定的屬性。
+					// This parameter is required.
 					return 'No property ' + parameter_name + ' specified';
 				}
 
@@ -9331,18 +9332,11 @@ function module_code(library_namespace) {
 		return parameters;
 	}
 
-	// ----------------------------------------------------
-
-	// wiki_API.delete(): remove / delete a page.
-	wiki_API['delete'] = function(options, callback) {
-		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
-		var parameters = draw_parameters(options, {
-			reason : false,
-			tags : false,
-			watchlist : false,
-			oldimage : false,
-			watchlist : false
-		});
+	// use "csrf" token retrieved from action=query&meta=tokens
+	function wiki_operator(action, default_parameters, options, callback) {
+		// default_parameters
+		// Warning: 除 pageid/title/token 之外，這邊只要是能指定給 API 的，皆必須列入！
+		var parameters = draw_parameters(options, default_parameters);
 		if (!library_namespace.is_Object(parameters)) {
 			// error occurred.
 			if (typeof callback === 'function')
@@ -9351,20 +9345,15 @@ function module_code(library_namespace) {
 		}
 
 		var session = options[KEY_SESSION];
+		// TODO: 若是頁面不存在，那就直接跳出。
 
-		var action = 'action=delete',
+		var action = 'action=' + action,
 		//
 		API_URL = session && session.API_URL;
 		if (API_URL) {
 			action = [ API_URL, action ];
 		}
 
-		/**
-		 * response: <code>
-		{"delete":{"title":"Title","reason":"content was: \"...\", and the only contributor was \"[[Special:Contributions/Cewbot|Cewbot]]\" ([[User talk:Cewbot|talk]])","logid":0000}}
-		{"error":{"code":"nosuchpageid","info":"There is no page with ID 0.","*":"See https://test.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1232"}
-		 * </code>
-		 */
 		wiki_API.query(action, function(response) {
 			// console.log(JSON.stringify(response));
 			var error = response && response.error;
@@ -9374,6 +9363,28 @@ function module_code(library_namespace) {
 				callback(response.protect);
 			}
 		}, parameters, session);
+	}
+
+	// ----------------------------------------------------
+
+	// wiki_API.delete(): remove / delete a page.
+	wiki_API['delete'] = function(options, callback) {
+		// https://www.mediawiki.org/w/api.php?action=help&modules=delete
+
+		/**
+		 * response: <code>
+		{"delete":{"title":"Title","reason":"content was: \"...\", and the only contributor was \"[[Special:Contributions/Cewbot|Cewbot]]\" ([[User talk:Cewbot|talk]])","logid":0000}}
+		{"error":{"code":"nosuchpageid","info":"There is no page with ID 0.","*":"See https://test.wikipedia.org/w/api.php for API usage. Subscribe to the mediawiki-api-announce mailing list at &lt;https://lists.wikimedia.org/mailman/listinfo/mediawiki-api-announce&gt; for notice of API deprecations and breaking changes."},"servedby":"mw1232"}
+		 * </code>
+		 */
+
+		wiki_operator('delete', {
+			reason : false,
+			tags : false,
+			watchlist : false,
+			oldimage : false,
+			watchlist : false
+		}, options, callback);
 	};
 
 	// ----------------------------------------------------
@@ -9382,34 +9393,6 @@ function module_code(library_namespace) {
 	// Change the protection level of a page.
 	wiki_API.protect = function(options, callback) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=protect
-		var parameters = draw_parameters(options, {
-			// default_parameters
-			// Warning: 除外pageid/title/token這邊只要是能指定給 API 的，皆必須列入！
-			// protections: e.g., 'edit=sysop|move=sysop', 一般說來edit應與move同步。
-			protections : true,
-			// reason: @see [[MediaWiki:Protect-dropdown]]
-			reason : true,
-			// expiry : 'infinite',
-			expiry : false,
-			tags : false,
-			cascade : false,
-			watchlist : false
-		});
-		if (!library_namespace.is_Object(parameters)) {
-			// error occurred.
-			if (typeof callback === 'function')
-				callback(undefined, parameters);
-			return;
-		}
-
-		var session = options[KEY_SESSION];
-
-		var action = 'action=protect',
-		//
-		API_URL = session && session.API_URL;
-		if (API_URL) {
-			action = [ API_URL, action ];
-		}
 
 		/**
 		 * response: <code>
@@ -9417,14 +9400,21 @@ function module_code(library_namespace) {
 		{"servedby":"mw1203","error":{"code":"nosuchpageid","info":"There is no page with ID 2006","*":"See https://zh.wikinews.org/w/api.php for API usage"}}
 		 * </code>
 		 */
-		wiki_API.query(action, function(response) {
-			var error = response && response.error;
-			if (error) {
-				callback(response, error);
-			} else {
-				callback(response.protect);
-			}
-		}, parameters, session);
+
+		wiki_operator('protect', {
+			// protections: e.g., 'edit=sysop|move=sysop', 一般說來edit應與move同步。
+			protections : true,
+			// 在正式場合，最好給個好的理由。
+			// reason: @see [[MediaWiki:Protect-dropdown]]
+			reason : false,
+			// expiry : 'infinite',
+			expiry : false,
+			tags : false,
+			cascade : false,
+			watchlist : false
+		}, Object.assign({
+			protections : 'edit=sysop|move=sysop'
+		}, options), callback);
 	};
 
 	// ----------------------------------------------------

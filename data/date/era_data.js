@@ -4220,12 +4220,13 @@ if (false) {
 // ---------------------------------------------------------------------//
 
 CeL.era.pass_on.step = function() {
-	var queue = this.queue,
+	// 還需要等待載入的國家。
+	var queue = CeL.era.load_queue,
 	// 因為載入時間較長，使用此功能可降低反應倦怠感，改善體驗。
 	loaded = typeof CeL.env.era_data_load === 'function'
 			&& CeL.env.era_data_load;
 
-	if (queue && queue.length > 0) {
+	if (Array.isArray(queue) && queue.length > 0) {
 		var country = queue.shift();
 		// console.info(country);
 
@@ -4258,6 +4259,7 @@ CeL.era.pass_on.step = function() {
 		// delete this.step;
 		// delete this.queue;
 		delete CeL.era.pass_on;
+		delete CeL.era.load_queue;
 	} catch (e) {
 		// IE10 不允許 <code>delete this.*;</code>。
 		// Error 445 [TypeError] (facility code 10): 物件不支援此動作
@@ -4272,13 +4274,14 @@ if (typeof CeL === 'function')
 		// 準備開始載入曆數資料。
 		CeL.era.loaded = false;
 
-		this.queue = [];
+		var queue = CeL.era.load_queue = [];
 		// 國家
 		for ( var country in this.countries)
-			this.queue.push(country);
+			queue.push(country);
 
 		if (typeof CeL.env.era_data_load === 'function') {
-			CeL.env.era_data_load(this.countries, this.queue);
+			// 第一次呼叫 callback，可以用來篩選需要載入的國家。
+			CeL.env.era_data_load(this.countries, queue);
 		}
 
 		setTimeout(this.step, 0);

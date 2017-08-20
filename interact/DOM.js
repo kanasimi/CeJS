@@ -1669,7 +1669,7 @@ function new_node(nodes, layer, ns) {
 				library_namespace.warn('new_node: layer is not a HTML Element!');
 
 			if (for_each == 1 && (parent = layer.firstChild))
-				// add as firstChild of layer
+				// 1: add as firstChild of layer
 				for_each = handler[1];
 
 			else if (for_each >= 0 && for_each !== 2 && for_each < 5) {
@@ -2294,13 +2294,14 @@ select_node = select_node;
  */
 function for_nodes(action, nodes, options) {
 
-	if (!nodes)
+	if (!nodes) {
 		// select all nodes
 		nodes = document.querySelectorAll ? document.querySelectorAll('*')
 				: select_node('*');
-	else if (typeof nodes === 'string')
+	} else if (typeof nodes === 'string') {
 		// selector || id
 		nodes = select_node(nodes) || get_element(nodes);
+	}
 
 	if (_.is_ELEMENT_NODE(nodes) || _.is_DOCUMENT_NODE(nodes)) {
 		if (nodes.item && !isNaN(nodes.length))
@@ -2309,11 +2310,18 @@ function for_nodes(action, nodes, options) {
 		else
 			// HTMLElement
 			nodes = [ nodes ];
-	} else if (_.is_NodeList(nodes))
-		// 預防中途變動。
+	} else if (_.is_NodeList(nodes)) {
+		// 固定下來，預防中途變動。
 		nodes = library_namespace.get_tag_list(nodes);
+	}
 
-	var i = 0, length = nodes.length, node, n, traversal, thisArg;
+	if (typeof action !== 'function'
+	//|| !Array.isArray(nodes)
+	) {
+		return true;
+	}
+
+	var traversal, thisArg;
 	if (length > 0)
 		library_namespace.debug('get ' + length + ' nodes.', 2, 'for_nodes');
 
@@ -2324,28 +2332,39 @@ function for_nodes(action, nodes, options) {
 			traversal = 1;
 		else if (traversal === 'breadth')
 			traversal = 2;
+		else if(traversal) {
+			traversal = 1;
+		}
+
+		if (traversal === 2) {
+			// TODO:
+			throw 'NYI: breadth-first search';
+		}
 	}
 
-	if (action
-	//&& Array.isArray(nodes)
-	)
-		for (; i < length; i++)
-			if (node = nodes[i]) {
-				if (traversal === 1 && (n = node.childNodes)) {
-					if (n = for_nodes(action, n, options))
-						return n;
-				}
-
-				try {
-					if (thisArg ? action.call(thisArg, node, i, nodes)
-							: action(node, i, nodes))
-						throw 0;
-				} catch (e) {
-					return node;
-				}
-
-				// TODO: breadth-first search
+	for (var index = 0, length = nodes.length, node, child; index < length; index++) {
+		if (node = nodes[index]) {
+			if (traversal === 1 && (child = node.childNodes)) {
+				if (child = for_nodes(action, child, options))
+					return n;
 			}
+
+			if (!node.parentNode
+			//
+			|| options && options.leaf_only && node.childNodes.length > 0) {
+				continue;
+			}
+			try {
+				// use node.parentNode to get parent node
+				// in traversal, node.parentNode.childNodes[index] === node
+				if (thisArg ? action.call(thisArg, node, index, nodes)
+						: action(node, index, nodes))
+					throw 0;
+			} catch (e) {
+				return node;
+			}
+		}
+	}
 
 	// return nodes;
 }

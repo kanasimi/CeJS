@@ -57,25 +57,29 @@ CeL.log(['今天是農曆: ', 今天的農曆日期]);
 CeL.era.中曆('415年三月');
 
 
+CeL.run('data.date.era', test_era_data);
+
+// era.onload
 CeL.env.era_data_load = function(country, queue) {
-	if (!queue)
-		// 判斷是否已載入。
-		CeL.log('era data loaded.');
+	CeL.log('era data of [' + country + '] loaded.');
+	// 判斷是否已載入所有曆數資料。
+	if (!queue) {
+		CeL.log('All era data loaded.');
+		// assert: CeL.era.loaded === true
+	}
 };
 
 
 function test_era_data() {
-	// 判斷是否已載入曆數資料。
+	// 判斷是否已載入所有曆數資料。
 	if (!CeL.era.loaded) {
 		setTimeout(test_era_data, 80);
 		return;
 	}
-
-// More examples: see /_test suite/test.js
-
 }
 
-CeL.run('data.date.era', test_era_data);
+
+// More examples: see /_test suite/test.js
 
 
  // should be error: 清任何一個紀年無第一八八〇年。
@@ -7531,7 +7535,7 @@ function module_code(library_namespace) {
 	function set_up_era_nodes(tag, options) {
 		// var last_era;
 		if (!tag)
-			tag = 'span';
+			tag = set_up_era_nodes.default_tag;
 		if (typeof tag === 'string')
 			library_namespace.for_nodes(options ? function(node) {
 				set_up_era_node(node, options);
@@ -7544,16 +7548,20 @@ function module_code(library_namespace) {
 			library_namespace.warn('set_up_era_nodes: 無法設定 [' + tag + ']');
 	}
 
+	set_up_era_nodes.default_tag = 'span';
+
 	// --------------------------------------------
 
 	// 辨識史籍(historical book)紀年用之 pattern。
 	var 史籍紀年_PATTERN, ERA_ONLY_PATTERN,
 	//
-	朔干支_PATTERN = generate_pattern(/(朔<\/span>)(干支)()/, false, 'g'),
+	朔干支_PATTERN = generate_pattern(
+			/(朔<\/'+set_up_era_nodes.default_tag+'>)(干支)()/, false, 'g'),
 	// 十二地支時辰. e.g., 光緒十九年八月初二日丑刻
 	時干支_PATTERN = generate_pattern(/(支)[時刻]/, false, 'g'),
 	// see era_text_to_HTML.build_pattern()
-	REPLACED_data_era = '$1<span data-era="~">$2</span>$3';
+	REPLACED_data_era = '$1<' + set_up_era_nodes.default_tag
+			+ ' data-era="~">$2</' + set_up_era_nodes.default_tag + '>$3';
 
 	/**
 	 * 將具有紀年日期資訊的純文字文本(e.g., 史書原文)，轉成供 set_up_era_node() 用之 HTML。<br />
@@ -7595,7 +7603,11 @@ function module_code(library_namespace) {
 				//
 				? $0 + '(' + start + ')'
 				//
-				: '<span title="' + start + '">' + $0 + '</span>';
+				: '<' + set_up_era_nodes.default_tag
+				//
+				+ ' title="' + start + '">'
+				//
+				+ $0 + '</' + set_up_era_nodes.default_tag + '>';
 			})
 			// 回復
 			.replace(/([，。；！）])\0/g, '$1')
@@ -7606,6 +7618,8 @@ function module_code(library_namespace) {
 			if (typeof node === 'string')
 				node = document.getElementById(node);
 			node.innerHTML = text;
+			// console.log(node);
+			// set_up_era_node(node, options);
 			set_up_era_nodes(null, options);
 		} else
 			return text;
@@ -7646,6 +7660,47 @@ function module_code(library_namespace) {
 				+ 日 + '|' + 月 + ')([^中]|$)', false, 'g');
 	};
 
+	/**
+	 * 直接處理一整個 HTML 元素，加上紀年標示。
+	 */
+	function add_era_note(node, options) {
+		library_namespace.for_nodes(function(node, index) {
+			// console.log(node);
+			var text;
+			if (node.nodeType !== document.TEXT_NODE
+					|| !(text = library_namespace.set_text(node)).trim()) {
+				return;
+			}
+
+			var HTML = era_text_to_HTML(text, null, options);
+			if (text === HTML) {
+				// 沒有改變。處理下一個。
+				return;
+			}
+
+			var last_node = node, parentNode = node.parentNode,
+			//
+			container = document.createElement(parentNode.tagName || 'div');
+			container.innerHTML = HTML;
+			// console.log(container);
+			library_namespace.get_tag_list(container.childNodes).reverse()
+			// node.parentNode.childNodes[index] === node;
+			.forEach(function(n) {
+				parentNode.insertBefore(n, last_node);
+				last_node = n;
+				if (n.tagName === set_up_era_nodes.default_tag)
+					set_up_era_node(n, options);
+			});
+			// 去掉原先的文字節點。
+			node.parentNode.removeChild(node);
+
+		}, node, {
+			traversal : 'depth'
+		});
+
+		// set_up_era_nodes(null, options);
+	}
+
 	// ---------------------------------------------------------------------//
 	// export 導出.
 
@@ -7676,6 +7731,7 @@ function module_code(library_namespace) {
 		node_era : caculate_node_era,
 		setup_nodes : set_up_era_nodes,
 		to_HTML : era_text_to_HTML,
+		note_node : add_era_note,
 		//
 		PERIOD_PATTERN : PERIOD_PATTERN
 	}, sign_note.notes);
