@@ -960,12 +960,12 @@ if (false) {
 
 		for (; i < l; i++)
 			try {
-			//	o[i].src 多是 full path, o[i].getAttribute('src') 僅取得其值，因此可能是相對的。
+				//	o[i].src 多是 full path, o[i].getAttribute('src') 僅取得其值，因此可能是相對的。
 				j = node = o[i];
 				j = j.getAttribute && j.getAttribute('src') || j.src;
 
 				index = j.lastIndexOf(JSFN);
-			//alert(j + ',' + JSFN + ',' + I);
+				// alert(j + ',' + JSFN + ',' + I);
 				if (index !== -1) {
 					//	正規化: URL 使用 '/' 而非 '\'
 					//	TODO: 尚未完善。
@@ -975,10 +975,12 @@ if (false) {
 					if (setup_extension && JSFN === _.env.main_script_name)
 						setup_extension(j.slice(index + JSFN.length), node);
 
-					//	TODO: test 是否以 JSFN 作為結尾。
-					// 注意: 依照現行的實作方法，用loader來載入JSFN時，必須以 JSFN 作為結尾。
 					base_path = j.slice(0, index);
-					break;
+					if (j.length === index + JSFN.length) {
+						// test 是否以 JSFN 作為結尾。
+						// 注意: 依照現行的實作方法，用loader來載入JSFN時，必須以 JSFN 作為結尾。
+						break;
+					}
 				}
 			} catch (e) {
 			}

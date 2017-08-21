@@ -2346,7 +2346,8 @@ function for_nodes(action, nodes, options) {
 		if (node = nodes[index]) {
 			if (traversal === 1 && (child = node.childNodes)) {
 				if (child = for_nodes(action, child, options))
-					return n;
+					// 直接跳出。
+					return node;
 			}
 
 			if (!node.parentNode
@@ -2354,14 +2355,22 @@ function for_nodes(action, nodes, options) {
 			|| options && options.leaf_only && node.childNodes.length > 0) {
 				continue;
 			}
-			try {
-				// use node.parentNode to get parent node
-				// in traversal, node.parentNode.childNodes[index] === node
-				if (thisArg ? action.call(thisArg, node, index, nodes)
-						: action(node, index, nodes))
-					throw 0;
-			} catch (e) {
+
+			// use node.parentNode to get parent node
+			// in traversal, node.parentNode.childNodes[index] === node
+			if (thisArg ? action.call(thisArg, node, index, nodes)
+					: action(node, index, nodes)) {
+				// 直接跳出。
 				return node;
+			}
+			if (false) {
+				try {
+					if (thisArg ? action.call(thisArg, node, index, nodes)
+							: action(node, index, nodes))
+						throw 0;
+				} catch (e) {
+					return node;
+				}
 			}
 		}
 	}
