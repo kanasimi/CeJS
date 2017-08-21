@@ -341,11 +341,10 @@ function module_code(library_namespace) {
 	// 見 initialize_era_date()
 	已壓縮曆數_PATTERN = /^(?:[\d\/]*=)?[\da-z]{3}[\da-z ]*$/,
 
-	// matched: [ , 閏, 月分號碼 ]
+	// matched: [ , is_閏月, 月分號碼 ]
 	// TODO: 11冬月, 12臘月.
 	// TODO: [閏後]
-	// TODO: 闰月
-	MONTH_NAME_PATTERN = /^(閏)?([正元]|[01]?\d)月?$/,
+	MONTH_NAME_PATTERN = /^([閏闰])?([正元]|[01]?\d)月?$/,
 
 	干支_PATTERN = generate_pattern(/^干支$/),
 
@@ -377,7 +376,7 @@ function module_code(library_namespace) {
 	// TODO: 11冬月, 12臘月.
 	起始日碼_PATTERN =
 	// [日朔晦望]
-	/^(-?\d+|元)?[\/.\-年](閏?(?:[正元]|[01]?\d))[\/.\-月]?(?:(初?\d{1,2}?|[正元])日?)?$/
+	/^(-?\d+|元)?[\/.\-年]([閏闰]?(?:[正元]|[01]?\d))[\/.\-月]?(?:(初?\d{1,2}?|[正元])日?)?$/
 	//
 	,
 
@@ -1218,7 +1217,7 @@ function module_code(library_namespace) {
 
 		number_String = String(number_String).trim();
 
-		// 處理元年, 閏?[正元]月, 初日
+		// 處理元年, [閏闰]?[正元]月, 初日
 		if (!no_alias)
 			number_String = number_String.replace(/^初/, '')
 			// 初吉即陰曆初一朔日。
@@ -4718,7 +4717,7 @@ function module_code(library_namespace) {
 							起始日碼 = '';
 
 						if ((month_name = 月名) || 年名 || 起始日碼) {
-							// 可能為: 閏?\d+, illegal.
+							// 可能為: [閏闰]?\d+, illegal.
 
 							if (i === 0 && j === 0 && !起始日碼
 									&& (month_name = month_name.match(
@@ -6691,7 +6690,7 @@ function module_code(library_namespace) {
 
 	var PATTERN_公元年_中曆月日
 	// [ all, 公元年, 中曆月, 中曆日, 中曆日 ]
-	= /(-?\d+)年(?:(閏?\d{1,2})月)?(?:初(\d)|(\d{1,2})日)?/;
+	= /(-?\d+)年(?:([閏闰]?\d{1,2})月)?(?:初(\d)|(\d{1,2})日)?/;
 
 	/**
 	 * 取得公元 CE_year 年, 中曆 月/日 之 CE Date。
@@ -7647,7 +7646,7 @@ function module_code(library_namespace) {
 		// e.g., 元, 二, 二十, 二十二, 二十有二, 卅又二
 		年 = '(?:(?:[廿卅]|[' + 日 + ']?十)[有又]?[' + 日 + ']?|[' + 日 + '元明隔去]){1,4}年',
 		// 春王正月 冬十有二月
-		月 = 季_SOURCE + '閏?(?:[正臘' + 日 + ']|十[有又]?){1,3}月';
+		月 = 季_SOURCE + '[閏闰]?(?:[正臘' + 日 + ']|十[有又]?){1,3}月';
 		日 = '(?:(?:(?:干支)?(?:初[' + 日 + ']日?|(?:' + 日
 				+ '|(?:[一二三]?十|[廿卅])[有又]?[元' + 日 + ']?|[元' + 日
 				+ '])日)|干支日?)[朔晦望]?旦?|[朔晦望]日?)';
