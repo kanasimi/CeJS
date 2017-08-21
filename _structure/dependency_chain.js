@@ -3988,7 +3988,7 @@ if (typeof CeL === 'function')
 		}
 
 		/**
-		 * check included resources.
+		 * check included resources. 檢查已載入的資源檔，預防重複載入。
 		 * 
 		 * @param {String}tag
 		 *            tag name to check.
@@ -4087,6 +4087,7 @@ if (typeof CeL === 'function')
 					// 已初始化。這是怕有人不用 .run()，而作了 cache。
 					return normal_run.apply(null, arguments);
 
+				// onload, 推入queue，以等待程式庫載入之後執行。
 				library_initializer.queue.push(Array.prototype.slice
 						.call(arguments));
 			};

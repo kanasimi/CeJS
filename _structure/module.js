@@ -972,8 +972,13 @@ if (false) {
 					if (j.indexOf('/') === -1 && j.indexOf('\\') !== -1)
 						j = j.replace(/\\/g, '/');
 
-					if (setup_extension && JSFN === _.env.main_script_name)
-						setup_extension(j.slice(index + JSFN.length), node);
+					// 處理 <script type="text/javascript" src="path/to/ce.js">//{"run":"initializer"}</script>
+					if (setup_extension) {
+						if (JSFN === _.env.main_script)
+							setup_extension(_.env.script_extension, node);
+						else if (JSFN === _.env.main_script_name)
+							setup_extension(j.slice(index + JSFN.length), node);
+					}
 
 					base_path = j.slice(0, index);
 					if (j.length === index + JSFN.length) {
@@ -992,9 +997,12 @@ if (false) {
 	};
 	// console.log(_.get_tag_list('script').map(function(n){return n.getAttribute('src')}));
 
+	// 處理 <script type="text/javascript" src="path/to/ce.js">//{"run":"initializer"}</script>
 	//	TODO: modify the dirty hack.
 	var setup_extension = function (extension, node) {
-		if (extension === '.js' || extension === '.txt') {
+		if (extension === _.env.script_extension
+		// || extension === '.js' || extension === '.txt'
+		) {
 			//	TODO: unload 時 delete .script_node
 			//_.script_node = node;
 			var env = _.env, config, matched;
