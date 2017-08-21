@@ -3720,6 +3720,9 @@ if (typeof CeL === 'function')
 				library_base_path = library_namespace.env.script_name !== library_namespace.env.main_script_name
 						// 否則先嘗試存放在 registry 中的 path。
 						&& library_namespace.env.registry_path
+						// 盡可能先檢查較具特徵、比較長的名稱: "ce.js"→"ce"。
+						|| library_namespace
+								.get_script_base_path(library_namespace.env.main_script)
 						|| library_namespace
 								.get_script_base_path(library_namespace.env.main_script_name)
 						|| library_namespace.get_script_base_path();
