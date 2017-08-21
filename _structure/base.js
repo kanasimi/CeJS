@@ -2727,7 +2727,7 @@ OS='UNIX'; // unknown
 	// https://github.com/tc39/proposal-global
 	// 由於在HTML Application環境中，self並不等於window，但是應該要用window，所以先跳過這一項。
 	// 因著HTA的問題，要採用也必須放在window之後。
-	// || typeof self !== 'undefined' && self
+	|| typeof self !== 'undefined' && self
 
 	// e.g., node.js
 	|| typeof global === 'object' && global && global.Array === Array && global

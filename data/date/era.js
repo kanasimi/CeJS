@@ -7348,7 +7348,7 @@ function module_code(library_namespace) {
 				date = null;
 				// 自身不完整。溯前尋找 base。
 				tmp = node;
-				while (tmp = tmp.previousSibling)
+				while (tmp = library_namespace.previous_node_of(tmp))
 					// 向前取第一個可以找出日期的。
 					if (date = caculate_node_era(tmp, 'String'))
 						break;
@@ -7436,11 +7436,11 @@ function module_code(library_namespace) {
 	 */
 	function popup_era_dialog() {
 		var era = this.era_popup, date;
-		if (era)
+		if (era) {
 			// had cached
 			library_namespace.toggle_display(this.era_popup, true);
 
-		else if (era = caculate_node_era(this)) {
+		} else if (era = caculate_node_era(this)) {
 			if (date = this.add_date) {
 				date = '（' + to_era_Date(
 				//

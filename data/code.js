@@ -645,7 +645,34 @@ _.ass_tag = ass_tag;
 //var tag = CeL.ass_tag([ { color : 'EEFFEE' }, 'colored text' ]);
 
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
+// https://en.wikipedia.org/wiki/Tree_traversal
+// traversal algorithm
+
+// @see traversal_DOM_backward() @ CeL.interact.DOM
+function traversal(start_node, action, options) {
+	// no for_node action: just get {Array}list
+	action = function(node) {
+		return exit;
+	};
+	options = {
+		//https://en.wikipedia.org/wiki/Depth-first_search
+		//pre-order, in-order and post-order depth-first traversal
+		//https://en.wikipedia.org/wiki/Breadth-first_search
+		type : 'breadth',
+		// direction: forward, backward
+		backward : true,
+		start_node_is_root : true,
+		terminate_node : node,
+		// get next node
+		next_node : function(node_now, index, parent) { return node; },
+		filter : function(node) { return true; },
+		// final action
+		last : function() { }
+	};
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 return (
 	_// JSDT:_module_

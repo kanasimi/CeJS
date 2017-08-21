@@ -2273,6 +2273,8 @@ _// JSDT:_module_
 select_node = select_node;
 
 
+//---------------------------------------------------
+
 /**
  * 對 nodes 指定之每一個 node 皆執行相同操作。<br />
  * TODO: buggy.
@@ -2342,35 +2344,38 @@ function for_nodes(action, nodes, options) {
 		}
 	}
 
-	for (var index = 0, length = nodes.length, node, child; index < length; index++) {
-		if (node = nodes[index]) {
-			if (traversal === 1 && (child = node.childNodes)) {
-				if (child = for_nodes(action, child, options))
-					// 直接跳出。
-					return node;
-			}
+	for (var index = 0, length = nodes.length, child; index < length; index++) {
+		var node = nodes[index];
+		if (!node) {
+			return;
+		}
 
-			if (!node.parentNode
-			//
-			|| options && options.leaf_only && node.childNodes.length > 0) {
-				continue;
-			}
-
-			// use node.parentNode to get parent node
-			// in traversal, node.parentNode.childNodes[index] === node
-			if (thisArg ? action.call(thisArg, node, index, nodes)
-					: action(node, index, nodes)) {
+		if (traversal === 1 && (child = node.childNodes)) {
+			if (child = for_nodes(action, child, options))
 				// 直接跳出。
 				return node;
-			}
-			if (false) {
-				try {
-					if (thisArg ? action.call(thisArg, node, index, nodes)
-							: action(node, index, nodes))
-						throw 0;
-				} catch (e) {
-					return node;
-				}
+		}
+
+		if (!node.parentNode
+		//
+		|| options && options.leaf_only && node.childNodes.length > 0) {
+			continue;
+		}
+
+		// use node.parentNode to get parent node
+		// in traversal, node.parentNode.childNodes[index] === node
+		if (thisArg ? action.call(thisArg, node, index, nodes)
+				: action(node, index, nodes)) {
+			// 直接跳出。
+			return node;
+		}
+		if (false) {
+			try {
+				if (thisArg ? action.call(thisArg, node, index, nodes)
+						: action(node, index, nodes))
+					throw 0;
+			} catch (e) {
+				return node;
 			}
 		}
 	}
@@ -2381,6 +2386,107 @@ function for_nodes(action, nodes, options) {
 _// JSDT:_module_
 .
 for_nodes = for_nodes;
+
+
+// ---------------------------------------------------
+
+// 在全局遍歷中，可用來代替 from_node.nextSibling
+function next_node_of(from_node) {
+	var next_node = from_node.firstChild;
+	// console.log([ 'firstChild', next_node ]);
+	if (!next_node) {
+		// console.log([ 'nextSibling', from_node.nextSibling ]);
+		// console.log([ 'parentNode', from_node.parentNode ]);
+		while (!(next_node = from_node.nextSibling)
+		//
+		&& (from_node = from_node.parentNode) && from_node !== document.body) {
+			;
+		}
+	}
+
+	// assert:
+	// nodes = document.querySelectorAll('*');
+	// next_node === nodes[nodes.indexOf(from_node) + 1]
+	return next_node;
+}
+
+// @see traversal @ CeL.data.code
+// https://www.w3.org/TR/DOM-Level-2-Traversal-Range/traversal.html
+// https://www.w3.org/wiki/Traversing_the_DOM
+// @see test_querySelectorAll.htm
+function traversal_DOM(action, options, from_node) {
+	if (!from_node) {
+		if (_.is_ELEMENT_NODE(options)) {
+			from_node = options;
+			options = null;
+		} else {
+			from_node = document.body;
+		}
+	}
+	if (action(from_node)) {
+		return;
+	}
+
+	var next_node = next_node_of(from_node);
+
+	if (next_node) {
+		// setImmediate()
+		setTimeout(function() {
+			traversal_DOM(action, options, next_node);
+		}, 0);
+	} else if (options && typeof options.last === 'function') {
+		options.last();
+	}
+}
+
+// 在全局遍歷中，可用來代替 from_node.previousSibling
+function previous_node_of(from_node) {
+	var next_node = from_node ? from_node.previousSibling : document.body;
+	if (next_node) {
+		// 找到本序列最後一個 child node
+		while (next_node.childNodes && next_node.childNodes.length > 0) {
+			next_node = next_node.childNodes[next_node.childNodes.length - 1];
+		}
+	} else {
+		next_node = from_node.parentNode;
+	}
+
+	// assert:
+	// nodes = document.querySelectorAll('*');
+	// next_node === next_node === nodes[nodes.indexOf(from_node) - 1]
+	return next_node;
+}
+
+function traversal_DOM_backward(action, options, from_node) {
+	if (!from_node) {
+		if (_.is_ELEMENT_NODE(options)) {
+			from_node = options;
+			options = null;
+		}
+	} else if (action(from_node)) {
+		return;
+	}
+
+	var next_node = previous_node_of(from_node);
+
+	if (next_node) {
+		// setImmediate()
+		setTimeout(function() {
+			traversal_DOM_backward(action, options, next_node);
+		}, 0);
+	} else if (options && typeof options.last === 'function') {
+		options.last();
+	}
+}
+
+_.next_node_of = next_node_of;
+_.traversal_DOM = traversal_DOM;
+_.previous_node_of = previous_node_of;
+_.traversal_DOM.backward = traversal_DOM_backward;
+
+
+// ---------------------------------------------------
+
 
 
 /**
