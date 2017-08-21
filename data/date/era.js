@@ -7548,7 +7548,7 @@ function module_code(library_namespace) {
 			library_namespace.warn('set_up_era_nodes: 無法設定 [' + tag + ']');
 	}
 
-	set_up_era_nodes.default_tag = 'span';
+	set_up_era_nodes.default_tag = 'span'.toLowerCase();
 
 	// --------------------------------------------
 
@@ -7688,14 +7688,16 @@ function module_code(library_namespace) {
 			.forEach(function(n) {
 				parentNode.insertBefore(n, last_node);
 				last_node = n;
-				if (n.tagName === set_up_era_nodes.default_tag)
+				if (n.tagName && n.tagName.toLowerCase()
+				//
+				=== set_up_era_nodes.default_tag)
 					set_up_era_node(n, options);
 			});
 			// 去掉原先的文字節點。
 			node.parentNode.removeChild(node);
 
 		}, node, {
-			traversal : 'depth'
+			traversal : true
 		});
 
 		// set_up_era_nodes(null, options);
