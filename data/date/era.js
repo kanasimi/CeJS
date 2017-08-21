@@ -7345,20 +7345,22 @@ function module_code(library_namespace) {
 
 			// date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
 			if (!date || !date[1]) {
-				date = null;
+				var previous_date = undefined;
 				// 自身不完整。溯前尋找 base。
 				tmp = node;
 				while (tmp = library_namespace.previous_node_of(tmp))
 					// 向前取第一個可以找出日期的。
-					if (date = caculate_node_era(tmp, 'String'))
+					if (previous_date = caculate_node_era(tmp, 'String'))
 						break;
-				if (!date)
+				if (!previous_date)
 					return;
 
+				// TODO: 當間隔過大，例如超過20年時，則跳過這一筆。
 				date = to_era_Date(era, {
 					parse_only : true,
-					base : date
+					base : previous_date
 				});
+				// console.log([ previous_date, date.join(', ') ]);
 				if (!date[1])
 					return;
 			}
@@ -7366,11 +7368,13 @@ function module_code(library_namespace) {
 			// assert: date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
 
 			tmp = date.shift();
-			if (tmp && tmp.size > 1)
+			if (tmp && tmp.size > 1) {
 				library_namespace.warn('caculate_node_era: [' + era + ']: 共取得 '
-						+ tmp.size + ' 個可能的紀年名稱！');
-			else
+				//
+				+ tmp.size + ' 個可能的紀年名稱: ' + Array.from(tmp).join(', '));
+			} else {
 				tmp = null;
+			}
 
 			if (Array.isArray(era = date.shift().name))
 				// 當有多個可能的紀年名稱時，僅取紀年名，保留最大可能性。
@@ -7396,10 +7400,12 @@ function module_code(library_namespace) {
 		if (return_type === 'String')
 			return era;
 
-		node = to_era_Date(era);
+		var era_date = to_era_Date(era);
+		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time
+		node.setAttribute('datetime', era_date.toISOString());
 		if (return_type === 'Date')
-			return node;
-		date = node.format(caculate_node_era.era_format);
+			return era_date;
+		date = era_date.format(caculate_node_era.era_format);
 
 		tmp = to_era_Date(era, {
 			get_range_String : caculate_node_era.format
@@ -7408,10 +7414,10 @@ function module_code(library_namespace) {
 			date += '起';
 
 		tmp = [ era, date, tmp ];
-		if (node.共存紀年) {
+		if (era_date.共存紀年) {
 			date = '<br />☼ ';
 			tmp.push('<hr />' + library_namespace.gettext('共存紀年') + '：' + date
-					+ node.共存紀年.join(date));
+					+ era_date.共存紀年.join(date));
 		}
 
 		return tmp;
@@ -7547,15 +7553,16 @@ function module_code(library_namespace) {
 			library_namespace.warn('set_up_era_nodes: 無法設定 [' + tag + ']');
 	}
 
-	set_up_era_nodes.default_tag = 'span'.toLowerCase();
+	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time
+	set_up_era_nodes.default_tag = 'time'.toLowerCase();
 
 	// --------------------------------------------
 
 	// 辨識史籍(historical book)紀年用之 pattern。
 	var 史籍紀年_PATTERN, ERA_ONLY_PATTERN,
 	//
-	朔干支_PATTERN = generate_pattern(
-			/(朔<\/'+set_up_era_nodes.default_tag+'>)(干支)()/, false, 'g'),
+	朔干支_PATTERN = generate_pattern('(朔<\\/' + set_up_era_nodes.default_tag
+			+ '>)(干支)()', false, 'g'),
 	// 十二地支時辰. e.g., 光緒十九年八月初二日丑刻
 	時干支_PATTERN = generate_pattern(/(支)[時刻]/, false, 'g'),
 	// see era_text_to_HTML.build_pattern()
