@@ -9382,8 +9382,7 @@ function module_code(library_namespace) {
 			reason : false,
 			tags : false,
 			watchlist : false,
-			oldimage : false,
-			watchlist : false
+			oldimage : false
 		}, options, callback);
 	};
 
