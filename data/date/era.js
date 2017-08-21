@@ -4468,7 +4468,7 @@ function module_code(library_namespace) {
 	 * 會更改到 plain_era_data！
 	 * 
 	 * @example <code>
-	 * CeL.era.pack('/文宗/天曆|1329/8/25~|2/8=30;29;29;30;30\t29;30;30;29');
+	CeL.era.pack('/文宗/天曆|1329/8/25~|2/8=30;29;29;30;30\t29;30;30;29');
 	 * </code>
 	 * 
 	 * @param {Array|Object|String}plain_era_data
@@ -7662,6 +7662,15 @@ function module_code(library_namespace) {
 
 	/**
 	 * 直接處理一整個 HTML 元素，加上紀年標示。
+	 * 
+	 * @example <code>
+	CeL.run([ 'data.date.era', 'interact.DOM' ]);
+	CeL.env.era_data_load = function(country, queue) {
+		if (!queue) {
+			CeL.era.note_node('#mw-content-text', { add_date : true });
+		}
+	};
+	 * </code>
 	 */
 	function add_era_note(node, options) {
 		library_namespace.for_nodes(function(node, index) {
@@ -7688,8 +7697,8 @@ function module_code(library_namespace) {
 			.forEach(function(n) {
 				parentNode.insertBefore(n, last_node);
 				last_node = n;
-				if (n.tagName && n.tagName.toLowerCase()
-				//
+				if (false && n.tagName && n.tagName.toLowerCase()
+				// TODO: useless...
 				=== set_up_era_nodes.default_tag)
 					set_up_era_node(n, options);
 			});
@@ -7700,7 +7709,7 @@ function module_code(library_namespace) {
 			traversal : true
 		});
 
-		// set_up_era_nodes(null, options);
+		set_up_era_nodes(null, options);
 	}
 
 	// ---------------------------------------------------------------------//
