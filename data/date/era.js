@@ -7482,11 +7482,15 @@ function module_code(library_namespace) {
 				if (!date[1])
 					return;
 
-				// count elements that has something
-				if (date.slice(2).reduce(function(count, e) {
-					return e ? count + 1 : count;
-				}, 0) === 1) {
-					previous_date_to_check = previous_date;
+				// 檢查本節點有幾項資料。
+				date.slice(2).forEach(function(name, index) {
+					if (name)
+						previous_date_to_check.push(index);
+				});
+				if (previous_date_to_check.length === 1) {
+					previous_date_to_check.unshift(previous_date);
+				} else {
+					previous_date_to_check = null;
 				}
 			}
 
@@ -7540,12 +7544,28 @@ function module_code(library_namespace) {
 
 		if (return_type === 'String') {
 			if (previous_date_to_check) {
-				tmp = to_era_Date(previous_date_to_check);
-				if (tmp - era_date > 0) {
-					// 當僅有年月日其中一項資料的時候，比較有可能是判讀、解析錯誤。因此不拿來當作參考對象。
+				var error = null,
+				//
+				previous_date = to_era_Date(previous_date_to_check[0]);
+				// 當僅有年月日其中一項資料的時候，比較有可能是判讀、解析錯誤。因此某些情況下不拿來當作參考對象。
+				if (previous_date - era_date > 0) {
+					error = '時間更早';
+				} else {
+					var diff_in_2_months = (era_date - previous_date)
+							/ (2 * 大月 * ONE_DAY_LENGTH_VALUE);
+					if (previous_date_to_check[1] === 2 ? diff_in_2_months > 1
+					// ↑ 僅有日期資料。 ↓ 僅有月份資料。
+					: previous_date_to_check[1] === 1 ? diff_in_2_months > 12
+							: diff_in_2_months > 100 * 12) {
+						error = '間距過長';
+					}
+				}
+				if (error) {
 					library_namespace.warn('caculate_node_era: 本節點[' + era
-							+ ']比前一個節點[' + previous_date_to_check
-							+ ']時間更早，且只有一項資料，因此跳過而取前一個節點。');
+							+ ']比起前一個節點[' + previous_date_to_check[0] + ']'
+							+ error + '，且只有一項資料['
+							+ '年月日'.charAt(previous_date_to_check[1])
+							+ ']，因此跳過本節點而取前一個節點。');
 					return;
 				}
 			}
