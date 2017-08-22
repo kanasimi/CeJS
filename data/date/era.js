@@ -7493,6 +7493,8 @@ function module_code(library_namespace) {
 				if (original_era && original_era[0]
 						&& original_era[0].size === 1) {
 					original_era = Array.from(original_era[0])[0];
+				} else {
+					original_era = null;
 				}
 				date = to_era_Date(era, {
 					parse_only : true,
