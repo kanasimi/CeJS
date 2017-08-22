@@ -6271,8 +6271,9 @@ function module_code(library_namespace) {
 					}
 					// "後一条天皇長元" 需要檢測到 (while ..) 這一項。
 				} while ((!紀年_list || 紀年_list.size === 0) && 偵測集.length > 0);
-			} else
+			} else {
 				tmp2 = null;
+			}
 
 			// 避免如 "三月庚子" 被解析成 "太祖庚子"
 			// 避免如 "十二月丁未" 被解析成 "丁先皇帝太平"
@@ -6378,9 +6379,10 @@ function module_code(library_namespace) {
 			// TODO: 篩選*所有*可用之紀年。
 			if (!('strict' in options)
 			//
-			&& 紀年_list && 紀年_list.size > 1)
+			&& 紀年_list && 紀年_list.size > 1) {
 				// 有多個選擇，因此嚐試嚴格篩選。
 				options.strict = true;
+			}
 			if (tmp = options.period_end) {
 				// 取得結束時間。else: 取得開始時間。
 				tmp = 日 ? 1 : 月 ? 2 : 年 ? 3 : 4;
@@ -6428,7 +6430,7 @@ function module_code(library_namespace) {
 
 			} else if (library_namespace.is_debug()
 			//
-			&& arguments[0])
+			&& arguments[0]) {
 				library_namespace.info([ 'to_era_Date: 無法自 [', {
 					b : arguments[0],
 					S : 'color:#e92;'
@@ -6437,6 +6439,7 @@ function module_code(library_namespace) {
 				'將視為' + standard_time_parser_name
 				//
 				+ '紀年時間，嘗試以日期解析器 [', standard_time_parser, '] 解析。' ]);
+			}
 
 			// 警告:請勿隨意更改這些回傳值，因為他們也為 module 內部其他功能所用!
 			if (options.get_era)
@@ -7534,13 +7537,19 @@ function module_code(library_namespace) {
 		var era_date = to_era_Date(era);
 		if (era_date.error) {
 			node.title = era + ': ' + era_date.error;
-			library_namespace.set_class(node, 'era_text', {
-				remove : true
+			// 假如有明確指定紀年名稱，則依然可參照之。
+			var tmp = to_era_Date(library_namespace.set_text(node), {
+				parse_only : true
 			});
-			// reset event / style
-			node.style.cursor = '';
-			node.onclick = node.onmouseover = node.onmouseout = null;
-			return;
+			if (!tmp || !tmp[1] || tmp[1].toString() !== era_date.紀年名) {
+				library_namespace.set_class(node, 'era_text', {
+					remove : true
+				});
+				// reset event / style
+				node.style.cursor = '';
+				node.onclick = node.onmouseover = node.onmouseout = null;
+				return;
+			}
 		}
 
 		if (return_type === 'String') {
