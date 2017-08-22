@@ -4228,7 +4228,7 @@ CeL.era.pass_on.step = function() {
 
 	if (Array.isArray(queue) && queue.length > 0) {
 		var country = queue.shift();
-		// console.info(country);
+		console.info(country);
 
 		CeL.era.set(this.countries[country], {
 			國家 : country
@@ -4267,7 +4267,7 @@ CeL.era.pass_on.step = function() {
 
 }.bind(CeL.era.pass_on);
 
-if (typeof CeL === 'function')
+if (typeof CeL === 'function') {
 	CeL.run('data.date.era', function() {
 		// delete this.CeL_era_data.data;
 
@@ -4280,13 +4280,16 @@ if (typeof CeL === 'function')
 			queue.push(country);
 
 		if (typeof CeL.env.era_data_load === 'function') {
-			// 第一次呼叫 callback，可以用來篩選需要載入的國家。
+			// 第一次呼叫 callback。
+			// 在載入era模組之前設定好，可以用來篩選需要載入的國家。
 			CeL.env.era_data_load(this.countries, queue);
 		}
+		// console.log('Load ' + queue.join(', '));
 
 		setTimeout(this.step, 0);
 
 	}.bind(CeL.era.pass_on));
 
-else
+} else {
 	CeL.era.pass_on.step();
+}

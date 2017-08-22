@@ -187,6 +187,13 @@ em {
 			if (location.protocol !== 'file:')
 				queue.push('http://apis.google.com/js/plusone.js');
 
+			CeL.env.era_data_load = function(country, queue) {
+				if (typeof country === 'object') {
+					// 第一次呼叫 callback。
+					// 在載入era模組之前設定好，可以用來篩選需要載入的國家。
+					queue.truncate().push('中國');
+				}
+			};
 			CeL.run(queue);
 		}
 	</script>

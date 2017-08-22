@@ -61,6 +61,14 @@ CeL.run('data.date.era', test_era_data);
 
 // era.onload
 CeL.env.era_data_load = function(country, queue) {
+	if (typeof country === 'object') {
+		// 第一次呼叫 callback。
+		// 在載入era模組之前設定好，可以用來篩選需要載入的國家。
+		queue.truncate().push('中國');
+		return;
+	}
+
+	// assert: {String}country
 	CeL.log('era data of [' + country + '] loaded.');
 	// 判斷是否已載入所有曆數資料。
 	if (!queue) {
@@ -260,6 +268,9 @@ function module_code(library_namespace) {
 	PERIOD_PREFIX = 'period:',
 	//
 	PERIOD_PATTERN = new RegExp('^' + PERIOD_PREFIX + '(.+)$'),
+	// 日期連接號。 e.g., "–".
+	// 減號"-"與太多符號用途重疊，因此不是個好的選擇。
+	PERIOD_DASH = '–',
 
 	// set normal month count of a year.
 	// 月數12: 每年有12個月.
@@ -2592,8 +2603,8 @@ function module_code(library_namespace) {
 
 						library_namespace.debug(
 						//
-						'複製本年接下來每月之曆數: ' + 月序 + '–' + era_year_data.length
-								+ '。', 5);
+						'複製本年接下來每月之曆數: ' + 月序 + PERIOD_DASH
+								+ era_year_data.length + '。', 5);
 						if (月序 < era_year_data.length)
 							Array_push(this_year_data, era_year_data.slice(月序));
 
@@ -2630,8 +2641,8 @@ function module_code(library_namespace) {
 						if (tmp && 月序 < tmp.length) {
 							library_namespace.debug(
 							//
-							'複製本年接下來每月之月分名稱 (' + 月序 + '–' + tmp.length + ') ['
-									+ tmp + ']。', 5);
+							'複製本年接下來每月之月分名稱 (' + 月序 + PERIOD_DASH + tmp.length
+									+ ') [' + tmp + ']。', 5);
 							// console.log(era_year_data);
 							// console.log(this_year_data);
 							if (!(NAME_KEY in this_year_data))
@@ -4309,6 +4320,7 @@ function module_code(library_namespace) {
 	function parse_duration(date, era) {
 		var tmp;
 		if (typeof date === 'string' && (tmp = date.match(
+		// Must include PERIOD_DASH
 		// [ matched, parser, 起, 訖1, 訖2 ]
 		/^\s*(?:([^:]+):)?\s*([^–－—~～〜至:]*)(?:[–－—~～〜至]\s*(.*)|(\+\d+))\s*$/
 		// @see String_to_Date.parser_PATTERN
@@ -4321,6 +4333,7 @@ function module_code(library_namespace) {
 				tmp = date[0];
 				// 針對從下一筆紀年調來的資料。
 				if (typeof tmp === 'string' && (tmp = tmp
+				// Must include PERIOD_DASH
 				// @see String_to_Date.parser_PATTERN
 				.match(/^\s*(?:([^:]+):)?\s*([^–－—~～〜至:]*)/)))
 					date = [ tmp[2], date[1], tmp[1] ];
@@ -4498,6 +4511,7 @@ function module_code(library_namespace) {
 				era = {
 					紀年 : era[0],
 					起訖 : parse_duration(era[1], era[0])
+					// Must include PERIOD_DASH
 					// assert: 已經警示過了。
 					|| era[1].split(/[–－—~～〜至]/),
 					曆數 : era[2]
@@ -4922,7 +4936,7 @@ function module_code(library_namespace) {
 			起訖時間[1] = 起訖時間[1].slice(i.length);
 		packed_era_data = [ 紀年名稱, (起訖時間[2] ? 起訖時間[2] + ':' : '')
 		//
-		+ 起訖時間[0] + '–' + 起訖時間[1], 年度月分資料.join('') ];
+		+ 起訖時間[0] + PERIOD_DASH + 起訖時間[1], 年度月分資料.join('') ];
 
 		// 添加其他附加屬性名稱。
 		for (i in plain_era_data)
@@ -5063,6 +5077,14 @@ function module_code(library_namespace) {
 	// build data (using insertion):
 	// parse era data
 	function parse_era(era_data_array, options) {
+		if (!era_data_array) {
+			// Invalid input.
+			if (options && options.國家) {
+				// 可能由CeL.env.era_data_load()篩選過。
+				library_namespace.error('Unknown country: ' + options.國家);
+			}
+			return;
+		}
 
 		function pre_parse_紀年資料(index) {
 			var i, j, 附加屬性, era_data = era_data_array[index];
@@ -6454,7 +6476,7 @@ function module_code(library_namespace) {
 						// 去除同一年。
 						&& 年[1] === tmp2[1])
 							tmp = tmp.replace(紀年, '');
-						date += '–' + tmp;
+						date += PERIOD_DASH + tmp;
 					}
 					// for 公元前。
 					return date.replace(/-(\d+年)/g, '前$1');
@@ -7315,6 +7337,13 @@ function module_code(library_namespace) {
 	// 網頁應用功能。
 	// warning: need CeL.interact.DOM
 
+	// UNDONE
+	function determain_node_era(node) {
+		var node_queue = [];
+		var era_data = library_namespace.DOM_data(node, 'era');
+
+	}
+
 	/**
 	 * 計算已具紀年標記之指定 node 之紀年值。
 	 * 
@@ -7326,16 +7355,22 @@ function module_code(library_namespace) {
 	 * @returns [range] || {String}date
 	 */
 	function caculate_node_era(node, return_type) {
-		var era, date, tmp = library_namespace.DOM_data(node, 'era');
-		if (!tmp)
-			// no era data.
+		var era, date,
+		// data-era: read-only
+		era_data = library_namespace.DOM_data(node, 'era');
+		if (!era_data) {
+			// no era data. Not a era node. Skip this node.
 			return;
+		}
 
+		// 看看是不是有之前解析解析過的cache。
 		era = library_namespace.DOM_data(node, 'era_parsed');
 		if (!era) {
+			// determain node era
+
 			// 解析 era。
-			era = tmp.replace(
-			// /~/:如英語字典之省略符號
+			era = era_data.replace(
+			// /~/:如英語字典之省略符號，將以本node之內含文字代替。
 			/~/, library_namespace.set_text(node));
 
 			// 干支_PATTERN: 預防"丁未"被 parse 成丁朝之類的意外。
@@ -7345,13 +7380,17 @@ function module_code(library_namespace) {
 
 			// date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
 			if (!date || !date[1]) {
+				var node_queue = [];
 				var previous_date = undefined;
 				// 自身不完整。溯前尋找 base。
-				tmp = node;
-				while (tmp = library_namespace.previous_node_of(tmp))
-					// 向前取第一個可以找出日期的。
-					if (previous_date = caculate_node_era(tmp, 'String'))
+				var node_to_test = node;
+				while (node_to_test = library_namespace
+						.previous_node_of(node_to_test)) {
+					// 向前取第一個可以明確找出日期的。
+					if (previous_date = caculate_node_era(node_to_test,
+							'String'))
 						break;
+				}
 				if (!previous_date)
 					return;
 
@@ -7367,27 +7406,29 @@ function module_code(library_namespace) {
 
 			// assert: date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
 
-			tmp = date.shift();
-			if (tmp && tmp.size > 1) {
+			var era_list = date.shift();
+			if (era_list && era_list.size > 1) {
 				library_namespace.warn('caculate_node_era: [' + era + ']: 共取得 '
 				//
-				+ tmp.size + ' 個可能的紀年名稱: ' + Array.from(tmp).join(', '));
+				+ era_list.size + ' 個可能的紀年名稱: '
+						+ Array.from(era_list).join(', '));
 			} else {
-				tmp = null;
+				era_list = null;
 			}
 
 			if (Array.isArray(era = date.shift().name))
 				// 當有多個可能的紀年名稱時，僅取紀年名，保留最大可能性。
-				era = tmp ? era[0]
+				era = era_list ? era[0]
 				//					
 				: era.slice(0, 2).reverse().join('');
 
-			if (tmp = date.shift()) {
-				era += tmp + '年';
-				if (tmp = date.shift()) {
-					era += tmp + '月';
-					if (tmp = date.shift())
-						era += tmp + '日';
+			var date_name = date.shift();
+			if (date_name) {
+				era += date_name + '年';
+				if (date_name = date.shift()) {
+					era += date_name + '月';
+					if (date_name = date.shift())
+						era += date_name + '日';
 				}
 			}
 
@@ -7407,10 +7448,10 @@ function module_code(library_namespace) {
 			return era_date;
 		date = era_date.format(caculate_node_era.era_format);
 
-		tmp = to_era_Date(era, {
+		var tmp = to_era_Date(era, {
 			get_range_String : caculate_node_era.format
 		});
-		if (tmp.includes('–'))
+		if (tmp.includes(PERIOD_DASH))
 			date += '起';
 
 		tmp = [ era, date, tmp ];
@@ -7604,7 +7645,7 @@ function module_code(library_namespace) {
 					// 24: 每天24小時
 					start += 24;
 				// 時: 小時
-				start += '–' + end + '時';
+				start += PERIOD_DASH + end + '時';
 				return options && options.add_date
 				//
 				? $0 + '(' + start + ')'
