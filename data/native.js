@@ -2136,6 +2136,15 @@ function module_code(library_namespace) {
 		return this;
 	}
 
+	// count elements that has something
+	if (false) {
+		Array.prototype.count_things = function() {
+			return this.reduce(function(count, e) {
+				return e ? count + 1 : count;
+			}, 0);
+		};
+	}
+
 	// Array.prototype.frequency()
 	// values count, 發生率
 	function array_frequency(select_max, target) {

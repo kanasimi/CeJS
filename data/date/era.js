@@ -4148,6 +4148,7 @@ function module_code(library_namespace) {
 		date_index = this.Date_to_date_index(date);
 		if (!date_index) {
 			library_namespace.error('sign_note: 加注日期於紀年 [' + this + '] 範圍外！');
+			date.error = 'out of range';
 		} else {
 			// 欲使用 date_index，應該考慮採 (date.年, date.月, date.日)。
 			// 因為日期可能不是從1月1日開始。
@@ -6274,10 +6275,13 @@ function module_code(library_namespace) {
 				tmp2 = null;
 
 			// 避免如 "三月庚子" 被解析成 "太祖庚子"
+			// 避免如 "十二月丁未" 被解析成 "丁先皇帝太平"
 			if (紀年_list && 紀年_list.size > 0 && !年 && 月 && 干支_PATTERN.test(日)) {
 				// console.log([ date, 年, 月, 日 ]);
 				紀年_list.forEach(function(era) {
-					if (era.name[0] === 日) {
+					if (era.name.some(function(name) {
+						return 日.includes(name);
+					})) {
 						check_to_modify();
 						// 刪掉不合適的紀年。
 						紀年_list['delete'](era);
@@ -7368,7 +7372,7 @@ function module_code(library_namespace) {
 	 * @returns [range] || {String}date
 	 */
 	function caculate_node_era(node, return_type) {
-		var era, date,
+		var era, date, previous_date_to_check,
 		// data-era: read-only
 		era_data = library_namespace.DOM_data(node, 'era');
 		if (!era_data) {
@@ -7378,6 +7382,7 @@ function module_code(library_namespace) {
 
 		// 看看是不是有之前解析、驗證過的cache。
 		era = library_namespace.DOM_data(node, 'era_parsed');
+		// console.log(era);
 		if (!era) {
 			// determain node era
 			if (false) {
@@ -7444,7 +7449,7 @@ function module_code(library_namespace) {
 			era = library_namespace.set_text(node);
 			if (era_data !== '~') {
 				// '~':如英語字典之省略符號，將以本node之內含文字代替。
-				era = era_data.replace('~', era);
+				era = era_data.replace('~', ' ' + era);
 			}
 
 			// 去除(干支_PATTERN): 預防"丁未"被 parse 成丁朝之類的意外。
@@ -7476,6 +7481,13 @@ function module_code(library_namespace) {
 				// console.log([ previous_date, date.join(', ') ]);
 				if (!date[1])
 					return;
+
+				// count elements that has something
+				if (date.slice(2).reduce(function(count, e) {
+					return e ? count + 1 : count;
+				}, 0) === 1) {
+					previous_date_to_check = previous_date;
+				}
 			}
 
 			// assert: date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
@@ -7490,12 +7502,14 @@ function module_code(library_namespace) {
 				era_list = null;
 			}
 
-			if (Array.isArray(era = date.shift().name))
+			if (Array.isArray(era = date.shift().name)) {
 				// 當有多個可能的紀年名稱時，僅取紀年名，保留最大可能性。
 				era = era_list ? era[0]
 				//					
 				: era.slice(0, 2).reverse().join('');
+			}
 
+			// console.log([ 'date:', date.join(', ') ]);
 			var date_name = date.shift();
 			if (date_name) {
 				era += date_name + '年';
@@ -7512,10 +7526,34 @@ function module_code(library_namespace) {
 			library_namespace.DOM_data(node, 'era_parsed', era);
 		}
 
-		if (return_type === 'String')
-			return era;
-
 		var era_date = to_era_Date(era);
+		if (era_date.error) {
+			node.title = era + ': ' + era_date.error;
+			library_namespace.set_class(node, 'era_text', {
+				remove : true
+			});
+			// reset event / style
+			node.style.cursor = '';
+			node.onclick = node.onmouseover = node.onmouseout = null;
+			return;
+		}
+
+		if (return_type === 'String') {
+			if (previous_date_to_check) {
+				tmp = to_era_Date(previous_date_to_check);
+				if (tmp - era_date > 0) {
+					// 當僅有年月日其中一項資料的時候，比較有可能是判讀、解析錯誤。因此不拿來當作參考對象。
+					library_namespace.warn('caculate_node_era: 本節點[' + era
+							+ ']比前一個節點[' + previous_date_to_check
+							+ ']時間更早，且只有一項資料，因此跳過而取前一個節點。');
+					return;
+				}
+			}
+
+			// console.log([ 'trace back to', era ]);
+			return /* !era_date.error && */era;
+		}
+
 		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time
 		node.setAttribute('datetime', era_date.toISOString());
 		if (return_type === 'Date')
