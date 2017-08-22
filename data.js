@@ -334,12 +334,16 @@ DO.normalize(): 合併所有child成一String, may crash IE6 Win!	http://www.qui
 _// JSDT:_module_
 .
 /**
- * 計算字數 count words.
+ * 計算字數 count words. word_count
  * 
  * @param {String} text
  *            文檔
  * @param {Number} flag	文檔格式/處理方法
- * @return	{Number} 字數 
+ * 
+ * @return	{Number} 字數
+ * 
+ * @see https://zh.wikipedia.org/wiki/User:%E5%B0%8F%E8%BA%8D/Wordcount.js
+ *  
  * @_memberOf _module_
  */
 count_word = function(text, flag) {

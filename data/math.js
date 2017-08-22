@@ -3368,9 +3368,9 @@ function digit_table(initial_value, options) {
 	// process: 以 greedy algorithm （貪心算法,貪心法）遞歸搜索
 
 	/**
-	 * caculate sum of digit values
+	 * calculate sum of digit values
 	 */
-	function caculate_sum(sum, exponent, digits) {
+	function calculate_sum(sum, exponent, digits) {
 		// 測試是否應終結。
 		if (exponent < 0) {
 			// 0,1 為當然結果。
@@ -3385,7 +3385,7 @@ function digit_table(initial_value, options) {
 
 		// 遞歸搜索
 		table[exponent--].forEach(function(v, d) {
-			caculate_sum(digits || d ? sum + v : sum, exponent,
+			calculate_sum(digits || d ? sum + v : sum, exponent,
 			// 對於 0 開頭者，視做少一位數，同時不計算本位數之 [0]。
 			digits || d ? digits + d : digits);
 		});
@@ -3404,7 +3404,7 @@ function digit_table(initial_value, options) {
 	}))
 		min = 0;
 
-	caculate_sum(0, table.length - 1, '');
+	calculate_sum(0, table.length - 1, '');
 
 	library_namespace.debug(result, 2);
 	return result;

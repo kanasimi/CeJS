@@ -933,7 +933,7 @@ Hebrew_Date.new_year_Date_original = function(year, days) {
 	return days;
 };
 
-// caculate days from 1/1/1.
+// calculate days from 1/1/1.
 // simplify from Hebrew_Date.new_year_Date_original()
 // new_year_days(1) = 0
 // new_year_days(2) = 354
@@ -2413,7 +2413,7 @@ Myanmar_Date.month_name.en.waso = [ 'First Waso', 'Second Waso' ];
 // The days between the akya day and the atat day are called akyat days.
 /**
  * get year start date of Myanmar calendar.<br />
- * Using integer to caculate Myanmar new year's day.
+ * Using integer to calculate Myanmar new year's day.
  *
  * @param {Integer}year
  *            year of Myanmar calendar.
@@ -4580,7 +4580,7 @@ function Egyptian_Date(year, month, date, options) {
 	if (shift && !isNaN(shift))
 		year += shift;
 
-	// caculate days.
+	// calculate days.
 	date = (year - Egyptian_epochal_year) * Egyptian_year_days
 	//
 	+ (month ? (month - 1) * Egyptian_month_days : 0)

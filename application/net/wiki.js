@@ -47,7 +47,7 @@ https://zh.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&uc
 
 
 gadgets 小工具 [[Wikipedia:Tools]], [[Category:Wikipedia scripts]], [[mw:ResourceLoader/Core modules]]
-
+[[Special:MyPage/common.js]] [[使用說明:維基用戶腳本開發指南]]
 
 // ---------------------------------------------------------
 

@@ -1,6 +1,6 @@
 /**
  * @name CeL function for era calendar.
- * @fileoverview 本檔案包含了東亞傳統曆法/中國傳統曆法/曆書/歷譜，農曆、夏曆、陰曆，中西曆/信史的日期轉換功能。<br />
+ * @fileoverview 本檔案包含了東亞傳統曆法/中國傳統曆法/曆書/歷譜/帝王紀年/年號紀年，農曆、夏曆、陰曆，中西曆/信史的日期轉換功能。<br />
  *               以歷史上使用過的曆數為準。用意不在推導曆法，而在對過去時間作正確轉換。因此僅用查表法，不作繁複天文計算。
  * 
  * @since 2013/2/13 12:45:44
@@ -68,7 +68,7 @@ CeL.env.era_data_load = function(country, queue) {
 		return;
 	}
 
-	// assert: {String}country
+	// assert: 已載入 {String}country
 	CeL.log('era data of [' + country + '] loaded.');
 	// 判斷是否已載入所有曆數資料。
 	if (!queue) {
@@ -6376,6 +6376,11 @@ function module_code(library_namespace) {
 				}
 			}
 
+			if (options.parse_without_check) {
+				// e.g., do not check range
+				return [ 紀年_list, 年, 月, 日 ];
+			}
+
 			// TODO: 篩選*所有*可用之紀年。
 			if (!('strict' in options)
 			//
@@ -6392,7 +6397,7 @@ function module_code(library_namespace) {
 			while (get_next_era()
 					&& (!(date = 紀年.date_name_to_Date(年, 月, 日, options.strict,
 							tmp))
-					//
+					// 在紀年範圍外。
 					|| isNaN(date.getTime()))) {
 				check_to_modify();
 				// 刪掉不合適的紀年。
@@ -7374,8 +7379,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns [range] || {String}date
 	 */
-	function caculate_node_era(node, return_type) {
-		var era, date, previous_date_to_check,
+	function calculate_node_era(node, return_type) {
+		var era, date, previous_date_to_check, original_era,
 		// data-era: read-only
 		era_data = library_namespace.DOM_data(node, 'era');
 		if (!era_data) {
@@ -7384,6 +7389,10 @@ function module_code(library_namespace) {
 		}
 
 		// 看看是不是有之前解析、驗證過的cache。
+		if (return_type === 'String'
+				&& (era = library_namespace.DOM_data(node, 'era_refrenced'))) {
+			return era;
+		}
 		era = library_namespace.DOM_data(node, 'era_parsed');
 		// console.log(era);
 		if (!era) {
@@ -7454,6 +7463,7 @@ function module_code(library_namespace) {
 				// '~':如英語字典之省略符號，將以本node之內含文字代替。
 				era = era_data.replace('~', ' ' + era);
 			}
+			// console.log([ 'era:', era ]);
 
 			// 去除(干支_PATTERN): 預防"丁未"被 parse 成丁朝之類的意外。
 			date = !干支_PATTERN.test(era) && to_era_Date(era, {
@@ -7469,14 +7479,21 @@ function module_code(library_namespace) {
 				while (node_to_test = library_namespace
 						.previous_node_of(node_to_test)) {
 					// 向前取第一個可以明確找出日期的。
-					if (previous_date = caculate_node_era(node_to_test,
+					if (previous_date = calculate_node_era(node_to_test,
 							'String'))
 						break;
 				}
 				if (!previous_date)
 					return;
 
-				// TODO: 當間隔過大，例如超過20年時，則跳過這一筆。
+				original_era = date = to_era_Date(era, {
+					parse_without_check : true
+				});
+				// console.log([ 'original_era:', original_era ]);
+				if (original_era && original_era[0]
+						&& original_era[0].size === 1) {
+					original_era = Array.from(original_era[0])[0];
+				}
 				date = to_era_Date(era, {
 					parse_only : true,
 					base : previous_date
@@ -7502,35 +7519,53 @@ function module_code(library_namespace) {
 
 			var era_list = date.shift();
 			if (era_list && era_list.size > 1) {
-				library_namespace.warn('caculate_node_era: [' + era + ']: 共取得 '
-				//
-				+ era_list.size + ' 個可能的紀年名稱: '
+				library_namespace.warn('calculate_node_era: [' + era
+						+ ']: 共取得 '
+						//
+						+ era_list.size + ' 個可能的紀年名稱: '
 						+ Array.from(era_list).join(', '));
 			} else {
 				era_list = null;
 			}
 
-			if (Array.isArray(era = date.shift().name)) {
+			if (Array.isArray((era = date.shift()).name)) {
 				// 當有多個可能的紀年名稱時，僅取紀年名，保留最大可能性。
-				era = era_list ? era[0]
-				//					
-				: era.slice(0, 2).reverse().join('');
+				era = era_list ? era.name[0] : era.toString();
+			}
+			if (original_era
+					&& era !== (original_era = original_era.toString())) {
+				library_namespace.debug('本節點本來就指定了紀年名稱[' + original_era
+						+ ']，因此當作後續節點之參考時，將使用原先的紀年，而不採用解析出的紀年[' + era + ']。');
+			} else {
+				original_era = null;
 			}
 
-			// console.log([ 'date:', date.join(', ') ]);
+			console.log([ 'date:', date.join(', '), 'era:', era ]);
 			var date_name = date.shift();
 			if (date_name) {
-				era += date_name + '年';
+				var tmp = date_name + '年';
+				era += tmp;
+				if (original_era)
+					original_era += tmp;
 				if (date_name = date.shift()) {
-					era += date_name + '月';
-					if (date_name = date.shift())
-						era += date_name + '日';
+					tmp = date_name + '月';
+					era += tmp;
+					if (original_era)
+						original_era += tmp;
+					if (date_name = date.shift()) {
+						tmp = date_name + '日';
+						era += tmp;
+						if (original_era)
+							original_era += tmp;
+					}
 				}
 			}
 
 			// assert: {String}era
 
 			// cache.
+			if (original_era)
+				library_namespace.DOM_data(node, 'era_refrenced', original_era);
 			library_namespace.DOM_data(node, 'era_parsed', era);
 		}
 
@@ -7541,6 +7576,9 @@ function module_code(library_namespace) {
 			var tmp = to_era_Date(library_namespace.set_text(node), {
 				parse_only : true
 			});
+			if (false)
+				console.log([ node, library_namespace.set_text(node), tmp, era,
+						era_date ]);
 			if (!tmp || !tmp[1] || tmp[1].toString() !== era_date.紀年名) {
 				library_namespace.set_class(node, 'era_text', {
 					remove : true
@@ -7566,12 +7604,13 @@ function module_code(library_namespace) {
 					if (previous_date_to_check[1] === 2 ? diff_in_2_months > 1
 					// ↑ 僅有日期資料。 ↓ 僅有月份資料。
 					: previous_date_to_check[1] === 1 ? diff_in_2_months > 12
-							: diff_in_2_months > 100 * 12) {
+					// 當間隔過大，例如超過200年時，則跳過這一筆。
+					: diff_in_2_months > 100 * 12) {
 						error = '間距過長';
 					}
 				}
 				if (error) {
-					library_namespace.warn('caculate_node_era: 本節點[' + era
+					library_namespace.warn('calculate_node_era: 本節點[' + era
 							+ ']比起前一個節點[' + previous_date_to_check[0] + ']'
 							+ error + '，且只有一項資料['
 							+ '年月日'.charAt(previous_date_to_check[1])
@@ -7584,14 +7623,18 @@ function module_code(library_namespace) {
 			return /* !era_date.error && */era;
 		}
 
+		if (era_date.error) {
+			return;
+		}
+
 		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/time
 		node.setAttribute('datetime', era_date.toISOString());
 		if (return_type === 'Date')
 			return era_date;
-		date = era_date.format(caculate_node_era.era_format);
+		date = era_date.format(calculate_node_era.era_format);
 
 		var tmp = to_era_Date(era, {
-			get_range_String : caculate_node_era.format
+			get_range_String : calculate_node_era.format
 		});
 		if (tmp.includes(PERIOD_DASH))
 			date += '起';
@@ -7608,13 +7651,13 @@ function module_code(library_namespace) {
 	}
 
 	// 紀年名
-	caculate_node_era.era_format = {
+	calculate_node_era.era_format = {
 		parser : standard_time_parser,
 		format : '%紀年名%年年%月月%日日(%日干支)',
 		locale : 'cmn-Hant-TW'
 	};
 	// range
-	caculate_node_era.format = {
+	calculate_node_era.format = {
 		parser : standard_time_parser,
 		format : standard_time_parser_name + '%Y年%m月%d日'
 	};
@@ -7630,18 +7673,20 @@ function module_code(library_namespace) {
 			// had cached
 			library_namespace.toggle_display(this.era_popup, true);
 
-		} else if (era = caculate_node_era(this)) {
+		} else if (era = calculate_node_era(this)) {
 			if (date = this.add_date) {
-				date = '（' + to_era_Date(
-				//
-				caculate_node_era(this, 'String'), {
+				// maybe ((undefined))
+				date = to_era_Date(calculate_node_era(this, 'String'), {
 					get_range_String : {
 						parser : standard_time_parser,
 						format : String(date) === 'true'
 						//
 						? popup_era_dialog.format : date
 					}
-				}) + '）';
+				});
+			}
+			if (date) {
+				date = '（' + date + '）';
 
 				if (this.appendChild)
 					this.appendChild(document.createTextNode(date));
@@ -7852,7 +7897,7 @@ function module_code(library_namespace) {
 	};
 
 	/**
-	 * 直接處理一整個 HTML 元素，加上紀年標示。
+	 * 標注文本: 直接處理一整個 HTML 元素，加上帝王紀年/年號紀年標示。
 	 * 
 	 * @example <code>
 	CeL.run([ 'data.date.era', 'interact.DOM' ]);
@@ -7930,7 +7975,7 @@ function module_code(library_namespace) {
 		MINUTE_OFFSET_KEY : MINUTE_OFFSET_KEY,
 
 		// 網頁應用功能。
-		node_era : caculate_node_era,
+		node_era : calculate_node_era,
 		setup_nodes : set_up_era_nodes,
 		to_HTML : era_text_to_HTML,
 		note_node : add_era_note,

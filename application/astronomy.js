@@ -14,7 +14,7 @@
  * https://web.archive.org/web/http://www.chris.obyrne.com/Eclipses/calculator.html
  * https://en.wikipedia.org/wiki/Astronomical_symbols
  * 
- * caculate Halley's Comet 哈雷彗星
+ * calculate Halley's Comet 哈雷彗星
  * 
  * Software & coded<br />
  * http://www.kentauren.info/menu/index1.htm?page=/cgi-bin/planeph_VSOP87d.pl
