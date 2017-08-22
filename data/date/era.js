@@ -7483,6 +7483,7 @@ function module_code(library_namespace) {
 					return;
 
 				// 檢查本節點有幾項資料。
+				previous_date_to_check = [];
 				date.slice(2).forEach(function(name, index) {
 					if (name)
 						previous_date_to_check.push(index);
