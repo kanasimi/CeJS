@@ -3224,6 +3224,9 @@ function test_era() {
 		[[0, CeL.era('前五千六百七十八') - CeL.era('公元前5678年1月1日')], '公元前5678年'],
 		[[0, CeL.era('五千六百七十八') - CeL.era('五千六百七十八年')], '五千六百七十八年'],
 		[[0, CeL.era('前五千六百七十八') - CeL.era('前五千六百七十八年')], '前五千六百七十八年'],
+		[[undefined, CeL.era('三月庚子')], 'NG: 三月庚子'],
+		[[undefined, CeL.era('三月庚子日')], 'NG: 三月庚子日'],
+		[[0, CeL.era('庚子三月') - CeL.era('西涼太祖庚子三月')], '庚子三月'],
 
 		[['412/3/29', CeL.era.中曆(412,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 412 年, 中曆 3/1 之 CE Date。'],
 		[['2016/3/11', CeL.era.中曆(2016,2,3).format({parser:'CE',format:'%Y/%m/%d'})], '取得公元 2016 年, 中曆 2/3 之 CE Date。'],

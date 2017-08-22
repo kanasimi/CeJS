@@ -191,7 +191,7 @@ em {
 				if (typeof country === 'object') {
 					// 第一次呼叫 callback。
 					// 在載入era模組之前設定好，可以用來篩選需要載入的國家。
-					queue.truncate().push('中國');
+					// queue.truncate().push('中國', '日本', '한국', 'Việt Nam');
 				}
 			};
 			CeL.run(queue);

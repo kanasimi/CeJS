@@ -6273,6 +6273,19 @@ function module_code(library_namespace) {
 			} else
 				tmp2 = null;
 
+			// 避免如 "三月庚子" 被解析成 "太祖庚子"
+			if (紀年_list && 紀年_list.size > 0 && !年 && 月 && 干支_PATTERN.test(日)) {
+				// console.log([ date, 年, 月, 日 ]);
+				紀年_list.forEach(function(era) {
+					if (era.name[0] === 日) {
+						check_to_modify();
+						// 刪掉不合適的紀年。
+						紀年_list['delete'](era);
+					}
+				});
+			}
+			// console.log([ date, 紀年_list ]);
+
 			if (date = options.base) {
 				if (!Array.isArray(date)
 				//
@@ -7363,17 +7376,78 @@ function module_code(library_namespace) {
 			return;
 		}
 
-		// 看看是不是有之前解析解析過的cache。
+		// 看看是不是有之前解析、驗證過的cache。
 		era = library_namespace.DOM_data(node, 'era_parsed');
 		if (!era) {
 			// determain node era
+			if (false) {
+				var node_queue = [], era_map = new Map;
+				// 自身不完整。溯前尋找 base。
+				for (var node_to_test = node;;
+				//
+				node_to_test = library_namespace.previous_node_of(node_to_test)) {
+					if (!node_to_test) {
+						break;
+					}
+					if (!node_to_test.tagName
+							|| node_to_test.tagName.toLowerCase() !== set_up_era_nodes.default_tag) {
+						continue;
+					}
+					// console.log(node_to_test);
 
+					era = library_namespace
+							.DOM_data(node_to_test, 'era_parsed');
+					if (era) {
+						node_queue.unshift(node_to_test);
+						continue;
+					}
+
+					var era_data = library_namespace.DOM_data(node_to_test,
+							'era');
+					era = library_namespace.set_text(node_to_test);
+					if (era_data !== '~') {
+						// '~':如英語字典之省略符號，將以本node之內含文字代替。
+						era = era_data.replace('~', era);
+					}
+					// console.log(era);
+
+					// 去除(干支_PATTERN): 預防"丁未"被 parse 成丁朝之類的意外。
+					date = !干支_PATTERN.test(era) && to_era_Date(era, {
+						parse_only : true
+					});
+
+					if (!date || !date[1]) {
+						continue;
+					}
+
+					// date: [ {Set}紀年_list, {Era}紀年, 年, 月, 日 ]
+					node_queue.unshift([ node_to_test, date, date[0].size ]);
+					if (node_queue.length > 3 && date[0].size === 1) {
+						// 找到了準確認判斷出的。
+						break;
+					}
+
+					// console.log(date[0]);
+					date[0].forEach(function(era) {
+						// console.log(era);
+						era_map.set(era,
+								era_map.has(era) ? era_map.get(era) + 1 : 1);
+					});
+				}
+
+				console.log([ node_queue, era_map ]);
+				return;
+			}
+
+			// ------------------------------------
 			// 解析 era。
-			era = era_data.replace(
-			// /~/:如英語字典之省略符號，將以本node之內含文字代替。
-			/~/, library_namespace.set_text(node));
+			era = library_namespace.set_text(node);
+			if (era_data !== '~') {
+				// '~':如英語字典之省略符號，將以本node之內含文字代替。
+				era = era_data.replace('~', era);
+			}
 
-			// 干支_PATTERN: 預防"丁未"被 parse 成丁朝之類的意外。
+			// 去除(干支_PATTERN): 預防"丁未"被 parse 成丁朝之類的意外。
 			date = !干支_PATTERN.test(era) && to_era_Date(era, {
 				parse_only : true
 			});
@@ -7456,7 +7530,8 @@ function module_code(library_namespace) {
 
 		tmp = [ era, date, tmp ];
 		if (era_date.共存紀年) {
-			date = '<br />☼ ';
+			// ☼
+			date = '<br />⏳ ';
 			tmp.push('<hr />' + library_namespace.gettext('共存紀年') + '：' + date
 					+ era_date.共存紀年.join(date));
 		}

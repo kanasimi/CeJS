@@ -4228,7 +4228,7 @@ CeL.era.pass_on.step = function() {
 
 	if (Array.isArray(queue) && queue.length > 0) {
 		var country = queue.shift();
-		console.info(country);
+		// console.info(country);
 
 		CeL.era.set(this.countries[country], {
 			國家 : country
