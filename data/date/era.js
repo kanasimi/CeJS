@@ -7370,12 +7370,12 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 計算已具紀年標記之指定 node 之紀年值。
+	 * 計算已具紀年標記之指定 HTML node 之紀年值。
 	 * 
 	 * @param {ELEMENT_NODE}node
 	 *            具紀年標記之指定 node。
-	 * @param {Boolean}[era_only]
-	 *            是否僅回傳 era String。
+	 * @param {Boolean}[return_type]
+	 *            回傳的型別。 'String': 僅回傳 era String。
 	 * 
 	 * @returns [range] || {String}date
 	 */
@@ -7542,7 +7542,7 @@ function module_code(library_namespace) {
 				original_era = null;
 			}
 
-			console.log([ 'date:', date.join(', '), 'era:', era ]);
+			// console.log([ 'date:', date.join(', '), 'era:', era ]);
 			var date_name = date.shift();
 			if (date_name) {
 				var tmp = date_name + '年';
@@ -7606,12 +7606,13 @@ function module_code(library_namespace) {
 					if (previous_date_to_check[1] === 2 ? diff_in_2_months > 1
 					// ↑ 僅有日期資料。 ↓ 僅有月份資料。
 					: previous_date_to_check[1] === 1 ? diff_in_2_months > 12
-					// 當間隔過大，例如超過200年時，則跳過這一筆。
-					: diff_in_2_months > 100 * 12) {
+					// 當間隔過大，例如超過80年時，則跳過這一筆。
+					: diff_in_2_months > 40 * 12) {
 						error = '間距過長';
 					}
 				}
 				if (error) {
+					node.title = era + ': ' + error;
 					library_namespace.warn('calculate_node_era: 本節點[' + era
 							+ ']比起前一個節點[' + previous_date_to_check[0] + ']'
 							+ error + '，且只有一項資料['

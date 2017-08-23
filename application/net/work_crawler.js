@@ -2105,7 +2105,8 @@ function module_code(library_namespace) {
 
 	var PATTERN_epub_file = /^\(一般小説\) \[([^\[\]]+)\] ([^\[\]]+) \[(.*?) (\d{8})(?: (\d{1,4})話)?\]\.(.+)\.epub$/i;
 	function parse_epub_name(file_name) {
-		var matched = file_name.match(PATTERN_epub_file);
+		var matched = typeof file_name === 'string'
+				&& file_name.match(PATTERN_epub_file);
 		if (matched) {
 			return {
 				file_name : file_name,
@@ -2131,9 +2132,10 @@ function module_code(library_namespace) {
 	// remove duplicate title ebooks.
 	// 封存舊的ebooks，移除較小的舊檔案。
 	function remove_old_ebooks(only_id) {
-		var _only_id;
-		if (only_id && (_only_id = parse_epub_name(only_id))) {
-			only_id = _only_id.id;
+		if (only_id) {
+			var _only_id = parse_epub_name(only_id);
+			if (_only_id)
+				only_id = _only_id.id;
 		}
 
 		var _this = this;
@@ -2171,6 +2173,8 @@ function module_code(library_namespace) {
 				|| only_id && data.id !== only_id) {
 					return;
 				}
+				// console.log('-'.repeat(60));
+				// console.log(data);
 				if (!last_id || last_id !== data.id) {
 					last_id = data.id;
 					last_file = data.file_name;
@@ -2180,11 +2184,13 @@ function module_code(library_namespace) {
 				var this_file = get_file_status(
 				//
 				data.file_name, directory);
+				// console.log(this_file);
 				if (typeof last_file === 'string') {
 					last_file = get_file_status(
 					//
 					last_file, directory);
 				}
+				// console.log(last_file);
 				// assert: this_file, last_file are all {Object}(file status)
 
 				if (this_file.size >= last_file.size) {
@@ -2219,7 +2225,7 @@ function module_code(library_namespace) {
 			+ '\n→ ' + last_file.replace(/(.[a-z\d\-]+)$/i, extension));
 			library_namespace.move_file(last_file,
 			//
-			+last_file.replace(/(.[a-z\d\-]+)$/i, extension));
+			last_file.replace(/(.[a-z\d\-]+)$/i, extension));
 		});
 
 		// ✘ 移除.ebook_archive_directory中，較小的ebooks舊檔案。
@@ -2258,9 +2264,10 @@ function module_code(library_namespace) {
 					//
 					? ' ' + work_data.chapter_count + '話' : '', '].',
 					work_data.id, '.epub' ].join('');
-			// assert: PATTERN_epub_file.test(file_name) === true
 		}
 		file_name = library_namespace.to_file_name(file_name);
+		// assert: PATTERN_epub_file.test(file_name) === true
+
 		// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
 		library_namespace.debug('打包 epub: ' + file_name);
 
@@ -2268,7 +2275,7 @@ function module_code(library_namespace) {
 		ebook.pack([ this.main_directory, file_name ],
 				this.remove_ebook_directory);
 
-		remove_old_ebooks.call(this, file_name);
+		remove_old_ebooks.call(this, work_data.id);
 	}
 
 	// --------------------------------------------------------------------------------------------
