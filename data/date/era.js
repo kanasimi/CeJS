@@ -1458,6 +1458,7 @@ function module_code(library_namespace) {
 			this[property] = properties[property];
 	}
 
+	// 當紀年名稱以這些字元結尾時，接上日期(年月日)時就會多添加上空格。
 	// ": "Casper", include [[en:Thai (Unicode block)]]
 	var NEED_SPLIT_CHARS = /a-zA-Z\d\-,'"\u0E00-\u0E7F/.source,
 	//
@@ -1472,18 +1473,20 @@ function module_code(library_namespace) {
 	REDUCE_PATTERN = new RegExp('([^' + NEED_SPLIT_CHARS + ']) ([^'
 			+ NEED_SPLIT_CHARS.replace('\\d', '') + '])', 'g');
 
-	// 警告:會改變 name_Array!
-	function concat_era_name(name_Array) {
-		name_Array.forEach(function(slice, index) {
+	// 警告: 會改變 name_with_date_Array!
+	function concat_era_name(name_with_date_Array) {
+		name_with_date_Array.forEach(function(slice, index) {
 			var _slice = String(slice).trim();
 			if (index > 0 && NEED_SPLIT_PREFIX.test(_slice)
-					&& NEED_SPLIT_POSTFIX.test(name_Array[index - 1]))
+			//
+			&& NEED_SPLIT_POSTFIX.test(name_with_date_Array[index - 1])) {
 				// 為需要以 space 間隔之紀元名添加 space。
 				_slice = ' ' + _slice;
+			}
 			if (_slice !== slice)
-				name_Array[index] = _slice;
+				name_with_date_Array[index] = _slice;
 		});
-		return name_Array.join('');
+		return name_with_date_Array.join('');
 	}
 
 	// remove needless space in the era name
@@ -7126,10 +7129,12 @@ function module_code(library_namespace) {
 				year_left = get_dates.DEFAULT_YEARS;
 
 			if (0 < year_index)
-				// 紀錄前一紀年。
-				date_list.previous = era.toString()
-						+ era.歲名(year_index < year_left ? 0 : year_index
-								- year_left) + '年';
+				// 紀錄前一年段的索引。
+				date_list.previous = concat_era_name([
+						era,
+						era.歲名(year_index < year_left ? 0 : year_index
+								- year_left)
+								+ '年' ]);
 
 			for (year_left = Math.min(year_left, calendar.length - year_index); 0 < year_left--; year_index++) {
 				start_time = era.year_start[year_index];
@@ -7142,8 +7147,9 @@ function module_code(library_namespace) {
 
 			date_list.type = 1;
 			if (year_index < calendar.length)
-				// 紀錄後一紀年。
-				date_list.next = era.toString() + era.歲名(year_index) + '年';
+				// 紀錄後一年段的索引。
+				date_list.next = concat_era_name([ era,
+						era.歲名(year_index) + '年' ]);
 			return date_list;
 		}
 
@@ -7172,11 +7178,12 @@ function module_code(library_namespace) {
 			date = date_list.selected;
 			// .日名(日序, 月序, 歲序) = [ 日名, 月名, 歲名 ]
 			if (i = era.日名(0, date[1] - 1, date[0]))
-				// 紀錄前一紀年。
-				date_list.previous = era.toString() + i[2] + '年' + i[1] + '月';
+				// 紀錄前一個月的索引。
+				date_list.previous = concat_era_name([ era,
+						i[2] + '年' + i[1] + '月' ]);
 			if (start_time < era.end && (i = era.日名(0, date[1] + 1, date[0])))
-				// 紀錄後一紀年。
-				date_list.next = era.toString() + i[2] + '年' + i[1] + '月';
+				// 紀錄後一個月的索引。
+				date_list.next = concat_era_name([ era, i[2] + '年' + i[1] + '月' ]);
 			return date_list;
 		}
 

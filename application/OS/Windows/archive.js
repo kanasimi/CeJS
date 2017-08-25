@@ -123,39 +123,73 @@ fO={
 }
 */
 // solid, overwrite, compressLevel, password
-function compressF(fO){	//	flags object
+/**
+ * compress FSO
+ * 
+ * @param {Object}fO
+ *            flags object
+ * @returns
+ */
+function compressF(fO) {
 	// 參數檢查: 未完全
-	if(!fO)fO={};
-	if(typeof fO!='object')return;
-	if(!fO.tool)fO.tool='WinRAR';
-	//if(!fO.m)fO.m='c';//method
-	if(!fO.m||!fO.archive&&(fO.m!='c'||fO.m=='c'&&!fO.files))return;
-	if(fO.m=='c'){
-		if(typeof fO.files!='object')fO.files=fO.files?[fO.files]:fO.archive.replace(/\..+$/,'');
-		if(!fO.archive)fO.archive=fO.files[0].replace(/[\\\/]$/,'')+_t.extension;
-		fO.files='"'+fO.files.join('" "')+'"';
+	if (!fO)
+		fO = {};
+	if (typeof fO != 'object')
+		return;
+	if (!fO.tool)
+		fO.tool = 'WinRAR';
+	// method
+	if (false && !fO.m)
+		fO.m = 'c';
+	if (!fO.m || !fO.archive && (fO.m != 'c' || fO.m == 'c' && !fO.files))
+		return;
+	if (fO.m == 'c') {
+		if (typeof fO.files != 'object')
+			fO.files = fO.files ? [ fO.files ] : fO.archive.replace(/\...+$/,
+					'');
+		if (!fO.archive)
+			fO.archive = fO.files[0].replace(/[\\\/]$/, '') + _t.extension;
+		fO.files = '"' + fO.files.join('" "') + '"';
 	}
-	var i,_t=compress_tool_set[fO.tool],_m,_c;
-	if(!_t||!(_m=_t[fO.m]))return;
-	else if(!/\.[a-z]+$/.test(fO.archive))fO.archive+='.'+_t.extension;
-	//if(fO.bD)fO.archive=fO.bD+(/[\\\/]$/.test(fO.bD)?'':'\\')+fO.archive;	//	base directory, work directory, base folder
-	fO.archive='"'+fO.archive.replace(/"/g, '""')+'"';
-	//library_namespace.debug('compressF(): check OK.');
-	// 構築 command line。
-	if(_m._cL&&!fO.rcL)_c=_m._cL;	//	rebuild command line
-	else{
-		_c=_m.cL.replace(/\$path/,_t.path);
-		for(i in _m)if(typeof fO[i]=='undefined')_c=_c.replace(new RegExp('\\$'+i),typeof _m[i]=='function'?_m[i](fO):_m[i]||'');
-		_m._cL=_c;
-		//library_namespace.debug('compressF():\n'+_c);
+	var i, _t = compress_tool_set[fO.tool], _m, _c;
+	if (!_t || !(_m = _t[fO.m]))
+		return;
+	else if (!/\.[a-z]+$/.test(fO.archive))
+		fO.archive += '.' + _t.extension;
+
+	if (false && fO.bD)
+		// base directory, work directory, base folder
+		fO.archive = fO.bD + (/[\\\/]$/.test(fO.bD) ? '' : '\\') + fO.archive;
+
+	fO.archive = '"' + fO.archive.replace(/"/g, '""') + '"';
+	library_namespace.debug('compressF(): check OK.');
+	// 構築 command line arguments。
+	if (_m._cL && !fO.rcL) {
+		_c = _m._cL;
+	} else {
+		// rebuild command line arguments
+		_c = _m.cL.replace(/\$path/, _t.path);
+		for (i in _m)
+			if (typeof fO[i] == 'undefined')
+				_c = _c.replace(new RegExp('\\$' + i),
+						typeof _m[i] == 'function' ? _m[i](fO) : _m[i] || '');
+		_m._cL = _c;
+		library_namespace.debug(_c, 2, 'compressF');
 	}
-	for(i in fO)_c=_c.replace(new RegExp('\\$'+i),fO[i]||'');
-	if(_c.indexOf('$')!=-1){library_namespace.debug('compressF() error:\n'+_c);return;}
-	library_namespace.debug('compressF() '+(_c.indexOf('$')==-1?'run':'error')+':\n'+_c);
+	for (i in fO)
+		_c = _c.replace(new RegExp('\\$' + i), fO[i] || '');
+	if (_c.indexOf('$') != -1) {
+		library_namespace.debug('compressF() error:\n' + _c);
+		return;
+	}
+	library_namespace.debug('compressF() '
+			+ (_c.indexOf('$') == -1 ? 'run' : 'error') + ':\n' + _c);
+
 	// run
-	return WshShell.Run(_c,0,true);
-	//run_command.Unicode(_c);
+	return WshShell.Run(_c, 0, true);
+	// run_command.Unicode(_c);
 }
+
 
 //compress[generateCode.dLK]='compressF';
 /**
@@ -171,8 +205,7 @@ function compressF(fO){	//	flags object
  */
 function compress(archive, files, options) {
 	// 前置處理。
-	if (!library_namespace.is_Object(options))
-		options = library_namespace.null_Object();
+	options = library_namespace.setup_options(options);
 
 	if (!options.m)
 		options.m = 'c';

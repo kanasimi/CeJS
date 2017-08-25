@@ -60,12 +60,12 @@ function module_code(library_namespace) {
 	var node_fs = require('fs');
 
 	// TODO: 規範化
-	function fs_status(file_path, only_status) {
+	function fs_status(file_path, with_error) {
 		var file_status;
 		try {
 			return node_fs.lstatSync(file_path);
 		} catch (e) {
-			if (!only_status) {
+			if (with_error) {
 				return e;
 			}
 		}
@@ -73,13 +73,13 @@ function module_code(library_namespace) {
 	_.fs_status = fs_status;
 
 	_.file_exists = function file_exists(file_path) {
-		var fso_status = fs_status(file_path, true);
+		var fso_status = fs_status(file_path);
 		return fso_status
 				&& (fso_status.isFile() || fso_status.isSymbolicLink());
 	};
 
 	_.directory_exists = function directory_exists(directory_path) {
-		var fso_status = fs_status(directory_path, true);
+		var fso_status = fs_status(directory_path);
 		return fso_status && fso_status.isDirectory();
 	};
 
@@ -520,7 +520,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------
 
-	//e.g., '123', '-123', '+12.34', '-.123'
+	// e.g., '123', '-123', '+12.34', '-.123'
 	var PATTERN_number_string = /^[+\-]?(?:\d{1,20}(?:\.\d{1,20})?|\.\d{1,20})$/,
 	// 在命令列設定這些值時，將會被轉換為所指定的值。
 	// 若是有必要將之當作字串值，必須特地加上引號。

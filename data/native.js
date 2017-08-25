@@ -2366,7 +2366,7 @@ function module_code(library_namespace) {
 	});
 
 	// ------------------------------------
-	// comparator, compare_function, sort_function
+	// comparator, compare_function, sort_function for array.sort()
 
 	// 用於由小至大升序序列排序, ascending, smallest to largest, A to Z。
 	// 注意：sort 方法會在原地排序 Array 物件。

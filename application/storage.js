@@ -68,7 +68,9 @@ function module_code(library_namespace) {
 	 * 公用API: 有些尚未完備，需要先確認。<code>
 
 	CeL.storage.fso_status(fso_path)
+	CeL.storage.fso_exists(file_path)
 	CeL.storage.file_exists(file_path)
+	// get the contents of file
 	CeL.storage.read_file(file_path, character_encoding = 'UTF-8')
 	CeL.storage.write_file(file_path, contents, character_encoding = 'UTF-8')
 	CeL.storage.append_file(file_path, contents, character_encoding = 'UTF-8')
@@ -79,7 +81,7 @@ function module_code(library_namespace) {
 	CeL.storage.copy_file(copy_from_path, copy_to_path)
 
 	CeL.storage.directory_exists(directory_path)
-	// get files, sub-directory of the directory.
+	// get the file and sub-directory list of the directory.
 	CeL.storage.read_directory(directory_path)
 	// CeL.storage.directory_is_empty(directory_path)
 	// alias: mkdir
@@ -106,7 +108,8 @@ function module_code(library_namespace) {
 		var node_fs = require('fs');
 
 		// 警告: 此函數之API尚未規範。
-		// _.fso_status = storage_module.fs_status;
+		// Not exist: will return false.
+		_.fso_status = storage_module.fs_status;
 
 		_.file_exists = storage_module.file_exists;
 		_.directory_exists = storage_module.directory_exists;
@@ -128,6 +131,7 @@ function module_code(library_namespace) {
 
 		_.read_directory = function(directory_path, options) {
 			try {
+				// fso_name_list
 				return node_fs.readdirSync(directory_path, options);
 			} catch (e) {
 				library_namespace.debug('Error to read directory: '
@@ -151,6 +155,33 @@ function module_code(library_namespace) {
 		// others done @ CeL.application.OS.Windows.file
 
 	}
+
+	// 找到下一個可用的檔案名稱。若是有重複的檔案存在，則會找到下一個沒有使用的編號為止。
+	function get_not_exist_filename(move_to_path) {
+		while (_.fso_status(move_to_path)) {
+			move_to_path = move_to_path.replace(
+			// Get next index that can use.
+			/( )?(?:\((\d{1,3})\))?(\.[^.]*)?$/, function(all, prefix_space,
+					index, extension) {
+				if (index > 99) {
+					throw 'The index ' + index + ' is too big! '
+					//
+					+ move_to_path;
+				}
+				return (prefix_space || !index ? ' ' : '') + '('
+						+ ((index | 0) + 1) + ')' + (extension || '');
+			});
+		}
+		return move_to_path;
+	}
+	_.next_fso_NO_unused = get_not_exist_filename;
+	_.move_fso_with_NO = function(from_path, to_path) {
+		to_path = get_not_exist_filename(to_path);
+		if (false)
+			library_namespace.info(library_namespace.display_align([
+					[ 'Move: ', from_path ], [ '→ ', move_to_path ] ]));
+		_.move_fso(from_path, to_path);
+	};
 
 	// -------------------------------------------------------------------------
 

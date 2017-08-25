@@ -1895,7 +1895,8 @@ function module_code(library_namespace) {
 
 		library_namespace.debug('bale packing: Not Yet Implemented.');
 
-		// TODO: use application.OS.execute instead
+		// TODO: use application.OS.Windows.archive,
+		// application.OS.execute instead
 		/** node.js: run OS command */
 		var execSync = require('child_process').execSync;
 
@@ -1906,12 +1907,12 @@ function module_code(library_namespace) {
 		// @see create_ebook.bat
 		'SET P7Z="C:\\Program Files\\7-Zip\\7z.exe"',
 				'SET BOOKNAME="' + ebook_file_name + '"',
-				// store mimetype
-				'%P7Z% a -tzip -mx=0 %BOOKNAME% mimetype',
-				'%P7Z% rn %BOOKNAME% mimetype !imetype',
+				// store mimetype first
+				'%P7Z% a -tzip -mx=0 -- %BOOKNAME% mimetype',
+				'%P7Z% rn -- %BOOKNAME% mimetype !imetype',
 				// archive others
-				'%P7Z% a -tzip -mx=9 -r %BOOKNAME% META-INF EPUB',
-				'%P7Z% rn %BOOKNAME% !imetype mimetype' ].join('\r\n'));
+				'%P7Z% a -tzip -mx=9 -r -- %BOOKNAME% META-INF EPUB',
+				'%P7Z% rn -- %BOOKNAME% !imetype mimetype' ].join('\r\n'));
 		var command = 'cd /d "' + this.path.root + '" && ' + command_file_name;
 		// https://github.com/ObjSal/p7zip/blob/master/GUI/Lang/ja.txt
 		library_namespace.debug('create ebook by 7z: ' + ebook_file_name);

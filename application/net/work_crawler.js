@@ -524,7 +524,7 @@ function module_code(library_namespace) {
 			// 去掉BOM (byte order mark)
 			.trim()
 			// TODO: 處理title中包含"#"的作品
-			.replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/);
+			.replace(/(?:^|\n)#[^\n]*/g, '').trim().split(/[\r\n]+/).unique();
 			this.get_work_list(work_list, callback);
 
 		} else if (work_id
@@ -2219,13 +2219,13 @@ function module_code(library_namespace) {
 			last_file = _this.main_directory + last_file.name;
 			var extension = (typeof _this.milestone_extension === 'string'
 			// allow .milestone_extension = true
-			? _this.milestone_extension : '.milestone') + '$1';
-			library_namespace.log(last_file
+			? _this.milestone_extension : '.milestone') + '$1',
 			// 舊檔比較大!!將之標註成里程碑紀念/紀錄。
-			+ '\n→ ' + last_file.replace(/(.[a-z\d\-]+)$/i, extension));
-			library_namespace.move_file(last_file,
-			//
-			last_file.replace(/(.[a-z\d\-]+)$/i, extension));
+			rename_to = last_file.replace(/(.[a-z\d\-]+)$/i, extension);
+			// assert: PATTERN_epub_file.test(rename_to) === false
+			// 不應再被納入檢測。
+			library_namespace.log(last_file + '\n→ ' + rename_to);
+			library_namespace.move_file(last_file, rename_to);
 		});
 
 		// ✘ 移除.ebook_archive_directory中，較小的ebooks舊檔案。
