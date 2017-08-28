@@ -4416,7 +4416,7 @@ function module_code(library_namespace) {
 		case 'search':
 			wiki_API.search([ this.API_URL, next[1] ],
 			//
-			function wiki_API_search_callback(key, pages, hits) {
+			function wiki_API_search_callback(pages, hits, key) {
 				// [ page_data ]
 				_this.last_pages = pages;
 				// 設定/紀錄後續檢索用索引值。
@@ -4425,12 +4425,14 @@ function module_code(library_namespace) {
 				if (pages.sroffset)
 					_this.next_mark.sroffset = pages.sroffset;
 
-				if (typeof next[2] === 'function')
+				if (typeof next[2] === 'function') {
 					// next[2] : callback(key, pages, hits)
-					next[2].call(_this, key, pages, hits);
-				else if (next[2] && next[2].each)
+					next[2].call(_this, pages, hits, key);
+				} else if (next[2] && next[2].each) {
 					// next[2] : 當作 work，處理積存工作。
+					// next[2].each(page_data, messages, config)
 					_this.work(next[2]);
+				}
 
 				_this.next();
 			},
@@ -5667,7 +5669,7 @@ function module_code(library_namespace) {
 				if (config.no_edit) {
 					// 不作編輯作業。
 					// 取得頁面內容。
-					this.page(page, function(page_data) {
+					this.page(page, function(page_data, error) {
 						each.call(this, page_data, messages, config);
 						if (messages.quit_operation) {
 							clear_work.call(this);
@@ -9052,15 +9054,28 @@ function module_code(library_namespace) {
 	 * search wikitext: using prefix "insource:". e.g.,
 	 * https://www.mediawiki.org/w/api.php?action=query&list=search&srwhat=text&srsearch=insource:abc+def
 	 * 
+	 * @example <code>
+
+	wiki.search(search_key, {
+		summary : summary,
+		log_to : log_to,
+		each : function(page_data, messages, config) {
+			console.log(page_data.title);
+		}
+	});
+
+	 * </code>
+	 * 
 	 * @param {String}key
 	 *            search key
 	 * @param {Function}[callback]
-	 *            回調函數。 callback(key, pages, hits)
+	 *            回調函數。 callback({Array}pages, {Integer}hits, {String}key_used)
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
-	 * @see https://www.mediawiki.org/wiki/API:Search_and_discovery
-	 * @see https://www.mediawiki.org/wiki/Help:CirrusSearch
+	 * @see https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bsearch
+	 *      https://www.mediawiki.org/wiki/API:Search_and_discovery
+	 *      https://www.mediawiki.org/wiki/Help:CirrusSearch
 	 */
 	wiki_API.search = function(key, callback, options) {
 		if (options > 0 || options === 'max')
@@ -9070,6 +9085,11 @@ function module_code(library_namespace) {
 		var API_URL;
 		if (Array.isArray(key))
 			API_URL = key[0], key = key[1];
+		if (library_namespace.is_RegExp(key)) {
+			// [[:en:Help:Searching/Regex]]
+			// 有無 global flag 結果不同。
+			key = ('insource:' + key).replace(/g([^\/]*)$/, '$1');
+		}
 		wiki_API.query([ API_URL, 'query&list=search&'
 		//
 		+ get_URL.parameters_to_String(Object.assign({
@@ -9091,14 +9111,16 @@ function module_code(library_namespace) {
 
 			// data: [ page_data ].hits = \d+, .sroffset = next
 			if (typeof callback === 'function')
-				// callback(key, pages, hits)
-				callback(key, data, data.hits);
+				// callback({Array}pages, {Integer}hits, {String}key_used)
+				callback(data, data.hits, key);
 		}, null, options);
 	};
 
 	wiki_API.search.default_parameters = {
 		srprop : 'redirecttitle',
 		// srlimit : 10,
+		srlimit : 'max',
+		// sroffset : 0,
 		srinterwiki : 1
 	};
 
@@ -9502,8 +9524,8 @@ function module_code(library_namespace) {
 
 		/**
 		 * response: <code>
-		   {"rollback":{"title":"title","pageid":1,"summary":"","revid":9,"old_revid":7,"last_revid":1,"messageHtml":"<p></p>"}}
-		   {"servedby":"mw1190","error":{"code":"badtoken","info":"Invalid token","*":"See https://zh.wikinews.org/w/api.php for API usage"}}
+		{"rollback":{"title":"title","pageid":1,"summary":"","revid":9,"old_revid":7,"last_revid":1,"messageHtml":"<p></p>"}}
+		{"servedby":"mw1190","error":{"code":"badtoken","info":"Invalid token","*":"See https://zh.wikinews.org/w/api.php for API usage"}}
 		 * </code>
 		 */
 		wiki_API.query(action, function(response) {
@@ -9537,7 +9559,7 @@ function module_code(library_namespace) {
 	 * Set default language. 改變預設之語言。
 	 * 
 	 * @example <code>
-	   CeL.wiki.set_language('en');
+	CeL.wiki.set_language('en');
 	 * </code>
 	 * 
 	 * @param {String}[language]
@@ -10254,12 +10276,12 @@ function module_code(library_namespace) {
 	/**
 	 * Get page title 頁面標題 list of [[Special:RecentChanges]] 最近更改.
 	 * 
-	 * <code>
-	   // get title list
-	   CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, {language:'ja', namespace:0, limit:20});
-	   // 應並用 timestamp + this_oldid
-	   CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return [row.title,row.rev_id,row.row.rc_timestamp.toString()];}));}, {where:{timestamp:'>=20170327143435',this_oldid:'>'+43772537}});
-	   </code>
+	 * @examples<code>
+		// get title list
+		CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return row.title;}));}, {language:'ja', namespace:0, limit:20});
+		// 應並用 timestamp + this_oldid
+		CeL.wiki.recent(function(rows){console.log(rows.map(function(row){return [row.title,row.rev_id,row.row.rc_timestamp.toString()];}));}, {where:{timestamp:'>=20170327143435',this_oldid:'>'+43772537}});
+		</code>
 	 * 
 	 * TODO: filter
 	 * 
