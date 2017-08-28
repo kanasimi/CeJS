@@ -2731,6 +2731,22 @@ function module_code(library_namespace) {
 	/**
 	 * 依照順序從 index 至 last 執行 for_each。
 	 * 
+	 * @examples <code>
+
+	function for_item(run_next, index, index, list) {
+		// do something
+		run_next();
+	}
+	CeL.run_serial(for_item, last_NO, first_NO, function() { 'done'; });
+
+	function for_item(run_next, item, index, list) {
+		// do something
+		run_next();
+	}
+	CeL.run_serial(for_item, list, function() { 'done'; });
+
+	 * </code>
+	 * 
 	 * @param {Function}for_each
 	 *            run for_each(run_next, item, index, list) for every elements.
 	 * @param {Integer|Array}last
@@ -3987,8 +4003,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @example <code>
 
-	 CeL.log((new Date).toISOString());
-	 CeL.log('' + CeL.ISO_date((new Date).toISOString()));
+	CeL.log((new Date).toISOString());
+	CeL.log('' + CeL.ISO_date((new Date).toISOString()));
 
 	 * </code>
 	 * 
