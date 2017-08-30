@@ -4417,17 +4417,17 @@ function module_code(library_namespace) {
 			wiki_API.search([ this.API_URL, next[1] ],
 			//
 			function wiki_API_search_callback(pages, totalhits, key) {
-				// [ page_data ]
+				// undefined || [ page_data ]
 				_this.last_pages = pages;
 				// 設定/紀錄後續檢索用索引值。
 				// 若是將錯誤的改正之後，應該重新自 offset 0 開始 search。
 				// 因此這種情況下基本上不應該使用此值。
-				if (pages.sroffset)
+				if (pages && pages.sroffset)
 					_this.next_mark.sroffset = pages.sroffset;
 
 				if (typeof next[2] === 'function') {
 					// next[2] : callback(...)
-					next[2].call(_this, pages, totalhits, key);
+					next[2].call(_this, pages || [], totalhits, key);
 				} else if (next[2] && next[2].each) {
 					// next[2] : 當作 work，處理積存工作。
 					// next[2].each(page_data, messages, config)
@@ -9100,11 +9100,20 @@ function module_code(library_namespace) {
 			// 有無 global flag 結果不同。
 			key = ('insource:' + key).replace(/g([^\/]*)$/, '$1');
 		}
+
+		var _options;
+		// 避免 session 也被帶入 parameters。
+		if (KEY_SESSION in options) {
+			_options = Object.clone(options);
+			delete _options[KEY_SESSION];
+		} else {
+			_options = options;
+		}
 		wiki_API.query([ API_URL, 'query&list=search&'
 		//
 		+ get_URL.parameters_to_String(Object.assign({
 			srsearch : key
-		}, wiki_API.search.default_parameters, options)) ], function(data,
+		}, wiki_API.search.default_parameters, _options)) ], function(data,
 				error) {
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
