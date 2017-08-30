@@ -4416,7 +4416,7 @@ function module_code(library_namespace) {
 		case 'search':
 			wiki_API.search([ this.API_URL, next[1] ],
 			//
-			function wiki_API_search_callback(pages, hits, key) {
+			function wiki_API_search_callback(pages, totalhits, key) {
 				// [ page_data ]
 				_this.last_pages = pages;
 				// 設定/紀錄後續檢索用索引值。
@@ -4426,8 +4426,8 @@ function module_code(library_namespace) {
 					_this.next_mark.sroffset = pages.sroffset;
 
 				if (typeof next[2] === 'function') {
-					// next[2] : callback(key, pages, hits)
-					next[2].call(_this, pages, hits, key);
+					// next[2] : callback(...)
+					next[2].call(_this, pages, totalhits, key);
 				} else if (next[2] && next[2].each) {
 					// next[2] : 當作 work，處理積存工作。
 					// next[2].each(page_data, messages, config)
@@ -5636,88 +5636,97 @@ function module_code(library_namespace) {
 					'wiki_API.work');
 			// cf. ((done))
 			var pages_left = 0;
-			pages.forEach(function for_each_page(page, index) {
-				if (library_namespace.is_debug(2)
-				// .show_value() @ interact.DOM, application.debug
-				&& library_namespace.show_value)
-					library_namespace.show_value(page, 'page');
-				if (!page) {
-					// nochange_count++;
-					// Skip invalid page. 預防如 .work(['']) 的情況。
-					return;
-				}
-
-				function clear_work() {
-					// 警告: 直接清空 .actions 不安全！
-					// this.actions.clear();
-					work_continue = target.length;
-
-					var next;
-					while (next = this.actions[0]) {
-						next = next[0];
-						if (next === 'page' || next === 'edit')
-							this.actions.shift();
-						else
-							break;
+			if (pages.length > 0) {
+				pages.forEach(function for_each_page(page, index) {
+					if (library_namespace.is_debug(2)
+					// .show_value() @ interact.DOM, application.debug
+					&& library_namespace.show_value)
+						library_namespace.show_value(page, 'page');
+					if (!page) {
+						// nochange_count++;
+						// Skip invalid page. 預防如 .work(['']) 的情況。
+						return;
 					}
-					library_namespace.debug('清空 actions queue: 剩下'
-							+ this.actions.length + ' actions。', 1,
-							'wiki_API.work');
-				}
 
-				pages_left++;
-				if (config.no_edit) {
-					// 不作編輯作業。
-					// 取得頁面內容。
-					this.page(page, function(page_data, error) {
-						each.call(this, page_data, messages, config);
-						if (messages.quit_operation) {
-							clear_work.call(this);
-						}
-						if (--pages_left === 0) {
-							finish_up.call(this);
-						}
-					},
-					// e.g., page_options:{rvprop:'ids|content|timestamp'}
-					// @see
-					// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
-					config.page_options);
+					function clear_work() {
+						// 警告: 直接清空 .actions 不安全！
+						// this.actions.clear();
+						work_continue = target.length;
 
-				} else {
-					// clone() 是為了能個別改變 summary。
-					// 例如: each() { options.summary += " -- ..."; }
-					var work_options = Object.clone(options);
-					// 取得頁面內容。一頁頁處理。
-					this.page(page, null, config.page_options)
-					// 編輯頁面內容。
-					.edit(function(page_data) {
-						// edit/process
-						if (!no_message)
-							library_namespace.sinfo([ 'wiki_API.work: edit '
-							//
-							+ (index + 1) + '/' + pages.length
-							//
-							+ ' [[', 'fg=yellow',
-							//
-							page_data.title, '-fg', ']]' ]);
-						// 以 each() 的回傳作為要改變成什麼內容。
-						var content = each.call(
-						// 注意: this === work_options
-						// @see wiki_API.edit()
-						this, page_data, messages, config);
-						if (messages.quit_operation) {
-							clear_work.call(this);
+						var next;
+						while (next = this.actions[0]) {
+							next = next[0];
+							if (next === 'page' || next === 'edit')
+								this.actions.shift();
+							else
+								break;
 						}
-						return content;
-					}, work_options, function() {
-						// function(title, error, result)
-						callback.apply(this, arguments);
-						if (--pages_left === 0) {
-							finish_up.call(this);
-						}
-					});
-				}
-			}, this);
+						library_namespace.debug('清空 actions queue: 剩下'
+								+ this.actions.length + ' actions。', 1,
+								'wiki_API.work');
+					}
+
+					pages_left++;
+					if (config.no_edit) {
+						// 不作編輯作業。
+						// 取得頁面內容。
+						this.page(page, function(page_data, error) {
+							each.call(this, page_data, messages, config);
+							if (messages.quit_operation) {
+								clear_work.call(this);
+							}
+							if (--pages_left === 0) {
+								finish_up.call(this);
+							}
+						},
+						// e.g., page_options:{rvprop:'ids|content|timestamp'}
+						// @see
+						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
+						config.page_options);
+
+					} else {
+						// clone() 是為了能個別改變 summary。
+						// 例如: each() { options.summary += " -- ..."; }
+						var work_options = Object.clone(options);
+						// 取得頁面內容。一頁頁處理。
+						this.page(page, null, config.page_options)
+						// 編輯頁面內容。
+						.edit(function(page_data) {
+							// edit/process
+							if (!no_message) {
+								library_namespace.sinfo([
+								//
+								'wiki_API.work: edit '
+								//
+								+ (index + 1) + '/' + pages.length
+								//
+								+ ' [[', 'fg=yellow',
+								//
+								page_data.title, '-fg', ']]' ]);
+							}
+							// 以 each() 的回傳作為要改變成什麼內容。
+							var content = each.call(
+							// 注意: this === work_options
+							// @see wiki_API.edit()
+							this, page_data, messages, config);
+							if (messages.quit_operation) {
+								clear_work.call(this);
+							}
+							return content;
+						}, work_options, function() {
+							// function(title, error, result)
+							callback.apply(this, arguments);
+							if (--pages_left === 0) {
+								finish_up.call(this);
+							}
+						});
+					}
+				}, this);
+
+			} else {
+				// 都沒有東西的時候依然應該執行收尾。
+				finish_up.call(this);
+			}
 
 			// 警告：不可省略，只為避免clear_work()誤刪！
 			this.run(function() {
@@ -9069,7 +9078,8 @@ function module_code(library_namespace) {
 	 * @param {String}key
 	 *            search key
 	 * @param {Function}[callback]
-	 *            回調函數。 callback({Array}pages, {Integer}hits, {String}key_used)
+	 *            回調函數。 callback({Array}pages, {Integer}totalhits,
+	 *            {String}key_used)
 	 * @param {Object}options
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
@@ -9094,25 +9104,28 @@ function module_code(library_namespace) {
 		//
 		+ get_URL.parameters_to_String(Object.assign({
 			srsearch : key
-		}, wiki_API.search.default_parameters, options)) ], function(data) {
+		}, wiki_API.search.default_parameters, options)) ], function(data,
+				error) {
 			if (library_namespace.is_debug(2)
 			// .show_value() @ interact.DOM, application.debug
 			&& library_namespace.show_value)
 				library_namespace.show_value(data, 'wiki_API.search');
 
 			options = data && (data['continue'] || data['query-continue']);
+			var totalhits;
 			if (data && (data = data.query)) {
 				if (options)
 					// data.search.sroffset = options.search.sroffset;
 					Object.assign(data.search, options.search);
-				data.search.hits = data.searchinfo.totalhits;
+				totalhits = data.searchinfo.totalhits;
 				data = data.search;
 			}
 
-			// data: [ page_data ].hits = \d+, .sroffset = next
-			if (typeof callback === 'function')
-				// callback({Array}pages, {Integer}hits, {String}key_used)
-				callback(data, data.hits, key);
+			// data: [ page_data ].sroffset = next
+			if (typeof callback === 'function') {
+				// callback({Array}pages, {Integer}totalhits, {String}key_used)
+				callback(data, totalhits, key);
+			}
 		}, null, options);
 	};
 
