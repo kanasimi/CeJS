@@ -634,6 +634,12 @@ function module_code(library_namespace) {
 					// API_URL : session.API_URL,
 					agent : agent
 				};
+				if (false) {
+					// set User-Agent to use:
+					// Special:ApiFeatureUsage&wpagent=CeJS script_name
+					wiki.get_URL_options.headers['User-Agent'] = CeL.get_URL.default_user_agent
+							+ ' ';
+				}
 			}
 
 		}

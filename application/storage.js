@@ -156,6 +156,8 @@ function module_code(library_namespace) {
 
 	}
 
+	// ----------------------------------------------------
+
 	// 找到下一個可用的檔案名稱。若是有重複的檔案存在，則會找到下一個沒有使用的編號為止。
 	function get_not_exist_filename(move_to_path) {
 		while (_.fso_status(move_to_path)) {
@@ -181,6 +183,22 @@ function module_code(library_namespace) {
 			library_namespace.info(library_namespace.display_align([
 					[ 'Move: ', from_path ], [ '→ ', move_to_path ] ]));
 		_.move_fso(from_path, to_path);
+	};
+
+	// 從一個目錄或檔案列表中，找出第一個存在的。
+	_.first_exist_fso = function(fso_list) {
+		var first_exist;
+		if (!Array.isArray(fso_list)) {
+			fso_list = [ fso_list ];
+		}
+		if (fso_list.some(function(fso) {
+			if (_.fso_status(fso)) {
+				first_exist = fso;
+				return true;
+			}
+		})) {
+			return first_exist;
+		}
 	};
 
 	// -------------------------------------------------------------------------
