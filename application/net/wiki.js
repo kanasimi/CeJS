@@ -158,6 +158,7 @@ function module_code(library_namespace) {
 	/** {String} old key: 'wiki' */
 	var KEY_SESSION = 'session';
 
+	// https://github.com/Microsoft/TypeScript/wiki/JSDoc-support-in-JavaScript
 	/**
 	 * web Wikipedia / 維基百科 用的 functions。<br />
 	 * 可執行環境: node.js, JScript。
@@ -168,6 +169,9 @@ function module_code(library_namespace) {
 	 *            user password
 	 * @param {String}[API_URL]
 	 *            language code or API URL
+	 * 
+	 * @returns {wiki_API}
+	 * @template wiki_API
 	 * 
 	 * @constructor
 	 */
@@ -206,8 +210,9 @@ function module_code(library_namespace) {
 	 * 檢查若 value 為 session。
 	 * 
 	 * @param value
+	 *            value to test. 要測試的值。
 	 * 
-	 * @returns {Boolean}value 為 session。
+	 * @returns {Boolean} value 為 session。
 	 */
 	function is_wiki_API(value) {
 		return value
@@ -304,6 +309,7 @@ function module_code(library_namespace) {
 	 * 測試看看指定值是否為API語言以及頁面標題或者頁面。
 	 * 
 	 * @param value
+	 *            value to test. 要測試的值。
 	 * @param {Boolean|String}[type]
 	 *            test type: true('simple'), 'language', 'URL'
 	 * @param {Boolean|String}[ignore_api]
@@ -388,9 +394,16 @@ function module_code(library_namespace) {
 		return metched || PATTERN_PROJECT_CODE_i.test(API_URL);
 	}
 
-	// 規範化 title_parameter
-	// setup [ {String}API_URL, title ]
-	// @see api_URL
+	/**
+	 * 規範化 title_parameter
+	 * 
+	 * setup [ {String}API_URL, title ]
+	 * 
+	 * @param {String}title
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * @see api_URL
+	 */
 	function normalize_title_parameter(title, options) {
 		var action = is_api_and_title(title, true)
 		// 不改變原 title。
@@ -415,7 +428,14 @@ function module_code(library_namespace) {
 		return action;
 	}
 
-	// append additional parameters of MediaWiki API.
+	/**
+	 * append additional parameters of MediaWiki API.
+	 * 
+	 * @param {Array}action
+	 * @param {Object}options
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * @inner
+	 */
 	function add_parameters(action, options) {
 		if (!options.parameters) {
 			return;
@@ -4674,7 +4694,7 @@ function module_code(library_namespace) {
 							// rollback
 							_this.actions.unshift(
 							// 重新登入以後，編輯頁面之前再取得一次頁面內容。
-							[ 'page', this.last_page.title ], next);
+							[ 'page', _this.last_page.title ], next);
 							// reset node agent.
 							// 應付 2016/1 MediaWiki 系統更新，
 							// 需要連 HTTP handler 都重換一個，重起 cookie。
@@ -13407,7 +13427,7 @@ function module_code(library_namespace) {
 	 * is_wikidata_page()
 	 * 
 	 * @param value
-	 *            要測試的值。
+	 *            value to test. 要測試的值。
 	 * @param {Boolean}[strict]
 	 *            嚴格檢測。
 	 * 
