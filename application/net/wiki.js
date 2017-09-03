@@ -753,6 +753,8 @@ function module_code(library_namespace) {
 	/**
 	 * The namespace number of the page. 列舉型別 (enumeration)
 	 * 
+	 * CeL.wiki.namespace.hash
+	 * 
 	 * {{NAMESPACENUMBER:{{FULLPAGENAME}}}}
 	 * 
 	 * @type {Object}
@@ -1329,6 +1331,7 @@ function module_code(library_namespace) {
 
 	/** {Object}prototype of {wiki page parser} */
 	var page_prototype = {
+		// for_token
 		// 在執行 .each() 之前，應該先執行 .parse()。
 		each : for_each_token,
 		parse : parse_page,
@@ -3070,6 +3073,50 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	// 因應不同的 mediawiki project 來處理日期。
+	// date_parser_config[project]
+	// = [ {RegExp}PATTERN, {Function}parser({Array}matched) : return {String},
+	// {Function}to_String({Date}date) : return {String} ]
+	//
+	// to_String: 日期的模式, should match "~~~~~".
+	var date_parser_config = {
+		'zh-classical' : [
+				// Warning: need CeL.data.numeral
+				/([一二][〇一二三四五六七八九]{3})年([[〇一]?[〇一二三四五六七八九])月([〇一二三]?[〇一二三四五六七八九])日 （([一二三四五六日])）( [〇一二三四五六七八九]{1,2}時[〇一二三四五六七八九]{1,2})分(?: \(([A-Z]{3})\))?/g,
+				function(matched) {
+					return library_namespace
+							.from_positional_Chinese_numeral(matched[1] + '/'
+									+ matched[2] + '/' + matched[3]
+									+ matched[5].replace('時', ':'))
+							+ ' ' + (matched[6] || 'UTC+8');
+				},
+				function(date) {
+					return library_namespace.to_positional_Chinese_numeral(date
+							.format({
+								format : '%Y年%m月%d日 （%a） %2H時%2M分 (UTC)',
+								// use UTC
+								zone : 0,
+								locale : 'cmn-Hant-TW'
+							}));
+				} ],
+		zh : [
+				// $dateFormats, 'Y年n月j日 (D) H:i'
+				// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hans.php
+				// e.g., "2016年8月1日 (一) 00:00 (UTC)",
+				// "2016年8月1日 (一) 00:00 (CST)"
+				// [, Y, m, d, week, time(hh:mm), timezone ]
+				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([一二三四五六日])\)( \d{1,2}:\d{1,2})(?: \(([A-Z]{3})\))?/g,
+				function(matched) {
+					return matched[1] + '/' + matched[2] + '/' + matched[3]
+							+ matched[5] + ' ' + (matched[6] || 'UTC+8');
+				}, {
+					format : '%Y年%m月%d日 (%a) %2H:%2M (UTC)',
+					// use UTC
+					zone : 0,
+					locale : 'cmn-Hant-TW'
+				} ]
+	};
+
 	/**
 	 * parse date string / 時間戳記 to {Date}
 	 * 
@@ -3089,14 +3136,23 @@ function module_code(library_namespace) {
 	 * 
 	 * @see [[en:Wikipedia:Signatures]], "~~~~~"
 	 */
-	function parse_date_zh(wikitext, options) {
+	function parse_date(wikitext, options) {
 		if (options === true) {
 			options = {
 				get_timevalue : true
 			};
+		} else if (is_wiki_API(options)) {
+			options = {
+				project : options.project || options.language
+			};
+		} else if (options in date_parser_config) {
+			options = {
+				project : options
+			};
 		} else {
 			options = library_namespace.setup_options(options);
 		}
+
 		var date_list;
 		if (options.get_all_list) {
 			// 若設定 options.get_all_list，須保證回傳 {Array}。
@@ -3106,23 +3162,18 @@ function module_code(library_namespace) {
 			return date_list;
 		}
 
-		// 日期的模式, should match "~~~~~".
-		// $dateFormats, 'Y年n月j日 (D) H:i'
-		// https://github.com/wikimedia/mediawiki/blob/master/languages/messages/MessagesZh_hans.php
-		// e.g., "2016年8月1日 (一) 00:00 (UTC)", "2016年8月1日 (一) 00:00 (CST)"
-		// {{unsigned|user|2016年10月18日 (二) 00:04‎ }}
-		// {{unsigned|1=user=user|2=2016年10月17日 (一) 23:45‎ }}
-		// [, Y, m, d, week, time(hh:mm), timezone ]
-		var PATTERN_date_zh = /([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \([一二三四五六日]\)( \d{1,2}:\d{1,2})(?: \(([A-Z]{3})\))?/g,
 		// <s>去掉</s>skip年分前之雜項。
 		// <s>去掉</s>skip星期與其後之雜項。
-		matched;
+		var matched, date_parser = date_parser_config[options.project
+				|| default_language], PATTERN_date = date_parser[0];
+		date_parser = date_parser[1];
 
-		while (matched = PATTERN_date_zh.exec(wikitext)) {
+		// reset PATTERN index
+		PATTERN_date.lastIndex = 0;
+		while (matched = PATTERN_date.exec(wikitext)) {
 			// Warning:
-			// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()比parse_date_zh()功能大多了。
-			var date = matched[1] + '/' + matched[2] + '/' + matched[3]
-					+ matched[5] + ' ' + (matched[6] || 'UTC+8');
+			// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()比parse_date()功能大多了。
+			var date = date_parser(matched);
 			// console.log(date);
 			date = Date.parse(date);
 			if (isNaN(date)) {
@@ -3146,15 +3197,23 @@ function module_code(library_namespace) {
 	 * assert: the same as "~~~~~".
 	 * 
 	 * @example <code>
-	(new Date).format(CeL.wiki.parse.date.format);
+	CeL.wiki.parse.date.to_String(new Date);
 	 * </code>
 	 */
-	parse_date_zh.format = {
-		format : '%Y年%m月%d日 (%a) %2H:%2M (UTC)',
-		// use UTC
-		zone : 0,
-		locale : 'cmn-Hant-TW'
-	};
+	function to_wiki_date(date, project) {
+		if (is_wiki_API(project)) {
+			project = project.project || project.language;
+		}
+		// console.log(project || default_language);
+		var to_String = date_parser_config[project || default_language][2];
+		return library_namespace.is_Object(to_String)
+		// treat to_String as date format
+		? date.format(to_String) : to_String(date);
+	}
+
+	parse_date.to_String = to_wiki_date;
+
+	// ------------------------------------------
 
 	/**
 	 * 使用者/用戶對話頁面所符合的匹配模式。
@@ -3171,7 +3230,7 @@ function module_code(library_namespace) {
 	var PATTERN_user_link =
 	// "\/": e.g., [[user talk:user_name/Flow]]
 	// 大小寫無差，但NG: "\n\t"
-	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|用户(?:讨论|对话)?|用戶(?:討論|對話)?|使用者(?:討論)?|利用者(?:‐会話)?|사용자(?:토론)?) *: *([^#\|\[\]\/]+)/i,
+	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?) *: *([^#\|\[\]\/]+)/i,
 	// matched: [ all, " user name " ]
 	PATTERN_user_contributions_link = /\[\[(?:Special|特別) *: *(?:Contributions|使用者貢獻|用戶貢獻|用户贡献|投稿記録)\/([^#\|\[\]\/]+)/i,
 	//
@@ -3543,7 +3602,7 @@ function module_code(library_namespace) {
 	// TODO: 統合於 CeL.wiki.parser 之中。
 	Object.assign(parse_wikitext, {
 		template : parse_template,
-		date : parse_date_zh,
+		date : parse_date,
 		// timestamp : parse_timestamp,
 		user : parse_user,
 		redirect : parse_redirect,
@@ -15278,7 +15337,7 @@ function module_code(library_namespace) {
 				// TODO: 解析各種日期格式。
 				if (value && isNaN(date_value = Date.parse(value))) {
 					// Warning:
-					// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()比parse_date_zh()功能大多了。
+					// String_to_Date()只在有載入CeL.data.date時才能用。但String_to_Date()比parse_date()功能大多了。
 					date_value = library_namespace.String_to_Date(value, {
 						// 都必須當作UTC+0，否則被轉換成UTC+0時會出現偏差。
 						zone : 0
@@ -15291,7 +15350,7 @@ function module_code(library_namespace) {
 						}
 						date_value = date_value.getTime();
 					} else {
-						date_value = parse_date_zh(value, true) || NaN;
+						date_value = parse_date(value, true) || NaN;
 					}
 				}
 				if (isNaN(date_value)) {

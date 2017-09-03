@@ -2898,6 +2898,16 @@ function test_wiki() {
 
 		wikitext = 't\n**a[[L#{{t:p}}|l]]b\n**a[[L#{{t:p}}]]b\n';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: list #1');
+
+		wikitext = '\n--user 2017年9月3日 (日) 02:06 (UTC)~~\n';
+		assert([ '2017-09-03T02:06:00.000Z', CeL.wiki.parse.date(wikitext, 'zh').toISOString() ], 'wiki.parse.date: zh #1');
+		assert([ '2017年9月3日 (日) 02:06 (UTC)', CeL.wiki.parse.date.to_String(new Date('2017-09-03T02:06:00.000Z'), 'zh') ], 'wiki.parse.date: zh #2');
+		wikitext = '\n--user 二〇一七年九月三日 （日） 〇二時一八分 (UTC)~~\n';
+		assert([ '2017-09-03T02:18:00.000Z', CeL.wiki.parse.date(wikitext, 'zh-classical').toISOString() ], 'wiki.parse.date: zh-classical #1');
+		assert([ '二〇一七年九月三日 （日） 〇二時一八分 (UTC)', CeL.wiki.parse.date.to_String(new Date('2017-09-03T02:18:00.000Z'), 'zh-classical') ], 'wiki.parse.date: zh-classical #2');
+		var test_date = new Date; test_date.setSeconds(0, 0); test_date = test_date.toISOString();
+		assert([ test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'zh'), 'zh').toISOString() ], 'wiki.parse.date: zh #3: ' + test_date);
+		assert([ test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'zh-classical'), 'zh-classical').toISOString() ], 'wiki.parse.date: zh-classical #3: ' + test_date);
 	});
 
 
