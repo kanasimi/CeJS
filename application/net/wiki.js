@@ -146,7 +146,9 @@ function module_code(library_namespace) {
 	// db: e.g., 'zhwiki_p'
 	//
 	//
-	// language (or project): 'en', 'zh', 'ja', ... (default: default_language)
+	// language (or project): default: default_language
+	// e.g., 'en', 'zh-classical', 'ja', ...
+	//
 	// project = language.family
 	//
 	// https://meta.wikimedia.org/wiki/List_of_Wikimedia_projects_by_size
@@ -669,19 +671,29 @@ function module_code(library_namespace) {
 		if (matched
 				&& !/test|wiki/i.test(matched[3])
 				&& ((matched = matched[4].toLowerCase()) in api_URL.shortcut_of_project)) {
+			// e.g., "wikipedia"
 			session.project = matched;
 		}
 	}
 
-	// @see set_default_language()
+	// @see set_default_language(), language_to_project(), language_to_site()
+	// language-code.wikipedia.org e.g., zh-classical.wikipedia.org
+	//
+	// IETF language tag language code for gettext() e.g., zh-classical → lzh
+	// [[language_code:]] e.g., [[zh-classical:]] @see [[m:List of Wikipedias]]
+	//
+	// site_namewiki for Wikidata API e.g., zh-classical → zh_classicalwiki
+	// @see https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
+	// language_code for database e.g., zh-classical → zh_classicalwiki_p
 	function setup_API_language(session, language_code) {
 		if (PATTERN_PROJECT_CODE_i.test(language_code)
 		// 不包括 test2.wikipedia.org 之類。
 		&& !/test|wiki/i.test(language_code)
 		// 排除 'Talk', 'User', 'Help', 'File', ...
 		&& !get_namespace.pattern.test(language_code)) {
+			// [[m:List of Wikipedias]]
 			session.language
-			//
+			// e.g., 'zh-classical', 'zh-yue', 'zh-min-nan', 'simple'
 			= language_code = language_code.toLowerCase();
 			// apply local lag interval rule.
 			if (!(session.lag >= 0) && (language_code in wiki_API.query.lag)) {
@@ -3074,7 +3086,7 @@ function module_code(library_namespace) {
 	// ----------------------------------------------------
 
 	// 因應不同的 mediawiki project 來處理日期。
-	// date_parser_config[project]
+	// date_parser_config[language]
 	// = [ {RegExp}PATTERN, {Function}parser({Array}matched) : return {String},
 	// {Function}to_String({Date}date) : return {String} ]
 	//
@@ -3143,11 +3155,11 @@ function module_code(library_namespace) {
 			};
 		} else if (is_wiki_API(options)) {
 			options = {
-				project : options.project || options.language
+				language : options.language
 			};
 		} else if (options in date_parser_config) {
 			options = {
-				project : options
+				language : options
 			};
 		} else {
 			options = library_namespace.setup_options(options);
@@ -3164,7 +3176,7 @@ function module_code(library_namespace) {
 
 		// <s>去掉</s>skip年分前之雜項。
 		// <s>去掉</s>skip星期與其後之雜項。
-		var matched, date_parser = date_parser_config[options.project
+		var matched, date_parser = date_parser_config[options.language
 				|| default_language], PATTERN_date = date_parser[0];
 		date_parser = date_parser[1];
 
@@ -3200,12 +3212,12 @@ function module_code(library_namespace) {
 	CeL.wiki.parse.date.to_String(new Date);
 	 * </code>
 	 */
-	function to_wiki_date(date, project) {
-		if (is_wiki_API(project)) {
-			project = project.project || project.language;
+	function to_wiki_date(date, language) {
+		if (is_wiki_API(language)) {
+			language = language.language;
 		}
-		// console.log(project || default_language);
-		var to_String = date_parser_config[project || default_language][2];
+		// console.log(language || default_language);
+		var to_String = date_parser_config[language || default_language][2];
 		return library_namespace.is_Object(to_String)
 		// treat to_String as date format
 		? date.format(to_String) : to_String(date);
@@ -3414,6 +3426,9 @@ function module_code(library_namespace) {
 	 * 條目名稱, section 章節, link說明 ]
 	 * 
 	 * TODO: /wiki/條目#hash 說明
+	 * 
+	 * TODO: https://zh.wikipedia.org/zh-tw/標題 →
+	 * https://zh.wikipedia.org/w/index.php?title=標題&variant=zh-tw
 	 * 
 	 * @type {RegExp}
 	 * 
@@ -9783,12 +9798,14 @@ function module_code(library_namespace) {
 		}
 
 		// 正規化。
-		language = language.trim().toLowerCase()
+		language = language.trim().toLowerCase();
 		// TODO: 'zh.news'
 		// 警告: this.language 可能包含 'zhwikinews' 之類。
 		this.language = language
 		// 'zhwiki' → 'zh'
-		.replace(/wik[a-z]+$/, '');
+		.replace(/wik[a-z]+$/, '')
+		// 'zh-classical' → 'zh_classical'
+		.replace(/-/g, '_');
 
 		if (language === 'meta') {
 			// @see /usr/bin/sql
@@ -9810,7 +9827,7 @@ function module_code(library_namespace) {
 			 */
 			this.database = language + '_p';
 		} else {
-			// e.g., 'zh'
+			// e.g., 'zh', 'zh_classical'
 			this.host = language + 'wiki.labsdb';
 			this.database = language + 'wiki_p';
 		}
@@ -9852,6 +9869,7 @@ function module_code(library_namespace) {
 			}
 			if (language.API_URL) {
 				// treat language as session.
+				// use set_SQL_config_language()
 				config.set_language(language_to_project(language), !user);
 			} else {
 				Object.assign(config, language);
@@ -11136,39 +11154,39 @@ function module_code(library_namespace) {
 	/**
 	 * 取得最新之 Wikimedia dump。
 	 * 
-	 * @param {String}[project]
+	 * @param {String}[wiki_site_name]
 	 *            project code name. e.g., 'enwiki'
 	 * @param {Function}callback
 	 *            回調函數。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
-	 * @see https://en.wikipedia.org/wiki/Wikipedia:Database_download#Where_do_I_get...
+	 * @see https://en.wikipedia.org/wiki/Wikipedia:Database_download#Where_do_I_get_it.3F
 	 * 
 	 * @inner
 	 */
-	function get_latest_dump(project, callback, options) {
+	function get_latest_dump(wiki_site_name, callback, options) {
 		if (false && !wmflabs) {
 			// 最起碼須有 bzip2, wget 特定版本輸出訊息 @ /bin/sh
 			throw new Error('Only for Tool Labs!');
 		}
 
-		if (typeof project === 'function' && typeof callback !== 'function'
-				&& !options) {
+		if (typeof wiki_site_name === 'function'
+				&& typeof callback !== 'function' && !options) {
 			// shift arguments
 			options = callback;
-			callback = project;
-			project = null;
+			callback = wiki_site_name;
+			wiki_site_name = null;
 		}
 
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
 		options = library_namespace.new_options(options);
 
-		if (!project) {
+		if (!wiki_site_name) {
 			// console.log(options);
 			// console.log(options[KEY_SESSION]);
 			// throw options[KEY_SESSION].language;
-			project = language_to_project(options[KEY_SESSION]
+			wiki_site_name = language_to_project(options[KEY_SESSION]
 					|| options.project);
 		}
 
@@ -11179,7 +11197,7 @@ function module_code(library_namespace) {
 		if (!latest) {
 			get_URL(
 			// Get the latest version.
-			host + project + '/', function(XMLHttp) {
+			host + wiki_site_name + '/', function(XMLHttp) {
 				var response = XMLHttp.responseText;
 				var latest = 0, previous, matched,
 				//
@@ -11195,14 +11213,14 @@ function module_code(library_namespace) {
 				options.latest = latest || 'latest';
 				if (previous)
 					options.previous = previous;
-				get_latest_dump(project, callback, options);
+				get_latest_dump(wiki_site_name, callback, options);
 			});
 			return;
 		}
 
 		var directory = options.directory || './',
 		//
-		filename = options.filename || project + '-' + latest
+		filename = options.filename || wiki_site_name + '-' + latest
 				+ '-pages-articles.xml';
 
 		/**
@@ -11217,14 +11235,14 @@ function module_code(library_namespace) {
 		 * e.g., <code>
 		callback = function(data) { console.log(data); };
 		latest = '20160305';
-		project = 'enwiki';
+		wiki_site_name = 'enwiki';
 		// directory to restore dump files.
 		// 指定 dump file 放置的 directory。
 		// e.g., '/shared/cache/', '/shared/dumps/', '~/dumps/'
 		// https://wikitech.wikimedia.org/wiki/Help:Tool_Labs/Developing#Using_the_shared_Pywikibot_files_.28recommended_setup.29
 		// /shared/: shared files
 		dump_directory = '/shared/cache/'
-		filename = project + '-' + latest + '-pages-articles-multistream-index.txt';
+		filename = wiki_site_name + '-' + latest + '-pages-articles-multistream-index.txt';
 		</code>
 		 */
 
@@ -11285,8 +11303,8 @@ function module_code(library_namespace) {
 		var source_directory, archive = options.archive || filename + '.bz2';
 
 		if (wmflabs) {
-			source_directory = '/public/dumps/public/' + project + '/' + latest
-					+ '/';
+			source_directory = '/public/dumps/public/' + wiki_site_name + '/'
+					+ latest + '/';
 			library_namespace.debug('Check if public dump archive exists: ['
 					+ source_directory + archive + ']', 1, 'get_latest_dump');
 			try {
@@ -11323,7 +11341,7 @@ function module_code(library_namespace) {
 		// -O=""
 		[ '--output-document=' + source_directory + archive,
 		// 經測試，採用 .spawn() 此種方法毋須考慮 '"' 之類 quote 的問題。
-		host + project + '/' + latest + '/' + archive ]);
+		host + wiki_site_name + '/' + latest + '/' + archive ]);
 
 		child.stdout.setEncoding('utf8');
 		child.stderr.setEncoding('utf8');
@@ -11372,7 +11390,7 @@ function module_code(library_namespace) {
 							+ options.previous + '].');
 					options.latest = options.previous;
 					delete options.previous;
-					get_latest_dump(project, callback, options);
+					get_latest_dump(wiki_site_name, callback, options);
 				} else {
 					callback();
 				}
@@ -14263,10 +14281,12 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	// Wikimedia project code alias
+	// https://github.com/wikimedia/mediawiki/blob/master/languages/LanguageCode.php
 	// language_code_to_project[language code] = project code
 	// @see [[en:Wikimedia_project#Project_codes]]
 	var language_code_to_project = {
 		// als : 'sq',
+		'be-tarask' : 'be-x-old',
 		// cmn : 'zh',
 		// gsw : 'als',
 		// hbs : 'sh',
@@ -14345,12 +14365,14 @@ function module_code(library_namespace) {
 		.replace(/wik.+$/, '') || default_language;
 
 		if (language.startsWith('category')) {
+			// e.g., input "language" of [[Category:title]]
 			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
 			return language;
 			return default_language + 'wiki';
 		}
 
 		if (language in language_code_to_project) {
+			// e.g., 'lzh' → 'zh-classical'
 			language = language_code_to_project[language];
 		}
 
@@ -14366,6 +14388,8 @@ function module_code(library_namespace) {
 	 *            語言代碼。
 	 * 
 	 * @returns {String}Wikidata API 可使用之 site name。
+	 * 
+	 * @see https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
 	 */
 	function language_to_site(language) {
 		// 正規化。
@@ -14373,6 +14397,7 @@ function module_code(library_namespace) {
 				.trim().toLowerCase() : default_language;
 
 		if (language.startsWith('category')) {
+			// e.g., input "language" of [[Category:title]]
 			// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
 			return language;
 			return default_language + 'wiki';
