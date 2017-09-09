@@ -793,6 +793,7 @@ function module_code(library_namespace) {
 		// [[MediaWiki:title]]
 		mediawiki : 8,
 		mediawiki_talk : 9,
+		// 模板
 		template : 10,
 		template_talk : 11,
 		help : 12,
@@ -809,6 +810,7 @@ function module_code(library_namespace) {
 		education_program_talk : 447,
 		timedtext : 710,
 		timedtext_talk : 711,
+		// 模块 模塊 模組
 		module : 828,
 		module_talk : 829,
 		topic : 2600
@@ -3111,7 +3113,7 @@ function module_code(library_namespace) {
 				// e.g., "2016年8月1日 (一) 00:00 (UTC)",
 				// "2016年8月1日 (一) 00:00 (CST)"
 				// [, Y, m, d, week, time(hh:mm), timezone ]
-				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([一二三四五六日])\)( \d{1,2}:\d{1,2})(?: \(([A-Z]{3})\))?/g,
+				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([一二三四五六日])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
 				function(matched) {
 					return matched[1] + '/' + matched[2] + '/' + matched[3]
 							+ matched[5] + ' ' + (matched[6] || 'UTC+8');
@@ -3120,6 +3122,20 @@ function module_code(library_namespace) {
 					// use UTC
 					zone : 0,
 					locale : 'cmn-Hant-TW'
+				} ],
+		en : [
+				// e.g., "01:20, 9 September 2017 (UTC)"
+				// [, time(hh:mm), d, m, Y, timezone ]
+				/([0-2]?\d:[0-6]?\d), ([0-3]?\d) ([a-z]{3,9}) ([12]\d{3})(?: \(([A-Z]{3})\))?/ig,
+				function(matched) {
+					return matched[2] + ' ' + matched[3] + ' ' + +matched[4]
+							+ ' ' + matched[1] + ' ' + (matched[6] || 'UTC');
+				}, {
+					// TODO: unfinished
+					format : '%2H:%2M %d %m %Y (UTC)',
+					// use UTC
+					zone : 0,
+					locale : 'en-US'
 				} ]
 	};
 
@@ -4222,7 +4238,8 @@ function module_code(library_namespace) {
 	// CeL.wiki.content_of.edit_time(page_data) -
 	// new Date(page_data.revisions[0].timestamp) === 0
 	// TODO: page_data.edit_time(revision_NO, return_value)
-	// return {Date}最後編輯時間。更正確地說，首個 revision 的 timestamp。
+	// return {Date}最後編輯時間/最近的變更日期。
+	// 更正確地說，revision[0]（通常是最後一個 revision）的 timestamp。
 	get_page_content.edit_time = function(page_data, revision_NO, return_value) {
 		var timestamp = library_namespace.is_Object(page_data)
 				&& page_data.revisions;
@@ -9233,6 +9250,9 @@ function module_code(library_namespace) {
 	};
 
 	wiki_API.search.default_parameters = {
+		// module + template + main
+		// srnamespace : '828|10|0',
+
 		srprop : 'redirecttitle',
 		// srlimit : 10,
 		srlimit : 'max',
@@ -12968,6 +12988,7 @@ function module_code(library_namespace) {
 						 * revision['*']
 						 */
 						content = CeL.wiki.content_of(page_data);
+
 						// 當取得了多個版本:
 						// content = CeL.wiki.content_of(page_data, 0);
 
@@ -12982,6 +13003,9 @@ function module_code(library_namespace) {
 							//
 							'No contents: [[' + title + ']]! 沒有頁面內容！' ];
 						}
+
+						var last_edit_Date = CeL.wiki.content_of
+								.edit_time(page_data);
 
 						// [[Wikipedia:快速删除方针]]
 						if (revision['*']) {

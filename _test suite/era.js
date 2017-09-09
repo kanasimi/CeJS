@@ -66,7 +66,7 @@ if (false) {
 
 // ---------------------------------------------------------------------//
 
-// define gettext() user domain resource location.
+// for i18n: define gettext() user domain resource location.
 // gettext() will auto load (CeL.env.domain_location + language + '.js').
 // e.g., resource/cmn-Hant-TW.js, resource/ja-JP.js
 CeL.env.domain_location = 'resource/';

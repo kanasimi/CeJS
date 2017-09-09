@@ -1210,6 +1210,9 @@ function month_name(ordinal, domain_name) {
 		? ordinal.replace(/\d+/, function ($0) { return Chinese_month_name[$0]; })
 		: Chinese_month_name[ordinal] || to_positional_Chinese_numeral(ordinal);
 
+	case 'en-US':
+		return English_month_name[ordinal];
+
 	default:
 		return ordinal;
 	}
@@ -1252,6 +1255,7 @@ Chinese_date_name = [ '' ];
 })();
 
 month_name.Chinese_month_name = Chinese_month_name;
+month_name.English_month_name = ',January,February,March,April,May,June,July,August,September,October,November,December'.split(',');
 date_name.Chinese_date_name = Chinese_date_name;
 
 var Chinese_week_name = '日一二三四五六'.split(''),

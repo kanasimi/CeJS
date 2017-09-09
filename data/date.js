@@ -1764,6 +1764,7 @@ function module_code(library_namespace) {
 			date_value.getFullYear(), options.numeral || options.locale);
 		},
 		// 月分 (1-12)。 將月份寫作十進制數（範圍[01,12]）。
+		// also: %B, %b
 		m : function(date_value, options) {
 			return gettext_date.month(1 +
 			// (options && options.original_Date || date_value)
