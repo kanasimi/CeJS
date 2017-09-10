@@ -178,6 +178,8 @@ function module_code(library_namespace) {
 	 * @constructor
 	 */
 	function wiki_API(user_name, password, API_URL) {
+		library_namespace.debug('API_URL: ' + API_URL + ', default_language: '
+				+ default_language, 3, 'wiki_API');
 		if (!this || this.constructor !== wiki_API) {
 			return wiki_API.query.apply(null, arguments);
 		}
@@ -512,6 +514,7 @@ function module_code(library_namespace) {
 		if (lower_case in api_URL.alias) {
 			project = api_URL.alias[lower_case];
 		}
+		library_namespace.debug('project: ' + project, 3, 'api_URL');
 		// PATTERN_PROJECT_CODE_i.test(undefined) === true
 		if (PATTERN_PROJECT_CODE_i.test(project)) {
 			if (lower_case in api_URL.wikimedia) {
@@ -625,6 +628,10 @@ function module_code(library_namespace) {
 	 * @inner
 	 */
 	function setup_API_URL(session, API_URL) {
+		library_namespace.debug('API_URL: ' + API_URL + ', default_language: '
+				+ default_language, 3, 'setup_API_URL');
+		// console.log(session);
+		// console.trace(default_language);
 		if (API_URL === true) {
 			// force to login.
 			API_URL = session.API_URL || wiki_API.API_URL;
@@ -3088,9 +3095,35 @@ function module_code(library_namespace) {
 	//
 	// to_String: 日期的模式, should match "~~~~~".
 	var date_parser_config = {
+		en : [
+				// e.g., "01:20, 9 September 2017 (UTC)"
+				// [, time(hh:mm), d, m, Y, timezone ]
+				/([0-2]?\d:[0-6]?\d)[, ]+([0-3]?\d) ([a-z]{3,9}) ([12]\d{3})(?: \(([A-Z]{3})\))?/ig,
+				function(matched) {
+					return matched[2] + ' ' + matched[3] + ' ' + +matched[4]
+							+ ' ' + matched[1] + ' ' + (matched[6] || 'UTC');
+				}, {
+					format : '%2H:%2M, %d %m %Y (UTC)',
+					// use UTC
+					zone : 0,
+					locale : 'en-US'
+				} ],
+		ja : [
+				// e.g., "2017年9月5日 (火) 09:29 (UTC)"
+				// [, Y, m, d, week, time(hh:mm), timezone ]
+				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日月火水木金土])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
+				function(matched) {
+					return matched[1] + '/' + matched[2] + '/' + matched[3]
+							+ matched[5] + ' ' + (matched[6] || 'UTC+9');
+				}, {
+					format : '%Y年%m月%d日 (%a) %2H:%2M (UTC)',
+					// use UTC
+					zone : 0,
+					locale : 'ja-JP'
+				} ],
 		'zh-classical' : [
 				// Warning: need CeL.data.numeral
-				/([一二][〇一二三四五六七八九]{3})年([[〇一]?[〇一二三四五六七八九])月([〇一二三]?[〇一二三四五六七八九])日 （([一二三四五六日])）( [〇一二三四五六七八九]{1,2}時[〇一二三四五六七八九]{1,2})分(?: \(([A-Z]{3})\))?/g,
+				/([一二][〇一二三四五六七八九]{3})年([[〇一]?[〇一二三四五六七八九])月([〇一二三]?[〇一二三四五六七八九])日 （([日一二三四五六])）( [〇一二三四五六七八九]{1,2}時[〇一二三四五六七八九]{1,2})分(?: \(([A-Z]{3})\))?/g,
 				function(matched) {
 					return library_namespace
 							.from_positional_Chinese_numeral(matched[1] + '/'
@@ -3113,7 +3146,7 @@ function module_code(library_namespace) {
 				// e.g., "2016年8月1日 (一) 00:00 (UTC)",
 				// "2016年8月1日 (一) 00:00 (CST)"
 				// [, Y, m, d, week, time(hh:mm), timezone ]
-				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([一二三四五六日])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
+				/([12]\d{3})年([[01]?\d)月([0-3]?\d)日 \(([日一二三四五六])\)( [0-2]?\d:[0-6]?\d)(?: \(([A-Z]{3})\))?/g,
 				function(matched) {
 					return matched[1] + '/' + matched[2] + '/' + matched[3]
 							+ matched[5] + ' ' + (matched[6] || 'UTC+8');
@@ -3122,20 +3155,6 @@ function module_code(library_namespace) {
 					// use UTC
 					zone : 0,
 					locale : 'cmn-Hant-TW'
-				} ],
-		en : [
-				// e.g., "01:20, 9 September 2017 (UTC)"
-				// [, time(hh:mm), d, m, Y, timezone ]
-				/([0-2]?\d:[0-6]?\d), ([0-3]?\d) ([a-z]{3,9}) ([12]\d{3})(?: \(([A-Z]{3})\))?/ig,
-				function(matched) {
-					return matched[2] + ' ' + matched[3] + ' ' + +matched[4]
-							+ ' ' + matched[1] + ' ' + (matched[6] || 'UTC');
-				}, {
-					// TODO: unfinished
-					format : '%2H:%2M %d %m %Y (UTC)',
-					// use UTC
-					zone : 0,
-					locale : 'en-US'
 				} ]
 	};
 
@@ -6123,6 +6142,7 @@ function module_code(library_namespace) {
 	// 因為直接採wiki_API.prototype.copy_from()會造成.page().copy_from()時.page()尚未執行完，
 	// 這會使執行.copy_from()時尚未取得.last_page，因此只好另開function。
 	// @see [[Template:Copied]]
+	// TODO: 添加 wikidata 語言連結。處理分類。
 	var wiki_API_prototype_copy_from = function(title, options, callback) {
 		if (typeof options === 'function') {
 			// shift arguments
@@ -7018,10 +7038,7 @@ function module_code(library_namespace) {
 			action = action[1];
 		}
 
-		if (false) {
-			library_namespace.debug('get url token: ' + action, 0,
-					'wiki_API.page');
-		}
+		library_namespace.debug('get url token: ' + action, 5, 'wiki_API.page');
 
 		wiki_API.query(action, typeof callback === 'function'
 		//
@@ -9691,6 +9708,53 @@ function module_code(library_namespace) {
 	/** {String}default language / wiki name */
 	var default_language;
 
+	// Wikimedia project code alias
+	// https://github.com/wikimedia/mediawiki/blob/master/languages/LanguageCode.php
+	// language_code_to_site_alias[language code] = project code
+	// @see function language_to_site(language, project)
+	// @see [[en:Wikimedia_project#Project_codes]]
+	var language_code_to_site_alias = {
+		// als : 'sq',
+		'be-tarask' : 'be-x-old',
+		// cmn : 'zh',
+		// gsw : 'als',
+		// hbs : 'sh',
+		lzh : 'zh-classical',
+		nan : 'zh-min-nan',
+		// nb : 'no',
+		rup : 'roa-rup',
+		sgs : 'bat-smg',
+		vro : 'fiu-vro',
+		// 為粵文維基百科特別處理。
+		yue : 'zh-yue',
+
+		// 為日文特別修正: 'jp' is wrong!
+		jp : 'ja'
+	},
+	// 客製化的設定。
+	// wikidata_site_alias[site code] = Wikidata site code
+	// @see https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
+	// for sites
+	wikidata_site_alias = {
+		// 為粵文維基百科特別處理。
+		yuewiki : 'zh_yuewiki',
+
+		// 為日文特別修正: 'jp' is wrong!
+		jpwiki : 'jawiki'
+	},
+	// @see function set_default_language(language)
+	valid_language = {
+		'nds-nl' : true,
+		'map-bms' : true
+	};
+
+	Object.entries(language_code_to_site_alias).forEach(function(pair) {
+		if (pair[0].includes('-'))
+			valid_language[pair[0]] = true;
+		if (pair[1].includes('-'))
+			valid_language[pair[1]] = true;
+	});
+
 	/**
 	 * Set default language. 改變預設之語言。
 	 * 
@@ -9722,9 +9786,17 @@ function module_code(library_namespace) {
 		// default api URL. Use <code>CeL.wiki.API_URL = api_URL('en')</code> to
 		// change it.
 		// see also: application.locale
-		wiki_API.API_URL = api_URL((library_namespace.is_WWW()
-				&& (navigator.userLanguage || navigator.language) || default_language)
-				.toLowerCase().replace(/-.+$/, ''));
+		wiki_API.API_URL = library_namespace.is_WWW()
+				&& (navigator.userLanguage || navigator.language)
+				|| default_language;
+		if (!(wiki_API.API_URL in valid_language)) {
+			// 'en-US' → 'en'
+			wiki_API.API_URL = wiki_API.API_URL.toLowerCase().replace(/-.+$/,
+					'');
+		}
+		wiki_API.API_URL = api_URL(wiki_API.API_URL);
+		library_namespace.debug('wiki_API.API_URL = ' + wiki_API.API_URL, 3,
+				'set_default_language');
 
 		if (SQL_config) {
 			SQL_config.set_language(default_language);
@@ -10739,6 +10811,8 @@ function module_code(library_namespace) {
 		}
 
 		library_namespace.info('add_listener: 開始監視 / scan '
+		//
+		+ (session && session.language || default_language) + ' '
 		//
 		+ (Date.now() - last_query_time > 100 ?
 		//
@@ -14298,40 +14372,6 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// Wikimedia project code alias
-	// https://github.com/wikimedia/mediawiki/blob/master/languages/LanguageCode.php
-	// language_code_to_site_alias[language code] = project code
-	// @see [[en:Wikimedia_project#Project_codes]]
-	var language_code_to_site_alias = {
-		// als : 'sq',
-		'be-tarask' : 'be-x-old',
-		// cmn : 'zh',
-		// gsw : 'als',
-		// hbs : 'sh',
-		lzh : 'zh-classical',
-		nan : 'zh-min-nan',
-		// nb : 'no',
-		rup : 'roa-rup',
-		sgs : 'bat-smg',
-		vro : 'fiu-vro',
-		// 為粵文維基百科特別處理。
-		yue : 'zh-yue',
-
-		// 為日文特別修正: 'jp' is wrong!
-		jp : 'ja'
-	},
-	// 客製化的設定。
-	// wikidata_site_alias[site code] = Wikidata site code
-	// @see https://www.wikidata.org/w/api.php?action=help&modules=wbeditentity
-	// for sites
-	wikidata_site_alias = {
-		// 為粵文維基百科特別處理。
-		yuewiki : 'zh_yuewiki',
-
-		// 為日文特別修正: 'jp' is wrong!
-		jpwiki : 'jawiki'
-	};
-
 	// @see [[:en:Help:Interwiki linking#Project titles and shortcuts]],
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	// TODO:
@@ -17459,7 +17499,7 @@ function module_code(library_namespace) {
 			// data 會在 set_claims() 被修改，因此不能提前設定。
 			options.data = JSON.stringify(data);
 			if (library_namespace.is_debug(2)) {
-				library_namespace.debug('options.data: ' + options.data, 0,
+				library_namespace.debug('options.data: ' + options.data, 2,
 						'wikidata_edit.do_wbeditentity');
 				console.log(data);
 			}

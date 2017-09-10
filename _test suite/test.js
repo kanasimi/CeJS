@@ -2905,9 +2905,17 @@ function test_wiki() {
 		wikitext = '\n--user 二〇一七年九月三日 （日） 〇二時一八分 (UTC)~~\n';
 		assert([ '2017-09-03T02:18:00.000Z', CeL.wiki.parse.date(wikitext, 'zh-classical').toISOString() ], 'wiki.parse.date: zh-classical #1');
 		assert([ '二〇一七年九月三日 （日） 〇二時一八分 (UTC)', CeL.wiki.parse.date.to_String(new Date('2017-09-03T02:18:00.000Z'), 'zh-classical') ], 'wiki.parse.date: zh-classical #2');
+		wikitext = '\n--user 23:56, 9 September 2017 (UTC)~~\n';
+		assert([ '2017-09-09T23:56:00.000Z', CeL.wiki.parse.date(wikitext, 'en').toISOString() ], 'wiki.parse.date: en #1');
+		assert([ '23:56, 9 September 2017 (UTC)', CeL.wiki.parse.date.to_String(new Date('2017-09-09T23:56:00.000Z'), 'en') ], 'wiki.parse.date: en #2');
+		wikitext = '\n--user 2017年9月5日 (火) 09:29 (UTC)~~\n';
+		assert([ '2017-09-05T09:29:00.000Z', CeL.wiki.parse.date(wikitext, 'ja').toISOString() ], 'wiki.parse.date: ja #1');
+		assert([ '2017年9月5日 (火) 09:29 (UTC)', CeL.wiki.parse.date.to_String(new Date('2017-09-05T09:29:00.000Z'), 'ja') ], 'wiki.parse.date: ja #2');
 		var test_date = new Date; test_date.setSeconds(0, 0); test_date = test_date.toISOString();
 		assert([ test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'zh'), 'zh').toISOString() ], 'wiki.parse.date: zh #3: ' + test_date);
 		assert([ test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'zh-classical'), 'zh-classical').toISOString() ], 'wiki.parse.date: zh-classical #3: ' + test_date);
+		assert([ test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'en'), 'en').toISOString() ], 'wiki.parse.date: en #3: ' + test_date);
+		assert([ test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'ja'), 'ja').toISOString() ], 'wiki.parse.date: ja #3: ' + test_date);
 	});
 
 

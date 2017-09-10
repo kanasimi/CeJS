@@ -1211,7 +1211,8 @@ function month_name(ordinal, domain_name) {
 		: Chinese_month_name[ordinal] || to_positional_Chinese_numeral(ordinal);
 
 	case 'en-US':
-		return English_month_name[ordinal];
+		// ordinal: 1–12
+		return month_name[domain_name][ordinal];
 
 	default:
 		return ordinal;
@@ -1254,37 +1255,41 @@ Chinese_date_name = [ '' ];
 	}
 })();
 
-month_name.Chinese_month_name = Chinese_month_name;
-month_name.English_month_name = ',January,February,March,April,May,June,July,August,September,October,November,December'.split(',');
-date_name.Chinese_date_name = Chinese_date_name;
+Object.assign(month_name, {
+	'en-US' : ',January,February,March,April,May,June,July,August,September,October,November,December'.split(','),
+	Chinese : Chinese_month_name
+});
 
-var Chinese_week_name = '日一二三四五六'.split(''),
-//
-Japanese_week_name = '日月火水木金土'.split(''),
-//
-English_week_name = 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(',');
 
 
 function week_name(ordinal, domain_name, full_name) {
-	// assert: ordinal: 0~6
+	// assert: ordinal: 0–6
 	switch (domain_name) {
 	case 'cmn-Hant-TW':
 	case 'cmn-Hans-CN':
 		// number to Chinese week name.
 		// 星期/週/禮拜
-		return (full_name ? '星期' : '') + Chinese_week_name[ordinal];
+		return (full_name ? '星期' : '') + week_name.cmn[ordinal];
 
 	case 'ja-JP':
-		return Japanese_week_name[ordinal] + (full_name ? '曜日' : '');
+		return week_name[domain_name][ordinal] + (full_name ? '曜日' : '');
 
 	case 'en-US':
-		return full_name ? English_week_name[ordinal] : English_week_name[ordinal].slice(0, 3);
+		var full_week_name = week_name[domain_name][ordinal];
+		return full_name ? full_week_name : full_week_name.slice(0, 3);
 
 	default:
 		// unknown domain
 		return ordinal;
 	}
 }
+
+// CeL.gettext.date.week[*]
+Object.assign(week_name, {
+	'en-US' : 'Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(','),
+	'ja-JP' : '日月火水木金土'.split(''),
+	'cmn' : '日一二三四五六'.split('')
+});
 
 
 
@@ -1435,7 +1440,7 @@ gettext.conversion = {
 		'‱' : function (number) {
 			return (10000 * number).to_fixed() + '‱';
 		},
-		// ppm (parts-per-million, 10–6), ppb (parts-per-billion, 10–9), ppt (parts-per-trillion, 10–12) and ppq (parts-per-quadrillion, 10-15).
+		// ppm (parts-per-million, 10–6), ppb (parts-per-billion, 10–9), ppt (parts-per-trillion, 10–12) and ppq (parts-per-quadrillion, 10–15).
 
 		d : gettext.date,
 		t : gettext.time,
