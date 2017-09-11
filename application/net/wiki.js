@@ -567,9 +567,11 @@ function module_code(library_namespace) {
 
 		releases : true
 	}
-	// shortcut
+	// shortcut, namespace aliases.
 	// the key MUST in lower case!
 	// @see [[m:Help:Interwiki linking#Project titles and shortcuts]],
+	// [[mw:Manual:InitialiseSettings.php]]
+	// https://noc.wikimedia.org/conf/highlight.php?file=InitialiseSettings.php
 	// [[:zh:Help:跨语言链接#出現在正文中的連結]]
 	api_URL.alias = {
 		// project with language prefix
@@ -1346,6 +1348,8 @@ function module_code(library_namespace) {
 
 	/** {Object}prototype of {wiki page parser} */
 	var page_prototype = {
+		each_section : for_each_section,
+
 		// for_token
 		// 在執行 .each() 之前，應該先執行 .parse()。
 		each : for_each_token,
@@ -1515,6 +1519,30 @@ function module_code(library_namespace) {
 		traversal_tokens(this, 0);
 
 		return this;
+	}
+
+	// TODO: test
+	// for_section(section)
+	function for_each_section(for_section, options) {
+		if (!this.sections) {
+			var _this = this, section_list = this.sections = [], last_section;
+			this.each('section_title', function(token, index) {
+				var section = _this.slice(
+						last_section ? last_section.index : 0, index);
+				section_list.push(section);
+				if (last_section) {
+					section.section = last_section;
+				}
+				last_section = token;
+				last_section.index = index;
+			}, false, 1);
+			section_list
+					.push(this.slice(last_section ? last_section.index : 0));
+		}
+
+		return this.sections.some(function(section) {
+			return for_section(section);
+		});
 	}
 
 	/**
@@ -3394,6 +3422,8 @@ function module_code(library_namespace) {
 	 * 
 	 * matched: [ all, "title#section" ]
 	 * 
+	 * zh-classical: 重新導向
+	 * 
 	 * @type {RegExp}
 	 * 
 	 * @see https://en.wikipedia.org/wiki/Module:Redirect
@@ -3402,7 +3432,7 @@ function module_code(library_namespace) {
 	 *      https://en.wikipedia.org/wiki/Help:Redirect
 	 *      https://phabricator.wikimedia.org/T68974
 	 */
-	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|転送|넘겨주기)\s*(?::\s*)?\[\[([^\[\]{}\n\|]+)(?:\|[^\[\]{}]+?)?\]\]/i;
+	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|重新導向|転送|넘겨주기)\s*(?::\s*)?\[\[([^\[\]{}\n\|]+)(?:\|[^\[\]{}]+?)?\]\]/i;
 
 	/**
 	 * parse redirect page. 解析重定向資訊。 若 wikitext 重定向到其他頁面，則回傳其{String}頁面名:
