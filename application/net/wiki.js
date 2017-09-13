@@ -1458,7 +1458,7 @@ function module_code(library_namespace) {
 			slice = undefined;
 		}
 
-		if (!this.parsed) {
+		if (!this.parsed && typeof this.parse === 'function') {
 			// 因為本函數為 CeL.wiki.parser(content) 最常使用者，
 			// 因此放在這少一道 .parse() 工序。
 			this.parse();
@@ -1525,19 +1525,28 @@ function module_code(library_namespace) {
 	// for_section(section)
 	function for_each_section(for_section, options) {
 		if (!this.sections) {
-			var _this = this, section_list = this.sections = [], last_section;
+			var _this = this, section_list = this.sections = [], last_section_title;
 			this.each('section_title', function(token, index) {
 				var section = _this.slice(
-						last_section ? last_section.index : 0, index);
+						last_section_title ? last_section_title.index : 0,
+						index);
 				section_list.push(section);
-				if (last_section) {
-					section.section = last_section;
+				// 發言順序
+				section.user_order = [];
+				// 發言時間
+				section.date_order = [];
+				for_each_token.call(section, 'link', function(token) {
+					// TODO
+					console.log(token);
+				});
+				if (last_section_title) {
+					section.section_title = last_section_title;
 				}
-				last_section = token;
-				last_section.index = index;
+				last_section_title = token;
+				last_section_title.index = index;
 			}, false, 1);
-			section_list
-					.push(this.slice(last_section ? last_section.index : 0));
+			section_list.push(this
+					.slice(last_section_title ? last_section_title.index : 0));
 		}
 
 		return this.sections.some(function(section) {
