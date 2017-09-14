@@ -1521,37 +1521,83 @@ function module_code(library_namespace) {
 		return this;
 	}
 
-	// TODO: test
-	// for_section(section)
+	/**
+	 * 為每一個章節執行特定作業 for_section(section)
+	 * 
+	 * @example <code>
+	parser = CeL.wiki.parser(page_data);
+	parser.each_section(function(section, index) {
+		if (index === 0)
+			return;
+		console.log('#' + section.section_title);
+		console.log([ section.users, section.dates ]);
+	}, {
+		get_users : true,
+		// set options[KEY_SESSION] for parse_date()
+		session : wiki
+	});
+	 * </code>
+	 */
 	function for_each_section(for_section, options) {
-		if (!this.sections) {
-			var _this = this, section_list = this.sections = [], last_section_title;
-			this.each('section_title', function(token, index) {
-				var section = _this.slice(
-						last_section_title ? last_section_title.index : 0,
-						index);
-				section_list.push(section);
-				// 發言順序
-				section.user_order = [];
-				// 發言時間
-				section.date_order = [];
-				for_each_token.call(section, 'link', function(token) {
-					// TODO
-					console.log(token);
-				});
-				if (last_section_title) {
-					section.section_title = last_section_title;
-				}
-				last_section_title = token;
-				last_section_title.index = index;
-			}, false, 1);
-			section_list.push(this
-					.slice(last_section_title ? last_section_title.index : 0));
+		options = library_namespace.setup_options(options);
+
+		var _this = this, section_list = this.sections = [], last_section_title;
+		function add_section(index) {
+			var section = _this.slice(
+					last_section_title ? last_section_title.index : 0,
+					index >= 0 ? index : _this.length);
+			if (last_section_title) {
+				section.section_title = last_section_title;
+			}
+			section_list.push(section);
 		}
 
-		return this.sections.some(function(section) {
-			return for_section(section);
-		});
+		this.each('section_title', function(section_title_token, index) {
+			if (!options.all_level && section_title_token.level !== 2) {
+				// 僅處理階級2的章節標題。
+				return;
+			}
+			add_section(index);
+
+			last_section_title = section_title_token;
+			last_section_title.index = index;
+		}, false,
+		// 只檢查第一層。
+		1);
+		// add the last section
+		add_section();
+
+		if (options.get_users) {
+			section_list.forEach(function(section) {
+				// [[WP:TALK]] conversations, dialogues, discussions, messages
+				// section.discussions = [];
+				// 發言順序
+				section.users = [];
+				// 發言時間
+				section.dates = [];
+				for (var section_index = 0, this_user;
+				// 只檢查第一層。
+				section_index < section.length; section_index++) {
+					var token = section[section_index];
+					if (typeof token === 'object') {
+						// assert: wikiprojects 計畫的簽名("~~~~~")必須要先從名稱再有日期。
+						// 因此等到出現日期的時候再來處理。
+						this_user = parse_user(token.toString());
+						// 若是有其他非字串的token介於名稱與日期中間，代表這個名稱可能並不是發言者，那麼就重設名稱。
+						continue;
+					}
+					var date = parse_date(token.toString(), options);
+					if (!date || !this_user) {
+						continue;
+					}
+					section.users.push(this_user);
+					this_user = null;
+					section.dates.push(date);
+				}
+			});
+		}
+
+		return section_list.some(for_section);
 	}
 
 	/**
@@ -2371,6 +2417,7 @@ function module_code(library_namespace) {
 				// Category name
 				parameters.name = normalize_page_name(category_matched[1]);
 			}
+			// TODO: [[Special:]]
 			_set_wiki_type(parameters, file_matched ? 'file'
 					: category_matched ? 'category' : 'link');
 			// [ page_name, section_title, displayed_text without '|' ]
@@ -3219,16 +3266,15 @@ function module_code(library_namespace) {
 			options = {
 				get_timevalue : true
 			};
-		} else if (is_wiki_API(options)) {
-			options = {
-				language : options.language
-			};
 		} else if (options in date_parser_config) {
 			options = {
 				language : options
 			};
 		} else {
 			options = library_namespace.setup_options(options);
+			if (!options.language && options[KEY_SESSION]) {
+				options.language = options[KEY_SESSION].language;
+			}
 		}
 
 		var date_list;
