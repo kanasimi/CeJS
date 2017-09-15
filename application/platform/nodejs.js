@@ -130,6 +130,7 @@ function module_code(library_namespace) {
 
 	// returns undefined if successful
 	function fs_copySync(source, target, overwrite) {
+		// destination
 		if (node_fs.existsSync(target))
 			if (overwrite) {
 				node_fs.unlinkSync(target);
@@ -137,6 +138,8 @@ function module_code(library_namespace) {
 				return new Error('Target file exists: [' + target + ']!');
 			}
 
+		// TODO: use fs.createReadStream(), fs.createWriteStream(, {mode})
+		// https://github.com/coderaiser/fs-copy-file/blob/master/lib/fs-copy-file.js
 		var buffer_length = 1 * 1024 * 1024,
 		//
 		buffer = new Buffer(buffer_length),
@@ -159,7 +162,14 @@ function module_code(library_namespace) {
 
 		copy_attributes(source, target);
 	}
-	_.fs_copySync = fs_copySync;
+	_.fs_copySync = node_fs.copyFileSync ? function(source, target, overwrite) {
+		try {
+			node_fs.copyFileSync(source, target, overwrite ? 0
+					: node_fs.constants.COPYFILE_EXCL);
+		} catch (e) {
+			// TODO: handle exception
+		}
+	} : fs_copySync;
 
 	/**
 	 * create directory / directories
