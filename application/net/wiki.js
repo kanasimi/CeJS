@@ -1541,7 +1541,9 @@ function module_code(library_namespace) {
 	function for_each_section(for_section, options) {
 		options = library_namespace.setup_options(options);
 
-		var _this = this, section_list = this.sections = [], last_section_title;
+		var _this = this,
+		// sections[0]: 常常是設定與公告區，或者放置維護模板。
+		section_list = this.sections = [], last_section_title;
 		function add_section(index) {
 			var section = _this.slice(
 					last_section_title ? last_section_title.index : 0,
@@ -1562,11 +1564,12 @@ function module_code(library_namespace) {
 			last_section_title = section_title_token;
 			last_section_title.index = index;
 		}, false,
-		// 只檢查第一層。
+		// 只檢查第一層之章節標題。
 		1);
 		// add the last section
 		add_section();
 
+		// get topics
 		if (options.get_users) {
 			section_list.forEach(function(section) {
 				// [[WP:TALK]] conversations, dialogues, discussions, messages
@@ -1576,7 +1579,8 @@ function module_code(library_namespace) {
 				// 發言時間
 				section.dates = [];
 				for (var section_index = 0, this_user;
-				// 只檢查第一層。
+				// TODO: 不可只檢查第一層。
+				// check <b>[[User:|]]</b>
 				section_index < section.length; section_index++) {
 					var token = section[section_index];
 					if (typeof token === 'object') {
@@ -1594,11 +1598,46 @@ function module_code(library_namespace) {
 					this_user = null;
 					section.dates.push(date);
 				}
+				var last_update_index = for_each_section.last_user_index(
+						section, true);
+				// section.users[section.last_update_index] = {String}最後更新發言者
+				// section.dates[section.last_update_index] = {Date}最後更新日期
+				if (last_update_index >= 0) {
+					section.last_update_index = last_update_index;
+				}
+				// 回應數量
+				section.replies
+				// 要先有不同的人發言，才能算作有回應。
+				= section.users.unique().length >= 2 ? section.users.length - 1
+						: 0;
 			});
 		}
 
 		return section_list.some(for_section);
 	}
+
+	for_each_section.last_user_index = function filter_last_user_of_section(
+			section, filter) {
+		var last_update_date, last_update_index;
+		section.dates.forEach(function(date, index) {
+			if (date - last_update_date < 0)
+				return;
+
+			var user_name = section.users[index];
+			if (library_namespace.is_Object(filter) ? user_name in filter
+			//
+			: typeof filter === 'function' ? filter(user_name)
+			//
+			: library_namespace.is_RegExp(filter) ? filter.test(user_name)
+			//
+			: typeof filter === 'string' ? filter === user_name : !!filter) {
+				last_update_date = date;
+				last_update_index = index;
+			}
+		});
+
+		return last_update_index;
+	};
 
 	/**
 	 * 設定好，並執行解析頁面的作業。
@@ -2799,10 +2838,13 @@ function module_code(library_namespace) {
 				parameters = [ parameters ];
 			}
 			parameters = _set_wiki_type(parameters, 'section_title');
+
+			// Use plain section_title instead of title with wikitext.
 			// 因為尚未resolve_escaped()，直接使用未parse_wikitext()者會包含未解碼之code!
-			// @see norma
+			// parameters.title = parameters.toString().trim();
 			/** {String}section title in wikitext */
-			parameters.title = parameters.toString().trim();
+			parameters.title = normalize_section_title(parameters.toString());
+
 			if (postfix && !normalize)
 				parameters.postfix = postfix;
 			parameters.level = section_level.length;
@@ -4564,6 +4606,54 @@ function module_code(library_namespace) {
 			page_parser(this.last_page, next[1]);
 			break;
 
+		case 'purge':
+			if (typeof next[1] === 'string' || typeof next[1] === 'number') {
+				// purge() 可以直接輸入頁面，不必先 .page('Title')
+				// wiki.purge('Title', callback, options)
+				// wiki.purge('Title', options)
+				// wiki.purge(pageid, callback, options)
+				// wiki.purge('pageid|pageid', options)
+			} else {
+				// wiki.page('Title').purge()
+				// wiki.page('Title').purge(callback, options)
+				// wiki.page('Title').purge(options)
+				next.splice(1, 0, this.last_page);
+			}
+
+			if (library_namespace.is_Object(next[2]) && !next[3]) {
+				// 直接輸入 options，未輸入 callback。
+				next.splice(2, 0, null);
+			}
+
+			// next: [ 'purge', pages, callback, options ]
+
+			if (!next[1]) {
+				library_namespace
+						.warn('wiki_API.prototype.next.purge: No page inputed!');
+				// next[3] : callback
+				if (typeof next[3] === 'function') {
+					next[3].call(_this, undefined, 'no page');
+				}
+				this.next();
+
+			} else {
+				wiki_API.purge([ this.API_URL, next[1] ],
+				//
+				function wiki_API_next_purge_callback(purge_pages, error) {
+					// next[2] : callback
+					if (typeof next[2] === 'function') {
+						next[2].call(_this, purge_pages, error);
+					}
+					_this.next();
+				},
+				// next[3] : options
+				Object.assign({
+					// [KEY_SESSION]
+					session : this
+				}, next[3]));
+			}
+			break;
+
 		case 'redirect_to':
 			// this.redirect_to(page data, callback, options);
 			if (library_namespace.is_Object(next[2]) && !next[3]) {
@@ -4594,8 +4684,14 @@ function module_code(library_namespace) {
 			break;
 
 		case 'list':
-			// get_list(). e.g., 反向連結/連入頁面.
-			// next[1] : title
+			// get_list(). e.g., 反向連結/連入頁面。
+
+			// next[1] : 大部分是 page title,
+			// 但因為有些方法不需要用到頁面標題(recentchanges,allusers)因此對於這一些方法需要特別處理。
+			if (typeof next[1] === 'function' && typeof next[2] !== 'function') {
+				next.splice(1, 0, '');
+			}
+
 			// 注意: arguments 與 get_list() 之 callback 連動。
 			wiki_API[list_type]([ this.API_URL, next[1] ],
 			//
@@ -5330,7 +5426,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @type {Array}
 	 */
-	wiki_API.prototype.next.methods = 'page,parse,redirect_to,check,copy_from,edit,upload,cache,listen,search,remove,delete,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
+	wiki_API.prototype.next.methods = 'page,parse,redirect_to,purge,check,copy_from,edit,upload,cache,listen,search,remove,delete,protect,rollback,logout,run,set_URL,set_language,set_data,data,edit_data,merge_data,query'
 			.split(',');
 
 	// ------------------------------------------------------------------------
@@ -6355,6 +6451,8 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query
 		if (!/^[a-z]+=/.test(action[1]))
 			action[1] = 'action=' + action[1];
+		var method = action[1].match(/(?:^|&)action=([a-z]+)/);
+		method = method && method[1];
 
 		// respect maxlag. 若為 query，非 edit (modify)，則不延遲等待。
 		var need_check_lag
@@ -6501,14 +6599,15 @@ function module_code(library_namespace) {
 				// 檢查若 options 本身即為 session。
 				|| is_wiki_API(options) && options);
 				if (session) {
-					if (post_data
+					if (method === 'edit' && post_data
 					//
 					&& (!post_data.token || post_data.token === BLANK_TOKEN)
 					// 防止未登錄編輯
 					&& session.token
 					//
 					&& (session.token.lgpassword || session.preserve_password)) {
-						library_namespace.error('未登錄編輯？');
+						// console.log([ action, post_data ]);
+						library_namespace.error('wiki_API.query: 未登錄編輯？');
 						throw new Error('未登錄編輯？');
 					}
 
@@ -7358,6 +7457,67 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// 強制更新/清除緩存並重新載入/重新整理/刷新頁面。
+	// 極端做法：re-edit the same contents
+	// @see https://www.mediawiki.org/w/api.php?action=help&modules=purge
+	wiki_API.purge = function(title, callback, options) {
+		var action = normalize_title_parameter(title, options);
+		if (!action) {
+			throw 'wiki_API.purge: Invalid title: '
+					+ get_page_title_link(title);
+		}
+
+		var POST_parameters = action[1];
+		action[1] = 'purge';
+		if (!action[0]) {
+			action = action[1];
+		}
+
+		wiki_API.query(action, typeof callback === 'function'
+		//
+		&& function(data) {
+			// copy from wiki_API.redirects()
+
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.error(
+				//
+				'wiki_API.purge: [' + error.code + '] ' + error.info);
+				if (data.warnings && data.warnings.query
+				//
+				&& data.warnings.query['*'])
+					library_namespace.warn(data.warnings.query['*']);
+				callback(undefined, error);
+				return;
+			}
+
+			// data:
+			// {"batchcomplete":"","purge":[{"ns":4,"title":"Title","purged":""}]}
+
+			if (!data || !data.purge) {
+				library_namespace.warn(
+				//
+				'wiki_API.purge: Unknown response: ['
+				//
+				+ (typeof data === 'object' && typeof JSON !== 'undefined'
+				//
+				? JSON.stringify(data) : data) + ']');
+				if (library_namespace.is_debug()
+				// .show_value() @ interact.DOM, application.debug
+				&& library_namespace.show_value)
+					library_namespace.show_value(data);
+				callback(undefined, 'Unknown response');
+				return;
+			}
+
+			// callback({Array}pages)
+			callback(data.purge);
+		}, POST_parameters, options);
+	};
+
+	// ------------------------------------------------------------------------
+
 	/**
 	 * 檢查頁面是否被保護。
 	 * 
@@ -7818,7 +7978,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}type
 	 *            one of get_list.type
-	 * @param {String}title
+	 * @param {String}[title]
 	 *            page title 頁面標題。
 	 * @param {Function}callback
 	 *            回調函數。 callback(pages, titles, title)<br />
@@ -7875,7 +8035,7 @@ function module_code(library_namespace) {
 		// {wiki_API}options.continue_session: 藉以取得後續檢索用索引值之 {wiki_API}。
 		// 若未設定 .next_mark，才會自 options.get_continue 取得後續檢索用索引值。
 		continue_session = options.continue_session;
-		if (continue_session)
+		if (continue_session) {
 			if (continue_session.constructor === wiki_API) {
 				library_namespace.debug(
 						'直接傳入了 {wiki_API}；可延續使用上次的後續檢索用索引值，避免重複 loading page。',
@@ -7905,6 +8065,7 @@ function module_code(library_namespace) {
 				library_namespace.debug('傳入的不是 {wiki_API}。 ', 4, 'get_list');
 				continue_session = undefined;
 			}
+		}
 
 		// options.get_continue: 用以取用後續檢索用索引值之 title。
 		// {String}title || {Array}[ API_URL, title ]
@@ -7986,6 +8147,13 @@ function module_code(library_namespace) {
 		+ ('namespace' in options
 		//
 		? '&' + prefix + 'namespace=' + options.namespace : '');
+
+		for ( var parameter in options) {
+			if (parameter.startsWith(prefix)) {
+				title[1] += '&' + parameter + '='
+						+ encodeURIComponent(options[parameter]);
+			}
+		}
 
 		add_parameters(title, options);
 
@@ -8160,6 +8328,9 @@ function module_code(library_namespace) {
 		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Balllinks
 		alllinks : 'al',
 
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Ballusers
+		allusers : 'au',
+
 		/**
 		 * 為頁面標題執行前綴搜索。<br />
 		 * <code>
@@ -8259,10 +8430,6 @@ function module_code(library_namespace) {
 				// assert: 不可改動 method @ IE！
 				var args = [ method ];
 				Array.prototype.push.apply(args, arguments);
-				if (method === 'recentchanges') {
-					// insert title
-					args.splice(1, 0, '');
-				}
 				try {
 					library_namespace.debug('add action: '
 							+ args.map(JSON.stringify).join('<br />\n'), 3,
@@ -9352,8 +9519,8 @@ function module_code(library_namespace) {
 	};
 
 	wiki_API.search.default_parameters = {
-		// module + template + main
-		// srnamespace : '828|10|0',
+		// module + template + category + main
+		// srnamespace : '828|10|14|0',
 
 		srprop : 'redirecttitle',
 		// srlimit : 10,
@@ -10897,7 +11064,9 @@ function module_code(library_namespace) {
 
 		library_namespace.info('add_listener: 開始監視 / scan '
 		//
-		+ (session && session.language || default_language) + ' '
+		+ (session && session.language || default_language)
+		//
+		+ (session && session.project ? '.' + session.project : '') + ' '
 		//
 		+ (Date.now() - last_query_time > 100 ?
 		//
