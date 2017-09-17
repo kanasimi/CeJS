@@ -74,6 +74,8 @@ var compress_tool_set = {
 	},
 
 	'7-Zip' : {
+		// The path of p7z executable file.
+		// TODO: use library_namespace.nodejs.executable_file_path('7z')
 		//	7zG.exe
 		path : '"%ProgramFiles%\\7-Zip\\7z.exe"',
 		extension : '7z',

@@ -78,10 +78,11 @@ function module_code(library_namespace) {
 				&& (fso_status.isFile() || fso_status.isSymbolicLink());
 	};
 
-	_.directory_exists = function directory_exists(directory_path) {
+	function directory_exists(directory_path) {
 		var fso_status = fs_status(directory_path);
 		return fso_status && fso_status.isDirectory();
-	};
+	}
+	_.directory_exists = directory_exists;
 
 	function copy_attributes(source, target) {
 		var file_status;
@@ -582,6 +583,51 @@ function module_code(library_namespace) {
 		// ↑ use ((CeL.env.arg_hash)) to get command line arguments
 		= library_namespace.null_Object());
 	}
+
+	// --------------------------------------------
+
+	function append_path_separator(directory_name) {
+		return /[\\\/]$/.test(directory_name) ? directory_name : directory_name
+				+ library_namespace.env.path_separator;
+	}
+
+	// search $PATH, 搜尋可執行檔案的完整路徑
+	// @see _CeL.updater.node.js
+	function executable_file_path(file_name, search_path_list) {
+		if (!Array.isArray(search_path_list)) {
+			search_path_list = String(search_path_list
+			// Unix: process.env.PATH, Windows: process.env.Path
+			|| process.env.PATH || '');
+
+			// Unix: ':', Windows: ';'
+			search_path_list = search_path_list.split(search_path_list
+					.includes(':\\') ? ';' : ':');
+		}
+
+		if (library_namespace.platform('windows')
+				&& !/\.(?:exe|com|bat)$/i.test(file_name)) {
+			file_name += '.exe';
+		}
+
+		// console.log(search_path_list);
+		if (search_path_list.some(function(directory) {
+			if (!directory_exists(directory)) {
+				return;
+			}
+
+			directory = append_path_separator(directory || '.');
+			// console.log('Test: ' + (directory + file_name));
+			var fso_status = fs_status(directory + file_name);
+			if (fso_status) {
+				file_name = directory + file_name;
+				return file_name;
+			}
+		})) {
+			return file_name;
+		}
+	}
+
+	_.executable_file_path = executable_file_path;
 
 	// --------------------------------------------
 

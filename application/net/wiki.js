@@ -3674,6 +3674,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @example <code>
 	var user_hash = CeL.wiki.parse.user.all(wikitext), user_list = Object.keys(user_hash);
+	var user_list = Object.keys(CeL.wiki.parse.user.all(wikitext));
 	 * </code>
 	 * 
 	 * @param {String}wikitext

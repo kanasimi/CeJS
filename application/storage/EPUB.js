@@ -1847,6 +1847,10 @@ function module_code(library_namespace) {
 		typeof callback === 'function' && callback();
 	}
 
+	// cache the path of p7z executable file
+	var p7zip_path = library_namespace.executable_file_path('7z')
+			|| '%ProgramFiles%\\7-Zip\\7z.exe';
+
 	// package, bale packing 打包 epub
 	function archive_to_ZIP(target_file, remove) {
 		// check arguments
@@ -1905,7 +1909,7 @@ function module_code(library_namespace) {
 		// 注意: 這需要先安裝7z.exe程式
 		library_namespace.write_file(this.path.root + command_file_name, [
 		// @see create_ebook.bat
-		'SET P7Z="C:\\Program Files\\7-Zip\\7z.exe"',
+		'SET P7Z="' + p7zip_path + '"',
 				'SET BOOKNAME="' + ebook_file_name + '"',
 				// store mimetype first
 				'%P7Z% a -tzip -mx=0 -- %BOOKNAME% mimetype',
