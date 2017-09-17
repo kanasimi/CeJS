@@ -1521,6 +1521,202 @@ function module_code(library_namespace) {
 		return this;
 	}
 
+	// ------------------------------------------------------------------------
+
+	/**
+	 * 快速取得 lead section 文字用。
+	 * 
+	 * @example <code>
+	CeL.wiki.lead_text(content);
+	 * </code>
+	 * 
+	 * @param {String}wikitext
+	 *            wikitext to parse
+	 * 
+	 * @returns {String}lead section wikitext 文字
+	 * 
+	 * @see 文章的開頭部分[[WP:LEAD|導言章節]] (lead section, introduction)
+	 */
+	function lead_text(wikitext) {
+		var page_data;
+		if (get_page_content.is_page_data(wikitext)) {
+			page_data = wikitext;
+			wikitext = get_page_content(page_data);
+		}
+		if (!wikitext || typeof wikitext !== 'string') {
+			return wikitext;
+		}
+
+		var matched = wikitext.indexOf('\n=');
+		if (matched >= 0) {
+			wikitext = wikitext.slice(0, matched);
+		}
+
+		// match/去除一開始的維護模板。
+		// <s>[[File:file|[[link]]...]] 因為不容易除盡，放棄處理。</s>
+		while (matched = wikitext.match(/^[\s\n]*({{|\[\[)/)) {
+			// 注意: 此處的 {{ / [[ 可能為中間的 token，而非最前面的一個。但若是沒有中間的 token，則一定是第一個。
+			matched = matched[1];
+			// may use get_page_title_link()
+			var index_end = wikitext.indexOf(matched === '{{' ? '}}' : ']]');
+			if (index_end === NOT_FOUND) {
+				library_namespace.debug('有問題的 wikitext，例如有首 "' + matched
+						+ '" 無尾？ [' + wikitext + ']', 2, 'lead_text');
+				break;
+			}
+			// 須預防 "-{}-" 之類。
+			var index_start = wikitext.lastIndexOf(matched, index_end);
+			wikitext = wikitext.slice(0, index_start)
+			// +2: '}}'.length, ']]'.length
+			+ wikitext.slice(index_end + 2);
+		}
+
+		if (page_data) {
+			page_data.lead_text = lead_text;
+		}
+
+		return wikitext.trim();
+	}
+
+	// 規範化話題/議題/章節標題
+	function normalize_section_title(section_title, callback) {
+		// 不會 reduce '\t'
+		return section_title.replace(/ {2,}/g, ' ').replace(
+				/<\/?[a-z][^<>]*>/g, '')
+		// escape wikilink
+		.replace(/\[\[:?([^\[\]\n]+)\]\]/g, function(all, inner) {
+			return inner.replace(/^[^\|]+\|/, '');
+		})
+		// escape external link
+		// .replace(/\[https?:\/\/[^ ]+ ([^\]]+)\]/ig, '$1')
+
+		// TODO: 這邊僅處理常用模板。正式應該用 parse。
+		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
+		.replace(/{{[Tt]l\s*\|([^{}]*)}}/g, '{{$1}}')
+		// escape control characters
+		.replace(/[{}\|]/g, function(character) {
+			return '&#' + character.charCodeAt(0) + ';';
+		}).trim();
+	}
+
+	// 採用連結的方法([[page.title#section_title|title]])可以免去需要自行解析標題的問題。
+	// also see [[H:MW]], {{anchorencode:章節標題}}, escapeId()
+	// https://phabricator.wikimedia.org/T152540
+	// https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
+
+	/**
+	 * <code>
+
+	CeL.wiki.sections(page_data);
+	page_data.sections.forEach(for_sections, page_data.sections);
+
+	CeL.wiki.sections(page_data)
+	//
+	.forEach(for_sections, page_data.sections);
+
+	 * </code>
+	 */
+
+	// 將 wikitext 拆解為各 section list
+	// get {Array}section list
+	//
+	// @deprecated: 無法處理 '<pre class="c">\n==t==\nw\n</pre>'
+	// use for_each_section() instead.
+	function deprecated_get_sections(wikitext) {
+		var page_data;
+		if (get_page_content.is_page_data(wikitext)) {
+			page_data = wikitext;
+			wikitext = get_page_content(page_data);
+		}
+		if (!wikitext || typeof wikitext !== 'string') {
+			return;
+		}
+
+		var section_list = [], index = 0, last_index = 0,
+		// 章節標題
+		section_title,
+		// [ all title, "=", section title ]
+		PATTERN_section = /\n(={1,2})([^=\n]+)\1\s*\n/g;
+
+		section_list.toString = function() {
+			return this.join('');
+		};
+		// 章節標題list
+		section_list.title = [];
+		// index hash
+		section_list.index = library_namespace.null_Object();
+
+		while (true) {
+			var matched = PATTERN_section.exec(wikitext),
+			// +1 === '\n'.length: skip '\n'
+			// 使每個 section_text 以 "=" 開頭。
+			next_index = matched && matched.index + 1,
+			//
+			section_text = matched ? wikitext.slice(last_index, next_index)
+					: wikitext.slice(last_index);
+
+			if (false) {
+				// 去掉章節標題。
+				section_text.replace(/^==[^=\n]+==\n+/, '');
+			}
+
+			library_namespace.debug('next_index: ' + next_index + '/'
+					+ wikitext.length, 3, 'get_sections');
+			// console.log(matched);
+			// console.log(PATTERN_section);
+
+			if (section_title) {
+				// section_list.title[{Number}index] = {String}section title
+				section_list.title[index] = section_title;
+				if (section_title in section_list) {
+					library_namespace.debug('重複 section title ['
+							+ section_title + '] 將僅取首個 section text。', 2,
+							'get_sections');
+
+				} else {
+					if (!(section_title >= 0)) {
+						// section_list[{String}section title] =
+						// {String}wikitext
+						section_list[section_title] = section_text;
+					}
+
+					// 不採用 section_list.length，預防 section_title 可能是 number。
+					// section_list.index[{String}section title] = {Number}index
+					section_list.index[section_title] = index;
+				}
+			}
+
+			// 不採用 section_list.push(section_text);，預防 section_title 可能是 number。
+			// section_list[{Number}index] = {String}wikitext
+			section_list[index++] = section_text;
+
+			if (matched) {
+				// 紀錄下一段會用到的資料。
+
+				last_index = next_index;
+
+				section_title = matched[2].trim();
+				// section_title = normalize_section_title(section_title);
+			} else {
+				break;
+			}
+		}
+
+		if (page_data) {
+			page_data.sections = section_list;
+			// page_data.lead_text = lead_text(section_list[0]);
+		}
+
+		// 檢核。
+		if (false && wikitext !== section_list.toString()) {
+			// debug 用. check parser, test if parser working properly.
+			throw new Error('get_sections: Parser error'
+			// may use get_page_title_link()
+			+ (page_data ? ': [[' + page_data.title + ']]' : ''));
+		}
+		return section_list;
+	}
+
 	/**
 	 * 為每一個章節執行特定作業 for_section(section)
 	 * 
@@ -1579,18 +1775,35 @@ function module_code(library_namespace) {
 				// 發言時間
 				section.dates = [];
 				for (var section_index = 0, this_user;
-				// TODO: 不可只檢查第一層。
+				// 只檢查第一層。
 				// check <b>[[User:|]]</b>
 				section_index < section.length; section_index++) {
 					var token = section[section_index];
 					if (typeof token === 'object') {
+						// assert: {Array}token
+						token = token.toString();
 						// assert: wikiprojects 計畫的簽名("~~~~~")必須要先從名稱再有日期。
 						// 因此等到出現日期的時候再來處理。
-						this_user = parse_user(token.toString());
-						// 若是有其他非字串的token介於名稱與日期中間，代表這個名稱可能並不是發言者，那麼就重設名稱。
-						continue;
+						var user_list = Object
+								.keys(parse_all_user_links(token));
+						// 因為現在有個性化簽名，需要因應之。
+						if (user_list.length === 1) {
+							this_user = user_list[0];
+						} else {
+							if (user_list.length > 0
+							// 若是有其他非字串的token介於名稱與日期中間，代表這個名稱可能並不是發言者，那麼就重設名稱。
+							|| token.length > 255 - '[[U:n]]'.length) {
+								this_user = undefined;
+							}
+							if (!this_user) {
+								continue;
+							}
+						}
+						// 繼續解析日期，預防有類似 "<b>[[User:]] date</b>" 的情況。
 					}
-					var date = parse_date(token.toString(), options);
+
+					// assert: {String}token
+					var date = parse_date(token, options);
 					if (!date || !this_user) {
 						continue;
 					}
@@ -3301,7 +3514,8 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Date}date of the date string
 	 * 
-	 * @see [[en:Wikipedia:Signatures]], "~~~~~"
+	 * @see [[en:Wikipedia:Signatures]], "~~~~~",
+	 *      [[en:Help:Sorting#Specifying_a_sort_key_for_a_cell]]
 	 */
 	function parse_date(wikitext, options) {
 		if (options === true) {
@@ -3458,48 +3672,55 @@ function module_code(library_namespace) {
 	/**
 	 * parse all user name. 解析所有使用者/用戶對話頁面資訊。 CeL.wiki.parse.user.all()
 	 * 
+	 * @example <code>
+	var user_hash = CeL.wiki.parse.user.all(wikitext), user_list = Object.keys(user_hash);
+	 * </code>
+	 * 
 	 * @param {String}wikitext
 	 *            wikitext to parse/check
 	 * @param {String}[user_name]
-	 *            測試是否有此 user name
+	 *            測試是否有此 user name，return {Integer}此 user name 之連結數量。
 	 * 
-	 * @returns {Boolean}has the user name
-	 * @returns {Array}normalized user name list
+	 * @returns {Integer}link count of the user name
+	 * @returns {Object}normalized user name hash: hash[name] = {Integer}count
 	 */
-	function parse_all_user(wikitext, user_name) {
-		if (!wikitext) {
-			return user_name ? false : [];
-		}
-
-		var matched, user_hash = library_namespace.null_Object(),
-		//
-		check_pattern = function(PATTERN_all) {
+	function parse_all_user_links(wikitext, user_name) {
+		function check_pattern(PATTERN_all) {
 			// reset PATTERN index
 			PATTERN_all.lastIndex = 0;
+			var matched;
 			while (matched = PATTERN_all.exec(wikitext)) {
 				var name = normalize_page_name(matched[1]);
-				if (user_name) {
-					if (user_name === name) {
-						return true;
+				if (!user_name || user_name === name) {
+					if (name in user_hash) {
+						user_hash[name]++;
+					} else {
+						user_hash[name] = 1;
 					}
-					continue;
 				}
-				user_hash[name] = true;
 			}
-		};
+		}
 
-		if (user_name && (user_name = normalize_page_name(user_name))) {
-			return check_pattern(PATTERN_user_link_all)
-					|| check_pattern(PATTERN_user_contributions_link_all);
+		if (user_name) {
+			user_name = normalize_page_name(user_name);
+		}
+
+		var user_hash = library_namespace.null_Object();
+
+		if (!wikitext) {
+			return user_name ? 0 : user_hash;
 		}
 
 		check_pattern(PATTERN_user_link_all);
 		check_pattern(PATTERN_user_contributions_link_all);
-		return Object.keys(user_hash);
+
+		return user_name ? user_name in user_hash[user_name] ? user_hash[user_name]
+				: 0
+				: user_hash;
 	}
 
 	// CeL.wiki.parse.user.all()
-	parse_user.all = parse_all_user;
+	parse_user.all = parse_all_user_links;
 
 	// 由使用者名稱來檢測匿名使用者/未註冊用戶 [[WP:IP]]
 	function is_IP_user(user_name) {
@@ -3811,203 +4032,6 @@ function module_code(library_namespace) {
 		.replace(/<p>([\s\S]+?)<\/p>\n*/g, '$1\n\n')
 		//
 		.replace(/\r?\n/g, '\n').replace(/\n{3,}/g, '\n\n');
-	}
-
-	// ------------------------------------------------------------------------
-
-	/**
-	 * 快速取得 lead section 文字用。
-	 * 
-	 * @example <code>
-	CeL.wiki.lead_text(content);
-	 * </code>
-	 * 
-	 * @param {String}wikitext
-	 *            wikitext to parse
-	 * 
-	 * @returns {String}lead section wikitext 文字
-	 * 
-	 * @see 文章的開頭部分[[WP:LEAD|導言章節]] (lead section, introduction)
-	 */
-	function lead_text(wikitext) {
-		var page_data;
-		if (get_page_content.is_page_data(wikitext)) {
-			page_data = wikitext;
-			wikitext = get_page_content(page_data);
-		}
-		if (!wikitext || typeof wikitext !== 'string') {
-			return wikitext;
-		}
-
-		var matched = wikitext.indexOf('\n=');
-		if (matched >= 0) {
-			wikitext = wikitext.slice(0, matched);
-		}
-
-		// match/去除一開始的維護模板。
-		// <s>[[File:file|[[link]]...]] 因為不容易除盡，放棄處理。</s>
-		while (matched = wikitext.match(/^[\s\n]*({{|\[\[)/)) {
-			// 注意: 此處的 {{ / [[ 可能為中間的 token，而非最前面的一個。但若是沒有中間的 token，則一定是第一個。
-			matched = matched[1];
-			// may use get_page_title_link()
-			var index_end = wikitext.indexOf(matched === '{{' ? '}}' : ']]');
-			if (index_end === NOT_FOUND) {
-				library_namespace.debug('有問題的 wikitext，例如有首 "' + matched
-						+ '" 無尾？ [' + wikitext + ']', 2, 'lead_text');
-				break;
-			}
-			// 須預防 "-{}-" 之類。
-			var index_start = wikitext.lastIndexOf(matched, index_end);
-			wikitext = wikitext.slice(0, index_start)
-			// +2: '}}'.length, ']]'.length
-			+ wikitext.slice(index_end + 2);
-		}
-
-		if (page_data) {
-			page_data.lead_text = lead_text;
-		}
-
-		return wikitext.trim();
-	}
-
-	// 規範化話題/議題/章節標題
-	function normalize_section_title(section_title, callback) {
-		// 不會 reduce '\t'
-		return section_title.replace(/ {2,}/g, ' ').replace(
-				/<\/?[a-z][^<>]*>/g, '')
-		// escape wikilink
-		.replace(/\[\[:?([^\[\]\n]+)\]\]/g, function(all, inner) {
-			return inner.replace(/^[^\|]+\|/, '');
-		})
-		// escape external link
-		// .replace(/\[https?:\/\/[^ ]+ ([^\]]+)\]/ig, '$1')
-
-		// TODO: 這邊僅處理常用模板。正式應該用 parse。
-		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
-		.replace(/{{[Tt]l\s*\|([^{}]*)}}/g, '{{$1}}')
-		// escape control characters
-		.replace(/[{}\|]/g, function(character) {
-			return '&#' + character.charCodeAt(0) + ';';
-		}).trim();
-	}
-
-	// 採用連結的方法([[page.title#section_title|title]])可以免去需要自行解析標題的問題。
-	// also see [[H:MW]], {{anchorencode:章節標題}}, escapeId()
-	// https://phabricator.wikimedia.org/T152540
-	// https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
-
-	/**
-	 * <code>
-
-	CeL.wiki.sections(page_data);
-	page_data.sections.forEach(for_sections, page_data.sections);
-
-	CeL.wiki.sections(page_data)
-	//
-	.forEach(for_sections, page_data.sections);
-
-	 * </code>
-	 */
-
-	// 將 wikitext 拆解為各 section list
-	// get {Array}section list
-	//
-	// @deprecated: 無法處理 '<pre class="c">\n==t==\nw\n</pre>'
-	// use below instead:
-	// CeL.wiki.parser(page_data).each('section_title',function(token,index){console.log('['+index+']'+token.title);},false,1);
-	function deprecated_get_sections(wikitext) {
-		var page_data;
-		if (get_page_content.is_page_data(wikitext)) {
-			page_data = wikitext;
-			wikitext = get_page_content(page_data);
-		}
-		if (!wikitext || typeof wikitext !== 'string') {
-			return;
-		}
-
-		var section_list = [], index = 0, last_index = 0,
-		// 章節標題
-		section_title,
-		// [ all title, "=", section title ]
-		PATTERN_section = /\n(={1,2})([^=\n]+)\1\s*\n/g;
-
-		section_list.toString = function() {
-			return this.join('');
-		};
-		// 章節標題list
-		section_list.title = [];
-		// index hash
-		section_list.index = library_namespace.null_Object();
-
-		while (true) {
-			var matched = PATTERN_section.exec(wikitext),
-			// +1 === '\n'.length: skip '\n'
-			// 使每個 section_text 以 "=" 開頭。
-			next_index = matched && matched.index + 1,
-			//
-			section_text = matched ? wikitext.slice(last_index, next_index)
-					: wikitext.slice(last_index);
-
-			if (false) {
-				// 去掉章節標題。
-				section_text.replace(/^==[^=\n]+==\n+/, '');
-			}
-
-			library_namespace.debug('next_index: ' + next_index + '/'
-					+ wikitext.length, 3, 'get_sections');
-			// console.log(matched);
-			// console.log(PATTERN_section);
-
-			if (section_title) {
-				// section_list.title[{Number}index] = {String}section title
-				section_list.title[index] = section_title;
-				if (section_title in section_list) {
-					library_namespace.debug('重複 section title ['
-							+ section_title + '] 將僅取首個 section text。', 2,
-							'get_sections');
-
-				} else {
-					if (!(section_title >= 0)) {
-						// section_list[{String}section title] =
-						// {String}wikitext
-						section_list[section_title] = section_text;
-					}
-
-					// 不採用 section_list.length，預防 section_title 可能是 number。
-					// section_list.index[{String}section title] = {Number}index
-					section_list.index[section_title] = index;
-				}
-			}
-
-			// 不採用 section_list.push(section_text);，預防 section_title 可能是 number。
-			// section_list[{Number}index] = {String}wikitext
-			section_list[index++] = section_text;
-
-			if (matched) {
-				// 紀錄下一段會用到的資料。
-
-				last_index = next_index;
-
-				section_title = matched[2].trim();
-				// section_title = normalize_section_title(section_title);
-			} else {
-				break;
-			}
-		}
-
-		if (page_data) {
-			page_data.sections = section_list;
-			// page_data.lead_text = lead_text(section_list[0]);
-		}
-
-		// 檢核。
-		if (false && wikitext !== section_list.toString()) {
-			// debug 用. check parser, test if parser working properly.
-			throw new Error('get_sections: Parser error'
-			// may use get_page_title_link()
-			+ (page_data ? ': [[' + page_data.title + ']]' : ''));
-		}
-		return section_list;
 	}
 
 	// ------------------------------------------------------------------------
