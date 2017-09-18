@@ -1906,7 +1906,8 @@ function module_code(library_namespace) {
 
 		var command_file_name = 'create.bat', ebook_file_name = 'book.epub';
 		library_namespace.remove_file(this.path.root + ebook_file_name);
-		// 注意: 這需要先安裝7z.exe程式
+		// 生成 .bat，作業完畢之後就會自動刪除 .bat。
+		// 注意: 這需要先安裝 7z.exe 程式。
 		library_namespace.write_file(this.path.root + command_file_name, [
 		// @see create_ebook.bat
 		'SET P7Z="' + p7zip_path + '"',

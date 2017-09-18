@@ -381,7 +381,7 @@ function module_code(library_namespace) {
 	 * fs.writeFileSync() without throw.
 	 * 
 	 * @example <code>
-	 * CeL.fs_write(path, data, 'utf8');
+	CeL.fs_write(path, data, 'utf8');
 	 * </code>
 	 * 
 	 * @param {String}file_path
@@ -591,8 +591,24 @@ function module_code(library_namespace) {
 				+ library_namespace.env.path_separator;
 	}
 
-	// search $PATH, 搜尋可執行檔案的完整路徑
-	// @see _CeL.updater.node.js
+	/**
+	 * search $PATH, 搜尋可執行檔案的完整路徑。
+	 * 
+	 * @example <code>
+	// cache the path of p7z executable file
+	var p7zip_path = CeL.executable_file_path('7z')
+		|| '%ProgramFiles%\\7-Zip\\7z.exe';
+	 * </code>
+	 * 
+	 * @param {String}file_name
+	 *            要搜尋的執行檔名。
+	 * @param {Array}[search_path_list]
+	 *            搜尋這些目錄路徑。
+	 * 
+	 * @returns {String}可執行檔案的完整路徑。
+	 * 
+	 * @see _CeL.updater.node.js
+	 */
 	function executable_file_path(file_name, search_path_list) {
 		if (!Array.isArray(search_path_list)) {
 			search_path_list = String(search_path_list

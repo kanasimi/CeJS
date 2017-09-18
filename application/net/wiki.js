@@ -126,7 +126,7 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	// TODO: 各種 type 間的轉換: 先要能擷取出 language + project
-	// @see language_to_site()
+	// @see language_to_site_name()
 	//
 	//
 	// type: 'API', 'db', 'site', 'link', 'dump', ...
@@ -686,7 +686,7 @@ function module_code(library_namespace) {
 		}
 	}
 
-	// @see set_default_language(), language_to_site()
+	// @see set_default_language(), language_to_site_name()
 	function setup_API_language(session, language_code) {
 		if (PATTERN_PROJECT_CODE_i.test(language_code)
 		// 不包括 test2.wikipedia.org 之類。
@@ -725,12 +725,13 @@ function module_code(library_namespace) {
 
 		if (typeof namespace === 'string') {
 			var list = [];
-			namespace.toLowerCase()
+			namespace.replace(/[_\s]+/g, '_').toLowerCase()
 			// for ',Template,Category', ';Template;Category',
 			// '|Template|Category'
-			.split(/[,;|]/).forEach(function(n) {
+			// https://www.mediawiki.org/w/api.php?action=help&modules=main#main.2Fdatatypes
+			.split(/(?:[,;|\u001F]|%7C|%1F)/).forEach(function(n) {
 				// get namespace only. e.g., 'wikipedia:sandbox' → 'wikipedia'
-				var _n = n.replace(/:.*$/, '').trim().replace(/\s+/g, '_');
+				var _n = n.replace(/:.*$/, '').trim();
 				if (!_n) {
 					// _n === ''
 					list.push(0);
@@ -782,6 +783,7 @@ function module_code(library_namespace) {
 		// 0: (Main/Article) main namespace 主要(條目內容/內文)命名空間/識別領域
 		// 條目 entry 文章 article: ns = 0, 頁面 page: ns = any. 章節/段落 section
 		'' : 0,
+		main : 0,
 		// 討論對話頁面
 		talk : 1,
 		// 使用者頁面
@@ -1718,7 +1720,7 @@ function module_code(library_namespace) {
 	}
 
 	/**
-	 * 為每一個章節執行特定作業 for_section(section)
+	 * 為每一個章節(討論串)執行特定作業 for_section(section)
 	 * 
 	 * @example <code>
 	parser = CeL.wiki.parser(page_data);
@@ -1750,6 +1752,10 @@ function module_code(library_namespace) {
 			section_list.push(section);
 		}
 
+		// get topics
+		// 讀取每一個章節的資料: 標題,內容
+		// TODO: 不必然是章節，也可以有其它不同的分割方法。
+		// TODO: 可以讀取含入的子頁面
 		this.each('section_title', function(section_title_token, index) {
 			if (!options.all_level && section_title_token.level !== 2) {
 				// 僅處理階級2的章節標題。
@@ -1765,14 +1771,17 @@ function module_code(library_namespace) {
 		// add the last section
 		add_section();
 
-		// get topics
+		// ----------------------------
+
+		// 讀取每一個章節的資料: 參與討論者,討論發言的時間
+		// 統計各討論串中簽名的次數和發言時間。
 		if (options.get_users) {
 			section_list.forEach(function(section) {
 				// [[WP:TALK]] conversations, dialogues, discussions, messages
 				// section.discussions = [];
-				// 發言順序
+				// 發言用戶名順序
 				section.users = [];
-				// 發言時間
+				// 發言時間日期
 				section.dates = [];
 				for (var section_index = 0, this_user;
 				// 只檢查第一層。
@@ -1811,6 +1820,7 @@ function module_code(library_namespace) {
 					this_user = null;
 					section.dates.push(date);
 				}
+				// 最後發言日期
 				var last_update_index = for_each_section.last_user_index(
 						section, true);
 				// section.users[section.last_update_index] = {String}最後更新發言者
@@ -1831,19 +1841,42 @@ function module_code(library_namespace) {
 
 	for_each_section.last_user_index = function filter_last_user_of_section(
 			section, filter) {
-		var last_update_date, last_update_index;
+		var last_update_date, last_update_index,
+		// filter: user_name_filter
+		_filter;
+		if (typeof filter === 'function') {
+			_filter = filter;
+		} else if (Array.isArray(filter)) {
+			_filter = function(user_name) {
+				return filter.includes(user_name);
+			};
+		} else if (library_namespace.is_Object(filter)) {
+			_filter = function(user_name) {
+				return user_name in filter;
+			};
+		} else if (library_namespace.is_RegExp(filter)) {
+			_filter = function(user_name) {
+				return filter.test(user_name);
+			};
+		} else if (typeof filter === 'string') {
+			_filter = function(user_name) {
+				return filter === user_name;
+			};
+		} else if (filter === true) {
+			_filter = function() {
+				return true;
+			};
+		} else {
+			throw 'for_each_section.last_user_index: Invalid filter: ' + filter;
+		}
+
 		section.dates.forEach(function(date, index) {
+			// assert: {Date}date is valid
 			if (date - last_update_date < 0)
 				return;
 
 			var user_name = section.users[index];
-			if (library_namespace.is_Object(filter) ? user_name in filter
-			//
-			: typeof filter === 'function' ? filter(user_name)
-			//
-			: library_namespace.is_RegExp(filter) ? filter.test(user_name)
-			//
-			: typeof filter === 'string' ? filter === user_name : !!filter) {
+			if (_filter(user_name)) {
 				last_update_date = date;
 				last_update_index = index;
 			}
@@ -3610,9 +3643,10 @@ function module_code(library_namespace) {
 	var PATTERN_user_link =
 	// "\/": e.g., [[user talk:user_name/Flow]]
 	// 大小寫無差，但NG: "\n\t"
-	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?) *: *([^#\|\[\]\/]+)/i,
+	/\[\[ *:?(?:[a-z\d\-]{1,14}:?)?(?:user(?:[ _]talk)?|使用者(?:討論)?|用戶(?:討論|對話)?|用户(?:讨论|对话)?|利用者(?:‐会話)?|사용자(?:토론)?) *: *([^#\|\[\]{}\/]+)/i,
+	// [[特殊:功績]]: zh-classical
 	// matched: [ all, " user name " ]
-	PATTERN_user_contributions_link = /\[\[(?:Special|特別) *: *(?:Contributions|使用者貢獻|用戶貢獻|用户贡献|投稿記録)\/([^#\|\[\]\/]+)/i,
+	PATTERN_user_contributions_link = /\[\[(?:Special|特別|特殊) *: *(?:Contributions|使用者貢獻|用戶貢獻|用户贡献|投稿記録|功績)\/([^#\|\[\]{}\/]+)/i,
 	//
 	PATTERN_user_link_all = new RegExp(PATTERN_user_link.source, 'ig'), PATTERN_user_contributions_link_all = new RegExp(
 			PATTERN_user_contributions_link.source, 'ig');
@@ -3627,8 +3661,8 @@ function module_code(library_namespace) {
 	 * @param {String}wikitext
 	 *            wikitext to parse
 	 * @param {String}[user_name]
-	 *            測試是否為此 user name。
-	 *            注意:這只會檢查第一個符合的連結。若一行中有多個連結，應該採用CeL.wiki.parse.user.all()!
+	 *            測試是否為此 user name。 注意:這只會檢查第一個符合的連結。若一行中有多個連結，應該採用
+	 *            CeL.wiki.parse.user.all() !
 	 * @param {Boolean}[to_full_link]
 	 *            get a full link
 	 * 
@@ -3655,6 +3689,7 @@ function module_code(library_namespace) {
 			user_name = undefined;
 		}
 		if (user_name) {
+			// 用戶名正規化
 			user_name = normalize_page_name(user_name);
 			if (user_name !== normalize_page_name(matched[1])) {
 				return false;
@@ -3691,6 +3726,7 @@ function module_code(library_namespace) {
 			PATTERN_all.lastIndex = 0;
 			var matched;
 			while (matched = PATTERN_all.exec(wikitext)) {
+				// 用戶名正規化
 				var name = normalize_page_name(matched[1]);
 				if (!user_name || user_name === name) {
 					if (name in user_hash) {
@@ -6347,7 +6383,7 @@ function module_code(library_namespace) {
 	// this_wiki.copy_from(wiki) 則呼叫時多半已經設定好 wiki，直接在本this_wiki中操作比較不會有同步性問題。
 	// 因為直接採wiki_API.prototype.copy_from()會造成.page().copy_from()時.page()尚未執行完，
 	// 這會使執行.copy_from()時尚未取得.last_page，因此只好另開function。
-	// @see [[Template:Copied]]
+	// @see [[Template:Copied]], [[Special:Log/import]]
 	// TODO: 添加 wikidata 語言連結。處理分類。
 	var wiki_API_prototype_copy_from = function(title, options, callback) {
 		if (typeof options === 'function') {
@@ -8254,6 +8290,11 @@ function module_code(library_namespace) {
 				&& library_namespace.show_value)
 					library_namespace.show_value(next_index,
 							'get_list: get the continue value');
+				if (type.incluses('users') && options.limit === 'max') {
+					library_namespace.warn(
+					//
+					'Too many users so we do not get full list!');
+				}
 
 			} else if (data && ('batchcomplete' in data) && continue_session) {
 				// ↑ check "batchcomplete"
@@ -9493,10 +9534,11 @@ function module_code(library_namespace) {
 	 *      https://www.mediawiki.org/wiki/Help:CirrusSearch
 	 */
 	wiki_API.search = function(key, callback, options) {
-		if (options > 0 || options === 'max')
+		if (options > 0 || options === 'max') {
 			options = {
 				srlimit : options
 			};
+		}
 		var API_URL;
 		if (Array.isArray(key))
 			API_URL = key[0], key = key[1];
@@ -9504,6 +9546,9 @@ function module_code(library_namespace) {
 			// [[:en:Help:Searching/Regex]]
 			// 有無 global flag 結果不同。
 			key = ('insource:' + key).replace(/g([^\/]*)$/, '$1');
+		}
+		if (options.srnamespace) {
+			options.srnamespace = get_namespace(options.srnamespace);
 		}
 
 		var _options;
@@ -9544,8 +9589,7 @@ function module_code(library_namespace) {
 	};
 
 	wiki_API.search.default_parameters = {
-		// module + template + category + main
-		// srnamespace : '828|10|14|0',
+		srnamespace : 'module|template|category|main',
 
 		srprop : 'redirecttitle',
 		// srlimit : 10,
@@ -9988,7 +10032,7 @@ function module_code(library_namespace) {
 	// Wikimedia project code alias
 	// https://github.com/wikimedia/mediawiki/blob/master/languages/LanguageCode.php
 	// language_code_to_site_alias[language code] = project code
-	// @see function language_to_site(language, project)
+	// @see function language_to_site_name(language, project)
 	// @see [[en:Wikimedia_project#Project_codes]]
 	var language_code_to_site_alias = {
 		// als : 'sq',
@@ -10233,7 +10277,7 @@ function module_code(library_namespace) {
 			if (language.API_URL) {
 				// treat language as session.
 				// use set_SQL_config_language()
-				config.set_language(language_to_site(language), !user);
+				config.set_language(language_to_site_name(language), !user);
 			} else {
 				Object.assign(config, language);
 			}
@@ -11553,7 +11597,7 @@ function module_code(library_namespace) {
 			// console.log(options);
 			// console.log(options[KEY_SESSION]);
 			// throw options[KEY_SESSION].language;
-			wiki_site_name = language_to_site(options[KEY_SESSION]
+			wiki_site_name = language_to_site_name(options[KEY_SESSION]
 					|| options.project);
 		}
 
@@ -14686,6 +14730,13 @@ function module_code(library_namespace) {
 	 * project name<br />
 	 * 將語言代碼轉為 Wikidata API 可使用之 site name。
 	 * 
+	 * @example<code>
+
+	// e.g., 'enwiki', 'zhwiki', 'enwikinews'
+	CeL.wiki.site_name(wiki)
+
+	</code>
+	 * 
 	 * @param {String}language
 	 *            語言代碼, project code or session。 e.g., en, zh-classical, ja
 	 * @param {String}[project]
@@ -14697,11 +14748,10 @@ function module_code(library_namespace) {
 	 * @see wikidata_get_site()
 	 * @see https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
 	 * 
-	 * @inner 現階段屬於內部成員。未來可能會改變。
-	 * 
-	 * @since 2017/9/4 20:57:8 整合原先的 language_to_project(), language_to_site()
+	 * @since 2017/9/4 20:57:8 整合原先的 language_to_project(),
+	 *        language_to_site_name()
 	 */
-	function language_to_site(language, project) {
+	function language_to_site_name(language, project) {
 		// 不能保證 is_wiki_API(language) → is_Object(language)，因此使用 typeof。
 		if (typeof language === 'object') {
 			var session = language[KEY_SESSION];
@@ -14740,13 +14790,13 @@ function module_code(library_namespace) {
 			 */
 			var matched = language.match(PATTERN_wiki_project_URL);
 			if (matched) {
-				library_namespace.debug(language, 4, 'language_to_site');
+				library_namespace.debug(language, 4, 'language_to_site_name');
 				project = project || matched[4];
 				// TODO: error handling
 				matched = matched[3]
 				// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
 				+ (project === 'wikipedia' ? 'wiki' : project);
-				library_namespace.debug(matched, 3, 'language_to_site');
+				library_namespace.debug(matched, 3, 'language_to_site_name');
 				return matched;
 			}
 		} else {
@@ -14900,10 +14950,11 @@ function module_code(library_namespace) {
 		}
 		if (false) {
 			library_namespace.debug('language: ' + options + '→'
-					+ language_to_site(language || options), 3,
+					+ language_to_site_name(language || options), 3,
 					'wikidata_get_site');
 		}
-		return get_language ? language : language_to_site(language || options);
+		return get_language ? language : language_to_site_name(language
+				|| options);
 	}
 
 	/**
@@ -14961,7 +15012,7 @@ function module_code(library_namespace) {
 	function get_entity_link(entity, language) {
 		var sitelinks = entity && entity.sitelinks;
 		if (sitelinks) {
-			var link = sitelinks[language_to_site(language)];
+			var link = sitelinks[language_to_site_name(language)];
 			if (link) {
 				return link.title;
 			}
@@ -15192,7 +15243,7 @@ function module_code(library_namespace) {
 		if (key.title) {
 			action = 'sites='
 					+ (key.site || key.language
-							&& language_to_site(key.language) || wikidata_get_site(options))
+							&& language_to_site_name(key.language) || wikidata_get_site(options))
 					+ '&titles=' + encodeURIComponent(key.title);
 		} else {
 			action = 'ids=' + key;
@@ -17739,7 +17790,7 @@ function module_code(library_namespace) {
 			options.id = id;
 
 		} else if (is_api_and_title(id)) {
-			options.site = language_to_site(id[0]);
+			options.site = language_to_site_name(id[0]);
 			options.title = id[1];
 
 		} else {
@@ -18600,6 +18651,8 @@ function module_code(library_namespace) {
 	Object.assign(wiki_API, {
 		api_URL : api_URL,
 		set_language : set_default_language,
+		// site_name_of
+		site_name : language_to_site_name,
 		LTR_SCRIPTS : LTR_SCRIPTS,
 		PATTERN_LTR : PATTERN_LTR,
 		PATTERN_common_characters : PATTERN_common_characters,
