@@ -1581,9 +1581,10 @@ function module_code(library_namespace) {
 	}
 
 	// 規範化話題/議題/章節標題
+	// 警告: 在遇到標題包含模板時，因為不能解析連模板最後產出的結果，會產生錯誤結果，若是用在連結則會失效。
 	function normalize_section_title(section_title, callback) {
 		// 不會 reduce '\t'
-		return section_title.replace(/ {2,}/g, ' ').replace(
+		section_title = section_title.replace(/ {2,}/g, ' ').replace(
 				/<\/?[a-z][^<>]*>/g, '')
 		// escape wikilink
 		.replace(/\[\[:?([^\[\]\n]+)\]\]/g, function(all, inner) {
@@ -1594,17 +1595,24 @@ function module_code(library_namespace) {
 
 		// TODO: 這邊僅處理常用模板。正式應該用 parse。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
-		.replace(/{{[Tt]l\s*\|([^{}]*)}}/g, '{{$1}}')
+		.replace(/{{[Tt]l\s*\|([^{}]*)}}/g, '{{$1}}');
+
+		section_title = section_title.replace(/[{}\|]/g,
 		// escape control characters
-		.replace(/[{}\|]/g, function(character) {
+		function(character) {
 			return '&#' + character.charCodeAt(0) + ';';
-		}).trim();
+		});
+
+		return section_title.trim();
 	}
 
 	// 採用連結的方法([[page.title#section_title|title]])可以免去需要自行解析標題的問題。
 	// also see [[H:MW]], {{anchorencode:章節標題}}, escapeId()
 	// https://phabricator.wikimedia.org/T152540
 	// https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
+
+	// 2017/9/20 18:33:32
+	// 對於包含某些模板(如包含{{para|p}})的情況，即使採用{{anchorencode}}連結依然會失效。現時間並沒有解決方法。
 
 	/**
 	 * <code>
@@ -2472,6 +2480,15 @@ function module_code(library_namespace) {
 						// 如果一個模板中的一個參數使用了多於一個值，則只有最後一個值會在顯示對應模板時顯示。
 						// parser 調用超過一個Template中參數的值，只有最後提供的值會被使用。
 						if (typeof token === 'string') {
+							// 處理某些特殊屬性的值。
+							if (false && /url$/i.test(key)) {
+								try {
+									// 有些參數值會迴避"="，此時使用decodeURIComponent可能會更好。
+									value = decodeURI(value);
+								} catch (e) {
+									// TODO: handle exception
+								}
+							}
 							parameter_index_of[key] = _index;
 							_parameters[key] = value;
 
@@ -9589,7 +9606,7 @@ function module_code(library_namespace) {
 	};
 
 	wiki_API.search.default_parameters = {
-		srnamespace : 'module|template|category|main',
+		srnamespace : get_namespace('module|template|category|main'),
 
 		srprop : 'redirecttitle',
 		// srlimit : 10,

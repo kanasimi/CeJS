@@ -158,13 +158,24 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
+	get_not_exist_filename.PATTERN = /( )?(?:\((\d{1,3})\))?(\.[^.]*)?$/;
+
 	// 找到下一個可用的檔案名稱。若是有重複的檔案存在，則會找到下一個沒有使用的編號為止。
-	function get_not_exist_filename(move_to_path) {
+	// recheck: 從頭檢查起。否則接續之前的序號檢查。
+	// CeL.next_fso_NO_unused("n (2).txt") 先檢查 "n (2).txt", "n (3).txt"，
+	// CeL.next_fso_NO_unused("n (2).txt", true) 先檢查 "n.txt", "n (1).txt"
+	function get_not_exist_filename(move_to_path, recheck) {
 		while (_.fso_status(move_to_path)) {
 			move_to_path = move_to_path.replace(
 			// Get next index that can use.
-			/( )?(?:\((\d{1,3})\))?(\.[^.]*)?$/, function(all, prefix_space,
-					index, extension) {
+			get_not_exist_filename.PATTERN, function(all, prefix_space, index,
+					extension) {
+				if (recheck) {
+					if (index) {
+						recheck = false;
+						return extension || '';
+					}
+				}
 				if (index > 99) {
 					throw 'The index ' + index + ' is too big! '
 					//
