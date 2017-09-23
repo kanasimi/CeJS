@@ -1412,8 +1412,10 @@ function module_code(library_namespace) {
 		if (typeof type === 'function' && max_depth === undefined) {
 			// for_each_token(processor, modify_this, max_depth)
 			// shift arguments.
-			max_depth = modify_this, modify_this = processor, processor = type,
-					type = undefined;
+			max_depth = modify_this;
+			modify_this = processor;
+			processor = type;
+			type = undefined;
 		}
 
 		var options;
@@ -1430,7 +1432,8 @@ function module_code(library_namespace) {
 				&& max_depth === undefined) {
 			// for_each_token(type, processor, max_depth)
 			// shift arguments.
-			max_depth = modify_this, modify_this = undefined;
+			max_depth = modify_this;
+			modify_this = undefined;
 		}
 
 		if (type || type === '') {
@@ -1450,10 +1453,11 @@ function module_code(library_namespace) {
 
 		// options.slice: range index: {Number}start index
 		// || {Array}[ {Number}start index, {Number}end index ]
-		var slice = options.slice;
+		var slice = options.slice, exit;
 		// console.log(slice);
 		if (slice >= 0) {
-			slice = [ slice, ];
+			// 第一層 start from ((slice))
+			slice = [ slice ];
 		} else if (slice && (!Array.isArray(slice) || slice.length > 2)) {
 			library_namespace.warn('for_each_token: Invalid slice: '
 					+ JSON.stringify(slice));
@@ -1475,11 +1479,24 @@ function module_code(library_namespace) {
 				if (!type
 				// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
 				|| type === (Array.isArray(token) ? token.type : 'plain')) {
+					if (options.add_index) {
+						// 假如需要自動設定 .parent, .index 則必須特別指定。
+						// token.parent[token.index] === token
+						token.index = index;
+						token.parent = _this;
+					}
 					// get result. 須注意: 此 token 可能為 Array, string, undefined！
-					// for_each_token(token, token_index, token_parent, depth)
+					// for_each_token(
+					// token, token_index, parent_of_token, depth)
 					var result = processor(token, index, _this, depth);
 					// console.log(modify_this);
 					// console.log(result);
+					if (result === for_each_token.exit) {
+						library_namespace.debug('Abort the operation', 3,
+								'for_each_token');
+						exit = true;
+						return true;
+					}
 					if (modify_this) {
 						if (typeof result === 'string') {
 							// {String}wikitext to ( {Object}element or '' )
@@ -1501,8 +1518,6 @@ function module_code(library_namespace) {
 				// 但這可能性已經在 parse_wikitext() 中偵測並去除。
 				// && type !== 'comment'
 				&& (!max_depth || depth < max_depth)) {
-					token.parent = _this;
-					token.index = index;
 					traversal_tokens(token, depth + 1);
 				}
 			}
@@ -1511,10 +1526,11 @@ function module_code(library_namespace) {
 				// 若有 slice，則以更快的方法遍歷 tokens。
 				for (var index = slice[0] | 0, boundary = slice[1] >= 0 ? Math
 						.min(slice[1] | 0, _this.length) : _this.length; index < boundary; index++) {
-					for_token(_this[index], index);
+					if (for_token(_this[index], index))
+						break;
 				}
-			} else {
-				_this.forEach(for_token);
+			} else if (!exit) {
+				_this.some(for_token);
 			}
 		}
 
@@ -1522,6 +1538,8 @@ function module_code(library_namespace) {
 
 		return this;
 	}
+
+	for_each_token.exit = [ 'abort the operation' ];
 
 	// ------------------------------------------------------------------------
 
@@ -5539,7 +5557,9 @@ function module_code(library_namespace) {
 		}
 		if (message = message.trim()) {
 			this.push((use_ordered_list ? '# ' : '* ')
-					+ (title && (title = get_page_title_link(title)) ? title
+					+ (title && (title = get_page_title_link(title))
+					// 對於非條目作特殊處理。
+					? /^\[\[[^:]+:/.test(title) ? "'''" + title + "'''" : title
 							+ ' ' : '') + message);
 		}
 	}
@@ -7103,6 +7123,14 @@ function module_code(library_namespace) {
 	CeL.wiki.page('史記', function(page_data) {
 		CeL.show_value(page_data);
 	});
+
+	// for many pages, e.g., more than 200, please use:
+	wiki.work({
+		// redirects : 1,
+		each : for_each_page_data,
+		last : last_operation,
+		no_edit : true
+	}, page_list);
 
 	 </code>
 	 * 
@@ -13413,9 +13441,11 @@ function module_code(library_namespace) {
 
 						// typeof content !== 'string'
 						if (!content) {
-							return [ CeL.wiki.edit.cancel,
-							//
-							'No contents: [[' + title + ']]! 沒有頁面內容！' ];
+							return [
+									CeL.wiki.edit.cancel,
+									'No contents: '
+											+ CeL.wiki.title_link_of(page_data)
+											+ '! 沒有頁面內容！' ];
 						}
 
 						var last_edit_Date = CeL.wiki.content_of
@@ -13429,9 +13459,22 @@ function module_code(library_namespace) {
 							// filter patterns
 
 						} else {
-							library_namespace.warn('* No contents: [['
-									+ page_data.title + ']]! 沒有頁面內容！');
+							library_namespace.warn('* No contents: '
+									+ CeL.wiki.title_link_of(page_data)
+									+ '! 沒有頁面內容！');
 						}
+
+						var parser = CeL.wiki.parser(page_data).parse();
+						if (CeL.wiki.content_of(page_data) !== parser
+								.toString()) {
+							console.log(CeL.LCS(CeL.wiki.content_of(page_data),
+									parser.toString(), 'diff'));
+							throw 'parser error';
+						}
+
+						parser.each('link', function(token, index) {
+							console.log(token);
+						});
 					}
 
 					// 註記為 dump。可以 ((messages)) 判斷是在 .work() 中執行或取用 dump 資料。

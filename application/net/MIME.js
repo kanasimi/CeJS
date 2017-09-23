@@ -86,13 +86,21 @@ function module_code(library_namespace) {
 		// common MIME types
 		// 常用 MIME types
 		switch (extension) {
+
+		// https://en.wikipedia.org/wiki/Image_file_formats
 		case 'jpg':
 			extension = 'jpeg';
 		case 'jpeg':
+		case 'bmp':
 		case 'gif':
 		case 'png':
 			// png → image/png
 			return 'image/' + extension;
+
+		case 'ico':
+		case 'icon':
+			// favicon: image/vnd.microsoft.icon
+			return 'image/x-icon';
 
 			// ---------------------------------------------
 
