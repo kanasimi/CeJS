@@ -1327,9 +1327,15 @@ function module_code(library_namespace) {
 		} else if (get_page_content.is_page_data(wikitext)) {
 			// 可以用 "CeL.wiki.parser(page_data).parse();" 來設置 parser。
 			var page_data = wikitext;
-			page_data.parsed = wikitext = [ get_page_content(page_data,
-					options || 0) ];
-			wikitext.page = page_data;
+			if (!page_data.parsed
+			// re-parse
+			|| options && (options.reparse || options.wikitext)) {
+				page_data.parsed = wikitext = [ options && options.wikitext
+						|| get_page_content(page_data, options || 0) ];
+				wikitext.page = page_data;
+			} else {
+				return page_data.parsed;
+			}
 		} else if (!wikitext) {
 			library_namespace.warn('page_parser: No wikitext specified.');
 			wikitext = [];
@@ -1342,13 +1348,13 @@ function module_code(library_namespace) {
 			wikitext.options = options;
 		}
 		// copy prototype methods
-		Object.assign(wikitext, page_prototype);
+		Object.assign(wikitext, page_parser.paser_prototype);
 		set_wiki_type(wikitext, 'plain');
 		return wikitext;
 	}
 
-	/** {Object}prototype of {wiki page parser} */
-	var page_prototype = {
+	/** {Object}prototype of {wiki page parser}, CeL.wiki.parser.paser_prototype */
+	page_parser.paser_prototype = {
 		each_section : for_each_section,
 
 		// for_token
@@ -1748,6 +1754,8 @@ function module_code(library_namespace) {
 	/**
 	 * 為每一個章節(討論串)執行特定作業 for_section(section)
 	 * 
+	 * CeL.wiki.parser.paser_prototype.each_section
+	 * 
 	 * @example <code>
 	parser = CeL.wiki.parser(page_data);
 	parser.each_section(function(section, index) {
@@ -1898,6 +1906,8 @@ function module_code(library_namespace) {
 		return this;
 	}
 
+	// var section_index_filter =
+	// CeL.wiki.parser.paser_prototype.each_section.index_filter;
 	for_each_section.index_filter = function filter_users_of_section(section,
 			filter, type) {
 		// filter: user_name_filter
@@ -1975,10 +1985,13 @@ function module_code(library_namespace) {
 	 * @see parse_wikitext()
 	 */
 	function parse_page(options) {
-		if (!this.parsed) {
+		if (!this.parsed
+		// re-parse
+		|| options && (options.reparse || options.wikitext)) {
 			// assert: this = [ {String} ]
-			var parsed = parse_wikitext(this[0], Object.assign(
-					library_namespace.null_Object(), this.options, options));
+			var parsed = parse_wikitext(options && options.wikitext || this[0],
+					Object.assign(library_namespace.null_Object(),
+							this.options, options));
 			// library_namespace.log(parsed);
 			if (Array.isArray(parsed) && parsed.type === 'plain') {
 				this.pop();
@@ -5928,10 +5941,11 @@ function module_code(library_namespace) {
 		// do a little check.
 		if (Array.isArray(pages) && Array.isArray(titles)
 		//
-		&& pages.length !== titles.length)
+		&& pages.length !== titles.length) {
 			library_namespace.warn(
 			//
 			'wiki_API.work: The length of pages and titles are different!');
+		}
 
 		var main_work = (function(data) {
 			if (!Array.isArray(data)) {
