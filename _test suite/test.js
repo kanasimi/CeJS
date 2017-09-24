@@ -2916,6 +2916,18 @@ function test_wiki() {
 		assert([ test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'zh-classical'), 'zh-classical').toISOString() ], 'wiki.parse.date: zh-classical #3: ' + test_date);
 		assert([ test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'en'), 'en').toISOString() ], 'wiki.parse.date: en #3: ' + test_date);
 		assert([ test_date, CeL.wiki.parse.date(CeL.wiki.parse.date.to_String(new Date(test_date), 'ja'), 'ja').toISOString() ], 'wiki.parse.date: ja #3: ' + test_date);
+
+		wikitext = '\nabc\n123\n';
+		assert([ undefined, CeL.wiki.parser(wikitext).parse().each_section().sections[0].section_title ], 'wiki.parser.each_section #1-1: 沒有章節標題的文章');
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().each_section().sections[0].toString() ], 'wiki.parser.each_section #1-2: 沒有章節標題的文章');
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().each_section().sections.join('|') ], 'wiki.parser.each_section #1-3: 沒有章節標題的文章');
+		wikitext = '==t1==\nabc\n123\n==t2==\n==t3==';
+		assert([ '\nabc\n123\n|\n|', CeL.wiki.parser(wikitext).parse().each_section().sections.join('|') ], 'wiki.parser.each_section #2-1: 以章節標題開頭的文章, 以章節標題結尾的文章, 章節標題+章節標題');
+		assert([ '==t1==', CeL.wiki.parser(wikitext).parse().each_section().sections[0].section_title.toString() ], 'wiki.parser.each_section #2-2: 以章節標題開頭的文章, 以章節標題結尾的文章, 章節標題+章節標題');
+		wikitext = 'cde\n==t1==\nabc\n123\n==t2==\n456';
+		assert([ 'cde\n|\nabc\n123\n|\n456', CeL.wiki.parser(wikitext).parse().each_section().sections.join('|') ], 'wiki.parser.each_section #3-1: 正常文章');
+		assert([ undefined, CeL.wiki.parser(wikitext).parse().each_section().sections[0].section_title ], 'wiki.parser.each_section #3-2: 正常文章');
+		assert([ '==t1==', CeL.wiki.parser(wikitext).parse().each_section().sections[1].section_title.toString() ], 'wiki.parser.each_section #3-3: 正常文章');
 	});
 
 

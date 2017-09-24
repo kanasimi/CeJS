@@ -669,8 +669,7 @@ function module_code(library_namespace) {
 				if (false) {
 					// set User-Agent to use:
 					// Special:ApiFeatureUsage&wpagent=CeJS script_name
-					wiki.get_URL_options.headers['User-Agent'] = CeL.get_URL.default_user_agent
-							+ ' ';
+					wiki.get_URL_options.headers['User-Agent'] = CeL.get_URL.default_user_agent;
 				}
 			}
 
@@ -1524,6 +1523,7 @@ function module_code(library_namespace) {
 
 			if (slice && depth === 0) {
 				// 若有 slice，則以更快的方法遍歷 tokens。
+				// TODO: 可以設定多個範圍，而不是只有一個 range。
 				for (var index = slice[0] | 0, boundary = slice[1] >= 0 ? Math
 						.min(slice[1] | 0, _this.length) : _this.length; index < boundary; index++) {
 					if (for_token(_this[index], index))
@@ -1767,14 +1767,26 @@ function module_code(library_namespace) {
 
 		var _this = this,
 		// sections[0]: 常常是設定與公告區，或者放置維護模板。
-		section_list = this.sections = [], last_section_title;
-		function add_section(index) {
-			var section = _this.slice(
-					last_section_title ? last_section_title.index : 0,
-					index >= 0 ? index : _this.length);
-			if (last_section_title) {
-				section.section_title = last_section_title;
+		section_list = this.sections = [];
+
+		// to test: 沒有章節標題的文章, 以章節標題開頭的文章, 以章節標題結尾的文章, 章節標題+章節標題
+
+		// 加入 **上一個** section, "this_section"
+		function add_section(next_section_title_index) {
+			// section_title === parser[section.range[0] - 1]
+			var this_section_title_index = section_list.length > 0 ? section_list[section_list.length - 1].range[1]
+					: undefined,
+			//
+			range = [ this_section_title_index >= 0
+			// +1: 這個範圍不包括 section_title。
+			? this_section_title_index + 1 : 0, next_section_title_index ],
+			//
+			section = _this.slice(range[0], range[1]);
+			if (this_section_title_index >= 0) {
+				section.section_title = _this[this_section_title_index];
 			}
+			section.range = range;
+			section.toString = _this.toString;
 			section_list.push(section);
 		}
 
@@ -1782,20 +1794,21 @@ function module_code(library_namespace) {
 		// 讀取每一個章節的資料: 標題,內容
 		// TODO: 不必然是章節，也可以有其它不同的分割方法。
 		// TODO: 可以讀取含入的子頁面
-		this.each('section_title', function(section_title_token, index) {
-			if (!options.all_level && section_title_token.level !== 2) {
+		this.each('section_title', function(section_title_token,
+				section_title_index) {
+			if (options.all_level || section_title_token.level === 2) {
 				// 僅處理階級2的章節標題。
-				return;
+				add_section(section_title_index);
 			}
-			add_section(index);
-
-			last_section_title = section_title_token;
-			last_section_title.index = index;
 		}, false,
 		// 只檢查第一層之章節標題。
 		1);
 		// add the last section
-		add_section();
+		add_section(this.length);
+		if (section_list[0].range[1] === 0) {
+			// 第一個章節為空。 e.g., 以章節標題開頭的文章
+			section_list.shift();
+		}
 
 		// ----------------------------
 
@@ -1846,9 +1859,25 @@ function module_code(library_namespace) {
 					this_user = null;
 					section.dates.push(date);
 				}
-				// 最後發言日期
-				var last_update_index = for_each_section.last_user_index(
-						section, true);
+
+				if (false) {
+					parser.each_section();
+					// scan / traversal section templates:
+					parser.each.call(parser.sections[section_index],
+							'template', function(token) {
+								;
+							});
+				}
+
+				if (false) {
+					// 首位發言者, 發起人 index
+					section.initiator_index = parser.each_section.index_filter(
+							section, true, 'first');
+				}
+
+				// 最後發言日期 index
+				var last_update_index = for_each_section.index_filter(section,
+						true, 'last');
 				// section.users[section.last_update_index] = {String}最後更新發言者
 				// section.dates[section.last_update_index] = {Date}最後更新日期
 				if (last_update_index >= 0) {
@@ -1862,18 +1891,22 @@ function module_code(library_namespace) {
 			});
 		}
 
-		return section_list.some(for_section);
+		if (typeof for_section === 'function') {
+			// for_section(section, section_index)
+			section_list.some(for_section);
+		}
+		return this;
 	}
 
-	for_each_section.last_user_index = function filter_last_user_of_section(
-			section, filter) {
-		var last_update_date, last_update_index,
+	for_each_section.index_filter = function filter_users_of_section(section,
+			filter, type) {
 		// filter: user_name_filter
-		_filter;
+		var _filter;
 		if (typeof filter === 'function') {
 			_filter = filter;
 		} else if (Array.isArray(filter)) {
 			_filter = function(user_name) {
+				// TODO: filter.some()
 				return filter.includes(user_name);
 			};
 		} else if (library_namespace.is_Object(filter)) {
@@ -1893,22 +1926,42 @@ function module_code(library_namespace) {
 				return true;
 			};
 		} else {
-			throw 'for_each_section.last_user_index: Invalid filter: ' + filter;
+			throw 'for_each_section.index_filter: Invalid filter: ' + filter;
 		}
+
+		// ----------------------------
+
+		if (!type) {
+			var user_and_date_indexs = [];
+			section.users.forEach(function(user_name, index) {
+				if (_filter(user_name)) {
+					user_and_date_indexs.push(index);
+				}
+			});
+
+			return user_and_date_indexs;
+		}
+
+		// ----------------------------
+
+		var index_specified, date_specified;
 
 		section.dates.forEach(function(date, index) {
 			// assert: {Date}date is valid
-			if (date - last_update_date < 0)
+			date = date.getTime();
+			if (type === 'first' ? date_specified <= date : type === 'last'
+					&& date < date_specified) {
 				return;
+			}
 
 			var user_name = section.users[index];
 			if (_filter(user_name)) {
-				last_update_date = date;
-				last_update_index = index;
+				date_specified = date;
+				index_specified = index;
 			}
 		});
 
-		return last_update_index;
+		return index_specified;
 	};
 
 	/**
@@ -5509,7 +5562,7 @@ function module_code(library_namespace) {
 		// ------------------------------------------------
 
 		default:
-			library_namespace.warn('Unknown operation: [' + next.join() + ']');
+			library_namespace.error('Unknown operation: [' + next.join() + ']');
 			this.next();
 			break;
 		}
@@ -5542,7 +5595,8 @@ function module_code(library_namespace) {
 	/**
 	 * 規範 log 之格式。(for wiki_API.prototype.work)
 	 * 
-	 * 若有必要跳過格式化的訊息，應該自行調用 message.push()。
+	 * 若有必要跳過格式化的訊息，應該自行調用 message.push({String}message) 而非
+	 * message.add({String}message)。
 	 * 
 	 * @param {String}message
 	 *            message
@@ -8335,10 +8389,14 @@ function module_code(library_namespace) {
 				&& library_namespace.show_value)
 					library_namespace.show_value(next_index,
 							'get_list: get the continue value');
-				if (type.incluses('users') && options.limit === 'max') {
-					library_namespace.warn(
+				if (options.limit === 'max' && type.includes('users')) {
+					library_namespace.debug(
 					//
-					'Too many users so we do not get full list!');
+					'Too many users so we do not get full list'
+					//
+					+ (options.augroup ? ' of [' + options.augroup + ']' : '')
+							+ '!', 1, 'get_list');
+					// 必須重複手動呼叫。
 				}
 
 			} else if (data && ('batchcomplete' in data) && continue_session) {
@@ -8729,7 +8787,21 @@ function module_code(library_namespace) {
 							session.token[key] = data[key];
 						}
 					});
+
+					delete session.login_failed_count;
+					// 紀錄最後一次成功登入。
+					// session.last_login = new Date;
 				} else {
+					// login error
+					if (!(session.login_failed_count > 0)) {
+						session.login_failed_count = 1;
+					} else if (++session.login_failed_count > wiki_API.login.MAX_ERROR) {
+						// 連續登入失敗太多次就跳出程序。
+						throw 'wiki_API.login: Login failed '
+								+ session.login_failed_count + ' times! Exit!';
+					}
+					// delete session.last_login;
+
 					/**
 					 * 當沒有登入成功時的處理以及警訊。
 					 * 
@@ -8738,8 +8810,10 @@ function module_code(library_namespace) {
 					 * </code>
 					 */
 					library_namespace.error('wiki_API.login: login ['
-							+ session.token.lgname + '] failed! ['
-							+ data.result + '] ' + data.reason);
+							+ session.token.lgname + '] failed '
+							+ session.login_failed_count + '/'
+							+ wiki_API.login.MAX_ERROR + ': [' + data.result
+							+ '] ' + data.reason);
 					if (data.result !== 'Failed' || data.result !== 'NeedToken') {
 						// Unknown result
 					}
@@ -8828,6 +8902,8 @@ function module_code(library_namespace) {
 
 		return session;
 	};
+
+	wiki_API.login.MAX_ERROR = 8;
 
 	/** {Array}欲 copy 至 session.token 之 keys。 */
 	wiki_API.login.copy_keys = 'lguserid,lgtoken,cookieprefix,sessionid'
@@ -14829,10 +14905,10 @@ function module_code(library_namespace) {
 
 		if (language) {
 			// 正規化。
-			language = String(language).trim().toLowerCase()
-			// e.g., 'zh-min-nan' → 'zh_min_nan'
-			.replace(/[- ]/g, '_');
-			if (language in get_namespace.hash) {
+			language = String(language).trim().toLowerCase();
+			if (language
+			// e.g., 'user talk' → 'user_talk'
+			.replace(/[_\- ]+/g, '_') in get_namespace.hash) {
 				// e.g., input "language" of [[Category:title]]
 				// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
 				// return language;
@@ -14854,6 +14930,8 @@ function module_code(library_namespace) {
 				project = project || matched[4];
 				// TODO: error handling
 				matched = matched[3]
+				// e.g., 'zh-min-nan' → 'zh_min_nan'
+				.replace(/[- ]/g, '_')
 				// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
 				+ (project === 'wikipedia' ? 'wiki' : project);
 				library_namespace.debug(matched, 3, 'language_to_site_name');
