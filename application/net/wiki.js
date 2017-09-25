@@ -1125,7 +1125,7 @@ function module_code(library_namespace) {
 
 	// [ all, file name ]
 	PATTERN_file_prefix = new RegExp('^ *(?:: *)?(?:' + PATTERN_file_prefix
-			+ ') *: *([^\| ][^\| ]*)', 'i');
+			+ ') *: *([^\\[\\]|#]+)', 'i');
 
 	// "Category" 本身可不分大小寫。
 	// 分類名稱重複時，排序索引以後出現者為主。
@@ -1484,7 +1484,7 @@ function module_code(library_namespace) {
 				if (!type
 				// 'plain': 對所有 plain text 或尚未 parse 的 wikitext.，皆執行特定作業。
 				|| type === (Array.isArray(token) ? token.type : 'plain')) {
-					if (options.add_index) {
+					if (options.add_index && typeof token !== 'string') {
 						// 假如需要自動設定 .parent, .index 則必須特別指定。
 						// token.parent[token.index] === token
 						token.index = index;
@@ -1514,6 +1514,10 @@ function module_code(library_namespace) {
 							_this[index] = token = result;
 						}
 					}
+				} else if (options.add_index === 'all'
+						&& typeof token !== 'string') {
+					token.index = index;
+					token.parent = _this;
 				}
 
 				// depth-first search (DFS) 向下層巡覽，再進一步處理。
@@ -1545,7 +1549,7 @@ function module_code(library_namespace) {
 		return this;
 	}
 
-	for_each_token.exit = [ 'abort the operation' ];
+	for_each_token.exit = [ 'for_each_token.exit: abort the operation' ];
 
 	// ------------------------------------------------------------------------
 
@@ -1804,12 +1808,20 @@ function module_code(library_namespace) {
 		// TODO: 可以讀取含入的子頁面
 		this.each('section_title', function(section_title_token,
 				section_title_index) {
-			if (options.all_level || section_title_token.level === 2) {
+			var level = section_title_token.level;
+			if (
+			// e.g., {level_filter:3}
+			1 <= options.level_filter ? level === options.level_filter
+			// e.g., {level_filter:[1,2]}
+			: Array.isArray(options.level_filter) ? options.level_filter
+					.includes(level)
+			// default: level 2
+			: level === 2) {
 				// 僅處理階級2的章節標題。
 				add_section(section_title_index);
 			}
 		}, false,
-		// 只檢查第一層之章節標題。
+		// Only check the first level. 只檢查第一層之章節標題。
 		1);
 		// add the last section
 		add_section(this.length);
@@ -1831,7 +1843,7 @@ function module_code(library_namespace) {
 				// 發言時間日期
 				section.dates = [];
 				for (var section_index = 0, this_user;
-				// 只檢查第一層。
+				// Only check the first level. 只檢查第一層。
 				// check <b>[[User:|]]</b>
 				section_index < section.length; section_index++) {
 					var token = section[section_index];
@@ -7197,7 +7209,10 @@ function module_code(library_namespace) {
 		// redirects : 1,
 		each : for_each_page_data,
 		last : last_operation,
-		no_edit : true
+		no_edit : true,
+		page_options : {
+			redirects : 1
+		}
 	}, page_list);
 
 	 </code>
@@ -7488,6 +7503,7 @@ function module_code(library_namespace) {
 
 			var convert_from;
 			if (data.query.converted) {
+				// 記錄經過轉換的標題。
 				page_list.converted = data.query.converted;
 				if (Array.isArray(data.query.converted)) {
 					convert_from = library_namespace.null_Object();
@@ -7541,6 +7557,7 @@ function module_code(library_namespace) {
 
 				// 可以利用 page_data.convert_from 來判別標題是否已經過繁簡轉換。
 				if (convert_from && convert_from[page.title]) {
+					// .from_title, .convert_from_title
 					page.convert_from = convert_from[page.title];
 				}
 				page_list.push(page);
@@ -11410,10 +11427,13 @@ function module_code(library_namespace) {
 					// 篩選PATTERN
 					? function(row) {
 						return row.title && options.filter.test(row.title);
+					} : Array.isArray(options.filter) ? function(row) {
+						return row.title && options.filter.includes(row.title);
 					} : function(row) {
 						if (false)
 							library_namespace.log([ row.title, options.filter,
 									normalize_page_name(options.filter) ]);
+						// assert: typeof options.filter === 'string'
 						return row.title
 						// treat options.filter as page title
 						&& (row.title.includes(options.filter)
@@ -11693,6 +11713,7 @@ function module_code(library_namespace) {
 		receive();
 	}
 
+	// wiki.listen()
 	wiki_API.listen = add_listener;
 
 	// --------------------------------------------------------------------------------------------
