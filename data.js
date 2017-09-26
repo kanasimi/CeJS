@@ -1722,7 +1722,7 @@ function parse_bencode(data, status, is_ASCII) {
 					library_namespace.error(
 					//
 					'The end of string is beyond the end of data! (ask '
-					//
+					// remaining
 					+ (index + tmp) + ' - data left ' + data.length
 							+ ' = lost ' + (index + tmp - data.length) + ')');
 				// tmp: length of string.

@@ -3801,10 +3801,12 @@ function module_code(library_namespace) {
 			to_full_link = user_name;
 			user_name = undefined;
 		}
+		// 正規化連結中的使用者名稱。
+		var name_from_link = normalize_page_name(matched[1]);
 		if (user_name) {
 			// 用戶名正規化
 			user_name = normalize_page_name(user_name);
-			if (user_name !== normalize_page_name(matched[1])) {
+			if (user_name !== name_from_link) {
 				return false;
 			}
 			if (!to_full_link) {
@@ -3813,8 +3815,8 @@ function module_code(library_namespace) {
 		}
 
 		// may use get_page_title_link()
-		return to_full_link ? via_contributions ? '[[User:' + matched[1] + ']]'
-				: matched[0].trimEnd() + ']]' : matched[1].trim();
+		return to_full_link ? via_contributions ? '[[User:' + name_from_link
+				+ ']]' : matched[0].trimEnd() + ']]' : name_from_link;
 	}
 
 	/**
@@ -4732,7 +4734,9 @@ function module_code(library_namespace) {
 			// → 此法會採用所輸入之 page data 作為 this.last_page，不再重新擷取 page。
 			if (get_page_content.is_page_data(next[1])
 			// 必須有頁面內容，要不可能僅有資訊。有時可能已經擷取過卻發生錯誤而沒有頁面內容，此時依然會再擷取一次。
-			&& get_page_content.has_content(next[1])) {
+			&& (get_page_content.has_content(next[1])
+			// 除非剛剛才取得，同一個執行緒中不需要再度取得內容。
+			|| next[3] && next[3].allow_missing && ('missing' in next[1]))) {
 				library_namespace.debug('採用所輸入之 '
 						+ get_page_title_link(next[1]) + ' 作為 this.last_page。',
 						2, 'wiki_API.prototype.next');
@@ -5009,8 +5013,11 @@ function module_code(library_namespace) {
 					library_namespace
 							.warn('wiki_API.prototype.next: The page to edit is Flow. I can not edit it directly.');
 					// next[3] : callback
-					if (typeof next[3] === 'function')
+					if (typeof next[3] === 'function') {
+						// 2017/9/18 Flow已被重新定義為結構化討論（Structured Discussions）。
+						// is [[mw:Structured Discussions]].
 						next[3].call(this, this.last_page.title, 'is Flow');
+					}
 					this.next();
 
 				} else if (!this.last_page.header) {
@@ -6123,7 +6130,7 @@ function module_code(library_namespace) {
 
 			library_namespace.debug('for each page: 主要機制是把工作全部推入 queue。', 2,
 					'wiki_API.work');
-			// cf. ((done))
+			// 剩下的頁面數量 pages remaining. cf. ((done))
 			var pages_left = 0;
 			if (pages.length > 0) {
 				pages.forEach(function for_each_page(page, index) {
@@ -6159,7 +6166,9 @@ function module_code(library_namespace) {
 					if (config.no_edit) {
 						// 不作編輯作業。
 						// 取得頁面內容。
+						// console.log(page);
 						this.page(page, function(page_data, error) {
+							// console.log([ page_data, config.page_options ]);
 							each.call(this, page_data, messages, config);
 							if (messages.quit_operation) {
 								clear_work.call(this);
@@ -6167,18 +6176,14 @@ function module_code(library_namespace) {
 							if (--pages_left === 0) {
 								finish_up.call(this);
 							}
-						},
-						// e.g., page_options:{rvprop:'ids|content|timestamp'}
-						// @see
-						// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
-						config.page_options);
+						}, single_page_options);
 
 					} else {
 						// clone() 是為了能個別改變 summary。
 						// 例如: each() { options.summary += " -- ..."; }
 						var work_options = Object.clone(options);
 						// 取得頁面內容。一頁頁處理。
-						this.page(page, null, config.page_options)
+						this.page(page, null, single_page_options)
 						// 編輯頁面內容。
 						.edit(function(page_data) {
 							// edit/process
@@ -6395,6 +6400,9 @@ function module_code(library_namespace) {
 
 		var target = pages || titles,
 		// 首先取得多個頁面內容所用之 options。
+		// e.g., page_options:{rvprop:'ids|content|timestamp'}
+		// @see
+		// https://www.mediawiki.org/w/api.php?action=help&modules=query%2Brevisions
 		page_options = Object.assign({
 			is_id : config.is_id,
 			multi : true
@@ -6405,6 +6413,15 @@ function module_code(library_namespace) {
 		slice_size = config.slice >= 1 ? Math.min(config.slice | 0, 500) : 500,
 		/** {ℕ⁰:Natural+0}自此 index 開始繼續作業 */
 		work_continue = 0, this_slice_size, setup_target;
+
+		// 個別頁面會採用的 page options 選項。
+		var single_page_options = Object.assign({
+			// 已經在多個頁面的時候取得過內容，因此不需要再確認一次。只是要過個水設定一下。
+			// 若是沒有設定這個選項，那麼對於錯誤的頁面，將會再嘗試取得。
+			allow_missing : true,
+		}, config.page_options);
+		// 在個別頁面還採取 .multi 這個選項會造成錯誤。
+		delete single_page_options.multi;
 
 		if (!config.no_edit) {
 			var check_options = config.check_options;
@@ -7072,8 +7089,9 @@ function module_code(library_namespace) {
 
 		if (Array.isArray(page_data)) {
 			// auto detect multi
-			if (multi === undefined)
+			if (multi === undefined) {
 				multi = pageid.length > 1;
+			}
 
 			pageid = [];
 			// 確認所有 page_data 皆有 pageid 屬性。
@@ -7193,6 +7211,11 @@ function module_code(library_namespace) {
 		});
 	}
 
+	// assert: !!KEY_KEEP_INDEX === true
+	var KEY_KEEP_INDEX = 'keep index',
+	// assert: !!KEY_KEEP_ORDER === true
+	KEY_KEEP_ORDER = 'keep order';
+
 	/**
 	 * 讀取頁面內容，取得頁面源碼。可一次處理多個標題。
 	 * 
@@ -7211,6 +7234,7 @@ function module_code(library_namespace) {
 		last : last_operation,
 		no_edit : true,
 		page_options : {
+			// multi : 'keep index',
 			redirects : 1
 		}
 	}, page_list);
@@ -7501,12 +7525,25 @@ function module_code(library_namespace) {
 
 			}
 
+			var redirect_from;
+			if (data.query.redirects) {
+				page_list.redirects = data.query.redirects;
+				if (Array.isArray(data.query.redirects)) {
+					page_list.redirect_from
+					// 記錄經過重導向的標題。
+					= redirect_from = library_namespace.null_Object();
+					data.query.redirects.forEach(function(item) {
+						redirect_from[item.to] = item.from;
+					});
+				}
+			}
 			var convert_from;
 			if (data.query.converted) {
-				// 記錄經過轉換的標題。
 				page_list.converted = data.query.converted;
 				if (Array.isArray(data.query.converted)) {
-					convert_from = library_namespace.null_Object();
+					page_list.convert_from
+					// 記錄經過轉換的標題。
+					= convert_from = library_namespace.null_Object();
 					data.query.converted.forEach(function(item) {
 						convert_from[item.to] = item.from;
 					});
@@ -7518,10 +7555,10 @@ function module_code(library_namespace) {
 			var need_warn = get_content;
 
 			for ( var pageid in pages) {
-				var page = pages[pageid];
-				if (!get_page_content.has_content(page)) {
+				var page_data = pages[pageid];
+				if (!get_page_content.has_content(page_data)) {
 
-					if (continue_id && continue_id === page.pageid) {
+					if (continue_id && continue_id === page_data.pageid) {
 						// 找到了 page_list.continue 所指之 index。
 						// effect length
 						page_list.OK_length = page_list.length;
@@ -7532,15 +7569,21 @@ function module_code(library_namespace) {
 					if (need_warn) {
 						library_namespace.warn('wiki_API.page: '
 						// 此頁面不存在/已刪除。Page does not exist. Deleted?
-						+ ('missing' in page ? 'Not exists' : 'No contents')
+						+ ('missing' in page_data
+						// e.g., 'wiki_API.page: Not exists: [[title]]'
+						? 'Not exists' : 'No contents')
 						// may use get_page_title_link()
-						+ ': ' + (page.title ? '[[' + page.title + ']]'
+						+ ': ' + (page_data.title
 						//
-						: 'id ' + page.pageid));
+						? '[[' + page_data.title + ']]'
+						//
+						: 'id ' + page_data.pageid));
 					}
 
 				} else if (page_cache_prefix) {
-					node_fs.writeFile(page_cache_prefix + page.title + '.json',
+					node_fs.writeFile(page_cache_prefix
+					//
+					+ page_data.title + '.json',
 					/**
 					 * 寫入cache。
 					 * 
@@ -7555,12 +7598,18 @@ function module_code(library_namespace) {
 					});
 				}
 
-				// 可以利用 page_data.convert_from 來判別標題是否已經過繁簡轉換。
-				if (convert_from && convert_from[page.title]) {
-					// .from_title, .convert_from_title
-					page.convert_from = convert_from[page.title];
+				if (redirect_from && redirect_from[page_data.title]) {
+					page_data.original_title
+					// .from_title, .redirect_from_title
+					= page_data.redirect_from = redirect_from[page_data.title];
 				}
-				page_list.push(page);
+				// 可以利用 page_data.convert_from 來判別標題是否已經過繁簡轉換。
+				if (convert_from && convert_from[page_data.title]) {
+					page_data.original_title
+					// .from_title, .convert_from_title
+					= page_data.convert_from = convert_from[page_data.title];
+				}
+				page_list.push(page_data);
 			}
 
 			if (data.warnings && data.warnings.query
@@ -7622,6 +7671,71 @@ function module_code(library_namespace) {
 					//
 					+ 'passed to the callback as Array!', 2, 'wiki_API.page');
 				}
+
+			} else if ((options.multi === KEY_KEEP_INDEX
+			// options.keep_order
+			|| options.multi === KEY_KEEP_ORDER)
+			//
+			&& is_api_and_title(title, true)
+			//
+			&& Array.isArray(title[1]) && title[1].length >= 2) {
+				var order_hash = title[1].to_hash(), ordered_list = [];
+				// console.log(title[1].join('|'));
+				// console.log(order_hash);
+
+				if (false) {
+					// another method
+					// re-sort page list
+					page_list.sort(function(page_data_1, page_data_2) {
+						return order_hash[page_data_1.original_title
+						//
+						|| page_data_1.title]
+						//
+						- order_hash[page_data_2.original_title
+						//
+						|| page_data_2.title];
+					});
+					console.log(page_list.map(function(page_data) {
+						return page_data.original_title
+						//
+						|| page_data.title;
+					}).join('|'));
+					throw 're-sort page list';
+				}
+
+				// 維持頁面的順序與輸入的相同。
+				page_list.forEach(function(page_data) {
+					var original_title = page_data.original_title
+					//
+					|| page_data.title;
+					if (original_title in order_hash) {
+						ordered_list[order_hash[original_title]] = page_data;
+					} else {
+						throw 'wiki_API.page: 取得了未指定的頁面: '
+						//
+						+ get_page_title_link(original_title);
+					}
+				});
+				// 緊湊化，去掉沒有設定到的頁面。
+				if (options.multi === KEY_KEEP_ORDER) {
+					ordered_list = ordered_list.filter(function(page_data) {
+						return !!page_data;
+					});
+				}
+
+				// copy attributes form original page_list
+				[ 'OK_length', 'truncated',
+				//
+				'redirects', 'redirect_from', 'converted', 'convert_from' ]
+				// 需要注意page_list可能帶有一些已經設定的屬性值，因此不能夠簡單的直接指派到另外一個值。
+				.forEach(function(attribute_name) {
+					if (attribute_name in page_list) {
+						ordered_list[attribute_name]
+						//
+						= page_list[attribute_name];
+					}
+				});
+				page_list = ordered_list;
 			}
 
 			if (options.save_response) {
@@ -8873,6 +8987,12 @@ function module_code(library_namespace) {
 		if (!session) {
 			// 初始化 session 與 agent。這裡 callback 當作 API_URL。
 			session = new wiki_API(name, password, API_URL);
+		}
+		if (!name || !password) {
+			library_namespace
+					.warn('wiki_API.login: User name or password not setted. Stop login.');
+			// console.trace('Stop login');
+			return session;
 		}
 
 		// copy configurations
@@ -14159,11 +14279,19 @@ function module_code(library_namespace) {
 		}
 
 		// set Wikidata session
-		session.data_session = wiki_API.login(session.token.lgname,
+		var data_config = [ session.token.lgname,
 		// wiki.set_data(host session, password)
 		password || session.token.lgpassword,
 		// API_URL: host session
-		typeof API_URL === 'string' && api_URL(API_URL) || wikidata_API_URL);
+		typeof API_URL === 'string' && api_URL(API_URL) || wikidata_API_URL ];
+		if (data_config[0] && data_config[1]) {
+			session.data_session = wiki_API.login(data_config[0],
+					data_config[1], data_config[2]);
+		} else {
+			session.data_session = new wiki_API(data_config[0], data_config[1],
+					data_config[2]);
+		}
+
 		// setup 宿主 host session.
 		session.data_session[KEY_HOST_SESSION] = session;
 		session.data_session.run(callback);

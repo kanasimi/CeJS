@@ -1420,7 +1420,9 @@ function module_code(library_namespace) {
 	}
 
 	function get_chapter_data(work_data, chapter, callback) {
-		var _this = this, left, image_list, waiting, chapter_label,
+		var _this = this,
+		// remaining
+		left, image_list, waiting, chapter_label,
 		//
 		chapter_URL = this.chapter_URL(work_data, chapter);
 		chapter_URL = this.full_URL(chapter_URL);
