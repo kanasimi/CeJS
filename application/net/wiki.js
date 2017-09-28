@@ -1623,7 +1623,10 @@ function module_code(library_namespace) {
 
 		// TODO: 這邊僅處理常用模板。正式應該用 parse。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
-		.replace(/{{[Tt]l\s*\|([^{}]*)}}/g, '{{$1}}');
+		.replace(/{{[Tt]l\s*\|([^{}]*)}}/g, '{{$1}}')
+
+		// 去除粗體與斜體。
+		.replace(/'''(.*?)'''/g, '$1').replace(/''(.*?)''/g, '$1');
 
 		section_title = section_title.replace(/[{}\|]/g,
 		// escape control characters
