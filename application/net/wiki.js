@@ -3668,7 +3668,8 @@ function module_code(library_namespace) {
 			options = {
 				get_timevalue : true
 			};
-		} else if (options in date_parser_config) {
+		} else if (typeof options === 'string'
+				&& (options in date_parser_config)) {
 			options = {
 				language : options
 			};
