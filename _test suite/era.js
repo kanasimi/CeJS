@@ -257,6 +257,7 @@ default_column = [
 auto_add_column.日本 = auto_add_column.한국 = auto_add_column['Việt Nam'] = auto_add_column.中國;
 
 function pin_text(gettext) {
+	// unfold / fold
 	var text = pin_column ? 'Unpin' : 'Pin';
 	if (gettext)
 		text = _(text);

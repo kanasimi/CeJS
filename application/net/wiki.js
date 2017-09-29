@@ -125,7 +125,7 @@ function module_code(library_namespace) {
 
 	// --------------------------------------------------------------------------------------------
 
-	// TODO: 各種 type 間的轉換: 先要能擷取出 language + project
+	// TODO: 各種 type 間的轉換: 先要能擷取出 language code + family
 	// @see language_to_site_name()
 	//
 	//
@@ -135,7 +135,7 @@ function module_code(library_namespace) {
 	// https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities
 	// site: e.g., 'zhwiki'
 	//
-	// https://en.wikipedia.org/wiki/Help:Interwikimedia_links
+	// [[en:Help:Interwikimedia_links]]
 	// https://zh.wikipedia.org/wiki/Special:GoToInterwiki/testwiki:
 	// link prefix: e.g., 'zh:n:' for zh.wikinews
 	//
@@ -146,14 +146,14 @@ function module_code(library_namespace) {
 	// db: e.g., 'zhwiki_p'
 	//
 	//
-	// language (or project): default: default_language
+	// language (or family/project): default: default_language
 	// e.g., 'en', 'zh-classical', 'ja', ...
 	//
-	// project = language.family
+	// project = language_code.family
 	//
-	// https://meta.wikimedia.org/wiki/List_of_Wikimedia_projects_by_size
+	// [[meta:List of Wikimedia projects by size]]
 	// family: 'wikipedia' (default), 'news', 'source', 'books', 'quote', ...
-	function get_project(language, project, type) {
+	function get_project(language, family, type) {
 		;
 	}
 
@@ -480,7 +480,7 @@ function module_code(library_namespace) {
 	 * 
 	 * matched: [ 0: protocol + host name, 1: protocol, 2: host name,<br />
 	 * 3: 第一 domain name (e.g., language code / project),<br />
-	 * 4: 第二 domain name (e.g., project: 'wikipedia') ]
+	 * 4: 第二 domain name (e.g., family: 'wikipedia') ]
 	 * 
 	 * @type {RegExp}
 	 * 
@@ -493,6 +493,8 @@ function module_code(library_namespace) {
 
 	/**
 	 * Get the API URL of specified project.
+	 * 
+	 * project = language_code.family
 	 * 
 	 * @param {String}project
 	 *            wiki project, domain or language. 指定維基百科語言/姊妹計劃<br />
@@ -519,7 +521,7 @@ function module_code(library_namespace) {
 		if (PATTERN_PROJECT_CODE_i.test(project)) {
 			if (lower_case in api_URL.wikimedia) {
 				project += '.wikimedia';
-			} else if (lower_case in api_URL.project) {
+			} else if (lower_case in api_URL.family) {
 				// (default_language || 'www') + '.' + project
 				project = default_language + '.' + project;
 			} else if (/wik/i.test(project)) {
@@ -601,9 +603,9 @@ function module_code(library_namespace) {
 
 		betawikiversity : 'beta.wikiversity'
 	};
-	// project with language prefix
+	// families must with language prefix
 	// the key MUST in lower case!
-	api_URL.project = {
+	api_URL.family = {
 		wikipedia : true,
 		wikibooks : true,
 		wikinews : true,
@@ -649,7 +651,7 @@ function module_code(library_namespace) {
 			delete session.last_page;
 			delete session.last_data;
 			// force to login again: see wiki_API.login
-			// 據測試，不同 project 間之 token 不能通用。
+			// 據測試，不同 projects 間之 token 不能通用。
 			delete session.token.csrftoken;
 			delete session.token.lgtoken;
 			// library_namespace.set_debug(6);
@@ -681,7 +683,7 @@ function module_code(library_namespace) {
 				&& !/test|wiki/i.test(matched[3])
 				&& ((matched = matched[4].toLowerCase()) in api_URL.shortcut_of_project)) {
 			// e.g., "wikipedia"
-			session.project = matched;
+			session.family = matched;
 		}
 	}
 
@@ -3576,7 +3578,7 @@ function module_code(library_namespace) {
 
 	// ----------------------------------------------------
 
-	// 因應不同的 mediawiki project 來處理日期。
+	// 因應不同的 mediawiki projects 來處理日期。
 	// date_parser_config[language]
 	// = [ {RegExp}PATTERN, {Function}parser({Array}matched) : return {String},
 	// {Function}to_String({Date}date) : return {String} ]
@@ -3955,8 +3957,8 @@ function module_code(library_namespace) {
 	/**
 	 * Wikipedia:Wikimedia sister projects 之 URL 匹配模式。
 	 * 
-	 * matched: [ all, 第一 domain name (e.g., language code / project), title
-	 * 條目名稱, section 章節, link說明 ]
+	 * matched: [ all, 第一 domain name (e.g., language code / family / project),
+	 * title 條目名稱, section 章節, link說明 ]
 	 * 
 	 * TODO: /wiki/條目#hash 說明
 	 * 
@@ -4077,13 +4079,13 @@ function module_code(library_namespace) {
 			return compose_link();
 		}
 
-		// 若非外project 或不同 language，則直接 callback(link)。
+		// 若非外 project 或不同 language，則直接 callback(link)。
 		if (section || language === default_language) {
 			callback(compose_link());
 			return;
 		}
 
-		// 嘗試取得本project 之對應連結。
+		// 嘗試取得本 project 之對應連結。
 		wiki_API.langlinks([ language, title ], function(to_title) {
 			if (to_title) {
 				language = default_language;
@@ -4436,9 +4438,9 @@ function module_code(library_namespace) {
 		if (session && session.language && !project_prefixed) {
 			// e.g., [[:zh:w:title]]
 			title = session.language + ':' + title;
-			if (session.project
-					&& (session.project in api_URL.shortcut_of_project)) {
-				title = api_URL.shortcut_of_project[session.project] + ':'
+			if (session.family
+					&& (session.family in api_URL.shortcut_of_project)) {
+				title = api_URL.shortcut_of_project[session.family] + ':'
 						+ title;
 			} else {
 				need_escape = true;
@@ -9896,6 +9898,8 @@ function module_code(library_namespace) {
 	 *            替代。<br />
 	 *            {Boolean}options.include_root 回傳 list 包含 title，而不只是所有 redirect
 	 *            到 [[title]] 之 pages。
+	 * 
+	 * @see [[Special:DoubleRedirects]]
 	 */
 	wiki_API.redirects = function(title, callback, options) {
 		// 正規化並提供可隨意改變的同內容參數，以避免修改或覆蓋附加參數。
@@ -11411,7 +11415,7 @@ function module_code(library_namespace) {
 		//
 		+ (session && session.language || default_language)
 		//
-		+ (session && session.project ? '.' + session.project : '') + ' '
+		+ (session && session.family ? '.' + session.family : '') + ' '
 		//
 		+ (Date.now() - last_query_time > 100 ?
 		//
@@ -11878,7 +11882,7 @@ function module_code(library_namespace) {
 			// console.log(options[KEY_SESSION]);
 			// throw options[KEY_SESSION].language;
 			wiki_site_name = language_to_site_name(options[KEY_SESSION]
-					|| options.project);
+					|| options.project || options.family);
 		}
 
 		// dump host: http "301 Moved Permanently" to https
@@ -15042,9 +15046,10 @@ function module_code(library_namespace) {
 	 * 
 	 * @param {String}language
 	 *            語言代碼, project code or session。 e.g., en, zh-classical, ja
-	 * @param {String}[project]
-	 *            Wikimedia project. e.g., wikipedia, wikinews, wiktionary.
-	 *            assert: project && /^wik[it][a-z]{0,9}$/.test(project)
+	 * @param {String}[family]
+	 *            Wikimedia project / family. e.g., wikipedia, wikinews,
+	 *            wiktionary. assert: family &&
+	 *            /^wik[it][a-z]{0,9}$/.test(family)
 	 * 
 	 * @returns {String}Wikidata API 可使用之 site name。
 	 * 
@@ -15054,7 +15059,7 @@ function module_code(library_namespace) {
 	 * @since 2017/9/4 20:57:8 整合原先的 language_to_project(),
 	 *        language_to_site_name()
 	 */
-	function language_to_site_name(language, project) {
+	function language_to_site_name(language, family) {
 		// 不能保證 is_wiki_API(language) → is_Object(language)，因此使用 typeof。
 		if (typeof language === 'object') {
 			var session = language[KEY_SESSION];
@@ -15080,27 +15085,26 @@ function module_code(library_namespace) {
 				// 光是只有 "Category"，代表還是在本 wiki 中，不算外語言。
 				// return language;
 				return default_language
-						+ (!project || project === 'wikipedia' ? 'wiki'
-								: project);
+						+ (!family || family === 'wikipedia' ? 'wiki' : family);
 			}
 
 			/**
 			 * matched: [ 0: protocol + host name, 1: protocol, 2: host name,<br />
-			 * 3: 第一 domain name (e.g., language code / project),<br />
-			 * 4: 第二 domain name (e.g., project: 'wikipedia') ]
+			 * 3: 第一 domain name (e.g., language code / family / project),<br />
+			 * 4: 第二 domain name (e.g., family: 'wikipedia') ]
 			 * 
 			 * @see PATTERN_PROJECT_CODE
 			 */
 			var matched = language.match(PATTERN_wiki_project_URL);
 			if (matched) {
 				library_namespace.debug(language, 4, 'language_to_site_name');
-				project = project || matched[4];
+				family = family || matched[4];
 				// TODO: error handling
 				matched = matched[3]
 				// e.g., 'zh-min-nan' → 'zh_min_nan'
 				.replace(/[- ]/g, '_')
 				// e.g., language = [ ..., 'zh', 'wikinews' ] → 'zhwikinews'
-				+ (project === 'wikipedia' ? 'wiki' : project);
+				+ (family === 'wikipedia' ? 'wiki' : family);
 				library_namespace.debug(matched, 3, 'language_to_site_name');
 				return matched;
 			}
@@ -15110,12 +15114,12 @@ function module_code(library_namespace) {
 		}
 
 		var matched = language
-		// 拆分 language, project。以防 incase wikt, wikisource
+		// 拆分 language, family。以防 incase wikt, wikisource
 		// testwikidatawiki → testwikidata,wiki
 		.match(/^([a-z\d_]+)(wik[it][a-z]{0,9}?)$/, '');
 		if (matched) {
 			language = matched[1];
-			project = project || matched[2];
+			family = family || matched[2];
 		}
 
 		if (language in language_code_to_site_alias) {
@@ -15123,8 +15127,7 @@ function module_code(library_namespace) {
 			language = language_code_to_site_alias[language];
 		}
 
-		return language
-				+ (!project || project === 'wikipedia' ? 'wiki' : project);
+		return language + (!family || family === 'wikipedia' ? 'wiki' : family);
 	}
 
 	/**
@@ -18893,7 +18896,7 @@ function module_code(library_namespace) {
 			// List of categories, one per line without "category:" part.
 			// 此時應設定 combination:union/subset
 			? categories.join('\n') : categories,
-			project : options.project || 'wikipedia',
+			project : options.project || options.family || 'wikipedia',
 			// 確保輸出為需要的格式。
 			format : 'wiki',
 			doit : 'D'
