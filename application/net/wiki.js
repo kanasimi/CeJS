@@ -1436,6 +1436,8 @@ function module_code(library_namespace) {
 			options = library_namespace.null_Object();
 		}
 
+		// console.log(options);
+
 		if (typeof modify_this === 'number' && modify_this > 0
 				&& max_depth === undefined) {
 			// for_each_token(type, processor, max_depth)
@@ -1808,7 +1810,7 @@ function module_code(library_namespace) {
 			section_list.push(section);
 		}
 
-		// get topics
+		// get topics using for_each_token()
 		// 讀取每一個章節的資料: 標題,內容
 		// TODO: 不必然是章節，也可以有其它不同的分割方法。
 		// TODO: 可以讀取含入的子頁面
@@ -1826,9 +1828,13 @@ function module_code(library_namespace) {
 				// 僅處理階級2的章節標題。
 				add_section(section_title_index);
 			}
-		}, false,
-		// Only check the first level. 只檢查第一層之章節標題。
-		1);
+		}, Object.assign({
+			modify : false,
+			// Only check the first level. 只檢查第一層之章節標題。
+			max_depth : 1
+		},
+		// options.for_each_token_options
+		options));
 		// add the last section
 		add_section(this.length);
 		if (section_list[0].range[1] === 0) {
@@ -4437,7 +4443,7 @@ function module_code(library_namespace) {
 			return '';
 		}
 		if (session && session.language && !project_prefixed) {
-			// e.g., [[:zh:w:title]]
+			// e.g., [[w:zh:title]]
 			title = session.language + ':' + title;
 			if (session.family
 					&& (session.family in api_URL.shortcut_of_project)) {
@@ -6726,7 +6732,7 @@ function module_code(library_namespace) {
 		}
 
 		// 一般情況下會重新導向至 https。
-		// 若在 Wikimedia Toolforge (舊稱 Tool Labs) 中，則視為在同一機房內，不採加密。如此亦可加快傳輸速度。
+		// 若在 Wikimedia Toolforge 中，則視為在同一機房內，不採加密。如此亦可加快傳輸速度。
 		if (wmflabs && wiki_API.use_Varnish) {
 			// UA → nginx → Varnish:80 → Varnish:3128 → Apache → HHVM → database
 			// https://wikitech.wikimedia.org/wiki/LVS_and_Varnish
@@ -6855,8 +6861,7 @@ function module_code(library_namespace) {
 							if (error.code === 'ENOTFOUND'
 							// CeL.wiki.wmflabs
 							&& wmflabs) {
-								// 若在 Wikimedia Toolforge (舊稱 Tool Labs)
-								// 取得 wikipedia 的資料，
+								// 若在 Wikimedia Toolforge 取得 wikipedia 的資料，
 								// 卻遇上 domain name not found，
 								// 通常表示 language (API_URL) 設定錯誤。
 							}
@@ -7039,8 +7044,7 @@ function module_code(library_namespace) {
 	 * edit (modify) 時之最大延遲參數。<br />
 	 * default: 使用5秒 (5000 ms) 的最大延遲參數。
 	 * 
-	 * 在 Wikimedia Toolforge (舊稱 Tool Labs) edit wikidata，單線程均速最快約 1584
-	 * ms/edits。
+	 * 在 Wikimedia Toolforge 上 edit wikidata，單線程均速最快約 1584 ms/edits。
 	 * 
 	 * @type {Object} of {ℕ⁰:Natural+0}
 	 * 
@@ -8644,8 +8648,8 @@ function module_code(library_namespace) {
 		// includes redirection 包含重定向頁面.
 		// @see traversal_pages()
 		// https://www.mediawiki.org/wiki/API:Allpages
-		// 警告: 不在 Wikimedia Toolforge (舊稱 Tool Labs) 執行 allpages 速度太慢。但若在
-		// Wikimedia Toolforge (舊稱 Tool Labs)，當改用 database。
+		// 警告: 不在 Wikimedia Toolforge 上執行 allpages 速度太慢。但若在
+		// Wikimedia Toolforge，當改用 database。
 		allpages : 'ap',
 
 		// https://www.mediawiki.org/wiki/API:Alllinks
@@ -10455,11 +10459,11 @@ function module_code(library_namespace) {
 	/** {String}user home directory */
 	home_directory = library_namespace.platform.nodejs
 			&& (process.env.HOME || process.env.USERPROFILE),
-	/** {String}Wikimedia Toolforge (舊稱 Tool Labs) database host */
+	/** {String}Wikimedia Toolforge database host */
 	TOOLSDB = 'tools-db',
 	/** {String}user/bot name */
 	user_name,
-	/** {String}Wikimedia Toolforge (舊稱 Tool Labs) name. CeL.wiki.wmflabs */
+	/** {String}Wikimedia Toolforge name. CeL.wiki.wmflabs */
 	wmflabs,
 	/** mysql handler */
 	mysql,
@@ -10606,7 +10610,7 @@ function module_code(library_namespace) {
 	// only for node.js.
 	// https://wikitech.wikimedia.org/wiki/Help:Toolforge/FAQ#How_can_I_detect_if_I.27m_running_in_Cloud_VPS.3F_And_which_project_.28tools_or_toolsbeta.29.3F
 	if (library_namespace.platform.nodejs) {
-		/** {String}Wikimedia Toolforge (舊稱 Tool Labs) name. CeL.wiki.wmflabs */
+		/** {String}Wikimedia Toolforge name. CeL.wiki.wmflabs */
 		wmflabs = node_fs.existsSync('/etc/wmflabs-project')
 		// e.g., 'tools-bastion-05'.
 		// if use ((process.env.INSTANCEPROJECT)), you may get 'tools' or
@@ -10632,7 +10636,7 @@ function module_code(library_namespace) {
 				// The production replicas.
 				// https://wikitech.wikimedia.org/wiki/Help:Toolforge#The_databases
 				// https://wikitech.wikimedia.org/wiki/Help:Toolforge/Database
-				// Wikimedia Toolforge (舊稱 Tool Labs)
+				// Wikimedia Toolforge
 				// 上之資料庫僅為正式上線版之刪節副本。資料並非最新版本(但誤差多於數分內)，也不完全，
 				// <s>甚至可能為其他 users 竄改過</s>。
 				+ 'replica.my.cnf');
@@ -10980,7 +10984,7 @@ function module_code(library_namespace) {
 		library_namespace
 				.debug('wiki_API.SQL_session: You may use SQL to get data.');
 		wiki_API.SQL = SQL_session;
-		// export 導出: CeL.wiki.SQL() 僅可在 Wikimedia Toolforge (舊稱 Tool Labs) 使用。
+		// export 導出: CeL.wiki.SQL() 僅可在 Wikimedia Toolforge 上使用。
 		wiki_API.SQL.config = SQL_config;
 		// wiki_API.SQL.create = create_database;
 	}
@@ -11867,7 +11871,8 @@ function module_code(library_namespace) {
 	function get_latest_dump(wiki_site_name, callback, options) {
 		if (false && !wmflabs) {
 			// 最起碼須有 bzip2, wget 特定版本輸出訊息 @ /bin/sh
-			// Wikimedia Toolforge (舊稱 Tool Labs)
+			// Wikimedia Toolforge (2017/8 之前舊稱 Tool Labs)
+			// https://wikitech.wikimedia.org/wiki/Labs_labs_labs#Toolforge
 			throw new Error('Only for Wikimedia Toolforge!');
 		}
 
@@ -13406,8 +13411,8 @@ function module_code(library_namespace) {
 	// --------------------------------------------------------------------------------------------
 
 	/**
-	 * 由 Wikimedia Toolforge (舊稱 Tool Labs) database replication 讀取所有
-	 * ns0，且未被刪除頁面最新修訂版本之版本編號 rev_id (包含重定向)。<br />
+	 * 由 Wikimedia Toolforge 上的 database replication 讀取所有 ns0，且未被刪除頁面最新修訂版本之版本編號
+	 * rev_id (包含重定向)。<br />
 	 * 從 `page` 之 page id 確認 page 之 namespace，以及未被刪除。然後選擇其中最大的 revision id。
 	 * 
 	 * .i: page id, .r: revision id
@@ -13423,7 +13428,7 @@ function module_code(library_namespace) {
 		/**
 		 * 採用此 SQL 之極大問題: page.page_latest 並非最新 revision id.<br />
 		 * the page.page_latest is not the latest revision id of a page in
-		 * Wikimedia Toolforge (舊稱 Tool Labs) database replication.
+		 * Wikimedia Toolforge database replication.
 		 */
 		all_revision_SQL = 'SELECT `page_id` AS i, `page_latest` AS l FROM `page` p INNER JOIN `revision` r ON p.page_latest = r.rev_id WHERE `page_namespace` = 0 AND r.rev_deleted = 0';
 	}
@@ -13526,8 +13531,8 @@ function module_code(library_namespace) {
 					'traversal_pages');
 			cache_config.list = function() {
 				library_namespace.info(
-				// database replicas. Wikimedia Toolforge (舊稱 Tool Labs)
-				'traversal_pages: 嘗試讀取 Wikimedia Toolforge 之 database replication 資料，'
+				// Wikimedia Toolforge database replicas.
+				'traversal_pages: 嘗試讀取 Wikimedia Toolforge 上之 database replication 資料，'
 						+ '一次讀取完所有頁面最新修訂版本之版本號 rev_id...');
 				// default: 採用 page_id 而非 page_title 來 query。
 				var is_id = 'is_id' in config ? config.is_id : true;
@@ -13583,13 +13588,13 @@ function module_code(library_namespace) {
 
 			 * 經測試，讀取 file 會比讀取 MariaDB 快，且又更勝於經 API 取得資料。
 			 * 經測試，遍歷 xml dump file 約 3分鐘(see process_dump.js)，會比隨機存取快得多。
-			 * database replicas @ Wikimedia Toolforge (舊稱 Tool Labs) 無 `text` table，因此實際頁面內容不僅能經過 replicas 存取。
+			 * database replicas @ Wikimedia Toolforge 無 `text` table，因此實際頁面內容不僅能經過 replicas 存取。
 
 			# 先將最新的 xml dump file 下載到本地(實為 network drive)並解開: read_dump()
-			# 由 Wikimedia Toolforge (舊稱 Tool Labs) database replication 讀取所有 ns0 且未被刪除頁面最新修訂版本之版本號 rev_id (包含重定向): traversal_pages() + all_revision_SQL
+			# 由 Wikimedia Toolforge database replication 讀取所有 ns0 且未被刪除頁面最新修訂版本之版本號 rev_id (包含重定向): traversal_pages() + all_revision_SQL
 			# 遍歷 xml dump file，若 dump 中為最新修訂版本，則先用之 (約 95%)；純粹篩選約需近 3 minutes: try_dump()
 			# 經 API 讀取餘下 dump 後近 5% 更動過的頁面內容: traversal_pages() + wiki_API.prototype.work
-			# 於 Wikimedia Toolforge (舊稱 Tool Labs)，解開 xml 後；自重新抓最新修訂版本之版本號起，網路連線順暢時整個作業時間約 12分鐘。
+			# 於 Wikimedia Toolforge，解開 xml 後；自重新抓最新修訂版本之版本號起，網路連線順暢時整個作業時間約 12分鐘。
 
 			</code>
 			 */

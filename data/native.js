@@ -3984,6 +3984,7 @@ function module_code(library_namespace) {
 
 		diff_with : diff_with_Array,
 
+		// [].run_async(for_each(run_next, item, index, list), callback, _this)
 		run_async : function run_asynchronous(for_each, callback, _this) {
 			run_serial_asynchronous(for_each, this, callback, _this);
 		},
