@@ -1312,6 +1312,8 @@ function module_code(library_namespace) {
 	 * TODO:<code>
 
 	should use:
+	parsetree of https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
+
 	class Wiki_page extends Array { }
 	http://www.2ality.com/2015/02/es6-classes-final.html
 
@@ -7234,6 +7236,10 @@ function module_code(library_namespace) {
 	 * 
 	 * 注意: 用太多 CeL.wiki.page() 並列處理，會造成 error.code "EMFILE"。
 	 * 
+	 * TODO:
+	 * https://www.mediawiki.org/w/api.php?action=help&modules=expandtemplates
+	 * or https://www.mediawiki.org/w/api.php?action=help&modules=parse
+	 * 
 	 * @example <code>
 
 	CeL.wiki.page('史記', function(page_data) {
@@ -7400,9 +7406,7 @@ function module_code(library_namespace) {
 
 			action[1] = 'rvprop='
 			//
-			+ get_content + '&'
-			// &rvexpandtemplates=1
-			+ action[1];
+			+ get_content + '&' + action[1];
 
 			get_content = get_content.includes('content');
 		}
@@ -7758,6 +7762,40 @@ function module_code(library_namespace) {
 				page_list.response = data;
 			}
 
+			if (options.expandtemplates) {
+				if (!Array.isArray(page_list)) {
+					// TODO: test
+					var revision = get_page_content.revision(page_list);
+					wiki_API_expandtemplates(
+					//
+					revision['*'], function() {
+						callback(page_list);
+					}, Object.assign({
+						page : page_list,
+						title : page_data.title,
+						revid : revision.revid,
+						includecomments : options.includecomments
+					}, options.expandtemplates));
+					return;
+				}
+
+				// TODO: test
+				page_list.run_async(function(run_next, page_data, index) {
+					var revision = get_page_content.revision(page_data);
+					wiki_API_expandtemplates(revision['*'], run_next,
+					//
+					Object.assign({
+						page : page_data,
+						title : page_data.title,
+						revid : revision.revid,
+						includecomments : options.includecomments
+					}, options.expandtemplates));
+				}, function() {
+					callback(page_list);
+				});
+				return;
+			}
+
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
 			callback(page_list);
@@ -7775,6 +7813,62 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	// 這種方法不能展開 module
+	function wiki_API_expandtemplates(wikitext, callback, options) {
+		var action = 'expandtemplates', post_data = {
+			text : wikitext,
+			prop : 'wikitext'
+		};
+
+		options = library_namespace.new_options(options);
+
+		for ( var parameter in wiki_API_expandtemplates.parameters) {
+			if (parameter in options) {
+				if (options[parameter] || options[parameter] === 0)
+					post_data[parameter] = options[parameter];
+			}
+		}
+
+		wiki_API.query(action, function(data) {
+			var error = data && data.error;
+			// 檢查伺服器回應是否有錯誤資訊。
+			if (error) {
+				library_namespace.error('wiki_API_expandtemplates: ['
+				//
+				+ error.code + '] ' + error.info);
+				return;
+			}
+
+			if (options.page) {
+				// use page_data.expandtemplates.wikitext
+				Object.assign(options.page, data);
+			}
+
+			typeof callback === 'function'
+			//
+			&& callback(data.expandtemplates);
+
+		}, post_data, options);
+	}
+
+	wiki_API_expandtemplates.parameters = {
+		title : undefined,
+		// text : wikitext,
+		revid : undefined,
+		prop : undefined,
+		includecomments : undefined,
+
+		templatesandboxprefix : undefined,
+		templatesandboxtitle : undefined,
+		templatesandboxtext : undefined,
+		templatesandboxcontentmodel : undefined,
+		templatesandboxcontentformat : undefined
+	};
+
+	wiki_API.expandtemplates = wiki_API_expandtemplates;
+
+	// ------------------------------------------------------------------------
+
 	// 強制更新/清除緩存並重新載入/重新整理/刷新頁面。
 	// 極端做法：re-edit the same contents
 	// @see https://www.mediawiki.org/w/api.php?action=help&modules=purge
@@ -7785,7 +7879,8 @@ function module_code(library_namespace) {
 					+ get_page_title_link(title);
 		}
 
-		var POST_parameters = action[1];
+		// POST_parameters
+		var post_data = action[1];
 		action[1] = 'purge';
 		if (!action[0]) {
 			action = action[1];
@@ -7831,7 +7926,7 @@ function module_code(library_namespace) {
 
 			// callback({Array}pages)
 			callback(data.purge);
-		}, POST_parameters, options);
+		}, post_data, options);
 	};
 
 	// ------------------------------------------------------------------------
