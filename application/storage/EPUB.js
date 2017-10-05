@@ -342,6 +342,7 @@ function module_code(library_namespace) {
 					}, {
 						'dc:title' : options.title || ''
 					}, {
+						// TODO: calibre 不認得 "cmn-Hant-TW"
 						'dc:language' : options.language || 'en'
 					}, {
 						// epub發行時間應用dc:date。
@@ -1318,14 +1319,17 @@ function module_code(library_namespace) {
 				contents = contents.replace(/<a ([^<>]+)>([^<>]+)<\/a>/ig,
 				// <a href="*.png">挿絵</a> → <img alt="挿絵" src="*.png" />
 				function(all, attributes, innerHTML) {
-					if (!attributes.includes('href="')) {
+					var href = attributes
+							.match(/(?:^|\s)href=(["'])([^"'])\1/i)
+							|| attributes.match(/(?:^|\s)href=()([^"'\s])/i);
+					if (!href || /\.html?$/i.test(href[2])) {
 						return all;
 					}
 					return '<img '
 							+ (attributes.includes('alt="') ? '' : 'alt="'
 									+ innerHTML + '" ')
-							+ attributes.replace(/(^|\s)href="/ig, ' src="')
-									.trim() + ' />';
+							+ attributes.replace(/(?:^|\s)href=(["'])/ig,
+									' src=$1').trim() + ' />';
 				});
 
 				contents = contents.replace(/<img ([^<>]+)>/ig, function(tag,
@@ -1698,9 +1702,9 @@ function module_code(library_namespace) {
 			date = Array.isArray(data.date) ? data.date[0] : data.date;
 			// console.log(data);
 
-			date = library_namespace.is_Date(date)
+			date = date ? ' <small>(' + (library_namespace.is_Date(date)
 			//
-			? date.format(' <small>(%Y-%2m-%2d)</small>') : date || '';
+			? date.format('%Y-%2m-%2d') : date) + ')</small>' : '';
 			// console.log(date);
 
 			TOC_html.push([ '<li>', '<a href="' + chapter.href + '">',

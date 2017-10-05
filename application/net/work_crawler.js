@@ -841,7 +841,7 @@ function module_code(library_namespace) {
 			try {
 				// console.log(XMLHttp.responseText);
 				id_data = _this.parse_search_result(XMLHttp.responseText,
-						get_label);
+						get_label, work_title);
 			} catch (e) {
 				console.trace(e);
 				library_namespace
@@ -1082,7 +1082,8 @@ function module_code(library_namespace) {
 				var skip_cache = {
 					process_status : _this.recheck,
 					words_so_far : true,
-					last_download : true
+					last_download : true,
+					chapter_count : true
 				};
 				// recall old work_data
 				// 基本上以新資料為準，除非無法取得新資料，才改用舊資料。
@@ -1093,6 +1094,7 @@ function module_code(library_namespace) {
 					}
 
 					if (!(key in work_data)) {
+						// 填入舊的資料。
 						work_data[key] = matched[key];
 
 					} else if (typeof work_data[key] !== 'object'
@@ -1131,10 +1133,13 @@ function module_code(library_namespace) {
 				throw message;
 			}
 
-			// reset chapter_count. 此處 chapter (章節)
-			// 指的為平台所給的id編號，並非"回"、"話"！且可能會跳號！
-			/** {ℕ⁰:Natural+0}章節數量 */
-			work_data.chapter_count = 0;
+			if (false) {
+				// reset chapter_count. 此處 chapter (章節)
+				// 指的為平台所給的id編號，可能是page，並非"回"、"話"！且可能會跳號！
+				/** {ℕ⁰:Natural+0}章節數量 */
+				work_data.chapter_count = 0;
+				// work_data.chapter_count這個數值在前面skip_cache已經設定為不會更新，因此在這邊不需要重新設定。
+			}
 
 			// 注意: 這時可能尚未建立 work_data.directory。
 			// 但this.get_chapter_count()若用到work_data[this.KEY_EBOOK].set_cover()，則會造成沒有建立基礎目錄的錯誤。
@@ -1171,6 +1176,7 @@ function module_code(library_namespace) {
 			if (true || _this.need_create_ebook) {
 				// 提供給 this.get_chapter_count() 使用。
 				// e.g., 'ja-JP'
+				// TODO: calibre 不認得 "cmn-Hant-TW"
 				if (!('language' in work_data)) {
 					work_data.language
 					// CeL.application.locale.detect_HTML_language()
@@ -1185,14 +1191,16 @@ function module_code(library_namespace) {
 				}
 			}
 
-			try {
-				_this.get_chapter_count(work_data, html, get_label);
-			} catch (e) {
-				library_namespace.error(_this.id
-						+ ': .get_chapter_count() throw error');
-				throw e;
-				typeof callback === 'function' && callback(work_data);
-				return;
+			if (typeof _this.get_chapter_count === 'function') {
+				try {
+					_this.get_chapter_count(work_data, html, get_label);
+				} catch (e) {
+					library_namespace.error(_this.id
+							+ ': .get_chapter_count() throw error');
+					throw e;
+					typeof callback === 'function' && callback(work_data);
+					return;
+				}
 			}
 			// 之前已設定 work_data.chapter_count=0
 			if (!work_data.chapter_count
@@ -1205,6 +1213,7 @@ function module_code(library_namespace) {
 			}
 
 			if (!(work_data.chapter_count >= 1)) {
+				// console.log(work_data);
 				library_namespace.error(work_id
 						+ (work_data.title ? ' ' + work_data.title : '')
 						+ ': Can not get chapter count!');
@@ -2024,7 +2033,8 @@ function module_code(library_namespace) {
 				// 當僅設定title時，將之當做章節名稱而非part名稱。
 				data.sub_title = data.title;
 				delete data.title;
-			} else if (work_data.chapter_list[chapter - 1].title) {
+			} else if (work_data.chapter_list
+					&& work_data.chapter_list[chapter - 1].title) {
 				data.sub_title = work_data.chapter_list[chapter - 1].title;
 			}
 		}
@@ -2049,10 +2059,11 @@ function module_code(library_namespace) {
 			// include images / 自動載入內含資源, 將外部media內部化
 			internalize_media : true,
 			file : library_namespace.to_file_name(file_title + '.xhtml'),
-			// 警告：必須設定 work_data.chapter_list。
-			date : work_data.chapter_list[chapter - 1].date,
+			// 一般說來必須設定 work_data.chapter_list。
+			date : data.date || work_data.chapter_list[chapter - 1].date,
 			// 設定item_data.url可以在閱讀電子書時，直接點選標題就跳到網路上的來源。
-			url : this.full_URL(this.chapter_URL(work_data, chapter)),
+			url : data.url
+					|| this.full_URL(this.chapter_URL(work_data, chapter)),
 			// pass Referer, User-Agent
 			get_URL_options : Object.assign({
 				error_retry : this.MAX_ERROR
@@ -2098,9 +2109,10 @@ function module_code(library_namespace) {
 		});
 
 		// 登記本作品到本章節總計的字數。
-		if (item && !item.error && item_data.word_count > 0)
+		if (item && !item.error && item_data.word_count > 0) {
 			work_data.words_so_far = (work_data.words_so_far || 0)
 					+ item_data.word_count;
+		}
 
 		return item;
 	}

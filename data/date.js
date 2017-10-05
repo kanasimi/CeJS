@@ -2680,6 +2680,106 @@ function module_code(library_namespace) {
 	_.age_of = age_of;
 
 	// ------------------------------------------
+
+	// @see https://en.wikipedia.org/wiki/Wikipedia:Comments_in_Local_Time
+	// https://en.wikipedia.org/wiki/User:Gary/comments_in_local_time.js
+	// https://zh.wikipedia.org/wiki/MediaWiki:Gadget-CommentsinLocalTime.js
+	function indicate_date_time(date, options) {
+		options = library_namespace.setup_options(options);
+		var date_value_diff = date - Date.now();
+		if (isNaN(date_value_diff)) {
+			// something wrong
+			return;
+		}
+		if (Math.abs(date_value_diff) > (options.max_interval || 7 * ONE_DAY_LENGTH_VALUE)) {
+			return date.format(options.general_format
+					|| indicate_date_time.general_format);
+		}
+
+		var passed = date_value_diff <= 0,
+		//
+		gettext = library_namespace.gettext || function(text, _1, _2) {
+			return text.replace(/%1/g, _1).replace(/%2/g, _2);
+		};
+
+		if (passed) {
+			date_value_diff = -date_value_diff;
+		} else {
+			// is future
+		}
+
+		// → seconds
+		date_value_diff /= 1000;
+
+		if (date_value_diff < 10) {
+			return passed ? 'several seconds ago' : 'soon';
+		}
+		if (date_value_diff < 10) {
+			return gettext(passed ? '% seconds ago' : 'after % seconds', Math
+					.round(date_value_diff));
+		}
+
+		// → minutes
+		date_value_diff /= 60;
+		if (date_value_diff < 60) {
+			return gettext(passed ? '% minutes ago' : 'after % minutes', Math
+					.round(date_value_diff));
+		}
+
+		// → hours
+		date_value_diff /= 60;
+		if (date_value_diff < 3) {
+			return gettext(passed ? '% hours ago' : 'after % hours', Math
+					.round(date_value_diff));
+		}
+
+		// ----------------------------
+
+		// → days
+		date_value_diff /= 24;
+
+		if (date_value_diff < 2) {
+			// the day of the month
+			var date_of_month = date.getDate(), date_now = new Date().getDate();
+			if (date_of_month === date_now) {
+				return date.format(gettext('today, %H:%M'));
+			}
+			if (Math.abs(date_of_month - date_now) === 1) {
+				return date.format(gettext(passed ? 'yesterday, %H:%M'
+						: 'tomorrow, %H:%M'));
+			}
+			// TODO: 前天 the day before yesterday
+			// 後天 the day after tomorrow
+		}
+
+		if (false && date_value_diff < 7) {
+			return gettext(passed ? '% days ago' : 'after % days',
+					date_value_diff | 0);
+		}
+
+		// ----------------------------
+
+		// TODO: weeks
+		if (false && date_value_diff < 30) {
+			return gettext(passed ? '% days ago' : 'after % days', Math
+					.round(date_value_diff / 7));
+		}
+
+		// ----------------------------
+
+		// for months
+
+		// ----------------------------
+
+		return date.format(options.general_format
+				|| indicate_date_time.general_format);
+	}
+
+	indicate_date_time.general_format = '%Y-%2m-%2d %2H:%2M';
+
+	_.indicate_date_time;
+
+	// ------------------------------------------
 	// {String}日期及時間表達式 → {Natural}timevalue in milliseconds
 
 	var PATTERN_ISO_8601_durations = /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/,
@@ -2755,7 +2855,7 @@ function module_code(library_namespace) {
 
 	_.to_millisecond = time_interval_to_millisecond;
 
-	// ------------------------------------------
+	// ---------------------------------------------------------------------//
 
 	// parse Durations
 	function parse_period(period) {

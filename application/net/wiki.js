@@ -1616,7 +1616,7 @@ function module_code(library_namespace) {
 	}
 
 	// 規範化話題/議題/章節標題
-	// 警告: 在遇到標題包含模板時，因為不能解析連模板最後產出的結果，會產生錯誤結果，若是用在連結則會失效。
+	// 警告: 在遇到標題包含模板、<ref>時，因為不能解析連模板最後產出的結果，會產生錯誤結果，若是用在連結則會失效。
 	function normalize_section_title(section_title, callback) {
 		// 不會 reduce '\t'
 		section_title = section_title.replace(/ {2,}/g, ' ').replace(
@@ -4498,6 +4498,19 @@ function module_code(library_namespace) {
 		if (content && (content = content.content)) {
 			// page_data.revision.content.content
 			return content.content;
+		}
+
+		if (page_data.expandtemplates
+		// 若有則用之否，則最起碼回傳一般的內容。
+		&& ('wikitext' in page_data.expandtemplates)) {
+			if (flow_view === 'expandtemplates')
+				return String(page_data.expandtemplates.wikitext || '');
+
+			library_namespace
+					.debug(
+							get_page_title_link(page_data)
+									+ ': The page has expandtemplates.wikitext but do not used.',
+							1, 'get_page_content');
 		}
 
 		// 檢測一般頁面。
@@ -7763,6 +7776,7 @@ function module_code(library_namespace) {
 			}
 
 			if (options.expandtemplates) {
+				// 需要expandtemplates的情況
 				if (!Array.isArray(page_list)) {
 					// TODO: test
 					var revision = get_page_content.revision(page_list);
@@ -7774,7 +7788,9 @@ function module_code(library_namespace) {
 						page : page_list,
 						title : page_data.title,
 						revid : revision.revid,
-						includecomments : options.includecomments
+						includecomments : options.includecomments,
+
+						session : options[KEY_SESSION]
 					}, options.expandtemplates));
 					return;
 				}
@@ -7788,13 +7804,17 @@ function module_code(library_namespace) {
 						page : page_data,
 						title : page_data.title,
 						revid : revision.revid,
-						includecomments : options.includecomments
+						includecomments : options.includecomments,
+
+						session : options[KEY_SESSION]
 					}, options.expandtemplates));
 				}, function() {
 					callback(page_list);
 				});
 				return;
 			}
+
+			// 一般正常回傳。
 
 			// page 之 structure 將按照 wiki API 本身之 return！
 			// page_data = {pageid,ns,title,revisions:[{timestamp,'*'}]}
@@ -7813,7 +7833,23 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
-	// 這種方法不能展開 module
+	/**
+	 * 展開內容
+	 * 
+	 * 這種方法不能展開 module
+	 * 
+	 * @example <code>
+
+	wiki.page(title, function(page_data) {
+		console.log(CeL.wiki.content_of(page_data, 'expandtemplates'));
+	}, {
+		expandtemplates : true
+	});
+
+	 </code>
+	 * 
+	 * @see wiki_API.protect
+	 */
 	function wiki_API_expandtemplates(wikitext, callback, options) {
 		var action = 'expandtemplates', post_data = {
 			text : wikitext,
@@ -7827,6 +7863,11 @@ function module_code(library_namespace) {
 				if (options[parameter] || options[parameter] === 0)
 					post_data[parameter] = options[parameter];
 			}
+		}
+
+		var session = options[KEY_SESSION];
+		if (session && session.API_URL) {
+			action = [ session.API_URL, action ];
 		}
 
 		wiki_API.query(action, function(data) {
