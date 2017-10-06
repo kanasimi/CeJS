@@ -1336,7 +1336,9 @@ function module_code(library_namespace) {
 						attributes) {
 					return '<img ' + attributes.replace(
 					// <img> 中不能使用 name="" 之類
-					/(?:^|\s)(?:name|border)=[^\s]+/ig, '').trim() + '>';
+					/(?:^|\s)(?:name|border|onmouse[a-z]+|onload)=[^\s]+/ig,
+					//
+					'').trim() + '>';
 				});
 
 				if (links.length > 0) {

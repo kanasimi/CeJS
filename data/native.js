@@ -1373,6 +1373,8 @@ function module_code(library_namespace) {
 	}
 
 	// callback(token, index, foot_index);
+	// 沒有輸入foot的話，則會把head拿來當作foot。
+	// TODO: {RegExp}head, foot
 	function each_between(head, foot, callback, thisArg, index) {
 		// for head: [head, foot]
 		if (Array.isArray(head) && typeof foot === 'function') {
@@ -1390,18 +1392,22 @@ function module_code(library_namespace) {
 		index |= 0;
 		// assert: !!head && !!foot
 		// && typeof head === 'string' && typeof foot === 'string'
-		var head_length = head.length, foot_length = foot.length;
+		var head_length = head.length, foot_length = foot ? foot.length : 0, foot_index;
 
 		if (!thisArg) {
 			thisArg = this;
 		}
 
-		while (index !== NOT_FOUND
-				&& (index = this.indexOf(head, index)) !== NOT_FOUND) {
-			var foot_index = this.indexOf(foot, index += head_length);
+		while (foot || !(foot_index > 0) ? index !== NOT_FOUND
+				&& (index = this.indexOf(head, index)) !== NOT_FOUND
+				: (index = foot_index) < this.length) {
+			foot_index = this.indexOf(foot || head, index += head_length);
 			if (foot_index === NOT_FOUND) {
-				// 接下來皆無foot，則即使再存有head亦無效。
-				break;
+				// 接下來皆無(foot||head)，則即使再存有head亦無效。
+				if (foot) {
+					break;
+				}
+				foot_index = this.length;
 			}
 			callback.call(thisArg, this.slice(index, foot_index), index,
 					foot_index);
