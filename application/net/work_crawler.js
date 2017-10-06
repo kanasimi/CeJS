@@ -25,6 +25,7 @@ parse 圖像
 從其他的資料來源網站尋找取得作品以及章節的資訊。
 檢核章節內容。
 proxy
+清除暫存檔
 
 </code>
  * 
@@ -2072,9 +2073,9 @@ function module_code(library_namespace) {
 		},
 		//
 		item = ebook.add(item_data, {
-			// part_title 卷
+			// part_title 卷/集
 			title : get_label(data.title || ''),
-			// chapter_title 章
+			// chapter_title 章節
 			sub_title : get_label(data.sub_title || ''),
 			text : data.text,
 			post_processor : function(contents) {

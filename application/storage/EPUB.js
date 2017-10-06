@@ -1381,23 +1381,32 @@ function module_code(library_namespace) {
 					return !!title;
 				}).join(' - '), '</title>', '</head><body>');
 
+				// ------------------------------
+
 				// 設定item_data.url可以在閱讀電子書時，直接點選標題就跳到網路上的來源。
 				var url_header = item_data.url
-						&& ('<a href="' + item_data.url + '">');
+						&& ('<a href="' + item_data.url + '">'), title_layer = [];
 				// 卷標題
 				if (contents.title) {
-					html.push('<h2>', url_header ? url_header + contents.title
-							+ '</a>' : contents.title, '</h2>');
+					title_layer
+							.push('<h2>', url_header ? url_header
+									+ contents.title + '</a>' : contents.title,
+									'</h2>');
 				}
 				// 章標題
 				if (contents.sub_title) {
-					html.push('<h3>', url_header ? url_header
+					title_layer.push('<h3>', url_header ? url_header
 							+ contents.sub_title + '</a>' : contents.sub_title,
 							'</h3>');
 				} else if (!contents.title) {
 					library_namespace.warn('add_chapter: 未設定標題: '
 							+ String(contents.text).slice(0, 200) + '...');
 				}
+
+				// ------------------------------
+
+				// 將作品資訊欄位置右。
+				html.push('<div id="chapter_information" style="float:right">');
 
 				if (item_data.date) {
 					// 掲載日/掲載開始日, 最新投稿/最終投稿日
@@ -1412,13 +1421,12 @@ function module_code(library_namespace) {
 					}).join(', ');
 					if (date_list) {
 						// 加入本章節之最後修訂日期標示。
-						html.push('<div class="date">', date_list, '</div>');
+						html.push('<p class="date">', date_list, '</p>');
 					}
 				}
 
 				if (false) {
-					html.push('<div style="float:right">', contents.chapter,
-							'</div>');
+					html.push('<div>', contents.chapter, '</div>');
 				}
 
 				var post_processor = contents.post_processor;
@@ -1437,15 +1445,23 @@ function module_code(library_namespace) {
 					item_data.word_count = library_namespace.count_word(
 							contents, 1 + 2);
 				}
-				html.push('<div class="word_count">',
+				html.push('<p class="word_count">',
 				// 加入本章節之字數統計標示。
 				_('%1 words', item_data.word_count)
 				// 從第一章到本章的文字總數。
 				+ (item_data.words_so_far > 0 ? ', ' + _('%1 words',
 				// item_data.words_so_far: 本作品到前一個章節總計的字數。
-				item_data.words_so_far + item_data.word_count) : ''), '</div>',
+				item_data.words_so_far + item_data.word_count) : ''), '</p>');
+
+				html.push('</div>');
+
+				// ------------------------------
+
+				html.append(title_layer);
+
 				// 加入本章節之內容。
-				'<div class="text">', contents, '</div>', '</body>', '</html>');
+				html.push('<div class="text">', contents, '</div>', '</body>',
+						'</html>');
 
 				contents = contents.length > this.MIN_CONTENTS_LENGTH ? html
 						.join(this.to_XML_options.separator) : '';
