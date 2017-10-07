@@ -296,13 +296,13 @@ function module_code(library_namespace) {
 			var status = work_data.status;
 			return status
 			// e.g., 连载中, 連載中, 已完结, 已完成
-			&& (/(^|已)完[結结成]/.test(status)
-			//
-			|| status.includes('完結済')
+			&& (/(^|已)完[結结成]/.test(status) || status.includes('完結済')
 			// e.g., https://syosetu.org/?mode=ss_detail&nid=33378
-			|| status.includes('(完結)')
+			|| /^\(?完[結结成]?\)?$/.test(status)
 			// http://book.qidian.com/
-			|| status.includes('完本'));
+			|| status.includes('完本')
+			// ck101
+			|| status.includes('全文完'));
 		},
 		pre_get_chapter_data : pre_get_chapter_data,
 		// 對於章節列表與作品資訊分列不同頁面(URL)的情況，應該另外指定.chapter_list_URL。
@@ -956,7 +956,7 @@ function module_code(library_namespace) {
 		var matched;
 		// matched: [ all, key, value ]
 		while (matched = PATTERN_work_data.exec(html)) {
-			var key = get_label(matched[1]).replace(/[:：\s]+$/, ''), value;
+			var key = get_label(matched[1]).replace(/[:：︰\s]+$/, ''), value;
 			// default: do not overwrite
 			if (key && (overwrite || !work_data[key])
 					&& (value = get_label(matched[2]))) {

@@ -46,6 +46,15 @@ https://zh.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&uc
 
 
 
+雙重重定向/重新導向
+特別:二重リダイレクト
+Special:DoubleRedirects
+Special:BrokenRedirects
+https://www.mediawiki.org/w/api.php?action=help&modules=query%2Bquerypage
+[[mw:User:Duplicatebug/API Overview/action]]
+https://test.wikipedia.org/w/api.php?action=query&list=querypage&qppage=DoubleRedirects&qplimit=max
+
+
 gadgets 小工具 [[Wikipedia:Tools]], [[Category:Wikipedia scripts]], [[mw:ResourceLoader/Core modules]]
 [[Special:MyPage/common.js]] [[使用說明:維基用戶腳本開發指南]]
 
@@ -1619,8 +1628,11 @@ function module_code(library_namespace) {
 	// 警告: 在遇到標題包含模板、<ref>時，因為不能解析連模板最後產出的結果，會產生錯誤結果，若是用在連結則會失效。
 	function normalize_section_title(section_title, callback) {
 		// 不會 reduce '\t'
-		section_title = section_title.replace(/ {2,}/g, ' ').replace(
-				/<\/?[a-z][^<>]*>/g, '')
+		section_title = section_title.replace(/ {2,}/g, ' ')
+		// reduce HTML tags
+		.replace(/<\/?([a-z]+)[^<>]*>/g, function(all, tag) {
+			return tag === 'ref' ? all : '';
+		})
 		// escape wikilink
 		.replace(/\[\[:?([^\[\]\n]+)\]\]/g, function(all, inner) {
 			return inner.replace(/^[^\|]+\|/, '');
@@ -1645,7 +1657,8 @@ function module_code(library_namespace) {
 	}
 
 	// 採用連結的方法([[page.title#section_title|title]])可以免去需要自行解析標題的問題。
-	// also see [[H:MW]], {{anchorencode:章節標題}}, escapeId()
+	// also see [[H:MW]], {{anchorencode:章節標題}}, [[Template:井戸端から誘導の使用]],
+	// escapeId()
 	// https://phabricator.wikimedia.org/T152540
 	// https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
 
@@ -1820,7 +1833,7 @@ function module_code(library_namespace) {
 				section_title_index) {
 			var level = section_title_token.level;
 			if (
-			// e.g., {level_filter:3}
+			// 要篩選的章節標題層級 e.g., {level_filter:3}
 			1 <= options.level_filter ? level === options.level_filter
 			// e.g., {level_filter:[1,2]}
 			: Array.isArray(options.level_filter) ? options.level_filter
