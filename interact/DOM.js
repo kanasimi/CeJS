@@ -6641,20 +6641,23 @@ to_HTML = function(text, mode) {
 _// JSDT:_module_
 .
 /**
- * Translate Unicode text to HTML code
+ * Translate Unicode text to HTML code. escape chars
  * @param text	Unicode text
  * @param flags	flags, f&1!=0: turn \t, (f&2)==0: \n→<br />, f==4: to quoted
  * @param	ignore_tags	e.g., {object:{src:/^https?:\/\//},img:{src:/^https?:\/\//},a:{href:/^https?:\/\//}}
  * @return
+ * @see https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references#Predefined_entities_in_XML
  * @_memberOf	_module_
  */
 Unicode_to_HTML = function(text, flags, ignore_tags) {
 	text = ('' + text)
+		// "&"這個字元得要首先escape
 		.replace(/&/g, '&amp;')
-		//	就是會出現這奇怪情況。
-		.replace(/&amp;amp;/g, '&amp;')
+		//	就是會出現這奇怪情況。但是卻也不能否認有特別想要表示"&amp;"這樣的情況。
+		//.replace(/&amp;amp;/g, '&amp;')
 		.replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&apos;')
 		;
 
 	if (ignore_tags)

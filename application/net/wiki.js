@@ -46,7 +46,7 @@ https://zh.wikipedia.org/w/api.php?action=query&format=json&list=usercontribs&uc
 
 
 
-雙重重定向/重新導向
+雙重重定向/重新導向/転送
 特別:二重リダイレクト
 Special:DoubleRedirects
 Special:BrokenRedirects
@@ -1610,7 +1610,7 @@ function module_code(library_namespace) {
 						+ '" 無尾？ [' + wikitext + ']', 2, 'lead_text');
 				break;
 			}
-			// 須預防 "-{}-" 之類。
+			// 須預防 "-{}-" 之類 language conversion。
 			var index_start = wikitext.lastIndexOf(matched, index_end);
 			wikitext = wikitext.slice(0, index_start)
 			// +2: '}}'.length, ']]'.length
@@ -1628,9 +1628,10 @@ function module_code(library_namespace) {
 	// 警告: 在遇到標題包含模板、<ref>時，因為不能解析連模板最後產出的結果，會產生錯誤結果，若是用在連結則會失效。
 	function normalize_section_title(section_title, callback) {
 		// 不會 reduce '\t'
-		section_title = section_title.replace(/ {2,}/g, ' ')
-		// reduce HTML tags
+		section_title = section_title.replace(/[ \n]{2,}/g, ' ')
+		// reduce HTML tags. TODO: test all ((markup_tags))
 		.replace(/<\/?([a-z]+)[^<>]*>/g, function(all, tag) {
+			// 注意: 必須要自行 escape <ref>。
 			return tag === 'ref' ? all : '';
 		})
 		// escape wikilink
@@ -1647,23 +1648,87 @@ function module_code(library_namespace) {
 		// 去除粗體與斜體。
 		.replace(/'''(.*?)'''/g, '$1').replace(/''(.*?)''/g, '$1');
 
-		section_title = section_title.replace(/[{}\|]/g,
-		// escape control characters
-		function(character) {
-			return '&#' + character.charCodeAt(0) + ';';
-		});
+		if (true) {
+			// 經測試anchor亦不可包含[\n\[\]{}]
+			section_title = section_title.replace(/[\|{}]/g,
+			// escape control characters, including language conversion -{}-
+			function(character) {
+				return '&#' + character.charCodeAt(0) + ';';
+			});
+			// 注意: 必須要自行 unescape language conversion -{}-。
+			// 或者使用 normalize_section_title.to_wikilink。
+		} else {
+			section_title = section_title.replace(/\||{{+|}}+/g,
+			// escape control characters, ignore language conversion -{}-
+			function(characters) {
+				var list = '&#' + characters.charCodeAt(0) + ';';
+				for (var index = 1; index < characters.length; index++) {
+					list += '&#' + characters.charCodeAt(index) + ';';
+				}
+				return list;
+			});
+		}
 
+		// 可以直接拿來做 wikilink anchor 的章節標題
 		return section_title.trim();
 	}
 
-	// 採用連結的方法([[page.title#section_title|title]])可以免去需要自行解析標題的問題。
-	// also see [[H:MW]], {{anchorencode:章節標題}}, [[Template:井戸端から誘導の使用]],
-	// escapeId()
-	// https://phabricator.wikimedia.org/T152540
-	// https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
+	// escape <ref></ref>
+	// @see use library_namespace.DOM.Unicode_to_HTML()
+	normalize_section_title.escape_tags = function(section_title) {
+		return section_title.replace(/<(\/?(?:ref)(?:[^<>a-z][^<>]*)?)>/g,
+				'&gt;$1&lt;');
+	};
 
-	// 2017/9/20 18:33:32
-	// 對於包含某些模板(如包含{{para|p}})的情況，即使採用{{anchorencode}}連結依然會失效。現時間並沒有解決方法。
+	/**
+	 * 產生連結到章節標題的維基連結。
+	 * 
+	 * 採用連結的方法([[page.title#section_title|title]])可以免去需要自行解析標題的問題。
+	 * 
+	 * @example <code>
+	CeL.wiki.normalize_section_title.to_wikilink(section_title, page_title);
+	 * </code>
+	 * 
+	 * TODO: 2017/9/20 18:33:32
+	 * 對於包含某些模板(如包含{{para|p}})的情況，即使採用{{anchorencode}}連結依然會失效。現時間並沒有解決方法。
+	 * 
+	 * @param {String}section_title
+	 *            章節標題
+	 * @param {String}[page_title]
+	 *            頁面標題
+	 * @param {String}[display_title]
+	 *            要顯示的連結文字。 default: section_title
+	 * @param {Boolean}[need_normalize]
+	 *            section_title 需要再做正規化
+	 * 
+	 * @returns {String}維基連結
+	 * 
+	 * @see [[H:MW]], {{anchorencode:章節標題}}, [[Template:井戸端から誘導の使用]], escapeId()
+	 * @see https://phabricator.wikimedia.org/T152540
+	 *      https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
+	 */
+	normalize_section_title.to_wikilink = function(section_title, page_title,
+			display_title, need_normalize) {
+		if (need_normalize) {
+			section_title = normalize_section_title(section_title);
+		}
+
+		section_title = normalize_section_title.escape_tags(section_title);
+		// display_title 應該是對已經正規化的 section_title 再做的變化。
+		display_title = display_title ? normalize_section_title
+				.escape_tags(display_title) : section_title;
+
+		// 預防在遇到標題包含模板時，因為不能解析連模板最後產出的結果，連結會失效。
+		// 但在包含{{para|p}}的情況下連結依然會失效。
+		section_title = '#' + section_title + '|'
+		// 自行 unescape language conversion -{}-。
+		+ display_title.replace(/-&#123;(.*?)&#125;-/g, function(all, text) {
+			return '-{' + text + '}-';
+		});
+
+		return page_title ? '[[' + page_title + section_title + ']]'
+				: section_title;
+	};
 
 	/**
 	 * <code>
@@ -2354,7 +2419,8 @@ function module_code(library_namespace) {
 		style : function() {
 			return this.join('');
 		},
-		// [[H:Convert]]
+		// 手工字詞轉換 language conversion -{}-
+		// [[w:zh:H:Convert]], [[mw:Help:Magic words]]
 		convert : function() {
 			return '-{' + this.join('|') + '}-';
 		},
@@ -3930,7 +3996,7 @@ function module_code(library_namespace) {
 	 *      https://en.wikipedia.org/wiki/Help:Redirect
 	 *      https://phabricator.wikimedia.org/T68974
 	 */
-	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|重新導向|転送|넘겨주기)\s*(?::\s*)?\[\[([^\[\]{}\n\|]+)(?:\|[^\[\]{}]+?)?\]\]/i;
+	var PATTERN_redirect = /(?:^|[\s\n]*)#(?:REDIRECT|重定向|重新導向|転送|リダイレクト|넘겨주기)\s*(?::\s*)?\[\[([^\[\]{}\n\|]+)(?:\|[^\[\]{}]+?)?\]\]/i;
 
 	/**
 	 * parse redirect page. 解析重定向資訊。 若 wikitext 重定向到其他頁面，則回傳其{String}頁面名:
