@@ -1372,6 +1372,7 @@ function module_code(library_namespace) {
 		each_section : for_each_section,
 
 		// for_token
+		// CeL.wiki.parser.paser_prototype.each.call(token_list,...)
 		// 在執行 .each() 之前，應該先執行 .parse()。
 		each : for_each_token,
 		parse : parse_page,
@@ -1519,6 +1520,8 @@ function module_code(library_namespace) {
 						return true;
 					}
 					if (modify_this) {
+						// 小技巧: 可以用 return [ inner ].is_atom = true 來避免進一步的
+						// parse 或者處理。
 						if (typeof result === 'string') {
 							// {String}wikitext to ( {Object}element or '' )
 							result = parse_wikitext(result);
@@ -1556,11 +1559,13 @@ function module_code(library_namespace) {
 						break;
 				}
 			} else if (!exit) {
+				// console.log(_this);
 				_this.some(for_token);
 			}
 		}
 
-		traversal_tokens(this, 0);
+		if (Array.isArray(this))
+			traversal_tokens(this, 0);
 
 		return this;
 	}
@@ -1624,26 +1629,203 @@ function module_code(library_namespace) {
 		return wikitext.trim();
 	}
 
-	// 規範化話題/議題/章節標題
-	// 警告: 在遇到標題包含模板、<ref>時，因為不能解析連模板最後產出的結果，會產生錯誤結果，若是用在連結則會失效。
+	// ------------------------------------------
+
+	// @inner
+	function preprocess_section_link_token(token) {
+		if (token.type === 'tag') {
+			if (token.tag === 'nowiki') {
+				return preprocess_section_link_token(token[1] ? token[1]
+						.toString() : '');
+			}
+			return preprocess_section_link_tokens(token[1] || '');
+		}
+		if (token.type === 'file') {
+			// 顯示時，TOC 中的圖片會被消掉，在內文中才會顯現。
+			return '';
+		}
+		if (token.type === 'link' || token.type === 'category') {
+			// return displayed_text
+			token = token[2] ? preprocess_section_link_tokens(token[2])
+			// @see wiki_toString
+			: token[0].toString() + token[1];
+			// console.log(token);
+			return token;
+		}
+		// 這邊僅處理常用模板。需要先保證這些模板存在，並且具有預期的功能。
+		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
+		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
+		if (token.type === 'transclusion') {
+			if (token.name === 'Tl' || token.name === 'Tlx') {
+				token.shift();
+				return token;
+			}
+			// 警告: 在遇到標題包含模板時，因為不能解析連模板最後產出的結果，會產生錯誤結果。
+			// TODO: 採用 parse 或 expandtemplates
+			return token;
+		}
+		if (token.type === 'external_link') {
+			// console.log('>> ' + token);
+			// console.log(token[1]);
+			// console.log(preprocess_section_link_tokens(token[1]));
+			if (token[1]) {
+				return preprocess_section_link_tokens(token[1]);
+			}
+			// TODO: error: 用在[URL]無標題連結會失效。需要計算外部連結的序號。
+			return token;
+		}
+		if (token.type === 'switch') {
+			return '';
+		}
+		if (token.type === 'bold' || token.type === 'italic') {
+			token.type = 'plain';
+			token.toString = wiki_toString.plain;
+			return token;
+		}
+		if (typeof token === 'string') {
+			// console.log('>> [' + index + '] ' + token);
+			// console.log(parent);
+			token = token.replace(/&#(\d+);/g, function(all, code) {
+				return String.fromCharCode(code);
+			}).replace(/&#x([0-9a-f]+);/ig, function(all, code) {
+				return String.fromCharCode(parseInt(code, 16));
+			}).replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(
+					/&amp;/g, '&');
+			if (/[^\s]/.test(token)) {
+				// 避免被進一步的處理，例如"&amp;amp;"。
+				token = [ token ];
+				token.is_atom = true;
+			}
+			return token;
+		}
+		return token;
+	}
+
+	// @inner
+	function preprocess_section_link_tokens(tokens) {
+		if (Array.isArray(tokens) && tokens.type === 'plain') {
+			// console.log('tokens:');
+			// console.log(tokens);
+			for_each_token.call(tokens, preprocess_section_link_token, true);
+			return tokens;
+		}
+
+		return preprocess_section_link_token(tokens);
+	}
+
+	// @inner
+	function section_link_toString(page_title) {
+		return '[[' + (page_title || this[0] || '') + '#' + (this[1] || '')
+				+ '|' + (this[2] || '') + ']]';
+	}
+
+	/**
+	 * 從章節標題產生連結到章節標題的wikilink。
+	 * 
+	 * TODO: 會失去''',''之屬性。
+	 * 
+	 * @example <code>
+	CeL.wiki.section_link(section_title)
+	 * </code>
+	 * 
+	 * @param {String}section_title
+	 *            section title in wikitext.
+	 * @param {Object}[options]
+	 *            附加參數/設定選擇性/特殊功能與選項
+	 * 
+	 * @returns {Array}link object
+	 */
+	function section_link(section_title, options) {
+		if (typeof options === 'string') {
+			options = {
+				page_title : options
+			};
+		} else if (typeof options === 'function') {
+			options = {
+				// TODO
+				callback : options
+			};
+		}
+
+		var parsed_title = preprocess_section_link_tokens(parse_wikitext(section_title)),
+		//
+		id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
+		// 有多個完全相同的anchor時，後面的會加上"_2", "_3",...。
+		// 這個部分的處理請見 function for_each_section()
+		anchor = id.replace(/[ _]+/g, '_').replace(/&/g, '&amp;');
+		anchor = encodeURIComponent(anchor);
+
+		for_each_token.call(parsed_title, function(token) {
+			if (token.type === 'convert') {
+				return token[0];
+			}
+		}, true);
+
+		var display_text = parsed_title.toString().trim()
+		//
+		.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, "&apos;")
+		// escape control characters, including language conversion -{}-
+		.replace(/['\|<>{}]/g, function(character) {
+			return '&#' + character.charCodeAt(0) + ';';
+		}).replace(/[ \n]{2,}/g, ' ');
+
+		// [ page title, anchor, display_text ].id = {String}id
+		var link = [ options && options.page_title, anchor, display_text ];
+		Object.assign(link, {
+			id : id,
+			// original section title
+			title : section_title,
+			parsed_title : parsed_title,
+			toString : section_link_toString
+		});
+		return link;
+	}
+
+	// ------------------------------------------
+
+	/**
+	 * 規範化話題/議題/章節標題。
+	 * 
+	 * @param {String}section_title
+	 *            章節標題。
+	 * @param {Function}[callback]
+	 *            TODO: 回調函數。
+	 * 
+	 * @returns {String}
+	 * 
+	 * @deprecated
+	 */
 	function normalize_section_title(section_title, callback) {
 		// 不會 reduce '\t'
 		section_title = section_title.replace(/[ \n]{2,}/g, ' ')
-		// reduce HTML tags. TODO: test all ((markup_tags))
-		.replace(/<\/?([a-z]+)[^<>]*>/g, function(all, tag) {
-			// 注意: 必須要自行 escape <ref>。
-			return tag === 'ref' ? all : '';
+		// TODO: use library_namespace.DOM.HTML_to_Unicode()
+		.replace(/&#(\d+);/g, function(all, code) {
+			return String.fromCharCode(code);
+		}).replace(/&#x([0-9a-f]+);/ig, function(all, code) {
+			return String.fromCharCode(parseInt(code, 16));
 		})
+		//
+		.replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&')
+		// escape characters inside <nowiki>
+		.replace(/<nowiki[^<>]*>(.+?)<\/nowiki>/g, function(all, inner) {
+			return inner.replace(/{/g, '&#123;').replace(/</g, '&lt;')
+			//
+			.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+		})
+		// reduce HTML tags.
+		.replace(PATTERN_WIKI_TAG_VOID, '').replace_till_stable(
+				PATTERN_WIKI_TAG, '$3')
 		// escape wikilink
 		.replace(/\[\[:?([^\[\]\n]+)\]\]/g, function(all, inner) {
 			return inner.replace(/^[^\|]+\|/, '');
 		})
 		// escape external link
-		// .replace(/\[https?:\/\/[^ ]+ ([^\]]+)\]/ig, '$1')
+		.replace(/\[https?:\/\/[^ ]+ ([^\]]+)\]/ig, '$1')
 
-		// TODO: 這邊僅處理常用模板。正式應該用 parse。
+		// TODO: 這邊僅處理常用模板。需要先保證這些模板存在，並且具有預期的功能。
+		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
-		.replace(/{{[Tt]l\s*\|([^{}]*)}}/g, '{{$1}}')
+		.replace(/{{Tlx?\s*\|([^{}]*)}}/ig, '{{$1}}')
 
 		// 去除粗體與斜體。
 		.replace(/'''(.*?)'''/g, '$1').replace(/''(.*?)''/g, '$1');
@@ -1669,7 +1851,7 @@ function module_code(library_namespace) {
 			});
 		}
 
-		// 可以直接拿來做 wikilink anchor 的章節標題
+		// 可以直接拿來做 wikilink anchor 的章節標題。
 		return section_title.trim();
 	}
 
@@ -1693,13 +1875,13 @@ function module_code(library_namespace) {
 	 * 對於包含某些模板(如包含{{para|p}})的情況，即使採用{{anchorencode}}連結依然會失效。現時間並沒有解決方法。
 	 * 
 	 * @param {String}section_title
-	 *            章節標題
+	 *            章節標題。
 	 * @param {String}[page_title]
-	 *            頁面標題
-	 * @param {String}[display_title]
+	 *            頁面標題。
+	 * @param {String}[display_text]
 	 *            要顯示的連結文字。 default: section_title
 	 * @param {Boolean}[need_normalize]
-	 *            section_title 需要再做正規化
+	 *            section_title 需要再做正規化。
 	 * 
 	 * @returns {String}維基連結
 	 * 
@@ -1708,27 +1890,29 @@ function module_code(library_namespace) {
 	 *      https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
 	 */
 	normalize_section_title.to_wikilink = function(section_title, page_title,
-			display_title, need_normalize) {
+			display_text, need_normalize) {
 		if (need_normalize) {
 			section_title = normalize_section_title(section_title);
 		}
 
 		section_title = normalize_section_title.escape_tags(section_title);
-		// display_title 應該是對已經正規化的 section_title 再做的變化。
-		display_title = display_title ? normalize_section_title
-				.escape_tags(display_title) : section_title;
+		// display_text 應該是對已經正規化的 section_title 再做的變化。
+		display_text = display_text ? normalize_section_title
+				.escape_tags(display_text) : section_title;
 
 		// 預防在遇到標題包含模板時，因為不能解析連模板最後產出的結果，連結會失效。
 		// 但在包含{{para|p}}的情況下連結依然會失效。
 		section_title = '#' + section_title + '|'
 		// 自行 unescape language conversion -{}-。
-		+ display_title.replace(/-&#123;(.*?)&#125;-/g, function(all, text) {
+		+ display_text.replace(/-&#123;(.*?)&#125;-/g, function(all, text) {
 			return '-{' + text + '}-';
 		});
 
 		return page_title ? '[[' + page_title + section_title + ']]'
 				: section_title;
 	};
+
+	// ------------------------------------------
 
 	/**
 	 * <code>
@@ -1759,7 +1943,7 @@ function module_code(library_namespace) {
 		}
 
 		var section_list = [], index = 0, last_index = 0,
-		// 章節標題
+		// 章節標題。
 		section_title,
 		// [ all title, "=", section title ]
 		PATTERN_section = /\n(={1,2})([^=\n]+)\1\s*\n/g;
@@ -1767,7 +1951,7 @@ function module_code(library_namespace) {
 		section_list.toString = function() {
 			return this.join('');
 		};
-		// 章節標題list
+		// 章節標題list。
 		section_list.title = [];
 		// index hash
 		section_list.index = library_namespace.null_Object();
@@ -1865,11 +2049,13 @@ function module_code(library_namespace) {
 	function for_each_section(for_section, options) {
 		options = library_namespace.setup_options(options);
 
-		var _this = this,
+		var _this = this, page_title = this.page && this.page.title,
 		// sections[0]: 常常是設定與公告區，或者放置維護模板。
-		section_list = this.sections = [];
+		section_list = this.sections = [],
+		// section_title_hash[section link anchor] = {Natural}count
+		section_title_hash = library_namespace.null_Object();
 
-		// to test: 沒有章節標題的文章, 以章節標題開頭的文章, 以章節標題結尾的文章, 章節標題+章節標題
+		// to test: 沒有章節標題的文章, 以章節標題開頭的文章, 以章節標題結尾的文章, 章節標題+章節標題。
 
 		// 加入 **上一個** section, "this_section"
 		function add_section(next_section_title_index) {
@@ -1896,6 +2082,18 @@ function module_code(library_namespace) {
 		// TODO: 可以讀取含入的子頁面
 		this.each('section_title', function(section_title_token,
 				section_title_index) {
+			if (page_title) {
+				// [0]: page title
+				section_title_token.link[0] = page_title;
+			}
+			if (section_title_hash[section_title_token.link[1]] > 0) {
+				section_title_token.link[1] += '_'
+				// 有多個完全相同的anchor時，後面的會加上"_2", "_3",...。
+				+ (++section_title_hash[section_title_token.link[1]]);
+			} else {
+				section_title_hash[section_title_token.link[1]] = 1;
+			}
+
 			var level = section_title_token.level;
 			if (
 			// 要篩選的章節標題層級 e.g., {level_filter:3}
@@ -1918,7 +2116,7 @@ function module_code(library_namespace) {
 		// add the last section
 		add_section(this.length);
 		if (section_list[0].range[1] === 0) {
-			// 第一個章節為空。 e.g., 以章節標題開頭的文章
+			// 第一個章節為空。 e.g., 以章節標題開頭的文章。
 			section_list.shift();
 		}
 
@@ -2321,6 +2519,12 @@ function module_code(library_namespace) {
 	// https://www.w3.org/TR/html5/syntax.html#void-elements
 	// @see [[phab:T134423]]
 	self_close_tags = 'nowiki|references|ref|area|base|br|col|embed|hr|img|input|keygen|link|meta|param|source|track|wbr',
+	/** {RegExp}HTML tags 的匹配模式。 */
+	PATTERN_WIKI_TAG = new RegExp('<(' + markup_tags
+			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
+	/** {RegExp}HTML self closed tags 的匹配模式。 */
+	PATTERN_WIKI_TAG_VOID = new RegExp('<(' + self_close_tags
+			+ ')(\\s[^<>]*)?>', 'ig'),
 	// 在其內部的wikitext不會被parse。
 	no_parse_tags = {
 		pre : true,
@@ -2424,6 +2628,21 @@ function module_code(library_namespace) {
 		convert : function() {
 			return '-{' + this.join('|') + '}-';
 		},
+
+		// Behavior switches
+		'switch' : function() {
+			// assert: this.length === 1
+			return '__' + this[0] + '__';
+		},
+		// italic type
+		italic : function() {
+			return "''" + this.join('') + "''";
+		},
+		// emphasis
+		bold : function() {
+			return "'''" + this.join('') + "'''";
+		},
+
 		// section title / section name
 		// show all section titles:
 		// parser=CeL.wiki.parser(page_data);parser.each('section_title',function(token,index){console.log('['+index+']'+token.title);},false,1);
@@ -2435,6 +2654,7 @@ function module_code(library_namespace) {
 			// this.join(''): 必須與 wikitext 相同。見 parse_wikitext.title。
 			+ this.join('') + level + (this.postfix || '');
 		},
+
 		// [[Help:Wiki markup]], HTML tags
 		tag : function() {
 			// this: [ {String}attributes, {Array}inner nodes ].tag
@@ -2455,6 +2675,7 @@ function module_code(library_namespace) {
 			// 欲取得 .tagName，請用 this.tag.toLowerCase();
 			return '<' + this.tag + this.join('') + '>';
 		},
+
 		// comments: <!-- ... -->
 		comment : function() {
 			// "<\": for Eclipse JSDoc.
@@ -2478,7 +2699,10 @@ function module_code(library_namespace) {
 	};
 
 	var Magic_words_hash = 'DISPLAYTITLE|DEFAULTSORT|デフォルトソート|CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
-			.split('|').to_hash();
+			.split('|').to_hash(),
+	// TODO: [[mw:Help:Magic words#Behavior switches]]
+	PATTERN_BEHAVIOR_SWITCH = /__([A-Z]+(?:_[A-Z]+)*)__/g;
+	PATTERN_BEHAVIOR_SWITCH = /__(NOTOC|FORCETOC|TOC|NOEDITSECTION|NEWSECTIONLINK|NONEWSECTIONLINK|NOGALLERY|HIDDENCAT|NOCONTENTCONVERT|NOCC|NOTITLECONVERT|NOTC|INDEX|NOINDEX|STATICREDIRECT|NOGLOBAL)__/g;
 
 	/**
 	 * parse The MediaWiki markup language (wikitext).
@@ -2494,6 +2718,8 @@ function module_code(library_namespace) {
 	[[<a>a</a>]]
 	CeL.wiki.parser('a[[未來日記-ANOTHER:WORLD-]]b').parse()[1]
 	<nowiki>...<!-- -->...</nowiki> 中的註解不應被削掉!
+
+	parse {{Template:Single chart}}
 
 	 * </code>
 	 * 
@@ -2515,7 +2741,7 @@ function module_code(library_namespace) {
 	 * 
 	 * @returns {Array}parsed data
 	 * 
-	 * @see [[:en:Wiki markup]], [[Wiki標記式語言]]
+	 * @see [[w:en:Help:Wikitext]], [[Wiki標記式語言]]
 	 *      https://www.mediawiki.org/wiki/Markup_spec/BNF/Article
 	 *      https://www.mediawiki.org/wiki/Markup_spec/BNF/Inline_text
 	 *      https://www.mediawiki.org/wiki/Markup_spec
@@ -2802,7 +3028,7 @@ function module_code(library_namespace) {
 
 		// ----------------------------------------------------
 		// -{...}-
-		wikitext = wikitext.replace_till_stable(/-{(.+?)}-/g, function(all,
+		wikitext = wikitext.replace_till_stable(/-{(.*?)}-/g, function(all,
 				parameters) {
 			// 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('-{'), previous;
@@ -2893,6 +3119,7 @@ function module_code(library_namespace) {
 				section_title = parse_wikitext(section_title, options, queue);
 			}
 
+			// [ page_name, section_title, displayed_text ]
 			var parameters = [ page_name, section_title ];
 
 			// assert: 'a'.match(/(b)?/)[1]===undefined
@@ -2993,17 +3220,17 @@ function module_code(library_namespace) {
 		// 由於 <tag>... 可能被 {{Template}} 截斷，因此先處理 {{Template}} 再處理 <t></t>。
 		// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
 
-		// 不採用 global variable，預防 multitasking 並行處理。
-		/** {RegExp}HTML tag 的匹配模式。 */
-		var PATTERN_TAG = new RegExp('<(' + markup_tags
-				+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig');
+		// <s>不採用 global variable，預防 multitasking 並行處理。</s>
+		// reset PATTERN index
+		// PATTERN_WIKI_TAG.lastIndex = 0;
+
 		// console.log(PATTERN_TAG);
 		// console.log(wikitext);
 
 		// HTML tags that must be closed.
 		// <pre>...</pre>, <code>int f()</code>
-		wikitext = wikitext.replace_till_stable(PATTERN_TAG, function(all, tag,
-				attributes, inner, end_tag) {
+		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG, function(all,
+				tag, attributes, inner, end_tag) {
 			// console.log('queue start:');
 			// console.log(queue);
 			var no_parse_tag = tag.toLowerCase() in no_parse_tags;
@@ -3106,11 +3333,11 @@ function module_code(library_namespace) {
 			return include_mark + (queue.length - 1) + end_mark;
 		}
 
-		var PATTERN_TAG_VOID = new RegExp('<(' + self_close_tags
-				+ ')(\\s[^<>]*)?>', 'ig');
+		// reset PATTERN index
+		// PATTERN_WIKI_TAG_VOID.lastIndex = 0;
 
 		// assert: 有 end tag 的皆已處理完畢，到這邊的是已經沒有 end tag 的。
-		wikitext = wikitext.replace_till_stable(PATTERN_TAG_VOID,
+		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_VOID,
 				parse_single_tag);
 		// 處理有明確標示為 simgle tag 的。
 		// 但 MediaWiki 現在會將 <b /> 轉成 <b>，因此不再處理這部分。
@@ -3136,10 +3363,11 @@ function module_code(library_namespace) {
 				caption = caption.split('||').map(function(piece) {
 					return parse_wikitext(piece, options, queue);
 				});
-				if (main_caption === undefined)
+				if (main_caption === undefined) {
 					// 表格標題以首次出現的為主。
 					// .toString(): 可能會包括 include_mark, end_mark，應去除之！
 					main_caption = caption[0].toString().trim();
+				}
 				// 'table_caption'
 				caption = _set_wiki_type(caption, 'caption');
 				queue.push(caption);
@@ -3266,16 +3494,61 @@ function module_code(library_namespace) {
 			return '\n' + include_mark + (queue.length - 1) + end_mark;
 		});
 
-		// TODO: Magic words
+		// ----------------------------------------------------
+
+		wikitext = wikitext.replace(PATTERN_BEHAVIOR_SWITCH, function(all,
+				switch_word) {
+			var parameters = _set_wiki_type(switch_word, 'switch');
+			if (!queue.switches) {
+				queue.switches = library_namespace.null_Object();
+			}
+			if (!queue.switches[switch_word]) {
+				queue.switches[switch_word] = [ parameters ];
+			} else {
+				// 照理來說通常不應該要有多個 switches...
+				queue.switches[switch_word].push(parameters);
+			}
+			queue.push(parameters);
+			return include_mark + (queue.length - 1) + end_mark;
+		});
+
+		function apostrophe_type(all, type, parameters) {
+			// console.log([ all, type, parameters ]);
+			var index = parameters.lastIndexOf(type), previous = '';
+			if (index !== NOT_FOUND) {
+				previous = type + parameters.slice(0, index);
+				parameters = parameters.slice(index + type.length);
+			}
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			parameters = parse_wikitext(parameters, options, queue);
+			// 注意: parameters.length 可能大於1
+			parameters = _set_wiki_type(parameters, type === "''" ? 'italic'
+					: 'bold');
+			queue.push(parameters);
+			return previous + include_mark + (queue.length - 1) + end_mark;
+		}
+
+		// 若是要處理<b>, <i>這兩項，也必須要調整 section_link()。
+
+		// ''''b''''' → <i><b>b</b></i>
+		// 因此先從<b>開始找。
+
 		// '''~''' 不能跨行！ 注意: '''{{font color}}''', '''{{tsl}}'''
+		wikitext = wikitext.replace_till_stable(/(''')([^'\n].*?)\1/g,
+				apostrophe_type);
 		// ''~'' 不能跨行！
-		// ~~~~~
-		// ----
+		wikitext = wikitext.replace_till_stable(/('')([^'\n].*?)\1/g,
+				apostrophe_type);
+		// '', ''' 似乎會經過微調: [[n:zh:Special:Permalink/120676]]
+
+		// ----, -{4,}
+
+		// ~~~, ~~~~, ~~~~~: 不應該出現
 
 		// ----------------------------------------------------
 		// parse_wikitext.section_title
 
-		// pstfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
+		// postfix 沒用 \s，是因為 node 中， /\s/.test('\n')，且全形空白之類的確實不能用在這。
 		wikitext = wikitext.replace_till_stable(
 		// @see PATTERN_section
 		/(^|\n)(=+)(.+)\2([ \t]*)(\n|$)/g, function(all, previous,
@@ -3294,8 +3567,9 @@ function module_code(library_namespace) {
 			// Use plain section_title instead of title with wikitext.
 			// 因為尚未resolve_escaped()，直接使用未parse_wikitext()者會包含未解碼之code!
 			// parameters.title = parameters.toString().trim();
+			parameters.link = section_link(parameters.toString());
 			/** {String}section title in wikitext */
-			parameters.title = normalize_section_title(parameters.toString());
+			parameters.title = parameters.link.id;
 
 			if (postfix && !normalize)
 				parameters.postfix = postfix;
@@ -3450,6 +3724,11 @@ function module_code(library_namespace) {
 		resolve_escaped(queue, include_mark, end_mark);
 
 		wikitext = queue[queue.length - 1];
+		if (initialized_fix && queue.switches) {
+			wikitext.switches = queue.switches;
+		}
+		// free
+		queue = null;
 		// console.log(wikitext);
 
 		if (initialized_fix && (!options || !options.parse_paragraph)
@@ -19222,7 +19501,9 @@ function module_code(library_namespace) {
 		content_of : get_page_content,
 		normalize_title : normalize_page_name,
 		normalize_title_pattern : normalize_name_pattern,
-		normalize_section_title : normalize_section_title,
+		// deprecated
+		// normalize_section_title : normalize_section_title,
+		section_link : section_link,
 		get_hash : list_to_hash,
 		unique_list : unique_list,
 
