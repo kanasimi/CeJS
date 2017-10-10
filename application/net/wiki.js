@@ -1635,9 +1635,11 @@ function module_code(library_namespace) {
 	function preprocess_section_link_token(token) {
 		if (token.type === 'tag') {
 			if (token.tag === 'nowiki') {
+				// escape characters inside <nowiki>
 				return preprocess_section_link_token(token[1] ? token[1]
 						.toString() : '');
 			}
+			// reduce HTML tags.
 			return preprocess_section_link_tokens(token[1] || '');
 		}
 		if (token.type === 'file') {
@@ -1645,6 +1647,7 @@ function module_code(library_namespace) {
 			return '';
 		}
 		if (token.type === 'link' || token.type === 'category') {
+			// escape wikilink
 			// return displayed_text
 			token = token[2] ? preprocess_section_link_tokens(token[2])
 			// @see wiki_toString
@@ -1665,6 +1668,7 @@ function module_code(library_namespace) {
 			return token;
 		}
 		if (token.type === 'external_link') {
+			// escape external link
 			// console.log('>> ' + token);
 			// console.log(token[1]);
 			// console.log(preprocess_section_link_tokens(token[1]));
@@ -1678,6 +1682,7 @@ function module_code(library_namespace) {
 			return '';
 		}
 		if (token.type === 'bold' || token.type === 'italic') {
+			// 去除粗體與斜體。
 			token.type = 'plain';
 			token.toString = wiki_toString.plain;
 			return token;
@@ -1685,6 +1690,7 @@ function module_code(library_namespace) {
 		if (typeof token === 'string') {
 			// console.log('>> [' + index + '] ' + token);
 			// console.log(parent);
+			// TODO: use library_namespace.DOM.HTML_to_Unicode()
 			token = token.replace(/&#(\d+);/g, function(all, code) {
 				return String.fromCharCode(code);
 			}).replace(/&#x([0-9a-f]+);/ig, function(all, code) {
@@ -1713,11 +1719,16 @@ function module_code(library_namespace) {
 		return preprocess_section_link_token(tokens);
 	}
 
-	function section_link_escape(text) {
+	function section_link_escape(text, uri) {
 		// escape control characters, including language conversion -{}-
 		if (true) {
 			// 盡可能減少字元的使用量，因此僅處理開頭，不處理結尾。
-			text = text.replace(/[\|<>{}]/g && /[\|<{}]/g, function(character) {
+			text = text.replace(uri ? /[\|<{}]/g : /[\|<>{}]/g && /[\|<{]/g,
+			// 經測試anchor亦不可包含[\n\[\]{}]。
+			function(character) {
+				if (uri) {
+					return '%' + character.charCodeAt(0).toString(16);
+				}
 				return '&#' + character.charCodeAt(0) + ';';
 			}).replace(/[ \n]{2,}/g, ' ');
 		} else {
@@ -1729,26 +1740,39 @@ function module_code(library_namespace) {
 	}
 
 	// @inner
+	// return [[維基連結]]
 	function section_link_toString(page_title) {
 		return '[[' + (page_title || this[0] || '') + '#' + (this[1] || '')
 				+ '|' + (this[2] || '') + ']]';
 	}
 
+	// 用來保留 display_text 中的 language conversion -{}-，
+	// 必須是標題裡面不會存在的字串，並且也不會被section_link_escape()轉換。
+	var section_link_START_CONVERT = '\0\x01', section_link_END_CONVERT = '\0\x02',
+	//
+	section_link_START_CONVERT_reg = new RegExp(section_link_START_CONVERT, 'g'),
+	//
+	section_link_END_CONVERT_reg = new RegExp(section_link_END_CONVERT, 'g');
+
 	/**
-	 * 從章節標題產生連結到章節標題的wikilink。
+	 * 從話題/議題/章節標題產生連結到章節標題的wikilink。
 	 * 
-	 * TODO: 會失去''',''之屬性。
+	 * TODO: 保留 display_text 中的 ''','' 屬性。
 	 * 
 	 * @example <code>
 	CeL.wiki.section_link(section_title)
 	 * </code>
 	 * 
 	 * @param {String}section_title
-	 *            section title in wikitext.
+	 *            section title in wikitext. 章節標題。
 	 * @param {Object}[options]
 	 *            附加參數/設定選擇性/特殊功能與選項
 	 * 
 	 * @returns {Array}link object
+	 * 
+	 * @see [[H:MW]], {{anchorencode:章節標題}}, [[Template:井戸端から誘導の使用]], escapeId()
+	 * @see https://phabricator.wikimedia.org/T152540
+	 *      https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
 	 */
 	function section_link(section_title, options) {
 		if (typeof options === 'string') {
@@ -1765,165 +1789,47 @@ function module_code(library_namespace) {
 		var parsed_title = preprocess_section_link_tokens(parse_wikitext(section_title)),
 		//
 		id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
+		// anchor: 可以直接拿來做 wikilink anchor 的章節標題。
 		// 有多個完全相同的anchor時，後面的會加上"_2", "_3",...。
 		// 這個部分的處理請見 function for_each_section()
 		anchor = section_link_escape(id
 		// 長度相同的情況下，盡可能保留原貌。
-		.replace(/([ _]){2,}/g, '$1').replace(/&/g, '&amp;'));
+		.replace(/([ _]){2,}/g, '$1').replace(/&/g, '&amp;'), true);
 
+		// console.log(parsed_title);
 		for_each_token.call(parsed_title, function(token) {
 			if (token.type === 'convert') {
 				// @see wiki_toString.convert
-				return token.join(';');
+				// return token.join(';');
+				token.toString = function() {
+					return section_link_START_CONVERT + this.join(';')
+							+ section_link_END_CONVERT;
+				};
 			}
 		}, true);
 
+		// display_text 應該是對已經正規化的 section_title 再做的變化。
 		var display_text = section_link_escape(parsed_title.toString().trim()
-		//
-		.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, "&apos;"));
+		// @see use library_namespace.DOM.Unicode_to_HTML()
+		.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, "&apos;"))
+		// recover language conversion -{}-
+		.replace(section_link_START_CONVERT_reg, '-{').replace(
+				section_link_END_CONVERT_reg, '}-');
 
-		// [ page title, anchor, display_text ].id = {String}id
+		// link = [ page title 頁面標題, anchor 章節標題,
+		// display_text 要顯示的連結文字 default: section_title ]
 		var link = [ options && options.page_title, anchor, display_text ];
 		Object.assign(link, {
+			// link.id = {String}id
 			id : id,
 			// original section title
 			title : section_title,
-			parsed_title : parsed_title,
+			// only for debug
+			// parsed_title : parsed_title,
 			toString : section_link_toString
 		});
 		return link;
 	}
-
-	// ------------------------------------------
-
-	/**
-	 * 規範化話題/議題/章節標題。
-	 * 
-	 * @param {String}section_title
-	 *            章節標題。
-	 * @param {Function}[callback]
-	 *            TODO: 回調函數。
-	 * 
-	 * @returns {String}
-	 * 
-	 * @deprecated
-	 */
-	function normalize_section_title(section_title, callback) {
-		// 不會 reduce '\t'
-		section_title = section_title.replace(/[ \n]{2,}/g, ' ')
-		// TODO: use library_namespace.DOM.HTML_to_Unicode()
-		.replace(/&#(\d+);/g, function(all, code) {
-			return String.fromCharCode(code);
-		}).replace(/&#x([0-9a-f]+);/ig, function(all, code) {
-			return String.fromCharCode(parseInt(code, 16));
-		})
-		//
-		.replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&')
-		// escape characters inside <nowiki>
-		.replace(/<nowiki[^<>]*>(.+?)<\/nowiki>/g, function(all, inner) {
-			return inner.replace(/{/g, '&#123;').replace(/</g, '&lt;')
-			//
-			.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-		})
-		// reduce HTML tags.
-		.replace(PATTERN_WIKI_TAG_VOID, '').replace_till_stable(
-				PATTERN_WIKI_TAG, '$3')
-		// escape wikilink
-		.replace(/\[\[:?([^\[\]\n]+)\]\]/g, function(all, inner) {
-			return inner.replace(/^[^\|]+\|/, '');
-		})
-		// escape external link
-		.replace(/\[https?:\/\/[^ ]+ ([^\]]+)\]/ig, '$1')
-
-		// TODO: 這邊僅處理常用模板。需要先保證這些模板存在，並且具有預期的功能。
-		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
-		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
-		.replace(/{{Tlx?\s*\|([^{}]*)}}/ig, '{{$1}}')
-
-		// 去除粗體與斜體。
-		.replace(/'''(.*?)'''/g, '$1').replace(/''(.*?)''/g, '$1');
-
-		if (true) {
-			// 經測試anchor亦不可包含[\n\[\]{}]
-			section_title = section_title.replace(/[\|{}]/g,
-			// escape control characters, including language conversion -{}-
-			function(character) {
-				return '&#' + character.charCodeAt(0) + ';';
-			});
-			// 注意: 必須要自行 unescape language conversion -{}-。
-			// 或者使用 normalize_section_title.to_wikilink。
-		} else {
-			section_title = section_title.replace(/\||{{+|}}+/g,
-			// escape control characters, ignore language conversion -{}-
-			function(characters) {
-				var list = '&#' + characters.charCodeAt(0) + ';';
-				for (var index = 1; index < characters.length; index++) {
-					list += '&#' + characters.charCodeAt(index) + ';';
-				}
-				return list;
-			});
-		}
-
-		// 可以直接拿來做 wikilink anchor 的章節標題。
-		return section_title.trim();
-	}
-
-	// escape <ref></ref>
-	// @see use library_namespace.DOM.Unicode_to_HTML()
-	normalize_section_title.escape_tags = function(section_title) {
-		return section_title.replace(/<(\/?(?:ref)(?:[^<>a-z][^<>]*)?)>/g,
-				'&gt;$1&lt;');
-	};
-
-	/**
-	 * 產生連結到章節標題的維基連結。
-	 * 
-	 * 採用連結的方法([[page.title#section_title|title]])可以免去需要自行解析標題的問題。
-	 * 
-	 * @example <code>
-	CeL.wiki.normalize_section_title.to_wikilink(section_title, page_title);
-	 * </code>
-	 * 
-	 * TODO: 2017/9/20 18:33:32
-	 * 對於包含某些模板(如包含{{para|p}})的情況，即使採用{{anchorencode}}連結依然會失效。現時間並沒有解決方法。
-	 * 
-	 * @param {String}section_title
-	 *            章節標題。
-	 * @param {String}[page_title]
-	 *            頁面標題。
-	 * @param {String}[display_text]
-	 *            要顯示的連結文字。 default: section_title
-	 * @param {Boolean}[need_normalize]
-	 *            section_title 需要再做正規化。
-	 * 
-	 * @returns {String}維基連結
-	 * 
-	 * @see [[H:MW]], {{anchorencode:章節標題}}, [[Template:井戸端から誘導の使用]], escapeId()
-	 * @see https://phabricator.wikimedia.org/T152540
-	 *      https://lists.wikimedia.org/pipermail/wikitech-l/2017-August/088559.html
-	 */
-	normalize_section_title.to_wikilink = function(section_title, page_title,
-			display_text, need_normalize) {
-		if (need_normalize) {
-			section_title = normalize_section_title(section_title);
-		}
-
-		section_title = normalize_section_title.escape_tags(section_title);
-		// display_text 應該是對已經正規化的 section_title 再做的變化。
-		display_text = display_text ? normalize_section_title
-				.escape_tags(display_text) : section_title;
-
-		// 預防在遇到標題包含模板時，因為不能解析連模板最後產出的結果，連結會失效。
-		// 但在包含{{para|p}}的情況下連結依然會失效。
-		section_title = '#' + section_title + '|'
-		// 自行 unescape language conversion -{}-。
-		+ display_text.replace(/-&#123;(.*?)&#125;-/g, function(all, text) {
-			return '-{' + text + '}-';
-		});
-
-		return page_title ? '[[' + page_title + section_title + ']]'
-				: section_title;
-	};
 
 	// ------------------------------------------
 
@@ -2019,7 +1925,7 @@ function module_code(library_namespace) {
 				last_index = next_index;
 
 				section_title = matched[2].trim();
-				// section_title = normalize_section_title(section_title);
+				// section_title = section_link(section_title).id;
 			} else {
 				break;
 			}
@@ -19590,8 +19496,6 @@ function module_code(library_namespace) {
 		content_of : get_page_content,
 		normalize_title : normalize_page_name,
 		normalize_title_pattern : normalize_name_pattern,
-		// deprecated
-		// normalize_section_title : normalize_section_title,
 		section_link : section_link,
 		get_hash : list_to_hash,
 		unique_list : unique_list,
