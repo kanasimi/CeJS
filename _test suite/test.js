@@ -2861,6 +2861,32 @@ function test_wiki() {
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
 		wikitext = 'a[[t|\'\'\' <span>T</span>\'\'\']].';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		wikitext = '<nowiki>-{ </nowiki> a <nowiki>}-</nowiki>';
+		assert([ '<nowiki>-{ </nowiki>', CeL.wiki.parser(wikitext).parse()[0].toString() ]);
+		wikitext = '-{ <nowiki>dd}-<b></nowiki> }-<nowiki> ff</b></nowiki>';
+		assert([ '-{ <nowiki>dd}-<b></nowiki> }-', CeL.wiki.parser(wikitext).parse()[0].toString() ]);
+		// language conversion -{}- 以後來使用的為主。
+		wikitext = '-{}-';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		assert([ undefined, CeL.wiki.parse(wikitext).converted ]);
+		wikitext = '-{  阿  }-';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		assert([ '  阿  ', CeL.wiki.parse(wikitext).converted ]);
+		wikitext = '-{zh-cn:2 ;  zh-tw: 阿  }-';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		assert([ '阿', CeL.wiki.parse(wikitext).converted ]);
+		wikitext = '-{zh-cn:2 ;  zh-tw: 阿  ;  }-';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		assert([ '阿  ', CeL.wiki.parse(wikitext).converted ]);
+		wikitext = '-{ "ee" [[dd]]  ;zh-hk:阿;- ;zh-tw:1亞1;zh-cn:阿2 ;  zh-tw: 亞;;}-';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		assert([ '亞;', CeL.wiki.parse(wikitext).conversion['zh-tw'] ]);
+		wikitext = '-{;  zh-hk:阿;- ;zh-tw:1亞1;zh-cn:阿2  ; zh-cn:阿3 ;  zh-tw: 2亞   ;  	 }-';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
+		// 顯示的時候，兩個以上的結尾空格會轉換成 " &nbsp;"。
+		assert([ '2亞   ', CeL.wiki.parse(wikitext).conversion['zh-tw'] ]);
+		wikitext = '-{  zh-tw:1;  zh-cn:2 ;}--{}--{  }--{;zh-tw:1;zh-cn:2}--{zh-tw:1;  zh-cn:2 ;  }-a[[t#a3| s[r]-{  ;  zh-hk:阿;- ;zh-tw:亞;zh-cn:阿2 ;  zh-tw:  亞姆----; ddff;;-ees: ggfggf;;}- ]]b';
+		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ]);
 
 		wikitext = '1<br>2';
 		assert([ wikitext, CeL.wiki.parser(wikitext).parse().toString() ], 'wiki.parse: HTML single tag #1');
@@ -2933,9 +2959,9 @@ function test_wiki() {
 		assert([ undefined, CeL.wiki.parser(wikitext).parse().each_section().sections[0].section_title ], 'wiki.parser.each_section #3-2: 正常文章');
 		assert([ '==t1==', CeL.wiki.parser(wikitext).parse().each_section().sections[1].section_title.toString() ], 'wiki.parser.each_section #3-3: 正常文章');
 
-		// [[n:zh:Special:Permalink/120708]]
-		wikitext = ' <> >< <title> \'\'\'<沙盒>\'\'\'  \'\'ii\'\' <i>iii</i> <b>bbb</b>   [[File:YesCheck_BlueLinear.svg|20px]]  & &amp; &amp;amp; "quot" &quot; &amp;quot; \'apos\' \'&apos;apos \'&apos; &amp;apos; <nowiki>  & &amp; &amp;amp; "quot" &quot; &amp;quot; \'apos\' \'&apos;apos \'&apos; &amp;apos;  \'\'\'bbb\'\'\' <b>bbb</b> <i>iii</i> <ref /> {{VOA}} {{tl|VOA}}</nowiki> \'\'\'[[abc]]\'\'\'  <b>[[w:abc]]</b>  \'\'\'<i>[[w :  123   #  cba]]</i>\'\'\' [[ABC|ab\'c]] [[ABC|ab\'\'c\'\']] __NOINDEX__ ____  ___ __ __  _ {{tl|VOA}} [[template:VOA]] [https://zh.wikipedia.org zh\'\'wiki\'\'] __TOC__ -{}- -{章節}-  \'\'\'<nowiki>\'\'< nowiki>\'\'</nowiki>\'\'\'  <span style="color:green">green</span> ';
-		assert([ '[[#%3C%3E_%3E%3C_%3Ctitle%3E_%3C%E6%B2%99%E7%9B%92%3E_ii_iii_bbb_%26amp%3B_%26amp%3B_%26amp%3Bamp%3B_%22quot%22_%22_%26amp%3Bquot%3B_\'apos\'_\'\'apos_\'\'_%26amp%3Bapos%3B_%26amp%3B_%26amp%3B_%26amp%3Bamp%3B_%22quot%22_%22_%26amp%3Bquot%3B_\'apos\'_\'\'apos_\'\'_%26amp%3Bapos%3B_\'\'\'bbb\'\'\'_%3Cb%3Ebbb%3C%2Fb%3E_%3Ci%3Eiii%3C%2Fi%3E_%3Cref_%2F%3E_%7B%7BVOA%7D%7D_%7B%7Btl%7CVOA%7D%7D_abc_w%3Aabc_w_%3A_123_%23_cba_ab\'c_abc_%7B%7BVOA%7D%7D_template%3AVOA_zhwiki_-%7B%7D-_-%7B%E7%AB%A0%E7%AF%80%7D-_\'\'%3C_nowiki%3E\'\'_green|&#60;&#62; &#62;&#60; &#60;title&#62; &#60;沙盒&#62; ii iii bbb &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &apos;&apos;&apos;bbb&apos;&apos;&apos; &#60;b&#62;bbb&#60;/b&#62; &#60;i&#62;iii&#60;/i&#62; &#60;ref /&#62; &#123;&#123;VOA&#125;&#125; &#123;&#123;tl&#124;VOA&#125;&#125; abc w:abc w : 123 # cba ab&apos;c abc ____ ___ __ __ _ &#123;&#123;VOA&#125;&#125; template:VOA zhwiki 章節 &apos;&apos;&#60; nowiki&#62;&apos;&apos; green]]', CeL.wiki.section_link(wikitext).toString() ], 'wiki.section_link #1-1');
+		// [[n:zh:Special:Permalink/120731]]
+		wikitext = " <> >< <title> '''<沙盒>'''  ''ii'' <i>iii</i> <b>bbb</b>   [[File:YesCheck_BlueLinear.svg|20px]]  & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos; <nowiki>  & &amp; &amp;amp; \"quot\" &quot; &amp;quot; 'apos' '&apos;apos '&apos; &amp;apos;  '''bbb''' <b>bbb</b> <i>iii</i> <ref /> {{VOA}} {{tl|VOA}}</nowiki> '''[[abc]]'''  <b>[[w:abc]]</b>  '''<i>[[w :  123   #  cba]]</i>''' [[ABC|ab'c]] [[ABC|ab''c'']] __NOINDEX__ ____  ___ __ __  _ {{tl|VOA}} [[template:VOA]] [https://zh.wikipedia.org zh''wiki''] __TOC__ -{}- C-{章}-D A-{  節  }-B  '''<nowiki>''< nowiki>''</nowiki>'''  <span style=\"color:green\">green</span> ";
+		assert([ "[[#&#60;> >&#60; &#60;title> &#60;沙盒> ii iii bbb &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; &amp; &amp; &amp;amp; \"quot\" \" &amp;quot; 'apos' ''apos '' &amp;apos; '''bbb''' &#60;b>bbb&#60;/b> &#60;i>iii&#60;/i> &#60;ref /> &#123;&#123;VOA&#125;&#125; &#123;&#123;tl&#124;VOA&#125;&#125; abc w:abc w : 123 # cba ab'c abc &#123;&#123;VOA&#125;&#125; template:VOA zhwiki -&#123;&#125;- C-&#123;章&#125;-D A-&#123; 節 &#125;-B ''&#60; nowiki>'' green|&#60;> >&#60; &#60;title> &#60;沙盒> ii iii bbb &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &amp; &amp; &amp;amp; &quot;quot&quot; &quot; &amp;quot; &apos;apos&apos; &apos;&apos;apos &apos;&apos; &amp;apos; &apos;&apos;&apos;bbb&apos;&apos;&apos; &#60;b>bbb&#60;/b> &#60;i>iii&#60;/i> &#60;ref /> &#123;&#123;VOA&#125;&#125; &#123;&#123;tl&#124;VOA&#125;&#125; abc w:abc w : 123 # cba ab&apos;c abc ____ ___ __ __ _ &#123;&#123;VOA&#125;&#125; template:VOA zhwiki C章D A 節 B &apos;&apos;&#60; nowiki>&apos;&apos; green]]", CeL.wiki.section_link(wikitext).toString() ], 'wiki.section_link #1-1');
 	});
 
 

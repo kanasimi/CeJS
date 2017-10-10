@@ -1615,7 +1615,7 @@ function module_code(library_namespace) {
 						+ '" 無尾？ [' + wikitext + ']', 2, 'lead_text');
 				break;
 			}
-			// 須預防 "-{}-" 之類 language conversion。
+			// 須預防 -{}- 之類 language conversion。
 			var index_start = wikitext.lastIndexOf(matched, index_end);
 			wikitext = wikitext.slice(0, index_start)
 			// +2: '}}'.length, ']]'.length
@@ -1713,6 +1713,21 @@ function module_code(library_namespace) {
 		return preprocess_section_link_token(tokens);
 	}
 
+	function section_link_escape(text) {
+		// escape control characters, including language conversion -{}-
+		if (true) {
+			// 盡可能減少字元的使用量，因此僅處理開頭，不處理結尾。
+			text = text.replace(/[\|<>{}]/g && /[\|<{}]/g, function(character) {
+				return '&#' + character.charCodeAt(0) + ';';
+			}).replace(/[ \n]{2,}/g, ' ');
+		} else {
+			// 只處理特殊字元而不是採用encodeURIComponent()，這樣能夠保存中文字，使其不被編碼。
+			text = encodeURIComponent(text);
+		}
+
+		return text;
+	}
+
 	// @inner
 	function section_link_toString(page_title) {
 		return '[[' + (page_title || this[0] || '') + '#' + (this[1] || '')
@@ -1752,22 +1767,20 @@ function module_code(library_namespace) {
 		id = parsed_title.toString().trim().replace(/[ \n]{2,}/g, ' '),
 		// 有多個完全相同的anchor時，後面的會加上"_2", "_3",...。
 		// 這個部分的處理請見 function for_each_section()
-		anchor = id.replace(/[ _]+/g, '_').replace(/&/g, '&amp;');
-		anchor = encodeURIComponent(anchor);
+		anchor = section_link_escape(id
+		// 長度相同的情況下，盡可能保留原貌。
+		.replace(/([ _]){2,}/g, '$1').replace(/&/g, '&amp;'));
 
 		for_each_token.call(parsed_title, function(token) {
 			if (token.type === 'convert') {
-				return token[0];
+				// @see wiki_toString.convert
+				return token.join(';');
 			}
 		}, true);
 
-		var display_text = parsed_title.toString().trim()
+		var display_text = section_link_escape(parsed_title.toString().trim()
 		//
-		.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, "&apos;")
-		// escape control characters, including language conversion -{}-
-		.replace(/['\|<>{}]/g, function(character) {
-			return '&#' + character.charCodeAt(0) + ';';
-		}).replace(/[ \n]{2,}/g, ' ');
+		.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, "&apos;"));
 
 		// [ page title, anchor, display_text ].id = {String}id
 		var link = [ options && options.page_title, anchor, display_text ];
@@ -2522,6 +2535,13 @@ function module_code(library_namespace) {
 	/** {RegExp}HTML tags 的匹配模式。 */
 	PATTERN_WIKI_TAG = new RegExp('<(' + markup_tags
 			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
+	/** {RegExp}HTML tags 的匹配模式 of <nowiki>。 */
+	PATTERN_WIKI_TAG_of_nowiki = new RegExp('<(' + 'nowiki'
+			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
+	/** {RegExp}HTML tags 的匹配模式 without <nowiki>。 */
+	PATTERN_WIKI_TAG_without_nowiki = new RegExp('<('
+			+ markup_tags.replace('nowiki|', '')
+			+ ')(\\s[^<>]*)?>([\\s\\S]*?)<\\/(\\1)>', 'ig'),
 	/** {RegExp}HTML self closed tags 的匹配模式。 */
 	PATTERN_WIKI_TAG_VOID = new RegExp('<(' + self_close_tags
 			+ ')(\\s[^<>]*)?>', 'ig'),
@@ -2624,9 +2644,8 @@ function module_code(library_namespace) {
 			return this.join('');
 		},
 		// 手工字詞轉換 language conversion -{}-
-		// [[w:zh:H:Convert]], [[mw:Help:Magic words]]
 		convert : function() {
-			return '-{' + this.join('|') + '}-';
+			return '-{' + this.join(';') + '}-';
 		},
 
 		// Behavior switches
@@ -2700,7 +2719,7 @@ function module_code(library_namespace) {
 
 	var Magic_words_hash = 'DISPLAYTITLE|DEFAULTSORT|デフォルトソート|CURRENTYEAR|CURRENTMONTH|CURRENTDAY|CURRENTTIME|CURRENTHOUR|CURRENTWEEK|CURRENTTIMESTAMP|FULLPAGENAME|PAGENAME|BASEPAGENAME|SUBPAGENAME|SUBJECTPAGENAME|TALKPAGENAME|NAMESPACE|LOCALURL|FULLURL|FILEPATH|URLENCODE|NS|LC|UC|UCFIRST'
 			.split('|').to_hash(),
-	// TODO: [[mw:Help:Magic words#Behavior switches]]
+	// 狀態開關: [[mw:Help:Magic words#Behavior switches]]
 	PATTERN_BEHAVIOR_SWITCH = /__([A-Z]+(?:_[A-Z]+)*)__/g;
 	PATTERN_BEHAVIOR_SWITCH = /__(NOTOC|FORCETOC|TOC|NOEDITSECTION|NEWSECTIONLINK|NONEWSECTIONLINK|NOGALLERY|HIDDENCAT|NOCONTENTCONVERT|NOCC|NOTITLECONVERT|NOTC|INDEX|NOINDEX|STATICREDIRECT|NOGLOBAL)__/g;
 
@@ -2833,6 +2852,105 @@ function module_code(library_namespace) {
 
 		// ------------------------------------------------------------------------
 		// parse functions
+
+		function parse_HTML_tag(all, tag, attributes, inner, end_tag) {
+			// console.log('queue start:');
+			// console.log(queue);
+			var no_parse_tag = tag.toLowerCase() in no_parse_tags;
+			// 在章節標題、表格 td/th 或 template parameter 結束時，
+			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
+			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
+			if (!no_parse_tag && /\n(?:[=|!]|\|})|[|!]{2}/.test(inner)) {
+				library_namespace.debug('表格 td/th 或 template parameter 中，'
+						+ '此時視為一般 text，當作未匹配 match HTML tag 成功。', 4,
+						'parse_wikitext.tag');
+				return all;
+			}
+			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
+			var matched = inner.match(new RegExp(
+			//
+			'<(' + tag + ')(\\s[^<>]*)?>([\\s\\S]*?)$', 'i')), previous;
+			if (matched) {
+				previous = all.slice(0, -matched[0].length
+				// length of </end_tag>
+				- end_tag.length - 3);
+				tag = matched[1];
+				attributes = matched[2];
+				inner = matched[3];
+			} else {
+				previous = '';
+			}
+			library_namespace.debug(previous + ' + <' + tag + '>', 4,
+					'parse_wikitext.tag');
+
+			// 2016/9/28 9:7:7
+			// 因為no_parse_tag內部可能已解析成其他的單元，因此還是必須parse_wikitext()。
+			// e.g., '<nowiki>-{ }-</nowiki>'
+			// 經過改變，需再進一步處理。
+			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
+					'parse_wikitext.tag');
+			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
+			attributes = parse_wikitext(attributes, options, queue);
+			inner = parse_wikitext(inner, options, queue);
+			// 若為 <pre> 之內，則不再變換。
+			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
+			// 則會顯示出內部<pre>，並取內部</pre>為外部<pre>之結尾。
+			// 因此應避免 <pre> 內有 <pre>。
+			if (false && !no_parse_tag) {
+				inner = inner.toString();
+			}
+			attributes
+			// TODO: parse attributes
+			= _set_wiki_type(attributes || '', 'tag_attributes');
+			// [ ... ]: 在 inner 為 Template 之類時，
+			// 不應直接在上面設定 type=tag_inner，以免破壞應有之格式！
+			// 但仍需要設定 type=tag_inner 以應 for_each_token 之需，因此多層[]包覆。
+			inner = _set_wiki_type([ inner || '' ], 'tag_inner');
+			all = [ attributes, inner ];
+
+			if (normalize) {
+				tag = tag.toLowerCase();
+			} else if (tag !== end_tag) {
+				all.end_tag = end_tag;
+			}
+			all.tag = tag;
+			// {String}Element.tagName
+			// all.tagName = tag.toLowerCase();
+
+			_set_wiki_type(all, 'tag');
+			queue.push(all);
+			// console.log('queue end:');
+			// console.log(queue);
+			return previous + include_mark + (queue.length - 1) + end_mark;
+		}
+
+		function parse_single_tag(all, tag, attributes) {
+			if (attributes) {
+				if (normalize) {
+					attributes = attributes.replace(/[\s\/]*$/, ' /');
+				}
+				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
+				all = parse_wikitext(attributes, options, queue);
+				if (all.type !== 'plain')
+					all = [ all ];
+			} else {
+				// use '' as attributes in case
+				// the .join() in .toString() doesn't work.
+				all = [ '' ];
+			}
+
+			if (normalize) {
+				tag = tag.toLowerCase();
+			}
+			all.tag = tag;
+			// {String}Element.tagName
+			// all.tagName = tag.toLowerCase();
+
+			_set_wiki_type(all, 'tag_single');
+			queue.push(all);
+			return include_mark + (queue.length - 1) + end_mark;
+		}
 
 		// or use ((PATTERN_transclusion))
 		// PATTERN_template
@@ -3023,14 +3141,24 @@ function module_code(library_namespace) {
 			});
 		}
 
+		// ----------------------------------------------------
+		// 因為<nowiki>可以打斷其他的語法，因此必須要先處理。
+
+		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG_of_nowiki,
+				parse_HTML_tag);
+
+		// ----------------------------------------------------
+
 		// 為了 "{{Tl|a<ref>[http://a.a.a b|c {{!}} {{CURRENTHOUR}}]</ref>}}"，
 		// 將 -{}-, [], [[]] 等，所有中間可穿插 "|" 的置於 {{{}}}, {{}} 前。
 
 		// ----------------------------------------------------
-		// -{...}-
+		// language conversion -{}- 以後來使用的為主。
+		// [[w:zh:H:Convert]], [[mw:Help:Magic words]]
+		// TODO: 使用魔術字 __NOTC__ 或 __NOTITLECONVERT__ 可避免標題轉換。
 		wikitext = wikitext.replace_till_stable(/-{(.*?)}-/g, function(all,
 				parameters) {
-			// 自 end_mark 向前回溯。
+			// -{...}- 自 end_mark 向前回溯。
 			var index = parameters.lastIndexOf('-{'), previous;
 			if (index > 0) {
 				previous = '-{' + parameters.slice(0, index);
@@ -3041,11 +3169,66 @@ function module_code(library_namespace) {
 			library_namespace.debug(previous + ' + ' + parameters, 4,
 					'parse_wikitext.convert');
 
-			parameters = parameters.split('|').map(function(token, index) {
-				// 經過改變，需再進一步處理。
-				return parse_wikitext(token, options, queue);
-			});
-			_set_wiki_type(parameters, 'convert');
+			// console.log(parameters);
+
+			var conversion = library_namespace.null_Object(),
+			// [, last conversion, this language token, this language code ]
+			PATTERN = /(^|.*?);(\s*(zh-(?:cn|tw|hk|mo|sg|hant|hans)):\s*)/g,
+			//
+			matched, last_matched, last_index = 0,
+			//
+			conversion_list = [], converted, token;
+			while (matched = PATTERN.exec(parameters)) {
+				last_index = PATTERN.lastIndex;
+				// 顯示的時候，兩個以上的結尾空格會轉換成 " &nbsp;"。
+				token = matched[1];
+				// console.log([ matched, token ]);
+				if (last_matched) {
+					conversion[last_matched[3]]
+					//
+					= converted = token;
+					token = last_matched[2] + matched[1];
+					// 經過改變，需再進一步處理。
+					token = parse_wikitext(token, options, queue);
+					conversion_list.push(token);
+				} else {
+					if (token) {
+						conversion[''] = converted = token;
+					}
+					token = matched[1];
+					// 經過改變，需再進一步處理。
+					token = parse_wikitext(token, options, queue);
+					conversion_list.push(token);
+				}
+				last_matched = matched;
+			}
+			matched = parameters.slice(last_index);
+			// 只有在曾經匹配過的時候才需要去尾
+			token = last_matched ? matched.trimEnd().replace(/;$/, '')
+					: matched;
+			// console.log([ matched, token, '$' ]);
+			if (token) {
+				conversion[last_matched ? last_matched[3] : '']
+				//
+				= converted = token;
+			}
+			token = last_matched ? last_matched[2] + matched : matched;
+			// 經過改變，需再進一步處理。
+			token = parse_wikitext(token, options, queue);
+			conversion_list.push(token);
+
+			parameters = _set_wiki_type(conversion_list, 'convert');
+			parameters.conversion = conversion;
+
+			if (queue.switches && (queue.switches.__NOCC__
+			// 使用魔術字 __NOCC__ 或 __NOCONTENTCONVERT__ 可避免轉換。
+			|| queue.switches.__NOCONTENTCONVERT__)) {
+				parameters.converted = parameters.toString();
+			} else {
+				// TODO: 先檢測當前使用的語言，然後轉成在當前環境下轉換過、會顯示出的結果。
+				parameters.converted = converted;
+			}
+
 			queue.push(parameters);
 			return previous + include_mark + (queue.length - 1) + end_mark;
 		});
@@ -3216,9 +3399,12 @@ function module_code(library_namespace) {
 		PATTERN_for_transclusion, parse_transclusion);
 
 		// ----------------------------------------------------
-		// [[Help:HTML in wikitext]]
+
 		// 由於 <tag>... 可能被 {{Template}} 截斷，因此先處理 {{Template}} 再處理 <t></t>。
 		// 先處理 <t></t> 再處理 <t/>，預防單獨的 <t> 被先處理了。
+
+		// ----------------------------------------------------
+		// [[Help:HTML in wikitext]]
 
 		// <s>不採用 global variable，預防 multitasking 並行處理。</s>
 		// reset PATTERN index
@@ -3229,109 +3415,12 @@ function module_code(library_namespace) {
 
 		// HTML tags that must be closed.
 		// <pre>...</pre>, <code>int f()</code>
-		wikitext = wikitext.replace_till_stable(PATTERN_WIKI_TAG, function(all,
-				tag, attributes, inner, end_tag) {
-			// console.log('queue start:');
-			// console.log(queue);
-			var no_parse_tag = tag.toLowerCase() in no_parse_tags;
-			// 在章節標題、表格 td/th 或 template parameter 結束時，
-			// 部分 HTML font style tag 似乎會被截斷，自動重設屬性，不會延續下去。
-			// 因為已經先處理 {{Template}}，因此不需要用 /\n(?:[=|!]|\|})|[|!}]{2}/。
-			if (!no_parse_tag && /\n(?:[=|!]|\|})|[|!]{2}/.test(inner)) {
-				library_namespace.debug('表格 td/th 或 template parameter 中，'
-						+ '此時視為一般 text，當作未匹配 match HTML tag 成功。', 4,
-						'parse_wikitext.tag');
-				return all;
-			}
-			// 自 end_mark (tag 結尾) 向前回溯，檢查是否有同名的 tag。
-			var matched = inner.match(new RegExp(
-			//
-			'<(' + tag + ')(\\s[^<>]*)?>([\\s\\S]*?)$', 'i')), previous;
-			if (matched) {
-				previous = all.slice(0, -matched[0].length
-				// length of </end_tag>
-				- end_tag.length - 3);
-				tag = matched[1];
-				attributes = matched[2];
-				inner = matched[3];
-			} else {
-				previous = '';
-			}
-			library_namespace.debug(previous + ' + <' + tag + '>', 4,
-					'parse_wikitext.tag');
-
-			// 2016/9/28 9:7:7
-			// 因為no_parse_tag內部可能已解析成其他的單元，因此還是必須parse_wikitext()。
-			// e.g., '<nowiki>-{ }-</nowiki>'
-			// 經過改變，需再進一步處理。
-			library_namespace.debug('<' + tag + '> 內部需再進一步處理。', 4,
-					'parse_wikitext.tag');
-			// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-			// e.g., '{{tl|<b a{{=}}"A">i</b>}}'
-			attributes = parse_wikitext(attributes, options, queue);
-			inner = parse_wikitext(inner, options, queue);
-			// 若為 <pre> 之內，則不再變換。
-			// 但 MediaWiki 的 parser 有問題，若在 <pre> 內有 <pre>，
-			// 則會顯示出內部<pre>，並取內部</pre>為外部<pre>之結尾。
-			// 因此應避免 <pre> 內有 <pre>。
-			if (false && !no_parse_tag) {
-				inner = inner.toString();
-			}
-			attributes
-			// TODO: parse attributes
-			= _set_wiki_type(attributes || '', 'tag_attributes');
-			// [ ... ]: 在 inner 為 Template 之類時，
-			// 不應直接在上面設定 type=tag_inner，以免破壞應有之格式！
-			// 但仍需要設定 type=tag_inner 以應 for_each_token 之需，因此多層[]包覆。
-			inner = _set_wiki_type([ inner || '' ], 'tag_inner');
-			all = [ attributes, inner ];
-
-			if (normalize) {
-				tag = tag.toLowerCase();
-			} else if (tag !== end_tag) {
-				all.end_tag = end_tag;
-			}
-			all.tag = tag;
-			// {String}Element.tagName
-			// all.tagName = tag.toLowerCase();
-
-			_set_wiki_type(all, 'tag');
-			queue.push(all);
-			// console.log('queue end:');
-			// console.log(queue);
-			return previous + include_mark + (queue.length - 1) + end_mark;
-		});
+		wikitext = wikitext.replace_till_stable(
+				PATTERN_WIKI_TAG_without_nowiki, parse_HTML_tag);
 
 		// ----------------------------------------------------
 		// single tags. e.g., <hr />
 		// TODO: <nowiki /> 能斷開如 [[L<nowiki />L]]
-
-		function parse_single_tag(all, tag, attributes) {
-			if (attributes) {
-				if (normalize) {
-					attributes = attributes.replace(/[\s\/]*$/, ' /');
-				}
-				// 預防有特殊 elements 置入其中。此時將之當作普通 element 看待。
-				all = parse_wikitext(attributes, options, queue);
-				if (all.type !== 'plain')
-					all = [ all ];
-			} else {
-				// use '' as attributes in case
-				// the .join() in .toString() doesn't work.
-				all = [ '' ];
-			}
-
-			if (normalize) {
-				tag = tag.toLowerCase();
-			}
-			all.tag = tag;
-			// {String}Element.tagName
-			// all.tagName = tag.toLowerCase();
-
-			_set_wiki_type(all, 'tag_single');
-			queue.push(all);
-			return include_mark + (queue.length - 1) + end_mark;
-		}
 
 		// reset PATTERN index
 		// PATTERN_WIKI_TAG_VOID.lastIndex = 0;
