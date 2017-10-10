@@ -8148,7 +8148,7 @@ function module_code(library_namespace) {
 					}, Object.assign({
 						page : page_list,
 						title : page_data.title,
-						revid : revision.revid,
+						revid : revision && revision.revid,
 						includecomments : options.includecomments,
 
 						session : options[KEY_SESSION]
@@ -8164,7 +8164,7 @@ function module_code(library_namespace) {
 					Object.assign({
 						page : page_data,
 						title : page_data.title,
-						revid : revision.revid,
+						revid : revision && revision.revid,
 						includecomments : options.includecomments,
 
 						session : options[KEY_SESSION]
