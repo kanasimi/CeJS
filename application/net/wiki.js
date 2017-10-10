@@ -590,9 +590,11 @@ function module_code(library_namespace) {
 		// project: language.*.org
 		w : 'wikipedia',
 		n : 'wikinews',
+		// 維基教科書
 		b : 'wikibooks',
 		q : 'wikiquote',
 		s : 'wikisource',
+		// 維基學院
 		v : 'wikiversity',
 		voy : 'wikivoyage',
 		wikt : 'wiktionary',
@@ -1659,7 +1661,8 @@ function module_code(library_namespace) {
 		// 正式應該採用 parse 或 expandtemplates 解析出實際的 title，之後 callback。
 		// https://www.mediawiki.org/w/api.php?action=help&modules=parse
 		if (token.type === 'transclusion') {
-			if (token.name === 'Tl' || token.name === 'Tlx') {
+			// template-linking templates: tl, tlx, tls, ...
+			if (/^T[ln][a-z]{0,3}[23]?$/.test(token.name)) {
 				token.shift();
 				return token;
 			}
@@ -5993,6 +5996,9 @@ function module_code(library_namespace) {
 
 	// ------------------------------------------------------------------------
 
+	/** {RegExp}pattern to test if is a robot name. CeL.wiki.PATTERN_BOT_NAME */
+	var PATTERN_BOT_NAME = /bot|機器人|機械人|机器人|ボット/i;
+
 	/**
 	 * default date format. 預設的日期格式
 	 * 
@@ -6215,11 +6221,13 @@ function module_code(library_namespace) {
 		// 採用 {{tlx|template_name}} 時，[[Special:RecentChanges]]頁面無法自動解析成 link。
 		options.summary = (callback = config.summary)
 		// 是為 Robot 運作。
-		? /bot/i.test(callback) ? callback
+		? PATTERN_BOT_NAME.test(callback) ? callback
 		// Robot: 若用戶名包含 'bot'，則直接引用之。
-		: (this.token.lgname.length < 9 && /bot/i.test(this.token.lgname)
+		: (this.token.lgname.length < 9
+				&& PATTERN_BOT_NAME.test(this.token.lgname)
 		//
-		? this.token.lgname : 'Robot') + ': ' + callback
+		? this.token.lgname : 'Robot')
+				+ ': ' + callback
 		// 未設置時，一樣添附 Robot。
 		: 'Robot';
 
@@ -6704,7 +6712,7 @@ function module_code(library_namespace) {
 									|| this.date_format) + ']' + count_summary,
 					// Robot: 若用戶名包含 'bot'，則直接引用之。
 					// 注意: this.token.lgname 可能為 undefined！
-					summary : (/bot/i.test(this.token.lgname)
+					summary : (PATTERN_BOT_NAME.test(this.token.lgname)
 					//
 					? this.token.lgname : 'Robot') + ': '
 					//
@@ -8129,13 +8137,13 @@ function module_code(library_namespace) {
 			}
 
 			if (options.expandtemplates) {
-				// 需要expandtemplates的情況
+				// 需要expandtemplates的情況。
 				if (!Array.isArray(page_list)) {
 					// TODO: test
 					var revision = get_page_content.revision(page_list);
 					wiki_API_expandtemplates(
-					//
-					revision['*'], function() {
+					// 出錯時 revision 可能等於 undefined。
+					revision && revision['*'] || '', function() {
 						callback(page_list);
 					}, Object.assign({
 						page : page_list,
@@ -19464,6 +19472,7 @@ function module_code(library_namespace) {
 		PATTERN_LTR : PATTERN_LTR,
 		PATTERN_common_characters : PATTERN_common_characters,
 		PATTERN_only_common_characters : PATTERN_only_common_characters,
+		PATTERN_BOT_NAME : PATTERN_BOT_NAME,
 
 		namespace : get_namespace,
 		remove_namespace : remove_namespace,

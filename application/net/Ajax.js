@@ -1313,31 +1313,43 @@ function module_code(library_namespace) {
 		var _URL = node_url.parse(URL),
 		// 不改到 options。
 		agent = options.agent;
+
+		// 處理 '//domain.org/path' 的情況。
+		if (!_URL.protocol) {
+			if (typeof URL === 'string' && URL.startsWith('//')) {
+				_URL = node_url.parse((agent && agent.protocol || 'https:')
+						+ URL);
+			} else {
+				// 直接設定。 default: https://
+				_URL.protocol = agent && agent.protocol || 'https:';
+			}
+		}
+
 		if (agent) {
 			library_namespace.debug('使用' + (agent === true ? '新' : '自定義')
 					+ ' agent。', 6, 'get_URL_node');
 			if (agent === true) {
-				// use new agent
-				agent = _URL.protocol === 'https:' ? new node_https.Agent
-						: new node_http.Agent;
+				// use new agent. default: https://
+				agent = _URL.protocol === 'http:' ? new node_http.Agent
+						: new node_https.Agent;
 			} else if (agent.protocol
 			// agent.protocol 可能是 undefined。
 			&& agent.protocol !== _URL.protocol) {
 				library_namespace
 						.warn('get_URL_node: 自定義 agent 與 URL 之協定不同，將嘗試採用符合的協定: '
 								+ agent.protocol + ' !== ' + _URL.protocol);
-				// use new agent
-				agent = _URL.protocol === 'https:' ? new node_https.Agent
-						: new node_http.Agent;
+				// use new agent. default: https://
+				agent = _URL.protocol === 'http:' ? new node_http.Agent
+						: new node_https.Agent;
 				if (options.agent.last_cookie) {
 					// 佈置原agent的設定。
 					agent.last_cookie = options.agent.last_cookie;
 				}
 			}
 		} else {
-			// 採用泛用的agent。
-			agent = _URL.protocol === 'https:' ? node_https_agent
-					: node_http_agent;
+			// 採用泛用的agent。 default: https://
+			agent = _URL.protocol === 'http:' ? node_http_agent
+					: node_https_agent;
 		}
 
 		if (options.cookie && !agent.last_cookie) {
@@ -1798,8 +1810,8 @@ function module_code(library_namespace) {
 			console.log(_URL.headers);
 		}
 		try {
-			request = _URL.protocol === 'https:' ? node_https.request(_URL,
-					_onload) : node_http.request(_URL, _onload);
+			request = _URL.protocol === 'http:' ? node_http.request(_URL,
+					_onload) : node_https.request(_URL, _onload);
 		} catch (e) {
 			// e.g., _http_client.js:52
 			if (0) {
