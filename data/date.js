@@ -134,6 +134,8 @@ function module_code(library_namespace) {
 
 	/** {Number}一整天的 time 值。should be 24 * 60 * 60 * 1000 = 86400000. */
 	var ONE_DAY_LENGTH_VALUE = new Date(0, 0, 2) - new Date(0, 0, 1),
+	// ONE_DAY_LENGTH_VALUE = CeL.date.to_millisecond('1D')
+
 	/** {Number}一分鐘的 time 值。should be 60 * 1000 = 60000. */
 	ONE_MINTE_LENGTH_VALUE = new Date(0, 0, 1, 0, 2) - new Date(0, 0, 1, 0, 1),
 	/** {Number}一整時辰的 time 值。should be 2 * 60 * 60 * 1000 = 7200000. */

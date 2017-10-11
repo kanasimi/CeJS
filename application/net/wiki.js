@@ -5997,7 +5997,7 @@ function module_code(library_namespace) {
 	// ------------------------------------------------------------------------
 
 	/** {RegExp}pattern to test if is a robot name. CeL.wiki.PATTERN_BOT_NAME */
-	var PATTERN_BOT_NAME = /bot|機器人|機械人|机器人|ボット/i;
+	var PATTERN_BOT_NAME = /bot|[機机][器械]人|ボット/i;
 
 	/**
 	 * default date format. 預設的日期格式
