@@ -843,6 +843,9 @@ function module_code(library_namespace) {
 				// console.log(XMLHttp.responseText);
 				id_data = _this.parse_search_result(XMLHttp.responseText,
 						get_label, work_title);
+				if (!id_data) {
+					throw '作品網址解析函數 parse_search_result 未 return 正規結果！';
+				}
 			} catch (e) {
 				console.trace(e);
 				library_namespace

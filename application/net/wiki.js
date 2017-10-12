@@ -8141,14 +8141,17 @@ function module_code(library_namespace) {
 				if (!Array.isArray(page_list)) {
 					// TODO: test
 					var revision = get_page_content.revision(page_list);
-					wiki_API_expandtemplates(
 					// 出錯時 revision 可能等於 undefined。
-					revision && revision['*'] || '', function() {
+					if (!revision) {
+						callback(page_list);
+						return;
+					}
+					wiki_API_expandtemplates(revision['*'] || '', function() {
 						callback(page_list);
 					}, Object.assign({
 						page : page_list,
 						title : page_data.title,
-						revid : revision && revision.revid,
+						revid : revision.revid,
 						includecomments : options.includecomments,
 
 						session : options[KEY_SESSION]
@@ -8238,6 +8241,9 @@ function module_code(library_namespace) {
 				library_namespace.error('wiki_API_expandtemplates: ['
 				//
 				+ error.code + '] ' + error.info);
+				typeof callback === 'function'
+				//
+				&& callback(undefined, errpr);
 				return;
 			}
 
@@ -14211,11 +14217,14 @@ function module_code(library_namespace) {
 						}
 
 						var parser = CeL.wiki.parser(page_data).parse();
+						// debug 用.
+						// check parser, test if parser working properly.
 						if (CeL.wiki.content_of(page_data) !== parser
 								.toString()) {
 							console.log(CeL.LCS(CeL.wiki.content_of(page_data),
 									parser.toString(), 'diff'));
-							throw 'parser error';
+							throw 'Parser error: '
+									+ CeL.wiki.title_link_of(page_data);
 						}
 
 						parser.each('link', function(token, index) {
